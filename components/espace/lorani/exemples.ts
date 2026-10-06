@@ -541,13 +541,13 @@ const RECUL = {
   nature: "plu" as const, gravite: "bloquant" as const, grandeur: "recul_limite_m", objet: "facade_est", article: "URm1 7",
   titre: "Le recul sur limite séparative de « facade est » (3,2 m sur PC2, p. 1) n'atteint pas la règle du PLU (au moins 4 m, article URm1 7).",
   correction: "Ramener le recul sur limite séparative de « facade est » à au moins 4 m (article URm1 7 du règlement), ou justifier une dérogation.",
-  valeurs: [{ piece: PD(1), reference: "PC2", page: 1, valeur: 3.2, texte: "3,20 m" }, { reference: "PLU-H URm1", page: 41, valeur: 4, borne: "min" as const, article: "URm1 7", regle: true }],
+  valeurs: [{ piece: PD(1), reference: "PC2", page: 1, valeur: 3.2, texte: "3,20 m", boite: { x: 0.62, y: 0.41, l: 0.08, h: 0.025 } }, { reference: "PLU-H URm1", page: 41, valeur: 4, borne: "min" as const, article: "URm1 7", regle: true }],
 };
 const POSTE_24 = {
   nature: "cctp_dpgf" as const, gravite: "mineur" as const, objet: "2_4",
   titre: "Le poste 2.4 « Isolation thermique par l'extérieur » est décrit au CCTP (CCTP 02, p. 9) mais n'est pas chiffré à la DPGF.",
   correction: "Ajouter le poste 2.4 à la DPGF, ou le retirer du CCTP.",
-  valeurs: [{ piece: PD(5), reference: "CCTP 02", page: 9, valeur: "Isolation thermique par l'extérieur", texte: "2.4 Isolation thermique par l'extérieur (ITE)" }],
+  valeurs: [{ piece: PD(5), reference: "CCTP 02", page: 9, valeur: "Isolation thermique par l'extérieur", texte: "2.4 Isolation thermique par l'extérieur (ITE)", boite: { x: 0.12, y: 0.33, l: 0.5, h: 0.02 } }],
 };
 const POSTE_27 = {
   nature: "cctp_dpgf" as const, gravite: "mineur" as const, objet: "2_7", statut: "ecarte" as const,
@@ -561,7 +561,7 @@ export const CONSTATS_EXEMPLE: Constat[] = [
     id: id("9", 1), controle_id: CA, nature: "incoherence", gravite: "majeur", grandeur: "hauteur_faitage_m", objet: "projet",
     titre: "La hauteur au faîtage diffère d'une pièce à l'autre : 15,6 m sur PC3 (p. 1) ; 16,1 m sur PC5 (p. 1).",
     correction: "Aligner la hauteur au faîtage sur une seule valeur dans toutes les pièces (écart de 0,5 m). Valeur la plus fréquente : 15,6 m.",
-    valeurs: [{ piece: PD(2), reference: "PC3", page: 1, valeur: 15.6, texte: "Faîtage +15,60" }, { piece: PD(3), reference: "PC5", page: 1, valeur: 16.1, texte: "+16,10" }],
+    valeurs: [{ piece: PD(2), reference: "PC3", page: 1, valeur: 15.6, texte: "Faîtage +15,60", boite: { x: 0.71, y: 0.18, l: 0.12, h: 0.02 } }, { piece: PD(3), reference: "PC5", page: 1, valeur: 16.1, texte: "+16,10" }],
     statut: "corrige", motif: "Corrigé à l'indice B.", corrige_au_controle: CB,
   }),
   constat({

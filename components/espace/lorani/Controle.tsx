@@ -9,12 +9,13 @@
    saisies s'appliquent en mémoire, sans croisement (les constats du contrôle précédent sont reconduits). */
 
 import { useMemo, useState } from "react";
-import { ScanSearch, ShieldCheck } from "lucide-react";
+import { FileDown, ScanSearch, ShieldCheck } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { Avis, Pastille } from "../ui";
 import { dateCourte } from "../format";
-import { deciderConstat, lancerControle, preparerControle } from "./portes";
+import { deciderConstat, lancerControle, octetsPiece, preparerControle } from "./portes";
+import { excelControle, pdfControle, telecharger, type DonneesRapport } from "./rapport";
 import type { Constat, Controle as ControleT, ControlePiece, Dossier, PieceProjet, Projet, RolePieceControle } from "./types";
 
 const ROLES: Record<RolePieceControle, string> = { planche: "Planche", cctp: "CCTP", dpgf: "DPGF", plu: "Règlement du PLU", autre: "Autre pièce" };
@@ -157,6 +158,27 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
     const k = form.constat;
     return lancer(() => deciderConstat(k.id, v), () => ({ ...dossier, constats: dossier.constats.map((x) => (x.id === k.id ? { ...x, ...v, decide_par: dossier.moi?.user_id ?? null, decide_le: new Date().toISOString() } : x)) }));
   };
+  /* le rapport : PDF annoté (pages citées, boîtes lues) et Excel */
+  const [rapport, setRapport] = useState<"pdf" | "xlsx" | null>(null);
+  const donnees = (): DonneesRapport | null => (c ? {
+    projet, controle: c, precedent, pieces, constats, corriges: corrigesIci, pieceDe, nommer,
+    octets: (p) => (p.chemin ? octetsPiece(p.chemin) : Promise.resolve(null)),
+  } : null);
+  const exporter = async (format: "pdf" | "xlsx") => {
+    const d = donnees();
+    if (!d) return;
+    setRapport(format);
+    setErreur(null);
+    try {
+      const r = format === "pdf" ? await pdfControle(d) : excelControle(d);
+      telecharger(r.nom, r.octets, format === "pdf" ? "application/pdf" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : "Le rapport n'a pas pu être fabriqué.");
+    } finally {
+      setRapport(null);
+    }
+  };
+
   const rouvrir = (k: Constat) => lancer(() => deciderConstat(k.id, { statut: "ouvert", motif: null }), () => ({ ...dossier, constats: dossier.constats.map((x) => (x.id === k.id ? { ...x, statut: "ouvert", motif: null } : x)) }));
 
   const nouveauOk = form?.type === "nouveau" && nc.intitule.trim().length >= 1 && nc.intitule.trim().length <= 160 && /^[0-9A-Za-z.-]{1,6}$/.test(nc.indice.trim())
@@ -212,6 +234,12 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
               {ouverts.length ? `${pluriel(ouverts.length, "constat")} ouvert${ouverts.length > 1 ? "s" : ""}, dont ${pluriel(bloquants, "bloquant")}.` : "Aucun constat ouvert."}
               {precedent ? ` ${pluriel(corrigesIci.length, "constat")} de l’indice ${precedent.indice} corrigé${corrigesIci.length > 1 ? "s" : ""}.` : ""}
             </p>
+          ) : null}
+          {c.lance_le ? (
+            <div className="esp-actions lor-rapport">
+              <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!!rapport} onClick={() => void exporter("pdf")}>{rapport === "pdf" ? <Loader variant="spin" /> : <FileDown width={15} height={15} aria-hidden="true" />} Rapport PDF annoté</button>
+              <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!!rapport} onClick={() => void exporter("xlsx")}>{rapport === "xlsx" ? <Loader variant="spin" /> : <FileDown width={15} height={15} aria-hidden="true" />} Tableau Excel</button>
+            </div>
           ) : null}
           {erreur && !form ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
 

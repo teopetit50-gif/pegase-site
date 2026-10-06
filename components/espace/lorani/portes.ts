@@ -64,7 +64,7 @@ export async function chargerDossier(): Promise<Dossier> {
     supabase.from("lorani_membres_projet").select("id, projet_id, user_id, role_projet").limit(2000),
     supabase.from("lorani_cas_rejet").select("code, article, libelle, source_url").order("code"),
     /* public.pieces date la réception (recue_le) ; l'écran la montre comme date de dépôt */
-    supabase.from("pieces").select("id, objet_id, nom_fichier, mime, statut, type_piece, motif, source, recue_le").eq("module", "lorani").eq("objet_type", "lorani_projet").order("recue_le", { ascending: false }).limit(600),
+    supabase.from("pieces").select("id, objet_id, nom_fichier, mime, statut, type_piece, motif, source, chemin, recue_le").eq("module", "lorani").eq("objet_type", "lorani_projet").order("recue_le", { ascending: false }).limit(600),
     supabase.rpc("annuaire", { p_client: moi.client_id }),
     /* b5_12 : absentes tant que la migration n'est pas posée ; l'écran montre alors des honoraires vides */
     supabase.from("lorani_honoraires").select("id, projet_id, element, intitule, montant_ht, heures_prevues, statut, achevee_le, facturee_le").limit(3000),
@@ -328,4 +328,14 @@ export async function deciderConstat(id: string, v: { statut: Constat["statut"];
   const supabase = createClient();
   const { error } = await supabase.from("lorani_constats").update(v).eq("id", id);
   if (error) throw new ErreurPorte(message(error));
+}
+
+/* les octets d'une pièce, par un lien signé de dix minutes (le rapport du contrôle en rend les pages citées) */
+export async function octetsPiece(chemin: string): Promise<Uint8Array> {
+  const supabase = createClient();
+  const { data, error } = await supabase.storage.from("omega-clients").createSignedUrl(chemin, 600);
+  if (error || !data?.signedUrl) throw new ErreurPorte(message(error));
+  const r = await fetch(data.signedUrl);
+  if (!r.ok) throw new ErreurPorte(`Fichier illisible (${r.status}).`);
+  return new Uint8Array(await r.arrayBuffer());
 }

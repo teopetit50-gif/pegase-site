@@ -598,3 +598,10 @@ des chantiers neufs (tables, écran, lecteur), à proposer au coordinateur en lo
   ajoutés au dépôt : planche, CCTP, DPGF, règlement du PLU.
 - Doute à lever sur la recette : `enregistrer_lecture` accepte-t-il ces types de pièce ? (contrat f54deda, A1).
 - Reste du n° 1 : rapport PDF annoté + Excel.
+- Rapport (n° 1, suite) : `components/espace/lorani/rapport.ts`, boutons « Rapport PDF annoté » / « Tableau Excel » sous un
+  contrôle passé. Aucune dépendance ajoutée : .xlsx écrit à la main (zip « stored » + CRC-32, feuilles Constats et Pièces) ;
+  PDF écrit à la main (Helvetica WinAnsi, titre /Info en UTF-16BE), pages citées rendues par pdf.js (legacy, comme
+  filed/PagePdf) avec cadre rouge + numéro sur la boîte lue ; fichier non ouvrable → page blanche avec les cadres.
+  Base réelle : octets par lien signé omega-clients (portes.octetsPiece, `pieces.chemin` ajouté à la lecture).
+  Recette : `omega/recette-b5/rapport-controle.mjs` (pdfinfo, pdftotext, unzip -t) ; exemples écrits à côté.
+  NON VÉRIFIÉ : le rendu d'un vrai PDF de la base (seul le repli « fichier non disponible » a tourné, sur l'exemple).
