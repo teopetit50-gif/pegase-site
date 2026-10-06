@@ -1,6 +1,6 @@
 # Session B2 — TAVARO, le module des loueurs (contrats, retours, barèmes, factures, avoirs, litiges)
 
-Branche `worker-b2`. Coordinateur : session_01B4JNQXyT69GytdvE9SjAnE. Dernière mise à jour : 06/10/2026, matin.
+Branche `worker-b2`, fusionnée dans main. Coordinateur : session_01BCGFdpRKBvXKjouC75sYBg (depuis le 06/10, 03 h 10 Paris ; auparavant session_01B4JNQXyT69GytdvE9SjAnE). Dernière mise à jour : 06/10/2026, 03 h 15 Paris.
 
 ## Les deux jauges
 
