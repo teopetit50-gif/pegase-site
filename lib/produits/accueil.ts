@@ -269,10 +269,13 @@ export const CANAUX = {
      deux emplacements intérieurs prennent le nom court, la liste sous `xl`
      donne le nom complet. */
   tuiles: [
+    /* 06/10/2026 (C5, décision du coordinateur) — les trois canaux de
+       réception qui existent (A2 : courriel, formulaire, WhatsApp). « Fiche
+       Google Business », « Google Agenda » et « Gmail / Outlook » reviendront
+       quand C3 (palier 5) et A2 les auront branchés. */
     { nom: "WhatsApp Business", court: "WhatsApp Business", icone: "bulle" },
-    { nom: "Fiche Google Business", court: "Fiche Google Business", icone: "etoile" },
-    { nom: "Google Agenda", court: "Agenda", icone: "agenda" },
-    { nom: "Gmail / Outlook", court: "Mail", icone: "enveloppe" },
+    { nom: "Courriel", court: "Courriel", icone: "enveloppe" },
+    { nom: "Formulaire de votre site", court: "Formulaire", icone: "formulaire" },
   ],
 };
 
@@ -314,7 +317,7 @@ export const METIERS = {
       icone: "cle",
       heure: "Samedi 21 h 47",
       demande: "Un de nos véhicules est immobilisé, vous avez un créneau ?",
-      issue: "Créneau réservé, rappel la veille",
+      issue: "Réponse prête, en attente de votre accord",
       transfert: false,
     },
     {
@@ -374,7 +377,7 @@ export const JOURNEE = {
       heure: "21 h 47",
       canal: "WhatsApp",
       texte: "Un de nos véhicules est immobilisé, vous avez un créneau ?",
-      issue: `Rendez-vous posé samedi 9 h 30`,
+      issue: "Réponse prête, en attente de votre accord",
       dehors: true,
       transfert: false,
     },
@@ -389,8 +392,8 @@ export const JOURNEE = {
     {
       heure: "Dimanche",
       canal: "Mail",
-      texte: `Je peux passer lundi à 18 h ?`,
-      issue: "Créneau réservé, rappel la veille",
+      texte: `Je peux passer lundi à 18 h ?`,
+      issue: "Répondu : ouvert lundi jusqu'à 19 h",
       dehors: true,
       transfert: false,
     },
@@ -511,8 +514,12 @@ export const FRANCAIS = {
   lien: { libelle: "Où vont vos données", href: "/vos-donnees" },
 } as const;
 
-/* La conversation de la fiche, jouée telle quelle dans le panneau du haut.
-   Rien n'est retouché : c'est le scénario écrit dans le texte source. */
+/* La conversation de la fiche, jouée dans le panneau du haut.
+   06/10/2026 (C5, décision du coordinateur) : le scénario source réservait
+   un créneau et posait un rappel — la prise de rendez-vous n'est pas
+   construite (C3, palier 5). La réponse dit maintenant ce que REPUT fait :
+   elle répond depuis la base (horaires, durée) et transfère le créneau à
+   l'équipe. On remettra la réservation quand C3 l'aura livrée. */
 export const CONVERSATION = {
   contexte: "Samedi, 21 h 47",
   sousTitre: "Le service est fermé, REPUT répond",
@@ -526,15 +533,9 @@ export const CONVERSATION = {
       de: "moteur",
       heure: "21:47",
       texte:
-        "Bonsoir ! Oui, l'atelier reçoit samedi de 8 h à 13 h. Comptez environ 45 minutes pour un diagnostic. Je peux vous réserver samedi 9 h 30 ?",
+        "Bonsoir ! Oui, l'atelier reçoit samedi de 8 h à 13 h. Comptez environ 45 minutes pour un diagnostic. Votre demande de créneau est transmise à l'atelier, qui vous le confirme dès l'ouverture.",
     },
-    { de: "client", heure: "21:52", texte: "Parfait pour 9h30 👍" },
-    {
-      de: "moteur",
-      heure: "21:52",
-      texte:
-        "C'est réservé, samedi 9 h 30. Vous recevrez un rappel vendredi soir. Bonne soirée !",
-    },
+    { de: "client", heure: "21:52", texte: "Parfait, merci 👍" },
   ],
-  issue: "Rendez-vous créé dans l'agenda du service · client confirmé",
+  issue: "Répondu depuis la base · créneau transféré à l'équipe",
 };
