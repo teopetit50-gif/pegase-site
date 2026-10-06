@@ -102,9 +102,28 @@ const ECRANS = [
     textes: ['Vos fournisseurs envoient leurs factures à', 'Nouveaux', 'Écartés', 'Pièces jointes', 'Devenue le document'],
     actions: [
       { nom: "Copier l'adresse" },
+      { nom: 'Marquer comme lu' },
+      { nom: 'Écarter' },
       { nom: 'Ouvrir la pièce' },
       { nom: 'Documents reçus', lien: '/filed' },
       { nom: 'Comptabilité', lien: '/filed/comptabilite' },
+      { nom: 'Toutes les demandes', lien: '/demandes' },
+    ],
+  },
+  {
+    cle: 'demandes', chemin: '/demandes', titre: 'Demandes reçues',
+    textes: ['Formulaire du site', 'WhatsApp', 'Enseigne', 'Toutes les demandes'],
+    actions: [
+      { nom: 'Boîte de FILED', lien: '/filed/boite' },
+    ],
+  },
+  {
+    cle: 'reglages', chemin: '/reglages', titre: 'Réglages',
+    textes: ['Le journal', 'Export complet', 'Quitter Omega', "l'export puis l'effacement"],
+    actions: [
+      { nom: 'Exporter mon journal' },
+      { nom: 'Exporter toutes mes données' },
+      { nom: "Préparer l'effacement" },
     ],
   },
   {
