@@ -2,7 +2,8 @@
 
 import { assert, assertEquals } from "@std/assert";
 import { csvMouvements, csvPatients, xlsxArticles } from "../exemples/generer.ts";
-import { decoderTexte, devinerSeparateur, lireCsv, lireTableau } from "../tableau.ts";
+import { decoderTexte, devinerSeparateur, lireCsv, lireTableau, lireXlsx } from "../tableau.ts";
+import { anomalieDeForme } from "../valeurs.ts";
 import { entetesCouvertes, motifReconnait, normaliserEntete, rapprocher } from "../entetes.ts";
 
 Deno.test("CSV « ; » en Windows-1252 : accents rendus, lignes vides ignorées, cellules entre guillemets", () => {
@@ -86,4 +87,33 @@ Deno.test("en-têtes : normalisation, rapprochement exact puis par préfixe, abs
   assertEquals(motifReconnait("^articles.*\\.xlsx$", "articles_varelo.xlsx"), true);
   assertEquals(motifReconnait("patients*.csv", "articles.xlsx"), false);
   assertEquals(motifReconnait(null, "x"), false);
+});
+
+Deno.test("XLSX : les dates au format par défaut sortent en AAAA-MM-JJ[ HH:MM], pas à l'américaine", async () => {
+  const XLSX = await import("xlsx");
+  const local = (a: number, m: number, j: number, h = 0, mi = 0) => new Date(a, m - 1, j, h, mi);
+  const ws = XLSX.utils.aoa_to_sheet([
+    ["N° RDV", "Début", "Date", "Heure", "Code postal"],
+    ["R1", local(2026, 10, 6, 8, 30), local(2026, 10, 6), local(1899, 12, 30, 14, 15), "01234"],
+  ], { cellDates: true });
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Agenda");
+  const t = await lireXlsx(new Uint8Array(XLSX.write(wb, { type: "array", bookType: "xlsx" })));
+  assertEquals(t.feuilles[0].lignes[0], ["R1", "2026-10-06 08:30", "2026-10-06", "14:15", "01234"]);
+});
+
+Deno.test("formes : dates et heures qui n'existent pas", () => {
+  assertEquals(anomalieDeForme("dateheure", "06/10/2026 08:30"), null);
+  assertEquals(anomalieDeForme("dateheure", "2026-10-06T08:30:00"), null);
+  assertEquals(anomalieDeForme("dateheure", "2026-10-06 08:30"), null);
+  assertEquals(anomalieDeForme("dateheure", "06/10/2026"), null);
+  assertEquals(anomalieDeForme("dateheure", "06/10/2026 25:00"), "date et heure illisibles");
+  assertEquals(anomalieDeForme("dateheure", "31/02/2026 10:00"), "date et heure illisibles");
+  assertEquals(anomalieDeForme("date", "31/02/2026"), "date illisible");
+  assertEquals(anomalieDeForme("date", "29/02/2028"), null);
+  assertEquals(anomalieDeForme("date", "13/13/2026"), "date illisible");
+  assertEquals(anomalieDeForme("date", "06/10/26"), null);
+  assertEquals(anomalieDeForme("heure", "8h30"), null);
+  assertEquals(anomalieDeForme("heure", "24:00"), "heure illisible");
+  assertEquals(anomalieDeForme("heure", "12:60"), "heure illisible");
 });

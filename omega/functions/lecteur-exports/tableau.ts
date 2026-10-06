@@ -133,9 +133,15 @@ export async function lireXlsx(octets: Uint8Array): Promise<Tableau> {
   const feuilles: Feuille[] = [];
   for (const nom of classeur.SheetNames) {
     const feuille = classeur.Sheets[nom];
-    const matrice = XLSX.utils.sheet_to_json<unknown[]>(feuille, { header: 1, raw: false, defval: "", blankrows: false }) as unknown[][];
-    const texte = (v: unknown) => (v === null || v === undefined ? "" : v instanceof Date ? v.toISOString().slice(0, 10) : String(v).trim());
-    const lignesTexte = matrice.map((l) => l.map(texte));
+    // Le texte affiché garde les zéros de tête et les formats de nombre ; mais une date au format
+    // par défaut du classeur s'affiche à l'américaine (« 10/6/26 », heure perdue) : les dates se
+    // reprennent donc de la valeur brute, en AAAA-MM-JJ[ HH:MM[:SS]], heure du classeur.
+    const options = { header: 1, defval: "", blankrows: false } as const;
+    const matrice = XLSX.utils.sheet_to_json<unknown[]>(feuille, { ...options, raw: false }) as unknown[][];
+    const brute = XLSX.utils.sheet_to_json<unknown[]>(feuille, { ...options, raw: true }) as unknown[][];
+    const texte = (v: unknown, b: unknown) =>
+      b instanceof Date ? dateDuClasseur(b) : v === null || v === undefined ? "" : v instanceof Date ? dateDuClasseur(v) : String(v).trim();
+    const lignesTexte = matrice.map((l, i) => l.map((v, k) => texte(v, brute[i]?.[k])));
     const premiere = lignesTexte.findIndex((l) => l.some((c) => c !== ""));
     if (premiere < 0) continue;
     const entetes = lignesTexte[premiere];
@@ -150,6 +156,22 @@ export async function lireXlsx(octets: Uint8Array): Promise<Tableau> {
     feuilles.push({ nom, entetes, lignes, numeros });
   }
   return { format: "xlsx", feuilles };
+}
+
+/**
+ * Une date de classeur (lue par SheetJS en heure locale du processus) en texte sans fuseau :
+ * « 2026-10-06 », « 2026-10-06 08:30 », « 2026-10-06 08:30:15 », ou « 08:30 » pour une heure seule
+ * (jour 0 du calendrier d'Excel). Arrondie à la seconde (SheetJS rend parfois 08:29:59.999).
+ */
+export function dateDuClasseur(d: Date): string {
+  if (Number.isNaN(d.getTime())) return "";
+  const r = new Date(Math.round(d.getTime() / 1000) * 1000);
+  const deux = (n: number) => String(n).padStart(2, "0");
+  const jour = `${r.getFullYear()}-${deux(r.getMonth() + 1)}-${deux(r.getDate())}`;
+  const h = r.getHours(), m = r.getMinutes(), sec = r.getSeconds();
+  const heure = h === 0 && m === 0 && sec === 0 ? "" : `${deux(h)}:${deux(m)}${sec ? `:${deux(sec)}` : ""}`;
+  if (r.getFullYear() <= 1900 && r.getMonth() === 11 && r.getDate() >= 30) return heure || "00:00";
+  return heure ? `${jour} ${heure}` : jour;
 }
 
 export function estXlsx(octets: Uint8Array): boolean {

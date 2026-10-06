@@ -1,0 +1,949 @@
+{
+  "source": "public.modeles_jeux, module tiroma, logiciel logosw, version 1 — extrait de la recette (omega/SOCLE-EXTRAITS-COMMUN.sql sur main). Hypothèses d en-têtes de B3, à confirmer sur un vrai export.",
+  "jeux": [
+    {
+      "code": "actes",
+      "libelle": "Actes réalisés",
+      "motif_fichier": "^(actes?|feuille|fse)",
+      "entetes": [
+        "N° acte",
+        "Date"
+      ],
+      "colonnes": {
+        "ref": {
+          "type": "texte",
+          "entetes": [
+            "N° acte",
+            "Id acte"
+          ],
+          "obligatoire": true
+        },
+        "code": {
+          "type": "texte",
+          "entetes": [
+            "Code",
+            "Code CCAM",
+            "Acte"
+          ]
+        },
+        "date": {
+          "type": "date",
+          "entetes": [
+            "Date",
+            "Date de l'acte"
+          ],
+          "obligatoire": true
+        },
+        "dents": {
+          "type": "texte",
+          "entetes": [
+            "Dents",
+            "Dent"
+          ],
+          "facultative": true
+        },
+        "libelle": {
+          "type": "texte",
+          "entetes": [
+            "Libellé"
+          ],
+          "facultative": true
+        },
+        "montant": {
+          "type": "decimal",
+          "entetes": [
+            "Montant",
+            "Honoraires"
+          ]
+        },
+        "rdv_ref": {
+          "type": "texte",
+          "entetes": [
+            "N° RDV",
+            "Rdv"
+          ],
+          "facultative": true
+        },
+        "praticien": {
+          "type": "texte",
+          "entetes": [
+            "Praticien"
+          ]
+        },
+        "patient_ref": {
+          "type": "texte",
+          "entetes": [
+            "N° patient",
+            "N° dossier",
+            "Patient"
+          ],
+          "obligatoire": true
+        },
+        "devis_numero": {
+          "type": "texte",
+          "entetes": [
+            "N° devis",
+            "Devis"
+          ],
+          "facultative": true
+        }
+      },
+      "cle": [
+        "ref"
+      ],
+      "options": {}
+    },
+    {
+      "code": "agenda",
+      "libelle": "Agenda",
+      "motif_fichier": "^(agenda|rdv|rendez)",
+      "entetes": [
+        "N° RDV",
+        "Début"
+      ],
+      "colonnes": {
+        "fin": {
+          "type": "dateheure",
+          "entetes": [
+            "Fin",
+            "Date fin"
+          ],
+          "facultative": true
+        },
+        "ref": {
+          "type": "texte",
+          "entetes": [
+            "N° RDV",
+            "N° rendez-vous",
+            "Id RDV"
+          ],
+          "libelle": "Numéro du rendez-vous",
+          "obligatoire": true
+        },
+        "type": {
+          "type": "texte",
+          "entetes": [
+            "Type",
+            "Type de RDV",
+            "Motif RDV"
+          ]
+        },
+        "debut": {
+          "type": "dateheure",
+          "entetes": [
+            "Début",
+            "Date début",
+            "Date"
+          ],
+          "obligatoire": true
+        },
+        "motif": {
+          "type": "texte",
+          "entetes": [
+            "Motif",
+            "Motif annulation"
+          ],
+          "sensible": true,
+          "facultative": true
+        },
+        "salle": {
+          "type": "texte",
+          "entetes": [
+            "Salle",
+            "Fauteuil",
+            "Agenda"
+          ]
+        },
+        "seance": {
+          "type": "entier",
+          "entetes": [
+            "Séance",
+            "N° séance"
+          ],
+          "facultative": true
+        },
+        "statut": {
+          "type": "texte",
+          "entetes": [
+            "Statut",
+            "État"
+          ]
+        },
+        "cree_le": {
+          "type": "dateheure",
+          "entetes": [
+            "Créé le",
+            "Date de création"
+          ],
+          "facultative": true
+        },
+        "devis_ref": {
+          "type": "texte",
+          "entetes": [
+            "N° devis",
+            "Devis"
+          ],
+          "facultative": true
+        },
+        "duree_min": {
+          "type": "entier",
+          "entetes": [
+            "Durée",
+            "Durée (min)"
+          ]
+        },
+        "praticien": {
+          "type": "texte",
+          "entetes": [
+            "Praticien",
+            "Code praticien"
+          ]
+        },
+        "patient_nom": {
+          "type": "texte",
+          "entetes": [
+            "Nom patient",
+            "Nom"
+          ],
+          "sensible": true,
+          "facultative": true
+        },
+        "patient_ref": {
+          "type": "texte",
+          "entetes": [
+            "N° patient",
+            "N° dossier",
+            "Patient"
+          ],
+          "libelle": "Numéro du patient"
+        },
+        "patient_naissance": {
+          "type": "date",
+          "entetes": [
+            "Naissance",
+            "Date de naissance"
+          ],
+          "sensible": true,
+          "facultative": true
+        }
+      },
+      "cle": [
+        "ref"
+      ],
+      "options": {}
+    },
+    {
+      "code": "attente",
+      "libelle": "Liste d'attente",
+      "motif_fichier": "^(attente|liste[_ -]?attente)",
+      "entetes": [
+        "N° attente",
+        "Depuis"
+      ],
+      "colonnes": {
+        "ref": {
+          "type": "texte",
+          "entetes": [
+            "N° attente",
+            "Id"
+          ],
+          "obligatoire": true
+        },
+        "type": {
+          "type": "texte",
+          "entetes": [
+            "Type",
+            "Type de RDV"
+          ],
+          "facultative": true
+        },
+        "depuis": {
+          "type": "date",
+          "entetes": [
+            "Depuis",
+            "Date d'inscription"
+          ]
+        },
+        "duree_min": {
+          "type": "entier",
+          "entetes": [
+            "Durée"
+          ],
+          "facultative": true
+        },
+        "praticien": {
+          "type": "texte",
+          "entetes": [
+            "Praticien"
+          ],
+          "facultative": true
+        },
+        "patient_ref": {
+          "type": "texte",
+          "entetes": [
+            "N° patient",
+            "N° dossier",
+            "Patient"
+          ],
+          "obligatoire": true
+        }
+      },
+      "cle": [
+        "ref"
+      ],
+      "options": {}
+    },
+    {
+      "code": "devis",
+      "libelle": "Devis et plans de traitement",
+      "motif_fichier": "^devis(?![_ -]?lignes)",
+      "entetes": [
+        "N° devis",
+        "Date"
+      ],
+      "colonnes": {
+        "date": {
+          "type": "date",
+          "entetes": [
+            "Date",
+            "Date du devis"
+          ],
+          "obligatoire": true
+        },
+        "type": {
+          "type": "texte",
+          "entetes": [
+            "Type"
+          ],
+          "facultative": true
+        },
+        "numero": {
+          "type": "texte",
+          "entetes": [
+            "N° devis",
+            "Numéro"
+          ],
+          "obligatoire": true
+        },
+        "panier": {
+          "type": "texte",
+          "entetes": [
+            "Panier"
+          ],
+          "facultative": true
+        },
+        "statut": {
+          "type": "texte",
+          "entetes": [
+            "Statut",
+            "État"
+          ]
+        },
+        "montant": {
+          "type": "decimal",
+          "entetes": [
+            "Montant",
+            "Total"
+          ]
+        },
+        "part_amc": {
+          "type": "decimal",
+          "entetes": [
+            "Part AMC",
+            "Mutuelle"
+          ],
+          "facultative": true
+        },
+        "part_amo": {
+          "type": "decimal",
+          "entetes": [
+            "Part AMO",
+            "Sécurité sociale"
+          ],
+          "facultative": true
+        },
+        "praticien": {
+          "type": "texte",
+          "entetes": [
+            "Praticien"
+          ]
+        },
+        "accepte_le": {
+          "type": "date",
+          "entetes": [
+            "Accepté le",
+            "Date d'acceptation",
+            "Signé le"
+          ],
+          "facultative": true
+        },
+        "patient_ref": {
+          "type": "texte",
+          "entetes": [
+            "N° patient",
+            "N° dossier",
+            "Patient"
+          ],
+          "obligatoire": true
+        },
+        "reste_a_charge": {
+          "type": "decimal",
+          "entetes": [
+            "Reste à charge",
+            "RAC"
+          ],
+          "facultative": true
+        },
+        "valide_jusqu_au": {
+          "type": "date",
+          "entetes": [
+            "Valide jusqu'au",
+            "Validité"
+          ],
+          "facultative": true
+        },
+        "alternative_100_sante": {
+          "type": "booleen",
+          "entetes": [
+            "Alternative 100 % Santé",
+            "Alternative 100% santé"
+          ],
+          "facultative": true
+        }
+      },
+      "cle": [
+        "numero"
+      ],
+      "options": {}
+    },
+    {
+      "code": "devis_lignes",
+      "libelle": "Lignes des devis",
+      "motif_fichier": "^(devis[_ -]?lignes|lignes)",
+      "entetes": [
+        "N° devis",
+        "Rang"
+      ],
+      "colonnes": {
+        "code": {
+          "type": "texte",
+          "entetes": [
+            "Code",
+            "Code CCAM",
+            "Acte"
+          ],
+          "facultative": true
+        },
+        "rang": {
+          "type": "entier",
+          "entetes": [
+            "Rang",
+            "N° ligne",
+            "Ligne"
+          ],
+          "obligatoire": true
+        },
+        "dents": {
+          "type": "texte",
+          "entetes": [
+            "Dents",
+            "Dent"
+          ],
+          "facultative": true
+        },
+        "numero": {
+          "type": "texte",
+          "entetes": [
+            "N° devis",
+            "Numéro"
+          ],
+          "obligatoire": true
+        },
+        "seance": {
+          "type": "entier",
+          "entetes": [
+            "Séance"
+          ],
+          "facultative": true
+        },
+        "fait_le": {
+          "type": "date",
+          "entetes": [
+            "Fait le",
+            "Réalisé le"
+          ],
+          "facultative": true
+        },
+        "libelle": {
+          "type": "texte",
+          "entetes": [
+            "Libellé"
+          ]
+        },
+        "montant": {
+          "type": "decimal",
+          "entetes": [
+            "Montant",
+            "Honoraires"
+          ]
+        },
+        "rdv_ref": {
+          "type": "texte",
+          "entetes": [
+            "Rdv",
+            "N° RDV"
+          ],
+          "facultative": true
+        },
+        "duree_min": {
+          "type": "entier",
+          "entetes": [
+            "Durée"
+          ],
+          "facultative": true
+        },
+        "devis_date": {
+          "type": "date",
+          "entetes": [
+            "Date du devis",
+            "Date"
+          ],
+          "obligatoire": true
+        },
+        "reste_a_charge": {
+          "type": "decimal",
+          "entetes": [
+            "Reste à charge",
+            "RAC"
+          ],
+          "facultative": true
+        },
+        "delai_min_jours": {
+          "type": "entier",
+          "entetes": [
+            "Délai",
+            "Délai avant le suivant"
+          ],
+          "facultative": true
+        }
+      },
+      "cle": [
+        "numero",
+        "rang"
+      ],
+      "options": {}
+    },
+    {
+      "code": "labo",
+      "libelle": "Fiches de laboratoire",
+      "motif_fichier": "^(labo|fiches?)",
+      "entetes": [
+        "N° fiche",
+        "Laboratoire"
+      ],
+      "colonnes": {
+        "ref": {
+          "type": "texte",
+          "entetes": [
+            "N° fiche",
+            "Id fiche"
+          ],
+          "obligatoire": true
+        },
+        "statut": {
+          "type": "texte",
+          "entetes": [
+            "Statut",
+            "État"
+          ],
+          "facultative": true
+        },
+        "envoye_le": {
+          "type": "date",
+          "entetes": [
+            "Envoyé le",
+            "Date d'envoi"
+          ]
+        },
+        "revenu_le": {
+          "type": "date",
+          "entetes": [
+            "Revenu le",
+            "Date de retour"
+          ],
+          "facultative": true
+        },
+        "laboratoire": {
+          "type": "texte",
+          "entetes": [
+            "Laboratoire",
+            "Labo"
+          ]
+        },
+        "patient_ref": {
+          "type": "texte",
+          "entetes": [
+            "N° patient",
+            "N° dossier",
+            "Patient"
+          ],
+          "obligatoire": true
+        },
+        "rdv_pose_ref": {
+          "type": "texte",
+          "entetes": [
+            "RDV de pose",
+            "N° RDV pose"
+          ],
+          "facultative": true
+        },
+        "type_travail": {
+          "type": "texte",
+          "entetes": [
+            "Type de travail",
+            "Travail"
+          ],
+          "facultative": true
+        },
+        "rdv_empreinte_ref": {
+          "type": "texte",
+          "entetes": [
+            "RDV d'empreinte",
+            "N° RDV empreinte"
+          ],
+          "facultative": true
+        },
+        "retour_attendu_le": {
+          "type": "date",
+          "entetes": [
+            "Retour attendu",
+            "Date de retour prévue"
+          ],
+          "facultative": true
+        }
+      },
+      "cle": [
+        "ref"
+      ],
+      "options": {}
+    },
+    {
+      "code": "odf",
+      "libelle": "Ententes d'orthodontie",
+      "motif_fichier": "^(odf|ententes?|ortho)",
+      "entetes": [
+        "N° entente",
+        "Demande"
+      ],
+      "colonnes": {
+        "ref": {
+          "type": "texte",
+          "entetes": [
+            "N° entente",
+            "Id"
+          ],
+          "obligatoire": true
+        },
+        "fin_le": {
+          "type": "date",
+          "entetes": [
+            "Fin",
+            "Fin du traitement"
+          ],
+          "facultative": true
+        },
+        "statut": {
+          "type": "texte",
+          "entetes": [
+            "Statut",
+            "État"
+          ],
+          "facultative": true
+        },
+        "debut_le": {
+          "type": "date",
+          "entetes": [
+            "Début",
+            "Début du traitement"
+          ],
+          "facultative": true
+        },
+        "semestre": {
+          "type": "entier",
+          "entetes": [
+            "Semestre",
+            "Semestre en cours"
+          ],
+          "facultative": true
+        },
+        "accord_le": {
+          "type": "date",
+          "entetes": [
+            "Accord",
+            "Date d'accord"
+          ],
+          "facultative": true
+        },
+        "demande_le": {
+          "type": "date",
+          "entetes": [
+            "Demande",
+            "Date de demande"
+          ]
+        },
+        "patient_ref": {
+          "type": "texte",
+          "entetes": [
+            "N° patient",
+            "N° dossier",
+            "Patient"
+          ],
+          "obligatoire": true
+        }
+      },
+      "cle": [
+        "ref"
+      ],
+      "options": {}
+    },
+    {
+      "code": "patients",
+      "libelle": "Patients actifs",
+      "motif_fichier": "^(patients?|liste)",
+      "entetes": [
+        "N° patient",
+        "Nom"
+      ],
+      "colonnes": {
+        "nom": {
+          "type": "texte",
+          "entetes": [
+            "Nom"
+          ],
+          "sensible": true,
+          "obligatoire": true
+        },
+        "ref": {
+          "type": "texte",
+          "entetes": [
+            "N° patient",
+            "N° dossier"
+          ],
+          "obligatoire": true
+        },
+        "prenom": {
+          "type": "texte",
+          "entetes": [
+            "Prénom"
+          ],
+          "sensible": true
+        },
+        "naissance": {
+          "type": "date",
+          "entetes": [
+            "Naissance",
+            "Date de naissance"
+          ],
+          "sensible": true
+        },
+        "praticien": {
+          "type": "texte",
+          "entetes": [
+            "Praticien",
+            "Praticien habituel"
+          ]
+        },
+        "famille_ref": {
+          "type": "texte",
+          "entetes": [
+            "Famille",
+            "N° famille",
+            "Lien familial"
+          ],
+          "facultative": true
+        },
+        "dernier_rdv_le": {
+          "type": "date",
+          "entetes": [
+            "Dernier RDV",
+            "Dernière visite"
+          ],
+          "facultative": true
+        },
+        "dernier_bilan_le": {
+          "type": "date",
+          "entetes": [
+            "Dernier bilan",
+            "Bilan de santé"
+          ],
+          "facultative": true
+        },
+        "ne_pas_contacter": {
+          "type": "booleen",
+          "entetes": [
+            "Ne pas contacter",
+            "Refus contact"
+          ],
+          "facultative": true
+        },
+        "questionnaire_le": {
+          "type": "date",
+          "entetes": [
+            "Questionnaire",
+            "Date questionnaire médical"
+          ],
+          "facultative": true
+        }
+      },
+      "cle": [
+        "ref"
+      ],
+      "options": {}
+    },
+    {
+      "code": "stock",
+      "libelle": "Stock",
+      "motif_fichier": "^stock",
+      "entetes": [
+        "Référence",
+        "Quantité"
+      ],
+      "colonnes": {
+        "lot": {
+          "type": "texte",
+          "entetes": [
+            "Lot",
+            "N° de lot"
+          ]
+        },
+        "seuil": {
+          "type": "entier",
+          "entetes": [
+            "Seuil",
+            "Seuil d'alerte"
+          ],
+          "facultative": true
+        },
+        "marque": {
+          "type": "texte",
+          "entetes": [
+            "Marque",
+            "Fabricant"
+          ],
+          "facultative": true
+        },
+        "famille": {
+          "type": "texte",
+          "entetes": [
+            "Famille",
+            "Catégorie"
+          ],
+          "facultative": true
+        },
+        "quantite": {
+          "type": "entier",
+          "entetes": [
+            "Quantité",
+            "Qté"
+          ],
+          "obligatoire": true
+        },
+        "reference": {
+          "type": "texte",
+          "entetes": [
+            "Référence",
+            "Réf."
+          ],
+          "obligatoire": true
+        },
+        "peremption": {
+          "type": "date",
+          "entetes": [
+            "Péremption",
+            "Date de péremption"
+          ],
+          "facultative": true
+        },
+        "diametre_mm": {
+          "type": "decimal",
+          "entetes": [
+            "Diamètre",
+            "Ø"
+          ],
+          "facultative": true
+        },
+        "longueur_mm": {
+          "type": "decimal",
+          "entetes": [
+            "Longueur"
+          ],
+          "facultative": true
+        }
+      },
+      "cle": [
+        "reference",
+        "lot"
+      ],
+      "options": {}
+    },
+    {
+      "code": "types_rdv",
+      "libelle": "Types de rendez-vous",
+      "motif_fichier": "^types?",
+      "entetes": [
+        "Libellé",
+        "Durée"
+      ],
+      "colonnes": {
+        "code": {
+          "type": "texte",
+          "entetes": [
+            "Code"
+          ],
+          "facultative": true
+        },
+        "salle": {
+          "type": "texte",
+          "entetes": [
+            "Salle",
+            "Salle associée"
+          ],
+          "facultative": true
+        },
+        "couleur": {
+          "type": "texte",
+          "entetes": [
+            "Couleur"
+          ],
+          "facultative": true
+        },
+        "libelle": {
+          "type": "texte",
+          "entetes": [
+            "Libellé",
+            "Type de RDV"
+          ],
+          "obligatoire": true
+        },
+        "categorie": {
+          "type": "texte",
+          "entetes": [
+            "Catégorie"
+          ],
+          "facultative": true
+        },
+        "duree_min": {
+          "type": "entier",
+          "entetes": [
+            "Durée",
+            "Durée par défaut"
+          ]
+        }
+      },
+      "cle": [
+        "libelle"
+      ],
+      "options": {}
+    }
+  ]
+}
