@@ -819,6 +819,27 @@ convient pas.
   d'envoi « site » (DROP CONSTRAINT sur `envois_canal_check`) et une porte de lecture par
   conversation. C'est à décider.
 
+## SMS Brevo : mise en service (06/10)
+
+- 19ap (widget) est posé et son test est vert ; la fonction `widget` v1 est déployée. Le
+  coordinateur ne veut pas de réponse dans la bulle pour l'instant : le courriel ou le SMS
+  suffit à la promesse.
+- **SMS** : le code d'envoi existe et il est testé (`expediteur/brevo.ts`,
+  `passage.ts` remettreSms, test « SMS remis… »), mais aucun SMS n'est jamais parti en vrai.
+  C'est une mise en service, pas un lot. Script `omega/banc/mise_en_service_sms.sql`, à
+  jouer par le coordinateur sur accord de Teo, après l'achat de crédits SMS Brevo :
+  - contrôles en lecture seule ;
+  - `brevo_sms` branché ;
+  - un expéditeur SMS « OMEGA » réservé au module d'essai `socle_sms` ;
+  - le module `socle_sms` en mode réel (plages larges, sans délai) ;
+  - un SMS d'essai vers le portable de Teo (numéro à écrire ; garde si absent) ;
+  - les requêtes de vérification et le retour arrière.
+
+  Le réglage de l'organisation n'est pas touché : s'il est en essai, le script le montre et
+  on s'arrête.
+- La promesse « appel manqué → SMS » demande aussi que le module crée l'envoi
+  (`preparer_envoi`, canal sms, transactionnel). Ce n'est pas mon périmètre.
+
 ## Risques résiduels et choix
 
 - **Clé Brevo absente** : l'envoi est reporté par `echouer_envoi(…, false)` et le
