@@ -43,8 +43,8 @@ begin
   perform tests.b3_endosser('referent');
   return next throws_ok(format('select public.tiroma_noter_contact(%L, %L, %L, ''email'', ''lucas@b3-patients.test'')', banc, entite, v_mondesir),
                         '22023', null, 'un patient « ne pas contacter » : aucun moyen de contact ne se note (22023)');
-  return next throws_ok(format('select public.tiroma_noter_contact(%L, %L, %L, ''whatsapp'', ''+590690000001'')', banc, entite, v_dorville),
-                        '22023', null, 'WhatsApp n''est pas proposé (22023)');
+  return next throws_ok(format('select public.tiroma_noter_contact(%L, %L, %L, ''sms'', ''+590690000001'')', banc, entite, v_dorville),
+                        '22023', null, 'pas de SMS dans un contexte de santé, décision D6 (22023)');
   return next throws_ok(format('select public.tiroma_noter_contact(%L, %L, %L, ''email'', ''pas-une-adresse'')', banc, entite, v_dorville),
                         '22023', null, 'une adresse invalide est refusée (22023)');
   return next throws_ok(format('select public.tiroma_noter_contact(%L, %L, %L, ''email'', ''michel@b3-patients.test'', false, false)', banc, entite, v_dorville),
@@ -58,7 +58,7 @@ begin
                  'l''accord est au registre commun des consentements, avec sa preuve');
   v_bis := public.tiroma_noter_contact(banc, entite, v_dorville, 'email', 'michel@b3-patients.test', true, true, 'oral', null);
   return next is(v_bis, v_contact, 'une seconde saisie met à jour le même moyen de contact');
-  perform public.tiroma_noter_contact(banc, entite, v_delannoy, 'sms', '+590 690 12 34 56', false, true, 'ecrit', 'Fiche de consentement signée le 06/10.');
+  perform public.tiroma_noter_contact(banc, entite, v_delannoy, 'email', 'marguerite@b3-patients.test', false, true, 'ecrit', 'Fiche de consentement signée le 06/10.');
   perform tests.b3_endosser('daf2');
   return next throws_ok(format('select public.tiroma_noter_contact(%L, %L, %L, ''email'', ''x@b3-patients.test'')', banc, entite, v_dorville),
                         '42501', null, 'daf2, sans profil, ne note rien (42501)');
@@ -79,9 +79,9 @@ begin
   return next ok(exists (select 1 from public.envois e where e.client_id = banc and e.module = 'tiroma' and e.cle_idempotence = 'tiroma:devis:'
                           || (select id from public.tiroma_plans where entite_id = entite and source_ref = 'D005')::text),
                  'le rappel du devis D005 (présenté il y a 20 jours) est préparé');
-  return next ok(exists (select 1 from public.envois e where e.client_id = banc and e.module = 'tiroma' and e.canal = 'sms'
+  return next ok(exists (select 1 from public.envois e where e.client_id = banc and e.module = 'tiroma' and e.canal = 'email'
                           and e.cle_idempotence like 'tiroma:plan:' || (select id from public.tiroma_plans where entite_id = entite and source_ref = 'D001')::text || ':%'),
-                 'la relance du plan D001 de Marguerite Delannoy (signé il y a 42 jours) est préparée, par SMS');
+                 'la relance du plan D001 de Marguerite Delannoy (signé il y a 42 jours) est préparée, par courriel');
   return next ok(not exists (select 1 from public.envois e where e.client_id = banc and e.module = 'tiroma' and e.objet_type = 'tiroma_rendez_vous'
                               and e.objet_id in (select id::text from public.tiroma_rendez_vous where patient_id = v_delannoy)),
                  'Marguerite Delannoy n''accepte que les relances : aucun rappel de rendez-vous pour elle');
@@ -130,6 +130,46 @@ begin
   return next ok(exists (select 1 from public.journal_opposable where client_id = banc and action = 'tiroma.contact_note'
                           and donnees::text not ilike '%b3-patients%'), 'journal : « tiroma.contact_note », sans adresse');
   perform tests.redevenir_admin();
+end $f$;
+
+-- Avec le lot socle 19ah (posé avec 19ah_recette_seulement) : le drapeau d'essai « données fictives » sur la ligne
+-- tiroma du banc, et le rappel J-2 passe le verrou santé EN ESSAI (remise à essai_adresse, jamais au patient).
+create or replace function tests.test_b3_15_rappels_essai_fictif() returns setof text
+language plpgsql as $f$
+declare
+  banc uuid := tests.b3_banc();
+  entite uuid := tests.b3_entite();
+  r jsonb;
+  v_dorville uuid;
+  v_rdv uuid;
+  v_j2 uuid;
+  rep jsonb;
+begin
+  r := tests.b3_cabinet_releve('initial');
+  select id into v_dorville from public.tiroma_patients where entite_id = entite and source_ref = 'P008';
+  select id into v_rdv from public.tiroma_rendez_vous where entite_id = entite and source_ref = 'R011';
+  perform tests.redevenir_admin();
+  insert into public.reglages_envois (client_id, module, mode, essai_adresse, canaux)
+  select banc, 'tiroma', 'essai', coalesce((select x.essai_adresse from public.reglages_envois x where x.client_id = banc and x.module is null), 'essais@omegaai.fr'), array['email']
+  where not exists (select 1 from public.reglages_envois x where x.client_id = banc and x.module = 'tiroma');
+  update public.reglages_envois set mode = 'essai', essai_donnees_fictives = true where client_id = banc and module = 'tiroma';
+  return next ok((select g.essai_donnees_fictives from public.reglages_envois g where g.client_id = banc and g.module = 'tiroma'),
+                 'la ligne tiroma du banc porte le drapeau d''essai « données fictives » (recette)');
+
+  perform tests.b3_endosser('referent');
+  perform public.tiroma_noter_contact(banc, entite, v_dorville, 'email', 'michel@b3-patients.test', true, false, 'oral', null);
+  perform tests.redevenir_admin();
+  perform private.tiroma_preparer_rappels(now(), banc);
+  select e.id into v_j2 from public.envois e
+  where e.client_id = banc and e.module = 'tiroma' and e.objet_type = 'tiroma_rendez_vous' and e.objet_id = v_rdv::text;
+  return next ok((select e.statut in ('a_valider', 'differe', 'pret') and e.mode = 'essai' and e.donnees_sante from public.envois e where e.id = v_j2),
+                 'le rappel J-2 de R011 passe le verrou santé en essai (' || (select statut || coalesce(' / ' || verrou, '') from public.envois where id = v_j2) || ')');
+  return next is(private.envoi_valide(v_j2), 'pret', 'validé : pret');
+  perform tests.endosser_serveur();
+  rep := private.commencer_envoi(v_j2);
+  perform tests.redevenir_admin();
+  return next is(rep ->> 'donnees_fictives', 'true', 'l''expéditeur reçoit donnees_fictives = true');
+  return next is(rep ->> 'fournisseur_hds', 'false', 'et fournisseur_hds = false : il remet à l''adresse d''essai seulement');
 end $f$;
 
 select * from runtests('tests'::name, '^test_b3_15_');

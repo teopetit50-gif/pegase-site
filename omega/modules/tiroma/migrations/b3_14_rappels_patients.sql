@@ -2,13 +2,14 @@
 -- sans réponse ; le canal choisi par chaque patient (son accord) ; ses réponses OUI / NON (vague 3, manque n° 3).
 --
 -- CE QUE ÇA POSE (côté module ; rien dans le socle) :
---   · table public.tiroma_contacts : le moyen de joindre un patient (courriel ou SMS), ce qu'il accepte de recevoir
+--   · table public.tiroma_contacts : le moyen de joindre un patient (le courriel : pas de SMS dans un contexte de santé,
+--     décision D6, private.modules_envois et canaux_envoi), ce qu'il accepte de recevoir
 --     (rappels de rendez-vous, relances de plan et de devis), et l'accord noté dans public.consentements
 --     (private.noter_consentement, module tiroma). Lecture sous RLS comme la liste d'attente ; écriture par la porte.
 --   · public.tiroma_noter_contact(p_client, p_entite, p_patient, p_canal, p_adresse, p_rappels, p_relances, p_source,
 --     p_preuve) → uuid ; public.tiroma_retirer_contact(p_contact, p_motif) → void.
---   · six gabarits globaux, validés : tiroma.rappel_j2_{email,sms}, tiroma.relance_plan_{email,sms},
---     tiroma.rappel_devis_{email,sms} ; tous donnees_sante = true (un rendez-vous chez le dentiste révèle un soin).
+--   · trois gabarits globaux de courriel, validés : tiroma.rappel_j2_email, tiroma.relance_plan_email,
+--     tiroma.rappel_devis_email ; tous donnees_sante = true (un rendez-vous chez le dentiste révèle un soin).
 --   · private.tiroma_preparer_rappels(p_maintenant) : chaque heure (cron tiroma-rappels), pour chaque cabinet dont le
 --     module tiroma est réglé (reglages_envois, mode essai ou réel), prépare par private.preparer_envoi :
 --       J-2      rendez-vous prévu après-demain (heure du cabinet), patient joignable qui accepte les rappels ;
@@ -33,7 +34,7 @@ create table if not exists public.tiroma_contacts (
   client_id uuid not null,
   entite_id uuid not null,
   patient_id uuid not null,
-  canal text not null check (canal in ('email', 'sms')),
+  canal text not null check (canal in ('email')),
   adresse text not null check (char_length(adresse) between 3 and 254),
   rappels boolean not null default true,
   relances boolean not null default false,
@@ -116,8 +117,8 @@ begin
   if pa.ne_pas_contacter then
     raise exception 'Ce patient a demandé à ne pas être contacté (logiciel du cabinet) : aucun moyen de contact ne se note.' using errcode = '22023';
   end if;
-  if p_canal is null or p_canal not in ('email', 'sms') then
-    raise exception 'Le canal vaut email ou sms.' using errcode = '22023';
+  if p_canal is null or p_canal <> 'email' then
+    raise exception 'Le cabinet écrit à ses patients par courriel : pas de SMS dans un contexte de santé (décision D6).' using errcode = '22023';
   end if;
   if p_source is null or p_source not in ('oral', 'ecrit', 'formulaire') then
     raise exception 'L''accord est oral, écrit ou par formulaire.' using errcode = '22023';
@@ -209,10 +210,6 @@ values
    || 'Répondez OUI pour le confirmer, ou NON si vous ne pouvez pas venir : nous proposerons ce créneau à un autre patient.' || chr(10) || chr(10)
    || 'Le cabinet {{entite}}.',
    '{"jour": "date", "heure": "texte"}'::jsonb, true, true, false, 'brouillon'),
-  (null, 'tiroma', 'tiroma.rappel_j2_sms', 'fr', 1, 'sms', 'Rappel de rendez-vous à J-2 (SMS)',
-   null,
-   'Cabinet {{entite}} : rendez-vous le {{jour}} à {{heure}}. Répondez OUI pour confirmer, NON si vous ne pouvez pas venir.',
-   '{"jour": "date", "heure": "texte"}'::jsonb, true, true, false, 'brouillon'),
   (null, 'tiroma', 'tiroma.relance_plan_email', 'fr', 1, 'email', 'Relance d''un plan de traitement sans rendez-vous (courriel)',
    'Votre plan de traitement — {{entite}}',
    'Bonjour,' || chr(10) || chr(10)
@@ -220,20 +217,12 @@ values
    || 'Appelez le cabinet {{entite}} pour le fixer, ou répondez à ce message : nous vous rappellerons.' || chr(10) || chr(10)
    || 'Le cabinet {{entite}}.',
    '{"signe_le": "date"}'::jsonb, true, true, false, 'brouillon'),
-  (null, 'tiroma', 'tiroma.relance_plan_sms', 'fr', 1, 'sms', 'Relance d''un plan de traitement sans rendez-vous (SMS)',
-   null,
-   'Cabinet {{entite}} : votre plan de traitement accepté le {{signe_le}} attend son prochain rendez-vous. Appelez-nous pour le fixer.',
-   '{"signe_le": "date"}'::jsonb, true, true, false, 'brouillon'),
   (null, 'tiroma', 'tiroma.rappel_devis_email', 'fr', 1, 'email', 'Rappel d''un devis sans réponse (courriel)',
    'Votre devis du {{presente_le}} — {{entite}}',
    'Bonjour,' || chr(10) || chr(10)
    || 'Le devis que le cabinet {{entite}} vous a remis le {{presente_le}} est valable jusqu''au {{valide_jusqu_au}}.' || chr(10)
    || 'Une question, un doute sur la prise en charge ? Répondez à ce message ou appelez-nous.' || chr(10) || chr(10)
    || 'Le cabinet {{entite}}.',
-   '{"presente_le": "date", "valide_jusqu_au": "date"}'::jsonb, true, true, false, 'brouillon'),
-  (null, 'tiroma', 'tiroma.rappel_devis_sms', 'fr', 1, 'sms', 'Rappel d''un devis sans réponse (SMS)',
-   null,
-   'Cabinet {{entite}} : votre devis du {{presente_le}} est valable jusqu''au {{valide_jusqu_au}}. Une question ? Appelez-nous.',
    '{"presente_le": "date", "valide_jusqu_au": "date"}'::jsonb, true, true, false, 'brouillon')
 on conflict (client_id, code, langue, version) do nothing;
 
@@ -243,8 +232,7 @@ begin
   for v_id in
     select g.id from public.gabarits_messages g
     where g.client_id is null and g.module = 'tiroma' and g.langue = 'fr' and g.version = 1 and g.statut = 'brouillon'
-      and g.code in ('tiroma.rappel_j2_email', 'tiroma.rappel_j2_sms', 'tiroma.relance_plan_email', 'tiroma.relance_plan_sms',
-                     'tiroma.rappel_devis_email', 'tiroma.rappel_devis_sms')
+      and g.code in ('tiroma.rappel_j2_email', 'tiroma.relance_plan_email', 'tiroma.rappel_devis_email')
   loop
     set local role service_role;
     perform public.valider_gabarit(v_id, 'B3 — recette, 06/10/2026 (rappels patients, vague 3)');

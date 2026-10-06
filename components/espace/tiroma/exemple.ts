@@ -226,15 +226,15 @@ export const DOSSIER_EXEMPLE: Dossier = {
   },
   /* b3_14 : les rappels du cabinet d'exemple, en essai (patients fictifs) */
   rappels: {
-    reglage: { mode: "essai", essai: true, canaux: ["email", "sms"] },
+    reglage: { mode: "essai", essai: true, canaux: ["email"] },
     contacts: [
       { id: "ct-1", patient_id: "pa-9", patient_nom: "Michel Dorville", canal: "email", adresse: "michel.dorville@exemple.test", rappels: true, relances: true, source: "oral", cree_le: ilYa(12) },
-      { id: "ct-2", patient_id: "pa-1", patient_nom: "Marguerite Delannoy", canal: "sms", adresse: "+590690123456", rappels: false, relances: true, source: "ecrit", cree_le: ilYa(30) },
-      { id: "ct-3", patient_id: "pa-6", patient_nom: "Patrice Zami", canal: "sms", adresse: "+590690654321", rappels: true, relances: false, source: "formulaire", cree_le: ilYa(4) },
+      { id: "ct-2", patient_id: "pa-1", patient_nom: "Marguerite Delannoy", canal: "email", adresse: "m.delannoy@exemple.test", rappels: false, relances: true, source: "ecrit", cree_le: ilYa(30) },
+      { id: "ct-3", patient_id: "pa-6", patient_nom: "Patrice Zami", canal: "email", adresse: "patrice.zami@exemple.test", rappels: true, relances: false, source: "formulaire", cree_le: ilYa(4) },
     ],
     envois: [
       { id: "en-1", type: "j2", canal: "email", mode: "essai", statut: "bloque", verrou: "SANTE_HORS_CANAL_AGREE", cree_le: a(0, 7, 7), envoye_le: null, patient_nom: "Michel Dorville" },
-      { id: "en-2", type: "plan", canal: "sms", mode: "essai", statut: "bloque", verrou: "CANAL_NON_PERMIS", cree_le: a(0, 7, 7), envoye_le: null, patient_nom: "Marguerite Delannoy" },
+      { id: "en-2", type: "plan", canal: "email", mode: "essai", statut: "bloque", verrou: "SANTE_HORS_CANAL_AGREE", cree_le: a(0, 7, 7), envoye_le: null, patient_nom: "Marguerite Delannoy" },
       { id: "en-3", type: "devis", canal: "email", mode: "essai", statut: "bloque", verrou: "SANTE_HORS_CANAL_AGREE", cree_le: a(-1, 7, 7), envoye_le: null, patient_nom: "Michel Dorville" },
     ],
     reponses: [

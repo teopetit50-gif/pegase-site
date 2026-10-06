@@ -1,7 +1,8 @@
 "use client";
 
 /* La section « Rappels aux patients » (06/10/2026, session B3, b3_14) : le
-   moyen de joindre chaque patient et son accord (courriel ou SMS ; rappels de
+   moyen de joindre chaque patient et son accord (le courriel : pas de SMS dans
+   un contexte de santé, décision D6 ; rappels de
    rendez-vous, relances de plan et de devis), les derniers rappels préparés
    et leur état, et les réponses OUI / NON reçues. Un rappel porte une donnée
    de santé : tant qu'aucun prestataire agréé HDS n'est branché, le socle le
@@ -18,7 +19,7 @@ import type { CanalPatient, ContactPatient, PatientCourt, Rappels as RappelsT } 
 
 export type NouveauContact = { patient: PatientCourt; canal: CanalPatient; adresse: string; rappels: boolean; relances: boolean; source: ContactPatient["source"]; preuve: string | null };
 
-const CANAUX: Record<CanalPatient, string> = { email: "Courriel", sms: "SMS" };
+const CANAUX: Record<CanalPatient, string> = { email: "Courriel" };
 const SOURCES: Record<ContactPatient["source"], string> = { oral: "Accord oral, au cabinet", ecrit: "Accord écrit (fiche signée)", formulaire: "Formulaire" };
 
 type Props = {
@@ -34,7 +35,7 @@ export default function Rappels({ rappels, peutEcrire, chercher, noter, retirer 
   const [texte, setTexte] = useState("");
   const [trouves, setTrouves] = useState<PatientCourt[]>([]);
   const [patient, setPatient] = useState<PatientCourt | null>(null);
-  const [canal, setCanal] = useState<CanalPatient>("sms");
+  const canal: CanalPatient = "email";
   const [adresse, setAdresse] = useState("");
   const [lesRappels, setLesRappels] = useState(true);
   const [relances, setRelances] = useState(false);
@@ -65,7 +66,7 @@ export default function Rappels({ rappels, peutEcrire, chercher, noter, retirer 
   if (!rappels) return null;
 
   const ouvrir = () => {
-    setOuvert(true); setTexte(""); setPatient(null); setCanal("sms"); setAdresse(""); setLesRappels(true); setRelances(false);
+    setOuvert(true); setTexte(""); setPatient(null); setAdresse(""); setLesRappels(true); setRelances(false);
     setSource("oral"); setPreuve(""); setErreur(null);
   };
   const confirmer = async () => {
@@ -104,7 +105,7 @@ export default function Rappels({ rappels, peutEcrire, chercher, noter, retirer 
           <div>
             <h3 className="esp-groupe-titre">Moyens de contact</h3>
             {!rappels.contacts.length ? (
-              <Vide titre="Aucun moyen de contact">Notez le courriel ou le portable d&apos;un patient, avec son accord, pour qu&apos;il reçoive ses rappels.</Vide>
+              <Vide titre="Aucun moyen de contact">Notez le courriel d&apos;un patient, avec son accord, pour qu&apos;il reçoive ses rappels.</Vide>
             ) : (
               <ul className="esp-liste" aria-label="Moyens de contact">
                 {rappels.contacts.map((c) => (
@@ -192,17 +193,10 @@ export default function Rappels({ rappels, peutEcrire, chercher, noter, retirer 
                   ))}
                 </ul>
               ) : null}
-              <div className="esp-form-ligne">
-                <label className="rv-libelle">Canal
-                  <select className="rv-champ" value={canal} onChange={(e) => setCanal(e.target.value as CanalPatient)}>
-                    <option value="sms">SMS</option>
-                    <option value="email">Courriel</option>
-                  </select>
-                </label>
-                <label className="rv-libelle">{canal === "sms" ? "Portable" : "Courriel"}
-                  <input className="rv-champ" value={adresse} onChange={(e) => setAdresse(e.target.value)} inputMode={canal === "sms" ? "tel" : "email"} placeholder={canal === "sms" ? "+590 690 12 34 56" : "prenom.nom@exemple.fr"} autoComplete="off" />
-                </label>
-              </div>
+              <label className="rv-libelle">Courriel du patient
+                <input className="rv-champ" type="email" value={adresse} onChange={(e) => setAdresse(e.target.value)} inputMode="email" placeholder="prenom.nom@exemple.fr" autoComplete="off" />
+              </label>
+              <p className="esp-fil-meta">Pas de SMS : aucun prestataire SMS n&apos;est agréé pour les données de santé.</p>
               <label className="esp-item-haut" style={{ gap: 8, cursor: "pointer" }}>
                 <input type="checkbox" checked={lesRappels} onChange={(e) => setLesRappels(e.target.checked)} />
                 <span>Rappel deux jours avant chaque rendez-vous</span>

@@ -359,7 +359,8 @@ export type Pilotage = {
 
 /* ——— les rappels aux patients (b3_14) ——— */
 
-export type CanalPatient = "email" | "sms";
+/** Le courriel seul : pas de SMS dans un contexte de santé (décision D6). */
+export type CanalPatient = "email";
 
 export type ContactPatient = {
   id: string;

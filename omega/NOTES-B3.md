@@ -250,3 +250,13 @@ logiciel métier qui la fait).
   Rejouée deux fois sur un Postgres local avec des tables simulées : idempotente, gabarits validés, crons inscrits, lecture OUI / NON conforme.
 - `omega/tests/tiroma/15_rappels_patients.sql` : `test_b3_15_rappels_patients` (35 assertions). Il vérifie notamment que le rappel J-2 de R011 (Dorville) est **bloqué SANTE_HORS_CANAL_AGREE** tant qu'aucun fournisseur n'est agréé, et que les réponses OUI, NON et la question sont lues comme attendu.
 - Écran : carte « Rappels aux patients » (mode essai ou en service, moyens de contact, réponses reçues, derniers rappels avec la raison du verrou) et dialogue « Ajouter un moyen de contact ». Recette : 81 contrôles, tout passe ; axe : 0 écart.
+- 06/10, ~16 h 30 Z — **voie d'essai acceptée** par le coordinateur ; extraits de la recette reçus. Conséquences :
+  - **Décision D6** : pas de SMS dans Tiroma (`modules_envois.tiroma` : email, whatsapp, appel ; `canaux_envoi.sms.permis_sante = false`). b3_14 passe au **courriel seul** : contacts en `email`, 3 gabarits au lieu de 6, refus 22023 d'un SMS, écran sans SMS. Le drapeau 19ah ne rouvre pas le SMS.
+  - `exiger_reglage_destinataire` admet gerant, admin, valideur et collaborateur (rôle socle). `referent@` est valideur : l'assistante du banc note donc les accords. **Une assistante « lecteur » serait refusée (42501)** : à l'installation d'un vrai cabinet, lui donner le rôle valideur ou collaborateur.
+  - **Lot socle écrit par B3** :
+    - `omega/modules/socle/migrations/19ah_essai_donnees_fictives.sql` : colonne `reglages_envois.essai_donnees_fictives`, CHECK (essai seulement), déclencheur (vrai refusé hors `environnement = recette`), réécriture par repères de `verrous_envoi` (SANTE_HORS_CANAL_AGREE sauté seulement en essai, drapeau posé sur la ligne du module, et environnement = recette) et de `commencer_envoi` (`donnees_fictives`). Le lot se rejoue (un repère déjà réécrit est sauté) ;
+    - `19ah_recette_seulement.sql` : `private.reglages('environnement') = 'recette'`, exclu de la prod par A5 ;
+    - `omega/tests/socle/19ah_essai_donnees_fictives.sql` (21 assertions) : sans drapeau bloqué ; avec drapeau accepté en essai et `donnees_fictives` rendu ; SMS toujours CANAL_NON_PERMIS ; réel refusé (CHECK) ; hors recette, l'envoi est bloqué et le drapeau ne se pose pas.
+
+    Réécriture vérifiée en local sur des fonctions simulées portant les repères de 19ab : posée deux fois, puis les cas sans drapeau, avec drapeau, réel et hors recette.
+  - Test 15 : second test `test_b3_15_rappels_essai_fictif` (5 assertions ; total 40). Avec 19ah, le rappel J-2 de R011 passe en essai, et `commencer_envoi` rend `donnees_fictives = true` et `fournisseur_hds = false`.

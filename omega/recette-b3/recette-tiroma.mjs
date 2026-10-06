@@ -161,7 +161,7 @@ for (const largeur of LARGEURS) {
   await s.dormir(700);
   ok(await s.evaluer(`(() => { const b = [...document.querySelectorAll('[role="dialog"] ul[aria-label="Patients trouvés pour le contact"] button')].find(b => /Rosalie Nestor/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`) === true, 'Rosalie Nestor trouvée, choisie');
   await s.dormir(200);
-  await s.evaluer(`(() => { const i = [...document.querySelectorAll('[role="dialog"] input.rv-champ')].find(x => x.getAttribute('inputmode') === 'tel'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, '+590 690 11 22 33'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.evaluer(`(() => { const i = [...document.querySelectorAll('[role="dialog"] input.rv-champ')].find(x => x.getAttribute('inputmode') === 'email'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, 'rosalie.nestor@exemple.test'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
   await s.dormir(200);
   await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Noter/.test(b.textContent))?.click()`);
   await s.dormir(900);
