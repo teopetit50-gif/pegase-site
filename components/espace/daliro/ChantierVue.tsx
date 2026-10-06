@@ -358,7 +358,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
       <section className="esp-carte" aria-label="Lots">
         <div className="esp-section-titre">Lots et déboursé — engagé au marché et par avenants signés, facturé, reste</div>
         {lots.length ? (
-          <div className="esp-tableau-cadre">
+          <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Lots (tableau qui défile)">
             <table className="esp-tableau">
               <thead><tr><th>Lot</th><th>Exécutant</th><th>État</th>{voit_prix ? <><th className="esp-num">Marché HT</th><th className="esp-num">Avenants</th><th className="esp-num">Facturé</th><th className="esp-num">Reste</th></> : null}</tr></thead>
               <tbody>
@@ -406,7 +406,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
                 {marche.controles.map((k, i) => <div key={i} className="esp-controle"><span className="esp-controle-icone" data-resultat={k.bloquant ? "anomalie" : "levee"} data-gravite={k.bloquant ? "bloquant" : "info"} aria-hidden="true"><ClipboardCheck width={14} height={14} /></span><div><div className="esp-controle-haut"><Pastille teinte={k.bloquant ? "rouge" : "bleu"}>{k.bloquant ? "Bloquant" : "Noté"}</Pastille>{k.ordre !== null ? <span className="esp-kpi-sous">ligne {marche.lignes.find((l) => l.id === k.ligne_id)?.numero ?? k.ordre}</span> : <span className="esp-kpi-sous">total</span>}</div><div className="esp-controle-message">{k.message}</div></div></div>)}
               </div>
             ) : null}
-            <div className="esp-tableau-cadre">
+            <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Lignes du marché (tableau qui défile)">
               <table className="esp-tableau">
                 <thead><tr><th>N°</th><th>Désignation</th><th>Lot</th><th className="esp-num">Qté</th><th>Unité</th>{voit_prix ? <><th className="esp-num">PU HT</th><th className="esp-num">Montant HT</th></> : null}<th>Contrôle</th></tr></thead>
                 <tbody>
@@ -446,7 +446,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
           </div>
         </div>
         {passages.length ? (
-          <div className="esp-tableau-cadre">
+          <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Planning (tableau qui défile)">
             <table className="esp-tableau">
               <thead><tr><th>Dates</th><th>Tâche</th><th>Lot</th><th>Qui</th><th>Confirmation</th><th></th></tr></thead>
               <tbody>
@@ -499,7 +499,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
               <div className="esp-controle-message">{a.objet}</div>
               {a.origine?.texte || a.origine?.canal ? <div className="esp-kpi-sous">Origine : {a.origine.canal === "vocal" ? "vocal" : a.origine.canal === "photo" ? "photo" : a.origine.canal === "visite" ? "visite" : a.origine.canal ?? "—"}{a.origine.auteur ? ` de ${a.origine.auteur}` : ""}{a.origine.date ? ` le ${dateCourte(String(a.origine.date))}` : ""}{a.origine.texte ? ` — « ${a.origine.texte} »` : ""}</div> : null}
               {a.lignes.length ? (
-                <div className="esp-tableau-cadre" style={{ marginTop: 6 }}>
+                <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Lignes de l'avenant (tableau qui défile)" style={{ marginTop: 6 }}>
                   <table className="esp-tableau">
                     <thead><tr><th>Désignation</th><th>Lot</th><th className="esp-num">Qté</th><th>Unité</th>{voit_prix ? <><th className="esp-num">PU HT</th><th className="esp-num">Montant HT</th></> : null}<th>Prix</th>{a.statut === "brouillon" ? <th></th> : null}</tr></thead>
                     <tbody>
@@ -542,7 +542,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
       <section className="esp-carte" aria-label="Factures">
         <div className="esp-section-titre">Factures fournisseurs rattachées — {factures.length ? `${factures.length}` : "aucune"}</div>
         {factures.length ? (
-          <div className="esp-tableau-cadre">
+          <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Factures (tableau qui défile)">
             <table className="esp-tableau">
               <thead><tr><th>Document</th><th>Fournisseur</th><th>Lot</th><th>Émise le</th>{voit_prix ? <th className="esp-num">HT</th> : null}<th>État FILED</th><th></th></tr></thead>
               <tbody>
@@ -574,7 +574,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
             <li key={t.id}><span className="esp-fil-point" data-teinte={t.vigilance === "a_jour" ? "vert" : t.vigilance === "absente" || t.vigilance === "echue" ? "rouge" : undefined} /><div><div className="esp-fil-texte"><strong>{t.nom}</strong> — {t.roles.map((r) => ROLES_TIERS[r] ?? r).join(", ")}</div><div className="esp-fil-meta">{t.commune ?? ""}{t.telephone ? ` · ${t.telephone}` : ""}{t.email ? ` · ${t.email}` : ""}{t.roles.includes("sous_traitant") && t.vigilance ? <> · <Pastille teinte={VIGILANCES[t.vigilance].teinte} contour>{VIGILANCES[t.vigilance].libelle}</Pastille></> : null}</div></div></li>
           ))}
         </ul>
-        <div className="esp-tableau-cadre" style={{ marginTop: 10 }}>
+        <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Bibliothèque de prix (tableau qui défile)" style={{ marginTop: 10 }}>
           <table className="esp-tableau">
             <thead><tr><th>Désignation</th><th>Unité</th>{voit_prix ? <th className="esp-num">PU HT</th> : null}<th>Origine</th><th>Statut</th><th></th></tr></thead>
             <tbody>
