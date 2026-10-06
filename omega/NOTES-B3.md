@@ -219,3 +219,17 @@ logiciel métier qui la fait).
   - n° 20 et 21 : **pas un trou** ; c'est mon test qui était faux. Le banc est installé en périmètre « tout le cabinet », et le collaborateur y voit les 30 patients (test 05, même règle que b3_07 et b3_09). Le test vérifie maintenant les deux périmètres : en mode cabinet, le collaborateur voit tout ; une fois `perimetre_partage = 'praticien'`, il ne voit et ne note que ses patients (42501 sur Delannoy).
   - Rejoué en local : v1 posée, puis v2 deux fois ; scénario en une seule transaction (prénom, dernier appel, confirmation, valeur 1180).
 - 06/10, ~15 h 05 Z — b3_12 v2 et le test 13 sont posés (dépôts 4635 et 4636). Le test socle 44 signale `private.tiroma_appelant`, exécutable par authenticated sans que ce soit nécessaire : **b3_12c** ramène ce droit à service_role seul (seule `tiroma_appels_lire`, en security definer, l'appelle), et la source b3_12 est alignée. Vérifié en local : authenticated n'a plus le droit, et le prénom se lit toujours.
+- 06/10, 15 h 05 Z — **b3_12 v2, test 13 et b3_12c sont verts sur la recette** : `^test_b3_` et le test socle 44, 15/15. L'écran du registre part sur main avec la prochaine poussée.
+
+### Vague 3, n° 2 : le pilotage du titulaire (06/10, ~15 h 30 Z)
+- `omega/modules/tiroma/migrations/b3_13_pilotage.sql` : la porte `tiroma_pilotage(p_client, p_entite, p_jours = 30)`, réservée au titulaire et à la direction. Sur une période glissante (et la période d'avant, de même longueur), elle rend :
+  - les devis présentés et signés, avec le taux, les montants et la répartition par panier (100 % Santé, maîtrisé, libre, non précisé) ;
+  - les devis en attente : montant, ceux qui expirent sous 30 jours, et ceux « à relancer » (présentés depuis 7 jours ou plus, sans appel noté depuis 14 jours ; liste de 10 au plus) ;
+  - le chiffre signé sans rendez-vous, tiré de la même source que la carte b3_03 ;
+  - les rendez-vous passés, honorés et manqués, avec le taux par praticien ;
+  - les appels de la période.
+
+  Lecture seule. Vérifiée sur un Postgres local, avec les devis du banc recopiés : 3 présentés, 2 signés, taux 0,667, 3 825 € présentés et 3 045 € signés, période d'avant 2/2, D005 à relancer puis plus du tout après un appel.
+- `omega/tests/tiroma/14_pilotage.sql` : `test_b3_14_pilotage`, 27 assertions.
+- Écran : carte « Pilotage » (titulaire et direction) avec 4 tuiles (devis acceptés et écart en points, signé sans rendez-vous, devis sans réponse, rendez-vous manqués), deux tableaux (par panier, manqués par praticien) et la liste des devis à relancer, chacun avec son bouton « Noter l'appel » (motif devis). Recette aux cinq largeurs : 76 contrôles, tout passe ; axe : 0 écart.
+- Reste pour le n° 2 : le rapport mensuel déposé au point du matin du 1er (agrégats seuls, sans nom). Ce sera une section de `tiroma_deposer_points`, après accord.
