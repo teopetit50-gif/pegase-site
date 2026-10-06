@@ -23,7 +23,7 @@ begin
 
   perform tests.endosser(v_lecteur, 'lecteur-c4@banc-varelo.test');
   return next throws_ok(format('select public.offload_installer(%L::uuid, null)', v_client), '42501',
-                        'Un lecteur n''installe pas OFFLOAD');
+                        null, 'Un lecteur n''installe pas OFFLOAD');
   perform tests.endosser((banc ->> 'gerant')::uuid, 'gerant@banc-varelo.test');
   r := public.offload_installer(v_client, null);
   return next is(r ->> 'mode', 'essai', 'Installé par le gérant, OFFLOAD commence en mode essai');
@@ -187,11 +187,11 @@ begin
   v_avoir := public.offload_saisir_achat(v_compte, current_date - 30, 30, 'AV-3', 'Retour', 'avoir');
   return next is((select a.montant_ht from public.offload_achats a where a.id = v_avoir), -30.00::numeric(14,2), 'Un avoir saisi est négatif');
   return next throws_ok(format('select public.offload_saisir_achat(%L::uuid, current_date + 3, 100)', v_compte), '22023',
-                        'Un achat n''est jamais daté dans le futur');
+                        null, 'Un achat n''est jamais daté dans le futur');
   return next throws_ok(format('select public.offload_saisir_compte(%L::uuid, null, null, %L, %L::jsonb)', v_client, 'X', '{"prix": 3}'),
-                        '22023', 'Un champ inconnu est refusé');
+                        '22023', null, 'Un champ inconnu est refusé');
   return next throws_ok(format('select public.offload_annuler_achat(%L::uuid, %L)', v_achat, '  '), '22023',
-                        'Une annulation dit pourquoi');
+                        null, 'Une annulation dit pourquoi');
   perform public.offload_annuler_achat(v_achat, 'Saisi en double');
   return next ok((select a.annule_le is not null and a.annule_motif = 'Saisi en double' from public.offload_achats a where a.id = v_achat),
                  'L''achat est annulé, pas effacé');
@@ -199,10 +199,10 @@ begin
   perform tests.endosser(v_lecteur, 'lecteur-c4@banc-varelo.test');
   return next is((select count(*)::integer from public.offload_achats a where a.compte_id = v_compte), 2, 'Le lecteur lit les achats de son organisation');
   return next throws_ok(format('select public.offload_saisir_achat(%L::uuid, current_date - 1, 100)', v_compte), '42501',
-                        'Un lecteur ne saisit pas');
+                        null, 'Un lecteur ne saisit pas');
   return next throws_ok(format('insert into public.offload_achats (client_id, entite_id, compte_id, date_achat, montant_ht, source) values (%L, %L, %L, current_date, 1, %L)',
                                v_client, banc ->> 'entite', v_compte, 'saisie'), '42501',
-                        'Personne n''écrit directement dans la table');
+                        null, 'Personne n''écrit directement dans la table');
   perform tests.redevenir_admin();
   return next ok(exists (select 1 from public.journal_opposable j where j.client_id = v_client and j.action = 'offload.achat_annule'
                          and j.objet_id = v_achat::text), 'L''annulation est au journal');

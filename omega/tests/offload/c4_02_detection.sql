@@ -143,13 +143,13 @@ begin
   r := public.offload_regler(v_client, '{"delai_silence_jours": 120, "jour_cloture": 25}');
   return next is((r ->> 'delai_silence_jours')::integer, 120, 'Le gérant règle le délai de silence');
   return next throws_ok(format('select public.offload_regler(%L::uuid, %L::jsonb)', v_client, '{"mode": "reel"}'), '22023',
-                        'Le mode ne se change pas par les réglages');
+                        null, 'Le mode ne se change pas par les réglages');
   r := public.offload_recalculer(v_client);
   return next ok(r ? 'niveaux', 'Le gérant recalcule à la demande');
   perform tests.endosser(v_lecteur, 'lecteur-c4@banc-varelo.test');
   return next throws_ok(format('select public.offload_regler(%L::uuid, %L::jsonb)', v_client, '{"montant_min": 1}'), '42501',
-                        'Un lecteur ne règle rien');
-  return next throws_ok(format('select public.offload_recalculer(%L::uuid)', v_client), '42501', 'Un lecteur ne recalcule pas');
+                        null, 'Un lecteur ne règle rien');
+  return next throws_ok(format('select public.offload_recalculer(%L::uuid)', v_client), '42501', null, 'Un lecteur ne recalcule pas');
   perform tests.redevenir_admin();
   return next ok(not has_function_privilege('authenticated', 'private.offload_detecter(uuid, date)', 'execute'),
                  'Le calcul reste au serveur');

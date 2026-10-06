@@ -319,4 +319,10 @@ Rien n'est basculé `atteste: true` par moi : c'est le coordinateur, sur preuve 
 - 06/10 — palier 5, lot c4_05 (garde-fous, doublons) poussé (621e1af).
 - 06/10 — c4_01 refusé à la pose (clé facultative) : corrigé ; Q2, Q3, Q4 appliqués (f99562d).
 - 06/10 — coordinateur : c4_01 à c4_05 et leurs tests POSÉS sur la recette (f99562d) ; test 44 sans aucune fonction C4.
-- 06/10 — c4_06 (source « contrat ») : 20 tests, 220 assertions vertes en local.
+- 06/10 — c4_06 (source « contrat ») poussé (1421d9f).
+- 06/10 — recette : 8 tests verts sur 19. Cause principale, dans MES tests : `throws_ok(sql, code, 'phrase')` — à trois
+  arguments, pgTAP lit le 3e comme le message d'erreur attendu. Tous les appels passent à
+  `throws_ok(sql, code, null, 'description')` ; le pgTAP factice local imite désormais ce comportement (il
+  reproduisait les 20 rouges avant correction). Consentement : corrigé par c4_06. `test_c4_03_issues` n°4 : sur le
+  banc, la ligne d'organisation garde le mode effectif en essai ; le test lit le mode effectif et vérifie la règle
+  dans les deux cas. Local : 20 tests, 221 assertions vertes.

@@ -18,7 +18,7 @@ begin
   return next is(r.statut, 'a_valider', 'Une reprise est en cours, son message en validation');
 
   perform tests.endosser((banc ->> 'gerant')::uuid, 'gerant@banc-varelo.test');
-  return next throws_ok(format('select public.offload_changer_statut(%L::uuid, %L, null)', v_c, 'exclu'), '22023', 'Reprendre la main dit pourquoi');
+  return next throws_ok(format('select public.offload_changer_statut(%L::uuid, %L, null)', v_c, 'exclu'), '22023', null, 'Reprendre la main dit pourquoi');
   perform public.offload_changer_statut(v_c, 'exclu', 'Sophie le suit en direct : rendez-vous prévu.');
   perform tests.redevenir_admin();
   r := tests.c4_reprise(v_c);
@@ -31,12 +31,12 @@ begin
   update public.offload_comptes set statut = 'arrete', statut_motif = 'stop' where id = v_c;
   perform tests.endosser(tests.c4_compte(v_client, 'collaborateur', 'commercial-c4@banc-varelo.test'), 'commercial-c4@banc-varelo.test');
   return next throws_ok(format('select public.offload_changer_statut(%L::uuid, %L, %L)', v_c, 'suivi', 'Il a rappelé'), '42501',
-                        'Un commercial ne remet pas dans le circuit un compte retiré à sa demande');
+                        null, 'Un commercial ne remet pas dans le circuit un compte retiré à sa demande');
   perform tests.endosser((banc ->> 'gerant')::uuid, 'gerant@banc-varelo.test');
   perform public.offload_changer_statut(v_c, 'suivi', 'Le client a redemandé nos offres par écrit le 06/10.');
   return next is((select c.statut from public.offload_comptes c where c.id = v_c), 'suivi', 'Le gérant le remet dans le circuit, motif écrit');
   perform tests.endosser(v_lecteur, 'lecteur-c4@banc-varelo.test');
-  return next throws_ok(format('select public.offload_changer_statut(%L::uuid, %L, %L)', v_c, 'exclu', 'x'), '42501', 'Un lecteur ne change rien');
+  return next throws_ok(format('select public.offload_changer_statut(%L::uuid, %L, %L)', v_c, 'exclu', 'x'), '42501', null, 'Un lecteur ne change rien');
 end $f$;
 
 create or replace function tests.test_c4_05_exclusions() returns setof text
@@ -62,8 +62,8 @@ begin
   v_ex := public.offload_exclure(v_client, 'secteur', 'Collectivités', 'Marchés publics : pas de démarchage.');
   perform public.offload_exclure(v_client, 'commercial', 'karim', 'Portefeuille de Karim suivi en direct.');
   perform public.offload_noter_contact(v_contact, current_date - 5, 'visite', 'Sophie', 'Passée en clientèle la semaine dernière.');
-  return next throws_ok(format('select public.offload_exclure(%L::uuid, %L, %L, %L)', v_client, 'pays', 'x', 'y'), '22023', 'Type d''exclusion inconnu refusé');
-  return next throws_ok(format('select public.offload_noter_contact(%L::uuid, current_date + 1, %L)', v_contact, 'appel'), '22023', 'Un contact futur est refusé');
+  return next throws_ok(format('select public.offload_exclure(%L::uuid, %L, %L, %L)', v_client, 'pays', 'x', 'y'), '22023', null, 'Type d''exclusion inconnu refusé');
+  return next throws_ok(format('select public.offload_noter_contact(%L::uuid, current_date + 1, %L)', v_contact, 'appel'), '22023', null, 'Un contact futur est refusé');
   perform tests.redevenir_admin();
 
   perform private.offload_detecter(v_client, null);
@@ -112,7 +112,7 @@ begin
   return next is((select count(*)::integer from public.offload_comptes c where c.fusionne_dans is not null), 0, 'Rien n''est fusionné sans accord');
 
   perform tests.endosser(tests.c4_compte(v_client, 'collaborateur', 'commercial-c4@banc-varelo.test'), 'commercial-c4@banc-varelo.test');
-  return next throws_ok(format('select public.offload_trancher_rapprochement(%L::uuid, true)', x), '42501', 'Un commercial ne fusionne pas');
+  return next throws_ok(format('select public.offload_trancher_rapprochement(%L::uuid, true)', x), '42501', null, 'Un commercial ne fusionne pas');
   perform tests.endosser((banc ->> 'gerant')::uuid, 'gerant@banc-varelo.test');
   n := (select count(*)::integer from public.offload_achats a where a.compte_id in (v_a, v_b));
   perform public.offload_trancher_rapprochement(x, true);

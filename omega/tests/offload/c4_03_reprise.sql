@@ -224,7 +224,7 @@ begin
                          and o.adresse = 'achats@arret.test' and o.levee_le is null),
                  'La désinscription est posée au socle : elle vaut pour tous les modules et tous les messages');
   return next throws_ok(format('select private.offload_ouvrir(%L::uuid, %L)', v_s, 'manuel'), '55000',
-                        'Personne ne rouvre une reprise sur ce compte');
+                        null, 'Personne ne rouvre une reprise sur ce compte');
   return next ok(private.offload_demande_arret(E'Merci, mais ne plus nous contacter svp') and private.offload_demande_arret('Je souhaite me désinscrire')
                  and not private.offload_demande_arret(E'Oui volontiers, appelez-moi.\n\n> Si vous ne souhaitez plus recevoir nos messages, répondez « stop »'),
                  'La lecture de l''arrêt ne se laisse pas prendre par la citation du message d''origine');
@@ -259,13 +259,27 @@ begin
   r := tests.c4_reprise(v_r);
   return next ok(r.statut = 'close' and r.issue = 'refusee', 'Refusé en validation : la reprise est close « refusée »');
 
-  -- Essai contre réel : OFFLOAD en essai ne prépare rien si les envois du module sont réglés en réel.
+  -- Essai contre réel : OFFLOAD en essai ne prépare rien si les envois du module sont EFFECTIVEMENT réglés en réel.
+  -- Le socle calcule le mode effectif (réglage du module, ligne de l'organisation) : sur le banc, la ligne de
+  -- l'organisation peut garder l'essai même si celle du module passe en réel. Le test lit le mode effectif et
+  -- vérifie la règle dans les deux cas, sans jamais faire partir quoi que ce soit.
   update public.reglages_envois set mode = 'reel' where client_id = v_client and module = 'offload';
   v_e := tests.c4_compte_courriel('IE1', 'Garde Essai', 'achats@essai.test', 70);
   perform private.offload_detecter(v_client, null);
-  return next throws_ok(format('select private.offload_ouvrir(%L::uuid, %L)', v_e, 'manuel'), '55000',
-                        'En essai, rien n''est préparé quand les envois du module sont réglés en réel');
-  return next ok((tests.c4_reprise(v_e)).id is null, 'Et aucune reprise n''est laissée à moitié ouverte');
+  if (private.reglages_envois_effectifs(v_client, 'offload') ->> 'mode') = 'reel' then
+    return next ok(private.offload_essai_contre_reel(v_client), 'Mode effectif réel et OFFLOAD en essai : le garde-fou le voit');
+    return next throws_ok(format('select private.offload_ouvrir(%L::uuid, %L)', v_e, 'manuel'), '55000',
+                          null, 'En essai, rien n''est préparé quand les envois du module sont réglés en réel');
+    return next ok((tests.c4_reprise(v_e)).id is null, 'Et aucune reprise n''est laissée à moitié ouverte');
+  else
+    return next ok(not private.offload_essai_contre_reel(v_client),
+                   format('Le socle garde le mode effectif « %s » (ligne de l''organisation) : le garde-fou ne bloque pas',
+                          coalesce(private.reglages_envois_effectifs(v_client, 'offload') ->> 'mode', 'aucun')));
+    perform private.offload_ouvrir(v_e, 'manuel');
+    return next ok((select e.mode from public.envois e where e.id = (tests.c4_reprise(v_e)).envoi1_id) is distinct from 'reel',
+                   'Et le message préparé n''est pas réel : il reste en essai');
+    return next ok(true, 'Branche « mode effectif réel » non exercée sur ce banc (couverte par le banc local)');
+  end if;
 end $f$;
 
 create or replace function tests.test_c4_03_taches_et_droits() returns setof text
@@ -291,12 +305,12 @@ begin
   perform tests.endosser(v_lecteur, 'lecteur-c4@banc-varelo.test');
   return next is((select count(*)::integer from public.offload_taches t where t.client_id = v_client), 1, 'Le lecteur voit les tâches');
   return next throws_ok(format('select public.offload_noter_tache(%L::uuid, %L, %L)', v_tache, 'faite', 'ok'), '42501',
-                        'Un lecteur ne note pas une tâche');
-  return next throws_ok(format('select public.offload_ouvrir_reprise(%L::uuid)', v_m), '42501', 'Un lecteur n''ouvre pas de reprise');
+                        null, 'Un lecteur ne note pas une tâche');
+  return next throws_ok(format('select public.offload_ouvrir_reprise(%L::uuid)', v_m), '42501', null, 'Un lecteur n''ouvre pas de reprise');
 
   perform tests.endosser((banc ->> 'gerant')::uuid, 'gerant@banc-varelo.test');
   return next throws_ok(format('select public.offload_noter_tache(%L::uuid, %L, null)', v_tache, 'abandonnee'), '22023',
-                        'Une tâche abandonnée dit pourquoi');
+                        null, 'Une tâche abandonnée dit pourquoi');
   perform public.offload_noter_tache(v_tache, 'faite', 'Appelé : rappelle en novembre pour le contrat d''entretien.');
   return next ok((select x.statut = 'close' and x.issue = 'appel_passe' from public.offload_reprises x where x.id = r.id),
                  'L''appel passé clôt la reprise sans message');
