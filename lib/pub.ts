@@ -44,8 +44,9 @@ export const ACCROCHES: Accroche[] = [
       },
     ],
     note: "Le renvoi se désactive à tout moment depuis votre téléphone. Le message envoyé est un message de service, jamais une relance commerciale.",
-    /* 06/10/2026 (C5) — décision de Teo : pas d'envoi de SMS pour l'instant
-       (crédits SMS). La promesse reste, marquée « en préparation ». */
+    /* 06/10/2026 (C5) — aucun SMS ne part aujourd'hui : la promesse reste,
+       marquée « en préparation ». L'ouverture de l'envoi SMS (coût des
+       crédits) attend la décision de Teo, sur recommandation du coordinateur. */
     preparation:
       "L'envoi par SMS est en préparation : cette page décrit le service tel qu'il ouvrira. Le diagnostic, lui, est disponible dès aujourd'hui.",
   },
