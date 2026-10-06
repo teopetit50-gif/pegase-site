@@ -37,7 +37,8 @@ export function etatPiece(p: Piece, jour = jourParis()): Piece {
 
 export function balanceDe(f: Fiche): Balance {
   const pieces = f.pieces.map((p) => etatPiece(p)).filter((p) => p.nature === "facture" || p.nature === "acompte");
-  const somme = (filtre: (p: Piece) => boolean) => Math.round(pieces.filter(filtre).reduce((s, p) => s + p.reste_du, 0) * 100) / 100;
+  const somme = (filtre: (p: Piece) => boolean, part: (p: Piece) => number = (p) => p.reste_du - (p.montant_conteste ?? 0)) =>
+    Math.round(pieces.filter(filtre).reduce((s, p) => s + part(p), 0) * 100) / 100;
   const horsLitige = (t: Tranche) => (p: Piece) => p.tranche === t && p.statut !== "litige";
   const credits =
     f.pieces.filter((p) => p.nature === "avoir" && p.statut === "ouverte").reduce((s, p) => s + p.reste_du, 0) +
@@ -58,8 +59,8 @@ export function balanceDe(f: Fiche): Balance {
     echu_61_90: somme(horsLitige("61_90")),
     echu_plus_90: somme(horsLitige("plus_90")),
     echu: somme((p) => !!p.tranche && p.tranche !== "non_echu" && p.statut !== "litige"),
-    en_litige: somme((p) => p.statut === "litige"),
-    encours: somme((p) => !!p.tranche),
+    en_litige: somme((p) => p.statut === "litige", (p) => p.reste_du) + somme((p) => p.statut !== "litige" && !!p.tranche, (p) => p.montant_conteste ?? 0),
+    encours: somme((p) => !!p.tranche, (p) => p.reste_du),
     credits,
     factures_ouvertes: pieces.filter((p) => p.tranche).length,
     factures_echues: pieces.filter((p) => p.retard_jours > 0).length,

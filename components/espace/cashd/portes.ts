@@ -102,3 +102,46 @@ export async function litige(facture: string, ouvrir: boolean, motif: string) {
 export async function preparerMaintenant(client: string) {
   return rpc<{ preparees: number; bloquees: number; coupees: number; mode_envoi: string | null }>("cashd_preparer_maintenant", { p_client: client });
 }
+
+/* ——— palier 4 (c2_03) ——— */
+
+export async function poserEcheancier(facture: string, echeances: { echeance: string; montant: number }[], motif: string) {
+  return rpc<{ echeances: number; echeance_suivie: string }>("cashd_poser_echeancier", { p_facture: facture, p_echeances: echeances, p_motif: motif });
+}
+
+export async function litigePartiel(facture: string, montant: number, motif: string) {
+  return rpc<{ montant_conteste: number; reste_relancable: number; relances_coupees: number }>("cashd_litige_partiel", { p_facture: facture, p_montant: montant, p_motif: motif });
+}
+
+export async function dossier(compte: string, motif: "litige" | "assurance_credit" | "recouvrement") {
+  return rpc<Record<string, unknown> | null>("cashd_dossier", { p_compte: compte, p_facture: null, p_motif: motif });
+}
+
+export async function proposerPlafond(compte: string) {
+  return rpc<{ propose: number | null; facture_mensuel_moyen: number; delai_retenu_jours: number; factures_douze_mois: number; plafond_actuel: number | null } | null>("cashd_proposer_plafond", { p_compte: compte });
+}
+
+export async function fixerPlafond(compte: string, plafond: number | null, motif: string) {
+  return rpc<{ plafond: number | null }>("cashd_fixer_plafond", { p_compte: compte, p_plafond: plafond, p_motif: motif });
+}
+
+export type Prevision = { a_30_jours: number; a_60_jours: number; au_dela: number; tenu_a_part: number };
+
+export async function prevision(client: string): Promise<Prevision | null> {
+  const p = await rpc<Prevision | null>("cashd_prevision", { p_client: client });
+  return p && typeof p === "object" ? p : null;
+}
+
+export type Reponse = { palier: string; envoyees: number; suivies: number; taux_pct: number | null };
+export type Arrete = { jour: string; balance: import("./types").Balance[]; totaux: { encours: number; echu: number; en_litige: number } };
+
+export async function chargerPilotage(client: string): Promise<{ reponses: Reponse[]; arretes: Arrete[] }> {
+  const supabase = createClient();
+  const [r, a] = await Promise.all([
+    supabase.from("cashd_reponses").select("palier, envoyees, suivies, taux_pct").eq("client_id", client),
+    supabase.from("cashd_arretes").select("jour, balance, totaux").eq("client_id", client).order("jour", { ascending: false }).limit(6),
+  ]);
+  if (r.error) throw new ErreurPorte(message(r.error));
+  if (a.error) throw new ErreurPorte(message(a.error));
+  return { reponses: (r.data ?? []) as Reponse[], arretes: (a.data ?? []) as Arrete[] };
+}

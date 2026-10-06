@@ -126,5 +126,49 @@ for (const largeur of LARGEURS) {
   s.fermer();
 }
 
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'c2-palier4', densite: 1 });
+  console.log('— /espace/cashd : échéancier, contestation partielle, plafond, tableur (exemple)');
+  ok(await s.aller(base + '/espace/cashd'), 'page chargée');
+  await s.dormir(500);
+  const prev = await s.evaluer(`document.querySelector('.c2-prevision')?.innerText || ''`);
+  ok(/Encaissements attendus/.test(prev) && /30 jours/.test(prev) && /60 jours/.test(prev), `prévision : « ${plat(prev).slice(0, 110)} »`);
+  ok(await s.evaluer(`[...document.querySelectorAll('section[aria-label="Débiteurs"] .esp-lien-bouton')].some(b => /Tableur/.test(b.textContent))`), 'la balance s\'exporte vers un tableur');
+  const pil = await s.evaluer(`document.querySelector('section[aria-label="Pilotage"]')?.innerText || ''`);
+  ok(/Taux de réponse par palier/i.test(pil) && /Rappel courtois/.test(pil) && /Arrêtés de la balance/i.test(pil) && /Tableur/.test(pil), 'pilotage : taux de réponse par palier et arrêtés téléchargeables');
+  /* l'échéancier de F-2026-101 en trois mensualités */
+  await s.evaluer(`(() => { const r = [...document.querySelectorAll('#c2-fiche .c2-pieces tbody tr')].find(x => /F-2026-101/.test(x.innerText)); [...r.querySelectorAll('button')].find(b => /Échéancier/.test(b.textContent)).click(); })()`);
+  await s.dormir(400);
+  const ech = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return { titre: d.querySelector('h2')?.textContent, lignes: d.querySelectorAll('input[type="date"]').length, total: d.querySelector('.c2-sous')?.textContent || '', gris: [...d.querySelectorAll('button')].find(b => /^\\s*Valider\\s*$/.test(b.textContent))?.disabled }; })()`);
+  ok(/Échéancier de F-2026-101/.test(ech.titre) && ech.lignes === 3 && /12 000,00/.test(plat(ech.total)) && ech.gris === true, `trois mensualités proposées (total ${plat(ech.total)}), motif exigé`);
+  await s.evaluer(`(() => { const t = document.querySelector('[role="dialog"] textarea'); const set = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set; set.call(t, 'Accord avec Mme Lefèvre par téléphone'); t.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Valider\\s*$/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const apresEch = await s.evaluer(`(() => ({ fait: document.querySelector('#c2-fiche .esp-avis')?.innerText || '', ligne: [...document.querySelectorAll('#c2-fiche .c2-pieces tbody tr')].find(x => /F-2026-101/.test(x.innerText))?.innerText || '' }))()`);
+  ok(/Échéancier posé/.test(apresEch.fait) && /échéancier \(au lieu du/.test(apresEch.ligne), 'l\'échéancier remplace l\'échéance d\'origine, qui reste lisible');
+  /* la contestation partielle de l'hôtel */
+  await s.evaluer(`[...document.querySelectorAll('section[aria-label="Débiteurs"] .esp-item')].find(b => /Hôtel des Brotteaux/.test(b.textContent)).click()`);
+  await s.dormir(400);
+  await s.evaluer(`(() => { const r = [...document.querySelectorAll('#c2-fiche .c2-pieces tbody tr')].find(x => /F-2026-050/.test(x.innerText)); [...r.querySelectorAll('button')].find(b => /Contestation partielle/.test(b.textContent)).click(); })()`);
+  await s.dormir(400);
+  await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; const i = d.querySelector('input[inputmode="decimal"]'); set.call(i, '1000'); i.dispatchEvent(new Event('input', { bubbles: true })); const t = d.querySelector('textarea'); const st = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set; st.call(t, 'Le client conteste la ligne pose'); t.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Valider\\s*$/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const conteste = await s.evaluer(`[...document.querySelectorAll('#c2-fiche .c2-pieces tbody tr')].find(x => /F-2026-050/.test(x.innerText))?.innerText || ''`);
+  ok(/dont 1 000,00 € contestés/.test(plat(conteste)), 'la part contestée se lit sur la facture');
+  const kpi = await s.evaluer(`document.querySelector('.esp-kpi .esp-kpi-valeur')?.textContent`);
+  ok(plat(kpi) === '4 810,00 €', `l'échu ne compte plus la part contestée ni la facture sous échéancier : ${plat(kpi)}`);
+  /* le plafond proposé */
+  await s.evaluer(`[...document.querySelectorAll('#c2-fiche .esp-actions button')].find(b => /Plafond/.test(b.textContent)).click()`);
+  await s.dormir(500);
+  const pl = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return d ? { desc: d.querySelector('p')?.textContent || '', valeur: d.querySelector('input[inputmode="decimal"]')?.value } : null; })()`);
+  ok(pl && /historique/.test(pl.desc) && Number(pl.valeur) > 0, `un plafond est proposé depuis l'historique : ${pl?.valeur} €`);
+  await s.capturer(`${dossier}cashd-plafond-1440.jpg`, { qualite: 55 });
+  s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
+  s.fermer();
+}
+
 console.log(echecs ? `\n${echecs} échec(s)` : '\nRecette CASHD : tout est vert.');
 process.exit(echecs ? 1 : 0);

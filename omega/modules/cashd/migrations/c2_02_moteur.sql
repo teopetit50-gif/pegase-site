@@ -170,6 +170,10 @@ end $do$;
 
 -- Une relance et son état vu de la file : à valider, approuvée, refusée, partie (date de l'envoi), coupée…
 -- Lecture des demandes et des envois du socle sous la RLS du lecteur.
+-- Rejouable même après une migration plus récente qui a étendu la vue (colonnes ajoutées à la fin) :
+-- dans ce cas la définition plus récente est gardée.
+do $vue$ begin
+  execute $v$
 create or replace view public.cashd_relances_etat with (security_invoker = true) as
 select r.*,
        d.statut as demande_statut, d.decide_le, d.politique_id,
@@ -184,10 +188,18 @@ select r.*,
        (select count(*) from public.cashd_relances_pieces p where p.relance_id = r.id and not p.annulee)::integer as nb_pieces
 from public.cashd_relances r
 left join public.demandes_validation d on d.id = r.demande_id
-left join public.envois e on e.id = r.envoi_id;
+left join public.envois e on e.id = r.envoi_id
+$v$;
+exception when invalid_table_definition then
+  raise notice 'public.cashd_relances_etat : déjà étendue par une migration plus récente que c2_02, gardée telle quelle.';
+end $vue$;
 
 -- Chaque pièce suivie : le dernier palier atteint, son état, le palier suivant et sa date. Le scénario est celui du
 -- compte, ou celui de l'organisation.
+-- Rejouable même après une migration plus récente qui a étendu la vue (colonnes ajoutées à la fin) :
+-- dans ce cas la définition plus récente est gardée.
+do $vue$ begin
+  execute $v$
 create or replace view public.cashd_suivi with (security_invoker = true) as
 with f as (
   select x.*, c.statut as compte_statut, c.reciproque,
@@ -224,7 +236,11 @@ left join lateral (
   select x.value ->> 'palier' as palier, (x.value ->> 'jours')::integer as jours, x.ordinality
   from jsonb_array_elements(f.sc) with ordinality x
   where x.ordinality > coalesce(d.rang, 0)
-  order by x.ordinality limit 1) s on true;
+  order by x.ordinality limit 1) s on true
+$v$;
+exception when invalid_table_definition then
+  raise notice 'public.cashd_suivi : déjà étendue par une migration plus récente que c2_02, gardée telle quelle.';
+end $vue$;
 
 revoke all on table public.cashd_relances_etat, public.cashd_suivi from anon, authenticated;
 grant select on table public.cashd_relances_etat, public.cashd_suivi to authenticated;

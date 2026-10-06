@@ -10,7 +10,7 @@ create or replace function tests.test_c2_03_moteur() returns setof text
 language plpgsql as $f$
 declare
   banc jsonb; v_client uuid; v_gerant uuid; v_collab uuid; p jsonb; j date := tests.c2_jour();
-  v_mode text; v_attendu text; v_b jsonb; r public.cashd_relances; d public.demandes_validation; v_rel uuid; v_x uuid; v_items jsonb; v_n integer;
+  v_mode text; v_attendu text; v_ouvre date; v_b jsonb; r public.cashd_relances; d public.demandes_validation; v_rel uuid; v_x uuid; v_items jsonb; v_n integer;
 begin
   banc := tests.c2_banc();
   v_client := (banc ->> 'client')::uuid; v_gerant := (banc ->> 'gerant')::uuid;
@@ -153,11 +153,15 @@ begin
   return next ok(exists (select 1 from jsonb_array_elements(v_items) x where tests.c2_plat(x ->> 'texte') like 'Hôtel des Brotteaux doit 3 000,00 € échus%'),
                  'Le point du matin dit qui doit quoi');
   return next ok(exists (select 1 from jsonb_array_elements(v_items) x where x ->> 'texte' like '%attend%votre validation%'), 'Et ce qui attend la validation');
-  -- Le passage de 7 h (le lendemain) : une fois par jour, jamais avant l'heure.
-  return next is(private.cashd_passage(((j + 1)::timestamp + time '06:50') at time zone 'Europe/Paris'), 0, 'Avant 7 h, rien');
-  v_n := private.cashd_passage(((j + 1)::timestamp + time '07:05') at time zone 'Europe/Paris');
-  return next ok(v_n >= 1 and exists (select 1 from public.cashd_passages x where x.client_id = v_client and x.jour = j + 1), 'Le passage de 7 h a lieu');
-  return next is(private.cashd_passage(((j + 1)::timestamp + time '07:20') at time zone 'Europe/Paris'), 0, 'Il ne se refait pas le même jour');
+  -- Le passage de 7 h (le prochain jour ouvré) : une fois par jour, jamais avant l'heure.
+  v_ouvre := j + 1;
+  while not public.jour_ouvre(v_ouvre, coalesce(public.territoire_de_entite(v_client, (banc ->> 'entite')::uuid), 'metropole')) loop
+    v_ouvre := v_ouvre + 1;
+  end loop;
+  return next is(private.cashd_passage((v_ouvre::timestamp + time '06:50') at time zone 'Europe/Paris'), 0, 'Avant 7 h, rien');
+  v_n := private.cashd_passage((v_ouvre::timestamp + time '07:05') at time zone 'Europe/Paris');
+  return next ok(v_n >= 1 and exists (select 1 from public.cashd_passages x where x.client_id = v_client and x.jour = v_ouvre), 'Le passage de 7 h a lieu');
+  return next is(private.cashd_passage((v_ouvre::timestamp + time '07:20') at time zone 'Europe/Paris'), 0, 'Il ne se refait pas le même jour');
   return next ok(tests.c2_journal(v_client, 'cashd.relance_preparee') is not null and tests.c2_journal(v_client, 'cashd.relance_coupee') is not null,
                  'Préparations et coupures sont au journal');
 end $f$;

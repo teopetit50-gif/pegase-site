@@ -16,14 +16,15 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FileUp, PenLine } from "lucide-react";
+import { Download, FileUp, PenLine } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { useSource } from "../source";
 import { useTempsReel } from "../tempsReel";
 import { Avis, Chargement, Pastille, Ruban, Vide } from "../ui";
 import { dateCourte, dateHeure, montant } from "../format";
-import { tableauDe, balanceDe } from "./calcul";
+import { tableauDe, balanceDe, etatPiece, jourParis } from "./calcul";
+import { exporterBalance, exporterJson, exporterRelances } from "./tableur";
 import { DERNIER_IMPORT_EXEMPLE, FICHES_EXEMPLE, REGLAGES_EXEMPLE, RELANCES_EXEMPLE, SANS_COMPTE_EXEMPLE } from "./exemples";
 import { ETATS_RELANCE, STATUTS_COMPTE, TRANCHES, libellePalier } from "./etats";
 import { JEUX, LIBELLES_CHAMPS, lireDepot, type Jeu } from "./depot";
@@ -46,6 +47,8 @@ export default function EcranCashd() {
   const [choix, setChoix] = useState<string | null>(null);
   const [chargeFiche, setChargeFiche] = useState(false);
   const [fait, setFait] = useState<string | null>(null);
+  const [previsionReelle, setPrevisionReelle] = useState<portes.Prevision | null>(null);
+  const [pilotageReel, setPilotageReel] = useState<{ reponses: portes.Reponse[]; arretes: portes.Arrete[] } | null>(null);
 
   const charger = useCallback(async () => {
     await Promise.resolve();
@@ -59,6 +62,8 @@ export default function EcranCashd() {
       }
       const [tableau, relances] = await Promise.all([portes.chargerTableau(client.client_id), portes.chargerRelances(client.client_id)]);
       setReel({ client, tableau, relances, fiches: {} });
+      setPrevisionReelle(await portes.prevision(client.client_id).catch(() => null));
+      setPilotageReel(await portes.chargerPilotage(client.client_id).catch(() => null));
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
       setReel({ client: null, tableau: null, relances: [], fiches: {} });
@@ -164,6 +169,62 @@ export default function EcranCashd() {
           majFiche(fiche.compte.id, (f) => ({ ...f, compte: { ...f.compte, statut, statut_motif: motif, statut_le: new Date().toISOString() } }));
           if (statut !== "actif") setRelancesLocales((prev) => prev.map((r) => (r.compte_id === fiche.compte.id && r.etat === "a_valider" ? { ...r, etat: "coupee", statut: "coupee", motif: `compte en pause : ${motif}` } : r)));
           return statut === "actif" ? "Le compte est repris (exemple)." : "Compte mis en pause (exemple) : ses relances prêtes sont coupées.";
+        },
+        echeancier: async (facture, echeances, motif) => {
+          if (source === "reelle") {
+            setChoix(fiche.compte.id);
+            const r = await portes.poserEcheancier(facture, echeances, motif);
+            await relire();
+            return `Échéancier posé : ${r.echeances} échéance${r.echeances > 1 ? "s" : ""}, la prochaine le ${dateCourte(r.echeance_suivie)}. Seule une échéance manquée relancera le cycle.`;
+          }
+          majFiche(fiche.compte.id, (f) => ({ ...f, pieces: f.pieces.map((p) => (p.id === facture ? { ...p, echeance_origine: p.echeance_origine ?? p.echeance, echeance: echeances[0].echeance } : p)) }));
+          setRelancesLocales((prev) => prev.map((x) => (x.etat === "a_valider" && x.pieces.some((p) => p.facture_id === facture) ? { ...x, etat: "coupee", statut: "coupee", motif: `échéancier négocié : ${motif}` } : x)));
+          return `Échéancier posé (exemple) : ${echeances.length} échéances, la prochaine le ${dateCourte(echeances[0].echeance)}.`;
+        },
+        contester: async (facture, montantConteste, motif) => {
+          if (source === "reelle") {
+            setChoix(fiche.compte.id);
+            const r = await portes.litigePartiel(facture, montantConteste, motif);
+            await relire();
+            return `${montant(r.montant_conteste)} contestés sortent du cycle ; ${montant(r.reste_relancable)} restent relancés. Le commercial du compte est prévenu.`;
+          }
+          majFiche(fiche.compte.id, (f) => ({ ...f, pieces: f.pieces.map((p) => (p.id === facture ? { ...p, montant_conteste: montantConteste } : p)) }));
+          setRelancesLocales((prev) => prev.map((x) => (x.etat === "a_valider" && x.pieces.some((p) => p.facture_id === facture) ? { ...x, etat: "coupee", statut: "coupee", motif: `contestation partielle : ${motif}` } : x)));
+          return `${montant(montantConteste)} contestés sortent du cycle (exemple) ; le reste continue d'être relancé.`;
+        },
+        dossier: async () => {
+          if (source === "reelle") {
+            const d = await portes.dossier(fiche.compte.id, "litige");
+            exporterJson(`dossier-${fiche.compte.reference}-${jourParis()}.json`, d);
+            return;
+          }
+          exporterJson(`dossier-${fiche.compte.reference}-${jourParis()}.json`, {
+            motif: "litige", constitue_le: new Date().toISOString(), debiteur: fiche.compte, balance: balanceDe(fiche),
+            pieces: fiche.pieces.map((p) => etatPiece(p)), reglements: fiche.reglements, relances: relancesLocales.filter((x) => x.compte_id === fiche.compte.id),
+          });
+        },
+        proposerPlafond: async () => {
+          if (source === "reelle") {
+            const p = await portes.proposerPlafond(fiche.compte.id);
+            return {
+              propose: p?.propose ?? null,
+              base: p && p.factures_douze_mois > 0
+                ? `Proposé depuis l'historique : ${montant(p.facture_mensuel_moyen)} facturés par mois en moyenne sur douze mois, payés en ${Math.round(p.delai_retenu_jours)} jours, plus une demi-marge.`
+                : "Pas d'historique de facturation sur douze mois : fixez le plafond vous-même.",
+            };
+          }
+          const total = fiche.pieces.filter((p) => p.nature === "facture" || p.nature === "acompte").reduce((t, p) => t + p.montant_ttc, 0);
+          const mensuel = total / 12;
+          return { propose: mensuel > 0 ? Math.ceil((mensuel * 1.5) / 100) * 100 : null, base: `Proposé depuis l'historique (exemple) : ${montant(mensuel)} facturés par mois en moyenne, payés à 30 jours, plus une demi-marge.` };
+        },
+        fixerPlafond: async (plafond, motif) => {
+          if (source === "reelle") {
+            await portes.fixerPlafond(fiche.compte.id, plafond, motif);
+            await relire();
+            return plafond === null ? "Le compte n'a plus de plafond." : `Plafond fixé à ${montant(plafond)} ; le changement est daté au journal.`;
+          }
+          majFiche(fiche.compte.id, (f) => ({ ...f, compte: { ...f.compte, plafond_encours: plafond } }));
+          return plafond === null ? "Le compte n'a plus de plafond (exemple)." : `Plafond fixé à ${montant(plafond)} (exemple).`;
         },
         litige: async (facture, ouvrir, motif) => {
           if (source === "reelle") {
@@ -292,6 +353,29 @@ export default function EcranCashd() {
   };
 
   const t = tableau?.totaux;
+  /* le pilotage : taux de réponse par palier et arrêtés de la balance (exemple : les relances parties de l'exemple) */
+  const pilotage = useMemo(() => {
+    if (source === "reelle") return pilotageReel;
+    const premier = `${jourParis().slice(0, 8)}01`;
+    return {
+      reponses: [
+        { palier: "rappel", envoyees: 14, suivies: 9, taux_pct: 64.3 },
+        { palier: "relance", envoyees: 6, suivies: 3, taux_pct: 50 },
+        { palier: "mise_en_demeure", envoyees: 2, suivies: 2, taux_pct: 100 },
+      ],
+      arretes: tableau ? [{ jour: premier, balance: tableau.comptes, totaux: { encours: tableau.totaux.encours, echu: tableau.totaux.echu, en_litige: tableau.totaux.en_litige } }] : [],
+    };
+  }, [source, pilotageReel, tableau]);
+  /* la prévision : la porte en base réelle ; en exemple, l'échéance de chaque pièce ouverte (même règle, sans retard habituel) */
+  const prevision = useMemo(() => {
+    if (source === "reelle") return previsionReelle;
+    const jour = jourParis();
+    const dans = (n: number) => { const d = new Date(`${jour}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+    const ouvertes = fiches.filter((f) => f.compte.statut !== "litige" && f.compte.statut !== "recouvrement" && f.compte.statut !== "hors_perimetre")
+      .flatMap((f) => f.pieces.map((p) => etatPiece(p)).filter((p) => (p.nature === "facture" || p.nature === "acompte") && p.statut === "ouverte" && p.reste_du > 0));
+    const somme = (limite: string) => ouvertes.filter((p) => (p.echeance ?? jour) <= limite).reduce((s, p) => s + p.reste_du - (p.montant_conteste ?? 0), 0);
+    return { a_30_jours: somme(dans(30)), a_60_jours: somme(dans(60)), au_dela: 0, tenu_a_part: 0 };
+  }, [source, previsionReelle, fiches]);
   const aValider = relances.filter((r) => r.etat === "a_valider" || r.etat === "non_reglee").length;
   const recentes = relances.slice(0, 12);
   const essai = tableau?.reglages?.mode !== "reel";
@@ -361,6 +445,12 @@ export default function EcranCashd() {
                 <div className="c2-barre" role="img" aria-label={TRANCHES.map((x) => `${x.libelle} : ${montant(t[x.cle])}`).join(", ")}>
                   {TRANCHES.map((x) => (t[x.cle] > 0 ? <span key={x.cle} className={`c2-segment ${x.teinte}`} style={{ width: `${(t[x.cle] / total) * 100}%` }} /> : null))}
                 </div>
+                {prevision ? (
+                  <p className="c2-prevision">
+                    Encaissements attendus : <strong>{montant(prevision.a_30_jours)}</strong> à 30 jours, <strong>{montant(prevision.a_60_jours)}</strong> à 60 jours
+                    {prevision.tenu_a_part > 0 ? ` ; ${montant(prevision.tenu_a_part)} tenus à part (litiges, recouvrement)` : ""}.
+                  </p>
+                ) : null}
                 <dl className="c2-legende">
                   {TRANCHES.map((x) => (
                     <div key={x.cle}>
@@ -385,7 +475,12 @@ export default function EcranCashd() {
             <section className="esp-carte" aria-label="Débiteurs">
               <div className="esp-carte-tete">
                 <h2 className="esp-carte-titre">{filtre === "echu" ? "Comptes en retard" : filtre === "plus_90" ? "Retards de plus de 90 jours" : filtre === "pause" ? "Comptes hors cycle" : "Débiteurs"}</h2>
-                <span className="esp-kpi-sous">{comptes.length} compte{comptes.length > 1 ? "s" : ""}</span>
+                <span className="c2-tete-droite">
+                  <span className="esp-kpi-sous">{comptes.length} compte{comptes.length > 1 ? "s" : ""}</span>
+                  <button type="button" className="esp-lien-bouton" onClick={() => exporterBalance(tableau?.comptes ?? [], jourParis())}>
+                    <Download width={14} height={14} aria-hidden="true" /> Tableur
+                  </button>
+                </span>
               </div>
               {comptes.length === 0 ? (
                 <Vide titre="Personne ne vous doit rien ici">{filtre ? "Rien dans ce filtre." : "Déposez l'export des factures non soldées de votre facturier pour commencer."}</Vide>
@@ -437,7 +532,12 @@ export default function EcranCashd() {
           <section id="c2-relances" className="esp-carte c2-section" aria-label="Relances">
             <div className="esp-carte-tete">
               <h2 className="esp-carte-titre">Relances écrites</h2>
-              <Link className="esp-lien-bouton" href="/espace/validations">Ouvrir la file de validation</Link>
+              <span className="c2-tete-droite">
+                <button type="button" className="esp-lien-bouton" onClick={() => exporterRelances(relances, jourParis())}>
+                  <Download width={14} height={14} aria-hidden="true" /> Tableur
+                </button>
+                <Link className="esp-lien-bouton" href="/espace/validations">Ouvrir la file de validation</Link>
+              </span>
             </div>
             {recentes.length === 0 ? (
               <Vide titre="Aucune relance">Les relances s&apos;écrivent chaque matin à 7 h pour les comptes qui ont atteint un palier.</Vide>
@@ -474,6 +574,47 @@ export default function EcranCashd() {
               </ul>
             )}
           </section>
+
+          {pilotage && (pilotage.reponses.length || pilotage.arretes.length) ? (
+            <section className="esp-carte c2-section" aria-label="Pilotage">
+              <div className="esp-carte-tete">
+                <h2 className="esp-carte-titre">Pilotage</h2>
+                <span className="esp-kpi-sous">une relance est « suivie » d&apos;un règlement ou d&apos;une réponse dans les quinze jours</span>
+              </div>
+              <div className="esp-carte-corps c2-pilotage">
+                <div>
+                  <h3 className="esp-section-titre">Taux de réponse par palier</h3>
+                  {pilotage.reponses.length ? (
+                    <ul className="c2-reglements">
+                      {pilotage.reponses.map((x) => (
+                        <li key={x.palier}>
+                          <span>{libellePalier(x.palier)}</span>
+                          <span className="esp-num">{x.taux_pct === null ? "—" : `${String(x.taux_pct).replace(".", ",")} %`}</span>
+                          <span className="c2-sous">{x.suivies} sur {x.envoyees} parties</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : <p className="c2-sous">Aucune relance partie pour l&apos;instant.</p>}
+                </div>
+                <div>
+                  <h3 className="esp-section-titre">Arrêtés de la balance</h3>
+                  {pilotage.arretes.length ? (
+                    <ul className="c2-reglements">
+                      {pilotage.arretes.map((a) => (
+                        <li key={a.jour}>
+                          <span>Au {dateCourte(a.jour)}</span>
+                          <span className="esp-num">{montant(a.totaux.echu)} échus</span>
+                          <button type="button" className="esp-lien-bouton" onClick={() => exporterBalance(a.balance, a.jour)}>
+                            <Download width={14} height={14} aria-hidden="true" /> Tableur
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : <p className="c2-sous">Le premier arrêté se prend au jour du mois réglé.</p>}
+                </div>
+              </div>
+            </section>
+          ) : null}
 
           {(tableau?.a_imputer ?? []).length ? (
             <section className="esp-carte c2-section" aria-label="Règlements à rapprocher">

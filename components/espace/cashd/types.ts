@@ -134,6 +134,11 @@ export type Piece = {
   jours_ecoules: number;
   retard_jours: number;
   tranche: Tranche | null;
+  devise?: string;
+  montant_conteste?: number;
+  reste_relancable?: number;
+  echeance_origine?: string | null;
+  reste_du_eur?: number | null;
 };
 
 /* La séquence d'une pièce (vue cashd_suivi) */

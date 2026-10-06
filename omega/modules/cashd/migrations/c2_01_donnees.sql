@@ -259,6 +259,10 @@ end $do$;
 -- Une facture et son état : réglé, avoirs imputés, reste dû, retard, tranche d'ancienneté. Le reste dû est le plus
 -- petit du calcul (TTC − imputations) et du reste dû lu dans l'export du facturier : un règlement que le facturier
 -- connaît déjà sort la facture de la liste, même avant que son encaissement soit noté ici.
+-- Rejouable même après une migration plus récente qui a étendu la vue (colonnes ajoutées à la fin) :
+-- dans ce cas la définition plus récente est gardée.
+do $vue$ begin
+  execute $v$
 create or replace view public.cashd_factures_etat with (security_invoker = true) as
 with i as (
   select x.facture_id,
@@ -297,19 +301,35 @@ select b.id, b.client_id, b.entite_id, b.compte_id, b.nature, b.numero, b.date_e
             when b.jour - b.echeance <= 90 then '61_90'
             else 'plus_90' end as tranche,
        (b.echeance - b.date_emission) as delai_jours
-from b;
+from b
+$v$;
+exception when invalid_table_definition then
+  raise notice 'public.cashd_factures_etat : déjà étendue par une migration plus récente que c2_01, gardée telle quelle.';
+end $vue$;
 
 -- Un règlement : ce qui en est imputé, ce qui reste à imputer.
+-- Rejouable même après une migration plus récente qui a étendu la vue (colonnes ajoutées à la fin) :
+-- dans ce cas la définition plus récente est gardée.
+do $vue$ begin
+  execute $v$
 create or replace view public.cashd_reglements_etat with (security_invoker = true) as
 select r.*,
        coalesce((select sum(x.montant) from public.cashd_imputations x where x.reglement_id = r.id and x.annulee_le is null), 0)::numeric(14,2) as impute,
        case when r.statut = 'annule' then 0
             else greatest(r.montant - coalesce((select sum(x.montant) from public.cashd_imputations x where x.reglement_id = r.id and x.annulee_le is null), 0), 0)
        end::numeric(14,2) as a_imputer
-from public.cashd_reglements r;
+from public.cashd_reglements r
+$v$;
+exception when invalid_table_definition then
+  raise notice 'public.cashd_reglements_etat : déjà étendue par une migration plus récente que c2_01, gardée telle quelle.';
+end $vue$;
 
 -- La balance âgée : l'encours de chaque compte par tranche d'ancienneté du retard. Les avoirs non imputés et les
 -- règlements non lettrés du compte sont déduits du solde (crédits), pas des tranches.
+-- Rejouable même après une migration plus récente qui a étendu la vue (colonnes ajoutées à la fin) :
+-- dans ce cas la définition plus récente est gardée.
+do $vue$ begin
+  execute $v$
 create or replace view public.cashd_balance_agee with (security_invoker = true) as
 select c.id as compte_id, c.client_id, c.entite_id, c.reference, c.nom, c.groupe, c.statut, c.plafond_encours, c.devise,
        coalesce(sum(f.reste_du) filter (where f.tranche = 'non_echu' and f.statut <> 'litige'), 0)::numeric(14,2) as non_echu,
@@ -328,7 +348,11 @@ select c.id as compte_id, c.client_id, c.entite_id, c.reference, c.nom, c.groupe
        min(f.echeance) filter (where f.retard_jours > 0) as plus_ancienne_echeance
 from public.cashd_comptes c
 left join public.cashd_factures_etat f on f.compte_id = c.id and f.nature in ('facture', 'acompte')
-group by c.id;
+group by c.id
+$v$;
+exception when invalid_table_definition then
+  raise notice 'public.cashd_balance_agee : déjà étendue par une migration plus récente que c2_01, gardée telle quelle.';
+end $vue$;
 
 revoke all on table public.cashd_factures_etat, public.cashd_reglements_etat, public.cashd_balance_agee from anon, authenticated;
 grant select on table public.cashd_factures_etat, public.cashd_reglements_etat, public.cashd_balance_agee to authenticated;
