@@ -852,7 +852,7 @@ function EtapeLigne({ e, avant }: { e: Etape; avant: React.ReactNode }) {
           {e.date ? dateCourte(`${e.date}T12:00:00`) : "—"}
           <small>{e.date ? (e.statut === "fait" ? "fait" : quand(e.date)) : "sans date"}{prevision && e.date ? " · prévision" : ""}</small>
         </div>
-        <span className="lor-etape-point" data-teinte={s.teinte} data-prevision={prevision} aria-label={s.libelle} />
+        <span className="lor-etape-point" data-teinte={s.teinte} data-prevision={prevision} role="img" aria-label={s.libelle} />
         <div className="lor-etape-texte">
           {e.libelle}
           {e.statut === "manque" ? <> <Pastille teinte="rouge">En retard</Pastille></> : null}
