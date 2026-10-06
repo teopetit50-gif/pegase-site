@@ -378,8 +378,8 @@ pour qu'il serve CHAQUE JOUR et qu'on le paie, par ordre d'importance :
   la convention et sa signature (pièce du dossier), le temps de chacun (description déchiffrée avec la clé du
   dossier), provisions et factures ; dialogues : saisir du temps, convention, signature, provision, reçue,
   facturer (aperçu HT / TVA / TTC / provisions / reste avant d'émettre), payée, annuler. Sans b4_06 sur la
-  base, la carte ne s'affiche pas (la production aujourd'hui). Recette : 78 contrôles aux cinq largeurs, dont
-  12 sur les honoraires (saisie 1 h 30 → 687,50 € HT, facture H-2026-000042, dossier sans convention signalé,
+  base, la carte ne s'affiche pas (la production aujourd'hui). Recette : 79 contrôles aux cinq largeurs, dont
+  13 sur les honoraires (saisie 1 h 30 → 687,50 € HT, facture H-2026-000042, dossier sans convention signalé,
   « Facturer » gris sans convention, carte qui tient à 390) ; axe-core 0 écart sur le dialogue. La recette a
   trouvé un vrai défaut avant la poussée (minutes par défaut affichées 30, lues 0) : corrigé.
 - **Pas fait** : l'édition imprimable de la facture (PDF : nom du client chiffré, donc à composer dans le
