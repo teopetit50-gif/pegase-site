@@ -15,11 +15,21 @@ declare
   v_apercu jsonb;
   v_envoi uuid;
   v_reglage jsonb;
+  v_quoi text;
+  v_items jsonb;
 begin
   r := tests.b3_cabinet_releve('initial');
   v_cabinet := (r ->> 'cabinet')::uuid;
   perform tests.b3_deposer_releve((r ->> 'branchement')::uuid, array['agenda', 'actes'], 'courant', 'b3:courant');
   perform tests.b3_traiter();
+
+  -- Diagnostic : chaque section, ligne par ligne, porte une gravité que deposer_section accepte.
+  for v_quoi in select unnest(array['creneaux', 'plans', 'avant', 'charge']) loop
+    v_items := private.tiroma_section_lignes(banc, entite, v_quoi, true, null);
+    return next ok(not exists (select 1 from jsonb_array_elements(v_items) x where coalesce(x.value ->> 'gravite', '?') not in ('info', 'attention', 'critique')),
+                   format('section %s : %s ligne(s), gravités admises', v_quoi, jsonb_array_length(v_items))
+                   || coalesce((select ' — fautive : ' || left(x.value::text, 400) from jsonb_array_elements(v_items) x where coalesce(x.value ->> 'gravite', '?') not in ('info', 'attention', 'critique') limit 1), ''));
+  end loop;
 
   -- 14. Le dépôt des sections à 6 h 30, heure du cabinet.
   n := private.tiroma_deposer_points((j + time '06:30') at time zone (select fuseau from public.entites where id = entite));
