@@ -1,5 +1,48 @@
 # NOTES — session A5 (garde-fous)
 
+## REPRISE (pause demandée par Teo, 6/10/2026, 21 h Z)
+
+Branche `worker-a5`, tout est poussé (SHA final : voir le dernier commit de la branche, « NOTES-A5 : reprise »).
+Aucun fichier du site public n'est modifié par A5.
+
+**Fait et posé sur la recette (verts)**
+- 19ai compteurs de facturation (731eb98) + 19ao ventilation par module (a5457ca) — test 56 vert.
+- 19aj export complet (27d1ad9) + 19an gérant seul (7d64984) — test 57 vert ; fonction Edge `export-complet` v2
+  déployée sur 66524c9 (porte `exporter_donnees_client`, origines + réglage `export_origines_recette`).
+- 19ak réceptions confidentielles par module (72bc763, tests b6ccec2) — test 58 vert.
+- 19am `apercu_effacement` + `reception_marquer` (79f0e58) — à confirmer posé ; test 59 vert sur la maquette.
+- Test 44 rapide (3018e1d) : < 1 min sur la recette ; il a relevé un vrai écart (`tiroma_duree_texte`, B3).
+- a5_01 en calcul linéaire (b65dafa) : résultat identique prouvé par except ; à rejouer à la clôture.
+
+**Fait, pas posé (fichiers)**
+- `omega/prod/` : repetition.sh (securiser coupe pg_cron/pg_net), garde_fous.sql (19ah), assembleur (19ah exclu,
+  clôture environnement=production), relever-base.sh, empreinte.sql.
+- `.github/workflows/omega-repetition-ci.yml` (voie C, gratuite, jamais tournée) + `omega/prod/REPETITION-CI.md`.
+- `omega/PRODUCTION-POUR-TEO.md` et `omega/CHIFFRAGE/production.md` (dd04c7a) : coûts, qui, ce qui bloque.
+- Maquette locale : 59/59 (`bash omega/tests/socle/local/lancer.sh`).
+
+**Attend le coordinateur**
+- Fusion de `worker-a5` dans main : retenue à cause de `omega-sauvegarde.yml` (artefacts GitHub hors UE ; décision
+  de Teo : gratuit jusqu'au premier client, Scaleway Paris ensuite). Ma session est bloquée par le contrôle des
+  permissions pour écrire le transfert vers Scaleway : à faire par une session autorisée, avec l'accord de Teo.
+- Poser 19am si ce n'est pas fait ; rejouer a5_01 v3 à la clôture.
+- « ecartee » est inscrit « ignoree » (CHECK de 18a) : à trancher si A3 veut le mot en base.
+
+**Attend Teo**
+- Offre Supabase de la prod (non vérifiée : A5 ne lit jamais la prod). En Free → passer en Pro (25 $/mois).
+- Secrets GitHub `SUPABASE_DB_URL` et `SAUVEGARDE_PHRASE`, puis un premier run de la sauvegarde.
+- Bedrock (IAM, eu-central-1, modèle), Brevo de production (DNS), Vercel Pro (20 $/mois), `cle_service` dans le Vault.
+- Le relevé du schéma de la prod (`omega/prod/base/relever-base.sh`, 2 min) pour la répétition C.
+
+**Prochaine étape exacte (à la reprise)**
+1. Lire les messages du coordinateur ; vérifier ce qui a été posé depuis 79f0e58.
+2. Au gel : recevoir les pages d'`exporter.sql` dans `omega/prod/sortie/`, lancer `assembler.mjs --cloture`,
+   remplir `omega/prod/base/` avec le relevé de Teo, pousser le tag `prod-*` → répétition C dans GitHub Actions.
+3. Corriger ce que la répétition remonte, puis paliers P1–P6 (MISE-EN-PRODUCTION.md).
+
+---
+
+
 Branche `worker-a5`. Mise à jour : 5 octobre 2026.
 
 ## Fait aujourd'hui
