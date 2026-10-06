@@ -14,7 +14,7 @@ Une ligne par établissement actif.
 - Varelo (holdings, sièges sociaux) : 668 lignes.
 - FILED/CASHD/OFFLOAD/REPUT (PME de services et de distribution) : 2 313 lignes, dont 39 avec téléphone, 5 avec courriel et 12 avec site web.
 - Limite principale : SIRENE ne donne ni téléphone ni courriel. Le passage par le site officiel de chaque entreprise a commencé sur les 1 200 plus grosses, mais il a été coupé par la limite de 200 recherches web par tour. Il reste environ 4 100 entreprises à traiter, par vagues.
-- Les numéros de portable (06 et 07) ne sont jamais repris, même quand l'Ordre les publie.
+- Les numéros de portable (06 et 07) ne sont pas repris des annuaires (Ordre, RPPS). Un portable n'est gardé que si l'entreprise le publie elle-même sur son site comme numéro de contact ; la colonne « remarque » le signale.
 
 ## Comment le fichier a été fait
 
