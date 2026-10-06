@@ -18,7 +18,7 @@ declare
   v_j jsonb; v_n integer; v_txt text; v_prix142 uuid; v_prixh uuid; v_prix_propose uuid;
   v_j2 date; v_p1 uuid; v_p2 uuid; v_p3 uuid; v_p4 uuid; v_p5 uuid; v_p7 uuid;
   v_acc uuid; v_av uuid; v_la uuid; v_lb uuid; v_dem uuid;
-  v_four_filed uuid; v_four_autre uuid; v_piece uuid; v_doc uuid; v_fact uuid; v_fact2 uuid; v_ratt uuid;
+  v_four_filed uuid; v_four_autre uuid; v_piece uuid; v_doc uuid; v_doc2 uuid; v_fact uuid; v_fact2 uuid; v_ratt uuid;
   r record;
 begin
   banc := tests.b6_banc();
@@ -329,9 +329,14 @@ begin
                                      fournisseur_id, fournisseur_identification, fournisseur_lu, acheteur_lu, empreinte_donnees, statut)
   values (v_client, v_entite, v_doc, 'facture', 'D-2026-118', 'D2026118', current_date - 2, current_date, 'EUR', 9940.00, 1988.00, 11928.00,
           v_four_filed, 'siren', '{"siren": "552100554", "nom": "Serrurerie Dumont"}', '{}', repeat('f', 64), 'a_valider') returning id into v_fact;
+  -- une facture par document, une pièce par document (contraintes d'A4) : la seconde facture a les siens
+  insert into public.pieces (client_id, module, source, nom_fichier, mime, octets, sha256, chemin, objet_type, objet_id, statut)
+  values (v_client, 'filed', 'depot', 'facture-autre-1.pdf', 'application/pdf', 2048, repeat('9', 64), v_client::text || '/filed_document/b6/facture-autre-1.pdf', 'filed_document', 'b6b', 'lue') returning id into v_piece;
+  insert into public.filed_documents (client_id, entite_id, annee_reception, numero_reception, piece_id, source, nom_fichier, sha256, recu_le, etat, nature, nature_source)
+  values (v_client, v_entite, extract(year from current_date)::int, 990002, v_piece, 'courriel', 'facture-autre-1.pdf', repeat('9', 64), now(), 'a_traiter', 'facture', 'lecteur') returning id into v_doc2;
   insert into public.filed_factures (client_id, entite_id, document_id, nature, numero, numero_normalise, date_emission, date_reception, devise, montant_ht, montant_tva, montant_ttc,
                                      fournisseur_id, fournisseur_identification, fournisseur_lu, acheteur_lu, empreinte_donnees, statut)
-  values (v_client, v_entite, v_doc, 'facture', 'A-2026-7', 'A20267', current_date - 1, current_date, 'EUR', 500.00, 100.00, 600.00,
+  values (v_client, v_entite, v_doc2, 'facture', 'A-2026-7', 'A20267', current_date - 1, current_date, 'EUR', 500.00, 100.00, 600.00,
           v_four_autre, 'siren', '{"siren": "775665011"}', '{}', repeat('a', 64), 'a_valider') returning id into v_fact2;
   perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
   return next throws_like(format('select public.btp_rattacher_facture(%L, %L, %L, null)', v_fact2, v_ch, v_lot2), '%n''est pas l''entreprise du lot 02%', '17. Une facture d''un autre SIREN ne se rattache pas au lot de Dumont');
