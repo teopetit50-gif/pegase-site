@@ -195,6 +195,7 @@ Deno.test("table des types par module : schémas d'outil et consignes", () => {
     "lorani_arrete",
     "lorani_certificat_tacite",
     "lorani_constat_affichage",
+    "lorani_courrier_autre",
     "autre",
   ]);
   const outil = schemaOutilPour("lorani") as { properties: Record<string, { enum?: string[]; items?: { properties: Record<string, { enum?: string[] }> } }> };
@@ -208,4 +209,49 @@ Deno.test("table des types par module : schémas d'outil et consignes", () => {
   assertStringIncludes(consigne, "accorde, refuse, non_opposition, opposition, sursis");
   assertStringIncludes(consigne, "Tu ne devines jamais");
   assertStringIncludes(consigneSysteme("filed"), "pièces comptables");
+});
+
+Deno.test("lorani : champs facultatifs de la fiche de B5 (récépissé, arrêté, constat)", async () => {
+  const octets = pdf([
+    "MAIRIE DE SAINT-HERBLAIN",
+    "Récépissé de dépôt — maison individuelle et/ou ses annexes (PCMI)",
+    "Dossier n° PC 044109 26 A0042",
+    "Demandeur : SCI LES TILLEULS",
+    "Le dossier a été déposé le 15/09/2026.",
+  ]);
+  const { issue, portes } = await lireLorani("29", "recepisse2.pdf", octets, {
+    lisible: true,
+    type_piece: "lorani_recepisse_depot",
+    confiance_type: 0.97,
+    valeurs: [
+      { champ: "date_depot", valeur: "2026-09-15", texte: "Le dossier a été déposé le 15/09/2026.", page: 1 },
+      { champ: "type_autorisation", valeur: "PCMI", texte: "maison individuelle et/ou ses annexes (PCMI)", page: 1 },
+      { champ: "commune", valeur: "Saint-Herblain", texte: "MAIRIE DE SAINT-HERBLAIN", page: 1 },
+      { champ: "demandeur", valeur: "SCI LES TILLEULS", texte: "Demandeur : SCI LES TILLEULS", page: 1 },
+    ],
+  });
+  assertEquals(issue, "lue", "numero_dossier n'est plus une clé : la date de dépôt suffit");
+  const v = new Map(portes.enregistrements[0].resultat.valeurs.map((x) => [x.champ, x]));
+  assertEquals(v.get("type_autorisation")!.valeur, "pcmi");
+  assertEquals(v.get("type_autorisation")!.verifiee, true);
+  assertEquals(v.get("demandeur")!.verifiee, true);
+  assertEquals(typerValeur("type_autorisation", "DP", champsPour("lorani")).valeur, "dp");
+  assertEquals(typerValeur("type_autorisation", "certificat d'urbanisme", champsPour("lorani")).ok, false);
+  assertEquals(typerValeur("delai_reponse_mois", "3 mois", champsPour("lorani")).valeur, 3);
+  assertEquals(typerValeur("delai_reponse_mois", 13, champsPour("lorani")).ok, false);
+  for (const c of ["motif_majoration", "prescriptions", "date_notification", "date_certificat", "commissaire"]) {
+    assert(champsPour("lorani").has(c), c);
+  }
+});
+
+Deno.test("lorani : un autre courrier de la mairie est lu, avec ou sans date", async () => {
+  const octets = pdf(["Accusé de réception électronique", "Votre envoi a bien été reçu."]);
+  const { issue, portes } = await lireLorani("30", "ar.pdf", octets, {
+    lisible: true,
+    type_piece: "lorani_courrier_autre",
+    confiance_type: 0.9,
+    valeurs: [],
+  });
+  assertEquals(issue, "lue");
+  assertEquals(portes.enregistrements[0].resultat.type_piece, "lorani_courrier_autre");
 });

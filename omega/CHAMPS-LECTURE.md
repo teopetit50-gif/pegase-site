@@ -161,16 +161,19 @@ Exemple : `[{"taux":20,"base":1234.4,"montant":246.88}]`
 
 ## Module Lorani — urbanisme (en service)
 
-Six types, tels que `private.lorani_propositions` les attend (B5, `omega/modules/lorani/CHAMPS-LECTURE-LORANI.md`). Le lecteur choisit la table des types selon `pieces.module` (`omega/functions/lecteur/schemas/modules.ts`) ; une pièce Lorani d'un autre type (une facture, une photo) part en `a_classer`. `numero_dossier` est attendu sur tous les types. Les dates sont en `AAAA-MM-JJ`, les boîtes en fractions de page avec `y` depuis le haut.
+Six types, plus `lorani_courrier_autre`, tels que `private.lorani_propositions` les attend (B5, `omega/modules/lorani/CHAMPS-LECTURE-LORANI.md`). Le lecteur choisit la table des types selon `pieces.module` (`omega/functions/lecteur/schemas/modules.ts`) ; une pièce Lorani d'un autre type (une facture, une photo) part en `a_classer`. `numero_dossier` est attendu sur tous les types. Les dates sont en `AAAA-MM-JJ`, les boîtes en fractions de page avec `y` depuis le haut.
 
 | `type_piece` | Ce que c'est | Champs | Clés (tous vérifiés → `lue`) |
 |---|---|---|---|
-| `lorani_recepisse_depot` | récépissé de dépôt d'une demande d'autorisation, remis par la mairie | `numero_dossier`, `date_depot` | les deux |
-| `lorani_lettre_delai` | lettre notifiant ou modifiant le délai d'instruction | `numero_dossier`, `delai_mois`, `date_lettre` | les trois |
-| `lorani_demande_pieces` | demande de pièces complémentaires | `numero_dossier`, `date_lettre`, `pieces` | les trois |
-| `lorani_arrete` | arrêté du maire ou du préfet | `numero_dossier`, `decision`, `date_decision` | les trois |
-| `lorani_certificat_tacite` | certificat de décision tacite acquise | `numero_dossier`, `date_tacite` | les deux |
-| `lorani_constat_affichage` | constat d'affichage par commissaire de justice | `numero_dossier`, `date_constat`, `passage` | les trois |
+| `lorani_recepisse_depot` | récépissé de dépôt d'une demande d'autorisation, remis par la mairie | `numero_dossier`, `date_depot`, `type_autorisation`, `commune`, `demandeur` | `date_depot` |
+| `lorani_lettre_delai` | lettre notifiant ou modifiant le délai d'instruction | `numero_dossier`, `delai_mois`, `date_lettre`, `motif_majoration` | `delai_mois` |
+| `lorani_demande_pieces` | demande de pièces complémentaires | `numero_dossier`, `date_lettre`, `pieces`, `delai_reponse_mois` | `date_lettre`, `pieces` |
+| `lorani_arrete` | arrêté du maire ou du préfet | `numero_dossier`, `decision`, `date_decision`, `prescriptions`, `date_notification` | `decision`, `date_decision` |
+| `lorani_certificat_tacite` | certificat de décision tacite acquise | `numero_dossier`, `date_tacite`, `date_certificat` | `date_tacite` |
+| `lorani_constat_affichage` | constat d'affichage par commissaire de justice | `numero_dossier`, `date_constat`, `passage`, `commissaire` | `date_constat` |
+| `lorani_courrier_autre` | autre courrier de la mairie (accusé de réception électronique, avis de commission, information) | `numero_dossier`, `date_lettre` | aucune : `lue` même sans date |
+
+Les clés sont les champs « obligatoires » de la fiche de B5 ; `numero_dossier` est rendu partout où il est écrit, sans être une clé.
 
 | Champ | Type de `valeur` | Description | Exemple |
 |---|---|---|---|
@@ -184,6 +187,15 @@ Six types, tels que `private.lorani_propositions` les attend (B5, `omega/modules
 | `date_tacite` | texte `AAAA-MM-JJ` | date d'acquisition de la décision tacite | `"2026-11-15"` |
 | `date_constat` | texte `AAAA-MM-JJ` | date du constat | `"2026-12-10"` |
 | `passage` | nombre entier, 1 à 3 | numéro du passage de l'huissier | `2` |
+| `type_autorisation` | texte parmi `pc`, `pcmi`, `pa`, `pd`, `dp` | nature de la demande (« PCMI » ramené à `pcmi`) | `"pcmi"` |
+| `commune` | texte (≤ 120) | commune de dépôt, telle qu'écrite | `"Saint-Herblain"` |
+| `demandeur` | texte (≤ 200) | demandeur, tel qu'écrit | `"SCI LES TILLEULS"` |
+| `motif_majoration` | texte (≤ 300) | motif de la majoration du délai | `"avis de l'architecte des Bâtiments de France"` |
+| `delai_reponse_mois` | nombre entier, 1 à 12 | délai pour fournir les pièces, s'il est écrit | `3` |
+| `prescriptions` | texte (≤ 1000) | prescriptions de l'arrêté | |
+| `date_notification` | texte `AAAA-MM-JJ` | date de notification de l'arrêté | |
+| `date_certificat` | texte `AAAA-MM-JJ` | date du certificat tacite | |
+| `commissaire` | texte (≤ 200) | commissaire de justice ou son étude | |
 
 Pas de `lignes` ni de `tva.ventilation` pour ce module.
 
