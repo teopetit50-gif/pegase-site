@@ -17,20 +17,26 @@
    gardée dans l'onglet, jamais envoyée (chiffrement.ts). Sans elle, le
    dossier reste « Chiffré » : les délais, audiences et décisions se
    lisent quand même, ils ne portent pas de clair.
+
+   Le coffre à clés (b4_05, 06/10/2026) : un cabinet peut passer au coffre
+   Scaleway. Le gérant l'active, puis un associé ré-enveloppe les dossiers
+   tapés sous la phrase (la clé ne change pas, son enveloppe si). Ensuite la
+   clé d'un dossier vient du coffre (fonction tamila-coffre), à l'ouverture
+   du dossier, pour qui le voit ; chaque déballage est journalisé.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FolderPlus, KeyRound, Lock, Unlock } from "lucide-react";
+import { FolderPlus, KeyRound, Lock, ShieldCheck, Unlock } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { useSource } from "../source";
 import { useTempsReel } from "../tempsReel";
 import { Avis, Chargement, Pastille, Ruban, Vide } from "../ui";
 import { dateCourte } from "../format";
-import { Trousseau, chiffrer, dechiffrer, envelopper, genererCle, memoriserPhrase, phraseMemorisee } from "./chiffrement";
+import { Trousseau, chiffrer, dechiffrer, envelopper, exporterCle, genererCle, importerCle, memoriserPhrase, phraseMemorisee } from "./chiffrement";
 import { DOSSIERS_EXEMPLE, EXEMPLE_CLIENT, MOI, PERSONNES_EXEMPLE, REGLAGES_EXEMPLE, REGLES_EXEMPLE } from "./exemples";
-import { MATIERES, STATUTS_DOSSIER, TERRITOIRES, delaiCourt, estAssocie, joursAvant, libelleMatiere, libelleTerritoire, type Moi } from "./regles";
-import { chargerCabinet, chargerDossier, cleDossier, creerDossier, installer, type Cabinet } from "./portes";
+import { MATIERES, STATUTS_DOSSIER, TERRITOIRES, delaiCourt, estAssocie, estGerant, joursAvant, libelleMatiere, libelleTerritoire, type Moi } from "./regles";
+import { chargerCabinet, chargerDossier, cleDossier, coffre, creerDossier, installer, type Cabinet, type EtatCoffre } from "./portes";
 import type { Clair, Dossier, DossierComplet } from "./types";
 import DossierTamila from "./DossierTamila";
 import "./tamila.css";
@@ -73,6 +79,20 @@ export default function EcranTamila() {
   const [formPhrase, setFormPhrase] = useState(false);
   const [saisiePhrase, setSaisiePhrase] = useState("");
 
+  /* le coffre à clés : celui du cabinet (base réelle), ou un coffre d'exemple, en mémoire */
+  const [coffreExemple, setCoffreExemple] = useState<EtatCoffre>({ statut: "local", region: null, dossiers_locaux: DOSSIERS_EXEMPLE.length, dossiers_scaleway: 0 });
+  const etat: EtatCoffre | null = source === "exemple" ? coffreExemple : (cabinet?.coffre ?? null);
+  const auCoffre = !!etat && etat.statut !== "local";
+
+  /* la clé d'un dossier par le coffre : null si le dossier est encore sous la phrase */
+  const cleParCoffre = useCallback(async (dossier: string): Promise<CryptoKey | null> => {
+    const r = await coffre<{ fournisseur: string; cle?: string }>("cle_dossier", { dossier });
+    if (r.fournisseur !== "scaleway" || !r.cle) return null;
+    const k = await importerCle(r.cle);
+    trousseau.current.poser(dossier, k);
+    return k;
+  }, []);
+
   useEffect(() => {
     const t = window.setTimeout(() => setPhrase(phraseMemorisee()), 0);
     return () => window.clearTimeout(t);
@@ -88,7 +108,7 @@ export default function EcranTamila() {
       setCabinet(await chargerCabinet());
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
-      setCabinet({ moi: { user_id: "", client_id: "", role: "lecteur", email: null }, installe: false, reglages: null, dossiers: [], cles: [], delais: [], audiences: [], demandes: [], personnes: [], regles: [], horsVue: null });
+      setCabinet({ moi: { user_id: "", client_id: "", role: "lecteur", email: null }, installe: false, reglages: null, dossiers: [], cles: [], delais: [], audiences: [], demandes: [], personnes: [], regles: [], horsVue: null, coffre: null });
     }
   }, []);
 
@@ -122,6 +142,7 @@ export default function EcranTamila() {
           prochains[d.id] = null;
           continue;
         }
+        if (k.fournisseur === "scaleway") continue;
         const cle = await trousseau.current.ouvrir(d.id, k.enveloppe, phrase);
         if (!cle) {
           prochains[d.id] = null;
@@ -215,9 +236,20 @@ export default function EcranTamila() {
       if (!cabinet) return;
       const k = cabinet.cles.find((c) => c.dossier_id === d.id && c.statut === "active") ?? null;
       const c = await chargerDossier(d, k, ["attente", "ouvert", "audit", "clos"].includes(d.statut));
-      /* l'enveloppe : lue dans tamila_cles (associés), sinon rendue par la porte tamila_cle_dossier (membres, b4_03) */
-      const enveloppe = k?.enveloppe ?? (phrase ? await cleDossier(d.id) : null);
-      const cle = trousseau.current.lire(d.id) ?? (enveloppe && phrase ? await trousseau.current.ouvrir(d.id, enveloppe, phrase) : null);
+      let cle = trousseau.current.lire(d.id);
+      /* au coffre : la clé vient de la fonction tamila-coffre (un déballage journalisé) */
+      if (!cle && (k?.fournisseur === "scaleway" || (!k && auCoffre))) {
+        try {
+          cle = await cleParCoffre(d.id);
+        } catch (e) {
+          setErreur(e instanceof Error ? e.message : "Le coffre n'a pas répondu.");
+        }
+      }
+      /* sous la phrase : l'enveloppe lue dans tamila_cles (associés), sinon rendue par tamila_cle_dossier (membres, b4_03) */
+      if (!cle && k?.fournisseur !== "scaleway" && phrase) {
+        const enveloppe = k?.enveloppe ?? (await cleDossier(d.id));
+        cle = enveloppe ? await trousseau.current.ouvrir(d.id, enveloppe, phrase) : null;
+      }
       setClesOuvertes((prev) => ({ ...prev, [d.id]: cle }));
       if (cle) {
         const [reference, intitule, numero_rg] = await Promise.all([dechiffrer(cle, d.reference_chiffree), dechiffrer(cle, d.intitule_chiffre), dechiffrer(cle, d.numero_rg_chiffre)]);
@@ -231,7 +263,7 @@ export default function EcranTamila() {
       }
       setComplets((prev) => ({ ...prev, [d.id]: c }));
     },
-    [cabinet, phrase],
+    [cabinet, phrase, auCoffre, cleParCoffre],
   );
 
   useEffect(() => {
@@ -319,30 +351,45 @@ export default function EcranTamila() {
     setNv({ reference: "", intitule: "", numero_rg: "", matiere: "civil", juridiction: "", territoire: "metropole", mode: "contentieux", responsable: moi?.user_id ?? "", audit_fin: "", phrase: "" });
     setFormNouveau(true);
   };
-  const nouveauOk = nv.reference.trim().length >= 2 && nv.intitule.trim().length >= 3 && (source === "exemple" || !!phrase || nv.phrase.trim().length >= 8);
+  const nouveauOk = nv.reference.trim().length >= 2 && nv.intitule.trim().length >= 3 && (source === "exemple" || auCoffre || !!phrase || nv.phrase.trim().length >= 8);
   const soumettreNouveau = async () => {
     if (!nouveauOk) return;
     setEnvoi(true);
     setErreurForm(null);
     try {
-      const id = crypto.randomUUID();
+      let id = crypto.randomUUID();
       const quand = new Date().toISOString();
       if (source === "reelle") {
         if (!cabinet?.moi.client_id) throw new Error("Aucun compte rattaché à cette session.");
-        const ph = phrase ?? nv.phrase.trim();
-        if (!phrase) {
-          memoriserPhrase(ph);
-          setPhrase(ph);
+        let cle: CryptoKey;
+        let fournisseur: "local" | "scaleway" = "local";
+        let p_cle_reference = `cabinet:${cabinet.moi.client_id}:${id}`;
+        let enveloppe: Promise<string>;
+        if (auCoffre) {
+          /* le coffre tire l'identifiant du dossier et sa clé, enveloppée sous la clé maître du cabinet */
+          const n = await coffre<{ dossier: string; reference: string; enveloppe: string; cle: string }>("nouvelle_cle", { client: cabinet.moi.client_id });
+          id = n.dossier;
+          cle = await importerCle(n.cle);
+          fournisseur = "scaleway";
+          p_cle_reference = n.reference;
+          enveloppe = Promise.resolve(`\\x${n.enveloppe}`);
+        } else {
+          const ph = phrase ?? nv.phrase.trim();
+          if (!phrase) {
+            memoriserPhrase(ph);
+            setPhrase(ph);
+          }
+          cle = await genererCle();
+          enveloppe = envelopper(cle, ph);
         }
-        const cle = await genererCle();
         const [p_reference, p_intitule, p_numero_rg, p_cle_enveloppe] = await Promise.all([
           chiffrer(cle, nv.reference.trim()),
           chiffrer(cle, nv.intitule.trim()),
           nv.numero_rg.trim() ? chiffrer(cle, nv.numero_rg.trim()) : Promise.resolve(null),
-          envelopper(cle, ph),
+          enveloppe,
         ]);
         await creerDossier({
-          p_client: cabinet.moi.client_id, p_dossier: id, p_reference, p_intitule, p_cle_fournisseur: "local", p_cle_reference: `cabinet:${cabinet.moi.client_id}:${id}`, p_cle_enveloppe,
+          p_client: cabinet.moi.client_id, p_dossier: id, p_reference, p_intitule, p_cle_fournisseur: fournisseur, p_cle_reference, p_cle_enveloppe,
           p_numero_rg, p_matiere: nv.matiere || null, p_juridiction: nv.juridiction.trim() || null, p_territoire: nv.territoire || null, p_mode: nv.mode, p_perso: false,
           p_audit_fin: nv.audit_fin || null, p_responsable: nv.responsable || null,
         });
@@ -389,6 +436,102 @@ export default function EcranTamila() {
     }
   };
 
+  /* ——— le coffre à clés ——— */
+  const [formCoffre, setFormCoffre] = useState(false);
+  const [coffreEnCours, setCoffreEnCours] = useState<{ fait: number; total: number } | null>(null);
+  const [coffreEchecs, setCoffreEchecs] = useState<string[]>([]);
+  const [erreurCoffre, setErreurCoffre] = useState<string | null>(null);
+  /* les dossiers que le coffre renvoie à la phrase (bascule en cours) : plus proposés à la lecture par le coffre */
+  const [sousLaPhrase, setSousLaPhrase] = useState<Record<string, true>>({});
+  const associe = estAssocie(moi);
+  const gerant = estGerant(moi);
+
+  const activerCoffre = async () => {
+    setErreurCoffre(null);
+    setEnvoi(true);
+    try {
+      if (source === "exemple") {
+        await new Promise((r) => setTimeout(r, 350));
+        setCoffreExemple((c) => ({ ...c, statut: "bascule", region: "fr-par" }));
+      } else {
+        if (!cabinet?.moi.client_id) throw new Error("Aucun compte rattaché à cette session.");
+        await coffre("activer", { client: cabinet.moi.client_id });
+        await relire();
+      }
+      setFait("Le coffre Scaleway du cabinet est activé : les nouveaux dossiers y prennent leur clé.");
+    } catch (e) {
+      setErreurCoffre(e instanceof Error ? e.message : "Le coffre n'a pas répondu.");
+    } finally {
+      setEnvoi(false);
+    }
+  };
+
+  /* la clé de chaque dossier encore sous la phrase, déballée ici, ré-enveloppée au coffre ; aucune pièce n'est touchée */
+  const reenvelopperTout = async () => {
+    setErreurCoffre(null);
+    setCoffreEchecs([]);
+    if (source === "exemple") {
+      const total = coffreExemple.dossiers_locaux;
+      for (let i = 1; i <= total; i++) {
+        setCoffreEnCours({ fait: i, total });
+        await new Promise((r) => setTimeout(r, 120));
+      }
+      setCoffreExemple((c) => ({ ...c, statut: "scaleway", dossiers_locaux: 0, dossiers_scaleway: c.dossiers_scaleway + c.dossiers_locaux }));
+      setCoffreEnCours(null);
+      setFait("Toutes les clés du cabinet sont au coffre Scaleway. La phrase n'est plus nécessaire.");
+      return;
+    }
+    if (!cabinet || !phrase) return;
+    const locales = cabinet.cles.filter((k) => k.statut === "active" && k.fournisseur === "local");
+    const echecs: string[] = [];
+    for (let i = 0; i < locales.length; i++) {
+      const k = locales[i];
+      setCoffreEnCours({ fait: i + 1, total: locales.length });
+      const nom = clairs[k.dossier_id]?.reference ?? `dossier ${k.dossier_id.slice(0, 8)}`;
+      try {
+        const cle = await trousseau.current.ouvrir(k.dossier_id, k.enveloppe, phrase);
+        if (!cle) {
+          echecs.push(`${nom} : la phrase ne l'ouvre pas`);
+          continue;
+        }
+        await coffre("reenvelopper", { dossier: k.dossier_id, cle: await exporterCle(cle) });
+      } catch (e) {
+        echecs.push(`${nom} : ${e instanceof Error ? e.message : "refusé"}`);
+      }
+    }
+    setCoffreEnCours(null);
+    setCoffreEchecs(echecs);
+    await relire();
+    if (!echecs.length) setFait(`${locales.length} dossier${locales.length > 1 ? "s" : ""} ré-enveloppé${locales.length > 1 ? "s" : ""} au coffre Scaleway, sans toucher aux pièces.`);
+  };
+
+  /* au coffre, les références de la liste se lisent à la demande : une ouverture de clé journalisée par dossier */
+  const aLireParCoffre = source === "reelle" && cabinet && auCoffre
+    ? cabinet.dossiers.filter((d) => {
+        const k = cabinet.cles.find((c) => c.dossier_id === d.id && c.statut === "active");
+        return !clairs[d.id] && !sousLaPhrase[d.id] && (k ? k.fournisseur === "scaleway" : true) && ["attente", "ouvert", "audit", "clos"].includes(d.statut);
+      })
+    : [];
+  const lireListeParCoffre = async () => {
+    setEnvoi(true);
+    setErreur(null);
+    try {
+      for (const d of aLireParCoffre) {
+        const cle = trousseau.current.lire(d.id) ?? (await cleParCoffre(d.id));
+        if (!cle) {
+          setSousLaPhrase((prev) => ({ ...prev, [d.id]: true }));
+          continue;
+        }
+        const [reference, intitule, numero_rg] = await Promise.all([dechiffrer(cle, d.reference_chiffree), dechiffrer(cle, d.intitule_chiffre), dechiffrer(cle, d.numero_rg_chiffre)]);
+        if (reference !== null && intitule !== null) setClairs((prev) => ({ ...prev, [d.id]: { reference, intitule, numero_rg } }));
+      }
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : "Le coffre n'a pas répondu.");
+    } finally {
+      setEnvoi(false);
+    }
+  };
+
   const avocats = personnes.filter((p) => ["gerant", "admin", "valideur"].includes(p.role));
   const reglages = source === "exemple" ? REGLAGES_EXEMPLE : (cabinet?.reglages ?? null);
 
@@ -405,6 +548,11 @@ export default function EcranTamila() {
           {source === "reelle" ? (
             <button type="button" className={`r-btn r-btn--fil tam-phrase${phrase ? "" : " tam-phrase--fermee"}`} onClick={() => setFormPhrase(true)} title={phrase ? "Phrase du cabinet mémorisée pour cet onglet" : "Sans la phrase, les dossiers restent chiffrés"}>
               {phrase ? <Unlock width={15} height={15} aria-hidden="true" /> : <Lock width={15} height={15} aria-hidden="true" />} {phrase ? "Phrase mémorisée" : "Phrase du cabinet"}
+            </button>
+          ) : null}
+          {etat && associe ? (
+            <button type="button" className={`r-btn r-btn--fil tam-coffre${auCoffre ? " tam-coffre--actif" : ""}`} onClick={() => { setErreurCoffre(null); setCoffreEchecs([]); setFormCoffre(true); }}>
+              <ShieldCheck width={15} height={15} aria-hidden="true" /> {etat.statut === "scaleway" ? "Coffre Scaleway" : etat.statut === "bascule" ? "Coffre : bascule" : "Coffre à clés"}
             </button>
           ) : null}
           <button type="button" className="r-btn r-btn--noir" onClick={ouvrirNouveau} disabled={source === "reelle" && (!cabinet?.installe || !moi || moi.role === "lecteur")}>
@@ -428,7 +576,19 @@ export default function EcranTamila() {
           </Avis>
         </div>
       ) : null}
-      {source === "reelle" && cabinet && !phrase && cabinet.dossiers.length ? (
+      {aLireParCoffre.length ? (
+        <div style={{ marginBottom: 14 }}>
+          <Avis teinte="bleu">
+            <strong>Les clés de ce cabinet sont au coffre Scaleway.</strong> Un dossier se déchiffre quand vous l&apos;ouvrez ; chaque clé remise par le coffre est journalisée (qui, quand, quel dossier).
+            <div className="esp-actions" style={{ marginTop: 8 }}>
+              <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={envoi} onClick={lireListeParCoffre}>
+                {envoi ? <Loader variant="spin" /> : null} Lire les références de la liste ({aLireParCoffre.length} ouverture{aLireParCoffre.length > 1 ? "s" : ""} de clé)
+              </button>
+            </div>
+          </Avis>
+        </div>
+      ) : null}
+      {source === "reelle" && cabinet && !phrase && !auCoffre && cabinet.dossiers.length ? (
         <div style={{ marginBottom: 14 }}>
           <Avis teinte="bleu">
             <strong>Les dossiers sont chiffrés.</strong> Tapez la phrase du cabinet pour lire les références, intitulés et noms des parties ; elle reste dans cet onglet et n&apos;est jamais envoyée.
@@ -523,6 +683,67 @@ export default function EcranTamila() {
         </section>
       </div>
 
+      {/* ——— le coffre à clés ——— */}
+      <Dialog open={formCoffre} onOpenChange={(o) => !o && !coffreEnCours && setFormCoffre(false)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><ShieldCheck width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Le coffre à clés du cabinet</DialogTitle>
+            <DialogDescription>Une clé maître par cabinet, chez Scaleway (France), qui ne sort jamais du coffre. Elle enveloppe la clé de chaque dossier ; le serveur la déballe pour qui voit le dossier et pour la lecture des pièces, et journalise chaque remise.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              {etat ? (
+                <dl className="tam-coffre-etat">
+                  <div><dt>État</dt><dd>{etat.statut === "scaleway" ? <Pastille teinte="vert">Toutes les clés au coffre</Pastille> : etat.statut === "bascule" ? <Pastille teinte="ambre">Bascule en cours</Pastille> : <Pastille teinte="gris">Phrase du cabinet</Pastille>}</dd></div>
+                  <div><dt>Sous la phrase</dt><dd>{etat.dossiers_locaux} dossier{etat.dossiers_locaux > 1 ? "s" : ""}</dd></div>
+                  <div><dt>Au coffre</dt><dd>{etat.dossiers_scaleway} dossier{etat.dossiers_scaleway > 1 ? "s" : ""}{etat.region ? ` · ${etat.region === "fr-par" ? "Paris" : etat.region}` : ""}</dd></div>
+                </dl>
+              ) : null}
+              {etat?.statut === "local" ? (
+                gerant ? (
+                  <Avis teinte="bleu">Activer le coffre crée la clé maître du cabinet chez Scaleway. Les nouveaux dossiers y prennent leur clé ; ceux qui existent restent sous la phrase jusqu&apos;à leur ré-enveloppement, que vous lancez ensuite.</Avis>
+                ) : (
+                  <Avis teinte="gris">Seul le gérant active le coffre du cabinet.</Avis>
+                )
+              ) : null}
+              {etat?.statut === "bascule" ? (
+                source === "reelle" && !phrase ? (
+                  <Avis teinte="ambre">Pour ré-envelopper les dossiers encore sous la phrase, tapez d&apos;abord la phrase du cabinet : chaque clé est déballée ici, puis confiée au coffre.</Avis>
+                ) : (
+                  <Avis teinte="bleu">Chaque clé est déballée dans votre navigateur avec la phrase, vérifiée par le coffre sur le dossier, puis enveloppée sous la clé maître. La clé ne change pas : aucune pièce n&apos;est déchiffrée ni re-chiffrée. Les pièces qui attendaient une lecture repartent au lecteur.</Avis>
+                )
+              ) : null}
+              {etat?.statut === "scaleway" ? <Avis teinte="vert">Toutes les clés du cabinet sont au coffre : la phrase n&apos;est plus nécessaire pour lire un dossier.</Avis> : null}
+              {coffreEnCours ? (
+                <div className="tam-coffre-progres" role="status" aria-live="polite">
+                  <Loader variant="spin" /> Ré-enveloppement : {coffreEnCours.fait} sur {coffreEnCours.total}
+                  <progress max={coffreEnCours.total} value={coffreEnCours.fait} aria-label="Avancement du ré-enveloppement" />
+                </div>
+              ) : null}
+              {coffreEchecs.length ? (
+                <Avis teinte="ambre" role="alert">
+                  <strong>{coffreEchecs.length} dossier{coffreEchecs.length > 1 ? "s" : ""} reste{coffreEchecs.length > 1 ? "nt" : ""} sous la phrase.</strong> Un dossier que vous ne voyez pas (clientèle personnelle, muraille) se ré-enveloppe par son responsable.
+                  <ul className="tam-coffre-echecs">{coffreEchecs.map((x) => <li key={x}>{x}</li>)}</ul>
+                </Avis>
+              ) : null}
+              {erreurCoffre ? <Avis teinte="rouge" role="alert">{erreurCoffre}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--fil" disabled={!!coffreEnCours} onClick={() => setFormCoffre(false)}>Fermer</button>
+            {etat?.statut === "local" && gerant ? (
+              <button type="button" className="r-btn r-btn--noir" disabled={envoi} onClick={activerCoffre}>{envoi ? <Loader variant="spin" /> : null} Passer au coffre Scaleway</button>
+            ) : null}
+            {etat?.statut === "bascule" ? (
+              <button type="button" className="r-btn r-btn--noir" disabled={!!coffreEnCours || (source === "reelle" && !phrase) || etat.dossiers_locaux === 0} onClick={reenvelopperTout}>
+                Ré-envelopper {etat.dossiers_locaux} dossier{etat.dossiers_locaux > 1 ? "s" : ""}
+              </button>
+            ) : null}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* ——— la phrase du cabinet ——— */}
       <Dialog open={formPhrase} onOpenChange={(o) => !o && setFormPhrase(false)}>
         <DialogContent>
@@ -552,7 +773,7 @@ export default function EcranTamila() {
           <DialogHeader>
             <DialogIcone><FolderPlus width={18} height={18} aria-hidden="true" /></DialogIcone>
             <DialogTitle>Ouvrir un dossier</DialogTitle>
-            <DialogDescription>Une clé est tirée dans votre navigateur ; référence, intitulé et n° RG sont chiffrés avant de partir. Le socle ne voit que des octets.</DialogDescription>
+            <DialogDescription>{auCoffre ? "Une clé est tirée par le coffre Scaleway du cabinet ; référence, intitulé et n° RG sont chiffrés dans votre navigateur avant de partir. Le socle ne voit que des octets." : "Une clé est tirée dans votre navigateur ; référence, intitulé et n° RG sont chiffrés avant de partir. Le socle ne voit que des octets."}</DialogDescription>
           </DialogHeader>
           <DialogBody>
             <div className="esp-form">
@@ -603,7 +824,7 @@ export default function EcranTamila() {
                   </label>
                 ) : null}
               </div>
-              {source === "reelle" && !phrase ? (
+              {source === "reelle" && !phrase && !auCoffre ? (
                 <label className="rv-libelle">Phrase du cabinet <span className="esp-obligatoire">(obligatoire, huit caractères au moins)</span>
                   <input className="rv-champ" type="password" autoComplete="off" value={nv.phrase} onChange={(e) => setNv({ ...nv, phrase: e.target.value })} />
                   <span className="esp-kpi-sous">La clé du dossier est enveloppée sous cette phrase ; elle sera mémorisée pour cet onglet.</span>

@@ -29,6 +29,9 @@
      tamila_demander_export / tamila_demander_export_cabinet / tamila_telecharger_export
      tamila_demander_cloture / tamila_annuler_cloture / tamila_convertir_audit
      tamila_registre_hors_vue(p_client) → int
+     tamila_coffre_etat(p_client) → jsonb (b4_05) ; la fonction Edge « tamila-coffre » (actions activer,
+       nouvelle_cle, cle_dossier, reenvelopper) au nom de la personne connectée : elle déballe les clés
+       des dossiers d'un cabinet passé au coffre Scaleway, chaque déballage journalisé
    Si la base répond autrement, l'écran montre son message tel quel.
    Les bytea partent en hexadécimal (« \x01… », chiffrement.ts).
    ══════════════════════════════════════════════════════════════════════ */
@@ -75,6 +78,8 @@ export type Cabinet = {
   personnes: Personne[];
   regles: RegleProcedure[];
   horsVue: number | null;
+  /* le coffre à clés du cabinet (b4_05) ; null si la porte n'existe pas sur cette base */
+  coffre: EtatCoffre | null;
 };
 
 export async function chargerCabinet(): Promise<Cabinet> {
@@ -105,6 +110,7 @@ export async function chargerCabinet(): Promise<Cabinet> {
     const { data } = await supabase.rpc("tamila_registre_hors_vue", { p_client: moi.client_id });
     horsVue = typeof data === "number" ? data : null;
   }
+  const coffreCabinet = await etatCoffre(moi.client_id);
   return {
     moi,
     installe: !!r.data,
@@ -117,6 +123,7 @@ export async function chargerCabinet(): Promise<Cabinet> {
     personnes,
     regles: (rg.data ?? []) as RegleProcedure[],
     horsVue,
+    coffre: coffreCabinet,
   };
 }
 
@@ -173,7 +180,7 @@ export type NouveauDossier = {
   p_dossier: string;
   p_reference: string;
   p_intitule: string;
-  p_cle_fournisseur: "local";
+  p_cle_fournisseur: "local" | "scaleway";
   p_cle_reference: string;
   p_cle_enveloppe: string;
   p_numero_rg: string | null;
@@ -219,6 +226,37 @@ export const avisLu = (p_client: string, p_dossier: string, p_type: string, p_va
 
 export const consulter = (p_dossier: string, p_contexte = "dossier") => rpc<string>("tamila_consulter", { p_dossier, p_contexte });
 /** L'enveloppe de la clé d'un dossier pour un membre qui n'est pas associé (migration b4_03) ; null sans porte ou sans clé active. */
+/* ——— le coffre à clés (b4_05) ——— */
+export type EtatCoffre = { statut: "local" | "bascule" | "scaleway"; region: string | null; dossiers_locaux: number; dossiers_scaleway: number };
+
+/** null : la porte n'existe pas sur cette base (b4_05 non posée) ; l'écran reste en mode phrase. */
+export async function etatCoffre(p_client: string): Promise<EtatCoffre | null> {
+  try {
+    return await rpc<EtatCoffre>("tamila_coffre_etat", { p_client });
+  } catch {
+    return null;
+  }
+}
+
+const MESSAGES_COFFRE: Record<string, string> = {
+  KM_ABSENT: "Le coffre n'est pas encore branché : les secrets Scaleway ne sont pas posés.",
+  KM_INDISPONIBLE: "Le coffre Scaleway ne répond pas pour l'instant ; réessayez dans un moment.",
+  CLE_FAUSSE: "Cette clé n'ouvre pas le dossier : la phrase n'est pas la bonne, rien n'a changé.",
+};
+
+/** Un geste du coffre (fonction Edge tamila-coffre), au nom de la personne connectée. */
+export async function coffre<T>(action: "activer" | "nouvelle_cle" | "cle_dossier" | "reenvelopper", corps: Record<string, unknown>): Promise<T> {
+  const supabase = createClient();
+  const { data, error } = await supabase.functions.invoke("tamila-coffre", { body: { action, ...corps } });
+  if (error) {
+    let detail: { erreur?: string; message?: string } = {};
+    const ctx = (error as { context?: unknown }).context;
+    if (ctx instanceof Response) detail = await ctx.json().catch(() => ({}));
+    throw new ErreurPorte((detail.erreur && MESSAGES_COFFRE[detail.erreur]) || detail.message || "Le coffre n'a pas répondu.");
+  }
+  return data as T;
+}
+
 export const cleDossier = (p_dossier: string) => rpc<string | null>("tamila_cle_dossier", { p_dossier }).catch(() => null);
 
 export const poserMuraille = (p_dossier: string, p_user: string, p_motif: string | null) => rpc<string>("tamila_poser_muraille", { p_dossier, p_user, p_motif });
