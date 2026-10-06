@@ -215,3 +215,15 @@
   display: grid;
   gap: 6px;
 }
+
+/* la lettre de protestation au transporteur (b1_11) */
+.dlg-panneau .vrl-lettre,
+.esp .vrl-lettre {
+  width: 100%;
+  min-height: 280px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12.5px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  resize: vertical;
+}
