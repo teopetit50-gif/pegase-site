@@ -174,6 +174,14 @@ begin
                  or not exists (select 1 from private.abonnements a where a.evenement = 'cashd.facture_reglee'),
                  'La facture réglée par le lien publie cashd.facture_reglee (numéro, adresse, date du règlement)');
 
+  -- ── Un contact en litige (pour REPUT) ──
+  return next ok(private.cashd_contact_en_litige(v_client, 'COMPTA@lefevre-patrimoine.test')
+                 and private.cashd_contact_en_litige(v_client, 'paul@atelier-bertin.test')
+                 and not private.cashd_contact_en_litige(v_client, 'mandatement@caluire.test')
+                 and not private.cashd_contact_en_litige(v_client, 'inconnu@exemple.test'),
+                 'Un contact d''un compte qui a une facture en litige est reconnu (facturation ou commercial) ; les autres non');
+  return next ok(not has_function_privilege('authenticated', 'private.cashd_contact_en_litige(uuid, text)', 'execute'), 'Lu par le serveur seul');
+
   -- ── Historique des réglages ──
   perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
   return next ok((select count(*) from public.cashd_historique_reglages h where h.client_id = v_client and h.action in ('cashd.reglages', 'cashd.plafond', 'cashd.echeancier')) >= 3,

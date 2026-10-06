@@ -231,6 +231,11 @@ CASHD étant vert.
 
 ## Journal de session
 
+- 06/10, soir : seconde demande de C3 : `private.cashd_contact_en_litige(p_client, p_adresse)` (serveur seul) — vrai si
+  l'adresse (facturation ou commerciale, en minuscules) ou le téléphone (9 derniers chiffres) est celui d'un compte en
+  litige ou portant une facture en litige, entière ou contestée en partie. REPUT ne répond jamais automatiquement à ce
+  contact. Test c2_04 (42) vert.
+
 - 06/10, soir : à la demande de C3 (REPUT, via le coordinateur), une facture soldée par lettrage publie l'événement du
   socle `cashd.facture_reglee` (facture, numero, compte, entite, regle_le, email, telephone, nom, particulier, langue ;
   clé `facture:<id>`) — REPUT s'y abonne pour la demande d'avis après règlement. Aucun module ne lit les tables de l'autre.

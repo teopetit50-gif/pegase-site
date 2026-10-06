@@ -996,6 +996,28 @@ begin
 end $function$;
 
 -- ═══════════════════════════════════════════════════════════════════════════
+-- 12 bis. Un contact en litige (pour REPUT : aucune réponse automatisée à un client en litige ouvert)
+-- ═══════════════════════════════════════════════════════════════════════════
+-- Vrai si un compte de l'organisation dont l'adresse de facturation, l'adresse commerciale (en minuscules) ou le
+-- téléphone de facturation (neuf derniers chiffres) égale p_adresse est en litige, ou porte une facture en litige
+-- (entière ou contestée en partie). Lu par le serveur seul ; aucun module ne lit les tables de l'autre.
+create or replace function private.cashd_contact_en_litige(p_client uuid, p_adresse text)
+ returns boolean language sql stable security definer set search_path to ''
+as $function$
+  with a as (select lower(btrim(coalesce(p_adresse, ''))) as courriel,
+                    right(regexp_replace(coalesce(p_adresse, ''), '[^0-9]', '', 'g'), 9) as chiffres)
+  select exists (
+    select 1 from public.cashd_comptes c, a
+    where c.client_id = p_client
+      and ((a.courriel <> '' and a.courriel in (lower(c.contact_facturation_email), lower(c.contact_commercial_email)))
+           or (char_length(a.chiffres) = 9 and right(regexp_replace(coalesce(c.contact_facturation_telephone, ''), '[^0-9]', '', 'g'), 9) = a.chiffres))
+      and (c.statut = 'litige'
+           or exists (select 1 from public.cashd_factures f where f.compte_id = c.id and (f.statut = 'litige' or f.montant_conteste > 0))))
+$function$;
+revoke execute on function private.cashd_contact_en_litige(uuid, text) from public, anon, authenticated;
+grant execute on function private.cashd_contact_en_litige(uuid, text) to service_role;
+
+-- ═══════════════════════════════════════════════════════════════════════════
 -- 13. Le texte (c2_02) : part contestée, échéancier, devise, lien de paiement
 -- ═══════════════════════════════════════════════════════════════════════════
 
