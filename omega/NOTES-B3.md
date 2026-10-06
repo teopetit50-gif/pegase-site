@@ -292,3 +292,22 @@ logiciel métier qui la fait).
    - `18_absences_probables.sql` : `test_b3_18_absences_probables`, 13 assertions (Jean Absent fort, Lina Nouvelle et ses raisons, confirmation qui efface, NON en tête, horizon).
    - Écran : carte « Absences probables » (niveau, raisons, « Noter l'appel »). Recette : 88 contrôles, tout passe ; axe : 0 écart.
    - Vérifié en local : Jean 4 points (fort), Lina 2 (moyen) ; après la confirmation de Jean et le NON de Lina, seule Lina reste, en « annonce ».
+4. **Assistante absente : soins à basculer** (06/10, ~19 h Z) :
+   - `b3_18_assistante_absente.sql` pose la table `public.tiroma_absences_membres` : membre, du, au, motif (congé, maladie, formation ou autre ; aucune raison médicale n'est demandée), `close_le`. L'équipe la lit sous RLS ; on n'y écrit que par les portes.
+   - Les portes, pour le titulaire et l'assistante :
+     - `tiroma_noter_absence_membre(client, entité, membre, début, fin, motif)` → uuid. Elle écrit au journal `tiroma.absence_membre_notee` ;
+     - `tiroma_retirer_absence_membre(absence)` clôt l'absence sans l'effacer ;
+     - `tiroma_soins_a_basculer(client, entité, jours = 7)` rend, pour chaque absence ouverte, les rendez-vous prévus sur le fauteuil habituel du membre absent pendant l'absence quand le soin exige une assistante. Pour chacun, elle donne les fauteuils où le basculer : actifs, équipés pour ce soin, libres sur ce créneau, non fermés, avec une assistante habituelle présente.
+   - `19_assistante_absente.sql` : `test_b3_19_assistante_absente`, 14 assertions. Le test vérifie les droits et les refus (dates, motif). Il vérifie aussi :
+     - le soin bascule vers le Fauteuil 2 avec Élodie, jamais vers le Fauteuil 3 (sans assistante), jamais vers celui de l'absente ;
+     - si Élodie est absente aussi, il n'y a plus de fauteuil où basculer ;
+     - une fois clôturée, l'absence n'apparaît plus mais reste dans l'historique ;
+     - daf2 ne voit rien ;
+     - la ligne est au journal.
+   - Écran : carte « Équipe absente » (titulaire et assistante) avec :
+     - les absences et les soins à basculer (« Vers Fauteuil 2 (avec Karine) » ou « Aucun fauteuil libre ») ;
+     - le dialogue « Noter une absence » (qui, du, au inclus, motif) ;
+     - « Clore l'absence ».
+
+     Recette : 94 contrôles, tout passe ; axe : 0 écart, dialogue compris.
+   - Vérifié en local : la porte rend le rendez-vous avec le Fauteuil 2 et Élodie ; après clôture, plus rien. Un premier essai a montré qu'une absence clôturée jouait encore dans la même transaction, parce que now() y est constant : d'où `close_le`.
