@@ -401,3 +401,25 @@ relire la nuit.
    décider `agree_sante` (aucun fournisseur agréé, manuel compris) et l'hébergement
    HDS pour un client santé ; secrets GitHub / Meta ; nettoyage Brevo ; prod plus
    tard (Bedrock).
+
+## REPRISE — 6 octobre 2026, 03 h 10 (Paris) : coordinateur session_01BCGFdpRKBvXKjouC75sYBg (Opus 5.5)
+
+- **Ouvriers prévenus** (send_message, 01 h 12 Z) : A2, A3, A4, A5, B1–B7 ont reçu le
+  nouvel id. **A1 : message refusé par le filtre de permissions** de cette session (non
+  relancé) ; A1 n'a rien de neuf sur worker-a1 (055b29c). A5 répond par NOTES-A5 (son
+  send_message est refusé depuis le début) : lire `git show origin/worker-a5:omega/NOTES-A5.md`.
+- **Point 1 fait — expediteur v11** déployé en coquille (index.ts qui importe
+  `…/29ef6e6036035165d9df07d86688e7e231b55328/omega/functions/expediteur/index.ts`,
+  deno.json vide ; `import_map_path` = deno.json obligatoire, sinon BadRequest), verify_jwt
+  true. Battement `expediteur` à 01 h 12 : 00 Z signé `…_11`, `cle_environnement` vrai.
+- **Point 2 fait — A5** : `a5_01_private_execute.sql`, `00_installation.sql`, `TOUT_4.sql`
+  posés depuis worker-a5 97853cb (ligne `a5_01_private_execute_v2`). Droits sur private :
+  anon 0/887, authenticated **221**/887 (330 avant), service_role 887/887. Test 44 **5/5**,
+  test 51 **3/3**.
+- **Lot 19ac — tests longs** : l'outil coupe à 60 s et perd la sortie. Nouveau :
+  `private.sorties_tests` + `private.tests_en_tache(lot, motif)` (security definer, sans
+  EXECUTE public). Usage : `select cron.schedule('<lot>', '* * * * *', $$select
+  private.tests_en_tache('<lot>', '^test_xx_')$$)` ; la tâche se retire seule
+  (cron.unschedule) ; lire `select lot, ligne from private.sorties_tests order by id`.
+  Attention : execute_sql ne rend que le résultat de la DERNIÈRE requête.
+- Point automatique réarmé : trig_01PJKxdeE5XGx3n8QTMoWwVe (toutes les 2 h, à h:14).
