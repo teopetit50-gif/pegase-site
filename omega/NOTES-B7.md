@@ -285,6 +285,41 @@ Pièce déposée par l'écran d'A3 : facture **Orange SA** (FAC-2026-10-0471, SI
 Rien à corriger. Avec `SIRENE_API_KEY` posée, la source du complément passera de `recherche-entreprises` à `sirene`
 sans redéploiement (la clé est lue à chaque passage).
 
+## 12. Fournisseurs étrangers (point 8 de la liste « PME » d'A4) — 6/10, sans code
+
+**Union européenne : déjà couvert.** Un numéro de TVA qui a la forme d'un des 27 États ou de XI (Irlande du Nord)
+passe le contrôle de forme d'A4 (`filed_tva_intracom_analyser`, clé vérifiée pour FR, BE, DE, IT, LU, NL, PT, DK, FI,
+SE, PL, AT, SI, HU), puis `identite.registre` demande VIES, et l'ouvrier interroge VIES pour tout préfixe de deux
+lettres. Depuis b7_04, une panne de VIES (MS_UNAVAILABLE, MS_MAX_CONCURRENT_REQ…) n'est plus lue comme un refus.
+Limites connues, sans code pour l'instant :
+- la Grèce est `EL` chez VIES ; un numéro écrit `GR…` sur une facture serait refusé par VIES. Correctif simple
+  côté ouvrier (`GR` → `EL` avant l'appel) si A4 accepte `GR` en forme ; à faire quand un vrai cas arrive ;
+- certains États ne rendent ni nom ni adresse (Allemagne notamment) : la preuve est alors « numéro reconnu » sans
+  nom, `coherence.noms_concordent` reste nul. Ce n'est pas un refus ;
+- seul le numéro FR est recoupé avec un second registre (Sirene).
+
+**Hors Union, faisable sans clé payante :**
+
+| Pays | Source | Clé | Ce qu'elle confirme |
+|---|---|---|---|
+| Suisse (et Liechtenstein) | Registre IDE/UID de l'Office fédéral de la statistique, service SOAP public `https://www.uid-wse.admin.ch/V5.0/PublicServices.svc` (`ValidateUID`, `ValidateVatNumber`, `GetByUID`) | aucune pour les services publics | l'IDE `CHE-123.456.789` existe, raison sociale, adresse, état, inscription à la TVA (`MWST/TVA/IVA`). Débit limité par l'OFS (chiffre exact à vérifier avant de coder). La clé de l'IDE (mod 11) se vérifie aussi sans réseau. |
+| Royaume-Uni (GB) | HMRC « Check a UK VAT number » API v2.0 (`api.service.hmrc.gov.uk`) | **gratuite mais obligatoire** : une application déclarée sur le Developer Hub de HMRC (OAuth 2, identifiants d'application), à créer par Teo | numéro de TVA GB enregistré, nom et adresse, numéro de consultation à garder comme preuve. Depuis 2021, VIES ne sert plus que XI (Irlande du Nord). Companies House (numéro de société, état) : clé gratuite aussi. |
+| Norvège | Brønnøysund, `https://data.brreg.no/enhetsregisteret/api/enheter/{orgnr}` | aucune | l'entreprise existe, son état, `registrertIMvaregisteret` (assujettie à la TVA). |
+| États-Unis et le reste (SaaS : Google, AWS…) | GLEIF, `https://api.gleif.org/api/v1/lei-records` | aucune | l'entité juridique existe (LEI, nom légal, siège, état) pour les grandes sociétés. Ne dit rien de la TVA : l'autoliquidation reste un contrôle d'A4. |
+
+Pour un particulier, un auto-entrepreneur étranger ou un pays sans registre ouvert, il ne reste que l'attestation
+humaine (`filed_attester_identite`, A4), qui gagnerait à être proposée d'emblée sur la fiche (point 8 d'A4).
+
+**Ce que demanderait le code (lot à venir, pas commencé) :**
+- `filed_verifications_tiers.registre` est contraint à `vies | sirene` (A4, a4_04) et `identites_registre` aussi (b7_01).
+  Ajouter `uid_ch` ou `hmrc` impose de remplacer ces contraintes. Une contrainte CHECK ne se remplace pas sans la
+  retirer, donc c'est une décision du coordinateur et d'A4. Autre voie, sans rien retirer : un champ `pays` et une table
+  à part pour les registres hors Union ;
+- le contrôle `identite.registre` d'A4 ne demande que VIES ou Sirene : il faudrait une branche pour `CHE…` et
+  `GB…` ;
+- ordre proposé : Suisse d'abord (sans clé, fréquente chez une PME française), puis GB quand Teo aura l'application
+  HMRC, puis GLEIF pour les grands fournisseurs SaaS.
+
 ## 11. Journal des étapes
 
 - 5/10 23 h 30 : lecture du contrat, du socle, du lot 4d d'A4, du lecteur ; scénario et portes écrits et
@@ -357,3 +392,11 @@ sans redéploiement (la clé est lue à chaque passage).
   b7_05 posés (`identite_b7_04_doute`), `^test_b7_` **11/11**. Cause confirmée par A3 : VIES répondait HTTP 200
   `{actionSucceed:false, errorWrappers:[{error:"MS_MAX_CONCURRENT_REQ"}]}`, lu « invalide » par l'ancien `vies.ts`.
   Rattrapage : ORANGE redemandée à 14:08:21 Z → **valide** (VIES), verdict du fournisseur 90cc1d86 rétabli.
+- 6/10 14 h 31 Z (coordinateur) : nouvelle vague. (1) `filed_verification_recente` ne doit plus rendre un
+  `indisponible` (doute compris) quand une réponse valide récente existe ; (2) fournisseurs étrangers.
+- 6/10 14 h 50 Z : (2) écrit en section 12 ; (1) codé : `omega/modules/identite/migrations/b7_05_recente.sql` (même
+  signature, texte d'a4_10 plus une condition : un `indisponible` est ignoré dès qu'une réponse valide **ou invalide**
+  de moins de p_jours existe pour le même client ; sinon la règle des deux heures d'a4_10 tient). La fonction est
+  celle d'A4 : s'il repose a4_10, il doit reprendre la condition. Test `omega/tests/identite/b7_06_recente.sql`
+  (test_b7_12, 11 assertions vertes en local, dont les deux cas du test a4_05 d'A4) ; `^test_b7_` complet vert en local.
+
