@@ -247,8 +247,8 @@ sur un SHA**. Recette relevée le 6/10 à 13 h 45 Z (sortie n° 4).
 | `lecteur` | `0d547318d1f4c7f57763b2d3128d1eb631811762` (worker-a1) | v17, coquille | true | **Production : Bedrock** (données en UE) : `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION` (eu-central-1), `BEDROCK_MODEL_ID` ; **pas** d'`ANTHROPIC_API_KEY`. Facultatifs : `MISTRAL_API_KEY`, `PLAFOND_IA_JOUR_CLIENT_EUR` | `omega-lecteur` `* * * * *` (19b) |
 | `lecteur-exports` | `d963121419b014081fc5155c8e01151b8fd76deb` (worker-a1) | v2, coquille | true | aucun en plus de ceux de Supabase | `omega-lecteur-exports` `* * * * *` (19aa) |
 | `expediteur` | `67f9cf677d306f4e82ce66dde0485602ee5e8956` (worker-a2) | v12, coquille | true | `BREVO_API_KEY` | `omega-expediteur` `* * * * *` (19b) |
-| `webhooks-brevo` | **87a1112** (worker-a2, `omega/functions/webhooks/brevo`). Présumé, non prouvé : c'est le seul commit qui touche ce dossier, et les fichiers de la v9 (index, portes, traitement, deno.json) sont les siens. La v9 de la recette est un dépôt de sources complètes, pas une coquille | v9 | **false** (jeton vérifié dans la fonction) | `BREVO_WEBHOOK_JETON` | aucun ; webhook Brevo *Transactionnel* → `/functions/v1/webhooks-brevo` |
-| `reception` | **18e7999 ou 4114a69** (worker-a2) : les sept fichiers déployés y sont identiques ; 4114a69 n'a changé que le README et `outils/`. Seul 81e1bd5, plus ancien, diffère (voir § 2.3). La v9 de la recette est un dépôt de sources complètes, pas une coquille | v9 | **false** | `BREVO_WEBHOOK_JETON`, `BREVO_API_KEY`, `META_VERIFY_TOKEN`, `META_APP_SECRET`, `META_ACCESS_TOKEN`, `FORMULAIRE_SECRET`, `FORMULAIRE_BOITE` | aucun ; domaine inbound Brevo → `/functions/v1/reception/brevo` |
+| `webhooks-brevo` | **87a1112** (worker-a2, `omega/functions/webhooks/brevo/index.ts`) — **figé** : la recette est passée en coquille sur ce SHA le 6/10 (v10) | v10, coquille | **false** (jeton vérifié dans la fonction) | `BREVO_WEBHOOK_JETON` | aucun ; webhook Brevo *Transactionnel* → `/functions/v1/webhooks-brevo` |
+| `reception` | **4114a69** (worker-a2, `omega/functions/reception/index.ts`) — **figé** : la recette est passée en coquille sur ce SHA le 6/10 (v10) | v10, coquille | **false** | `BREVO_WEBHOOK_JETON`, `BREVO_API_KEY`, `META_VERIFY_TOKEN`, `META_APP_SECRET`, `META_ACCESS_TOKEN`, `FORMULAIRE_SECRET`, `FORMULAIRE_BOITE` | aucun ; domaine inbound Brevo → `/functions/v1/reception/brevo` |
 | `identite` | **e77fabb** (coquille relevée) ; `deno.json` mappe `@partage/` sur `_partage` au **7425991** | v2 | true | `SIRENE_API_KEY` (facultatif : repli recherche-entreprises), `IDENTITE_CACHE_JOURS` (30), `IDENTITE_BALAYAGE_JOURS`, `IDENTITE_BALAYAGE_MAX` | `omega-identite` `* * * * *` (19v) |
 
 En production, **toutes** les fonctions sont des coquilles sur un SHA complet. On
@@ -298,47 +298,34 @@ appellent `net.http_post` sur `https://ygwbgpowzlbdaajlsqkn.supabase.co/function
 À ne pas emporter : aucune tâche de test. `private.tests_en_tache` (19ac)
 programme des tâches qui se retirent seules, et 19ac est exclu.
 
-### 2.3 Trou : `reception` et `webhooks-brevo` ne sont pas figées
+### 2.3 `reception` et `webhooks-brevo` : figées le 6/10
 
-Sur la recette, ces deux fonctions sont des dépôts de sources complètes (v9,
-`ezbr_sha256` 3437e4ea… et 1a637aa3…), sans SHA. Pour retrouver le commit,
-j'ai comparé le dépôt au contenu de chaque fichier de chaque commit :
-- **webhooks-brevo** : un seul commit touche `omega/functions/webhooks/brevo`, le
-  87a1112. Empreintes SHA-256 (12 premiers caractères) :
-  - `index.ts` 946d49e223e3 ;
-  - `portes.ts` 1dc9fdb12c01 ;
-  - `traitement.ts` 9c653cf0df89 ;
-  - `deno.json` a94336efd621.
-- **reception** : trois commits.
-  - 81e1bd5, le premier, a une autre `portes.ts` : en-tête « Les deux portes
-    ci-dessous n'existent pas encore », champ `type_mime`.
-  - 18e7999 et 4114a69 portent des fichiers déployés identiques : en-tête
-    « posées sur la recette par le coordinateur (lot 18, 05/10/2026) », champ
-    `mime`.
-  - Empreintes à 18e7999 / 4114a69 :
-    - `index.ts` e489fb2ad689 ;
-    - `portes.ts` df12ba277cd2 ;
-    - `commun.ts` c669ef80a302 ;
-    - `brevo_entrant.ts` 5af0b2a3adc6 ;
-    - `whatsapp.ts` a0ac1c24b015 ;
-    - `formulaire.ts` 3fc3c2f2de29 ;
-    - `deno.json` a94336efd621.
-- **Pour lever le doute**, deux vérifications par fichier de la v9 déployée
-  (`get_edge_function`) :
-  - pour `reception`, la présence de `mime: string;` dans `portes.ts` ;
-  - pour les deux fonctions, le `sha256sum` de chaque fichier comparé aux
-    empreintes ci-dessus.
+Jusqu'au 6/10, ces deux fonctions étaient sur la recette des dépôts de sources
+complètes (v9, sans SHA).
 
-  Si une seule empreinte diffère, le code de la recette a été retouché au
-  déploiement. C'est alors un vrai trou : il faut redéployer la recette en
-  coquille sur le commit retenu et rejouer ses tests (réception d'un courriel,
-  d'un webhook `delivered`) avant la production.
-- **Quoi qu'il en soit** : avant la répétition, passer les deux fonctions de la
-  recette en coquille, `reception` sur **4114a69** et `webhooks-brevo` sur
-  **87a1112**. Leurs `deno.json` importent `@std/assert` (jsr), à garder dans le
-  `deno.json` de la coquille.
+**Ce qui a été comparé**, par moi dans le dépôt :
+- `webhooks-brevo` : un seul commit touche son dossier, 87a1112.
+- `reception` : 18e7999 et 4114a69 portent les mêmes sept fichiers. 81e1bd5, plus
+  ancien, a un `portes.ts` différent (champ `type_mime`).
+- Le coordinateur a vérifié que `portes.ts` à 4114a69 porte bien `mime: string;`
+  (ligne 25).
 
+**Ce qui a été fait**, par le coordinateur, le 6/10 vers 13 h 54 Z : les deux
+fonctions de la recette sont passées en coquille.
+- `webhooks-brevo` v10, sur 87a1112 ;
+- `reception` v10, sur 4114a69 ;
+- toutes deux en `verify_jwt` false, avec `@std/assert` dans `deno.json`.
 
+**Contrôle de fumée** (POST `{}` sans jeton) : `reception/formulaire` 401,
+`reception/brevo` 401, `webhooks-brevo` 401 `{"erreur":"jeton invalide"}`. C'est le
+code du dépôt qui répond.
+
+**Encore à faire sur la recette, avant la répétition** : un passage réel de bout en
+bout, c'est-à-dire un envoi d'essai, puis le webhook Brevo `delivered` reçu avec le
+vrai jeton, puis la ligne `envois_evenements` `remis`. Plus un courriel entrant sur
+la boîte formulaire si Brevo inbound est branché. Les empreintes de la v9 n'ont pas
+été comparées ; c'est désormais sans objet, puisque la recette tourne sur le code
+du dépôt. Seul ce passage réel prouve que rien ne manquait à la v9.
 
 ---
 
@@ -519,6 +506,6 @@ Restent ouverts :
 - la provenance de chaque ligne « dépôt », lue dans `statements` à l'export (§ 1.5) ;
 - les crons de la production, relevés à P1 par Teo ou la session autorisée (la
   lecture de la production est refusée au coordinateur, à juste titre) ;
-- `reception` et `webhooks-brevo` : vérifier les empreintes, puis les passer en
-  coquille (§ 2.3) ;
+- `reception` et `webhooks-brevo` : figées en coquille (87a1112, 4114a69) ; reste
+  un passage réel de bout en bout sur la recette (§ 2.3) ;
 - `tamila_m10b_porte_etroite` : emporter ou non, à juger sur son texte.
