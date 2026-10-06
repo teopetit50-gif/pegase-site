@@ -3,6 +3,19 @@
 Branche `worker-b6`. Coordinateur : session `session_01B4JNQXyT69GytdvE9SjAnE` (Fable, jusqu'au 06/10 03 h 10 Paris), puis `session_01BCGFdpRKBvXKjouC75sYBg` (Opus 5.5) — passation reçue le 06/10 à 03 h 10 : « B6 est clos et fusionné ; rien n'est attendu ».
 Dernière mise à jour : 06/10/2026, 03 h 00 Paris — lot B6 terminé.
 
+## REPRISE — pause demandée par Teo (06/10/2026, 21 h Z)
+
+**Fait, posé et vert sur la recette** (b6_01 → b6_25b ; dernier lot ^test_b6_2 : 21 ok, 0 not ok) :
+- Météo MET Norway (b6_21, b6_21b) : **état A**. L'essai réel sur le banc (banc_meteo_reel.sql, 8bd031b) a rendu 200, la prévision et le risque « pluie 15 mm le 07/10 ». Test b6_15 corrigé (baa1f4f) et vert.
+- Avancement lu dans les photos : b6_25 (76d0c79) puis b6_25b (1c9b986, photo lue dans lecture.medias), test b6_21 vert. Le lecteur v31 rend la nature « avancement » (A1 e0932e3). **État B** sur la recette.
+- Chiffrage des promesses de /secteurs/btp : omega/CHIFFRAGE/daliro.md (ad459f3).
+
+**Attend le coordinateur** : fusionner sur main l'écran de b6_25 (76d0c79). Fichiers : components/espace/daliro/SituationsCarte.tsx, situations.ts, portes.ts, types.ts, FilCarte.tsx, et omega/recette-b6/recette-daliro.mjs. tsc, eslint, build et recette aux cinq largeurs (205) sont verts. Tout le reste de worker-b6 est de la documentation ou du SQL déjà posé.
+
+**Attend Teo** : WhatsApp Business branché (Meta : numéro, secrets META_*) ; transcription des vocaux (payante, refusée tant que WhatsApp n'est pas branché) ; accord permanent des J-2 ; région des données (Supabase, et Vercel sans région posée). Les six phrases fausses de la page sont listées en fin de CHIFFRAGE/daliro.md.
+
+**Prochaine étape exacte** : quand le numéro WhatsApp est branché, envoyer depuis un vrai chantier du banc une photo avec un ouvrage posé. Puis vérifier, dans l'ordre, le message rangé (btp_messages), la lecture « avancement » et la proposition de btp_avancement_photos sur une situation en préparation : avancement → état A. Ensuite, dans l'ordre du chiffrage : comparaison au marché avec chiffrage automatique (4 j), import du devis (3 j), fonctions fermées par formule et quota de comptes (1,5 j).
+
 ## Les deux jauges
 
 | Jauge | Valeur | Ce qui la fait monter |
