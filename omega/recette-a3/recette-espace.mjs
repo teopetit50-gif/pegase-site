@@ -32,11 +32,12 @@ for (const [nom, chemin] of ECRANS.filter(([n]) => !SAUTER.has(n))) {
     await s.dormir(600);
     const mesure = await s.evaluer(`(() => {
       const w = document.documentElement.clientWidth;
-      /* un élément dans un cadre qui défile (tableau des lignes) n'est pas un débordement */
-      const dansCadre = (e) => !!e.closest('.esp-tableau-cadre') && e !== e.closest('.esp-tableau-cadre');
-      const larges = [...document.querySelectorAll('.esp *')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > w + 1 && !dansCadre(e); })
+      /* un élément dans un cadre qui défile (tableau des lignes, .esp-tableau-cadre ou .v2-tableau-cadre) n'est pas un débordement */
+      const dansCadre = (e) => { for (let a = e.parentElement; a && a !== document.body; a = a.parentElement) { if (/(auto|scroll)/.test(getComputedStyle(a).overflowX)) return true; } return false; };
+      const zone = document.querySelector('.esp') ?? document.querySelector('main') ?? document.body;
+      const larges = [...zone.querySelectorAll('*')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > w + 1 && !dansCadre(e); })
         .slice(0, 5).map(e => e.tagName + '.' + [...e.classList].join('.') + '→' + Math.round(e.getBoundingClientRect().right));
-      return { deb: document.documentElement.scrollWidth - w, larges, texte: document.querySelector('.esp')?.innerText || '', h1: document.querySelector('.esp h1')?.textContent };
+      return { deb: document.documentElement.scrollWidth - w, larges, texte: zone.innerText || '', h1: (document.querySelector('.esp h1') ?? zone.querySelector('h1'))?.textContent };
     })()`);
     ok(mesure.deb === 0, `pas de débordement horizontal (${mesure.deb})`);
     ok(mesure.larges.length === 0, `aucun élément plus large que l'écran ${mesure.larges.length ? JSON.stringify(mesure.larges) : ''}`);
@@ -44,8 +45,9 @@ for (const [nom, chemin] of ECRANS.filter(([n]) => !SAUTER.has(n))) {
     ok(!anglais, anglais ? `mot anglais à l'écran : « ${anglais[0]} »` : 'aucun mot anglais surveillé à l\'écran');
     ok(!!mesure.h1, `titre : ${mesure.h1}`);
     await s.capturer(`${dossier}${nom}-${largeur}.jpg`, { qualite: 55 });
-    /* ERR_BLOCKED_BY_ORB : le script de Vercel Analytics (va.vercel-scripts.com), chargé en dev, refusé par le mandataire du conteneur */
-    s.soucis.filter((x) => !/CERT|insights|404|favicon|ERR_BLOCKED_BY_ORB/.test(x)).forEach((x) => ok(false, x));
+    /* ERR_SSL_PROTOCOL_ERROR : un build de production servi en http local (next start) porte upgrade-insecure-requests ;
+       ERR_BLOCKED_BY_ORB : le script de Vercel Analytics (va.vercel-scripts.com), chargé en dev, refusé par le mandataire du conteneur */
+    s.soucis.filter((x) => !/CERT|insights|404|favicon|ERR_BLOCKED_BY_ORB|ERR_SSL_PROTOCOL_ERROR/.test(x)).forEach((x) => ok(false, x));
     s.fermer();
   }
 }
@@ -228,32 +230,37 @@ for (const [nom, chemin] of ECRANS.filter(([n]) => !SAUTER.has(n))) {
 }
 
 if (!SAUTER.has('a-payer')) {
+  /* sélecteurs neutres (06/10, demande de C1) : le même enchaînement joue sur /espace et sur /espace2,
+     dont « À payer » est réécrit — groupes = h2, lignes = tbody tr, dialogue = [role=dialog], message = [role=status] */
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-a-payer', densite: 1 });
-  console.log('— /espace/filed/a-payer : les factures validées par échéance');
+  console.log(`— ${P}/filed/a-payer : les factures validées par échéance`);
   ok(await s.aller(base + P + '/filed/a-payer'), 'page chargée');
-  await s.dormir(600);
-  const r = await s.evaluer(`(() => ({ kpi: [...document.querySelectorAll('.esp-kpi')].map(k => k.innerText.replace(/\\s+/g, ' ')), groupes: [...document.querySelectorAll('section.esp-carte .esp-carte-titre')].map(e => e.textContent), lignes: [...document.querySelectorAll('.esp-a-payer tbody tr')].map(t => t.innerText.replace(/\\s+/g, ' ')), avis: [...document.querySelectorAll('.esp-avis')].map(a => a.textContent) }))()`);
-  ok(r.groupes.join(',') === 'En retard,Cette semaine,Ce mois-ci', `groupes dans l'ordre : ${r.groupes.join(', ')}`);
-  ok(/Transports Rivière/.test(r.lignes[0] ?? '') && /de retard/.test(r.lignes[0] ?? ''), `la facture en retard vient d'abord (${r.lignes[0]})`);
+  await s.dormir(800);
+  const LIGNES = `[...document.querySelectorAll('tbody tr')].filter(t => /R20\\d\\d-\\d{6}/.test(t.textContent))`;
+  const r = await s.evaluer(`(() => ({ groupes: [...document.querySelectorAll('h2')].map(e => (e.textContent.trim().match(/^(En retard|Cette semaine|Ce mois-ci|Plus tard)/) ?? [])[1]).filter(Boolean), lignes: ${LIGNES}.map(t => t.innerText.replace(/\\s+/g, ' ')), texte: document.body.innerText }))()`);
+  ok(r.groupes.slice(0, 3).join(',') === 'En retard,Cette semaine,Ce mois-ci', `groupes dans l'ordre : ${r.groupes.join(', ')}`);
+  ok(/Transports Rivière/.test(r.lignes[0] ?? '') && /de retard/.test(r.lignes[0] ?? ''), `la facture en retard vient d'abord (${r.lignes[0]?.slice(0, 80)})`);
   ok(r.lignes.some(l => /Cabinet Ferrand/.test(l) && /IBAN manquant/.test(l)), 'la facture sans IBAN validé le dit');
-  ok(r.avis.some(a => /1 facture sans IBAN validé/.test(a)), "l'avis IBAN manquant");
+  ok(/1 facture sans IBAN validé/.test(r.texte), "l'avis IBAN manquant");
   ok(r.lignes.length === 3, `${r.lignes.length} factures validées à payer`);
   ok(/Payée en partie/.test(r.lignes[0] ?? '') && /1 000,00 € réglés/.test(r.lignes[0] ?? '') && /1 208,00 €/.test(r.lignes[0] ?? ''), `le règlement partiel se voit : reste, réglé, état (${r.lignes[0]?.slice(0, 160)})`);
   await s.capturer(`${dossier}a-payer-1440.jpg`, { qualite: 55 });
   /* noter tout le reste sur la facture de Cabinet Ferrand : elle sort de la liste */
-  await s.evaluer(`[...document.querySelectorAll('.esp-a-payer tbody tr')].find(t => /Cabinet Ferrand/.test(t.textContent))?.querySelector('button')?.click()`);
+  await s.evaluer(`${LIGNES}.find(t => /Cabinet Ferrand/.test(t.textContent))?.querySelector('button')?.click()`);
   await s.dormir(500);
-  const dlgP = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); if (!d) return null; const i = d.querySelector('input[inputmode="decimal"]'); return { titre: d.querySelector('h2')?.textContent, montant: i?.value, moyen: d.querySelector('select')?.value }; })()`);
+  const MONTANT = `(document.querySelector('[role="dialog"] input[inputmode="decimal"]'))`;
+  const dlgP = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); if (!d) return null; return { titre: d.querySelector('h2')?.textContent, montant: ${MONTANT}?.value, moyen: d.querySelector('select')?.value }; })()`);
   ok(dlgP && /Noter un paiement/.test(dlgP.titre) && dlgP.montant === '1140', `le dialogue propose le reste (${dlgP?.montant}) et, sans IBAN validé, le moyen « ${dlgP?.moyen} »`);
-  await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input[inputmode="decimal"]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, '5000'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  const saisir = (v) => s.evaluer(`(() => { const i = ${MONTANT}; Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, ${JSON.stringify(v)}); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await saisir('5000');
   await s.dormir(200);
   ok(await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Noter le paiement/.test(b.textContent))?.disabled`) === true, 'un montant au-delà du reste laisse le bouton gris');
-  await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input[inputmode="decimal"]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, ''); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await saisir('');
   await s.dormir(200);
   await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Noter le paiement/.test(b.textContent))?.click()`);
-  await s.dormir(800);
-  const apresP = await s.evaluer(`({ lignes: [...document.querySelectorAll('.esp-a-payer tbody tr')].map(t => t.textContent), fait: [...document.querySelectorAll('.esp-avis')].map(a => a.textContent).find(t => /C'est fait/.test(t)) ?? '', payees: [...document.querySelectorAll('.esp-filtre')].map(b => b.textContent).find(t => /payées/.test(t)) ?? '' })`);
-  ok(apresP.lignes.length === 2 && !apresP.lignes.some(t => /Cabinet Ferrand/.test(t)) && /la facture est payée/.test(apresP.fait) && /Afficher les payées \(1\)/.test(apresP.payees), `payée : elle sort de la liste, « ${apresP.payees} » (${apresP.fait.slice(0, 90)})`);
+  await s.dormir(900);
+  const apresP = await s.evaluer(`({ lignes: ${LIGNES}.map(t => t.textContent), fait: [...document.querySelectorAll('[role="status"]')].map(a => a.textContent).find(t => /C'est fait/.test(t)) ?? '', payees: [...document.querySelectorAll('button')].map(b => b.textContent).find(t => /payées/.test(t)) ?? '' })`);
+  ok(apresP.lignes.length === 2 && !apresP.lignes.some(t => /Cabinet Ferrand/.test(t)) && /la facture est payée/.test(apresP.fait) && /Afficher les payées \(1\)/.test(apresP.payees), `payée : elle sort de la liste, « ${apresP.payees.trim()} » (${apresP.fait.slice(0, 90)})`);
   s.fermer();
 }
 
