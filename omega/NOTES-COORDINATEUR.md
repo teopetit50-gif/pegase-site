@@ -997,3 +997,16 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   Main : fusion b1, b4 (expertises), c4 (échéances), c5 passe 6, b2 (écran contestations) ; GUIDE-WIDGET ; pastille
   Tamila « pièces attendues » retirée ; apostrophe échappée dans app/offres/page.tsx (eslint).
   À décider par Teo : coffre Scaleway du banc (Key Manager), transcription Mistral, crédits SMS Brevo.
+- 19 h 05 Z — Teo est là. Décisions de Teo : BASCULE oui (a1f12b2 fusionnée + exception proxy.ts pour cashd, offload,
+  demandes absents de /espace2 ; Vercel « rate limited » : pas encore en ligne) ; Scaleway seulement si gratuit (A5 :
+  non, 0,008 à 0,016 €/Go/mois ; essai 90 j) → après le premier client ; météo gratuite → MET Norway (réglage posé) ;
+  clé Brevo : sujet clos. Modèles de page : aperçu de projet Vercel pour la vue d'ensemble, page Usage pour les suivis
+  (→ C1). Bug signalé par Teo sur la fenêtre Approuver : corrigé (36d475b).
+  Poses : b5_16b (DROP CONSTRAINT d'élargissement, accepté) + b5_07 v3 + b5_09, b5_21 + b5_12, b5_22 + b5_13 (B5
+  defb33a) ; b6_24b + b6_19, b6_21b + b6_20 + réglage MET Norway (B6 72ce4c9) ; b3t_01 v3 à b3t_04 + test (B3
+  f8d8bd2) ; b2_10 + test 19 (B2 1c467ef) ; a4_31 + a4_24 (A4 655d260) ; 19an_export_complet_gerant_seul + 57 (A5
+  7d64984) ; tests c2_01/c2_04 (C2 a693a81), c3_07 (C3 cffb6c5) ; c4_08 + test (C4 e4365bf). Lecteur v30 (A1 d52bc71).
+  Lots h1830lot 1630 ok / 2, h1900lot 860 ok / 2 : seul rouge test_b3t_02 n° 9 (journal tavaro.controle_conducteur_note)
+  → B3 ; écran B3 non fusionné. 44/46/51/55/57 verts. btp_meteo_demander() = 0 (aucun passage extérieur au banc).
+  Main : fusion b5, b6, b2, a4, c2, c3, a3, c5, c4. Pastilles retirées : alerte météo, 6 lignes Lorani, remise en
+  location et entretien. Restent volontairement : métré (phrase trop forte), PLU servitudes/risques, vocaux.
