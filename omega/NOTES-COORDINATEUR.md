@@ -823,3 +823,11 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   **b6_13** réception (eec567e) **casse btp_tableau_chantier** (42702 « v » ambigu) : 2/8, renvoyé
   en urgence à B6, écran non fusionné. Le cron de test coupe à ~2 min : un motif par appel.
   Écrans fusionnés : Tavaro avis de contravention, Tiroma appels, Varelo encours.
+- 15 h 35 Z — **Teo valide le nouveau tableau de bord** (C1 366b75f, barre latérale + barre du
+  haut) → **phase 2 confiée à C1** : tous les écrans de /espace réhabillés sur tableau-de-bord-v2,
+  vraies données, mêmes portes ; bascule /espace2 → /espace après accord de Teo.
+  Poses : b2_05b (36bd54f), test b4 16 (5f490c4). Tests : g11 ^test_b3_ 15/15 (b3_13 compris),
+  g12 ^test_(b2_|44_) 15/15, g13 ^test_b4_16_ vert, g14 ^test_b1_ 20/20. tamila-coffre v2 (coquille
+  5f490c4). Fusionnés et poussés dans main 1f6427c : Tamila conflits (5f490c4), Varelo contrats
+  (d369676), Tiroma pilotage (29c453b), Tavaro état des lieux (36bd54f). Courriel d'essai de Teo
+  vers banc@recu.omegaai.fr : toujours 0 réception.
