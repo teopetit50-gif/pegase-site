@@ -10,6 +10,7 @@
    (SIREN refusé sur le mauvais lot) ; l'accord permanent des J-2 (b6_08) :
    révoquer avec un motif, puis le redonner (« à valider ») ; les situations de travaux (b6_12) : ouvrir
    la n° 2 des Tilleuls, avancer une ligne, lire les totaux, soumettre ; axe-core sur la carte et sa fenêtre ;
+   l'encaissement (b6_16) : un paiement partiel sur la n° 1, le reste dû ;
    la réception (b6_13) : prononcer avec deux réserves, en lever une, noter une opposition, préparer et envoyer
    le décompte ; axe-core sur la carte et ses fenêtres.
    usage : node omega/recette-b6/recette-daliro.mjs [origine] */
@@ -209,6 +210,18 @@ const choisir = (sel, valeur) => `(() => { const t = document.querySelector('${s
     await s.dormir(600);
     const carte = `document.querySelector('section[aria-label="Situations de travaux"]')`;
     ok(await s.evaluer(`/1 validée/i.test(${carte}?.innerText || '')`), 'la situation n° 1 (validée) est listée');
+    // b6_16 : l'encaissement de la n° 1 (19 499,40 € nets, à échoir) — un paiement partiel de 10 000 €
+    ok(await s.evaluer(`/À échoir/.test(${carte}?.innerText || '')`), 'la situation n° 1 est « à échoir »');
+    ok(await s.evaluer(bouton('/Noter un paiement/', carte)) === true, 'clic sur « Noter un paiement »');
+    await s.dormir(400);
+    await s.evaluer(axe + ';true');
+    const dp = await s.evaluer(graves(`document.querySelector('[role="dialog"]')`));
+    ok(dp.length === 0, `fenêtre « Paiement reçu » : aucun écart axe grave ${dp.length ? JSON.stringify(dp) : ''}`);
+    await s.evaluer(saisir('[role="dialog"] input[inputmode="decimal"]', '10000'));
+    await s.dormir(150);
+    await s.evaluer(`${dlgBouton('/Noter le paiement/')}?.click()`);
+    await s.dormir(500);
+    ok(await s.evaluer(`/Reste 9[\\s\\u202f\\u00a0]499,40/.test(${carte}?.innerText || '')`), 'paiement partiel noté : reste 9 499,40 €');
     ok(await s.evaluer(bouton('/Nouvelle situation/', carte)) === true, 'clic sur « Nouvelle situation »');
     await s.dormir(400);
     await s.evaluer(axe + ';true');

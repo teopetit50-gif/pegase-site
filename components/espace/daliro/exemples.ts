@@ -245,7 +245,7 @@ export const TABLEAUX_EXEMPLE: Record<string, Tableau> = {
   const s1 = ouvrirLocale({ ...t, situations: [] }, aujourdHui(-6), null, () => id(String(300 + ++n)));
   const pct = (d: string) => (/fenêtre/i.test(d) ? 35 : /garde-corps/i.test(d) ? 20 : /installation/i.test(d) ? 100 : 0);
   const validee = recalculer({ ...s1, lignes: s1.lignes.map((l) => ({ ...l, avancement: pct(l.designation) })) });
-  t.situations = [{ ...validee, statut: "validee", demande_id: id("399"), demande_statut: "executee", soumise_le: ilYa(5, 16), validee_le: ilYa(4, 10), validee_libelle: "Claire Morel" }];
+  t.situations = [{ ...validee, statut: "validee", demande_id: id("399"), demande_statut: "executee", soumise_le: ilYa(5, 16), validee_le: ilYa(4, 10), validee_libelle: "Claire Morel", echeance: aujourdHui(26), penalites_taux: null, paiements: [] }];
   TABLEAUX_EXEMPLE[ROLLAND].situations = [];
 }
 

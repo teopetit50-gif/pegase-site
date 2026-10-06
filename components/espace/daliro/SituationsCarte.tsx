@@ -18,8 +18,8 @@ import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
 import { dateCourte, montant, pourcent } from "../format";
 import { Avis, Pastille, type Teinte } from "../ui";
-import { annulerSituation, avancerSituation, ouvrirSituation, soumettreSituation, validerSituation } from "./portes";
-import { ouvrirLocale, recalculer, tauxZone } from "./situations";
+import { annulerSituation, avancerSituation, noterPaiement, ouvrirSituation, soumettreSituation, validerSituation } from "./portes";
+import { encaissement, ouvrirLocale, recalculer, tauxZone } from "./situations";
 import type { Situation, StatutSituation, Tableau } from "./types";
 
 const STATUTS: Record<StatutSituation, { libelle: string; teinte: Teinte }> = {
@@ -46,6 +46,10 @@ export default function SituationsCarte({ tableau, source, onLocal, relire }: Pr
   const situations = tableau.situations ?? [];
   const [ouvrirForm, setOuvrirForm] = useState(false);
   const [annuler, setAnnuler] = useState<Situation | null>(null);
+  const [payer, setPayer] = useState<Situation | null>(null);
+  const [montantPaye, setMontantPaye] = useState("");
+  const [datePaiement, setDatePaiement] = useState(aujourdhui());
+  const [reference, setReference] = useState("");
   const [fin, setFin] = useState(aujourdhui());
   const [taux, setTaux] = useState<string>("");
   const [motif, setMotif] = useState("");
@@ -153,6 +157,32 @@ export default function SituationsCarte({ tableau, source, onLocal, relire }: Pr
     if (ok) { setAnnuler(null); setMotif(""); }
   };
 
+  const ouvrirPaiement = (x: Situation) => {
+    const e = encaissement(x, aujourdhui());
+    setMontantPaye(String(e.reste).replace(".", ","));
+    setDatePaiement(aujourdhui());
+    setReference("");
+    setErreur(null);
+    setPayer(x);
+  };
+  const confirmerPaiement = async () => {
+    if (!payer) return;
+    const x = payer;
+    const m = Number(montantPaye.replace(/\s/g, "").replace(",", "."));
+    const ok = await agir(
+      () => noterPaiement(x.id, m, datePaiement, reference.trim() || null),
+      () => {
+        const e = encaissement(x, aujourdhui());
+        if (!(m > 0)) throw new Error("Le montant reçu est positif.");
+        if (datePaiement > aujourdhui()) throw new Error("La date du paiement est entre la validation de la situation et aujourd'hui.");
+        if (Math.round((e.encaisse + m) * 100) > Math.round(x.net_a_payer * 100)) throw new Error(`Ce paiement dépasse le reste dû (${montant(e.reste)}).`);
+        return avecSituation({ ...x, paiements: [...(x.paiements ?? []), { id: nid(), situation_id: x.id, recu_le: datePaiement, montant: Math.round(m * 100) / 100, reference: reference.trim() || null }] });
+      },
+      `Paiement de ${montant(m)} noté sur la situation n° ${x.numero}.`,
+    );
+    if (ok) setPayer(null);
+  };
+
   const modifiable = enCours && (enCours.statut === "brouillon" || enCours.statut === "refusee");
   const approuvee = enCours?.demande_statut === "approuvee" || enCours?.demande_statut === "executee";
 
@@ -171,7 +201,7 @@ export default function SituationsCarte({ tableau, source, onLocal, relire }: Pr
         </div>
       </div>
       {fait ? <div style={{ marginBottom: 10 }}><Avis teinte="vert" role="status">{fait}</Avis></div> : null}
-      {erreur && !ouvrirForm && !annuler ? <div style={{ marginBottom: 10 }}><Avis teinte="rouge" role="alert">{erreur}</Avis></div> : null}
+      {erreur && !ouvrirForm && !annuler && !payer ? <div style={{ marginBottom: 10 }}><Avis teinte="rouge" role="alert">{erreur}</Avis></div> : null}
 
       {enCours ? (
         <div style={{ marginBottom: 14 }}>
@@ -230,18 +260,32 @@ export default function SituationsCarte({ tableau, source, onLocal, relire }: Pr
       {validees.length ? (
         <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Situations validées (tableau qui défile)">
           <table className="esp-tableau">
-            <thead><tr><th>N°</th><th>Période au</th><th className="esp-num">Cumul HT</th><th className="esp-num">Période HT</th><th className="esp-num">TVA</th><th className="esp-num">Retenue</th><th className="esp-num">Net</th><th>Validée</th></tr></thead>
+            <thead><tr><th>N°</th><th>Période au</th><th className="esp-num">Période HT</th><th className="esp-num">TVA</th><th className="esp-num">Retenue</th><th className="esp-num">Net</th><th>Validée</th><th>Échéance</th><th className="esp-num">Encaissé</th><th>Paiement</th></tr></thead>
             <tbody>
               {validees.map((s) => (
                 <tr key={s.id}>
                   <td>{s.numero}</td>
                   <td>{dateCourte(s.periode_fin)}</td>
-                  <td className="esp-num">{montant(s.cumul_ht)}</td>
                   <td className="esp-num">{montant(s.periode_ht)}</td>
                   <td className="esp-num">{s.autoliquidation ? "autoliquidée" : montant(s.tva)}</td>
                   <td className="esp-num">{montant(s.retenue)}</td>
                   <td className="esp-num"><strong>{montant(s.net_a_payer)}</strong></td>
                   <td>{dateCourte(s.validee_le)}{s.validee_libelle ? ` · ${s.validee_libelle}` : ""}</td>
+                  <td>{dateCourte(s.echeance)}</td>
+                  {(() => {
+                    const e = encaissement(s, aujourdhui());
+                    return <>
+                      <td className="esp-num">{montant(e.encaisse)}</td>
+                      <td>
+                        {e.etat === "payee" ? <Pastille teinte="vert">Payée{e.retard ? ` (${e.retard} j de retard)` : ""}</Pastille>
+                          : e.etat === "en_retard" ? <Pastille teinte="rouge">En retard de {e.retard} j</Pastille>
+                          : e.etat === "partielle" ? <Pastille teinte="ambre">Reste {montant(e.reste)}</Pastille>
+                          : <Pastille teinte="gris">À échoir</Pastille>}
+                        {e.etat === "en_retard" ? <div className="esp-kpi-sous">Indemnité de 40 € due{e.penalites ? `, pénalités ${montant(e.penalites)}` : ""}</div> : null}
+                        {e.etat !== "payee" ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrirPaiement(s)} disabled={envoi}>Noter un paiement</button></div> : null}
+                      </td>
+                    </>;
+                  })()}
                 </tr>
               ))}
             </tbody>
@@ -276,6 +320,35 @@ export default function SituationsCarte({ tableau, source, onLocal, relire }: Pr
           </DialogBody>
           <DialogFooter>
             <button type="button" className="r-btn r-btn--noir" onClick={() => void ouvrir()} disabled={envoi || !fin}>{envoi ? <Loader variant="spin" /> : null} Ouvrir la situation</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!payer} onOpenChange={(o) => !o && setPayer(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><FileSpreadsheet width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Paiement reçu — situation n° {payer?.numero}</DialogTitle>
+            <DialogDescription>Net à payer {montant(payer?.net_a_payer)} ; déjà encaissé {montant(payer ? encaissement(payer, aujourdhui()).encaisse : 0)}. Un paiement partiel est admis.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <div className="esp-form-ligne">
+                <label className="rv-libelle">Montant reçu (€) <span className="esp-obligatoire">(obligatoire)</span>
+                  <input className="rv-champ" inputMode="decimal" value={montantPaye} onChange={(e) => setMontantPaye(e.target.value)} />
+                </label>
+                <label className="rv-libelle">Reçu le
+                  <input className="rv-champ" type="date" max={aujourdhui()} value={datePaiement} onChange={(e) => setDatePaiement(e.target.value)} />
+                </label>
+              </div>
+              <label className="rv-libelle">Référence (virement, chèque)
+                <input className="rv-champ" maxLength={120} value={reference} onChange={(e) => setReference(e.target.value)} placeholder="VIR SCI LEFEVRE 0123" />
+              </label>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" onClick={() => void confirmerPaiement()} disabled={envoi || !montantPaye.trim()}>{envoi ? <Loader variant="spin" /> : null} Noter le paiement</button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

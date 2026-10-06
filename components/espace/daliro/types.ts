@@ -425,7 +425,13 @@ export type Situation = {
   validee_libelle: string | null;
   motif: string | null;
   lignes: LigneSituation[];
+  /* b6_16 : l'encaissement */
+  echeance?: string | null;
+  penalites_taux?: number | null;
+  encaisse?: number;
+  paiements?: PaiementSituation[];
 };
+export type PaiementSituation = { id: string; situation_id: string; recu_le: string; montant: number; reference: string | null };
 
 /* L'accord permanent des confirmations J-2 (b6_08) : trois politiques du socle, une par canal. */
 export type CanalAccordJ2 = {
