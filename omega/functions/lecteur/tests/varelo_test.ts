@@ -31,7 +31,7 @@ class VareloFactice implements PortesVarelo {
 
 const BON = [
   "BON DE LIVRAISON",
-  "Expéditeur : Sodimat SA - SIREN 412345678",
+  "Expéditeur : Sodimat SA - SIREN 552100554",
   "Transporteur : Transports Caraïbes Express",
   "Lettre de voiture n° LV-2026-0915",
   "Livré le 03/10/2026",
@@ -48,7 +48,7 @@ const valeursBon = (reserve = "2 colis manquants, 1 carton écrasé", texteReser
   { champ: "colis_recus", valeur: 10, texte: "Colis reçus : 10", page: 1 },
   { champ: "reserves_ecrites", valeur: reserve, texte: texteReserve, page: 1 },
   { champ: "expediteur", valeur: "Sodimat SA", texte: "Expéditeur : Sodimat SA", page: 1 },
-  { champ: "expediteur_siren", valeur: "412345678", texte: "SIREN 412345678", page: 1 },
+  { champ: "expediteur_siren", valeur: "552100554", texte: "SIREN 552100554", page: 1 },
   { champ: "mode", valeur: "routier", texte: "Lettre de voiture", page: 1 },
 ];
 
@@ -109,7 +109,7 @@ Deno.test("varelo : bon lu → réception posée avec les valeurs vérifiées (m
   assertEquals(a.champs.manquant, true);
   assertEquals(a.champs.avarie, false);
   assertEquals(a.champs.reserves_sur_bon, "2 colis manquants, 1 carton écrasé");
-  assertEquals(a.champs.expediteur, "Sodimat SA (SIREN 412345678)");
+  assertEquals(a.champs.expediteur, "Sodimat SA (SIREN 552100554)");
   assertEquals(a.champs.piece_id, "cccccccc-0000-4000-8000-000000000071");
   assertStringIncludes(a.champs.constat as string, "12 colis annoncés, 10 reçus");
   assertEquals((fini.reception_varelo as Record<string, unknown>).reception, "posee");

@@ -131,7 +131,14 @@ export function typerValeur(
         ? valeur.split(/[\n;,]|\s+et\s+/).map((x) => x.trim())
         : [];
       const propres = elements.filter((x) => x !== "").map((x) => x.slice(0, 200)).slice(0, 100);
-      return propres.length === 0 ? { valeur, ok: false, detail: "liste vide" } : { valeur: propres, ok: true };
+      if (propres.length === 0) return { valeur, ok: false, detail: "liste vide" };
+      if (def.choix) {
+        // Une liste à vocabulaire fermé (les activités d'une attestation décennale) : chaque élément est un code admis.
+        const codes = [...new Set(propres.map(normaliserChoix))];
+        const hors = codes.filter((c) => !def.choix!.includes(c));
+        return hors.length > 0 ? { valeur: codes, ok: false, detail: `hors vocabulaire : ${hors.slice(0, 5).join(", ")}` } : { valeur: codes, ok: true };
+      }
+      return { valeur: propres, ok: true };
     }
     case "date": {
       const d = dateIso(valeur);
@@ -165,6 +172,7 @@ export function typerValeur(
 function regleDeForme(champ: string, valeur: unknown): string | null {
   const s = String(valeur ?? "");
   if (champ.endsWith(".siren") && !sirenValide(s)) return "clé SIREN invalide";
+  if ((champ === "siren" || champ.endsWith("_siren")) && !sirenValide(s.replace(/\s+/g, ""))) return "clé SIREN invalide";
   if (champ.endsWith(".siret") && !(/^\d{14}$/.test(s) && sirenValide(s))) return "SIRET invalide";
   if (champ.endsWith(".tva") && s.startsWith("FR") && !tvaFrValide(s)) return "clé de TVA invalide";
   if (champ.endsWith(".pays") && !/^[A-Z]{2}$/.test(s)) return "code pays attendu sur deux lettres";
@@ -213,7 +221,7 @@ export function verifierValeurs(
       controle = "sans citation";
     } else if (!pageLue) {
       controle = page === undefined ? "page non citée" : `page ${page} inexistante`;
-    } else if (Array.isArray(typage.valeur)) {
+    } else if (Array.isArray(typage.valeur) && !(champs.get(b.champ) as ChampDeclare | undefined)?.choix) {
       // Une liste : chaque élément doit se retrouver sur la page citée.
       const manquants = (typage.valeur as string[]).filter((x) => !retrouver(x, pageLue.texte).trouve);
       if (manquants.length === 0) {
@@ -223,6 +231,7 @@ export function verifierValeurs(
         controle = `éléments introuvables page ${page} : ${manquants.slice(0, 5).join(", ")}`;
       }
     } else {
+      // Une valeur simple, ou une liste de codes (vocabulaire fermé) : la citation doit se retrouver sur la page citée.
       const r = retrouver(citation, pageLue.texte);
       if (r.trouve) {
         verifiee = true;

@@ -88,6 +88,15 @@ const FAMILLES_CONTROLE: FamilleChamps[] = [
   },
 ];
 
+/** Le vocabulaire des activités garanties (b5_18, le même que lorani_lots.activites_requises). */
+export const ACTIVITES_BTP = [
+  "demolition", "terrassement", "vrd", "amelioration_sols", "fondations_speciales", "maconnerie_beton_arme", "pierre_taille",
+  "charpente_bois", "charpente_metallique", "couverture", "etancheite_toiture", "etancheite_cuvelage", "facades_rideaux", "bardage",
+  "menuiseries_exterieures", "ite", "ravalement", "menuiseries_interieures", "platrerie", "serrurerie", "vitrerie", "peinture",
+  "revetements_durs", "revetements_souples", "isolation_interieure", "plomberie", "chauffage", "ventilation", "electricite",
+  "photovoltaique", "ascenseurs", "ssi", "piscines", "amiante",
+] as const;
+
 export const DECISIONS_ARRETE = ["accorde", "refuse", "non_opposition", "opposition", "sursis"] as const;
 export const TYPES_AUTORISATION = ["pc", "pcmi", "pa", "pd", "dp"] as const;
 
@@ -191,6 +200,14 @@ export const SCHEMA_LORANI: SchemaModule = {
       cles: [],
     },
     {
+      type: "lorani_attestation_decennale",
+      libelle: "attestation décennale",
+      description:
+        "l'attestation d'assurance de responsabilité civile décennale d'une entreprise (modèle de l'arrêté du 5 janvier 2016) : assureur, police, assuré, SIREN, activités garanties, période de validité, plafond par sinistre",
+      champs: ["assureur", "numero_police", "assure", "siren", "activites", "debut", "fin", "plafond_eur"],
+      cles: ["assure", "activites", "debut", "fin", "plafond_eur"],
+    },
+    {
       type: "lorani_plu_reglement",
       libelle: "règlement du PLU",
       description:
@@ -262,6 +279,24 @@ export const SCHEMA_LORANI: SchemaModule = {
     { champ: "reference", type: "texte", max: 40, description: "planche : sa référence (« PC2 », « A-102 »)" },
     { champ: "indice", type: "texte", max: 20, description: "planche : son indice (« B », « ind. C »)" },
     { champ: "zone", type: "texte", max: 20, description: "règlement du PLU : la zone (« UB »)" },
+    { champ: "assureur", type: "texte", max: 120, description: "attestation décennale : la compagnie d'assurance (« SMABTP »)" },
+    { champ: "numero_police", type: "texte", max: 60, description: "attestation décennale : le numéro du contrat (police), tel qu'imprimé" },
+    { champ: "assure", type: "texte", max: 200, description: "attestation décennale : la raison sociale de l'assuré, telle qu'écrite" },
+    { champ: "siren", type: "texte", max: 11, description: "attestation décennale : le SIREN de l'assuré, neuf chiffres (les 9 premiers d'un SIRET)" },
+    {
+      champ: "activites",
+      type: "liste",
+      choix: [...ACTIVITES_BTP],
+      description:
+        "attestation décennale : les activités garanties, ramenées au vocabulaire (la plus proche si l'intitulé diffère : « maçonnerie et béton armé » → maconnerie_beton_arme, « isolation thermique par l'extérieur » → ite) ; une ligne, un tableau",
+    },
+    { champ: "debut", type: "date", description: "attestation décennale : début de la période de validité" },
+    { champ: "fin", type: "date", description: "attestation décennale : fin de la période de validité" },
+    {
+      champ: "plafond_eur",
+      type: "nombre",
+      description: "attestation décennale : le plafond de garantie par sinistre pour les ouvrages non soumis à l'obligation d'assurance, en euros, nombre sans unité",
+    },
   ],
   lignes: false,
 };

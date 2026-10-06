@@ -185,6 +185,8 @@ export function consignePour(module: string | null | undefined, reglesCommunes: 
   const champsTexte = s.champs.map((c) => {
     const bornes = c.type === "choix" && c.choix
       ? ` (valeurs admises : ${c.choix.join(", ")})`
+      : c.type === "liste" && c.choix
+      ? ` (chaque élément parmi : ${c.choix.join(", ")} ; citation = le passage qui les énumère)`
       : c.type === "entier" && c.min !== undefined
       ? ` (entier de ${c.min} à ${c.maximum})`
       : c.type === "mois"
