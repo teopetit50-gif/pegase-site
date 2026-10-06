@@ -3,7 +3,7 @@
    passent), offsets de la table xref calculés. Sert à courrier-reel.mjs : chaque nature donne un fichier
    d'empreinte différente (la base refuse deux fois le même sha256 sur un même projet).
 
-   usage : node omega/recette-b5/fabriquer-courrier.mjs <recepisse|demande_pieces> <sortie.pdf> [mention]
+   usage : node omega/recette-b5/fabriquer-courrier.mjs <recepisse|demande_pieces|demande_pieces_2> <sortie.pdf> [mention]
    mention : une ligne de plus en pied de page (« Réf. 2 »…), pour redéposer le même courrier sous une autre empreinte. */
 import { writeFileSync } from 'node:fs';
 
@@ -53,9 +53,15 @@ const MODELES = {
     [11, 'Le service instructeur'],
   ],
 };
+/* une seconde demande, autre date et autres pièces : le socle écarte une proposition déjà saisie sur le permis
+   (lorani_deja_saisi), une lettre identique ne proposerait plus rien */
+MODELES.demande_pieces_2 = MODELES.demande_pieces.map(([c, t]) => [c, t
+  .replace('Nantes, le 01/10/2026', 'Nantes, le 03/10/2026')
+  .replace('PCMI 3 : plan en coupe du terrain et de la construction', 'PCMI 2 : plan de masse des constructions à édifier')
+  .replace('PCMI 6 : document graphique', 'PCMI 8 : photographie situant le terrain dans le paysage proche, et document graphique')]);
 
 const [nature, sortie, mention] = process.argv.slice(2);
-if (!MODELES[nature] || !sortie) { console.error('usage : node fabriquer-courrier.mjs <recepisse|demande_pieces> <sortie.pdf>'); process.exit(2); }
+if (!MODELES[nature] || !sortie) { console.error('usage : node fabriquer-courrier.mjs <recepisse|demande_pieces|demande_pieces_2> <sortie.pdf>'); process.exit(2); }
 
 const echapper = (t) => t.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
 let y = 790;
