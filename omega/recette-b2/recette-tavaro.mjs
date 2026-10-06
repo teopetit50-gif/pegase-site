@@ -9,7 +9,9 @@
    seule : « Vous » est valideur, le bouton est gris). Les avis de contravention
    (vague 3, b2_03) : la liste par échéance, un avis saisi qui se rapproche
    tout seul du contrat, la désignation consignée, le classement réservé à
-   la direction.
+   la direction. L'état des lieux (b2_05) : le départ signé se lit dans le
+   dossier, l'état de retour se fait (quatre vues, signature au doigt) et
+   le chiffrage annonce « déjà au départ » pour la rayure notée.
    usage : node omega/recette-b2/recette-tavaro.mjs [origine] */
 import { mkdirSync } from 'node:fs';
 import { ouvrirSession } from '../../outils/chrome.mjs';
@@ -187,6 +189,56 @@ for (const largeur of LARGEURS) {
   const efface = await s.evaluer(`[...${sect}.querySelectorAll('.tav-avis')].find(x => /2025 0812 6604 51/.test(x.innerText))?.innerText ?? ''`);
   ok(/identité effacée le/.test(efface) && /DES-2025-074410/.test(efface), 'désigné il y a plus d\'un an : l\'identité est effacée, la référence reste');
   await s.capturer(`${dossier}tavaro-avis-1440.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b2-edl', densite: 1 });
+  console.log('— /espace/tavaro : état des lieux contradictoire (exemple)');
+  ok(await s.aller(base + '/espace/tavaro'), 'page chargée');
+  await s.dormir(400);
+  const sect = `document.querySelector('#esp-dossier section[aria-label="États des lieux"]')`;
+  const lu = await s.evaluer(`(() => { const c = ${sect}; return c ? c.innerText : ''; })()`);
+  ok(/Signé par Marie Durand/.test(lu) && /Flanc droit/.test(lu) && /Caution 800,00/.test(lu) && /prise/.test(lu), 'le départ signé se lit : signataire, rayure du flanc droit, caution prise');
+  ok(/empreinte [0-9a-f]{8}…/.test(lu), 'l\'empreinte du contenu signé est montrée');
+  /* l'état de retour : sans les quatre vues, le bouton reste gris ; avec, la signature */
+  await s.evaluer(`[...${sect}.querySelectorAll('.r-btn')].find(b => /Faire l.état de retour/.test(b.textContent)).click()`);
+  await s.dormir(500);
+  const gris = await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer et faire signer/.test(b.textContent))?.disabled`);
+  ok(gris === true, 'sans les quatre côtés en photo, « Enregistrer et faire signer » reste gris');
+  const photo = new URL('tavaro-390.jpg', import.meta.url).pathname;
+  /* envoyer rend le message CDP entier : le résultat est sous .result */
+  const doc = (await s.envoyer('DOM.getDocument', { depth: -1 })).result;
+  for (const vue of ['avant', 'arriere', 'flanc_gauche', 'flanc_droit']) {
+    const { nodeId } = (await s.envoyer('DOM.querySelector', { nodeId: doc.root.nodeId, selector: `#edl-${vue}` })).result;
+    await s.envoyer('DOM.setFileInputFiles', { nodeId, files: [photo] });
+  }
+  await s.dormir(300);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer et faire signer/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const signature = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return { canvas: !!d.querySelector('canvas'), nom: d.querySelector('input')?.value, gris: [...d.querySelectorAll('button')].find(b => /Signer l.état/.test(b.textContent))?.disabled }; })()`);
+  ok(signature.canvas && signature.nom === 'Marie Durand' && signature.gris === true, 'la signature : nom prérempli, zone de signature, « Signer » gris tant que rien n\'est tracé');
+  const r = await s.evaluer(`(() => { const c = document.querySelector('[role="dialog"] canvas').getBoundingClientRect(); return { x: c.left + 40, y: c.top + 60 }; })()`);
+  await s.envoyer('Input.dispatchMouseEvent', { type: 'mousePressed', x: r.x, y: r.y, button: 'left', clickCount: 1 });
+  for (let i = 1; i <= 8; i++) await s.envoyer('Input.dispatchMouseEvent', { type: 'mouseMoved', x: r.x + i * 25, y: r.y + (i % 2 ? 20 : -10), button: 'left', buttons: 1 });
+  await s.envoyer('Input.dispatchMouseEvent', { type: 'mouseReleased', x: r.x + 200, y: r.y, button: 'left', clickCount: 1 });
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Signer l.état/.test(b.textContent))?.click()`);
+  await s.dormir(900);
+  const apres = await s.evaluer(`(() => ({ texte: ${sect}.innerText, fait: document.querySelector('#esp-dossier .esp-avis[data-teinte="vert"]')?.innerText ?? '' }))()`);
+  ok(/signé par Marie Durand : il ne change plus/.test(apres.fait) && (apres.texte.match(/Signé par Marie Durand/g) ?? []).length === 2, 'le retour est signé : les deux états portent la signature');
+  /* le chiffrage : carburant du départ verrouillé, la rayure du flanc droit annoncée « pas facturée » */
+  await s.evaluer(`[...document.querySelectorAll('#esp-dossier .esp-actions .r-btn')].find(b => /Chiffrer le retour/.test(b.textContent)).click()`);
+  await s.dormir(500);
+  const verrou = await s.evaluer(`[...document.querySelectorAll('[role="dialog"] select')][0]?.disabled`);
+  ok(verrou === true, 'le carburant au départ est repris de l\'état signé et verrouillé');
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Ajouter un dommage/.test(b.textContent))?.click()`);
+  await s.dormir(300);
+  await s.evaluer(`(() => { const sel = [...document.querySelectorAll('[role="dialog"] .tav-ligne-saisie select')]; const set = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set; set.call(sel[0], 'flanc_droit'); sel[0].dispatchEvent(new Event('change', { bubbles: true })); set.call(sel[1], 'RAYURE_PORTIERE'); sel[1].dispatchEvent(new Event('change', { bubbles: true })); })()`);
+  await s.dormir(300);
+  const deja = await s.evaluer(`document.querySelector('[role="dialog"] .tav-ligne-saisie')?.innerText ?? ''`);
+  ok(/Déjà noté sur l.état de départ signé/.test(deja) && /ne sera pas facturé/.test(deja), 'une rayure dans une zone déjà notée au départ : « ne sera pas facturé » avant le clic');
+  await s.capturer(`${dossier}tavaro-edl-1440.jpg`, { qualite: 55 });
   s.fermer();
 }
 

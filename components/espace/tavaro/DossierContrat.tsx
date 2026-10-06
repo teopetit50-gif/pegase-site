@@ -24,6 +24,7 @@ import { dateCourte, dateHeure, montant, nombreFr, relatif } from "../format";
 import { AMENDEMENTS, AVERTISSEMENTS_CONTRAT, FAMILLES_LIGNE, MODES_REGLEMENT, POLITIQUES, STATUTS_AVOIR, STATUTS_CONTRAT, STATUTS_FACTURE, STATUTS_PROPOSITION, UNITES, libelleAvertissement, nomLocataire, propositionVivante, resteDu } from "./etats";
 import type { Dossier, Facture, LigneBareme, LigneProposition, Reglages, Retour, Role } from "./types";
 import FormulaireRetour from "./FormulaireRetour";
+import EtatsDesLieux, { type GestesEtats } from "./EtatsDesLieux";
 
 export type Gestes = {
   completer: (valeurs: Record<string, unknown>) => Promise<void>;
@@ -91,7 +92,7 @@ function Preuves({ preuves }: { preuves: LigneProposition["preuves"] }) {
   );
 }
 
-export default function DossierContrat({ dossier, source, role, moi, bareme, reglages, agences, nommer, gestes }: {
+export default function DossierContrat({ dossier, source, role, moi, bareme, reglages, agences, nommer, gestes, gestesEtats }: {
   dossier: Dossier;
   source: Source;
   role: Role | null;
@@ -101,6 +102,7 @@ export default function DossierContrat({ dossier, source, role, moi, bareme, reg
   agences: { entite_id: string; code: string; nom?: string }[];
   nommer: (id: string | null | undefined) => string;
   gestes: Gestes;
+  gestesEtats: GestesEtats;
 }) {
   const { contrat: c, locataire, vehicule, categorie } = dossier;
   const [form, setForm] = useState<Form>(null);
@@ -229,6 +231,9 @@ export default function DossierContrat({ dossier, source, role, moi, bareme, reg
           </div>
         </div>
       </div>
+
+      {/* ——— les états des lieux (b2_05) ——— */}
+      <EtatsDesLieux dossier={dossier} role={role} bareme={bareme} nommer={nommer} gestes={gestesEtats} onFait={(m) => setFait(m)} />
 
       {/* ——— le chiffrage ——— */}
       <div className="esp-carte">
