@@ -1,6 +1,6 @@
 # Session B3 — TIROMA (cabinets dentaires : praticiens, fauteuils, horaires, rendez-vous, point du matin)
 
-Branche `worker-b3`. Coordinateur : session `session_01B4JNQXyT69GytdvE9SjAnE`.
+Branche `worker-b3`. Coordinateur : session `session_01BCGFdpRKBvXKjouC75sYBg` (depuis le 06/10, 01 h 10 Z ; avant : `session_01B4JNQXyT69GytdvE9SjAnE`).
 Dernière mise à jour : 06/10/2026, nuit (douze fichiers verts, branche fusionnée dans main d298f07, règle santé tranchée).
 
 ## Les deux jauges
@@ -55,7 +55,7 @@ aujourd'hui, Brevo compris, tant que Teo n'a pas de preuve de certification HDS 
 chemin santé) et `canaux_envoi.sante_autorise` (courriel et LRE oui si le fournisseur est HDS ; SMS et
 WhatsApp non pour un contenu de santé — un SMS « neutre » est un envoi `donnees_sante = false` décidé par
 le gabarit). Un envoi `donnees_sante = true` n'est confié qu'à un fournisseur `hds = true` sur un canal
-`sante_autorise`, sinon verrou `SANTE_FOURNISSEUR` qui bloque (jamais un différé, jamais de repli). A2
+`sante_autorise`, sinon verrou `SANTE_FOURNISSEUR_NON_HDS` (expéditeur v11) qui bloque (jamais un différé, jamais de repli). A2
 écrit le lot.
 
 **Vigilance à garder pour TIROMA** : la table `receptions` porte aussi des données de santé (les réponses
@@ -118,7 +118,7 @@ d'écriture directe hors RLS.
 4. **Accords des mutuelles sans source** (modèle d'export devis sans colonne mutuelle, aucune porte) → b3_07 (écrit).
 5. **Heures d'export lues en UTC** (`tiroma_v_instant`) : 9 h à Pointe-à-Pitre devenait 5 h → b3_08 (écrit).
 6. **Aucun ouvrier ne lit les exports** (`releve.lire`) : trou commun n° 1, confié à A1 par le coordinateur.
-7. **Canaux `permis_sante = true` sans fournisseur agréé** (F5) : le verrou `SANTE_HORS_CANAL_AGREE` protège déjà le nominatif ; règle stricte proposée puis **tranchée par le coordinateur** (`fournisseurs_envoi.hds`, `canaux_envoi.sante_autorise`, verrou `SANTE_FOURNISSEUR`) : A2 écrit le lot socle.
+7. **Canaux `permis_sante = true` sans fournisseur agréé** (F5) : le verrou `SANTE_HORS_CANAL_AGREE` protège déjà le nominatif ; règle stricte proposée puis **tranchée par le coordinateur** (`fournisseurs_envoi.hds`, `canaux_envoi.sante_autorise`, verrou `SANTE_FOURNISSEUR_NON_HDS`) : A2 écrit le lot socle.
 8. **Liste d'attente « commune »** (`source = 'tiroma'`) sans porte d'écriture : à faire (b3_09) après le lot 2.
 9. **`private.tiroma_trace_ecriture()` inexécutable par authenticated** (23 triggers) : corrigé côté socle par le coordinateur (lot 19u).
 10. **Tout texte libre du module est tenu pour de la santé** (`private.creer_envoi` : `v_contexte_sante`, `modules_envois.tiroma.sante = true`) : même un courriel de compteurs sans nom est bloqué `SANTE_HORS_CANAL_AGREE`. Pour qu'un point « sans donnée de santé » parte, il faut un **gabarit validé** sans variable libre : b3_10 pose `tiroma.point_matin` (global, courriel, compteurs + lien), validé par le serveur ; le test 08 vérifie qu'il part.
@@ -133,4 +133,8 @@ d'écriture directe hors RLS.
 - 05/10, 20 h 58 — PAUSE demandée par Teo. 06/10 — REPRISE : F8 (13 indicateurs tiroma inscrits), F9 (tiroma_conservation et tiroma_passages existent).
 - 06/10 — b3_07 à b3_09 posés ; écran fusionné (d572973) ; lot 2 joué deux fois (retours : clé `jeu` de terminer_lecture, destinataire par `adresse`, somme des travaux, colonne `etat`, booléen mutuelle, périmètre du collaborateur, verrou consentement avant santé, patient gêné) ; b3_10 et le troisième passage demandés (5220b21).
 - 06/10, 00 h 25–00 h 37 Z — b3_10 refusé deux fois (« entier » n'est pas un type de variable ; « nombre ») ; troisième passage : 05/06/07/11 verts, 08 révèle l'item sans gravité ; quatrième passage : **28/28, 11 fichiers verts**. Clé publique de la recette reçue pour la relecture réelle (faite). Test 12 poussé (a4d1212) : 18/18 au premier passage, 12 fichiers verts.
-- 06/10, 00 h 51–00 h 55 Z — omegaai.fr sert /espace/tiroma (quota Vercel revenu) ; « terminé » envoyé (87b914e), fusionné dans main (d298f07) ; règle santé tranchée (hds / sante_autorise / SANTE_FOURNISSEUR, lot A2) ; vigilance `receptions` + hébergement HDS consignée.
+- 06/10, 00 h 51–00 h 55 Z — omegaai.fr sert /espace/tiroma (quota Vercel revenu) ; « terminé » envoyé (87b914e), fusionné dans main (d298f07) ; règle santé tranchée (hds / sante_autorise / SANTE_FOURNISSEUR_NON_HDS, lot A2) ; vigilance `receptions` + hébergement HDS consignée.
+- 06/10, 01 h 10 Z — passation du coordinateur à la session `session_01BCGFdpRKBvXKjouC75sYBg`. Lot socle 19ab (santé des envois) posé sur la recette : test 08 toujours vert 28/28. e7fe453 fusionné dans main. Rien n'est attendu de B3.
+- 06/10 — **Reprise de B3** par la session `session_016947vqqcuBzgihDxHt7Aoo` (Opus 5.5), qui remplace `session_01XVDbxXV3nk5ANUdd5hfZHf` (limite de crédit Fable). État relu, coordinateur prévenu par send_message. Rien en attente ; prochain chantier : premier export Logos_w réel de Teo, rejoué sur le banc par la chaîne de relevé.
+- 06/10, 01 h 34 Z — remarques d'A1 (lecteur-exports d963121) : signatures qui se recouvrent (actes/agenda/devis_lignes ⊇ devis ; agenda ⊇ patients ; devis_lignes ⊇ types_rdv). **b3_11** (`omega/modules/tiroma/migrations/b3_11_signatures_logosw.sql`) : devis + « Part AMO », patients + « Prénom », types_rdv + « Couleur » ; plus aucun recouvrement sur tous les alias des dix jeux. `agenda.patient_ref` reste non obligatoire, volontairement (créneaux sans patient ; l'application garde le patient connu si la référence est vide). Aucun test pgTAP touché (les tests déposent les lignes, la signature ne sert qu'au lecteur).
+- 06/10, 01 h 39 Z — **b3_11 posé** par le coordinateur (ligne `tiroma_b3_11_signatures_logosw`), signatures relues en base ; `^test_b3_` rejoué : **12/12**. A1 a reporté les signatures (worker-a1 041f6a2, test « chaque jeu se reconnaît par ses seuls en-têtes » vert). Rien en attente ; prochain chantier : le vrai export Logos_w de Teo, d'abord par `deno task essai` d'A1.
