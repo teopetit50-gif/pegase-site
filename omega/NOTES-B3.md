@@ -289,6 +289,6 @@ logiciel métier qui la fait).
      - −3 si le patient a confirmé au rappel.
 
      Niveau « fort » à partir de 3 points, « moyen » à 2. Un NON au rappel est rendu en tête (« annonce »).
-   - `18_absences_probables.sql` : `test_b3_18_absences_probables`, 12 assertions (Jean Absent fort, Lina Nouvelle et ses raisons, confirmation qui efface, NON en tête, horizon).
+   - `18_absences_probables.sql` : `test_b3_18_absences_probables`, 13 assertions (Jean Absent fort, Lina Nouvelle et ses raisons, confirmation qui efface, NON en tête, horizon).
    - Écran : carte « Absences probables » (niveau, raisons, « Noter l'appel »). Recette : 88 contrôles, tout passe ; axe : 0 écart.
    - Vérifié en local : Jean 4 points (fort), Lina 2 (moyen) ; après la confirmation de Jean et le NON de Lina, seule Lina reste, en « annonce ».
