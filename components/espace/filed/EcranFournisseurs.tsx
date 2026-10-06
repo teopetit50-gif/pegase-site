@@ -256,7 +256,7 @@ export default function EcranFournisseurs() {
           ) : visibles.length === 0 ? (
             <Vide titre="Aucun fournisseur">{filtre || recherche ? "Rien ne correspond." : "Les fournisseurs naissent de la première facture lue."}</Vide>
           ) : (
-            <ul className="esp-liste" role="listbox" aria-label="Fournisseurs">
+            <ul className="esp-liste" aria-label="Fournisseurs">
               {visibles.map((x) => {
                 const s = STATUTS_FOURNISSEUR[x.statut] ?? STATUTS_FOURNISSEUR.actif;
                 const id = identiteDe(x);
@@ -266,8 +266,7 @@ export default function EcranFournisseurs() {
                   <li key={x.id}>
                     <button
                       type="button"
-                      role="option"
-                      aria-selected={choisi === x.id}
+                      aria-current={choisi === x.id ? "true" : undefined}
                       className="esp-item"
                       onClick={() => {
                         setChoix(x.id);
