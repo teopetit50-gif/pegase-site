@@ -560,7 +560,8 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
                 {dossier.lignes.length ? (
                   <div>
                     <div className="esp-section-titre">Lignes</div>
-                    <div className="esp-tableau-cadre">
+                    {/* un cadre qui défile se rejoint au clavier (axe : scrollable-region-focusable) */}
+                    <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Lignes de la facture">
                       <table className="esp-tableau">
                         <thead>
                           <tr><th>#</th><th>Désignation</th><th className="esp-num">Qté</th><th className="esp-num">P.U. HT</th><th className="esp-num">Montant HT</th><th className="esp-num">TVA</th><th>Commande</th><th aria-label="Apparier" /></tr>
