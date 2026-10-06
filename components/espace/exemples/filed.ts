@@ -296,8 +296,19 @@ const D14: DossierFiled = {
     hist("integration", "Intégrée : demande de paiement créée dans la file de validation.", ilYa(4, 10)),
   ],
 };
-/* approuvée dans la file (demande « Payer la facture R2026-000014 ») : validée, à payer */
+/* approuvée dans la file (demande « Payer la facture R2026-000014 ») : validée, à payer.
+   C'est aussi la facture ÉLECTRONIQUE de l'exemple : reçue par la plateforme agréée, ses
+   valeurs viennent du fichier structuré (source xml, sans page ni boîte) et font foi. */
 D14.facture!.statut = "validee";
+D14.facture!.provenance = "structuree";
+D14.recuePlateforme = true;
+D14.valeurs = D14.valeurs.map((v) => (/^(fournisseur|facture|totaux|paiement|acheteur)\./.test(v.champ) ? { ...v, source: "xml" as const, confiance: 1, verifiee: true, page: null, boite: null } : v));
+D14.cycle = [
+  { code: 204, libelle: "Prise en charge", survenu_le: ilYa(4, 10), motif_code: null, motif_libelle: null, motif: null, montant: null, etat: "emis", emis_le: ilYa(4, 10), sens: "emis", erreur: null, obligatoire: false },
+  { code: 205, libelle: "Approuvée", survenu_le: ilYa(3, 15), motif_code: null, motif_libelle: null, motif: null, montant: null, etat: "a_emettre", emis_le: null, sens: "emis", erreur: null, obligatoire: false },
+];
+D14.ecritures = [];
+D14.litiges = [];
 
 /* ——— 2. R2026-000009 — Métallerie Roux : IBAN changé → bloquée ——— */
 const f09 = facture(9, {
@@ -679,6 +690,20 @@ function masque(iban: string) {
 const RIVIERE = { nom: "Transports Rivière", siren: "734 205 180", tva: "FR 80 734205180", adresse: "5 quai Perrache, 69002 Lyon", iban: "FR76 1468 9000 0100 2233 4455 618", code: "RIVIERE" };
 const FERRAND = { nom: "Cabinet Ferrand, expertise comptable", siren: "488 102 633", tva: "FR 82 488102633", adresse: "40 rue de la Charité, 69002 Lyon", iban: "", code: "FERRAND" };
 const D18 = validee(18, { fournisseur: RIVIERE, numero: "TR-2026-0712", emission: fr(ilYa(35)), echeance: fr(ilYa(5)), ht: 1840, designation: "Transport de mobilier — 2 rotations Lyon ↔ Grenoble", iban: true, expediteur: "compta@transports-riviere.fr" });
+/* Rivière : lue sur le PDF, transmise à la comptabilité, payée en partie */
+D18.facture!.statut = "comptabilisee";
+D18.cycle = [
+  { code: 204, libelle: "Prise en charge", survenu_le: ilYa(12, 9), motif_code: null, motif_libelle: null, motif: null, montant: null, etat: "sans_objet", emis_le: null, sens: "emis", erreur: null, obligatoire: false },
+  { code: 205, libelle: "Approuvée", survenu_le: ilYa(10, 11), motif_code: null, motif_libelle: null, motif: null, montant: null, etat: "sans_objet", emis_le: null, sens: "emis", erreur: null, obligatoire: false },
+  { code: 211, libelle: "Paiement transmis", survenu_le: ilYa(2, 10), motif_code: null, motif_libelle: null, motif: null, montant: 1000, etat: "sans_objet", emis_le: null, sens: "emis", erreur: null, obligatoire: false },
+];
+D18.ecritures = [
+  { journal_code: "HA", journal_lib: "Achats", ecriture_num: 41, ecriture_date: isoFr(fr(ilYa(10))), compte_num: "6241", compte_lib: "Transports sur achats", comp_aux_num: null, debit: 1840, credit: 0, ecriture_let: null, date_let: null },
+  { journal_code: "HA", journal_lib: "Achats", ecriture_num: 41, ecriture_date: isoFr(fr(ilYa(10))), compte_num: "44566", compte_lib: "TVA déductible sur autres biens et services", comp_aux_num: null, debit: 368, credit: 0, ecriture_let: null, date_let: null },
+  { journal_code: "HA", journal_lib: "Achats", ecriture_num: 41, ecriture_date: isoFr(fr(ilYa(10))), compte_num: "401", compte_lib: "Fournisseurs", comp_aux_num: "RIVIERE", debit: 0, credit: 2208, ecriture_let: null, date_let: null },
+  { journal_code: "BQ", journal_lib: "Banque", ecriture_num: 57, ecriture_date: isoFr(fr(ilYa(2))), compte_num: "401", compte_lib: "Fournisseurs", comp_aux_num: "RIVIERE", debit: 1000, credit: 0, ecriture_let: null, date_let: null },
+  { journal_code: "BQ", journal_lib: "Banque", ecriture_num: 57, ecriture_date: isoFr(fr(ilYa(2))), compte_num: "512", compte_lib: "Banque", comp_aux_num: null, debit: 0, credit: 1000, ecriture_let: null, date_let: null },
+];
 const D19 = validee(19, { fournisseur: FERRAND, numero: "CF-26-118", emission: fr(ilYa(25)), echeance: fr(dans(3)), ht: 950, designation: "Honoraires — situation intermédiaire au 30/09", iban: false, expediteur: "cabinet@ferrand-expertise.fr" });
 
 /* Les commandes connues (filed_commandes) et leurs lignes : celles que les
