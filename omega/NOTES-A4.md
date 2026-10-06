@@ -45,6 +45,7 @@ Recette seulement (omega-recette) ; la production est au coordinateur.
 | `a4_16b_filed_lot9_droits_meme_valeur.sql` | correctif (test socle 44) : `private.filed_meme_valeur` retirée à authenticated (seul un déclencheur definer l'appelle) ; source d'a4_16 alignée. Même règle appliquée dans la source d'a4_17 (`filed_fec_texte`, `_montant`, `_date`), non encore posée. |
 | `a4_18_filed_lot11_echange_pa.sql` | lot 11, portes de l'ouvrier `echange-pa` d'A2 (06/10) : `filed_cycle_vie.suivi` (trackingId), `sens`, `flux_pa` ; un statut n'est à émettre que pour une facture reçue par la PA (`filed_deposer_cycle_vie` remplacée), il dépose alors le travail `pa.statut` ; `filed_pa_flux`, `filed_pa_etat` ; portes `pa_commencer_statut` (CDAR : BY → SE, motif, montant), `pa_noter_statut`, `pa_echouer_statut`, `pa_curseur`, `pa_poser_curseur`, `pa_noter_flux` (idempotente ; accusés, CDAR entrants, facture entrante rattachée par SIREN de l'acheteur, `chemin_cible`), `pa_deposer_facture` (2ᵉ temps, après copie du fichier) ; `pa_*_depot` : non pris en charge (FILED = achats). Tests pgTAP `a4_12_echange_pa.sql` (`^test_a4_18_`). |
 | `a4_19_filed_lot11b_pa_fournisseur_etranger.sql` | vendeur étranger sans SIREN (demande d'A2, BAC-0001) : `pa_commencer_statut` met dans le CDAR `facture.emetteur_tva`, `destinataire.tva`, `emetteur.tva` ; `pa_noter_flux` rapproche un CDAR entrant par SIREN ou TVA. Source d'a4_18 alignée. Test `test_a4_19_01`. |
+| `a4_20_filed_lot12_reception_courriel.sql` | carnet de l'audit, n° 1 (06/10) : abonnement `reception.nouvelle → filed.reception` ; `private.filed_rattacher_reception` (pièces jointes lisibles d'une boîte FILED → documents FILED, source courriel, expéditeur, doublon par empreinte, idempotent sur le chemin, alerte si aucune pièce lisible, réception « traitee ») ; `filed_traiter` (texte d'a4_08) prend `filed.reception`. Tests pgTAP `a4_13_reception_courriel.sql` (`^test_a4_20_`). |
 | `a4_08_filed_lot4e_branchements.sql` | `private.filed_apres_controle`, `private.filed_balayer_lot4` (+ `private.filed_lot4_passages`) ; `filed_controler_facture` modifié par lecture du corps en place et quatre insertions (identité + exercice après le rapprochement ; statut décidé conservé ; message d'historique ; appel après l'écriture du statut) ; `filed_rapprocher_ligne`, `filed_traiter`, `filed_executer_decision` recopiés en entier + lignes « Lot 4 (A4) ». |
 
 Tests (`omega/tests/filed/`, DO … assert …, tout en rollback, données d'exemple) :
@@ -315,6 +316,17 @@ b2brouter.net/fr/tarifs ; documentation docs.invopop.com ; comparatif digitiz.fr
 Sources consultées : impots.gouv.fr (« Je passe à la facturation électronique », dossier de spécifications externes,
 norme XP Z12-012), AFNOR (XP Z12-013), documentation publique des statuts (invopop), b2brouter.net, presse
 spécialisée pour le nombre de PA.
+
+## Carnet de l'audit des promesses (06/10, ordre du coordinateur) — preuves pour factures.ts
+
+1. **Courriel → document FILED** (a4_20) : preuve de la ligne 28 « Une adresse dédiée reçoit les pièces, et
+   l'expéditeur est repris sur la ligne d'achat » (déjà `atteste: true` côté site ; jusqu'ici la réception rangeait
+   le courriel sans rien déposer dans FILED). Tests `test_a4_20_01` à `03`.
+2. Découpage des fichiers multi-factures (avec A1) — à faire.
+3. FEC : autoliquidation, devise, extourne — à faire.
+4. Rapprochement commande / réception / facture — à faire (ligne 59).
+5. Reprise de plusieurs exercices — à faire (ligne 35).
+6. Envoi vers Pennylane, Sage, Cegid, QuickBooks — à faire.
 
 ## a4_15 (06/10) — posé sur la recette (~05:12 UTC, 634fe24)
 

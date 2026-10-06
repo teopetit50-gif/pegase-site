@@ -68,3 +68,11 @@ alter table public.filed_documents enable row level security; alter table public
 grant select on all tables in schema public to authenticated, service_role;
 grant all on all tables in schema public to service_role;
 grant all on all sequences in schema public to service_role;
+
+-- Lot 12 (a4_20) : la réception d'A2 et ce que le dépôt du socle écrit dans pieces.
+alter table public.pieces add column if not exists expediteur text;
+alter table public.pieces add column if not exists depose_par uuid;
+create table if not exists public.receptions (id bigint generated always as identity primary key, client_id uuid not null, entite_id uuid, module text,
+  canal text not null, boite text not null, identifiant_externe text not null, de_adresse text, de_nom text, sujet text, corps text, corps_html text,
+  pieces jsonb not null default '[]', detail jsonb not null default '{}', statut text not null default 'nouvelle', recu_le timestamptz not null default now(),
+  cree_le timestamptz not null default now(), maj_le timestamptz not null default now(), unique (client_id, canal, identifiant_externe));

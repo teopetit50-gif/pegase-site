@@ -1307,3 +1307,7 @@ create trigger approbations_appliquer after insert on public.approbations for ea
 create policy d on public.filed_documents for select to authenticated using (client_id in (select private.mes_clients()) and private.perimetre_couvre(auth.uid(), client_id, entite_id));
 create policy f on public.filed_factures for select to authenticated using (exists (select 1 from public.filed_documents d where d.id = document_id));
 grant anon, authenticated, service_role to postgres;
+
+-- Lot 12 (a4_20) : la numérotation du socle (corps absent des extraits ; souche).
+create or replace function private.filed_prochain_numero(p_client uuid, p_serie text, p_annee smallint) returns integer language sql as $$
+  select coalesce(max(d.numero_reception), 0) + 1 from public.filed_documents d where d.client_id = p_client and d.annee_reception = p_annee $$;
