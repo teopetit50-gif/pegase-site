@@ -14,7 +14,8 @@
 --      que la ligne reglages_envois du module (mode essai) porte le drapeau, et que l'environnement est « recette ».
 --      Rien d'autre ne change : CANAL_NON_PERMIS (le SMS en santé, décision D6), consentement, oppositions, doublons,
 --      plages restent. En essai, le message ne part qu'à essai_adresse, jamais au destinataire.
---   3. commencer_envoi : la réponse rendue à l'ouvrier porte 'donnees_fictives' (vrai seulement dans ce cas) ;
+--   3. commencer_envoi : la réponse rendue à l'ouvrier porte 'donnees_fictives', vrai seulement pour un envoi qui porte
+--      des données de santé, en essai, avec le drapeau, sur la recette (v2) ;
 --      fournisseur_hds reste la vérité (faux). L'expéditeur (A2) n'accepte un envoi de santé vers un fournisseur non HDS
 --      que si mode = essai et donnees_fictives = vrai.
 -- Réécriture par repères (comme 19ab) : un repère absent ou multiple arrête le lot sans rien changer ; un repère déjà
@@ -89,7 +90,7 @@ begin
     d := replace(d, rep, par);
     rep := '  v_hds := coalesce((select f.agree_sante from private.fournisseurs_envoi f where f.fournisseur = e.fournisseur), false);';
     par := rep || chr(10)
-        || '  v_fictif := e.mode = ''essai'' and coalesce((select x.valeur from private.reglages x where x.cle = ''environnement''), '''') = ''recette''' || chr(10)
+        || '  v_fictif := e.donnees_sante and e.mode = ''essai'' and coalesce((select x.valeur from private.reglages x where x.cle = ''environnement''), '''') = ''recette''' || chr(10)
         || '              and exists (select 1 from public.reglages_envois g where g.client_id = e.client_id and g.module = e.module' || chr(10)
         || '                            and g.mode = ''essai'' and g.essai_donnees_fictives);';
     n := (length(d) - length(replace(d, rep, ''))) / length(rep);
@@ -106,10 +107,23 @@ begin
     d := replace(d, rep, par);
     execute d;
   end if;
+
+  -- 4. (v2, 06/10 15 h 50 Z) donnees_fictives n'est vrai que pour un envoi QUI PORTE des données de santé : un envoi
+  --    ordinaire d'un module au drapeau posé n'est pas « fictif ». Rejouable : corrige une pose v1 déjà faite.
+  select pg_get_functiondef('private.commencer_envoi(uuid)'::regprocedure) into d;
+  rep := '  v_fictif := e.mode = ''essai'' and';
+  if position(rep in d) > 0 then
+    n := (length(d) - length(replace(d, rep, ''))) / length(rep);
+    if n <> 1 then
+      raise exception 'Lot 19ah v2, commencer_envoi : repère multiple (%) : %', n, rep;
+    end if;
+    execute replace(d, rep, '  v_fictif := e.donnees_sante and e.mode = ''essai'' and');
+  end if;
 end $lot$;
 
 select (select count(*) from information_schema.columns where table_schema = 'public' and table_name = 'reglages_envois'
           and column_name = 'essai_donnees_fictives') as colonne,
        position('g.essai_donnees_fictives' in pg_get_functiondef('private.verrous_envoi(public.envois, boolean, timestamp with time zone)'::regprocedure)) > 0 as verrous,
        position('donnees_fictives' in pg_get_functiondef('private.commencer_envoi(uuid)'::regprocedure)) > 0 as commencer,
+       position('v_fictif := e.donnees_sante and' in pg_get_functiondef('private.commencer_envoi(uuid)'::regprocedure)) > 0 as fictif_si_sante,
        coalesce((select valeur from private.reglages where cle = 'environnement'), '(absent)') as environnement;
