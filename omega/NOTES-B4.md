@@ -1,6 +1,7 @@
 # Session B4 — TAMILA, le module des cabinets d'avocats
 
-Branche `worker-b4`. Coordinateur : session_01B4JNQXyT69GytdvE9SjAnE.
+Branche `worker-b4`. Coordinateur : session_01B4JNQXyT69GytdvE9SjAnE (arrêtée le 06/10 à 03 h 10
+Paris) ; relais : session_01BCGFdpRKBvXKjouC75sYBg. **B4 est clos et fusionné.**
 Dernière mise à jour : 06/10/2026, matin (lot B4-2 : corrections du retour de recette, b4_01 et b4_04, pièces chiffrées à l'écran).
 
 ## Les deux jauges
