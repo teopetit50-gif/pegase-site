@@ -222,6 +222,13 @@ fonctions Edge se déploient de même en coquille sur un SHA (voir lecteur).
 - 47335ff : worker-b7 fusionné (omega/functions/identite, migrations b7_01–03,
   tests, NOTES-B7). 6635b1c : `tsconfig.json` exclut `omega/functions` (code
   Deno des ouvriers, vérifié par Deno, pas par le tsc du site). **B7 terminé.**
+- 0a65434, d298f07, 155e201, 2e8bbf9 : worker-b1 (7f015ff), worker-b3 (87b914e),
+  worker-b4 (16bad34), worker-b5 (8f6d793) fusionnés : notes de fin, tests à
+  jour (tamila 06 jour de Paris dans l'EXECUTE, varelo b1_06 bigint, tiroma 12),
+  migration b1_03_proposer_nom_unique (déjà posée : varelo_b1_03). Les deux
+  fichiers de la barre d'onglets restent ceux de main (huit onglets). Fusion
+  faite avec `-X theirs` puis `git checkout HEAD -- components/espace/…`.
+  **B1, B3, B4, B5, B7 terminés** (6/10, 01 h 10 Z). Restent B2 et B6.
 
 ## Branches des ouvriers
 
