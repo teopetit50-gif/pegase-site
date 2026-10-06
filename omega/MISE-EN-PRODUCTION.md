@@ -159,9 +159,14 @@ sont livrés : leurs bases partent. **Teo confirme.**
 | 20261006045756, 045757 | `b6_07`, `b5_08` + `b5_09` | dépôt (b3bd323, 8b9ebbc, fbf4c98) | |
 | 20261006051221 | `a4_15` | dépôt (634fe24) | |
 | 20261006134231 | `filed_realtime_fournisseurs` | SQL | |
+| 20261006134914 | `lorani_b5_10` | dépôt : `omega/modules/lorani/migrations/b5_10_jurisprudence_seconde_demande.sql` (main 027eca3) | seconde demande de pièces : l'alerte et l'écran citent la jurisprudence |
+| 20261006140050 | `daliro_b6_08` | dépôt : `omega/modules/daliro/migrations/b6_08_accord_j2.sql` (main bc7ca7c) | accord permanent des J-2 par les politiques du socle |
+| 20261006140438 | `tamila_b4_05` | dépôt : `omega/modules/tamila/migrations/b4_05_tamila_coffre.sql` (main 38b45a0) | coffre Scaleway. Accorde à tort deux outils à authenticated (lignes 669-670), corrigé par 19ag |
+| 20261006140946 | `identite_b7_04` | dépôt : `omega/modules/identite/migrations/b7_04_doute.sql` (worker-b7 0f74430, pas encore sur main) | un refus isolé de VIES n'est pas un verdict |
 | 20261006142236 | `socle_lot19af_activation_seul_decideur` | dépôt (worker-a5 430cf0e) : `omega/modules/socle/migrations/19af_activation_seul_decideur.sql` | un gérant **seul décideur** active lui-même un accord permanent de la liste blanche (Daliro J-2). Réécrit `preparer_approbation` par repère ; test 55 vert sur la recette |
-| 20261006 vers 14 h 25 Z (à lire dans `schema_migrations`) | `socle_lot19ag` | dépôt (worker-a5 28a046b) : `omega/modules/socle/migrations/19ag_execute_apres_a4_14_b4_05.sql` | EXECUTE à authenticated sur les quatre contrôles FILED rendus nécessaires par a4_14 ; retrait des deux outils du coffre Tamila accordés en trop par b4_05 (test 44) |
-| 20261006 vers 14 h 25 Z, après 19ag (à lire dans `schema_migrations`) | `daliro_b6_11` | dépôt (worker-b6 6263048) | les vues `btp_avenants_chiffres` et `btp_avenants_lignes_chiffrees` passent en `security_invoker` ; EXECUTE à authenticated sur `private.btp_prix_avenant(uuid)` et `btp_prix_ligne_avenant(uuid)`, que ces vues appellent désormais avec les droits du lecteur |
+| 20261006142237 | `daliro_b6_09` + `b6_10` | dépôt : `omega/modules/daliro/migrations/b6_09_activation_accord_j2.sql` (main 4fbd941), `b6_10_activation_seul_approbation.sql` (main 79cb08a) | activation de l'accord J-2 : règle des deux personnes, puis le seul décideur (b6_10, **après 19af**) |
+| 20261006142702 | `socle_lot19ag_execute_apres_a4_14_b4_05` | dépôt (worker-a5 28a046b) : `omega/modules/socle/migrations/19ag_execute_apres_a4_14_b4_05.sql` | EXECUTE à authenticated sur les quatre contrôles FILED rendus nécessaires par a4_14 ; retrait des deux outils du coffre Tamila accordés en trop par b4_05 (test 44) |
+| 20261006142703 | `daliro_b6_11_vues_invoker` (posé avec b6_05 et b6_06) | dépôt : `omega/modules/daliro/migrations/b6_11_vues_invoker.sql` (main 6263048) | les vues `btp_avenants_chiffres` et `btp_avenants_lignes_chiffrees` passent en `security_invoker` ; EXECUTE à authenticated sur `private.btp_prix_avenant(uuid)` et `btp_prix_ligne_avenant(uuid)`, que ces vues appellent désormais avec les droits du lecteur |
 
 **Étape C — clôture, toujours en dernier.**
 
