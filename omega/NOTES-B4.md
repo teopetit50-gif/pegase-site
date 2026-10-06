@@ -1,6 +1,7 @@
 # Session B4 — TAMILA, le module des cabinets d'avocats
 
-Branche `worker-b4`. Coordinateur : session_01B4JNQXyT69GytdvE9SjAnE.
+Branche `worker-b4`. Coordinateur : session_01B4JNQXyT69GytdvE9SjAnE (arrêtée le 06/10 à 03 h 10
+Paris) ; relais : session_01BCGFdpRKBvXKjouC75sYBg. **B4 est clos et fusionné.**
 Dernière mise à jour : 06/10/2026, matin (lot B4-2 : corrections du retour de recette, b4_01 et b4_04, pièces chiffrées à l'écran).
 
 ## Les deux jauges
@@ -293,3 +294,7 @@ passe**, captures `omega/recette-b4/reel-*-1440.jpg`.
 - 06/10, matin — retour de recette traité (00, 11, b4_04), b4_01 + test 13, carte Pièces et dépôt
   chiffré à l'écran, onglet dans ecrans.ts, souche locale commencée. Lot B4-2 envoyé (367fc44).
 - 06/10 — relecture en base réelle, tout passe (§ 8).
+- 06/10, 03 h 30 Paris — reprise par session_01ACKfUXKSgnD521nunHBY1w (Opus 5.5) après l'arrêt de
+  session_01HRJ7AmG9hKtDenMRTt1eW6 (crédit Fable). Écrit `omega/modules/tamila/CHAMPS-LECTURE-TAMILA.md` pour A1 :
+  les dix avis RPVA (`type_piece` = code `rpva_*` de `tamila_avis_lu`), leurs champs, `tamila_piece_autre`, et le
+  rappel qu'aucune pièce Tamila n'est lisible avant le coffre. Passerelle pièce lue → avis : à venir avec le coffre.
