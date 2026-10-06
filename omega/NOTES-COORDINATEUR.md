@@ -665,3 +665,12 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
 - 07 h 25 — A3 04efcda fusionné : « Noter un paiement » dans « À payer » (reste à payer,
   « Payée en partie / Payée », payées masquées). Relu en réel : 100 € par virement sur
   FAC-2026-10-0471 (daf2@) → reste 188,00 € sur 288,00 €, filed_etat_paiement partielle.
+- 07 h 30 — **Accessibilité des six écrans B fusionnée** (B1 be56d79, B2 3b3708e, B3 8d20e49,
+  B4 71c9463, B5 afebaaf, B6 6131c1a) : listbox/option → listes de boutons (aria-current),
+  pastilles role=img, cadres défilants tabIndex/region/aria-label ; scripts axe par module.
+  Restent des cadres défilants sans tabIndex : tiroma/Cabinet (B3), varelo/Depot et
+  ObjetDetail (B1), filed/EcranAPayer (A3) — demandés. A3 prépare
+  omega/recette-a3/verifier-en-ligne.mjs (13 écrans sur omegaai.fr).
+- **Vercel** : 4d1e26d est passé (statut success) — le quota glisse sur 24 h, des créneaux se
+  libèrent ; 05c7391 et fccee92 refusés de nouveau. À chaque point : regarder le statut du
+  HEAD et, s'il est refusé, retenter plus tard (une poussée suffit, elle emporte tout).
