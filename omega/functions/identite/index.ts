@@ -6,7 +6,7 @@
 
 import { journal, messageDe } from "@partage/journal.ts";
 import { configSupabaseDepuisEnv } from "@partage/portes.ts";
-import { passage } from "./passage.ts";
+import { optionsDepuisEnv, passage } from "./passage.ts";
 import { PortesIdentiteRpc } from "./portes.ts";
 import { sireneDepuisEnv } from "./sirene.ts";
 import { CACHE_JOURS_PAR_DEFAUT, type Contexte } from "./verifier.ts";
@@ -43,7 +43,7 @@ Deno.serve(async (req: Request) => {
     const url = new URL(req.url);
     const nombre = Number(url.searchParams.get("nombre") ?? "");
     const ctx = contexteDepuisEnv();
-    const bilan = await passage(ctx, Number.isInteger(nombre) && nombre > 0 ? { nombre: Math.min(nombre, 20) } : {});
+    const bilan = await passage(ctx, { ...optionsDepuisEnv(ctx.env), ...(Number.isInteger(nombre) && nombre > 0 ? { nombre: Math.min(nombre, 20) } : {}) });
     return new Response(JSON.stringify(bilan), { status: 200, headers: entetes });
   } catch (e) {
     // Même une panne de configuration répond proprement : le planificateur verra le motif.

@@ -28,6 +28,7 @@ Deno.test("portes : identite_a_verifier, noter_identite, identite_relancer", asy
     ) => ((c as { p_verification: string }).p_verification === "v1" ? { id: "v1", registre: "sirene", identifiant: "123456782", cache: null } : null),
     noter_identite: { verification: "v1", deja_repondue: false, complements: 1, recontrolees: "2" },
     identite_relancer: 3,
+    identite_balayer: 4,
   });
   const portes = new PortesIdentiteRpc(cfg, f);
   const d = await portes.aVerifier("v1");
@@ -55,6 +56,8 @@ Deno.test("portes : identite_a_verifier, noter_identite, identite_relancer", asy
   });
   assertEquals(await portes.relancer(2), 3);
   assertEquals(appels[3].corps, { p_heures: 2 });
+  assertEquals(await portes.balayer(90, 5), 4);
+  assertEquals(appels[4].corps, { p_jours: 90, p_max: 5 });
   assert(appels.every((a) => a.url.includes("/rest/v1/rpc/")));
 });
 

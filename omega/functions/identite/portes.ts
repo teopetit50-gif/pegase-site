@@ -1,6 +1,6 @@
 // Les portes de l'ouvrier IDENTITÉ : la file des travaux (socle partagé) et les
-// trois portes du lot b7_01 : identite_a_verifier, noter_identite,
-// identite_relancer, par la fonction rpc() exportée du socle partagé (A1,
+// portes des lots b7_01 et b7_03 : identite_a_verifier, noter_identite,
+// identite_relancer, identite_balayer, par la fonction rpc() exportée du socle partagé (A1,
 // commit 7425991). Jamais de lecture ni d'écriture directe dans une table.
 
 import { type ConfigSupabase, type Portes, PortesRpc, rpc } from "@partage/portes.ts";
@@ -60,6 +60,8 @@ export interface PortesIdentite extends PortesFile {
   ): Promise<Notation>;
   /** identite_relancer : rouvre les « indisponible » plus vieux que p_heures. */
   relancer(heures: number): Promise<number>;
+  /** identite_balayer : ouvre une demande pour chaque fournisseur dont la dernière réponse a plus de p_jours, p_max au plus. */
+  balayer(jours: number, max: number): Promise<number>;
 }
 
 /** Les portes par RPC PostgREST : la file par le socle partagé, les portes d'identité par le même chemin. */
@@ -110,6 +112,11 @@ export class PortesIdentiteRpc implements PortesIdentite {
 
   async relancer(heures: number): Promise<number> {
     const n = await this.rpc<number | null>("identite_relancer", { p_heures: heures });
+    return Number(n ?? 0);
+  }
+
+  async balayer(jours: number, max: number): Promise<number> {
+    const n = await this.rpc<number | null>("identite_balayer", { p_jours: jours, p_max: max });
     return Number(n ?? 0);
   }
 }

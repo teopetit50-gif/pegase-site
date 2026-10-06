@@ -1,18 +1,22 @@
 // Le passage : relance, prise, budget, battement toujours.
 
 import { assert, assertEquals } from "@std/assert";
-import { GENRES, MODULE, passage } from "../passage.ts";
+import { GENRES, MODULE, optionsDepuisEnv, passage } from "../passage.ts";
+import { envFactice } from "./doubles.ts";
 import { contexteDeTest, demandeDeTest, sireneActif, travailDeTest } from "./doubles.ts";
 
 Deno.test("passage à vide : relance, rien pris, battement avec le bilan", async () => {
   const { ctx, portes } = contexteDeTest({ env: { IDENTITE_VERSION: "identite/2026-10-05/t" } });
   portes.aRelancer = 2;
+  portes.aBalayer = 3;
   const b = await passage(ctx);
   assertEquals(b.pris, 0);
   assertEquals(b.relancees, 2);
+  assertEquals(b.balayees, 3);
   assertEquals(portes.relances, [2]);
-  assertEquals(portes.appels[1].porte, "prendreTravaux");
-  assertEquals(portes.appels[1].args, [GENRES, 10, "5 minutes", "identite-test"]);
+  assertEquals(portes.balayages, [{ jours: 90, max: 5 }]);
+  assertEquals(portes.appels[2].porte, "prendreTravaux");
+  assertEquals(portes.appels[2].args, [GENRES, 10, "5 minutes", "identite-test"]);
   assertEquals(portes.battements.length, 1);
   assertEquals(portes.battements[0].module, MODULE);
   assertEquals(portes.battements[0].genres, ["identite.verifier"]);
@@ -20,7 +24,27 @@ Deno.test("passage à vide : relance, rien pris, battement avec le bilan", async
   assertEquals(d.version, "identite/2026-10-05/t");
   assertEquals(d.sirene, "sirene-factice");
   assertEquals(d.vies, "vies-factice");
+  assertEquals(d.balayees, 3);
   assertEquals(b.battus, 1);
+});
+
+Deno.test("balayage : réglable par l'environnement, coupé à 0, une panne n'arrête rien", async () => {
+  assertEquals(optionsDepuisEnv(envFactice({})), {});
+  assertEquals(optionsDepuisEnv(envFactice({ IDENTITE_BALAYAGE_JOURS: "30", IDENTITE_BALAYAGE_MAX: "20" })), { balayageJours: 30, balayageMax: 20 });
+  assertEquals(optionsDepuisEnv(envFactice({ IDENTITE_BALAYAGE_MAX: "0" })), { balayageMax: 0 });
+  assertEquals(optionsDepuisEnv(envFactice({ IDENTITE_BALAYAGE_JOURS: "x", IDENTITE_BALAYAGE_MAX: "-1" })), {});
+  assertEquals(optionsDepuisEnv(envFactice({ IDENTITE_BALAYAGE_MAX: "9999" })), { balayageMax: 500 });
+
+  const { ctx, portes } = contexteDeTest();
+  const coupe = await passage(ctx, { balayageMax: 0 });
+  assertEquals(coupe.balayees, null);
+  assertEquals(portes.balayages, []);
+
+  portes.panne.balayer = new Error("identite_balayer : HTTP 500");
+  const b = await passage(ctx, { balayageJours: 30, balayageMax: 10 });
+  assertEquals(b.balayees, null);
+  assertEquals(b.erreur, undefined);
+  assertEquals(portes.appels.filter((a) => a.porte === "balayer")[0].args, [30, 10]);
 });
 
 Deno.test("passage : chaque travail compte dans son issue", async () => {

@@ -20,6 +20,8 @@ export class PortesMemoire implements PortesIdentite {
   battements: { module: string; genres: string[]; detail: unknown }[] = [];
   relances: number[] = [];
   aRelancer = 0;
+  balayages: { jours: number; max: number }[] = [];
+  aBalayer = 0;
   /** Pour simuler une porte en panne. */
   panne: Partial<Record<keyof PortesIdentite, Error>> = {};
 
@@ -73,6 +75,11 @@ export class PortesMemoire implements PortesIdentite {
     this.noterAppel("relancer", heures);
     this.relances.push(heures);
     return this.aRelancer;
+  }
+  async balayer(jours: number, max: number): Promise<number> {
+    this.noterAppel("balayer", jours, max);
+    this.balayages.push({ jours, max });
+    return this.aBalayer;
   }
 }
 
