@@ -149,7 +149,7 @@ export const SECRET = {
   engagements: [
     { titre: "Vous choisissez les dossiers lus", texte: "Tamila ne lit que les dossiers que vous lui ouvrez, un par un, et ne parcourt jamais votre messagerie de lui-même." },
     { titre: "Aucun entraînement sur vos pièces", texte: "Vos pièces ne servent à entraîner aucun modèle, ni le nôtre ni celui d'un fournisseur. Cette exclusion est une clause du contrat." },
-    { titre: "Effacement à la clôture", preparation: true, texte: "Lorsque vous clôturez un dossier, ses pièces et son dossier de faits sont effacés. Vous conservez l'export que vous avez téléchargé." },
+    { titre: "Effacement à la clôture", texte: "Lorsque vous clôturez un dossier, ses pièces et son dossier de faits sont effacés. Vous conservez l'export que vous avez téléchargé." },
     { titre: "Chiffrées sur votre poste", texte: "Chaque pièce est chiffrée, dossier par dossier, avant de quitter votre poste, puis conservée dans l'Union européenne. Les clés sont chez un prestataire français. Le modèle qui la lit est interrogé hors d'Europe, sans entraînement sur vos pièces." },
     { titre: "Chaque accès est journalisé", preparation: true, texte: "Le journal indique qui a consulté quel dossier, et à quelle date. Vous pouvez l'exporter à tout moment." },
     { titre: "Aucune écriture dans vos outils", texte: "Tamila dispose d'un accès en lecture seule : il n'envoie aucun message, ne communique aucune pièce et ne modifie rien dans votre logiciel." },
