@@ -1521,3 +1521,21 @@
   outline-offset: 2px;
   border-radius: 6px;
 }
+
+/* ——— la boîte de réception de FILED : le texte d'un courriel (jamais son HTML) ——— */
+.esp .esp-courriel-texte {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 12px 14px;
+  border: 1px solid var(--r-filet);
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--r-texte);
+}
+.esp .esp-courriel-texte:focus-visible {
+  outline: 2px solid var(--r-texte);
+  outline-offset: 2px;
+}

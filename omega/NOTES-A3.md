@@ -570,6 +570,32 @@ Dans `/espace/filed` seulement, la coquille et la barre ne bougent pas.
   « Corriger » reste actif sur R2026-000005 : certains champs n'y viennent pas
   du xml — conforme.
 
+## Lot du 06/10 (14) — point avec C1, puis la boîte de réception de FILED
+
+- **C1** (session_013U6ss7Vw2rKrDY5C7ax656) a reçu la liste de mes écrans, des
+  enchaînements de `recette-espace.mjs`, des relectures et des pièges connus,
+  et la commande pour jouer `non-regression.mjs` contre `/espace2`.
+- **Nouvelle page `/espace/filed/boite` « Boîte de réception »** (lien en tête
+  de FILED) : les courriels de `public.receptions` (canal email, module
+  filed), lecture seule sous la politique du périmètre. L'adresse de la boîte
+  (expediteurs, gérant/admin ; sinon la boîte des réceptions) avec « Copier
+  l'adresse » ; compteurs Nouveaux / Lus / Traités / Écartés (filtres) ;
+  recherche ; détail : De / À / Reçu le, pièces jointes (lien signé
+  `omega-clients`), « Devenue le document R… » par rapprochement (source
+  courriel + même expéditeur + même nom + ±2 jours, faute de lien en base),
+  pièces écartées (`detail.pieces_ignorees`), texte du message (jamais le
+  HTML). Le titre n'est pas « Documents reçus » : c'est déjà le h1 de
+  `/espace/filed` (les documents numérotés) ; la boîte montre les courriels
+  d'où ils viennent.
+- Aucune porte ne change le statut d'une réception côté client : la page ne
+  marque rien (ni « lu », ni « indésirable »). À demander si on le veut.
+- Recette : + boîte aux 5 largeurs et un enchaînement (adresse, 13 courriels,
+  pièce → R2026-000014, pièce écartée, filtre Écartés) ; accessibilité tout
+  passe ; non-régression 433/433 (écran `boite` nouveau, lien depuis `filed`).
+- Base réelle (`relecture-boite.mjs`, gérant et daf2) : boîte
+  factures@essai.omegaai.fr, 1 courriel « Facture 123 » (réception d'essai
+  id 1), Nouveau, sans pièce, texte lu. Rien écrit.
+
 ## Bloqué / contourné
 
 - **Outil Supabase (MCP)** : la permission d'exécuter du SQL a été refusée
