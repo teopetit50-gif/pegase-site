@@ -124,6 +124,8 @@ export default function DossierContrat({ dossier, source, role, moi, bareme, reg
   const prolongation = dossier.amendements.filter((a) => a.retour_prevu_le).sort((a, b) => (b.retour_prevu_le ?? "").localeCompare(a.retour_prevu_le ?? ""))[0] ?? null;
   const retourPrevu = prolongation?.retour_prevu_le && prolongation.retour_prevu_le > c.retour_prevu_le ? prolongation.retour_prevu_le : c.retour_prevu_le;
   const agence = agences.find((a) => a.entite_id === c.entite_id);
+  /* le retour chiffré porte l'heure de restitution (entrees.retour_reel_le) tant que l'export ne l'a pas écrite sur le contrat */
+  const renduLe = c.retour_reel_le ?? (p && typeof p.entrees.retour_reel_le === "string" ? p.entrees.retour_reel_le : null);
 
   const peutAgir = role !== null && role !== "lecteur";
   const peutAmender = role === "gerant" || role === "admin" || role === "valideur";
@@ -185,7 +187,7 @@ export default function DossierContrat({ dossier, source, role, moi, bareme, reg
         <div className="esp-carte-tete">
           <div className="esp-item-haut">
             <span className="esp-mono" style={{ fontWeight: 700, fontSize: 15 }}>{c.numero}</span>
-            <Pastille teinte={STATUTS_CONTRAT[c.statut].teinte}>{STATUTS_CONTRAT[c.statut].libelle}</Pastille>
+            <Pastille teinte={c.statut === "ouvert" && renduLe ? "gris" : STATUTS_CONTRAT[c.statut].teinte}>{c.statut === "ouvert" && renduLe ? "Rendu" : STATUTS_CONTRAT[c.statut].libelle}</Pastille>
             {p ? <Pastille teinte={STATUTS_PROPOSITION[p.statut].teinte}>{STATUTS_PROPOSITION[p.statut].libelle}</Pastille> : null}
             {p?.hors_bareme ? <Pastille teinte="ambre">Hors barème</Pastille> : null}
             {dossier.factures.some((f) => f.statut === "litige") ? <Pastille teinte="rouge">Litige</Pastille> : null}
@@ -200,7 +202,7 @@ export default function DossierContrat({ dossier, source, role, moi, bareme, reg
             <Def etiquette="Véhicule" fort>{vehicule ? `${vehicule.immatriculation}${vehicule.modele ? ` · ${vehicule.modele}` : ""}` : "—"}{categorie ? ` · cat. ${categorie.code}` : ""}</Def>
             <Def etiquette="Départ">{dateHeure(c.depart_le)}</Def>
             <Def etiquette="Retour prévu">{dateHeure(retourPrevu)}{prolongation ? <span className="esp-kpi-sous"> · {AMENDEMENTS[prolongation.type].toLowerCase()}</span> : null}</Def>
-            <Def etiquette="Rendu le" fort>{c.retour_reel_le ? dateHeure(c.retour_reel_le) : "pas encore"}</Def>
+            <Def etiquette="Rendu le" fort>{renduLe ? dateHeure(renduLe) : "pas encore"}</Def>
             <Def etiquette="Compteur">{c.km_depart !== null ? `${nombreFr(c.km_depart)} km` : "—"}{c.km_retour !== null ? ` → ${nombreFr(c.km_retour)} km` : ""}</Def>
             <Def etiquette="Forfait km">{c.km_illimite ? "illimité" : c.km_inclus !== null ? `${nombreFr(c.km_inclus)} km` : c.km_inclus_jour !== null ? `${nombreFr(c.km_inclus_jour)} km / jour` : <span className="esp-obligatoire">inconnu</span>}</Def>
             <Def etiquette="Carburant">{c.politique_carburant ? POLITIQUES[c.politique_carburant] : <span className="esp-obligatoire">inconnue</span>}{c.politique_carburant === "seuil" && c.seuil_charge_pct !== null ? ` (${c.seuil_charge_pct} %)` : ""}</Def>

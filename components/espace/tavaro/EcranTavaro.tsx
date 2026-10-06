@@ -343,7 +343,7 @@ export default function EcranTavaro() {
                       <span className="esp-item-titre">{nomLocataire(d.locataire)}{d.vehicule ? ` — ${d.vehicule.immatriculation}${d.vehicule.modele ? ` · ${d.vehicule.modele}` : ""}` : ""}</span>
                       <span className="esp-item-bas">
                         <span>Départ {dateCourte(d.contrat.depart_le)}</span>
-                        <span>{d.contrat.retour_reel_le ? `Rendu ${dateCourte(d.contrat.retour_reel_le)}` : `Retour prévu ${dateCourte(d.contrat.retour_prevu_le)}`}</span>
+                        <span>{d.contrat.retour_reel_le ? `Rendu ${dateCourte(d.contrat.retour_reel_le)}` : p && typeof p.entrees.retour_reel_le === "string" ? `Rendu ${dateCourte(p.entrees.retour_reel_le)}` : `Retour prévu ${dateCourte(d.contrat.retour_prevu_le)}`}</span>
                         <span>{nomAgenceDe(d.contrat.entite_id)}</span>
                       </span>
                     </button>
