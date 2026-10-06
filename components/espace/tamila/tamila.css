@@ -113,3 +113,10 @@
   text-underline-offset: 2px;
   cursor: pointer;
 }
+
+/* Le dossier ouvert dans la liste : une liste de boutons, l'ouvert porte
+   aria-current (axe-core refuse listbox / option sur des <li>). */
+.esp .esp-item[aria-current="true"] {
+  background: #f5f5f5;
+  box-shadow: inset 3px 0 0 #050505;
+}

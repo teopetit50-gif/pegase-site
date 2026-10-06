@@ -461,7 +461,7 @@ export default function EcranTamila() {
           ) : visibles.length === 0 ? (
             <Vide titre="Aucun dossier">{filtre ? "Rien dans cette famille." : source === "reelle" ? "Aucun dossier ne vous est ouvert. Ouvrez-en un, ou demandez à un responsable de vous y ajouter." : "Aucun dossier."}</Vide>
           ) : (
-            <ul className="esp-liste" role="listbox" aria-label="Dossiers du cabinet">
+            <ul className="esp-liste" aria-label="Dossiers du cabinet">
               {visibles.map((x) => {
                 const s = STATUTS_DOSSIER[x.dossier.statut];
                 const jours = x.prochaine ? joursAvant(x.prochaine) : null;
@@ -469,8 +469,7 @@ export default function EcranTamila() {
                   <li key={x.dossier.id}>
                     <button
                       type="button"
-                      role="option"
-                      aria-selected={choisi === x.dossier.id}
+                      aria-current={choisi === x.dossier.id ? "true" : undefined}
                       className="esp-item"
                       onClick={() => {
                         setChoix(x.dossier.id);
