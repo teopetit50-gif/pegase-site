@@ -232,4 +232,10 @@ Ouvert : le TAP du test à 5a4a2e6 (en cours chez le coordinateur) ; la fusion d
   un texte à virgules ; ordre gardé, sans doublon, filtre de b5_05 ; `lorani_propositions` (corps de b5_05) l'appelle.
   Essayé sur un Postgres 16 local jetable : sept formes, toutes justes ; la proposition rend [PCMI3, PCMI6].
   Test : deux assertions de plus (étape 19, b5_06) → 114 attendues.
+- 06/10, 2 h 02 Z (coordinateur) : décision commune (A1, `omega/CHAMPS-LECTURE.md` 9ebefca, « Une ligne par champ,
+  jamais deux ») : une liste = UNE ligne dont la valeur est un tableau jsonb. Suites : b5_06 recopie aussi
+  `lorani_valeurs_de_piece` (corps de b5_04) pour remonter le tableau tel quel (jsonb) ; l'ancienne forme reste lue.
+  Essayé en local (table `pieces_valeurs` réduite) : tableau → [PCMI3, PCMI6] ; deux lignes → [PC5, PC8] dans l'ordre
+  des boîtes. Test, étape 7 : la demande de pièces s'écrit désormais en une ligne `["PC5", "PC 8"]` (vraie chaîne
+  `enregistrer_lecture` → `lorani_lectures_passage`). Fiche `CHAMPS-LECTURE-LORANI.md` ligne 23 : une seule forme écrite.
 

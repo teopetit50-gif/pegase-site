@@ -13,6 +13,10 @@
 -- points-virgules). Un élément de tableau peut être un texte ou un objet {valeur|code}. Un JSON illisible est lu
 -- comme du texte. Les codes gardent le filtre de b5_05 : (PCMI|DPMI|PC|PA|PD|DP|CU) n[-n].
 -- private.lorani_propositions (corps de b5_05) n'appelle plus que cette fonction pour la liste.
+-- Décision commune du 06/10 (omega/CHAMPS-LECTURE.md, « Une ligne par champ, jamais deux », A1 9ebefca) : une liste
+-- est UNE ligne dont la valeur est un tableau jsonb. private.lorani_valeurs_de_piece (corps de b5_04) remonte donc
+-- désormais un tableau tel quel (jsonb) au lieu de sa chaîne JSON ; les valeurs simples restent du texte, comme avant.
+-- L'ancienne forme (plusieurs lignes « pieces ») reste lue.
 -- Migration idempotente (create or replace), rien n'est retiré.
 
 CREATE OR REPLACE FUNCTION private.lorani_codes_pieces(p jsonb)
@@ -137,3 +141,37 @@ begin
   return '[]'::jsonb;
 end $function$
 ;
+
+CREATE OR REPLACE FUNCTION private.lorani_valeurs_de_piece(p_piece uuid)
+ RETURNS jsonb
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+  with lues as (
+    select pv.id, pv.champ,
+           case jsonb_typeof(pv.valeur) when 'array' then pv.valeur else to_jsonb(pv.valeur #>> '{}') end as valeur, (pv.verifiee or pv.source = 'humain') as verifiee,
+           pv.texte, pv.page, pv.boite, pv.source = 'humain' as humain, pv.cree_le
+    from public.pieces_valeurs pv
+    where pv.piece_id = p_piece and pv.chiffre is null
+  ), simples as (
+    select distinct on (l.champ) l.champ,
+           jsonb_build_object('valeur', l.valeur, 'verifiee', l.verifiee, 'texte', l.texte, 'page', l.page) as v
+    from lues l
+    where l.champ <> 'pieces'
+    order by l.champ, l.humain desc, l.verifiee desc, l.cree_le desc, l.id
+  ), repetes as (
+    select l.champ,
+           jsonb_agg(jsonb_build_object('valeur', l.valeur, 'verifiee', l.verifiee, 'texte', l.texte, 'page', l.page)
+                     order by l.page nulls last,
+                              coalesce((l.boite ->> 'y')::numeric, -((l.boite ->> 'y1')::numeric)) nulls last,
+                              coalesce((l.boite ->> 'x')::numeric, (l.boite ->> 'x0')::numeric) nulls last,
+                              l.cree_le, l.id) as v
+    from lues l
+    where l.champ = 'pieces'
+      and (l.humain or not exists (select 1 from lues h where h.champ = 'pieces' and h.humain))
+    group by l.champ
+  )
+  select coalesce(jsonb_object_agg(x.champ, x.v), '{}'::jsonb)
+  from (select * from simples union all select * from repetes) x
+$function$;
