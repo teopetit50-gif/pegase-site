@@ -423,6 +423,22 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
 - À jouer contre omegaai.fr au retour du quota Vercel (07/10 ~04 h 30
   Paris), au signal du coordinateur.
 
+## Lot du 06/10 (10) — cadres qui défilent, atteignables au clavier (remarque de B6)
+
+- Les deux cadres de tableau qui défilent dans mes écrans (lignes de la
+  facture dans le dossier FILED, tableaux de « À payer ») portent
+  `tabIndex={0}`, `role="region"` et un `aria-label` ; leur focus se voit
+  (`.esp-tableau-cadre:focus-visible`). Validations, fournisseurs et point
+  n'ont pas de cadre défilant.
+- Contrôle ajouté à 390 px dans `accessibilite.mjs` et `verifier-en-ligne.mjs` :
+  toute zone qui défile (overflow auto/scroll et contenu plus grand) doit
+  avoir tabIndex ≥ 0 avec un rôle et un nom, ou contenir un élément
+  focalisable. Mes cinq écrans passent ; le contrôle relève bien, comme axe,
+  les cadres de tavaro, lorani et daliro.
+- `verifier-en-ligne.mjs` nomme désormais l'écran dans chaque constat. Contre
+  le Next local : écrans d'A3 tout passe ; 15 constats sur les B (12 axe +
+  3 cadres défilants). Recette 190 ✓, accessibilité ✓.
+
 ## Bloqué / contourné
 
 - **Outil Supabase (MCP)** : la permission d'exécuter du SQL a été refusée

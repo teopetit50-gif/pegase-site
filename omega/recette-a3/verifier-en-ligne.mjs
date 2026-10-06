@@ -24,6 +24,18 @@ const constats = [];
 const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) echecs++; };
 const releve = (c, m) => { console.log(`${c ? '  ✓' : '  !'} ${m}`); if (!c) constats.push(m); };
 
+/* une zone qui défile (horizontalement ou verticalement) doit se rejoindre au
+   clavier : elle a tabIndex ≥ 0 (et alors un rôle et un nom), ou contient un
+   élément focalisable — ce que mesure aussi axe (scrollable-region-focusable) */
+const DEFILANTES = `(() => [...document.querySelectorAll('.esp *')].filter(e => {
+  const st = getComputedStyle(e);
+  const defile = (/(auto|scroll)/.test(st.overflowX) && e.scrollWidth > e.clientWidth + 1) || (/(auto|scroll)/.test(st.overflowY) && e.scrollHeight > e.clientHeight + 1);
+  if (!defile) return false;
+  const atteinte = e.tabIndex >= 0 && e.getAttribute('role') && (e.getAttribute('aria-label') || e.getAttribute('aria-labelledby'));
+  const contient = !!e.querySelector('a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])');
+  return !atteinte && !contient;
+}).map(e => e.tagName + '.' + [...e.classList].join('.')))()`;
+
 /* [clé, chemin, à A3 ?, phrases attendues] */
 const ECRANS = [
   ['validations', '/espace/validations', true, ['Décider en lot', 'Le dossier', 'Ouvrir le dossier']],
@@ -42,7 +54,7 @@ const ECRANS = [
 const LARGEURS = [390, 768, 1024, 1440, 1700];
 
 for (const [cle, chemin, aA3, phrases] of ECRANS) {
-  const dire = aA3 ? ok : releve;
+  const dire = (c, m) => (aA3 ? ok : releve)(c, `${cle} · ${m}`);
   console.log(`— ${chemin}${aA3 ? '' : ' (écran des B : constats)'}`);
   const statut = await fetch(base + chemin, { redirect: 'follow' }).then((r) => r.status).catch((e) => `réseau : ${e.message}`);
   dire(statut === 200, `répond ${statut}`);
@@ -61,6 +73,7 @@ for (const [cle, chemin, aA3, phrases] of ECRANS) {
     dire(m.deb === 0 && m.larges.length === 0, `${largeur} : pas de débordement (${m.deb}${m.larges.length ? ' ; ' + m.larges.join(', ') : ''})`);
     /* sans la casse : les titres de section sont mis en capitales par la feuille de style */
     if (largeur === 1440) for (const p of phrases) dire(m.texte.toLowerCase().includes(p.toLowerCase()), `la page dit « ${p} »`);
+    if (largeur === 390) { const d = await s.evaluer(DEFILANTES); dire(d.length === 0, `390 : zones qui défilent atteignables au clavier${d.length ? ' — sauf ' + d.join(', ') : ''}`); }
     if (largeur === 390 || largeur === 1440) {
       await s.evaluer(axe + ';true');
       const v = await s.evaluer(`(async () => (await axe.run(document.querySelector('.esp'), { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] })).violations.map(x => ({ id: x.id, impact: x.impact, n: x.nodes.length })))()`);
