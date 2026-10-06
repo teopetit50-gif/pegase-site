@@ -6,6 +6,8 @@
    Ce que le client voit et fait, dans l'ordre du scénario (NOTES-B1.md) :
      · en tête, « Ce matin » (vague 3, CeMatin.tsx) : les lignes du point
        du matin Varelo — contrats à dénoncer, encours, réciproques ;
+     · « Le groupe sur une page » (GroupePage.tsx, b1_08) : ventes,
+       résultat, trésorerie et écarts de chaque société ;
      · en haut, quatre compteurs pour la nature choisie (codes locaux,
        objets du groupe, lots à valider, taux de rattachement) ;
      · à gauche, les objets du groupe (F-00001 « Scieries du Jura »…) ;
@@ -51,6 +53,7 @@ import Encours from "./Encours";
 import Contrats from "./Contrats";
 import Reciproques from "./Reciproques";
 import CeMatin from "./CeMatin";
+import GroupePage from "./GroupePage";
 import "./varelo.css";
 
 export type Donnees = Referentiel;
@@ -447,6 +450,7 @@ export default function EcranVarelo() {
       ) : null}
 
       {donnees && contexte ? <CeMatin source={source} client_id={client_id} actif={!!reel?.installation} codes={donnees.codes} objets={donnees.objets} /> : null}
+      {donnees && contexte ? <GroupePage source={source} contexte={contexte} client_id={client_id} societes={donnees.societes} onFait={(m) => setFait(m)} /> : null}
 
       <div className="esp-filtres" data-arrivee="" role="group" aria-label="Nature du référentiel" style={{ marginBottom: 12 }}>
         {NATURES.map((n) => (

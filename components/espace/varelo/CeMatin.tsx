@@ -5,7 +5,8 @@
    06/10/2026, B1). Les mêmes lignes que les sections déposées chaque
    matin au gérant et aux directions (private.grp_lignes_matin, migration
    b1_07) : contrats à dénoncer, encours du groupe, réciproques
-   intragroupe. En base réelle, public.grp_ce_matin(p_client) les rend au
+   intragroupe ; et, depuis b1_08, « le groupe ce matin » (trésorerie sous
+   plancher, ventes en retard sur l'objectif, balance ancienne). En base réelle, public.grp_ce_matin(p_client) les rend au
    périmètre de la personne ; dans l'exemple, elles sont tirées des mêmes
    données d'exemple que les cartes.
    ══════════════════════════════════════════════════════════════════════ */
@@ -18,12 +19,14 @@ import { montant } from "../format";
 import { aujourdhui, contratsExemple, echeancier } from "./contrats";
 import { calculerGroupe, exempleEncours, PLAFONDS_EXEMPLE } from "./encours";
 import { RECIPROQUES_EXEMPLE } from "./reciproques";
+import { BASES_EXEMPLE, ligneDePage } from "./groupe";
 import type { CodeRef, Objet } from "./types";
 
 type Ligne = { texte: string; gravite: "info" | "attention" | "critique"; lien: string };
-type Matin = { contrats: Ligne[]; encours: Ligne[]; reciproques: Ligne[] };
+type Matin = { groupe: Ligne[]; contrats: Ligne[]; encours: Ligne[]; reciproques: Ligne[] };
 
 const BLOCS: { cle: keyof Matin; titre: string; ancre: string; vide: string }[] = [
+  { cle: "groupe", titre: "Le groupe ce matin", ancre: "vrl-groupe", vide: "Trésoreries au-dessus des planchers, ventes dans les objectifs." },
   { cle: "contrats", titre: "Contrats à dénoncer", ancre: "vrl-contrats", vide: "Aucun contrat à dénoncer dans les 30 jours." },
   { cle: "encours", titre: "Encours du groupe", ancre: "vrl-encours", vide: "Aucun client au-dessus de son plafond ; les balances sont à jour." },
   { cle: "reciproques", titre: "Réciproques intragroupe", ancre: "vrl-reciproques", vide: "Les comptes réciproques concordent." },
@@ -63,7 +66,14 @@ function matinExemple(codes: CodeRef[], objets: Objet[]): Matin {
       gravite: (r.etat === "ecart" ? "attention" : "info") as Ligne["gravite"],
       lien: "/espace/varelo",
     }));
-  return { contrats, encours, reciproques };
+  const groupe: Ligne[] = [];
+  for (const p of BASES_EXEMPLE().map(ligneDePage).sort((a, b) => a.societe.localeCompare(b.societe))) {
+    if (p.sous_plancher) groupe.push({ texte: `${p.societe} : trésorerie de ${euros(p.tresorerie)}, sous son plancher de ${euros(p.tresorerie_plancher)} (balance au ${jj(p.arrete_le)})`, gravite: "attention", lien: "/espace/varelo" });
+    if (p.objectif_a_date !== null && p.objectif_a_date > 0 && p.ecart_objectif !== null && p.ecart_objectif < -0.1 * p.objectif_a_date)
+      groupe.push({ texte: `${p.societe} : ventes de ${euros(p.ventes)} au ${jj(p.arrete_le)}, ${euros(Math.round(-p.ecart_objectif * 100) / 100)} sous l'objectif à date`, gravite: "attention", lien: "/espace/varelo" });
+    if (p.age_jours > 35) groupe.push({ texte: `La balance générale de ${p.societe} date du ${jj(p.arrete_le)} (${p.age_jours} jours) : à redéposer`, gravite: "info", lien: "/espace/varelo" });
+  }
+  return { groupe, contrats, encours, reciproques };
 }
 
 export default function CeMatin({ source, client_id, actif, codes, objets }: { source: Source; client_id: string; actif: boolean; codes: CodeRef[]; objets: Objet[] }) {
@@ -75,10 +85,10 @@ export default function CeMatin({ source, client_id, actif, codes, objets }: { s
     const { data, error } = await createClient().rpc("grp_ce_matin", { p_client: client_id });
     if (error) {
       setErreur(true);
-      setReel({ contrats: [], encours: [], reciproques: [] });
+      setReel({ groupe: [], contrats: [], encours: [], reciproques: [] });
     } else {
       setErreur(false);
-      setReel(data as Matin);
+      setReel({ groupe: [], ...(data as Partial<Matin>) } as Matin);
     }
   }, [client_id]);
   useEffect(() => {
@@ -89,7 +99,7 @@ export default function CeMatin({ source, client_id, actif, codes, objets }: { s
 
   const m = source === "exemple" ? exemple : reel;
   if (!m) return null;
-  const total = m.contrats.length + m.encours.length + m.reciproques.length;
+  const total = m.groupe.length + m.contrats.length + m.encours.length + m.reciproques.length;
 
   return (
     <section className="esp-carte vrl-matin" aria-label="Ce matin" style={{ marginBottom: 16 }}>

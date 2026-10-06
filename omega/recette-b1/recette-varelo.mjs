@@ -301,11 +301,51 @@ for (const largeur of LARGEURS) {
   ok(await s.aller(base + '/espace/varelo'), 'page chargée');
   await s.dormir(500);
   const m = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Ce matin"]'); if (!c) return null; return { blocs: [...c.querySelectorAll('.vrl-matin-bloc')].map(b => ({ titre: b.querySelector('h3')?.innerText.replace(/\\s+/g, ' '), lignes: [...b.querySelectorAll('li[data-gravite]')].map(li => li.dataset.gravite + ' | ' + li.innerText) })), avant: c.compareDocumentPosition(document.querySelector('section[aria-label="Objets du groupe"]')) & 4 }; })()`);
-  ok(!!m && m.blocs.length === 3 && !!m.avant, '« Ce matin » est en tête, avec ses trois blocs');
-  ok(m && /Contrats à dénoncer 2/i.test(m.blocs[0].titre) && /^critique \| Avant le .* : dénoncer « Location de deux chariots élévateurs » \(Loc'Manut, Atelier Bertin — Siège \(Lyon\)\) — 7\s800\s€ par an$/.test(m.blocs[0].lignes[0]), `contrats : ${m?.blocs[0].lignes[0]}`);
-  ok(m && /Hôtel des Alpes : 79\s000\s€ d'encours pour le groupe, plafond 70\s000\s€/.test(m.blocs[1].lignes.join(' ')) && /balance clients de Bertin Menuiserie \(Annecy\) date du .* \(12 jours\)/.test(m.blocs[1].lignes.join(' ')), 'encours : le plafond dépassé et la balance ancienne');
-  ok(m && /écart de -500\s€ à expliquer/.test(m.blocs[2].lignes.join(' ')) && m.blocs[2].lignes.length === 3, `réciproques : ${m?.blocs[2].lignes.length} lignes`);
+  ok(!!m && m.blocs.length === 4 && !!m.avant, '« Ce matin » est en tête, avec ses quatre blocs');
+  ok(m && /Contrats à dénoncer 2/i.test(m.blocs[1].titre) && /^critique \| Avant le .* : dénoncer « Location de deux chariots élévateurs » \(Loc'Manut, Atelier Bertin — Siège \(Lyon\)\) — 7\s800\s€ par an$/.test(m.blocs[1].lignes[0]), `contrats : ${m?.blocs[1].lignes[0]}`);
+  ok(m && /Hôtel des Alpes : 79\s000\s€ d'encours pour le groupe, plafond 70\s000\s€/.test(m.blocs[2].lignes.join(' ')) && /balance clients de Bertin Menuiserie \(Annecy\) date du .* \(12 jours\)/.test(m.blocs[2].lignes.join(' ')), 'encours : le plafond dépassé et la balance ancienne');
+  ok(m && /écart de -500\s€ à expliquer/.test(m.blocs[3].lignes.join(' ')) && m.blocs[3].lignes.length === 3, `réciproques : ${m?.blocs[3].lignes.length} lignes`);
+  ok(m && m.blocs[0].lignes.length === 3 && /Agence de Grenoble : trésorerie de 18\s500\s€, sous son plancher de 25\s000\s€/.test(m.blocs[0].lignes.join(' ')) && /Bertin Menuiserie \(Annecy\) date du .* \(37 jours\)/.test(m.blocs[0].lignes.join(' ')), `le groupe ce matin : ${m?.blocs[0].lignes.join(' / ')}`);
   ok(await s.evaluer(`(() => { const a = document.querySelector('section[aria-label="Ce matin"] a[href="#vrl-contrats"]'); return !!a && !!document.getElementById('vrl-contrats'); })()`), 'le titre « Contrats à dénoncer » mène à la carte des contrats');
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1024, hauteur: 900, marque: 'b1-groupe', densite: 1 });
+  console.log('— le groupe sur une page (b1_08)');
+  ok(await s.aller(base + '/espace/varelo'), 'page chargée');
+  await s.dormir(500);
+  const carte = `document.querySelector('section[aria-label="Le groupe sur une page"]')`;
+  const lu = await s.evaluer(`(() => { const c = ${carte}; if (!c) return null; return { lignes: [...c.querySelectorAll('tbody tr')].map(tr => tr.innerText.replace(/\\s+/g, ' ')), texte: c.innerText.replace(/\\s+/g, ' ') }; })()`);
+  ok(!!lu && lu.lignes.length === 3, `la carte « Le groupe sur une page » : ${lu?.lignes.length} sociétés`);
+  ok(lu && /Ventes du groupe \(sociales\) 1\s720\s500,00\s€/.test(lu.texte) && /Trésorerie 220\s700,00\s€ 1 sous plancher/.test(lu.texte), 'totaux du groupe : ventes 1 720 500 €, trésorerie 220 700 €, une société sous son plancher');
+  const agence = lu?.lignes.find(l => /Agence de Grenoble/.test(l)) ?? '';
+  ok(/298\s500,00\s€/.test(agence) && /pas de balance N-1/.test(agence) && /Sous le plancher/.test(agence), `Grenoble : ventes, sans N-1, sous le plancher (${agence})`);
+  const siege = lu?.lignes.find(l => /Siège/.test(l)) ?? '';
+  ok(/1\s056\s000,00\s€/.test(siege) && /\+7,2\s%/.test(siege), `le siège : 1 056 000 €, +7,2 % sur l'an dernier (${siege})`);
+  ok(/ancienne de 37 jours/.test(lu?.lignes.find(l => /Annecy/.test(l)) ?? ''), 'la balance d\'Annecy est dite ancienne');
+  ok(await s.evaluer(`(() => { const tr = [...${carte}.querySelectorAll('tbody tr')].find(t => /Grenoble/.test(t.innerText)); const b = tr && [...tr.querySelectorAll('button')].find(b => /Objectifs/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`) === true, 'clic « Objectifs » sur Grenoble');
+  await s.dormir(400);
+  await s.evaluer(`(() => { const ch = [...${dlg()}.querySelectorAll('input.rv-champ')]; const poser = (el, v) => { Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, v); el.dispatchEvent(new Event('input', { bubbles: true })); }; poser(ch[1], '15 000'); })()`);
+  await s.dormir(200);
+  await s.evaluer(clic('[role="dialog"] button', '/Enregistrer/'));
+  await s.dormir(600);
+  const apres = await s.evaluer(`[...${carte}.querySelectorAll('tbody tr')].find(t => /Grenoble/.test(t.innerText))?.innerText.replace(/\\s+/g, ' ')`);
+  ok(apres && !/Sous le plancher/.test(apres) && /plancher 15\s000,00\s€/.test(apres), `plancher abaissé à 15 000 € : plus d'alerte (${apres})`);
+  ok(await s.evaluer(clic(`section[aria-label="Le groupe sur une page"] .esp-carte-tete button`, '/Déposer une balance générale/')) === true, 'clic « Déposer une balance générale »');
+  await s.dormir(400);
+  await s.evaluer(saisir('[role="dialog"] textarea', 'N° compte;Intitulé;Solde débit;Solde crédit\n706000;Prestations;;400 000,00\n512000;Banque;12 000,00;\nXYZ;Faux;1;'));
+  await s.dormir(300);
+  const pret = await s.evaluer(`(() => { const p = [...${dlg()}.querySelectorAll('.esp-pastille')].map(x => x.textContent); return p.includes('3 lignes') && p.includes('compte') && p.includes('debit') && p.includes('credit'); })()`);
+  ok(pret, 'les en-têtes Sage « N° compte », « Solde débit », « Solde crédit » sont reconnus');
+  await s.evaluer(clic('[role="dialog"] button', '/^\\s*Déposer\\s*$/'));
+  await s.dormir(700);
+  const res = await s.evaluer(`${dlg()}?.innerText.replace(/\\s+/g, ' ')`);
+  ok(/Balance déposée/.test(res) && /Comptes retenus 2/.test(res) && /numéro de compte illisible/.test(res) && /Ventes 400\s000,00\s€/.test(res), 'deux comptes retenus, un rejeté, ventes 400 000 €');
+  await s.evaluer(clic('[role="dialog"] button', '/^\\s*Fermer\\s*$/'));
+  await s.dormir(400);
+  const fin = await s.evaluer(`[...${carte}.querySelectorAll('tbody tr')].map(t => t.innerText.replace(/\\s+/g, ' '))`);
+  ok(fin.some(l => /400\s000,00\s€/.test(l)), 'la nouvelle balance remplace la précédente sur la page');
   s.fermer();
 }
 
