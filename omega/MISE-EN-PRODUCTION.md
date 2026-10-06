@@ -159,8 +159,9 @@ sont livrés : leurs bases partent. **Teo confirme.**
 | 20261006045756, 045757 | `b6_07`, `b5_08` + `b5_09` | dépôt (b3bd323, 8b9ebbc, fbf4c98) | |
 | 20261006051221 | `a4_15` | dépôt (634fe24) | |
 | 20261006134231 | `filed_realtime_fournisseurs` | SQL | |
-| (version de la pose, à relever) | `socle_lot19af_activation_seul_decideur` | dépôt (worker-a5 430cf0e) : `omega/modules/socle/migrations/19af_activation_seul_decideur.sql` | un gérant **seul décideur** active lui-même un accord permanent de la liste blanche (Daliro J-2). Réécrit `preparer_approbation` par repère ; test 55 vert sur la recette |
-| (version de la pose, à relever) | `socle_lot19ag` | dépôt (worker-a5, ce commit) : `omega/modules/socle/migrations/19ag_execute_apres_a4_14_b4_05.sql` | EXECUTE à authenticated sur les quatre contrôles FILED rendus nécessaires par a4_14 ; retrait des deux outils du coffre Tamila accordés en trop par b4_05 (test 44) |
+| 20261006142236 | `socle_lot19af_activation_seul_decideur` | dépôt (worker-a5 430cf0e) : `omega/modules/socle/migrations/19af_activation_seul_decideur.sql` | un gérant **seul décideur** active lui-même un accord permanent de la liste blanche (Daliro J-2). Réécrit `preparer_approbation` par repère ; test 55 vert sur la recette |
+| 20261006 vers 14 h 25 Z (à lire dans `schema_migrations`) | `socle_lot19ag` | dépôt (worker-a5 28a046b) : `omega/modules/socle/migrations/19ag_execute_apres_a4_14_b4_05.sql` | EXECUTE à authenticated sur les quatre contrôles FILED rendus nécessaires par a4_14 ; retrait des deux outils du coffre Tamila accordés en trop par b4_05 (test 44) |
+| 20261006 vers 14 h 25 Z, après 19ag (à lire dans `schema_migrations`) | `daliro_b6_11` | dépôt (worker-b6 6263048) | les vues `btp_avenants_chiffres` et `btp_avenants_lignes_chiffrees` passent en `security_invoker` ; EXECUTE à authenticated sur `private.btp_prix_avenant(uuid)` et `btp_prix_ligne_avenant(uuid)`, que ces vues appellent désormais avec les droits du lecteur |
 
 **Étape C — clôture, toujours en dernier.**
 
@@ -525,10 +526,19 @@ Constats du 6/10 vers 14 h 20 Z, en rejouant les tests 40 à 55 après 19af :
   - Pour que les fichiers eux-mêmes soient justes : A4 ajoute le `grant` à
     authenticated dans a4_14, et B4 retire `authenticated` des lignes 669-670 de
     b4_05.
-- **test 46, rouge** : les vues `btp_avenants_chiffres` et
-  `btp_avenants_lignes_chiffrees` (Daliro, B6) ne sont pas `security_invoker`. Une
-  vue lisible sans `security_invoker` contourne la RLS. **Bloquant pour la
-  production** tant que B6 ne l'a pas corrigé.
+- **test 46, rouge, puis corrigé par b6_11 (B6 6263048). Le blocage est levé.** Les
+  vues `btp_avenants_chiffres` et `btp_avenants_lignes_chiffrees` (Daliro) n'étaient
+  pas `security_invoker`. b6_11 les y passe, et donne EXECUTE à authenticated sur
+  `btp_prix_avenant(uuid)` et `btp_prix_ligne_avenant(uuid)`.
+- **Rejeu du 6/10 vers 14 h 27 Z** (tests 40 à 55 et `^test_b6_`) : **22/22 ok**, dont
+  les tests 44 et 46.
+- **a5_01 rejouée (étape C) garde ces deux fonctions.** Sa source (d) retient toute
+  fonction de `private` dont dépend (`pg_depend`, par la règle de réécriture) une vue
+  de `public` lisible par authenticated. Le test 44, qui applique la même règle, est
+  vert avec elles exécutables. Le fichier `omega/a5_01_liste_figee.txt` (main) n'est
+  lu par aucune migration ; il date du 5/10 (187 fonctions, contre 228 sur 824
+  aujourd'hui). Pour le remettre à jour, une seule source : la sortie de
+  `omega/migrations/a5_01_liste_requises.sql`, jouée sur la recette.
 
 Restent ouverts :
 - la provenance de chaque ligne « dépôt », lue dans `statements` à l'export (§ 1.5) ;
