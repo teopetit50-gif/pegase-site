@@ -30,6 +30,7 @@ const ECRANS = [
   ['demandes', '/espace2/demandes'],
   ['activite', '/espace2/activite'],
   ['reglages', '/espace2/reglages'],
+  ['utilisation', '/espace2/utilisation'],
   ['filed', '/espace2/filed?objet=facture:R2026-000016'],
   ['a-payer', '/espace2/filed/a-payer'],
   ['fournisseurs', '/espace2/filed/fournisseurs'],
