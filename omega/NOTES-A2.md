@@ -278,6 +278,50 @@ recette et poussé. Ce qui suit ne dépend pas de cette session :
    renvoyée (`messageId` ou `reference`) retrouve bien l'envoi, sinon la variante
    `p_reference = 'envoi:<uuid>'` de `noter_remise`.
 
+## Avis A2 : règle santé sur les envois (trou commun n° 7, proposé par B3)
+
+Position de l'ouvrier : **la restriction doit vivre dans le socle, avant que le
+travail existe**, pas dans l'ouvrier. L'expéditeur remet ce que `commencer_envoi` lui
+rend ; s'il doit décider seul qu'un fournisseur est interdit, la règle est déjà
+contournable (un autre ouvrier, un autre fournisseur).
+
+Où la porter, dans cet ordre :
+
+1. **Sur le fournisseur** : `private.fournisseurs_envoi.hds boolean not null default
+   false` (hébergement de données de santé certifié). Aujourd'hui tous à `false`,
+   `brevo` et `brevo_sms` compris, sauf preuve de certification HDS fournie par Teo.
+   `manuel` reste le seul chemin des envois de santé tant qu'aucun fournisseur HDS
+   n'est branché.
+2. **Sur le canal** : `canaux_envoi.sante_autorise boolean` : `email` et `lre`
+   oui (si fournisseur HDS), `sms` et `whatsapp` **non** pour un contenu de santé
+   (texte en clair chez un tiers non HDS, pas de pièce jointe chiffrée). Un module
+   de santé peut quand même envoyer un SMS *neutre* (« vous avez un message sur votre
+   espace ») : c'est un envoi avec `donnees_sante = false`, et c'est le gabarit qui
+   le dit (`gabarits_messages.donnees_sante`), pas le module.
+3. **Sur l'envoi, pas seulement sur le module** : `envois.donnees_sante` existe déjà,
+   c'est la bonne maille. `reglages_envois.sante = true` sert de garde-fou de module
+   (force `donnees_sante = true` sur tout envoi du module, ou interdit les gabarits
+   non marqués), pas de règle en soi.
+
+Règle à appliquer par le socle, au moment des verrous de `creer_envoi` / de la
+préparation, et à nouveau dans `confier_envoi` : **un envoi `donnees_sante = true`
+n'est confié qu'à un fournisseur `hds = true` sur un canal `sante_autorise`** ;
+sinon verrou `SANTE_FOURNISSEUR` (statut `bloque`, motif explicite, événement), jamais
+un simple différé, et jamais de repli silencieux vers un autre fournisseur.
+
+Ceinture et bretelles côté ouvrier, à faible coût : que `commencer_envoi` rende
+`donnees_sante` et `fournisseur_hds` ; l'expéditeur refuse alors définitivement
+(`echouer_envoi(…, true)`, code `SANTE_FOURNISSEUR_NON_HDS`) un envoi de santé qui
+lui arriverait quand même vers un fournisseur non HDS. Une vérification, un test.
+
+**Lot socle nécessaire : oui, petit** : deux colonnes (`fournisseurs_envoi.hds`,
+`canaux_envoi.sante_autorise`), le verrou dans la préparation et dans
+`confier_envoi`, et les deux clés dans la réponse de `commencer_envoi`. Côté A2, une
+vérification et un test une fois les clés exposées. Point de vigilance pour B3 :
+la réception (`receptions`) porte aussi des données de santé quand un patient
+répond ; même logique, le bucket `omega-clients` et la base doivent être HDS pour
+ces clients, ce qui est une question d'hébergement Supabase, pas d'ouvrier.
+
 ## Risques résiduels et choix
 
 - **Clé Brevo absente** : l'envoi est reporté par `echouer_envoi(…, false)` et le
