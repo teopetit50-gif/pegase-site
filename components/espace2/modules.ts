@@ -19,6 +19,7 @@ export const ONGLETS_ORGANISATION: Onglet[] = [
   { libelle: "Vue d'ensemble", href: RACINE, exact: true },
   { libelle: "À valider", href: `${RACINE}/validations` },
   { libelle: "Point du matin", href: `${RACINE}/point` },
+  { libelle: "Demandes reçues", href: `${RACINE}/demandes` },
   { libelle: "Activité", href: `${RACINE}/activite` },
   { libelle: "Réglages", href: `${RACINE}/reglages` },
 ];
@@ -63,6 +64,7 @@ export const MODULES: ModuleV2[] = [
     ],
     true,
   ),
+  m("cashd", "CASHD", "Relances", "Qui vous doit, depuis quand, où en est chaque relance", HandCoins),
   m("reput", "REPUT", "Demandes clients", "Demandes reçues et réponses préparées", MessageSquareText),
   m("varelo", "VARELO", "Référentiel du groupe", "Sociétés, lots et objets du groupe", Building),
   m("tavaro", "TAVARO", "Location", "Contrats, retours et barèmes", CarFront),
@@ -70,12 +72,11 @@ export const MODULES: ModuleV2[] = [
   m("tiroma", "TIROMA", "Cabinet dentaire", "Créneaux, fauteuils et liste d'attente", Smile),
   m("tamila", "TAMILA", "Dossiers du cabinet", "Dossiers chiffrés et pièces", FolderLock),
   m("daliro", "DALIRO", "Chantiers", "Chantiers, envois et accords", HardHat),
+  m("offload", "OFFLOAD", "Clients qui décrochent", "Rythme d'achat, décrochages et reprises de contact", UserMinus),
 ];
 
 /* les modules annoncés, sans écran encore : une place dans la navigation, sans lien */
 export const MODULES_A_VENIR: { cle: string; nom: string; libelle: string; icone: LucideIcon }[] = [
-  { cle: "cashd", nom: "CASHD", libelle: "Relances d'impayés", icone: HandCoins },
-  { cle: "offload", nom: "OFFLOAD", libelle: "Clients qui décrochent", icone: UserMinus },
 ];
 
 export const moduleDe = (cle: string | undefined) => MODULES.find((x) => x.cle === cle);

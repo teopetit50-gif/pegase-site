@@ -45,14 +45,17 @@ const ANCIEN = "espace_ancien";
 /* 06/10/2026, bascule accordée par Teo (coordinateur) : les écrans qui
    n'existent pas encore dans /espace2 restent sur l'ancien design, sans
    redirection, jusqu'à ce que C1 les reprenne. Retirer une entrée d'ici
-   quand app/espace2/<écran> existe. */
-const PAS_ENCORE_DANS_ESPACE2 = /^\/espace\/(cashd|offload|demandes)(\/|$)/;
+   quand app/espace2/<écran> existe. Le soir même, C1 a repris cashd,
+   offload et demandes : la liste est vide, gardée pour le prochain module
+   (un nom de premier niveau sous /espace, ex. "nouveau-module"). */
+const PAS_ENCORE_DANS_ESPACE2: string[] = [];
+const pasEncore = (chemin: string) => PAS_ENCORE_DANS_ESPACE2.some((e) => chemin === `/espace/${e}` || chemin.startsWith(`/espace/${e}/`));
 
 export async function proxy(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
   if (pathname === "/espace" || pathname.startsWith("/espace/")) {
     const demande = searchParams.get("ancien");
-    if (!PAS_ENCORE_DANS_ESPACE2.test(pathname) && (demande === "0" || (demande !== "1" && !request.cookies.has(ANCIEN)))) {
+    if (!pasEncore(pathname) && (demande === "0" || (demande !== "1" && !request.cookies.has(ANCIEN)))) {
       const cible = request.nextUrl.clone();
       cible.pathname = pathname.replace(/^\/espace/, "/espace2");
       cible.searchParams.delete("ancien");

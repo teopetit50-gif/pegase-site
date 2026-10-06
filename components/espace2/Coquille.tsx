@@ -22,7 +22,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, Banknote, Bell, Check, CheckCheck, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, LayoutGrid, Laptop, LifeBuoy, LogOut, Menu as IconeMenu, Moon, MoreHorizontal, Search, Settings, Sparkles, Sun, X } from "lucide-react";
+import { Activity, Banknote, Inbox, Bell, Check, CheckCheck, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, LayoutGrid, Laptop, LifeBuoy, LogOut, Menu as IconeMenu, Moon, MoreHorizontal, Search, Settings, Sparkles, Sun, X } from "lucide-react";
 import { Button, Dialog, DialogTrigger, Modal, ModalOverlay, Popover, RouterProvider } from "react-aria-components";
 import type { Utilisateur } from "@/lib/compte";
 import { SourceFournisseur, useSource } from "@/components/espace/source";
@@ -279,6 +279,7 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
       { libelle: "Vue d'ensemble", href: RACINE, icone: <LayoutGrid {...I} />, exact: true },
       { libelle: "À valider", href: `${RACINE}/validations`, icone: <CheckCheck {...I} />, compteur: enAttente },
       { libelle: "Point du matin", href: `${RACINE}/point`, icone: <Sun {...I} /> },
+      { libelle: "Demandes reçues", href: `${RACINE}/demandes`, icone: <Inbox {...I} /> },
       { libelle: "Activité", href: `${RACINE}/activite`, icone: <Activity {...I} /> },
     ],
     MODULES.map<Lien>((m) => ({

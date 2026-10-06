@@ -52,6 +52,8 @@ export default function APayer() {
   const [referenceSaisie, setReferenceSaisie] = useState("");
   const [envoi, setEnvoi] = useState(false);
   const [erreurPaiement, setErreurPaiement] = useState<string | null>(null);
+  /* le message de l'écran actuel, gardé à l'identique : « C'est fait. … » */
+  const [fait, setFait] = useState<string | null>(null);
 
   const charger = useCallback(async () => {
     await Promise.resolve();
@@ -104,6 +106,7 @@ export default function APayer() {
 
   const ouvrirPaiement = (f: FactureDuFournisseur) => {
     setErreurPaiement(null);
+    setFait(null);
     setDate(aujourdhuiIso());
     setMontantSaisi(String(aPayer(f, etats)).replace(".", ","));
     setMoyen(ibanValide(f.fournisseur_id) ? "virement" : "autre");
@@ -135,6 +138,7 @@ export default function APayer() {
         });
       }
       const reste = resteANoter - (m ?? resteANoter);
+      setFait(`${montant(m ?? resteANoter, f.devise)} notés sur ${f.reference ?? "la facture"} (${LIBELLES_MOYEN[moyen].toLowerCase()})${reste > 0.004 ? ` ; reste ${montant(Math.round(reste * 100) / 100, f.devise)}.` : " : la facture est payée."}`);
       toast(`Paiement noté : ${montant(m ?? resteANoter, f.devise)} sur ${f.reference ?? "la facture"}${reste > 0.004 ? `, reste ${montant(Math.round(reste * 100) / 100, f.devise)}` : ", facture payée"}`, "vert");
       setANoter(null);
     } catch (e) {
@@ -204,6 +208,11 @@ export default function APayer() {
       </div>
 
       <div style={{ display: "grid", gap: 12, marginBottom: 24 }}>
+        {fait ? (
+          <Note teinte="vert" role="status">
+            <strong>C&apos;est fait.</strong> {fait}
+          </Note>
+        ) : null}
         {sansIban ? (
           <Note teinte="ambre">
             <strong>
