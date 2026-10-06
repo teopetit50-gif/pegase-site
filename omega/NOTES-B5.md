@@ -7,8 +7,8 @@ Dernière mise à jour : 05/10/2026, 23 h.
 
 | Jauge | Valeur | Ce qui la fait monter |
 |---|---|---|
-| **Mécanique** (le socle fait ce que la page promet, prouvé par des tests joués sur la recette) | 90 % (**111/111** à 9ba2900, b5_01 à b5_04 posées sur la recette) | b5_01 à b5_03 posés sur la recette ; test pgTAP joué par le coordinateur : **110/111** (20 étapes : projet, équipe, RLS, lecture simulée par les portes du lecteur, confirmation, échéances dans `delais`, rappel J-10 par `controler_delais` → alerte → envoi `a_valider` au chef de projet, décision tacite, affichage, recours, purge, mesures, journal) ; les deux rouges corrigés (b5_04 + lecture du point) : **111/111 le 06/10 à 0 h 01 Z** ; manque : le lecteur réel ne connaît pas les types Lorani (spécification écrite, à A1) |
-| **Livrable client** (un gérant d'agence ouvre /espace/lorani et suit un vrai permis) | 85 % (**en ligne** sur https://omegaai.fr/espace/lorani depuis le 06/10, 0 h 52) | écran recetté aux cinq largeurs (41 contrôles), **relu en base réelle** avec `gerant@banc-varelo.test` : projet et PCMI créés par l'écran, calendrier calculé par le socle, **un vrai récépissé déposé et lu par le lecteur** (mais rendu « courrier non reconnu », voir § 3) ; fusion sur `main` en cours chez le coordinateur ; reste la vérification sur omegaai.fr et le rejeu du dépôt réel quand le lecteur connaît les types |
+| **Mécanique** (le socle fait ce que la page promet, prouvé par des tests joués sur la recette) | 95 % (114/114 le 06/10 à 2 h 05 Z, b5_05 et b5_06 posées ; avant :) 90 % (**111/111** à 9ba2900, b5_01 à b5_04 posées sur la recette) | b5_01 à b5_03 posés sur la recette ; test pgTAP joué par le coordinateur : **110/111** (20 étapes : projet, équipe, RLS, lecture simulée par les portes du lecteur, confirmation, échéances dans `delais`, rappel J-10 par `controler_delais` → alerte → envoi `a_valider` au chef de projet, décision tacite, affichage, recours, purge, mesures, journal) ; les deux rouges corrigés (b5_04 + lecture du point) : **111/111 le 06/10 à 0 h 01 Z** ; manque : le lecteur réel ne connaît pas les types Lorani (spécification écrite, à A1) |
+| **Livrable client** (un gérant d'agence ouvre /espace/lorani et suit un vrai permis) | 92 % (06/10, 2 h 10 Z : récépissé et demande de pièces réels lus par le lecteur, proposés, confirmés par l'écran ; avant :) 85 % (**en ligne** sur https://omegaai.fr/espace/lorani depuis le 06/10, 0 h 52) | écran recetté aux cinq largeurs (41 contrôles), **relu en base réelle** avec `gerant@banc-varelo.test` : projet et PCMI créés par l'écran, calendrier calculé par le socle, **un vrai récépissé déposé et lu par le lecteur** (mais rendu « courrier non reconnu », voir § 3) ; fusion sur `main` en cours chez le coordinateur ; reste la vérification sur omegaai.fr et le rejeu du dépôt réel quand le lecteur connaît les types |
 
 **Ce qui manque** : le lecteur (A1) doit apprendre les six types de courriers Lorani (`omega/modules/lorani/CHAMPS-LECTURE-LORANI.md`) ;
 la fusion dans `main` ; la vérification sur omegaai.fr. **Ce que Teo doit fournir** : rien pour l'instant ; pour que
@@ -238,4 +238,12 @@ Ouvert : le TAP du test à 5a4a2e6 (en cours chez le coordinateur) ; la fusion d
   Essayé en local (table `pieces_valeurs` réduite) : tableau → [PCMI3, PCMI6] ; deux lignes → [PC5, PC8] dans l'ordre
   des boîtes. Test, étape 7 : la demande de pièces s'écrit désormais en une ligne `["PC5", "PC 8"]` (vraie chaîne
   `enregistrer_lecture` → `lorani_lectures_passage`). Fiche `CHAMPS-LECTURE-LORANI.md` ligne 23 : une seule forme écrite.
+- 06/10, 2 h 05 Z (coordinateur) : b5_06 posé **depuis 24ea9b0** (pas encore fcd1b1a, messages croisés), `^test_b5_`
+  **114/114** ; lecteur A1 en version 17 (worker-a1 0d54731).
+- 06/10, 2 h 05–2 h 10 Z : **troisième dépôt réel, la chaîne complète passe.** `demande-pieces-v3.pdf` (pièce
+  2bfb560c…) : `Lue` à 35 s, proposition à 247 s « Date de la demande : 01/10/2026 — Pièces réclamées : PCMI3, PCMI6 »
+  (citations « Nantes, le 01/10/2026 », « - PCMI 3 : plan en coupe… »), confirmée par l'écran. Relu sous RLS avec la
+  session du gérant : permis 56c88739… `pieces_demandees`, numéro PC04410926A0042, dépôt 2026-09-15, demande
+  2026-10-01, `pieces_demandees = [PCMI3, PCMI6]` ; échéance `pieces` au 2027-01-01, ouverte, rappels [10, 3, 0].
+  Reste sur le banc la proposition vide confirmée à 1 h 40 (pièce 1c55b927…), donnée de recette.
 
