@@ -163,6 +163,33 @@ begin
   return jsonb_build_object('manifeste', v_m, 'fichiers', v_liste);
 end $$;
 
+-- Le point du matin (souche de deposer_section et retirer_section : une ligne par section ; le vrai socle valide
+-- les lignes, refuse le texte libre sur un objet chiffré et assemble le point).
+create table public.points_sections (id uuid primary key default gen_random_uuid(), client_id uuid not null, module text not null, jour date not null,
+  destinataire uuid, role text, titre text not null, items jsonb not null, ordre integer, retiree boolean not null default false,
+  unique nulls not distinct (client_id, module, jour, destinataire, role, titre));
+create or replace function private.deposer_section(p_client uuid, p_module text, p_jour date, p_destinataire uuid, p_role text, p_titre text, p_items jsonb, p_entite uuid default null, p_equipe uuid default null, p_sante boolean default false, p_donnees_du timestamptz default null, p_incomplete boolean default false, p_ordre integer default 100) returns uuid language plpgsql security definer set search_path to '' as $$
+declare v_id uuid;
+begin
+  if num_nonnulls(p_destinataire, p_role, p_equipe) <> 1 then raise exception 'un seul destinataire' using errcode = '22023'; end if;
+  if exists (select 1 from jsonb_array_elements(p_items) e where e ? 'objet_type' or coalesce(e ->> 'gravite', '') not in ('info', 'attention', 'critique')
+             or left(e ->> 'lien', 1) <> '/' or char_length(e ->> 'texte') > 300) then
+    raise exception 'ligne refusée par la souche' using errcode = '22023';
+  end if;
+  insert into public.points_sections (client_id, module, jour, destinataire, role, titre, items, ordre)
+  values (p_client, p_module, p_jour, p_destinataire, p_role, p_titre, p_items, p_ordre)
+  on conflict (client_id, module, jour, destinataire, role, titre) do update set items = excluded.items, retiree = false
+  returning id into v_id;
+  return v_id;
+end $$;
+create or replace function private.retirer_section(p_client uuid, p_module text, p_jour date, p_destinataire uuid, p_role text, p_titre text, p_entite uuid default null, p_equipe uuid default null) returns boolean language plpgsql security definer set search_path to '' as $$
+begin
+  update public.points_sections set retiree = true
+   where client_id = p_client and module = p_module and jour = p_jour and destinataire is not distinct from p_destinataire
+     and role is not distinct from p_role and titre = p_titre;
+  return found;
+end $$;
+
 -- ── B5, les délais (souche fidèle au calcul attendu par Tamila) ──
 create or replace function public.ajouter_mois(p_date date, p_mois int) returns date language sql immutable as $$ select (p_date + make_interval(months => p_mois))::date $$;
 -- Prorogation (art. 642) : samedi, dimanche et jours fériés de métropole → premier jour ouvrable suivant.

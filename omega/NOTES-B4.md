@@ -520,6 +520,22 @@ avaient quitté le bucket.
   Conséquence à prévoir : quand A5 l'appellera, l'assistante verra la file des avis à rattacher (RLS de
   `tamila_avis_entrants`) sans leur contenu ; à aligner alors (file réservée aux avocats).
 
+## 19. Le point du matin (carnet du coordinateur, n° 3 ; lot B4-14, 06/10)
+
+- **Base** : `b4_14_tamila_point_matin.sql` — `tamila_deposer_points` (cron `tamila-matin` toutes les 30 min, dès
+  5 h heure de Paris) dépose par `deposer_section` :
+  · à chaque avocat ou collaborateur, « Tamila : vos délais et audiences » sur SES dossiers (responsable ou membre,
+    hors muraille) : délais à confirmer (avocats ; critique au-delà de 48 h), échéances dépassées sans acte et
+    échéances des sept jours (critique à J-2), audiences d'aujourd'hui et de demain, audiences des trois derniers
+    jours sans temps saisi (b4_12), avis reçus par courriel à rattacher (qui lit la réception, b4_13) ;
+  · au gérant, « Tamila : le cabinet » : délais dépassés sans acte, conflits sans décision, dossiers sans
+    convention après quinze jours, factures impayées à trente jours (montant), effacements des sept jours.
+  Aucun nom, aucune référence, aucune juridiction, aucun objet désigné (le socle n'accepterait pour un objet
+  chiffré qu'un gabarit) : des comptes, des dates, des actes et des natures d'audience, lien `/espace/tamila`.
+  Section vide retirée ; erreur d'un cabinet → alerte, les autres continuent. Le serveur seul.
+- **Test** `23_point_matin.sql` : 18 contrôles (souche : `deposer_section` / `retirer_section` imités). Série
+  locale 530 ok (les 25 échecs connus de 04/06/10/11, faute des règles de procédure en local).
+
 ## 7. Prochaine étape
 
 1. (fait : en ligne, vérifié le 06/10.)
