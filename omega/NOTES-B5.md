@@ -1,6 +1,6 @@
 # Session B5 — LORANI, le calendrier du permis (vague 2)
 
-Branche `worker-b5`. Coordinateur : session_01B4JNQXyT69GytdvE9SjAnE.
+Branche `worker-b5`. Coordinateur : session_01BCGFdpRKBvXKjouC75sYBg (Opus 5.5, depuis le 06/10 à 1 h 10 ; auparavant session_01B4JNQXyT69GytdvE9SjAnE).
 Dernière mise à jour : 05/10/2026, 23 h.
 
 ## Jauges
