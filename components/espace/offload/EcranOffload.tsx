@@ -27,6 +27,7 @@ import { dateCourte, montant } from "../format";
 import { A_RISQUE, NIVEAUX, STATUTS_REPRISE } from "./etats";
 import { exempleOffload } from "./exemples";
 import FicheCompte, { type Geste } from "./FicheCompte";
+import Affaires from "./Affaires";
 import Echeances from "./Echeances";
 import { changerStatut, chargerFiche, chargerTableau, noterContact, noterTache, ouvrirReprise, recalculer, saisirAchat, trancherRapprochement } from "./portes";
 import type { Compte, Fiche, Tableau } from "./types";
@@ -320,6 +321,11 @@ export default function EcranOffload() {
             )}
           </section>
           <Echeances source={source} onChoisir={(id) => {
+            setFiltre("tous");
+            setChoix(id);
+            if (window.innerWidth < 1024) document.getElementById("esp-dossier")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }} />
+          <Affaires source={source} onChoisir={(id) => {
             setFiltre("tous");
             setChoix(id);
             if (window.innerWidth < 1024) document.getElementById("esp-dossier")?.scrollIntoView({ behavior: "smooth", block: "start" });

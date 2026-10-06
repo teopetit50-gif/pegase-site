@@ -185,3 +185,41 @@ export type Equipement = {
 export type Contrat = { id: string; numero: string; libelle: string | null; debut: string | null; fin: string; reconduction: string; statut: string; s_eteint: boolean };
 
 export type ParcCompte = { equipements: Equipement[]; contrats: Contrat[] };
+
+/* c4_08 — affaires restées en plan */
+export type StatutAffaire = "en_attente" | "relancee_1" | "relancee_2" | "decision" | "repondue" | "retiree" | "close_sans_suite";
+
+export type AffaireLigne = {
+  id: string;
+  type: "commande" | "intervention";
+  reference: string;
+  libelle: string | null;
+  compte_id: string;
+  compte_nom: string;
+  compte_niveau: string | null;
+  disponible_le: string;
+  jours: number;
+  valeur_ht: number | null;
+  statut: StatutAffaire;
+  motif: string | null;
+  plus_vue: boolean;
+};
+
+export type AffairesListe = {
+  total: { affaires: number; valeur_ht: number; a_decider: number; closes_sans_suite: number };
+  affaires: AffaireLigne[];
+};
+
+export type AffaireCompte = {
+  id: string;
+  type: "commande" | "intervention";
+  reference: string;
+  libelle: string | null;
+  disponible_le: string;
+  jours: number;
+  valeur_ht: number | null;
+  statut: StatutAffaire;
+  motif: string | null;
+  retire_le: string | null;
+  decision: string | null;
+};

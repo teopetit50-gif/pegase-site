@@ -18,6 +18,7 @@ import { Loader } from "@/components/ui/loader";
 import { dateCourte, montant, nombreFr } from "../format";
 import { Avis, Def, Pastille, Vide } from "../ui";
 import Courbe from "./Courbe";
+import AffairesCompte from "./AffairesCompte";
 import ParcCompte from "./ParcCompte";
 import type { Source } from "../source";
 import { ISSUES, NIVEAUX, STATUTS_COMPTE, STATUTS_REPRISE } from "./etats";
@@ -198,6 +199,9 @@ export default function FicheCompte({ fiche, onAgir, source = "exemple" }: { fic
           </div>
         </div>
       ) : null}
+
+      <div className="esp-section-titre">En attente de retrait</div>
+      <AffairesCompte key={`affaires-${compte.id}`} compte={compte.id} source={source} />
 
       {source === "reelle" ? (
         <>
