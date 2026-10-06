@@ -123,6 +123,62 @@ priorité, journal, retour à « ok » après une commande, hors fenêtre de cl�
 
 **À inscrire dans `a5_01_liste_figee.txt`** : `offload_recalculer(p_client uuid)`.
 
+## Palier 3 — la reprise (lot c4_03)
+
+**Ce qui est posé** (`omega/modules/offload/migrations/c4_03_reprise.sql`) :
+
+- `public.offload_reprises` : une reprise par compte et par cycle (un seul cycle ouvert par compte, index unique) —
+  statut `a_valider` → `envoyee` → `relance_a_valider` → `relancee`, ou `appel` (pas de courriel, ou message retenu
+  par un verrou du socle) ; fin `repondue` (issue `reponse` ou `arret`) ou `close` (`commande`, `sans_reponse`,
+  `refusee`, `appel_passe`, `reprise_en_main`, `abandon`). Le signal du jour (niveau, score, raisons) y est figé.
+- `public.offload_taches` : `appel` (commercial du compte, échéance avant la clôture et sous 3 jours, détail = les
+  raisons en phrases + la dernière commande + téléphone + contact) et `repondre` (quand le client répond).
+- **Le message**, sans IA, depuis l'historique seul : « Je reprends votre dossier : votre dernière commande chez X
+  date du 1er septembre 2025 (réf. M1-1, « Entretien annuel », 650 € HT), il y a 13 mois. » Puis une question
+  ouverte, la signature réglée, et « répondez simplement « stop » ». Aucun prix, délai ni remise (test). La relance
+  cite le premier message et annonce qu'elle est la dernière.
+- **Validation** : chaque message passe par `private.preparer_envoi` → le socle crée la demande `envoi.email` (rien
+  ne part sans une personne), applique ses verrous (consentement, oppositions, heures, plafonds) et le mode des
+  réglages d'envoi. **Garde-fou essai** : OFFLOAD en mode essai ne prépare rien si les envois du module sont réglés
+  en réel (alerte du module, test).
+- **Suivi** : abonnements `envoi.{envoye,refuse,bloque,annule,expire,echec,non_remis}.offload` → `offload.envoi`,
+  `reception.nouvelle` → `offload.reception`. Réponse rattachée à l'envoi d'origine, sinon à l'adresse du compte.
+  À la réponse : pause du destinataire au socle (`private.opposer`, 30 j : la relance en attente est bloquée),
+  tâche « répondre ». Sur « stop », « désinscrire », « ne plus nous contacter »… (lu avant la citation) :
+  désinscription au socle, compte `arrete`, aucune reprise possible.
+- **Cycle** (`private.offload_cycle`, enchaîné à la détection de la nuit par `offload_detecter_tout`) : clôture sur
+  commande, relance après `delai_relance_jours` (7 ; 3 au moins), sortie du cycle après la relance, ouverture des
+  nouvelles reprises (clôture proche d'abord, puis priorité), au plus `plafond_reprises_jour` (20), quarantaine
+  `quarantaine_jours` (90). Bilan au journal (`offload.cycle`).
+- **Point du matin** « Clients qui décrochent » (gérant, valideur, collaborateur) : réponses à traiter, comptes à
+  joindre avant la clôture, comptes entrés à risque, appels du jour, messages en attente de validation ; cron
+  `offload-matin` (toutes les 30 min, dès 5 h à Paris).
+- Portes : `offload_ouvrir_reprise(compte)`, `offload_noter_tache(tache, statut, compte_rendu)` ;
+  `offload_regler` étendu (`signature`, `delai_relance_jours`, `quarantaine_jours`, `plafond_reprises_jour`).
+
+**Tests** : `omega/tests/offload/c4_03_reprise.sql` — `test_c4_03_message`, `test_c4_03_cycle`,
+`test_c4_03_reponse`, `test_c4_03_issues`, `test_c4_03_taches_et_droits`, `test_c4_03_point_matin`. Le départ réel
+(validation approuvée, ouvrier d'A2) est hors module : le test rejoue l'événement `envoi.envoye.offload` sur le
+suivi. Banc local : 14 tests verts sur les trois paliers.
+
+**Ordre de pose (recette)**, après c4_01 et c4_02 :
+1. `omega/modules/offload/migrations/c4_03_reprise.sql`
+2. `omega/tests/offload/c4_03_reprise.sql` (il emploie `tests.c4_compte_achats` de `c4_02_detection.sql` ;
+   `runtests('tests', '^test_c4_03_')`)
+
+**À inscrire dans `a5_01_liste_figee.txt`** : `offload_ouvrir_reprise(p_compte uuid)`,
+`offload_noter_tache(p_tache uuid, p_statut text, p_compte_rendu text)`.
+
+**Questions au coordinateur** :
+- Q3. **Consentement B2B.** Une reprise est un message non transactionnel : le socle exige un consentement
+  (`CONSENTEMENT_ABSENT`) sinon il bloque. La prospection par courriel d'un professionnel, sur un objet lié à son
+  activité, est permise sans accord préalable si l'opposition est offerte (le message dit « stop »). Voulez-vous
+  (a) que le gérant enregistre un consentement par compte (`noter_consentement`, source `contrat`), (b) une règle
+  socle « destinataire professionnel + courriel + lien de désinscription », ou (c) autre chose ? En attendant, un
+  compte sans accord voit sa reprise passer par l'appel du commercial, rien n'est envoyé.
+- Q4. `reglages_envois` du module `offload` pour le banc (mode `essai`, `essai_adresse`) : le test le pose lui-même
+  dans sa transaction ; pour un essai réel sur la recette, il faut la ligne (comme `recette-b6/banc_j2_reel.sql`).
+
 ## Lignes de capacité (`lib/produits/capacites/reprise.ts`) — tenue et preuve
 
 Rien n'est basculé `atteste: true` par moi : c'est le coordinateur, sur preuve posée en recette.
@@ -134,7 +190,18 @@ Rien n'est basculé `atteste: true` par moi : c'est le coordinateur, sur preuve 
 | Chaque compte est classé par la date de son dernier contact, au-delà d'un seuil que vous fixez. | **palier 2 livré (à poser)** — dernier contact = dernier achat pour l'instant ; les reprises du palier 3 s'y ajouteront | `offload_signaux.dernier_achat`, `jours_silence`, réglage `delai_silence_jours` ; `test_c4_02_detection` |
 | La fréquence d'achat habituelle d'un compte est mesurée, puis son décrochage détecté. | **palier 2 livré (à poser)** | `rythme_jours`, raisons `retard` / `silence` / `ralenti` ; `test_c4_02_detection` |
 | Les comptes sont priorisés par valeur attendue, pas par ordre alphabétique. | **palier 2 livré (à poser)** | `priorite` = valeur annuelle × score ; assertion « le premier de la liste est celui qui pèse le plus » |
-| Les autres lignes | à venir (paliers 3 à 5) | — |
+| Chaque message reprend la dernière prestation du compte et le temps écoulé depuis. | **palier 3 livré (à poser)** | `private.offload_message` ; `test_c4_03_message` |
+| Un compte sans réponse reçoit un second message, puis il sort du cycle. | **palier 3 livré (à poser)** | cycle : relance puis `sans_reponse` ; `test_c4_03_cycle` |
+| Un compte reçoit deux messages en tout, espacés d'au moins trois jours. | **palier 3 livré (à poser)** | `delai_relance_jours` ≥ 3 (contrainte) ; « deux messages en tout, jamais un troisième » ; quarantaine |
+| Une réponse, même négative, arrête la séquence et vous rend la conversation. | **palier 3 livré (à poser)** | `offload_lire_reponse` : pause socle, tâche « répondre » ; `test_c4_03_reponse` |
+| Aucun prix ni aucun délai n'est avancé dans un message sans que vous l'ayez écrit. | **palier 3 livré (à poser)** | message tiré de l'historique seul ; assertion « aucun prix, aucune remise, aucun délai » |
+| Une demande d'arrêt vaut retrait immédiat et définitif du cycle. | **palier 3 livré (à poser)** | désinscription socle + compte `arrete` ; `test_c4_03_reponse` |
+| Chaque message parti reste au journal, daté et consultable. | **palier 3 livré (à poser)** | `offload.message_envoye` au journal opposable + l'envoi du socle |
+| Les vagues s'enchaînent au rythme convenu, et chaque exécution laisse son bilan. | **palier 3 livré (à poser)** | cycle quotidien, `plafond_reprises_jour`, bilan `offload.cycle` au journal |
+| Les comptes réactivés sont suivis jusqu'à leur première commande. | **palier 3 livré (à poser)** | issue `commande` ; `test_c4_03_issues` |
+| Les messages partent par courriel, depuis la boîte de votre entreprise. | **partiel** : OFFLOAD prépare des courriels ; l'expéditeur (boîte de l'entreprise) est celui du socle (A2 : Gmail / Microsoft 365 pas encore branchés) | — |
+| Le système s'arrête de lui-même au premier doute, et vous le signale. | **partiel** : import douteux non appliqué, essai contre réel, verrous du socle ; d'autres doutes au palier 5 | `test_c4_01_garde_fou`, `test_c4_03_issues` |
+| Les autres lignes | à venir (paliers 4 et 5) | — |
 
 ## Journal
 
@@ -142,4 +209,5 @@ Rien n'est basculé `atteste: true` par moi : c'est le coordinateur, sur preuve 
   `lib/produits/capacites/reprise.ts` (46 lignes), SOCLE-EXTRAITS-COMMUN (relevés, jeux, instantanés, travaux,
   journal), NOTES-A1 (lecteur-exports), migrations Tiroma et Daliro pour les conventions.
 - 06/10 — palier 1 écrit, vérifié sur le banc local (pose ×2, 62 assertions vertes), poussé sur `worker-c4` (7c8c520), envoyé au coordinateur.
-- 06/10 — palier 2 (détection) écrit et vérifié sur le banc local (104 assertions vertes au total).
+- 06/10 — palier 2 (détection) écrit et vérifié sur le banc local, poussé (ce6cd3c), envoyé au coordinateur.
+- 06/10 — palier 3 (reprise) écrit et vérifié sur le banc local (14 tests verts sur les trois paliers).
