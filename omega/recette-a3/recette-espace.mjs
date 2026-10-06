@@ -16,7 +16,7 @@ mkdirSync(dossier, { recursive: true });
 let echecs = 0;
 const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) echecs++; };
 const ANGLAIS = /\b(Loading|Submit|Cancel|Approve|Reject|Delete|Save|Error|Pending|Due|Invoice|Supplier|Settings|Logout|Sign in|Dashboard|Today|Yesterday|Tomorrow)\b/;
-const ECRANS = [['validations', '/espace/validations'], ['filed', '/espace/filed'], ['point', '/espace/point']];
+const ECRANS = [['validations', '/espace/validations'], ['filed', '/espace/filed'], ['fournisseurs', '/espace/filed/fournisseurs'], ['point', '/espace/point']];
 const LARGEURS = [390, 768, 1024, 1440, 1700];
 
 for (const [nom, chemin] of ECRANS) {
@@ -39,7 +39,8 @@ for (const [nom, chemin] of ECRANS) {
     ok(!anglais, anglais ? `mot anglais à l'écran : « ${anglais[0]} »` : 'aucun mot anglais surveillé à l\'écran');
     ok(!!mesure.h1, `titre : ${mesure.h1}`);
     await s.capturer(`${dossier}${nom}-${largeur}.jpg`, { qualite: 55 });
-    s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
+    /* ERR_BLOCKED_BY_ORB : le script de Vercel Analytics (va.vercel-scripts.com), chargé en dev, refusé par le mandataire du conteneur */
+    s.soucis.filter((x) => !/CERT|insights|404|favicon|ERR_BLOCKED_BY_ORB/.test(x)).forEach((x) => ok(false, x));
     s.fermer();
   }
 }
@@ -163,6 +164,30 @@ for (const [nom, chemin] of ECRANS) {
   await s.dormir(900);
   const introuvable = await s.evaluer(`/Document introuvable/.test(document.querySelector('.esp').innerText)`);
   ok(introuvable, 'une cible inconnue est dite, sans erreur');
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-fournisseurs', densite: 1 });
+  console.log('— /espace/filed/fournisseurs : à confirmer en tête, fiche, factures');
+  ok(await s.aller(base + '/espace/filed/fournisseurs'), 'page chargée');
+  await s.dormir(600);
+  const tete = await s.evaluer(`(() => ({ premier: document.querySelector('.esp-item .esp-item-titre')?.textContent, kpi: [...document.querySelectorAll('.esp-kpi')].map(k => k.innerText.replace(/\\s+/g, ' ')), titre: document.querySelector('#esp-fournisseur .esp-carte-titre')?.textContent }))()`);
+  ok(tete.premier === 'Imprimerie Vidal SAS' && tete.titre === 'Imprimerie Vidal SAS', `le fournisseur à confirmer est en tête et ouvert (${tete.premier})`);
+  ok(/À confirmer 1/.test(tete.kpi.join(' | ')), `compteurs : ${tete.kpi.join(' | ')}`);
+  const fiche = await s.evaluer(`(() => { const t = document.querySelector('#esp-fournisseur').innerText; return { vies: /par VIES/.test(t), iban: /validé avec le fournisseur à sa confirmation/.test(t), facture: !!document.querySelector('#esp-fournisseur a[href*="objet=facture"]') }; })()`);
+  ok(fiche.vies && fiche.iban && fiche.facture, `fiche : identité VIES, IBAN proposé, lien vers la facture (${JSON.stringify(fiche)})`);
+  await s.evaluer(`[...document.querySelectorAll('#esp-fournisseur .r-btn')].find(b => /Confirmer ce fournisseur/.test(b.textContent))?.click()`);
+  await s.dormir(500);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Confirmer le fournisseur/.test(b.textContent))?.click()`);
+  await s.dormir(900);
+  const apres = await s.evaluer(`(() => { const t = document.querySelector('#esp-fournisseur').innerText; return { fait: /est confirmé/.test(t), actif: /Actif/.test(t), ibanValide: /Validé/.test(t), facture: /À valider/.test(t) }; })()`);
+  ok(apres.fait && apres.actif && apres.ibanValide && apres.facture, `confirmé : actif, IBAN validé, facture à valider (${JSON.stringify(apres)})`);
+  await s.capturer(`${dossier}fournisseurs-confirme-1440.jpg`, { qualite: 55 });
+  await s.evaluer(`(() => { const i = document.querySelector('input[type="search"]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, '512448'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(400);
+  const cherche = await s.evaluer(`[...document.querySelectorAll('.esp-item .esp-item-titre')].map(e => e.textContent)`);
+  ok(cherche.length === 1 && cherche[0] === 'Métallerie Roux SARL', `la recherche par SIREN trouve le fournisseur (${cherche.join(', ')})`);
   s.fermer();
 }
 

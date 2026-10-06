@@ -215,6 +215,39 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
 - Recette aux cinq largeurs : 112 contrôles ✓ (dont « de la demande à son
   dossier » : aperçu, lien, ouverture par l'URL, cible inconnue).
 
+## Lot du 06/10 (3) — la vue « Fournisseurs » de FILED
+
+- **/espace/filed/fournisseurs** (`app/espace/filed/fournisseurs/page.tsx`,
+  `components/espace/filed/EcranFournisseurs.tsx`), lien « Fournisseurs »
+  dans l'en-tête de FILED et retour « Documents reçus » ; sous
+  /espace/filed, l'onglet FILED reste allumé — la barre n'est pas touchée.
+- Compteurs (à confirmer, bloqués, actifs, refusés, filtrants), recherche
+  par nom / SIREN / TVA / code, liste triée (à confirmer, bloqués, puis par
+  nom) avec statut, identité, « n IBAN à valider », factures en cours.
+- Fiche : la même que dans le dossier (`FicheFournisseur.tsx`, sortie de
+  DossierVue) — confirmer (gris pour le déposant de la pièce d'origine),
+  revérifier (relu à 1, 2, 4 min), attester ; plus proposer un IBAN,
+  bloquer / débloquer. Les IBAN avec leur statut (un IBAN proposé d'un
+  fournisseur actif renvoie à la file « À valider ») et les factures du
+  fournisseur, chacune liée à son dossier (`/espace/filed?objet=facture:…`).
+- Lecture : `chargerVueFournisseurs` (`portes.ts`) — fournisseurs, IBAN,
+  dernière version de chaque facture avec la référence de son document, et
+  le déposant de la pièce d'origine. Realtime : `filed_fournisseurs`,
+  `filed_fournisseurs_ibans`, `filed_factures`.
+- Exemple : les fournisseurs des dossiers d'exemple réunis par leur code
+  (un même fournisseur y avait un identifiant par dossier).
+- **Relu en réel** (daf2@, 06/10 ~02 h 15 Z) : 1 à confirmer (Papeterie
+  Delorme SAS, « Sans identifiant », facture R2026-000003 bloquée, IBAN
+  …0189 proposé « validé avec le fournisseur à sa confirmation »), 1 actif
+  (ORANGE SA, identité vérifiée, l'IBAN d'essai à valider) ; aucun refus.
+  Capture `reel-fournisseurs-1440.jpg`.
+- Recette : la vue aux cinq largeurs et un enchaînement (à confirmer en
+  tête, fiche, confirmation → actif, IBAN validé, facture à valider ;
+  recherche par SIREN) — **143 contrôles ✓**. La recette ignore désormais
+  `ERR_BLOCKED_BY_ORB` : c'est le script Vercel Analytics
+  (`va.vercel-scripts.com`) chargé en dev, refusé par le mandataire du
+  conteneur, pas l'écran.
+
 ## Bloqué / contourné
 
 - **Outil Supabase (MCP)** : la permission d'exécuter du SQL a été refusée
