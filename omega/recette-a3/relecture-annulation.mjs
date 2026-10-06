@@ -47,7 +47,7 @@ await s.evaluer(`[...document.querySelectorAll('.r-btn')].find(b => /Annuler ma 
 await s.dormir(600);
 await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Annuler la demande/.test(b.textContent))?.click()`);
 let dit = '';
-for (let i = 0; i < 30; i++) { await s.dormir(500); dit = await s.evaluer(`[...document.querySelectorAll('.esp-avis')].map(a => a.textContent.trim()).filter(t => /C'est fait|Refusé|refus/i.test(t)).join(' / ')`); if (dit) break; }
+for (let i = 0; i < 30; i++) { await s.dormir(500); dit = await s.evaluer(`[...document.querySelectorAll('.esp-avis')].map(a => a.textContent.trim()).filter(t => /C'est fait|Refusé par la base/.test(t)).join(' / ')`); if (dit) break; }
 console.log('    après l\'annulation :', dit);
 ok(/est annulée/.test(dit), 'la base accepte l\'annulation');
 await s.dormir(1500);
