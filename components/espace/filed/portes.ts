@@ -246,4 +246,18 @@ export const confirmerFournisseur = (p_fournisseur: string, p_motif: string) => 
 export const attesterIdentite = (p_fournisseur: string, p_motif: string) => rpc("filed_attester_identite", { p_fournisseur, p_motif });
 export const demanderVerification = (p_client: string, p_registre: "sirene" | "vies", p_identifiant: string, p_fournisseur: string) =>
   rpc<string>("identite_demander", { p_client, p_registre, p_identifiant, p_fournisseur, p_force: true });
+/* a4_15 : le paiement d'une facture validée. filed_etat_paiement est une
+   lecture sous RLS ; sa forme (objet ou ligne de table) est normalisée. */
+export type EtatPaiement = { du: number; regle: number; reste: number; etat: "a_payer" | "partielle" | "payee"; dernier_le: string | null; nb_reglements: number };
+export const MOYENS_PAIEMENT = ["virement", "prelevement", "cheque", "carte", "especes", "compensation", "autre"] as const;
+export type MoyenPaiement = (typeof MOYENS_PAIEMENT)[number];
+export async function etatPaiement(p_facture: string): Promise<EtatPaiement | null> {
+  const r = await rpc<unknown>("filed_etat_paiement", { p_facture });
+  const o = (Array.isArray(r) ? r[0] : r) as Record<string, unknown> | null | undefined;
+  if (!o || typeof o !== "object") return null;
+  const n = (v: unknown) => (typeof v === "number" ? v : Number(v ?? 0));
+  return { du: n(o.du), regle: n(o.regle), reste: n(o.reste), etat: (o.etat as EtatPaiement["etat"]) ?? "a_payer", dernier_le: (o.dernier_le as string | null) ?? null, nb_reglements: n(o.nb_reglements) };
+}
+export const noterPaiement = (o: { facture: string; date: string | null; montant: number | null; moyen: MoyenPaiement | null; reference: string | null }) =>
+  rpc<string>("filed_noter_paiement", { p_facture: o.facture, p_date: o.date, p_montant: o.montant, p_moyen: o.moyen, p_reference: o.reference });
 export const apparierLigne = (p_facture: string, p_facture_ligne: string, p_commande_ligne: string, p_motif: string) => rpc("filed_apparier_ligne", { p_facture, p_facture_ligne, p_commande_ligne, p_motif });

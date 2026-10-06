@@ -18,7 +18,7 @@ const ECRANS = [
   ['validations', '/espace/validations', `[...document.querySelectorAll('.esp-actions .r-btn')].find(b => /^\\s*Approuver/.test(b.textContent))?.click()`],
   ['filed', '/espace/filed', `[...document.querySelectorAll('#esp-dossier .r-btn')].find(b => /Confirmer ce fournisseur/.test(b.textContent))?.click()`],
   ['fournisseurs', '/espace/filed/fournisseurs', `[...document.querySelectorAll('#esp-fournisseur .r-btn')].find(b => /Proposer un IBAN/.test(b.textContent))?.click()`],
-  ['a-payer', '/espace/filed/a-payer', null],
+  ['a-payer', '/espace/filed/a-payer', `[...document.querySelectorAll('.esp-a-payer .r-btn')].find(b => /Noter un paiement/.test(b.textContent))?.click()`],
   ['point', '/espace/point', null],
 ];
 

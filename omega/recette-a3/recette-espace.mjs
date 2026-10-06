@@ -231,9 +231,24 @@ for (const [nom, chemin] of ECRANS) {
   ok(r.groupes.join(',') === 'En retard,Cette semaine,Ce mois-ci', `groupes dans l'ordre : ${r.groupes.join(', ')}`);
   ok(/Transports Rivière/.test(r.lignes[0] ?? '') && /de retard/.test(r.lignes[0] ?? ''), `la facture en retard vient d'abord (${r.lignes[0]})`);
   ok(r.lignes.some(l => /Cabinet Ferrand/.test(l) && /IBAN manquant/.test(l)), 'la facture sans IBAN validé le dit');
-  ok(r.avis.some(a => /1 facture sans IBAN validé/.test(a)) && r.avis.some(a => /pas encore suivi/.test(a)), 'les avis : IBAN manquant, paiement non suivi');
+  ok(r.avis.some(a => /1 facture sans IBAN validé/.test(a)), "l'avis IBAN manquant");
   ok(r.lignes.length === 3, `${r.lignes.length} factures validées à payer`);
+  ok(/Payée en partie/.test(r.lignes[0] ?? '') && /1 000,00 € réglés/.test(r.lignes[0] ?? '') && /1 208,00 €/.test(r.lignes[0] ?? ''), `le règlement partiel se voit : reste, réglé, état (${r.lignes[0]?.slice(0, 160)})`);
   await s.capturer(`${dossier}a-payer-1440.jpg`, { qualite: 55 });
+  /* noter tout le reste sur la facture de Cabinet Ferrand : elle sort de la liste */
+  await s.evaluer(`[...document.querySelectorAll('.esp-a-payer tbody tr')].find(t => /Cabinet Ferrand/.test(t.textContent))?.querySelector('button')?.click()`);
+  await s.dormir(500);
+  const dlgP = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); if (!d) return null; const i = d.querySelector('input[inputmode="decimal"]'); return { titre: d.querySelector('h2')?.textContent, montant: i?.value, moyen: d.querySelector('select')?.value }; })()`);
+  ok(dlgP && /Noter un paiement/.test(dlgP.titre) && dlgP.montant === '1140', `le dialogue propose le reste (${dlgP?.montant}) et, sans IBAN validé, le moyen « ${dlgP?.moyen} »`);
+  await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input[inputmode="decimal"]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, '5000'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  ok(await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Noter le paiement/.test(b.textContent))?.disabled`) === true, 'un montant au-delà du reste laisse le bouton gris');
+  await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input[inputmode="decimal"]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, ''); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Noter le paiement/.test(b.textContent))?.click()`);
+  await s.dormir(800);
+  const apresP = await s.evaluer(`({ lignes: [...document.querySelectorAll('.esp-a-payer tbody tr')].map(t => t.textContent), fait: [...document.querySelectorAll('.esp-avis')].map(a => a.textContent).find(t => /C'est fait/.test(t)) ?? '', payees: [...document.querySelectorAll('.esp-filtre')].map(b => b.textContent).find(t => /payées/.test(t)) ?? '' })`);
+  ok(apresP.lignes.length === 2 && !apresP.lignes.some(t => /Cabinet Ferrand/.test(t)) && /la facture est payée/.test(apresP.fait) && /Afficher les payées \(1\)/.test(apresP.payees), `payée : elle sort de la liste, « ${apresP.payees} » (${apresP.fait.slice(0, 90)})`);
   s.fermer();
 }
 
