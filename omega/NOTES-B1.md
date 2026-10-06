@@ -199,3 +199,11 @@ prévu dans `espace.css`). Aucun autre listbox/option dans le module.
 Vérifié : tsc ✓, eslint ✓, build ✓, `recette-varelo.mjs` aux cinq largeurs ✓,
 `omega/recette-b1/accessibilite-varelo.mjs` (axe-core WCAG 2.1 A/AA à 390 et
 1440) : 0 écart, un seul objet courant, il suit le choix.
+
+**Suite (06/10, remarque de B6, axe `scrollable-region-focusable` à 390 px)** :
+les deux cadres `.esp-tableau-cadre` qui défilent — codes locaux de l'objet
+(`ObjetDetail.tsx`) et lignes rejetées d'un dépôt (`Depot.tsx`) — portent
+`tabIndex={0}`, `role="region"` et un `aria-label` (modèle
+`daliro/ChantierVue.tsx`). `accessibilite-varelo.mjs` contrôle les deux cadres
+et repasse axe sur le dialogue du dépôt avec son tableau des rejets, à 390 et
+1440 : 0 écart. tsc ✓ eslint ✓ build ✓, recette cinq largeurs ✓.

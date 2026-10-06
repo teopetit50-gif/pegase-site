@@ -112,7 +112,7 @@ export default function ObjetDetail({ objet, donnees, actions }: { objet: Objet;
         {codes.length === 0 ? (
           <p className="esp-kpi-sous">Aucun code : cet objet a été vidé par une correction.</p>
         ) : (
-          <div className="esp-tableau-cadre">
+          <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Codes locaux de l'objet (tableau qui défile)">
             <table className="esp-tableau">
               <thead>
                 <tr>
