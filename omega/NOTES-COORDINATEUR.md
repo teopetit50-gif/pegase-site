@@ -485,3 +485,8 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   (b1f4a03, cohérence du fournisseur) 3/3, mais 0 envoi réel comparé.
 - Remarques d'A1 sur les signatures Logos_w (actes ⊃ devis, devis_lignes ⊃ types_rdv ;
   patient_ref facultatif dans agenda) transmises à B3.
+- 03 h 40 — **Logos_w** : b3_11_signatures_logosw (worker-b3 9a183b1) posé ; signatures
+  devis +« Part AMO », patients +« Prénom », types_rdv +« Couleur » (relues en base) ;
+  `^test_b3_` 12/12 après. A1 041f6a2 : modeles/tiroma_logosw.json aligné, test « chaque
+  jeu reconnu par ses seuls en-têtes » vert ; pas de redéploiement (le JSON ne sert qu'à
+  l'essai à blanc, la fonction lit les jeux en base).
