@@ -605,3 +605,22 @@ des chantiers neufs (tables, écran, lecteur), à proposer au coordinateur en lo
   Base réelle : octets par lien signé omega-clients (portes.octetsPiece, `pieces.chemin` ajouté à la lecture).
   Recette : `omega/recette-b5/rapport-controle.mjs` (pdfinfo, pdftotext, unzip -t) ; exemples écrits à côté.
   NON VÉRIFIÉ : le rendu d'un vrai PDF de la base (seul le repli « fichier non disponible » a tourné, sur l'exemple).
+
+## b5_17 — le PLU depuis l'adresse (carnet n° 2) — 06/10/2026
+
+- Socle : `omega/modules/lorani/migrations/b5_17_plu_adresse.sql`, test `omega/tests/lorani/b5_08_plu_adresse.sql` (18 assertions,
+  réponses jouées par `private.lorani_plu_poser` : runtests annule, donc pg_net n'envoie rien).
+- Sources publiques sans clé : géocodage `data.geopf.fr/geocodage/search` (q, citycode, limit) ; cadastre
+  `apicarto.ign.fr/api/cadastre/parcelle` (code_insee, section, numero ; PLM : 75056/69123/13055 + code_arr) ; GPU
+  `apicarto.ign.fr/api/gpu/zone-urba|document|prescription-surf` (geom GeoJSON) et `municipality` (insee → is_rnu).
+- Appels par pg_net depuis la base (`private.lorani_http_get`) : la CSP (`next.config.ts`, partagé) bloque le navigateur.
+  Chaîne : chercher → geocodage (adresse ; type municipality ou autre commune à score < 0,7 → parcelle) → zonage (3 appels
+  ensemble) → trouve / introuvable (RNU dit) / erreur. `lorani_suivre_plu` relève net._http_response ; l'écran relève
+  toutes les 2,5 s pendant 1 min ; `lorani_lectures_passage` (redéfini une fois de plus, corps b5_16 + PLU) reprend toutes
+  les 5 min ; une demande sans réponse après 5 min = délai dépassé.
+- Essayé en local avec un faux schéma net et les VRAIES réponses relevées (12 rue des Hauts-Pavés, Nantes) : zone UMa,
+  PLUi Nantes Métropole, lien du règlement metropole.nantes.fr, 6 prescriptions. Non vérifié : pg_net réel (droits du
+  propriétaire sur net._http_response), à voir à la pose.
+- Écran : `components/espace/lorani/PluProjet.tsx` (« Règles d'urbanisme », avant le contrôle). Exemple : Lemoine (UMa,
+  Nantes) et Mercière (UCe1b, Lyon) trouvés ; Dubois a une réponse préparée (URm1, PLU-H) au clic.
+- Fiche de lecture : paragraphe pour A1 — ne rendre que les règles de la zone de `lorani_plu.zone`.

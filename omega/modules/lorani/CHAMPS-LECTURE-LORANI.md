@@ -71,3 +71,8 @@ il cite.
 - `<référence>` d'un poste : le numéro d'article tel qu'écrit, normalisé (`2.3.1` → `2_3_1`, `GO.04` → `go_04`).
 - Valeurs canoniques : nombre avec un point (`9.85`, `312.40`), sans unité. `page` et `boite` obligatoires sur
   chaque mesure : le constat renvoie l'architecte à l'endroit exact.
+- La zone du terrain est connue avant la lecture du règlement (b5_17) : `public.lorani_plu` (une ligne par projet,
+  `zone` = « UMa », `zones` si la parcelle en touche plusieurs, `document`, `reglement_url`), trouvée par la base au
+  Géoportail de l'urbanisme. Un règlement de PLUi couvre toutes les zones : ne rendre que les `regle.*` de la zone de
+  `lorani_plu.zone` (ou de chaque zone de `zones`), et `zone` = cette zone. Sans ligne `lorani_plu`, lire la zone
+  écrite sur la pièce.
