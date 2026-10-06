@@ -17,7 +17,7 @@ import { useState } from "react";
 import { Loader } from "@/components/ui/loader";
 import { dateCourte } from "../format";
 import { Avis, Pastille, type Teinte } from "../ui";
-import { activerAccordSeul, donnerAccord, fixerDelai, revoquerAccord } from "./portes";
+import { activerAccordSeul, donnerAccord, fixerDelai, revoquerAccord, routerSujet } from "./portes";
 import type { AccordSujet, Client, Monde } from "./types";
 
 const ETATS: Record<AccordSujet["statut"], { libelle: string; teinte: Teinte }> = {
@@ -59,6 +59,22 @@ export default function SujetsAutorises({ monde, source, client, role, relire, m
       setFait(quoi === "donner" ? `Accord proposé pour « ${a.libelle} » : un autre décideur l'active dans « À valider ».`
         : quoi === "revoquer" ? `Accord révoqué : les réponses « ${a.libelle} » attendent de nouveau votre validation.`
           : `Accord activé : les réponses « ${a.libelle} » tirées de votre base partent seules.`);
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
+    } finally {
+      setEnvoi(null);
+    }
+  };
+
+  const router = async (sujet: string, equipe: string | null) => {
+    setEnvoi(sujet);
+    setErreur(null);
+    try {
+      if (source === "reelle" && client) {
+        await routerSujet(client.client_id, sujet, equipe);
+        await relire();
+      } else modifierLocal((m) => ({ ...m, sujets: m.sujets.map((x) => (x.code === sujet ? { ...x, equipe_id: equipe } : x)) }));
+      setFait(equipe ? "Ce sujet va désormais au service choisi : seuls ses membres valident ses réponses." : "Ce sujet est de nouveau décidé par tous les décideurs.");
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
     } finally {
@@ -109,7 +125,22 @@ export default function SujetsAutorises({ monde, source, client, role, relire, m
                     {a.autorisable ? <Pastille teinte={e.teinte}>{e.libelle}</Pastille> : <Pastille contour>Toujours relu, par principe</Pastille>}
                   </span>
                   {(() => {
-                    const delai = monde.sujets.find((x) => x.code === a.sujet)?.delai_heures;
+                    const sujet = a.genre === "message" ? undefined : monde.sujets.find((x) => x.code === a.sujet);
+                    const equipes = monde.equipes ?? [];
+                    if (!sujet || equipes.length === 0) return null;
+                    return (
+                      <label className="esp-kpi-sous" style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                        Service qui décide :
+                        <select className="rv-champ" style={{ width: "auto", minWidth: 220, padding: "4px 30px 4px 8px" }} disabled={!dirige || envoi !== null} value={sujet.equipe_id ?? ""}
+                          onChange={(e) => void router(sujet.code, e.target.value || null)}>
+                          <option value="">Tous les décideurs</option>
+                          {equipes.map((q) => <option key={q.id} value={q.id}>{q.nom}</option>)}
+                        </select>
+                      </label>
+                    );
+                  })()}
+                  {(() => {
+                    const delai = a.genre === "message" ? null : monde.sujets.find((x) => x.code === a.sujet)?.delai_heures;
                     return delai ? (
                       <span className="esp-kpi-sous">
                         Délai de traitement : {delai} h{dirige ? (

@@ -130,3 +130,17 @@ Deno.test("une réception d'un autre module ou déjà traitée est ignorée sans
   assertEquals(b.issues.ignore, 2);
   assertEquals(claude.demandes.length, 0);
 });
+
+Deno.test("un dossier sur deux canaux : les messages précédents sont joints, et leurs nombres sont permis", () => {
+  const d = dossier("Et vous êtes ouverts samedi ?", {
+    precedents: [{ canal: "formulaire", recu_le: "2026-10-06T08:00:00Z", sujet: "Formulaire du site", corps: "Combien pour 2 portes ?", statut: "a_valider" }],
+  });
+  const q = contenuDemande(d);
+  assertStringIncludes(q, "MESSAGES PRÉCÉDENTS DU MÊME CLIENT");
+  assertStringIncludes(q, "<message_precedent canal=\"formulaire\"");
+  assertStringIncludes(q, "Combien pour 2 portes ?");
+  assert(q.indexOf("message_precedent") < q.indexOf("MESSAGE REÇU"), "les précédents viennent avant le dernier message");
+  const { redaction } = controler(d, { sujet: "horaires", langue: "fr", urgence: false, couverte: true, sources: [FICHE_HORAIRES.id],
+                                       corps: "Pour vos 2 portes, nous revenons vers vous ; le samedi, nous sommes ouverts de 9 h à 12 h." });
+  assertEquals(redaction.couverte, true);
+});
