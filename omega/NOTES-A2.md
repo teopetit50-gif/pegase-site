@@ -446,6 +446,66 @@ commande curl signée (il faut la valeur du secret : Teo, ou une session qui la 
   `public.receptions` (lue par REST si `SUPABASE_SERVICE_ROLE_KEY` est fournie, sinon
   requête SQL imprimée). Vérifié en local contre `traiterFormulaire` et les doubles : 1–3 OK.
 
+## Échange PA (06/10, demandé par le coordinateur) : ouvrier `echange-pa`
+
+Code dans `omega/functions/echange-pa/`, 24 tests Deno verts sur doubles, **rien de déployé,
+aucun appel réseau réel** (pas de compte PA). Voir le README des fonctions.
+
+**Choix de l'adaptateur, en attendant A4** : A4 n'a pas encore écrit sa recommandation de
+PA (pas de section « PA » dans NOTES-A4 au 06/10 14 h 40 Z). J'ai donc écrit l'adaptateur de
+**l'API normalisée AFNOR XP Z12-013** (annexe A, service Flow), que toutes les PA sont
+censées exposer aux opérateurs de dématérialisation. Il vaut pour la PA qu'A4 choisira, si
+elle suit la norme. Sources : les modèles publics de la norme (FlowInfo, Flow,
+SearchFlowParams, Acknowledgement), repris dans le SDK public `factpulse/sdk-go`, et pour
+les statuts la description publique de XP Z12-012 (CDAR). Si A4 recommande une PA dont
+l'API propre diffère (B2Brouter, par exemple : `/accounts/{account}/invoices…`), il suffit
+d'un second adaptateur qui implémente `PlateformeAgreee` : le passage ne change pas.
+
+**À A4, par le coordinateur** : (1) quelle PA, et expose-t-elle XP Z12-013 ? (2) qui fabrique
+les CDAR : le socle (champ `chemin`) ou l'ouvrier (champ `cdar`) ? Les deux sont prévus.
+(3) Ta table d'événements de cycle de vie : je prends les codes 200 à 213 ; l'ouvrier refuse
+d'émettre 200, 201, 202, 203 et 213 (statuts de plateforme).
+
+### Portes à poser (socle / FILED, pas A2), toutes `service_role`, en RPC
+
+Genres de travaux : `pa.deposer` charge `{"facture": uuid}` ; `pa.statut` charge
+`{"statut": uuid}`. Déposés par le socle quand une facture émise est prête, ou quand un
+statut est décidé (refus, encaissement…).
+
+1. `pa_commencer_depot(p_facture uuid) → jsonb` : verrouille. Rend `{deposer: false, statut,
+   motif}` (déjà déposée, annulée…) ou `{deposer: true, facture, client_id, suivi, nom,
+   syntaxe ('Factur-X'|'UBL'|'CII'), profil, regle, chemin, type_mime}`. `suivi` = id Omega
+   de la facture : c'est le `trackingId`, clé d'idempotence côté PA. `chemin` : le fichier
+   dans `omega-clients`.
+2. `pa_noter_depot(p_facture uuid, p_flux text, p_depose_le timestamptz)` : rejouable.
+3. `pa_echouer_depot(p_facture uuid, p_erreur text, p_definitif boolean)`.
+4. `pa_commencer_statut(p_statut uuid) → jsonb` : `{envoyer: false, …}` ou `{envoyer: true,
+   statut, client_id, suivi, chemin | cdar}`. `cdar` = `{message, emis_le, code, facture:
+   {numero, date AAAA-MM-JJ, type_code, emetteur_siren}, emetteur: {siren, nom, role BY|SE},
+   destinataire: {…}, motif: {code, texte}, montant: {valeur, devise}}`. Montant obligatoire
+   pour 212 ; motif pour 206, 207, 210.
+5. `pa_noter_statut(p_statut uuid, p_flux text, p_depose_le timestamptz)` et
+   `pa_echouer_statut(p_statut uuid, p_erreur text, p_definitif boolean)`.
+6. `pa_curseur() → timestamptz | null` et `pa_poser_curseur(p_curseur timestamptz)` : le
+   `updatedAt` du dernier flux relevé (une ligne, par PA).
+7. `pa_noter_flux(p_flux, p_sens 'entrant'|'sortant', p_type, p_syntaxe, p_suivi, p_accuse
+   'en_attente'|'ok'|'erreur', p_maj_le, p_chemin, p_sha256, p_detail jsonb, p_cle text) →
+   {id, nouveau}` : **idempotente sur `p_cle`** (`pa:<flux>:<maj_le>:<accuse>`). Elle fait le
+   métier :
+   - sortant avec `p_suivi` = id d'une facture ou d'un statut Omega : accusé de la PA (ok →
+     déposée ; erreur → rejetée, `p_detail.details` porte les motifs) ; c'est aussi le
+     rapprochement si `pa_noter_depot` est tombé après un dépôt accepté ;
+   - entrant facture (`SupplierInvoice`…) : `p_chemin` = `_pa/entrants/<flux>/<nom>` dans
+     `omega-clients`. **Le client n'est pas connu de l'ouvrier** : la porte le retrouve
+     (SIREN de l'acheteur dans le document, ou annuaire), rattache, et dépose la facture dans
+     FILED (lecture Factur-X / UBL / CII, côté A4) ;
+   - entrant statut (`…LC`, syntaxe CDAR) : `p_detail.cdar` = `{message, code, libelle,
+     facture, motif}` lu par l'ouvrier ; la porte retrouve la facture émise par son numéro.
+
+Points ouverts : chiffrement ou HDS des factures de santé ; une seule connexion PA (Omega
+opérateur pour tous ses clients) ou une par client (alors `pa_commencer_*` rend aussi
+l'identité de connexion, et l'ouvrier lit les secrets par client comme `secret_expediteur`).
+
 ## Risques résiduels et choix
 
 - **Clé Brevo absente** : l'envoi est reporté par `echouer_envoi(…, false)` et le

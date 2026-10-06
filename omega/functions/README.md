@@ -12,6 +12,7 @@ RPC et le contrat des portes, `doubles.ts` les doubles de test.
 | `expediteur` | `expediteur/` | ouvrier `envois.brevo`, `envois.brevo_sms`, `envois.confirmer` ; appelé chaque minute | `true` |
 | `webhooks-brevo` | `webhooks/brevo/` | événements de remise Brevo (remis, rebond, plainte, refus) | `false` |
 | `reception` | `reception/` | e-mail entrant Brevo, WhatsApp Cloud API, formulaire du site | `false` |
+| `echange-pa` | `echange-pa/` | ouvrier `pa.deposer`, `pa.statut` + relevé de la plateforme agréée ; appelé chaque minute. **Pas encore déployable : portes `pa_*` à poser** | `true` |
 
 Projet de recette : `ygwbgpowzlbdaajlsqkn` (`https://ygwbgpowzlbdaajlsqkn.supabase.co`).
 Jamais la production depuis ces sessions.
@@ -24,6 +25,7 @@ Prérequis : Deno 2 (`curl -fsSL https://deno.land/install.sh | sh`).
 cd omega/functions/expediteur     && deno fmt --check && deno lint && deno check index.ts && deno test --allow-env
 cd omega/functions/webhooks/brevo && deno fmt --check && deno lint && deno check index.ts && deno test --allow-env
 cd omega/functions/reception      && deno fmt --check && deno lint && deno check index.ts && deno test --allow-env
+cd omega/functions/echange-pa     && deno fmt --check && deno lint && deno check index.ts && deno test --allow-env
 ```
 
 Les tests n'ont besoin ni de réseau ni de base : toutes les portes, Brevo, Graph et
@@ -163,6 +165,28 @@ FORMULAIRE_SECRET=… deno run --allow-env omega/functions/reception/outils/sign
 ```
 
 Il imprime la commande `curl` complète avec les deux en-têtes.
+
+## Échange avec la plateforme agréée (`echange-pa/`)
+
+Facture électronique (réforme du 1/09/2026) : dépôt des factures émises, dépôt des statuts
+de cycle de vie (CDAR), relevé des factures et statuts reçus. Même forme que l'expéditeur.
+
+- `pa.ts` : l'interface `PlateformeAgreee` (`deposer`, `relever`, `telecharger`, `sante`),
+  `ErreurPA` classée définitive (400, 404, 413, 422) ou transitoire (401, 403, 429, 5xx,
+  réseau), les quatorze statuts 200 à 213.
+- `afnor.ts` : adaptateur de l'API normalisée AFNOR XP Z12-013 (service Flow : `POST /flows`
+  multipart `flowInfo` + `file`, `POST /flows/search`, `GET /flows/{id}?docType=Original`,
+  `GET /healthcheck`), OAuth2 client credentials. Écrit d'après les modèles publics de la
+  norme ; **aucun appel réel fait** (pas de compte PA).
+- `cdar.ts` : fabrication d'un CDAR de traitement (TypeCode 23) pour les statuts 204 à 212,
+  lecture tolérante d'un CDAR reçu. **À valider contre le XSD CDAR D22B et le Schematron
+  BR-FR-CDV dans le bac à sable de la PA avant tout envoi réel.**
+- `passage.ts` : travaux `pa.deposer` {facture} et `pa.statut` {statut}, puis relevé depuis
+  le curseur, puis `battre_ouvrier('echange-pa', …)`.
+- Variables : `PA_FLOW_URL` (racine du service Flow chez la PA, version comprise),
+  `PA_TOKEN_URL`, `PA_CLIENT_ID`, `PA_CLIENT_SECRET`, `PA_SCOPE` (facultatif). Absentes :
+  travaux reportés `PA_NON_BRANCHEE`, aucun relevé, battement `pa_branchee: false`.
+- Portes `pa_*` : contrat dans `omega/NOTES-A2.md` (« Échange PA »), **pas encore posées**.
 
 ## Contrat des portes (rappel)
 
