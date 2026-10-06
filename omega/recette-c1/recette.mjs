@@ -33,6 +33,8 @@ const ECRANS = [
   ['a-payer', '/espace2/filed/a-payer'],
   ['fournisseurs', '/espace2/filed/fournisseurs'],
   ['comptabilite', '/espace2/filed/comptabilite'],
+  ['boite', '/espace2/filed/boite'],
+  ['reput', '/espace2/reput'],
   ['filed-electronique', '/espace2/filed?objet=facture:R2026-000014'],
   ['varelo', '/espace2/varelo'],
   ['tavaro', '/espace2/tavaro'],
