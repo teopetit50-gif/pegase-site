@@ -357,3 +357,21 @@ A0103, déposée le 2026-06-01 ; le socle la met d'emblée en `decision_a_confir
   d'un autre permis, en mémoire seulement (rien en base). `courrier-reel.mjs` s'arrête désormais si le permis visé
   n'est pas ouvert en base réelle.
 
+## 10. b5_07 en réel (06/10, 2 h 35–2 h 52 Z)
+
+- Coordinateur, 2 h 35 Z : b5_07 posée depuis a4e3197, `^test_b5_` **120/120** ; amorce sur le banc : « Pavillon
+  Lemoine » → historique [{2026-10-03, [PCMI2, PCMI8]}] (la lettre du 01/10 avait été écrasée avant la pose).
+- Rejeu par l'écran : `demande-pieces-v4.pdf` = la lettre du 01/10 (PCMI 3, PCMI 6), autre empreinte, déposée sur
+  « Pavillon Lemoine » : proposition à 211 s [PCMI3, PCMI6] du 01/10 (non écartée : l'historique ne la connaissait
+  pas), confirmée. Relu sous RLS : `date_demande_pieces` **2026-10-01** (la plus ancienne), `pieces_demandees`
+  **[PCMI3, PCMI6, PCMI2, PCMI8]** (la lettre la plus ancienne d'abord), `demandes_pieces` = les deux lettres,
+  échéance `pieces` revenue au **2027-01-01**, rappels [10, 3, 0] ; alerte « attention »
+  `lorani:permis:56c88739…:seconde_demande:2`. L'écran (base réelle) affiche « Plusieurs demandes de pièces. À
+  fournir : PCMI3, PCMI6, PCMI2, PCMI8. Lettres : du 01/10/2026 (PCMI3, PCMI6) ; du 03/10/2026 (PCMI2, PCMI8)… »
+  (capture `reel-seconde-demande-1440.jpg`). Le banc a retrouvé une scène juste, et le cas « la lettre la plus
+  ancienne arrive en second » est prouvé.
+- Défaut vu : le titre de l'alerte dépassait 200 caractères, coupé avant les articles → **b5_08**
+  (`b5_08_titre_alerte_seconde_demande.sql`, corps du trigger de b5_07, seuls les deux titres changent : articles
+  avant la liste, intitulé borné à 60). Essayé en local par-dessus b5_07 : titres complets, règle inchangée. Le
+  test 19 bis (titre `like '%seconde demande de pièces%'`) reste vrai.
+
