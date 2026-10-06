@@ -1,5 +1,27 @@
 # Session C5 — la vitrine exactement vraie
 
+## REPRISE (pause demandée par Teo, 06/10/2026, 21 h Z)
+
+**Règle de Teo (06/10, 19 h 25 Z puis 19 h 40 Z) : le site public omegaai.fr reste inchangé.** Aucune pastille
+« En préparation », aucune reformulation sans son accord. main est revenu à la vitrine de 15 h 55 (c0494b4c), sauf
+trois phrases corrigées avec son accord (Tamila hébergé dans l'UE ; Tiroma point du matin dans l'espace sécurisé ;
+Tiroma ne contacte un patient qu'avec un message validé). **Ne modifier aucun fichier de vitrine sans un ordre écrit
+du coordinateur qui cite l'accord de Teo.**
+
+**Fait :**
+- Passes 1 à 8 (reformulations, pastilles, REPUT, OFFLOAD, métré, appels manqués) : écrites et recettées, détail
+  ci-dessous phrase par phrase. Les passes 1 à 7 ont été fusionnées puis retirées de main par la remise du site ; la
+  passe 8 (972ccfda, b2f01678) n'a jamais été fusionnée. **Aucune n'est à fusionner** (décision de Teo) ; la branche
+  est gardée comme trace.
+- Chiffrage des pages transversales (lecture seule) : `omega/CHIFFRAGE/transversal.md`, commit f8c9ff9d. 220 promesses
+  (29 A, 67 B, 76 C, 33 D, 15 T), ≈ 135–160 j pour tout amener à B, ≈ 80 j + 4 j communs de B à A. À reprendre
+  seul : `git checkout f8c9ff9d -- omega/CHIFFRAGE/transversal.md` (ne pas fusionner la branche).
+
+**Prochaine étape exacte :** attendre le réveil du coordinateur. Si Teo accepte de corriger les phrases fausses
+relevées sans code (synthèse du chiffrage, point 5), repartir d'une branche neuve sur origin/main, corriger ces
+phrases seulement, recette aux 5 largeurs, et rendre le SHA sans pousser sur main.
+
+
 Branche `worker-c5`. Coordinateur : session_01BCGFdpRKBvXKjouC75sYBg.
 Source : `omega/AUDIT-PROMESSES.md` (06/10/2026, 16 h Z), § 0, § 1, § 2 et § 3.
 Dernière mise à jour : 06/10/2026.
