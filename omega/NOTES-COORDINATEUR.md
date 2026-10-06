@@ -1051,3 +1051,5 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   les 15 fichiers omega/modules/lorani/donnees/b5_24_*.sql (lorani_ref_sources attendu : libelles 49, risques 31 733,
   radon 32 771, sismicite 35 346), puis test b5_14 v2 ; relevé réel : lorani_chercher_plu sur « Extension Garnier
   (banc) » doit finir « fait » avec les risques de Nantes. Seul C1 n'a pas encore confirmé sa pause.
+- C1 en pause : tableau-de-bord-v2 c632394 fusionnée (vue d'ensemble « aperçu de projet », Suivi.tsx réutilisable,
+  /espace2/utilisation). Avis de Teo attendu sur ces deux pages. TOUS les ouvriers sont en pause (18/18).
