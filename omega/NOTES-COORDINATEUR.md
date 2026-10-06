@@ -924,3 +924,13 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   (apercu_effacement, reception_marquer) ; A3 a la main sur ecrans.ts pour l'ancien /espace ; C4 consentement
   = intérêt légitime B2B / soft opt-in clients existants ; A4 API logiciels comptables sur doubles (identifiants
   de bac à sable = Teo).
+- 19 h 05 Z — Poses : a4_27 (3656d23 ; test 02 : pieces_pages.methode NOT NULL → A4), b7 test 07 v2 (a6101c9,
+  vert), 19am + test 59 (A5 79f0e58, vert), a5_01 v3 linéaire (b65dafa), Tiroma b3_19 v2 / b3_20 / b3_21 + tests
+  (2da76ec : ^test_b3_ 24/24), b1_11 + b1_14 (306d644 : 10/10, mais 44 rouge sur
+  private.grp_exiger_decideur_reception → B1 b1_11b), b6_21 météo + b6_15 (c33c69c : 14/15, gel J+3 → B6 ;
+  source = API Météo-France, Open-Meteo gratuit interdit en commercial), b5_17 + b5_08 (10a59bf, vert),
+  b2_09 v2 + 18 (2dba750, vert). tavaro-pdf v2 (6ea1694). b5_16 amendé par B5 alors qu'il était déjà posé
+  → lot de reprise b5_16b demandé. Loc_contestations : aucun gardien (visible de tous les membres) → B2 b2_09b.
+  Main : écrans Tiroma (synthèse, réinscription, absences, équipe absente, demi-journées, objectifs), Tavaro
+  facture électronique + contestations, Lorani PLU, route OAuth app/api/messagerie + guides Gmail/Microsoft.
+  C2 / C4 : c2_01 et c4_01 TOUJOURS non corrigés (lots 2 à 5 en attente derrière).
