@@ -1,5 +1,5 @@
 -- TOUT_B2.sql — les tests pgTAP du module TAVARO (session B2), assemblés par assembler.sh.
--- Prérequis : omega/tests/socle/00_installation.sql (A5) déjà joué ; migrations b2_01 à b2_11 posées (avec b2_05b, b2_06b et b2_09b).
+-- Prérequis : omega/tests/socle/00_installation.sql (A5) déjà joué ; migrations b2_01 à b2_11 posées (avec b2_05b, b2_06b, b2_09b et b2_11b).
 -- Un seul appel execute_sql sur la RECETTE ; runtests() annule tout ce que les tests écrivent.
 
 -- ═══════════════════════════ 00_jeu_tavaro.sql
@@ -1739,6 +1739,13 @@ begin
   return next ok((select (s.fiche ->> 'immatriculation') is not null from public.loc_sorties_flotte s where s.id = v_sortie), 'La fiche est figée sur la sortie');
   return next ok(tests.tavaro_journal(v_client, 'tavaro.sortie_validee') >= 1 and tests.tavaro_journal(v_client, 'tavaro.sortie_conclue') >= 1,
     'Le journal garde la validation et la vente');
+  -- b2_11b : l'import ne remet pas en service un véhicule vendu.
+  if to_regprocedure('private.loc_garder_vehicule_sorti()') is null then
+    return next diag('b2_11b (garde du véhicule sorti) n''est pas posée : non vérifié.');
+  else
+    update public.loc_vehicules set statut = 'actif' where id = v_vehicule;
+    return next is((select v.statut from public.loc_vehicules v where v.id = v_vehicule), 'sorti', 'Un import qui remet « actif » un véhicule vendu ne le remet pas en service');
+  end if;
 end $f$;
 
 
