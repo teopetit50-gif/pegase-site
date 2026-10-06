@@ -6,7 +6,8 @@
    Puis quatre enchaînements sur l'exemple : ouvrir le dossier en tête et lire
    le calcul d'un délai (art. 908 + 915-4) ; confirmer ce délai ; déclarer un
    acte déposé ; poser une muraille ; ouvrir un nouveau dossier ; passer le
-   cabinet au coffre Scaleway et ré-envelopper ses dossiers (b4_05).
+   cabinet au coffre Scaleway et ré-envelopper ses dossiers (b4_05) ; les
+   honoraires : saisir du temps, facturer, convention manquante (b4_06).
    usage : node omega/recette-b4/recette-tamila.mjs [origine] */
 import { mkdirSync } from 'node:fs';
 import { ouvrirSession } from '../../outils/chrome.mjs';
@@ -150,6 +151,64 @@ for (const largeur of LARGEURS) {
   const debPage = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
   ok(debPage === 0, `pas de débordement horizontal avec le bouton du coffre (${debPage})`);
   s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b4-honoraires', densite: 1 });
+  console.log('— les honoraires (b4_06)');
+  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  await s.dormir(500);
+  await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /2026-0412/.test(b.textContent))?.click()`);
+  await s.dormir(500);
+  const carte = () => s.evaluer(`document.querySelector('section[aria-label="Honoraires"]')?.innerText || ''`);
+  const t0 = await carte();
+  ok(/Signée le/.test(t0) && /250,00\s€ HT de l.heure/.test(t0), 'la convention signée, au temps passé, 250 € de l\'heure');
+  ok(/312,50\s€ HT/.test(t0), 'à facturer : 1 h 15 de recherche × 250 € = 312,50 € HT (le quart d\'heure non facturable n\'y est pas)');
+  ok(/H-2026-000041/.test(t0) && /Reste dû 485,00\s€/.test(t0), 'la facture H-2026-000041, reste dû 485 €');
+  await s.evaluer(`[...document.querySelectorAll('section[aria-label="Honoraires"] .r-btn')].find(b => /Saisir du temps/.test(b.textContent))?.click()`);
+  await s.dormir(400);
+  await s.evaluer(`(() => { const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; const [h, m] = [...document.querySelectorAll('[role="dialog"] input[type="number"]')]; set.call(h, '1'); h.dispatchEvent(new Event('input', { bubbles: true })); set.call(m, '30'); m.dispatchEvent(new Event('input', { bubbles: true })); const ta = document.querySelector('[role="dialog"] textarea'); const setT = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set; setT.call(ta, 'Préparation de l\\'audience de mise en état'); ta.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Saisir/.test(b.textContent))?.click()`);
+  await s.dormir(800);
+  const t1 = await carte();
+  ok(/1 h 30 de rédaction saisies/.test(t1) && /687,50\s€ HT/.test(t1), 'saisi : 1 h 30 de plus, à facturer 687,50 € HT');
+  ok(/Préparation de l.audience de mise en état/.test(t1), 'la description se relit (chiffrée en base réelle)');
+  await s.evaluer(`[...document.querySelectorAll('section[aria-label="Honoraires"] .r-btn')].find(b => /Facturer/.test(b.textContent))?.click()`);
+  await s.dormir(400);
+  const apercu = await s.evaluer(`document.querySelector('[role="dialog"]')?.innerText || ''`);
+  ok(/687,50\s€/.test(apercu) && /825,00\s€/.test(apercu), 'l\'aperçu : 687,50 € HT, 825 € TTC');
+  await s.capturer(`${dossier}tamila-facture-1440.jpg`, { qualite: 55 });
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Émettre la facture/.test(b.textContent))?.click()`);
+  await s.dormir(900);
+  const t2 = await carte();
+  ok(/H-2026-000042/.test(t2) && /0,00\s€ HT/.test(t2), 'la facture H-2026-000042 est émise, plus rien à facturer');
+  await s.evaluer(`document.querySelector('section[aria-label="Honoraires"]')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}tamila-honoraires-1440.jpg`, { qualite: 55 });
+  await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /2026-0398/.test(b.textContent))?.click()`);
+  await s.dormir(500);
+  const t3 = await carte();
+  ok(/Pas de convention d.honoraires signée/.test(t3), 'un dossier ouvert depuis deux mois sans convention est signalé (loi 1971, art. 10)');
+  const gris = await s.evaluer(`[...document.querySelectorAll('section[aria-label="Honoraires"] .r-btn')].find(b => /Facturer/.test(b.textContent))?.disabled`);
+  ok(gris === true, 'sans convention, « Facturer » reste gris');
+  s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 390, hauteur: 844, marque: 'b4-honoraires-390', densite: 1 });
+  console.log('— la carte des honoraires à 390');
+  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  await s.dormir(500);
+  await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /2026-0412/.test(b.textContent))?.click()`);
+  await s.dormir(600);
+  await s.evaluer(`document.querySelector('section[aria-label="Honoraires"]')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(300);
+  const m = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Honoraires"]'); const w = document.documentElement.clientWidth; const larges = [...c.querySelectorAll('*')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > w + 1; }).length; return { larges, deb: document.documentElement.scrollWidth - w }; })()`);
+  ok(m.larges === 0 && m.deb === 0, `la carte tient dans 390 px (${m.larges} élément(s) trop large(s), débordement ${m.deb})`);
+  await s.capturer(`${dossier}tamila-honoraires-390.jpg`, { qualite: 55 });
   s.fermer();
 }
 
