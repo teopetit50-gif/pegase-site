@@ -962,3 +962,15 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   Main : fusion worker-b3 (écran Règles communes, en-préparation), worker-c4 (écran /espace/offload),
   worker-b6 (météo, appro), worker-c5 passe 4. tsc, eslint, build verts ; 6 pages × 5 largeurs sans débord.
   Bascule C1 (0d36f55) NON fusionnée : attend Teo, après l'aperçu.
+- 17 h 25 Z — Poses : CASHD c2_02 + c2_03 v2 et tests c2_03/c2_04 (C2 8b8fbb4 : journal de relance, cashd.facture_reglee,
+  cashd_contact_en_litige), REPUT c3_06 + test (C3 83e67d5), FILED a4_30 alerte au changement d'IBAN + test a4_23
+  (A4 a3054d4), Varelo b1_12 photos + b1_13 pièce unique + tests b1_15/b1_16 (B1 10276d8), Lorani b5_19 OS, réserves,
+  GPA + test b5_10 (B5 eacc7a5), Daliro b6_23 appro suite + tests b6_17 et b6_16 v3 (B6 a1d141e), test c4_03 v3
+  (C4 f9bf72d). ^test_(c2_|c3_|a4_30_|b1_1[4-6]_|b5_10_|b6_|c4_03_) : 1120 ok, 0 échec ; 44/46/51/55 : 34 ok, 0.
+  (Attention : les noms de lot gNN sont réutilisés ; lire par motif et par heure.)
+  Lecteur v28 (A1 25c86f5 : interrupteur en base, attestation décennale). reception v12 (A2 72c21d5 : médias
+  WhatsApp). private.reglages lecteur_analyses = 'oui' sur la recette (plafond_ia_jour_client = 5).
+  Main : fusion worker-c2 (écran CASHD), c3 (écran REPUT + export), a4, b1, b4 (pilotage du cabinet), b5, b6, c4 ;
+  GUIDE-WHATSAPP (A2). Pastilles retirées : Tamila point du matin, marge, charge, séries, sans diligence ;
+  Lorani OS et réserves/GPA ; Daliro signature sur place et 4 lignes d'appro ; Varelo réserves (plus aucune ligne).
+  12 pages × 5 largeurs : 200, sans débord.
