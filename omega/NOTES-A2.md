@@ -1,6 +1,8 @@
 # NOTES-A2 — ouvrier EXPÉDITEUR et RÉCEPTION
 
-Session worker A2, branche `worker-a2`. Dernière mise à jour : 05/10/2026, soir.
+Session worker A2, branche `worker-a2`. Dernière mise à jour : 06/10/2026.
+Coordinateur depuis le 06/10 : session `session_01BCGFdpRKBvXKjouC75sYBg` (passation
+de `session_01B4JNQXyT69GytdvE9SjAnE`).
 Périmètre : `omega/functions/expediteur/`, `omega/functions/reception/`,
 `omega/functions/webhooks/`. Aucune migration SQL, aucune écriture directe en table :
 tout passe par les portes du socle, appelées en RPC avec la clé de service.
@@ -108,9 +110,9 @@ tout passe par les portes du socle, appelées en RPC avec la clé de service.
 ## Bloqué
 
 - ~~Push GitHub~~ : poussé, voir la fin de ce fichier.
-- **Migration santé** (trou n° 7) : demandée à A2, non écrite, voir « Avis A2 » plus
-  bas : hors brief (« aucune migration SQL ») et sans accès aux sources du socle.
-  Spécification complète fournie pour qui a les sources.
+- ~~Migration santé~~ : posée par le coordinateur (lot socle 19ab, 06/10) à partir de
+  la spécification d'A2, voir « Avis A2 ». La garde côté ouvrier devient active au
+  redéploiement de `expediteur` au SHA 29ef6e6 ou plus récent.
 - **Secrets** : `BREVO_API_KEY`, `BREVO_WEBHOOK_JETON`, `FORMULAIRE_SECRET`,
   `META_*` sont entre les mains de Teo (liste transmise par le coordinateur). Tant
   qu'ils manquent, `webhooks-brevo` et `reception` répondent 503, l'expéditeur
@@ -327,7 +329,15 @@ envoyé) avec son test ; no-op tant que `commencer_envoi` n'expose pas
 `donnees_sante` (clé absente → comportement inchangé ; `donnees_sante = true` et
 `fournisseur_hds` absent ou faux → refus).
 
-**Migration du lot : demandée à A2 par le coordinateur le 06/10, NON écrite par A2.**
+**Lot socle 19ab posé par le coordinateur le 06/10** (`verrous_envoi` refuse le canal
+non permis pour tout envoi `donnees_sante` ; `commencer_envoi` rend `donnees_sante` et
+`fournisseur_hds` = `agree_sante` du fournisseur, en essai comme en réel ; test pgTAP
+12/12). **Aucun fournisseur n'est agréé, `manuel` compris : décision de Teo.** Tant
+qu'il n'en agrée pas un, tout envoi de santé est bloqué par le socle, et la garde de
+l'ouvrier le refuserait de toute façon.
+
+**Migration du lot : demandée à A2 le 06/10, NON écrite par A2, finalement posée par
+le coordinateur.**
 Deux raisons : le brief de Teo pose « aucune migration SQL » et un périmètre limité à
 `omega/functions/` ; et A2 n'a pas la source des fonctions du socle à modifier
 (préparation, `confier_envoi`, `commencer_envoi` vivent dans la base, qu'A2 ne lit
