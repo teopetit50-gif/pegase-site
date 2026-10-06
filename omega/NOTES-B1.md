@@ -397,3 +397,40 @@ du matin et l'onglet reprennent les trois listes ; prod au gel avec A5.
   compteur sur l'onglet VARELO se lit par `rpc('grp_ce_matin', {p_client})` —
   nombre de lignes de gravité attention ou critique dans les trois listes.
   Je n'ai pas touché la coquille.
+
+### Carnet de l'audit des promesses (coordinateur, 06/10, 15 h 58 Z)
+
+Ordre décidé (omega/AUDIT-PROMESSES.md § 2 Varelo) : 1. « le groupe sur une
+page » ; 2. les reportings dus ; 3. un modèle `modeles_jeux` Varelo pour le
+lecteur d'exports d'A1 ; 4. les réserves à émettre, avec A1. « Une seule IA » :
+reformulé par C5.
+
+### 1. Le groupe sur une page (b1_08)
+
+- **Source** : la balance générale de chaque société (tous les logiciels la
+  sortent). Plan comptable (ANC 2014-03) : ventes = − Σ 70, résultat = − Σ
+  classes 6 et 7, trésorerie = Σ 51 et 53 (519 compris). Chiffres sociaux, non
+  consolidés (dit à l'écran).
+- **Migration** `omega/modules/varelo/migrations/b1_08_groupe_page.sql` :
+  `grp_balances_depots` / `grp_balances_lignes` (une balance à un arrêté, avec
+  le début de l'exercice ; la courante = la dernière ; déséquilibre dit, pas
+  refusé ; `depose_le` = clock_timestamp), `grp_objectifs` (objectif de ventes
+  de l'exercice, plancher de trésorerie) ; vue `grp_groupe_page` (ventes,
+  résultat, trésorerie ; N-1 à la même date si déposée ; objectif au prorata
+  des jours ; sous plancher ; ancienneté) ; portes `grp_deposer_balance`
+  (gérant, admin) et `grp_regler_objectif` (gérant, admin, valideur DF) ;
+  alerte `varelo:tresorerie.<entité>` levée/fermée d'elle-même ; journal
+  `varelo.balance.depot | objectif.regle | tresorerie.plancher`. Le point du
+  matin gagne « Le groupe ce matin » (trésorerie sous plancher, ventes à plus
+  de 10 % sous l'objectif à date, balance de plus de 35 jours ; au gérant, à la
+  DF, à la présidence) : `grp_ce_matin` et `grp_deposer_points` remplacés
+  (create or replace), le reste de b1_07 inchangé.
+- **Tests** `omega/tests/varelo/b1_11_groupe_page.sql` (motif `^test_b1_11_`) :
+  `_page` (16), `_droits` (12). Maquette : 28/28 ; 171 assertions de b1_07 à
+  b1_11.
+- **Écran** `GroupePage.tsx` + `groupe.ts` : carte « Le groupe sur une page »
+  sous « Ce matin » (totaux, tableau par société : ventes à date, sur l'an
+  dernier, sur l'objectif, résultat, trésorerie et plancher, ancienneté ;
+  dialogues Objectifs et Déposer une balance générale — en-têtes Sage « N°
+  compte », « Solde débit/crédit » reconnus). « Ce matin » passe à quatre blocs.
+  Recette 133 contrôles, cinq largeurs ✓ ; axe 0 écart.
