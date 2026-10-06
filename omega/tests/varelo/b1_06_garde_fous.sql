@@ -98,7 +98,7 @@ begin
   perform public.grp_exporter_referentiel(v_client, 'fournisseur');
   perform tests.redevenir_admin();
   n_apres := tests.compter('public', 'journal_opposable', cond);
-  return next cmp_ok(n_apres, '>=', 5, format('au moins cinq lignes varelo.* au journal du groupe neuf (installation, lecture ×2, calcul, export) : %s', n_apres));
+  return next cmp_ok(n_apres, '>=', 5::bigint, format('au moins cinq lignes varelo.* au journal du groupe neuf (installation, lecture ×2, calcul, export) : %s', n_apres));
   return next ok(tests.compter('public', 'journal_opposable', cond || format(' and %I = ''varelo.installation''', v_col_action)) >= 1, 'l''installation journalisée');
   return next ok(tests.compter('public', 'journal_opposable', cond || format(' and %I = ''varelo.referentiel.lecture''', v_col_action)) >= 2, 'deux lectures journalisées');
   return next ok(tests.compter('public', 'journal_opposable', cond || format(' and %I = ''varelo.referentiel.calcul''', v_col_action)) >= 1, 'un calcul journalisé');
