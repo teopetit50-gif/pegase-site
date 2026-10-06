@@ -11,8 +11,9 @@
 --     au coffre Scaleway (le serveur ne peut rien chiffrer sous la phrase du cabinet : 55000 « passez au coffre ») ;
 --     les pièces chiffrées du dossier déjà lues (toutes par défaut, ou celles choisies, qui doivent en être) ; 200 au
 --     plus, 60 pour la pré-lecture ; une analyse du même type déjà en cours est rendue telle quelle.
---   · Une politique RESTRICTIVE sur public.analyses : une analyse Tamila ne se lit que par qui voit le dossier
---     (tamila_voit_dossier_pour, murailles comprises), quel que soit le gardien inscrit pour voit_objet.
+--   · Deux politiques sur public.analyses : une PERMISSIVE (qui voit le dossier lit ses analyses, même si voit_objet
+--     ne connaît pas le gardien tamila_dossier) et une RESTRICTIVE (personne d'autre : murailles comprises, quel que
+--     soit ce que rend voit_objet).
 -- Rien n'est retiré ni effacé. Porte private : revoke from public, grant authenticated.
 
 create or replace function private.tamila_demander_analyse(p_dossier uuid, p_type text, p_pieces uuid[] default null)
@@ -96,5 +97,13 @@ begin
                        and policyname = 'tamila : qui voit le dossier, et lui seul') then
     create policy "tamila : qui voit le dossier, et lui seul" on public.analyses as restrictive for select to authenticated
       using (module <> 'tamila' or private.tamila_voit_dossier_pour((select auth.uid()), client_id, objet_id));
+  end if;
+  -- Et la lecture elle-même : une restrictive ne fait que retirer ; celle-ci ouvre l'analyse à qui voit le dossier,
+  -- même si voit_objet (19an) ne connaît pas le gardien tamila_dossier.
+  if to_regclass('public.analyses') is not null
+     and not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'analyses'
+                       and policyname = 'tamila : qui voit le dossier lit ses analyses') then
+    create policy "tamila : qui voit le dossier lit ses analyses" on public.analyses for select to authenticated
+      using (module = 'tamila' and private.tamila_voit_dossier_pour((select auth.uid()), client_id, objet_id));
   end if;
 end $p$;

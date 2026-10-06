@@ -66,7 +66,14 @@ begin
   perform tests.redevenir_admin();
   return next throws_ok(format('update public.analyses set resultat = ''{"x": 1}'' where id = %L', v_a), '23514', null, 'jamais de résultat en clair (23514)');
 
-  -- Qui lit : qui voit le dossier, murailles comprises.
+  -- Qui lit : qui voit le dossier, murailles comprises. Les politiques Tamila suffisent, même quand voit_objet
+  -- (19an) rend faux : on l'examine en coupant la politique du socle le temps du test (annulé par runtests).
+  alter policy "on voit les analyses des objets qu'on voit" on public.analyses using (false);
+  perform tests.endosser((jeu ->> 'avocat')::uuid, 'b4-rousseau@essai.invalid');
+  select count(*) into n from public.analyses where objet_id = v_dossier::text;
+  return next is(n, 2::bigint, 'voit_objet muet : l''avocat du dossier lit quand même ses deux analyses');
+  perform tests.redevenir_admin();
+  alter policy "on voit les analyses des objets qu'on voit" on public.analyses using (private.voit_objet(client_id, objet_type, objet_id));
   perform tests.endosser((jeu ->> 'avocat')::uuid, 'b4-rousseau@essai.invalid');
   select count(*) into n from public.analyses where objet_id = v_dossier::text;
   return next is(n, 2::bigint, 'l''avocat du dossier voit ses deux analyses');
