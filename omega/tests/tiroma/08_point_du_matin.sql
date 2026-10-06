@@ -1,6 +1,6 @@
 -- B3-08 — Le point du matin de Tiroma et la santé : les sections sont déposées pour l'équipe, lues par apercu_point,
 -- et rien de nominatif ne part par un canal sans expéditeur agréé (étape 14 du scénario).
--- Après 00_aides_b3.sql, 00b_export_logosw.sql, b3_01 à b3_08, et la ligne reglages_envois (banc, tiroma, essai, sante)
+-- Après 00_aides_b3.sql, 00b_export_logosw.sql, b3_01 à b3_10, et la ligne reglages_envois (banc, tiroma, essai, sante)
 -- posée par le coordinateur. runtests() annule tout.
 
 create or replace function tests.test_b3_08_point_du_matin() returns setof text
@@ -88,6 +88,18 @@ begin
   return next is((select statut || '/' || coalesce(verrou, '') from public.envois where id = v_envoi), 'bloque/SANTE_HORS_CANAL_AGREE',
                  'courriel des compteurs en texte libre : bloqué lui aussi, le module est un contexte de santé (il faudra un gabarit validé)');
   return next ok((select donnees_sante from public.envois where id = v_envoi), 'le socle l''a marqué santé de lui-même');
+  -- b3_10 : le même contenu par le gabarit validé tiroma.point_matin (aucune variable libre) : il n'est pas santé, il part.
+  return next ok(exists (select 1 from public.gabarits_messages g where g.client_id is null and g.code = 'tiroma.point_matin' and g.statut = 'valide'),
+                 'le gabarit tiroma.point_matin est validé (b3_10)');
+  v_envoi := private.preparer_envoi(banc, 'tiroma', 'tiroma_cabinets', v_cabinet::text, 'email',
+               jsonb_build_object('adresse', 'gerant@banc-varelo.test', 'nom', 'Gérant du banc'), 'tiroma.point_matin',
+               jsonb_build_object('jour', j, 'creneaux', 1, 'plans', 4, 'verifications', 6, 'demi_journees_vides', 2), null, null, null,
+               'b3:sante:gabarit:' || v_cabinet::text, entite, true, false, null, '{}'::jsonb);
+  return next ok((select statut in ('a_valider', 'differe', 'pret') from public.envois where id = v_envoi),
+                 'courriel des compteurs par le gabarit : accepté (' || (select statut || coalesce(' / ' || verrou, '') from public.envois where id = v_envoi) || ')');
+  return next ok((select not donnees_sante from public.envois where id = v_envoi), 'il n''est pas marqué santé');
+  return next ok((select corps like '%1 créneau(x)%' and corps like '%/espace/tiroma%' and corps not like '%Delannoy%' from public.envois where id = v_envoi),
+                 'le corps porte les compteurs et le lien, aucun nom');
 end $f$;
 
 select * from runtests('tests'::name, '^test_b3_08_');

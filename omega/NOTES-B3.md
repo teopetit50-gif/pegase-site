@@ -62,7 +62,7 @@ d'écriture directe hors RLS.
 7. **Canaux `permis_sante = true` sans fournisseur agréé** (F5) : le verrou `SANTE_HORS_CANAL_AGREE` protège déjà le nominatif ; règle stricte « permis_sante ET agree_sante » à proposer sur le socle commun après le lot 2.
 8. **Liste d'attente « commune »** (`source = 'tiroma'`) sans porte d'écriture : à faire (b3_09) après le lot 2.
 9. **`private.tiroma_trace_ecriture()` inexécutable par authenticated** (23 triggers) : corrigé côté socle par le coordinateur (lot 19u).
-10. **Tout texte libre du module est tenu pour de la santé** (`private.creer_envoi` : `v_contexte_sante`, `modules_envois.tiroma.sante = true`) : même un courriel de compteurs sans nom est bloqué `SANTE_HORS_CANAL_AGREE`. Pour qu'un point « sans donnée de santé » parte, il faut un **gabarit validé** `gabarits_messages` (module tiroma, canal email, `donnees_sante = false`) : à écrire (b3_10) une fois la forme des gabarits connue (demande d'extrait au coordinateur).
+10. **Tout texte libre du module est tenu pour de la santé** (`private.creer_envoi` : `v_contexte_sante`, `modules_envois.tiroma.sante = true`) : même un courriel de compteurs sans nom est bloqué `SANTE_HORS_CANAL_AGREE`. Pour qu'un point « sans donnée de santé » parte, il faut un **gabarit validé** sans variable libre : b3_10 pose `tiroma.point_matin` (global, courriel, compteurs + lien), validé par le serveur ; le test 08 vérifie qu'il part.
 11. **Un même patient pouvait être proposé deux fois** pour un créneau (par son plan et par la liste d'attente) : corrigé dans b3_02 (une voie par patient, la meilleure) — à reposer.
 
 ## Journal des échanges avec le coordinateur
