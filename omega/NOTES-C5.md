@@ -359,3 +359,21 @@ les fournisseurs Gmail / Microsoft.
 | components/produits/accueil/Icones.tsx | — | icône `formulaire` (même trait) |
 
 Restent (code mort, non servi) : `CAPACITES.titreFin` « son rappel la veille » dans lib/produits/accueil.ts.
+
+## Passe 5 — 06/10, 17 h 10 Z : balayage final du § 3 sur main 23a5bd9
+
+Les 13 points du § 3 sont traités (passes 1 à 4). Balayage de tout le code servi (hors /espace, hors code mort
+`lib/fiches.ts` et `lib/services-detail.ts`) pour les phrases des points 1 à 12 : une seule restait, dans
+`lib/secteurs.ts` (cartes de /secteurs et de /offres, et bloc « Se combine avec » des pages métiers). Les lignes
+Tiroma déjà retirées par B3 (d091f77) ne sont pas touchées.
+
+| Fichier:ligne | Avant | Après | Raison |
+|---|---|---|---|
+| lib/secteurs.ts:156 (Varelo) | « Varelo branche la même IA sur les logiciels et les tableurs de chaque société, en lecture seule, et range … » | « Chaque société dépose l'export de son logiciel et de ses tableurs ; Varelo le lit sans rien y écrire et range … » | point 9 |
+| lib/secteurs.ts:85 (Tamila → REPUT) | « … qualifiées et le premier rendez-vous proposé, à toute heure. » | « … qualifiées, leur réponse prête à toute heure. » | passe 4 : prise de rendez-vous non construite (C3 palier 5) |
+| lib/secteurs.ts:114 (Tavaro → REPUT) | « Les demandes de réservation traitées à toute heure, y compris agence fermée. » | « … reçues à toute heure, leur réponse prête même agence fermée. » | point 8 |
+| lib/secteurs.ts:136 (Tiroma → REPUT) | « Les demandes de rendez-vous des patients traitées à toute heure, hors des heures du secrétariat. » | « Les demandes des patients reçues à toute heure, transmises au secrétariat pour son retour. » | passe 4 et D6 (pas de réponse automatique sur un contenu de santé) |
+
+Non touchés, signalés : `lib/pub.ts` (page /p/appels-manques, « Chaque appel manqué vous revient par SMS ») — hors
+des 13 points de l'audit, à vérifier avec A2 (fournisseur `brevo_sms`) ; la maquette Tavaro « Assistance » (« Je vous
+envoie le résumé par SMS ») porte déjà la pastille du module.
