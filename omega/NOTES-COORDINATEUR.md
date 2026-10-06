@@ -495,3 +495,11 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   b3_11, CHAMPS-LECTURE-TAMILA, scripts recette-b5). components/, app/, lib/ inchangés ;
   tsc et build verts. A1, A2, A4, A5 toujours non fusionnées (code des fonctions, migrations,
   workflow de sauvegarde : à traiter à part).
+- 04 h 00 — **Lorani, premier vrai courrier** (B5, lecteur v14) : récépissé de dépôt lu et
+  confirmé de bout en bout (PC 044109 26 A0042, 15/09/2026). Demande de pièces : le
+  lecteur citait « PCMI 3 », mais le socle jetait les codes PCMI/DPMI (regex de
+  private.lorani_propositions). **b5_05_codes_pcmi** (worker-b5 ea53b85) posé : corps
+  identique à l'extrait du socle sauf cette ligne ; essai direct → PCMI3, PCMI6, PC2 ;
+  `^test_b5_` **112/112**. Écran PermisVue.tsx (liste des pièces obligatoire pour confirmer)
+  fusionné ; tsc, eslint, build verts. La demande confirmée vide sur « Pavillon Lemoine »
+  reste une donnée de recette ; B5 redépose un nouveau PDF.
