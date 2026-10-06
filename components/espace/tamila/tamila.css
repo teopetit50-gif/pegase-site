@@ -227,3 +227,29 @@
     grid-column: 1 / -1;
   }
 }
+
+/* les avis RPVA reçus par courriel, à rattacher (b4_10) : au-dessus des compteurs */
+.esp .tam-entrants {
+  margin-bottom: 14px;
+}
+.esp .tam-entrants .esp-carte-titre {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.esp .tam-entrants .tam-ligne-titre {
+  overflow-wrap: anywhere;
+}
+/* le corps du courriel, cité dans le dialogue (porté hors de .esp) */
+.tam-citation {
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--r-filet, #d9d9d4);
+  background: #f6f6f4;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  max-height: 180px;
+  overflow: auto;
+}

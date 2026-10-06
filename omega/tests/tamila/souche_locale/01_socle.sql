@@ -305,3 +305,19 @@ create policy "membres lisent" on public.approbations for select to authenticate
 create policy "membres decident" on public.approbations for insert to authenticated with check (true);
 alter table public.journal_opposable enable row level security;
 alter table public.lectures enable row level security;
+
+-- ── Réceptions (b4_10) : la table du socle et la publication d'événement, imitées ──
+create table if not exists public.receptions (id bigserial primary key, client_id uuid not null, entite_id uuid, module text, canal text not null default 'email', boite text not null default 'boite',
+  identifiant_externe text not null, de_adresse text, de_empreinte text, de_nom text, sujet text, corps text, corps_html text, pieces jsonb not null default '[]', detail jsonb not null default '{}',
+  en_reponse_a uuid, fil text, langue text, statut text not null default 'nouvelle' check (statut in ('nouvelle', 'lue', 'traitee', 'ignoree', 'indesirable')), traite_par uuid,
+  recu_le timestamptz not null default now(), cree_le timestamptz not null default now(), maj_le timestamptz not null default now(), unique (client_id, canal, identifiant_externe));
+create or replace function private.publier_evenement(p_client uuid, p_evenement text, p_charge jsonb default '{}', p_cle text default null) returns integer language plpgsql security definer set search_path to '' as $$
+declare r record; n integer := 0;
+begin
+  for r in select a.module, a.genre from private.abonnements a where a.evenement = p_evenement loop
+    perform private.deposer_travail(p_client, r.module, r.genre, coalesce(p_charge, '{}'::jsonb) || jsonb_build_object('evenement', p_evenement),
+      case when p_cle is null then null else p_evenement || ':' || p_cle end, 0::smallint);
+    n := n + 1;
+  end loop;
+  return n;
+end $$;
