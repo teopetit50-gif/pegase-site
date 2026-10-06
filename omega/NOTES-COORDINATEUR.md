@@ -907,3 +907,20 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   Lorani contrôle du dossier → a4521d5 (non poussé : test 44 en cours).
   **Test 44 dépasse 2 min** sur la recette → relancé avec statement_timeout 15 min (job g60) ; A5 doit
   l'accélérer. Numéros : A4 a4_25 = CHECK uid_ch/hmrc + comptes système ; A2 19al.
+- 18 h 50 Z — Poses : 00_installation + 44 v2 (A5 3018e1d, 44 en moins d'une minute), 56 v3 (9f44233, vert),
+  b2_06b (42fdbe4) + b2_09 + 18 (1ee1134) → Tavaro tout vert ; tests b3_16/17 v2 (e15aa42), b3_18 + 19
+  (3240cb3), b3_19 + 20 (0c3976a) → 17, 18 verts, 16/19/20 rouges + **44 rouge (private.tiroma_duree_texte
+  exécutable)** → B3 ; b4_13 + 22 + 19 (f4b2ba1, vert) ; b1_10 + b1_13 (e1c4eae, vert) ; a4 tests v2 (e020969),
+  a4_25 + a4_18 (b2ee58c, vert), a4_26 + a4_26b (DROP CONSTRAINT accepté : élargissement) + a4_19 (3172b44 :
+  01/03/05 verts, 02/04 rouges tva_check → normaliser les TVA étrangères), a4_23 rouges (filed_receptions_lignes
+  client_id) → A4 ; **a4_27 REFUSÉ** (pieces_pages.page → n) → A4 ; b7_06 + b7_07 (faf9247 : 4 assertions
+  42501 au lieu de 22023) → B7 ; C3 tests v2 + c3_04 (cd1aaa2, verts) ; **19al messageries** (A2 e9f4ebc, DROP
+  CONSTRAINT d'élargissement accepté, vert) ; b6_20 + b6_14 (6dc34a7, vert ; exception anon accordée).
+  taux-bce appelé à la main (net 5289) avant 17 h Z. 46/51 verts.
+  Main e197172 : boîte de réception FILED (A3), Tamila conflits auto + honoraires du cabinet + file des avis,
+  Lorani rapport PDF/Excel, écran REPUT (C3), vitrine passe 2 (C5), Varelo branchements, Daliro signature sur
+  place (+ app/signer). C2 et C4 : c2_01 / c4_01 toujours pas corrigés (relancés).
+  Décisions : atteste:true basculé seulement au palier de production ; A1 écrit 19an_analyses ; A5 19am
+  (apercu_effacement, reception_marquer) ; A3 a la main sur ecrans.ts pour l'ancien /espace ; C4 consentement
+  = intérêt légitime B2B / soft opt-in clients existants ; A4 API logiciels comptables sur doubles (identifiants
+  de bac à sable = Teo).
