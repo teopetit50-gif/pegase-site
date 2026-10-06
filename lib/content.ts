@@ -124,7 +124,7 @@ export const FAMILLES: Famille[] = [
         slug: "demandes-clients",
         title: "REPUT · demandes entrantes & avis",
         job: "Les demandes reçues par e-mail et par WhatsApp (horaires, tarifs, disponibilités, prise de rendez-vous) obtiennent une réponse à toute heure, tirée de la base de connaissances validée par vos équipes et jamais inventée. Chaque client satisfait se voit ensuite demander un avis au moment où il est le plus enclin à le laisser.",
-        benefit: "Une demande reçue à 21 h reçoit sa réponse à 21 h, sur son canal.",
+        benefit: "Une demande reçue à 21 h a sa réponse prête à 21 h, sur son canal.",
       },
       {
         system: "FILED",

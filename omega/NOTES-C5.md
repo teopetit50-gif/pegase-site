@@ -299,3 +299,44 @@ en production et tests verts là-bas ; aujourd'hui la recette seulement.
 La réception par courriel (a4_20, e749aa5) prouve la ligne 28, déjà à `true`. L'extourne (a4_22) n'a pas de ligne
 propre. Le reste de la liste « dès la production posée » de NOTES-A4 (lignes 60, 62, 69, 70, 72 à 74, 82, 85, 86,
 94 à 98) est à basculer dans le même geste.
+
+## Passe 3 — 06/10, après 16 h 45 Z (main e197172)
+
+### Décision du coordinateur sur `atteste`
+
+**Aucune ligne de catalogue ne passe à `atteste: true` avant la production.** « En préparation » reste vrai pour le
+client tant qu'il ne peut pas s'en servir. Le coordinateur bascule tout au palier de mise en production, avec la liste
+ci-dessus (passe 2, FILED) tenue à jour ici. Ajouts depuis a4_27 (467f423, lecteur v24) :
+
+| Ligne de factures.ts | Texte | Preuve | État |
+|---|---|---|---|
+| 44 | « La TVA multi-taux, l'autoliquidation, l'exonération et la TVA sur les débits. » | a4_11, a4_22, a4_27 (mention `tva.debits` lue et signalée) | passe à **oui** (était « non ») |
+| 45 | « La devise, le taux de change et la contre-valeur en euros au jour d'émission. » | a4_22 + a4_27 (`test_a4_27_03`, `04`) | oui, une fois que l'ouvrier BCE de B7 pose les cours |
+| 48 | « Les mentions d'escompte, de pénalité de retard et d'indemnité forfaitaire. » | a4_27 (`test_a4_27_01`, `02`) | oui |
+
+REPUT (`lib/produits/capacites/accueil.ts`) : lignes tenues d'après NOTES-C3 § « Lignes de capacité » (base versionnée,
+réponse tirée de la base, transfert hors base, classement, langue, plusieurs langues, mention automatisée,
+réclamation, demande de parler à quelqu'un, hors périmètre, archive) ; à basculer au même palier.
+
+### Corrections
+
+| Fichier:ligne | Avant | Après | Raison |
+|---|---|---|---|
+| lib/produits/capacites/factures.ts:132 | « Les montants sont lus tels qu'ils figurent sur la pièce, sans conversion. La contre-valeur en euros reste à la charge de votre comptabilité. » | « … avec la devise et le taux. L'écriture porte la contre-valeur en euros, au taux de la pièce ou au cours BCE du jour d'émission, et l'écart de change ; sans taux connu, la pièce attend au lieu d'être comptabilisée. » | a4_22 30d3991, a4_27 467f423 (NOTES-A4 § lecteur v24) |
+| lib/produits/accueil.ts:85 (héros /offres/demandes-clients) | « Une demande reçue à 21 h obtient sa réponse à 21 h » | « … a sa réponse prête à 21 h » | C3 : réponse préparée, envoi seul sur sujet autorisé |
+| lib/produits/accueil.ts (chapô du héros) | « … votre client reçoit sa réponse, et elle ne dit rien que vous n'ayez validé. » | « … la réponse est préparée dans la minute à partir de la base que vous avez validée. Elle part seule sur les sujets que vous avez autorisés, et attend votre accord sur tous les autres. » | C3 paliers 2 et 3 |
+| lib/produits/accueil.ts (ÉTAPES 02) | « Nous connectons WhatsApp Business, votre messagerie et votre agenda … » | « Nous connectons WhatsApp Business et votre messagerie … Le raccordement de votre agenda est en préparation. » | rendez-vous : C3 palier 5, pas construit |
+| lib/produits/accueil.ts (ÉTAPES 03) | « Une semaine en double » ; « Vos équipes reçoivent copie de chaque réponse la première semaine … sur les postes que vous ouvrez. » | « Une semaine sous votre contrôle » ; « La première semaine, chaque réponse attend votre validation, et nous corrigeons la base sur des cas réels. Vous autorisez ensuite, sujet par sujet, les réponses qui partent seules. » | C3 : file de validation, accord par sujet |
+| lib/produits/accueil.ts (CANAUX, chapô) | « … puis répond à partir de votre base. » | « … puis prépare la réponse à partir de votre base. » | idem |
+| lib/produits/accueil.ts (FAQ « même créneau ») | « La réservation s'écrit directement dans votre agenda … » | « La prise de rendez-vous dans votre agenda est en préparation. Une fois raccordée, la réservation s'écrit en temps réel … » | palier 5 |
+| lib/produits/accueil.ts (FAQ « qui décide ») | « … vous décidez poste par poste ce qui part seul … » | « … vous autorisez sujet par sujet les réponses qui partent seules ; les réclamations, les urgences et les demandes de parler à quelqu'un restent toujours relues par vos équipes. » | C3 c3_01 (sujets jamais autorisables), c3_03 (garde) |
+| lib/produits/accueil.ts (FAQ avis) | « La demande part dans les trois jours … » | « La demande d'avis est en préparation. Elle partira dans les trois jours … » | palier 5 |
+| lib/produits/accueil.ts (JOURNÉE, 23 h 05) | « Transféré : l'astreinte est appelée » | « Transféré : alerte urgente à vos équipes » | C3 : alerte critique ; l'appel d'astreinte est au palier 5 |
+| app/offres/demandes-clients/page.tsx:72 (meta) | « … obtiennent une réponse à toute heure … » | « … ont leur réponse prête à toute heure …, et validée par vous. » | idem |
+| lib/content.ts:127 (benefit REPUT) | « … reçoit sa réponse à 21 h, sur son canal. » | « … a sa réponse prête à 21 h, sur son canal. » | idem |
+
+Laissés tels quels, mais à signaler : la conversation d'exemple du haut de la page (« Je peux vous réserver samedi
+9 h 30 ? », « Rendez-vous créé dans l'agenda ») et les issues d'exemple « Créneau réservé, rappel la veille »
+(MÉTIERS, JOURNÉE) montrent la prise de rendez-vous, qui n'est pas construite ; les tuiles « Fiche Google Business »
+et « Google Agenda » de CANAUX (positionnées en absolu, pas de place pour une pastille). Les catalogues portent la
+pastille sur ces lignes. Retour aux anciennes phrases : quand C3 livre le palier 5 (rendez-vous, avis, astreinte).
