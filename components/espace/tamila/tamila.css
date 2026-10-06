@@ -322,3 +322,7 @@
 .tam-cabinet-filtres {
   flex-wrap: wrap;
 }
+/* le pilotage : le coût de revient, un champ court */
+.tam-cout {
+  max-width: 340px;
+}
