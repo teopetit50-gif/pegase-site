@@ -97,6 +97,8 @@ L'entreprise : **Atelier Bertin** (menuiserie-agencement, Lyon — la même entr
 
 ## Journal de session
 
+- 06/10, 06 h 58 Paris : tests 9f7325e reposés, `^test_b6_` vert (b6_01 154/154, b6_02 38/38, b6_03 29/29). b6_07 et l'écran fusionnés dans main (tsc/eslint/build verts) ; en ligne au retour du quota Vercel (~04 h 30 Paris le 07/10). Accord permanent des J-2 : en attente de Teo. Rien n'est attendu de B6.
+
 - 06/10, 04 h 45 Paris : b6_07 (réponse OUI/NON lue → btp_repondre_confirmation ; tableau du chantier : « envoi » par passage) + test b6_03_reponses + écran (ligne « Demande remise le … »). Syntaxe des migrations et lecture OUI/NON vérifiées sur un Postgres 16 local jetable (pas Supabase) ; tsc, eslint, build, recette verts. Accord permanent pour les J-2 : NON pour l'instant (décision de Teo).
 
 - 06/10, 04 h 33 Paris : **J-2 réel vert de bout en bout sur la recette** (coordinateur, depuis 60fa33c). Daliro installé sur le banc (chantiers/20/5) ; chantier ESSAI-J2 (d5671933…) ouvert, passage 4a850610… du 08/10 ; demande J-2 → travail daliro.confirmation 3695 fait → envoi 4742391e… email, mode essai, validé par la DAF → brevo, envoyé 02:33:00 Z, référence <202610060233.94075144052@smtp-relay.mailin.fr>, remis 02:33:05 Z. Les sept « Essai B6 — hh:mm » sont annulés. Restent ouverts : (1) la réponse OUI/NON reçue → btp_repondre_confirmation ; (2) le fil du passage ne montre pas « envoyée / remise » (lisible dans envois) ; (3) le moteur passe par la validation « À valider » : un accord permanent pour les J-2 serait une décision du coordinateur.
