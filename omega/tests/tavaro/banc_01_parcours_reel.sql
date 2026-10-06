@@ -112,8 +112,8 @@ begin
   raise notice 'relance : %', v_res;
   perform tests.redevenir_admin();
 end $$;
-select f.reference, f.relances, f.relance_le, e.statut as envoi_statut, e.cle
-from public.loc_factures f join public.envois e on e.client_id = f.client_id and e.cle = 'tavaro:relance:' || f.id::text || ':' || f.relances
+select f.reference, f.relances, f.relance_le, e.statut as envoi_statut, e.cle_idempotence
+from public.loc_factures f join public.envois e on e.client_id = f.client_id and e.cle_idempotence = 'tavaro:relance:' || f.id::text || ':' || f.relances
 where f.client_id = 'cccccccc-0000-4000-8000-00000000000c' and f.contrat_numero = 'BANC-2026-0001';
 
 -- ═══ E. Le journal opposable du banc pour ce contrat
