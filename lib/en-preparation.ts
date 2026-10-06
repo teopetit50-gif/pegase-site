@@ -132,6 +132,20 @@ const LIGNES = {
     "Relevés constructeur",
     "Plan de flotte",
   ],
+
+  /* OFFLOAD — ouvrier C4. Lignes « non construites » de NOTES-C4 (f9bf72d)
+     qui apparaissent hors du catalogue. Le catalogue, lui, porte déjà
+     `atteste: false`. */
+  offload: [
+    "Entretien annuel redevenu dû",
+    "Pièce arrivée, jamais reprise",
+  ],
+
+  /* REPUT — ouvrier C3 (palier 5 : rendez-vous, avis, astreinte). Lignes
+     non tenues (NOTES-C3) qui apparaissent hors du catalogue. */
+  reput: [
+    "Prise de rendez-vous",
+  ],
 };
 
 /* Une liste PAR MODULE : la même phrase peut être livrée chez l'un et pas
