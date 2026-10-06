@@ -15,6 +15,8 @@
 --     de retour ;
 --   · demande : réservations en option ou confirmées dont le départ tombe dans la fenêtre.
 --   Excédent d'une catégorie à une agence = au parc + retours − demande (s'il est positif).
+--   Un véhicule immobilisé (public.loc_immobilisations de B2, période sans fin_le) n'est ni au parc ni « inactif » :
+--   il est indisponible pour une raison (lu par to_regclass : tant que la table n'est pas posée, aucun ne l'est).
 --
 -- LES RÈGLES, lisibles, chacune avec sa raison :
 --   · Véhicules inactifs : un véhicule au parc et sans réservation à lui sur 72 h a pour probabilité de rester trois
@@ -67,6 +69,27 @@ as $function$
                    order by c.depart_le desc limit 1), p_rattachement)
 $function$;
 
+-- Les véhicules immobilisés (b2_10 de B2, public.loc_immobilisations : une période ouverte, fin_le null) ne sont ni au
+-- parc ni « inactifs » : ils sont indisponibles pour une raison. Tant que la table n'est pas posée, aucun ne l'est.
+create or replace function private.loc_b3t_immobilises(p_client uuid)
+ returns uuid[]
+ language plpgsql
+ stable
+ security definer
+ set search_path to ''
+as $function$
+declare
+  v uuid[];
+begin
+  if to_regclass('public.loc_immobilisations') is null then
+    return '{}'::uuid[];
+  end if;
+  execute 'select coalesce(array_agg(distinct i.vehicule_id), ''{}''::uuid[]) from public.loc_immobilisations i
+           where i.client_id = $1 and i.fin_le is null and i.vehicule_id is not null'
+    into v using p_client;
+  return coalesce(v, '{}'::uuid[]);
+end $function$;
+
 create or replace function private.loc_b3t_flux(p_client uuid, p_debut timestamp with time zone, p_fin timestamp with time zone)
  returns table(entite_id uuid, categorie_id uuid, au_parc integer, retours integer, demande integer)
  language sql
@@ -74,10 +97,12 @@ create or replace function private.loc_b3t_flux(p_client uuid, p_debut timestamp
  security definer
  set search_path to ''
 as $function$
-  with parc as (
+  with immo as (select private.loc_b3t_immobilises(p_client) as ids),
+  parc as (
     select private.loc_b3t_position(v.client_id, v.id, v.entite_id) as entite_id, v.categorie_id
     from public.loc_vehicules v
     where v.client_id = p_client and v.statut = 'actif' and v.disparu_le is null and v.categorie_id is not null
+      and not exists (select 1 from immo where v.id = any (immo.ids))
       and not exists (select 1 from public.loc_contrats c where c.client_id = v.client_id and c.vehicule_id = v.id
                         and c.statut = 'ouvert' and c.retour_reel_le is null and c.disparu_le is null)
   ),
@@ -129,6 +154,7 @@ create or replace function private.loc_vehicules_inactifs_lire(p_client uuid, p_
 as $function$
 declare
   v_fin timestamptz := p_maintenant + interval '72 hours';
+  v_immo uuid[] := private.loc_b3t_immobilises(p_client);
   v_res jsonb;
 begin
   with flux as (select * from private.loc_b3t_flux(p_client, p_maintenant, v_fin)),
@@ -139,7 +165,7 @@ begin
                        and c.disparu_le is null and c.retour_reel_le is not null), v.cree_le) as au_parking_depuis
     from public.loc_vehicules v
     join public.loc_categories k on k.client_id = v.client_id and k.id = v.categorie_id
-    where v.client_id = p_client and v.statut = 'actif' and v.disparu_le is null
+    where v.client_id = p_client and v.statut = 'actif' and v.disparu_le is null and v.id <> all (v_immo)
       and not exists (select 1 from public.loc_contrats c where c.client_id = v.client_id and c.vehicule_id = v.id
                         and c.statut = 'ouvert' and c.retour_reel_le is null and c.disparu_le is null)
       and not exists (select 1 from public.loc_reservations r where r.client_id = v.client_id and r.vehicule_id = v.id
@@ -189,7 +215,7 @@ begin
          order by x.probabilite desc, x.au_parking_depuis, x.immatriculation), '[]'::jsonb)
     into v_res
   from actions x;
-  return jsonb_build_object('calcule_le', p_maintenant, 'horizon_heures', 72, 'vehicules', v_res,
+  return jsonb_build_object('calcule_le', p_maintenant, 'horizon_heures', 72, 'vehicules', v_res, 'immobilises', cardinality(v_immo),
     'a_risque', (select count(*) from jsonb_array_elements(v_res) e where e ->> 'niveau' in ('fort', 'moyen')));
 end $function$;
 
@@ -396,6 +422,8 @@ grant execute on function public.loc_montee_en_gamme(uuid, uuid, integer) to aut
 
 revoke all on function private.loc_b3t_regard(uuid, text[]) from public, anon, authenticated;
 grant execute on function private.loc_b3t_regard(uuid, text[]) to service_role;
+revoke all on function private.loc_b3t_immobilises(uuid) from public, anon, authenticated;
+grant execute on function private.loc_b3t_immobilises(uuid) to service_role;
 revoke all on function private.loc_b3t_position(uuid, uuid, uuid) from public, anon, authenticated;
 grant execute on function private.loc_b3t_position(uuid, uuid, uuid) to service_role;
 revoke all on function private.loc_b3t_flux(uuid, timestamp with time zone, timestamp with time zone) from public, anon, authenticated;

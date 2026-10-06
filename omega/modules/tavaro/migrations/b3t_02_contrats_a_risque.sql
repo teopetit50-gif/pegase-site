@@ -17,7 +17,8 @@
 --       conducteur    +3 pièce d'identité ou permis non conforme ; +2 permis de moins de trois ans ;
 --                     +1 pièces pas encore contrôlées ;
 --       historique    +1 nouveau client ; +2 déjà rendu un véhicule en retard (plus d'une heure) ;
---                     +3 facture échue impayée ou en litige ;
+--                     +3 facture échue impayée ou en litige ; +3 a déjà contesté un débit auprès de sa banque
+--                     (public.loc_contestations de B2, lue par to_regclass) ;
 --       sinistralité  +2 une facture de dommages par le passé, +3 deux ou plus.
 --     « Fort » à partir de 4, « moyen » à 2 ; en dessous, le contrat n'est pas listé. L'action dit quoi faire :
 --     contrôler les pièces, demander un dépôt, appeler le client avant le retour.
@@ -85,6 +86,27 @@ begin
   return v_id;
 end $function$;
 
+-- Les locataires qui ont déjà contesté un débit auprès de leur banque (b2_09 de B2 : public.loc_contestations).
+create or replace function private.loc_b3t_contesteurs(p_client uuid)
+ returns uuid[]
+ language plpgsql
+ stable
+ security definer
+ set search_path to ''
+as $function$
+declare
+  v uuid[];
+begin
+  if to_regclass('public.loc_contestations') is null then
+    return '{}'::uuid[];
+  end if;
+  execute 'select coalesce(array_agg(distinct h.locataire_id), ''{}''::uuid[]) from public.loc_contestations x
+           join public.loc_contrats h on h.client_id = x.client_id and h.id = x.contrat_id
+           where x.client_id = $1 and h.locataire_id is not null'
+    into v using p_client;
+  return coalesce(v, '{}'::uuid[]);
+end $function$;
+
 create or replace function private.loc_contrats_a_risque_lire(p_client uuid, p_entite uuid default null,
                                                                p_maintenant timestamp with time zone default now(), p_regarder boolean default true)
  returns jsonb
@@ -94,6 +116,7 @@ create or replace function private.loc_contrats_a_risque_lire(p_client uuid, p_e
  set search_path to ''
 as $function$
 declare
+  v_contesteurs uuid[] := private.loc_b3t_contesteurs(p_client);
   v_res jsonb;
 begin
   with ouverts as (
@@ -116,6 +139,7 @@ begin
            (o.loc_id is not null and exists (select 1 from public.loc_factures f join public.loc_contrats h on h.client_id = f.client_id and h.id = f.contrat_id
                                               where f.client_id = p_client and h.locataire_id = o.loc_id
                                                 and (f.statut = 'litige' or (f.statut in ('emise', 'envoyee') and f.echeance_le < p_maintenant::date)))) as impaye,
+           (o.loc_id is not null and o.loc_id = any (v_contesteurs)) as conteste,
            (select count(*) from public.loc_factures f join public.loc_contrats h on h.client_id = f.client_id and h.id = f.contrat_id
              where f.client_id = p_client and o.loc_id is not null and h.locataire_id = o.loc_id and h.id <> o.id
                and f.nature = 'dommages' and f.statut <> 'avoir')::integer as sinistres
@@ -126,6 +150,7 @@ begin
     select f.*,
            (case when f.pieces_ko then 3 else 0 end + case when f.permis_recent then 2 else 0 end + case when f.pieces_a_controler then 1 else 0 end
             + case when f.nouveau then 1 else 0 end + case when f.retard then 2 else 0 end + case when f.impaye then 3 else 0 end
+            + case when f.conteste then 3 else 0 end
             + case when f.sinistres >= 2 then 3 when f.sinistres = 1 then 2 else 0 end) as score,
            array_remove(array[
              case when f.pieces_ko then 'pièce d''identité ou permis non conforme' end,
@@ -134,6 +159,7 @@ begin
              case when f.nouveau then 'nouveau client' end,
              case when f.retard then 'a déjà rendu un véhicule en retard' end,
              case when f.impaye then 'facture échue impayée ou en litige' end,
+             case when f.conteste then 'a déjà contesté un débit auprès de sa banque' end,
              case when f.sinistres >= 2 then format('%s factures de dommages par le passé', f.sinistres)
                   when f.sinistres = 1 then 'une facture de dommages par le passé' end], null) as raisons
     from faits f
@@ -150,6 +176,7 @@ begin
            'action', case when n.pieces_a_controler then 'Contrôler la pièce d''identité et le permis'
                           when n.pieces_ko then 'Ne pas remettre les clés sans pièces conformes'
                           when n.impaye then 'Demander le règlement de l''impayé ou un dépôt avant le départ'
+                          when n.conteste then 'Faire signer l''état des lieux de départ, photos à l''appui : il a déjà contesté un débit'
                           when n.sinistres >= 1 or n.permis_recent then 'Faire l''état des lieux de départ avec le client, photos à l''appui'
                           else 'Appeler le client la veille du retour' end)
          order by n.score desc, n.depart_le), '[]'::jsonb)
@@ -176,6 +203,8 @@ revoke all on function public.loc_noter_controle_conducteur(uuid, text, text, bo
 grant execute on function public.loc_noter_controle_conducteur(uuid, text, text, boolean) to authenticated, service_role;
 revoke all on function public.loc_contrats_a_risque(uuid, uuid) from public, anon;
 grant execute on function public.loc_contrats_a_risque(uuid, uuid) to authenticated, service_role;
+revoke all on function private.loc_b3t_contesteurs(uuid) from public, anon, authenticated;
+grant execute on function private.loc_b3t_contesteurs(uuid) to service_role;
 revoke all on function private.loc_contrats_a_risque_lire(uuid, uuid, timestamp with time zone, boolean) from public, anon, authenticated;
 grant execute on function private.loc_contrats_a_risque_lire(uuid, uuid, timestamp with time zone, boolean) to service_role;
 
