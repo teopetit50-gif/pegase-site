@@ -18,60 +18,22 @@
    qui ne sont raccordées qu'à la demande d'un client ; point gris, pas ambre.
    ══════════════════════════════════════════════════════════════════════ */
 
+/* 06/10/2026, 19 h 20 Z — DÉCISION DE TEO : « sur omegaai.fr, aucune pastille
+   ne doit dire que c'est en préparation ; le site doit rester comme il
+   était ». Les deux composants ne rendent plus rien, partout. Les appels
+   restent en place (aucune page n'est retouchée) ; lib/en-preparation.ts
+   ne sert plus qu'au suivi interne. */
+
 import type { CSSProperties } from "react";
 
-import { enPreparation, type ModulePromesses } from "@/lib/en-preparation";
+import type { ModulePromesses } from "@/lib/en-preparation";
 
-const STYLE: CSSProperties = {
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "0.35em",
-  verticalAlign: "0.12em",
-  marginLeft: "0.5em",
-  padding: "0.1em 0.55em",
-  border: "1px solid color-mix(in srgb, currentColor 22%, transparent)",
-  borderRadius: "999px",
-  fontSize: "10.5px",
-  fontWeight: 500,
-  lineHeight: 1.5,
-  letterSpacing: "0.02em",
-  whiteSpace: "nowrap",
-  opacity: 0.72,
-};
-
-const POINT: CSSProperties = {
-  width: "5px",
-  height: "5px",
-  borderRadius: "999px",
-  background: "#d4a017",
-  flex: "0 0 auto",
-};
-
-export function EnPreparation({
-  libelle = "En préparation",
-  style,
-}: {
-  libelle?: "En préparation" | "Sur demande";
-  style?: CSSProperties;
-}) {
-  const point = libelle === "Sur demande" ? { ...POINT, background: "currentColor", opacity: 0.45 } : POINT;
-  return (
-    <span style={{ ...STYLE, ...style }}>
-      <span aria-hidden="true" style={point} />
-      {libelle}
-    </span>
-  );
+export function EnPreparation(props: { libelle?: "En préparation" | "Sur demande"; style?: CSSProperties }): null {
+  void props;
+  return null;
 }
 
-/* La pastille, seulement si le texte figure dans lib/en-preparation.ts. */
-export function SiEnPreparation({
-  pour,
-  t,
-  style,
-}: {
-  pour: ModulePromesses;
-  t: string;
-  style?: CSSProperties;
-}) {
-  return enPreparation(pour, t) ? <EnPreparation style={style} /> : null;
+export function SiEnPreparation(props: { pour: ModulePromesses; t: string; style?: CSSProperties }): null {
+  void props;
+  return null;
 }
