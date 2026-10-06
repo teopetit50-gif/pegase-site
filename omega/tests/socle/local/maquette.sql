@@ -165,7 +165,7 @@ create table public.envois (
   transactionnel boolean not null default true,
   module text not null default 'tavaro', mode text not null default 'essai', donnees_sante boolean not null default false,
   echeance timestamptz, reprise_le timestamptz,
-  statut text not null default 'a_envoyer', cree_le timestamptz not null default now()
+  statut text not null default 'a_envoyer', fournisseur text, expediteur_id uuid, cree_le timestamptz not null default now()
 );
 create table public.envois_evenements (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), envoi_id uuid not null references public.envois(id), survenu_le timestamptz not null default now(), type text not null constraint envois_evenements_type_check check (type = any (array['remis', 'rebond_temporaire', 'rebond', 'plainte', 'refuse'])), detail jsonb);
 create trigger t_envois_evenements_ajout_seul before update or delete on public.envois_evenements for each row execute function private.ajout_seul();
@@ -346,3 +346,20 @@ create schema if not exists storage;
 create table storage.buckets (id text primary key, name text not null, public boolean default false);
 create table storage.objects (id uuid primary key default gen_random_uuid(), bucket_id text references storage.buckets(id), name text not null, metadata jsonb, created_at timestamptz default now());
 insert into storage.buckets (id, name) values ('omega-clients', 'omega-clients');
+
+-- Réceptions et boîtes (18a, extraits du socle commun), pour la confidentialité par module (19ak).
+create table public.expediteurs (id uuid primary key default gen_random_uuid(), client_id uuid not null references public.clients(id), module text not null, canal text not null, identite text not null, fournisseur text, cree_le timestamptz not null default now());
+alter table public.expediteurs enable row level security;
+create table public.receptions (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), module text, canal text not null, boite text not null, identifiant_externe text not null, sujet text, pieces jsonb not null default '[]', recu_le timestamptz not null default now());
+alter table public.receptions enable row level security;
+create policy "on voit les réceptions de son périmètre" on public.receptions for select to authenticated using (client_id in (select private.mes_clients()));
+grant select on public.receptions to authenticated;
+insert into private.tables_locataires (nom, ordre_effacement) values ('receptions', 5), ('expediteurs', 6);
+-- Storage : la politique de lecture de 19b (préfixe client seulement).
+alter table storage.objects enable row level security;
+create policy "les membres lisent les pièces de leurs organisations" on storage.objects for select to authenticated
+  using (bucket_id = 'omega-clients' and name ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/'
+         and (substring(name from 1 for 36))::uuid in (select private.mes_clients()));
+grant usage on schema storage to authenticated;
+grant select on storage.objects to authenticated;
+
