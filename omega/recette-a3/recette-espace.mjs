@@ -16,7 +16,7 @@ mkdirSync(dossier, { recursive: true });
 let echecs = 0;
 const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) echecs++; };
 const ANGLAIS = /\b(Loading|Submit|Cancel|Approve|Reject|Delete|Save|Error|Pending|Due|Invoice|Supplier|Settings|Logout|Sign in|Dashboard|Today|Yesterday|Tomorrow)\b/;
-const ECRANS = [['validations', '/espace/validations'], ['filed', '/espace/filed'], ['fournisseurs', '/espace/filed/fournisseurs'], ['a-payer', '/espace/filed/a-payer'], ['comptabilite', '/espace/filed/comptabilite'], ['point', '/espace/point']];
+const ECRANS = [['validations', '/espace/validations'], ['filed', '/espace/filed'], ['fournisseurs', '/espace/filed/fournisseurs'], ['a-payer', '/espace/filed/a-payer'], ['comptabilite', '/espace/filed/comptabilite'], ['boite', '/espace/filed/boite'], ['point', '/espace/point']];
 const LARGEURS = [390, 768, 1024, 1440, 1700];
 
 for (const [nom, chemin] of ECRANS) {
@@ -341,7 +341,7 @@ for (const [nom, chemin] of ECRANS) {
   await s.evaluer(`[...document.querySelectorAll('.esp button')].find(b => /Exporter le FEC/.test(b.textContent)).click()`);
   await s.dormir(800);
   const av = await s.evaluer(`[...document.querySelectorAll('.esp-avis')].map(a => a.textContent).join(' | ')`);
-  ok(/lignes/.test(av) && /écritures/.test(av) && /crédit/.test(av), `bilan de l'export : ${av.slice(0, 140)}`);
+  ok(/lignes?/.test(av) && /écritures?/.test(av) && /crédit/.test(av), `bilan de l'export : ${av.slice(0, 140)}`);
   await s.evaluer(`[...document.querySelectorAll('.esp button')].find(b => /^Modifier le compte : Banque/.test(b.getAttribute('aria-label') ?? '')).click()`);
   await s.dormir(400);
   await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, '51'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
@@ -355,6 +355,33 @@ for (const [nom, chemin] of ECRANS) {
   const ligne = await s.evaluer(`[...document.querySelectorAll('.esp-tableau tbody tr')].map(t => t.innerText.replace(/\\s+/g, ' ')).find(t => /Banque/.test(t)) ?? ''`);
   ok(/512100/.test(ligne) && !/par défaut/.test(ligne), `le compte banque devient 512100 (${ligne})`);
   await s.capturer(`${dossier}comptabilite-fec-1440.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-boite', densite: 1 });
+  console.log('— /espace/filed/boite : les courriels reçus');
+  ok(await s.aller(base + '/espace/filed/boite'), 'page chargée');
+  await s.dormir(600);
+  const r = await s.evaluer(`(() => ({ boite: document.querySelector('.esp-avis strong.esp-mono')?.textContent, kpi: [...document.querySelectorAll('.esp-kpi')].map(k => k.innerText.replace(/\\s+/g, ' ')), lignes: [...document.querySelectorAll('.esp-liste .esp-item')].map(t => t.innerText.replace(/\\s+/g, ' ')), detail: document.querySelector('#esp-courriel')?.innerText ?? '' }))()`);
+  ok(/@/.test(r.boite ?? ''), `l'adresse de la boîte est dite (${r.boite})`);
+  ok(r.lignes.length >= 8, `${r.lignes.length} courriels, du plus récent au plus ancien`);
+  ok(/Pièces jointes/i.test(r.detail) && /Message/i.test(r.detail), 'le détail du premier courriel : pièces et message');
+  /* la facture de Papeterie Durand : sa pièce est devenue R2026-000014 */
+  await s.evaluer(`[...document.querySelectorAll('.esp-liste .esp-item')].find(b => /PD-2026-1187/.test(b.textContent) && !/Relance/.test(b.textContent))?.click()`);
+  await s.dormir(300);
+  const lien = await s.evaluer(`[...document.querySelectorAll('#esp-courriel a')].map(a => ({ t: a.textContent, h: a.getAttribute('href') })).find(a => /R2026-000014/.test(a.t)) ?? null`);
+  ok(!!lien && /objet=document:/.test(lien.h), `la pièce mène à son document FILED (${lien?.t} → ${lien?.h})`);
+  /* la pièce écartée se dit */
+  await s.evaluer(`[...document.querySelectorAll('.esp-liste .esp-item')].find(b => /photos de la livraison/.test(b.textContent))?.click()`);
+  await s.dormir(300);
+  ok(/n.a pas été gardée/.test(await s.evaluer(`document.querySelector('#esp-courriel').innerText`)), 'une pièce écartée à la réception est signalée');
+  /* filtre « Écartés » */
+  await s.evaluer(`[...document.querySelectorAll('.esp-kpi')].find(b => /Écartés/.test(b.textContent)).click()`);
+  await s.dormir(300);
+  const ec = await s.evaluer(`[...document.querySelectorAll('.esp-liste .esp-item')].map(t => t.innerText.replace(/\\s+/g, ' '))`);
+  ok(ec.length === 1 && /Indésirable/.test(ec[0]), `filtre « Écartés » : ${ec.join(' / ').slice(0, 90)}`);
+  await s.capturer(`${dossier}boite-detail-1440.jpg`, { qualite: 55 });
   s.fermer();
 }
 
