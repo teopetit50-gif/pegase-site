@@ -470,3 +470,9 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   lignes de factures.ts à passer à atteste: true listées (worker-a4 aa909e0, après la prod).
   B5 rejoue un courrier de mairie réel (accès recette renvoyés). B6 propose : envoi réel du
   J-2 et clôture des sept chantiers « Essai B6 » du banc (décision du coordinateur, en attente).
+- 03 h 35 : **règle santé des envois prouvée sur la recette** — tests d'A5 52 et 53 (worker-a5
+  607c2e6) 4/4 et 5/5 : SMS santé → CANAL_NON_PERMIS définitif ; email santé chez un
+  fournisseur non agréé (brevo) → SANTE_HORS_CANAL_AGREE définitif ; brevo agréé ou envoi
+  sans santé → seulement HORS_HEURES. Question ouverte d'A5 soumise à A2 : verrous_envoi juge
+  le fournisseur de l'expéditeur actif, commencer_envoi rend fournisseur_hds d'après
+  envois.fournisseur — peuvent-ils diverger ?
