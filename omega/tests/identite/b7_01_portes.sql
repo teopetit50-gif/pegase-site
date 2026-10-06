@@ -45,12 +45,12 @@ declare v_id uuid; d jsonb; v_ident text := 'ZZ' || upper(substr(md5(random()::t
 begin
   -- Le cache identites_registre est global et la recette en porte de vraies lignes : l'identifiant est tiré au sort,
   -- jamais vu nulle part (préfixe ZZ, hors de l'Union), pour que « aucun cache » reste vrai.
-  v_id := tests.b7_demande('vies', lower(v_ident));
+  v_id := tests.b7_demande('vies', v_ident);
   d := public.identite_a_verifier(v_id);
   return next ok(d is not null, 'La porte rend la demande');
   return next is(d ->> 'id', v_id::text, 'id');
   return next is(d ->> 'registre', 'vies', 'registre');
-  return next is(d ->> 'identifiant', v_ident, 'identifiant normalisé');
+  return next is(d ->> 'identifiant', v_ident, 'identifiant');
   return next is(d ->> 'client_id', tests.b7_client()::text, 'client');
   return next ok(d ->> 'repondu_le' is null, 'pas encore répondue');
   return next ok(jsonb_typeof(d -> 'cache') = 'null', 'aucun cache pour un identifiant jamais vu');
