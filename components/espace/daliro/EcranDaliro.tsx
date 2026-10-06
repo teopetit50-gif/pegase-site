@@ -270,7 +270,7 @@ export default function EcranDaliro() {
           ) : visibles.length === 0 ? (
             <Vide titre="Aucun chantier">{filtre ? "Rien dans cette famille." : "Créez votre premier chantier : son nom, son adresse, son maître d'ouvrage."}</Vide>
           ) : (
-            <ul className="esp-liste" role="listbox" aria-label="Chantiers">
+            <ul className="esp-liste" aria-label="Chantiers">
               {visibles.map((c) => {
                 const s = STATUTS_CHANTIER[c.statut];
                 const p = c.prochain_passage;
@@ -278,8 +278,7 @@ export default function EcranDaliro() {
                   <li key={c.id}>
                     <button
                       type="button"
-                      role="option"
-                      aria-selected={choisi === c.id}
+                      aria-current={choisi === c.id ? "true" : undefined}
                       className="esp-item"
                       onClick={() => {
                         setChoix(c.id);
