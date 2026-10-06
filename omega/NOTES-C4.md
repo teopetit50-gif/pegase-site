@@ -4,6 +4,37 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 `components/espace/offload/`, `app/espace/offload/`, et ce fichier. Coordinateur : session
 `session_01BCGFdpRKBvXKjouC75sYBg`. Je n'appelle jamais Supabase : le coordinateur pose, je reçois les sorties brutes.
 
+## REPRISE (pause demandée par Teo le 06/10, 21 h Z)
+
+**Fait** (branche `worker-c4`, tout poussé) :
+- c4_01 à c4_09 sont posés sur la recette et verts. Dernière recette : `^test_c4_09_` 21 ok, 0 not ok.
+- c4_07 (échéances) `5f2cc7e`, c4_08 (affaires en plan) `e4365bf`, c4_09 (pilotage) `ed946d2a`, avec les corrections du test
+  `910c2672` et `8b71a98a`.
+- 41 lignes sur 45 sont prouvées sur la recette ; 4 sont partielles (6, 11, 15, 38).
+- Accessibilité : `role="img"` sur les barres de la courbe, `d41125a3` (axe : 0 violation).
+- Chiffrage des promesses de la page : `omega/CHIFFRAGE/offload.md`, `5cbbc113`.
+
+**Attend le coordinateur** : fusionner dans main tout ce qui suit `efd478e` sur `worker-c4` :
+- l'écran Pilotage (`Pilotage.tsx`, `tableur.ts`, `EcranOffload.tsx`, `portes.ts`, `types.ts`) ;
+- `role="img"` dans `Courbe.tsx` ;
+- les notes et le chiffrage.
+
+**Attend Teo** :
+- choisir, pour les cinq phrases de la page qui contredisent le produit (vague du mardi, un message par trimestre, un
+  seul canal, compte en litige, réécriture dans le CRM), entre construire (3,5 j) ou corriger le texte ;
+- repasser en `atteste: false` les lignes 11, 15 et 38 du catalogue ;
+- les tiers du passage en vrai : messagerie du client (A2), client pilote, annexe des prestataires, régions
+  d'hébergement.
+
+**Prochaine étape exacte** (au réveil, sur ordre) : les 4 lignes partielles, dans cet ordre :
+1. 38, coupe-circuit au premier doute (2 j) ;
+2. 6, vue par raison sociale mère (2 j) ;
+3. réponses d'absence reconnues, aujourd'hui comptées comme une réponse (1 j) ;
+4. 11, règles en français (6 j, avec un modèle de langue).
+
+La ligne 15 dépend de la messagerie du client (A2). Le banc local se remonte avec `scratchpad/rejouer.sh` ; il est
+perdu si le conteneur est recyclé, et sa reconstruction est décrite dans « Méthode de vérification ».
+
 ## Méthode de vérification avant chaque envoi
 
 Un Postgres 16 local (dans le conteneur de la session, jamais Supabase) porte un **socle factice** : les tables et
@@ -447,14 +478,14 @@ l'écran /espace/offload (liste par priorité avec la raison, fiche, reprise, t�
 | 37 | Les listes d'exclusion se tiennent par compte, par secteur et par commercial. | **prouvée (recette)** | test_c4_05_exclusions |
 | 38 | Le système s'arrête de lui-même au premier doute, et vous le signale. | partielle | import douteux non appliqué et journalisé (test_c4_01_garde_fou) ; essai contre réel (test_c4_03_issues) ; verrous du socle. Pas un arrêt général du module |
 | 39 | Chaque message parti reste au journal, daté et consultable. | **prouvée (recette)** | test_c4_03_cycle (recette 17 h 25 Z, 1120 ok) |
-| 40 | Le chiffre d'affaires remis en jeu se lit vague par vague. | **c4_09, à poser** | test_c4_09_pilotage (vague du jour : comptes, en jeu, réponses, commandes, chiffre repris) |
+| 40 | Le chiffre d'affaires remis en jeu se lit vague par vague. | **prouvée (recette)** | test_c4_09_pilotage (vague du jour : comptes, en jeu, réponses, commandes, chiffre repris) |
 | 41 | Les comptes réactivés sont suivis jusqu'à leur première commande. | **prouvée (recette)** | test_c4_03_issues |
-| 42 | Le taux de réponse se compare par segment, par canal et par message. | **c4_09, à poser** | test_c4_09_pilotage (segment, canal, message, niveau) |
-| 43 | Les échéances honorées et les commandes reprises alimentent un tableau de suivi. | **c4_09, à poser** | test_c4_09_pilotage (suivi du mois) |
-| 44 | Les résultats se lisent par entité, par site et en consolidé. | **c4_09, à poser** | test_c4_09_pilotage (site, entité, consolidé) |
-| 45 | Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe. | **c4_09, à poser** | à la demande : bouton « Exporter vers un tableur » de chaque onglet (CSV) ; à date fixe : test_c4_09_arretes (arrêté mensuel) |
+| 42 | Le taux de réponse se compare par segment, par canal et par message. | **prouvée (recette)** | test_c4_09_pilotage (segment, canal, message, niveau) |
+| 43 | Les échéances honorées et les commandes reprises alimentent un tableau de suivi. | **prouvée (recette)** | test_c4_09_pilotage (suivi du mois) |
+| 44 | Les résultats se lisent par entité, par site et en consolidé. | **prouvée (recette)** | test_c4_09_pilotage (site, entité, consolidé) |
+| 45 | Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe. | **prouvée (recette)** | à la demande : bouton « Exporter vers un tableur » de chaque onglet (CSV) ; à date fixe : test_c4_09_arretes (arrêté mensuel) |
 
-Toutes les lignes sont construites. Les cinq de « Pilotage » (40, 42 à 45) le sont par c4_09, à poser.
+Toutes les lignes sont construites. Les cinq de « Pilotage » (40, 42 à 45) sont prouvées sur la recette (c4_09, 21 ok).
 Partielles : 6, 11, 15, 38.
 
 ## Journal
@@ -483,3 +514,4 @@ Partielles : 6, 11, 15, 38.
   294 assertions vertes en local ; écran recetté.
 - 06/10, 19 h 05 Z — recette : c4_08 posé et vert (860 ok), lignes 25 à 32 prouvées. Lot c4_09 (pilotage) : 28 tests,
   312 assertions vertes en local ; écran recetté.
+- 06/10, 20 h 45 Z — c4_09 vert sur la recette (21 ok) ; pause demandée par Teo à 21 h Z, section REPRISE écrite.
