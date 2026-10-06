@@ -16,7 +16,7 @@ import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
 import { Avis, Pastille } from "../ui";
 import { dateCourte } from "../format";
-import { conformiteExemple, honorairesExemple } from "./exemples";
+import { conformiteExemple, expertisesExemple, honorairesExemple } from "./exemples";
 import { charges, marges, piecesAttendues, sansDiligence, series, type DonneesPilotage } from "./pilotage";
 import * as portes from "./portes";
 import { libelleMatiere } from "./regles";
@@ -71,6 +71,7 @@ export default function PilotageCabinet({ ouvert, onFermer, source, clientId, do
               avis: exemple.flatMap((c) => c.avis.map((a) => ({ dossier_id: a.dossier_id, date_avis: a.date_avis }))),
               pieces: exemple.flatMap((c) => c.pieces.map((p) => ({ objet_id: c.dossier.id, recue_le: p.recue_le, type_piece: p.type_piece }))),
               vigilances: exemple.flatMap((c) => { const v = conformiteExemple(c.dossier.id).vigilance; return v ? [v] : []; }),
+              expertises: exemple.flatMap((c) => expertisesExemple(c.dossier.id)),
             }
           : await portes.chargerPilotage(clientId);
         if (actif) setLu({ x, le: Date.now() });

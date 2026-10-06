@@ -578,6 +578,19 @@ avaient quitté le bucket.
   2026-0412 (en mémoire, non chiffrée). **Pas encore vu sur un vrai résultat du lecteur** : à recetter dès la
   première analyse rendue en base.
 
+## 23. L'expertise et les pièces attendues de l'expert (lot B4-18, 06/10, demande du coordinateur)
+
+- **Base** : `b4_16_tamila_expertises.sql` — `tamila_expertises` (des dates et des statuts, aucun nom ; RLS qui voit le
+  dossier ; effacée avec le dossier) ; `tamila_poser_expertise` (qui écrit dans le dossier ; champs connus, dates
+  AAAA-MM-JJ, cohérence : ordonnance d'abord, pré-rapport avant la fin des dires, dires avant le rapport) ;
+  `tamila_noter_expertise` (consignation versée, pré-rapport reçu, dires adressés, rapport reçu — qui clôt —, abandon ;
+  jamais dans le futur). Le point du matin (b4_14) gagne ses lignes : consignation (art. 271) et dires (art. 276) à
+  J-7, critiques à J-2 ; pré-rapport et rapport en retard (`tamila_point_lignes_personne` remplacée, bloc 6 ajouté).
+  Test `25_expertises.sql` : 16 contrôles ; série locale 562 ok (25 échecs connus 04/06/10/11).
+- **Écran** : carte « Expertise » dans le dossier (`ExpertiseTamila.tsx`) ; le pilotage « Pièces attendues » liste
+  le justificatif de consignation, le pré-rapport, nos dires et le rapport définitif. Exemple : 2026-0398, pré-rapport
+  en retard, dires dans douze jours. Recette 188/188, axe 0 écart grave.
+
 ## 7. Prochaine étape
 
 1. (fait : en ligne, vérifié le 06/10.)

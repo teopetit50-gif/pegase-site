@@ -13,7 +13,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { dans, ilYa } from "../exemples/socle";
-import type { Audience, CalculDelai, Conformite, Delai, Dossier, DossierComplet, Export, Honoraires, Membre, Partie, Personne, Piece, RegleProcedure, Reglages } from "./types";
+import type { Audience, CalculDelai, Conformite, Delai, Dossier, DossierComplet, Expertise, Export, Honoraires, Membre, Partie, Personne, Piece, RegleProcedure, Reglages } from "./types";
 
 export const EXEMPLE_CLIENT = "00000000-0000-4000-8000-00000000000b";
 export const EXEMPLE_ENTITE = "00000000-0000-4000-8000-0000000000e1";
@@ -292,4 +292,16 @@ export function conformiteExemple(dossier: string): Conformite {
     vigilance: dossier === D1 ? { dossier_id: D1, client_id: C, assujetti: false, activite: null, identification_le: null, identification_piece: null, beneficiaire_effectif_le: null, risque: null, revue_le: jour(ilYa(20)), par: MOI, maj_le: ilYa(20) } : null,
     vigilance_a_faire: dossier !== D1 && !!c && ["attente", "ouvert", "audit"].includes(c.dossier.statut),
   };
+}
+
+/* ——— l'expertise d'exemple (b4_16) : 2026-0398, expertise médicale ordonnée il y a 70 jours ; le pré-rapport est en
+   retard de quatre jours, les dires sont à adresser dans douze jours ——— */
+export function expertisesExemple(dossier: string): Expertise[] {
+  if (dossier !== D2) return [];
+  return [{
+    id: `${D2}-ex1`, client_id: C, dossier_id: D2, mission: "judiciaire", statut: "en_cours",
+    ordonnee_le: jour(ilYa(70)), consignation_avant: jour(ilYa(40)), consignation_versee_le: jour(ilYa(45)), premiere_reunion_le: jour(ilYa(30)),
+    pre_rapport_attendu_le: jour(ilYa(4)), pre_rapport_recu_le: null, dires_jusqu_au: jour(dans(12)), dires_deposes_le: null,
+    rapport_attendu_le: jour(dans(60)), rapport_recu_le: null, cree_le: ilYa(70),
+  }];
 }
