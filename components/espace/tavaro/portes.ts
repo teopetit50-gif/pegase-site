@@ -81,7 +81,7 @@ export async function chargerMonde(): Promise<Monde> {
     supabase.from("loc_categories").select("id, code, libelle"),
     supabase.from("loc_baremes").select("*").order("date_effet", { ascending: false }),
     supabase.from("loc_bareme_lignes").select("*").order("rang"),
-    supabase.from("loc_reglages").select("tolerance_retard_min, echeance_pro_jours, tva_sur_debits, emetteur").limit(1),
+    supabase.from("loc_reglages").select("*").limit(1),
     supabase.from("entites").select("id, nom"),
   ]);
   const avisLus = await supabase.from("loc_avis_contravention").select("*").order("echeance_le").limit(500);
@@ -177,6 +177,7 @@ export const factureElectronique = (p_facture: string) => rpc<FormeElectronique>
 export const avoirElectronique = (p_avoir: string) => rpc<FormeElectronique>("loc_avoir_electronique", { p_avoir });
 export const completerLocataire = (p_locataire: string, p_valeurs: Record<string, unknown>) => rpc<Record<string, unknown>>("loc_completer_locataire", { p_locataire, p_valeurs });
 export const preparation2027 = () => rpc<Preparation>("loc_preparation_2027", {});
+export const refacturerAvis = (p_avis: string) => rpc<Record<string, unknown>>("loc_refacturer_avis", { p_avis });
 export const anonymiserLocataire = (p_locataire: string) => rpc<Record<string, unknown>>("loc_anonymiser_locataire", { p_locataire, p_motif: "demande" });
 
 /* Les réglages du module : la seule écriture directe, ouverte par la RLS au gérant. */

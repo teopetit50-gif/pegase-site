@@ -26,7 +26,7 @@ import { dateCourte, montant } from "../format";
 import { chiffrerLocal } from "./calcul";
 import { FAMILLES, STATUTS_CONTRAT, STATUTS_PROPOSITION, famille, nomLocataire, propositionVivante, resteDu, type Famille } from "./etats";
 import { AGENCES_EXEMPLE, AVIS_EXEMPLE, BAREME_EXEMPLE, BAREME_RETIRE_EXEMPLE, CATEGORIES_EXEMPLE, DOSSIERS_EXEMPLE, LIGNES_BAREME_EXEMPLE, REGLAGES_EXEMPLE, nomPersonneTavaro } from "./exemples";
-import { amenderContrat, avoirElectronique, chargerMonde, chiffrerRetour, classerAvis, completerContrat, completerLocataire, constaterRefus, factureElectronique, preparation2027, etablirEtat, leverCaution, signerEtat, demanderAvoir, deposerPhoto, designerConducteur, enregistrerAvis, marquerLitige, marquerReglee, monCompte, publierBareme, rattacherAvis, relancerFacture, retirerBareme, type Moi, type Monde } from "./portes";
+import { amenderContrat, avoirElectronique, chargerMonde, chiffrerRetour, classerAvis, completerContrat, completerLocataire, constaterRefus, factureElectronique, preparation2027, refacturerAvis, etablirEtat, leverCaution, signerEtat, demanderAvoir, deposerPhoto, designerConducteur, enregistrerAvis, marquerLitige, marquerReglee, monCompte, publierBareme, rattacherAvis, relancerFacture, retirerBareme, type Moi, type Monde } from "./portes";
 import type { AvisContravention, Avoir, Bareme, EtatDesLieux, Dossier, Facture, LigneBareme, LigneJournal, Retour, Role } from "./types";
 import DossierContrat, { type Gestes } from "./DossierContrat";
 import type { GestesEtats } from "./EtatsDesLieux";
@@ -328,16 +328,20 @@ export default function EcranTavaro() {
     return {
       etablir: async (moment, valeurs, fichiers) => {
         const d = d0();
+        /* la netteté mesurée par l'écran suit chaque photo, dans l'ordre des fichiers de sa vue (b2_07) */
+        const nettetes = new Map<string, (number | undefined)[]>();
+        for (const ph of (valeurs.photos as { vue: string; nettete?: number }[]) ?? []) nettetes.set(ph.vue, [...(nettetes.get(ph.vue) ?? []), ph.nettete]);
+        const nettetePreuve = (i: number, j: number) => ((valeurs.dommages as { preuves?: { nettete?: number }[] }[]) ?? [])[i]?.preuves?.[j]?.nettete;
         if (source === "reelle") {
           const client = moi?.client_id;
           if (!client) throw new Error("Compte introuvable : reconnectez-vous.");
           const photos: Record<string, unknown>[] = [];
           for (const [cle, fs] of fichiers) {
             if (!cle.startsWith("vue:")) continue;
-            for (const f of fs) photos.push({ vue: cle.slice(4), chemin: await deposerPhoto(client, d.contrat.id, f), prise_le: new Date(f.lastModified).toISOString() });
+            for (const [j, f] of fs.entries()) photos.push({ vue: cle.slice(4), chemin: await deposerPhoto(client, d.contrat.id, f), prise_le: new Date(f.lastModified).toISOString(), nettete: nettetes.get(cle.slice(4))?.[j] });
           }
           const dommages = await Promise.all(((valeurs.dommages as Record<string, unknown>[]) ?? []).map(async (x, i) => ({
-            ...x, preuves: await Promise.all((fichiers.get(`dommage:${i}`) ?? []).map(async (f) => ({ chemin: await deposerPhoto(client, d.contrat.id, f), prise_le: new Date(f.lastModified).toISOString() }))),
+            ...x, preuves: await Promise.all((fichiers.get(`dommage:${i}`) ?? []).map(async (f, j) => ({ chemin: await deposerPhoto(client, d.contrat.id, f), prise_le: new Date(f.lastModified).toISOString(), nettete: nettetePreuve(i, j) }))),
           })));
           const id = await etablirEtat(d.contrat.id, moment, { ...valeurs, photos, dommages });
           await relire();
@@ -345,8 +349,8 @@ export default function EcranTavaro() {
         }
         await attendre();
         const exist = d.etats.find((e) => e.moment === moment);
-        const photos = [...fichiers].filter(([k]) => k.startsWith("vue:")).flatMap(([k, fs]) => fs.map((f) => ({ vue: k.slice(4), chemin: f.name, prise_le: maintenant() })));
-        const dommages = ((valeurs.dommages as Record<string, unknown>[]) ?? []).map((x, i) => ({ ...x, preuves: (fichiers.get(`dommage:${i}`) ?? []).map((f) => ({ chemin: f.name, prise_le: maintenant() })) })) as EtatDesLieux["dommages"];
+        const photos = [...fichiers].filter(([k]) => k.startsWith("vue:")).flatMap(([k, fs]) => fs.map((f, j) => ({ vue: k.slice(4), chemin: f.name, prise_le: maintenant(), nettete: nettetes.get(k.slice(4))?.[j] })));
+        const dommages = ((valeurs.dommages as Record<string, unknown>[]) ?? []).map((x, i) => ({ ...x, preuves: (fichiers.get(`dommage:${i}`) ?? []).map((f, j) => ({ chemin: f.name, prise_le: maintenant(), nettete: nettetePreuve(i, j) })) })) as EtatDesLieux["dommages"];
         const caution = typeof valeurs.caution_eur === "number" ? valeurs.caution_eur : null;
         const mode = (valeurs.caution_mode as EtatDesLieux["caution_mode"]) ?? null;
         const e: EtatDesLieux = {
@@ -459,6 +463,15 @@ export default function EcranTavaro() {
         await attendre();
         if (role !== "gerant" && role !== "admin") throw new Error("Classer un avis sans désigner engage l'entreprise : la direction seule le fait.");
         changerAvis(avis.id, (a) => ({ ...a, statut: "classe", motif_classement: motif, classe_le: maintenant(), classe_par: moiId }));
+      },
+      refacturer: async (avis) => {
+        if (source === "reelle") {
+          await refacturerAvis(avis.id);
+          await relire();
+          return;
+        }
+        await attendre();
+        changerAvis(avis.id, (a) => ({ ...a, refacture_proposition_id: ids() }));
       },
     };
   }, [source, local, moiId, role, relire]);

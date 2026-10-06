@@ -188,6 +188,10 @@ for (const largeur of LARGEURS) {
   await s.dormir(300);
   const designe = await s.evaluer(`[...${sect}.querySelectorAll('.tav-avis')].find(x => /2026 1004 1412 77/.test(x.innerText))?.innerText ?? ''`);
   ok(/Désigné : Marie Durand/.test(designe) && /dans le délai/.test(designe), 'l\'avis passe dans « Traités » : désigné, dans le délai');
+  await s.evaluer(`(() => { const a = [...${sect}.querySelectorAll('.tav-avis')].find(x => /2026 1004 1412 77/.test(x.innerText)); [...a.querySelectorAll('.r-btn')].find(b => /Refacturer les frais/.test(b.textContent)).click(); })()`);
+  await s.dormir(700);
+  const refacture = await s.evaluer(`(() => ({ fait: ${sect}.querySelector('.esp-avis')?.innerText ?? '', avis: [...${sect}.querySelectorAll('.tav-avis')].find(x => /2026 1004 1412 77/.test(x.innerText))?.innerText ?? '' }))()`);
+  ok(/proposés à la facturation/.test(refacture.fait) && /Frais de dossier refacturés au locataire/.test(refacture.avis), 'les frais de dossier de l\'avis désigné sont proposés à la facturation, par la validation');
   const efface = await s.evaluer(`[...${sect}.querySelectorAll('.tav-avis')].find(x => /2025 0812 6604 51/.test(x.innerText))?.innerText ?? ''`);
   ok(/identité effacée le/.test(efface) && /DES-2025-074410/.test(efface), 'désigné il y a plus d\'un an : l\'identité est effacée, la référence reste');
   await s.capturer(`${dossier}tavaro-avis-1440.jpg`, { qualite: 55 });
@@ -208,9 +212,18 @@ for (const largeur of LARGEURS) {
   await s.dormir(500);
   const gris = await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer et faire signer/.test(b.textContent))?.disabled`);
   ok(gris === true, 'sans les quatre côtés en photo, « Enregistrer et faire signer » reste gris');
-  const photo = new URL('tavaro-390.jpg', import.meta.url).pathname;
+  const photo = new URL('photos/nette.jpg', import.meta.url).pathname;
+  const floue = new URL('photos/floue.jpg', import.meta.url).pathname;
   /* envoyer rend le message CDP entier : le résultat est sous .result */
   const doc = (await s.envoyer('DOM.getDocument', { depth: -1 })).result;
+  /* la photo floue est refusée dès le choix du fichier (b2_07) */
+  {
+    const { nodeId } = (await s.envoyer('DOM.querySelector', { nodeId: doc.root.nodeId, selector: '#edl-avant' })).result;
+    await s.envoyer('DOM.setFileInputFiles', { nodeId, files: [floue] });
+    await s.dormir(900);
+    const refus = await s.evaluer(`document.querySelector('[role="dialog"]').innerText`);
+    ok(/Photo floue refusée/.test(refus) && /floue\.jpg » est floue/.test(refus) && /Photos manquantes : Avant/.test(refus), 'une photo floue est refusée dès son choix : nommée, mesurée, la vue reste manquante');
+  }
   for (const vue of ['avant', 'arriere', 'flanc_gauche', 'flanc_droit']) {
     const { nodeId } = (await s.envoyer('DOM.querySelector', { nodeId: doc.root.nodeId, selector: `#edl-${vue}` })).result;
     await s.envoyer('DOM.setFileInputFiles', { nodeId, files: [photo] });

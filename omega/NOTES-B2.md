@@ -201,3 +201,18 @@ Sources :
   - le SIREN d'exemple de l'émetteur est corrigé (512345679, clé valide ; TVA FR75…) ;
   - tsc, eslint et build verts ; recette 82 contrôles verts ; axe : 0 écart, dialogue compris.
 - **Reste au socle (coordinateur)** : le raccordement à une plateforme agréée et le dépôt ; le PDF/A-3 Factur-X qui embarque ce XML ; la transmission du e-reporting B2C ; les statuts de cycle de vie renvoyés par la plateforme.
+
+### Carnet de l'audit des promesses (coordinateur, 06/10, 15 h 58 Z) — point 1 fait
+
+Ordre décidé :
+1. les deux petits (faits ci-dessous) ;
+2. la facture qui part avec son PDF et les photos datées en pièces jointes (avec A2) ;
+3. les modules promis : 17 Contestations bancaires, puis Remise en location et entretien, puis Sortie de flotte, puis 02–11, 13, 15, 16, 18, 20 ;
+4. Assistance et 19 Relevés constructeur, en contrat d'interface seulement, le tiers à noter pour Teo ;
+5. le contrat d'interface du paiement de la caution (préautorisation, capture, libération), sans fournisseur ; le coordinateur choisira le fournisseur avec Teo.
+
+- **Test 15** : il mourait sur un appel à `private.loc_dec` sous le rôle endossé. Le test calcule maintenant la valeur attendue sans fonction privée (7bb5c00). `loc_dec` est mon formateur de décimaux, pas un déchiffrement.
+- **b2_07** (0e2cc89) et son écran :
+  - **la photo floue est refusée**. L'écran mesure la netteté dans le navigateur (`nettete.ts` : variance du laplacien sur l'image réduite à 512 px ; fixtures `omega/recette-b2/photos` : nette 2 554, légère 350, floue 8 ; seuil 40, réglable par `loc_reglages.nettete_min`) et écarte la photo floue dès son choix, en la nommant. La base garde la mesure et une garde refuse de signer un état dont une photo mesurée est sous le seuil.
+  - **les frais de dossier d'un avis sont refacturés** : `loc_refacturer_avis` crée une proposition d'une ligne (FRAIS_AVIS du barème), qui suit validation, facture et courriel. L'écran a un bouton « Refacturer les frais de dossier » sur un avis désigné. Test 16 : 12 assertions, jusqu'à la facture émise.
+  - Recette : 84 contrôles verts, dont la photo floue refusée (vraie fixture déposée par CDP) et la refacturation ; axe : 0 écart.

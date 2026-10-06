@@ -239,7 +239,7 @@ export default function DossierContrat({ dossier, source, role, moi, bareme, reg
       </div>
 
       {/* ——— les états des lieux (b2_05) ——— */}
-      <EtatsDesLieux dossier={dossier} role={role} bareme={bareme} nommer={nommer} gestes={gestesEtats} onFait={(m) => setFait(m)} />
+      <EtatsDesLieux dossier={dossier} role={role} bareme={bareme} nommer={nommer} gestes={gestesEtats} onFait={(m) => setFait(m)} netteteMin={reglages?.nettete_min} />
 
       {/* ——— le chiffrage ——— */}
       <div className="esp-carte">

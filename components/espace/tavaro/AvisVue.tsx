@@ -30,6 +30,8 @@ export type GestesAvis = {
   rattacher: (avis: AvisContravention, contrat_id: string) => Promise<void>;
   designer: (avis: AvisContravention, designation: Record<string, unknown>, mode: string, reference: string | null) => Promise<void>;
   classer: (avis: AvisContravention, motif: string) => Promise<void>;
+  /* b2_07 : les frais de dossier refacturés au locataire, par une proposition que l'agence valide */
+  refacturer: (avis: AvisContravention) => Promise<void>;
 };
 
 const STATUTS: Record<AvisContravention["statut"], { libelle: string; teinte: Teinte }> = {
@@ -225,6 +227,11 @@ export default function AvisVue({ avis, dossiers, role, nommer, nomAgence, geste
                   </p>
                   {a.statut === "designe" ? (
                     <p className="esp-kpi-sous">Désigné : <strong>{nom}</strong> · le {dateCourte(a.designe_le)} par {nommer(a.designe_par)} · {a.mode_designation === "lrar" ? "lettre recommandée" : "en ligne, ANTAI"}{a.reference_designation ? ` · réf. ${a.reference_designation}` : ""}</p>
+                  ) : null}
+                  {a.statut === "designe" && a.contrat_id ? (
+                    a.refacture_proposition_id
+                      ? <p className="esp-kpi-sous">Frais de dossier refacturés au locataire : la facture attend la validation de l&apos;agence, puis part avec son courriel.</p>
+                      : <div className="esp-actions"><button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutSaisir || envoi} onClick={() => envoyer(async () => { await gestes.refacturer(a); return `Les frais de dossier de l'avis ${a.numero_avis} sont proposés à la facturation : une autre personne de l'agence valide, puis la facture part.`; })}>Refacturer les frais de dossier</button></div>
                   ) : null}
                   {a.statut === "classe" ? <p className="esp-kpi-sous">Classé le {dateCourte(a.classe_le)} par {nommer(a.classe_par)} : {a.motif_classement}</p> : null}
                   {a.statut === "a_rapprocher" || a.statut === "a_designer" ? (

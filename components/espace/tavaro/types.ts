@@ -261,6 +261,8 @@ export type Reglages = {
   echeance_pro_jours: number;
   tva_sur_debits: boolean;
   emetteur: Record<string, string>;
+  /* b2_07 : netteté minimale d'une photo d'état des lieux (absente tant que la migration n'est pas posée) */
+  nettete_min?: number;
 };
 
 /* l'état d'une demande de validation du socle, tel que l'écran le montre */
@@ -357,12 +359,14 @@ export type AvisContravention = {
   source: "saisie" | "lecture";
   cree_par: string | null;
   cree_le: string;
+  /* b2_07 : la proposition qui refacture les frais de dossier au locataire */
+  refacture_proposition_id?: string | null;
 };
 
 /* ——— l'état des lieux contradictoire (migration b2_05, vague 3) ——— */
 export type ZoneDommage = "avant" | "arriere" | "flanc_gauche" | "flanc_droit" | "toit" | "pare_brise" | "vitres" | "jantes" | "interieur" | "coffre";
-export type PhotoEtat = { vue: string; chemin: string; prise_le?: string };
-export type DommageConstate = { zone: ZoneDommage; code?: string; description: string; preuves: { chemin: string; prise_le?: string }[] };
+export type PhotoEtat = { vue: string; chemin: string; prise_le?: string; nettete?: number };
+export type DommageConstate = { zone: ZoneDommage; code?: string; description: string; preuves: { chemin: string; prise_le?: string; nettete?: number }[] };
 export type EtatDesLieux = {
   id: string;
   client_id: string;
