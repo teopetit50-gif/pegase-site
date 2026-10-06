@@ -1,6 +1,6 @@
--- 19am_depots — socle : le dépôt par lot d'une organisation (dossier réseau WebDAV), d'abord pour FILED.
+-- 19ao_depots — socle : le dépôt par lot d'une organisation (dossier réseau WebDAV), d'abord pour FILED.
 -- A2, 06/10/2026, demandé par le coordinateur (promesse de FILED : « dépôt par lot depuis un dossier partagé ou un
--- transfert de fichiers »). Numéro à confirmer par le coordinateur. Pose : recette ygwbgpowzlbdaajlsqkn, puis production.
+-- transfert de fichiers »). Pose : recette ygwbgpowzlbdaajlsqkn, puis production.
 -- Fonction Edge : omega/functions/depot/ (contrat des portes : depot/portes.ts). Choix WebDAV plutôt que SFTP : NOTES-A2.
 --
 -- Ce lot pose :
@@ -41,7 +41,7 @@ create table if not exists public.depots (
   constraint depots_entite_fkey foreign key (client_id, entite_id) references public.entites (client_id, id)
 );
 comment on table public.depots is
-  'Lot 19am : dépôts par lot (WebDAV) d''une organisation. Le mot de passe n''est jamais gardé, seulement son empreinte.';
+  'Lot 19ao : dépôts par lot (WebDAV) d''une organisation. Le mot de passe n''est jamais gardé, seulement son empreinte.';
 alter table public.depots enable row level security;
 revoke all on table public.depots from public, anon, authenticated;
 grant select (id, client_id, entite_id, module, libelle, identifiant, actif, cree_par, cree_le, renouvele_le,
@@ -73,7 +73,7 @@ create table if not exists public.depots_fichiers (
   constraint depots_fichiers_reference_check check (char_length(reference) <= 100),
   constraint depots_fichiers_motif_check check (char_length(motif) <= 300)
 );
-comment on table public.depots_fichiers is 'Lot 19am : ce que chaque dépôt par lot a reçu (dossiers, fichiers, état, référence FILED).';
+comment on table public.depots_fichiers is 'Lot 19ao : ce que chaque dépôt par lot a reçu (dossiers, fichiers, état, référence FILED).';
 alter table public.depots_fichiers enable row level security;
 revoke all on table public.depots_fichiers from public, anon, authenticated;
 grant select on table public.depots_fichiers to authenticated;

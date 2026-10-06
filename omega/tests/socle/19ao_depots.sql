@@ -1,8 +1,8 @@
--- Socle 19am — le dépôt par lot : droits, mot de passe jamais gardé, ouverture et fermeture après 10 échecs, liste,
--- réservation puis import, renommage limité, dépôt FILED imposé au client du dépôt. Après le lot 19am.
+-- Socle 19ao — le dépôt par lot : droits, mot de passe jamais gardé, ouverture et fermeture après 10 échecs, liste,
+-- réservation puis import, renommage limité, dépôt FILED imposé au client du dépôt. Après le lot 19ao.
 -- Client A de tests.jeu() : un gérant (gerant_a) et un collaborateur (user_a). runtests() annule tout.
 
-create or replace function tests.test_socle_19am_depots() returns setof text
+create or replace function tests.test_socle_19ao_depots() returns setof text
 language plpgsql as $f$
 declare
   jeu jsonb; client uuid; gerant uuid; membre uuid; r jsonb; r2 jsonb; v_depot uuid; code text; i integer;
@@ -96,4 +96,4 @@ begin
   perform tests.redevenir_admin();
 end $f$;
 
-select * from runtests('tests'::name, '^test_socle_19am_');
+select * from runtests('tests'::name, '^test_socle_19ao_');

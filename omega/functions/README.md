@@ -14,7 +14,7 @@ RPC et le contrat des portes, `doubles.ts` les doubles de test.
 | `reception` | `reception/` | e-mail entrant Brevo, WhatsApp Cloud API, formulaire du site | `false` |
 | `messagerie` | `messagerie/` (`index.ts`) | ouvrier des messageries connectées : relève Gmail / Microsoft 365 → réceptions, brouillons `envois.gmail` / `envois.microsoft`, révocations ; chaque minute. Portes `messagerie_*` à poser | `true` |
 | `messagerie-oauth` | `messagerie/` (`entree_oauth.ts`) | connexion OAuth Google et Microsoft (`google/…` et `microsoft/…` : `debut`, `retour`) | `false` |
-| `depot` | `depot/` (`index.ts`) | dépôt par lot WebDAV (FILED) : un « dossier réseau » par organisation, Basic par dépôt, chaque fichier devient une pièce FILED. Lot 19am, guide `omega/GUIDE-DEPOT.md` | `false` |
+| `depot` | `depot/` (`index.ts`) | dépôt par lot WebDAV (FILED) : un « dossier réseau » par organisation, Basic par dépôt, chaque fichier devient une pièce FILED. Lot 19ao, guide `omega/GUIDE-DEPOT.md` | `false` |
 | `pa-bac-a-sable` | `pa-bac-a-sable/` | faux serveur AFNOR XP Z12-013 (recette seulement) pour jouer `echange-pa` sans compte PA | `false` |
 | `echange-pa` | `echange-pa/` | ouvrier `pa.statut` (et `pa.deposer`, refusé par FILED tant qu'Omega n'émet pas de factures) + relevé de la plateforme agréée ; appelé chaque minute. Portes `pa_*` : a4_18 | `true` |
 

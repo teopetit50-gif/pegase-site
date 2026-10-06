@@ -1,5 +1,5 @@
-// Portes du socle pour le dépôt par lot (WebDAV). Lot SQL : omega/modules/socle/migrations/19am_depots.sql
-// (numéro à confirmer par le coordinateur). Le mot de passe d'un dépôt n'est jamais gardé : seule son empreinte
+// Portes du socle pour le dépôt par lot (WebDAV). Lot SQL : omega/modules/socle/migrations/19ao_depots.sql
+//. Le mot de passe d'un dépôt n'est jamais gardé : seule son empreinte
 // SHA-256 l'est (mot de passe tiré au hasard, 128 bits : une empreinte lente n'ajouterait rien).
 
 export type DepotOuvert = {

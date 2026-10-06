@@ -739,8 +739,8 @@ comptable. **Décision : WebDAV**, servi par une fonction Edge `depot`.
 - **Ce qui est écrit :**
   - `omega/functions/depot/` : `webdav.ts` (OPTIONS, PROPFIND, PUT, MKCOL, MOVE, LOCK,
     UNLOCK, PROPPATCH ; GET et DELETE refusés), `portes.ts`, 7 tests Deno verts ;
-  - lot SQL `omega/modules/socle/migrations/19am_depots.sql` (numéro à confirmer) et son test
-    `omega/tests/socle/19am_depots.sql`, 25 assertions vertes sur la maquette locale ;
+  - lot SQL `omega/modules/socle/migrations/19ao_depots.sql`  et son test
+    `omega/tests/socle/19ao_depots.sql`, 25 assertions vertes sur la maquette locale ;
   - le guide du cabinet, `omega/GUIDE-DEPOT.md`.
 - **Comportements :**
   - le PUT de 0 octet de l'Explorateur réserve le nom sans rien importer ;
@@ -753,9 +753,15 @@ comptable. **Décision : WebDAV**, servi par une fonction Edge `depot`.
     SHA-256 est gardée ; 10 échecs en 15 minutes ferment l'identifiant 15 minutes ;
   - l'authentification est gardée une minute en mémoire : un lot de fichiers ne fait qu'un
     appel à `depot_ouvrir`.
-- **Non vérifié** (pas d'accès à un Windows ni à la passerelle depuis ici) : le passage des
-  méthodes WebDAV par la passerelle de Supabase, et le montage dans l'Explorateur Windows. C'est
-  au coordinateur de les éprouver au déploiement (`curl -X PROPFIND`).
+- **Passerelle vérifiée par le coordinateur** (06/10, sur pa-bac-a-sable) : PROPFIND, MKCOL,
+  OPTIONS et LOCK atteignent la fonction. Reste à vérifier : le montage dans l'Explorateur Windows.
+- **Pourquoi pas la voie réception (a4_20)** : elle demanderait un canal « depot » dans
+  `receptions_canal_check`, donc un DROP CONSTRAINT. Le dépôt range déjà chaque fichier à
+  l'endroit exigé par `filed_deposer_piece` (`<client>/filed_document/<document>/<nom>`), il
+  passe donc directement par elle.
+- **Authentification** (exigence du coordinateur, remplie) : un mot de passe d'application par
+  dépôt, dont seule l'empreinte est en base, révocable (`depot_fermer`) et renouvelable
+  (`depot_renouveler`), jamais le mot de passe d'un compte Omega.
 
 ## Risques résiduels et choix
 
