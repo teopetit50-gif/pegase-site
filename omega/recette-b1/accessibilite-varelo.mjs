@@ -8,7 +8,8 @@
    dialogue) : tabIndex 0, role region, aria-label ; axe repassé sur le
    dialogue du dépôt avec son tableau des rejets. Vague 3 : la nature
    « clients » avec la carte de l'encours du groupe, et le dialogue du plafond ;
-   les contrats du groupe à dénoncer et le dialogue d'ajout.
+   les contrats du groupe à dénoncer et le dialogue d'ajout ; les comptes
+   réciproques intragroupe et le dialogue de justification.
    usage : node omega/recette-b1/accessibilite-varelo.mjs [origine] */
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -85,6 +86,16 @@ for (const largeur of [390, 1440]) {
   await s.evaluer(`(e => { e?.focus(); e?.click(); })([...document.querySelectorAll('section[aria-label="Contrats du groupe à dénoncer"] .esp-carte-tete button')].find(b => /Ajouter un contrat/.test(b.textContent)))`);
   await s.dormir(500);
   dire(`varelo ${largeur}, dialogue d'ajout d'un contrat`, await analyser(s, `document.querySelector('[role="dialog"]')`));
+
+  /* vague 3 : les comptes réciproques intragroupe, et le dialogue de justification */
+  await s.aller(base + '/espace/varelo');
+  await s.dormir(800);
+  await s.evaluer(axe + ';true');
+  const recip = await s.evaluer(cadres(`document.querySelector('section[aria-label="Comptes réciproques intragroupe"]')`));
+  ok(cadresBons(recip), `varelo ${largeur}, cadre des réciproques : ${JSON.stringify(recip)}`);
+  await s.evaluer(`(e => { e?.focus(); e?.click(); })([...document.querySelectorAll('section[aria-label="Comptes réciproques intragroupe"] tbody button')].find(b => /^Justifier$/.test(b.textContent)))`);
+  await s.dormir(500);
+  dire(`varelo ${largeur}, dialogue de justification`, await analyser(s, `document.querySelector('[role="dialog"]')`));
   s.fermer();
 }
 console.log(echecs ? `\n${echecs} échec(s)` : '\ntout passe');

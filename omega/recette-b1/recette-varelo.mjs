@@ -10,7 +10,8 @@
    lignes rejetées), lancer un passage (les codes à traiter ouvrent leurs
    objets), changer de nature, l'export CSV ; l'encours du groupe (vague 3 :
    plafond, dépassement, dépôt d'une balance âgée) ; les contrats du groupe
-   à dénoncer (date limite, reconduction tacite, dénonciation, ajout).
+   à dénoncer (date limite, reconduction tacite, dénonciation, ajout) ; les
+   comptes réciproques intragroupe (états, justification, export).
    usage : node omega/recette-b1/recette-varelo.mjs [origine] */
 import { mkdirSync } from 'node:fs';
 import { ouvrirSession } from '../../outils/chrome.mjs';
@@ -263,6 +264,34 @@ for (const largeur of LARGEURS) {
   const ajoute = await s.evaluer(`[...${carte}.querySelectorAll('tbody tr')].find(tr => /Maintenance des climatisations/.test(tr.innerText))?.innerText.replace(/\\s+/g, ' ')`);
   ok(!!ajoute && /Froid Caraïbes/.test(ajoute) && /Moins de 30 jours/.test(ajoute), `le contrat ajouté (échéance J+40, préavis d'un mois) est à dénoncer sous 30 jours (${ajoute})`);
   ok(!(await s.evaluer(`/NaN|undefined|Invalid/.test(${carte}.innerText)`)), 'aucun « NaN », « undefined » ni « Invalid » dans la carte');
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 768, hauteur: 900, marque: 'b1-reciproques', densite: 1 });
+  console.log('— les comptes réciproques intragroupe (vague 3)');
+  ok(await s.aller(base + '/espace/varelo'), 'page chargée');
+  await s.dormir(500);
+  const carte = `document.querySelector('section[aria-label="Comptes réciproques intragroupe"]')`;
+  const lu = await s.evaluer(`(() => { const c = ${carte}; if (!c) return null; return { lignes: [...c.querySelectorAll('tbody tr')].map(tr => tr.innerText.replace(/\\s+/g, ' ')), texte: c.innerText.replace(/\\s+/g, ' ') }; })()`);
+  ok(!!lu, 'la carte « Comptes réciproques intragroupe » est là');
+  ok(lu && /Bertin Menuiserie/.test(lu.lignes[0]) && /Écart à expliquer/.test(lu.lignes[0]) && /-500,00\s€/.test(lu.lignes[0]), `en tête, l'écart de 500 € entre la menuiserie et le siège (${lu?.lignes[0]})`);
+  ok(lu && /À traiter avant la clôture 3 paires/.test(lu.texte), 'trois paires à traiter avant la clôture');
+  ok(lu && lu.lignes.some(l => /Concorde/.test(l)) && lu.lignes.some(l => /Arrêtés différents/.test(l)) && lu.lignes.some(l => /Dette non reconnue/.test(l)), 'concorde, arrêtés différents, dette non reconnue : chaque état est dit');
+  ok(await s.evaluer(clic(`section[aria-label="Comptes réciproques intragroupe"] tbody button`, '/^Justifier$/')) === true, 'clic « Justifier » sur le premier écart');
+  await s.dormir(400);
+  ok((await s.evaluer(`[...${dlg()}.querySelectorAll('button')].find(b => /Justifier l.écart/.test(b.textContent))?.disabled`)) === true, 'sans explication, « Justifier l\'écart » reste gris');
+  await s.evaluer(saisir('[role="dialog"] textarea', 'Facture F-778 du 30/09 reçue par le siège le 2/10.'));
+  await s.dormir(200);
+  await s.evaluer(clic('[role="dialog"] button', '/Justifier l.écart/'));
+  await s.dormir(600);
+  const apres = await s.evaluer(`(() => { const c = ${carte}; return { ligne: [...c.querySelectorAll('tbody tr')].find(tr => /Bertin Menuiserie/.test(tr.innerText) && /-500/.test(tr.innerText))?.innerText.replace(/\\s+/g, ' '), texte: c.innerText.replace(/\\s+/g, ' ') }; })()`);
+  ok(apres.ligne && /Écart justifié/.test(apres.ligne) && /Facture F-778/.test(apres.ligne) && /À traiter avant la clôture 2 paires/.test(apres.texte), `l'écart est justifié, deux paires restent (${apres.ligne})`);
+  const telecharge = await s.evaluer(`(() => { window.__csv = null; URL.createObjectURL = (b) => { b.text().then(t => { window.__csv = t; }); return 'blob:essai'; }; HTMLAnchorElement.prototype.click = function () {}; const b = [...${carte}.querySelectorAll('button')].find(b => /Exporter/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`);
+  ok(telecharge === true, 'clic « Exporter (CSV) »');
+  await s.dormir(500);
+  const csv = await s.evaluer(`window.__csv`);
+  ok(typeof csv === 'string' && /^﻿?creancier;debiteur;creance;arrete_creancier;dette;arrete_debiteur;ecart;etat;categorie;motif\n/.test(csv) && /;-500,00;justifie;en_transit;Facture F-778/.test(csv), 'le CSV porte l\'en-tête et l\'écart justifié');
   s.fermer();
 }
 

@@ -324,3 +324,42 @@ test_51 (politiques et droits). La liste figée d'A5 se calcule en base : rien
   en position absolue et sortait du cadre qui défile : débordement de la page
   à 390 et 768 en vue clients (carte Encours, déjà sur 786017e) et sous la
   carte Contrats. Passé en bloc en ligne de 1 px.
+
+### Retour de la recette sur b1_05 (coordinateur, 06/10, 15 h 34 Z)
+
+b1_05 posé, `^test_b1_` **20/20 verts** ; carte Contrats fusionnée dans main
+(1f6427c) et poussée.
+
+### N° 3 codé — les comptes réciproques intragroupe (b1_06)
+
+- **Migration** `omega/modules/varelo/migrations/b1_06_reciproques.sql` (après
+  b1_04) : vue security_invoker `grp_reciproques` — pour chaque paire
+  (créancier, débiteur) de sociétés du groupe, la créance vue du créancier (sa
+  balance clients, codes dont l'objet est intragroupe = le débiteur) face à la
+  dette vue du débiteur (sa balance fournisseurs), les deux arrêtés, l'écart, et
+  l'état concorde (< 1 €, même arrêté) / ecart / justifie / dates_differentes /
+  manque_creancier / manque_debiteur ; table `grp_reciproques_justifs` (cause
+  en_transit, change, litige, decalage_periode, erreur_saisie, autre + motif),
+  valable pour l'écart ET les deux arrêtés du moment — un nouveau dépôt qui
+  change l'écart la rend caduque ; portes `grp_justifier_ecart` (gérant, admin,
+  valideur DF ; seulement un état ecart ou dates_differentes) et
+  `grp_exporter_reciproques` (gérant, admin, valideur ; CSV protégé par
+  `private.grp_csv`, montants à la française) ; journal
+  `varelo.reciproques.justification | export`.
+- **Défaut de b1_04 trouvé et corrigé ici** : deux dépôts d'une même transaction
+  avaient le même `now()` et le même arrêté → le « dépôt courant » tiré au
+  hasard. `alter table grp_encours_depots alter column depose_le set default
+  clock_timestamp()` en tête de b1_06.
+- **Tests** `omega/tests/varelo/b1_09_reciproques.sql` (motif `^test_b1_09_`) :
+  `_paires` (15), `_export_isolement` (10). Maquette locale : 25/25 (b1_07 et
+  b1_08 toujours verts, 122 assertions en tout). La maquette pose maintenant
+  `intragroupe_entite_id` comme `private.grp_marquer_intragroupe`.
+- **Écran** `Reciproques.tsx` + `reciproques.ts` : carte « Comptes réciproques
+  intragroupe » (paires, concordantes ou justifiées, à traiter avant la clôture
+  avec le montant ; tableau créancier → débiteur, créance et arrêté, dette
+  reconnue et arrêté, écart, état ; dialogue Justifier ; Exporter (CSV)).
+  `recette-varelo.mjs` : 114 contrôles, cinq largeurs ✓ ; axe 0 écart à 390 et
+  1440 (carte et dialogue de justification).
+- Limite dite : au périmètre partiel, on ne voit que le côté de ses sociétés
+  (l'autre apparaît « manquant ») ; le tableau de clôture se lit au périmètre
+  total.
