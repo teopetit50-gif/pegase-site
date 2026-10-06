@@ -195,6 +195,31 @@ for (const largeur of LARGEURS) {
   await s.dormir(300);
   await s.capturer(`${dossier}lorani-os-reserves-1440.jpg`, { qualite: 55 });
 
+  console.log('— les comptes rendus de chantier (b5_20) : Façade rue Mercière, CR n° 3 en brouillon');
+  const crx = await s.evaluer(`(() => { const t = (document.querySelector('.lor-cr-bloc')?.closest('.esp-carte-corps')?.innerText || '').replace(/[\\u202f\\u00a0]/g, ' '); return { tete: /Compte rendu n° 3 · visite du/.test(t) && /Brouillon/.test(t), onglets: document.querySelectorAll('.lor-cr-bloc')[0]?.closest('.esp-carte-corps')?.querySelectorAll('.esp-filtre').length, suspens: /En suspens \\(2\\)/i.test(t), age: /Échafaudages Rhône · pour le .* · en suspens depuis 21 j \\(CR n° 1\\)/.test(t), retard: /En retard/.test(t), nouveaux: /Points de cette visite \\(0\\)/i.test(t), notes: /Notes de visite : 4 lignes, à rédiger en points/.test(t) }; })()`);
+  ok(crx.tete && crx.onglets === 3 && crx.suspens && crx.age && crx.retard && crx.nouveaux && crx.notes, `CR n° 3 : 2 points en suspens (dont une question à l’échafaudeur depuis 21 j, en retard), 4 lignes de notes (${JSON.stringify(crx)})`);
+  await s.evaluer(`[...document.querySelectorAll('.r-btn')].find(b => b.textContent.trim() === 'Rédiger depuis les notes')?.click()`);
+  await s.dormir(500);
+  const lus = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const li = [...(d?.querySelectorAll('li') || [])].map(x => x.innerText.replace(/\\n/g, ' ')); return { n: li.length, q: /^Question · Pierres de Bourgogne SARL · lot 01 · pour le/.test(li[0] || ''), a: /^Action/.test(li[1] || ''), d: /^Décision/.test(li[2] || ''), o: /^Observation · lot 01/.test(li[3] || ''), bouton: [...(d?.querySelectorAll('button') || [])].some(b => /Ajouter 4 points/.test(b.textContent)) }; })()`);
+  ok(Object.values(lus).every((v) => v === true || v === 4), `les notes lues : 4 points (question à Pierres de Bourgogne, lot 01, datée ; action ; décision ; observation lot 01) (${JSON.stringify(lus)})`);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Ajouter 4 points/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  ok(await s.evaluer(`/Points de cette visite \\(4\\)/i.test(document.querySelector('.lor-cr-bloc')?.closest('.esp-carte-corps')?.innerText || '')`), 'les 4 points sont au CR n° 3');
+  await s.evaluer(`[...[...document.querySelectorAll('.lor-cr-bloc')][1]?.querySelectorAll('li') || []].find(li => /Échafaudages Rhône/.test(li.textContent))?.querySelector('.lor-point-actions .esp-lien-bouton')?.click()`);
+  await s.dormir(500);
+  await s.evaluer(`(() => { const ta = document.querySelector('[role="dialog"] textarea'); Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(ta, 'Dépose côté cour le 20/10, confirmée par téléphone'); ta.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Enregistrer\\s*$/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  ok(await s.evaluer(`(() => { const b = [...document.querySelectorAll('.lor-cr-bloc')][1]; return /En suspens \\(1\\)/i.test(b?.innerText || '') && !/Échafaudages Rhône/.test(b?.innerText || '') && /calepinage/.test(b?.innerText || ''); })()`), 'réponse reçue : la question de l’échafaudeur quitte les points en suspens, l’action reste');
+  await s.evaluer(`[...document.querySelectorAll('.r-btn')].find(b => b.textContent.trim() === 'Diffuser')?.click()`);
+  await s.dormir(700);
+  const dif = await s.evaluer(`(() => { const t = document.querySelector('.lor-cr-bloc')?.closest('.esp-carte-corps')?.innerText || ''; return { diffuse: /Diffusé le/.test(t), plusDeBrouillon: ![...document.querySelectorAll('.r-btn')].some(b => b.textContent.trim() === 'Diffuser'), soldes: /Soldés depuis le CR n° 2 \\(1\\)/.test(t) }; })()`);
+  ok(dif.diffuse && dif.plusDeBrouillon && dif.soldes, `CR n° 3 diffusé : figé, la réponse reçue est listée parmi les soldés (${JSON.stringify(dif)})`);
+  await s.evaluer(`document.querySelector('.lor-cr-bloc')?.closest('.esp-carte-corps')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}lorani-cr-1440.jpg`, { qualite: 55 });
+
   console.log('— le régime du permis : secteur protégé coché, le silence reste un accord ; un cas R*424-2 coché, le silence vaut rejet');
   await s.evaluer(`[...document.querySelectorAll('#esp-detail .esp-lien-bouton')].find(b => /Régime/.test(b.textContent))?.click()`);
   await s.dormir(500);
