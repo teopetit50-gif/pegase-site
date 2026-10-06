@@ -115,7 +115,7 @@ begin
   reset role;
 
   insert into public.filed_fournisseurs (client_id, code, nom, nom_normalise, pays, statut, source, siren)
-  values (v_cl, null, 'PAPETERIE DELORME', 'papeterie delorme', 'FR', 'actif', 'saisie', tests.a4_siren_aleatoire()) returning id into v_four;
+  values (v_cl, 'PDEL', 'PAPETERIE DELORME', 'papeterie delorme', 'FR', 'actif', 'saisie', tests.a4_siren_aleatoire()) returning id into v_four;
   return next is((select fournisseur_id from public.filed_reprise_tiers where client_id = v_cl and comp_aux_num = 'FDELORME'), v_four,
                  'Le fournisseur créé après la reprise retrouve son tiers par le nom');
   return next is((select a.nb_validees from public.filed_imputations_apprises a join public.filed_plan_comptable c on c.id = a.compte_id
