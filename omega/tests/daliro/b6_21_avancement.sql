@@ -1,5 +1,5 @@
 -- b6_21 — DALIRO : l'avancement lu dans les photos, proposé à la situation (session B6, 06/10/2026), b6_25.
--- Exécutable tel quel par execute_sql sur la RECETTE, après b6_00_jeu.sql et les migrations b6_01 à b6_25.
+-- Exécutable tel quel par execute_sql sur la RECETTE, après b6_00_jeu.sql et les migrations b6_01 à b6_25b.
 -- runtests() annule tout. Le lecteur n'est pas appelé : ses lectures « avancement » (nature demandée à A1) sont
 -- posées sur les messages rangés comme public.daliro_media_lu le ferait.
 --
@@ -37,8 +37,9 @@ begin
   insert into public.btp_messages (client_id, reception_id, chantier_id, canal, de_nom, pieces, statut, recu_le, lecture) values
    (v_client, v_rec, v_ch, 'whatsapp', 'Chef d''équipe', jsonb_build_array(jsonb_build_object('chemin', 'ava/1.jpg', 'mime', 'image/jpeg')), 'range', now() - interval '5 days',
     '{"demandes": [{"nature": "avancement", "lot_code": "01", "ouvrage": "menuiseries", "pourcentage": 30, "source": {"media": 1}}]}'),
-   (v_client, v_rec - 1, v_ch, 'whatsapp', 'Chef d''équipe', jsonb_build_array(jsonb_build_object('chemin', 'ava/2.ogg', 'mime', 'audio/ogg'), jsonb_build_object('chemin', 'ava/2.jpg', 'mime', 'image/jpeg')), 'range', now() - interval '1 day',
-    '{"demandes": [{"nature": "avancement", "lot_code": "01", "ouvrage": "Menuiseries posées", "pourcentage": 60, "source": {"media": 2, "extrait": "les fenêtres du R+1 sont posées"}},
+   (v_client, v_rec - 1, v_ch, 'whatsapp', 'Chef d''équipe', jsonb_build_array(jsonb_build_object('chemin', 'ava/2.pdf', 'mime', 'application/pdf'), jsonb_build_object('chemin', 'ava/2.ogg', 'mime', 'audio/ogg'), jsonb_build_object('chemin', 'ava/2.jpg', 'mime', 'image/jpeg')), 'range', now() - interval '1 day',
+    '{"medias": [{"n": 1, "chemin": "ava/2.ogg", "nature": "vocal", "statut": "non_transcrit"}, {"n": 2, "chemin": "ava/2.jpg", "nature": "photo", "statut": "lu"}],
+      "demandes": [{"nature": "avancement", "lot_code": "01", "ouvrage": "Menuiseries posées", "pourcentage": 60, "source": {"media": 2, "extrait": "les fenêtres du R+1 sont posées"}},
                    {"nature": "avancement", "lot_code": "01", "ouvrage": "garde-corps", "pourcentage": 0},
                    {"nature": "avancement", "ouvrage": "carrelage", "pourcentage": 40},
                    {"nature": "travail_supplementaire", "texte": "reprise d''enduit", "quantite": 2}]}'),
@@ -58,7 +59,7 @@ begin
   return next is((v_r -> 'propositions' -> 0 ->> 'ligne') || '/' || (v_r -> 'propositions' -> 0 ->> 'actuel') || '/' || (v_r -> 'propositions' -> 0 ->> 'propose'),
                  v_sl1::text || '/0.00/60.00', 'La lecture la plus récente l''emporte : 60 %, pas 30 %, ni 90 % lu après la période');
   return next is((v_r -> 'propositions' -> 0 ->> 'photo') || ' — ' || (v_r -> 'propositions' -> 0 ->> 'extrait'), 'ava/2.jpg — les fenêtres du R+1 sont posées',
-                 'Avec la photo citée par la lecture et l''extrait');
+                 'Avec la photo citée par la lecture (média n° 2 du lecteur, le PDF n''est pas numéroté) et l''extrait');
   return next is((select string_agg(x ->> 'ouvrage', ',') from jsonb_array_elements(v_r -> 'non_rattaches') x), 'carrelage',
                  'Le carrelage, sans lot ni ligne, est rendu à part');
 
