@@ -53,7 +53,7 @@ export async function passage(ctx: Contexte, options: Partial<OptionsPassage> = 
   const debut = Date.now();
   const bilan: BilanPassage = {
     pris: 0,
-    issues: { valide: 0, invalide: 0, indisponible: 0, cache: 0, ignore: 0, repris: 0, abandon: 0, erreur: 0 },
+    issues: { valide: 0, invalide: 0, indisponible: 0, doute: 0, cache: 0, ignore: 0, repris: 0, abandon: 0, erreur: 0 },
     reportes: 0,
     relancees: null,
     balayees: null,

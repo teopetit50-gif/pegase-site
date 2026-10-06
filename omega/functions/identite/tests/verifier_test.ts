@@ -2,7 +2,9 @@
 // pannes, travail rendu dans tous les cas, journal sans donnée.
 
 import { assert, assertEquals } from "@std/assert";
+import { tvaFrDepuisSiren } from "../coherence.ts";
 import { verifierTravail } from "../verifier.ts";
+import { ViesRest } from "../vies.ts";
 import { capturerJournal, contexteDeTest, demandeDeTest, sireneActif, travailDeTest, viesValide } from "./doubles.ts";
 
 const V = "11111111-0000-4000-8000-000000000001";
@@ -229,4 +231,44 @@ Deno.test("journal : ni identifiant ni nom n'y passent, seulement l'id de la vé
   assertEquals(fin.verification, V);
   assertEquals(fin.issue, "valide");
   assertEquals(fin.registre, "vies");
+});
+
+Deno.test("vies : un double VIES qui rend valid:false pour une TVA FR à clé juste, SIREN actif → refus suspect ; mis en doute, issue « doute »", async () => {
+  const { ctx, portes, sirene } = contexteDeTest();
+  const siren = "123456782";
+  const tva = tvaFrDepuisSiren(siren);
+  // Le vrai lecteur de VIES derrière un faux fetch : la réponse est celle du 6/10 à 13 h 54 Z (valid:false, INVALID).
+  ctx.vies = new ViesRest(async () =>
+    await Promise.resolve(
+      new Response(JSON.stringify({ countryCode: "FR", vatNumber: tva.slice(2), valid: false, name: "---", address: "---", userError: "INVALID" }), {
+        status: 200,
+      }),
+    )
+  );
+  sirene.reponses.set(siren, sireneActif(siren, "ORANGE"));
+  portes.demandes.set(V, demandeDeTest(V, "vies", tva));
+  portes.douter.add(V);
+  const issue = await verifierTravail(ctx, travailDeTest(1, V));
+  assertEquals(issue, "doute");
+  const n = portes.notations[0];
+  assertEquals(n.resultat, "invalide", "l'ouvrier transmet ce que VIES a dit");
+  assertEquals((n.preuve.suspect as Record<string, unknown>).motif, "Clé de TVA juste et SIREN actif à Sirene.");
+  assert(String(n.preuve.remarque).includes("panne de VIES possible"));
+  assertEquals(n.preuve.code_vies, "INVALID");
+  const fini = portes.finis[0].resultat as Record<string, unknown>;
+  assertEquals(fini.resultat, "indisponible");
+  assertEquals(fini.doute, true);
+  assertEquals(fini.resultat_registre, "invalide");
+  assertEquals(portes.echoues.length, 0, "le travail est fini, la relance redemandera");
+});
+
+Deno.test("vies : valid:false avec une clé de TVA fausse ou un SIREN cessé n'est pas suspect", async () => {
+  const { ctx, portes, sirene, vies } = contexteDeTest();
+  const siren = "123456782";
+  const tva = tvaFrDepuisSiren(siren);
+  vies.reponses.set(tva, { etat: "invalide", preuve: { registre: "vies", etat: "invalide", motif: "VIES ne reconnaît pas ce numéro de TVA." } });
+  sirene.reponses.set(siren, { etat: "cesse", source: "sirene", preuve: { registre: "sirene", siren, etat: "cesse" } });
+  portes.demandes.set(V, demandeDeTest(V, "vies", tva));
+  assertEquals(await verifierTravail(ctx, travailDeTest(1, V)), "invalide");
+  assertEquals(portes.notations[0].preuve.suspect, undefined);
 });

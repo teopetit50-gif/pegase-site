@@ -64,3 +64,27 @@ Deno.test("paysEtNumero", () => {
   assertEquals(paysEtNumero("FR11123456782"), { pays: "FR", numero: "11123456782" });
   assertEquals(paysEtNumero("123"), null);
 });
+
+Deno.test("lireReponseVies : une réponse d'erreur (errorWrappers, actionSucceed false) ou sans verdict n'est jamais « invalide »", () => {
+  const env = lireReponseVies("FR", "89380129866", { actionSucceed: false, errorWrappers: [{ error: "MS_UNAVAILABLE", message: "x" }] });
+  assertEquals(env.etat, "indisponible");
+  assertEquals(env.motif, "VIES : MS_UNAVAILABLE");
+  assertEquals(lireReponseVies("FR", "1", { actionSucceed: false, errorWrappers: [{ error: "MS_MAX_CONCURRENT_REQ" }] }).etat, "indisponible");
+  assertEquals(lireReponseVies("FR", "1", { actionSucceed: false }).etat, "indisponible");
+  assertEquals(lireReponseVies("FR", "1", { actionSucceed: false, errorWrappers: [{ error: "INVALID_INPUT" }] }).etat, "invalide");
+  // Pas de champ valid : rien n'a été dit sur le numéro.
+  assertEquals(lireReponseVies("FR", "1", { countryCode: "FR" }).etat, "indisponible");
+  assertEquals(lireReponseVies("FR", "1", { valid: "false" }).etat, "indisponible");
+  // Un vrai refus garde le code de VIES dans la preuve.
+  assertEquals(lireReponseVies("FR", "1", { valid: false, userError: "INVALID" }).preuve.code_vies, "INVALID");
+});
+
+Deno.test("ViesRest : HTTP 200 avec errorWrappers → indisponible", async () => {
+  const { f } = fauxFetch(() => ({
+    statut: 200,
+    corps: { actionSucceed: false, errorWrappers: [{ error: "MS_UNAVAILABLE", message: "Member State unavailable" }] },
+  }));
+  const r = await new ViesRest(f).consulter("FR", "89380129866");
+  assertEquals(r.etat, "indisponible");
+  assert(String(r.motif).includes("MS_UNAVAILABLE"));
+});

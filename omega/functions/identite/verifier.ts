@@ -21,7 +21,8 @@ export interface Contexte {
   cacheJours: number;
 }
 
-export type Issue = "valide" | "invalide" | "indisponible" | "cache" | "ignore" | "repris" | "abandon" | "erreur";
+/** « doute » : le registre a refusé, la porte l'a écrit « indisponible » à revérifier (b7_04 : un refus isolé n'est pas un verdict). */
+export type Issue = "valide" | "invalide" | "indisponible" | "doute" | "cache" | "ignore" | "repris" | "abandon" | "erreur";
 
 export const CACHE_JOURS_PAR_DEFAUT = 30;
 
@@ -107,7 +108,11 @@ export async function verifierVies(ctx: Contexte, tva: string, demande: Demande)
           const concordent = nomsConcordent(preuve.nom, s.preuve.denomination);
           if (concordent !== null) coherence.noms_concordent = concordent;
           if (r.etat === "invalide" && s.etat === "actif") {
-            preuve.remarque = "SIREN actif à Sirene, numéro de TVA non reconnu par VIES : non assujetti probable (franchise en base) ou numéro récent.";
+            // VIES rend valid:false quand la base d'un État membre flanche : avec une clé juste et un SIREN actif, le
+            // refus est suspect ; la porte (b7_04) ne le retient qu'une fois confirmé une heure plus tard.
+            preuve.remarque = "SIREN actif à Sirene, numéro de TVA non reconnu par VIES : panne de VIES possible, " +
+              "revérifié avant de conclure ; si le refus se confirme, non assujetti probable (franchise en base) ou numéro récent.";
+            if (fr.cle_ok === true) preuve.suspect = { motif: "Clé de TVA juste et SIREN actif à Sirene." };
           }
           if (r.etat === "valide" && s.etat === "cesse") {
             preuve.remarque = "VIES reconnaît le numéro mais Sirene donne l'entreprise cessée : à regarder.";
@@ -171,6 +176,11 @@ export async function verifierTravail(ctx: Contexte, t: Travail): Promise<Issue>
       return (issue = "indisponible");
     }
     const n = await ctx.portes.noter(d.id, v.resultat, { ...v.preuve, verifie_par: version }, v.source, v.complements);
+    if (n.doute) {
+      // Refus mis en doute par la porte : écrit « indisponible », la relance redemandera (1 h, puis 6 h).
+      await ctx.portes.finirTravail(t.id, { resultat: "indisponible", doute: true, resultat_registre: v.resultat, source: v.source, version });
+      return (issue = "doute");
+    }
     await ctx.portes.finirTravail(t.id, {
       resultat: v.resultat,
       source: v.source,

@@ -43,6 +43,10 @@ export interface Notation {
   deja_repondue: boolean;
   complements: number;
   recontrolees: number;
+  /** Le résultat écrit (b7_04) : un refus douteux est écrit « indisponible ». */
+  resultat?: ResultatRegistre | null;
+  /** Vrai quand la porte a mis le refus en doute (b7_04). */
+  doute: boolean;
 }
 
 export type PortesFile = Pick<Portes, "prendreTravaux" | "finirTravail" | "echouerTravail" | "battreOuvrier">;
@@ -107,6 +111,8 @@ export class PortesIdentiteRpc implements PortesIdentite {
       deja_repondue: n?.deja_repondue === true,
       complements: Number(n?.complements ?? 0),
       recontrolees: Number(n?.recontrolees ?? 0),
+      resultat: n?.resultat ?? null,
+      doute: n?.doute === true,
     };
   }
 

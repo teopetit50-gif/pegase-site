@@ -46,7 +46,8 @@ Deno.test("portes : identite_a_verifier, noter_identite, identite_relancer", asy
     preuve: {},
     source: "vies",
   }]);
-  assertEquals(n, { verification: "v1", deja_repondue: false, complements: 1, recontrolees: 2 });
+  // Une porte d'avant b7_04 ne rend ni resultat ni doute : pas de doute.
+  assertEquals(n, { verification: "v1", deja_repondue: false, complements: 1, recontrolees: 2, resultat: null, doute: false });
   assertEquals(appels[2].corps, {
     p_verification: "v1",
     p_resultat: "valide",

@@ -66,8 +66,16 @@ function propre(valeur: unknown): string | null {
   return v === "" || v === "---" ? null : v;
 }
 
+/** Le code d'erreur de VIES : userError, ou, quand l'API REST échoue, errorWrappers[0].error (actionSucceed: false). */
+function codeVies(corps: Record<string, unknown>): string {
+  const enveloppes = Array.isArray(corps.errorWrappers) ? corps.errorWrappers : [];
+  const premier = enveloppes[0] as Record<string, unknown> | undefined;
+  const code = corps.userError ?? premier?.error ?? (corps.actionSucceed === false ? "ACTION_ECHOUEE" : "");
+  return String(code ?? "").trim().toUpperCase();
+}
+
 export function lireReponseVies(pays: string, numero: string, corps: Record<string, unknown>): ReponseVies {
-  const code = String(corps.userError ?? "").toUpperCase();
+  const code = codeVies(corps);
   if (code && code !== "VALID" && code !== "INVALID") {
     if (CODES_INDISPONIBLE.has(code)) return { etat: "indisponible", preuve: {}, motif: `VIES : ${code}` };
     if (code === "INVALID_INPUT") {
@@ -78,7 +86,9 @@ export function lireReponseVies(pays: string, numero: string, corps: Record<stri
     }
     return { etat: "indisponible", preuve: {}, motif: `VIES : code inattendu ${code}` };
   }
-  const valide = corps.valid === true;
+  // Sans verdict booléen (réponse d'erreur, format inconnu), VIES n'a rien dit sur le numéro : jamais « invalide ».
+  if (typeof corps.valid !== "boolean") return { etat: "indisponible", preuve: {}, motif: "VIES : réponse sans verdict." };
+  const valide = corps.valid;
   const preuve: Record<string, unknown> = {
     registre: "vies",
     pays,
@@ -95,6 +105,7 @@ export function lireReponseVies(pays: string, numero: string, corps: Record<stri
     if (ref) preuve.reference = ref;
   } else {
     preuve.motif = "VIES ne reconnaît pas ce numéro de TVA.";
+    if (code) preuve.code_vies = code;
   }
   return { etat: valide ? "valide" : "invalide", preuve };
 }

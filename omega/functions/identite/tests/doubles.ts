@@ -22,6 +22,8 @@ export class PortesMemoire implements PortesIdentite {
   aRelancer = 0;
   balayages: { jours: number; max: number }[] = [];
   aBalayer = 0;
+  /** Pour simuler la règle de b7_04 : les refus de ces vérifications sont mis en doute. */
+  douter = new Set<string>();
   /** Pour simuler une porte en panne. */
   panne: Partial<Record<keyof PortesIdentite, Error>> = {};
 
@@ -65,11 +67,13 @@ export class PortesMemoire implements PortesIdentite {
     this.noterAppel("noter", verification, resultat, preuve, source, complements);
     const d = this.demandes.get(verification);
     if (!d) throw new Error("Vérification inconnue.");
-    if (d.repondu_le) return { verification, deja_repondue: true, complements: 0, recontrolees: 0 };
+    if (d.repondu_le) return { verification, deja_repondue: true, complements: 0, recontrolees: 0, resultat: d.resultat, doute: false };
+    const doute = resultat === "invalide" && this.douter.has(verification);
+    const ecrit: ResultatRegistre = doute ? "indisponible" : resultat;
     d.repondu_le = "2026-10-05T10:00:01Z";
-    d.resultat = resultat;
+    d.resultat = ecrit;
     this.notations.push({ verification, resultat, preuve, source, complements });
-    return { verification, deja_repondue: false, complements: complements.length, recontrolees: resultat === "indisponible" ? 0 : 1 };
+    return { verification, deja_repondue: false, complements: complements.length, recontrolees: ecrit === "indisponible" ? 0 : 1, resultat: ecrit, doute };
   }
   async relancer(heures: number): Promise<number> {
     this.noterAppel("relancer", heures);
