@@ -85,8 +85,8 @@ Il faudra vérifier, sur la répétition, qu'elles passent après
 | 20260929023244 | `daliro_m0c_planning` | SQL |
 | 20260929024032 | `tamila_m10_delais_correctifs` | SQL |
 | 20260929033045 | `varelo_referentiel_perf` | SQL |
-| 20260929033851 | `tamila_m10b_porte_etroite` | SQL |
-| 20260929034413 | `tiroma_releve` | SQL (citée le 5/10 comme absente de la production ; **absente de la sortie n° 2 : à vérifier**) |
+| 20260929033851 | `tamila_m10b_porte_etroite` | SQL — marquée « recette seulement » à la pose : **à juger** sur le texte exporté (porte étroite d'essai, ou correctif à emporter ?) |
+| 20260929034413 | `tiroma_releve` | SQL (absente de la production : confirmé le 6/10) |
 
 Daliro et Varelo étaient notés « à garder en recette » le 5/10. Les deux modules
 sont livrés : leurs bases partent. **Teo confirme.**
@@ -99,7 +99,14 @@ sont livrés : leurs bases partent. **Teo confirme.**
 | 20261005140000 → 140300 | `socle_lot18a` à `18d` (receptions, portes de réception, remise idempotente, boîte formulaire) | SQL | |
 | 20261005163500 | `socle_lot19a_exigences_annuaire` | SQL | |
 | 20261005163600 | `socle_lot19b_portes_lecteur_pgtap_storage` | SQL | **à retoucher** : sans `create extension pgtap`, cron `omega-lecteur` réécrit sur l'URL de production (§ 2.2) |
-| 20261005164500 → 165200 | `filed_lot4a`, `4b`, `socle_lot19c` (séparation saisie/approbation), `4c`, `4d`, `5a`, `6a`, `4f` | dépôt (a4_01 → a4_07) + SQL (19c) | l'ordre exact entre ces huit lignes se lit dans la sortie n° 1 |
+| 20261005164500 | `filed_lot4a_comptabilite_tables` | dépôt (a4_01) | |
+| 20261005164600 | `filed_lot4b_comptabilite_portes` | dépôt (a4_02) | retire l'ancienne contrainte `filed_factures_statut_check` |
+| 20261005164700 | `socle_lot19c_separation_saisie_approbation` | SQL | |
+| 20261005164800 | `filed_lot4c_charges_recurrentes` | dépôt (a4_03) | |
+| 20261005164900 | `filed_lot4d_controles_identite` | dépôt (a4_04) | |
+| 20261005165000 | `filed_lot5a_archivage_probant` | dépôt (a4_05) | |
+| 20261005165100 | `filed_lot6a_pilotage` | dépôt (a4_06) | |
+| 20261005165200 | `filed_lot4f_circuit_validation` | dépôt (a4_07) | |
 | 20261005170800 | `filed_lot4e` | dépôt (a4_08) | |
 | 20261005170900 | `filed_lot4g` | dépôt (a4_09) | |
 | 20261005171500 | `socle_lot19d_droits_tables` | SQL | après les tables FILED 4–6 |
@@ -240,13 +247,13 @@ sur un SHA**. Recette relevée le 6/10 à 13 h 45 Z (sortie n° 4).
 | `lecteur` | `0d547318d1f4c7f57763b2d3128d1eb631811762` (worker-a1) | v17, coquille | true | **Production : Bedrock** (données en UE) : `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION` (eu-central-1), `BEDROCK_MODEL_ID` ; **pas** d'`ANTHROPIC_API_KEY`. Facultatifs : `MISTRAL_API_KEY`, `PLAFOND_IA_JOUR_CLIENT_EUR` | `omega-lecteur` `* * * * *` (19b) |
 | `lecteur-exports` | `d963121419b014081fc5155c8e01151b8fd76deb` (worker-a1) | v2, coquille | true | aucun en plus de ceux de Supabase | `omega-lecteur-exports` `* * * * *` (19aa) |
 | `expediteur` | `67f9cf677d306f4e82ce66dde0485602ee5e8956` (worker-a2) | v12, coquille | true | `BREVO_API_KEY` | `omega-expediteur` `* * * * *` (19b) |
-| `webhooks-brevo` | **à fixer** : la v9 de la recette n'est pas une coquille relevée. Dernier code : 87a1112 (worker-a2, `omega/functions/webhooks/brevo`) | v9 | **false** (jeton vérifié dans la fonction) | `BREVO_WEBHOOK_JETON` | aucun ; webhook Brevo *Transactionnel* → `/functions/v1/webhooks-brevo` |
-| `reception` | **à fixer** : v9, même remarque. Dernier code : 4114a69 (worker-a2) | v9 | **false** | `BREVO_WEBHOOK_JETON`, `BREVO_API_KEY`, `META_VERIFY_TOKEN`, `META_APP_SECRET`, `META_ACCESS_TOKEN`, `FORMULAIRE_SECRET`, `FORMULAIRE_BOITE` | aucun ; domaine inbound Brevo → `/functions/v1/reception/brevo` |
-| `identite` | **à fixer** : v2 déployée par B7 (NOTES-B7 : e77fabb). Dernier code : 7035cb2 (balayage, sur main) | v2 | true | `SIRENE_API_KEY` (facultatif : repli recherche-entreprises), `IDENTITE_CACHE_JOURS` (30), `IDENTITE_BALAYAGE_JOURS`, `IDENTITE_BALAYAGE_MAX` | `omega-identite` `* * * * *` (19v) |
+| `webhooks-brevo` | **87a1112** (worker-a2, `omega/functions/webhooks/brevo`). Présumé, non prouvé : c'est le seul commit qui touche ce dossier, et les fichiers de la v9 (index, portes, traitement, deno.json) sont les siens. La v9 de la recette est un dépôt de sources complètes, pas une coquille | v9 | **false** (jeton vérifié dans la fonction) | `BREVO_WEBHOOK_JETON` | aucun ; webhook Brevo *Transactionnel* → `/functions/v1/webhooks-brevo` |
+| `reception` | **18e7999 ou 4114a69** (worker-a2) : les sept fichiers déployés y sont identiques ; 4114a69 n'a changé que le README et `outils/`. Seul 81e1bd5, plus ancien, diffère (voir § 2.3). La v9 de la recette est un dépôt de sources complètes, pas une coquille | v9 | **false** | `BREVO_WEBHOOK_JETON`, `BREVO_API_KEY`, `META_VERIFY_TOKEN`, `META_APP_SECRET`, `META_ACCESS_TOKEN`, `FORMULAIRE_SECRET`, `FORMULAIRE_BOITE` | aucun ; domaine inbound Brevo → `/functions/v1/reception/brevo` |
+| `identite` | **e77fabb** (coquille relevée) ; `deno.json` mappe `@partage/` sur `_partage` au **7425991** | v2 | true | `SIRENE_API_KEY` (facultatif : repli recherche-entreprises), `IDENTITE_CACHE_JOURS` (30), `IDENTITE_BALAYAGE_JOURS`, `IDENTITE_BALAYAGE_MAX` | `omega-identite` `* * * * *` (19v) |
 
-Pour les trois « à fixer » : en production, on déploie une coquille sur un SHA
-**complet**, relevé et testé sur la répétition. On ne recopie pas la version de la
-recette dont on ignore le SHA.
+En production, **toutes** les fonctions sont des coquilles sur un SHA complet. On
+ne recopie jamais une version de la recette dont on ignore le SHA, ce qui vaut pour
+`reception` et `webhooks-brevo` (§ 2.3).
 
 Communs à toutes : `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (fournis par
 Supabase). **Vault** de production : le secret `cle_service`, lu par les crons qui
@@ -266,7 +273,7 @@ c'est voulu.
 
 | Origine | Tâches |
 |---|---|
-| Lots déjà en production (socle 1–16, modules communs) — **à vérifier présents en production** | `omega-chien-de-garde` */15, `omega-controle-delais` 7 *, `omega-envois` */5, `omega-filed` *, `omega-mesure` 11 *, `omega-points-assemblage` */5, `omega-points-controle` 2-59/5, `omega-points-purge` 29 3, `omega-purge-historique-cron` 17 3, `omega-purge-lectures` 17 3, `omega-purge-releves` 47 3, `omega-purge-travaux` 43 3, `omega-releves` */15, `omega-releves-file` *, `omega-suivis` 23 *, `omega-verifier-sauvegardes` 7 8, `lorani-calendrier` 12 *, `lorani-lectures` */5, `tamila-coffre` 11 *, `tamila-decisions` *, `tamila-delais` 17 *, `tavaro-matin` */30, `tavaro-mesure` 0 9, `tavaro-ouvrier` *, `tavaro-purge` 27 3, `tiroma-horloge` */10, `tiroma-purge` 37 3, `tiroma-releves` * |
+| Lots déjà en production (socle 1–16, modules communs) — **à vérifier présents en production au palier P1** (`select jobname, schedule from cron.job order by 1;`, par Teo ou la session autorisée : la lecture de la production est refusée au coordinateur) | `omega-chien-de-garde` */15, `omega-controle-delais` 7 *, `omega-envois` */5, `omega-filed` *, `omega-mesure` 11 *, `omega-points-assemblage` */5, `omega-points-controle` 2-59/5, `omega-points-purge` 29 3, `omega-purge-historique-cron` 17 3, `omega-purge-lectures` 17 3, `omega-purge-releves` 47 3, `omega-purge-travaux` 43 3, `omega-releves` */15, `omega-releves-file` *, `omega-suivis` 23 *, `omega-verifier-sauvegardes` 7 8, `lorani-calendrier` 12 *, `lorani-lectures` */5, `tamila-coffre` 11 *, `tamila-decisions` *, `tamila-delais` 17 *, `tavaro-matin` */30, `tavaro-mesure` 0 9, `tavaro-ouvrier` *, `tavaro-purge` 27 3, `tiroma-horloge` */10, `tiroma-purge` 37 3, `tiroma-releves` * |
 | Étape A (bases Daliro, Varelo) | `daliro-referentiel` 20 6, `varelo-referentiel` *, `varelo-referentiel-hebdo` 45 4 * * 0, `varelo-referentiel-quotidien` 30 4 |
 | Étape B, SQL pur | `tavaro-relances` 15 9 (b2_02), `tiroma-matin` */30 (b3_06), `daliro-confirmations-j2` 0 15 (b6_02), `daliro-ouvrier` * (b6_06) |
 | Étape B, appel d'une fonction Edge | `omega-lecteur` *, `omega-expediteur` * (19b), `omega-identite` * (19v), `omega-lecteur-exports` * (19aa) |
@@ -290,6 +297,48 @@ appellent `net.http_post` sur `https://ygwbgpowzlbdaajlsqkn.supabase.co/function
 
 À ne pas emporter : aucune tâche de test. `private.tests_en_tache` (19ac)
 programme des tâches qui se retirent seules, et 19ac est exclu.
+
+### 2.3 Trou : `reception` et `webhooks-brevo` ne sont pas figées
+
+Sur la recette, ces deux fonctions sont des dépôts de sources complètes (v9,
+`ezbr_sha256` 3437e4ea… et 1a637aa3…), sans SHA. Pour retrouver le commit,
+j'ai comparé le dépôt au contenu de chaque fichier de chaque commit :
+- **webhooks-brevo** : un seul commit touche `omega/functions/webhooks/brevo`, le
+  87a1112. Empreintes SHA-256 (12 premiers caractères) :
+  - `index.ts` 946d49e223e3 ;
+  - `portes.ts` 1dc9fdb12c01 ;
+  - `traitement.ts` 9c653cf0df89 ;
+  - `deno.json` a94336efd621.
+- **reception** : trois commits.
+  - 81e1bd5, le premier, a une autre `portes.ts` : en-tête « Les deux portes
+    ci-dessous n'existent pas encore », champ `type_mime`.
+  - 18e7999 et 4114a69 portent des fichiers déployés identiques : en-tête
+    « posées sur la recette par le coordinateur (lot 18, 05/10/2026) », champ
+    `mime`.
+  - Empreintes à 18e7999 / 4114a69 :
+    - `index.ts` e489fb2ad689 ;
+    - `portes.ts` df12ba277cd2 ;
+    - `commun.ts` c669ef80a302 ;
+    - `brevo_entrant.ts` 5af0b2a3adc6 ;
+    - `whatsapp.ts` a0ac1c24b015 ;
+    - `formulaire.ts` 3fc3c2f2de29 ;
+    - `deno.json` a94336efd621.
+- **Pour lever le doute**, deux vérifications par fichier de la v9 déployée
+  (`get_edge_function`) :
+  - pour `reception`, la présence de `mime: string;` dans `portes.ts` ;
+  - pour les deux fonctions, le `sha256sum` de chaque fichier comparé aux
+    empreintes ci-dessus.
+
+  Si une seule empreinte diffère, le code de la recette a été retouché au
+  déploiement. C'est alors un vrai trou : il faut redéployer la recette en
+  coquille sur le commit retenu et rejouer ses tests (réception d'un courriel,
+  d'un webhook `delivered`) avant la production.
+- **Quoi qu'il en soit** : avant la répétition, passer les deux fonctions de la
+  recette en coquille, `reception` sur **4114a69** et `webhooks-brevo` sur
+  **87a1112**. Leurs `deno.json` importent `@std/assert` (jsr), à garder dans le
+  `deno.json` de la coquille.
+
+
 
 ---
 
@@ -327,7 +376,7 @@ Après **chaque ligne** des étapes A à C, et sur la copie seulement (la répé
 ### 4.2 Sur la production — lecture seule
 
 On contrôle à six **paliers** plutôt qu'après chacune des quelque 110 lignes :
-- **P1**, après l'étape A ;
+- **P1**, avant l'étape A puis après elle. Avant : relever `select jobname, schedule from cron.job order by 1;` et comparer au § 2.1. La lecture de la production est refusée au coordinateur ; c'est donc Teo ou la session autorisée qui la fait ;
 - **P2**, après `socle_lot19h` (20261005182000) ;
 - **P3**, après `socle_lot19z` (20261005215301) ;
 - **P4**, après `b3_06_v2` (20261006003701) ;
@@ -456,21 +505,20 @@ where d.start_time > now() - interval '15 minutes' and d.status <> 'succeeded';
 
 ---
 
-## 8. Sorties de la recette (reçues le 6/10 à 13 h 45 Z)
+## 8. Sorties de la recette (reçues le 6/10 à 13 h 45 et 13 h 52 Z)
 
-Reçues du coordinateur, en lecture seule, et intégrées aux § 1.2, 1.3, 2 et 2.1 :
-1. `schema_migrations` de la recette ;
-2. noms des migrations de production ;
+Reçues du coordinateur, en lecture seule, et intégrées aux § 1.2, 1.3, 2 et 2.1 à 2.3 :
+1. `schema_migrations` de la recette, y compris l'ordre des lignes 164500 → 165200 ;
+2. noms des migrations de production, avec la confirmation que `tiroma_releve`,
+   `varelo_referentiel_perf` et `tamila_m10b_porte_etroite` y sont absentes ;
 3. `cron.job` de la recette ;
-4. fonctions Edge de la recette.
+4. fonctions Edge de la recette, avec le contenu des coquilles et la liste des fichiers
+   de `reception` et `webhooks-brevo`.
 
-Restent à relever :
-- l'ordre exact entre les huit lignes 20261005164500 → 165200 (sortie n° 1
-  complète) ;
-- la provenance (branche, SHA, chemin) de chaque ligne « dépôt », à lire dans
-  `statements` au moment de l'export (§ 1.5) ;
-- les SHA de `webhooks-brevo`, `reception` et `identite` à déployer ;
-- en production, la liste des crons existants (pour la ligne « à vérifier » du
-  § 2.1) ;
-- `tiroma_releve` : la sortie n° 2 ne la nomme pas parmi les manques ; la
-  vérifier.
+Restent ouverts :
+- la provenance de chaque ligne « dépôt », lue dans `statements` à l'export (§ 1.5) ;
+- les crons de la production, relevés à P1 par Teo ou la session autorisée (la
+  lecture de la production est refusée au coordinateur, à juste titre) ;
+- `reception` et `webhooks-brevo` : vérifier les empreintes, puis les passer en
+  coquille (§ 2.3) ;
+- `tamila_m10b_porte_etroite` : emporter ou non, à juger sur son texte.
