@@ -135,6 +135,7 @@ begin
   return next is(e #>> '{controle,permis}', 'non_conforme', 'le contrôle est rendu avec le contrat');
   perform public.loc_noter_controle_conducteur(v_ouvert, 'conforme', 'conforme', false);
   return next is((select count(*) from public.loc_controles_conducteur k where k.contrat_id = v_ouvert), 1::bigint, 'un seul contrôle par contrat : le dernier remplace');
+  perform tests.redevenir_admin();   -- le journal opposable ne se lit pas sous le jeton d'un collaborateur (RLS)
   return next ok(tests.tavaro_journal(c, 'tavaro.controle_conducteur_note') >= 2, 'journal : « tavaro.controle_conducteur_note »');
 
   perform tests.endosser((jeu ->> 'autre')::uuid, 'b2-autre-loueur@essai.invalid');
