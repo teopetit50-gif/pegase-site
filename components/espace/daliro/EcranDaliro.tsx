@@ -28,6 +28,7 @@ import { TABLEAUX_EXEMPLE } from "./exemples";
 import { chargerListe, chargerTableau, monClient } from "./portes";
 import type { Chantier, Tableau } from "./types";
 import ChantierVue from "./ChantierVue";
+import AccordJ2 from "./AccordJ2";
 
 type Reel = { liste: Chantier[]; tableaux: Record<string, Tableau>; client: { client_id: string; user_id: string; role: string } | null };
 
@@ -252,6 +253,8 @@ export default function EcranDaliro() {
           </button>
         ))}
       </div>
+
+      <AccordJ2 key={`${source}:${reel?.client?.client_id ?? ""}`} source={source} client={source === "reelle" ? reel?.client ?? null : null} />
 
       {erreur ? (
         <div style={{ marginBottom: 14 }}>

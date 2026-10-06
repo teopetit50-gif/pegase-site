@@ -97,6 +97,8 @@ L'entreprise : **Atelier Bertin** (menuiserie-agencement, Lyon — la même entr
 
 ## Journal de session
 
+- 06/10, 16 h Paris : b6_08 accord permanent des J-2 (décision de Teo, voie A du coordinateur : public.politiques du socle, une par canal, nombre_mensuel 1000, un an ; portes btp_donner_accord_j2 / btp_revoquer_accord_j2 / btp_accord_j2, gérant ou admin ; trace « approuvé par accord permanent du … » au journal et sur l'envoi ; alerte 30 jours avant la fin). Test b6_04_accord_j2 (40 + 1 diag : l'auto-activation par le gérant est DITE, pas supposée). Écran : carte « Accord permanent des confirmations J-2 » (donner, révoquer avec motif, renouveler). tsc, eslint, build, recette 5 largeurs + axe verts.
+
 - 06/10, 06 h 58 Paris : tests 9f7325e reposés, `^test_b6_` vert (b6_01 154/154, b6_02 38/38, b6_03 29/29). b6_07 et l'écran fusionnés dans main (tsc/eslint/build verts) ; en ligne au retour du quota Vercel (~04 h 30 Paris le 07/10). Accord permanent des J-2 : en attente de Teo. Rien n'est attendu de B6.
 
 - 06/10, 04 h 45 Paris : b6_07 (réponse OUI/NON lue → btp_repondre_confirmation ; tableau du chantier : « envoi » par passage) + test b6_03_reponses + écran (ligne « Demande remise le … »). Syntaxe des migrations et lecture OUI/NON vérifiées sur un Postgres 16 local jetable (pas Supabase) ; tsc, eslint, build, recette verts. Accord permanent pour les J-2 : NON pour l'instant (décision de Teo).

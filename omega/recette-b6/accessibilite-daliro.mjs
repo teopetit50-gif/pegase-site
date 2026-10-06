@@ -16,6 +16,7 @@ const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) ech
 
 const ECRANS = [
   ['daliro', '/espace/daliro', `[...document.querySelectorAll('.esp .r-btn')].find(b => /Nouveau chantier/.test(b.textContent))?.click()`],
+  ['daliro-accord', '/espace/daliro', `[...document.querySelectorAll('section[aria-label="Accord permanent des confirmations J-2"] button')].find(b => /^\\s*Révoquer\\s*$/.test(b.textContent))?.click()`],
 ];
 
 const analyser = (s, cible) => s.evaluer(`(async () => {
