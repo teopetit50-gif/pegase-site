@@ -151,6 +151,18 @@ begin
   return jsonb_build_object('effacement', v_id, 'pieces', n);
 end $$;
 
+-- La liste des fichiers d'un objet et son manifeste (souche de preparer_effacement : les objets du bucket sous
+-- <client>/<type>/<id>/ ; le vrai socle passe par fichiers_de).
+create or replace function private.preparer_effacement(p_client uuid, p_objet_type text default null, p_objet_id text default null) returns jsonb language plpgsql security definer set search_path to '' as $$
+declare v_cle text := p_client::text || coalesce('/' || p_objet_type || '/' || p_objet_id, ''); v_liste jsonb; v_m jsonb;
+begin
+  select coalesce(jsonb_agg(jsonb_build_object('bucket', o.bucket_id, 'nom', o.name, 'octets', 0, 'empreinte', md5(o.name)) order by o.name), '[]') into v_liste
+    from storage.objects o where starts_with(o.name, v_cle || '/');
+  v_m := jsonb_build_object('nombre', jsonb_array_length(v_liste), 'octets', 0, 'empreinte_sha256', encode(sha256(convert_to(v_liste::text, 'UTF8')), 'hex'));
+  insert into private.manifestes_effacement (cle, manifeste) values (v_cle, v_m) on conflict (cle) do update set manifeste = excluded.manifeste;
+  return jsonb_build_object('manifeste', v_m, 'fichiers', v_liste);
+end $$;
+
 -- ── B5, les délais (souche fidèle au calcul attendu par Tamila) ──
 create or replace function public.ajouter_mois(p_date date, p_mois int) returns date language sql immutable as $$ select (p_date + make_interval(months => p_mois))::date $$;
 -- Prorogation (art. 642) : samedi, dimanche et jours fériés de métropole → premier jour ouvrable suivant.
