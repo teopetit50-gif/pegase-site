@@ -6,6 +6,7 @@ import type { Travail } from "@partage/portes.ts";
 import type { Complement, Demande, Notation, PortesIdentite, ResultatRegistre } from "../portes.ts";
 import type { ReponseSirene, Sirene } from "../sirene.ts";
 import type { Contexte } from "../verifier.ts";
+import type { RegistreHmrc, ReponseHmrc } from "../hmrc.ts";
 import type { RegistreUidCh, ReponseUidCh } from "../uid_ch.ts";
 import type { ReponseVies, Vies } from "../vies.ts";
 
@@ -121,6 +122,18 @@ export class UidChFactice implements RegistreUidCh {
   async consulter(uid: string, tva: boolean): Promise<ReponseUidCh> {
     this.appels.push({ uid, tva });
     return this.reponses.get(uid) ?? this.parDefaut;
+  }
+}
+
+/** HMRC « Check a UK VAT number » (pas encore branché sur verifier.ts). */
+export class HmrcFactice implements RegistreHmrc {
+  readonly nom = "hmrc-factice";
+  reponses = new Map<string, ReponseHmrc>();
+  parDefaut: ReponseHmrc = { etat: "indisponible", preuve: {}, motif: "double sans réponse" };
+  appels: string[] = [];
+  async consulter(vrn: string): Promise<ReponseHmrc> {
+    this.appels.push(vrn);
+    return this.reponses.get(vrn) ?? this.parDefaut;
   }
 }
 
