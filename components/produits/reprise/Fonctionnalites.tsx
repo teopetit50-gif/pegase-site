@@ -7,6 +7,7 @@ import { FONCTIONNALITES as F } from "@/lib/produits/reprise";
 import { Cadre, TitreSection } from "./Cadre";
 import { TramePoints } from "./Manifeste";
 import { cn } from "./cn";
+import { SiEnPreparation } from "@/components/ui/en-preparation";
 
 /* Hachure de fond des grilles bento, relevée telle quelle (pas 10 px, 315°).
    Sa jumelle `dark:[background-image:…]` est retirée : page figée en clair. */
@@ -182,6 +183,7 @@ function CartePalette() {
                       </div>
                     </div>
                     <span className="ml-2 truncate font-medium">{l.texte}</span>
+                    <SiEnPreparation pour="offload" t={l.texte} style={{ flexShrink: 0 }} />
                   </div>
                 ))}
               </div>

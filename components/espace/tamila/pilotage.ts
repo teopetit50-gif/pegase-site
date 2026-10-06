@@ -11,7 +11,7 @@
 
 import { resumer } from "./HonorairesTamila";
 import { normaliserNom } from "./index";
-import type { Audience, Avis, Clair, Delai, Dossier, Honoraires, Personne, Piece, Vigilance } from "./types";
+import type { Audience, Avis, Clair, Delai, Dossier, Expertise, Honoraires, Personne, Piece, Vigilance } from "./types";
 
 export type DonneesPilotage = {
   dossiers: { dossier: Dossier; clair: Clair | null }[];
@@ -20,11 +20,14 @@ export type DonneesPilotage = {
   avis: Pick<Avis, "dossier_id" | "date_avis">[];
   pieces: Pick<Piece, "objet_id" | "recue_le" | "type_piece">[];
   vigilances: Pick<Vigilance, "dossier_id" | "assujetti" | "identification_piece">[];
+  /* les expertises en cours (b4_16) */
+  expertises: Expertise[];
   honoraires: Record<string, Honoraires>;
   personnes: Personne[];
 };
 
 const JOUR = 86_400_000;
+const fr = (iso: string) => new Date(`${iso.slice(0, 10)}T12:00:00`).toLocaleDateString("fr-FR");
 const VIVANTS = ["attente", "ouvert", "audit"];
 const vide: Honoraires = { convention: null, conventions: [], temps: [], provisions: [], factures: [] };
 
@@ -120,7 +123,8 @@ export function sansDiligence(x: DonneesPilotage, maintenant: number, seuil = 45
 
 export type PieceAttendue = { dossier: Dossier; clair: Clair | null; quoi: string; gravite: "rouge" | "ambre" };
 
-/** Ce qui manque au dossier : exemplaire signé de la convention, accusé de dépôt d'un acte déclaré, pièce d'identité (LCB-FT), toute pièce. */
+/** Ce qui manque au dossier : exemplaire signé de la convention, accusé de dépôt d'un acte déclaré, pièce d'identité (LCB-FT), toute pièce ;
+ *  et ce qu'on attend de l'expert ou qu'on lui doit (consignation, pré-rapport, dires, rapport définitif). */
 export function piecesAttendues(x: DonneesPilotage, maintenant: number): PieceAttendue[] {
   const out: PieceAttendue[] = [];
   for (const { dossier, clair } of x.dossiers) {
@@ -132,6 +136,20 @@ export function piecesAttendues(x: DonneesPilotage, maintenant: number): PieceAt
     }
     const v = x.vigilances.find((y) => y.dossier_id === dossier.id);
     if (v?.assujetti && !v.identification_piece) out.push({ dossier, clair, quoi: "La pièce d'identité du client (vigilance LCB-FT)", gravite: "rouge" });
+    /* l'expert : consignation, pré-rapport, dires, rapport définitif (b4_16) */
+    const jourIso = new Date(maintenant).toISOString().slice(0, 10);
+    const dans = (iso: string) => Math.round((Date.parse(`${iso}T12:00:00Z`) - Date.parse(`${jourIso}T12:00:00Z`)) / JOUR);
+    for (const e of x.expertises ?? []) {
+      if (e.dossier_id !== dossier.id || e.statut !== "en_cours") continue;
+      if (e.consignation_avant && !e.consignation_versee_le && dans(e.consignation_avant) <= 15)
+        out.push({ dossier, clair, quoi: `Le justificatif de consignation de l'expertise, avant le ${fr(e.consignation_avant)} (sinon caducité, art. 271 CPC)`, gravite: dans(e.consignation_avant) <= 2 ? "rouge" : "ambre" });
+      if (e.pre_rapport_attendu_le && !e.pre_rapport_recu_le && dans(e.pre_rapport_attendu_le) <= 0)
+        out.push({ dossier, clair, quoi: `Le pré-rapport de l'expert, attendu le ${fr(e.pre_rapport_attendu_le)}`, gravite: dans(e.pre_rapport_attendu_le) < 0 ? "rouge" : "ambre" });
+      if (e.dires_jusqu_au && !e.dires_deposes_le && dans(e.dires_jusqu_au) <= 15)
+        out.push({ dossier, clair, quoi: `Nos dires à l'expert, au plus tard le ${fr(e.dires_jusqu_au)} (art. 276 CPC)`, gravite: dans(e.dires_jusqu_au) <= 3 ? "rouge" : "ambre" });
+      if (e.rapport_attendu_le && !e.rapport_recu_le && dans(e.rapport_attendu_le) <= 0)
+        out.push({ dossier, clair, quoi: `Le rapport définitif de l'expert, attendu le ${fr(e.rapport_attendu_le)}`, gravite: "rouge" });
+    }
     const ouvert = Date.parse(dossier.ouvert_le ?? dossier.cree_le);
     if (maintenant - ouvert > 7 * JOUR && !x.pieces.some((p) => p.objet_id === dossier.id)) out.push({ dossier, clair, quoi: "Aucune pièce au dossier depuis son ouverture", gravite: "ambre" });
   }

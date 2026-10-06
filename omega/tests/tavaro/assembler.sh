@@ -5,7 +5,7 @@
 cd "$(dirname "$0")"
 {
   echo "-- TOUT_B2.sql — les tests pgTAP du module TAVARO (session B2), assemblés par assembler.sh."
-  echo "-- Prérequis : omega/tests/socle/00_installation.sql (A5) déjà joué ; migrations b2_01 à b2_09 posées (avec b2_05b et b2_06b)."
+  echo "-- Prérequis : omega/tests/socle/00_installation.sql (A5) déjà joué ; migrations b2_01 à b2_09 posées (avec b2_05b, b2_06b et b2_09b)."
   echo "-- Un seul appel execute_sql sur la RECETTE ; runtests() annule tout ce que les tests écrivent."
   echo
   for f in 00_jeu_tavaro.sql $(ls [0-9][0-9]_*.sql | grep -v '^00_'); do

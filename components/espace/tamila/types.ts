@@ -481,3 +481,23 @@ export type Conformite = {
 /* Une correspondance rendue par tamila_controler_conflits. */
 export type Trouve = { dossier: string | null; qualite: QualitePartie; statut: string | null; nature: "conflit" | "meme_cote" | "information" };
 export type ControleConflits = { controle: string; correspondances: number; conflits: number; hors_vue: number; trouves: Trouve[] };
+
+/* ——— l'expertise d'un dossier (b4_16, 06/10/2026) : des dates, aucun nom ——— */
+export type Expertise = {
+  id: string;
+  client_id: string;
+  dossier_id: string;
+  mission: "judiciaire" | "amiable";
+  statut: "en_cours" | "deposee" | "abandonnee";
+  ordonnee_le: string | null;
+  consignation_avant: string | null;
+  consignation_versee_le: string | null;
+  premiere_reunion_le: string | null;
+  pre_rapport_attendu_le: string | null;
+  pre_rapport_recu_le: string | null;
+  dires_jusqu_au: string | null;
+  dires_deposes_le: string | null;
+  rapport_attendu_le: string | null;
+  rapport_recu_le: string | null;
+  cree_le: string;
+};

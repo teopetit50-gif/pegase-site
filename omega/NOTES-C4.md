@@ -277,6 +277,47 @@ tsc, eslint, build verts ; recette 5 largeurs sans débordement.
 `offload_noter_contact(p_compte uuid, p_le date, p_canal text, p_par text, p_note text)`,
 `offload_rapprocher(p_client uuid)`, `offload_trancher_rapprochement(p_rapprochement uuid, p_accepter boolean)`.
 
+## Lot c4_07 — échéances et renouvellements (moteur CYCLE, première moitié)
+
+**Ce qui est posé** (`omega/modules/offload/migrations/c4_07_echeances.sql`) :
+- tables `offload_equipements` (site, type d'entretien, périodicité, nature réglementaire / commerciale, dernière
+  intervention), `offload_interventions` (dont « faite ailleurs »), `offload_contrats` (fin, reconduction tacite /
+  expresse / aucune), `offload_echeances` (entretien d'un équipement ou fin d'un contrat) ; RLS lecture seule ;
+- trois modèles d'export offload/tableur (`equipements` clé compte_ref + ref ; `interventions` clé equipement_ref +
+  date ; `contrats` clé numero — toutes obligatoires, conformes à `declaration_coherente`) ; les branchements déjà
+  posés reçoivent ces jeux par `private.declarer_jeu` (le banc en a un) ; l'import les applique (comptes cités créés,
+  intervention rattachée par n° de série, « semestriel » → 6 mois, « Réglementaire » → réglementaire) ;
+- `private.offload_echeances_cycle` : échéance = dernière intervention enregistrée + périodicité ; une intervention
+  plus récente honore les échéances d'avant (`honoree_ailleurs` si faite ailleurs) ; message **de J-7 à J-1, jamais le
+  jour même**, un seul, par `preparer_envoi` (validation, essai) avec le consentement d'un client existant ; sans
+  courriel ou message retenu : tâche d'appel ; tombée sans trace : `depassee`, sans seconde relance ; contrats sans
+  reconduction tacite à 60 jours ou passés : signalés, tâche « proposer le renouvellement », journal
+  `offload.contrat_s_eteint` ; plafond au groupe (un message d'échéance par groupe et par semaine) ;
+- redéfinitions par copie de la dernière version : `offload_appliquer_releve`, `offload_traiter_travaux` (après un
+  import : détection puis échéances), `offload_suivre_envoi` (un message d'échéance → `prevenue`),
+  `offload_point_lignes` (échéances de la semaine, réglementaires d'abord ; contrats qui s'éteignent),
+  `offload_detecter_tout` (la nuit enchaîne les échéances) ;
+- portes `offload_saisir_equipement`, `offload_noter_intervention` (dont `p_ailleurs`), `offload_saisir_contrat` ;
+  lectures `offload_parc(client)` (consolidé + site par site), `offload_echeances_tableau(client)`,
+  `offload_parc_compte(compte)` ;
+- écran : carte « Échéances et contrats » (réglementaire marqué), fiche « Parc installé et contrats » avec « Noter une
+  intervention » (dont « faite ailleurs ») ; la légende et les mois de la courbe passent en HTML (lisibles à toutes
+  les largeurs).
+
+**Tests** : `omega/tests/offload/c4_07_echeances.sql` — `test_c4_07_echeances`, `test_c4_07_contrats_et_parc`,
+`test_c4_07_import_et_groupe` (30 assertions). Banc local : 23 tests, 252 assertions vertes, migrations posées deux
+fois ; tsc, eslint, build verts ; recette 5 largeurs sans débordement.
+
+**Ordre de pose** : `c4_07_echeances.sql`, puis `omega/tests/offload/c4_07_echeances.sql`
+(`runtests('tests', '^test_c4_07_')`).
+
+**À inscrire dans `a5_01`** : `offload_saisir_equipement(p_compte uuid, p_ref text, p_designation text, p_champs jsonb)`,
+`offload_noter_intervention(p_equipement uuid, p_le date, p_nature text, p_ailleurs boolean, p_reference text)`,
+`offload_saisir_contrat(p_compte uuid, p_numero text, p_fin date, p_champs jsonb)`.
+
+**Limite** : une réponse du client à un message d'échéance n'est pas encore rattachée à l'échéance (le socle la
+reçoit ; la réponse arrête les reprises, pas les échéances qui n'ont qu'un message).
+
 ## Lignes de capacité (`lib/produits/capacites/reprise.ts`, 45 lignes) — tenue et preuve
 
 Recette du 06/10, 17 h 10 Z (coordinateur) : `^test_(b3_|c4_|b4_24_|b6_16_)` → 834 ok, 0 not ok ; migrations
@@ -294,7 +335,7 @@ l'écran /espace/offload (liste par priorité avec la raison, fiche, reprise, t�
 | 5 | Les doublons de fiches sont rapprochés quand deux lignes désignent le même client. | **prouvée (recette)** | test_c4_05_doublons |
 | 6 | Les entités d'un même groupe client sont regroupées sous une raison sociale mère. | partielle | `groupe` lu dans les exports, plafond au groupe (test_c4_05_exclusions) ; pas de vue consolidée par raison sociale mère |
 | 7 | Un tableur sans colonne de date est exploité à partir des dates de facture. | **prouvée (recette)** | test_c4_01_import ; test_c4_02_detection (`sans_achat` présenté à part) |
-| 8 | Les contrats et les équipements installés sont suivis jusqu'à leur échéance. | non construite | — |
+| 8 | Les contrats et les équipements installés sont suivis jusqu'à leur échéance. | **c4_07, à poser** | test_c4_07_echeances, test_c4_07_contrats_et_parc |
 | 9 | Chaque message reprend la dernière prestation du compte et le temps écoulé depuis. | **prouvée (recette)** | test_c4_03_message |
 | 10 | Un compte sans réponse reçoit un second message, puis il sort du cycle. | **prouvée (recette)** | test_c4_03_cycle |
 | 11 | Les règles de ton et de contenu s'écrivent en français, sans case à cocher. | partielle | seule la signature se règle ; pas de règles de ton appliquées au message |
@@ -303,14 +344,14 @@ l'écran /espace/offload (liste par priorité avec la raison, fiche, reprise, t�
 | 14 | Les comptes déjà contactés par un commercial sont écartés de la vague en cours. | **prouvée (recette)** | test_c4_05_exclusions |
 | 15 | Les messages partent par courriel, depuis la boîte de votre entreprise. | partielle | OFFLOAD prépare des courriels validés ; la boîte de l'entreprise dépend de l'expéditeur du socle (A2 : Gmail / Microsoft 365 pas branchés) ; rien n'est parti en réel |
 | 16 | Les vagues s'enchaînent au rythme convenu, et chaque exécution laisse son bilan. | **prouvée (recette)** | test_c4_03_cycle (bilan `offload.cycle`) ; test_c4_05_exclusions (bilan des écartés) |
-| 17 | Les entretiens, révisions et contrôles périodiques sont suivis jusqu'à leur échéance. | non construite | — |
-| 18 | Chaque échéance est datée à partir de la dernière intervention enregistrée. | non construite | — |
-| 19 | Le client est prévenu la semaine qui précède, pas le jour où l'échéance tombe. | non construite | — |
-| 20 | Une échéance déjà honorée ailleurs sort du cycle dès que la date est connue. | non construite | — |
-| 21 | Les contrats d'entretien qui s'éteignent faute de reconduction sont signalés. | non construite | — |
-| 22 | Les équipements installés sont rattachés au compte qui les exploite. | non construite | — |
-| 23 | Un parc réparti sur plusieurs sites se lit site par site et en consolidé. | non construite | — |
-| 24 | Les échéances réglementaires sont distinguées des échéances commerciales. | non construite | — |
+| 17 | Les entretiens, révisions et contrôles périodiques sont suivis jusqu'à leur échéance. | **c4_07, à poser** | test_c4_07_echeances |
+| 18 | Chaque échéance est datée à partir de la dernière intervention enregistrée. | **c4_07, à poser** | test_c4_07_echeances, test_c4_07_import_et_groupe |
+| 19 | Le client est prévenu la semaine qui précède, pas le jour où l'échéance tombe. | **c4_07, à poser** | test_c4_07_echeances (J-5 → message ; J → rien) |
+| 20 | Une échéance déjà honorée ailleurs sort du cycle dès que la date est connue. | **c4_07, à poser** | test_c4_07_echeances |
+| 21 | Les contrats d'entretien qui s'éteignent faute de reconduction sont signalés. | **c4_07, à poser** | test_c4_07_contrats_et_parc |
+| 22 | Les équipements installés sont rattachés au compte qui les exploite. | **c4_07, à poser** | test_c4_07_import_et_groupe |
+| 23 | Un parc réparti sur plusieurs sites se lit site par site et en consolidé. | **c4_07, à poser** | test_c4_07_contrats_et_parc (offload_parc) |
+| 24 | Les échéances réglementaires sont distinguées des échéances commerciales. | **c4_07, à poser** | test_c4_07_echeances |
 | 25 | Les commandes arrivées qu'aucun client n'est venu reprendre sont listées. | non construite | — |
 | 26 | Les interventions terminées et non retirées sont relancées après le délai que vous fixez. | non construite | — |
 | 27 | Le stock immobilisé par une commande non reprise est chiffré. | non construite | — |
@@ -351,6 +392,8 @@ taux de réponse par segment, tableau des échéances et commandes reprises, ré
 - 06/10 — coordinateur : c4_01 à c4_05 et leurs tests POSÉS sur la recette (f99562d) ; test 44 sans aucune fonction C4.
 - 06/10 — c4_06 (source « contrat ») poussé (1421d9f).
 - 06/10, 17 h 10 Z — recette verte (834 ok, 0 not ok), banc posé, écran fusionné dans main (23a5bd9). Assertion « message parti au journal » ajoutée (222 vertes en local).
+- 06/10, 17 h 25 Z — recette : ligne 39 prouvée (1120 ok, 0 not ok) ; 19 lignes prouvées. Ordre du coordinateur : échéances, puis affaires en plan, puis pilotage.
+- 06/10 — lot c4_07 (échéances et renouvellements) : 23 tests, 252 assertions vertes en local ; écran recetté.
 - 06/10 — recette : 8 tests verts sur 19. Cause principale, dans MES tests : `throws_ok(sql, code, 'phrase')` — à trois
   arguments, pgTAP lit le 3e comme le message d'erreur attendu. Tous les appels passent à
   `throws_ok(sql, code, null, 'description')` ; le pgTAP factice local imite désormais ce comportement (il
