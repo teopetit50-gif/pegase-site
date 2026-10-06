@@ -28,6 +28,7 @@ $PSQL -f "$ICI/../../../modules/socle/migrations/19ai_compteurs_facturation.sql"
 $PSQL -f "$ICI/../../../modules/socle/migrations/19aj_export_complet.sql" 2>&1 | grep -v "NOTICE" || true
 $PSQL -f "$ICI/../../../modules/socle/migrations/19ak_receptions_confidentialite_module.sql" 2>&1 | grep -v "NOTICE" || true
 $PSQL -f "$ICI/../../../modules/socle/migrations/19am_apercu_effacement_reception_marquer.sql" 2>&1 | grep -v "NOTICE" || true
+$PSQL -f "$ICI/../../../modules/socle/migrations/19an_export_complet_gerant_seul.sql" 2>&1 | grep -v "NOTICE" || true
 $PSQL -f "$ICI/../../../migrations/a5_01_private_execute.sql" 2>&1 | grep -v "^NOTICE" || true
 # Une fonction créée APRÈS la migration ne doit plus naître avec EXECUTE à PUBLIC (défauts posés par a5_01)
 $PSQL -c "create or replace function private.nee_apres_a5_01() returns int language sql as 'select 1'"

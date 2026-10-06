@@ -780,6 +780,18 @@ begin
   perform tests.redevenir_admin();
   return next is(code, '42501', 'un collaborateur ne demande pas l''export complet');
 
+  -- Un admin du client ne demande pas non plus (19an : gérant seul, comme exporter_donnees_client).
+  if to_regclass('public.exports_complets') is not null and tests.role_admis('admin') = 'admin' then
+    update public.comptes set role = 'admin' where user_id = membre and client_id = client_a;
+    perform tests.endosser(membre);
+    begin
+      perform public.demander_export_complet(client_a); code := 'accepté';
+    exception when others then code := sqlstate || ' ' || sqlerrm; end;
+    perform tests.redevenir_admin();
+    update public.comptes set role = (jeu ->> 'role_membre') where user_id = membre and client_id = client_a;
+    return next ok(code like '42501 %gérant%', 'un admin ne demande pas l''export complet, avec un message clair (' || code || ')');
+  end if;
+
   perform tests.endosser(gerant);
   begin
     perform public.demander_export_complet(client_b); code := 'accepté';
