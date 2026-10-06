@@ -233,6 +233,36 @@ Garder la forme avec `(select ...)` partout, y compris pour `auth.uid()` :
 | `multiple_permissive_policies` | perf | fusionner les politiques permissives d'une même commande et d'un même rôle |
 | `unindexed_foreign_keys`, `unused_index` | perf | §2.4 ; supprimer les index jamais lus après un mois d'observation |
 
+## 3 bis. Règle santé des envois (trou n° 7 signalé par B3, à instruire avec A2)
+
+Constat : les modules santé (Tiroma) envoient par les mêmes canaux et les
+mêmes fournisseurs que les autres ; or une donnée de santé ne doit transiter
+que par un canal admis et un fournisseur hébergé HDS. Le socle a déjà la
+colonne `private.canaux_envoi.permis_sante` ; il manque le même drapeau côté
+fournisseur et le verrou qui les lit.
+
+Proposition pour A2 (socle des envois), sans schéma neuf côté client :
+
+1. `private.fournisseurs_envoi` (ou la table existante des fournisseurs) :
+   colonne `hds boolean not null default false` + `hds_attestation text`
+   (référence du certificat, date de fin).
+2. Qualifier l'envoi : un envoi est « santé » si son module l'est
+   (`envois.module in (select module from private.modules where sante)`,
+   ou colonne `envois.sante boolean` posée par la porte Tiroma) ; jamais
+   déduit du contenu.
+3. Verrou dans `private.verrous_envoi()` : pour un envoi santé, refus
+   (`verrou = 'sante:canal'`) si `canaux_envoi.permis_sante` est faux, refus
+   (`verrou = 'sante:fournisseur'`) si le fournisseur retenu n'est pas `hds`
+   ou si son attestation est expirée ; aucun repli automatique vers un autre
+   canal (on diffère et on alerte le gérant). Le verrou est lu par
+   `tache_envois` comme les autres : rien à changer côté tâche.
+4. Garde-fous : test pgTAP « un envoi santé vers un canal non permis est
+   verrouillé » et « vers un fournisseur non HDS est verrouillé » (mêmes
+   outils que les tests 36–37 : `tests.inserer_minimal` + `verrous_envoi`),
+   et une ligne au journal opposable à chaque refus santé.
+5. Priorité haute dès que Tiroma envoie en production ; moyenne tant que
+   Tiroma n'est qu'en recette.
+
 ## 4. Ce qui est bien et qu'il faut garder
 
 - `private` sans aucun droit de table pour `anon`/`authenticated` : vérifié

@@ -40,7 +40,36 @@ Branche `worker-a5`. Mise à jour : 5 octobre 2026.
   dédié, `search_path` des SECURITY DEFINER, vues `security_invoker`, index
   `client_id`.
 
-## Réponse au coordinateur (REPRISE, message de 23:41 UTC) — commit à lire : le dernier de `worker-a5`
+## Réponse au coordinateur (message de 00:52 UTC) — SHA à poser
+
+Tes trois points étaient déjà couverts par `db8fb41` (poussé à 00:40 UTC,
+juste avant ton message) ; le présent commit n'ajoute que la règle santé.
+
+1. **Test 44 / a5_01** : la fin de 19z est intégrée dans `db8fb41`, avec la
+   vraie cause de la rechute : un REVOKE de défaut *par schéma* n'enlève pas
+   le défaut intégré, il faut le REVOKE *global* par rôle créateur (posé pour
+   `postgres`, le rôle courant et chaque propriétaire de fonction de
+   `private`, avec compensation par schéma pour `public` et `extensions`).
+   Ma liste « en trop » ne peut se calculer que sur la recette : rejoue le 44
+   de `db8fb41`, il l'imprime ; avec les sources élargies (appels non
+   qualifiés, domaines, vues via fonctions publiques) les 58 d'hier
+   devraient fondre à ce qui est vraiment à révoquer.
+2. **Test 51** : corrigé depuis `72053b1`. Précision : `has_table_privilege`
+   accepte bien `DELETE` ; c'est `has_any_column_privilege` (que j'utilisais
+   pour admettre les droits par colonne de `tamila_cles`) qui ne le connaît
+   pas. Le test utilise maintenant l'un pour DELETE et l'autre pour
+   SELECT/INSERT/UPDATE ; vert sur la maquette.
+3. **Règle santé des envois (trou n° 7 de B3)** : proposition rédigée dans
+   `omega/docs/SECURITE.md` §3 bis pour A2 : drapeau `hds` côté
+   fournisseur, qualification « santé » posée par le module (jamais déduite
+   du contenu), deux verrous dans `private.verrous_envoi()` (`sante:canal`,
+   `sante:fournisseur`), pas de repli automatique, deux tests pgTAP et une
+   ligne au journal par refus.
+
+SHA à poser : `72053b1` (test 51), `db8fb41` (a5_01, sources, TOUT à 51
+tests), puis le présent commit (règle santé, documentation seule).
+
+## Réponse au coordinateur (REPRISE, message de 23:41 UTC) — commit à lire : `db8fb41`
 
 Fichiers touchés : `omega/migrations/a5_01_private_execute.sql`,
 `omega/migrations/a5_01_liste_requises.sql`, `omega/tests/socle/00_installation.sql`
