@@ -54,6 +54,16 @@ export class PortesMemoire implements Portes {
     const p = this.pieces.get(piece);
     if (!p) throw new Error("Pièce introuvable.");
     if (p.statut !== "en_lecture") throw new Error(`La pièce n'est pas en lecture (statut ${p.statut}).`);
+    // Pièce chiffrée : la règle de private.enregistrer_lecture, ni texte ni valeur en clair (et l'inverse).
+    const brut = resultat as unknown as { pages: Record<string, unknown>[]; valeurs: Record<string, unknown>[] };
+    if (p.chiffrement) {
+      if (brut.pages.some((pg) => (pg.texte ?? "") !== "" || !pg.texte_chiffre)) throw new Error("Pièce chiffrée : ni texte ni valeur en clair (page).");
+      if (brut.valeurs.some((v) => !v.chiffre || (v.valeur ?? null) !== null || v.texte !== undefined || v.boite !== undefined || v.controle !== undefined)) {
+        throw new Error("Pièce chiffrée : ni texte ni valeur en clair (valeur).");
+      }
+    } else if (brut.pages.some((pg) => "texte_chiffre" in pg) || brut.valeurs.some((v) => "chiffre" in v)) {
+      throw new Error("Pièce en clair : rien ne s'y écrit chiffré.");
+    }
     // Les mêmes contrôles de forme que la base.
     for (const pg of resultat.pages) {
       if (!["natif", "ocr", "ocr_manuscrit", "vision"].includes(pg.methode)) throw new Error(`methode de page invalide : ${pg.methode}`);

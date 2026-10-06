@@ -5,15 +5,20 @@
 
 import { assert, assertEquals, assertStringIncludes } from "@std/assert";
 // deno-lint-ignore no-import-prefix
-import { chiffrer } from "https://raw.githubusercontent.com/teopetit50-gif/pegase-site/e0c4bcc82b0f916018af94f7535df37c2abc913a/omega/functions/tamila-coffre/aesgcm.ts";
+import { chiffrer, dechiffrer } from "https://raw.githubusercontent.com/teopetit50-gif/pegase-site/2556214e4befd2c8ad09f9a65c95227e70571e06/omega/functions/tamila-coffre/aesgcm.ts";
 import { ecrirePdf } from "../banc/pdf_minimal.ts";
-import { type ClePiece, CoffreRpc, type CoffreTamila } from "../coffre.ts";
+import { type AvisLu, type ClePiece, CoffreRpc, type CoffreTamila, type DossierPourLecteur } from "../coffre.ts";
 import { lirePiece } from "../lire_piece.ts";
 import { contexteDeTest, pieceDeTest, travailDeTest } from "./doubles.ts";
 
 class CoffreDouble implements CoffreTamila {
   appels: string[] = [];
   remises: Uint8Array[] = [];
+  avisPoses: { piece: string; avis: AvisLu; concorde: boolean | null }[] = [];
+  /** le n° RG du dossier, chiffré (hex « \\x… » comme PostgREST rend un bytea) */
+  rgChiffre: string | null = null;
+  avisDeja = false;
+  panneAvis: Error | null = null;
   constructor(private reponse: () => ClePiece | Promise<ClePiece>) {}
   async clePiece(piece: string): Promise<ClePiece> {
     this.appels.push(piece);
@@ -21,6 +26,20 @@ class CoffreDouble implements CoffreTamila {
     if (r.fournisseur === "scaleway") this.remises.push(r.cle);
     return r;
   }
+  dossier(piece: string): Promise<DossierPourLecteur> {
+    return Promise.resolve({ piece, dossier: "dddddddd-0000-4000-8000-000000000001", client: "c", statut: "ouvert", numero_rg: this.rgChiffre, avis_deja: this.avisDeja });
+  }
+  poserAvis(piece: string, avis: AvisLu, concorde: boolean | null) {
+    if (this.panneAvis) return Promise.reject(this.panneAvis);
+    this.avisPoses.push({ piece, avis, concorde });
+    return Promise.resolve({ avis: "aaaaaaaa-0000-4000-8000-0000000000aa", statut: concorde === false ? "a_verifier" : "lu", effet: "audience" });
+  }
+}
+
+const hex = (o: Uint8Array) => "\\x" + Array.from(o, (b) => b.toString(16).padStart(2, "0")).join("");
+async function ouvrir(chiffreB64: string): Promise<string> {
+  const o = Uint8Array.from(atob(chiffreB64), (c) => c.charCodeAt(0));
+  return new TextDecoder().decode(await dechiffrer(CLE(), o));
 }
 
 const CLE = () => Uint8Array.from({ length: 32 }, (_, i) => (i * 7 + 3) & 0xff);
@@ -63,10 +82,11 @@ async function enJournal<T>(f: () => Promise<T>): Promise<{ r: T; lignes: string
   }
 }
 
-Deno.test("coffre scaleway : la pièce Tamila est déchiffrée en mémoire et lue, la clé effacée, rien en journal", async () => {
+Deno.test("coffre scaleway : déchiffrée, lue, rendue CHIFFRÉE, avis posé avec RG concordant, clé effacée, rien en journal", async () => {
   const clair = avisPdf();
   const chiffre = await chiffrer(CLE(), clair);
   const coffre = new CoffreDouble(() => ({ fournisseur: "scaleway", cle: CLE(), dossier: "dddddddd-0000-4000-8000-000000000001" }));
+  coffre.rgChiffre = hex(await chiffrer(CLE(), new TextEncoder().encode("RG 26/04512")));
   const { ctx, portes, ia, piece } = preparer(coffre, chiffre);
   ia!.prochaine = {
     lisible: true,
@@ -81,16 +101,89 @@ Deno.test("coffre scaleway : la pièce Tamila est déchiffrée en mémoire et lu
   const { r: issue, lignes } = await enJournal(() => lirePiece(ctx, travailDeTest(41, piece.id)));
   assertEquals(issue, "lue");
   assertEquals(coffre.appels, [piece.id]);
-  assert(coffre.remises[0].every((b) => b === 0), "la clé remise par le coffre est effacée");
-  const r = portes.enregistrements[0].resultat;
+  assert(coffre.remises[0].every((b) => b === 0), "la clé remise par le coffre est effacée à la fin du travail");
+
+  // Ce qui part en base : aucun clair (le double applique la règle d'enregistrer_lecture), mais tout se rouvre avec la clé.
+  const r = portes.enregistrements[0].resultat as unknown as {
+    type_piece: string;
+    pages: { texte: string; texte_chiffre: string }[];
+    valeurs: { champ: string; valeur: unknown; chiffre: string; verifiee: boolean; page?: number }[];
+    motif?: string;
+  };
   assertEquals(r.type_piece, "rpva_avis_audience");
-  assertEquals(r.valeurs.find((v) => v.champ === "date_audience")!.valeur, "2027-02-04T09:30");
-  assertEquals((portes.finis[0].resultat as Record<string, unknown>).dechiffree, true);
-  // Ni la clé (hex, base64) ni le texte de la pièce dans le journal.
+  assertEquals(r.pages[0].texte, "");
+  assertStringIncludes(await ouvrir(r.pages[0].texte_chiffre), "N° RG 26/04512");
+  const audience = r.valeurs.find((v) => v.champ === "date_audience")!;
+  assertEquals(audience.valeur, null);
+  assertEquals(audience.verifiee, true);
+  const dedans = JSON.parse(await ouvrir(audience.chiffre));
+  assertEquals(dedans.valeur, "2027-02-04T09:30");
+  assertStringIncludes(dedans.texte, "audience du jeudi");
+  assert(dedans.boite, "la boîte est rangée dans le chiffré");
+
+  // La passerelle b4_08 : seules les valeurs que tamila_avis_lu lit, RG comparé au dossier déchiffré.
+  assertEquals(coffre.avisPoses.length, 1);
+  assertEquals(coffre.avisPoses[0].avis.type, "rpva_avis_audience");
+  assertEquals(coffre.avisPoses[0].avis.valeurs, { date_avis: "2026-10-02", date_audience: "2027-02-04T09:30" });
+  assertEquals(coffre.avisPoses[0].avis.confiance, "modele");
+  assertEquals(coffre.avisPoses[0].concorde, true);
+  const fin = portes.finis[0].resultat as Record<string, unknown>;
+  assertEquals(fin.dechiffree, true);
+  assertEquals((fin.avis_rpva as Record<string, unknown>).avis, "pose");
+  // Ni la clé (hex, base64) ni le contenu dans le journal.
   const cle = CLE();
   assert(!lignes.includes(btoa(String.fromCharCode(...cle))), "clé en base64 journalisée");
   assert(!lignes.includes(Array.from(cle, (b) => b.toString(16).padStart(2, "0")).join("")), "clé en hexadécimal journalisée");
   assert(!lignes.includes("04512"), "contenu de la pièce journalisé");
+});
+
+Deno.test("avis RPVA : RG différent → concorde false ; avis déjà posé → rien ; porte en panne → lecture gardée, avis à saisir", async () => {
+  const lecture = {
+    lisible: true,
+    type_piece: "rpva_avis_902",
+    confiance_type: 0.95,
+    valeurs: [
+      { champ: "date_avis", valeur: "2026-10-02", texte: "Paris, le 2 octobre 2026", page: 1 },
+      { champ: "numero_rg", valeur: "26/04512", texte: "N° RG 26/04512", page: 1 },
+    ],
+  };
+  const essai = async (regler: (c: CoffreDouble) => Promise<void>) => {
+    const coffre = new CoffreDouble(() => ({ fournisseur: "scaleway", cle: CLE(), dossier: "d" }));
+    await regler(coffre);
+    const t = preparer(coffre, await chiffrer(CLE(), avisPdf()));
+    t.ia!.prochaine = lecture;
+    const issue = await lirePiece(t.ctx, travailDeTest(48, t.piece.id));
+    return { issue, coffre, fin: t.portes.finis[0]?.resultat as Record<string, unknown>, t };
+  };
+  const autre = await essai(async (c) => {
+    c.rgChiffre = hex(await chiffrer(CLE(), new TextEncoder().encode("25/00001")));
+  });
+  assertEquals(autre.coffre.avisPoses[0].concorde, false);
+  const sansRg = await essai(() => Promise.resolve());
+  assertEquals(sansRg.coffre.avisPoses[0].concorde, null, "RG du dossier absent : non vérifié");
+  const deja = await essai((c) => {
+    c.avisDeja = true;
+    return Promise.resolve();
+  });
+  assertEquals(deja.coffre.avisPoses.length, 0);
+  assertEquals((deja.fin.avis_rpva as Record<string, unknown>).avis, "deja");
+  const panne = await essai((c) => {
+    c.panneAvis = new Error("HTTP 503");
+    return Promise.resolve();
+  });
+  assertEquals(panne.issue, "lue", "la lecture reste enregistrée");
+  assertEquals((panne.fin.avis_rpva as Record<string, unknown>).avis, "erreur");
+  assertEquals(panne.t.portes.echoues.length, 0);
+});
+
+Deno.test("pièce Tamila chiffrée qui n'est pas un avis : lue et rendue chiffrée, aucun avis, motif sans contenu", async () => {
+  const coffre = new CoffreDouble(() => ({ fournisseur: "scaleway", cle: CLE(), dossier: "d" }));
+  const t = preparer(coffre, await chiffrer(CLE(), avisPdf()));
+  t.ia!.prochaine = { lisible: true, type_piece: "autre", confiance_type: 0.4, motif: "jugement Dupont c/ Martin", valeurs: [] };
+  assertEquals(await lirePiece(t.ctx, travailDeTest(49, t.piece.id)), "a_classer");
+  assertEquals(coffre.avisPoses.length, 0);
+  const motif = t.portes.enregistrements[0].resultat.motif ?? "";
+  assert(!motif.includes("Dupont"), `motif en clair : ${motif}`);
 });
 
 Deno.test("coffre local (pas de coffre serveur) : close sans lecture, comme avant", async () => {

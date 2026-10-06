@@ -15,7 +15,7 @@ import type { Ocr } from "./ocr.ts";
 import { analyserPdf, type PagePdf, pageSansTexte } from "./pdf.ts";
 import { controlerPlafond } from "./plafond.ts";
 import { champsPour, schemaPour } from "./schemas/modules.ts";
-import { type CoffreTamila, depotDechiffrant } from "./coffre.ts";
+import { type BilanAvis, chiffrerLecture, type CoffreTamila, depotDechiffrant, poserAvisTamila } from "./coffre.ts";
 import { lireCsv, lireXlsx } from "./tableur.ts";
 import { valeurLignes, valeurVentilation, verifierValeurs } from "./verifier.ts";
 import { estXmlFacture, lireXmlFacture } from "./xml_facture.ts";
@@ -104,7 +104,7 @@ export async function lirePiece(ctx: Contexte, travail: Travail): Promise<Issue>
         journal("info", "pièce déjà lue ou détachée, travail ignoré", { ...trace, statut: piece.statut });
         return "ignore";
       }
-      return await lireEtRendre(ctxLecture, travail, piece, trace, cle !== null);
+      return await lireEtRendre(ctxLecture, travail, piece, trace, cle);
     } finally {
       // La clé ne survit pas au travail, même si le fichier n'a jamais été téléchargé.
       cle?.fill(0);
@@ -115,12 +115,27 @@ export async function lirePiece(ctx: Contexte, travail: Travail): Promise<Issue>
 }
 
 /** La lecture proprement dite, une fois la pièce à soi (et son dépôt déchiffrant pour une pièce chiffrée). */
-async function lireEtRendre(ctx: Contexte, travail: Travail, piece: Piece, trace: Record<string, unknown>, dechiffree: boolean): Promise<Issue> {
+async function lireEtRendre(ctx: Contexte, travail: Travail, piece: Piece, trace: Record<string, unknown>, cle: Uint8Array | null): Promise<Issue> {
   const pieceId = piece.id;
+  const dechiffree = cle !== null;
   const bilan = await lire(ctx, piece);
   const modele = bilan.ia?.modele ?? null;
   const version = versionLecteur(ctx.maintenant(), modele);
-  const enregistre = await ctx.portes.enregistrerLecture(pieceId, bilan.resultat, version);
+  // Une pièce chiffrée se rend chiffrée : rien de son contenu n'entre en clair en base.
+  const aEnregistrer = cle ? await chiffrerLecture(bilan.resultat, cle) : bilan.resultat;
+  const enregistre = await ctx.portes.enregistrerLecture(pieceId, aEnregistrer, version);
+  // Un avis RPVA lu pose ses délais (b4_08). Un échec ici ne défait pas la lecture, déjà enregistrée : il est dit dans
+  // le résultat du travail et journalisé, l'avis reste à saisir à la main.
+  let avis: BilanAvis | { avis: "erreur"; erreur: string } | undefined;
+  if (cle && piece.module === "tamila" && ctx.coffre && ["lue", "a_verifier"].includes(bilan.resultat.statut)) {
+    try {
+      avis = await poserAvisTamila(ctx.coffre, pieceId, bilan.resultat, cle);
+    } catch (e) {
+      const code = e instanceof ErreurOuvrier ? e.code : "ERREUR_INTERNE";
+      avis = { avis: "erreur", erreur: code };
+      journal("alerte", "avis RPVA lu mais non posé : à saisir à la main", { ...trace, erreur: code });
+    }
+  }
   const prealable = bilan.prealable ?? SANS_PREALABLE;
   const cout = Math.round(((bilan.ia?.cout_eur ?? 0) + bilan.cout_ocr + prealable.cout_eur) * 1e6) / 1e6;
   await ctx.portes.finirTravail(travail.id, {
@@ -134,8 +149,11 @@ async function lireEtRendre(ctx: Contexte, travail: Travail, piece: Piece, trace
     tokens_sortie: (bilan.ia?.usage.tokens_sortie ?? 0) + prealable.tokens_sortie,
     appels_ia: (bilan.ia ? 1 : 0) + prealable.appels_ia,
     cout_eur: cout,
-    ...(bilan.decoupage && bilan.decoupage.length > 1 ? { decoupage: bilan.decoupage } : {}),
+    ...(bilan.decoupage && bilan.decoupage.length > 1
+      ? { decoupage: bilan.decoupage.map((d) => (dechiffree ? { pages: d.pages, type_piece: d.type_piece } : d)) }
+      : {}),
     ...(dechiffree ? { dechiffree: true } : {}),
+    ...(avis ? { avis_rpva: avis } : {}),
   });
   journal("info", "pièce lue", {
     ...trace,
