@@ -26,13 +26,15 @@ import { dateCourte, montant } from "../format";
 import { chiffrerLocal } from "./calcul";
 import { FAMILLES, STATUTS_CONTRAT, STATUTS_PROPOSITION, famille, nomLocataire, propositionVivante, resteDu, type Famille } from "./etats";
 import { AGENCES_EXEMPLE, AVIS_EXEMPLE, BAREME_EXEMPLE, BAREME_RETIRE_EXEMPLE, CATEGORIES_EXEMPLE, DOSSIERS_EXEMPLE, LIGNES_BAREME_EXEMPLE, REGLAGES_EXEMPLE, nomPersonneTavaro } from "./exemples";
-import { amenderContrat, chargerMonde, chiffrerRetour, classerAvis, completerContrat, constaterRefus, etablirEtat, leverCaution, signerEtat, demanderAvoir, deposerPhoto, designerConducteur, enregistrerAvis, marquerLitige, marquerReglee, monCompte, publierBareme, rattacherAvis, relancerFacture, retirerBareme, type Moi, type Monde } from "./portes";
+import { amenderContrat, avoirElectronique, chargerMonde, chiffrerRetour, classerAvis, completerContrat, completerLocataire, constaterRefus, factureElectronique, preparation2027, etablirEtat, leverCaution, signerEtat, demanderAvoir, deposerPhoto, designerConducteur, enregistrerAvis, marquerLitige, marquerReglee, monCompte, publierBareme, rattacherAvis, relancerFacture, retirerBareme, type Moi, type Monde } from "./portes";
 import type { AvisContravention, Avoir, Bareme, EtatDesLieux, Dossier, Facture, LigneBareme, LigneJournal, Retour, Role } from "./types";
 import DossierContrat, { type Gestes } from "./DossierContrat";
 import type { GestesEtats } from "./EtatsDesLieux";
 import { appliquerEtats, empreinte } from "./edl";
 import BaremeVue from "./BaremeVue";
 import AvisVue, { type GestesAvis } from "./AvisVue";
+import { Preparation2027, type Preparation } from "./FactureElectronique";
+import { controler, docAvoir, docFacture, formeLocale, sirenValide } from "./cii";
 import "./tavaro.css";
 
 const MONDE_EXEMPLE: Monde = {
@@ -90,6 +92,35 @@ export default function EcranTavaro() {
       /* la prochaine lecture à la main dira l'erreur */
     }
   }, []);
+  /* la préparation au 1er septembre 2027 : la porte en base réelle (direction et valideurs), le même calcul pour l'exemple */
+  const [prepReelle, setPrepReelle] = useState<Preparation | null>(null);
+  useEffect(() => {
+    if (source !== "reelle" || !reel) return;
+    let vivant = true;
+    preparation2027().then((p) => { if (vivant) setPrepReelle(p); }).catch(() => { if (vivant) setPrepReelle(null); });
+    return () => { vivant = false; };
+  }, [source, reel]);
+  const prepExemple = useMemo<Preparation | null>(() => {
+    const factures = local.dossiers.flatMap((d) => d.factures.map((f) => ({ f, d })));
+    const e = factures[0]?.f.emetteur ?? {};
+    const parFlux = new Map<string, { flux: string; n: number; prets: number }>();
+    for (const { f, d } of factures) {
+      const c = controler(docFacture(f, d.lignesFactures));
+      const g = parFlux.get(c.flux) ?? { flux: c.flux, n: 0, prets: 0 };
+      g.n += 1;
+      if (c.pret) g.prets += 1;
+      parFlux.set(c.flux, g);
+    }
+    const sansSiren = new Set(local.dossiers.filter((d) => d.locataire?.type === "professionnel" && !d.locataire.anonymise_le && !sirenValide(d.locataire.siren)).map((d) => d.locataire!.id)).size;
+    return {
+      echeance_emission: "2027-09-01",
+      emetteur: { siren: sirenValide(e.siren), numero_tva: !!e.numero_tva, adresse: /[0-9]{5}\s+\S/.test(e.adresse ?? "") },
+      clients_pro_sans_siren: sansSiren,
+      pieces_90_jours: [...parFlux.values()],
+    };
+  }, [local]);
+  const preparation = source === "exemple" ? prepExemple : prepReelle;
+
   useTempsReel(["loc_contrats", "loc_propositions", "loc_factures", "loc_avoirs", "loc_avis_contravention", "loc_etats_des_lieux"], source === "reelle", relire);
 
   const nommer = useCallback((id: string | null | undefined) => {
@@ -243,6 +274,25 @@ export default function EcranTavaro() {
           remplacerLocal(journaliser({ ...d, factures: d.factures.map((f) => (f.id === facture.id ? { ...f, relances: n, relance_le: maintenant() } : f)) }, "tavaro.facture_relancee", "loc_factures", facture.id, { reference: facture.reference, relance: n, origine: "agence", reste_du: resteDu(facture, d.avoirs) }));
         },
       ),
+      electronique: async (facture) => (source === "reelle" ? factureElectronique(facture.id) : formeLocale(docFacture(facture, d0().lignesFactures))),
+      electroniqueAvoir: async (avoir) => {
+        if (source === "reelle") return avoirElectronique(avoir.id);
+        const f = d0().factures.find((x) => x.id === avoir.facture_id);
+        if (!f) throw new Error("Facture d'origine introuvable.");
+        return formeLocale(docAvoir(avoir, f));
+      },
+      completerClient: async (valeurs) => {
+        const d = d0();
+        if (!d.locataire) throw new Error("Ce contrat n'a pas de client connu.");
+        if (source === "reelle") {
+          await completerLocataire(d.locataire.id, valeurs);
+          await relire();
+          return;
+        }
+        await new Promise((r) => setTimeout(r, 350));
+        if (valeurs.siren && !sirenValide(valeurs.siren)) throw new Error("Ce SIREN n'est pas valide (neuf chiffres, clé de contrôle).");
+        remplacerLocal(journaliser({ ...d, locataire: { ...d.locataire, siren: valeurs.siren ?? d.locataire.siren ?? null, type: "professionnel" } }, "tavaro.locataire_complete", "loc_locataires", d.locataire.id, { champs: Object.keys(valeurs) }));
+      },
     };
   }, [source, dossier, moi, moiId, local, relire, remplacerLocal]);
 
@@ -522,6 +572,12 @@ export default function EcranTavaro() {
       <div style={{ marginTop: 16 }}>
         <AvisVue avis={monde?.avis ?? []} dossiers={dossiers} role={role} nommer={nommer} nomAgence={nomAgenceDe} gestes={gestesAvis} />
       </div>
+
+      {role === "gerant" || role === "admin" || role === "valideur" ? (
+        <div style={{ marginTop: 16 }}>
+          <Preparation2027 preparation={preparation} />
+        </div>
+      ) : null}
 
       <div style={{ marginTop: 16 }}>
         <BaremeVue baremes={monde?.baremes ?? []} lignes={monde?.lignesBareme ?? []} categories={monde?.categories ?? []} role={role} onPublier={publier} onRetirer={retirer} />

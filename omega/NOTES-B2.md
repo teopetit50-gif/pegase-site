@@ -180,3 +180,24 @@ Sources :
   - la préautorisation bancaire réelle (un prestataire de paiement, à choisir par Teo) ;
   - l'état des lieux envoyé en PDF au locataire après la signature (lié au PDF de facture) ;
   - le n° 2, la facture électronique ; les mentions (SIREN client, catégorie d'opération) peuvent commencer dans le module, le raccordement à une plateforme agréée relève du socle.
+
+### Manque n° 2 — la facture électronique, partie module : état au 06/10, 17 h 45 Z
+
+- **Recette** : b2_05 et b2_05b sont posés ; `^test_(b2_|44_)` passe 15/15. L'écran de l'état des lieux est fusionné dans main (1f6427c).
+- **Base** (03a86fa) : `b2_06_facture_electronique.sql`. Aucune table touchée, rien d'effacé ; l'émission du socle ne change pas (il met déjà le SIREN client, la nature des opérations et l'option débits dans les mentions).
+  - Le CII D16B, profil EN 16931, de chaque facture et de chaque avoir.
+  - Un contrôle par pièce : le flux (e_invoicing, e_reporting, a_completer) et ce qui ferait rejeter la pièce.
+  - Les portes `loc_facture_electronique`, `loc_avoir_electronique`, `loc_completer_locataire` (SIREN avec clé de Luhn) et `loc_preparation_2027`.
+  - **Validé hors base** avec le XSD Factur-X EN 16931 et les schematrons EN 16931 et BR-FR Flux 2 du paquet `factur-x` (Saxon) : 0 erreur, 0 avertissement pour une facture de frais pro, une facture de dommages pro (catégorie O) et un avoir pro. Le BR-FR avait d'abord trouvé quatre manques, corrigés :
+    - le cadre de facturation BT-23 = S1 ;
+    - les notes PMD, PMT et AAB ;
+    - les adresses électroniques BT-34 et BT-49 = SIREN au schéma 0225 ;
+    - la date de livraison = la restitution.
+  - L'outil : `omega/recette-b2/valider_cii.py`, avec trois XML d'exemple dans `omega/recette-b2/cii/`. Test 15 : 18 assertions.
+- **Écran** :
+  - un bouton « Forme électronique » sur chaque facture et chaque avoir émis ; le dialogue montre le flux, ce qui manque, le XML lisible et téléchargeable, et un champ pour compléter le SIREN du client, contrôlé avant le clic ;
+  - une carte « Facture électronique : prêt pour le 1er septembre 2027 ? », pour la direction et les valideurs ;
+  - `cii.ts` est le port exact du constructeur pour l'exemple : ses six pièces d'exemple, données à un pro, passent elles aussi XSD, EN 16931 et BR-FR ;
+  - le SIREN d'exemple de l'émetteur est corrigé (512345679, clé valide ; TVA FR75…) ;
+  - tsc, eslint et build verts ; recette 82 contrôles verts ; axe : 0 écart, dialogue compris.
+- **Reste au socle (coordinateur)** : le raccordement à une plateforme agréée et le dépôt ; le PDF/A-3 Factur-X qui embarque ce XML ; la transmission du e-reporting B2C ; les statuts de cycle de vie renvoyés par la plateforme.

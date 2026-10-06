@@ -11,7 +11,9 @@
    tout seul du contrat, la désignation consignée, le classement réservé à
    la direction. L'état des lieux (b2_05) : le départ signé se lit dans le
    dossier, l'état de retour se fait (quatre vues, signature au doigt) et
-   le chiffrage annonce « déjà au départ » pour la rayure notée.
+   le chiffrage annonce « déjà au départ » pour la rayure notée. La
+   facture électronique (b2_06) : la préparation 2027, la forme
+   électronique d'une facture pro sans SIREN, le SIREN contrôlé.
    usage : node omega/recette-b2/recette-tavaro.mjs [origine] */
 import { mkdirSync } from 'node:fs';
 import { ouvrirSession } from '../../outils/chrome.mjs';
@@ -239,6 +241,39 @@ for (const largeur of LARGEURS) {
   const deja = await s.evaluer(`document.querySelector('[role="dialog"] .tav-ligne-saisie')?.innerText ?? ''`);
   ok(/Déjà noté sur l.état de départ signé/.test(deja) && /ne sera pas facturé/.test(deja), 'une rayure dans une zone déjà notée au départ : « ne sera pas facturé » avant le clic');
   await s.capturer(`${dossier}tavaro-edl-1440.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b2-fe', densite: 1 });
+  console.log('— /espace/tavaro : facture électronique (exemple)');
+  ok(await s.aller(base + '/espace/tavaro'), 'page chargée');
+  await s.dormir(400);
+  const prep = await s.evaluer(`document.querySelector('section[aria-label="Facture électronique : préparation 2027"]')?.innerText ?? ''`);
+  ok(/prêt pour le 1er septembre 2027/.test(prep) && /2 clients professionnels sans SIREN valide/.test(prep) && /à préparer/.test(prep), 'la préparation 2027 se lit : deux clients pros sans SIREN, « à préparer »');
+  await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /C-2026-0322/.test(b.textContent)).click()`);
+  await s.dormir(400);
+  await s.evaluer(`[...document.querySelectorAll('#esp-dossier .tav-facture .r-btn')].find(b => /Forme électronique/.test(b.textContent)).click()`);
+  await s.dormir(600);
+  const forme = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return { texte: d.innerText, xml: d.querySelector('.tav-xml pre')?.textContent ?? '' }; })()`);
+  ok(/à compléter avant envoi/.test(forme.texte) && /le SIREN du client professionnel/.test(forme.texte), 'une facture pro sans SIREN : « à compléter », le SIREN du client manque');
+  ok(/urn:cen\.eu:en16931:2017/.test(forme.xml) && /<ram:ID>FA-2026-000071<\/ram:ID>/.test(forme.xml) && /<ram:ID>S1<\/ram:ID>/.test(forme.xml), 'le XML CII se lit : contexte EN 16931, cadre S1, numéro de la facture');
+  const saisir = (v) => s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input[inputmode="numeric"]'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, '${v}'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  const bouton = () => s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer le SIREN/.test(b.textContent))?.disabled`);
+  await saisir('123 456 789');
+  await s.dormir(200);
+  ok(await bouton() === true && /clé de contrôle de ce SIREN est fausse/.test(await s.evaluer(`document.querySelector('[role="dialog"]').innerText`)), 'un SIREN à la clé fausse : bouton gris, l\'écran le dit');
+  await saisir('552 100 554');
+  await s.dormir(200);
+  ok(await bouton() === false, 'un SIREN valide : le bouton s\'active');
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer le SIREN/.test(b.textContent)).click()`);
+  await s.dormir(700);
+  ok(/les prochaines factures le porteront/.test(await s.evaluer(`document.querySelector('[role="dialog"]').innerText`)), 'le SIREN est enregistré ; la facture émise ne change pas');
+  await s.capturer(`${dossier}tavaro-fe-1440.jpg`, { qualite: 55 });
+  await s.envoyer('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+  await s.dormir(400);
+  const prep2 = await s.evaluer(`document.querySelector('section[aria-label="Facture électronique : préparation 2027"]')?.innerText ?? ''`);
+  ok(/1 client professionnel sans SIREN valide/.test(prep2), 'la préparation se met à jour : un seul client pro sans SIREN');
   s.fermer();
 }
 

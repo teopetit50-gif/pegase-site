@@ -23,6 +23,9 @@
      loc_signer_etat(p_etat, p_signataire, p_signature) → jsonb
      loc_constater_refus(p_etat, p_motif) → jsonb
      loc_lever_caution(p_contrat, p_motif) → jsonb
+     loc_facture_electronique(p_facture) / loc_avoir_electronique(p_avoir) → jsonb (migration b2_06)
+     loc_completer_locataire(p_locataire, p_valeurs jsonb) → jsonb
+     loc_preparation_2027() → jsonb
    Deux exceptions, que le socle ouvre par une politique RLS au gérant
    seul : loc_reglages (INSERT/UPDATE) et loc_agences (INSERT/UPDATE).
    Signatures lues dans omega/SOCLE-EXTRAITS-TAVARO.sql ; si la base
@@ -31,6 +34,8 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { assemblerDossiers } from "./exemples";
+import type { FormeElectronique } from "./cii";
+import type { Preparation } from "./FactureElectronique";
 import type { Agence, Amendement, AvisContravention, Avoir, EtatDesLieux, Bareme, Categorie, Contrat, DemandeCourte, Dossier, Facture, LigneBareme, LigneFacture, LigneJournal, LigneProposition, Locataire, Proposition, Reglages, Retour, Role, Vehicule } from "./types";
 
 export class ErreurPorte extends Error {}
@@ -86,7 +91,7 @@ export async function chargerMonde(): Promise<Monde> {
   const vide = { data: [] as unknown[] };
   const [locataires, vehicules, amendements, propositions, factures, avoirs] = ids.length
     ? await Promise.all([
-        supabase.from("loc_locataires").select("id, type, nom, prenom, raison_sociale, email, telephone, adresse, anonymise_le").in("id", liste.map((c) => c.locataire_id).filter(Boolean) as string[]),
+        supabase.from("loc_locataires").select("id, type, nom, prenom, raison_sociale, siren, email, telephone, adresse, anonymise_le").in("id", liste.map((c) => c.locataire_id).filter(Boolean) as string[]),
         supabase.from("loc_vehicules").select("id, immatriculation, modele, categorie_id, energie, reservoir_l, statut, km_dernier").in("id", liste.map((c) => c.vehicule_id).filter(Boolean) as string[]),
         supabase.from("loc_contrats_amendements").select("*").in("contrat_id", ids).order("accorde_le"),
         supabase.from("loc_propositions").select("*").in("contrat_id", ids).order("version"),
@@ -168,6 +173,10 @@ export const etablirEtat = (p_contrat: string, p_moment: "depart" | "retour", p_
 export const signerEtat = (p_etat: string, p_signataire: string, p_signature: string | null) => rpc<Record<string, unknown>>("loc_signer_etat", { p_etat, p_signataire, p_signature });
 export const constaterRefus = (p_etat: string, p_motif: string) => rpc<Record<string, unknown>>("loc_constater_refus", { p_etat, p_motif });
 export const leverCaution = (p_contrat: string, p_motif: string | null) => rpc<Record<string, unknown>>("loc_lever_caution", { p_contrat, p_motif });
+export const factureElectronique = (p_facture: string) => rpc<FormeElectronique>("loc_facture_electronique", { p_facture });
+export const avoirElectronique = (p_avoir: string) => rpc<FormeElectronique>("loc_avoir_electronique", { p_avoir });
+export const completerLocataire = (p_locataire: string, p_valeurs: Record<string, unknown>) => rpc<Record<string, unknown>>("loc_completer_locataire", { p_locataire, p_valeurs });
+export const preparation2027 = () => rpc<Preparation>("loc_preparation_2027", {});
 export const anonymiserLocataire = (p_locataire: string) => rpc<Record<string, unknown>>("loc_anonymiser_locataire", { p_locataire, p_motif: "demande" });
 
 /* Les réglages du module : la seule écriture directe, ouverte par la RLS au gérant. */

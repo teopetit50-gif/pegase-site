@@ -55,6 +55,8 @@ export type Locataire = {
   nom: string | null;
   prenom: string | null;
   raison_sociale: string | null;
+  /* b2_06 : le SIREN d'un client professionnel (facture électronique) */
+  siren?: string | null;
   email: string | null;
   telephone: string | null;
   adresse: string | null;
