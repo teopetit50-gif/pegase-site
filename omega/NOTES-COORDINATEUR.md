@@ -662,3 +662,6 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   contrôlé (relu : handlers de l'appelant préservés, preventDefault respecté). Les écrans
   des B (tiroma/ListeAttente, tamila, varelo, daliro, lorani, tavaro) gardent le même
   role=listbox/option : à corriger par chacun (demandé).
+- 07 h 25 — A3 04efcda fusionné : « Noter un paiement » dans « À payer » (reste à payer,
+  « Payée en partie / Payée », payées masquées). Relu en réel : 100 € par virement sur
+  FAC-2026-10-0471 (daf2@) → reste 188,00 € sur 288,00 €, filed_etat_paiement partielle.
