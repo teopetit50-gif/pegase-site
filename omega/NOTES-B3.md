@@ -1,14 +1,14 @@
 # Session B3 — TIROMA (cabinets dentaires : praticiens, fauteuils, horaires, rendez-vous, point du matin)
 
 Branche `worker-b3`. Coordinateur : session `session_01B4JNQXyT69GytdvE9SjAnE`.
-Dernière mise à jour : 06/10/2026, soir (lot 2, troisième passage demandé).
+Dernière mise à jour : 06/10/2026, nuit (lot 2 vert, relecture réelle faite).
 
 ## Les deux jauges
 
 | Jauge | Où on en est | Ce qui manque pour 100 % |
 |---|---|---|
-| **Mécanique** (le socle fait ce que le scénario demande, prouvé par pgTAP sur la recette) | **70 %** — lot 1 vert (98/98) ; b3_01 à b3_09 posés ; lot 2 joué deux fois : la chaîne d'export est prouvée (05 à un contrôle près, 09, 10 verts), 06/07/08/11 corrigés et à rejouer. | Le troisième passage du lot 2 jusqu'au vert (point du matin : 0 membre servi, cause à lire) ; b3_10 posé ; la règle santé stricte dans verrous_envoi (socle commun). |
-| **Livrable client** (un cabinet installe, branche, reçoit son point du matin, ouvre /espace/tiroma) | **45 %** — écran /espace/tiroma écrit, recetté aux cinq largeurs, en fusion sur main par le coordinateur ; le point du matin TIROMA existe (b3_06) ; la chaîne d'export est jouable par les portes. | **Aucun ouvrier ne lit les exports** (trou commun n° 1, confié à A1) ; aucun fournisseur d'envoi agréé santé → le point nominatif reste derrière l'authentification ; aucun export Logos_w réel (Teo). |
+| **Mécanique** (le socle fait ce que le scénario demande, prouvé par pgTAP sur la recette) | **85 %** — 11 fichiers verts sur la recette (lot 1 : 98/98 ; lot 2 : 05 50/50, 06 35/35, 07 32/32, 08 28/28, 09 17/17, 10 13/13, 11 18/18) ; b3_01 à b3_10 posés ; gabarit `tiroma.point_matin` validé ; chaîne d'export prouvée de bout en bout ; test 12 (vocabulaire) 18/18 : **12 fichiers verts**. | La règle santé stricte (proposition ci-dessous, portée par le coordinateur à A5/A2 avec le prochain lot socle) ; un ouvrier d'export (trou commun n° 1, A1) ; un export Logos_w réel pour confirmer les en-têtes. |
+| **Livrable client** (un cabinet installe, branche, reçoit son point du matin, ouvre /espace/tiroma) | **55 %** — écran /espace/tiroma en ligne sur omegaai.fr, relu en base réelle avec le compte du banc ; le point du matin TIROMA se dépose (b3_06) et le courriel de compteurs part par le gabarit validé ; la chaîne d'export est jouable par les portes. | **Aucun ouvrier ne lit les exports** (A1) ; aucun fournisseur d'envoi agréé santé → le point nominatif reste derrière l'authentification ; aucun export Logos_w réel (Teo). |
 
 ### Ce que Teo (le patron) doit fournir lui-même
 
@@ -21,9 +21,32 @@ Dernière mise à jour : 06/10/2026, soir (lot 2, troisième passage demandé).
 - **Posé sur la recette** (par le coordinateur) : b3_01 (portes + droits), b3_02 (reposé : une voie par patient), b3_03 (à reposer : booléen `mutuelle_accord_sans_rdv` jamais nul), b3_04, b3_05, b3_06 (point du matin + cron tiroma-matin), b3_07 (mutuelle), b3_08 (heures locales), b3_09 (liste d'attente). b3_10 (gabarit validé `tiroma.point_matin`) envoyé, pose à confirmer.
 - **Lot 1** (`^test_b3_0[1-4]`) : 98/98 verts.
 - **Lot 2** (`^test_b3_(05|06|07|08|09|10|11)_`) : joué deux fois par le coordinateur. Au second passage : 05 49/50 (le compteur de travaux additionne maintenant toutes les passes), 09 17/17, 10 13/13 ; 06, 07, 08, 11 corrigés d'après les sorties brutes (colonne `etat` des capacités, périmètre du collaborateur qui peut noter la mutuelle de son patient, envois transactionnels pour atteindre le verrou santé avant le consentement, patient gêné proposé avant le patient en attente). La chaîne relevé → instantané → travail → `tiroma_appliquer_releve` est **prouvée de bout en bout** sur la recette.
-- **Reste inexpliqué** : au second passage, `tiroma_deposer_points` a servi 0 membre sans qu'on lise pourquoi ; le test 08 imprime désormais le détail de l'alerte `tiroma:point:depot:<cabinet>` s'il y en a une. Troisième passage demandé (SHA 5220b21).
-- **Prochaine étape** : lire la troisième sortie, corriger jusqu'au vert ; puis la règle santé stricte du socle commun (proposition au coordinateur), la relecture de /espace/tiroma en base réelle avec le compte du banc (comme A3 : omega/recette-a3/relecture-reelle.mjs) quand omegaai.fr sert la page.
+- **Lot 2 vert** (troisième et quatrième passages) : la pendule de test `tests.b3_vieillir` (un instant par relevé) a fait tomber les huit rouges de 06 ; b3_06 corrigé (un item « avant les rendez-vous » était coupé en deux objets par une concaténation jsonb non parenthésée) ; b3_10 : variables de type « nombre ».
+- **Test 12** (vocabulaire) : 18/18 au premier passage. **12/12 fichiers verts.** Rien n'est en attente côté B3.
+- **Prochaine étape** : attendre le premier vrai export Logos_w de Teo et l'ouvrier lecteur d'exports d'A1 (déployé) ; le rejouer alors sur le banc par la chaîne de relevé, et confirmer ou corriger les en-têtes de `modeles_jeux` tiroma/logosw. La règle santé stricte est portée par le coordinateur au prochain lot socle.
 - **Écran** : /espace/tiroma fusionné sur main par le coordinateur (d572973), avec la ligne de navigation dans `components/espace/ecrans.ts`.
+
+## Proposition pour le socle commun : la règle santé stricte (trou n° 7)
+
+Constat (F5 et test 08) : des canaux portent `permis_sante = true` alors qu'aucun fournisseur n'est
+`agree_sante`. Aujourd'hui seul le verrou `SANTE_HORS_CANAL_AGREE` (fournisseur) protège le nominatif ;
+le drapeau du canal ne veut donc rien dire par lui-même. Proposition, à poser par le coordinateur dans
+le socle commun (je ne touche pas à `private.verrous_envoi` ni aux canaux) :
+
+1. **Cohérence des canaux** : un déclencheur sur `private.canaux_envoi` refuse `permis_sante = true` si
+   le fournisseur du canal n'est pas `agree_sante` (22023 « Un canal n'est permis pour la santé que si son
+   fournisseur est agréé santé. ») ; et quand un fournisseur perd son agrément, ses canaux repassent à
+   `permis_sante = false` (déclencheur sur la table des fournisseurs). Les deux vérités ne peuvent plus
+   diverger.
+2. **Le verrou lit les deux** : `CANAL_NON_PERMIS` dès que `p_donnees_sante` (ou le contexte santé d'un
+   module `sante = true`) et `not permis_sante`, avant `SANTE_HORS_CANAL_AGREE` — même résultat qu'aujourd'hui
+   pour l'envoi, mais le code du verrou dit « canal » quand c'est le canal, « fournisseur » quand c'est lui.
+3. **Une alerte interne** (`lever_alerte_module`, clé `sante:canal:<canal>`) quand un `reglages_envois`
+   d'un module `sante = true` désigne un canal non permis santé : le cockpit voit le trou avant le
+   premier point du matin bloqué.
+4. **Rien ne change pour TIROMA** : le point nominatif reste derrière l'authentification tant qu'aucun
+   fournisseur n'est agréé ; le courriel de compteurs (gabarit `tiroma.point_matin`, `donnees_sante =
+   false`) continue de partir.
 
 ## Relecture de /espace/tiroma en base réelle — faite le 06/10 (00 h 37 Z)
 
@@ -62,15 +85,15 @@ d'écriture directe hors RLS.
 4. **Horaires.** Lundi–vendredi 8–12 / 14–19, samedi 8–12, un exceptionnel ; `tiroma_ouvert` : 540 / 240 / 0 minutes, férié local fermé. *(02, vert)*
 5. **Fermetures.** Fauteuil fermé l'après-midi, cabinet en formation : la plage se réduit. *(02, vert)*
 6. **Branchement.** `tiroma_brancher_cabinet` → dix jeux, cabinet actif, journal ; refusé à l'assistante et sur un cabinet clos. *(03, vert)*
-7. **Premier relevé (reprise).** Dix fichiers par les portes du socle → relevé `ok/reprise`, 30 patients, praticiens et fauteuils reconnus par leur nom, 9 types (un à classer), rendez-vous aux heures du cabinet (b3_08), 5 plans et 9 lignes, actes liés, fiche labo liée à la pose, stock, ODF, attente ; zéro événement ; journal ; six capacités ; périmètres de lecture. *(05, écrit)*
-8. **Vocabulaire.** Validation d'un type par le titulaire (déclencheur). *(écran recetté sur l'exemple ; test à écrire)*
-9. **Relevé courant, annulation.** R010 disparaît → `supprime` + événement `annulation` immuable ; `tiroma_creneaux_a_sauver` rend le créneau avec trois candidats dans l'ordre : plan accepté (Delannoy), liste d'attente (Bazile), contrôle dû (Nestor). *(06, écrit)*
-10. **Honoré / manqué / présumé.** R003 honoré, R005 manqué, R004 présumé honoré par l'acte du jour. *(06, écrit)*
-11. **Garde-fou.** Une journée de dix rendez-vous vidée → relevé `douteux`, journal, compteur 1 puis 0. *(06, écrit)*
-12. **Plans sans rendez-vous.** D001, D002, D003, D004 dans l'ordre ; proche à planifier ; **accord de mutuelle noté par l'assistante** (b3_07, l'export ne le porte pas). *(07, écrit)*
-13. **Avant les rendez-vous.** Labo critique, implant sous seuil, devis qui expire, mutuelle sans rendez-vous, ODF sans début, traitement interrompu, devis sans réponse ; charge des fauteuils au titulaire seul. *(07, écrit)*
-14. **Point du matin.** `tiroma_deposer_points` à 6 h 30 : sections santé par membre selon son périmètre, `apercu_point` les rend ; courriel nominatif → `SANTE_HORS_CANAL_AGREE`, SMS → `CANAL_NON_PERMIS`, courriel sans santé → accepté. *(08, écrit)*
-15. **Mesures du soir, mode réel, journal, isolement, relevé en retard, fermeture et purge.** Mode réel, journal et isolement : *(03/04, verts)* ; mesures, retard, purge : *(09/10, à écrire)*.
+7. **Premier relevé (reprise).** Dix fichiers par les portes du socle → relevé `ok/reprise`, 30 patients, praticiens et fauteuils reconnus par leur nom, 9 types (un à classer), rendez-vous aux heures du cabinet (b3_08), 5 plans et 9 lignes, actes liés, fiche labo liée à la pose, stock, ODF, attente ; zéro événement ; journal ; six capacités ; périmètres de lecture. *(05, vert)*
+8. **Vocabulaire.** Le titulaire classe « RDV LV » et valide ; l'assistante et le témoin ne changent rien ; pas de validation sans famille ; le relevé suivant respecte la classification humaine. *(12, vert)*
+9. **Relevé courant, annulation.** R010 disparaît → `supprime` + événement `annulation` immuable ; `tiroma_creneaux_a_sauver` rend le créneau avec trois candidats dans l'ordre : plan accepté (Delannoy), liste d'attente (Bazile), contrôle dû (Nestor). *(06, vert)*
+10. **Honoré / manqué / présumé.** R003 honoré, R005 manqué, R004 présumé honoré par l'acte du jour. *(06, vert)*
+11. **Garde-fou.** Une journée de dix rendez-vous vidée → relevé `douteux`, journal, compteur 1 puis 0. *(06, vert)*
+12. **Plans sans rendez-vous.** D001, D002, D003, D004 dans l'ordre ; proche à planifier ; **accord de mutuelle noté par l'assistante** (b3_07, l'export ne le porte pas). *(07, vert)*
+13. **Avant les rendez-vous.** Labo critique, implant sous seuil, devis qui expire, mutuelle sans rendez-vous, ODF sans début, traitement interrompu, devis sans réponse ; charge des fauteuils au titulaire seul. *(07, vert)*
+14. **Point du matin.** `tiroma_deposer_points` à 6 h 30 : sections santé par membre selon son périmètre, `apercu_point` les rend ; courriel nominatif → `SANTE_HORS_CANAL_AGREE`, SMS → `CANAL_NON_PERMIS`, courriel sans santé → accepté. *(08, vert)*
+15. **Mesures du soir, mode réel, journal, isolement, relevé en retard, fermeture et purge.** Mode réel, journal et isolement : *(03/04, verts)* ; mesures, retard, purge : *(09/10, verts)* ; liste d'attente : *(11, vert)*.
 
 ## Trous du socle relevés et ce qui en est fait
 
@@ -94,3 +117,4 @@ d'écriture directe hors RLS.
 - 05/10, 20 h 54 — b3_02 à b3_06 posés depuis f7194d6 ; Realtime publié sur cinq tables tiroma ; fusion de l'écran promise par le coordinateur.
 - 05/10, 20 h 58 — PAUSE demandée par Teo. 06/10 — REPRISE : F8 (13 indicateurs tiroma inscrits), F9 (tiroma_conservation et tiroma_passages existent).
 - 06/10 — b3_07 à b3_09 posés ; écran fusionné (d572973) ; lot 2 joué deux fois (retours : clé `jeu` de terminer_lecture, destinataire par `adresse`, somme des travaux, colonne `etat`, booléen mutuelle, périmètre du collaborateur, verrou consentement avant santé, patient gêné) ; b3_10 et le troisième passage demandés (5220b21).
+- 06/10, 00 h 25–00 h 37 Z — b3_10 refusé deux fois (« entier » n'est pas un type de variable ; « nombre ») ; troisième passage : 05/06/07/11 verts, 08 révèle l'item sans gravité ; quatrième passage : **28/28, 11 fichiers verts**. Clé publique de la recette reçue pour la relecture réelle (faite). Test 12 poussé (a4d1212) : 18/18 au premier passage, 12 fichiers verts ; règle santé stricte prise par le coordinateur pour le prochain lot socle.
