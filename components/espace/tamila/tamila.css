@@ -285,3 +285,40 @@
   padding-left: 10px;
   border-left: 3px solid var(--r-filet, #e5e5e0);
 }
+
+/* le tableau des honoraires du cabinet : un dialogue large, un tableau qui défile seul sur un téléphone */
+.dlg-panneau.resa.tam-cabinet-dialogue {
+  max-width: 1100px;
+}
+.tam-cabinet-table {
+  overflow-x: auto;
+  border: 1px solid var(--r-filet, #e5e5e0);
+  border-radius: 10px;
+}
+.tam-cabinet-table table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.tam-cabinet-table th,
+.tam-cabinet-table td {
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--r-filet, #e5e5e0);
+}
+.tam-cabinet-table th {
+  font-weight: 600;
+  background: #f6f6f4;
+}
+.tam-cabinet-table .tam-num {
+  text-align: right;
+  white-space: nowrap;
+}
+.tam-cabinet-table td .esp-pastille {
+  margin: 0 4px 4px 0;
+}
+.tam-cabinet-filtres {
+  flex-wrap: wrap;
+}
