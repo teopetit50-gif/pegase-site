@@ -452,3 +452,11 @@ Les fichiers portent le préfixe b3t_. Aucune fonction ni table de B2 n'est modi
   - contrat de Rémi Risque à 5 points, puis 6 après le contrôle ;
   - plan : 5 citadines du siège vers NORD ;
   - point du matin : 3 sections déposées.
+- **Après la réponse de B2 (06/10, ~18 h 30 Z)** :
+  - La carte est déplacée entre « Contestations bancaires » et « Facture électronique : préparation 2027 », comme B2 l'a demandé.
+  - Les véhicules immobilisés sont exclus du parc et de la liste des inactifs. Ils viennent de `public.loc_immobilisations` (b2_10 de B2, période ouverte avec `fin_le` null) ; la table est lue par `to_regclass` et une requête dynamique, donc tant qu'elle n'est pas posée, aucun véhicule n'est immobilisé. Le résultat donne leur nombre (`immobilises`).
+  - Contrats à risque : +3 si le client a déjà contesté un débit auprès de sa banque (`public.loc_contestations` de B2, même lecture dynamique). L'action proposée est alors de faire signer l'état des lieux de départ, photos à l'appui.
+  - Vérifié en local, avec des tables simulées pour ces deux sources : le véhicule immobilisé est exclu, et le contestataire reçoit +3.
+  - Les tests pgTAP ne couvrent pas ces deux chemins, faute de connaître le schéma définitif des tables de B2.
+  - La recette de B3 et celle de B2 repassent.
+  - Mes tests ne passent pas par `assembler.sh` de B2 (motif `[0-9][0-9]_*.sql`) : `b3t_01_analyses.sql` se pose seul, après `00_jeu_tavaro.sql`.
