@@ -462,3 +462,24 @@ Sources : [La Fabrique du Net — alternatives à Archipad](https://www.lafabriq
 Ordre retenu : le 1 d'abord, parce qu'il casse la promesse déjà en ligne (« Les courriers de la mairie sont lus ») pour
 la majorité des dossiers réels, et qu'il est court (module Lorani, réception d'A2 déjà en place). Le 2 et le 3 sont
 des chantiers neufs (tables, écran, lecteur), à proposer au coordinateur en lots séparés.
+
+### Vague 3, n° 1 livré à poser — b5_11, les courriels du guichet rangés seuls (06/10)
+
+- `omega/modules/lorani/migrations/b5_11_courriels_guichet.sql` : abonnement `reception.nouvelle → lorani.reception` ;
+  `private.lorani_numeros_cites(text)` (numéros d'autorisation dans un texte : espaces, tirets, minuscules, collés, noms
+  de fichiers ; essayé en local) ; `private.lorani_rattacher_reception(bigint)` (les numéros du sujet, du corps, du HTML
+  et des noms de pièces jointes → les permis actifs d'UN dossier → chaque PDF / PNG / JPEG devient une pièce du dossier,
+  source `courriel`, statut `recue`, et le socle lance la lecture ; idempotent ; sans pièce jointe → alerte « à lire » ;
+  boîte Lorani sans numéro ou plusieurs dossiers → alerte « à ranger » ; autre module sans numéro Lorani → ignoré) ;
+  `private.lorani_lectures_passage()` prend aussi `lorani.reception` (corps du socle). Trois fonctions nouvelles en
+  `revoke execute from public`. Journal `lorani.courriel_rattache`.
+- Test : `omega/tests/lorani/b5_02_courriels_guichet.sql` (`test_b5_02_courriels_guichet`, 16 assertions, aides de
+  b5_01) → `^test_b5_` attendu **136/136**.
+- Fiche `CHAMPS-LECTURE-LORANI.md` : l'ARE / l'AEE d'un dépôt en ligne est un `lorani_recepisse_depot` (date de
+  réception qu'il indique), il ne va plus en `lorani_courrier_autre` — **à reprendre par A1** dans le lecteur.
+- Écran (`components/espace/lorani` seulement) : une pièce venue d'un courriel dit « Reçu par courriel du guichet et
+  rangé ici par son numéro de dossier » ; l'exemple « Clôture Martin » a un ARE reçu par courriel ; recette +1 contrôle.
+  tsc, eslint, build, recette cinq largeurs, axe : verts.
+- Reste à faire pour que ce soit réel chez une agence : une boîte de réception Lorani par agence (expéditeur `identite`
+  = adresse, module lorani, chez A2) vers laquelle l'agence fait suivre les courriels du guichet ; l'écran n'affiche
+  pas encore cette adresse (elle n'existe pas encore).
