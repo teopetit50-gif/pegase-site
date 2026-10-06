@@ -59,7 +59,7 @@ language plpgsql as $f$
 declare o jsonb := tests.a4_organisation(); fa jsonb;
 begin
   fa := tests.a4_facture(o, 'ia', 'MEN-010', 120);
-  insert into public.pieces_pages (piece_id, page, texte) values ((fa ->> 'piece')::uuid, 1,
+  insert into public.pieces_pages (client_id, piece_id, n, texte) values ((o ->> 'client')::uuid, (fa ->> 'piece')::uuid, 1,
     'Pénalités de retard : trois fois le taux d''intérêt légal. Indemnité forfaitaire pour frais de recouvrement : 40 €. '
     || 'Option pour le paiement de la taxe d''après les débits.');
   perform private.filed_controler_facture((fa ->> 'facture')::uuid);

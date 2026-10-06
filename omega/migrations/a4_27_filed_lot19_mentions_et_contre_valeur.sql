@@ -50,10 +50,11 @@ returns boolean language sql immutable set search_path to '' as $$
               when lower(btrim(p #>> '{}')) in ('false', 'faux', 'non', '0') then false end
 $$;
 -- Le texte des pages d'une pièce, en minuscules et sans accents si la base est en UTF-8 (pour reconnaître une mention que le
--- lecteur n'a pas rendue) ; les motifs qui le lisent tolèrent une lettre accentuée restée telle quelle.
+-- lecteur n'a pas rendue) ; les motifs qui le lisent tolèrent une lettre accentuée restée telle quelle. Seule la colonne
+-- texte est lue (jamais texte_chiffre, des pièces chiffrées) ; n est le numéro de page.
 create or replace function private.filed_texte_pages(p_piece uuid)
 returns text language sql stable security definer set search_path to '' as $$
-  select translate(lower(string_agg(pg.texte, ' ' order by pg.page)), 'àâäéèêëîïôöùûüç’''', 'aaaeeeeiioouuuc  ')
+  select translate(lower(string_agg(pg.texte, ' ' order by pg.n)), 'àâäéèêëîïôöùûüç’''', 'aaaeeeeiioouuuc  ')
     from public.pieces_pages pg where pg.piece_id = p_piece
 $$;
 revoke all on function private.filed_valeur_texte(jsonb) from public, anon, authenticated;

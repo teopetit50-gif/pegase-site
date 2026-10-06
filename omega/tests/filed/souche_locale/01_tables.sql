@@ -78,4 +78,4 @@ create table if not exists public.receptions (id bigint generated always as iden
   cree_le timestamptz not null default now(), maj_le timestamptz not null default now(), unique (client_id, canal, identifiant_externe));
 -- Lot 13 (a4_21) : la mère d'une pièce fille.
 alter table public.pieces add column if not exists piece_mere_id uuid references public.pieces(id);
-create table public.pieces_pages (id uuid primary key default gen_random_uuid(), piece_id uuid, page int, texte text);
+create table public.pieces_pages (id uuid primary key default gen_random_uuid(), client_id uuid, piece_id uuid, n integer, methode text, texte text, confiance numeric, manuscrit boolean, largeur numeric, hauteur numeric, texte_chiffre bytea);
