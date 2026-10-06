@@ -503,3 +503,11 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   `^test_b5_` **112/112**. Écran PermisVue.tsx (liste des pièces obligatoire pour confirmer)
   fusionné ; tsc, eslint, build verts. La demande confirmée vide sur « Pavillon Lemoine »
   reste une donnée de recette ; B5 redépose un nouveau PDF.
+- 04 h 05 — **A3 fusionné** (worker-a3 4887759) : FILED, fiche « Fournisseur » — Confirmer
+  (filed_confirmer_fournisseur, grisé pour le déposant), Revérifier (identite_demander
+  p_force), Attester (filed_attester_identite), « Vérifiée le … par … ». Relu en réel par A3
+  sur la recette (ORANGE SA, revérification 01:39 → 01:43 Z). tsc, eslint, build verts.
+  **Lot 19ad (Realtime de public.filed_fournisseurs) refusé par le filtre de permissions** :
+  à poser par Teo ou avec son accord (`alter publication supabase_realtime add table
+  public.filed_fournisseurs;` ; RLS « membres lisent les fournisseurs », anon sans SELECT).
+  Sans lui, la fiche ne se relit pas seule après une action.
