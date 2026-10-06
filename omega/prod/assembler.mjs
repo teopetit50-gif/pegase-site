@@ -51,27 +51,84 @@ function commitPresent(sha) {
   try { git('cat-file', '-e', `${sha}^{commit}`); return true; } catch { return false; }
 }
 
-function lireAuSha(branche, sha, chemin) {
-  if (!commitPresent(sha)) {
-    const cible = branche && branche !== '?' ? branche : null;
-    try { git('fetch', '--quiet', 'origin', ...(cible ? [cible] : [])); } catch { /* le message vient plus bas */ }
-  }
-  if (!commitPresent(sha)) throw new Error(`commit ${sha} introuvable (branche ${branche || '?'})`);
+function lireAuSha(sha, chemin) {
+  if (!estCommit(sha)) throw new Error(`commit ${sha} introuvable`);
   return git('show', `${sha}:${chemin}`);
 }
 
-// Provenance : « posé depuis le dépôt : <branche> <sha> <chemin> » — tolère plusieurs fichiers et un ordre libre.
-function lireProvenance(texte) {
-  const fichiers = [];
-  const motif = /(?:(worker-[a-z0-9]+|main)[\s,:]+)?([0-9a-f]{7,40})[\s,:]+(omega\/[^\s'",;)]+\.sql)/g;
-  for (const m of texte.matchAll(motif)) fichiers.push({ branche: m[1] || null, sha: m[2], chemin: m[3] });
-  if (fichiers.length === 0) {
-    // ordre « chemin … sha » : un chemin, puis le premier SHA qui suit
-    const motif2 = /(omega\/[^\s'",;)]+\.sql)[^0-9a-f]+(?:(worker-[a-z0-9]+|main)[\s,:]+)?([0-9a-f]{7,40})/g;
-    for (const m of texte.matchAll(motif2)) fichiers.push({ branche: m[2] || null, sha: m[3], chemin: m[1] });
+// Fichiers corrigés depuis leur pose sur la recette (relevé du coordinateur, 06/10) : la production prend la version
+// corrigée. Clé : chemin ; valeur : SHA de remplacement et raison.
+const REMPLACEMENTS = {
+  'omega/migrations/a4_14_filed_lot7_cle_valeurs_humaines.sql': { sha: '7c29802', raison: 'A4 a corrigé le fichier (EXECUTE des contrôles FILED)' },
+  'omega/modules/tamila/migrations/b4_05_tamila_coffre.sql': { sha: 'dc24eec', raison: 'B4 a corrigé les grants (outils du coffre)' },
+};
+
+const arbres = new Map();
+function arbre(sha) {
+  if (!arbres.has(sha)) arbres.set(sha, git('ls-tree', '-r', '--name-only', sha, 'omega').split('\n').filter(Boolean));
+  return arbres.get(sha);
+}
+
+let recupere = false;
+function estCommit(sha) {
+  if (commitPresent(sha)) return true;
+  if (!recupere) { recupere = true; try { git('fetch', '--quiet', 'origin'); } catch { /* hors ligne : on garde ce qu'on a */ } }
+  return commitPresent(sha);
+}
+
+// Une note de pose → la liste ordonnée des fichiers, chacun avec le SHA qui le précède (sinon le premier qui le suit).
+// Reconnaît : un chemin complet « omega/…/x.sql », un nom de fichier « b3_08_heures_locales.sql », un nom de lot
+// « b5_06 », « a4_13 », une plage « b6_01..b6_04 », et le cas du socle « 19ab » quand le chemin est donné.
+// Rend { fichiers, avertissements } ; un fichier de omega/tests/ est rendu avec test = true (exclu par l'appelant).
+function lireNote(texte) {
+  const avertissements = [];
+  const jetons = [];
+  const re = /(omega\/[^\s'",;()]+\.sql)|([A-Za-z0-9_]+\.sql)|\b([ab]\d)_(\d{2})\s*(?:\.\.|…|à|-)\s*(?:[ab]\d_)?(\d{2})\b|\b([ab]\d_\d{2})(?:_v\d+)?\b|\b(worker-[a-z0-9]+|main)\b|\b([0-9a-f]{7,40})\b/g;
+  for (const m of texte.matchAll(re)) {
+    if (m[1]) jetons.push({ type: 'chemin', val: m[1], pos: m.index });
+    else if (m[2]) jetons.push({ type: 'fichier', val: m[2], pos: m.index });
+    else if (m[3]) { for (let i = Number(m[4]); i <= Number(m[5]); i++) jetons.push({ type: 'lot', val: `${m[3]}_${String(i).padStart(2, '0')}`, pos: m.index }); }
+    else if (m[6]) {
+      // « test a4_08 vert », « tests b5_* » : le nom désigne un test, pas une migration à emporter.
+      if (/\btests?\b[\s:]*$/i.test(texte.slice(Math.max(0, m.index - 12), m.index))) avertissements.push(`${m[6]} cité comme test : ignoré`);
+      else jetons.push({ type: 'lot', val: m[6], pos: m.index });
+    }
+    else if (m[7]) jetons.push({ type: 'branche', val: m[7], pos: m.index });
+    else if (m[8]) jetons.push({ type: 'sha', val: m[8], pos: m.index });
   }
-  const branche = (texte.match(/\b(worker-[a-z0-9]+|main)\b/) || [])[1] || null;
-  return fichiers.map((f) => ({ ...f, branche: f.branche || branche }));
+  const shas = jetons.filter((j) => j.type === 'sha' && estCommit(j.val));
+  const branches = jetons.filter((j) => j.type === 'branche');
+  const vus = new Set();
+  const fichiers = [];
+  const nomsExplicites = jetons.filter((x) => x.type === 'chemin' || x.type === 'fichier').map((x) => x.val.split('/').pop());
+  const utiles = jetons.filter((x) => ['chemin', 'fichier'].includes(x.type)
+    || (x.type === 'lot' && !nomsExplicites.some((n) => n.startsWith(x.val + '_') || n === x.val + '.sql')));
+  for (const j of utiles) {
+    const avant = shas.filter((x) => x.pos < j.pos).pop();
+    const apres = shas.find((x) => x.pos > j.pos);
+    let sha = (avant || apres || {}).val;
+    let branche = (branches.filter((x) => x.pos < j.pos).pop() || branches[0] || {}).val || null;
+    if (!sha && branche) { sha = `origin/${branche}`; avertissements.push(`${j.val} : aucun SHA, pointe de ${branche} prise`); }
+    if (!sha) { avertissements.push(`${j.val} : ni SHA ni branche`); continue; }
+    const tous = arbre(sha);
+    let chemins;
+    if (j.type === 'chemin') chemins = tous.includes(j.val) ? [j.val] : [];
+    else if (j.type === 'fichier') chemins = tous.filter((c) => c.endsWith('/' + j.val));
+    else chemins = tous.filter((c) => c.includes('/migrations/') && (c.split('/').pop().startsWith(j.val + '_') || c.split('/').pop() === j.val + '.sql'));
+    if (j.type !== 'chemin' && chemins.length > 1) chemins = chemins.filter((c) => c.includes('/migrations/'));
+    if (chemins.length !== 1) { avertissements.push(`${j.val} @ ${sha} : ${chemins.length} fichier(s) trouvé(s)`); continue; }
+    const chemin = chemins[0];
+    if (vus.has(chemin)) continue;
+    vus.add(chemin);
+    const r = REMPLACEMENTS[chemin];
+    if (r && sha !== r.sha) {
+      avertissements.push(`${chemin} : ${sha} remplacé par ${r.sha} (${r.raison})`);
+      sha = r.sha;
+      if (!estCommit(sha)) { avertissements.push(`${r.sha} introuvable`); continue; }
+    }
+    fichiers.push({ sha, branche, chemin, test: chemin.startsWith('omega/tests/') });
+  }
+  return { fichiers, avertissements };
 }
 
 function slug(nom) {
@@ -123,6 +180,7 @@ function principal() {
   mkdirSync(SORTIE, { recursive: true });
   const manifeste = [];
   const erreurs = [];
+  const aReconstruire = [];
   let derniere = '0';
 
   for (const l of lignes) {
@@ -134,12 +192,27 @@ function principal() {
     }
     let texte;
     let origine;
+    const notesLigne = [];
     try {
-      if (l.source === 'depot') {
-        const fichiers = lireProvenance(l.provenance || '');
-        if (fichiers.length === 0) throw new Error(`provenance illisible : ${JSON.stringify((l.provenance || '').slice(0, 200))}`);
-        texte = fichiers.map((f) => `-- ═══ ${f.chemin} @ ${f.sha} (${f.branche || '?'})\n${lireAuSha(f.branche, f.sha, f.chemin)}`).join('\n\n');
-        origine = 'dépôt : ' + fichiers.map((f) => `${f.branche || '?'} ${f.sha} ${f.chemin}`).join(' ; ');
+      if (l.source === 'note' || l.source === 'depot') {
+        const { fichiers, avertissements } = lireNote(l.provenance || '');
+        notesLigne.push(...avertissements);
+        const migrations = fichiers.filter((f) => !f.test);
+        if (fichiers.length > 0 && migrations.length === 0) {
+          manifeste.push({ version, name: l.name, decision: 'exclure: pose de tests (omega/tests/)', source: l.source, fichier: '—',
+                           notes: fichiers.map((f) => `${f.chemin} @ ${f.sha}`) });
+          continue;
+        }
+        if (migrations.length === 0) {
+          aReconstruire.push(`${version} ${l.name}`);
+          manifeste.push({ version, name: l.name, decision: 'À RECONSTRUIRE', source: l.source, fichier: '—',
+                           notes: [`note sans fichier : ${JSON.stringify((l.provenance || '').slice(0, 160))}`, ...avertissements] });
+          continue;
+        }
+        if (migrations.length < fichiers.length) notesLigne.push(`fichiers de tests ignorés : ${fichiers.filter((f) => f.test).map((f) => f.chemin).join(', ')}`);
+        texte = migrations.map((f) => `-- ═══ ${f.chemin} @ ${f.sha}\n${lireAuSha(f.sha, f.chemin)}`).join('\n\n');
+        origine = 'dépôt : ' + migrations.map((f) => `${f.sha} ${f.chemin}`).join(' ; ');
+        notesLigne.unshift('fichiers : ' + migrations.map((f) => `${f.chemin.split('/').pop()} @ ${f.sha}`).join(', '));
       } else {
         if (typeof l.sql !== 'string' || l.sql.length === 0) throw new Error('texte absent : rejouer la page avec avec_texte = true');
         texte = l.sql;
@@ -150,7 +223,8 @@ function principal() {
       manifeste.push({ version, name: l.name, decision: 'ERREUR', source: l.source, fichier: '—', notes: [e.message] });
       continue;
     }
-    const { texte: final, notes } = transformer(texte);
+    const { texte: final, notes: notesTransfo } = transformer(texte);
+    const notes = [...notesLigne, ...notesTransfo];
     const refus = controler(final);
     if (refus.length && !forcer) {
       erreurs.push(`${version} ${l.name} : contenu refusé (${refus.join(', ')})`);
@@ -187,7 +261,7 @@ function principal() {
     '# Manifeste des migrations de production (assemblé, non posé)',
     '',
     `Assemblé par \`omega/prod/assembler.mjs\` depuis ${pages.length} page(s) de \`omega/prod/exporter.sql\` (recette ${RECETTE}).`,
-    `Fichiers écrits : ${manifeste.filter((m) => m.decision === 'emporter').length} ; exclus : ${manifeste.filter((m) => m.decision.startsWith('exclure')).length} ; erreurs : ${erreurs.length}.`,
+    `Fichiers écrits : ${manifeste.filter((m) => m.decision === 'emporter').length} ; exclus : ${manifeste.filter((m) => m.decision.startsWith('exclure')).length} ; à reconstruire : ${aReconstruire.length} ; erreurs : ${erreurs.length}.`,
     '',
     '| Version | Nom | Décision | Source | Fichier | sha256 (16) | Notes |',
     '|---|---|---|---|---|---|---|',
@@ -200,10 +274,12 @@ function principal() {
   const attendus = new Set(manifeste.map((m) => m.fichier));
   const orphelins = presents.filter((f) => !attendus.has(f));
   if (orphelins.length) console.error(`Fichiers présents mais absents de cet assemblage (à relire) : ${orphelins.join(', ')}`);
+  if (aReconstruire.length) console.error(`${aReconstruire.length} ligne(s) à reconstruire (note sans fichier) :\n  ` + aReconstruire.join('\n  '));
   if (erreurs.length) {
     console.error(`${erreurs.length} erreur(s) :\n  ` + erreurs.join('\n  '));
     process.exit(1);
   }
+  if (aReconstruire.length) process.exitCode = 3;
   console.log(`${manifeste.filter((m) => m.decision === 'emporter').length} fichier(s) écrit(s) dans omega/prod/migrations/ ; manifeste : omega/prod/migrations/MANIFESTE.md`);
 }
 

@@ -29,3 +29,54 @@ Rien ici ne touche une base. Deux outils, en deux temps.
 
 Essayé en local le 6/10 sur une `schema_migrations` factice reprenant tous les cas
 (exclusions, provenance simple et double, URL, pgtap, uuid du banc refusé).
+
+## Lots « à reconstruire » : la note de pose, sans le SQL
+
+La page 0 du 6/10 l'a montré : pour les lots du socle 17, 18a–d, 19a–19j, 19l–19q,
+19s–19v, 19x, 19y et 19aa (sauf 19k, 19r, 19w, 19z et quelques autres),
+`statements` ne garde que la note du coordinateur, de 34 à 300 octets. Le SQL
+lui-même n'existe dans aucun fichier. `assembler.mjs` les marque « À RECONSTRUIRE »
+(code de sortie 3) et n'invente rien.
+
+Méthode proposée, dans l'ordre de préférence :
+
+1. **Retrouver le SQL exact là où il a été tapé.** Chaque lot a été posé par
+   `execute_sql` depuis une session coordinateur : la Fable
+   `session_01B4JNQXyT69GytdvE9SjAnE` jusqu'au 6/10 à 03 h 30, puis
+   `session_01BCGFdpRKBvXKjouC75sYBg`. Le paramètre `query` de chaque appel est dans
+   le fil de la session (`list_events` / `get_event`, en lecture). Pour chaque
+   version « à reconstruire », il faut retrouver l'appel qui l'a posée (même
+   horodatage, et l'`insert into supabase_migrations.schema_migrations` du même
+   lot). Le SQL tel quel va dans `omega/prod/recupere/<version>_<nom>.sql`, et
+   l'assembleur le prend comme source « sql ». C'est la seule méthode qui
+   reproduit l'histoire à l'identique.
+2. **À défaut, reconstruire l'état, pas l'histoire.** Les lots qui ne changent que
+   des réglages transverses se régénèrent depuis le catalogue de la recette, en
+   formes idempotentes. Une migration d'« état cible » se pose en fin de séquence,
+   juste avant la clôture a5_01 :
+   - **droits** (19d, e, f, j, l, s, t, u) : GRANT/REVOKE tirés d'`aclexplode` sur
+     `public` (tables, vues, fonctions), puis a5_01 pour `private` ;
+   - **Realtime** (19h, n, x, y) : `pg_publication_tables` de
+     `supabase_realtime`, en `alter publication … add table` gardé par un `DO` ;
+   - **Storage** (part de 19b, 19m, 19o) : `pg_policies` de `storage.objects`, en
+     `create policy` gardé ;
+   - **crons** (19b, 19v, 19aa) : `cron.job`, URL réécrite ;
+   - **données de référence** (19b `plafond_ia_jour_client`, 19g plages
+     SMS/WhatsApp) : les lignes de `private.reglages` et `private.canaux_envoi`.
+
+   Les lots qui créent des **objets** (17 : `prendre_travaux`, `battre_ouvrier` ;
+   18a–d : `receptions`, `resoudre_boite`, `deposer_reception`, `noter_remise` ;
+   19a : colonnes `exige_*`, `approbations.piece_id`, `annuaire` ; 19b : portes du
+   lecteur ; 19c : `preparer_approbation` ; 19p : vue `tamila_registre`) sont
+   régénérés à la version du lot 17. Le contenu est pris à leur état final
+   (`pg_get_functiondef`, colonnes et contraintes du catalogue), avec
+   `set check_function_bodies = off`. Les lots par repère qui passent après
+   (19ab, 19af) savent déjà ne rien faire sur un corps déjà corrigé ; 19ab devra
+   recevoir la même garde que 19af.
+3. **Preuve, quelle que soit la méthode : l'empreinte du catalogue.** Une requête
+   en lecture seule rend, pour chaque objet de `public`, `private`, des politiques
+   de `storage`, de la publication, de `cron.job` et des droits, son type, son
+   nom et le md5 de sa définition. Elle se joue sur la recette, puis sur la
+   répétition une fois toute la séquence posée. Les deux listes doivent être
+   identiques, hors données. C'est la seule vérification qui dit que la
+   production sera la recette.

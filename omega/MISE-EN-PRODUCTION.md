@@ -211,6 +211,17 @@ Chaque ligne devient le fichier `omega/prod/migrations/<version>_<name>.sql` :
 Les lignes du § 1.4 n'y figurent pas. Le dossier est commité et relu, puis il sert
 tel quel à la répétition et à la production.
 
+**Constat de la page 0 (6/10, 14 h 35 Z).** Pour la plupart des lots du socle 17 à
+19aa, `statements` ne garde que la note de pose, sans le SQL. Ces lots sont à
+reconstruire avant toute répétition. La méthode (retrouver le SQL dans le fil des
+sessions coordinateur, sinon régénérer l'état depuis le catalogue, et prouver par
+l'empreinte du catalogue) est dans `omega/prod/README.md`. L'outillage
+(`omega/prod/exporter.sql`, `omega/prod/assembler.mjs`) :
+- lit les notes de pose ;
+- prend a4_14 et b4_05 dans leurs versions corrigées (7c29802, dc24eec) ;
+- exclut les poses de tests (`omega/tests/`) ;
+- marque « À RECONSTRUIRE » ce qu'aucun fichier ne porte.
+
 ### 1.6 Fichiers du dépôt concernés (pour la relecture)
 
 - FILED (`worker-a4`) : `omega/migrations/a4_01` … `a4_15`, derniers commits

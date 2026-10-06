@@ -4,10 +4,10 @@
 -- Rend une ligne par version de supabase_migrations.schema_migrations à considérer, dans l'ordre :
 --   version, name,
 --   decision   : 'emporter' ou 'exclure: <raison>' (les exclusions du § 1.4 restent visibles, pour relecture),
---   source     : 'depot' (la ligne porte une provenance : le fichier viendra du dépôt, au SHA indiqué)
---                ou 'sql' (posée par execute_sql : son texte vient de statements),
---   provenance : pour 'depot', le texte brut de statements (court) ; omega/prod/assembler.mjs en tire branche, SHA, chemin,
---   sql        : pour 'sql', le texte complet de statements, instructions séparées par une ligne vide ; null pour 'depot',
+--   source     : 'note' (statements ne porte qu'une note de pose : les fichiers viendront du dépôt, aux SHA cités, ou
+--                sont à reconstruire si la note n'en nomme aucun) ou 'sql' (statements porte le SQL lui-même),
+--   provenance : pour 'note', le texte brut ; omega/prod/assembler.mjs en tire SHA et fichiers (chemin ou nom de lot),
+--   sql        : pour 'sql', le texte complet de statements, instructions séparées par une ligne vide ; null pour 'note',
 --   octets     : taille de ce que la ligne rend (pour découper en pages).
 --
 -- Pagination : send_message est borné à 64 Ko. D'abord la page 0 (avec_texte = false) : versions, décisions, provenances,
@@ -43,17 +43,15 @@ classees as (
                                                               then 'exclure: outillage de pose ou de test de la recette'
       else 'emporter'
     end as decision,
-    -- Une pose « depuis le dépôt » : statements court, qui nomme un chemin omega/…/*.sql et un SHA hexadécimal.
-    (length(l.texte) < 4000
-     and l.texte ~ 'omega/[^[:space:]'',;]+\.sql'
-     and l.texte ~ '(^|[^0-9a-f])[0-9a-f]{7,40}([^0-9a-f]|$)'
-     and l.texte !~* '(^|\s)(create|alter|grant|revoke|insert|update|select)\s') as par_depot
+    -- Une NOTE de pose (« posé depuis le dépôt : … », « voir omega/… ») et non du SQL : une fois les commentaires
+    -- retirés, le texte ne commence pas par un mot-clé SQL. omega/prod/assembler.mjs en tire les fichiers (SHA, nom).
+    (regexp_replace(l.texte, '--[^\n]*', '', 'g') !~* '^\s*(create|alter|grant|revoke|insert|update|select|do|comment|with|set|begin|notify|refresh|truncate|security|cluster|reindex|vacuum)\M') as est_note
   from lignes l
 )
 select c.version, c.name, c.decision,
-       case when c.par_depot then 'depot' else 'sql' end as source,
-       case when c.par_depot then c.texte end as provenance,
-       case when not c.par_depot and c.decision = 'emporter' and (select avec_texte from bornes) then c.texte end as sql,
+       case when c.est_note then 'note' else 'sql' end as source,
+       case when c.est_note then c.texte end as provenance,
+       case when not c.est_note and c.decision = 'emporter' and (select avec_texte from bornes) then c.texte end as sql,
        octet_length(c.texte) as octets
 from classees c
 order by c.version;
