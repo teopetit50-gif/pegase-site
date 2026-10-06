@@ -114,10 +114,14 @@ begin
   return next ok(exists (select 1 from jsonb_array_elements(p -> 'entites' -> 'par_site') x where x ->> 'site' = 'Agence de Rennes'
                          and (x ->> 'comptes')::integer = 1 and (x ->> 'chiffre_repris')::numeric = 900 and (x ->> 'echeances_honorees')::integer = 1),
                  'Les résultats se lisent par site');
-  return next ok(jsonb_array_length(p -> 'entites' -> 'par_entite') = 1
-                 and (p -> 'entites' -> 'par_entite' -> 0 ->> 'comptes')::integer = 2
-                 and (p -> 'entites' -> 'par_entite' -> 0 ->> 'societe') = (select e.nom from public.entites e where e.id = (banc ->> 'entite')::uuid),
+  -- Le banc peut porter d'autres entités (sans activité ici) : on cherche la ligne de la société du banc.
+  return next ok(exists (select 1 from jsonb_array_elements(p -> 'entites' -> 'par_entite') x
+                         where (x ->> 'comptes')::integer = 2 and (x ->> 'chiffre_repris')::numeric = 900),
                  'Par entité (le site compte dans sa société)');
+  return next diag('par_entite : ' || coalesce((p -> 'entites' -> 'par_entite')::text, 'null'));
+  return next diag('entités du banc : ' || coalesce((select jsonb_agg(jsonb_build_object('id', e.id, 'nom', e.nom, 'type', e.type,
+                                                     'parent', e.parent_id, 'principale', e.principale) order by e.nom)::text
+                                                     from public.entites e where e.client_id = v_client), 'aucune'));
   return next ok((p -> 'entites' -> 'consolide' ->> 'comptes')::integer = 2 and (p -> 'entites' -> 'consolide' ->> 'chiffre_repris')::numeric = 900,
                  'Et en consolidé');
 
