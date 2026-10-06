@@ -280,3 +280,15 @@ logiciel métier qui la fait).
    - `17_reinscription.sql` : `test_b3_17_reinscription`, 18 assertions.
    - Écran : carte « Réinscription » (taux et écart, détail par praticien, « Vus sans prochain rendez-vous » avec « Noter l'appel ») et une colonne réinscription dans la synthèse. Recette : 85 contrôles, tout passe ; axe : 0 écart.
    - Vérifié en local : b3_15 et b3_16 posées deux fois ; 2 visites, 1 réinscrit, taux 0,5, Hugo dans la liste ; la direction voit « Patient du cabinet ».
+3. **Absences probables** (06/10, ~18 h Z) :
+   - `b3_17_absences_probables.sql` : `public.tiroma_absences_probables(client, entité, jours = 3)` (titulaire, assistante, collaborateur pour ses patients). C'est un score à règles lisible, chaque point avec sa raison :
+     - +3 pour deux manqués ou plus en 18 mois, +2 pour un seul ;
+     - +1 pour un nouveau patient ;
+     - +1 pour un créneau à risque (même jour et même demi-journée, au moins 10 rendez-vous sur 180 jours, taux de manqués au moins 1,5 fois celui du cabinet) ;
+     - +1 pour un rendez-vous pris 60 jours avant ou plus (si l'export donne la date de création) ;
+     - −3 si le patient a confirmé au rappel.
+
+     Niveau « fort » à partir de 3 points, « moyen » à 2. Un NON au rappel est rendu en tête (« annonce »).
+   - `18_absences_probables.sql` : `test_b3_18_absences_probables`, 12 assertions (Jean Absent fort, Lina Nouvelle et ses raisons, confirmation qui efface, NON en tête, horizon).
+   - Écran : carte « Absences probables » (niveau, raisons, « Noter l'appel »). Recette : 88 contrôles, tout passe ; axe : 0 écart.
+   - Vérifié en local : Jean 4 points (fort), Lina 2 (moyen) ; après la confirmation de Jean et le NON de Lina, seule Lina reste, en « annonce ».
