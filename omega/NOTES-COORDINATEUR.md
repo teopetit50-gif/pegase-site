@@ -655,3 +655,10 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   et public.filed_etat_paiement (a_payer / partielle / payee) ; a4_09 vert. Pas de statut
   « payee » sur la facture (la comptabilisation reste possible). A3 branche « Noter un
   paiement » dans « À payer ».
+- 07 h 20 — A3 433b71a fusionné (accessibilité, axe-core WCAG 2.1 A/AA + clavier, 22
+  contrôles) : files en listes de boutons (aria-current) au lieu de listbox/option invalides,
+  contraste du numéro de page 5:1, point du matin role=img, et **components/ui/dialog.tsx
+  (partagé site)** : le focus revient à l'élément d'origine à la fermeture d'un dialogue
+  contrôlé (relu : handlers de l'appelant préservés, preventDefault respecté). Les écrans
+  des B (tiroma/ListeAttente, tamila, varelo, daliro, lorani, tavaro) gardent le même
+  role=listbox/option : à corriger par chacun (demandé).
