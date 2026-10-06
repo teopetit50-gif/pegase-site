@@ -269,6 +269,8 @@ export default function ConformiteTamila({ dossier: d, source, clientId, parties
               <Def etiquette="Vigilance LCB-FT">{!v ? "À poser" : !v.assujetti ? "Non assujetti" : `${ACTIVITES[v.activite as ActiviteAssujettie] ?? "Assujetti"}${v.risque ? ` · risque ${RISQUES[v.risque].toLowerCase()}` : ""}`}</Def>
             </dl>
 
+            <p className="esp-kpi-sous tam-notice">Les noms ne sont jamais conservés en clair ; une empreinte reste pour détecter un conflit avec un ancien client.</p>
+
             {resultats ? resultats.map((r) => (
               <div key={r.controle.controle} className="tam-ligne">
                 <div className="tam-ligne-haut">

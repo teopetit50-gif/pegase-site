@@ -224,6 +224,7 @@ for (const largeur of LARGEURS) {
   const t0 = await carte();
   ok(/Jamais/.test(t0) && /2 sur 2/.test(t0), 'jamais contrôlé, deux parties indexées');
   ok(/vigilance LCB-FT n.est pas posée/.test(t0), 'la vigilance est à poser');
+  ok(/Les noms ne sont jamais conservés en clair ; une empreinte reste pour détecter un conflit avec un ancien client\./.test(t0), 'la notice : pas de nom en clair, une empreinte reste pour les anciens clients');
   await s.evaluer(`[...document.querySelectorAll('section[aria-label="Conflits d\\'intérêts et vigilance"] .r-btn')].find(b => /Contrôler les conflits/.test(b.textContent))?.click()`);
   await s.dormir(900);
   const t1 = await carte();

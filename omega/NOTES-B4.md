@@ -396,7 +396,9 @@ pour qu'il serve CHAQUE JOUR et qu'on le paie, par ordre d'importance :
   conflit » interdit quand un conflit est trouvé), motif en code ; vigilance LCB-FT (activité assujettie,
   identification du client et du bénéficiaire effectif, risque, revue annuelle) ; résumé `tamila_conformite`.
   Empreintes et contrôles conservés après l'effacement du dossier (registre des conflits) : **à confirmer par
-  Teo** (sinon une ligne de `private.tables_objets`).
+  Teo** (sinon une ligne de `private.tables_objets`). **Décision de Teo (06/10) : on les garde** ; la carte le dit en
+  une ligne (« les noms ne sont jamais conservés en clair ; une empreinte reste pour détecter un conflit avec un
+  ancien client »).
 - **Ouvrier** (2868bcb) : tamila-coffre `nouvelle_cle_index` (gérant) et `cle_index` (personne du cabinet), données
   associées « index:<client> ». 20 tests Deno.
 - **Écran** : `components/espace/tamila/index.ts` (normalisation : accents, formes sociales, civilités, mots vides,
@@ -404,7 +406,7 @@ pour qu'il serve CHAQUE JOUR et qu'on le paie, par ordre d'importance :
   et vigilance » (`ConformiteTamila.tsx`, après les honoraires) : création de la clé d'index par le gérant,
   indexation et contrôle des parties du dossier en un geste, résultats nommés (référence en clair du dossier si
   on la connaît), décision, vigilance. Exemple : 2026-0430 « Garnier c/ SCI du Moulin » montre un conflit avec
-  2026-0412 (la SCI y est cliente). Recette cinq largeurs 89/89 (10 sur les conflits et la vigilance), axe-core
+  2026-0412 (la SCI y est cliente). Recette cinq largeurs 90/90 (11 sur les conflits et la vigilance), axe-core
   0 écart sur le dialogue de vigilance. **Pas rejoué en base réelle.**
 - **Limites** : un nom mal orthographié n'est pas trouvé (égalité stricte après normalisation, pas de
   ressemblance : un index aveugle ne permet pas la recherche floue sans affaiblir l'aveuglement) ; la clé d'index
