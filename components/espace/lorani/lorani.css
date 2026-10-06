@@ -342,7 +342,9 @@
 }
 
 /* ——— le chantier : situations à viser (b5_13) ——— */
-.esp .lor-situation {
+.esp .lor-situation,
+.esp .lor-os,
+.esp .lor-reserve {
   display: grid;
   gap: 8px;
   padding: 12px 14px;
@@ -350,7 +352,8 @@
   border-radius: 12px;
   box-shadow: 0 0 0 1px var(--r-filet);
 }
-.esp .lor-situation[data-retard] {
+.esp .lor-situation[data-retard],
+.esp .lor-reserve[data-retard] {
   box-shadow: 0 0 0 1px var(--esp-rouge);
 }
 .esp .lor-situation-tete {
@@ -359,7 +362,8 @@
   align-items: center;
   gap: 6px 10px;
 }
-.esp .lor-situation .esp-actions {
+.esp .lor-situation .esp-actions,
+.esp .lor-reserve .esp-actions {
   margin: 0;
 }
 .esp .lor-chantier {
@@ -370,4 +374,135 @@
 }
 .esp .esp-tableau-cadre + .esp-tableau-cadre {
   margin-top: 12px;
+}
+
+/* ——— le contrôle du dossier (b5_16) ; le choix des pièces vit dans un dialogue, hors de .esp ——— */
+.esp .lor-controles {
+  margin-bottom: 10px;
+}
+.esp .lor-controle-tete,
+.esp .lor-plu-tete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+.esp .lor-controle-pieces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 8px 0 12px;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+}
+.esp .lor-constat {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  box-shadow: 0 0 0 1px var(--r-filet);
+  overflow-wrap: anywhere;
+}
+.esp .lor-constat[data-gravite="bloquant"] {
+  box-shadow: 0 0 0 1px var(--esp-rouge);
+}
+.esp .lor-constat .esp-actions {
+  margin: 0;
+}
+.esp .lor-citations {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12.5px;
+  color: var(--r-doux);
+}
+.lor-choix-pieces {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.lor-choix-piece {
+  display: grid;
+  gap: 6px;
+}
+.lor-choix-case {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  overflow-wrap: anywhere;
+}
+.lor-choix-role {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 96px;
+  gap: 6px;
+  padding-left: 24px;
+}
+.esp .lor-rapport {
+  margin: 0 0 10px;
+}
+
+/* ——— les décennales (b5_18) : la liste des activités, en colonnes dans le dialogue ——— */
+.lor-activites {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 6px 14px;
+}
+
+/* ——— ordres de service et réserves (b5_19) ——— */
+/* une liste simple (esp-fil est une frise à deux colonnes : pas pour du texte libre) */
+.esp .lor-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.esp .lor-liste > li {
+  padding: 7px 0;
+  border-top: 1px solid var(--r-filet);
+  font-size: 13.5px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.esp .lor-liste > li:first-child {
+  border-top: 0;
+}
+/* une réserve levée ou contestée : fond grisé, sans baisser le contraste du texte */
+.esp .lor-reserve[data-statut="levee"],
+.esp .lor-reserve[data-statut="contestee"] {
+  background: #fafafa;
+}
+
+/* ——— les comptes rendus de chantier (b5_20) ——— */
+.esp .lor-cr-bloc {
+  margin-top: 12px;
+}
+.esp .lor-cr-titre {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--r-doux);
+  margin-bottom: 4px;
+}
+.esp .lor-point-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 4px;
+}
+.dlg-panneau .lor-liste,
+.lor-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.dlg-panneau .lor-liste > li {
+  padding: 7px 0;
+  border-top: 1px solid var(--r-filet, #e5e5e5);
+  font-size: 13.5px;
+  overflow-wrap: anywhere;
 }

@@ -35,7 +35,7 @@ language plpgsql as $f$
 declare
   jeu jsonb; v_client uuid; v_gerant uuid; v_referent uuid;
   v_projet uuid; v_autre uuid; v_pc2 uuid; v_pc5 uuid; v_pc5b uuid; v_plu uuid; v_cctp uuid; v_dpgf uuid; v_etrangere uuid; v_pc6 uuid;
-  v_c1 uuid; v_c2 uuid; v_c3 uuid; r jsonb; n integer;
+  v_c1 uuid; v_c2 uuid; v_c3 uuid; v_c4 uuid; v_metre uuid; r jsonb; n integer;
   k public.lorani_constats;
 begin
   jeu := tests.b5_jeu();
@@ -201,6 +201,25 @@ begin
   r := private.lorani_lectures_passage();
   return next ok((r ->> 'erreurs')::integer = 0 and (select statut = 'controle' and constats_nb = 1 from public.lorani_controles where id = v_c3),
                  '9. la dernière pièce lue, le contrôle se lance seul : 1 constat (faîtage 9,85 m contre 9,60 m) : ' || r::text);
+
+  -- ── 10. Le métré contre la DPGF ──
+  v_metre := tests.b5_lire(v_referent, v_projet, 'Metre-lot-02.pdf', 'lorani_metre', jsonb_build_array(
+    jsonb_build_object('champ', 'quantite.2_1', 'valeur', '140.5', 'texte', 'Déblais en pleine masse 140,50 m3'),
+    jsonb_build_object('champ', 'quantite.2_3', 'valeur', '14.3', 'texte', 'Longrines 14,30 ml')));
+  r := private.lorani_lectures_passage();
+  perform tests.b5_endosser(v_referent);
+  insert into public.lorani_controles (client_id, projet_id, intitule, indice) values (v_client, v_projet, 'Métré contre DPGF', 'A') returning id into v_c4;
+  insert into public.lorani_controle_pieces (client_id, projet_id, controle_id, piece_id, role, reference) values
+    (v_client, v_projet, v_c4, v_metre, 'metre', 'Métré 02'), (v_client, v_projet, v_c4, v_dpgf, 'dpgf', 'DPGF 02');
+  r := public.lorani_lancer_controle(v_c4);
+  perform tests.b5_admin();
+  select * into k from public.lorani_constats where controle_id = v_c4 and signature = 'metre_dpgf|2_1';
+  return next ok(k.nature = 'metre_dpgf' and k.gravite = 'majeur'
+                 and k.titre = 'Le poste 2.1 est chiffré à 120 à la DPGF (DPGF 02, p. 1) pour 140,5 mesurés (Métré 02, p. 1) : sous-estimé de 15 %.'
+                 and k.correction = 'Porter la quantité du poste 2.1 à 140,5 à la DPGF, ou justifier l''écart.' and jsonb_array_length(k.valeurs) = 2,
+                 '10. poste 2.1 : 120 à la DPGF pour 140,5 mesurés, sous-estimé de 15 % : majeur, quantité mesurée proposée : ' || coalesce(k.titre, '∅'));
+  return next ok(not exists (select 1 from public.lorani_constats where controle_id = v_c4 and signature = 'metre_dpgf|2_3')
+                 and (r ->> 'constats')::integer = 1, '10. poste 2.3 : 14 contre 14,3 mesurés (2 %), sous le seuil de 5 % : rien');
 end $f$;
 
 select * from runtests('tests'::name, '^test_b5_07_');

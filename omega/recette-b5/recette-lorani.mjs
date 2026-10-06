@@ -146,6 +146,80 @@ for (const largeur of LARGEURS) {
   await s.dormir(300);
   await s.capturer(`${dossier}lorani-chantier-1440.jpg`, { qualite: 55 });
 
+  console.log('— les décennales (b5_18) : Façade rue Mercière, chantier ouvert il y a 100 jours');
+  const dec = await s.evaluer(`(() => { const c = [...document.querySelectorAll('.lor-constat')].filter(x => /contrat/.test(x.innerText)); const t = c.map(x => x.innerText).join(' | ').replace(/[\\u202f\\u00a0]/g, ' '); return { n: c.length, pierre: /Non conforme[\\s\\S]*Lot 01 · Pierres de Bourgogne SARL[\\s\\S]*Bloquant : Activité du lot 01 non couverte : Taille de pierre/.test(t), echue: /Échue[\\s\\S]*Lot 02 · Échafaudages Rhône[\\s\\S]*demandez à l’entreprise l’attestation/.test(t), doc: /Chantier ouvert le/.test(document.querySelector('#esp-detail').innerText) }; })()`);
+  ok(dec.n === 2 && dec.pierre && dec.echue && dec.doc, `deux attestations : taille de pierre non couverte (bloquant), échafaudage échu ; date d’ouverture dite (${JSON.stringify(dec)})`);
+  await s.evaluer(`[...document.querySelectorAll('.esp-lien-bouton')].find(b => b.getAttribute('aria-label') === 'Modifier les activités du lot 01')?.click()`);
+  await s.dormir(500);
+  const act = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return { titre: d?.querySelector('h2')?.textContent, cochees: d?.querySelectorAll('input:checked').length, cases: d?.querySelectorAll('input[type="checkbox"]').length }; })()`);
+  ok(act.titre === 'Activités du lot 01' && act.cochees === 2 && act.cases === 34, `dialogue « ${act.titre} » : 2 activités cochées sur 34`);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] label')].find(l => /Taille de pierre/.test(l.textContent))?.querySelector('input')?.click()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Enregistrer\\s*$/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  ok(await s.evaluer(`/Conforme[\\s\\S]*Lot 01 · Pierres de Bourgogne SARL/.test([...document.querySelectorAll('.lor-constat')].find(x => /Pierres de Bourgogne/.test(x.innerText) && /contrat/.test(x.innerText))?.innerText || '')`),
+     'le lot 01 ne demande plus la taille de pierre : l’attestation est recontrôlée, conforme');
+  await s.evaluer(`[...document.querySelectorAll('.lor-constat')].find(x => /Pierres de Bourgogne/.test(x.innerText) && /contrat/.test(x.innerText))?.scrollIntoView({ block: 'center' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}lorani-decennales-1440.jpg`, { qualite: 55 });
+
+  console.log('— les ordres de service et les réserves (b5_19) : Façade rue Mercière');
+  const osm = await s.evaluer(`(() => { const c = [...document.querySelectorAll('.lor-os')]; const t = c.map(x => x.innerText).join(' | ').replace(/[\\u202f\\u00a0]/g, ' '); return { n: c.length, montant: /210 100 € HT à date \\(\\+13 % du marché initial de 186 000 €, avenants compris\\)/.test(t), delai: /délai 180 j \\+10 j d’OS \\+ 7 j d’arrêt/.test(t), avenant: /OS cumulés : \\+13 % du marché initial\\. Un avenant est à envisager/.test(t), reserves: /Réserves : Délai demandé : 15 jours|réserves : Délai demandé : 15 jours/.test(t), retour: /Retour de l’entreprise/.test(t) }; })()`);
+  ok(osm.n === 2 && Object.values(osm).every(Boolean), `OS : 210 100 € HT à date (+13 %), +10 j d’OS + 7 j d’arrêt, avenant à envisager (marché privé, > 10 %), réserves de l’entreprise dites (${JSON.stringify(osm)})`);
+  await s.evaluer(`[...document.querySelectorAll('.lor-os')].find(x => /Échafaudages Rhône/.test(x.innerText))?.querySelectorAll('.esp-lien-bouton')[1]?.click()`);
+  await s.dormir(500);
+  await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const set = (el, v) => { const p = el.tagName === 'SELECT' ? HTMLSelectElement.prototype : HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(p, 'value').set.call(el, v); el.dispatchEvent(new Event(el.tagName === 'SELECT' ? 'change' : 'input', { bubbles: true })); }; set(d.querySelector('select'), 'travaux_supplementaires'); })()`);
+  await s.dormir(200);
+  await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const set = (el, v) => { Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, v); el.dispatchEvent(new Event('input', { bubbles: true })); }; const i = d.querySelectorAll('input:not([type="date"])'); set(i[0], 'Prolongation de location de l’échafaudage'); set(i[1], '3000'); set(i[2], '21'); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Émettre\\s*$/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  ok(await s.evaluer(`/OS n° 2 · Travaux supplémentaires · Prolongation de location/.test([...document.querySelectorAll('.lor-os')].find(x => /Échafaudages Rhône/.test(x.innerText))?.innerText || '') && /27 000 € HT à date \\(\\+12,5 %/.test(([...document.querySelectorAll('.lor-os')].find(x => /Échafaudages Rhône/.test(x.innerText))?.innerText || '').replace(/[\\u202f\\u00a0]/g, ' '))`),
+     'OS n° 2 émis pour l’échafaudage : +3 000 € HT, 27 000 € à date (+12,5 %), +21 j');
+  const res = await s.evaluer(`(() => { const c = [...document.querySelectorAll('.lor-reserve')]; return { n: c.length, retard: c.filter(x => x.hasAttribute('data-retard')).length, levee: c.filter(x => x.dataset.statut === 'levee').length, statut: document.querySelector('.lor-reserve')?.closest('.esp-carte-corps')?.querySelector('[role="status"]')?.innerText }; })()`);
+  ok(res.n === 3 && res.retard === 1 && res.levee === 1 && /Réception non prononcée\. 2 réserves non levées sur 3\./.test(res.statut), `réserves : 3 (1 en retard, 1 levée), « ${res.statut} »`);
+  await s.evaluer(`[...document.querySelectorAll('.lor-reserve')].find(x => /Réserve n° 1/.test(x.innerText))?.querySelector('.r-btn--noir')?.click()`);
+  await s.dormir(500);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Enregistrer\\s*$/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  ok(await s.evaluer(`/Levée le/.test([...document.querySelectorAll('.lor-reserve')].find(x => /Réserve n° 1/.test(x.innerText))?.innerText || '')`), 'réserve n° 1 : levée constatée');
+  await s.evaluer(`[...document.querySelectorAll('.esp-lien-bouton')].find(b => b.textContent.trim() === 'Prononcer la réception')?.click()`);
+  await s.dormir(500);
+  await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input[type="date"]'); const d = new Date(); d.setDate(d.getDate() - 1); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, d.toISOString().slice(0, 10)); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Enregistrer\\s*$/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  ok(await s.evaluer(`/Réception le .* · garantie de parfait achèvement jusqu’au .*\\. 1 réserve non levée sur 3\\./.test(document.querySelector('.lor-reserve')?.closest('.esp-carte-corps')?.querySelector('[role="status"]')?.innerText || '')`),
+     'réception prononcée : la garantie de parfait achèvement court un an, 1 réserve non levée');
+  await s.evaluer(`document.querySelector('.lor-os')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}lorani-os-reserves-1440.jpg`, { qualite: 55 });
+
+  console.log('— les comptes rendus de chantier (b5_20) : Façade rue Mercière, CR n° 3 en brouillon');
+  const crx = await s.evaluer(`(() => { const t = (document.querySelector('.lor-cr-bloc')?.closest('.esp-carte-corps')?.innerText || '').replace(/[\\u202f\\u00a0]/g, ' '); return { tete: /Compte rendu n° 3 · visite du/.test(t) && /Brouillon/.test(t), onglets: document.querySelectorAll('.lor-cr-bloc')[0]?.closest('.esp-carte-corps')?.querySelectorAll('.esp-filtre').length, suspens: /En suspens \\(2\\)/i.test(t), age: /Échafaudages Rhône · pour le .* · en suspens depuis 21 j \\(CR n° 1\\)/.test(t), retard: /En retard/.test(t), nouveaux: /Points de cette visite \\(0\\)/i.test(t), notes: /Notes de visite : 4 lignes, à rédiger en points/.test(t) }; })()`);
+  ok(crx.tete && crx.onglets === 3 && crx.suspens && crx.age && crx.retard && crx.nouveaux && crx.notes, `CR n° 3 : 2 points en suspens (dont une question à l’échafaudeur depuis 21 j, en retard), 4 lignes de notes (${JSON.stringify(crx)})`);
+  await s.evaluer(`[...document.querySelectorAll('.r-btn')].find(b => b.textContent.trim() === 'Rédiger depuis les notes')?.click()`);
+  await s.dormir(500);
+  const lus = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const li = [...(d?.querySelectorAll('li') || [])].map(x => x.innerText.replace(/\\n/g, ' ')); return { n: li.length, q: /^Question · Pierres de Bourgogne SARL · lot 01 · pour le/.test(li[0] || ''), a: /^Action/.test(li[1] || ''), d: /^Décision/.test(li[2] || ''), o: /^Observation · lot 01/.test(li[3] || ''), bouton: [...(d?.querySelectorAll('button') || [])].some(b => /Ajouter 4 points/.test(b.textContent)) }; })()`);
+  ok(Object.values(lus).every((v) => v === true || v === 4), `les notes lues : 4 points (question à Pierres de Bourgogne, lot 01, datée ; action ; décision ; observation lot 01) (${JSON.stringify(lus)})`);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Ajouter 4 points/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  ok(await s.evaluer(`/Points de cette visite \\(4\\)/i.test(document.querySelector('.lor-cr-bloc')?.closest('.esp-carte-corps')?.innerText || '')`), 'les 4 points sont au CR n° 3');
+  await s.evaluer(`[...[...document.querySelectorAll('.lor-cr-bloc')][1]?.querySelectorAll('li') || []].find(li => /Échafaudages Rhône/.test(li.textContent))?.querySelector('.lor-point-actions .esp-lien-bouton')?.click()`);
+  await s.dormir(500);
+  await s.evaluer(`(() => { const ta = document.querySelector('[role="dialog"] textarea'); Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(ta, 'Dépose côté cour le 20/10, confirmée par téléphone'); ta.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Enregistrer\\s*$/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  ok(await s.evaluer(`(() => { const b = [...document.querySelectorAll('.lor-cr-bloc')][1]; return /En suspens \\(1\\)/i.test(b?.innerText || '') && !/Échafaudages Rhône/.test(b?.innerText || '') && /calepinage/.test(b?.innerText || ''); })()`), 'réponse reçue : la question de l’échafaudeur quitte les points en suspens, l’action reste');
+  await s.evaluer(`[...document.querySelectorAll('.r-btn')].find(b => b.textContent.trim() === 'Diffuser')?.click()`);
+  await s.dormir(700);
+  const dif = await s.evaluer(`(() => { const t = document.querySelector('.lor-cr-bloc')?.closest('.esp-carte-corps')?.innerText || ''; return { diffuse: /Diffusé le/.test(t), plusDeBrouillon: ![...document.querySelectorAll('.r-btn')].some(b => b.textContent.trim() === 'Diffuser'), soldes: /Soldés depuis le CR n° 2 \\(1\\)/.test(t) }; })()`);
+  ok(dif.diffuse && dif.plusDeBrouillon && dif.soldes, `CR n° 3 diffusé : figé, la réponse reçue est listée parmi les soldés (${JSON.stringify(dif)})`);
+  await s.evaluer(`document.querySelector('.lor-cr-bloc')?.closest('.esp-carte-corps')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}lorani-cr-1440.jpg`, { qualite: 55 });
+
   console.log('— le régime du permis : secteur protégé coché, le silence reste un accord ; un cas R*424-2 coché, le silence vaut rejet');
   await s.evaluer(`[...document.querySelectorAll('#esp-detail .esp-lien-bouton')].find(b => /Régime/.test(b.textContent))?.click()`);
   await s.dormir(500);
@@ -157,6 +231,45 @@ for (const largeur of LARGEURS) {
   await s.dormir(800);
   const regle = await s.evaluer(`(() => { const t = document.querySelector('#esp-detail')?.innerText || ''; const i = t.indexOf('sans réponse de la mairie'); return t.slice(i, i + 80); })()`);
   ok(regle.includes('rejet implicite (art. R*424-2, d)'), `le régime dit « rejet implicite (art. R*424-2, d) » après la saisie : « ${regle} »`);
+
+  console.log('— le contrôle du dossier (b5_16) : Surélévation Dubois, indice B revérifiant l’indice A');
+  await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /Surélévation Dubois/.test(b.textContent))?.click()`);
+  await s.dormir(600);
+  console.log('— le PLU depuis l’adresse (b5_17) : Surélévation Dubois, pas encore cherché');
+  ok(await s.evaluer(`/Lorani localise l’adresse/.test(document.querySelector('#esp-detail')?.innerText || '')`), 'avant recherche : l’écran dit ce que Lorani va chercher');
+  await s.evaluer(`[...document.querySelectorAll('.esp-lien-bouton')].find(b => b.textContent.trim() === 'Trouver le PLU')?.click()`);
+  await s.dormir(400);
+  ok(await s.evaluer(`/Adresse en cours de localisation/.test(document.querySelector('#esp-detail')?.innerText || '')`), 'recherche lancée : « Adresse en cours de localisation… »');
+  await s.dormir(3200);
+  const plu = await s.evaluer(`(() => { const t = document.querySelector('.lor-plu')?.innerText || ''; return { zone: /Zone URm1/.test(t), doc: /PLU-H MÉTROPOLE DE LYON/.test(t), type: /zone urbaine/.test(t), point: /Localisé par l’adresse : 8 Rue Francis de Pressensé 69100 Villeurbanne \\(confiance 96 %\\)/.test(t), sansLien: /déposez-le comme pièce « Règlement du PLU »/.test(t) }; })()`);
+  ok(Object.values(plu).every(Boolean), `trouvé : zone URm1 (zone urbaine) du PLU-H, point et confiance dits, pas de lien direct (${JSON.stringify(plu)})`);
+  const ctl = await s.evaluer(`(() => { const c = document.querySelector('.lor-controle-tete')?.closest('.esp-carte-corps'); const t = (c?.innerText || '').replace(/[\\u202f\\u00a0]/g, ' '); return { tete: document.querySelector('.lor-controle-tete')?.innerText, cartes: document.querySelectorAll('.lor-constat').length, bloquant: document.querySelectorAll('.lor-constat[data-gravite="bloquant"]').length, resume: /3 constats ouverts, dont 1 bloquant\\. 2 constats de l’indice A corrigés\\./.test(t), citation: /PC2, p\\. 1 : « 3,20 m »/.test(t), regle: /Règle : au moins 4 m, article URm1 7 \\(PLU-H URm1, p\\. 41\\)/.test(t), correction: /Correction proposée : Ramener le recul sur limite séparative/.test(t), releve: /relevé depuis l’indice A/.test(t), corriges: /Corrigés depuis l’indice A \\(2\\)/.test(t), decides: /Décidés \\(1\\)/.test(t) }; })()`);
+  ok(/Dossier de permis · indice B/.test(ctl.tete) && ctl.cartes === 3 && ctl.bloquant === 1 && ctl.resume && ctl.citation && ctl.regle && ctl.correction && ctl.releve && ctl.corriges && ctl.decides,
+     `indice B : 3 constats ouverts dont 1 bloquant (dont le métré du poste 2.2), page et texte cités, règle et article, correction proposée, 2 corrigés depuis l’indice A (${JSON.stringify(ctl)})`);
+  await s.evaluer(`document.querySelector('.lor-controle-tete')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}lorani-controle-1440.jpg`, { qualite: 55 });
+  await s.evaluer(`[...document.querySelectorAll('.lor-constat')].find(c => /recul sur limite/.test(c.textContent))?.querySelectorAll('.r-btn--fil')[1]?.click()`);
+  await s.dormir(500);
+  const ec = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const b = [...(d?.querySelectorAll('button') || [])].find(x => /^\\s*Écarter\\s*$/.test(x.textContent)); return { titre: d?.querySelector('h2')?.textContent, gris: b?.disabled }; })()`);
+  ok(ec.titre === 'Écarter' && ec.gris === true, `dialogue « ${ec.titre} » : sans motif, « Écarter » reste grisé`);
+  await s.evaluer(`(() => { const ta = document.querySelector('[role="dialog"] textarea'); Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(ta, 'Dérogation accordée par la mairie (art. L152-4)'); ta.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(x => /^\\s*Écarter\\s*$/.test(x.textContent))?.click()`);
+  await s.dormir(700);
+  const ap = await s.evaluer(`(() => { const t = document.querySelector('.lor-controle-tete')?.closest('.esp-carte-corps')?.textContent || ''; return { cartes: document.querySelectorAll('.lor-constat').length, decides: /Décidés \\(2\\)/.test(t), motif: /Motif : Dérogation accordée par la mairie/.test(t) }; })()`);
+  ok(ap.cartes === 2 && ap.decides && ap.motif, `le recul est écarté avec son motif : 2 constats ouverts, 2 décidés (${JSON.stringify(ap)})`);
+  await s.evaluer(`[...document.querySelectorAll('.esp-lien-bouton')].find(b => b.textContent.trim() === 'Revérifier à l’indice suivant')?.click()`);
+  await s.dormir(500);
+  const rv = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const i = d?.querySelectorAll('input:not([type="checkbox"])'); return { titre: d?.querySelector('h2')?.textContent, indice: i?.[1]?.value, cochees: d?.querySelectorAll('input[type="checkbox"]:checked').length }; })()`);
+  ok(rv.titre === 'Revérifier à l’indice suivant' && rv.indice === 'C' && rv.cochees === 6, `dialogue « ${rv.titre} » : indice ${rv.indice} proposé, ${rv.cochees} pièces reprises de l’indice B`);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(x => /Préparer le contrôle/.test(x.textContent))?.click()`);
+  await s.dormir(700);
+  ok(await s.evaluer(`/indice C/.test(document.querySelector('.lor-controle-tete')?.innerText || '') && /Pièces en lecture/.test(document.querySelector('.lor-controle-tete')?.innerText || '')`), 'le contrôle de l’indice C est préparé, en attente de lecture');
+  await s.evaluer(`[...document.querySelectorAll('.lor-controle-tete .esp-lien-bouton')].find(b => /Lancer/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const c3 = await s.evaluer(`(() => ({ tete: document.querySelector('.lor-controle-tete')?.innerText || '', cartes: document.querySelectorAll('.lor-constat').length, onglets: document.querySelectorAll('.lor-controles .esp-filtre').length }))()`);
+  ok(/Contrôlé/.test(c3.tete) && c3.cartes === 2 && c3.onglets === 3, `lancé : l’indice C reconduit ce qui reste (2 ouverts), trois contrôles au projet (${JSON.stringify(c3)})`);
   s.fermer();
 }
 
@@ -168,6 +281,39 @@ for (const largeur of LARGEURS) {
   const t = await s.evaluer(`(() => { const d = document.querySelector('#esp-detail'); return { titre: d.querySelector('h2')?.textContent, purge: /Purgé de tout recours/.test(d.innerText), chantier: /vous pouvez démarrer/.test(d.innerText), gracieux: /Recours gracieux/.test(d.innerText) }; })()`);
   ok(/Façade rue Mercière/.test(t.titre) && t.purge && t.chantier && t.gracieux, `le permis visé par l'URL est ouvert : ${t.titre}, purgé, chantier possible, recours gracieux rejeté dans l'historique`);
   await s.capturer(`${dossier}lorani-purge-1024.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1024, hauteur: 900, marque: 'b5-plu', densite: 1 });
+  console.log('— le PLU trouvé (b5_17) : Maison Lemoine, ouverte par ?projet=');
+  ok(await s.aller(base + chemin + '?projet=00000000-0000-4000-8000-00000000b001'), 'page chargée');
+  await s.dormir(700);
+  const p = await s.evaluer(`(() => { const d = document.querySelector('.lor-plu'); const a = d?.querySelector('a'); return { t: (d?.innerText || '').replace(/\\s+/g, ' '), href: a?.href || '', cible: a?.target, rel: a?.rel }; })()`);
+  ok(/Zone UMa/.test(p.t) && /PLUI NANTES METROPOLE · PLUi/.test(p.t) && /Secteur de développement des centralités/.test(p.t) && /Prescriptions à cet endroit \(2\)/.test(p.t),
+     `zone UMa du PLUi Nantes Métropole, libellé long, 2 prescriptions (${p.t.slice(0, 160)})`);
+  ok(p.href.startsWith('https://metropole.nantes.fr/') && p.cible === '_blank' && /noopener/.test(p.rel), 'lien du règlement, dans un nouvel onglet, noopener');
+  await s.evaluer(`document.querySelector('.lor-plu')?.scrollIntoView({ block: 'center' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}lorani-plu-1024.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 390, hauteur: 844, marque: 'b5-controle-390', densite: 1 });
+  console.log('— le contrôle du dossier à 390');
+  ok(await s.aller(base + chemin + '?projet=00000000-0000-4000-8000-00000000b005'), 'page chargée');
+  await s.dormir(700);
+  await s.evaluer(`document.querySelector('.lor-controle-tete')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(300);
+  const m = await s.evaluer(`(() => { const w = document.documentElement.clientWidth; const larges = [...document.querySelectorAll('.esp *')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > w + 1 && !e.closest('.esp-tableau-cadre'); }).slice(0, 5).map(e => e.tagName + '.' + [...e.classList].join('.')); return { deb: document.documentElement.scrollWidth - w, larges, cartes: document.querySelectorAll('.lor-constat').length }; })()`);
+  ok(m.deb === 0 && m.larges.length === 0 && m.cartes === 3, `Surélévation Dubois à 390 : pas de débordement, 3 constats lisibles (${JSON.stringify(m)})`);
+  await s.capturer(`${dossier}lorani-controle-390.jpg`, { qualite: 55 });
+  await s.evaluer(`[...document.querySelectorAll('.esp-lien-bouton')].find(b => b.textContent.trim() === 'Revérifier à l’indice suivant')?.click()`);
+  await s.dormir(500);
+  const d = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const r = d?.getBoundingClientRect(); const larges = [...(d?.querySelectorAll('*') || [])].filter(e => { const x = e.getBoundingClientRect(); return x.width > 0 && x.right > r.right + 1; }).length; return { ouvert: !!d, larges }; })()`);
+  ok(d.ouvert && d.larges === 0, `dialogue de revérification à 390 : rien ne dépasse (${JSON.stringify(d)})`);
+  await s.capturer(`${dossier}lorani-controle-dialogue-390.jpg`, { qualite: 55 });
   s.fermer();
 }
 

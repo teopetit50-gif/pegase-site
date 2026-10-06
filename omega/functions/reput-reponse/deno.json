@@ -1,0 +1,12 @@
+{
+  "imports": {
+    "@partage/": "../_partage/",
+    "@std/assert": "jsr:@std/assert@^1.0.14"
+  },
+  "tasks": {
+    "test": "deno test -A tests/"
+  },
+  "compilerOptions": {
+    "strict": true
+  }
+}

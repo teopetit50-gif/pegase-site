@@ -41,7 +41,10 @@ begin
 
   -- Qui voit la file.
   perform tests.endosser((jeu ->> 'assistante')::uuid, 'b4-assistante@essai.invalid');
-  return next is((select count(*) from public.tamila_avis_entrants), 3::bigint, 'l''assistante voit la file');
+  -- Depuis b4_13, la file est réservée aux avocats qui lisent la réception (tamila_peut_lire_reception).
+  return next is((select count(*) from public.tamila_avis_entrants),
+                 case when to_regprocedure('private.tamila_peut_lire_reception(uuid, uuid)') is null then 3 else 0 end::bigint,
+                 'l''assistante voit la file avant b4_13, plus après');
   perform tests.redevenir_admin();
   perform tests.endosser((jeu ->> 'stagiaire')::uuid, 'b4-stagiaire@essai.invalid');
   return next is((select count(*) from public.tamila_avis_entrants), 0::bigint, 'le stagiaire ne la voit pas');

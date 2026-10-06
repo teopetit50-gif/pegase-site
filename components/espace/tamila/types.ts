@@ -376,6 +376,8 @@ export type Convention = {
   cree_par: string | null;
   cree_le: string;
   resiliee_le: string | null;
+  /* le temps prévu au forfait, en minutes (b4_12) */
+  minutes_prevues?: number | null;
 };
 
 export type Temps = {
@@ -392,6 +394,8 @@ export type Temps = {
   statut: "saisi" | "facture" | "annule";
   facture_id: string | null;
   cree_le: string;
+  /* l'événement du dossier dont ce temps a été proposé (b4_12) : « audience:<id> », « acte:<id> », « avis:<id> » */
+  origine?: string | null;
 };
 
 export type Provision = {
@@ -440,6 +444,8 @@ export type Honoraires = {
   temps: Temps[];
   provisions: Provision[];
   factures: Facture[];
+  /* les propositions de temps que je ne veux plus voir (b4_12) */
+  ecartes?: string[];
 };
 
 /* ——— conflits d'intérêts et vigilance LCB-FT (b4_07, 06/10/2026) ——— */

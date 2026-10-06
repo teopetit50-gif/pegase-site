@@ -69,7 +69,7 @@ export const metadata: Metadata = {
      règle que `fiche.meta` pour les pages de paquet, et même signature
      de fin que les trois autres pages produit. */
   description:
-    "Les demandes reçues par mail et WhatsApp obtiennent une réponse à toute heure, tirée de ce que votre entreprise sait vraiment, jamais inventée. Un système Omega.",
+    "Les demandes reçues par mail et WhatsApp ont leur réponse prête à toute heure, tirée de ce que votre entreprise sait vraiment, jamais inventée, et validée par vous. Un système Omega.",
 };
 
 export default function Page() {

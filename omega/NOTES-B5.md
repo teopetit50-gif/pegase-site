@@ -576,3 +576,108 @@ des chantiers neufs (tables, écran, lecteur), à proposer au coordinateur en lo
   DEFINER du module) ; le test dira si une garde refuse.
 - Test `omega/tests/lorani/b5_06_echeance_visas.sql` (12 assertions, vraie chaîne `controler_delais` → passage) →
   `^test_b5_` attendu **209/209** (6 tests).
+
+## b5_16 — le contrôle du dossier (carnet 15:58Z, n° 1) — 06/10/2026
+
+- Socle : `omega/modules/lorani/migrations/b5_16_controle_dossier.sql` (a05f77c), test `omega/tests/lorani/b5_07_controle_dossier.sql`
+  (29 assertions). Essayé en local sur des doubles du socle (/tmp/pgb5.g7u7, e11.sql) : vert ; pas encore posé sur la recette.
+- Tables `lorani_controles` (intitulé, indice, précédent, statut en_lecture|controle|clos), `lorani_controle_pieces` (rôle
+  planche|cctp|dpgf|plu|autre, référence « PC2 »), `lorani_constats` (nature incoherence|plu|cctp_dpgf, gravité, valeurs citées
+  [{piece, reference, page, boite, valeur, texte}] + la règle {regle:true, borne, article}, correction proposée, statut
+  ouvert|corrige|accepte|ecarte, motif obligatoire pour accepter/écarter). Un membre ne change que statut et motif (trigger
+  `lorani_constats_garder`, GUC `lorani.controle_en_cours` pour le socle).
+- Croisement `private.lorani_controler` : incohérence = même grandeur + même objet sur ≥ 2 pièces, écart > tolérance (0,05 m ;
+  0,5 m² ; 0,5 % ; 0 pour un nombre), correction = valeur la plus fréquente ; PLU = mesure hors max/min (marge tolérance/10), un
+  constat par grandeur/objet/borne, la PIRE valeur citée, toutes les pièces fautives jointes ; CCTP/DPGF = poste décrit non chiffré
+  et l'inverse (seulement si les deux côtés ont des postes). Revérification : precedent_id → reconduit + hérite accepte/ecarte ;
+  ancien ouvert disparu → corrige, corrige_au_controle, « Corrigé à l'indice B. ». Alerte `lorani:controle:<id>`, journal
+  `lorani.controle_passe`. Lancement seul (`lorani_piece_controle_lue`) quand plus aucune pièce n'est recue/en_lecture/
+  a_rattacher/en_attente_expediteur (une pièce en échec ne bloque pas).
+- Écran : `components/espace/lorani/Controle.tsx` dans la carte projet (avant Honoraires) ; exemple = Surélévation Dubois,
+  indice A puis B. Les pièces de contrôle sont exclues des « Courriers du dossier » d'un permis (TYPES_CONTROLE). Types
+  ajoutés au dépôt : planche, CCTP, DPGF, règlement du PLU.
+- Doute à lever sur la recette : `enregistrer_lecture` accepte-t-il ces types de pièce ? (contrat f54deda, A1).
+- Reste du n° 1 : rapport PDF annoté + Excel.
+- Rapport (n° 1, suite) : `components/espace/lorani/rapport.ts`, boutons « Rapport PDF annoté » / « Tableau Excel » sous un
+  contrôle passé. Aucune dépendance ajoutée : .xlsx écrit à la main (zip « stored » + CRC-32, feuilles Constats et Pièces) ;
+  PDF écrit à la main (Helvetica WinAnsi, titre /Info en UTF-16BE), pages citées rendues par pdf.js (legacy, comme
+  filed/PagePdf) avec cadre rouge + numéro sur la boîte lue ; fichier non ouvrable → page blanche avec les cadres.
+  Base réelle : octets par lien signé omega-clients (portes.octetsPiece, `pieces.chemin` ajouté à la lecture).
+  Recette : `omega/recette-b5/rapport-controle.mjs` (pdfinfo, pdftotext, unzip -t) ; exemples écrits à côté.
+  NON VÉRIFIÉ : le rendu d'un vrai PDF de la base (seul le repli « fichier non disponible » a tourné, sur l'exemple).
+
+## b5_17 — le PLU depuis l'adresse (carnet n° 2) — 06/10/2026
+
+- Socle : `omega/modules/lorani/migrations/b5_17_plu_adresse.sql`, test `omega/tests/lorani/b5_08_plu_adresse.sql` (18 assertions,
+  réponses jouées par `private.lorani_plu_poser` : runtests annule, donc pg_net n'envoie rien).
+- Sources publiques sans clé : géocodage `data.geopf.fr/geocodage/search` (q, citycode, limit) ; cadastre
+  `apicarto.ign.fr/api/cadastre/parcelle` (code_insee, section, numero ; PLM : 75056/69123/13055 + code_arr) ; GPU
+  `apicarto.ign.fr/api/gpu/zone-urba|document|prescription-surf` (geom GeoJSON) et `municipality` (insee → is_rnu).
+- Appels par pg_net depuis la base (`private.lorani_http_get`) : la CSP (`next.config.ts`, partagé) bloque le navigateur.
+  Chaîne : chercher → geocodage (adresse ; type municipality ou autre commune à score < 0,7 → parcelle) → zonage (3 appels
+  ensemble) → trouve / introuvable (RNU dit) / erreur. `lorani_suivre_plu` relève net._http_response ; l'écran relève
+  toutes les 2,5 s pendant 1 min ; `lorani_lectures_passage` (redéfini une fois de plus, corps b5_16 + PLU) reprend toutes
+  les 5 min ; une demande sans réponse après 5 min = délai dépassé.
+- Essayé en local avec un faux schéma net et les VRAIES réponses relevées (12 rue des Hauts-Pavés, Nantes) : zone UMa,
+  PLUi Nantes Métropole, lien du règlement metropole.nantes.fr, 6 prescriptions. Non vérifié : pg_net réel (droits du
+  propriétaire sur net._http_response), à voir à la pose.
+- Écran : `components/espace/lorani/PluProjet.tsx` (« Règles d'urbanisme », avant le contrôle). Exemple : Lemoine (UMa,
+  Nantes) et Mercière (UCe1b, Lyon) trouvés ; Dubois a une réponse préparée (URm1, PLU-H) au clic.
+- Fiche de lecture : paragraphe pour A1 — ne rendre que les règles de la zone de `lorani_plu.zone`.
+
+## n° 3 a — métré contre DPGF (dans b5_16, amendé AVANT pose) — 06/10/2026
+
+- b5_16 n'étant pas posé, je l'ai amendé plutôt que d'écrire un ALTER (élargir un CHECK demanderait de retirer
+  l'ancien : mot interdit). Rôle `metre`, nature `metre_dpgf`. Si b5_16 avait déjà été posé dans l'ancienne version :
+  le dire, il faudra un lot de reprise.
+- Règle : quantité mesurée = `quantite.<réf>` du métré (rôle metre) ou, sans métré, somme des planches ; DPGF
+  `poste.<réf>` (quantité) + `unite.<réf>` ; écart > 5 % = constat ; DPGF < 90 % du mesuré = majeur (sous-estimé).
+- Test b5_07 § 10 (2 assertions, 31 au total) ; type de pièce `lorani_metre` dans la fiche, le dépôt et le passage.
+
+## b5_18 — les décennales (carnet n° 3 b) — 06/10/2026
+
+- Socle : `omega/modules/lorani/migrations/b5_18_decennales.sql`, test `omega/tests/lorani/b5_09_decennales.sql` (18 assertions).
+- `public.lorani_attestations` (entreprise = intervenant, lot repris de l'entreprise, pièce lue, assureur, police, assuré,
+  SIREN, activités, début/fin, plafond) ; trigger `lorani_attestation_verifier` : activités requises du lot couvertes
+  (vocabulaire fermé `private.lorani_activite`, 34 activités, nomenclature France Assureurs simplifiée), date
+  d'ouverture du chantier (`lorani_projets.ouverture_chantier`, ajoutée ; sinon aujourd'hui) dans la période
+  (C. assur. L241-1), plafond ≥ marché du lot (HT + avenants), SIREN / nom de l'assuré ; statut conforme | non_conforme
+  | expiree. Échéance = fin de validité au registre (J-30, J-7, J), remplacée si la fin change. Journal
+  lorani.attestation_controlee (la date du contrôle), alerte « attention » si non conforme / échue.
+- Revue automatique quand les activités d'un lot, l'ouverture du chantier ou le marché changent.
+- Lecture : type `lorani_attestation_decennale` (fiche § « Les attestations décennales ») → passage → ligne.
+- Abonnements delai.proche/depasse.lorani → lorani.attestation.rappel/.depasse (chaque gestionnaire ignore les délais
+  qui ne sont pas les siens). `lorani_lectures_passage` redéfini (corps b5_17 + attestations).
+- Essayé en local sur doubles (vert). Écran : `components/espace/lorani/Assurances.tsx` (après Chantier) ; exemple
+  Mercière (taille de pierre non couverte, échafaudage échu). Activités des lots d'exemple remises au vocabulaire.
+
+## b5_19 — OS, réserves, GPA (carnet n° 4, première partie) — 06/10/2026
+
+- Socle : `omega/modules/lorani/migrations/b5_19_os_reserves_gpa.sql`, test `omega/tests/lorani/b5_10_os_reserves.sql` (21 assertions).
+- `lorani_ordres_service` (numérotés par marché, nature démarrage/modificatifs/supplémentaires/arrêt/reprise/autre,
+  incidence HT et jours, statut, réserves de l'entreprise jusqu'à notification + 15 j — CCAG 2021 art. 3.8.2) ;
+  vue `lorani_os_incidence` (security_invoker) : montant à date, part du marché initial, jours d'OS, jours d'arrêt
+  (arrêt → reprise suivante, ou aujourd'hui) ; `private.lorani_fin_contractuelle` = démarrage + délai + OS + arrêts.
+  Alerte cumul > 15 % (public, CCP R2194-8) / > 10 % (privé) ; alerte info à chaque incidence sur le délai.
+- `lorani_reserves` (numérotées par projet, lot repris du marché, à lever avant = échéance J-7/J, levée = tenue,
+  contestée = motif obligatoire) ; `lorani_projets.reception_le` → échéance fin de GPA (1 an, J-60/J-30/J-7/J) ;
+  rappel GPA = compte des réserves ouvertes par lot + retenue de garantie à conserver (loi 71-584 art. 2).
+- Nouveaux genres lorani.chantier.rappel/.depasse ; passage redéfini (corps b5_18 + chantier).
+- Écran : `OrdresService.tsx`, `Reserves.tsx` (après Chantier, avant Assurances). Leçon : `esp-fil` est une frise à
+  deux colonnes (point + texte) — pour du texte libre, `lor-liste`.
+
+## b5_20 — comptes rendus de chantier, points suivis jusqu'à la réponse (carnet n° 4, seconde partie) — 06/10/2026
+
+- Socle : `omega/modules/lorani/migrations/b5_20_comptes_rendus.sql`, test `omega/tests/lorani/b5_11_comptes_rendus.sql` (17 assertions).
+- `lorani_comptes_rendus` (numérotés, présents, notes brutes, avancement, brouillon | diffuse ; diffusé = contenu figé
+  par le socle, réécriture refusée 55000 ; journal lorani.cr_diffuse) ; `lorani_points` (question | action | decision
+  | observation ; échéance au registre J-2/J ; réponse saisie → répondu, échéance tenue) ; `public.lorani_cr_contenu`
+  (nouveaux, en suspens avec âge, soldés depuis le CR précédent).
+- « Une question suivie jusqu'à la réponse » : question à un intervenant qui a un courriel → `private.ouvrir_suivi`
+  (destinataire {adresse, nom, professionnel}, nature reponse, clé lorani:point:<id>) = relances par la file des envois ;
+  réponse → `clore_suivi(…, 'repondu', …)`. Si l'ouverture échoue (module lorani absent de modules_envois ?), alerte
+  info « l'échéance interne la suit ». Leçon : un trigger « update of statut » ne voit pas un statut changé par un
+  BEFORE — trigger sans liste de colonnes.
+- `private.lorani_chantier_rappeler` redéfini (corps b5_19 + points en retard).
+- Écran : `ComptesRendus.tsx` + `cr.ts` (lireNotes : ?, !, =, @entreprise, lot NN, avant le JJ/MM ; contenu ; PDF via
+  `rapport.ts` exporté). Exemple Mercière : CR n° 1-2 diffusés, n° 3 en brouillon avec 4 lignes de notes.

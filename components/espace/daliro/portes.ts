@@ -19,14 +19,20 @@
      btp_prononcer_reception, btp_lever_reserve, btp_opposer_retenue, btp_liberer_retenue,
      btp_preparer_decompte, btp_envoyer_decompte, btp_repondre_decompte (b6_13) ;
      btp_noter_paiement, btp_fixer_echeance (b6_16) ;
-     btp_heures_chantier (lecture), btp_pointer, btp_pointer_equipe, btp_poser_cout_horaire (b6_17).
+     btp_heures_chantier (lecture), btp_pointer, btp_pointer_equipe, btp_poser_cout_horaire (b6_17) ;
+     btp_proposer_recalage (lecture), btp_recaler, btp_terminer_passage (b6_19) ;
+     btp_preparer_signature, btp_preuve_signature (b6_20 ; la page /signer/<jeton> appelle btp_lire_a_signer et
+     btp_signer_sur_place sans compte) ;
+     btp_meteo_chantier (lecture, b6_21) ;
+     btp_appro_chantier (lecture), btp_ecrire_commande, btp_noter_commande, btp_noter_livraison, btp_annuler_commande (b6_22) ;
+     btp_preparer_liste, btp_recevoir, btp_noter_retour (b6_23).
    Les tables sans porte (chantiers, lots, tiers, dépendances, acceptations)
    s'écrivent en direct, comme le socle le prévoit (politiques du bureau).
    Si la base répond autrement, l'écran montre son message tel quel.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { AccordJ2, Chantier, FactureCandidate, HeuresChantier, Remplacant, RetourPointage, Tableau } from "./types";
+import type { AccordJ2, Appro, Chantier, FactureCandidate, HeuresChantier, MeteoChantier, Recalage, Remplacant, RetourPointage, Tableau } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -207,4 +213,73 @@ export async function pointerEquipe(chantier: string, equipe: string, jour: stri
 
 export async function poserCoutHoraire(client: string, intervenant: string | null, cout: number, depuis: string): Promise<unknown> {
   return rpc("btp_poser_cout_horaire", { p_client: client, p_intervenant: intervenant, p_cout: cout, p_depuis: depuis });
+}
+
+/* b6_19 : le recalage du planning */
+export async function proposerRecalage(passage: string, nouvelleFin: string): Promise<Recalage> {
+  return rpc<Recalage>("btp_proposer_recalage", { p_passage: passage, p_nouvelle_fin: nouvelleFin });
+}
+
+export async function recaler(passage: string, nouvelleFin: string, motif: string | null): Promise<Recalage> {
+  return rpc<Recalage>("btp_recaler", { p_passage: passage, p_nouvelle_fin: nouvelleFin, p_motif: motif });
+}
+
+export async function terminerPassage(passage: string, finReelle: string): Promise<unknown> {
+  return rpc("btp_terminer_passage", { p_passage: passage, p_fin_reelle: finReelle });
+}
+
+/* b6_20 : la signature sur place */
+export async function preparerSignature(avenant: string, heures: number): Promise<{ signature_id: string; jeton: string; lien: string; expire_le: string; empreinte: string }> {
+  return rpc("btp_preparer_signature", { p_avenant: avenant, p_heures: heures });
+}
+
+export type PreuveSignature = {
+  signature_id: string; statut: "ouverte" | "signee" | "annulee"; empreinte: string; expire_le: string; prepare_le: string;
+  signataire_nom: string | null; signataire_qualite: string | null; trace: string | null; trace_empreinte: string | null;
+  appareil: string | null; signee_le: string | null; preuve_empreinte: string | null; annulee_motif: string | null;
+};
+
+export async function preuveSignature(avenant: string): Promise<PreuveSignature | null> {
+  return rpc<PreuveSignature | null>("btp_preuve_signature", { p_avenant: avenant });
+}
+
+/* b6_21 : la météo du chantier */
+export async function chargerMeteo(chantier: string): Promise<MeteoChantier | null> {
+  const m = await rpc<MeteoChantier | null>("btp_meteo_chantier", { p_chantier: chantier });
+  return m && typeof m === "object" ? m : null;
+}
+
+/* b6_22 : l'approvisionnement */
+export async function chargerAppro(chantier: string): Promise<Appro | null> {
+  const a = await rpc<Appro | null>("btp_appro_chantier", { p_chantier: chantier });
+  return a && typeof a === "object" ? a : null;
+}
+
+export async function ecrireCommande(commande: string | null, chantier: string, champs: Record<string, unknown>): Promise<string> {
+  return rpc<string>("btp_ecrire_commande", { p_commande: commande, p_chantier: chantier, p_champs: champs });
+}
+
+export async function noterCommande(commande: string, livraisonPrevue: string, commandeeLe: string, reference: string | null): Promise<unknown> {
+  return rpc("btp_noter_commande", { p_commande: commande, p_livraison_prevue: livraisonPrevue, p_commandee_le: commandeeLe, p_reference: reference });
+}
+
+export async function noterLivraison(commande: string, livreeLe: string, complete: boolean, note: string | null): Promise<unknown> {
+  return rpc("btp_noter_livraison", { p_commande: commande, p_livree_le: livreeLe, p_complete: complete, p_note: note });
+}
+
+export async function annulerCommande(commande: string, motif: string): Promise<unknown> {
+  return rpc("btp_annuler_commande", { p_commande: commande, p_motif: motif });
+}
+
+/* b6_23 : la liste depuis le devis, les bons de livraison, les retours */
+export async function preparerListe(chantier: string): Promise<{ creees: number; deja: number }> {
+  return rpc("btp_preparer_liste", { p_chantier: chantier });
+}
+
+export async function recevoir(commande: string, livreeLe: string, quantite: number | null, bon: string | null, note: string | null): Promise<{ rapprochement: string; etat: string; ecart: number | null }> {
+  return rpc("btp_recevoir", { p_commande: commande, p_livree_le: livreeLe, p_quantite: quantite, p_bon_reference: bon, p_piece: null, p_note: note });
+}
+
+export async function noterRetour(commande: string, renduLe: string | null, retourPrevu: string | null): Promise<unknown> {
+  return rpc("btp_noter_retour", { p_commande: commande, p_rendu_le: renduLe, p_retour_prevu: retourPrevu });
 }

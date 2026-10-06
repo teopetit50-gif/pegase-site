@@ -6,7 +6,8 @@
    matin au gérant et aux directions (private.grp_lignes_matin, migration
    b1_07) : contrats à dénoncer, encours du groupe, réciproques
    intragroupe ; et, depuis b1_08, « le groupe ce matin » (trésorerie sous
-   plancher, ventes en retard sur l'objectif, balance ancienne). En base réelle, public.grp_ce_matin(p_client) les rend au
+   plancher, ventes en retard sur l'objectif, balance ancienne) ; depuis
+   b1_11, les réserves à émettre (protestation au transporteur). En base réelle, public.grp_ce_matin(p_client) les rend au
    périmètre de la personne ; dans l'exemple, elles sont tirées des mêmes
    données d'exemple que les cartes.
    ══════════════════════════════════════════════════════════════════════ */
@@ -15,66 +16,17 @@ import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Source } from "../source";
 import { Pastille } from "../ui";
-import { montant } from "../format";
-import { aujourdhui, contratsExemple, echeancier } from "./contrats";
-import { calculerGroupe, exempleEncours, PLAFONDS_EXEMPLE } from "./encours";
-import { RECIPROQUES_EXEMPLE } from "./reciproques";
-import { BASES_EXEMPLE, ligneDePage } from "./groupe";
+import { matinExemple, type Matin } from "./matin";
 import type { CodeRef, Objet } from "./types";
-
-type Ligne = { texte: string; gravite: "info" | "attention" | "critique"; lien: string };
-type Matin = { groupe: Ligne[]; contrats: Ligne[]; encours: Ligne[]; reciproques: Ligne[] };
 
 const BLOCS: { cle: keyof Matin; titre: string; ancre: string; vide: string }[] = [
   { cle: "groupe", titre: "Le groupe ce matin", ancre: "vrl-groupe", vide: "Trésoreries au-dessus des planchers, ventes dans les objectifs." },
+  { cle: "reserves", titre: "Réserves à émettre", ancre: "vrl-reserves", vide: "Aucune livraison abîmée ou incomplète en attente de protestation." },
+  { cle: "reportings", titre: "Reportings dus", ancre: "vrl-reportings", vide: "Aucun reporting en retard ni dû dans la semaine." },
   { cle: "contrats", titre: "Contrats à dénoncer", ancre: "vrl-contrats", vide: "Aucun contrat à dénoncer dans les 30 jours." },
   { cle: "encours", titre: "Encours du groupe", ancre: "vrl-encours", vide: "Aucun client au-dessus de son plafond ; les balances sont à jour." },
   { cle: "reciproques", titre: "Réciproques intragroupe", ancre: "vrl-reciproques", vide: "Les comptes réciproques concordent." },
 ];
-
-const euros = (v: number | null) => (v === null ? "—" : montant(v).replace(/,00\s€$/, " €"));
-const jj = (iso: string) => iso.slice(8, 10) + "/" + iso.slice(5, 7);
-
-/* l'exemple, avec les mêmes phrases que private.grp_lignes_matin */
-function matinExemple(codes: CodeRef[], objets: Objet[]): Matin {
-  const bruts = contratsExemple(objets);
-  const contrats = bruts
-    .map((k) => echeancier(k, bruts))
-    .filter((c) => c.statut === "actif" && c.reconduction === "tacite" && c.date_limite >= aujourdhui() && c.jours_restants <= 30)
-    .sort((a, b) => a.date_limite.localeCompare(b.date_limite))
-    .map((c) => ({
-      texte: `Avant le ${jj(c.date_limite)} : dénoncer « ${c.intitule} » (${c.tiers}, ${c.societe})${c.montant_annuel !== null ? ` — ${euros(c.montant_annuel)} par an` : ""}${c.contrats_du_tiers > 1 ? ` ; ${c.contrats_du_tiers} contrats chez ce tiers dans le groupe` : ""}`,
-      gravite: (c.jours_restants <= 7 ? "critique" : "attention") as Ligne["gravite"],
-      lien: "/espace/varelo",
-    }));
-  const d = exempleEncours(codes, objets, PLAFONDS_EXEMPLE);
-  const encours: Ligne[] = [
-    ...calculerGroupe(d.lignes, d.plafonds)
-      .filter((g) => g.nature === "client" && g.depasse && !g.intragroupe)
-      .map((g) => ({ texte: `${g.nom_groupe} : ${euros(g.total)} d'encours pour le groupe, plafond ${euros(g.plafond)} (dont ${euros(g.echu)} échus, ${g.societes} société${g.societes > 1 ? "s" : ""})`, gravite: "attention" as const, lien: "/espace/varelo" })),
-    ...d.courants
-      .filter((c) => c.age_jours > 7)
-      .map((c) => ({ texte: `La balance ${c.nature === "client" ? "clients" : "fournisseurs"} de ${c.societe} date du ${jj(c.arrete_le)} (${c.age_jours} jours) : à redéposer`, gravite: "info" as const, lien: "/espace/varelo" })),
-  ];
-  const reciproques = RECIPROQUES_EXEMPLE.filter((r) => r.etat === "ecart" || r.etat === "manque_debiteur" || r.etat === "dates_differentes")
-    .sort((a, b) => Math.abs(b.ecart) - Math.abs(a.ecart))
-    .map((r) => ({
-      texte:
-        r.etat === "ecart" ? `${r.creancier} → ${r.debiteur} : écart de ${euros(r.ecart)} à expliquer`
-        : r.etat === "manque_debiteur" ? `${r.creancier} dit que ${r.debiteur} lui doit ${euros(r.creance)} ; ${r.debiteur} ne reconnaît rien`
-        : `${r.creancier} → ${r.debiteur} : balances arrêtées à des dates différentes (${jj(r.arrete_creancier ?? "")} et ${jj(r.arrete_debiteur ?? "")})`,
-      gravite: (r.etat === "ecart" ? "attention" : "info") as Ligne["gravite"],
-      lien: "/espace/varelo",
-    }));
-  const groupe: Ligne[] = [];
-  for (const p of BASES_EXEMPLE().map(ligneDePage).sort((a, b) => a.societe.localeCompare(b.societe))) {
-    if (p.sous_plancher) groupe.push({ texte: `${p.societe} : trésorerie de ${euros(p.tresorerie)}, sous son plancher de ${euros(p.tresorerie_plancher)} (balance au ${jj(p.arrete_le)})`, gravite: "attention", lien: "/espace/varelo" });
-    if (p.objectif_a_date !== null && p.objectif_a_date > 0 && p.ecart_objectif !== null && p.ecart_objectif < -0.1 * p.objectif_a_date)
-      groupe.push({ texte: `${p.societe} : ventes de ${euros(p.ventes)} au ${jj(p.arrete_le)}, ${euros(Math.round(-p.ecart_objectif * 100) / 100)} sous l'objectif à date`, gravite: "attention", lien: "/espace/varelo" });
-    if (p.age_jours > 35) groupe.push({ texte: `La balance générale de ${p.societe} date du ${jj(p.arrete_le)} (${p.age_jours} jours) : à redéposer`, gravite: "info", lien: "/espace/varelo" });
-  }
-  return { groupe, contrats, encours, reciproques };
-}
 
 export default function CeMatin({ source, client_id, actif, codes, objets }: { source: Source; client_id: string; actif: boolean; codes: CodeRef[]; objets: Objet[] }) {
   const [exemple] = useState<Matin>(() => matinExemple(codes, objets));
@@ -85,10 +37,10 @@ export default function CeMatin({ source, client_id, actif, codes, objets }: { s
     const { data, error } = await createClient().rpc("grp_ce_matin", { p_client: client_id });
     if (error) {
       setErreur(true);
-      setReel({ groupe: [], contrats: [], encours: [], reciproques: [] });
+      setReel({ groupe: [], reserves: [], reportings: [], contrats: [], encours: [], reciproques: [] });
     } else {
       setErreur(false);
-      setReel({ groupe: [], ...(data as Partial<Matin>) } as Matin);
+      setReel({ groupe: [], reserves: [], reportings: [], ...(data as Partial<Matin>) } as Matin);
     }
   }, [client_id]);
   useEffect(() => {
@@ -99,7 +51,7 @@ export default function CeMatin({ source, client_id, actif, codes, objets }: { s
 
   const m = source === "exemple" ? exemple : reel;
   if (!m) return null;
-  const total = m.groupe.length + m.contrats.length + m.encours.length + m.reciproques.length;
+  const total = m.groupe.length + m.reserves.length + m.reportings.length + m.contrats.length + m.encours.length + m.reciproques.length;
 
   return (
     <section className="esp-carte vrl-matin" aria-label="Ce matin" style={{ marginBottom: 16 }}>

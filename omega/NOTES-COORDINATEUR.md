@@ -893,3 +893,93 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   **Bloqué, pour Teo** : la sauvegarde vers Scaleway (A5). Le contrôle des permissions de la session A5 a
   refusé un workflow qui envoie les dumps de la prod hors de GitHub. Il faut l'accord explicite de Teo.
   Numéros : a4_24 = CHECK uid_ch / hmrc + comptes système ; 19al = messageries d'A2. B7 : ouvrier taux BCE.
+- 17 h 50 Z — Poses : tests 56/58 v2 (b6ccec2 : 58 vert, 56 rouge pieces_rattachee_avant_lecture → A5),
+  b3_17 + 18 (3b51e28, vert), c3_02 + c3_03 + banc_reput (54ec0ce : tests rouges, garder_envoi refuse
+  « envoye » → C3 passe par commencer/confirmer_envoi), b4_12 + 21 (385e77c, vert), b1_09 + b1_12 (68f7d46,
+  6/6), b6_19 + b6_13 (9ad8930, vert), a4_24 + a4_17 (e3eaac3 : 2/3, filed_fournisseurs.code NOT NULL → A4),
+  b7_07 + b7_08 (67fd7ff, vert), b2_08 + 17 (981144c, vert ; b2_15 toujours rouge, b2_06b attendu).
+  **c2_01 (C2 d23388e) REFUSÉ** : modeles_jeux_coherent, comme C4 → C2.
+  Fonctions : taux-bce v1 (67fd7ff) + crons omega-taux-bce (35 14,15 * * 1-5) et taux-bce-veille ;
+  tavaro-pdf v1 (981144c) + cron chaque minute ; reput-reponse v1 (54ec0ce) + cron omega-reput ; lecteur
+  v26 (A1 c81a6d2, analyses inertes sans LECTEUR_ANALYSES).
+  omega/SOCLE-EXTRAITS-ENVOIS.sql (959f115) : 24 fonctions du socle, pour A2 et C3.
+  Main : vitrine honnête C5 (a803fd1) + écrans Tamila temps proposé, Varelo reportings, Daliro recalage,
+  Lorani contrôle du dossier → a4521d5 (non poussé : test 44 en cours).
+  **Test 44 dépasse 2 min** sur la recette → relancé avec statement_timeout 15 min (job g60) ; A5 doit
+  l'accélérer. Numéros : A4 a4_25 = CHECK uid_ch/hmrc + comptes système ; A2 19al.
+- 18 h 50 Z — Poses : 00_installation + 44 v2 (A5 3018e1d, 44 en moins d'une minute), 56 v3 (9f44233, vert),
+  b2_06b (42fdbe4) + b2_09 + 18 (1ee1134) → Tavaro tout vert ; tests b3_16/17 v2 (e15aa42), b3_18 + 19
+  (3240cb3), b3_19 + 20 (0c3976a) → 17, 18 verts, 16/19/20 rouges + **44 rouge (private.tiroma_duree_texte
+  exécutable)** → B3 ; b4_13 + 22 + 19 (f4b2ba1, vert) ; b1_10 + b1_13 (e1c4eae, vert) ; a4 tests v2 (e020969),
+  a4_25 + a4_18 (b2ee58c, vert), a4_26 + a4_26b (DROP CONSTRAINT accepté : élargissement) + a4_19 (3172b44 :
+  01/03/05 verts, 02/04 rouges tva_check → normaliser les TVA étrangères), a4_23 rouges (filed_receptions_lignes
+  client_id) → A4 ; **a4_27 REFUSÉ** (pieces_pages.page → n) → A4 ; b7_06 + b7_07 (faf9247 : 4 assertions
+  42501 au lieu de 22023) → B7 ; C3 tests v2 + c3_04 (cd1aaa2, verts) ; **19al messageries** (A2 e9f4ebc, DROP
+  CONSTRAINT d'élargissement accepté, vert) ; b6_20 + b6_14 (6dc34a7, vert ; exception anon accordée).
+  taux-bce appelé à la main (net 5289) avant 17 h Z. 46/51 verts.
+  Main e197172 : boîte de réception FILED (A3), Tamila conflits auto + honoraires du cabinet + file des avis,
+  Lorani rapport PDF/Excel, écran REPUT (C3), vitrine passe 2 (C5), Varelo branchements, Daliro signature sur
+  place (+ app/signer). C2 et C4 : c2_01 / c4_01 toujours pas corrigés (relancés).
+  Décisions : atteste:true basculé seulement au palier de production ; A1 écrit 19an_analyses ; A5 19am
+  (apercu_effacement, reception_marquer) ; A3 a la main sur ecrans.ts pour l'ancien /espace ; C4 consentement
+  = intérêt légitime B2B / soft opt-in clients existants ; A4 API logiciels comptables sur doubles (identifiants
+  de bac à sable = Teo).
+- 19 h 05 Z — Poses : a4_27 (3656d23 ; test 02 : pieces_pages.methode NOT NULL → A4), b7 test 07 v2 (a6101c9,
+  vert), 19am + test 59 (A5 79f0e58, vert), a5_01 v3 linéaire (b65dafa), Tiroma b3_19 v2 / b3_20 / b3_21 + tests
+  (2da76ec : ^test_b3_ 24/24), b1_11 + b1_14 (306d644 : 10/10, mais 44 rouge sur
+  private.grp_exiger_decideur_reception → B1 b1_11b), b6_21 météo + b6_15 (c33c69c : 14/15, gel J+3 → B6 ;
+  source = API Météo-France, Open-Meteo gratuit interdit en commercial), b5_17 + b5_08 (10a59bf, vert),
+  b2_09 v2 + 18 (2dba750, vert). tavaro-pdf v2 (6ea1694). b5_16 amendé par B5 alors qu'il était déjà posé
+  → lot de reprise b5_16b demandé. Loc_contestations : aucun gardien (visible de tous les membres) → B2 b2_09b.
+  Main : écrans Tiroma (synthèse, réinscription, absences, équipe absente, demi-journées, objectifs), Tavaro
+  facture électronique + contestations, Lorani PLU, route OAuth app/api/messagerie + guides Gmail/Microsoft.
+  C2 / C4 : c2_01 et c4_01 TOUJOURS non corrigés (lots 2 à 5 en attente derrière).
+- 19 h 20 Z — **OFFLOAD posé** : c4_01 à c4_05 + tests (C4 f99562d). ^test_c4_ 8/19 : la plupart des rouges
+  viennent de throws_ok à 3 arguments (le 3e est le message attendu) ; vrais écarts : source de consentement
+  hors CHECK (décision : source 'contrat' + preuve de la base légale, pas d'élargissement du socle),
+  « en essai, rien n'est préparé si le module est réglé en réel » non levé → C4 c4_06. b2_09b gardien des
+  contestations (3856716, b2_18 vert). b4_14 point du matin Tamila (baedbd9 ; test 23 lit s.items → points_items).
+  44 : seul rouge = private.grp_exiger_decideur_reception (B1). WebDAV : la passerelle Supabase laisse passer
+  PROPFIND/MKCOL/LOCK → A2 lot 19ao_depots. Main 5c3362c : vitrine passe 3 (C5).
+  B6 a proposé meteo_url Open-Meteo : NON posé (décision Météo-France).
+- 19 h 40 Z — Poses : b5_18 + b5_09 (152721c), **19an analyses** (A1 fd0bb0e) + b4_15 + 24 (9e51869), test b4_23 v2
+  (5644c0d), b1_11b (d6bb557 → **44 vert**), a4_28 envoi API comptable (5e509db) + a4_29 TVA étrangère normalisée
+  (7a28a06) + tests → ^test_a4_2[36-9] 19/19, c3_05 accusés/avis (1ad1430), **19ao dépôts WebDAV** (A2 59fc8d0),
+  b6 test 15 v2 (571382c, vert) + b6_22 appro (00e3337 ; test 16 : 42501 btp_echeances_commande → B6),
+  **CASHD c2_01 à c2_03 + tests** (C2 6c29b77 : 3/4, assertion 42 « coupures au journal » → C2).
+  Tous les autres verts ; 44/46/51 verts.
+  **Dépôt par lot prouvé de bout en bout** : fonction depot v1 (verify_jwt false, 59fc8d0) ; OPTIONS 200 DAV 1,2 ;
+  PUT d'un PDF → 201 → filed_documents R2026-000007 (source connecteur, en lecture) ; boîte de test fermée → 401.
+  Décisions : météo = abonnement Open-Meteo à décider par Teo (Météo-France n'a pas d'API par point) ; pas d'agenda
+  pour REPUT maintenant ; LECTEUR_ANALYSES à lire en base (pas de moyen de poser un secret Edge ici) → A1.
+  Main 4238c6c : Varelo réserves + compteur d'exemple, REPUT réglages et avis, Lorani décennales, GUIDE-DEPOT.
+- 17 h 10 Z (horloge serveur ; les entrées précédentes marquées « Z » étaient à l'heure de Paris) — Poses :
+  b3_22 règles communes + test 23 (B3 4295ff8), c4_06 consentement en source « contrat » + tests c4_01/02/03/05
+  (C4 4e6b417), b4_15 v2 politique PERMISSIVE + test 24 (B4 fad9015), test b6_16 v2 (B6 06026f4).
+  ^test_(b3_|c4_|b4_24_|b6_16_) : 834 ok, 0 échec. 44/46/51 : 32 ok, 0 échec.
+  Banc OFFLOAD installé (essai, courriel seul, jeux clients + ventes). Lecteur v27 (A1 6f57d5e : bon de livraison
+  Varelo, métré et zone PLUi Lorani).
+  Main : fusion worker-b3 (écran Règles communes, en-préparation), worker-c4 (écran /espace/offload),
+  worker-b6 (météo, appro), worker-c5 passe 4. tsc, eslint, build verts ; 6 pages × 5 largeurs sans débord.
+  Bascule C1 (0d36f55) NON fusionnée : attend Teo, après l'aperçu.
+- 17 h 25 Z — Poses : CASHD c2_02 + c2_03 v2 et tests c2_03/c2_04 (C2 8b8fbb4 : journal de relance, cashd.facture_reglee,
+  cashd_contact_en_litige), REPUT c3_06 + test (C3 83e67d5), FILED a4_30 alerte au changement d'IBAN + test a4_23
+  (A4 a3054d4), Varelo b1_12 photos + b1_13 pièce unique + tests b1_15/b1_16 (B1 10276d8), Lorani b5_19 OS, réserves,
+  GPA + test b5_10 (B5 eacc7a5), Daliro b6_23 appro suite + tests b6_17 et b6_16 v3 (B6 a1d141e), test c4_03 v3
+  (C4 f9bf72d). ^test_(c2_|c3_|a4_30_|b1_1[4-6]_|b5_10_|b6_|c4_03_) : 1120 ok, 0 échec ; 44/46/51/55 : 34 ok, 0.
+  (Attention : les noms de lot gNN sont réutilisés ; lire par motif et par heure.)
+  Lecteur v28 (A1 25c86f5 : interrupteur en base, attestation décennale). reception v12 (A2 72c21d5 : médias
+  WhatsApp). private.reglages lecteur_analyses = 'oui' sur la recette (plafond_ia_jour_client = 5).
+  Main : fusion worker-c2 (écran CASHD), c3 (écran REPUT + export), a4, b1, b4 (pilotage du cabinet), b5, b6, c4 ;
+  GUIDE-WHATSAPP (A2). Pastilles retirées : Tamila point du matin, marge, charge, séries, sans diligence ;
+  Lorani OS et réserves/GPA ; Daliro signature sur place et 4 lignes d'appro ; Varelo réserves (plus aucune ligne).
+  12 pages × 5 largeurs : 200, sans débord.
+- 17 h 45 Z (point horaire) — Pose : Lorani b5_20 comptes rendus + test b5_11 (B5 81d468d) ; ^test_b5_ : 323 ok, 0 échec
+  (la question suivie ouvre bien un suivi du socle, puis le clôt). banc_cashd joué (5781 : essai, email + lre).
+  Main : fusion worker-a3 (Demandes reçues, Réglages : journal CSV, export complet, aperçu d'effacement), worker-c5
+  passe 5 (Varelo point 9, REPUT sans prise de rendez-vous), worker-b4 jusqu'à a4b1cbc (écran des lectures longues,
+  citation non retrouvée mise à part), worker-b5 (CR de chantier), tableau-de-bord-v2 jusqu'à 7eabe12 (/espace2 :
+  REPUT, Boîte FILED) — SANS la bascule a1f12b2 (vérifié : pas ancêtre de main). Build vert ; 12 pages × 5 largeurs.
+  /espace (racine) est en 404 en ligne comme avant : c'est la bascule qui le résoudra.
+  Ouverts : export-complet appelle public.exporter_client (inexistante) → A5 ; « appel manqué par SMS » (lib/pub.ts)
+  → A2 dit si l'ouvrier envoie réellement en brevo_sms, sinon C5 reformule.

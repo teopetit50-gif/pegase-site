@@ -29,6 +29,12 @@ import { dateCourte } from "../format";
 import { ETATS, FAMILLES, NATURES_INTERVENANT, NATURES_PROJET, PHASES, ROLES_PROJET, TYPES, TYPES_PIECE, famille, prochaineDate, titrePermis, type Famille } from "./etats";
 import { dossierExemple } from "./exemples";
 import Chantier from "./Chantier";
+import Assurances from "./Assurances";
+import ComptesRendus from "./ComptesRendus";
+import OrdresService from "./OrdresService";
+import Reserves from "./Reserves";
+import Controle from "./Controle";
+import PluProjet from "./PluProjet";
 import Honoraires from "./Honoraires";
 import PermisVue from "./PermisVue";
 import { ajouterIntervenant, ajouterLot, ajouterMembre, chargerDossier, deposerCourrier, ouvrirPermis, ouvrirProjet } from "./portes";
@@ -61,7 +67,7 @@ export default function EcranLorani() {
       setReel(await chargerDossier());
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
-      setReel({ ...dossierExemple(), projets: [], permis: [], datesLues: [], echeances: [], recours: [], lots: [], intervenants: [], membres: [], pieces: [], moi: null });
+      setReel({ ...dossierExemple(), projets: [], permis: [], datesLues: [], echeances: [], recours: [], lots: [], intervenants: [], membres: [], pieces: [], controles: [], controlePieces: [], constats: [], plu: [], attestations: [], ordresService: [], reserves: [], comptesRendus: [], points: [], moi: null });
     }
   }, []);
   useEffect(() => {
@@ -765,8 +771,14 @@ function ProjetCarte({ projet, dossier, nommer, peutEcrire, envoi, ouvrirForm, a
           <div className="lor-tableau-vide">Aucun intervenant.</div>
         )}
       </div>
+      <PluProjet projet={projet} dossier={dossier} peutEcrire={peutEcrire} agir={agir} />
+      <Controle projet={projet} dossier={dossier} nommer={nommer} peutEcrire={peutEcrire} agir={agir} />
       <Honoraires projet={projet} dossier={dossier} nommer={nommer} peutEcrire={peutEcrire} agir={agir} />
       <Chantier projet={projet} dossier={dossier} peutEcrire={peutEcrire} agir={agir} />
+      <ComptesRendus projet={projet} dossier={dossier} peutEcrire={peutEcrire} agir={agir} />
+      <OrdresService projet={projet} dossier={dossier} peutEcrire={peutEcrire} agir={agir} />
+      <Reserves projet={projet} dossier={dossier} peutEcrire={peutEcrire} agir={agir} />
+      <Assurances projet={projet} dossier={dossier} peutEcrire={peutEcrire} agir={agir} />
     </section>
   );
 }

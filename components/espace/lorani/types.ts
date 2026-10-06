@@ -47,6 +47,10 @@ export type Projet = {
   phase: PhaseProjet;
   territoire: string | null;
   actif: boolean;
+  /* la déclaration d'ouverture du chantier (b5_18) : la date que les décennales doivent couvrir */
+  ouverture_chantier?: string | null;
+  /* la réception (b5_19) : la garantie de parfait achèvement court un an */
+  reception_le?: string | null;
   cree_le: string;
   maj_le: string;
 };
@@ -255,6 +259,8 @@ export type PieceProjet = {
   motif?: string | null;
   /* « courriel » : pièce jointe d'un courriel du guichet, rangée seule par son numéro de dossier (b5_11) */
   source?: string | null;
+  /* le chemin du fichier dans omega-clients (base réelle) : le rapport du contrôle en rend les pages */
+  chemin?: string | null;
   cree_le?: string;
 };
 
@@ -292,6 +298,9 @@ export type Marche = {
   retenue_pct: number;
   delai_verification_jours: number | null;
   actif: boolean;
+  /* b5_19 : le délai contractuel et la date de l'OS de démarrage */
+  delai_execution_jours?: number | null;
+  demarrage_le?: string | null;
 };
 export type Situation = {
   id: string;
@@ -322,6 +331,175 @@ export type Visa = {
   vise_le: string | null;
 };
 
+/* le contrôle du dossier (b5_16) : les pièces croisées, ce qui est relevé, ce qui est décidé */
+export type RolePieceControle = "planche" | "cctp" | "dpgf" | "plu" | "metre" | "autre";
+export type Controle = {
+  id: string;
+  projet_id: string;
+  intitule: string;
+  indice: string;
+  precedent_id: string | null;
+  statut: "en_lecture" | "controle" | "clos";
+  lance_le: string | null;
+  constats_nb: number;
+  cree_le: string;
+};
+export type ControlePiece = {
+  id: string;
+  controle_id: string;
+  piece_id: string;
+  role: RolePieceControle;
+  reference: string | null;
+};
+/* une valeur citée : la pièce, la page, la boîte et le texte lu ; « regle » pour le seuil du PLU */
+export type ValeurCitee = {
+  piece?: string;
+  reference?: string | null;
+  page?: number | null;
+  valeur?: number | string | null;
+  texte?: string | null;
+  borne?: "max" | "min";
+  article?: string | null;
+  regle?: boolean;
+  /* fractions de la page, y depuis le haut (contrat de lecture) */
+  boite?: { x: number; y: number; l: number; h: number } | null;
+};
+export type Constat = {
+  id: string;
+  controle_id: string;
+  nature: "incoherence" | "plu" | "cctp_dpgf" | "metre_dpgf";
+  gravite: "bloquant" | "majeur" | "mineur";
+  grandeur: string | null;
+  objet: string | null;
+  titre: string;
+  correction: string | null;
+  article: string | null;
+  valeurs: ValeurCitee[];
+  statut: "ouvert" | "corrige" | "accepte" | "ecarte";
+  motif: string | null;
+  precedent_id: string | null;
+  corrige_au_controle: string | null;
+  decide_par: string | null;
+  decide_le: string | null;
+};
+
+/* le PLU du projet trouvé depuis son adresse (b5_17), Géoportail de l'urbanisme */
+export type ZonePlu = { libelle: string | null; libelong: string | null; typezone: string | null; partition: string | null; idurba: string | null; nomfic: string | null; urlfic: string | null; datvalid: string | null };
+export type Plu = {
+  id: string;
+  projet_id: string;
+  statut: "a_chercher" | "geocodage" | "zonage" | "trouve" | "introuvable" | "erreur";
+  methode: "adresse" | "parcelle" | null;
+  requete: string | null;
+  point_libelle: string | null;
+  point_score: number | null;
+  zones: ZonePlu[];
+  zone: string | null;
+  document: { du_type: string | null; titre: string | null; nom: string | null; partition: string | null } | null;
+  reglement_url: string | null;
+  prescriptions: { libelle: string | null; typepsc: string | null; stypepsc: string | null }[];
+  rnu: boolean | null;
+  erreur: string | null;
+  demande_le: string;
+  trouve_le: string | null;
+};
+
+/* une attestation décennale d'entreprise, contrôlée contre le lot (b5_18) */
+export type ConstatAttestation = { code: string; gravite: "bloquant" | "majeur" | "mineur"; texte: string; activites?: string[] };
+export type Attestation = {
+  id: string;
+  projet_id: string;
+  intervenant_id: string | null;
+  lot_id: string | null;
+  piece_id: string | null;
+  assureur: string | null;
+  numero_police: string | null;
+  assure: string | null;
+  siren: string | null;
+  activites: string[];
+  debut: string | null;
+  fin: string | null;
+  plafond_eur: number | null;
+  statut: "a_verifier" | "conforme" | "non_conforme" | "expiree";
+  constats: ConstatAttestation[];
+  verifie_le: string | null;
+};
+
+/* les ordres de service et les réserves (b5_19) */
+export type NatureOs = "demarrage" | "travaux_modificatifs" | "travaux_supplementaires" | "arret" | "reprise" | "autre";
+export type OrdreService = {
+  id: string;
+  projet_id: string;
+  marche_id: string;
+  numero: number;
+  nature: NatureOs;
+  objet: string;
+  emis_le: string;
+  notifie_le: string | null;
+  montant_ht: number;
+  delai_jours: number;
+  statut: "emis" | "signe" | "signe_reserves" | "refuse";
+  reserves_entreprise: string | null;
+  reserves_jusquau: string | null;
+};
+export type Reserve = {
+  id: string;
+  projet_id: string;
+  lot_id: string | null;
+  marche_id: string | null;
+  numero: number;
+  intitule: string;
+  localisation: string | null;
+  origine: "reception" | "opr" | "gpa";
+  constatee_le: string;
+  lever_avant: string | null;
+  statut: "ouverte" | "levee" | "contestee";
+  levee_le: string | null;
+  motif: string | null;
+};
+
+/* les comptes rendus de chantier et leurs points (b5_20) */
+export type Present = { nom: string; organisme?: string | null; intervenant?: string | null; present: boolean };
+export type CompteRendu = {
+  id: string;
+  projet_id: string;
+  numero: number;
+  visite_le: string;
+  presents: Present[];
+  notes: string | null;
+  avancement: string | null;
+  prochaine_visite: string | null;
+  statut: "brouillon" | "diffuse";
+  diffuse_le: string | null;
+  contenu: ContenuCr | null;
+};
+export type Point = {
+  id: string;
+  projet_id: string;
+  lot_id: string | null;
+  intervenant_id: string | null;
+  nature: "question" | "action" | "decision" | "observation";
+  texte: string;
+  echeance: string | null;
+  statut: "ouvert" | "repondu" | "clos";
+  reponse: string | null;
+  repondu_le: string | null;
+  ouvert_au_cr: string | null;
+  clos_au_cr: string | null;
+  cree_le: string;
+  maj_le?: string;
+};
+/* le contenu d'un CR, tel que public.lorani_cr_contenu le rend (et tel qu'il est figé à la diffusion) */
+export type LigneCr = { id: string; nature: Point["nature"]; texte: string; lot: string | null; entreprise: string | null; echeance: string | null; statut: Point["statut"]; reponse: string | null; repondu_le: string | null; ne_au_cr: number | null; age_jours?: number };
+export type ContenuCr = {
+  cr: { id: string; numero: number; visite_le: string; prochaine_visite: string | null; statut: CompteRendu["statut"]; avancement: string | null; presents: Present[] };
+  projet: { nom: string; reference: string | null; adresse: string | null; commune: string | null } | null;
+  precedent: { numero: number; visite_le: string } | null;
+  nouveaux: LigneCr[];
+  en_suspens: LigneCr[];
+  soldes: LigneCr[];
+};
+
 /* tout ce que l'écran montre, d'une source ou de l'autre */
 export type Dossier = {
   projets: Projet[];
@@ -339,6 +517,15 @@ export type Dossier = {
   marches: Marche[];
   situations: Situation[];
   visas: Visa[];
+  controles: Controle[];
+  controlePieces: ControlePiece[];
+  constats: Constat[];
+  plu: Plu[];
+  attestations: Attestation[];
+  ordresService: OrdreService[];
+  reserves: Reserve[];
+  comptesRendus: CompteRendu[];
+  points: Point[];
   /* user_id → nom (annuaire) */
   noms: Record<string, string>;
   /* le compte de la personne connectée (base réelle) */

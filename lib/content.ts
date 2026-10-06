@@ -124,7 +124,7 @@ export const FAMILLES: Famille[] = [
         slug: "demandes-clients",
         title: "REPUT · demandes entrantes & avis",
         job: "Les demandes reçues par e-mail et par WhatsApp (horaires, tarifs, disponibilités, prise de rendez-vous) obtiennent une réponse à toute heure, tirée de la base de connaissances validée par vos équipes et jamais inventée. Chaque client satisfait se voit ensuite demander un avis au moment où il est le plus enclin à le laisser.",
-        benefit: "Une demande reçue à 21 h reçoit sa réponse à 21 h, sur son canal.",
+        benefit: "Une demande reçue à 21 h a sa réponse prête à 21 h, sur son canal.",
       },
       {
         system: "FILED",
@@ -393,7 +393,7 @@ export const POSTS: Post[] = [
       },
       {
         h: "Le choix Omega.AI : un espace dédié par client",
-        p: "Chez Omega.AI, chaque entreprise a son espace de données propre : chiffré, hébergé dans l'Union européenne, strictement séparé de celui des autres clients. Vous gardez vos outils de tous les jours (messagerie, tableur, WhatsApp), et c'est là que les systèmes agissent. Les modèles d'intelligence artificielle utilisés reçoivent le strict nécessaire à chaque tâche, jamais l'intégralité d'un fichier, et rien n'est réutilisé à d'autres fins.",
+        p: "Chez Omega.AI, chaque entreprise a son espace de données propre : chiffré, hébergé dans l'Union européenne, strictement séparé de celui des autres clients. Vous gardez vos outils de tous les jours (messagerie, tableur, WhatsApp), et c'est là que les systèmes agissent. Les modèles d'intelligence artificielle utilisés ne reçoivent que la pièce à lire, jamais le reste de votre espace, et rien n'est réutilisé à d'autres fins.",
       },
       {
         h: "Ce que cela change concrètement",

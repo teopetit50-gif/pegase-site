@@ -278,6 +278,13 @@ export type Dossier = {
   appels: RegistreAppels | null;
   pilotage: Pilotage | null;
   rappels: Rappels | null;
+  synthese: Synthese | null;
+  reinscription: Reinscription | null;
+  absences: AbsenceProbable[] | null;
+  equipe: AbsenceEquipe[] | null;
+  demiJournees: DemiJournees | null;
+  objectifs: Objectifs | null;
+  reglesCommunes: ReglesCommunes | null;
 };
 
 /* ——— le registre des appels (b3_12) ——— */
@@ -400,4 +407,124 @@ export type Rappels = {
   contacts: ContactPatient[];
   envois: EnvoiRappel[];
   reponses: ReponseRappel[];
+};
+
+/* ——— la synthèse de la semaine (b3_15) ——— */
+
+export type SyntheseCabinet = {
+  entite_id: string;
+  nom: string;
+  rdv: { passes: number; honores: number; manques: number; annules: number; taux_manques: number | null };
+  creneaux: { liberes: number };
+  devis: { presentes: number; signes: number; taux: number | null; montant_signe: number };
+  plans_sans_rdv: { nombre: number; montant: number };
+  appels: { appels: number; rdv_pris: number; confirmes: number };
+  rappels: { prepares: number; envoyes: number; retenus: number };
+  reinscription?: { visites: number; reinscrits: number; taux: number | null };
+  precedent?: { taux_manques: number | null; devis_signes: number | null; devis_taux: number | null; passes: number | null; reinscription_taux?: number | null };
+};
+
+export type Synthese = {
+  semaine: { du: string; au: string };
+  cabinets: SyntheseCabinet[];
+  total: {
+    passes: number; manques: number; taux_manques: number | null; creneaux_liberes: number; devis_presentes: number; devis_signes: number;
+    montant_signe: number; plans_sans_rdv: number; montant_plans_sans_rdv: number; appels: number; rdv_confirmes: number;
+    visites?: number; reinscrits?: number; reinscription_taux?: number | null;
+  };
+};
+
+/* ——— la réinscription (b3_16) ——— */
+
+export type Reinscription = {
+  periode: { du: string; au: string; jours: number };
+  visites: number;
+  reinscrits: number;
+  taux: number | null;
+  precedent: { taux: number | null; visites: number | null };
+  par_praticien: { praticien_id: string | null; nom: string | null; visites: number; reinscrits: number; taux: number | null }[];
+  sans_suite: { patient_id: string; patient_nom: string; derniere_visite: string; praticien: string | null }[];
+};
+
+/* ——— les absences probables (b3_17) ——— */
+
+export type AbsenceProbable = {
+  rendez_vous_id: string;
+  debut: string;
+  patient_id: string;
+  patient_nom: string;
+  praticien_nom: string | null;
+  fauteuil_nom: string | null;
+  score: number;
+  niveau: "fort" | "moyen" | "annonce";
+  raisons: string[];
+  annonce: boolean;
+};
+
+/* ——— assistante absente : les soins à basculer (b3_18) ——— */
+
+export type MotifAbsenceMembre = "conge" | "maladie" | "formation" | "autre";
+
+export type SoinABasculer = {
+  rendez_vous_id: string;
+  debut: string;
+  fin: string;
+  patient_nom: string;
+  soin: string | null;
+  vers: { fauteuil_id: string; fauteuil_nom: string; assistante: string }[];
+};
+
+export type AbsenceEquipe = {
+  absence_id: string;
+  membre_id: string;
+  membre: string;
+  motif: MotifAbsenceMembre;
+  debut: string;
+  fin: string;
+  fauteuil_id: string | null;
+  fauteuil_nom: string | null;
+  soins: SoinABasculer[];
+};
+
+/* ——— les demi-journées vides des praticiens (b3_19) ——— */
+
+export type DemiJourneeVide = {
+  praticien_id: string;
+  praticien: string;
+  jour: string;
+  moment: "matin" | "apres_midi";
+  source: "horaires" | "habitude";
+  ouvert_min: number;
+  prevu_min: number;
+  libre_min: number;
+  taux: number;
+  attente: number;
+};
+
+export type DemiJournees = { du: string; au: string; seuil: number | null; demi_journees: DemiJourneeVide[] };
+
+/* ——— les objectifs par fauteuil (b3_20) ——— */
+
+export type SemaineFauteuil = { lundi: string; ouvert_min: number; occupe_min: number; taux: number | null; atteint: boolean | null };
+
+export type ObjectifFauteuil = {
+  fauteuil_id: string;
+  nom: string;
+  objectif: number | null;
+  semaines: SemaineFauteuil[];
+  moyenne: number | null;
+  atteintes: number;
+  comptees: number;
+};
+
+export type Objectifs = {
+  semaines: { lundi: string; nature: "realisee" | "prevue"; en_cours: boolean }[];
+  fauteuils: ObjectifFauteuil[];
+};
+
+/* ——— les règles de priorité communes à plusieurs centres (b3_22) ——— */
+
+export type ReglesCommunes = {
+  centres: { entite_id: string; nom: string; regles: Record<string, unknown> }[];
+  ecarts: string[];
 };

@@ -10,7 +10,12 @@
    honoraires : saisir du temps, facturer, convention manquante (b4_06) ;
    les conflits d'intérêts et la vigilance LCB-FT (b4_07) ; la facture
    imprimable et l'en-tête du cabinet (b4_09) ; les avis RPVA reçus par
-   courriel, à rattacher (b4_10), avec axe-core sur la carte et le dialogue.
+   courriel, à rattacher (b4_10), avec axe-core sur la carte et le dialogue ;
+   le temps proposé à la saisie et le forfait consommé (b4_12) ; le contrôle
+   des conflits lancé de lui-même à l'ajout d'une partie ; le tableau des
+   honoraires du cabinet (1440 et 390 px, axe-core) ; le pilotage du cabinet
+   (marge, charge, séries, sans diligence, pièces attendues) ; les lectures
+   longues du dossier (chronologie déchiffrée, citations, demande).
    usage : node omega/recette-b4/recette-tamila.mjs [origine] */
 import { mkdirSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -324,6 +329,202 @@ for (const largeur of LARGEURS) {
   await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Écarter\\s*$/.test(b.textContent))?.click()`);
   await s.dormir(800);
   ok(await carte() === null, 'le dernier avis écarté : la file disparaît');
+  s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b4-temps-propose', densite: 1 });
+  console.log('— le temps proposé à la saisie, le forfait consommé (b4_12)');
+  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  await s.dormir(600);
+  const hono = () => s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Honoraires"]'); return c ? c.innerText : ''; })()`);
+  const ref = await s.evaluer(`document.querySelector('#esp-dossier .esp-carte-titre .esp-mono')?.textContent`);
+  ok(ref === '2026-0377', `dossier au forfait ouvert d'office (${ref})`);
+  const h0 = await hono();
+  ok(/Forfait consommé/.test(h0) && /85 % du temps prévu/.test(h0), 'forfait : 85 % du temps prévu');
+  ok(/17 h 00 passées sur 20 h 00 prévues/.test(h0) && /176,47\s€ HT de l.heure/.test(h0), '17 h sur 20 h, taux effectif 176,47 € de l\'heure');
+  ok(/Plus de 80 % du temps prévu/.test(h0), 'l\'alerte à 80 %');
+  const jauge = await s.evaluer(`(() => { const j = document.querySelector('section[aria-label="Honoraires"] .tam-jauge'); return j ? j.getAttribute('aria-valuenow') + '/' + j.dataset.teinte : null; })()`);
+  ok(jauge === '85/ambre', `la jauge : ${jauge}`);
+  ok(/Proposé à la saisie/.test(h0) && /Signifier les conclusions aux parties non constituées : déposé le/.test(h0), 'l\'acte déposé il y a cinq jours est proposé');
+  ok(!/Accusé de dépôt/.test(h0.split('Proposé à la saisie')[1]?.split('Temps passé')[0] ?? ''), 'l\'accusé de dépôt n\'est pas proposé une seconde fois');
+  await s.evaluer(`[...document.querySelectorAll('section[aria-label="Temps proposé à la saisie"] .esp-lien-bouton, [aria-label="Temps proposé à la saisie"] .esp-lien-bouton')].find(b => /Ignorer/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const h1 = await hono();
+  ok(!/Proposé à la saisie/.test(h1) && /ne vous sera plus proposé/.test(h1), 'ignorée : la proposition disparaît');
+  await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /2026-0412/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const h2 = await hono();
+  ok(/Traitement : Ordonnance du conseiller de la mise en état du/.test(h2), 'dossier 2026-0412 : l\'ordonnance reçue est proposée');
+  ok(!/Forfait consommé/.test(h2), 'au temps passé, pas de jauge de forfait');
+  const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+  await s.evaluer(axe + ';true');
+  const graves = (cible) => s.evaluer(`(async () => { const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`);
+  const g1 = await graves(`document.querySelector('section[aria-label="Honoraires"]')`);
+  ok(g1.length === 0, `axe sur la carte Honoraires : ${g1.length ? g1.join(' ; ') : 'aucun écart grave'}`);
+  await s.evaluer(`(e => { e?.focus(); e?.click(); })([...document.querySelectorAll('[aria-label="Temps proposé à la saisie"] .esp-lien-bouton')].find(b => /Saisir/.test(b.textContent)))`);
+  await s.dormir(600);
+  const dlg = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); if (!d) return null; const v = (l) => [...d.querySelectorAll('label')].find(x => x.textContent.startsWith(l))?.querySelector('input,select,textarea')?.value; return { titre: d.querySelector('h2')?.textContent, nature: v('Nature'), heures: v('Heures'), minutes: v('Minutes'), description: v('Ce qui a été fait') }; })()`);
+  ok(dlg && dlg.nature === 'correspondance' && dlg.heures === '0' && dlg.minutes === '15' && /Ordonnance/.test(dlg.description), `formulaire pré-rempli : ${dlg?.nature}, ${dlg?.heures} h ${dlg?.minutes}`);
+  const g2 = await graves(`document.querySelector('[role="dialog"]')`);
+  ok(g2.length === 0, `axe sur le dialogue : ${g2.length ? g2.join(' ; ') : 'aucun écart grave'}`);
+  await s.capturer(`${dossier}tamila-temps-propose-1440.jpg`, { qualite: 55 });
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Saisir\\s*$/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const h3 = await hono();
+  ok(!/Proposé à la saisie/.test(h3) && /0 h 15 de correspondance saisies/.test(h3), 'saisie : le temps entre au dossier, la proposition disparaît');
+  s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b4-conflit-auto', densite: 1 });
+  console.log('— le contrôle des conflits, automatique à l\'ajout d\'une partie');
+  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  await s.dormir(500);
+  await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /2026-0398/.test(b.textContent))?.click()`);
+  await s.dormir(600);
+  const carte = () => s.evaluer(`document.querySelector('section[aria-label="Conflits d\\'intérêts et vigilance"]')?.innerText || ''`);
+  const ajouter = async (nom, qualite) => {
+    await s.evaluer(`[...document.querySelectorAll('section[aria-label="Parties"] .r-btn')].find(b => /Ajouter/.test(b.textContent))?.click()`);
+    await s.dormir(400);
+    await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const champ = (l) => [...d.querySelectorAll('label')].find(x => x.textContent.startsWith(l))?.querySelector('input,select');
+      const i = champ('Nom'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, ${JSON.stringify(nom)}); i.dispatchEvent(new Event('input', { bubbles: true }));
+      const q = champ('Qualité'); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(q, ${JSON.stringify(qualite)}); q.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+    await s.dormir(200);
+    await s.evaluer(`document.querySelector('[role="dialog"] .r-btn--noir')?.click()`);
+    await s.dormir(1300);
+  };
+  await ajouter('Moulin (SCI du)', 'adverse');
+  const t1 = await carte();
+  ok(/Contrôle automatique de « Moulin \(SCI du\) » : 1 conflit/.test(t1), 'l\'adversaire ajouté est contrôlé sans geste : un conflit (cliente dans 2026-0412)');
+  ok(/Conflit : client dans le dossier 2026-0412/.test(t1) && /Décider/.test(t1), 'le conflit est nommé, la décision est proposée');
+  const alerte = await s.evaluer(`[...document.querySelectorAll('section[aria-label="Conflits d\\'intérêts et vigilance"] [role="alert"]')].length`);
+  ok(alerte >= 1, 'annoncé comme une alerte');
+  await ajouter('Mme Paule Neuve', 'client');
+  const t2 = await carte();
+  ok(/Nouvelle partie contrôlée d.elle-même : aucun conflit/.test(t2) && /Paule Neuve[\s\S]*Aucune correspondance/.test(t2), 'un client jamais vu : contrôlé de lui-même, aucun conflit');
+  ok(/Moulin \(SCI du\)/.test(t2), 'le conflit précédent reste affiché');
+  s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
+  s.fermer();
+}
+
+for (const largeur of [1440, 390]) {
+  const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'b4-hono-cabinet', densite: 1 });
+  console.log(`— le tableau des honoraires du cabinet à ${largeur}`);
+  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  await s.dormir(600);
+  await s.evaluer(`(e => { e?.focus(); e?.click(); })([...document.querySelectorAll('.esp-tete .r-btn')].find(b => /Honoraires du cabinet/.test(b.textContent)))`);
+  await s.dormir(800);
+  const d = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); if (!d) return null; const w = document.documentElement.clientWidth;
+    return { titre: d.querySelector('h2')?.textContent, texte: d.innerText, lignes: d.querySelectorAll('tbody tr').length, deb: document.documentElement.scrollWidth - w,
+             panneau: Math.round(d.getBoundingClientRect().right) <= w + 1, region: !!d.querySelector('.tam-cabinet-table[role="region"][tabindex="0"]') }; })()`);
+  ok(d && d.titre === 'Honoraires du cabinet', `dialogue « ${d?.titre} »`);
+  ok(d && d.lignes >= 5, `${d?.lignes} dossiers au tableau`);
+  ok(/485,00\s€/.test(d?.texte ?? '') && /312,50\s€/.test(d?.texte ?? ''), '2026-0412 : 312,50 € à facturer (1 h 15 à 250 €), 485 € restent dus');
+  ok(/3\s000,00\s€/.test(d?.texte ?? '') && /Forfait consommé à 85 %/.test(d?.texte ?? ''), '2026-0377 : le forfait de 3 000 € à facturer, consommé à 85 %');
+  ok(d && d.deb === 0 && d.panneau, `le dialogue tient dans ${largeur} px (débordement ${d?.deb})`);
+  ok(d && d.region, 'le tableau défile seul, atteignable au clavier');
+  if (largeur === 1440) {
+    const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+    await s.evaluer(axe + ';true');
+    const g = await s.evaluer(`(async () => { const r = await axe.run(document.querySelector('[role="dialog"]'), { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+      return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`);
+    ok(g.length === 0, `axe sur le tableau : ${g.length ? g.join(' ; ') : 'aucun écart grave'}`);
+    await s.evaluer(`[...document.querySelectorAll('[role="dialog"] .tam-cabinet-filtres .r-btn')].find(b => /À traiter/.test(b.textContent))?.click()`);
+    await s.dormir(300);
+    const n = await s.evaluer(`document.querySelectorAll('[role="dialog"] tbody tr').length`);
+    ok(n >= 1 && n < d.lignes, `« À traiter » : ${n} dossier(s)`);
+    await s.capturer(`${dossier}tamila-honoraires-cabinet-1440.jpg`, { qualite: 55 });
+    await s.evaluer(`[...document.querySelectorAll('[role="dialog"] tbody .esp-lien-bouton')].find(b => /2026-0377/.test(b.textContent))?.click()`);
+    await s.dormir(600);
+    const ref = await s.evaluer(`document.querySelector('[role="dialog"]') ? 'ouvert' : document.querySelector('#esp-dossier .esp-carte-titre .esp-mono')?.textContent`);
+    ok(ref === '2026-0377', `un clic sur la référence ouvre le dossier (${ref})`);
+  } else {
+    await s.capturer(`${dossier}tamila-honoraires-cabinet-390.jpg`, { qualite: 55 });
+  }
+  s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
+  s.fermer();
+}
+
+for (const largeur of [1440, 390]) {
+  const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'b4-pilotage', densite: 1 });
+  console.log(`— le pilotage du cabinet à ${largeur}`);
+  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  await s.dormir(600);
+  await s.evaluer(`(e => { e?.focus(); e?.click(); })([...document.querySelectorAll('.esp-tete .r-btn')].find(b => /Pilotage/.test(b.textContent)))`);
+  await s.dormir(900);
+  const texte = () => s.evaluer(`document.querySelector('[role="dialog"]')?.innerText || ''`);
+  const vue = async (nom) => { await s.evaluer(`[...document.querySelectorAll('[role="dialog"] .tam-cabinet-filtres .r-btn')].find(b => b.textContent.startsWith(${JSON.stringify(nom)}))?.click()`); await s.dormir(300); return texte(); };
+  const t0 = await texte();
+  ok(/Pilotage du cabinet/.test(t0) && ['Marge', 'Charge', 'Séries', 'Sans diligence', 'Pièces attendues'].every((v) => t0.includes(v)), 'le dialogue et ses cinq vues');
+  ok(/2026-0412/.test(t0) && /738\s€/.test(t0), '2026-0412 : 1 187,50 € HT contre 5 h à 90 € → marge 738 €');
+  ok(/2026-0377/.test(t0) && /1\s470\s€/.test(t0), '2026-0377 : forfait de 3 000 € contre 17 h à 90 € → marge 1 470 €');
+  const d = await s.evaluer(`(() => { const w = document.documentElement.clientWidth; const d = document.querySelector('[role="dialog"]'); return { deb: document.documentElement.scrollWidth - w, bord: Math.round(d.getBoundingClientRect().right) <= w + 1 }; })()`);
+  ok(d.deb === 0 && d.bord, `le dialogue tient dans ${largeur} px`);
+  if (largeur === 1440) {
+    const t1 = await vue('Charge');
+    ok(/Me Claire Delorme/.test(t1) && /Temps saisi \(30 jours\)/.test(t1), 'la charge par personne');
+    const t2 = await vue('Séries');
+    ok(/SCI du Moulin/.test(t2) && /Même partie/.test(t2) && /2026-0430/.test(t2), 'une série : deux dossiers où figure la SCI du Moulin');
+    const t3 = await vue('Pièces attendues');
+    ok(/exemplaire signé de la convention/.test(t3), 'la convention signée dont l\'exemplaire manque');
+    const t4 = await vue('Sans diligence');
+    ok(/jours sans diligence|a bougé dans les 45 derniers jours/.test(t4), 'la vue « sans diligence » répond');
+    const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+    await s.evaluer(axe + ';true');
+    await vue('Marge');
+    const g = await s.evaluer(`(async () => { const r = await axe.run(document.querySelector('[role="dialog"]'), { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+      return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`);
+    ok(g.length === 0, `axe sur le pilotage : ${g.length ? g.join(' ; ') : 'aucun écart grave'}`);
+    await s.capturer(`${dossier}tamila-pilotage-1440.jpg`, { qualite: 55 });
+  } else {
+    await s.capturer(`${dossier}tamila-pilotage-390.jpg`, { qualite: 55 });
+  }
+  s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
+  s.fermer();
+}
+
+for (const largeur of [1440, 390]) {
+  const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'b4-analyses', densite: 1 });
+  console.log(`— les lectures longues du dossier à ${largeur}`);
+  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  await s.dormir(600);
+  await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /2026-0412/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const carte = () => s.evaluer(`document.querySelector('section[aria-label="Lectures du dossier"]')?.innerText || ''`);
+  const t0 = await carte();
+  ok(/Chronologie/.test(t0) && /Prête/.test(t0) && /1 à vérifier/.test(t0), 'la chronologie est prête, un constat à vérifier');
+  ok(/ne se lit qu.ici/.test(t0), 'la mention : résultat chiffré, lu seulement ici');
+  const m = await s.evaluer(`(() => { const w = document.documentElement.clientWidth; return { deb: document.documentElement.scrollWidth - w }; })()`);
+  ok(m.deb === 0, `la carte tient dans ${largeur} px`);
+  await s.evaluer(`(e => { e?.focus(); e?.click(); })([...document.querySelectorAll('section[aria-label="Lectures du dossier"] .esp-lien-bouton')].find(b => /Lire/.test(b.textContent)))`);
+  await s.dormir(700);
+  const t1 = await s.evaluer(`document.querySelector('[role="dialog"]')?.innerText || ''`);
+  ok(/Chronologie — 2026-0412/.test(t1) && /3 constat\(s\)/.test(t1), 'le dialogue : la chronologie du dossier, trois constats');
+  ok(/conclusions-adverses\.pdf, p\. 5, l\. 12-14/.test(t1) && /« dès le mois de février 2023, des infiltrations »/.test(t1), 'chaque constat cite la pièce, la page, les lignes et l\'extrait');
+  ok(/Non retrouvée dans la pièce, ne vaut pas preuve/.test(t1) && /Vérifiée/.test(t1), 'une citation non retrouvée est mise à part : elle ne vaut pas preuve');
+  ok(/02\/2023/.test(t1) && /14\/06\/2019/.test(t1), 'les dates, à leur précision (mois, jour)');
+  if (largeur === 1440) {
+    const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+    await s.evaluer(axe + ';true');
+    const g = await s.evaluer(`(async () => { const r = await axe.run(document.querySelector('[role="dialog"]'), { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+      return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`);
+    ok(g.length === 0, `axe sur la lecture : ${g.length ? g.join(' ; ') : 'aucun écart grave'}`);
+    const doc = await s.evaluer(`document.querySelector('iframe.tam-analyse-impression')?.contentDocument?.body?.innerText || ''`);
+    ok(/Chronologie — 2026-0412/.test(doc) && /l'avocat vérifie avant tout usage/.test(doc) && /ne vaut pas preuve/.test(doc), 'le document à imprimer ou exporter en Word est composé');
+    await s.capturer(`${dossier}tamila-analyse-1440.jpg`, { qualite: 55 });
+    await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Fermer/.test(b.textContent))?.click()`);
+    await s.dormir(400);
+    await s.evaluer(`[...document.querySelectorAll('section[aria-label="Lectures du dossier"] .r-btn')].find(b => /Bordereau/.test(b.textContent))?.click()`);
+    await s.dormir(700);
+    const t2 = await carte();
+    ok(/Bordereau demandée/.test(t2) && /Bordereau[\s\S]*Demandée/.test(t2), 'le bordereau est demandé au lecteur');
+  } else {
+    await s.capturer(`${dossier}tamila-analyse-390.jpg`, { qualite: 55 });
+  }
   s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
   s.fermer();
 }

@@ -17,7 +17,7 @@ let echecs = 0;
 const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) echecs++; };
 const ANGLAIS = /\b(Loading|Submit|Cancel|Approve|Reject|Delete|Save|Error|Pending|Due|Invoice|Supplier|Settings|Logout|Sign in|Dashboard|Today|Yesterday|Tomorrow|Chair|Patient list|Appointment)\b/;
 const LARGEURS = [390, 768, 1024, 1440, 1700];
-const CARTES = ['Créneaux à sauver', 'Plans sans rendez-vous', 'Avant les rendez-vous', 'Charge des fauteuils', 'Appels', 'Pilotage', 'Rappels aux patients', "Liste d'attente", 'Le cabinet'];
+const CARTES = ['Créneaux à sauver', 'Plans sans rendez-vous', 'Avant les rendez-vous', 'Charge des fauteuils', 'Demi-journées vides', 'Objectifs par fauteuil', 'Absences probables', 'Équipe absente', 'Appels', 'Synthèse de la semaine', 'Réinscription', 'Pilotage', 'Rappels aux patients', "Liste d'attente", 'Règles communes', 'Le cabinet'];
 
 for (const largeur of LARGEURS) {
   const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'b3-tiroma', densite: 1 });
@@ -40,7 +40,7 @@ for (const largeur of LARGEURS) {
   ok(!anglais, anglais ? `mot anglais à l'écran : « ${anglais[0]} »` : 'aucun mot anglais surveillé à l\'écran');
   ok(mesure.h1 === 'Cabinet dentaire', `titre : ${mesure.h1}`);
   ok(mesure.kpis === 4, `quatre compteurs (${mesure.kpis})`);
-  ok(CARTES.every((c) => mesure.cartes.includes(c)), `les neuf cartes : ${mesure.cartes.join(' · ')}`);
+  ok(CARTES.every((c) => mesure.cartes.includes(c)), `les seize cartes : ${mesure.cartes.join(' · ')}`);
   ok(mesure.ruban === "Données d'exemple", `ruban : ${mesure.ruban}`);
   ok(/Marguerite Delannoy/.test(mesure.texte) && /Plan accepté/.test(mesure.texte), 'un créneau à sauver porte son premier candidat (plan accepté)');
   ok(/Fauteuil 2/.test(mesure.texte) && /Après-midi vide/.test(mesure.texte), 'la charge dit la demi-journée vide du fauteuil 2');
@@ -141,6 +141,101 @@ for (const largeur of LARGEURS) {
   await s.evaluer(`document.getElementById('tiroma-appels')?.scrollIntoView({ block: 'start' })`);
   await s.dormir(400);
   await s.capturer(`${dossier}tiroma-appels-1440.jpg`, { qualite: 55 });
+
+  console.log('— /espace/tiroma : les absences probables (exemple, b3_17)');
+  const abs = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Absences probables"]'); if (!c) return null;
+    const li = [...c.querySelectorAll('ul[aria-label="Rendez-vous à risque d\\'absence"] > li')];
+    return { n: li.length, premier: li[0]?.innerText || '', texte: c.innerText }; })()`);
+  ok(abs && abs.n === 3, `trois rendez-vous à risque (${abs?.n})`);
+  ok(abs && /A annoncé son absence/.test(abs.premier), 'l\'absence annoncée vient en tête');
+  ok(abs && /2 rendez-vous manqués en 18 mois/.test(abs.texte), 'chaque risque dit sa raison');
+  await s.evaluer(`document.getElementById('tiroma-absences')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(400);
+  await s.capturer(`${dossier}tiroma-absences-1440.jpg`, { qualite: 55 });
+
+  console.log('— /espace/tiroma : l\'équipe absente, les soins à basculer (exemple, b3_18)');
+  const eq = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Équipe absente"]'); if (!c) return null;
+    return { n: c.querySelectorAll('ul[aria-label^="Soins à basculer"] > li').length, texte: c.innerText }; })()`);
+  ok(eq && eq.n === 2, `deux soins à basculer pendant l'absence d'Élodie (${eq?.n})`);
+  ok(eq && /Vers Fauteuil 2 \(avec Karine\)/.test(eq.texte), 'le soin de Sylvie Marlin bascule vers le Fauteuil 2, avec Karine');
+  ok(eq && /Aucun fauteuil libre/.test(eq.texte), 'la chirurgie sans fauteuil libre le dit');
+  await s.evaluer(`[...document.querySelectorAll('section[aria-label="Équipe absente"] button')].find(b => /Noter une absence/.test(b.textContent))?.click()`);
+  await s.dormir(500);
+  ok(await s.evaluer(`/Noter une absence/.test(document.querySelector('[role="dialog"]')?.textContent || '')`), 'le dialogue « Noter une absence » s\'ouvre');
+  await s.evaluer(`(() => { const sel = document.querySelector('[role="dialog"] select.rv-champ'); const set = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set; set.call(sel, 'm-2'); sel.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+  await s.evaluer(`document.querySelector('[role="dialog"] input[type="radio"][value="maladie"]')?.click()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Noter/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const eq2 = await s.evaluer(`document.querySelector('section[aria-label="Équipe absente"]')?.innerText || ''`);
+  ok(!(await s.evaluer(`!!document.querySelector('[role="dialog"]')`)) && /Karine — Fauteuil 2/.test(eq2) && /Arrêt/.test(eq2), 'l\'absence de Karine (arrêt) est notée, le dialogue se ferme');
+  await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Équipe absente"]'); const b = [...c.querySelectorAll('button')].filter(b => /Clore l.absence/.test(b.textContent)).pop(); b?.click(); })()`);
+  await s.dormir(400);
+  ok(!/Karine — Fauteuil 2/.test(await s.evaluer(`document.querySelector('section[aria-label="Équipe absente"]')?.innerText || ''`)), '« Clore l\'absence » la retire');
+  await s.evaluer(`document.getElementById('tiroma-equipe')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(400);
+  await s.capturer(`${dossier}tiroma-equipe-1440.jpg`, { qualite: 55 });
+
+  console.log('— /espace/tiroma : les demi-journées vides (exemple, b3_19)');
+  const dj = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Demi-journées vides"]'); if (!c) return null;
+    return { n: c.querySelectorAll('ul[aria-label="Demi-journées à remplir"] > li').length, texte: c.innerText }; })()`);
+  ok(dj && dj.n === 3, `trois demi-journées à remplir (${dj?.n})`);
+  ok(dj && /Dr Mathis Rousseau/.test(dj.texte) && /4 h 30 libres sur 5 h/.test(dj.texte), 'le titulaire voit le praticien et les heures libres');
+  ok(dj && /3 patients en liste d'attente/.test(dj.texte) && /habituelles/.test(dj.texte), 'la liste d\'attente et la source « habitude » sont dites');
+  await s.evaluer(`document.getElementById('tiroma-demi-journees')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(400);
+  await s.capturer(`${dossier}tiroma-demi-journees-1440.jpg`, { qualite: 55 });
+
+  console.log('— /espace/tiroma : les objectifs par fauteuil (exemple, b3_20)');
+  const obj = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Objectifs par fauteuil"]'); if (!c) return null;
+    return { lignes: c.querySelectorAll('tbody tr').length, cols: c.querySelectorAll('thead th').length, texte: c.innerText }; })()`);
+  ok(obj && obj.lignes === 3 && obj.cols === 10, `trois fauteuils, six semaines (${obj?.lignes} lignes, ${obj?.cols} colonnes)`);
+  ok(obj && /Cette semaine/.test(obj.texte) && /3\/4/.test(obj.texte), 'la semaine en cours et le compte des semaines tenues');
+  await s.evaluer(`(() => { const tr = [...document.querySelectorAll('section[aria-label="Objectifs par fauteuil"] tbody tr')].find(t => /Fauteuil 2/.test(t.textContent)); [...tr.querySelectorAll('button')].find(b => /Changer/.test(b.textContent))?.click(); })()`);
+  await s.dormir(500);
+  ok(await s.evaluer(`/Objectif — Fauteuil 2/.test(document.querySelector('[role="dialog"]')?.textContent || '')`), 'le dialogue « Objectif — Fauteuil 2 » s\'ouvre');
+  await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input.rv-champ'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, '65'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const obj2 = await s.evaluer(`(() => { const tr = [...document.querySelectorAll('section[aria-label="Objectifs par fauteuil"] tbody tr')].find(t => /Fauteuil 2/.test(t.textContent)); return tr ? tr.innerText : ''; })()`);
+  ok(!(await s.evaluer(`!!document.querySelector('[role="dialog"]')`)) && /65 %/.test(obj2) && /4\/4/.test(obj2), 'objectif ramené à 65 % : le Fauteuil 2 tient ses quatre semaines');
+  await s.evaluer(`document.getElementById('tiroma-objectifs')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(400);
+  await s.capturer(`${dossier}tiroma-objectifs-1440.jpg`, { qualite: 55 });
+
+  console.log('— /espace/tiroma : les règles communes à deux centres (exemple, b3_22)');
+  const rc = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Règles communes"]'); if (!c) return null;
+    return { lignes: c.querySelectorAll('tbody tr').length, texte: c.innerText }; })()`);
+  ok(rc && rc.lignes === 2 && /2 écarts/.test(rc.texte) && /attente → plan → contrôle/.test(rc.texte), `deux règles diffèrent entre les centres (${rc?.lignes})`);
+  await s.evaluer(`[...document.querySelectorAll('section[aria-label="Règles communes"] button')].find(b => /Aligner sur ce centre/.test(b.textContent))?.click()`);
+  await s.dormir(500);
+  ok(await s.evaluer(`/Aligner sur/.test(document.querySelector('[role="dialog"]')?.textContent || '')`), 'le dialogue « Aligner sur … » s\'ouvre');
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Aligner/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const rc2 = await s.evaluer(`document.querySelector('section[aria-label="Règles communes"]')?.innerText || ''`);
+  ok(/Mêmes règles partout/.test(rc2) && /1 centre aligné/.test(rc2), 'après l\'alignement : mêmes règles partout, un centre aligné');
+  await s.evaluer(`document.getElementById('tiroma-regles-communes')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}tiroma-regles-communes-1440.jpg`, { qualite: 55 });
+
+  console.log('— /espace/tiroma : la synthèse de la semaine (exemple, b3_15)');
+  const syn = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Synthèse de la semaine"]'); if (!c) return null;
+    return { lignes: c.querySelectorAll('tbody tr').length, texte: c.innerText }; })()`);
+  ok(syn && syn.lignes === 2, `deux centres dans la synthèse (${syn?.lignes})`);
+  ok(syn && /4,2 %/.test(syn.texte) && !/(Dorville|Delannoy|Bazile)/.test(syn.texte), 'le taux de manqués des deux centres (4,2 %), sans nom de patient');
+  await s.evaluer(`document.getElementById('tiroma-synthese')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(400);
+  await s.capturer(`${dossier}tiroma-synthese-1440.jpg`, { qualite: 55 });
+
+  console.log('— /espace/tiroma : la réinscription (exemple, b3_16)');
+  const rei = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Réinscription"]'); if (!c) return null;
+    return { texte: c.innerText, sans: c.querySelectorAll('ul[aria-label="Patients vus sans prochain rendez-vous"] > li').length }; })()`);
+  ok(rei && /74,6 %/.test(rei.texte) && /\+2,8 pt sur la période d'avant/.test(rei.texte), 'le taux de réinscription (74,6 %) et son écart (+2,8 pt)');
+  ok(rei && rei.sans === 3, `trois patients vus sans prochain rendez-vous (${rei?.sans})`);
+  await s.evaluer(`document.getElementById('tiroma-reinscription')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(400);
+  await s.capturer(`${dossier}tiroma-reinscription-1440.jpg`, { qualite: 55 });
 
   console.log('— /espace/tiroma : le pilotage du titulaire (exemple, b3_13)');
   const pil = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Pilotage"]'); if (!c) return null;

@@ -169,7 +169,7 @@
 }
 @media (min-width: 1440px) {
   .esp .vrl-matin-blocs {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 .esp .vrl-matin-bloc .esp-section-titre a {
@@ -195,4 +195,63 @@
 }
 .esp .vrl-matin-liste li[data-gravite="attention"] {
   border-left-color: var(--esp-ambre);
+}
+
+/* une case à cocher dans un formulaire (b1_09) */
+.esp-form .vrl-case,
+.dlg-panneau .vrl-case {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-weight: 400;
+}
+
+/* les exports attendus d'un branchement (b1_10) */
+.dlg-panneau .vrl-jeux,
+.esp .vrl-jeux {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+/* la lettre de protestation au transporteur (b1_11) */
+.dlg-panneau .vrl-lettre,
+.esp .vrl-lettre {
+  width: 100%;
+  min-height: 280px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12.5px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  resize: vertical;
+}
+
+/* les photos du constat (b1_12) */
+.dlg-panneau .vrl-photos,
+.esp .vrl-photos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+}
+.vrl-photos li {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.vrl-photos img,
+.vrl-photo-attente {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 6px;
+  background: var(--esp-fond-doux, rgba(127, 127, 127, 0.12));
+}
+.vrl-photos .vrl-paire-sous {
+  overflow-wrap: anywhere;
 }

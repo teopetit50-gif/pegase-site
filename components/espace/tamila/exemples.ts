@@ -244,6 +244,7 @@ export const DESCRIPTIONS_TEMPS_EXEMPLE: Record<string, string> = {
 };
 
 export function honorairesExemple(dossier: string): Honoraires {
+  if (dossier === D3) return forfaitExemple();
   if (dossier !== D1) return { convention: null, conventions: [], temps: [], provisions: [], factures: [] };
   const convention = {
     id: `${D1}-hc`, client_id: C, dossier_id: D1, mode: "temps_passe" as const, taux_horaire_cents: 25000, forfait_cents: null, complement_resultat_pct: 10, taux_tva: 20,
@@ -264,6 +265,21 @@ export function honorairesExemple(dossier: string): Honoraires {
     temps: [temps(4, ROUSSEAU, 1, 15, "correspondance", "saisi", false), temps(3, ROUSSEAU, 2, 75, "recherche", "saisi"), temps(1, MOI, 9, 150, "redaction", "facture"), temps(2, MOI, 12, 60, "rendez_vous", "facture")],
     provisions: [{ id: `${D1}-hp1`, client_id: C, dossier_id: D1, montant_ttc_cents: 60000, demandee_le: jour(ilYa(22)), recue_le: jour(ilYa(18)), mode_reglement: "virement", statut: "recue", facture_id: facture.id, cree_par: MOI, cree_le: ilYa(22) }],
     factures: [facture],
+  };
+}
+
+/* Le dossier 2026-0377 est au forfait (3 000 € HT, prévu pour 20 heures) : 17 heures passées, 85 % (b4_12). */
+function forfaitExemple(): Honoraires {
+  const convention = {
+    id: `${D3}-hc`, client_id: C, dossier_id: D3, mode: "forfait" as const, taux_horaire_cents: null, forfait_cents: 300000, complement_resultat_pct: null, taux_tva: 20,
+    urgence: false, statut: "signee" as const, signee_le: jour(ilYa(84)), piece_id: null, cree_par: MOI, cree_le: ilYa(85), resiliee_le: null, minutes_prevues: 1200,
+  };
+  const temps = (n: number, user_id: string, il: number, minutes: number, nature: Honoraires["temps"][number]["nature"]) => ({
+    id: `${D3}-h${n}`, client_id: C, dossier_id: D3, user_id, jour: jour(ilYa(il)), minutes, nature, description_chiffree: null, facturable: true, statut: "saisi" as const, facture_id: null, cree_le: ilYa(il),
+  });
+  return {
+    convention, conventions: [convention], provisions: [], factures: [],
+    temps: [temps(1, MOI, 6, 240, "redaction"), temps(2, BENALI, 10, 300, "recherche"), temps(3, MOI, 30, 180, "redaction"), temps(4, BENALI, 60, 120, "recherche"), temps(5, MOI, 80, 180, "consultation")],
   };
 }
 
