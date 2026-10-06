@@ -16,7 +16,7 @@ mkdirSync(dossier, { recursive: true });
 let echecs = 0;
 const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) echecs++; };
 const ANGLAIS = /\b(Loading|Submit|Cancel|Approve|Reject|Delete|Save|Error|Pending|Due|Invoice|Supplier|Settings|Logout|Sign in|Dashboard|Today|Yesterday|Tomorrow)\b/;
-const ECRANS = [['validations', '/espace/validations'], ['filed', '/espace/filed'], ['fournisseurs', '/espace/filed/fournisseurs'], ['point', '/espace/point']];
+const ECRANS = [['validations', '/espace/validations'], ['filed', '/espace/filed'], ['fournisseurs', '/espace/filed/fournisseurs'], ['a-payer', '/espace/filed/a-payer'], ['point', '/espace/point']];
 const LARGEURS = [390, 768, 1024, 1440, 1700];
 
 for (const [nom, chemin] of ECRANS) {
@@ -219,6 +219,21 @@ for (const [nom, chemin] of ECRANS) {
   await s.dormir(900);
   const apres = await s.evaluer(`(() => ({ bloc: !!document.querySelector('.esp-identifiants-lus'), fiche: document.querySelector('#esp-dossier').innerText.includes('SIREN 519803415') || /SIREN\\s*519 ?803 ?415/.test(document.querySelector('#esp-dossier').innerText) }))()`);
   ok(!apres.bloc && apres.fiche, `saisis : le bloc tombe, la fiche porte le SIREN (${JSON.stringify(apres)})`);
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-a-payer', densite: 1 });
+  console.log('— /espace/filed/a-payer : les factures validées par échéance');
+  ok(await s.aller(base + '/espace/filed/a-payer'), 'page chargée');
+  await s.dormir(600);
+  const r = await s.evaluer(`(() => ({ kpi: [...document.querySelectorAll('.esp-kpi')].map(k => k.innerText.replace(/\\s+/g, ' ')), groupes: [...document.querySelectorAll('section.esp-carte .esp-carte-titre')].map(e => e.textContent), lignes: [...document.querySelectorAll('.esp-a-payer tbody tr')].map(t => t.innerText.replace(/\\s+/g, ' ')), avis: [...document.querySelectorAll('.esp-avis')].map(a => a.textContent) }))()`);
+  ok(r.groupes.join(',') === 'En retard,Cette semaine,Ce mois-ci', `groupes dans l'ordre : ${r.groupes.join(', ')}`);
+  ok(/Transports Rivière/.test(r.lignes[0] ?? '') && /de retard/.test(r.lignes[0] ?? ''), `la facture en retard vient d'abord (${r.lignes[0]})`);
+  ok(r.lignes.some(l => /Cabinet Ferrand/.test(l) && /IBAN manquant/.test(l)), 'la facture sans IBAN validé le dit');
+  ok(r.avis.some(a => /1 facture sans IBAN validé/.test(a)) && r.avis.some(a => /pas encore suivi/.test(a)), 'les avis : IBAN manquant, paiement non suivi');
+  ok(r.lignes.length === 3, `${r.lignes.length} factures validées à payer`);
+  await s.capturer(`${dossier}a-payer-1440.jpg`, { qualite: 55 });
   s.fermer();
 }
 
