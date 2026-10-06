@@ -80,3 +80,29 @@ il cite.
   Géoportail de l'urbanisme. Un règlement de PLUi couvre toutes les zones : ne rendre que les `regle.*` de la zone de
   `lorani_plu.zone` (ou de chaque zone de `zones`), et `zone` = cette zone. Sans ligne `lorani_plu`, lire la zone
   écrite sur la pièce.
+
+## Les attestations décennales des entreprises (b5_18)
+
+Type `lorani_attestation_decennale` — l'attestation d'assurance de responsabilité civile décennale d'une entreprise
+(modèle de l'arrêté du 5 janvier 2016). Une ligne par champ, valeurs canoniques :
+
+| champ | valeur | exemple |
+|---|---|---|
+| `assureur` | la compagnie | « SMABTP » |
+| `numero_police` | le numéro du contrat | « 123456 B 1234 » |
+| `assure` | la raison sociale de l'assuré, telle qu'écrite | « PIERRES DE BOURGOGNE » |
+| `siren` | neuf chiffres (espaces admis) | « 538765432 » |
+| `activites` | **tableau jsonb** des activités garanties, dans le vocabulaire ci-dessous | `["ravalement", "pierre_taille"]` |
+| `debut`, `fin` | période de validité, AAAA-MM-JJ | « 2026-01-01 », « 2026-12-31 » |
+| `plafond_eur` | plafond de garantie par sinistre (ouvrages non soumis à l'obligation), nombre | « 1500000 » |
+
+Vocabulaire fermé des activités (le même que `lorani_lots.activites_requises` ; nomenclature des activités du BTP de
+France Assureurs, simplifiée — une activité lue qui n'y figure pas : la plus proche, sinon l'écrire au coordinateur) :
+`demolition`, `terrassement`, `vrd`, `amelioration_sols`, `fondations_speciales`, `maconnerie_beton_arme`,
+`pierre_taille`, `charpente_bois`, `charpente_metallique`, `couverture`, `etancheite_toiture`, `etancheite_cuvelage`,
+`facades_rideaux`, `bardage`, `menuiseries_exterieures`, `ite`, `ravalement`, `menuiseries_interieures`, `platrerie`,
+`serrurerie`, `vitrerie`, `peinture`, `revetements_durs`, `revetements_souples`, `isolation_interieure`, `plomberie`,
+`chauffage`, `ventilation`, `electricite`, `photovoltaique`, `ascenseurs`, `ssi`, `piscines`, `amiante`.
+
+Le socle reconnaît l'entreprise par le SIREN (sinon par le nom), prend son lot, et contrôle : activités requises du lot
+couvertes, date d'ouverture du chantier dans la période, plafond au moins égal au marché du lot, assuré = entreprise.

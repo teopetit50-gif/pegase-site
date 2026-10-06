@@ -633,3 +633,20 @@ des chantiers neufs (tables, écran, lecteur), à proposer au coordinateur en lo
 - Règle : quantité mesurée = `quantite.<réf>` du métré (rôle metre) ou, sans métré, somme des planches ; DPGF
   `poste.<réf>` (quantité) + `unite.<réf>` ; écart > 5 % = constat ; DPGF < 90 % du mesuré = majeur (sous-estimé).
 - Test b5_07 § 10 (2 assertions, 31 au total) ; type de pièce `lorani_metre` dans la fiche, le dépôt et le passage.
+
+## b5_18 — les décennales (carnet n° 3 b) — 06/10/2026
+
+- Socle : `omega/modules/lorani/migrations/b5_18_decennales.sql`, test `omega/tests/lorani/b5_09_decennales.sql` (18 assertions).
+- `public.lorani_attestations` (entreprise = intervenant, lot repris de l'entreprise, pièce lue, assureur, police, assuré,
+  SIREN, activités, début/fin, plafond) ; trigger `lorani_attestation_verifier` : activités requises du lot couvertes
+  (vocabulaire fermé `private.lorani_activite`, 34 activités, nomenclature France Assureurs simplifiée), date
+  d'ouverture du chantier (`lorani_projets.ouverture_chantier`, ajoutée ; sinon aujourd'hui) dans la période
+  (C. assur. L241-1), plafond ≥ marché du lot (HT + avenants), SIREN / nom de l'assuré ; statut conforme | non_conforme
+  | expiree. Échéance = fin de validité au registre (J-30, J-7, J), remplacée si la fin change. Journal
+  lorani.attestation_controlee (la date du contrôle), alerte « attention » si non conforme / échue.
+- Revue automatique quand les activités d'un lot, l'ouverture du chantier ou le marché changent.
+- Lecture : type `lorani_attestation_decennale` (fiche § « Les attestations décennales ») → passage → ligne.
+- Abonnements delai.proche/depasse.lorani → lorani.attestation.rappel/.depasse (chaque gestionnaire ignore les délais
+  qui ne sont pas les siens). `lorani_lectures_passage` redéfini (corps b5_17 + attestations).
+- Essayé en local sur doubles (vert). Écran : `components/espace/lorani/Assurances.tsx` (après Chantier) ; exemple
+  Mercière (taille de pierre non couverte, échafaudage échu). Activités des lots d'exemple remises au vocabulaire.

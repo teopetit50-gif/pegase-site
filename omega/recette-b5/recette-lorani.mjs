@@ -146,6 +146,23 @@ for (const largeur of LARGEURS) {
   await s.dormir(300);
   await s.capturer(`${dossier}lorani-chantier-1440.jpg`, { qualite: 55 });
 
+  console.log('— les décennales (b5_18) : Façade rue Mercière, chantier ouvert il y a 100 jours');
+  const dec = await s.evaluer(`(() => { const c = [...document.querySelectorAll('.lor-constat')].filter(x => /contrat/.test(x.innerText)); const t = c.map(x => x.innerText).join(' | ').replace(/[\\u202f\\u00a0]/g, ' '); return { n: c.length, pierre: /Non conforme[\\s\\S]*Lot 01 · Pierres de Bourgogne SARL[\\s\\S]*Bloquant : Activité du lot 01 non couverte : Taille de pierre/.test(t), echue: /Échue[\\s\\S]*Lot 02 · Échafaudages Rhône[\\s\\S]*demandez à l’entreprise l’attestation/.test(t), doc: /Chantier ouvert le/.test(document.querySelector('#esp-detail').innerText) }; })()`);
+  ok(dec.n === 2 && dec.pierre && dec.echue && dec.doc, `deux attestations : taille de pierre non couverte (bloquant), échafaudage échu ; date d’ouverture dite (${JSON.stringify(dec)})`);
+  await s.evaluer(`[...document.querySelectorAll('.esp-lien-bouton')].find(b => b.getAttribute('aria-label') === 'Modifier les activités du lot 01')?.click()`);
+  await s.dormir(500);
+  const act = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return { titre: d?.querySelector('h2')?.textContent, cochees: d?.querySelectorAll('input:checked').length, cases: d?.querySelectorAll('input[type="checkbox"]').length }; })()`);
+  ok(act.titre === 'Activités du lot 01' && act.cochees === 2 && act.cases === 34, `dialogue « ${act.titre} » : 2 activités cochées sur 34`);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] label')].find(l => /Taille de pierre/.test(l.textContent))?.querySelector('input')?.click()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Enregistrer\\s*$/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  ok(await s.evaluer(`/Conforme[\\s\\S]*Lot 01 · Pierres de Bourgogne SARL/.test([...document.querySelectorAll('.lor-constat')].find(x => /Pierres de Bourgogne/.test(x.innerText) && /contrat/.test(x.innerText))?.innerText || '')`),
+     'le lot 01 ne demande plus la taille de pierre : l’attestation est recontrôlée, conforme');
+  await s.evaluer(`[...document.querySelectorAll('.lor-constat')].find(x => /Pierres de Bourgogne/.test(x.innerText) && /contrat/.test(x.innerText))?.scrollIntoView({ block: 'center' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}lorani-decennales-1440.jpg`, { qualite: 55 });
+
   console.log('— le régime du permis : secteur protégé coché, le silence reste un accord ; un cas R*424-2 coché, le silence vaut rejet');
   await s.evaluer(`[...document.querySelectorAll('#esp-detail .esp-lien-bouton')].find(b => /Régime/.test(b.textContent))?.click()`);
   await s.dormir(500);
