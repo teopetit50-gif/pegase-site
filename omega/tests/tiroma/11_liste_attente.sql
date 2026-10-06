@@ -37,14 +37,14 @@ begin
   return next is(tests.compter('public', 'tiroma_liste_attente', format('entite_id = %L and retire_le is null', entite)), 3::bigint, 'trois patients en attente (deux du logiciel, un de Tiroma)');
   perform tests.redevenir_admin();
 
-  -- Le créneau libéré : Nestor passe de « contrôle dû » à « liste d'attente », après Bazile (inscrit avant elle).
+  -- Le créneau libéré : Nestor passe de « contrôle dû » à « liste d'attente » ; gênée, elle passe devant Bazile.
   perform tests.b3_deposer_releve((r ->> 'branchement')::uuid, array['agenda', 'actes'], 'courant', 'b3:courant');
   perform tests.b3_traiter();
   perform tests.b3_endosser('gerant');
   c := public.tiroma_creneaux_a_sauver(banc, entite) -> 0;
-  return next is(c #>> '{candidats,1,origine}' || ':' || (c #>> '{candidats,1,patient_nom}'), 'attente:Kévin Bazile', '2. Kévin Bazile (liste d''attente du logiciel, plus ancienne)');
-  return next is(c #>> '{candidats,2,origine}' || ':' || (c #>> '{candidats,2,patient_nom}'), 'attente:Rosalie Nestor', '3. Rosalie Nestor, désormais par la liste d''attente');
-  return next ok((c #>> '{candidats,2,attente_id}')::uuid = v_attente, 'le candidat cite son inscription');
+  return next is(c #>> '{candidats,1,origine}' || ':' || (c #>> '{candidats,1,patient_nom}'), 'attente:Rosalie Nestor', '2. Rosalie Nestor, par la liste d''attente : patiente gênée, elle passe devant');
+  return next is(c #>> '{candidats,2,origine}' || ':' || (c #>> '{candidats,2,patient_nom}'), 'attente:Kévin Bazile', '3. Kévin Bazile (liste d''attente du logiciel, plus ancienne mais sans gêne)');
+  return next ok((c #>> '{candidats,1,attente_id}')::uuid = v_attente, 'le candidat cite son inscription');
 
   -- Le rendez-vous est pris : l'assistante la retire.
   perform tests.b3_endosser('referent');

@@ -36,7 +36,7 @@ begin
   return next ok(exists (select 1 from public.tiroma_evenements_agenda e join public.tiroma_rendez_vous x on x.id = e.rendez_vous_id where x.entite_id = entite and x.source_ref = 'R005' and e.type = 'absence'), 'événement « absence » pour R005');
   return next is((select statut || '/' || presume from public.tiroma_rendez_vous where entite_id = entite and source_ref = 'R004'), 'prevu/honore', 'R004, prévu sans statut mais avec un acte le même jour, est présumé honoré');
   return next ok(exists (select 1 from public.tiroma_evenements_agenda e join public.tiroma_rendez_vous x on x.id = e.rendez_vous_id where x.entite_id = entite and x.source_ref = 'R004' and e.type = 'presume_honore'), 'événement « présumé honoré » pour R004');
-  return next is((select statut from public.tiroma_capacites where entite_id = entite and domaine = 'statuts_manques'), 'tenu', 'capacité : le logiciel tient les statuts « manqué »');
+  return next is((select etat from public.tiroma_capacites where entite_id = entite and domaine = 'statuts_manques'), 'tenu', 'capacité : le logiciel tient les statuts « manqué »');
 
   -- Le journal des événements est immuable.
   return next throws_ok(format('update public.tiroma_evenements_agenda set type = ''honore'' where id = %s', v_ev), '42501', null, 'un événement ne se modifie pas (42501)');

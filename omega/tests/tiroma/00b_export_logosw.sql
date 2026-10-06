@@ -192,14 +192,16 @@ end $$;
 -- Fait avancer la file des relevés puis traite les travaux de Tiroma, comme les crons omega-releves-file et
 -- tiroma-releves le feraient. Rend le bilan de tiroma_traiter_travaux.
 create or replace function tests.b3_traiter() returns jsonb language plpgsql as $$
-declare r jsonb; k integer;
+declare r jsonb; k integer; n_faits integer := 0; n_echecs integer := 0;
 begin
   perform private.avancer_releves();
   for k in 1..3 loop
     r := private.tiroma_traiter_travaux(20);
+    n_faits := n_faits + (r ->> 'faits')::integer;
+    n_echecs := n_echecs + (r ->> 'echecs')::integer;
     exit when (r ->> 'faits')::integer = 0 and (r ->> 'echecs')::integer = 0;
   end loop;
-  return r;
+  return jsonb_build_object('faits', n_faits, 'echecs', n_echecs);
 end $$;
 
 -- Le cabinet installé, équipé, horaires posés, branché, puis le premier relevé appliqué (tous les jeux). Rend

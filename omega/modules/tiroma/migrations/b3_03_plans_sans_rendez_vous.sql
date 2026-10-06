@@ -53,7 +53,7 @@ begin
            'signe_le', p.signe_le, 'depuis', p.depuis, 'jours_depuis', v_jour - p.depuis,
            'montant', p.montant, 'reste_a_charge', p.reste_a_charge,
            'mutuelle_statut', p.mutuelle_statut, 'mutuelle_reponse_le', p.mutuelle_reponse_le,
-           'mutuelle_accord_sans_rdv', p.mutuelle_statut = 'accord',
+           'mutuelle_accord_sans_rdv', coalesce(p.mutuelle_statut = 'accord', false),
            'valide_jusqu_au', p.valide_jusqu_au,
            'jours_avant_expiration', case when p.valide_jusqu_au is not null then p.valide_jusqu_au - v_jour end,
            'a_verifier', p.a_verifier,

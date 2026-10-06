@@ -24,6 +24,8 @@ begin
   -- 14. Le dépôt des sections à 6 h 30, heure du cabinet.
   n := private.tiroma_deposer_points((j + time '06:30') at time zone (select fuseau from public.entites where id = entite));
   return next is(n, 3, 'trois membres servis (titulaire, collaborateur, assistante)');
+  return next ok(not exists (select 1 from public.alertes a where a.client_id = banc and a.cle_regroupement = 'tiroma:point:depot:' || v_cabinet::text and a.acquittee_le is null),
+                 'aucune alerte de dépôt' || coalesce((select ' : ' || (a.detail ->> 'erreur') from public.alertes a where a.client_id = banc and a.cle_regroupement = 'tiroma:point:depot:' || v_cabinet::text limit 1), ''));
   return next ok(exists (select 1 from public.points_sections s where s.client_id = banc and s.module = 'tiroma' and s.jour = j and s.destinataire = tests.b3_compte('gerant') and s.titre = 'Créneaux à sauver' and s.sante and s.nb_items = 1),
                  'titulaire : section « Créneaux à sauver », santé, 1 ligne');
   return next ok(exists (select 1 from public.points_sections s where s.client_id = banc and s.module = 'tiroma' and s.jour = j and s.destinataire = tests.b3_compte('gerant') and s.titre = 'Plans sans rendez-vous' and s.sante and s.nb_items = 4),
@@ -63,13 +65,14 @@ begin
                  'le collaborateur ne voit pas la patiente du Dr Lacour dans son point');
   perform tests.redevenir_admin();
 
-  -- La santé : un message nominatif ne part que par un expéditeur agréé ; sans lui, il est bloqué.
+  -- La santé : un message nominatif ne part que par un expéditeur agréé ; sans lui, il est bloqué. (Transactionnel : sinon le
+  -- verrou de consentement, qui précède celui de santé dans verrous_envoi, répondrait CONSENTEMENT_ABSENT.)
   v_reglage := private.reglages_envois_effectifs(banc, 'tiroma');
   return next ok(v_reglage ->> 'mode' is not null, 'reglages_envois (banc, tiroma) est posé : mode ' || coalesce(v_reglage ->> 'mode', 'ABSENT'));
   v_envoi := private.preparer_envoi(banc, 'tiroma', 'tiroma_cabinets', v_cabinet::text, 'email',
                jsonb_build_object('adresse', 'gerant@banc-varelo.test', 'nom', 'Gérant du banc'), null, '{}'::jsonb,
                'Point du matin — Tiroma', 'Annulation demain 9 h : appeler Marguerite Delannoy (plan accepté).', null,
-               'b3:sante:email:' || v_cabinet::text, entite, false, true, null, '{}'::jsonb);
+               'b3:sante:email:' || v_cabinet::text, entite, true, true, null, '{}'::jsonb);
   return next is((select statut || '/' || coalesce(verrou, '') from public.envois where id = v_envoi), 'bloque/SANTE_HORS_CANAL_AGREE',
                  'courriel nominatif (données de santé) : bloqué, SANTE_HORS_CANAL_AGREE — aucun fournisseur n''est agréé');
   v_envoi := private.preparer_envoi(banc, 'tiroma', 'tiroma_cabinets', v_cabinet::text, 'sms',
@@ -81,7 +84,7 @@ begin
   v_envoi := private.preparer_envoi(banc, 'tiroma', 'tiroma_cabinets', v_cabinet::text, 'email',
                jsonb_build_object('adresse', 'gerant@banc-varelo.test', 'nom', 'Gérant du banc'), null, '{}'::jsonb,
                'Point du matin — Tiroma', '1 créneau à reprendre, 4 plans sans rendez-vous, 6 vérifications : https://app.omegaai.fr/espace/tiroma', null,
-               'b3:sante:compteurs:' || v_cabinet::text, entite, false, false, null, '{}'::jsonb);
+               'b3:sante:compteurs:' || v_cabinet::text, entite, true, false, null, '{}'::jsonb);
   -- Le socle tient tout texte libre d'un module de santé pour de la santé (creer_envoi : v_contexte_sante) : même le
   -- courriel des seuls compteurs est bloqué. Pour qu'il parte, il faudra un gabarit validé (gabarits_messages,
   -- donnees_sante = false) : trou n° 10 dans omega/NOTES-B3.md.
