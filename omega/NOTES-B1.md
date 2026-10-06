@@ -279,3 +279,48 @@ demandent des bons de réception qu'aucun module ne lit encore.
   `accessibilite-varelo.mjs` : carte et dialogue du plafond, 0 écart à 390
   et 1440.
 - Ni coquille de l'espace ni fichier partagé touchés.
+
+### Retour de la recette sur b1_04 (coordinateur, 06/10, 15 h 08 Z)
+
+Posé (dépôt 4633, test 4634) : `^test_b1_` + socle 46/51 : **19/19 verts**, dont
+test_b1_07_depot, _perimetre, _plafond, test_46 (vues security_invoker) et
+test_51 (politiques et droits). La liste figée d'A5 se calcule en base : rien
+à y ajouter (test 44 vert).
+
+### N° 2 codé — les contrats du groupe à dénoncer (b1_05)
+
+- **Migration** `omega/modules/varelo/migrations/b1_05_contrats_groupe.sql` :
+  table `grp_contrats` (société, tiers du référentiel ou libellé, intitulé,
+  catégorie, échéance, reconduction tacite/expresse/aucune, durée d'une
+  reconduction, préavis en jours ou en mois, montant annuel ; statut actif →
+  denonce | archive, rien ne s'efface) ; vue security_invoker
+  `grp_contrats_echeancier` (échéance courante : un contrat tacite échu sans
+  dénonciation avance d'une période — art. 1215 C. civ. ; date limite =
+  échéance − préavis ; jours restants ; état depasse/urgent ≤ 30 j/bientot
+  ≤ 90 j/large/sans_objet ; contrats actifs du même tiers dans le groupe) ;
+  portes `grp_enregistrer_contrat` (créer ou corriger ; gérant, admin,
+  valideur, collaborateur, dans son périmètre), `grp_denoncer_contrat`
+  (gérant, admin, valideur DJ ou DF ; date ≤ aujourd'hui ; hors délai dit),
+  `grp_archiver_contrat` (gérant, admin) ; `grp_controler_contrats` (une
+  alerte par contrat tacite dont la date limite est à ≤ 30 j, « critique »
+  à ≤ 7 j, clé `varelo:contrats.<id>`, fermée au dénoncé/archivé/délai
+  passé) et cron **`varelo-contrats`** (`17 5 * * *`,
+  `private.grp_controler_contrats_tous()`) ; journal
+  `varelo.contrat.enregistre | denonce | archive`. Les deux fonctions de dates
+  (`grp_contrat_echeance`, `grp_contrat_limite`) sont exécutables par
+  authenticated : la vue les appelle.
+- **Défaut trouvé et corrigé avant envoi** : la contrainte « un tiers » laissait
+  passer un tiers nul (un CHECK à NULL passe) → `coalesce(…, 0) >= 1`.
+- **Tests** `omega/tests/varelo/b1_08_contrats.sql` (motif `^test_b1_08_`) :
+  `_echeances` (12), `_denonciation` (18), `_perimetre` (10) — dates relatives
+  à current_date. Maquette locale : **40/40** (et b1_07 toujours 58/58).
+- **Écran** `Contrats.tsx` + `contrats.ts` : carte « Contrats du groupe à
+  dénoncer » (sous 30 j, sous 90 j, montant en jeu, reconduits ; filtres À
+  surveiller / Dénoncés / Tous ; tableau par date limite ; pastille « N
+  contrats chez ce tiers, M sociétés » ; dialogues Ajouter/Corriger et Noter
+  la dénonciation ; Archiver). Recette `recette-varelo.mjs` : 104 contrôles,
+  cinq largeurs ✓ ; axe 0 écart à 390 et 1440 (carte et dialogue d'ajout).
+- **Corrigé au passage** : l'en-tête masqué « Action » (`.vrl-masque`) était
+  en position absolue et sortait du cadre qui défile : débordement de la page
+  à 390 et 768 en vue clients (carte Encours, déjà sur 786017e) et sous la
+  carte Contrats. Passé en bloc en ligne de 1 px.
