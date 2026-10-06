@@ -22,10 +22,8 @@ const NOMS: Record<string, string> = {
   types_rdv: "types_rdv.csv",
 };
 
-// Constat du 06/10 sur les modèles v1 : un fichier qui porte toutes les colonnes d'« actes »
-// couvre aussi la signature de « devis » (N° devis, Date) ; « devis_lignes » couvre celle de
-// « types_rdv » (Libellé, Durée). Seul le nom du fichier les départage.
-const AMBIGUS_PAR_ENTETES: Record<string, string[]> = { actes: ["devis"], devis_lignes: ["types_rdv"] };
+// Constat du 06/10 sur les modèles v1 : « actes » couvrait la signature de « devis », « devis_lignes » celle de
+// « types_rdv », « agenda » celle de « patients ». Signatures resserrées par b3_11 : plus aucun recouvrement.
 
 function exemple(type: string, rang: number): string {
   switch (type) {
@@ -68,12 +66,7 @@ for (const jeu of JEUX) {
     assertEquals(parNom.entetes_non_declares, []);
     assertEquals(parNom.lignes_avec_anomalie, 0, JSON.stringify(parNom.anomalies));
     const parEntetes = await essaiABlanc("export.csv", octets, JEUX);
-    if (AMBIGUS_PAR_ENTETES[jeu.code]) {
-      // Signatures du modèle trop larges : sous un nom neutre, le fichier part « à classer » (B3 prévenu).
-      assertEquals(parEntetes.statut, "a_classer", jeu.code);
-    } else {
-      assertEquals(parEntetes.jeu, jeu.code, `${jeu.code} par en-têtes : ${parEntetes.statut} ${parEntetes.motif ?? ""}`);
-    }
+    assertEquals(parEntetes.jeu, jeu.code, `${jeu.code} par en-têtes : ${parEntetes.statut} ${parEntetes.motif ?? ""}`);
   });
 }
 
