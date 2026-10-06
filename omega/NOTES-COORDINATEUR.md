@@ -693,3 +693,22 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   (Vercel success). Recette saine : 0 échec cron, 0 erreur HTTP sur 2 h, cron vivant 10:16 Z.
   Rien à poser. Notes commitées sans poussée (pas de déploiement Vercel pour une ligne de
   journal ; partiront avec la prochaine vraie modification). Toujours en attente de Teo.
+- **Décisions de Teo (06/10, ~13 h 40 Z)** :
+  1. J-2 Daliro : **accord permanent OUI** → B6 écrit b6_08 (réglage par organisation,
+     révocable, approbation tracée « par accord permanent », mode essai prioritaire).
+  2. Realtime filed_fournisseurs : **OUI** → posé sur la recette (version 20261006134231
+     filed_realtime_fournisseurs) ; A3 branche l'abonnement sur la vue Fournisseurs.
+  3. Export Logos_w : reporté à la fin (introuvable pour l'instant).
+  4. SIRENE_API_KEY : à obtenir (compte INSEE au nom de Teo) ; le repli recherche-entreprises
+     fonctionne déjà sans clé.
+  5. HDS : **Scaleway** choisi par le coordinateur (certifié HDS depuis juillet 2024 ; il faut un
+     support Business/Enterprise et un contrat HDS) — souscrit au premier client santé.
+  6. Coffre Tamila : choix délégué → **Scaleway Key Manager** (même fournisseur que HDS),
+     « local » gardé en repli ; B4 écrit b4_05 + ouvrier tamila-coffre, tests avec faux KMS.
+  7. Juriste (seconde demande de pièces) : recherche du coordinateur — **CE 30 avril 2024
+     n° 461958** : une nouvelle demande est possible mais sans incidence sur le délai ni sur le
+     rejet tacite ; CE 4 février 2025 : une seule pièce prévue par le code suffit à interrompre.
+     b5_07 est donc juste ; B5 ajoute la référence à l'avertissement.
+  8. Courriel d'essai Tavaro : **reçu** par Teo → chaîne validée par un humain.
+  9. Vercel Pro : **non**. On ne pousse sur main qu'à la fin d'un gros chantier.
+  Préparation de la production confiée à A5 (omega/MISE-EN-PRODUCTION.md, prod non touchée).
