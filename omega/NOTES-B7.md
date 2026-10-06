@@ -322,3 +322,8 @@ sans redéploiement (la clé est lue à chaque passage).
 - 6/10 0 h 49 Z (coordinateur) : **chaîne à vrai SIREN prouvée** (section 10). Rien à corriger.
 - 6/10 3 h 35 : notes closes, « terminé » envoyé au coordinateur. Reste chez Teo : `SIRENE_API_KEY` ; chez A3 : le
   bouton « revérifier » (contrat en 9 b) ; chez le coordinateur : la production.
+- 6/10 1 h 22 Z (coordinateur) : rejeu `^test_b7_` 9/10 — test_b7_02 « aucun cache pour un identifiant jamais vu »
+  tombait : le cache global porte maintenant de vraies lignes (preuve Orange). Corrigé par Fable en a84d621 + 91b919d
+  (identifiant `ZZ` + 11 caractères tirés au sort, aucune contrainte de format sur `filed_verifications_tiers.identifiant`).
+  Les autres tests lisent le cache filtré sur leur propre identifiant. À reposer : `omega/tests/identite/b7_01_portes.sql`.
+- 6/10 1 h 35 Z : reprise par session_01967jUehrY7tLAXLn9pBaSw (Opus 5.5), Fable à court de crédit.
