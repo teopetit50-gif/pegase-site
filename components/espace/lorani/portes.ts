@@ -61,7 +61,8 @@ export async function chargerDossier(): Promise<Dossier> {
     supabase.from("lorani_intervenants").select("*").order("organisme").limit(2000),
     supabase.from("lorani_membres_projet").select("id, projet_id, user_id, role_projet").limit(2000),
     supabase.from("lorani_cas_rejet").select("code, article, libelle, source_url").order("code"),
-    supabase.from("pieces").select("id, objet_id, nom_fichier, mime, statut, type_piece, cree_le").eq("module", "lorani").eq("objet_type", "lorani_projet").order("cree_le", { ascending: false }).limit(600),
+    /* public.pieces date la réception (recue_le) ; l'écran la montre comme date de dépôt */
+    supabase.from("pieces").select("id, objet_id, nom_fichier, mime, statut, type_piece, motif, recue_le").eq("module", "lorani").eq("objet_type", "lorani_projet").order("recue_le", { ascending: false }).limit(600),
     supabase.rpc("annuaire", { p_client: moi.client_id }),
   ]);
   /* le premier refus de la base est dit tel quel ; les lectures secondaires manquantes ne cachent pas les permis */
@@ -78,7 +79,7 @@ export async function chargerDossier(): Promise<Dossier> {
     intervenants: (intervenants.data ?? []) as Intervenant[],
     membres: (membres.data ?? []) as MembreProjet[],
     casRejet: (cas.data ?? []) as CasRejet[],
-    pieces: (pieces.data ?? []) as PieceProjet[],
+    pieces: ((pieces.data ?? []) as (Omit<PieceProjet, "cree_le"> & { recue_le: string | null })[]).map(({ recue_le, ...x }) => ({ ...x, cree_le: recue_le ?? undefined })),
     noms,
     moi,
   };

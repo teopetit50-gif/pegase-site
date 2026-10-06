@@ -1,63 +1,74 @@
 # Session B3 — TIROMA (cabinets dentaires : praticiens, fauteuils, horaires, rendez-vous, point du matin)
 
 Branche `worker-b3`. Coordinateur : session `session_01B4JNQXyT69GytdvE9SjAnE`.
-Dernière mise à jour : 05/10/2026, soir (lecture du socle, scénario écrit, rien de posé encore).
+Dernière mise à jour : 06/10/2026 (reprise après la pause de Teo).
 
 ## Les deux jauges
 
 | Jauge | Où on en est | Ce qui manque pour 100 % |
 |---|---|---|
-| **Mécanique** (le socle fait ce que le scénario demande, prouvé par pgTAP sur la recette) | **15 %** — le socle TIROMA existe (23 tables, 92 fonctions, 3 crons) et sait appliquer un relevé, mesurer, purger ; rien n'est encore joué en réel, et trois trous sont déjà visibles à la lecture (ci-dessous). | Les portes publiques exécutables par un titulaire ; une porte de dépôt de relevé jouable en test ; le point du matin TIROMA (sections) ; les créneaux à sauver ; les vérifications à J-2 ; les tests verts. |
-| **Livrable client** (un cabinet installe, branche, reçoit son point du matin, ouvre /espace/tiroma) | **5 %** — la promesse est écrite sur /secteurs/dentaire, l'écran n'existe pas, aucun connecteur Logos_w n'a jamais livré d'export réel. | L'écran /espace/tiroma (exemple + base réelle) ; l'envoi du point du matin dans un canal permis pour la santé ; un vrai export Logos_w d'un vrai cabinet (Teo). |
+| **Mécanique** (le socle fait ce que le scénario demande, prouvé par pgTAP sur la recette) | **55 %** — lot 1 vert sur la recette (98/98 : installation, profils, fauteuils, horaires, fermetures, branchement, mode, journal, isolement) ; b3_01 à b3_06 posés ; lot 2 écrit (relevé initial, relevé courant, portes métier, point du matin + santé) mais **pas encore joué**. | Jouer le lot 2 jusqu'au vert (dépend de b3_07, b3_08 et d'une ligne reglages_envois tiroma pour le banc) ; tests des mesures du soir (horloge), du relevé en retard et de la purge ; la règle santé stricte dans verrous_envoi (socle commun). |
+| **Livrable client** (un cabinet installe, branche, reçoit son point du matin, ouvre /espace/tiroma) | **45 %** — écran /espace/tiroma écrit, recetté aux cinq largeurs, en fusion sur main par le coordinateur ; le point du matin TIROMA existe (b3_06) ; la chaîne d'export est jouable par les portes. | **Aucun ouvrier ne lit les exports** (trou commun n° 1, confié à A1) ; aucun fournisseur d'envoi agréé santé → le point nominatif reste derrière l'authentification ; aucun export Logos_w réel (Teo). |
 
 ### Ce que Teo (le patron) doit fournir lui-même
 
-1. Un export Logos_w réel (ou le gabarit d'export du logiciel du premier cabinet) : le socle ne lit « pour l'instant que Logos_w » (`private.tiroma_brancher_cabinet`) et `modeles_jeux` ne se devine pas.
-2. Le canal de remise du point du matin **permis pour la santé** : aucun prestataire d'envoi n'est certifié HDS ; tant qu'il n'y en a pas, le point du matin TIROMA ne sortira d'Omega que **sans donnée de santé** (compteurs, liens vers l'espace) — le contenu nominatif reste derrière l'authentification de /espace/tiroma. Décision à prendre par Teo : ce repli convient-il, ou faut-il un canal HDS avant la première mise en route ?
-3. Le territoire des cabinets de recette (code ISO sur l'entité, jours fériés de droit local « complets ») : `tiroma_installer_cabinet` refuse une entité sans territoire ou sans calendrier complet.
+1. Un export Logos_w réel (ou le gabarit d'export du logiciel du premier cabinet) : les modèles `modeles_jeux` tiroma/logosw sont des **hypothèses d'en-têtes** (leur colonne `source` le dit) ; il faut un vrai fichier pour les confirmer.
+2. Le canal de remise du point du matin **agréé pour la santé** : aucun fournisseur d'envoi n'est `agree_sante` ; tant qu'il n'y en a pas, `verrous_envoi` bloque tout message nominatif (`SANTE_HORS_CANAL_AGREE`) et le point du matin TIROMA ne sort d'Omega que **sans donnée de santé** (compteurs + lien vers /espace/tiroma). Décision à prendre par Teo : ce repli convient-il, ou faut-il un canal HDS avant la première mise en route ?
+3. Le territoire des cabinets (code ISO sur l'entité) : `tiroma_installer_cabinet` refuse une entité sans territoire complet.
+
+## État exact au 06/10 et prochaine étape
+
+- **Posé sur la recette** (par le coordinateur) : b3_01 (portes + droits), b3_02 à b3_05 (portes de lecture, avec variantes `_pour`), b3_06 (point du matin + cron tiroma-matin). Lot 1 (`^test_b3_0[1-4]`) : 98/98 verts.
+- **Écrit, pas encore posé** : `b3_07_mutuelle.sql` (porte `tiroma_noter_mutuelle`), `b3_08_heures_locales.sql` (correctif de `private.tiroma_v_instant` : les heures d'un export sont lues dans le fuseau du cabinet), `b3_09_liste_attente.sql` (portes `tiroma_ajouter_attente` / `tiroma_retirer_attente`), et `b3_02` à reposer (un patient, une voie).
+- **Écrit, pas encore joué** : `00b_export_logosw.sql` (export Logos_w d'exemple, dix jeux, dates relatives ; dépôt par `recevoir_releve` → `commencer_releve` → `deposer_lignes` → `terminer_lecture`, puis `avancer_releves()` et `tiroma_traiter_travaux()`), tests `05_releve_initial`, `06_releve_courant`, `07_portes_metier`, `08_point_du_matin`, `09_mesures_du_soir`, `10_retard_et_purge`, `11_liste_attente`.
+- **Prochaine étape** : le coordinateur pose b3_07 et b3_08, pose la ligne `reglages_envois (banc, tiroma, essai, sante=true)`, rejoue 00, 00b puis 05 → 08, me renvoie les sorties brutes ; je corrige jusqu'au vert. Puis : le gabarit validé du point sans santé (b3_10, forme des gabarits demandée), la règle santé stricte du socle commun, la relecture en base réelle de l'écran avec le compte du banc (comme A3 : omega/recette-a3/relecture-reelle.mjs).
+- **Écran** : /espace/tiroma, « prêt à fusionner » envoyé (dernier SHA de worker-b3 : la mutuelle se note depuis la carte Plans, la carte « Liste d'attente » inscrit et retire un patient par les portes b3_09 ; recette 67 contrôles) ; fichiers à prendre : `app/espace/tiroma/page.tsx`, `components/espace/tiroma/*` (types, exemple, portes, libelles, EcranTiroma, Creneaux, Plans, AvantRendezVous, ChargeFauteuils, ListeAttente, Cabinet), `omega/recette-b3/*` ; ligne à ajouter dans `components/espace/ecrans.ts` : `{ cle: "tiroma", href: "/espace/tiroma", libelle: "Cabinet dentaire", court: "TIROMA" }`.
 
 ## Le scénario réel de bout en bout (ce que les tests jouent)
 
 Un cabinet de trois fauteuils, un titulaire (le gérant de l'organisation), un
 collaborateur, une assistante ; le logiciel Logos_w. Sur la recette : le client
-du banc `cccccccc-0000-4000-8000-00000000000c`, les comptes `gerant`
-(titulaire), `daf` (collaborateur), `referent` (assistante), `daf2` (témoin :
-valideur sans profil TIROMA). Tout passe par les portes publiques ou par les
-écritures sous RLS que le socle prévoit (fauteuils, horaires, fermetures,
-membres, profils, règles, vocabulaire) ; jamais d'écriture directe hors RLS.
+du banc `cccccccc-0000-4000-8000-00000000000c`, l'entité **Novasud Antilles**
+(Guadeloupe, calendrier complet), les comptes `gerant` (titulaire), `daf`
+(collaborateur, relié au praticien « Dr Rousseau »), `referent` (assistante),
+`daf2` (témoin : valideur sans profil TIROMA). Tout passe par les portes
+publiques ou par les écritures sous RLS que le socle prévoit ; jamais
+d'écriture directe hors RLS.
 
-1. **Installation.** Le titulaire appelle `tiroma_installer_cabinet(client, entité, 'logosw', 'cabinet')` : ligne `tiroma_cabinets` (statut `installation`, mode `a_blanc`) + `tiroma_regles` par défaut. Refusé si l'entité n'a pas de territoire ou de fuseau cohérent. Le témoin `daf2` ne peut pas l'appeler.
-2. **Profils.** Le gérant se donne `titulaire`, donne `collaborateur` à `daf` (relié à un praticien), `assistante` à `referent` (reliée à un membre). Le déclencheur refuse un titulaire qui n'est pas gérant et une direction qui n'est ni gérante ni admin ; les droits `tiroma.voir_*` suivent.
-3. **Fauteuils.** Trois fauteuils (soins ; prothèse + chirurgie ; orthodontie) posés par le titulaire (INSERT sous RLS) ; l'assistante ne peut pas en poser, mais les voit.
-4. **Horaires.** Lundi–vendredi 8 h–12 h et 14 h–19 h, samedi 8 h–12 h, un horaire exceptionnel un jour donné ; `private.tiroma_ouvert` rend les plages, vide un jour férié du territoire.
-5. **Fermetures.** Congé d'un praticien, fermeture du cabinet ; la plage ouverte se réduit d'autant.
-6. **Branchement.** `tiroma_brancher_cabinet(client, entité, 'exports')` : branchement + jeux (types_rdv, patients, agenda, devis, devis_lignes, actes, labo, stock, odf, attente), cabinet `actif`, journal `tiroma.connecteur_active`. Refusé sur un cabinet clos.
-7. **Premier relevé (reprise initiale).** Un export Logos_w d'exemple déposé par la porte du socle, puis `tiroma_traiter_travaux()` : `tiroma_releves` `ok`, patients, praticiens, fauteuils et types créés, rendez-vous de la semaine, devis signés et leurs lignes, actes, fiche de laboratoire, implant en stock, entente ODF, liste d'attente ; aucun événement d'agenda (c'est une reprise). Types classés par règle (« Couronne — pose » → `prothese_pose`, labo requis).
-8. **Vocabulaire.** Le titulaire valide un type à classer (UPDATE sous RLS) : `valide_par`, `valide_le`, `classe_par = 'humain'` posés par le déclencheur.
-9. **Relevé courant avec annulation.** Un rendez-vous de demain disparaît : événement `annulation` (immuable), rendez-vous `supprime`. **Créneau à sauver** : les candidats dans l'ordre des règles (plan signé de la même famille → liste d'attente → contrôle dû), durée et préférences tenues.
-10. **Relevé avec rendez-vous honoré / manqué.** Statuts du logiciel → événements `honore` / `absence` ; actes du jour sans statut → `presume_honore` ; faits patients remis (dernier rendez-vous, prochain, dernier contrôle).
-11. **Garde-fou.** Un relevé qui vide une journée entière : relevé `douteux`, journal `tiroma.releve_douteux`, `releves_douteux_suite` = 1, aucun battement ; le suivant repart à 0.
-12. **Plans sans rendez-vous.** Devis signé il y a six semaines, aucune ligne planifiée : il remonte, du plus ancien au plus récent ; quand un rendez-vous de la bonne famille arrive, `tiroma_rattacher_plans` le lie et la ligne passe `planifie`.
-13. **Avant les rendez-vous (J-2).** Pose de prothèse dans deux jours sans retour du laboratoire ; chirurgie d'implant dont la référence manque au stock ; devis qui expire dans 30 jours ; accord de mutuelle sans rendez-vous ; accord ODF de plus de six mois sans début.
-14. **Point du matin à 7 h.** La section TIROMA (trois décisions du jour : créneaux à sauver, plans sans rendez-vous, vérifications J-2) est déposée pour le titulaire et l'assistante, marquée `sante`. `apercu_point` / `lire_point` la rendent. L'envoi passe par `preparer_envoi(..., p_donnees_sante => true)` : seul un canal `permis_sante` la porte ; sinon le point sort **sans données de santé** (compteurs + lien) — jamais de nom de patient dans un courriel Brevo.
-15. **Mesures du soir.** `tiroma_horloge` après 23 h 30 : occupation réalisée par fauteuil, reprise à 48 h, production, délai labo, patients sans contrôle, réinscription, acceptation des devis ; enregistrées en mode `a_blanc` ; visibles du titulaire, jamais par personne.
-16. **Mode réel.** `tiroma_changer_mode(..., 'reel')` par le titulaire ; refusé à l'assistante ; `mode_depuis` posé.
-17. **Journal opposable.** Chaque étape laisse sa ligne (`connecteur_active`, `releve_termine`, `releve_douteux`, `indicateurs_calcules`), écrite par `private.journaliser` seulement, lisible par le gérant, pas par le collaborateur, jamais modifiable.
-18. **Isolement.** Un gérant d'un autre client ne voit rien ; l'assistante ne lit ni règles ni relevés ; un collaborateur en périmètre `praticien` ne voit que ses patients et sa production ; la production du cabinet est au titulaire seul.
-19. **Relevé en retard.** L'export du matin n'arrive pas : alerte `attention` « Tiroma n'a pas reçu l'export … » ; elle se ferme quand l'export arrive.
-20. **Fermeture et conservation.** Le titulaire coupe puis clôt son cabinet ; `tiroma_purger` retire les objets au-delà de la durée de conservation et le journal le dit.
+1. **Installation.** `tiroma_installer_cabinet(client, entité, 'logosw', 'cabinet')` par le titulaire ; refusé sans territoire ; refusé au témoin `daf2` et au gérant d'un autre client. *(test 01, vert)*
+2. **Profils.** Titulaire, collaborateur (relié à un praticien), assistante (reliée à un membre) ; refus d'un titulaire non gérant ; droits `tiroma.voir_*`. *(01, vert)*
+3. **Fauteuils.** Trois fauteuils posés par le titulaire ; l'assistante voit, ne pose pas, ne modifie pas. *(02, vert)*
+4. **Horaires.** Lundi–vendredi 8–12 / 14–19, samedi 8–12, un exceptionnel ; `tiroma_ouvert` : 540 / 240 / 0 minutes, férié local fermé. *(02, vert)*
+5. **Fermetures.** Fauteuil fermé l'après-midi, cabinet en formation : la plage se réduit. *(02, vert)*
+6. **Branchement.** `tiroma_brancher_cabinet` → dix jeux, cabinet actif, journal ; refusé à l'assistante et sur un cabinet clos. *(03, vert)*
+7. **Premier relevé (reprise).** Dix fichiers par les portes du socle → relevé `ok/reprise`, 30 patients, praticiens et fauteuils reconnus par leur nom, 9 types (un à classer), rendez-vous aux heures du cabinet (b3_08), 5 plans et 9 lignes, actes liés, fiche labo liée à la pose, stock, ODF, attente ; zéro événement ; journal ; six capacités ; périmètres de lecture. *(05, écrit)*
+8. **Vocabulaire.** Validation d'un type par le titulaire (déclencheur). *(écran recetté sur l'exemple ; test à écrire)*
+9. **Relevé courant, annulation.** R010 disparaît → `supprime` + événement `annulation` immuable ; `tiroma_creneaux_a_sauver` rend le créneau avec trois candidats dans l'ordre : plan accepté (Delannoy), liste d'attente (Bazile), contrôle dû (Nestor). *(06, écrit)*
+10. **Honoré / manqué / présumé.** R003 honoré, R005 manqué, R004 présumé honoré par l'acte du jour. *(06, écrit)*
+11. **Garde-fou.** Une journée de dix rendez-vous vidée → relevé `douteux`, journal, compteur 1 puis 0. *(06, écrit)*
+12. **Plans sans rendez-vous.** D001, D002, D003, D004 dans l'ordre ; proche à planifier ; **accord de mutuelle noté par l'assistante** (b3_07, l'export ne le porte pas). *(07, écrit)*
+13. **Avant les rendez-vous.** Labo critique, implant sous seuil, devis qui expire, mutuelle sans rendez-vous, ODF sans début, traitement interrompu, devis sans réponse ; charge des fauteuils au titulaire seul. *(07, écrit)*
+14. **Point du matin.** `tiroma_deposer_points` à 6 h 30 : sections santé par membre selon son périmètre, `apercu_point` les rend ; courriel nominatif → `SANTE_HORS_CANAL_AGREE`, SMS → `CANAL_NON_PERMIS`, courriel sans santé → accepté. *(08, écrit)*
+15. **Mesures du soir, mode réel, journal, isolement, relevé en retard, fermeture et purge.** Mode réel, journal et isolement : *(03/04, verts)* ; mesures, retard, purge : *(09/10, à écrire)*.
 
-## Trous du socle déjà vus à la lecture (à confirmer par les faits)
+## Trous du socle relevés et ce qui en est fait
 
-1. **Les trois portes publiques ne sont pas exécutables par un titulaire.** `public.tiroma_installer_cabinet`, `tiroma_brancher_cabinet`, `tiroma_changer_mode` sont des `language sql` SECURITY INVOKER qui appellent `private.tiroma_*` ; or `private.tiroma_installer_cabinet` et ses sœurs ne sont pas dans la liste figée d'a5_01 (`omega/a5_01_liste_figee.txt`) → « permission denied for function ». Et elles ne vérifient **aucun droit** (n'importe quel compte ayant EXECUTE pourrait installer un cabinet chez autrui). → `b3_01` : portes SECURITY DEFINER qui exigent `private.a_un_role(p_client, '{gerant}')` et `private.voit_entite` (installer, brancher) ou `private.tiroma_est_titulaire` (changer le mode).
-2. **Aucune porte de lecture « métier »** : créneaux à sauver avec candidats, plans sans rendez-vous, charge des fauteuils, vérifications J-2. L'écran ne doit pas recalculer la promesse en TypeScript. → `b3_02…` : `tiroma_creneaux_a_sauver`, `tiroma_plans_sans_rendez_vous`, `tiroma_charge_fauteuils`, `tiroma_avant_rendez_vous`.
-3. **Aucun dépôt de section du point du matin** par TIROMA (TAVARO et LORANI ont leur `*_deposer_point*` et leur cron) ; aucun gabarit `tiroma.*`. → `b3_0N` : `private.tiroma_deposer_points` + gabarits + cron, section `sante = true`.
-4. **La liste d'attente et les créneaux à sauver** ne s'alimentent que par le logiciel (`source = 'logiciel'`) : `tiroma_liste_attente.source` admet `tiroma` mais aucune porte n'y écrit (« Une liste d'attente commune » promise au Groupe).
-
-## Demandes au coordinateur (faits et extraits)
-
-Envoyées le 05/10 au soir — voir le journal des échanges en bas.
+1. **Portes publiques inexécutables et sans contrôle de droits** → b3_01 (posé, confirmé par F1).
+2. **Aucune porte de lecture métier** (créneaux, plans, J-2, charge) → b3_02 à b3_05 (posés).
+3. **Aucun dépôt de section du point du matin** par TIROMA → b3_06 (posé).
+4. **Accords des mutuelles sans source** (modèle d'export devis sans colonne mutuelle, aucune porte) → b3_07 (écrit).
+5. **Heures d'export lues en UTC** (`tiroma_v_instant`) : 9 h à Pointe-à-Pitre devenait 5 h → b3_08 (écrit).
+6. **Aucun ouvrier ne lit les exports** (`releve.lire`) : trou commun n° 1, confié à A1 par le coordinateur.
+7. **Canaux `permis_sante = true` sans fournisseur agréé** (F5) : le verrou `SANTE_HORS_CANAL_AGREE` protège déjà le nominatif ; règle stricte « permis_sante ET agree_sante » à proposer sur le socle commun après le lot 2.
+8. **Liste d'attente « commune »** (`source = 'tiroma'`) sans porte d'écriture : à faire (b3_09) après le lot 2.
+9. **`private.tiroma_trace_ecriture()` inexécutable par authenticated** (23 triggers) : corrigé côté socle par le coordinateur (lot 19u).
+10. **Tout texte libre du module est tenu pour de la santé** (`private.creer_envoi` : `v_contexte_sante`, `modules_envois.tiroma.sante = true`) : même un courriel de compteurs sans nom est bloqué `SANTE_HORS_CANAL_AGREE`. Pour qu'un point « sans donnée de santé » parte, il faut un **gabarit validé** `gabarits_messages` (module tiroma, canal email, `donnees_sante = false`) : à écrire (b3_10) une fois la forme des gabarits connue (demande d'extrait au coordinateur).
+11. **Un même patient pouvait être proposé deux fois** pour un créneau (par son plan et par la liste d'attente) : corrigé dans b3_02 (une voie par patient, la meilleure) — à reposer.
 
 ## Journal des échanges avec le coordinateur
 
-- 05/10, soir — scénario envoyé en 15 lignes + demande d'extraits du socle commun (branchements, relevés, instantanés, point du matin, envois / santé) et de faits (droits sur les trois portes, entités du banc, territoires, modèles de jeux Logos_w, comptes).
+- 05/10, soir — scénario envoyé ; extraits demandés (reçus : omega/SOCLE-EXTRAITS-COMMUN.sql sur main) ; faits F1–F6 reçus.
+- 05/10, 20 h 39 — lot 1 : 96/98 puis 98/98 après trois corrections (b3_compte SECURITY DEFINER ; UPDATE/suppression sous RLS ne lèvent pas ; mot interdit coupé).
+- 05/10, 20 h 49 — F7 : pas d'ouvrier d'export ; portes commencer_releve / deposer_lignes / terminer_lecture / recevoir_releve (service_role).
+- 05/10, 20 h 54 — b3_02 à b3_06 posés depuis f7194d6 ; Realtime publié sur cinq tables tiroma ; fusion de l'écran promise par le coordinateur.
+- 05/10, 20 h 58 — PAUSE demandée par Teo. 06/10 — REPRISE : F8 (13 indicateurs tiroma inscrits), F9 (tiroma_conservation et tiroma_passages existent).

@@ -23,14 +23,15 @@ import AvantRendezVous from "./AvantRendezVous";
 import Cabinet, { type Action } from "./Cabinet";
 import ChargeFauteuils from "./ChargeFauteuils";
 import Creneaux from "./Creneaux";
-import Plans from "./Plans";
+import ListeAttente, { type Inscription, type Retrait } from "./ListeAttente";
+import Plans, { type Mutuelle } from "./Plans";
 import { DOSSIER_EXEMPLE } from "./exemple";
 import { LOGICIELS, libelleLogiciel } from "./libelles";
 import {
   ajouterFauteuil, ajouterFermeture, ajouterHoraire, ajouterPraticien, brancherCabinet, changerMode, changerStatut, chargerDossier,
-  classerType, installerCabinet, listerCabinets, monCompte, retirerHoraire, type Compte,
+  ajouterAttente, chercherPatients, classerType, installerCabinet, listerCabinets, monCompte, noterMutuelle, retirerAttente, retirerHoraire, type Compte,
 } from "./portes";
-import type { Cabinet as CabinetT, Dossier, Logiciel } from "./types";
+import type { Cabinet as CabinetT, Dossier, Logiciel, PatientCourt } from "./types";
 
 type Reel = { compte: Compte | null; cabinets: CabinetT[]; dossier: Dossier | null; avis: string[] };
 
@@ -134,6 +135,59 @@ export default function EcranTiroma() {
       case "classer": await classerType(a.typeRdv, { famille: a.famille, statut: a.statut, necessite_labo: a.necessite_labo, chirurgie: a.chirurgie, exige_assistante: a.exige_assistante, duree_defaut_min: a.duree_defaut_min }); break;
     }
     await charger(d.cabinet.id);
+  }, [source, reel, charger]);
+
+  /* b3_07 : la mutuelle, notée sur un plan ; en exemple, la ligne change en mémoire */
+  const noter = useCallback(async (m: Mutuelle) => {
+    if (source === "exemple") {
+      await new Promise((r) => setTimeout(r, 250));
+      setLocal((prev) => ({
+        ...prev,
+        plans: prev.plans.map((p) => (p.plan_id === m.plan.plan_id ? { ...p, mutuelle_statut: m.statut, mutuelle_reponse_le: m.statut === "accord" || m.statut === "refus" ? m.le : null, mutuelle_accord_sans_rdv: m.statut === "accord" } : p)),
+      }));
+      return;
+    }
+    await noterMutuelle(m.plan.plan_id, m.statut, m.le, m.motif);
+    await charger(reel?.dossier?.cabinet.id);
+  }, [source, reel, charger]);
+
+  /* b3_09 : la liste d'attente commune */
+  const PATIENTS_EXEMPLE: PatientCourt[] = useMemo(() => [
+    { id: "pa-3", nom: "Nestor", prenom: "Rosalie", praticien_habituel_id: null, ne_pas_contacter: false },
+    { id: "pa-5", nom: "Rigoulet", prenom: "Sylvie", praticien_habituel_id: null, ne_pas_contacter: false },
+    { id: "pa-6", nom: "Zami", prenom: "Patrice", praticien_habituel_id: null, ne_pas_contacter: false },
+    { id: "pa-8", nom: "Mondésir", prenom: "Lucas", praticien_habituel_id: null, ne_pas_contacter: true },
+    { id: "pa-13", nom: "Pétro", prenom: "Georges", praticien_habituel_id: null, ne_pas_contacter: false },
+  ], []);
+  const chercher = useCallback(async (texte: string) => {
+    const t = texte.trim().toLowerCase();
+    if (source === "exemple") return PATIENTS_EXEMPLE.filter((p) => p.nom.toLowerCase().startsWith(t) || (p.prenom ?? "").toLowerCase().startsWith(t));
+    const d = reel?.dossier;
+    if (!d) return [];
+    return chercherPatients(d.cabinet.entite_id, texte);
+  }, [source, reel, PATIENTS_EXEMPLE]);
+  const inscrire = useCallback(async (i: Inscription) => {
+    if (source === "exemple") {
+      await new Promise((r) => setTimeout(r, 250));
+      setLocal((prev) => ({
+        ...prev,
+        attente: [...prev.attente.filter((a) => a.patient_id !== i.patient.id), { id: `at-${Date.now()}`, entite_id: prev.cabinet.entite_id, patient_id: i.patient.id, famille: i.famille, duree_min: i.duree_min, praticien_id: i.praticien_id, preavis_minutes: i.preavis_minutes, drapeau_gene: i.gene, source: "tiroma", ajoute_le: new Date().toISOString(), retire_le: null, motif_retrait: null, patient_nom: [i.patient.prenom, i.patient.nom].filter(Boolean).join(" ") }],
+      }));
+      return;
+    }
+    const d = reel?.dossier;
+    if (!d) throw new Error("Aucun cabinet ouvert.");
+    await ajouterAttente(d.cabinet, { patient_id: i.patient.id, famille: i.famille, duree_min: i.duree_min, praticien_id: i.praticien_id, preavis_minutes: i.preavis_minutes, gene: i.gene });
+    await charger(d.cabinet.id);
+  }, [source, reel, charger]);
+  const retirer = useCallback(async (r: Retrait) => {
+    if (source === "exemple") {
+      await new Promise((x) => setTimeout(x, 250));
+      setLocal((prev) => ({ ...prev, attente: prev.attente.filter((a) => a.id !== r.attente.id) }));
+      return;
+    }
+    await retirerAttente(r.attente.id, r.motif);
+    await charger(reel?.dossier?.cabinet.id);
   }, [source, reel, charger]);
 
   const installer = async () => {
@@ -255,12 +309,13 @@ export default function EcranTiroma() {
         <div style={{ display: "grid", gap: 14 }}>
           <div className="esp-grille">
             <Creneaux creneaux={dossier.creneaux} horizon={dossier.regles?.horizon_creneaux_jours ?? 2} />
-            <Plans plans={dossier.plans} />
+            <Plans plans={dossier.plans} noterMutuelle={noter} />
           </div>
           <div className="esp-grille">
             <AvantRendezVous verifications={dossier.verifications} jours={dossier.regles?.labo_verif_jours ?? 2} />
             <ChargeFauteuils charge={dossier.charge} titulaire={titulaire} />
           </div>
+          <ListeAttente attente={dossier.attente} praticiens={dossier.praticiens} peutEcrire={dossier.profil !== null && dossier.profil !== "direction"} chercher={chercher} inscrire={inscrire} retirer={retirer} />
           <Cabinet dossier={dossier} agir={agir} />
         </div>
       )}

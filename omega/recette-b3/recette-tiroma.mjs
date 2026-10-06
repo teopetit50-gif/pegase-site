@@ -17,7 +17,7 @@ let echecs = 0;
 const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) echecs++; };
 const ANGLAIS = /\b(Loading|Submit|Cancel|Approve|Reject|Delete|Save|Error|Pending|Due|Invoice|Supplier|Settings|Logout|Sign in|Dashboard|Today|Yesterday|Tomorrow|Chair|Patient list|Appointment)\b/;
 const LARGEURS = [390, 768, 1024, 1440, 1700];
-const CARTES = ['Créneaux à sauver', 'Plans sans rendez-vous', 'Avant les rendez-vous', 'Charge des fauteuils', 'Le cabinet'];
+const CARTES = ['Créneaux à sauver', 'Plans sans rendez-vous', 'Avant les rendez-vous', 'Charge des fauteuils', "Liste d'attente", 'Le cabinet'];
 
 for (const largeur of LARGEURS) {
   const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'b3-tiroma', densite: 1 });
@@ -40,7 +40,7 @@ for (const largeur of LARGEURS) {
   ok(!anglais, anglais ? `mot anglais à l'écran : « ${anglais[0]} »` : 'aucun mot anglais surveillé à l\'écran');
   ok(mesure.h1 === 'Cabinet dentaire', `titre : ${mesure.h1}`);
   ok(mesure.kpis === 4, `quatre compteurs (${mesure.kpis})`);
-  ok(CARTES.every((c) => mesure.cartes.includes(c)), `les cinq cartes : ${mesure.cartes.join(' · ')}`);
+  ok(CARTES.every((c) => mesure.cartes.includes(c)), `les six cartes : ${mesure.cartes.join(' · ')}`);
   ok(mesure.ruban === "Données d'exemple", `ruban : ${mesure.ruban}`);
   ok(/Marguerite Delannoy/.test(mesure.texte) && /Plan accepté/.test(mesure.texte), 'un créneau à sauver porte son premier candidat (plan accepté)');
   ok(/Fauteuil 2/.test(mesure.texte) && /Après-midi vide/.test(mesure.texte), 'la charge dit la demi-journée vide du fauteuil 2');
@@ -90,6 +90,40 @@ for (const largeur of LARGEURS) {
   await s.dormir(900);
   const ligne = await s.evaluer(`(() => { const r = [...document.querySelectorAll('section[aria-label="Le cabinet"] table tr')].find(t => /RDV LV/.test(t.textContent)); return r ? r.innerText : null; })()`);
   ok(ligne && /Prothèse — pose/.test(ligne) && /Validé/.test(ligne), `« RDV LV » est classé : ${ligne?.replace(/\\s+/g, ' ').slice(0, 80)}`);
+
+  console.log('— /espace/tiroma : noter l\'accord de la mutuelle (exemple)');
+  const mut = await s.evaluer(`(() => { const c = [...document.querySelectorAll('section[aria-label="Plans sans rendez-vous"] .esp-item')].find(i => /Nadège Hilaire/.test(i.textContent)); const b = c && [...c.querySelectorAll('button')].find(b => /Noter la mutuelle/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`);
+  ok(mut === true, 'bouton « Noter la mutuelle » cliqué sur le plan de Nadège Hilaire');
+  await s.dormir(500);
+  await s.evaluer(`(() => { const sel = document.querySelector('[role="dialog"] select.rv-champ'); const set = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set; set.call(sel, 'accord'); sel.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Noter/.test(b.textContent))?.click()`);
+  await s.dormir(900);
+  const accord = await s.evaluer(`(() => { const c = [...document.querySelectorAll('section[aria-label="Plans sans rendez-vous"] .esp-item')].find(i => /Nadège Hilaire/.test(i.textContent)); return c ? /Accord de mutuelle reçu/.test(c.textContent) : null; })()`);
+  ok(accord === true, 'le plan de Nadège Hilaire porte « Accord de mutuelle reçu » (en mémoire)');
+
+  console.log('— /espace/tiroma : inscrire un patient en liste d\'attente, puis le retirer (exemple)');
+  const avantAtt = await s.evaluer(`document.querySelectorAll('section[aria-label="Liste d\\'attente"] .esp-liste > li').length`);
+  ok(await s.evaluer(`(() => { const b = [...document.querySelectorAll('section[aria-label="Liste d\\'attente"] button')].find(b => /Inscrire un patient/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`) === true, 'bouton « Inscrire un patient » cliqué');
+  await s.dormir(400);
+  await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input.rv-champ'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, 'Nes'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(600);
+  const choixPat = await s.evaluer(`(() => { const b = [...document.querySelectorAll('[role="dialog"] [role="option"]')].find(b => /Rosalie Nestor/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`);
+  ok(choixPat === true, 'la recherche propose Rosalie Nestor, choisie');
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Inscrire/.test(b.textContent))?.click()`);
+  await s.dormir(900);
+  const apresAtt = await s.evaluer(`document.querySelectorAll('section[aria-label="Liste d\\'attente"] .esp-liste > li').length`);
+  ok(apresAtt === avantAtt + 1, `la liste passe de ${avantAtt} à ${apresAtt} patients (en mémoire)`);
+  ok(await s.evaluer(`(() => { const li = [...document.querySelectorAll('section[aria-label="Liste d\\'attente"] .esp-liste > li')].find(l => /Rosalie Nestor/.test(l.textContent)); const b = li && [...li.querySelectorAll('button')].find(b => /Retirer/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`) === true, 'bouton « Retirer » de Rosalie Nestor cliqué');
+  await s.dormir(400);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Retirer/.test(b.textContent))?.click()`);
+  await s.dormir(900);
+  const finAtt = await s.evaluer(`document.querySelectorAll('section[aria-label="Liste d\\'attente"] .esp-liste > li').length`);
+  ok(finAtt === avantAtt, `elle est retirée : ${finAtt} patients`);
+  await s.evaluer(`document.getElementById('tiroma-attente')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(400);
+  await s.capturer(`${dossier}tiroma-attente-1440.jpg`, { qualite: 55 });
 
   console.log('— /espace/tiroma : repasser à blanc puis en mode réel (exemple)');
   await s.evaluer(`[...document.querySelectorAll('section[aria-label="Le cabinet"] button')].find(b => /Repasser à blanc/.test(b.textContent))?.click()`);

@@ -7,13 +7,14 @@ Dernière mise à jour : 05/10/2026, 23 h.
 
 | Jauge | Valeur | Ce qui la fait monter |
 |---|---|---|
-| **Mécanique** (le socle fait ce que la page promet, prouvé par des tests joués sur la recette) | 35 % | le test pgTAP du parcours (20 étapes, ~95 contrôles) est écrit et les trois migrations aussi ; rien n'est encore joué sur la recette — le lot 1 est chez le coordinateur |
-| **Livrable client** (un gérant d'agence ouvre /espace/lorani et suit un vrai permis) | 55 % | l'écran est écrit, recetté aux cinq largeurs sur l'exemple, build vert ; reste la relecture en base réelle avec le compte du banc (clé publique de la recette à fournir), la fusion dans main et la vérification sur omegaai.fr |
+| **Mécanique** (le socle fait ce que la page promet, prouvé par des tests joués sur la recette) | 80 % | b5_01 à b5_03 posés sur la recette ; test pgTAP joué par le coordinateur : **110/111** (20 étapes : projet, équipe, RLS, lecture simulée par les portes du lecteur, confirmation, échéances dans `delais`, rappel J-10 par `controler_delais` → alerte → envoi `a_valider` au chef de projet, décision tacite, affichage, recours, purge, mesures, journal) ; les deux rouges sont corrigés (b5_04 + lecture du point), rejoué à 9ba2900 ; manque : le lecteur réel ne connaît pas les types Lorani (spécification écrite, à A1) |
+| **Livrable client** (un gérant d'agence ouvre /espace/lorani et suit un vrai permis) | 80 % | écran recetté aux cinq largeurs (41 contrôles), **relu en base réelle** avec `gerant@banc-varelo.test` : projet et PCMI créés par l'écran, calendrier calculé par le socle, **un vrai récépissé déposé et lu par le lecteur** (mais rendu « courrier non reconnu », voir § 3) ; fusion sur `main` en cours chez le coordinateur ; reste la vérification sur omegaai.fr et le rejeu du dépôt réel quand le lecteur connaît les types |
 
-**Ce qui manque** : la pose des migrations b5_01 à b5_03 et le premier passage du test (lot 1 envoyé), la clé `publishable`
-de la recette pour la relecture réelle, la fusion dans `main`. **Ce que Teo doit fournir** : rien pour l'instant ; pour que
-les rappels partent réellement, un accord permanent (politique de validation) sur les envois `envoi.email` du module
-lorani chez chaque agence, ou l'approbation au cas par cas dans /espace/validations — c'est le dessin du socle.
+**Ce qui manque** : le lecteur (A1) doit apprendre les six types de courriers Lorani (`omega/modules/lorani/CHAMPS-LECTURE-LORANI.md`) ;
+la fusion dans `main` ; la vérification sur omegaai.fr. **Ce que Teo doit fournir** : rien pour l'instant ; pour que
+les rappels partent réellement chez une agence, un accord permanent (politique de validation) sur les envois
+`envoi.email` du module lorani, ou l'approbation au cas par cas dans /espace/validations — c'est le dessin du socle
+(un moteur ne se passe jamais de la validation) ; sur le banc, la ligne `reglages_envois` lorani (mode essai) est posée.
 
 ## La promesse faite aux clients (app/secteurs/architectes)
 
@@ -83,6 +84,7 @@ le banc le temps du test (objets_restreints, annulé par runtests) pour prouver 
 | `b5_01_lorani_deposer_piece.sql` | aucune porte n'attachait une pièce à un projet Lorani (FILED a `filed_deposer_piece`). `public.lorani_deposer_piece(p_projet, p_nom_fichier, p_mime, p_octets, p_sha256, p_chemin, p_type_piece) → uuid`, réservée à qui écrit sur le projet, `statut = 'recue'` → le trigger du socle dépose `lecteur.lire`. Journal `lorani.piece_deposee`. Le bucket est couvert par la politique 19o du coordinateur (`<client>/<objet_type>/…`). | envoyé (lot 1) |
 | `b5_02_liens_espace.sql` | les alertes et les lignes du point pointaient `/secteurs/architectes/permis` (page inexistante). `lorani_lien_permis` → `/espace/lorani?permis=`, `lorani_lien_projet` → `?projet=` ; `lorani_alerter_transition` et `lorani_lire_piece` recopiés avec le lien. | envoyé (lot 1) |
 | `b5_03_rappels_envoyes.sql` | la page promet des rappels, le socle ne levait qu'une alerte (remise le lendemain par le point du matin). `lorani_alerter_rappel` prépare en plus un ENVOI courriel au chef de projet (`private.preparer_envoi`, clé = clé de l'alerte, transactionnel, échéance = date butoir, corps nommant les pièces et le lien) ; il passe par la file de validation `envoi.email` sauf accord permanent ; en mode essai il part à l'adresse d'essai. Un échec de préparation ne casse pas le rappel (alerte interne). Hypothèse à confirmer : `resoudre_destinataire` accepte `{"membre": <user_id>}`. | envoyé (lot 1) |
+| `b5_04_ordre_pieces.sql` | `lorani_valeurs_de_piece` rangeait les pièces réclamées par `boite ->> 'y1'` / `'x0'`, clés que le lecteur n'écrit pas ({x, y, l, h}) : ordre aléatoire, relevé par le coordinateur au premier passage du test (tantôt [PC8, PC5]). Désormais y puis x (repli y1/x0), puis `cree_le`, `id`. | envoyé (9ba2900) |
 | ~~b5_03 visibilité des échéances~~ | retiré : la politique SELECT de `lorani_permis_echeances` passe par une sous-requête sur `lorani_projets`, elle-même sous RLS : un membre qui ne voit pas le projet ne voit pas ses échéances. Rien à poser. | — |
 
 Faits reçus du coordinateur (05/10, 22 h 30) et repris dans le test : colonnes de `public.pieces` (statut `recue`,
@@ -128,19 +130,61 @@ Dialog de `components/ui`, temps réel sur les quatre tables publiées.
   l'affichage, saisir un recours et le voir suspendre la purge, ouvrir par `?permis=`). Captures dans
   `omega/recette-b5/` (`lorani-<largeur>.jpg`, `lorani-confirmer-1440.jpg`, `lorani-implicite-1440.jpg`,
   `lorani-recours-1440.jpg`, `lorani-purge-1024.jpg`).
-- **Pas encore fait** : la relecture en base réelle avec `gerant@banc-varelo.test` (il faut la clé `publishable` de la
-  recette `ygwbgpowzlbdaajlsqkn` pour pointer le serveur de dev dessus, comme A3) ; les cases du régime (secteur
-  protégé, MH, ERP, IGH, évaluation environnementale, cas de rejet) se lisent mais ne se cochent pas encore à l'écran.
+- **Régime du permis** (06/10) : bouton « Régime » dans l'en-tête → Dialog à cases (secteur protégé, monument
+  inscrit, ERP, IGH, évaluation environnementale, cas de l'art. R*424-2 lus dans `lorani_cas_rejet`) → UPDATE
+  `lorani_permis` ; en exemple l'effet du silence et les articles se recalculent en mémoire (recette : « rejet
+  implicite (art. R*424-2, d) »).
+- **Relecture en base réelle** (06/10, `omega/recette-b5/relecture-reelle.mjs`, calqué sur A3) : serveur de dev pointé
+  sur la recette (`NEXT_PUBLIC_SUPABASE_URL` + clé `publishable` reçues du coordinateur), session de
+  `gerant@banc-varelo.test` posée en cookie, Chromium avec `--ignore-certificate-errors` (le mandataire du conteneur ;
+  sans lui, « Failed to fetch »). Résultat : identité affichée, interrupteur sur « Base réelle », toutes les lectures
+  passent (la seule erreur 400 était `pieces.cree_le`, corrigée en `recue_le`), **puis l'écran a écrit pour de vrai** :
+  projet « Maison Lemoine (banc) » (INSERT `lorani_projets` sous RLS, territoire déduit) et PCMI « Pavillon Lemoine »
+  déposé il y a vingt jours (INSERT `lorani_permis`) → le trigger du socle a calculé : état « complétude », règle
+  `lorani.urbanisme.instruction_pcmi`, décision attendue à deux mois, 3 étapes, 2 échéances posées dans `delais`,
+  article R*423 cité. Captures `reel-lorani-1440.jpg`, `reel-permis-1440.jpg`. Ces deux lignes restent sur le banc
+  (données de recette, comme la délégation d'A3). Realtime : la poignée de main WebSocket échoue depuis le conteneur
+  (mandataire sans WebSocket), comme pour A3 — à vérifier depuis un navigateur ordinaire.
+- **Un vrai récépissé déposé par l'écran** (06/10, `omega/recette-b5/courrier-reel.mjs`) : PDF d'une page fabriqué
+  pour l'essai (`recepisse-depot.pdf`, « Dossier n° PC 044109 26 A0042 … déposé le 15/09/2026 »), posé dans le
+  contrôle de fichier par CDP, nature « Récépissé de dépôt », Déposer → fichier dans
+  `omega-clients/<client>/lorani_projet/<projet>/…`, pièce créée par `lorani_deposer_piece` (b5_01 sur la recette),
+  visible dans « Courriers du dossier », **prise par le lecteur en 35 s** (`en_lecture`) puis lue en 70 s… en
+  `a_classer`, `type_piece = 'autre'`, motif « Récépissé de dépôt d'un permis de construire délivré par la Ville de
+  Nantes : document administratif, sans montant ni caractère de pièce comptable ». **Le lecteur ne connaît que les
+  pièces de FILED** : il lit parfaitement le courrier mais ne sait pas le nommer, donc `lorani_lire_piece` ne propose
+  rien. Spécification écrite pour A1 : `omega/modules/lorani/CHAMPS-LECTURE-LORANI.md` (six types, leurs champs, un
+  exemple de résultat attendu). L'écran dit désormais « Courrier non reconnu » avec le motif du lecteur et invite à
+  saisir la date à la main. **C'est le seul maillon manquant de la chaîne réelle** ; la mécanique côté socle est
+  prouvée par le test (étapes 5, 7, 9, 16 jouent `enregistrer_lecture` avec les bons types).
+- **Pas encore fait** : revoir le dépôt réel dès que le lecteur connaît les types Lorani (le script attend la
+  proposition et la confirme) ; les annexes de la purge (`chantier_sans_risque_le`) ne s'affichent qu'une fois
+  l'affichage saisi.
 
-## 4. Questions ouvertes au coordinateur
+## 4. Réponses du coordinateur (05/10, 23 h 43) et ce qui reste ouvert
 
-1. `private.resoudre_destinataire` : accepte-t-elle `{"membre": <user_id>}` (b5_03) ? Sinon, quelle forme ?
-2. `private.modules_envois` : une ligne `lorani` est-elle nécessaire (canaux `["email"]`) ? `reglages_envois` du banc
-   porte-t-il une ligne `lorani` (mode essai) ?
-3. La clé `publishable` de la recette, pour la relecture réelle de l'écran.
+1. `private.resoudre_destinataire(p_client, p_canal, p_destinataire, p_entite)` : `{"membre": "<user_id>"}` est exactement
+   la forme (clés admises : membre ou adresse, nom, ref, fuseau, territoire, professionnel, langue) ; l'adresse vient
+   d'`auth.users.email`, sans adresse l'envoi naît `bloque` (pas d'exception). b5_03 est juste.
+2. `private.modules_envois` n'a pas de ligne lorani ; `reglages_envois` du banc : lignes `lorani` et `tavaro` posées en
+   mode essai (adresse de Teo). Si `preparer_envoi` exige `modules_envois`, le test le dira (étape 10).
+3. Clé publique de la recette reçue, relecture réelle faite (§ 3).
+
+Ouvert : le TAP du test à 5a4a2e6 (en cours chez le coordinateur) ; la fusion de l'écran sur `main`.
 
 ## 5. Journal de bord
 
 - 05/10 soir : lecture du cadre, scénario écrit et envoyé ; test pgTAP, migrations b5_01/02/03, écran, recette ;
   réponses du coordinateur intégrées (dates du test recalées sur la vraie chaîne des délais, colonnes de `pieces`,
   comptes du banc). Lot 1 envoyé au coordinateur : poser b5_01, b5_02, b5_03, jouer `omega/tests/lorani/b5_01_parcours_permis.sql`.
+- 05/10, 23 h : pause générale demandée par Teo (limite d'usage) ; reprise à 23 h 43. Le coordinateur a posé b5_01 et
+  b5_02, rejoue le test à 5a4a2e6 (la version 50ccebd mourait sur `deposer_travail(…, integer)` ; 5a4a2e6 passe par
+  `controler_delais`, plus d'appel direct).
+- 06/10, nuit : dialogue « Régime », relecture en base réelle (projet + permis créés par l'écran sur le banc),
+  `pieces.recue_le`, notes. Prêt à fusionner — liste des fichiers envoyée au coordinateur.
+- 05/10, 23 h 47 (coordinateur) : b5_03 posé ; test rejoué deux fois : **110/111** avec la ligne `reglages_envois`
+  lorani du banc (sans elle, l'envoi du rappel naît `bloque` ; avec, `a_valider → referent@banc-varelo.test`). Rouges :
+  ordre des pièces non déterministe (→ b5_04) et la lecture du point du matin (→ `points_sections` / `points_items`).
+  Corrigés dans 9ba2900, renvoyé.
+- 06/10, 0 h : un vrai récépissé PDF déposé par l'écran sur le banc (`omega/recette-b5/courrier-reel.mjs`) : fichier
+  dans le bucket, pièce créée par `lorani_deposer_piece`, prise par le lecteur en 35 s ; attente de la proposition.

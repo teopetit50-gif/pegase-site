@@ -249,11 +249,14 @@ begin
   -- Le point du matin, pendant qu'une date lue attend : elle passe avant le reste.
   n := private.lorani_deposer_point(v_client, current_date);
   return next ok(n >= 2, format('7. point du matin : une section « Calendrier des permis » pour le gérant et le chef de projet (%s sections)', n));
-  return next ok(exists (select 1 from public.points_du_jour_lignes l join public.points_du_jour p on p.id = l.point_id
-                         where p.client_id = v_client and p.user_id = v_referent and p.jour = current_date and l.texte like '%une date lue sur les courriers de la mairie%'),
-                 '7. … la ligne dit « une date lue sur les courriers de la mairie, à confirmer ou à écarter »');
-  return next ok(not exists (select 1 from public.points_du_jour p where p.client_id = v_client and p.user_id = v_daf2 and p.jour = current_date
-                             and exists (select 1 from public.points_du_jour_lignes l where l.point_id = p.id and l.module = 'lorani')),
+  -- deposer_section écrit la section du module dans points_sections / points_items ; le point du matin les assemble plus tard.
+  return next diag('7. sections lorani du jour : ' || coalesce((select string_agg(format('%s → %s', coalesce((select u.email from auth.users u where u.id = ps.destinataire), ps.destinataire::text), (select string_agg(left(i.texte, 90), ' | ') from public.points_items i where i.section_id = ps.id)), ' ;; ')
+                                                              from public.points_sections ps where ps.client_id = v_client and ps.module = 'lorani' and ps.jour = current_date), 'aucune'));
+  return next ok(exists (select 1 from public.points_sections ps join public.points_items i on i.section_id = ps.id
+                         where ps.client_id = v_client and ps.module = 'lorani' and ps.jour = current_date and ps.destinataire = v_referent
+                           and i.texte like '%une date lue sur les courriers de la mairie%'),
+                 '7. … la ligne du chef de projet dit « une date lue sur les courriers de la mairie, à confirmer ou à écarter »');
+  return next ok(not exists (select 1 from public.points_sections ps where ps.client_id = v_client and ps.module = 'lorani' and ps.jour = current_date and ps.destinataire = v_daf2),
                  '7. … et rien pour le valideur hors projet');
 
   -- ── 8. Confirmée ──
