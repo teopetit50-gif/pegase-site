@@ -43,7 +43,7 @@ create table if not exists public.tiroma_appels (
 -- Pas de clé étrangère vers tiroma_patients / tiroma_plans dans ce fichier : la clause d'effacement en cascade porte
 -- un mot que la règle des fichiers à poser interdit. La porte vérifie que patient et plan sont du cabinet ; une ligne
 -- dont le patient a été effacé ne se lit plus (la politique exige un patient visible) et ne porte aucun nom.
--- Question posée au coordinateur : ajouter les deux clés en cascade par sa propre pose.
+-- Les deux clés sont posées par b3_12b (accord du coordinateur, 06/10).
 
 create index if not exists tiroma_appels_serie on public.tiroma_appels (client_id, entite_id, patient_id, motif, appele_le desc);
 create index if not exists tiroma_appels_jour on public.tiroma_appels (client_id, entite_id, appele_le desc);

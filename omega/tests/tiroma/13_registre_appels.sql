@@ -1,6 +1,6 @@
 -- B3-13 — Le registre des appels (b3_12) : l'assistante note ses appels, le patient « à rappeler » revient le jour dit,
 -- un « rendez-vous pris » n'est compté qu'une fois vu dans l'agenda du logiciel, et le titulaire voit ce que ça a
--- rapporté. Après 00, 00b, b3_01 à b3_12. runtests() annule tout.
+-- rapporté. Après 00, 00b, b3_01 à b3_12 et b3_12b (clés, second test). runtests() annule tout.
 
 create or replace function tests.test_b3_13_registre_appels() returns setof text
 language plpgsql as $f$
@@ -93,6 +93,47 @@ begin
   return next ok(not exists (select 1 from public.journal_opposable where client_id = banc and action = 'tiroma.appel_note'
                              and (donnees::text ilike '%Delannoy%' or donnees::text ilike '%Marguerite%')), 'le journal ne porte aucun nom');
   perform tests.redevenir_admin();
+end $f$;
+
+-- b3_12b : un plan effacé laisse l'appel (sans plan) ; un patient effacé emporte ses appels.
+create or replace function tests.test_b3_13_registre_effacement() returns setof text
+language plpgsql as $f$
+declare
+  banc uuid := tests.b3_banc();
+  entite uuid := tests.b3_entite();
+  r jsonb;
+  v_delannoy uuid;
+  v_bazile uuid;
+  v_plan uuid;
+  v_appel_plan uuid;
+begin
+  r := tests.b3_cabinet_releve('initial');
+  select id into v_delannoy from public.tiroma_patients where entite_id = entite and source_ref = 'P001';
+  select id into v_bazile from public.tiroma_patients where entite_id = entite and source_ref = 'P002';
+  select id into v_plan from public.tiroma_plans where entite_id = entite and patient_id = v_delannoy order by signe_le nulls last limit 1;
+
+  perform tests.b3_endosser('referent');
+  v_appel_plan := public.tiroma_noter_appel(banc, entite, v_delannoy, 'plan', 'message', v_plan);
+  perform public.tiroma_noter_appel(banc, entite, v_delannoy, 'controle', 'pas_de_reponse');
+  perform public.tiroma_noter_appel(banc, entite, v_bazile, 'controle', 'refus');
+  perform tests.redevenir_admin();
+  return next ok(exists (select 1 from pg_constraint where conrelid = 'public.tiroma_appels'::regclass and conname = 'tiroma_appels_patient_fkey' and convalidated),
+                 'la clé vers le patient est posée et validée');
+  return next ok(exists (select 1 from pg_constraint where conrelid = 'public.tiroma_appels'::regclass and conname = 'tiroma_appels_plan_fkey' and convalidated),
+                 'la clé vers le plan est posée et validée');
+
+  -- Le plan disparaît : l'appel reste, sans plan.
+  perform set_config('omega.tiroma_moteur', 'releve', true);
+  delete from public.tiroma_plans where id = v_plan;
+  return next ok((select a.plan_id is null from public.tiroma_appels a where a.id = v_appel_plan), 'plan effacé : l''appel reste, son plan passe à null');
+
+  -- Le patient est effacé : ses appels partent avec lui, ceux des autres restent.
+  delete from public.tiroma_patients where id = v_delannoy;
+  perform set_config('omega.tiroma_moteur', '', true);
+  return next is((select count(*) from public.tiroma_appels where patient_id = v_delannoy), 0::bigint, 'patient effacé : aucun de ses appels ne reste');
+  return next is((select count(*) from public.tiroma_appels where patient_id = v_bazile), 1::bigint, 'l''appel de Kévin Bazile reste');
+  return next throws_ok(format('insert into public.tiroma_appels (client_id, entite_id, patient_id, motif, issue) values (%L, %L, %L, ''autre'', ''message'')',
+                               banc, entite, v_delannoy), '23503', null, 'aucun appel ne s''écrit pour un patient qui n''existe plus (23503)');
 end $f$;
 
 select * from runtests('tests'::name, '^test_b3_13_');
