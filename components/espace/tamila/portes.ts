@@ -32,12 +32,16 @@
      tamila_coffre_etat(p_client) → jsonb (b4_05) ; la fonction Edge « tamila-coffre » (actions activer,
        nouvelle_cle, cle_dossier, reenvelopper) au nom de la personne connectée : elle déballe les clés
        des dossiers d'un cabinet passé au coffre Scaleway, chaque déballage journalisé
+     les honoraires (b4_06) : tamila_poser_convention, tamila_signer_convention, tamila_saisir_temps,
+       tamila_annuler_temps, tamila_demander_provision, tamila_provision_recue, tamila_emettre_facture,
+       tamila_facture_payee, tamila_annuler_facture ; lecture des tables tamila_conventions, tamila_temps,
+       tamila_provisions, tamila_factures (RLS : qui voit le dossier)
    Si la base répond autrement, l'écran montre son message tel quel.
    Les bytea partent en hexadécimal (« \x01… », chiffrement.ts).
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { Appel, Audience, Avis, CalculDelai, Cle, Delai, DemandeTamila, Dossier, DossierComplet, Export, Lecture, Membre, Muraille, Partie, Personne, Piece, RegleProcedure, Reglages } from "./types";
+import type { Appel, Audience, Avis, CalculDelai, Cle, Convention, Delai, DemandeTamila, Dossier, DossierComplet, Export, Facture, Honoraires, Lecture, Membre, ModeHonoraires, ModeReglement, Muraille, NatureTemps, Partie, Personne, Piece, Provision, RegleProcedure, Reglages, Temps } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -286,3 +290,38 @@ export async function urlArchive(chemin: string): Promise<string> {
   if (error) throw new ErreurPorte(message(error));
   return data.signedUrl;
 }
+
+/* ——— les honoraires (b4_06) ——— */
+
+/** null : les tables n'existent pas sur cette base (b4_06 non posée) ; la carte ne s'affiche pas. */
+export async function chargerHonoraires(p_dossier: string): Promise<Honoraires | null> {
+  const supabase = createClient();
+  const [c, t, p, f] = await Promise.all([
+    supabase.from("tamila_conventions").select("*").eq("dossier_id", p_dossier).order("cree_le", { ascending: false }),
+    supabase.from("tamila_temps").select("*").eq("dossier_id", p_dossier).order("jour", { ascending: false }).order("cree_le", { ascending: false }),
+    supabase.from("tamila_provisions").select("*").eq("dossier_id", p_dossier).order("demandee_le", { ascending: false }),
+    supabase.from("tamila_factures").select("*").eq("dossier_id", p_dossier).order("cree_le", { ascending: false }),
+  ]);
+  if (c.error || t.error || p.error || f.error) return null;
+  const conventions = (c.data ?? []) as Convention[];
+  return {
+    conventions,
+    convention: conventions.find((x) => x.statut !== "resiliee") ?? null,
+    temps: (t.data ?? []) as Temps[],
+    provisions: (p.data ?? []) as Provision[],
+    factures: (f.data ?? []) as Facture[],
+  };
+}
+
+export const poserConvention = (p_dossier: string, p_mode: ModeHonoraires, p_taux_horaire_cents: number | null, p_forfait_cents: number | null, p_complement_pct: number | null, p_taux_tva: number, p_urgence: boolean) =>
+  rpc<string>("tamila_poser_convention", { p_dossier, p_mode, p_taux_horaire_cents, p_forfait_cents, p_complement_pct, p_taux_tva, p_urgence });
+export const signerConvention = (p_convention: string, p_signee_le: string, p_piece: string | null) => rpc<void>("tamila_signer_convention", { p_convention, p_signee_le, p_piece });
+export const saisirTemps = (p_dossier: string, p_jour: string, p_minutes: number, p_nature: NatureTemps, p_description: string | null, p_facturable: boolean) =>
+  rpc<string>("tamila_saisir_temps", { p_dossier, p_jour, p_minutes, p_nature, p_description, p_facturable });
+export const annulerTemps = (p_temps: string) => rpc<void>("tamila_annuler_temps", { p_temps });
+export const demanderProvision = (p_dossier: string, p_montant_ttc_cents: number) => rpc<string>("tamila_demander_provision", { p_dossier, p_montant_ttc_cents });
+export const provisionRecue = (p_provision: string, p_recue_le: string, p_mode: ModeReglement) => rpc<void>("tamila_provision_recue", { p_provision, p_recue_le, p_mode });
+export const emettreFacture = (p_dossier: string, p_jusqu_au: string, p_debours_cents: number, p_definitif: boolean) =>
+  rpc<{ numero: string; total_ttc_cents: number; reste_du_cents: number }>("tamila_emettre_facture", { p_dossier, p_jusqu_au, p_debours_cents, p_definitif });
+export const facturePayee = (p_facture: string, p_payee_le: string, p_mode: ModeReglement) => rpc<void>("tamila_facture_payee", { p_facture, p_payee_le, p_mode });
+export const annulerFacture = (p_facture: string, p_motif: string) => rpc<void>("tamila_annuler_facture", { p_facture, p_motif });

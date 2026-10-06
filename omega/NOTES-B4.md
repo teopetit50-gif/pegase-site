@@ -365,6 +365,27 @@ pour qu'il serve CHAQUE JOUR et qu'on le paie, par ordre d'importance :
 **N° 1 commencé le 06/10** (lot B4-7) : `b4_06_tamila_honoraires.sql`, test `15_honoraires.sql`, carte
 « Honoraires » du dossier. Voir § 11.
 
+## 11. Les honoraires (vague 3, n° 1 ; lot B4-7, 06/10)
+
+- **Base** (32479a4) : `b4_06_tamila_honoraires.sql`, test `15_honoraires.sql` (51 contrôles, souche locale ;
+  série complète 339/339). Convention (temps passé, forfait, mixte ; honoraire de résultat ; TVA ; urgence),
+  temps passé (description chiffrée), provisions (RIN 11.6), facture et compte détaillé définitif (RIN 11.7)
+  numérotés H-AAAA-NNNNNN sans trou, annulation qui garde le numéro, drapeau « ouvert depuis 15 jours sans
+  convention ». Effacement : seuls les temps partent avec le dossier ; factures, provisions, conventions restent
+  (pièces comptables, C. com. L.123-22).
+- **Écran** : carte « Honoraires » du dossier (`components/espace/tamila/HonorairesTamila.tsx`, insérée dans
+  DossierTamila après les pièces) : trois chiffres (à facturer HT et durée, provisions disponibles, reste dû),
+  la convention et sa signature (pièce du dossier), le temps de chacun (description déchiffrée avec la clé du
+  dossier), provisions et factures ; dialogues : saisir du temps, convention, signature, provision, reçue,
+  facturer (aperçu HT / TVA / TTC / provisions / reste avant d'émettre), payée, annuler. Sans b4_06 sur la
+  base, la carte ne s'affiche pas (la production aujourd'hui). Recette : 78 contrôles aux cinq largeurs, dont
+  12 sur les honoraires (saisie 1 h 30 → 687,50 € HT, facture H-2026-000042, dossier sans convention signalé,
+  « Facturer » gris sans convention, carte qui tient à 390) ; axe-core 0 écart sur le dialogue. La recette a
+  trouvé un vrai défaut avant la poussée (minutes par défaut affichées 30, lues 0) : corrigé.
+- **Pas fait** : l'édition imprimable de la facture (PDF : nom du client chiffré, donc à composer dans le
+  navigateur), le tableau des honoraires du cabinet (tous dossiers), le minuteur, l'export comptable.
+  **Pas rejoué en base réelle** : b4_06 à poser d'abord.
+
 ## 7. Prochaine étape
 
 1. (fait : en ligne, vérifié le 06/10.)

@@ -3,12 +3,12 @@
 /* ══════════════════════════════════════════════════════════════════════
    Un dossier Tamila ouvert (05/10/2026, session B4)
 
-   Huit cartes : l'en-tête (identité déchiffrée, statut, décisions en
+   Les cartes : l'en-tête (identité déchiffrée, statut, décisions en
    attente, export, clôture), les parties, l'appel et ses délais (chaque
    délai avec son calcul en toutes lettres et les gestes de l'avocat :
    confirmer, corriger, interrompre, annuler, acte déposé), les audiences,
-   les avis RPVA, les membres et murailles, les exports, le journal des
-   accès.
+   les pièces, les honoraires (HonorairesTamila, b4_06), les avis RPVA,
+   les membres et murailles, les exports, le journal des accès.
 
    Chaque geste passe par une porte (portes.ts) ; en exemple il est
    appliqué en mémoire pour que l'écran réagisse. L'écran dit avant le
@@ -32,6 +32,7 @@ import {
   libelleMatiere, libelleTerritoire, type Moi,
 } from "./regles";
 import type { Audience, CalculDelai, Delai, DemandeTamila, DossierComplet, Partie, Personne, RegleProcedure, Reglages } from "./types";
+import HonorairesTamila from "./HonorairesTamila";
 
 type Props = {
   complet: DossierComplet;
@@ -685,6 +686,9 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
           ))}
         </div>
       </section>
+
+      {/* ——— les honoraires (b4_06) ——— */}
+      <HonorairesTamila dossier={d} source={source} moi={moi} personnes={personnes} pieces={pieces} cle={cle} peutEcrire={peutEcrire} peutGerer={peutGerer && avocat} peutEncaisser={(peutGerer && avocat) || (associe && !murailles.some((m) => m.user_id === moi?.user_id && !m.leve_le))} />
 
       {/* ——— les avis RPVA ——— */}
       <section className="esp-carte" aria-label="Avis RPVA">

@@ -13,7 +13,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { dans, ilYa } from "../exemples/socle";
-import type { Audience, CalculDelai, Delai, Dossier, DossierComplet, Export, Membre, Partie, Personne, Piece, RegleProcedure, Reglages } from "./types";
+import type { Audience, CalculDelai, Delai, Dossier, DossierComplet, Export, Honoraires, Membre, Partie, Personne, Piece, RegleProcedure, Reglages } from "./types";
 
 export const EXEMPLE_CLIENT = "00000000-0000-4000-8000-00000000000b";
 export const EXEMPLE_ENTITE = "00000000-0000-4000-8000-0000000000e1";
@@ -224,3 +224,36 @@ export const DOSSIERS_EXEMPLE: DossierComplet[] = [
     consulteJusqu: null,
   },
 ];
+
+/* ——— les honoraires d'exemple (b4_06) : le premier dossier a sa convention signée, du temps, une
+   provision reçue et une facture ; le deuxième, ouvert depuis deux mois, n'a pas de convention ——— */
+export const DESCRIPTIONS_TEMPS_EXEMPLE: Record<string, string> = {
+  [`${D1}-h1`]: "Rédaction des conclusions d'appelant (art. 908)",
+  [`${D1}-h2`]: "Rendez-vous client : pièces du chantier et devis",
+  [`${D1}-h3`]: "Recherche : jurisprudence garantie décennale",
+  [`${D1}-h4`]: "Courriel au confrère adverse",
+};
+
+export function honorairesExemple(dossier: string): Honoraires {
+  if (dossier !== D1) return { convention: null, conventions: [], temps: [], provisions: [], factures: [] };
+  const convention = {
+    id: `${D1}-hc`, client_id: C, dossier_id: D1, mode: "temps_passe" as const, taux_horaire_cents: 25000, forfait_cents: null, complement_resultat_pct: 10, taux_tva: 20,
+    urgence: false, statut: "signee" as const, signee_le: jour(ilYa(23)), piece_id: null, cree_par: MOI, cree_le: ilYa(24), resiliee_le: null,
+  };
+  const facture = {
+    id: `${D1}-hf1`, client_id: C, dossier_id: D1, numero: "H-2026-000041", nature: "facture" as const, emise_le: jour(ilYa(8)), jusqu_au: jour(ilYa(8)), minutes: 210,
+    honoraires_temps_cents: 87500, forfait_cents: 0, debours_cents: 3500, total_ht_cents: 87500, taux_tva: 20, tva_cents: 17500, total_ttc_cents: 108500,
+    provisions_imputees_cents: 60000, reste_du_cents: 48500, statut: "emise" as const, payee_le: null, mode_reglement: null, motif_annulation: null, emise_par: MOI, cree_le: ilYa(8),
+  };
+  const temps = (n: number, user_id: string, il: number, minutes: number, nature: Honoraires["temps"][number]["nature"], statut: "saisi" | "facture", facturable = true) => ({
+    id: `${D1}-h${n}`, client_id: C, dossier_id: D1, user_id, jour: jour(ilYa(il)), minutes, nature, description_chiffree: CHIFFRE, facturable, statut,
+    facture_id: statut === "facture" ? facture.id : null, cree_le: ilYa(il),
+  });
+  return {
+    convention,
+    conventions: [convention],
+    temps: [temps(4, ROUSSEAU, 1, 15, "correspondance", "saisi", false), temps(3, ROUSSEAU, 2, 75, "recherche", "saisi"), temps(1, MOI, 9, 150, "redaction", "facture"), temps(2, MOI, 12, 60, "rendez_vous", "facture")],
+    provisions: [{ id: `${D1}-hp1`, client_id: C, dossier_id: D1, montant_ttc_cents: 60000, demandee_le: jour(ilYa(22)), recue_le: jour(ilYa(18)), mode_reglement: "virement", statut: "recue", facture_id: facture.id, cree_par: MOI, cree_le: ilYa(22) }],
+    factures: [facture],
+  };
+}
