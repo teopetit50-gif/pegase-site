@@ -1,5 +1,34 @@
 # Session B1 — VARELO, le référentiel du groupe (sociétés, pôles, rapprochement)
 
+## REPRISE (pause demandée par Teo, 06/10/2026, 21 h Z)
+
+**Fait, posé sur la recette et fusionné dans main** (worker-b1 fusionnée par le coordinateur, dernière fusion
+après d794f00) : b1_01 à b1_03 (référentiel), b1_04 encours, b1_05 contrats, b1_06 réciproques, b1_07 point
+du matin, b1_08 groupe sur une page, b1_09 reportings, b1_10 + b1_14 exports lus (modèles et signatures),
+b1_11 + b1_11b réserves, b1_12 photos du constat, b1_13 une pièce une livraison. Tests b1_07 à b1_17 verts
+sur la recette (dernier relevé : 1120 ok, plus b1_13 à b1_17 verts à 18 h 25 Z ; socle 44, 46, 51, 55 :
+34 ok). Écran /espace/varelo complet ; plus aucune ligne Varelo dans lib/en-preparation.ts.
+
+**Non fusionné, rien à poser** : 7197df1 — `omega/CHIFFRAGE/varelo.md` (chiffrage de /secteurs/groupes,
+39 promesses ; document seul, aucun fichier du site). À fusionner quand le coordinateur le souhaite.
+
+**Attend le coordinateur / A5** : la production. Seuls b1_01 à b1_03 sont au plan de
+`MISE-EN-PRODUCTION.md` ; b1_04 à b1_14 (dans cet ordre, b1_11b après b1_11) restent à reposer en
+production au gel, avec leurs crons (varelo-contrats, -matin, -reportings, -releves, -reserves).
+
+**Attend Teo** (voir le chiffrage, synthèse) : la formulation de la page (« branche la même IA » ou
+« dépose l'export ») ; un premier groupe réel et un vrai export de chacun de ses logiciels pour l'essai à
+blanc du lecteur ; s'il veut « une seule IA » au sens d'un assistant : le fournisseur de modèle UE (DPA,
+sans entraînement) ; les accès API (Pennylane, Cegid, Sage) et les éditeurs de caisses si l'on branche.
+
+**Prochaine étape exacte** : à la reprise, lire la réponse de Teo au chiffrage. Sans décision nouvelle, le
+premier geste est l'essai à blanc des modèles `varelo` sur un vrai export (avec A1), puis, dans l'ordre du
+chiffrage : décisions validables depuis le point du matin (demandes_validation pour dénoncer, protester,
+relever un plafond), réglages du groupe (règles écrites une fois), débrancher avec accord DSI.
+Rien n'est en cours : arbre propre, aucun serveur lancé. Maquette locale (PG16, port 5499) et scripts dans
+le scratchpad de la session : jetables, tout ce qui compte est dans le dépôt.
+
+
 Branche `worker-b1`. Dernière mise à jour : 06/10/2026, 03 h UTC — **terminé** :
 les 14 tests sont verts sur la recette, les trois migrations sont posées,
 /espace/varelo est sur main (b287d04) et **en ligne sur omegaai.fr**. Le
