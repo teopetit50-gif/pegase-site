@@ -151,6 +151,18 @@ begin
   return jsonb_build_object('effacement', v_id, 'pieces', n);
 end $$;
 
+-- La liste des fichiers d'un objet et son manifeste (souche de preparer_effacement : les objets du bucket sous
+-- <client>/<type>/<id>/ ; le vrai socle passe par fichiers_de).
+create or replace function private.preparer_effacement(p_client uuid, p_objet_type text default null, p_objet_id text default null) returns jsonb language plpgsql security definer set search_path to '' as $$
+declare v_cle text := p_client::text || coalesce('/' || p_objet_type || '/' || p_objet_id, ''); v_liste jsonb; v_m jsonb;
+begin
+  select coalesce(jsonb_agg(jsonb_build_object('bucket', o.bucket_id, 'nom', o.name, 'octets', 0, 'empreinte', md5(o.name)) order by o.name), '[]') into v_liste
+    from storage.objects o where starts_with(o.name, v_cle || '/');
+  v_m := jsonb_build_object('nombre', jsonb_array_length(v_liste), 'octets', 0, 'empreinte_sha256', encode(sha256(convert_to(v_liste::text, 'UTF8')), 'hex'));
+  insert into private.manifestes_effacement (cle, manifeste) values (v_cle, v_m) on conflict (cle) do update set manifeste = excluded.manifeste;
+  return jsonb_build_object('manifeste', v_m, 'fichiers', v_liste);
+end $$;
+
 -- ── B5, les délais (souche fidèle au calcul attendu par Tamila) ──
 create or replace function public.ajouter_mois(p_date date, p_mois int) returns date language sql immutable as $$ select (p_date + make_interval(months => p_mois))::date $$;
 -- Prorogation (art. 642) : samedi, dimanche et jours fériés de métropole → premier jour ouvrable suivant.
@@ -305,3 +317,19 @@ create policy "membres lisent" on public.approbations for select to authenticate
 create policy "membres decident" on public.approbations for insert to authenticated with check (true);
 alter table public.journal_opposable enable row level security;
 alter table public.lectures enable row level security;
+
+-- ── Réceptions (b4_10) : la table du socle et la publication d'événement, imitées ──
+create table if not exists public.receptions (id bigserial primary key, client_id uuid not null, entite_id uuid, module text, canal text not null default 'email', boite text not null default 'boite',
+  identifiant_externe text not null, de_adresse text, de_empreinte text, de_nom text, sujet text, corps text, corps_html text, pieces jsonb not null default '[]', detail jsonb not null default '{}',
+  en_reponse_a uuid, fil text, langue text, statut text not null default 'nouvelle' check (statut in ('nouvelle', 'lue', 'traitee', 'ignoree', 'indesirable')), traite_par uuid,
+  recu_le timestamptz not null default now(), cree_le timestamptz not null default now(), maj_le timestamptz not null default now(), unique (client_id, canal, identifiant_externe));
+create or replace function private.publier_evenement(p_client uuid, p_evenement text, p_charge jsonb default '{}', p_cle text default null) returns integer language plpgsql security definer set search_path to '' as $$
+declare r record; n integer := 0;
+begin
+  for r in select a.module, a.genre from private.abonnements a where a.evenement = p_evenement loop
+    perform private.deposer_travail(p_client, r.module, r.genre, coalesce(p_charge, '{}'::jsonb) || jsonb_build_object('evenement', p_evenement),
+      case when p_cle is null then null else p_evenement || ':' || p_cle end, 0::smallint);
+    n := n + 1;
+  end loop;
+  return n;
+end $$;

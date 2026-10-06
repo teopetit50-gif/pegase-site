@@ -363,3 +363,74 @@ b1_05 posé, `^test_b1_` **20/20 verts** ; carte Contrats fusionnée dans main
 - Limite dite : au périmètre partiel, on ne voit que le côté de ses sociétés
   (l'autre apparaît « manquant ») ; le tableau de clôture se lit au périmètre
   total.
+
+### Retour de la recette sur b1_06 (coordinateur, 06/10, 15 h 47 Z)
+
+b1_06 + test b1_09 posés : `^test_b1_09_` **2/2 verts**. Écran Réciproques
+fusionné après le vert du test 51. Suite décidée par le coordinateur : le point
+du matin et l'onglet reprennent les trois listes ; prod au gel avec A5.
+
+### Le point du matin Varelo (b1_07)
+
+- **Migration** `omega/modules/varelo/migrations/b1_07_point_du_matin.sql` :
+  `private.grp_lignes_matin(client, 'contrats'|'encours'|'reciproques')`
+  (SECURITY INVOKER, lit les vues de b1_04–b1_06 : contrats tacites à dénoncer
+  ≤ 30 j — critique ≤ 7 j ; clients au-dessus du plafond, balances de plus de
+  7 jours ; réciproques en écart, non reconnues ou à arrêtés différents) ;
+  `public.grp_ce_matin(client)` (les trois listes au périmètre de la personne,
+  pour l'écran) ; `private.grp_deposer_points(maintenant)` (dès 5 h, heure de
+  l'entité principale : « Contrats à dénoncer », « Encours du groupe »,
+  « Réciproques intragroupe » au rôle gérant et à l'équipe direction_financiere,
+  « Contrats à dénoncer » à direction_juridique, par `private.deposer_section` ;
+  section vide retirée ; battement `varelo_matin` ; erreur → alerte) ;
+  `private.grp_euros` (montants à la française) ; cron **`varelo-matin`**
+  (`*/30 * * * *`). Aucune donnée de santé.
+- **Tests** `omega/tests/varelo/b1_10_point_du_matin.sql` (motif
+  `^test_b1_10_`, après b1_08 et b1_09 dont il reprend les aides) : `_ce_matin`
+  (10), `_depot` (11). Maquette locale : 21/21, 143 assertions en tout de b1_07
+  à b1_10.
+- **Écran** `CeMatin.tsx` : le bloc « Ce matin » en tête de /espace/varelo,
+  mêmes phrases que le point du matin, trois blocs avec renvoi à leur carte
+  (`#vrl-contrats`, `#vrl-encours`, `#vrl-reciproques`). Recette 120 contrôles,
+  cinq largeurs ✓, axe 0 écart.
+- **Pour l'onglet de la barre** (fichier partagé de la coquille, chez C1) : un
+  compteur sur l'onglet VARELO se lit par `rpc('grp_ce_matin', {p_client})` —
+  nombre de lignes de gravité attention ou critique dans les trois listes.
+  Je n'ai pas touché la coquille.
+
+### Carnet de l'audit des promesses (coordinateur, 06/10, 15 h 58 Z)
+
+Ordre décidé (omega/AUDIT-PROMESSES.md § 2 Varelo) : 1. « le groupe sur une
+page » ; 2. les reportings dus ; 3. un modèle `modeles_jeux` Varelo pour le
+lecteur d'exports d'A1 ; 4. les réserves à émettre, avec A1. « Une seule IA » :
+reformulé par C5.
+
+### 1. Le groupe sur une page (b1_08)
+
+- **Source** : la balance générale de chaque société (tous les logiciels la
+  sortent). Plan comptable (ANC 2014-03) : ventes = − Σ 70, résultat = − Σ
+  classes 6 et 7, trésorerie = Σ 51 et 53 (519 compris). Chiffres sociaux, non
+  consolidés (dit à l'écran).
+- **Migration** `omega/modules/varelo/migrations/b1_08_groupe_page.sql` :
+  `grp_balances_depots` / `grp_balances_lignes` (une balance à un arrêté, avec
+  le début de l'exercice ; la courante = la dernière ; déséquilibre dit, pas
+  refusé ; `depose_le` = clock_timestamp), `grp_objectifs` (objectif de ventes
+  de l'exercice, plancher de trésorerie) ; vue `grp_groupe_page` (ventes,
+  résultat, trésorerie ; N-1 à la même date si déposée ; objectif au prorata
+  des jours ; sous plancher ; ancienneté) ; portes `grp_deposer_balance`
+  (gérant, admin) et `grp_regler_objectif` (gérant, admin, valideur DF) ;
+  alerte `varelo:tresorerie.<entité>` levée/fermée d'elle-même ; journal
+  `varelo.balance.depot | objectif.regle | tresorerie.plancher`. Le point du
+  matin gagne « Le groupe ce matin » (trésorerie sous plancher, ventes à plus
+  de 10 % sous l'objectif à date, balance de plus de 35 jours ; au gérant, à la
+  DF, à la présidence) : `grp_ce_matin` et `grp_deposer_points` remplacés
+  (create or replace), le reste de b1_07 inchangé.
+- **Tests** `omega/tests/varelo/b1_11_groupe_page.sql` (motif `^test_b1_11_`) :
+  `_page` (16), `_droits` (12). Maquette : 28/28 ; 171 assertions de b1_07 à
+  b1_11.
+- **Écran** `GroupePage.tsx` + `groupe.ts` : carte « Le groupe sur une page »
+  sous « Ce matin » (totaux, tableau par société : ventes à date, sur l'an
+  dernier, sur l'objectif, résultat, trésorerie et plancher, ancienneté ;
+  dialogues Objectifs et Déposer une balance générale — en-têtes Sage « N°
+  compte », « Solde débit/crédit » reconnus). « Ce matin » passe à quatre blocs.
+  Recette 133 contrôles, cinq largeurs ✓ ; axe 0 écart.

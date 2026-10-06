@@ -851,3 +851,45 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   au rattachement, copie en clair purgée, 7 j max) → B4 b4_09. A4 : TVA dans le cdar (fournisseur
   étranger) → a4_19, puis echange-pa 21466c7 et rejeu du 204. A1 : branchement avis Tamila.
   B2 b2_06 annoncé mais pas poussé.
+- 16 h 20 Z — **Facture électronique : parcours PA du bac à sable prouvé de bout en bout** (a4_19 52100b4,
+  echange-pa v3 21466c7) : 204 et 207 (litige TX_TVA_ERR) émis en CDAR, accusés ok, battement echange_pa.
+  Lecteur v23 (A1 9eabc10 : pièces chiffrées lues chiffrées + passerelle avis RPVA). Poses : taux pénalités
+  Daliro 0.1240 (66f5ec6), 19ah v2 (77cecd9, test 20/20), b2_06 + test 15 (03a86fa : 14/15, loc_dec 42501
+  → B2). 44 vert.
+  **Audit des promesses du site** rendu → omega/AUDIT-PROMESSES.md (carnet de commandes). Nouveaux
+  ouvriers : **C2 CASHD** session_01FM1C6EZzNaNZdUh92m7KQP (worker-c2), **C3 REPUT réponse**
+  session_01Fb8QHDbEZep6P1zq77gN3n (worker-c3), **C4 OFFLOAD** session_01TzwZQvXaqH1JTKSGp7JmrX
+  (worker-c4), **C5 vitrine honnête** session_0165VcUYH1QptmMroZso9GQg (worker-c5) ; branches c2–c5
+  exclues des prévisualisations Vercel (6dfeb11). Carnets envoyés à A1–A5, B1–B7.
+  Main c239974 : voie C d'A5 (workflow de répétition, omega/prod ; omega-sauvegarde.yml NON repris :
+  dumps hors UE), écran Rappels Tiroma (e79c729 + 19ah v2).
+- 16 h 35 Z — Poses : b4_09 facture_entete + test 18 (99d0467), test b2_15 v2 (7bb5c00), b1_07 + test b1_10
+  (7512a38, cron varelo-matin actif), b5_14 + b5_05 et b5_15 + b5_06 (d9000ea). Tests : b4_18 vert,
+  b1_10 2/2, b5_05/06 2/2, 44 vert ; **b2_15 rouge** (loc_completer_locataire l. 32 : 22P02 « malformed
+  array literal: siren » → B2 b2_06b). Main a264a45 : facture imprimable Tamila, Ce matin Varelo, lots
+  Lorani (en ligne au retour du quota). C1 informé des nouveaux écrans et des modules CASHD/REPUT/OFFLOAD.
+- 16 h 55 Z — Poses (toutes vertes sauf mention) : a4_20 + a4_13 (e749aa5, courriel → FILED), a4_21 + a4_14
+  (f184edc, pièces filles), b2_07 + test 16 (0e2cc89), b4_10 + test 19 (e39e4ef, avis par courriel), b6_17 +
+  b6_11 (c706dcb, heures), b6_18 + b6_12 (c3ab533), c3_01 + c3_00 + c3_01_base (C3 0419e27), b3_15 + test 16
+  (72ec683 : **rouge**, préparation du test — daf2 valideur ne peut être direction → B3). 44, 46, 51 verts.
+  Fonctions : lecteur v24 (A1 df07435 : découpage, TVA débits, contre-valeur, mentions), identite v5 (B7
+  4ed0bff, sans effet tant que les CHECK ne sont pas élargis), tamila-purge v1 (b4b664e) + cron
+  omega-tamila-purge */5. Boîte cabinet-banc@recu.omegaai.fr (module tamila). Main f733c22.
+  Décisions : A5 19ai (réceptions lisibles selon le module, Tamila : pas les murés) ; A4 a4_22 (CHECK
+  uid_ch/hmrc, retrait de l'ancienne contrainte posé à part) ; A2 autorisé à écrire 19aj_messageries
+  (statut brouillon_depose) ; Gmail en régime Test, CASA = décision de Teo ; Microsoft 365 ensuite.
+  À dire à Teo : frais de gestion d'avis de contravention à mettre dans les CGV des loueurs.
+- 17 h 20 Z — Poses : b5_16 + b5_07 (a05f77c, contrôle du dossier Lorani), a4_22 + a4_15 (30d3991, FEC
+  autoliquidation / devise / extourne), a4_23 + a4_16 (11c1f8b, recontrôle 3 voies), b1_08 + b1_11 (fdd8e5c,
+  groupe sur une page), socle 19ai compteurs facturation (731eb98), 19aj export complet (27d1ad9), 19ak
+  réceptions confidentielles par module (72bc763), b4_11 + test 20 (814adee), b3_15 v2 + b3_16 (3dd4b88).
+  **c4_01 (C4 7c8c520) REFUSÉ** : modeles_jeux_coherent (clé « reference » facultative) → C4.
+  Tests verts : b5_07, a4_22 ×3, b1_10/11, 57, b4_20, 44, 46, 51. Rouges (préparation des tests) :
+  a4_23_02/03 (filed_receptions.entite_id NOT NULL → A4), 56 (sha256 en double → A5), 58 (fournisseur
+  essai_a5 inconnu → A5), b3_16/17 (daf2 « direction » refusé → B3).
+  Fonctions : lecteur v25 (A1 f893452 : Lorani), tamila-purge v2 (fab4e01), export-complet v1 (27d1ad9).
+  Main f77a674. C1 : phase 2 finie (5e64be7, 13 écrans, 368/368), prévisualisation refusée par le quota ;
+  captures envoyées à Teo.
+  **Bloqué, pour Teo** : la sauvegarde vers Scaleway (A5). Le contrôle des permissions de la session A5 a
+  refusé un workflow qui envoie les dumps de la prod hors de GitHub. Il faut l'accord explicite de Teo.
+  Numéros : a4_24 = CHECK uid_ch / hmrc + comptes système ; 19al = messageries d'A2. B7 : ouvrier taux BCE.

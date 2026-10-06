@@ -16,7 +16,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useMemo, useState } from "react";
-import { Banknote, Clock, FileSignature, ReceiptText } from "lucide-react";
+import { Banknote, Clock, FileSignature, Printer, ReceiptText } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
@@ -24,9 +24,10 @@ import { Avis, Def, Pastille } from "../ui";
 import { dateCourte } from "../format";
 import { chiffrer, dechiffrer } from "./chiffrement";
 import { DESCRIPTIONS_TEMPS_EXEMPLE, honorairesExemple } from "./exemples";
+import FactureImprimable from "./FactureImprimable";
 import * as portes from "./portes";
 import type { Moi } from "./regles";
-import type { Convention, Dossier, Facture, Honoraires, ModeHonoraires, ModeReglement, NatureTemps, Personne, Piece, Provision, Temps } from "./types";
+import type { Clair, Convention, Dossier, EnteteFacture, Facture, Honoraires, ModeHonoraires, ModeReglement, NatureTemps, Personne, Piece, Provision, Temps } from "./types";
 
 type Props = {
   dossier: Dossier;
@@ -39,6 +40,12 @@ type Props = {
   peutGerer: boolean;
   /* un associé du cabinet, ou celui qui gère le dossier : il note les encaissements */
   peutEncaisser: boolean;
+  /* pour la facture imprimable (b4_09) */
+  clientId: string;
+  gerant: boolean;
+  entete: EnteteFacture;
+  clair: Clair | null;
+  clientNom: string | null;
 };
 
 type Form =
@@ -92,7 +99,7 @@ export function resumer(h: Honoraires, d: Dossier, maintenant = Date.now()) {
   };
 }
 
-export default function HonorairesTamila({ dossier: d, source, moi, personnes, pieces, cle, peutEcrire, peutGerer, peutEncaisser }: Props) {
+export default function HonorairesTamila({ dossier: d, source, moi, personnes, pieces, cle, peutEcrire, peutGerer, peutEncaisser, clientId, gerant, entete, clair, clientNom }: Props) {
   /* undefined : lecture en cours ; null : la base n'a pas les honoraires (b4_06 non posée) */
   const [h, setH] = useState<Honoraires | null | undefined>(() => (source === "exemple" ? honorairesExemple(d.id) : undefined));
   const [descriptions, setDescriptions] = useState<Record<string, string>>(() => (source === "exemple" ? DESCRIPTIONS_TEMPS_EXEMPLE : {}));
@@ -101,6 +108,7 @@ export default function HonorairesTamila({ dossier: d, source, moi, personnes, p
   const [erreur, setErreur] = useState<string | null>(null);
   const [fait, setFait] = useState<string | null>(null);
   const [tout, setTout] = useState(false);
+  const [imprimee, setImprimee] = useState<Facture | null>(null);
   const [f, setF] = useState<Record<string, string>>({});
   const champ = (k: string, defaut = "") => f[k] ?? defaut;
   const poser = (k: string, v: string) => setF((p) => ({ ...p, [k]: v }));
@@ -433,6 +441,7 @@ export default function HonorairesTamila({ dossier: d, source, moi, personnes, p
                 <div className="tam-ligne-meta">
                   <span>Émise le {dateCourte(fa.emise_le)}</span>
                   <span>{duree(fa.minutes)} · honoraires {euros(fa.total_ht_cents)} HT · TVA {euros(fa.tva_cents)}{fa.debours_cents ? ` · déboursés ${euros(fa.debours_cents)}` : ""}{fa.provisions_imputees_cents ? ` · provisions ${euros(fa.provisions_imputees_cents)}` : ""}</span>
+                  {fa.statut !== "annulee" ? <button type="button" className="esp-lien-bouton" onClick={() => setImprimee(fa)}><Printer width={12} height={12} aria-hidden="true" /> Imprimer</button> : null}
                   {fa.statut === "emise" && peutEncaisser ? <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "payee", facture: fa })}>Payée</button> : null}
                   {fa.statut === "emise" && peutGerer ? <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "annuler_facture", facture: fa })}>Annuler</button> : null}
                 </div>
@@ -441,6 +450,23 @@ export default function HonorairesTamila({ dossier: d, source, moi, personnes, p
           </>
         )}
       </div>
+
+      {imprimee && h ? (
+        <FactureImprimable
+          ouvert
+          onFermer={() => setImprimee(null)}
+          source={source}
+          clientId={clientId}
+          facture={imprimee}
+          convention={h.conventions.find((c) => c.statut !== "resiliee") ?? h.conventions[0] ?? null}
+          temps={h.temps.filter((t) => t.facture_id === imprimee.id)}
+          descriptions={descriptions}
+          entete={entete}
+          clientNom={clientNom}
+          dossier={clair ? { reference: clair.reference, intitule: clair.intitule } : null}
+          gerant={gerant}
+        />
+      ) : null}
 
       <Dialog open={!!form} onOpenChange={(o) => !o && setForm(null)}>
         <DialogContent>

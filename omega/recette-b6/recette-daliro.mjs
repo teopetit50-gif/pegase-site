@@ -12,7 +12,8 @@
    la n° 2 des Tilleuls, avancer une ligne, lire les totaux, soumettre ; axe-core sur la carte et sa fenêtre ;
    l'encaissement (b6_16) : un paiement partiel sur la n° 1, le reste dû ;
    la réception (b6_13) : prononcer avec deux réserves, en lever une, noter une opposition, préparer et envoyer
-   le décompte ; axe-core sur la carte et ses fenêtres.
+   le décompte ; axe-core sur la carte et ses fenêtres ;
+   les heures (b6_17) : 11 h (alerte L3121-18), 12,5 h (refus), le coût horaire chargé, la rentabilité ; axe-core.
    usage : node omega/recette-b6/recette-daliro.mjs [origine] */
 import { mkdirSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -298,6 +299,50 @@ const choisir = (sel, valeur) => `(() => { const t = document.querySelector('${s
     ok(c1.length === 0, `carte de la réception : aucun écart axe grave ${c1.length ? JSON.stringify(c1) : ''}`);
     const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
     ok(deb === 0, `pas de débordement horizontal (${deb})`);
+    s.fermer();
+  }
+}
+
+{
+  const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+  const graves = (cible) => `(async () => { const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`;
+  // la case du jour (la dernière case ouverte) de Lucas Morel : saisir puis quitter la case
+  const caseDuJour = (valeur) => `(() => { const c = [...document.querySelectorAll('section[aria-label="Heures et rentabilité"] input')].filter(i => /^Heures de Lucas Morel/.test(i.getAttribute('aria-label') || '') && !i.disabled).pop();
+    if (!c) return false; c.focus(); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(c, ${JSON.stringify(valeur)}); c.dispatchEvent(new Event('input', { bubbles: true })); c.blur(); return true; })()`;
+  for (const largeur of [390, 1440]) {
+    const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `b6-heures-${largeur}`, densite: 1 });
+    console.log(`— Les Tilleuls : heures pointées et rentabilité (${largeur})`);
+    ok(await s.aller(base + chemin), 'page chargée');
+    await s.dormir(500);
+    await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /Tilleuls/.test(b.textContent))?.click()`);
+    await s.dormir(600);
+    const carte = `document.querySelector('section[aria-label="Heures et rentabilité"]')`;
+    const t0 = await s.evaluer(`${carte}?.innerText || ''`);
+    ok(/h pointées/i.test(t0) && /Karim Haddad/.test(t0) && /Semaine du/.test(t0), 'la semaine de l\'équipe Pose A est affichée');
+    ok(/Rentabilité à date/i.test(t0) && /Marge à date/i.test(t0) && /Main-d.œuvre/.test(t0), 'la rentabilité à date est affichée');
+    ok(await s.evaluer(caseDuJour('11')), 'Lucas Morel : 11 h aujourd\'hui');
+    await s.dormir(400);
+    ok(await s.evaluer(`/au-delà de 10 h \\(L3121-18\\)/.test(${carte}?.innerText || '')`), 'au-delà de 10 h : pointé, avec l\'alerte du Code du travail');
+    ok(await s.evaluer(caseDuJour('12,5')), 'Lucas Morel : 12,5 h');
+    await s.dormir(400);
+    ok(await s.evaluer(`/de 0 à 12, au quart d.heure/.test(${carte}?.innerText || '')`), '12,5 h : refusé');
+    ok(await s.evaluer(bouton('/Coût horaire/', carte)) === true, 'clic sur « Coût horaire »');
+    await s.dormir(400);
+    await s.evaluer(axe + ';true');
+    const d1 = await s.evaluer(graves(`document.querySelector('[role="dialog"]')`));
+    ok(d1.length === 0, `fenêtre « Coût horaire chargé » : aucun écart axe grave ${d1.length ? JSON.stringify(d1) : ''}`);
+    await s.evaluer(saisir('[role="dialog"] input[inputmode="decimal"]', '40'));
+    await s.dormir(150);
+    await s.evaluer(`${dlgBouton('/Poser le coût/')}?.click()`);
+    await s.dormir(500);
+    ok(await s.evaluer(`/Coût horaire chargé de l.entreprise \\(par défaut\\) : 40,00/.test(${carte}?.innerText || '')`), 'le coût horaire par défaut passe à 40 €');
+    const c1 = await s.evaluer(graves(carte));
+    ok(c1.length === 0, `carte des heures : aucun écart axe grave ${c1.length ? JSON.stringify(c1) : ''}`);
+    const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
+    ok(deb === 0, `pas de débordement horizontal (${deb})`);
+    await s.evaluer(`${carte}?.scrollIntoView()`);
+    await s.capturer(`${dossier}daliro-heures-${largeur}.jpg`, { qualite: 55 });
     s.fermer();
   }
 }

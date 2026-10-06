@@ -8,9 +8,12 @@
    acte déposé ; poser une muraille ; ouvrir un nouveau dossier ; passer le
    cabinet au coffre Scaleway et ré-envelopper ses dossiers (b4_05) ; les
    honoraires : saisir du temps, facturer, convention manquante (b4_06) ;
-   les conflits d'intérêts et la vigilance LCB-FT (b4_07).
+   les conflits d'intérêts et la vigilance LCB-FT (b4_07) ; la facture
+   imprimable et l'en-tête du cabinet (b4_09) ; les avis RPVA reçus par
+   courriel, à rattacher (b4_10), avec axe-core sur la carte et le dialogue.
    usage : node omega/recette-b4/recette-tamila.mjs [origine] */
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { ouvrirSession } from '../../outils/chrome.mjs';
 
 const base = process.argv[2] ?? 'http://localhost:3010';
@@ -252,6 +255,75 @@ for (const largeur of LARGEURS) {
   await s.dormir(700);
   const t3 = await carte();
   ok(/Transaction immobilière/.test(t3) && /identifiez le client et le bénéficiaire effectif/.test(t3), 'assujetti sans identification : encore à faire');
+  s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b4-facture-imprimee', densite: 1 });
+  console.log('— la facture imprimable (b4_09)');
+  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  await s.dormir(500);
+  await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /2026-0412/.test(b.textContent))?.click()`);
+  await s.dormir(600);
+  await s.evaluer(`[...document.querySelectorAll('section[aria-label="Honoraires"] .esp-lien-bouton')].find(b => /Imprimer/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const apercu = () => s.evaluer(`document.querySelector('iframe.tam-facture-apercu')?.contentDocument?.body?.innerText || ''`);
+  const f0 = await apercu();
+  ok(/Facture/.test(f0) && /H-2026-000041/.test(f0), 'l\'aperçu de la facture H-2026-000041');
+  ok(/SIREN 552100554/.test(f0) && /TVA FR40552100554/.test(f0) && /barreau de Paris/.test(f0), 'les mentions du cabinet : SIREN, TVA, barreau');
+  ok(/SCI du Moulin/.test(f0), 'le client, déchiffré dans le navigateur');
+  ok(/Rédaction — Rédaction des conclusions d.appelant/.test(f0) && /625,00/.test(f0) && /250,00/.test(f0), 'le détail du temps : 2 h 30 de rédaction × 250 € = 625 €');
+  ok(/Reste à payer\s*485,00/.test(f0) && /Provisions reçues, déduites/.test(f0), 'provision déduite, reste à payer 485 €');
+  ok(/indemnité forfaitaire de 40 €/.test(f0) && /L\.441-10/.test(f0) && /Échéance le/.test(f0), 'échéance, pénalités de retard et indemnité de 40 € (L.441-10, D.441-5)');
+  await s.evaluer(`(() => { const ta = [...document.querySelectorAll('[role="dialog"] textarea')][0]; const set = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set; set.call(ta, '3 chemin des Moulins\\n97100 Basse-Terre'); ta.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(500);
+  ok(/97100 Basse-Terre/.test(await apercu()), 'l\'adresse du client tapée pour l\'impression apparaît sur la facture');
+  await s.capturer(`${dossier}tamila-facture-imprimee-1440.jpg`, { qualite: 55 });
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] .esp-lien-bouton')].find(b => /Modifier l.en-tête/.test(b.textContent))?.click()`);
+  await s.dormir(300);
+  await s.evaluer(`(() => { const l = [...document.querySelectorAll('[role="dialog"] label')].find(l => /^Toque/.test(l.textContent)); const i = l.querySelector('input'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, 'P 0456'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer l.en-tête/.test(b.textContent))?.click()`);
+  await s.dormir(500);
+  ok(/toque P 0456/.test(await apercu()), 'le gérant modifie l\'en-tête : la toque change sur la facture');
+  s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b4-avis-entrants', densite: 1 });
+  console.log('— les avis RPVA reçus par courriel, à rattacher (b4_10)');
+  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  await s.dormir(600);
+  const carte = () => s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Avis RPVA à rattacher"]'); return c ? { texte: c.innerText, lignes: c.querySelectorAll('.tam-ligne').length } : null; })()`);
+  const c0 = await carte();
+  ok(c0 && c0.lignes === 2, `la file montre ${c0?.lignes} avis à rattacher`);
+  ok(/transite en clair chez le prestataire de courriel/.test(c0?.texte ?? '') && /sept jours au plus/.test(c0?.texte ?? ''), 'la mention honnête : le clair transite chez le prestataire, sept jours au plus');
+  ok(/Dossier 2026-0412 \(même n° RG\)/.test(c0?.texte ?? ''), 'le dossier proposé par le n° RG cité (26/01234 → 2026-0412)');
+  const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+  await s.evaluer(axe + ';true');
+  const analyser = (cible) => s.evaluer(`(async () => { const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`);
+  const g1 = await analyser(`document.querySelector('section[aria-label="Avis RPVA à rattacher"]')`);
+  ok(g1.length === 0, `axe sur la carte : ${g1.length ? g1.join(' ; ') : 'aucun écart grave'}`);
+  await s.evaluer(`(e => { e?.focus(); e?.click(); })([...document.querySelectorAll('section[aria-label="Avis RPVA à rattacher"] .tam-ligne')][0]?.querySelector('.esp-lien-bouton'))`);
+  await s.dormir(600);
+  const dlg = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const sel = d?.querySelector('select'); return d ? { titre: d.querySelector('h2')?.textContent, choisi: sel?.selectedOptions[0]?.textContent, citation: !!d.querySelector('.tam-citation') } : null; })()`);
+  ok(dlg && /Rattacher l.avis/.test(dlg.titre) && /2026-0412/.test(dlg.choisi) && dlg.citation, `dialogue « ${dlg?.titre} », dossier présélectionné : ${dlg?.choisi}`);
+  const g2 = await analyser(`document.querySelector('[role="dialog"]')`);
+  ok(g2.length === 0, `axe sur le dialogue : ${g2.length ? g2.join(' ; ') : 'aucun écart grave'}`);
+  await s.capturer(`${dossier}tamila-avis-entrant-1440.jpg`, { qualite: 55 });
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Chiffrer et rattacher/.test(b.textContent))?.click()`);
+  await s.dormir(900);
+  const c1 = await carte();
+  ok(c1 && c1.lignes === 1 && /Avis rattaché au dossier 2026-0412/.test(c1.texte) && /copie reçue par courriel est effacée/.test(c1.texte), 'rattaché : l\'avis quitte la file, la copie en clair est annoncée effacée');
+  const ouvert = await s.evaluer(`document.querySelector('#esp-dossier .esp-carte-titre .esp-mono')?.textContent`);
+  ok(ouvert === '2026-0412', `le dossier rattaché s'ouvre (${ouvert})`);
+  await s.evaluer(`[...document.querySelectorAll('section[aria-label="Avis RPVA à rattacher"] .esp-lien-bouton')].find(b => /Écarter/.test(b.textContent))?.click()`);
+  await s.dormir(500);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Écarter\\s*$/.test(b.textContent))?.click()`);
+  await s.dormir(800);
+  ok(await carte() === null, 'le dernier avis écarté : la file disparaît');
   s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
   s.fermer();
 }

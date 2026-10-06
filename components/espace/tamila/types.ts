@@ -261,6 +261,26 @@ export type Reglages = {
   conservation_audit_jours: number;
   conservation_exports_jours: number;
   maj_le: string;
+  /* b4_09 : l'en-tête des factures du cabinet (absent avant la pose) */
+  facture_entete?: EnteteFacture;
+};
+
+/* L'en-tête des factures du cabinet (b4_09) : ses mentions publiques, les mêmes pour toutes ses factures. */
+export type EnteteFacture = {
+  nom?: string;
+  forme?: string;
+  adresse?: string;
+  code_postal_ville?: string;
+  siren?: string;
+  tva_intracom?: string;
+  barreau?: string;
+  toque?: string;
+  telephone?: string;
+  courriel?: string;
+  iban?: string;
+  bic?: string;
+  delai_paiement_jours?: number;
+  mention_tva?: string;
 };
 
 export type RegleProcedure = {

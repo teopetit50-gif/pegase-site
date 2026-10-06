@@ -212,7 +212,7 @@ export default function Encours({ source, contexte, client_id, nature, societes,
   );
 
   return (
-    <section className="esp-carte" aria-label={`Encours du groupe, ${libelle.des}`} style={{ marginTop: 16 }}>
+    <section id="vrl-encours" className="esp-carte" aria-label={`Encours du groupe, ${libelle.des}`} style={{ marginTop: 16 }}>
       <div className="esp-carte-tete">
         <div>
           <h2 className="esp-carte-titre">Encours du groupe — {libelle.des}</h2>

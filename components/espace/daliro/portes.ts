@@ -18,14 +18,15 @@
      btp_annuler_situation (b6_12) ;
      btp_prononcer_reception, btp_lever_reserve, btp_opposer_retenue, btp_liberer_retenue,
      btp_preparer_decompte, btp_envoyer_decompte, btp_repondre_decompte (b6_13) ;
-     btp_noter_paiement, btp_fixer_echeance (b6_16).
+     btp_noter_paiement, btp_fixer_echeance (b6_16) ;
+     btp_heures_chantier (lecture), btp_pointer, btp_pointer_equipe, btp_poser_cout_horaire (b6_17).
    Les tables sans porte (chantiers, lots, tiers, dépendances, acceptations)
    s'écrivent en direct, comme le socle le prévoit (politiques du bureau).
    Si la base répond autrement, l'écran montre son message tel quel.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { AccordJ2, Chantier, FactureCandidate, Remplacant, Tableau } from "./types";
+import type { AccordJ2, Chantier, FactureCandidate, HeuresChantier, Remplacant, RetourPointage, Tableau } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -188,4 +189,22 @@ export async function repondreDecompte(reception: string, accepte: boolean, moti
 /* L'encaissement des situations (b6_16). */
 export async function noterPaiement(situation: string, montant: number, date: string, reference: string | null): Promise<unknown> {
   return rpc("btp_noter_paiement", { p_situation: situation, p_montant: montant, p_date: date, p_reference: reference });
+}
+
+/* b6_17 : les heures et la rentabilité */
+export async function chargerHeures(chantier: string, lundi: string): Promise<HeuresChantier | null> {
+  const h = await rpc<HeuresChantier | null>("btp_heures_chantier", { p_chantier: chantier, p_lundi: lundi });
+  return h && typeof h === "object" ? h : null;
+}
+
+export async function pointer(chantier: string, intervenant: string, jour: string, heures: number, lot: string | null, note: string | null): Promise<RetourPointage> {
+  return rpc<RetourPointage>("btp_pointer", { p_chantier: chantier, p_intervenant: intervenant, p_jour: jour, p_heures: heures, p_lot: lot, p_note: note });
+}
+
+export async function pointerEquipe(chantier: string, equipe: string, jour: string, heures: number, lot: string | null): Promise<{ pointes: number; alertes: string[] }> {
+  return rpc("btp_pointer_equipe", { p_chantier: chantier, p_equipe: equipe, p_jour: jour, p_heures: heures, p_lot: lot });
+}
+
+export async function poserCoutHoraire(client: string, intervenant: string | null, cout: number, depuis: string): Promise<unknown> {
+  return rpc("btp_poser_cout_horaire", { p_client: client, p_intervenant: intervenant, p_cout: cout, p_depuis: depuis });
 }

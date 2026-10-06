@@ -27,14 +27,15 @@ import Creneaux from "./Creneaux";
 import ListeAttente, { type Inscription, type Retrait } from "./ListeAttente";
 import Pilotage from "./Pilotage";
 import Plans, { type Mutuelle } from "./Plans";
+import Rappels, { type NouveauContact } from "./Rappels";
 import { DOSSIER_EXEMPLE } from "./exemple";
 import { LOGICIELS, libelleLogiciel } from "./libelles";
 import {
   ajouterFauteuil, ajouterFermeture, ajouterHoraire, ajouterPraticien, brancherCabinet, changerMode, changerStatut, chargerDossier,
   ajouterAttente, chercherPatients, classerType, installerCabinet, listerCabinets, monCompte, noterMutuelle, retirerAttente, retirerHoraire, type Compte,
-  noterAppel,
+  noterAppel, noterContact, retirerContact,
 } from "./portes";
-import type { Cabinet as CabinetT, CibleAppel, Dossier, Logiciel, PatientCourt, RegistreAppels } from "./types";
+import type { Cabinet as CabinetT, CibleAppel, ContactPatient, Dossier, Logiciel, PatientCourt, RegistreAppels } from "./types";
 
 type Reel = { compte: Compte | null; cabinets: CabinetT[]; dossier: Dossier | null; avis: string[] };
 
@@ -221,6 +222,35 @@ export default function EcranTiroma() {
     await charger(d.cabinet.id);
   }, [source, reel, charger]);
 
+  /* b3_14 : les moyens de contact des patients ; en exemple, en mémoire */
+  const noterUnContact = useCallback(async (c: NouveauContact) => {
+    if (source === "exemple") {
+      await new Promise((r) => setTimeout(r, 250));
+      setLocal((prev) => prev.rappels ? ({
+        ...prev,
+        rappels: {
+          ...prev.rappels,
+          contacts: [...prev.rappels.contacts.filter((x) => !(x.patient_id === c.patient.id && x.canal === c.canal)),
+            { id: `ct-${Date.now()}`, patient_id: c.patient.id, patient_nom: [c.patient.prenom, c.patient.nom].filter(Boolean).join(" "), canal: c.canal,
+              adresse: c.adresse, rappels: c.rappels, relances: c.relances, source: c.source, cree_le: new Date().toISOString() }],
+        },
+      }) : prev);
+      return;
+    }
+    const d = reel?.dossier;
+    if (!d) throw new Error("Aucun cabinet ouvert.");
+    await noterContact(d.cabinet, { patient_id: c.patient.id, canal: c.canal, adresse: c.adresse, rappels: c.rappels, relances: c.relances, source: c.source, preuve: c.preuve });
+    await charger(d.cabinet.id);
+  }, [source, reel, charger]);
+  const retirerUnContact = useCallback(async (c: ContactPatient) => {
+    if (source === "exemple") {
+      setLocal((prev) => prev.rappels ? ({ ...prev, rappels: { ...prev.rappels, contacts: prev.rappels.contacts.filter((x) => x.id !== c.id) } }) : prev);
+      return;
+    }
+    await retirerContact(c.id, null);
+    await charger(reel?.dossier?.cabinet.id);
+  }, [source, reel, charger]);
+
   const installer = async () => {
     if (!reel?.compte || !entiteInst) return;
     setInstalle(true);
@@ -348,6 +378,7 @@ export default function EcranTiroma() {
             <AvantRendezVous verifications={dossier.verifications} jours={dossier.regles?.labo_verif_jours ?? 2} />
             <ChargeFauteuils charge={dossier.charge} titulaire={titulaire} />
           </div>
+          <Rappels rappels={dossier.rappels} peutEcrire={dossier.profil !== null && dossier.profil !== "direction"} chercher={chercher} noter={noterUnContact} retirer={retirerUnContact} />
           <ListeAttente attente={dossier.attente} praticiens={dossier.praticiens} peutEcrire={dossier.profil !== null && dossier.profil !== "direction"} chercher={chercher} inscrire={inscrire} retirer={retirer} />
           <Cabinet dossier={dossier} agir={agir} />
           <DialogueAppel cible={cibleAppel} jour={dossier.appels?.jour ?? new Date().toISOString().slice(0, 10)} fermer={() => setCibleAppel(null)} noter={noterUnAppel} />

@@ -692,7 +692,7 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
       </section>
 
       {/* ——— les honoraires (b4_06) ——— */}
-      <HonorairesTamila dossier={d} source={source} moi={moi} personnes={personnes} pieces={pieces} cle={cle} peutEcrire={peutEcrire} peutGerer={peutGerer && avocat} peutEncaisser={(peutGerer && avocat) || (associe && !murailles.some((m) => m.user_id === moi?.user_id && !m.leve_le))} />
+      <HonorairesTamila dossier={d} source={source} moi={moi} personnes={personnes} pieces={pieces} cle={cle} peutEcrire={peutEcrire} peutGerer={peutGerer && avocat} peutEncaisser={(peutGerer && avocat) || (associe && !murailles.some((m) => m.user_id === moi?.user_id && !m.leve_le))} clientId={clientId} gerant={gerant} entete={reglages?.facture_entete ?? {}} clair={clair} clientNom={(() => { const p = parties.find((x) => x.qualite === "client"); return p ? (complet.partiesClair[p.id]?.nom ?? null) : null; })()} />
 
       {/* ——— conflits d'intérêts et vigilance LCB-FT (b4_07) ——— */}
       <ConformiteTamila dossier={d} source={source} clientId={clientId} parties={parties} partiesClair={complet.partiesClair} pieces={pieces} peutEcrire={peutEcrire} peutGerer={peutGerer && avocat} gerant={gerant} referenceDe={referenceDe} />
