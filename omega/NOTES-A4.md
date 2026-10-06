@@ -36,6 +36,7 @@ Recette seulement (omega-recette) ; la production est au coordinateur.
 | `a4_09_filed_lot4g_acquittement_alerte.sql` | correctif : `private.filed_reconnaitre_charge` acquitte l'alerte « facture attendue absente » (`alertes.acquittee_le`) quand la facture arrive tard. |
 | `a4_10_filed_lot7_identite_fournisseur.sql` | lot 7 : `filed_fournisseurs.identite_verifiee_le / identite_source / identite_verdict` ; `private.filed_completer_fournisseur_lu` (SIREN, TVA, IBAN lus par le lecteur remontés vers `fournisseur_lu`, `filed_factures.iban` et le fournisseur) en tête de `filed_controler_facture` (repère, corps en place) ; `filed_repondre_verification` pose le verdict sur le fournisseur et recontrôle ses factures ; `filed_attester_identite` (une personne) ; `filed_controles_identite` lit le verdict ; porte `filed_confirmer_fournisseur`. |
 | `a4_11_filed_lot7_controler_facture_complet.sql` | `private.filed_controler_facture` en texte complet (corps de la recette + lignes « Lot 4 (A4) » + appel de `filed_completer_fournisseur_lu` en tête). Remplace les poses par repère d'a4_08 et a4_10, restées sans effet sur la recette pour lot 7. |
+| `a4_12_filed_lot7_a_confirmer_non_levable.sql` | correctif (remontée d'A3, 06/10) : le contrôle `fournisseur.a_confirmer` n'est levable par personne. Déclencheur sur `filed_levees` (refus 42501) et sur `filed_controles` (une levée antérieure retombe en `anomalie`). Sortie unique : `filed_confirmer_fournisseur`. Ne dépend pas du corps de `filed_lever_anomalie` (absent des extraits). Test `a4_06_a_confirmer_non_levable.sql`. |
 | `a4_08_filed_lot4e_branchements.sql` | `private.filed_apres_controle`, `private.filed_balayer_lot4` (+ `private.filed_lot4_passages`) ; `filed_controler_facture` modifié par lecture du corps en place et quatre insertions (identité + exercice après le rapprochement ; statut décidé conservé ; message d'historique ; appel après l'écriture du statut) ; `filed_rapprocher_ligne`, `filed_traiter`, `filed_executer_decision` recopiés en entier + lignes « Lot 4 (A4) ». |
 
 Tests (`omega/tests/filed/`, DO … assert …, tout en rollback, données d'exemple) :
@@ -171,6 +172,16 @@ Famille « Pilotage » :
 - « Le délai moyen de traitement se mesure de la réception au classement. »
 - « Les pièces bloquées, en litige ou en attente d'approbation sont comptées en continu. »
 - « Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe. »
+
+## a4_12 (06/10) — remontée d'A3 : levée de `fournisseur.a_confirmer`
+
+- Constat : rien dans a4_10 / a4_11 ne refusait la levée ; la souche (et l'extrait de `filed_poser_resultat`)
+  montre `private.filed_levable` = tout sauf `lecture.%`. Le corps réel de `filed_lever_anomalie` n'est dans aucun
+  extrait : la garde est posée sur les tables, pas dans la porte.
+- Choix : refus pour **tout le monde**, pas seulement pour le déposant. Lever revient à confirmer sans journal,
+  sans valider l'IBAN, pour une seule facture ; les personnes habilitées ont `filed_confirmer_fournisseur`.
+- Local : a4_01→a4_12 deux fois, six tests verts ; le cas 2 (porte réelle) ne se joue que sur la recette.
+- À A3 : masquer « Lever avec un motif » pour ce code et montrer « Confirmer le fournisseur ».
 
 ## factures.ts : lignes exactes à passer à `atteste: true` (06/10, relevé sur origin/main 70f9b7c)
 
