@@ -200,6 +200,7 @@ function fr(iso: string): string {
 const ROUX = { nom: "Métallerie Roux SARL", siren: "512 448 109", tva: "FR 41 512448109", adresse: "ZI des Bruyères, 69800 Saint-Priest", iban: "FR76 3000 4000 0512 3456 7890 143", code: "ROUX" };
 const DURAND = { nom: "Papeterie Durand", siren: "398 772 540", tva: "FR 22 398772540", adresse: "4 place Bellecour, 69002 Lyon", iban: "FR76 1027 8060 0100 0203 0450 183", code: "DURAND" };
 const TECHPRO = { nom: "TechPro Informatique", siren: "833 110 254", tva: "FR 65 833110254", adresse: "12 rue de la République, 38000 Grenoble", iban: "FR76 1820 6000 7865 4321 0987 612", code: "TECHPRO" };
+const VIDAL = { nom: "Imprimerie Vidal SAS", siren: "421 937 058", tva: "FR 83 421937058", adresse: "7 rue Juiverie, 69005 Lyon", iban: "FR76 1009 6180 1100 0456 7812 044", code: "VIDAL" };
 const EDL = { nom: "Électricité de Lyon", siren: "552 081 317", tva: "FR 03 552081317", adresse: "22 avenue Jean Jaurès, 69007 Lyon", iban: "FR76 3000 3030 2000 0500 0123 456", code: "EDL" };
 
 function doc(n: number, o: Partial<DossierFiled["document"]> & { reference: string; nom_fichier: string; recu_le: string; etat: DossierFiled["document"]["etat"] }): DossierFiled["document"] {
@@ -556,6 +557,54 @@ const D08: DossierFiled = {
 };
 D08.facture!.statut = "a_valider";
 
+/* ——— 9. R2026-000016 — Imprimerie Vidal : fournisseur nouveau, à confirmer ———
+   Déposée par Sofia Carvalho : une autre personne confirme le fournisseur
+   (filed_confirmer_fournisseur). Son identité est déjà confirmée par VIES. */
+const f16 = facture(16, {
+  fournisseur: { ...VIDAL, statut: "a_confirmer" },
+  numero: "IV-2026-1187",
+  emission: fr(ilYa(1)),
+  echeance: fr(dans(29)),
+  ht: 640,
+  tva: 128,
+  ttc: 768,
+  taux: 20,
+  lignes: [{ designation: "Brochures A5, 16 pages, 500 exemplaires", quantite: 500, unite: "pièce", pu: 1.28 }],
+  verifiees: true,
+});
+f16.facture.statut = "bloquee";
+f16.facture.anomalies = ["fournisseur.a_confirmer"];
+f16.facture.nb_bloquants = 1;
+const D16: DossierFiled = {
+  document: doc(16, { reference: "R2026-000016", nom_fichier: "IV-2026-1187.pdf", recu_le: ilYa(1, 10), etat: "a_traiter", source: "depot", expediteur: "sofia.carvalho@atelier-bertin.fr", depose_par: SOFIA }),
+  ...f16,
+  fournisseur: {
+    ...f16.fournisseur,
+    document_origine: u("dd", 16),
+    identite_verifiee_le: ilYa(1, 10),
+    identite_source: "vies",
+    identite_verdict: { resultat: "valide", registre: "vies", identifiant: "FR83421937058", preuve: { nom: "IMPRIMERIE VIDAL", adresse: "7 RUE JUIVERIE 69005 LYON" } },
+  },
+  controles: [
+    ctrl(f16.facture.id, "mentions.numero_present", "bloquant", "ok", "Numéro de facture présent."),
+    ctrl(f16.facture.id, "identite.registre", "attention", "ok", "Identité confirmée par VIES le " + fr(ilYa(1)) + "."),
+    ctrl(f16.facture.id, "fournisseur.a_confirmer", "bloquant", "anomalie", "Fournisseur nouveau (IMPRIMERIE VIDAL SAS) : une personne confirme qu'il s'agit bien d'un fournisseur de l'entreprise.", null, { fournisseur: "Imprimerie Vidal SAS" }),
+    ctrl(f16.facture.id, "tva.coherence", "bloquant", "ok", "640,00 € × 20 % = 128,00 €."),
+    ctrl(f16.facture.id, "totaux.ht_tva_ttc", "bloquant", "ok", "HT + TVA = TTC."),
+  ],
+  levees: [],
+  ibans: [{ id: u("ib", 16), fournisseur_id: f16.fournisseur.id, iban_masque: "FR76 •••• •••• •••• 2044", statut: "propose", propose_le: ilYa(1, 10) }],
+  appariements: [],
+  rapprochement: null,
+  origine_deposee_par: SOFIA,
+  historique: [
+    hist("reception", "Déposée depuis l'espace par Sofia Carvalho.", ilYa(1, 10), "Sofia Carvalho"),
+    hist("lecture", "Lue en 4 s — PDF natif, 1 page.", ilYa(1, 10)),
+    hist("controles", "5 contrôles : fournisseur nouveau, à confirmer.", ilYa(1, 10)),
+    hist("identite", "Identité confirmée par VIES (IMPRIMERIE VIDAL).", ilYa(1, 10)),
+  ],
+};
+
 /* Les commandes connues (filed_commandes) et leurs lignes : celles que les
    factures d'exemple citent, plus une ouverte sans facture. */
 export const COMMANDES_EXEMPLE: Commande[] = [
@@ -572,9 +621,9 @@ export const LIGNES_COMMANDE_EXEMPLE: LigneCommande[] = [
   { id: u("cl", 6), commande_id: u("bc", 80), rang: 1, designation: "Agencement comptoir d'accueil — chêne massif, fourniture et pose", quantite: 1, unite: "forfait", prix_unitaire: 4850, montant_ht: 4850 },
 ];
 
-export const DOSSIERS_EXEMPLE: DossierFiled[] = [D15, D09, D11, D13, D12, D14, D10, D08];
+export const DOSSIERS_EXEMPLE: DossierFiled[] = [D15, D16, D09, D11, D13, D12, D14, D10, D08];
 
-/* Le fournisseur d'exemple pour « rattacher » : les quatre connus. */
-export const FOURNISSEURS_EXEMPLE = [D14, D09, D11, D08].map((d) => d.fournisseur!);
+/* Les fournisseurs d'exemple pour « rattacher » : les cinq connus. */
+export const FOURNISSEURS_EXEMPLE = [D14, D09, D11, D08, D16].map((d) => d.fournisseur!);
 
 export { SOFIA as EXEMPLE_SOFIA };

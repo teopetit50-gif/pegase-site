@@ -16,7 +16,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useMemo, useState } from "react";
-import { AlertTriangle, Ban, Check, CheckCircle2, ClipboardList, FolderInput, Landmark, Link2, Pencil, ShieldCheck, Unlock } from "lucide-react";
+import { AlertTriangle, Ban, BadgeCheck, Check, CheckCircle2, ClipboardList, FolderInput, Landmark, Link2, Pencil, RefreshCw, ShieldCheck, Unlock, UserCheck } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
@@ -24,7 +24,7 @@ import { Avis, Def, Pastille } from "../ui";
 import { dateCourte, dateHeure, masquerIban, montant, nombreFr, pourcent } from "../format";
 import type { Commande, Controle, DossierFiled, Fournisseur, LigneCommande, LigneFacture, MotifRefus, NatureDocument } from "../types";
 import { CHAMPS_CORRIGEABLES, CHAMPS_PAR_NOTION, ETATS, FAMILLES_CONTROLE, NATURES, NOTION_PAR_COLONNE, STATUTS_FACTURE, grouperControles, libelleChamp } from "./etats";
-import { apparierLigne, bloquerFournisseur, classerDocument, confirmerValeurs, corrigerFacture, leverAnomalie, proposerIban, rattacherCommande, rattacherFournisseur } from "./portes";
+import { apparierLigne, attesterIdentite, bloquerFournisseur, classerDocument, confirmerFournisseur, confirmerValeurs, corrigerFacture, demanderVerification, leverAnomalie, proposerIban, rattacherCommande, rattacherFournisseur } from "./portes";
 import VisionneusePiece from "./VisionneusePiece";
 
 type Props = {
@@ -36,6 +36,9 @@ type Props = {
   lignesCommande: LigneCommande[];
   onLocal: (d: DossierFiled) => void;
   relire: () => Promise<void>;
+  /* la personne connectée (exemple : « vous ») — celle qui a déposé la pièce
+     d'origine d'un fournisseur ne le confirme pas */
+  moi: string | null;
 };
 
 type Form =
@@ -48,11 +51,13 @@ type Form =
   | { type: "bloquer"; bloquer: boolean }
   | { type: "commande" }
   | { type: "apparier"; ligne: LigneFacture }
+  | { type: "confirmer_fournisseur" }
+  | { type: "attester" }
   | null;
 
 const maintenant = () => new Date().toISOString();
 
-export default function DossierVue({ dossier, source, motifs, fournisseurs, commandes, lignesCommande, onLocal, relire }: Props) {
+export default function DossierVue({ dossier, source, motifs, fournisseurs, commandes, lignesCommande, onLocal, relire, moi }: Props) {
   const { document: doc, facture, fournisseur } = dossier;
   const [actif, setActif] = useState<string | null>(null);
   const [form, setForm] = useState<Form>(null);
@@ -253,6 +258,75 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
     );
   };
 
+  /* ——— le fournisseur : confirmer (a4_10), attester, revérifier (b7_02) ——— */
+  const deposantOrigine = !!fournisseur && fournisseur.statut === "a_confirmer" && !!moi && dossier.origine_deposee_par === moi;
+  /* le registre qu'on interroge : VIES si le fournisseur a une TVA, sinon Sirene (comme le balayage de B7) */
+  const registre: { nom: "vies" | "sirene"; identifiant: string } | null = fournisseur?.tva
+    ? { nom: "vies", identifiant: fournisseur.tva }
+    : fournisseur?.siren
+      ? { nom: "sirene", identifiant: fournisseur.siren }
+      : null;
+
+  /* le contrôle « fournisseur à confirmer » tombe, la facture avance (en exemple seulement : la base recontrôle) */
+  const sansControle = (d: DossierFiled, code: string, message: string): DossierFiled => {
+    if (!d.facture) return d;
+    const controles = d.controles.map((x) => (x.code === code && x.resultat === "anomalie" ? { ...x, resultat: "ok" as const, message } : x));
+    const restants = controles.filter((x) => x.resultat === "anomalie");
+    const nb_bloquants = restants.filter((x) => x.gravite === "bloquant").length;
+    const nb_attention = restants.filter((x) => x.gravite === "attention").length;
+    return { ...d, controles, facture: { ...d.facture, nb_bloquants, nb_attention, anomalies: restants.map((x) => x.code), statut: nb_bloquants ? "bloquee" : "a_valider" } };
+  };
+
+  const soumettreConfirmationFournisseur = () => {
+    if (!fournisseur) return;
+    return envoyer(
+      () => confirmerFournisseur(fournisseur.id, motif.trim()).then(() => undefined),
+      () => {
+        const quand = maintenant();
+        const d = sansControle(dossier, "fournisseur.a_confirmer", "Fournisseur confirmé par une personne.");
+        const ibans = d.ibans.map((i) => (i.statut === "propose" ? { ...i, statut: "valide" as const } : i));
+        return ajouterFil({ ...d, ibans, fournisseur: { ...fournisseur, statut: "actif", confirme_le: quand, confirme_par: moi } }, "confirmation", `Fournisseur confirmé par une personne${motif.trim() ? ` : ${motif.trim()}` : "."}`);
+      },
+      `${fournisseur.nom} est confirmé ; ses factures bloquées sont recontrôlées.`,
+    );
+  };
+
+  const soumettreAttestation = () => {
+    if (!fournisseur) return;
+    return envoyer(
+      () => attesterIdentite(fournisseur.id, motif.trim()).then(() => undefined),
+      () => {
+        const quand = maintenant();
+        const d = sansControle(dossier, "identite.registre", "Identité attestée par une personne.");
+        return ajouterFil(
+          { ...d, fournisseur: { ...fournisseur, identite_verifiee_le: quand, identite_source: "humain", identite_verdict: { resultat: "valide", registre: "humain", preuve: { par: moi, motif: motif.trim() } } } },
+          "identite_attestee",
+          `Identité attestée par une personne : ${motif.trim()}`,
+        );
+      },
+      "L'identité est attestée, avec votre motif ; les factures du fournisseur sont recontrôlées.",
+    );
+  };
+
+  const reverifier = () => {
+    if (!fournisseur || !registre) return;
+    const nom = registre.nom === "vies" ? "VIES" : "Sirene";
+    return envoyer(
+      () => demanderVerification(doc.client_id, registre.nom, registre.identifiant, fournisseur.id).then(() => undefined),
+      () => {
+        const quand = maintenant();
+        return ajouterFil(
+          { ...dossier, fournisseur: { ...fournisseur, identite_verifiee_le: quand, identite_source: registre.nom, identite_verdict: { resultat: "valide", registre: registre.nom, identifiant: registre.identifiant.replace(/\s+/g, "") } } },
+          "identite",
+          `Identité revérifiée : confirmée par ${nom}.`,
+        );
+      },
+      source === "reelle"
+        ? `La vérification est demandée à ${nom} ; la réponse arrive en une à deux minutes et l'écran se relit seul.`
+        : `Identité confirmée par ${nom} (en exemple, la réponse est immédiate ; en base réelle elle arrive en une à deux minutes).`,
+    );
+  };
+
   const e = ETATS[doc.etat];
 
   return (
@@ -321,6 +395,18 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
                   </div>
                 </div>
 
+                {fournisseur ? (
+                  <FicheFournisseur
+                    fournisseur={fournisseur}
+                    deposantOrigine={deposantOrigine}
+                    registre={registre?.nom ?? null}
+                    envoi={envoi && !form}
+                    onConfirmer={() => ouvrir({ type: "confirmer_fournisseur" })}
+                    onAttester={() => ouvrir({ type: "attester" })}
+                    onReverifier={() => { setFait(null); void reverifier(); }}
+                  />
+                ) : null}
+
                 <div>
                   <div className="esp-section-titre">
                     Contrôles — {groupes.passes.length} passé{groupes.passes.length > 1 ? "s" : ""}, {groupes.echoues.length} échoué{groupes.echoues.length > 1 ? "s" : ""}, {groupes.leves.length} levé{groupes.leves.length > 1 ? "s" : ""}
@@ -361,6 +447,8 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
                             <div className="esp-controle-actions">
                               <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "lever", controle: c })}><Unlock width={12} height={12} aria-hidden="true" /> Lever avec un motif</button>
                               {c.preuve?.champ ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => citer(String(c.preuve.champ))}>Voir dans la pièce</button> : null}
+                              {c.code === "fournisseur.a_confirmer" && fournisseur?.statut === "a_confirmer" ? <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={deposantOrigine} title={deposantOrigine ? "Vous avez déposé la pièce d'origine : une autre personne confirme." : undefined} onClick={() => ouvrir({ type: "confirmer_fournisseur" })}><UserCheck width={12} height={12} aria-hidden="true" /> Confirmer ce fournisseur</button> : null}
+                              {c.code === "identite.registre" && fournisseur && registre ? <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={envoi} onClick={() => { setFait(null); void reverifier(); }}><RefreshCw width={12} height={12} aria-hidden="true" /> Revérifier</button> : null}
                               {c.code === "fournisseur.iban_connu" && fournisseur ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "iban" })}><Landmark width={12} height={12} aria-hidden="true" /> Proposer cet IBAN</button> : null}
                             </div>
                           ) : null}
@@ -686,6 +774,48 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
         </DialogContent>
       </Dialog>
 
+      <Dialog open={form?.type === "confirmer_fournisseur"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><UserCheck width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Confirmer le fournisseur</DialogTitle>
+            <DialogDescription>Vous confirmez que {fournisseur?.nom} est bien un fournisseur de l&apos;entreprise. Il devient actif, l&apos;IBAN proposé avec sa première facture est validé, et ses factures bloquées sont recontrôlées.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <Avis teinte="ambre">La personne qui a déposé la pièce d&apos;origine ne confirme pas ce fournisseur : une autre personne décide. La confirmation est réservée au gérant, à l&apos;administrateur et au valideur ; elle est conservée avec votre nom et l&apos;heure.</Avis>
+              <label className="rv-libelle">
+                Motif <span className="esp-kpi-sous">(facultatif)</span>
+                <textarea className="rv-champ" value={motif} onChange={(e2) => setMotif(e2.target.value)} maxLength={500} placeholder="Ce que vous avez vérifié : bon de commande, appel au numéro connu, contrat…" />
+              </label>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={envoi || deposantOrigine} onClick={soumettreConfirmationFournisseur}>{envoi ? <Loader variant="spin" /> : null} Confirmer le fournisseur</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={form?.type === "attester"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><BadgeCheck width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Attester l&apos;identité</DialogTitle>
+            <DialogDescription>Quand le registre ne répond pas, ou pour un fournisseur étranger hors registre, vous attestez que {fournisseur?.nom} est bien l&apos;entreprise qu&apos;il dit être.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <ChampMotif motif={motif} onChange={setMotif} aide="Sur quoi l'attestation se fonde : extrait Kbis reçu, registre étranger consulté, contrat signé…" />
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!motifOk || envoi} onClick={soumettreAttestation}>{envoi ? <Loader variant="spin" /> : null} Attester</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={form?.type === "bloquer"} onOpenChange={(o) => !o && setForm(null)}>
         <DialogContent>
           <DialogHeader>
@@ -704,6 +834,87 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+/* La fiche du fournisseur : son statut, et ce qu'on sait de son identité
+   (NOTES-B7 § 9 b) — « Vérifiée le … par VIES / Sirene », « attestée par
+   une personne », « Non vérifiée », « Invalide : <motif> ». */
+const REGISTRES: Record<string, string> = { vies: "VIES", sirene: "Sirene", humain: "une personne" };
+const STATUTS_FOURNISSEUR: Record<Fournisseur["statut"], { libelle: string; teinte: "ambre" | "vert" | "rouge" | "gris" }> = {
+  a_confirmer: { libelle: "À confirmer", teinte: "ambre" },
+  actif: { libelle: "Actif", teinte: "vert" },
+  bloque: { libelle: "Bloqué", teinte: "rouge" },
+  refuse: { libelle: "Refusé", teinte: "gris" },
+};
+
+function identiteDe(f: Fournisseur): { teinte: "vert" | "rouge" | "ambre" | "gris"; texte: string } {
+  const v = f.identite_verdict ?? null;
+  const quand = f.identite_verifiee_le ? dateHeure(f.identite_verifiee_le) : null;
+  const par = REGISTRES[f.identite_source ?? v?.registre ?? ""] ?? f.identite_source ?? v?.registre ?? "un registre";
+  const preuve = v?.preuve ?? null;
+  const motif = preuve && typeof preuve === "object" ? (preuve.motif ?? preuve.message ?? preuve.etat) : null;
+  if (v?.resultat === "invalide") return { teinte: "rouge", texte: `Invalide${quand ? ` (${par}, le ${quand})` : ""}${motif ? ` : ${String(motif)}` : ""}` };
+  if (v?.resultat === "indisponible") return { teinte: "ambre", texte: `Registre indisponible${quand ? ` le ${quand}` : ""} : nouvel essai automatique` };
+  if (f.identite_source === "humain") return { teinte: "vert", texte: `Attestée par une personne${quand ? ` le ${quand}` : ""}${motif ? ` : ${String(motif)}` : ""}` };
+  if (quand) return { teinte: "vert", texte: `Vérifiée le ${quand} par ${par}` };
+  return { teinte: "gris", texte: "Non vérifiée" };
+}
+
+function FicheFournisseur({ fournisseur: f, deposantOrigine, registre, envoi, onConfirmer, onAttester, onReverifier }: {
+  fournisseur: Fournisseur;
+  deposantOrigine: boolean;
+  registre: "vies" | "sirene" | null;
+  envoi: boolean;
+  onConfirmer: () => void;
+  onAttester: () => void;
+  onReverifier: () => void;
+}) {
+  const s = STATUTS_FOURNISSEUR[f.statut] ?? STATUTS_FOURNISSEUR.actif;
+  const id = identiteDe(f);
+  const valide = f.identite_verdict?.resultat === "valide" || (!!f.identite_verifiee_le && !f.identite_verdict);
+  return (
+    <div>
+      <div className="esp-section-titre">Fournisseur</div>
+      {f.statut === "a_confirmer" ? (
+        <Avis teinte="ambre">
+          <strong>Fournisseur nouveau.</strong> Ses factures restent bloquées tant qu&apos;une personne n&apos;a pas confirmé qu&apos;il s&apos;agit bien d&apos;un fournisseur de l&apos;entreprise.
+          {deposantOrigine ? " Vous avez déposé sa première pièce : une autre personne confirme." : ""}
+        </Avis>
+      ) : null}
+      <dl className="esp-def" style={{ marginTop: f.statut === "a_confirmer" ? 10 : 0 }}>
+        <Def etiquette="Nom">
+          <span className="esp-item-haut"><span>{f.nom}</span><Pastille teinte={s.teinte}>{s.libelle}</Pastille></span>
+        </Def>
+        {f.siren || f.tva ? (
+          <Def etiquette="Identifiants">
+            {f.siren ? <div>SIREN <span className="esp-mono">{f.siren}</span></div> : null}
+            {f.tva ? <div>TVA <span className="esp-mono">{f.tva}</span></div> : null}
+          </Def>
+        ) : null}
+        <Def etiquette="Identité">
+          <span className="esp-item-haut"><Pastille teinte={id.teinte}>{id.teinte === "vert" ? "Vérifiée" : id.teinte === "rouge" ? "Invalide" : id.teinte === "ambre" ? "En attente" : "Non vérifiée"}</Pastille><span>{id.texte}</span></span>
+        </Def>
+        {f.confirme_le ? <Def etiquette="Confirmé">le {dateCourte(f.confirme_le)}</Def> : null}
+      </dl>
+      <div className="esp-actions" style={{ marginTop: 10 }}>
+        {f.statut === "a_confirmer" ? (
+          <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={deposantOrigine} title={deposantOrigine ? "Vous avez déposé la pièce d'origine : une autre personne confirme." : undefined} onClick={onConfirmer}>
+            <UserCheck width={13} height={13} aria-hidden="true" /> Confirmer ce fournisseur
+          </button>
+        ) : null}
+        {registre ? (
+          <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={envoi} onClick={onReverifier}>
+            {envoi ? <Loader variant="spin" /> : <RefreshCw width={13} height={13} aria-hidden="true" />} Revérifier auprès de {registre === "vies" ? "VIES" : "Sirene"}
+          </button>
+        ) : null}
+        {!valide ? (
+          <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={onAttester}>
+            <BadgeCheck width={13} height={13} aria-hidden="true" /> Attester l&apos;identité
+          </button>
+        ) : null}
+      </div>
     </div>
   );
 }

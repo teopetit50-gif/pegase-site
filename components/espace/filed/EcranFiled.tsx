@@ -18,7 +18,7 @@ import { Upload } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { COMMANDES_EXEMPLE, DOSSIERS_EXEMPLE, FOURNISSEURS_EXEMPLE, LIGNES_COMMANDE_EXEMPLE, MOTIFS_EXEMPLE } from "../exemples/filed";
-import { ENTITES, EXEMPLE_CLIENT_ID, SIEGE, nomEntite } from "../exemples/socle";
+import { ENTITES, EXEMPLE_CLIENT_ID, EXEMPLE_MOI, SIEGE, nomEntite } from "../exemples/socle";
 import { useSource } from "../source";
 import { useTempsReel } from "../tempsReel";
 import { Avis, Chargement, Pastille, Ruban, Vide } from "../ui";
@@ -28,7 +28,7 @@ import { ETATS, FAMILLES, NATURES, STATUTS_FACTURE, famille, type Famille } from
 import { chargerCommandes, chargerDossier, chargerFournisseurs, chargerListe, deposerDocument, monClient, type Apercu } from "./portes";
 import DossierVue from "./DossierVue";
 
-type Reel = { apercus: Apercu[]; motifs: MotifRefus[]; fournisseurs: Fournisseur[]; commandes: Commande[]; lignesCommande: LigneCommande[]; dossiers: Record<string, DossierFiled> };
+type Reel = { apercus: Apercu[]; motifs: MotifRefus[]; fournisseurs: Fournisseur[]; commandes: Commande[]; lignesCommande: LigneCommande[]; dossiers: Record<string, DossierFiled>; moi: string | null };
 
 export default function EcranFiled() {
   const { source } = useSource();
@@ -44,15 +44,16 @@ export default function EcranFiled() {
     setErreur(null);
     setReel(null);
     try {
-      const [liste, fournisseurs, cmd] = await Promise.all([
+      const [liste, fournisseurs, cmd, compte] = await Promise.all([
         chargerListe(),
         chargerFournisseurs().catch(() => [] as Fournisseur[]),
         chargerCommandes().catch(() => ({ commandes: [] as Commande[], lignes: [] as LigneCommande[] })),
+        monClient().catch(() => null),
       ]);
-      setReel({ ...liste, fournisseurs, commandes: cmd.commandes, lignesCommande: cmd.lignes, dossiers: {} });
+      setReel({ ...liste, fournisseurs, commandes: cmd.commandes, lignesCommande: cmd.lignes, dossiers: {}, moi: compte?.user_id ?? null });
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
-      setReel({ apercus: [], motifs: [], fournisseurs: [], commandes: [], lignesCommande: [], dossiers: {} });
+      setReel({ apercus: [], motifs: [], fournisseurs: [], commandes: [], lignesCommande: [], dossiers: {}, moi: null });
     }
   }, []);
 
@@ -72,7 +73,7 @@ export default function EcranFiled() {
       /* la prochaine lecture à la main dira l'erreur */
     }
   }, []);
-  useTempsReel(["filed_documents", "filed_factures", "filed_controles", "filed_historique"], source === "reelle", relire);
+  useTempsReel(["filed_documents", "filed_factures", "filed_controles", "filed_historique", "filed_fournisseurs"], source === "reelle", relire);
 
   /* ——— la liste, sous une forme commune aux deux sources ——— */
   const apercus: Apercu[] = useMemo(() => {
@@ -197,10 +198,14 @@ export default function EcranFiled() {
 
   /* en mode exemple, une correction remplace le dossier en mémoire ; en
      base réelle, on relit le dossier après la porte */
+  /* après une action, le dossier ouvert le reste, même s'il change de rang
+     dans la liste (une facture débloquée passe derrière les bloquées) */
   const remplacerLocal = useCallback((d: DossierFiled) => {
     setLocal((prev) => prev.map((x) => (x.document.id === d.document.id ? d : x)));
+    setChoix(d.document.id);
   }, []);
   const relireReel = useCallback(async (a: Apercu) => {
+    setChoix(a.document.id);
     const liste = await chargerListe();
     const frais = liste.apercus.find((x) => x.document.id === a.document.id) ?? a;
     const d = await chargerDossier(frais);
@@ -305,6 +310,7 @@ export default function EcranFiled() {
               lignesCommande={lignesCommande}
               onLocal={remplacerLocal}
               relire={() => (apercu ? relireReel(apercu) : Promise.resolve())}
+              moi={source === "exemple" ? EXEMPLE_MOI : (reel?.moi ?? null)}
             />
           ) : chargeDossier || (source === "reelle" && apercu) ? (
             <div className="esp-carte"><Chargement texte="Lecture du dossier…" /></div>
