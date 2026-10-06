@@ -337,6 +337,15 @@ non permis pour tout envoi `donnees_sante` ; `commencer_envoi` rend `donnees_san
 qu'il n'en agrée pas un, tout envoi de santé est bloqué par le socle, et la garde de
 l'ouvrier le refuserait de toute façon.
 
+**Question d'A5, tranchée par A2 le 06/10** : `verrous_envoi` juge le fournisseur de
+l'expéditeur actif, `commencer_envoi` rend `fournisseur_hds` d'après `envois.fournisseur`.
+Si les deux divergent, la garde refuse déjà dès que `fournisseur_hds` n'est pas vrai.
+Trou restant, fermé côté ouvrier : l'expéditeur remet **toujours par Brevo** quel que soit
+`envoi.fournisseur`. Un envoi de santé dont `envois.fournisseur` serait agréé (`manuel`,
+par exemple) mais qui arriverait en `envois.brevo` passait la garde. Désormais, un envoi
+de santé est aussi refusé (`SANTE_FOURNISSEUR_NON_HDS`, définitif) si `envoi.fournisseur`
+n'est pas `brevo` / `brevo_sms` (`FOURNISSEURS_REMIS`). Test ajouté (cas « e »).
+
 **Migration du lot : demandée à A2 le 06/10, NON écrite par A2, finalement posée par
 le coordinateur.**
 Deux raisons : le brief de Teo pose « aucune migration SQL » et un périmètre limité à

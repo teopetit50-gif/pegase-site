@@ -34,6 +34,8 @@ export const GENRES = [
   GENRE_CONFIRMATION,
 ] as const;
 export const CANAUX_PRIS_EN_CHARGE = new Set(["email", "sms"]);
+/** Fournisseurs que cet ouvrier remet réellement (toujours par l'API Brevo). */
+export const FOURNISSEURS_REMIS = new Set(["brevo", "brevo_sms"]);
 
 export type Journal = {
   info(message: string, detail?: Record<string, unknown>): void;
@@ -336,8 +338,14 @@ async function remettre(
   // Ceinture et bretelles santé : la règle vit dans le socle (verrou SANTE_FOURNISSEUR
   // avant confier_envoi) ; si un envoi de santé arrive quand même vers un fournisseur
   // non HDS, on refuse définitivement, jamais de repli. No-op tant que commencer_envoi
-  // n'expose pas donnees_sante.
-  if (envoi.donnees_sante === true && envoi.fournisseur_hds !== true) {
+  // n'expose pas donnees_sante. fournisseur_hds est jugé sur envoi.fournisseur : s'il
+  // nomme un autre fournisseur que Brevo (verrou et envoi divergents), son agrément ne
+  // couvre pas ce que l'ouvrier ferait réellement, on refuse aussi.
+  if (
+    envoi.donnees_sante === true &&
+    (envoi.fournisseur_hds !== true ||
+      !FOURNISSEURS_REMIS.has(envoi.fournisseur))
+  ) {
     throw new ErreurRemise(
       "SANTE_FOURNISSEUR_NON_HDS",
       `envoi de santé vers ${envoi.fournisseur} (hds = ${

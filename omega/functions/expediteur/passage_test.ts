@@ -373,6 +373,25 @@ Deno.test("santé : donnees_sante=true vers un fournisseur non HDS → échec d�
   await executerPassage(c.deps);
   assertEquals(c.brevo.emails.length, 1);
 
+  // Agréé, mais pour un autre fournisseur que celui que l'ouvrier remet : refus.
+  const e = monter();
+  e.portes.envois.set(
+    ENVOI,
+    envoiExemple({
+      donnees_sante: true,
+      fournisseur_hds: true,
+      fournisseur: "manuel",
+    }),
+  );
+  e.portes.travaux = [travailExemple(34, "envois.brevo", ENVOI)];
+  await executerPassage(e.deps);
+  assertEquals(e.brevo.emails.length, 0);
+  assertEquals(e.portes.envoisEchoues.get(ENVOI)!.definitif, true);
+  assertMatch(
+    e.portes.envoisEchoues.get(ENVOI)!.erreur,
+    /^SANTE_FOURNISSEUR_NON_HDS/,
+  );
+
   const d = monter();
   d.portes.envois.set(ENVOI, envoiExemple());
   d.portes.travaux = [travailExemple(33, "envois.brevo", ENVOI)];
