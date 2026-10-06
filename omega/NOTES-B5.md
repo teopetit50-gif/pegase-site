@@ -414,3 +414,51 @@ A0103, déposée le 2026-06-01 ; le socle la met d'emblée en `decision_a_confir
 - Coordinateur, 13 h 49 Z : b5_10 posée (027eca3), `^test_b5_` **120/120** (ok 116 : l'alerte cite CE 30 avril 2024,
   n° 461958) ; écran fusionné dans main, en ligne avec la prochaine poussée groupée. b5_01 à b5_10 posées.
 
+
+## Vague 3 — les trois manques pour qu'une vraie agence paie Lorani et l'ouvre chaque jour (06/10, 14 h 30 Z)
+
+Point de départ : la page des architectes (`app/secteurs/architectes/page.tsx`) promet, au-delà du calendrier du
+permis, « les honoraires phase par phase », « chaque situation comparée au marché et à la précédente », « la date
+butoir de chaque visa calée sur le délai de commande » et la relecture des planches contre le PLU. Le socle Lorani
+n'a que neuf tables : projets, membres, lots, intervenants, permis et ce qui l'entoure. Ni honoraires, ni temps,
+ni situations, ni visas (vérifié dans `omega/SOCLE-EXTRAITS-LORANI.sql` et sur `main`).
+
+**1. Le dépôt dématérialisé : l'accusé de réception électronique et les courriels du guichet.**
+Depuis le 1er janvier 2022, toutes les communes reçoivent les demandes d'autorisation d'urbanisme par voie
+électronique (SVE, art. L.112-8 CRPA) ; celles de plus de 3 500 habitants les instruisent sous forme dématérialisée
+(art. L.423-3 du code de l'urbanisme, loi ELAN art. 62) et les échangent avec les services consultés par PLAT'AU.
+**Le pétitionnaire ne voit pas PLAT'AU** : il dépose et suit sur le guichet de la commune (ou Géoportail / GNAU) et
+reçoit tout **par courriel**. Pour une demande électronique, **le récépissé est l'accusé de réception électronique**
+(ARE, art. L.112-11 CRPA ; art. R*423-3 à R*423-5) ; la date de réception est celle de l'accusé d'enregistrement
+électronique (AEE), et elle fait partir le délai d'instruction. Or notre fiche de lecture rangeait l'« accusé de
+réception électronique » en `lorani_courrier_autre` : **pour l'essentiel des permis déposés depuis 2022, Lorani ne lirait
+jamais la date de dépôt**, et chaque courriel du guichet devait être enregistré puis redéposé à la main dans l'écran.
+L'agence n'ouvrira pas Lorani chaque jour si elle doit y recopier sa boîte aux lettres. → Rattacher automatiquement
+les courriels du guichet (ARE, demandes de pièces, arrêtés) au bon dossier par le numéro cité, et lire l'ARE comme
+un récépissé. Pas d'intégration PLAT'AU possible côté pétitionnaire : tout passe par le courriel (A2, `receptions`).
+Sources : [ecologie.gouv.fr — Dématérialisation des autorisations d'urbanisme](https://www.ecologie.gouv.fr/dematerialisation-des-autorisations-durbanisme) ;
+[Préfecture de Seine-et-Marne — Démat. ADS](https://www.seine-et-marne.gouv.fr/contenu/telechargement/49978/365617/file/Démat.%20ADS%20Présentation%20générale%20202105%20V2.2.pdf) (PLAT'AU n'est pas visible du pétitionnaire) ;
+[Eurojuris — Récépissé et délai d'instruction du permis de construire](https://www.eurojuris.fr/contentieux-entreprises/articles/recepisse-delai-instruction-permis-construire-11686.htm) (ARE = récépissé, date de l'AEE) ;
+[DDT de l'Oise — fiche SVE](https://www.oise.gouv.fr/contenu/telechargement/61288/374954/file/A_08_SVE%202020.pdf).
+
+**2. Les honoraires phase par phase (temps passé contre honoraires de chaque élément de mission).**
+C'est le cœur économique d'une agence : honoraires facturés par élément de mission (ESQ, APS, APD, PRO, ACT, VISA,
+DET, AOR, référentiel MOP, décret 93-1268 intégré au code de la commande publique), appel à l'achèvement de chaque
+phase, et dérive du temps passé à repérer avant la fin de la mission. La page le promet (« Une phase qui consomme
+plus que prévu remonte avant la fin de la mission ») ; rien ne le porte. C'est aussi ce qui fait ouvrir l'outil
+chaque jour (saisie des temps). Le concurrent de référence, OOTI (plus de 800 agences), vend exactement cela.
+Sources : [Hayot Expertise — facturer ses honoraires par phase (2026)](https://hayot-expertise.fr/blog/architecte-facturer-honoraires-phases-mission-2026) ;
+[Appvizer — OOTI](https://www.appvizer.fr/construction/architecture/ooti) ; [GetApp — OOTI](https://www.getapp.fr/software/114699/ooti).
+
+**3. Le chantier : situations de travaux comparées au marché, visas datés.**
+Pendant la DET, l'architecte vise les situations mensuelles des entreprises (cumul contre marché et avenants, écart
+avec la précédente) et les plans d'exécution (visa, date butoir calée sur le délai de commande). La page le promet
+(« Lorani compare chaque situation reçue au marché et à la précédente, puis chiffre l'écart ») ; rien ne le porte.
+Archipad, la référence du suivi de chantier sur tablette, couvre réserves et comptes rendus mais pas le contrôle
+financier des situations ; le lecteur d'A1 sait déjà lire des factures (FILED), le pas est court.
+Sources : [La Fabrique du Net — alternatives à Archipad](https://www.lafabriquedunet.fr/logiciels/alternatives/alternative-archipad) ;
+[Ordre des architectes — Archigraphie 2024](https://prod.architectes.ows.fr/sites/cnoa/files/2024-12/ARCHIGRAPHIE-2024_13decembre_1.pdf) (profil des agences).
+
+Ordre retenu : le 1 d'abord, parce qu'il casse la promesse déjà en ligne (« Les courriers de la mairie sont lus ») pour
+la majorité des dossiers réels, et qu'il est court (module Lorani, réception d'A2 déjà en place). Le 2 et le 3 sont
+des chantiers neufs (tables, écran, lecteur), à proposer au coordinateur en lots séparés.
