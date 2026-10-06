@@ -170,7 +170,14 @@ export const TYPES_PIECE: { cle: string; libelle: string }[] = [
   { cle: "lorani_arrete", libelle: "Arrêté (accord ou refus)" },
   { cle: "lorani_certificat_tacite", libelle: "Certificat de permis tacite" },
   { cle: "lorani_constat_affichage", libelle: "Constat d'affichage" },
+  { cle: "lorani_planche", libelle: "Planche (plan, coupe, façade)" },
+  { cle: "lorani_cctp", libelle: "CCTP" },
+  { cle: "lorani_dpgf", libelle: "DPGF" },
+  { cle: "lorani_plu_reglement", libelle: "Règlement du PLU" },
 ];
+
+/* les pièces du contrôle du dossier (b5_16) : pas des courriers de la mairie */
+export const TYPES_CONTROLE = ["lorani_planche", "lorani_cctp", "lorani_dpgf", "lorani_plu_reglement"];
 
 export function libelleTypePiece(cle: string | null | undefined): string {
   return TYPES_PIECE.find((t) => t.cle === cle)?.libelle ?? "Courrier";

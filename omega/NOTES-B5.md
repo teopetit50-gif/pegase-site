@@ -576,3 +576,25 @@ des chantiers neufs (tables, écran, lecteur), à proposer au coordinateur en lo
   DEFINER du module) ; le test dira si une garde refuse.
 - Test `omega/tests/lorani/b5_06_echeance_visas.sql` (12 assertions, vraie chaîne `controler_delais` → passage) →
   `^test_b5_` attendu **209/209** (6 tests).
+
+## b5_16 — le contrôle du dossier (carnet 15:58Z, n° 1) — 06/10/2026
+
+- Socle : `omega/modules/lorani/migrations/b5_16_controle_dossier.sql` (a05f77c), test `omega/tests/lorani/b5_07_controle_dossier.sql`
+  (29 assertions). Essayé en local sur des doubles du socle (/tmp/pgb5.g7u7, e11.sql) : vert ; pas encore posé sur la recette.
+- Tables `lorani_controles` (intitulé, indice, précédent, statut en_lecture|controle|clos), `lorani_controle_pieces` (rôle
+  planche|cctp|dpgf|plu|autre, référence « PC2 »), `lorani_constats` (nature incoherence|plu|cctp_dpgf, gravité, valeurs citées
+  [{piece, reference, page, boite, valeur, texte}] + la règle {regle:true, borne, article}, correction proposée, statut
+  ouvert|corrige|accepte|ecarte, motif obligatoire pour accepter/écarter). Un membre ne change que statut et motif (trigger
+  `lorani_constats_garder`, GUC `lorani.controle_en_cours` pour le socle).
+- Croisement `private.lorani_controler` : incohérence = même grandeur + même objet sur ≥ 2 pièces, écart > tolérance (0,05 m ;
+  0,5 m² ; 0,5 % ; 0 pour un nombre), correction = valeur la plus fréquente ; PLU = mesure hors max/min (marge tolérance/10), un
+  constat par grandeur/objet/borne, la PIRE valeur citée, toutes les pièces fautives jointes ; CCTP/DPGF = poste décrit non chiffré
+  et l'inverse (seulement si les deux côtés ont des postes). Revérification : precedent_id → reconduit + hérite accepte/ecarte ;
+  ancien ouvert disparu → corrige, corrige_au_controle, « Corrigé à l'indice B. ». Alerte `lorani:controle:<id>`, journal
+  `lorani.controle_passe`. Lancement seul (`lorani_piece_controle_lue`) quand plus aucune pièce n'est recue/en_lecture/
+  a_rattacher/en_attente_expediteur (une pièce en échec ne bloque pas).
+- Écran : `components/espace/lorani/Controle.tsx` dans la carte projet (avant Honoraires) ; exemple = Surélévation Dubois,
+  indice A puis B. Les pièces de contrôle sont exclues des « Courriers du dossier » d'un permis (TYPES_CONTROLE). Types
+  ajoutés au dépôt : planche, CCTP, DPGF, règlement du PLU.
+- Doute à lever sur la recette : `enregistrer_lecture` accepte-t-il ces types de pièce ? (contrat f54deda, A1).
+- Reste du n° 1 : rapport PDF annoté + Excel.

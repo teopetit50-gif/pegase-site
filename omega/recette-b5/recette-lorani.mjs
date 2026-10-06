@@ -157,6 +157,37 @@ for (const largeur of LARGEURS) {
   await s.dormir(800);
   const regle = await s.evaluer(`(() => { const t = document.querySelector('#esp-detail')?.innerText || ''; const i = t.indexOf('sans réponse de la mairie'); return t.slice(i, i + 80); })()`);
   ok(regle.includes('rejet implicite (art. R*424-2, d)'), `le régime dit « rejet implicite (art. R*424-2, d) » après la saisie : « ${regle} »`);
+
+  console.log('— le contrôle du dossier (b5_16) : Surélévation Dubois, indice B revérifiant l’indice A');
+  await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /Surélévation Dubois/.test(b.textContent))?.click()`);
+  await s.dormir(600);
+  const ctl = await s.evaluer(`(() => { const c = document.querySelector('.lor-controle-tete')?.closest('.esp-carte-corps'); const t = (c?.innerText || '').replace(/[\\u202f\\u00a0]/g, ' '); return { tete: document.querySelector('.lor-controle-tete')?.innerText, cartes: document.querySelectorAll('.lor-constat').length, bloquant: document.querySelectorAll('.lor-constat[data-gravite="bloquant"]').length, resume: /2 constats ouverts, dont 1 bloquant\\. 2 constats de l’indice A corrigés\\./.test(t), citation: /PC2, p\\. 1 : « 3,20 m »/.test(t), regle: /Règle : au moins 4 m, article URm1 7 \\(PLU-H URm1, p\\. 41\\)/.test(t), correction: /Correction proposée : Ramener le recul sur limite séparative/.test(t), releve: /relevé depuis l’indice A/.test(t), corriges: /Corrigés depuis l’indice A \\(2\\)/.test(t), decides: /Décidés \\(1\\)/.test(t) }; })()`);
+  ok(/Dossier de permis · indice B/.test(ctl.tete) && ctl.cartes === 2 && ctl.bloquant === 1 && ctl.resume && ctl.citation && ctl.regle && ctl.correction && ctl.releve && ctl.corriges && ctl.decides,
+     `indice B : 2 constats ouverts dont 1 bloquant, page et texte cités, règle et article, correction proposée, 2 corrigés depuis l’indice A (${JSON.stringify(ctl)})`);
+  await s.evaluer(`document.querySelector('.lor-controle-tete')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}lorani-controle-1440.jpg`, { qualite: 55 });
+  await s.evaluer(`[...document.querySelectorAll('.lor-constat')].find(c => /recul sur limite/.test(c.textContent))?.querySelectorAll('.r-btn--fil')[1]?.click()`);
+  await s.dormir(500);
+  const ec = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const b = [...(d?.querySelectorAll('button') || [])].find(x => /^\\s*Écarter\\s*$/.test(x.textContent)); return { titre: d?.querySelector('h2')?.textContent, gris: b?.disabled }; })()`);
+  ok(ec.titre === 'Écarter' && ec.gris === true, `dialogue « ${ec.titre} » : sans motif, « Écarter » reste grisé`);
+  await s.evaluer(`(() => { const ta = document.querySelector('[role="dialog"] textarea'); Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(ta, 'Dérogation accordée par la mairie (art. L152-4)'); ta.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(x => /^\\s*Écarter\\s*$/.test(x.textContent))?.click()`);
+  await s.dormir(700);
+  const ap = await s.evaluer(`(() => { const t = document.querySelector('.lor-controle-tete')?.closest('.esp-carte-corps')?.textContent || ''; return { cartes: document.querySelectorAll('.lor-constat').length, decides: /Décidés \\(2\\)/.test(t), motif: /Motif : Dérogation accordée par la mairie/.test(t) }; })()`);
+  ok(ap.cartes === 1 && ap.decides && ap.motif, `le recul est écarté avec son motif : 1 constat ouvert, 2 décidés (${JSON.stringify(ap)})`);
+  await s.evaluer(`[...document.querySelectorAll('.esp-lien-bouton')].find(b => b.textContent.trim() === 'Revérifier à l’indice suivant')?.click()`);
+  await s.dormir(500);
+  const rv = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const i = d?.querySelectorAll('input:not([type="checkbox"])'); return { titre: d?.querySelector('h2')?.textContent, indice: i?.[1]?.value, cochees: d?.querySelectorAll('input[type="checkbox"]:checked').length }; })()`);
+  ok(rv.titre === 'Revérifier à l’indice suivant' && rv.indice === 'C' && rv.cochees === 6, `dialogue « ${rv.titre} » : indice ${rv.indice} proposé, ${rv.cochees} pièces reprises de l’indice B`);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(x => /Préparer le contrôle/.test(x.textContent))?.click()`);
+  await s.dormir(700);
+  ok(await s.evaluer(`/indice C/.test(document.querySelector('.lor-controle-tete')?.innerText || '') && /Pièces en lecture/.test(document.querySelector('.lor-controle-tete')?.innerText || '')`), 'le contrôle de l’indice C est préparé, en attente de lecture');
+  await s.evaluer(`[...document.querySelectorAll('.lor-controle-tete .esp-lien-bouton')].find(b => /Lancer/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const c3 = await s.evaluer(`(() => ({ tete: document.querySelector('.lor-controle-tete')?.innerText || '', cartes: document.querySelectorAll('.lor-constat').length, onglets: document.querySelectorAll('.lor-controles .esp-filtre').length }))()`);
+  ok(/Contrôlé/.test(c3.tete) && c3.cartes === 1 && c3.onglets === 3, `lancé : l’indice C reconduit ce qui reste (1 ouvert), trois contrôles au projet (${JSON.stringify(c3)})`);
   s.fermer();
 }
 
@@ -168,6 +199,24 @@ for (const largeur of LARGEURS) {
   const t = await s.evaluer(`(() => { const d = document.querySelector('#esp-detail'); return { titre: d.querySelector('h2')?.textContent, purge: /Purgé de tout recours/.test(d.innerText), chantier: /vous pouvez démarrer/.test(d.innerText), gracieux: /Recours gracieux/.test(d.innerText) }; })()`);
   ok(/Façade rue Mercière/.test(t.titre) && t.purge && t.chantier && t.gracieux, `le permis visé par l'URL est ouvert : ${t.titre}, purgé, chantier possible, recours gracieux rejeté dans l'historique`);
   await s.capturer(`${dossier}lorani-purge-1024.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 390, hauteur: 844, marque: 'b5-controle-390', densite: 1 });
+  console.log('— le contrôle du dossier à 390');
+  ok(await s.aller(base + chemin + '?projet=00000000-0000-4000-8000-00000000b005'), 'page chargée');
+  await s.dormir(700);
+  await s.evaluer(`document.querySelector('.lor-controle-tete')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(300);
+  const m = await s.evaluer(`(() => { const w = document.documentElement.clientWidth; const larges = [...document.querySelectorAll('.esp *')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > w + 1 && !e.closest('.esp-tableau-cadre'); }).slice(0, 5).map(e => e.tagName + '.' + [...e.classList].join('.')); return { deb: document.documentElement.scrollWidth - w, larges, cartes: document.querySelectorAll('.lor-constat').length }; })()`);
+  ok(m.deb === 0 && m.larges.length === 0 && m.cartes === 2, `Surélévation Dubois à 390 : pas de débordement, 2 constats lisibles (${JSON.stringify(m)})`);
+  await s.capturer(`${dossier}lorani-controle-390.jpg`, { qualite: 55 });
+  await s.evaluer(`[...document.querySelectorAll('.esp-lien-bouton')].find(b => b.textContent.trim() === 'Revérifier à l’indice suivant')?.click()`);
+  await s.dormir(500);
+  const d = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const r = d?.getBoundingClientRect(); const larges = [...(d?.querySelectorAll('*') || [])].filter(e => { const x = e.getBoundingClientRect(); return x.width > 0 && x.right > r.right + 1; }).length; return { ouvert: !!d, larges }; })()`);
+  ok(d.ouvert && d.larges === 0, `dialogue de revérification à 390 : rien ne dépasse (${JSON.stringify(d)})`);
+  await s.capturer(`${dossier}lorani-controle-dialogue-390.jpg`, { qualite: 55 });
   s.fermer();
 }
 
