@@ -579,3 +579,8 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   pas repartir le délai, au mieux complète la liste. **b5_07 validé** (union, première date
   gardée, historique, avertissement). **Pour Teo / un juriste** : cas d'une seconde demande
   DANS le mois.
+- 04 h 25 — **A3 0af323c fusionné** : vue FILED « Fournisseurs » (/espace/filed/fournisseurs) —
+  compteurs, recherche nom/SIREN/TVA, « à confirmer » en tête, fiche (confirmer, revérifier,
+  attester, proposer un IBAN, bloquer), IBAN et factures liées. Relue en réel avec daf2@.
+  Constat : Papeterie Delorme (R2026-000003) n'a ni SIREN ni TVA → « Revérifier »
+  impossible (relayé à A1/A4).
