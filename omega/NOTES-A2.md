@@ -411,6 +411,13 @@ essai → adresse d'essai de Teo), objet « Essai coquille webhooks-brevo », cl
 `tache_envois` ; l'expéditeur le remet. Contrôle (bloc E) : `envois_evenements` type `remis`,
 clé `brevo:email:<reference_externe>:delivered:…`, `recu_le` > `envoye_le`. Sans DROP ni DELETE.
 
+**Joué par le coordinateur le 06/10 à 13 h 58 Z : chemin utile de webhooks-brevo v10 (87a1112) prouvé.**
+Envoi `b109eea1-…`, approuvé par la DAF, `pret` 13:58:54 Z, `envoye` 13:59:01 Z, référence
+`<202610061359.72974083619@smtp-relay.mailin.fr>` ; `envois_evenements` `remis`, clé
+`brevo:email:<…>:delivered:2026-10-06T13:59:04.000Z`, `recu_le` 13:59:05 Z : 4 s de bout en bout.
+Le travail `tavaro.envoi` laissé `a_faire` est attendu : c'est l'événement `envoi.envoye.tavaro`
+routé vers l'ouvrier de base tavaro (`loc_envoi_issue`), qui rend `ignoree` pour un envoi sans objet.
+
 **Trou : l'inbound Brevo n'est pas branché sur la recette** (NOTES-COORDINATEUR, « Ce que Teo
 doit encore poser » n° 4 : domaine inbound vers `/functions/v1/reception/brevo`). Aucun
 courriel entrant ne peut donc atteindre `reception/brevo`. À poser par Teo : un sous-domaine
