@@ -96,7 +96,9 @@ export async function chargerCabinet(): Promise<Cabinet> {
   const annuaire = (Array.isArray(an.data) ? an.data : []) as { user_id: string; nom?: string | null; email?: string | null; role?: string | null }[];
   const personnes: Personne[] = ((co.data ?? []) as { user_id: string; role: Personne["role"] }[]).map((c) => {
     const a = annuaire.find((x) => x.user_id === c.user_id);
-    return { user_id: c.user_id, role: c.role, nom: a?.nom || a?.email || c.user_id.slice(0, 8) };
+    /* sans nom ni courriel dans l'annuaire : « Vous » pour la personne connectée, sinon son rôle (jamais un identifiant brut) */
+    const roles: Record<Personne["role"], string> = { gerant: "Associé gérant", admin: "Associé", valideur: "Avocat", collaborateur: "Assistant juridique", lecteur: "Stagiaire" };
+    return { user_id: c.user_id, role: c.role, nom: a?.nom || a?.email?.split("@")[0] || (c.user_id === moi.user_id ? "Vous" : `${roles[c.role]} · ${c.user_id.slice(0, 4)}`) };
   });
   let horsVue: number | null = null;
   if (["gerant", "admin"].includes(moi.role)) {
@@ -227,7 +229,7 @@ export const demanderExport = (p_dossier: string) => rpc<string>("tamila_demande
 /** Le fichier CHIFFRÉ part au bucket omega-clients (politique INSERT des membres, lot 19o), puis la porte tamila_deposer_piece (b4_01). */
 export async function televerser(chemin: string, octets: Uint8Array): Promise<void> {
   const supabase = createClient();
-  const { error } = await supabase.storage.from("omega-clients").upload(chemin, new Blob([octets.buffer.slice(octets.byteOffset, octets.byteOffset + octets.byteLength) as ArrayBuffer], { type: "application/octet-stream" }), { upsert: true, contentType: "application/octet-stream" });
+  const { error } = await supabase.storage.from("omega-clients").upload(chemin, new Blob([octets.buffer.slice(octets.byteOffset, octets.byteOffset + octets.byteLength) as ArrayBuffer], { type: "application/octet-stream" }), { upsert: false, contentType: "application/octet-stream" });
   if (error) throw new ErreurPorte(message(error));
 }
 export const deposerPiece = (p_dossier: string, p_nom_fichier: string, p_mime: string, p_octets: number, p_sha256: string, p_chemin: string, p_type_piece: string | null) =>
