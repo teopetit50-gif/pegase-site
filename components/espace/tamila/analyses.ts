@@ -102,8 +102,8 @@ export function htmlAnalyse(r: ResultatAnalyse, nomPiece: (id: string) => string
     : r.constats
         .map((c) => {
           const meta = resumeDonnees(r.type, c.donnees);
-          const cites = c.citations
-            .map((x) => `<li>${echapper(nomPiece(x.piece))}, p. ${x.page}${lignesDe(x) ? `, ${lignesDe(x)}` : ""} : « ${echapper(x.extrait)} »${x.verifiee ? "" : " <i>(citation non vérifiée)</i>"}</li>`)
+          const cites = [...c.citations].sort((a, b) => Number(b.verifiee) - Number(a.verifiee))
+            .map((x) => `<li${x.verifiee ? "" : ' style="color:#777"'}>${echapper(nomPiece(x.piece))}, p. ${x.page}${lignesDe(x) ? `, ${lignesDe(x)}` : ""} : « ${echapper(x.extrait)} »${x.verifiee ? "" : " <i>(non retrouvée dans la pièce : ne vaut pas preuve)</i>"}</li>`)
             .join("");
           return `<h3 style="font-size:14px;margin:16px 0 4px">${echapper(c.titre)}${c.gravite !== "info" ? ` <span style="color:${c.gravite === "critique" ? "#b42318" : "#9a6700"}">(${c.gravite})</span>` : ""}</h3>${meta ? `<div style="color:#555;font-size:12px">${echapper(meta)}</div>` : ""}${c.texte ? `<p style="margin:4px 0">${echapper(c.texte)}</p>` : ""}${cites ? `<ul style="margin:4px 0 0 18px;font-size:12px">${cites}</ul>` : ""}`;
         })

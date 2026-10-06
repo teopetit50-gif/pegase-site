@@ -505,7 +505,7 @@ for (const largeur of [1440, 390]) {
   const t1 = await s.evaluer(`document.querySelector('[role="dialog"]')?.innerText || ''`);
   ok(/Chronologie — 2026-0412/.test(t1) && /3 constat\(s\)/.test(t1), 'le dialogue : la chronologie du dossier, trois constats');
   ok(/conclusions-adverses\.pdf, p\. 5, l\. 12-14/.test(t1) && /« dès le mois de février 2023, des infiltrations »/.test(t1), 'chaque constat cite la pièce, la page, les lignes et l\'extrait');
-  ok(/Non vérifiée/.test(t1) && /Vérifiée/.test(t1), 'une citation non vérifiée est marquée');
+  ok(/Non retrouvée dans la pièce, ne vaut pas preuve/.test(t1) && /Vérifiée/.test(t1), 'une citation non retrouvée est mise à part : elle ne vaut pas preuve');
   ok(/02\/2023/.test(t1) && /14\/06\/2019/.test(t1), 'les dates, à leur précision (mois, jour)');
   if (largeur === 1440) {
     const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
@@ -514,7 +514,7 @@ for (const largeur of [1440, 390]) {
       return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`);
     ok(g.length === 0, `axe sur la lecture : ${g.length ? g.join(' ; ') : 'aucun écart grave'}`);
     const doc = await s.evaluer(`document.querySelector('iframe.tam-analyse-impression')?.contentDocument?.body?.innerText || ''`);
-    ok(/Chronologie — 2026-0412/.test(doc) && /l'avocat vérifie avant tout usage/.test(doc) && /citation non vérifiée/.test(doc), 'le document à imprimer ou exporter en Word est composé');
+    ok(/Chronologie — 2026-0412/.test(doc) && /l'avocat vérifie avant tout usage/.test(doc) && /ne vaut pas preuve/.test(doc), 'le document à imprimer ou exporter en Word est composé');
     await s.capturer(`${dossier}tamila-analyse-1440.jpg`, { qualite: 55 });
     await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Fermer/.test(b.textContent))?.click()`);
     await s.dormir(400);

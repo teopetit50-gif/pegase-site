@@ -199,13 +199,22 @@ export default function AnalysesTamila({ dossier: d, source, cle, pieces, clair,
                         {meta ? <div className="tam-ligne-meta"><span>{meta}</span></div> : null}
                         {c.texte ? <p className="tam-constat-texte">{c.texte}</p> : null}
                         <ul className="tam-citations">
-                          {c.citations.map((x, j) => (
+                          {c.citations.filter((x) => x.verifiee).map((x, j) => (
                             <li key={j}>
-                              <span className="esp-mono">{nomPiece(x.piece)}, p. {x.page}{lignesDe(x) ? `, ${lignesDe(x)}` : ""}</span> — « {x.extrait} »{" "}
-                              {x.verifiee ? <Pastille teinte="vert">Vérifiée</Pastille> : <Pastille teinte="ambre">Non vérifiée</Pastille>}
+                              <span className="esp-mono">{nomPiece(x.piece)}, p. {x.page}{lignesDe(x) ? `, ${lignesDe(x)}` : ""}</span> — « {x.extrait} » <Pastille teinte="vert">Vérifiée</Pastille>
                             </li>
                           ))}
                         </ul>
+                        {c.citations.some((x) => !x.verifiee) ? (
+                          <ul className="tam-citations tam-citations--doute" aria-label="Citations non retrouvées">
+                            {c.citations.filter((x) => !x.verifiee).map((x, j) => (
+                              <li key={j}>
+                                <Pastille teinte="ambre">Non retrouvée dans la pièce, ne vaut pas preuve</Pastille>{" "}
+                                <span className="esp-mono">{nomPiece(x.piece)}, p. {x.page}{lignesDe(x) ? `, ${lignesDe(x)}` : ""}</span> — « {x.extrait} »
+                              </li>
+                            ))}
+                          </ul>
+                        ) : null}
                       </div>
                     );
                   })}
