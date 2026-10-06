@@ -589,6 +589,12 @@ l'acheteur si l'entité en a une (`jsonb_strip_nulls` garde le reste propre).
 `select public.deposer_travail('<client>', 'filed', 'pa.statut', jsonb_build_object('statut', '<suivi>'), 'pa.statut:<suivi>', 5::smallint);`
 (la clé ne bloque que contre un travail actif : l'ancien est « fait », un nouveau naît).
 
+**Étape 5, 204 réussi de bout en bout (06/10, 15 h 52 Z)** : a4_19 d'A4 (52100b4, TVA transmise)
+posé, echange-pa v3 (21466c7), 204 relancé par `pa_echouer_statut` + `deposer_travail`. Cycle
+de vie 204 `emis` (flux b0d2b4e1-…, essais 2) ; travail 5220 `fait` {pa afnor, note true} ; flux
+sortant CDAR `CustomerInvoiceLC` accusé `ok` ; battement `echange_pa` présent (pa_branchee vrai,
+erreur_releve null). Reste : le litige 207 (bloc B) et ses contrôles (bloc D).
+
 Points ouverts (avant réponse) : chiffrement ou HDS des factures de santé ; une seule connexion PA (Omega
 opérateur pour tous ses clients) ou une par client (alors `pa_commencer_*` rend aussi
 l'identité de connexion, et l'ouvrier lit les secrets par client comme `secret_expediteur`).
