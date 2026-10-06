@@ -5,8 +5,9 @@ Préparé par A5 (garde-fous), 6 octobre 2026, à la demande du coordinateur.
 été ni lue ni touchée ; l'inventaire vient du dépôt (main, `worker-a1`, `worker-a2`,
 `worker-a4`, `worker-a5`) et du journal `omega/NOTES-COORDINATEUR.md`.
 
-Recette de référence : `ygwbgpowzlbdaajlsqkn`. Les cases « à confirmer » attendent
-les quatre sorties brutes demandées au coordinateur (§ 8).
+Recette de référence : `ygwbgpowzlbdaajlsqkn`. Ordre, crons et fonctions recalés le
+6/10 sur les sorties brutes relayées par le coordinateur (§ 8) ; ce qui reste à
+relever est listé au § 8.
 
 ---
 
@@ -34,144 +35,196 @@ les quatre sorties brutes demandées au coordinateur (§ 8).
 
 ## 1. Inventaire ordonné des migrations
 
-### 1.1 Règle d'ordre
+### 1.1 Règle : rejouer la séquence de la recette, à l'identique
 
-L'ordre de vérité est **l'ordre des versions de la recette** (`schema_migrations`) :
-chaque lot y a été posé sur l'état laissé par le précédent, et plusieurs corps sont
-réécrits « par repère » (19ab, a4_11, b5_05…) — rejoués dans un autre ordre, ils
-s'arrêtent (sans rien changer, c'est voulu) ou, pire, réécrivent une version
-périmée. L'ordre ci-dessous est celui que donnent les notes ; il sera recalé ligne
-par ligne sur la sortie n° 1 du coordinateur.
+L'ordre de vérité est **l'ordre des versions de la recette** (`schema_migrations`,
+sortie n° 1 du coordinateur, 6/10 13 h 45 Z). Chaque lot y a été posé sur l'état
+laissé par le précédent. Plusieurs corps sont réécrits « par repère » : 19ab, a4_11,
+b5_05, et les `_v2`, `_v3`, `_v4` qui reprennent un lot. Rejoués dans un autre
+ordre, ils s'arrêtent sans rien changer (c'est voulu), ou bien ils posent une
+version périmée.
 
-Chaque fichier se pose **dans une transaction** : il passe en entier ou rien.
+**Décision proposée** : la production rejoue **la même séquence, version pour
+version, en gardant les numéros de version de la recette**. Elle exclut seulement
+les lignes du § 1.4. Les reprises (`_v2`, `_v3`…) sont rejouées à leur place, et non
+fusionnées dans la première pose. C'est la seule façon d'arriver au même état sans
+avoir à prouver que chaque version finale ne dépend de rien de posé après sa
+première version. Le coût, quelques corps de fonction écrits deux fois, est nul.
 
-### 1.2 Ce que la production a déjà
+Chaque ligne se pose **dans une transaction** : elle passe en entier ou rien.
 
-D'après la comparaison des deux `list_migrations` du 5 octobre (NOTES-A5,
-« Alignement ») : les 61 migrations historiques (la recette les a écrasées en
-`base_existante`) et 73 migrations communes (socle lots 1 → 16, lorani, filed lots
-1–3, tavaro, tiroma, tamila m0). **À confirmer** par la sortie n° 2 : rien n'a été
-posé en production depuis.
+### 1.2 Ce que la production a déjà (sortie n° 2)
 
-### 1.3 Ce qui doit y aller, dans l'ordre
+Un historique propre jusqu'au 27/09 (v1_2 → v3_0, comptes_clients,
+paiement_stripe, grille de prix, veille_youtube, securite_*). Ensuite, les lots
+1 à 16 du socle et les lots de modules communs, jusqu'à `20260929092923
+tavaro_lot2a2_reseau`. **Rien après.** `base_existante` n'existe pas en production,
+et c'est normal (elle ne sert qu'à la recette et à la CI ; elle refuse une base non
+vide).
 
-Légende de la colonne Source : **fichier** = chemin dans le dépôt + SHA du dernier
-commit qui le touche ; **recette seule** = à exporter d'abord (constat 1).
+### 1.3 Ce qui doit y aller, dans l'ordre (sortie n° 1)
 
-**Étape A — bases des modules absentes de la production**
+Source de chaque ligne :
+- **fichier** : chemin du dépôt, SHA du dernier commit qui le touche ;
+- **dépôt** : posée « depuis le dépôt ». Le champ `statements` de la recette porte
+  la provenance (branche, SHA, chemin), et c'est **ce SHA-là** qui fait foi ;
+- **SQL** : posée par `execute_sql`. Le texte est dans `statements`, à exporter en
+  fichier (§ 1.5).
 
-| # | Version (recette) | Nom | Source |
-|---|---|---|---|
-| A1 | 20260928214838 | `daliro_m0a_referentiel` | recette seule |
-| A2 | 20260928221251 | `varelo_referentiel` | recette seule |
-| A3 | 20260928222752 | `daliro_m0b_marches` | recette seule |
-| A4 | 20260928223335 | `varelo_referentiel_index` | recette seule |
-| A5 | 20260929023244 | `daliro_m0c_planning` | recette seule |
-| A6 | 20260929024032 | `tamila_m10_delais_correctifs` | recette seule |
-| A7 | 20260929033045 | `varelo_referentiel_perf` | recette seule |
-| A8 | 20260929033851 | `tamila_m10b_porte_etroite` | recette seule |
-| A9 | 20260929034413 | `tiroma_releve` | recette seule |
+**Étape A — bases des modules, posées sur la recette avant le 29/09 et absentes de
+la production.** Elles se placent entre les lots de modules communs, à leur version.
+Il faudra vérifier, sur la répétition, qu'elles passent après
+`tavaro_lot2a2_reseau`.
 
-Le 5 octobre, Daliro et Varelo étaient notés « à garder en recette ». Les deux
-modules sont maintenant livrés (écrans en ligne) : leurs bases partent donc.
-**Décision de Teo à confirmer.**
-
-**Étape B — socle, avant les modules de la vague 2**
-
-| # | Nom | Contenu (résumé) | Source |
-|---|---|---|---|
-| B1 | `socle_lot17_portes_ouvrier` (20261004220932) | `prendre_travaux`, `battre_ouvrier` | recette seule |
-| B2 | `socle_lot18a` … `18d` | `receptions`, `resoudre_boite`, `deposer_reception`, `noter_remise` à 6 arguments | recette seule |
-| B3 | `socle_lot19a` | `regles_validation`/`demandes_validation` : `exige_*` ; `approbations.piece_id` ; `public.annuaire` | recette seule |
-| B4 | `socle_lot19b` | portes du lecteur (`piece_a_lire`, `consommation_ia_jour`, `lire_parametre`), réglage `plafond_ia_jour_client` = 5, crons `omega-lecteur` et `omega-expediteur`, politique Storage SELECT `omega-clients`. **Sans** `create extension pgtap` (voir § 3) | recette seule |
-| B5 | `socle_lot19c` | `preparer_approbation` refuse le déposant | recette seule |
-| B6 | `filed_lot4a` … `4g`, `5a`, `6a` | `omega/migrations/a4_01` → `a4_09` (voir étape C) | fichiers |
-| B7 | `socle_lot19d` | revoke des droits par défaut (dont les 20 tables FILED des lots 4–6 : **après B6**) | recette seule |
-| B8 | `socle_lot19e`, `19f` | TRUNCATE/REFERENCES/TRIGGER retirés ; INSERT/UPDATE d'anon retirés | recette seule |
-| B9 | `socle_lot19g` | plages SMS/WhatsApp 08:00–20:00 lun–sam | recette seule |
-| B10 | `socle_lot19h`, `19n`, `19x`, `19y`, Realtime `filed_fournisseurs` (20261006134231) | publication `supabase_realtime` (validations, FILED, Varelo, Lorani, Tiroma, Tavaro, fournisseurs) | recette seule |
-| B11 | `socle_lot19k`, `19l` | GRANT pour chaque politique visant authenticated ; revoke des écritures sans politique | recette seule |
-| B12 | `socle_lot19m`, `19o`, `19p` | politiques Storage INSERT des membres ; vue `tamila_registre` (anon sans rien) | recette seule |
-| B13 | `socle_lot19v`, `socle_lot19aa` | crons `omega-identite` et `omega-lecteur-exports` (après le déploiement des fonctions, § 2) | recette seule |
-| B14 | `socle_lot19i` | Brevo `branche = true` dans `private.fournisseurs_envoi` : **seulement quand les secrets Brevo de production sont posés** (§ 2) | recette seule |
-
-**Étape C — FILED (A4), dans l'ordre des numéros**
-
-| # | Fichier (`worker-a4`) | SHA | Lot recette |
-|---|---|---|---|
-| C1 | `omega/migrations/a4_01_filed_lot4a_comptabilite_tables.sql` | 1500b1a | filed_lot4a |
-| C2 | `omega/migrations/a4_02_filed_lot4b_comptabilite_portes.sql` | 1500b1a | filed_lot4b |
-| C3 | `omega/migrations/a4_03_filed_lot4c_charges_recurrentes.sql` | 2ea2cc1 | filed_lot4c |
-| C4 | `omega/migrations/a4_04_filed_lot4d_controles_identite.sql` | 1500b1a | filed_lot4d |
-| C5 | `omega/migrations/a4_05_filed_lot5a_archivage_probant.sql` | 1500b1a | filed_lot5a |
-| C6 | `omega/migrations/a4_06_filed_lot6a_pilotage.sql` | 1500b1a | filed_lot6a |
-| C7 | `omega/migrations/a4_07_filed_lot4f_circuit_validation.sql` | 1500b1a | filed_lot4f |
-| C8 | `omega/migrations/a4_08_filed_lot4e_branchements.sql` | 2ea2cc1 | filed_lot4e |
-| C9 | `omega/migrations/a4_09_filed_lot4g_acquittement_alerte.sql` | 55af068 | filed_lot4g |
-| C10 | `omega/migrations/a4_10_filed_lot7_identite_fournisseur.sql` | 316697e | filed_lot7 |
-| C11 | `omega/migrations/a4_11_filed_lot7_controler_facture_complet.sql` | 179fd13 | (corps complet, remplace le patch de a4_10) |
-| C12 | `omega/migrations/a4_12_filed_lot7_a_confirmer_non_levable.sql` | 18578a3 | |
-| C13 | `omega/migrations/a4_13_filed_lot7_demandeur_systeme_iban.sql` | 5f6aa66 | |
-| C14 | `omega/migrations/a4_14_filed_lot7_cle_valeurs_humaines.sql` | cf4c3af | |
-| C15 | `omega/migrations/a4_15_filed_lot8_paiements.sql` | 634fe24 | |
-
-C1–C9 se posent **à la place B6** (avant 19d). C10–C15 vont avant B7 Identité (étape D) :
-`identite_b7_01` v3 suppose la contrainte `filed_fournisseurs_identite_source` d'a4_10.
-
-**Étape D — modules de la vague 2 (fichiers sur main)**
-
-| # | Fichier | SHA |
+| Version | Nom | Source |
 |---|---|---|
-| D1 | `omega/modules/identite/migrations/b7_01_portes.sql` | 9032537 |
-| D2 | `omega/modules/identite/migrations/b7_02_demander.sql` | 4d0f61b |
-| D3 | `omega/modules/identite/migrations/b7_03_balayer.sql` | 8145532 |
-| D4 | `omega/modules/varelo/migrations/b1_01_portes_roles.sql` | b287d04 |
-| D5 | `omega/modules/varelo/migrations/b1_02_portes_authenticated.sql` | b287d04 |
-| D6 | `omega/modules/varelo/migrations/b1_03_proposer_nom_unique.sql` | 3860e00 |
-| D7 | `omega/modules/tavaro/migrations/b2_01_separation_saisie_approbation.sql` | e6d991a |
-| D8 | `omega/modules/tavaro/migrations/b2_02_relances_factures.sql` (cron `tavaro-relances` 09:15 UTC) | e6d991a |
-| D9–D19 | `omega/modules/tiroma/migrations/b3_01` → `b3_11` (b3_06 : cron `tiroma-matin` */30) | 7d13c1a, b287d04, e6d991a, 7d13c1a, 7d13c1a, e6d991a, b287d04, b287d04, b287d04, e6d991a, 9a183b1 |
-| D20–D23 | `omega/modules/tamila/migrations/b4_01` → `b4_04` | b287d04 |
-| D24–D32 | `omega/modules/lorani/migrations/b5_01` → `b5_09` | 7d13c1a ×3, b287d04, ea53b85, fcd1b1a, a4e3197, 8b9ebbc, fbf4c98 |
-| D33–D39 | `omega/modules/daliro/migrations/b6_01` → `b6_07` (b6_02 : cron `daliro-confirmations-j2` 15:00 ; b6_06 : cron `daliro-ouvrier` chaque minute) | d572973 ×4, daab913, 697c580, b3bd323 |
+| 20260928214838 | `daliro_m0a_referentiel` | SQL |
+| 20260928221251 | `varelo_referentiel` | SQL |
+| 20260928222752 | `daliro_m0b_marches` | SQL |
+| 20260928223335 | `varelo_referentiel_index` | SQL |
+| 20260929023244 | `daliro_m0c_planning` | SQL |
+| 20260929024032 | `tamila_m10_delais_correctifs` | SQL |
+| 20260929033045 | `varelo_referentiel_perf` | SQL |
+| 20260929033851 | `tamila_m10b_porte_etroite` | SQL |
+| 20260929034413 | `tiroma_releve` | SQL (citée le 5/10 comme absente de la production ; **absente de la sortie n° 2 : à vérifier**) |
 
-Dépendances relevées dans les fichiers :
-- b6_03 référence `filed_factures`, donc FILED (étape C) passe avant ;
-- b2_01 s'appuie sur `preparer_approbation` de 19c (B5) ;
-- b5_03 et b6_06 passent par `preparer_envoi` ;
-- b3_06 et b3_10 supposent `private.verrous_envoi` (lot socle).
+Daliro et Varelo étaient notés « à garder en recette » le 5/10. Les deux modules
+sont livrés : leurs bases partent. **Teo confirme.**
 
-**Étape E — socle après les modules**
+**Étape B — la séquence du 4 au 6 octobre** (✗ = ne pas emporter, voir § 1.4).
 
-| # | Fichier | SHA | Remarque |
+| Version | Nom | Source | Note |
 |---|---|---|---|
-| E1 | `omega/modules/socle/migrations/19ab_sante_envois.sql` | 6b9c88d | réécrit `verrous_envoi` et `commencer_envoi` par repère ; s'arrête sans rien changer si le corps de production diffère |
-| E2 | `omega/migrations/a5_01_private_execute.sql` (`worker-a5`) | db8fb41 | **toujours en dernier**, et à rejouer après tout lot futur. Calcule les fonctions de `private` requises, retire EXECUTE à public/anon/authenticated, le rend à la liste, donne tout à service_role, pose les droits par défaut globaux. Idempotente ; elle s'arrête par exception si anon exécute encore quelque chose |
-| E3 | `omega/migrations/a5_01_liste_requises.sql` | db8fb41 | lecture seule : la liste à comparer à `omega/a5_01_liste_figee.txt` et à la recette (221 fonctions le 6/10) |
+| 20261004220932 | `socle_lot17_portes_ouvrier` | SQL | `prendre_travaux`, `battre_ouvrier` |
+| 20261005140000 → 140300 | `socle_lot18a` à `18d` (receptions, portes de réception, remise idempotente, boîte formulaire) | SQL | |
+| 20261005163500 | `socle_lot19a_exigences_annuaire` | SQL | |
+| 20261005163600 | `socle_lot19b_portes_lecteur_pgtap_storage` | SQL | **à retoucher** : sans `create extension pgtap`, cron `omega-lecteur` réécrit sur l'URL de production (§ 2.2) |
+| 20261005164500 → 165200 | `filed_lot4a`, `4b`, `socle_lot19c` (séparation saisie/approbation), `4c`, `4d`, `5a`, `6a`, `4f` | dépôt (a4_01 → a4_07) + SQL (19c) | l'ordre exact entre ces huit lignes se lit dans la sortie n° 1 |
+| 20261005170800 | `filed_lot4e` | dépôt (a4_08) | |
+| 20261005170900 | `filed_lot4g` | dépôt (a4_09) | |
+| 20261005171500 | `socle_lot19d_droits_tables` | SQL | après les tables FILED 4–6 |
+| 20261005171800 | `socle_lot19e_droits_larges` | SQL | |
+| 20261005172000 | `socle_lot19f_anon_sans_ecriture` | SQL | |
+| 20261005175500 | `socle_lot19g_plages_sms_whatsapp` | SQL | |
+| 20261005181500 | `filed_lot4f_decider_sans_separation` | dépôt (a4_07, 1500b1a) | |
+| 20261005182000 | `socle_lot19h_realtime_espace` | SQL | |
+| 20261005185500 | `a5_01_private_execute` (v1) | dépôt | rejouée en v2 plus loin, et en dernier (étape C) |
+| 20261005190000 | `socle_lot19i_brevo_branche_recette` | SQL | ✗ « recette seulement » : en production, `branche = true` seulement quand les secrets Brevo de production sont posés (§ 2) |
+| 20261005190500 | `socle_lot19j_service_role_private` | SQL | |
+| 20261005195000 | `socle_lot19k_grants_selon_policies` (75) | SQL | |
+| 20261005195100 | `socle_lot19l` | SQL | |
+| 20261005195800 | `socle_lot19m_storage_depot_membres` | SQL | |
+| 20261005202500 | `socle_lot19n_realtime_vague2` | SQL | |
+| 20261005202600 | `socle_lot19o_storage_depot_tout_objet` | SQL | |
+| 20261005203000 | `socle_lot19p` | SQL | |
+| 20261005204500 | `tiroma_b3_01` | dépôt | |
+| 20261005205000 | `banc_lot19q` | SQL | ✗ banc |
+| 20261005205500 → 205800 | `socle_lot19r` (89), `19s`, `19t` (« aucun »), `19u` | SQL | 19r est inutile mais sans effet durable : a5_01 v2 le défait |
+| 20261005210000 | `a4_10` | dépôt | |
+| 20261005210100 → 210300 | `b2_01`, `b2_02`, `b1_01` | dépôt | |
+| 20261005211500 | `socle_lot19v_cron_omega_identite` | SQL | cron réécrit sur l'URL de production (§ 2.2) |
+| 20261005212000 | `b7_01` | dépôt | |
+| 20261005212100 | `b6_01` → `b6_04` | dépôt | |
+| 20261005212500 | `socle_lot19w` (4) | SQL | |
+| 20261005213000 | `socle_lot19x_realtime_tiroma` | SQL | |
+| 20261005213500 | `a4_11` | dépôt | |
+| 20261005215001 | `b7_01_v2` | dépôt | |
+| 20261005215101 → 215105 | `b3_02` → `b3_06` | dépôt | |
+| 20261005215106, 215107 | `b5_01`, `b5_02` | dépôt | |
+| 20261005215201 | `socle_lot19y_realtime_loc` | SQL | |
+| 20261005215301 | `socle_lot19z_private_anon_zero` | SQL | |
+| 20261005234001 → 234006 | `b7_01_v3`, `b1_02`, `b6_03_v2`, `b4_02`, `b4_03`, `b5_03` | dépôt | |
+| 20261006000101 → 000112 | `b7_02`, `b6_01_v2`, `b6_04_v2`, `b4_01`, `b4_04`, `b5_01_v2`, `b5_03_v2`, `b5_04`, `b3_08`, `b3_07`, `b3_09`, `b3_02_v2` | dépôt | |
+| 20261006000201 | `socle_lot19aa_cron_lecteur_exports` | SQL | cron réécrit sur l'URL de production (§ 2.2) |
+| 20261006003001 → 003701 | `b1_03`, `b2_01_v2`, `b6_05`, `b2_02_v2`, `b3_03_v2`, `b7_03`, `b3_10`, `b3_06_v2` | dépôt | |
+| 20261006010711 | `socle_lot19ab_sante_envois` | fichier `omega/modules/socle/migrations/19ab_sante_envois.sql` (6b9c88d) | |
+| 20261006011655 | `socle_lot19ac_sorties_tests` | SQL | ✗ outil de test |
+| 20261006011840 | `a5_01_private_execute_v2` | dépôt (worker-a5 97853cb) | |
+| 20261006012449 | `b2_11` (tests) | dépôt | ✗ tests |
+| 20261006013028 | `b7_01_v4` | dépôt | |
+| 20261006013338 | tests A5 52/53 | dépôt | ✗ tests |
+| 20261006013731 | `b3_11` | dépôt (9a183b1) | |
+| 20261006014905 | `b5_05` | dépôt (ea53b85) | |
+| 20261006015557 | `socle_lot19ae_tester_sans_trace` | SQL | ✗ outil de test |
+| 20261006015637 | `a4_12` | dépôt (18578a3) | |
+| 20261006020532, 020533 | `b5_06`, `a4_13` | dépôt (fcd1b1a, 5f6aa66) | |
+| 20261006023553 → 023555 | `b6_06`, `b5_07`, `a4_14` | dépôt (697c580, a4e3197, cf4c3af) | |
+| 20261006045756, 045757 | `b6_07`, `b5_08` + `b5_09` | dépôt (b3bd323, 8b9ebbc, fbf4c98) | |
+| 20261006051221 | `a4_15` | dépôt (634fe24) | |
+| 20261006134231 | `filed_realtime_fournisseurs` | SQL | |
 
-**Lots de la recette absorbés par a5_01 (E2) — ne pas les rejouer un par un :**
-`socle_lot19j` (EXECUTE à service_role), `19r` (fonctions de déclencheur, inutile),
-`19s`, `19t`, `19u` (clause WHEN), `19w`, `19z`. Le test 44 (§ 4) prouve que E2 les
-couvre.
+**Étape C — clôture, toujours en dernier.**
 
-### 1.4 Comment poser en production
+| Ordre | Quoi | Source |
+|---|---|---|
+| C1 | `a5_01_private_execute.sql` rejouée. Depuis sa v2 (011840), dix lots ont créé des fonctions dans `private` (b7_01_v4, b3_11, b5_05 → a4_15). Elle les range dans la règle et pose les droits par défaut globaux. Idempotente ; elle s'arrête par exception si anon exécute encore quelque chose | `omega/migrations/a5_01_private_execute.sql`, worker-a5 db8fb41 |
+| C2 | `a5_01_liste_requises.sql` (lecture seule) : la liste à comparer à celle de la répétition et à la recette (221 le 6/10) | même SHA |
+
+### 1.4 Lignes de la recette à ne pas rejouer
+
+- `base_existante` : la production a son propre historique.
+- `banc_lot19q` : donnée du banc.
+- `socle_lot19ac_sorties_tests` et `socle_lot19ae_tester_sans_trace` : outils de
+  test.
+- `b2_11` (tests) et tests A5 52/53 : des tests, pas des migrations.
+- `socle_lot19i_brevo_branche_recette` : à remplacer par la décision de production
+  (§ 2).
+- Dans `socle_lot19b`, la ligne `create extension pgtap` : retirée.
+
+Le reste est rejoué tel quel, y compris 19j, 19r, 19s, 19t, 19u, 19w et 19z. a5_01
+(étape C) rétablit ensuite la règle exacte, et le test 44 le prouve.
+
+### 1.5 Exporter les lignes « SQL » et figer les lignes « dépôt »
+
+Avant toute répétition, une seule extraction en lecture seule sur la recette :
+
+```sql
+select version, name, statements
+from supabase_migrations.schema_migrations
+where version > '20260929092923' or name in ('daliro_m0a_referentiel', 'daliro_m0b_marches', 'daliro_m0c_planning',
+  'varelo_referentiel', 'varelo_referentiel_index', 'varelo_referentiel_perf',
+  'tamila_m10_delais_correctifs', 'tamila_m10b_porte_etroite', 'tiroma_releve')
+order by version;
+```
+
+Chaque ligne devient le fichier `omega/prod/migrations/<version>_<name>.sql` :
+- pour une ligne « SQL », c'est le texte de `statements` ;
+- pour une ligne « dépôt », c'est le fichier lu au SHA de la provenance
+  (`git show <sha>:<chemin>`), pas la version de main. Le SHA de provenance prime
+  sur ceux du § 1.6, qui ne donnent que le dernier commit du fichier.
+
+Les lignes du § 1.4 n'y figurent pas. Le dossier est commité et relu, puis il sert
+tel quel à la répétition et à la production.
+
+### 1.6 Fichiers du dépôt concernés (pour la relecture)
+
+- FILED (`worker-a4`) : `omega/migrations/a4_01` … `a4_15`, derniers commits
+  1500b1a (01, 02, 04–07), 2ea2cc1 (03, 08), 55af068 (09), 316697e (10),
+  179fd13 (11), 18578a3 (12), 5f6aa66 (13), cf4c3af (14), 634fe24 (15).
+- Modules (main) : `omega/modules/identite/migrations/b7_01..03` (9032537,
+  4d0f61b, 8145532) ; `varelo/b1_01..03` (b287d04, b287d04, 3860e00) ;
+  `tavaro/b2_01..02` (e6d991a) ; `tiroma/b3_01..11` ; `tamila/b4_01..04`
+  (b287d04) ; `lorani/b5_01..09` ; `daliro/b6_01..07`.
+- Socle : `omega/modules/socle/migrations/19ab_sante_envois.sql` (6b9c88d) ;
+  `omega/migrations/a5_01_private_execute.sql` et `a5_01_liste_requises.sql`
+  (worker-a5 db8fb41).
+- Aucun de ces fichiers ne contient de donnée du banc : vérifié par recherche de
+  `cccccccc` et de `banc` dans tous les fichiers de migration.
+
+### 1.7 Comment poser en production
 
 - **Pas** de `depot_demander` / `depot_executer` (constat 2).
 - **Pas** d'`execute_sql` fichier par fichier : l'outil bloque sur le mot
   `delete`, et les migrations en contiennent (`on delete cascade`, déclencheurs
   `before … or delete`).
-- **Ce que je conseille** : un dossier `supabase/migrations/` (ou
-  `omega/prod/migrations/`), avec un fichier par ligne des étapes A à E. Il se
-  remplit avec les fichiers du dépôt, et pour les lots « recette seule » avec leurs
-  `statements` exportés. Teo (ou une session autorisée) pose ensuite :
-  `supabase link --project-ref noepmkkplxshjbmqqxft`, puis
-  `supabase db push --dry-run`, relu, puis `supabase db push`.
-  Les 61 + 73 versions déjà en production doivent figurer dans l'historique local
-  (`supabase migration repair --status applied <version>`), sinon `db push` veut
-  les rejouer.
-- Figer un **tag** du dépôt (`prod-AAAA-MM-JJ`) après la fusion de `worker-a4` et
-  `worker-a5` dans main. Tous les SHA ci-dessus deviennent alors un seul point de
-  vérité.
+- **Ce que je conseille** :
+  1. Pour la répétition, copier `omega/prod/migrations/` (§ 1.5) dans
+     `supabase/migrations/`.
+  2. `supabase migration repair --status applied <version>` pour chaque version
+     déjà en production (sortie n° 2), afin que l'historique local la connaisse.
+  3. `supabase db push --dry-run`, relu, puis `supabase db push`.
+  4. La même chose en production, lancée par Teo ou une session autorisée.
+- Figer un **tag** du dépôt (`prod-AAAA-MM-JJ`) quand le dossier est commité.
 
 ---
 
@@ -180,46 +233,63 @@ couvre.
 Méthode inchangée : une « coquille ». `index.ts` importe
 `https://raw.githubusercontent.com/teopetit50-gif/pegase-site/<SHA complet>/omega/functions/<nom>/index.ts`,
 et `deno.json` sert d'`import_map_path` (obligatoire). Chaque coquille est **figée
-sur un SHA**.
+sur un SHA**. Recette relevée le 6/10 à 13 h 45 Z (sortie n° 4).
 
-| Fonction | SHA (branche) | Version recette | verify_jwt | Secrets (noms seuls) | Cron |
+| Fonction | SHA à déployer | Recette | verify_jwt | Secrets (noms seuls) | Cron |
 |---|---|---|---|---|---|
-| `lecteur` | 0d54731 (`worker-a1`) | v17 | true | **Production : Bedrock** (décision de Teo, données en UE) : `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION` (eu-central-1), `BEDROCK_MODEL_ID` ; **pas** d'`ANTHROPIC_API_KEY`. Facultatifs : `MISTRAL_API_KEY`, `PLAFOND_IA_JOUR_CLIENT_EUR` | `omega-lecteur` `* * * * *` (19b) |
-| `lecteur-exports` | d963121 (`worker-a1`) | v2 | true | aucun en plus de ceux de Supabase | `omega-lecteur-exports` `* * * * *` (19aa) |
-| `expediteur` | 67f9cf6 (`worker-a2`) | v12 | true | `BREVO_API_KEY` | `omega-expediteur` `* * * * *` (19b) |
-| `webhooks-brevo` | 87a1112 (`worker-a2`, dernier commit de `omega/functions/webhooks`) | v1 | **false** (jeton vérifié dans la fonction) | `BREVO_WEBHOOK_JETON` | aucun ; webhook Brevo *Transactionnel* → `/functions/v1/webhooks-brevo` |
-| `reception` | 4114a69 (`worker-a2`, dernier commit de `omega/functions/reception`) | v1 | **false** | `BREVO_WEBHOOK_JETON`, `BREVO_API_KEY`, `META_VERIFY_TOKEN`, `META_APP_SECRET`, `META_ACCESS_TOKEN`, `FORMULAIRE_SECRET`, `FORMULAIRE_BOITE` | aucun ; domaine inbound Brevo → `/functions/v1/reception/brevo` |
-| `identite` | e77fabb (main ; code au 7035cb2) — **à confirmer** | v2 | true | `SIRENE_API_KEY` (facultatif : repli recherche-entreprises), `IDENTITE_CACHE_JOURS` (30), `IDENTITE_BALAYAGE_JOURS`, `IDENTITE_BALAYAGE_MAX` | `omega-identite` `* * * * *` (19v) |
+| `lecteur` | `0d547318d1f4c7f57763b2d3128d1eb631811762` (worker-a1) | v17, coquille | true | **Production : Bedrock** (données en UE) : `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION` (eu-central-1), `BEDROCK_MODEL_ID` ; **pas** d'`ANTHROPIC_API_KEY`. Facultatifs : `MISTRAL_API_KEY`, `PLAFOND_IA_JOUR_CLIENT_EUR` | `omega-lecteur` `* * * * *` (19b) |
+| `lecteur-exports` | `d963121419b014081fc5155c8e01151b8fd76deb` (worker-a1) | v2, coquille | true | aucun en plus de ceux de Supabase | `omega-lecteur-exports` `* * * * *` (19aa) |
+| `expediteur` | `67f9cf677d306f4e82ce66dde0485602ee5e8956` (worker-a2) | v12, coquille | true | `BREVO_API_KEY` | `omega-expediteur` `* * * * *` (19b) |
+| `webhooks-brevo` | **à fixer** : la v9 de la recette n'est pas une coquille relevée. Dernier code : 87a1112 (worker-a2, `omega/functions/webhooks/brevo`) | v9 | **false** (jeton vérifié dans la fonction) | `BREVO_WEBHOOK_JETON` | aucun ; webhook Brevo *Transactionnel* → `/functions/v1/webhooks-brevo` |
+| `reception` | **à fixer** : v9, même remarque. Dernier code : 4114a69 (worker-a2) | v9 | **false** | `BREVO_WEBHOOK_JETON`, `BREVO_API_KEY`, `META_VERIFY_TOKEN`, `META_APP_SECRET`, `META_ACCESS_TOKEN`, `FORMULAIRE_SECRET`, `FORMULAIRE_BOITE` | aucun ; domaine inbound Brevo → `/functions/v1/reception/brevo` |
+| `identite` | **à fixer** : v2 déployée par B7 (NOTES-B7 : e77fabb). Dernier code : 7035cb2 (balayage, sur main) | v2 | true | `SIRENE_API_KEY` (facultatif : repli recherche-entreprises), `IDENTITE_CACHE_JOURS` (30), `IDENTITE_BALAYAGE_JOURS`, `IDENTITE_BALAYAGE_MAX` | `omega-identite` `* * * * *` (19v) |
+
+Pour les trois « à fixer » : en production, on déploie une coquille sur un SHA
+**complet**, relevé et testé sur la répétition. On ne recopie pas la version de la
+recette dont on ignore le SHA.
 
 Communs à toutes : `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (fournis par
-Supabase). **Vault** de production : le secret `cle_service`, lu par chaque cron qui
-appelle une fonction. Sans lui, les crons tournent mais les fonctions répondent 401.
+Supabase). **Vault** de production : le secret `cle_service`, lu par les crons qui
+appellent une fonction. Sans lui, les crons tournent mais les fonctions répondent
+401.
 
-Ordre de déploiement :
+Ordre :
 1. Les fonctions, d'abord sans cron.
-2. Les secrets.
-3. Un appel à la main de chaque fonction (200, battement écrit).
-4. Les crons, aux étapes B4 et B13.
+2. Les secrets et `cle_service`.
+3. Un appel à la main de chaque fonction : 200, et le battement écrit.
+4. Les crons.
 
 `webhooks-brevo` et `reception` répondent 503 tant que leurs secrets manquent :
 c'est voulu.
 
-### 2.1 Crons SQL (sans fonction Edge)
+### 2.1 Crons — sortie n° 3 (recette, 40 tâches)
 
-Sur la recette au 5/10 au soir (`SOCLE-EXTRAITS-COMMUN.sql`), 34 crons :
-`omega-*` (chien de garde, contrôle des délais, envois, filed, mesure, points ×3,
-purges ×5, relevés ×2, suivis, `omega-verifier-sauvegardes`), `daliro-referentiel`,
-`lorani-calendrier`, `lorani-lectures`, `tamila-*` (×3), `tavaro-*` (×4),
-`tiroma-*` (×3), `varelo-referentiel*` (×3). Depuis : `tavaro-relances`,
-`tiroma-matin`, `daliro-confirmations-j2`, `daliro-ouvrier`, `omega-identite`,
-`omega-lecteur-exports`.
+| Origine | Tâches |
+|---|---|
+| Lots déjà en production (socle 1–16, modules communs) — **à vérifier présents en production** | `omega-chien-de-garde` */15, `omega-controle-delais` 7 *, `omega-envois` */5, `omega-filed` *, `omega-mesure` 11 *, `omega-points-assemblage` */5, `omega-points-controle` 2-59/5, `omega-points-purge` 29 3, `omega-purge-historique-cron` 17 3, `omega-purge-lectures` 17 3, `omega-purge-releves` 47 3, `omega-purge-travaux` 43 3, `omega-releves` */15, `omega-releves-file` *, `omega-suivis` 23 *, `omega-verifier-sauvegardes` 7 8, `lorani-calendrier` 12 *, `lorani-lectures` */5, `tamila-coffre` 11 *, `tamila-decisions` *, `tamila-delais` 17 *, `tavaro-matin` */30, `tavaro-mesure` 0 9, `tavaro-ouvrier` *, `tavaro-purge` 27 3, `tiroma-horloge` */10, `tiroma-purge` 37 3, `tiroma-releves` * |
+| Étape A (bases Daliro, Varelo) | `daliro-referentiel` 20 6, `varelo-referentiel` *, `varelo-referentiel-hebdo` 45 4 * * 0, `varelo-referentiel-quotidien` 30 4 |
+| Étape B, SQL pur | `tavaro-relances` 15 9 (b2_02), `tiroma-matin` */30 (b3_06), `daliro-confirmations-j2` 0 15 (b6_02), `daliro-ouvrier` * (b6_06) |
+| Étape B, appel d'une fonction Edge | `omega-lecteur` *, `omega-expediteur` * (19b), `omega-identite` * (19v), `omega-lecteur-exports` * (19aa) |
 
-**À confirmer** par la sortie n° 3 :
-- lesquels existent déjà en production ;
-- lesquels viennent des migrations de base de l'étape A.
+### 2.2 Les quatre crons qui appellent une fonction portent l'URL de la recette
 
-**À ne pas emporter** : toute tâche `tests_*` ou nommée d'après un lot de tests
-(19ac).
+`omega-lecteur`, `omega-expediteur`, `omega-identite` et `omega-lecteur-exports`
+appellent `net.http_post` sur `https://ygwbgpowzlbdaajlsqkn.supabase.co/functions/v1/…`,
+écrit en dur.
+- **Rejoués tels quels en production, ils réveilleraient les ouvriers de la
+  recette.**
+- Dans les fichiers exportés de 19b, 19v et 19aa (§ 1.5), il faut remplacer
+  `ygwbgpowzlbdaajlsqkn` par `noepmkkplxshjbmqqxft` avant toute répétition. Mieux
+  encore : une URL lue dans `private.reglages`, pour que le même fichier serve
+  partout.
+- Contrôle après pose (attendu : 0 ligne) :
+  `select jobname from cron.job where command like '%ygwbgpowzlbdaajlsqkn%';`
+- Il faut aussi chercher l'URL de la recette dans tout le corps de fonction de
+  production (attendu : 0 ligne) :
+  `select p.oid::regprocedure from pg_proc p where prosrc like '%ygwbgpowzlbdaajlsqkn%';`
+
+À ne pas emporter : aucune tâche de test. `private.tests_en_tache` (19ac)
+programme des tâches qui se retirent seules, et 19ac est exclu.
 
 ---
 
@@ -234,7 +304,7 @@ purges ×5, relevés ×2, suivis, `omega-verifier-sauvegardes`), `daliro-referen
 | Scripts `omega/recette-a3`, `recette-b1` … `recette-b6`, `omega/banc/`, `banc_01_parcours_reel.sql` (B2), `banc_j2_reel.sql` (B6), `b6_00_jeu.sql` | dépôt | outils de recette, jamais exécutés en production |
 | Schéma `tests`, fonctions `tests.*`, `omega/tests/**`, extension `pgtap` | recette | ne s'installent en production que **dans une transaction annulée** (§ 4.2) |
 | `private.sorties_tests`, `private.tests_en_tache` (19ac), `private.tester_sans_trace` (19ae) | recette seule | outillage de test |
-| `private.depot_demander`, `private.depot_executer` | recette seule | exécution de SQL distant (constat 2) |
+| `private.depot_demander`, `private.depot_executer` | recette seule, posées hors `schema_migrations` | exécution de SQL distant (constat 2) ; elles ne sont dans aucune ligne rejouée, vérifier sur la répétition qu'elles n'existent pas |
 | Schéma `scories` (`zz_essai_lot18*`), réception d'essai `receptions` id 1 | recette | scories |
 | Fournisseur d'envoi agréé santé | `private.fournisseurs_envoi` | rester à `agree_sante = false` partout tant que Teo n'a pas la preuve HDS (§ 6) |
 | `ANTHROPIC_API_KEY` | secrets Edge | recette seulement (données hors UE) ; Bedrock en production |
@@ -246,7 +316,7 @@ purges ×5, relevés ×2, suivis, `omega-verifier-sauvegardes`), `daliro-referen
 
 ### 4.1 Sur la répétition (copie de la production)
 
-Après chaque étape A à E, et sur la copie seulement :
+Après **chaque ligne** des étapes A à C, et sur la copie seulement (la répétition s'automatise : un `db push` par ligne, puis les suites) :
 1. `00_installation.sql`, puis les suites pgTAP.
 2. Socle (`omega/tests/socle/TOUT_1..4.sql`, **54 tests**, `worker-a5`) ; `19ab_sante_envois.sql`.
 3. FILED (`a4_*`).
@@ -256,10 +326,18 @@ Après chaque étape A à E, et sur la copie seulement :
 
 ### 4.2 Sur la production — lecture seule
 
-Après chaque étape :
+On contrôle à six **paliers** plutôt qu'après chacune des quelque 110 lignes :
+- **P1**, après l'étape A ;
+- **P2**, après `socle_lot19h` (20261005182000) ;
+- **P3**, après `socle_lot19z` (20261005215301) ;
+- **P4**, après `b3_06_v2` (20261006003701) ;
+- **P5**, après `filed_realtime_fournisseurs` (20261006134231) ;
+- **P6**, après l'étape C.
+
+À chaque palier :
 
 ```sql
--- Garde-fou 1 : EXECUTE sur private (attendu après E2 : anon 0 ; authenticated = le nombre de la répétition ; service_role = tout)
+-- Garde-fou 1 : EXECUTE sur private (attendu à P6 : anon 0 ; authenticated = le nombre de la répétition ; service_role = tout)
 select r.rolname,
        count(*) filter (where has_function_privilege(r.rolname, p.oid, 'execute')) as executables,
        count(*) as total
@@ -320,11 +398,11 @@ where d.start_time > now() - interval '15 minutes' and d.status <> 'succeeded';
 | Étape | Retour arrière |
 |---|---|
 | Un fichier qui échoue | rien à faire : la transaction est annulée, rien n'est posé. On corrige sur la répétition et on rejoue |
-| A, C, D (tables et portes nouvelles) | désactiver ce qui agit : `cron.alter_job(jobid, active := false)` pour les crons du lot, `revoke execute` sur les portes publiques du lot pour anon/authenticated. Les tables restent, vides et inertes (pas de DROP : l'outil le refuse, et une table vide ne nuit pas). Les fonctions remplacées sont rejouées depuis le relevé fait avant l'étape |
-| B (droits, Realtime, Storage) | rejouer l'inverse, généré avant l'étape à partir du relevé `aclexplode` / `pg_publication_tables` / `pg_policies` de `storage.objects` |
-| B4, B13, D8, D19, D35, D38 (crons) | `cron.alter_job(…, active := false)` |
-| E1 (19ab) | rejouer les deux corps relevés (`verrous_envoi`, `commencer_envoi`) |
-| E2 (a5_01) | ne pas annuler : un manque se corrige en ajoutant la source dans a5_01, puis en la rejouant. En urgence, `grant execute on function private.<f> to authenticated` sur la seule fonction en cause, à reporter ensuite dans a5_01 |
+| A et B, lots qui créent tables et portes | désactiver ce qui agit : `cron.alter_job(jobid, active := false)` pour les crons du lot, `revoke execute` sur les portes publiques du lot pour anon/authenticated. Les tables restent, vides et inertes (pas de DROP : l'outil le refuse, et une table vide ne nuit pas). Les fonctions remplacées sont rejouées depuis le relevé fait avant l'étape |
+| B, lots de droits, Realtime, Storage (19d–19p, 19x, 19y, Realtime filed_fournisseurs) | rejouer l'inverse, généré avant l'étape à partir du relevé `aclexplode` / `pg_publication_tables` / `pg_policies` de `storage.objects` |
+| Lots qui posent un cron (19b, 19v, 19aa, b2_02, b3_06, b6_02, b6_06 et leurs `_v2`) | `cron.alter_job(…, active := false)` |
+| `socle_lot19ab` | rejouer les deux corps relevés (`verrous_envoi`, `commencer_envoi`) |
+| a5_01 (v1, v2, étape C) | ne pas annuler : un manque se corrige en ajoutant la source dans a5_01, puis en la rejouant. En urgence, `grant execute on function private.<f> to authenticated` sur la seule fonction en cause, à reporter ensuite dans a5_01 |
 | § 2 (fonctions Edge) | redéployer la coquille au SHA précédent ; désactiver le cron le temps de le faire |
 | Catastrophe (données abîmées) | restauration de la sauvegarde d'avant l'étape (procédure `SAUVEGARDE.md` § 4), ou PITR. RPO de la sauvegarde nocturne : 24 h ; la sauvegarde manuelle faite juste avant l'étape le ramène à quelques minutes |
 
@@ -371,19 +449,28 @@ where d.start_time > now() - interval '15 minutes' and d.status <> 'succeeded';
 1. Exporter les lots « recette seule » en fichiers (constat 1).
 2. Répétition générale sur une copie de la production : A → E, fonctions Edge, crons.
    Toutes les suites pgTAP doivent passer au vert.
-3. Production : A → B → C → D → E, avec les contrôles du § 4.2 après chaque étape.
-4. Production : fonctions Edge, secrets, appel à la main, puis crons (B4, B13).
+3. Production : A → B → C, avec les contrôles du § 4.2 à chaque palier (P1 à P6). Les quatre crons qui appellent une fonction (19b, 19v, 19aa) portent l'URL de production (§ 2.2).
+4. Production : fonctions Edge, secrets, `cle_service`, appel à la main de chaque fonction.
 5. Premier client : réglages d'envoi en `coupe` ou `essai`, puis `reel` sur décision
    écrite.
 
 ---
 
-## 8. Sorties demandées au coordinateur (lecture seule)
+## 8. Sorties de la recette (reçues le 6/10 à 13 h 45 Z)
 
-1. Recette : `select version, name, array_length(statements,1), left(array_to_string(statements, E'\n'), 300) from supabase_migrations.schema_migrations order by version;`
-   — fixe l'ordre exact et sert à l'export du constat 1.
-2. Production : `version, name` de `schema_migrations`, si le filtre le permet ;
-   sinon, la dernière liste connue.
-3. Recette : `select jobname, schedule, left(command, 200) from cron.job order by jobname;`
-4. Recette : `list_edge_functions` (nom, version, verify_jwt, SHA de chaque coquille),
-   et les **noms** des secrets Edge posés.
+Reçues du coordinateur, en lecture seule, et intégrées aux § 1.2, 1.3, 2 et 2.1 :
+1. `schema_migrations` de la recette ;
+2. noms des migrations de production ;
+3. `cron.job` de la recette ;
+4. fonctions Edge de la recette.
+
+Restent à relever :
+- l'ordre exact entre les huit lignes 20261005164500 → 165200 (sortie n° 1
+  complète) ;
+- la provenance (branche, SHA, chemin) de chaque ligne « dépôt », à lire dans
+  `statements` au moment de l'export (§ 1.5) ;
+- les SHA de `webhooks-brevo`, `reception` et `identite` à déployer ;
+- en production, la liste des crons existants (pour la ligne « à vérifier » du
+  § 2.1) ;
+- `tiroma_releve` : la sortie n° 2 ne la nomme pas parmi les manques ; la
+  vérifier.
