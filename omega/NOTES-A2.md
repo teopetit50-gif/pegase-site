@@ -403,6 +403,25 @@ la réception (`receptions`) porte aussi des données de santé quand un patient
 répond ; même logique, le bucket `omega-clients` et la base doivent être HDS pour
 ces clients, ce qui est une question d'hébergement Supabase, pas d'ouvrier.
 
+## Banc de la coquille webhooks-brevo (06/10, demandé par le coordinateur)
+
+`omega/banc/banc_a2_coquille_webhooks.sql` : un envoi e-mail d'essai (module tavaro du banc, mode
+essai → adresse d'essai de Teo), objet « Essai coquille webhooks-brevo », clé
+`banc:a2:coquille-webhooks:1`, préparé par le moteur, approuvé par la DAF, confié par
+`tache_envois` ; l'expéditeur le remet. Contrôle (bloc E) : `envois_evenements` type `remis`,
+clé `brevo:email:<reference_externe>:delivered:…`, `recu_le` > `envoye_le`. Sans DROP ni DELETE.
+
+**Trou : l'inbound Brevo n'est pas branché sur la recette** (NOTES-COORDINATEUR, « Ce que Teo
+doit encore poser » n° 4 : domaine inbound vers `/functions/v1/reception/brevo`). Aucun
+courriel entrant ne peut donc atteindre `reception/brevo`. À poser par Teo : un sous-domaine
+(ex. `reponses.omegaai.fr`, MX vers Brevo), le webhook `inbound` Brevo vers
+`…/functions/v1/reception/brevo` avec le même jeton bearer, et une ligne `expediteurs`
+(canal `email`) dont `identite` est l'adresse de la boîte sur ce domaine. Ensuite il suffit
+d'écrire à cette adresse. D'ici là, le chemin utile de la coquille `reception` se prouve
+par `/reception/formulaire` (`FORMULAIRE_SECRET` posé, boîte `site:omegaai.fr` connue) :
+`FORMULAIRE_SECRET=… deno run reception/outils/signer_formulaire.ts '<corps JSON>' [URL]` imprime la
+commande curl signée (il faut la valeur du secret : Teo, ou une session qui la lit).
+
 ## Risques résiduels et choix
 
 - **Clé Brevo absente** : l'envoi est reporté par `echouer_envoi(…, false)` et le
