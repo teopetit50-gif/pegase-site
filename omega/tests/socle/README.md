@@ -1,6 +1,6 @@
 # Tests du socle — pgTAP
 
-Cinquante et un tests qui vérifient les garde-fous du socle Omega : isolement par
+Cinquante-trois tests qui vérifient les garde-fous du socle Omega : isolement par
 client, journal opposable en ajout seul et chaîné, verrous d'envoi, droits par
 objet, preuves d'effacement, sauvegardes. Session A5.
 
@@ -26,16 +26,16 @@ la fin du test, y compris en cas d'échec. Aucune donnée d'essai ne reste.
 
 ## Fichiers groupés pour le coordinateur
 
-- `TOUT.sql` : `00_installation.sql` suivi des 51 tests (la règle « pas de
+- `TOUT.sql` : `00_installation.sql` suivi des 53 tests (la règle « pas de
   DELETE en clair » est levée depuis que les fichiers sont posés depuis le
   dépôt), terminé par un seul `runtests()` qui rend une ligne `ok` / `not ok`
   par test. Un seul appel.
 - `TOUT_1.sql` à `TOUT_4.sql` : le même contenu en quatre parts (13 + 13 + 13 +
-  12 tests), chacune terminée par son `runtests()`, à lancer dans l'ordre si
+  14 tests), chacune terminée par son `runtests()`, à lancer dans l'ordre si
   un seul appel est trop gros.
 - Ils sont générés depuis les fichiers numérotés ; pour les refaire après une
   modification d'un test, relancer le script de la section « Régénérer ».
-- Validés sur la maquette locale : `TOUT.sql` rend `1..51`, 51 `ok`.
+- Validés sur la maquette locale : `TOUT.sql` rend `1..53`, 53 `ok`.
 
 ## Ce que chaque test vérifie
 
@@ -64,6 +64,8 @@ la fin du test, y compris en cas d'échec. Aucune donnée d'essai ne reste.
 | 49 | `private.verifier_sauvegardes()` lève l'alerte sans preuve, l'acquitte avec une preuve `reussie` récente, refuse un verdict hors liste |
 | 50 | Export et effacement outillés, preuves d'effacement immuables |
 | 51 | Toute politique visant authenticated a son GRANT ; tout GRANT d'écriture sur une table en RLS a sa politique ; aucune écriture sur une table sans RLS (lots 19k/19l) |
+| 52 | Un envoi `donnees_sante` sur un canal dont `permis_sante` est faux (SMS) est verrouillé `CANAL_NON_PERMIS`, définitivement, même hors module de santé ; témoin sans santé, contre-épreuve sur le courriel (lot 19ab) |
+| 53 | Un envoi `donnees_sante` vers un fournisseur dont `agree_sante` est faux est verrouillé `SANTE_HORS_CANAL_AGREE` (le verrou « sante:fournisseur »), définitivement ; témoins : même fournisseur agréé dans la transaction, même envoi sans santé |
 
 ## Mécanique réelle du socle prise en compte (retours de la recette du 5 octobre)
 
@@ -116,7 +118,7 @@ import re, glob
 fichiers = sorted(f for f in glob.glob('[0-9][0-9]_*.sql') if f[:2] != '00')
 corps = lambda f: re.sub(r"\nselect \* from runtests\('tests'::name, '\^test_\d\d_'\);\n", "\n", open(f).read())
 zero = open('00_installation.sql').read()
-open('TOUT.sql', 'w').write("-- TOUT.sql — installation + les 51 tests.\n\n" + zero + "\n\n" + "\n\n".join(map(corps, fichiers)) + "\n\nselect * from runtests('tests'::name, '^test_');\n")
+open('TOUT.sql', 'w').write("-- TOUT.sql — installation + les 53 tests.\n\n" + zero + "\n\n" + "\n\n".join(map(corps, fichiers)) + "\n\nselect * from runtests('tests'::name, '^test_');\n")
 for i, p in enumerate([fichiers[:13], fichiers[13:26], fichiers[26:39], fichiers[39:]], 1):
     nums = '|'.join(f[:2] for f in p)
     open(f'TOUT_{i}.sql', 'w').write(f"-- TOUT_{i}.sql — partie {i}/4.\n\n" + (zero + "\n\n" if i == 1 else "") + "\n\n".join(map(corps, p)) + f"\n\nselect * from runtests('tests'::name, '^test_({nums})_');\n")

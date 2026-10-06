@@ -144,6 +144,12 @@ insert into private.canaux_envoi (canal, libelle, consentement_toujours, plages_
   ('sms', 'SMS', true, '{"jours": [1,2,3,4,5,6], "debut": "08:00", "fin": "20:00"}', 'Jamais le dimanche ni les jours fériés'),
   ('telephone', 'Téléphone', true, '{"jours": [1,2,3,4,5], "debut": "10:00", "fin": "20:00", "pause": ["13:00", "14:00"]}', 'Démarchage : plages légales'),
   ('courrier', 'Courrier postal', false, null, null);
+-- Santé (lot socle 19ab) : comme sur la recette, aucun prestataire SMS n'est certifié HDS.
+update private.canaux_envoi set permis_sante = canal in ('email', 'lre', 'appel', 'whatsapp');
+create table private.fournisseurs_envoi (fournisseur text primary key, canal text, automatique boolean not null default true, branche boolean not null default false, agree_sante boolean not null default false, note text);
+insert into private.fournisseurs_envoi (fournisseur, canal, branche) values ('brevo', 'email', true), ('brevo_sms', 'sms', false), ('manuel', null, true);
+create table private.reglages (cle text primary key, valeur text);
+insert into private.reglages values ('envois_essai_fournisseur', 'brevo');
 create table public.oppositions (id bigint generated always as identity primary key, client_id uuid not null references public.clients(id), type text not null check (type in ('prospect', 'client', 'contact')), canal text not null, adresse text not null, ref text, depuis timestamptz not null default now(), jusqu_au timestamptz, motif text, source text, par uuid);
 create or replace function private.opposer(p_client uuid, p_type text, p_adresse text, p_canal text, p_ref text, p_jusqu_au timestamptz, p_motif text, p_source text, p_par uuid) returns bigint
 language plpgsql security definer set search_path = public, pg_temp as $$
@@ -157,6 +163,7 @@ create table public.envois (
   id uuid primary key default gen_random_uuid(), client_id uuid not null references public.clients(id),
   canal text not null references private.canaux_envoi(canal), destinataire_adresse text not null,
   transactionnel boolean not null default true,
+  module text not null default 'tavaro', mode text not null default 'essai', donnees_sante boolean not null default false,
   echeance timestamptz, reprise_le timestamptz,
   statut text not null default 'a_envoyer', cree_le timestamptz not null default now()
 );
@@ -166,8 +173,16 @@ create trigger t_envois_evenements_ajout_seul before update or delete on public.
 -- Les verrous : lus par la tâche d'envoi, pas un déclencheur d'insertion.
 create or replace function private.verrous_envoi(p_e public.envois, p_complet boolean, p_instant timestamptz) returns jsonb
 language plpgsql stable security definer set search_path = public, private, pg_temp as $$
-declare verrous jsonb := '[]'::jsonb; plages jsonb; debut time; fin time; jours int[]; local_ts timestamptz;
+declare verrous jsonb := '[]'::jsonb; plages jsonb; debut time; fin time; jours int[]; local_ts timestamptz; v_fournisseur text;
 begin
+  -- Santé : un contenu de santé ne passe ni par un canal non permis, ni par un fournisseur non agréé (verrous définitifs).
+  if p_e.donnees_sante and not coalesce((select c.permis_sante from private.canaux_envoi c where c.canal = p_e.canal), false) then
+    return jsonb_build_object('code', 'CANAL_NON_PERMIS', 'definitif', true, 'motif', 'canal non permis pour des données de santé');
+  end if;
+  v_fournisseur := coalesce((select g.valeur from private.reglages g where g.cle = 'envois_essai_fournisseur'), 'brevo');
+  if p_e.donnees_sante and not coalesce((select f.agree_sante from private.fournisseurs_envoi f where f.fournisseur = v_fournisseur), false) then
+    return jsonb_build_object('code', 'SANTE_HORS_CANAL_AGREE', 'definitif', true, 'motif', 'fournisseur non agréé HDS');
+  end if;
   if exists (select 1 from public.oppositions o where o.client_id = p_e.client_id and o.canal = p_e.canal and o.adresse = lower(p_e.destinataire_adresse) and coalesce(o.jusqu_au, 'infinity') > p_instant) then
     verrous := verrous || jsonb_build_object('verrou', 'opposition', 'detail', 'destinataire en opposition sur ce canal');
   end if;

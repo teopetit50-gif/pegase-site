@@ -40,6 +40,33 @@ Branche `worker-a5`. Mise à jour : 5 octobre 2026.
   dédié, `search_path` des SECURITY DEFINER, vues `security_invoker`, index
   `client_id`.
 
+## Reprise (session_01BnmsMXfPeMf55k32si4Zdd, 6 octobre) — tests santé des envois 52 et 53
+
+Reçu : a5_01 v2 posée depuis 97853cb, test 44 5/5, test 51 3/3.
+
+- **52 `sante_canal_non_permis`** : envoi `donnees_sante` sur un canal dont
+  `permis_sante` est faux (SMS), module tavaro (pas de santé), mode essai →
+  `CANAL_NON_PERMIS`, définitif ; témoin sans santé (le canal n'est pas
+  refusé en soi), contre-épreuve sur le courriel.
+- **53 `sante_fournisseur_non_agree`** : le verrou « sante:fournisseur »
+  **existe** déjà, sous le nom `SANTE_HORS_CANAL_AGREE` (verrous_envoi, après
+  le consentement). Envoi santé par courriel (permis), fournisseur d'essai
+  (`envois_essai_fournisseur`, brevo) à `agree_sante` faux → verrouillé,
+  définitif, pas le canal ; témoins : brevo agréé dans la transaction, envoi
+  sans santé.
+- Envoi construit en mémoire (`jsonb_populate_record`), pas d'insertion dans
+  `envois` ; le réglage d'essai `reglages_envois (client fictif A, tavaro,
+  essai)` est posé par `inserer_minimal` (diag s'il est refusé). runtests()
+  annule tout, y compris la bascule d'`agree_sante`.
+- Maquette alignée (canaux `permis_sante`, `fournisseurs_envoi`,
+  `reglages`, deux verrous santé) : 53/53, `TOUT.sql` → 53 `ok`. Mutation :
+  retirer chaque règle rend son test rouge.
+- **Point à vérifier (non testé)** : en mode réel, `verrous_envoi` lit le
+  fournisseur de l'**expéditeur actif**, alors que `commencer_envoi` (19ab)
+  rend `fournisseur_hds` d'après **`envois.fournisseur`**. Si les deux peuvent
+  diverger, l'ouvrier d'A2 reçoit un `fournisseur_hds` qui n'est pas celui
+  que le verrou a jugé.
+
 ## PASSATION — pour le nouveau coordinateur (session_01BCGFdpRKBvXKjouC75sYBg), 6 octobre 01:15 UTC
 
 L'ancien coordinateur me demande de t'envoyer mes réponses en attente. Le
