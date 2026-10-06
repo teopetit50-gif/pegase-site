@@ -8,28 +8,31 @@ promettent quand même une fonction).
 États : **A** prouvé en vrai (un vrai cabinet, de vraies pièces) · **B** construit et testé sur la recette avec des
 données fictives (test cité) · **C** partiel · **D** pas construit · **T** dépend d'un tiers, d'un compte ou d'un
 achat de Teo. Jours : ouvrier comme moi, « → B » puis « B → A », honnêtes. Les lignes marquées *(A1)* portent sur
-la lecture IA des pièces : chiffres à confirmer par A1, sollicité le 06/10 à 19 h 55 Z.
+la lecture IA des pièces : jours du lecteur donnés par A1 (omega/CHIFFRAGE/lecteur.md, worker-a1 e0932e3), auxquels
+j'ajoute la part écran et porte (B4). Coûts d'A1 : avis RPVA ≈ 0,015 € ; page scannée 0,02-0,03 € ; lecture longue
+1 à 5 € par dossier courant (plafond 15 €) ; nouveau type 0,5 à 3 € par dossier. Aucune qualité n'est encore mesurée
+sur de vrais documents Tamila.
 
 ## Synthèse
 
-1. **63 promesses**, classées sur leur état principal : A **0** · B **8** · C **28** · D **18** · T **9**. Rien n'est prouvé en vrai : aucun cabinet réel, aucune vraie pièce lue de bout en bout.
-2. **Pour tout amener en B : ≈ 100 jours**, dont ≈ 62 de lecture IA (avec A1), ≈ 28 de gestion et d'écran, ≈ 10 d'infrastructure (hébergeur français, lecture en UE).
-3. **Pour tout amener ensuite en A : ≈ 68 jours de plus**, avec un cabinet pilote et ses vraies pièces.
+1. **63 promesses**, classées sur leur état principal : A **0** · B **10** · C **26** · D **18** · T **9**. Rien n'est prouvé en vrai : aucun cabinet réel, aucune vraie pièce lue de bout en bout, aucune qualité mesurée sur de vrais documents.
+2. **Pour tout amener en B : ≈ 74 jours**, dont ≈ 41,5 de lecture IA (jours du lecteur d'A1 + écrans B4), ≈ 24 de gestion et d'écran, ≈ 8,5 d'infrastructure (hébergeur français, lecture en UE).
+3. **Pour tout amener ensuite en A : ≈ 54 jours de plus**, avec un cabinet pilote et ses vraies pièces.
 4. **Tiers et achats** :
    - hébergeur français pour la base et les fichiers (aujourd'hui Supabase, région à confirmer) ;
-   - modèle servi en UE (Bedrock eu-west-3 ou équivalent) ;
-   - **hébergeur HDS** pour les pièces médicales (dommage corporel) ;
-   - compte Scaleway Key Manager activé ;
-   - OCR des scans et manuscrits (Mistral OCR ou équivalent) ;
+   - un compte AWS avec Bedrock en UE (eu-central-1), pour une lecture en Europe sans conservation : le lecteur sait déjà y passer (A1) ;
+   - **hébergeur HDS** pour les pièces médicales du dommage corporel, à faire trancher par un juriste ;
+   - Scaleway Key Manager activé (décision de Teo en attente) ;
+   - en option, une clé Mistral OCR ;
    - contrat et DPA (art. 28 RGPD) rédigés par un avocat.
-5. **Pour un premier cabinet réel** :
-   - le coffre activé et une pré-lecture qui tourne sur un vrai dossier (chronologie, contradictions, bordereau : lignes 3-5, ≈ 6 j) ;
-   - la lecture en UE (tiers) et la mention d'hébergement rendue vraie (tiers, ou page reformulée) ;
-   - le contrat et le DPA ;
-   - l'export du dossier (ouvrier absent, 3 j) ;
-   - l'effacement du dossier de faits à la clôture (1 j) ;
-   - le point du matin complété (forfaits, sans diligence : 1,5 j).
-   Soit **≈ 12 jours d'ouvrier**, plus les tiers ci-dessus. Honoraires, délais et pilotage sont en B et peuvent servir.
+5. **Pour un premier cabinet réel : ≈ 8,5 jours d'ouvrier**, plus les tiers ci-dessus. Il faut :
+   - activer le coffre et faire tourner la pré-lecture (chronologie, contradictions, bordereau) sur un vrai dossier, avec un essai fictif à grande échelle d'abord (lignes 3-5, ≈ 2,5 j) ;
+   - écrire l'ouvrier d'export du dossier, absent aujourd'hui (3 j) ;
+   - effacer le dossier de faits à la clôture (1 j) ;
+   - compléter le point du matin (forfaits, sans diligence : 1,5 j) ;
+   - basculer la lecture sur Bedrock UE (0,5 j) ;
+   - rendre vraie la mention d'hébergement en France, ou reformuler la page.
+   Honoraires, délais et pilotage sont en B et peuvent servir.
 6. **Avis** : la gestion de cabinet (délais, honoraires, point du matin, pilotage, secret) est presque livrable. La « pré-lecture » qui fait le titre de la page n'est livrable que sur sa base (chronologie, contradictions, bordereau), et elle n'a encore jamais tourné sur une vraie pièce. Plus de la moitié de sa liste reste à construire. Trois mentions de souveraineté sont aujourd'hui fausses : hébergeur français, lecture en Europe, contrat.
 
 ## 1. Le haut de page (HERO) et la description
@@ -37,20 +40,20 @@ la lecture IA des pièces : chiffres à confirmer par A1, sollicité le 06/10 à
 | # | Promesse (texte exact) | Où | État | Preuve | Ce qui manque | Jours → B / B → A | Coût externe |
 |---|---|---|---|---|---|---|---|
 | 1 | « Tamila suit désormais vos délais d'appel » | textes.ts:37 | B | tests b4 05/06/10, rejoué en base réelle sur le banc (§ 8 de NOTES-B4 : délai art. 908 + 915-4 posé, confirmé) | un vrai cabinet | 0 / 2 | — |
-| 2 | « Tamila la rapproche de vos faits dès son arrivée et vous signale ce qu'elle change » | textes.ts:41 | D | — | analyse incrémentale à l'arrivée d'une pièce (diff contre le dossier de faits), alerte *(A1)* | 6 / 3 | coût IA par pièce |
-| 3 | « une chronologie dont chaque fait renvoie à sa pièce » | textes.ts:41 | C | lecteur `tamila.chronologie` (A1), porte b4_15 + test 24, écran 7ec04ec (recette exemple 181/181) | jamais tourné sur une vraie pièce (pas de dossier au coffre sur la recette) | 2 / 3 | Scaleway KM, IA |
-| 4 | « des contradictions relevées entre pièces » | textes.ts:41 | C | type `tamila.contradictions` (A1), même chaîne | idem | 1 / 2 | IA |
-| 5 | « un bordereau rapproché de vos conclusions » | textes.ts:41 | C | type `tamila.bordereau` (numérotation) | le rapprochement avec les conclusions (pièces invoquées ↔ bordereau) *(A1)* | 3 / 2 | IA |
+| 2 | « Tamila la rapproche de vos faits dès son arrivée et vous signale ce qu'elle change » | textes.ts:41 | D | — | analyse incrémentale à l'arrivée d'une pièce (diff contre le dossier de faits), alerte *(A1)* | 3 / 1,5 | coût IA par pièce |
+| 3 | « une chronologie dont chaque fait renvoie à sa pièce » | textes.ts:41 | C | lecteur `tamila.chronologie` (A1), porte b4_15 + test 24, écran 7ec04ec (recette exemple 181/181) | jamais tourné sur une vraie pièce (pas de dossier au coffre sur la recette) | 1 / 1,5 | Scaleway KM, IA |
+| 4 | « des contradictions relevées entre pièces » | textes.ts:41 | C | type `tamila.contradictions` (A1), même chaîne | idem | (compté en 3) | IA |
+| 5 | « un bordereau rapproché de vos conclusions » | textes.ts:41 | C | type `tamila.bordereau` (numérotation) | le rapprochement avec les conclusions (pièces invoquées ↔ bordereau) *(A1)* | 1,5 / 0,5 | IA |
 | 6 | « Tamila lit toutes les pièces d'un dossier et rend la chronologie, les contradictions et le bordereau contrôlé, chaque fait renvoyé à sa page » | page.tsx:79 | C | idem 3-5 | plafond 200 pièces / 3 000 pages, pas éprouvé sur un vrai dossier | (compté en 3-5) | IA |
-| 7 | Illustration : conclusions annotées en marge, « un passage conforme au bail, un passage contredit par un constat » | ApercuDossier.tsx:130 | D | — | lecture des conclusions du cabinet face au dossier de faits, rendu en marge *(A1 + B4)* | 5 / 2 | IA |
+| 7 | Illustration : conclusions annotées en marge, « un passage conforme au bail, un passage contredit par un constat » | ApercuDossier.tsx:130 | D | — | lecture des conclusions du cabinet face au dossier de faits, rendu en marge *(A1 + B4)* | 3 / 1,5 | IA |
 | 8 | Illustration : « Notification : pièce adverse n° 23 reçue aujourd'hui à 10 h 25 » | Illustrations.tsx:63 | C | avis par courriel b4_10 (test 19, recette 181/181) | notification à l'arrivée d'une pièce adverse (pas seulement d'un avis RPVA) | 1 / 1 | — |
 
 ## 2. Les pièces lues et les fonctionnalités
 
 | # | Promesse | Où | État | Preuve | Ce qui manque | Jours → B / B → A | Coût externe |
 |---|---|---|---|---|---|---|---|
-| 9 | « Chaque pièce est lue, même manuscrite » | textes.ts:47-48 | C/T | lecteur PDF texte (A1) | OCR des scans et de l'écriture manuscrite, éprouvé *(A1)* | 3 / 2 | OCR (Mistral) |
-| 10 | Familles lues : Conclusions, Bordereaux, Pièces adverses, Expertises, Pré-rapports, Constats, Courriels, Avis RPVA, Scans | textes.ts:50 | C | avis RPVA : CHAMPS-LECTURE + passerelle b4_08 (test 17) ; courriels : b4_10 | lecture éprouvée de chaque famille sur de vraies pièces *(A1)* | 2 / 3 | OCR |
+| 9 | « Chaque pièce est lue, même manuscrite » | textes.ts:47-48 | B | lecture visuelle par le modèle, y compris une pièce chiffrée déchiffrée en mémoire (A1) ; Mistral OCR en option (T, clé non posée) | qualité sur le manuscrit non mesurée *(A1)* | 0 / 1 | OCR (Mistral) |
+| 10 | Familles lues : Conclusions, Bordereaux, Pièces adverses, Expertises, Pré-rapports, Constats, Courriels, Avis RPVA, Scans | textes.ts:50 | B | avis RPVA : CHAMPS-LECTURE + passerelle b4_08 (test 17) ; courriels : b4_10 | lecture éprouvée de chaque famille sur de vraies pièces *(A1)* | 0 / 1 | OCR |
 | 11 | « Tamila reconstitue les faits à partir de chaque pièce, même scannée, et renvoie chacun d'eux à la page qui le fonde » | textes.ts:57 | C | = 3 | = 3 + 9 | (compté) | — |
 | 12 | Carte « Pièces adverses du jour » | textes.ts:59 | D | — | = 2 | (compté en 2) | — |
 | 13 | Carte « Chronologie sourcée » | textes.ts:60 | C | = 3 | = 3 | (compté) | — |
@@ -66,7 +69,7 @@ la lecture IA des pièces : chiffres à confirmer par A1, sollicité le 06/10 à
 | 18 | Carte « Forfaits dépassés : le temps passé est rapporté à la convention d'honoraires » | textes.ts:73-74 | B | b4_06 + b4_12, tests 15 et 21, carte Honoraires (jauge), recette | un vrai cabinet | 0 / 1 | — |
 | 19 | Carte « Sans diligence : aucun acte depuis trente jours » | textes.ts:85-86 | C | pilotage « Sans diligence » (0c0714d), seuil codé à **45** jours | aligner sur 30 jours ou rendre réglable | 0,5 / 1 | — |
 | 20 | Carte « Délais de procédure : lus dans les avis RPVA et classés du plus proche au plus lointain » | textes.ts:97-98 | C | classement B ; lecture de l'avis : passerelle b4_08 + lecteur (A1), saisie et avis par courriel B | lecture d'un vrai avis chiffré au coffre jamais faite | 1 / 2 | Scaleway KM |
-| 21 | Carte « Ce que le cabinet attend : des pièces du client, des pré-rapports de l'expert et des pièces citées par le confrère » | textes.ts:109-110 | C | expert : b4_16 + test 25, pilotage ; client : convention, pièce d'identité | demandes de pièces au client (liste, relance) ; pièces citées par le confrère (lecture de ses conclusions, *A1*) | 4 / 2 | IA |
+| 21 | Carte « Ce que le cabinet attend : des pièces du client, des pré-rapports de l'expert et des pièces citées par le confrère » | textes.ts:109-110 | C | expert : b4_16 + test 25, pilotage ; client : convention, pièce d'identité | demandes de pièces au client (liste, relance) ; pièces citées par le confrère (lecture de ses conclusions, *A1*) | 2,5 / 1,5 | IA |
 
 ## 4. Les outils du cabinet (CONNEXIONS)
 
@@ -85,7 +88,7 @@ la lecture IA des pièces : chiffres à confirmer par A1, sollicité le 06/10 à
 |---|---|---|---|---|---|---|---|
 | 28 | « Tamila les chiffre sur votre poste » | textes.ts:136 | B | = 16 | — | 0 / 1 | — |
 | 29 | « les conserve dans l'Union européenne » | textes.ts:136 | T | — | région du projet Supabase à confirmer, ou migration | 0 / 0 | hébergeur |
-| 30 | « et les lit en Europe, sans rien en conserver » | textes.ts:136 | T | lecteur sur l'API Anthropic directe (NOTES-COORDINATEUR) | modèle servi en UE (Bedrock eu-west-3 ou équivalent), sans rétention | 2 / 1 | compte AWS Bedrock UE |
+| 30 | « et les lit en Europe, sans rien en conserver » | textes.ts:136 | T | **faux aujourd'hui** : API Anthropic directe, ni hébergement UE garanti ni « zero data retention » signé (A1) | le lecteur sait déjà passer par Bedrock UE (eu-central-1) : retirer la clé Anthropic, poser les identifiants AWS, vérifier (A1) | 0,5 / 0,5 | compte AWS Bedrock UE |
 | 31 | « Chacun de nos engagements figure dans le contrat que vous signez » | textes.ts:136 | D/T | — | le contrat et ses clauses | 0 / 0 | avocat rédacteur |
 | 32 | Badge « Français, hébergé dans l'UE » | textes.ts:137 | T | = 29 | = 29 | (compté) | — |
 | 33 | « Le contrat précise les dossiers que Tamila lit, le lieu où les pièces sont conservées et la date de leur effacement » | textes.ts:138 | D/T | — | = 31 | (compté) | avocat |
@@ -109,18 +112,18 @@ la lecture IA des pièces : chiffres à confirmer par A1, sollicité le 06/10 à
 | 46 | Pré-lecture, Contentieux : « Dossier de faits daté et sourcé » | textes.ts:171 | C | = 3 | = 3 | (compté) | — |
 | 47 | « Contradictions entre pièces » | textes.ts:171 | C | = 4 | = 4 | (compté) | — |
 | 48 | « Bordereau contrôlé (art. 768) » | textes.ts:171 | C | = 5 | = 5 | (compté) | — |
-| 49 | « Dispositif contre motifs (art. 954) » | textes.ts:171 | D | — | nouveau type *(A1)* + écran | 4 / 2 | IA |
-| 50 | « Prétentions nouvelles et concentration en appel » | textes.ts:171 | D | — | nouveau type (art. 564, 910-4 CPC) *(A1)* + écran | 4 / 2 | IA |
-| 51 | « Pièces citées jamais communiquées, sommation prête » | textes.ts:171 | D | — | nouveau type + modèle de sommation *(A1 + B4)* | 4 / 2 | IA |
-| 52 | « Dires à l'expert préparés sur le pré-rapport » | textes.ts:171-172 | D | dates de l'expertise en B (b4_16) | rédaction des dires à partir du pré-rapport *(A1)* | 4 / 2 | IA |
-| 53 | « Trous de la chronologie et faits contredits » | textes.ts:171 | C | contradictions = 4 | les trous (périodes sans pièce) *(A1)* | 1 / 1 | — |
-| 54 | « Index des personnes et faits classés par moyen » | textes.ts:171 | D | — | nouveau type *(A1)* + écran | 3 / 1 | IA |
-| 55 | « Questions posées au dossier » | textes.ts:171-172 | D | — | questions-réponses sourcées sur le dossier *(A1)* + écran | 4 / 2 | IA |
-| 56 | « Premier jet de l'exposé des faits » | textes.ts:171-172 | D | — | nouveau type, export Word *(A1)* | 2 / 1 | IA |
-| 57 | « Dossier de plaidoirie et renvois cliquables » | textes.ts:171 | D | citations à l'écran (pièce, page, lignes), non cliquables vers la page | visionneuse de la pièce déchiffrée, ouverte à la page citée ; dossier de plaidoirie exporté | 4 / 1 | — |
+| 49 | « Dispositif contre motifs (art. 954) » | textes.ts:171 | D | — | nouveau type *(A1)* + écran | 2 / 1,5 | IA |
+| 50 | « Prétentions nouvelles et concentration en appel » | textes.ts:171 | D | — | nouveau type (art. 564, 910-4 CPC) *(A1)* + écran | 2,5 / 1,5 | IA |
+| 51 | « Pièces citées jamais communiquées, sommation prête » | textes.ts:171 | D | — | nouveau type + modèle de sommation *(A1 + B4)* | 2,5 / 1 | IA |
+| 52 | « Dires à l'expert préparés sur le pré-rapport » | textes.ts:171-172 | D | dates de l'expertise en B (b4_16) | rédaction des dires à partir du pré-rapport *(A1)* | 2,5 / 1,5 | IA |
+| 53 | « Trous de la chronologie et faits contredits » | textes.ts:171 | C | contradictions = 4 | les trous (périodes sans pièce) *(A1)* | 1 / 0,5 | — |
+| 54 | « Index des personnes et faits classés par moyen » | textes.ts:171 | D | — | nouveau type *(A1)* + écran | 2 / 1,5 | IA |
+| 55 | « Questions posées au dossier » | textes.ts:171-172 | D | — | questions-réponses sourcées sur le dossier *(A1)* + écran | 4 / 1,5 | IA |
+| 56 | « Premier jet de l'exposé des faits » | textes.ts:171-172 | D | — | nouveau type, export Word *(A1)* | 1,5 / 1 | IA |
+| 57 | « Dossier de plaidoirie et renvois cliquables » | textes.ts:171 | D | citations à l'écran (pièce, page, lignes), non cliquables vers la page | visionneuse de la pièce déchiffrée, ouverte à la page citée ; dossier de plaidoirie exporté | 3,5 / 1 | — |
 | 58 | « Pièces adverses du jour » ; « Pièces scannées et manuscrites » | textes.ts:171 | D / C | = 2, = 9 | = 2, = 9 | (compté) | — |
 | 59 | « Export Word et PDF » | textes.ts:171-172 | B | export des lectures (7ec04ec), factures (99d0467) ; recette | export d'un vrai résultat | 0 / 0,5 | — |
-| 60 | Dommage corporel : « Chronologie des soins », « Interruptions de soins repérées », « Nomenclature Dintilhac pré-remplie », « Écarts entre rapports d'expertise », « Source de chaque poste de préjudice », « Questions posées au dossier médical », « Pièces médicales scannées » | textes.ts:172 | D (chronologie : C) | — | cinq types propres au corporel *(A1)*, écran Dintilhac ; **hébergement HDS** pour les pièces médicales | 10 / 5 | **hébergeur HDS**, OCR |
+| 60 | Dommage corporel : « Chronologie des soins », « Interruptions de soins repérées », « Nomenclature Dintilhac pré-remplie », « Écarts entre rapports d'expertise », « Source de chaque poste de préjudice », « Questions posées au dossier médical », « Pièces médicales scannées » | textes.ts:172 | D (chronologie : C) | — | cinq types propres au corporel *(A1)*, écran Dintilhac ; **hébergement HDS** pour les pièces médicales | 9 / 5 | **hébergeur HDS**, OCR |
 | 61 | « Effacement à la clôture » (formule corporel) | textes.ts:172 | C | = 41 | = 41 | (compté) | — |
 | 62 | Cabinet : « Point du matin à 7 h », « Délais d'appel lus dans l'avis RPVA », « Pièces attendues du client et de l'expert » | textes.ts:183-184 | C | = 17, 20, 21 | = 17, 20, 21 | (compté) | — |
 | 63 | Cabinet : « Forfaits dépassés » / « Conventions et forfaits », « Marge par dossier », « Contentieux (Dossiers) en série comparés », « Dossiers sans diligence », « Charge par avocat », « Temps passé proposé à la saisie », « Lecture seule de vos outils » | textes.ts:183-184 | B (séries : C) | b4_06, b4_12 (tests 15, 21), pilotage 0c0714d, recette 162-188 | « comparés » : les séries sont regroupées, pas comparées (issues, durées, montants) | 2 / 3 | — |
@@ -131,7 +134,7 @@ le champ matière (B). En revanche, les délais calculés ne couvrent que la pro
 
 ## Totaux (somme des lignes, arrondis)
 
-- **→ B : ≈ 100 j.** Lecture IA *(A1)* : 62 j (lignes 2, 3-5, 7, 9, 10, 21, 49-56, 60). Gestion et écran : 28 j. Infrastructure : 10 j (lignes 29, 30, 36).
-- **B → A : ≈ 68 j**, dont 37 de lecture IA, 27 de gestion, 4 d'infrastructure, avec un cabinet pilote (ses vraies pièces, ses retours).
+- **→ B : ≈ 74 j.** Lecture IA : 41,5 j (lignes 2, 3-5, 7, 9, 10, 21, 49-57, 60 ; part lecteur d'A1 + écrans B4). Gestion et écran : 24 j. Infrastructure : 8,5 j (lignes 29, 30, 36).
+- **B → A : ≈ 54 j** : 24,5 de lecture IA, 26 de gestion, 3,5 d'infrastructure, avec un cabinet pilote (ses vraies pièces, ses retours).
 - Comptage : somme des colonnes « Jours » ; « (compté) » renvoie à une autre ligne et n'est pas recompté. L'état retenu est la lettre principale (« C/T » compte en C, « D / C » en D).
-- Ces chiffres restent à confirmer par A1 pour toutes les lignes *(A1)*.
+- Part lecteur : chiffres d'A1 (06/10, 20 h 30 Z), repris tels quels ; part écran et porte : B4.
