@@ -665,3 +665,19 @@ des chantiers neufs (tables, écran, lecteur), à proposer au coordinateur en lo
 - Nouveaux genres lorani.chantier.rappel/.depasse ; passage redéfini (corps b5_18 + chantier).
 - Écran : `OrdresService.tsx`, `Reserves.tsx` (après Chantier, avant Assurances). Leçon : `esp-fil` est une frise à
   deux colonnes (point + texte) — pour du texte libre, `lor-liste`.
+
+## b5_20 — comptes rendus de chantier, points suivis jusqu'à la réponse (carnet n° 4, seconde partie) — 06/10/2026
+
+- Socle : `omega/modules/lorani/migrations/b5_20_comptes_rendus.sql`, test `omega/tests/lorani/b5_11_comptes_rendus.sql` (17 assertions).
+- `lorani_comptes_rendus` (numérotés, présents, notes brutes, avancement, brouillon | diffuse ; diffusé = contenu figé
+  par le socle, réécriture refusée 55000 ; journal lorani.cr_diffuse) ; `lorani_points` (question | action | decision
+  | observation ; échéance au registre J-2/J ; réponse saisie → répondu, échéance tenue) ; `public.lorani_cr_contenu`
+  (nouveaux, en suspens avec âge, soldés depuis le CR précédent).
+- « Une question suivie jusqu'à la réponse » : question à un intervenant qui a un courriel → `private.ouvrir_suivi`
+  (destinataire {adresse, nom, professionnel}, nature reponse, clé lorani:point:<id>) = relances par la file des envois ;
+  réponse → `clore_suivi(…, 'repondu', …)`. Si l'ouverture échoue (module lorani absent de modules_envois ?), alerte
+  info « l'échéance interne la suit ». Leçon : un trigger « update of statut » ne voit pas un statut changé par un
+  BEFORE — trigger sans liste de colonnes.
+- `private.lorani_chantier_rappeler` redéfini (corps b5_19 + points en retard).
+- Écran : `ComptesRendus.tsx` + `cr.ts` (lireNotes : ?, !, =, @entreprise, lot NN, avant le JJ/MM ; contenu ; PDF via
+  `rapport.ts` exporté). Exemple Mercière : CR n° 1-2 diffusés, n° 3 en brouillon avec 4 lignes de notes.

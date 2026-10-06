@@ -225,7 +225,7 @@ type PageTexte = { type: "texte"; flux: string };
 type PageImage = { type: "image"; jpeg: Uint8Array; l: number; h: number; legende: string };
 
 /* Les pages de texte du rapport, en A4 (595 × 842 points). */
-class Mise {
+export class Mise {
   pages: PageTexte[] = [];
   private flux = "";
   private y = 0;
@@ -266,7 +266,7 @@ class Mise {
   }
 }
 
-function ecrirePdf(pages: (PageTexte | PageImage)[], titre: string): Uint8Array {
+export function ecrirePdf(pages: (PageTexte | PageImage)[], titre: string): Uint8Array {
   const enc = new TextEncoder();
   const objets: (Uint8Array | string)[] = [];
   const ajouter = (o: Uint8Array | string) => {

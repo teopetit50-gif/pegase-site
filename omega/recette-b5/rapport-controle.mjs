@@ -59,6 +59,21 @@ if (xl) {
   const classeur = execFileSync('unzip', ['-p', chemin, 'xl/workbook.xml']).toString();
   ok(/name="Constats"/.test(classeur) && /name="Pièces"/.test(classeur), 'deux feuilles : Constats, Pièces');
 }
+console.log('— le compte rendu de chantier en PDF (b5_20) : Façade rue Mercière, CR n° 3');
+await s.aller(base + '/espace/lorani?projet=00000000-0000-4000-8000-00000000b004');
+await s.dormir(700);
+await s.evaluer(`(() => { window.__fichiers = []; const orig = URL.createObjectURL; URL.createObjectURL = (b) => { window.__fichiers.push(b); return orig.call(URL, b); }; HTMLAnchorElement.prototype.click = function () { window.__noms = [...(window.__noms || []), this.download]; }; return true; })()`);
+await s.evaluer(`[...document.querySelectorAll('.r-btn')].find(b => b.textContent.trim() === 'PDF')?.click()`);
+await s.dormir(800);
+const crp = await s.evaluer(`(async () => { const b = window.__fichiers.shift(); if (!b) return null; const a = new Uint8Array(await b.arrayBuffer()); let t = ''; for (let i = 0; i < a.length; i += 0x8000) t += String.fromCharCode(...a.subarray(i, i + 0x8000)); return { nom: (window.__noms || []).slice(-1)[0], b64: btoa(t) }; })()`);
+ok(crp && /^cr-25-031-n3\.pdf$/.test(crp.nom), `PDF du CR fabriqué : ${crp?.nom}`);
+if (crp) {
+  const chemin = `${dossier}cr-chantier-exemple.pdf`;
+  writeFileSync(chemin, Buffer.from(crp.b64, 'base64'));
+  const texte = execFileSync('pdftotext', ['-layout', chemin, '-']).toString().replace(/\s+/g, ' ');
+  ok(/Compte rendu de chantier n° 3 — Façade rue Mercière/.test(texte) && /Points en suspens/.test(texte) && /en suspens depuis 21 jours \(CR n° 1\)/.test(texte) && /Présent · Marc Roussel \(Pierres de Bourgogne SARL\)/.test(texte),
+     'pdftotext : titre, présents, points en suspens avec leur âge');
+}
 s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
 s.fermer();
 console.log(echecs ? `\n${echecs} échec(s)` : '\ntout passe');

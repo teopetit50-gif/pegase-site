@@ -475,3 +475,34 @@
 .esp .lor-reserve[data-statut="contestee"] {
   background: #fafafa;
 }
+
+/* ——— les comptes rendus de chantier (b5_20) ——— */
+.esp .lor-cr-bloc {
+  margin-top: 12px;
+}
+.esp .lor-cr-titre {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--r-doux);
+  margin-bottom: 4px;
+}
+.esp .lor-point-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 4px;
+}
+.dlg-panneau .lor-liste,
+.lor-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.dlg-panneau .lor-liste > li {
+  padding: 7px 0;
+  border-top: 1px solid var(--r-filet, #e5e5e5);
+  font-size: 13.5px;
+  overflow-wrap: anywhere;
+}

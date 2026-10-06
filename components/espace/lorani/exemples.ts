@@ -17,7 +17,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { EXEMPLE_CLIENT_ID, EXEMPLE_MOI, CLAIRE, SIEGE, SOFIA, YANIS, aujourdHui, ilYa } from "../exemples/socle";
-import type { Attestation, OrdreService, Reserve, CasRejet, Constat, Controle, Plu, ControlePiece, DateLue, Dossier, Echeance, Etape, Honoraire, Intervenant, Lot, Marche, MembreProjet, Permis, PieceProjet, Projet, Recours, Situation, Temps, Visa } from "./types";
+import type { Attestation, CompteRendu, OrdreService, Point, Reserve, CasRejet, Constat, Controle, Plu, ControlePiece, DateLue, Dossier, Echeance, Etape, Honoraire, Intervenant, Lot, Marche, MembreProjet, Permis, PieceProjet, Projet, Recours, Situation, Temps, Visa } from "./types";
 
 const C = EXEMPLE_CLIENT_ID;
 const j = (n: number) => aujourdHui(n);
@@ -650,6 +650,27 @@ export const RESERVES_EXEMPLE: Reserve[] = [
   reserve({ id: id("f", 3), numero: 3, intitule: "Joint ouvert en pied de façade", localisation: "Façade sud, soubassement", lever_avant: j(-3), statut: "levee", levee_le: j(-4) }),
 ];
 
+/* ——— les comptes rendus de chantier (b5_20) : la façade rue Mercière, trois visites ——— */
+const CR = (n: number) => id("a", 100 + n);
+export const CR_EXEMPLE: CompteRendu[] = [
+  { id: CR(1), projet_id: P_MERCIERE, numero: 1, visite_le: j(-21), presents: [{ nom: "Marc Roussel", organisme: "Pierres de Bourgogne SARL", intervenant: id("2", 8), present: true }, { nom: "Échafaudages Rhône", intervenant: id("2", 9), present: false }],
+    notes: null, avancement: "Façade sud : piochage des enduits terminé, purge des pierres en cours.", prochaine_visite: j(-7), statut: "diffuse", diffuse_le: ilYa(21), contenu: null },
+  { id: CR(2), projet_id: P_MERCIERE, numero: 2, visite_le: j(-7), presents: [{ nom: "Marc Roussel", organisme: "Pierres de Bourgogne SARL", intervenant: id("2", 8), present: true }, { nom: "Échafaudages Rhône", intervenant: id("2", 9), present: true }],
+    notes: null, avancement: "Corniche : 14 pierres remplacées sur 14. Rejointoiement commencé travées 1 à 3.", prochaine_visite: j(0), statut: "diffuse", diffuse_le: ilYa(7), contenu: null },
+  { id: CR(3), projet_id: P_MERCIERE, numero: 3, visite_le: j(0), presents: [{ nom: "Marc Roussel", organisme: "Pierres de Bourgogne SARL", intervenant: id("2", 8), present: true }, { nom: "Échafaudages Rhône", intervenant: id("2", 9), present: true }],
+    notes: "? @Pierres de Bourgogne planning de reprise des appuis de baies avant le " + fr(9).slice(0, 5) + "\n! relancer le bureau de contrôle sur la note de stabilité de l’échafaudage\n= dépose de l’échafaudage côté rue reportée à la fin des joints\nlot 01 ragréage des appuis de baies en cours",
+    avancement: "Rejointoiement travées 1 à 5 ; appuis de baies en reprise.", prochaine_visite: j(7), statut: "brouillon", diffuse_le: null, contenu: null },
+];
+const point = (p: Partial<Point> & Pick<Point, "id" | "nature" | "texte" | "ouvert_au_cr">): Point => ({
+  projet_id: P_MERCIERE, lot_id: null, intervenant_id: null, echeance: null, statut: "ouvert", reponse: null, repondu_le: null, clos_au_cr: null, cree_le: ilYa(21), maj_le: ilYa(21), ...p,
+});
+export const POINTS_EXEMPLE: Point[] = [
+  point({ id: id("a", 201), nature: "question", texte: "Fournir la fiche technique du mortier de chaux teintée", ouvert_au_cr: CR(1), intervenant_id: id("2", 8), lot_id: id("1", 8), echeance: j(-14), statut: "repondu", reponse: "Fiche transmise par courriel, visée le " + fr(-12), repondu_le: j(-12), clos_au_cr: CR(2), maj_le: ilYa(12) }),
+  point({ id: id("a", 202), nature: "question", texte: "Confirmer la date de dépose de l’échafaudage côté cour", ouvert_au_cr: CR(1), intervenant_id: id("2", 9), lot_id: id("1", 9), echeance: j(-5) }),
+  point({ id: id("a", 203), nature: "action", texte: "Transmettre le calepinage révisé de la corniche à l’entreprise", ouvert_au_cr: CR(2), echeance: j(3), cree_le: ilYa(7), maj_le: ilYa(7) }),
+  point({ id: id("a", 204), nature: "decision", texte: "Joints à la chaux teintée, teinte « pierre de Bourgogne » retenue", ouvert_au_cr: CR(2), statut: "clos", cree_le: ilYa(7), maj_le: ilYa(7) }),
+];
+
 export function dossierExemple(): Dossier {
   return {
     projets: PROJETS_EXEMPLE,
@@ -668,6 +689,8 @@ export function dossierExemple(): Dossier {
     plu: PLU_EXEMPLE,
     attestations: ATTESTATIONS_EXEMPLE,
     ordresService: OS_EXEMPLE,
+    comptesRendus: CR_EXEMPLE,
+    points: POINTS_EXEMPLE,
     reserves: RESERVES_EXEMPLE,
     honoraires: HONORAIRES_EXEMPLE,
     temps: TEMPS_EXEMPLE,
