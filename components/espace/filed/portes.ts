@@ -30,7 +30,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { Commande, DocumentFiled, DossierFiled, Facture, Fournisseur, LigneCommande, MotifRefus, NatureDocument } from "../types";
+import type { Commande, DocumentFiled, DossierFiled, Facture, Fournisseur, IbanFournisseur, LigneCommande, MotifRefus, NatureDocument } from "../types";
 
 export class ErreurPorte extends Error {}
 
@@ -181,6 +181,37 @@ export async function chargerFournisseurs(): Promise<Fournisseur[]> {
   const { data, error } = await supabase.from("filed_fournisseurs").select("*").order("nom").limit(500);
   if (error) throw new ErreurPorte(message(error));
   return (data ?? []) as Fournisseur[];
+}
+
+/* La vue « Fournisseurs » : tous les fournisseurs, leurs IBAN, leurs
+   factures (avec la référence du document), et qui a déposé la pièce
+   d'origine de chacun (il ne le confirme pas). */
+export type FactureDuFournisseur = { id: string; numero: string | null; statut: Facture["statut"]; montant_ttc: number | null; devise: string; date_emission: string | null; fournisseur_id: string | null; reference: string | null };
+export type VueFournisseurs = { fournisseurs: Fournisseur[]; ibans: IbanFournisseur[]; factures: FactureDuFournisseur[]; deposants: Record<string, string | null> };
+
+export async function chargerVueFournisseurs(): Promise<VueFournisseurs> {
+  const supabase = createClient();
+  const [fo, ib, fa] = await Promise.all([
+    supabase.from("filed_fournisseurs").select("*").order("nom").limit(1000),
+    supabase.from("filed_fournisseurs_ibans").select("id, fournisseur_id, iban_masque, statut, propose_le").limit(2000),
+    supabase.from("filed_factures").select("id, numero, statut, montant_ttc, devise, date_emission, fournisseur_id, document_id, version").not("fournisseur_id", "is", null).order("date_emission", { ascending: false }).limit(1000),
+  ]);
+  if (fo.error) throw new ErreurPorte(message(fo.error));
+  const fournisseurs = (fo.data ?? []) as Fournisseur[];
+  const lignes = (fa.data ?? []) as (Omit<FactureDuFournisseur, "reference"> & { document_id: string; version: number })[];
+  /* une facture par document : sa dernière version */
+  const parDocument = new Map<string, (typeof lignes)[number]>();
+  for (const l of lignes) if ((parDocument.get(l.document_id)?.version ?? -1) < l.version) parDocument.set(l.document_id, l);
+  const origines = fournisseurs.map((f) => f.document_origine).filter(Boolean) as string[];
+  const docIds = Array.from(new Set([...parDocument.keys(), ...origines]));
+  const docs = docIds.length ? await supabase.from("filed_documents").select("id, reference, depose_par").in("id", docIds) : null;
+  const doc = new Map(((docs?.data ?? []) as { id: string; reference: string; depose_par: string | null }[]).map((d) => [d.id, d]));
+  return {
+    fournisseurs,
+    ibans: (ib.data ?? []) as IbanFournisseur[],
+    factures: Array.from(parDocument.values()).map((f) => ({ id: f.id, numero: f.numero, statut: f.statut, montant_ttc: f.montant_ttc, devise: f.devise ?? "EUR", date_emission: f.date_emission, fournisseur_id: f.fournisseur_id, reference: doc.get(f.document_id)?.reference ?? null })),
+    deposants: Object.fromEntries(fournisseurs.map((f) => [f.id, f.document_origine ? (doc.get(f.document_origine)?.depose_par ?? null) : null])),
+  };
 }
 
 async function rpc<T = unknown>(nom: string, args: Record<string, unknown>): Promise<T> {
