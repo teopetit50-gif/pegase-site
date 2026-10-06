@@ -1,6 +1,6 @@
 # Session B3 — TIROMA (cabinets dentaires : praticiens, fauteuils, horaires, rendez-vous, point du matin)
 
-Branche `worker-b3`. Coordinateur : session `session_01B4JNQXyT69GytdvE9SjAnE`.
+Branche `worker-b3`. Coordinateur : session `session_01BCGFdpRKBvXKjouC75sYBg` (depuis le 06/10, 01 h 10 Z ; avant : `session_01B4JNQXyT69GytdvE9SjAnE`).
 Dernière mise à jour : 06/10/2026, nuit (douze fichiers verts, branche fusionnée dans main d298f07, règle santé tranchée).
 
 ## Les deux jauges
@@ -134,3 +134,4 @@ d'écriture directe hors RLS.
 - 06/10 — b3_07 à b3_09 posés ; écran fusionné (d572973) ; lot 2 joué deux fois (retours : clé `jeu` de terminer_lecture, destinataire par `adresse`, somme des travaux, colonne `etat`, booléen mutuelle, périmètre du collaborateur, verrou consentement avant santé, patient gêné) ; b3_10 et le troisième passage demandés (5220b21).
 - 06/10, 00 h 25–00 h 37 Z — b3_10 refusé deux fois (« entier » n'est pas un type de variable ; « nombre ») ; troisième passage : 05/06/07/11 verts, 08 révèle l'item sans gravité ; quatrième passage : **28/28, 11 fichiers verts**. Clé publique de la recette reçue pour la relecture réelle (faite). Test 12 poussé (a4d1212) : 18/18 au premier passage, 12 fichiers verts.
 - 06/10, 00 h 51–00 h 55 Z — omegaai.fr sert /espace/tiroma (quota Vercel revenu) ; « terminé » envoyé (87b914e), fusionné dans main (d298f07) ; règle santé tranchée (hds / sante_autorise / SANTE_FOURNISSEUR, lot A2) ; vigilance `receptions` + hébergement HDS consignée.
+- 06/10, 01 h 10 Z — passation du coordinateur à la session `session_01BCGFdpRKBvXKjouC75sYBg`. Lot socle 19ab (santé des envois) posé sur la recette : test 08 toujours vert 28/28. e7fe453 fusionné dans main. Rien n'est attendu de B3.
