@@ -163,6 +163,20 @@ export type Passage = {
   source_ref: string | null;
   version: number;
   confirmations?: EvenementConfirmation[];
+  envoi?: EnvoiPassage | null;
+};
+
+/* La dernière demande J-2 partie pour un passage (public.envois, b6_07). */
+export type EnvoiPassage = {
+  id: string;
+  canal: string;
+  mode: "essai" | "reel";
+  statut: string;
+  verrou: string | null;
+  cree_le: string;
+  envoye_le: string | null;
+  remise: string | null;
+  remise_le: string | null;
 };
 
 export type Dependance = {

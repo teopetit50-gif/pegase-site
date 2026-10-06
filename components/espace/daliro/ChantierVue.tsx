@@ -24,7 +24,7 @@ import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
 import { Avis, Def, Pastille } from "../ui";
 import { dateCourte, dateHeure, montant, nombreFr, pourcent } from "../format";
-import { ACCEPTATIONS, CONFIRMATIONS, CONTROLES_LIGNE, EXECUTIONS, GRAVITES, ROLES_TIERS, STATUTS_AVENANT, STATUTS_CHANTIER, UNITES, VIGILANCES, familleControle, libelleStatutFacture, libelleUnite } from "./etats";
+import { ACCEPTATIONS, CONFIRMATIONS, CONTROLES_LIGNE, EXECUTIONS, GRAVITES, ROLES_TIERS, STATUTS_AVENANT, STATUTS_CHANTIER, UNITES, VIGILANCES, familleControle, libelleEnvoi, libelleStatutFacture, libelleUnite } from "./etats";
 import { FACTURES_CANDIDATES_EXEMPLE } from "./exemples";
 import { abandonnerAvenant, accepterEcart, changerStatutChantier, chargerFacturesCandidates, chiffrerLigneAvenant, confirmerDependance, detacherFacture, ecrireLigne, ecrireMarche, ouvrirAvenant, poserPrix, proposerDependances, proposerRemplacants, rattacherFacture, repondreConfirmation, retirerLigneAvenant, rouvrirMarche, signerAvenant, soumettreAvenant, validerPrix, verifierMarche } from "./portes";
 import type { Avenant, FactureCandidate, LigneAvenant, LigneMarche, Marche, Passage, Prix, Remplacant, Tableau } from "./types";
@@ -459,7 +459,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
                       <td>{p.tache ?? "—"}{p.statut === "fait" ? <span className="esp-kpi-sous"> · fait</span> : null}</td>
                       <td>{p.lot_code ? <span className="esp-mono">{p.lot_code}</span> : <span className="esp-obligatoire">aucun</span>}</td>
                       <td>{p.intervenant_nom ?? p.intervenant_lu ?? "—"}{p.intervenant_type === "inconnu" ? <div><Pastille teinte="ambre" contour>À ranger</Pastille></div> : p.rapprochement === "ressemblance" ? <div className="esp-kpi-sous">lu « {p.intervenant_lu} »</div> : null}</td>
-                      <td>{p.intervenant_type === "tiers" ? <><Pastille teinte={k.teinte}>{k.libelle}</Pastille>{dernier ? <div className="esp-kpi-sous">{dateHeure(dernier.survenu_le)}{dernier.canal ? ` · ${dernier.canal}` : ""}{typeof dernier.detail.texte === "string" ? ` · « ${dernier.detail.texte} »` : ""}</div> : null}</> : <span className="esp-kpi-sous">équipe interne</span>}</td>
+                      <td>{p.intervenant_type === "tiers" ? <><Pastille teinte={k.teinte}>{k.libelle}</Pastille>{dernier ? <div className="esp-kpi-sous">{dateHeure(dernier.survenu_le)}{dernier.canal ? ` · ${dernier.canal}` : ""}{typeof dernier.detail.texte === "string" ? ` · « ${dernier.detail.texte} »` : ""}</div> : null}{p.envoi ? <div className="esp-kpi-sous">{libelleEnvoi(p.envoi, dateHeure)}</div> : null}</> : <span className="esp-kpi-sous">équipe interne</span>}</td>
                       <td>
                         {p.intervenant_type === "tiers" && p.statut === "prevu" && p.confirmation !== "non_demandee" && p.confirmation !== "confirmee" ? <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "reponse", passage: p })}>Noter la réponse</button> : null}
                         {p.intervenant_type === "tiers" && p.statut === "prevu" && (p.confirmation === "declinee" || p.confirmation === "sans_reponse") ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "remplacants", passage: p })}>Remplaçants</button></div> : null}
