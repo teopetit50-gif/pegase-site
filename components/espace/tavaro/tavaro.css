@@ -129,3 +129,29 @@
 .esp .esp-form .esp-section-titre {
   margin-top: 8px;
 }
+
+/* Les avis de contravention (b2_03) : une liste de blocs, l'échéance en pastille. */
+.esp .tav-avis-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.esp .tav-avis {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--r-filet);
+  border-radius: 12px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.esp .tav-avis .esp-actions {
+  margin-top: 6px;
+}
+.esp .tav-avis-titre {
+  margin: 2px 0 0;
+  font-size: 14px;
+  font-weight: 500;
+}
