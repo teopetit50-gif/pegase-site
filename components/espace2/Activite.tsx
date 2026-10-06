@@ -35,7 +35,7 @@ export default function Activite() {
     const l: Ligne[] = [];
     for (const d of donnees.docs) {
       const e = etatDocument(d.etat);
-      l.push({ id: `doc-${d.id}`, quand: d.recu_le, quoi: "Document reçu", detail: `${d.reference}${d.fournisseur ? ` · ${d.fournisseur}` : ""}`, module: "filed", par: d.fournisseur ?? "Expéditeur inconnu", etat: { libelle: e.libelle, teinte: teinte(e.teinte) }, lien: `/espace/filed?objet=document:${encodeURIComponent(d.id)}` });
+      l.push({ id: `doc-${d.id}`, quand: d.recu_le, quoi: "Document reçu", detail: `${d.reference}${d.fournisseur ? ` · ${d.fournisseur}` : ""}`, module: "filed", par: d.fournisseur ?? "Expéditeur inconnu", etat: { libelle: e.libelle, teinte: teinte(e.teinte) }, lien: `/espace2/filed?objet=document:${encodeURIComponent(d.id)}` });
     }
     for (const d of donnees.demandes) {
       const s = STATUTS[d.statut] ?? { libelle: d.statut, teinte: "gris" as const };
@@ -51,6 +51,7 @@ export default function Activite() {
 
   return (
     <div className="v2-page v2-arrivee">
+      <h1 className="v2-sr">Activité</h1>
       <div className="v2-tete">
         <div>
           <p>Ce qui s&apos;est passé dans l&apos;organisation, du plus récent au plus ancien.</p>

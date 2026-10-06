@@ -29,6 +29,7 @@ export default function Reglages() {
 
   return (
     <div className="v2-page v2-arrivee">
+      <h1 className="v2-sr">Réglages</h1>
       <div className="v2-avec-cote">
         <nav className="v2-cote" aria-label="Rubriques des réglages">
           {RUBRIQUES.map((r) => (
@@ -106,12 +107,12 @@ export default function Reglages() {
                 Compte et équipe
               </h2>
               <p className="v2-gris" style={{ margin: 0 }}>
-                Les personnes, les rôles et les règles de validation se règlent pour l&apos;instant dans l&apos;espace client actuel.
+                Les délégations et les règles de validation se règlent depuis la file « À valider ».
               </p>
             </div>
             <div className="v2-carte-pied">
-              <span>Écran actuel</span>
-              <Link href="/espace/validations" className="v2-btn v2-btn--petit">
+              <span>À valider</span>
+              <Link href="/espace2/validations" className="v2-btn v2-btn--petit">
                 Ouvrir
               </Link>
             </div>

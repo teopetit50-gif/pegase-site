@@ -67,7 +67,7 @@ export default function Accueil() {
       if (compte.semaine.length) return { texte: `${compte.semaine.length} à payer cette semaine`, teinte: "ambre" };
       return { texte: "Rien en retard", teinte: "vert" };
     }
-    return { texte: "Nouveau design à venir", teinte: "gris" };
+    return { texte: source === "reelle" ? "Base réelle" : "Données d'exemple", teinte: "gris" };
   };
 
   const copier = (chemin: string) =>
@@ -78,6 +78,7 @@ export default function Accueil() {
 
   return (
     <div className="v2-page v2-arrivee">
+      <h1 className="v2-sr">Vue d&apos;ensemble</h1>
       <div className="v2-outils">
         <label className="v2-champ">
           <Search width={16} height={16} aria-hidden="true" />
@@ -312,7 +313,7 @@ export default function Accueil() {
                             return (
                               <tr key={d.id}>
                                 <td data-etiquette="Référence">
-                                  <Link href={`/espace/filed?objet=document:${encodeURIComponent(d.id)}`} className="v2-mono">
+                                  <Link href={`/espace2/filed?objet=document:${encodeURIComponent(d.id)}`} className="v2-mono">
                                     {d.reference}
                                   </Link>
                                 </td>

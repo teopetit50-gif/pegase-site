@@ -22,7 +22,8 @@ html:has(.v2) {
 }
 
 .v2,
-.v2-jetons {
+.v2-jetons,
+html.v2-actif .dlg-panneau {
   /* ——— jetons Geist, thème clair ——— */
   --v2-bg-100: #fff;
   --v2-bg-200: #fafafa;
@@ -101,7 +102,7 @@ html:has(.v2) {
 
 /* ——— thème sombre : le choix « sombre », ou « système » sur un poste sombre ——— */
 @media (prefers-color-scheme: dark) {
-  html:not([data-v2-theme="light"]) :is(.v2, .v2-jetons) {
+  html:not([data-v2-theme="light"]) :is(.v2, .v2-jetons, .dlg-panneau) {
     --v2-bg-100: #0a0a0a;
     --v2-bg-200: #000;
     --v2-gray-100: #1a1a1a;
@@ -154,7 +155,7 @@ html:has(.v2) {
     color-scheme: dark;
   }
 }
-html[data-v2-theme="dark"] :is(.v2, .v2-jetons) {
+html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   --v2-bg-100: #0a0a0a;
   --v2-bg-200: #000;
   --v2-gray-100: #1a1a1a;

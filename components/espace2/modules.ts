@@ -42,7 +42,7 @@ const m = (cle: string, nom: string, libelle: string, description: string, icone
   libelle,
   description,
   icone,
-  ancien: `/espace/${cle}`,
+  ancien: `/espace/${cle}?ancien=1`,
   pret,
   onglets: onglets ?? [{ libelle: "Vue d'ensemble", href: `${RACINE}/${cle}`, exact: true }],
 });
@@ -77,7 +77,7 @@ export function porteeDe(chemin: string): ModuleV2 | null {
   return moduleDe(seg) ?? null;
 }
 
-/* le titre de la page, au centre de la barre du haut (c'est le h1 de la page) */
+/* le titre de la page, au centre de la barre du haut */
 export function titreDe(chemin: string): string {
   const portee = porteeDe(chemin);
   /* un module sans sous-pages porte son nom ; avec, le nom de la sous-page */

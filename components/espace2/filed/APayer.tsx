@@ -154,6 +154,7 @@ export default function APayer() {
 
   return (
     <div className="v2-page v2-arrivee">
+      <h1 className="v2-sr">À payer</h1>
       <div className="v2-tete">
         <div>
           <p>Les factures validées, par échéance : le retard d&apos;abord, le reste à payer, et ce qui empêcherait de payer.</p>
@@ -301,7 +302,7 @@ export default function APayer() {
                           const ep = etats[l.id];
                           const jours = l.echeance_lue ? Math.round((jourDe(l.echeance_lue) - aujourdhui) / JOUR) : null;
                           const peutPayer = l.nature !== "avoir" && ep?.etat !== "payee";
-                          const lien = `/espace/filed?objet=facture:${encodeURIComponent(l.id)}`;
+                          const lien = `/espace2/filed?objet=facture:${encodeURIComponent(l.id)}`;
                           return (
                             <tr key={l.id}>
                               <td data-etiquette="Échéance">

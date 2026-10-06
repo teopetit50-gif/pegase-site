@@ -32,7 +32,7 @@ export default function Palette({ ouverte, changer }: { ouverte: boolean; change
         () => toast("Lien copié", "vert"),
         () => toast("Impossible de copier le lien. Réessayez.", "rouge"),
       );
-    } else if (c === "ancien") router.push("/espace/validations");
+    } else if (c === "ancien") router.push("/espace/validations?ancien=1");
   };
 
   return (

@@ -41,6 +41,9 @@ function initiales(u: Utilisateur): string {
   return i || u.email.charAt(0).toUpperCase();
 }
 
+/* un lien vers /espace/… mène à /espace2/… ; « ?ancien=1 » le garde vers l'écran actuel */
+export const versV2 = (href: string) => (/^\/espace(\/|\?|$)/.test(href) && !href.includes("ancien=1") ? href.replace(/^\/espace/, RACINE) : null);
+
 const coche = (oui: boolean) => (oui ? <Check width={16} height={16} aria-label="choisi" /> : null);
 const I = { width: 16, height: 16, strokeWidth: 1.6, "aria-hidden": true } as const;
 
@@ -50,13 +53,48 @@ export default function Coquille({ utilisateur, police, children }: { utilisateu
      variable de la police Geist doit vivre sur <html> pendant la visite */
   useEffect(() => {
     const html = document.documentElement;
-    html.classList.add(police);
-    return () => html.classList.remove(police);
+    html.classList.add(police, "v2-actif");
+    return () => html.classList.remove(police, "v2-actif");
   }, [police]);
+
+  /* Les écrans repris de /espace écrivent leurs liens en dur vers /espace/… :
+     dans le nouvel espace, ils mènent à /espace2/…. Les attributs href sont
+     réécrits (survol, copie, lecteur d'écran), et un clic est rattrapé
+     avant le routeur. Les liens hors de l'espace client ne sont pas touchés. */
+  useEffect(() => {
+    const reecrire = (racine: ParentNode) => {
+      racine.querySelectorAll<HTMLAnchorElement>('a[href^="/espace"], a[data-v2-cible]').forEach((a) => {
+        const href = a.getAttribute("href") ?? "";
+        const v = versV2(href);
+        if (v) {
+          a.dataset.v2Cible = v;
+          a.setAttribute("href", v);
+        } else if (!href.startsWith(RACINE)) delete a.dataset.v2Cible;
+      });
+    };
+    reecrire(document);
+    const obs = new MutationObserver(() => reecrire(document));
+    obs.observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["href"] });
+    const clic = (e: MouseEvent) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const a = (e.target as Element | null)?.closest?.("a[href]") as HTMLAnchorElement | null;
+      if (!a || a.target === "_blank") return;
+      /* l'attribut a pu être réécrit déjà : le composant Link, lui, garde son href d'origine */
+      const v = a.dataset.v2Cible ?? versV2(a.getAttribute("href") ?? "");
+      if (!v) return;
+      e.preventDefault();
+      router.push(v);
+    };
+    window.addEventListener("click", clic, true);
+    return () => {
+      obs.disconnect();
+      window.removeEventListener("click", clic, true);
+    };
+  }, [router]);
   return (
     <div className="v2" data-lenis-prevent="">
       <SourceFournisseur connecte={!!utilisateur}>
-        <RouterProvider navigate={router.push}>
+        <RouterProvider navigate={(href, options) => router.push(versV2(href) ?? href, options)}>
           <FournisseurToasts>
             <Cadre utilisateur={utilisateur}>{children}</Cadre>
           </FournisseurToasts>
@@ -156,7 +194,8 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
                 </SectionMenu>
               </MenuDeroulant>
             </div>
-            <h1 className="v2-haut-titre">{titreDe(chemin)}</h1>
+            {/* le titre visible ; chaque page porte son propre h1 (masqué), pour garder le titre exact de l'écran */}
+            <p className="v2-haut-titre">{titreDe(chemin)}</p>
             <div className="v2-haut-droite">
               <MenuDeroulant
                 etiquette="Nouveau"
@@ -174,7 +213,7 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
                 <ItemMenu id="paiement" href={`${RACINE}/filed/a-payer`} icone={<Banknote {...I} />}>
                   Noter un paiement
                 </ItemMenu>
-                <ItemMenu id="document" href="/espace/filed" icone={<FileText {...I} />}>
+                <ItemMenu id="document" href={`${RACINE}/filed`} icone={<FileText {...I} />}>
                   Déposer un document
                 </ItemMenu>
                 <ItemMenu id="valider" href={`${RACINE}/validations`} icone={<CheckCheck {...I} />}>
@@ -363,7 +402,7 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
           </SectionMenu>
           <SeparateurMenu />
           <SectionMenu>
-            <ItemMenu id="ancien" href="/espace/validations" icone={<ExternalLink {...I} />}>
+            <ItemMenu id="ancien" href="/espace/validations?ancien=1" icone={<ExternalLink {...I} />}>
               Ancien espace client
             </ItemMenu>
             <ItemMenu id="site" href="/" icone={<ExternalLink {...I} />}>

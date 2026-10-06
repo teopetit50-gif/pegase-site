@@ -1,0 +1,670 @@
+/* ══════════════════════════════════════════════════════════════════════
+   L'habillage des écrans actuels dans le nouvel espace (06/10/2026, C1)
+
+   Phase 2 : les écrans de /espace (components/espace/**) sont repris tels
+   quels — mêmes composants, mêmes portes, même logique — et rendus dans la
+   coquille du nouvel espace, sous `.v2 .esp`. Cette feuille ne fait que
+   changer leur habit : elle rebranche les jetons de l'ancien monde
+   (--r-*, --esp-*) sur ceux de Geist (--v2-*), ce qui donne aussi le thème
+   sombre, puis reprend les briques (cartes, boutons, champs, listes,
+   tableaux, pastilles, avis, dialogues) aux mesures du nouveau design.
+
+   Spécificité : chaque règle porte `.v2 .esp` (0,3,0 et plus) et passe
+   donc devant les règles d'origine (`.esp .x`, `.resa .x` : 0,2,0) quel
+   que soit l'ordre des feuilles. Les dialogues sont rendus dans <body>,
+   hors de `.v2` : ils sont visés par `html.v2-actif` (classe posée par la
+   coquille pendant la visite). Aucune feuille partagée n'est modifiée.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ——— les jetons de l'ancien monde, rebranchés ——— */
+.v2 .resa.esp,
+html.v2-actif .dlg-panneau.resa {
+  --r-texte: var(--v2-gray-1000);
+  --r-doux: var(--v2-gray-900);
+  --r-faible: var(--v2-gray-900);
+  --r-fond: var(--v2-bg-200);
+  --r-filet: var(--v2-a-400);
+  --r-seg: var(--v2-gray-100);
+  --esp-vert-fond: var(--v2-green-100);
+  --esp-vert: var(--v2-green-900);
+  --esp-vert-filet: var(--v2-green-400);
+  --esp-ambre-fond: var(--v2-amber-100);
+  --esp-ambre: var(--v2-amber-900);
+  --esp-ambre-filet: var(--v2-amber-400);
+  --esp-rouge-fond: var(--v2-red-100);
+  --esp-rouge: var(--v2-red-900);
+  --esp-rouge-filet: var(--v2-red-400);
+  --esp-bleu-fond: var(--v2-blue-100);
+  --esp-bleu: var(--v2-blue-900);
+  --esp-bleu-filet: var(--v2-blue-400);
+  --esp-gris-fond: var(--v2-gray-200);
+  --esp-gris: var(--v2-gray-1000);
+  --font-inter: var(--font-geist);
+  --font-jakarta: var(--font-geist);
+  --font-jbmono: var(--font-omega-mono);
+  font-family: var(--v2-sans);
+  color: var(--v2-gray-1000);
+}
+.v2 .resa.esp {
+  min-height: 0;
+  background: transparent;
+  box-shadow: none;
+  clip-path: none;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+/* ——— l'en-tête de l'écran : le titre est dans la barre du haut ——— */
+.v2 .esp .esp-tete {
+  margin: 0 0 24px;
+  padding: 0;
+  gap: 12px 16px;
+  align-items: flex-end;
+}
+.v2 .esp .esp-titre {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.v2 .esp .esp-sous {
+  margin: 0;
+  max-width: 680px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--v2-gray-900);
+}
+.v2 .esp .esp-section-titre,
+.v2 .esp .esp-groupe-titre {
+  font-family: var(--v2-sans);
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.32px;
+  font-weight: 600;
+  color: var(--v2-gray-1000);
+  text-transform: none;
+}
+.v2 .esp .esp-mono {
+  font-family: var(--v2-mono);
+  font-size: 13px;
+}
+
+/* ——— boutons ——— */
+.v2 .esp .r-btn,
+html.v2-actif .dlg-panneau .r-btn {
+  min-height: 40px;
+  height: auto;
+  padding: 0 12px;
+  gap: 6px;
+  border: 0;
+  border-radius: 6px;
+  font-family: var(--v2-sans);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  /* un libellé long passe à la ligne plutôt que de pousser la page (VARELO à 390) */
+  text-align: center;
+  background: var(--v2-bg-100);
+  color: var(--v2-gray-1000);
+  box-shadow: var(--v2-ombre-petite);
+  transition: background 0.15s, box-shadow 0.15s, color 0.15s, transform 0.1s;
+}
+.v2 .esp .r-btn:hover,
+html.v2-actif .dlg-panneau .r-btn:hover {
+  background: var(--v2-gray-100);
+}
+.v2 .esp .r-btn--petit,
+html.v2-actif .dlg-panneau .r-btn--petit {
+  min-height: 32px;
+  padding: 0 8px;
+  font-size: 14px;
+}
+.v2 .esp .r-btn--noir,
+html.v2-actif .dlg-panneau .r-btn--noir {
+  background: var(--v2-gray-1000);
+  color: var(--v2-bg-100);
+  box-shadow: none;
+}
+.v2 .esp .r-btn--noir:hover,
+html.v2-actif .dlg-panneau .r-btn--noir:hover {
+  background: var(--v2-primaire-survol);
+}
+.v2 .esp .r-btn--rouge,
+html.v2-actif .dlg-panneau .r-btn--rouge {
+  /* teintes fixes, les mêmes dans les deux thèmes : blanc dessus ≥ 4,5:1 */
+  background: #d60020;
+  color: #fff;
+  box-shadow: none;
+}
+.v2 .esp .r-btn--rouge:hover,
+html.v2-actif .dlg-panneau .r-btn--rouge:hover {
+  background: #b0001a;
+}
+.v2 .esp .r-btn--vert,
+html.v2-actif .dlg-panneau .r-btn--vert {
+  background: #107d32;
+  color: #fff;
+  box-shadow: none;
+}
+.v2 .esp .r-btn--vert:hover,
+html.v2-actif .dlg-panneau .r-btn--vert:hover {
+  background: #0b6127;
+}
+.v2 .esp .r-btn:disabled,
+.v2 .esp .r-btn[aria-disabled="true"],
+html.v2-actif .dlg-panneau .r-btn:disabled {
+  background: var(--v2-gray-100);
+  color: var(--v2-gray-700);
+  box-shadow: 0 0 0 1px var(--v2-a-400);
+  cursor: not-allowed;
+  transform: none;
+}
+.v2 .esp .r-btn:focus-visible,
+html.v2-actif .dlg-panneau .r-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--v2-anneau);
+}
+.v2 .esp .esp-lien-bouton,
+html.v2-actif .dlg-panneau .esp-lien-bouton {
+  color: var(--v2-gray-1000);
+  text-decoration-color: var(--v2-a-500);
+}
+
+/* les filtres : les puces du design de référence */
+.v2 .esp .esp-filtre,
+html.v2-actif .dlg-panneau .esp-filtre {
+  height: 32px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--v2-bg-100);
+  color: var(--v2-gray-900);
+  box-shadow: 0 0 0 1px var(--v2-a-400);
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+.v2 .esp .esp-filtre:hover,
+html.v2-actif .dlg-panneau .esp-filtre:hover {
+  background: var(--v2-gray-100);
+  color: var(--v2-gray-1000);
+}
+.v2 .esp .esp-filtre[aria-pressed="true"],
+html.v2-actif .dlg-panneau .esp-filtre[aria-pressed="true"] {
+  background: var(--v2-gray-1000);
+  color: var(--v2-bg-100);
+  box-shadow: none;
+}
+
+/* ——— champs ——— */
+.v2 .esp .rv-libelle,
+html.v2-actif .dlg-panneau .rv-libelle,
+.v2 .esp .esp-form .rv-libelle,
+html.v2-actif .dlg-panneau .esp-form .rv-libelle {
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--v2-gray-900);
+}
+.v2 .esp .rv-libelle small,
+html.v2-actif .dlg-panneau .rv-libelle small {
+  color: var(--v2-gray-900);
+}
+.v2 .esp .rv-champ,
+html.v2-actif .dlg-panneau .rv-champ {
+  margin-top: 8px;
+  min-height: 40px;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 6px;
+  background-color: var(--v2-bg-100);
+  color: var(--v2-gray-1000);
+  box-shadow: 0 0 0 1px var(--v2-a-400);
+  font-family: var(--v2-sans);
+  font-size: 14px;
+  line-height: 20px;
+  transition: box-shadow 0.15s;
+}
+.v2 .esp .rv-champ:hover,
+html.v2-actif .dlg-panneau .rv-champ:hover {
+  box-shadow: 0 0 0 1px var(--v2-a-500);
+}
+.v2 .esp .rv-champ:focus,
+html.v2-actif .dlg-panneau .rv-champ:focus {
+  outline: none;
+  box-shadow: var(--v2-anneau);
+}
+.v2 .esp .rv-champ::placeholder,
+html.v2-actif .dlg-panneau .rv-champ::placeholder {
+  color: var(--v2-gray-700);
+}
+.v2 .esp select.rv-champ,
+html.v2-actif .dlg-panneau select.rv-champ {
+  background-image: none;
+  padding-right: 12px;
+  appearance: auto;
+}
+.v2 .esp textarea.rv-champ,
+html.v2-actif .dlg-panneau textarea.rv-champ {
+  min-height: 80px;
+}
+
+/* ——— compteurs (les « stats ») ——— */
+.v2 .esp .esp-kpis {
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.v2 .esp .esp-kpi {
+  padding: 16px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--v2-bg-100);
+  box-shadow: var(--v2-ombre-petite);
+  transition: box-shadow 0.2s;
+}
+.v2 .esp .esp-kpi:hover {
+  border-color: transparent;
+  box-shadow: 0 0 0 1px var(--v2-a-500), 0px 2px 2px #0000000a;
+}
+.v2 .esp .esp-kpi[aria-pressed="true"] {
+  border-color: transparent;
+  box-shadow: 0 0 0 1px var(--v2-gray-1000);
+}
+.v2 .esp .esp-kpi-etiquette {
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--v2-gray-900);
+}
+.v2 .esp .esp-kpi-valeur {
+  font-family: var(--v2-sans);
+  font-size: 24px;
+  line-height: 32px;
+  letter-spacing: -0.96px;
+  font-weight: 600;
+}
+.v2 .esp .esp-kpi-sous {
+  font-size: 13px;
+  color: var(--v2-gray-900);
+}
+
+/* ——— cartes ——— */
+.v2 .esp .esp-carte {
+  border: 0;
+  border-radius: 12px;
+  background: var(--v2-bg-100);
+  box-shadow: var(--v2-ombre-petite);
+}
+.v2 .esp .esp-carte-tete {
+  border-bottom-color: var(--v2-a-400);
+}
+.v2 .esp .esp-carte-titre {
+  font-family: var(--v2-sans);
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.28px;
+  font-weight: 600;
+  color: var(--v2-gray-1000);
+  text-transform: none;
+}
+
+/* ——— listes (la colonne de gauche des écrans maître / détail) ——— */
+.v2 .esp .esp-item {
+  border-color: var(--v2-a-400);
+  transition: background 0.15s;
+}
+.v2 .esp .esp-item:hover {
+  background: var(--v2-a-100);
+}
+.v2 .esp .esp-item[aria-selected="true"],
+.v2 .esp .esp-item[aria-current="true"] {
+  background: var(--v2-a-200);
+  box-shadow: inset 2px 0 0 var(--v2-gray-1000);
+}
+.v2 .esp .esp-item-titre {
+  font-weight: 500;
+  color: var(--v2-gray-1000);
+}
+
+/* ——— tableaux ——— */
+.v2 .esp .esp-tableau-cadre {
+  border-radius: 12px;
+}
+.v2 .esp .esp-tableau-cadre:focus-visible {
+  outline: none;
+  box-shadow: var(--v2-anneau);
+}
+.v2 .esp .esp-tableau {
+  font-size: 14px;
+}
+.v2 .esp .esp-tableau th {
+  height: 40px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--v2-gray-900);
+  background: var(--v2-bg-200);
+  border-bottom: 1px solid var(--v2-a-400);
+}
+.v2 .esp .esp-tableau td {
+  border-bottom-color: var(--v2-a-400);
+}
+.v2 .esp .esp-tableau tbody tr {
+  transition: background 0.15s;
+}
+.v2 .esp .esp-tableau tbody tr:hover {
+  background: var(--v2-a-100);
+}
+
+/* ——— pastilles (les « badges ») ——— */
+.v2 .esp .esp-pastille,
+html.v2-actif .dlg-panneau .esp-pastille {
+  height: 20px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 20px;
+  background: var(--v2-gray-200);
+  color: var(--v2-gray-1000);
+}
+.v2 .esp .esp-pastille[data-teinte="vert"],
+html.v2-actif .dlg-panneau .esp-pastille[data-teinte="vert"] {
+  background: var(--v2-green-200);
+  color: var(--v2-green-900);
+}
+.v2 .esp .esp-pastille[data-teinte="ambre"],
+html.v2-actif .dlg-panneau .esp-pastille[data-teinte="ambre"] {
+  background: var(--v2-amber-200);
+  color: var(--v2-amber-900);
+}
+.v2 .esp .esp-pastille[data-teinte="rouge"],
+html.v2-actif .dlg-panneau .esp-pastille[data-teinte="rouge"] {
+  background: var(--v2-red-200);
+  color: var(--v2-red-900);
+}
+.v2 .esp .esp-pastille[data-teinte="bleu"],
+html.v2-actif .dlg-panneau .esp-pastille[data-teinte="bleu"] {
+  background: var(--v2-blue-200);
+  color: var(--v2-blue-900);
+}
+.v2 .esp .esp-pastille[data-teinte="noir"],
+html.v2-actif .dlg-panneau .esp-pastille[data-teinte="noir"] {
+  background: var(--v2-gray-1000);
+  color: var(--v2-bg-100);
+}
+.v2 .esp .esp-pastille--contour,
+html.v2-actif .dlg-panneau .esp-pastille--contour {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--v2-a-400);
+}
+.v2 .esp .esp-ruban {
+  height: 24px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--v2-gray-200);
+  color: var(--v2-gray-1000);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* ——— avis (la « note ») ——— */
+.v2 .esp .esp-avis,
+html.v2-actif .dlg-panneau .esp-avis {
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--v2-gray-100);
+  color: var(--v2-gray-1000);
+  box-shadow: inset 0 0 0 1px var(--v2-a-400);
+  font-size: 14px;
+  line-height: 20px;
+}
+.v2 .esp .esp-avis[data-teinte="ambre"],
+html.v2-actif .dlg-panneau .esp-avis[data-teinte="ambre"] {
+  background: var(--v2-amber-100);
+  color: var(--v2-amber-900);
+  box-shadow: inset 0 0 0 1px var(--v2-amber-400);
+}
+.v2 .esp .esp-avis[data-teinte="rouge"],
+html.v2-actif .dlg-panneau .esp-avis[data-teinte="rouge"] {
+  background: var(--v2-red-100);
+  color: var(--v2-red-900);
+  box-shadow: inset 0 0 0 1px var(--v2-red-400);
+}
+.v2 .esp .esp-avis[data-teinte="vert"],
+html.v2-actif .dlg-panneau .esp-avis[data-teinte="vert"] {
+  background: var(--v2-green-100);
+  color: var(--v2-green-900);
+  box-shadow: inset 0 0 0 1px var(--v2-green-400);
+}
+.v2 .esp .esp-avis[data-teinte="bleu"],
+html.v2-actif .dlg-panneau .esp-avis[data-teinte="bleu"] {
+  background: var(--v2-blue-100);
+  color: var(--v2-blue-900);
+  box-shadow: inset 0 0 0 1px var(--v2-blue-400);
+}
+
+/* ——— le fil (historique) ——— */
+.v2 .esp .esp-fil-point,
+html.v2-actif .dlg-panneau .esp-fil-point {
+  border-color: var(--v2-bg-100);
+  background: var(--v2-gray-600);
+}
+.v2 .esp .esp-fil-point[data-teinte="vert"] {
+  background: var(--v2-green-700);
+}
+.v2 .esp .esp-fil-point[data-teinte="rouge"] {
+  background: var(--v2-red-700);
+}
+.v2 .esp .esp-fil-point[data-teinte="ambre"] {
+  background: var(--v2-amber-700);
+}
+.v2 .esp .esp-fil-point[data-teinte="bleu"] {
+  background: var(--v2-blue-700);
+}
+
+/* ——— les surfaces encore peintes en dur dans l'ancien monde ——— */
+.v2 .esp .esp-valeur,
+.v2 .esp .esp-page-attente,
+.v2 .esp .esp-direct {
+  background: var(--v2-bg-100);
+  border-color: var(--v2-a-400);
+  color: var(--v2-gray-1000);
+}
+.v2 .esp .esp-valeur:hover {
+  border-color: var(--v2-a-500);
+}
+.v2 .esp .esp-valeur[aria-pressed="true"] {
+  background: var(--v2-amber-100);
+}
+.v2 .esp .esp-piece {
+  background: var(--v2-gray-100);
+}
+.v2 .esp .esp-jauge span {
+  background: var(--v2-gray-300);
+}
+.v2 .esp .esp-jauge span[data-fait="true"] {
+  background: var(--v2-green-700);
+}
+.v2 .esp .esp-jauge span[data-fait="refus"] {
+  background: var(--v2-red-700);
+}
+.v2 .esp .esp-lot-barre,
+html.v2-actif .dlg-panneau .esp-lot-barre {
+  border-color: var(--v2-a-400);
+  background: var(--v2-bg-200);
+}
+.v2 .esp .esp-item-coche {
+  border-bottom-color: var(--v2-a-400);
+}
+.v2 .esp .esp-item-coche input,
+.v2 .esp .tav-coche input,
+.v2 .esp .lor-cases input {
+  accent-color: var(--v2-gray-1000);
+}
+/* le point du matin : l'en-tête noir devient une carte du design */
+.v2 .esp .esp-point-tete {
+  background: var(--v2-bg-100);
+  color: var(--v2-gray-1000);
+  border-radius: 12px;
+  box-shadow: var(--v2-ombre-petite);
+}
+.v2 .esp .esp-point-meta {
+  color: var(--v2-gray-900);
+}
+.v2 .esp .esp-point-nav button {
+  border: 0;
+  color: var(--v2-gray-1000);
+  background: var(--v2-bg-100);
+  box-shadow: var(--v2-ombre-petite);
+}
+.v2 .esp .esp-point-nav button:hover {
+  background: var(--v2-gray-100);
+}
+.v2 .esp .esp-point-gravite[data-gravite="critique"] {
+  background: var(--v2-red-700);
+}
+.v2 .esp .esp-point-gravite[data-gravite="attention"] {
+  background: var(--v2-amber-700);
+}
+.v2 .esp .esp-point-gravite[data-gravite="info"] {
+  background: var(--v2-blue-700);
+}
+.v2 .esp .esp-point-gravite[data-sante="true"] {
+  background: var(--v2-green-700);
+}
+
+/* modules : les quelques fonds peints en dur */
+.v2 .esp .lor-chiffre,
+.v2 .esp .lor-lecture[data-statut="ecartee"],
+.v2 .esp .tam-calcul,
+.v2 .esp .vrl-gabarit,
+.v2 .esp .tav-preuve {
+  background: var(--v2-gray-100);
+}
+.v2 .esp .lor-chiffre[data-teinte="rouge"] {
+  background: var(--v2-red-100);
+  border-color: var(--v2-red-400);
+}
+.v2 .esp .lor-chiffre[data-teinte="vert"],
+.v2 .esp .lor-lecture[data-statut="confirmee"] {
+  background: var(--v2-green-100);
+  border-color: var(--v2-green-400);
+}
+.v2 .esp .lor-etape-point {
+  border-color: var(--v2-bg-100);
+}
+.v2 .esp .tav-total[data-fort="true"] {
+  background: var(--v2-gray-1000);
+  color: var(--v2-bg-100);
+  border-color: var(--v2-gray-1000);
+}
+html.v2-actif .tam-honoraires-apercu {
+  background: var(--v2-gray-100);
+}
+
+/* ——— les dialogues (Radix, rendus dans <body>) : la fenêtre du design ——— */
+html.v2-actif .dlg-voile {
+  background: #000000b3;
+}
+html.v2-actif .dlg-panneau.resa {
+  border: 0;
+  border-radius: 12px;
+  background: var(--v2-bg-100);
+  color: var(--v2-gray-1000);
+  box-shadow: var(--v2-ombre-modal);
+  font-family: var(--v2-sans);
+  font-size: 14px;
+  line-height: 20px;
+  clip-path: none;
+}
+html.v2-actif .dlg-titre {
+  font-family: var(--v2-sans);
+  font-size: 24px;
+  line-height: 32px;
+  letter-spacing: -0.96px;
+  font-weight: 600;
+  color: var(--v2-gray-1000);
+}
+html.v2-actif .dlg-intro {
+  color: var(--v2-gray-900);
+  font-size: 14px;
+}
+html.v2-actif .dlg-icone {
+  border: 0;
+  background: var(--v2-bg-100);
+  color: var(--v2-gray-1000);
+  box-shadow: 0 0 0 1px var(--v2-a-400);
+}
+html.v2-actif .dlg-pied {
+  background: var(--v2-bg-200);
+  border-top: 1px solid var(--v2-a-400);
+  border-radius: 0 0 12px 12px;
+}
+html.v2-actif .dlg-fermer {
+  color: var(--v2-gray-900);
+  border-radius: 6px;
+}
+html.v2-actif .dlg-fermer:hover {
+  background: var(--v2-a-200);
+  color: var(--v2-gray-1000);
+}
+html.v2-actif .dlg-fermer:focus-visible,
+html.v2-actif .dlg-sortie:focus-visible {
+  outline: none;
+  box-shadow: var(--v2-anneau);
+}
+html.v2-actif .dlg-sortie {
+  color: var(--v2-gray-900);
+}
+html.v2-actif .dlg-sortie:hover:not(:disabled) {
+  color: var(--v2-gray-1000);
+}
+
+/* ——— les couleurs écrites en dur dans les écrans (style en ligne, couleurs de
+   module) : reprises par les jetons, pour rester lisibles en sombre ——— */
+.v2 .esp [style*="#b45309"] {
+  color: var(--v2-amber-900) !important;
+}
+.v2 .esp [style*="#e3e3e3"] {
+  background: var(--v2-gray-300) !important;
+}
+.v2 .esp .lor-aujourdhui {
+  color: var(--v2-red-900);
+}
+.v2 .esp .lor-aujourdhui::after {
+  background: var(--v2-red-900);
+}
+.v2 .esp .tam-ligne-date[data-proche="true"] {
+  color: var(--v2-amber-900);
+}
+.v2 .esp .tam-phrase:not(.tam-phrase--fermee),
+.v2 .esp .tam-coffre--actif {
+  border-color: var(--v2-green-900);
+  color: var(--v2-green-900);
+}
+
+/* ——— à côté de la barre latérale, la colonne est plus étroite que l'écran :
+   les compteurs se règlent sur elle (quatre de front dès 600 px de colonne).
+   La grille liste | détail garde ses paliers d'écran, que la logique des
+   écrans suit aussi (défilement vers le détail sous 1024 px). ——— */
+.v2 .esp .esp-kpis {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@container principale (min-width: 600px) {
+  .v2 .esp .esp-kpis {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.v2 .esp .esp-colle {
+  top: 80px;
+}
