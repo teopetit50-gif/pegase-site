@@ -175,6 +175,11 @@ Famille « Pilotage » :
 - « Les pièces bloquées, en litige ou en attente d'approbation sont comptées en continu. »
 - « Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe. »
 
+## a4_14 (06/10) — posé sur la recette (~02:35 UTC, cf4c3af)
+
+- Test a4_08 vert (`tester_sans_trace`) ; `filed_siren_de_tva_fr('FR52842115763')` → null ; aucune valeur humaine
+  siren à clé fausse déjà en base. Liste « PME » transmise à Teo par le coordinateur. Rien d'autre attendu.
+
 ## Ce qui manquerait pour une vraie PME (relecture après FAC-2026-10-0471, 06/10 — sans code)
 
 Relecture des règles d'a4_01 à a4_13 (une cinquantaine de codes de contrôle, circuit, imputation, archivage,
