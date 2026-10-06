@@ -1,5 +1,45 @@
 # Session B4 — TAMILA, le module des cabinets d'avocats
 
+## REPRISE — pause demandée par Teo (06/10/2026, 21 h Z)
+
+**État.** Branche worker-b4 propre, poussée. Fusionnée dans main par le coordinateur jusqu'à d181670 ; après :
+1e64795 et 988cec8 (chiffrage, `omega/CHIFFRAGE/tamila.md`), plus la présente note.
+
+**Posé et vert sur la recette** : b4_01 à b4_16 et leurs tests jusqu'au 25 (b4_15 en v2, fad9015). Les ouvriers
+tamila-coffre v2 et tamila-purge v2 (fab4e01) sont déployés, avec le cron. Point du matin (b4_14), expertises (b4_16),
+lectures longues (b4_15 + socle 19an d'A1, lecteur v28, lecteur_analyses = 'oui').
+
+**Écrans** dans main, en `/espace2/tamila` : avis à rattacher, conflits automatiques, honoraires du cabinet, temps
+proposé et forfait, pilotage, lectures longues (citation non retrouvée mise à part), expertise. Recette 188/188 sur
+l'exemple, axe 0 écart grave.
+
+**Attend le coordinateur** : fusionner 1e64795 et 988cec8 (chiffrage) et cette note. Rien d'autre à poser.
+
+**Attend Teo** :
+- l'activation du coffre Scaleway du banc (vrai appel Key Manager), pour la première lecture longue réelle ;
+- le compte AWS Bedrock UE, pour une lecture « en Europe, sans conservation » ;
+- l'hébergeur français et l'hébergeur HDS (pièces médicales) ;
+- le contrat et le DPA.
+Voir `omega/CHIFFRAGE/tamila.md`.
+
+**Prochaine étape exacte** (si Teo accepte le coffre) :
+1. Créer un compte de test par l'inscription normale de la recette (mot de passe dans le scratchpad, jamais transmis).
+2. Le coordinateur l'ajoute au banc comme gérant.
+3. Lancer `RECETTE_MANDATAIRE=1 TAMILA_ACTIVER_COFFRE=1 node omega/recette-b4/analyse-reelle.mjs <session.json>` : coffre,
+   dossier neuf, 4 pièces chiffrées, pré-lecture et chronologie.
+4. Donner l'id du dossier au coordinateur, puis recetter l'écran « Lectures du dossier » sur le premier résultat fini.
+
+**Ensuite, par ordre du chiffrage** :
+1. l'ouvrier `tamila.exporter` (l'archive du dossier n'est jamais produite) ;
+2. l'effacement des analyses à la clôture ;
+3. le point du matin complété (forfaits dépassés, sans diligence) ;
+4. le seuil « sans diligence » à 30 jours, comme la page ;
+5. l'export du journal des accès.
+
+**Outils** : souche PostgreSQL locale (`omega/tests/tamila/souche_locale/jouer.sh`, `chmod 711 /tmp/claude-0`
+d'abord ; 04/06/10/11 échouent en local seulement, faute des règles de procédure). Recette navigateur :
+`omega/recette-b4/recette-tamila.mjs` sur `npx next start -p 3010`.
+
 Branche `worker-b4`. Coordinateur : session_01B4JNQXyT69GytdvE9SjAnE (arrêtée le 06/10 à 03 h 10
 Paris) ; relais : session_01BCGFdpRKBvXKjouC75sYBg. **B4 est clos et fusionné.**
 Dernière mise à jour : 06/10/2026, matin (lot B4-2 : corrections du retour de recette, b4_01 et b4_04, pièces chiffrées à l'écran).
