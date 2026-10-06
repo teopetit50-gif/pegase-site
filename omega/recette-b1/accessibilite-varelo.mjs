@@ -6,7 +6,8 @@
    un autre objet le prend quand on le choisit. Enfin les cadres de tableau
    qui défilent (codes de l'objet ouvert, lignes rejetées d'un dépôt dans son
    dialogue) : tabIndex 0, role region, aria-label ; axe repassé sur le
-   dialogue du dépôt avec son tableau des rejets.
+   dialogue du dépôt avec son tableau des rejets. Vague 3 : la nature
+   « clients » avec la carte de l'encours du groupe, et le dialogue du plafond.
    usage : node omega/recette-b1/accessibilite-varelo.mjs [origine] */
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -60,6 +61,19 @@ for (const largeur of [390, 1440]) {
   const rejets = await s.evaluer(cadres(`document.querySelector('[role="dialog"]')`));
   ok(cadresBons(rejets), `varelo ${largeur}, cadre des lignes rejetées : ${JSON.stringify(rejets)}`);
   dire(`varelo ${largeur}, dialogue du dépôt avec ses rejets`, await analyser(s, `document.querySelector('[role="dialog"]')`));
+
+  /* vague 3 : la carte de l'encours du groupe (clients), son tableau et le dialogue du plafond */
+  await s.aller(base + '/espace/varelo');
+  await s.dormir(800);
+  await s.evaluer(axe + ';true');
+  await s.evaluer(clic('.esp-filtres button', '/^Clients$/'));
+  await s.dormir(400);
+  const encours = await s.evaluer(cadres(`document.querySelector('section[aria-label="Encours du groupe, clients"]')`));
+  ok(cadresBons(encours), `varelo ${largeur}, cadre de l'encours par client : ${JSON.stringify(encours)}`);
+  dire(`varelo ${largeur}, clients avec l'encours du groupe`, await analyser(s, `document.querySelector('.esp')`));
+  await s.evaluer(`(e => { e?.focus(); e?.click(); })([...document.querySelectorAll('section[aria-label="Encours du groupe, clients"] tbody button')].find(b => /^Plafond$/.test(b.textContent)))`);
+  await s.dormir(500);
+  dire(`varelo ${largeur}, dialogue du plafond`, await analyser(s, `document.querySelector('[role="dialog"]')`));
   s.fermer();
 }
 console.log(echecs ? `\n${echecs} échec(s)` : '\ntout passe');
