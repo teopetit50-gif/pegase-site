@@ -5,6 +5,10 @@ Recette seulement (omega-recette) ; la production est au coordinateur.
 
 ## Organisation (05/10/2026, passation le 06/10 à 01:10 UTC)
 
+- **06/10, ~01:30 UTC : la session A4 Fable `session_01ScVNMRrPwNeNjD9LBufDVP` (crédit épuisé) est
+  remplacée par `session_01FiYEg9p2egKbatQDPJGmFY` (Opus 5.5)**, même branche, même périmètre.
+
+
 - **Coordinateur depuis le 06/10** : la session `session_01BCGFdpRKBvXKjouC75sYBg` (Opus 5.5) remplace
   la session Fable `session_01B4JNQXyT69GytdvE9SjAnE`. Tout (SHA à poser, résultats, questions) lui est
   adressé désormais ; les règles ne changent pas.
@@ -167,6 +171,47 @@ Famille « Pilotage » :
 - « Le délai moyen de traitement se mesure de la réception au classement. »
 - « Les pièces bloquées, en litige ou en attente d'approbation sont comptées en continu. »
 - « Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe. »
+
+## factures.ts : lignes exactes à passer à `atteste: true` (06/10, relevé sur origin/main 70f9b7c)
+
+Pour le coordinateur ou la session du site, **pas sur main par A4**. Condition commune : migrations
+a4_01 → a4_11 posées en **production** et les cinq tests verts là-bas (aujourd'hui : recette seulement).
+Numéros de ligne de `lib/produits/capacites/factures.ts` à 70f9b7c ; rechercher le texte si le
+fichier a bougé.
+
+À passer à `true` dès la production posée (portes + test vert sur la recette) :
+
+| Ligne | Texte (début) | Preuve |
+|---|---|---|
+| 60 | « Un écart de prix ou de quantité … signalé, pas absorbé. » | a4_08 (rapprochement), test a4_02 n° 8 |
+| 62 | « Une pièce reçue après la clôture est orientée vers l'exercice suivant … » | a4_02, test a4_01 |
+| 69 | « L'approbation suit le montant, le centre de coût et la société … » | a4_07 `filed_circuits`, test a4_02 |
+| 70 | « Au-delà d'un seuil …, deux approbations distinctes … » | a4_07, test a4_02 |
+| 72 | « L'approbateur qui n'a pas répondu est relancé, puis … remonte d'un niveau. » | a4_07 `filed_relancer_validations`, test a4_02 |
+| 73 | « Le commentaire, la pièce jointe et le motif de refus restent attachés … » | a4_07 `filed_factures_annexes`, test a4_02 |
+| 74 | « Celui qui saisit et celui qui approuve ne peuvent pas être la même personne. » | socle `preparer_approbation` + `filed_saisisseurs`, test a4_02 |
+| 81 | « L'imputation analytique s'apprend sur vos écritures passées … » | a4_02 apprentissage, test a4_01 |
+| 82 | « Chaque pièce est affectée au plan comptable et au centre de coût … » | a4_01/a4_02, test a4_01 |
+| 85 | « Les charges récurrentes produisent leurs écritures d'abonnement … » | a4_03, test a4_02 |
+| 86 | « L'archivage est à valeur probante, et la piste d'audit … » | a4_05, test a4_01 |
+| 94 | « L'engagé du mois se lit par fournisseur, par société et par centre … » | a4_06 `filed_engage_mois`, test a4_01 |
+| 95 | « L'échéancier fournisseur … trente et soixante jours. » | a4_06 `filed_echeancier`, test a4_01 |
+| 96 | « Le délai moyen de traitement se mesure … » | a4_06 `filed_delai_traitement`, test a4_01 |
+| 97 | « Les pièces bloquées, en litige ou en attente d'approbation sont comptées … » | a4_06 `filed_pieces_en_cours`, test a4_01 |
+| 98 | « Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe. » | a4_06 export + exports programmés, tests a4_01 et a4_02 |
+
+Sous condition supplémentaire :
+
+| Ligne | Texte (début) | Ce qui manque |
+|---|---|---|
+| 58 | « Le numéro de TVA intracommunautaire et le SIREN sont vérifiés avant classement. » | Format, clé et cohérence : faits (a4_04, test a4_03). L'existence au registre exige l'ouvrier B7 en marche en production **et** `SIRENE_API_KEY` posée par Teo. Avant cela : rester à `false`. |
+| 71 | « Une délégation d'approbation se pose pour une absence, avec sa date de fin. » | Porte du socle (testée par FILED, test a4_02) : à attester par le coordinateur, pas par A4. |
+| 87 | « Le journal des pièces reçues est numéroté en continu et ne se modifie pas. » | Lot F1 du socle (`filed_documents` R2026-…, `filed_historique` immuable) : au coordinateur. |
+
+Hors A4, à laisser tels quels : 57 (alerte changement d'IBAN : `filed_fournisseurs_ibans` /
+`filed.valider_iban` du socle F1 — A4 ne fait que valider l'IBAN proposé avec un fournisseur
+confirmé), 59 (rapprochement à trois voies commande / réception / facture : la réception n'est
+pas rapprochée par A4), lignes 31–48 (lecture : A1).
 
 ## Demain
 
