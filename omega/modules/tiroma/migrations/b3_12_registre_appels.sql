@@ -24,7 +24,8 @@
 --       un « suivi » = la dernière ligne d'une série (patient, motif, plan) dont l'issue appelle une suite
 --       (message, pas_de_reponse, rappeler) ; « du » quand c'est pour aujourd'hui ou avant.
 -- Profils : titulaire, assistante, collaborateur (sur ses patients). Journal « tiroma.appel_note » (codes seuls).
--- Idempotent : create table if not exists, create or replace, politique recréée seulement si absente, grant.
+-- Idempotent : create table if not exists, create or replace, politique et clés ajoutées seulement si absentes, grant.
+-- v2 (06/10) : clés étrangères (ex-b3_12b), heure réelle de l'appel (clock_timestamp), prénom de l'appelant par son profil.
 
 create table if not exists public.tiroma_appels (
   id uuid not null default gen_random_uuid() primary key,
@@ -36,17 +37,41 @@ create table if not exists public.tiroma_appels (
   evenement_id bigint,
   issue text not null check (issue in ('rdv_pris', 'message', 'pas_de_reponse', 'rappeler', 'refus', 'ne_plus_contacter')),
   rappeler_le date,
-  appele_le timestamp with time zone not null default now(),
+  appele_le timestamp with time zone not null default clock_timestamp(),
   appele_par uuid,
   constraint tiroma_appels_rappel check ((issue = 'rappeler') = (rappeler_le is not null))
 );
--- Pas de clé étrangère vers tiroma_patients / tiroma_plans dans ce fichier : la clause d'effacement en cascade porte
--- un mot que la règle des fichiers à poser interdit. La porte vérifie que patient et plan sont du cabinet ; une ligne
--- dont le patient a été effacé ne se lit plus (la politique exige un patient visible) et ne porte aucun nom.
--- Les deux clés sont posées par b3_12b (accord du coordinateur, 06/10).
+
+-- L'heure de l'appel est l'heure réelle de l'écriture (clock_timestamp), pas celle du début de la transaction : deux
+-- appels notés dans la même transaction (un test, un lot) gardent leur ordre, et « le dernier appel » est bien le dernier.
+alter table public.tiroma_appels alter column appele_le set default clock_timestamp();
+
+-- Les clés (ex-b3_12b, accordées par le coordinateur le 06/10) : un patient effacé (droit à l'effacement, purge)
+-- emporte ses appels ; un plan effacé laisse l'appel, sans plan. Ajoutées si elles manquent, « not valid » puis
+-- validées : une ligne orpheline éventuelle est signalée sans bloquer la pose.
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conrelid = 'public.tiroma_appels'::regclass and conname = 'tiroma_appels_patient_fkey') then
+    alter table public.tiroma_appels add constraint tiroma_appels_patient_fkey
+      foreign key (client_id, entite_id, patient_id) references public.tiroma_patients (client_id, entite_id, id)
+      on delete cascade not valid;
+  end if;
+  if not exists (select 1 from pg_constraint where conrelid = 'public.tiroma_appels'::regclass and conname = 'tiroma_appels_plan_fkey') then
+    alter table public.tiroma_appels add constraint tiroma_appels_plan_fkey
+      foreign key (client_id, entite_id, plan_id) references public.tiroma_plans (client_id, entite_id, id)
+      on delete set null (plan_id) not valid;
+  end if;
+  begin
+    alter table public.tiroma_appels validate constraint tiroma_appels_patient_fkey;
+    alter table public.tiroma_appels validate constraint tiroma_appels_plan_fkey;
+  exception when foreign_key_violation then
+    raise notice 'b3_12 : des appels orphelins empêchent la validation ; les clés jouent pour toute nouvelle écriture.';
+  end;
+end $$;
 
 create index if not exists tiroma_appels_serie on public.tiroma_appels (client_id, entite_id, patient_id, motif, appele_le desc);
 create index if not exists tiroma_appels_jour on public.tiroma_appels (client_id, entite_id, appele_le desc);
+create index if not exists tiroma_appels_plan on public.tiroma_appels (client_id, entite_id, plan_id) where plan_id is not null;
 
 alter table public.tiroma_appels enable row level security;
 
@@ -63,6 +88,22 @@ end $$;
 revoke all on table public.tiroma_appels from public, anon, authenticated;
 grant select on table public.tiroma_appels to authenticated;
 grant all on table public.tiroma_appels to service_role;
+
+-- ——— Qui a appelé : le prénom du membre relié au profil (assistante), sinon le praticien du profil ———
+create or replace function private.tiroma_appelant(p_client uuid, p_entite uuid, p_user uuid)
+ returns text
+ language sql
+ stable
+ security definer
+ set search_path to ''
+as $function$
+  select coalesce(
+    (select m.prenom from public.tiroma_profils pr join public.tiroma_membres m on m.id = pr.membre_id
+      where pr.client_id = p_client and pr.entite_id = p_entite and pr.user_id = p_user limit 1),
+    (select m.prenom from public.tiroma_membres m where m.client_id = p_client and m.entite_id = p_entite and m.user_id = p_user limit 1),
+    (select x.nom_affiche from public.tiroma_profils pr join public.tiroma_praticiens x on x.id = pr.praticien_id
+      where pr.client_id = p_client and pr.entite_id = p_entite and pr.user_id = p_user limit 1))
+$function$;
 
 -- ——— Noter un appel ———
 create or replace function private.tiroma_noter_appel(p_client uuid, p_entite uuid, p_patient uuid, p_motif text, p_issue text,
@@ -158,11 +199,9 @@ begin
   with vus as (
     select a.*, pa.nom, pa.prenom, pa.ne_pas_contacter,
            (rg.voit_tous or pa.praticien_habituel_id = rg.praticien_id) as voit_nom,
-           m.prenom as par_prenom
+           private.tiroma_appelant(a.client_id, a.entite_id, a.appele_par) as par_prenom
     from public.tiroma_appels a
     join public.tiroma_patients pa on pa.id = a.patient_id
-    left join lateral (select x.prenom from public.tiroma_membres x
-                       where x.client_id = a.client_id and x.entite_id = a.entite_id and x.user_id = a.appele_par limit 1) m on true
     where a.client_id = p_client and a.entite_id = p_entite
       and (rg.voit_tous or (rg.praticien_id is not null and pa.praticien_habituel_id = rg.praticien_id))
   ),
@@ -184,11 +223,9 @@ begin
     and s.appele_le >= now() - interval '60 days';
 
   with vus as (
-    select a.*, m.prenom as par_prenom
+    select a.*, private.tiroma_appelant(a.client_id, a.entite_id, a.appele_par) as par_prenom
     from public.tiroma_appels a
     join public.tiroma_patients pa on pa.id = a.patient_id
-    left join lateral (select x.prenom from public.tiroma_membres x
-                       where x.client_id = a.client_id and x.entite_id = a.entite_id and x.user_id = a.appele_par limit 1) m on true
     where a.client_id = p_client and a.entite_id = p_entite and a.appele_le >= now() - interval '60 days'
       and (rg.voit_tous or (rg.praticien_id is not null and pa.praticien_habituel_id = rg.praticien_id))
   ),
@@ -263,5 +300,7 @@ grant execute on function public.tiroma_noter_appel(uuid, uuid, uuid, text, text
 grant execute on function public.tiroma_appels(uuid, uuid, integer) to authenticated, service_role;
 grant execute on function private.tiroma_noter_appel(uuid, uuid, uuid, text, text, uuid, bigint, date) to authenticated, service_role;
 grant execute on function private.tiroma_appels_lire(uuid, uuid, integer) to authenticated, service_role;
+revoke all on function private.tiroma_appelant(uuid, uuid, uuid) from public, anon;
+grant execute on function private.tiroma_appelant(uuid, uuid, uuid) to authenticated, service_role;
 
-select 'b3_12 registre des appels posé' as resultat;
+select 'b3_12 v2 registre des appels posé' as resultat, (select count(*) from pg_constraint where conrelid = 'public.tiroma_appels'::regclass and contype = 'f' and convalidated) as cles_validees;

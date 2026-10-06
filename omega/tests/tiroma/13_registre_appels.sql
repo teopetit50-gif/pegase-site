@@ -1,6 +1,6 @@
 -- B3-13 — Le registre des appels (b3_12) : l'assistante note ses appels, le patient « à rappeler » revient le jour dit,
 -- un « rendez-vous pris » n'est compté qu'une fois vu dans l'agenda du logiciel, et le titulaire voit ce que ça a
--- rapporté. Après 00, 00b, b3_01 à b3_12 et b3_12b (clés, second test). runtests() annule tout.
+-- rapporté. Après 00, 00b, b3_01 à b3_12 (v2 : clés, heure réelle). runtests() annule tout.
 
 create or replace function tests.test_b3_13_registre_appels() returns setof text
 language plpgsql as $f$
@@ -69,8 +69,9 @@ begin
   -- Le relevé suivant trouve le rendez-vous dans l'agenda du logiciel.
   perform tests.redevenir_admin();
   perform set_config('omega.tiroma_moteur', 'releve', true);
-  insert into public.tiroma_rendez_vous (client_id, entite_id, source_ref, patient_id, debut, fin, statut, plan_id)
-  values (banc, entite, 'R-B3-13', v_delannoy, now() + interval '6 days', now() + interval '6 days 45 minutes', 'prevu', v_plan);
+  -- (vu à l'heure réelle : l'appel, lui aussi, porte clock_timestamp et non le début de la transaction)
+  insert into public.tiroma_rendez_vous (client_id, entite_id, source_ref, patient_id, debut, fin, statut, plan_id, vu_premier_le, vu_dernier_le)
+  values (banc, entite, 'R-B3-13', v_delannoy, now() + interval '6 days', now() + interval '6 days 45 minutes', 'prevu', v_plan, clock_timestamp(), clock_timestamp());
   perform set_config('omega.tiroma_moteur', '', true);
   perform tests.b3_endosser('gerant');
   j := public.tiroma_appels(banc, entite);
@@ -78,12 +79,20 @@ begin
   return next is((j #>> '{bilan,valeur_plans}')::numeric, coalesce(v_montant, 0), 'la valeur du plan remis à l''agenda est comptée');
   return next is((j #>> '{bilan,appels}')::integer, 3, 'trois appels sur la période');
 
-  -- Le collaborateur (Dr Rousseau) ne voit que ses patients et n'appelle pas ceux des autres.
+  -- Le collaborateur (Dr Rousseau). Cabinet installé « tout le cabinet » (test 05 : il voit les 30 patients) : il voit
+  -- et note les appels de tous. Cabinet passé « chaque praticien, les siens » : il ne voit plus que ses patients.
   perform tests.b3_endosser('daf');
   j := public.tiroma_appels(banc, entite);
-  return next ok(not (j -> 'derniers' ? v_delannoy::text), 'le collaborateur ne voit pas les appels des patients de Dr Lacour');
+  return next ok(j -> 'derniers' ? v_delannoy::text, 'périmètre cabinet : le collaborateur voit les appels de tout le cabinet');
+  perform tests.redevenir_admin();
+  update public.tiroma_cabinets set perimetre_partage = 'praticien' where client_id = banc and entite_id = entite;
+  perform tests.b3_endosser('daf');
+  j := public.tiroma_appels(banc, entite);
+  return next ok(not (j -> 'derniers' ? v_delannoy::text) and j -> 'derniers' ? v_bazile::text,
+                 'périmètre praticien : il ne voit plus que les appels de ses patients (Bazile, pas Delannoy)');
   return next throws_ok(format('select public.tiroma_noter_appel(%L, %L, %L, ''plan'', ''refus'', %L)', banc, entite, v_delannoy, v_plan),
-                        '42501', null, 'il ne note pas d''appel hors de son périmètre (42501)');
+                        '42501', null, 'périmètre praticien : il ne note pas d''appel sur une patiente de Dr Lacour (42501)');
+  return next ok(public.tiroma_noter_appel(banc, entite, v_bazile, 'controle', 'message') is not null, 'il note un appel sur son patient');
   perform tests.b3_endosser('daf2');
   return next throws_ok(format('select public.tiroma_appels(%L, %L)', banc, entite), '42501', null, 'daf2, sans profil, ne lit pas le registre (42501)');
   return next is((select count(*) from public.tiroma_appels), 0::bigint, 'ni ne voit une ligne de la table');
