@@ -159,12 +159,20 @@ sont livrés : leurs bases partent. **Teo confirme.**
 | 20261006045756, 045757 | `b6_07`, `b5_08` + `b5_09` | dépôt (b3bd323, 8b9ebbc, fbf4c98) | |
 | 20261006051221 | `a4_15` | dépôt (634fe24) | |
 | 20261006134231 | `filed_realtime_fournisseurs` | SQL | |
+| 20261006134914 | `lorani_b5_10` | dépôt : `omega/modules/lorani/migrations/b5_10_jurisprudence_seconde_demande.sql` (main 027eca3) | seconde demande de pièces : l'alerte et l'écran citent la jurisprudence |
+| 20261006140050 | `daliro_b6_08` | dépôt : `omega/modules/daliro/migrations/b6_08_accord_j2.sql` (main bc7ca7c) | accord permanent des J-2 par les politiques du socle |
+| 20261006140438 | `tamila_b4_05` | dépôt : `omega/modules/tamila/migrations/b4_05_tamila_coffre.sql` (main 38b45a0) | coffre Scaleway. Accorde à tort deux outils à authenticated (lignes 669-670), corrigé par 19ag |
+| 20261006140946 | `identite_b7_04` | dépôt : `omega/modules/identite/migrations/b7_04_doute.sql` (worker-b7 0f74430, pas encore sur main) | un refus isolé de VIES n'est pas un verdict |
+| 20261006142236 | `socle_lot19af_activation_seul_decideur` | dépôt (worker-a5 430cf0e) : `omega/modules/socle/migrations/19af_activation_seul_decideur.sql` | un gérant **seul décideur** active lui-même un accord permanent de la liste blanche (Daliro J-2). Réécrit `preparer_approbation` par repère ; test 55 vert sur la recette |
+| 20261006142237 | `daliro_b6_09` + `b6_10` | dépôt : `omega/modules/daliro/migrations/b6_09_activation_accord_j2.sql` (main 4fbd941), `b6_10_activation_seul_approbation.sql` (main 79cb08a) | activation de l'accord J-2 : règle des deux personnes, puis le seul décideur (b6_10, **après 19af**) |
+| 20261006142702 | `socle_lot19ag_execute_apres_a4_14_b4_05` | dépôt (worker-a5 28a046b) : `omega/modules/socle/migrations/19ag_execute_apres_a4_14_b4_05.sql` | EXECUTE à authenticated sur les quatre contrôles FILED rendus nécessaires par a4_14 ; retrait des deux outils du coffre Tamila accordés en trop par b4_05 (test 44) |
+| 20261006142703 | `daliro_b6_11_vues_invoker` (posé avec b6_05 et b6_06) | dépôt : `omega/modules/daliro/migrations/b6_11_vues_invoker.sql` (main 6263048) | les vues `btp_avenants_chiffres` et `btp_avenants_lignes_chiffrees` passent en `security_invoker` ; EXECUTE à authenticated sur `private.btp_prix_avenant(uuid)` et `btp_prix_ligne_avenant(uuid)`, que ces vues appellent désormais avec les droits du lecteur |
 
 **Étape C — clôture, toujours en dernier.**
 
 | Ordre | Quoi | Source |
 |---|---|---|
-| C1 | `a5_01_private_execute.sql` rejouée. Depuis sa v2 (011840), dix lots ont créé des fonctions dans `private` (b7_01_v4, b3_11, b5_05 → a4_15). Elle les range dans la règle et pose les droits par défaut globaux. Idempotente ; elle s'arrête par exception si anon exécute encore quelque chose | `omega/migrations/a5_01_private_execute.sql`, worker-a5 db8fb41 |
+| C1 | `a5_01_private_execute.sql` rejouée. Depuis sa v2 (011840), dix lots ont créé ou rendu nécessaires des fonctions de `private` (b7_01_v4, b3_11, b5_05 → a4_15). Le test 44 rejoué le 6/10 après 19af l'a montré : a4_14 en a rendu quatre nécessaires, b4_05 en a accordé deux en trop, et 19ag l'a corrigé. Elle les range dans la règle et pose les droits par défaut globaux. Idempotente ; elle s'arrête par exception si anon exécute encore quelque chose | `omega/migrations/a5_01_private_execute.sql`, worker-a5 db8fb41 |
 | C2 | `a5_01_liste_requises.sql` (lecture seule) : la liste à comparer à celle de la répétition et à la recette (221 le 6/10) | même SHA |
 
 ### 1.4 Lignes de la recette à ne pas rejouer
@@ -377,7 +385,7 @@ On contrôle à six **paliers** plutôt qu'après chacune des quelque 110 lignes
 - **P2**, après `socle_lot19h` (20261005182000) ;
 - **P3**, après `socle_lot19z` (20261005215301) ;
 - **P4**, après `b3_06_v2` (20261006003701) ;
-- **P5**, après `filed_realtime_fournisseurs` (20261006134231) ;
+- **P5**, après `daliro_b6_11_vues_invoker` (20261006142703), dernière ligne de l'étape B ;
 - **P6**, après l'étape C.
 
 À chaque palier :
@@ -511,6 +519,31 @@ Reçues du coordinateur, en lecture seule, et intégrées aux § 1.2, 1.3, 2 et 
 3. `cron.job` de la recette ;
 4. fonctions Edge de la recette, avec le contenu des coquilles et la liste des fichiers
    de `reception` et `webhooks-brevo`.
+
+Constats du 6/10 vers 14 h 20 Z, en rejouant les tests 40 à 55 après 19af :
+- **test 44, rouge, puis corrigé par 19ag.** Quatre fonctions requises n'étaient pas
+  exécutables : `filed_iban_valide`, `filed_luhn`, `filed_siren_valide`,
+  `filed_tva_intracom_analyser`, rendues nécessaires par a4_14. Deux étaient en trop :
+  `tamila_coffre_serveur`, `tamila_coffre_reference`, accordées par b4_05.
+  - **Les fichiers sources ne sont pas corrigés.** Rejoués tels quels en
+    production, a4_14 laisse le manque et b4_05 remet l'excès. 19ag, puis a5_01 en
+    clôture (étape C), rétablissent la règle.
+  - Pour que les fichiers eux-mêmes soient justes : A4 ajoute le `grant` à
+    authenticated dans a4_14, et B4 retire `authenticated` des lignes 669-670 de
+    b4_05.
+- **test 46, rouge, puis corrigé par b6_11 (B6 6263048). Le blocage est levé.** Les
+  vues `btp_avenants_chiffres` et `btp_avenants_lignes_chiffrees` (Daliro) n'étaient
+  pas `security_invoker`. b6_11 les y passe, et donne EXECUTE à authenticated sur
+  `btp_prix_avenant(uuid)` et `btp_prix_ligne_avenant(uuid)`.
+- **Rejeu du 6/10 vers 14 h 27 Z** (tests 40 à 55 et `^test_b6_`) : **22/22 ok**, dont
+  les tests 44 et 46.
+- **a5_01 rejouée (étape C) garde ces deux fonctions.** Sa source (d) retient toute
+  fonction de `private` dont dépend (`pg_depend`, par la règle de réécriture) une vue
+  de `public` lisible par authenticated. Le test 44, qui applique la même règle, est
+  vert avec elles exécutables. Le fichier `omega/a5_01_liste_figee.txt` (main) n'est
+  lu par aucune migration ; il date du 5/10 (187 fonctions, contre 228 sur 824
+  aujourd'hui). Pour le remettre à jour, une seule source : la sortie de
+  `omega/migrations/a5_01_liste_requises.sql`, jouée sur la recette.
 
 Restent ouverts :
 - la provenance de chaque ligne « dépôt », lue dans `statements` à l'export (§ 1.5) ;
