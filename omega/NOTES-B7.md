@@ -544,8 +544,8 @@ taux de référence de la BCE chaque jour ouvré.
   test `omega/tests/identite/b7_07_etrangers.sql` (test_b7_13, 26 assertions vertes en local avec les contraintes
   élargies simulées ; il échoue exprès tant qu'elles ne le sont pas). **À poser après le lot d'A4**, sinon le
   balayage heurte la contrainte à chaque passage dès qu'un fournisseur suisse ou britannique existe.
-- 6/10 16 h 16 Z (coordinateur) : b7_06 et b7_07 (tests) posés après le lot d'A4 (a4_24). Nouvelle tâche : l'ouvrier
-  des taux BCE.
+- 6/10 16 h 16 Z (coordinateur) : b7_06 et son test seront posés APRÈS le lot d'A4 (a4_24), pas encore posés.
+  Nouvelle tâche : l'ouvrier des taux BCE.
 - 6/10 17 h 10 Z : lot `b7_07_taux_bce.sql` (portes, passages, alerte interne, veille), test `test_b7_14`, ouvrier
   `taux-bce` (15 tests Deno) ; sondé en réel. Section 15. Attention : le test des étrangers s'appelle
   `b7_07_etrangers.sql` (dans tests/identite), la migration des taux `b7_07_taux_bce.sql` (dans modules/taux_bce) :
