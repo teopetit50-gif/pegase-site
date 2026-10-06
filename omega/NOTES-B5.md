@@ -254,3 +254,47 @@ Ouvert : le TAP du test à 5a4a2e6 (en cours chez le coordinateur) ; la fusion d
   [PCMI2, PCMI8] du 2026-10-03, confirmée par l'écran ; permis : `pieces_demandees = [PCMI2, PCMI8]`, demande
   2026-10-03, échéance `pieces` 2027-01-03 ouverte, rappels [10, 3, 0]. `courrier-reel.mjs` : `PIECES_ATTENDUES`.
 
+## 6. Question métier : une seconde demande de pièces (06/10, posée par le coordinateur) — proposition b5_07, pas de code
+
+**Constat sur le banc** : la demande du 03/10 (PCMI2, PCMI8) a **remplacé** celle du 01/10 (PCMI3, PCMI6) :
+`lorani_confirmer_date_lue` fait `set date_demande_pieces = <nouvelle>, pieces_demandees = <nouvelle liste>`. Les
+pièces PCMI3 et PCMI6 ont disparu du permis et l'échéance « pièces » a glissé du 2027-01-01 au 2027-01-03.
+
+**Ce que dit le code de l'urbanisme** (à faire valider par un juriste urbaniste avant de coder) :
+- R*423-38 : dans le mois qui suit le dépôt, la mairie adresse UNE lettre indiquant **de façon exhaustive** les
+  pièces manquantes. La pratique et la jurisprudence en déduisent que la liste doit être complète en une fois.
+- R*423-39 : le demandeur a trois mois à compter de la réception de la lettre pour tout fournir ; à défaut, décision
+  tacite de rejet (ou d'opposition). Le délai d'instruction part de la réception de **toutes** les pièces.
+- R*423-41 : une demande notifiée **après le délai d'un mois**, ou qui porte sur une pièce **non prévue par le
+  code**, ne modifie pas les délais d'instruction (le socle le traite déjà : avertissement du calcul quand
+  `date_demande_pieces` dépasse la fin de complétude ; le Conseil d'État en tire qu'une telle demande n'empêche pas
+  le permis tacite).
+- Une seconde demande dans le mois : le texte ne l'interdit pas en toutes lettres, mais elle ne fait pas repartir
+  un délai que la première a déjà ouvert ; au mieux elle complète la liste.
+
+**Donc l'écrasement est faux** sur deux points : on perd des pièces que la mairie attend toujours (le demandeur qui
+suit l'écran ne fournirait que PCMI2 et PCMI8 et se ferait opposer un rejet tacite), et on retarde l'échéance.
+
+**b5_07 proposée** (un `create or replace` de `lorani_confirmer_date_lue`, une colonne, l'écran) :
+1. Une demande confirmée sur un permis qui a déjà `date_demande_pieces` et pas de `date_pieces_fournies` :
+   `pieces_demandees` = **union**, dans l'ordre (d'abord la première liste, puis les nouveaux codes) ;
+   `date_demande_pieces` **garde la première date** (le délai de trois mois ne repart pas ; c'est aussi le côté sûr
+   pour le demandeur : les rappels tombent plus tôt).
+2. Nouvelle colonne `lorani_permis.demandes_pieces jsonb` (historique `[{date, pieces, piece_id, dates_lue_id}]`),
+   tracée comme les autres ; `pieces_demandees` reste la liste à fournir.
+3. Avertissement du calcul : « Seconde demande de pièces reçue le … : la mairie doit tout réclamer en une fois
+   (art. R*423-38) ; elle ne fait pas repartir le délai de trois mois. Si elle arrive après le délai d'un mois ou
+   porte sur une pièce non prévue par le code, elle ne modifie pas les délais (art. R*423-41). Fournissez quand même
+   toutes les pièces. »
+4. Une demande qui arrive **après** `date_pieces_fournies` : ne rien écraser, la garder dans l'historique avec
+   l'avertissement R*423-41 ; c'est au membre de décider (saisir de nouvelles pièces fournies s'il les envoie).
+5. `lorani_deja_saisi('demande_pieces')` : déjà saisi si la date est dans l'historique avec la même liste (une
+   lettre relue ne repropose rien), plus seulement si elle égale la liste courante.
+6. L'écran : la ligne « Pièces à fournir » montre la liste fusionnée et, dessous, les demandes successives (date,
+   pièces, courrier) ; la saisie manuelle « Demande de pièces reçue » suit la même règle (union).
+7. Test : étape 7 bis, une seconde demande dans le mois → union, date et échéance inchangées, avertissement ; une
+   demande après les pièces fournies → historique seulement.
+
+Je ne code pas b5_07 avant ta réponse (et idéalement celle d'un juriste sur le point « seconde demande dans le
+mois »). Le permis « Pavillon Lemoine » du banc garde l'état écrasé, utile pour rejouer b5_07.
+
