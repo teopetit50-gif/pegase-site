@@ -262,3 +262,14 @@ logiciel métier qui la fait).
   - Test 15 : second test `test_b3_15_rappels_essai_fictif` (5 assertions ; total 40). Avec 19ah, le rappel J-2 de R011 passe en essai, et `commencer_envoi` rend `donnees_fictives = true` et `fournisseur_hds = false`.
   - Test socle 19ah, n° 15 : le second envoi allait au même destinataire, donc il était différé (espacement) et commencer_envoi ne rendait pas la réponse d'un envoi prêt (have NULL). Corrigé : autre destinataire, donnees_sante lu sur l'envoi, et donnees_fictives jamais vrai pour un envoi ordinaire. 20 assertions.
   - Test socle 19ah, n° 16 : un vrai défaut, relevé par le coordinateur. commencer_envoi rendait donnees_fictives = le drapeau du module, même pour un envoi sans donnée de santé. **19ah v2** : v_fictif := e.donnees_sante and … ; l'étape 4, rejouable, corrige une pose v1 (vérifié en local : la v1 posée est corrigée, un envoi de santé donne true, un envoi ordinaire false, et une seconde pose ne change rien).
+
+### Suite de la vague 3 (audit des promesses, § 2 Tiroma), dans l'ordre du coordinateur
+1. **Synthèse de la semaine pour la direction** (06/10, ~17 h Z) :
+   - `b3_15_synthese_semaine.sql` :
+     - `private.tiroma_indicateurs_semaine` donne, par cabinet et du lundi au dimanche : rendez-vous, manqués et taux, créneaux libérés, devis présentés et signés (montant), plans sans rendez-vous, appels et rendez-vous repris, rappels, plus la semaine d'avant ;
+     - `public.tiroma_synthese_semaine(client, entité = null, lundi = null)` est réservée au titulaire et à la direction. Sans entité, elle couvre tous leurs centres (la direction voit ses sous-entités), avec un total. Aucune donnée nominative ;
+     - `private.tiroma_deposer_synthese` : le lundi dès 5 h, une ligne de chiffres « Synthèse de la semaine — <centre> » au point du matin du titulaire et de la direction (de l'entité ou d'un parent), `sante = false`. Cron tiroma-synthese.
+
+     Vérifié en local (tables simulées) : idempotente ; 2 rendez-vous dont 1 manqué sur la semaine du 28/09 au 04/10 ; dépôt le lundi, rien le mardi.
+   - `16_synthese_semaine.sql` : `test_b3_16_synthese_semaine`, 22 assertions (droits, chiffres comparés à la base, profil direction, dépôt du lundi, pas à l'assistante, rien le mardi).
+   - Écran : carte « Synthèse de la semaine » (4 tuiles, tableau par centre avec l'écart de manqués). Recette : 83 contrôles, tout passe ; axe : 0 écart.
