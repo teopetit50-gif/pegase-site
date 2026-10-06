@@ -686,9 +686,18 @@ renvoi sur omegaai.fr.
   (service_role, rejouable, gmail/microsoft seulement) : `envoye_le` = l'heure du dépôt, Message-ID
   en `reference_externe`, id du brouillon en `compte_rendu`, événement
   `envoi.brouillon_depose.<module>`.
-- **À voir par les modules** : les abonnements à `envoi.envoye.<module>` (tavaro…) ne voient pas
-  un brouillon déposé. Les fonctions qui citent 'envoye' (marquer_envoi_manuel, loc_envoi_issue,
+- **Consigne pour les ouvriers des modules** (décision du coordinateur, 06/10 16 h 40 Z ; il la
+  transmettra quand Gmail sera réellement branché) : là où un module suit
+  `envoi.envoye.<module>`, il s'abonne aussi à `envoi.brouillon_depose.<module>`, et le traite
+  comme **« remis au client pour envoi »**, pas comme « parti ». L'objet garde son état « en
+  attente d'envoi » jusqu'à ce que la réception rattache une réponse (`receptions.en_reponse_a`
+  = l'envoi, par le Message-ID `<omega.<envoi>@…>`), ou que le client le marque lui-même.
+  Pour le socle en revanche (doublon, délai minimal, plafonds), un brouillon déposé compte comme
+  parti. Les fonctions qui citent 'envoye' (marquer_envoi_manuel, loc_envoi_issue,
   tiroma_indicateurs_semaine, btp_*decompte) ne sont pas touchées.
+- 19al est **posé sur la recette** (e9f4ebc, 06/10 16 h 40 Z), y compris l'élargissement de
+  `envois_statut_check`. Les fonctions `messagerie` et `messagerie-oauth` seront déployées par le
+  coordinateur seulement quand les secrets de Teo seront posés.
 - `preparer_expediteur` exige `secret_nom` pour gmail/microsoft : l'expéditeur reçoit
   `messagerie_<id de connexion>`. C'est un nom ; les jetons restent dans messageries → Vault.
 - Test : `omega/tests/socle/19al_messageries.sql`, 45 assertions vertes en local sur une maquette
