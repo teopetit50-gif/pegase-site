@@ -363,3 +363,37 @@ b1_05 posé, `^test_b1_` **20/20 verts** ; carte Contrats fusionnée dans main
 - Limite dite : au périmètre partiel, on ne voit que le côté de ses sociétés
   (l'autre apparaît « manquant ») ; le tableau de clôture se lit au périmètre
   total.
+
+### Retour de la recette sur b1_06 (coordinateur, 06/10, 15 h 47 Z)
+
+b1_06 + test b1_09 posés : `^test_b1_09_` **2/2 verts**. Écran Réciproques
+fusionné après le vert du test 51. Suite décidée par le coordinateur : le point
+du matin et l'onglet reprennent les trois listes ; prod au gel avec A5.
+
+### Le point du matin Varelo (b1_07)
+
+- **Migration** `omega/modules/varelo/migrations/b1_07_point_du_matin.sql` :
+  `private.grp_lignes_matin(client, 'contrats'|'encours'|'reciproques')`
+  (SECURITY INVOKER, lit les vues de b1_04–b1_06 : contrats tacites à dénoncer
+  ≤ 30 j — critique ≤ 7 j ; clients au-dessus du plafond, balances de plus de
+  7 jours ; réciproques en écart, non reconnues ou à arrêtés différents) ;
+  `public.grp_ce_matin(client)` (les trois listes au périmètre de la personne,
+  pour l'écran) ; `private.grp_deposer_points(maintenant)` (dès 5 h, heure de
+  l'entité principale : « Contrats à dénoncer », « Encours du groupe »,
+  « Réciproques intragroupe » au rôle gérant et à l'équipe direction_financiere,
+  « Contrats à dénoncer » à direction_juridique, par `private.deposer_section` ;
+  section vide retirée ; battement `varelo_matin` ; erreur → alerte) ;
+  `private.grp_euros` (montants à la française) ; cron **`varelo-matin`**
+  (`*/30 * * * *`). Aucune donnée de santé.
+- **Tests** `omega/tests/varelo/b1_10_point_du_matin.sql` (motif
+  `^test_b1_10_`, après b1_08 et b1_09 dont il reprend les aides) : `_ce_matin`
+  (10), `_depot` (11). Maquette locale : 21/21, 143 assertions en tout de b1_07
+  à b1_10.
+- **Écran** `CeMatin.tsx` : le bloc « Ce matin » en tête de /espace/varelo,
+  mêmes phrases que le point du matin, trois blocs avec renvoi à leur carte
+  (`#vrl-contrats`, `#vrl-encours`, `#vrl-reciproques`). Recette 120 contrôles,
+  cinq largeurs ✓, axe 0 écart.
+- **Pour l'onglet de la barre** (fichier partagé de la coquille, chez C1) : un
+  compteur sur l'onglet VARELO se lit par `rpc('grp_ce_matin', {p_client})` —
+  nombre de lignes de gravité attention ou critique dans les trois listes.
+  Je n'ai pas touché la coquille.

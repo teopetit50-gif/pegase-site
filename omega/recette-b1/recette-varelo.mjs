@@ -11,7 +11,7 @@
    objets), changer de nature, l'export CSV ; l'encours du groupe (vague 3 :
    plafond, dépassement, dépôt d'une balance âgée) ; les contrats du groupe
    à dénoncer (date limite, reconduction tacite, dénonciation, ajout) ; les
-   comptes réciproques intragroupe (états, justification, export).
+   comptes réciproques intragroupe (états, justification, export) ; « Ce matin ».
    usage : node omega/recette-b1/recette-varelo.mjs [origine] */
 import { mkdirSync } from 'node:fs';
 import { ouvrirSession } from '../../outils/chrome.mjs';
@@ -292,6 +292,20 @@ for (const largeur of LARGEURS) {
   await s.dormir(500);
   const csv = await s.evaluer(`window.__csv`);
   ok(typeof csv === 'string' && /^﻿?creancier;debiteur;creance;arrete_creancier;dette;arrete_debiteur;ecart;etat;categorie;motif\n/.test(csv) && /;-500,00;justifie;en_transit;Facture F-778/.test(csv), 'le CSV porte l\'en-tête et l\'écart justifié');
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b1-matin', densite: 1 });
+  console.log('— « Ce matin » : le point du matin Varelo en tête de l\'écran (vague 3)');
+  ok(await s.aller(base + '/espace/varelo'), 'page chargée');
+  await s.dormir(500);
+  const m = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Ce matin"]'); if (!c) return null; return { blocs: [...c.querySelectorAll('.vrl-matin-bloc')].map(b => ({ titre: b.querySelector('h3')?.innerText.replace(/\\s+/g, ' '), lignes: [...b.querySelectorAll('li[data-gravite]')].map(li => li.dataset.gravite + ' | ' + li.innerText) })), avant: c.compareDocumentPosition(document.querySelector('section[aria-label="Objets du groupe"]')) & 4 }; })()`);
+  ok(!!m && m.blocs.length === 3 && !!m.avant, '« Ce matin » est en tête, avec ses trois blocs');
+  ok(m && /Contrats à dénoncer 2/i.test(m.blocs[0].titre) && /^critique \| Avant le .* : dénoncer « Location de deux chariots élévateurs » \(Loc'Manut, Atelier Bertin — Siège \(Lyon\)\) — 7\s800\s€ par an$/.test(m.blocs[0].lignes[0]), `contrats : ${m?.blocs[0].lignes[0]}`);
+  ok(m && /Hôtel des Alpes : 79\s000\s€ d'encours pour le groupe, plafond 70\s000\s€/.test(m.blocs[1].lignes.join(' ')) && /balance clients de Bertin Menuiserie \(Annecy\) date du .* \(12 jours\)/.test(m.blocs[1].lignes.join(' ')), 'encours : le plafond dépassé et la balance ancienne');
+  ok(m && /écart de -500\s€ à expliquer/.test(m.blocs[2].lignes.join(' ')) && m.blocs[2].lignes.length === 3, `réciproques : ${m?.blocs[2].lignes.length} lignes`);
+  ok(await s.evaluer(`(() => { const a = document.querySelector('section[aria-label="Ce matin"] a[href="#vrl-contrats"]'); return !!a && !!document.getElementById('vrl-contrats'); })()`), 'le titre « Contrats à dénoncer » mène à la carte des contrats');
   s.fermer();
 }
 

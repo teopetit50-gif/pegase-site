@@ -178,7 +178,7 @@ export default function Contrats({ source, contexte, client_id, societes, objets
   );
 
   return (
-    <section className="esp-carte" aria-label="Contrats du groupe à dénoncer" style={{ marginTop: 16 }}>
+    <section id="vrl-contrats" className="esp-carte" aria-label="Contrats du groupe à dénoncer" style={{ marginTop: 16 }}>
       <div className="esp-carte-tete">
         <div>
           <h2 className="esp-carte-titre">Contrats du groupe à dénoncer</h2>
