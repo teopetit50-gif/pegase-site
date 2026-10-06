@@ -6,6 +6,7 @@ import type { Travail } from "@partage/portes.ts";
 import type { Complement, Demande, Notation, PortesIdentite, ResultatRegistre } from "../portes.ts";
 import type { ReponseSirene, Sirene } from "../sirene.ts";
 import type { Contexte } from "../verifier.ts";
+import type { RegistreUidCh, ReponseUidCh } from "../uid_ch.ts";
 import type { ReponseVies, Vies } from "../vies.ts";
 
 export const CLIENT_BANC = "cccccccc-0000-4000-8000-00000000000c";
@@ -108,6 +109,18 @@ export class ViesFactice implements Vies {
   async consulter(pays: string, numero: string): Promise<ReponseVies> {
     this.appels.push({ pays, numero });
     return this.reponses.get(pays + numero) ?? this.parDefaut;
+  }
+}
+
+/** Le registre IDE suisse (pas encore branché sur verifier.ts). */
+export class UidChFactice implements RegistreUidCh {
+  readonly nom = "uid_ch-factice";
+  reponses = new Map<string, ReponseUidCh>();
+  parDefaut: ReponseUidCh = { etat: "indisponible", preuve: {}, motif: "double sans réponse" };
+  appels: { uid: string; tva: boolean }[] = [];
+  async consulter(uid: string, tva: boolean): Promise<ReponseUidCh> {
+    this.appels.push({ uid, tva });
+    return this.reponses.get(uid) ?? this.parDefaut;
   }
 }
 
