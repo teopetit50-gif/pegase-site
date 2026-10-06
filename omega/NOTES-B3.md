@@ -1,5 +1,31 @@
 # Session B3 — TIROMA (cabinets dentaires : praticiens, fauteuils, horaires, rendez-vous, point du matin)
 
+## REPRISE (pause demandée par Teo, 06/10, 21 h Z)
+
+**Fait, posé, vert, fusionné dans main par le coordinateur :**
+- **Tiroma**, b3_01 à b3_22, tests B3-01 à B3-23 : ^test_b3_ 24/24. Écrans /espace/tiroma : toutes les cartes, jusqu'aux Règles communes. Aucune promesse Tiroma sans code ; `lib/en-preparation.ts` a la clé tiroma vide.
+- **Tavaro (renfort)**, b3t_01 v3, b3t_02 v2, b3t_03, b3t_04 et le test `omega/tests/tavaro/b3t_01_analyses.sql` (f1e9c42) : ^test_b3t_ vert (lot h1915tav, 501 ok). Écran AnalysesParc (79be032, c3640a3). Les 5 lignes sont retirées de « en préparation » (4653c92). La recette de B2 est corrigée (8ac47dd) avec son accord.
+- **Chiffrage** demandé par Teo : `omega/CHIFFRAGE/tiroma.md` (3235aba).
+
+**Attention, vitrine** : main a été remis à la vitrine de 15 h 55 (c0494b4). Sur cette version, les 5 lignes Tavaro portent encore « En préparation », et la carte WhatsApp de `Formules.tsx:162` est inexacte. Je ne touche pas au site : décision de Teo.
+
+**Attend le coordinateur** : rien à poser. Seulement vérifier que la vitrine reprend 4653c92, l'écran AnalysesParc et les cartes Tiroma si Teo le décide.
+
+**Attend Teo** :
+- un export réel du logiciel du premier cabinet ;
+- Scaleway HDS et un fournisseur de courriel HDS ;
+- la passerelle ou l'accord éditeur pour le quasi temps réel ;
+- le contrat-type ;
+- la correction de la phrase WhatsApp ;
+- pour Tavaro, des données réelles d'un loueur.
+
+**Prochaine étape exacte** (au réveil) :
+1. Lire les notifications.
+2. Si un export réel arrive, le jouer par la chaîne de relevé et caler les `modeles_jeux` tiroma/logosw.
+3. Sinon, la liste « Pour tout amener en B » du chiffrage, dans l'ordre : soins à déplacer, séance longue mal placée, créneau proposé pour un plan, liste des contrôles dus, export des données.
+
+Base de travail locale : `/var/tmp/pgb3`, port 5499 (bases b3_rap et b3_tav). Elle sera perdue avec le conteneur, ce qui n'a aucune importance.
+
 Branche `worker-b3`. Coordinateur : session `session_01BCGFdpRKBvXKjouC75sYBg` (depuis le 06/10, 01 h 10 Z ; avant : `session_01B4JNQXyT69GytdvE9SjAnE`).
 Dernière mise à jour : 06/10/2026, nuit (douze fichiers verts, branche fusionnée dans main d298f07, règle santé tranchée).
 
