@@ -1,10 +1,10 @@
 # NOTES — session B7 (identité des tiers)
 
-Branche `worker-b7`. Mise à jour : 6 octobre 2026, 3 h 05 Paris.
+Branche `worker-b7`. Mise à jour : 6 octobre 2026, 3 h 15 Paris.
 
 | Jauge | % | Ce que ça veut dire |
 |---|---|---|
-| **Mécanique** | 95 | Tout est posé sur la recette et vert (b7_01 v3, b7_02, 9 fichiers pgTAP, scénario de bout en bout), ouvrier `identite` v1 déployé (e4fd65f), cron chaque minute. Reste : le premier passage réel sur une pièce à vrai SIREN (dépôt de Teo à refaire) et la clé `SIRENE_API_KEY` (repli annuaire en attendant). |
+| **Mécanique** | 95 | Tout est posé sur la recette et vert (b7_01 v3, b7_02, 9 fichiers pgTAP, scénario de bout en bout), ouvrier `identite` **v2** déployé (e77fabb, avec le balayage), cron chaque minute, b7_03 posé et test_b7_10 16/16 sur la recette. Reste : le premier passage réel sur une pièce à vrai SIREN (dépôt de Teo à refaire) et la clé `SIRENE_API_KEY` (repli annuaire en attendant). |
 | **Livrable client** | 30 | La chaîne est en ligne sur la recette : la prochaine facture lue avec un SIREN ou une TVA valides portera « confirmé par Sirene / VIES le … » dans ses contrôles, sans geste humain. Pas encore vu sur une vraie pièce, pas en production, pas de bouton « revérifier » à l'écran. |
 
 ## 1. Le scénario
@@ -220,9 +220,9 @@ Toutes `security definer`, `set search_path = ''`, `revoke … from public, anon
 
 ## 8. À faire par le coordinateur
 
-1. ~~Poser `b7_01_portes.sql`, `b7_02_demander.sql`~~ (posés) ; poser `b7_03_balayer.sql`.
-2. ~~Jouer `b7_01_portes.sql`, `b7_02_scenario.sql`, `b7_03_demander.sql`~~ (verts sur la recette) ; jouer `b7_04_balayer.sql`.
-3. Déployer la coquille `identite` (verify_jwt true, `@partage/` → SHA d'A1), secrets : `SIRENE_API_KEY` (quand
+1. ~~Poser `b7_01_portes.sql`, `b7_02_demander.sql`, `b7_03_balayer.sql`~~ (posés).
+2. ~~Jouer les dix fichiers pgTAP et le scénario~~ (verts sur la recette, 6/10 2 h 29 Z).
+3. ~~Déployer la coquille `identite`~~ (v2 à e77fabb). Secrets : `SIRENE_API_KEY` (quand
    Teo l'a ; sans elle, repli annuaire et le battement dit `sirene: "repli"`), facultatifs `IDENTITE_VERSION`,
    `IDENTITE_CACHE_JOURS` (30), `SIRENE_REPLI` (`non` pour couper le repli), `IDENTITE_NOM`.
 4. Cron `omega-identite` chaque minute, comme le lecteur (`Authorization: Bearer <cle_service>` du Vault).
@@ -298,3 +298,6 @@ ajouter sans cas réel.
 - 6/10 2 h 35 : jauges à jour ; scénario du lot 3 écrit (section 9), envoyé au coordinateur avant de coder.
 - 6/10 2 h 26 Z (coordinateur) : GO sur le balayage ; p_max bas, compteur dans le battement ; SQL d'abord, coquille ensuite.
 - 6/10 3 h 05 : lot 3 écrit, testé en local (pgTAP 10 fichiers verts dont b7_04, scénario vert, 44 tests Deno), poussé.
+- 6/10 2 h 29 Z (coordinateur) : b7_03 posé (`identite_b7_03_balayer`), test_b7_10 16/16, coquille `identite` **v2**
+  redéployée à e77fabb. Attendus : `battements.identite` du prochain passage (balayees, issues), la pièce à vrai
+  SIREN (Teo), `SIRENE_API_KEY` (Teo).
