@@ -390,3 +390,65 @@ Coordinateur : toutes les migrations sont posées, `^test_b3_` passe à 24/24 et
   - daf2 qui ne voit aucune règle.
 - **Écran** : carte « Règles communes » (titulaire de plusieurs centres) avec le tableau des écarts et le dialogue « Aligner sur ce centre ». Recette : 104 contrôles, tout passe ; axe : 0 écart, dialogue compris.
 - **Vérifié en local** (tables simulées) : posée deux fois. Les écarts relevés sont `nb_propositions` et `ordre_priorite`. Une cible étrangère est refusée sans écriture. L'alignement donne 1 et laisse l'objectif de B à 4000 ; il ne reste ensuite aucun écart.
+
+## Renfort Tavaro (06/10, ~18 h Z) — les cinq lignes d'analyse
+
+Le coordinateur m'a confié, en renfort de B2, cinq lignes de la page /secteurs/location qui étaient en préparation : Véhicules inactifs (n° 10), Réservations à risque (07), Montée en gamme (08), Contrats à risque (09), Plan de flotte (20). B2 garde les douze autres et en a été prévenu (session_01HKxgZfAkgWXmzJkkwWRMN5).
+
+Les fichiers portent le préfixe b3t_. Aucune fonction ni table de B2 n'est modifiée ; les tables loc_ ne sont que lues, sauf la nouvelle table du contrôle des pièces.
+
+- **`b3t_01_parc_et_reservations.sql`**
+  - `private.loc_b3t_flux` calcule, sur 72 h, l'offre et la demande par agence et par catégorie : véhicules au parc (là où leur dernier contrat les a rendus), retours prévus, départs réservés.
+  - `public.loc_vehicules_inactifs(client, entité)` : pour chaque véhicule au parc sans réservation propre, la probabilité de rester trois jours, calculée ainsi :
+    - excédent = au parc + retours − départs, plafonné au nombre au parc ;
+    - probabilité = excédent / au parc ;
+    - niveau « fort » à partir de 0,66, « moyen » à partir de 0,34.
+
+    L'action proposée, dans cet ordre : transférer vers l'agence où la catégorie manque, sinon proposer le véhicule en montée en gamme, sinon placer l'entretien dans ce creux.
+  - `public.loc_reservations_a_risque(client, entité, heures = 72)` : un score à règles, chaque point avec sa raison.
+    - +3 si le client a déjà fait faux bond ;
+    - +2 si la réservation n'est qu'une option ;
+    - +2 si elle n'est ni prépayée ni couverte par un acompte ;
+    - +1 pour un nouveau client ;
+    - +1 si le canal est à risque (taux de non-présentation au moins 1,5 fois celui du réseau, sur 10 réservations au moins) ;
+    - +1 si la réservation date de plus de 60 jours.
+
+    L'action suit la raison : confirmer, demander un acompte ou relancer.
+  - `public.loc_montee_en_gamme(client, entité, heures = 48)` propose la catégorie immédiatement supérieure qui a un excédent à l'agence, si le profil s'y prête :
+    - +2 si le client a déjà loué plus haut ;
+    - +1 pour un professionnel ;
+    - +1 pour une location de 3 jours ou plus ;
+    - +1 s'il est fidèle.
+
+    Jamais à un client qui a un impayé, un litige ou une non-présentation.
+- **`b3t_02_contrats_a_risque.sql`**
+  - La table `public.loc_controles_conducteur` garde un contrôle par contrat : pièce d'identité et permis conforme ou non, permis de moins de trois ans. Minimisation : ni numéro, ni date, ni photo. RLS : lecture par qui voit l'agence du contrat.
+  - La porte `public.loc_noter_controle_conducteur` écrit au journal.
+  - `public.loc_contrats_a_risque` donne un score sur trois axes :
+    - conducteur : +3 pièce non conforme, +2 permis récent, +1 pièces à contrôler ;
+    - historique : +1 nouveau client, +2 retard passé, +3 impayé ou litige ;
+    - sinistralité : +2 pour une facture de dommages, +3 pour deux ou plus.
+- **`b3t_03_plan_de_flotte.sql`** : `public.loc_plan_de_flotte(client, mois = 12, cible = 0,80)`, réservé au gérant et à l'admin. Par agence et par catégorie, il donne la flotte, l'utilisation, le pic au 95e centile et la cible.
+  - La cible est le plus grand de deux chiffres : le pic, et ce qu'il faut pour louer les mêmes jours à l'utilisation visée.
+  - On déplace avant d'acheter, puis on vend le reste, des plus anciens aux plus kilométrés.
+  - Sont à renouveler les véhicules qui auront 4 ans ou plus, ou 120 000 km ou plus.
+- **`b3t_04_point_du_matin.sql`** : `private.loc_b3t_deposer_points` (cron tavaro-analyses) dépose dès 5 h quatre sections par agence, au rôle valideur : Véhicules inactifs, Réservations à risque, Contrats à risque, Montée en gamme. Une section vide est retirée. `loc_deposer_points` de B2 n'est pas touché.
+- **Droits** : les portes publiques sont en security definer et contrôlent le rôle (`private.loc_b3t_regard`) et le périmètre (`voit_entite`). Toutes les fonctions private sont réservées au service_role.
+- **Tests** : `omega/tests/tavaro/b3t_01_analyses.sql`, 4 fonctions, 42 assertions, sur le jeu de B2 (`tests.tavaro_jeu`, `tavaro_jeu_facture`) et un parc posé par `tests.b3t_parc`. Ils couvrent :
+  - les probabilités et les actions ;
+  - les scores ;
+  - l'offre de montée en gamme ;
+  - le périmètre d'un collaborateur de NORD ;
+  - le contrôle des pièces (refus, remplacement, journal, autre loueur) ;
+  - le plan (droits, déplacer avant acheter, renouveler) ;
+  - le point du matin.
+- **Écran** : la carte `AnalysesParc.tsx` (avec `analyses.ts` et `analyses-exemple.ts`) s'insère en une ligne dans `EcranTavaro.tsx`, au-dessus des avis de contravention. Elle regroupe quatre listes et le plan de flotte, avec le dialogue « Noter le contrôle ». Le rendu attend le montage côté navigateur, sinon les dates de l'exemple faisaient une erreur d'hydratation (#418).
+- **Recette** : `omega/recette-b3/recette-tavaro-analyses.mjs`, 45 contrôles aux 5 largeurs, scénario du contrôle et axe sur les cinq cartes et le dialogue : tout passe. La recette de B2 passe aussi, après une seule correction : son compte « 8 contrats listés » prenait tous les `.esp-item` de la page, il est désormais limité à la liste « Contrats de location ».
+- **Vérifié en local** (tables loc_ simulées) :
+  - transfert SIÈGE → NORD avec une probabilité de 0,67, et une compacte certaine de rester ;
+  - R1 à 5 points (« fort »), R2 « a déjà fait faux bond » ;
+  - R3 reçoit l'offre de la catégorie C ;
+  - collaborateur de NORD : aucun véhicule du siège ;
+  - contrat de Rémi Risque à 5 points, puis 6 après le contrôle ;
+  - plan : 5 citadines du siège vers NORD ;
+  - point du matin : 3 sections déposées.
