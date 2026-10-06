@@ -62,7 +62,7 @@ export async function chargerDossier(): Promise<Dossier> {
     supabase.from("lorani_membres_projet").select("id, projet_id, user_id, role_projet").limit(2000),
     supabase.from("lorani_cas_rejet").select("code, article, libelle, source_url").order("code"),
     /* public.pieces date la réception (recue_le) ; l'écran la montre comme date de dépôt */
-    supabase.from("pieces").select("id, objet_id, nom_fichier, mime, statut, type_piece, motif, recue_le").eq("module", "lorani").eq("objet_type", "lorani_projet").order("recue_le", { ascending: false }).limit(600),
+    supabase.from("pieces").select("id, objet_id, nom_fichier, mime, statut, type_piece, motif, source, recue_le").eq("module", "lorani").eq("objet_type", "lorani_projet").order("recue_le", { ascending: false }).limit(600),
     supabase.rpc("annuaire", { p_client: moi.client_id }),
   ]);
   /* le premier refus de la base est dit tel quel ; les lectures secondaires manquantes ne cachent pas les permis */

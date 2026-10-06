@@ -8,9 +8,11 @@
    un prix validé et la soumettre ; signer l'avenant validé ; noter la
    réponse d'un sous-traitant ; voir les remplaçants ; rattacher une facture
    (SIREN refusé sur le mauvais lot) ; l'accord permanent des J-2 (b6_08) :
-   révoquer avec un motif, puis le redonner (« à valider »).
+   révoquer avec un motif, puis le redonner (« à valider ») ; les situations de travaux (b6_12) : ouvrir
+   la n° 2 des Tilleuls, avancer une ligne, lire les totaux, soumettre ; axe-core sur la carte et sa fenêtre.
    usage : node omega/recette-b6/recette-daliro.mjs [origine] */
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { ouvrirSession } from '../../outils/chrome.mjs';
 
 const base = process.argv[2] ?? 'http://localhost:3012';
@@ -190,6 +192,50 @@ const choisir = (sel, valeur) => `(() => { const t = document.querySelector('${s
   const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
   ok(deb === 0, `pas de débordement horizontal (${deb})`);
   s.fermer();
+}
+
+{
+  const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+  const graves = (cible) => `(async () => { const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`;
+  for (const largeur of [390, 1440]) {
+    const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `b6-situ-${largeur}`, densite: 1 });
+    console.log(`— Les Tilleuls : situations de travaux (${largeur})`);
+    ok(await s.aller(base + chemin), 'page chargée');
+    await s.dormir(500);
+    await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /Tilleuls/.test(b.textContent))?.click()`);
+    await s.dormir(600);
+    const carte = `document.querySelector('section[aria-label="Situations de travaux"]')`;
+    ok(await s.evaluer(`/1 validée/i.test(${carte}?.innerText || '')`), 'la situation n° 1 (validée) est listée');
+    ok(await s.evaluer(bouton('/Nouvelle situation/', carte)) === true, 'clic sur « Nouvelle situation »');
+    await s.dormir(400);
+    await s.evaluer(axe + ';true');
+    const dlg = await s.evaluer(graves(`document.querySelector('[role="dialog"]')`));
+    ok(dlg.length === 0, `fenêtre « Nouvelle situation » : aucun écart axe grave ${dlg.length ? JSON.stringify(dlg) : ''}`);
+    await s.evaluer(`${dlgBouton('/Ouvrir la situation/')}?.click()`);
+    await s.dormir(600);
+    ok(await s.evaluer(`/Situation n° 2/.test(${carte}?.innerText || '')`), 'la situation n° 2 est ouverte');
+    const precedent = await s.evaluer(`(() => { const i = ${carte}?.querySelector('input[aria-label*="Fenêtre bois-alu"]'); return i?.value; })()`);
+    ok(precedent === '35', `l'avancement repart de la n° 1 (fenêtres : ${precedent} %)`);
+    await s.evaluer(`(() => { const i = ${carte}.querySelector('input[aria-label*="Fenêtre bois-alu"]'); i.focus(); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, '60'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+    await s.dormir(150);
+    await s.evaluer(`${carte}.querySelector('input[aria-label*="Fenêtre bois-alu"]').blur()`);
+    await s.dormir(500);
+    const texte = await s.evaluer(`${carte}?.innerText || ''`);
+    // 28 320 × 25 % = 7 080 HT ; TVA 20 % 1 416 ; retenue 5 % du HT (marché M-2026-014) 354 ; net 8 142
+    ok(/7[\s\u202f\u00a0]080,00/.test(texte) && /8[\s\u202f\u00a0]142,00/.test(texte), 'période 7 080 € HT, net à payer 8 142 € (TVA 20 %, retenue 5 % HT)');
+    ok(/loi n° 71-584/.test(texte), 'la mention de la retenue de garantie est affichée');
+    await s.evaluer(axe + ';true');
+    const sit = await s.evaluer(graves(carte));
+    ok(sit.length === 0, `carte des situations : aucun écart axe grave ${sit.length ? JSON.stringify(sit) : ''}`);
+    ok(await s.evaluer(bouton('/Soumettre à la validation/', carte)) === true, 'clic sur « Soumettre à la validation »');
+    await s.dormir(500);
+    ok(await s.evaluer(`/Dans « À valider »/.test(${carte}?.innerText || '') && [...${carte}.querySelectorAll('button')].find(b => /Valider la situation/.test(b.textContent))?.disabled === true`),
+       'soumise : elle attend dans « À valider », « Valider la situation » reste gris');
+    const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
+    ok(deb === 0, `pas de débordement horizontal (${deb})`);
+    s.fermer();
+  }
 }
 
 console.log(echecs ? `\n${echecs} échec(s)` : '\ntout passe');

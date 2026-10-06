@@ -310,7 +310,7 @@ export const PIECES_EXEMPLE: PieceProjet[] = [
   { id: PIECE_RECEPISSE, objet_id: P_LEMOINE, nom_fichier: "recepisse-depot-PC04410926A0042.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_recepisse_depot", cree_le: ilYa(93) },
   { id: PIECE_DEMANDE, objet_id: P_LEMOINE, nom_fichier: "demande-pieces-mairie-nantes.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_demande_pieces", cree_le: ilYa(80) },
   { id: PIECE_LETTRE, objet_id: P_LEMOINE, nom_fichier: "lettre-delai-majore.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_lettre_delai", cree_le: ilYa(0, 8) },
-  { id: PIECE_RECEPISSE_DP, objet_id: P_MARTIN, nom_fichier: "recepisse-DP06938326N0107.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_recepisse_depot", cree_le: ilYa(44) },
+  { id: PIECE_RECEPISSE_DP, objet_id: P_MARTIN, nom_fichier: "ARE_DP06938326N0107.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_recepisse_depot", source: "courriel", cree_le: ilYa(44) },
   { id: PIECE_ARRETE, objet_id: P_MERCIERE, nom_fichier: "arrete-PC06938225V0344.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_arrete", cree_le: ilYa(218) },
   { id: PIECE_CONSTAT, objet_id: P_MERCIERE, nom_fichier: "constat-affichage-huissier.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_constat_affichage", cree_le: ilYa(209) },
 ];

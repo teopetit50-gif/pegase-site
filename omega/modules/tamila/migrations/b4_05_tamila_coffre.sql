@@ -665,9 +665,9 @@ grant execute on function public.tamila_coffre_conclure(bigint, text, jsonb) to 
 grant execute on function private.tamila_coffre_conclure(bigint, text, jsonb) to service_role;
 grant execute on function public.tamila_coffre_reenveloppe(bigint, bytea) to service_role;
 grant execute on function private.tamila_coffre_reenveloppe(bigint, bytea) to service_role;
--- Les outils, appelés depuis les fonctions ci-dessus (security definer) et depuis le déclencheur.
-grant execute on function private.tamila_coffre_serveur() to authenticated, service_role;
-grant execute on function private.tamila_coffre_reference(text, text) to authenticated, service_role;
+-- Les outils : appelés seulement depuis des fonctions security definer (et le déclencheur), donc jamais par authenticated (test socle 44).
+grant execute on function private.tamila_coffre_serveur() to service_role;
+grant execute on function private.tamila_coffre_reference(text, text) to service_role;
 grant execute on function private.tamila_cle_conforme() to authenticated, service_role;
 
 comment on function public.tamila_coffre_pour_membre(uuid, uuid) is

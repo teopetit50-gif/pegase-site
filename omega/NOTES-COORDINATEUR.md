@@ -791,3 +791,21 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   (omega/prod) ; B1–B6 « 3 manques pour un vrai client » + n° 1 codé ; B7 indisponibles ignorés
   dans filed_verification_recente + tiers étrangers ; C1 nouveau tableau de bord. Routine de
   2 h mise à jour.
+- 14 h 40 Z — Vague 3, premières poses : **b7_05** (dbd308f, filed_verification_recente ignore
+  les indisponibles devant une réponse récente) `^test_b7_` 12/12 ; **lecteur v20** (672ac97 :
+  Factur-X/UBL/CII lus sans IA, concordance XML↔PDF, 2 bugs corrigés : commentaire de licence en
+  tête, TVA UBL prise hors régime VAT) ; **b4_06 honoraires Tamila** (32479a4) `^test_b4_` 15/15 +
+  socle 44/46/51 verts. A2 : GUIDE-INBOUND.md sur main. A5 : page 0 de l'export jouée — trou :
+  les lots 18a–19aa posés par execute_sql n'ont que la note de pose en statements, à
+  reconstruire depuis l'état de la recette ; motif « dépôt » à élargir ; 2 poses de tests à
+  exclure ; a4_14 → 7c29802, b4_05 → dc24eec.
+- 14 h 55 Z — Poses vague 3 : **a4_16** facture électronique (07cab32) 5/5 ; **b5_11** courriels
+  du guichet (218a777) `^test_b5_` 2/2 ; **b6_12** situations de travaux (9566496) `^test_b6_`
+  7/7 ; **b3_12** registre des appels (5f62e7e) 21/25 — **trou de périmètre** (un collaborateur
+  voit et note des appels hors périmètre), renvoyé à B3 ; **b2_03** avis de contravention
+  (8fd4e11) meurt sur « record r is not assigned yet », renvoyé à B2. Test socle 44 rouge :
+  filed_meme_valeur (A4 a4_16b). **Factur-X réel prouvé** (R2026-000005, lu par le XML,
+  appels_ia 0, coût 0). Lecteur v21 (d2d03f7, ARE/AEE). Empreinte du catalogue (A5) relevée.
+  C1 : palier 1 du tableau de bord montré à Teo. Teo a posé les MX de recu.omegaai.fr (la
+  seconde vise inbound1 au lieu d'inbound2, à corriger). Écrans fusionnés : Tamila honoraires,
+  Lorani courriels du guichet, Daliro situations.

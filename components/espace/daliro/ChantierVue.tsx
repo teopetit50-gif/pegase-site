@@ -22,6 +22,7 @@ import { BookOpen, CheckCircle2, ClipboardCheck, FileSignature, FileText, Link2,
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
+import SituationsCarte from "./SituationsCarte";
 import { Avis, Def, Pastille } from "../ui";
 import { dateCourte, dateHeure, montant, nombreFr, pourcent } from "../format";
 import { ACCEPTATIONS, CONFIRMATIONS, CONTROLES_LIGNE, EXECUTIONS, GRAVITES, ROLES_TIERS, STATUTS_AVENANT, STATUTS_CHANTIER, UNITES, VIGILANCES, familleControle, libelleEnvoi, libelleStatutFacture, libelleUnite } from "./etats";
@@ -537,6 +538,9 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
         })}
         {!avenants.length ? <div className="esp-kpi-sous">Un travail supplémentaire repéré (vocal, photo, visite) devient un avenant chiffré sur vos prix, signé avant exécution.</div> : null}
       </section>
+
+      {/* ——— situations de travaux (b6_12) ——— */}
+      <SituationsCarte tableau={tableau} source={source} onLocal={onLocal} relire={relire} />
 
       {/* ——— factures ——— */}
       <section className="esp-carte" aria-label="Factures">

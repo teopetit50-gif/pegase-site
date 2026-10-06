@@ -166,3 +166,22 @@
   padding-left: 18px;
   font-size: 13px;
 }
+
+/* les honoraires (b4_06) : les trois chiffres, les sous-titres, l'aperçu de la facture */
+.esp .tam-honoraires-chiffres {
+  margin-bottom: 12px;
+}
+.esp .tam-sous-titre {
+  margin: 16px 0 2px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--r-faible);
+}
+.tam-honoraires-apercu {
+  margin-top: 4px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f6f6f4;
+  border: 1px solid var(--r-filet);
+}
