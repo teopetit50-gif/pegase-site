@@ -17,7 +17,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { EXEMPLE_CLIENT_ID, EXEMPLE_MOI, CLAIRE, SIEGE, SOFIA, YANIS, aujourdHui, ilYa } from "../exemples/socle";
-import type { CasRejet, DateLue, Dossier, Echeance, Etape, Intervenant, Lot, MembreProjet, Permis, PieceProjet, Projet, Recours } from "./types";
+import type { CasRejet, DateLue, Dossier, Echeance, Etape, Honoraire, Intervenant, Lot, MembreProjet, Permis, PieceProjet, Projet, Recours, Temps } from "./types";
 
 const C = EXEMPLE_CLIENT_ID;
 const j = (n: number) => aujourdHui(n);
@@ -465,6 +465,32 @@ export const CAS_REJET_EXEMPLE: CasRejet[] = [
   { code: "r424_2_1", article: "R424-2-1", libelle: "Projet soumis à évaluation environnementale (demandes déposées depuis le 31/12/2025)", source_url: URL_LEGIFRANCE },
 ];
 
+/* ——— les honoraires (b5_12) : Maison Lemoine, mission complète ; Pôle enfance, conception en cours ——— */
+const H = (n: number) => id("h", n);
+export const HONORAIRES_EXEMPLE: Honoraire[] = [
+  { id: H(1), projet_id: P_LEMOINE, element: "esq", intitule: null, montant_ht: 2400, heures_prevues: 30, statut: "facturee", achevee_le: j(-150), facturee_le: j(-145) },
+  { id: H(2), projet_id: P_LEMOINE, element: "aps", intitule: null, montant_ht: 4200, heures_prevues: 52, statut: "facturee", achevee_le: j(-120), facturee_le: j(-112) },
+  { id: H(3), projet_id: P_LEMOINE, element: "apd", intitule: null, montant_ht: 5600, heures_prevues: 70, statut: "achevee", achevee_le: j(-100), facturee_le: null },
+  { id: H(4), projet_id: P_LEMOINE, element: "pc", intitule: null, montant_ht: 3800, heures_prevues: 45, statut: "en_cours", achevee_le: null, facturee_le: null },
+  { id: H(5), projet_id: P_LEMOINE, element: "pro", intitule: null, montant_ht: 7200, heures_prevues: 90, statut: "a_venir", achevee_le: null, facturee_le: null },
+  { id: H(6), projet_id: P_LEMOINE, element: "det", intitule: null, montant_ht: 9800, heures_prevues: 120, statut: "a_venir", achevee_le: null, facturee_le: null },
+  { id: H(7), projet_id: P_ENFANCE, element: "esq", intitule: null, montant_ht: 9000, heures_prevues: 110, statut: "achevee", achevee_le: j(-40), facturee_le: null },
+  { id: H(8), projet_id: P_ENFANCE, element: "aps", intitule: null, montant_ht: 14000, heures_prevues: 170, statut: "en_cours", achevee_le: null, facturee_le: null },
+];
+const T = (n: number) => id("t", n);
+export const TEMPS_EXEMPLE: Temps[] = [
+  { id: T(1), projet_id: P_LEMOINE, honoraire_id: H(1), membre: EXEMPLE_MOI, jour: j(-160), heures: 26, note: "Relevé, esquisses" },
+  { id: T(2), projet_id: P_LEMOINE, honoraire_id: H(2), membre: EXEMPLE_MOI, jour: j(-130), heures: 31, note: null },
+  { id: T(3), projet_id: P_LEMOINE, honoraire_id: H(2), membre: SOFIA, jour: j(-128), heures: 18, note: "Plans au 1/100" },
+  { id: T(4), projet_id: P_LEMOINE, honoraire_id: H(3), membre: SOFIA, jour: j(-104), heures: 62, note: "Plans au 1/50, métré" },
+  { id: T(5), projet_id: P_LEMOINE, honoraire_id: H(3), membre: EXEMPLE_MOI, jour: j(-101), heures: 14, note: "Descriptif" },
+  { id: T(6), projet_id: P_LEMOINE, honoraire_id: H(4), membre: SOFIA, jour: j(-90), heures: 24, note: "Pièces graphiques PCMI" },
+  { id: T(7), projet_id: P_LEMOINE, honoraire_id: H(4), membre: EXEMPLE_MOI, jour: j(-3), heures: 13.5, note: "Réponse à la demande de pièces" },
+  { id: T(8), projet_id: P_ENFANCE, honoraire_id: H(7), membre: YANIS, jour: j(-45), heures: 96, note: null },
+  { id: T(9), projet_id: P_ENFANCE, honoraire_id: H(8), membre: YANIS, jour: j(-6), heures: 58, note: null },
+  { id: T(10), projet_id: P_ENFANCE, honoraire_id: H(8), membre: SOFIA, jour: j(-2), heures: 41, note: "Économie, estimation" },
+];
+
 export function dossierExemple(): Dossier {
   return {
     projets: PROJETS_EXEMPLE,
@@ -477,6 +503,8 @@ export function dossierExemple(): Dossier {
     membres: MEMBRES_EXEMPLE,
     casRejet: CAS_REJET_EXEMPLE,
     pieces: PIECES_EXEMPLE,
+    honoraires: HONORAIRES_EXEMPLE,
+    temps: TEMPS_EXEMPLE,
     noms: {},
     moi: { user_id: EXEMPLE_MOI, client_id: C, role: "valideur" },
   };
