@@ -158,7 +158,12 @@ for (const largeur of LARGEURS) {
         await s.capturer(`${sortie}/compte-${largeur}-${theme}.jpg`, { qualite: 72 });
         juger('menu compte', await analyser(s, `document.querySelector('.v2-popover')`));
       }
-      const soucis = s.soucis.filter((x) => !/favicon|_vercel|va\.vercel|Failed to load resource/.test(x));
+      /* En local, en http : la politique de contenu de production porte
+         upgrade-insecure-requests, et le préchargement des liens /espace/…
+         (redirigés vers /espace2/… par la bascule) part alors en https sur
+         localhost, qui n'en a pas. Sur omegaai.fr (https) c'est sans effet. */
+      const httpLocal = /^http:\/\/localhost/.test(base);
+      const soucis = s.soucis.filter((x) => !/favicon|_vercel|va\.vercel|Failed to load resource/.test(x) && !(httpLocal && /ERR_SSL_PROTOCOL_ERROR/.test(x)));
       ok(!soucis.length, `console propre${soucis.length ? ' : ' + soucis.slice(0, 3).join(' / ') : ''}`);
     } finally {
       s.fermer();
