@@ -177,6 +177,26 @@ propre hors /_vercel/insights) : **verte**. Captures 390 et 1440 dans `omega/rec
 Ordre de pose : `c3_05_accuse_avis_indicateurs.sql` → test `omega/tests/reput/c3_05_accuse_avis.sql`
 (après c3_02 et c3_03, dont il reprend les aides) → 44, 46, 51, 55.
 
+## c3_06 — CASHD, litige, délais, client reconnu, récurrents, avis par site
+
+- **Avis après règlement, sans saisie** : abonnement `cashd.facture_reglee` → `reput.avis_reglement` ; l'ouvrier
+  de base programme la demande d'avis (courriel, sinon WhatsApp) si le client a coché `avis_auto_reglement` (faux
+  par défaut) et posé son lien. Côté CASHD (C2, demandé le 06/10) : publier l'événement quand une facture passe
+  soldée par lettrage, charge `{facture, numero, compte, entite, regle_le, email, telephone, nom}`.
+- **Litige** : `private.reput_en_litige` appelle `private.cashd_contact_en_litige(client, adresse)` si C2 l'a
+  posée (demandé), sinon faux. Contact en litige → `reput.transferer` (jamais d'envoi seul), alerte.
+- **Délai et escalade** : `reput_sujets.delai_heures` (urgence 1 h, réclamation / humain 4 h, le reste 24 h),
+  `reput_fixer_delai` (gérant, admin) ; l'ouvrier remonte une fois toute demande en attente au-delà du délai.
+- **Client reconnu** : `reput_demandes.de_empreinte` ; `reput_commencer` rend `client_connu` (nombre, dernière
+  date, sujets, sans texte) ; l'écran le montre.
+- **Sujets récurrents** : point du matin, sujets hors base ≥ 2 fois sur 7 jours (« ajoutez une fiche »).
+- **Avis par site** : vue `reput_avis_indicateurs` (entité, mois : programmés, demandés, relancés, reçus).
+- Écran : client connu, litige, délai dépassé, pièces jointes conservées ; délai par sujet modifiable ; case
+  « avis automatique après règlement ».
+
+Test `omega/tests/reput/c3_06_cashd_escalade.sql` (27 ; souche 233/233). Il pose sa propre
+`private.cashd_contact_en_litige` dans sa transaction (annulée) : indépendant de l'état de CASHD.
+
 ## Lignes de capacité (`lib/produits/capacites/accueil.ts`) : tenues et preuves
 
 | Ligne | État | Preuve |
@@ -198,6 +218,13 @@ Ordre de pose : `c3_05_accuse_avis_indicateurs.sql` → test `omega/tests/reput/
 | Le délai de première réponse est mesuré, demande par demande. | **tenue** | `reput_demandes.envoyee_le - recu_le`, vue `reput_indicateurs` ; écran |
 | Le volume de demandes se lit par canal, par service et par heure de la journée. | **tenue** (canal, sujet, heure ; par service = entité) | vues `reput_indicateurs`, `reput_volumes_heure` |
 | La part des demandes traitées sans intervention humaine est suivie dans le temps. | **tenue** | `parties_seules` par jour |
+| Un client en litige ouvert ne reçoit aucune réponse automatisée. | **tenue** (c3_06, avec la fonction de C2) | c3_06 « en litige : toujours relue » |
+| Le client est reconnu à partir de son numéro ou de son adresse avant toute réponse. | **tenue** (historique des demandes ; le contrat et les interventions restent hors REPUT) | c3_06 « client reconnu » |
+| Chaque type de demande porte un délai de traitement que vous fixez. / Le délai dépassé fait remonter la demande au responsable du service. | **tenues** | c3_06 « délai de 2 h dépassé : la demande remonte » |
+| Les sujets qui reviennent sont remontés, et ils nourrissent la base de connaissances. | **tenue** | c3_06 point du matin |
+| Les avis obtenus après intervention sont comptés par service et par site. | **tenue** | vue reput_avis_indicateurs |
+| Les pièces jointes sont conservées et rattachées à la demande. | **tenue** (A2 les dépose ; l'écran les montre) | écran |
+| Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe. | **tenue à la demande** (CSV « ; », UTF-8, depuis l'écran) ; à date fixe : non | écran « Exporter vers un tableur » |
 | Une demande hors périmètre est transférée avec la fiche de son escalade. | **tenue** | alerte au client portant la demande ; c3_02 |
 | Chaque échange reste archivé, transféré ou non, et reste consultable. | **tenue** | `reput_demandes` + `reput_reponses` (versions), RLS ; c3_02 « Le gérant lit » |
 
@@ -213,6 +240,14 @@ Ordre de pose : `c3_05_accuse_avis_indicateurs.sql` → test `omega/tests/reput/
 2. `private.politique_couvrante` : sa source aussi (le libellé du type d'action est-il comparé tel quel ?).
 
 ## Journal de session
+
+- 06/10, ~22 h Z : C2 a posé son côté (worker-c2 ef9bc7d : événement cashd.facture_reglee ; 8b8fbb4 :
+  private.cashd_contact_en_litige, litige de compte, de facture ou contestation partielle). Charge et signature
+  conformes à c3_06 ; rien à changer chez REPUT. Facture soldée par disparition de l'export : non publiée (pas de
+  date de règlement sûre), décision C3.
+
+- 06/10, ~21 h 45 Z : c3_05 posé et vert (coordinateur). c3_06 écrit (CASHD, litige, délais, client reconnu,
+  récurrents, avis par site) ; souche 233/233 ; recette 5 largeurs verte. Demandes envoyées à C2.
 
 - 06/10, ~21 h Z : c3_02/c3_03 v2 et c3_04 posés et verts (coordinateur) ; écran fusionné dans main e197172.
   Palier 5 écrit (c3_05 + onglet Réglages et avis) ; souche 206/206 ; recette 5 largeurs verte.

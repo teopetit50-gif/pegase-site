@@ -61,6 +61,7 @@ export default function ReglagesAvis({ monde, source, client, role, relire, modi
       signature: r.signature, formule_appel: r.formule_appel, formule_politesse: r.formule_politesse, ton: r.ton,
       mention_automatisee: r.mention_automatisee, langues: r.langues, accuse: r.accuse, texte_accuse: r.texte_accuse,
       lien_avis: r.lien_avis, texte_avis: r.texte_avis,
+      ...(r.avis_auto_reglement !== undefined ? { avis_auto_reglement: r.avis_auto_reglement } : {}),
     };
     void agir("reglages", () => regler(client!.client_id, champs), (m) => ({ ...m, reglages: r }), "Réglages enregistrés : ils valent dès la prochaine réponse.");
   };
@@ -124,6 +125,10 @@ export default function ReglagesAvis({ monde, source, client, role, relire, modi
               </label>
               <label className="rv-libelle">Lien de votre page d&apos;avis (https)
                 <input className="rv-champ" disabled={!dirige} value={r.lien_avis ?? ""} onChange={(e) => setR({ ...r, lien_avis: e.target.value })} placeholder="https://g.page/r/…/review" />
+              </label>
+              <label className="rv-libelle" style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <input type="checkbox" disabled={!dirige} checked={!!r.avis_auto_reglement} onChange={(e) => setR({ ...r, avis_auto_reglement: e.target.checked })} />
+                Demander un avis automatiquement après chaque facture réglée (relances d&apos;impayés CASHD)
               </label>
               <label className="rv-libelle">Texte de la demande d&apos;avis
                 <textarea className="rv-champ" rows={2} disabled={!dirige} value={r.texte_avis} onChange={(e) => setR({ ...r, texte_avis: e.target.value })} />

@@ -33,7 +33,8 @@ export const SUJETS_EXEMPLE: Sujet[] = [
   ["devis", "Demande de devis", true], ["information", "Renseignement", true], ["suivi", "Suivi d'un dossier", true],
   ["avis", "Avis et retours", true], ["reclamation", "Réclamation", false], ["urgence", "Urgence", false],
   ["humain", "Parler à une personne", false], ["autre", "Autre", false],
-].map(([code, libelle, autorisable], i) => ({ code: code as string, libelle: libelle as string, description: null, autorisable: autorisable as boolean, actif: true, ordre: (i + 1) * 10 }));
+].map(([code, libelle, autorisable], i) => ({ code: code as string, libelle: libelle as string, description: null, autorisable: autorisable as boolean, actif: true, ordre: (i + 1) * 10,
+               delai_heures: code === "urgence" ? 1 : code === "reclamation" || code === "humain" ? 4 : 24 }));
 
 function demande(n: number, canal: Demande["canal"], nom: string, adresse: string | null, recu: string, extra: Partial<Demande>): Demande {
   return {
@@ -57,7 +58,8 @@ export function mondeExemple(): Monde {
   const d1 = demande(1, "email", "Marie Durand", "marie.durand@exemple.fr", ilYa(1, 21), { objet: "Ouverts samedi ?", sujet: "horaires" });
   const d2 = demande(2, "whatsapp", "Karim B.", "+33 6 12 34 56 78", ilYa(1, 19), { sujet: "tarifs", statut: "envoyee", decidee_le: ilYa(1, 19), envoyee_le: ilYa(1, 19) });
   const d3 = demande(3, "formulaire", "Luc Martin", "luc.martin@exemple.fr", ilYa(0, 7), { objet: "Formulaire du site", sujet: "devis", couverte: false });
-  const d4 = demande(4, "email", "Hélène Roux", "h.roux@exemple.fr", ilYa(0, 8), { objet: "Pose non terminée", sujet: "reclamation", urgence: false });
+  const d4 = demande(4, "email", "Hélène Roux", "h.roux@exemple.fr", ilYa(0, 8), { objet: "Pose non terminée", sujet: "reclamation", urgence: false,
+                                                                                  de_empreinte: "exemple-roux", litige: true, escaladee_le: ilYa(0, 12) });
   const d5 = demande(5, "formulaire", "Bernard", null, ilYa(0, 6), { objet: "Formulaire du site", sujet: "rendez_vous", statut: "a_traiter", couverte: false,
                                                                      motif: "Aucune adresse de réponse : à traiter par une personne." });
   const receptions: Record<number, Reception> = {
@@ -67,8 +69,9 @@ export function mondeExemple(): Monde {
             corps: "Bonsoir, c'est combien pour que vous veniez voir ma porte d'entrée qui frotte ?" },
     9003: { id: 9003, canal: "formulaire", de_nom: "Luc Martin", de_adresse: "luc.martin@exemple.fr", sujet: "Formulaire du site", recu_le: d3.recu_le, pieces: [],
             corps: "Bonjour, je refais ma cuisine (4 m linéaires, chêne). Pouvez-vous me faire un devis pour les façades et le plan de travail ?" },
-    9004: { id: 9004, canal: "email", de_nom: "Hélène Roux", de_adresse: "h.roux@exemple.fr", sujet: "Pose non terminée", recu_le: d4.recu_le, pieces: [],
-            corps: "Votre poseur devait finir le dressing mardi, personne n'est venu et personne ne m'a prévenue. Je commence à perdre patience." },
+    9004: { id: 9004, canal: "email", de_nom: "Hélène Roux", de_adresse: "h.roux@exemple.fr", sujet: "Pose non terminée", recu_le: d4.recu_le,
+            corps: "Votre poseur devait finir le dressing mardi, personne n'est venu et personne ne m'a prévenue. Je commence à perdre patience.",
+            pieces: [{ nom: "photo-dressing.jpg" }] },
     9005: { id: 9005, canal: "formulaire", de_nom: "Bernard", de_adresse: null, sujet: "Formulaire du site", recu_le: d5.recu_le, pieces: [],
             corps: "Rappelez-moi pour un rendez-vous, au 06 00 00 00 00." },
   };
@@ -102,6 +105,7 @@ export function mondeExemple(): Monde {
       texte_accuse: "Nous avons bien reçu votre message. Notre équipe vous répond au plus vite.",
       lien_avis: "https://g.page/r/atelier-bertin/review",
       texte_avis: "Merci de nous avoir fait confiance. Votre avis aide d'autres clients à nous choisir : il prend une minute.",
+      avis_auto_reglement: true,
     },
     avis: [
       { id: "00000000-0000-4000-8000-00000000c3b1", canal: "email", adresse: "m.lefevre@exemple.fr", nom: "M. Lefèvre", reference: "F-2026-118",
