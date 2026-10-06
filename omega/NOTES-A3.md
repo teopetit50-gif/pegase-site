@@ -439,6 +439,21 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
   le Next local : écrans d'A3 tout passe ; 15 constats sur les B (12 axe +
   3 cadres défilants). Recette 190 ✓, accessibilité ✓.
 
+## Vérifié en ligne (06/10, ~06 h 15 Z) — omegaai.fr, main 99c37b6
+
+`node omega/recette-a3/verifier-en-ligne.mjs https://omegaai.fr`, après
+reprise de main : **181 ✓, 0 échec, 0 constat** — les onze écrans (A3 et
+B) répondent 200, sans débordement aux cinq largeurs, sans écart axe grave
+à 390 et 1440, zones défilantes atteignables ; les phrases des lots de la
+nuit sont dans les pages servies (« Décider en lot », « Le dossier »,
+« Ouvrir le dossier », « Fournisseurs », « À payer », « Identifiants lus sur
+la pièce, non retenus », « Saisir les vrais identifiants », « Les
+fournisseurs que FILED connaît », « Noter un paiement », « Payée en
+partie »…). Sortie brute : `omega/recette-a3/en-ligne-2026-10-06.txt`.
+Correctif du script : sur le site servi (plus lent), attendre que l'espace
+soit rendu (`.esp h1`) plutôt qu'un délai fixe ; un axe qui ne tourne pas est
+dit au lieu de planter.
+
 ## Bloqué / contourné
 
 - **Outil Supabase (MCP)** : la permission d'exécuter du SQL a été refusée

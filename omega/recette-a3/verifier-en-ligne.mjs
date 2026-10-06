@@ -61,8 +61,9 @@ for (const [cle, chemin, aA3, phrases] of ECRANS) {
   if (statut !== 200) continue;
   for (const largeur of LARGEURS) {
     const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `a3-ligne-${cle}`, densite: 1 });
-    await s.aller(base + chemin);
-    await s.dormir(1200);
+    /* le site servi est plus lent que le serveur local : on attend que l'espace soit rendu, pas un délai fixe */
+    await s.aller(base + chemin, { signe: `document.readyState === 'complete' && !!document.querySelector('.esp h1')` });
+    await s.dormir(1500);
     const m = await s.evaluer(`(() => {
       const w = document.documentElement.clientWidth;
       const dansCadre = (e) => !!e.closest('.esp-tableau-cadre') && e !== e.closest('.esp-tableau-cadre');
@@ -76,7 +77,9 @@ for (const [cle, chemin, aA3, phrases] of ECRANS) {
     if (largeur === 390) { const d = await s.evaluer(DEFILANTES); dire(d.length === 0, `390 : zones qui défilent atteignables au clavier${d.length ? ' — sauf ' + d.join(', ') : ''}`); }
     if (largeur === 390 || largeur === 1440) {
       await s.evaluer(axe + ';true');
-      const v = await s.evaluer(`(async () => (await axe.run(document.querySelector('.esp'), { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] })).violations.map(x => ({ id: x.id, impact: x.impact, n: x.nodes.length })))()`);
+      const r = await s.evaluer(`(async () => { try { return (await axe.run(document.querySelector('.esp') ?? document.body, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] })).violations.map(x => ({ id: x.id, impact: x.impact, n: x.nodes.length })); } catch (e) { return String(e && e.message || e); } })()`);
+      if (!Array.isArray(r)) { dire(false, `${largeur} : axe n'a pas tourné (${r})`); s.fermer(); continue; }
+      const v = r;
       const graves = v.filter((x) => x.impact === 'serious' || x.impact === 'critical');
       dire(graves.length === 0, `${largeur} : axe, ${graves.length} écart(s) grave(s)${graves.length ? ' — ' + graves.map((x) => `${x.id} ×${x.n}`).join(', ') : ''}${v.length > graves.length ? `, ${v.length - graves.length} mineur(s)` : ''}`);
     }
