@@ -385,7 +385,7 @@ On contrôle à six **paliers** plutôt qu'après chacune des quelque 110 lignes
 - **P2**, après `socle_lot19h` (20261005182000) ;
 - **P3**, après `socle_lot19z` (20261005215301) ;
 - **P4**, après `b3_06_v2` (20261006003701) ;
-- **P5**, après `filed_realtime_fournisseurs` (20261006134231) ;
+- **P5**, après `daliro_b6_11_vues_invoker` (20261006142703), dernière ligne de l'étape B ;
 - **P6**, après l'étape C.
 
 À chaque palier :
