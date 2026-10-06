@@ -457,3 +457,85 @@ export type AccordJ2 = {
   /* b6_09 : le lecteur est-il le seul décideur (gérant, admin, valideur) de l'organisation ? */
   seul_decideur?: boolean;
 };
+
+/* b6_17 : le pointage des heures et la rentabilité du chantier (public.btp_heures_chantier) */
+export type IntervenantHeures = {
+  id: string;
+  nom: string;
+  role_terrain: "chef_equipe" | "compagnon" | "conducteur" | "autre";
+  actif: boolean;
+  equipe_id: string | null;
+  equipe_nom: string | null;
+};
+export type Pointage = {
+  id: string;
+  intervenant_id: string;
+  jour: string;
+  lot_id: string | null;
+  heures: number;
+  note: string | null;
+  source: "saisie" | "equipe" | "message";
+};
+export type RentabiliteLot = {
+  lot_id: string | null;
+  code: string | null;
+  libelle: string;
+  vendu_ht: number;
+  facture_ht: number;
+  heures: number;
+  main_oeuvre_ht: number;
+  heures_sans_cout: number;
+  achats_ht: number;
+  debourse_ht: number;
+  marge_ht: number;
+};
+export type Rentabilite = {
+  vendu_ht: number;
+  facture_ht: number;
+  heures: number;
+  heures_sans_cout: number;
+  main_oeuvre_ht: number;
+  achats_ht: number;
+  debourse_ht: number;
+  marge_ht: number;
+  marge_taux: number | null;
+  lots: RentabiliteLot[];
+};
+export type HeuresChantier = {
+  chantier_id: string;
+  lundi: string;
+  jours: string[];
+  intervenants: IntervenantHeures[];
+  equipes: { id: string; nom: string }[];
+  pointages: Pointage[];
+  semaine_heures: number;
+  total_heures: number;
+  voit_prix: boolean;
+  cout_defaut: number | null;
+  rentabilite: Rentabilite | null;
+};
+/* Le retour d'un pointage : les totaux de l'intervenant et les alertes du Code du travail. */
+export type RetourPointage = { jour_total: number; semaine_total: number; alertes: string[] };
+
+/* b6_19 : le recalage du planning (public.btp_proposer_recalage, btp_recaler, btp_terminer_passage) */
+export type DeplacementPassage = {
+  passage_id: string;
+  tache: string | null;
+  lot_id: string | null;
+  intervenant: string | null;
+  ancien_debut: string;
+  ancien_fin: string;
+  nouveau_debut: string;
+  nouveau_fin: string;
+  reconfirmer: boolean;
+  exterieur: boolean;
+};
+export type Recalage = {
+  passage_id: string;
+  chantier_id: string;
+  nouvelle_fin: string;
+  deplaces: DeplacementPassage[];
+  nombre: number;
+  fin_planning: string | null;
+  fin_prevue_chantier: string | null;
+};

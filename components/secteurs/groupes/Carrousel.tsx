@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { SiEnPreparation } from "@/components/ui/en-preparation";
 import { AUDIT, CARROUSEL } from "./textes";
 
 const deux = (n: number) => String(n).padStart(2, "0");
@@ -34,6 +35,7 @@ export default function Carrousel() {
           {c.role}
           <br />
           <span>{c.liste}</span>
+          <SiEnPreparation pour="varelo" t={c.liste} />
         </p>
         <Link href={AUDIT}>{CARROUSEL.lien} ↗</Link>
       </article>

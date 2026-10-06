@@ -393,7 +393,7 @@ export const POSTS: Post[] = [
       },
       {
         h: "Le choix Omega.AI : un espace dédié par client",
-        p: "Chez Omega.AI, chaque entreprise a son espace de données propre : chiffré, hébergé dans l'Union européenne, strictement séparé de celui des autres clients. Vous gardez vos outils de tous les jours (messagerie, tableur, WhatsApp), et c'est là que les systèmes agissent. Les modèles d'intelligence artificielle utilisés reçoivent le strict nécessaire à chaque tâche, jamais l'intégralité d'un fichier, et rien n'est réutilisé à d'autres fins.",
+        p: "Chez Omega.AI, chaque entreprise a son espace de données propre : chiffré, hébergé dans l'Union européenne, strictement séparé de celui des autres clients. Vous gardez vos outils de tous les jours (messagerie, tableur, WhatsApp), et c'est là que les systèmes agissent. Les modèles d'intelligence artificielle utilisés ne reçoivent que la pièce à lire, jamais le reste de votre espace, et rien n'est réutilisé à d'autres fins.",
       },
       {
         h: "Ce que cela change concrètement",

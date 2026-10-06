@@ -868,3 +868,42 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   b1_10 2/2, b5_05/06 2/2, 44 vert ; **b2_15 rouge** (loc_completer_locataire l. 32 : 22P02 « malformed
   array literal: siren » → B2 b2_06b). Main a264a45 : facture imprimable Tamila, Ce matin Varelo, lots
   Lorani (en ligne au retour du quota). C1 informé des nouveaux écrans et des modules CASHD/REPUT/OFFLOAD.
+- 16 h 55 Z — Poses (toutes vertes sauf mention) : a4_20 + a4_13 (e749aa5, courriel → FILED), a4_21 + a4_14
+  (f184edc, pièces filles), b2_07 + test 16 (0e2cc89), b4_10 + test 19 (e39e4ef, avis par courriel), b6_17 +
+  b6_11 (c706dcb, heures), b6_18 + b6_12 (c3ab533), c3_01 + c3_00 + c3_01_base (C3 0419e27), b3_15 + test 16
+  (72ec683 : **rouge**, préparation du test — daf2 valideur ne peut être direction → B3). 44, 46, 51 verts.
+  Fonctions : lecteur v24 (A1 df07435 : découpage, TVA débits, contre-valeur, mentions), identite v5 (B7
+  4ed0bff, sans effet tant que les CHECK ne sont pas élargis), tamila-purge v1 (b4b664e) + cron
+  omega-tamila-purge */5. Boîte cabinet-banc@recu.omegaai.fr (module tamila). Main f733c22.
+  Décisions : A5 19ai (réceptions lisibles selon le module, Tamila : pas les murés) ; A4 a4_22 (CHECK
+  uid_ch/hmrc, retrait de l'ancienne contrainte posé à part) ; A2 autorisé à écrire 19aj_messageries
+  (statut brouillon_depose) ; Gmail en régime Test, CASA = décision de Teo ; Microsoft 365 ensuite.
+  À dire à Teo : frais de gestion d'avis de contravention à mettre dans les CGV des loueurs.
+- 17 h 20 Z — Poses : b5_16 + b5_07 (a05f77c, contrôle du dossier Lorani), a4_22 + a4_15 (30d3991, FEC
+  autoliquidation / devise / extourne), a4_23 + a4_16 (11c1f8b, recontrôle 3 voies), b1_08 + b1_11 (fdd8e5c,
+  groupe sur une page), socle 19ai compteurs facturation (731eb98), 19aj export complet (27d1ad9), 19ak
+  réceptions confidentielles par module (72bc763), b4_11 + test 20 (814adee), b3_15 v2 + b3_16 (3dd4b88).
+  **c4_01 (C4 7c8c520) REFUSÉ** : modeles_jeux_coherent (clé « reference » facultative) → C4.
+  Tests verts : b5_07, a4_22 ×3, b1_10/11, 57, b4_20, 44, 46, 51. Rouges (préparation des tests) :
+  a4_23_02/03 (filed_receptions.entite_id NOT NULL → A4), 56 (sha256 en double → A5), 58 (fournisseur
+  essai_a5 inconnu → A5), b3_16/17 (daf2 « direction » refusé → B3).
+  Fonctions : lecteur v25 (A1 f893452 : Lorani), tamila-purge v2 (fab4e01), export-complet v1 (27d1ad9).
+  Main f77a674. C1 : phase 2 finie (5e64be7, 13 écrans, 368/368), prévisualisation refusée par le quota ;
+  captures envoyées à Teo.
+  **Bloqué, pour Teo** : la sauvegarde vers Scaleway (A5). Le contrôle des permissions de la session A5 a
+  refusé un workflow qui envoie les dumps de la prod hors de GitHub. Il faut l'accord explicite de Teo.
+  Numéros : a4_24 = CHECK uid_ch / hmrc + comptes système ; 19al = messageries d'A2. B7 : ouvrier taux BCE.
+- 17 h 50 Z — Poses : tests 56/58 v2 (b6ccec2 : 58 vert, 56 rouge pieces_rattachee_avant_lecture → A5),
+  b3_17 + 18 (3b51e28, vert), c3_02 + c3_03 + banc_reput (54ec0ce : tests rouges, garder_envoi refuse
+  « envoye » → C3 passe par commencer/confirmer_envoi), b4_12 + 21 (385e77c, vert), b1_09 + b1_12 (68f7d46,
+  6/6), b6_19 + b6_13 (9ad8930, vert), a4_24 + a4_17 (e3eaac3 : 2/3, filed_fournisseurs.code NOT NULL → A4),
+  b7_07 + b7_08 (67fd7ff, vert), b2_08 + 17 (981144c, vert ; b2_15 toujours rouge, b2_06b attendu).
+  **c2_01 (C2 d23388e) REFUSÉ** : modeles_jeux_coherent, comme C4 → C2.
+  Fonctions : taux-bce v1 (67fd7ff) + crons omega-taux-bce (35 14,15 * * 1-5) et taux-bce-veille ;
+  tavaro-pdf v1 (981144c) + cron chaque minute ; reput-reponse v1 (54ec0ce) + cron omega-reput ; lecteur
+  v26 (A1 c81a6d2, analyses inertes sans LECTEUR_ANALYSES).
+  omega/SOCLE-EXTRAITS-ENVOIS.sql (959f115) : 24 fonctions du socle, pour A2 et C3.
+  Main : vitrine honnête C5 (a803fd1) + écrans Tamila temps proposé, Varelo reportings, Daliro recalage,
+  Lorani contrôle du dossier → a4521d5 (non poussé : test 44 en cours).
+  **Test 44 dépasse 2 min** sur la recette → relancé avec statement_timeout 15 min (job g60) ; A5 doit
+  l'accélérer. Numéros : A4 a4_25 = CHECK uid_ch/hmrc + comptes système ; A2 19al.

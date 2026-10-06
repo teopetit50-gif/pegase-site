@@ -42,13 +42,20 @@ export const FAMILLES_OUTILS: Famille[] = [
   "Site web",
 ];
 
-type Fiche = { famille: Famille; role: string };
+/* `statut` (C5, 06/10/2026, omega/AUDIT-PROMESSES.md § 0 et § 3, points 10 et
+   13) : « preparation » = le raccordement est en construction (A2) ;
+   « demande » = l'outil se raccorde à la demande d'un client, aucun connecteur
+   n'existe encore. Sans statut : le code du raccordement existe. La grille
+   affiche la pastille correspondante ; on retire le statut quand l'ouvrier
+   livre (relevé dans omega/NOTES-C5.md). */
+type Fiche = { famille: Famille; role: string; statut?: "preparation" | "demande" };
 
 /* Clé = le `title` exact de simple-icons (voir OUTILS dans MediaMoteurs). */
 export const OUTIL_INFOS: Record<string, Fiche> = {
   Gmail: {
     famille: "Messagerie",
-    role: "Le système lit les fils entrants, rédige les relances et les dépose en brouillon dans la messagerie. L'envoi reste le geste de vos équipes.",
+    role: "Le système lit les fils entrants, rédige les relances et les dépose en brouillon dans votre file de validation Omega. L'envoi reste le geste de vos équipes.",
+    statut: "preparation",
   },
   WhatsApp: {
     famille: "Messagerie",
@@ -57,66 +64,82 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   Telegram: {
     famille: "Messagerie",
     role: "Canal de notification : le point du matin et les alertes de retard critique arrivent là où vos équipes regardent déjà.",
+    statut: "demande",
   },
   "Google Sheets": {
     famille: "Tableur & base",
     role: "Beaucoup de services pilotent encore leur encours dans un tableur. Le système y lit les échéances et y réécrit l'état de chaque relance.",
+    statut: "demande",
   },
   Airtable: {
     famille: "Tableur & base",
     role: "Même rôle qu'un tableur, avec des vues par statut, utile quand plusieurs services suivent le même encours.",
+    statut: "demande",
   },
   Notion: {
     famille: "Tableur & base",
     role: "Base de connaissances de REPUT : horaires, tarifs, conditions. Le système y puise ses réponses au lieu de les inventer.",
+    statut: "demande",
   },
   "Google Drive": {
     famille: "Fichiers",
     role: "Dépôt des pièces classées : chaque facture fournisseur extraite est rangée par émetteur et par mois, prête pour la comptabilité.",
+    statut: "demande",
   },
   Dropbox: {
     famille: "Fichiers",
     role: "Même classement des pièces, quand vos dossiers vivent déjà là.",
+    statut: "demande",
   },
   Stripe: {
     famille: "Paiement",
     role: "Le système lit les encaissements et cesse de relancer une facture réglée, ce qui évite la relance de trop.",
+    statut: "demande",
   },
   PayPal: {
     famille: "Paiement",
     role: "Même lecture des encaissements, pour les activités qui facturent par ce canal.",
+    statut: "demande",
   },
   Shopify: {
     famille: "E-commerce",
     role: "OFFLOAD lit l'historique de commandes pour identifier les clients inactifs et les classer par valeur et par récence.",
+    statut: "demande",
   },
   WooCommerce: {
     famille: "E-commerce",
     role: "Même exploitation de l'historique de commandes, pour les sites marchands sous WordPress.",
+    statut: "demande",
   },
   "Google Calendar": {
     famille: "Agenda",
     role: "REPUT propose des créneaux réellement libres et pose le rendez-vous, sans double réservation.",
+    statut: "demande",
   },
   Calendly: {
     famille: "Agenda",
     role: "Quand la prise de rendez-vous passe déjà par là, le système s'y connecte plutôt que d'ouvrir un second canal.",
+    statut: "demande",
   },
   "Google Meet": {
     famille: "Agenda",
     role: "Lien de visio généré à la confirmation du rendez-vous, joint au message de rappel.",
+    statut: "demande",
   },
   Zoom: {
     famille: "Agenda",
     role: "Même génération de lien, pour les entreprises déjà équipées.",
+    statut: "demande",
   },
   QuickBooks: {
     famille: "Comptabilité",
     role: "Les pièces classées partent en dossier complet, avec leurs champs comptables extraits, sans ressaisie ni pièce manquante.",
+    statut: "demande",
   },
   Sage: {
     famille: "Comptabilité",
     role: "Même transmission structurée vers la comptabilité, au format attendu par l'outil.",
+    statut: "demande",
   },
   /* ⚠ 14/08/2026 — la fiche n8n a été RETIRÉE. Elle disait « le socle sur
      lequel tournent les moteurs » : c'était nommer notre outil interne sur
@@ -125,44 +148,54 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   Zapier: {
     famille: "Automatisation",
     role: "Passerelle vers les outils métier qui ne sont pas raccordés en direct.",
+    statut: "demande",
   },
   Trello: {
     famille: "Projet & CRM",
     role: "Chaque relance sans réponse peut ouvrir une carte à traiter, pour que rien ne se perde entre deux dossiers.",
+    statut: "demande",
   },
   Asana: {
     famille: "Projet & CRM",
     role: "Même remontée des dossiers à reprendre à la main, quand le suivi passe par là.",
+    statut: "demande",
   },
   HubSpot: {
     famille: "Projet & CRM",
     role: "Les réponses de prospection sont classées par niveau d'intérêt et écrites dans la fiche du contact.",
+    statut: "demande",
   },
   /* clé « MailChimp » avec un C majuscule : c'est le `title` exact de
      simple-icons, et la fiche était silencieusement écartée sans lui */
   MailChimp: {
     famille: "Projet & CRM",
     role: "Les vagues de réactivation partent sous votre marque, avec le suivi d'ouverture et de désinscription.",
+    statut: "demande",
   },
   Typeform: {
     famille: "Formulaires",
     role: "Une réponse à un formulaire déclenche la chaîne : qualification, accusé de réception, puis suivi.",
+    statut: "demande",
   },
   "Google Forms": {
     famille: "Formulaires",
     role: "Même déclenchement, pour les entreprises qui collectent déjà par ce biais.",
+    statut: "demande",
   },
   Facebook: {
     famille: "Réseaux sociaux",
     role: "Publication programmée aux heures d'audience, à partir du calendrier éditorial validé avec vous.",
+    statut: "demande",
   },
   Instagram: {
     famille: "Réseaux sociaux",
     role: "Même programmation, déclinée au format du réseau.",
+    statut: "demande",
   },
   WordPress: {
     famille: "Site web",
     role: "Les demandes reçues par le formulaire du site entrent dans le même circuit que le reste.",
+    statut: "demande",
   },
 };
 

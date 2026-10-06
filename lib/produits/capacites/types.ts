@@ -15,9 +15,10 @@
    · `false` — elle est ÉCRITE MAIS PAS CONSTRUITE. Décision de Teo du
      14/09 : « pour l'instant le site ne va pas être en ligne, donc on peut
      mettre des trucs faux, on modifiera une fois qu'on le partagera ».
-   Le drapeau n'est PAS rendu sur la page : il vit dans la donnée pour
-   qu'on retrouve mécaniquement, avant tout partage, ce qui reste à
-   construire ou à retirer. Le relevé complet est dans
+   06/10/2026 (C5) : le drapeau EST rendu — une ligne à `false` porte la
+   pastille « En préparation » (components/ui/en-preparation.tsx). Règle de
+   Teo : rien n'est retiré, on livre ; le coordinateur bascule `true` sur
+   preuve de l'ouvrier (omega/AUDIT-PROMESSES.md), et la pastille tombe. Le relevé complet est dans
    `CAPACITES-A-VALIDER.md`, à la racine du banc, et il se régénère par
    `node outils/capacites-a-valider.mjs`.
 

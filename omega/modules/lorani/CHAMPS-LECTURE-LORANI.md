@@ -45,3 +45,29 @@ Exemple attendu pour le récépissé déposé le 06/10 (`omega/recette-b5/courri
    {"champ": "type_autorisation", "valeur": "pcmi", "texte": "maison individuelle et/ou ses annexes (PCMI)", "page": 1, "verifiee": true, "source": "ia", "confiance": 0.9}
  ]}
 ```
+
+## Le contrôle du dossier : planches, CCTP, DPGF, règlement du PLU (b5_16, avec A1)
+
+Un **contrôle** rassemble N pièces d'un projet (un dossier de permis, un DCE) à un indice donné. Le lecteur lit chaque
+pièce et rend ce qu'il y mesure ; le socle (`private.lorani_controler`) croise les mesures entre elles et contre les
+règles, et pose des **constats** avec la page, la valeur, l'article et la correction proposée. Le lecteur ne juge rien :
+il cite.
+
+| `type_piece` | La pièce | Champs rendus (une ligne par champ, règle commune) |
+|---|---|---|
+| `lorani_planche` | Une planche graphique : plan de masse, plans de niveaux, coupes, façades, notice (PC1 à PC8, PCMI1 à PCMI8, planches de DCE) | `reference` (« PC2 », « A-102 ») ; `indice` ; et une ligne **par mesure lue** : `mesure.<grandeur>.<objet>` |
+| `lorani_cctp` | Le cahier des clauses techniques particulières (par lot) | `lot` ; une ligne par poste décrit : `poste.<référence>` (valeur = intitulé du poste, texte = la citation) ; et les mesures écrites : `mesure.<grandeur>.<objet>` |
+| `lorani_dpgf` | La décomposition du prix global et forfaitaire (par lot) | `lot` ; une ligne par poste chiffré : `poste.<référence>` (valeur = quantité canonique, texte = la ligne) |
+| `lorani_plu_reglement` | Le règlement écrit du PLU (zone du terrain) | `zone` (« UB ») ; par règle chiffrée : `regle.<grandeur>.max` ou `regle.<grandeur>.min` (valeur canonique), et `regle.<grandeur>.article` (« UB 10 ») |
+
+- `<grandeur>` (vocabulaire fermé, l'unité fait partie du nom) : `hauteur_faitage_m`, `hauteur_egout_m`,
+  `hauteur_acrotere_m`, `recul_voie_m`, `recul_limite_m`, `distance_batiments_m`, `emprise_sol_m2`,
+  `emprise_sol_pct`, `surface_plancher_m2`, `surface_taxable_m2`, `espaces_verts_pct`, `pleine_terre_pct`,
+  `stationnement_nb`, `logements_nb`, `niveaux_nb`, `pente_toiture_pct`, `longueur_m`, `largeur_m`,
+  `cote_altimetrique_m` (NGF). Une grandeur hors liste est ignorée par le socle (à demander au coordinateur).
+- `<objet>` : ce que la mesure qualifie, en minuscules sans accent : `projet` (le tout), `batiment_a`, `facade_sud`,
+  `niveau_r1`, `limite_nord`, `voie_rue_x`… Deux pièces qui mesurent la même chose doivent rendre le **même objet** :
+  c'est la clé du croisement. Pour une grandeur du projet entier (`surface_plancher_m2`), `projet`.
+- `<référence>` d'un poste : le numéro d'article tel qu'écrit, normalisé (`2.3.1` → `2_3_1`, `GO.04` → `go_04`).
+- Valeurs canoniques : nombre avec un point (`9.85`, `312.40`), sans unité. `page` et `boite` obligatoires sur
+  chaque mesure : le constat renvoie l'architecte à l'endroit exact.

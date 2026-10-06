@@ -322,6 +322,56 @@ export type Visa = {
   vise_le: string | null;
 };
 
+/* le contrôle du dossier (b5_16) : les pièces croisées, ce qui est relevé, ce qui est décidé */
+export type RolePieceControle = "planche" | "cctp" | "dpgf" | "plu" | "autre";
+export type Controle = {
+  id: string;
+  projet_id: string;
+  intitule: string;
+  indice: string;
+  precedent_id: string | null;
+  statut: "en_lecture" | "controle" | "clos";
+  lance_le: string | null;
+  constats_nb: number;
+  cree_le: string;
+};
+export type ControlePiece = {
+  id: string;
+  controle_id: string;
+  piece_id: string;
+  role: RolePieceControle;
+  reference: string | null;
+};
+/* une valeur citée : la pièce, la page, la boîte et le texte lu ; « regle » pour le seuil du PLU */
+export type ValeurCitee = {
+  piece?: string;
+  reference?: string | null;
+  page?: number | null;
+  valeur?: number | string | null;
+  texte?: string | null;
+  borne?: "max" | "min";
+  article?: string | null;
+  regle?: boolean;
+};
+export type Constat = {
+  id: string;
+  controle_id: string;
+  nature: "incoherence" | "plu" | "cctp_dpgf";
+  gravite: "bloquant" | "majeur" | "mineur";
+  grandeur: string | null;
+  objet: string | null;
+  titre: string;
+  correction: string | null;
+  article: string | null;
+  valeurs: ValeurCitee[];
+  statut: "ouvert" | "corrige" | "accepte" | "ecarte";
+  motif: string | null;
+  precedent_id: string | null;
+  corrige_au_controle: string | null;
+  decide_par: string | null;
+  decide_le: string | null;
+};
+
 /* tout ce que l'écran montre, d'une source ou de l'autre */
 export type Dossier = {
   projets: Projet[];
@@ -339,6 +389,9 @@ export type Dossier = {
   marches: Marche[];
   situations: Situation[];
   visas: Visa[];
+  controles: Controle[];
+  controlePieces: ControlePiece[];
+  constats: Constat[];
   /* user_id → nom (annuaire) */
   noms: Record<string, string>;
   /* le compte de la personne connectée (base réelle) */

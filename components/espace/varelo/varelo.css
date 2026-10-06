@@ -162,7 +162,12 @@
   gap: 14px 22px;
   margin-top: 8px;
 }
-@media (min-width: 1024px) {
+@media (min-width: 768px) {
+  .esp .vrl-matin-blocs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1440px) {
   .esp .vrl-matin-blocs {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -190,4 +195,13 @@
 }
 .esp .vrl-matin-liste li[data-gravite="attention"] {
   border-left-color: var(--esp-ambre);
+}
+
+/* une case à cocher dans un formulaire (b1_09) */
+.esp-form .vrl-case,
+.dlg-panneau .vrl-case {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-weight: 400;
 }

@@ -438,6 +438,73 @@ pour qu'il serve CHAQUE JOUR et qu'on le paie, par ordre d'importance :
   « Imprimer » sur chaque facture de la carte Honoraires. Recette 99/99 (9 sur la facture imprimée), axe-core
   0 écart. **Rien ne part au serveur** : nom du client et détail du temps restent dans le navigateur.
 
+## 15. La porte d'entrée automatique des avis : le canal courriel du socle (lot B4-11, 06/10)
+
+Décision du coordinateur : pas d'API e-barreau ouverte, on n'en invente pas. Le cabinet fait suivre ses
+notifications RPVA vers son adresse de réception (ligne `expediteurs`, module tamila, à créer par le
+coordinateur, du type `cabinet-x@recu.omegaai.fr`) ; `deposer_reception` publie `reception.nouvelle`.
+
+- **Base** (e39e4ef) : `b4_10_tamila_avis_entrants.sql` — table `tamila_avis_entrants` (une ligne par réception,
+  sans un mot en clair : type supposé en code, nombre de pièces, statut `a_rattacher|rattache|ecarte|expire`,
+  dossier, pièces chiffrées, échéance à 7 jours) ; abonnement `reception.nouvelle → tamila` ; portes
+  `tamila_rattacher_avis` (les pièces doivent être des pièces chiffrées du dossier), `tamila_ecarter_avis`
+  (avocats) ; purge : la réception passe `traitee`, sujet, corps et expéditeur vidés, et un travail
+  `tamila.purger_reception` est déposé ; passage `tamila-receptions` toutes les 5 min (pg_cron) : au-delà de 7
+  jours, `expire` + purge + alerte critique. Portes serveur `tamila_reception_a_purger` /
+  `tamila_reception_purgee` (service_role seul). Sans drop, sans effacement SQL, revoke from public partout.
+  Test `19_avis_entrants.sql` : 28 contrôles, verts sur la souche (série locale 440/440).
+- **Ouvrier** (b4b664e) : `omega/functions/tamila-purge/` — prend les travaux `tamila.purger_reception`,
+  efface au bucket les fichiers de `<client>/receptions/` (chemins hors de ce préfixe ignorés), puis
+  `tamila_reception_purgee`. 4 tests Deno. Aucun secret propre (clé service du socle). À déployer, et à
+  appeler toutes les 5 minutes comme les autres ouvriers.
+- **Écran** : `AvisEntrantsTamila.tsx`, au-dessus des compteurs (gérant, admin, valideur, collaborateur ; pas
+  le stagiaire). Le n° RG cité par le courriel est comparé dans le navigateur aux n° RG déchiffrés : dossier
+  proposé. L'avocat choisit ; chaque pièce jointe est téléchargée, chiffrée avec la clé du dossier (trousseau,
+  coffre ou phrase), déposée (`tamila_deposer_piece`, type d'avis choisi ou laissé au lecteur), puis
+  rattachée. Mention à l'écran : « L'avis transite en clair chez le prestataire de courriel et dans sa
+  réception le temps du rattachement, sept jours au plus ; dès qu'il est rattaché (ou écarté), cette copie
+  est effacée. » Recette 109/109 (10 sur la file), axe-core 0 écart grave (carte et dialogue).
+- **Limites, honnêtement** : (1) la politique RLS du socle sur `receptions` laisse tout membre du cabinet lire
+  la réception le temps qu'elle est en clair (stagiaire et membres murés compris) — à resserrer côté socle
+  si besoin ; (2) l'écran suppose que la politique SELECT du bucket laisse un membre télécharger
+  `<client>/receptions/…` — à vérifier en recette ; sinon il faut une URL signée par une fonction ;
+  (3) un courriel sans pièce jointe ne se rattache pas : il s'écarte et l'avis se saisit à la main.
+
+## 16. L'effacement réel des fichiers à la clôture (carnet du coordinateur, n° 1 ; lot B4-12, 06/10)
+
+Constat : la ronde horaire déposait `tamila.effacer_dossier`, `tamila.purger_export` et `tamila.detruire_cle`, mais
+aucun ouvrier ne les prenait ; et `tamila_effacer_dossier` posait sa preuve sans vérifier que les pièces chiffrées
+avaient quitté le bucket.
+
+- **Base** : `b4_11_tamila_effacement_fichiers.sql` — `tamila_dossier_a_effacer` (mêmes refus que
+  `tamila_effacer_dossier` : clôture approuvée, échéance atteinte ; prépare le manifeste ; rend les fichiers du
+  manifeste et tout objet resté sous `<client>/tamila_dossier/<dossier>/`, buckets des locataires seulement) ;
+  `tamila_effacer_dossier_verifie` (55000 tant qu'un fichier du dossier est au stockage, sinon
+  `tamila_effacer_dossier` et sa preuve) ; `tamila_fichiers_restants`. service_role seul, revoke from public.
+  Test `20_effacement_fichiers.sql` : 20 contrôles, verts sur la souche (la souche imite `preparer_effacement`).
+- **Ouvrier** : `tamila-purge` prend désormais quatre genres (réception, dossier, archive, clé). Dossier : liste →
+  effacement au bucket (rien hors de `<client>/`) → constat ; s'il reste un fichier, le travail est repris au
+  passage suivant, le dossier reste intact. Archive : fichier effacé puis `tamila_export_purge`. Clé :
+  `tamila_cle_detruite` (enveloppe mise à zéro). 8 tests Deno.
+- **Reste** : l'ancienne porte `tamila_effacer_dossier` reste appelable par le serveur sans la vérification (je ne
+  la réécris pas) ; l'ouvrier, lui, ne passe que par la porte vérifiée.
+
+## 17. Le temps proposé à la saisie, le forfait consommé (carnet du coordinateur, n° 2 ; lot B4-13, 06/10)
+
+- **Base** : `b4_12_tamila_temps_propose.sql` — `tamila_temps.origine` (« audience:<id> », « acte:<id> »,
+  « avis:<id> » ; un même événement une fois par personne tant que le temps n'est pas annulé) ;
+  `tamila_temps_ecartes` (ce que chacun a ignoré, lu par son auteur seul, effacé avec le dossier) ;
+  `tamila_conventions.minutes_prevues`. Portes `tamila_saisir_temps_propose` (l'événement doit être du dossier ;
+  passe par `tamila_saisir_temps`, mêmes règles), `tamila_ecarter_proposition`, `tamila_prevoir_forfait` (qui
+  gère le dossier, convention au forfait ou mixte). Test `21_temps_propose.sql` : 20 contrôles verts (souche).
+- **Écran** : `temps.ts` (propositions des soixante derniers jours : audience tenue ou passée — plaidoiries 2 h,
+  mise en état 30 min… ; acte déposé — conclusions 4 h, signification 30 min ; avis reçu — 15 min, conclusions
+  adverses 1 h de lecture ; l'accusé de dépôt n'est pas reproposé ; filtre par personne) et carte Honoraires :
+  « Proposé à la saisie » (Saisir ouvre le formulaire pré-rempli, Ignorer ne le propose plus) ; « Forfait
+  consommé » (jauge, temps passé de tous contre temps prévu, taux horaire effectif, alerte à 80 % et au
+  dépassement). Exemple : 2026-0377 au forfait, 17 h sur 20 h. Recette 124/124, axe 0 écart grave.
+- Les durées proposées sont des usages, corrigeables ; rien ne se saisit sans le geste de l'avocat.
+
 ## 7. Prochaine étape
 
 1. (fait : en ligne, vérifié le 06/10.)

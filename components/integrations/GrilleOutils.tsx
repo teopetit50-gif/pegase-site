@@ -2,6 +2,7 @@
 
 import { useRef, useState, type KeyboardEvent } from "react";
 import { motion, useReducedMotion } from "motion/react";
+import { EnPreparation } from "@/components/ui/en-preparation";
 import "./GrilleOutils.css";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -68,6 +69,8 @@ export type Outil = {
   path: string;
   famille: string;
   role: string;
+  /** C5, 06/10/2026 — pastille « En préparation » ou « Sur demande » (lib/integrations.ts). */
+  statut: "preparation" | "demande" | null;
 };
 
 export type Groupe = { famille: string; outils: Outil[] };
@@ -195,7 +198,12 @@ export default function GrilleOutils({
                     <path d={o.path} />
                   </svg>
                 </span>
-                <p className="go-nom">{o.title}</p>
+                <p className="go-nom">
+                  {o.title}
+                  {o.statut ? (
+                    <EnPreparation libelle={o.statut === "demande" ? "Sur demande" : "En préparation"} />
+                  ) : null}
+                </p>
                 <p className="go-role">{o.role}</p>
               </article>
             </motion.li>
