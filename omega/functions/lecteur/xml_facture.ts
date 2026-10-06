@@ -77,8 +77,13 @@ function typeDepuisCode(code: string | null, racine: "Invoice" | "CreditNote" | 
   return "facture";
 }
 
+/** Le début utile d'un XML : sans prologue ni commentaires (les exemples officiels FeRD ouvrent sur 5 Ko de licence). */
+export function debutUtile(xml: string, longueur = 4000): string {
+  return xml.slice(0, 200_000).replace(/<!--[\s\S]*?-->/g, "").replace(/<\?[\s\S]*?\?>/g, "").trimStart().slice(0, longueur);
+}
+
 export function estXmlFacture(xml: string): boolean {
-  return /CrossIndustryInvoice|<(\w+:)?Invoice[\s>]|<(\w+:)?CreditNote[\s>]/.test(xml.slice(0, 4000));
+  return /CrossIndustryInvoice|<(\w+:)?Invoice[\s>]|<(\w+:)?CreditNote[\s>]/.test(debutUtile(xml));
 }
 
 export function lireXmlFacture(xml: string): LectureXml | null {
@@ -272,6 +277,9 @@ function partieUbl(c: Collecteur, p: Noeud, prefixe: "fournisseur" | "acheteur",
     else c.texte(`${prefixe}.id_legal`, t, `${balise}/CompanyID`);
   }
   for (const ts of tous((premier(p) as Record<string, Noeud>)?.["PartyTaxScheme"])) {
+    // Seul le régime « VAT » porte le numéro de TVA ; « FC » (numéro fiscal national) ou autre n'en est pas un.
+    const regime = texte(noeud(ts, "TaxScheme.ID"));
+    if (regime && regime.toUpperCase() !== "VAT") continue;
     c.texte(`${prefixe}.tva`, noeud(ts, "CompanyID"), `${balise}/PartyTaxScheme/CompanyID`, (s) => s.replace(/[\s.\-]/g, "").toUpperCase());
   }
   c.texte(`${prefixe}.pays`, noeud(p, "PostalAddress.Country.IdentificationCode"), `${balise}/PostalAddress/Country`, (s) => s.toUpperCase());

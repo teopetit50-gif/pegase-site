@@ -1,6 +1,8 @@
 // Reconnaître la famille d'un fichier à ses premiers octets, puis au MIME
 // déclaré et au nom : les clients envoient ce qu'ils ont sous la main.
 
+import { debutUtile } from "./xml_facture.ts";
+
 export type Famille = "pdf" | "xml" | "image" | "tableur" | "texte" | "inconnu";
 export type FormatImage = "png" | "jpeg" | "gif" | "webp";
 
@@ -34,8 +36,10 @@ export function detecter(octets: Uint8Array, mime: string, nom: string): Detecti
   }
 
   const debut = new TextDecoder("utf-8", { fatal: false }).decode(octets.subarray(0, 512)).replace(/^﻿/, "").trimStart();
-  if (debut.startsWith("<?xml") || /^<[A-Za-z:]/.test(debut)) {
-    if (ext === "xml" || m.includes("xml") || /CrossIndustryInvoice|<Invoice|<CreditNote|urn:oasis/.test(debut)) return { famille: "xml" };
+  if (debut.startsWith("<?xml") || debut.startsWith("<!--") || /^<[A-Za-z:]/.test(debut)) {
+    // La racine peut venir après un long commentaire (licence des exemples FeRD) : on la cherche plus loin.
+    const racine = debutUtile(new TextDecoder("utf-8", { fatal: false }).decode(octets.subarray(0, 200_000)), 1000);
+    if (ext === "xml" || m.includes("xml") || /CrossIndustryInvoice|<(\w+:)?Invoice|<(\w+:)?CreditNote|urn:oasis/.test(racine)) return { famille: "xml" };
     return { famille: "texte" };
   }
   if (ext === "csv" || m === "text/csv" || ext === "tsv") return { famille: "tableur", formatTableur: "csv" };

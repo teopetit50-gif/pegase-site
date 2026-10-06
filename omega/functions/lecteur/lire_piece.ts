@@ -19,6 +19,7 @@ import { type CoffreTamila, depotDechiffrant } from "./coffre.ts";
 import { lireCsv, lireXlsx } from "./tableur.ts";
 import { valeurLignes, valeurVentilation, verifierValeurs } from "./verifier.ts";
 import { estXmlFacture, lireXmlFacture } from "./xml_facture.ts";
+import { concorder } from "./concordance.ts";
 
 export interface Environnement {
   get(nom: string): string | undefined;
@@ -208,13 +209,19 @@ function rejet(motif: string): Bilan {
   return { resultat: { statut: "rejetee", motif: motif.slice(0, 500), pages: [], valeurs: [] }, ia: null, cout_ocr: 0 };
 }
 
-function lireXml(xml: string, pagesPdf: PageLue[]): Bilan {
+function lireXml(xml: string, pagesPdf: PageLue[], pdfBrut: PagePdf[] = []): Bilan {
   const lu = lireXmlFacture(xml);
   if (!lu) return echec("XML reconnu mais ni Factur-X (CII) ni UBL : structure inconnue.");
   const pages: PageLue[] = pagesPdf.length > 0 ? pagesPdf : [{ n: 1, methode: "natif", texte: xml.slice(0, MAX_TEXTE_PAGE), confiance: 1 }];
   const cles = ["numero", "date", "montant_ttc", "fournisseur.nom"];
   const manquants = cles.filter((c) => !lu.valeurs.some((v) => v.champ === c && v.verifiee));
   const statut: StatutLecture = manquants.length === 0 ? "lue" : "a_verifier";
+  // Factur-X : le XML fait foi ; chaque valeur clé est rapprochée du PDF visible, les écarts sont notés.
+  const { valeurs, divergences } = pagesPdf.length > 0 ? concorder(lu.valeurs, pagesPdf, pdfBrut) : { valeurs: lu.valeurs, divergences: [] };
+  const motifs = [
+    manquants.length > 0 ? `Champs absents du XML ${lu.norme.toUpperCase()} : ${manquants.join(", ")}.` : "",
+    divergences.length > 0 ? `Non retrouvés dans le PDF visible (le XML fait foi) : ${divergences.join(", ")}.` : "",
+  ].filter((m) => m !== "");
   return {
     resultat: {
       statut,
@@ -222,9 +229,9 @@ function lireXml(xml: string, pagesPdf: PageLue[]): Bilan {
       confiance_type: 1,
       methode: "xml",
       nb_pages: pages.length,
-      motif: manquants.length > 0 ? `Champs absents du XML ${lu.norme.toUpperCase()} : ${manquants.join(", ")}.` : undefined,
+      motif: motifs.length > 0 ? motifs.join(" ").slice(0, 500) : undefined,
       pages,
-      valeurs: lu.valeurs,
+      valeurs,
     },
     ia: null,
     cout_ocr: 0,
@@ -266,7 +273,7 @@ async function lirePdf(ctx: Contexte, piece: Piece, octets: Uint8Array, contexte
   const pj = analyse.piecesJointes.find((p) => /factur-?x|zugferd|xrechnung|\.xml$/i.test(p.nom));
   if (pj) {
     const xml = new TextDecoder().decode(pj.octets);
-    if (estXmlFacture(xml)) return lireXml(xml, pagesNatives);
+    if (estXmlFacture(xml)) return lireXml(xml, pagesNatives, analyse.pages);
   }
 
   const sansTexte = analyse.pages.filter(pageSansTexte);
