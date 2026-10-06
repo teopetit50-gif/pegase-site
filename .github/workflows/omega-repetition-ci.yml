@@ -1,0 +1,160 @@
+# Répétition du SQL de mise en production dans un Postgres jetable (voie C de omega/prod/repetition.md).
+#
+# À chaque gel (tag prod-*) ou à la demande : une base supabase/postgres vierge dans le runner, la base de départ
+# (omega/prod/base/), puis les migrations assemblées (omega/prod/migrations/, assembler.mjs), chacune dans une
+# transaction, puis tous les tests pgTAP, un fichier par appel. Aucun secret : ni la production, ni la recette ne
+# sont jamais contactées. Pas d'Auth, de Storage ni de fonctions Edge : le SQL et ses tests seulement.
+#
+# La base de départ : les migrations assemblées ne sont que ce qui manque à la production (MISE-EN-PRODUCTION.md
+# § 1.3). Sur une base vierge, il faut d'abord ce que la production a déjà : `base_existante` (les 61 migrations
+# historiques écrasées) puis les lots jusqu'à 20260929092923, exportés de la recette au gel dans
+# omega/prod/base/<version>_<nom>.sql. Tant que ce dossier ou omega/prod/migrations/ est vide, la tâche échoue
+# proprement en le disant.
+#
+# pg_cron et pg_net de l'image sont coupés avant toute pose : jobs désactivés au fil de l'eau, droit d'appel retiré.
+# Rien ne peut sortir du runner vers une fonction Edge.
+
+name: Répétition du SQL (Postgres jetable)
+
+on:
+  push:
+    tags: ['prod-*'] # le gel (MISE-EN-PRODUCTION.md § 1.7) ; pas sur les branches : la base de départ n'y est pas
+  workflow_dispatch:
+    inputs:
+      motif:
+        description: 'Pourquoi cette répétition'
+        required: false
+        default: 'manuelle'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: omega-repetition-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  repeter:
+    name: Base, migrations assemblées, tests pgTAP
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    services:
+      base:
+        # Version de Postgres de Supabase ; à aligner sur celle de la production au gel (select version()).
+        image: supabase/postgres:15.8.1.060
+        env:
+          POSTGRES_PASSWORD: repetition
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -h localhost"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 30
+    env:
+      ADMIN_URL: postgresql://supabase_admin:repetition@localhost:5432/postgres
+      BASE_URL: postgresql://postgres:repetition@localhost:5432/postgres
+      SORTIE: ${{ runner.temp }}/repetition
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Client psql
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client >/dev/null
+          psql --version
+          mkdir -p "$SORTIE/poses" "$SORTIE/tests"
+
+      - name: Les fichiers à poser existent
+        run: |
+          base=$(ls omega/prod/base/*.sql 2>/dev/null | wc -l)
+          migrations=$(ls omega/prod/migrations/*.sql 2>/dev/null | wc -l)
+          echo "Base de départ : $base fichier(s) ; migrations assemblées : $migrations fichier(s)."
+          if [ "$base" -eq 0 ] || [ "$migrations" -eq 0 ]; then
+            echo "::error title=Rien à répéter::omega/prod/base/ ($base) ou omega/prod/migrations/ ($migrations) est vide. Les remplir au gel : voir l'en-tête de ce workflow et omega/prod/README.md."
+            exit 1
+          fi
+
+      - name: Couper pg_cron et pg_net avant toute pose
+        run: |
+          set -euo pipefail
+          psql "$ADMIN_URL" -v ON_ERROR_STOP=1 -X -q <<'SQL'
+            create extension if not exists pg_cron;
+            create extension if not exists pg_net with schema extensions;
+            -- Tout job créé par une migration naît inactif ; ceux qui existent déjà sont désactivés.
+            create or replace function public.repetition_cron_inactif() returns trigger language plpgsql as $$
+            begin new.active := false; return new; end $$;
+            create trigger repetition_cron_inactif before insert or update on cron.job
+              for each row execute function public.repetition_cron_inactif();
+            update cron.job set active = false where active;
+            do $$ declare r record; begin
+              for r in select p.oid::regprocedure as f from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+                       where n.nspname = 'net' and p.proname in ('http_get', 'http_post', 'http_delete') loop
+                execute format('revoke execute on function %s from public, postgres, anon, authenticated, service_role', r.f);
+              end loop;
+            end $$;
+          SQL
+          echo "pg_cron : $(psql "$ADMIN_URL" -XAtc 'select count(*) from cron.job where active') job(s) actif(s)."
+
+      - name: Poser la base de départ puis les migrations assemblées (une transaction par fichier)
+        run: |
+          set -uo pipefail
+          n=0
+          for f in $(ls omega/prod/base/*.sql | sort) $(ls omega/prod/migrations/*.sql | sort); do
+            nom=$(basename "$f" .sql)
+            if ! psql "$ADMIN_URL" -v ON_ERROR_STOP=1 -X -q -1 -f "$f" > "$SORTIE/poses/$nom.txt" 2>&1; then
+              echo "::error title=Pose en échec::$f"
+              tail -20 "$SORTIE/poses/$nom.txt"
+              exit 1
+            fi
+            n=$((n + 1))
+          done
+          echo "$n fichier(s) posé(s), chacun en entier."
+
+      - name: Aucun job actif, aucun appel parti
+        run: |
+          set -euo pipefail
+          actifs=$(psql "$ADMIN_URL" -XAtc "select count(*) from cron.job where active")
+          partis=$(psql "$ADMIN_URL" -XAtc "select case when to_regclass('net._http_response') is null then 0 else (select count(*) from net._http_response) end")
+          echo "Crons actifs : $actifs ; réponses pg_net : $partis."
+          [ "$actifs" = 0 ] && [ "$partis" = 0 ] || { echo "::error::pg_cron ou pg_net n'est pas resté coupé"; exit 1; }
+
+      - name: Garde-fous (omega/prod/garde_fous.sql)
+        run: psql "$ADMIN_URL" -v ON_ERROR_STOP=1 -X -f omega/prod/garde_fous.sql | tee "$SORTIE/garde_fous.txt"
+
+      - name: Tests pgTAP, un fichier par appel
+        run: |
+          set -uo pipefail
+          psql "$ADMIN_URL" -v ON_ERROR_STOP=1 -X -q -c "create extension if not exists pgtap with schema extensions" -c "create schema if not exists tests"
+          sed 's/^create extension if not exists pgtap with schema extensions;/-- (pgTAP déjà présent)/' omega/tests/socle/00_installation.sql |
+            psql "$ADMIN_URL" -v ON_ERROR_STOP=1 -X -q -f - > "$SORTIE/tests/00_installation.txt" 2>&1 \
+            || { echo "::error::00_installation en échec"; tail -20 "$SORTIE/tests/00_installation.txt"; exit 1; }
+          total=0; ko=0; so=0
+          {
+            echo "## Répétition du SQL — tests pgTAP"; echo; echo "| Fichier | ok | rouge |"; echo "|---|---|---|"
+          } >> "$GITHUB_STEP_SUMMARY"
+          for f in omega/tests/socle/[0-9][0-9]_*.sql omega/tests/socle/19[a-z]*.sql omega/tests/{filed,identite,varelo,tavaro,tiroma,tamila,lorani,daliro}/*.sql; do
+            [ -f "$f" ] || continue
+            case "$(basename "$f")" in 00_installation.sql|TOUT*.sql) continue ;; esac
+            nom="$(basename "$(dirname "$f")")_$(basename "$f" .sql)"
+            # Les tests qui supposent le banc de la recette n'ont pas d'objet sur une base sans données.
+            if grep -qE 'cccccccc-0000-4000-8000-00000000000c|banc-varelo' "$f"; then so=$((so + 1)); continue; fi
+            psql "$ADMIN_URL" -X -q -At -c "set statement_timeout = '110s'" -f "$f" > "$SORTIE/tests/$nom.txt" 2>&1 || true
+            n_ok=$(grep -c '^ok ' "$SORTIE/tests/$nom.txt" || true)
+            n_ko=$(grep -cE '^not ok |ERROR' "$SORTIE/tests/$nom.txt" || true)
+            total=$((total + n_ok + n_ko)); ko=$((ko + n_ko))
+            printf '%-55s ok %3s  rouge %3s\n' "$nom" "$n_ok" "$n_ko"
+            echo "| $nom | $n_ok | $n_ko |" >> "$GITHUB_STEP_SUMMARY"
+          done
+          echo >> "$GITHUB_STEP_SUMMARY"
+          echo "**$total résultats, $ko rouges, $so fichiers sans objet (banc de recette).**" >> "$GITHUB_STEP_SUMMARY"
+          echo "Tests : $total résultats, $ko rouges, $so sans objet."
+          [ "$ko" -eq 0 ] || { echo "::error title=Tests rouges::$ko résultat(s) rouge(s)"; exit 1; }
+
+      - name: Garder les sorties
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repetition-sql-${{ github.run_id }}
+          path: ${{ runner.temp }}/repetition
+          retention-days: 14

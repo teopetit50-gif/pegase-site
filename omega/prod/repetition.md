@@ -15,7 +15,7 @@ Prix relevés le 6/10/2026 sur supabase.com ; à vérifier au moment de commande
 |---|---|---|---|
 | **A. Branche Supabase** créée depuis le tableau de bord, option « Include data » | Le schéma est rejoué depuis l'historique des migrations du projet principal ; les données sont copiées si on coche « Include data ». Ni les objets Storage, ni les fonctions Edge | Plans Pro et Team seulement (pas Free). **0,01344 $ de l'heure** en compute Micro, soit 0,32 $ par jour et environ 9,60 $ pour un mois entier. S'y ajoutent disque et trafic au-delà du quota. Les crédits de compute ne s'appliquent pas, et le plafond de dépense (Spend Cap) ne couvre pas les branches | La doc dit qu'une branche est construite « depuis les fichiers de migration » : il faut vérifier que l'historique de la production suffit à la reconstruire, alors que ses 61 migrations historiques ne sont pas dans le dépôt. Si la branche naît vide ou incomplète, passer à B |
 | **B. Dupliquer le projet** depuis une sauvegarde (« Restore to a new project ») | Schéma, données, index, rôles, droits, utilisateurs Auth, clé racine du Vault. **Pas** les objets Storage, les fonctions Edge, les réglages Auth, Realtime ni les extensions, à remettre à la main | Plans payants, sauvegardes physiques actives. Le nouveau projet est facturé comme un projet normal, au prorata. En Micro : 10 $ par mois, soit 0,0139 $ de l'heure, environ 0,33 $ par jour, plus le disque | **pg_cron et pg_net se réactivent seuls à la restauration**, et la clé du Vault est copiée : les crons de la copie appelleraient les fonctions Edge de la **production** avec sa clé de service. `repetition.sh securiser` en premier, sans délai. Une copie restaurée ne peut pas servir de source à une autre |
-| **C. Postgres jetable en CI** (image `supabase/postgres`), avec une sauvegarde de la production restaurée comme le fait déjà `omega-sauvegarde.yml` | Base seule | Gratuit (minutes GitHub Actions) | Pas d'Auth, de Storage ni de fonctions Edge : la répétition du SQL et des tests seulement. Demande le secret `SUPABASE_DB_URL`, déjà prévu pour la sauvegarde |
+| **C. Postgres jetable en CI** (image `supabase/postgres`) : `.github/workflows/omega-repetition-ci.yml`, joué à chaque tag `prod-*` ou à la demande | Base seule : `omega/prod/base/` (ce que la production a déjà, exporté de la recette au gel) puis `omega/prod/migrations/`, une transaction par fichier, puis garde-fous et tous les tests pgTAP | Gratuit (minutes GitHub Actions) | Aucun secret : ne touche ni la production ni la recette. Pas d'Auth, de Storage ni de fonctions Edge, pas de données réelles : la répétition du SQL et des tests seulement. pg_cron et pg_net coupés avant la première pose. **À remplir au gel** : `omega/prod/base/` (`base_existante` et les lots jusqu'à 20260929092923) n'existe pas encore |
 
 Recommandation : **B**. Une journée de répétition coûte moins d'un dollar de
 compute ; c'est la copie la plus fidèle, et la seule dont on est sûr qu'elle porte
@@ -40,10 +40,33 @@ est bien une copie de la production.
 ## 2. Sécuriser, puis relever (immédiatement)
 
 ```bash
-bash omega/prod/repetition.sh securiser   # tous les crons désactivés, arrêt général des envois
+bash omega/prod/repetition.sh securiser   # pg_cron puis pg_net coupés, aucun appel parti, arrêt général des envois
 bash omega/prod/repetition.sh relever     # définitions, crons, publication d'avant pose (pour l'exercice du § 7)
 bash omega/prod/repetition.sh empreinte avant
 ```
+
+`securiser` passe en premier, dès la fin de la restauration. Chaque étape est
+bloquante, dans cet ordre :
+1. **pg_cron** : tous les jobs désactivés (`cron.alter_job`), puis contrôle qu'il
+   n'en reste aucun actif. L'état d'origine est gardé dans `crons-avant.txt`.
+2. **pg_net** : la file `net.http_request_queue` est vidée (`truncate`), le droit
+   d'exécuter `net.http_get/http_post/http_delete` est retiré à public, postgres,
+   anon, authenticated, service_role et supabase_functions_admin, et le secret
+   Vault `cle_service` (la clé de service de la **production**, copiée avec la
+   base) est remplacé par une valeur neutre. Le retrait des droits n'aboutit que
+   si postgres en est le concédant : le résultat réel est dans
+   `net-droits-apres.txt`. La clé neutralisée suffit à ce qu'un appel égaré soit
+   refusé par la production.
+3. **Aucun appel parti** : `net._http_response` doit être vide. Cette table n'est
+   pas journalisée, donc vide à la restauration : une ligne veut dire qu'un cron
+   a tiré entre la restauration et `securiser`. Le script s'arrête alors
+   (`net-partis.txt`). Il faut prévenir Teo et faire tourner la clé de service de
+   la production.
+4. Arrêt général des envois (`envois_arret_general = 'oui'`).
+
+Sans `securise.ok`, toutes les autres sous-commandes (sauf `verifier` et
+`rapport`) refusent de tourner. Elles refusent aussi dès qu'un cron actif appelle
+`functions/v1` ailleurs que sur la copie.
 
 ## 3. Assembler
 
@@ -86,8 +109,10 @@ Pour la répétition, **ne pas** exporter `BREVO_API_KEY` ni `META_*` : aucun me
 ne doit partir d'une copie des données réelles. Le lecteur peut recevoir les clés
 Bedrock pour une lecture d'essai.
 
-Poser à la main le secret Vault `cle_service` (la clé de service **de la copie**).
-Ensuite seulement, réactiver un par un les crons qui appellent une fonction, en
+Poser à la main le secret Vault `cle_service` (la clé de service **de la copie**,
+`select vault.update_secret(id, '<clé de la copie>') from vault.secrets where name = 'cle_service'`)
+et rendre l'appel à pg_net (`grant execute on function net.http_post(text, jsonb, jsonb, jsonb, integer)
+to postgres`, idem pour les rôles listés dans `net-coupe.txt` si besoin). Ensuite seulement, réactiver un par un les crons qui appellent une fonction, en
 vérifiant leur URL :
 
 ```sql
@@ -146,7 +171,11 @@ Rien d'autre n'a été touché : la production n'a été ni lue ni écrite par l
 
 Sur une base Postgres locale jetable (pas une copie de la production) :
 - refus de la recette, de la production et d'une URL qui les désigne ;
-- `securiser`, `relever`, `preparer` (repères compris), `empreinte`, `controles`,
+- `securiser` : crons coupés et contrôlés, file pg_net vidée, `cle_service`
+  neutralisée, arrêt sur une ligne de `net._http_response`, refus des autres
+  sous-commandes sans sécurisation ou avec un cron actif vers la production
+  (bouchons locaux pour `cron`, `net` et `vault` : à confirmer sur la vraie copie) ;
+- `relever`, `preparer` (repères compris), `empreinte`, `controles`,
   `tests` (56 fichiers joués un à un), `restaurer-fonctions` et `comparer`.
 
 **Pas essayé, faute de CLI Supabase et de projet** : `pousser` (`db push`), `edge`

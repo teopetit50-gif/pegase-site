@@ -28,6 +28,7 @@ REF="${REPETITION_REF:-}"
 TRAVAIL="${OMEGA_TRAVAIL:-/tmp/omega-repetition-${REF:-sans-ref}}"
 PAGES="${OMEGA_PAGES:-$ICI/sortie}"
 JOURNAL="$TRAVAIL/journal.txt"
+COMMANDE="${1:-}"
 
 # Fonctions Edge : nom déployé | dossier source | SHA du code | SHA de _partage (vide si sans @partage) | verify_jwt
 FONCTIONS=(
@@ -56,6 +57,7 @@ garde() {
   [[ "$REPETITION_DB_URL" != *"$PRODUCTION"* && "$REPETITION_DB_URL" != *"$RECETTE"* ]] || arret "REPETITION_DB_URL désigne la recette ou la production"
   [[ "$REPETITION_DB_URL" == *"$REF"* ]] || arret "REPETITION_DB_URL ne désigne pas $REF"
   mkdir -p "$TRAVAIL"
+  case "$COMMANDE" in verifier|securiser|rapport) ;; *) exiger_securise ;; esac
 }
 
 cmd_verifier() {
@@ -68,17 +70,76 @@ cmd_verifier() {
   psqlr -At -c "select 'copie de la production : ' || (exists (select 1 from cron.job where command like '%$PRODUCTION%'))::text" | tee -a "$JOURNAL"
 }
 
-# Avant tout : rien ne doit partir d'une copie qui porte les données de la production.
+# Avant tout : rien ne doit partir d'une copie qui porte les données de la production. Une copie restaurée réactive
+# pg_cron et pg_net, et porte la clé de service de la production dans le Vault : ses crons appelleraient les fonctions
+# Edge de la PRODUCTION. Chaque étape est bloquante ; les autres sous-commandes refusent de tourner sans securise.ok.
 cmd_securiser() {
   garde
-  psqlr -At -c "select jobid, jobname, active from cron.job order by jobname" > "$TRAVAIL/crons-avant.txt"
-  psqlr -c "select cron.alter_job(jobid, active := false) from cron.job where active"
+  rm -f "$TRAVAIL/securise.ok"
+  # 1. pg_cron : tous les jobs inactifs, puis contrôle. Rien d'autre ne passe avant.
+  # crons-avant.txt garde l'état d'origine : une seconde passe ne l'écrase pas.
+  [[ -s "$TRAVAIL/crons-avant.txt" ]] || psqlr -At -c "select jobid, jobname, active from cron.job order by jobname" > "$TRAVAIL/crons-avant.txt"
+  psqlr -c "select cron.alter_job(jobid, active := false) from cron.job where active" >/dev/null
+  local actifs; actifs="$(psqlr -At -c "select count(*) from cron.job where active")"
+  [[ "$actifs" == 0 ]] || arret "pg_cron : $actifs job(s) encore actif(s) après désactivation"
+  dire "pg_cron coupé : $(grep -c . "$TRAVAIL/crons-avant.txt") jobs inactifs (état d'origine dans crons-avant.txt)."
+  # 2. pg_net : file vidée (requêtes pas encore parties), droit d'appel retiré, clé de service du Vault neutralisée.
+  psqlr -At -f - > "$TRAVAIL/net-coupe.txt" 2>&1 <<'SQL' || arret "pg_net : coupure en échec (net-coupe.txt)"
+do $$
+declare r record; v_n bigint; v_roles text[] := array['public', 'postgres', 'anon', 'authenticated', 'service_role', 'supabase_functions_admin'];
+begin
+  if to_regnamespace('net') is null then raise notice 'pg_net absent'; return; end if;
+  if to_regclass('net.http_request_queue') is not null then
+    select count(*) into v_n from net.http_request_queue;
+    execute 'truncate net.http_request_queue';
+    raise notice 'file pg_net vidée : % requête(s) en attente', v_n;
+  end if;
+  for r in select p.oid::regprocedure as f, x.rol from pg_proc p join pg_namespace n on n.oid = p.pronamespace and n.nspname = 'net'
+           cross join unnest(v_roles) x(rol)
+           where p.proname in ('http_get', 'http_post', 'http_delete')
+             and (x.rol = 'public' or exists (select 1 from pg_roles where rolname = x.rol)) loop
+    begin
+      execute format('revoke execute on function %s from %s', r.f, case when r.rol = 'public' then 'public' else quote_ident(r.rol) end);
+    exception when others then raise notice 'revoke % de % : %', r.f, r.rol, sqlerrm;
+    end;
+  end loop;
+  if to_regclass('vault.secrets') is not null then
+    for r in select id from vault.secrets where name = 'cle_service' loop
+      perform vault.update_secret(r.id, 'neutralisee-repetition');
+      raise notice 'Vault : cle_service neutralisée';
+    end loop;
+  end if;
+end $$;
+SQL
+  # Le droit d'appel ne se retire que si postgres en est le concédant : on constate, sans se fier au revoke.
+  psqlr -At -F' ' -c "select r, has_function_privilege(r, 'net.http_post(text, jsonb, jsonb, jsonb, integer)', 'execute')
+                      from unnest(array['postgres', 'anon', 'authenticated', 'service_role']) r
+                      where to_regprocedure('net.http_post(text, jsonb, jsonb, jsonb, integer)') is not null and exists (select 1 from pg_roles where rolname = r)" \
+    > "$TRAVAIL/net-droits-apres.txt"
+  psqlr -At -c "select count(*) from vault.decrypted_secrets where name = 'cle_service' and decrypted_secret <> 'neutralisee-repetition'" 2>/dev/null | grep -qx 0 \
+    || arret "Vault : cle_service n'est pas neutralisée (la copie porte la clé de service de la production)"
+  # 3. Aucun appel n'est parti : net._http_response vide (table non journalisée, vide à la restauration).
+  local partis; partis="$(psqlr -At -c "select case when to_regclass('net._http_response') is null then 0 else (select count(*) from net._http_response) end")"
+  if [[ "$partis" != 0 ]]; then
+    psqlr -At -F' | ' -c "select id, status_code, created from net._http_response order by created" > "$TRAVAIL/net-partis.txt"
+    arret "pg_net : $partis appel(s) déjà parti(s) de la copie (net-partis.txt). Prévenir Teo : faire tourner la clé de service de la production."
+  fi
+  dire "pg_net coupé : file vidée, droits constatés dans net-droits-apres.txt, cle_service neutralisée, net._http_response vide."
+  # 4. Arrêt général des envois, en plus.
   psqlr -c "do \$\$ begin
     if to_regclass('private.reglages') is not null then
       update private.reglages set valeur = 'oui' where cle = 'envois_arret_general';
       if not found then insert into private.reglages (cle, valeur) values ('envois_arret_general', 'oui'); end if;
     end if; end \$\$"
-  dire "Sécurisé : $(grep -c . "$TRAVAIL/crons-avant.txt") crons désactivés (état d'origine dans crons-avant.txt), arrêt général des envois posé."
+  date -u +%FT%TZ > "$TRAVAIL/securise.ok"
+  dire "Sécurisé : crons coupés, pg_net coupé, aucun appel parti, arrêt général des envois posé."
+}
+
+# Les sous-commandes après securiser : la copie doit avoir été sécurisée, et aucun cron actif ne vise autre chose qu'elle.
+exiger_securise() {
+  [[ -f "$TRAVAIL/securise.ok" ]] || arret "copie non sécurisée : lancer d'abord « securiser »"
+  local hors; hors="$(psqlr -At -c "select count(*) from cron.job where active and command like '%functions/v1%' and command not like '%$REF%'")"
+  [[ "$hors" == 0 ]] || arret "$hors cron(s) actif(s) appellent une autre base que la copie"
 }
 
 # Relevé d'avant pose, pour s'exercer au retour arrière (MISE-EN-PRODUCTION.md § 5).
