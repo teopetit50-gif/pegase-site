@@ -3,7 +3,7 @@
    passent), offsets de la table xref calculés. Sert à courrier-reel.mjs : chaque nature donne un fichier
    d'empreinte différente (la base refuse deux fois le même sha256 sur un même projet).
 
-   usage : node omega/recette-b5/fabriquer-courrier.mjs <recepisse|demande_pieces|demande_pieces_2|arrete|constat_affichage> <sortie.pdf> [mention]
+   usage : node omega/recette-b5/fabriquer-courrier.mjs <recepisse|demande_pieces|demande_pieces_2|arrete|constat_affichage|lettre_delai|certificat_tacite> <sortie.pdf> [mention]
    mention : une ligne de plus en pied de page (« Réf. 2 »…), pour redéposer le même courrier sous une autre empreinte. */
 import { writeFileSync } from 'node:fs';
 
@@ -100,8 +100,45 @@ MODELES.constat_affichage = [
   [11, 'Maître Bertaud, commissaire de justice'],
 ];
 
+/* « Surélévation Garnier » (PC 044109 26 A0091, déposé le 20/09/2026) : délai porté à six mois (avis de l'ABF) ;
+   « Clôture Garnier » (DP 044109 26 A0103, déposée le 01/06/2026) : certificat de non-opposition tacite */
+MODELES.lettre_delai = [
+  [16, 'VILLE DE NANTES'],
+  [11, 'Direction de l\'urbanisme - Service des autorisations du droit des sols'],
+  [0, ''],
+  [12, 'Nantes, le 02/10/2026'],
+  [12, 'Lettre recommandée avec accusé de réception'],
+  [0, ''],
+  [14, 'Objet : modification du délai d\'instruction'],
+  [12, 'Dossier n° PC 044109 26 A0091 - Mme Garnier - surélévation d\'une maison'],
+  [0, ''],
+  [11, 'Madame,'],
+  [11, 'Votre projet est situé dans le périmètre d\'un site patrimonial remarquable et requiert l\'accord'],
+  [11, 'de l\'architecte des Bâtiments de France.'],
+  [11, 'En application de l\'article R*423-28 du code de l\'urbanisme, le délai d\'instruction de votre'],
+  [11, 'demande est porté à 6 mois. Il court à compter du dépôt de votre dossier complet.'],
+  [0, ''],
+  [11, 'Le service instructeur'],
+];
+MODELES.certificat_tacite = [
+  [16, 'VILLE DE NANTES'],
+  [11, 'Direction de l\'urbanisme'],
+  [0, ''],
+  [14, 'CERTIFICAT DE NON-OPPOSITION TACITE À UNE DÉCLARATION PRÉALABLE'],
+  [11, '(article R*424-13 du code de l\'urbanisme)'],
+  [0, ''],
+  [12, 'Dossier n° DP 044109 26 A0103 - Mme Garnier - édification d\'une clôture'],
+  [12, 'Déclaration déposée le 01/06/2026.'],
+  [0, ''],
+  [11, 'Le Maire de Nantes certifie qu\'aucune décision d\'opposition n\'a été notifiée dans le délai'],
+  [11, 'd\'instruction. La déclarante bénéficie d\'une décision de non-opposition tacite'],
+  [11, 'à compter du 02/07/2026.'],
+  [0, ''],
+  [12, 'Fait à Nantes, le 15/09/2026'],
+];
+
 const [nature, sortie, mention] = process.argv.slice(2);
-if (!MODELES[nature] || !sortie) { console.error('usage : node fabriquer-courrier.mjs <recepisse|demande_pieces|demande_pieces_2|arrete|constat_affichage> <sortie.pdf>'); process.exit(2); }
+if (!MODELES[nature] || !sortie) { console.error('usage : node fabriquer-courrier.mjs <recepisse|demande_pieces|demande_pieces_2|arrete|constat_affichage|lettre_delai|certificat_tacite> <sortie.pdf>'); process.exit(2); }
 
 const echapper = (t) => t.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
 let y = 790;
