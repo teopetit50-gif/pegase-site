@@ -134,9 +134,9 @@ const LIGNES = {
 
   /* OFFLOAD — ouvrier C4. Lignes « non construites » de NOTES-C4 (f9bf72d)
      qui apparaissent hors du catalogue. Le catalogue, lui, porte déjà
-     `atteste: false`. */
+     `atteste: false`. Retiré le 06/10 au soir : « Entretien annuel redevenu
+     dû » (c4_07, 5f2cc7e, échéances et renouvellements). */
   offload: [
-    "Entretien annuel redevenu dû",
     "Pièce arrivée, jamais reprise",
   ],
 
