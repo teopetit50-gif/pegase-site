@@ -548,6 +548,23 @@ avaient quitté le bucket.
   `voit_objet` imité au plus large pour prouver la restriction).
 - **Écran** : à faire quand le lecteur rendra ses premiers résultats (déchiffrement, constats, citations).
 
+## 21. Le pilotage du cabinet (carnet n° 5 ; lot B4-16, 06/10)
+
+- **Écran seul** (lecture sous RLS, calcul dans le navigateur) : bouton « Pilotage » dans l'en-tête (avocats),
+  `PilotageCabinet.tsx` + `pilotage.ts` (fonctions pures). Cinq vues :
+  · **Marge** : (facturé HT + à facturer HT) − temps passé × coût de revient horaire (réglé dans la vue, gardé
+    dans ce navigateur, 90 € par défaut), taux horaire réalisé ; les dossiers en perte d'abord ;
+  · **Charge** : par personne, temps saisi sur 30 jours, dossiers dont elle est responsable, délais et audiences
+    des 30 jours ;
+  · **Séries** : dossiers vivants où figure la même partie (intitulé « A c/ B » déchiffré, nom normalisé comme
+    l'index des conflits), ou trois dans la même matière devant la même juridiction ;
+  · **Sans diligence** : rien depuis 45 jours (temps, acte, audience, avis, pièce) ;
+  · **Pièces attendues** : exemplaire signé de la convention, accusé de dépôt d'un acte déclaré, pièce d'identité
+    d'un dossier assujetti LCB-FT, dossier sans aucune pièce après sept jours.
+- Recette 162/162 (15 sur le pilotage, 1440 et 390), axe 0 écart grave. Aucune base à poser.
+- Limite : la marge ne connaît pas les déboursés engagés non refacturés ; le coût de revient est une estimation
+  que le cabinet règle.
+
 ## 7. Prochaine étape
 
 1. (fait : en ligne, vérifié le 06/10.)
