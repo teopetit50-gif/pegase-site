@@ -9,8 +9,10 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
 
 | Jauge | Valeur | Ce qui la fait monter |
 |---|---|---|
-| **Mécanique** (pgTAP sur la recette) | paliers 1, 2 et 4 écrits, **150/150 verts en local** (Postgres 16 jetable + socle réduit ; pose neuve c2_01→c2_03 puis rejeu des trois, dans le désordre compris), à poser | c2_01 à c2_03 posés et `^test_c2_` vert sur la recette |
-| **Livrable client** (/espace/cashd) | écran écrit sur worker-c2 : **recette 76/76 aux cinq largeurs** (exemple) ; pas encore en ligne | fusion par le coordinateur ; lien de menu (C1) ; relecture réelle avec le compte du banc après la pose |
+| **Mécanique** (pgTAP sur la recette) | **100 %** — c2_01 → c2_03 posés ; ^test_c2_ vert (lot de 1120 ok, 0 not ok) et socle 44/46/51/55 verts, 06/10 17 h 25 Z | — |
+| ~~Mécanique, avant la pose~~ | paliers 1, 2 et 4 écrits, **150/150 verts en local** (Postgres 16 jetable + socle réduit ; pose neuve c2_01→c2_03 puis rejeu des trois, dans le désordre compris), à poser | c2_01 à c2_03 posés et `^test_c2_` vert sur la recette |
+| **Livrable client** (/espace/cashd) | **en ligne** : worker-c2 fusionnée dans main (7399f41), build vert, /espace/cashd 200 aux cinq largeurs (coordinateur) ; lien de menu chez C1 ; banc_cashd.sql à jouer | relecture réelle avec le compte du banc |
+| ~~Livrable, avant la fusion~~ | écran écrit sur worker-c2 : **recette 76/76 aux cinq largeurs** (exemple) ; pas encore en ligne | fusion par le coordinateur ; lien de menu (C1) ; relecture réelle avec le compte du banc après la pose |
 
 ## Paliers
 
@@ -122,85 +124,85 @@ l'ancien corps des fonctions que la plus récente redéfinit.
 
 ## Les 50 lignes de `lib/produits/capacites/relances.ts`, une à une
 
-« Verte en local » : la preuve passe sur le Postgres local (socle réduit) ; elle devient « tenue » quand la même preuve
-passe sur la recette (sorties brutes du coordinateur). Tests : t1 = test_c2_01_donnees, t2 = test_c2_02_export,
+« Tenue » : la preuve passe sur la recette — lot ^test_c2_ (avec c3, a4_30, b1, b5, b6, c4) 1120 ok / 0 not ok, socle
+44/46/51/55 34 ok, le 06/10 à 17 h 25 Z (coordinateur, après pose de c2_01 → c2_03 depuis 8b8fbb4). Tests : t1 = test_c2_01_donnees, t2 = test_c2_02_export,
 t3 = test_c2_03_moteur, t4 = test_c2_04_capacites ; R = recette de l'écran (omega/recette-c2/recette-cashd.mjs).
 
 ### Suivi de l'encours
 | # | Ligne | État | Preuve |
 |---|---|---|---|
-| 1 | Le système relit votre facturier chaque matin, avant d'écrire la moindre relance. | verte en local | chaîne de relevés (t2) ; `cashd_passage` relit avant d'écrire (t3) |
-| 2 | Chaque devis porte le nombre de jours écoulés depuis son envoi. | verte en local | `jours_ecoules` (t1) ; R « 5 j sans réponse » |
-| 3 | Chaque facture porte son montant dû, son retard et le compte concerné. | verte en local | `cashd_factures_etat` (t1) ; R |
-| 4 | Un règlement encaissé la veille sort de la liste du jour. | verte en local | t2 « absente de l'export… soldée », « reste dû lu dans l'export » |
-| 5 | La balance âgée range l'encours par tranche d'ancienneté, compte par compte. | verte en local | `cashd_balance_agee` (t1) ; R (barre, 5 tranches) |
-| 6 | Chaque ligne indique l'état de la relance et le palier suivant. | verte en local | `cashd_suivi` (t3) ; R « Suivant : relance ferme » |
-| 7 | Un échéancier négocié remplace l'échéance d'origine, et le suivi épouse ses termes. | verte en local | `cashd_poser_echeancier` (t4 : refus du total faux, échéance suivie, payée → suivante) ; R |
-| 8 | Les devis sans réponse sont suivis au même titre que les factures échues. | verte en local | t3 « Le devis de 5 jours est relancé » |
+| 1 | Le système relit votre facturier chaque matin, avant d'écrire la moindre relance. | tenue | chaîne de relevés (t2) ; `cashd_passage` relit avant d'écrire (t3) |
+| 2 | Chaque devis porte le nombre de jours écoulés depuis son envoi. | tenue | `jours_ecoules` (t1) ; R « 5 j sans réponse » |
+| 3 | Chaque facture porte son montant dû, son retard et le compte concerné. | tenue | `cashd_factures_etat` (t1) ; R |
+| 4 | Un règlement encaissé la veille sort de la liste du jour. | tenue | t2 « absente de l'export… soldée », « reste dû lu dans l'export » |
+| 5 | La balance âgée range l'encours par tranche d'ancienneté, compte par compte. | tenue | `cashd_balance_agee` (t1) ; R (barre, 5 tranches) |
+| 6 | Chaque ligne indique l'état de la relance et le palier suivant. | tenue | `cashd_suivi` (t3) ; R « Suivant : relance ferme » |
+| 7 | Un échéancier négocié remplace l'échéance d'origine, et le suivi épouse ses termes. | tenue | `cashd_poser_echeancier` (t4 : refus du total faux, échéance suivie, payée → suivante) ; R |
+| 8 | Les devis sans réponse sont suivis au même titre que les factures échues. | tenue | t3 « Le devis de 5 jours est relancé » |
 
 ### Relance et escalade
 | # | Ligne | État | Preuve |
 |---|---|---|---|
-| 9 | Une facture échue suit trois paliers : deux relances, puis la mise en demeure. | verte en local | t3 (rappel J+7, relance J+21, mise en demeure J+30, puis rien) |
-| 10 | Un devis sans réponse est relancé au troisième jour, puis sept jours après ce rappel. | verte en local | scénario devis 3 / 10 (t3) |
-| 11 | La fermeté du message suit le palier atteint, du rappel à la mise en demeure. | verte en local | `cashd_ecrire_texte` (t3, trois textes) |
-| 12 | Chaque message reprend le secteur du compte, sa référence, son montant et son retard. | verte en local | t3 « Le message reprend… » |
+| 9 | Une facture échue suit trois paliers : deux relances, puis la mise en demeure. | tenue | t3 (rappel J+7, relance J+21, mise en demeure J+30, puis rien) |
+| 10 | Un devis sans réponse est relancé au troisième jour, puis sept jours après ce rappel. | tenue | scénario devis 3 / 10 (t3) |
+| 11 | La fermeté du message suit le palier atteint, du rappel à la mise en demeure. | tenue | `cashd_ecrire_texte` (t3, trois textes) |
+| 12 | Chaque message reprend le secteur du compte, sa référence, son montant et son retard. | tenue | t3 « Le message reprend… » |
 | 13 | Les relances partent par courriel, depuis la boîte de votre entreprise. | **moitié** | courriel par le socle (`preparer_envoi`, canal email) ; « depuis la boîte de votre entreprise » attend Gmail / Microsoft 365 (A2) |
-| 14 | Au-delà d'un montant que vous fixez, la relance remonte à la direction avant l'envoi. | verte en local | `seuil_direction` → `regles_validation` (t3) |
-| 15 | Chaque facture suit sa propre séquence, avec son palier et son échéance. | verte en local | `cashd_relances_pieces` (t3) |
-| 16 | Les envois respectent les jours ouvrés, les jours fériés locaux et vos fenêtres horaires. | verte en local | passage seulement un jour ouvré du territoire (calendrier du socle, t4 « un samedi ») ; heure réglée (t3) ; fenêtres d'envoi : réglages d'envoi du socle |
+| 14 | Au-delà d'un montant que vous fixez, la relance remonte à la direction avant l'envoi. | tenue | `seuil_direction` → `regles_validation` (t3) |
+| 15 | Chaque facture suit sa propre séquence, avec son palier et son échéance. | tenue | `cashd_relances_pieces` (t3) |
+| 16 | Les envois respectent les jours ouvrés, les jours fériés locaux et vos fenêtres horaires. | tenue | passage seulement un jour ouvré du territoire (calendrier du socle, t4 « un samedi ») ; heure réglée (t3) ; fenêtres d'envoi : réglages d'envoi du socle |
 | 17 | Les comptes export reçoivent leur relance dans leur langue de facturation. | **moitié** | français et anglais (`cashd_comptes.langue`) ; d'autres langues : textes à écrire |
 
 ### Litiges et exceptions
 | # | Ligne | État | Preuve |
 |---|---|---|---|
 | 18 | Une contestation écrite bascule la facture en litige et la sort du cycle. | **moitié** | la sortie du cycle : `cashd_litige` (t3) ; la réponse reçue est signalée (`cashd_suivre_reception`) mais la bascule reste une décision humaine (lecture de la contestation non automatisée) |
-| 19 | Le commercial en charge du compte est notifié dès l'ouverture du litige. | verte en local | alerte nominative au commercial (t4) |
-| 20 | Une facture contestée sur une seule ligne laisse le reste en relance. | verte en local | `cashd_litige_partiel` (t4 : 1 000 € contestés, le reste relancé et dit) ; R |
-| 21 | La reprise des relances demande une décision, jamais un simple délai écoulé. | verte en local | motif obligatoire (t3) |
-| 22 | Le contact de facturation reçoit les relances, le contact commercial reçoit les alertes. | verte en local | relances au contact de facturation ; alertes du compte au commercial (`cashd_alerter_commercial`, t4) |
-| 23 | Un compte se met en pause ou sort du périmètre à tout moment. | verte en local | `cashd_statut_compte` (t3) ; R |
-| 24 | La mise en demeure est préparée, puis elle attend une validation explicite. | verte en local | t3 (commentaire exigé, jamais d'accord permanent) |
-| 25 | Le dossier de litige réunit les pièces, les envois et les accusés de réception. | verte en local | `cashd_dossier` (pièces, imputations, relances + remise, réponses, journal) (t4) ; R « Dossier » |
-| 26 | Le courrier recommandé électronique est préparé quand la créance l'exige. | verte en local (préparé) ; **départ : tiers AR24** | mise en demeure en canal `lre` au-delà de `seuil_lre` (t4) |
+| 19 | Le commercial en charge du compte est notifié dès l'ouverture du litige. | tenue | alerte nominative au commercial (t4) |
+| 20 | Une facture contestée sur une seule ligne laisse le reste en relance. | tenue | `cashd_litige_partiel` (t4 : 1 000 € contestés, le reste relancé et dit) ; R |
+| 21 | La reprise des relances demande une décision, jamais un simple délai écoulé. | tenue | motif obligatoire (t3) |
+| 22 | Le contact de facturation reçoit les relances, le contact commercial reçoit les alertes. | tenue | relances au contact de facturation ; alertes du compte au commercial (`cashd_alerter_commercial`, t4) |
+| 23 | Un compte se met en pause ou sort du périmètre à tout moment. | tenue | `cashd_statut_compte` (t3) ; R |
+| 24 | La mise en demeure est préparée, puis elle attend une validation explicite. | tenue | t3 (commentaire exigé, jamais d'accord permanent) |
+| 25 | Le dossier de litige réunit les pièces, les envois et les accusés de réception. | tenue | `cashd_dossier` (pièces, imputations, relances + remise, réponses, journal) (t4) ; R « Dossier » |
+| 26 | Le courrier recommandé électronique est préparé quand la créance l'exige. | tenue (préparé) ; **départ : tiers AR24** | mise en demeure en canal `lre` au-delà de `seuil_lre` (t4) |
 
 ### Encaissement et rapprochement
 | # | Ligne | État | Preuve |
 |---|---|---|---|
-| 27 | Un règlement enregistré interrompt la séquence avant le prochain envoi. | verte en local | t3 « Le règlement… coupe la relance prête » ; R |
-| 28 | Les règlements partiels sont imputés, et le solde dû continue d'être suivi. | verte en local | t1 |
-| 29 | Le lettrage rapproche chaque encaissement de la facture qu'il solde. | verte en local | t1, t2 (y compris journal arrivé avant les factures) |
-| 30 | Les écritures bancaires sont rapprochées de l'encours, jour après jour. | verte en local (par export) | jeu `reglements` (relevé bancaire filtré sur les crédits) + relettrage à chaque export ; un flux bancaire direct serait un tiers (agrégateur DSP2) |
-| 31 | Un virement sans référence est proposé au rapprochement avec les factures probables. | verte en local | `cashd_propositions` (t1) ; la séquence du compte attend (t3) ; R |
-| 32 | Les avoirs et les acomptes sont déduits avant tout calcul du solde dû. | verte en local | t1 ; avoirs imputés avant d'écrire (t3) |
-| 33 | Les pénalités de retard et l'indemnité forfaitaire de recouvrement sont calculées. | verte en local | `cashd_penalites` (t3) |
-| 34 | Un lien de paiement accompagne la relance et s'éteint dès le règlement. | contrat d'interface vert en local ; **tiers : prestataire de paiement** | `cashd_poser_lien`, `cashd_lien_paye`, extinction au règlement (t4) ; le lien entre dans le texte |
-| 35 | Les factures en devise étrangère sont suivies dans leur devise et en euros. | verte en local | `cashd_taux_change`, `reste_du_eur`, balance en euros (t4) ; le chargement quotidien des taux BCE est à brancher (ouvrier serveur, source publique) |
+| 27 | Un règlement enregistré interrompt la séquence avant le prochain envoi. | tenue | t3 « Le règlement… coupe la relance prête » ; R |
+| 28 | Les règlements partiels sont imputés, et le solde dû continue d'être suivi. | tenue | t1 |
+| 29 | Le lettrage rapproche chaque encaissement de la facture qu'il solde. | tenue | t1, t2 (y compris journal arrivé avant les factures) |
+| 30 | Les écritures bancaires sont rapprochées de l'encours, jour après jour. | tenue (par export) | jeu `reglements` (relevé bancaire filtré sur les crédits) + relettrage à chaque export ; un flux bancaire direct serait un tiers (agrégateur DSP2) |
+| 31 | Un virement sans référence est proposé au rapprochement avec les factures probables. | tenue | `cashd_propositions` (t1) ; la séquence du compte attend (t3) ; R |
+| 32 | Les avoirs et les acomptes sont déduits avant tout calcul du solde dû. | tenue | t1 ; avoirs imputés avant d'écrire (t3) |
+| 33 | Les pénalités de retard et l'indemnité forfaitaire de recouvrement sont calculées. | tenue | `cashd_penalites` (t3) |
+| 34 | Un lien de paiement accompagne la relance et s'éteint dès le règlement. | contrat d'interface tenu ; **tiers : prestataire de paiement** | `cashd_poser_lien`, `cashd_lien_paye`, extinction au règlement (t4) ; le lien entre dans le texte |
+| 35 | Les factures en devise étrangère sont suivies dans leur devise et en euros. | tenue | `cashd_taux_change`, `reste_du_eur`, balance en euros (t4) ; le chargement quotidien des taux BCE est à brancher (ouvrier serveur, source publique) |
 
 ### Risque client
 | # | Ligne | État | Preuve |
 |---|---|---|---|
-| 36 | Un plafond d'encours se fixe par compte, à partir de son historique. | verte en local | `cashd_proposer_plafond` / `cashd_fixer_plafond` (t4) ; R |
-| 37 | Le dépassement du plafond déclenche une alerte avant toute nouvelle commande. | verte en local | `cashd_alerter_plafonds` (t4) ; point du matin |
-| 38 | Une commande au-delà du plafond est bloquée jusqu'à la décision d'un responsable. | verte en local (porte) ; raccord au logiciel de commandes : contrat d'interface | `cashd_verifier_commande` → demande `cashd.commande_hors_plafond` (t4) |
-| 39 | Vos règles de communication et vos interdits sont repris dans chaque message. | verte en local | formule, signature, interdits (t3) |
-| 40 | Un compte qui se dégrade est signalé avant que le retard s'installe. | verte en local | vue `cashd_delais_reglement.se_degrade` ; alerte au commercial et point du matin (c2_03) |
-| 41 | Un compte se met en pause, et il n'y revient que sur votre décision. | verte en local | t3 |
-| 42 | Le dossier destiné à l'assurance-crédit est constitué avec les pièces exigées. | verte en local (avec les pièces que CASHD détient) | `cashd_dossier(…, 'assurance_credit')` (t4) ; les PDF des factures restent dans le facturier |
-| 43 | Le dossier de recouvrement judiciaire est remis complet à qui vous désignez. | verte en local | `cashd_remettre_dossier` : compte en recouvrement, relances coupées, envoi du récapitulatif par la file (t4) |
+| 36 | Un plafond d'encours se fixe par compte, à partir de son historique. | tenue | `cashd_proposer_plafond` / `cashd_fixer_plafond` (t4) ; R |
+| 37 | Le dépassement du plafond déclenche une alerte avant toute nouvelle commande. | tenue | `cashd_alerter_plafonds` (t4) ; point du matin |
+| 38 | Une commande au-delà du plafond est bloquée jusqu'à la décision d'un responsable. | tenue (porte) ; raccord au logiciel de commandes : contrat d'interface | `cashd_verifier_commande` → demande `cashd.commande_hors_plafond` (t4) |
+| 39 | Vos règles de communication et vos interdits sont repris dans chaque message. | tenue | formule, signature, interdits (t3) |
+| 40 | Un compte qui se dégrade est signalé avant que le retard s'installe. | tenue | vue `cashd_delais_reglement.se_degrade` ; alerte au commercial et point du matin (c2_03) ; assertion `test_c2_04` (30 j de retard contre 5 d'habitude) |
+| 41 | Un compte se met en pause, et il n'y revient que sur votre décision. | tenue | t3 |
+| 42 | Le dossier destiné à l'assurance-crédit est constitué avec les pièces exigées. | tenue (avec les pièces que CASHD détient) | `cashd_dossier(…, 'assurance_credit')` (t4) ; les PDF des factures restent dans le facturier |
+| 43 | Le dossier de recouvrement judiciaire est remis complet à qui vous désignez. | tenue | `cashd_remettre_dossier` : compte en recouvrement, relances coupées, envoi du récapitulatif par la file (t4) |
 
 ### Pilotage
 | # | Ligne | État | Preuve |
 |---|---|---|---|
-| 44 | Le délai moyen de règlement se mesure compte par compte. | verte en local | `cashd_delais_reglement` (t4 : 35 jours sur dix factures) |
-| 45 | La prévision d'encaissement est établie à trente et à soixante jours. | verte en local | `cashd_prevision` (t4) ; R |
-| 46 | Chaque relance partie est datée et consignée, avec son objet et son destinataire. | verte en local | `envois` du socle + journal ; R (« partie le… ») |
-| 47 | Le taux de réponse aux relances se suit palier par palier. | verte en local | vue `cashd_reponses` ; R (carte Pilotage) |
-| 48 | Les créances en litige, en pause et en recouvrement sont comptées en continu. | verte en local | `cashd_tableau.par_statut`, `factures_en_litige` (t4) |
-| 49 | Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe. | verte en local | à la demande : boutons « Tableur » (R) ; à date fixe : `cashd_arretes`, arrêté mensuel (t4) |
-| 50 | Les seuils et les cadences se modifient, et chaque changement reste daté. | verte en local | `cashd_historique_reglages` (t4) |
+| 44 | Le délai moyen de règlement se mesure compte par compte. | tenue | `cashd_delais_reglement` (t4 : 35 jours sur dix factures) |
+| 45 | La prévision d'encaissement est établie à trente et à soixante jours. | tenue | `cashd_prevision` (t4) ; R |
+| 46 | Chaque relance partie est datée et consignée, avec son objet et son destinataire. | tenue | `envois` du socle + journal ; R (« partie le… ») |
+| 47 | Le taux de réponse aux relances se suit palier par palier. | tenue | vue `cashd_reponses` ; R (carte Pilotage) |
+| 48 | Les créances en litige, en pause et en recouvrement sont comptées en continu. | tenue | `cashd_tableau.par_statut`, `factures_en_litige` (t4) |
+| 49 | Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe. | tenue | à la demande : boutons « Tableur » (R) ; à date fixe : `cashd_arretes`, arrêté mensuel (t4) |
+| 50 | Les seuils et les cadences se modifient, et chaque changement reste daté. | tenue | `cashd_historique_reglages` (t4) |
 
-Bilan : 45 lignes vertes en local ; 3 à moitié (13 boîte de l'entreprise → A2 ; 17 autres langues ; 18 lecture
+Bilan : 45 lignes tenues ; 3 à moitié (13 boîte de l'entreprise → A2 ; 17 autres langues ; 18 lecture
 automatique d'une contestation) ; 2 attendent un tiers pour partir vraiment (26 LRE, 34 lien de paiement), leur côté
 CASHD étant vert.
 
@@ -230,6 +232,16 @@ CASHD étant vert.
   dans `components/espace/ecrans.ts` (fichier de la coquille, à C1).
 
 ## Journal de session
+
+- 06/10, 18 h Z : rouge au rejeu de `test_c2_04` (n° 38, arrêté de la balance) après `banc_cashd.sql`. Cause : CASHD
+  désormais installé pour de bon sur le banc, le cron `cashd-matin` y arrête la balance du mois courant ; le test
+  attendait un arrêté le lundi suivant du même mois. Le test vise maintenant le premier jour ouvré du mois suivant.
+  Même cause latente dans `test_c2_01` (« avant l'installation ») : il vise une organisation sans CASHD. Les quatre
+  tests passent (154/154) sur base vierge comme avec CASHD installé, un arrêté et un passage du jour déjà posés.
+
+- 06/10, 17 h 25 Z (coordinateur) : c2_02 et c2_03 reposés depuis 8b8fbb4 ; lot ^test_(c2_|c3_|…) 1120 ok, 0 not ok ; 44/46/51/55
+  34 ok ; worker-c2 fusionnée dans main (7399f41), /espace/cashd 200 aux cinq largeurs. 45 lignes « tenues ». banc_cashd.sql
+  inchangé depuis 6c29b77, à jouer.
 
 - 06/10, soir : seconde demande de C3 : `private.cashd_contact_en_litige(p_client, p_adresse)` (serveur seul) — vrai si
   l'adresse (facturation ou commerciale, en minuscules) ou le téléphone (9 derniers chiffres) est celui d'un compte en
