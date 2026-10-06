@@ -478,14 +478,14 @@ export default function EcranVarelo() {
           ) : objets.length === 0 ? (
             <Vide titre="Aucun objet">{recherche ? "Rien ne répond à cette recherche." : `Aucun ${LIBELLE_NATURE[nature].un} dans le référentiel : déposez l'export d'une société, le prochain passage ouvre les objets.`}</Vide>
           ) : (
-            <ul className="esp-liste" role="listbox" aria-label="Objets du groupe" style={{ marginTop: 10 }}>
+            <ul className="esp-liste" aria-label="Objets du groupe" style={{ marginTop: 10 }}>
               {objets.map((o) => {
                 const codes = codesParObjet.get(o.id) ?? [];
                 const attente = attenteParObjet.get(o.id) ?? 0;
                 const societes = Array.from(new Set(codes.map((c) => c.societe)));
                 return (
                   <li key={o.id}>
-                    <button type="button" role="option" aria-selected={choisi === o.id} className="esp-item" onClick={() => { setChoix(o.id); if (window.innerWidth < 1024) document.getElementById("vrl-objet")?.scrollIntoView({ behavior: "smooth", block: "start" }); }}>
+                    <button type="button" aria-current={choisi === o.id ? "true" : undefined} className="esp-item" onClick={() => { setChoix(o.id); if (window.innerWidth < 1024) document.getElementById("vrl-objet")?.scrollIntoView({ behavior: "smooth", block: "start" }); }}>
                       <span className="esp-item-haut">
                         <span className="esp-mono" style={{ fontWeight: 600 }}>{o.code_groupe}</span>
                         {attente ? <Pastille teinte="ambre">{attente} à valider</Pastille> : null}
