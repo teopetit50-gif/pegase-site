@@ -176,3 +176,20 @@ Deno.test("transcription Mistral : multipart model/language/file, texte, durée,
   const ko = new TranscripteurMistral({ cle: "k", modele: "m", prixUsdMinute: 0.002, tauxUsdEur: 1 }, () => Promise.resolve(new Response("busy", { status: 503 })));
   await ko.transcrire(OGG, "audio/ogg", "v.ogg").then(() => assert(false), (e) => assertEquals(e.reprendre, true));
 });
+
+Deno.test("media : avancement (b6_25) — ouvrage, lot, pourcentage ; jamais vérifié depuis une photo ; sans ouvrage, écarté", async () => {
+  const claude = new Claude({
+    resume: "Avancement des cloisons.",
+    demandes: [
+      { nature: "avancement", texte: "Cloisons R+1 finies", ouvrage: "Cloisons R+1", lot_code: "05", pourcentage: 100, source: { media: 1, extrait: "il manque une palette de plaques" } },
+      { nature: "avancement", texte: "Doublage posé", ouvrage: "Doublage façade nord", pourcentage: 140, source: { media: 2, extrait: "doublage posé" } },
+      { nature: "avancement", texte: "Sans ouvrage", source: { media: 2, extrait: "x" } },
+    ],
+  });
+  const { ctx, portes } = contexte(claude, new Transcrit());
+  await lireMedia(ctx, travail({ ...CHARGE, retour: undefined }));
+  const d = (portes.finis[0].resultat as { lecture: LectureMedia }).lecture.demandes;
+  assertEquals(d.length, 2);
+  assertEquals([d[0].ouvrage, d[0].lot_code, d[0].pourcentage, d[0].verifiee], ["Cloisons R+1", "05", 100, true]);
+  assertEquals([d[1].ouvrage, d[1].pourcentage, d[1].verifiee], ["Doublage façade nord", undefined, false], "pourcentage hors 0–100 écarté ; photo : à confirmer");
+});

@@ -24,7 +24,7 @@ import type { Transcripteur } from "./transcription.ts";
 export const GENRE_MEDIA = "lecteur.media";
 export const MAX_MEDIAS = 6;
 export const LIMITE_AUDIO_OCTETS = 25_000_000;
-export const NATURES_DEMANDE = ["travail_supplementaire", "probleme", "question", "information"] as const;
+export const NATURES_DEMANDE = ["travail_supplementaire", "probleme", "question", "information", "avancement"] as const;
 
 export interface PieceMedia {
   chemin: string;
@@ -57,6 +57,10 @@ export interface Demande {
   quantite?: number;
   unite?: string;
   lieu?: string;
+  /** Avancement (b6_25) : l'ouvrage vu ou dit, le code du lot s'il est dit, le pourcentage fait (0 à 100). */
+  ouvrage?: string;
+  lot_code?: string;
+  pourcentage?: number;
   /** D'où elle vient : 0 = le texte du message, n ≥ 1 = le média n. */
   source: { media: number; extrait: string };
   verifiee: boolean;
@@ -111,7 +115,7 @@ export function chargeMedia(travail: Travail): ChargeMedia | string {
 const CONSIGNE = `Tu es le lecteur d'Omega pour une entreprise du bâtiment. Tu reçois un message envoyé sur le numéro WhatsApp professionnel (ou par courriel) par un client, un chef d'équipe ou un ouvrier : son texte, la transcription de ses vocaux, ses photos.
 Tu rends l'outil lire_media :
 1. resume : ce que dit le message, en une ou deux phrases neutres, sans rien ajouter.
-2. demandes : chaque chose à traiter, une par ligne — travail_supplementaire (un ouvrage demandé en plus du marché : « il veut aussi des garde-corps au R+3 »), probleme (un dommage, un retard, un manque, un défaut visible), question, information utile au chantier. Pour chacune : texte (court, factuel), quantite et unite si elles sont dites (« douze mètres » → 12, ml), lieu si dit, et source : media = 0 pour le texte du message, sinon le numéro du média (1, 2…), extrait = les mots EXACTS de la transcription ou du texte qui la portent (pour une photo : ce qu'on y voit, en quelques mots).
+2. demandes : chaque chose à traiter, une par ligne — travail_supplementaire (un ouvrage demandé en plus du marché : « il veut aussi des garde-corps au R+3 »), probleme (un dommage, un retard, un manque, un défaut visible), question, information utile au chantier, avancement (où en est un ouvrage : « les cloisons du R+1 sont finies », une photo qui montre un ouvrage posé — ouvrage, lot_code s'il est dit, pourcentage fait de 0 à 100 seulement s'il est dit ou évident). Pour chacune : texte (court, factuel), quantite et unite si elles sont dites (« douze mètres » → 12, ml), lieu si dit, et source : media = 0 pour le texte du message, sinon le numéro du média (1, 2…), extrait = les mots EXACTS de la transcription ou du texte qui la portent (pour une photo : ce qu'on y voit, en quelques mots).
 3. N'invente rien : pas de demande sans source ; un vocal marqué « non transcrit » ne se devine pas ; une photo ne prouve qu'elle-même.`;
 
 const SCHEMA_OUTIL = {
@@ -128,6 +132,9 @@ const SCHEMA_OUTIL = {
           quantite: { type: "number" },
           unite: { type: "string" },
           lieu: { type: "string" },
+          ouvrage: { type: "string" },
+          lot_code: { type: "string" },
+          pourcentage: { type: "number" },
           source: { type: "object", properties: { media: { type: "integer" }, extrait: { type: "string" } }, required: ["media", "extrait"] },
         },
         required: ["nature", "texte", "source"],
@@ -162,6 +169,7 @@ export function verifierDemandes(brut: unknown, textes: Map<number, string>, pho
     const media = Number.isInteger(src.media) ? (src.media as number) : -1;
     const extrait = typeof src.extrait === "string" ? src.extrait.trim().slice(0, 500) : "";
     if (!nature || texte === "" || extrait === "") continue;
+    if (nature === "avancement" && !(typeof x.ouvrage === "string" && x.ouvrage.trim())) continue;
     let verifiee = false;
     let controle: string;
     if (textes.has(media)) {
@@ -182,6 +190,11 @@ export function verifierDemandes(brut: unknown, textes: Map<number, string>, pho
       ...(q !== undefined ? { quantite: q } : {}),
       ...(typeof x.unite === "string" && x.unite.trim() ? { unite: x.unite.trim().slice(0, 20) } : {}),
       ...(typeof x.lieu === "string" && x.lieu.trim() ? { lieu: x.lieu.trim().slice(0, 200) } : {}),
+      ...(typeof x.ouvrage === "string" && x.ouvrage.trim() ? { ouvrage: x.ouvrage.trim().slice(0, 200) } : {}),
+      ...(typeof x.lot_code === "string" && x.lot_code.trim() ? { lot_code: x.lot_code.trim().slice(0, 20) } : {}),
+      ...(typeof x.pourcentage === "number" && Number.isFinite(x.pourcentage) && x.pourcentage >= 0 && x.pourcentage <= 100
+        ? { pourcentage: Math.round(x.pourcentage * 10) / 10 }
+        : {}),
       source: { media, extrait },
       verifiee,
       controle,

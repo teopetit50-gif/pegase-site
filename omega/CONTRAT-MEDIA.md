@@ -47,7 +47,7 @@ tant qu'aucun travail n'est déposé, rien ne se passe.
 
 - `statut` d'un média : `lu`, `non_transcrit` (vocal sans service), `absent` (fichier manquant), `trop_lourd`
   (image > 3,75 Mo, audio > 25 Mo), `ignore` (ni audio ni image : un PDF joint suit le chemin des pièces).
-- `nature` d'une demande : `travail_supplementaire`, `probleme`, `question`, `information`.
+- `nature` d'une demande : `travail_supplementaire`, `probleme`, `question`, `information`, `avancement` (b6_25 : `ouvrage`, `lot_code?`, `pourcentage?` de 0 à 100 ; une demande d'avancement sans `ouvrage` est écartée ; tirée d'une photo, toujours `verifiee = false`).
 - `source.media` : 0 = le texte du message, n = le média n. **Vérifiée** seulement si l'extrait se retrouve mot pour
   mot (espaces près) dans le texte ou la transcription ; une demande tirée d'une photo reste `verifiee = false`
   (« à confirmer ») ; une demande attribuée à un vocal non transcrit ou à une source inconnue est écartée.
