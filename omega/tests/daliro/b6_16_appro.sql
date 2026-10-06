@@ -39,7 +39,7 @@ begin
   return next ok(not has_function_privilege('anon', 'public.btp_ecrire_commande(uuid, uuid, jsonb)', 'execute'), 'anon ne commande pas');
 
   -- ── Ouvrir des commandes ──
-  return next throws_ok(format('select public.btp_ecrire_commande(null, %L, ''{"objet": "Sans fournisseur"}'')', v_ch), '22023', null, 'Sans fournisseur : refusé');
+  return next throws_ok(format('select public.btp_ecrire_commande(null, %L, ''{"objet": "  ", "fournisseur_libelle": "X"}'')', v_ch), '22023', null, 'Sans objet : refusé');
   return next throws_ok(format('select public.btp_ecrire_commande(null, %L, %L)', v_ch, jsonb_build_object('objet', 'X', 'fournisseur_id', v_mo)), '22023', null,
                         'Un maître d''ouvrage n''est pas un fournisseur');
   v_k1 := public.btp_ecrire_commande(null, v_ch, jsonb_build_object('objet', 'Fenêtres sur mesure', 'quantite_texte', '14 châssis', 'fournisseur_id', v_four,

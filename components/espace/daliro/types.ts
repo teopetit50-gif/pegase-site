@@ -546,7 +546,7 @@ export type RisqueMeteo = { passage_id: string; tache: string | null; chantier_i
 export type MeteoChantier = { localise: boolean; ouverte: boolean; prevision: JourMeteo[]; recue_le: string | null; erreur: string | null; risques: RisqueMeteo[] };
 
 /* b6_22 : l'approvisionnement (public.btp_appro_chantier) */
-export type EtatCommande = "a_commander" | "a_commander_vite" | "commande_en_retard" | "commandee" | "livraison_tardive" | "livraison_attendue" | "livree_partielle" | "livree" | "annulee";
+export type EtatCommande = "a_commander" | "a_commander_vite" | "commande_en_retard" | "commandee" | "livraison_tardive" | "livraison_trop_tot" | "livraison_attendue" | "livree_partielle" | "livree" | "annulee";
 export type Commande = {
   id: string;
   chantier_id: string;
@@ -567,6 +567,19 @@ export type Commande = {
   livree_le: string | null;
   note: string | null;
   motif: string | null;
-  echeances: { besoin_le: string | null; livrer_avant: string | null; commander_avant: string | null; etat: EtatCommande };
+  /* b6_23 : quantité du devis, matériel à rendre, bons de livraison */
+  ligne_marche_id?: string | null;
+  quantite?: number | null;
+  unite?: string | null;
+  a_retourner?: boolean;
+  retour_prevu?: string | null;
+  retourne_le?: string | null;
+  livraisons?: LivraisonCommande[];
+  echeances: {
+    besoin_le: string | null; livrer_avant: string | null; livrer_le?: string | null; commander_avant: string | null; etat: EtatCommande;
+    quantite_commandee?: number | null; quantite_livree?: number | null; ecart?: number | null;
+    retour_prevu?: string | null; retour?: "sur_chantier" | "a_rendre" | "rendu" | null;
+  };
 };
-export type Appro = { commandes: Commande[]; fournisseurs: { id: string; nom: string }[] };
+export type LivraisonCommande = { id: string; livree_le: string; quantite: number | null; bon_reference: string | null; piece_id: string | null; note: string | null };
+export type Appro = { commandes: Commande[]; fournisseurs: { id: string; nom: string }[]; devis_verifie?: boolean };
