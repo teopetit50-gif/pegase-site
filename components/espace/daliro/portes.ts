@@ -13,7 +13,7 @@
      btp_soumettre_avenant, btp_signer_avenant, btp_abandonner_avenant (b6_01) ;
      btp_repondre_confirmation, btp_proposer_remplacants (b6_02) ;
      btp_rattacher_facture, btp_detacher_facture (b6_03) ;
-     btp_accord_j2, btp_donner_accord_j2, btp_revoquer_accord_j2 (b6_08).
+     btp_accord_j2, btp_donner_accord_j2, btp_revoquer_accord_j2 (b6_08), btp_activer_accord_j2_seul (b6_09).
    Les tables sans porte (chantiers, lots, tiers, dépendances, acceptations)
    s'écrivent en direct, comme le socle le prévoit (politiques du bureau).
    Si la base répond autrement, l'écran montre son message tel quel.
@@ -135,4 +135,7 @@ export async function donnerAccordJ2(client: string): Promise<AccordJ2> {
 }
 export async function revoquerAccordJ2(client: string, motif: string | null): Promise<AccordJ2> {
   return rpc<AccordJ2>("btp_revoquer_accord_j2", { p_client: client, p_motif: motif });
+}
+export async function activerAccordJ2Seul(client: string): Promise<AccordJ2> {
+  return rpc<AccordJ2>("btp_activer_accord_j2_seul", { p_client: client });
 }

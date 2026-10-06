@@ -362,4 +362,6 @@ export type AccordJ2 = {
   etat: "aucun" | "a_valider" | "actif" | "partiel" | "revoque";
   fin: string | null;
   canaux: CanalAccordJ2[];
+  /* b6_09 : le lecteur est-il le seul décideur (gérant, admin, valideur) de l'organisation ? */
+  seul_decideur?: boolean;
 };
