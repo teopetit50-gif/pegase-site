@@ -32,6 +32,7 @@ import DossierContrat, { type Gestes } from "./DossierContrat";
 import type { GestesEtats } from "./EtatsDesLieux";
 import { appliquerEtats, empreinte } from "./edl";
 import BaremeVue from "./BaremeVue";
+import AnalysesParc from "./AnalysesParc";
 import AvisVue, { type GestesAvis } from "./AvisVue";
 import ContestationsVue, { type GestesContestations } from "./ContestationsVue";
 import { forcesLocales } from "./contestations";
@@ -654,6 +655,11 @@ export default function EcranTavaro() {
             <div className="esp-carte"><Vide titre="Choisissez un contrat">Le contrat, le chiffrage du retour, les factures et les avoirs s&apos;affichent ici.</Vide></div>
           )}
         </section>
+      </div>
+
+      {/* b3t_01 à b3t_03 (renfort B3) : véhicules inactifs, réservations et contrats à risque, montée en gamme, plan de flotte */}
+      <div style={{ marginTop: 16 }}>
+        <AnalysesParc source={source} moi={moi} role={role} />
       </div>
 
       <div style={{ marginTop: 16 }}>
