@@ -562,3 +562,8 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   2bfb560c lue en 35 s, proposition à 247 s « PCMI3, PCMI6 », confirmée 02:10:09 Z ; permis
   56c88739 en pieces_demandees, échéance 2027-01-01, rappels [10,3,0]. Jauges B5 : mécanique
   95 %, livrable 92 %. Reste sur le banc la demande confirmée vide de 01:40 (pièce 1c55b927).
+- 04 h 25 — B6 bf18d74 fusionné : libellés des statuts de facture FILED dans Daliro (validee,
+  refusee, ecartee, comptabilisee ; inconnu affiché tel quel). Décision sur ses deux
+  propositions : oui à un J-2 réel sur le banc en mode essai (remis à l'adresse de Teo,
+  comme Tavaro) et à la clôture (annule) des sept chantiers « Essai B6 » — B6 écrit les
+  fichiers, le coordinateur pose.
