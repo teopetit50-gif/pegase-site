@@ -396,3 +396,19 @@ A0103, déposée le 2026-06-01 ; le socle la met d'emblée en `decision_a_confir
   rend le focus à « Régime ». tsc, eslint, build, recette aux cinq largeurs : verts. Pas touché : dialog.tsx,
   barre d'onglets.
 
+## 12. Jurisprudence de la seconde demande (06/10, 13 h 43 Z, recherche du coordinateur) — b5_10
+
+- CE, 30 avril 2024, n° 461958 : la mairie peut inviter de nouveau à compléter le dossier, mais cette demande est
+  sans incidence sur le cours du délai et sur la naissance d'une décision tacite ; l'instruction part de la dernière
+  pièce reçue. CE, 4 février 2025 : une seule pièce prévue par le code suffit à interrompre valablement le délai.
+  **La règle de b5_07 est confirmée** ; le point « juriste » du § 8 est clos.
+- `b5_10_jurisprudence_seconde_demande.sql` : corps du trigger (b5_08) ; titre « 2e demande de pièces du …, sans
+  effet sur les délais (CE 30 avril 2024, n° 461958) ; délai depuis la lettre du … » (≤ 200, intitulé borné à 50) ;
+  le détail de l'alerte cite la décision et R*423-38 / R*423-39 ; l'alerte « après la remise » ajoute la décision.
+- « Pièce non prévue par le code » : Lorani n'a aucun avertissement de ce genre sur une demande entière (le socle garde
+  les codes, écarte le texte libre sans le signaler) ; R*423-41 n'apparaît que pour une demande hors du mois (calcul)
+  ou après la remise des pièces. Rien à retirer.
+- Écran : l'avis « Plusieurs demandes de pièces » cite la décision ; recette (contrôle b5_07 : « 461958 ») et axe :
+  verts. Test 19 bis : l'alerte doit porter « 2e demande de pièces » et la référence. Essai local (b5_07 + b5_08 +
+  b5_10) : titres de 175 et 162 caractères, règle inchangée.
+
