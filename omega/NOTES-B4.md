@@ -267,6 +267,53 @@ passe**, captures `omega/recette-b4/reel-*-1440.jpg`.
   corrigés, puis 06 (le jour de Paris écrit dans le SQL des throws_ok). **Résultat du coordinateur,
   06/10 à 02 h 25 Paris : 13 fichiers verts sur 13.** Plus rien à poser.
 
+## 10. Le coffre Scaleway (lot B4-5, 06/10) — décision du coordinateur : Scaleway Key Manager
+
+Une clé maître par cabinet chez Scaleway ; chaque clé de dossier (AES-256-GCM, inchangée) est enveloppée
+par elle, avec l'identifiant du dossier en données associées. Le mode local (phrase du cabinet) reste celui
+d'un cabinet qui n'a pas basculé.
+
+**À poser** (recette) : `omega/modules/tamila/migrations/b4_05_tamila_coffre.sql`, puis jouer
+`omega/tests/tamila/14_coffre.sql` (`^test_b4_14_`), et rejouer 02 et 09 (la garde de `tamila_cles` est
+reprise en `create or replace`, avec une seule exception : le ré-enveloppement). Pas de drop, pas de
+suppression ; toute fonction private nouvelle : `revoke execute … from public`, puis grant au seul rôle utile.
+Deux tables neuves **sans clé étrangère vers clients** (`tamila_coffres`, `tamila_coffre_journal`) : la
+cascade s'écrit avec un mot interdit dans un fichier à poser ; si le coordinateur la veut, à ajouter par lui.
+
+- Tables : `tamila_coffres` (local | bascule | scaleway, région, identifiant de la clé maître),
+  `tamila_coffre_journal` (chaque remise d'enveloppe : qui, quand, dossier, pièce, pour qui, issue ; lu par
+  les associés, personne n'y écrit en direct).
+- Portes : `tamila_coffre_etat`, `_demander_activation` (gérant), `_activer` (serveur), `_pour_nouvelle_cle`,
+  `_pour_membre`, `_pour_lecteur` (serveur), `_conclure` (serveur), `_a_reenvelopper` (associé ou responsable
+  qui voit le dossier), `_reenveloppe` (serveur). Déclencheur `tamila_cles_conforme` : un cabinet passé au
+  coffre n'ouvre plus de dossier qu'avec une clé émise par le coffre pour ce dossier et cette personne.
+- Ré-enveloppement local → scaleway : la personne qui a la phrase déballe la clé dans son navigateur et
+  l'envoie au coffre ; le coffre vérifie qu'elle ouvre le témoin (référence chiffrée, étiquette GCM),
+  l'enveloppe chez Scaleway, le serveur pose l'enveloppe. **Aucune pièce n'est déchiffrée ni re-chiffrée
+  en base.** Les pièces restées « recue » (closes `chiffree_sans_coffre` par le lecteur) repartent à la
+  lecture. Le coffre passe « scaleway » quand plus aucun dossier n'est local.
+- Ouvrier `omega/functions/tamila-coffre/` (Deno, verify_jwt true) : `index.ts` (entrée), `http.ts` (qui
+  appelle : la clé de service = le lecteur ; un autre jeton = une personne ; CORS omegaai.fr), `coffre.ts`
+  (activer, nouvelle_cle, cle_dossier, cle_piece, reenvelopper), `keymanager.ts` (Scaleway v1alpha1,
+  X-Auth-Token), `portes.ts`, `aesgcm.ts`, `lecteur.ts` (**pour A1** : `clePourPiece` +
+  `lirePieceChiffree`, avec le mode d'emploi en tête de fichier). Le coffre ne décide d'aucun droit : chaque
+  geste commence par une porte. La clé de dossier ne vit qu'en mémoire, effacée après la réponse, jamais
+  journalisée (test dédié).
+- **Secrets à poser par Teo** (fonction tamila-coffre) : `SCALEWAY_SECRET_KEY`, `SCALEWAY_PROJECT_ID`,
+  `SCALEWAY_REGION` (facultatif, `fr-par` par défaut) ; facultatif `TAMILA_COFFRE_ORIGINES`. Supabase fournit
+  `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ANON_KEY`. Sans les secrets Scaleway, le coffre
+  répond 503 `KM_ABSENT` et ne pose rien. La clé IAM : une application limitée au Key Manager du projet.
+- **À revérifier sur le premier vrai compte** : la forme exacte des réponses Scaleway (`keys[]`, `id`,
+  `ciphertext`, `plaintext`) ; le client est écrit d'après la documentation v1alpha1, testé contre un faux.
+- Tests : pgTAP `14_coffre.sql` (64 contrôles) ; Deno `omega/functions/tamila-coffre/tests` (18 tests, faux
+  Key Manager à vrai AES-GCM avec données associées, faux fetch Scaleway) : `deno task verifier`.
+- **Souche locale terminée** (`omega/tests/tamila/souche_locale/jouer.sh`) : PostgreSQL 16 local, socle
+  imité, socle Tamila extrait, b4_01 à b4_05, aides d'A5, pgTAP imité. Le 06/10 : 01, 02, 03, 05, 07, 08,
+  09, 12, 13, 14 verts (288 contrôles) ; 04, 06, 10, 11 attendent les 26 règles de procédure dans la souche.
+- **Reste** : l'écran (bouton « Passer au coffre » du gérant, ré-enveloppement dossier par dossier, clé par
+  le coffre au lieu de la phrase), le branchement dans le lecteur (A1), la passerelle avis lu →
+  `tamila_avis_lu` (le lecteur, ayant la clé, peut désormais comparer le n° RG).
+
 ## 7. Prochaine étape
 
 1. (fait : en ligne, vérifié le 06/10.)
