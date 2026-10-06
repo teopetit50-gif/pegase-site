@@ -2,6 +2,23 @@
 
 Branche `worker-a3`. Dernière mise à jour : 06/10/2026, 03 h 50 Paris (reprise par la session Opus 5.5 `session_01Npbh1aR6LoEX7PZDchMSca`, à la suite de `session_01DdgwRadkJFx5u9buwh5crS`).
 
+## REPRISE (pause demandée par Teo, 06/10 21 h Z)
+
+**Fait, poussé sur worker-a3** (tête = ce commit de notes, au-dessus de fa23419) :
+- Fusionné dans main par le coordinateur : facture électronique + Comptabilité/FEC (5091088), boîte FILED (fd6df00), Demandes reçues + Réglages (journal CSV, export complet, aperçu d'effacement) + marquer une réception (fed6368).
+- **À fusionner** : 0295d85 (onglets REPUT et CASHD dans ECRANS ; libellés longs à 2240 px, treize onglets) ; d418e0a et fa23419 (scripts de recette : PREFIXE / CAPTURES / SAUTER, sélecteurs neutres pour « À payer » et la boucle des largeurs). Recette /espace et /espace2 (09a02c7) : tout passe ; accessibilité : tout passe ; non-régression : tout est là. Rien n'est en ligne : quota Vercel.
+- Aucun fichier du site public touché.
+
+**Attend le coordinateur / A5** :
+- export-complet sur la recette : la fonction appelle public.exporter_client (404, la porte n'existe pas sous ce nom) ; origine http://localhost:3010 à autoriser sur la recette pour relire le bouton de bout en bout.
+- OFFLOAD dans ECRANS : oui ou non (dit « plus tard »).
+
+**Attend Teo** : rien de mon côté.
+
+**Pas commencé** : le chiffrage omega/CHIFFRAGE/espace.md (demandé à 18 h 26 Z). Relevé déjà fait, à reprendre : ce site n'a ni page de connexion (l'espace renvoie au « cockpit », application à part ; /auth/confirm redirige vers /compte, absent ici) ni écran d'invitation (la porte rattacher_membre existe, aucun écran ne l'appelle) ni écran des rôles (la politique UPDATE de comptes le permet) ; tout ce qui est livré l'est sur la recette (aucune preuve avec un vrai compte client en production).
+
+**Prochaine étape exacte** : écrire omega/CHIFFRAGE/espace.md (synthèse 6 lignes ; connexion, installation, invitation, rôles, validations, réglages, export, effacement, mobile, accessibilité ; chaque promesse du site sur l'espace client avec état A/B/C/D/T, manque, jours actuel→B et B→A), en relevant les promesses dans lib/produits/**, app/vos-donnees, app/tarifs, app/installation et CAPACITES-A-VALIDER.md ; puis le SHA au coordinateur.
+
 ## Fait
 
 Trois écrans pour une personne connectée, sur la charte du site (monde
