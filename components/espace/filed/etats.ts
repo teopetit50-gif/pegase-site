@@ -93,16 +93,19 @@ export function grouperControles(controles: Controle[]) {
 }
 
 /* Les champs d'une facture qu'on peut corriger par filed_corriger_facture :
-   clé envoyée → libellé, type de saisie. */
-export const CHAMPS_CORRIGEABLES: { cle: string; libelle: string; type: "texte" | "date" | "montant" }[] = [
-  { cle: "numero", libelle: "Numéro de facture", type: "texte" },
-  { cle: "date_emission", libelle: "Date d'émission", type: "date" },
-  { cle: "echeance_lue", libelle: "Échéance", type: "date" },
-  { cle: "montant_ht", libelle: "Montant HT", type: "montant" },
-  { cle: "montant_tva", libelle: "Montant TVA", type: "montant" },
-  { cle: "montant_ttc", libelle: "Montant TTC", type: "montant" },
-  { cle: "net_a_payer", libelle: "Net à payer", type: "montant" },
-  { cle: "iban", libelle: "IBAN", type: "texte" },
+   la colonne de filed_factures (écran, exemple) → la clé que la porte
+   accepte (relue sur la recette le 06/10 : `date`, `echeance`,
+   `fournisseur.iban` — pas les noms de colonne), libellé, type de saisie.
+   Une autre clé est refusée par la base (22023). */
+export const CHAMPS_CORRIGEABLES: { cle: string; porte: string; libelle: string; type: "texte" | "date" | "montant" }[] = [
+  { cle: "numero", porte: "numero", libelle: "Numéro de facture", type: "texte" },
+  { cle: "date_emission", porte: "date", libelle: "Date d'émission", type: "date" },
+  { cle: "echeance_lue", porte: "echeance", libelle: "Échéance", type: "date" },
+  { cle: "montant_ht", porte: "montant_ht", libelle: "Montant HT", type: "montant" },
+  { cle: "montant_tva", porte: "montant_tva", libelle: "Montant TVA", type: "montant" },
+  { cle: "montant_ttc", porte: "montant_ttc", libelle: "Montant TTC", type: "montant" },
+  { cle: "net_a_payer", porte: "net_a_payer", libelle: "Net à payer", type: "montant" },
+  { cle: "iban", porte: "fournisseur.iban", libelle: "IBAN", type: "texte" },
 ];
 
 /* Les noms de champ des valeurs lues (pieces_valeurs.champ), par notion :

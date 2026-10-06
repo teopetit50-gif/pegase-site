@@ -248,6 +248,42 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
   (`va.vercel-scripts.com`) chargé en dev, refusé par le mandataire du
   conteneur, pas l'écran.
 
+## Lot du 06/10 (4) — identifiants lus non retenus ; les clés de « Corriger une valeur »
+
+- **Bloc « Identifiants lus sur la pièce, non retenus »** dans le dossier
+  (sous la fiche fournisseur), quand `filed_factures.fournisseur_lu.non_verifie`
+  porte un SIREN ou une TVA que la fiche n'a pas : la valeur, sa raison
+  (clé de Luhn invalide ; TVA FR : forme, Luhn du SIREN porté, clé
+  `(12 + 3 × (SIREN mod 97)) mod 97`), « Voir sur la pièce ».
+  « Confirmer la valeur lue » (`filed_confirmer_valeurs`) n'est proposé
+  **que si la clé est juste** — la porte ne contrôle pas la clé (lu sur la
+  recette par le coordinateur) ; a4_14 refuse désormais une valeur humain à
+  clé fausse (22023), le message s'afficherait tel quel. « Saisir les vrais
+  identifiants » → `filed_corriger_facture(p_facture, {"fournisseur.siren",
+  "fournisseur.tva"}, motif)` ; le navigateur vérifie les clés et la
+  cohérence SIREN ↔ TVA avant l'envoi (`filed/identifiants.ts`). Le bouton
+  général « Confirmer les N valeurs non vérifiées » n'emporte plus un SIREN
+  ou une TVA à clé fausse.
+- **Défaut existant corrigé** : « Corriger une valeur » envoyait les noms de
+  colonne (`date_emission`, `echeance_lue`, `iban`) ; la porte attend
+  `date`, `echeance`, `fournisseur.iban` (clés relues par le coordinateur) —
+  ces trois corrections étaient refusées en réel (22023). `CHAMPS_CORRIGEABLES`
+  porte désormais la clé de porte. **Prouvé en réel** (daf2@, R2026-000003,
+  02 h 4x Z) : l'échéance relue à l'identique (2026-11-04) est acceptée,
+  `pieces_valeurs` porte la ligne `echeance` source humain avec le motif.
+- **Relecture réelle** (daf2@, R2026-000003, lecture seule) : « SIREN lu
+  842115763 — clé de Luhn invalide », « TVA lu FR42842115763 — le SIREN
+  qu'elle porte a une clé invalide », pas de « confirmer », « Saisir les vrais
+  identifiants » offert. Rien n'a été saisi sur Delorme : pas de SIREN
+  inventé sur le banc (capture `reel-identifiants-lus-1440.jpg`).
+- Exemple : dossier R2026-000017 (Fournitures Lebrun, fictive), identifiants
+  lus à clé fausse. Au passage, les SIREN d'exemple qui ne passaient pas la
+  clé de Luhn (Durand, Roux, TechPro, Vidal) sont remplacés par des numéros
+  à clé juste, TVA recalculées.
+- Recette : 149 contrôles ✓ (dont l'enchaînement « identifiants lus » :
+  raison affichée, pas de confirmation d'une clé fausse, TVA d'un autre
+  SIREN refusée avant l'envoi, saisie qui fait tomber le bloc).
+
 ## Bloqué / contourné
 
 - **Outil Supabase (MCP)** : la permission d'exécuter du SQL a été refusée

@@ -27,6 +27,7 @@ import { CHAMPS_CORRIGEABLES, CHAMPS_PAR_NOTION, FAMILLES_CONTROLE, NATURES, NOT
 import { apparierLigne, attesterIdentite, bloquerFournisseur, classerDocument, confirmerFournisseur, confirmerValeurs, corrigerFacture, demanderVerification, leverAnomalie, proposerIban, rattacherCommande, rattacherFournisseur } from "./portes";
 import VisionneusePiece from "./VisionneusePiece";
 import FicheFournisseur, { registreDe } from "./FicheFournisseur";
+import { analyserTva, chiffres, sirenValide, tvaPropre } from "./identifiants";
 
 type Props = {
   dossier: DossierFiled;
@@ -54,6 +55,7 @@ type Form =
   | { type: "apparier"; ligne: LigneFacture }
   | { type: "confirmer_fournisseur" }
   | { type: "attester" }
+  | { type: "identifiants" }
   | null;
 
 const maintenant = () => new Date().toISOString();
@@ -73,6 +75,8 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
   const [iban, setIban] = useState("");
   const [commandeChoisie, setCommandeChoisie] = useState("");
   const [ligneCommandeChoisie, setLigneCommandeChoisie] = useState("");
+  const [sirenSaisi, setSirenSaisi] = useState("");
+  const [tvaSaisie, setTvaSaisie] = useState("");
 
   const groupes = useMemo(() => grouperControles(dossier.controles), [dossier.controles]);
   const motifOfficiel = (code: string | null) => (code ? motifs.find((m) => m.code === code) ?? { code, libelle: code.replace(/_/g, " ").toLowerCase(), description: null } : null);
@@ -94,7 +98,14 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
   };
   /* la valeur de la facture, sinon le texte cité dans la pièce */
   const ou = (valeur: string | null | undefined, v: DossierFiled["valeurs"][number] | null) => (valeur && valeur !== "—" ? valeur : (v?.texte ?? "—"));
-  const nonVerifiees = dossier.valeurs.filter((v) => !v.verifiee);
+  /* un SIREN ou une TVA lus dont la clé est fausse ne se confirment pas en bloc : ils se corrigent */
+  const cleFausse = (v: DossierFiled["valeurs"][number]) => {
+    const brut = String(v.valeur ?? v.texte ?? "");
+    if (CHAMPS_PAR_NOTION.siren.includes(v.champ)) return !sirenValide(brut);
+    if (CHAMPS_PAR_NOTION.tva_intracom.includes(v.champ)) return analyserTva(brut).valide === false;
+    return false;
+  };
+  const nonVerifiees = dossier.valeurs.filter((v) => !v.verifiee && !cleFausse(v));
 
   const ouvrir = (f: Form) => {
     setErreur(null);
@@ -145,9 +156,9 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
     if (!facture) return;
     const def = CHAMPS_CORRIGEABLES.find((c) => c.cle === champ)!;
     const brut = valeur.trim();
-    const val: unknown = def.type === "montant" ? Number(brut.replace(/\s/g, "").replace(",", ".")) : brut;
+    const val: unknown = def.type === "montant" ? Number(brut.replace(/\s/g, "").replace(",", ".")) : def.porte === "fournisseur.iban" ? brut.replace(/\s+/g, "").toUpperCase() : brut;
     return envoyer(
-      () => corrigerFacture(facture.id, { [champ]: val }, motif.trim()).then(() => undefined),
+      () => corrigerFacture(facture.id, { [def.porte]: val }, motif.trim()).then(() => undefined),
       () => {
         const cite = valeurDe(NOTION_PAR_COLONNE[champ] ?? champ);
         const f = { ...facture, [champ]: val, version: facture.version + 1, champs_douteux: facture.champs_douteux.filter((c) => c !== cite?.champ) };
@@ -334,6 +345,55 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
     );
   };
 
+  /* ——— les identifiants lus sur la pièce mais non retenus (a4_10 :
+     fournisseur_lu.non_verifie) : une personne confirme la valeur lue si
+     sa clé est juste, ou saisit les vrais identifiants ——— */
+  const nonVerifie = (facture?.fournisseur_lu?.non_verifie ?? null) as { siren?: string; tva?: string } | null;
+  const lus = [
+    nonVerifie?.siren && !fournisseur?.siren ? { notion: "siren", libelle: "SIREN", valeur: nonVerifie.siren, juste: sirenValide(nonVerifie.siren), raison: sirenValide(nonVerifie.siren) ? "clé juste" : "clé de Luhn invalide" } : null,
+    nonVerifie?.tva && !fournisseur?.tva ? (() => { const a = analyserTva(nonVerifie.tva!); return { notion: "tva_intracom", libelle: "TVA", valeur: nonVerifie.tva!, juste: a.valide === true, raison: a.raison }; })() : null,
+  ].filter(Boolean) as { notion: string; libelle: string; valeur: string; juste: boolean; raison: string }[];
+
+  const confirmerLu = (notion: string) => {
+    if (!facture) return;
+    const v = valeurDe(notion);
+    if (!v) return;
+    return envoyer(
+      () => confirmerValeurs(facture.id, [v.champ]).then(() => undefined),
+      () => ajouterFil({ ...dossier, valeurs: dossier.valeurs.map((x) => (x.id === v.id ? { ...x, verifiee: true } : x)) }, "confirmation", `${libelleChamp(v.champ)} lu confirmé sur la pièce : ${v.texte}`),
+      "La valeur lue est confirmée ; les contrôles vont la reprendre.",
+    );
+  };
+
+  const sirenNet = chiffres(sirenSaisi);
+  const tvaNette = tvaPropre(tvaSaisie);
+  const avisTva = tvaNette ? analyserTva(tvaNette) : null;
+  const identifiantsOk =
+    (!!sirenNet || !!tvaNette) &&
+    (!sirenNet || sirenValide(sirenNet)) &&
+    (!avisTva || avisTva.valide !== false) &&
+    (!sirenNet || !avisTva?.siren || avisTva.siren === sirenNet);
+  const soumettreIdentifiants = () => {
+    if (!facture) return;
+    const valeurs: Record<string, string> = {};
+    if (sirenNet) valeurs["fournisseur.siren"] = sirenNet;
+    if (tvaNette) valeurs["fournisseur.tva"] = tvaNette;
+    return envoyer(
+      () => corrigerFacture(facture.id, valeurs, motif.trim()).then(() => undefined),
+      () => {
+        const siren = sirenNet || avisTva?.siren || null;
+        const lu = { ...facture.fournisseur_lu, siren: siren ?? facture.fournisseur_lu?.siren, tva: tvaNette || facture.fournisseur_lu?.tva };
+        delete (lu as Record<string, unknown>).non_verifie;
+        return ajouterFil(
+          { ...dossier, facture: { ...facture, version: facture.version + 1, fournisseur_lu: lu }, fournisseur: fournisseur ? { ...fournisseur, siren: fournisseur.siren ?? siren, tva: fournisseur.tva ?? (tvaNette || null) } : fournisseur },
+          "correction",
+          `Identifiants du fournisseur saisis : ${[sirenNet ? `SIREN ${sirenNet}` : null, tvaNette ? `TVA ${tvaNette}` : null].filter(Boolean).join(", ")} — ${motif.trim()}`,
+        );
+      },
+      "Les identifiants sont saisis ; les contrôles et la vérification au registre vont être rejoués.",
+    );
+  };
+
   const e = etatDocument(doc.etat);
 
   return (
@@ -390,7 +450,7 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
                   </div>
                   <div className="esp-actions" style={{ marginTop: 10 }}>
                     <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "corriger" })}><Pencil width={13} height={13} aria-hidden="true" /> Corriger une valeur</button>
-                    <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!nonVerifiees.length} onClick={() => ouvrir({ type: "confirmer" })}><ShieldCheck width={13} height={13} aria-hidden="true" /> Confirmer les {nonVerifiees.length || ""} valeurs non vérifiées</button>
+                    <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!nonVerifiees.length} onClick={() => ouvrir({ type: "confirmer" })}><ShieldCheck width={13} height={13} aria-hidden="true" /> {nonVerifiees.length ? `Confirmer ${nonVerifiees.length > 1 ? `les ${nonVerifiees.length} valeurs non vérifiées` : "la valeur non vérifiée"}` : "Valeurs lues vérifiées"}</button>
                     <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "rattacher" })}><Link2 width={13} height={13} aria-hidden="true" /> Rattacher à un fournisseur</button>
                     <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!commandes.length} onClick={() => ouvrir({ type: "commande" })}><ClipboardList width={13} height={13} aria-hidden="true" /> {commandeRetenue ? `Commande ${commandeRetenue.numero} · changer` : "Désigner une commande"}</button>
                     {fournisseur ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "iban" })}><Landmark width={13} height={13} aria-hidden="true" /> Proposer un IBAN</button> : null}
@@ -412,6 +472,35 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
                     onAttester={() => ouvrir({ type: "attester" })}
                     onReverifier={() => { setFait(null); void reverifier(); }}
                   />
+                ) : null}
+
+                {lus.length ? (
+                  <div className="esp-identifiants-lus">
+                    <Avis teinte="ambre">
+                      <strong>Identifiants lus sur la pièce, non retenus.</strong> Le lecteur les a trouvés sans pouvoir les vérifier : ils ne montent pas sur la fiche du fournisseur tant qu&apos;une personne ne les a pas confirmés ou corrigés.
+                    </Avis>
+                    <ul className="esp-fil" style={{ marginTop: 10 }}>
+                      {lus.map((l) => (
+                        <li key={l.notion}>
+                          <span className="esp-fil-point" data-teinte={l.juste ? "bleu" : "rouge"} />
+                          <div>
+                            <div className="esp-fil-texte esp-item-haut">
+                              <span>{l.libelle} lu</span>
+                              <span className="esp-mono">{l.valeur}</span>
+                              <Pastille teinte={l.juste ? "bleu" : "rouge"}>{l.raison}</Pastille>
+                            </div>
+                            <div className="esp-actions" style={{ marginTop: 6 }}>
+                              {valeurDe(l.notion) ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => citer(l.notion)}>Voir sur la pièce</button> : null}
+                              {l.juste && valeurDe(l.notion) ? <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={envoi} onClick={() => { setFait(null); void confirmerLu(l.notion); }}><ShieldCheck width={12} height={12} aria-hidden="true" /> Confirmer la valeur lue</button> : null}
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="esp-actions">
+                      <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={() => { ouvrir({ type: "identifiants" }); setSirenSaisi(""); setTvaSaisie(""); }}><Pencil width={13} height={13} aria-hidden="true" /> Saisir les vrais identifiants</button>
+                    </div>
+                  </div>
                 ) : null}
 
                 <div>
@@ -802,6 +891,34 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
           </DialogBody>
           <DialogFooter>
             <button type="button" className="r-btn r-btn--noir" disabled={envoi || deposantOrigine} onClick={soumettreConfirmationFournisseur}>{envoi ? <Loader variant="spin" /> : null} Confirmer le fournisseur</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={form?.type === "identifiants"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><Pencil width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Saisir les identifiants du fournisseur</DialogTitle>
+            <DialogDescription>Les valeurs saisies remplacent celles lues sur la pièce : une nouvelle version de la facture est créée, ses contrôles sont rejoués et l&apos;identité est demandée au registre public.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">SIREN
+                <input className="rv-champ esp-mono" inputMode="numeric" value={sirenSaisi} onChange={(e2) => setSirenSaisi(e2.target.value)} placeholder="9 chiffres" autoComplete="off" />
+              </label>
+              {sirenNet && !sirenValide(sirenNet) ? <Avis teinte="ambre">Ce SIREN n&apos;a pas une clé juste (neuf chiffres, clé de Luhn) : vérifiez-le sur un document officiel du fournisseur.</Avis> : null}
+              <label className="rv-libelle">TVA intracommunautaire
+                <input className="rv-champ esp-mono" value={tvaSaisie} onChange={(e2) => setTvaSaisie(e2.target.value)} placeholder="FR + 2 + SIREN" autoComplete="off" />
+              </label>
+              {avisTva && avisTva.valide === false ? <Avis teinte="ambre">TVA : {avisTva.raison}.</Avis> : null}
+              {sirenNet && avisTva?.siren && avisTva.siren !== sirenNet ? <Avis teinte="ambre">La TVA porte le SIREN {avisTva.siren}, pas {sirenNet}.</Avis> : null}
+              <ChampMotif motif={motif} onChange={setMotif} aide="Où vous avez lu ces identifiants : Kbis, papier à en-tête, annuaire des entreprises…" />
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!identifiantsOk || !motifOk || envoi} onClick={soumettreIdentifiants}>{envoi ? <Loader variant="spin" /> : null} Enregistrer</button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
