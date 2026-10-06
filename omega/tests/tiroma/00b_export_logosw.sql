@@ -204,8 +204,24 @@ begin
   return jsonb_build_object('faits', n_faits, 'echecs', n_echecs);
 end $$;
 
--- Le cabinet installé, équipé, horaires posés, branché, puis le premier relevé appliqué (tous les jeux). Rend
--- {cabinet, branchement, releve, bilan}. En admin à la sortie.
+-- La pendule du test. Dans une transaction, now() ne bouge pas : deux relevés déposés par le même test portent le
+-- même instant, et le socle prend alors un rendez-vous déjà connu pour un rendez-vous « nouveau » (report au lieu
+-- d'annulation ; patients « créés » comptés deux fois). On vieillit ce que le dernier relevé a posé, comme s'il
+-- datait de la veille. Fixture de test : en production, deux relevés n'ont jamais le même instant.
+create or replace function tests.b3_vieillir(p_de interval default interval '1 day') returns void language plpgsql as $$
+declare v_entite uuid := tests.b3_entite(); v_banc uuid := tests.b3_banc();
+begin
+  perform tests.redevenir_admin();
+  perform set_config('omega.tiroma_moteur', 'releve', true);
+  update public.tiroma_releves set recu_le = recu_le - p_de, fini_le = fini_le - p_de where client_id = v_banc and entite_id = v_entite and recu_le >= now();
+  update public.tiroma_rendez_vous set vu_premier_le = vu_premier_le - p_de, vu_dernier_le = vu_dernier_le - p_de where client_id = v_banc and entite_id = v_entite and vu_premier_le >= now();
+  update public.tiroma_patients set vu_premier_le = vu_premier_le - p_de, vu_dernier_le = vu_dernier_le - p_de where client_id = v_banc and entite_id = v_entite and vu_premier_le >= now();
+  update public.tiroma_plans set vu_premier_le = vu_premier_le - p_de, vu_dernier_le = vu_dernier_le - p_de where client_id = v_banc and entite_id = v_entite and vu_premier_le >= now();
+  perform set_config('omega.tiroma_moteur', '', true);
+end $$;
+
+-- Le cabinet installé, équipé, horaires posés, branché, puis le premier relevé appliqué (tous les jeux), daté de la
+-- veille (tests.b3_vieillir). Rend {cabinet, branchement, releve, bilan}. En admin à la sortie.
 create or replace function tests.b3_cabinet_releve(p_variante text default 'initial') returns jsonb language plpgsql as $$
 declare v_cabinet uuid; v_branchement uuid; v_depot jsonb; v_bilan jsonb;
 begin
@@ -216,6 +232,7 @@ begin
   perform tests.redevenir_admin();
   v_depot := tests.b3_deposer_releve(v_branchement, array['types_rdv', 'patients', 'agenda', 'devis', 'devis_lignes', 'actes', 'labo', 'stock', 'odf', 'attente'], p_variante, 'b3:' || p_variante);
   v_bilan := tests.b3_traiter();
+  perform tests.b3_vieillir();
   return jsonb_build_object('cabinet', v_cabinet, 'branchement', v_branchement, 'releve', v_depot ->> 'releve', 'depot', v_depot, 'bilan', v_bilan);
 end $$;
 

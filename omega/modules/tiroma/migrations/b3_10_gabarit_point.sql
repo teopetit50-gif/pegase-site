@@ -8,7 +8,7 @@
 -- partir tant qu'aucun canal n'est agréé — des nombres et un lien vers l'espace, jamais un nom.
 --
 -- CE QUE ÇA POSE : le gabarit global (client_id null) tiroma.point_matin, canal email, langue fr, version 1,
--- variables {jour: date, creneaux: entier, plans: entier, verifications: entier, demi_journees_vides: entier},
+-- variables {jour: date, creneaux: nombre, plans: nombre, verifications: nombre, demi_journees_vides: nombre},
 -- transactionnel, donnees_sante = false ; posé en brouillon puis validé par le serveur (public.valider_gabarit,
 -- réservé à service_role). Idempotent : « on conflict do nothing » sur (client_id, code, langue, version), et la
 -- validation ne touche qu'un brouillon.
@@ -27,7 +27,7 @@ values (null, 'tiroma', 'tiroma.point_matin', 'fr', 1, 'email',
         || 'Le détail, avec les patients à appeler, est dans votre espace : https://app.omegaai.fr/espace/tiroma' || chr(10)
         || '(il ne sort jamais d''Omega par courriel : aucun prestataire d''envoi n''est agréé pour les données de santé).' || chr(10) || chr(10)
         || 'Tiroma, pour {{organisation}}.',
-        '{"jour": "date", "creneaux": "entier", "plans": "entier", "verifications": "entier", "demi_journees_vides": "entier"}'::jsonb,
+        '{"jour": "date", "creneaux": "nombre", "plans": "nombre", "verifications": "nombre", "demi_journees_vides": "nombre"}'::jsonb,
         true, false, false, 'brouillon')
 on conflict (client_id, code, langue, version) do nothing;
 
