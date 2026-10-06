@@ -22,7 +22,7 @@
 import { createClient } from "@/lib/supabase/client";
 import type {
   Attente, Cabinet, CapaciteLue, Charge, Creneau, Dossier, Fauteuil, Fermeture, Horaire, Logiciel, Membre, PatientCourt, PlanSansRdv, Praticien, Profil,
-  Regles, Releve, TypeRdv, Verification,
+  Regles, Releve, TypeRdv, Verification, RegistreAppels, CibleAppel, IssueAppel,
 } from "./types";
 
 export class ErreurPorte extends Error {}
@@ -108,8 +108,10 @@ export async function chargerDossier(cabinet: Cabinet, compte: Compte): Promise<
   ]);
   /* la charge des fauteuils est réservée au titulaire : on ne la demande que pour lui */
   const charge = profil === "titulaire" ? await quiet(rpc<Charge | null>("tiroma_charge_fauteuils", { p_client: c, p_entite: e, p_jour: null }, null), null, "charge des fauteuils") : null;
+  /* b3_12 : le registre des appels (titulaire, assistante, collaborateur ; la direction ne l'a pas) */
+  const appels = profil && profil !== "direction" ? await quiet(rpc<RegistreAppels | null>("tiroma_appels", { p_client: c, p_entite: e, p_jours: 30 }, null), null, "registre des appels") : null;
   return {
-    dossier: { cabinet, profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, attente, creneaux, plans, verifications, charge },
+    dossier: { cabinet, profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, attente, creneaux, plans, verifications, charge, appels },
     avis,
   };
 }
@@ -234,4 +236,15 @@ export async function reglerRegles(r: Regles, v: Partial<Regles>): Promise<void>
   const supabase = createClient();
   const { error } = await supabase.from("tiroma_regles").update(v).eq("id", r.id);
   if (error) throw new ErreurPorte(message(error));
+}
+
+/** b3_12 : noter un appel (issue codée, jamais de texte libre). */
+export async function noterAppel(cabinet: Cabinet, a: { cible: CibleAppel; issue: IssueAppel; rappeler_le: string | null }): Promise<string> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc("tiroma_noter_appel", {
+    p_client: cabinet.client_id, p_entite: cabinet.entite_id, p_patient: a.cible.patient_id, p_motif: a.cible.motif, p_issue: a.issue,
+    p_plan: a.cible.plan_id, p_evenement: a.cible.evenement_id === null ? null : Number(a.cible.evenement_id), p_rappeler_le: a.issue === "rappeler" ? a.rappeler_le : null,
+  });
+  if (error) throw new ErreurPorte(message(error));
+  return data as string;
 }

@@ -68,6 +68,8 @@ for (const largeur of LARGEURS) {
   await s.dormir(500);
   const impl = await s.evaluer(`(() => { const d = document.querySelector('#esp-detail'); return { tacite: /Non-opposition tacite née/.test(d.innerText), bouton: !![...d.querySelectorAll('.r-btn')].find(b => /Confirmer la décision implicite/.test(b.textContent)) }; })()`);
   ok(impl.tacite && impl.bouton, 'la DP montre la non-opposition tacite née, à confirmer');
+  ok(await s.evaluer(`/ARE_DP06938326N0107\\.pdf[\\s\\S]{0,120}Reçu par courriel du guichet et rangé ici par son numéro de dossier/.test(document.querySelector('#esp-detail').innerText)`),
+     'son accusé de réception électronique est dit « reçu par courriel du guichet et rangé par son numéro » (b5_11)');
   await s.evaluer(`[...document.querySelectorAll('#esp-detail .r-btn')].find(b => /Confirmer la décision implicite/.test(b.textContent))?.click()`);
   await s.dormir(500);
   await s.capturer(`${dossier}lorani-implicite-1440.jpg`, { qualite: 55 });
@@ -97,6 +99,27 @@ for (const largeur of LARGEURS) {
   ok(lem.pieces && lem.rappel && lem.bouton, 'Maison Lemoine : pièces à fournir, rappel J-10 parti, « Pièces reçues » à saisir');
   const deux = await s.evaluer(`(() => { const t = document.querySelector('#esp-detail').innerText; return /Plusieurs demandes de pièces/.test(t) && /À fournir : PC5, PC8/.test(t) && /461958/.test(t); })()`);
   ok(deux, 'Maison Lemoine : deux lettres de demande, « À fournir : PC5, PC8 », le délai court depuis la première (b5_07)');
+
+  console.log('— les honoraires phase par phase (b5_12)');
+  const hon = await s.evaluer(`(() => { const t = document.querySelector('.lor-honoraires'); if (!t) return null; const txt = t.closest('.esp-carte-corps').innerText; return { lignes: t.querySelectorAll('tbody tr').length, surveiller: /Dossier de permis : 37,5 h pour 45 h prévues \\(83 %\\), avant la fin de la phase/.test(txt), appel: /Achevé, appel à émettre/.test(txt), total: /33 000 € HT d.honoraires/.test(txt.replace(/ | /g, ' ')) }; })()`);
+  ok(hon && hon.lignes === 6 && hon.surveiller && hon.appel && hon.total, `Maison Lemoine : six éléments, 33 000 € HT, le PC « à surveiller » (83 %), l'APD achevé « appel à émettre » (${JSON.stringify(hon)})`);
+  await s.evaluer(`[...document.querySelectorAll('.esp-lien-bouton')].find(b => b.textContent.trim() === 'Saisir du temps')?.click()`);
+  await s.dormir(500);
+  await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const i = [...d.querySelectorAll('input')].find(x => x.getAttribute('inputmode') === 'decimal'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, '9'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  const dlgT = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return { titre: /Saisir du temps/.test(d.innerText), choix: d.querySelector('select').selectedOptions[0]?.textContent, actif: [...d.querySelectorAll('button')].find(b => /Enregistrer/.test(b.textContent))?.disabled === false }; })()`);
+  ok(dlgT.titre && /PC/.test(dlgT.choix || '') && dlgT.actif, `dialogue « Saisir du temps » : l'élément en cours proposé (${dlgT.choix}), « Enregistrer » actif à 9 h`);
+  await s.capturer(`${dossier}lorani-temps-1440.jpg`, { qualite: 55 });
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const apresT = await s.evaluer(`(() => { const txt = document.querySelector('.lor-honoraires').closest('.esp-carte-corps').innerText; return { depasse: /Dossier de permis : 46,5 h pour 45 h prévues \\(103 %\\), les honoraires de la phase sont dépassés/.test(txt), ferme: !document.querySelector('[role="dialog"]') }; })()`);
+  ok(apresT.depasse && apresT.ferme, 'après 9 h de plus : le PC passe « dépassé » (46,5 h pour 45 h, 103 %)');
+  await s.evaluer(`[...document.querySelectorAll('.lor-honoraires tbody tr')].find(tr => /Dossier de permis/.test(tr.textContent))?.querySelector('.esp-lien-bouton')?.click()`);
+  await s.dormir(600);
+  ok(await s.evaluer(`/Achevé, appel à émettre/.test([...document.querySelectorAll('.lor-honoraires tbody tr')].find(tr => /Dossier de permis/.test(tr.textContent))?.innerText || '')`), '« Achevé » : le PC attend son appel d’honoraires');
+  await s.evaluer(`document.querySelector('.lor-honoraires')?.scrollIntoView({ block: 'center' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}lorani-honoraires-1440.jpg`, { qualite: 55 });
 
   console.log('— le régime du permis : secteur protégé coché, le silence reste un accord ; un cas R*424-2 coché, le silence vaut rejet');
   await s.evaluer(`[...document.querySelectorAll('#esp-detail .esp-lien-bouton')].find(b => /Régime/.test(b.textContent))?.click()`);

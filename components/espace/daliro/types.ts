@@ -339,6 +339,92 @@ export type Tableau = {
   tiers: Tiers[];
   equipes: { id: string; nom: string }[];
   bibliotheque: Prix[];
+  /* b6_12 : les situations de travaux (vide sans le droit voir_prix) */
+  situations?: Situation[];
+  /* b6_13 : la réception (null tant qu'elle n'est pas prononcée, ou sans le droit voir_prix) */
+  reception?: Reception | null;
+};
+
+export type Reserve = {
+  id: string;
+  reception_id: string;
+  lot_id: string | null;
+  ordre: number;
+  description: string;
+  statut: "ouverte" | "levee";
+  levee_le: string | null;
+};
+export type Reception = {
+  id: string;
+  chantier_id: string;
+  date_reception: string;
+  avec_reserves: boolean;
+  retenue_montant: number;
+  retenue_caution: boolean;
+  retenue_due_le: string;
+  retenue_statut: "bloquee" | "opposee" | "liberee";
+  retenue_etat?: "bloquee" | "liberable" | "opposee" | "liberee";
+  opposition_le: string | null;
+  opposition_motif: string | null;
+  liberee_le: string | null;
+  liberee_avant_terme: boolean;
+  decompte_statut: "a_preparer" | "projet" | "envoye" | "accepte" | "conteste";
+  decompte_marche_ht: number | null;
+  decompte_facture_ht: number | null;
+  decompte_reste_ht: number | null;
+  decompte_retenue: number | null;
+  decompte_envoye_le: string | null;
+  decompte_repondu_le: string | null;
+  decompte_motif: string | null;
+  decompte_echeance?: string;
+  reserves: Reserve[];
+};
+
+/* Une situation de travaux (b6_12) : acompte mensuel à l'avancement cumulé. */
+export type LigneSituation = {
+  id: string;
+  situation_id: string;
+  origine: "marche" | "avenant";
+  ligne_marche_id: string | null;
+  ligne_avenant_id: string | null;
+  avenant_numero: number | null;
+  lot_id: string | null;
+  ordre: number;
+  designation: string;
+  base_ht: number;
+  avancement: number;
+  precedent_avancement: number;
+  cumule_ht: number;
+  precedent_ht: number;
+};
+export type StatutSituation = "brouillon" | "soumise" | "refusee" | "validee" | "annulee";
+export type Situation = {
+  id: string;
+  chantier_id: string;
+  marche_id: string;
+  numero: number;
+  periode_fin: string;
+  statut: StatutSituation;
+  regime_tva: "normal" | "autoliquidation" | "non_applicable" | "hors_champ";
+  taux_tva: number;
+  autoliquidation: boolean;
+  retenue_taux: number;
+  retenue_base: "ht" | "ttc";
+  retenue_caution: boolean;
+  cumul_ht: number;
+  precedent_ht: number;
+  periode_ht: number;
+  tva: number;
+  retenue: number;
+  net_a_payer: number;
+  mentions: string[];
+  demande_id: string | null;
+  demande_statut?: string | null;
+  soumise_le: string | null;
+  validee_le: string | null;
+  validee_libelle: string | null;
+  motif: string | null;
+  lignes: LigneSituation[];
 };
 
 /* L'accord permanent des confirmations J-2 (b6_08) : trois politiques du socle, une par canal. */
@@ -362,4 +448,6 @@ export type AccordJ2 = {
   etat: "aucun" | "a_valider" | "actif" | "partiel" | "revoque";
   fin: string | null;
   canaux: CanalAccordJ2[];
+  /* b6_09 : le lecteur est-il le seul décideur (gérant, admin, valideur) de l'organisation ? */
+  seul_decideur?: boolean;
 };

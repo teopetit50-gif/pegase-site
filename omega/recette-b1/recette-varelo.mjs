@@ -8,7 +8,8 @@
    différent), un rattachement refusé pour un code en attente, inscrire une
    société (territoire obligatoire), déposer un export (lecture des colonnes,
    lignes rejetées), lancer un passage (les codes à traiter ouvrent leurs
-   objets), changer de nature, l'export CSV.
+   objets), changer de nature, l'export CSV ; l'encours du groupe (vague 3 :
+   plafond, dépassement, dépôt d'une balance âgée).
    usage : node omega/recette-b1/recette-varelo.mjs [origine] */
 import { mkdirSync } from 'node:fs';
 import { ouvrirSession } from '../../outils/chrome.mjs';
@@ -179,6 +180,47 @@ for (const largeur of LARGEURS) {
   const csv = await s.evaluer(`window.__csv`);
   ok(typeof csv === 'string' && /^\ufeff?code_groupe;nom_groupe;societe;code_local;nom_local;etat\n/.test(csv) && /C-00001;Hôtel des Alpes;/.test(csv), 'le CSV commence par son en-tête et porte C-00001');
   ok(!!(await s.evaluer(`/est exporté \\(4 lignes\\)/.test(document.querySelector('.esp')?.innerText || '')`)), 'l\'avis compte quatre lignes exportées');
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b1-encours', densite: 1 });
+  console.log('— l\'encours du groupe (vague 3) : clients, plafond, balance âgée');
+  ok(await s.aller(base + '/espace/varelo'), 'page chargée');
+  await s.dormir(500);
+  await s.evaluer(clic('.esp-filtres button', '/^Clients$/'));
+  await s.dormir(400);
+  const carte = `document.querySelector('section[aria-label="Encours du groupe, clients"]')`;
+  const lu = await s.evaluer(`(() => { const c = ${carte}; if (!c) return null; const lignes = [...c.querySelectorAll('tbody tr')].map(tr => tr.innerText.replace(/\\s+/g, ' ')); return { lignes, texte: c.innerText.replace(/\\s+/g, ' ') }; })()`);
+  ok(!!lu, 'la carte « Encours du groupe — clients » est là');
+  ok(lu && /Hôtel des Alpes/.test(lu.lignes[0]) && /79\s000,00\s€/.test(lu.lignes[0]) && /Au-dessus du plafond/.test(lu.lignes[0]), `Hôtel des Alpes en tête : 79 000 € pour le groupe, au-dessus de son plafond (${lu?.lignes[0]})`);
+  ok(lu && /ancienne de 12 jours/.test(lu.texte), 'la balance d\'Annecy est dite ancienne de 12 jours');
+  ok(lu && /C-NOUV/.test(lu.texte) && /pas encore rangé/.test(lu.texte), 'une ligne sous un code pas encore rangé est dite');
+  ok(await s.evaluer(clic(`section[aria-label="Encours du groupe, clients"] tbody button`, '/^Plafond$/')) === true, 'clic « Plafond » sur Hôtel des Alpes');
+  await s.dormir(400);
+  ok(!!(await s.evaluer(`/Plafond d.encours — Hôtel des Alpes/.test(${dlg()}?.innerText || '')`)), 'le dialogue du plafond s\'ouvre');
+  await s.evaluer(saisir('[role="dialog"] input.rv-champ', '90 000'));
+  await s.dormir(200);
+  await s.evaluer(clic('[role="dialog"] button', '/Enregistrer/'));
+  await s.dormir(700);
+  const apres = await s.evaluer(`(() => { const c = ${carte}; return { ligne: [...c.querySelectorAll('tbody tr')].find(tr => /Hôtel des Alpes/.test(tr.innerText))?.innerText.replace(/\\s+/g, ' '), avis: document.querySelector('.esp [role="status"]')?.innerText || '' }; })()`);
+  ok(apres.ligne && !/Au-dessus du plafond/.test(apres.ligne) && /90\s000,00\s€/.test(apres.ligne) && /en dessous/.test(apres.avis), `plafond relevé à 90 000 € : plus de dépassement (${apres.ligne})`);
+  ok(await s.evaluer(clic(`section[aria-label="Encours du groupe, clients"] button`, '/Déposer une balance âgée/')) === true, 'clic « Déposer une balance âgée »');
+  await s.dormir(400);
+  await s.evaluer(saisir('[role="dialog"] textarea', 'Code tiers;Raison sociale;Non échu;1-30;> 90\nC0211;HOTEL DES ALPES;50 000,00;;20 000,00\nC9999;NOUVEAU CLIENT;1 000;;\n;Sans code;5;;\nC0304;Mairie;douze;;'));
+  await s.dormir(300);
+  const pret = await s.evaluer(`(() => { const d = ${dlg()}; const p = [...d.querySelectorAll('.esp-pastille')].map(x => x.textContent); return { lignes: p.includes('4 lignes'), colonnes: p.includes('code') && p.includes('non_echu') && p.includes('echu_30') && p.includes('echu_plus'), actif: ![...d.querySelectorAll('button')].find(b => /^\\s*Déposer\\s*$/.test(b.textContent))?.disabled }; })()`);
+  ok(pret.lignes && pret.colonnes && pret.actif, 'quatre lignes lues, colonnes « Non échu », « 1-30 », « > 90 » reconnues, « Déposer » actif');
+  await s.evaluer(clic('[role="dialog"] button', '/^\\s*Déposer\\s*$/'));
+  await s.dormir(900);
+  const res = await s.evaluer(`(() => { const d = ${dlg()}; const t = d.innerText.replace(/\\s+/g, ' '); return { t, rejets: d.querySelectorAll('tbody tr').length }; })()`);
+  ok(/Balance déposée/.test(res.t) && /Retenues 2/.test(res.t) && res.rejets === 2 && /code local manquant/.test(res.t) && /montant illisible \(non_echu\)/.test(res.t), `deux lignes retenues, deux rejetées avec leur motif (${res.rejets})`);
+  ok(/Codes inscrits au référentiel 1/.test(res.t), 'le code inconnu C9999 est inscrit au référentiel');
+  await s.evaluer(clic('[role="dialog"] button', '/^\\s*Fermer\\s*$/'));
+  await s.dormir(500);
+  const fin = await s.evaluer(`(() => { const c = ${carte}; return [...c.querySelectorAll('tbody tr')].find(tr => /Hôtel des Alpes/.test(tr.innerText))?.innerText.replace(/\\s+/g, ' '); })()`);
+  ok(fin && /101\s000,00\s€/.test(fin) && /Au-dessus du plafond/.test(fin), `la nouvelle balance du siège : 70 000 + 31 000 = 101 000 €, au-dessus des 90 000 (${fin})`);
+  ok(!(await s.evaluer(`/Erreur|undefined|NaN/.test(${carte}.innerText)`)), 'aucun « NaN », « undefined » ni « Erreur » dans la carte');
   s.fermer();
 }
 

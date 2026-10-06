@@ -916,7 +916,7 @@ function PieceLigne({ piece, decisions, nommer }: { piece: PieceProjet; decision
           <Pastille teinte={teinte}>{piece.statut === "lue" ? "Lue" : piece.statut === "en_lecture" ? "En lecture" : piece.statut === "a_verifier" ? "À vérifier" : piece.statut === "a_classer" ? "Courrier non reconnu" : piece.statut === "echec" ? "Illisible" : piece.statut === "rejetee" ? "Rejetée" : "Reçue"}</Pastille>
         </div>
         <div className="esp-fil-meta">
-          {piece.cree_le ? `Déposé le ${dateHeure(piece.cree_le)}. ` : ""}
+          {piece.cree_le ? `${piece.source === "courriel" ? "Reçu par courriel du guichet et rangé ici par son numéro de dossier, le" : "Déposé le"} ${dateHeure(piece.cree_le)}. ` : ""}
           {piece.statut === "a_classer" ? `Le lecteur n'a pas reconnu un courrier de la mairie${piece.motif ? ` : « ${piece.motif} »` : ""}. Aucune date n'en est proposée ; saisissez-la à la main. ` : ""}
           {piece.statut === "echec" && piece.motif ? `Motif : « ${piece.motif} ». ` : ""}
           {decisions.map((d) => (

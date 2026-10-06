@@ -150,6 +150,19 @@ export async function desenvelopper(enveloppeHex: string, phrase: string): Promi
   }
 }
 
+/** Une clé de dossier rendue par le coffre (32 octets en base64). */
+export async function importerCle(base64: string): Promise<CryptoKey> {
+  const brute = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+  if (brute.length !== 32) throw new Error("Le coffre n'a pas rendu une clé de 32 octets.");
+  return crypto.subtle.importKey("raw", tampon(brute), { name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
+}
+
+/** La clé brute en base64, pour la ré-envelopper au coffre (passage de la phrase au coffre Scaleway). */
+export async function exporterCle(cle: CryptoKey): Promise<string> {
+  const brute = new Uint8Array(await crypto.subtle.exportKey("raw", cle));
+  return btoa(String.fromCharCode(...brute));
+}
+
 /** Le trousseau d'un onglet : les clés déballées, par dossier. Rien n'est écrit nulle part. */
 export class Trousseau {
   private cles = new Map<string, CryptoKey>();

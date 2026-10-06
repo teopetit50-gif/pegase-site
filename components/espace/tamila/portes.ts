@@ -29,12 +29,19 @@
      tamila_demander_export / tamila_demander_export_cabinet / tamila_telecharger_export
      tamila_demander_cloture / tamila_annuler_cloture / tamila_convertir_audit
      tamila_registre_hors_vue(p_client) → int
+     tamila_coffre_etat(p_client) → jsonb (b4_05) ; la fonction Edge « tamila-coffre » (actions activer,
+       nouvelle_cle, cle_dossier, reenvelopper) au nom de la personne connectée : elle déballe les clés
+       des dossiers d'un cabinet passé au coffre Scaleway, chaque déballage journalisé
+     les honoraires (b4_06) : tamila_poser_convention, tamila_signer_convention, tamila_saisir_temps,
+       tamila_annuler_temps, tamila_demander_provision, tamila_provision_recue, tamila_emettre_facture,
+       tamila_facture_payee, tamila_annuler_facture ; lecture des tables tamila_conventions, tamila_temps,
+       tamila_provisions, tamila_factures (RLS : qui voit le dossier)
    Si la base répond autrement, l'écran montre son message tel quel.
    Les bytea partent en hexadécimal (« \x01… », chiffrement.ts).
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { Appel, Audience, Avis, CalculDelai, Cle, Delai, DemandeTamila, Dossier, DossierComplet, Export, Lecture, Membre, Muraille, Partie, Personne, Piece, RegleProcedure, Reglages } from "./types";
+import type { Appel, Audience, Avis, CalculDelai, Cle, Convention, Delai, DemandeTamila, Dossier, DossierComplet, Export, Facture, Honoraires, Lecture, Membre, ModeHonoraires, ModeReglement, Muraille, NatureTemps, Partie, Personne, Piece, Provision, RegleProcedure, Reglages, Temps } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -75,6 +82,8 @@ export type Cabinet = {
   personnes: Personne[];
   regles: RegleProcedure[];
   horsVue: number | null;
+  /* le coffre à clés du cabinet (b4_05) ; null si la porte n'existe pas sur cette base */
+  coffre: EtatCoffre | null;
 };
 
 export async function chargerCabinet(): Promise<Cabinet> {
@@ -105,6 +114,7 @@ export async function chargerCabinet(): Promise<Cabinet> {
     const { data } = await supabase.rpc("tamila_registre_hors_vue", { p_client: moi.client_id });
     horsVue = typeof data === "number" ? data : null;
   }
+  const coffreCabinet = await etatCoffre(moi.client_id);
   return {
     moi,
     installe: !!r.data,
@@ -117,6 +127,7 @@ export async function chargerCabinet(): Promise<Cabinet> {
     personnes,
     regles: (rg.data ?? []) as RegleProcedure[],
     horsVue,
+    coffre: coffreCabinet,
   };
 }
 
@@ -173,7 +184,7 @@ export type NouveauDossier = {
   p_dossier: string;
   p_reference: string;
   p_intitule: string;
-  p_cle_fournisseur: "local";
+  p_cle_fournisseur: "local" | "scaleway";
   p_cle_reference: string;
   p_cle_enveloppe: string;
   p_numero_rg: string | null;
@@ -219,6 +230,37 @@ export const avisLu = (p_client: string, p_dossier: string, p_type: string, p_va
 
 export const consulter = (p_dossier: string, p_contexte = "dossier") => rpc<string>("tamila_consulter", { p_dossier, p_contexte });
 /** L'enveloppe de la clé d'un dossier pour un membre qui n'est pas associé (migration b4_03) ; null sans porte ou sans clé active. */
+/* ——— le coffre à clés (b4_05) ——— */
+export type EtatCoffre = { statut: "local" | "bascule" | "scaleway"; region: string | null; dossiers_locaux: number; dossiers_scaleway: number };
+
+/** null : la porte n'existe pas sur cette base (b4_05 non posée) ; l'écran reste en mode phrase. */
+export async function etatCoffre(p_client: string): Promise<EtatCoffre | null> {
+  try {
+    return await rpc<EtatCoffre>("tamila_coffre_etat", { p_client });
+  } catch {
+    return null;
+  }
+}
+
+const MESSAGES_COFFRE: Record<string, string> = {
+  KM_ABSENT: "Le coffre n'est pas encore branché : les secrets Scaleway ne sont pas posés.",
+  KM_INDISPONIBLE: "Le coffre Scaleway ne répond pas pour l'instant ; réessayez dans un moment.",
+  CLE_FAUSSE: "Cette clé n'ouvre pas le dossier : la phrase n'est pas la bonne, rien n'a changé.",
+};
+
+/** Un geste du coffre (fonction Edge tamila-coffre), au nom de la personne connectée. */
+export async function coffre<T>(action: "activer" | "nouvelle_cle" | "cle_dossier" | "reenvelopper", corps: Record<string, unknown>): Promise<T> {
+  const supabase = createClient();
+  const { data, error } = await supabase.functions.invoke("tamila-coffre", { body: { action, ...corps } });
+  if (error) {
+    let detail: { erreur?: string; message?: string } = {};
+    const ctx = (error as { context?: unknown }).context;
+    if (ctx instanceof Response) detail = await ctx.json().catch(() => ({}));
+    throw new ErreurPorte((detail.erreur && MESSAGES_COFFRE[detail.erreur]) || detail.message || "Le coffre n'a pas répondu.");
+  }
+  return data as T;
+}
+
 export const cleDossier = (p_dossier: string) => rpc<string | null>("tamila_cle_dossier", { p_dossier }).catch(() => null);
 
 export const poserMuraille = (p_dossier: string, p_user: string, p_motif: string | null) => rpc<string>("tamila_poser_muraille", { p_dossier, p_user, p_motif });
@@ -248,3 +290,38 @@ export async function urlArchive(chemin: string): Promise<string> {
   if (error) throw new ErreurPorte(message(error));
   return data.signedUrl;
 }
+
+/* ——— les honoraires (b4_06) ——— */
+
+/** null : les tables n'existent pas sur cette base (b4_06 non posée) ; la carte ne s'affiche pas. */
+export async function chargerHonoraires(p_dossier: string): Promise<Honoraires | null> {
+  const supabase = createClient();
+  const [c, t, p, f] = await Promise.all([
+    supabase.from("tamila_conventions").select("*").eq("dossier_id", p_dossier).order("cree_le", { ascending: false }),
+    supabase.from("tamila_temps").select("*").eq("dossier_id", p_dossier).order("jour", { ascending: false }).order("cree_le", { ascending: false }),
+    supabase.from("tamila_provisions").select("*").eq("dossier_id", p_dossier).order("demandee_le", { ascending: false }),
+    supabase.from("tamila_factures").select("*").eq("dossier_id", p_dossier).order("cree_le", { ascending: false }),
+  ]);
+  if (c.error || t.error || p.error || f.error) return null;
+  const conventions = (c.data ?? []) as Convention[];
+  return {
+    conventions,
+    convention: conventions.find((x) => x.statut !== "resiliee") ?? null,
+    temps: (t.data ?? []) as Temps[],
+    provisions: (p.data ?? []) as Provision[],
+    factures: (f.data ?? []) as Facture[],
+  };
+}
+
+export const poserConvention = (p_dossier: string, p_mode: ModeHonoraires, p_taux_horaire_cents: number | null, p_forfait_cents: number | null, p_complement_pct: number | null, p_taux_tva: number, p_urgence: boolean) =>
+  rpc<string>("tamila_poser_convention", { p_dossier, p_mode, p_taux_horaire_cents, p_forfait_cents, p_complement_pct, p_taux_tva, p_urgence });
+export const signerConvention = (p_convention: string, p_signee_le: string, p_piece: string | null) => rpc<void>("tamila_signer_convention", { p_convention, p_signee_le, p_piece });
+export const saisirTemps = (p_dossier: string, p_jour: string, p_minutes: number, p_nature: NatureTemps, p_description: string | null, p_facturable: boolean) =>
+  rpc<string>("tamila_saisir_temps", { p_dossier, p_jour, p_minutes, p_nature, p_description, p_facturable });
+export const annulerTemps = (p_temps: string) => rpc<void>("tamila_annuler_temps", { p_temps });
+export const demanderProvision = (p_dossier: string, p_montant_ttc_cents: number) => rpc<string>("tamila_demander_provision", { p_dossier, p_montant_ttc_cents });
+export const provisionRecue = (p_provision: string, p_recue_le: string, p_mode: ModeReglement) => rpc<void>("tamila_provision_recue", { p_provision, p_recue_le, p_mode });
+export const emettreFacture = (p_dossier: string, p_jusqu_au: string, p_debours_cents: number, p_definitif: boolean) =>
+  rpc<{ numero: string; total_ttc_cents: number; reste_du_cents: number }>("tamila_emettre_facture", { p_dossier, p_jusqu_au, p_debours_cents, p_definitif });
+export const facturePayee = (p_facture: string, p_payee_le: string, p_mode: ModeReglement) => rpc<void>("tamila_facture_payee", { p_facture, p_payee_le, p_mode });
+export const annulerFacture = (p_facture: string, p_motif: string) => rpc<void>("tamila_annuler_facture", { p_facture, p_motif });

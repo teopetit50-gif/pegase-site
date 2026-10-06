@@ -143,3 +143,22 @@ export function minutesEnClair(m: number): string {
   const r = Math.round(m % 60);
   return r ? `${h} h ${String(r).padStart(2, "0")}` : `${h} h`;
 }
+
+/* b3_12 : le registre des appels */
+export const ISSUES_APPEL: Record<"rdv_pris" | "message" | "pas_de_reponse" | "rappeler" | "refus" | "ne_plus_contacter", { libelle: string; teinte: "vert" | "bleu" | "ambre" | "gris" | "rouge" }> = {
+  rdv_pris: { libelle: "Rendez-vous pris", teinte: "vert" },
+  message: { libelle: "Message laissé", teinte: "bleu" },
+  pas_de_reponse: { libelle: "Pas de réponse", teinte: "gris" },
+  rappeler: { libelle: "À rappeler", teinte: "ambre" },
+  refus: { libelle: "Ne souhaite pas", teinte: "gris" },
+  ne_plus_contacter: { libelle: "Ne plus contacter", teinte: "rouge" },
+};
+
+export const MOTIFS_APPEL: Record<"creneau" | "plan" | "devis" | "controle" | "attente" | "autre", string> = {
+  creneau: "créneau libéré",
+  plan: "plan signé",
+  devis: "devis sans réponse",
+  controle: "contrôle dû",
+  attente: "liste d'attente",
+  autre: "autre",
+};

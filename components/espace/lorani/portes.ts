@@ -26,7 +26,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { Calcul, CasRejet, DateLue, Dossier, Echeance, Intervenant, Lot, MembreProjet, Permis, PieceProjet, Projet, Recours } from "./types";
+import type { Calcul, CasRejet, DateLue, Dossier, Echeance, Honoraire, Intervenant, Lot, MembreProjet, Permis, PieceProjet, Projet, Recours, Temps } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -51,7 +51,7 @@ export async function chargerDossier(): Promise<Dossier> {
   const supabase = createClient();
   const moi = await monCompte();
   if (!moi) throw new ErreurPorte("Aucune session ouverte : connectez-vous depuis le cockpit.");
-  const [projets, permis, dates, echeances, recours, lots, intervenants, membres, cas, pieces, annuaire] = await Promise.all([
+  const [projets, permis, dates, echeances, recours, lots, intervenants, membres, cas, pieces, annuaire, honoraires, temps] = await Promise.all([
     supabase.from("lorani_projets").select("*").order("maj_le", { ascending: false }).limit(300),
     supabase.from("lorani_permis").select("*").order("cree_le", { ascending: false }).limit(600),
     supabase.from("lorani_permis_dates_lues").select("*").order("cree_le", { ascending: false }).limit(600),
@@ -62,8 +62,11 @@ export async function chargerDossier(): Promise<Dossier> {
     supabase.from("lorani_membres_projet").select("id, projet_id, user_id, role_projet").limit(2000),
     supabase.from("lorani_cas_rejet").select("code, article, libelle, source_url").order("code"),
     /* public.pieces date la réception (recue_le) ; l'écran la montre comme date de dépôt */
-    supabase.from("pieces").select("id, objet_id, nom_fichier, mime, statut, type_piece, motif, recue_le").eq("module", "lorani").eq("objet_type", "lorani_projet").order("recue_le", { ascending: false }).limit(600),
+    supabase.from("pieces").select("id, objet_id, nom_fichier, mime, statut, type_piece, motif, source, recue_le").eq("module", "lorani").eq("objet_type", "lorani_projet").order("recue_le", { ascending: false }).limit(600),
     supabase.rpc("annuaire", { p_client: moi.client_id }),
+    /* b5_12 : absentes tant que la migration n'est pas posée ; l'écran montre alors des honoraires vides */
+    supabase.from("lorani_honoraires").select("id, projet_id, element, intitule, montant_ht, heures_prevues, statut, achevee_le, facturee_le").limit(3000),
+    supabase.from("lorani_temps").select("id, projet_id, honoraire_id, membre, jour, heures, note").order("jour", { ascending: false }).limit(5000),
   ]);
   /* le premier refus de la base est dit tel quel ; les lectures secondaires manquantes ne cachent pas les permis */
   for (const r of [projets, permis, dates]) if (r.error) throw new ErreurPorte(message(r.error));
@@ -79,6 +82,8 @@ export async function chargerDossier(): Promise<Dossier> {
     intervenants: (intervenants.data ?? []) as Intervenant[],
     membres: (membres.data ?? []) as MembreProjet[],
     casRejet: (cas.data ?? []) as CasRejet[],
+    honoraires: ((honoraires.data ?? []) as Honoraire[]).map((h) => ({ ...h, montant_ht: Number(h.montant_ht), heures_prevues: Number(h.heures_prevues) })),
+    temps: ((temps.data ?? []) as Temps[]).map((t) => ({ ...t, heures: Number(t.heures) })),
     pieces: ((pieces.data ?? []) as (Omit<PieceProjet, "cree_le"> & { recue_le: string | null })[]).map(({ recue_le, ...x }) => ({ ...x, cree_le: recue_le ?? undefined })),
     noms,
     moi,
@@ -227,3 +232,24 @@ export async function calendrier(faits: Record<string, unknown>): Promise<Calcul
   if (error) throw new ErreurPorte(message(error));
   return data as Calcul;
 }
+
+/* ——— les honoraires (b5_12) ——— */
+
+export async function poserHonoraire(v: { client_id: string; projet_id: string; element: string; intitule: string | null; montant_ht: number; heures_prevues: number }): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.from("lorani_honoraires").insert(v);
+  if (error) throw new ErreurPorte(message(error));
+}
+
+export async function changerHonoraire(id: string, valeurs: Partial<Pick<Honoraire, "montant_ht" | "heures_prevues" | "statut">>): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.from("lorani_honoraires").update(valeurs).eq("id", id);
+  if (error) throw new ErreurPorte(message(error));
+}
+
+export async function saisirTemps(v: { client_id: string; projet_id: string; honoraire_id: string; jour: string; heures: number; note: string | null }): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.from("lorani_temps").insert(v);
+  if (error) throw new ErreurPorte(message(error));
+}
+

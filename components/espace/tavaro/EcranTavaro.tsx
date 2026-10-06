@@ -25,11 +25,12 @@ import { Avis, Chargement, Pastille, Ruban, Vide } from "../ui";
 import { dateCourte, montant } from "../format";
 import { chiffrerLocal } from "./calcul";
 import { FAMILLES, STATUTS_CONTRAT, STATUTS_PROPOSITION, famille, nomLocataire, propositionVivante, resteDu, type Famille } from "./etats";
-import { AGENCES_EXEMPLE, BAREME_EXEMPLE, BAREME_RETIRE_EXEMPLE, CATEGORIES_EXEMPLE, DOSSIERS_EXEMPLE, LIGNES_BAREME_EXEMPLE, REGLAGES_EXEMPLE, nomPersonneTavaro } from "./exemples";
-import { amenderContrat, chargerMonde, chiffrerRetour, completerContrat, demanderAvoir, deposerPhoto, marquerLitige, marquerReglee, monCompte, publierBareme, relancerFacture, retirerBareme, type Moi, type Monde } from "./portes";
-import type { Avoir, Bareme, Dossier, Facture, LigneBareme, LigneJournal, Retour, Role } from "./types";
+import { AGENCES_EXEMPLE, AVIS_EXEMPLE, BAREME_EXEMPLE, BAREME_RETIRE_EXEMPLE, CATEGORIES_EXEMPLE, DOSSIERS_EXEMPLE, LIGNES_BAREME_EXEMPLE, REGLAGES_EXEMPLE, nomPersonneTavaro } from "./exemples";
+import { amenderContrat, chargerMonde, chiffrerRetour, classerAvis, completerContrat, demanderAvoir, deposerPhoto, designerConducteur, enregistrerAvis, marquerLitige, marquerReglee, monCompte, publierBareme, rattacherAvis, relancerFacture, retirerBareme, type Moi, type Monde } from "./portes";
+import type { AvisContravention, Avoir, Bareme, Dossier, Facture, LigneBareme, LigneJournal, Retour, Role } from "./types";
 import DossierContrat, { type Gestes } from "./DossierContrat";
 import BaremeVue from "./BaremeVue";
+import AvisVue, { type GestesAvis } from "./AvisVue";
 import "./tavaro.css";
 
 const MONDE_EXEMPLE: Monde = {
@@ -40,6 +41,7 @@ const MONDE_EXEMPLE: Monde = {
   lignesBareme: LIGNES_BAREME_EXEMPLE,
   reglages: REGLAGES_EXEMPLE,
   entites: AGENCES_EXEMPLE.map((a) => ({ id: a.entite_id, nom: a.nom })),
+  avis: AVIS_EXEMPLE,
 };
 
 const ids = () => crypto.randomUUID();
@@ -69,7 +71,7 @@ export default function EcranTavaro() {
       setMoi(compte);
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
-      setReel({ dossiers: [], agences: [], categories: [], baremes: [], lignesBareme: [], reglages: null, entites: [] });
+      setReel({ dossiers: [], agences: [], categories: [], baremes: [], lignesBareme: [], reglages: null, entites: [], avis: [] });
     }
   }, []);
 
@@ -86,7 +88,7 @@ export default function EcranTavaro() {
       /* la prochaine lecture à la main dira l'erreur */
     }
   }, []);
-  useTempsReel(["loc_contrats", "loc_propositions", "loc_factures", "loc_avoirs"], source === "reelle", relire);
+  useTempsReel(["loc_contrats", "loc_propositions", "loc_factures", "loc_avoirs", "loc_avis_contravention"], source === "reelle", relire);
 
   const nommer = useCallback((id: string | null | undefined) => {
     if (!id) return "Système";
@@ -259,6 +261,73 @@ export default function EcranTavaro() {
     setLocal((prev) => ({ ...prev, baremes: prev.baremes.map((x) => (x.id === b.id ? { ...x, statut: "retire" as const, retire_le: maintenant(), motif_retrait: motif || null } : x)) }));
   };
 
+  /* ——— les avis de contravention : la porte en base réelle, le même rapprochement en mémoire pour l'exemple ——— */
+  const gestesAvis: GestesAvis = useMemo(() => {
+    const changerAvis = (id: string, f: (a: AvisContravention) => AvisContravention) => setLocal((prev) => ({ ...prev, avis: prev.avis.map((a) => (a.id === id ? f(a) : a)) }));
+    const attendre = () => new Promise((r) => setTimeout(r, 350));
+    return {
+      enregistrer: async (valeurs) => {
+        if (source === "reelle") {
+          const r = await enregistrerAvis(valeurs);
+          await relire();
+          return r;
+        }
+        await attendre();
+        const numero = String(valeurs.numero_avis).toUpperCase().replace(/\s+/g, " ");
+        const deja = local.avis.find((a) => a.numero_avis === numero);
+        if (deja) return { avis: deja.id, statut: deja.statut, deja: true, echeance_le: deja.echeance_le, contrat: deja.contrat_id };
+        const plaque = String(valeurs.immatriculation).toUpperCase().replace(/[^0-9A-Z]/g, "");
+        const t = Date.parse(String(valeurs.infraction_le));
+        const trouves = local.dossiers.filter((d) => d.vehicule && d.vehicule.immatriculation.replace(/[^0-9A-Z]/g, "") === plaque && d.contrat.statut !== "annule"
+          && Date.parse(d.contrat.depart_le) <= t && t <= (d.contrat.retour_reel_le ? Date.parse(d.contrat.retour_reel_le) : d.contrat.statut === "ouvert" ? Infinity : Date.parse(d.contrat.retour_prevu_le)));
+        const v = local.dossiers.find((d) => d.vehicule && d.vehicule.immatriculation.replace(/[^0-9A-Z]/g, "") === plaque)?.vehicule ?? null;
+        const un = trouves.length === 1 ? trouves[0] : null;
+        const envoye = String(valeurs.avis_envoye_le);
+        const echeance = new Date(Date.parse(envoye + "T12:00:00Z") + 45 * 86_400_000).toISOString().slice(0, 10);
+        const a: AvisContravention = {
+          id: ids(), client_id: EXEMPLE_CLIENT_ID, entite_id: un?.contrat.entite_id ?? null, numero_avis: numero, immatriculation: v?.immatriculation ?? String(valeurs.immatriculation).toUpperCase(),
+          vehicule_id: v?.id ?? null, infraction_le: new Date(t).toISOString(), lieu: (valeurs.lieu as string) ?? null, nature: (valeurs.nature as string) ?? null,
+          montant_eur: typeof valeurs.montant_eur === "number" ? valeurs.montant_eur : null, avis_envoye_le: envoye, recu_le: String(valeurs.recu_le ?? envoye), echeance_le: echeance,
+          contrat_id: un?.contrat.id ?? null, locataire_id: un?.contrat.locataire_id ?? null, rapprochement: un ? "auto" : null, candidats: trouves.length,
+          statut: un ? "a_designer" : "a_rapprocher", designation: null, mode_designation: null, reference_designation: null, designe_le: null, designe_par: null, hors_delai: null,
+          motif_classement: null, classe_le: null, classe_par: null, source: "saisie", cree_par: moiId, cree_le: maintenant(),
+        };
+        setLocal((prev) => ({ ...prev, avis: [...prev.avis, a] }));
+        return { avis: a.id, statut: a.statut, deja: false, echeance_le: a.echeance_le, contrat: a.contrat_id, candidats: trouves.length };
+      },
+      rattacher: async (avis, contrat_id) => {
+        if (source === "reelle") {
+          await rattacherAvis(avis.id, contrat_id);
+          await relire();
+          return;
+        }
+        await attendre();
+        const d = local.dossiers.find((x) => x.contrat.id === contrat_id);
+        changerAvis(avis.id, (a) => ({ ...a, contrat_id, locataire_id: d?.contrat.locataire_id ?? null, entite_id: d?.contrat.entite_id ?? a.entite_id, rapprochement: "manuel", statut: "a_designer" }));
+      },
+      designer: async (avis, designation, mode, reference) => {
+        if (source === "reelle") {
+          await designerConducteur(avis.id, designation, mode, reference);
+          await relire();
+          return;
+        }
+        await attendre();
+        const auj = new Date().toISOString().slice(0, 10);
+        changerAvis(avis.id, (a) => ({ ...a, statut: "designe", designation: designation as AvisContravention["designation"], mode_designation: mode as AvisContravention["mode_designation"], reference_designation: reference, designe_le: maintenant(), designe_par: moiId, hors_delai: auj > a.echeance_le }));
+      },
+      classer: async (avis, motif) => {
+        if (source === "reelle") {
+          await classerAvis(avis.id, motif);
+          await relire();
+          return;
+        }
+        await attendre();
+        if (role !== "gerant" && role !== "admin") throw new Error("Classer un avis sans désigner engage l'entreprise : la direction seule le fait.");
+        changerAvis(avis.id, (a) => ({ ...a, statut: "classe", motif_classement: motif, classe_le: maintenant(), classe_par: moiId }));
+      },
+    };
+  }, [source, local, moiId, role, relire]);
+
   const agences = monde?.agences ?? [];
   const nomAgenceDe = (entite_id: string) => agences.find((a) => a.entite_id === entite_id)?.nom ?? agences.find((a) => a.entite_id === entite_id)?.code ?? entite_id.slice(0, 8);
 
@@ -363,6 +432,10 @@ export default function EcranTavaro() {
             <div className="esp-carte"><Vide titre="Choisissez un contrat">Le contrat, le chiffrage du retour, les factures et les avoirs s&apos;affichent ici.</Vide></div>
           )}
         </section>
+      </div>
+
+      <div style={{ marginTop: 16 }}>
+        <AvisVue avis={monde?.avis ?? []} dossiers={dossiers} role={role} nommer={nommer} nomAgence={nomAgenceDe} gestes={gestesAvis} />
       </div>
 
       <div style={{ marginTop: 16 }}>

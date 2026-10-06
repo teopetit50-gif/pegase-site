@@ -13,6 +13,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { EXEMPLE_CLIENT_ID, EXEMPLE_MOI, YANIS, aujourdHui, ilYa } from "../exemples/socle";
+import { ouvrirLocale, recalculer } from "./situations";
 import type { Avenant, Chantier, Controle, Lot, Marche, Passage, Prix, Tableau, Tiers } from "./types";
 
 const id = (n: string) => `00000000-0000-4000-8000-00000000d${n.padStart(3, "0")}`;
@@ -236,6 +237,17 @@ export const TABLEAUX_EXEMPLE: Record<string, Tableau> = {
     bibliotheque: BIBLIOTHEQUE,
   },
 };
+
+/* La situation n° 1 des Tilleuls, validée le mois dernier (b6_12) : de quoi voir la suite repartir de son avancement. */
+{
+  const t = TABLEAUX_EXEMPLE[TILLEULS];
+  let n = 0;
+  const s1 = ouvrirLocale({ ...t, situations: [] }, aujourdHui(-6), null, () => id(String(300 + ++n)));
+  const pct = (d: string) => (/fenêtre/i.test(d) ? 35 : /garde-corps/i.test(d) ? 20 : /installation/i.test(d) ? 100 : 0);
+  const validee = recalculer({ ...s1, lignes: s1.lignes.map((l) => ({ ...l, avancement: pct(l.designation) })) });
+  t.situations = [{ ...validee, statut: "validee", demande_id: id("399"), demande_statut: "executee", soumise_le: ilYa(5, 16), validee_le: ilYa(4, 10), validee_libelle: "Claire Morel" }];
+  TABLEAUX_EXEMPLE[ROLLAND].situations = [];
+}
 
 export const LISTE_EXEMPLE: Chantier[] = [CHANTIER_TIL, CHANTIER_ROL];
 

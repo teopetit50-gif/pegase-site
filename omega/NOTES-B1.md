@@ -207,3 +207,75 @@ les deux cadres `.esp-tableau-cadre` qui défilent — codes locaux de l'objet
 `daliro/ChantierVue.tsx`). `accessibilite-varelo.mjs` contrôle les deux cadres
 et repasse axe sur le dialogue du dépôt avec son tableau des rejets, à 390 et
 1440 : 0 écart. tsc ✓ eslint ✓ build ✓, recette cinq largeurs ✓.
+
+## Vague 3 — les trois manques pour qu'un groupe paie Varelo et l'ouvre chaque matin (06/10/2026)
+
+Demande du coordinateur (14 h 31 Z). Constat de départ : Varelo range les
+codes (le référentiel) mais ne porte **aucun montant ni aucune échéance** ;
+or `/secteurs/groupes` promet « le groupe sur une page », « un seuil
+d'encours », « les contrats à dénoncer ». Un référentiel seul se paie une
+fois (projet de nettoyage) ; ce qui se paie tous les mois, c'est ce que le
+groupe en tire chaque matin.
+
+| # | Manque | Pourquoi un client paie, chaque jour | Concurrents et réglementation |
+|---|---|---|---|
+| **1** | **L'encours du groupe par tiers, avec un plafond groupe** : chaque société dépose sa balance âgée ; Varelo additionne ce qu'un même client doit à toutes les sociétés (grâce au référentiel), montre l'échu et l'ancienneté, alerte quand un plafond groupe est dépassé. | Le risque client d'un groupe est consolidé ou n'est pas : un client à 60 k€ dans une filiale et 50 k€ dans une autre est à 110 k€ pour le groupe, et personne ne le voit. C'est la première chose que l'assurance-crédit et la DAF demandent. Alerte quotidienne, pas un projet. | Les outils de credit management le vendent au niveau groupe : Agicap (DSO et balance âgée « au niveau du groupe, d'une filiale ou d'un client ») ; Atradius Credit Power (analyse du poste clients « par entreprise, groupe d'entreprises ») ; HighRadius Credit Cloud (limites de crédit). Aucun ne s'appuie sur un référentiel qui relie les codes locaux. Réglementation : délais de paiement plafonnés (60 jours date de facture ou 45 jours fin de mois, art. L441-10 C. com.), amende jusqu'à 2 M€ pour une personne morale (art. L441-16) — l'échu par tranche est ce qui le montre. |
+| **2** | **Les contrats du groupe à dénoncer** : registre des contrats de chaque société rattachés au fournisseur du groupe, échéance, préavis, reconduction tacite, date limite de dénonciation ; la liste du matin « à dénoncer avant le … ». | Promis sur la page (« les contrats à dénoncer »), absent du socle. Un même fournisseur sous cinq contrats dans cinq sociétés = une négociation groupe manquée et des reconductions subies. | Contrats à durée déterminée : la reconduction tacite produit un nouveau contrat (art. 1215 C. civ.) — d'où la date limite de préavis à tenir. Outils CLM (gestion de contrats) du marché : aucun n'est branché au référentiel tiers d'un groupe. |
+| **3** | **Les comptes réciproques intragroupe à la clôture** : les dettes et créances entre sociétés du groupe (le référentiel les marque déjà « intragroupe ») rapprochées des deux côtés, avec les écarts à expliquer avant la consolidation. | La clôture : chaque écart intragroupe se règle aujourd'hui par Excel et courriel. Le manque n° 1 apporte déjà les soldes par code ; le n° 3 les met face à face. | Règlement ANC 2020-01 : les créances et dettes réciproques sont éliminées en consolidation (intégration globale et proportionnelle) ; les éditeurs de consolidation vendent un module de rapprochement intragroupe à part (Lefebvre-Dalloz, Fiducial, Sigma Conso), qui réduit la clôture de moitié selon eux. |
+
+Sources : [Agicap — poste client](https://agicap.com/fr/produits/poste-client/) ;
+[Atradius Credit Power](https://atradius-fr-ts1.opc.oracleoutsourcing.com/rapports/atradius-france---credit-power---fiche-produit-ecran-%282%29.pdf) ;
+[HighRadius Credit Cloud](https://highradius.com/fr/software/order-to-cash-ar/credit-cloud/) ;
+[délais de paiement, L441-10 et L441-16](https://www.swim.legal/blog/delai-paiement-facture-entreprises-regles-lme-sanctions)
+et [DREETS Nouvelle-Aquitaine](https://nouvelle-aquitaine.dreets.gouv.fr/sites/nouvelle-aquitaine.dreets.gouv.fr/IMG/pdf/brochure-delais-paiments.pdf) ;
+[art. 1215 C. civ., tacite reconduction](https://www.weblex.fr/fiches-conseils/renouvellement-tacite-reconduction) ;
+[règlement ANC 2020-01](https://www.anc.gouv.fr/files/anc/files/1_Normes_fran%C3%A7aises/recueil/REGLT-2020_01-VERSION-RECUEIL2026.pdf)
+et [Lefebvre-Dalloz, réconciliation intercos](https://formation.lefebvre-dalloz.fr/actualite/reconciliation-intercos-cycle-essentiel-de-la-cloture-des-comptes) ;
+[Paperjam / Sigma Conso](https://paperjam.lu/article/accelerer-rapprochement-interc).
+Écarté de la liste : la fraude au changement de RIB (la France est le pays
+européen le plus ciblé, [Clubic / baromètre Allianz](https://clubic.com//dossier-610123-l-arnaque-au-faux-fournisseur-une-fraude-qui-cible-les-pme-et-detourne-les-virements.html)) :
+Varelo a déjà sa règle « IBAN différent → deux approbations de la DF », et
+la vérification des tiers est le terrain de B7 ; « les réserves à émettre »
+(art. L133-3 C. com., trois jours pour protester auprès du transporteur)
+demandent des bons de réception qu'aucun module ne lit encore.
+
+### N° 1 codé — l'encours du groupe par tiers (b1_04)
+
+- **Migration** `omega/modules/varelo/migrations/b1_04_encours_groupe.sql` :
+  tables `grp_encours_depots` (une balance âgée d'une société, d'une nature,
+  à une date d'arrêté ; le courant = le dernier arrêté, rien ne s'efface),
+  `grp_encours_lignes` (non échu, 1–30, 31–60, 61–90, > 90, échu sans
+  ancienneté ; total et échu calculés), `grp_encours_plafonds` (clients
+  seulement, total et échu, retiré = `actif false`) ; vues security_invoker
+  `grp_encours_courant`, `grp_encours_par_code`, `grp_encours_groupe` ;
+  portes `grp_deposer_encours` (gérant, admin) et `grp_regler_plafond`
+  (gérant, admin, valideur de la DF) ; `private.grp_montant` (montants à la
+  française), `private.grp_controler_encours` (une alerte « attention »
+  `varelo:encours.<objet>` par client au-dessus de son plafond, fermée
+  d'elle-même) ; journal `varelo.encours.depot | plafond | depassement`.
+  Un code inconnu d'une balance (avec un nom) est inscrit au référentiel par
+  `private.grp_deposer_codes` ; un code connu n'est jamais réécrit.
+  Sans drop ni delete ; rejouable (deux poses de suite essayées).
+- **À inscrire dans la liste figée d'A5** (exécutables par authenticated) :
+  `private.grp_deposer_encours(uuid, uuid, text, date, jsonb, text)`,
+  `private.grp_regler_plafond(uuid, numeric, numeric, text)`.
+  `grp_montant` et `grp_controler_encours` : service_role seulement.
+- **Tests** `omega/tests/varelo/b1_07_encours.sql` (motif `^test_b1_07_`) :
+  `test_b1_07_depot` (23), `test_b1_07_plafond` (19), `test_b1_07_perimetre`
+  (16). Joués ici sur une **maquette locale** du socle (PostgreSQL 16,
+  `grp_rapprocher` simulé : même SIREN ⇒ code proposé sur l'objet ; aides
+  d'A5 et pgTAP décalqués) : **58/58**. Ce qui peut différer sur la recette :
+  le vrai passage (placement d'office par SIREN pour des clients, marquage
+  intragroupe), l'index d'unicité des alertes, le compte des travaux.
+- **Écran** `components/espace/varelo/Encours.tsx` + `encours.ts` (et
+  `lireTableau` dans `csv.ts`) : pour les clients et les fournisseurs, la
+  carte « Encours du groupe » — totaux hors intragroupe, la balance de
+  chaque société et son ancienneté (> 7 jours : « ancienne »), le tableau
+  par objet du groupe (encours, échu, > 90 j, plafond, « Au-dessus du
+  plafond » / « Provisoire » / « Intragroupe »), le dialogue du plafond, le
+  dépôt d'une balance âgée (en-têtes Sage/EBP/Cegid reconnus : « Non échu »,
+  « 1-30 », « > 90 », « Solde »…). tsc ✓ eslint ✓ build ✓ ;
+  `recette-varelo.mjs` cinq largeurs ✓ (+ 14 vérifications « encours ») ;
+  `accessibilite-varelo.mjs` : carte et dialogue du plafond, 0 écart à 390
+  et 1440.
+- Ni coquille de l'espace ni fichier partagé touchés.

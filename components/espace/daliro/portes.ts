@@ -13,7 +13,11 @@
      btp_soumettre_avenant, btp_signer_avenant, btp_abandonner_avenant (b6_01) ;
      btp_repondre_confirmation, btp_proposer_remplacants (b6_02) ;
      btp_rattacher_facture, btp_detacher_facture (b6_03) ;
-     btp_accord_j2, btp_donner_accord_j2, btp_revoquer_accord_j2 (b6_08).
+     btp_accord_j2, btp_donner_accord_j2, btp_revoquer_accord_j2 (b6_08), btp_activer_accord_j2_seul (b6_09) ;
+     btp_ouvrir_situation, btp_avancer_situation, btp_soumettre_situation, btp_valider_situation,
+     btp_annuler_situation (b6_12) ;
+     btp_prononcer_reception, btp_lever_reserve, btp_opposer_retenue, btp_liberer_retenue,
+     btp_preparer_decompte, btp_envoyer_decompte, btp_repondre_decompte (b6_13).
    Les tables sans porte (chantiers, lots, tiers, dépendances, acceptations)
    s'écrivent en direct, comme le socle le prévoit (politiques du bureau).
    Si la base répond autrement, l'écran montre son message tel quel.
@@ -135,4 +139,47 @@ export async function donnerAccordJ2(client: string): Promise<AccordJ2> {
 }
 export async function revoquerAccordJ2(client: string, motif: string | null): Promise<AccordJ2> {
   return rpc<AccordJ2>("btp_revoquer_accord_j2", { p_client: client, p_motif: motif });
+}
+export async function activerAccordJ2Seul(client: string): Promise<AccordJ2> {
+  return rpc<AccordJ2>("btp_activer_accord_j2_seul", { p_client: client });
+}
+
+/* Les situations de travaux (b6_12). */
+export async function ouvrirSituation(chantier: string, periodeFin: string, tauxTva: number | null): Promise<string> {
+  return rpc<string>("btp_ouvrir_situation", { p_chantier: chantier, p_periode_fin: periodeFin, p_taux_tva: tauxTva });
+}
+export async function avancerSituation(ligne: string, avancement: number): Promise<unknown> {
+  return rpc("btp_avancer_situation", { p_ligne: ligne, p_avancement: avancement });
+}
+export async function soumettreSituation(situation: string): Promise<string> {
+  return rpc<string>("btp_soumettre_situation", { p_situation: situation });
+}
+export async function validerSituation(situation: string): Promise<unknown> {
+  return rpc("btp_valider_situation", { p_situation: situation });
+}
+export async function annulerSituation(situation: string, motif: string | null): Promise<unknown> {
+  return rpc("btp_annuler_situation", { p_situation: situation, p_motif: motif });
+}
+
+/* La réception, les réserves, la retenue, le décompte (b6_13). */
+export async function prononcerReception(chantier: string, date: string, reserves: { description: string; lot_id?: string | null }[]): Promise<string> {
+  return rpc<string>("btp_prononcer_reception", { p_chantier: chantier, p_date: date, p_reserves: reserves, p_piece: null });
+}
+export async function leverReserve(reserve: string): Promise<unknown> {
+  return rpc("btp_lever_reserve", { p_reserve: reserve });
+}
+export async function opposerRetenue(reception: string, motif: string, date: string): Promise<unknown> {
+  return rpc("btp_opposer_retenue", { p_reception: reception, p_motif: motif, p_date: date });
+}
+export async function libererRetenue(reception: string, accordMaitreOuvrage: boolean): Promise<unknown> {
+  return rpc("btp_liberer_retenue", { p_reception: reception, p_accord_maitre_ouvrage: accordMaitreOuvrage });
+}
+export async function preparerDecompte(reception: string): Promise<unknown> {
+  return rpc("btp_preparer_decompte", { p_reception: reception });
+}
+export async function envoyerDecompte(reception: string): Promise<unknown> {
+  return rpc("btp_envoyer_decompte", { p_reception: reception });
+}
+export async function repondreDecompte(reception: string, accepte: boolean, motif: string | null): Promise<unknown> {
+  return rpc("btp_repondre_decompte", { p_reception: reception, p_accepte: accepte, p_motif: motif });
 }

@@ -314,3 +314,43 @@ export type Dossier = {
 };
 
 export type Role = "gerant" | "admin" | "valideur" | "collaborateur" | "lecteur";
+
+/* ——— les avis de contravention (migration b2_03, vague 3) ——— */
+export type StatutAvis = "a_rapprocher" | "a_designer" | "designe" | "classe";
+export type DesignationPersonne = { type: "personne"; nom: string; prenom: string; date_naissance: string; lieu_naissance: string; adresse: string; permis_numero: string; permis_delivre_le?: string; permis_lieu?: string };
+export type DesignationSociete = { type: "societe"; raison_sociale: string; siren: string; adresse: string };
+/* un an après la désignation, l'identité s'efface (b2_04, art. 9 du code de procédure pénale) : la forme reste */
+export type DesignationEffacee = { type: "personne" | "societe"; effacee_le: string };
+export type AvisContravention = {
+  id: string;
+  client_id: string;
+  entite_id: string | null;
+  numero_avis: string;
+  immatriculation: string;
+  vehicule_id: string | null;
+  infraction_le: string;
+  lieu: string | null;
+  nature: string | null;
+  montant_eur: number | null;
+  avis_envoye_le: string;
+  recu_le: string;
+  echeance_le: string;
+  contrat_id: string | null;
+  locataire_id: string | null;
+  rapprochement: "auto" | "manuel" | null;
+  candidats: number;
+  statut: StatutAvis;
+  designation: DesignationPersonne | DesignationSociete | DesignationEffacee | null;
+  designation_effacee_le?: string | null;
+  mode_designation: "antai_en_ligne" | "lrar" | null;
+  reference_designation: string | null;
+  designe_le: string | null;
+  designe_par: string | null;
+  hors_delai: boolean | null;
+  motif_classement: string | null;
+  classe_le: string | null;
+  classe_par: string | null;
+  source: "saisie" | "lecture";
+  cree_par: string | null;
+  cree_le: string;
+};

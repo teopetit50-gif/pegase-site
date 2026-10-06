@@ -295,3 +295,48 @@
   font-size: 13px;
   color: var(--r-faible);
 }
+
+/* ——— honoraires par élément de mission (b5_12) ——— */
+.esp .lor-honoraires-total {
+  margin: 0 0 10px;
+}
+.esp .lor-honoraires {
+  /* le texte « sr-only » de l'en-tête (position absolue) reste dans le cadre qui défile, sans élargir la page */
+  position: relative;
+}
+.esp .lor-honoraires td {
+  vertical-align: middle;
+}
+.esp .lor-jauge {
+  display: block;
+  width: 100%;
+  min-width: 88px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--r-filet);
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+.esp .lor-jauge > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--esp-vert);
+}
+.esp .lor-jauge[data-etat="a_surveiller"] > span {
+  background: var(--esp-ambre);
+}
+.esp .lor-jauge[data-etat="depasse"] > span {
+  background: var(--esp-rouge);
+}
+.esp .lor-temps-recents {
+  margin-top: 12px;
+}
+.esp .lor-temps-recents > summary {
+  cursor: pointer;
+  color: var(--r-doux);
+  font-size: 0.875rem;
+}
+.esp .lor-honoraires + * {
+  margin-top: 0;
+}

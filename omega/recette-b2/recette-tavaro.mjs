@@ -6,7 +6,10 @@
    un retour avec un dommage sans photo (l'avis ambre), puis avec photo, et
    voir la proposition « À valider » ; passer une facture en litige ; demander
    un avoir (montant borné) ; relancer l'impayé ; publier un barème (direction
-   seule : « Vous » est valideur, le bouton est gris).
+   seule : « Vous » est valideur, le bouton est gris). Les avis de contravention
+   (vague 3, b2_03) : la liste par échéance, un avis saisi qui se rapproche
+   tout seul du contrat, la désignation consignée, le classement réservé à
+   la direction.
    usage : node omega/recette-b2/recette-tavaro.mjs [origine] */
 import { mkdirSync } from 'node:fs';
 import { ouvrirSession } from '../../outils/chrome.mjs';
@@ -134,6 +137,56 @@ for (const largeur of LARGEURS) {
   const bareme = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Barème de remise en état"]'); return { publier: [...c.querySelectorAll('.r-btn')].find(b => /Publier un barème/.test(b.textContent))?.disabled, retirer: [...c.querySelectorAll('.r-btn')].find(b => /Retirer/.test(b.textContent))?.disabled, vigueur: /en vigueur depuis/.test(c.innerText) }; })()`);
   ok(bareme.publier === true && bareme.retirer === true && bareme.vigueur, 'le barème en vigueur se lit ; publier et retirer sont réservés à la direction (gris pour un valideur)');
   await s.capturer(`${dossier}tavaro-bareme-1440.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b2-avis', densite: 1 });
+  console.log('— /espace/tavaro : avis de contravention (exemple)');
+  ok(await s.aller(base + '/espace/tavaro'), 'page chargée');
+  await s.dormir(400);
+  const sect = `document.querySelector('section[aria-label="Avis de contravention"]')`;
+  const etat = await s.evaluer(`(() => { const c = ${sect}; const l = [...c.querySelectorAll('.tav-avis')]; return { n: l.length, premier: l[0]?.innerText ?? '', urgent: /urgent/.test(c.querySelector('.esp-carte-tete').innerText), classer: [...c.querySelectorAll('.r-btn')].filter(b => /^Classer$/.test(b.textContent.trim())).every(b => b.disabled) }; })()`);
+  ok(etat.n === 3, `${etat.n} avis à traiter (3 attendus)`);
+  ok(/À rattacher/.test(etat.premier) && /2 j pour désigner/.test(etat.premier), 'le premier est le plus urgent : à rattacher, 2 jours');
+  ok(etat.urgent, 'la tête de la carte compte l\'urgent');
+  ok(etat.classer, 'classer est réservé à la direction (gris pour un valideur)');
+  /* saisir un avis : la Clio, avant-hier à 14 h 12, pendant le contrat C-2026-0412 */
+  await s.evaluer(`[...${sect}.querySelectorAll('.r-btn')].find(b => /Enregistrer un avis/.test(b.textContent)).click()`);
+  await s.dormir(400);
+  await s.evaluer(`(() => {
+    const d = document.querySelector('[role="dialog"]');
+    const j = (n) => { const x = new Date(Date.now() - n * 86400000); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); };
+    const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+    const champs = [...d.querySelectorAll('input')];
+    const v = ['2026 1004 1412 77', 'ga 123 bc', j(2), '14:12', 'Excès de vitesse inférieur à 20 km/h', 'A6, Auxerre', '135', j(1)];
+    v.forEach((x, i) => { set.call(champs[i], x); champs[i].dispatchEvent(new Event('input', { bubbles: true })); });
+  })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Enregistrer\\s*$/.test(b.textContent))?.click()`);
+  await s.dormir(800);
+  const apres = await s.evaluer(`(() => { const c = ${sect}; return { fait: c.querySelector('.esp-avis')?.innerText ?? '', n: c.querySelectorAll('.tav-avis').length }; })()`);
+  ok(/rapproché du contrat C-2026-0412/.test(apres.fait) && apres.n === 4, `l'avis saisi se rapproche tout seul : « ${apres.fait.slice(0, 90)} »`);
+  /* désigner : prérempli depuis la locataire, il manque la naissance et le permis */
+  await s.evaluer(`(() => { const a = [...${sect}.querySelectorAll('.tav-avis')].find(x => /2026 1004 1412 77/.test(x.innerText)); [...a.querySelectorAll('.r-btn')].find(b => /Désigner/.test(b.textContent)).click(); })()`);
+  await s.dormir(400);
+  const pre = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const i = [...d.querySelectorAll('input')]; return { nom: i[0].value, prenom: i[1].value, gris: [...d.querySelectorAll('button')].find(b => /Consigner/.test(b.textContent)).disabled }; })()`);
+  ok(pre.nom === 'Durand' && pre.prenom === 'Marie' && pre.gris, 'la désignation est préremplie (Marie Durand) et reste grise tant qu\'il manque la naissance et le permis');
+  await s.evaluer(`(() => {
+    const d = document.querySelector('[role="dialog"]'); const i = [...d.querySelectorAll('input')];
+    const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+    [[2, '1985-03-02'], [3, 'Lyon'], [5, '12AB34567']].forEach(([k, v]) => { set.call(i[k], v); i[k].dispatchEvent(new Event('input', { bubbles: true })); });
+  })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Consigner/.test(b.textContent))?.click()`);
+  await s.dormir(800);
+  await s.evaluer(`[...${sect}.querySelectorAll('.esp-filtre')].find(b => /Traités/.test(b.textContent)).click()`);
+  await s.dormir(300);
+  const designe = await s.evaluer(`[...${sect}.querySelectorAll('.tav-avis')].find(x => /2026 1004 1412 77/.test(x.innerText))?.innerText ?? ''`);
+  ok(/Désigné : Marie Durand/.test(designe) && /dans le délai/.test(designe), 'l\'avis passe dans « Traités » : désigné, dans le délai');
+  const efface = await s.evaluer(`[...${sect}.querySelectorAll('.tav-avis')].find(x => /2025 0812 6604 51/.test(x.innerText))?.innerText ?? ''`);
+  ok(/identité effacée le/.test(efface) && /DES-2025-074410/.test(efface), 'désigné il y a plus d\'un an : l\'identité est effacée, la référence reste');
+  await s.capturer(`${dossier}tavaro-avis-1440.jpg`, { qualite: 55 });
   s.fermer();
 }
 

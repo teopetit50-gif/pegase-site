@@ -755,3 +755,71 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   locale annulée, rien poussé). Suite : **A5 écrit le socle 19af** (exception étroite dans
   preparer_approbation : seul décideur + liste blanche daliro envoi.*), puis B6 b6_10 (la porte
   insère une approbation au lieu de forcer le statut).
+- 14 h 15 Z — **Demande de Teo : nouveau tableau de bord au design de Vercel** (disposition,
+  boutons, animations ; marque Omega gardée, rien de propriétaire copié). Nouvel ouvrier
+  **C1 session_013U6ss7Vw2rKrDY5C7ax656**, branche **tableau-de-bord-v2** (jamais main),
+  construit à côté de l'ancien (/espace2), données d'exemple d'abord ; premier palier = coquille
+  + FILED « À payer », montré à Teo par prévisualisation Vercel et captures ; migration de /espace
+  seulement après son accord.
+- 14 h 20 Z — **Écran du coffre Tamila fusionné** (worker-b4 9377b33 : « Coffre à clés »,
+  « Passer au coffre Scaleway », ré-enveloppement). Fonction **tamila-coffre v1** déployée en
+  coquille sur la recette (9377b33, verify_jwt true) ; fumée : 400 CLIENT_ILLISIBLE sur un corps
+  vide (elle démarre). Sans secrets SCALEWAY_*, KM_ABSENT. b6_10 (79cb08a) écrit d'avance : à poser
+  APRÈS 19af. C1 : peut utiliser les skills et saasui.design (inspiration, rien de copié).
+- **Point 16 h 15 (14 h 15 Z)** : recette saine (0 cron en échec, 0 erreur HTTP, 0 travail en
+  échec sur 2 h). Repris sur main : omega/MISE-EN-PRODUCTION.md (A5 9ab08c0), NOTES-B2 (1a0a628),
+  NOTES-B5 (70c54d4), NOTES-B7 (87be597). En attente : A5 19af (socle « seul décideur ») puis b6_10
+  (79cb08a) ; C1 premier palier du tableau de bord ; secrets Scaleway (Teo, au premier client).
+- 14 h 22 Z — **19af posé** (A5 430cf0e : exception « seul décideur » dans preparer_approbation,
+  liste blanche daliro envoi.*), test 55 vert ; **b6_09 + b6_10 posés** (79cb08a : la porte insère
+  une approbation) ; test_b6_05 25/26 (le commentaire est préfixé « [seul décideur] » par le socle,
+  test à corriger). Écran Daliro « Activer moi-même » fusionné. **Rejeu socle 40–55** : test_44
+  rouge (filed_iban_valide, filed_luhn, filed_siren_valide, filed_tva_intracom_analyser non
+  exécutables par authenticated ; tamila_coffre_reference/serveur exécutables en trop) → A5 19ag ;
+  test_46 rouge (vues btp_avenants_chiffres, btp_avenants_lignes_chiffrees sans security_invoker)
+  → B6 b6_11.
+- 14 h 27 Z — **19ag posé** (A5 28a046b : EXECUTE rendu à authenticated sur filed_iban_valide,
+  filed_luhn, filed_siren_valide, filed_tva_intracom_analyser — oubli d'a4_14, un membre ne pouvait
+  plus saisir une valeur « humain » ; tamila_coffre_reference/serveur retirées à authenticated) ;
+  **b6_11** (6263048 : vues btp_avenants_* en security_invoker) + tests b6_05/b6_06. Rejeu socle
+  40–55 + `^test_b6_` : **22/22 verts**. Sources à corriger : A4 (a4_14 grants), B4 (b4_05
+  l. 669-670), A5 (liste figée + btp_prix_avenant, btp_prix_ligne_avenant). Accord J-2 clos.
+- 14 h 35 Z — **Vague 3 lancée** (Teo : « pourquoi les ouvriers n'ont plus de travail ») :
+  A4 + A1 facture électronique en réception (Factur-X / UBL / CII, cycle de vie, note sur les PA),
+  puis FEC ; A2 guide d'inbound Brevo pour Teo + preuve de reception par formulaire signé ; A3
+  suite de non-régression /espace vs /espace2 ; A5 export des migrations pour la prod
+  (omega/prod) ; B1–B6 « 3 manques pour un vrai client » + n° 1 codé ; B7 indisponibles ignorés
+  dans filed_verification_recente + tiers étrangers ; C1 nouveau tableau de bord. Routine de
+  2 h mise à jour.
+- 14 h 40 Z — Vague 3, premières poses : **b7_05** (dbd308f, filed_verification_recente ignore
+  les indisponibles devant une réponse récente) `^test_b7_` 12/12 ; **lecteur v20** (672ac97 :
+  Factur-X/UBL/CII lus sans IA, concordance XML↔PDF, 2 bugs corrigés : commentaire de licence en
+  tête, TVA UBL prise hors régime VAT) ; **b4_06 honoraires Tamila** (32479a4) `^test_b4_` 15/15 +
+  socle 44/46/51 verts. A2 : GUIDE-INBOUND.md sur main. A5 : page 0 de l'export jouée — trou :
+  les lots 18a–19aa posés par execute_sql n'ont que la note de pose en statements, à
+  reconstruire depuis l'état de la recette ; motif « dépôt » à élargir ; 2 poses de tests à
+  exclure ; a4_14 → 7c29802, b4_05 → dc24eec.
+- 14 h 55 Z — Poses vague 3 : **a4_16** facture électronique (07cab32) 5/5 ; **b5_11** courriels
+  du guichet (218a777) `^test_b5_` 2/2 ; **b6_12** situations de travaux (9566496) `^test_b6_`
+  7/7 ; **b3_12** registre des appels (5f62e7e) 21/25 — **trou de périmètre** (un collaborateur
+  voit et note des appels hors périmètre), renvoyé à B3 ; **b2_03** avis de contravention
+  (8fd4e11) meurt sur « record r is not assigned yet », renvoyé à B2. Test socle 44 rouge :
+  filed_meme_valeur (A4 a4_16b). **Factur-X réel prouvé** (R2026-000005, lu par le XML,
+  appels_ia 0, coût 0). Lecteur v21 (d2d03f7, ARE/AEE). Empreinte du catalogue (A5) relevée.
+  C1 : palier 1 du tableau de bord montré à Teo. Teo a posé les MX de recu.omegaai.fr (la
+  seconde vise inbound1 au lieu d'inbound2, à corriger). Écrans fusionnés : Tamila honoraires,
+  Lorani courriels du guichet, Daliro situations.
+- 15 h 15 Z — **Inbound Brevo branché** par le coordinateur : fonction one-shot
+  brevo-inbound-installer (BREVO_API_KEY et BREVO_WEBHOOK_JETON lus dans les secrets, aucun
+  affiché ; désactivée ensuite, 410) → webhook **2225428**, domaine **omegaai.fr** (Brevo refuse le
+  sous-domaine : « Domain is not found or is inactive »), url reception/brevo. MX recu.omegaai.fr
+  10 inbound1 / 20 inbound2 (Teo, OVH). Boîte banc@recu.omegaai.fr dans expediteurs (a3630f13,
+  reput, suspendu). En attente du courriel d'essai de Teo. Teo a montré sa clé Brevo sur une
+  capture : à faire tourner (et mettre à jour BREVO_API_KEY dans Supabase).
+- Poses : **a4_16b/a4_17/a4_18** (00eeeeb : FEC, portes PA) `^test_a4_` 19/19 ; **b3_12 v2 + 12c**
+  (cef1ef4, 453e332) `^test_b3_` 15/15 et socle 44 vert ; **b2_03 v2 + b2_04** (7e97d91) `^test_b2_`
+  13/13 ; **b1_04** encours groupe (786017e) 19/19 avec 46/51 ; **lecteur v22** (36a88b2, avoirs) ;
+  **b4_07** conflits (875e83f) 15/16 (test 16 : clé étrangère auth.users, test à corriger) ;
+  **b6_13** réception (eec567e) **casse btp_tableau_chantier** (42702 « v » ambigu) : 2/8, renvoyé
+  en urgence à B6, écran non fusionné. Le cron de test coupe à ~2 min : un motif par appel.
+  Écrans fusionnés : Tavaro avis de contravention, Tiroma appels, Varelo encours.

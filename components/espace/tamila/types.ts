@@ -334,3 +334,90 @@ export type DossierComplet = {
   /* la fenêtre de lecture tracée (tamila_consulter) : jusqu'à quand les parties se lisent */
   consulteJusqu: string | null;
 };
+
+/* ——— les honoraires (b4_06, 06/10/2026) ——— */
+export type ModeHonoraires = "temps_passe" | "forfait" | "mixte";
+export type NatureTemps = "consultation" | "redaction" | "recherche" | "audience" | "rendez_vous" | "correspondance" | "deplacement" | "negociation" | "autre";
+export type ModeReglement = "especes" | "cheque" | "virement" | "billet_a_ordre" | "carte";
+
+export type Convention = {
+  id: string;
+  client_id: string;
+  dossier_id: string;
+  mode: ModeHonoraires;
+  taux_horaire_cents: number | null;
+  forfait_cents: number | null;
+  complement_resultat_pct: number | null;
+  taux_tva: number;
+  urgence: boolean;
+  statut: "proposee" | "signee" | "resiliee";
+  signee_le: string | null;
+  piece_id: string | null;
+  cree_par: string | null;
+  cree_le: string;
+  resiliee_le: string | null;
+};
+
+export type Temps = {
+  id: string;
+  client_id: string;
+  dossier_id: string;
+  user_id: string;
+  jour: string;
+  minutes: number;
+  nature: NatureTemps;
+  /* chiffrée avec la clé du dossier (hexadécimal « \x01… ») */
+  description_chiffree: string | null;
+  facturable: boolean;
+  statut: "saisi" | "facture" | "annule";
+  facture_id: string | null;
+  cree_le: string;
+};
+
+export type Provision = {
+  id: string;
+  client_id: string;
+  dossier_id: string;
+  montant_ttc_cents: number;
+  demandee_le: string;
+  recue_le: string | null;
+  mode_reglement: ModeReglement | null;
+  statut: "demandee" | "recue" | "annulee";
+  facture_id: string | null;
+  cree_par: string | null;
+  cree_le: string;
+};
+
+export type Facture = {
+  id: string;
+  client_id: string;
+  dossier_id: string;
+  numero: string;
+  nature: "facture" | "compte_definitif";
+  emise_le: string;
+  jusqu_au: string;
+  minutes: number;
+  honoraires_temps_cents: number;
+  forfait_cents: number;
+  debours_cents: number;
+  total_ht_cents: number;
+  taux_tva: number;
+  tva_cents: number;
+  total_ttc_cents: number;
+  provisions_imputees_cents: number;
+  reste_du_cents: number;
+  statut: "emise" | "payee" | "annulee";
+  payee_le: string | null;
+  mode_reglement: ModeReglement | null;
+  motif_annulation: string | null;
+  emise_par: string | null;
+  cree_le: string;
+};
+
+export type Honoraires = {
+  convention: Convention | null;
+  conventions: Convention[];
+  temps: Temps[];
+  provisions: Provision[];
+  factures: Facture[];
+};

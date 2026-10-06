@@ -253,7 +253,32 @@ export type PieceProjet = {
   type_piece: string | null;
   /* le motif du lecteur quand il n'a pas reconnu le courrier (a_classer) ou n'a pas pu le lire */
   motif?: string | null;
+  /* « courriel » : pièce jointe d'un courriel du guichet, rangée seule par son numéro de dossier (b5_11) */
+  source?: string | null;
   cree_le?: string;
+};
+
+/* les honoraires d'un élément de mission (b5_12) et les temps passés dessus */
+export type ElementMission = "diag" | "esq" | "aps" | "apd" | "pc" | "pro" | "dce" | "act" | "visa" | "exe" | "det" | "opc" | "aor" | "autre";
+export type Honoraire = {
+  id: string;
+  projet_id: string;
+  element: ElementMission;
+  intitule: string | null;
+  montant_ht: number;
+  heures_prevues: number;
+  statut: "a_venir" | "en_cours" | "achevee" | "facturee";
+  achevee_le: string | null;
+  facturee_le: string | null;
+};
+export type Temps = {
+  id: string;
+  projet_id: string;
+  honoraire_id: string;
+  membre: string;
+  jour: string;
+  heures: number;
+  note: string | null;
 };
 
 /* tout ce que l'écran montre, d'une source ou de l'autre */
@@ -268,6 +293,8 @@ export type Dossier = {
   membres: MembreProjet[];
   casRejet: CasRejet[];
   pieces: PieceProjet[];
+  honoraires: Honoraire[];
+  temps: Temps[];
   /* user_id → nom (annuaire) */
   noms: Record<string, string>;
   /* le compte de la personne connectée (base réelle) */
