@@ -326,7 +326,7 @@ export const METIERS = {
       icone: "industrie",
       heure: "Dimanche 10 h",
       demande: "Vous pouvez livrer 40 palettes la semaine prochaine ?",
-      issue: "Demande qualifiée, transmise au commercial",
+      issue: "Demande qualifiée, transférée à l'équipe",
       transfert: false,
     },
     {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SiEnPreparation } from "@/components/ui/en-preparation";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -388,7 +389,7 @@ const PAQUETS = [
     icone: Users,
     titre: "OFFLOAD",
     href: "/offres/nouvelles-affaires",
-    lignes: ["Clients inactifs", "Classement par valeur", "Un message par trimestre"],
+    lignes: ["Clients inactifs", "Classement par valeur", "Deux messages au plus"],
   },
   {
     icone: MessageSquare,
@@ -818,7 +819,10 @@ export default function OffresPage() {
                       {lignes.map((l) => (
                         <li key={l} className="ofd-body">
                           <Check size={16} strokeWidth={2} />
-                          <span>{l}</span>
+                          <span>
+                            {l}
+                            {titre === "REPUT" ? <SiEnPreparation pour="reput" t={l} /> : null}
+                          </span>
                         </li>
                       ))}
                     </ul>
