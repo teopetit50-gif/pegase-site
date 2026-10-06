@@ -14,7 +14,7 @@ n'a été touché.
    - C : 29
    - D : 13
    - T : 3
-2. **Pour tout mettre en B : ≈ 98 jours de travail**, dont ≈ 38 relèvent du lecteur ou d'un ouvrier « dwg ». Le seul métré sur le dessin en pèse 12,5 ; A1 et B5 conseillent de le reformuler plutôt que de le construire.
+2. **Pour tout mettre en B : ≈ 95 jours de travail**, dont ≈ 38 relèvent du lecteur ou d'un ouvrier « dwg ». Le seul métré sur le dessin en pèse 12,5 ; A1 et B5 conseillent de le reformuler plutôt que de le construire.
 3. **Pour passer de B à A : ≈ 69 jours en somme brute.** C'est plutôt ≈ 45 jours, parce qu'un même vrai dossier d'agence fait passer plusieurs lignes à la fois. Il faut y ajouter le calendrier d'un vrai permis : 2 à 5 mois jusqu'à la purge.
 4. **Tiers et achats de Teo** :
    - modèle de lecture : 0,02 à 0,05 € par planche, 0,1 à 0,3 € par CCTP ou DPGF, 0,3 à 1,5 € par PLUi (chiffres A1) ;
@@ -25,15 +25,15 @@ n'a été touché.
    - compte API INSEE (index BT) ;
    - références DTU (AFNOR/CSTB, payant) et Avis Techniques (CSTB) ;
    - accès partenaires des plateformes ;
-   - **Géorisques est injoignable depuis nos hébergeurs** : on le remplace par les données ouvertes (ligne 21b).
+   - **Géorisques est injoignable depuis nos hébergeurs** : il est remplacé par les données ouvertes (b5_24, ligne 21b).
 5. **Pour servir UNE première agence réelle** en formule Agence :
    - 5 vraies planches lues, puis un dossier client fiable (#1, #4 : 4,5 j, A1) ;
-   - les risques par les données ouvertes (#21b : 4 j) ;
+   - les risques par les données ouvertes (#21b : construits, à poser, 0,5 j) ;
    - le rappel J-10, « 8 jours le matin » et « constat → question » (#39, #46, #45 : 3 j) ;
    - la région UE (#6 : 1 j) et le règlement du PLU (#20 : 0,5 j) ;
    - l'audit sur un permis déjà instruit.
 
-   Cela fait **≈ 13 jours**, ou 19 jours avec « Questions posées au dossier », que la formule Agence promet aussi (#53).
+   Cela fait **≈ 9,5 jours**, ou 15,5 jours avec « Questions posées au dossier », que la formule Agence promet aussi (#53).
 6. **Avis honnête** : le moteur (croisement, règles, permis, chantier) est construit et testé, et la recherche des servitudes depuis l'adresse marche en vrai. Ce qui manque, c'est l'œil, c'est-à-dire la lecture d'une vraie planche. Moins de travail que prévu (≈ 4 j selon A1), mais encore jamais essayée. Deux pans entiers de la page manquent aussi : Analyse des offres, et le fond du Visa. Une première agence peut être servie en ≈ 3 semaines ; la page entière tenue en vrai, c'est ≈ 140 jours-ouvrier.
 
 **À signaler** : à 18 h 28 Z, `omegaai.fr/secteurs/architectes` affiche encore des pastilles « En préparation », y compris sur
@@ -89,7 +89,7 @@ des lignes déjà retirées de `lib/en-preparation.ts` (Accessibilité, Cerfa, R
 | 19 | « Délai d'instruction suivi jusqu'à la purge » ; « Calendrier du permis jusqu'à la purge des recours » ; FAQ « Il suit le délai d'instruction, la demande de pièces complémentaires … la date du permis tacite et la fin du délai de recours des tiers » | Fonctionnement.tsx:229 ; Formules.tsx:175 ; Questions.tsx:63 | B | b5_01 (121 assertions), b5_02 (courriels du guichet), dépôt réel du banc sur la recette (`courrier-reel.mjs`) | Un vrai permis suivi : c'est du calendrier, 2 à 5 mois | 0 / 2 | — |
 | 20 | « Règles du PLU citées par article » | Fonctionnement.tsx:211 | B | b5_07 §3 (article UB 10) | La lecture du règlement existe chez A1 (B) : vérifier qu'elle ne rend que la zone du terrain | 0 / 0,5 | 0,3 à 1,5 € pour un PLUi entier (A1) |
 | 21 | « PLU, servitudes et risques lus depuis l'adresse » ; FAQ « … les servitudes … et le périmètre des Monuments historiques » | Formules.tsx:157 ; Questions.tsx:58 | **A** (zone et servitudes) | **Relevé réel du coordinateur, 20 h 15 Z** : `lorani_chercher_plu` sur un projet du banc, 3 rue des Hauts-Pavés à Nantes. Résultat : géocodage 200 ; zone UMa du PLUi de Nantes Métropole ; servitude AC1, abords de la salle Saint-Joseph de Bel-Air ; `secteur_protege` = vrai. b5_23 et b5_14 posés, verts | — | 0 / 0 | — (API IGN gratuites) |
-| 21b | « … les risques connus (inondation, argile, sismicité) » | Questions.tsx:58 ; Formules.tsx:157 | C | b5_14 vert (réponses jouées). En vrai, les 4 appels Géorisques expirent (poignée TLS > 20 s, réponses 6502 à 6505). Géorisques est injoignable depuis Supabase comme depuis nos conteneurs : filtrage des IP de cloud ou panne | **Autre source publique**, chargée en tables et mise à jour chaque mois (détail sous le tableau) : GASPAR (risques par commune), zonage sismique (décret 2010-1255), potentiel radon (IRSN). Argiles : couche BRGM, par point. On peut aussi tester 0,5 j un relais par une fonction Vercel en région UE | 3,5 / 0,5 | — (données ouvertes, licence Etalab) ; tâche mensuelle hors base |
+| 21b | « … les risques connus (inondation, argile, sismicité) » | Questions.tsx:58 ; Formules.tsx:157 | C → B à la pose | L'API Géorisques n'aboutit jamais depuis nos hébergeurs (relevé du 06/10 à 20 h 15 Z ; BRGM rejette aussi). **Construit le 06/10 (b5_24)** : les risques viennent de trois sources ouvertes chargées en tables, joignables (essai de B5) : GASPAR/DDRM (31 733 communes, argiles = code 127), zonage sismique 2011 (35 346 communes) et radon 2018 (32 771). b5_14 v2 : 13/13 en local sur les doubles du socle. À Nantes : sismicité 3, radon 3, argiles recensées, 9 risques | Poser b5_24, les 15 lots de données (`omega/modules/lorani/donnees/`) et b5_14 v2. GASPAR change chaque semaine : relancer `generer.mjs` (manuel) ; une tâche mensuelle automatique coûterait 1 j de plus. Les argiles sont données à la commune, pas à l'adresse (la carte BRGM fait 623 Mo et son service rejette nos IP) | 0 / 0,5 | — (licence Etalab) |
 | 22 | « … lit la zone du PLU **et son règlement** » (sans téléversement) | Questions.tsx:58 | C | b5_17 trouve le document d'urbanisme | Télécharger le règlement depuis le Géoportail et le passer au lecteur, qui sait le lire (A1). Extraire les articles de la zone pour le contrôle | 1,5 / 0,5 | 0,3 à 1,5 € par PLUi (A1) |
 | 23 | « … puis en déduit les pièces que le permis exigera » | Questions.tsx:58 | D | `secteur_protege` posé par b5_23 | Table des pièces exigées (R431-5 à R431-34 : secteur protégé, ERP, lotissement, PPR…) branchée sur la liste des pièces du projet | 2 / 1 | — |
 
@@ -170,21 +170,18 @@ des lignes déjà retirées de `lib/en-preparation.ts` (Accessibilité, Cerfa, R
 
 Les exemples des maquettes sont des illustrations, mais chacun se rattache à une ligne :
 
-**Géorisques injoignable : source de remplacement (ligne 21b)**
+**Géorisques injoignable : ce qui est construit (b5_24, ligne 21b)**
 
-| Donnée | Source ouverte | Forme | Jours |
+| Donnée | Source ouverte, joignable | Lignes chargées | Mise à jour |
 |---|---|---|---|
-| Risques par commune (inondation, séisme, mouvements de terrain…) | Base GASPAR (data.gouv.fr, MTE) | CSV par code INSEE | 1 |
-| Sismicité | Zonage sismique, décret 2010-1255 | ≈ 35 000 communes | inclus |
-| Radon | Potentiel radon des communes (IRSN, data.gouv.fr) | CSV par code INSEE | inclus |
-| Argiles | Exposition au retrait-gonflement (BRGM) | Polygones, interrogés par point | 1,5 |
-| Mise à jour | Tâche mensuelle hors base (action planifiée qui télécharge les CSV et les pose par la clé de service) | — | 1 |
+| Risques par commune ; argiles par le code 127 « tassements différentiels » | GASPAR/DDRM, https://files.georisques.fr/GASPAR/gaspar.zip | 31 733 communes, 49 libellés | chaque semaine à la source ; on relance `generer.mjs` |
+| Sismicité | « Zonage sismique de la France » (data.gouv.fr), décret 2010-1255 | 35 346 communes | aucune (zonage inchangé depuis 2011) |
+| Radon | ASN, « Connaître le potentiel radon de ma commune » (data.gouv.fr), arrêté du 27 juin 2018 | 32 771 communes, arrondissements compris | aucune |
 
-Pour le retrait-gonflement des argiles, deux voies :
-- une table spatiale, si PostGIS est sur la recette ;
-- sinon, une recherche par la Géoplateforme, si la couche BRGM y est servie (à vérifier).
-
-`lorani_plu_complement_poser` garde la même forme de sortie, donc l'écran ne change pas.
+Ce qui n'est pas couvert :
+- **L'API Géorisques et geoservices.brgm.fr rejettent les IP de cloud.**
+- **Les argiles sont donc données à la commune**, pas à l'adresse : la carte d'aléa BRGM est un fichier de 623 Mo, et son service est filtré.
+- **Une commune nouvelle**, créée après 2011 (sismicité) ou après 2018 (radon), est signalée comme absente des référentiels plutôt que devinée.
 
 | Exemple | Où | Ligne |
 |---|---|---|
@@ -214,16 +211,16 @@ Pour le retrait-gonflement des argiles, deux voies :
 |---|---|---|---|
 | Haut de page, garanties, compteurs | 10 | 8 | 11 |
 | Produit | 8 | 3 | 6,5 |
-| Permis et PLU | 6 | 7 | 4,5 |
+| Permis et PLU | 6 | 3,5 | 4,5 |
 | Analyse des offres (avec métré et décennales) | 6 | 21,5 | 10,5 |
 | Situations de travaux | 5 | 6,5 | 3,5 |
 | Visa des documents | 6 | 8,25 | 5,75 |
 | Fonctionnalités, questions et indices | 16 | 23,1 | 13,5 |
 | Dossier, réception, chantier, honoraires | 9 | 7,5 | 8,5 |
 | Formats, logiciels, offre commerciale (DWG, imports) | 3 | 13,5 | 5 |
-| **Total** | **69** | **≈ 98** | **≈ 69** (≈ 45 avec les recouvrements) |
+| **Total** | **69** | **≈ 95** | **≈ 69** (≈ 45 avec les recouvrements) |
 
-Les lignes « voir #… » ne sont pas comptées deux fois. Sans le métré sur le dessin, s'il est reformulé : ≈ 86 / 64.
+Les lignes « voir #… » ne sont pas comptées deux fois. Sans le métré sur le dessin, s'il est reformulé : ≈ 82 / 64.
 
 **Estimations du lecteur** : les lignes #1, #4, #20, #22, #24, #28, #29 et #66 portent les chiffres **confirmés par A1**
 (messages de 18 h 29 à 18 h 31 Z ; détail dans omega/CHIFFRAGE/lecteur.md, worker-a1 e0932e3). Ce sont des jours de lecteur seul, hors attente des fichiers.
