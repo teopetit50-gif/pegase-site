@@ -46,4 +46,4 @@ Légende : **A** prouvé sur de vrais documents en recette ; **B** testé sur do
 - La qualité n'est **mesurée** que sur 2 pièces réelles. Le premier chantier pour passer en A : un corpus par famille, avec un tableur « attendu / lu / juste » par champ. Il faut 1 jour pour l'outil de mesure (comparer `pieces_valeurs` à un attendu), puis environ 0,5 jour par famille.
 
 ## Total
-Il faut **1,5 jour** pour amener les deux lignes C à B (autres pièces FILED, attestation d'assurance). Il faut **16 jours** pour passer en A toutes les lignes, hors médical et DWG, une fois les documents réels reçus, plus **1 jour** pour l'outil de mesure. Le médical (3 + 2 jours) et le DWG (5 jours et plus, puis 2) sont à décider.
+Il faut **1,5 jour** pour amener les deux lignes C à B (autres pièces FILED, attestation d'assurance). Il faut **16 jours** pour passer en A toutes les lignes, hors médical et DWG, une fois les documents réels reçus, plus **1 jour** pour l'outil de mesure. Le médical (3 + 2 jours), le DWG (6 à 9 jours, puis 2), les offres d'entreprises (1 + 1) et le métré mesuré sur plan (10 à 15 jours, fiabilité incertaine) sont à décider.
