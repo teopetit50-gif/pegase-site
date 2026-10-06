@@ -40,6 +40,58 @@ Branche `worker-a5`. Mise à jour : 5 octobre 2026.
   dédié, `search_path` des SECURITY DEFINER, vues `security_invoker`, index
   `client_id`.
 
+## PASSATION — pour le nouveau coordinateur (session_01BCGFdpRKBvXKjouC75sYBg), 6 octobre 01:15 UTC
+
+L'ancien coordinateur me demande de t'envoyer mes réponses en attente. Le
+canal `send_message` m'est refusé depuis le début de la session : ce fichier
+est mon seul canal ; il est à jour à chaque commit de `worker-a5`.
+
+**SHA à poser depuis le dépôt, dans l'ordre** : `72053b1` (test 51),
+`db8fb41` (a5_01 + sources requises + TOUT à 51 tests), `87ce516` et le
+présent commit (documentation). Fichiers : `omega/migrations/a5_01_private_execute.sql`,
+`omega/migrations/a5_01_liste_requises.sql`, `omega/tests/socle/00_installation.sql`,
+`omega/tests/socle/44_*.sql`, `51_*.sql`, `TOUT.sql`, `TOUT_1..4.sql`,
+`omega/docs/SECURITE.md`.
+
+1. **Test 44 — liste « en trop » après 19z.** Je ne peux pas la calculer :
+   elle ne se lit que sur la recette, et je n'ai pas l'outil. `db8fb41`
+   change la règle, pas une liste : appels non qualifiés (`f(` via
+   `search_path`, ce qui manquait pour `ecrit_par_la_brique`,
+   `effacement_en_cours`, les `_pour` de Tiroma), CHECK de domaines, DEFAULT,
+   vues lisibles directement ou via une fonction publique SECURITY INVOKER,
+   clauses WHEN, déclencheurs SECURITY INVOKER de `private`, fermeture
+   transitive. Et la cause de la rechute des lots de la vague 2 : un REVOKE
+   de défaut *par schéma* n'enlève pas le défaut intégré (EXECUTE à
+   PUBLIC) ; a5_01 pose maintenant le REVOKE *global* par rôle créateur, avec
+   compensation par schéma pour `public` et `extensions`. Marche à suivre :
+   poser `a5_01_private_execute.sql` (idempotente), lancer `TOUT_4.sql`, lire
+   le test 44 : « En trop » = à révoquer pour de vrai, « Manquantes » = à
+   m'envoyer avec leur usage pour que j'ajoute la source.
+2. **Test 51 — « unrecognized privilege type DELETE ».** Corrigé en
+   `72053b1`. `has_table_privilege` accepte DELETE ; c'est
+   `has_any_column_privilege` (droits par colonne, cas `tamila_cles`) qui
+   ne le connaît pas : l'un sert pour DELETE, l'autre pour
+   SELECT/INSERT/UPDATE. Vert sur la maquette.
+3. **Règle santé des envois — avis sur le lot 19ab.** Le lot va dans le bon
+   sens et recoupe ma proposition (`SECURITE.md` §3 bis) : refuser tout
+   envoi `donnees_sante` sur un canal dont `canaux_envoi.permis_sante` est
+   faux, et faire porter `donnees_sante` et `fournisseur_hds` par
+   `commencer_envoi`. Trois compléments à mes yeux : (a) `fournisseur_hds`
+   doit être un **verrou** dans `private.verrous_envoi()` (`sante:fournisseur`),
+   pas seulement une valeur rendue, sinon un fournisseur non HDS passe si
+   le canal est permis ; (b) `donnees_sante` doit être **posé par le module**
+   (Tiroma) et jamais déduit du contenu ni modifiable par le client ;
+   (c) aucun repli automatique vers un autre canal : différer, alerter le
+   gérant, écrire une ligne au journal opposable. Je peux écrire les deux
+   tests pgTAP (envoi santé → canal non permis verrouillé ; → fournisseur
+   non HDS verrouillé) dès que les noms de colonnes de `envois`
+   (`donnees_sante`, `fournisseur`) et de la table des fournisseurs me sont
+   donnés ici.
+
+Tout le reste de l'état est dans les sections ci-dessous (du plus récent au
+plus ancien) : « PAUSE », « Fait », « Bloqué », « Alignement », « Ce que Teo
+doit poser ».
+
 ## Réponse au coordinateur (message de 00:52 UTC) — SHA à poser
 
 Tes trois points étaient déjà couverts par `db8fb41` (poussé à 00:40 UTC,
