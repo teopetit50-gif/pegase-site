@@ -111,8 +111,9 @@ tout passe par les portes du socle, appelées en RPC avec la clé de service.
 
 - ~~Push GitHub~~ : poussé, voir la fin de ce fichier.
 - ~~Migration santé~~ : posée par le coordinateur (lot socle 19ab, 06/10) à partir de
-  la spécification d'A2, voir « Avis A2 ». La garde côté ouvrier devient active au
-  redéploiement de `expediteur` au SHA 29ef6e6 ou plus récent.
+  la spécification d'A2, voir « Avis A2 ». `expediteur` redéployé le 06/10 (version 11,
+  coquille qui importe `index.ts` au SHA 29ef6e6) : la garde SANTE_FOURNISSEUR_NON_HDS
+  est active sur la recette ; le coordinateur vérifie le battement.
 - **Secrets** : `BREVO_API_KEY`, `BREVO_WEBHOOK_JETON`, `FORMULAIRE_SECRET`,
   `META_*` sont entre les mains de Teo (liste transmise par le coordinateur). Tant
   qu'ils manquent, `webhooks-brevo` et `reception` répondent 503, l'expéditeur
