@@ -595,3 +595,13 @@ signées 10 min) et ajout. Tests b1_15 : 11 assertions (maquette : 269 ok au
 total, storage.objects simulé). Recette 171 ✓, axe 0 écart sur le dialogue.
 Avec cela, la ligne « Les réserves à émettre » de `lib/en-preparation.ts`
 peut tomber (fichier partagé : retrait par le coordinateur à la pose).
+
+### Une pièce, une livraison (b1_13, tests b1_16) — demande d'A1, 17 h 10 Z
+
+Le lecteur v27 d'A1 (6f57d5e) lit le bon de livraison déposé sur
+`grp_societes/<entité>` et appelle `private.grp_enregistrer_reception` avec
+`piece_id`. b1_13 : index unique `grp_receptions_piece_key (client_id,
+piece_id)` ; la porte refuse une pièce d'une autre organisation (22023), et
+une pièce déjà enregistrée rend la livraison existante (`deja` = true), sans
+écrire ni journaliser ; une course de deux lectures bute sur l'index et rend
+la même livraison. Tests b1_16 : 9 assertions (maquette : 278 ok au total).
