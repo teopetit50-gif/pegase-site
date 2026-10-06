@@ -27,6 +27,7 @@ import ChargeFauteuils from "./ChargeFauteuils";
 import Creneaux from "./Creneaux";
 import DemiJournees from "./DemiJournees";
 import EquipeAbsente, { type NouvelleAbsence } from "./EquipeAbsente";
+import Objectifs from "./Objectifs";
 import ListeAttente, { type Inscription, type Retrait } from "./ListeAttente";
 import Pilotage from "./Pilotage";
 import Plans, { type Mutuelle } from "./Plans";
@@ -38,9 +39,9 @@ import { LOGICIELS, libelleLogiciel } from "./libelles";
 import {
   ajouterFauteuil, ajouterFermeture, ajouterHoraire, ajouterPraticien, brancherCabinet, changerMode, changerStatut, chargerDossier,
   ajouterAttente, chercherPatients, classerType, installerCabinet, listerCabinets, monCompte, noterMutuelle, retirerAttente, retirerHoraire, type Compte,
-  noterAppel, noterContact, retirerContact, noterAbsenceMembre, retirerAbsenceMembre,
+  noterAppel, noterContact, retirerContact, noterAbsenceMembre, retirerAbsenceMembre, fixerObjectif,
 } from "./portes";
-import type { AbsenceEquipe, Cabinet as CabinetT, CibleAppel, ContactPatient, Dossier, Logiciel, PatientCourt, RegistreAppels } from "./types";
+import type { AbsenceEquipe, Cabinet as CabinetT, ObjectifFauteuil, CibleAppel, ContactPatient, Dossier, Logiciel, PatientCourt, RegistreAppels } from "./types";
 
 type Reel = { compte: Compte | null; cabinets: CabinetT[]; dossier: Dossier | null; avis: string[] };
 
@@ -283,6 +284,29 @@ export default function EcranTiroma() {
     await charger(reel?.dossier?.cabinet.id);
   }, [source, reel, charger]);
 
+  /* b3_20 : l'objectif d'un fauteuil ; en exemple, en mémoire (les semaines se relisent contre le nouvel objectif) */
+  const fixerUnObjectif = useCallback(async (f: ObjectifFauteuil, objectif: number | null) => {
+    if (source === "exemple") {
+      await new Promise((r) => setTimeout(r, 250));
+      setLocal((prev) => ({
+        ...prev,
+        fauteuils: prev.fauteuils.map((x) => (x.id === f.fauteuil_id ? { ...x, objectif_occupation: objectif } : x)),
+        objectifs: prev.objectifs ? {
+          ...prev.objectifs,
+          fauteuils: prev.objectifs.fauteuils.map((x) => {
+            if (x.fauteuil_id !== f.fauteuil_id) return x;
+            const semaines = x.semaines.map((s) => ({ ...s, atteint: objectif === null || s.taux === null ? null : s.taux >= objectif }));
+            const passes = semaines.slice(0, prev.objectifs ? prev.objectifs.semaines.filter((s) => s.nature === "realisee").length : 0);
+            return { ...x, objectif, semaines, comptees: objectif === null ? 0 : passes.length, atteintes: passes.filter((s) => s.atteint).length };
+          }),
+        } : prev.objectifs,
+      }));
+      return;
+    }
+    await fixerObjectif(f.fauteuil_id, objectif);
+    await charger(reel?.dossier?.cabinet.id);
+  }, [source, reel, charger]);
+
   const installer = async () => {
     if (!reel?.compte || !entiteInst) return;
     setInstalle(true);
@@ -415,6 +439,7 @@ export default function EcranTiroma() {
             <AvantRendezVous verifications={dossier.verifications} jours={dossier.regles?.labo_verif_jours ?? 2} />
             <ChargeFauteuils charge={dossier.charge} titulaire={titulaire} />
           </div>
+          {titulaire ? <Objectifs objectifs={dossier.objectifs} fixer={fixerUnObjectif} /> : null}
           <DemiJournees demiJournees={dossier.profil === "titulaire" || dossier.profil === "collaborateur" ? dossier.demiJournees : null} titulaire={titulaire} />
           <Rappels rappels={dossier.rappels} peutEcrire={dossier.profil !== null && dossier.profil !== "direction"} chercher={chercher} noter={noterUnContact} retirer={retirerUnContact} />
           <ListeAttente attente={dossier.attente} praticiens={dossier.praticiens} peutEcrire={dossier.profil !== null && dossier.profil !== "direction"} chercher={chercher} inscrire={inscrire} retirer={retirer} />

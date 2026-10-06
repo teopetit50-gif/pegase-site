@@ -33,6 +33,28 @@ function a(jours: number, heure: number, minute = 0): string {
   return d.toISOString();
 }
 
+/** Le lundi de la semaine (décalée de k semaines), en date ISO. */
+function lundi(k: number): string {
+  const d = new Date();
+  d.setHours(12, 0, 0, 0);
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7) + 7 * k);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Les semaines d'un fauteuil : quatre passées (réalisé), l'en cours et la suivante (prévu), 2 700 minutes ouvertes. */
+function semainesFauteuil(objectif: number, taux: number[]) {
+  return taux.map((t, i) => ({ lundi: lundi(i - 4), ouvert_min: 2700, occupe_min: Math.round(2700 * t), taux: t, atteint: t >= objectif }));
+}
+
+function objectifFauteuil(fauteuil_id: string, nom: string, objectif: number, taux: number[]) {
+  const passes = taux.slice(0, 4);
+  return {
+    fauteuil_id, nom, objectif, semaines: semainesFauteuil(objectif, taux),
+    moyenne: Math.round((passes.reduce((a, b) => a + b, 0) / passes.length) * 1000) / 1000,
+    atteintes: passes.filter((t) => t >= objectif).length, comptees: passes.length,
+  };
+}
+
 const cabinet: Cabinet = {
   id: "00000000-0000-4000-8000-0000000000c0",
   client_id: C,
@@ -300,6 +322,15 @@ export const DOSSIER_EXEMPLE: Dossier = {
       ],
     },
   ],
+  /* b3_20 : les objectifs par fauteuil, quatre semaines passées et deux à venir */
+  objectifs: {
+    semaines: [-4, -3, -2, -1, 0, 1].map((k) => ({ lundi: lundi(k), nature: k < 0 ? "realisee" as const : "prevue" as const, en_cours: k === 0 })),
+    fauteuils: [
+      objectifFauteuil(F1, "Fauteuil 1", 0.85, [0.88, 0.86, 0.79, 0.91, 0.74, 0.52]),
+      objectifFauteuil(F2, "Fauteuil 2", 0.8, [0.71, 0.76, 0.69, 0.73, 0.66, 0.41]),
+      objectifFauteuil(F3, "Fauteuil 3", 0.7, [0.72, 0.75, 0.7, 0.81, 0.69, 0.48]),
+    ],
+  },
   /* b3_19 : les demi-journées vides des quatorze prochains jours */
   demiJournees: {
     du: aujourdHui(0), au: aujourdHui(14), seuil: 0.2,

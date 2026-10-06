@@ -17,7 +17,7 @@ let echecs = 0;
 const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) echecs++; };
 const ANGLAIS = /\b(Loading|Submit|Cancel|Approve|Reject|Delete|Save|Error|Pending|Due|Invoice|Supplier|Settings|Logout|Sign in|Dashboard|Today|Yesterday|Tomorrow|Chair|Patient list|Appointment)\b/;
 const LARGEURS = [390, 768, 1024, 1440, 1700];
-const CARTES = ['Créneaux à sauver', 'Plans sans rendez-vous', 'Avant les rendez-vous', 'Charge des fauteuils', 'Demi-journées vides', 'Absences probables', 'Équipe absente', 'Appels', 'Synthèse de la semaine', 'Réinscription', 'Pilotage', 'Rappels aux patients', "Liste d'attente", 'Le cabinet'];
+const CARTES = ['Créneaux à sauver', 'Plans sans rendez-vous', 'Avant les rendez-vous', 'Charge des fauteuils', 'Demi-journées vides', 'Objectifs par fauteuil', 'Absences probables', 'Équipe absente', 'Appels', 'Synthèse de la semaine', 'Réinscription', 'Pilotage', 'Rappels aux patients', "Liste d'attente", 'Le cabinet'];
 
 for (const largeur of LARGEURS) {
   const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'b3-tiroma', densite: 1 });
@@ -40,7 +40,7 @@ for (const largeur of LARGEURS) {
   ok(!anglais, anglais ? `mot anglais à l'écran : « ${anglais[0]} »` : 'aucun mot anglais surveillé à l\'écran');
   ok(mesure.h1 === 'Cabinet dentaire', `titre : ${mesure.h1}`);
   ok(mesure.kpis === 4, `quatre compteurs (${mesure.kpis})`);
-  ok(CARTES.every((c) => mesure.cartes.includes(c)), `les quatorze cartes : ${mesure.cartes.join(' · ')}`);
+  ok(CARTES.every((c) => mesure.cartes.includes(c)), `les quinze cartes : ${mesure.cartes.join(' · ')}`);
   ok(mesure.ruban === "Données d'exemple", `ruban : ${mesure.ruban}`);
   ok(/Marguerite Delannoy/.test(mesure.texte) && /Plan accepté/.test(mesure.texte), 'un créneau à sauver porte son premier candidat (plan accepté)');
   ok(/Fauteuil 2/.test(mesure.texte) && /Après-midi vide/.test(mesure.texte), 'la charge dit la demi-journée vide du fauteuil 2');
@@ -185,6 +185,24 @@ for (const largeur of LARGEURS) {
   await s.evaluer(`document.getElementById('tiroma-demi-journees')?.scrollIntoView({ block: 'start' })`);
   await s.dormir(400);
   await s.capturer(`${dossier}tiroma-demi-journees-1440.jpg`, { qualite: 55 });
+
+  console.log('— /espace/tiroma : les objectifs par fauteuil (exemple, b3_20)');
+  const obj = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Objectifs par fauteuil"]'); if (!c) return null;
+    return { lignes: c.querySelectorAll('tbody tr').length, cols: c.querySelectorAll('thead th').length, texte: c.innerText }; })()`);
+  ok(obj && obj.lignes === 3 && obj.cols === 10, `trois fauteuils, six semaines (${obj?.lignes} lignes, ${obj?.cols} colonnes)`);
+  ok(obj && /Cette semaine/.test(obj.texte) && /3\/4/.test(obj.texte), 'la semaine en cours et le compte des semaines tenues');
+  await s.evaluer(`(() => { const tr = [...document.querySelectorAll('section[aria-label="Objectifs par fauteuil"] tbody tr')].find(t => /Fauteuil 2/.test(t.textContent)); [...tr.querySelectorAll('button')].find(b => /Changer/.test(b.textContent))?.click(); })()`);
+  await s.dormir(500);
+  ok(await s.evaluer(`/Objectif — Fauteuil 2/.test(document.querySelector('[role="dialog"]')?.textContent || '')`), 'le dialogue « Objectif — Fauteuil 2 » s\'ouvre');
+  await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input.rv-champ'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, '65'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const obj2 = await s.evaluer(`(() => { const tr = [...document.querySelectorAll('section[aria-label="Objectifs par fauteuil"] tbody tr')].find(t => /Fauteuil 2/.test(t.textContent)); return tr ? tr.innerText : ''; })()`);
+  ok(!(await s.evaluer(`!!document.querySelector('[role="dialog"]')`)) && /65 %/.test(obj2) && /4\/4/.test(obj2), 'objectif ramené à 65 % : le Fauteuil 2 tient ses quatre semaines');
+  await s.evaluer(`document.getElementById('tiroma-objectifs')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(400);
+  await s.capturer(`${dossier}tiroma-objectifs-1440.jpg`, { qualite: 55 });
 
   console.log('— /espace/tiroma : la synthèse de la semaine (exemple, b3_15)');
   const syn = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Synthèse de la semaine"]'); if (!c) return null;

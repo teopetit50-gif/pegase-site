@@ -283,6 +283,7 @@ export type Dossier = {
   absences: AbsenceProbable[] | null;
   equipe: AbsenceEquipe[] | null;
   demiJournees: DemiJournees | null;
+  objectifs: Objectifs | null;
 };
 
 /* ——— le registre des appels (b3_12) ——— */
@@ -500,3 +501,22 @@ export type DemiJourneeVide = {
 };
 
 export type DemiJournees = { du: string; au: string; seuil: number | null; demi_journees: DemiJourneeVide[] };
+
+/* ——— les objectifs par fauteuil (b3_20) ——— */
+
+export type SemaineFauteuil = { lundi: string; ouvert_min: number; occupe_min: number; taux: number | null; atteint: boolean | null };
+
+export type ObjectifFauteuil = {
+  fauteuil_id: string;
+  nom: string;
+  objectif: number | null;
+  semaines: SemaineFauteuil[];
+  moyenne: number | null;
+  atteintes: number;
+  comptees: number;
+};
+
+export type Objectifs = {
+  semaines: { lundi: string; nature: "realisee" | "prevue"; en_cours: boolean }[];
+  fauteuils: ObjectifFauteuil[];
+};

@@ -22,7 +22,7 @@
 import { createClient } from "@/lib/supabase/client";
 import type {
   Attente, Cabinet, CapaciteLue, Charge, Creneau, Dossier, Fauteuil, Fermeture, Horaire, Logiciel, Membre, PatientCourt, PlanSansRdv, Praticien, Profil,
-  Regles, Releve, TypeRdv, Verification, RegistreAppels, CibleAppel, IssueAppel, Pilotage, Rappels, CanalPatient, ContactPatient, Synthese, Reinscription, AbsenceProbable, AbsenceEquipe, MotifAbsenceMembre, DemiJournees,
+  Regles, Releve, TypeRdv, Verification, RegistreAppels, CibleAppel, IssueAppel, Pilotage, Rappels, CanalPatient, ContactPatient, Synthese, Reinscription, AbsenceProbable, AbsenceEquipe, MotifAbsenceMembre, DemiJournees, Objectifs,
 } from "./types";
 
 export class ErreurPorte extends Error {}
@@ -124,8 +124,10 @@ export async function chargerDossier(cabinet: Cabinet, compte: Compte): Promise<
   const equipe = profil === "titulaire" || profil === "assistante" ? await quiet(rpc<AbsenceEquipe[] | null>("tiroma_soins_a_basculer", { p_client: c, p_entite: e, p_jours: 7 }, null), null, "soins à basculer") : null;
   /* b3_19 : les demi-journées vides des quatorze prochains jours (titulaire : tous ; collaborateur : les siennes) */
   const demiJournees = profil === "titulaire" || profil === "collaborateur" ? await quiet(rpc<DemiJournees | null>("tiroma_demi_journees_vides", { p_client: c, p_entite: e, p_jours: 14 }, null), null, "demi-journées vides") : null;
+  /* b3_20 : les objectifs par fauteuil, quatre semaines passées et deux à venir (titulaire) */
+  const objectifs = profil === "titulaire" ? await quiet(rpc<Objectifs | null>("tiroma_objectifs_fauteuils", { p_client: c, p_entite: e, p_semaines: 4 }, null), null, "objectifs par fauteuil") : null;
   return {
-    dossier: { cabinet, profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, attente, creneaux, plans, verifications, charge, appels, pilotage, rappels, synthese, reinscription, absences, equipe, demiJournees },
+    dossier: { cabinet, profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, attente, creneaux, plans, verifications, charge, appels, pilotage, rappels, synthese, reinscription, absences, equipe, demiJournees, objectifs },
     avis,
   };
 }
@@ -206,6 +208,13 @@ export async function changerStatut(cabinet: Cabinet, statut: "actif" | "coupe" 
 export async function ajouterFauteuil(cabinet: Cabinet, f: { nom: string; capacites: string[]; objectif: number | null }): Promise<void> {
   const supabase = createClient();
   const { error } = await supabase.from("tiroma_fauteuils").insert({ client_id: cabinet.client_id, entite_id: cabinet.entite_id, nom: f.nom, capacites: f.capacites, objectif_occupation: f.objectif });
+  if (error) throw new ErreurPorte(message(error));
+}
+
+/** b3_20 : l'objectif d'occupation d'un fauteuil (le titulaire, sous RLS) ; null le retire. */
+export async function fixerObjectif(fauteuil_id: string, objectif: number | null): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.from("tiroma_fauteuils").update({ objectif_occupation: objectif }).eq("id", fauteuil_id);
   if (error) throw new ErreurPorte(message(error));
 }
 
