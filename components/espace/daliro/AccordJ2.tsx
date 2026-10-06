@@ -6,7 +6,9 @@
    Décision de Teo : avec cet accord, les demandes de confirmation J-2
    partent sans approbation envoi par envoi. C'est un accord permanent du
    socle (public.politiques, une par canal), donné par le gérant ou un
-   administrateur, activé dans « À valider », révocable à tout moment.
+   administrateur, activé dans « À valider » par un autre décideur (règle
+   des deux personnes) — ou, si le gérant est le SEUL décideur de
+   l'organisation, par lui-même (b6_09, tracé) —, révocable à tout moment.
    Révoquer ne touche pas aux envois déjà partis : les suivants retournent
    dans « À valider ».
    ══════════════════════════════════════════════════════════════════════ */
@@ -18,7 +20,7 @@ import { Loader } from "@/components/ui/loader";
 import { ilYa, dans } from "../exemples/socle";
 import { dateCourte } from "../format";
 import { Avis, Pastille } from "../ui";
-import { chargerAccordJ2, donnerAccordJ2, revoquerAccordJ2 } from "./portes";
+import { activerAccordJ2Seul, chargerAccordJ2, donnerAccordJ2, revoquerAccordJ2 } from "./portes";
 import type { AccordJ2 as Accord, CanalAccordJ2 } from "./types";
 
 const LIBELLE_CANAL: Record<CanalAccordJ2["canal"], string> = { email: "courriel", whatsapp: "WhatsApp", sms: "SMS" };
@@ -72,9 +74,22 @@ export default function AccordJ2({ source, client }: { source: "exemple" | "reel
     setErreur(null);
     try {
       if (source === "reelle" && client) setAccord(await donnerAccordJ2(client.client_id));
-      else setAccord({ etat: "a_valider", fin: null, canaux: (["email", "sms", "whatsapp"] as const).map((c) => canal(c, "a_valider", { debut: dans(0), fin: dans(365), cree_le: dans(0), donne_par_libelle: "Vous", demande_statut: "en_attente" })) });
+      else setAccord({ etat: "a_valider", fin: null, seul_decideur: false, canaux: (["email", "sms", "whatsapp"] as const).map((c) => canal(c, "a_valider", { debut: dans(0), fin: dans(365), cree_le: dans(0), donne_par_libelle: "Vous", demande_statut: "en_attente" })) });
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
+    } finally {
+      setEnvoi(false);
+    }
+  };
+
+  const activerSeul = async () => {
+    setEnvoi(true);
+    setErreur(null);
+    try {
+      if (source === "reelle" && client) setAccord(await activerAccordJ2Seul(client.client_id));
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
+      void lire();
     } finally {
       setEnvoi(false);
     }
@@ -116,17 +131,23 @@ export default function AccordJ2({ source, client }: { source: "exemple" | "reel
         {etat === "actif" || etat === "partiel"
           ? `Les demandes de confirmation à J-2 partent sans passer par « À valider ». Donné le ${dateCourte(premier?.cree_le)}${premier?.donne_par_libelle ? ` par ${premier.donne_par_libelle}` : ""}, activé le ${dateCourte(premier?.active_le)} ; ${utilises} demande${utilises > 1 ? "s" : ""} ce mois-ci (au plus 1 000 par canal).`
           : etat === "a_valider"
-            ? `Proposé le ${dateCourte(premier?.cree_le)}${premier?.donne_par_libelle ? ` par ${premier.donne_par_libelle}` : ""}. Il couvrira les demandes J-2 dès qu'il sera activé dans « À valider » ; d'ici là, chacune y attend sa validation.`
+            ? `Proposé le ${dateCourte(premier?.cree_le)}${premier?.donne_par_libelle ? ` par ${premier.donne_par_libelle}` : ""}. ${accord?.seul_decideur ? "Vous êtes le seul décideur de l'organisation : vous pouvez l'activer vous-même, la décision est tracée." : "En attente de validation par un autre décideur, dans « À valider » : on ne valide pas sa propre demande."} D'ici là, chaque demande J-2 attend sa validation.`
             : etat === "revoque"
               ? `Révoqué le ${dateCourte(premier?.revoquee_le)}${premier?.revoquee_par_libelle ? ` par ${premier.revoquee_par_libelle}` : ""}${premier?.motif_revocation ? ` (« ${premier.motif_revocation} »)` : ""}. Chaque demande J-2 attend de nouveau sa validation ; les envois déjà partis ne sont pas touchés.`
               : "Sans accord, chaque demande de confirmation à J-2 attend sa validation dans « À valider ». Avec l'accord, elles partent seules, tracées « approuvé par accord permanent »."}
       </p>
       {finProche && (etat === "actif" || etat === "partiel") ? <div style={{ marginBottom: 10 }}><Avis teinte="ambre">L&apos;accord prend fin le {dateCourte(accord?.fin)} : renouvelez-le pour que les demandes J-2 continuent de partir seules.</Avis></div> : null}
+      {etat === "a_valider" && accord?.seul_decideur ? <div style={{ marginBottom: 10 }}><Avis teinte="ambre">Vous activerez seul un accord que vous avez proposé : c&apos;est permis parce que personne d&apos;autre ne décide dans l&apos;organisation. Le journal gardera « activé par le seul décideur de l&apos;organisation ». Dès qu&apos;un autre décideur vous rejoint, l&apos;activation passe par lui.</Avis></div> : null}
       {erreur ? <div style={{ marginBottom: 10 }}><Avis teinte="rouge" role="alert">{erreur}</Avis></div> : null}
       <div className="esp-actions" style={{ marginTop: 0 }}>
         {etat === "aucun" || etat === "revoque" || ((etat === "actif" || etat === "partiel") && finProche) ? (
           <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={donner} disabled={envoi}>
             {envoi ? <Loader variant="spin" /> : <ShieldCheck width={14} height={14} aria-hidden="true" />} {etat === "actif" || etat === "partiel" ? "Renouveler l'accord" : "Donner l'accord permanent"}
+          </button>
+        ) : null}
+        {etat === "a_valider" && accord?.seul_decideur ? (
+          <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={activerSeul} disabled={envoi}>
+            {envoi ? <Loader variant="spin" /> : <ShieldCheck width={14} height={14} aria-hidden="true" />} Activer moi-même (vous êtes le seul décideur)
           </button>
         ) : null}
         {etat === "actif" || etat === "partiel" || etat === "a_valider" ? (

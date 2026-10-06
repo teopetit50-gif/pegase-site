@@ -185,6 +185,8 @@ const choisir = (sel, valeur) => `(() => { const t = document.querySelector('${s
   ok(await s.evaluer(bouton('/Donner l.accord permanent/', carte)) !== null, 'clic sur « Donner l\'accord permanent »');
   await s.dormir(400);
   ok(await s.evaluer(`/À valider/.test(${carte}?.innerText || '')`), 'redonné, il attend son activation (« À valider »)');
+  ok(await s.evaluer(`/autre décideur/.test(${carte}?.innerText || '') && ![...(${carte}?.querySelectorAll('button') ?? [])].some(b => /Activer moi-même/.test(b.textContent))`),
+     'plusieurs décideurs : « en attente d\'un autre décideur », pas d\'activation par soi-même');
   const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
   ok(deb === 0, `pas de débordement horizontal (${deb})`);
   s.fermer();

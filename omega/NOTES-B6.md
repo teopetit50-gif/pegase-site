@@ -97,6 +97,12 @@ L'entreprise : **Atelier Bertin** (menuiserie-agencement, Lyon — la même entr
 
 ## Journal de session
 
+- 06/10, 16 h 15 Paris : b6_09 posé ; b6_05 meurt sur garder_demande (« Approbations insuffisantes : une demande n'est approuvée que par des personnes. ») — voulu par le socle, pas de contournement. Le coordinateur fait écrire 19af par A5 (exception étroite dans preparer_approbation : demandeur seul décideur + liste blanche private.activation_seul_autorisee). b6_10 écrit d'avance (approbation au nom du gérant au lieu de l'UPDATE) et test b6_05 ajusté (26) : À POSER APRÈS 19af. Écran hors de main d'ici là.
+
+- 06/10, 16 h 20 Paris : b6_09 (décision de Teo sur l'activation) : règle politique.activer daliro ouverte à gérant/admin/valideur, posée par btp_donner_accord_j2 ; porte btp_activer_accord_j2_seul pour le seul décideur (revérifie sous verrou, passe la demande d'activation à approuvée, journal daliro.accord_j2_active_seul) ; btp_accord_j2 dit seul_decideur. Test b6_05_activation_seul (25). Écran : « Activer moi-même (vous êtes le seul décideur) » ou « en attente d'un autre décideur ». tsc, eslint, build, recettes vertes.
+
+- 06/10, 16 h 01 Paris : b6_08 posé (daliro_b6_08_accord_j2), `^test_b6_` 265/265 (154 + 38 + 29 + 40). actions_sans_accord : aucune entrée envoi.* ni daliro. **Auto-activation refusée** : « 42501 Le demandeur ne décide pas de sa propre demande. » Il faut un second gérant (ou une règle politique.activer), question posée à Teo par le coordinateur ; le socle reste tel quel. Écran fusionné sur main.
+
 - 06/10, 16 h Paris : b6_08 accord permanent des J-2 (décision de Teo, voie A du coordinateur : public.politiques du socle, une par canal, nombre_mensuel 1000, un an ; portes btp_donner_accord_j2 / btp_revoquer_accord_j2 / btp_accord_j2, gérant ou admin ; trace « approuvé par accord permanent du … » au journal et sur l'envoi ; alerte 30 jours avant la fin). Test b6_04_accord_j2 (40 + 1 diag : l'auto-activation par le gérant est DITE, pas supposée). Écran : carte « Accord permanent des confirmations J-2 » (donner, révoquer avec motif, renouveler). tsc, eslint, build, recette 5 largeurs + axe verts.
 
 - 06/10, 06 h 58 Paris : tests 9f7325e reposés, `^test_b6_` vert (b6_01 154/154, b6_02 38/38, b6_03 29/29). b6_07 et l'écran fusionnés dans main (tsc/eslint/build verts) ; en ligne au retour du quota Vercel (~04 h 30 Paris le 07/10). Accord permanent des J-2 : en attente de Teo. Rien n'est attendu de B6.
