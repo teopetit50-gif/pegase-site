@@ -255,6 +255,8 @@ export type PieceProjet = {
   motif?: string | null;
   /* « courriel » : pièce jointe d'un courriel du guichet, rangée seule par son numéro de dossier (b5_11) */
   source?: string | null;
+  /* le chemin du fichier dans omega-clients (base réelle) : le rapport du contrôle en rend les pages */
+  chemin?: string | null;
   cree_le?: string;
 };
 
@@ -352,6 +354,8 @@ export type ValeurCitee = {
   borne?: "max" | "min";
   article?: string | null;
   regle?: boolean;
+  /* fractions de la page, y depuis le haut (contrat de lecture) */
+  boite?: { x: number; y: number; l: number; h: number } | null;
 };
 export type Constat = {
   id: string;
