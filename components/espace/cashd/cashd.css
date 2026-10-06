@@ -1,0 +1,237 @@
+/* ══════════════════════════════════════════════════════════════════════
+   /espace/cashd — compléments à la charte .esp d'A3 (06/10/2026, C2).
+   Rien ici ne redéfinit une classe .esp-* : seulement les pièces propres
+   aux relances (la balance âgée, la table des pièces, les relances écrites).
+   ══════════════════════════════════════════════════════════════════════ */
+
+.esp .c2-kpi-montant {
+  font-size: 22px;
+}
+@media (min-width: 1440px) {
+  .esp .c2-kpi-montant {
+    font-size: 26px;
+  }
+}
+
+.esp .c2-balance,
+.esp .c2-section {
+  margin-bottom: 14px;
+}
+.esp .c2-section {
+  margin-top: 14px;
+}
+
+/* la balance âgée : une barre empilée et sa légende */
+.esp .c2-barre {
+  display: flex;
+  width: 100%;
+  height: 14px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--r-filet);
+}
+.esp .c2-segment {
+  display: block;
+  height: 100%;
+  min-width: 3px;
+}
+.esp .c2-t0 { background: #8fb39a; }
+.esp .c2-t1 { background: #d9b45a; }
+.esp .c2-t2 { background: #d98a4a; }
+.esp .c2-t3 { background: #c8623f; }
+.esp .c2-t4 { background: #9e2f2a; }
+.esp .c2-legende {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 16px;
+  margin: 12px 0 0;
+}
+@media (min-width: 768px) {
+  .esp .c2-legende {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+.esp .c2-legende dt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--r-faible);
+}
+.esp .c2-legende dd {
+  margin: 2px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--r-texte);
+}
+.esp .c2-puce {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+}
+
+/* la table des pièces d'un compte */
+.esp .c2-sous {
+  display: block;
+  font-size: 12px;
+  color: var(--r-faible);
+  line-height: 1.4;
+}
+.esp .c2-retard {
+  color: var(--esp-rouge);
+}
+.esp .c2-pieces tr[data-solde] td {
+  color: var(--r-faible);
+}
+.esp .c2-gestes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+.esp .c2-masque {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.esp .c2-reglements {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.esp .c2-reglements li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  padding: 6px 0;
+  border-top: 1px solid var(--r-filet);
+  font-size: 13.5px;
+}
+.esp .c2-reglements li:first-child {
+  border-top: none;
+}
+.esp .c2-reglements .esp-num {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+/* les relances écrites et les règlements à rapprocher */
+.esp .c2-relances {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.esp .c2-relances > li {
+  padding: 12px 16px;
+  border-top: 1px solid var(--r-filet);
+}
+.esp .c2-relances summary {
+  display: grid;
+  gap: 4px;
+  cursor: pointer;
+  list-style: none;
+}
+.esp .c2-relances summary::-webkit-details-marker {
+  display: none;
+}
+.esp .c2-relance-ligne {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+  font-size: 13.5px;
+  color: var(--r-texte);
+  min-width: 0;
+}
+.esp .c2-relance-ligne > span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.esp .c2-relance-ligne .esp-num {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.esp .c2-motif {
+  color: var(--esp-ambre);
+}
+.esp .c2-corps {
+  margin: 10px 0 0;
+  padding: 12px 14px;
+  border: 1px solid var(--r-filet);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--r-texte);
+  max-height: 420px;
+  overflow-y: auto;
+}
+.esp .c2-propositions {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 13px;
+}
+.esp .c2-propositions > span {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+.c2-coche,
+.esp .c2-coche {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.c2-coche input {
+  margin-top: 3px;
+}
+.dlg-panneau .c2-sous {
+  display: block;
+  font-size: 12.5px;
+  color: var(--r-faible);
+  margin: -4px 0 0;
+}
+
+.esp .c2-tete-droite {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px 12px;
+}
+.esp .c2-tete-droite .esp-lien-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.esp .c2-prevision {
+  margin: 0 0 12px;
+  font-size: 13.5px;
+  color: var(--r-texte);
+}
+
+.esp .c2-pilotage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px 28px;
+}
+@media (min-width: 768px) {
+  .esp .c2-pilotage {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.esp .c2-pilotage .c2-reglements .c2-sous {
+  flex-basis: 100%;
+}
