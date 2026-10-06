@@ -650,3 +650,8 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   Correctif transversal : les dialogues (portail hors de .esp) recevaient mal les styles de
   l'espace → espace.css (partagé) double 51 règles pour .dlg-panneau.resa ; à surveiller
   sur les écrans des B. Notes B6 f5c0cd1 fusionnées.
+- 07 h 15 — **a4_15 posé** (634fe24) : public.filed_noter_paiement (gérant/admin/valideur ;
+  partiel ; gardes : pas au-delà du reste, pas de date future, référence unique par facture)
+  et public.filed_etat_paiement (a_payer / partielle / payee) ; a4_09 vert. Pas de statut
+  « payee » sur la facture (la comptabilisation reste possible). A3 branche « Noter un
+  paiement » dans « À payer ».
