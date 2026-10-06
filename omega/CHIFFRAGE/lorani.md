@@ -8,25 +8,33 @@ n'a été touché.
 
 ## Synthèse
 
-1. **Promesses : 68 lignes** (66 numérotées + 2 commerciales) — A : 0 · B : 23 · C : 29 · D : 13 · T : 3. Aucune n'est prouvée en vrai : aucune agence, aucune vraie planche lue de bout en bout.
-2. **Pour tout mettre en B : ≈ 101 jours de travail**, dont ≈ 43 j relèvent du lecteur (A1 : planches et scans, offres, fiches techniques, nomenclatures, charte, DWG, métré sur le dessin).
-3. **Pour passer de B à A : ≈ 77 jours en somme brute.** C'est plutôt ≈ 50 jours, parce qu'un même vrai dossier d'agence fait passer plusieurs lignes à la fois. Il faut y ajouter le calendrier d'un vrai permis : 2 à 5 mois jusqu'à la purge.
+1. **Promesses : 69 lignes** (66 numérotées, plus 21b et 2 lignes commerciales).
+   - A : 1 (zone du PLU et servitudes, relevé réel du 06/10 à 20 h 15 Z)
+   - B : 23
+   - C : 29
+   - D : 13
+   - T : 3
+2. **Pour tout mettre en B : ≈ 98 jours de travail**, dont ≈ 38 relèvent du lecteur ou d'un ouvrier « dwg ». Le seul métré sur le dessin en pèse 12,5 ; A1 et B5 conseillent de le reformuler plutôt que de le construire.
+3. **Pour passer de B à A : ≈ 69 jours en somme brute.** C'est plutôt ≈ 45 jours, parce qu'un même vrai dossier d'agence fait passer plusieurs lignes à la fois. Il faut y ajouter le calendrier d'un vrai permis : 2 à 5 mois jusqu'à la purge.
 4. **Tiers et achats de Teo** :
-   - coût du modèle de lecture par dossier ;
+   - modèle de lecture : 0,02 à 0,05 € par planche, 0,1 à 0,3 € par CCTP ou DPGF, 0,3 à 1,5 € par PLUi (chiffres A1) ;
    - région UE à confirmer : Supabase de prod, Vercel, et surtout le fournisseur du modèle de lecture ;
    - 5 DWG et 5 jeux de planches réels d'agence ;
-   - compte API INSEE (index BT, gratuit) ;
+   - un conteneur pour la lecture DWG ;
+   - clé Mistral OCR, si on la retient ;
+   - compte API INSEE (index BT) ;
    - références DTU (AFNOR/CSTB, payant) et Avis Techniques (CSTB) ;
-   - accès partenaires des plateformes (Kroqi, Autodesk Docs, Trimble Connect).
+   - accès partenaires des plateformes ;
+   - **Géorisques est injoignable depuis nos hébergeurs** : on le remplace par les données ouvertes (ligne 21b).
 5. **Pour servir UNE première agence réelle** en formule Agence :
-   - le lecteur d'A1 lit en vrai ses planches PDF, scans compris, avec page et boîte (#1, #4) ;
-   - b5_23 est posé et Géorisques vérifié (#21) ;
-   - J-10 (#39), « 8 jours le matin » (#46) et « constat → question » (#45) sont faits ;
-   - la région UE est vérifiée (#6) ;
-   - le tout est rejoué sur un permis déjà instruit de l'agence (l'audit).
+   - 5 vraies planches lues, puis un dossier client fiable (#1, #4 : 4,5 j, A1) ;
+   - les risques par les données ouvertes (#21b : 4 j) ;
+   - le rappel J-10, « 8 jours le matin » et « constat → question » (#39, #46, #45 : 3 j) ;
+   - la région UE (#6 : 1 j) et le règlement du PLU (#20 : 0,5 j) ;
+   - l'audit sur un permis déjà instruit.
 
-   Cela fait **≈ 13 jours, dont 10 côté lecteur**, ou 17 jours avec « Questions posées au dossier », que la formule Agence promet aussi (#53).
-6. **Avis honnête** : le moteur (croisement, règles, permis, chantier) est construit et testé. Ce qui manque, c'est l'œil, c'est-à-dire la lecture fiable de vraies planches, ainsi que deux pans entiers de la page (Analyse des offres, et le fond du Visa). Une première agence peut être servie en ≈ 3 semaines ; la page entière tenue en vrai, c'est de l'ordre de 150 jours-ouvrier.
+   Cela fait **≈ 13 jours**, ou 19 jours avec « Questions posées au dossier », que la formule Agence promet aussi (#53).
+6. **Avis honnête** : le moteur (croisement, règles, permis, chantier) est construit et testé, et la recherche des servitudes depuis l'adresse marche en vrai. Ce qui manque, c'est l'œil, c'est-à-dire la lecture d'une vraie planche. Moins de travail que prévu (≈ 4 j selon A1), mais encore jamais essayée. Deux pans entiers de la page manquent aussi : Analyse des offres, et le fond du Visa. Une première agence peut être servie en ≈ 3 semaines ; la page entière tenue en vrai, c'est ≈ 140 jours-ouvrier.
 
 **À signaler** : à 18 h 28 Z, `omegaai.fr/secteurs/architectes` affiche encore des pastilles « En préparation », y compris sur
 des lignes déjà retirées de `lib/en-preparation.ts` (Accessibilité, Cerfa, RE2020, décennales, fonds BET, DOE). Sur main c0494b4,
@@ -50,10 +58,10 @@ des lignes déjà retirées de `lib/en-preparation.ts` (Accessibilité, Cerfa, R
 
 | # | Promesse (texte exact) | Où | État | Preuve | Ce qui manque | Jours | Coût externe / tiers |
 |---|---|---|---|---|---|---|---|
-| 1 | « Lorani croise chaque planche avec le cahier des clauses techniques (CCTP), la décomposition des prix (DPGF) et les pièces du permis » | textes.ts:27 ; app/page.tsx:81-83 | C | Moteur : b5_07 (31 assertions : planches entre elles, CCTP contre DPGF, PLU) | Le croisement est testé, mais sur des valeurs jouées. Le lecteur d'A1 n'a pas lu en vrai une planche d'agence avec page et boîte. Le moteur ne croise que des **grandeurs nommées** (hauteurs, reculs, surfaces, places…), pas tout le contenu d'une planche | 8 / 5 | modèle de lecture (€ par planche) |
+| 1 | « Lorani croise chaque planche avec le cahier des clauses techniques (CCTP), la décomposition des prix (DPGF) et les pièces du permis » | textes.ts:27 ; app/page.tsx:81-83 | C | Moteur : b5_07 (31 assertions : planches entre elles, CCTP contre DPGF, PLU) | Confirmé par A1 (18 h 31 Z) : aucune vraie planche n'a été lue, ni en recette ni en prod. `lorani_planche` suit le contrat mais n'est testé que sur des doubles. PDF natif : page et boîte exactes. PDF de DAO (cotes tracées, pas du texte) : lecture visuelle, boîte estimée. A0/A1 lourds : découpés en morceaux, mais une page dense perd en lisibilité. Le moteur ne croise que des **grandeurs nommées** (hauteurs, reculs, surfaces, places…), pas tout le contenu d'une planche | 1,5 / 2 | 0,02 à 0,05 € par planche ; 0,1 à 0,3 € pour un CCTP ou une DPGF de 30 pages (A1) |
 | 2 | « En quelques heures, vous recevez la liste des incohérences » | textes.ts:27 | C | Le passage des lectures tourne toutes les 5 min (cron `lorani_lectures_passage`). Le contrôle se lance seul quand la dernière pièce est lue (b5_07 §9) | Aucun chronométrage sur un dossier réel de 42 planches : le délai dépend du lecteur | 1 / 1 | coût de lecture d'un dossier entier |
 | 3 | « Sans BIM » ; « Non. Un jeu de plans en PDF suffit » | textes.ts:28 ; Questions.tsx:38 | B | Le contrat de lecture ne demande que des PDF (CHAMPS-LECTURE-LORANI.md) | — | 0 / 1 | — |
-| 4 | « Vos PDF, même scannés » | textes.ts:28 ; Questions.tsx:33 | C | — | OCR des planches scannées côté lecteur (A1) : non prouvé | 2 / 2 | modèle de lecture |
+| 4 | « Vos PDF, même scannés » | textes.ts:28 ; Questions.tsx:33 | C | — | Scan : lecture visuelle, boîte estimée (A1). Avec Mistral OCR il n'y a pas de boîte. Prévoir un rendu de la page en tuiles si les cotes sont trop petites | 0,5 / 0,5 | clé Mistral OCR, non posée (T), si on la retient |
 | 5 | « Lecture seule » ; « 0 Fichier modifié » ; « Lorani ne modifie aucun fichier » ; « Il lit vos fichiers et n'en écrit aucun » | textes.ts:28,39 ; Produit.tsx:511 ; Questions.tsx:103 | B | Par construction : pièces en lecture, rapport à part (`rapport.ts`). b5_07 §6 : un membre décide, il ne modifie rien | — | 0 / 0,5 | — |
 | 6 | « Données hébergées dans l'UE » ; « hébergés dans l'Union européenne et chiffrés pendant leur transfert comme pendant leur conservation. Ils ne servent à entraîner aucun modèle » | textes.ts:28 ; Formules.tsx:511 ; Questions.tsx:108 | T | — | Région du projet Supabase de prod, région des fonctions Vercel, et surtout **où le lecteur envoie les pages** (fournisseur du modèle : région de traitement, clause de non-entraînement). Rien n'est vérifié de mon côté | 0,5 / 0,5 | contrat / région du fournisseur du modèle |
 | 7 | « vous pouvez les retirer à tout moment, rapports compris » | Questions.tsx:108 | D | — | Retrait d'un dossier à la demande du client : pièces, valeurs lues, constats et rapports. Il faut une fonction de purge validée par le coordinateur (règle : pas de suppression en clair dans un SQL à poser) | 1,5 / 0,5 | — |
@@ -79,21 +87,22 @@ des lignes déjà retirées de `lib/en-preparation.ts` (Accessibilité, Cerfa, R
 | # | Promesse (texte exact) | Où | État | Preuve | Ce qui manque | Jours | Coût externe / tiers |
 |---|---|---|---|---|---|---|---|
 | 19 | « Délai d'instruction suivi jusqu'à la purge » ; « Calendrier du permis jusqu'à la purge des recours » ; FAQ « Il suit le délai d'instruction, la demande de pièces complémentaires … la date du permis tacite et la fin du délai de recours des tiers » | Fonctionnement.tsx:229 ; Formules.tsx:175 ; Questions.tsx:63 | B | b5_01 (121 assertions), b5_02 (courriels du guichet), dépôt réel du banc sur la recette (`courrier-reel.mjs`) | Un vrai permis suivi : c'est du calendrier, 2 à 5 mois | 0 / 2 | — |
-| 20 | « Règles du PLU citées par article » | Fonctionnement.tsx:211 | B | b5_07 §3 (article UB 10) | Le règlement doit être lu par A1 (aujourd'hui, une pièce déposée) | 0 / 2 | — |
-| 21 | « PLU, servitudes et risques lus depuis l'adresse » ; FAQ « À partir de l'adresse du terrain, Lorani lit la zone du PLU … les servitudes, les risques connus (inondation, argile, sismicité) et le périmètre des Monuments historiques » | Formules.tsx:157 ; Questions.tsx:58 | C | Zone : b5_08 (18 assertions, posé). Servitudes et risques : b5_23 et b5_14 écrits (4acf771), **pas posés** | Poser b5_23 et b5_14, puis lancer un vrai `lorani_chercher_plu` pour vérifier Géorisques (injoignable depuis mon poste) | 0,5 / 1 | — (API IGN et Géorisques gratuites) |
-| 22 | « … lit la zone du PLU **et son règlement** » (sans téléversement) | Questions.tsx:58 | C | b5_17 trouve le document d'urbanisme | Télécharger le règlement depuis le Géoportail, le faire lire par A1, et en extraire les articles de la zone pour le contrôle | 3 / 2 | modèle de lecture |
+| 20 | « Règles du PLU citées par article » | Fonctionnement.tsx:211 | B | b5_07 §3 (article UB 10) | La lecture du règlement existe chez A1 (B) : vérifier qu'elle ne rend que la zone du terrain | 0 / 0,5 | 0,3 à 1,5 € pour un PLUi entier (A1) |
+| 21 | « PLU, servitudes et risques lus depuis l'adresse » ; FAQ « … les servitudes … et le périmètre des Monuments historiques » | Formules.tsx:157 ; Questions.tsx:58 | **A** (zone et servitudes) | **Relevé réel du coordinateur, 20 h 15 Z** : `lorani_chercher_plu` sur un projet du banc, 3 rue des Hauts-Pavés à Nantes. Résultat : géocodage 200 ; zone UMa du PLUi de Nantes Métropole ; servitude AC1, abords de la salle Saint-Joseph de Bel-Air ; `secteur_protege` = vrai. b5_23 et b5_14 posés, verts | — | 0 / 0 | — (API IGN gratuites) |
+| 21b | « … les risques connus (inondation, argile, sismicité) » | Questions.tsx:58 ; Formules.tsx:157 | C | b5_14 vert (réponses jouées). En vrai, les 4 appels Géorisques expirent (poignée TLS > 20 s, réponses 6502 à 6505). Géorisques est injoignable depuis Supabase comme depuis nos conteneurs : filtrage des IP de cloud ou panne | **Autre source publique**, chargée en tables et mise à jour chaque mois (détail sous le tableau) : GASPAR (risques par commune), zonage sismique (décret 2010-1255), potentiel radon (IRSN). Argiles : couche BRGM, par point. On peut aussi tester 0,5 j un relais par une fonction Vercel en région UE | 3,5 / 0,5 | — (données ouvertes, licence Etalab) ; tâche mensuelle hors base |
+| 22 | « … lit la zone du PLU **et son règlement** » (sans téléversement) | Questions.tsx:58 | C | b5_17 trouve le document d'urbanisme | Télécharger le règlement depuis le Géoportail et le passer au lecteur, qui sait le lire (A1). Extraire les articles de la zone pour le contrôle | 1,5 / 0,5 | 0,3 à 1,5 € par PLUi (A1) |
 | 23 | « … puis en déduit les pièces que le permis exigera » | Questions.tsx:58 | D | `secteur_protege` posé par b5_23 | Table des pièces exigées (R431-5 à R431-34 : secteur protégé, ERP, lotissement, PPR…) branchée sur la liste des pièces du projet | 2 / 1 | — |
 
 ### Analyse des offres
 
 | # | Promesse (texte exact) | Où | État | Preuve | Ce qui manque | Jours | Coût externe / tiers |
 |---|---|---|---|---|---|---|---|
-| 24 | « Analyse des offres » ; « Chaque offre est alignée sur la DPGF. Lorani compare les offres reçues ligne par ligne, si bien que les postes non chiffrés ressortent avant l'attribution » ; « Analyse des offres sur DPGF » ; carte métier « Sur quatre offres reçues dans quatre formats, un poste n'est chiffré par aucune entreprise » ; « Le poste 3.4 n'est chiffré que par une entreprise sur trois » | app/page.tsx:105-109 ; Fonctionnement.tsx:119,478 ; Formules.tsx:277 ; Metiers.tsx:108 ; Dossier.tsx:324 | D | — (aucune table d'offre, aucun type de lecture « offre ») | Lecture des offres Excel/PDF en lignes de prix (A1, ≈ 3 j) ; alignement sur la DPGF ; tableau comparatif ; onglet de l'écran | 7 / 3 | modèle de lecture |
+| 24 | « Analyse des offres » ; « Chaque offre est alignée sur la DPGF. Lorani compare les offres reçues ligne par ligne, si bien que les postes non chiffrés ressortent avant l'attribution » ; « Analyse des offres sur DPGF » ; carte métier « Sur quatre offres reçues dans quatre formats, un poste n'est chiffré par aucune entreprise » ; « Le poste 3.4 n'est chiffré que par une entreprise sur trois » | app/page.tsx:105-109 ; Fonctionnement.tsx:119,478 ; Formules.tsx:277 ; Metiers.tsx:108 ; Dossier.tsx:324 | D | — (aucune table d'offre, aucun type de lecture « offre ») | A1 : pas de type « offre » aujourd'hui. La lecture d'Excel et de CSV existe (le tableur est mis en texte). `lorani_dpgf` lit les quantités, pas les prix. Un type `lorani_offre` coûte 1 j → B et +1 j → A, plus 0,5 j au-delà de 500 lignes. Côté B5 : alignement sur la DPGF, tableau comparatif, onglet de l'écran | 5,5 / 3 | 0 à 0,05 € par PDF ; 0,1 à 0,3 € par gros Excel (A1) |
 | 25 | « Postes non chiffrés et réserves » | Fonctionnement.tsx:499 | D | — | Fait partie de #24 (réserves et variantes des offres) | 1 / 0,5 | — |
 | 26 | « Écarts à l'estimation par ligne » | Fonctionnement.tsx:518 | D | — | Estimation de l'architecte (DPGF chiffrée) comparée offre par offre | 1 / 0,5 | — |
 | 27 | « Rapport d'analyse prêt à signer » | Fonctionnement.tsx:536 | D | — | Rapport PDF et Excel (on peut reprendre le moteur de `rapport.ts`) | 1,5 / 0,5 | — |
-| 28 | « Métré des plans contre les quantités » ; « Métré des plans contre la DPGF » ; FAQ « Il mesure les surfaces et les longueurs sur les plans, puis les compare aux quantités de la DPGF » ; « Le plan donne 412 m² de cloisons, la DPGF en prévoit 360 » | Fonctionnement.tsx:554,1363 ; Formules.tsx:367 ; Questions.tsx:73 | C | b5_07 §10 : quantité mesurée contre DPGF, seuil 5 %, majeur | **La phrase promet une mesure sur le dessin.** Le lecteur lit les cotes écrites, il ne mesure pas. Deux options : C5 reformule (0 j), ou on mesure sur le PDF vectoriel ou le DWG (polylignes, échelle). Chiffre B5, à confirmer par A1 | 10 / 5 | — |
-| 29 | « Décennales contrôlées contre le lot » ; FAQ « Lorani lit chaque attestation décennale et vérifie que les activités couvertes correspondent au lot attribué, ainsi que les dates et le plafond … le registre en garde la date » | Fonctionnement.tsx:572 ; Formules.tsx:385 ; Questions.tsx:78 | B | b5_09 (18 assertions : activité, plafond contre marché, période d'ouverture du chantier, échéance au registre, rappels) | Vraies attestations d'assureurs (SMABTP, MAAF, AXA…) lues par A1 | 0 / 1,5 | — |
+| 28 | « Métré des plans contre les quantités » ; « Métré des plans contre la DPGF » ; FAQ « Il mesure les surfaces et les longueurs sur les plans, puis les compare aux quantités de la DPGF » ; « Le plan donne 412 m² de cloisons, la DPGF en prévoit 360 » | Fonctionnement.tsx:554,1363 ; Formules.tsx:367 ; Questions.tsx:73 | C | b5_07 §10 : quantité mesurée contre DPGF, seuil 5 %, majeur | **La phrase promet une mesure sur le dessin.** Le lecteur lit les cotes écrites, il ne mesure pas. A1 : une mesure facturable n'est faisable que par la géométrie vectorielle du PDF ou du DWG (tracés, échelle du cartouche, pièces, linéaires). Il faut 10 à 15 j pour une première version, sans garantie sur des plans réels. **A1 et B5 conseillent de ne pas le promettre** tant que ce n'est pas fait : reformuler en « métré déposé ou cotes écrites contre la DPGF », ce qui est en B (b5_07 §10) | 12,5 / 5 | — |
+| 29 | « Décennales contrôlées contre le lot » ; FAQ « Lorani lit chaque attestation décennale et vérifie que les activités couvertes correspondent au lot attribué, ainsi que les dates et le plafond … le registre en garde la date » | Fonctionnement.tsx:572 ; Formules.tsx:385 ; Questions.tsx:78 | B | b5_09 (18 assertions : activité, plafond contre marché, période d'ouverture du chantier, échéance au registre, rappels) | Lecture de vraies attestations (SMABTP, MAAF, AXA…) : 0,5 j côté A1 | 0 / 1 | ≈ 0,015 € par attestation (A1) |
 
 ### Situations de travaux
 
@@ -155,11 +164,27 @@ des lignes déjà retirées de `lib/en-preparation.ts` (Accessibilité, Cerfa, R
 
 | # | Promesse (texte exact) | Où | État | Preuve | Ce qui manque | Jours | Coût externe / tiers |
 |---|---|---|---|---|---|---|---|
-| 66 | « Les plans de vos logiciels, lus en PDF ou en DWG » (AutoCAD, Revit, Archicad, SketchUp, Allplan, Vectorworks, BricsCAD, Rhino) ; FAQ « … en PDF, même scannés, ou en DWG ; CCTP, DPGF et offres des entreprises en Excel ou en PDF » | Metiers.tsx:428 ; Questions.tsx:33 | D | Étude DWG faite (ETUDE-DWG.md, essai LibreDWG sur 3 formats) ; DPGF lue (contrat) | DWG : dépôt ½ j, lecture serveur 2-3 j, recalage PDF↔DWG 1-2 j. Excel des offres : #24 | 4,5 / 2 | **5 vrais DWG d'agence** (Teo) ; GPL côté serveur seulement |
+| 66 | « Les plans de vos logiciels, lus en PDF ou en DWG » (AutoCAD, Revit, Archicad, SketchUp, Allplan, Vectorworks, BricsCAD, Rhino) ; FAQ « … en PDF, même scannés, ou en DWG ; CCTP, DPGF et offres des entreprises en Excel ou en PDF » | Metiers.tsx:428 ; Questions.tsx:33 | D | Étude DWG faite (ETUDE-DWG.md, essai LibreDWG sur 3 formats) ; DPGF lue (contrat) | DWG, chiffré avec A1 : ½ j de dépôt + 3 à 4 j de lecture serveur + 1 à 2 j de recalage PDF↔DWG + 1 à 2 j d'infrastructure, soit 6 à 9 j. LibreDWG ne tient pas dans une fonction Edge sur de gros fichiers : il faut un petit conteneur à part. A1 préfère un ouvrier « dwg » dédié, qui rende les mesures au format `mesure.<grandeur>.<objet>`. Excel des offres : voir #24 | 7,5 / 2 | **5 vrais DWG d'agence** (Teo) ; hébergement d'un conteneur (T) ; GPL côté serveur seulement |
 | — | « Utilisateurs sans supplément » ; « Accès sans limite d'équipe » ; « Sur audit » ; « Jugez Lorani sur un permis déjà instruit » ; « L'audit se fait sur un permis déjà instruit » | Formules.tsx:493,795,78 ; textes.ts:44 ; Questions.tsx:113 | T | Engagement commercial, aucun code | Teo fixe le prix et mène l'audit, qui n'est crédible qu'avec #1 en A | 0 / 0 | temps de Teo |
 | — | « Import depuis vos plateformes de projet » | Formules.tsx:777 | T | — | Connecteurs (Kroqi, Autodesk Docs, Trimble Connect…) : ≈ 3 j par plateforme | 6 / 3 | accès partenaire et API des plateformes |
 
 Les exemples des maquettes sont des illustrations, mais chacun se rattache à une ligne :
+
+**Géorisques injoignable : source de remplacement (ligne 21b)**
+
+| Donnée | Source ouverte | Forme | Jours |
+|---|---|---|---|
+| Risques par commune (inondation, séisme, mouvements de terrain…) | Base GASPAR (data.gouv.fr, MTE) | CSV par code INSEE | 1 |
+| Sismicité | Zonage sismique, décret 2010-1255 | ≈ 35 000 communes | inclus |
+| Radon | Potentiel radon des communes (IRSN, data.gouv.fr) | CSV par code INSEE | inclus |
+| Argiles | Exposition au retrait-gonflement (BRGM) | Polygones, interrogés par point | 1,5 |
+| Mise à jour | Tâche mensuelle hors base (action planifiée qui télécharge les CSV et les pose par la clé de service) | — | 1 |
+
+Pour le retrait-gonflement des argiles, deux voies :
+- une table spatiale, si PostGIS est sur la recette ;
+- sinon, une recherche par la Géoplateforme, si la couche BRGM y est servie (à vérifier).
+
+`lorani_plu_complement_poser` garde la même forme de sortie, donc l'écran ne change pas.
 
 | Exemple | Où | Ligne |
 |---|---|---|
@@ -173,11 +198,11 @@ Les exemples des maquettes sont des illustrations, mais chacun se rattache à un
 
 ## Totaux (recomptés depuis le tableau)
 
-**Par état** (68 lignes) :
+**Par état** (69 lignes) :
 
 | État | Lignes |
 |---|---|
-| A | 0 |
+| A | 1 |
 | B | 23 |
 | C | 29 |
 | D | 13 |
@@ -187,18 +212,23 @@ Les exemples des maquettes sont des illustrations, mais chacun se rattache à un
 
 | Section | Lignes | Vers B | De B vers A |
 |---|---|---|---|
-| Haut de page, garanties, compteurs | 10 | 16 | 15,5 |
+| Haut de page, garanties, compteurs | 10 | 8 | 11 |
 | Produit | 8 | 3 | 6,5 |
-| Permis et PLU | 5 | 5,5 | 8 |
-| Analyse des offres (avec métré et décennales) | 6 | 20,5 | 11 |
+| Permis et PLU | 6 | 7 | 4,5 |
+| Analyse des offres (avec métré et décennales) | 6 | 21,5 | 10,5 |
 | Situations de travaux | 5 | 6,5 | 3,5 |
 | Visa des documents | 6 | 8,25 | 5,75 |
 | Fonctionnalités, questions et indices | 16 | 23,1 | 13,5 |
 | Dossier, réception, chantier, honoraires | 9 | 7,5 | 8,5 |
-| Formats, logiciels, offre commerciale (DWG, imports) | 3 | 10,5 | 5 |
-| **Total** | **68** | **≈ 101** | **≈ 77** (≈ 50 avec les recouvrements) |
+| Formats, logiciels, offre commerciale (DWG, imports) | 3 | 13,5 | 5 |
+| **Total** | **69** | **≈ 98** | **≈ 69** (≈ 45 avec les recouvrements) |
 
-Les lignes « voir #… » ne sont pas comptées deux fois.
+Les lignes « voir #… » ne sont pas comptées deux fois. Sans le métré sur le dessin, s'il est reformulé : ≈ 86 / 64.
 
-**Estimations du lecteur** : les chiffres des lignes qui le concernent (#1, #4, #8, #22, #24, #28, #35, #52, #54, #66) sont
-ceux de B5. **Ils ne sont pas encore confirmés par A1**, interrogé à 18 h 35 Z ; sa réponse sera ajoutée ici.
+**Estimations du lecteur** : les lignes #1, #4, #20, #22, #24, #28, #29 et #66 portent les chiffres **confirmés par A1**
+(messages de 18 h 29 à 18 h 31 Z ; détail dans omega/CHIFFRAGE/lecteur.md, worker-a1 e0932e3). Ce sont des jours de lecteur seul, hors attente des fichiers.
+Pour #8, #35, #52 et #54 (contrôle visuel des PC, fiches techniques, charte, nomenclatures), A1 n'a rien chiffré : ce sont les chiffres de B5.
+
+**Recherche PLU sans écran ouvert** (remarque du coordinateur, 20 h 15 Z) : `private.lorani_lectures_passage` fait déjà avancer les
+recherches en cours (b5_17 l. 438 ; b5_23 l. 342 : `statut in ('geocodage', 'zonage') or complements_statut = 'en_cours'`).
+Si une recherche reste en « geocodage » plus de 5 minutes sur la recette, c'est que la tâche cron du passage n'y tourne pas.
