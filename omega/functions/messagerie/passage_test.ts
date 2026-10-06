@@ -182,7 +182,15 @@ Deno.test("brouillon : fabriqué depuis l'envoi, déposé dans la messagerie, en
   assertMatch(brut, /^X-Omega-Envoi: 55555555-5555-4555-8555-555555555555/m);
   assertMatch(brut, /filename="facture\.pdf"/);
   assertEquals(a.portes.confirmes.get(ENVOI), "gmail:brouillon:r-1");
-  assertEquals(a.portes.finis.get(1)!.brouillon, true);
+  assertEquals(
+    a.portes.references.get(ENVOI),
+    "<omega.55555555-5555-4555-8555-555555555555@banc.test>",
+  );
+  assertMatch(
+    brut,
+    /^Message-ID: <omega\.55555555-5555-4555-8555-555555555555@banc\.test>/m,
+  );
+  assertEquals(a.portes.finis.get(1)!.brouillon, "gmail:brouillon:r-1");
 });
 
 Deno.test("brouillon refusé : santé vers un fournisseur non agréé, connexion absente ; Gmail non branché : reporté", async () => {
@@ -270,6 +278,7 @@ Deno.test("Microsoft : relève du dossier inbox, jeton de renouvellement tourné
   const bilan = await executerPassage(a.deps);
   assertEquals([bilan.brouillons, bilan.recus], [1, 1]);
   assertEquals(a.portes.confirmes.get(ENVOI), "microsoft:brouillon:r-1");
+  assertEquals(a.portes.references.get(ENVOI), "m-1");
   assertEquals(ms.etiquettesDemandees, ["inbox"]);
   assertEquals(
     a.portes.jetonsParConnexion.get(CONNEXION)!.renouvellement,

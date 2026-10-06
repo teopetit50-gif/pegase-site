@@ -1,8 +1,7 @@
 // Portes du socle pour les messageries connectées. Existantes : prendre_travaux, finir_travail,
-// echouer_travail, battre_ouvrier, commencer_envoi, confirmer_envoi, echouer_envoi,
-// deposer_reception. Les portes `messagerie_*` sont PROPOSÉES par A2 (contrat dans
-// omega/NOTES-A2.md, « Messageries connectées ») : à écrire côté socle, jetons au Vault, jamais
-// en clair dans une table, jamais rendus à authenticated.
+// echouer_travail, battre_ouvrier, commencer_envoi, echouer_envoi, deposer_reception. Lot
+// 19aj_messageries (omega/modules/socle/migrations/) : les portes `messagerie_*` (jetons au Vault,
+// jamais en clair dans une table, jamais rendus à authenticated). Lot 19aj_b : confirmer_brouillon.
 
 import type { EnvoiAEnvoyer, ReponseCommencer } from "../expediteur/portes.ts";
 import type { Reception } from "../reception/portes.ts";
@@ -55,7 +54,15 @@ export interface Portes {
   ): Promise<number>;
 
   commencerEnvoi(envoi: string): Promise<ReponseCommencer>;
-  confirmerEnvoi(envoi: string, reference: string): Promise<void>;
+  /**
+   * Le brouillon est déposé chez le client : statut « brouillon_depose ». `reference` est le
+   * Message-ID (les réponses s'y rattachent) ; `brouillon` l'identifiant chez le fournisseur.
+   */
+  confirmerBrouillon(
+    envoi: string,
+    reference: string,
+    brouillon: string,
+  ): Promise<void>;
   echouerEnvoi(
     envoi: string,
     erreur: string,
@@ -164,10 +171,11 @@ export function portesSupabase(rpc: AppelRpc): Portes {
         motif: "commencer_envoi a rendu null",
       };
     },
-    async confirmerEnvoi(envoi, reference) {
-      await rpc("confirmer_envoi", {
+    async confirmerBrouillon(envoi, reference, brouillon) {
+      await rpc("confirmer_brouillon", {
         p_envoi: envoi,
         p_reference: reference.slice(0, 300),
+        p_brouillon: brouillon.slice(0, 300),
       });
     },
     async echouerEnvoi(envoi, erreur, definitif) {

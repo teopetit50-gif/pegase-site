@@ -17,6 +17,11 @@ export type DependancesOAuth = {
   messageries: Partial<Record<NomMessagerie, Messagerie>>;
   /** URL publique de la fonction, sans barre finale : …/functions/v1/messagerie-oauth */
   base: string;
+  /**
+   * Base de l'adresse de retour déclarée chez Google / Microsoft, si elle n'est pas la fonction
+   * elle-même : https://omegaai.fr/api/messagerie en production (la route du site renvoie ici).
+   */
+  retourBase?: string;
   journal: { erreur(message: string, detail?: Record<string, unknown>): void };
 };
 
@@ -85,7 +90,7 @@ export function creerOAuth(
         `L'application ${marque} d'Omega n'est pas encore configurée.`,
       );
     }
-    const retour = `${deps.base}/${trouve[1]}/retour`;
+    const retour = `${deps.retourBase ?? deps.base}/${trouve[1]}/retour`;
     const verifier = async (etat: string) => {
       const o = await deps.portes.ouvrir(etat);
       if (o.fournisseur !== nom) throw new Error("fournisseur de l'état");

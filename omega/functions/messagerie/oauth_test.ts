@@ -165,3 +165,33 @@ Deno.test("Microsoft : enregistrement en panne → pas de révocation distante (
     503,
   );
 });
+
+Deno.test("adresse de retour sur omegaai.fr : même URI au consentement et à l'échange du code", async () => {
+  const portes = new PortesDouble();
+  portes.etats.set(ETAT, {
+    client_id: "c",
+    fournisseur: "gmail",
+    retour_ecran: null,
+  });
+  const g = new GmailDouble();
+  const servir = creerOAuth({
+    portes,
+    messageries: { gmail: g },
+    base: BASE,
+    retourBase: "https://omegaai.fr/api/messagerie",
+    journal: journalMuet,
+  });
+  const d = await servir(new Request(`${BASE}/google/debut?etat=${ETAT}`));
+  assertMatch(
+    decodeURIComponent(d.headers.get("location")!),
+    /redirect_uri=https:\/\/omegaai\.fr\/api\/messagerie\/google\/retour/,
+  );
+  await servir(
+    new Request(
+      `${BASE}/google/retour?code=code-valide-0123456789&state=${ETAT}`,
+    ),
+  );
+  assertEquals(g.retoursEchange, [
+    "https://omegaai.fr/api/messagerie/google/retour",
+  ]);
+});

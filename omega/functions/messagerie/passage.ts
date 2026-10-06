@@ -1,8 +1,10 @@
 // Un passage de l'ouvrier MESSAGERIE (Gmail, Microsoft 365) :
 //   1. travaux `envois.gmail` / `envois.microsoft` {envoi} : commencer_envoi → jetons de la
 //      connexion de l'expéditeur (expediteur.parametres.connexion) → brouillon fabriqué (mime.ts)
-//      → dépôt dans la messagerie → confirmer_envoi(envoi, "<fournisseur>:brouillon:<id>"). Le
-//      message RESTE un brouillon dans la messagerie du client : rien n'est envoyé par Omega.
+//      → dépôt dans la messagerie → confirmer_brouillon(envoi, <Message-ID>, "<fournisseur>:
+//      brouillon:<id>") : statut « brouillon_depose » (lot 19aj_b), compté comme parti pour
+//      l'espacement et les plafonds. Le message RESTE un brouillon dans la messagerie du client :
+//      rien n'est envoyé par Omega.
 //      travaux `messagerie.revoquer` {connexion} : messagerie_oublier (efface le Vault, rend le
 //      jeton et le fournisseur) → révocation chez Google (Microsoft n'en offre pas).
 //   2. relevé de chaque connexion active, fournisseur par fournisseur : jeton d'accès renouvelé
@@ -314,15 +316,21 @@ async function brouillon(t: Travail, deps: Dependances, bilan: Bilan) {
       html: html ? e.corps : null,
       pieces,
       entetes: { "X-Omega-Envoi": e.envoi },
+      messageId: identifiantMessage(e),
     });
     const d = await m.creerBrouillon(acces, new TextEncoder().encode(brut));
-    const reference = `${m.nom}:brouillon:${d.brouillon}`;
-    await deps.portes.confirmerEnvoi(e.envoi, reference);
+    // La référence est le Message-ID que citeront les réponses (deposer_reception les rattache
+    // à l'envoi par reference_externe) : le nôtre, ou celui que Microsoft a imposé au brouillon.
+    const reference = m.nom === "microsoft" && d.message
+      ? d.message
+      : identifiantMessage(e);
+    const brouillonRef = `${m.nom}:brouillon:${d.brouillon}`;
+    await deps.portes.confirmerBrouillon(e.envoi, reference, brouillonRef);
     bilan.brouillons++;
     await finir(deps, t.id, {
       fournisseur_id: reference,
+      brouillon: brouillonRef,
       message: d.message,
-      brouillon: true,
     });
   } catch (x) {
     const err = classer(x);
@@ -351,6 +359,13 @@ async function brouillon(t: Travail, deps: Dependances, bilan: Bilan) {
         : { reporte: true, erreur: err.message },
     );
   }
+}
+
+/** Message-ID stable d'un envoi : rejouer le même envoi redonne le même identifiant. */
+function identifiantMessage(e: EnvoiAEnvoyer): string {
+  const domaine = (e.expediteur.identite.split("@")[1] ?? "").toLowerCase()
+    .replace(/[^a-z0-9.-]/g, "") || "omegaai.fr";
+  return `<omega.${e.envoi}@${domaine}>`;
 }
 
 async function revoquer(t: Travail, deps: Dependances, bilan: Bilan) {

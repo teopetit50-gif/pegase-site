@@ -28,6 +28,7 @@ export class PortesDouble implements Portes {
   battements: Record<string, unknown>[] = [];
   envois = new Map<string, ReponseCommencer>();
   confirmes = new Map<string, string>();
+  references = new Map<string, string>();
   echoues = new Map<string, { erreur: string; definitif: boolean }>();
   receptions = new Map<string, Reception>();
   actives: ConnexionActive[] = [];
@@ -61,8 +62,13 @@ export class PortesDouble implements Portes {
       { envoyer: false as const, statut: "introuvable" };
   }
   // deno-lint-ignore require-await
-  async confirmerEnvoi(envoi: string, reference: string) {
-    this.confirmes.set(envoi, reference);
+  async confirmerBrouillon(
+    envoi: string,
+    reference: string,
+    brouillon: string,
+  ) {
+    this.confirmes.set(envoi, brouillon);
+    this.references.set(envoi, reference);
   }
   // deno-lint-ignore require-await
   async echouerEnvoi(envoi: string, erreur: string, definitif: boolean) {
@@ -153,6 +159,7 @@ export class GmailDouble implements Messagerie {
   readonly etiquetteParDefaut: string;
   readonly revocationDistante: boolean;
   etiquettesDemandees: string[] = [];
+  retoursEchange: string[] = [];
   constructor(readonly nom: NomMessagerie = "gmail") {
     this.etiquetteParDefaut = nom === "gmail" ? "INBOX" : "inbox";
     this.revocationDistante = nom === "gmail";
@@ -172,7 +179,8 @@ export class GmailDouble implements Messagerie {
     }`;
   }
   // deno-lint-ignore require-await
-  async echangerCode(code: string) {
+  async echangerCode(code: string, retour: string) {
+    this.retoursEchange.push(retour);
     if (code !== "code-valide-0123456789") {
       throw new ErreurMessagerie("DEFINITIVE", "code refusé");
     }

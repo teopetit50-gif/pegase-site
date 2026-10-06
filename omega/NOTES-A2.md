@@ -603,7 +603,7 @@ l'identité de connexion, et l'ouvrier lit les secrets par client comme `secret_
 
 Promesses du site visées : « Vous connectez une messagerie, c'est la seule chose à faire »
 (FILED) et « le message reste un brouillon dans votre outil ». Code dans
-`omega/functions/messagerie/`, 33 tests Deno verts sur doubles, **rien de déployé, aucun appel
+`omega/functions/messagerie/`, 34 tests Deno verts sur doubles, **rien de déployé, aucun appel
 réel** (ni application Google ni application Microsoft). Guides pour Teo :
 `omega/GUIDE-GMAIL.md`, `omega/GUIDE-MICROSOFT.md`.
 
@@ -657,44 +657,44 @@ réel** (ni application Google ni application Microsoft). Guides pour Teo :
 - Secrets que seul Teo peut poser : `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET`
   (le secret client Azure expire : 24 mois au plus, à renouveler).
 
-### Lot socle à écrire (pas par A2 : brief « aucune migration SQL »)
+### Lot socle 19aj (écrit par A2 sur décision du coordinateur, 06/10 16 h 08 Z)
 
-Tables :
-- `public.messageries` : `id uuid`, `client_id`, `entite_id`, `fournisseur` ('gmail' |
-  'microsoft'), `adresse`, `etiquette` (défaut 'INBOX'), `curseur text`, `etat` ('active' |
-  'a_reconnecter' | 'revoquee'), `portees text[]`, `secret_renouvellement uuid` et
-  `secret_acces uuid` (ids Vault, **jamais lisibles par authenticated**), `acces_expire_le`,
-  `connecte_par`, `connecte_le`, `erreur`, `maj_le`. RLS : lecture par les membres du client
-  d'une vue sans les colonnes de secret ; écriture par les portes seules.
-- `private.messageries_etats` : `etat text` (aléatoire, 32 octets base64url), `client_id`,
-  `fournisseur`, `demande_par`, `retour_ecran` (https), `cree_le`, `consomme_le` ; valable
-  15 minutes, usage unique.
+Le coordinateur, par délégation de Teo, lève pour ce connecteur la règle « aucune migration ».
+Il fixe aussi : statut d'envoi distinct `brouillon_depose`, compté comme « parti » pour
+l'espacement et les plafonds ; régime Test de Google pour la recette et les pilotes ; route de
+renvoi sur omegaai.fr.
 
-Portes pour l'écran (authenticated, gérant / admin) :
-- `messagerie_preparer(p_client, p_fournisseur, p_retour_ecran) → text` : l'état ; l'écran
-  ouvre `…/functions/v1/messagerie-oauth/google/debut?etat=<état>` (Gmail) ou
-  `…/microsoft/debut?etat=<état>` (Microsoft).
-- `messagerie_revoquer(p_connexion)` : état `revoquee`, ligne `expediteurs` suspendue, travail
-  `messagerie.revoquer` {connexion} déposé.
-
-Portes pour l'ouvrier (service_role), contrat exact dans `messagerie/portes.ts` :
-`messagerie_connexions(p_fournisseur)`, `messagerie_jetons(p_connexion)` (lit le Vault),
-`messagerie_poser_acces(p_connexion, p_acces, p_expire_le, p_renouvellement)` (**p_renouvellement
-text, null = inchangé** ; non null = remplace le secret Vault, rotation Microsoft),
-`messagerie_poser_curseur` (curseur text sans limite courte : un deltaLink Graph fait ~1 Ko), `messagerie_a_reconnecter` (état +
-alerte au client), `messagerie_ouvrir(p_etat)` (vérifie sans consommer),
-`messagerie_enregistrer(p_etat, p_adresse, p_renouvellement, p_acces, p_acces_expire_le,
-p_portees, p_curseur)` (consomme l'état, `vault.create_secret`, crée ou met à jour la
-connexion et la ligne `expediteurs` : canal email, fournisseur = celui de l'état (`gmail` |
-`microsoft`), identite = adresse, `parametres.connexion`), `messagerie_oublier(p_connexion) →
-{renouvellement, fournisseur}` (rend puis efface les secrets du Vault).
-
-Envois : fournisseurs `gmail` et `microsoft` dans `fournisseurs_envoi` (`branche` à vrai quand
-c'est prêt), `confier_envoi` dépose `envois.gmail` / `envois.microsoft` (genres pris par
-l'ouvrier `messagerie` ; un envoi dont le fournisseur ne correspond pas au genre est refusé). **À trancher côté socle** : `confirmer_envoi` avec
-`gmail:brouillon:<id>` / `microsoft:brouillon:<id>` ne veut pas dire « envoyé » mais « brouillon déposé chez le client » ;
-un statut distinct (`brouillon`) éviterait de compter comme envoyé ce que le client n'a pas
-encore envoyé.
+- `omega/modules/socle/migrations/19aj_messageries.sql` : `public.messageries` (RLS ; lecture
+  colonne par colonne par gérant et admin, sans ids Vault ni curseur ; aucune écriture hors
+  des portes), `private.messageries_etats` (état à usage unique, 15 minutes, 20 par quart d'heure
+  et par organisation), Vault (`messagerie_poser_secret`, `_lire_secret`, `_effacer_secret` :
+  `delete` sinon écrasement), portes de l'écran `messagerie_preparer` et `messagerie_revoquer`
+  (gérant ou admin ; retour seulement vers les hôtes de `private.reglages`
+  'messagerie_hotes_retour', par défaut `omegaai.fr www.omegaai.fr`), portes de l'ouvrier
+  (`messagerie_*`, service_role), expéditeur créé ou réactivé à la connexion puis suspendu à la
+  déconnexion. États : active → a_reconnecter (alerte au client) / deconnexion (écran) →
+  revoquee (ouvrier, secrets effacés).
+- `verrous_envoi` (réécriture par repère) : à portée égale (module), la boîte connectée passe
+  avant l'expéditeur partagé (Brevo). **Choix à confirmer** : un client qui garde Brevo pour
+  ses relances automatiques doit poser un expéditeur Brevo **par module**.
+- Test : `omega/tests/socle/19aj_messageries.sql` (37 assertions, vertes en local sur une
+  maquette PostgreSQL 16 du socle ; pas encore passées sur la recette).
+- **19aj_b (statut `brouillon_depose`, porte `confirmer_brouillon`) : en attente** des corps de
+  `private.confirmer_envoi`, `garder_envoi` et des autres fonctions demandées au coordinateur.
+  Il faudra une contrainte de statut élargie : c'est un `DROP CONSTRAINT` puis un `ADD`, que
+  le coordinateur doit accepter (aucune donnée retirée).
+- `fournisseurs_envoi` porte déjà `gmail` et `microsoft` (automatique, branche = faux), et
+  `confier_envoi` dépose déjà `envois.<fournisseur>` : seul `branche` est à passer à vrai au
+  déploiement.
+- L'ouvrier appelle `confirmer_brouillon(p_envoi, p_reference = Message-ID, p_brouillon =
+  "<fournisseur>:brouillon:<id>")`. Chaque brouillon porte `Message-ID: <omega.<envoi>@<domaine
+  de l'expéditeur>>` (Microsoft impose le sien : on garde celui qu'il rend). Ainsi
+  `deposer_reception` rattache la réponse du destinataire à l'envoi.
+- Retour OAuth sur omegaai.fr : `app/api/messagerie/[fournisseur]/retour/route.ts` (302 vers la
+  fonction, seulement les paramètres OAuth) ; côté fonction, `MESSAGERIE_RETOUR_BASE =
+  https://omegaai.fr/api/messagerie` aligne le consentement et l'échange du code.
+- Cron à poser après le déploiement de la fonction (sur le modèle d'`omega-expediteur`) :
+  `omega-messagerie`, chaque minute, `net.http_post` vers `…/functions/v1/messagerie`.
 
 ## Risques résiduels et choix
 

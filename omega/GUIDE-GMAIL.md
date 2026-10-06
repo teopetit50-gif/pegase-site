@@ -107,6 +107,63 @@ Le coordinateur déploie les deux fonctions et la partie base de données, puis 
 4. **Déconnecter** depuis l'écran : la permission disparaît aussi de
    <https://myaccount.google.com/permissions>.
 
+## Passer en production (décision de Teo, à son retour)
+
+Décision du coordinateur du 6 octobre : la recette et les premiers clients pilotes restent en
+régime « Test ». Cela veut dire 100 comptes au plus, et une reconnexion chaque semaine, que
+l'écran signale. Le passage en production se décide plus tard. Voici ce qu'il demande.
+
+**Pourquoi c'est obligatoire.** Google exige une évaluation de sécurité de toute application
+qui demande des portées restreintes et qui peut lire ces données depuis un serveur. C'est le
+cas d'Omega : la relève tourne sur Supabase. Les exemptions (usage personnel, application
+interne à une seule organisation Google Workspace, données gardées sur l'appareil seulement)
+ne s'appliquent pas.
+
+**Les étapes, dans l'ordre :**
+
+1. **Le domaine.** Prouver que `omegaai.fr` appartient à Omega dans Google Search Console
+   (un enregistrement DNS TXT). La page d'accueil et les règles de confidentialité doivent
+   être sur ce domaine.
+2. **L'adresse de retour sur `omegaai.fr`.** Google n'accepte pas, en production, une URI de
+   redirection sur un domaine qu'Omega ne possède pas (`supabase.co`). La route de renvoi
+   `https://omegaai.fr/api/messagerie/google/retour` est écrite pour cela (branche
+   worker-a2). Il faudra l'ajouter dans l'application Google (étape 4) et le dire au
+   coordinateur.
+3. **Les règles de confidentialité.** Elles doivent dire quelles données Gmail Omega lit, pour
+   quoi faire, où elles sont gardées. Elles doivent aussi reprendre l'engagement « Limited
+   Use » de Google : pas de publicité, pas de revente, pas d'entraînement de modèles d'IA
+   généralistes avec ces données, lecture par un humain seulement avec l'accord du client
+   ou pour la sécurité.
+4. **La demande de validation.** Dans la console Google : passer en « Production »,
+   remplir le formulaire de validation, expliquer chaque portée et joindre une **courte
+   vidéo** qui montre la connexion et l'usage (relève, brouillon). Comptez 2 à 3 jours
+   ouvrés pour la marque, puis plusieurs semaines en tout.
+5. **L'évaluation de sécurité (CASA)** par un laboratoire agréé par l'App Defense Alliance
+   (TAC Security, DEKRA, Leviathan…). Google fixe le niveau selon la sensibilité des données
+   et le nombre d'utilisateurs. Le laboratoire remet une lettre de validation à Google.
+6. **Le renouvellement.** Il faut repasser l'évaluation au moins tous les 12 mois, à compter
+   de la date de la lettre.
+
+**Coût et délai estimés** (source : DeepStrike, « Google CASA Security Assessment », mise à
+jour du 2 septembre 2026, <https://deepstrike.io/blog/google-casa-security-assessment-2025>,
+qui cite les tarifs publics de TAC Security ; Google ne publie aucun prix) :
+
+| Niveau fixé par Google | Prix annoncé (TAC Security) | Durée de l'évaluation |
+|---|---|---|
+| Tier 2 | 540 à 1 800 $ par an | 1 à 3 semaines |
+| Tier 3 (test d'intrusion) | 4 500 $ par an | 2 à 4 semaines, une fois le dossier complet |
+
+Il faut prévoir **environ deux mois** de bout en bout, en comptant les allers-retours avec
+Google et le laboratoire. Ces chiffres viennent d'un tiers et sont à confirmer par un devis
+du laboratoire avant toute décision. Les exigences et la durée de validité viennent de la
+page officielle de Google, « Restricted scope verification »
+(<https://developers.google.com/identity/protocols/oauth2/production-readiness/restricted-scope-verification>),
+consultée le 6 octobre 2026.
+
+**À comparer.** Microsoft 365 ne demande pas d'évaluation payante (voir
+`GUIDE-MICROSOFT.md`). Brevo reste aussi disponible pour les envois qui n'ont pas besoin
+de partir de la boîte du client.
+
 ## Si quelque chose ne va pas
 
 - **« redirect_uri_mismatch »** : l'URI de l'étape 4 n'est pas exactement celle ci-dessus.

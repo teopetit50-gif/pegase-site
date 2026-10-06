@@ -3,6 +3,9 @@
 // URI de redirection à déclarer :
 //   Google    : https://<projet>.supabase.co/functions/v1/messagerie-oauth/google/retour
 //   Microsoft : https://<projet>.supabase.co/functions/v1/messagerie-oauth/microsoft/retour
+// En production, Google veut un retour sur omegaai.fr : MESSAGERIE_RETOUR_BASE =
+// https://omegaai.fr/api/messagerie (route du site app/api/messagerie/[fournisseur]/retour, qui
+// renvoie ici avec les mêmes paramètres).
 
 import { configurationGoogleDepuisEnvironnement, gmail } from "./gmail.ts";
 import {
@@ -23,6 +26,9 @@ const servir = creerOAuth({
   base: `${
     (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "")
   }/functions/v1/messagerie-oauth`,
+  retourBase:
+    Deno.env.get("MESSAGERIE_RETOUR_BASE")?.trim().replace(/\/+$/, "") ||
+    undefined,
   journal: {
     erreur: (m, d) =>
       console.error(`[messagerie-oauth] ${m}`, d ? JSON.stringify(d) : ""),
