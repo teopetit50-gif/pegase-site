@@ -489,6 +489,28 @@ dit au lieu de planter.
   pour B7 ; un « Revérifier » quand VIES répond remettra le verdict.
 - Recette 190 ✓.
 
+## Lot du 06/10 (12) — suite de non-régression pour la migration vers /espace2
+
+- **`omega/recette-a3/non-regression.mjs [préfixe] [origine]`** — demandée par
+  le coordinateur pour le nouveau tableau de bord de C1 (/espace2). Le même
+  parcours se joue contre `/espace` et `/espace2` et dit ce qui MANQUE. Il ne
+  lit aucune classe CSS, seulement ce que voit l'utilisateur : h1, textes
+  clés, nom accessible des commandes, dialogues (role="dialog" et titre),
+  parcours clavier (Tab), axe-core, débordement à 390. Données d'exemple,
+  sans connexion. `NR_ECRANS=filed,varelo` pour n'en jouer que certains.
+- Douze écrans : validations, filed (dossier R2026-000016, par
+  `?objet=facture:…`), filed-identifiants (R2026-000017), fournisseurs, à
+  payer, varelo, tavaro, tiroma, tamila, lorani, daliro, point. Pour chaque
+  action : présente, visible, active, atteinte au clavier ; un « dialogue »
+  s'ouvre au bon titre, le focus y entre, Échap ferme et rend le focus ; un
+  « lien » mène à la bonne page **sous le même préfixe**.
+- Les attentes ont été relevées sur /espace (inventaire des commandes et
+  sonde des dialogues, 06/10 ~14 h 45 Z). **Contre /espace : 368/368**
+  (`non-regression-espace-2026-10-06.txt`). Contre un préfixe absent
+  (/espace2 sur ma branche), « À payer » sort 4/12 avec chaque manque nommé
+  : la suite sait échouer.
+- Je ne touche pas la branche de C1 (tableau-de-bord-v2).
+
 ## Bloqué / contourné
 
 - **Outil Supabase (MCP)** : la permission d'exécuter du SQL a été refusée

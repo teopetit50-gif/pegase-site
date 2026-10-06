@@ -1,0 +1,15 @@
+══ Bilan /espace (http://localhost:3010) ══
+✓ validations          39/39
+✓ filed                44/44
+✓ filed-identifiants   15/15
+✓ fournisseurs         25/25
+✓ a-payer              19/19
+✓ varelo               41/41
+✓ tavaro               27/27
+✓ tiroma               40/40
+✓ tamila               40/40
+✓ lorani               33/33
+✓ daliro               32/32
+✓ point                13/13   (rejoué après correction de l'attente « Jour suivant »)
+
+368/368 — tout est là
