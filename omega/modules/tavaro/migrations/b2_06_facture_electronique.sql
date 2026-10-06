@@ -387,12 +387,12 @@ begin
     if not private.loc_siren_valide(v_siren) then
       raise exception 'Ce SIREN n''est pas valide (neuf chiffres, clé de contrôle) : vérifiez-le sur l''extrait Kbis ou annuaire-entreprises.data.gouv.fr.' using errcode = '22023';
     end if;
-    v_champs := v_champs || 'siren';
+    v_champs := array_append(v_champs, 'siren');
   end if;
   v_rs := private.loc_lire_texte(p_valeurs, 'raison_sociale', 200);
-  if v_rs is not null then v_champs := v_champs || 'raison_sociale'; end if;
+  if v_rs is not null then v_champs := array_append(v_champs, 'raison_sociale'); end if;
   v_adresse := private.loc_lire_texte(p_valeurs, 'adresse', 500);
-  if v_adresse is not null then v_champs := v_champs || 'adresse'; end if;
+  if v_adresse is not null then v_champs := array_append(v_champs, 'adresse'); end if;
   if cardinality(v_champs) = 0 then
     raise exception 'Rien à compléter.' using errcode = '22023';
   end if;
