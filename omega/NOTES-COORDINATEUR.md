@@ -644,3 +644,9 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   [PCMI3, PCMI6, PCMI2, PCMI8], échéance 2027-01-01) ; b5_08 (titre d'alerte) et b5_09
   (titre du permis) posés, 120/120. A3 : décision en lot dans /espace/validations validée
   (deux demandes VARELO approuvées au plus). A4 : a4_15 (paiement) pas encore livré.
+- 07 h 10 — A3 78cd9f0 fusionné : « Décider en lot » dans /espace/validations (mêmes
+  garde-fous qu'à l'unité, écartées motivées, bilan ligne à ligne) ; relu en réel avec
+  referent@ : 2 demandes VARELO approuvées et exécutées (05:04 Z), 5 restent en attente.
+  Correctif transversal : les dialogues (portail hors de .esp) recevaient mal les styles de
+  l'espace → espace.css (partagé) double 51 règles pour .dlg-panneau.resa ; à surveiller
+  sur les écrans des B. Notes B6 f5c0cd1 fusionnées.
