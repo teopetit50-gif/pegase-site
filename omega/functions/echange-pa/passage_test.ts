@@ -436,3 +436,8 @@ Deno.test("pa_deposer_facture en panne : relevé arrêté, curseur gardé ; au p
   assertEquals(a.portes.facturesDeposees.size, 1);
   assertEquals(a.portes.curseurActuel, "2026-10-06T16:00:00Z");
 });
+
+Deno.test("battement : nom de module admis par battements.module (sans tiret)", async () => {
+  const { MODULE } = await import("./passage.ts");
+  assertMatch(MODULE, /^[a-z][a-z_]{1,29}$/);
+});

@@ -14,7 +14,9 @@
 //      curseur que jusqu'au dernier flux noté : rien n'est sauté.
 //      Le relevé est aussi le rapprochement : un dépôt accepté par la PA dont pa_noter_depot
 //      est tombé revient comme flux sortant, avec son trackingId (= id Omega).
-//   3. battre_ouvrier('echange-pa', …) en fin de passage, même à vide.
+//   3. battre_ouvrier('echange_pa', …) en fin de passage, même à vide (module sans tiret :
+//      contrainte de battements.module ; et le socle ne bat que pour les clients qui ont eu un
+//      travail pa.* dans la journée).
 
 import type { Portes, Travail } from "./portes.ts";
 import {
@@ -35,7 +37,8 @@ import { sirenAcheteur } from "./acheteur.ts";
 import { sha256Hex } from "./afnor.ts";
 import { cheminEntrant, type Stockage } from "./stockage.ts";
 
-export const MODULE = "echange-pa";
+// Nom de module du battement : `battements.module` n'admet que ^[a-z][a-z_]{1,29}$ (pas de tiret).
+export const MODULE = "echange_pa";
 export const GENRES = ["pa.deposer", "pa.statut"] as const;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

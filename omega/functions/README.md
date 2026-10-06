@@ -186,7 +186,7 @@ de cycle de vie (CDAR), relevé des factures et statuts reçus. Même forme que 
 - `acheteur.ts` : le SIREN de l'acheteur d'une facture reçue (CII, UBL, et le CII joint d'un
   PDF Factur-X, décompressé au besoin) ; c'est par lui que `pa_noter_flux` retrouve le client.
 - `passage.ts` : travaux `pa.deposer` {facture} et `pa.statut` {statut}, puis relevé depuis
-  le curseur, puis `battre_ouvrier('echange-pa', …)`. Une facture reçue se dépose en deux
+  le curseur, puis `battre_ouvrier('echange_pa', …)` (sans tiret : contrainte de `battements.module` ; le socle ne bat que pour un client qui a eu un travail `pa.*` dans la journée). Une facture reçue se dépose en deux
   temps (a4_18) : `pa_noter_flux` rend `chemin_cible` → l'ouvrier y copie le fichier →
   `pa_deposer_facture(flux_id, octets)`. Si un passage s'arrête entre les deux, le suivant
   relit le flux (curseur non avancé), la même clé rend `rattache`, et le dépôt est rejoué.

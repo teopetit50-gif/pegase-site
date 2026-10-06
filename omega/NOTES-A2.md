@@ -558,6 +558,18 @@ Edge). Garde dure : hôte exact `ygwbgpowzlbdaajlsqkn.supabase.co`, sinon 503 (b
 d'une seule requête, `net.http_post`). Fumée locale : bac sur l'URL de recette → 401 sans
 jeton, jeton fixe → healthcheck UP ; sur une autre URL → 503 « pas la recette ».
 
+**Parcours PA du bac, étapes 1 à 4 réussies sur la recette (06/10, 15 h 21 Z)** : bac et ouvrier
+déployés en coquille (9d6cace, recette.ts) ; healthcheck sans jeton → 401 ; facture UBL publique
+injectée avec l'acheteur 500000013 (entité principale du banc) → `filed_pa_flux` 19 `depose`,
+`chemin_cible` dans `filed_document`, pièce FILED source `connecteur` lue en xml, facture
+BAC-0001 créée (`bloquee` : fournisseur inconnu, attendu). **Battement absent** : le module
+s'appelait `echange-pa`, or `battements.module` n'admet pas de tiret (`^[a-z][a-z_]{1,29}$`) ;
+corrigé en `echange_pa` (test ajouté). Et `battre_ouvrier` ne bat que pour les clients qui ont
+un travail `pa.*` dans la journée : pas de ligne tant qu'aucun statut n'a été déposé.
+Étape 5 : `omega/banc/banc_a2_pa_statut.sql` (litige 207 codé TX_TVA_ERR, car un refus 210
+exige la file de validation et BAC-0001 est bloquée ; bloc 210 conditionnel ; contrôles
+cycle de vie, travaux, accusé, battement).
+
 Points ouverts (avant réponse) : chiffrement ou HDS des factures de santé ; une seule connexion PA (Omega
 opérateur pour tous ses clients) ou une par client (alors `pa_commencer_*` rend aussi
 l'identité de connexion, et l'ouvrier lit les secrets par client comme `secret_expediteur`).
