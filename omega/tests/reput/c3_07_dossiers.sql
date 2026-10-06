@@ -53,7 +53,11 @@ begin
                  'La première demande est regroupée avec la seconde');
   return next is((select e.statut from public.envois e where e.id = (v_d1 ->> 'envoi')::uuid), 'annule', 'Sa réponse en attente ne partira pas : une réponse, pas deux');
   return next is((select v.statut from public.demandes_validation v where v.id = (v_d1 ->> 'demande_validation')::uuid), 'annulee', 'et sort de la file');
-  return next is((select d.statut from public.reput_demandes d where d.id = v_dem2), 'a_valider', 'La seconde attend, seule');
+  -- Sur la recette, une réponse WhatsApp est « bloquee » par les verrous du socle (accord préalable du destinataire
+  -- exigé) ; ici seul compte qu'elle reste, non regroupée.
+  return next ok((select d.statut in ('a_valider', 'bloquee') and d.regroupee_avec is null from public.reput_demandes d where d.id = v_dem2),
+                 'La seconde reste, seule (à valider, ou bloquée par les verrous WhatsApp du socle) : '
+                 || (select d.statut from public.reput_demandes d where d.id = v_dem2));
   v_rec := tests.c3_reception_detail(v_client, 'email', 'autre.personne@exemple.test', 'Autre', 'Bonjour');
   v_dem3 := (public.reput_commencer(v_rec) ->> 'demande')::uuid;
   return next isnt((select d.dossier_id from public.reput_demandes d where d.id = v_dem3), (select d.dossier_id from public.reput_demandes d where d.id = v_dem2),
