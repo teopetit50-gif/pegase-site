@@ -101,6 +101,7 @@ for (const largeur of LARGEURS) {
   const factures = await s.evaluer(`(() => { const f = [...document.querySelectorAll('#esp-dossier .tav-facture')]; return f.map(x => ({ ref: x.querySelector('.esp-mono')?.textContent, litige: [...x.querySelectorAll('.r-btn')].find(b => /Litige/.test(b.textContent))?.disabled, avoir: [...x.querySelectorAll('.r-btn')].find(b => /avoir/.test(b.textContent))?.disabled })); })()`);
   ok(factures.length === 2 && factures[0].ref === 'FA-2026-000118' && factures[1].ref === 'FA-2026-000119', `deux factures : ${factures.map(f => f.ref).join(', ')}`);
   ok(factures[0].litige === false && factures[1].litige === true, 'la facture envoyée peut passer en litige ; celle déjà en litige non');
+  ok(/PDF et photos datées joints/.test(await s.evaluer(`document.querySelector('#esp-dossier .tav-facture')?.innerText ?? ''`)), 'la facture dit que le PDF et les photos datées sont joints au courriel');
   await s.evaluer(`[...document.querySelectorAll('#esp-dossier .tav-facture')[0].querySelectorAll('.r-btn')].find(b => /Litige/.test(b.textContent)).click()`);
   await s.dormir(400);
   const litigeGris = await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Mettre en litige/.test(b.textContent))?.disabled`);

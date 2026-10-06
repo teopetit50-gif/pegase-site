@@ -185,6 +185,8 @@ export type Facture = {
   mode_reglement: ModeReglement | null;
   litige_motif: string | null;
   envoi_id: string | null;
+  /* b2_08 : le PDF de la facture, joint au courriel avec les photos datées */
+  pdf_piece_id?: string | null;
   /* b2_02 */
   relances?: number;
   relance_le?: string | null;

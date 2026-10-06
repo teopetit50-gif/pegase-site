@@ -339,7 +339,7 @@ export default function DossierContrat({ dossier, source, role, moi, bareme, reg
                     <Def etiquette="Échéance">{new Date(f.echeance_le) <= new Date(f.date_facture) ? "à réception" : dateCourte(f.echeance_le)}</Def>
                     <Def etiquette="Reste dû" fort>{f.statut === "reglee" || f.statut === "avoir" ? montant(0) : montant(reste)}</Def>
                     <Def etiquette="Destinataire">{f.destinataire.raison_sociale || f.destinataire.nom || "inconnu"}{f.destinataire.email ? ` · ${f.destinataire.email}` : ""}</Def>
-                    <Def etiquette="Courriel">{f.statut === "envoyee" || f.statut === "reglee" ? "parti" : f.envoi_id ? "préparé" : "à envoyer vous-même"}</Def>
+                    <Def etiquette="Courriel">{f.statut === "envoyee" || f.statut === "reglee" ? "parti" : f.envoi_id ? "préparé" : "à envoyer vous-même"}{f.pdf_piece_id ? " · PDF et photos datées joints" : f.statut === "emise" && !f.envoi_id ? " · PDF en préparation" : ""}</Def>
                     {f.regle_le ? <Def etiquette="Réglée">{dateCourte(f.regle_le)} · {MODES_REGLEMENT.find((m) => m.cle === f.mode_reglement)?.libelle ?? f.mode_reglement}</Def> : null}
                     {f.litige_motif ? <Def etiquette="Contestation">{f.litige_motif}</Def> : null}
                     {typeof f.mentions.tva === "string" ? <Def etiquette="TVA">{f.mentions.tva}</Def> : null}

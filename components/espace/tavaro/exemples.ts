@@ -208,7 +208,7 @@ export const LIGNES_EXEMPLE: LigneProposition[] = [
 const fac = (n: number, o: Partial<Facture> & Pick<Facture, "contrat_id" | "contrat_numero" | "proposition_id" | "nature" | "reference" | "emise_le" | "echeance_le" | "statut" | "total_ht" | "total_tva" | "total_ttc" | "destinataire">): Facture => ({
   id: u("fa", n), demande_id: u("de", n), date_facture: o.emise_le.slice(0, 10), a_debiter_avant: null, emetteur: { nom: "Autoloc Bertin", siren: "512345679", ...REGLAGES_EXEMPLE.emetteur },
   mentions: { mandat: "Facture établie par Omega au nom et pour le compte de Autoloc Bertin.", objet: o.nature === "frais" ? "Frais complémentaires de location" : "Dommages constatés à la restitution", contrat: o.contrat_numero, ...(o.nature === "dommages" ? { tva: "Indemnité hors du champ de la TVA (BOI-TVA-BASE-10-10-50, § 300)." } : {}) },
-  regle_le: null, mode_reglement: null, litige_motif: null, envoi_id: u("en", n), relances: 0, relance_le: null, ...o,
+  regle_le: null, mode_reglement: null, litige_motif: null, envoi_id: u("en", n), pdf_piece_id: u("pd", n), relances: 0, relance_le: null, ...o,
 });
 
 const dest = (l: Locataire) => ({ type: l.type, nom: [l.prenom, l.nom].filter(Boolean).join(" "), raison_sociale: l.raison_sociale ?? "", adresse: l.adresse ?? "", email: l.email ?? "" });

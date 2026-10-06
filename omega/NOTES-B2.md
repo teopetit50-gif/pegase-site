@@ -216,3 +216,15 @@ Ordre décidé :
   - **la photo floue est refusée**. L'écran mesure la netteté dans le navigateur (`nettete.ts` : variance du laplacien sur l'image réduite à 512 px ; fixtures `omega/recette-b2/photos` : nette 2 554, légère 350, floue 8 ; seuil 40, réglable par `loc_reglages.nettete_min`) et écarte la photo floue dès son choix, en la nommant. La base garde la mesure et une garde refuse de signer un état dont une photo mesurée est sous le seuil.
   - **les frais de dossier d'un avis sont refacturés** : `loc_refacturer_avis` crée une proposition d'une ligne (FRAIS_AVIS du barème), qui suit validation, facture et courriel. L'écran a un bouton « Refacturer les frais de dossier » sur un avis désigné. Test 16 : 12 assertions, jusqu'à la facture émise.
   - Recette : 84 contrôles verts, dont la photo floue refusée (vraie fixture déposée par CDP) et la refacturation ; axe : 0 écart.
+
+### Carnet, point 2 — la facture part avec son PDF et ses photos datées (06/10, 18 h 30 Z)
+
+- **b2_08** (8c928e4) :
+  - `loc_envoyer_factures` attend les PDF quand un courriel doit vraiment partir (travail `tavaro.pdf_factures`), puis joint PDF et photos (10 pièces et 15 Mo au plus, règles du socle) ;
+  - les pièces sont créées au statut « lue » : pas de lecture IA ;
+  - le filet `loc_pdf_en_souffrance` (cron toutes les 15 minutes) fait partir le courriel sans pièce jointe au bout de 30 minutes si l'ouvrier ne répond pas ;
+  - test 17 : 16 assertions.
+- **Ouvrier `omega/functions/tavaro-pdf`** (Deno, pdf-lib) : un PDF A4 par facture, déposé dans omega-clients ; les photos sont mesurées (taille, SHA-256) ; au dernier essai, envoi sans pièce jointe. deno test 7/7, check, lint et fmt OK ; PDF relu à l'œil. **À déployer par le coordinateur, avant la pose de b2_08.**
+- **L'expéditeur d'A2** joint déjà les pièces d'un envoi (Brevo `attachment`) : rien à changer chez lui ; à prouver sur le banc.
+- **Écran** : la facture dit « PDF et photos datées joints », ou « PDF en préparation » ; recette 85 contrôles verts.
+- **Suite du carnet** : le point 3, en commençant par le module 17 (contestations bancaires : le dossier de preuve en un clic).
