@@ -95,11 +95,27 @@ if (process.env.B6_ECRIRE === 'oui') {
   await s.evaluer(`(() => { const t = [...document.querySelectorAll('[role="dialog"] input')].find(i => !i.placeholder && i.type !== 'date' && i.inputMode !== 'decimal' && i.previousSibling === null); })()`);
   const champs = await s.evaluer(`[...document.querySelectorAll('[role="dialog"] input')].map(i => i.placeholder + '|' + i.inputMode)`);
   console.log('    champs ligne :', champs.join(' ; '));
-  await s.evaluer(`(() => { const ins = [...document.querySelectorAll('[role="dialog"] input')]; const set = (el, v) => { Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, v); el.dispatchEvent(new Event('input', { bubbles: true })); };
-    set(ins[0], '1'); set(ins[1], 'Ouvrage d\'essai B6'); const dec = ins.filter(i => i.inputMode === 'decimal'); set(dec[0], '10'); set(dec[1], '100'); set(dec[2], '990'); })()`);
+  /* remplir champ par champ, en relisant la valeur : un rendu de React juste après la relecture du tableau
+     peut absorber une saisie synthétique trop rapide (vu le 06/10 : cinq champs vides au moment du clic) */
+  const remplir = async (indice, valeur, decimal) => {
+    for (let essai = 0; essai < 4; essai++) {
+      await s.evaluer(`(() => { const ins = [...document.querySelectorAll('[role="dialog"] input')]${decimal ? ".filter(i => i.inputMode === 'decimal')" : ''}; const el = ins[${indice}]; if (!el) return;
+        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, ${JSON.stringify(valeur)}); el.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+      await s.dormir(250);
+      const lu = await s.evaluer(`[...document.querySelectorAll('[role="dialog"] input')]${decimal ? ".filter(i => i.inputMode === 'decimal')" : ''}[${indice}]?.value`);
+      if (lu === valeur) return true;
+    }
+    return false;
+  };
+  await s.dormir(800);
+  ok(await remplir(0, '1', false) && await remplir(1, 'Ouvrage d\'essai B6', false) && await remplir(0, '10', true) && await remplir(1, '100', true) && await remplir(2, '990', true), 'les cinq champs de la ligne sont saisis et relus');
   await s.dormir(300);
+  console.log('    bouton « Ajouter la ligne » gris ?', await s.evaluer(`${dlgBouton('/Ajouter la ligne/')}?.disabled`), '| valeurs :', JSON.stringify(await s.evaluer(`[...document.querySelectorAll('[role="dialog"] input')].map(i => i.value)`)));
   await s.evaluer(`${dlgBouton('/Ajouter la ligne/')}?.click()`);
-  ok(await attendre(`/Ouvrage d.essai B6/.test(document.querySelector('#esp-dossier')?.innerText || '')`), 'btp_ecrire_ligne : la ligne est écrite et relue');
+  const ligneLue = await attendre(`/Ouvrage d.essai B6/.test(document.querySelector('#esp-dossier')?.innerText || '')`);
+  if (!ligneLue) console.log('    requêtes rpc :', JSON.stringify(await s.evaluer(`performance.getEntriesByType('resource').filter(r => /rest\\/v1\\/rpc/.test(r.name)).map(r => r.name.split('/rpc/')[1] + ' ' + (r.responseStatus ?? '?') + ' ' + Math.round(r.duration) + 'ms')`)));
+  if (!ligneLue) console.log('    dialogue :', String(await s.evaluer(`document.querySelector('[role="dialog"]')?.innerText.slice(0, 600)`)).replace(/\n+/g, ' / '), '| tableau :', (await s.evaluer(`(document.querySelector('#esp-dossier')?.innerText || '')`)).slice(0, 400).replace(/\n+/g, ' / '));
+  ok(ligneLue, 'btp_ecrire_ligne : la ligne est écrite et relue');
   const apres = await s.evaluer(`(document.querySelector('#esp-dossier')?.innerText || '')`);
   ok(/Montant ≠ quantité × PU/.test(apres) && /Accepter l.écart/.test(apres), 'la base a calculé « montant_faux » (10 × 100 ≠ 990) et l\'écran propose d\'accepter l\'écart');
   ok(/Ligne rattachée à aucun lot|aucun lot/.test(apres), 'et « sans lot » (bloquant), lu de btp_controle_marches');
