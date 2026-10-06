@@ -1,7 +1,9 @@
 /* relecture-boite.mjs — la boîte de réception de FILED en BASE RÉELLE
    (session A3, 06/10/2026) : la page lit public.receptions (canal email,
    module filed) sous la politique du périmètre, dit l'adresse de la boîte,
-   liste les courriels et ouvre le premier. Lecture seule : rien n'est écrit.
+   liste les courriels et ouvre le premier. Lecture seule, sauf MARQUER=1 :
+   « Marquer comme lu » puis « Remettre en nouveau » sur le premier courriel
+   (reception_marquer, socle 19am ; deux lignes au journal, statut rendu).
 
    usage : node omega/recette-a3/relecture-boite.mjs <session.json>
    Origine : variable ORIGINE (défaut http://localhost:3010). Le fichier de
@@ -38,6 +40,17 @@ r.lignes.slice(0, 5).forEach((l) => console.log('    ·', l));
 console.log('    détail :', r.detail.slice(0, 300));
 ok(!r.avis.some((a) => /n'a pas répondu/.test(a)), 'la base répond (aucune erreur de lecture)');
 ok(r.lignes.length >= 1, `${r.lignes.length} courriel(s) lus dans public.receptions`);
+if (process.env.MARQUER === '1') {
+  const statut = () => s.evaluer(`document.querySelector('#esp-courriel .esp-carte-tete .esp-pastille')?.textContent`);
+  const avant = await statut();
+  for (const [geste, attendu] of [['Marquer comme lu', 'Lu'], ['Remettre en nouveau', 'Nouveau']]) {
+    await s.evaluer(`[...document.querySelectorAll('#esp-courriel button')].find(b => b.textContent.includes(${JSON.stringify(geste)}))?.click()`);
+    let v = '';
+    for (let i = 0; i < 20; i++) { await s.dormir(400); v = await statut(); if (v === attendu) break; }
+    const refus = await s.evaluer(`[...document.querySelectorAll('#esp-courriel .esp-avis')].map(a => a.textContent).join(' | ')`);
+    ok(v === attendu, `« ${geste} » : ${avant} → ${v}${refus ? ` (${refus})` : ''}`);
+  }
+}
 await s.capturer(`${dossier}reel-boite-1440.jpg`, { qualite: 55 });
 s.soucis.filter((x) => !/CERT|insights|404|favicon|ERR_BLOCKED_BY_ORB|websocket|realtime/i.test(x)).forEach((x) => console.log('    souci :', x));
 s.fermer();

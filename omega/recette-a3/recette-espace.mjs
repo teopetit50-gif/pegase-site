@@ -16,7 +16,7 @@ mkdirSync(dossier, { recursive: true });
 let echecs = 0;
 const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) echecs++; };
 const ANGLAIS = /\b(Loading|Submit|Cancel|Approve|Reject|Delete|Save|Error|Pending|Due|Invoice|Supplier|Settings|Logout|Sign in|Dashboard|Today|Yesterday|Tomorrow)\b/;
-const ECRANS = [['validations', '/espace/validations'], ['filed', '/espace/filed'], ['fournisseurs', '/espace/filed/fournisseurs'], ['a-payer', '/espace/filed/a-payer'], ['comptabilite', '/espace/filed/comptabilite'], ['boite', '/espace/filed/boite'], ['point', '/espace/point']];
+const ECRANS = [['validations', '/espace/validations'], ['filed', '/espace/filed'], ['fournisseurs', '/espace/filed/fournisseurs'], ['a-payer', '/espace/filed/a-payer'], ['comptabilite', '/espace/filed/comptabilite'], ['boite', '/espace/filed/boite'], ['demandes', '/espace/demandes'], ['reglages', '/espace/reglages'], ['point', '/espace/point']];
 const LARGEURS = [390, 768, 1024, 1440, 1700];
 
 for (const [nom, chemin] of ECRANS) {
@@ -376,12 +376,64 @@ for (const [nom, chemin] of ECRANS) {
   await s.evaluer(`[...document.querySelectorAll('.esp-liste .esp-item')].find(b => /photos de la livraison/.test(b.textContent))?.click()`);
   await s.dormir(300);
   ok(/n.a pas été gardée/.test(await s.evaluer(`document.querySelector('#esp-courriel').innerText`)), 'une pièce écartée à la réception est signalée');
+  /* marquer lu, puis écarter (reception_marquer ; ici en local, données d'exemple) */
+  await s.evaluer(`[...document.querySelectorAll('#esp-courriel button')].find(b => /Marquer comme lu/.test(b.textContent)).click()`);
+  await s.dormir(300);
+  const m1 = await s.evaluer(`({ statut: document.querySelector('#esp-courriel .esp-carte-tete .esp-pastille')?.textContent, boutons: [...document.querySelectorAll('#esp-courriel .esp-actions button')].map(b => b.textContent.trim()) })`);
+  ok(m1.statut === 'Lu' && m1.boutons.join('|') === 'Écarter|Remettre en nouveau', `marqué lu : ${m1.statut}, gestes ${m1.boutons.join(', ')}`);
+  await s.evaluer(`[...document.querySelectorAll('#esp-courriel button')].find(b => /Écarter/.test(b.textContent)).click()`);
+  await s.dormir(300);
+  const m2 = await s.evaluer(`({ statut: document.querySelector('#esp-courriel .esp-carte-tete .esp-pastille')?.textContent, ecartes: [...document.querySelectorAll('.esp-kpi')].find(k => /Écartés/.test(k.textContent))?.querySelector('.esp-kpi-valeur')?.textContent })`);
+  ok(m2.statut === 'Ignoré' && m2.ecartes === '2', `écarté : ${m2.statut}, Écartés = ${m2.ecartes}`);
   /* filtre « Écartés » */
   await s.evaluer(`[...document.querySelectorAll('.esp-kpi')].find(b => /Écartés/.test(b.textContent)).click()`);
   await s.dormir(300);
   const ec = await s.evaluer(`[...document.querySelectorAll('.esp-liste .esp-item')].map(t => t.innerText.replace(/\\s+/g, ' '))`);
-  ok(ec.length === 1 && /Indésirable/.test(ec[0]), `filtre « Écartés » : ${ec.join(' / ').slice(0, 90)}`);
+  ok(ec.length === 2 && ec.some(t => /Indésirable/.test(t)) && ec.some(t => /Ignoré/.test(t)), `filtre « Écartés » : ${ec.join(' / ').slice(0, 120)}`);
   await s.capturer(`${dossier}boite-detail-1440.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-demandes', densite: 1 });
+  console.log('— /espace/demandes : toutes les demandes reçues, par enseigne');
+  ok(await s.aller(base + '/espace/demandes'), 'page chargée');
+  await s.dormir(600);
+  const r = await s.evaluer(`(() => ({ n: document.querySelectorAll('.esp-liste .esp-item').length, canaux: [...new Set([...document.querySelectorAll('.esp-liste .esp-pastille--contour')].map(p => p.textContent.trim()))], boites: [...document.querySelectorAll('.esp select option')].map(o => o.textContent) }))()`);
+  ok(r.n >= 15, `${r.n} demandes`);
+  ok(['Courriel', 'WhatsApp', 'Formulaire du site'].every(c => r.canaux.includes(c)), `canaux affichés : ${r.canaux.join(', ')}`);
+  ok(r.boites.length >= 4, `filtre par enseigne : ${r.boites.join(' / ')}`);
+  await s.evaluer(`(() => { const sel = document.querySelector('.esp select'); const o = [...sel.options].find(x => /atelier-bertin\\.fr/.test(x.textContent)); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(sel, o.value); sel.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+  await s.dormir(300);
+  const f = await s.evaluer(`(() => ({ lignes: [...document.querySelectorAll('.esp-liste .esp-item')].map(t => t.innerText.replace(/\\s+/g, ' ')), detail: document.querySelector('#esp-courriel').innerText.replace(/\\s+/g, ' ') }))()`);
+  ok(f.lignes.length === 1 && /devis/i.test(f.lignes[0]), `une enseigne : ${f.lignes[0]?.slice(0, 80)}`);
+  ok(/Champs du formulaire/i.test(f.detail) && /06 12 34 56 78/.test(f.detail), 'les champs du formulaire sont lus (téléphone, ville, budget)');
+  await s.capturer(`${dossier}demandes-detail-1440.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-reglages', densite: 1 });
+  console.log('— /espace/reglages : exporter le journal, tout exporter, préparer l\'effacement');
+  ok(await s.aller(base + '/espace/reglages'), 'page chargée');
+  await s.dormir(500);
+  /* le contenu téléchargé se lit au passage (URL.createObjectURL) */
+  await s.evaluer(`(() => { window.__blobs = []; const o = URL.createObjectURL; URL.createObjectURL = (b) => { b.arrayBuffer().then(a => window.__blobs.push(new TextDecoder('utf-8', { ignoreBOM: true }).decode(a))); return o(b); }; })()`);
+  await s.evaluer(`[...document.querySelectorAll('.esp button')].find(b => /Exporter mon journal/.test(b.textContent)).click()`);
+  await s.dormir(800);
+  const j = await s.evaluer(`({ avis: [...document.querySelectorAll('.esp-avis')].map(a => a.textContent).join(' | '), csv: window.__blobs[0] ?? '' })`);
+  const lignesCsv = j.csv.split('\r\n').filter(Boolean);
+  ok(/journal-omega-\d{8}\.csv téléchargé : 6 lignes/.test(j.avis), `bilan : ${j.avis.slice(0, 120)}`);
+  ok(j.csv.startsWith('﻿') && /^﻿n°;survenu_le;acteur_type/.test(j.csv) && lignesCsv.length === 7 && /;"\{""commentaire""/.test(j.csv), `CSV : BOM, en-tête, 6 lignes, JSON échappé (${lignesCsv[3]?.slice(0, 90)})`);
+  await s.evaluer(`[...document.querySelectorAll('.esp button')].find(b => /Exporter toutes mes données/.test(b.textContent)).click()`);
+  await s.dormir(800);
+  const e = await s.evaluer(`({ avis: [...document.querySelectorAll('.esp-avis')].map(a => a.textContent).join(' | '), lien: [...document.querySelectorAll('.esp a')].find(a => /Télécharger l.archive/.test(a.textContent))?.getAttribute('href'), mdp: [...document.querySelectorAll('.esp .esp-mono')].map(x => x.textContent).find(t => /^[A-Za-z0-9]{4}(-[A-Za-z0-9]{4}){3}$/.test(t)), texte: document.querySelector('.esp').innerText })`);
+  ok(/Votre archive est prête\. 12 fichiers, 4,5 Mo\. 1 fichier introuvable/.test(e.avis) && !!e.lien, `export complet : ${e.avis.match(/Votre archive[^|]*/)?.[0]?.slice(0, 110)}`);
+  ok(!!e.mdp && /montré qu.une fois/.test(e.texte) && /7-Zip/.test(e.texte) && /macOS/.test(e.texte), `le mot de passe est montré une fois (${e.mdp}), avec les outils qui ouvrent l'archive`);
+  await s.evaluer(`[...document.querySelectorAll('.esp button')].find(b => /Préparer l.effacement/.test(b.textContent)).click()`);
+  await s.dormir(600);
+  ok(/Liste prête\. 1284 lignes dans 5 tables, 4 comptes et 12 fichiers/.test(await s.evaluer(`[...document.querySelectorAll('.esp-avis')].map(a => a.textContent).join(' | ')`)), 'préparation de l\'effacement : la liste, rien d\'effacé');
+  await s.capturer(`${dossier}reglages-exports-1440.jpg`, { qualite: 55 });
   s.fermer();
 }
 

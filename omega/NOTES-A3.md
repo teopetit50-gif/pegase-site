@@ -596,6 +596,54 @@ Dans `/espace/filed` seulement, la coquille et la barre ne bougent pas.
   factures@essai.omegaai.fr, 1 courriel « Facture 123 » (réception d'essai
   id 1), Nouveau, sans pièce, texte lu. Rien écrit.
 
+## Lot du 06/10 (15) — Demandes reçues, Réglages (journal CSV, export complet, sortie), marquer une réception
+
+Audit des promesses § 0 et § 1, accord du coordinateur pour `ecrans.ts`.
+- **Onglets** : « Demandes reçues » (`demandes`) et « Réglages » (`reglages`)
+  à droite de Point. Avec onze onglets, les libellés longs ne passent plus à
+  1700 px : ils s'affichent à partir de 1920 px (espace.css), en dessous les
+  libellés courts. REPUT / CASHD : pas encore dans main, ajoutés quand ils
+  seront fusionnés.
+- **/espace/demandes** : `EcranBoite portee="toutes"` — toutes les réceptions,
+  tous canaux, SAUF le module tiroma (données de santé) ; filtre « Enseigne
+  (boîte) » ; pastille du canal ; champs d'un formulaire (`detail`, sans les
+  clés techniques).
+- **Marquer** (boîte FILED et demandes) : « Marquer comme lu », « Écarter »,
+  « Remettre en nouveau » → `reception_marquer` (socle 19am). Rien pour une
+  réception traitée ou indésirable.
+- **/espace/reglages** :
+  - « Exporter mon journal (CSV) » : `journal_opposable` par pages de 1 000,
+    CSV `;` UTF-8 avec BOM, CRLF, empreintes en hexadécimal (gérant/admin) ;
+  - « Exporter toutes mes données » : fonction Edge `export-complet` (A5,
+    19aj) par `functions.invoke` avec le jeton de la personne ; lien 24 h,
+    mot de passe montré une fois (copier), avertissement AES-256 / macOS
+    (7-Zip, Keka, WinRAR), fichiers manquants, SHA-256 ;
+  - « Préparer l'effacement » : `apercu_effacement` (19am) — lignes, tables,
+    comptes, fichiers ; rien n'est effacé.
+- Recette : + demandes et réglages aux 5 largeurs, enchaînements (enseigne,
+  champs de formulaire ; marquer lu/écarter ; CSV lu octet par octet, BOM
+  compris ; export complet et mot de passe ; aperçu) : tout passe ;
+  accessibilité : tout passe ; non-régression 468/468.
+- **Base réelle** (gérant) : demandes 1 (aucune tiroma), 3 boîtes ; marquer
+  lu puis remettre en nouveau sur la réception 1 (Nouveau → Lu → Nouveau,
+  deux lignes au journal) ; journal 3 127 lignes en CSV avec empreintes ;
+  aperçu d'effacement 5 879 lignes / 94 tables / 4 comptes / 21 fichiers ;
+  daf2 (valideur) : les trois gestes refusés avec la raison.
+- **Bloqué, pas par l'écran** :
+  1. `export-complet` refuse l'origine http://localhost:3010 (CORS :
+     EXPORT_ORIGINES = https://omegaai.fr) : non vérifiable depuis la recette
+     locale ;
+  2. appelée directement (curl, jeton du gérant), la fonction répond
+     « exporter_client : HTTP 404 Could not find the function
+     public.exporter_client(p_client) » : la fonction appelle une porte qui
+     n'existe pas sous ce nom (la porte publique est exporter_donnees_client,
+     service seulement). À corriger chez A5. La demande d'export laissée
+     « en cours » peut bloquer la suivante (55P03 → 409).
+  3. Un premier passage a montré « Cette page n'a pas pu s'afficher » sur
+     Réglages : l'écran attendait la forme de preparer_effacement, alors
+     qu'apercu_effacement (posée entre-temps) rend une autre forme. Corrigé
+     (forme de 19am, lectures défensives).
+
 ## Bloqué / contourné
 
 - **Outil Supabase (MCP)** : la permission d'exécuter du SQL a été refusée

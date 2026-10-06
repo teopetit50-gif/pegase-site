@@ -129,7 +129,8 @@
 .esp .esp-nav-court {
   display: inline;
 }
-@media (min-width: 1700px) {
+/* onze onglets depuis le 06/10 (Demandes, Réglages) : les libellés longs à 1920 px seulement */
+@media (min-width: 1920px) {
   .esp .esp-nav-long {
     display: inline;
   }
