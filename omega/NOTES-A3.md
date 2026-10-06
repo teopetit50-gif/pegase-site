@@ -511,6 +511,29 @@ dit au lieu de planter.
   : la suite sait échouer.
 - Je ne touche pas la branche de C1 (tableau-de-bord-v2).
 
+## 06/10 — service pour A1 : le vrai Factur-X déposé par l'écran
+
+- Le banc d'A1 (`omega/banc/facturx_reel.mjs`, worker-a1 883ee39) exige la
+  clé de service pour toutes ses lectures : je ne l'ai pas, je ne l'ai pas
+  jouée. Le dépôt est passé **par l'écran FILED**, au nom du gérant
+  (`omega/recette-a3/relecture-depot.mjs` : « Déposer un document », champ
+  fichier rempli par DOM.setFileInputFiles), avec la pièce
+  `EN16931_Einfach.pdf` lue à ce SHA (37 897 octets, sha256 05b5a382…d1d0).
+- 14:44:15 Z reçu **R2026-000005** ; 14:45:01 pièce **lue** — facture,
+  `methode xml`, 2 pages, `version_lecteur lecteur/2026-10-06/sans-ia`, sans
+  motif ; 14:46:00 document `integre`.
+- Relu sous la session du gérant (RLS) — mêmes contrôles que le script
+  d'A1 : 17 valeurs, une par champ, toutes `xml` confiance 1 ; lignes ×2,
+  ventilation TVA ×2 ; numéro 471102 ; HT 473, TVA 56.87 ; TTC 529.87 page 2,
+  avec boîte, « lu dans CII GrandTotalAmount ; concorde avec le PDF page 2 ».
+- Non lisible par le gérant (42501, voulu) : `travaux` (appels_ia du travail
+  lecteur.lire) et `consommation_ia_jour` — **contrôles SQL du coordinateur**
+  (`omega/banc/facturx_reel_controle.sql`).
+- FILED : facture 471102 du 15/11/2024 **bloquée** (3 bloquants, 2 à
+  vérifier : date.ancienne, fournisseur.a_confirmer, identite.siren,
+  identite.tva_intracom, tva.taux) — attendu pour un exemple allemand fictif
+  (TVA DE123456789, taux 7 % / 19 %), rien à corriger côté lecteur.
+
 ## Bloqué / contourné
 
 - **Outil Supabase (MCP)** : la permission d'exécuter du SQL a été refusée
