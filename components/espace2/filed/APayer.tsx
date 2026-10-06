@@ -351,7 +351,7 @@ export default function APayer() {
                                   {ep?.etat === "payee" ? (
                                     <Etat teinte="vert">Payée</Etat>
                                   ) : ep?.etat === "partielle" ? (
-                                    <Etat teinte="ambre">En partie</Etat>
+                                    <Etat teinte="ambre">Payée en partie</Etat>
                                   ) : (
                                     <Etat teinte={teinte(st.teinte)}>{st.libelle}</Etat>
                                   )}
