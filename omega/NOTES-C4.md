@@ -200,6 +200,13 @@ suivi. Banc local : 14 tests verts sur les trois paliers.
   05/10 n'accepte que les sources `formulaire, ecrit, oral, contrat, message, import` : les deux sources décidées
   doivent être acceptées par le socle, sinon la préparation du message échoue (travail repris, reprise non ouverte).
   Test : `test_c4_03_consentement` (SARL → B2B avec preuve ; sans achat → rien ; désinscription levée → rien).
+  **Lot c4_06 (06/10, 16 h 55)** : la recette refuse ces deux sources (`consentements_source_check`) et le
+  coordinateur n'élargit pas le socle. `offload_assurer_consentement` est redéfinie : source **« contrat »**
+  (relation commerciale existante) dans les deux cas ; la preuve dit la base légale exacte — « intérêt légitime
+  B2B, client existant, message en rapport avec son activité (CNIL) » ou « soft opt-in, client existant, produits
+  analogues (CPCE L34-5) ». Conditions inchangées. La contrainte de source est reproduite dans le socle factice :
+  sans c4_06, `test_c4_06_consentement_source` tombe sur `consentements_source_check` ; avec, il passe. Le test
+  c4_03 est aligné (assertions de source et de preuve) : **à reposer** avec c4_06.
 - Q4. `reglages_envois` du module `offload` pour le banc (mode `essai`, `essai_adresse`) : le test le pose lui-même
   dans sa transaction ; pour un essai réel sur la recette, il faut la ligne (comme `recette-b6/banc_j2_reel.sql`).
   **Réponse : oui** → `omega/recette-c4/banc_offload.sql` (ligne reglages_envois offload en ESSAI avec l'adresse
@@ -310,4 +317,6 @@ Rien n'est basculé `atteste: true` par moi : c'est le coordinateur, sur preuve 
 - 06/10 — palier 3 (reprise) poussé (376387e), envoyé au coordinateur.
 - 06/10 — palier 4 (écran) poussé (963b991), envoyé au coordinateur.
 - 06/10 — palier 5, lot c4_05 (garde-fous, doublons) poussé (621e1af).
-- 06/10 — c4_01 refusé à la pose (clé facultative) : corrigé ; Q2, Q3, Q4 appliqués ; 19 tests, 214 assertions vertes en local.
+- 06/10 — c4_01 refusé à la pose (clé facultative) : corrigé ; Q2, Q3, Q4 appliqués (f99562d).
+- 06/10 — coordinateur : c4_01 à c4_05 et leurs tests POSÉS sur la recette (f99562d) ; test 44 sans aucune fonction C4.
+- 06/10 — c4_06 (source « contrat ») : 20 tests, 220 assertions vertes en local.

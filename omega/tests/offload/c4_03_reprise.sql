@@ -115,8 +115,8 @@ begin
   r := tests.c4_reprise(v_b);
   return next is(r.statut, 'a_valider', 'Un client existant sans accord noté : OFFLOAD note son consentement (Q3), le message va en validation');
   return next ok(exists (select 1 from public.consentements k where k.client_id = v_client and k.adresse = 'achats@sans-accord.test'
-                         and k.source = 'soft_opt_in' and k.portee = 'tout' and k.preuve like 'client existant, produits analogues%'),
-                 'Particulier qui a déjà acheté : soft opt-in, avec sa preuve');
+                         and k.source = 'contrat' and k.portee = 'tout' and k.preuve = 'soft opt-in, client existant, produits analogues (CPCE L34-5)'),
+                 'Particulier qui a déjà acheté : source « contrat », la preuve dit « soft opt-in » (c4_06)');
 
   return next ok(exists (select 1 from public.journal_opposable j where j.client_id = v_client and j.action = 'offload.cycle'
                          and (j.donnees ->> 'ouvertes')::integer = 3), 'Le cycle laisse son bilan au journal');
@@ -166,7 +166,8 @@ begin
 
   return next is(private.offload_assurer_consentement(v_pro), 'interet_legitime_b2b', 'Personne morale (SARL) : intérêt légitime B2B');
   return next ok(exists (select 1 from public.consentements k where k.adresse = 'achats@froid-sarl.test'
-                         and k.preuve = 'client existant, message en rapport avec son activité (CNIL, prospection B2B)'), 'Avec la preuve écrite');
+                         and k.source = 'contrat' and k.preuve = 'intérêt légitime B2B, client existant, message en rapport avec son activité (CNIL)'),
+                 'Source « contrat », la preuve dit la base légale (c4_06)');
   return next is(private.offload_assurer_consentement(v_neuf), null::text, 'Aucun consentement inventé pour un contact sans achat');
   return next is(private.offload_assurer_consentement(v_desinscrit), null::text, 'Ni pour une adresse qui s''est déjà opposée, même levée');
   return next is(private.offload_assurer_consentement(v_pro), 'deja', 'Rejouer ne note rien de plus');
