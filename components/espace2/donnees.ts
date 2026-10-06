@@ -12,14 +12,17 @@ import { DOSSIERS_EXEMPLE } from "@/components/espace/exemples/filed";
 import { vueExemple } from "@/components/espace/filed/EcranFournisseurs";
 import { chargerListe, chargerVueFournisseurs, etatPaiement, type EtatPaiement, type VueFournisseurs } from "@/components/espace/filed/portes";
 import { chargerFile } from "@/components/espace/validations/portes";
-import type { Demande } from "@/components/espace/types";
+import type { Demande, DossierFiled } from "@/components/espace/types";
 import { A_PAYER, etatsExemple, minuit, type Etats } from "./filed/calculs";
 
 export type Doc = { id: string; reference: string; fournisseur: string | null; recu_le: string; etat: string; montant: number | null; devise: string };
 /* etats : l'état de paiement de chaque facture à payer (filed_etat_paiement) */
-export type Donnees = { vue: VueFournisseurs; etats: Etats; demandes: Demande[]; docs: Doc[] };
+/* dernier : le dossier complet du document le plus récent, pour l'aperçu
+   de la vue d'ensemble — sur l'exemple seulement (en base réelle, la pièce
+   demande une URL signée : l'aperçu montre alors la fiche sans la page) */
+export type Donnees = { vue: VueFournisseurs; etats: Etats; demandes: Demande[]; docs: Doc[]; dernier: DossierFiled | null };
 
-const VIDE: Donnees = { vue: { fournisseurs: [], ibans: [], factures: [], deposants: {} }, etats: {}, demandes: [], docs: [] };
+const VIDE: Donnees = { vue: { fournisseurs: [], ibans: [], factures: [], deposants: {} }, etats: {}, demandes: [], docs: [], dernier: null };
 
 export function useDonnees(): { donnees: Donnees | null; erreur: string | null } {
   const { source } = useSource();
@@ -31,6 +34,7 @@ export function useDonnees(): { donnees: Donnees | null; erreur: string | null }
     return {
       vue,
       etats: etatsExemple(vue.factures, minuit()),
+      dernier: DOSSIERS_EXEMPLE.filter((d) => d.facture).sort((a, b) => b.document.recu_le.localeCompare(a.document.recu_le))[0] ?? null,
       demandes: DEMANDES_EXEMPLE,
       docs: DOSSIERS_EXEMPLE.map((d) => ({
         id: d.document.id,
@@ -54,6 +58,7 @@ export function useDonnees(): { donnees: Donnees | null; erreur: string | null }
       setReel({
         vue,
         etats: Object.fromEntries(lus.filter((x): x is readonly [string, EtatPaiement] => !!x[1])),
+        dernier: null,
         demandes: file.demandes,
         docs: liste.apercus.map((a) => ({
           id: a.document.id,

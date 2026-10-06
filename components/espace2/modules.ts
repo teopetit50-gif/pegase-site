@@ -21,6 +21,7 @@ export const ONGLETS_ORGANISATION: Onglet[] = [
   { libelle: "Point du matin", href: `${RACINE}/point` },
   { libelle: "Demandes reçues", href: `${RACINE}/demandes` },
   { libelle: "Activité", href: `${RACINE}/activite` },
+  { libelle: "Utilisation", href: `${RACINE}/utilisation` },
   { libelle: "Réglages", href: `${RACINE}/reglages` },
 ];
 
