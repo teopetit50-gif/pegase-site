@@ -435,3 +435,31 @@ relire la nuit.
   cette session** (non relancée) : à faire par Teo ou une session autorisée, méthode
   inchangée (`-X theirs` + checkout de la barre d'onglets). Les branches A1/A2/A4/A5 ne
   sont toujours pas fusionnées (comme avant la passation).
+
+### Ouvriers relancés en Opus 5.5 (6/10, 03 h 28 Paris — demande de Teo : « limite Fable atteinte »)
+
+Les douze sessions Fable sont remplacées (A1 et A5 étaient bloquées « Fable limit », les dix
+autres en alerte). Chaque nouvelle session part de sa branche worker-xx, lit son NOTES-xx.md,
+et écrit au coordinateur session_01BCGFdpRKBvXKjouC75sYBg. **Ce sont désormais les seuls ids
+valables** ; les anciennes sessions Fable ne sont pas archivées (A3 Fable attend une
+permission execute_sql : à refuser / ignorer).
+
+| Ouvrier | Nouvelle session (Opus 5.5) | Ancienne (Fable) |
+|---|---|---|
+| A1 lecteur | session_01HaFWLmwpsdUSHC7X6raEZU | session_01XQrgbohqqVEJwGK724wJ7h |
+| A2 expéditeur / réception | session_01WbmeaVoucWEVBzXRYRyHab | session_01E3CW3mskiafCa1zPdxjrFo |
+| A3 écran client | session_01Npbh1aR6LoEX7PZDchMSca | session_01DdgwRadkJFx5u9buwh5crS |
+| A4 FILED | session_01FiYEg9p2egKbatQDPJGmFY | session_01ScVNMRrPwNeNjD9LBufDVP |
+| A5 garde-fous | session_01BnmsMXfPeMf55k32si4Zdd | session_01HFL5DbN61Rux6iSMf2djPG |
+| B1 Varelo | session_018XzgEK2qPbPzZBtrX7BdWB | session_01CrMrfRwPXbEdP2cxzcaCNh |
+| B2 Tavaro | session_01HKxgZfAkgWXmzJkkwWRMN5 | session_01FifCHkLgBbAZrwtHTGDvzP |
+| B3 Tiroma | session_016947vqqcuBzgihDxHt7Aoo | session_01XVDbxXV3nk5ANUdd5hfZHf |
+| B4 Tamila | session_01ACKfUXKSgnD521nunHBY1w | session_01HRJ7AmG9hKtDenMRTt1eW6 |
+| B5 Lorani | session_018iNiXjY8eWmMjaGrXSGgma | session_013VSXzohLtDQS5bbWfRb4xR |
+| B6 Daliro | session_013Vf6v9HerZzPG1w9ErbfMw | session_01DcUXF2LPTVH2CpVdget9fu |
+| B7 Identité | session_01967jUehrY7tLAXLn9pBaSw | session_011T7gKKsmg6y6ndZbzggDk5 |
+
+Tâches données au départ : A3 (confirmer/attester le fournisseur, « revérifier », « Annuler ma
+demande ») ; A5 (deux tests pgTAP santé des envois) ; B4 (CHAMPS-LECTURE-TAMILA.md pour A1) ;
+B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ; B7 (b7_02 test
+7, filtre sur la scène) ; les autres relisent leurs notes et attendent.
