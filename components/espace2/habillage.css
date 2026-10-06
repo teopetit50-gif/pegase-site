@@ -694,3 +694,76 @@ html.v2-actif .dlg-sortie:hover:not(:disabled) {
   outline: none;
   box-shadow: var(--v2-anneau);
 }
+
+/* ══ Les écrans liste | détail, à la manière du design de référence ═══════
+   (retour de Teo : « exactement » le design de référence) — dès 1024 px, la
+   liste devient une colonne collée sous la barre du haut, qui défile pour
+   elle-même à côté du détail ; ses intertitres restent visibles en tête de
+   leur groupe ; la ligne choisie se lit par son fond, sans filet noir. La
+   logique ne bouge pas : seule la colonne de gauche change de comportement. */
+@media (min-width: 1024px) {
+  .v2 .esp .esp-grille:has(> .esp-detail-mobile) > :first-child {
+    position: sticky;
+    top: 88px;
+    max-height: calc(100dvh - 112px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--v2-a-500) transparent;
+    border-radius: 12px;
+  }
+  .v2 .esp .esp-grille:has(> .esp-detail-mobile) > :first-child .esp-groupe-titre {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--v2-bg-100);
+  }
+}
+.v2 .esp .esp-grille:has(> .esp-detail-mobile) .esp-groupe-titre {
+  margin: 0;
+  padding: 10px 16px 6px;
+  font-size: 13px;
+  line-height: 18px;
+  letter-spacing: 0;
+  font-weight: 500;
+  color: var(--v2-gray-900);
+  border-bottom: 1px solid var(--v2-a-400);
+}
+.v2 .esp .esp-item[aria-selected="true"],
+.v2 .esp .esp-item[aria-current="true"] {
+  box-shadow: none;
+}
+.v2 .esp .esp-item:focus-visible {
+  outline: none;
+  box-shadow: inset var(--v2-anneau);
+}
+
+/* les compteurs : chiffre neutre, la teinte passe dans un point devant l'étiquette */
+.v2 .esp .esp-kpi[data-teinte] .esp-kpi-valeur {
+  color: var(--v2-gray-1000);
+}
+.v2 .esp .esp-kpi .esp-kpi-etiquette {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.v2 .esp .esp-kpi .esp-kpi-etiquette::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  flex: none;
+  background: var(--v2-gray-500);
+}
+.v2 .esp .esp-kpi[data-teinte="rouge"] .esp-kpi-etiquette::before {
+  background: var(--v2-red-700);
+}
+.v2 .esp .esp-kpi[data-teinte="ambre"] .esp-kpi-etiquette::before {
+  background: var(--v2-amber-700);
+}
+.v2 .esp .esp-kpi[data-teinte="vert"] .esp-kpi-etiquette::before {
+  background: var(--v2-green-700);
+}
+.v2 .esp .esp-kpi[data-teinte="bleu"] .esp-kpi-etiquette::before {
+  background: var(--v2-blue-700);
+}
