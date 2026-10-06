@@ -241,3 +241,11 @@ revoke all on function private.filed_valeur_humaine_cle() from public, anon, aut
 create or replace trigger pieces_valeurs_cle_humaine
   before insert or update on public.pieces_valeurs
   for each row execute function private.filed_valeur_humaine_cle();
+
+-- Droits (ajout du 06/10, après le lot socle 19ag d'A5) : private.filed_valeur_humaine_cle() est SECURITY INVOKER ;
+-- un membre qui écrit sous RLS une valeur « humain » dans pieces_valeurs exécute donc, avec ses droits, ces quatre
+-- fonctions (filed_luhn par filed_tva_intracom_analyser). Sans EXECUTE : « permission denied ».
+grant execute on function private.filed_siren_valide(text) to authenticated, service_role;
+grant execute on function private.filed_luhn(text) to authenticated, service_role;
+grant execute on function private.filed_iban_valide(text) to authenticated, service_role;
+grant execute on function private.filed_tva_intracom_analyser(text) to authenticated, service_role;
