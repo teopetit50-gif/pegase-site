@@ -174,6 +174,13 @@ Famille « Pilotage » :
 - « Les pièces bloquées, en litige ou en attente d'approbation sont comptées en continu. »
 - « Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe. »
 
+## a4_13 (06/10) — posé sur la recette (~02:08 UTC, 5f6aa66)
+
+- Test a4_07 vert par `tester_sans_trace` (notices perdues : on ne sait pas si le cas replica a été joué).
+- Réel : IBAN …0189 repris (demande annulée/utilisateur puis en_attente/système). FAC-2026-10-0471 déjà
+  approuvée par daf2@ avant la pose (executee) : rien à redéposer. Le (a) reste à démontrer sur la prochaine
+  vraie facture née d'un recontrôle (demande attendue : `demandeur_type = 'systeme'`, daf absent de `saisi_par`).
+
 ## a4_12 (06/10) — remontée d'A3 : levée de `fournisseur.a_confirmer`
 
 - Constat : rien dans a4_10 / a4_11 ne refusait la levée ; la souche (et l'extrait de `filed_poser_resultat`)
