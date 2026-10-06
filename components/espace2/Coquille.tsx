@@ -22,7 +22,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, Banknote, Inbox, Bell, Check, CheckCheck, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, LayoutGrid, Laptop, LifeBuoy, LogOut, Menu as IconeMenu, Moon, MoreHorizontal, Search, Settings, Sparkles, Sun, X } from "lucide-react";
+import { Activity, Banknote, Gauge, Inbox, Bell, Check, CheckCheck, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, LayoutGrid, Laptop, LifeBuoy, LogOut, Menu as IconeMenu, Moon, MoreHorizontal, Search, Settings, Sparkles, Sun, X } from "lucide-react";
 import { Button, Dialog, DialogTrigger, Modal, ModalOverlay, Popover, RouterProvider } from "react-aria-components";
 import type { Utilisateur } from "@/lib/compte";
 import { SourceFournisseur, useSource } from "@/components/espace/source";
@@ -32,6 +32,7 @@ import { ItemMenu, Kbd, MenuDeroulant, SectionMenu, SeparateurMenu } from "./ui"
 import Palette from "./Palette";
 import { MODULES, MODULES_A_VENIR, RACINE, porteeDe, titreDe } from "./modules";
 import { useCompteurs } from "./compteurs";
+import { OrganisationContexte } from "./organisation";
 import { changerTheme, useTheme } from "./theme";
 import { useDonnees } from "./donnees";
 import { A_PAYER, groupeDe, minuit } from "./filed/calculs";
@@ -97,7 +98,9 @@ export default function Coquille({ utilisateur, police, children }: { utilisateu
       <SourceFournisseur connecte={!!utilisateur}>
         <RouterProvider navigate={(href, options) => router.push(versV2(href) ?? href, options)}>
           <FournisseurToasts>
-            <Cadre utilisateur={utilisateur}>{children}</Cadre>
+            <OrganisationContexte.Provider value={{ nom: utilisateur?.entreprise || (utilisateur ? "Mon organisation" : "Atelier Bertin"), connecte: !!utilisateur }}>
+              <Cadre utilisateur={utilisateur}>{children}</Cadre>
+            </OrganisationContexte.Provider>
           </FournisseurToasts>
         </RouterProvider>
       </SourceFournisseur>
@@ -290,6 +293,7 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
       sous: m.onglets.length > 1 ? m.onglets.map((o) => ({ libelle: o.libelle, href: o.href })) : undefined,
     })).concat(MODULES_A_VENIR.map<Lien>((m) => ({ libelle: m.nom, href: `${RACINE}/${m.cle}`, icone: <m.icone {...I} />, bientot: true }))),
     [
+      { libelle: "Utilisation", href: `${RACINE}/utilisation`, icone: <Gauge {...I} /> },
       { libelle: "Aide", href: "/contact", icone: <LifeBuoy {...I} /> },
       {
         libelle: "Réglages",

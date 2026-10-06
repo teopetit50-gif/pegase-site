@@ -3,36 +3,40 @@
 /* ══════════════════════════════════════════════════════════════════════
    La vue d'ensemble de l'organisation (06/10/2026, session C1)
 
-   La page d'accueil du tableau de bord de référence, transposée : en haut,
-   la recherche, le choix grille / liste et le bouton « Nouveau… » ; à
-   gauche, la carte des compteurs (l'« usage ») et la liste de ce qui
-   attend une décision ; à droite, une carte par module (la carte
-   « projet ») ; dessous, le tableau des derniers documents reçus.
-
-   Les chiffres viennent des mêmes sources que les écrans : l'exemple
-   (components/espace/exemples) ou la base réelle (mêmes portes).
+   Sur le modèle de la page d'aperçu d'un projet du tableau de bord de
+   référence (retour de Teo, 18 h 50 Z) :
+     · un en-tête : le nom, l'état (exemple ou base réelle), les liens
+       principaux à droite ;
+     · un grand bloc pour l'élément le plus récent — le dernier document
+       reçu, avec l'aperçu de sa pièce à gauche (comme la capture d'un
+       déploiement) et sa fiche à droite, ses boutons en pied ;
+     · des blocs compacts : activité récente, indicateurs, décisions en
+       attente ; puis les modules.
+   Les chiffres viennent des mêmes sources que les écrans (./donnees.ts).
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowUpRight, Copy, ExternalLink, LayoutGrid, List, MoreHorizontal, Search } from "lucide-react";
+import { ArrowUpRight, Banknote, CheckCheck, Copy, ExternalLink, FileText, Inbox, MoreHorizontal, Sun } from "lucide-react";
 import { useSource } from "@/components/espace/source";
 import { nomPersonne } from "@/components/espace/exemples/socle";
-import { dateCourte, libelleModule, montant, relatif } from "@/components/espace/format";
+import { dateCourte, dateHeure, libelleModule, montant, relatif } from "@/components/espace/format";
 import { etatDocument } from "@/components/espace/filed/etats";
+import FactureDessinee from "@/components/espace/filed/FactureDessinee";
 import { A_PAYER, aPayer, du, groupeDe, minuit, totaux } from "./filed/calculs";
-import { AnneauJauge, Badge, Etat, ItemMenu, MenuDeroulant, SeparateurMenu, Squelette, Vide, teinte } from "./ui";
+import { AnneauJauge, Badge, Etat, ItemMenu, MenuDeroulant, SeparateurMenu, Squelette, teinte } from "./ui";
 import { MODULES, RACINE, type ModuleV2 } from "./modules";
 import { useToast } from "./Toasts";
 import { useDonnees } from "./donnees";
-
-const sansAccents = (s: string) => s.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+import { evenements } from "./evenements";
+import { useOrganisation } from "./organisation";
+import "@/components/espace/espace.css";
+import "./habillage.css";
 
 export default function Accueil() {
   const { source } = useSource();
   const toast = useToast();
-  const [vueModules, setVueModules] = useState<"grille" | "liste">("grille");
-  const [recherche, setRecherche] = useState("");
+  const { nom: organisation } = useOrganisation();
   const [aujourdhui] = useState(minuit);
   const { donnees, erreur } = useDonnees();
   const chargement = !donnees;
@@ -58,12 +62,23 @@ export default function Accueil() {
     };
   }, [donnees, aujourdhui]);
 
-  const q = sansAccents(recherche.trim());
-  const modules = MODULES.filter((m) => !q || sansAccents(`${m.nom} ${m.libelle} ${m.description}`).includes(q));
+  /* le plus récent : sur l'exemple, le dernier document qui a une facture
+     (son aperçu parle) ; en base réelle, le dernier document reçu, sans aperçu */
+  const vedette = useMemo(() => {
+    if (!donnees) return null;
+    if (donnees.dernier) {
+      const d = donnees.dernier;
+      return { doc: donnees.docs.find((x) => x.id === d.document.id) ?? null, dossier: d };
+    }
+    const doc = donnees.docs.slice().sort((a, b) => b.recu_le.localeCompare(a.recu_le))[0] ?? null;
+    return { doc, dossier: null };
+  }, [donnees]);
+
+  const activite = useMemo(() => (donnees ? evenements(donnees).slice(0, 6) : []), [donnees]);
 
   const pilule = (m: ModuleV2): { texte: string; teinte: "rouge" | "ambre" | "vert" | "gris" } => {
     if (m.cle === "filed" && compte) {
-      if (compte.retard.length) return { texte: `${compte.retard.length} facture${compte.retard.length > 1 ? "s" : ""} en retard · ${compte.totalRetard}`, teinte: "rouge" };
+      if (compte.retard.length) return { texte: `${compte.retard.length} facture${compte.retard.length > 1 ? "s" : ""} en retard`, teinte: "rouge" };
       if (compte.semaine.length) return { texte: `${compte.semaine.length} à payer cette semaine`, teinte: "ambre" };
       return { texte: "Rien en retard", teinte: "vert" };
     }
@@ -76,22 +91,32 @@ export default function Accueil() {
       () => toast("Impossible de copier le lien. Réessayez.", "rouge"),
     );
 
+  const v = vedette;
+  const etatV = v?.doc ? etatDocument(v.doc.etat) : null;
+  const bloquants = (v?.dossier?.controles ?? []).filter((c) => c.resultat === "anomalie" && c.gravite === "bloquant").length;
+  const lienV = v?.doc ? `${RACINE}/filed?objet=document:${encodeURIComponent(v.doc.id)}` : `${RACINE}/filed`;
+
   return (
     <div className="v2-page v2-arrivee">
-      <h1 className="v2-sr">Vue d&apos;ensemble</h1>
-      <div className="v2-outils">
-        <label className="v2-champ">
-          <Search width={16} height={16} aria-hidden="true" />
-          <span className="v2-sr">Rechercher un module</span>
-          <input type="search" value={recherche} onChange={(e) => setRecherche(e.target.value)} placeholder="Rechercher un module…" />
-        </label>
-        <div className="v2-bascule v2-masque-mobile" role="group" aria-label="Affichage des modules">
-          <button type="button" aria-pressed={vueModules === "grille"} onClick={() => setVueModules("grille")} aria-label="En grille">
-            <LayoutGrid width={16} height={16} aria-hidden="true" />
-          </button>
-          <button type="button" aria-pressed={vueModules === "liste"} onClick={() => setVueModules("liste")} aria-label="En liste">
-            <List width={16} height={16} aria-hidden="true" />
-          </button>
+      {/* ——— l'en-tête : le nom, l'état, les liens principaux ——— */}
+      <div className="v2-apercu-tete">
+        <div className="v2-apercu-nom">
+          <h1>{organisation}</h1>
+          <Badge moyen teinte={source === "reelle" ? "bleu" : "gris"}>
+            {source === "reelle" ? "Base réelle" : "Données d'exemple"}
+          </Badge>
+        </div>
+        <div className="v2-actions">
+          <Link href={`${RACINE}/point`} className="v2-btn v2-btn--petit">
+            <Sun width={16} height={16} aria-hidden="true" /> Point du matin
+          </Link>
+          <Link href={`${RACINE}/validations`} className="v2-btn v2-btn--petit">
+            <CheckCheck width={16} height={16} aria-hidden="true" /> À valider
+            {compte?.enAttente.length ? <span className="v2-badge">{compte.enAttente.length}</span> : null}
+          </Link>
+          <Link href={`${RACINE}/filed`} className="v2-btn v2-btn--petit v2-btn--primaire">
+            <FileText width={16} height={16} aria-hidden="true" /> Documents reçus
+          </Link>
         </div>
       </div>
 
@@ -101,16 +126,150 @@ export default function Accueil() {
         </div>
       ) : null}
 
-      <div className="v2-accueil">
+      {/* ——— le grand bloc : le dernier document reçu ——— */}
+      <section className="v2-carte v2-vedette" aria-labelledby="titre-vedette">
+        <div className="v2-vedette-corps">
+          <div className="v2-vedette-apercu">
+            {chargement ? (
+              <Squelette largeur="100%" hauteur={260} />
+            ) : v?.dossier ? (
+              <div className="resa esp v2-vedette-page" role="img" aria-label={`Aperçu de la pièce ${v.dossier.document.reference}`}>
+                <div className="esp-page" style={{ aspectRatio: "595 / 842" }}>
+                  <FactureDessinee dossier={v.dossier} page={1} />
+                </div>
+              </div>
+            ) : (
+              <div className="v2-vedette-vide" aria-hidden="true">
+                <FileText width={28} height={28} />
+              </div>
+            )}
+          </div>
+          <div className="v2-vedette-fiche">
+            <h2 className="v2-h3 v2-gris" id="titre-vedette" style={{ fontWeight: 500 }}>
+              Dernier document reçu
+            </h2>
+            {chargement ? (
+              <div style={{ display: "grid", gap: 12 }}>
+                <Squelette largeur="60%" />
+                <Squelette largeur="40%" />
+                <Squelette largeur="50%" />
+              </div>
+            ) : v?.doc ? (
+              <dl className="v2-fiche">
+                <div>
+                  <dt>Document</dt>
+                  <dd>
+                    <Link href={lienV} className="v2-mono v2-lien-souligne">
+                      {v.doc.reference}
+                    </Link>
+                  </dd>
+                </div>
+                <div>
+                  <dt>Fournisseur</dt>
+                  <dd>{v.doc.fournisseur ?? <span className="v2-gris">à identifier</span>}</dd>
+                </div>
+                <div>
+                  <dt>État</dt>
+                  <dd className="v2-fiche-ligne">
+                    <Etat teinte={teinte(etatV?.teinte)}>{etatV?.libelle}</Etat>
+                    {bloquants ? (
+                      <Badge teinte="rouge">
+                        {bloquants} contrôle{bloquants > 1 ? "s" : ""} bloquant{bloquants > 1 ? "s" : ""}
+                      </Badge>
+                    ) : null}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Reçu</dt>
+                  <dd title={dateHeure(v.doc.recu_le)}>
+                    {relatif(v.doc.recu_le)}
+                    {v.dossier?.document.expediteur ? <span className="v2-gris"> · {v.dossier.document.expediteur}</span> : null}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Montant</dt>
+                  <dd className="v2-tabulaire">{montant(v.doc.montant, v.doc.devise)}</dd>
+                </div>
+                {v.dossier?.facture?.echeance_lue ? (
+                  <div>
+                    <dt>Échéance</dt>
+                    <dd>{dateCourte(v.dossier.facture.echeance_lue)}</dd>
+                  </div>
+                ) : null}
+              </dl>
+            ) : (
+              <p className="v2-gris" style={{ margin: 0 }}>
+                Aucun document reçu pour l&apos;instant.
+              </p>
+            )}
+          </div>
+        </div>
+        <div className="v2-carte-pied v2-vedette-pied">
+          <span>Les documents arrivent par la boîte de réception ou par dépôt ; FILED les lit et les contrôle.</span>
+          <span className="v2-actions">
+            <Link href={`${RACINE}/filed/boite`} className="v2-btn v2-btn--petit">
+              <Inbox width={16} height={16} aria-hidden="true" /> Boîte de réception
+            </Link>
+            <Link href={`${RACINE}/filed/a-payer`} className="v2-btn v2-btn--petit">
+              <Banknote width={16} height={16} aria-hidden="true" /> À payer
+            </Link>
+            <Link href={lienV} className="v2-btn v2-btn--petit v2-btn--primaire">
+              Ouvrir le dossier
+            </Link>
+          </span>
+        </div>
+      </section>
+
+      {/* ——— les blocs compacts ——— */}
+      <div className="v2-accueil v2-accueil--apercu">
+        <section aria-labelledby="titre-activite">
+          <div className="v2-section-titre">
+            <h2 className="v2-h2" id="titre-activite">
+              Activité récente
+            </h2>
+            <Link href={`${RACINE}/activite`} className="v2-gris" style={{ fontSize: 13 }}>
+              Tout voir
+            </Link>
+          </div>
+          <div className="v2-carte">
+            <ul className="v2-liste" aria-busy={chargement}>
+              {chargement
+                ? [0, 1, 2, 3].map((i) => (
+                    <li key={i} className="v2-liste-item">
+                      <Squelette largeur={10} hauteur={10} rond />
+                      <span className="v2-liste-texte">
+                        <Squelette largeur="70%" hauteur={14} />
+                        <Squelette largeur="40%" hauteur={12} />
+                      </span>
+                    </li>
+                  ))
+                : activite.map((e) => (
+                    <li key={e.id} className="v2-liste-item">
+                      <span className="v2-point" data-teinte={e.etat.teinte} aria-hidden="true" />
+                      <span className="v2-liste-texte">
+                        {e.lien ? <Link href={e.lien}>{e.quoi}</Link> : <span>{e.quoi}</span>}
+                        <small>
+                          {e.detail} · {libelleModule(e.module)}
+                        </small>
+                      </span>
+                      <span className="v2-gris" style={{ fontSize: 13, whiteSpace: "nowrap" }} title={dateHeure(e.quand)}>
+                        {relatif(e.quand)}
+                      </span>
+                    </li>
+                  ))}
+            </ul>
+          </div>
+        </section>
+
         <div className="v2-colonne">
-          <section aria-labelledby="titre-jour">
+          <section aria-labelledby="titre-indicateurs">
             <div className="v2-section-titre">
-              <h2 className="v2-h2" id="titre-jour">
-                Aujourd&apos;hui
+              <h2 className="v2-h2" id="titre-indicateurs">
+                Indicateurs
               </h2>
-              <span className="v2-gris" style={{ fontSize: 13 }}>
-                {source === "reelle" ? "Base réelle" : "Données d'exemple"}
-              </span>
+              <Link href={`${RACINE}/utilisation`} className="v2-gris" style={{ fontSize: 13 }}>
+                Utilisation
+              </Link>
             </div>
             <div className="v2-carte">
               <div className="v2-jauges">
@@ -146,12 +305,6 @@ export default function Accueil() {
                   </>
                 )}
               </div>
-              <div className="v2-carte-pied">
-                <span>Mis à jour à l&apos;ouverture</span>
-                <Link href={`${RACINE}/activite`} className="v2-btn v2-btn--petit">
-                  Activité
-                </Link>
-              </div>
             </div>
           </section>
 
@@ -166,35 +319,23 @@ export default function Accueil() {
             </div>
             <div className="v2-carte">
               {chargement || !compte ? (
-                <ul className="v2-liste" aria-busy="true">
-                  {[0, 1, 2].map((i) => (
-                    <li key={i} className="v2-liste-item">
-                      <Squelette largeur={32} hauteur={32} rond />
-                      <span className="v2-liste-texte">
-                        <Squelette largeur="80%" hauteur={14} />
-                        <Squelette largeur="40%" hauteur={12} />
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                <div className="v2-carte-corps">
+                  <Squelette hauteur={14} />
+                </div>
               ) : compte.enAttente.length ? (
                 <ul className="v2-liste">
                   {compte.enAttente
                     .slice()
                     .sort((a, b) => (a.echeance ?? "9999").localeCompare(b.echeance ?? "9999"))
-                    .slice(0, 5)
+                    .slice(0, 3)
                     .map((d) => {
                       const enRetard = !!d.echeance && new Date(d.echeance).getTime() < aujourdhui;
                       return (
                         <li key={d.id} className="v2-liste-item">
-                          <span className="v2-projet-icone" aria-hidden="true" style={{ fontSize: 11, fontWeight: 600 }}>
-                            {libelleModule(d.module).slice(0, 2)}
-                          </span>
                           <span className="v2-liste-texte">
                             <span>{d.resume}</span>
                             <small>
                               {d.demandeur_type === "systeme" ? "Omega" : nomPersonne(d.demandeur_id)} · {libelleModule(d.module)}
-                              {d.montant !== null ? ` · ${montant(d.montant, d.devise)}` : ""}
                             </small>
                           </span>
                           <Badge teinte={enRetard ? "rouge" : "gris"} title={d.echeance ? `Échéance le ${dateCourte(d.echeance)}` : undefined}>
@@ -210,134 +351,57 @@ export default function Accueil() {
             </div>
           </section>
         </div>
-
-        <div className="v2-colonne">
-          <section aria-labelledby="titre-modules">
-            <div className="v2-section-titre">
-              <h2 className="v2-h2" id="titre-modules">
-                Modules
-              </h2>
-            </div>
-            {modules.length ? (
-              <div className="v2-projets" data-vue={vueModules}>
-                {modules.map((m) => {
-                  const p = pilule(m);
-                  const href = `${RACINE}/${m.cle}${m.cle === "filed" ? "/a-payer" : ""}`;
-                  return (
-                    <article key={m.cle} className="v2-projet">
-                      <div className="v2-projet-haut">
-                        <span className="v2-projet-icone" aria-hidden="true">
-                          <m.icone width={16} height={16} />
-                        </span>
-                        <div style={{ minWidth: 0 }}>
-                          <h3 className="v2-projet-titre v2-h3">
-                            <Link href={href} className="v2-projet-lien">
-                              {m.nom}
-                            </Link>
-                          </h3>
-                          <div className="v2-projet-sous">{m.libelle}</div>
-                        </div>
-                        <div className="v2-projet-menu">
-                          <MenuDeroulant etiquette={`Actions sur ${m.nom}`} declencheur={<MoreHorizontal width={16} height={16} aria-hidden="true" />}>
-                            <ItemMenu id="ouvrir" href={href} icone={<ArrowUpRight width={16} height={16} aria-hidden="true" />}>
-                              Ouvrir {m.nom}
-                            </ItemMenu>
-                            <ItemMenu id="ancien" href={m.ancien} icone={<ExternalLink width={16} height={16} aria-hidden="true" />}>
-                              Ouvrir l&apos;écran actuel
-                            </ItemMenu>
-                            <SeparateurMenu />
-                            <ItemMenu id="copier" onAction={() => void copier(href)} icone={<Copy width={16} height={16} aria-hidden="true" />}>
-                              Copier le lien
-                            </ItemMenu>
-                          </MenuDeroulant>
-                        </div>
-                      </div>
-                      <span className="v2-projet-pilule">
-                        <span className="v2-point" data-teinte={p.teinte} aria-hidden="true" style={{ width: 8, height: 8 }} />
-                        <span>{chargement && m.cle === "filed" ? "Lecture…" : p.texte}</span>
-                      </span>
-                      <div className="v2-projet-bas">
-                        <span>{m.description}</span>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            ) : (
-              <Vide icone={<Search width={20} height={20} />} titre="Aucun module ne correspond">
-                Rien ne répond à « {recherche} ».
-              </Vide>
-            )}
-          </section>
-
-          <section aria-labelledby="titre-docs">
-            <div className="v2-section-titre">
-              <h2 className="v2-h2" id="titre-docs">
-                Derniers documents reçus
-              </h2>
-              <Link href={`${RACINE}/filed`} className="v2-gris" style={{ fontSize: 13 }}>
-                Tout voir
-              </Link>
-            </div>
-            <div className="v2-carte">
-              <div className="v2-tableau-cadre">
-                <table className="v2-tableau v2-tableau--empile">
-                  <thead>
-                    <tr>
-                      <th scope="col">Référence</th>
-                      <th scope="col">Fournisseur</th>
-                      <th scope="col">Reçu</th>
-                      <th scope="col">État</th>
-                      <th scope="col" className="v2-num">
-                        Montant
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {chargement
-                      ? [0, 1, 2, 3].map((i) => (
-                          <tr key={i}>
-                            {[0, 1, 2, 3, 4].map((j) => (
-                              <td key={j}>
-                                <Squelette hauteur={14} />
-                              </td>
-                            ))}
-                          </tr>
-                        ))
-                      : donnees.docs
-                          .slice()
-                          .sort((a, b) => b.recu_le.localeCompare(a.recu_le))
-                          .slice(0, 6)
-                          .map((d) => {
-                            const e = etatDocument(d.etat);
-                            return (
-                              <tr key={d.id}>
-                                <td data-etiquette="Référence">
-                                  <Link href={`/espace2/filed?objet=document:${encodeURIComponent(d.id)}`} className="v2-mono">
-                                    {d.reference}
-                                  </Link>
-                                </td>
-                                <td data-etiquette="Fournisseur">{d.fournisseur ?? <span className="v2-gris">à identifier</span>}</td>
-                                <td data-etiquette="Reçu">
-                                  <span title={dateCourte(d.recu_le)}>{relatif(d.recu_le)}</span>
-                                </td>
-                                <td data-etiquette="État">
-                                  <Etat teinte={teinte(e.teinte)}>{e.libelle}</Etat>
-                                </td>
-                                <td data-etiquette="Montant" className="v2-num">
-                                  {montant(d.montant, d.devise)}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                  </tbody>
-                </table>
-              </div>
-              {!chargement && !donnees.docs.length ? <div className="v2-carte-corps v2-gris">Aucun document reçu.</div> : null}
-            </div>
-          </section>
-        </div>
       </div>
+
+      {/* ——— les modules ——— */}
+      <section aria-labelledby="titre-modules" style={{ marginTop: 32 }}>
+        <div className="v2-section-titre">
+          <h2 className="v2-h2" id="titre-modules">
+            Modules
+          </h2>
+        </div>
+        <div className="v2-projets" data-vue="grille">
+          {MODULES.map((m) => {
+            const p = pilule(m);
+            const href = `${RACINE}/${m.cle}${m.cle === "filed" ? "/a-payer" : ""}`;
+            return (
+              <article key={m.cle} className="v2-projet">
+                <div className="v2-projet-haut">
+                  <span className="v2-projet-icone" aria-hidden="true">
+                    <m.icone width={16} height={16} />
+                  </span>
+                  <div style={{ minWidth: 0 }}>
+                    <h3 className="v2-projet-titre v2-h3">
+                      <Link href={href} className="v2-projet-lien">
+                        {m.nom}
+                      </Link>
+                    </h3>
+                    <div className="v2-projet-sous">{m.libelle}</div>
+                  </div>
+                  <div className="v2-projet-menu">
+                    <MenuDeroulant etiquette={`Actions sur ${m.nom}`} declencheur={<MoreHorizontal width={16} height={16} aria-hidden="true" />}>
+                      <ItemMenu id="ouvrir" href={href} icone={<ArrowUpRight width={16} height={16} aria-hidden="true" />}>
+                        Ouvrir {m.nom}
+                      </ItemMenu>
+                      <ItemMenu id="ancien" href={m.ancien} icone={<ExternalLink width={16} height={16} aria-hidden="true" />}>
+                        Ouvrir l&apos;écran actuel
+                      </ItemMenu>
+                      <SeparateurMenu />
+                      <ItemMenu id="copier" onAction={() => void copier(href)} icone={<Copy width={16} height={16} aria-hidden="true" />}>
+                        Copier le lien
+                      </ItemMenu>
+                    </MenuDeroulant>
+                  </div>
+                </div>
+                <span className="v2-projet-pilule">
+                  <span className="v2-point" data-teinte={p.teinte} aria-hidden="true" style={{ width: 8, height: 8 }} />
+                  <span>{chargement && m.cle === "filed" ? "Lecture…" : p.texte}</span>
+                </span>
+              </article>
+            );
+          })}
+        </div>
+      </section>
     </div>
   );
 }

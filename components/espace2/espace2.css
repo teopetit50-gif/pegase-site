@@ -473,7 +473,7 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
 .v2-sous-menu[data-ouvert] {
   grid-template-rows: 1fr;
 }
-.v2-sous-menu > ul {
+.v2-sous-menu > * {
   min-height: 0;
   overflow: hidden;
   list-style: none;
@@ -790,7 +790,9 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   height: 32px;
   padding: 0 8px;
 }
-.v2-btn--primaire {
+.v2-btn--primaire,
+.v2 a.v2-btn--primaire {
+  /* « .v2 a » (couleur héritée) l'emporterait sur un lien-bouton */
   background: var(--v2-gray-1000);
   color: var(--v2-bg-100);
   box-shadow: none;
@@ -1926,5 +1928,213 @@ a.v2-jauge:hover {
   .v2-toast {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* ══ Les pages de suivi (la page « Usage » de la référence) ═════════════ */
+.v2-suivi-tete {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--v2-a-400);
+}
+.v2-suivi-ligne + .v2-suivi-ligne {
+  border-top: 1px solid var(--v2-a-400);
+}
+.v2-suivi-bouton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 16px;
+  border: 0;
+  background: transparent;
+  color: var(--v2-gray-1000);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+button.v2-suivi-bouton:hover {
+  background: var(--v2-a-100);
+}
+.v2-suivi-bouton[aria-expanded="true"] .v2-lien-chevron {
+  transform: rotate(90deg);
+}
+.v2-suivi-libelle {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.v2-suivi-libelle small {
+  font-size: 13px;
+  color: var(--v2-gray-900);
+}
+.v2-suivi-valeur {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.v2-suivi-detail {
+  padding: 4px 16px 16px 46px;
+}
+.v2-barres {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.v2-barres li {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 2fr) auto;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+.v2-barres-libelle {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--v2-gray-900);
+}
+.v2-barres-rail {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--v2-gray-200);
+  overflow: hidden;
+}
+.v2-barres-rail span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--v2-blue-700);
+  transition: width 0.3s var(--v2-doux);
+}
+@media (max-width: 767px) {
+  .v2-suivi-detail {
+    padding-left: 16px;
+  }
+  .v2-barres li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .v2-barres-rail {
+    grid-column: 1 / -1;
+    order: 3;
+  }
+}
+
+/* ══ La vue d'ensemble, sur le modèle de l'aperçu d'un projet ═══════════ */
+.v2-apercu-tete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.v2-apercu-nom {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.v2-apercu-nom h1 {
+  margin: 0;
+  font-size: 32px;
+  line-height: 40px;
+  letter-spacing: -1.28px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2-vedette {
+  margin-bottom: 32px;
+}
+.v2-vedette-corps {
+  display: grid;
+  gap: 24px;
+  padding: 24px;
+  grid-template-columns: minmax(0, 1fr);
+}
+@container principale (min-width: 768px) {
+  .v2-vedette-corps {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 32px;
+  }
+}
+/* l'aperçu : le haut de la pièce, cadré comme la capture d'un déploiement */
+.v2-vedette-apercu {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--v2-gray-100);
+  box-shadow: 0 0 0 1px var(--v2-a-400);
+}
+.v2 .v2-vedette-page.resa.esp {
+  position: absolute;
+  inset: 12px 12px auto 12px;
+}
+.v2 .v2-vedette-page .esp-page {
+  border-radius: 4px;
+  box-shadow: 0 1px 2px #0000001a;
+}
+.v2-vedette-vide {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--v2-gray-700);
+}
+.v2-vedette-fiche {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  min-width: 0;
+}
+.v2-fiche {
+  margin: 0;
+  display: grid;
+  gap: 16px;
+}
+.v2-fiche > div {
+  display: grid;
+  gap: 4px;
+}
+.v2-fiche dt {
+  font-size: 13px;
+  color: var(--v2-gray-900);
+}
+.v2-fiche dd {
+  margin: 0;
+  font-size: 14px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.v2-fiche-ligne {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.v2-lien-souligne {
+  text-decoration: underline;
+  text-decoration-color: var(--v2-a-500);
+  text-underline-offset: 3px;
+}
+.v2-lien-souligne:hover {
+  text-decoration-color: currentColor;
+}
+.v2-vedette-pied {
+  flex-wrap: wrap;
+}
+@media (min-width: 1024px) {
+  .v2-accueil--apercu {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   }
 }
