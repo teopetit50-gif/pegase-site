@@ -505,6 +505,21 @@ avaient quitté le bucket.
   dépassement). Exemple : 2026-0377 au forfait, 17 h sur 20 h. Recette 124/124, axe 0 écart grave.
 - Les durées proposées sont des usages, corrigeables ; rien ne se saisit sans le geste de l'avocat.
 
+## 18. Avant le carnet : conflits automatiques, honoraires du cabinet, lecture des réceptions (06/10)
+
+- **Contrôle des conflits automatique** (5503ad6, écran seul) : dès qu'un client ou un adversaire entre au
+  dossier, la carte « Conflits d'intérêts » l'indexe et le contrôle sans geste (si la clé d'index s'ouvre) ; un
+  conflit s'annonce en alerte avec « Décider » ; les parties jamais indexées sont signalées. Recette : 6 contrôles.
+- **Tableau des honoraires du cabinet** (198cf78, écran seul, lecture RLS) : bouton « Honoraires du cabinet » dans
+  l'en-tête (avocats) ; une ligne par dossier visible, calculée comme la carte du dossier (`resumer`) ; totaux (à
+  facturer, reste dû, facturé et encaissé dans l'année) ; « À traiter » (sans convention, facture impayée à
+  30 jours, forfait à 80 %, clos avec du temps non facturé) ; export CSV composé dans le navigateur. Recette :
+  17 contrôles (1440 et 390), axe 0 écart grave.
+- **`private.tamila_peut_lire_reception(client, user)`** (b4_13, test 22, 10 contrôles) : avocat du cabinet
+  (gerant, admin, valideur) sous aucune muraille active. Pour le lot socle d'A5 (receptions et `receptions/`).
+  Conséquence à prévoir : quand A5 l'appellera, l'assistante verra la file des avis à rattacher (RLS de
+  `tamila_avis_entrants`) sans leur contenu ; à aligner alors (file réservée aux avocats).
+
 ## 7. Prochaine étape
 
 1. (fait : en ligne, vérifié le 06/10.)
