@@ -23,6 +23,16 @@ for (const cas of CAS) {
     assertEquals(issue, attendu.issue, "issue du travail");
     assertEquals(ia!.appels.length > 0, attendu.ia_appelee, "appel de l'IA");
 
+    if (attendu.ignore_contient) {
+      assertEquals(portes.echoues.length, 0, "aucune reprise");
+      assertEquals(portes.finis.length, 1);
+      assert(JSON.stringify(portes.finis[0].resultat).includes(attendu.ignore_contient), JSON.stringify(portes.finis[0].resultat));
+      assertEquals(portes.enregistrements.length, 0);
+      assertEquals(portes.appels.some((a) => a.porte === "commencerLecture"), false, "pas de commencer_lecture sur une pièce chiffrée");
+      assertEquals(depot.telechargements, 0, "fichier chiffré jamais téléchargé");
+      return;
+    }
+
     if (attendu.erreur_contient) {
       assertEquals(portes.echoues.length, 1);
       assert(portes.echoues[0].erreur.includes(attendu.erreur_contient), portes.echoues[0].erreur);

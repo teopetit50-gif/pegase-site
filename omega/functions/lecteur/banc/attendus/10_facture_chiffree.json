@@ -1,8 +1,8 @@
 {
-  "titre": "Pièce d'un dossier chiffré : hors vague 1, reprise plus tard",
+  "titre": "Pièce d'un dossier chiffré : sans coffre, travail clos sans reprise, pièce laissée recue",
   "fichier": "10_facture_chiffree.pdf",
   "mime": "application/pdf",
-  "issue": "repris",
+  "issue": "ignore",
   "ia_appelee": false,
-  "erreur_contient": "CHIFFREMENT_NON_PRIS_EN_CHARGE"
+  "ignore_contient": "chiffree_sans_coffre"
 }

@@ -180,22 +180,23 @@ Pas de `lignes` ni de `tva.ventilation` pour ce module.
 
 ## Module Tamila — avis RPVA des cabinets d'avocats (table prête, lecture en attente du coffre)
 
-Dix types, un par valeur de `tamila_avis.type_avis`, et des champs qui portent **le nom exact des clés de `p_valeurs`** de `public.tamila_avis_lu(p_client, p_dossier, p_piece, p_type, p_valeurs, p_confiance, p_rg_concorde)` (B4, `omega/SOCLE-EXTRAITS-TAMILA.sql`) : celui qui applique une lecture passe `type_piece` en `p_type` et l'objet `{champ: valeur}` des valeurs vérifiées en `p_valeurs`, `p_confiance = 'modele'`. `numero_rg` n'est pas lu par `tamila_avis_lu` : il sert à calculer `p_rg_concorde` contre le n° RG du dossier, qui est chiffré (le lecteur ne le voit pas, la comparaison se fait là où la clé du dossier est déballée).
+Dix types d'avis, un par valeur de `tamila_avis.type_avis`, plus `tamila_piece_autre`, conformes à la fiche de B4 (`omega/modules/tamila/CHAMPS-LECTURE-TAMILA.md`, worker-b4 66ec6fb), et des champs qui portent **le nom exact des clés de `p_valeurs`** de `public.tamila_avis_lu(p_client, p_dossier, p_piece, p_type, p_valeurs, p_confiance, p_rg_concorde)` (B4, `omega/SOCLE-EXTRAITS-TAMILA.sql`) : celui qui applique une lecture passe `type_piece` en `p_type` et l'objet `{champ: valeur}` des valeurs vérifiées en `p_valeurs`, `p_confiance = 'modele'`. `numero_rg` n'est pas lu par `tamila_avis_lu` : il sert à calculer `p_rg_concorde` contre le n° RG du dossier, qui est chiffré (le lecteur ne le voit pas, la comparaison se fait là où la clé du dossier est déballée).
 
-**Limite actuelle** : les pièces déposées par `tamila_deposer_piece` sont chiffrées (`chiffrement = dossier:v1`) et le lecteur les reporte (`CHIFFREMENT_NON_PRIS_EN_CHARGE`) tant qu'il n'y a pas de coffre pour déballer la clé du dossier. La table sert dès qu'une pièce Tamila arrive en clair (`pieces.module = 'tamila'`, sans chiffrement) ou que le coffre existe.
+**Limite actuelle** : les pièces déposées par `tamila_deposer_piece` sont chiffrées (`chiffrement = dossier:v1`) et, tant qu'il n'y a pas de coffre pour déballer la clé du dossier, le lecteur clôt leur travail sans les télécharger (`finir_travail {"ignore": "chiffree_sans_coffre"}`, sans reprise) ; la pièce reste `recue`. La table sert dès qu'une pièce Tamila arrive en clair (`pieces.module = 'tamila'`, sans chiffrement) ou que le coffre existe.
 
 | `type_piece` | Ce que c'est | Champs | Clés (toutes vérifiées → `lue`) |
 |---|---|---|---|
 | `rpva_declaration_appel` | avis d'enregistrement (ou notification) d'une déclaration d'appel | `numero_rg`, `date_avis`, `partie_visee` | `date_avis` |
 | `rpva_avis_902` | avis d'avoir à signifier la déclaration d'appel (art. 902) | `numero_rg`, `date_avis` | `date_avis` |
-| `rpva_avis_fixation` | avis de fixation à bref délai (art. 906) | `numero_rg`, `date_avis`, `date_audience`, `date_cloture_previsible` | `date_avis`, `date_audience` |
+| `rpva_avis_fixation` | avis de fixation à bref délai (art. 906) | `numero_rg`, `date_avis`, `date_audience`, `date_cloture_previsible` | `date_avis` |
 | `rpva_conclusions` | notification de conclusions entre avocats | `numero_rg`, `date_avis`, `partie_visee`, `rang` | `date_avis`, `partie_visee` |
 | `rpva_appel_incident` | conclusions portant appel incident ou provoqué | `numero_rg`, `date_avis` | `date_avis` |
-| `rpva_intervention` | intervention forcée ou volontaire | `numero_rg`, `date_avis` | `date_avis` |
+| `rpva_intervention` | intervention forcée ou volontaire | `numero_rg`, `date_avis`, `partie_visee` (`intervenant`) | `date_avis` |
 | `rpva_ordonnance_mee` | ordonnance ou avis du conseiller de la mise en état | `numero_rg`, `date_avis`, `date_limite`, `date_cloture_previsible` | `date_avis` |
 | `rpva_avis_audience` | avis fixant ou renvoyant une audience | `numero_rg`, `date_avis`, `date_audience`, `date_cloture_previsible` | `date_avis`, `date_audience` |
 | `rpva_accuse_depot` | accusé de réception RPVA d'un dépôt du cabinet | `numero_rg`, `date_avis`, `depose_le` | `date_avis`, `depose_le` |
 | `rpva_interruption` | avis d'un événement interruptif d'instance | `numero_rg`, `date_avis` | `date_avis` |
+| `tamila_piece_autre` | toute autre pièce du dossier (jugement, conclusions elles-mêmes, bordereau, pièce adverse, courrier) | `date_piece` | aucune : `lue` même sans date |
 
 | Champ | Type de `valeur` | Description | Exemple |
 |---|---|---|---|
@@ -207,6 +208,9 @@ Dix types, un par valeur de `tamila_avis.type_avis`, et des champs qui portent *
 | `partie_visee` | texte parmi `appelant`, `intime`, `intervenant` | conclusions : la partie qui conclut ; déclaration d'appel : la qualité de la partie défendue par l'avocat destinataire ; « Intimé », « l'intimée » ramenés à `intime` | `"intime"` |
 | `rang` | nombre entier, 1 à 99 | rang des conclusions (1 = premières) | `2` |
 | `depose_le` | comme `date_audience` | date et heure du dépôt accusé | `"2026-10-03T16:12"` |
+| `date_piece` | texte `AAAA-MM-JJ` | date portée sur une autre pièce du dossier | `"2026-06-12"` |
+
+Aucun nom de partie, d'avocat adverse ni l'intitulé de l'affaire n'entre dans `valeurs` (ils sont chiffrés en base) : aucun champ ne les porte.
 
 Pas de `lignes` ni de `tva.ventilation` pour ce module.
 

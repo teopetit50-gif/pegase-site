@@ -78,7 +78,11 @@ export async function lirePiece(ctx: Contexte, travail: Travail): Promise<Issue>
       return "ignore";
     }
     if (piece.chiffrement) {
-      throw new ErreurOuvrier("CHIFFREMENT_NON_PRIS_EN_CHARGE", `pièce chiffrée (${piece.chiffrement}) : hors vague 1`, true);
+      // Sans coffre, la clé du dossier n'est jamais là : reprendre ne servirait à rien (cinq échecs par
+      // pièce). Le travail est clos, la pièce reste « recue » ; le coffre la redemandera (NOTES-B4).
+      await ctx.portes.finirTravail(travail.id, { ignore: "chiffree_sans_coffre", chiffrement: piece.chiffrement, statut: piece.statut });
+      journal("info", "pièce chiffrée sans coffre, travail clos sans lecture", { ...trace, chiffrement: piece.chiffrement });
+      return "ignore";
     }
     if (!(await ctx.portes.commencerLecture(pieceId))) {
       await ctx.portes.finirTravail(travail.id, { ignore: "plus rien à lire", statut: piece.statut });
@@ -451,7 +455,7 @@ export function assembler(
       motif = `À vérifier : ${verif.clesDouteuses.join(", ")}.`;
     }
   } else {
-    statut = valeurs.some((v) => v.verifiee) ? "lue" : "a_verifier";
+    statut = typeDeclare.lueSansValeur || valeurs.some((v) => v.verifiee) ? "lue" : "a_verifier";
     if (statut === "a_verifier") motif = "Aucune valeur n'a pu être vérifiée sur la pièce.";
   }
 

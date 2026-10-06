@@ -34,6 +34,8 @@ export interface TypeDeclare {
   champs: string[];
   /** Les champs qui doivent être vérifiés pour que la pièce soit « lue » ; vide = une valeur vérifiée suffit. */
   cles: string[];
+  /** Sans clé : la pièce est « lue » même sans aucune valeur (une pièce que le module range sans en rien tirer). */
+  lueSansValeur?: boolean;
 }
 
 export interface SchemaModule {

@@ -148,10 +148,10 @@ Deno.test("tamila : date et heure locale", () => {
 });
 
 Deno.test("table des types : Tamila suit tamila_avis_lu", () => {
-  assertEquals(typesPour("tamila"), [...TYPES_AVIS.slice().sort((a, b) => ordre(a) - ordre(b)), "autre"]);
+  assertEquals(typesPour("tamila"), [...TYPES_AVIS.slice().sort((a, b) => ordre(a) - ordre(b)), "tamila_piece_autre", "autre"]);
   const champs = [...champsPour("tamila").keys()];
   for (const c of CLES_AVIS_LU) assert(champs.includes(c), `clé de p_valeurs absente : ${c}`);
-  assertEquals(champs.filter((c) => !CLES_AVIS_LU.includes(c)), ["numero_rg"]);
+  assertEquals(champs.filter((c) => !CLES_AVIS_LU.includes(c)), ["numero_rg", "date_piece"]);
   assertEquals(champsPour("tamila").get("partie_visee")!.choix, ["appelant", "intime", "intervenant"]);
   const outil = schemaOutilPour("tamila") as {
     properties: Record<string, { enum?: string[]; items?: { properties: Record<string, { enum?: string[]; description?: string }> } }>;
@@ -184,3 +184,43 @@ function ordre(t: string): number {
     "rpva_interruption",
   ].indexOf(t);
 }
+
+Deno.test("tamila : une autre pièce du dossier est lue, avec ou sans date", async () => {
+  const octets = pdf(["BORDEREAU DE COMMUNICATION DE PIÈCES", "Pièce n° 1 : contrat de construction"]);
+  const { issue, portes } = await lireTamila("35", "bordereau.pdf", octets, {
+    lisible: true,
+    type_piece: "tamila_piece_autre",
+    confiance_type: 0.9,
+    valeurs: [],
+  });
+  assertEquals(issue, "lue");
+  assertEquals(portes.enregistrements[0].resultat.type_piece, "tamila_piece_autre");
+  const jugement = pdf(["TRIBUNAL JUDICIAIRE DE PARIS", "Jugement du 12/06/2026"]);
+  const b = await lireTamila("36", "jugement.pdf", jugement, {
+    lisible: true,
+    type_piece: "tamila_piece_autre",
+    confiance_type: 0.9,
+    valeurs: [{ champ: "date_piece", valeur: "2026-06-12", texte: "Jugement du 12/06/2026", page: 1 }],
+  });
+  assertEquals(b.issue, "lue");
+  assertEquals(b.portes.enregistrements[0].resultat.valeurs[0].valeur, "2026-06-12");
+});
+
+Deno.test("tamila : pièce chiffrée (dossier:v1) sans coffre → travail clos sans reprise, rien téléchargé", async () => {
+  const { ctx, portes, depot, ia } = contexteDeTest();
+  const piece = pieceDeTest("cccccccc-0000-4000-8000-000000000037", "avis.pdf.chiffre", "application/octet-stream", {
+    module: "tamila",
+    objet_type: "tamila_dossier",
+    chiffrement: "dossier:v1",
+  });
+  portes.pieces.set(piece.id, piece);
+  depot.fichiers.set(piece.chemin, new Uint8Array([1, 2, 3]));
+  const issue = await lirePiece(ctx, travailDeTest(37, piece.id));
+  assertEquals(issue, "ignore");
+  assertEquals(portes.echoues.length, 0);
+  assertEquals(portes.finis.length, 1);
+  assertEquals((portes.finis[0].resultat as Record<string, unknown>).ignore, "chiffree_sans_coffre");
+  assertEquals(portes.enregistrements.length, 0);
+  assertEquals(depot.telechargements, 0);
+  assertEquals(ia!.appels.length, 0);
+});

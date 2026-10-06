@@ -64,6 +64,8 @@ export interface Attendu {
   nb_pages?: number;
   methode_page_1?: string;
   ia_appelee: boolean;
+  /** Le travail est clos par finir_travail {ignore} contenant ce motif, sans lecture. */
+  ignore_contient?: string;
   /** Valeurs attendues (champ → valeur jsonb) parmi celles enregistrées. */
   valeurs?: Record<string, unknown>;
   /** Les champs qui doivent être vérifiés. */
@@ -660,9 +662,9 @@ export const CAS: Cas[] = [
     id: "10_facture_chiffree",
     fichier: "10_facture_chiffree.pdf",
     mime: "application/pdf",
-    titre: "Pièce d'un dossier chiffré : hors vague 1, reprise plus tard",
+    titre: "Pièce d'un dossier chiffré : sans coffre, travail clos sans reprise, pièce laissée recue",
     pagesTexte: [facture01],
     chiffrement: "dossier:v1",
-    attendu: { issue: "repris", ia_appelee: false, erreur_contient: "CHIFFREMENT_NON_PRIS_EN_CHARGE" },
+    attendu: { issue: "ignore", ia_appelee: false, ignore_contient: "chiffree_sans_coffre" },
   },
 ];

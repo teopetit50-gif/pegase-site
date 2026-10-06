@@ -92,7 +92,9 @@ export class PortesMemoire implements Portes {
 
 export class DepotMemoire implements Depot {
   fichiers = new Map<string, Uint8Array>();
+  telechargements = 0;
   async telecharger(chemin: string): Promise<Telechargement> {
+    this.telechargements++;
     const o = this.fichiers.get(chemin);
     return o ? { present: true, octets: o, mime: null } : { present: false };
   }

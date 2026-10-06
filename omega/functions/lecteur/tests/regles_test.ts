@@ -216,7 +216,7 @@ Deno.test("passage à vide : battre_ouvrier appelé quand même", async () => {
   assertEquals(portes.appels[0].args, [["lecteur.lire"], 5, "10 minutes", "lecteur-test"]);
 });
 
-Deno.test("passage avec deux travaux : l'un lu, l'autre repris, battement avec le bilan", async () => {
+Deno.test("passage avec deux travaux : l'un lu, l'autre chiffré clos sans lecture, battement avec le bilan", async () => {
   const { ctx, portes, depot, ia } = contexteDeTest();
   const p1 = await poserPiece(portes, depot);
   const p2 = pieceDeTest("aaaaaaaa-0000-4000-8000-000000000002", "x.pdf", "application/pdf", { chiffrement: "dossier:v1" });
@@ -226,7 +226,7 @@ Deno.test("passage avec deux travaux : l'un lu, l'autre repris, battement avec l
   const bilan = await passage(ctx);
   assertEquals(bilan.pris, 2);
   assertEquals(bilan.issues.lue, 1);
-  assertEquals(bilan.issues.repris, 1);
+  assertEquals(bilan.issues.ignore, 1);
   assertEquals(portes.battements.length, 1);
 });
 

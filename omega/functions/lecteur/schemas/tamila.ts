@@ -1,6 +1,7 @@
 // Tamila — cabinets d'avocats : les avis et messages reçus par le RPVA (e-barreau)
 // sur un dossier d'appel, tels que private.tamila_avis_lu les attend (B4,
-// SOCLE-EXTRAITS-TAMILA.sql) : un type par valeur de tamila_avis.type_avis, des
+// omega/modules/tamila/CHAMPS-LECTURE-TAMILA.md sur worker-b4, 66ec6fb) : un type par
+// valeur de tamila_avis.type_avis, plus tamila_piece_autre pour le reste du dossier ; des
 // champs qui portent le nom exact des clés de p_valeurs (date_avis,
 // date_audience, date_cloture_previsible, date_limite, partie_visee, rang,
 // depose_le), plus numero_rg pour que l'appelant calcule p_rg_concorde (le n° RG
@@ -40,7 +41,7 @@ export const SCHEMA_TAMILA: SchemaModule = {
       description:
         "l'avis de fixation de l'affaire à bref délai (articles 906 et suivants) : date de l'avis, date et heure de l'audience de plaidoiries, parfois la date de clôture prévisible",
       champs: ["numero_rg", "date_avis", "date_audience", "date_cloture_previsible"],
-      cles: ["date_avis", "date_audience"],
+      cles: ["date_avis"],
     },
     {
       type: "rpva_conclusions",
@@ -60,8 +61,9 @@ export const SCHEMA_TAMILA: SchemaModule = {
     {
       type: "rpva_intervention",
       libelle: "intervention",
-      description: "la notification d'une intervention forcée (assignation en intervention) ou de conclusions d'intervention volontaire",
-      champs: ["numero_rg", "date_avis"],
+      description:
+        "la notification d'une intervention forcée (assignation en intervention) ou de conclusions d'intervention volontaire ; partie_visee = intervenant",
+      champs: ["numero_rg", "date_avis", "partie_visee"],
       cles: ["date_avis"],
     },
     {
@@ -94,6 +96,15 @@ export const SCHEMA_TAMILA: SchemaModule = {
       champs: ["numero_rg", "date_avis"],
       cles: ["date_avis"],
     },
+    {
+      type: "tamila_piece_autre",
+      libelle: "autre pièce du dossier",
+      description:
+        "toute autre pièce lisible du dossier, qui n'est aucun des avis RPVA ci-dessus (jugement de première instance, conclusions elles-mêmes, bordereau, pièce adverse, courrier du client) : seulement sa date si elle en porte une",
+      champs: ["date_piece"],
+      cles: [],
+      lueSansValeur: true,
+    },
   ],
   champs: [
     {
@@ -118,6 +129,7 @@ export const SCHEMA_TAMILA: SchemaModule = {
     },
     { champ: "rang", type: "entier", min: 1, maximum: 99, description: "le rang des conclusions notifiées (1 = premières conclusions)" },
     { champ: "depose_le", type: "dateheure", description: "la date et l'heure du dépôt accusé par le RPVA, heure locale" },
+    { champ: "date_piece", type: "date", description: "la date portée sur une autre pièce du dossier (tamila_piece_autre)" },
   ],
   lignes: false,
 };
