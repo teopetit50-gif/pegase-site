@@ -253,6 +253,8 @@ export type PieceProjet = {
   type_piece: string | null;
   /* le motif du lecteur quand il n'a pas reconnu le courrier (a_classer) ou n'a pas pu le lire */
   motif?: string | null;
+  /* « courriel » : pièce jointe d'un courriel du guichet, rangée seule par son numéro de dossier (b5_11) */
+  source?: string | null;
   cree_le?: string;
 };
 

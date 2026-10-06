@@ -68,6 +68,8 @@ for (const largeur of LARGEURS) {
   await s.dormir(500);
   const impl = await s.evaluer(`(() => { const d = document.querySelector('#esp-detail'); return { tacite: /Non-opposition tacite née/.test(d.innerText), bouton: !![...d.querySelectorAll('.r-btn')].find(b => /Confirmer la décision implicite/.test(b.textContent)) }; })()`);
   ok(impl.tacite && impl.bouton, 'la DP montre la non-opposition tacite née, à confirmer');
+  ok(await s.evaluer(`/ARE_DP06938326N0107\\.pdf[\\s\\S]{0,120}Reçu par courriel du guichet et rangé ici par son numéro de dossier/.test(document.querySelector('#esp-detail').innerText)`),
+     'son accusé de réception électronique est dit « reçu par courriel du guichet et rangé par son numéro » (b5_11)');
   await s.evaluer(`[...document.querySelectorAll('#esp-detail .r-btn')].find(b => /Confirmer la décision implicite/.test(b.textContent))?.click()`);
   await s.dormir(500);
   await s.capturer(`${dossier}lorani-implicite-1440.jpg`, { qualite: 55 });
