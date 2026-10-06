@@ -109,8 +109,20 @@ Repère du marché : Graneet, Obat, Batappli, Tolteck, Extrabat font tous des **
 2. **La rentabilité réelle du chantier** — heures pointées par équipe × coût horaire + achats rattachés (FILED) face au facturé : la marge à date, lot par lot (Graneet en fait son argument n° 1). Il faut le pointage des heures (équipes terrain, mobile).
 3. **La facture électronique des situations** (attend la plateforme agréée) et la **révision de prix** (index BT01 de l'INSEE, formule du marché) — la seconde demande la source des index.
 
+### Taux des pénalités de retard (réglage private.reglages « daliro_taux_penalites_retard »)
+
+- Décidé par le coordinateur pour Omega (06/10) : la règle légale, taux BCE + 10 points (C. com. L441-10, II).
+- **2e semestre 2026 : 0.1240 (12,40 %)** — opérations principales de refinancement à 2,40 % depuis le 17/06/2026, en vigueur au 1er juillet
+  (source : BCE, « Key ECB interest rates », https://www.ecb.europa.eu/stats/policy_and_exchange_rates/key_ecb_interest_rates/html/index.en.html ;
+  concordant : FNTP, « Taux BCE et taux de l'intérêt légal », qui cite le même taux au 1er juillet 2026).
+  Fichier de pose : omega/modules/daliro/reglages/taux_penalites_2026s2.sql (rejouable, sans retrait).
+- **À METTRE À JOUR au 1er janvier et au 1er juillet** : nouveau fichier taux_penalites_AAAAsN.sql. Au 1er janvier 2027 : la BCE est à 2,65 %
+  depuis le 16/09/2026, donc 0.1265 sauf nouveau mouvement d'ici là. Le taux est recopié sur la situation à sa validation : le changer ne
+  touche pas les situations déjà validées.
+
 ## Journal de session
 
+- 06/10, 18 h Paris : b6_16 + b6_10 posés, ^test_b6_ 10/10. Taux des pénalités 2026 S2 = 12,40 % (BCE 2,40 % + 10), fichier reglages/taux_penalites_2026s2.sql. Suite : n° 2, pointage des heures.
 - 06/10, 17 h 45 Paris : b6_15 posé, ^test_b6_ 9/9. b6_16 encaissement des situations (L441-10) : échéance à 30 j posée à la validation (déclencheur), fixable jusqu'à 60 j ; paiements partiels (table btp_situations_paiements, portes seules, RLS prix) ; retard, indemnité 40 €, pénalités au taux posé dans private.reglages « daliro_taux_penalites_retard » (recopié à la validation), calculées paiement par paiement ; point du matin « situation impayée : relancez » ; tableau (paiements, encaissé). Exécuté en local (1 200 € : 7,99 € / 7,16 € de pénalités, refus des dépassements et des 61 jours). Test b6_10_encaissement (20). Écran : échéance, encaissé, état, « Noter un paiement ».
 
 - 06/10, 17 h 30 Paris : b6_13 cassait btp_tableau_chantier sur la recette (alias « v » des réserves = variable « v », 42702) → b6_14 correctif posé, ^test_b6_ 8/8. Leçon : un banc local d'EXÉCUTION réelle du tableau (pas seulement la compilation), reproduisant la panne puis le correctif. b6_15 : section « Chantiers : réceptions et retenues » du point du matin (gérant + valideurs, dès 5 h Paris, cron daliro-matin 30 min) — retenues dues / proches, décomptes à envoyer, réserves ouvertes, réceptions à prononcer ; exécutée en local (5 lignes justes). Test b6_09_point_matin (10).
