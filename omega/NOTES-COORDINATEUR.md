@@ -538,3 +538,13 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   pièces justes) → 0 proposition, car lorani_propositions attendait une ligne par code et
   lorani_valeurs_de_piece remonte le tableau en chaîne JSON. B5 écrit b5_06 (deux formes
   acceptées, fiche corrigée) ; A1 ajoute les champs facultatifs Lorani de la fiche de B5.
+- 04 h 10 — **b5_06** (worker-b5 24ea9b0) posé : private.lorani_codes_pieces accepte toutes
+  les formes de liste ; `^test_b5_` 114/114 ; pièce réelle 059e705e → [PCMI3, PCMI6]. B5
+  redépose une v3 par l'écran pour la preuve de bout en bout. **Lecteur v17** (worker-a1
+  0d54731 : champs facultatifs Lorani, lorani_courrier_autre, clés réduites aux champs
+  obligatoires). **a4_13** (worker-a4 5f6aa66) posé : demandes de facture et d'IBAN déposées
+  au nom du système, filed_saisisseurs ignore les étapes écrites par FILED, IBAN repris après
+  annulation ; a4_07 vert ; IBAN …0189 redéposé (en_attente, système). **FAC-2026-10-0471
+  validée de bout en bout** : approuvée par daf2@ à 02:03:20 Z (A3), demande executee —
+  posée juste avant a4_13, donc le correctif du demandeur reste à prouver sur la prochaine
+  facture réelle.
