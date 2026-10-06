@@ -2,7 +2,8 @@
    06/10/2026), sur le modèle de omega/recette-a3/accessibilite.mjs : à 390
    et 1440 px, les règles WCAG 2.1 A et AA sur la zone de l'espace (.esp),
    puis sur le dialogue « Inscrire un patient » avec la liste des patients
-   trouvés ouverte (« Nes » → Rosalie Nestor). Un écart « serious » ou
+   trouvés ouverte (« Nes » → Rosalie Nestor), et sur le dialogue « Noter
+   l'appel » (b3_12). Un écart « serious » ou
    « critical » fait échouer.
    usage : node omega/recette-b3/accessibilite-tiroma.mjs [origine] */
 import { readFileSync } from 'node:fs';
@@ -39,6 +40,16 @@ for (const largeur of [390, 1440]) {
   const liste = await s.evaluer(`document.querySelectorAll('[role="dialog"] ul[aria-label="Patients trouvés"] button').length`);
   ok(liste > 0, `la liste des patients trouvés est ouverte (${liste} bouton(s))`);
   dire(`tiroma ${largeur}, dialogue liste d'attente`, await analyser(s, `document.querySelector('[role="dialog"]')`));
+  /* b3_12 : le dialogue « Noter l'appel », issue « à rappeler » (le champ date apparaît) */
+  await s.aller(base + '/espace/tiroma');
+  await s.dormir(800);
+  await s.evaluer(axe + ';true');
+  await s.evaluer(`[...document.querySelectorAll('section[aria-label="Créneaux à sauver"] button')].find(b => /Noter l.appel/.test(b.textContent))?.click()`);
+  await s.dormir(500);
+  await s.evaluer(`document.querySelector('[role="dialog"] input[type="radio"][value="rappeler"]')?.click()`);
+  await s.dormir(300);
+  ok(await s.evaluer(`!!document.querySelector('[role="dialog"] input[type="date"]')`), 'le dialogue « Noter l\'appel » est ouvert, date de rappel visible');
+  dire(`tiroma ${largeur}, dialogue noter l'appel`, await analyser(s, `document.querySelector('[role="dialog"]')`));
   s.fermer();
 }
 console.log(echecs ? `\n${echecs} échec(s)` : '\ntout passe');

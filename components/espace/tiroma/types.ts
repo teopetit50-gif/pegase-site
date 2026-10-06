@@ -275,4 +275,43 @@ export type Dossier = {
   plans: PlanSansRdv[];
   verifications: Verification[];
   charge: Charge | null;
+  appels: RegistreAppels | null;
 };
+
+/* ——— le registre des appels (b3_12) ——— */
+
+export type MotifAppel = "creneau" | "plan" | "devis" | "controle" | "attente" | "autre";
+export type IssueAppel = "rdv_pris" | "message" | "pas_de_reponse" | "rappeler" | "refus" | "ne_plus_contacter";
+
+export type DernierAppel = { motif: MotifAppel; issue: IssueAppel; appele_le: string; rappeler_le: string | null; par: string | null };
+
+export type SuiviAppel = DernierAppel & {
+  patient_id: string;
+  patient_nom: string;
+  plan_id: string | null;
+  tentatives: number;
+  du: boolean;
+};
+
+export type BilanAppels = {
+  jours: number;
+  appels: number;
+  patients: number;
+  rdv_pris: number;
+  confirmes: number;
+  refus: number;
+  ne_plus_contacter: number;
+  a_reporter_logiciel: number;
+  valeur_plans: number;
+  minutes_creneaux: number;
+};
+
+export type RegistreAppels = {
+  jour: string;
+  a_reprendre: SuiviAppel[];
+  derniers: Record<string, DernierAppel>;
+  bilan: BilanAppels;
+};
+
+/** Ce qu'on appelle : un patient, pour une raison, éventuellement un plan ou un créneau. */
+export type CibleAppel = { patient_id: string; patient_nom: string; motif: MotifAppel; plan_id: string | null; evenement_id: number | string | null };

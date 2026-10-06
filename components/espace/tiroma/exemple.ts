@@ -178,4 +178,19 @@ export const DOSSIER_EXEMPLE: Dossier = {
     total: { ouvert_min: 1620, prevu_min: 870, taux: 0.537 },
     demi_journees_vides: 2,
   },
+  /* b3_12 : trente jours d'appels du cabinet d'exemple */
+  appels: {
+    jour: aujourdHui(0),
+    a_reprendre: [
+      { patient_id: "pa-6", patient_nom: "Patrice Zami", motif: "plan", plan_id: "pl-2", issue: "message", appele_le: a(-1, 16, 10), rappeler_le: null, par: "Élodie", tentatives: 1, du: true },
+      { patient_id: "pa-5", patient_nom: "Sylvie Rigoulet", motif: "controle", plan_id: null, issue: "rappeler", appele_le: a(-3, 11, 5), rappeler_le: aujourdHui(0), par: "Élodie", tentatives: 2, du: true },
+      { patient_id: "pa-7", patient_nom: "Nadège Hilaire", motif: "plan", plan_id: "pl-3", issue: "rappeler", appele_le: a(0, 8, 40), rappeler_le: aujourdHui(3), par: "Élodie", tentatives: 1, du: false },
+    ],
+    derniers: {
+      "pa-6": { motif: "plan", issue: "message", appele_le: a(-1, 16, 10), rappeler_le: null, par: "Élodie" },
+      "pa-5": { motif: "controle", issue: "rappeler", appele_le: a(-3, 11, 5), rappeler_le: aujourdHui(0), par: "Élodie" },
+      "pa-7": { motif: "plan", issue: "rappeler", appele_le: a(0, 8, 40), rappeler_le: aujourdHui(3), par: "Élodie" },
+    },
+    bilan: { jours: 30, appels: 64, patients: 41, rdv_pris: 19, confirmes: 17, refus: 6, ne_plus_contacter: 1, a_reporter_logiciel: 1, valeur_plans: 8740, minutes_creneaux: 495 },
+  },
 };
