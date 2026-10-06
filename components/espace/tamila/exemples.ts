@@ -13,7 +13,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { dans, ilYa } from "../exemples/socle";
-import type { Audience, CalculDelai, Delai, Dossier, DossierComplet, Export, Honoraires, Membre, Partie, Personne, Piece, RegleProcedure, Reglages } from "./types";
+import type { Audience, CalculDelai, Conformite, Delai, Dossier, DossierComplet, Export, Honoraires, Membre, Partie, Personne, Piece, RegleProcedure, Reglages } from "./types";
 
 export const EXEMPLE_CLIENT = "00000000-0000-4000-8000-00000000000b";
 export const EXEMPLE_ENTITE = "00000000-0000-4000-8000-0000000000e1";
@@ -200,9 +200,12 @@ export const DOSSIERS_EXEMPLE: DossierComplet[] = [
   },
   {
     dossier: dossier(5, { statut: "attente", matiere: "baux", juridiction: "Cour d'appel de Lyon", responsable_id: ROUSSEAU, cree_le: ilYa(1), cree_par: BENALI, ouvert_le: null, ouvert_par: null, demande_ouverture_id: `${D5}-dem1` }),
-    clair: { reference: "2026-0430", intitule: "Garnier c/ SCI Bellecour", numero_rg: null },
+    clair: { reference: "2026-0430", intitule: "Garnier c/ SCI du Moulin", numero_rg: null },
     cle: null,
-    parties: [], partiesClair: {}, appel: null, delais: [], audiences: [], avis: [],
+    /* le cas d'école du contrôle des conflits : l'adversaire est client du cabinet dans 2026-0412 */
+    parties: [partie(D5, 1, "client", "metropole"), partie(D5, 2, "adverse", "metropole")],
+    partiesClair: { [`${D5}-p1`]: { nom: "M. Jean Garnier", courriels: null }, [`${D5}-p2`]: { nom: "Moulin (SCI du)", courriels: null } },
+    appel: null, delais: [], audiences: [], avis: [],
     membres: [membre(D5, 1, ROUSSEAU, "responsable"), membre(D5, 2, BENALI, "intervenant")],
     murailles: [], exports: [], pieces: [piece(D5, 1, "bail-commercial.pdf", null, "a_rattacher", ilYa(1))], lectures: [],
     demandes: [{ id: `${D5}-dem1`, type_action: "ouvrir_dossier", objet_id: D5, resume: "Ouverture d'un dossier à la lecture", payload: { initiateur: BENALI, responsable: ROUSSEAU }, statut: "en_attente", cree_le: ilYa(1), roles_autorises: ["gerant", "admin", "valideur"] }],
@@ -255,5 +258,16 @@ export function honorairesExemple(dossier: string): Honoraires {
     temps: [temps(4, ROUSSEAU, 1, 15, "correspondance", "saisi", false), temps(3, ROUSSEAU, 2, 75, "recherche", "saisi"), temps(1, MOI, 9, 150, "redaction", "facture"), temps(2, MOI, 12, 60, "rendez_vous", "facture")],
     provisions: [{ id: `${D1}-hp1`, client_id: C, dossier_id: D1, montant_ttc_cents: 60000, demandee_le: jour(ilYa(22)), recue_le: jour(ilYa(18)), mode_reglement: "virement", statut: "recue", facture_id: facture.id, cree_par: MOI, cree_le: ilYa(22) }],
     factures: [facture],
+  };
+}
+
+/* ——— la conformité d'exemple (b4_07) : l'index est en place ; le premier dossier a sa vigilance (non assujetti) ——— */
+export function conformiteExemple(dossier: string): Conformite {
+  const c = DOSSIERS_EXEMPLE.find((x) => x.dossier.id === dossier);
+  const parties = (c?.parties ?? []).filter((p) => p.qualite === "client" || p.qualite === "adverse").length;
+  return {
+    dossier, index: true, parties, parties_indexees: parties, controles: 0, conflits_sans_decision: 0, dernier_controle: null,
+    vigilance: dossier === D1 ? { dossier_id: D1, client_id: C, assujetti: false, activite: null, identification_le: null, identification_piece: null, beneficiaire_effectif_le: null, risque: null, revue_le: jour(ilYa(20)), par: MOI, maj_le: ilYa(20) } : null,
+    vigilance_a_faire: dossier !== D1 && !!c && ["attente", "ouvert", "audit"].includes(c.dossier.statut),
   };
 }

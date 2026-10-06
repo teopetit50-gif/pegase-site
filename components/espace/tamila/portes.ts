@@ -36,12 +36,14 @@
        tamila_annuler_temps, tamila_demander_provision, tamila_provision_recue, tamila_emettre_facture,
        tamila_facture_payee, tamila_annuler_facture ; lecture des tables tamila_conventions, tamila_temps,
        tamila_provisions, tamila_factures (RLS : qui voit le dossier)
+     les conflits et la vigilance (b4_07) : tamila_index_cle, tamila_poser_index_cle, tamila_indexer_partie,
+       tamila_controler_conflits, tamila_decider_conflit, tamila_poser_vigilance, tamila_conformite
    Si la base répond autrement, l'écran montre son message tel quel.
    Les bytea partent en hexadécimal (« \x01… », chiffrement.ts).
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { Appel, Audience, Avis, CalculDelai, Cle, Convention, Delai, DemandeTamila, Dossier, DossierComplet, Export, Facture, Honoraires, Lecture, Membre, ModeHonoraires, ModeReglement, Muraille, NatureTemps, Partie, Personne, Piece, Provision, RegleProcedure, Reglages, Temps } from "./types";
+import type { Appel, Audience, Avis, CalculDelai, Cle, Conformite, ControleConflits, Convention, Delai, DemandeTamila, Dossier, DossierComplet, Export, Facture, Honoraires, Lecture, Membre, ModeHonoraires, ModeReglement, Muraille, NatureTemps, Partie, Personne, Piece, Provision, RegleProcedure, Reglages, Temps } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -249,7 +251,7 @@ const MESSAGES_COFFRE: Record<string, string> = {
 };
 
 /** Un geste du coffre (fonction Edge tamila-coffre), au nom de la personne connectée. */
-export async function coffre<T>(action: "activer" | "nouvelle_cle" | "cle_dossier" | "reenvelopper", corps: Record<string, unknown>): Promise<T> {
+export async function coffre<T>(action: "activer" | "nouvelle_cle" | "cle_dossier" | "reenvelopper" | "nouvelle_cle_index" | "cle_index", corps: Record<string, unknown>): Promise<T> {
   const supabase = createClient();
   const { data, error } = await supabase.functions.invoke("tamila-coffre", { body: { action, ...corps } });
   if (error) {
@@ -325,3 +327,22 @@ export const emettreFacture = (p_dossier: string, p_jusqu_au: string, p_debours_
   rpc<{ numero: string; total_ttc_cents: number; reste_du_cents: number }>("tamila_emettre_facture", { p_dossier, p_jusqu_au, p_debours_cents, p_definitif });
 export const facturePayee = (p_facture: string, p_payee_le: string, p_mode: ModeReglement) => rpc<void>("tamila_facture_payee", { p_facture, p_payee_le, p_mode });
 export const annulerFacture = (p_facture: string, p_motif: string) => rpc<void>("tamila_annuler_facture", { p_facture, p_motif });
+
+/* ——— conflits d'intérêts et vigilance (b4_07) ——— */
+
+/** null : la porte n'existe pas sur cette base (b4_07 non posée) ; la carte ne s'affiche pas. */
+export async function conformite(p_dossier: string): Promise<Conformite | null> {
+  try {
+    return await rpc<Conformite>("tamila_conformite", { p_dossier });
+  } catch {
+    return null;
+  }
+}
+export const indexCle = (p_client: string) => rpc<{ fournisseur: "local" | "scaleway"; reference: string; enveloppe: string | null } | null>("tamila_index_cle", { p_client });
+export const poserIndexCle = (p_client: string, p_enveloppe: string) => rpc<void>("tamila_poser_index_cle", { p_client, p_reference: null, p_enveloppe });
+export const indexerPartie = (p_partie: string, p_empreintes: string[]) => rpc<number>("tamila_indexer_partie", { p_partie, p_empreintes });
+export const controlerConflits = (p_client: string, p_dossier: string | null, p_qualite: string, p_empreintes: string[]) =>
+  rpc<ControleConflits>("tamila_controler_conflits", { p_client, p_dossier, p_qualite, p_empreintes });
+export const deciderConflit = (p_controle: string, p_decision: string, p_motif: string) => rpc<void>("tamila_decider_conflit", { p_controle, p_decision, p_motif });
+export const poserVigilance = (p_dossier: string, p_assujetti: boolean, p_activite: string | null, p_identification_le: string | null, p_identification_piece: string | null, p_beneficiaire_effectif_le: string | null, p_risque: string | null) =>
+  rpc<void>("tamila_poser_vigilance", { p_dossier, p_assujetti, p_activite, p_identification_le, p_identification_piece, p_beneficiaire_effectif_le, p_risque });
