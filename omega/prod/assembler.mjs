@@ -4,7 +4,8 @@
 // A5, 06/10/2026. Ne touche à aucune base : lit des fichiers JSON et le dépôt, écrit des fichiers.
 //
 // Usage :
-//   node omega/prod/assembler.mjs [--cloture] [--forcer] omega/prod/sortie/page-*.json
+//   node omega/prod/assembler.mjs [--cloture] [--forcer] [--projet=<ref>] omega/prod/sortie/page-*.json
+//     --projet  : référence du projet cible des URL (défaut : production noepmkkplxshjbmqqxft ; la répétition passe la sienne).
 //     --cloture : ajoute en dernier a5_01_private_execute.sql (étape C du dossier), lu sur origin/worker-a5.
 //     --forcer  : écrit même si un contrôle de contenu échoue (déconseillé ; le manifeste le signale).
 //
@@ -28,10 +29,14 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const RECETTE = 'ygwbgpowzlbdaajlsqkn';
-const PRODUCTION = 'noepmkkplxshjbmqqxft';
+// Projet cible des URL réécrites : la production par défaut ; --projet=<ref> pour la répétition (sa branche ou sa copie).
+const PROJET_ARG = process.argv.find((a) => a.startsWith('--projet='));
+const PRODUCTION = PROJET_ARG ? PROJET_ARG.slice('--projet='.length) : 'noepmkkplxshjbmqqxft';
+if (!/^[a-z]{20}$/.test(PRODUCTION)) { console.error(`--projet : référence de projet invalide (${PRODUCTION})`); process.exit(2); }
+if (PRODUCTION === 'ygwbgpowzlbdaajlsqkn') { console.error('--projet : la recette ne peut pas être la cible'); process.exit(2); }
 const ICI = dirname(fileURLToPath(import.meta.url));
 const RACINE = resolve(ICI, '..', '..');
-const SORTIE = join(ICI, 'migrations');
+const SORTIE = process.env.OMEGA_SORTIE_MIGRATIONS || join(ICI, 'migrations');
 
 const INTERDITS = [
   [/cccccccc-0000-4000-8000-00000000000c/i, 'client du banc'],
@@ -363,7 +368,7 @@ function principal() {
     process.exit(1);
   }
   if (aReconstruire.length) process.exitCode = 3;
-  console.log(`${manifeste.filter((m) => m.decision === 'emporter').length} fichier(s) écrit(s) dans omega/prod/migrations/ ; manifeste : omega/prod/migrations/MANIFESTE.md`);
+  console.log(`${manifeste.filter((m) => m.decision === 'emporter').length} fichier(s) écrit(s) dans ${SORTIE} ; manifeste : ${join(SORTIE, 'MANIFESTE.md')}`);
 }
 
 principal();
