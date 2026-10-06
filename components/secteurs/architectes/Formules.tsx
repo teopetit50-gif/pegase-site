@@ -408,8 +408,8 @@ export default function Formules() {
                       <path d="M20 6 9 17l-5-5"></path>
                     </svg>
                     <span>
-                      Métré des plans contre la DPGF
-                      <SiEnPreparation pour="lorani" t="Métré des plans contre la DPGF" />
+                      Métré déposé contre la DPGF
+                      <SiEnPreparation pour="lorani" t="Métré déposé contre la DPGF" />
                     </span>
                   </li>
                   <li className="flex items-center gap-3">

@@ -70,7 +70,7 @@ const QUESTIONS = [
   {
     id: "metre",
     q: "Lorani contrôle-t-il les quantités de la DPGF ?",
-    a: "Oui. Il mesure les surfaces et les longueurs sur les plans, puis les compare aux quantités de la DPGF, lot par lot. Un poste sous-estimé ressort avant la consultation, là où il deviendrait sinon une plus-value de chantier.",
+    a: "Oui. Le métré que vous déposez, ou les quantités écrites sur les planches, est comparé aux quantités de la DPGF, lot par lot. Un poste sous-estimé ressort avant la consultation, là où il deviendrait sinon une plus-value de chantier.",
   },
   {
     id: "assurances",

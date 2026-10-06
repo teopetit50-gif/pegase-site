@@ -71,14 +71,15 @@ const LIGNES = {
      (b5_13 à b5_15) ; ordres de service et réserves jusqu'à la GPA (b5_19) ; comptes rendus de
      chantier et questions suivies jusqu'à la réponse (b5_20) ; décennales
      (b5_18, b5_09) ; accessibilité, ERP, RE2020, Cerfa, fonds BET et DOE
-     (b5_21). Restent : PLU (servitudes et risques non lus) et le métré, dont
-     la phrase promet une mesure sur le dessin que le lecteur ne fait pas. */
+     (b5_21). Le métré : retiré le 06/10 au soir, la phrase dit maintenant le
+     métré déposé (ou les quantités écrites sur les planches) comparé à la
+     DPGF (b5_16 amendé, 3c838eb8) ; le lecteur ne mesure pas le dessin.
+     Reste : PLU (servitudes et risques non lus). */
   lorani: [
     "Plans croisés, rapport PDF annoté",
     "PLU, servitudes et risques lus depuis l'adresse",
     "Questions posées au dossier",
     "Analyse des offres sur DPGF",
-    "Métré des plans contre la DPGF",
     "Une question en un clic",
     "Checklists de l'agence",
     "Export Excel par lot",
@@ -132,10 +133,9 @@ const LIGNES = {
   /* OFFLOAD — ouvrier C4. Lignes « non construites » de NOTES-C4 (f9bf72d)
      qui apparaissent hors du catalogue. Le catalogue, lui, porte déjà
      `atteste: false`. Retiré le 06/10 au soir : « Entretien annuel redevenu
-     dû » (c4_07, 5f2cc7e, échéances et renouvellements). */
-  offload: [
-    "Pièce arrivée, jamais reprise",
-  ],
+     dû » (c4_07, 5f2cc7e, échéances et renouvellements) ; « Pièce arrivée,
+     jamais reprise » (c4_08, e4365bfb, affaires restées en plan). */
+  offload: [] as string[],
 
   /* REPUT — ouvrier C3 (palier 5 : rendez-vous, avis, astreinte). Lignes
      non tenues (NOTES-C3) qui apparaissent hors du catalogue. */
