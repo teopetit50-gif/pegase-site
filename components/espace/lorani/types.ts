@@ -281,6 +281,47 @@ export type Temps = {
   note: string | null;
 };
 
+/* le chantier (b5_13) : marchés par lot, situations de travaux, documents d'exécution à viser */
+export type Marche = {
+  id: string;
+  projet_id: string;
+  lot_id: string;
+  titulaire: string;
+  montant_ht: number;
+  avenants_ht: number;
+  retenue_pct: number;
+  delai_verification_jours: number | null;
+  actif: boolean;
+};
+export type Situation = {
+  id: string;
+  projet_id: string;
+  marche_id: string;
+  numero: number;
+  mois: string;
+  cumul_ht: number;
+  recue_le: string;
+  a_viser_avant: string | null;
+  statut: "a_viser" | "visee" | "rectifiee";
+  cumul_admis_ht: number | null;
+  observation: string | null;
+  visee_le: string | null;
+};
+export type Visa = {
+  id: string;
+  projet_id: string;
+  lot_id: string | null;
+  document: string;
+  indice: string;
+  recu_le: string;
+  commande_le: string | null;
+  delai_visa_jours: number;
+  a_viser_avant: string | null;
+  avis: "a_viser" | "vso" | "vao" | "ref";
+  observation: string | null;
+  vise_le: string | null;
+};
+
 /* tout ce que l'écran montre, d'une source ou de l'autre */
 export type Dossier = {
   projets: Projet[];
@@ -295,6 +336,9 @@ export type Dossier = {
   pieces: PieceProjet[];
   honoraires: Honoraire[];
   temps: Temps[];
+  marches: Marche[];
+  situations: Situation[];
+  visas: Visa[];
   /* user_id → nom (annuaire) */
   noms: Record<string, string>;
   /* le compte de la personne connectée (base réelle) */

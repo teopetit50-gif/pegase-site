@@ -28,6 +28,7 @@ import { Avis, Chargement, Pastille, Ruban, Vide } from "../ui";
 import { dateCourte } from "../format";
 import { ETATS, FAMILLES, NATURES_INTERVENANT, NATURES_PROJET, PHASES, ROLES_PROJET, TYPES, TYPES_PIECE, famille, prochaineDate, titrePermis, type Famille } from "./etats";
 import { dossierExemple } from "./exemples";
+import Chantier from "./Chantier";
 import Honoraires from "./Honoraires";
 import PermisVue from "./PermisVue";
 import { ajouterIntervenant, ajouterLot, ajouterMembre, chargerDossier, deposerCourrier, ouvrirPermis, ouvrirProjet } from "./portes";
@@ -765,6 +766,7 @@ function ProjetCarte({ projet, dossier, nommer, peutEcrire, envoi, ouvrirForm, a
         )}
       </div>
       <Honoraires projet={projet} dossier={dossier} nommer={nommer} peutEcrire={peutEcrire} agir={agir} />
+      <Chantier projet={projet} dossier={dossier} peutEcrire={peutEcrire} agir={agir} />
     </section>
   );
 }

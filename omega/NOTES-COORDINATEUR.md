@@ -831,3 +831,23 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   5f490c4). Fusionnés et poussés dans main 1f6427c : Tamila conflits (5f490c4), Varelo contrats
   (d369676), Tiroma pilotage (29c453b), Tavaro état des lieux (36bd54f). Courriel d'essai de Teo
   vers banc@recu.omegaai.fr : toujours 0 réception.
+- 15 h 55 Z — Poses : b5_13 + test b5_04 (53bc500), b6_16 + test b6_10 (187e1c1), 19ah_recette_seulement +
+  19ah + test socle (dcb2542), b3_14 v2 + test 15 (d64d4c1). Tests : ^test_b5_ 4/4, ^test_b6_ 10/10,
+  ^test_b3_ 17/17, 19ab 12/12, **19ah 18/19** (n° 15 : donnees_sante NULL au lieu de false → B3),
+  44 et 46 verts, **51 rouge** (DELETE accordé sans politique sur lorani_honoraires/marches/situations/
+  temps/visas → B5 b5_13b). echange-pa v2 (bb6ab78). Étape 5 PA : bloc A seul — le 204 de BAC-0001 est
+  en échec « CDAR_INVALIDE : SIREN invalide : undefined » (fournisseur allemand sans SIREN) → A2.
+  Fusionnés dans main : Daliro encaissement (187e1c1), notice Tamila (3d0e1a0) → 93ff8ee.
+  **Vercel : 93ff8ee refusé « Deployment rate limited — retry in 24 hours »** (quota gratuit). En ligne :
+  1f6427c. C1 limité à 2–3 pushes par jour. Les fusions suivantes partiront au retour du quota.
+- 16 h 05 Z — **Teo absent plusieurs heures : décisions par le coordinateur** (son autorisation ;
+  objectif « livrer tout ce que le site promet »). Routine passée à toutes les heures ; audit des
+  promesses du site lancé (agent en lecture). Poses : b4_08 + test 17 (2556214), test 19ah corrigé
+  (631ea79), b1_06 + test b1_09 (ccc8f8f), b5_13b (7515fbd). Tests : b4_17 vert, b1_09 2/2, 51 vert,
+  44 vert, **19ah 19/20** (n° 16 : donnees_fictives vrai sur un envoi ordinaire → B3 corrige le lot).
+  Fusionnés dans main 26cdd66 (build vert, en ligne au retour du quota) : Lorani chantier (7515fbd),
+  Varelo réciproques (ccc8f8f), FILED facture électronique + Comptabilité/FEC (A3 5091088), lecteur
+  Tamila (2556214). Décision Tamila : avis RPVA par le canal courriel (file « à rattacher », chiffrés
+  au rattachement, copie en clair purgée, 7 j max) → B4 b4_09. A4 : TVA dans le cdar (fournisseur
+  étranger) → a4_19, puis echange-pa 21466c7 et rejeu du 204. A1 : branchement avis Tamila.
+  B2 b2_06 annoncé mais pas poussé.

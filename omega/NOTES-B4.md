@@ -396,7 +396,9 @@ pour qu'il serve CHAQUE JOUR et qu'on le paie, par ordre d'importance :
   conflit » interdit quand un conflit est trouvé), motif en code ; vigilance LCB-FT (activité assujettie,
   identification du client et du bénéficiaire effectif, risque, revue annuelle) ; résumé `tamila_conformite`.
   Empreintes et contrôles conservés après l'effacement du dossier (registre des conflits) : **à confirmer par
-  Teo** (sinon une ligne de `private.tables_objets`).
+  Teo** (sinon une ligne de `private.tables_objets`). **Décision de Teo (06/10) : on les garde** ; la carte le dit en
+  une ligne (« les noms ne sont jamais conservés en clair ; une empreinte reste pour détecter un conflit avec un
+  ancien client »).
 - **Ouvrier** (2868bcb) : tamila-coffre `nouvelle_cle_index` (gérant) et `cle_index` (personne du cabinet), données
   associées « index:<client> ». 20 tests Deno.
 - **Écran** : `components/espace/tamila/index.ts` (normalisation : accents, formes sociales, civilités, mots vides,
@@ -404,11 +406,24 @@ pour qu'il serve CHAQUE JOUR et qu'on le paie, par ordre d'importance :
   et vigilance » (`ConformiteTamila.tsx`, après les honoraires) : création de la clé d'index par le gérant,
   indexation et contrôle des parties du dossier en un geste, résultats nommés (référence en clair du dossier si
   on la connaît), décision, vigilance. Exemple : 2026-0430 « Garnier c/ SCI du Moulin » montre un conflit avec
-  2026-0412 (la SCI y est cliente). Recette cinq largeurs 89/89 (10 sur les conflits et la vigilance), axe-core
+  2026-0412 (la SCI y est cliente). Recette cinq largeurs 90/90 (11 sur les conflits et la vigilance), axe-core
   0 écart sur le dialogue de vigilance. **Pas rejoué en base réelle.**
 - **Limites** : un nom mal orthographié n'est pas trouvé (égalité stricte après normalisation, pas de
   ressemblance : un index aveugle ne permet pas la recherche floue sans affaiblir l'aveuglement) ; la clé d'index
   d'un cabinet local ne se ré-enveloppe pas encore au passage au coffre (à faire, comme les clés de dossier).
+
+## 13. Les avis RPVA lus (vague 3, n° 3 : la part faisable sans compte Scaleway ; lot B4-9, 06/10)
+
+- La porte d'entrée (relevé e-barreau ou transfert des notifications) reste à concevoir avec Teo : aucune API
+  publique e-barreau connue pour un logiciel tiers ; le socle a un canal courriel (`deposer_reception`) mais une
+  pièce arrivée par courriel est en clair et sans dossier : à rattacher puis chiffrer, ce qui suppose l'écran.
+- **Fait** : la passerelle « avis lu → délais » pour les pièces déposées dans un dossier, dès que le lecteur lit les
+  pièces chiffrées (coffre + A1). `b4_08_tamila_avis_lecteur.sql` (deux portes serveur : `tamila_dossier_pour_lecteur`,
+  `tamila_avis_du_lecteur`), test `17_avis_lecteur.sql` (15 contrôles : serveur seul, pièce lue, confiance,
+  **aucune valeur hors des sept clés** (un nom est refusé), avis idempotent, audience posée à l'heure de Paris, RG
+  différent → à vérifier + alerte critique) ; côté lecteur, `tamila-coffre/lecteur.ts` (`avisDepuisLecture`,
+  `rgConcorde`, `dossierPourLecteur`, `poserAvisLu`, 5 tests Deno de plus, 25 au total) ; CHAMPS-LECTURE-TAMILA
+  mis à jour. **À A1** : le branchement dans `lire_piece.ts` (mode d'emploi en tête de la section de `lecteur.ts`).
 
 ## 7. Prochaine étape
 

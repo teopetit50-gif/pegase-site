@@ -16,7 +16,8 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AlertTriangle, Ban, BadgeCheck, Check, CheckCircle2, ClipboardList, FolderInput, Landmark, Link2, Pencil, RefreshCw, ShieldCheck, Unlock, UserCheck } from "lucide-react";
+import Link from "next/link";
+import { AlertTriangle, Ban, BadgeCheck, BookOpen, Check, CheckCircle2, ClipboardList, FolderInput, Landmark, Link2, Pencil, RefreshCw, Scale, ShieldCheck, Unlock, UserCheck, X } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
@@ -28,6 +29,8 @@ import { apparierLigne, attesterIdentite, bloquerFournisseur, classerDocument, c
 import VisionneusePiece from "./VisionneusePiece";
 import FicheFournisseur, { registreDe } from "./FicheFournisseur";
 import { analyserTva, chiffres, sirenValide, tvaPropre } from "./identifiants";
+import { AIDE_FAIT_FOI, MOTIFS_207, chargerMotifsLitige, cloreLitige, comptabiliserFacture, ouvrirLitige, pastilleProvenance, provenanceDe, quand, type MotifLitige } from "./factureElectronique";
+import { CycleDeVie, EcrituresFacture } from "./CycleEcritures";
 
 type Props = {
   dossier: DossierFiled;
@@ -56,6 +59,9 @@ type Form =
   | { type: "confirmer_fournisseur" }
   | { type: "attester" }
   | { type: "identifiants" }
+  | { type: "litige" }
+  | { type: "clore_litige"; litige: string }
+  | { type: "comptabiliser" }
   | null;
 
 const maintenant = () => new Date().toISOString();
@@ -75,6 +81,9 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
   const [iban, setIban] = useState("");
   const [commandeChoisie, setCommandeChoisie] = useState("");
   const [ligneCommandeChoisie, setLigneCommandeChoisie] = useState("");
+  const [onglet, setOnglet] = useState<"dossier" | "cycle" | "ecritures">("dossier");
+  const [motifsLitige, setMotifsLitige] = useState<MotifLitige[]>(MOTIFS_207);
+  const [codeLitige, setCodeLitige] = useState("");
   const [sirenSaisi, setSirenSaisi] = useState("");
   const [tvaSaisie, setTvaSaisie] = useState("");
 
@@ -394,6 +403,65 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
     );
   };
 
+  /* ——— la facture électronique (fiche d'A4, a4_16 à a4_18) ——— */
+  const provenance = pastilleProvenance(dossier);
+  const structuree = provenanceDe(dossier) === "structuree";
+  /* une valeur du fichier structuré fait foi : elle ne se corrige pas (la base refuse, 22023) */
+  const faitFoi = (cle: string) => {
+    const notion = NOTION_PAR_COLONNE[cle] ?? cle;
+    const v = valeurDe(notion);
+    return v?.source === "xml";
+  };
+  const toutFaitFoi = CHAMPS_CORRIGEABLES.every((c) => faitFoi(c.cle));
+  const litigeOuvert = (dossier.litiges ?? []).find((l) => !l.clos_le) ?? null;
+
+  const ouvrirFormLitige = () => {
+    ouvrir({ type: "litige" });
+    setCodeLitige("");
+    if (source === "reelle") void chargerMotifsLitige().then(setMotifsLitige);
+  };
+  const soumettreLitige = () => {
+    if (!facture) return;
+    const libelle = motifsLitige.find((m) => m.code === codeLitige)?.libelle;
+    return envoyer(
+      () => ouvrirLitige(facture.id, codeLitige || null, motif).then(() => undefined),
+      () => {
+        const quandIso = maintenant();
+        const texte = codeLitige ? `${codeLitige} : ${motif.trim()}` : motif.trim();
+        const cycle = [...(dossier.cycle ?? []), { code: 207, libelle: "En litige", survenu_le: quandIso, motif_code: codeLitige || "AUTRE", motif_libelle: libelle ?? "Autre", motif: motif.trim(), montant: null, etat: structuree ? "a_emettre" : "sans_objet", emis_le: null, sens: "emis" as const, erreur: null, obligatoire: false }];
+        return ajouterFil({ ...dossier, cycle, litiges: [{ id: `litige-${Date.now()}`, ouvert_le: quandIso, motif: texte, clos_le: null, issue: null }, ...(dossier.litiges ?? [])] }, "litige", `Litige ouvert${libelle ? ` (${libelle})` : ""} : ${motif.trim()}`);
+      },
+      "Le litige est ouvert ; le statut « En litige » part au fournisseur.",
+    );
+  };
+  const soumettreClotureLitige = (id: string) =>
+    envoyer(
+      () => cloreLitige(id, motif.trim()),
+      () => ajouterFil({ ...dossier, litiges: (dossier.litiges ?? []).map((l) => (l.id === id ? { ...l, clos_le: maintenant(), issue: motif.trim() } : l)) }, "litige", `Litige clos : ${motif.trim()}`),
+      "Le litige est clos, avec son issue.",
+    );
+  const soumettreComptabilisation = () => {
+    if (!facture) return;
+    return envoyer(
+      () => comptabiliserFacture(facture.id, motif.trim() || null).then(() => undefined),
+      () => {
+        const ht = facture.montant_ht ?? 0;
+        const tva = facture.montant_tva ?? 0;
+        const ttc = facture.montant_ttc ?? ht + tva;
+        const num = 1 + Math.max(0, ...(dossier.ecritures ?? []).map((x) => x.ecriture_num));
+        const base = { journal_code: "HA", journal_lib: "Achats", ecriture_num: num, ecriture_date: maintenant().slice(0, 10), comp_aux_num: null, ecriture_let: null, date_let: null };
+        const ecritures = [
+          ...(dossier.ecritures ?? []),
+          { ...base, compte_num: "606", compte_lib: "Achats non stockés", debit: ht, credit: 0 },
+          { ...base, compte_num: "44566", compte_lib: "TVA déductible sur autres biens et services", debit: tva, credit: 0 },
+          { ...base, compte_num: "401", compte_lib: "Fournisseurs", comp_aux_num: fournisseur?.code ?? null, debit: 0, credit: ttc },
+        ];
+        return ajouterFil({ ...dossier, ecritures, facture: { ...facture, statut: "comptabilisee" } }, "comptabilisation", "Transmise à la comptabilité : écriture d'achat passée.");
+      },
+      "La facture est transmise à la comptabilité ; ses écritures sont passées.",
+    );
+  };
+
   const e = etatDocument(doc.etat);
 
   return (
@@ -404,6 +472,8 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
             <span className="esp-mono" style={{ fontWeight: 700, fontSize: 15 }}>{doc.reference}</span>
             <Pastille teinte={e.teinte}>{e.libelle}</Pastille>
             {facture ? <Pastille teinte={statutFacture(facture.statut).teinte}>{statutFacture(facture.statut).libelle}</Pastille> : null}
+            {facture ? <Pastille teinte={provenance.cle === "electronique" ? "noir" : provenance.cle === "structure" ? "bleu" : undefined} contour={provenance.cle === "lue" || provenance.cle === "saisie"} title={provenance.aide}>{provenance.libelle}</Pastille> : null}
+            {litigeOuvert ? <Pastille teinte="ambre">En litige</Pastille> : null}
             {doc.nature ? <Pastille contour>{NATURES[doc.nature]}{doc.nature_source === "humain" ? " · classé à la main" : ""}</Pastille> : <Pastille teinte="ambre">Nature à classer</Pastille>}
             {facture ? <Pastille contour>version {facture.version}</Pastille> : null}
           </div>
@@ -413,6 +483,36 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
         <div className="esp-dossier-grille">
           {/* ——— colonne dossier ——— */}
           <div className="esp-carte-corps" style={{ display: "grid", gap: 16 }}>
+            {facture ? (
+              <div className="esp-onglets" role="tablist" aria-label="Le dossier de la facture">
+                {([["dossier", "Dossier"], ["cycle", `Cycle de vie${dossier.cycle?.length ? ` (${dossier.cycle.length})` : ""}`], ["ecritures", `Écritures${dossier.ecritures?.length ? ` (${dossier.ecritures.length})` : ""}`]] as const).map(([cle, libelle]) => (
+                  <button key={cle} type="button" role="tab" aria-selected={onglet === cle} className="esp-onglet" onClick={() => { setOnglet(cle); setFait(null); }}>{libelle}</button>
+                ))}
+              </div>
+            ) : null}
+            {onglet !== "dossier" && facture ? (
+              <>
+                {fait ? <Avis teinte="vert" role="status"><strong>C&apos;est fait.</strong> {fait}</Avis> : null}
+                {erreur && !form ? <Avis teinte="rouge" role="alert"><strong>Refusé par la base.</strong> {erreur}</Avis> : null}
+                {onglet === "cycle" ? (
+                  <CycleDeVie lignes={dossier.cycle ?? []} />
+                ) : (
+                  <EcrituresFacture
+                    ecritures={dossier.ecritures ?? []}
+                    peutTransmettre={facture.statut === "validee"}
+                    envoi={envoi}
+                    onTransmettre={() => ouvrir({ type: "comptabiliser" })}
+                  />
+                )}
+              </>
+            ) : (
+            <>
+            {litigeOuvert ? (
+              <Avis teinte="ambre">
+                <strong>En litige depuis le {quand(litigeOuvert.ouvert_le)}.</strong> {litigeOuvert.motif}{" "}
+                <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "clore_litige", litige: litigeOuvert.id })}>Clore le litige</button>
+              </Avis>
+            ) : null}
             {doc.etat === "doublon" ? (
               <Avis teinte="gris"><strong>Doublon.</strong> {doc.motif ?? "Ce document a déjà été reçu."}</Avis>
             ) : null}
@@ -449,7 +549,9 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
                     })}
                   </div>
                   <div className="esp-actions" style={{ marginTop: 10 }}>
-                    <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "corriger" })}><Pencil width={13} height={13} aria-hidden="true" /> Corriger une valeur</button>
+                    <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={toutFaitFoi} title={toutFaitFoi ? AIDE_FAIT_FOI : undefined} onClick={() => { ouvrir({ type: "corriger" }); const libre = CHAMPS_CORRIGEABLES.find((c) => !faitFoi(c.cle)); if (libre) setChamp(libre.cle); }}><Pencil width={13} height={13} aria-hidden="true" /> Corriger une valeur</button>
+                    {!litigeOuvert ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={ouvrirFormLitige}><Scale width={13} height={13} aria-hidden="true" /> Ouvrir un litige</button> : null}
+                    {structuree && (facture.statut === "a_valider" || facture.statut === "bloquee") ? <Link href="/espace/validations" className="r-btn r-btn--fil r-btn--petit" title="La facture se refuse dans la file de validation, avec son motif."><X width={13} height={13} aria-hidden="true" /> Refuser</Link> : null}
                     <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!nonVerifiees.length} onClick={() => ouvrir({ type: "confirmer" })}><ShieldCheck width={13} height={13} aria-hidden="true" /> {nonVerifiees.length ? `Confirmer ${nonVerifiees.length > 1 ? `les ${nonVerifiees.length} valeurs non vérifiées` : "la valeur non vérifiée"}` : "Valeurs lues vérifiées"}</button>
                     <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "rattacher" })}><Link2 width={13} height={13} aria-hidden="true" /> Rattacher à un fournisseur</button>
                     <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!commandes.length} onClick={() => ouvrir({ type: "commande" })}><ClipboardList width={13} height={13} aria-hidden="true" /> {commandeRetenue ? `Commande ${commandeRetenue.numero} · changer` : "Désigner une commande"}</button>
@@ -660,6 +762,8 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
                 {!dossier.historique.length ? <li><span className="esp-fil-point" /><div className="esp-fil-meta">Aucun évènement.</div></li> : null}
               </ul>
             </div>
+            </>
+            )}
           </div>
 
           {/* ——— colonne pièce ——— */}
@@ -681,9 +785,10 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
             <div className="esp-form">
               <label className="rv-libelle">Champ
                 <select className="rv-champ" value={champ} onChange={(e2) => setChamp(e2.target.value)}>
-                  {CHAMPS_CORRIGEABLES.map((c) => <option key={c.cle} value={c.cle}>{c.libelle}</option>)}
+                  {CHAMPS_CORRIGEABLES.map((c) => <option key={c.cle} value={c.cle} disabled={faitFoi(c.cle)}>{c.libelle}{faitFoi(c.cle) ? " — du fichier, fait foi" : ""}</option>)}
                 </select>
               </label>
+              {structuree ? <Avis teinte="bleu">{AIDE_FAIT_FOI} Un champ absent du fichier se complète normalement.</Avis> : null}
               <label className="rv-libelle">Nouvelle valeur <span className="esp-obligatoire">(obligatoire)</span>
                 <input className="rv-champ" type={CHAMPS_CORRIGEABLES.find((c) => c.cle === champ)?.type === "date" ? "date" : "text"} inputMode={CHAMPS_CORRIGEABLES.find((c) => c.cle === champ)?.type === "montant" ? "decimal" : undefined} value={valeur} onChange={(e2) => setValeur(e2.target.value)} />
               </label>
@@ -924,6 +1029,75 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
         </DialogContent>
       </Dialog>
 
+      <Dialog open={form?.type === "litige"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><Scale width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Ouvrir un litige</DialogTitle>
+            <DialogDescription>Le litige suspend la facture : elle n&apos;entre plus dans l&apos;échéancier tant qu&apos;il est ouvert{structuree ? ", et le statut « En litige » part au fournisseur avec son motif" : ""}.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Motif du litige
+                <select className="rv-champ" value={codeLitige} onChange={(e2) => setCodeLitige(e2.target.value)}>
+                  <option value="">Autre motif</option>
+                  {motifsLitige.filter((m) => m.code !== "AUTRE").map((m) => <option key={m.code} value={m.code}>{m.libelle}</option>)}
+                </select>
+              </label>
+              <label className="rv-libelle">Précisez pour le fournisseur <span className="esp-obligatoire">(obligatoire, 3 caractères au moins)</span>
+                <textarea className="rv-champ" value={motif} onChange={(e2) => setMotif(e2.target.value)} maxLength={480} placeholder="Ce qui ne va pas, et ce que vous attendez (avoir, facture rectificative…)." />
+              </label>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!motifOk || envoi} onClick={soumettreLitige}>{envoi ? <Loader variant="spin" /> : null} Ouvrir le litige</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={form?.type === "clore_litige"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><Scale width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Clore le litige</DialogTitle>
+            <DialogDescription>La facture revient dans l&apos;échéancier. L&apos;issue est conservée avec votre nom et l&apos;heure.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Issue du litige <span className="esp-obligatoire">(obligatoire, 3 caractères au moins)</span>
+                <textarea className="rv-champ" value={motif} onChange={(e2) => setMotif(e2.target.value)} maxLength={480} placeholder="Avoir reçu, facture rectifiée, accord trouvé…" />
+              </label>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!motifOk || envoi} onClick={() => form?.type === "clore_litige" && soumettreClotureLitige(form.litige)}>{envoi ? <Loader variant="spin" /> : null} Clore le litige</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={form?.type === "comptabiliser"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><BookOpen width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Transmettre à la comptabilité</DialogTitle>
+            <DialogDescription>FILED passe l&apos;écriture d&apos;achat de la facture (journal Achats) d&apos;après ses imputations validées. Une écriture ne se modifie plus : une erreur se corrige par une écriture de correction.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Motif <span className="esp-kpi-sous">(facultatif)</span>
+                <textarea className="rv-champ" value={motif} onChange={(e2) => setMotif(e2.target.value)} maxLength={480} />
+              </label>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}{/imputation/i.test(erreur) ? " Complétez l'imputation de la facture, puis recommencez." : ""}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={envoi} onClick={soumettreComptabilisation}>{envoi ? <Loader variant="spin" /> : null} Transmettre</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={form?.type === "attester"} onOpenChange={(o) => !o && setForm(null)}>
         <DialogContent>
           <DialogHeader>
@@ -973,7 +1147,7 @@ function Valeur({ champ, texte, v, actif, onClick, douteux }: { champ: string; t
         {v?.verifiee ? <span className="esp-coche" title="Vérifiée"><CheckCircle2 width={14} height={14} aria-label="vérifiée" /></span> : null}
       </span>
       <span className="esp-valeur-texte">{texte}</span>
-      <span className="esp-valeur-cite">{v ? `p. ${v.page ?? 1} · ${v.source === "humain" ? "saisie" : v.source === "regle" ? "règle" : v.source.toUpperCase()}${v.confiance !== null && v.source !== "humain" ? ` · ${Math.round(v.confiance * 100)} %` : ""}` : douteux ? "douteux" : "non cité"}</span>
+      <span className="esp-valeur-cite">{v?.source === "xml" ? "du fichier" : v ? `p. ${v.page ?? 1} · ${v.source === "humain" ? "saisie" : v.source === "regle" ? "règle" : v.source.toUpperCase()}${v.confiance !== null && v.source !== "humain" ? ` · ${Math.round(v.confiance * 100)} %` : ""}` : douteux ? "douteux" : "non cité"}</span>
     </button>
   );
 }

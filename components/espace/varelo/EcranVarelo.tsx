@@ -16,6 +16,8 @@
        par objet du groupe, le plafond et son dépassement ;
      · les contrats du groupe à dénoncer (vague 3, Contrats.tsx), rangés
        par date limite de dénonciation ;
+     · les comptes réciproques intragroupe (vague 3, Reciproques.tsx) :
+       créance de l'une, dette reconnue de l'autre, écart, justification ;
      · dessous, les lots à valider (paires proposées par le calcul, avec
        la preuve ; « écarter cette paire » ; le lot se décide dans
        /espace/validations) et les sociétés du groupe par pôle (inscrire
@@ -45,6 +47,7 @@ import Societes from "./Societes";
 import Depot from "./Depot";
 import Encours from "./Encours";
 import Contrats from "./Contrats";
+import Reciproques from "./Reciproques";
 import "./varelo.css";
 
 export type Donnees = Referentiel;
@@ -557,6 +560,8 @@ export default function EcranVarelo() {
           onFait={(m) => setFait(m)}
         />
       ) : null}
+
+      {donnees && contexte ? <Reciproques source={source} contexte={contexte} client_id={client_id} onFait={(m) => setFait(m)} /> : null}
 
       <div className="esp-grille" style={{ marginTop: 16 }}>
         {donnees ? <Lots donnees={donnees} actions={actions} /> : null}

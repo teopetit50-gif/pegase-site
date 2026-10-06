@@ -26,7 +26,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { Calcul, CasRejet, DateLue, Dossier, Echeance, Honoraire, Intervenant, Lot, MembreProjet, Permis, PieceProjet, Projet, Recours, Temps } from "./types";
+import type { Calcul, CasRejet, DateLue, Dossier, Echeance, Honoraire, Intervenant, Lot, Marche, MembreProjet, Permis, PieceProjet, Projet, Recours, Situation, Temps, Visa } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -51,7 +51,7 @@ export async function chargerDossier(): Promise<Dossier> {
   const supabase = createClient();
   const moi = await monCompte();
   if (!moi) throw new ErreurPorte("Aucune session ouverte : connectez-vous depuis le cockpit.");
-  const [projets, permis, dates, echeances, recours, lots, intervenants, membres, cas, pieces, annuaire, honoraires, temps] = await Promise.all([
+  const [projets, permis, dates, echeances, recours, lots, intervenants, membres, cas, pieces, annuaire, honoraires, temps, marches, situations, visas] = await Promise.all([
     supabase.from("lorani_projets").select("*").order("maj_le", { ascending: false }).limit(300),
     supabase.from("lorani_permis").select("*").order("cree_le", { ascending: false }).limit(600),
     supabase.from("lorani_permis_dates_lues").select("*").order("cree_le", { ascending: false }).limit(600),
@@ -67,6 +67,10 @@ export async function chargerDossier(): Promise<Dossier> {
     /* b5_12 : absentes tant que la migration n'est pas posée ; l'écran montre alors des honoraires vides */
     supabase.from("lorani_honoraires").select("id, projet_id, element, intitule, montant_ht, heures_prevues, statut, achevee_le, facturee_le").limit(3000),
     supabase.from("lorani_temps").select("id, projet_id, honoraire_id, membre, jour, heures, note").order("jour", { ascending: false }).limit(5000),
+    /* b5_13 : absentes tant que la migration n'est pas posée ; le chantier est alors vide */
+    supabase.from("lorani_marches").select("id, projet_id, lot_id, titulaire, montant_ht, avenants_ht, retenue_pct, delai_verification_jours, actif").limit(2000),
+    supabase.from("lorani_situations").select("id, projet_id, marche_id, numero, mois, cumul_ht, recue_le, a_viser_avant, statut, cumul_admis_ht, observation, visee_le").order("numero").limit(5000),
+    supabase.from("lorani_visas").select("id, projet_id, lot_id, document, indice, recu_le, commande_le, delai_visa_jours, a_viser_avant, avis, observation, vise_le").order("recu_le", { ascending: false }).limit(5000),
   ]);
   /* le premier refus de la base est dit tel quel ; les lectures secondaires manquantes ne cachent pas les permis */
   for (const r of [projets, permis, dates]) if (r.error) throw new ErreurPorte(message(r.error));
@@ -84,6 +88,9 @@ export async function chargerDossier(): Promise<Dossier> {
     casRejet: (cas.data ?? []) as CasRejet[],
     honoraires: ((honoraires.data ?? []) as Honoraire[]).map((h) => ({ ...h, montant_ht: Number(h.montant_ht), heures_prevues: Number(h.heures_prevues) })),
     temps: ((temps.data ?? []) as Temps[]).map((t) => ({ ...t, heures: Number(t.heures) })),
+    marches: ((marches.data ?? []) as Marche[]).map((m) => ({ ...m, montant_ht: Number(m.montant_ht), avenants_ht: Number(m.avenants_ht), retenue_pct: Number(m.retenue_pct) })),
+    situations: ((situations.data ?? []) as Situation[]).map((x) => ({ ...x, cumul_ht: Number(x.cumul_ht), cumul_admis_ht: x.cumul_admis_ht === null ? null : Number(x.cumul_admis_ht) })),
+    visas: (visas.data ?? []) as Visa[],
     pieces: ((pieces.data ?? []) as (Omit<PieceProjet, "cree_le"> & { recue_le: string | null })[]).map(({ recue_le, ...x }) => ({ ...x, cree_le: recue_le ?? undefined })),
     noms,
     moi,
@@ -250,6 +257,38 @@ export async function changerHonoraire(id: string, valeurs: Partial<Pick<Honorai
 export async function saisirTemps(v: { client_id: string; projet_id: string; honoraire_id: string; jour: string; heures: number; note: string | null }): Promise<void> {
   const supabase = createClient();
   const { error } = await supabase.from("lorani_temps").insert(v);
+  if (error) throw new ErreurPorte(message(error));
+}
+
+/* ——— le chantier (b5_13) ——— */
+
+export async function poserMarche(v: { client_id: string; projet_id: string; lot_id: string; titulaire: string; montant_ht: number; avenants_ht: number; retenue_pct: number }): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.from("lorani_marches").insert(v);
+  if (error) throw new ErreurPorte(message(error));
+}
+
+export async function recevoirSituation(v: { client_id: string; projet_id: string; marche_id: string; numero: number; mois: string; cumul_ht: number; recue_le: string }): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.from("lorani_situations").insert(v);
+  if (error) throw new ErreurPorte(message(error));
+}
+
+export async function viserSituation(id: string, v: { statut: "visee" | "rectifiee"; cumul_admis_ht: number | null; observation: string | null }): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.from("lorani_situations").update(v).eq("id", id);
+  if (error) throw new ErreurPorte(message(error));
+}
+
+export async function recevoirDocument(v: { client_id: string; projet_id: string; lot_id: string | null; document: string; indice: string; recu_le: string; commande_le: string | null }): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.from("lorani_visas").insert(v);
+  if (error) throw new ErreurPorte(message(error));
+}
+
+export async function rendreVisa(id: string, v: { avis: "vso" | "vao" | "ref"; observation: string | null }): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.from("lorani_visas").update(v).eq("id", id);
   if (error) throw new ErreurPorte(message(error));
 }
 
