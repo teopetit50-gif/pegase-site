@@ -158,9 +158,13 @@ begin
     'message', v_e.suivi, 'emis_le', now(), 'code', v_e.code,
     'facture', jsonb_build_object('numero', v_f.numero, 'date', to_char(v_f.date_emission, 'YYYY-MM-DD'),
                                   'type_code', case when v_f.nature = 'avoir' then '381' else '380' end,
-                                  'emetteur_siren', coalesce(v_f.fournisseur_lu ->> 'siren', v_four.siren)),
-    'emetteur', jsonb_build_object('siren', coalesce(v_f.acheteur_lu ->> 'siren', v_ent.siren), 'nom', v_ent.nom, 'role', 'BY'),
-    'destinataire', jsonb_build_object('siren', coalesce(v_f.fournisseur_lu ->> 'siren', v_four.siren), 'nom', v_four.nom, 'role', 'SE'),
+                                  'emetteur_siren', coalesce(v_f.fournisseur_lu ->> 'siren', v_four.siren),
+                                  -- Lot 11b (a4_19) : un vendeur étranger n'a pas de SIREN ; sa TVA l'identifie.
+                                  'emetteur_tva', coalesce(v_f.fournisseur_lu ->> 'tva', v_four.tva)),
+    'emetteur', jsonb_build_object('siren', coalesce(v_f.acheteur_lu ->> 'siren', v_ent.siren), 'nom', v_ent.nom, 'role', 'BY',
+                                   'tva', coalesce(v_f.acheteur_lu ->> 'tva', to_jsonb(v_ent) ->> 'tva')),
+    'destinataire', jsonb_build_object('siren', coalesce(v_f.fournisseur_lu ->> 'siren', v_four.siren), 'nom', v_four.nom, 'role', 'SE',
+                                       'tva', coalesce(v_f.fournisseur_lu ->> 'tva', v_four.tva)),
     'motif', case when v_e.code in (206, 207, 208, 210) then jsonb_build_object('code', coalesce(v_e.motif_code, 'AUTRE'), 'texte', left(v_motif, 500)) end,
     'montant', case when v_e.code in (211, 212) then jsonb_build_object('valeur', v_e.montant, 'devise', coalesce(v_f.devise, 'EUR')) end));
   return jsonb_build_object('envoyer', true, 'statut', v_e.code, 'client_id', v_e.client_id, 'suivi', v_e.suivi, 'cdar', v_cdar);
@@ -299,7 +303,10 @@ begin
     select f.* into v_f from public.filed_factures f
       left join public.filed_fournisseurs fo on fo.id = f.fournisseur_id
      where f.numero_normalise = upper(regexp_replace(coalesce(v_cdar -> 'facture' ->> 'numero', ''), '[^A-Za-z0-9]', '', 'g'))
-       and coalesce(f.fournisseur_lu ->> 'siren', fo.siren) = coalesce(v_cdar -> 'facture' ->> 'emetteur_siren', v_cdar -> 'emetteur' ->> 'siren')
+       -- Lot 11b (a4_19) : par le SIREN du vendeur, ou par sa TVA (vendeur étranger sans SIREN).
+       and (coalesce(f.fournisseur_lu ->> 'siren', fo.siren) = coalesce(v_cdar -> 'facture' ->> 'emetteur_siren', v_cdar -> 'emetteur' ->> 'siren')
+            or upper(regexp_replace(coalesce(f.fournisseur_lu ->> 'tva', fo.tva, ''), '[^A-Za-z0-9]', '', 'g'))
+               = upper(regexp_replace(coalesce(v_cdar -> 'facture' ->> 'emetteur_tva', v_cdar -> 'emetteur' ->> 'tva', '#'), '[^A-Za-z0-9]', '', 'g')))
      order by f.cree_le desc limit 1;
     v_code := case when (v_cdar ->> 'code') ~ '^[0-9]{3}$' then (v_cdar ->> 'code')::smallint end;
     if v_f.id is null or v_code is null or not exists (select 1 from public.filed_cycle_vie_statuts s where s.code = v_code) then

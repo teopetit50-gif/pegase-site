@@ -165,3 +165,26 @@ begin
     '{"cdar": {"code": "212", "facture": {"numero": "INCONNUE", "emetteur_siren": "123456782"}}}', 'pa:FLUX-LC-2:t1:ok');
   return next is(r ->> 'etat', 'orphelin', 'CDAR d''une facture inconnue : orphelin');
 end $f$;
+
+-- a4_19 : un vendeur étranger sans SIREN ; le CDAR porte sa TVA, et un CDAR entrant se rapproche par la TVA.
+create or replace function tests.test_a4_19_01_fournisseur_etranger() returns setof text
+language plpgsql as $f$
+declare o jsonb := tests.a4_organisation(); s jsonb; v_four uuid; v_suivi uuid; r jsonb;
+begin
+  insert into public.filed_fournisseurs (client_id, code, nom, nom_normalise, pays, statut, source, tva)
+  values ((o ->> 'client')::uuid, 'LIEF', 'Lieferant GmbH', 'lieferant gmbh', 'DE', 'actif', 'saisie', 'DE123456789')
+  returning id into v_four;
+  s := tests.a4_facture_pa(o, 'xml', 'BAC-0001');
+  update public.filed_factures set fournisseur_id = v_four, fournisseur_lu = '{"nom": "Lieferant GmbH", "tva": "DE123456789"}'
+   where id = (s ->> 'facture')::uuid;
+  select suivi into v_suivi from public.filed_cycle_vie where facture_id = (s ->> 'facture')::uuid and code = 204;
+  r := public.pa_commencer_statut(v_suivi);
+  return next is((r ->> 'envoyer')::boolean, true, 'Vendeur sans SIREN : le statut part quand même');
+  return next is(r -> 'cdar' -> 'facture' ->> 'emetteur_tva', 'DE123456789', 'facture.emetteur_tva = TVA du vendeur');
+  return next is(r -> 'cdar' -> 'destinataire' ->> 'tva', 'DE123456789', 'destinataire.tva = TVA du vendeur');
+  return next ok(not (r -> 'cdar' -> 'facture' ? 'emetteur_siren') and not (r -> 'cdar' -> 'destinataire' ? 'siren'),
+                 'Pas de SIREN vide dans le CDAR (jsonb_strip_nulls)');
+  r := public.pa_noter_flux('FLUX-LC-DE', 'entrant', 'SupplierInvoiceLC', 'CDAR', null, 'ok', now(), null, null,
+    '{"cdar": {"code": "212", "facture": {"numero": "BAC-0001", "emetteur_tva": "DE 123 456 789"}}}', 'pa:FLUX-LC-DE:t1:ok');
+  return next is(r ->> 'facture', s ->> 'facture', 'CDAR entrant rapproché par la TVA du vendeur');
+end $f$;
