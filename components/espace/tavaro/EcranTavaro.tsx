@@ -32,6 +32,7 @@ import DossierContrat, { type Gestes } from "./DossierContrat";
 import type { GestesEtats } from "./EtatsDesLieux";
 import { appliquerEtats, empreinte } from "./edl";
 import BaremeVue from "./BaremeVue";
+import AnalysesParc from "./AnalysesParc";
 import AvisVue, { type GestesAvis } from "./AvisVue";
 import ContestationsVue, { type GestesContestations } from "./ContestationsVue";
 import ParcVue, { type GestesParc } from "./ParcVue";
@@ -770,6 +771,11 @@ export default function EcranTavaro() {
 
       <div style={{ marginTop: 16 }}>
         <ContestationsVue contestations={monde?.contestations ?? []} dossiers={dossiers} reglages={monde?.reglages ?? null} role={role} nommer={nommer} nomAgence={nomAgenceDe} gestes={gestesContestations} />
+      </div>
+
+      {/* b3t_01 à b3t_03 (renfort B3) : véhicules inactifs, réservations et contrats à risque, montée en gamme, plan de flotte */}
+      <div style={{ marginTop: 16 }}>
+        <AnalysesParc source={source} moi={moi} role={role} />
       </div>
 
       {role === "gerant" || role === "admin" || role === "valideur" ? (
