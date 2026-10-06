@@ -1019,3 +1019,26 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   réécrite en conséquence. Poses : c3_08 (bb153a2), a4_32 (19d98ea), b2_10 v2 (66d8199), b2_11 (a8f17be), 19ao
   (f10a4b0) ; lots h1915tav 501/0, h1930lot 85/0 (44/46/51/56 compris). Fusion c3, a4, b2, b3 (espace client).
   worker-a5 non fusionnée (omega-sauvegarde.yml, non approuvé). Vercel toujours limité : en ligne demain.
+
+## REPRISE — pause demandée par Teo le 06/10 à 21 h Z
+
+- Routine horaire trig_01PJKxdeE5XGx3n8QTMoWwVe DÉSACTIVÉE (enabled = false) ; son texte porte la règle de Teo
+  sur la vitrine. Le déclencheur unique de 02 h 32 Z (redéploiement de main) reste actif.
+- Ouvriers en pause, chacun avec une section « REPRISE » en tête de sa NOTES : A1 6022838, A3 66cf791, A4 ac31278,
+  A5 8abc536, B1 41e86e5, B2 528034d, B3 0ea8ec5, B4 52ecf3b, B6 a418d1f, C2 abbefb4, C3 6a815f2, C4 b639da2,
+  C5 c4ff2736. Pas encore de réponse à la pause : A2, B5, B7, C1.
+- Main (dab9e49 + ce commit) : fusion a3, a4, b1, b2, b3, b4, b6, c2, c3, c4. NON fusionnées : worker-a1
+  (vercel.json propre à la branche ; le code tourne depuis le SHA déployé, lecteur v31 e0932e3), worker-a2
+  (fonctions servies depuis leurs SHA), worker-a5 (omega-sauvegarde.yml non approuvé), worker-c5 (passes de vitrine
+  annulées par Teo), worker-b5 et tableau-de-bord-v2 (attendre leur SHA de pause). Vitrine : 0 fichier modifié
+  depuis 6f2a957.
+- Recette : tout est posé et vert jusqu'à b6_25b, c4_09, b2_11b, b5_23, c3_08, a4_32, 19ao. Déployés : lecteur v31,
+  reception v12, widget v1, export-complet v2, reput-reponse v2. Réglages recette : lecteur_analyses = oui,
+  export_origines_recette = http://localhost:3010, MET Norway.
+- À la reprise : (1) lire omega/CHIFFRAGE/SYNTHESE.md avec Teo et choisir le premier module à mettre en vrai ;
+  (2) la production (omega/CHIFFRAGE/production.md : Supabase Pro, Vercel Pro, Bedrock UE, secrets) ;
+  (3) débordement de 9 px à 390 sur /espace2/cashd (C1/C2) ; (4) Géorisques injoignable (B5 : relais Vercel puis
+  data.gouv) ; (5) Teo a dit NON à toute modification de la vitrine, phrases fausses comprises (relevé dans
+  transversal.md et les fichiers par module).
+- Prospection Guadeloupe : session P1 (session_01Lv8Yz477zkrpiu5TWReysT), branche prospection-guadeloupe,
+  sources ouvertes seulement (SIRENE, Annuaire Santé, ordres, sites officiels).
