@@ -12,6 +12,7 @@ RPC et le contrat des portes, `doubles.ts` les doubles de test.
 | `expediteur` | `expediteur/` | ouvrier `envois.brevo`, `envois.brevo_sms`, `envois.confirmer` ; appelé chaque minute | `true` |
 | `webhooks-brevo` | `webhooks/brevo/` | événements de remise Brevo (remis, rebond, plainte, refus) | `false` |
 | `reception` | `reception/` | e-mail entrant Brevo, WhatsApp Cloud API, formulaire du site | `false` |
+| `pa-bac-a-sable` | `pa-bac-a-sable/` | faux serveur AFNOR XP Z12-013 (recette seulement) pour jouer `echange-pa` sans compte PA | `false` |
 | `echange-pa` | `echange-pa/` | ouvrier `pa.deposer`, `pa.statut` + relevé de la plateforme agréée ; appelé chaque minute. **Pas encore déployable : portes `pa_*` à poser** | `true` |
 
 Projet de recette : `ygwbgpowzlbdaajlsqkn` (`https://ygwbgpowzlbdaajlsqkn.supabase.co`).
@@ -26,6 +27,7 @@ cd omega/functions/expediteur     && deno fmt --check && deno lint && deno check
 cd omega/functions/webhooks/brevo && deno fmt --check && deno lint && deno check index.ts && deno test --allow-env
 cd omega/functions/reception      && deno fmt --check && deno lint && deno check index.ts && deno test --allow-env
 cd omega/functions/echange-pa     && deno fmt --check && deno lint && deno check index.ts && deno test --allow-env
+cd omega/functions/pa-bac-a-sable && deno fmt --check && deno lint && deno check index.ts && deno test --allow-env
 ```
 
 Les tests n'ont besoin ni de réseau ni de base : toutes les portes, Brevo, Graph et
@@ -187,6 +189,37 @@ de cycle de vie (CDAR), relevé des factures et statuts reçus. Même forme que 
   `PA_TOKEN_URL`, `PA_CLIENT_ID`, `PA_CLIENT_SECRET`, `PA_SCOPE` (facultatif). Absentes :
   travaux reportés `PA_NON_BRANCHEE`, aucun relevé, battement `pa_branchee: false`.
 - Portes `pa_*` : contrat dans `omega/NOTES-A2.md` (« Échange PA »), **pas encore posées**.
+
+### Bac à sable de la PA (`pa-bac-a-sable/`, recette seulement)
+
+Aucune PA n'ouvre de bac à sable sans contrat : `pa-bac-a-sable` est un faux serveur
+AFNOR XP Z12-013 (jeton OAuth2, `flows`, `flows/search`, `flows/{id}`, `healthcheck`), qui
+garde ses flux dans `omega-clients` sous `_pa/bac-a-sable/`. Il accuse « Ok » tout dépôt, sauf
+un fichier contenant `REJET-BAC` (accusé « Error », motif `REJ_SEMAN`). Il rend le même flux
+pour le même `trackingId`. Il ne valide ni Factur-X, ni UBL, ni CDAR : ce n'est pas une PA.
+`serveur_test.ts` le joue de bout en bout avec l'adaptateur AFNOR et le passage d'`echange-pa`.
+
+Pour le jouer sur la recette, **une fois les portes `pa_*` posées (a4_17)** :
+
+1. Déployer `pa-bac-a-sable` (verify_jwt **false**), secrets `PA_BAC_CLIENT_ID`,
+   `PA_BAC_CLIENT_SECRET`, `PA_BAC_CLE_JETONS` (trois chaînes aléatoires, 32 octets hex).
+2. Déployer `echange-pa` (verify_jwt true), secrets :
+   `PA_FLOW_URL=https://ygwbgpowzlbdaajlsqkn.supabase.co/functions/v1/pa-bac-a-sable/flow/v1`,
+   `PA_TOKEN_URL=https://ygwbgpowzlbdaajlsqkn.supabase.co/functions/v1/pa-bac-a-sable/oauth/token`,
+   `PA_CLIENT_ID` et `PA_CLIENT_SECRET` = ceux du bac à sable.
+3. Cron `omega-echange-pa` chaque minute (même forme que `omega-expediteur`), puis déposer un
+   travail `pa.deposer` pour une facture émise du banc.
+4. Simuler une facture fournisseur reçue :
+
+   ```sh
+   J=$(curl -s -X POST "$BAC/oauth/token" -d grant_type=client_credentials \
+        -d client_id="$PA_BAC_CLIENT_ID" -d client_secret="$PA_BAC_CLIENT_SECRET" | jq -r .access_token)
+   curl -s -X POST "$BAC/_bac/entrant" -H "Authorization: Bearer $J" -H 'Content-Type: application/json' \
+        -d '{"name":"facture-fournisseur.xml","flowSyntax":"UBL","contenu":"<Invoice>…</Invoice>"}'
+   ```
+
+   (`BAC=https://ygwbgpowzlbdaajlsqkn.supabase.co/functions/v1/pa-bac-a-sable`). Une minute
+   plus tard, `pa_noter_flux` l'a reçue (sens `entrant`, chemin `_pa/entrants/<flux>/…`).
 
 ## Contrat des portes (rappel)
 

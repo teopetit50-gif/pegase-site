@@ -502,7 +502,21 @@ statut est décidé (refus, encaissement…).
    - entrant statut (`…LC`, syntaxe CDAR) : `p_detail.cdar` = `{message, code, libelle,
      facture, motif}` lu par l'ouvrier ; la porte retrouve la facture émise par son numéro.
 
-Points ouverts : chiffrement ou HDS des factures de santé ; une seule connexion PA (Omega
+**Réponses du coordinateur (06/10, provisoires jusqu'au choix de Teo)** : voie 1, Omega
+opérateur de dématérialisation chez une PA technique en marque blanche, par l'API AFNOR
+XP Z12-013 (Iopole, B2Brouter… immatriculation à vérifier) : l'adaptateur AFNOR est le bon.
+L'ouvrier fabrique les CDAR (champ `cdar`). Codes 200 à 213, jamais d'émission de 200–203 ni
+de 213. Une seule connexion PA pour tous les clients. Pas de facture de santé dans FILED pour
+l'instant. A4 écrit les portes `pa_*` dans a4_17.
+
+**Bac à sable** (`omega/functions/pa-bac-a-sable/`) : aucune PA trouvée qui ouvre un bac à
+sable sans contrat. J'ai donc écrit un faux serveur AFNOR, déployable en fonction Edge
+(verify_jwt false, flux dans le bucket sous `_pa/bac-a-sable/`) pour que `echange-pa` le
+joigne depuis la recette. Le test de bout en bout passe : dépôt, accusé relevé, rejet simulé
+(`REJET-BAC`), facture et CDAR entrants injectés par `/_bac/entrant`, idempotence au troisième
+passage. Mode d'emploi pour la recette : README des fonctions, § « Bac à sable de la PA ».
+
+Points ouverts (avant réponse) : chiffrement ou HDS des factures de santé ; une seule connexion PA (Omega
 opérateur pour tous ses clients) ou une par client (alors `pa_commencer_*` rend aussi
 l'identité de connexion, et l'ouvrier lit les secrets par client comme `secret_expediteur`).
 
