@@ -372,6 +372,29 @@ Ce que fait l'adaptateur :
 Pour le brancher, il faut la même décision que pour la Suisse (le registre `hmrc` dans les contraintes, accord de
 Teo) et une branche `GB…` dans le contrôle `identite.registre` d'A4. XI (Irlande du Nord) reste à VIES.
 
+## 14. Tiers étrangers dans FILED : ce qui manque pour que la fiche porte un identifiant étranger vérifié (6/10)
+
+**Côté ouvrier, c'est fait (inerte).** `verifier.ts` aiguille selon le registre de la demande : `sirene`, `vies`,
+`uid_ch` (registre IDE suisse, sans clé), `hmrc` (TVA GB, identifiants HMRC). Un registre inconnu n'est plus envoyé
+par défaut à VIES : le travail est fini, ignoré. Sans `HMRC_CLIENT_ID` et `HMRC_CLIENT_SECRET`, une demande `hmrc`
+est reportée (indisponible), et le battement le dit (`hmrc: "absent"`). Aujourd'hui aucune demande `uid_ch` ni `hmrc`
+ne peut exister : la base les refuse. Le redéploiement est donc sans effet tant que rien d'autre ne bouge.
+
+**Côté base : trois contraintes CHECK à élargir.** Chacune doit être retirée puis reposée avec la nouvelle liste,
+d'où l'accord de Teo. Un seul « go » pour les trois :
+1. `filed_verifications_tiers.registre` (A4, a4_04) : `vies | sirene` → `+ uid_ch | hmrc` ;
+2. `identites_registre.registre` (B7, b7_01, contrainte nommée par défaut) : même liste ;
+3. `filed_fournisseurs.identite_source` (A4, a4_10) : `sirene | vies | humain` → `+ uid_ch | hmrc` (le verdict pose le
+   registre comme source).
+
+**Ensuite, deux lots, chacun dans son périmètre :**
+- **A4** : `filed_controles_identite` demande `uid_ch` quand la TVA ou `id_etranger` a la forme `CHE…`, `hmrc` pour
+  `GB…`. Pour un pays sans registre ouvert, `identite.registre` reste « attention » et propose l'attestation humaine.
+- **B7** : `identite_demander` admet les deux registres (formes `CHE` + 9 chiffres + suffixe facultatif, `GB` + 9
+  ou 12 chiffres) ; `identite_balayer` revérifie aussi les fournisseurs étrangers ; test pgTAP de bout en bout
+  (demande → travail → `noter_identite` → verdict `identite_source = uid_ch` sur la fiche). Une vingtaine de lignes
+  SQL, écrites dès que les contraintes sont élargies.
+
 ## 11. Journal des étapes
 
 - 5/10 23 h 30 : lecture du contrat, du socle, du lot 4d d'A4, du lecteur ; scénario et portes écrits et
@@ -468,4 +491,9 @@ Teo) et une branche `GB…` dans le contrôle `identite.registre` d'A4. XI (Irla
 - 6/10 15 h 20 Z : `omega/functions/identite/hmrc.ts` + `tests/hmrc_test.ts` (7) + double `HmrcFactice` ; 65 tests
   Deno verts ; formes prises dans la spécification OpenAPI publiée par HMRC (v2.0) ; aucun appel réel. Étapes pour
   Teo en section 13.
+- 6/10 15 h 58 Z (coordinateur) : l'audit des promesses note HMRC et UID « à poser » ; suite : les tiers étrangers
+  dans FILED.
+- 6/10 16 h 20 Z : rien à poser en base pour HMRC et UID (adaptateurs seulement). Aiguillage par registre dans
+  l'ouvrier (`uid_ch`, `hmrc`, registre inconnu ignoré), `hmrcDepuisEnv`, `hmrc` dans le battement ; 69 tests Deno
+  verts. Ce qui manque en base, section 14 : trois contraintes à élargir (accord de Teo), puis un lot A4 et un lot B7.
 
