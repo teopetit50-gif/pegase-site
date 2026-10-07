@@ -2138,3 +2138,28 @@ button.v2-suivi-bouton:hover {
     grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   }
 }
+
+/* ══ Réglages : intertitres des rubriques, mode calme (07/10/2026) ═════ */
+.v2-cote-groupe {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .v2-cote-groupe {
+    display: block;
+    margin: 12px 12px 4px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--v2-gray-700);
+  }
+  .v2-cote-groupe:first-child {
+    margin-top: 0;
+  }
+}
+html.v2-calme *,
+html.v2-calme *::before,
+html.v2-calme *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}

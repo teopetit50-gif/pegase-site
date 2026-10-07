@@ -34,6 +34,7 @@ import { MODULES, MODULES_A_VENIR, RACINE, porteeDe, titreDe } from "./modules";
 import { useCompteurs } from "./compteurs";
 import { OrganisationContexte } from "./organisation";
 import { changerTheme, useTheme } from "./theme";
+import { useCalme } from "./mouvement";
 import { useDonnees } from "./donnees";
 import { A_PAYER, groupeDe, minuit } from "./filed/calculs";
 import "./espace2.css";
@@ -252,6 +253,7 @@ type Lien = { libelle: string; href: string; icone: React.ReactNode; exact?: boo
 
 function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisateur: Utilisateur | null; chemin: string; ouvrirPalette: () => void; fermer?: () => void }) {
   const theme = useTheme();
+  useCalme();
   const toast = useToast();
   const { source, changer, connecte } = useSource();
   const { alertes, enAttente } = useAlertes();
@@ -302,7 +304,7 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
         sous: [
           { libelle: "Apparence", href: `${RACINE}/reglages#apparence` },
           { libelle: "Données", href: `${RACINE}/reglages#donnees` },
-          { libelle: "Compte", href: `${RACINE}/reglages#compte` },
+          { libelle: "Équipe", href: `${RACINE}/reglages#compte` },
         ],
       },
     ],
