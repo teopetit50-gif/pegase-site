@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import EcranCashd from "@/components/espace/cashd/EcranCashd";
 import Habille from "@/components/espace2/Habille";
+import TableauCashd from "@/components/espace2/TableauCashd";
 
-/* /espace2/cashd — l'écran de /espace/cashd, repris tel quel dans le nouvel espace. */
+/* /espace2/cashd — en haut, le tableau de bord CASHD (maquette de Teo,
+   07/10/2026) ; dessous, l'écran de travail de /espace/cashd, inchangé. */
 
 export const metadata: Metadata = {
   title: "Relances",
@@ -11,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function PageCashd() {
   return (
-    <Habille>
+    <Habille avant={<TableauCashd />}>
       <EcranCashd />
     </Habille>
   );

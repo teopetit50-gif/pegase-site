@@ -12,9 +12,12 @@
 import "@/components/espace/espace.css";
 import "./habillage.css";
 
-export default function Habille({ children }: { children: React.ReactNode }) {
+/* `avant` : un bloc du nouvel espace posé au-dessus de l'écran repris
+   (le tableau de bord CASHD), hors du monde `.resa .esp` */
+export default function Habille({ children, avant }: { children: React.ReactNode; avant?: React.ReactNode }) {
   return (
     <div className="v2-page v2-arrivee">
+      {avant}
       <div className="resa esp">{children}</div>
     </div>
   );
