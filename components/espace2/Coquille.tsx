@@ -31,7 +31,7 @@ import { FournisseurToasts, useToast } from "./Toasts";
 import { ItemMenu, Kbd, MenuDeroulant, SectionMenu, SeparateurMenu } from "./ui";
 import Palette from "./Palette";
 import { ecrireStockage, useOuvertes, useStockage } from "./Collection";
-import { MODULES, MODULES_A_VENIR, RACINE, porteeDe, titreDe } from "./modules";
+import { MODULES, MODULES_A_VENIR, MODULES_PRINCIPAUX, RACINE, moduleMetier, porteeDe, titreDe } from "./modules";
 import { useCompteurs } from "./compteurs";
 import { OrganisationContexte } from "./organisation";
 import { useTheme } from "./theme";
@@ -250,7 +250,7 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
   );
 }
 
-type Lien = { libelle: string; href: string; icone: React.ReactNode; exact?: boolean; compteur?: number; sous?: { libelle: string; href: string }[]; bientot?: boolean };
+type Lien = { libelle: string; href: string; icone: React.ReactNode; exact?: boolean; /** l'adresse qui allume l'entrée, quand le lien mène à une sous-page */ racine?: string; compteur?: number; sous?: { libelle: string; href: string }[]; bientot?: boolean };
 
 function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisateur: Utilisateur | null; chemin: string; ouvrirPalette: () => void; fermer?: () => void }) {
   useTheme();
@@ -260,7 +260,8 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
   const { alertes, enAttente } = useAlertes();
   const compteurs = useCompteurs();
   const tachesOuvertes = useOuvertes("taches");
-  const [replies, replier] = useReplis();
+  const metier = moduleMetier(utilisateur?.secteur, !!utilisateur);
+  const [ouvertes, basculer] = useSections();
   const organisation = utilisateur?.entreprise || (utilisateur ? "Mon organisation" : "Atelier Bertin");
   const nom = utilisateur ? [utilisateur.prenom, utilisateur.nom].filter(Boolean).join(" ") || utilisateur.email : null;
 
@@ -307,13 +308,19 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
     },
     {
       titre: "Modules",
-      liens: MODULES.map<Lien>((m) => ({
-        libelle: m.nom,
-        href: `${RACINE}/${m.cle}`,
-        icone: <m.icone {...I} />,
-        compteur: compteurs[m.cle],
-        sous: m.onglets.length > 1 ? m.onglets.map((o) => ({ libelle: o.libelle, href: o.href })) : undefined,
-      })).concat(MODULES_A_VENIR.map<Lien>((m) => ({ libelle: m.nom, href: `${RACINE}/${m.cle}`, icone: <m.icone {...I} />, bientot: true }))),
+      liens: MODULES.filter((m) => MODULES_PRINCIPAUX.includes(m.cle) || m.cle === metier)
+        /* les quatre communs dans leur ordre, puis le module du métier */
+        .sort((a, b) => Number(a.cle === metier) - Number(b.cle === metier))
+        .map<Lien>((m) => ({
+          libelle: m.nom,
+          /* FILED : un lien simple vers « À payer », sans menu déroulant —
+             ses autres pages sont dans ses onglets */
+          href: `${RACINE}/${m.cle}${m.cle === "filed" ? "/a-payer" : ""}`,
+          racine: `${RACINE}/${m.cle}`,
+          icone: <m.icone {...I} />,
+          compteur: compteurs[m.cle],
+        }))
+        .concat(MODULES_A_VENIR.map<Lien>((m) => ({ libelle: m.nom, href: `${RACINE}/${m.cle}`, icone: <m.icone {...I} />, bientot: true }))),
     },
     {
       titre: "Suivi",
@@ -401,11 +408,14 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
 
       <nav className="v2-laterale-nav" aria-label="Pages et modules">
         {groupes.map((g, i) => {
-          const replie = !!g.titre && replies.includes(g.titre);
+          /* fermée par défaut (Teo, 07/10) ; celle de la page courante
+             s'ouvre seule, tant qu'on ne l'a pas refermée à la main */
+          const ici = g.liens.some((l) => chemin === (l.racine ?? l.href) || chemin.startsWith(`${l.racine ?? l.href}/`));
+          const replie = !!g.titre && !(ouvertes[g.titre] ?? ici);
           return (
             <div key={i} className="v2-section">
               {g.titre ? (
-                <button type="button" className="v2-section-titre" aria-expanded={!replie} onClick={() => replier(g.titre!)}>
+                <button type="button" className="v2-section-titre" aria-expanded={!replie} onClick={() => basculer(g.titre!, replie)}>
                   <span>{g.titre}</span>
                   <ChevronDown width={14} height={14} aria-hidden="true" />
                 </button>
@@ -491,21 +501,22 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
   );
 }
 
-/* les sections repliées, gardées sur l'appareil */
-function useReplis(): [string[], (titre: string) => void] {
-  const brut = useStockage("espace2-replis");
-  let replies: string[] = [];
+/* l'état ouvert / fermé choisi à la main pour chaque section, gardé sur
+   l'appareil ; une section jamais touchée suit la règle par défaut */
+function useSections(): [Record<string, boolean>, (titre: string, ouvrir: boolean) => void] {
+  const brut = useStockage("espace2-sections");
+  let etat: Record<string, boolean> = {};
   try {
-    const v = JSON.parse(brut || "[]");
-    if (Array.isArray(v)) replies = v;
+    const v = JSON.parse(brut || "{}");
+    if (v && typeof v === "object" && !Array.isArray(v)) etat = v;
   } catch {}
-  const replier = (titre: string) =>
-    ecrireStockage("espace2-replis", JSON.stringify(replies.includes(titre) ? replies.filter((x) => x !== titre) : [...replies, titre]));
-  return [replies, replier];
+  const basculer = (titre: string, ouvrir: boolean) => ecrireStockage("espace2-sections", JSON.stringify({ ...etat, [titre]: ouvrir }));
+  return [etat, basculer];
 }
 
 function LienLateral({ lien, chemin }: { lien: Lien; chemin: string }) {
-  const dedans = lien.exact ? chemin === lien.href : chemin === lien.href || chemin.startsWith(`${lien.href}/`);
+  const base = lien.racine ?? lien.href;
+  const dedans = lien.exact ? chemin === lien.href : chemin === base || chemin.startsWith(`${base}/`);
   const [ouvert, setOuvert] = useState(dedans);
   /* un module annoncé : sa place, sans lien tant que son écran n'existe pas */
   if (lien.bientot) {

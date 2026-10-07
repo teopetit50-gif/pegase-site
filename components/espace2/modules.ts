@@ -82,6 +82,27 @@ export const MODULES: ModuleV2[] = [
   m("offload", "OFFLOAD", "Clients qui décrochent", "Rythme d'achat, décrochages et reprises de contact", UserMinus),
 ];
 
+/* 07/10/2026 — demande de Teo : la barre ne montre que les quatre
+   modules communs, puis LE module du métier de l'entreprise (un seul).
+   Les autres restent atteignables par « Tous les modules », en haut. */
+export const MODULES_PRINCIPAUX = ["filed", "cashd", "reput", "offload"];
+
+/** Le module métier d'un secteur (valeurs de SECTEURS, lib/creneaux) ;
+    sans compte (démo), celui du BTP. */
+export function moduleMetier(secteur: string | undefined, connecte: boolean): string | null {
+  if (!connecte) return "daliro";
+  const table: Record<string, string> = {
+    btp: "daliro",
+    archi: "lorani",
+    location: "tavaro",
+    dentaire: "tiroma",
+    avocats: "tamila",
+    groupe: "varelo",
+    immo: "varelo",
+  };
+  return (secteur && table[secteur]) || null;
+}
+
 /* les modules annoncés, sans écran encore : une place dans la navigation, sans lien */
 export const MODULES_A_VENIR: { cle: string; nom: string; libelle: string; icone: LucideIcon }[] = [
 ];
