@@ -2430,3 +2430,43 @@ html.v2-calme *::after {
   .v2-val-case { width: 44px; }
   .v2-val-recherche { width: 180px; }
 }
+
+/* ══ Point du matin, redessiné (07/10/2026) — la maquette de Teo ═════════ */
+.v2-page.v2-pm { display: grid; gap: 12px; max-width: none; padding: 16px 16px 48px; }
+.v2-pm .v2-carte { border-radius: 6px; box-shadow: 0 0 0 1px var(--v2-a-400); background: var(--v2-bg-100); }
+.v2-pm-remise { font-size: 12px; color: var(--v2-gray-900); }
+.v2-pm-grille { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: stretch; }
+.v2-pm-large { grid-column: span 2; }
+.v2-pm-haut { align-self: start; }
+.v2-pm-carte { display: flex; flex-direction: column; min-width: 0; }
+.v2-pm-tete { display: flex; align-items: center; gap: 8px; padding: 12px 16px 4px; }
+.v2-pm-tete h2 { margin: 0; flex: 1; font-size: 14px; line-height: 20px; font-weight: 500; color: var(--v2-gray-1000); }
+.v2-pm-badge { padding: 1px 8px; border-radius: 6px; box-shadow: 0 0 0 1px var(--v2-a-400); font-size: 12px; color: var(--v2-gray-900); }
+.v2 .v2-pm-kebab { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 6px; color: var(--v2-gray-900); }
+.v2 .v2-pm-kebab:hover { background: var(--v2-a-200); color: var(--v2-gray-1000); }
+.v2-pm-corps { flex: 1; padding: 0 16px; }
+.v2-pm-pied { display: flex; justify-content: flex-end; padding: 10px 16px 12px; border-top: 1px solid var(--v2-a-400); margin: 0 16px; padding-left: 0; padding-right: 0; }
+.v2-pm-rien { margin: 8px 0 16px; font-size: 13px; color: var(--v2-gray-900); }
+.v2-pm-liste { list-style: none; margin: 0; padding: 0; }
+.v2-pm-liste li { display: flex; align-items: flex-start; gap: 14px; padding: 10px 0; }
+.v2-pm-liste li + li { border-top: 1px solid var(--v2-a-400); }
+.v2-pm-icone { flex-shrink: 0; margin-top: 1px; color: var(--v2-gray-1000); }
+.v2-pm-icone[data-critique] { color: var(--v2-red-900); }
+.v2-pm-texte { flex: 1; min-width: 0; display: grid; gap: 3px; }
+.v2-pm-texte > span { font-size: 13px; font-weight: 500; color: var(--v2-gray-1000); }
+.v2-pm-texte > small { font-size: 12px; color: var(--v2-gray-900); }
+.v2-pm-montant { font-size: 20px; line-height: 28px; font-weight: 500; letter-spacing: -0.4px; color: var(--v2-gray-1000); font-variant-numeric: tabular-nums; }
+.v2 .v2-pm-action { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; align-self: center; font-size: 12px; font-weight: 500; color: var(--v2-gray-1000); white-space: nowrap; }
+.v2 .v2-pm-action:hover { color: var(--v2-blue-700); }
+.v2-pm-qualite { display: grid; gap: 10px; padding: 8px 0 12px; }
+.v2-pm-qualite p { margin: 0 0 3px; font-size: 13px; font-weight: 500; color: var(--v2-gray-1000); }
+.v2-pm-qualite small { font-size: 12px; color: var(--v2-gray-900); }
+.v2-pm-equipe { display: grid; }
+.v2-pm-equipe-ligne { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; padding: 10px 0; }
+.v2-pm-equipe-qui { display: flex; gap: 14px; padding-right: 16px; border-right: 1px solid var(--v2-a-400); }
+.v2-pm-equipe-remp { align-content: start; }
+.v2-pm-equipe-pied { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0 12px; border-top: 1px solid var(--v2-a-400); font-size: 12px; color: var(--v2-gray-900); }
+@media (max-width: 1023px) {
+  .v2-pm-grille { grid-template-columns: minmax(0, 1fr); }
+  .v2-pm-large { grid-column: auto; }
+}
