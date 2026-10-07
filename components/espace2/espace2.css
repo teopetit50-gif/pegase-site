@@ -2264,19 +2264,22 @@ html.v2-calme *::after {
 }
 
 /* ══ Vue d'ensemble, refonte (07/10/2026) ═══════════════════════════════ */
-.v2-va { display: grid; gap: 16px; }
+.v2-va { display: grid; gap: 24px; }
+.v2-va .v2-carte { border-radius: 16px; box-shadow: 0 0 0 1px var(--v2-a-400); }
+.v2-va .v2-carte-corps { padding: 20px 24px; }
+.v2-va-col { display: grid; gap: 24px; align-content: start; min-width: 0; }
 .v2-va-tete { display: flex; align-items: center; gap: 12px; }
-.v2-va-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.v2-va-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.v2-va-kpi-tete { display: flex; align-items: center; gap: 8px; }
+.v2-va-kpi-tete .v2-va-pastille { width: 24px; height: 24px; }
 .v2-va-kpi { display: grid; gap: 4px; padding: 16px 20px; color: inherit; border-radius: 12px; transition: background 0.15s; }
-.v2-va-kpi:hover { background: var(--v2-a-100); }
-.v2-va-kpi { position: relative; padding: 20px 24px; }
-.v2-va-kpi + .v2-va-kpi { border-radius: 0; }
-.v2-va-kpi + .v2-va-kpi::before { content: ""; position: absolute; left: 0; top: 20px; bottom: 20px; width: 1px; background: var(--v2-a-400); }
+.v2-va-kpi:hover { box-shadow: 0 0 0 1px var(--v2-a-500); }
+.v2-va .v2-va-kpi { padding: 14px 16px; gap: 6px; }
 .v2-va-kpi > span { font-size: 13px; }
 .v2-va-kpi-sous { font-size: 12px; }
-.v2-va-kpi strong { font-size: 28px; line-height: 36px; font-weight: 500; letter-spacing: -0.6px; color: var(--v2-gray-1000); font-variant-numeric: tabular-nums; }
+.v2-va-kpi strong { font-size: 22px; line-height: 28px; font-weight: 500; letter-spacing: -0.6px; color: var(--v2-gray-1000); font-variant-numeric: tabular-nums; }
 .v2-va-kpi strong[data-alerte] { color: var(--v2-red-900); }
-.v2-va-grille { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.v2-va-grille { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr); gap: 24px; align-items: start; }
 .v2-va-sous { margin: 2px 0 0; font-size: 13px; }
 .v2-va-periode { height: 32px; padding: 0 8px; width: auto; }
 .v2-va-periode select { font-size: 13px; }
@@ -2314,6 +2317,5 @@ html.v2-calme *::after {
 @media (max-width: 1023px) {
   .v2-va-grille { grid-template-columns: minmax(0, 1fr); }
   .v2-va-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .v2-va-kpi:nth-child(3) { border-left: 0; }
-  .v2-va-kpi:nth-child(n + 3) { border-top: 1px solid var(--v2-a-400); }
+  
 }

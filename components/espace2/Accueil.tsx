@@ -9,7 +9,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Banknote, Building2, CheckCheck, ChevronRight, FileText, ListChecks, Sparkles } from "lucide-react";
+import { AlertCircle, ArrowRight, Banknote, Building2, CheckCheck, ChevronRight, FileText, ListChecks, Sparkles } from "lucide-react";
 import { useSource } from "@/components/espace/source";
 import { dateCourte, montant, relatif } from "@/components/espace/format";
 import { A_PAYER, aPayer, groupeDe, minuit, totaux } from "./filed/calculs";
@@ -89,10 +89,10 @@ export default function Accueil() {
   const enRetard = taches.filter((t) => !t.fait && t.echeance && new Date(t.echeance).getTime() < aujourdhui).length;
 
   const kpis = [
-    { libelle: "Reste à payer", valeur: c?.totalARegler, sous: c ? `${c.aRegler.length} facture${c.aRegler.length > 1 ? "s" : ""} validée${c.aRegler.length > 1 ? "s" : ""}` : "", lien: `${RACINE}/filed/a-payer` },
-    { libelle: "En retard", valeur: c?.totalRetard, sous: c ? `${c.retard.length} échéance${c.retard.length > 1 ? "s" : ""} dépassée${c.retard.length > 1 ? "s" : ""}` : "", lien: `${RACINE}/filed/a-payer`, alerte: !!c?.retard.length },
-    { libelle: "À valider", valeur: c ? String(c.aValider) : undefined, sous: "demandes en attente de votre accord", lien: `${RACINE}/validations` },
-    { libelle: "Tâches en retard", valeur: String(enRetard), sous: `${duJour.length} tâche${duJour.length > 1 ? "s" : ""} ouverte${duJour.length > 1 ? "s" : ""}`, lien: `${RACINE}/taches` },
+    { libelle: "Reste à payer", valeur: c?.totalARegler, sous: c ? `${c.aRegler.length} facture${c.aRegler.length > 1 ? "s" : ""} validée${c.aRegler.length > 1 ? "s" : ""}` : "", lien: `${RACINE}/filed/a-payer`, icone: Banknote },
+    { libelle: "En retard", valeur: c?.totalRetard, sous: c ? `${c.retard.length} échéance${c.retard.length > 1 ? "s" : ""} dépassée${c.retard.length > 1 ? "s" : ""}` : "", lien: `${RACINE}/filed/a-payer`, alerte: !!c?.retard.length, icone: AlertCircle },
+    { libelle: "À valider", valeur: c ? String(c.aValider) : undefined, sous: "demandes en attente de votre accord", lien: `${RACINE}/validations`, icone: CheckCheck },
+    { libelle: "Tâches en retard", valeur: String(enRetard), sous: `${duJour.length} tâche${duJour.length > 1 ? "s" : ""} ouverte${duJour.length > 1 ? "s" : ""}`, lien: `${RACINE}/taches`, icone: ListChecks },
   ];
 
   return (
@@ -105,10 +105,13 @@ export default function Accueil() {
       </div>
       {erreur ? <p className="v2-gris">La base n&apos;a pas répondu : {erreur}</p> : null}
 
-      <section className="v2-carte v2-va-kpis" aria-label="Chiffres clés">
+      <section className="v2-va-kpis" aria-label="Chiffres clés">
         {kpis.map((k) => (
-          <Link key={k.libelle} href={k.lien} className="v2-va-kpi">
-            <span className="v2-gris">{k.libelle}</span>
+          <Link key={k.libelle} href={k.lien} className="v2-carte v2-va-kpi">
+            <span className="v2-va-kpi-tete">
+              <span className="v2-va-pastille" aria-hidden="true"><k.icone width={14} height={14} /></span>
+              <span className="v2-gris">{k.libelle}</span>
+            </span>
             {k.valeur === undefined ? <Squelette largeur={120} hauteur={32} /> : <strong data-alerte={k.alerte ? "" : undefined}>{k.valeur}</strong>}
             <small className="v2-gris v2-va-kpi-sous">{k.sous}</small>
           </Link>
@@ -116,6 +119,7 @@ export default function Accueil() {
       </section>
 
       <div className="v2-va-grille">
+        <div className="v2-va-col">
         <section className="v2-carte v2-carte-corps">
           <div className="v2-va-titre" style={{ marginBottom: 16 }}>
             <div>
@@ -133,6 +137,37 @@ export default function Accueil() {
           {c ? <Courbe valeurs={c.courbe} debut={c.debut} /> : <Squelette largeur="100%" hauteur={220} />}
         </section>
 
+        <section className="v2-carte v2-carte-corps">
+          <div className="v2-va-titre">
+            <h2 className="v2-h2">À payer en priorité</h2>
+            <Link href={`${RACINE}/filed/a-payer`} className="v2-va-lien">Voir tout <ArrowRight width={14} height={14} /></Link>
+          </div>
+          {!c ? <Squelette largeur="100%" hauteur={200} /> : c.priorite.length === 0 ? (
+            <p className="v2-gris" style={{ margin: 0 }}>Aucune facture à payer.</p>
+          ) : (
+            <div className="v2-tableau-cadre">
+              <table className="v2-va-table">
+                <thead>
+                  <tr><th>Fournisseur</th><th>Échéance</th><th>État</th><th style={{ textAlign: "right" }}>Reste à payer</th><th aria-hidden="true" /></tr>
+                </thead>
+                <tbody>
+                  {c.priorite.map(({ f, nom, groupe, reste }) => (
+                    <tr key={f.id}>
+                      <td><span className="v2-va-fournisseur"><Building2 width={18} height={18} aria-hidden="true" />{nom}</span></td>
+                      <td className="v2-gris">{f.echeance_lue ? dateCourte(f.echeance_lue) : "—"}</td>
+                      <td><Badge teinte={groupe === "retard" ? "rouge" : groupe === "semaine" ? "ambre" : "gris"}>{groupe === "retard" ? "En retard" : groupe === "semaine" ? "Cette semaine" : "À venir"}</Badge></td>
+                      <td style={{ textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{montant(reste, f.devise)}</td>
+                      <td><Link href={`${RACINE}/filed/a-payer`} aria-label={`Ouvrir la facture de ${nom}`}><ChevronRight width={16} height={16} /></Link></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
+        </div>
+        <div className="v2-va-col">
         <section className="v2-carte v2-carte-corps">
           <div className="v2-va-titre">
             <h2 className="v2-h2">Aujourd&apos;hui</h2>
@@ -170,35 +205,6 @@ export default function Accueil() {
 
         <section className="v2-carte v2-carte-corps">
           <div className="v2-va-titre">
-            <h2 className="v2-h2">À payer en priorité</h2>
-            <Link href={`${RACINE}/filed/a-payer`} className="v2-va-lien">Voir tout <ArrowRight width={14} height={14} /></Link>
-          </div>
-          {!c ? <Squelette largeur="100%" hauteur={200} /> : c.priorite.length === 0 ? (
-            <p className="v2-gris" style={{ margin: 0 }}>Aucune facture à payer.</p>
-          ) : (
-            <div className="v2-tableau-cadre">
-              <table className="v2-va-table">
-                <thead>
-                  <tr><th>Fournisseur</th><th>Échéance</th><th>État</th><th style={{ textAlign: "right" }}>Reste à payer</th><th aria-hidden="true" /></tr>
-                </thead>
-                <tbody>
-                  {c.priorite.map(({ f, nom, groupe, reste }) => (
-                    <tr key={f.id}>
-                      <td><span className="v2-va-fournisseur"><Building2 width={18} height={18} aria-hidden="true" />{nom}</span></td>
-                      <td className="v2-gris">{f.echeance_lue ? dateCourte(f.echeance_lue) : "—"}</td>
-                      <td><Badge teinte={groupe === "retard" ? "rouge" : groupe === "semaine" ? "ambre" : "gris"}>{groupe === "retard" ? "En retard" : groupe === "semaine" ? "Cette semaine" : "À venir"}</Badge></td>
-                      <td style={{ textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{montant(reste, f.devise)}</td>
-                      <td><Link href={`${RACINE}/filed/a-payer`} aria-label={`Ouvrir la facture de ${nom}`}><ChevronRight width={16} height={16} /></Link></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
-
-        <section className="v2-carte v2-carte-corps">
-          <div className="v2-va-titre">
             <h2 className="v2-h2">Activité récente</h2>
             <Link href={`${RACINE}/activite`} className="v2-va-lien">Voir tout</Link>
           </div>
@@ -219,6 +225,7 @@ export default function Accueil() {
             </ul>
           )}
         </section>
+        </div>
       </div>
 
       <section className="v2-carte v2-carte-corps v2-va-ia">
