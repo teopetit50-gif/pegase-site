@@ -18,8 +18,8 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useState } from "react";
-import { Check, ListChecks, X } from "lucide-react";
-import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
+import { Ban, Check, MessageSquareText, PenLine } from "lucide-react";
+import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
 import { Avis } from "../ui";
@@ -121,90 +121,117 @@ export default function DecisionLot({
 
   const reussies = bilan?.filter((l) => l.ok).length ?? 0;
 
+  /* 07/10/2026 — demande de Teo : la fenêtre prend le gabarit d'une carte
+     de connexion (titre à gauche, ce qui est retenu en cases, un séparateur,
+     le champ à icône, le bouton pleine largeur, puis un pied discret).
+     La logique ne change pas. */
+  const verbe = decision === "approuve" ? "Approuver" : "Refuser";
   return (
     <Dialog open={ouvert} onOpenChange={(o) => !o && !envoi && onFermer(bilan)}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogIcone>{decision === "approuve" ? <ListChecks width={18} height={18} aria-hidden="true" /> : <X width={18} height={18} aria-hidden="true" />}</DialogIcone>
-          <DialogTitle>{decision === "approuve" ? "Approuver en lot" : "Refuser en lot"}</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="dl-carte">
+        <DialogHeader className="dl-tete">
+          <DialogTitle className="dl-titre">{decision === "approuve" ? "Approuver en lot" : "Refuser en lot"}</DialogTitle>
+          <DialogDescription className="dl-description">
             {bilan
               ? `${reussies} sur ${retenues.length} décidée${reussies > 1 ? "s" : ""}.`
               : `${retenues.length} demande${retenues.length > 1 ? "s" : ""} retenue${retenues.length > 1 ? "s" : ""}${total ? ` · ${montant(total)}` : ""}. Une décision est enregistrée pour chacune, en votre nom, avec le même ${decision === "approuve" ? "commentaire" : "motif"}.`}
           </DialogDescription>
         </DialogHeader>
-        <DialogBody>
-          <div className="esp-form">
-            {bilan ? (
-              <ul className="esp-fil esp-lot-bilan" aria-live="polite">
-                {bilan.map((l) => (
-                  <li key={l.demande.id}>
-                    <span className="esp-fil-point" data-teinte={l.ok ? "vert" : "rouge"} />
-                    <div>
-                      <div className="esp-fil-texte">{l.demande.resume}</div>
-                      <div className="esp-fil-meta">{l.ok ? <><Check width={12} height={12} aria-hidden="true" /> {l.message}</> : <>Refusé par la base : {l.message}</>}</div>
-                    </div>
-                  </li>
-                ))}
-                {envoi ? <li><span className="esp-fil-point" /><div className="esp-fil-meta"><Loader variant="spin" /> {retenues.length - bilan.length} en cours…</div></li> : null}
-              </ul>
-            ) : (
-              <>
-                <ul className="esp-fil esp-lot-retenues">
+        <DialogBody className="dl-corps">
+          {bilan ? (
+            <ul className="dl-cases" aria-live="polite">
+              {bilan.map((l) => (
+                <li key={l.demande.id} data-etat={l.ok ? "ok" : "refus"}>
+                  <span className="dl-case-titre">{l.demande.resume}</span>
+                  <span className="dl-case-sous">{l.ok ? <><Check width={12} height={12} aria-hidden="true" /> {l.message}</> : <>Refusé par la base : {l.message}</>}</span>
+                </li>
+              ))}
+              {envoi ? (
+                <li>
+                  <span className="dl-case-sous"><Loader variant="spin" /> {retenues.length - bilan.length} en cours…</span>
+                </li>
+              ) : null}
+            </ul>
+          ) : (
+            <>
+              <div className="dl-bloc">
+                <span className="dl-etiquette">Demandes retenues</span>
+                <ul className="dl-cases">
                   {retenues.map((e) => (
                     <li key={e.demande.id}>
-                      <span className="esp-fil-point" data-teinte="bleu" />
-                      <div>
-                        <div className="esp-fil-texte">{e.demande.resume}</div>
-                        <div className="esp-fil-meta">
-                          {e.demande.montant !== null ? montant(e.demande.montant, e.demande.devise) : "sans montant"}
-                          {e.au_nom_de ? ` · au nom de ${nommer(e.au_nom_de.delegant)}` : ""}
-                          {exigences(e.demande).commentaire ? " · commentaire exigé" : ""}
-                        </div>
-                      </div>
+                      <span className="dl-case-titre">{e.demande.resume}</span>
+                      <span className="dl-case-sous">
+                        {e.demande.montant !== null ? montant(e.demande.montant, e.demande.devise) : "sans montant"}
+                        {e.au_nom_de ? ` · au nom de ${nommer(e.au_nom_de.delegant)}` : ""}
+                        {exigences(e.demande).commentaire ? " · commentaire exigé" : ""}
+                      </span>
                     </li>
                   ))}
                 </ul>
-                {ecartees.length ? (
-                  <Avis teinte="ambre">
-                    <strong>{ecartees.length} demande{ecartees.length > 1 ? "s" : ""} écartée{ecartees.length > 1 ? "s" : ""} du lot.</strong>
-                    <ul className="esp-lot-ecartees">
-                      {ecartees.map((e) => (
-                        <li key={e.demande.id}><b>{e.demande.resume}</b> — {e.raison}</li>
-                      ))}
-                    </ul>
-                  </Avis>
-                ) : null}
-                {decision === "rejete" ? (
-                  <>
-                    <label className="rv-libelle">Motif du refus <span className="esp-obligatoire">(obligatoire)</span>
-                      <select className="rv-champ" value={motif} onChange={(e) => setMotif(e.target.value)}>
+              </div>
+              {ecartees.length ? (
+                <Avis teinte="ambre">
+                  <strong>{ecartees.length} demande{ecartees.length > 1 ? "s" : ""} écartée{ecartees.length > 1 ? "s" : ""} du lot.</strong>
+                  <ul className="esp-lot-ecartees">
+                    {ecartees.map((e) => (
+                      <li key={e.demande.id}><b>{e.demande.resume}</b> — {e.raison}</li>
+                    ))}
+                  </ul>
+                </Avis>
+              ) : null}
+
+              <div className="dl-separateur" aria-hidden="true"><span>votre décision</span></div>
+
+              {decision === "rejete" ? (
+                <>
+                  <div className="dl-bloc">
+                    <label className="dl-libelle" htmlFor="dl-motif">
+                      Motif du refus <span>obligatoire</span>
+                    </label>
+                    <span className="dl-champ">
+                      <Ban width={16} height={16} aria-hidden="true" />
+                      <select id="dl-motif" value={motif} onChange={(e) => setMotif(e.target.value)}>
                         <option value="">Choisir un motif…</option>
                         {MOTIFS_REFUS.map((m) => <option key={m} value={m}>{m}</option>)}
                       </select>
-                    </label>
-                    <label className="rv-libelle">Précision
-                      <input className="rv-champ" value={motifLibre} onChange={(e) => setMotifLibre(e.target.value)} maxLength={300} />
-                    </label>
-                  </>
-                ) : null}
-                <label className="rv-libelle">
-                  Commentaire {exigeCommentaire ? <span className="esp-obligatoire">(obligatoire : une demande du lot l&apos;exige)</span> : <span className="esp-kpi-sous">(facultatif)</span>}
-                  <textarea className="rv-champ" value={commentaire} onChange={(e) => setCommentaire(e.target.value)} maxLength={2000} placeholder={decision === "approuve" ? "Ce que vous avez vérifié, valable pour tout le lot." : "Précisions sur le refus."} />
+                    </span>
+                  </div>
+                  <div className="dl-bloc">
+                    <label className="dl-libelle" htmlFor="dl-precision">Précision</label>
+                    <span className="dl-champ">
+                      <PenLine width={16} height={16} aria-hidden="true" />
+                      <input id="dl-precision" value={motifLibre} onChange={(e) => setMotifLibre(e.target.value)} maxLength={300} />
+                    </span>
+                  </div>
+                </>
+              ) : null}
+              <div className="dl-bloc">
+                <label className="dl-libelle" htmlFor="dl-commentaire">
+                  Commentaire <span>{exigeCommentaire ? "obligatoire : une demande du lot l'exige" : "facultatif"}</span>
                 </label>
-              </>
-            )}
-            {bilan && !envoi && bilan.some((l) => !l.ok) ? <Avis teinte="rouge" role="alert">Les demandes refusées par la base restent dans la file : ouvrez-les une par une pour voir pourquoi.</Avis> : null}
-          </div>
-        </DialogBody>
-        <DialogFooter>
-          {bilan ? (
-            <button type="button" className="r-btn r-btn--noir" disabled={envoi} onClick={() => onFermer(bilan)}>Fermer</button>
-          ) : (
-            <button type="button" className={`r-btn ${decision === "approuve" ? "r-btn--vert" : "r-btn--rouge"}`} disabled={!pret || envoi} onClick={() => void envoyer()}>
-              {envoi ? <Loader variant="spin" /> : null} {decision === "approuve" ? `Approuver ${retenues.length} demande${retenues.length > 1 ? "s" : ""}` : `Refuser ${retenues.length} demande${retenues.length > 1 ? "s" : ""}`}
-            </button>
+                <span className="dl-champ dl-champ--long">
+                  <MessageSquareText width={16} height={16} aria-hidden="true" />
+                  <textarea id="dl-commentaire" value={commentaire} onChange={(e) => setCommentaire(e.target.value)} maxLength={2000} rows={3} placeholder={decision === "approuve" ? "Ce que vous avez vérifié, valable pour tout le lot." : "Précisions sur le refus."} />
+                </span>
+              </div>
+            </>
           )}
+          {bilan && !envoi && bilan.some((l) => !l.ok) ? <Avis teinte="rouge" role="alert">Les demandes refusées par la base restent dans la file : ouvrez-les une par une pour voir pourquoi.</Avis> : null}
+        </DialogBody>
+        <DialogFooter className="dl-pied">
+          {bilan ? (
+            <button type="button" className="dl-principal" disabled={envoi} onClick={() => onFermer(bilan)}>Fermer</button>
+          ) : (
+            <>
+              <button type="button" className="dl-principal" disabled={!pret || envoi} onClick={() => void envoyer()}>
+                {envoi ? <Loader variant="spin" /> : null} {verbe} {retenues.length} demande{retenues.length > 1 ? "s" : ""}
+              </button>
+              <button type="button" className="dl-discret" disabled={envoi} onClick={() => onFermer(null)}>
+                Annuler
+              </button>
+            </>
+          )}
+          <p className="dl-mention">Chaque décision est prise en votre nom et reste lisible dans le journal.</p>
         </DialogFooter>
       </DialogContent>
     </Dialog>

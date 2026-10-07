@@ -1541,3 +1541,38 @@
   outline: 2px solid var(--r-texte);
   outline-offset: 2px;
 }
+
+/* ══ La décision en lot, au gabarit d'une carte de connexion (07/10/2026) ══
+   Titre à gauche, ce qui est retenu en cases, un séparateur, des champs à
+   icône, le bouton pleine largeur, un pied discret. Jetons --r-* : juste
+   dans l'ancien espace (clair) comme dans le nouveau (sombre). */
+.dlg-panneau.dl-carte { max-width: 460px; padding: 0; border-radius: 10px; }
+.dl-carte .dl-tete { padding: 24px 24px 0; text-align: left; }
+.dl-carte .dl-titre { margin: 0; font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.4px; color: var(--r-texte); }
+.dl-carte .dl-description { margin: 6px 0 0; font-size: 13px; line-height: 19px; color: var(--r-doux); }
+.dl-carte .dl-corps { display: grid; gap: 16px; padding: 20px 24px 0; }
+.dl-bloc { display: grid; gap: 8px; }
+.dl-etiquette { font-size: 12px; color: var(--r-doux); }
+.dl-cases { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.dl-cases li { display: grid; gap: 3px; padding: 10px 12px; border: 1px solid var(--r-filet); border-radius: 6px; }
+.dl-cases li[data-etat="refus"] { border-style: dashed; }
+.dl-case-titre { font-size: 13px; font-weight: 500; color: var(--r-texte); }
+.dl-case-sous { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--r-doux); }
+.dl-separateur { display: flex; align-items: center; gap: 10px; }
+.dl-separateur::before, .dl-separateur::after { content: ""; flex: 1; border-top: 1px solid var(--r-filet); }
+.dl-separateur span { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--r-doux); }
+.dl-libelle { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; font-weight: 500; color: var(--r-texte); }
+.dl-libelle span { font-weight: 400; font-size: 12px; color: var(--r-doux); }
+.dl-champ { position: relative; display: block; }
+.dl-champ > svg { position: absolute; left: 11px; top: 11px; color: var(--r-doux); pointer-events: none; }
+.dl-champ input, .dl-champ select, .dl-champ textarea { width: 100%; height: 38px; padding: 0 12px 0 36px; border: 1px solid var(--r-filet); border-radius: 6px; background: transparent; color: var(--r-texte); font: inherit; font-size: 13px; outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+.dl-champ textarea { height: auto; min-height: 84px; padding-top: 9px; padding-bottom: 9px; line-height: 19px; resize: vertical; }
+.dl-champ input:focus, .dl-champ select:focus, .dl-champ textarea:focus { border-color: var(--r-texte); box-shadow: 0 0 0 3px color-mix(in srgb, var(--r-texte) 12%, transparent); }
+.dl-champ textarea::placeholder, .dl-champ input::placeholder { color: var(--r-doux); }
+.dlg-panneau.dl-carte .dlg-pied.dl-pied { display: grid; gap: 8px; padding: 20px 24px 20px; border-top: 0; background: transparent; }
+html.v2-actif .dlg-panneau.dl-carte .dlg-pied.dl-pied { border-top: 0; }
+.dl-principal { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 38px; border: 0; border-radius: 6px; background: var(--r-texte); color: var(--r-panneau, var(--v2-bg-100, #fff)); font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; transition: opacity 0.15s; }
+.dl-principal:disabled { opacity: 0.45; cursor: default; }
+.dl-discret { width: 100%; height: 34px; border: 0; border-radius: 6px; background: transparent; color: var(--r-doux); font: inherit; font-size: 13px; cursor: pointer; }
+.dl-discret:hover:not(:disabled) { background: color-mix(in srgb, var(--r-texte) 6%, transparent); color: var(--r-texte); }
+.dl-mention { margin: 4px 0 0; text-align: center; font-size: 11px; color: var(--r-doux); }
