@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import FileValidations from "@/components/espace/validations/FileValidations";
-import Habille from "@/components/espace2/Habille";
+import Validations from "@/components/espace2/Validations";
 import { utilisateurCourant } from "@/lib/supabase/server";
 
-/* /espace2/validations — la file « À valider » de /espace, dans le nouvel espace. */
+/* /espace2/validations — « À valider », redessiné au dessin de la maquette
+   de Teo (07/10/2026). La logique reste celle de /espace (voir le composant). */
 
 export const metadata: Metadata = {
   title: "À valider",
@@ -12,9 +12,5 @@ export const metadata: Metadata = {
 
 export default async function PageValidations() {
   const utilisateur = await utilisateurCourant();
-  return (
-    <Habille>
-      <FileValidations utilisateur={utilisateur} />
-    </Habille>
-  );
+  return <Validations utilisateur={utilisateur} />;
 }

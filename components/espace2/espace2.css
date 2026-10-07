@@ -2324,3 +2324,109 @@ html.v2-calme *::after {
   .v2-va-kpi:nth-child(3)::after { display: none; }
   .v2-va-kpi:nth-child(n + 3) { border-top: 1px solid var(--v2-a-400); }
 }
+
+/* ══ À valider, redessiné (07/10/2026) — la maquette de Teo, à l'identique ═ */
+.v2-page.v2-val { display: grid; gap: 16px; max-width: none; padding: 16px 16px 48px; }
+.v2-val .v2-carte { border-radius: 6px; box-shadow: 0 0 0 1px var(--v2-a-400); background: var(--v2-bg-100); }
+.v2-val-gris { color: var(--v2-gray-900); }
+.v2-val-pad { margin: 0; padding: 16px 20px 20px; font-size: 13px; }
+
+/* les boutons, à la finition d'Attio : 32 px, filet fin, coins 6 px,
+   icône · libellé · chevron ; c'est le modèle des boutons de l'espace */
+.v2-val-filtres { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.v2-val-droite { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.v2-val-bouton { position: relative; display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 10px; border-radius: 6px; background: var(--v2-bg-100); box-shadow: 0 0 0 1px var(--v2-a-400); color: var(--v2-gray-1000); font: inherit; font-size: 14px; font-weight: 500; white-space: nowrap; cursor: pointer; border: 0; transition: background 0.15s, box-shadow 0.15s; }
+.v2-val-bouton:hover { background: var(--v2-a-200); box-shadow: 0 0 0 1px var(--v2-a-500, var(--v2-a-400)); }
+.v2-val-bouton > svg { color: var(--v2-gray-900); flex-shrink: 0; }
+.v2-val-bouton[data-actif] { box-shadow: 0 0 0 1px var(--v2-blue-700); }
+.v2-val-bouton[data-actif] > svg:first-child { color: var(--v2-blue-700); }
+.v2-val-bouton-chevron { margin-left: -2px; }
+.v2-val-bouton select { position: absolute; inset: 0; opacity: 0; cursor: pointer; font-size: 16px; }
+.v2-val-bouton:focus-within { box-shadow: var(--v2-anneau); }
+.v2-val-bouton--icone { width: 32px; padding: 0; justify-content: center; }
+.v2-val-recherche { display: inline-flex; align-items: center; gap: 8px; width: 260px; height: 32px; padding: 0 8px 0 10px; border-radius: 6px; background: var(--v2-bg-100); box-shadow: var(--v2-anneau); color: var(--v2-gray-900); }
+.v2-val-recherche input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--v2-gray-1000); font: inherit; font-size: 14px; }
+.v2-val-icone { display: grid; place-items: center; border: 0; background: none; color: var(--v2-gray-900); cursor: pointer; padding: 2px; }
+
+/* la barre du lot */
+.v2-val-lot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; border-radius: 6px; background: var(--v2-a-200); font-size: 14px; }
+
+/* la grille : la file à gauche, le circuit à droite */
+.v2-val-grille { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(320px, 1fr); gap: 16px; align-items: start; }
+.v2-val-col { display: grid; gap: 16px; min-width: 0; }
+.v2-val-cote { position: sticky; top: 80px; }
+.v2-val-vide { padding: 24px 20px; color: var(--v2-gray-900); font-size: 14px; }
+.v2-val-groupe { margin: 0; padding: 16px 20px 12px; font-size: 16px; line-height: 24px; font-weight: 500; letter-spacing: -0.2px; color: var(--v2-gray-1000); border-bottom: 1px solid var(--v2-a-400); }
+
+/* une ligne de la file */
+.v2-val-liste { list-style: none; margin: 0; padding: 0; }
+.v2-val-ligne { display: flex; align-items: stretch; transition: background 0.15s; }
+.v2-val-ligne + .v2-val-ligne { border-top: 1px solid var(--v2-a-400); }
+.v2-val-ligne:hover { background: var(--v2-a-100); }
+.v2-val-ligne[aria-current] { background: var(--v2-a-200); }
+.v2-val-ligne:last-child { border-radius: 0 0 6px 6px; }
+.v2-val-case { display: grid; place-items: center; width: 64px; flex-shrink: 0; }
+.v2-val-case input { appearance: none; -webkit-appearance: none; display: grid; place-items: center; width: 20px; height: 20px; margin: 0; border: 1.5px solid var(--v2-gray-900); border-radius: 4px; background: transparent; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+.v2-val-case input:hover:not(:disabled) { border-color: var(--v2-gray-1000); }
+.v2-val-case input:checked { background: var(--v2-gray-1000); border-color: var(--v2-gray-1000); }
+.v2-val-case input:checked::after { content: ""; width: 5px; height: 10px; margin-top: -2px; border: solid var(--v2-bg-100); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.v2-val-case input:focus-visible { box-shadow: var(--v2-anneau); }
+.v2-val-case input:disabled { cursor: not-allowed; opacity: 0.4; }
+.v2-val-corps { flex: 1; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) 72px 150px 24px; align-items: center; gap: 12px; padding: 12px 20px 12px 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.v2-val-texte { min-width: 0; display: grid; gap: 4px; }
+.v2-val-texte > * { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2-val-texte > span { font-size: 14px; font-weight: 500; color: var(--v2-gray-1000); }
+.v2-val-texte > small { font-size: 13px; color: var(--v2-gray-900); }
+.v2-val-module { display: grid; place-items: center; color: var(--v2-gray-1000); }
+.v2-val-montant { display: grid; gap: 4px; text-align: right; font-variant-numeric: tabular-nums; }
+.v2-val-montant > span { font-size: 14px; color: var(--v2-gray-1000); }
+.v2-val-montant > small { font-size: 13px; color: var(--v2-gray-900); }
+.v2-val-montant > small[data-retard] { color: var(--v2-red-900); }
+.v2-val-chevron { color: var(--v2-gray-900); }
+
+/* le circuit d'approbation */
+.v2-val-circuit { display: grid; gap: 16px; padding: 16px 20px 20px; }
+.v2-val-circuit p { margin: 0; }
+.v2-val-circuit-titre { font-size: 15px; font-weight: 500; color: var(--v2-gray-1000); margin-bottom: 4px !important; }
+.v2-val-circuit .v2-val-gris { font-size: 13px; }
+.v2-val-jauge { height: 6px; border-radius: 999px; background: var(--v2-a-300, var(--v2-a-400)); overflow: hidden; }
+.v2-val-jauge span { display: block; height: 100%; border-radius: 999px; background: var(--v2-gray-1000); transition: width 0.3s; }
+.v2-val-etapes { list-style: none; margin: 0; padding: 0 0 4px; display: grid; gap: 0; border-bottom: 1px solid var(--v2-a-400); }
+.v2-val-etapes li { position: relative; display: flex; gap: 16px; padding: 8px 0 20px; }
+.v2-val-etapes li:last-child { padding-bottom: 16px; }
+.v2-val-etapes li:not(:last-child)::after { content: ""; position: absolute; left: 10px; top: 36px; bottom: 4px; width: 1px; background: var(--v2-a-500, var(--v2-a-400)); }
+.v2-val-etapes li > span:last-child { display: grid; gap: 4px; }
+.v2-val-etape-icone { display: grid; place-items: center; width: 20px; height: 20px; margin-top: 2px; color: var(--v2-gray-1000); flex-shrink: 0; }
+.v2-val-etape-icone[data-refus] { color: var(--v2-red-900); }
+.v2-val-etapes li[data-attente] .v2-val-etape-icone { color: var(--v2-gray-900); }
+.v2-val-etape-nom { font-size: 14px; font-weight: 500; color: var(--v2-gray-1000); }
+.v2-val-etapes small { font-size: 13px; }
+.v2-val-dossier { display: grid; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid var(--v2-a-400); }
+.v2-val-dossier > p { font-size: 13px; }
+.v2-val-dossier-ligne { display: flex; align-items: center; gap: 14px; font-size: 14px; color: var(--v2-gray-1000); }
+.v2-val-dossier-ligne small { margin-left: auto; font-size: 13px; }
+.v2 .v2-val-lien { display: inline-flex; align-items: center; gap: 8px; width: fit-content; padding: 0; border: 0; background: none; color: var(--v2-gray-1000); font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; }
+.v2 .v2-val-lien:hover { color: var(--v2-blue-700); }
+.v2 .v2-val-lien--petit { font-size: 13px; color: var(--v2-gray-1000); gap: 6px; flex-shrink: 0; }
+
+/* les délégations */
+.v2-val-delegations { list-style: none; margin: 0; padding: 0 20px; }
+.v2-val-delegations li { display: flex; align-items: center; gap: 16px; padding: 16px 0; color: var(--v2-gray-1000); }
+.v2-val-delegations li + li { border-top: 1px solid var(--v2-a-400); }
+.v2-val-delegations li > svg { color: var(--v2-gray-900); flex-shrink: 0; }
+.v2-val-delegations .v2-val-texte { flex: 1; }
+
+/* le panneau du détail : plus large que l'assistant */
+.v2-val-panneau { width: min(560px, 100vw); }
+.v2.v2-val-panneau-corps { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; background: transparent; }
+
+@media (max-width: 1023px) {
+  .v2-val-grille { grid-template-columns: minmax(0, 1fr); }
+  .v2-val-cote { position: static; }
+}
+@media (max-width: 640px) {
+  .v2-val-corps { grid-template-columns: minmax(0, 1fr) 110px 18px; padding-right: 12px; }
+  .v2-val-module { display: none; }
+  .v2-val-case { width: 44px; }
+  .v2-val-recherche { width: 180px; }
+}
