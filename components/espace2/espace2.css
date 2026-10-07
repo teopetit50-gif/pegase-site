@@ -2278,7 +2278,7 @@ html.v2-calme *::after {
 .v2-va-kpi:hover { background: var(--v2-a-100); }
 .v2-va-kpi-libelle { font-size: 12px; font-weight: 500; color: var(--v2-gray-900); }
 .v2-va-kpi strong { font-size: 20px; line-height: 28px; font-weight: 500; letter-spacing: -0.4px; color: var(--v2-gray-1000); font-variant-numeric: tabular-nums; }
-.v2-va-kpi strong[data-alerte] { color: var(--v2-red-900); }
+.v2-va-kpi strong[data-alerte] { color: var(--v2-gray-1000); }
 .v2-va-kpi-sous { font-size: 12px; }
 
 /* deux colonnes collées, un filet entre elles ; chaque panneau a son filet bas */
@@ -2381,7 +2381,7 @@ html.v2-calme *::after {
 .v2-val-montant { display: grid; gap: 4px; text-align: right; font-variant-numeric: tabular-nums; }
 .v2-val-montant > span { font-size: 13px; color: var(--v2-gray-1000); }
 .v2-val-montant > small { font-size: 12px; color: var(--v2-gray-900); }
-.v2-val-montant > small[data-retard] { color: var(--v2-red-900); }
+.v2-val-montant > small[data-retard] { color: var(--v2-gray-1000); font-weight: 500; }
 .v2-val-chevron { color: var(--v2-gray-900); }
 
 /* le circuit d'approbation */
@@ -2397,7 +2397,7 @@ html.v2-calme *::after {
 .v2-val-etapes li:not(:last-child)::after { content: ""; position: absolute; left: 10px; top: 36px; bottom: 4px; width: 1px; background: var(--v2-a-500, var(--v2-a-400)); }
 .v2-val-etapes li > span:last-child { display: grid; gap: 4px; }
 .v2-val-etape-icone { display: grid; place-items: center; width: 20px; height: 20px; margin-top: 2px; color: var(--v2-gray-1000); flex-shrink: 0; }
-.v2-val-etape-icone[data-refus] { color: var(--v2-red-900); }
+.v2-val-etape-icone[data-refus] { color: var(--v2-gray-900); }
 .v2-val-etapes li[data-attente] .v2-val-etape-icone { color: var(--v2-gray-900); }
 .v2-val-etape-nom { font-size: 13px; font-weight: 500; color: var(--v2-gray-1000); }
 .v2-val-etapes small { font-size: 12px; }
@@ -2451,7 +2451,7 @@ html.v2-calme *::after {
 .v2-pm-liste li { display: flex; align-items: flex-start; gap: 14px; padding: 10px 0; }
 .v2-pm-liste li + li { border-top: 1px solid var(--v2-a-400); }
 .v2-pm-icone { flex-shrink: 0; margin-top: 1px; color: var(--v2-gray-1000); }
-.v2-pm-icone[data-critique] { color: var(--v2-red-900); }
+.v2-pm-icone[data-critique] { color: var(--v2-gray-1000); }
 .v2-pm-texte { flex: 1; min-width: 0; display: grid; gap: 3px; }
 .v2-pm-texte > span { font-size: 13px; font-weight: 500; color: var(--v2-gray-1000); }
 .v2-pm-texte > small { font-size: 12px; color: var(--v2-gray-900); }
@@ -2470,3 +2470,6 @@ html.v2-calme *::after {
   .v2-pm-grille { grid-template-columns: minmax(0, 1fr); }
   .v2-pm-large { grid-column: auto; }
 }
+
+/* un état, sobre : pas de couleur, un filet fin (Teo, 07/10 : « pas de couleurs comme ça ») */
+.v2-etat { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 6px; box-shadow: 0 0 0 1px var(--v2-a-400); font-size: 12px; font-weight: 500; color: var(--v2-gray-1000); white-space: nowrap; }

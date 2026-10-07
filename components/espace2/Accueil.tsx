@@ -12,7 +12,7 @@ import Link from "next/link";
 import { ArrowRight, Banknote, Building2, CheckCheck, ChevronRight, FileText, ListChecks, Sparkles } from "lucide-react";
 import { dateCourte, montant, relatif } from "@/components/espace/format";
 import { A_PAYER, aPayer, groupeDe, minuit, totaux } from "./filed/calculs";
-import { Badge, Squelette } from "./ui";
+import { Squelette } from "./ui";
 import { RACINE } from "./modules";
 import { useDonnees } from "./donnees";
 import { evenements } from "./evenements";
@@ -143,7 +143,7 @@ export default function Accueil() {
                     <tr key={f.id}>
                       <td><span className="v2-va-fournisseur"><Building2 width={18} height={18} aria-hidden="true" />{nom}</span></td>
                       <td className="v2-gris">{f.echeance_lue ? dateCourte(f.echeance_lue) : "—"}</td>
-                      <td><Badge teinte={groupe === "retard" ? "rouge" : groupe === "semaine" ? "ambre" : "gris"}>{groupe === "retard" ? "En retard" : groupe === "semaine" ? "Cette semaine" : "À venir"}</Badge></td>
+                      <td><span className="v2-etat">{groupe === "retard" ? "En retard" : groupe === "semaine" ? "Cette semaine" : "À venir"}</span></td>
                       <td style={{ textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{montant(reste, f.devise)}</td>
                       <td><Link href={`${RACINE}/filed/a-payer`} aria-label={`Ouvrir la facture de ${nom}`}><ChevronRight width={16} height={16} /></Link></td>
                     </tr>
