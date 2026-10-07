@@ -102,7 +102,7 @@ export default function Coquille({ utilisateur, police, children }: { utilisateu
       <SourceFournisseur connecte={!!utilisateur}>
         <RouterProvider navigate={(href, options) => router.push(versV2(href) ?? href, options)}>
           <FournisseurToasts>
-            <OrganisationContexte.Provider value={{ nom: utilisateur?.entreprise || (utilisateur ? "Mon organisation" : "Atelier Bertin"), connecte: !!utilisateur }}>
+            <OrganisationContexte.Provider value={{ nom: utilisateur?.entreprise || (utilisateur ? "Mon organisation" : "CAMA"), connecte: !!utilisateur }}>
               <Cadre utilisateur={utilisateur}>{children}</Cadre>
             </OrganisationContexte.Provider>
           </FournisseurToasts>
@@ -271,7 +271,7 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
   const tachesOuvertes = useOuvertes("taches");
   const metier = moduleMetier(utilisateur?.secteur, !!utilisateur);
   const [ouvertes, basculer] = useSections();
-  const organisation = utilisateur?.entreprise || (utilisateur ? "Mon organisation" : "Atelier Bertin");
+  const organisation = utilisateur?.entreprise || (utilisateur ? "Mon organisation" : "CAMA");
   const nom = utilisateur ? [utilisateur.prenom, utilisateur.nom].filter(Boolean).join(" ") || utilisateur.email : null;
 
   const choisirSource = (s: "exemple" | "reelle") => {
@@ -374,7 +374,7 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
                 <img src="/logo-pegase-blanc.png" alt="" width={20} height={20} />
               </span>
               <span className="v2-marque-fois" aria-hidden="true">×</span>
-              <LogoClient chemin={utilisateur?.logo ?? null} nom={organisation} />
+              <LogoClient chemin={utilisateur?.logo ?? null} nom={organisation} demo={!utilisateur} />
               <span className="v2-equipe-nom">{organisation}</span>
               <ChevronsUpDown width={14} height={14} aria-hidden="true" className="v2-equipe-chevrons" />
             </>
@@ -516,7 +516,7 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
    l'appareil ; une section jamais touchée suit la règle par défaut */
 /* le logo du client : une URL signée du seau omega-clients ; sans logo
    (ou s'il ne se lit pas), l'initiale de l'entreprise */
-function LogoClient({ chemin, nom }: { chemin: string | null; nom: string }) {
+function LogoClient({ chemin, nom, demo }: { chemin: string | null; nom: string; demo?: boolean }) {
   const [url, setUrl] = useState<string | null>(null);
   useEffect(() => {
     if (!chemin) return;
@@ -531,6 +531,16 @@ function LogoClient({ chemin, nom }: { chemin: string | null; nom: string }) {
       actif = false;
     };
   }, [chemin]);
+  /* la démonstration : CAMA, concession Renault — le losange, dessiné */
+  if (demo)
+    return (
+      <span className="v2-marque-client v2-marque-client--svg" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="miter">
+          <path d="M12 2.5 L18.5 12 L12 21.5 L5.5 12 Z" />
+          <path d="M12 7.2 L15.3 12 L12 16.8 L8.7 12 Z" />
+        </svg>
+      </span>
+    );
   return (
     <span className="v2-marque-client" aria-hidden="true">
       {/* eslint-disable-next-line @next/next/no-img-element -- une URL signée, hors de next/image */}
