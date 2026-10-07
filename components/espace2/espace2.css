@@ -2734,7 +2734,7 @@ html.v2-calme *::after {
 .v2-equipe { gap: 7px; }
 .v2-marque-omega { display: grid; place-items: center; width: 24px; height: 24px; flex: none; }
 .v2-marque-omega img { width: 22px; height: 22px; object-fit: contain; }
-.v2-marque-fois { flex: none; display: inline-block; font-size: 17px; line-height: 1; font-weight: 700; font-style: italic; color: var(--v2-gray-1000); transform: rotate(-10deg) skewX(-8deg); margin: 0 1px; }
+.v2-marque-fois { flex: none; display: grid; place-items: center; width: 14px; height: 14px; color: var(--v2-gray-1000); margin: 0 1px; }
 .v2-marque-client { display: grid; place-items: center; width: 22px; height: 22px; flex: none; overflow: hidden; border-radius: 5px; background: var(--v2-a-200); font-size: 11px; font-weight: 600; color: var(--v2-gray-1000); }
 .v2-marque-client img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
 .v2-marque-client--svg { background: transparent; color: var(--v2-gray-1000); }

@@ -373,7 +373,13 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
                 {/* eslint-disable-next-line @next/next/no-img-element -- le logo Omega, déjà à sa taille */}
                 <img src="/logo-pegase-blanc.png" alt="" width={20} height={20} />
               </span>
-              <span className="v2-marque-fois" aria-hidden="true">×</span>
+              <span className="v2-marque-fois" aria-hidden="true">
+                {/* le X, à la façon de celui de X (Twitter) : une branche pleine, une branche fine */}
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+                  <path d="M3 2h5.2l12.8 20h-5.2z" />
+                  <path d="M19.6 2h1.7L4.4 22H2.7z" />
+                </svg>
+              </span>
               <LogoClient chemin={utilisateur?.logo ?? null} nom={organisation} demo={!utilisateur} />
               <span className="v2-equipe-nom">{organisation}</span>
               <ChevronsUpDown width={14} height={14} aria-hidden="true" className="v2-equipe-chevrons" />
@@ -535,9 +541,13 @@ function LogoClient({ chemin, nom, demo }: { chemin: string | null; nom: string;
   if (demo)
     return (
       <span className="v2-marque-client v2-marque-client--svg" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="miter">
-          <path d="M12 2.5 L18.5 12 L12 21.5 L5.5 12 Z" />
-          <path d="M12 7.2 L15.3 12 L12 16.8 L8.7 12 Z" />
+        {/* le losange Renault : un anneau en losange, deux entailles pour l'entrelacs */}
+        <svg viewBox="0 0 100 130" width="15" height="19">
+          <mask id="v2-losange">
+            <path fill="#fff" fillRule="evenodd" d="M50 0 L90 65 L50 130 L10 65 Z M50 24 L75 65 L50 106 L25 65 Z" />
+            <path d="M30 32 L44 49 M70 98 L56 81" stroke="#000" strokeWidth="5" />
+          </mask>
+          <rect width="100" height="130" fill="currentColor" mask="url(#v2-losange)" />
         </svg>
       </span>
     );
