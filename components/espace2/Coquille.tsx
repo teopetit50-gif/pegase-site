@@ -30,6 +30,7 @@ import { relatif } from "@/components/espace/format";
 import { FournisseurToasts, useToast } from "./Toasts";
 import { ItemMenu, Kbd, MenuDeroulant, SectionMenu, SeparateurMenu } from "./ui";
 import Palette from "./Palette";
+import Assistant from "./Assistant";
 import { ecrireStockage, useOuvertes, useStockage } from "./Collection";
 import { MODULES, MODULES_A_VENIR, MODULES_PRINCIPAUX, RACINE, moduleMetier, porteeDe, titreDe } from "./modules";
 import { useCompteurs } from "./compteurs";
@@ -131,6 +132,7 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
   const chemin = usePathname() ?? RACINE;
   const [palette, setPalette] = useState(false);
   const [tiroir, setTiroir] = useState(false);
+  const [assistant, setAssistant] = useState(false);
   const portee = porteeDe(chemin);
 
   /* ⌘K / Ctrl+K partout ; F hors des champs de saisie */
@@ -226,9 +228,8 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
                   Décider d&apos;une validation
                 </ItemMenu>
               </MenuDeroulant>
-              <button type="button" className="v2-btn v2-btn--petit v2-masque-mobile" disabled title="L'assistant arrive bientôt">
+              <button type="button" className="v2-btn v2-btn--petit v2-masque-mobile" onClick={() => setAssistant(true)}>
                 <Sparkles {...I} /> Assistant
-                <span className="v2-badge">bientôt</span>
               </button>
             </div>
           </header>
@@ -238,6 +239,7 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
         </div>
       </div>
 
+      <Assistant ouvert={assistant} changer={setAssistant} connecte={!!utilisateur} />
       <ModalOverlay isOpen={tiroir} onOpenChange={setTiroir} isDismissable className="v2-jetons v2-voile v2-voile--tiroir">
         <Modal className="v2-tiroir">
           <Dialog className="v2-modale-dialogue v2-laterale" aria-label="Navigation de l'espace client">
