@@ -5,7 +5,7 @@ Une ligne par établissement actif.
 
 ## Résumé
 
-- **7 188 établissements**, dont **778 avec téléphone**, 274 avec courriel et 105 avec site web.
+- **7 188 établissements**, dont **807 avec téléphone**, 299 avec courriel et 137 avec site web.
 
 | Module | Lignes | Téléphone | Courriel |
 |---|---|---|---|
@@ -15,7 +15,7 @@ Une ligne par établissement actif.
 | Daliro (BTP) | 1 172 | 7 | 1 |
 | Tavaro (loueurs de voitures) | 1 719 | 56 | 30 |
 | Varelo (holdings) | 670 | 3 | 0 |
-| PME de services et de distribution, dont experts-comptables | 2 358 | 238 | 7 |
+| PME de services et de distribution, dont experts-comptables | 2 358 | 267 | 32 |
 
 - `martinique.csv` contient en plus 52 cibles de Martinique (972). Elles viennent toutes de la liste ChatGPT et sont à vérifier.
 - **Trous principaux :**
