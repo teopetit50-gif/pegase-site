@@ -381,7 +381,8 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
                 </svg>
               </span>
               <LogoClient chemin={utilisateur?.logo ?? null} nom={organisation} demo={!utilisateur} />
-              <span className="v2-equipe-nom">{organisation}</span>
+              {/* en démonstration, le logo Renault suffit (Teo, 07/10) */}
+              {utilisateur ? <span className="v2-equipe-nom">{organisation}</span> : <span className="v2-sr">{organisation}</span>}
               <ChevronsUpDown width={14} height={14} aria-hidden="true" className="v2-equipe-chevrons" />
             </>
           }
