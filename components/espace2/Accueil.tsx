@@ -10,22 +10,18 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Banknote, Building2, CheckCheck, ChevronRight, FileText, ListChecks, Sparkles } from "lucide-react";
-import { useSource } from "@/components/espace/source";
 import { dateCourte, montant, relatif } from "@/components/espace/format";
 import { A_PAYER, aPayer, groupeDe, minuit, totaux } from "./filed/calculs";
 import { Badge, Squelette } from "./ui";
 import { RACINE } from "./modules";
 import { useDonnees } from "./donnees";
 import { evenements } from "./evenements";
-import { useOrganisation } from "./organisation";
 import { ecrireStockage, useStockage } from "./Collection";
 import "./habillage.css";
 
 const CLE_TACHES = "espace2-collection-taches";
 
 export default function Accueil() {
-  const { source } = useSource();
-  const { nom: organisation } = useOrganisation();
   const [aujourdhui] = useState(minuit);
   const { donnees, erreur } = useDonnees();
   const [periode, setPeriode] = useState(30);
@@ -97,12 +93,7 @@ export default function Accueil() {
 
   return (
     <div className="v2-page v2-arrivee v2-va">
-      <div className="v2-va-tete">
-        <h1 className="v2-h2" style={{ fontSize: 20 }}>{organisation}</h1>
-        <Badge moyen teinte={source === "reelle" ? "bleu" : "gris"}>
-          {source === "reelle" ? "Base réelle" : "Données d'exemple"}
-        </Badge>
-      </div>
+      <h1 className="v2-sr">Vue d&apos;ensemble</h1>
       {erreur ? <p className="v2-gris">La base n&apos;a pas répondu : {erreur}</p> : null}
 
       <section className="v2-va-kpis" aria-label="Chiffres clés">
