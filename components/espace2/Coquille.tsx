@@ -25,6 +25,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Activity, Banknote, Building2, CheckSquare, ChevronDown, NotebookPen, Phone, Users, Workflow, Gauge, Inbox, Bell, Check, CheckCheck, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, LayoutGrid, LifeBuoy, LogOut, Menu as IconeMenu, MoreHorizontal, Search, Settings, Sparkles, Sun, X } from "lucide-react";
 import { Button, Dialog, DialogTrigger, Modal, ModalOverlay, Popover, RouterProvider } from "react-aria-components";
 import type { Utilisateur } from "@/lib/compte";
+import { createClient } from "@/lib/supabase/client";
 import { SourceFournisseur, useSource } from "@/components/espace/source";
 import { relatif } from "@/components/espace/format";
 import { FournisseurToasts, useToast } from "./Toasts";
@@ -365,14 +366,16 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
           largeur={260}
           declencheur={
             <>
-              <span className="v2-pastille-ronde" aria-hidden="true">
-                {/* eslint-disable-next-line @next/next/no-img-element -- le logo Omega, 16 px, déjà à sa taille */}
-                <img src="/logo-pegase-blanc.png" alt="" width={16} height={16} />
+              {/* 07/10 — demande de Teo : « Omega × l'entreprise », comme un
+                 partenariat — le logo Omega, un ×, puis le logo et le nom
+                 du client (CAMA, logo Renault) */}
+              <span className="v2-marque-omega" aria-hidden="true">
+                {/* eslint-disable-next-line @next/next/no-img-element -- le logo Omega, déjà à sa taille */}
+                <img src="/logo-pegase-blanc.png" alt="" width={20} height={20} />
               </span>
+              <span className="v2-marque-fois" aria-hidden="true">×</span>
+              <LogoClient chemin={utilisateur?.logo ?? null} nom={organisation} />
               <span className="v2-equipe-nom">{organisation}</span>
-              <span className="v2-badge" data-teinte={source === "reelle" ? "bleu" : "gris"}>
-                {source === "reelle" ? "Base réelle" : "Exemple"}
-              </span>
               <ChevronsUpDown width={14} height={14} aria-hidden="true" className="v2-equipe-chevrons" />
             </>
           }
@@ -511,6 +514,31 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
 
 /* l'état ouvert / fermé choisi à la main pour chaque section, gardé sur
    l'appareil ; une section jamais touchée suit la règle par défaut */
+/* le logo du client : une URL signée du seau omega-clients ; sans logo
+   (ou s'il ne se lit pas), l'initiale de l'entreprise */
+function LogoClient({ chemin, nom }: { chemin: string | null; nom: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (!chemin) return;
+    let actif = true;
+    createClient()
+      .storage.from("omega-clients")
+      .createSignedUrl(chemin, 3600)
+      .then(({ data }) => {
+        if (actif && data?.signedUrl) setUrl(data.signedUrl);
+      });
+    return () => {
+      actif = false;
+    };
+  }, [chemin]);
+  return (
+    <span className="v2-marque-client" aria-hidden="true">
+      {/* eslint-disable-next-line @next/next/no-img-element -- une URL signée, hors de next/image */}
+      {chemin && url ? <img src={url} alt="" width={20} height={20} /> : nom.charAt(0).toUpperCase()}
+    </span>
+  );
+}
+
 function useSections(): [Record<string, boolean>, (titre: string, ouvrir: boolean) => void] {
   const brut = useStockage("espace2-sections");
   let etat: Record<string, boolean> = {};

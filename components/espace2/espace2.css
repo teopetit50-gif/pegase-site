@@ -2710,3 +2710,30 @@ html.v2-calme *::after {
   .v2-dr-trois, .v2-dr-deux { grid-template-columns: minmax(0, 1fr); }
 }
 .v2-page.v2-cd-page { max-width: none; padding: 16px 16px 48px; }
+/* 07/10 — moins de défilement : toute la largeur, une ligne de titre qui
+   porte les raccourcis, deux cartes à vues (flèches au bord) */
+.v2-page:has(> .v2-dr) { max-width: none; padding: 16px 16px 48px; }
+.v2-dr-titre-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.v2 .v2-dr-titre-actions .v2-dr-principal { display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px; border-radius: 6px; background: var(--v2-gray-1000); color: var(--v2-bg-100); font-size: 13px; font-weight: 500; white-space: nowrap; }
+.v2-dr-principale { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(320px, 1fr); gap: 16px; align-items: stretch; }
+.v2-dr-carrousel { display: flex; flex-direction: column; }
+.v2-dr-carrousel-tete { display: flex; align-items: center; gap: 12px; }
+.v2-dr-carrousel-tete h3 { flex: 1; }
+.v2-dr-points { display: flex; gap: 5px; }
+.v2-dr-points i { width: 6px; height: 6px; border-radius: 999px; background: var(--v2-a-400); }
+.v2-dr-points i[data-actif] { background: var(--v2-gray-1000); }
+.v2-dr-fleches { display: flex; gap: 6px; }
+.v2-dr-carrousel-corps { flex: 1; min-height: 0; }
+.v2-dr-carrousel--liste .v2-dr-liste { padding: 12px 0 0; }
+.v2-dr-trois .v2-dr-jauge-valeur { margin-top: 6px; }
+@media (max-width: 1023px) {
+  .v2-dr-principale { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* « Omega × l'entreprise » en tête de la barre (07/10/2026) */
+.v2-equipe { gap: 7px; }
+.v2-marque-omega { display: grid; place-items: center; width: 24px; height: 24px; flex: none; }
+.v2-marque-omega img { width: 22px; height: 22px; object-fit: contain; }
+.v2-marque-fois { flex: none; font-size: 12px; font-weight: 400; color: var(--v2-gray-900); }
+.v2-marque-client { display: grid; place-items: center; width: 22px; height: 22px; flex: none; overflow: hidden; border-radius: 5px; background: var(--v2-a-200); font-size: 11px; font-weight: 600; color: var(--v2-gray-1000); }
+.v2-marque-client img { width: 100%; height: 100%; object-fit: contain; background: #fff; }

@@ -48,6 +48,9 @@ export type Utilisateur = {
   secteur?: string;
   commune?: string;
   siret?: string;
+  /* le chemin du logo de l'entreprise dans le seau omega-clients
+     (posé par /bienvenue : <client>/logo/logo.<ext>) */
+  logo?: string;
   mdpDefini: boolean;
 };
 
@@ -71,6 +74,7 @@ export function utilisateurDepuis(u: {
     secteur: texte(meta.secteur),
     commune: texte(meta.commune),
     siret: texte(meta.siret),
+    logo: texte(meta.logo),
     mdpDefini: meta.mdp_defini === true,
   };
 }

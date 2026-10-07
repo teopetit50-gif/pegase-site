@@ -16,7 +16,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Bell, CheckCheck, ChevronDown, ChevronRight, Globe, Inbox, Info, ListChecks, Mail, MessageCircle, Plug, Smartphone, Sparkles } from "lucide-react";
+import { Bell, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, Globe, Inbox, Info, Mail, MessageCircle, Plug, Smartphone, Sparkles } from "lucide-react";
 import { useSource } from "@/components/espace/source";
 import { vueExemple } from "@/components/espace/filed/EcranBoite";
 import { CANAUX, chargerBoite, type Canal, type VueBoite } from "@/components/espace/filed/receptions";
@@ -117,20 +117,31 @@ export default function TableauDemandes() {
 
   return (
     <div className="v2-dr">
-      {/* ——— le titre et la période ——— */}
+      {/* ——— le titre, les raccourcis, la période (une seule ligne) ——— */}
       <div className="v2-dr-titre">
         <h2>Vue d&apos;ensemble</h2>
-        <label className="v2-val-bouton">
-          <span>{PERIODES.find((p) => p.cle === periode)?.libelle}</span>
-          <ChevronDown width={14} height={14} aria-hidden="true" className="v2-val-bouton-chevron" />
-          <select value={periode} onChange={(e) => setPeriode(Number(e.target.value))} aria-label="Période">
-            {PERIODES.map((p) => (
-              <option key={p.cle} value={p.cle}>
-                {p.libelle}
-              </option>
-            ))}
-          </select>
-        </label>
+        <span className="v2-dr-titre-actions">
+          <button type="button" className="v2-val-bouton" onClick={() => window.dispatchEvent(new Event("espace2-assistant"))}>
+            <Sparkles width={16} height={16} aria-hidden="true" /> Préparer une réponse
+          </button>
+          <Link href={`${RACINE}/reglages`} className="v2-val-bouton">
+            <Bell width={16} height={16} aria-hidden="true" /> Alertes
+          </Link>
+          <label className="v2-val-bouton">
+            <span>{PERIODES.find((p) => p.cle === periode)?.libelle}</span>
+            <ChevronDown width={14} height={14} aria-hidden="true" className="v2-val-bouton-chevron" />
+            <select value={periode} onChange={(e) => setPeriode(Number(e.target.value))} aria-label="Période">
+              {PERIODES.map((p) => (
+                <option key={p.cle} value={p.cle}>
+                  {p.libelle}
+                </option>
+              ))}
+            </select>
+          </label>
+          <a href="#ecran" className="v2-dr-principal">
+            <Inbox width={16} height={16} aria-hidden="true" /> Ouvrir les nouvelles{c.nouvelles ? ` (${c.nouvelles})` : ""}
+          </a>
+        </span>
       </div>
 
       {/* ——— trois cartes à jauge ——— */}
@@ -164,27 +175,37 @@ export default function TableauDemandes() {
         />
       </div>
 
-      {/* ——— l'activité, jour par jour ——— */}
-      <section className="v2-dr-carte" aria-label="Activité">
-        <h3>Activité</h3>
+      {/* ——— deux cartes à vues : les graphiques, les listes (flèches au bord) ——— */}
+      <div className="v2-dr-principale" id="canaux">
+        <Carrousel
+          vues={[
+            {
+              titre: "Activité",
+              contenu: (
+                <>
         <p className="v2-dr-pic">
           <span>Pic :</span> {c.pic ? `${c.pic.n} demande${c.pic.n > 1 ? "s" : ""} (${jourCourt(c.pic.t)})` : "aucune demande sur la période"}{" "}
           <Info width={14} height={14} aria-label="Le jour qui a reçu le plus de demandes sur la période" />
         </p>
         <Chaleur debut={c.debut} fin={aujourdhui} parJour={c.parJour} />
-      </section>
-
-      {/* ——— la courbe, les canaux ——— */}
-      <div className="v2-dr-deux">
-        <section className="v2-dr-carte" aria-label="Demandes dans le temps">
-          <h3>Demandes {c.parMois ? "par mois" : "par semaine"}</h3>
+                </>
+              ),
+            },
+            {
+              titre: c.parMois ? "Demandes par mois" : "Demandes par semaine",
+              contenu: (
+                <>
           <p className="v2-dr-sous">
             Moy. {(c.seaux.reduce((s, x) => s + x.n, 0) / Math.max(1, c.seaux.length)).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} <strong>/ {c.parMois ? "mois" : "semaine"}</strong>
           </p>
           <Courbe seaux={c.seaux} />
-        </section>
-        <section className="v2-dr-carte" aria-label="Demandes par canal">
-          <h3>Par canal</h3>
+                </>
+              ),
+            },
+            {
+              titre: "Par canal",
+              contenu: (
+                <>
           <p className="v2-dr-sous">
             Moy. {(total / ORDRE_CANAUX.length).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} <strong>/ canal</strong>
           </p>
@@ -196,37 +217,17 @@ export default function TableauDemandes() {
             })()}
             <strong>{CANAUX[canalMax.canal]}</strong> : {canalMax.n} demande{canalMax.n > 1 ? "s" : ""} <span>({total ? Math.round((canalMax.n / total) * 100) : 0} % du volume)</span>
           </p>
-        </section>
-      </div>
-
-      {/* ——— les raccourcis ——— */}
-      <section className="v2-dr-carte" aria-label="Raccourcis">
-        <h3>Raccourcis</h3>
-        <div className="v2-dr-raccourcis">
-          <a href="#ecran">
-            <ListChecks width={16} height={16} aria-hidden="true" /> Voir les demandes <ChevronRight width={14} height={14} aria-hidden="true" />
-          </a>
-          <button type="button" onClick={() => window.dispatchEvent(new Event("espace2-assistant"))}>
-            <Sparkles width={16} height={16} aria-hidden="true" /> Préparer une réponse <ChevronRight width={14} height={14} aria-hidden="true" />
-          </button>
-          <Link href={`${RACINE}/reglages`}>
-            <Bell width={16} height={16} aria-hidden="true" /> Régler les alertes <ChevronRight width={14} height={14} aria-hidden="true" />
-          </Link>
-          <a href="#ecran" className="v2-dr-principal">
-            <Inbox width={16} height={16} aria-hidden="true" /> Ouvrir les nouvelles{c.nouvelles ? ` (${c.nouvelles})` : ""}
-          </a>
-        </div>
-      </section>
-
-      {/* ——— les boîtes, les canaux ——— */}
-      <div className="v2-dr-deux" id="canaux">
-        <section className="v2-dr-carte v2-dr-carte--liste" aria-label="Boîtes de réception">
-          <div className="v2-dr-liste-tete">
-            <h3>
-              <Inbox width={18} height={18} aria-hidden="true" /> Boîtes de réception
-            </h3>
-            <p className="v2-dr-sous">Les adresses, sites et numéros qui reçoivent vos demandes</p>
-          </div>
+                </>
+              ),
+            },
+          ]}
+        />
+        <Carrousel
+          liste
+          vues={[
+            {
+              titre: "Boîtes de réception",
+              contenu: (
           <ul className="v2-dr-liste">
             {c.parBoite.length ? (
               c.parBoite.map((b, i) => {
@@ -255,14 +256,11 @@ export default function TableauDemandes() {
               </li>
             )}
           </ul>
-        </section>
-        <section className="v2-dr-carte v2-dr-carte--liste" aria-label="Canaux">
-          <div className="v2-dr-liste-tete">
-            <h3>
-              <Plug width={18} height={18} aria-hidden="true" /> Canaux
-            </h3>
-            <p className="v2-dr-sous">D&apos;où arrivent vos demandes, et ce qui reste à brancher</p>
-          </div>
+              ),
+            },
+            {
+              titre: "Canaux",
+              contenu: (
           <ul className="v2-dr-liste">
             {c.parCanal.map((x) => {
               const I = ICONE_CANAL[x.canal];
@@ -286,9 +284,43 @@ export default function TableauDemandes() {
               );
             })}
           </ul>
-        </section>
+              ),
+            },
+          ]}
+        />
       </div>
     </div>
+  );
+}
+
+/* ——— une carte à plusieurs vues : le titre de la vue, des points, et
+   deux flèches au bord droit pour passer de l'une à l'autre ——— */
+function Carrousel({ vues, liste }: { vues: { titre: string; contenu: React.ReactNode }[]; liste?: boolean }) {
+  const [i, setI] = useState(0);
+  const aller = (d: number) => setI((x) => (x + d + vues.length) % vues.length);
+  const v = vues[i];
+  return (
+    <section className={`v2-dr-carte v2-dr-carrousel${liste ? " v2-dr-carrousel--liste" : ""}`} aria-label={v.titre} aria-roledescription="carrousel">
+      <div className="v2-dr-carrousel-tete">
+        <h3>{v.titre}</h3>
+        <span className="v2-dr-points" aria-hidden="true">
+          {vues.map((x, k) => (
+            <i key={x.titre} data-actif={k === i ? "" : undefined} />
+          ))}
+        </span>
+        <span className="v2-dr-fleches">
+          <button type="button" className="v2-val-bouton v2-val-bouton--icone" aria-label="Vue précédente" onClick={() => aller(-1)}>
+            <ChevronLeft width={16} height={16} />
+          </button>
+          <button type="button" className="v2-val-bouton v2-val-bouton--icone" aria-label="Vue suivante" onClick={() => aller(1)}>
+            <ChevronRight width={16} height={16} />
+          </button>
+        </span>
+      </div>
+      <div className="v2-dr-carrousel-corps" aria-live="polite">
+        {v.contenu}
+      </div>
+    </section>
   );
 }
 
