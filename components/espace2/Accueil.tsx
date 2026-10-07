@@ -9,7 +9,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { AlertCircle, ArrowRight, Banknote, Building2, CheckCheck, ChevronRight, FileText, ListChecks, Sparkles } from "lucide-react";
+import { ArrowRight, Banknote, Building2, CheckCheck, ChevronRight, FileText, ListChecks, Sparkles } from "lucide-react";
 import { useSource } from "@/components/espace/source";
 import { dateCourte, montant, relatif } from "@/components/espace/format";
 import { A_PAYER, aPayer, groupeDe, minuit, totaux } from "./filed/calculs";
@@ -89,10 +89,10 @@ export default function Accueil() {
   const enRetard = taches.filter((t) => !t.fait && t.echeance && new Date(t.echeance).getTime() < aujourdhui).length;
 
   const kpis = [
-    { libelle: "Reste à payer", valeur: c?.totalARegler, sous: c ? `${c.aRegler.length} facture${c.aRegler.length > 1 ? "s" : ""} validée${c.aRegler.length > 1 ? "s" : ""}` : "", lien: `${RACINE}/filed/a-payer`, icone: Banknote },
-    { libelle: "En retard", valeur: c?.totalRetard, sous: c ? `${c.retard.length} échéance${c.retard.length > 1 ? "s" : ""} dépassée${c.retard.length > 1 ? "s" : ""}` : "", lien: `${RACINE}/filed/a-payer`, alerte: !!c?.retard.length, icone: AlertCircle },
-    { libelle: "À valider", valeur: c ? String(c.aValider) : undefined, sous: "demandes en attente de votre accord", lien: `${RACINE}/validations`, icone: CheckCheck },
-    { libelle: "Tâches en retard", valeur: String(enRetard), sous: `${duJour.length} tâche${duJour.length > 1 ? "s" : ""} ouverte${duJour.length > 1 ? "s" : ""}`, lien: `${RACINE}/taches`, icone: ListChecks },
+    { libelle: "Reste à payer", valeur: c?.totalARegler, sous: c ? `${c.aRegler.length} facture${c.aRegler.length > 1 ? "s" : ""} validée${c.aRegler.length > 1 ? "s" : ""}` : "", lien: `${RACINE}/filed/a-payer` },
+    { libelle: "En retard", valeur: c?.totalRetard, sous: c ? `${c.retard.length} échéance${c.retard.length > 1 ? "s" : ""} dépassée${c.retard.length > 1 ? "s" : ""}` : "", lien: `${RACINE}/filed/a-payer`, alerte: !!c?.retard.length },
+    { libelle: "À valider", valeur: c ? String(c.aValider) : undefined, sous: "demandes en attente de votre accord", lien: `${RACINE}/validations` },
+    { libelle: "Tâches en retard", valeur: String(enRetard), sous: `${duJour.length} tâche${duJour.length > 1 ? "s" : ""} ouverte${duJour.length > 1 ? "s" : ""}`, lien: `${RACINE}/taches` },
   ];
 
   return (
@@ -107,11 +107,8 @@ export default function Accueil() {
 
       <section className="v2-va-kpis" aria-label="Chiffres clés">
         {kpis.map((k) => (
-          <Link key={k.libelle} href={k.lien} className="v2-carte v2-va-kpi">
-            <span className="v2-va-kpi-tete">
-              <span className="v2-va-pastille" aria-hidden="true"><k.icone width={14} height={14} /></span>
-              <span className="v2-gris">{k.libelle}</span>
-            </span>
+          <Link key={k.libelle} href={k.lien} className="v2-va-kpi" data-alerte={k.alerte ? "" : undefined}>
+            <span className="v2-va-kpi-libelle">{k.libelle}</span>
             {k.valeur === undefined ? <Squelette largeur={120} hauteur={32} /> : <strong data-alerte={k.alerte ? "" : undefined}>{k.valeur}</strong>}
             <small className="v2-gris v2-va-kpi-sous">{k.sous}</small>
           </Link>
