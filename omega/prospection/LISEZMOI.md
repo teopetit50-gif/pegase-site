@@ -5,18 +5,20 @@ Une ligne par établissement actif.
 
 ## Résumé
 
-- **7 188 établissements**, dont **807 avec téléphone**, 299 avec courriel et 137 avec site web.
+- **11 901 établissements**, dont **1 004 avec téléphone**, 314 avec courriel.
 
 | Module | Lignes | Téléphone | Courriel |
 |---|---|---|---|
-| Tiroma (dentistes) | 316 | 54 | 4 |
-| Tamila (avocats) | 454 | 219 | 229 |
+| Tiroma (dentistes) | 315 | 54 | 4 |
+| Tamila (avocats, quelques notaires) | 454 | 230 | 239 |
 | Lorani (architectes) | 499 | 201 | 3 |
-| Daliro (BTP) | 1 172 | 7 | 1 |
+| Daliro (BTP) | 1 172 | 11 | 3 |
 | Tavaro (loueurs de voitures) | 1 719 | 56 | 30 |
-| Varelo (holdings) | 670 | 3 | 0 |
+| Varelo (holdings) | 670 | 8 | 3 |
 | PME de services et de distribution, dont experts-comptables | 2 358 | 267 | 32 |
+| Autres PME, tous secteurs, 3 salariés et plus | 4 714 | 177 | 0 |
 
+- **Module « Autres PME (3+ salariés) »** : toutes les autres entreprises du 971 qui déclarent au moins 3 salariés, quel que soit leur métier. Les administrations, les organismes publics et les associations y sont exclus. Le code NAF figure dans la colonne « remarque ».
 - `martinique.csv` contient en plus 52 cibles de Martinique (972). Elles viennent toutes de la liste ChatGPT et sont à vérifier.
 - **Trous principaux :**
   - BTP et holdings : très peu de ces entreprises ont un site web.
