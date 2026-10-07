@@ -133,6 +133,12 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
   const [palette, setPalette] = useState(false);
   const [tiroir, setTiroir] = useState(false);
   const [assistant, setAssistant] = useState(false);
+  /* la Vue d'ensemble ouvre l'assistant par un événement */
+  useEffect(() => {
+    const ouvrir = () => setAssistant(true);
+    window.addEventListener("espace2-assistant", ouvrir);
+    return () => window.removeEventListener("espace2-assistant", ouvrir);
+  }, []);
   const portee = porteeDe(chemin);
 
   /* ⌘K / Ctrl+K partout ; F hors des champs de saisie */
