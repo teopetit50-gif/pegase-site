@@ -43,9 +43,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    /* suppressHydrationWarning : le script d'amorce de /espace2 pose
+       data-v2-theme="dark" sur <html> avant React (pas d'éclair blanc) */
     <html
       lang="fr"
       className={`${omega.variable} ${omegaMono.variable} antialiased`}
+      suppressHydrationWarning
     >
       {/* Vercel Web Analytics — sans cookie, donc pas de bandeau consentement.
           Le script ne collecte qu'une fois « Web Analytics » activé sur le

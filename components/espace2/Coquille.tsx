@@ -22,7 +22,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, Banknote, Gauge, Inbox, Bell, Check, CheckCheck, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, LayoutGrid, Laptop, LifeBuoy, LogOut, Menu as IconeMenu, Moon, MoreHorizontal, Search, Settings, Sparkles, Sun, X } from "lucide-react";
+import { Activity, Banknote, Building2, CheckSquare, ChevronDown, NotebookPen, Phone, Users, Workflow, Gauge, Inbox, Bell, Check, CheckCheck, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, LayoutGrid, LifeBuoy, LogOut, Menu as IconeMenu, MoreHorizontal, Search, Settings, Sparkles, Sun, X } from "lucide-react";
 import { Button, Dialog, DialogTrigger, Modal, ModalOverlay, Popover, RouterProvider } from "react-aria-components";
 import type { Utilisateur } from "@/lib/compte";
 import { SourceFournisseur, useSource } from "@/components/espace/source";
@@ -30,10 +30,11 @@ import { relatif } from "@/components/espace/format";
 import { FournisseurToasts, useToast } from "./Toasts";
 import { ItemMenu, Kbd, MenuDeroulant, SectionMenu, SeparateurMenu } from "./ui";
 import Palette from "./Palette";
+import { ecrireStockage, useOuvertes, useStockage } from "./Collection";
 import { MODULES, MODULES_A_VENIR, RACINE, porteeDe, titreDe } from "./modules";
 import { useCompteurs } from "./compteurs";
 import { OrganisationContexte } from "./organisation";
-import { changerTheme, useTheme } from "./theme";
+import { useTheme } from "./theme";
 import { useCalme } from "./mouvement";
 import { useDonnees } from "./donnees";
 import { A_PAYER, groupeDe, minuit } from "./filed/calculs";
@@ -252,19 +253,17 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
 type Lien = { libelle: string; href: string; icone: React.ReactNode; exact?: boolean; compteur?: number; sous?: { libelle: string; href: string }[]; bientot?: boolean };
 
 function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisateur: Utilisateur | null; chemin: string; ouvrirPalette: () => void; fermer?: () => void }) {
-  const theme = useTheme();
+  useTheme();
   useCalme();
   const toast = useToast();
   const { source, changer, connecte } = useSource();
   const { alertes, enAttente } = useAlertes();
   const compteurs = useCompteurs();
+  const tachesOuvertes = useOuvertes("taches");
+  const [replies, replier] = useReplis();
   const organisation = utilisateur?.entreprise || (utilisateur ? "Mon organisation" : "Atelier Bertin");
   const nom = utilisateur ? [utilisateur.prenom, utilisateur.nom].filter(Boolean).join(" ") || utilisateur.email : null;
 
-  const choisirTheme = (t: "systeme" | "clair" | "sombre") => {
-    changerTheme(t);
-    toast(t === "systeme" ? "Thème du système appliqué" : t === "clair" ? "Thème clair appliqué" : "Thème sombre appliqué");
-  };
   const choisirSource = (s: "exemple" | "reelle") => {
     if (s === "reelle" && !connecte) return;
     changer(s);
@@ -279,35 +278,66 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
     f.submit();
   };
 
-  const groupes: Lien[][] = [
-    [
-      { libelle: "Vue d'ensemble", href: RACINE, icone: <LayoutGrid {...I} />, exact: true },
-      { libelle: "À valider", href: `${RACINE}/validations`, icone: <CheckCheck {...I} />, compteur: enAttente },
-      { libelle: "Point du matin", href: `${RACINE}/point`, icone: <Sun {...I} /> },
-      { libelle: "Demandes reçues", href: `${RACINE}/demandes`, icone: <Inbox {...I} /> },
-      { libelle: "Activité", href: `${RACINE}/activite`, icone: <Activity {...I} /> },
-    ],
-    MODULES.map<Lien>((m) => ({
-      libelle: m.nom,
-      href: `${RACINE}/${m.cle}`,
-      icone: <m.icone {...I} />,
-      compteur: compteurs[m.cle],
-      sous: m.onglets.length > 1 ? m.onglets.map((o) => ({ libelle: o.libelle, href: o.href })) : undefined,
-    })).concat(MODULES_A_VENIR.map<Lien>((m) => ({ libelle: m.nom, href: `${RACINE}/${m.cle}`, icone: <m.icone {...I} />, bientot: true }))),
-    [
-      { libelle: "Utilisation", href: `${RACINE}/utilisation`, icone: <Gauge {...I} /> },
-      { libelle: "Aide", href: "/contact", icone: <LifeBuoy {...I} /> },
-      {
-        libelle: "Réglages",
-        href: `${RACINE}/reglages`,
-        icone: <Settings {...I} />,
-        sous: [
-          { libelle: "Apparence", href: `${RACINE}/reglages#apparence` },
-          { libelle: "Données", href: `${RACINE}/reglages#donnees` },
-          { libelle: "Équipe", href: `${RACINE}/reglages#compte` },
-        ],
-      },
-    ],
+  /* 07/10/2026 — demande de Teo : des sections titrées, comme la barre
+     d'Attio (« Records ⌄ », « Lists ⌄ »), qui se replient d'un clic pour
+     que la liste ne devienne pas immense à faire défiler. */
+  const groupes: { titre?: string; liens: Lien[] }[] = [
+    {
+      liens: [
+        { libelle: "Vue d'ensemble", href: RACINE, icone: <LayoutGrid {...I} />, exact: true },
+        { libelle: "À valider", href: `${RACINE}/validations`, icone: <CheckCheck {...I} />, compteur: enAttente },
+        { libelle: "Point du matin", href: `${RACINE}/point`, icone: <Sun {...I} /> },
+        { libelle: "Demandes reçues", href: `${RACINE}/demandes`, icone: <Inbox {...I} /> },
+      ],
+    },
+    {
+      titre: "Travail",
+      liens: [
+        { libelle: "Tâches", href: `${RACINE}/taches`, icone: <CheckSquare {...I} />, compteur: tachesOuvertes },
+        { libelle: "Notes", href: `${RACINE}/notes`, icone: <NotebookPen {...I} /> },
+        { libelle: "Appels", href: `${RACINE}/appels`, icone: <Phone {...I} /> },
+      ],
+    },
+    {
+      titre: "Fiches",
+      liens: [
+        { libelle: "Entreprises", href: `${RACINE}/entreprises`, icone: <Building2 {...I} /> },
+        { libelle: "Contacts", href: `${RACINE}/contacts`, icone: <Users {...I} /> },
+      ],
+    },
+    {
+      titre: "Modules",
+      liens: MODULES.map<Lien>((m) => ({
+        libelle: m.nom,
+        href: `${RACINE}/${m.cle}`,
+        icone: <m.icone {...I} />,
+        compteur: compteurs[m.cle],
+        sous: m.onglets.length > 1 ? m.onglets.map((o) => ({ libelle: o.libelle, href: o.href })) : undefined,
+      })).concat(MODULES_A_VENIR.map<Lien>((m) => ({ libelle: m.nom, href: `${RACINE}/${m.cle}`, icone: <m.icone {...I} />, bientot: true }))),
+    },
+    {
+      titre: "Suivi",
+      liens: [
+        { libelle: "Activité", href: `${RACINE}/activite`, icone: <Activity {...I} /> },
+        { libelle: "Automatisations", href: `${RACINE}/automatisations`, icone: <Workflow {...I} /> },
+        { libelle: "Utilisation", href: `${RACINE}/utilisation`, icone: <Gauge {...I} /> },
+      ],
+    },
+    {
+      liens: [
+        { libelle: "Aide", href: "/contact", icone: <LifeBuoy {...I} /> },
+        {
+          libelle: "Réglages",
+          href: `${RACINE}/reglages`,
+          icone: <Settings {...I} />,
+          sous: [
+            { libelle: "Accessibilité", href: `${RACINE}/reglages#accessibilite` },
+            { libelle: "Données", href: `${RACINE}/reglages#donnees` },
+            { libelle: "Équipe", href: `${RACINE}/reglages#compte` },
+          ],
+        },
+      ],
+    },
   ];
 
   return (
@@ -370,13 +400,26 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
       </button>
 
       <nav className="v2-laterale-nav" aria-label="Pages et modules">
-        {groupes.map((g, i) => (
-          <ul key={i} className="v2-groupe">
-            {g.map((l) => (
-              <LienLateral key={l.href} lien={l} chemin={chemin} />
-            ))}
-          </ul>
-        ))}
+        {groupes.map((g, i) => {
+          const replie = !!g.titre && replies.includes(g.titre);
+          return (
+            <div key={i} className="v2-section">
+              {g.titre ? (
+                <button type="button" className="v2-section-titre" aria-expanded={!replie} onClick={() => replier(g.titre!)}>
+                  <span>{g.titre}</span>
+                  <ChevronDown width={14} height={14} aria-hidden="true" />
+                </button>
+              ) : null}
+              {replie ? null : (
+                <ul className="v2-groupe">
+                  {g.liens.map((l) => (
+                    <LienLateral key={l.href} lien={l} chemin={chemin} />
+                  ))}
+                </ul>
+              )}
+            </div>
+          );
+        })}
       </nav>
 
       <div className="v2-laterale-bas">
@@ -399,18 +442,6 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
           }
           declencheur={<MoreHorizontal {...I} />}
         >
-          <SectionMenu titre="Thème">
-            <ItemMenu id="t-systeme" onAction={() => choisirTheme("systeme")} icone={<Laptop {...I} />} suffixe={coche(theme === "systeme")}>
-              Système
-            </ItemMenu>
-            <ItemMenu id="t-clair" onAction={() => choisirTheme("clair")} icone={<Sun {...I} />} suffixe={coche(theme === "clair")}>
-              Clair
-            </ItemMenu>
-            <ItemMenu id="t-sombre" onAction={() => choisirTheme("sombre")} icone={<Moon {...I} />} suffixe={coche(theme === "sombre")}>
-              Sombre
-            </ItemMenu>
-          </SectionMenu>
-          <SeparateurMenu />
           <SectionMenu>
             <ItemMenu id="ancien" href="/espace/validations?ancien=1" icone={<ExternalLink {...I} />}>
               Ancien espace client
@@ -458,6 +489,19 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
       </div>
     </div>
   );
+}
+
+/* les sections repliées, gardées sur l'appareil */
+function useReplis(): [string[], (titre: string) => void] {
+  const brut = useStockage("espace2-replis");
+  let replies: string[] = [];
+  try {
+    const v = JSON.parse(brut || "[]");
+    if (Array.isArray(v)) replies = v;
+  } catch {}
+  const replier = (titre: string) =>
+    ecrireStockage("espace2-replis", JSON.stringify(replies.includes(titre) ? replies.filter((x) => x !== titre) : [...replies, titre]));
+  return [replies, replier];
 }
 
 function LienLateral({ lien, chemin }: { lien: Lien; chemin: string }) {

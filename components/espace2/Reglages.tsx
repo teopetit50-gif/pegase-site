@@ -2,20 +2,18 @@
 
 /* Les réglages : la page « avec barre latérale » de la référence. À
    gauche, les rubriques ; à droite, une carte par réglage, avec son pied
-   gris et son bouton. Le thème et les données affichées sont à nous ; la
+   gris et son bouton. Les données affichées sont à nous ; la
    rubrique « Données » porte aussi l'écran Réglages de /espace (A3 :
    journal, export complet, préparer l'effacement), repris tel quel — son
    h1 « Réglages » est celui de la page. */
 
 import { Fragment, useState } from "react";
 import Link from "next/link";
-import { Laptop, Moon, Sun } from "lucide-react";
 import { useSource } from "@/components/espace/source";
 import EcranReglages from "@/components/espace/reglages/EcranReglages";
 import "@/components/espace/espace.css";
 import "./habillage.css";
 import { Interrupteur, Note } from "./ui";
-import { changerTheme, useTheme, type Theme } from "./theme";
 import { changerCalme, useCalme } from "./mouvement";
 import { useToast } from "./Toasts";
 
@@ -27,7 +25,6 @@ const GROUPES = [
   {
     titre: "Personnel",
     rubriques: [
-      { id: "apparence", libelle: "Apparence" },
       { id: "accessibilite", libelle: "Accessibilité" },
     ],
   },
@@ -52,12 +49,9 @@ const RUBRIQUES = GROUPES.flatMap((g) => g.rubriques);
 const TITRE_CARTE = { fontSize: 20, lineHeight: "26px", letterSpacing: "-0.4px" } as const;
 
 export default function Reglages() {
-  const theme = useTheme();
   const toast = useToast();
   const { source, changer, connecte } = useSource();
-  const [choix, setChoix] = useState<Theme | null>(null);
   const [rubrique, setRubrique] = useState(RUBRIQUES[0].id);
-  const enCours = choix ?? theme;
   const calme = useCalme();
 
   return (
@@ -76,46 +70,6 @@ export default function Reglages() {
           ))}
         </nav>
         <div style={{ display: "grid", gap: 24 }}>
-          <section id="apparence" className="v2-carte" aria-labelledby="t-apparence">
-            <div className="v2-carte-corps" style={{ display: "grid", gap: 16 }}>
-              <h2 className="v2-h2" id="t-apparence" style={TITRE_CARTE}>
-                Thème
-              </h2>
-              <p className="v2-gris" style={{ margin: 0 }}>
-                Le thème de l&apos;espace client sur cet appareil. « Système » suit le réglage de votre ordinateur ou de votre téléphone.
-              </p>
-              <div className="v2-bascule" role="radiogroup" aria-label="Thème" style={{ width: "fit-content" }}>
-                {(
-                  [
-                    ["systeme", "Système", Laptop],
-                    ["clair", "Clair", Sun],
-                    ["sombre", "Sombre", Moon],
-                  ] as const
-                ).map(([cle, libelle, Icone]) => (
-                  <button key={cle} type="button" role="radio" aria-checked={enCours === cle} onClick={() => setChoix(cle)} style={{ width: "auto", padding: "0 12px", gap: 6, display: "inline-flex", alignItems: "center" }}>
-                    <Icone width={16} height={16} aria-hidden="true" /> {libelle}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="v2-carte-pied">
-              <span>Enregistré sur cet appareil.</span>
-              <button
-                type="button"
-                className="v2-btn v2-btn--petit v2-btn--primaire"
-                disabled={!choix || choix === theme}
-                onClick={() => {
-                  if (!choix) return;
-                  changerTheme(choix);
-                  setChoix(null);
-                  toast("Thème enregistré", "vert");
-                }}
-              >
-                Enregistrer
-              </button>
-            </div>
-          </section>
-
           <section id="accessibilite" className="v2-carte" aria-labelledby="t-accessibilite">
             <div className="v2-carte-corps" style={{ display: "grid", gap: 16 }}>
               <h2 className="v2-h2" id="t-accessibilite" style={TITRE_CARTE}>

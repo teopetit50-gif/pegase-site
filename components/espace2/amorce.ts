@@ -4,4 +4,5 @@
 
 export const CLE_THEME = "espace2.theme";
 
-export const AMORCE_THEME = `try{var t=localStorage.getItem(${JSON.stringify(CLE_THEME)});if(t==="sombre")document.documentElement.dataset.v2Theme="dark";else if(t==="clair")document.documentElement.dataset.v2Theme="light"}catch(e){}`;
+/* 07/10/2026 — demande de Teo : l'espace est en sombre, sans choix. */
+export const AMORCE_THEME = `document.documentElement.dataset.v2Theme="dark"`;
