@@ -5,7 +5,7 @@ Une ligne par établissement actif.
 
 ## Résumé
 
-- **11 901 établissements**, dont **1 004 avec téléphone**, 314 avec courriel.
+- **11 901 établissements**, dont **1 052 avec téléphone**, 348 avec courriel et 202 avec site web.
 
 | Module | Lignes | Téléphone | Courriel |
 |---|---|---|---|
@@ -16,7 +16,7 @@ Une ligne par établissement actif.
 | Tavaro (loueurs de voitures) | 1 719 | 56 | 30 |
 | Varelo (holdings) | 670 | 8 | 3 |
 | PME de services et de distribution, dont experts-comptables | 2 358 | 267 | 32 |
-| Autres PME, tous secteurs, 3 salariés et plus | 4 714 | 177 | 0 |
+| Autres PME, tous secteurs, 3 salariés et plus | 4 714 | 225 | 34 |
 
 - **Module « Autres PME (3+ salariés) »** : toutes les autres entreprises du 971 qui déclarent au moins 3 salariés, quel que soit leur métier. Les administrations, les organismes publics et les associations y sont exclus. Le code NAF figure dans la colonne « remarque ».
 - `martinique.csv` contient en plus 52 cibles de Martinique (972). Elles viennent toutes de la liste ChatGPT et sont à vérifier.
