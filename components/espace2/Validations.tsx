@@ -369,13 +369,13 @@ export default function Validations({ utilisateur }: { utilisateur: Utilisateur 
                               <small>{sousTitre(d)}</small>
                             </span>
                             <span className="v2-val-module" aria-hidden="true">
-                              <Icone width={18} height={18} />
+                              <Icone width={16} height={16} />
                             </span>
                             <span className="v2-val-montant">
                               <span>{d.montant !== null ? montant(d.montant, d.devise) : "—"}</span>
                               <small data-retard={d.statut === "en_attente" && groupeDe(d) === "retard" ? "" : undefined}>{quand}</small>
                             </span>
-                            <ChevronRight width={18} height={18} aria-hidden="true" className="v2-val-chevron" />
+                            <ChevronRight width={16} height={16} aria-hidden="true" className="v2-val-chevron" />
                           </button>
                         </li>
                       );
@@ -406,7 +406,7 @@ export default function Validations({ utilisateur }: { utilisateur: Utilisateur 
                   {circuit.liees.map((a) => (
                     <li key={a.id}>
                       <span className="v2-val-etape-icone" data-refus={a.decision === "rejete" ? "" : undefined}>
-                        {a.decision === "rejete" ? <CircleX width={20} height={20} /> : <CircleCheck width={20} height={20} />}
+                        {a.decision === "rejete" ? <CircleX width={18} height={18} /> : <CircleCheck width={18} height={18} />}
                       </span>
                       <span>
                         <span className="v2-val-etape-nom">{a.user_nom ?? nommer(a.user_id)}</span>
@@ -419,7 +419,7 @@ export default function Validations({ utilisateur }: { utilisateur: Utilisateur 
                   {Array.from({ length: circuit.restantes }, (_, i) => (
                     <li key={`attente-${i}`} data-attente="">
                       <span className="v2-val-etape-icone">
-                        <CircleDashed width={20} height={20} />
+                        <CircleDashed width={18} height={18} />
                       </span>
                       <span>
                         <span className="v2-val-etape-nom">{RANGS[circuit.faites + i] ?? `${circuit.faites + i + 1}e`} approbation</span>
@@ -429,7 +429,7 @@ export default function Validations({ utilisateur }: { utilisateur: Utilisateur 
                   ))}
                   {demande.statut !== "en_attente" && !circuit.liees.length ? (
                     <li>
-                      <span className="v2-val-etape-icone"><CircleCheck width={20} height={20} /></span>
+                      <span className="v2-val-etape-icone"><CircleCheck width={18} height={18} /></span>
                       <span>
                         <span className="v2-val-etape-nom">{STATUTS[demande.statut].libelle}</span>
                         <small className="v2-val-gris">{demande.decide_le ? dateCourte(demande.decide_le) : ""}</small>
