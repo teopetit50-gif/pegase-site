@@ -2627,3 +2627,86 @@ html.v2-calme *::after {
    ni sa balance âgée en couleurs : le tableau de bord les porte déjà */
 .v2-cd ~ .resa .esp-kpis,
 .v2-cd ~ .resa .c2-balance { display: none; }
+
+/* ══ Demandes reçues, vue d'ensemble (07/10/2026) — la maquette de Teo ═══ */
+.v2-dr { display: grid; gap: 16px; margin-bottom: 24px; }
+.v2-dr-carte { display: block; min-width: 0; padding: 18px 20px; border-radius: 6px; background: var(--v2-bg-100); box-shadow: 0 0 0 1px var(--v2-a-400); color: inherit; }
+.v2-dr-carte h3 { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 15px; font-weight: 500; color: var(--v2-gray-1000); }
+.v2-dr-vide { color: var(--v2-gray-900); font-size: 13px; }
+.v2-dr-sous { margin: 4px 0 0; font-size: 13px; color: var(--v2-gray-900); }
+.v2-dr-sous strong { font-weight: 500; color: var(--v2-gray-1000); }
+.v2-dr-titre { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.v2-dr-titre h2 { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: -0.4px; color: var(--v2-gray-1000); }
+.v2-dr-trois { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.v2-dr-deux { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+
+/* les cartes à jauge */
+.v2-dr-jauge { display: grid; gap: 12px; transition: box-shadow 0.15s; }
+.v2-dr-jauge:hover { box-shadow: 0 0 0 1px var(--v2-a-500, var(--v2-gray-700)); }
+.v2-dr-jauge-tete { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--v2-gray-900); }
+.v2-dr-jauge-tete svg:last-child { margin-left: auto; }
+.v2-dr-jauge-valeur { margin-top: 14px; font-size: 18px; color: var(--v2-gray-900); font-variant-numeric: tabular-nums; }
+.v2-dr-jauge-valeur strong { font-weight: 600; color: var(--v2-gray-1000); }
+.v2-dr-jauge-barre { display: flex; gap: 2px; }
+.v2-dr-jauge-barre i { flex: 1; height: 10px; border-radius: 3px; background: var(--v2-a-300, var(--v2-a-400)); }
+.v2-dr-jauge-barre i[data-plein] { background: var(--v2-gray-900); }
+.v2-dr-jauge small { font-size: 12px; color: var(--v2-gray-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* l'activité */
+.v2-dr-pic { display: flex; align-items: center; gap: 6px; margin: 6px 0 18px; font-family: var(--v2-mono, ui-monospace, monospace); font-size: 13px; color: var(--v2-gray-1000); }
+.v2-dr-pic > span { color: var(--v2-gray-900); }
+.v2-dr-pic svg { color: var(--v2-gray-900); }
+.v2-dr-chaleur-grille { display: grid; gap: 4px; align-items: center; }
+.v2-dr-chaleur-mois { font-size: 12px; color: var(--v2-gray-1000); white-space: nowrap; overflow: visible; }
+.v2-dr-chaleur-jour { font-size: 12px; color: var(--v2-gray-1000); }
+.v2-dr-chaleur-grille i, .v2-dr-echelle i { display: block; aspect-ratio: 1; max-height: 16px; border-radius: 3px; background: var(--v2-a-200); }
+.v2-dr-chaleur-grille i[data-n="-1"] { background: transparent; }
+.v2-dr-chaleur-grille i[data-n="1"], .v2-dr-echelle i[data-n="1"] { background: var(--v2-a-400); }
+.v2-dr-chaleur-grille i[data-n="2"], .v2-dr-echelle i[data-n="2"] { background: var(--v2-gray-700); }
+.v2-dr-chaleur-grille i[data-n="3"], .v2-dr-echelle i[data-n="3"] { background: var(--v2-gray-900); }
+.v2-dr-chaleur-grille i[data-n="4"], .v2-dr-echelle i[data-n="4"] { background: var(--v2-gray-1000); }
+.v2-dr-echelle { display: flex; align-items: center; gap: 4px; margin: 20px 0 0; font-size: 13px; color: var(--v2-gray-1000); }
+.v2-dr-echelle svg { color: var(--v2-gray-900); margin-right: 6px; }
+.v2-dr-echelle i { width: 16px; }
+
+/* la courbe et les colonnes */
+.v2-dr-courbe, .v2-dr-colonnes { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; margin-top: 20px; }
+.v2-dr-axe-y { display: flex; flex-direction: column; justify-content: space-between; height: 220px; margin-top: -7px; font-size: 12px; color: var(--v2-gray-900); text-align: right; }
+.v2-dr-courbe svg { width: 100%; height: 220px; display: block; }
+.v2-dr-axe-x { position: relative; height: 22px; margin-top: 8px; font-size: 12px; color: var(--v2-gray-900); }
+.v2-dr-axe-x span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.v2-dr-axe-x span:first-child { transform: none; }
+.v2-dr-colonnes-zone { display: flex; align-items: flex-end; justify-content: space-around; gap: 12px; height: 220px; border-left: 1px solid var(--v2-a-400); border-bottom: 1px solid var(--v2-a-400); padding: 0 12px; }
+.v2-dr-col { flex: 1; max-width: 44px; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 8px; color: var(--v2-gray-1000); }
+.v2-dr-col > span { width: 100%; border-radius: 8px 8px 0 0; background: var(--v2-gray-700); }
+.v2-dr-col[data-max] > span { background: var(--v2-gray-1000); opacity: 0.85; }
+.v2-dr-note { display: flex; align-items: center; gap: 8px; margin: 14px 0 0; font-size: 13px; color: var(--v2-gray-1000); }
+.v2-dr-note strong { font-weight: 500; }
+.v2-dr-note span { color: var(--v2-gray-900); }
+
+/* les raccourcis */
+.v2-dr-raccourcis { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 28px; margin-top: 16px; }
+.v2-dr-raccourcis > a, .v2-dr-raccourcis > button { display: inline-flex; align-items: center; gap: 8px; padding: 6px 0; border: 0; background: none; color: var(--v2-gray-900); font: inherit; font-size: 13px; cursor: pointer; transition: color 0.15s; }
+.v2-dr-raccourcis > a:hover, .v2-dr-raccourcis > button:hover { color: var(--v2-gray-1000); }
+.v2 .v2-dr-raccourcis .v2-dr-principal { margin-left: auto; height: 32px; padding: 0 14px; border-radius: 6px; background: var(--v2-gray-1000); color: var(--v2-bg-100); font-weight: 500; }
+.v2 .v2-dr-raccourcis .v2-dr-principal:hover { color: var(--v2-bg-100); opacity: 0.9; }
+
+/* les boîtes et les canaux */
+.v2-dr-carte--liste { padding: 0; }
+.v2-dr-liste-tete { padding: 18px 20px 16px; border-bottom: 1px solid var(--v2-a-400); }
+.v2-dr-liste { list-style: none; margin: 0; padding: 12px; display: grid; gap: 4px; }
+.v2-dr-liste li { display: flex; align-items: center; gap: 14px; padding: 12px; border-radius: 6px; color: var(--v2-gray-1000); }
+.v2-dr-liste li[data-premier] { background: var(--v2-a-100); }
+.v2-dr-liste li > svg { flex-shrink: 0; color: var(--v2-gray-900); }
+.v2-dr-liste li > span { flex: 1; min-width: 0; display: grid; gap: 3px; }
+.v2-dr-liste li > span > span { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2-dr-liste li > span > small { font-size: 12px; color: var(--v2-gray-900); }
+.v2 .v2-dr-liste li > a:not(.v2-val-bouton) { display: grid; place-items: center; color: var(--v2-gray-900); }
+
+/* l'écran de travail, dessous, ne répète pas ses compteurs */
+.v2-dr ~ .resa .esp-kpis { display: none; }
+
+@media (max-width: 1023px) {
+  .v2-dr-trois, .v2-dr-deux { grid-template-columns: minmax(0, 1fr); }
+}
+.v2-page.v2-cd-page { max-width: none; padding: 16px 16px 48px; }

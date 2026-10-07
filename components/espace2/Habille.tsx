@@ -18,7 +18,7 @@ export default function Habille({ children, avant }: { children: React.ReactNode
   return (
     <div className="v2-page v2-arrivee">
       {avant}
-      <div className="resa esp">{children}</div>
+      <div id="ecran" className="resa esp">{children}</div>
     </div>
   );
 }

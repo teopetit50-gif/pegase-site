@@ -13,8 +13,8 @@
    FICHES_EXEMPLE) ou la base réelle (cashd_tableau, cashd_relances_du_jour,
    cashd_reponses). Aucune variation « vs mois dernier » n'est affichée :
    l'historique n'est pas encore assez long pour la calculer honnêtement.
-   L'écran de travail (débiteurs, fiche, relances, règlements) reste
-   dessous, inchangé.
+   Il remplace l'écran de travail repris de /espace/cashd (décision de
+   Teo, 07/10/2026).
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
@@ -249,9 +249,9 @@ export default function TableauCashd() {
           </div>
           <p className="v2-cd-centre-titre">{aValider.length ? `${aValider.length} relance${aValider.length > 1 ? "s" : ""} à valider` : "Aucune relance à valider"}</p>
           <p className="v2-cd-centre-texte">{aValider.length ? "Écrites ce matin. Aucune ne part sans votre accord." : "Les relances sont écrites chaque matin, avant votre arrivée."}</p>
-          <a href="#c2-relances" className="v2-val-bouton">
+          <Link href={`${RACINE}/validations`} className="v2-val-bouton">
             <ListChecks width={16} height={16} aria-hidden="true" /> Voir les relances
-          </a>
+          </Link>
         </section>
 
         <section className="v2-cd-carte" aria-label="Ancienneté par débiteur">
@@ -264,14 +264,14 @@ export default function TableauCashd() {
           </p>
           <ul className="v2-cd-raccourcis">
             <li>
-              <a href="#c2-relances">
+              <Link href={`${RACINE}/validations`}>
                 <Mail width={18} height={18} aria-hidden="true" />
                 <span>
                   <span>Relances du jour</span>
                   <small>Relire et valider les messages.</small>
                 </span>
                 <ChevronRight width={16} height={16} aria-hidden="true" />
-              </a>
+              </Link>
             </li>
             <li>
               <Link href={`${RACINE}/validations`}>
