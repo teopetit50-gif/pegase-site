@@ -246,7 +246,7 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
         </div>
       </div>
 
-      <Assistant ouvert={assistant} changer={setAssistant} connecte={!!utilisateur} />
+      <Assistant ouvert={assistant} changer={setAssistant} connecte={!!utilisateur} prenom={utilisateur?.prenom ?? null} />
       <ModalOverlay isOpen={tiroir} onOpenChange={setTiroir} isDismissable className="v2-jetons v2-voile v2-voile--tiroir">
         <Modal className="v2-tiroir">
           <Dialog className="v2-modale-dialogue v2-laterale" aria-label="Navigation de l'espace client">
@@ -540,15 +540,19 @@ function LogoClient({ chemin, nom, demo }: { chemin: string | null; nom: string;
   /* la démonstration : CAMA, concession Renault — le losange, dessiné */
   if (demo)
     return (
-      <span className="v2-marque-client v2-marque-client--svg" aria-hidden="true">
-        {/* le losange Renault : un anneau en losange, deux entailles pour l'entrelacs */}
-        <svg viewBox="0 0 100 130" width="15" height="19">
-          <mask id="v2-losange">
-            <path fill="#fff" fillRule="evenodd" d="M50 0 L90 65 L50 130 L10 65 Z M50 24 L75 65 L50 106 L25 65 Z" />
-            <path d="M30 32 L44 49 M70 98 L56 81" stroke="#000" strokeWidth="5" />
-          </mask>
-          <rect width="100" height="130" fill="currentColor" mask="url(#v2-losange)" />
+      <span className="v2-marque-renault" aria-hidden="true">
+        {/* le losange Renault (deux brins en chevrons), tracé d'après le logo fourni par Teo */}
+        <svg viewBox="290 60 670 880" width="13" height="17" fill="currentColor">
+          <polygon points="528,65 595,65 362,500 295,500" />
+          <polygon points="295,500 362,500 595,935 528,935" />
+          <polygon points="528,935 595,935 828,500 761,500" />
+          <polygon points="761,500 828,500 713,285 646,285" />
+          <polygon points="655,65 722,65 955,500 888,500" />
+          <polygon points="888,500 955,500 722,935 655,935" />
+          <polygon points="655,65 722,65 489,500 422,500" />
+          <polygon points="422,500 489,500 605,715 538,715" />
         </svg>
+        <span>RENAULT</span>
       </span>
     );
   return (
