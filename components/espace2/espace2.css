@@ -2269,12 +2269,24 @@ html.v2-calme *::after {
 .v2-va-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .v2-va-kpi { display: grid; gap: 4px; padding: 16px 20px; color: inherit; border-radius: 12px; transition: background 0.15s; }
 .v2-va-kpi:hover { background: var(--v2-a-100); }
-.v2-va-kpi + .v2-va-kpi { border-left: 1px solid var(--v2-a-400); border-radius: 0; }
-.v2-va-kpi strong { font-size: 28px; line-height: 36px; font-weight: 600; letter-spacing: -0.6px; color: var(--v2-gray-1000); font-variant-numeric: tabular-nums; }
+.v2-va-kpi { position: relative; padding: 20px 24px; }
+.v2-va-kpi + .v2-va-kpi { border-radius: 0; }
+.v2-va-kpi + .v2-va-kpi::before { content: ""; position: absolute; left: 0; top: 20px; bottom: 20px; width: 1px; background: var(--v2-a-400); }
+.v2-va-kpi > span { font-size: 13px; }
+.v2-va-kpi-sous { font-size: 12px; }
+.v2-va-kpi strong { font-size: 28px; line-height: 36px; font-weight: 500; letter-spacing: -0.6px; color: var(--v2-gray-1000); font-variant-numeric: tabular-nums; }
 .v2-va-kpi strong[data-alerte] { color: var(--v2-red-900); }
-.v2-va-grille { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr); gap: 16px; }
+.v2-va-grille { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.v2-va-sous { margin: 2px 0 0; font-size: 13px; }
+.v2-va-periode { height: 32px; padding: 0 8px; width: auto; }
+.v2-va-periode select { font-size: 13px; }
+.v2-va-pastille { display: grid; place-items: center; width: 28px; height: 28px; flex-shrink: 0; border-radius: 999px; background: var(--v2-a-200); color: var(--v2-gray-900); }
+.v2-va-courbe { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; }
+.v2-va-axe-y { display: flex; flex-direction: column; justify-content: space-between; height: 200px; font-size: 11px; color: var(--v2-gray-900); text-align: right; margin-top: -7px; padding-bottom: 0; }
+.v2-va-axe-y span { line-height: 14px; }
 .v2-va-titre { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
-.v2-va-lien { display: inline-flex; align-items: center; gap: 4px; color: var(--v2-blue-900); font-size: 13px; }
+.v2 .v2-va-lien { display: inline-flex; align-items: center; gap: 4px; color: var(--v2-blue-700); font-size: 13px; font-weight: 500; }
+.v2 .v2-va-lien:hover { color: var(--v2-blue-900); }
 .v2-va-liste { list-style: none; margin: 0; padding: 0; }
 .v2-va-liste li { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
 .v2-va-liste li + li { border-top: 1px solid var(--v2-a-400); }
@@ -2282,7 +2294,10 @@ html.v2-calme *::after {
 .v2-va-liste a { color: var(--v2-gray-900); display: flex; }
 .v2-va-texte { flex: 1; min-width: 0; display: grid; gap: 2px; }
 .v2-va-texte > * { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.v2-va-heure { width: 72px; flex-shrink: 0; }
+.v2-va-heure { width: 64px; flex-shrink: 0; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.v2-va-liste li { padding: 12px 0; }
+.v2-va-texte > span { font-size: 14px; color: var(--v2-gray-1000); }
+.v2-va-texte > small { font-size: 12px; }
 .v2-va-table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .v2-va-table th { text-align: left; font-weight: 500; font-size: 12px; color: var(--v2-gray-900); padding: 0 8px 8px 0; }
 .v2-va-table td { padding: 10px 8px 10px 0; border-top: 1px solid var(--v2-a-400); white-space: nowrap; }
@@ -2295,7 +2310,7 @@ html.v2-calme *::after {
 .v2-va-axe span:last-child { transform: translateX(-100%); }
 .v2-va-ia { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .v2-va-ia > div { display: grid; gap: 4px; }
-.v2-va-ia-marque { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 12px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: var(--v2-blue-900); }
+.v2-va-ia-marque { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 12px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: var(--v2-blue-700); }
 @media (max-width: 1023px) {
   .v2-va-grille { grid-template-columns: minmax(0, 1fr); }
   .v2-va-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
