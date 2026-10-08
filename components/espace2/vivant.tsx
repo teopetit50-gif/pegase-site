@@ -68,7 +68,7 @@ export function EnDirect() {
   );
 }
 
-/* une teinte par module, comme les objets d'Attio */
+/* (gardé pour mémoire, plus affiché) */
 export const TEINTES_MODULE: Record<string, string> = {
   filed: "#3b82f6",
   cashd: "#10b981",
@@ -82,14 +82,10 @@ export const TEINTES_MODULE: Record<string, string> = {
   varelo: "#64748b",
 };
 
-export function IconeModule({ cle, icone: Icone, taille = 18 }: { cle: string | null | undefined; icone: LucideIcon; taille?: number }) {
-  const fond = cle ? TEINTES_MODULE[cle] : undefined;
-  if (!fond) return <Icone width={taille} height={taille} aria-hidden="true" />;
-  return (
-    <span className="v2-icone-module" style={{ width: taille, height: taille, background: fond }} aria-hidden="true">
-      <Icone width={Math.round(taille * 0.62)} height={Math.round(taille * 0.62)} strokeWidth={2.4} />
-    </span>
-  );
+/* 08/10 — Teo n'a pas voulu des carrés de couleur : l'icône reste la
+   ligne d'origine ; la seule couleur d'accent est le bleu de la courbe. */
+export function IconeModule({ icone: Icone, taille = 18 }: { cle?: string | null; icone: LucideIcon; taille?: number }) {
+  return <Icone width={taille} height={taille} aria-hidden="true" />;
 }
 
 /** « Sofia Carvalho » → « SC », dans une pastille ronde à peine teintée (trois gris). */
