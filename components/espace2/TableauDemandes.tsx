@@ -21,6 +21,7 @@ import { useSource } from "@/components/espace/source";
 import { vueExemple } from "@/components/espace/filed/EcranBoite";
 import { CANAUX, chargerBoite, type Canal, type VueBoite } from "@/components/espace/filed/receptions";
 import { RACINE } from "./modules";
+import { Chiffre, EnDirect } from "./vivant";
 
 const JOUR = 86_400_000;
 const PERIODES = [
@@ -116,11 +117,12 @@ export default function TableauDemandes() {
   const canalMax = c.parCanal.reduce((m, x) => (x.n > m.n ? x : m), c.parCanal[0]);
 
   return (
-    <div className="v2-dr">
+    <div className="v2-dr v2-vivant">
       {/* ——— le titre, les raccourcis, la période (une seule ligne) ——— */}
       <div className="v2-dr-titre">
         <h2>Vue d&apos;ensemble</h2>
         <span className="v2-dr-titre-actions">
+          <EnDirect />
           <button type="button" className="v2-val-bouton" onClick={() => window.dispatchEvent(new Event("espace2-assistant"))}>
             <Sparkles width={16} height={16} aria-hidden="true" /> Préparer une réponse
           </button>
@@ -335,7 +337,7 @@ function Jauge({ icone: Icone, titre, lien, fort, faible, part, pied }: { icone:
         <ChevronRight width={16} height={16} aria-hidden="true" />
       </span>
       <span className="v2-dr-jauge-valeur">
-        <strong>{fort}</strong>
+        <strong><Chiffre valeur={fort} /></strong>
         {faible}
       </span>
       <span className="v2-dr-jauge-barre" aria-hidden="true">
@@ -418,7 +420,7 @@ function Courbe({ seaux }: { seaux: { libelle: string; n: number }[] }) {
           {[0, 0.25, 0.5, 0.75, 1].map((p) => (
             <line key={p} x1="0" x2={L} y1={H * p} y2={H * p} stroke="var(--v2-a-400)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
           ))}
-          <path d={d} fill="none" stroke="var(--v2-gray-900)" strokeWidth="2" vectorEffect="non-scaling-stroke" />
+          <path d={d} pathLength={1} className="v2-trace" fill="none" stroke="var(--v2-gray-900)" strokeWidth="2" vectorEffect="non-scaling-stroke" />
         </svg>
         <div className="v2-dr-axe-x" aria-hidden="true">
           {seaux.map((s, i) => (

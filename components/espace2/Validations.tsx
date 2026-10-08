@@ -20,7 +20,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  ArrowLeft,
   ArrowRight,
   ArrowUpRight,
   CalendarDays,
@@ -54,6 +53,7 @@ import DetailDemande from "@/components/espace/validations/DetailDemande";
 import DecisionLot, { eligibilite } from "@/components/espace/validations/DecisionLot";
 import MesDelegations from "@/components/espace/validations/MesDelegations";
 import { Note } from "./ui";
+import { EnDirect, IconeModule, Initiales } from "./vivant";
 import { useToast } from "./Toasts";
 import "@/components/espace/espace.css";
 import "./habillage.css";
@@ -278,7 +278,7 @@ export default function Validations({ utilisateur }: { utilisateur: Utilisateur 
   };
 
   return (
-    <div className="v2-page v2-arrivee v2-val">
+    <div className="v2-page v2-arrivee v2-val v2-vivant">
       <h1 className="v2-sr">À valider</h1>
 
       {/* ——— la vue et les filtres, en menus ; la recherche à droite ——— */}
@@ -288,6 +288,7 @@ export default function Validations({ utilisateur }: { utilisateur: Utilisateur 
         <Selecteur icone={ListFilter} valeur={categorie} changer={setCategorie} tous="Toutes les catégories" options={categories.map((c) => ({ cle: c, libelle: categorie_libelle(c) }))} />
         <Selecteur icone={CalendarDays} valeur={echeance} changer={setEcheance} tous="Toutes les échéances" options={GROUPES.map((g) => ({ cle: g.cle, libelle: g.libelle }))} />
         <span className="v2-val-droite">
+          <EnDirect />
           {recherche !== null ? (
             <span className="v2-val-recherche">
               <Search width={16} height={16} aria-hidden="true" />
@@ -369,7 +370,7 @@ export default function Validations({ utilisateur }: { utilisateur: Utilisateur 
                               <small>{sousTitre(d)}</small>
                             </span>
                             <span className="v2-val-module" aria-hidden="true">
-                              <Icone width={16} height={16} />
+                              <IconeModule cle={d.module} icone={Icone} taille={20} />
                             </span>
                             <span className="v2-val-montant">
                               <span>{d.montant !== null ? montant(d.montant, d.devise) : "—"}</span>
@@ -405,8 +406,9 @@ export default function Validations({ utilisateur }: { utilisateur: Utilisateur 
                 <ol className="v2-val-etapes">
                   {circuit.liees.map((a) => (
                     <li key={a.id}>
-                      <span className="v2-val-etape-icone" data-refus={a.decision === "rejete" ? "" : undefined}>
-                        {a.decision === "rejete" ? <CircleX width={18} height={18} /> : <CircleCheck width={18} height={18} />}
+                      <span className="v2-val-etape-icone v2-val-etape-avatar" data-refus={a.decision === "rejete" ? "" : undefined}>
+                        <Initiales nom={a.user_nom ?? nommer(a.user_id)} taille={22} />
+                        <i>{a.decision === "rejete" ? <CircleX width={11} height={11} /> : <CircleCheck width={11} height={11} />}</i>
                       </span>
                       <span>
                         <span className="v2-val-etape-nom">{a.user_nom ?? nommer(a.user_id)}</span>
@@ -464,7 +466,7 @@ export default function Validations({ utilisateur }: { utilisateur: Utilisateur 
                   const donnee = g.delegant === moi.id;
                   return (
                     <li key={g.id}>
-                      {donnee ? <ArrowRight width={18} height={18} aria-hidden="true" /> : <ArrowLeft width={18} height={18} aria-hidden="true" />}
+                      <Initiales nom={donnee ? (g.delegataire_nom ?? nommer(g.delegataire)) : (g.delegant_nom ?? nommer(g.delegant))} taille={28} />
                       <span className="v2-val-texte">
                         <span>{donnee ? `Donnée → ${g.delegataire_nom ?? nommer(g.delegataire)}` : `Reçue ← ${g.delegant_nom ?? nommer(g.delegant)}`}</span>
                         <small>

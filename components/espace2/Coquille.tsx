@@ -31,6 +31,7 @@ import { relatif } from "@/components/espace/format";
 import { FournisseurToasts, useToast } from "./Toasts";
 import { ItemMenu, Kbd, MenuDeroulant, SectionMenu, SeparateurMenu } from "./ui";
 import Palette from "./Palette";
+import { IconeModule } from "./vivant";
 import Assistant from "./Assistant";
 import { ecrireStockage, useOuvertes, useStockage } from "./Collection";
 import { MODULES, MODULES_A_VENIR, MODULES_PRINCIPAUX, RACINE, moduleMetier, porteeDe, titreDe } from "./modules";
@@ -102,7 +103,7 @@ export default function Coquille({ utilisateur, police, children }: { utilisateu
       <SourceFournisseur connecte={!!utilisateur}>
         <RouterProvider navigate={(href, options) => router.push(versV2(href) ?? href, options)}>
           <FournisseurToasts>
-            <OrganisationContexte.Provider value={{ nom: utilisateur?.entreprise || (utilisateur ? "Mon organisation" : "CAMA"), connecte: !!utilisateur }}>
+            <OrganisationContexte.Provider value={{ nom: utilisateur?.entreprise || (utilisateur ? "Mon organisation" : "CAMA"), connecte: !!utilisateur, prenom: utilisateur?.prenom ?? null }}>
               <Cadre utilisateur={utilisateur}>{children}</Cadre>
             </OrganisationContexte.Provider>
           </FournisseurToasts>
@@ -326,7 +327,7 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
              ses autres pages sont dans ses onglets */
           href: `${RACINE}/${m.cle}${m.cle === "filed" ? "/a-payer" : ""}`,
           racine: `${RACINE}/${m.cle}`,
-          icone: <m.icone {...I} />,
+          icone: <IconeModule cle={m.cle} icone={m.icone} />,
           compteur: compteurs[m.cle],
         }))
         .concat(MODULES_A_VENIR.map<Lien>((m) => ({ libelle: m.nom, href: `${RACINE}/${m.cle}`, icone: <m.icone {...I} />, bientot: true }))),

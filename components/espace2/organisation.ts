@@ -5,6 +5,6 @@
 
 import { createContext, useContext } from "react";
 
-export const OrganisationContexte = createContext<{ nom: string; connecte: boolean }>({ nom: "Atelier Bertin", connecte: false });
+export const OrganisationContexte = createContext<{ nom: string; connecte: boolean; prenom?: string | null }>({ nom: "CAMA", connecte: false, prenom: null });
 
 export const useOrganisation = () => useContext(OrganisationContexte);

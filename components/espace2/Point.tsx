@@ -46,6 +46,7 @@ import { libelleModule } from "@/components/espace/format";
 import type { LignePoint, PointDuJour } from "@/components/espace/types";
 import { apercuPoint, lirePoint, listerPoints, monCompte } from "@/components/espace/point/portes";
 import { Note } from "./ui";
+import { Chiffre, EnDirect, IconeModule, Initiales } from "./vivant";
 import { useToast } from "./Toasts";
 import { RACINE } from "./modules";
 
@@ -207,7 +208,7 @@ export default function Point() {
   const vide = !enCours && !(contenu?.lignes ?? []).length;
 
   return (
-    <div className="v2-page v2-arrivee v2-pm">
+    <div className="v2-page v2-arrivee v2-pm v2-vivant">
       <h1 className="v2-sr">Point du matin</h1>
 
       {/* ——— les menus, la remise ——— */}
@@ -242,6 +243,7 @@ export default function Point() {
           </select>
         </label>
         <span className="v2-val-droite">
+          <EnDirect />
           <span className="v2-pm-remise">{p?.remis_le ? `Remis par ${canal}` : contenu?.apercu ? "Aperçu, non remis" : "Pas encore remis"}</span>
           <button
             type="button"
@@ -286,7 +288,7 @@ export default function Point() {
                   const action = l.module === "socle" ? { libelle: "À valider", icone: ArrowRight } : l.gravite === "critique" ? { libelle: "Ouvrir", icone: ArrowUpRight } : { libelle: "Examiner", icone: ArrowUpRight };
                   return (
                     <li key={l.id}>
-                      <Icone width={20} height={20} aria-hidden="true" className="v2-pm-icone" data-critique={l.gravite === "critique" ? "" : undefined} />
+                      <span className="v2-pm-icone" data-critique={l.gravite === "critique" ? "" : undefined}><IconeModule cle={l.module} icone={Icone} taille={22} /></span>
                       <span className="v2-pm-texte">
                         <span>{titre}</span>
                         {l.entite_nom || l.objet_id ? <small>{[l.entite_nom, l.objet_id].filter(Boolean).join(" · ")}</small> : null}
@@ -315,7 +317,7 @@ export default function Point() {
                   const Icone = l.module === "cashd" ? Send : (ICONE_MODULE[l.module ?? ""] ?? FileText);
                   return (
                     <li key={l.id}>
-                      <Icone width={20} height={20} aria-hidden="true" className="v2-pm-icone" />
+                      <span className="v2-pm-icone"><IconeModule cle={l.module} icone={Icone} taille={22} /></span>
                       <span className="v2-pm-texte">
                         <span>{titre}</span>
                         <small>{[libelleModule(l.module), detail].filter(Boolean).join(" · ")}</small>
@@ -341,7 +343,7 @@ export default function Point() {
                       {e ? (
                         <span className="v2-pm-texte">
                           {e.qui ? <small>{e.qui}</small> : null}
-                          <strong className="v2-pm-montant">{e.montant}</strong>
+                          <strong className="v2-pm-montant"><Chiffre valeur={e.montant} /></strong>
                           {e.notes.map((n) => (
                             <small key={n}>{n}</small>
                           ))}
@@ -442,7 +444,7 @@ export default function Point() {
                     return qui && periode ? (
                       <div key={l.id} className="v2-pm-equipe-ligne">
                         <span className="v2-pm-equipe-qui">
-                          <User width={20} height={20} aria-hidden="true" className="v2-pm-icone" />
+                          <Initiales nom={qui} taille={30} />
                           <span className="v2-pm-texte">
                             <span>{qui}</span>
                             <small>

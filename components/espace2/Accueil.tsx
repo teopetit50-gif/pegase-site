@@ -9,7 +9,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Banknote, Building2, CheckCheck, ChevronRight, FileText, ListChecks, Sparkles } from "lucide-react";
+import { ArrowRight, Banknote, CheckCheck, ChevronRight, FileText, ListChecks, Sparkles } from "lucide-react";
 import { dateCourte, montant, relatif } from "@/components/espace/format";
 import { A_PAYER, aPayer, groupeDe, minuit, totaux } from "./filed/calculs";
 import { Squelette } from "./ui";
@@ -17,6 +17,8 @@ import { RACINE } from "./modules";
 import { useDonnees } from "./donnees";
 import { evenements } from "./evenements";
 import { ecrireStockage, useStockage } from "./Collection";
+import { useOrganisation } from "./organisation";
+import { Chiffre, EnDirect, Initiales } from "./vivant";
 import "./habillage.css";
 
 const CLE_TACHES = "espace2-collection-taches";
@@ -82,6 +84,10 @@ export default function Accueil() {
   }, [brut]);
   const duJour = taches.filter((t) => !t.fait).slice(0, 4);
   const cocher = (id: string) => ecrireStockage(CLE_TACHES, JSON.stringify(taches.map((t) => (t.id === id ? { ...t, fait: true } : t))));
+  const { prenom } = useOrganisation();
+  const aFaire = (c?.actions.length ?? 0) + duJour.length;
+  const heureJour = new Date().getHours();
+  const salut = heureJour >= 18 ? "Bonsoir" : "Bonjour";
   const enRetard = taches.filter((t) => !t.fait && t.echeance && new Date(t.echeance).getTime() < aujourdhui).length;
 
   const kpis = [
@@ -92,15 +98,32 @@ export default function Accueil() {
   ];
 
   return (
-    <div className="v2-page v2-arrivee v2-va">
+    <div className="v2-page v2-arrivee v2-va v2-vivant">
       <h1 className="v2-sr">Vue d&apos;ensemble</h1>
+      {/* 08/10 — la salutation : qui est là, et combien de choses l'attendent */}
+      <div className="v2-salut">
+        <div>
+          <p className="v2-salut-titre" suppressHydrationWarning>
+            {salut}
+            {prenom ? ` ${prenom}` : ""}
+            {c ? (
+              <span>
+                {" "}
+                — {aFaire ? `${aFaire} chose${aFaire > 1 ? "s" : ""} vous attend${aFaire > 1 ? "ent" : ""} ${new Date().getHours() < 12 ? "ce matin" : "aujourd'hui"}` : "rien d'urgent aujourd'hui"}
+              </span>
+            ) : null}
+          </p>
+          <p className="v2-salut-date" suppressHydrationWarning>{new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}</p>
+        </div>
+        <EnDirect />
+      </div>
       {erreur ? <p className="v2-gris">La base n&apos;a pas répondu : {erreur}</p> : null}
 
       <section className="v2-va-kpis" aria-label="Chiffres clés">
         {kpis.map((k) => (
           <Link key={k.libelle} href={k.lien} className="v2-va-kpi" data-alerte={k.alerte ? "" : undefined}>
             <span className="v2-va-kpi-libelle">{k.libelle}</span>
-            {k.valeur === undefined ? <Squelette largeur={120} hauteur={32} /> : <strong data-alerte={k.alerte ? "" : undefined}>{k.valeur}</strong>}
+            {k.valeur === undefined ? <Squelette largeur={120} hauteur={32} /> : <strong data-alerte={k.alerte ? "" : undefined}><Chiffre valeur={k.valeur} /></strong>}
             <small className="v2-gris v2-va-kpi-sous">{k.sous}</small>
           </Link>
         ))}
@@ -141,7 +164,7 @@ export default function Accueil() {
                 <tbody>
                   {c.priorite.map(({ f, nom, groupe, reste }) => (
                     <tr key={f.id}>
-                      <td><span className="v2-va-fournisseur"><Building2 width={18} height={18} aria-hidden="true" />{nom}</span></td>
+                      <td><span className="v2-va-fournisseur"><Initiales nom={nom} taille={24} />{nom}</span></td>
                       <td className="v2-gris">{f.echeance_lue ? dateCourte(f.echeance_lue) : "—"}</td>
                       <td><span className="v2-etat">{groupe === "retard" ? "En retard" : groupe === "semaine" ? "Cette semaine" : "À venir"}</span></td>
                       <td style={{ textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{montant(reste, f.devise)}</td>
@@ -276,7 +299,7 @@ function Courbe({ valeurs, debut }: { valeurs: number[]; debut: number }) {
           </defs>
           {[0, 0.25, 0.5, 0.75, 1].map((p) => <line key={p} x1="0" x2={L} y1={H * p} y2={H * p} stroke="var(--v2-a-300, var(--v2-a-400))" strokeWidth="1" vectorEffect="non-scaling-stroke" />)}
           <path d={`${ligne} L${L},${H} L0,${H} Z`} fill="url(#v2-va-degrade)" />
-          <path d={ligne} fill="none" stroke="var(--v2-blue-700)" strokeWidth="2" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+          <path d={ligne} pathLength={1} className="v2-trace" fill="none" stroke="var(--v2-blue-700)" strokeWidth="2" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
         </svg>
         <div className="v2-va-axe">
           {reperes.map((r) => <span key={r.x} style={{ left: `${r.x}%` }}>{r.texte}</span>)}

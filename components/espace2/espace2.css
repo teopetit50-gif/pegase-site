@@ -2789,3 +2789,57 @@ html.v2-calme *::after {
 .v2-ia-suppr:hover { background: var(--v2-a-200); color: var(--v2-gray-1000); }
 .v2-marque-renault { display: inline-flex; align-items: center; gap: 4px; flex: none; color: var(--v2-gray-1000); }
 .v2-marque-renault > span { font-size: 9.5px; font-weight: 700; letter-spacing: 0.06em; line-height: 1; }
+
+/* ══ Le vivant (08/10/2026) : mouvement, repères colorés, profondeur ═════ */
+/* un halo très doux en haut des quatre pages principales */
+.v2-vivant { background-image: radial-gradient(ellipse 70% 260px at 50% -40px, color-mix(in srgb, var(--v2-gray-1000) 5%, transparent), transparent 70%); background-repeat: no-repeat; }
+/* les cartes arrivent l'une après l'autre */
+@keyframes v2-arrive { from { opacity: 0; transform: translateY(6px); } }
+.v2-vivant .v2-carte, .v2-vivant .v2-dr-carte, .v2-vivant .v2-va-kpis { animation: v2-arrive 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.v2-vivant .v2-va-grille .v2-carte:nth-child(2), .v2-vivant .v2-val-col .v2-carte:nth-child(2), .v2-vivant .v2-pm-grille > :nth-child(2), .v2-vivant .v2-dr-trois > :nth-child(2) { animation-delay: 60ms; }
+.v2-vivant .v2-val-col .v2-carte:nth-child(3), .v2-vivant .v2-pm-grille > :nth-child(3), .v2-vivant .v2-dr-trois > :nth-child(3) { animation-delay: 120ms; }
+.v2-vivant .v2-pm-grille > :nth-child(4), .v2-vivant .v2-val-col .v2-carte:nth-child(4), .v2-vivant .v2-dr-principale > :nth-child(1) { animation-delay: 180ms; }
+.v2-vivant .v2-pm-grille > :nth-child(n + 5), .v2-vivant .v2-dr-principale > :nth-child(2) { animation-delay: 240ms; }
+/* au survol, la carte se soulève à peine */
+.v2-vivant .v2-carte, .v2-vivant .v2-dr-carte { transition: box-shadow 0.2s, transform 0.2s; }
+.v2-vivant .v2-carte:hover, .v2-vivant .v2-dr-carte:hover { box-shadow: 0 0 0 1px var(--v2-a-500, var(--v2-gray-700)), 0 8px 24px rgba(0, 0, 0, 0.28); }
+/* les courbes se dessinent */
+@keyframes v2-trace { from { stroke-dashoffset: 1; } }
+.v2-trace { stroke-dasharray: 1; stroke-dashoffset: 0; animation: v2-trace 1.1s cubic-bezier(0.3, 0.6, 0.2, 1) both; }
+/* les colonnes et les jauges montent */
+@keyframes v2-monte { from { transform: scaleY(0); } }
+@keyframes v2-pousse { from { transform: scaleX(0); } }
+.v2-vivant .v2-dr-col > span { transform-origin: bottom; animation: v2-monte 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.v2-vivant .v2-dr-col:nth-child(2) > span { animation-delay: 60ms; }
+.v2-vivant .v2-dr-col:nth-child(3) > span { animation-delay: 120ms; }
+.v2-vivant .v2-dr-col:nth-child(4) > span { animation-delay: 180ms; }
+.v2-vivant .v2-dr-jauge-barre, .v2-vivant .v2-val-jauge span { transform-origin: left; animation: v2-pousse 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.v2-chiffre { font-variant-numeric: tabular-nums; }
+
+/* « En direct » qui pulse ; « Exemple » qui ne pulse pas */
+.v2-direct { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 9px; border-radius: 999px; box-shadow: 0 0 0 1px var(--v2-a-400); font-size: 12px; font-weight: 500; color: var(--v2-gray-1000); white-space: nowrap; }
+.v2-direct i { position: relative; width: 7px; height: 7px; border-radius: 999px; background: #10b981; }
+.v2-direct i::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: inherit; animation: v2-pulse 1.8s ease-out infinite; }
+@keyframes v2-pulse { to { transform: scale(2.6); opacity: 0; } }
+.v2-direct[data-exemple] { color: var(--v2-gray-900); }
+.v2-direct[data-exemple] i { background: var(--v2-gray-700); }
+.v2-direct[data-exemple] i::after { animation: none; }
+
+/* l'icône d'un module dans son carré de couleur (comme Attio) */
+.v2-icone-module { display: inline-grid; place-items: center; flex: none; border-radius: 5px; color: #fff; }
+/* une personne, un fournisseur */
+.v2-initiales { display: inline-grid; place-items: center; flex: none; border-radius: 999px; font-weight: 600; letter-spacing: 0.02em; color: var(--v2-gray-1000); background: var(--v2-a-200); box-shadow: inset 0 0 0 1px var(--v2-a-400); }
+.v2-initiales[data-n="1"] { background: var(--v2-a-300, var(--v2-a-200)); }
+.v2-initiales[data-n="2"] { background: var(--v2-a-100); }
+
+/* la salutation de la Vue d'ensemble */
+.v2-salut { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding: 4px 4px 0; }
+.v2-salut-titre { margin: 0; font-size: 20px; line-height: 28px; font-weight: 600; letter-spacing: -0.4px; color: var(--v2-gray-1000); }
+.v2-salut-titre span { font-weight: 400; color: var(--v2-gray-900); }
+.v2-salut-date { margin: 2px 0 0; font-size: 13px; color: var(--v2-gray-900); text-transform: capitalize; }
+
+/* les avatars du circuit d'approbation */
+.v2-val-etape-avatar { position: relative; width: 22px; height: 22px; }
+.v2-val-etape-avatar > i { position: absolute; right: -4px; bottom: -4px; display: grid; place-items: center; width: 14px; height: 14px; border-radius: 999px; background: var(--v2-bg-100); color: var(--v2-gray-1000); }
+.v2-val-etapes li:not(:last-child)::after { left: 11px; }
+.v2-pm-icone { display: inline-grid; place-items: center; }
