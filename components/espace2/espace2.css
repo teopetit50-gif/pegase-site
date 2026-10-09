@@ -2894,32 +2894,9 @@ html.v2-calme *::after {
 .v2-vivant :nth-child(2n) > .v2-carte::before, .v2-vivant .v2-carte:nth-child(2n)::before, .v2-vivant .v2-dr-carte:nth-child(2n)::before { animation-delay: -3s; }
 .v2-vivant .v2-carte:nth-child(3n)::before, .v2-vivant .v2-dr-carte:nth-child(3n)::before { animation-delay: -6s; }
 /* et une lueur très douce, à peine visible, sous la carte */
-.v2-vivant .v2-carte, .v2-vivant .v2-dr-carte, .v2-vivant .v2-va-kpis { box-shadow: 0 0 0 1px var(--v2-a-400), 0 0 8px -4px color-mix(in srgb, var(--v2-blue-700) 45%, transparent); }
-.v2-vivant .v2-carte:hover, .v2-vivant .v2-dr-carte:hover { box-shadow: 0 0 0 1px var(--v2-a-500, var(--v2-gray-700)), 0 0 10px -4px color-mix(in srgb, var(--v2-blue-700) 55%, transparent); }
+.v2-vivant .v2-carte, .v2-vivant .v2-dr-carte, .v2-vivant .v2-va-kpis { box-shadow: 0 0 0 1px var(--v2-a-400); }
+.v2-vivant .v2-carte:hover, .v2-vivant .v2-dr-carte:hover { box-shadow: 0 0 0 1px var(--v2-a-500, var(--v2-gray-700)); }
 @media (prefers-reduced-motion: reduce) { .v2-vivant .v2-carte::before, .v2-vivant .v2-dr-carte::before, .v2-vivant .v2-va-kpis::before { animation: none; --v2-led: 220deg; } }
 html.v2-calme .v2-vivant .v2-carte::before, html.v2-calme .v2-vivant .v2-dr-carte::before, html.v2-calme .v2-vivant .v2-va-kpis::before { animation: none; --v2-led: 220deg; }
-
-/* 08/10 (3e retouche) — « on voit trop que c'est une ligne » : le filet
-   s'efface, la lumière passe dans un halo flou qui suit le même arc,
-   derrière la carte (seul ce qui déborde se voit). */
-.v2-vivant .v2-carte::after,
-.v2-vivant .v2-dr-carte::after,
-.v2-vivant .v2-va-kpis::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  border-radius: inherit;
-  pointer-events: none;
-  background: conic-gradient(from var(--v2-led), transparent 0deg, color-mix(in srgb, var(--v2-blue-700) 60%, transparent) 55deg, transparent 140deg, transparent 220deg, color-mix(in srgb, var(--v2-blue-700) 25%, transparent) 255deg, transparent 320deg);
-  /* derrière la carte, même arrondi : la lueur déborde autant aux angles
-     qu'aux bords, l'intérieur reste couvert par le fond de la carte */
-  filter: blur(3px);
-  opacity: 0.4;
-  animation: v2-led 9s linear infinite;
-  animation-delay: inherit;
-}
-.v2-vivant :nth-child(2n) > .v2-carte::after, .v2-vivant .v2-carte:nth-child(2n)::after, .v2-vivant .v2-dr-carte:nth-child(2n)::after { animation-delay: -3s; }
-.v2-vivant .v2-carte:nth-child(3n)::after, .v2-vivant .v2-dr-carte:nth-child(3n)::after { animation-delay: -6s; }
-html.v2-calme .v2-vivant .v2-carte::after, html.v2-calme .v2-vivant .v2-dr-carte::after, html.v2-calme .v2-vivant .v2-va-kpis::after { animation: none; --v2-led: 220deg; }
-@media (prefers-reduced-motion: reduce) { .v2-vivant .v2-carte::after, .v2-vivant .v2-dr-carte::after, .v2-vivant .v2-va-kpis::after { animation: none; --v2-led: 220deg; } }
+/* 08/10 — le halo flou est retiré : pendant l'apparition des cartes il
+   passait au premier plan et voilait la page de bleu. Reste le liseré. */
