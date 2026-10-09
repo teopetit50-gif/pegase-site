@@ -20,7 +20,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, ArrowRight, Bell, Building2, Check, CheckCheck, CheckSquare, ChevronDown, ChevronRight, ChevronsUpDown, ClipboardCheck, CornerDownLeft, ExternalLink, Gauge, Inbox, LayoutGrid, LifeBuoy, Link2, ListChecks, LogOut, Menu as IconeMenu, MoreHorizontal, NotebookPen, Phone, Search, Settings, Sun, UserPlus, Users, Workflow, X } from "lucide-react";
+import { Activity, ArrowRight, Bell, Building2, Check, CheckCheck, CheckSquare, ChevronDown, ChevronRight, ChevronsUpDown, ClipboardCheck, CornerDownLeft, ExternalLink, Gauge, Inbox, LayoutGrid, GraduationCap, Link2, ListChecks, LogOut, Menu as IconeMenu, MoreHorizontal, NotebookPen, Phone, Search, Settings, Sun, UserPlus, Users, Workflow, X } from "lucide-react";
 import { MODULES, MODULES_PRINCIPAUX } from "@/components/espace2/modules";
 import { titrePage } from "./pages";
 import { Autocomplete, Button, Dialog, DialogTrigger, Input, Menu, Modal, ModalOverlay, Popover, RouterProvider, TextField, useFilter } from "react-aria-components";
@@ -277,7 +277,7 @@ function BarreLaterale({ email, chemin, ouvrirPalette, fermer }: { email: string
     },
     {
       liens: [
-        { libelle: "Aide", href: `${RACINE}/aide`, icone: <LifeBuoy {...I} /> },
+        { libelle: "Formation", href: `${RACINE}/aide`, icone: <GraduationCap {...I} /> },
         { libelle: "Réglages", href: `${RACINE}/reglages`, icone: <Settings {...I} /> },
       ],
     },

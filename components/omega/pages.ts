@@ -12,20 +12,24 @@
      Demandes reçues  → le suivi des prospects et clients
      Tâches           → le plan sur 90 jours, les ajouts, les routines
      Notes            → stratégie, manuel, plan LinkedIn
-     Appels           → la méthode de vente, les fiches, le kit setter
-     Entreprises      → la liste BTP à prospecter
-     Contacts         → le programme partenaires
+     Appels           → le mode appels, les objections, la méthode de vente
+     Entreprises      → les ≈ 12 000 établissements à prospecter
+     Contacts         → les contacts suivis, les clients installés
      <module>         → la fiche de vente et les vidéos du produit
-     Activité         → le calendrier vidéo, la pub, les preuves
+     Activité         → la production vidéo, la pub, les preuves
      Automatisations  → les chantiers des moteurs, l'état des produits
-     Utilisation      → les finances, la santé des clients
-     Aide             → le manuel ; Réglages → le kit contractuel
+     Utilisation      → les chiffres de la semaine, les finances réelles
+     Aide             → la formation vidéo, le manuel ; Réglages → contrats
 
    Un onglet est soit un document (slug de omega_pages), soit un ou
    plusieurs tableaux (omega_lignes), soit un écran à part (« special »).
+   Les onglets d'une page ne s'empilent jamais : on passe de l'un à
+   l'autre avec le sélecteur ⌃⌄ en tête de page (demande de Teo, 09/10 :
+   « des boutons qui changent le contenu, pas des sections à faire
+   défiler »). `groupe` les range par rubrique dans ce menu.
    ══════════════════════════════════════════════════════════════════════ */
 
-export type OngletPage = { cle: string; libelle: string; doc?: string; tableaux?: string[]; special?: "validations" | "point" | "prospects" | "demandes" | "contacts" };
+export type OngletPage = { cle: string; libelle: string; doc?: string; tableaux?: string[]; special?: "validations" | "point" | "prospects" | "demandes" | "contacts" | "formation" | "appels" | "semaine"; groupe?: string };
 export type DefPage = { titre: string; onglets: OngletPage[] };
 
 const NOMS_MODULES: Record<string, string> = { filed: "FILED", cashd: "CASHD", reput: "REPUT", offload: "OFFLOAD", daliro: "DALIRO", tavaro: "TAVARO", lorani: "LORANI", tamila: "TAMILA", tiroma: "TIROMA", varelo: "VARELO" };
@@ -33,7 +37,13 @@ const NOMS_MODULES: Record<string, string> = { filed: "FILED", cashd: "CASHD", r
 export const PAGES_OMEGA: Record<string, DefPage> = {
   validations: { titre: "À valider", onglets: [{ cle: "", libelle: "Décisions", special: "validations" }] },
   point: { titre: "Point du matin", onglets: [{ cle: "", libelle: "Aujourd'hui", special: "point" }] },
-  demandes: { titre: "Demandes reçues", onglets: [{ cle: "", libelle: "Prospects et clients", special: "demandes" }] },
+  demandes: {
+    titre: "Demandes reçues",
+    onglets: [
+      { cle: "", libelle: "Prospects et clients", special: "demandes" },
+      { cle: "rdv", libelle: "Rendez-vous et audits", tableaux: ["rdv"] },
+    ],
+  },
   taches: {
     titre: "Tâches",
     onglets: [
@@ -52,20 +62,31 @@ export const PAGES_OMEGA: Record<string, DefPage> = {
   appels: {
     titre: "Appels",
     onglets: [
-      { cle: "", libelle: "Méthode de vente", doc: "vendre" },
-      { cle: "fiches", libelle: "Toutes les fiches", doc: "vendre-fiches" },
-      { cle: "setter", libelle: "Kit setter", doc: "setter" },
+      { cle: "", libelle: "Mode appels", special: "appels", groupe: "Appeler" },
+      { cle: "objections", libelle: "Objections entendues", tableaux: ["objections"], groupe: "Appeler" },
+      { cle: "methode", libelle: "Méthode de vente", doc: "vendre", groupe: "Préparer" },
+      { cle: "fiches", libelle: "Toutes les fiches", doc: "vendre-fiches", groupe: "Préparer" },
+      { cle: "setter", libelle: "Kit setter", doc: "setter", groupe: "Préparer" },
     ],
   },
   entreprises: { titre: "Entreprises", onglets: [{ cle: "", libelle: "Prospection", special: "prospects" }] },
-  contacts: { titre: "Contacts", onglets: [{ cle: "", libelle: "Mes contacts", special: "contacts" }] },
+  contacts: {
+    titre: "Contacts",
+    onglets: [
+      { cle: "", libelle: "Mes contacts", special: "contacts" },
+      { cle: "installes", libelle: "Clients installés", tableaux: ["installes"] },
+    ],
+  },
   activite: {
     titre: "Activité",
     onglets: [
-      { cle: "", libelle: "Calendrier vidéo", doc: "videos" },
-      { cle: "general", libelle: "Vidéos générales", doc: "videos-general" },
-      { cle: "publicite", libelle: "Publicité Meta", doc: "publicite" },
-      { cle: "preuves", libelle: "Machine à preuves", doc: "preuves" },
+      { cle: "", libelle: "Production vidéo", tableaux: ["videos"], groupe: "Vidéos" },
+      { cle: "calendrier", libelle: "Calendrier vidéo", doc: "videos", groupe: "Vidéos" },
+      { cle: "general", libelle: "Vidéos générales", doc: "videos-general", groupe: "Vidéos" },
+      { cle: "campagnes", libelle: "Suivi des campagnes", tableaux: ["pubs"], groupe: "Publicité" },
+      { cle: "publicite", libelle: "Plan de publicité Meta", doc: "publicite", groupe: "Publicité" },
+      { cle: "collectees", libelle: "Preuves collectées", tableaux: ["preuves"], groupe: "Preuves" },
+      { cle: "preuves", libelle: "Machine à preuves", doc: "preuves", groupe: "Preuves" },
     ],
   },
   automatisations: {
@@ -78,11 +99,19 @@ export const PAGES_OMEGA: Record<string, DefPage> = {
   utilisation: {
     titre: "Utilisation",
     onglets: [
-      { cle: "", libelle: "Pilotage financier", doc: "finances" },
+      { cle: "", libelle: "Chiffres de la semaine", special: "semaine" },
+      { cle: "finances", libelle: "Finances réelles", tableaux: ["finances"] },
+      { cle: "pilotage", libelle: "Pilotage financier", doc: "finances" },
       { cle: "sante", libelle: "Santé des clients", doc: "sante" },
     ],
   },
-  aide: { titre: "Aide", onglets: [{ cle: "", libelle: "Manuel", doc: "manuel" }] },
+  aide: {
+    titre: "Formation",
+    onglets: [
+      { cle: "", libelle: "Vidéos de formation", special: "formation" },
+      { cle: "manuel", libelle: "Manuel", doc: "manuel" },
+    ],
+  },
   reglages: {
     titre: "Réglages",
     onglets: [{ cle: "", libelle: "Kit contractuel", doc: "contrats" }],

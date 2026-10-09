@@ -22,9 +22,11 @@ export async function lirePage(slug: string): Promise<{ titre: string; contenu: 
   return data ?? null;
 }
 
-export async function lireLignes(): Promise<Ligne[]> {
+export async function lireLignes(tableaux?: string[]): Promise<Ligne[]> {
   const supabase = await createClient();
-  const { data } = await supabase.from("omega_lignes").select("id, tableau, ordre, donnees, maj").order("ordre");
+  let req = supabase.from("omega_lignes").select("id, tableau, ordre, donnees, maj");
+  if (tableaux) req = req.in("tableau", tableaux);
+  const { data } = await req.order("ordre");
   return (data ?? []) as Ligne[];
 }
 
@@ -109,4 +111,22 @@ export async function lireContactsSuivis(): Promise<{ contacts: Contact[]; echan
     supabase.from("omega_echanges").select("id, contact_id, quand, canal, resume").order("quand", { ascending: false }).limit(2000),
   ]);
   return { contacts: (c ?? []) as Contact[], echanges: (e ?? []) as Echange[] };
+}
+
+/* ——— le mode appels (09/10/2026) : la file du jour, les établissements
+   avec un téléphone encore « À contacter » ou « Rappeler », ceux à
+   rappeler d'abord ——— */
+export async function lireFileAppels(secteur?: string) {
+  const supabase = await createClient();
+  let req = supabase
+    .from("omega_prospects")
+    .select("id, departement, secteur, moteurs, entreprise, enseigne, commune, dirigeant, effectif, telephone, courriel, site, personne_physique, statut, note")
+    .not("telephone", "is", null)
+    .in("statut", ["À contacter", "Rappeler"]);
+  if (secteur) req = req.eq("secteur", secteur);
+  const [{ data }, { data: secteurs }] = await Promise.all([
+    req.order("statut", { ascending: false }).order("entreprise").limit(40),
+    supabase.from("omega_prospects_secteurs").select("secteur, moteurs, total, avec_tel, contactes").order("total", { ascending: false }),
+  ]);
+  return { prospects: (data ?? []) as Prospect[], secteurs: (secteurs ?? []) as Secteur[] };
 }

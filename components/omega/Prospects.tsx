@@ -27,7 +27,7 @@ import type { FiltresProspects, Prospect, Secteur } from "@/lib/omega/donnees";
 
 const STATUTS = ["À contacter", "Appelé", "Rappeler", "Visité", "Audit réservé", "Client", "Pas intéressé", "Ne plus contacter"];
 const teinte = (s: string) => (s === "Client" || s === "Audit réservé" ? "vert" : s === "Appelé" || s === "Visité" || s === "Rappeler" ? "bleu" : s === "Pas intéressé" || s === "Ne plus contacter" ? "rouge" : "gris");
-const ROLE: Record<string, string> = {
+export const ROLE: Record<string, string> = {
   CASHD: "relance les devis et les factures en retard",
   REPUT: "répond aux demandes et demande les avis",
   FILED: "lit et classe les factures fournisseurs",

@@ -280,3 +280,86 @@
 /* la barre « Rechercher… » : angles de 6 px comme les boutons, au lieu de la pilule (Teo, 09/10) */
 .om .v2-trouver { border-radius: 6px; }
 .om .v2-trouver kbd, .om .v2-trouver .v2-kbd { border-radius: 4px; }
+
+/* — le sélecteur ⌃⌄ des vues d'une page (09/10/2026), à la place des onglets — */
+.om-vue-barre { margin: -16px 0 24px; }
+.om-vue-haut { margin: 24px 0 -8px 24px; }
+.om-vue-haut--dedans { margin: 0 0 16px; }
+.om-pousse { margin-left: auto; }
+
+/* — Formation — */
+.om-formation-compte { font-size: 13px; }
+.om-formation-grille { display: grid; grid-template-columns: minmax(240px, 320px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.om-formation-liste { padding: 6px; max-height: calc(100vh - 190px); overflow-y: auto; }
+.om-formation-liste ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.om-formation-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px; border: 0; border-radius: 6px; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.om-formation-item:hover { background: var(--v2-a-100); }
+.om-formation-item[aria-current] { background: var(--v2-a-200, var(--v2-gray-200)); box-shadow: 0 0 0 1px var(--v2-a-400); }
+.om-formation-num { flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 999px; font-size: 11px; font-weight: 600; background: var(--v2-a-200, var(--v2-gray-200)); color: var(--v2-gray-900); }
+.om-formation-num[data-teinte="vert"] { background: var(--v2-green-200, var(--v2-a-200)); color: var(--v2-green-900, var(--v2-gray-1000)); }
+.om-formation-num[data-teinte="bleu"] { background: var(--v2-blue-200); color: var(--v2-blue-900); }
+.om-formation-texte { display: grid; min-width: 0; font-size: 13px; color: var(--v2-gray-1000); }
+.om-formation-texte > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.om-formation-texte small { font-size: 12px; color: var(--v2-gray-900); }
+.om-formation-video { overflow: hidden; }
+.om-formation-ecran { aspect-ratio: 16 / 9; max-height: 38vh; width: 100%; background: var(--v2-bg-200, #000); }
+.om-formation-ecran iframe, .om-formation-ecran video { display: block; width: 100%; height: 100%; border: 0; background: #000; }
+.om-formation-vide { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; height: 100%; min-height: 160px; padding: 24px; text-align: center; font-size: 13px; color: var(--v2-gray-900); }
+.om-formation-fiche { display: grid; gap: 12px; padding: 16px 20px 20px; }
+.om-formation-tete { display: flex; align-items: center; gap: 8px; }
+.om-formation-champ { width: 100%; min-width: 0; padding: 6px 8px; border: 0; border-radius: 6px; background: transparent; color: var(--v2-gray-1000); font: inherit; font-size: 13px; box-shadow: 0 0 0 1px var(--v2-a-400); resize: vertical; }
+.om-formation-champ:hover { box-shadow: 0 0 0 1px var(--v2-a-500, var(--v2-a-400)); }
+.om-formation-champ:focus { outline: none; box-shadow: 0 0 0 1px var(--v2-blue-700), 0 0 0 4px var(--v2-blue-300, transparent); }
+.om-formation-titre { flex: 1; font-size: 16px; font-weight: 600; box-shadow: none; padding-left: 0; }
+.om-formation-champs { display: grid; grid-template-columns: 1fr 120px 2fr; gap: 12px; }
+.om-formation-champs label, .om-formation-bloc { display: grid; gap: 4px; }
+.om-formation-champs label > span, .om-formation-bloc > span { font-size: 12px; color: var(--v2-gray-900); }
+
+/* — Mode appels — */
+.om-appels-compteurs { display: inline-flex; align-items: baseline; gap: 14px; margin-left: auto; font-size: 13px; color: var(--v2-gray-900); }
+.om-appels-compteurs strong { color: var(--v2-gray-1000); font-size: 15px; font-weight: 600; margin-right: 3px; }
+.om-appels-grille { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; align-items: start; }
+.om-appel { display: grid; gap: 16px; padding: 20px 24px; }
+.om-appel-tete { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+.om-appel-tete h2 { margin: 2px 0 2px; font-size: 20px; font-weight: 600; }
+.om-appel-tete p { margin: 0; font-size: 13px; }
+.om-appel-file { font-size: 12px; }
+.om-appel-numero { gap: 8px; font-variant-numeric: tabular-nums; }
+.om-appel-vente { display: flex; flex-wrap: wrap; gap: 8px; }
+.om-appel-moteur { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 6px; box-shadow: 0 0 0 1px var(--v2-a-400); color: var(--v2-gray-900); text-decoration: none; font-size: 12px; }
+.om-appel-moteur:hover { background: var(--v2-a-100); }
+.om-appel-script { margin: 0; padding: 12px 16px; border-left: 2px solid var(--v2-blue-700); border-radius: 0 6px 6px 0; background: var(--v2-a-100); font-size: 14px; line-height: 1.55; color: var(--v2-gray-1000); }
+.om-appel-issues { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.om-appel-rdv { display: inline-flex; gap: 6px; align-items: center; }
+.om-appel-rdv .om-formation-champ { width: auto; height: 30px; padding: 0 8px; }
+.om-appel-issues button:disabled { opacity: 0.5; cursor: default; }
+.om-objections { padding: 12px 0 8px; }
+.om-objections .om-section-tete { padding: 0 16px; }
+.om-objections .om-section-tete a { font-size: 12px; text-decoration: none; }
+.om-objections ul { list-style: none; margin: 8px 0 0; padding: 0; }
+.om-objections li { display: flex; align-items: flex-start; gap: 6px; padding: 6px 8px 6px 16px; border-top: 1px solid var(--v2-a-200, var(--v2-gray-200)); }
+.om-objections details { flex: 1; min-width: 0; font-size: 13px; }
+.om-objections summary { display: flex; justify-content: space-between; gap: 8px; cursor: pointer; list-style: none; padding: 4px 0; color: var(--v2-gray-1000); }
+.om-objections summary::-webkit-details-marker { display: none; }
+.om-objections details p { margin: 4px 0 6px; color: var(--v2-gray-900); line-height: 1.5; }
+
+/* — Chiffres de la semaine — */
+.om-cartes--quatre { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: 16px; }
+.om-carte-pied[data-sens="haut"] { color: var(--v2-green-900, var(--v2-gray-1000)); }
+.om-carte-pied[data-sens="bas"] { color: var(--v2-red-900, var(--v2-gray-900)); }
+.om-semaine .om-carte-valeur strong { font-size: 24px; }
+.om-semaine-grille th:not(:first-child), .om-semaine-grille td:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
+.om-semaine-grille td { padding-top: 8px; padding-bottom: 8px; }
+.om-semaine-grille [data-choisie] { background: var(--v2-a-100); color: var(--v2-gray-1000); font-weight: 600; }
+
+@media (max-width: 1023px) {
+  .om-formation-grille, .om-appels-grille { grid-template-columns: 1fr; }
+  .om-formation-liste { max-height: 260px; }
+  .om-cartes--quatre { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .om-formation-champs { grid-template-columns: 1fr; }
+  .om-appels-compteurs { margin-left: 0; }
+  .om-vue-haut { margin: 16px 0 -8px 16px; }
+  .om-cartes--quatre { grid-template-columns: 1fr 1fr; }
+}

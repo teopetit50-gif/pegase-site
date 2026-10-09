@@ -2,25 +2,37 @@
    ses onglets, et le contenu d'Omega — un document modifiable, un ou
    plusieurs tableaux, ou un écran à part (À valider, Point du matin). */
 
-import Link from "next/link";
 import Document from "./Document";
 import Tableaux from "./Tableaux";
 import Journee from "./Journee";
 import Prospects from "./Prospects";
 import DemandesOmega from "./DemandesOmega";
 import Contacts from "./Contacts";
+import Formation from "./Formation";
+import ModeAppels from "./ModeAppels";
+import Semaine from "./Semaine";
+import SelecteurVue from "./SelecteurVue";
 import type { DefPage, OngletPage } from "./pages";
-import { PAR_PAGE, lireContacts, lireContactsSuivis, lireLignes, lirePage, lireProspects, type FiltresProspects } from "@/lib/omega/donnees";
+import { PAR_PAGE, lireContacts, lireContactsSuivis, lireFileAppels, lireLignes, lirePage, lireProspects, type FiltresProspects } from "@/lib/omega/donnees";
 
 export default async function EcranOmega({ page, def, actif, filtres = {} }: { page: string; def: DefPage; actif: OngletPage; filtres?: FiltresProspects }) {
-  const base = `/omega/${page}`;
   /* les écrans dupliqués de /espace2 portent leur propre page, sans titre visible (il est dans la barre du haut) */
   if (actif.special === "validations" || actif.special === "point") return <Journee mode={actif.special} lignes={await lireLignes()} />;
+  const selecteur = def.onglets.length > 1 ? <SelecteurVue page={page} titre={def.titre} onglets={def.onglets} actif={actif.cle} /> : null;
+  if (actif.special === "formation") return <Formation lignes={await lireLignes(["formation"])} selecteur={selecteur} />;
+  if (actif.special === "appels") {
+    const [file, lignes] = await Promise.all([lireFileAppels(filtres.secteur), lireLignes(["appels", "objections"])]);
+    return <ModeAppels file={file.prospects} secteurs={file.secteurs} secteur={filtres.secteur} lignes={lignes} selecteur={selecteur} />;
+  }
+  if (actif.special === "semaine") {
+    const [lignes, { echanges }, { contacts }] = await Promise.all([lireLignes(), lireContactsSuivis(), lireContacts()]);
+    return <Semaine lignes={lignes} echanges={echanges.map((e) => e.quand)} prospects={contacts} selecteur={selecteur} />;
+  }
   if (actif.special === "contacts") {
     const { contacts, echanges } = await lireContactsSuivis();
     return (
       <>
-        {def.onglets.length > 1 ? <OngletsHaut page={page} def={def} actif={actif} /> : null}
+        {selecteur ? <div className="om-vue-haut">{selecteur}</div> : null}
         <Contacts contacts={contacts} echanges={echanges} />
       </>
     );
@@ -33,6 +45,7 @@ export default async function EcranOmega({ page, def, actif, filtres = {} }: { p
     const [lignes, { contacts, secteurs }] = await Promise.all([lireLignes(), lireContacts()]);
     return (
       <div className="v2-page v2-arrivee">
+        {selecteur ? <div className="om-vue-haut om-vue-haut--dedans">{selecteur}</div> : null}
         <DemandesOmega lignes={lignes} secteurs={secteurs} contacts={contacts} />
         <div id="ecran" className="om-ecran-liste">
           <Tableaux lignes={lignes} seulement={["clients"]} />
@@ -45,15 +58,7 @@ export default async function EcranOmega({ page, def, actif, filtres = {} }: { p
       <div className="v2-tete">
         <h1>{def.titre}</h1>
       </div>
-      {def.onglets.length > 1 ? (
-        <nav className="om-onglets" aria-label={`Sections de ${def.titre}`}>
-          {def.onglets.map((o) => (
-            <Link key={o.cle} href={o.cle ? `${base}/${o.cle}` : base} className="om-onglet" aria-current={o.cle === actif.cle ? "page" : undefined}>
-              {o.libelle}
-            </Link>
-          ))}
-        </nav>
-      ) : null}
+      {selecteur ? <div className="om-vue-barre">{selecteur}</div> : null}
       <Contenu actif={actif} filtres={filtres} />
     </div>
   );
@@ -71,18 +76,4 @@ async function Contenu({ actif, filtres }: { actif: OngletPage; filtres: Filtres
   const lignes = await lireLignes();
   if (actif.special === "validations" || actif.special === "point") return <Journee mode={actif.special} lignes={lignes} />;
   return <Tableaux lignes={lignes} seulement={actif.tableaux} />;
-}
-
-/* les onglets posés au-dessus d'un écran dupliqué de /espace2 (qui porte sa propre page) */
-function OngletsHaut({ page, def, actif }: { page: string; def: DefPage; actif: OngletPage }) {
-  const base = `/omega/${page}`;
-  return (
-    <nav className="om-onglets om-onglets--haut" aria-label={`Sections de ${def.titre}`}>
-      {def.onglets.map((o) => (
-        <Link key={o.cle} href={o.cle ? `${base}/${o.cle}` : base} className="om-onglet" aria-current={o.cle === actif.cle ? "page" : undefined}>
-          {o.libelle}
-        </Link>
-      ))}
-    </nav>
-  );
 }
