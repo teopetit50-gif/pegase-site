@@ -154,3 +154,20 @@
   .om-md { padding-right: 0; padding-top: 28px; }
   .om-modifier { opacity: 1; top: 10px; right: 10px; }
 }
+
+/* — l'outil d'audit — */
+.om-audit { display: grid; gap: 16px; }
+.om-audit-entete { display: grid; gap: 12px; }
+.om-audit-champs, .om-audit-roles { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.om-audit .om-label { display: grid; gap: 6px; }
+.om-depot { position: relative; display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 88px; padding: 16px; border-radius: 8px; border: 1px dashed var(--v2-a-500, var(--v2-a-400)); color: var(--v2-gray-900); font-size: 14px; cursor: pointer; text-align: center; }
+.om-depot:hover { background: var(--v2-a-100); color: var(--v2-gray-1000); }
+.om-depot input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.om-note { margin: 0; font-size: 12px; }
+.om-verdict-total { font-size: 18px; color: var(--v2-gray-1000); }
+.om-verdict-texte { margin: 16px 0; font-size: 14px; line-height: 1.6; color: var(--v2-gray-1000); }
+.om-verdict[data-rien] .om-verdict-total { color: var(--v2-gray-900); }
+@media print {
+  .om-sans-impression, .v2-laterale, .v2-haut { display: none !important; }
+  .om-audit { padding: 0; }
+}

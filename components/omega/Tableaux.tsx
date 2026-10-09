@@ -16,7 +16,7 @@ import { useSearchParams } from "next/navigation";
 import { ChevronRight, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
-export type Ligne = { id: string; tableau: string; ordre: number; donnees: Record<string, string> };
+export type Ligne = { id: string; tableau: string; ordre: number; donnees: Record<string, string>; maj?: string };
 
 const STATUTS = ["À faire", "En cours", "Fait", "Bloqué"];
 const ETAPES = ["À contacter", "Audit réservé", "Audit tenu", "Récap envoyé", "Signé", "Installé", "En rodage", "En réel", "Bilan J30 fait", "SaaS métier en route", "2e offre proposée", "Engagement annuel", "Perdu"];
@@ -31,12 +31,13 @@ export const TABLEAUX: Def[] = [
   { cle: "ajouts", titre: "Ajouts du 9 octobre (Léo Grindas et Hormozi)", intro: "Ce qui manquait au plan : le système de test des vidéos, l'enregistrement des appels, le suivi du coût d'un client.", colonnes: PLAN },
   { cle: "routines", titre: "Les routines", intro: "Remets les statuts à « À faire » chaque lundi matin avec le bouton du tableau.", colonnes: [{ cle: "Routine", large: true }, { cle: "Fréquence" }, { cle: "Moment" }, { cle: "Statut cette semaine", choix: STATUTS }] },
   { cle: "clients", titre: "Le suivi clients", intro: "Une ligne par prospect ou client, de l'audit jusqu'à J90. Ajoute une ligne à chaque nouveau prospect.", colonnes: [{ cle: "Client" }, { cle: "Métier" }, { cle: "Offre visée" }, { cle: "Étape", choix: ETAPES }, { cle: "Prochaine action", large: true }, { cle: "Date", etroite: true }, { cle: "Encours relevé (€)", etroite: true }, { cle: "Étude de cas", etroite: true }] },
+  { cle: "entreprises", titre: "Entreprises du BTP à prospecter", intro: "300 entreprises actives de 3 salariés ou plus en Guadeloupe (annuaire officiel des entreprises et fiches Google publiques). Passe une ligne dans « Demandes reçues » dès qu'un contact s'engage.", colonnes: [{ cle: "Entreprise", large: true }, { cle: "Commune" }, { cle: "Activité", large: true }, { cle: "Effectif" }, { cle: "Téléphone" }, { cle: "Site" }, { cle: "E-mail" }, { cle: "Avis Google", etroite: true }, { cle: "Prospection", choix: ["À contacter", "Appelé", "Rappeler", "Visité", "Audit réservé", "Pas intéressé"] }] },
   { cle: "moteurs", titre: "Développement des moteurs", intro: "En parallèle de la vente, sans dépasser 20 % du temps : on ne touche au produit que pour débloquer un client ou améliorer la conversion.", colonnes: [{ cle: "N°", etroite: true }, { cle: "Chantier", large: true }, { cle: "Pourquoi", large: true }, { cle: "Échéance", etroite: true }, { cle: "Statut", choix: STATUTS }] },
 ];
 
 const teinteStatut = (v: string | undefined) => (v === "Fait" || v === "Signé" || v === "En réel" || v === "Engagement annuel" ? "vert" : v === "En cours" || v === "Audit réservé" || v === "Audit tenu" || v === "Récap envoyé" || v === "Installé" || v === "En rodage" ? "bleu" : v === "Bloqué" || v === "Perdu" ? "rouge" : "gris");
 
-export default function Tableaux({ lignes: initiales }: { lignes: Ligne[] }) {
+export default function Tableaux({ lignes: initiales, seulement, cartes = false }: { lignes: Ligne[]; seulement?: string[]; cartes?: boolean }) {
   const [lignes, setLignes] = useState(initiales);
   const [masquerFaits, setMasquerFaits] = useState(false);
   const [etat, setEtat] = useState("");
@@ -97,15 +98,17 @@ export default function Tableaux({ lignes: initiales }: { lignes: Ligne[] }) {
 
   return (
     <div className="om-tableaux">
+      {cartes ? (
       <div className="om-cartes">
         <Carte titre="Plan sur 90 jours" valeur={faits} total={plan.length} unite="tâches faites" pied={prochaine ? `Prochaine : ${prochaine.donnees["Tâche"] ?? ""}` : "Tout est fait"} ancre="#plan" />
         <Carte titre="Clients" valeur={signes} total={20} unite="signés sur l'objectif" pied={`${actifs} prospects ou clients suivis`} ancre="#clients" />
         <Carte titre="Moteurs" valeur={moteursFaits} total={moteurs.length} unite="chantiers faits" pied={`${moteurs.filter((l) => l.donnees["Statut"] === "En cours").length} en cours`} ancre="#moteurs" />
       </div>
+      ) : null}
       <p className="om-etat" role="status">
         {etat}
       </p>
-      {TABLEAUX.map((t) => {
+      {TABLEAUX.filter((t) => !seulement || seulement.includes(t.cle)).map((t) => {
         const ls = de(t.cle).filter((l) => !(masquerFaits && (t.cle === "plan" || t.cle === "ajouts") && l.donnees["Statut"] === "Fait"));
         return (
           <section key={t.cle} id={t.cle} className="v2-carte om-section">

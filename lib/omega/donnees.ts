@@ -24,6 +24,6 @@ export async function lirePage(slug: string): Promise<{ titre: string; contenu: 
 
 export async function lireLignes(): Promise<Ligne[]> {
   const supabase = await createClient();
-  const { data } = await supabase.from("omega_lignes").select("id, tableau, ordre, donnees").order("ordre");
+  const { data } = await supabase.from("omega_lignes").select("id, tableau, ordre, donnees, maj").order("ordre");
   return (data ?? []) as Ligne[];
 }

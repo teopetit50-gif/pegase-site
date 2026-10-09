@@ -20,11 +20,13 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ArrowRight, Bell, BookOpen, CalendarCheck, Check, ChevronDown, ChevronRight, ChevronsUpDown, Clapperboard, Compass, CornerDownLeft, ExternalLink, LayoutGrid, Link2, ListChecks, LogOut, Menu as IconeMenu, MessagesSquare, MoreHorizontal, Repeat, Search, UserPlus, Users, Wrench, X } from "lucide-react";
+import { Activity, ArrowRight, Bell, Building2, Check, CheckCheck, CheckSquare, ChevronDown, ChevronRight, ChevronsUpDown, ClipboardCheck, CornerDownLeft, ExternalLink, Gauge, Inbox, LayoutGrid, LifeBuoy, Link2, ListChecks, LogOut, Menu as IconeMenu, MoreHorizontal, NotebookPen, Phone, Search, Settings, Sun, UserPlus, Users, Workflow, X } from "lucide-react";
+import { MODULES, MODULES_PRINCIPAUX } from "@/components/espace2/modules";
+import { titrePage } from "./pages";
 import { Autocomplete, Button, Dialog, DialogTrigger, Input, Menu, Modal, ModalOverlay, Popover, RouterProvider, TextField, useFilter } from "react-aria-components";
 import { createClient } from "@/lib/supabase/client";
 import { FournisseurToasts, useToast } from "@/components/espace2/Toasts";
-import { ItemMenu, Kbd, MenuDeroulant, SectionMenu } from "@/components/espace2/ui";
+import { ItemMenu, Kbd, MenuDeroulant, SectionMenu, SeparateurMenu } from "@/components/espace2/ui";
 import { ecrireStockage, useStockage } from "@/components/espace2/Collection";
 import "@/components/espace2/espace2.css";
 import "./omega.css";
@@ -33,19 +35,9 @@ export const RACINE = "/omega";
 const I = { width: 16, height: 16, strokeWidth: 1.6, "aria-hidden": true } as const;
 const coche = (oui: boolean) => (oui ? <Check width={16} height={16} aria-label="choisi" /> : null);
 
-const FICHES: [string, string][] = [["cashd", "CASHD"], ["reput", "REPUT"], ["filed", "FILED"], ["offload", "OFFLOAD"], ["daliro", "Daliro (BTP)"], ["tavaro", "Tavaro (loueurs)"], ["lorani", "Lorani (architectes)"], ["tamila", "Tamila (avocats)"], ["tiroma", "Tiroma (dentaires)"], ["varelo", "Varelo (groupes)"]];
-const VIDEOS: [string, string][] = [["general", "Général"], ...FICHES];
-
-/* les cinq pages, dans l'ordre de la portée et de la palette */
-export const PAGES = [
-  { cle: "tableau", href: RACINE, nom: "Vue d'ensemble", libelle: "le tableau opérationnel", icone: LayoutGrid },
-  { cle: "strategie", href: `${RACINE}/strategie`, nom: "Stratégie", libelle: "le pourquoi, Hormozi", icone: Compass },
-  { cle: "manuel", href: `${RACINE}/manuel`, nom: "Manuel", libelle: "le parcours en 9 étapes", icone: BookOpen },
-  { cle: "vendre", href: `${RACINE}/vendre`, nom: "Vendre", libelle: "méthode et fiches", icone: MessagesSquare },
-  { cle: "videos", href: `${RACINE}/videos`, nom: "Vidéos", libelle: "bibliothèque et calendrier", icone: Clapperboard },
-] as const;
-
-const pageDe = (chemin: string) => PAGES.find((p) => (p.href === RACINE ? chemin === RACINE : chemin === p.href || chemin.startsWith(`${p.href}/`)));
+/* les modules, dans l'ordre de /espace2 : les quatre communs, puis les métiers */
+const MODULES_OMEGA = [...MODULES].sort((a, b) => Number(!MODULES_PRINCIPAUX.includes(a.cle)) - Number(!MODULES_PRINCIPAUX.includes(b.cle)) || MODULES_PRINCIPAUX.indexOf(a.cle) - MODULES_PRINCIPAUX.indexOf(b.cle));
+const moduleDe = (chemin: string) => MODULES_OMEGA.find((m) => chemin === `${RACINE}/${m.cle}` || chemin.startsWith(`${RACINE}/${m.cle}/`));
 
 /* ——— le tableau opérationnel, lu pour la cloche et les compteurs ——— */
 type LigneBrute = { tableau: string; donnees: Record<string, string> };
@@ -78,13 +70,13 @@ function useTableau() {
   const semaine = taches.filter((l) => (echeance(l.donnees["Échéance"]) ?? Infinity) < maintenant + 7 * 864e5);
   const clients = lignes.filter((l) => l.tableau === "clients" && l.donnees["Client"] && l.donnees["Étape"] !== "Perdu");
   const moteurs = lignes.filter((l) => l.tableau === "moteurs" && l.donnees["Statut"] !== "Fait");
-  const routines = lignes.filter((l) => l.tableau === "routines" && l.donnees["Statut cette semaine"] !== "Fait");
+  const decisions = taches.filter((l) => ["Fondations", "Pilotage"].includes(l.donnees["Catégorie"]));
   return {
-    alertes: enRetard.map((l, i) => ({ id: `t-${i}`, texte: l.donnees["Tâche"] ?? "Tâche", quand: l.donnees["Échéance"] ?? "", lien: `${RACINE}#plan` })),
+    alertes: enRetard.map((l, i) => ({ id: `t-${i}`, texte: l.donnees["Tâche"] ?? "Tâche", quand: l.donnees["Échéance"] ?? "", lien: `${RACINE}/taches` })),
     semaine: semaine.length,
     clients: clients.length,
     moteurs: moteurs.length,
-    routines: routines.length,
+    decisions: decisions.length,
   };
 }
 
@@ -110,7 +102,7 @@ function Cadre({ email, children }: { email: string; children: React.ReactNode }
   const chemin = usePathname() ?? RACINE;
   const [palette, setPalette] = useState(false);
   const [tiroir, setTiroir] = useState(false);
-  const page = pageDe(chemin);
+  const portee = moduleDe(chemin);
 
   /* ⌘K / Ctrl+K partout ; F hors des champs de saisie */
   useEffect(() => {
@@ -154,28 +146,32 @@ function Cadre({ email, children }: { email: string; children: React.ReactNode }
                 <IconeMenu {...I} />
               </button>
               <MenuDeroulant
-                etiquette={`Page : ${page ? page.nom : "pilotage"}. Changer de page`}
+                etiquette={`Portée : ${portee ? portee.nom : "tous les modules"}. Changer de module`}
                 classe="v2-portee"
                 placement="bottom start"
                 largeur={300}
                 declencheur={
                   <>
-                    {page ? <page.icone {...I} /> : <LayoutGrid {...I} />}
-                    <span className="v2-portee-nom">{page ? page.nom : "Pilotage"}</span>
+                    {portee ? <portee.icone {...I} /> : <LayoutGrid {...I} />}
+                    <span className="v2-portee-nom">{portee ? portee.nom : "Tous les modules"}</span>
                     <ChevronsUpDown width={14} height={14} aria-hidden="true" />
                   </>
                 }
               >
-                <SectionMenu titre="Pages">
-                  {PAGES.map((p) => (
-                    <ItemMenu key={p.cle} id={p.cle} href={p.href} textValue={p.nom} icone={<p.icone {...I} />} suffixe={coche(p.cle === page?.cle)}>
-                      {p.nom} <span className="v2-gris">· {p.libelle}</span>
+                <ItemMenu id="tous" href={RACINE} textValue="Tous les modules" icone={<LayoutGrid {...I} />} suffixe={coche(!portee)}>
+                  Tous les modules
+                </ItemMenu>
+                <SeparateurMenu />
+                <SectionMenu titre="Modules">
+                  {MODULES_OMEGA.map((m) => (
+                    <ItemMenu key={m.cle} id={m.cle} href={`${RACINE}/${m.cle}`} textValue={m.nom} icone={<m.icone {...I} />} suffixe={coche(m.cle === portee?.cle)}>
+                      {m.nom} <span className="v2-gris">· {m.libelle}</span>
                     </ItemMenu>
                   ))}
                 </SectionMenu>
               </MenuDeroulant>
             </div>
-            <p className="v2-haut-titre">{page?.nom ?? "Pilotage"}</p>
+            <p className="v2-haut-titre">{titrePage(chemin)}</p>
             <div className="v2-haut-droite">
               <MenuDeroulant
                 etiquette="Nouveau"
@@ -190,16 +186,19 @@ function Cadre({ email, children }: { email: string; children: React.ReactNode }
                   </>
                 }
               >
-                <ItemMenu id="tache" href={`${RACINE}?ajouter=plan#plan`} icone={<ListChecks {...I} />}>
+                <ItemMenu id="tache" href={`${RACINE}/taches?ajouter=plan`} icone={<ListChecks {...I} />}>
                   Ajouter une tâche
                 </ItemMenu>
-                <ItemMenu id="prospect" href={`${RACINE}?ajouter=clients#clients`} icone={<UserPlus {...I} />}>
+                <ItemMenu id="prospect" href={`${RACINE}/demandes?ajouter=clients`} icone={<UserPlus {...I} />}>
                   Ajouter un prospect
                 </ItemMenu>
-                <ItemMenu id="chantier" href={`${RACINE}?ajouter=moteurs#moteurs`} icone={<Wrench {...I} />}>
-                  Ajouter un chantier moteur
+                <ItemMenu id="audit" href={`${RACINE}/audit`} icone={<ClipboardCheck {...I} />}>
+                  Lancer un audit
                 </ItemMenu>
               </MenuDeroulant>
+              <Link href={`${RACINE}/audit`} className="v2-btn v2-btn--petit v2-masque-mobile">
+                <ClipboardCheck {...I} /> Audit
+              </Link>
             </div>
           </header>
           <main id="contenu" tabIndex={-1} style={{ outline: "none" }}>
@@ -223,7 +222,7 @@ function Cadre({ email, children }: { email: string; children: React.ReactNode }
 type Lien = { libelle: string; href: string; icone: React.ReactNode; exact?: boolean; racine?: string; compteur?: number; sous?: { libelle: string; href: string }[] };
 
 function BarreLaterale({ email, chemin, ouvrirPalette, fermer }: { email: string; chemin: string; ouvrirPalette: () => void; fermer?: () => void }) {
-  const { alertes, semaine, clients, moteurs, routines } = useTableau();
+  const { alertes, semaine, clients, moteurs, decisions } = useTableau();
   const [ouvertes, basculer] = useSections();
   const deconnecter = () => {
     const f = document.createElement("form");
@@ -233,52 +232,47 @@ function BarreLaterale({ email, chemin, ouvrirPalette, fermer }: { email: string
     f.submit();
   };
 
+  /* les sections de /espace2, aux mêmes places (Teo, 09/10) */
   const groupes: { titre?: string; liens: Lien[] }[] = [
     {
       liens: [
         { libelle: "Vue d'ensemble", href: RACINE, icone: <LayoutGrid {...I} />, exact: true },
-        { libelle: "Cette semaine", href: `${RACINE}#plan`, icone: <CalendarCheck {...I} />, compteur: semaine },
-        { libelle: "Routines", href: `${RACINE}#routines`, icone: <Repeat {...I} />, compteur: routines },
+        { libelle: "À valider", href: `${RACINE}/validations`, icone: <CheckCheck {...I} />, compteur: decisions },
+        { libelle: "Point du matin", href: `${RACINE}/point`, icone: <Sun {...I} /> },
+        { libelle: "Demandes reçues", href: `${RACINE}/demandes`, icone: <Inbox {...I} />, compteur: clients },
       ],
     },
     {
-      titre: "Pilotage",
+      titre: "Travail",
       liens: [
-        { libelle: "Suivi clients", href: `${RACINE}#clients`, icone: <Users {...I} />, compteur: clients },
-        { libelle: "Moteurs", href: `${RACINE}#moteurs`, icone: <Wrench {...I} />, compteur: moteurs },
+        { libelle: "Tâches", href: `${RACINE}/taches`, icone: <CheckSquare {...I} />, compteur: semaine },
+        { libelle: "Notes", href: `${RACINE}/notes`, icone: <NotebookPen {...I} /> },
+        { libelle: "Appels", href: `${RACINE}/appels`, icone: <Phone {...I} /> },
       ],
     },
     {
-      titre: "Documents",
+      titre: "Fiches",
       liens: [
-        { libelle: "Stratégie", href: `${RACINE}/strategie`, icone: <Compass {...I} /> },
-        { libelle: "Manuel", href: `${RACINE}/manuel`, icone: <BookOpen {...I} /> },
+        { libelle: "Entreprises", href: `${RACINE}/entreprises`, icone: <Building2 {...I} /> },
+        { libelle: "Contacts", href: `${RACINE}/contacts`, icone: <Users {...I} /> },
       ],
     },
     {
-      titre: "Vendre",
+      titre: "Modules",
+      liens: MODULES_OMEGA.map<Lien>((m) => ({ libelle: m.nom, href: `${RACINE}/${m.cle}`, icone: <m.icone {...I} /> })),
+    },
+    {
+      titre: "Suivi",
       liens: [
-        { libelle: "La méthode", href: `${RACINE}/vendre`, icone: <MessagesSquare {...I} />, exact: true },
-        {
-          libelle: "Fiches de vente",
-          href: `${RACINE}/vendre/fiches`,
-          racine: `${RACINE}/vendre/`,
-          icone: <ListChecks {...I} />,
-          sous: [{ libelle: "Toutes les fiches", href: `${RACINE}/vendre/fiches` }, ...FICHES.map(([c, l]) => ({ libelle: l, href: `${RACINE}/vendre/${c}` }))],
-        },
+        { libelle: "Activité", href: `${RACINE}/activite`, icone: <Activity {...I} /> },
+        { libelle: "Automatisations", href: `${RACINE}/automatisations`, icone: <Workflow {...I} />, compteur: moteurs },
+        { libelle: "Utilisation", href: `${RACINE}/utilisation`, icone: <Gauge {...I} /> },
       ],
     },
     {
-      titre: "Vidéos",
       liens: [
-        { libelle: "Mode d'emploi", href: `${RACINE}/videos`, icone: <Clapperboard {...I} />, exact: true },
-        {
-          libelle: "Bibliothèque",
-          href: `${RACINE}/videos/general`,
-          racine: `${RACINE}/videos/`,
-          icone: <BookOpen {...I} />,
-          sous: VIDEOS.map(([c, l]) => ({ libelle: l, href: `${RACINE}/videos/${c}` })),
-        },
+        { libelle: "Aide", href: `${RACINE}/aide`, icone: <LifeBuoy {...I} /> },
+        { libelle: "Réglages", href: `${RACINE}/reglages`, icone: <Settings {...I} /> },
       ],
     },
   ];
@@ -337,7 +331,7 @@ function BarreLaterale({ email, chemin, ouvrirPalette, fermer }: { email: string
       <nav className="v2-laterale-nav" aria-label="Pages du pilotage">
         {groupes.map((g, i) => {
           const ici = g.liens.some((l) => chemin === (l.racine ?? l.href) || chemin.startsWith(l.racine ?? `${l.href}/`));
-          const replie = !!g.titre && !(ouvertes[g.titre] ?? (ici || g.titre === "Pilotage"));
+          const replie = !!g.titre && !(ouvertes[g.titre] ?? ici);
           return (
             <div key={i} className="v2-section">
               {g.titre ? (
@@ -475,6 +469,23 @@ function LienLateral({ lien, chemin }: { lien: Lien; chemin: string }) {
 }
 
 /* la palette (F, ⌘K) : la même que l'espace client, sur les pages du pilotage */
+const ECRANS: [string, string][] = [
+  [RACINE, "Vue d'ensemble"],
+  [`${RACINE}/validations`, "À valider"],
+  [`${RACINE}/point`, "Point du matin"],
+  [`${RACINE}/demandes`, "Demandes reçues (prospects)"],
+  [`${RACINE}/taches`, "Tâches (plan sur 90 jours)"],
+  [`${RACINE}/notes`, "Notes (stratégie, manuel)"],
+  [`${RACINE}/appels`, "Appels (méthode de vente)"],
+  [`${RACINE}/audit`, "Audit"],
+  [`${RACINE}/entreprises`, "Entreprises BTP"],
+  [`${RACINE}/contacts`, "Contacts (partenaires)"],
+  [`${RACINE}/activite`, "Activité (vidéos, pub, preuves)"],
+  [`${RACINE}/automatisations`, "Automatisations (moteurs, état des produits)"],
+  [`${RACINE}/utilisation`, "Utilisation (finances, santé clients)"],
+  [`${RACINE}/reglages`, "Réglages (kit contractuel)"],
+];
+
 function PaletteOmega({ ouverte, changer }: { ouverte: boolean; changer: (v: boolean) => void }) {
   const router = useRouter();
   const toast = useToast();
@@ -502,23 +513,16 @@ function PaletteOmega({ ouverte, changer }: { ouverte: boolean; changer: (v: boo
             </TextField>
             <Menu className="v2-menu" onAction={agir} aria-label="Résultats" renderEmptyState={() => <div className="v2-palette-vide">Aucun résultat.</div>}>
               <SectionMenu titre="Pages">
-                {PAGES.map((p) => (
-                  <ItemMenu key={p.cle} id={`aller:${p.href}`} textValue={`${p.nom} ${p.libelle}`} icone={<p.icone width={16} height={16} aria-hidden="true" />} suffixe={<span>{p.libelle}</span>}>
-                    {p.nom}
+                {ECRANS.map(([href, libelle]) => (
+                  <ItemMenu key={href} id={`aller:${href}`} textValue={libelle} icone={fleche}>
+                    {libelle}
                   </ItemMenu>
                 ))}
               </SectionMenu>
-              <SectionMenu titre="Fiches de vente">
-                {FICHES.map(([c, l]) => (
-                  <ItemMenu key={c} id={`aller:${RACINE}/vendre/${c}`} textValue={`Fiche de vente ${l}`} icone={fleche}>
-                    {`Fiche ${l}`}
-                  </ItemMenu>
-                ))}
-              </SectionMenu>
-              <SectionMenu titre="Vidéos">
-                {VIDEOS.map(([c, l]) => (
-                  <ItemMenu key={c} id={`aller:${RACINE}/videos/${c}`} textValue={`Vidéos ${l}`} icone={fleche}>
-                    {`Vidéos ${l}`}
+              <SectionMenu titre="Modules">
+                {MODULES_OMEGA.map((m) => (
+                  <ItemMenu key={m.cle} id={`aller:${RACINE}/${m.cle}`} textValue={`${m.nom} ${m.libelle}`} icone={<m.icone width={16} height={16} aria-hidden="true" />} suffixe={<span>{m.libelle}</span>}>
+                    {m.nom}
                   </ItemMenu>
                 ))}
               </SectionMenu>
