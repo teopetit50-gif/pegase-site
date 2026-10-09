@@ -6,10 +6,11 @@ import Link from "next/link";
 import Document from "./Document";
 import Tableaux from "./Tableaux";
 import Journee from "./Journee";
+import Prospects from "./Prospects";
 import type { DefPage, OngletPage } from "./pages";
-import { lireLignes, lirePage } from "@/lib/omega/donnees";
+import { PAR_PAGE, lireLignes, lirePage, lireProspects, type FiltresProspects } from "@/lib/omega/donnees";
 
-export default async function EcranOmega({ page, def, actif }: { page: string; def: DefPage; actif: OngletPage }) {
+export default async function EcranOmega({ page, def, actif, filtres = {} }: { page: string; def: DefPage; actif: OngletPage; filtres?: FiltresProspects }) {
   const base = `/omega/${page}`;
   return (
     <div className={`v2-page om-page${actif.tableaux || actif.special ? " om-page--large" : ""}`}>
@@ -25,17 +26,21 @@ export default async function EcranOmega({ page, def, actif }: { page: string; d
           ))}
         </nav>
       ) : null}
-      <Contenu actif={actif} />
+      <Contenu actif={actif} filtres={filtres} />
     </div>
   );
 }
 
-async function Contenu({ actif }: { actif: OngletPage }) {
+async function Contenu({ actif, filtres }: { actif: OngletPage; filtres: FiltresProspects }) {
+  if (actif.special === "prospects") {
+    const r = await lireProspects(filtres);
+    return <Prospects lignes={r.lignes} total={r.total} page={r.page} parPage={PAR_PAGE} secteurs={r.secteurs} filtres={filtres} />;
+  }
   if (actif.doc) {
     const p = await lirePage(actif.doc);
     return <Document key={actif.doc} slug={actif.doc} titre={p?.titre ?? actif.libelle} contenu={p?.contenu ?? ""} />;
   }
   const lignes = await lireLignes();
-  if (actif.special) return <Journee mode={actif.special} lignes={lignes} />;
+  if (actif.special === "validations" || actif.special === "point") return <Journee mode={actif.special} lignes={lignes} />;
   return <Tableaux lignes={lignes} seulement={actif.tableaux} />;
 }

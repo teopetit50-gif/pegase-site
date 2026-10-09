@@ -171,3 +171,23 @@
   .om-sans-impression, .v2-laterale, .v2-haut { display: none !important; }
   .om-audit { padding: 0; }
 }
+
+/* — la prospection (Entreprises) — */
+.om-prospects { display: grid; gap: 16px; }
+.om-secteurs { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; }
+.om-secteur { display: grid; gap: 6px; padding: 12px; border-radius: 8px; box-shadow: 0 0 0 1px var(--v2-a-400); color: inherit; text-decoration: none; }
+.om-secteur:hover { background: var(--v2-a-100); }
+.om-secteur[aria-current] { box-shadow: 0 0 0 1px var(--v2-blue-700); background: var(--v2-a-100); }
+.om-secteur-nom { font-size: 13px; font-weight: 600; color: var(--v2-gray-1000); }
+.om-secteur-chiffres { font-size: 12px; }
+.om-moteurs { display: flex; flex-wrap: wrap; gap: 4px; }
+.om-moteur { padding: 1px 7px; border-radius: 999px; font-size: 11px; font-weight: 500; background: var(--v2-a-200, var(--v2-a-100)); color: var(--v2-gray-900); white-space: nowrap; }
+.om-moteur[data-premier] { background: var(--v2-blue-200); color: var(--v2-blue-900); }
+.om-filtres { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 12px 0 16px; }
+.om-filtre-recherche { flex: 1 1 260px; }
+.om-grille-prospects { min-width: 1100px; }
+.om-grille-prospects td { font-size: 13px; vertical-align: middle; }
+.om-p-nom { display: block; font-weight: 500; color: var(--v2-gray-1000); }
+.om-p-sous { display: block; font-size: 12px; margin-top: 2px; }
+.om-tel { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; color: var(--v2-blue-900); }
+.om-pagination { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 16px; font-size: 13px; }

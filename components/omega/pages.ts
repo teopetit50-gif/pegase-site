@@ -25,7 +25,7 @@
    plusieurs tableaux (omega_lignes), soit un écran à part (« special »).
    ══════════════════════════════════════════════════════════════════════ */
 
-export type OngletPage = { cle: string; libelle: string; doc?: string; tableaux?: string[]; special?: "validations" | "point" };
+export type OngletPage = { cle: string; libelle: string; doc?: string; tableaux?: string[]; special?: "validations" | "point" | "prospects" };
 export type DefPage = { titre: string; onglets: OngletPage[] };
 
 const NOMS_MODULES: Record<string, string> = { filed: "FILED", cashd: "CASHD", reput: "REPUT", offload: "OFFLOAD", daliro: "DALIRO", tavaro: "TAVARO", lorani: "LORANI", tamila: "TAMILA", tiroma: "TIROMA", varelo: "VARELO" };
@@ -57,7 +57,7 @@ export const PAGES_OMEGA: Record<string, DefPage> = {
       { cle: "setter", libelle: "Kit setter", doc: "setter" },
     ],
   },
-  entreprises: { titre: "Entreprises", onglets: [{ cle: "", libelle: "BTP à prospecter", tableaux: ["entreprises"] }] },
+  entreprises: { titre: "Entreprises", onglets: [{ cle: "", libelle: "Prospection", special: "prospects" }] },
   contacts: { titre: "Contacts", onglets: [{ cle: "", libelle: "Programme partenaires", doc: "partenaires" }] },
   activite: {
     titre: "Activité",
