@@ -23,6 +23,8 @@ const geist = Geist({ subsets: ["latin"], variable: "--font-geist", display: "sw
 export const metadata: Metadata = {
   title: { default: "Espace client Omega (nouveau design)", template: "%s | Espace client Omega" },
   robots: { index: false, follow: false },
+  /* l'onglet du navigateur : le logo blanc sur fond noir (demande de Teo, 09/10 — l'icône noire disparaissait dans la barre sombre) */
+  icons: { icon: [{ url: "/omega-icone-pilotage.png", type: "image/png", sizes: "64x64" }], apple: [{ url: "/omega-icone-pilotage-apple.png", sizes: "180x180" }] },
 };
 
 export default async function LayoutEspace2({ children }: { children: React.ReactNode }) {

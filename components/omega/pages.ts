@@ -29,7 +29,7 @@
    défiler »). `groupe` les range par rubrique dans ce menu.
    ══════════════════════════════════════════════════════════════════════ */
 
-export type OngletPage = { cle: string; libelle: string; doc?: string; tableaux?: string[]; special?: "validations" | "point" | "prospects" | "demandes" | "contacts" | "formation" | "appels" | "semaine"; groupe?: string };
+export type OngletPage = { cle: string; libelle: string; doc?: string; tableaux?: string[]; special?: "validations" | "point" | "prospects" | "demandes" | "contacts" | "formation" | "appels" | "semaine" | "meta"; groupe?: string };
 export type DefPage = { titre: string; onglets: OngletPage[] };
 
 const NOMS_MODULES: Record<string, string> = { filed: "FILED", cashd: "CASHD", reput: "REPUT", offload: "OFFLOAD", daliro: "DALIRO", tavaro: "TAVARO", lorani: "LORANI", tamila: "TAMILA", tiroma: "TIROMA", varelo: "VARELO" };
@@ -83,7 +83,9 @@ export const PAGES_OMEGA: Record<string, DefPage> = {
       { cle: "", libelle: "Production vidéo", tableaux: ["videos"], groupe: "Vidéos" },
       { cle: "calendrier", libelle: "Calendrier vidéo", doc: "videos", groupe: "Vidéos" },
       { cle: "general", libelle: "Vidéos générales", doc: "videos-general", groupe: "Vidéos" },
-      { cle: "campagnes", libelle: "Suivi des campagnes", tableaux: ["pubs"], groupe: "Publicité" },
+      { cle: "meta", libelle: "Tableau Meta Ads", special: "meta", groupe: "Publicité" },
+      { cle: "campagnes", libelle: "Liste des campagnes", tableaux: ["pubs"], groupe: "Publicité" },
+      { cle: "meta-guide", libelle: "Comment marche Meta Ads", doc: "meta-ads", groupe: "Publicité" },
       { cle: "publicite", libelle: "Plan de publicité Meta", doc: "publicite", groupe: "Publicité" },
       { cle: "collectees", libelle: "Preuves collectées", tableaux: ["preuves"], groupe: "Preuves" },
       { cle: "preuves", libelle: "Machine à preuves", doc: "preuves", groupe: "Preuves" },
