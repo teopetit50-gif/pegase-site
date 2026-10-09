@@ -199,9 +199,6 @@ export default function Contacts({ contacts: initiaux, echanges: echangesInitiau
                   <ul className="v2-val-liste">
                     {liste.map((c) => (
                       <li key={c.id} className="v2-val-ligne" aria-current={choisi?.id === c.id ? "true" : undefined}>
-                        <span className="v2-val-case om-initiales" aria-hidden="true">
-                          {(c.nom || "?").split(/\s+/).slice(0, 2).map((m) => m.charAt(0).toUpperCase()).join("")}
-                        </span>
                         <button type="button" className="v2-val-corps" onClick={() => setChoix(c.id)}>
                           <span className="v2-val-texte">
                             <span>{c.nom}</span>
