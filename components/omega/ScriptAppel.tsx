@@ -84,7 +84,7 @@ const CONSEILS = [
   "Ton de pair : calme, un peu plus lent que d'habitude, une pause en fin de phrase. Jamais « Comment allez-vous aujourd'hui ? ».",
   "Une histoire, pas une liste de bénéfices. S'il coupe : « Ah ? » et deux secondes de silence.",
   "Jamais « ça vous intéresse ? » : la seule réponse logique est non. Une question de logistique.",
-  "Le moment où il vous fait le plus confiance : c'est maintenant qu'on qualifie. Note sa réponse ci-dessous.",
+  "Le moment où il vous fait le plus confiance : c'est maintenant qu'on qualifie. Note sa réponse ci-dessous, puis la recommandation : « Et autour de vous, qui a le même souci ? » (un nom, pas un oui/non).",
 ];
 
 export default function ScriptAppel({ prenom, moteur }: { prenom: string; moteur?: string }) {

@@ -419,3 +419,6 @@ button.om-choix[data-focus-visible] { box-shadow: var(--v2-anneau); }
 .om-script-conseil { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin: 0; font-size: 12px; }
 .om-script-suite { border: 0; background: none; padding: 0; color: var(--v2-blue-900, var(--v2-gray-1000)); font: inherit; font-size: 12px; font-weight: 500; cursor: pointer; }
 .om-script-suite:hover { text-decoration: underline; }
+.om-appel-preparer { display: inline-flex; align-items: center; gap: 10px; margin-left: auto; font-size: 12px; }
+.om-appel-preparer a { color: var(--v2-gray-1000); text-decoration: none; box-shadow: inset 0 -1px 0 var(--v2-a-500, var(--v2-a-400)); }
+.om-appel-preparer a:hover { box-shadow: inset 0 -1px 0 var(--v2-gray-1000); }

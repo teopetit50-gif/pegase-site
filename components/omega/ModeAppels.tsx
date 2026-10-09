@@ -60,15 +60,18 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
 
   async function noter(issue: string, statut: string) {
     if (!p || envoi) return;
+    /* BAMFAM (Hormozi) : on ne raccroche jamais sans savoir quand on se reparle */
+    if ((issue === "RDV pris" || issue === "Rappeler") && !dateRdv) return setEtat(issue === "RDV pris" ? "Choisis la date du rendez-vous avant de valider." : "Fixe la date du rappel avant de raccrocher : jamais de prospect sans prochaine date.");
     setEnvoi(true);
     const sb = createClient();
     const nom = p.enseigne || p.entreprise;
     const maintenant = new Date();
-    const donnees = { Date: maintenant.toISOString(), Entreprise: nom, Secteur: p.secteur, Issue: issue, Note: note.trim(), Prospect: String(p.id) };
+    const rappel = issue === "Rappeler" && dateRdv ? new Date(dateRdv).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }) : "";
+    const donnees = { Date: maintenant.toISOString(), Entreprise: nom, Secteur: p.secteur, Issue: issue, Note: [note.trim(), rappel ? `Rappeler le ${rappel}` : ""].filter(Boolean).join(" — "), Prospect: String(p.id) };
     const ordre = Math.floor(maintenant.getTime() / 1000);
     const [a, b] = await Promise.all([
       sb.from("omega_lignes").insert({ tableau: "appels", ordre, donnees }).select("id, tableau, ordre, donnees").single(),
-      sb.from("omega_prospects").update({ statut, note: note.trim() ? [p.note, `${maintenant.toLocaleDateString("fr-FR")} : ${note.trim()}`].filter(Boolean).join("\n") : p.note, maj: maintenant.toISOString() }).eq("id", p.id),
+      sb.from("omega_prospects").update({ statut, note: note.trim() || rappel ? [p.note, `${maintenant.toLocaleDateString("fr-FR")} : ${[note.trim(), rappel ? `rappeler le ${rappel}` : ""].filter(Boolean).join(" — ")}`].filter(Boolean).join("\n") : p.note, maj: maintenant.toISOString() }).eq("id", p.id),
     ]);
     if (issue === "RDV pris") {
       const dirigeant = p.dirigeant?.replace(/\s*\(.*\)$/, "");
@@ -160,6 +163,18 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
                 <h2>{p.enseigne || p.entreprise}</h2>
                 <p className="v2-gris">{[dirigeant, p.commune, p.effectif, p.secteur].filter(Boolean).join(" · ")}</p>
               </div>
+              <span className="om-appel-preparer">
+                <span className="v2-gris">Préparer :</span>
+                <a href={`https://www.google.com/search?q=${encodeURIComponent(`${p.enseigne || p.entreprise} ${p.commune ?? ""}`)}`} target="_blank" rel="noreferrer">
+                  Google
+                </a>
+                <a href={`https://www.google.com/maps/search/${encodeURIComponent(`${p.enseigne || p.entreprise} ${p.commune ?? ""}`)}`} target="_blank" rel="noreferrer">
+                  Avis
+                </a>
+                <a href={`https://annuaire-entreprises.data.gouv.fr/rechercher?terme=${encodeURIComponent(p.entreprise)}`} target="_blank" rel="noreferrer">
+                  Société
+                </a>
+              </span>
               <a className="v2-btn v2-btn--primaire om-appel-numero" href={`tel:${p.telephone}`}>
                 <Phone width={16} height={16} aria-hidden="true" />
                 {p.telephone}
@@ -193,7 +208,7 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
 
             <div className="om-appel-issues">
               <span className="om-appel-rdv">
-                <input type="datetime-local" className="om-formation-champ" aria-label="Date et heure du rendez-vous" value={dateRdv} onChange={(e) => setDateRdv(e.target.value)} />
+                <input type="datetime-local" className="om-formation-champ" aria-label="Date et heure du rendez-vous ou du rappel" title="Rendez-vous ou rappel : jamais de prospect sans prochaine date" value={dateRdv} onChange={(e) => setDateRdv(e.target.value)} />
                 <button type="button" className="v2-btn v2-btn--primaire v2-btn--petit" disabled={envoi} onClick={() => noter("RDV pris", "Audit réservé")}>
                   <CalendarCheck width={14} height={14} aria-hidden="true" />
                   RDV pris
