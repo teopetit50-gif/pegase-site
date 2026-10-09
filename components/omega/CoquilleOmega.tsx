@@ -38,7 +38,7 @@ const VIDEOS: [string, string][] = [["general", "Général"], ...FICHES];
 
 /* les cinq pages, dans l'ordre de la portée et de la palette */
 export const PAGES = [
-  { cle: "tableau", href: RACINE, nom: "Tableau opérationnel", libelle: "ce qu'il y a à faire", icone: LayoutGrid },
+  { cle: "tableau", href: RACINE, nom: "Vue d'ensemble", libelle: "le tableau opérationnel", icone: LayoutGrid },
   { cle: "strategie", href: `${RACINE}/strategie`, nom: "Stratégie", libelle: "le pourquoi, Hormozi", icone: Compass },
   { cle: "manuel", href: `${RACINE}/manuel`, nom: "Manuel", libelle: "le parcours en 9 étapes", icone: BookOpen },
   { cle: "vendre", href: `${RACINE}/vendre`, nom: "Vendre", libelle: "méthode et fiches", icone: MessagesSquare },

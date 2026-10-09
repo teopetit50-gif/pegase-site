@@ -73,5 +73,6 @@ export async function proxy(request: NextRequest) {
 export const config = {
   /* 17/09 — /site/* sort du matcher : le tunnel de commande de site est
      supprimé (plus aucun compte ne se crée depuis omegaai.fr). */
-  matcher: ["/installation", "/auth/:path*", "/espace/:path*", "/espace2/:path*"],
+  /* 09/10 — /omega (pilotage interne) : la session y est tenue à jour. */
+  matcher: ["/installation", "/auth/:path*", "/espace/:path*", "/espace2/:path*", "/omega", "/omega/:path*"],
 };
