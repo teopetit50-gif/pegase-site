@@ -23,6 +23,7 @@ import { ArrowUpRight, Building2, CalendarCheck, ChevronsUpDown, LayoutGrid, Pho
 import { createClient } from "@/lib/supabase/client";
 import { ItemMenu, MenuDeroulant, SectionMenu } from "@/components/espace2/ui";
 import { ROLE } from "./Prospects";
+import ScriptAppel from "./ScriptAppel";
 import type { Ligne } from "./Tableaux";
 import type { Prospect, Secteur } from "@/lib/omega/donnees";
 
@@ -137,6 +138,9 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
           <span>
             <strong>{rdv}</strong> RDV
           </span>
+          <span title="Part des appels décrochés qui finissent en rendez-vous">
+            <strong>{decroches ? Math.round((rdv / decroches) * 100) : 0} %</strong> des décrochés
+          </span>
           <span className="v2-gris">aujourd&apos;hui</span>
         </span>
       </div>
@@ -174,10 +178,7 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
               ))}
             </div>
 
-            <blockquote className="om-appel-script">
-              « Bonjour{dirigeant ? ` ${dirigeant.split(" ").slice(-1)[0]}` : ""}, Teo, d&apos;Omega. Je vous appelle parce que je travaille avec des entreprises de votre métier, ici aux Antilles.
-              {moteur ? ` On installe un système qui ${ROLE[moteur] ?? "fait gagner du temps sur l'administratif"}.` : ""} Je ne vous vends rien aujourd&apos;hui : je vous propose un audit gratuit de 30 minutes pour voir ce que ça donnerait chez vous. Vous auriez un créneau cette semaine ? »
-            </blockquote>
+            <ScriptAppel key={p.id} prenom={dirigeant ? dirigeant.split(" ").slice(-1)[0] : ""} moteur={moteur} />
 
             <div className="om-appel-relances" aria-label="Si ça bloque">
               <span className="v2-gris">Question piège : accueillir, associer, puis une question sur sa question.</span>

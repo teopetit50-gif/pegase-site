@@ -411,3 +411,11 @@ button.om-choix[data-focus-visible] { box-shadow: var(--v2-anneau); }
 .om-appel-relances { display: grid; gap: 6px; font-size: 12px; }
 .om-appel-relances ul { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0; padding: 0; }
 .om-appel-relances li { padding: 4px 8px; border-radius: 6px; background: var(--v2-a-100); box-shadow: 0 0 0 1px var(--v2-a-300, var(--v2-a-200)); color: var(--v2-gray-1000); font-size: 12px; }
+/* — le script en quatre temps du mode appels — */
+.om-script { display: grid; gap: 8px; }
+.om-script-etapes { margin: 0; }
+.om-script-etapes .om-onglet { border: 0; background: none; font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; }
+.om-script-etapes .om-onglet[aria-selected="true"] { color: var(--v2-gray-1000); background: var(--v2-a-200, var(--v2-gray-200)); box-shadow: 0 0 0 1px var(--v2-a-400); }
+.om-script-conseil { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin: 0; font-size: 12px; }
+.om-script-suite { border: 0; background: none; padding: 0; color: var(--v2-blue-900, var(--v2-gray-1000)); font: inherit; font-size: 12px; font-weight: 500; cursor: pointer; }
+.om-script-suite:hover { text-decoration: underline; }
