@@ -276,3 +276,7 @@
 .om-journal-texte { display: block; white-space: pre-wrap; margin-top: 2px; }
 .om-nouveau form { display: grid; gap: 8px; padding-bottom: 16px; }
 .om-nouveau .om-actions { padding: 0 16px; }
+
+/* la barre « Rechercher… » : angles de 6 px comme les boutons, au lieu de la pilule (Teo, 09/10) */
+.om .v2-trouver { border-radius: 6px; }
+.om .v2-trouver kbd, .om .v2-trouver .v2-kbd { border-radius: 4px; }
