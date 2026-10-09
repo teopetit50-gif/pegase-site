@@ -16,7 +16,8 @@
      Entreprises      → les ≈ 12 000 établissements à prospecter
      Contacts         → les contacts suivis, les clients installés
      <module>         → la fiche de vente et les vidéos du produit
-     Activité         → la production vidéo, la pub, les preuves
+     Activité         → la production vidéo, les styles de montage des
+                        reels, la pub, les preuves
      Automatisations  → les chantiers des moteurs, l'état des produits
      Utilisation      → les chiffres de la semaine, les finances réelles
      Aide             → la formation vidéo, le manuel ; Réglages → contrats
@@ -83,6 +84,7 @@ export const PAGES_OMEGA: Record<string, DefPage> = {
       { cle: "", libelle: "Production vidéo", tableaux: ["videos"], groupe: "Vidéos" },
       { cle: "calendrier", libelle: "Calendrier vidéo", doc: "videos", groupe: "Vidéos" },
       { cle: "general", libelle: "Vidéos générales", doc: "videos-general", groupe: "Vidéos" },
+      { cle: "styles", libelle: "Styles de montage", doc: "styles-montage", groupe: "Vidéos" },
       { cle: "meta", libelle: "Tableau Meta Ads", special: "meta", groupe: "Publicité" },
       { cle: "campagnes", libelle: "Liste des campagnes", tableaux: ["pubs"], groupe: "Publicité" },
       { cle: "meta-guide", libelle: "Comment marche Meta Ads", doc: "meta-ads", groupe: "Publicité" },
