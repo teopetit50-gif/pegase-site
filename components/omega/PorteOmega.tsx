@@ -1,0 +1,76 @@
+"use client";
+
+/* La porte du pilotage (09/10/2026) : e-mail + mot de passe, dans le
+   style sombre du tableau de bord (le module du site, clair, devenait
+   illisible sur ce fond). Après connexion, on recharge : le layout
+   décide si la personne entre. Pas de création de compte ici. */
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { COCKPIT_URL } from "@/lib/supabase/config";
+import "@/components/espace2/espace2.css";
+import "./omega.css";
+
+export default function PorteOmega({ police }: { police: string }) {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [mdp, setMdp] = useState("");
+  const [erreur, setErreur] = useState("");
+  const [envoi, setEnvoi] = useState(false);
+  useEffect(() => {
+    const html = document.documentElement;
+    html.classList.add(police, "v2-actif");
+    return () => html.classList.remove(police, "v2-actif");
+  }, [police]);
+
+  async function connecter(e: { preventDefault: () => void }) {
+    e.preventDefault();
+    setEnvoi(true);
+    setErreur("");
+    const { error } = await createClient().auth.signInWithPassword({ email: email.trim(), password: mdp });
+    setEnvoi(false);
+    if (error) return setErreur("Adresse ou mot de passe incorrect.");
+    router.refresh();
+  }
+
+  return (
+    <div className="v2 om-porte">
+      <form className="v2-carte om-porte-boite" onSubmit={connecter} noValidate>
+        <span className="om-marque">
+          <span className="v2-marque-omega" aria-hidden="true">
+            {/* eslint-disable-next-line @next/next/no-img-element -- le logo Omega, déjà à sa taille */}
+            <img src="/logo-pegase-blanc.png" alt="" width={20} height={20} />
+          </span>
+          <span className="v2-equipe-nom">Omega</span>
+          <span className="v2-badge">interne</span>
+        </span>
+        <h1 className="om-porte-titre">Pilotage</h1>
+        <p className="v2-gris om-porte-texte">Espace réservé. Connectez-vous avec votre adresse.</p>
+        <label className="om-label" htmlFor="porte-email">
+          Adresse e-mail
+        </label>
+        <span className="v2-champ">
+          <input id="porte-email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        </span>
+        <label className="om-label" htmlFor="porte-mdp">
+          Mot de passe
+        </label>
+        <span className="v2-champ">
+          <input id="porte-mdp" type="password" autoComplete="current-password" value={mdp} onChange={(e) => setMdp(e.target.value)} required />
+        </span>
+        {erreur ? (
+          <p className="om-porte-erreur" role="alert">
+            {erreur}
+          </p>
+        ) : null}
+        <button type="submit" className="v2-btn v2-btn--primaire om-porte-bouton" disabled={envoi || !email || !mdp}>
+          {envoi ? "Connexion…" : "Se connecter"}
+        </button>
+        <a className="om-porte-lien" href={`${COCKPIT_URL}/connexion`}>
+          Mot de passe oublié ?
+        </a>
+      </form>
+    </div>
+  );
+}
