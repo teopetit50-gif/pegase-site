@@ -431,3 +431,8 @@ button.om-choix[data-focus-visible] { box-shadow: var(--v2-anneau); }
   html:not([data-v2-theme="light"]) .v2.om { --v2-bg-100: #000; }
 }
 html[data-v2-theme="dark"] .v2.om { --v2-bg-100: #000; }
+
+/* — le logo suit le thème : blanc en sombre, noir en clair — */
+.om-logo-clair { display: none; }
+html[data-v2-theme="light"] .om-logo-clair { display: block; }
+html[data-v2-theme="light"] .om-logo-sombre { display: none; }

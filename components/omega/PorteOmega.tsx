@@ -65,7 +65,9 @@ export default function PorteOmega({ police }: { police: string }) {
         <span className="om-marque">
           <span className="v2-marque-omega" aria-hidden="true">
             {/* eslint-disable-next-line @next/next/no-img-element -- le logo Omega, déjà à sa taille */}
-            <img src="/logo-pegase-blanc.png" alt="" width={20} height={20} />
+            <img src="/logo-pegase-blanc.png" alt="" width={20} height={20} className="om-logo-sombre" />
+            {/* eslint-disable-next-line @next/next/no-img-element -- la variante noire, pour le thème clair */}
+            <img src="/logo-pegase.png" alt="" width={20} height={20} className="om-logo-clair" />
           </span>
           <span className="v2-equipe-nom">Omega</span>
         </span>

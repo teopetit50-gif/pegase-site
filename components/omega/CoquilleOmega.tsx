@@ -20,13 +20,14 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, ArrowRight, Bell, Building2, Check, CheckCheck, CheckSquare, ChevronDown, ChevronRight, ChevronsUpDown, ClipboardCheck, CornerDownLeft, ExternalLink, Gauge, Inbox, LayoutGrid, GraduationCap, Link2, ListChecks, LogOut, Menu as IconeMenu, MoreHorizontal, NotebookPen, Phone, Search, Settings, Sun, UserPlus, Users, Workflow, X } from "lucide-react";
+import { Activity, ArrowRight, Bell, Building2, Check, CheckCheck, CheckSquare, ChevronDown, ChevronRight, ChevronsUpDown, ClipboardCheck, CornerDownLeft, ExternalLink, Gauge, Inbox, LayoutGrid, GraduationCap, Link2, ListChecks, LogOut, Menu as IconeMenu, Moon, MoreHorizontal, NotebookPen, Phone, Search, Settings, Sun, UserPlus, Users, Workflow, X } from "lucide-react";
 import { MODULES, MODULES_PRINCIPAUX } from "@/components/espace2/modules";
 import { titrePage } from "./pages";
 import { Autocomplete, Button, Dialog, DialogTrigger, Input, Menu, Modal, ModalOverlay, Popover, RouterProvider, TextField, useFilter } from "react-aria-components";
 import { createClient } from "@/lib/supabase/client";
 import { FournisseurToasts, useToast } from "@/components/espace2/Toasts";
 import { ItemMenu, Kbd, MenuDeroulant, SectionMenu, SeparateurMenu } from "@/components/espace2/ui";
+import { CLE_THEME_OMEGA } from "./theme";
 import { ecrireStockage, useStockage } from "@/components/espace2/Collection";
 import "@/components/espace2/espace2.css";
 import "./omega.css";
@@ -230,6 +231,15 @@ type Lien = { libelle: string; href: string; icone: React.ReactNode; exact?: boo
 function BarreLaterale({ email, chemin, ouvrirPalette, fermer }: { email: string; chemin: string; ouvrirPalette: () => void; fermer?: () => void }) {
   const { alertes, semaine, clients, moteurs, decisions } = useTableau();
   const [ouvertes, basculer] = useSections();
+  /* le thème, lu sur <html> (posé par l'amorce du layout) et retenu dans ce navigateur */
+  const [theme, setTheme] = useState<"sombre" | "clair">(() => (typeof document !== "undefined" && document.documentElement.dataset.v2Theme === "light" ? "clair" : "sombre"));
+  const changerTheme = (t: "sombre" | "clair") => {
+    document.documentElement.dataset.v2Theme = t === "clair" ? "light" : "dark";
+    try {
+      localStorage.setItem(CLE_THEME_OMEGA, t);
+    } catch {}
+    setTheme(t);
+  };
   const deconnecter = () => {
     const f = document.createElement("form");
     f.method = "post";
@@ -295,7 +305,9 @@ function BarreLaterale({ email, chemin, ouvrirPalette, fermer }: { email: string
             <>
               <span className="v2-marque-omega" aria-hidden="true">
                 {/* eslint-disable-next-line @next/next/no-img-element -- le logo Omega, déjà à sa taille */}
-                <img src="/logo-pegase-blanc.png" alt="" width={20} height={20} />
+                <img src="/logo-pegase-blanc.png" alt="" width={20} height={20} className="om-logo-sombre" />
+                {/* eslint-disable-next-line @next/next/no-img-element -- la variante noire, pour le thème clair */}
+                <img src="/logo-pegase.png" alt="" width={20} height={20} className="om-logo-clair" />
               </span>
               <span className="v2-equipe-nom">Omega</span>
               <ChevronsUpDown width={14} height={14} aria-hidden="true" className="v2-equipe-chevrons" />
@@ -377,6 +389,15 @@ function BarreLaterale({ email, chemin, ouvrirPalette, fermer }: { email: string
           }
           declencheur={<MoreHorizontal {...I} />}
         >
+          <SectionMenu titre="Apparence">
+            <ItemMenu id="sombre" textValue="Thème sombre" onAction={() => changerTheme("sombre")} icone={<Moon {...I} />} suffixe={coche(theme === "sombre")}>
+              Sombre
+            </ItemMenu>
+            <ItemMenu id="clair" textValue="Thème clair" onAction={() => changerTheme("clair")} icone={<Sun {...I} />} suffixe={coche(theme === "clair")}>
+              Clair
+            </ItemMenu>
+          </SectionMenu>
+          <SeparateurMenu />
           <SectionMenu>
             <ItemMenu id="client" href="/espace2" icone={<ExternalLink {...I} />}>
               Espace client (démonstration)

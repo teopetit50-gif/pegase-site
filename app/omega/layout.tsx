@@ -3,7 +3,7 @@ import { Geist } from "next/font/google";
 import { notFound } from "next/navigation";
 import CoquilleOmega from "@/components/omega/CoquilleOmega";
 import PorteOmega from "@/components/omega/PorteOmega";
-import { AMORCE_THEME } from "@/components/espace2/amorce";
+import { AMORCE_THEME_OMEGA } from "@/components/omega/theme";
 import { utilisateurCourant } from "@/lib/supabase/server";
 import { estAdmin } from "@/lib/omega/donnees";
 
@@ -34,7 +34,7 @@ export default async function LayoutOmega({ children }: { children: React.ReactN
   if (!utilisateur) {
     return (
       <div className={geist.variable}>
-        <script dangerouslySetInnerHTML={{ __html: AMORCE_THEME }} />
+        <script dangerouslySetInnerHTML={{ __html: AMORCE_THEME_OMEGA }} />
         <PorteOmega police={geist.variable} />
       </div>
     );
@@ -42,7 +42,7 @@ export default async function LayoutOmega({ children }: { children: React.ReactN
   if (!admin) notFound();
   return (
     <div className={geist.variable}>
-      <script dangerouslySetInnerHTML={{ __html: AMORCE_THEME }} />
+      <script dangerouslySetInnerHTML={{ __html: AMORCE_THEME_OMEGA }} />
       <CoquilleOmega email={utilisateur.email} police={geist.variable}>
         {children}
       </CoquilleOmega>
