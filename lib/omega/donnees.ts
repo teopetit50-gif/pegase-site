@@ -81,3 +81,32 @@ export async function lireContacts(): Promise<{ contacts: string[]; secteurs: Se
   ]);
   return { contacts: (c ?? []).map((x) => x.maj as string), secteurs: (s ?? []) as Secteur[] };
 }
+
+/* ——— les contacts suivis et leur journal d'échanges (09/10/2026) ——— */
+export type Contact = {
+  id: number;
+  nom: string;
+  entreprise: string | null;
+  role: string | null;
+  type: string;
+  telephone: string | null;
+  courriel: string | null;
+  commune: string | null;
+  secteur: string | null;
+  etape: string;
+  source: string | null;
+  prochaine_action: string | null;
+  prochaine_date: string | null;
+  note: string | null;
+  maj: string;
+};
+export type Echange = { id: number; contact_id: number; quand: string; canal: string; resume: string };
+
+export async function lireContactsSuivis(): Promise<{ contacts: Contact[]; echanges: Echange[] }> {
+  const supabase = await createClient();
+  const [{ data: c }, { data: e }] = await Promise.all([
+    supabase.from("omega_contacts").select("id, nom, entreprise, role, type, telephone, courriel, commune, secteur, etape, source, prochaine_action, prochaine_date, note, maj").order("prochaine_date", { ascending: true, nullsFirst: false }),
+    supabase.from("omega_echanges").select("id, contact_id, quand, canal, resume").order("quand", { ascending: false }).limit(2000),
+  ]);
+  return { contacts: (c ?? []) as Contact[], echanges: (e ?? []) as Echange[] };
+}

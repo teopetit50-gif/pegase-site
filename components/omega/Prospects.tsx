@@ -60,6 +60,14 @@ export default function Prospects({ lignes: initiales, total, page, parPage, sec
     return `/omega/entreprises${s ? `?${s}` : ""}`;
   };
 
+  const [ajoutes, setAjoutes] = useState<number[]>([]);
+  async function versContact(l: Prospect) {
+    const { error } = await createClient().from("omega_contacts").insert({ nom: l.dirigeant?.replace(/\s*\(.*\)$/, "") || l.enseigne || l.entreprise, entreprise: l.enseigne || l.entreprise, role: l.dirigeant?.match(/\((.*)\)/)?.[1] ?? null, type: "Prospect", telephone: l.telephone, courriel: l.courriel, commune: l.commune, secteur: l.secteur, source: "Liste des entreprises", prospect_id: l.id, note: `À vendre : ${l.moteurs.join(", ")}` });
+    if (error) return setEtat("Échec de l'ajout aux contacts.");
+    setAjoutes((a) => [...a, l.id]);
+    setEtat(`${l.enseigne || l.entreprise} ajouté aux contacts`);
+  }
+
   async function maj(id: number, champ: "statut" | "note", valeur: string) {
     setLignes((ls) => ls.map((l) => (l.id === id ? { ...l, [champ]: valeur } : l)));
     const { error } = await createClient().from("omega_prospects").update({ [champ]: valeur, maj: new Date().toISOString() }).eq("id", id);
@@ -224,6 +232,7 @@ export default function Prospects({ lignes: initiales, total, page, parPage, sec
                 <th>Téléphone</th>
                 <th>Statut</th>
                 <th>Note</th>
+                <th aria-label="Contacts" />
               </tr>
             </thead>
             <tbody>
@@ -270,6 +279,17 @@ export default function Prospects({ lignes: initiales, total, page, parPage, sec
                   </td>
                   <td className="om-note-cellule">
                     <Note valeur={l.note ?? ""} onValider={(v) => maj(l.id, "note", v)} />
+                  </td>
+                  <td>
+                    {ajoutes.includes(l.id) ? (
+                      <Link href="/omega/contacts" className="v2-val-bouton">
+                        Dans les contacts
+                      </Link>
+                    ) : (
+                      <button type="button" className="v2-val-bouton" onClick={() => versContact(l)} title="Suivre cette entreprise dans Contacts">
+                        + Contact
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

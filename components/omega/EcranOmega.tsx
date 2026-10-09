@@ -8,13 +8,23 @@ import Tableaux from "./Tableaux";
 import Journee from "./Journee";
 import Prospects from "./Prospects";
 import DemandesOmega from "./DemandesOmega";
+import Contacts from "./Contacts";
 import type { DefPage, OngletPage } from "./pages";
-import { PAR_PAGE, lireContacts, lireLignes, lirePage, lireProspects, type FiltresProspects } from "@/lib/omega/donnees";
+import { PAR_PAGE, lireContacts, lireContactsSuivis, lireLignes, lirePage, lireProspects, type FiltresProspects } from "@/lib/omega/donnees";
 
 export default async function EcranOmega({ page, def, actif, filtres = {} }: { page: string; def: DefPage; actif: OngletPage; filtres?: FiltresProspects }) {
   const base = `/omega/${page}`;
   /* les écrans dupliqués de /espace2 portent leur propre page, sans titre visible (il est dans la barre du haut) */
   if (actif.special === "validations" || actif.special === "point") return <Journee mode={actif.special} lignes={await lireLignes()} />;
+  if (actif.special === "contacts") {
+    const { contacts, echanges } = await lireContactsSuivis();
+    return (
+      <>
+        {def.onglets.length > 1 ? <OngletsHaut page={page} def={def} actif={actif} /> : null}
+        <Contacts contacts={contacts} echanges={echanges} />
+      </>
+    );
+  }
   if (actif.special === "prospects") {
     const r = await lireProspects(filtres);
     return <Prospects lignes={r.lignes} total={r.total} page={r.page} parPage={PAR_PAGE} secteurs={r.secteurs} filtres={filtres} />;
@@ -61,4 +71,18 @@ async function Contenu({ actif, filtres }: { actif: OngletPage; filtres: Filtres
   const lignes = await lireLignes();
   if (actif.special === "validations" || actif.special === "point") return <Journee mode={actif.special} lignes={lignes} />;
   return <Tableaux lignes={lignes} seulement={actif.tableaux} />;
+}
+
+/* les onglets posés au-dessus d'un écran dupliqué de /espace2 (qui porte sa propre page) */
+function OngletsHaut({ page, def, actif }: { page: string; def: DefPage; actif: OngletPage }) {
+  const base = `/omega/${page}`;
+  return (
+    <nav className="om-onglets om-onglets--haut" aria-label={`Sections de ${def.titre}`}>
+      {def.onglets.map((o) => (
+        <Link key={o.cle} href={o.cle ? `${base}/${o.cle}` : base} className="om-onglet" aria-current={o.cle === actif.cle ? "page" : undefined}>
+          {o.libelle}
+        </Link>
+      ))}
+    </nav>
+  );
 }
