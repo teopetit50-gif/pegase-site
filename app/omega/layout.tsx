@@ -27,7 +27,8 @@ export const metadata: Metadata = {
 };
 
 export default async function LayoutOmega({ children }: { children: React.ReactNode }) {
-  const utilisateur = await utilisateurCourant();
+  /* l'identité et le droit sont lus EN MÊME TEMPS (deux allers-retours vers la base, pas l'un après l'autre) */
+  const [utilisateur, admin] = await Promise.all([utilisateurCourant(), estAdmin()]);
   if (!utilisateur) {
     return (
       <div className={geist.variable}>
@@ -36,7 +37,7 @@ export default async function LayoutOmega({ children }: { children: React.ReactN
       </div>
     );
   }
-  if (!(await estAdmin())) notFound();
+  if (!admin) notFound();
   return (
     <div className={geist.variable}>
       <script dangerouslySetInnerHTML={{ __html: AMORCE_THEME }} />

@@ -15,6 +15,10 @@ export default async function EcranOmega({ page, def, actif, filtres = {} }: { p
   const base = `/omega/${page}`;
   /* les écrans dupliqués de /espace2 portent leur propre page, sans titre visible (il est dans la barre du haut) */
   if (actif.special === "validations" || actif.special === "point") return <Journee mode={actif.special} lignes={await lireLignes()} />;
+  if (actif.special === "prospects") {
+    const r = await lireProspects(filtres);
+    return <Prospects lignes={r.lignes} total={r.total} page={r.page} parPage={PAR_PAGE} secteurs={r.secteurs} filtres={filtres} />;
+  }
   if (actif.special === "demandes") {
     const [lignes, { contacts, secteurs }] = await Promise.all([lireLignes(), lireContacts()]);
     return (

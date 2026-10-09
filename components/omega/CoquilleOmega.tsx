@@ -52,7 +52,13 @@ function echeance(texte: string | undefined): number | null {
 
 function useTableau() {
   const [{ lignes, maintenant }, setEtat] = useState<{ lignes: LigneBrute[]; maintenant: number }>({ lignes: [], maintenant: 0 });
-  const chemin = usePathname();
+  /* lu une fois à l'ouverture, puis quand la fenêtre revient au premier plan — pas à chaque page */
+  const [tour, setTour] = useState(0);
+  useEffect(() => {
+    const revenir = () => document.visibilityState === "visible" && setTour((t) => t + 1);
+    document.addEventListener("visibilitychange", revenir);
+    return () => document.removeEventListener("visibilitychange", revenir);
+  }, []);
   useEffect(() => {
     let actif = true;
     createClient()
@@ -64,7 +70,7 @@ function useTableau() {
     return () => {
       actif = false;
     };
-  }, [chemin]);
+  }, [tour]);
   const taches = lignes.filter((l) => (l.tableau === "plan" || l.tableau === "ajouts") && l.donnees["Statut"] !== "Fait");
   const enRetard = taches.filter((l) => (echeance(l.donnees["Échéance"]) ?? Infinity) < maintenant);
   const semaine = taches.filter((l) => (echeance(l.donnees["Échéance"]) ?? Infinity) < maintenant + 7 * 864e5);
