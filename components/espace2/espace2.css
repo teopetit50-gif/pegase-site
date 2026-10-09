@@ -2855,7 +2855,7 @@ html.v2-calme *::after {
 
 /* ══ Le liseré lumineux (08/10/2026) — demande de Teo : « une ligne
    derrière, en dégradé, effet LED, le même bleu, léger » ══════════════
-   Un filet de 1 px tracé par un dégradé conique : un arc bleu qui fait
+   Un filet de 0,5 px (affiné le 08/10) tracé par un dégradé conique : un arc bleu qui fait
    lentement le tour de la carte, le reste transparent (le filet gris de
    la carte reste visible dessous). Fixe si l'on réduit les animations. */
 @property --v2-led { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
@@ -2870,17 +2870,17 @@ html.v2-calme *::after {
   position: absolute;
   inset: 0;
   z-index: 1;
-  padding: 1px;
+  padding: 0.5px;
   border-radius: inherit;
   pointer-events: none;
   background: conic-gradient(
     from var(--v2-led),
     transparent 0deg,
-    color-mix(in srgb, var(--v2-blue-700) 70%, transparent) 40deg,
-    color-mix(in srgb, var(--v2-blue-700) 15%, transparent) 110deg,
+    color-mix(in srgb, var(--v2-blue-700) 90%, white 10%) 40deg,
+    color-mix(in srgb, var(--v2-blue-700) 22%, transparent) 110deg,
     transparent 160deg,
     transparent 200deg,
-    color-mix(in srgb, var(--v2-blue-700) 35%, transparent) 250deg,
+    color-mix(in srgb, var(--v2-blue-700) 45%, transparent) 250deg,
     transparent 320deg
   );
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
@@ -2893,7 +2893,7 @@ html.v2-calme *::after {
 .v2-vivant :nth-child(2n) > .v2-carte::before, .v2-vivant .v2-carte:nth-child(2n)::before, .v2-vivant .v2-dr-carte:nth-child(2n)::before { animation-delay: -3s; }
 .v2-vivant .v2-carte:nth-child(3n)::before, .v2-vivant .v2-dr-carte:nth-child(3n)::before { animation-delay: -6s; }
 /* et une lueur très douce, à peine visible, sous la carte */
-.v2-vivant .v2-carte, .v2-vivant .v2-dr-carte, .v2-vivant .v2-va-kpis { box-shadow: 0 0 0 1px var(--v2-a-400), 0 0 28px -14px color-mix(in srgb, var(--v2-blue-700) 45%, transparent); }
-.v2-vivant .v2-carte:hover, .v2-vivant .v2-dr-carte:hover { box-shadow: 0 0 0 1px var(--v2-a-500, var(--v2-gray-700)), 0 0 32px -10px color-mix(in srgb, var(--v2-blue-700) 55%, transparent); }
+.v2-vivant .v2-carte, .v2-vivant .v2-dr-carte, .v2-vivant .v2-va-kpis { box-shadow: 0 0 0 1px var(--v2-a-400), 0 0 28px -14px color-mix(in srgb, var(--v2-blue-700) 55%, transparent); }
+.v2-vivant .v2-carte:hover, .v2-vivant .v2-dr-carte:hover { box-shadow: 0 0 0 1px var(--v2-a-500, var(--v2-gray-700)), 0 0 32px -10px color-mix(in srgb, var(--v2-blue-700) 65%, transparent); }
 @media (prefers-reduced-motion: reduce) { .v2-vivant .v2-carte::before, .v2-vivant .v2-dr-carte::before, .v2-vivant .v2-va-kpis::before { animation: none; --v2-led: 220deg; } }
 html.v2-calme .v2-vivant .v2-carte::before, html.v2-calme .v2-vivant .v2-dr-carte::before, html.v2-calme .v2-vivant .v2-va-kpis::before { animation: none; --v2-led: 220deg; }
