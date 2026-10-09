@@ -260,52 +260,59 @@ function heureCourte(iso: string): string {
   return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
 }
 
-/* la courbe en aire de la vue d'ensemble de /espace2, en nombre de tâches */
+/* l'avancement en barres, un jour = une barre (09/10/2026, retour de Teo :
+   la courbe lissée de /espace2 se brisait et étirait un seul pic sur des
+   données clairsemées). En tête : le total, la moyenne, le meilleur jour. */
 function Courbe({ valeurs, debut }: { valeurs: number[]; debut: number }) {
-  const L = 600,
-    H = 200,
-    n = valeurs.length;
-  const max = Math.max(4, ...valeurs);
-  const pts = valeurs.map((v, i) => [(i / Math.max(1, n - 1)) * L, H - (v / max) * H] as const);
-  let ligne = `M${pts[0][0]},${pts[0][1]}`;
-  for (let i = 0; i < pts.length - 1; i++) {
-    const p0 = pts[i - 1] ?? pts[i],
-      p1 = pts[i],
-      p2 = pts[i + 1],
-      p3 = pts[i + 2] ?? p2;
-    const c1y = Math.min(H, p1[1] + (p2[1] - p0[1]) / 6),
-      c2y = Math.min(H, p2[1] - (p3[1] - p1[1]) / 6);
-    ligne += ` C${p1[0] + (p2[0] - p0[0]) / 6},${c1y} ${p2[0] - (p3[0] - p1[0]) / 6},${c2y} ${p2[0]},${p2[1]}`;
-  }
-  const reperes = [0, 0.25, 0.5, 0.75, 1].map((p) => {
-    const i = Math.round(p * (n - 1));
-    return { x: p * 100, texte: new Date(debut + i * JOUR).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) };
-  });
+  const n = valeurs.length;
+  const total = valeurs.reduce((a, b) => a + b, 0);
+  const max = Math.max(1, ...valeurs);
+  const haut = Math.max(4, Math.ceil(max / 2) * 2);
+  const record = valeurs.indexOf(max);
+  const date = (i: number, mois: "short" | "long" = "short") => new Date(debut + i * JOUR).toLocaleDateString("fr-FR", { day: "numeric", month: mois });
+  const actifs = valeurs.filter((v) => v > 0).length;
+  const reperes = [0, Math.round((n - 1) / 3), Math.round((2 * (n - 1)) / 3), n - 1];
   return (
-    <figure className="v2-va-courbe">
-      <div className="v2-va-axe-y" aria-hidden="true">
-        {[1, 0.75, 0.5, 0.25, 0].map((p) => (
-          <span key={p}>{Math.round(max * p)}</span>
-        ))}
+    <figure className="om-barres" aria-label={`${total} tâches faites sur ${n} jours`}>
+      <div className="om-barres-resume">
+        <span>
+          <strong>{total}</strong> faites
+        </span>
+        <span>
+          <strong>{(total / n).toLocaleString("fr-FR", { maximumFractionDigits: 1 })}</strong> par jour
+        </span>
+        <span>
+          <strong>{actifs}</strong> jour{actifs > 1 ? "s" : ""} actif{actifs > 1 ? "s" : ""}
+        </span>
+        {total ? (
+          <span className="v2-gris">
+            meilleur jour : {max} le {date(record, "long")}
+          </span>
+        ) : null}
       </div>
-      <div style={{ minWidth: 0 }}>
-        <svg viewBox={`0 0 ${L} ${H}`} preserveAspectRatio="none" style={{ width: "100%", height: 200, display: "block", overflow: "visible" }} role="img" aria-label={`Tâches faites par jour, aujourd'hui : ${valeurs[n - 1] ?? 0}`}>
-          <defs>
-            <linearGradient id="om-va-degrade" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="var(--v2-blue-700)" stopOpacity="0.4" />
-              <stop offset="1" stopColor="var(--v2-blue-700)" stopOpacity="0.02" />
-            </linearGradient>
-          </defs>
-          {[0, 0.25, 0.5, 0.75, 1].map((p) => (
-            <line key={p} x1="0" x2={L} y1={H * p} y2={H * p} stroke="var(--v2-a-300, var(--v2-a-400))" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+      <div className="om-barres-cadre">
+        <div className="om-barres-axe-y" aria-hidden="true">
+          {[1, 0.5, 0].map((p) => (
+            <span key={p}>{Math.round(haut * p)}</span>
           ))}
-          <path d={`${ligne} L${L},${H} L0,${H} Z`} fill="url(#om-va-degrade)" />
-          <path d={ligne} pathLength={1} className="v2-trace" fill="none" stroke="var(--v2-blue-700)" strokeWidth="2" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
-        </svg>
-        <div className="v2-va-axe">
-          {reperes.map((r) => (
-            <span key={r.x} style={{ left: `${r.x}%` }}>
-              {r.texte}
+        </div>
+        <div className="om-barres-zone">
+          {[0, 0.5, 1].map((p) => (
+            <span key={p} className="om-barres-grille" style={{ bottom: `${p * 100}%` }} aria-hidden="true" />
+          ))}
+          <ol className="om-barres-jours" style={{ gap: n > 60 ? 2 : n > 20 ? 4 : 8 }}>
+            {valeurs.map((v, i) => (
+              <li key={i} title={`${date(i, "long")} : ${v} tâche${v > 1 ? "s" : ""}`} data-vide={v ? undefined : ""} data-aujourdhui={i === n - 1 ? "" : undefined}>
+                <span style={{ height: v ? `${(v / haut) * 100}%` : undefined }} />
+              </li>
+            ))}
+          </ol>
+        </div>
+        <span />
+        <div className="om-barres-axe" aria-hidden="true">
+          {reperes.map((i) => (
+            <span key={i} style={{ left: `${((i + 0.5) / n) * 100}%` }}>
+              {i === n - 1 ? "Aujourd'hui" : date(i)}
             </span>
           ))}
         </div>

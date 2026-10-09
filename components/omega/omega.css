@@ -436,3 +436,29 @@ html[data-v2-theme="dark"] .v2.om { --v2-bg-100: #000; }
 .om-logo-clair { display: none; }
 html[data-v2-theme="light"] .om-logo-clair { display: block; }
 html[data-v2-theme="light"] .om-logo-sombre { display: none; }
+
+/* — l'avancement en barres (vue d'ensemble) — */
+.om-barres { margin: 0; display: grid; gap: 16px; }
+.om-barres-resume { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 20px; font-size: 13px; color: var(--v2-gray-900); }
+.om-barres-resume strong { margin-right: 4px; font-size: 20px; font-weight: 600; color: var(--v2-gray-1000); font-variant-numeric: tabular-nums; }
+.om-barres-cadre { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 10px; row-gap: 8px; }
+.om-barres-axe-y { display: flex; flex-direction: column; justify-content: space-between; height: 180px; font-size: 11px; color: var(--v2-gray-700); font-variant-numeric: tabular-nums; text-align: right; transform: translateY(-6px); }
+.om-barres-zone { position: relative; height: 180px; }
+.om-barres-grille { position: absolute; left: 0; right: 0; height: 1px; background: var(--v2-a-200, var(--v2-a-300)); }
+.om-barres-jours { position: absolute; inset: 0; display: flex; align-items: flex-end; margin: 0; padding: 0; list-style: none; }
+.om-barres-jours li { flex: 1; display: flex; align-items: flex-end; height: 100%; min-width: 0; cursor: default; }
+.om-barres-jours li > span { width: 100%; max-width: 28px; margin: 0 auto; min-height: 3px; border-radius: 4px 4px 1px 1px; background: var(--v2-blue-700); transition: background 0.15s, opacity 0.15s; }
+.om-barres-jours li[data-vide] > span { height: 3px; border-radius: 2px; background: var(--v2-a-300, var(--v2-a-400)); }
+.om-barres-jours:hover li > span { opacity: 0.45; }
+.om-barres-jours li:hover > span { opacity: 1; background: var(--v2-blue-900, var(--v2-blue-700)); }
+.om-barres-jours li[data-vide]:hover > span { background: var(--v2-a-600, var(--v2-gray-700)); }
+.om-barres-axe { position: relative; height: 16px; font-size: 11px; color: var(--v2-gray-700); }
+.om-barres-axe span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
+.om-barres-axe span:first-child { transform: none; left: 0 !important; }
+.om-barres-axe span:last-child { transform: none; left: auto !important; right: 0; }
+
+/* — pas de liseré lumineux qui tourne autour des cartes (retour de Teo, 09/10) :
+   l'effet « LED » de /espace2 reste là-bas ; ici, le filet gris seul — */
+.v2.om .v2-carte::before,
+.v2.om .v2-dr-carte::before,
+.v2.om .v2-va-kpis::before { content: none; animation: none; }
