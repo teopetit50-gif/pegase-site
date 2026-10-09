@@ -58,13 +58,7 @@ export const PAGES_OMEGA: Record<string, DefPage> = {
     ],
   },
   entreprises: { titre: "Entreprises", onglets: [{ cle: "", libelle: "Prospection", special: "prospects" }] },
-  contacts: {
-    titre: "Contacts",
-    onglets: [
-      { cle: "", libelle: "Mes contacts", special: "contacts" },
-      { cle: "partenaires", libelle: "Programme partenaires", doc: "partenaires" },
-    ],
-  },
+  contacts: { titre: "Contacts", onglets: [{ cle: "", libelle: "Mes contacts", special: "contacts" }] },
   activite: {
     titre: "Activité",
     onglets: [
