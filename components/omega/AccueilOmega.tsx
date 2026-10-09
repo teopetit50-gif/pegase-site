@@ -36,6 +36,7 @@ function echeance(texte: string | undefined): number | null {
 export default function AccueilOmega({ lignes: initiales }: { lignes: Ligne[] }) {
   const [lignes, setLignes] = useState(initiales);
   const [periode, setPeriode] = useState(30);
+  const [exemple, setExemple] = useState(false);
   const [maintenant] = useState(() => Date.now());
 
   async function faire(l: Ligne) {
@@ -114,9 +115,15 @@ export default function AccueilOmega({ lignes: initiales }: { lignes: Ligne[] })
                 <h2 className="v2-h2">Avancement</h2>
                 <p className="v2-gris v2-va-sous">Tâches passées à « Fait », jour par jour</p>
               </div>
-              <Choix classe="v2-va-periode" etiquette="Période" valeur={String(periode)} onChange={(v) => setPeriode(Number(v))} options={[{ cle: "7", libelle: "7 derniers jours" }, { cle: "30", libelle: "30 derniers jours" }, { cle: "90", libelle: "90 derniers jours" }]} />
+              <span className="om-barres-actions">
+                <button type="button" className="v2-val-bouton" data-actif={exemple ? "" : undefined} aria-pressed={exemple} onClick={() => setExemple((x) => !x)}>
+                  {exemple ? "Revenir aux vrais chiffres" : "Voir un exemple"}
+                </button>
+                <Choix classe="v2-va-periode" etiquette="Période" valeur={String(periode)} onChange={(v) => setPeriode(Number(v))} options={[{ cle: "7", libelle: "7 derniers jours" }, { cle: "30", libelle: "30 derniers jours" }, { cle: "90", libelle: "90 derniers jours" }]} />
+              </span>
             </div>
-            <Courbe valeurs={c.courbe} debut={c.debut} />
+            {exemple ? <p className="om-barres-exemple">Exemple : des chiffres inventés pour voir le rendu, rien n&apos;est enregistré.</p> : null}
+            <Courbe valeurs={exemple ? valeursExemple(periode) : c.courbe} debut={c.debut} />
           </section>
 
           <section className="v2-carte v2-carte-corps">
@@ -258,6 +265,17 @@ function heureCourte(iso: string): string {
   j.setDate(j.getDate() - 1);
   if (d.toDateString() === j.toDateString()) return `Hier ${h}`;
   return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+}
+
+/* des valeurs de démonstration (bouton « Voir un exemple ») : une montée en
+   régime réaliste, creux le week-end, toujours les mêmes d'un affichage à l'autre */
+function valeursExemple(n: number) {
+  return Array.from({ length: n }, (_, i) => {
+    const t = i / Math.max(1, n - 1);
+    const bruit = ((i * 7919) % 13) / 13;
+    const weekEnd = (i + 2) % 7 >= 5;
+    return Math.max(0, Math.round((1 + t * 4) * (weekEnd ? 0.3 : 1) + (bruit - 0.45) * 2.4));
+  });
 }
 
 /* l'avancement en barres, un jour = une barre (09/10/2026, retour de Teo :
