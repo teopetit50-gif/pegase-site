@@ -68,7 +68,6 @@ export default function PorteOmega({ police }: { police: string }) {
             <img src="/logo-pegase-blanc.png" alt="" width={20} height={20} />
           </span>
           <span className="v2-equipe-nom">Omega</span>
-          <span className="v2-badge">pilotage</span>
         </span>
         <h1 className="om-porte-titre">Pilotage</h1>
         <p className="v2-gris om-porte-texte">{mode === "code" ? info : "Espace réservé. Connectez-vous avec votre adresse."}</p>

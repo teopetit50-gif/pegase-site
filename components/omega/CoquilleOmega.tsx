@@ -298,7 +298,6 @@ function BarreLaterale({ email, chemin, ouvrirPalette, fermer }: { email: string
                 <img src="/logo-pegase-blanc.png" alt="" width={20} height={20} />
               </span>
               <span className="v2-equipe-nom">Omega</span>
-              <span className="v2-badge">pilotage</span>
               <ChevronsUpDown width={14} height={14} aria-hidden="true" className="v2-equipe-chevrons" />
             </>
           }
