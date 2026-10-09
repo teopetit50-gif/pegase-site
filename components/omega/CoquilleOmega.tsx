@@ -91,8 +91,8 @@ export default function CoquilleOmega({ email, police, children }: { email: stri
   const router = useRouter();
   useEffect(() => {
     const html = document.documentElement;
-    html.classList.add(police, "v2-actif");
-    return () => html.classList.remove(police, "v2-actif");
+    html.classList.add(police, "v2-actif", "om-actif");
+    return () => html.classList.remove(police, "v2-actif", "om-actif");
   }, [police]);
   return (
     <div className="v2 om" data-lenis-prevent="">

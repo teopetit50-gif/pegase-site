@@ -588,3 +588,43 @@ html[data-v2-theme="light"] .om-logo-sombre { display: none; }
 /* les cartes de chiffres de la vue d'ensemble : libellé 13 px gris, chiffre en 600 */
 .v2.om .v2-va-kpi-libelle { font-size: 13px; color: var(--v2-gray-900); }
 .v2.om .v2-va-kpi-valeur, .v2.om .v2-va-kpi strong { font-weight: 600; }
+
+/* ══ Finition relevée sur le tableau de bord Vercel lui-même (09/10/2026) ══
+   Mesures prises sur vercel.com (connecté) : texte 14 px, graisse 500 pour
+   la navigation, les titres de carte et les libellés ; lettres resserrées
+   de 0,02 em ; rendu « optimizeLegibility » ; jeux OpenType "calt" 0,
+   "rlig", "ss11" ; liens de navigation de 36 px, 6 px de rayon, gris au
+   repos, blancs au survol et sur la page ouverte ; cartes : filet de 1 px
+   et ombre de 2 px. Les menus flottants (hors de .om) suivent via
+   html.om-actif. */
+.v2.om, html.om-actif .v2-jetons {
+  font-feature-settings: "calt" 0, "rlig", "ss11";
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.v2.om { --v2-mono: var(--om-mono); }
+
+/* la navigation latérale */
+.v2.om .v2-lien { height: 36px; border-radius: 6px; font-weight: 500; letter-spacing: -0.02em; color: var(--v2-gray-900); }
+.v2.om .v2-lien:hover { color: var(--v2-gray-1000); }
+.v2.om .v2-lien[aria-current="page"], .v2.om .v2-lien[data-dedans] { color: var(--v2-gray-1000); }
+.v2.om .v2-lien svg { color: currentColor; opacity: 0.85; }
+.v2.om .v2-section-titre { font-size: 12px; font-weight: 500; letter-spacing: 0; color: var(--v2-gray-700); }
+.v2.om .v2-trouver { height: 32px; font-weight: 400; }
+
+/* la barre du haut */
+.v2.om .v2-haut-titre { font-weight: 500; letter-spacing: -0.02em; }
+.v2.om .v2-portee, .v2.om .v2-btn, .v2.om .v2-val-bouton { font-weight: 500; letter-spacing: -0.01em; }
+
+/* les libellés, titres de ligne et de carte : 500, comme chez eux */
+.v2.om :is(.v2-val-titre, .v2-dr-titre-ligne, .om-formation-texte > span, .om-colonne-titre, .om-mesure-libelle, .om-graph-pastille, .om-carte-titre, .v2-va-tache-titre, .v2-pm-titre) { font-weight: 500; letter-spacing: -0.01em; }
+.v2.om :is(.v2-gris, .v2-va-sous, .om-score-texte) { color: var(--v2-gray-900); }
+
+/* les cartes : filet + ombre de 2 px (Geist « material-small ») */
+.v2.om .v2-carte, .v2.om .v2-dr-carte, .v2.om .v2-va-kpis { box-shadow: 0 0 0 1px var(--v2-a-400), 0 2px 2px rgba(0, 0, 0, 0.04); }
+html[data-v2-theme="dark"] .v2.om :is(.v2-carte, .v2-dr-carte, .v2-va-kpis) { box-shadow: 0 0 0 1px var(--v2-a-400), 0 2px 2px rgba(0, 0, 0, 0.32); }
+
+/* les menus flottants du pilotage : 12 px de rayon (Geist « material-menu ») */
+html.om-actif .v2-popover { border-radius: 12px; }
+html.om-actif .v2-menu-item { border-radius: 6px; font-weight: 400; }
