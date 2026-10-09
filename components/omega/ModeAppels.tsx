@@ -30,6 +30,9 @@ const I = { width: 16, height: 16, strokeWidth: 1.6, "aria-hidden": true } as co
 const jour = (d: Date) => d.toISOString().slice(0, 10);
 const nomModule = (m: string) => m.toUpperCase();
 
+/* les questions qui ramènent au vrai blocage (Hormozi, « les 3A », Méthode de vente) */
+const RELANCES = ["« Ah ? » … et 2 secondes de silence", "« Qu'est-ce qui vous fait poser cette question ? »", "« Qu'est-ce qui vous inquiète le plus ? »", "« Qu'est-ce qu'il faudrait pour que ce soit un oui ? »", "« Vous comparez à quoi ? »"];
+
 type Issue = { cle: string; libelle: string; statut: string; icone: React.ReactNode };
 const ISSUES: Issue[] = [
   { cle: "Pas de réponse", libelle: "Pas de réponse", statut: "Rappeler", icone: <PhoneMissed {...I} /> },
@@ -175,6 +178,15 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
               « Bonjour{dirigeant ? ` ${dirigeant.split(" ").slice(-1)[0]}` : ""}, Teo, d&apos;Omega. Je vous appelle parce que je travaille avec des entreprises de votre métier, ici aux Antilles.
               {moteur ? ` On installe un système qui ${ROLE[moteur] ?? "fait gagner du temps sur l'administratif"}.` : ""} Je ne vous vends rien aujourd&apos;hui : je vous propose un audit gratuit de 30 minutes pour voir ce que ça donnerait chez vous. Vous auriez un créneau cette semaine ? »
             </blockquote>
+
+            <div className="om-appel-relances" aria-label="Si ça bloque">
+              <span className="v2-gris">Question piège : accueillir, associer, puis une question sur sa question.</span>
+              <ul>
+                {RELANCES.map((q) => (
+                  <li key={q}>{q}</li>
+                ))}
+              </ul>
+            </div>
 
             <textarea className="om-formation-champ om-appel-note" rows={2} placeholder="Ce qu'il a dit, ce qui l'intéresse, quand rappeler…" aria-label="Note de l'appel" value={note} onChange={(e) => setNote(e.target.value)} />
 
