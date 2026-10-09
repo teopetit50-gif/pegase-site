@@ -2795,7 +2795,7 @@ html.v2-calme *::after {
 .v2-vivant { background-image: radial-gradient(ellipse 70% 260px at 50% -40px, color-mix(in srgb, var(--v2-gray-1000) 5%, transparent), transparent 70%); background-repeat: no-repeat; }
 /* les cartes arrivent l'une après l'autre */
 @keyframes v2-arrive { from { opacity: 0; transform: translateY(6px); } }
-.v2-vivant .v2-carte, .v2-vivant .v2-dr-carte, .v2-vivant .v2-va-kpis { animation: v2-arrive 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.v2-vivant .v2-carte, .v2-vivant .v2-dr-carte, .v2-vivant .v2-va-kpis { animation: v2-arrive 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
 .v2-vivant .v2-va-grille .v2-carte:nth-child(2), .v2-vivant .v2-val-col .v2-carte:nth-child(2), .v2-vivant .v2-pm-grille > :nth-child(2), .v2-vivant .v2-dr-trois > :nth-child(2) { animation-delay: 60ms; }
 .v2-vivant .v2-val-col .v2-carte:nth-child(3), .v2-vivant .v2-pm-grille > :nth-child(3), .v2-vivant .v2-dr-trois > :nth-child(3) { animation-delay: 120ms; }
 .v2-vivant .v2-pm-grille > :nth-child(4), .v2-vivant .v2-val-col .v2-carte:nth-child(4), .v2-vivant .v2-dr-principale > :nth-child(1) { animation-delay: 180ms; }
@@ -2862,7 +2862,7 @@ html.v2-calme *::after {
 @keyframes v2-led { to { --v2-led: 360deg; } }
 .v2-vivant .v2-carte,
 .v2-vivant .v2-dr-carte,
-.v2-vivant .v2-va-kpis { position: relative; isolation: isolate; }
+.v2-vivant .v2-va-kpis { position: relative; }
 .v2-vivant .v2-carte::before,
 .v2-vivant .v2-dr-carte::before,
 .v2-vivant .v2-va-kpis::before {
@@ -2876,12 +2876,12 @@ html.v2-calme *::after {
   background: conic-gradient(
     from var(--v2-led),
     transparent 0deg,
-    color-mix(in srgb, var(--v2-blue-700) 18%, transparent) 20deg,
-    color-mix(in srgb, var(--v2-blue-700) 55%, transparent) 55deg,
-    color-mix(in srgb, var(--v2-blue-700) 18%, transparent) 100deg,
+    color-mix(in srgb, var(--v2-blue-700) 12%, transparent) 20deg,
+    color-mix(in srgb, var(--v2-blue-700) 38%, transparent) 55deg,
+    color-mix(in srgb, var(--v2-blue-700) 12%, transparent) 100deg,
     transparent 150deg,
     transparent 210deg,
-    color-mix(in srgb, var(--v2-blue-700) 22%, transparent) 255deg,
+    color-mix(in srgb, var(--v2-blue-700) 15%, transparent) 255deg,
     transparent 310deg
   );
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
@@ -2894,8 +2894,8 @@ html.v2-calme *::after {
 .v2-vivant :nth-child(2n) > .v2-carte::before, .v2-vivant .v2-carte:nth-child(2n)::before, .v2-vivant .v2-dr-carte:nth-child(2n)::before { animation-delay: -3s; }
 .v2-vivant .v2-carte:nth-child(3n)::before, .v2-vivant .v2-dr-carte:nth-child(3n)::before { animation-delay: -6s; }
 /* et une lueur très douce, à peine visible, sous la carte */
-.v2-vivant .v2-carte, .v2-vivant .v2-dr-carte, .v2-vivant .v2-va-kpis { box-shadow: 0 0 0 1px var(--v2-a-400), 0 0 28px -14px color-mix(in srgb, var(--v2-blue-700) 55%, transparent); }
-.v2-vivant .v2-carte:hover, .v2-vivant .v2-dr-carte:hover { box-shadow: 0 0 0 1px var(--v2-a-500, var(--v2-gray-700)), 0 0 32px -10px color-mix(in srgb, var(--v2-blue-700) 65%, transparent); }
+.v2-vivant .v2-carte, .v2-vivant .v2-dr-carte, .v2-vivant .v2-va-kpis { box-shadow: 0 0 0 1px var(--v2-a-400), 0 0 8px -4px color-mix(in srgb, var(--v2-blue-700) 45%, transparent); }
+.v2-vivant .v2-carte:hover, .v2-vivant .v2-dr-carte:hover { box-shadow: 0 0 0 1px var(--v2-a-500, var(--v2-gray-700)), 0 0 10px -4px color-mix(in srgb, var(--v2-blue-700) 55%, transparent); }
 @media (prefers-reduced-motion: reduce) { .v2-vivant .v2-carte::before, .v2-vivant .v2-dr-carte::before, .v2-vivant .v2-va-kpis::before { animation: none; --v2-led: 220deg; } }
 html.v2-calme .v2-vivant .v2-carte::before, html.v2-calme .v2-vivant .v2-dr-carte::before, html.v2-calme .v2-vivant .v2-va-kpis::before { animation: none; --v2-led: 220deg; }
 
@@ -2907,19 +2907,15 @@ html.v2-calme .v2-vivant .v2-carte::before, html.v2-calme .v2-vivant .v2-dr-cart
 .v2-vivant .v2-va-kpis::after {
   content: "";
   position: absolute;
-  inset: -10px;
-  z-index: 0;
-  padding: 10px;
-  border-radius: 16px;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
   pointer-events: none;
   background: conic-gradient(from var(--v2-led), transparent 0deg, color-mix(in srgb, var(--v2-blue-700) 60%, transparent) 55deg, transparent 140deg, transparent 220deg, color-mix(in srgb, var(--v2-blue-700) 25%, transparent) 255deg, transparent 320deg);
-  filter: blur(7px);
-  /* seul l'anneau hors de la carte se voit : l'intérieur reste net */
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  opacity: 0.45;
+  /* derrière la carte, même arrondi : la lueur déborde autant aux angles
+     qu'aux bords, l'intérieur reste couvert par le fond de la carte */
+  filter: blur(3px);
+  opacity: 0.4;
   animation: v2-led 9s linear infinite;
   animation-delay: inherit;
 }
