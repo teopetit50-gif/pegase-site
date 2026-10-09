@@ -71,3 +71,13 @@ export async function lireProspects(f: FiltresProspects) {
   const { data: secteurs } = await supabase.from("omega_prospects_secteurs").select("secteur, moteurs, total, avec_tel, contactes").order("total", { ascending: false });
   return { lignes: (data ?? []) as Prospect[], total: count ?? 0, page, secteurs: (secteurs ?? []) as Secteur[] };
 }
+
+/* l'activité d'appel sur la liste : la date de chaque prospect dont le statut a bougé */
+export async function lireContacts(): Promise<{ contacts: string[]; secteurs: Secteur[] }> {
+  const supabase = await createClient();
+  const [{ data: c }, { data: s }] = await Promise.all([
+    supabase.from("omega_prospects").select("maj").neq("statut", "À contacter").order("maj", { ascending: false }).limit(5000),
+    supabase.from("omega_prospects_secteurs").select("secteur, moteurs, total, avec_tel, contactes").order("total", { ascending: false }),
+  ]);
+  return { contacts: (c ?? []).map((x) => x.maj as string), secteurs: (s ?? []) as Secteur[] };
+}

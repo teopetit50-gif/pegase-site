@@ -7,11 +7,25 @@ import Document from "./Document";
 import Tableaux from "./Tableaux";
 import Journee from "./Journee";
 import Prospects from "./Prospects";
+import DemandesOmega from "./DemandesOmega";
 import type { DefPage, OngletPage } from "./pages";
-import { PAR_PAGE, lireLignes, lirePage, lireProspects, type FiltresProspects } from "@/lib/omega/donnees";
+import { PAR_PAGE, lireContacts, lireLignes, lirePage, lireProspects, type FiltresProspects } from "@/lib/omega/donnees";
 
 export default async function EcranOmega({ page, def, actif, filtres = {} }: { page: string; def: DefPage; actif: OngletPage; filtres?: FiltresProspects }) {
   const base = `/omega/${page}`;
+  /* les écrans dupliqués de /espace2 portent leur propre page, sans titre visible (il est dans la barre du haut) */
+  if (actif.special === "validations" || actif.special === "point") return <Journee mode={actif.special} lignes={await lireLignes()} />;
+  if (actif.special === "demandes") {
+    const [lignes, { contacts, secteurs }] = await Promise.all([lireLignes(), lireContacts()]);
+    return (
+      <div className="v2-page v2-arrivee">
+        <DemandesOmega lignes={lignes} secteurs={secteurs} contacts={contacts} />
+        <div id="ecran" className="om-ecran-liste">
+          <Tableaux lignes={lignes} seulement={["clients"]} />
+        </div>
+      </div>
+    );
+  }
   return (
     <div className={`v2-page om-page${actif.tableaux || actif.special ? " om-page--large" : ""}`}>
       <div className="v2-tete">

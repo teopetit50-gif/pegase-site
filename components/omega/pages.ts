@@ -25,7 +25,7 @@
    plusieurs tableaux (omega_lignes), soit un écran à part (« special »).
    ══════════════════════════════════════════════════════════════════════ */
 
-export type OngletPage = { cle: string; libelle: string; doc?: string; tableaux?: string[]; special?: "validations" | "point" | "prospects" };
+export type OngletPage = { cle: string; libelle: string; doc?: string; tableaux?: string[]; special?: "validations" | "point" | "prospects" | "demandes" };
 export type DefPage = { titre: string; onglets: OngletPage[] };
 
 const NOMS_MODULES: Record<string, string> = { filed: "FILED", cashd: "CASHD", reput: "REPUT", offload: "OFFLOAD", daliro: "DALIRO", tavaro: "TAVARO", lorani: "LORANI", tamila: "TAMILA", tiroma: "TIROMA", varelo: "VARELO" };
@@ -33,7 +33,7 @@ const NOMS_MODULES: Record<string, string> = { filed: "FILED", cashd: "CASHD", r
 export const PAGES_OMEGA: Record<string, DefPage> = {
   validations: { titre: "À valider", onglets: [{ cle: "", libelle: "Décisions", special: "validations" }] },
   point: { titre: "Point du matin", onglets: [{ cle: "", libelle: "Aujourd'hui", special: "point" }] },
-  demandes: { titre: "Demandes reçues", onglets: [{ cle: "", libelle: "Prospects et clients", tableaux: ["clients"] }] },
+  demandes: { titre: "Demandes reçues", onglets: [{ cle: "", libelle: "Prospects et clients", special: "demandes" }] },
   taches: {
     titre: "Tâches",
     onglets: [

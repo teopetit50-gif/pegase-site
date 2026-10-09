@@ -191,3 +191,6 @@
 .om-p-sous { display: block; font-size: 12px; margin-top: 2px; }
 .om-tel { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; color: var(--v2-blue-900); }
 .om-pagination { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 16px; font-size: 13px; }
+.om-decision-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.om-ecran-liste { margin-top: 24px; }
+.om-col-libelle { font-size: 10.5px; color: var(--v2-gray-900); white-space: nowrap; }
