@@ -16,7 +16,8 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useMemo, useState } from "react";
-import { BellRing, CalendarClock, CheckCheck, ChevronDown, ChevronRight, ChevronsUpDown, LayoutGrid, Mail, MessageCircle, Phone, Plus, Search, Trash2, UserRound, Users, X } from "lucide-react";
+import Choix from "./Choix";
+import { BellRing, CalendarClock, CheckCheck, ChevronRight, ChevronsUpDown, LayoutGrid, Mail, MessageCircle, Phone, Plus, Search, Trash2, UserRound, Users, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Chiffre } from "@/components/espace2/vivant";
 import { ItemMenu, MenuDeroulant, SectionMenu, SeparateurMenu } from "@/components/espace2/ui";
@@ -135,17 +136,7 @@ export default function Contacts({ contacts: initiaux, echanges: echangesInitiau
           </SectionMenu>
         </MenuDeroulant>
 
-        <label className="v2-val-bouton" data-actif={etape ? "" : undefined}>
-          <CheckCheck {...I} />
-          <span>{etape || "Toutes les étapes"}</span>
-          <ChevronDown width={14} height={14} aria-hidden="true" className="v2-val-bouton-chevron" />
-          <select value={etape} onChange={(e) => setEtape(e.target.value)} aria-label="Étape">
-            <option value="">Toutes les étapes</option>
-            {ETAPES.map((s) => (
-              <option key={s}>{s}</option>
-            ))}
-          </select>
-        </label>
+        <Choix forme="bouton" etiquette="Étape" icone={<CheckCheck {...I} />} valeur={etape} onChange={setEtape} vide="Toutes les étapes" options={ETAPES} actif={!!etape} />
 
         <button type="button" className="v2-val-bouton" data-actif={relancer ? "" : undefined} aria-pressed={relancer} onClick={() => setRelancer((v) => !v)}>
           <BellRing {...I} />
@@ -273,22 +264,14 @@ function Fiche({ c, echanges, maj, noter, supprimer }: { c: Contact; echanges: E
           ) : null}
         </div>
         <div className="om-fiche-grille">
-          <label className="om-fiche-champ">
+          <div className="om-fiche-champ">
             <span>Type</span>
-            <select defaultValue={c.type} onChange={(e) => maj(c.id, { type: e.target.value })}>
-              {TYPES.map((t) => (
-                <option key={t}>{t}</option>
-              ))}
-            </select>
-          </label>
-          <label className="om-fiche-champ">
+            <Choix forme="fiche" etiquette="Type" valeur={c.type} onChange={(v) => maj(c.id, { type: v })} options={TYPES} />
+          </div>
+          <div className="om-fiche-champ">
             <span>Étape</span>
-            <select value={c.etape} onChange={(e) => maj(c.id, { etape: e.target.value })}>
-              {ETAPES.map((t) => (
-                <option key={t}>{t}</option>
-              ))}
-            </select>
-          </label>
+            <Choix forme="fiche" etiquette="Étape" valeur={c.etape} onChange={(v) => maj(c.id, { etape: v })} options={ETAPES} />
+          </div>
           {champ("nom", "Nom")}
           {champ("role", "Rôle")}
           {champ("entreprise", "Entreprise")}
@@ -327,14 +310,10 @@ function Fiche({ c, echanges, maj, noter, supprimer }: { c: Contact; echanges: E
           </div>
           <textarea className="om-zone" rows={3} value={resume} onChange={(e) => setResume(e.target.value)} placeholder="Ce qui s'est dit, ce qu'il a répondu, l'objection…" aria-label="Résumé de l'échange" />
           <div className="om-fiche-grille">
-            <label className="om-fiche-champ">
+            <div className="om-fiche-champ">
               <span>Nouvelle étape</span>
-              <select value={etape} onChange={(e) => setEtape(e.target.value)}>
-                {ETAPES.map((t) => (
-                  <option key={t}>{t}</option>
-                ))}
-              </select>
-            </label>
+              <Choix forme="fiche" etiquette="Nouvelle étape" valeur={etape} onChange={setEtape} options={ETAPES} />
+            </div>
             <label className="om-fiche-champ">
               <span>Date de relance</span>
               <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
@@ -403,14 +382,10 @@ function NouveauContact({ annuler, creer }: { annuler: () => void; creer: (c: Pa
           {champ("nom", "Nom *")}
           {champ("entreprise", "Entreprise")}
           {champ("role", "Rôle")}
-          <label className="om-fiche-champ">
+          <div className="om-fiche-champ">
             <span>Type</span>
-            <select value={f.type} onChange={(e) => setF((x) => ({ ...x, type: e.target.value }))}>
-              {TYPES.map((t) => (
-                <option key={t}>{t}</option>
-              ))}
-            </select>
-          </label>
+            <Choix forme="fiche" etiquette="Type" valeur={f.type} onChange={(v) => setF((x) => ({ ...x, type: v }))} options={TYPES} />
+          </div>
           {champ("telephone", "Téléphone", "tel")}
           {champ("courriel", "E-mail", "email")}
           {champ("commune", "Commune")}

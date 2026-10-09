@@ -11,6 +11,7 @@
    les clients, les chantiers des moteurs.
    ══════════════════════════════════════════════════════════════════════ */
 
+import Choix from "./Choix";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ChevronRight, Plus, RotateCcw, Trash2 } from "lucide-react";
@@ -165,13 +166,7 @@ export default function Tableaux({ lignes: initiales, seulement, cartes = false 
                       {t.colonnes.map((c) => (
                         <td key={c.cle} data-large={c.large ? "" : undefined}>
                           {c.choix ? (
-                            <select className="om-choix" data-teinte={teinteStatut(l.donnees[c.cle])} value={l.donnees[c.cle] ?? c.choix[0]} onChange={(e) => maj(l.id, c.cle, e.target.value)} aria-label={c.cle}>
-                              {c.choix.map((o) => (
-                                <option key={o} value={o}>
-                                  {o}
-                                </option>
-                              ))}
-                            </select>
+                            <Choix forme="pastille" etiquette={c.cle} teinte={teinteStatut(l.donnees[c.cle])} valeur={l.donnees[c.cle] ?? c.choix[0]} onChange={(v) => maj(l.id, c.cle, v)} options={c.choix} />
                           ) : (
                             <Cellule valeur={l.donnees[c.cle] ?? ""} etiquette={c.cle} large={!!c.large} onValider={(v) => maj(l.id, c.cle, v)} />
                           )}

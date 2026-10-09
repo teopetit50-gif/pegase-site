@@ -14,6 +14,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useMemo, useState } from "react";
+import Choix from "./Choix";
 import Link from "next/link";
 import { ArrowRight, CheckCheck, ChevronRight, ClipboardCheck, ListChecks, UserRound, Wrench } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -113,13 +114,7 @@ export default function AccueilOmega({ lignes: initiales }: { lignes: Ligne[] })
                 <h2 className="v2-h2">Avancement</h2>
                 <p className="v2-gris v2-va-sous">Tâches passées à « Fait », jour par jour</p>
               </div>
-              <span className="v2-champ v2-va-periode">
-                <select value={periode} onChange={(e) => setPeriode(Number(e.target.value))} aria-label="Période">
-                  <option value={7}>7 derniers jours</option>
-                  <option value={30}>30 derniers jours</option>
-                  <option value={90}>90 derniers jours</option>
-                </select>
-              </span>
+              <Choix classe="v2-va-periode" etiquette="Période" valeur={String(periode)} onChange={(v) => setPeriode(Number(v))} options={[{ cle: "7", libelle: "7 derniers jours" }, { cle: "30", libelle: "30 derniers jours" }, { cle: "90", libelle: "90 derniers jours" }]} />
             </div>
             <Courbe valeurs={c.courbe} debut={c.debut} />
           </section>

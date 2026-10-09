@@ -12,8 +12,9 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
+import Choix from "./Choix";
 import { useMemo, useState } from "react";
-import { Building2, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, ClipboardCheck, Inbox, Info, Bell, Users } from "lucide-react";
+import { Building2, CheckCheck, ChevronLeft, ChevronRight, ClipboardCheck, Inbox, Info, Bell, Users } from "lucide-react";
 import { Chiffre } from "@/components/espace2/vivant";
 import type { Ligne } from "./Tableaux";
 import type { Secteur } from "@/lib/omega/donnees";
@@ -80,17 +81,7 @@ export default function DemandesOmega({ lignes, secteurs, contacts }: { lignes: 
           <Link href={`${R}/point`} className="v2-val-bouton">
             <Bell width={16} height={16} aria-hidden="true" /> Relances du jour
           </Link>
-          <label className="v2-val-bouton">
-            <span>{PERIODES.find((p) => p.cle === periode)?.libelle}</span>
-            <ChevronDown width={14} height={14} aria-hidden="true" className="v2-val-bouton-chevron" />
-            <select value={periode} onChange={(e) => setPeriode(Number(e.target.value))} aria-label="Période">
-              {PERIODES.map((p) => (
-                <option key={p.cle} value={p.cle}>
-                  {p.libelle}
-                </option>
-              ))}
-            </select>
-          </label>
+          <Choix forme="bouton" etiquette="Période" valeur={String(periode)} onChange={(v) => setPeriode(Number(v))} options={PERIODES.map((p) => ({ cle: String(p.cle), libelle: p.libelle }))} />
           <a href="#ecran" className="v2-dr-principal">
             <Inbox width={16} height={16} aria-hidden="true" /> Ouvrir les prospects{c.enCours.length ? ` (${c.enCours.length})` : ""}
           </a>

@@ -13,6 +13,7 @@
    de prompteur.
    ══════════════════════════════════════════════════════════════════════ */
 
+import Choix from "./Choix";
 import { useState } from "react";
 import { Check, ChevronsUpDown, Circle, CirclePlay, GraduationCap, LayoutGrid, Plus, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -171,11 +172,7 @@ export default function Formation({ lignes: initiales, selecteur }: { lignes: Li
             <div className="om-formation-fiche">
               <div className="om-formation-tete">
                 <Champ valeur={video.donnees["Vidéo"] ?? ""} etiquette="Titre" classe="om-formation-titre" onValider={(v) => maj(video.id, "Vidéo", v)} />
-                <select className="om-choix" data-teinte={teinte(video.donnees["Statut"] ?? "")} value={video.donnees["Statut"] ?? STATUTS[0]} onChange={(e) => maj(video.id, "Statut", e.target.value)} aria-label="Statut">
-                  {STATUTS.map((s) => (
-                    <option key={s}>{s}</option>
-                  ))}
-                </select>
+                <Choix forme="pastille" etiquette="Statut" teinte={teinte(video.donnees["Statut"] ?? "")} valeur={video.donnees["Statut"] ?? STATUTS[0]} onChange={(v) => maj(video.id, "Statut", v)} options={STATUTS} />
                 <button type="button" className="v2-btn v2-btn--petit v2-btn--icone v2-btn--fantome" aria-label="Retirer la vidéo" onClick={() => supprimer(video.id)}>
                   <Trash2 width={14} height={14} aria-hidden="true" />
                 </button>

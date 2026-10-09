@@ -16,6 +16,7 @@
    quand Teo le demande.
    ══════════════════════════════════════════════════════════════════════ */
 
+import Choix from "./Choix";
 import { useMemo, useState } from "react";
 import { FileUp, Printer, Save } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -187,13 +188,7 @@ export default function AuditOmega() {
           </label>
           <label className="om-label">
             Métier
-            <span className="v2-champ">
-              <select value={metier} onChange={(e) => setMetier(e.target.value)}>
-                {["BTP", "Location automobile", "Architecte", "Avocat", "Cabinet dentaire", "Groupe", "Autre"].map((m) => (
-                  <option key={m}>{m}</option>
-                ))}
-              </select>
-            </span>
+            <Choix etiquette="Métier" valeur={metier} onChange={setMetier} options={["BTP", "Location automobile", "Architecte", "Avocat", "Cabinet dentaire", "Groupe", "Autre"]} />
           </label>
         </div>
         <label className="om-depot om-sans-impression">
@@ -214,16 +209,7 @@ export default function AuditOmega() {
             {ROLES.map((r) => (
               <label key={r.cle} className="om-label">
                 {r.libelle}
-                <span className="v2-champ">
-                  <select value={roles[r.cle] ?? ""} onChange={(e) => setRoles((x) => ({ ...x, [r.cle]: e.target.value === "" ? undefined : Number(e.target.value) }))}>
-                    <option value="">— aucune —</option>
-                    {table.tete.map((h, i) => (
-                      <option key={i} value={i}>
-                        {h || `Colonne ${i + 1}`}
-                      </option>
-                    ))}
-                  </select>
-                </span>
+                <Choix etiquette={r.libelle} valeur={roles[r.cle] === undefined ? "" : String(roles[r.cle])} onChange={(v) => setRoles((x) => ({ ...x, [r.cle]: v === "" ? undefined : Number(v) }))} vide="— aucune —" options={table.tete.map((h, i) => ({ cle: String(i), libelle: h || `Colonne ${i + 1}` }))} />
               </label>
             ))}
           </div>

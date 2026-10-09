@@ -395,3 +395,16 @@
   .om-meta-diag { max-height: none; }
   .om-meta-saisie { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* — le menu de choix (Choix.tsx), à la place des <select> natifs — */
+.om-choix-popover .v2-menu { max-height: min(360px, 60vh); overflow-y: auto; }
+.om-choix-libelle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+button.om-choix { display: inline-flex; align-items: center; max-width: 100%; text-align: left; }
+button.om-choix[data-focus-visible] { box-shadow: var(--v2-anneau); }
+.om-choix-champ { width: 100%; justify-content: space-between; border: 0; font: inherit; font-size: 14px; color: var(--v2-gray-1000); cursor: pointer; text-align: left; }
+.om-choix-champ[data-focus-visible] { box-shadow: var(--v2-anneau); }
+.om-choix-champ.v2-va-periode { width: auto; font-size: 13px; gap: 6px; }
+.om-choix-fiche { display: flex; align-items: center; justify-content: space-between; gap: 6px; width: 100%; min-width: 0; height: 32px; padding: 0 10px; border: 0; border-radius: 6px; background: var(--v2-bg-100); box-shadow: var(--v2-ombre-petite); color: var(--v2-gray-1000); font: inherit; font-size: 13px; cursor: pointer; text-align: left; }
+.om-choix-fiche[data-hovered] { background: var(--v2-gray-100); }
+.om-choix-fiche[data-focus-visible] { outline: 0; box-shadow: var(--v2-anneau); }
+.om-choix-fiche .v2-val-bouton-chevron, .om-choix-champ .v2-val-bouton-chevron { flex: none; color: var(--v2-gray-900); }

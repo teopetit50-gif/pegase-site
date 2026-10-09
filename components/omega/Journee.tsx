@@ -11,8 +11,9 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useMemo, useState } from "react";
+import Choix from "./Choix";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, CalendarDays, ChevronDown, ChevronRight, CircleCheck, CircleDashed, Clock, Compass, FileText, Inbox, LayoutGrid, ListChecks, ListFilter, Megaphone, MoreVertical, Repeat, Search, UserRound, Wrench, X } from "lucide-react";
+import { ArrowRight, ArrowUpRight, CalendarDays, ChevronRight, CircleCheck, CircleDashed, Clock, Compass, FileText, Inbox, LayoutGrid, ListChecks, ListFilter, Megaphone, MoreVertical, Repeat, Search, UserRound, Wrench, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Ligne } from "./Tableaux";
 
@@ -49,22 +50,7 @@ function useLignes(initiales: Ligne[]) {
 
 /* le menu déroulant de la barre de filtres, comme dans /espace2 */
 function Selecteur({ icone: Icone, valeur, changer, tous, options }: { icone: typeof FileText; valeur: string; changer: (v: string) => void; tous?: string; options: { cle: string; libelle: string }[] }) {
-  const choisi = options.find((o) => o.cle === valeur);
-  return (
-    <label className="v2-val-bouton" data-actif={valeur && tous ? "" : undefined}>
-      <Icone width={16} height={16} aria-hidden="true" />
-      <span>{choisi ? choisi.libelle : tous}</span>
-      <ChevronDown width={14} height={14} aria-hidden="true" className="v2-val-bouton-chevron" />
-      <select value={valeur} onChange={(e) => changer(e.target.value)} aria-label={tous ?? "Vue"}>
-        {tous ? <option value="">{tous}</option> : null}
-        {options.map((o) => (
-          <option key={o.cle} value={o.cle}>
-            {o.libelle}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
+  return <Choix forme="bouton" etiquette={tous ?? "Vue"} icone={<Icone width={16} height={16} aria-hidden="true" />} valeur={valeur} onChange={changer} vide={tous} options={options} actif={!!valeur && !!tous} />;
 }
 
 export default function Journee({ mode, lignes }: { mode: "validations" | "point"; lignes: Ligne[] }) {

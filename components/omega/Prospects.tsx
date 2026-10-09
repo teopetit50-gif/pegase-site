@@ -17,9 +17,10 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useState } from "react";
+import Choix from "./Choix";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, Building2, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronsUpDown, LayoutGrid, ListFilter, Phone, Search, X } from "lucide-react";
+import { ArrowUpRight, Building2, CheckCheck, ChevronLeft, ChevronRight, ChevronsUpDown, LayoutGrid, ListFilter, Phone, Search, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Chiffre } from "@/components/espace2/vivant";
 import { ItemMenu, MenuDeroulant, SectionMenu, SeparateurMenu } from "@/components/espace2/ui";
@@ -110,17 +111,7 @@ export default function Prospects({ lignes: initiales, total, page, parPage, sec
           </SectionMenu>
         </MenuDeroulant>
 
-        <label className="v2-val-bouton" data-actif={filtres.statut ? "" : undefined}>
-          <ListFilter {...I} />
-          <span>{filtres.statut ?? "Tous les statuts"}</span>
-          <ChevronDown width={14} height={14} aria-hidden="true" className="v2-val-bouton-chevron" />
-          <select value={filtres.statut ?? ""} onChange={(e) => router.push(lien({ statut: e.target.value || undefined }))} aria-label="Statut">
-            <option value="">Tous les statuts</option>
-            {STATUTS.map((s) => (
-              <option key={s}>{s}</option>
-            ))}
-          </select>
-        </label>
+        <Choix forme="bouton" etiquette="Statut" icone={<ListFilter {...I} />} valeur={filtres.statut ?? ""} onChange={(v) => router.push(lien({ statut: v || undefined }))} vide="Tous les statuts" options={STATUTS} actif={!!filtres.statut} />
 
         <Link href={lien({ tel: filtres.tel === "1" ? undefined : "1" })} className="v2-val-bouton" data-actif={filtres.tel === "1" ? "" : undefined} aria-pressed={filtres.tel === "1"}>
           <Phone {...I} />
@@ -271,11 +262,7 @@ export default function Prospects({ lignes: initiales, total, page, parPage, sec
                     ) : null}
                   </td>
                   <td>
-                    <select className="om-choix" data-teinte={teinte(l.statut)} value={l.statut} onChange={(e) => maj(l.id, "statut", e.target.value)} aria-label={`Statut de ${l.entreprise}`}>
-                      {STATUTS.map((s) => (
-                        <option key={s}>{s}</option>
-                      ))}
-                    </select>
+                    <Choix forme="pastille" etiquette={`Statut de ${l.entreprise}`} teinte={teinte(l.statut)} valeur={l.statut} onChange={(v) => maj(l.id, "statut", v)} options={STATUTS} />
                   </td>
                   <td className="om-note-cellule">
                     <Note valeur={l.note ?? ""} onValider={(v) => maj(l.id, "note", v)} />
