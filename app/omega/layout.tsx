@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
 import CoquilleOmega from "@/components/omega/CoquilleOmega";
 import PorteOmega from "@/components/omega/PorteOmega";
@@ -20,6 +20,8 @@ import { estAdmin } from "@/lib/omega/donnees";
    ══════════════════════════════════════════════════════════════════════ */
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist", display: "swap" });
+/* les chiffres des graphiques et des jauges, à chasse fixe comme chez Vercel */
+const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono", display: "swap" });
 
 export const metadata: Metadata = {
   title: { default: "Pilotage", template: "%s | Pilotage Omega" },
@@ -33,7 +35,7 @@ export default async function LayoutOmega({ children }: { children: React.ReactN
   const [utilisateur, admin] = await Promise.all([utilisateurCourant(), estAdmin()]);
   if (!utilisateur) {
     return (
-      <div className={geist.variable}>
+      <div className={`${geist.variable} ${geistMono.variable}`}>
         <script dangerouslySetInnerHTML={{ __html: AMORCE_THEME_OMEGA }} />
         <PorteOmega police={geist.variable} />
       </div>
@@ -41,7 +43,7 @@ export default async function LayoutOmega({ children }: { children: React.ReactN
   }
   if (!admin) notFound();
   return (
-    <div className={geist.variable}>
+    <div className={`${geist.variable} ${geistMono.variable}`}>
       <script dangerouslySetInnerHTML={{ __html: AMORCE_THEME_OMEGA }} />
       <CoquilleOmega email={utilisateur.email} police={geist.variable}>
         {children}

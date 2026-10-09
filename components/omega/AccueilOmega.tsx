@@ -7,7 +7,7 @@
    rangée de quatre chiffres, même grille (courbe + tableau à gauche,
    « Aujourd'hui » + « Activité récente » à droite), même carte du bas.
    Le contenu vient du tableau opérationnel (omega_lignes) :
-     · la courbe = les tâches passées à « Fait », jour par jour ;
+     · le graphique (Graphique.tsx) = tâches, appels, RDV, vidéos par jour ;
      · le tableau = les prochaines échéances ;
      · « Aujourd'hui » = ce qui est dû, cochable ;
      · l'activité = les dernières lignes modifiées.
@@ -15,6 +15,7 @@
 
 import { useMemo, useState } from "react";
 import Choix from "./Choix";
+import Graphique from "./Graphique";
 import Link from "next/link";
 import { ArrowRight, CheckCheck, ChevronRight, ClipboardCheck, ListChecks, UserRound, Wrench } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -56,19 +57,30 @@ export default function AccueilOmega({ lignes: initiales }: { lignes: Ligne[] })
     const routines = lignes.filter((l) => l.tableau === "routines" && /jour/i.test(l.donnees["Fréquence"] ?? "") && l.donnees["Statut cette semaine"] !== "Fait");
     const decisions = ouvertes.filter((l) => ["Fondations", "Pilotage"].includes(l.donnees["Catégorie"]));
     const signes = lignes.filter((l) => l.tableau === "clients" && FINIS.includes(l.donnees["Étape"])).length;
-    /* la courbe : tâches faites par jour sur la période (date de la dernière modification) */
+    /* le graphique : quatre séries jour par jour sur la période, et la période d'avant pour l'écart */
     const debut = new Date(maintenant - (periode - 1) * JOUR).setHours(0, 0, 0, 0);
-    const courbe = Array.from({ length: periode }, () => 0);
-    for (const l of faites) {
-      const t = l.maj ? new Date(l.maj).getTime() : NaN;
-      const i = Math.floor((t - debut) / JOUR);
-      if (i >= 0 && i < periode) courbe[i]++;
-    }
+    const compter = (dates: number[]) => {
+      const valeurs = Array.from({ length: periode }, () => 0);
+      const avant = Array.from({ length: periode }, () => 0);
+      for (const t of dates) {
+        const i = Math.floor((t - debut) / JOUR);
+        if (i >= 0 && i < periode) valeurs[i]++;
+        else if (i < 0 && i >= -periode) avant[i + periode]++;
+      }
+      return { valeurs, avant };
+    };
+    const appels = lignes.filter((l) => l.tableau === "appels");
+    const series = [
+      { cle: "taches", libelle: "Tâches faites", ...compter(faites.map((l) => (l.maj ? new Date(l.maj).getTime() : NaN))) },
+      { cle: "appels", libelle: "Appels", ...compter(appels.map((l) => lireDate(l.donnees["Date"]))) },
+      { cle: "rdv", libelle: "RDV pris", ...compter(appels.filter((l) => l.donnees["Issue"] === "RDV pris").map((l) => lireDate(l.donnees["Date"]))) },
+      { cle: "videos", libelle: "Vidéos publiées", ...compter(lignes.filter((l) => l.tableau === "videos" && l.donnees["Statut"] === "Publiée").map((l) => lireDate(l.donnees["Sortie"]))) },
+    ];
     const activite = [...lignes]
       .filter((l) => l.maj)
       .sort((a, b) => (b.maj ?? "").localeCompare(a.maj ?? ""))
       .slice(0, 6);
-    return { taches, ouvertes, faites, retard, duJour, routines, decisions, signes, courbe, debut, activite };
+    return { taches, ouvertes, faites, retard, duJour, routines, decisions, signes, series, debut, activite };
   }, [lignes, periode, maintenant]);
 
   const heure = new Date(maintenant).getHours();
@@ -112,8 +124,8 @@ export default function AccueilOmega({ lignes: initiales }: { lignes: Ligne[] })
           <section className="v2-carte v2-carte-corps">
             <div className="v2-va-titre" style={{ marginBottom: 16 }}>
               <div>
-                <h2 className="v2-h2">Avancement</h2>
-                <p className="v2-gris v2-va-sous">Tâches passées à « Fait », jour par jour</p>
+                <h2 className="v2-h2">Activité</h2>
+                <p className="v2-gris v2-va-sous">Jour par jour, comparé à la période précédente</p>
               </div>
               <span className="om-barres-actions">
                 <button type="button" className="v2-val-bouton" data-actif={exemple ? "" : undefined} aria-pressed={exemple} onClick={() => setExemple((x) => !x)}>
@@ -123,7 +135,11 @@ export default function AccueilOmega({ lignes: initiales }: { lignes: Ligne[] })
               </span>
             </div>
             {exemple ? <p className="om-barres-exemple">Exemple : des chiffres inventés pour voir le rendu, rien n&apos;est enregistré.</p> : null}
-            <Courbe valeurs={exemple ? valeursExemple(periode) : c.courbe} debut={c.debut} />
+            <Graphique
+              key={exemple ? "exemple" : "vrai"}
+              debut={c.debut}
+              series={exemple ? c.series.map((x, k) => ({ ...x, valeurs: valeursExemple(periode, k * 5, [1, 3, 0.4, 0.3][k]), avant: valeursExemple(periode, k * 5 + 3, [0.8, 2.6, 0.35, 0.3][k]) })) : c.series}
+            />
           </section>
 
           <section className="v2-carte v2-carte-corps">
@@ -268,73 +284,22 @@ function heureCourte(iso: string): string {
 }
 
 /* des valeurs de démonstration (bouton « Voir un exemple ») : une montée en
-   régime réaliste, creux le week-end, toujours les mêmes d'un affichage à l'autre */
-function valeursExemple(n: number) {
+   régime, creux le week-end, toujours les mêmes d'un affichage à l'autre */
+function valeursExemple(n: number, graine: number, echelle: number) {
   return Array.from({ length: n }, (_, i) => {
     const t = i / Math.max(1, n - 1);
-    const bruit = ((i * 7919) % 13) / 13;
+    const bruit = (((i + graine) * 7919) % 13) / 13;
     const weekEnd = (i + 2) % 7 >= 5;
-    return Math.max(0, Math.round((1 + t * 4) * (weekEnd ? 0.3 : 1) + (bruit - 0.45) * 2.4));
+    return Math.max(0, Math.round(((1 + t * 4) * (weekEnd ? 0.3 : 1) + (bruit - 0.45) * 2.4) * echelle));
   });
 }
 
-/* l'avancement en barres, un jour = une barre (09/10/2026, retour de Teo :
-   la courbe lissée de /espace2 se brisait et étirait un seul pic sur des
-   données clairsemées). En tête : le total, la moyenne, le meilleur jour. */
-function Courbe({ valeurs, debut }: { valeurs: number[]; debut: number }) {
-  const n = valeurs.length;
-  const total = valeurs.reduce((a, b) => a + b, 0);
-  const max = Math.max(1, ...valeurs);
-  const haut = Math.max(4, Math.ceil(max / 2) * 2);
-  const record = valeurs.indexOf(max);
-  const date = (i: number, mois: "short" | "long" = "short") => new Date(debut + i * JOUR).toLocaleDateString("fr-FR", { day: "numeric", month: mois });
-  const actifs = valeurs.filter((v) => v > 0).length;
-  const reperes = [0, Math.round((n - 1) / 3), Math.round((2 * (n - 1)) / 3), n - 1];
-  return (
-    <figure className="om-barres" aria-label={`${total} tâches faites sur ${n} jours`}>
-      <div className="om-barres-resume">
-        <span>
-          <strong>{total}</strong> faites
-        </span>
-        <span>
-          <strong>{(total / n).toLocaleString("fr-FR", { maximumFractionDigits: 1 })}</strong> par jour
-        </span>
-        <span>
-          <strong>{actifs}</strong> jour{actifs > 1 ? "s" : ""} actif{actifs > 1 ? "s" : ""}
-        </span>
-        {total ? (
-          <span className="v2-gris">
-            meilleur jour : {max} le {date(record, "long")}
-          </span>
-        ) : null}
-      </div>
-      <div className="om-barres-cadre">
-        <div className="om-barres-axe-y" aria-hidden="true">
-          {[1, 0.5, 0].map((p) => (
-            <span key={p}>{Math.round(haut * p)}</span>
-          ))}
-        </div>
-        <div className="om-barres-zone">
-          {[0, 0.5, 1].map((p) => (
-            <span key={p} className="om-barres-grille" style={{ bottom: `${p * 100}%` }} aria-hidden="true" />
-          ))}
-          <ol className="om-barres-jours" style={{ gap: n > 60 ? 2 : n > 20 ? 4 : 8 }}>
-            {valeurs.map((v, i) => (
-              <li key={i} title={`${date(i, "long")} : ${v} tâche${v > 1 ? "s" : ""}`} data-vide={v ? undefined : ""} data-aujourdhui={i === n - 1 ? "" : undefined}>
-                <span style={{ height: v ? `${(v / haut) * 100}%` : undefined }} />
-              </li>
-            ))}
-          </ol>
-        </div>
-        <span />
-        <div className="om-barres-axe" aria-hidden="true">
-          {reperes.map((i) => (
-            <span key={i} style={{ left: `${((i + 0.5) / n) * 100}%` }}>
-              {i === n - 1 ? "Aujourd'hui" : date(i)}
-            </span>
-          ))}
-        </div>
-      </div>
-    </figure>
-  );
+/* les dates saisies à la main : « 14/10 », « 14/10/2026 », « 2026-10-14… » */
+function lireDate(v: string | undefined): number {
+  if (!v) return NaN;
+  if (/^\d{4}-\d{2}-\d{2}/.test(v)) return new Date(v).getTime();
+  const m = v.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/);
+  if (!m) return NaN;
+  const an = m[3] ? Number(m[3].length === 2 ? `20${m[3]}` : m[3]) : 2026;
+  return new Date(an, Number(m[2]) - 1, Number(m[1])).getTime();
 }

@@ -26,6 +26,7 @@ import { CalendarRange, ChevronsUpDown, LayoutGrid, Megaphone, Plus, Trash2, X }
 import { createClient } from "@/lib/supabase/client";
 import { ItemMenu, MenuDeroulant, SectionMenu } from "@/components/espace2/ui";
 import type { Ligne } from "./Tableaux";
+import { Colonnes, Mesure } from "./Mesures";
 
 const I = { width: 16, height: 16, strokeWidth: 1.6, "aria-hidden": true } as const;
 const CHAMPS = ["Dépensé (€)", "Impressions", "Portée", "Clics sur le lien", "Prospects", "Audits calés", "Clients signés"] as const;
@@ -197,12 +198,21 @@ export default function MetaAds({ lignes: initiales, selecteur }: { lignes: Lign
         {etat}
       </p>
 
-      <div className="om-cartes om-cartes--quatre">
-        <Kpi titre="Dépensé" valeur={euros(t["Dépensé (€)"])} pied={`${t["Impressions"].toLocaleString("fr-FR")} impressions · CPM ${euros(m.cpm, 2)}`} />
-        <Kpi titre="Coût par audit calé" valeur={euros(m.cpa)} pied={`${t["Audits calés"]} audits · plafond ${euros(coutMax)}`} ton={m.cpa === null ? undefined : m.cpa <= coutMax ? "vert" : "rouge"} />
-        <Kpi titre="Taux de clic (lien)" valeur={pct(m.ctr)} pied={`${t["Clics sur le lien"]} clics · CPC ${euros(m.cpc, 2)}`} ton={m.ctr === null ? undefined : m.ctr >= 0.01 ? "vert" : m.ctr < 0.008 ? "rouge" : undefined} />
-        <Kpi titre="Fréquence" valeur={m.freq === null ? "—" : m.freq.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} pied={`${t["Portée"].toLocaleString("fr-FR")} personnes touchées`} ton={m.freq === null ? undefined : m.freq > 3 ? "rouge" : "vert"} />
-      </div>
+      <section className="v2-carte om-meta-haut">
+        <div className="om-mesures">
+          <Mesure libelle="Dépensé" valeur={euros(t["Dépensé (€)"])} ratio={null} pied={<span className="v2-gris">{t["Impressions"].toLocaleString("fr-FR")} impressions · CPM {euros(m.cpm, 2)}</span>} />
+          <Mesure libelle="Coût par audit calé" valeur={euros(m.cpa)} ratio={m.cpa ? coutMax / m.cpa : null} pied={<span className="v2-gris">{t["Audits calés"]} audits · plafond {euros(coutMax)}</span>} />
+          <Mesure libelle="Taux de clic (lien)" valeur={pct(m.ctr)} ratio={m.ctr === null ? null : m.ctr / 0.01} pied={<span className="v2-gris">{t["Clics sur le lien"]} clics · CPC {euros(m.cpc, 2)}</span>} />
+          <Mesure libelle="Fréquence" valeur={m.freq === null ? "—" : m.freq.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} ratio={m.freq ? 3 / m.freq : null} pied={<span className="v2-gris">{t["Portée"].toLocaleString("fr-FR")} personnes touchées</span>} />
+        </div>
+        <Colonnes
+          colonnes={[
+            { ton: "rouge", titre: "À couper", vide: "Aucune pub à couper.", elements: pubs.filter((x) => x.verdict.ton === "rouge").map((x) => ({ nom: x.p || x.c, chiffre: x.cpa === null ? "0 audit" : `${euros(x.cpa)} / audit`, detail: x.verdict.titre })) },
+            { ton: "orange", titre: "À corriger", vide: "Rien à corriger.", elements: pubs.filter((x) => x.verdict.ton === "bleu").map((x) => ({ nom: x.p || x.c, chiffre: x.cpa === null ? "0 audit" : `${euros(x.cpa)} / audit`, detail: x.verdict.titre })) },
+            { ton: "vert", titre: "Bon ou en apprentissage", vide: "Le diagnostic apparaît dès le premier relevé.", elements: pubs.filter((x) => x.verdict.ton === "vert" || x.verdict.ton === "gris").map((x) => ({ nom: x.p || x.c, chiffre: x.cpa === null ? "—" : `${euros(x.cpa)} / audit`, detail: x.verdict.titre })) },
+          ]}
+        />
+      </section>
 
       <div className="om-meta-grille">
         <section className="v2-carte om-section om-meta-releves">
@@ -278,18 +288,6 @@ export default function MetaAds({ lignes: initiales, selecteur }: { lignes: Lign
           </ul>
         </section>
       </div>
-    </div>
-  );
-}
-
-function Kpi({ titre, valeur, pied, ton }: { titre: string; valeur: string; pied: string; ton?: "vert" | "rouge" }) {
-  return (
-    <div className="v2-carte om-carte">
-      <span className="om-carte-titre">{titre}</span>
-      <span className="om-carte-valeur" data-ton={ton}>
-        <strong>{valeur}</strong>
-      </span>
-      <span className="om-carte-pied">{pied}</span>
     </div>
   );
 }

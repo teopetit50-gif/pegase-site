@@ -17,6 +17,8 @@ import { useState } from "react";
 import { CalendarRange, ChevronsUpDown } from "lucide-react";
 import { ItemMenu, MenuDeroulant } from "@/components/espace2/ui";
 import type { Ligne } from "./Tableaux";
+import { Ecart } from "./Graphique";
+import { Mesure, Score } from "./Mesures";
 
 const JOUR = 86400000;
 
@@ -64,7 +66,14 @@ export default function Semaine({ lignes, echanges, prospects, selecteur }: { li
     { cle: "encaisse", libelle: "Encaissé", valeur: somme("Recette"), argent: true },
     { cle: "depense", libelle: "Dépensé", valeur: somme("Dépense"), argent: true },
   ];
-  const UNE = ["appels", "rdv", "videos", "encaisse"];
+  /* les objectifs de la semaine : la jauge de chaque mesure et le score (moyenne, plafonnée à 100 %) */
+  const OBJECTIFS = [
+    { cle: "appels", cible: 100 },
+    { cle: "rdv", cible: 5 },
+    { cle: "audits", cible: 3 },
+    { cle: "videos", cible: 3 },
+  ];
+  const score = (d: Date) => (OBJECTIFS.reduce((a, o) => a + Math.min(1, MESURES.find((m) => m.cle === o.cle)!.valeur(d) / o.cible), 0) / OBJECTIFS.length) * 100;
 
   const libelleSemaine = (n: number) => {
     const d = debutDe(n);
@@ -110,24 +119,27 @@ export default function Semaine({ lignes, echanges, prospects, selecteur }: { li
         <span className="v2-gris om-formation-compte">{conversion}</span>
       </div>
 
-      <div className="om-cartes om-cartes--quatre">
-        {MESURES.filter((m) => UNE.includes(m.cle)).map((m) => {
-          const v = m.valeur(debut);
-          const p = m.valeur(avant);
-          const ecart = v - p;
-          return (
-            <div key={m.cle} className="v2-carte om-carte">
-              <span className="om-carte-titre">{m.libelle}</span>
-              <span className="om-carte-valeur">
-                <strong>{fmt(m, v)}</strong>
-              </span>
-              <span className="om-carte-pied" data-sens={ecart > 0 ? "haut" : ecart < 0 ? "bas" : undefined}>
-                {ecart === 0 ? "comme la semaine d'avant" : `${ecart > 0 ? "+" : "−"}${fmt(m, Math.abs(ecart))} sur la semaine d'avant`}
-              </span>
-            </div>
-          );
-        })}
-      </div>
+      <section className="v2-carte om-semaine-score">
+        <Score
+          valeur={score(debut)}
+          titre="Score de la semaine"
+          ecart={<Ecart t={score(debut)} a={score(avant)} />}
+          texte="La moyenne des quatre objectifs de la semaine : 100 appels, 5 RDV, 3 audits tenus, 3 vidéos publiées."
+        />
+        <div className="om-mesures">
+          {OBJECTIFS.map((o) => {
+            const m = MESURES.find((x) => x.cle === o.cle)!;
+            const v = m.valeur(debut);
+            return <Mesure key={o.cle} libelle={m.libelle} valeur={fmt(m, v)} unite={` / ${o.cible}`} ratio={v / o.cible} pied={<Ecart t={v} a={m.valeur(avant)} />} />;
+          })}
+          {(() => {
+            const m = MESURES.find((x) => x.cle === "encaisse")!;
+            const v = m.valeur(debut);
+            const d = MESURES.find((x) => x.cle === "depense")!.valeur(debut);
+            return <Mesure libelle="Encaissé" valeur={fmt(m, v)} ratio={d ? v / d : v ? 1.5 : null} pied={<span className="v2-gris">dépensé : {fmt(m, d)}</span>} />;
+          })()}
+        </div>
+      </section>
 
       <section className="v2-carte om-section">
         <div className="v2-tableau-cadre om-tableau-cadre">
@@ -147,7 +159,7 @@ export default function Semaine({ lignes, echanges, prospects, selecteur }: { li
                 <tr key={m.cle}>
                   <td>{m.libelle}</td>
                   {colonnes.map((n) => (
-                    <td key={n} data-choisie={n === choisie ? "" : undefined}>
+                    <td key={n} data-choisie={n === choisie ? "" : undefined} data-zero={m.valeur(debutDe(n)) ? undefined : ""}>
                       {fmt(m, m.valeur(debutDe(n)))}
                     </td>
                   ))}
