@@ -226,3 +226,14 @@
 .om-courriel { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .om-note-cellule { min-width: 180px; }
 .om-pagination { padding: 12px 16px 4px; }
+
+/* — survols (retour de Teo, 09/10) —
+   Les chiffres clés : plus de bloc gris qui ne remplit qu'une partie de la
+   carte ; au survol, le libellé s'éclaire et le chiffre passe au bleu.
+   La barre latérale : l'anneau de focus ne reste plus après un clic
+   (le lien perd le focus au clic ; l'anneau reste au clavier). */
+.om .v2-va-kpi:hover { background: none; }
+.om .v2-va-kpi .v2-va-kpi-libelle, .om .v2-va-kpi strong { transition: color 0.15s; }
+.om .v2-va-kpi:hover .v2-va-kpi-libelle { color: var(--v2-gray-1000); }
+.om .v2-va-kpi:hover strong { color: var(--v2-blue-900); }
+.om .v2-lien:focus:not(:focus-visible) { box-shadow: none; }

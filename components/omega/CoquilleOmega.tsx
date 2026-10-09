@@ -94,7 +94,7 @@ export default function CoquilleOmega({ email, police, children }: { email: stri
     return () => html.classList.remove(police, "v2-actif");
   }, [police]);
   return (
-    <div className="v2" data-lenis-prevent="">
+    <div className="v2 om" data-lenis-prevent="">
       <RouterProvider navigate={(href, options) => router.push(href, options)}>
         <FournisseurToasts>
           <Cadre email={email}>{children}</Cadre>
@@ -453,7 +453,7 @@ function LienLateral({ lien, chemin }: { lien: Lien; chemin: string }) {
           <ul inert={!ouvert}>
             {lien.sous.map((s) => (
               <li key={s.href}>
-                <Link href={s.href} className="v2-lien v2-lien--sous" aria-current={chemin === s.href ? "page" : undefined}>
+                <Link href={s.href} className="v2-lien v2-lien--sous" aria-current={chemin === s.href ? "page" : undefined} onClick={(e) => e.currentTarget.blur()}>
                   {s.libelle}
                 </Link>
               </li>
@@ -465,7 +465,7 @@ function LienLateral({ lien, chemin }: { lien: Lien; chemin: string }) {
   }
   return (
     <li>
-      <Link href={lien.href} className="v2-lien" aria-current={!lien.href.includes("#") && dedans ? "page" : undefined}>
+      <Link href={lien.href} className="v2-lien" aria-current={!lien.href.includes("#") && dedans ? "page" : undefined} onClick={(e) => e.currentTarget.blur()}>
         {lien.icone}
         <span>{lien.libelle}</span>
         {lien.compteur ? <span className="v2-lien-compteur">{lien.compteur}</span> : null}
