@@ -21,7 +21,16 @@ import { ChartColumn, ChartLine, List } from "lucide-react";
 export type Serie = { cle: string; libelle: string; valeurs: number[]; avant: number[]; couleur?: string };
 type Mode = "courbe" | "barres" | "liste";
 const JOUR = 86_400_000;
-const COULEURS = ["var(--v2-blue-700)", "var(--v2-amber-700)", "var(--v2-green-700)", "#8e4ec6"];
+// Tout en bleu du dashboard (demande de Teo, 09/10 : « prends les couleurs du
+// dashboard de base, donc bleu »). Le bleu plein, puis le même bleu à 62 % et
+// 36 % (plus sombre en thème sombre, plus clair en thème clair), et le bout
+// de la gamme pour la 4e série : presque blanc en sombre, marine en clair.
+const COULEURS = [
+  "var(--v2-blue-700)",
+  "color-mix(in srgb, var(--v2-blue-700) 62%, transparent)",
+  "color-mix(in srgb, var(--v2-blue-700) 36%, transparent)",
+  "var(--v2-blue-1000)",
+];
 const L = 1000;
 const H = 220;
 

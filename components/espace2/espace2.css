@@ -2349,7 +2349,9 @@ html.v2-calme *::after {
 .v2-val-icone { display: grid; place-items: center; border: 0; background: none; color: var(--v2-gray-900); cursor: pointer; padding: 2px; }
 
 /* la barre du lot */
-.v2-val-lot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 14px; border-radius: 6px; background: var(--v2-a-200); font-size: 13px; }
+.v2-val-lot { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 12px; padding: 8px 14px; border-radius: 6px; background: var(--v2-a-200); font-size: 13px; }
+/* Les boutons du lot (Annuler · Bloquées · Faites) se touchaient : aucun écart défini (09/10). */
+.v2-val-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 
 /* la grille : la file à gauche, le circuit à droite */
 .v2-val-grille { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr); gap: 12px; align-items: start; }
