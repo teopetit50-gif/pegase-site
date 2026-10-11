@@ -1,6 +1,17 @@
 # Session B2 — TAVARO, le module des loueurs (contrats, retours, barèmes, factures, avoirs, litiges)
 
-## Reprise du 11/10/2026 — fait
+## REPRISE — pause demandée par Teo (11/10/2026, 15 h 40 Z)
+
+**Branche** : `worker-b2`. Arbre propre, tout est poussé. Aucun fichier du site public modifié.
+
+**État** :
+- **Posé et vert sur la recette** : b2_01 à b2_16, et les tests 01 à 25.
+- **Dans main** (1e27e72) : l'écran Opérations et le lien /espace2/validations. C'est en ligne : le bundle d'omegaai.fr porte « Contrôle avant de donner les clés ».
+- **Rien n'attend d'être posé.**
+
+**Prochain pas** : les modules restants du carnet, 13, 15, 16 et 18. Ils seront affichés dans /espace2 : aucun lien vers /espace, et ne pas toucher `components/omega`.
+
+### Détail de la reprise du 11/10
 
 - **Posé et vert sur la recette** (^test_b2_ 01 à 25) :
   - b2_12 : rappels, Crit'Air, contrôle du départ, photos du départ jointes à la facture ;
