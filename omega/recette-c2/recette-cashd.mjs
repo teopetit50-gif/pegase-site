@@ -284,5 +284,17 @@ for (const largeur of LARGEURS) {
   s.fermer();
 }
 
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'c2-vue', densite: 1 });
+  console.log('— /espace/cashd : une vue ouverte par l\'adresse (?vue=)');
+  ok(await s.aller(base + CHEMIN + (CHEMIN.includes('?') ? '&' : '?') + 'vue=tresorerie'), 'page chargée');
+  await s.dormir(500);
+  const v = await s.evaluer(`document.querySelector('.c2-onglets [aria-selected="true"]')?.textContent.trim() + '/' + !!document.querySelector('section[aria-label="Balance âgée"]')`);
+  ok(v === 'Trésorerie/true', `?vue=tresorerie ouvre la Trésorerie (${v})`);
+  await onglet(s, 'Envois');
+  ok(/vue=envois/.test(await s.evaluer('location.search')), 'la vue choisie reste dans l\'adresse');
+  s.fermer();
+}
+
 console.log(echecs ? `\n${echecs} échec(s)` : '\nRecette CASHD : tout est vert.');
 process.exit(echecs ? 1 : 0);

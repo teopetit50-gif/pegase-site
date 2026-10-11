@@ -36,7 +36,7 @@ import "./cashd.css";
 
 type Filtre = "echu" | "plus_90" | "pause" | null;
 /* Les quatre vues de l'espace (11/10, c2_04) : celles que la page produit montre. */
-type Onglet = "debiteurs" | "relances" | "envois" | "tresorerie";
+export type Onglet = "debiteurs" | "relances" | "envois" | "tresorerie";
 const ONGLETS: { cle: Onglet; libelle: string }[] = [
   { cle: "debiteurs", libelle: "Débiteurs" },
   { cle: "relances", libelle: "Relances" },
@@ -53,7 +53,10 @@ const ETATS_COMMANDE: Record<RelanceCommande["statut"], { libelle: string; teint
 };
 type Reel = { client: portes.MonClient | null; tableau: Tableau | null; relances: Relance[]; fiches: Record<string, Fiche> };
 
-export default function EcranCashd() {
+const estOnglet = (v: string | null | undefined): v is Onglet => !!v && ONGLETS.some((o) => o.cle === v);
+
+/* `vue` (ou `?vue=` dans l'adresse) ouvre une des quatre vues : debiteurs, relances, envois, tresorerie. */
+export default function EcranCashd({ vue }: { vue?: Onglet } = {}) {
   const { source } = useSource();
   const [fiches, setFiches] = useState<Fiche[]>(FICHES_EXEMPLE);
   const [sansCompte, setSansCompte] = useState<ReglementEtat[]>(SANS_COMPTE_EXEMPLE);
@@ -66,7 +69,21 @@ export default function EcranCashd() {
   const [fait, setFait] = useState<string | null>(null);
   const [previsionReelle, setPrevisionReelle] = useState<portes.Prevision | null>(null);
   const [pilotageReel, setPilotageReel] = useState<{ reponses: portes.Reponse[]; arretes: portes.Arrete[] } | null>(null);
-  const [onglet, setOnglet] = useState<Onglet>("debiteurs");
+  const [onglet, setOngletEtat] = useState<Onglet>(vue ?? "debiteurs");
+  useEffect(() => {
+    if (vue) return;
+    const v = new URLSearchParams(window.location.search).get("vue");
+    if (!estOnglet(v)) return;
+    const t = window.setTimeout(() => setOngletEtat(v), 0);
+    return () => window.clearTimeout(t);
+  }, [vue]);
+  /* la vue choisie reste dans l'adresse : un lien la rouvre */
+  const setOnglet = (o: Onglet) => {
+    setOngletEtat(o);
+    const u = new URL(window.location.href);
+    u.searchParams.set("vue", o);
+    window.history.replaceState(window.history.state, "", u);
+  };
   const [commandesReelles, setCommandesReelles] = useState<RelanceCommande[]>([]);
   const [commandesLocales, setCommandesLocales] = useState<RelanceCommande[]>([]);
 

@@ -17,7 +17,8 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
 - **Écran** (`components/espace/cashd/`) : quatre vues (Débiteurs, Relances, Envois, Trésorerie), « Vos textes », trois
   gestes de la fiche (bon de commande, solde, accord oral). Recette 130/130 aux cinq largeurs sur
   `/espace/cashd?ancien=1`. ⚠ Depuis le 07/10, Teo a réduit `/espace2/cashd` à son tableau de bord (TableauCashd, C1) :
-  ces fonctions ne sont visibles que dans l'ancien design ; il faut leur donner une place dans /espace2 (C1 / Teo).
+  C1 loge l'écran tel quel à `/espace2/cashd/suivi` (branche tableau-de-bord-v2, ec24902) ; chaque vue s'ouvre par
+  `?vue=debiteurs|relances|envois|tresorerie` ou la prop `vue` d'EcranCashd (recette 133/133).
 - **Attend le coordinateur** : poser c2_04 puis c2_05 (dans cet ordre, après c2_03), fusionner ; décider avec C1 où vivent
   « Vos textes », les Envois et les gestes de la fiche dans /espace2.
 - **Attend Teo** : tiers inchangés (AR24, paiement, Google / Microsoft, WhatsApp) ; à la vitrine : refaire les quatre
