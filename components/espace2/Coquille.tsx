@@ -364,7 +364,9 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
     <div className="v2-laterale-int">
       <div className="v2-laterale-haut">
         <MenuDeroulant
-          etiquette={`Organisation : ${organisation}. Changer d'organisation ou de données`}
+          /* le nom accessible contient le texte visible (« RENAULT » en
+             démonstration) — WCAG 2.5.3 */
+          etiquette={`Organisation : ${utilisateur ? "" : "Renault, "}${organisation}. Changer d'organisation ou de données`}
           classe="v2-equipe"
           placement="bottom start"
           largeur={260}
@@ -420,7 +422,6 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
           fermer?.();
           ouvrirPalette();
         }}
-        aria-label="Rechercher (touche F)"
         aria-keyshortcuts="F Meta+K Control+K"
       >
         <Search {...I} />
@@ -561,9 +562,11 @@ function LogoClient({ chemin, nom, demo }: { chemin: string | null; nom: string;
       </span>
     );
   return (
-    <span className="v2-marque-client" aria-hidden="true">
+    /* l'initiale, sans logo, est dessinée en CSS : elle ne s'ajoute pas au
+       texte visible du bouton, que son nom accessible doit contenir */
+    <span className="v2-marque-client" aria-hidden="true" data-initiale={chemin && url ? undefined : nom.charAt(0).toUpperCase()}>
       {/* eslint-disable-next-line @next/next/no-img-element -- une URL signée, hors de next/image */}
-      {chemin && url ? <img src={url} alt="" width={20} height={20} /> : nom.charAt(0).toUpperCase()}
+      {chemin && url ? <img src={url} alt="" width={20} height={20} /> : null}
     </span>
   );
 }
