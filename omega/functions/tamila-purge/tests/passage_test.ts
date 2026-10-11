@@ -2,8 +2,9 @@
 // Le passage de tamila-purge avec des portes et un bucket en mémoire. Aucun appel réseau.
 
 import { assertEquals } from "@std/assert";
-import { GENRE, GENRE_CLE, GENRE_DOSSIER, GENRE_EXPORT, passage } from "../passage.ts";
-import { type DossierAEffacer, ErreurPorte, type Portes, type Travail } from "../portes.ts";
+import { GENRE, GENRE_ARCHIVE, GENRE_CLE, GENRE_DOSSIER, GENRE_EXPORT, passage } from "../passage.ts";
+import { crc32 } from "../zip.ts";
+import { type ContenuExport, type DossierAEffacer, ErreurPorte, type Portes, type Travail } from "../portes.ts";
 import { type Stockage, StockageSupabase } from "../stockage.ts";
 
 const CLIENT = "cccccccc-0000-4000-8000-00000000000c";
@@ -67,6 +68,21 @@ class PortesMemoire implements Portes {
   async cleDetruite(dossier: string) {
     this.clesDetruites.push(dossier);
   }
+  /* b4_17 : l'archive */
+  contenus = new Map<string, ContenuExport>();
+  prets: { exportId: string; chemin: string; octets: number; empreinte: string }[] = [];
+  enEchec: { exportId: string; motif: string }[] = [];
+  async exportContenu(exportId: string) {
+    const c = this.contenus.get(exportId);
+    if (!c) throw new ErreurPorte("55000", "Cet export n'est pas en préparation.", false);
+    return c;
+  }
+  async exportPret(exportId: string, chemin: string, octets: number, empreinte: string) {
+    this.prets.push({ exportId, chemin, octets, empreinte });
+  }
+  async exportEchec(exportId: string, motif: string) {
+    this.enEchec.push({ exportId, motif });
+  }
 }
 
 class BucketMemoire implements Stockage {
@@ -79,6 +95,16 @@ class BucketMemoire implements Stockage {
     let n = 0;
     for (const c of chemins) if (c !== this.tenace && this.fichiers.delete(c)) n++;
     return n;
+  }
+  contenus = new Map<string, Uint8Array>();
+  async lire(chemin: string) {
+    if (this.panne) throw new Error("Storage 503");
+    return this.contenus.get(chemin) ?? null;
+  }
+  async deposer(chemin: string, octets: Uint8Array) {
+    if (this.contenus.has(chemin)) throw new Error("Storage 409 : existe déjà");
+    this.contenus.set(chemin, octets);
+    this.fichiers.add(chemin);
   }
 }
 
@@ -93,7 +119,7 @@ Deno.test("passage : efface les pièces de la réception, constate la purge, fin
   p.chemins.set(41, [`${CLIENT}/receptions/m1/avis.pdf`, `${CLIENT}/receptions/m1/annexe.pdf`]);
   p.travaux = [travail(1, 41)];
   const bilan = await passage(p, b);
-  assertEquals(bilan, { pris: 1, purges: 1, dossiers: 0, exports: 0, cles: 0, fichiers: 2, echecs: 0 });
+  assertEquals(bilan, { pris: 1, purges: 1, archives: 0, dossiers: 0, exports: 0, cles: 0, fichiers: 2, echecs: 0 });
   assertEquals([...b.fichiers], [`${CLIENT}/tamila_dossier/d/autre.chiffre`], "seule la copie en clair est effacée");
   assertEquals(p.purgees, [{ reception: 41, fichiers: 2 }]);
   assertEquals(p.finis, [{ id: 1, resultat: { reception: 41, fichiers: 2 } }]);
@@ -201,6 +227,92 @@ Deno.test("archive échue : le fichier est effacé puis la purge constatée ; la
   assertEquals(b.fichiers.size, 0);
   assertEquals(p.exportsPurges, [E]);
   assertEquals(p.clesDetruites, [D1]);
+});
+
+/* lire un ZIP « stocké » : les entrées du répertoire central, et leurs octets */
+function lireZip(z: Uint8Array): Map<string, Uint8Array> {
+  const v = new DataView(z.buffer, z.byteOffset, z.byteLength);
+  let fin = z.length - 22;
+  while (v.getUint32(fin, true) !== 0x06054b50) fin--;
+  const n = v.getUint16(fin + 10, true);
+  let p = v.getUint32(fin + 16, true);
+  const out = new Map<string, Uint8Array>();
+  for (let i = 0; i < n; i++) {
+    const taille = v.getUint32(p + 20, true);
+    const lnom = v.getUint16(p + 28, true);
+    const crc = v.getUint32(p + 16, true);
+    const local = v.getUint32(p + 42, true);
+    const nom = new TextDecoder().decode(z.slice(p + 46, p + 46 + lnom));
+    const debut = local + 30 + v.getUint16(local + 26, true) + v.getUint16(local + 28, true);
+    const octets = z.slice(debut, debut + taille);
+    assertEquals(crc32(octets), crc, `CRC de ${nom}`);
+    out.set(nom, octets);
+    p += 46 + lnom + v.getUint16(p + 30, true) + v.getUint16(p + 32, true);
+  }
+  return out;
+}
+
+Deno.test("archive : manifeste, pièces chiffrées telles qu'au bucket, LISEZMOI ; rangée sous le dossier, déclarée prête", async () => {
+  const p = new PortesMemoire();
+  const b = new BucketMemoire();
+  const E = "e2e2e2e2-0000-4000-8000-0000000000e2";
+  const chemin = `${CLIENT}/tamila_dossier/${D1}/conclusions.pdf.abc.chiffre`;
+  const chiffre = new Uint8Array([1, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 1, 2, 42, 42]);
+  b.contenus.set(chemin, chiffre);
+  p.contenus.set(E, {
+    export: E,
+    client: CLIENT,
+    dossier: D1,
+    format: "tamila-archive/1",
+    dossiers: [{
+      dossier: { reference_chiffree: "\\x01abcd" },
+      pieces: [{ id: "a1a1a1a1-0000-4000-8000-0000000000a1", nom_fichier: "conclusions.pdf", chemin, sha256: "0".repeat(64) }],
+    }],
+  } as ContenuExport);
+  p.travaux = [tache(30, GENRE_ARCHIVE, { export: E, dossier: D1 })];
+  const bilan = await passage(p, b);
+  assertEquals([bilan.archives, bilan.echecs], [1, 0]);
+  assertEquals(p.prets.length, 1);
+  assertEquals(p.prets[0].chemin, `${CLIENT}/tamila_dossier/${D1}/exports/${E}.zip`);
+  const zip = lireZip(b.contenus.get(p.prets[0].chemin)!);
+  assertEquals([...zip.keys()].sort(), ["LISEZMOI.txt", "manifeste.json", "pieces/a1a1a1a1-conclusions.pdf.chiffre"]);
+  assertEquals(zip.get("pieces/a1a1a1a1-conclusions.pdf.chiffre"), chiffre, "la pièce, octet pour octet, toujours chiffrée");
+  const m = JSON.parse(new TextDecoder().decode(zip.get("manifeste.json")!));
+  assertEquals(m.dossiers[0].dossier.reference_chiffree, "\\x01abcd");
+  assertEquals(p.prets[0].octets, b.contenus.get(p.prets[0].chemin)!.length);
+  assertEquals(/^[0-9a-f]{64}$/.test(p.prets[0].empreinte), true);
+});
+
+Deno.test("archive : une pièce absente du bucket fait échouer l'export, motivé, sans reprise ; une panne se reprend", async () => {
+  const p = new PortesMemoire();
+  const b = new BucketMemoire();
+  const E = "e3e3e3e3-0000-4000-8000-0000000000e3";
+  p.contenus.set(
+    E,
+    {
+      export: E,
+      client: CLIENT,
+      dossier: D1,
+      format: "tamila-archive/1",
+      dossiers: [{
+        pieces: [{
+          id: "b1b1b1b1-0000-4000-8000-0000000000b1",
+          nom_fichier: "x.pdf",
+          chemin: `${CLIENT}/tamila_dossier/${D1}/x.chiffre`,
+          sha256: "0".repeat(64),
+        }],
+      }],
+    } as ContenuExport,
+  );
+  p.travaux = [tache(31, GENRE_ARCHIVE, { export: E })];
+  await passage(p, b);
+  assertEquals(p.enEchec, [{ exportId: E, motif: "piece_introuvable" }]);
+  assertEquals(p.echoues.at(-1)!.reprendre, false);
+  b.panne = true;
+  p.travaux = [tache(32, GENRE_ARCHIVE, { export: E })];
+  await passage(p, b);
+  assertEquals(p.echoues.at(-1)!.reprendre, true);
+  assertEquals(p.enEchec.length, 1, "une panne du bucket ne déclare pas l'échec");
 });
 
 Deno.test("StockageSupabase : DELETE sur le bucket, les chemins en prefixes, la clé de service", async () => {

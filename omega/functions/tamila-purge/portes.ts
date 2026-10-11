@@ -35,6 +35,20 @@ export interface Portes {
   exportPurge(exportId: string): Promise<void>;
   /** tamila_cle_detruite (socle Tamila) : l'enveloppe de la clé d'un dossier effacé, mise à zéro. */
   cleDetruite(dossier: string, preuve: Record<string, unknown>): Promise<void>;
+  /** tamila_export_contenu (b4_17) : le contenu de l'archive, champs chiffrés compris. */
+  exportContenu(exportId: string): Promise<ContenuExport>;
+  /** tamila_export_pret / tamila_export_echec (socle Tamila). */
+  exportPret(exportId: string, chemin: string, octets: number, empreinte: string): Promise<void>;
+  exportEchec(exportId: string, motif: string): Promise<void>;
+}
+
+export interface ContenuExport {
+  export: string;
+  client: string;
+  dossier: string | null;
+  format: string;
+  dossiers: { pieces?: { id: string; nom_fichier: string; chemin: string; sha256: string }[]; [cle: string]: unknown }[];
+  [cle: string]: unknown;
 }
 
 export interface DossierAEffacer {
@@ -101,5 +115,14 @@ export class PortesRpc implements Portes {
   }
   async cleDetruite(dossier: string, preuve: Record<string, unknown>) {
     await this.rpc("tamila_cle_detruite", { p_dossier: dossier, p_preuve: preuve });
+  }
+  exportContenu(exportId: string) {
+    return this.rpc<ContenuExport>("tamila_export_contenu", { p_export: exportId });
+  }
+  async exportPret(exportId: string, chemin: string, octets: number, empreinte: string) {
+    await this.rpc("tamila_export_pret", { p_export: exportId, p_chemin: chemin, p_octets: octets, p_empreinte: empreinte });
+  }
+  async exportEchec(exportId: string, motif: string) {
+    await this.rpc("tamila_export_echec", { p_export: exportId, p_motif: motif });
   }
 }
