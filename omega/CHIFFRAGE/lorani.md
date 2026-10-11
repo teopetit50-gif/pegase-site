@@ -9,9 +9,9 @@ n'a été touché.
 ## Synthèse
 
 1. **Promesses : 69 lignes** (66 numérotées, plus 21b et 2 lignes commerciales).
-   - A : 1 (zone du PLU et servitudes, relevé réel du 06/10 à 20 h 15 Z)
+   - A : 2 (zone du PLU et servitudes, relevé réel du 06/10 ; risques de la commune, relevé réel du 11/10)
    - B : 23
-   - C : 29
+   - C : 28
    - D : 13
    - T : 3
 2. **Pour tout mettre en B : ≈ 95 jours de travail**, dont ≈ 38 relèvent du lecteur ou d'un ouvrier « dwg ». Le seul métré sur le dessin en pèse 12,5 ; A1 et B5 conseillent de le reformuler plutôt que de le construire.
@@ -28,12 +28,12 @@ n'a été touché.
    - **Géorisques est injoignable depuis nos hébergeurs** : il est remplacé par les données ouvertes (b5_24, ligne 21b).
 5. **Pour servir UNE première agence réelle** en formule Agence :
    - 5 vraies planches lues, puis un dossier client fiable (#1, #4 : 4,5 j, A1) ;
-   - les risques par les données ouvertes (#21b : construits, à poser, 0,5 j) ;
+   - les risques par les données ouvertes (#21b : fait, prouvé en vrai le 11/10) ;
    - le rappel J-10, « 8 jours le matin » et « constat → question » (#39, #46, #45 : 3 j) ;
    - la région UE (#6 : 1 j) et le règlement du PLU (#20 : 0,5 j) ;
    - l'audit sur un permis déjà instruit.
 
-   Cela fait **≈ 9,5 jours**, ou 15,5 jours avec « Questions posées au dossier », que la formule Agence promet aussi (#53).
+   Cela fait **≈ 9 jours**, ou 15 jours avec « Questions posées au dossier », que la formule Agence promet aussi (#53).
 6. **Avis honnête** : le moteur (croisement, règles, permis, chantier) est construit et testé, et la recherche des servitudes depuis l'adresse marche en vrai. Ce qui manque, c'est l'œil, c'est-à-dire la lecture d'une vraie planche. Moins de travail que prévu (≈ 4 j selon A1), mais encore jamais essayée. Deux pans entiers de la page manquent aussi : Analyse des offres, et le fond du Visa. Une première agence peut être servie en ≈ 3 semaines ; la page entière tenue en vrai, c'est ≈ 140 jours-ouvrier.
 
 **À signaler** : à 18 h 28 Z, `omegaai.fr/secteurs/architectes` affiche encore des pastilles « En préparation », y compris sur
@@ -89,7 +89,7 @@ des lignes déjà retirées de `lib/en-preparation.ts` (Accessibilité, Cerfa, R
 | 19 | « Délai d'instruction suivi jusqu'à la purge » ; « Calendrier du permis jusqu'à la purge des recours » ; FAQ « Il suit le délai d'instruction, la demande de pièces complémentaires … la date du permis tacite et la fin du délai de recours des tiers » | Fonctionnement.tsx:229 ; Formules.tsx:175 ; Questions.tsx:63 | B | b5_01 (121 assertions), b5_02 (courriels du guichet), dépôt réel du banc sur la recette (`courrier-reel.mjs`) | Un vrai permis suivi : c'est du calendrier, 2 à 5 mois | 0 / 2 | — |
 | 20 | « Règles du PLU citées par article » | Fonctionnement.tsx:211 | B | b5_07 §3 (article UB 10) | La lecture du règlement existe chez A1 (B) : vérifier qu'elle ne rend que la zone du terrain | 0 / 0,5 | 0,3 à 1,5 € pour un PLUi entier (A1) |
 | 21 | « PLU, servitudes et risques lus depuis l'adresse » ; FAQ « … les servitudes … et le périmètre des Monuments historiques » | Formules.tsx:157 ; Questions.tsx:58 | **A** (zone et servitudes) | **Relevé réel du coordinateur, 20 h 15 Z** : `lorani_chercher_plu` sur un projet du banc, 3 rue des Hauts-Pavés à Nantes. Résultat : géocodage 200 ; zone UMa du PLUi de Nantes Métropole ; servitude AC1, abords de la salle Saint-Joseph de Bel-Air ; `secteur_protege` = vrai. b5_23 et b5_14 posés, verts | — | 0 / 0 | — (API IGN gratuites) |
-| 21b | « … les risques connus (inondation, argile, sismicité) » | Questions.tsx:58 ; Formules.tsx:157 | C → B à la pose | L'API Géorisques n'aboutit jamais depuis nos hébergeurs (relevé du 06/10 à 20 h 15 Z ; BRGM rejette aussi). **Construit le 06/10 (b5_24)** : les risques viennent de trois sources ouvertes chargées en tables, joignables (essai de B5) : GASPAR/DDRM (31 733 communes, argiles = code 127), zonage sismique 2011 (35 346 communes) et radon 2018 (32 771). b5_14 v2 : 13/13 en local sur les doubles du socle. À Nantes : sismicité 3, radon 3, argiles recensées, 9 risques | Poser b5_24, les 15 lots de données (`omega/modules/lorani/donnees/`) et b5_14 v2. GASPAR change chaque semaine : relancer `generer.mjs` (manuel) ; une tâche mensuelle automatique coûterait 1 j de plus. Les argiles sont données à la commune, pas à l'adresse (la carte BRGM fait 623 Mo et son service rejette nos IP) | 0 / 0,5 | — (licence Etalab) |
+| 21b | « … les risques connus (inondation, argile, sismicité) » | Questions.tsx:58 ; Formules.tsx:157 | **A** (à la commune) | L'API Géorisques étant filtrée, les risques viennent des données ouvertes en tables (b5_24 : GASPAR/DDRM, zonage sismique 2011, radon 2018), posées sur la recette le 11/10 ; b5_14 v2 vert (lot h1340b5b7 : 42 ok, 0 not ok). **Relevé réel le 11/10 à 13 h 40 Z** : `lorani_chercher_plu` sur « Extension Garnier (banc) », 3 rue des Hauts-Pavés à Nantes, sous le gérant du banc. Résultat en 22 s : statut « fait », zone UMa, AC1, sismicité « 3 - Modérée », radon 3, argiles recensées, 9 risques et 13 détails | Les argiles sont données à la commune, pas à l'adresse. GASPAR se rafraîchit à la main (`generer.mjs`) ; l'automatiser coûterait 1 j | 0 / 0 | — (licence Etalab) |
 | 22 | « … lit la zone du PLU **et son règlement** » (sans téléversement) | Questions.tsx:58 | C | b5_17 trouve le document d'urbanisme | Télécharger le règlement depuis le Géoportail et le passer au lecteur, qui sait le lire (A1). Extraire les articles de la zone pour le contrôle | 1,5 / 0,5 | 0,3 à 1,5 € par PLUi (A1) |
 | 23 | « … puis en déduit les pièces que le permis exigera » | Questions.tsx:58 | D | `secteur_protege` posé par b5_23 | Table des pièces exigées (R431-5 à R431-34 : secteur protégé, ERP, lotissement, PPR…) branchée sur la liste des pièces du projet | 2 / 1 | — |
 
@@ -199,9 +199,9 @@ Ce qui n'est pas couvert :
 
 | État | Lignes |
 |---|---|
-| A | 1 |
+| A | 2 |
 | B | 23 |
-| C | 29 |
+| C | 28 |
 | D | 13 |
 | T | 3 |
 
@@ -211,7 +211,7 @@ Ce qui n'est pas couvert :
 |---|---|---|---|
 | Haut de page, garanties, compteurs | 10 | 8 | 11 |
 | Produit | 8 | 3 | 6,5 |
-| Permis et PLU | 6 | 3,5 | 4,5 |
+| Permis et PLU | 6 | 3,5 | 4 |
 | Analyse des offres (avec métré et décennales) | 6 | 21,5 | 10,5 |
 | Situations de travaux | 5 | 6,5 | 3,5 |
 | Visa des documents | 6 | 8,25 | 5,75 |

@@ -5,6 +5,11 @@ Dernière mise à jour : 05/10/2026, 23 h.
 
 ## REPRISE (pause demandée par Teo, 06/10/2026 à 21 h Z)
 
+**11/10, 13 h 40 Z — b5_24 posé et prouvé.**
+- Le coordinateur a posé b5_24, les 15 lots de données et b5_14 v2. Lot h1340b5b7 : 42 ok, 0 not ok. Référentiels conformes : risques 31 733, radon 32 771, sismicité 35 346, libellés 49.
+- Relevé réel sous le gérant du banc (`omega/recette-b5`, comme un client), `lorani_chercher_plu` sur 7ef5d6aa (Nantes). Résultat en 22 s : « fait », UMa, AC1, sismicité 3, radon 3, argiles recensées, 9 risques.
+- La ligne « PLU, servitudes et risques lus depuis l'adresse » peut sortir de `lib/en-preparation.ts` (au coordinateur : c'est un fichier du site).
+
 **Branche `worker-b5`, dernier SHA de travail : 6082922.** Aucun fichier du site public n'a été modifié.
 
 **Fait et posé sur la recette (vert, rapports du coordinateur) :**
