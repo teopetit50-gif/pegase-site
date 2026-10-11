@@ -117,6 +117,8 @@ export class DepotMemoire implements Depot {
 export class ExtracteurFactice implements Extracteur {
   readonly modele = "eu.anthropic.claude-sonnet-4-5-20250929-v1:0";
   prochaine: SortieOutil | null = null;
+  /** Une réponse calculée sur l'entrée (lecture par morceaux) ; prime sur « prochaine ». */
+  repondre: ((e: EntreeIa) => SortieOutil) | null = null;
   appels: { entree: EntreeIa; piece: ContextePiece }[] = [];
   estimation = 0.01;
   /** La transcription rendue pour une page donnée (gros documents lus par morceaux). */
@@ -133,8 +135,9 @@ export class ExtracteurFactice implements Extracteur {
   }
   async extraire(entree: EntreeIa, piece: ContextePiece): Promise<SortieIa> {
     this.appels.push({ entree, piece });
-    if (!this.prochaine) throw new Error("le double de l'IA n'a rien à rendre");
-    return { brut: this.prochaine, usage: { tokens_entree: 1200, tokens_sortie: 400 }, modele: this.modele, cout_eur: 0.00884 };
+    const brut = this.repondre ? this.repondre(entree) : this.prochaine;
+    if (!brut) throw new Error("le double de l'IA n'a rien à rendre");
+    return { brut, usage: { tokens_entree: 1200, tokens_sortie: 400 }, modele: this.modele, cout_eur: 0.00884 };
   }
 }
 

@@ -35,7 +35,7 @@ Légende : **A** prouvé sur de vrais documents en recette ; **B** testé sur do
 | Vocaux (Daliro) | B / **T** | — | Clé Mistral et accord de Teo (refusé pour l'instant) ; WhatsApp | — | 0,5 | ≈ 0,002 € la minute + 0,01 € |
 | Documents médicaux (ordonnances, comptes rendus) | **D** | — | Aucun type ; à cadrer (hébergement de données de santé, HDS) avant tout code | 3 | 2 | ≈ 0,015–0,03 € |
 | DWG (plans natifs) | **D** / T | — | Étude de B5 corrigée : LibreDWG (GPL) dans un petit service serveur à part, car une fonction Edge ne tient pas les gros fichiers ; hébergement à prévoir. Lecture serveur 3–4 j, dépôt 0,5 j, recalage PDF↔DWG 1–2 j, infrastructure 1–2 j | 6–9 | 2 | 0 € (géométrie, sans IA) |
-| Offres d'entreprises (Excel, PDF : prix par poste) | **D** | — | Type `lorani_offre` (entreprise, lot, total HT, prix unitaire, montant, quantité et unité par poste) ; Excel de plus de 500 lignes à découper (+0,5 j) | 1 | 1 | 0,02–0,05 € (PDF court) ; 0,1–0,3 € (gros Excel) |
+| Offres d'entreprises (Excel, PDF : prix par poste) | B (11/10, b5_26) | — | `lorani_offre` fait ; un long tableau se lit par morceaux de 80 lignes. Il manque de vraies offres pour la mesure | — | 1 | ≈ 0,25 € par tranche de 100 lignes (une valeur citée par cellule coûte en sortie) ; 0,02–0,05 € pour un devis court |
 | Métré mesuré sur les plans (surfaces et longueurs prises sur le dessin) | **D** | — | Seule la géométrie vectorielle (PDF ou DWG) peut le donner : tracés, échelle du cartouche, pièces. La vision ne donne que des ordres de grandeur. À ne pas promettre avant | 10–15 | ? | 0 € (géométrie) |
 
 ## Ce qui vaut pour toutes les lignes
@@ -46,4 +46,4 @@ Légende : **A** prouvé sur de vrais documents en recette ; **B** testé sur do
 - La qualité n'est **mesurée** que sur 2 pièces réelles. Le premier chantier pour passer en A : un corpus par famille, avec un tableur « attendu / lu / juste » par champ. L'outil de mesure est **fait** (11/10, `lecteur/outils/mesurer.ts` : squelette d'attendu, puis précision, rappel, « vérifiées et fausses », coût, écarts). Il reste environ 0,5 jour par famille, une fois le corpus déposé et relu.
 
 ## Total
-Il faut **1,5 jour** pour amener les deux lignes C à B (autres pièces FILED, attestation d'assurance). Il faut **16 jours** pour passer en A toutes les lignes, hors médical et DWG, une fois les documents réels reçus (l'outil de mesure est fait). Le médical (3 + 2 jours), le DWG (6 à 9 jours, puis 2), les offres d'entreprises (1 + 1) et le métré mesuré sur plan (10 à 15 jours, fiabilité incertaine) sont à décider.
+Il faut **1,5 jour** pour amener les deux lignes C à B (autres pièces FILED, attestation d'assurance). Il faut **16 jours** pour passer en A toutes les lignes, hors médical et DWG, une fois les documents réels reçus (l'outil de mesure est fait). Le médical (3 + 2 jours), le DWG (6 à 9 jours, puis 2), le métré mesuré sur plan (10 à 15 jours, fiabilité incertaine) sont à décider.

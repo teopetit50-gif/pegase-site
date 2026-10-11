@@ -73,16 +73,38 @@ const FAMILLES_CONTROLE: FamilleChamps[] = [
     famille: "quantite.<référence>",
     motif: "^quantite\\.[a-z0-9_]{1,40}$",
     type: "nombre",
-    types: ["lorani_metre", "lorani_planche"],
+    types: ["lorani_metre", "lorani_planche", "lorani_offre"],
     description:
       "une quantité mesurée pour un poste (surface, longueur, volume, nombre), en nombre sans unité ; <référence> normalisée comme au CCTP. Sur une planche, seulement la quantité écrite pour ce poste (tu ne mesures rien sur le dessin).",
+  },
+  {
+    famille: "prix_unitaire.<référence>",
+    motif: "^prix_unitaire\\.[a-z0-9_]{1,40}$",
+    type: "nombre",
+    types: ["lorani_offre", "lorani_dpgf"],
+    description: "le prix unitaire HT du poste, en euros, nombre sans unité ; <référence> = celle de la DPGF (8.1 → 8_1), ou celle de l'entreprise pour un poste qu'elle ajoute.",
+  },
+  {
+    famille: "montant.<référence>",
+    motif: "^montant\\.[a-z0-9_]{1,40}$",
+    type: "nombre",
+    types: ["lorani_offre", "lorani_dpgf"],
+    description: "le montant HT du poste, en euros, nombre sans unité. Un poste vide, « néant » ou « inclus » n'est pas rendu ; « 0 » écrit est rendu 0.",
+  },
+  {
+    famille: "reserve.<n>",
+    motif: "^reserve\\.[0-9]{1,3}$",
+    type: "texte",
+    max: 500,
+    types: ["lorani_offre"],
+    description: "une réserve, variante ou exclusion écrite par l'entreprise, recopiée (une par numéro : reserve.1, reserve.2…).",
   },
   {
     famille: "unite.<référence>",
     motif: "^unite\\.[a-z0-9_]{1,40}$",
     type: "texte",
     max: 10,
-    types: ["lorani_metre", "lorani_dpgf"],
+    types: ["lorani_metre", "lorani_dpgf", "lorani_offre"],
     description: "l'unité du poste, ramenée à m2, ml, m3, u, kg, t, ens ou h (m² → m2, mètre linéaire → ml, unité / pièce → u, forfait / ensemble → ens).",
   },
   {
@@ -209,9 +231,17 @@ export const SCHEMA_LORANI: SchemaModule = {
     {
       type: "lorani_dpgf",
       libelle: "DPGF",
-      description: "la décomposition du prix global et forfaitaire d'un lot : le lot, une ligne par poste chiffré (poste.<référence>, valeur = quantité) et son unité (unite.<référence>)",
+      description: "la décomposition du prix global et forfaitaire d'un lot : le lot, une ligne par poste chiffré (poste.<référence>, valeur = quantité) et son unité (unite.<référence>) ; si la maîtrise d'œuvre l'a chiffrée (estimation), prix_unitaire.<référence> et montant.<référence>",
       champs: ["lot"],
       cles: [],
+    },
+    {
+      type: "lorani_offre",
+      libelle: "offre d'entreprise",
+      description:
+        "l'offre d'une entreprise pour un lot (DPGF remplie, devis, bordereau) : l'entreprise, son SIREN, le lot, le montant total HT, et par poste prix_unitaire.<référence>, quantite.<référence> (si écrite), montant.<référence>, unite.<référence>, avec les références de la DPGF ; chaque réserve, variante ou exclusion en reserve.<n>. Montants HT seulement",
+      champs: ["entreprise", "siren", "lot", "montant_total_ht"],
+      cles: ["entreprise", "montant_total_ht"],
     },
     {
       type: "lorani_metre",
@@ -336,7 +366,9 @@ export const SCHEMA_LORANI: SchemaModule = {
     { champ: "assureur", type: "texte", max: 120, description: "attestation décennale : la compagnie d'assurance (« SMABTP »)" },
     { champ: "numero_police", type: "texte", max: 60, description: "attestation décennale : le numéro du contrat (police), tel qu'imprimé" },
     { champ: "assure", type: "texte", max: 200, description: "attestation décennale : la raison sociale de l'assuré, telle qu'écrite" },
-    { champ: "siren", type: "texte", max: 11, description: "attestation décennale : le SIREN de l'assuré, neuf chiffres (les 9 premiers d'un SIRET)" },
+    { champ: "siren", type: "texte", max: 11, description: "attestation décennale, offre : le SIREN de l'assuré ou de l'entreprise, neuf chiffres (les 9 premiers d'un SIRET)" },
+    { champ: "entreprise", type: "texte", max: 200, description: "offre : la raison sociale de l'entreprise, telle qu'écrite" },
+    { champ: "montant_total_ht", type: "nombre", description: "offre : le montant total HT de l'offre, en euros, nombre sans unité" },
     {
       champ: "activites",
       type: "liste",

@@ -491,8 +491,71 @@ async function extraireDepuisTexte(
   if (pages.every((p) => p.texte.replace(/\s+/g, "") === "")) {
     return { ...echec("Aucun texte lisible sur les pages."), cout_ocr: coutOcr, prealable };
   }
+  // Un long tableau à champs composés (offre, DPGF, CCTP de plusieurs centaines de lignes) : une valeur citée par cellule
+  // déborderait la sortie d'un seul appel. On le lit par morceaux de lignes, puis on réunit (la première valeur d'un champ
+  // l'emporte, comme dans un seul appel). Les citations se vérifient toujours sur la page entière.
+  const morceaux = (schemaPour(piece.module).familles?.length ?? 0) > 0 ? morceauxDeLignes(pages) : [];
+  if (morceaux.length > 1) {
+    const sorties: SortieIa[] = [];
+    for (const m of morceaux) {
+      sorties.push(await appelerIa(ctx, piece, { mode: "texte", pages: m }, contexte));
+    }
+    // Le bilan compte un appel pour la sortie réunie : les autres morceaux s'ajoutent aux appels préalables.
+    return { ...assembler(reunir(sorties), pagesPdf, pages, methode, coutOcr, piece.module), prealable: { ...prealable, appels_ia: prealable.appels_ia + sorties.length - 1 } };
+  }
   const ia = await appelerIa(ctx, piece, { mode: "texte", pages: pages.map((p) => ({ n: p.n, texte: p.texte })) }, contexte);
   return { ...assembler(ia, pagesPdf, pages, methode, coutOcr, piece.module), prealable };
+}
+
+export const LIGNES_PAR_MORCEAU = 80;
+export const CARACTERES_PAR_MORCEAU = 40_000;
+
+/** Les pages coupées en morceaux de LIGNES_PAR_MORCEAU lignes ou CARACTERES_PAR_MORCEAU caractères au plus ; un seul
+ *  morceau si tout tient. Chaque morceau garde le numéro de sa page. */
+export function morceauxDeLignes(pages: { n: number; texte: string }[]): { n: number; texte: string }[][] {
+  const morceaux: { n: number; texte: string }[][] = [];
+  let courant: { n: number; texte: string }[] = [];
+  let lignes = 0;
+  let taille = 0;
+  const pousser = () => {
+    if (courant.length > 0) morceaux.push(courant);
+    courant = [];
+    lignes = 0;
+    taille = 0;
+  };
+  for (const p of pages) {
+    let bloc: string[] = [];
+    for (const l of p.texte.split("\n")) {
+      if ((lignes + 1 > LIGNES_PAR_MORCEAU || taille + l.length > CARACTERES_PAR_MORCEAU) && (bloc.length > 0 || courant.length > 0)) {
+        if (bloc.length > 0) courant.push({ n: p.n, texte: bloc.join("\n") });
+        bloc = [];
+        pousser();
+      }
+      bloc.push(l);
+      lignes++;
+      taille += l.length + 1;
+    }
+    if (bloc.length > 0) courant.push({ n: p.n, texte: bloc.join("\n") });
+  }
+  pousser();
+  return morceaux;
+}
+
+/** Les sorties des morceaux réunies en une : type du morceau le plus sûr, valeurs mises bout à bout, coûts additionnés. */
+export function reunir(sorties: SortieIa[]): SortieIa {
+  const sure = [...sorties].sort((a, b) => (b.brut.confiance_type ?? 0) - (a.brut.confiance_type ?? 0))[0];
+  return {
+    brut: {
+      lisible: sorties.some((s) => s.brut.lisible),
+      type_piece: sure.brut.type_piece,
+      confiance_type: sure.brut.confiance_type,
+      motif: sorties.every((s) => !s.brut.lisible) ? sure.brut.motif : undefined,
+      valeurs: sorties.flatMap((s) => s.brut.valeurs ?? []),
+    },
+    usage: sorties.reduce((u, s) => ({ tokens_entree: u.tokens_entree + s.usage.tokens_entree, tokens_sortie: u.tokens_sortie + s.usage.tokens_sortie }), { tokens_entree: 0, tokens_sortie: 0 }),
+    modele: sure.modele,
+    cout_eur: Math.round(sorties.reduce((c, s) => c + s.cout_eur, 0) * 1e6) / 1e6,
+  };
 }
 
 /** Du résultat brut de l'IA au résultat de lecture : pages, valeurs vérifiées, statut. */
