@@ -30,6 +30,8 @@ const ECRANS = [
   ['lorani-cr', '/espace/lorani', `[...document.querySelectorAll('.esp-lien-bouton')].find(b => b.textContent.trim() === 'Nouveau compte rendu')?.click()`, /Façade rue Mercière/],
   /* le DOE (b5_21) : la façade rue Mercière, puis le dialogue « Reçu » */
   ['lorani-doe', '/espace/lorani', `[...document.querySelectorAll('.lor-doe-ligne .esp-lien-bouton')].find(b => b.textContent.trim() === 'Reçu')?.click()`, /Façade rue Mercière/],
+  /* l'analyse des offres (b5_26) : la Maison Lemoine, puis le dialogue « Écarter l'offre » */
+  ['lorani-offres', '/espace/lorani', `[...document.querySelectorAll('[aria-label="Classement des offres"] tbody tr')].find(r => /Ateliers Bois/.test(r.textContent))?.querySelectorAll('.r-btn--fil')[0]?.click()`, /Maison Lemoine/],
   ['lorani-controle', '/espace/lorani', `[...document.querySelectorAll('.esp-lien-bouton')].find(b => b.textContent.trim() === 'Revérifier à l’indice suivant')?.click()`, /Surélévation Dubois/],
 ];
 
