@@ -17,6 +17,7 @@
    elles sont appliquées en mémoire pour que l'enchaînement se voie.
    ══════════════════════════════════════════════════════════════════════ */
 
+import ChiffrageLu from "./ChiffrageLu";
 import { useMemo, useState } from "react";
 import { BookOpen, CheckCircle2, ClipboardCheck, FileSignature, FileText, Link2, MessageSquare, PenLine, Plus, RotateCcw, Unlock, Users } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
@@ -519,6 +520,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
               </div>
               <div className="esp-controle-message">{a.objet}</div>
               {a.origine?.texte || a.origine?.canal ? <div className="esp-kpi-sous">Origine : {a.origine.canal === "vocal" ? "vocal" : a.origine.canal === "photo" ? "photo" : a.origine.canal === "visite" ? "visite" : a.origine.canal ?? "—"}{a.origine.auteur ? ` de ${a.origine.auteur}` : ""}{a.origine.date ? ` le ${dateCourte(String(a.origine.date))}` : ""}{a.origine.texte ? ` — « ${a.origine.texte} »` : ""}</div> : null}
+              <ChiffrageLu chiffrage={a.origine?.chiffrage} chiffree={a.lignes.some((l) => l.origine_prix === "bibliotheque")} voitPrix={!!voit_prix} />
               {a.lignes.length ? (
                 <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Lignes de l'avenant (tableau qui défile)" style={{ marginTop: 6 }}>
                   <table className="esp-tableau">

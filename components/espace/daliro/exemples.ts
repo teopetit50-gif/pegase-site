@@ -129,7 +129,9 @@ const PASSAGES_TIL: Passage[] = [
 
 const AVENANTS_TIL: Avenant[] = [
   { id: AV1, chantier_id: TILLEULS, marche_id: M1, numero: 1, objet: "Garde-corps supplémentaires sur les balcons du R+3 (12 ml), demandés par le maître d'ouvrage en visite",
-    origine: { canal: "vocal", auteur: "Chef d'équipe Pose A", date: aujourdHui(-2), texte: "Lefèvre veut aussi des garde-corps au R+3, douze mètres." },
+    origine: { canal: "vocal", auteur: "Chef d'équipe Pose A", date: aujourdHui(-2), texte: "Lefèvre veut aussi des garde-corps au R+3, douze mètres.", lecteur: true,
+              chiffrage: { etat: "trouve", designation: "Garde-corps acier laqué, hauteur 1,00 m", prix_unitaire_ht: 142, unite: "ml",
+                           proche_du_marche: { designation: "Garde-corps acier laqué, hauteur 1,00 m", unite: "ml" } } },
     statut: "soumis", demande_id: id("301"), demande_statut: "approuvee", piece_id: null, soumis_le: ilYa(1, 10), signe_le: null, signe_par: null, signe_libelle: null, motif: null, cree_le: ilYa(2, 15), nb_lignes: 2, montant_ht: 1884,
     lignes: [
       { id: id("311"), avenant_id: AV1, lot_id: LOT2, prix_id: PRIX_GC, ordre: 1, designation: "Garde-corps acier laqué, hauteur 1,00 m", unite: "ml", quantite: 12, sens: 1, nature: "ouvrage", origine_prix: "bibliotheque", prix_unitaire_ht: 142, montant_ht: 1704 },
