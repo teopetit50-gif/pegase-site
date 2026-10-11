@@ -1,5 +1,11 @@
 # Session B1 — VARELO, le référentiel du groupe (sociétés, pôles, rapprochement)
 
+## REPRISE (11/10/2026, 15 h 40 Z — pause demandée par Teo)
+
+Arrêté proprement : arbre propre, rien en cours. Tout ce qui suit est posé vert sur la recette et dans main ; le
+seul commit non fusionné est le chiffrage mis à jour et cette note (documents, rien à poser). Prochain pas : un
+export réel pour l'essai à blanc, ou la décision de Teo sur l'outil « contexte_varelo » de l'assistant.
+
 ## REPRISE (11/10/2026, 15 h 25 Z)
 
 Fait et vert sur la recette, dans main : b1_15 décisions, b1_16 règles du groupe et sources DSI, b1_17 caisses,
