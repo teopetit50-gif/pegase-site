@@ -366,8 +366,10 @@ export default function APayer() {
                                   )}
                                   <span style={{ display: "inline-flex", gap: 4 }}>
                                     {peutPayer ? (
-                                      <button type="button" className="v2-btn v2-btn--petit" onClick={() => ouvrirPaiement(l)} aria-label={`Noter un paiement sur ${l.reference ?? "la facture"}`}>
-                                        <Banknote width={14} height={14} aria-hidden="true" /> Payer
+                                      <button type="button" className="v2-btn v2-btn--petit" onClick={() => ouvrirPaiement(l)}>
+                                        {/* le texte visible est dans le nom accessible (axe : label-content-name-mismatch) */}
+                                        <Banknote width={14} height={14} aria-hidden="true" /> Noter un paiement
+                                        <span className="v2-sr"> sur {l.reference ?? "la facture"}</span>
                                       </button>
                                     ) : null}
                                     <MenuDeroulant etiquette={`Actions sur ${l.reference ?? "la facture"}`} declencheur={<MoreHorizontal width={16} height={16} aria-hidden="true" />}>

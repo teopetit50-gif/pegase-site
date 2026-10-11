@@ -17,6 +17,8 @@
    elles sont appliquées en mémoire pour que l'enchaînement se voie.
    ══════════════════════════════════════════════════════════════════════ */
 
+import ChiffrageLu from "./ChiffrageLu";
+import { ouverte } from "./fonctions";
 import { useMemo, useState } from "react";
 import { BookOpen, CheckCircle2, ClipboardCheck, FileSignature, FileText, Link2, MessageSquare, PenLine, Plus, RotateCcw, Unlock, Users } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
@@ -478,8 +480,8 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
                       <td>{p.intervenant_type === "tiers" ? <><Pastille teinte={k.teinte}>{k.libelle}</Pastille>{dernier ? <div className="esp-kpi-sous">{dateHeure(dernier.survenu_le)}{dernier.canal ? ` · ${dernier.canal}` : ""}{typeof dernier.detail.texte === "string" ? ` · « ${dernier.detail.texte} »` : ""}</div> : null}{p.envoi ? <div className="esp-kpi-sous">{libelleEnvoi(p.envoi, dateHeure)}</div> : null}</> : <span className="esp-kpi-sous">équipe interne</span>}</td>
                       <td>
                         {p.intervenant_type === "tiers" && p.statut === "prevu" && p.confirmation !== "non_demandee" && p.confirmation !== "confirmee" ? <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "reponse", passage: p })}>Noter la réponse</button> : null}
-                        {p.intervenant_type === "tiers" && p.statut === "prevu" && (p.confirmation === "declinee" || p.confirmation === "sans_reponse") ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "remplacants", passage: p })}>Remplaçants</button></div> : null}
-                        {p.statut === "prevu" && planningVivant ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "recaler", passage: p })}>Recaler</button></div> : null}
+                        {ouverte(tableau, "remplacants") && p.intervenant_type === "tiers" && p.statut === "prevu" && (p.confirmation === "declinee" || p.confirmation === "sans_reponse") ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "remplacants", passage: p })}>Remplaçants</button></div> : null}
+                        {p.statut === "prevu" && planningVivant && ouverte(tableau, "ordre_lots") ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "recaler", passage: p })}>Recaler</button></div> : null}
                         {p.statut === "prevu" && planningVivant && p.debut <= aujourdhui() ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "terminer", passage: p })}>Noter fait</button></div> : null}
                       </td>
                     </tr>
@@ -519,6 +521,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
               </div>
               <div className="esp-controle-message">{a.objet}</div>
               {a.origine?.texte || a.origine?.canal ? <div className="esp-kpi-sous">Origine : {a.origine.canal === "vocal" ? "vocal" : a.origine.canal === "photo" ? "photo" : a.origine.canal === "visite" ? "visite" : a.origine.canal ?? "—"}{a.origine.auteur ? ` de ${a.origine.auteur}` : ""}{a.origine.date ? ` le ${dateCourte(String(a.origine.date))}` : ""}{a.origine.texte ? ` — « ${a.origine.texte} »` : ""}</div> : null}
+              <ChiffrageLu chiffrage={a.origine?.chiffrage} chiffree={a.lignes.some((l) => l.origine_prix === "bibliotheque")} voitPrix={!!voit_prix} />
               {a.lignes.length ? (
                 <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Lignes de l'avenant (tableau qui défile)" style={{ marginTop: 6 }}>
                   <table className="esp-tableau">

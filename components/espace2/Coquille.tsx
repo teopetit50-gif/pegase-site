@@ -329,6 +329,9 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
           racine: `${RACINE}/${m.cle}`,
           icone: <IconeModule cle={m.cle} icone={m.icone} />,
           compteur: compteurs[m.cle],
+          /* CASHD : son tableau de bord et l'écran de travail (débiteurs,
+             relances, envois, trésorerie, vos textes) — 11/10, avec C2 */
+          sous: m.cle === "cashd" ? m.onglets.map((o) => ({ libelle: o.libelle, href: o.href })) : undefined,
         }))
         .concat(MODULES_A_VENIR.map<Lien>((m) => ({ libelle: m.nom, href: `${RACINE}/${m.cle}`, icone: <m.icone {...I} />, bientot: true }))),
     },
