@@ -444,7 +444,7 @@ begin
   return next is(x.date_demande_pieces, current_date - 12, '19 bis. … la date reste celle de la première lettre (le délai de trois mois ne repart pas)');
   return next is(jsonb_array_length(x.demandes_pieces), 2, '19 bis. … les deux lettres sont dans l''historique demandes_pieces');
   return next ok(exists (select 1 from public.alertes where client_id = v_client and cle_regroupement = format('lorani:permis:%s:seconde_demande:2', v_pcmi)
-                         and titre like '%seconde demande de pièces%'), '19 bis. … alerte « seconde demande de pièces » levée');
+                         and titre like '%2e demande de pièces%' and titre like '%CE 30 avril 2024, n° 461958%'), '19 bis. … alerte « 2e demande de pièces » levée, qui cite CE 30 avril 2024, n° 461958 (b5_10)');
   return next ok(private.lorani_deja_saisi(x, 'demande_pieces', jsonb_build_object('date_demande_pieces', current_date - 10, 'pieces', '[{"code": "PCMI2"}, {"code": "PCMI6"}]'::jsonb)),
                  '19 bis. … la seconde lettre relue ne repropose rien (lorani_deja_saisi lit l''historique)');
   perform tests.b5_endosser(v_referent);

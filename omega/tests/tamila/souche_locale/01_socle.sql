@@ -27,7 +27,7 @@ create table public.comptes (id uuid primary key default gen_random_uuid(), user
 create table public.comptes_entites (user_id uuid, client_id uuid, entite_id uuid);
 create table public.equipes (id uuid primary key default gen_random_uuid(), client_id uuid not null, nom text not null);
 create table public.equipes_membres (equipe_id uuid, user_id uuid);
-create table public.pieces (id uuid primary key default gen_random_uuid(), client_id uuid not null, module text not null, source text not null check (source in ('depot', 'courriel', 'connecteur', 'export', 'api')), nom_fichier text not null, mime text not null, octets bigint not null, sha256 text not null check (sha256 ~ '^[0-9a-f]{64}$'), chemin text not null, objet_type text, objet_id text, statut text not null default 'recue' check (statut in ('a_rattacher', 'recue', 'en_lecture', 'lue', 'a_verifier', 'a_classer', 'rejetee', 'echec', 'effacee')), chiffrement text check (chiffrement is null or chiffrement in ('dossier:v1')), type_piece text, nb_pages int, piece_mere_id uuid, recue_le timestamptz default now());
+create table public.pieces (id uuid primary key default gen_random_uuid(), client_id uuid not null, module text not null, source text not null check (source in ('depot', 'courriel', 'connecteur', 'export', 'api')), expediteur text, depose_par uuid, motif text, nom_fichier text not null, mime text not null, octets bigint not null, sha256 text not null check (sha256 ~ '^[0-9a-f]{64}$'), chemin text not null, objet_type text, objet_id text, statut text not null default 'recue' check (statut in ('a_rattacher', 'recue', 'en_lecture', 'lue', 'a_verifier', 'a_classer', 'rejetee', 'echec', 'effacee')), chiffrement text check (chiffrement is null or chiffrement in ('dossier:v1')), type_piece text, nb_pages int, piece_mere_id uuid, recue_le timestamptz default now());
 create table public.journal_opposable (id bigserial primary key, client_id uuid not null, entite_id uuid, survenu_le timestamptz not null default now(), acteur_type text not null default 'systeme', acteur_id uuid, acteur_libelle text, action text not null, objet_type text not null, objet_id text not null, donnees jsonb not null default '{}', hash_precedent bytea, hash bytea);
 create table public.audit_journal (id bigserial primary key, client_id uuid, table_name text, op text, ligne jsonb, survenu_le timestamptz default now());
 create table public.alertes (id uuid primary key default gen_random_uuid(), client_id uuid, interne boolean not null default false, niveau text not null check (niveau in ('info', 'attention', 'critique')), source text not null, titre text not null check (char_length(titre) between 1 and 200), detail jsonb default '{}', cle_regroupement text, destinataire uuid, cree_le timestamptz default now(), close_le timestamptz, acquittee_le timestamptz);
@@ -36,8 +36,8 @@ create table public.regles_validation (id uuid primary key default gen_random_uu
 create table public.demandes_validation (id uuid primary key default gen_random_uuid(), client_id uuid not null, entite_id uuid, module text not null check (module ~ '^[a-z][a-z_]{1,29}$'), type_action text not null check (char_length(type_action) between 1 and 80), objet_type text not null, objet_id text not null, resume text not null check (char_length(resume) between 1 and 500), montant numeric check (montant is null or montant >= 0), devise char(3) default 'EUR', payload jsonb not null default '{}', demandeur_type text, demandeur_id uuid, statut text not null default 'en_attente' check (statut in ('en_attente', 'approuvee', 'rejetee', 'annulee', 'expiree', 'executee', 'echec_execution')), approbations_requises smallint, roles_autorises text[], regle_id uuid, echeance timestamptz, cle_idempotence text not null, cree_le timestamptz default now(), decide_le timestamptz, execute_le timestamptz, motif_echec text, equipe_id uuid, politique_id uuid, exige_commentaire boolean, exige_piece boolean, exige_motif boolean, unique (client_id, cle_idempotence));
 create table public.approbations (id uuid primary key default gen_random_uuid(), demande_id uuid not null references public.demandes_validation(id), client_id uuid, user_id uuid, au_nom_de uuid, delegation_id uuid, decision text not null check (decision in ('approuve', 'rejete')), commentaire text check (commentaire is null or char_length(commentaire) <= 2000), piece_id uuid, decide_le timestamptz default now(), cree_le timestamptz default now(), unique (demande_id, user_id));
 create table public.delegations (id uuid primary key default gen_random_uuid(), client_id uuid not null, delegant uuid not null, delegataire uuid not null, entite_id uuid, module text, debut timestamptz not null, fin timestamptz not null, motif text, cree_par uuid, cree_le timestamptz default now(), revoquee_le timestamptz);
-create table public.travaux (id bigserial primary key, client_id uuid, module text, genre text, charge jsonb default '{}', cle text, priorite smallint default 0, statut text default 'a_faire', resultat jsonb, erreur text, essais int default 0, essais_max int default 5, prochain_le timestamptz default now(), verrou_jusqu_au timestamptz, pris_par text, cree_le timestamptz default now());
-create unique index travaux_cle_ouverte on public.travaux (genre, cle) where statut in ('a_faire', 'en_cours');
+create table public.travaux (id bigserial primary key, client_id uuid, module text, genre text, charge jsonb default '{}', cle text, priorite smallint default 0, etat text default 'a_faire', resultat jsonb, erreur text, essais int default 0, essais_max int default 5, prochain_le timestamptz default now(), verrou_jusqu_au timestamptz, pris_par text, cree_le timestamptz default now(), fini_le timestamptz);
+create unique index travaux_cle_ouverte on public.travaux (genre, cle) where etat in ('a_faire', 'en_cours');
 create table public.battements (client_id uuid, module text, dernier_le timestamptz, primary key (client_id, module));
 create table public.lectures (id bigserial primary key, client_id uuid not null, objet_type text not null, objet_id text not null, user_id uuid not null, contexte text, lu_le timestamptz not null default now());
 create table public.territoires (code text primary key, nom text, fuseau text not null);
@@ -100,13 +100,13 @@ create or replace function private.deposer_travail(p_client uuid, p_module text,
 declare v bigint;
 begin
   insert into public.travaux (client_id, module, genre, charge, cle, priorite) values (p_client, p_module, p_genre, p_charge, p_cle, p_priorite)
-  on conflict (genre, cle) where statut in ('a_faire', 'en_cours') do update set priorite = excluded.priorite returning id into v;
+  on conflict (genre, cle) where etat in ('a_faire', 'en_cours') do update set priorite = excluded.priorite returning id into v;
   return v;
 end $$;
 create or replace function private.prendre_travaux(p_genres text[], p_n int, p_bail interval, p_ouvrier text) returns setof public.travaux language sql as $$
-  update public.travaux set statut = 'en_cours', pris_par = p_ouvrier, verrou_jusqu_au = now() + p_bail where id in (select id from public.travaux where genre = any (p_genres) and statut = 'a_faire' and prochain_le <= now() order by priorite desc, id limit p_n) returning * $$;
-create or replace function private.finir_travail(p_id bigint, p_resultat jsonb) returns void language sql as $$ update public.travaux set statut = 'fait', resultat = p_resultat where id = p_id $$;
-create or replace function private.echouer_travail(p_id bigint, p_err text) returns void language sql as $$ update public.travaux set statut = 'echec', erreur = p_err where id = p_id $$;
+  update public.travaux set etat = 'en_cours', pris_par = p_ouvrier, verrou_jusqu_au = now() + p_bail where id in (select id from public.travaux where genre = any (p_genres) and etat = 'a_faire' and prochain_le <= now() order by priorite desc, id limit p_n) returning * $$;
+create or replace function private.finir_travail(p_id bigint, p_resultat jsonb) returns void language sql as $$ update public.travaux set etat = 'fait', resultat = p_resultat where id = p_id $$;
+create or replace function private.echouer_travail(p_id bigint, p_err text) returns void language sql as $$ update public.travaux set etat = 'echec', erreur = p_err where id = p_id $$;
 create or replace function private.battre(p_client uuid, p_moteur text, p_detail jsonb, p_x uuid) returns void language sql as $$
   insert into public.battements (client_id, module, dernier_le) values (p_client, p_moteur, now()) on conflict (client_id, module) do update set dernier_le = now() $$;
 create or replace function private.regler_battement(p_client uuid, p_moteur text, p_tous_les interval, p_x uuid, p_fuseau text) returns void language sql as $$ select null::void $$;
@@ -150,6 +150,142 @@ begin
   insert into public.effacements_objets (client_id, objet_type, objet_id, motif, detail) values (p_client, p_objet_type, p_objet_id, p_motif, jsonb_build_object('pieces', n)) returning id into v_id;
   return jsonb_build_object('effacement', v_id, 'pieces', n);
 end $$;
+
+-- La liste des fichiers d'un objet et son manifeste (souche de preparer_effacement : les objets du bucket sous
+-- <client>/<type>/<id>/ ; le vrai socle passe par fichiers_de).
+create or replace function private.preparer_effacement(p_client uuid, p_objet_type text default null, p_objet_id text default null) returns jsonb language plpgsql security definer set search_path to '' as $$
+declare v_cle text := p_client::text || coalesce('/' || p_objet_type || '/' || p_objet_id, ''); v_liste jsonb; v_m jsonb;
+begin
+  select coalesce(jsonb_agg(jsonb_build_object('bucket', o.bucket_id, 'nom', o.name, 'octets', 0, 'empreinte', md5(o.name)) order by o.name), '[]') into v_liste
+    from storage.objects o where starts_with(o.name, v_cle || '/');
+  v_m := jsonb_build_object('nombre', jsonb_array_length(v_liste), 'octets', 0, 'empreinte_sha256', encode(sha256(convert_to(v_liste::text, 'UTF8')), 'hex'));
+  insert into private.manifestes_effacement (cle, manifeste) values (v_cle, v_m) on conflict (cle) do update set manifeste = excluded.manifeste;
+  return jsonb_build_object('manifeste', v_m, 'fichiers', v_liste);
+end $$;
+
+-- Le point du matin (souche de deposer_section et retirer_section, à la forme de la recette : la section dans
+-- points_sections, ses lignes dans points_items ; le vrai socle valide les lignes et refuse le texte libre sur un objet
+-- chiffré ; retirer une section la fait disparaître avec ses lignes).
+create table public.points_sections (id uuid primary key default gen_random_uuid(), client_id uuid not null, module text not null, jour date not null,
+  destinataire uuid, role text, equipe_id uuid, entite_id uuid, titre text not null, ordre integer, nb_items integer not null default 0,
+  depose_le timestamptz not null default now(), maj_le timestamptz not null default now(),
+  unique nulls not distinct (client_id, module, jour, destinataire, role, titre));
+create table public.points_items (id uuid primary key default gen_random_uuid(), client_id uuid not null, section_id uuid not null references public.points_sections(id) on delete cascade,
+  rang integer not null, texte text not null, lien text, gravite text not null, objet_type text, objet_id text, gabarit text, gabarit_version integer, valeurs jsonb);
+create or replace function private.deposer_section(p_client uuid, p_module text, p_jour date, p_destinataire uuid, p_role text, p_titre text, p_items jsonb, p_entite uuid default null, p_equipe uuid default null, p_sante boolean default false, p_donnees_du timestamptz default null, p_incomplete boolean default false, p_ordre integer default 100) returns uuid language plpgsql security definer set search_path to '' as $$
+declare v_id uuid;
+begin
+  if num_nonnulls(p_destinataire, p_role, p_equipe) <> 1 then raise exception 'un seul destinataire' using errcode = '22023'; end if;
+  if exists (select 1 from jsonb_array_elements(p_items) e where e ? 'objet_type' or coalesce(e ->> 'gravite', '') not in ('info', 'attention', 'critique')
+             or left(e ->> 'lien', 1) <> '/' or char_length(e ->> 'texte') > 300) then
+    raise exception 'ligne refusée par la souche' using errcode = '22023';
+  end if;
+  insert into public.points_sections (client_id, module, jour, destinataire, role, titre, ordre, nb_items)
+  values (p_client, p_module, p_jour, p_destinataire, p_role, p_titre, p_ordre, jsonb_array_length(p_items))
+  on conflict (client_id, module, jour, destinataire, role, titre) do update set nb_items = excluded.nb_items, maj_le = now()
+  returning id into v_id;
+  delete from public.points_items where section_id = v_id;
+  insert into public.points_items (client_id, section_id, rang, texte, lien, gravite)
+  select p_client, v_id, x.n, x.e ->> 'texte', x.e ->> 'lien', x.e ->> 'gravite' from jsonb_array_elements(p_items) with ordinality x(e, n);
+  return v_id;
+end $$;
+create or replace function private.retirer_section(p_client uuid, p_module text, p_jour date, p_destinataire uuid, p_role text, p_titre text, p_entite uuid default null, p_equipe uuid default null) returns boolean language plpgsql security definer set search_path to '' as $$
+begin
+  delete from public.points_sections
+   where client_id = p_client and module = p_module and jour = p_jour and destinataire is not distinct from p_destinataire
+     and role is not distinct from p_role and titre = p_titre;
+  return found;
+end $$;
+
+-- voit_objet, imitée au plus large (tout membre du cabinet voit) : le pire cas, celui d'un objet sans gardien inscrit.
+create or replace function private.voit_objet(p_client uuid, p_type text, p_id text) returns boolean language sql stable security definer set search_path to '' as $$
+  select exists (select 1 from public.comptes c where c.user_id = (select auth.uid()) and c.client_id = p_client) $$;
+-- Les analyses longues (copie de omega/modules/socle/migrations/19an_analyses.sql, worker-a1 fd0bb0e : la table et
+-- private.demander_analyse ; la RLS du socle passe par voit_objet, non imitée ici).
+create table if not exists public.analyses (
+  id uuid primary key default gen_random_uuid(),
+  client_id uuid not null references public.clients(id),
+  module text not null check (module ~ '^[a-z][a-z_]{1,29}$'),
+  objet_type text check (objet_type ~ '^[a-z][a-z0-9_]{1,59}$'),
+  objet_id text check (char_length(objet_id) <= 200),
+  type text not null check (type ~ '^[a-z][a-z_]{1,29}\.[a-z][a-z0-9_]{1,59}$'),
+  statut text not null default 'demandee' check (statut in ('demandee', 'en_cours', 'finie', 'partielle', 'echec')),
+  pieces uuid[] not null default '{}',
+  chiffrement text check (chiffrement = 'dossier:v1'),
+  resultat jsonb,
+  resultat_chiffre bytea,
+  etat jsonb,
+  etat_chiffre bytea,
+  comptes jsonb,
+  sans_source integer check (sans_source >= 0),
+  pieces_lues integer check (pieces_lues >= 0),
+  pieces_non_lues uuid[],
+  cout_eur numeric(12, 6) check (cout_eur >= 0),
+  appels_ia integer check (appels_ia >= 0),
+  modele text check (char_length(modele) <= 120),
+  version text check (char_length(version) <= 40),
+  motif text check (char_length(motif) <= 500),
+  paliers integer not null default 0 check (paliers >= 0),
+  demandee_par uuid,
+  demandee_le timestamptz not null default now(),
+  commencee_le timestamptz,
+  finie_le timestamptz,
+  constraint analyses_client_id_id_key unique (client_id, id),
+  -- Un module chiffré : rien en clair ; un module en clair : rien de chiffré.
+  constraint analyses_clair_ou_chiffre check (
+    (chiffrement is null or (resultat is null and etat is null))
+    and (chiffrement is not null or (resultat_chiffre is null and etat_chiffre is null))),
+  -- Tamila (B4) : toujours chiffré.
+  constraint analyses_tamila_chiffree check (module <> 'tamila' or (chiffrement is not null and resultat is null and etat is null))
+);
+
+create index if not exists analyses_objet on public.analyses (client_id, module, objet_type, objet_id, demandee_le desc);
+
+alter table public.analyses enable row level security;
+do $p$
+begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'analyses'
+                 and policyname = 'on voit les analyses des objets qu''on voit') then
+    create policy "on voit les analyses des objets qu'on voit" on public.analyses
+      for select to authenticated using (private.voit_objet(client_id, objet_type, objet_id));
+  end if;
+end $p$;
+revoke all on table public.analyses from public, anon, authenticated;
+grant select on table public.analyses to authenticated;
+grant all on table public.analyses to service_role;
+
+comment on table public.analyses is
+  'Lectures longues d''un dossier (lecteur.analyser, 19an). Écriture par les portes seulement ; un module chiffré n''a ni résultat ni état en clair.';
+
+-- ─── private.demander_analyse : pour les portes des modules ───
+create or replace function private.demander_analyse(
+  p_client uuid, p_module text, p_objet_type text, p_objet_id text, p_type text, p_pieces uuid[],
+  p_chiffrement text default null, p_par uuid default null)
+returns uuid language plpgsql security definer set search_path to '' as $$
+declare v_id uuid; v_inconnues integer;
+begin
+  if p_client is null or p_module is null or p_type is null then
+    raise exception 'Organisation, module et type d''analyse sont nécessaires.' using errcode = '22023';
+  end if;
+  if split_part(p_type, '.', 1) <> p_module then
+    raise exception 'Le type % n''est pas du module %.', p_type, p_module using errcode = '22023';
+  end if;
+  if coalesce(cardinality(p_pieces), 0) = 0 then
+    raise exception 'Une analyse porte sur au moins une pièce.' using errcode = '22023';
+  end if;
+  select count(*) into v_inconnues from unnest(p_pieces) x(id)
+   where not exists (select 1 from public.pieces p where p.id = x.id and p.client_id = p_client);
+  if v_inconnues > 0 then
+    raise exception '% pièce(s) hors de cette organisation.', v_inconnues using errcode = '22023';
+  end if;
+  insert into public.analyses (client_id, module, objet_type, objet_id, type, pieces, chiffrement, demandee_par)
+  values (p_client, p_module, p_objet_type, p_objet_id, p_type, p_pieces, p_chiffrement, p_par)
+  returning id into v_id;
+  perform private.deposer_travail(p_client, p_module, 'lecteur.analyser', jsonb_build_object('analyse', v_id),
+                                  'analyse:' || v_id::text || ':0', 0::smallint);
+  return v_id;
+end $$;
+
 
 -- ── B5, les délais (souche fidèle au calcul attendu par Tamila) ──
 create or replace function public.ajouter_mois(p_date date, p_mois int) returns date language sql immutable as $$ select (p_date + make_interval(months => p_mois))::date $$;
@@ -305,3 +441,19 @@ create policy "membres lisent" on public.approbations for select to authenticate
 create policy "membres decident" on public.approbations for insert to authenticated with check (true);
 alter table public.journal_opposable enable row level security;
 alter table public.lectures enable row level security;
+
+-- ── Réceptions (b4_10) : la table du socle et la publication d'événement, imitées ──
+create table if not exists public.receptions (id bigserial primary key, client_id uuid not null, entite_id uuid, module text, canal text not null default 'email', boite text not null default 'boite',
+  identifiant_externe text not null, de_adresse text, de_empreinte text, de_nom text, sujet text, corps text, corps_html text, pieces jsonb not null default '[]', detail jsonb not null default '{}',
+  en_reponse_a uuid, fil text, langue text, statut text not null default 'nouvelle' check (statut in ('nouvelle', 'lue', 'traitee', 'ignoree', 'indesirable')), traite_par uuid,
+  recu_le timestamptz not null default now(), cree_le timestamptz not null default now(), maj_le timestamptz not null default now(), unique (client_id, canal, identifiant_externe));
+create or replace function private.publier_evenement(p_client uuid, p_evenement text, p_charge jsonb default '{}', p_cle text default null) returns integer language plpgsql security definer set search_path to '' as $$
+declare r record; n integer := 0;
+begin
+  for r in select a.module, a.genre from private.abonnements a where a.evenement = p_evenement loop
+    perform private.deposer_travail(p_client, r.module, r.genre, coalesce(p_charge, '{}'::jsonb) || jsonb_build_object('evenement', p_evenement),
+      case when p_cle is null then null else p_evenement || ':' || p_cle end, 0::smallint);
+    n := n + 1;
+  end loop;
+  return n;
+end $$;

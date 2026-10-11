@@ -30,6 +30,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
+import { chargerFactureElectronique } from "./factureElectronique";
 import type { Commande, DocumentFiled, DossierFiled, Facture, Fournisseur, IbanFournisseur, LigneCommande, MotifRefus, NatureDocument } from "../types";
 
 export class ErreurPorte extends Error {}
@@ -103,6 +104,7 @@ export async function chargerDossier(a: Apercu): Promise<DossierFiled> {
     valeurs: (valeurs?.data ?? []) as DossierFiled["valeurs"],
     appariements: (appar?.data ?? []) as DossierFiled["appariements"],
     origine_deposee_par: await deposantOrigine(a),
+    ...(await chargerFactureElectronique(a.document.id, fid ?? null).catch(() => ({}))),
   };
 }
 
@@ -165,15 +167,17 @@ export async function deposerDocument(o: { client_id: string; entite_id: string 
   return { document_id: texte(r.document) ?? document_id, reference: texte(r.reference), etat: texte(r.etat), doublon_de: texte(r.doublon_de) };
 }
 
-export async function monClient(): Promise<{ user_id: string; client_id: string; email: string | null; entites: { id: string; nom: string }[] } | null> {
+export async function monClient(): Promise<{ user_id: string; client_id: string; email: string | null; role: string | null; entites: { id: string; nom: string; siren?: string | null }[] } | null> {
   const supabase = createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return null;
-  const { data } = await supabase.from("comptes").select("client_id").eq("user_id", auth.user.id).limit(1);
-  const c = (data ?? [])[0] as { client_id: string } | undefined;
+  const { data } = await supabase.from("comptes").select("client_id, role").eq("user_id", auth.user.id).limit(1);
+  const c = (data ?? [])[0] as { client_id: string; role: string | null } | undefined;
   if (!c) return null;
-  const e = await supabase.from("entites").select("id, nom").eq("client_id", c.client_id).order("principale", { ascending: false });
-  return { user_id: auth.user.id, client_id: c.client_id, email: auth.user.email ?? null, entites: (e.data ?? []) as { id: string; nom: string }[] };
+  const e = await supabase.from("entites").select("id, nom, siren").eq("client_id", c.client_id).order("principale", { ascending: false });
+  /* le SIREN n'est peut-être pas lisible : on retombe sur id et nom */
+  const ent = e.error ? await supabase.from("entites").select("id, nom").eq("client_id", c.client_id).order("principale", { ascending: false }) : e;
+  return { user_id: auth.user.id, client_id: c.client_id, email: auth.user.email ?? null, role: c.role ?? null, entites: (ent.data ?? []) as { id: string; nom: string; siren?: string | null }[] };
 }
 
 export async function chargerFournisseurs(): Promise<Fournisseur[]> {
@@ -246,4 +250,18 @@ export const confirmerFournisseur = (p_fournisseur: string, p_motif: string) => 
 export const attesterIdentite = (p_fournisseur: string, p_motif: string) => rpc("filed_attester_identite", { p_fournisseur, p_motif });
 export const demanderVerification = (p_client: string, p_registre: "sirene" | "vies", p_identifiant: string, p_fournisseur: string) =>
   rpc<string>("identite_demander", { p_client, p_registre, p_identifiant, p_fournisseur, p_force: true });
+/* a4_15 : le paiement d'une facture validée. filed_etat_paiement est une
+   lecture sous RLS ; sa forme (objet ou ligne de table) est normalisée. */
+export type EtatPaiement = { du: number; regle: number; reste: number; etat: "a_payer" | "partielle" | "payee"; dernier_le: string | null; nb_reglements: number };
+export const MOYENS_PAIEMENT = ["virement", "prelevement", "cheque", "carte", "especes", "compensation", "autre"] as const;
+export type MoyenPaiement = (typeof MOYENS_PAIEMENT)[number];
+export async function etatPaiement(p_facture: string): Promise<EtatPaiement | null> {
+  const r = await rpc<unknown>("filed_etat_paiement", { p_facture });
+  const o = (Array.isArray(r) ? r[0] : r) as Record<string, unknown> | null | undefined;
+  if (!o || typeof o !== "object") return null;
+  const n = (v: unknown) => (typeof v === "number" ? v : Number(v ?? 0));
+  return { du: n(o.du), regle: n(o.regle), reste: n(o.reste), etat: (o.etat as EtatPaiement["etat"]) ?? "a_payer", dernier_le: (o.dernier_le as string | null) ?? null, nb_reglements: n(o.nb_reglements) };
+}
+export const noterPaiement = (o: { facture: string; date: string | null; montant: number | null; moyen: MoyenPaiement | null; reference: string | null }) =>
+  rpc<string>("filed_noter_paiement", { p_facture: o.facture, p_date: o.date, p_montant: o.montant, p_moyen: o.moyen, p_reference: o.reference });
 export const apparierLigne = (p_facture: string, p_facture_ligne: string, p_commande_ligne: string, p_motif: string) => rpc("filed_apparier_ligne", { p_facture, p_facture_ligne, p_commande_ligne, p_motif });

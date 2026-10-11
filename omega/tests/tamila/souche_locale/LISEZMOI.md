@@ -1,4 +1,4 @@
-# Souche locale Tamila (B4) — EN COURS, ne s'exécute nulle part ailleurs qu'en local
+# Souche locale Tamila (B4) — ne s'exécute nulle part ailleurs qu'en local
 
 But : jouer `omega/tests/tamila/*.sql` sur un PostgreSQL 16 local (installé dans le conteneur de
 recette : /usr/lib/postgresql/16), sans toucher à la recette, comme A4 l'a fait pour FILED.
@@ -13,3 +13,7 @@ recette : /usr/lib/postgresql/16), sans toucher à la recette, comme A4 l'a fait
   installé localement), les lignes de `tamila_regles_procedure` et `regles_delais` (26 codes, voir
   la réponse 1 du coordinateur dans NOTES-B4), `jouer.sh` (initdb, 01, 02, aides A5, 03, puis chaque
   test entre begin/rollback). Priorité basse tant que le coordinateur joue les lots sur la recette.
+
+**06/10 : jouée.** `sudo ./jouer.sh [14 13 …]` (root : initdb tourne sous postgres ; `SOUCHE_DIR` pour garder la
+base). `03_pgtap.sql` imite ok/is/isnt/throws_ok/lives_ok/runtests (chaque test annulé). Verts : 01, 02, 03, 05,
+07, 08, 09, 12, 13, 14. Encore rouges faute des 26 règles de procédure dans la souche : 04, 06, 10, 11.

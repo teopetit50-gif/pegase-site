@@ -89,7 +89,7 @@ export default function Depot({ ouvert, onFermer, societes, deposer, onFait }: P
                 <div><dt>Rejetées</dt><dd>{resultat.rejetes.length}</dd></div>
               </dl>
               {resultat.rejetes.length ? (
-                <div className="esp-tableau-cadre">
+                <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Lignes rejetées (tableau qui défile)">
                   <table className="esp-tableau">
                     <thead><tr><th className="esp-num">Ligne</th><th>Code</th><th>Motif</th></tr></thead>
                     <tbody>

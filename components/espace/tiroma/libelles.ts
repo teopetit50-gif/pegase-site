@@ -143,3 +143,52 @@ export function minutesEnClair(m: number): string {
   const r = Math.round(m % 60);
   return r ? `${h} h ${String(r).padStart(2, "0")}` : `${h} h`;
 }
+
+/* b3_12 : le registre des appels */
+export const ISSUES_APPEL: Record<"rdv_pris" | "message" | "pas_de_reponse" | "rappeler" | "refus" | "ne_plus_contacter", { libelle: string; teinte: "vert" | "bleu" | "ambre" | "gris" | "rouge" }> = {
+  rdv_pris: { libelle: "Rendez-vous pris", teinte: "vert" },
+  message: { libelle: "Message laissé", teinte: "bleu" },
+  pas_de_reponse: { libelle: "Pas de réponse", teinte: "gris" },
+  rappeler: { libelle: "À rappeler", teinte: "ambre" },
+  refus: { libelle: "Ne souhaite pas", teinte: "gris" },
+  ne_plus_contacter: { libelle: "Ne plus contacter", teinte: "rouge" },
+};
+
+export const MOTIFS_APPEL: Record<"creneau" | "plan" | "devis" | "controle" | "attente" | "autre", string> = {
+  creneau: "créneau libéré",
+  plan: "plan signé",
+  devis: "devis sans réponse",
+  controle: "contrôle dû",
+  attente: "liste d'attente",
+  autre: "autre",
+};
+
+/* b3_13 : les paniers du devis (100 % Santé, reste à charge maîtrisé, libre) */
+export const PANIERS: Record<string, string> = {
+  "100_sante": "100 % Santé",
+  maitrise: "Reste à charge maîtrisé",
+  libre: "Tarifs libres",
+  mixte: "Mixte",
+  non_precise: "Panier non précisé",
+};
+
+/* b3_14 : les rappels aux patients */
+export const TYPES_RAPPEL: Record<"j2" | "plan" | "devis", string> = { j2: "Rappel J-2", plan: "Relance de plan", devis: "Rappel de devis" };
+export const REPONSES_RAPPEL: Record<"confirme" | "annule" | "a_lire" | "autre_adresse", { libelle: string; teinte: "vert" | "rouge" | "ambre" | "gris" }> = {
+  confirme: { libelle: "Confirme", teinte: "vert" },
+  annule: { libelle: "Ne viendra pas", teinte: "rouge" },
+  a_lire: { libelle: "À lire", teinte: "ambre" },
+  autre_adresse: { libelle: "Autre adresse", teinte: "ambre" },
+};
+export const STATUTS_ENVOI: Record<string, string> = {
+  a_valider: "À valider", differe: "Différé", pret: "Prêt", en_cours: "En cours", envoye: "Envoyé", bloque: "Retenu",
+  refuse: "Refusé", annule: "Annulé", expire: "Expiré", echec: "Échec",
+};
+export const VERROUS_ENVOI: Record<string, string> = {
+  SANTE_HORS_CANAL_AGREE: "aucun prestataire agréé HDS",
+  SANTE_FOURNISSEUR_NON_HDS: "prestataire non agréé HDS",
+  CANAL_NON_PERMIS: "canal non permis en santé",
+  CONFIG_ABSENTE: "module non réglé",
+  CONSENTEMENT_ABSENT: "accord manquant",
+  DESINSCRIT: "patient désinscrit",
+};

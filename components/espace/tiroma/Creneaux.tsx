@@ -8,10 +8,11 @@
 
 import { Phone } from "lucide-react";
 import { Pastille, Vide } from "../ui";
+import { DernierAppelLigne } from "./Appels";
 import { FAMILLES, ORIGINES, TYPES_CRENEAU, heureCourte, jourEtHeure, minutesEnClair } from "./libelles";
-import type { Creneau } from "./types";
+import type { CibleAppel, Creneau, DernierAppel } from "./types";
 
-export default function Creneaux({ creneaux, horizon }: { creneaux: Creneau[]; horizon: number }) {
+export default function Creneaux({ creneaux, horizon, derniers, appeler }: { creneaux: Creneau[]; horizon: number; derniers?: Record<string, DernierAppel>; appeler?: (c: CibleAppel) => void }) {
   return (
     <section id="tiroma-creneaux" className="esp-carte" aria-label="Créneaux à sauver">
       <div className="esp-carte-tete">
@@ -51,6 +52,13 @@ export default function Creneaux({ creneaux, horizon }: { creneaux: Creneau[]; h
                               {!k.preferences_ok ? <Pastille teinte="gris" contour title="Ses disponibilités connues ne couvrent pas ce créneau">hors préférences</Pastille> : null}
                             </span>
                             <div className="esp-fil-meta">{k.motif} · {minutesEnClair(k.duree_min)}</div>
+                            <DernierAppelLigne d={derniers?.[k.patient_id]} />
+                            {appeler && !k.ne_pas_contacter ? (
+                              <button type="button" className="esp-lien-bouton" style={{ justifySelf: "start" }}
+                                onClick={() => appeler({ patient_id: k.patient_id, patient_nom: k.patient_nom, motif: "creneau", plan_id: k.plan_id, evenement_id: c.evenement_id })}>
+                                Noter l&apos;appel
+                              </button>
+                            ) : null}
                           </div>
                         </li>
                       ))}

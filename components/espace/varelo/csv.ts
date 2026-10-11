@@ -12,7 +12,7 @@
 
 export type LigneDepot = Record<string, string>;
 
-const SYNONYMES: Record<string, string[]> = {
+export const SYNONYMES: Record<string, string[]> = {
   code: ["code", "code_local", "codelocal", "code tiers", "code_tiers", "codetiers", "reference", "référence", "ref", "compte", "numero", "numéro", "n°", "id", "identifiant", "code article", "code_article", "code client", "code fournisseur", "ct_num", "ar_ref"],
   nom: ["nom", "libelle", "libellé", "designation", "désignation", "raison sociale", "raison_sociale", "raisonsociale", "intitule", "intitulé", "nom_local", "ct_intitule", "ar_design", "denomination", "dénomination", "societe", "société"],
   siren: ["siren", "n° siren", "numero siren"],
@@ -43,9 +43,9 @@ function normaliser(s: string): string {
     .trim();
 }
 
-function cleDe(entete: string): string | null {
+function cleDe(entete: string, synonymes: Record<string, string[]> = SYNONYMES): string | null {
   const n = normaliser(entete);
-  for (const [cle, syn] of Object.entries(SYNONYMES)) {
+  for (const [cle, syn] of Object.entries(synonymes)) {
     if (syn.some((s) => normaliser(s) === n)) return cle;
   }
   return null;
@@ -89,12 +89,14 @@ export type Lecture = {
   manque: string[];
 };
 
-export function lireExport(texte: string): Lecture {
+/* lit un tableau collé ou chargé avec une table de synonymes : la première
+   ligne porte les en-têtes ; les clés de `obligatoires` doivent y être */
+export function lireTableau(texte: string, synonymes: Record<string, string[]>, obligatoires: string[]): Lecture {
   const brut = texte.replace(/\r\n?/g, "\n").split("\n").filter((l) => l.trim() !== "");
-  if (!brut.length) return { lignes: [], reconnues: [], ignorees: [], manque: ["code", "nom"] };
+  if (!brut.length) return { lignes: [], reconnues: [], ignorees: [], manque: obligatoires };
   const sep = separateur(brut[0]);
   const entetes = champs(brut[0], sep);
-  const cles = entetes.map(cleDe);
+  const cles = entetes.map((e) => cleDe(e, synonymes));
   const reconnues: { entete: string; cle: string }[] = [];
   const ignorees: string[] = [];
   const vues = new Set<string>();
@@ -104,7 +106,7 @@ export function lireExport(texte: string): Lecture {
       reconnues.push({ entete: entetes[i], cle: k });
     } else ignorees.push(entetes[i]);
   });
-  const manque = ["code", "nom"].filter((k) => !vues.has(k));
+  const manque = obligatoires.filter((k) => !vues.has(k));
   const lignes: LigneDepot[] = [];
   for (const l of brut.slice(1)) {
     const v = champs(l, sep);
@@ -119,6 +121,10 @@ export function lireExport(texte: string): Lecture {
     if (Object.keys(o).length) lignes.push(o);
   }
   return { lignes, reconnues, ignorees, manque };
+}
+
+export function lireExport(texte: string): Lecture {
+  return lireTableau(texte, SYNONYMES, ["code", "nom"]);
 }
 
 /* le gabarit à coller, pour qui part d'un tableur vide */

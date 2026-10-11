@@ -33,6 +33,28 @@ function a(jours: number, heure: number, minute = 0): string {
   return d.toISOString();
 }
 
+/** Le lundi de la semaine (décalée de k semaines), en date ISO. */
+function lundi(k: number): string {
+  const d = new Date();
+  d.setHours(12, 0, 0, 0);
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7) + 7 * k);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Les semaines d'un fauteuil : quatre passées (réalisé), l'en cours et la suivante (prévu), 2 700 minutes ouvertes. */
+function semainesFauteuil(objectif: number, taux: number[]) {
+  return taux.map((t, i) => ({ lundi: lundi(i - 4), ouvert_min: 2700, occupe_min: Math.round(2700 * t), taux: t, atteint: t >= objectif }));
+}
+
+function objectifFauteuil(fauteuil_id: string, nom: string, objectif: number, taux: number[]) {
+  const passes = taux.slice(0, 4);
+  return {
+    fauteuil_id, nom, objectif, semaines: semainesFauteuil(objectif, taux),
+    moyenne: Math.round((passes.reduce((a, b) => a + b, 0) / passes.length) * 1000) / 1000,
+    atteintes: passes.filter((t) => t >= objectif).length, comptees: passes.length,
+  };
+}
+
 const cabinet: Cabinet = {
   id: "00000000-0000-4000-8000-0000000000c0",
   client_id: C,
@@ -107,7 +129,10 @@ export const DOSSIER_EXEMPLE: Dossier = {
   profil: "titulaire",
   fauteuils,
   praticiens,
-  membres: [{ id: "m-1", entite_id: ENTITE_CABINET, prenom: "Élodie", fauteuil_habituel_id: F1, actif: true }],
+  membres: [
+    { id: "m-1", entite_id: ENTITE_CABINET, prenom: "Élodie", fauteuil_habituel_id: F1, actif: true },
+    { id: "m-2", entite_id: ENTITE_CABINET, prenom: "Karine", fauteuil_habituel_id: F2, actif: true },
+  ],
   horaires,
   fermetures: [
     { id: "fe-1", entite_id: ENTITE_CABINET, praticien_id: P2, fauteuil_id: null, debut: dans(8, 0), fin: dans(13, 0), nature: "conge", source: "saisie" },
@@ -177,5 +202,150 @@ export const DOSSIER_EXEMPLE: Dossier = {
     ],
     total: { ouvert_min: 1620, prevu_min: 870, taux: 0.537 },
     demi_journees_vides: 2,
+  },
+  /* b3_12 : trente jours d'appels du cabinet d'exemple */
+  appels: {
+    jour: aujourdHui(0),
+    a_reprendre: [
+      { patient_id: "pa-6", patient_nom: "Patrice Zami", motif: "plan", plan_id: "pl-2", issue: "message", appele_le: a(-1, 16, 10), rappeler_le: null, par: "Élodie", tentatives: 1, du: true },
+      { patient_id: "pa-5", patient_nom: "Sylvie Rigoulet", motif: "controle", plan_id: null, issue: "rappeler", appele_le: a(-3, 11, 5), rappeler_le: aujourdHui(0), par: "Élodie", tentatives: 2, du: true },
+      { patient_id: "pa-7", patient_nom: "Nadège Hilaire", motif: "plan", plan_id: "pl-3", issue: "rappeler", appele_le: a(0, 8, 40), rappeler_le: aujourdHui(3), par: "Élodie", tentatives: 1, du: false },
+    ],
+    derniers: {
+      "pa-6": { motif: "plan", issue: "message", appele_le: a(-1, 16, 10), rappeler_le: null, par: "Élodie" },
+      "pa-5": { motif: "controle", issue: "rappeler", appele_le: a(-3, 11, 5), rappeler_le: aujourdHui(0), par: "Élodie" },
+      "pa-7": { motif: "plan", issue: "rappeler", appele_le: a(0, 8, 40), rappeler_le: aujourdHui(3), par: "Élodie" },
+    },
+    bilan: { jours: 30, appels: 64, patients: 41, rdv_pris: 19, confirmes: 17, refus: 6, ne_plus_contacter: 1, a_reporter_logiciel: 1, valeur_plans: 8740, minutes_creneaux: 495 },
+  },
+  /* b3_13 : trente jours de pilotage du cabinet d'exemple */
+  pilotage: {
+    periode: { du: aujourdHui(-29), au: aujourdHui(0), jours: 30 },
+    devis: {
+      presentes: 38, signes: 24, taux: 0.632, montant_presente: 61840, montant_signe: 39210,
+      par_panier: [
+        { panier: "100_sante", presentes: 11, signes: 9, montant_signe: 4120 },
+        { panier: "libre", presentes: 12, signes: 6, montant_signe: 21950 },
+        { panier: "maitrise", presentes: 15, signes: 9, montant_signe: 13140 },
+      ],
+      precedent: { presentes: 34, signes: 19, taux: 0.559 },
+    },
+    en_attente: {
+      devis: 9, montant: 18460, expirent_30j: 2, a_relancer: 3,
+      a_relancer_liste: [
+        { plan_id: "pl-9", patient_id: "pa-15", patient_nom: "Joëlle Céleste", devis_numero: "D-2026-0488", montant: 4280, reste_a_charge: 1960, presente_le: aujourdHui(-19), valide_jusqu_au: aujourdHui(161), panier: "libre" },
+        { plan_id: "pl-10", patient_id: "pa-16", patient_nom: "Firmin Bellance", devis_numero: "D-2026-0497", montant: 1350, reste_a_charge: 410, presente_le: aujourdHui(-12), valide_jusqu_au: aujourdHui(18), panier: "maitrise" },
+        { plan_id: "pl-11", patient_id: "pa-17", patient_nom: "Rose-Aimée Ternel", devis_numero: "D-2026-0503", montant: 690, reste_a_charge: 0, presente_le: aujourdHui(-9), valide_jusqu_au: aujourdHui(171), panier: "100_sante" },
+      ],
+    },
+    plans_sans_rdv: { nombre: 4, montant: 4865, reste_a_charge: 1748 },
+    rendez_vous: {
+      passes: 612, honores: 583, manques: 21, annules: 47, taux_manques: 0.034,
+      par_praticien: [
+        { praticien_id: P1, nom: "Dr Ambre Lacour", passes: 344, manques: 14, taux: 0.041 },
+        { praticien_id: P2, nom: "Dr Mathis Rousseau", passes: 268, manques: 7, taux: 0.026 },
+      ],
+      precedent: { passes: 590, manques: 26, taux_manques: 0.044 },
+    },
+    appels: { appels: 64, rdv_pris: 19 },
+  },
+  /* b3_14 : les rappels du cabinet d'exemple, en essai (patients fictifs) */
+  rappels: {
+    reglage: { mode: "essai", essai: true, canaux: ["email"] },
+    contacts: [
+      { id: "ct-1", patient_id: "pa-9", patient_nom: "Michel Dorville", canal: "email", adresse: "michel.dorville@exemple.test", rappels: true, relances: true, source: "oral", cree_le: ilYa(12) },
+      { id: "ct-2", patient_id: "pa-1", patient_nom: "Marguerite Delannoy", canal: "email", adresse: "m.delannoy@exemple.test", rappels: false, relances: true, source: "ecrit", cree_le: ilYa(30) },
+      { id: "ct-3", patient_id: "pa-6", patient_nom: "Patrice Zami", canal: "email", adresse: "patrice.zami@exemple.test", rappels: true, relances: false, source: "formulaire", cree_le: ilYa(4) },
+    ],
+    envois: [
+      { id: "en-1", type: "j2", canal: "email", mode: "essai", statut: "bloque", verrou: "SANTE_HORS_CANAL_AGREE", cree_le: a(0, 7, 7), envoye_le: null, patient_nom: "Michel Dorville" },
+      { id: "en-2", type: "plan", canal: "email", mode: "essai", statut: "bloque", verrou: "SANTE_HORS_CANAL_AGREE", cree_le: a(0, 7, 7), envoye_le: null, patient_nom: "Marguerite Delannoy" },
+      { id: "en-3", type: "devis", canal: "email", mode: "essai", statut: "bloque", verrou: "SANTE_HORS_CANAL_AGREE", cree_le: a(-1, 7, 7), envoye_le: null, patient_nom: "Michel Dorville" },
+    ],
+    reponses: [
+      { id: "rp-1", reponse: "confirme", recue_le: a(-1, 18, 2), rendez_vous_id: "rdv-11", debut: a(1, 14, 30), patient_nom: "Christiane Laurent" },
+      { id: "rp-2", reponse: "annule", recue_le: a(0, 7, 55), rendez_vous_id: "rdv-12", debut: a(2, 9, 0), patient_nom: "Georges Pétro" },
+    ],
+  },
+  /* b3_15 : la semaine dernière, deux centres de la même direction */
+  synthese: {
+    semaine: { du: aujourdHui(-((new Date().getDay() + 6) % 7) - 7), au: aujourdHui(-((new Date().getDay() + 6) % 7) - 1) },
+    cabinets: [
+      {
+        entite_id: ENTITE_CABINET, nom: "Cabinet des Abymes",
+        rdv: { passes: 148, honores: 141, manques: 7, annules: 12, taux_manques: 0.047 }, creneaux: { liberes: 12 },
+        devis: { presentes: 9, signes: 6, taux: 0.667, montant_signe: 9860 }, plans_sans_rdv: { nombre: 4, montant: 4865 },
+        appels: { appels: 17, rdv_pris: 6, confirmes: 5 }, rappels: { prepares: 61, envoyes: 0, retenus: 61 },
+        reinscription: { visites: 131, reinscrits: 98, taux: 0.748 },
+        precedent: { taux_manques: 0.061, devis_signes: 4, devis_taux: 0.5, passes: 152, reinscription_taux: 0.712 },
+      },
+      {
+        entite_id: "00000000-0000-4000-8000-0000000000e2", nom: "Centre de Jarry",
+        rdv: { passes: 212, honores: 204, manques: 8, annules: 15, taux_manques: 0.038 }, creneaux: { liberes: 15 },
+        devis: { presentes: 14, signes: 8, taux: 0.571, montant_signe: 13420 }, plans_sans_rdv: { nombre: 7, montant: 9310 },
+        appels: { appels: 23, rdv_pris: 9, confirmes: 8 }, rappels: { prepares: 88, envoyes: 0, retenus: 88 },
+        reinscription: { visites: 190, reinscrits: 151, taux: 0.795 },
+        precedent: { taux_manques: 0.042, devis_signes: 9, devis_taux: 0.6, passes: 205, reinscription_taux: 0.781 },
+      },
+    ],
+    total: { passes: 360, manques: 15, taux_manques: 0.042, creneaux_liberes: 27, devis_presentes: 23, devis_signes: 14, montant_signe: 23280,
+             plans_sans_rdv: 11, montant_plans_sans_rdv: 14175, appels: 40, rdv_confirmes: 13, visites: 321, reinscrits: 249, reinscription_taux: 0.776 },
+  },
+  /* b3_16 : trente jours de réinscription */
+  reinscription: {
+    periode: { du: aujourdHui(-29), au: aujourdHui(0), jours: 30 },
+    visites: 548, reinscrits: 409, taux: 0.746,
+    precedent: { taux: 0.718, visites: 531 },
+    par_praticien: [
+      { praticien_id: P1, nom: "Dr Ambre Lacour", visites: 302, reinscrits: 236, taux: 0.781 },
+      { praticien_id: P2, nom: "Dr Mathis Rousseau", visites: 246, reinscrits: 173, taux: 0.703 },
+    ],
+    sans_suite: [
+      { patient_id: "pa-18", patient_nom: "Firmin Bellance", derniere_visite: aujourdHui(-21), praticien: "Dr Ambre Lacour" },
+      { patient_id: "pa-19", patient_nom: "Joëlle Céleste", derniere_visite: aujourdHui(-14), praticien: "Dr Mathis Rousseau" },
+      { patient_id: "pa-20", patient_nom: "Hugo Ternel", derniere_visite: aujourdHui(-6), praticien: "Dr Mathis Rousseau" },
+    ],
+  },
+  /* b3_17 : les absences probables des trois prochains jours */
+  absences: [
+    { rendez_vous_id: "rdv-12", debut: a(2, 9, 0), patient_id: "pa-13", patient_nom: "Georges Pétro", praticien_nom: "Dr Ambre Lacour", fauteuil_nom: "Fauteuil 2", score: 0, niveau: "annonce", raisons: ["a répondu NON au rappel : créneau à libérer"], annonce: true },
+    { rendez_vous_id: "rdv-21", debut: a(1, 16, 30), patient_id: "pa-21", patient_nom: "Dimitri Saint-Ange", praticien_nom: "Dr Mathis Rousseau", fauteuil_nom: "Fauteuil 1", score: 4, niveau: "fort", raisons: ["2 rendez-vous manqués en 18 mois", "créneau où les absences sont fréquentes au cabinet"], annonce: false },
+    { rendez_vous_id: "rdv-22", debut: a(1, 8, 30), patient_id: "pa-22", patient_nom: "Maëlys Darius", praticien_nom: "Dr Ambre Lacour", fauteuil_nom: "Fauteuil 3", score: 2, niveau: "moyen", raisons: ["nouveau patient", "pris il y a 74 jours"], annonce: false },
+  ],
+  /* b3_18 : Élodie, l'assistante du Fauteuil 1, est en formation demain et après-demain */
+  equipe: [
+    {
+      absence_id: "ab-1", membre_id: "m-1", membre: "Élodie", motif: "formation", debut: a(1, 0, 0), fin: a(3, 0, 0), fauteuil_id: F1, fauteuil_nom: "Fauteuil 1",
+      soins: [
+        { rendez_vous_id: "rdv-31", debut: a(1, 10, 0), fin: a(1, 11, 0), patient_nom: "Sylvie Marlin", soin: "Couronne — préparation", vers: [{ fauteuil_id: F2, fauteuil_nom: "Fauteuil 2", assistante: "Karine" }] },
+        { rendez_vous_id: "rdv-32", debut: a(2, 14, 0), fin: a(2, 15, 30), patient_nom: "Thierry Bellay", soin: "Implant — chirurgie", vers: [] },
+      ],
+    },
+  ],
+  /* b3_20 : les objectifs par fauteuil, quatre semaines passées et deux à venir */
+  objectifs: {
+    semaines: [-4, -3, -2, -1, 0, 1].map((k) => ({ lundi: lundi(k), nature: k < 0 ? "realisee" as const : "prevue" as const, en_cours: k === 0 })),
+    fauteuils: [
+      objectifFauteuil(F1, "Fauteuil 1", 0.85, [0.88, 0.86, 0.79, 0.91, 0.74, 0.52]),
+      objectifFauteuil(F2, "Fauteuil 2", 0.8, [0.71, 0.76, 0.69, 0.73, 0.66, 0.41]),
+      objectifFauteuil(F3, "Fauteuil 3", 0.7, [0.72, 0.75, 0.7, 0.81, 0.69, 0.48]),
+    ],
+  },
+  /* b3_22 : les règles de priorité des deux centres du titulaire (deux écarts) */
+  reglesCommunes: {
+    centres: [
+      { entite_id: ENTITE_CABINET, nom: ENTITE_CABINET_NOM, regles: { ordre_priorite: ["plan", "attente", "controle"], nb_propositions: 3, seuil_controle_mois: 12, seuil_demi_journee_vide: 0.2 } },
+      { entite_id: "00000000-0000-4000-8000-0000000000e4", nom: "Centre dentaire du Gosier (exemple)", regles: { ordre_priorite: ["attente", "plan", "controle"], nb_propositions: 5, seuil_controle_mois: 12, seuil_demi_journee_vide: 0.2 } },
+    ],
+    ecarts: ["nb_propositions", "ordre_priorite"],
+  },
+  /* b3_19 : les demi-journées vides des quatorze prochains jours */
+  demiJournees: {
+    du: aujourdHui(0), au: aujourdHui(14), seuil: 0.2,
+    demi_journees: [
+      { praticien_id: P2, praticien: "Dr Mathis Rousseau", jour: aujourdHui(2), moment: "apres_midi", source: "horaires", ouvert_min: 300, prevu_min: 30, libre_min: 270, taux: 0.1, attente: 3 },
+      { praticien_id: P2, praticien: "Dr Mathis Rousseau", jour: aujourdHui(6), moment: "matin", source: "horaires", ouvert_min: 240, prevu_min: 0, libre_min: 240, taux: 0, attente: 2 },
+      { praticien_id: P1, praticien: "Dr Ambre Lacour", jour: aujourdHui(9), moment: "matin", source: "habitude", ouvert_min: 240, prevu_min: 40, libre_min: 200, taux: 0.167, attente: 4 },
+    ],
   },
 };

@@ -28,6 +28,15 @@ import { Avis, Chargement, Pastille, Ruban, Vide } from "../ui";
 import { dateCourte } from "../format";
 import { ETATS, FAMILLES, NATURES_INTERVENANT, NATURES_PROJET, PHASES, ROLES_PROJET, TYPES, TYPES_PIECE, famille, prochaineDate, titrePermis, type Famille } from "./etats";
 import { dossierExemple } from "./exemples";
+import Chantier from "./Chantier";
+import Assurances from "./Assurances";
+import ComptesRendus from "./ComptesRendus";
+import Doe from "./Doe";
+import OrdresService from "./OrdresService";
+import Reserves from "./Reserves";
+import Controle from "./Controle";
+import PluProjet from "./PluProjet";
+import Honoraires from "./Honoraires";
 import PermisVue from "./PermisVue";
 import { ajouterIntervenant, ajouterLot, ajouterMembre, chargerDossier, deposerCourrier, ouvrirPermis, ouvrirProjet } from "./portes";
 import type { Dossier, Intervenant, Lot, MembreProjet, Permis, PieceProjet, Projet } from "./types";
@@ -59,7 +68,7 @@ export default function EcranLorani() {
       setReel(await chargerDossier());
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
-      setReel({ ...dossierExemple(), projets: [], permis: [], datesLues: [], echeances: [], recours: [], lots: [], intervenants: [], membres: [], pieces: [], moi: null });
+      setReel({ ...dossierExemple(), projets: [], permis: [], datesLues: [], echeances: [], recours: [], lots: [], intervenants: [], membres: [], pieces: [], controles: [], controlePieces: [], constats: [], plu: [], attestations: [], ordresService: [], reserves: [], comptesRendus: [], points: [], doe: [], moi: null });
     }
   }, []);
   useEffect(() => {
@@ -208,6 +217,15 @@ export default function EcranLorani() {
     }
   };
   const clientId = dossier.moi?.client_id ?? "";
+  /* les honoraires (b5_12) gèrent leurs propres dialogues : l'erreur de la base leur revient */
+  const agir = async (reel: () => Promise<void>, localFn: () => Dossier) => {
+    if (source === "reelle") {
+      await reel();
+      await relire();
+    } else {
+      setLocal(localFn());
+    }
+  };
 
   const soumettreProjet = async () => {
     const parcelles = np.parcelles.split(/[,;\n]+/).map((x) => x.trim().toUpperCase()).filter(Boolean);
@@ -338,14 +356,14 @@ export default function EcranLorani() {
                       <span className="lor-projet-nom">{pr?.nom ?? "Projet"}{pr?.reference ? <span className="esp-kpi-sous"> · {pr.reference}</span> : null}</span>
                       <span className="lor-projet-lieu">{[pr?.commune, pr && NATURES_PROJET[pr.nature]].filter(Boolean).join(" · ")}</span>
                     </div>
-                    <ul className="esp-liste" role="listbox" aria-label={pr?.nom ?? "Projet"}>
+                    <ul className="esp-liste" aria-label={pr?.nom ?? "Projet"}>
                       {liste.map((p) => {
                         const n = proposeesPar[p.id] ?? 0;
                         const e = ETATS[p.etat] ?? ETATS.a_deposer;
                         const prochaine = prochaineDate(p);
                         return (
                           <li key={p.id}>
-                            <button type="button" role="option" aria-selected={choisi === p.id} className="esp-item" onClick={() => ouvrir(p.id)}>
+                            <button type="button" aria-current={choisi === p.id ? "true" : undefined} className="esp-item" onClick={() => ouvrir(p.id)}>
                               <span className="esp-item-haut">
                                 <Pastille teinte="noir">{TYPES[p.type_autorisation].court}</Pastille>
                                 <Pastille teinte={e.teinte}>{e.court}</Pastille>
@@ -379,9 +397,9 @@ export default function EcranLorani() {
                     <span className="lor-projet-nom">{pr.nom}{pr.reference ? <span className="esp-kpi-sous"> · {pr.reference}</span> : null}</span>
                     <span className="lor-projet-lieu">{[pr.commune, NATURES_PROJET[pr.nature]].filter(Boolean).join(" · ")}</span>
                   </div>
-                  <ul className="esp-liste" role="listbox" aria-label={pr.nom}>
+                  <ul className="esp-liste" aria-label={pr.nom}>
                     <li>
-                      <button type="button" role="option" aria-selected={choisi === `projet:${pr.id}`} className="esp-item" onClick={() => ouvrir(`projet:${pr.id}`)}>
+                      <button type="button" aria-current={choisi === `projet:${pr.id}` ? "true" : undefined} className="esp-item" onClick={() => ouvrir(`projet:${pr.id}`)}>
                         <span className="esp-item-haut"><Pastille teinte="gris">Sans permis</Pastille></span>
                         <span className="esp-item-titre">Aucun permis saisi pour ce projet</span>
                         <span className="esp-item-bas"><span>Phase : {PHASES[pr.phase]}</span></span>
@@ -410,10 +428,10 @@ export default function EcranLorani() {
                 onLocal={(d) => { setChoix(permis.id); setLocal(d); }}
                 relire={async () => { setChoix(permis.id); await relire(); }}
               />
-              <ProjetCarte projet={projet} dossier={dossier} nommer={nommer} peutEcrire={peutEcrire} envoi={envoi} ouvrirForm={(f) => { setErreurForm(null); setForm(f); }} />
+              <ProjetCarte projet={projet} dossier={dossier} nommer={nommer} peutEcrire={peutEcrire} envoi={envoi} ouvrirForm={(f) => { setErreurForm(null); setForm(f); }} agir={agir} />
             </div>
           ) : projet ? (
-            <ProjetCarte projet={projet} dossier={dossier} nommer={nommer} peutEcrire={peutEcrire} envoi={envoi} ouvrirForm={(f) => { setErreurForm(null); setForm(f); }} />
+            <ProjetCarte projet={projet} dossier={dossier} nommer={nommer} peutEcrire={peutEcrire} envoi={envoi} ouvrirForm={(f) => { setErreurForm(null); setForm(f); }} agir={agir} />
           ) : (
             <div className="esp-carte"><Vide titre="Choisissez un permis">Le calendrier, les dates lues sur les courriers et les recours s&apos;affichent ici.</Vide></div>
           )}
@@ -654,7 +672,7 @@ export default function EcranLorani() {
 }
 
 /* ——— le dossier du projet : équipe, lots, intervenants, actions ——— */
-function ProjetCarte({ projet, dossier, nommer, peutEcrire, envoi, ouvrirForm }: { projet: Projet; dossier: Dossier; nommer: (id: string | null | undefined) => string; peutEcrire: boolean; envoi: boolean; ouvrirForm: (f: Form) => void }) {
+function ProjetCarte({ projet, dossier, nommer, peutEcrire, envoi, ouvrirForm, agir }: { projet: Projet; dossier: Dossier; nommer: (id: string | null | undefined) => string; peutEcrire: boolean; envoi: boolean; ouvrirForm: (f: Form) => void; agir: (reel: () => Promise<void>, local: () => Dossier) => Promise<void> }) {
   const membres = dossier.membres.filter((m) => m.projet_id === projet.id);
   const lots = dossier.lots.filter((l) => l.projet_id === projet.id);
   const intervenants = dossier.intervenants.filter((i) => i.projet_id === projet.id && i.actif);
@@ -727,7 +745,8 @@ function ProjetCarte({ projet, dossier, nommer, peutEcrire, envoi, ouvrirForm }:
           <button type="button" className="esp-lien-bouton" disabled={gris} onClick={() => ouvrirForm({ type: "intervenant", projet: projet.id })}>Ajouter</button>
         </div>
         {intervenants.length ? (
-          <div className="esp-tableau-cadre">
+          /* le tableau défile à 390 : focusable au clavier, nommé (axe, scrollable-region-focusable) */
+          <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Intervenants du projet">
             <table className="esp-tableau">
               <thead>
                 <tr>
@@ -753,6 +772,15 @@ function ProjetCarte({ projet, dossier, nommer, peutEcrire, envoi, ouvrirForm }:
           <div className="lor-tableau-vide">Aucun intervenant.</div>
         )}
       </div>
+      <PluProjet projet={projet} dossier={dossier} peutEcrire={peutEcrire} agir={agir} />
+      <Controle projet={projet} dossier={dossier} nommer={nommer} peutEcrire={peutEcrire} agir={agir} />
+      <Honoraires projet={projet} dossier={dossier} nommer={nommer} peutEcrire={peutEcrire} agir={agir} />
+      <Chantier projet={projet} dossier={dossier} peutEcrire={peutEcrire} agir={agir} />
+      <ComptesRendus projet={projet} dossier={dossier} peutEcrire={peutEcrire} agir={agir} />
+      <OrdresService projet={projet} dossier={dossier} peutEcrire={peutEcrire} agir={agir} />
+      <Reserves projet={projet} dossier={dossier} peutEcrire={peutEcrire} agir={agir} />
+      <Doe projet={projet} dossier={dossier} peutEcrire={peutEcrire} agir={agir} />
+      <Assurances projet={projet} dossier={dossier} peutEcrire={peutEcrire} agir={agir} />
     </section>
   );
 }

@@ -28,7 +28,7 @@ import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
 import { Avis, Pastille } from "../ui";
 import { dateCourte, dateHeure } from "../format";
-import { DECISIONS, ETATS, ISSUES_RECOURS, NATURES_DATE_LUE, NATURES_RECOURS, STATUTS_ETAPE, TYPES, libelleRappel, libelleTypePiece, titrePermis } from "./etats";
+import { DECISIONS, ETATS, ISSUES_RECOURS, NATURES_DATE_LUE, NATURES_RECOURS, STATUTS_ETAPE, TYPES, TYPES_CONTROLE, libelleRappel, libelleTypePiece, titrePermis } from "./etats";
 import { clore_recours, confirmerDateLue, confirmerDecisionImplicite, ecarterDateLue, saisirPermis, saisirRecours, type SaisiePermis } from "./portes";
 import type { Calcul, DateLue, Dossier, Echeance, Etape, Permis, PieceProjet, Projet, Recours } from "./types";
 
@@ -125,7 +125,7 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
   const decidees = datesLues.filter((d) => d.statut !== "proposee").sort((a, b) => (b.decide_le ?? "").localeCompare(a.decide_le ?? ""));
   const echeances = useMemo(() => dossier.echeances.filter((e) => e.permis_id === p.id).sort((a, b) => a.echeance.localeCompare(b.echeance)), [dossier.echeances, p.id]);
   const recours = useMemo(() => dossier.recours.filter((r) => r.permis_id === p.id), [dossier.recours, p.id]);
-  const pieces = useMemo(() => dossier.pieces.filter((x) => x.objet_id === p.projet_id), [dossier.pieces, p.projet_id]);
+  const pieces = useMemo(() => dossier.pieces.filter((x) => x.objet_id === p.projet_id && !TYPES_CONTROLE.includes(x.type_piece ?? "")), [dossier.pieces, p.projet_id]);
   const etat = ETATS[p.etat] ?? ETATS.a_deposer;
   const dp = p.type_autorisation === "dp";
   const accorde = p.decision === "favorable" || p.decision === "tacite";
@@ -519,7 +519,7 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
         <Avis teinte="ambre">
           <strong>Plusieurs demandes de pièces.</strong> À fournir : {p.pieces_demandees.map((x) => x.code).join(", ") || "—"}.{" "}
           Lettres : {p.demandes_pieces!.map((h) => `du ${dateCourte(`${h.date}T12:00:00`)} (${h.pieces.map((x) => x.code).join(", ") || "aucune pièce"})`).join(" ; ")}.{" "}
-          La mairie doit tout réclamer en une fois (art. R*423-38) : une lettre de plus ne fait pas repartir le délai de trois mois, qui court depuis la première
+          Une nouvelle invitation à compléter le dossier est sans incidence sur le cours du délai et sur la naissance d’une décision tacite (CE, 30 avril 2024, n° 461958 ; art. R*423-38) : le délai de trois mois court depuis la première lettre
           {p.date_pieces_fournies ? " ; une lettre reçue après la remise des pièces ne modifie pas les délais (art. R*423-41)" : ""}.
         </Avis>
       ) : null}
@@ -852,7 +852,7 @@ function EtapeLigne({ e, avant }: { e: Etape; avant: React.ReactNode }) {
           {e.date ? dateCourte(`${e.date}T12:00:00`) : "—"}
           <small>{e.date ? (e.statut === "fait" ? "fait" : quand(e.date)) : "sans date"}{prevision && e.date ? " · prévision" : ""}</small>
         </div>
-        <span className="lor-etape-point" data-teinte={s.teinte} data-prevision={prevision} aria-label={s.libelle} />
+        <span className="lor-etape-point" data-teinte={s.teinte} data-prevision={prevision} role="img" aria-label={s.libelle} />
         <div className="lor-etape-texte">
           {e.libelle}
           {e.statut === "manque" ? <> <Pastille teinte="rouge">En retard</Pastille></> : null}
@@ -916,7 +916,7 @@ function PieceLigne({ piece, decisions, nommer }: { piece: PieceProjet; decision
           <Pastille teinte={teinte}>{piece.statut === "lue" ? "Lue" : piece.statut === "en_lecture" ? "En lecture" : piece.statut === "a_verifier" ? "À vérifier" : piece.statut === "a_classer" ? "Courrier non reconnu" : piece.statut === "echec" ? "Illisible" : piece.statut === "rejetee" ? "Rejetée" : "Reçue"}</Pastille>
         </div>
         <div className="esp-fil-meta">
-          {piece.cree_le ? `Déposé le ${dateHeure(piece.cree_le)}. ` : ""}
+          {piece.cree_le ? `${piece.source === "courriel" ? "Reçu par courriel du guichet et rangé ici par son numéro de dossier, le" : "Déposé le"} ${dateHeure(piece.cree_le)}. ` : ""}
           {piece.statut === "a_classer" ? `Le lecteur n'a pas reconnu un courrier de la mairie${piece.motif ? ` : « ${piece.motif} »` : ""}. Aucune date n'en est proposée ; saisissez-la à la main. ` : ""}
           {piece.statut === "echec" && piece.motif ? `Motif : « ${piece.motif} ». ` : ""}
           {decisions.map((d) => (

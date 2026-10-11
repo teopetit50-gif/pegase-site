@@ -1,0 +1,15 @@
+# empreinte.sql (worker-a5 d3dd1bf), niveau resume, recette ygwbgpowzlbdaajlsqkn, 6/10/2026 14:50 Z — relayé par le coordinateur.
+# Cible MOUVANTE : la vague 3 pose des lots depuis 14:30 Z (a4_16, b2_03, b3_12, b4_06, b5_11, b6_12, b7_05). À rejouer au gel.
+# categorie | nombre | md5
+contrainte | 2159 | 5f519eea6f19b98dd808aaed4379d49b
+cron | 41 | 0aca026d6d6d752ddaab63f86b7a923b
+declencheur | 271 | 38fc7b318ff6702776e07f4783d3c0d9
+droit | 1498 | 3f7019928c0271e3cde3bdd61fb480ba
+droit_defaut | 12 | cfd33994f38ea7e5ab6925a5c415caea
+extension | 7 | a884021f8fd6317950e2483d2549d867
+fonction | 1243 | 3693320df7f7186e3d2f435d157fd40a
+index | 762 | 76137fa54da052e3edf92ef603f26101
+politique | 312 | 702458439051aaad4d3b76e8e515623c
+publication | 27 | 5a07394cfbb11c5030db435460a78d87
+table | 223 | 906bc70d78944bb26fa05f5277e1d998
+vue | 17 | b52c1f71928e4ec44ba7f77b0c5b167f

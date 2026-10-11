@@ -1,0 +1,15 @@
+{
+  "imports": {
+    "@std/assert": "jsr:@std/assert@^1.0.14"
+  },
+  "tasks": {
+    "test": "deno test -A tests/",
+    "verifier": "deno check index.ts lecteur.ts && deno lint && deno fmt --check && deno test -A tests/"
+  },
+  "compilerOptions": {
+    "strict": true
+  },
+  "fmt": {
+    "lineWidth": 160
+  }
+}

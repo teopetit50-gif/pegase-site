@@ -27,7 +27,7 @@ export default function AvantRendezVous({ verifications, jours }: { verification
           <div className="esp-point-sections" style={{ gridTemplateColumns: "1fr" }}>
             {verifications.map((v, i) => (
               <div key={`${v.nature}-${v.objet_id ?? i}-${v.rendez_vous_id ?? ""}`} className="esp-point-ligne">
-                <span className="esp-point-gravite" data-gravite={v.gravite === "info" ? undefined : v.gravite} data-sante={v.gravite === "info"} aria-label={v.gravite} />
+                <span className="esp-point-gravite" data-gravite={v.gravite === "info" ? undefined : v.gravite} data-sante={v.gravite === "info"} role="img" aria-label={v.gravite === "info" ? "information" : v.gravite} />
                 <div>
                   <div className="esp-item-haut">
                     <Pastille teinte={TEINTES[v.gravite]}>{NATURES_VERIF[v.nature]}</Pastille>
