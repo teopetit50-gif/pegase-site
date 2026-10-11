@@ -1,6 +1,9 @@
 # NOTES — session B7 (identité des tiers)
 
-## REPRISE (pause demandée par Teo, 6/10 21 h Z) — lire d'abord
+## REPRISE (pause demandée par Teo, 6/10 21 h Z, puis 11/10 15 h 40 Z) — lire d'abord
+
+Au 11/10 15 h 40 Z : tout est posé et vert (`^test_b7_` jusqu'à 14 compris), taux-bce conforme. Rien à poser.
+Prochain pas unique : l'essai HMRC en bac à sable dès que Teo a posé les identifiants (section 13, GUIDE-HMRC.md).
 
 Branche `worker-b7`, rien en cours, arbre propre. Session : session_01967jUehrY7tLAXLn9pBaSw (Opus 5.5).
 
