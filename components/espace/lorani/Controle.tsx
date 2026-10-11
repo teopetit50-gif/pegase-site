@@ -45,6 +45,8 @@ const jour = (d: string | null) => (d ? dateCourte(d.length === 10 ? `${d}T12:00
 const indiceSuivant = (i: string) => (/^[A-Y]$/.test(i) ? String.fromCharCode(i.charCodeAt(0) + 1) : /^\d+$/.test(i) ? String(Number(i) + 1) : "");
 /* l'unité d'une grandeur du contrat de lecture, d'après son suffixe (hauteur_faitage_m, emprise_sol_m2, espaces_verts_pct…) */
 const unite = (g: string | null) => (!g ? "" : g.endsWith("_m2") ? " m²" : g === "cote_altimetrique_m" ? " m NGF" : g.endsWith("_m") ? " m" : g.endsWith("_pct") ? " %" : "");
+/* une valeur d'un indice : « 1,8 m », ou « absente » */
+const valeurIndice = (v: number | null, u: string | null) => (v === null ? "absente" : `${String(v).replace(".", ",")}${u ? ` ${u}` : ""}`);
 const pluriel = (n: number, s: string) => `${n} ${s}${n > 1 ? "s" : ""}`;
 
 type Choix = { piece_id: string; role: RolePieceControle; reference: string };
@@ -303,6 +305,20 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
             </div>
           ))}
 
+          {c.changements?.length ? (
+            <details className="lor-temps-recents" open={c.changements.some((x) => !x.releve)}>
+              <summary>Changements depuis l’indice {precedent?.indice ?? "précédent"} ({c.changements.length}{c.changements.some((x) => !x.releve) ? `, dont ${c.changements.filter((x) => !x.releve).length} non relevé${c.changements.filter((x) => !x.releve).length > 1 ? "s" : ""}` : ""})</summary>
+              <ul className="lor-liste">
+                {c.changements.map((x, i) => (
+                  <li key={i}>
+                    <Pastille teinte={x.releve ? "gris" : "ambre"}>{x.releve ? "Relevé" : "Non relevé"}</Pastille>{" "}
+                    <strong>{x.reference}</strong> · {x.libelle.charAt(0).toUpperCase() + x.libelle.slice(1)} : {valeurIndice(x.avant, x.unite)} → {valeurIndice(x.apres, x.unite)}
+                    <span className="lor-sous"> {x.page_apres ? `p. ${x.page_apres}` : ""}{x.texte_apres ? ` · « ${x.texte_apres} »` : ""}</span>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          ) : null}
           {corrigesIci.length ? (
             <details className="lor-temps-recents">
               <summary>Corrigés depuis l’indice {precedent?.indice ?? "précédent"} ({corrigesIci.length})</summary>

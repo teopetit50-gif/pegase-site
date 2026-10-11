@@ -38,6 +38,10 @@ if (pdf) {
   const info = execFileSync('pdfinfo', [chemin]).toString();
   const pages = Number(info.match(/Pages:\s+(\d+)/)?.[1]);
   ok(pages >= 4, `pdfinfo lit le PDF : ${pages} pages (rapport + pages citées annotées)`);
+  {
+    const texte = execFileSync('pdftotext', ['-layout', chemin, '-']).toString().replace(/\s+/g, ' ');
+    ok(/Changements depuis l'indice A/.test(texte) && /PC3 · la largeur de « tremie r1 » : de 1,2 m à 1,8 m, p\. 1 · non relevé par le contrôle/.test(texte), 'pdftotext : les changements depuis l’indice A, la trémie non relevée');
+  }
   ok(/Title:\s+Contrôle du dossier — Surélévation Dubois/.test(info), 'titre du document avec ses accents');
   const texte = execFileSync('pdftotext', ['-layout', chemin, '-']).toString();
   ok(/3 constats ouverts, dont 1 bloquant/.test(texte) && /sous-estimé de 18 %/.test(texte) && /Corrigés depuis l'indice A/.test(texte), 'le résumé : 3 ouverts dont 1 bloquant (métré compris), corrigés depuis l’indice A');
