@@ -231,14 +231,17 @@ export default function EcranCashd({ vue }: { vue?: Onglet } = {}) {
           setRelancesLocales((prev) => prev.map((x) => (x.etat === "a_valider" && x.pieces.some((p) => p.facture_id === facture) ? { ...x, etat: "coupee", statut: "coupee", motif: `contestation partielle : ${motif}` } : x)));
           return `${montant(montantConteste)} contestés sortent du cycle (exemple) ; le reste continue d'être relancé.`;
         },
-        dossier: async () => {
+        dossier: async (motif = "litige") => {
           if (source === "reelle") {
-            const d = await portes.dossier(fiche.compte.id, "litige");
-            exporterJson(`dossier-${fiche.compte.reference}-${jourParis()}.json`, d);
+            const d = await portes.dossier(fiche.compte.id, motif);
+            exporterJson(`dossier-${motif === "assurance_credit" ? "assurance-credit-" : ""}${fiche.compte.reference}-${jourParis()}.json`, d);
             return;
           }
-          exporterJson(`dossier-${fiche.compte.reference}-${jourParis()}.json`, {
-            motif: "litige", constitue_le: new Date().toISOString(), debiteur: fiche.compte, balance: balanceDe(fiche),
+          const jointes = fiche.pieces_jointes ?? [];
+          exporterJson(`dossier-${motif === "assurance_credit" ? "assurance-credit-" : ""}${fiche.compte.reference}-${jourParis()}.json`, {
+            motif, constitue_le: new Date().toISOString(), debiteur: fiche.compte, balance: balanceDe(fiche),
+            pieces_jointes: jointes,
+            pdf_manquants: fiche.pieces.filter((p) => (p.nature === "facture" || p.nature === "acompte") && p.statut !== "soldee" && !jointes.some((x) => x.facture_id === p.id && x.nature === "facture_pdf")).map((p) => p.numero),
             pieces: fiche.pieces.map((p) => etatPiece(p)), reglements: fiche.reglements, relances: relancesLocales.filter((x) => x.compte_id === fiche.compte.id),
           });
         },
@@ -312,6 +315,40 @@ export default function EcranCashd({ vue }: { vue?: Onglet } = {}) {
           majFiche(fiche.compte.id, (y) => ({ ...y, pieces: y.pieces.map((p) => (p.id === facture ? { ...p, solde_decision: decision, solde_decision_motif: motif } : p)) }));
           if (decision === "abandonne") setRelancesLocales((prev) => prev.map((x) => (x.etat === "a_valider" && x.pieces.some((p) => p.facture_id === facture) ? { ...x, etat: "coupee", statut: "coupee", motif: `solde abandonné : ${motif}` } : x)));
           return decision === "abandonne" ? "Solde abandonné (exemple)." : decision === "reclame" ? "Solde réclamé (exemple)." : "La règle du seuil reprend (exemple).";
+        },
+        trancherReponse: async (x, accepter) => {
+          if (source === "reelle") {
+            setChoix(fiche.compte.id);
+            const r = await portes.trancherReponse(x.id, accepter, null);
+            await relire();
+            return !accepter ? "Proposition écartée : rien ne change ; la décision reste au journal."
+              : x.proposition === "litige" ? `${r.effets} facture${r.effets > 1 ? "s" : ""} en litige ; leurs relances prêtes sont coupées.`
+              : x.proposition === "attente_contact" ? "Le compte attend un nouveau contact : désignez-le avant toute reprise."
+              : "Le compte est en pause le temps du règlement annoncé ; il reprend sur votre décision.";
+          }
+          majFiche(fiche.compte.id, (y) => {
+            const reponses_lues = (y.reponses_lues ?? []).filter((z) => z.id !== x.id);
+            if (!accepter) return { ...y, reponses_lues };
+            if (x.proposition === "litige") {
+              const ids = relancesLocales.find((r) => r.id === x.relance_id)?.pieces.map((p) => p.facture_id) ?? [];
+              return { ...y, reponses_lues, pieces: y.pieces.map((p) => (ids.includes(p.id) ? { ...p, statut: "litige", statut_motif: "contestation écrite du client" } : p)) };
+            }
+            const statut = x.proposition === "attente_contact" ? "attente_contact" : "pause";
+            return { ...y, reponses_lues, compte: { ...y.compte, statut, statut_motif: x.proposition === "pause" ? "le client annonce son règlement" : "l'interlocuteur a quitté l'entreprise", statut_le: new Date().toISOString() } };
+          });
+          if (accepter && x.proposition !== "aucune") setRelancesLocales((prev) => prev.map((r) => (r.compte_id === fiche.compte.id && r.etat === "a_valider" ? { ...r, etat: "coupee", statut: "coupee", motif: "réponse du client tranchée" } : r)));
+          return accepter ? "Proposition acceptée (exemple)." : "Proposition écartée (exemple) : rien ne change.";
+        },
+        joindrePiece: async (facture, nature, fichier) => {
+          if (source === "reelle") {
+            if (!reel?.client) throw new Error("Aucun compte rattaché à cette session.");
+            setChoix(fiche.compte.id);
+            await portes.joindrePiece(reel.client.client_id, facture, nature, fichier);
+            setReel((prev) => (prev ? { ...prev, fiches: Object.fromEntries(Object.entries(prev.fiches).filter(([k]) => k !== fiche.compte.id)) } : prev));
+            return `${fichier.name} est joint à la facture ; il rejoint ses dossiers.`;
+          }
+          majFiche(fiche.compte.id, (y) => ({ ...y, pieces_jointes: [...(y.pieces_jointes ?? []), { id: crypto.randomUUID(), facture_id: facture, nature, chemin: `exemple/${fichier.name}`, nom: fichier.name, cree_le: new Date().toISOString() }] }));
+          return `${fichier.name} est joint à la facture (exemple, rien n'est envoyé).`;
         },
         consignerAccord: async (devis, note, le) => {
           if (source === "reelle") {

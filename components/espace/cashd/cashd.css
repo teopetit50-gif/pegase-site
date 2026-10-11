@@ -290,3 +290,24 @@
 .esp .c2-envois .c2-sous {
   display: block;
 }
+
+/* ——— c2_05 (11/10) : réponses à trancher, pièces du dossier ——— */
+.esp .c2-reponses {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.esp .c2-reponses > li {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--r-filet, #e5e5e5);
+  border-radius: 10px;
+}
+.esp .c2-tete-gauche {
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 6px;
+}
