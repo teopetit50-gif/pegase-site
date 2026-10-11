@@ -1,7 +1,8 @@
 -- b6_22 — DALIRO : le travail repéré, comparé au marché et chiffré sur les prix validés (session B6, 11/10/2026), b6_26.
 -- Exécutable tel quel par execute_sql sur la RECETTE, après b6_00_jeu.sql et les migrations b6_01 à b6_26.
 -- runtests() annule tout. Le lecteur n'est pas appelé : sa lecture est rendue à public.daliro_media_lu comme il le
--- ferait, avec les droits du serveur. Désignations rares (ragréage, badigeon, calepinage) : le banc n'en porte pas.
+-- ferait, avec les droits du serveur. Désignations rares (ragréage, tadelakt, calepinage) : le banc n'en porte pas.
+-- Un seul prix validé par désignation et unité (index du socle) : l'ambiguïté se joue entre deux désignations.
 
 create or replace function tests.b6_chiffrage_ranger(p_reception bigint) returns jsonb
 language sql security definer set search_path to '' as $$ select private.btp_ranger_reception(p_reception) $$;
@@ -37,12 +38,12 @@ begin
   insert into public.btp_passages (client_id, chantier_id, lot_id, equipe_id, tache, debut, fin)
   values (v_client, v_ch, v_lot, v_eq, 'Sols du chiffrage', v_j - 1, v_j + 1);
 
-  -- ── La bibliothèque : le prix du marché validé ; deux badigeons validés à des prix différents ──
+  -- ── La bibliothèque : le prix du marché validé ; deux tadelakts validés, désignations voisines, prix différents ──
   perform tests.redevenir_admin();
   update public.btp_bibliotheque_prix set statut = 'valide', valide_le = now() where client_id = v_client and ligne_marche_id = v_l;
   insert into public.btp_bibliotheque_prix (client_id, designation, unite, prix_unitaire_ht, origine, statut, valide_le) values
-    (v_client, 'Badigeon chaulé', 'm2', 12, 'saisie', 'valide', now()),
-    (v_client, 'Badigeon chaulé', 'm2', 14, 'saisie', 'valide', now());
+    (v_client, 'Tadelakt mural', 'm2', 95, 'saisie', 'valide', now()),
+    (v_client, 'Tadelakt plafond', 'm2', 110, 'saisie', 'valide', now());
 
   -- ── Les droits ──
   return next ok(not has_function_privilege('authenticated', 'private.btp_prix_pour(uuid, uuid, text, text)', 'execute')
@@ -65,8 +66,8 @@ begin
     'demandes', jsonb_build_array(
       jsonb_build_object('nature', 'travail_supplementaire', 'texte', 'Reprise du ragréage autolissant', 'quantite', 12, 'unite', 'm²', 'lot_code', '02',
                          'source', jsonb_build_object('media', 1, 'extrait', 'le ragréage est à reprendre sur douze mètres carrés'), 'verifiee', true),
-      jsonb_build_object('nature', 'travail_supplementaire', 'texte', 'Badigeon chaulé du hall', 'quantite', 30, 'unite', 'm2',
-                         'source', jsonb_build_object('media', 1, 'extrait', 'un badigeon dans le hall'), 'verifiee', true),
+      jsonb_build_object('nature', 'travail_supplementaire', 'texte', 'Tadelakt de la douche', 'quantite', 6, 'unite', 'm2',
+                         'source', jsonb_build_object('media', 1, 'extrait', 'du tadelakt dans la douche'), 'verifiee', true),
       jsonb_build_object('nature', 'travail_supplementaire', 'texte', 'Calepinage mosaïque', 'quantite', 4, 'unite', 'm2',
                          'source', jsonb_build_object('media', 1, 'extrait', 'une mosaïque'), 'verifiee', true))));
   v_a1 := (v_res -> 'avenants' ->> 0)::uuid; v_a2 := (v_res -> 'avenants' ->> 1)::uuid; v_a3 := (v_res -> 'avenants' ->> 2)::uuid;
@@ -79,7 +80,7 @@ begin
                  'Il reste un brouillon ; la ligne du marché proche est signalée (déjà au marché ?)');
   return next is((select (a.origine -> 'chiffrage' ->> 'etat') || '/' || jsonb_array_length(a.origine -> 'chiffrage' -> 'candidats')
                          || '/' || (select count(*) from public.btp_avenants_lignes l where l.avenant_id = a.id)
-                  from public.btp_avenants a where a.id = v_a2), 'ambigu/2/0', 'Deux badigeons à 12 et 14 € : ambigu, rien n''est chiffré, les candidats sont gardés');
+                  from public.btp_avenants a where a.id = v_a2), 'ambigu/2/0', 'Tadelakt mural (95 €) ou plafond (110 €) : ambigu, rien n''est chiffré, les candidats sont gardés');
   return next is((select (a.origine -> 'chiffrage' ->> 'etat') || '/' || (select count(*) from public.btp_avenants_lignes l where l.avenant_id = a.id)
                   from public.btp_avenants a where a.id = v_a3), 'sans_prix/0', 'Aucun prix validé pour la mosaïque : à chiffrer à la main');
   return next ok(jsonb_array_length(v_res -> 'refus') = 0, 'Aucun refus');
