@@ -31,7 +31,7 @@ export type Reglages = {
   paliers_validation?: PalierValidation[] | null;
 };
 
-export type RoleValidation = "collaborateur" | "valideur" | "admin" | "gerant";
+export type RoleValidation = "valideur" | "admin" | "gerant";
 export type PalierValidation = { montant: number; roles: RoleValidation[] };
 
 export type Totaux = {

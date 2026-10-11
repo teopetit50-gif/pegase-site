@@ -248,12 +248,12 @@ for (const largeur of LARGEURS) {
   const Q = 'section[aria-label="Vos textes"] [aria-label="Qui valide"]';
   const q = () => s.evaluer(`(() => { const t = document.querySelector('${Q}'); return { paliers: t.querySelectorAll('fieldset').length, avis: t.querySelector('.esp-avis')?.innerText || '', gris: [...t.querySelectorAll('button')].find(b => /Enregistrer les paliers/.test(b.textContent))?.disabled }; })()`);
   let qv = await q();
-  ok(qv.paliers === 3 && qv.gris === false, 'trois paliers proposés : chargé de compte, responsable crédit, direction');
+  ok(qv.paliers === 3 && qv.gris === false, 'trois paliers proposés : valideur, administrateur, direction');
   await s.evaluer(`[...document.querySelectorAll('${Q} fieldset')][2].querySelector('input[type="checkbox"]:checked')?.click()`);
   await s.dormir(200);
   qv = await q();
   ok(/au moins un rôle/.test(qv.avis) && qv.gris === true, 'un palier sans rôle ne s\'enregistre pas');
-  await s.evaluer(`[...document.querySelectorAll('${Q} fieldset')][2].querySelectorAll('input[type="checkbox"]')[3].click()`);
+  await s.evaluer(`[...document.querySelectorAll('${Q} fieldset')][2].querySelectorAll('input[type="checkbox"]')[2].click()`);
   await s.dormir(200);
   await s.evaluer(`[...document.querySelectorAll('${Q} button')].find(b => /Enregistrer les paliers/.test(b.textContent)).click()`);
   await s.dormir(400);

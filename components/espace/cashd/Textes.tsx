@@ -23,15 +23,15 @@ import * as portes from "./portes";
 import { apercu, GABARITS_EXEMPLE, PALIERS_GABARIT, VARIABLES, verifier } from "./gabarits";
 import type { CleGabarit, Gabarit, PalierValidation, Reglages, RoleValidation } from "./types";
 
+/* les trois rôles que le socle admet en validation : le chargé de compte ou le responsable crédit valident s'ils portent le rôle valideur */
 const ROLES: { cle: RoleValidation; libelle: string }[] = [
-  { cle: "collaborateur", libelle: "Chargé de compte" },
-  { cle: "valideur", libelle: "Responsable crédit" },
+  { cle: "valideur", libelle: "Valideur (chargé de compte, responsable crédit)" },
   { cle: "admin", libelle: "Administrateur" },
   { cle: "gerant", libelle: "Direction" },
 ];
 const PALIERS_DEFAUT: PalierValidation[] = [
-  { montant: 0, roles: ["collaborateur", "valideur", "gerant"] },
-  { montant: 2000, roles: ["valideur", "gerant"] },
+  { montant: 0, roles: ["valideur", "admin", "gerant"] },
+  { montant: 2000, roles: ["admin", "gerant"] },
   { montant: 10000, roles: ["gerant"] },
 ];
 

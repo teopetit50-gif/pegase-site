@@ -7,7 +7,9 @@
 -- Jusqu'ici un seul seuil (seuil_direction) faisait monter la relance à la direction. L'organisation règle maintenant
 -- jusqu'à trois paliers {montant, rôles} (porte cashd_regler_validation, gérant seulement) ; CASHD les écrit en règles
 -- de validation du socle (public.regles_validation, module cashd), que le socle applique à chaque demande : la règle au
--- montant minimal le plus haut que la relance atteint décide des rôles qui peuvent valider. Les paliers remplacent le
+-- montant minimal le plus haut que la relance atteint décide des rôles qui peuvent valider. Le socle admet trois rôles de
+-- validation (gerant, admin, valideur) : le chargé de compte, le responsable crédit et la direction s'y rangent par le
+-- rôle que leur compte porte. Les paliers remplacent le
 -- seuil de direction (sa règle est désactivée). Les anciennes règles ne sont jamais supprimées : elles passent inactives.
 -- La mise en demeure garde son exigence de commentaire et n'est jamais couverte par un accord permanent (c2_02).
 --
@@ -17,9 +19,10 @@
 alter table public.cashd_reglages add column if not exists paliers_validation jsonb;
 alter table public.cashd_reglages add column if not exists regles_paliers uuid[] not null default '{}';
 
--- Les paliers : [{"montant": 0, "roles": ["collaborateur", "valideur", "gerant"]}, {"montant": 5000, "roles": [...]}, …]
--- — un à trois, montants croissants, le premier à 0 ; rôles parmi gerant, admin, valideur, collaborateur. Liste vide ou
--- null : plus de paliers (les rôles par défaut du socle reprennent).
+-- Les paliers : [{"montant": 0, "roles": ["valideur", "admin", "gerant"]}, {"montant": 5000, "roles": [...]}, …]
+-- — un à trois, montants croissants, le premier à 0 ; rôles parmi gerant, admin, valideur (ceux que le socle admet en
+-- validation : contrainte regles_validation_roles_autorises_check). Le chargé de compte valide s'il porte le rôle
+-- valideur. Liste vide ou null : plus de paliers (les rôles par défaut du socle reprennent).
 create or replace function public.cashd_regler_validation(p_client uuid, p_paliers jsonb)
  returns jsonb language plpgsql security definer set search_path to ''
 as $function$
@@ -50,10 +53,10 @@ begin
        select 1 from jsonb_array_elements(p_paliers) with ordinality x
        where jsonb_typeof(x.value) <> 'object' or jsonb_typeof(x.value -> 'montant') <> 'number' or (x.value ->> 'montant')::numeric < 0
           or jsonb_typeof(x.value -> 'roles') <> 'array' or jsonb_array_length(x.value -> 'roles') = 0
-          or exists (select 1 from jsonb_array_elements_text(x.value -> 'roles') r where r not in ('gerant', 'admin', 'valideur', 'collaborateur'))
+          or exists (select 1 from jsonb_array_elements_text(x.value -> 'roles') r where r not in ('gerant', 'admin', 'valideur'))
           or (x.ordinality = 1 and (x.value ->> 'montant')::numeric <> 0)
           or (x.ordinality > 1 and (x.value ->> 'montant')::numeric <= (p_paliers -> (x.ordinality::integer - 2) ->> 'montant')::numeric)) then
-    raise exception 'Chaque palier a un montant (le premier à 0, puis croissants) et des rôles parmi gerant, admin, valideur, collaborateur.' using errcode = '22023';
+    raise exception 'Chaque palier a un montant (le premier à 0, puis croissants) et des rôles parmi gerant, admin, valideur.' using errcode = '22023';
   end if;
 
   -- Les règles précédentes de CASHD passent inactives (jamais supprimées), le seuil de direction compris.

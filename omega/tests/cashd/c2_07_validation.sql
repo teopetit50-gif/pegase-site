@@ -5,7 +5,7 @@ create or replace function tests.test_c2_07_validation() returns setof text
 language plpgsql as $f$
 declare
   banc jsonb; v_client uuid; v_gerant uuid; v_daf uuid; p jsonb; j date := tests.c2_jour(); v_r jsonb; v_regles uuid[];
-  v_paliers jsonb := '[{"montant": 0, "roles": ["collaborateur", "valideur", "gerant"]}, {"montant": 2000, "roles": ["valideur", "gerant"]}, {"montant": 10000, "roles": ["gerant"]}]';
+  v_paliers jsonb := '[{"montant": 0, "roles": ["valideur", "admin", "gerant"]}, {"montant": 2000, "roles": ["admin", "gerant"]}, {"montant": 10000, "roles": ["gerant"]}]';
 begin
   banc := tests.c2_banc();
   v_client := (banc ->> 'client')::uuid; v_gerant := (banc ->> 'gerant')::uuid; v_daf := (banc ->> 'daf')::uuid;
@@ -21,8 +21,8 @@ begin
   perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
   return next throws_ok(format('select public.cashd_regler_validation(%L, %L)', v_client, '[{"montant": 0, "roles": ["gerant"]}, {"montant": 0, "roles": ["gerant"]}]'),
                         '22023', null, 'Des montants qui ne croissent pas sont refusés');
-  return next throws_ok(format('select public.cashd_regler_validation(%L, %L)', v_client, '[{"montant": 0, "roles": ["stagiaire"]}]'), '22023', null,
-                        'Un rôle inconnu est refusé');
+  return next throws_ok(format('select public.cashd_regler_validation(%L, %L)', v_client, '[{"montant": 0, "roles": ["collaborateur"]}]'), '22023', null,
+                        'Un rôle que le socle n''admet pas en validation (collaborateur) est refusé');
   return next throws_ok(format('select public.cashd_regler_validation(%L, %L)', v_client, '[{"montant": 100, "roles": ["gerant"]}]'), '22023', null,
                         'Le premier palier part de 0 €');
 
@@ -40,11 +40,11 @@ begin
                   where x.compte_id = (p ->> 'sci')::uuid and x.jour = j + 1 and x.nature = 'facture'), '{gerant}',
                  'Une relance de 12 000 € ne se valide que par la direction');
   return next is((select d.roles_autorises::text from public.cashd_relances x join public.demandes_validation d on d.id = x.demande_id
-                  where x.compte_id = (p ->> 'hotel')::uuid and x.jour = j + 1 and x.nature = 'facture'), '{valideur,gerant}',
-                 'Une relance de 3 000 € se valide par le responsable crédit ou la direction');
+                  where x.compte_id = (p ->> 'hotel')::uuid and x.jour = j + 1 and x.nature = 'facture'), '{admin,gerant}',
+                 'Une relance de 3 000 € se valide par l''administrateur ou la direction');
   return next is((select d.roles_autorises::text from public.cashd_relances x join public.demandes_validation d on d.id = x.demande_id
-                  where x.compte_id = (p ->> 'sci')::uuid and x.jour = j + 1 and x.nature = 'devis'), '{collaborateur,valideur,gerant}',
-                 'Une relance de devis (sans montant dû) se valide dès le chargé de compte');
+                  where x.compte_id = (p ->> 'sci')::uuid and x.jour = j + 1 and x.nature = 'devis'), '{valideur,admin,gerant}',
+                 'Une relance de devis (sans montant dû) se valide dès le valideur (chargé de compte ou responsable crédit)');
   return next ok(exists (select 1 from public.cashd_historique_reglages h where h.client_id = v_client and h.donnees ? 'paliers_validation'),
                  'Le changement reste daté');
 
