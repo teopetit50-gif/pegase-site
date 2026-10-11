@@ -1,5 +1,21 @@
 # Session B2 — TAVARO, le module des loueurs (contrats, retours, barèmes, factures, avoirs, litiges)
 
+## Reprise du 11/10/2026 — fait
+
+- **Posé et vert sur la recette** (^test_b2_ 01 à 25) :
+  - b2_12 : rappels, Crit'Air, contrôle du départ, photos du départ jointes à la facture ;
+  - b2_13 : transferts ;
+  - b2_14 : péages ;
+  - b2_15 : sinistres ;
+  - b2_16 : interfaces Assistance, Relevés constructeur et caution.
+  - SHA : 1ac2b00 et 814ddc7, puis les corrections 51455ca et 9943cdd.
+- **Contrat des fournisseurs** : `omega/modules/tavaro/INTERFACES.md`.
+- **Écran « Opérations »** (`components/espace/tavaro/OperationsVue.tsx`, `operations.ts`) : 3884a2b, recette c326fe3 (141 contrôles, axe 60). À fusionner par le coordinateur.
+- **Prochaine étape** : les modules restants du carnet, 13, 15, 16 et 18 (B3 a 07–10 et 20). Questions (06) attend un modèle de langage.
+- **Local** :
+  - le Postgres de /var/tmp/pgb2 s'arrête quand le conteneur dort : `pg_ctl ... -o '-p 5499 -k /tmp' start` ;
+  - la souche e12 porte b2_12–b2_16.
+
 ## REPRISE — pause demandée par Teo (06/10/2026, 21 h Z)
 
 **Branche** : `worker-b2`, tête 2613a68 au moment de la pause, avant ce commit de notes. Arbre propre, tout est poussé.
