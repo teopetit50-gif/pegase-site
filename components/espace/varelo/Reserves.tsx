@@ -234,7 +234,7 @@ export default function Reserves({ source, contexte, client_id, societes, objets
                       </td>
                       <td>
                         <span className="esp-item-haut">
-                          <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => setPhotos(r.id)} aria-label={`Photos du constat, livraison de ${r.transporteur} du ${dateCourte(r.date_reception)} (${r.photos.length})`}><Camera width={14} height={14} aria-hidden="true" /> Photos{r.photos.length ? ` (${r.photos.length})` : ""}</button>
+                          <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => setPhotos(r.id)} aria-label={`Photos${r.photos.length ? ` (${r.photos.length})` : ""} : constat de la livraison de ${r.transporteur} du ${dateCourte(r.date_reception)}`}><Camera width={14} height={14} aria-hidden="true" /> Photos{r.photos.length ? ` (${r.photos.length})` : ""}</button>
                           {(() => {
                             const d = decisionDe("protester_reception", r.id);
                             if (d) return <Pastille teinte={etiquetteDecision(d).teinte} title={d.calcul}>{etiquetteDecision(d).libelle}</Pastille>;
@@ -246,7 +246,7 @@ export default function Reserves({ source, contexte, client_id, societes, objets
                             <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => void ouvrirLettre(r)} aria-label={`Préparer la lettre de protestation à ${r.transporteur}, livraison du ${dateCourte(r.date_reception)}`}><FileText width={14} height={14} aria-hidden="true" /> Lettre</button>
                           ) : null}
                           {r.statut === "a_examiner" && peutDecider ? (
-                            <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={() => setSuite(r)} aria-label={`Donner la suite de la livraison de ${r.transporteur} du ${dateCourte(r.date_reception)}`}>Suite…</button>
+                            <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={() => setSuite(r)} aria-label={`Suite… : donner la suite de la livraison de ${r.transporteur} du ${dateCourte(r.date_reception)}`}>Suite…</button>
                           ) : null}
                         </span>
                       </td>
