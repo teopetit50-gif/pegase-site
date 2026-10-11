@@ -187,3 +187,19 @@ export async function chargerRelancesCommande(client: string): Promise<RelanceCo
   if (error) throw new ErreurPorte(message(error));
   return (data ?? []) as RelanceCommande[];
 }
+
+/* ——— c2_05 : trancher une réponse lue, joindre une pièce ——— */
+
+export async function trancherReponse(reponse: string, accepter: boolean, motif: string | null) {
+  return rpc<{ statut: string; proposition: string; effets: number }>("cashd_trancher_reponse", { p_reponse: reponse, p_accepter: accepter, p_motif: motif });
+}
+
+/* Le fichier part dans le stockage de l'organisation (omega-clients/<client>/cashd/<facture>/…), puis la porte le rattache. */
+export async function joindrePiece(client: string, facture: string, nature: string, fichier: File) {
+  const supabase = createClient();
+  const nom = fichier.name.normalize("NFD").replace(/[^\w.-]+/g, "_").slice(-120);
+  const chemin = `${client}/cashd/${facture}/${Date.now()}-${nom}`;
+  const { error } = await supabase.storage.from("omega-clients").upload(chemin, fichier, { upsert: false, contentType: fichier.type || undefined });
+  if (error) throw new ErreurPorte(message(error));
+  return rpc<{ id: string }>("cashd_joindre_piece", { p_facture: facture, p_nature: nature, p_chemin: chemin, p_nom: fichier.name, p_actif: true });
+}
