@@ -17,8 +17,7 @@ Branche `worker-b7`, rien en cours, arbre propre. Session : session_01967jUehrY7
   avant 17 h Z.
 
 **Attend le coordinateur :**
-- reposer le test corrigé `omega/tests/identite/b7_07_etrangers.sql` (a6101c9), puis rejouer `^test_b7_13`. Il était
-  rouge sur 4 assertions à cause d'un rôle manquant dans le test, pas dans le code ;
+- ~~reposer `b7_07_etrangers.sql` et rejouer `^test_b7_13`~~ : fait le 11/10, lot h1340b5b7, 0 « not ok » ;
 - me renvoyer le premier bilan de `taux-bce` (`taux_bce_passages`, `filed_taux_change` : environ 1 856 taux attendus) ;
 - fusionner `worker-b7` sur main quand il le jugera bon.
 
