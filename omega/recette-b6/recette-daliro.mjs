@@ -504,5 +504,30 @@ const choisir = (sel, valeur) => `(() => { const t = document.querySelector('${s
   }
 }
 
+{
+  // b6_30 : le point du mois, sur la liste des chantiers
+  const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+  const graves = (cible) => `(async () => { const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`;
+  for (const largeur of [390, 1440]) {
+    const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `b6-point-${largeur}`, densite: 1 });
+    console.log(`— Le point du mois (${largeur})`);
+    ok(await s.aller(base + chemin), 'page chargée');
+    await s.dormir(600);
+    const carte = `document.querySelector('section[aria-label="Point du mois"]')`;
+    const t = await s.evaluer(`${carte}?.innerText || ''`);
+    ok(/Point du mois/.test(t) && /repéré/.test(t) && /reste à facturer/i.test(t) && /Résidence Les Tilleuls/.test(t), 'le point du mois : repérés, signés, reste à facturer, par chantier');
+    ok(await s.evaluer(bouton('/Mois dernier/', carte)) === true, 'clic sur « Mois dernier »');
+    await s.dormir(300);
+    ok(await s.evaluer(`[...${carte}.querySelectorAll('button[aria-pressed="true"]')].map(b => b.textContent).join() === 'Mois dernier'`), 'le mois dernier est choisi');
+    await s.evaluer(axe + ';true');
+    const g = await s.evaluer(graves(carte));
+    ok(g.length === 0, `carte du point : aucun écart axe grave ${g.length ? JSON.stringify(g) : ''}`);
+    const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
+    ok(deb === 0, `pas de débordement horizontal (${deb})`);
+    s.fermer();
+  }
+}
+
 console.log(echecs ? `\n${echecs} échec(s)` : '\ntout passe');
 process.exit(echecs ? 1 : 0);
