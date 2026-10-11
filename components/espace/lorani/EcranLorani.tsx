@@ -30,6 +30,7 @@ import { ETATS, FAMILLES, NATURES_INTERVENANT, NATURES_PROJET, PHASES, ROLES_PRO
 import { dossierExemple } from "./exemples";
 import Chantier from "./Chantier";
 import Assurances from "./Assurances";
+import Offres from "./Offres";
 import ComptesRendus from "./ComptesRendus";
 import Doe from "./Doe";
 import OrdresService from "./OrdresService";
@@ -68,7 +69,7 @@ export default function EcranLorani() {
       setReel(await chargerDossier());
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
-      setReel({ ...dossierExemple(), projets: [], permis: [], datesLues: [], echeances: [], recours: [], lots: [], intervenants: [], membres: [], pieces: [], controles: [], controlePieces: [], constats: [], plu: [], attestations: [], ordresService: [], reserves: [], comptesRendus: [], points: [], doe: [], moi: null });
+      setReel({ ...dossierExemple(), projets: [], permis: [], datesLues: [], echeances: [], recours: [], lots: [], intervenants: [], membres: [], pieces: [], controles: [], controlePieces: [], constats: [], plu: [], attestations: [], ordresService: [], reserves: [], comptesRendus: [], points: [], doe: [], consultations: [], offres: [], moi: null });
     }
   }, []);
   useEffect(() => {
@@ -774,6 +775,7 @@ function ProjetCarte({ projet, dossier, nommer, peutEcrire, envoi, ouvrirForm, a
       </div>
       <PluProjet projet={projet} dossier={dossier} peutEcrire={peutEcrire} agir={agir} />
       <Controle projet={projet} dossier={dossier} nommer={nommer} peutEcrire={peutEcrire} agir={agir} />
+      <Offres projet={projet} dossier={dossier} peutEcrire={peutEcrire} agir={agir} />
       <Honoraires projet={projet} dossier={dossier} nommer={nommer} peutEcrire={peutEcrire} agir={agir} />
       <Chantier projet={projet} dossier={dossier} peutEcrire={peutEcrire} agir={agir} />
       <ComptesRendus projet={projet} dossier={dossier} peutEcrire={peutEcrire} agir={agir} />
