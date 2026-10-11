@@ -1070,3 +1070,23 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   - lot h1350b3a5 (b3, 44, 60) : 597 ok, 0 not ok ;
   - lot h1404tout : 888 ok, 10 not ok (a4_33 ×2, a4_34, b1_18, b2_23, b2_25, b5_15, b6_22, c4_10, 44 pour filed_rapprocher_ligne), relayés aux ouvriers ;
   - fusionnés : C1 86706a9 et B4 300bd59. Écrans B1, B5, B6 et C4 retenus tant que leurs tests sont rouges.
+
+## REPRISE — pause du 11/10, 15 h 40 Z (demande de Teo : « économiser les tokens »)
+- **Routines coupées** : trig_01PJKxdeE5XGx3n8QTMoWwVe (point toutes les 3 h) est désactivée. Pour repartir : update_trigger enabled=true.
+- **Pause** : les 16 ouvriers et P1 ont reçu la consigne de pause (commit, push, REPRISE dans leurs NOTES, puis silence). C5 reste à l'arrêt.
+- **main** = 1e27e72. Les écrans d'aujourd'hui sont fusionnés : Varelo, Daliro, CASHD, Tavaro, Tamila, Tiroma, Lorani, OFFLOAD, FILED et C1.
+- **Posé sur la recette, test pas encore lu** :
+  - h1527c2 (c2_ + 44 ; C2 0615c80, portefeuille par chargé) : à lire dans private.sorties_tests ;
+  - à lancer : ^test_(b6_(0[1-3]|25|27)_|b5_17_). b6_31 et b6_27 sont posés depuis 43353c4, b5_28 et b5_17 depuis 4bff78f.
+- **Écrans à fusionner une fois ces tests verts** :
+  - C2 : d01be6e..worker-c2, sur cashd ;
+  - B5 : eada47c..worker-b5, sur lorani ;
+  - B6 : cb55002..worker-b6, sur daliro.
+- **Priorité de Teo (15 h Z)** : l'espace client /espace2 doit prendre le dessin de /omega, recopié et sans rien de propre à Teo. C1 est dessus, sur tableau-de-bord-v2 après dc963df ; rien n'est encore fusionné.
+- **Décisions qui reviennent à Teo** :
+  - l'outil « contexte_varelo » pour l'assistant (B1, 357fcb2) ;
+  - la preuve en vrai mail + formulaire de C3 (deux vrais courriels) ;
+  - les secrets AR24 et HMRC ;
+  - le coffre Scaleway, Bedrock UE et les exports réels.
+- **Recette** : une autre session a appliqué « varelo_referentiel_perf » à 15 h 28 Z, puis la base a redémarré à 15 h 29. Les identifiants de dépôt (pg_net) sont repartis à 23 ; aucune donnée perdue.
+- **Copie de travail pour les fusions** : scratchpad/wt, avec node_modules installé. Le package-lock de main est désynchronisé : `npm install`, pas `npm ci`.
