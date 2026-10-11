@@ -25,6 +25,11 @@ const ECRANS = [
   ['tavaro-flotte', '/espace/tavaro', `[...document.querySelectorAll('section[aria-label="Flotte : garder, vendre ou renouveler"] .r-btn')].find(b => /Fiche/.test(b.textContent))?.click()`],
   ['tavaro-contestations', '/espace/tavaro', `[...document.querySelectorAll('section[aria-label="Contestations bancaires"] .r-btn')].find(b => /Ouvrir une contestation/.test(b.textContent) && !b.disabled)?.click()`,
     `(() => { const d = document.querySelector('section[aria-label="Contestations bancaires"] .tav-forces'); if (d) d.open = true; })()`],
+  /* b2_12 à b2_16 : les opérations — le formulaire du sinistre (le plus long), puis le volet péages */
+  ['tavaro-operations', '/espace/tavaro', `[...document.querySelectorAll('section[aria-label="Opérations"] .r-btn')].find(b => /Déclarer un sinistre/.test(b.textContent) && !b.disabled)?.click()`,
+    `[...document.querySelectorAll('section[aria-label="Opérations"] .esp-filtre')].find(b => b.textContent.startsWith('Sinistres')).click()`],
+  ['tavaro-operations-peages', '/espace/tavaro', `[...document.querySelectorAll('section[aria-label="Opérations"] .r-btn')].find(b => /^Payé$/.test(b.textContent) && !b.disabled)?.click()`,
+    `[...document.querySelectorAll('section[aria-label="Opérations"] .esp-filtre')].find(b => b.textContent.startsWith('Péages')).click()`],
 ];
 
 const analyser = (s, cible) => s.evaluer(`(async () => {
