@@ -1060,3 +1060,9 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
 - Posé depuis worker-b5 23af6b0 : b5_24, ses 15 fichiers de données et le test b5_14. Posé depuis a6101c9 : b7_07.
 - Lot h1340b5b7 : 42 ok, 0 not ok. Comptes des tables lorani_ref conformes.
 - Relevé PLU réel à Nantes : confié à B5 (il faut la session du gérant).
+- Fonctions Edge à déployer en un seul lot :
+  - **sortie** : A4 619a04b, cron chaque minute ;
+  - **alertes-quotidiennes** : A5 42ee9db, 19ap posé ; puis les réglages et le cron de 06:17 ;
+  - **expediteur** et **reception** : A2 b69423f, branche=false sur meta_whatsapp et ar24 ; vérifier que noter_remise accepte 'meta_whatsapp'.
+- C3 3eca49f7 : la preuve en vrai mail + formulaire attend deux vrais courriels de Teo.
+- A1 : decoupage_reel.mjs suspendu (règle « jamais Supabase » maintenue).
