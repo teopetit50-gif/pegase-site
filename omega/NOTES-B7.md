@@ -18,7 +18,8 @@ Branche `worker-b7`, rien en cours, arbre propre. Session : session_01967jUehrY7
 
 **Attend le coordinateur :**
 - ~~reposer `b7_07_etrangers.sql` et rejouer `^test_b7_13`~~ : fait le 11/10, lot h1340b5b7, 0 « not ok » ;
-- me renvoyer le premier bilan de `taux-bce` (`taux_bce_passages`, `filed_taux_change` : environ 1 856 taux attendus) ;
+- ~~bilan `taux-bce`~~ : reçu le 11/10. `filed_taux_change` = 1 943 lignes (1 856 du premier passage + 3 jours × 29),
+  16 passages, sans alerte les 8 et 9/10 ; 14 h 35 Z : 29 posés, 15 h 35 Z : 29 inchangés. Conforme ;
 - fusionner `worker-b7` sur main quand il le jugera bon.
 
 **Attend Teo :**
