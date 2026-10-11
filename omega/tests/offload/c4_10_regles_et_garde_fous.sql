@@ -117,6 +117,8 @@ declare
   v_motif text;
   v_attente uuid;
   v_collab uuid;
+  v_rebonds uuid[];
+  v_fournisseurs text[];
 begin
   perform tests.c4_reprises_pretes();
   for k in 1 .. 6 loop
@@ -133,12 +135,14 @@ begin
   return next is(private.offload_surveiller(v_client), null, 'Tout va bien : la surveillance ne dit rien');
   -- Deux messages reviennent en rebond : l'ouvrier le note par la voie du socle (noter_remise), qui publie
   -- envoi.non_remis.offload ; le module le lit à son passage.
+  -- Les envois et leur fournisseur sont lus avant d'endosser l'ouvrier : le rôle de service n'exécute pas les aides de test.
+  select array_agg(e.id order by e.id), array_agg(e.fournisseur order by e.id) into v_rebonds, v_fournisseurs
+  from public.envois e where e.id in ((tests.c4_reprise(v[1])).envoi1_id, (tests.c4_reprise(v[2])).envoi1_id);
   if to_regprocedure('tests.endosser_serveur()') is not null then
     execute 'select tests.endosser_serveur()';
   end if;
   for k in 1 .. 2 loop
-    perform private.noter_remise((select e.fournisseur from public.envois e where e.id = (tests.c4_reprise(v[k])).envoi1_id),
-                                 'essai:c4:' || (tests.c4_reprise(v[k])).envoi1_id::text, 'rebond', '{"code": "550", "raison": "boîte inexistante"}'::jsonb);
+    perform private.noter_remise(v_fournisseurs[k], 'essai:c4:' || v_rebonds[k]::text, 'rebond', '{"code": "550", "raison": "boîte inexistante"}'::jsonb);
   end loop;
   perform tests.redevenir_admin();
   perform private.offload_traiter_travaux(50);
