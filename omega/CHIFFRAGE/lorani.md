@@ -10,9 +10,9 @@ n'a été touché.
 
 1. **Promesses : 69 lignes** (66 numérotées, plus 21b et 2 lignes commerciales).
    - A : 2 (zone du PLU et servitudes, relevé réel du 06/10 ; risques de la commune, relevé réel du 11/10)
-   - B : 26
+   - B : 30
    - C : 25
-   - D : 13
+   - D : 9
    - T : 3
 2. **Pour tout mettre en B : ≈ 95 jours de travail**, dont ≈ 38 relèvent du lecteur ou d'un ouvrier « dwg ». Le seul métré sur le dessin en pèse 12,5 ; A1 et B5 conseillent de le reformuler plutôt que de le construire.
 3. **Pour passer de B à A : ≈ 69 jours en somme brute.** C'est plutôt ≈ 45 jours, parce qu'un même vrai dossier d'agence fait passer plusieurs lignes à la fois. Il faut y ajouter le calendrier d'un vrai permis : 2 à 5 mois jusqu'à la purge.
@@ -97,10 +97,10 @@ des lignes déjà retirées de `lib/en-preparation.ts` (Accessibilité, Cerfa, R
 
 | # | Promesse (texte exact) | Où | État | Preuve | Ce qui manque | Jours | Coût externe / tiers |
 |---|---|---|---|---|---|---|---|
-| 24 | « Analyse des offres » ; « Chaque offre est alignée sur la DPGF. Lorani compare les offres reçues ligne par ligne, si bien que les postes non chiffrés ressortent avant l'attribution » ; « Analyse des offres sur DPGF » ; carte métier « Sur quatre offres reçues dans quatre formats, un poste n'est chiffré par aucune entreprise » ; « Le poste 3.4 n'est chiffré que par une entreprise sur trois » | app/page.tsx:105-109 ; Fonctionnement.tsx:119,478 ; Formules.tsx:277 ; Metiers.tsx:108 ; Dossier.tsx:324 | C → B à la pose | b5_26 (11/10), test b5_16 (16 assertions) ; écran Analyse des offres | Le moteur est fait (b5_26 : consultation du lot, offres lues rangées, alignement ligne par ligne, classement comparable, attribution qui crée le marché) et l'écran aussi (11/10, recette 5 largeurs + rapport-offres.mjs verts). Restent la pose (b5_26 + test b5_16) et le type de lecture `lorani_offre` chez A1 (1 j → B, +1 j → A) | 1 / 3 | 0 à 0,05 € par PDF ; 0,1 à 0,3 € par gros Excel (A1) |
-| 25 | « Postes non chiffrés et réserves » | Fonctionnement.tsx:499 | C → B à la pose | b5_26 (11/10), test b5_16 (16 assertions) ; écran Analyse des offres | Fait : postes non chiffrés (majeur) et réserves écrites relevés par offre ; à poser (b5_26) | 0 / 0,5 | — |
-| 26 | « Écarts à l'estimation par ligne » | Fonctionnement.tsx:518 | C → B à la pose | b5_26 (11/10), test b5_16 (16 assertions) ; écran Analyse des offres | Fait : écart de chaque ligne au montant estimé de la DPGF chiffrée au-delà d'un seuil (20 % par défaut) ; à poser (b5_26) | 0 / 0,5 | — |
-| 27 | « Rapport d'analyse prêt à signer » | Fonctionnement.tsx:536 | C → B à la pose | b5_26 (11/10), test b5_16 (16 assertions) ; écran Analyse des offres | Fait : rapport d'analyse PDF prêt à signer (classement, relevés, poste par poste, proposition, cadre de signature) et Excel à trois feuilles, vérifiés par pdftotext et unzip | 0 / 0,5 | — |
+| 24 | « Analyse des offres » ; « Chaque offre est alignée sur la DPGF. Lorani compare les offres reçues ligne par ligne, si bien que les postes non chiffrés ressortent avant l'attribution » ; « Analyse des offres sur DPGF » ; carte métier « Sur quatre offres reçues dans quatre formats, un poste n'est chiffré par aucune entreprise » ; « Le poste 3.4 n'est chiffré que par une entreprise sur trois » | app/page.tsx:105-109 ; Fonctionnement.tsx:119,478 ; Formules.tsx:277 ; Metiers.tsx:108 ; Dossier.tsx:324 | B | b5_26 posé, test b5_16 vert sur la recette (lot h1445a4b5, 11/10) ; écran Analyse des offres (recette 5 largeurs, rapport-offres.mjs, accessibilité) | Lecture `lorani_offre` livrée par A1 (worker-a1 b47c89a, à redéployer) ; reste une vraie offre d'entreprise déposée et lue (A) | 0 / 1 | 0 à 0,05 € par PDF ; 0,1 à 0,3 € par gros Excel (A1) |
+| 25 | « Postes non chiffrés et réserves » | Fonctionnement.tsx:499 | B | b5_26 posé, test b5_16 vert sur la recette (lot h1445a4b5, 11/10) ; écran Analyse des offres (recette 5 largeurs, rapport-offres.mjs, accessibilité) | — | 0 / 0,5 | — |
+| 26 | « Écarts à l'estimation par ligne » | Fonctionnement.tsx:518 | B | b5_26 posé, test b5_16 vert sur la recette (lot h1445a4b5, 11/10) ; écran Analyse des offres (recette 5 largeurs, rapport-offres.mjs, accessibilité) | — | 0 / 0,5 | — |
+| 27 | « Rapport d'analyse prêt à signer » | Fonctionnement.tsx:536 | B | b5_26 posé, test b5_16 vert sur la recette (lot h1445a4b5, 11/10) ; écran Analyse des offres (recette 5 largeurs, rapport-offres.mjs, accessibilité) | — | 0 / 0,5 | — |
 | 28 | « Métré des plans contre les quantités » ; « Métré des plans contre la DPGF » ; FAQ « Il mesure les surfaces et les longueurs sur les plans, puis les compare aux quantités de la DPGF » ; « Le plan donne 412 m² de cloisons, la DPGF en prévoit 360 » | Fonctionnement.tsx:554,1363 ; Formules.tsx:367 ; Questions.tsx:73 | C | b5_07 §10 : quantité mesurée contre DPGF, seuil 5 %, majeur | **La phrase promet une mesure sur le dessin.** Le lecteur lit les cotes écrites, il ne mesure pas. A1 : une mesure facturable n'est faisable que par la géométrie vectorielle du PDF ou du DWG (tracés, échelle du cartouche, pièces, linéaires). Il faut 10 à 15 j pour une première version, sans garantie sur des plans réels. **A1 et B5 conseillent de ne pas le promettre** tant que ce n'est pas fait : reformuler en « métré déposé ou cotes écrites contre la DPGF », ce qui est en B (b5_07 §10) | 12,5 / 5 | — |
 | 29 | « Décennales contrôlées contre le lot » ; FAQ « Lorani lit chaque attestation décennale et vérifie que les activités couvertes correspondent au lot attribué, ainsi que les dates et le plafond … le registre en garde la date » | Fonctionnement.tsx:572 ; Formules.tsx:385 ; Questions.tsx:78 | B | b5_09 (18 assertions : activité, plafond contre marché, période d'ouverture du chantier, échéance au registre, rappels) | Lecture de vraies attestations (SMABTP, MAAF, AXA…) : 0,5 j côté A1 | 0 / 1 | ≈ 0,015 € par attestation (A1) |
 
@@ -200,9 +200,9 @@ Ce qui n'est pas couvert :
 | État | Lignes |
 |---|---|
 | A | 2 |
-| B | 26 |
+| B | 30 |
 | C | 25 |
-| D | 13 |
+| D | 9 |
 | T | 3 |
 
 **Jours par section** :
