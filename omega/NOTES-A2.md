@@ -1,14 +1,14 @@
 # NOTES-A2 — ouvrier EXPÉDITEUR et RÉCEPTION
 
-Session worker A2, branche `worker-a2`. Dernière mise à jour : 06/10/2026.
+Session worker A2, branche `worker-a2`. Dernière mise à jour : 11/10/2026.
 Coordinateur depuis le 06/10 : session `session_01BCGFdpRKBvXKjouC75sYBg` (passation
 de `session_01B4JNQXyT69GytdvE9SjAnE`).
 
-## REPRISE — pause demandée par Teo le 06/10/2026, 21 h Z
+## REPRISE — pause demandée par Teo le 11/10/2026, 15 h 40 Z (précédente : 06/10, 21 h Z)
 
 La construction est arrêtée. Rien n'est en cours, l'arbre est propre. Branche `worker-a2` ;
 le dernier SHA est celui du commit qui pose cette section (voir `git log -1`). Le précédent est
-`ecf5275`.
+`b69423f` (envoi WhatsApp et AR24).
 
 **États** :
 - **A** prouvé en vrai ;
@@ -30,7 +30,7 @@ le dernier SHA est celui du commit qui pose cette section (voir `git log -1`). L
 | Script de mise en service des SMS | c1218ed | — | **Non joué** (attend les crédits SMS et l'accord de Teo) |
 | Guides : GMAIL (§ production), MICROSOFT, WHATSAPP, DEPOT, WIDGET | divers | — | Pris dans main : WHATSAPP, DEPOT, WIDGET |
 | Chiffrage des canaux `omega/CHIFFRAGE/canaux.md` | ecf5275 | — | Pour Teo |
-| Envoi WhatsApp (`meta_whatsapp`) et LRE AR24 dans `expediteur` ; accusés WhatsApp → `noter_remise` dans `reception` ; GUIDE-AR24, § envoi de GUIDE-WHATSAPP (11/10) | voir le dernier commit | B (doubles), T | Non déployé : redéployer `expediteur` et `reception` ; `branche` reste false jusqu'aux comptes |
+| Envoi WhatsApp (`meta_whatsapp`) et LRE AR24 dans `expediteur` ; accusés WhatsApp → `noter_remise` dans `reception` ; GUIDE-AR24, § envoi de GUIDE-WHATSAPP (11/10) | b69423f | B (doubles), T | **Déployé** : `expediteur` v14, `reception` v13 ; `noter_remise` accepte `meta_whatsapp` ; `meta_whatsapp` et `ar24` restent `branche = false` |
 
 ### Ce qui attend le coordinateur
 
@@ -57,6 +57,9 @@ le dernier SHA est celui du commit qui pose cette section (voir `git log -1`). L
   `MICROSOFT_CLIENT_SECRET` (`GUIDE-MICROSOFT.md`). La vérification d'éditeur est conseillée.
 - **Meta WhatsApp** : portefeuille, app, numéro, secrets `META_APP_SECRET`,
   `META_ACCESS_TOKEN` et `META_VERIFY_TOKEN` (`GUIDE-WHATSAPP.md`).
+- **AR24** : compte professionnel et accès API, secrets `AR24_TOKEN` et `AR24_CLE_PRIVEE`
+  (`AR24_URL` vide = bac à sable), id_user pour l'expéditeur (`GUIDE-AR24.md`).
+- **Meta, modèles** : faire approuver les modèles de message pour écrire hors fenêtre de 24 h.
 - **Brevo** : crédits SMS, puis son accord pour jouer `omega/banc/mise_en_service_sms.sql`.
 - Le montage du dépôt dans l'Explorateur Windows, sur un vrai PC (`GUIDE-DEPOT.md`).
 
@@ -66,9 +69,11 @@ Relire les messages du coordinateur. Le premier compte que Teo crée décide de 
 - secrets Google ou Microsoft → déploiement de `messagerie` et `messagerie-oauth`, connexion de
   la boîte du banc, puis un courriel reçu et un brouillon déposé (A) ;
 - Meta → un message, une photo et un vocal reçus au numéro (A) ;
-- crédits SMS → le script de mise en service, puis un SMS réel au portable de Teo (A).
+- crédits SMS → le script de mise en service, puis un SMS réel au portable de Teo (A) ;
+- accès AR24 → une LRE dans le bac à sable (expéditeur `lre`/`ar24`, `branche = true` sur la
+  recette), puis écrire le webhook d'accusés AR24 sur le premier exemple réel (format non public).
 
-Rien d'autre n'est ouvert.
+Seul chantier de code connu : ce webhook AR24. Rien d'autre n'est ouvert.
 
 Périmètre : `omega/functions/expediteur/`, `omega/functions/reception/`,
 `omega/functions/webhooks/`. Aucune migration SQL, aucune écriture directe en table :
