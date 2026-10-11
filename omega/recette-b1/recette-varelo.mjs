@@ -493,10 +493,22 @@ for (const largeur of LARGEURS) {
   await s.dormir(400);
   const d = await s.evaluer(`(() => { const d = ${dlg()}; return { titre: d.querySelector('h2')?.textContent, cases: d.querySelectorAll('input[type="checkbox"]:checked').length, logiciel: d.querySelector('select')?.value }; })()`);
   ok(/Brancher le logiciel — Bertin Menuiserie/.test(d.titre) && d.cases === 5 && d.logiciel === 'tableur', `le dialogue propose le tableur (logiciel de la société) et les cinq exports (${d.logiciel}, ${d.cases})`);
-  await s.evaluer(clic('[role="dialog"] button', '/^\\s*Brancher\\s*$/'));
+  await s.evaluer(clic('[role="dialog"] button', '/Demander à la DSI/'));
   await s.dormir(600);
   const apres = await s.evaluer(`[...${carte}.querySelectorAll('li')].find(x => /Annecy/.test(x.innerText))?.innerText.replace(/\\s+/g, ' ')`);
-  ok(/Tableur \(Excel, CSV\) : Fournisseurs \(rien reçu\)/.test(apres) && /branché/.test(apres), `branchée : ${apres}`);
+  ok(/Branchement en attente de la DSI/.test(apres), `demande à la DSI : ${apres}`);
+  ok(await s.evaluer(`(() => { const li = [...${carte}.querySelectorAll('li')].find(x => /Siège/.test(x.innerText)); const b = li && [...li.querySelectorAll('button')].find(b => /Débrancher/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`) === true, 'clic « Débrancher » sur le siège');
+  await s.dormir(600);
+  ok(/Débranchement en attente de la DSI/.test(await s.evaluer(`[...${carte}.querySelectorAll('li')].find(x => /Siège/.test(x.innerText))?.innerText`) ?? ''), 'le débranchement attend la DSI');
+  const regles = `document.querySelector('section[aria-label="Règles du groupe"]')`;
+  ok(await s.evaluer(clic('section[aria-label="Règles du groupe"] .esp-carte-tete button', '/Modifier les règles/')) === true, 'clic « Modifier les règles »');
+  await s.dormir(400);
+  await s.evaluer(`(() => { const ch = [...${dlg()}.querySelectorAll('input.rv-champ')]; const poser = (el, v) => { Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, v); el.dispatchEvent(new Event('input', { bubbles: true })); }; poser(ch[2], '50 000'); poser(ch[3], '2'); })()`);
+  await s.dormir(200);
+  await s.evaluer(clic('[role="dialog"] button', '/Enregistrer les règles/'));
+  await s.dormir(600);
+  const lr = await s.evaluer(`${regles}?.innerText.replace(/\\s+/g, ' ')`);
+  ok(/50\s000,00\s€/.test(lr ?? '') && /au plus 2 jours après la livraison/.test(lr ?? ''), `règles du groupe posées : ${lr}`);
   s.fermer();
 }
 

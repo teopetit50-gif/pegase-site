@@ -1,5 +1,17 @@
 # Session B1 — VARELO, le référentiel du groupe (sociétés, pôles, rapprochement)
 
+## 11/10/2026 — les règles du groupe, les sources validées par la DSI (b1_16, tests b1_19)
+
+Lignes 9, 23, 25 du chiffrage. `b1_16_regles_groupe.sql` : `grp_reglages` + porte `grp_regler_groupe` (gérant,
+admin) — préavis par défaut (repris par `grp_enregistrer_contrat`), délai de proposition de la dénonciation
+(repris par `grp_proposer_du_jour`), plafond d'encours par défaut (vue `grp_encours_groupe`, colonne
+`plafond_source`), délai interne de réserve (déclencheur avant insertion sur `grp_receptions`, l'échéance
+légale reste dans le calcul). Équipe `dsi` ; `grp_sources_demandes` + porte `grp_demander_source` (brancher,
+débrancher) → demande `varelo.brancher|debrancher` routée à la DSI → exécutée par `grp_executer_source`
+(branché par `private.brancher` ou réactivé ; débranché par statut). Tests b1_19 : 23 assertions (maquette :
+329 ok). Écran : carte « Règles du groupe », « Exports automatiques » par demande à la DSI (brancher,
+débrancher). Recette 185 ✓, axe 0 écart.
+
 ## 11/10/2026 — reprise : les décisions à valider (b1_15, tests b1_18)
 
 Lignes 4, 10, 30, 32 et 39 du chiffrage. `b1_15_decisions.sql` : table `grp_decisions` adossée à

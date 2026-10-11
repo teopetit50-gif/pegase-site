@@ -141,11 +141,19 @@ for (const largeur of [390, 1440]) {
   await s.dormir(500);
   dire(`varelo ${largeur}, dialogue de proposition d'un plafond`, await analyser(s, `document.querySelector('[role="dialog"]')`));
 
+  /* b1_16 : les règles du groupe */
+  await s.aller(base + '/espace/varelo');
+  await s.dormir(800);
+  await s.evaluer(axe + ';true');
+  await s.evaluer(`(e => { e?.focus(); e?.click(); })([...document.querySelectorAll('section[aria-label="Règles du groupe"] button')].find(b => /Modifier les règles/.test(b.textContent)))`);
+  await s.dormir(500);
+  dire(`varelo ${largeur}, dialogue des règles du groupe`, await analyser(s, `document.querySelector('[role="dialog"]')`));
+
   /* b1_10 : brancher le logiciel d'une société */
   await s.aller(base + '/espace/varelo');
   await s.dormir(800);
   await s.evaluer(axe + ';true');
-  await s.evaluer(`(e => { e?.focus(); e?.click(); })(document.querySelector('section[aria-label="Exports automatiques"] li button'))`);
+  await s.evaluer(`(e => { e?.focus(); e?.click(); })([...document.querySelectorAll('section[aria-label="Exports automatiques"] li button')].find(b => /^\\s*Brancher\\s*$/.test(b.textContent)))`);
   await s.dormir(500);
   dire(`varelo ${largeur}, dialogue du branchement`, await analyser(s, `document.querySelector('[role="dialog"]')`));
   s.fermer();
