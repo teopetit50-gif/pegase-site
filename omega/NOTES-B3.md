@@ -1,6 +1,6 @@
 # Session B3 — TIROMA (cabinets dentaires : praticiens, fauteuils, horaires, rendez-vous, point du matin)
 
-## REPRISE (pause demandée par Teo, 06/10, 21 h Z)
+## REPRISE (pause demandée par Teo, 11/10, 15 h 40 Z ; la précédente datait du 06/10, 21 h Z)
 
 **Fait, posé, vert, fusionné dans main par le coordinateur :**
 - **Tiroma**, b3_01 à b3_22, tests B3-01 à B3-23 : ^test_b3_ 24/24. Écrans /espace/tiroma : toutes les cartes, jusqu'aux Règles communes. Aucune promesse Tiroma sans code ; `lib/en-preparation.ts` a la clé tiroma vide.
@@ -33,12 +33,19 @@
   - `tiroma_exporter_donnees` (titulaire) : toutes les tables Tiroma du cabinet, avec le journal.
 - Test `24_complements_cabinet.sql`.
 - Vérifié en local : un soin seul sur le F3 part vers le F1 ; la chirurgie de 11 h 30 à 13 h a deux raisons ; la couronne est proposée seulement sur le F2 ; Nestor est listée et le patient « ne pas contacter » est compté à part ; l'export couvre 20 tables.
-- Pas d'écran dans ce lot.
+- Posé par le coordinateur : lot h1350b3a5 (^test_b3_, 44, 60), 597 ok, 0 not ok.
+- Écran (10debab, sur worker-b3, **à fusionner** par le coordinateur) : `components/espace/tiroma/ComplementsCabinet.tsx`. Cinq cartes : Soins à regrouper (titulaire), Séances longues mal placées, Un créneau pour chaque plan, Contrôles dus, Vos données (export JSON, titulaire). Branché dans EcranTiroma, portes, types et exemple. tsc, eslint et build propres. Recette aux 5 largeurs : 104 ✓ ; axe : tout passe.
+- Info Teo (11/10) : le tableau de bord prend le dessin de omegaai.fr/omega, et C1 refait /espace2 sans changer les adresses. Interdits : tout lien vers l'ancien dessin (/espace sans le 2, ?ancien=1) et toute modification de `components/omega`. Mes écrans n'en ont pas.
+
+**Prochaine étape exacte (11/10)** :
+1. Lire les notifications. Si une recette en base réelle des cartes b3_23 revient rouge, la corriger.
+2. Si un export réel arrive, le jouer par la chaîne de relevé.
+3. Sinon, le reste du « B » : la lecture des accords mutuelle si un export les porte, un second modèle de logiciel, et pour Tavaro le contrôle d'identité automatique et le coût de revente dans le plan.
 
 Base de travail locale : `/var/tmp/pgb3`, port 5499 (bases b3_rap et b3_tav). Elle sera perdue avec le conteneur, ce qui n'a aucune importance.
 
 Branche `worker-b3`. Coordinateur : session `session_01BCGFdpRKBvXKjouC75sYBg` (depuis le 06/10, 01 h 10 Z ; avant : `session_01B4JNQXyT69GytdvE9SjAnE`).
-Dernière mise à jour : 06/10/2026, nuit (douze fichiers verts, branche fusionnée dans main d298f07, règle santé tranchée).
+Dernière mise à jour : 11/10/2026, 15 h 40 Z (pause ; b3_23 posé, écran 10debab à fusionner).
 
 ## Les deux jauges
 
