@@ -23,7 +23,7 @@ export default async function EcranOmega({ page, def, actif, filtres = {} }: { p
   const selecteur = def.onglets.length > 1 ? <SelecteurVue page={page} titre={def.titre} onglets={def.onglets} actif={actif.cle} /> : null;
   if (actif.special === "formation") return <Formation lignes={await lireLignes(["formation"])} selecteur={selecteur} />;
   if (actif.special === "appels") {
-    const [file, lignes] = await Promise.all([lireFileAppels(filtres.secteur), lireLignes(["appels", "objections"])]);
+    const [file, lignes] = await Promise.all([lireFileAppels(filtres.secteur), lireLignes(["appels", "objections", "rdv", "ajouts"])]);
     return <ModeAppels file={file.prospects} secteurs={file.secteurs} secteur={filtres.secteur} lignes={lignes} selecteur={selecteur} />;
   }
   if (actif.special === "taches") return <PlanTaches lignes={await lireLignes(["plan", "ajouts"])} selecteur={selecteur} />;

@@ -79,23 +79,28 @@ export const PITCHS: Record<string, Pitch> = {
   },
 };
 
-const ETAPES = ["Ouverture", "Pitch", "Demande", "Après le oui"] as const;
-const CONSEILS = [
+export const ETAPES = ["Ouverture", "Pitch", "Demande", "Après le oui"] as const;
+export const CONSEILS = [
   "Ton de pair : calme, un peu plus lent que d'habitude, une pause en fin de phrase. Jamais « Comment allez-vous aujourd'hui ? ».",
   "Une histoire, pas une liste de bénéfices. S'il coupe : « Ah ? » et deux secondes de silence.",
   "Jamais « ça vous intéresse ? » : la seule réponse logique est non. Une question de logistique.",
   "Le moment où il vous fait le plus confiance : c'est maintenant qu'on qualifie. Note sa réponse ci-dessous, puis la recommandation : « Et autour de vous, qui a le même souci ? » (un nom, pas un oui/non).",
 ];
 
-export default function ScriptAppel({ prenom, moteur }: { prenom: string; moteur?: string }) {
-  const [etape, setEtape] = useState(0);
+/* les quatre phrases de l'appel, pour un prénom et un moteur — reprises par la page Appels */
+export function textesScript(prenom: string, moteur?: string): { textes: string[]; douleurs: [string, string, string] } {
   const p = (moteur && PITCHS[moteur]) || PITCHS.CASHD;
-  const textes = [
+  return { douleurs: p.douleurs, textes: [
     `Bonjour${prenom ? ` ${prenom}` : ""}, c'est Teo, d'Omega. Je sais que je vous appelle à l'improviste… vous me laissez trente secondes pour vous dire pourquoi j'appelle, et vous me dites si ça vous parle ?`,
     `${p.reference} ${p.solution} C'est pour ça que j'appelle : je propose un audit de 30 minutes, gratuit, où on regarde vos vrais chiffres. Si ça ne vaut pas le coup chez vous, je vous le dirai.`,
     "Le plus simple, c'est qu'on se cale 30 minutes. Vous avez votre agenda sous la main ? … Vous êtes plutôt matin ou après-midi ?",
     `Parfait, c'est noté. Dernière chose avant de vous laisser : dans votre métier, on retrouve en général l'un de ces trois soucis : ${p.douleurs[0]}, ${p.douleurs[1]}, ou ${p.douleurs[2]}. Chez vous, c'est lequel le plus important en ce moment ?`,
-  ];
+  ] };
+}
+
+export default function ScriptAppel({ prenom, moteur }: { prenom: string; moteur?: string }) {
+  const [etape, setEtape] = useState(0);
+  const { textes } = textesScript(prenom, moteur);
   return (
     <div className="om-script">
       <div className="om-onglets om-script-etapes" role="tablist" aria-label="Temps de l'appel">

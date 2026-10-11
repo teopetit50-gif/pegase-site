@@ -104,11 +104,11 @@ html.v2-actif .dlg-panneau {
 /* ——— thème sombre : le choix « sombre », ou « système » sur un poste sombre ——— */
 @media (prefers-color-scheme: dark) {
   html:not([data-v2-theme="light"]) :is(.v2, .v2-jetons, .dlg-panneau) {
-    /* le gris bleuté d'Attio (relevé sur ses captures, 10/10 : page #0f1112, fenêtre #17191a), plus de noir pur */
+    /* les gris d'Attio (relevés sur ses captures, 10/10) : page #0f1112, barre latérale #0c0b0e, ligne active #161819, fenêtre #17191a */
     --v2-bg-100: #0f1112;
-    --v2-bg-200: #0f1112;
+    --v2-bg-200: #0c0b0e;
     --v2-bg-eleve: #17191a;
-    --v2-gray-100: #1a1c1e;
+    --v2-gray-100: #161819;
     --v2-gray-200: #1f2123;
     --v2-gray-300: #292929;
     --v2-gray-400: #2e2e2e;
@@ -160,9 +160,9 @@ html.v2-actif .dlg-panneau {
 }
 html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   --v2-bg-100: #0f1112;
-  --v2-bg-200: #0f1112;
+  --v2-bg-200: #0c0b0e;
   --v2-bg-eleve: #17191a;
-  --v2-gray-100: #1a1c1e;
+  --v2-gray-100: #161819;
   --v2-gray-200: #1f2123;
   --v2-gray-300: #292929;
   --v2-gray-400: #2e2e2e;
@@ -2906,3 +2906,19 @@ html.v2-calme *::after {
 html.v2-calme .v2-vivant .v2-carte::before, html.v2-calme .v2-vivant .v2-dr-carte::before, html.v2-calme .v2-vivant .v2-va-kpis::before { animation: none; --v2-led: 220deg; }
 /* 08/10 — le halo flou est retiré : pendant l'apparition des cartes il
    passait au premier plan et voilait la page de bleu. Reste le liseré. */
+
+/* ══════════════════════════════════════════════════════════════════════
+   Finition Attio (10/10/2026) — relevée sur les captures d'Attio envoyées
+   par Teo, à la même échelle que les nôtres : lignes du menu de 28 px,
+   contrôles de 28 px, barre du haut de 48 px, ligne active pleine
+   (#161819) plutôt que voilée. Vaut pour /espace2 et /omega.
+   ══════════════════════════════════════════════════════════════════════ */
+.v2 .v2-haut { height: 48px; padding: 0 16px; }
+.v2 .v2-lien { height: 28px; gap: 8px; border-radius: 6px; }
+.v2 .v2-lien[aria-current="page"], .v2 .v2-lien[data-dedans] { background: var(--v2-gray-100); }
+.v2 .v2-section-titre { height: 24px; }
+.v2 .v2-trouver { height: 28px; }
+.v2 .v2-equipe { height: 32px; }
+.v2 .v2-portee, .v2 .v2-btn--petit, .v2 .v2-val-bouton { height: 28px; }
+.v2 .v2-btn--petit.v2-btn--icone { width: 28px; }
+.v2 .v2-val-recherche { height: 28px; }
