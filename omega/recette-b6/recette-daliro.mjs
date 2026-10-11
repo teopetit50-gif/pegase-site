@@ -108,6 +108,10 @@ const choisir = (sel, valeur) => `(() => { const t = document.querySelector('${s
   await s.dormir(500);
   const signerGris = await s.evaluer(`[...document.querySelectorAll('#esp-dossier button')].filter(b => /^\\s*Signer\\s*$/.test(b.textContent)).map(b => b.disabled)`);
   ok(signerGris.length === 1 && signerGris[0] === false, 'l\'avenant n° 1 (validé par la file) propose « Signer » ; le n° 2 (brouillon) non');
+  // b6_26 : l'avenant n° 1, ouvert par le lecteur, dit sur quel prix validé il a été chiffré et quelle ligne du marché lui ressemble
+  ok(await s.evaluer(`/Chiffré par Daliro sur votre prix validé « Garde-corps acier laqué, hauteur 1,00 m »/.test(document.querySelector('#esp-dossier')?.innerText || '')
+                      && /Proche de la ligne du marché/.test(document.querySelector('#esp-dossier')?.innerText || '')`),
+     'avenant n° 1 : chiffré par Daliro sur le prix validé, ligne du marché proche signalée');
   ok(await s.evaluer(bouton('/Chiffrer une ligne/')) !== null, 'clic sur « Chiffrer une ligne » (avenant n° 2)');
   await s.dormir(400);
   const choixPrix = await s.evaluer(`[...document.querySelectorAll('[role="dialog"] select')[1].options].map(o => o.textContent)`);
