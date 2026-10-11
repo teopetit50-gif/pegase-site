@@ -251,7 +251,7 @@ begin
   v_bareme := private.loc_bareme_en_vigueur(c.client_id, (now() at time zone coalesce(v_fuseau, 'Europe/Paris'))::date);
   select * into lp from public.loc_bareme_lignes l where l.client_id = c.client_id and l.bareme_id = v_bareme and l.code = 'PEAGE' order by l.categorie_id nulls last limit 1;
   if lp.id is null then
-    raise exception 'Ajoutez au barème la ligne PEAGE (péage refacturé au montant réel, prévu par vos conditions générales).' using errcode = '23514';
+    raise exception 'Ajoutez au barème la ligne PEAGE, unité « devis » (péage refacturé au montant réel, prévu par vos conditions générales).' using errcode = '23514';
   end if;
   select * into lf from public.loc_bareme_lignes l where l.client_id = c.client_id and l.bareme_id = v_bareme and l.code = 'FRAIS_PEAGE' order by l.categorie_id nulls last limit 1;
   select coalesce(max(p.version), 0) + 1 into v_version from public.loc_propositions p where p.client_id = c.client_id and p.contrat_id = c.id;
@@ -265,7 +265,7 @@ begin
     v_ht := case when lp.regime_tva = 'taxable' and coalesce(v_taux, 0) > 0 then round(x.montant_eur / (1 + v_taux / 100), 2) else x.montant_eur end;
     perform private.loc_poser_ligne(c.client_id, v_prop, v_rang, 'frais', lp.famille, lp.code,
       format('%s — %s, %s', lp.libelle, coalesce(x.portique, x.operateur), to_char(x.passe_le at time zone coalesce(v_fuseau, 'Europe/Paris'), 'DD/MM/YYYY à HH24:MI')),
-      lp.id, lp.unite, 1, v_ht, v_ht, lp.regime_tva, v_taux, 'chiffree',
+      lp.id, 'forfait', 1, v_ht, v_ht, lp.regime_tva, v_taux, 'chiffree',
       jsonb_build_object('passage', x.id, 'operateur', x.operateur, 'reference', x.reference, 'paiement', x.paiement_reference),
       jsonb_build_array(jsonb_build_object('note', format('Passage %s chez %s, payé le %s (référence %s)', x.reference, x.operateur,
                                                           to_char(x.paye_le at time zone coalesce(v_fuseau, 'Europe/Paris'), 'DD/MM/YYYY'), x.paiement_reference))),

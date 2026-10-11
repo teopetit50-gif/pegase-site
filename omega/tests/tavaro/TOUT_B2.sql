@@ -1945,7 +1945,7 @@ begin
   return next throws_ok(format('select public.loc_refacturer_peages(%L::uuid)', v_contrat), '23514', null, 'Sans la ligne PEAGE au barème, la refacturation dit quoi faire');
   perform tests.endosser((jeu ->> 'gerant')::uuid, 'b2-gerant@essai.invalid');
   perform public.loc_publier_bareme('Barème avec péages', v_jour, tests.tavaro_bareme_lignes() || jsonb_build_array(
-    jsonb_build_object('code', 'PEAGE', 'libelle', 'Péage en flux libre', 'famille', 'frais', 'unite', 'forfait', 'regime_tva', 'taxable', 'taux_tva', 20),
+    jsonb_build_object('code', 'PEAGE', 'libelle', 'Péage en flux libre, au montant réel', 'famille', 'frais', 'unite', 'devis', 'regime_tva', 'taxable', 'taux_tva', 20),
     jsonb_build_object('code', 'FRAIS_PEAGE', 'libelle', 'Frais de gestion du péage', 'famille', 'frais', 'unite', 'forfait', 'prix_eur', 5, 'regime_tva', 'taxable', 'taux_tva', 20)));
   perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
   r := public.loc_refacturer_peages(v_contrat);
@@ -2111,11 +2111,11 @@ begin
   -- La caution.
   r := public.loc_demander_preautorisation(v_contrat);
   k := (r ->> 'caution')::uuid;
-  return next ok((r ->> 'montant_eur')::numeric > 0 and exists (select 1 from public.travaux t where t.cle = 'tavaro:caution:' || k::text || ':preautoriser'),
-                 'La préautorisation est demandée au montant du dépôt, le travail attend l''ouvrier du prestataire');
   return next throws_ok(format('select public.loc_demander_preautorisation(%L::uuid, 100)', v_contrat), '23505', null, 'Une seule caution en cours par contrat');
   return next throws_ok(format('select public.loc_liberer_caution(%L::uuid)', k), '23514', null, 'Une caution pas encore préautorisée ne se libère pas');
   perform tests.redevenir_admin();
+  return next ok((r ->> 'montant_eur')::numeric > 0 and exists (select 1 from public.travaux t where t.cle = 'tavaro:caution:' || k::text || ':preautoriser'),
+                 'La préautorisation est demandée au montant du dépôt, le travail attend l''ouvrier du prestataire');
   r := public.loc_caution_evenement(k, jsonb_build_object('type', 'preautorisee', 'prestataire', 'psp-essai', 'reference_externe', 'pi_essai_1', 'expire_le', now() + interval '7 days'));
   return next is(r ->> 'statut', 'preautorisee', 'Le prestataire confirme la préautorisation');
   return next ok((public.loc_caution_evenement(k, '{"type":"preautorisee"}') ->> 'ignore')::boolean, 'Un événement rejoué ne défait rien');

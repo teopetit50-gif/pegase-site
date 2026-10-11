@@ -44,7 +44,7 @@ begin
   return next throws_ok(format('select public.loc_refacturer_peages(%L::uuid)', v_contrat), '23514', null, 'Sans la ligne PEAGE au barème, la refacturation dit quoi faire');
   perform tests.endosser((jeu ->> 'gerant')::uuid, 'b2-gerant@essai.invalid');
   perform public.loc_publier_bareme('Barème avec péages', v_jour, tests.tavaro_bareme_lignes() || jsonb_build_array(
-    jsonb_build_object('code', 'PEAGE', 'libelle', 'Péage en flux libre', 'famille', 'frais', 'unite', 'forfait', 'regime_tva', 'taxable', 'taux_tva', 20),
+    jsonb_build_object('code', 'PEAGE', 'libelle', 'Péage en flux libre, au montant réel', 'famille', 'frais', 'unite', 'devis', 'regime_tva', 'taxable', 'taux_tva', 20),
     jsonb_build_object('code', 'FRAIS_PEAGE', 'libelle', 'Frais de gestion du péage', 'famille', 'frais', 'unite', 'forfait', 'prix_eur', 5, 'regime_tva', 'taxable', 'taux_tva', 20)));
   perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
   r := public.loc_refacturer_peages(v_contrat);

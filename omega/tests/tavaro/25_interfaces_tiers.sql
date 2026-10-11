@@ -70,11 +70,11 @@ begin
   -- La caution.
   r := public.loc_demander_preautorisation(v_contrat);
   k := (r ->> 'caution')::uuid;
-  return next ok((r ->> 'montant_eur')::numeric > 0 and exists (select 1 from public.travaux t where t.cle = 'tavaro:caution:' || k::text || ':preautoriser'),
-                 'La préautorisation est demandée au montant du dépôt, le travail attend l''ouvrier du prestataire');
   return next throws_ok(format('select public.loc_demander_preautorisation(%L::uuid, 100)', v_contrat), '23505', null, 'Une seule caution en cours par contrat');
   return next throws_ok(format('select public.loc_liberer_caution(%L::uuid)', k), '23514', null, 'Une caution pas encore préautorisée ne se libère pas');
   perform tests.redevenir_admin();
+  return next ok((r ->> 'montant_eur')::numeric > 0 and exists (select 1 from public.travaux t where t.cle = 'tavaro:caution:' || k::text || ':preautoriser'),
+                 'La préautorisation est demandée au montant du dépôt, le travail attend l''ouvrier du prestataire');
   r := public.loc_caution_evenement(k, jsonb_build_object('type', 'preautorisee', 'prestataire', 'psp-essai', 'reference_externe', 'pi_essai_1', 'expire_le', now() + interval '7 days'));
   return next is(r ->> 'statut', 'preautorisee', 'Le prestataire confirme la préautorisation');
   return next ok((public.loc_caution_evenement(k, '{"type":"preautorisee"}') ->> 'ignore')::boolean, 'Un événement rejoué ne défait rien');
