@@ -1264,6 +1264,27 @@ begin
   return (select to_jsonb(x) from public.cashd_reglages x where x.client_id = p_client);
 end $function$;
 
+-- La fiche d'un compte (c2_01), avec les décisions de c2_04 sur chaque pièce.
+create or replace function public.cashd_fiche_compte(p_compte uuid)
+ returns jsonb language sql stable security invoker set search_path to ''
+as $function$
+  select case when c.id is null then null else jsonb_build_object(
+    'compte', to_jsonb(c),
+    'balance', (select to_jsonb(b) from public.cashd_balance_agee b where b.compte_id = c.id),
+    'pieces', (select coalesce(jsonb_agg(to_jsonb(f) || (select jsonb_build_object('solde_decision', z.solde_decision, 'solde_decision_motif', z.solde_decision_motif,
+                 'accord_oral_le', z.accord_oral_le, 'accord_note', z.accord_note, 'attente_commande_le', z.attente_commande_le,
+                 'attente_commande_email', z.attente_commande_email, 'attente_commande_nom', z.attente_commande_nom,
+                 'attente_commande_motif', z.attente_commande_motif) from public.cashd_factures z where z.id = f.id)
+               order by (f.reste_du > 0) desc, f.echeance nulls last, f.date_emission desc), '[]'::jsonb)
+               from public.cashd_factures_etat f where f.compte_id = c.id),
+    'reglements', (select coalesce(jsonb_agg(to_jsonb(r) order by r.recu_le desc, r.cree_le desc), '[]'::jsonb)
+                   from public.cashd_reglements_etat r where r.compte_id = c.id),
+    'imputations', (select coalesce(jsonb_agg(to_jsonb(x) || jsonb_build_object('facture', (select f.numero from public.cashd_factures f where f.id = x.facture_id))
+                                              order by x.cree_le desc), '[]'::jsonb)
+                    from public.cashd_imputations x join public.cashd_factures f on f.id = x.facture_id where f.compte_id = c.id)) end
+  from (select 1) d left join public.cashd_comptes c on c.id = p_compte
+$function$;
+
 -- ═══════════════════════════════════════════════════════════════════════════
 -- 8. Droits
 -- ═══════════════════════════════════════════════════════════════════════════

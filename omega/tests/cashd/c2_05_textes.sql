@@ -49,6 +49,9 @@ begin
   return next throws_ok(format('select public.cashd_attendre_commande(%L, %L, %L, %L)', v_fbc, 'achats@caluire.test', 'Achats', ' '), '22023', null,
                         'Le motif de blocage se consigne');
   perform public.cashd_attendre_commande(v_fbc, 'achats@caluire.test', 'Service des achats', 'bon de commande n° à émettre par le service des achats');
+  return next ok(exists (select 1 from jsonb_array_elements(public.cashd_fiche_compte((p ->> 'mairie')::uuid) -> 'pieces') x
+                         where x ->> 'numero' = 'F-2026-BC' and x ->> 'attente_commande_email' = 'achats@caluire.test' and x ->> 'attente_commande_le' is not null),
+                 'La fiche du compte montre la facture qui attend son bon, et à qui il est demandé');
 
   -- ── Premier passage (j+1) ──
   perform tests.redevenir_admin();
@@ -117,6 +120,20 @@ begin
   return next ok(r3.corps like '%Compte tenu du montant en jeu%' and r3.corps not like '%simple oubli%'
                  and r3.corps like '%Vous pouvez régler par virement sur le compte FR76%' and r3.corps like '%en plusieurs fois%',
                  'Au-delà de 10 000 €, la relance demande la date de règlement ; elle donne les moyens de régler et propose un échéancier');
+
+  -- ── Une autre langue : l'organisation écrit ses textes en allemand pour un compte allemand ──
+  perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
+  v_r := jsonb_build_object('compte', public.cashd_ecrire_compte(null, v_client, jsonb_build_object('reference', 'C-BERLIN', 'nom', 'Holzbau Berlin GmbH',
+           'langue', 'de', 'contact_facturation_email', 'buchhaltung@holzbau.test')));
+  perform public.cashd_ecrire_facture(null, v_client, jsonb_build_object('compte_id', v_r ->> 'compte', 'numero', 'F-2026-DE1', 'date_emission', j - 50,
+             'echeance', j - 20, 'montant_ttc', 9000));
+  perform public.cashd_ecrire_gabarit(v_client, 'rappel', 'de', 1, '{emetteur} — Zahlungserinnerung: {numero}',
+    E'Sehr geehrte Damen und Herren,\n\nfolgender Betrag ist noch offen ({compte}):\n{lignes}\nGesamt: {total}.\n');
+  perform tests.redevenir_admin();
+  perform private.cashd_preparer_relances(v_client, j + 4, null);
+  select * into r3 from public.cashd_relances x where x.compte_id = (v_r ->> 'compte')::uuid and x.jour = j + 4;
+  return next ok(r3.sujet like '%Zahlungserinnerung: F-2026-DE1%' and r3.corps like '%folgender Betrag ist noch offen (C-BERLIN)%' and r3.corps like '%F-2026-DE1%',
+                 'Un compte allemand reçoit le texte que l''organisation a écrit en allemand');
 
   -- ── Les petits soldes décidés ──
   perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');

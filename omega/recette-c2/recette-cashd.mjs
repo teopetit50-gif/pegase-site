@@ -8,6 +8,11 @@
    relance coupée, l'échu baisse), la pause de l'hôtel (sa mise en demeure
    coupée), le virement sans référence rapproché, un export collé (compte des
    lignes, colonnes reconnues).
+   11/10 (c2_04) : les quatre vues (Débiteurs, Relances, Envois, Trésorerie)
+   mesurées une à une aux cinq largeurs ; vos textes (aperçu, variable
+   obligatoire refusée, texte enregistré puis rendu au défaut, ton au-delà
+   d'un montant, vocabulaire du bâtiment) ; dans la fiche, le bon de commande
+   attendu, le solde abandonné, l'accord oral sur un devis.
    usage : node omega/recette-c2/recette-cashd.mjs [origine] */
 import { mkdirSync } from 'node:fs';
 import { ouvrirSession } from '../../outils/chrome.mjs';
@@ -18,13 +23,26 @@ mkdirSync(dossier, { recursive: true });
 let echecs = 0;
 const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) echecs++; };
 const ANGLAIS = /\b(Loading|Submit|Cancel|Approve|Reject|Delete|Save|Error|Pending|Due|Invoice|Overdue|Payment|Settings|Logout|Sign in|Dashboard|Today|Yesterday|Tomorrow|Reminder|Customer)\b/;
+const CHEMIN = process.argv[3] ?? '/espace/cashd?ancien=1';
 const LARGEURS = [390, 768, 1024, 1440, 1700];
 const plat = (t) => (t || '').replace(/[  ]/g, ' ');
+const onglet = async (s, nom) => {
+  await s.evaluer(`[...document.querySelectorAll('.c2-onglets [role="tab"]')].find(b => b.textContent.trim().startsWith(${JSON.stringify(nom)}))?.click()`);
+  await s.dormir(300);
+};
+const saisir = (selecteur, valeur, type = 'HTMLTextAreaElement') => `(() => { const e = document.querySelector(${JSON.stringify(selecteur)}); const set = Object.getOwnPropertyDescriptor(${type}.prototype, 'value').set; set.call(e, ${JSON.stringify(valeur)}); e.dispatchEvent(new Event(${type === 'HTMLSelectElement' ? "'change'" : "'input'"}, { bubbles: true })); })()`;
+const DEBORDE = `(() => {
+    const w = document.documentElement.clientWidth;
+    const dansCadre = (e) => !!e.closest('.esp-tableau-cadre') && e !== e.closest('.esp-tableau-cadre');
+    const larges = [...document.querySelectorAll('.esp *')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > w + 1 && !dansCadre(e); })
+      .slice(0, 5).map(e => e.tagName + '.' + [...e.classList].join('.') + '→' + Math.round(e.getBoundingClientRect().right));
+    return { deb: document.documentElement.scrollWidth - w, larges, texte: document.querySelector('.esp')?.innerText || '' };
+  })()`;
 
 for (const largeur of LARGEURS) {
   const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'c2-cashd', densite: 1 });
   console.log(`— /espace/cashd à ${largeur}`);
-  ok(await s.aller(base + '/espace/cashd'), 'page chargée');
+  ok(await s.aller(base + CHEMIN), 'page chargée');
   await s.dormir(700);
   const mesure = await s.evaluer(`(() => {
     const w = document.documentElement.clientWidth;
@@ -34,8 +52,7 @@ for (const largeur of LARGEURS) {
     return { deb: document.documentElement.scrollWidth - w, larges, texte: document.querySelector('.esp')?.innerText || '', h1: document.querySelector('.esp h1')?.textContent,
              kpis: [...document.querySelectorAll('.esp-kpi')].map(k => (k.querySelector('.esp-kpi-etiquette')?.textContent + ' = ' + k.querySelector('.esp-kpi-valeur')?.textContent)),
              items: document.querySelectorAll('section[aria-label="Débiteurs"] .esp-item').length,
-             segments: document.querySelectorAll('.c2-segment').length,
-             relances: document.querySelectorAll('#c2-relances .c2-relances > li').length,
+             onglets: [...document.querySelectorAll('.c2-onglets [role="tab"]')].map(b => b.textContent.replace(/[0-9]+$/, '').trim()).join('|'),
              pieces: document.querySelectorAll('#c2-fiche .c2-pieces tbody tr').length };
   })()`);
   ok(mesure.deb === 0, `pas de débordement horizontal (${mesure.deb})`);
@@ -45,11 +62,23 @@ for (const largeur of LARGEURS) {
   ok(mesure.h1 === 'Relances', `titre : ${mesure.h1}`);
   ok(/Encours échu = 17 810,00 €/.test(plat(mesure.kpis.join(' | '))), `encours échu au total : ${plat(mesure.kpis[0])}`);
   ok(mesure.items === 5, `${mesure.items} débiteurs listés (5 attendus)`);
-  ok(mesure.segments === 4, `balance âgée : ${mesure.segments} tranches non vides (4 attendues)`);
-  ok(mesure.relances === 5, `${mesure.relances} relances écrites (5 attendues)`);
+  ok(mesure.onglets === 'Débiteurs|Relances|Envois|Trésorerie', `les quatre vues : ${mesure.onglets}`);
   ok(mesure.pieces === 3, `la fiche ouverte d'office (SCI Lefèvre) porte ${mesure.pieces} pièces (3 attendues)`);
   console.log('    compteurs :', plat(mesure.kpis.join(' · ')));
   await s.capturer(`${dossier}cashd-${largeur}.jpg`, { qualite: 55 });
+  for (const [vue, compte] of [['Relances', `document.querySelectorAll('#c2-relances .c2-relances > li').length + '/' + !!document.querySelector('section[aria-label="Vos textes"]')`],
+                                ['Envois', `document.querySelectorAll('section[aria-label="Envois"] tbody tr').length`],
+                                ['Trésorerie', `document.querySelectorAll('.c2-segment').length + '/' + !!document.querySelector('section[aria-label="Pilotage"]')`]]) {
+    await onglet(s, vue);
+    const m = await s.evaluer(DEBORDE);
+    ok(m.deb === 0 && m.larges.length === 0, `${vue} : pas de débordement (${m.deb}) ${m.larges.length ? JSON.stringify(m.larges) : ''}`);
+    const anglaisVue = m.texte.match(ANGLAIS);
+    ok(!anglaisVue, anglaisVue ? `${vue} : mot anglais « ${anglaisVue[0]} »` : `${vue} : aucun mot anglais surveillé`);
+    const n = String(await s.evaluer(compte));
+    const attendu = { Relances: '4/true', Envois: '1', 'Trésorerie': '4/true' }[vue];
+    ok(n === attendu, `${vue} : ${n} (attendu ${attendu}${vue === 'Relances' ? ' — quatre relances écrites, et vos textes' : vue === 'Envois' ? ' — la relance partie' : ' — quatre tranches, le pilotage'})`);
+    if (largeur === 390 || largeur === 1440) await s.capturer(`${dossier}cashd-${vue.toLowerCase().normalize('NFD').replace(/[^a-z]/g, '')}-${largeur}.jpg`, { qualite: 55 });
+  }
   s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
   s.fermer();
 }
@@ -57,7 +86,7 @@ for (const largeur of LARGEURS) {
 {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'c2-gestes', densite: 1 });
   console.log('— /espace/cashd : la fiche, un règlement, une pause, un rapprochement, un dépôt (exemple)');
-  ok(await s.aller(base + '/espace/cashd'), 'page chargée');
+  ok(await s.aller(base + CHEMIN), 'page chargée');
   await s.dormir(500);
   const fiche = await s.evaluer(`(() => { const f = document.querySelector('#c2-fiche'); return { titre: f.querySelector('.esp-carte-titre')?.textContent, lignes: [...f.querySelectorAll('.c2-pieces tbody tr')].map(r => r.innerText.replace(/\\s+/g, ' ')) }; })()`);
   ok(fiche.titre === 'SCI Lefèvre Patrimoine', `fiche ouverte : ${fiche.titre}`);
@@ -70,12 +99,15 @@ for (const largeur of LARGEURS) {
   ok(dlg && dlg.titre === 'Noter un règlement' && dlg.montant === '12000', `dialogue « ${dlg?.titre} », montant prérempli ${dlg?.montant}`);
   await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Valider\\s*$/.test(b.textContent))?.click()`);
   await s.dormir(700);
+  const faitReglement = await s.evaluer(`document.querySelector('#c2-fiche .esp-avis')?.innerText || ''`);
+  await onglet(s, 'Relances');
   const apres = await s.evaluer(`(() => ({ kpi: document.querySelector('.esp-kpi .esp-kpi-valeur')?.textContent, fait: document.querySelector('#c2-fiche .esp-avis')?.innerText || '', coupee: [...document.querySelectorAll('#c2-relances .c2-relances > li')].find(x => /SCI Lefèvre/.test(x.innerText) && /Rappel courtois/.test(x.innerText))?.innerText || '' }))()`);
-  ok(/C.est fait/.test(apres.fait) && /coupée/.test(apres.fait), `le règlement est noté et lettré : « ${apres.fait.slice(0, 90)} »`);
+  ok(/C.est fait/.test(faitReglement) && /coupée/.test(faitReglement), `le règlement est noté et lettré : « ${faitReglement.slice(0, 90)} »`);
   ok(plat(apres.kpi) === '5 810,00 €', `l'encours échu baisse à ${plat(apres.kpi)}`);
   ok(/Coupée/.test(apres.coupee) && /facture réglée/.test(apres.coupee), 'la relance prête de F-2026-101 est coupée avant l\'envoi');
   await s.capturer(`${dossier}cashd-reglement-1440.jpg`, { qualite: 55 });
   /* l'hôtel en pause : sa mise en demeure coupée */
+  await onglet(s, 'Débiteurs');
   await s.evaluer(`[...document.querySelectorAll('section[aria-label="Débiteurs"] .esp-item')].find(b => /Hôtel des Brotteaux/.test(b.textContent)).click()`);
   await s.dormir(400);
   await s.evaluer(`[...document.querySelectorAll('#c2-fiche .esp-actions button')].find(b => /Mettre en pause/.test(b.textContent)).click()`);
@@ -86,10 +118,13 @@ for (const largeur of LARGEURS) {
   await s.dormir(200);
   await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Valider\\s*$/.test(b.textContent))?.click()`);
   await s.dormir(700);
+  const pauseFiche = await s.evaluer(`(() => ({ pastille: document.querySelector('#c2-fiche .esp-carte-tete .esp-pastille')?.textContent, reprendre: [...document.querySelectorAll('#c2-fiche .esp-actions button')].some(b => /Reprendre/.test(b.textContent)) }))()`);
+  await onglet(s, 'Relances');
   const pause = await s.evaluer(`(() => ({ pastille: document.querySelector('#c2-fiche .esp-carte-tete .esp-pastille')?.textContent, reprendre: [...document.querySelectorAll('#c2-fiche .esp-actions button')].some(b => /Reprendre/.test(b.textContent)), med: [...document.querySelectorAll('#c2-relances .c2-relances > li')].find(x => /Hôtel/.test(x.innerText))?.innerText || '' }))()`);
-  ok(pause.pastille === 'En pause' && pause.reprendre, 'l\'hôtel est en pause ; seul « Reprendre les relances » est proposé');
+  ok(pauseFiche.pastille === 'En pause' && pauseFiche.reprendre, 'l\'hôtel est en pause ; seul « Reprendre les relances » est proposé');
   ok(/Mise en demeure/.test(pause.med) && /Coupée/.test(pause.med), 'sa mise en demeure prête est coupée');
   /* le virement sans référence */
+  await onglet(s, 'Trésorerie');
   await s.evaluer(`[...document.querySelectorAll('section[aria-label="Règlements à rapprocher"] button')].find(b => /Factures probables/.test(b.textContent)).click()`);
   await s.dormir(300);
   const prop = await s.evaluer(`document.querySelector('section[aria-label="Règlements à rapprocher"] .c2-propositions')?.innerText || ''`);
@@ -113,8 +148,9 @@ for (const largeur of LARGEURS) {
 {
   const s = await ouvrirSession({ largeur: 390, hauteur: 844, marque: 'c2-mobile', densite: 1 });
   console.log('— /espace/cashd : la relance dépliée et la fiche à 390');
-  ok(await s.aller(base + '/espace/cashd'), 'page chargée');
+  ok(await s.aller(base + CHEMIN), 'page chargée');
   await s.dormir(500);
+  await onglet(s, 'Relances');
   await s.evaluer(`document.querySelector('#c2-relances details')?.setAttribute('open', '')`);
   await s.dormir(200);
   const r = await s.evaluer(`(() => { const w = document.documentElement.clientWidth; const pre = document.querySelector('#c2-relances .c2-corps'); return { deb: document.documentElement.scrollWidth - w, texte: pre?.innerText || '' }; })()`);
@@ -129,13 +165,15 @@ for (const largeur of LARGEURS) {
 {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'c2-palier4', densite: 1 });
   console.log('— /espace/cashd : échéancier, contestation partielle, plafond, tableur (exemple)');
-  ok(await s.aller(base + '/espace/cashd'), 'page chargée');
+  ok(await s.aller(base + CHEMIN), 'page chargée');
   await s.dormir(500);
+  await onglet(s, 'Trésorerie');
   const prev = await s.evaluer(`document.querySelector('.c2-prevision')?.innerText || ''`);
   ok(/Encaissements attendus/.test(prev) && /30 jours/.test(prev) && /60 jours/.test(prev), `prévision : « ${plat(prev).slice(0, 110)} »`);
-  ok(await s.evaluer(`[...document.querySelectorAll('section[aria-label="Débiteurs"] .esp-lien-bouton')].some(b => /Tableur/.test(b.textContent))`), 'la balance s\'exporte vers un tableur');
   const pil = await s.evaluer(`document.querySelector('section[aria-label="Pilotage"]')?.innerText || ''`);
   ok(/Taux de réponse par palier/i.test(pil) && /Rappel courtois/.test(pil) && /Arrêtés de la balance/i.test(pil) && /Tableur/.test(pil), 'pilotage : taux de réponse par palier et arrêtés téléchargeables');
+  await onglet(s, 'Débiteurs');
+  ok(await s.evaluer(`[...document.querySelectorAll('section[aria-label="Débiteurs"] .esp-lien-bouton')].some(b => /Tableur/.test(b.textContent))`), 'la balance s\'exporte vers un tableur');
   /* l'échéancier de F-2026-101 en trois mensualités */
   await s.evaluer(`(() => { const r = [...document.querySelectorAll('#c2-fiche .c2-pieces tbody tr')].find(x => /F-2026-101/.test(x.innerText)); [...r.querySelectorAll('button')].find(b => /Échéancier/.test(b.textContent)).click(); })()`);
   await s.dormir(400);
@@ -166,6 +204,82 @@ for (const largeur of LARGEURS) {
   const pl = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return d ? { desc: d.querySelector('p')?.textContent || '', valeur: d.querySelector('input[inputmode="decimal"]')?.value } : null; })()`);
   ok(pl && /historique/.test(pl.desc) && Number(pl.valeur) > 0, `un plafond est proposé depuis l'historique : ${pl?.valeur} €`);
   await s.capturer(`${dossier}cashd-plafond-1440.jpg`, { qualite: 55 });
+  s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'c2-textes', densite: 1 });
+  console.log('— /espace/cashd : vos textes, le bon de commande, le solde, l\'accord oral (exemple)');
+  ok(await s.aller(base + CHEMIN), 'page chargée');
+  await s.dormir(500);
+  await onglet(s, 'Relances');
+  const T = 'section[aria-label="Vos textes"]';
+  const lire = () => s.evaluer(`(() => { const t = document.querySelector('${T}'); return { pastille: t.querySelector('.c2-tete-droite .esp-pastille')?.textContent || '', apercu: t.querySelector('.c2-corps')?.innerText || '', avis: [...t.querySelectorAll('.esp-avis')].map(a => a.innerText).join(' | '), enregistrer: [...t.querySelectorAll('button')].find(b => /Enregistrer ce texte/.test(b.textContent))?.disabled, variantes: t.querySelectorAll('select')[2]?.options.length }; })()`);
+  let v = await lire();
+  ok(/Texte par défaut/.test(v.pastille) && /Sauf erreur de notre part/.test(v.apercu) && /C-LEFEVRE/.test(v.apercu) && !/\{/.test(v.apercu) && v.variantes === 3,
+     `le rappel par défaut, rempli sur l'exemple, en trois variantes possibles (${v.pastille})`);
+  const corps = await s.evaluer(`document.querySelector('${T} textarea').value`);
+  await s.evaluer(saisir(`${T} textarea`, corps.replace('{lignes}', '')));
+  await s.dormir(200);
+  v = await lire();
+  ok(/exige dans le corps : \{lignes\}/.test(v.avis) && v.enregistrer === true, 'sans {lignes}, le texte ne s\'enregistre pas');
+  await s.evaluer(saisir(`${T} textarea`, corps.replace('Sauf erreur de notre part', "Petit mot de l'atelier. Sauf erreur de notre part")));
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('${T} button')].find(b => /Enregistrer ce texte/.test(b.textContent)).click()`);
+  await s.dormir(400);
+  v = await lire();
+  ok(/Votre texte/.test(v.pastille) && /Petit mot de l'atelier/.test(v.apercu) && /Texte enregistré/.test(v.avis), 'le texte de l\'organisation est enregistré et se lit dans l\'aperçu');
+  await s.evaluer(`[...document.querySelectorAll('${T} button')].find(b => /Revenir au texte par défaut/.test(b.textContent)).click()`);
+  await s.dormir(400);
+  v = await lire();
+  ok(/Texte par défaut/.test(v.pastille) && !/Petit mot/.test(v.apercu), 'rendu au texte par défaut');
+  await s.evaluer(saisir(`${T} input[placeholder="10 000"]`, '10000', 'HTMLInputElement'));
+  await s.dormir(200);
+  v = await lire();
+  ok(/Compte tenu du montant en jeu/.test(v.apercu) && !/simple oubli/.test(v.apercu), 'au-delà de 10 000 €, la relance demande la date de règlement');
+  await s.evaluer(saisir(`${T} select`, 'devis_rappel', 'HTMLSelectElement'));
+  await s.evaluer(saisir(`${T} .esp-carte-corps:last-child select`, 'btp', 'HTMLSelectElement'));
+  await s.dormir(300);
+  v = await lire();
+  ok(/date d.intervention/.test(v.apercu) && !/relance/i.test(v.apercu), 'au métier du bâtiment, le rappel de devis parle chantier et date d\'intervention, sans le mot « relance »');
+  await s.capturer(`${dossier}cashd-textes-1440.jpg`, { qualite: 55 });
+  /* les gestes de la fiche */
+  await onglet(s, 'Débiteurs');
+  const geste = async (numero, bouton) => {
+    await s.evaluer(`(() => { const r = [...document.querySelectorAll('#c2-fiche .c2-pieces tbody tr')].find(x => x.innerText.includes(${JSON.stringify(numero)})); [...r.querySelectorAll('button')].find(b => b.textContent.trim() === ${JSON.stringify(bouton)}).click(); })()`);
+    await s.dormir(400);
+  };
+  const boutonValider = `[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Valider\\s*$/.test(b.textContent))`;
+  const valider = async () => { await s.evaluer(`${boutonValider}?.click()`); await s.dormir(600); };
+  const ligne = (numero) => s.evaluer(`[...document.querySelectorAll('#c2-fiche .c2-pieces tbody tr')].find(x => x.innerText.includes(${JSON.stringify(numero)}))?.innerText || ''`);
+  await geste('F-2026-101', 'Bon de commande');
+  ok(await s.evaluer(`${boutonValider}?.disabled`) === true, 'sans adresse ni motif, le bon de commande ne se consigne pas');
+  await s.evaluer(saisir('[role="dialog"] input[type="email"]', 'achats@lefevre-patrimoine.test', 'HTMLInputElement'));
+  await s.evaluer(saisir('[role="dialog"] textarea', 'Bon de commande attendu du service des achats'));
+  await s.dormir(200);
+  await valider();
+  ok(/Attend un bon de commande/.test(await ligne('F-2026-101')), 'F-2026-101 attend son bon de commande');
+  await onglet(s, 'Relances');
+  const cmd = await s.evaluer(`document.querySelector('section[aria-label="Bons de commande attendus"]')?.innerText || ''`);
+  ok(/achats@lefevre-patrimoine.test/.test(cmd) && /À valider/.test(cmd) && /bon de commande attendu pour la facture F-2026-101/.test(cmd), 'le service des achats reçoit sa relance, à valider');
+  await onglet(s, 'Débiteurs');
+  await geste('F-2026-101', 'Bon reçu');
+  await valider();
+  ok(!/Attend un bon de commande/.test(await ligne('F-2026-101')), 'le bon reçu, la facture reprend son cycle');
+  await geste('F-2026-140', 'Solde');
+  await s.evaluer(saisir('[role="dialog"] textarea', 'Écart de règlement accepté'));
+  await s.dormir(200);
+  await valider();
+  ok(/Solde abandonné/.test(await ligne('F-2026-140')), 'le solde abandonné se lit sur la facture');
+  await geste('D-2026-033', 'Accord oral');
+  await s.evaluer(saisir('[role="dialog"] textarea', 'Accord de M. Lefèvre au téléphone'));
+  await s.dormir(200);
+  await valider();
+  ok(/Accepté de vive voix/.test(await ligne('D-2026-033')), 'l\'accord oral sur le devis est consigné');
+  await onglet(s, 'Envois');
+  const env = await s.evaluer(`document.querySelector('section[aria-label="Envois"] tbody')?.innerText || ''`);
+  ok(/Courriel/.test(env) && /Partie/.test(env), `le journal des envois : destinataire, objet, canal, état (${plat(env).replace(/\s+/g, ' ').slice(0, 80)})`);
   s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
   s.fermer();
 }

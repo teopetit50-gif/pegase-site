@@ -2,6 +2,24 @@
 
 C2, 06/10/2026, 18 h 31 Z (heure du conteneur). Demande de Teo, relayée par le coordinateur : « estime ce qui reste à construire pour avoir vraiment un truc livrable, et vérifie toutes les petites promesses ». Lu sur main c0494b4 (vitrine), **aucun fichier du site public modifié**.
 
+## Mise à jour du 11/10/2026 (reprise, c2_04 + écran)
+
+Construit et testé (recette locale ; à poser sur le banc) — les lacunes côté CASHD de la synthèse :
+
+| Lacune | Ce qui est fait | Preuve |
+|---|---|---|
+| G2 gabarits | textes de l'organisation par palier, langue et variante ; textes par défaut lisibles comme point de départ ; écran « Vos textes » (aperçu, variables, refus d'une variable inconnue ou manquante, retour au défaut) | `test_c2_05_textes` ; recette écran |
+| G3 variation, ton, métier | deux variantes par défaut (trois au plus), tournantes par compte et par palier ; phrase de ton au-delà de `seuil_ton` ; vocabulaire du bâtiment pour les devis (jamais le mot « relance ») | `test_c2_05_textes` |
+| G21 moyens de règlement | `moyens_reglement`, proposition d'échéancier au-delà d'`echelonnement_des` | `test_c2_05_textes` |
+| G9 petits soldes | seuil de relance par entité ; solde abandonné ou réclamé, motivé, journalisé | `test_c2_05_textes` ; fiche |
+| G8 accord oral | devis accepté de vive voix : cadence arrêtée, relance écrite coupée ; le point du matin signale l'accord sans facture | `test_c2_05_textes` ; fiche |
+| G7 bon de commande | la facture sort de la relance à la comptabilité ; relance au service émetteur tous les 7 jours, par la file ; le retard court et se lit | `test_c2_05_textes` ; fiche + vue Relances |
+| G14 quatre vues | l'écran tient en quatre vues — Débiteurs, Relances, Envois (journal : date, destinataire, objet, canal, état), Trésorerie — aux cinq largeurs | recette écran |
+| G6 (en partie) | une organisation peut écrire ses textes dans toute langue (de, es…) ; le détail des pièces reste en anglais | `test_c2_05_textes` (compte allemand) |
+
+Effet sur la synthèse : **jours → B restants ≈ 28 j, dont ≈ 8,5 j dans CASHD** (G5 lecture des réponses 2,5 ; G6 fin 1 ; G10 portefeuille par chargé 1,5 ; G11 trois paliers de validation 1 ; G19 raccord commandes 1,5 ; G20 pièces assurance-crédit 1) et ≈ 19,5 j ailleurs (inchangé).
+Passent de C/D à B : P10, P12, P33, M4, M5, M6, M7, L7, L11, L12 (le seul D). **Restent à la vitrine** (aucun fichier public touché) : les quatre captures de la page viennent toujours de la maquette — l'écran a maintenant ses quatre vues, les captures sont à refaire depuis lui (P26) ; « rappel à l'échéance » (M8) et « J+3 puis J+7 » (P21) restent des écarts de texte.
+
 ## Synthèse
 
 1. **Par état** (117 promesses) : A 0 · B 71 · C 38 · D 1 · T 7. Rien n'est prouvé EN VRAI : aucun client réel, aucun envoi réel (le banc est en essai et ses envois sont gardés).
