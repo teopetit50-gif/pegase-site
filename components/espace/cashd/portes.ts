@@ -13,7 +13,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { Fiche, Gabarits, Proposition, Relance, RelanceCommande, StatutCompte, Suivi, Tableau } from "./types";
+import type { Fiche, Gabarits, PalierValidation, Proposition, Relance, RelanceCommande, StatutCompte, Suivi, Tableau } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -202,4 +202,9 @@ export async function joindrePiece(client: string, facture: string, nature: stri
   const { error } = await supabase.storage.from("omega-clients").upload(chemin, fichier, { upsert: false, contentType: fichier.type || undefined });
   if (error) throw new ErreurPorte(message(error));
   return rpc<{ id: string }>("cashd_joindre_piece", { p_facture: facture, p_nature: nature, p_chemin: chemin, p_nom: fichier.name, p_actif: true });
+}
+
+/* ——— c2_06 : qui valide selon le montant (gérant seulement) ——— */
+export async function reglerValidation(client: string, paliers: PalierValidation[]) {
+  return rpc<{ paliers: PalierValidation[] | null; regles: string[] }>("cashd_regler_validation", { p_client: client, p_paliers: paliers });
 }
