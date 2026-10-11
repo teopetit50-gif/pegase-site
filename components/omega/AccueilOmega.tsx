@@ -1,40 +1,31 @@
 "use client";
 
 /* ══════════════════════════════════════════════════════════════════════
-   La vue d'ensemble du pilotage
+   La vue d'ensemble du pilotage (09/10/2026)
 
-   09/10/2026 : dupliquée de /espace2 (courbes, échéances, aujourd'hui,
-   activité récente, encart de l'audit).
-   11/10/2026 — retour de Teo : « trop surchargé, fais simple comme la
-   page Notes ». Il reste, sur le squelette de Notes (simple.css) :
-     · la barre : la courbe à suivre (tâches faites, appels, RDV pris,
-       vidéos publiées) et la période ;
-     · UNE courbe, à la manière des tuiles de PMT (Graphique.tsx) ;
-     · « Aujourd'hui » : ce qui est dû et les routines du jour, cochables ;
-     · « Cette semaine » : les échéances des sept jours qui viennent.
-   Retirés : les quatre courbes à la fois, « Voir un exemple », l'activité
-   récente, l'encart de l'audit (le bouton « Audit » est dans la barre du
-   haut).
+   DUPLIQUÉE de components/espace2/Accueil.tsx, sans la salutation ni la
+   rangée de quatre chiffres (retirées le 11/10/2026 : Attio n'en a pas) ;
+   même grille (courbe + tableau à gauche,
+   « Aujourd'hui » + « Activité récente » à droite), même carte du bas.
+   Le contenu vient du tableau opérationnel (omega_lignes) :
+     · le graphique (Graphique.tsx) = tâches, appels, RDV, vidéos par jour ;
+     · le tableau = les prochaines échéances ;
+     · « Aujourd'hui » = ce qui est dû, cochable ;
+     · l'activité = les dernières lignes modifiées.
    ══════════════════════════════════════════════════════════════════════ */
 
-import "@/components/espace2/notes.css";
-import "./simple.css";
 import { useMemo, useState } from "react";
-import Link from "next/link";
-import { ArrowRight, CalendarDays, Check, ChevronDown, LineChart } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
-import { ItemMenu, MenuDeroulant } from "@/components/espace2/ui";
+import Choix from "./Choix";
 import Graphique from "./Graphique";
+import Link from "next/link";
+import { ArrowRight, CheckCheck, ChevronRight, ClipboardCheck, ListChecks, UserRound, Wrench } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 import type { Ligne } from "./Tableaux";
+import "@/components/espace2/habillage.css";
 
 const R = "/omega";
 const JOUR = 86_400_000;
-const I = { width: 14, height: 14, strokeWidth: 1.6, "aria-hidden": true } as const;
-const PERIODES = [
-  { jours: 7, libelle: "7 derniers jours" },
-  { jours: 30, libelle: "30 derniers jours" },
-  { jours: 90, libelle: "90 derniers jours" },
-];
+const FINIS = ["Signé", "Installé", "En rodage", "En réel", "Bilan J30 fait", "SaaS métier en route", "2e offre proposée", "Engagement annuel"];
 
 function echeance(texte: string | undefined): number | null {
   const m = texte?.match(/(\d{1,2})\/(\d{1,2})/);
@@ -42,42 +33,31 @@ function echeance(texte: string | undefined): number | null {
   const mois = Number(m[2]);
   return new Date(mois >= 10 ? 2026 : 2027, mois - 1, Number(m[1]), 23, 59).getTime();
 }
-const quand = (t: number | null, maintenant: number) => {
-  if (t === null) return "";
-  if (t < maintenant) return `En retard de ${Math.max(1, Math.ceil((maintenant - t) / JOUR))} j`;
-  const j = Math.floor((t - maintenant) / JOUR);
-  if (j === 0) return "Aujourd'hui";
-  if (j === 1) return "Demain";
-  return new Date(t).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric" });
-};
 
 export default function AccueilOmega({ lignes: initiales }: { lignes: Ligne[] }) {
   const [lignes, setLignes] = useState(initiales);
   const [periode, setPeriode] = useState(30);
-  const [serie, setSerie] = useState("taches");
+  const [exemple, setExemple] = useState(false);
   const [maintenant] = useState(() => Date.now());
-  /* une ligne cochée ici reste visible, barrée, jusqu'au prochain passage */
-  const [cochees, setCochees] = useState<string[]>([]);
 
-  async function cocher(l: Ligne, fait: boolean) {
+  async function faire(l: Ligne) {
     const cle = l.tableau === "routines" ? "Statut cette semaine" : "Statut";
-    const donnees = { ...l.donnees, [cle]: fait ? "Fait" : "À faire" };
+    const donnees = { ...l.donnees, [cle]: "Fait" };
     const maj = new Date().toISOString();
-    setCochees((x) => (fait ? [...x, l.id] : x.filter((y) => y !== l.id)));
     setLignes((ls) => ls.map((x) => (x.id === l.id ? { ...x, donnees, maj } : x)));
     await createClient().from("omega_lignes").update({ donnees, maj }).eq("id", l.id);
   }
 
   const c = useMemo(() => {
     const taches = lignes.filter((l) => l.tableau === "plan" || l.tableau === "ajouts");
-    const ouvertes = taches.filter((l) => l.donnees["Statut"] !== "Fait" || cochees.includes(l.id)).sort((a, b) => (echeance(a.donnees["Échéance"]) ?? 9e15) - (echeance(b.donnees["Échéance"]) ?? 9e15));
+    const ouvertes = taches.filter((l) => l.donnees["Statut"] !== "Fait").sort((a, b) => (echeance(a.donnees["Échéance"]) ?? 9e15) - (echeance(b.donnees["Échéance"]) ?? 9e15));
+    const faites = taches.filter((l) => l.donnees["Statut"] === "Fait");
+    const retard = ouvertes.filter((l) => (echeance(l.donnees["Échéance"]) ?? Infinity) < maintenant);
     const duJour = ouvertes.filter((l) => (echeance(l.donnees["Échéance"]) ?? Infinity) < maintenant + JOUR);
-    const semaine = ouvertes.filter((l) => {
-      const e = echeance(l.donnees["Échéance"]) ?? Infinity;
-      return e >= maintenant + JOUR && e < maintenant + 7 * JOUR;
-    });
-    const routines = lignes.filter((l) => l.tableau === "routines" && /jour/i.test(l.donnees["Fréquence"] ?? "") && (l.donnees["Statut cette semaine"] !== "Fait" || cochees.includes(l.id)));
-    /* la courbe : une série jour par jour sur la période, et la période d'avant pour l'écart */
+    const routines = lignes.filter((l) => l.tableau === "routines" && /jour/i.test(l.donnees["Fréquence"] ?? "") && l.donnees["Statut cette semaine"] !== "Fait");
+    const decisions = ouvertes.filter((l) => ["Fondations", "Pilotage"].includes(l.donnees["Catégorie"]));
+    const signes = lignes.filter((l) => l.tableau === "clients" && FINIS.includes(l.donnees["Étape"])).length;
+    /* le graphique : quatre séries jour par jour sur la période, et la période d'avant pour l'écart */
     const debut = new Date(maintenant - (periode - 1) * JOUR).setHours(0, 0, 0, 0);
     const compter = (dates: number[]) => {
       const valeurs = Array.from({ length: periode }, () => 0);
@@ -91,130 +71,195 @@ export default function AccueilOmega({ lignes: initiales }: { lignes: Ligne[] })
     };
     const appels = lignes.filter((l) => l.tableau === "appels");
     const series = [
-      { cle: "taches", libelle: "Tâches faites", ...compter(taches.filter((l) => l.donnees["Statut"] === "Fait").map((l) => (l.maj ? new Date(l.maj).getTime() : NaN))) },
+      { cle: "taches", libelle: "Tâches faites", ...compter(faites.map((l) => (l.maj ? new Date(l.maj).getTime() : NaN))) },
       { cle: "appels", libelle: "Appels", ...compter(appels.map((l) => lireDate(l.donnees["Date"]))) },
       { cle: "rdv", libelle: "RDV pris", ...compter(appels.filter((l) => l.donnees["Issue"] === "RDV pris").map((l) => lireDate(l.donnees["Date"]))) },
       { cle: "videos", libelle: "Vidéos publiées", ...compter(lignes.filter((l) => l.tableau === "videos" && l.donnees["Statut"] === "Publiée").map((l) => lireDate(l.donnees["Sortie"]))) },
     ];
-    return { duJour, semaine, routines, series, debut };
-  }, [lignes, periode, maintenant, cochees]);
+    const activite = [...lignes]
+      .filter((l) => l.maj)
+      .sort((a, b) => (b.maj ?? "").localeCompare(a.maj ?? ""))
+      .slice(0, 6);
+    return { taches, ouvertes, faites, retard, duJour, routines, decisions, signes, series, debut, activite };
+  }, [lignes, periode, maintenant]);
 
-  const courante = c.series.find((s) => s.cle === serie) ?? c.series[0];
-  const aujourdhui = [...c.duJour, ...c.routines];
-  const reste = aujourdhui.filter((l) => !cochees.includes(l.id)).length;
-
+  const aFaire = c.duJour.length + c.routines.length;
   return (
-    <div className="no-page si-page v2-arrivee">
+    <div className="v2-page v2-arrivee v2-va v2-vivant">
       <h1 className="v2-sr">Vue d&apos;ensemble</h1>
+      <div className="v2-va-grille">
+        <div className="v2-va-col">
+          <section className="v2-carte v2-carte-corps">
+            <div className="v2-va-titre" style={{ marginBottom: 16 }}>
+              <div>
+                <h2 className="v2-h2">Activité</h2>
+                <p className="v2-gris v2-va-sous">Jour par jour, comparé à la période précédente</p>
+              </div>
+              <span className="om-barres-actions">
+                <button type="button" className="v2-val-bouton" data-actif={exemple ? "" : undefined} aria-pressed={exemple} onClick={() => setExemple((x) => !x)}>
+                  {exemple ? "Revenir aux vrais chiffres" : "Voir un exemple"}
+                </button>
+                <Choix classe="v2-va-periode" etiquette="Période" valeur={String(periode)} onChange={(v) => setPeriode(Number(v))} options={[{ cle: "7", libelle: "7 derniers jours" }, { cle: "30", libelle: "30 derniers jours" }, { cle: "90", libelle: "90 derniers jours" }]} />
+              </span>
+            </div>
+            {exemple ? <p className="om-barres-exemple">Exemple : des chiffres inventés pour voir le rendu, rien n&apos;est enregistré.</p> : null}
+            <Graphique
+              key={exemple ? "exemple" : "vrai"}
+              debut={c.debut}
+              series={exemple ? c.series.map((x, k) => ({ ...x, valeurs: valeursExemple(periode, k * 5, [1, 3, 0.4, 0.3][k]), avant: valeursExemple(periode, k * 5 + 3, [0.8, 2.6, 0.35, 0.3][k]) })) : c.series}
+            />
+          </section>
 
-      <div className="no-barre">
-        <div className="no-barre-droite">
-          <MenuDeroulant
-            etiquette="Courbe à suivre"
-            classe="no-bouton"
-            placement="bottom start"
-            largeur={220}
-            declencheur={
-              <>
-                <LineChart {...I} />
-                {courante.libelle}
-                <ChevronDown {...I} />
-              </>
-            }
-          >
-            {c.series.map((s) => (
-              <ItemMenu key={s.cle} id={s.cle} textValue={s.libelle} onAction={() => setSerie(s.cle)} suffixe={s.cle === courante.cle ? <Check {...I} /> : null}>
-                {s.libelle}
-              </ItemMenu>
-            ))}
-          </MenuDeroulant>
-          <MenuDeroulant
-            etiquette="Période"
-            classe="no-bouton"
-            placement="bottom start"
-            largeur={220}
-            declencheur={
-              <>
-                <CalendarDays {...I} />
-                {PERIODES.find((p) => p.jours === periode)?.libelle}
-                <ChevronDown {...I} />
-              </>
-            }
-          >
-            {PERIODES.map((p) => (
-              <ItemMenu key={p.jours} id={String(p.jours)} textValue={p.libelle} onAction={() => setPeriode(p.jours)} suffixe={p.jours === periode ? <Check {...I} /> : null}>
-                {p.libelle}
-              </ItemMenu>
-            ))}
-          </MenuDeroulant>
+          <section className="v2-carte v2-carte-corps">
+            <div className="v2-va-titre">
+              <h2 className="v2-h2">Prochaines échéances</h2>
+              <Link href={`${R}/taches`} className="v2-va-lien">
+                Voir tout <ArrowRight width={14} height={14} />
+              </Link>
+            </div>
+            {c.ouvertes.length === 0 ? (
+              <p className="v2-gris" style={{ margin: 0 }}>
+                Tout le plan est fait.
+              </p>
+            ) : (
+              <div className="v2-tableau-cadre">
+                <table className="v2-va-table">
+                  <thead>
+                    <tr>
+                      <th>Tâche</th>
+                      <th>Échéance</th>
+                      <th>État</th>
+                      <th aria-hidden="true" />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {c.ouvertes.slice(0, 6).map((l) => {
+                      const e = echeance(l.donnees["Échéance"]);
+                      return (
+                        <tr key={l.id}>
+                          <td>{l.donnees["Tâche"]}</td>
+                          <td className="v2-gris">{l.donnees["Échéance"] ?? "—"}</td>
+                          <td>
+                            <span className="v2-etat">{e !== null && e < maintenant ? "En retard" : e !== null && e < maintenant + 7 * JOUR ? "Cette semaine" : "À venir"}</span>
+                          </td>
+                          <td>
+                            <Link href={`${R}/taches`} aria-label={`Ouvrir « ${l.donnees["Tâche"]} »`}>
+                              <ChevronRight width={16} height={16} />
+                            </Link>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+        </div>
+
+        <div className="v2-va-col">
+          <section className="v2-carte v2-carte-corps">
+            <div className="v2-va-titre">
+              <h2 className="v2-h2">Aujourd&apos;hui</h2>
+              <span className="v2-gris">{aFaire} à faire</span>
+            </div>
+            {aFaire === 0 ? (
+              <p className="v2-gris" style={{ margin: 0 }}>
+                Rien d&apos;urgent aujourd&apos;hui.{" "}
+                <Link href={`${R}/taches?ajouter=plan`} className="v2-va-lien">
+                  Ajouter une tâche
+                </Link>
+              </p>
+            ) : (
+              <ul className="v2-va-liste">
+                {[...c.duJour, ...c.routines].slice(0, 7).map((l) => (
+                  <li key={l.id}>
+                    <input type="checkbox" aria-label={`Marquer « ${l.donnees["Tâche"] ?? l.donnees["Routine"]} » comme fait`} onChange={() => faire(l)} />
+                    <span className="v2-va-texte">
+                      <span>{l.donnees["Tâche"] ?? l.donnees["Routine"]}</span>
+                      <small className="v2-gris">{l.tableau === "routines" ? ["Routine", l.donnees["Moment"]].filter(Boolean).join(" · ") : ["Tâche", l.donnees["Catégorie"], l.donnees["Échéance"]].filter(Boolean).join(" · ")}</small>
+                    </span>
+                    <Link href={l.tableau === "routines" ? `${R}/taches/routines` : `${R}/taches`} aria-label="Ouvrir">
+                      <ChevronRight width={16} height={16} />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section className="v2-carte v2-carte-corps">
+            <div className="v2-va-titre">
+              <h2 className="v2-h2">Activité récente</h2>
+              <Link href={`${R}/taches`} className="v2-va-lien">
+                Voir tout
+              </Link>
+            </div>
+            {c.activite.length === 0 ? (
+              <p className="v2-gris" style={{ margin: 0 }}>
+                Rien pour l&apos;instant.
+              </p>
+            ) : (
+              <ul className="v2-va-liste">
+                {c.activite.map((l) => (
+                  <li key={l.id}>
+                    <span className="v2-va-pastille" aria-hidden="true">
+                      {l.tableau === "clients" ? <UserRound width={14} height={14} /> : l.tableau === "moteurs" ? <Wrench width={14} height={14} /> : l.donnees["Statut"] === "Fait" ? <CheckCheck width={14} height={14} /> : <ListChecks width={14} height={14} />}
+                    </span>
+                    <small className="v2-gris v2-va-heure" suppressHydrationWarning>
+                      {heureCourte(l.maj!)}
+                    </small>
+                    <span className="v2-va-texte">
+                      <span>{l.donnees["Tâche"] ?? l.donnees["Client"] ?? l.donnees["Chantier"] ?? l.donnees["Routine"] ?? l.donnees["Entreprise"] ?? "Ligne modifiée"}</span>
+                      <small className="v2-gris">{[NOMS[l.tableau] ?? l.tableau, l.donnees["Statut"] ?? l.donnees["Étape"] ?? l.donnees["Statut cette semaine"] ?? l.donnees["Prospection"]].filter(Boolean).join(" · ")}</small>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
         </div>
       </div>
 
-      <section className="si-section si-courbe" aria-label={courante.libelle}>
-        <Graphique key={`${courante.cle}-${periode}`} debut={c.debut} series={[courante]} />
+      <section className="v2-carte v2-carte-corps v2-va-ia">
+        <div>
+          <p className="v2-va-ia-marque">
+            <ClipboardCheck width={14} height={14} aria-hidden="true" /> Audit Omega
+          </p>
+          <h2 className="v2-h2">Lance l&apos;audit d&apos;un prospect pendant le rendez-vous.</h2>
+          <p className="v2-gris" style={{ margin: 0 }}>
+            Dépose son export de factures : l&apos;argent qui dort, les devis sans réponse et le retard moyen sortent en direct, avec le rapport à son nom.
+          </p>
+        </div>
+        <Link href={`${R}/audit`} className="v2-btn v2-btn--primaire">
+          Ouvrir l&apos;audit <ArrowRight width={16} height={16} aria-hidden="true" />
+        </Link>
       </section>
-
-      <div className="si-deux">
-        <section className="si-section" aria-label="Aujourd'hui">
-          <div className="si-tete">
-            <h2>Aujourd&apos;hui</h2>
-            <span className="no-compte">{reste}</span>
-            <Link href={`${R}/point`} className="si-lien">
-              Point du matin <ArrowRight {...I} />
-            </Link>
-          </div>
-          {aujourdhui.length ? (
-            <ul className="si-liste">
-              {aujourdhui.slice(0, 8).map((l) => {
-                const routine = l.tableau === "routines";
-                const coche = cochees.includes(l.id);
-                const titre = l.donnees["Tâche"] ?? l.donnees["Routine"];
-                return (
-                  <li key={l.id} className="si-ligne" data-fait={coche ? "" : undefined}>
-                    <button type="button" role="checkbox" aria-checked={coche} aria-label={`${titre} : fait`} className="si-case" onClick={() => cocher(l, !coche)}>
-                      <Check width={11} height={11} strokeWidth={3} aria-hidden="true" />
-                    </button>
-                    <Link href={routine ? `${R}/taches/routines` : `${R}/taches`} className="si-texte">
-                      <strong>{titre}</strong>
-                      <span>{routine ? "Routine" : l.donnees["Catégorie"]}</span>
-                    </Link>
-                    <span className="si-meta">{routine ? l.donnees["Moment"] : quand(echeance(l.donnees["Échéance"]), maintenant)}</span>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <p className="si-vide">Rien d&apos;urgent aujourd&apos;hui.</p>
-          )}
-        </section>
-
-        <section className="si-section" aria-label="Cette semaine">
-          <div className="si-tete">
-            <h2>Cette semaine</h2>
-            <span className="no-compte">{c.semaine.length}</span>
-            <Link href={`${R}/taches`} className="si-lien">
-              Le plan <ArrowRight {...I} />
-            </Link>
-          </div>
-          {c.semaine.length ? (
-            <ul className="si-liste">
-              {c.semaine.slice(0, 8).map((l) => (
-                <li key={l.id} className="si-ligne">
-                  <Link href={`${R}/taches`} className="si-texte">
-                    <strong>{l.donnees["Tâche"]}</strong>
-                    <span>{l.donnees["Catégorie"]}</span>
-                  </Link>
-                  <span className="si-meta">{quand(echeance(l.donnees["Échéance"]), maintenant)}</span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="si-vide">Rien d&apos;autre cette semaine.</p>
-          )}
-        </section>
-      </div>
     </div>
   );
+}
+
+const NOMS: Record<string, string> = { plan: "Plan", ajouts: "Plan", routines: "Routine", clients: "Prospect", moteurs: "Chantier", entreprises: "Entreprise" };
+
+function heureCourte(iso: string): string {
+  const d = new Date(iso);
+  const j = new Date();
+  const h = d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+  if (d.toDateString() === j.toDateString()) return h;
+  j.setDate(j.getDate() - 1);
+  if (d.toDateString() === j.toDateString()) return `Hier ${h}`;
+  return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+}
+
+/* des valeurs de démonstration (bouton « Voir un exemple ») : une montée en
+   régime, creux le week-end, toujours les mêmes d'un affichage à l'autre */
+function valeursExemple(n: number, graine: number, echelle: number) {
+  return Array.from({ length: n }, (_, i) => {
+    const t = i / Math.max(1, n - 1);
+    const bruit = (((i + graine) * 7919) % 13) / 13;
+    const weekEnd = (i + 2) % 7 >= 5;
+    return Math.max(0, Math.round(((1 + t * 4) * (weekEnd ? 0.3 : 1) + (bruit - 0.45) * 2.4) * echelle));
+  });
 }
 
 /* les dates saisies à la main : « 14/10 », « 14/10/2026 », « 2026-10-14… » */
