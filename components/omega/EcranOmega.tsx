@@ -15,12 +15,20 @@ import MetaAds from "./MetaAds";
 import PlanTaches from "./PlanTaches";
 import NotesOmega from "./NotesOmega";
 import SelecteurVue from "./SelecteurVue";
+import ActiviteOmega from "./ActiviteOmega";
 import type { DefPage, OngletPage } from "./pages";
 import { PAR_PAGE, lireNotes, lireContacts, lireContactsSuivis, lireFileAppels, lireLignes, lirePage, lireProspects, type FiltresProspects } from "@/lib/omega/donnees";
 
 export default async function EcranOmega({ page, def, actif, filtres = {} }: { page: string; def: DefPage; actif: OngletPage; filtres?: FiltresProspects }) {
   /* les écrans dupliqués de /espace2 portent leur propre page, sans titre visible (il est dans la barre du haut) */
   if (actif.special === "validations" || actif.special === "point") return <Journee mode={actif.special} lignes={await lireLignes()} />;
+  /* Activité (11/10) : une seule page, un seul dessin — toutes les vues lues d'un coup, le sélecteur change la vue sans recharger */
+  if (page === "activite") {
+    const slugs = def.onglets.flatMap((o) => (o.doc ? [o.doc] : []));
+    const [lignes, pages] = await Promise.all([lireLignes(["videos", "pubs", "preuves", "meta", "meta-seuils"]), Promise.all(slugs.map((s) => lirePage(s)))]);
+    const docs = Object.fromEntries(slugs.map((s, i) => [s, { titre: pages[i]?.titre ?? "", contenu: pages[i]?.contenu ?? "" }]));
+    return <ActiviteOmega onglets={def.onglets} lignes={lignes} docs={docs} />;
+  }
   const selecteur = def.onglets.length > 1 ? <SelecteurVue page={page} titre={def.titre} onglets={def.onglets} actif={actif.cle} /> : null;
   if (actif.special === "formation") return <Formation lignes={await lireLignes(["formation"])} selecteur={selecteur} />;
   if (actif.special === "appels") {

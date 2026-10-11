@@ -1,0 +1,126 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Les pages simples du pilotage, à la manière de Notes (11/10/2026)
+
+   Retour de Teo : Appels, Tâches, Vue d'ensemble, Point du matin et
+   À valider « beaucoup trop surchargés : réduis, fais simple comme la
+   page Notes ». Même squelette partout : la page .no-page, une rangée
+   d'onglets .no-onglets, la barre .no-barre (notes.css), puis des
+   sections à plat séparées d'un filet, et dedans des listes à plat —
+   pas de cartes, pas de panneau à côté, pas d'icônes décoratives.
+   ══════════════════════════════════════════════════════════════════════ */
+.si-page { padding-bottom: 48px; }
+.si-date { margin: 0; font-size: 13px; font-weight: 500; color: var(--v2-gray-900); white-space: nowrap; }
+.si-date::first-letter { text-transform: uppercase; }
+
+/* une section : son titre en petit, son compte, un lien discret à droite */
+.si-section { padding: 20px 0 4px; }
+.si-section + .si-section { margin: 12px -20px 0; padding: 20px 20px 4px; border-top: 1px solid var(--v2-a-400); }
+.si-tete { display: flex; align-items: center; gap: 8px; min-height: 26px; margin: 0 0 10px; }
+.si-tete h2 { margin: 0; font-size: 13px; line-height: 18px; font-weight: 500; color: var(--v2-gray-900); }
+.si-lien { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; height: 26px; padding: 0 8px; margin-right: -8px; border-radius: 6px; font-size: 13px; font-weight: 500; color: var(--v2-gray-900); text-decoration: none; transition: background 0.15s, color 0.15s; }
+.si-lien:hover { background: var(--v2-a-200); color: var(--v2-gray-1000); }
+.si-lien:focus-visible { outline: 0; box-shadow: var(--v2-anneau); }
+.si-deux { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; }
+.si-deux > .si-section + .si-section { margin: 0; padding: 20px 0 4px; border-top: 0; }
+
+/* la liste à plat : un cadre fin, des rangées séparées d'un filet */
+.si-liste { display: grid; margin: 0; padding: 0; list-style: none; border-radius: 8px; background: var(--v2-bg-100); box-shadow: 0 0 0 1px var(--v2-a-400); overflow: hidden; }
+.si-ligne { position: relative; display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 6px 12px; font-size: 14px; transition: background 0.15s; }
+.si-ligne + .si-ligne { border-top: 1px solid var(--v2-a-400); }
+.si-ligne:hover { background: var(--v2-a-100); }
+.si-ligne[data-fait] .si-texte strong { color: var(--v2-gray-900); text-decoration: line-through; text-decoration-color: var(--v2-a-600); }
+.si-texte { display: grid; gap: 1px; flex: 1; min-width: 0; color: inherit; text-decoration: none; }
+a.si-texte:focus-visible, button.si-texte:focus-visible { outline: 0; border-radius: 4px; box-shadow: var(--v2-anneau); }
+button.si-texte { padding: 0; border: 0; background: transparent; font: inherit; text-align: left; cursor: pointer; }
+.si-texte strong { font-weight: 500; color: var(--v2-gray-1000); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.si-texte span { font-size: 13px; color: var(--v2-gray-900); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.si-meta { flex: none; font-size: 13px; color: var(--v2-gray-900); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.si-meta[data-retard] { color: var(--v2-red-900, var(--v2-red-700)); }
+
+/* la case ronde (comme les tâches d'Attio) : un clic = fait */
+.si-case { flex: none; display: grid; place-items: center; width: 18px; height: 18px; padding: 0; border: 0; border-radius: 50%; background: transparent; box-shadow: inset 0 0 0 1.5px var(--v2-gray-600); color: transparent; cursor: pointer; transition: box-shadow 0.15s, background 0.15s, color 0.15s; }
+.si-case:hover { box-shadow: inset 0 0 0 1.5px var(--v2-gray-900); color: var(--v2-gray-900); }
+.si-case[aria-checked="true"] { background: var(--v2-blue-700); box-shadow: none; color: #fff; }
+.si-case:focus-visible { outline: 0; box-shadow: inset 0 0 0 1.5px var(--v2-gray-900), var(--v2-anneau); }
+
+/* l'action d'une rangée : visible au survol (toujours au doigt) */
+.si-action { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; color: var(--v2-gray-900); font: inherit; font-size: 13px; font-weight: 500; text-decoration: none; white-space: nowrap; cursor: pointer; opacity: 0; transition: opacity 0.15s, background 0.15s, color 0.15s; }
+.si-ligne:hover .si-action, .si-action:focus-visible { opacity: 1; }
+.si-action:hover { background: var(--v2-a-200); color: var(--v2-gray-1000); }
+.si-action:focus-visible { outline: 0; box-shadow: var(--v2-anneau); }
+@media (hover: none) { .si-action { opacity: 1; } }
+
+.si-vide { margin: 0; padding: 18px 16px; border: 1px dashed var(--v2-a-500); border-radius: 8px; font-size: 13px; color: var(--v2-gray-900); text-align: center; }
+.si-plus { display: inline-flex; align-items: center; gap: 6px; height: 28px; margin-top: 8px; padding: 0 8px; margin-left: -8px; border: 0; border-radius: 6px; background: transparent; color: var(--v2-gray-900); font: inherit; font-size: 13px; font-weight: 500; text-decoration: none; cursor: pointer; transition: background 0.15s, color 0.15s; }
+.si-plus:hover { background: var(--v2-a-200); color: var(--v2-gray-1000); }
+.si-plus:focus-visible { outline: 0; box-shadow: var(--v2-anneau); }
+
+/* la recherche de la barre : 26 px, filet fin */
+.si-recherche { position: relative; display: inline-flex; align-items: center; width: 220px; height: 26px; border-radius: 6px; background: var(--v2-bg-100); box-shadow: 0 0 0 1px var(--v2-a-400); transition: box-shadow 0.15s; }
+.si-recherche:hover { box-shadow: 0 0 0 1px var(--v2-a-500); }
+.si-recherche:focus-within { box-shadow: var(--v2-anneau); }
+.si-recherche > svg { position: absolute; left: 8px; color: var(--v2-gray-900); pointer-events: none; }
+.si-recherche input { width: 100%; height: 100%; min-width: 0; padding: 0 10px 0 28px; border: 0; outline: 0; border-radius: inherit; background: transparent; color: var(--v2-gray-1000); font: inherit; font-size: 13px; }
+.si-recherche input::placeholder { color: var(--v2-gray-800); }
+.si-recherche input::-webkit-search-cancel-button { display: none; }
+
+/* une section repliable (les semaines des Tâches) */
+.si-replier { display: flex; align-items: center; gap: 8px; width: 100%; height: 26px; padding: 0; border: 0; background: transparent; color: var(--v2-gray-900); font: inherit; font-size: 13px; font-weight: 500; text-align: left; cursor: pointer; }
+.si-replier:hover { color: var(--v2-gray-1000); }
+.si-replier:focus-visible { outline: 0; border-radius: 4px; box-shadow: var(--v2-anneau); }
+.si-chevron { flex: none; transition: transform 0.15s; }
+.si-replier[aria-expanded="false"] .si-chevron { transform: rotate(-90deg); }
+.si-chevron[data-ouvert] { transform: rotate(180deg); }
+.si-maintenant { color: var(--v2-blue-900, var(--v2-blue-700)); font-weight: 500; }
+.si-dates { margin-left: auto; font-weight: 400; font-variant-numeric: tabular-nums; }
+.si-ligne--discrete { min-height: 40px; }
+.si-ligne--discrete .si-plus { margin: 0 0 0 -8px; }
+.si-pied { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin-top: 12px; }
+
+/* le sélecteur ⌃⌄ d'une page, à la taille des boutons de la barre */
+.no-barre .om-vue { height: 26px; padding: 0 10px; border-radius: 6px; background: var(--v2-bg-100); box-shadow: 0 0 0 1px var(--v2-a-400); font-size: 13px; }
+.no-barre .om-vue:hover, .no-barre .om-vue[data-hovered] { background: var(--v2-gray-100); }
+
+/* le tiroir : une fiche qui s'ouvre sur le côté, au clic seulement */
+.si-voile { position: fixed; inset: 0; z-index: 100; display: flex; justify-content: flex-end; background: color-mix(in srgb, var(--v2-voile) 55%, transparent); }
+.si-voile[data-entering] { animation: v2-fondu var(--v2-overlay) var(--v2-swift); }
+.si-tiroir { display: flex; width: min(460px, 100%); height: 100dvh; background: var(--v2-bg-eleve, var(--v2-bg-100)); box-shadow: -1px 0 0 var(--v2-a-400), var(--v2-ombre-modal); outline: none; }
+.si-tiroir[data-entering] { animation: si-tiroir-entree 0.28s var(--v2-tiroir); }
+@keyframes si-tiroir-entree { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+.si-tiroir-dialogue { width: 100%; overflow-y: auto; outline: none; font-family: var(--v2-sans); color: var(--v2-gray-1000); }
+.si-tiroir .om-pt-fiche { position: static; align-content: start; width: 100%; max-height: none; min-height: 100%; border-radius: 0; background: transparent; box-shadow: none; padding: 14px 20px 24px; animation: none; overflow: visible; }
+.si-tiroir .om-pt-fiche-haut .v2-btn { display: inline-flex; }
+@media (prefers-reduced-motion: reduce) { .si-tiroir, .si-voile { animation: none; } }
+
+/* la courbe unique de la vue d'ensemble : une tuile, pleine largeur */
+.si-courbe .om-pmt { grid-template-columns: minmax(0, 1fr); }
+
+@container principale (max-width: 899px) {
+  .si-deux { grid-template-columns: minmax(0, 1fr); }
+  .si-deux > .si-section + .si-section { margin: 12px -20px 0; padding: 20px 20px 4px; border-top: 1px solid var(--v2-a-400); }
+}
+@container principale (max-width: 639px) {
+  .si-section + .si-section, .si-deux > .si-section + .si-section { margin: 12px -16px 0; padding: 20px 16px 4px; }
+  .si-recherche { flex: 1; width: auto; }
+  .si-meta--large { display: none; }
+}
+/* la ligne d'état (« Enregistré », erreurs) ne prend pas de place quand elle est vide */
+.si-page .om-etat:empty { position: absolute; width: 1px; height: 1px; margin: 0; overflow: hidden; }
+
+/* Appels : la fiche d'appel dans un cadre fin, comme les listes */
+.om-ap-fiche--simple { margin-top: 16px; border-radius: 8px; background: var(--v2-bg-100); box-shadow: 0 0 0 1px var(--v2-a-400); }
+.om-ap-fiche--simple .om-ap-fiche-tete { padding: 16px 16px 16px 20px; }
+.om-ap-position { display: inline-flex; align-items: center; gap: 4px; }
+.om-ap-position .om-ap-rond { width: 26px; height: 26px; }
+.om-ap-position .si-meta { margin-left: 4px; }
+.om-ap-a-vendre { color: var(--v2-gray-1000); }
+.om-ap-fiche--simple .om-ap-issue { border-radius: 0 0 8px 8px; }
+.om-ap .om-ap-enregistrer:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* au téléphone : les onglets tiennent sur une ligne (ils défilent au besoin), l'action secondaire d'une rangée s'efface */
+.si-page .no-onglets { overflow-x: auto; scrollbar-width: none; }
+.si-page .no-onglets::-webkit-scrollbar { display: none; }
+.si-page .no-onglet { flex: none; white-space: nowrap; }
+@container principale (max-width: 639px) {
+  .si-action { display: none; }
+}

@@ -329,6 +329,9 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
           racine: `${RACINE}/${m.cle}`,
           icone: <IconeModule cle={m.cle} icone={m.icone} />,
           compteur: compteurs[m.cle],
+          /* CASHD : son tableau de bord et l'écran de travail (débiteurs,
+             relances, envois, trésorerie, vos textes) — 11/10, avec C2 */
+          sous: m.cle === "cashd" ? SOUS_CASHD : undefined,
         }))
         .concat(MODULES_A_VENIR.map<Lien>((m) => ({ libelle: m.nom, href: `${RACINE}/${m.cle}`, icone: <m.icone {...I} />, bientot: true }))),
     },
@@ -575,6 +578,16 @@ function useSections(): [Record<string, boolean>, (titre: string, ouvrir: boolea
   const basculer = (titre: string, ouvrir: boolean) => ecrireStockage("espace2-sections", JSON.stringify({ ...etat, [titre]: ouvrir }));
   return [etat, basculer];
 }
+
+/* CASHD : le tableau de bord, puis chaque vue de l'écran de travail —
+   EcranCashd (C2) ouvre la vue que porte ?vue= */
+const SOUS_CASHD = [
+  { libelle: "Tableau de bord", href: `${RACINE}/cashd` },
+  { libelle: "Débiteurs", href: `${RACINE}/cashd/suivi?vue=debiteurs` },
+  { libelle: "Relances", href: `${RACINE}/cashd/suivi?vue=relances` },
+  { libelle: "Envois", href: `${RACINE}/cashd/suivi?vue=envois` },
+  { libelle: "Trésorerie", href: `${RACINE}/cashd/suivi?vue=tresorerie` },
+];
 
 function LienLateral({ lien, chemin }: { lien: Lien; chemin: string }) {
   const base = lien.racine ?? lien.href;

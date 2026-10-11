@@ -47,7 +47,7 @@ export const TABLEAUX: Def[] = [
 const VERTS = ["Fait", "Signé", "En réel", "Engagement annuel", "Publiée", "Tenu", "Payé", "Recette", "Accord obtenu"];
 const BLEUS = ["En cours", "Audit réservé", "Audit tenu", "Récap envoyé", "Installé", "En rodage", "En installation", "Script écrit", "Tournée", "Montée", "Programmée", "Prévu", "Demandé", "Prête"];
 const ROUGES = ["Bloqué", "Perdu", "Abandonnée", "Absent", "Annulé", "À risque", "Arrêté", "Arrêtée", "En retard", "Refusé"];
-const teinteStatut = (v: string | undefined) => (!v ? "gris" : VERTS.includes(v) ? "vert" : BLEUS.includes(v) ? "bleu" : ROUGES.includes(v) ? "rouge" : "gris");
+export const teinteStatut = (v: string | undefined) => (!v ? "gris" : VERTS.includes(v) ? "vert" : BLEUS.includes(v) ? "bleu" : ROUGES.includes(v) ? "rouge" : "gris");
 
 export default function Tableaux({ lignes: initiales, seulement, cartes = false }: { lignes: Ligne[]; seulement?: string[]; cartes?: boolean }) {
   const [lignes, setLignes] = useState(initiales);

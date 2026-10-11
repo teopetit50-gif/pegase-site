@@ -61,6 +61,8 @@ export type Compte = {
   statut: "suivi" | "exclu" | "arrete";
   statut_motif: string | null;
   dernier_contact?: string | null;
+  verification?: "echec" | "reattribuer" | null;
+  verification_motif?: string | null;
   signal: Signal | null;
   reprise?: Reprise | null;
 };
@@ -251,3 +253,20 @@ export type Pilotage = {
   };
 };
 export type Arrete = { jour: string; pilotage: Pilotage; cree_le: string };
+
+/* c4_10 — règles en français, coupe-circuit, raison sociale mère */
+export type Regle = {
+  id: string; texte: string; famille: string; statut: "appliquee" | "en_attente" | "non_comprise"; reponse: string; cree_le: string;
+};
+export type GardeFous = {
+  suspendu_le: string | null; suspendu_motif: string | null; seuil_non_remis_pct: number; regles: Regle[]; a_verifier: number;
+};
+export type GroupeCompte = { id: string; nom: string; ref: string; niveau: string | null; ca_12m: number | null; statut: string; verification: string | null };
+export type Groupe = {
+  nom: string; nb: number; comptes: GroupeCompte[]; ca_12m: number; valeur_annuelle: number; dernier_achat: string | null;
+  pire_niveau: string | null; reprises_en_cours: number; echeances: number; affaires_valeur: number;
+};
+export type Groupes = {
+  groupes: Groupe[];
+  a_rattacher: { domaine: string; comptes: { id: string; nom: string; groupe: string | null }[] }[];
+};

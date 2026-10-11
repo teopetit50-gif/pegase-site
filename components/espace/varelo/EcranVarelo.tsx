@@ -13,6 +13,8 @@
      · « Réserves à émettre » (Reserves.tsx, b1_11) : les livraisons abîmées
        ou incomplètes, la date limite de protestation au transporteur, la
        lettre prête ;
+     · en bas, « Règles du groupe » (ReglesGroupe.tsx, b1_16) : écrites une
+       fois, appliquées dans chaque société ;
      · en bas, « Exports automatiques » (Branchements.tsx, b1_10) : le
        logiciel de chaque société branché, ses exports lus d'eux-mêmes ;
      · en haut, quatre compteurs pour la nature choisie (codes locaux,
@@ -64,6 +66,7 @@ import GroupePage from "./GroupePage";
 import Reportings from "./Reportings";
 import Reserves from "./Reserves";
 import Branchements from "./Branchements";
+import ReglesGroupe from "./ReglesGroupe";
 import "./varelo.css";
 
 export type Donnees = Referentiel;
@@ -589,6 +592,7 @@ export default function EcranVarelo() {
         {donnees ? <Societes donnees={donnees} actions={actions} majLocal={majLocal} onDepot={() => setDepot(true)} /> : null}
       </div>
 
+      {donnees && contexte ? <ReglesGroupe source={source} contexte={contexte} client_id={client_id} onFait={(m) => setFait(m)} /> : null}
       {donnees && contexte ? <Branchements source={source} contexte={contexte} client_id={client_id} societes={donnees.societes} onFait={(m) => setFait(m)} /> : null}
 
       {donnees ? <Depot ouvert={depot} onFermer={() => setDepot(false)} societes={donnees.societes} deposer={deposer} onFait={(m) => setFait(m)} /> : null}
