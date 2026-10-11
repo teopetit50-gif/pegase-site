@@ -179,6 +179,11 @@ export function excelControle(d: DonneesRapport): { nom: string; octets: Uint8Ar
   return { nom: nomFichier(d, "xlsx"), octets };
 }
 
+/* une archive .zip de fichiers déjà fabriqués (le dossier daté du projet) */
+export function archive(fichiers: { nom: string; donnees: Uint8Array }[]): Uint8Array {
+  return zip(fichiers);
+}
+
 /* un classeur de N feuilles (première ligne en en-tête, filtrée, figée) : le même format que excelControle */
 export function classeur(feuilles: { nom: string; lignes: (string | number | null)[][]; largeurs: number[] }[], titre: string): Uint8Array {
   const enc = new TextEncoder();
