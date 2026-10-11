@@ -23,12 +23,15 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
   et fiche enrichis) et `test_c2_06_reponses` (15). Local : 199/199 (c2_01 → c2_06), aussi avec CASHD installé sur le banc.
   Écran : « Réponses à trancher », « Pièces du dossier » (dépôt dans omega-clients/<client>/cashd/…), bouton Assurance-crédit ;
   recette 143/143.
+- **Fait le 11/10 (fin d'après-midi), À POSER** : `c2_06_validation.sql` (trois paliers de validation par montant → règles
+  du socle) et `test_c2_07_validation` (10). Local : 209/209 (c2_01 → c2_07), aussi avec CASHD installé. Écran : « Qui valide »
+  dans Vos textes ; recette 146/146.
 - **Attend le coordinateur** : poser c2_04 puis c2_05 (dans cet ordre, après c2_03), fusionner ; décider avec C1 où vivent
   « Vos textes », les Envois et les gestes de la fiche dans /espace2.
 - **Attend Teo** : tiers inchangés (AR24, paiement, Google / Microsoft, WhatsApp) ; à la vitrine : refaire les quatre
   captures depuis l'écran, trancher « J+3 puis J+7 » et « rappel à l'échéance » (omega/CHIFFRAGE/cashd.md, mise à jour).
-- **Prochaine étape** : G10 (portefeuille par chargé), G11 (trois paliers de validation : lire d'abord comment le socle
-  choisit entre plusieurs regles_validation), G19 (raccord du logiciel de commandes). Banc local : /tmp/pgc2 (port 5499, base c2b) ; le constructeur de c2_04
+- **Prochaine étape** : G10 (portefeuille par chargé : les portes de lecture sont SECURITY DEFINER, à filtrer elles aussi),
+  G6 (détail des pièces dans d'autres langues), G19 (raccord du logiciel de commandes, avec un premier client). Banc local : /tmp/pgc2 (port 5499, base c2b) ; le constructeur de c2_04
   est dans le scratchpad (copies patchées des dernières définitions).
 
 ## Les deux jauges

@@ -239,11 +239,25 @@ for (const largeur of LARGEURS) {
   v = await lire();
   ok(/Compte tenu du montant en jeu/.test(v.apercu) && !/simple oubli/.test(v.apercu), 'au-delà de 10 000 €, la relance demande la date de règlement');
   await s.evaluer(saisir(`${T} select`, 'devis_rappel', 'HTMLSelectElement'));
-  await s.evaluer(saisir(`${T} .esp-carte-corps:last-child select`, 'btp', 'HTMLSelectElement'));
+  await s.evaluer(saisir(`${T} select:has(option[value="btp"])`, 'btp', 'HTMLSelectElement'));
   await s.dormir(300);
   v = await lire();
   ok(/date d.intervention/.test(v.apercu) && !/relance/i.test(v.apercu), 'au métier du bâtiment, le rappel de devis parle chantier et date d\'intervention, sans le mot « relance »');
   await s.capturer(`${dossier}cashd-textes-1440.jpg`, { qualite: 55 });
+  /* qui valide : trois paliers, un palier sans rôle refusé */
+  const Q = 'section[aria-label="Vos textes"] [aria-label="Qui valide"]';
+  const q = () => s.evaluer(`(() => { const t = document.querySelector('${Q}'); return { paliers: t.querySelectorAll('fieldset').length, avis: t.querySelector('.esp-avis')?.innerText || '', gris: [...t.querySelectorAll('button')].find(b => /Enregistrer les paliers/.test(b.textContent))?.disabled }; })()`);
+  let qv = await q();
+  ok(qv.paliers === 3 && qv.gris === false, 'trois paliers proposés : chargé de compte, responsable crédit, direction');
+  await s.evaluer(`[...document.querySelectorAll('${Q} fieldset')][2].querySelector('input[type="checkbox"]:checked')?.click()`);
+  await s.dormir(200);
+  qv = await q();
+  ok(/au moins un rôle/.test(qv.avis) && qv.gris === true, 'un palier sans rôle ne s\'enregistre pas');
+  await s.evaluer(`[...document.querySelectorAll('${Q} fieldset')][2].querySelectorAll('input[type="checkbox"]')[3].click()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('${Q} button')].find(b => /Enregistrer les paliers/.test(b.textContent)).click()`);
+  await s.dormir(400);
+  ok(/Paliers enregistrés/.test(await s.evaluer(`document.querySelector('section[aria-label="Vos textes"]').innerText`)), 'les paliers s\'enregistrent');
   /* les gestes de la fiche */
   await onglet(s, 'Débiteurs');
   const geste = async (numero, bouton) => {

@@ -27,7 +27,12 @@ export type Reglages = {
   metier?: "general" | "btp";
   relance_commande_jours?: number;
   suivi_facturation_jours?: number;
+  /* c2_06 : qui valide selon le montant */
+  paliers_validation?: PalierValidation[] | null;
 };
+
+export type RoleValidation = "collaborateur" | "valideur" | "admin" | "gerant";
+export type PalierValidation = { montant: number; roles: RoleValidation[] };
 
 export type Totaux = {
   encours: number;

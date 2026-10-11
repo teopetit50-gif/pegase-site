@@ -21,7 +21,19 @@ import { Avis, Chargement, Pastille } from "../ui";
 import { montant } from "../format";
 import * as portes from "./portes";
 import { apercu, GABARITS_EXEMPLE, PALIERS_GABARIT, VARIABLES, verifier } from "./gabarits";
-import type { CleGabarit, Gabarit, Reglages } from "./types";
+import type { CleGabarit, Gabarit, PalierValidation, Reglages, RoleValidation } from "./types";
+
+const ROLES: { cle: RoleValidation; libelle: string }[] = [
+  { cle: "collaborateur", libelle: "Chargé de compte" },
+  { cle: "valideur", libelle: "Responsable crédit" },
+  { cle: "admin", libelle: "Administrateur" },
+  { cle: "gerant", libelle: "Direction" },
+];
+const PALIERS_DEFAUT: PalierValidation[] = [
+  { montant: 0, roles: ["collaborateur", "valideur", "gerant"] },
+  { montant: 2000, roles: ["valideur", "gerant"] },
+  { montant: 10000, roles: ["gerant"] },
+];
 
 type Source = "exemple" | "reelle";
 type Reglage = { metier: "general" | "btp"; seuil_ton: string; moyens_reglement: string; echelonnement_des: string };
@@ -138,6 +150,31 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
         : `Le texte par défaut reprend la main${source === "exemple" ? " (exemple)" : ""}.`);
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base a refusé ce texte.");
+    } finally {
+      setEnvoi(false);
+    }
+  };
+
+  /* qui valide, selon le montant (c2_06) */
+  const [paliers, setPaliers] = useState<{ montant: string; roles: RoleValidation[] }[]>(
+    (reglages?.paliers_validation ?? PALIERS_DEFAUT).map((x) => ({ montant: String(x.montant), roles: x.roles })),
+  );
+  const paliersLus = paliers.map((x, i) => ({ montant: i === 0 ? 0 : nombre(x.montant), roles: x.roles }));
+  const paliersValides = paliersLus.every((x, i) => x.montant !== null && !Number.isNaN(x.montant) && x.roles.length > 0 && (i === 0 || (x.montant as number) > (paliersLus[i - 1].montant as number)));
+  const reglerPaliers = async (vider: boolean) => {
+    setEnvoi(true);
+    setErreur(null);
+    setFait(null);
+    try {
+      const liste = vider ? [] : paliersLus.map((x) => ({ montant: x.montant as number, roles: x.roles }));
+      if (source === "reelle") {
+        if (!client) throw new Error("Aucun compte rattaché à cette session.");
+        await portes.reglerValidation(client, liste);
+        await apresReglage?.();
+      }
+      setFait(vider ? `Plus de paliers${source === "exemple" ? " (exemple)" : ""} : les rôles par défaut valident.` : `Paliers enregistrés${source === "exemple" ? " (exemple)" : ""} : chaque relance attend la validation des rôles de son montant. La mise en demeure exige toujours un commentaire.`);
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : "La base a refusé ces paliers.");
     } finally {
       setEnvoi(false);
     }
@@ -269,6 +306,41 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
           </label>
           <div className="esp-actions">
             <button type="button" className="r-btn" disabled={!reglageValide || envoi} onClick={() => void reglerTon()}>Enregistrer ces réglages</button>
+          </div>
+        </div>
+      </div>
+
+      <div className="esp-carte-corps" aria-label="Qui valide">
+        <h3 className="esp-section-titre">Qui valide les relances, selon le montant</h3>
+        <p className="c2-sous">Le gérant règle jusqu&apos;à trois paliers. Une relance attend la validation d&apos;une personne d&apos;un des rôles de son palier.</p>
+        <div className="esp-form">
+          {paliers.map((x, i) => (
+            <fieldset key={i} className="c2-palier">
+              <legend>{i === 0 ? "Dès 0 €" : `Palier ${i + 1}`}</legend>
+              {i > 0 ? (
+                <label className="rv-libelle">À partir de (€)
+                  <input className="rv-champ" inputMode="decimal" value={x.montant} onChange={(e) => setPaliers(paliers.map((y, k) => (k === i ? { ...y, montant: e.target.value } : y)))} />
+                </label>
+              ) : null}
+              <span className="c2-roles">
+                {ROLES.map((r) => (
+                  <label key={r.cle} className="c2-coche">
+                    <input type="checkbox" checked={x.roles.includes(r.cle)}
+                      onChange={(e) => setPaliers(paliers.map((y, k) => (k === i ? { ...y, roles: e.target.checked ? [...y.roles, r.cle] : y.roles.filter((z) => z !== r.cle) } : y)))} />
+                    <span>{r.libelle}</span>
+                  </label>
+                ))}
+              </span>
+            </fieldset>
+          ))}
+          <div className="esp-actions">
+            {paliers.length < 3 ? <button type="button" className="esp-lien-bouton" onClick={() => setPaliers([...paliers, { montant: "", roles: ["gerant"] }])}>Ajouter un palier</button> : null}
+            {paliers.length > 1 ? <button type="button" className="esp-lien-bouton" onClick={() => setPaliers(paliers.slice(0, -1))}>Retirer le dernier palier</button> : null}
+          </div>
+          {!paliersValides ? <Avis teinte="ambre">Chaque palier a au moins un rôle, et ses montants croissent.</Avis> : null}
+          <div className="esp-actions">
+            <button type="button" className="r-btn" disabled={!paliersValides || envoi} onClick={() => void reglerPaliers(false)}>Enregistrer les paliers</button>
+            {reglages?.paliers_validation ? <button type="button" className="r-btn" disabled={envoi} onClick={() => void reglerPaliers(true)}>Revenir aux rôles par défaut</button> : null}
           </div>
         </div>
       </div>
