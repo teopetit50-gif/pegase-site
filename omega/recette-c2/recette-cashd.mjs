@@ -284,6 +284,34 @@ for (const largeur of LARGEURS) {
   s.fermer();
 }
 
+for (const largeur of [1440, 390]) {
+  const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'c2-reponses', densite: 1 });
+  console.log(`— /espace/cashd : une réponse à trancher, une pièce jointe (exemple, ${largeur})`);
+  ok(await s.aller(base + CHEMIN), 'page chargée');
+  await s.dormir(500);
+  await s.evaluer(`[...document.querySelectorAll('section[aria-label="Débiteurs"] .esp-item')].find(b => /Hôtel des Brotteaux/.test(b.textContent)).click()`);
+  await s.dormir(400);
+  const rep = await s.evaluer(`document.querySelector('#c2-fiche [aria-label="Réponses à trancher"]')?.innerText || ''`);
+  ok(/Règlement annoncé/.test(rep) && /le virement a ete effectue/.test(rep) && /en pause le temps du règlement/.test(rep), 'la réponse lue est proposée, avec le passage reconnu');
+  const m = await s.evaluer(DEBORDE);
+  ok(m.deb === 0 && m.larges.length === 0, `fiche avec réponse : pas de débordement (${m.deb}) ${m.larges.length ? JSON.stringify(m.larges) : ''}`);
+  await s.evaluer(`[...document.querySelectorAll('#c2-fiche [aria-label="Réponses à trancher"] button')].find(b => /Accepter/.test(b.textContent)).click()`);
+  await s.dormir(600);
+  const apres = await s.evaluer(`({ pastille: document.querySelector('#c2-fiche .esp-carte-tete .esp-pastille')?.textContent, reste: !!document.querySelector('#c2-fiche [aria-label="Réponses à trancher"]') })`);
+  ok(apres.pastille === 'En pause' && !apres.reste, 'acceptée, la proposition met le compte en pause et quitte la liste');
+  await s.evaluer(`[...document.querySelectorAll('#c2-fiche [aria-label="Pièces du dossier"] button')].find(b => /Joindre une pièce/.test(b.textContent)).click()`);
+  await s.dormir(400);
+  await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input[type="file"]'); const dt = new DataTransfer(); dt.items.add(new File(['%PDF-1.4'], 'F-2026-050.pdf', { type: 'application/pdf' })); i.files = dt.files; i.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Valider\\s*$/.test(b.textContent))?.click()`);
+  await s.dormir(600);
+  const pj = await s.evaluer(`document.querySelector('#c2-fiche [aria-label="Pièces du dossier"]')?.innerText || ''`);
+  ok(/F-2026-050/.test(pj) && /PDF de la facture/.test(pj) && /F-2026-050\.pdf/.test(pj), 'la pièce est jointe à la facture et se lit dans le dossier');
+  if (largeur === 390) await s.capturer(`${dossier}cashd-reponse-390.jpg`, { qualite: 55 });
+  s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
+  s.fermer();
+}
+
 {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'c2-vue', densite: 1 });
   console.log('— /espace/cashd : une vue ouverte par l\'adresse (?vue=)');

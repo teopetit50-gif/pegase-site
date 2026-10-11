@@ -19,12 +19,16 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
   `/espace/cashd?ancien=1`. ⚠ Depuis le 07/10, Teo a réduit `/espace2/cashd` à son tableau de bord (TableauCashd, C1) :
   C1 loge l'écran tel quel à `/espace2/cashd/suivi` (branche tableau-de-bord-v2, ec24902) ; chaque vue s'ouvre par
   `?vue=debiteurs|relances|envois|tresorerie` ou la prop `vue` d'EcranCashd (recette 133/133).
+- **Fait le 11/10 après-midi, À POSER** : `c2_05_reponses.sql` (réponses lues → propositions tranchées ; pièces jointes ; dossier
+  et fiche enrichis) et `test_c2_06_reponses` (15). Local : 199/199 (c2_01 → c2_06), aussi avec CASHD installé sur le banc.
+  Écran : « Réponses à trancher », « Pièces du dossier » (dépôt dans omega-clients/<client>/cashd/…), bouton Assurance-crédit ;
+  recette 143/143.
 - **Attend le coordinateur** : poser c2_04 puis c2_05 (dans cet ordre, après c2_03), fusionner ; décider avec C1 où vivent
   « Vos textes », les Envois et les gestes de la fiche dans /espace2.
 - **Attend Teo** : tiers inchangés (AR24, paiement, Google / Microsoft, WhatsApp) ; à la vitrine : refaire les quatre
   captures depuis l'écran, trancher « J+3 puis J+7 » et « rappel à l'échéance » (omega/CHIFFRAGE/cashd.md, mise à jour).
-- **Prochaine étape** : G5 (lecture des réponses reçues, 2,5 j), G10 (portefeuille par chargé), G11 (trois paliers de
-  validation), G20 (pièces de l'assurance-crédit). Banc local : /tmp/pgc2 (port 5499, base c2b) ; le constructeur de c2_04
+- **Prochaine étape** : G10 (portefeuille par chargé), G11 (trois paliers de validation : lire d'abord comment le socle
+  choisit entre plusieurs regles_validation), G19 (raccord du logiciel de commandes). Banc local : /tmp/pgc2 (port 5499, base c2b) ; le constructeur de c2_04
   est dans le scratchpad (copies patchées des dernières définitions).
 
 ## Les deux jauges
@@ -178,7 +182,7 @@ t3 = test_c2_03_moteur, t4 = test_c2_04_capacites ; R = recette de l'écran (ome
 ### Litiges et exceptions
 | # | Ligne | État | Preuve |
 |---|---|---|---|
-| 18 | Une contestation écrite bascule la facture en litige et la sort du cycle. | **moitié** | la sortie du cycle : `cashd_litige` (t3) ; la réponse reçue est signalée (`cashd_suivre_reception`) mais la bascule reste une décision humaine (lecture de la contestation non automatisée) |
+| 18 | Une contestation écrite bascule la facture en litige et la sort du cycle. | tenue (c2_05) — la réponse est lue et proposée, une personne tranche ; avant : **moitié** | la sortie du cycle : `cashd_litige` (t3) ; la réponse reçue est signalée (`cashd_suivre_reception`) mais la bascule reste une décision humaine (lecture de la contestation non automatisée) |
 | 19 | Le commercial en charge du compte est notifié dès l'ouverture du litige. | tenue | alerte nominative au commercial (t4) |
 | 20 | Une facture contestée sur une seule ligne laisse le reste en relance. | tenue | `cashd_litige_partiel` (t4 : 1 000 € contestés, le reste relancé et dit) ; R |
 | 21 | La reprise des relances demande une décision, jamais un simple délai écoulé. | tenue | motif obligatoire (t3) |
@@ -210,7 +214,7 @@ t3 = test_c2_03_moteur, t4 = test_c2_04_capacites ; R = recette de l'écran (ome
 | 39 | Vos règles de communication et vos interdits sont repris dans chaque message. | tenue | formule, signature, interdits (t3) |
 | 40 | Un compte qui se dégrade est signalé avant que le retard s'installe. | tenue | vue `cashd_delais_reglement.se_degrade` ; alerte au commercial et point du matin (c2_03) ; assertion `test_c2_04` (30 j de retard contre 5 d'habitude) |
 | 41 | Un compte se met en pause, et il n'y revient que sur votre décision. | tenue | t3 |
-| 42 | Le dossier destiné à l'assurance-crédit est constitué avec les pièces exigées. | tenue (avec les pièces que CASHD détient) | `cashd_dossier(…, 'assurance_credit')` (t4) ; les PDF des factures restent dans le facturier |
+| 42 | Le dossier destiné à l'assurance-crédit est constitué avec les pièces exigées. | tenue (c2_05 : pièces jointes, PDF manquants nommés) | `cashd_dossier(…, 'assurance_credit')` (t4) ; les PDF des factures restent dans le facturier |
 | 43 | Le dossier de recouvrement judiciaire est remis complet à qui vous désignez. | tenue | `cashd_remettre_dossier` : compte en recouvrement, relances coupées, envoi du récapitulatif par la file (t4) |
 
 ### Pilotage

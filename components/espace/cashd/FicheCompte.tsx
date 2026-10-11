@@ -12,17 +12,20 @@
    c2_04 : une facture attend un bon de commande (la relance va au service
    qui l'émet), un petit solde se décide (abandonné ou réclamé), un devis
    accepté de vive voix se consigne.
+   c2_05 : les réponses reçues, lues et classées (contestation, contact
+   parti, promesse), se tranchent ici — rien ne bascule seul ; les pièces
+   (PDF de la facture, bon de livraison…) se joignent pour le dossier.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useState } from "react";
-import { Banknote, CalendarRange, ClipboardList, FileDown, Gauge, Handshake, PauseCircle, PlayCircle, Scale, Scissors } from "lucide-react";
+import { Banknote, CalendarRange, ClipboardList, FileDown, Gauge, Handshake, Paperclip, PauseCircle, PlayCircle, Scale, Scissors } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { Avis, Def, Pastille, Vide } from "../ui";
 import { dateCourte, montant } from "../format";
 import { libellePalier, libelleSequence, STATUTS_COMPTE } from "./etats";
 import { etatPiece, jourParis } from "./calcul";
-import type { Fiche, Piece, StatutCompte } from "./types";
+import type { Fiche, NaturePiece, Piece, ReponseLue, StatutCompte } from "./types";
 
 type Geste =
   | { type: "reglement"; facture: Piece | null }
@@ -34,7 +37,8 @@ type Geste =
   | { type: "commande"; facture: Piece }
   | { type: "bon_recu"; facture: Piece }
   | { type: "solde"; facture: Piece }
-  | { type: "accord"; devis: Piece };
+  | { type: "accord"; devis: Piece }
+  | { type: "piece" };
 
 export type Actions = {
   noterReglement: (o: { montant: number; date: string; reference: string | null; mode: string | null; facture: string | null }) => Promise<string>;
@@ -42,13 +46,30 @@ export type Actions = {
   litige: (facture: string, ouvrir: boolean, motif: string) => Promise<string>;
   echeancier: (facture: string, echeances: { echeance: string; montant: number }[], motif: string) => Promise<string>;
   contester: (facture: string, montant: number, motif: string) => Promise<string>;
-  dossier: () => Promise<void>;
+  dossier: (motif?: "litige" | "assurance_credit") => Promise<void>;
   proposerPlafond: () => Promise<{ propose: number | null; base: string }>;
   fixerPlafond: (plafond: number | null, motif: string) => Promise<string>;
   attendreCommande: (facture: string, email: string | null, nom: string | null, motif: string | null) => Promise<string>;
   deciderSolde: (facture: string, decision: "abandonne" | "reclame" | null, motif: string) => Promise<string>;
   consignerAccord: (devis: string, note: string, le: string) => Promise<string>;
+  trancherReponse: (reponse: ReponseLue, accepter: boolean) => Promise<string>;
+  joindrePiece: (facture: string, nature: NaturePiece, fichier: File) => Promise<string>;
 };
+
+const LECTURES: Record<ReponseLue["lecture"], string> = { contestation: "Contestation", absence: "Contact parti", promesse: "Règlement annoncé", autre: "Réponse" };
+const PROPOSITIONS: Record<ReponseLue["proposition"], string> = {
+  litige: "mettre les factures de la relance en litige",
+  attente_contact: "mettre le compte en attente d'un nouveau contact",
+  pause: "mettre le compte en pause le temps du règlement",
+  aucune: "rien : lisez-la",
+};
+const NATURES: { cle: NaturePiece; libelle: string }[] = [
+  { cle: "facture_pdf", libelle: "PDF de la facture" },
+  { cle: "bon_livraison", libelle: "Bon de livraison" },
+  { cle: "bon_commande", libelle: "Bon de commande" },
+  { cle: "contrat", libelle: "Contrat" },
+  { cle: "autre", libelle: "Autre pièce" },
+];
 
 const ADRESSE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
@@ -96,6 +117,22 @@ export default function FicheCompte({ fiche, actions }: { fiche: Fiche; actions:
   const [service, setService] = useState({ email: "", nom: "" });
   const [decision, setDecision] = useState<"abandonne" | "reclame" | "">("abandonne");
   const [accordLe, setAccordLe] = useState(jourParis());
+  const [jointe, setJointe] = useState<{ facture: string; nature: NaturePiece; fichier: File | null }>({ facture: "", nature: "facture_pdf", fichier: null });
+  const [tranche, setTranche] = useState<string | null>(null);
+  const facturesJoignables = fiche.pieces.filter((p) => p.nature === "facture" || p.nature === "acompte");
+  const numero = (id: string) => fiche.pieces.find((p) => p.id === id)?.numero ?? "—";
+  const trancher = async (x: ReponseLue, accepter: boolean) => {
+    setTranche(x.id);
+    setErreur(null);
+    try {
+      setFait(await actions.trancherReponse(x, accepter));
+    } catch (e) {
+      setFait(null);
+      setErreur(e instanceof Error ? e.message : "La base a refusé.");
+    } finally {
+      setTranche(null);
+    }
+  };
 
   const ouvrir = (g: Geste) => {
     setErreur(null);
@@ -106,6 +143,7 @@ export default function FicheCompte({ fiche, actions }: { fiche: Fiche; actions:
     if (g.type === "commande") setService({ email: g.facture.attente_commande_email ?? "", nom: g.facture.attente_commande_nom ?? "" });
     if (g.type === "solde") setDecision(g.facture.solde_decision === "abandonne" ? "reclame" : "abandonne");
     if (g.type === "accord") setAccordLe(jourParis());
+    if (g.type === "piece") setJointe({ facture: facturesJoignables[0]?.id ?? "", nature: "facture_pdf", fichier: null });
     setGeste(g);
   };
   const ouvrirPlafond = async () => {
@@ -118,10 +156,10 @@ export default function FicheCompte({ fiche, actions }: { fiche: Fiche; actions:
       setErreur(e instanceof Error ? e.message : "La proposition n'a pas pu être lue.");
     }
   };
-  const telecharger = async () => {
+  const telecharger = async (motif: "litige" | "assurance_credit" = "litige") => {
     setTelecharge(true);
     try {
-      await actions.dossier();
+      await actions.dossier(motif);
     } finally {
       setTelecharge(false);
     }
@@ -142,6 +180,8 @@ export default function FicheCompte({ fiche, actions }: { fiche: Fiche; actions:
               ? ADRESSE.test(service.email.trim()) && motif.trim().length > 2
               : geste?.type === "bon_recu"
                 ? true
+                : geste?.type === "piece"
+                  ? !!jointe.facture && !!jointe.fichier
                 : geste?.type === "accord"
                   ? motif.trim().length > 2 && accordLe >= geste.devis.date_emission && accordLe <= jourParis()
                   : motif.trim().length > 2;
@@ -168,6 +208,9 @@ export default function FicheCompte({ fiche, actions }: { fiche: Fiche; actions:
         msg = await actions.attendreCommande(geste.facture.id, null, null, null);
       } else if (geste.type === "solde") {
         msg = await actions.deciderSolde(geste.facture.id, decision || null, motif.trim());
+      } else if (geste.type === "piece") {
+        if (!jointe.fichier) return;
+        msg = await actions.joindrePiece(jointe.facture, jointe.nature, jointe.fichier);
       } else if (geste.type === "accord") {
         msg = await actions.consignerAccord(geste.devis.id, motif.trim(), accordLe);
       } else {
@@ -214,6 +257,9 @@ export default function FicheCompte({ fiche, actions }: { fiche: Fiche; actions:
           <button type="button" className="r-btn" disabled={telecharge} onClick={() => void telecharger()}>
             {telecharge ? <Loader variant="spin" /> : <FileDown width={15} height={15} aria-hidden="true" />} Dossier
           </button>
+          <button type="button" className="r-btn" disabled={telecharge} onClick={() => void telecharger("assurance_credit")}>
+            <FileDown width={15} height={15} aria-hidden="true" /> Assurance-crédit
+          </button>
           {c.statut === "actif" ? (
             <button type="button" className="r-btn" onClick={() => ouvrir({ type: "statut", vers: "pause" })}>
               <PauseCircle width={15} height={15} aria-hidden="true" /> Mettre en pause
@@ -225,7 +271,31 @@ export default function FicheCompte({ fiche, actions }: { fiche: Fiche; actions:
           )}
         </div>
         {fait ? <div style={{ marginTop: 12 }}><Avis teinte="vert" role="status"><strong>C&apos;est fait.</strong> {fait}</Avis></div> : null}
+        {erreur && !geste ? <div style={{ marginTop: 12 }}><Avis teinte="rouge" role="alert">{erreur}</Avis></div> : null}
       </div>
+
+      {(fiche.reponses_lues ?? []).length ? (
+        <div className="esp-carte-corps" aria-label="Réponses à trancher">
+          <h3 className="esp-section-titre">Réponses à trancher</h3>
+          <ul className="c2-reponses">
+            {(fiche.reponses_lues ?? []).map((x) => (
+              <li key={x.id}>
+                <span className="esp-item-haut">
+                  <Pastille teinte={x.lecture === "contestation" ? "rouge" : x.lecture === "promesse" ? "vert" : "ambre"}>{LECTURES[x.lecture]}</Pastille>
+                  <span className="c2-sous">reçue le {dateCourte(x.cree_le)}{x.indice ? ` · « ${x.indice} »` : ""}</span>
+                </span>
+                <span>Proposé : {PROPOSITIONS[x.proposition]}.</span>
+                <span className="c2-gestes">
+                  {x.proposition !== "aucune" ? (
+                    <button type="button" className="r-btn r-btn--noir" disabled={tranche === x.id} onClick={() => void trancher(x, true)}>{tranche === x.id ? <Loader variant="spin" /> : null} Accepter</button>
+                  ) : null}
+                  <button type="button" className="r-btn" disabled={tranche === x.id} onClick={() => void trancher(x, false)}>{x.proposition === "aucune" ? "Lue" : "Écarter"}</button>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       <div className="esp-carte-corps">
         <h3 className="esp-section-titre">Pièces et relances</h3>
@@ -312,6 +382,25 @@ export default function FicheCompte({ fiche, actions }: { fiche: Fiche; actions:
         )}
       </div>
 
+      <div className="esp-carte-corps" aria-label="Pièces du dossier">
+        <div className="c2-tete-droite c2-tete-gauche">
+          <h3 className="esp-section-titre">Pièces du dossier</h3>
+          {facturesJoignables.length ? (
+            <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "piece" })}><Paperclip width={14} height={14} aria-hidden="true" /> Joindre une pièce</button>
+          ) : null}
+        </div>
+        {(fiche.pieces_jointes ?? []).length ? (
+          <ul className="c2-reglements">
+            {(fiche.pieces_jointes ?? []).map((x) => (
+              <li key={x.id}>
+                <span>{numero(x.facture_id)} · {NATURES.find((n) => n.cle === x.nature)?.libelle}</span>
+                <span className="c2-sous">{x.nom}</span>
+              </li>
+            ))}
+          </ul>
+        ) : <p className="c2-sous">Aucune pièce jointe : le dossier d&apos;assurance-crédit nommera les factures à qui manque leur PDF.</p>}
+      </div>
+
       {fiche.reglements.length ? (
         <div className="esp-carte-corps">
           <h3 className="esp-section-titre">Règlements</h3>
@@ -331,13 +420,15 @@ export default function FicheCompte({ fiche, actions }: { fiche: Fiche; actions:
         <DialogContent>
           <DialogHeader>
             <DialogIcone>
-              {geste?.type === "commande" || geste?.type === "bon_recu" ? <ClipboardList width={18} height={18} aria-hidden="true" /> : geste?.type === "solde" ? <Scissors width={18} height={18} aria-hidden="true" /> : geste?.type === "accord" ? <Handshake width={18} height={18} aria-hidden="true" /> : geste?.type === "reglement" ? <Banknote width={18} height={18} aria-hidden="true" /> : geste?.type === "litige" || geste?.type === "conteste" ? <Scale width={18} height={18} aria-hidden="true" /> : geste?.type === "echeancier" ? <CalendarRange width={18} height={18} aria-hidden="true" /> : geste?.type === "plafond" ? <Gauge width={18} height={18} aria-hidden="true" /> : <PauseCircle width={18} height={18} aria-hidden="true" />}
+              {geste?.type === "piece" ? <Paperclip width={18} height={18} aria-hidden="true" /> : geste?.type === "commande" || geste?.type === "bon_recu" ? <ClipboardList width={18} height={18} aria-hidden="true" /> : geste?.type === "solde" ? <Scissors width={18} height={18} aria-hidden="true" /> : geste?.type === "accord" ? <Handshake width={18} height={18} aria-hidden="true" /> : geste?.type === "reglement" ? <Banknote width={18} height={18} aria-hidden="true" /> : geste?.type === "litige" || geste?.type === "conteste" ? <Scale width={18} height={18} aria-hidden="true" /> : geste?.type === "echeancier" ? <CalendarRange width={18} height={18} aria-hidden="true" /> : geste?.type === "plafond" ? <Gauge width={18} height={18} aria-hidden="true" /> : <PauseCircle width={18} height={18} aria-hidden="true" />}
             </DialogIcone>
             <DialogTitle>
-              {geste?.type === "commande" ? `${geste.facture.numero} attend un bon de commande` : geste?.type === "bon_recu" ? `Le bon de commande de ${geste.facture.numero} est arrivé` : geste?.type === "solde" ? `Le solde de ${geste.facture.numero}` : geste?.type === "accord" ? `Accord de vive voix sur ${geste.devis.numero}` : geste?.type === "reglement" ? "Noter un règlement" : geste?.type === "statut" ? (geste.vers === "actif" ? "Reprendre les relances" : "Mettre le compte en pause") : geste?.type === "echeancier" ? `Échéancier de ${geste.facture.numero}` : geste?.type === "conteste" ? `Contestation partielle de ${geste.facture.numero}` : geste?.type === "plafond" ? "Plafond d'encours" : geste?.type === "litige" && geste.ouvrir ? `Mettre ${geste.facture.numero} en litige` : "Clore le litige"}
+              {geste?.type === "piece" ? "Joindre une pièce" : geste?.type === "commande" ? `${geste.facture.numero} attend un bon de commande` : geste?.type === "bon_recu" ? `Le bon de commande de ${geste.facture.numero} est arrivé` : geste?.type === "solde" ? `Le solde de ${geste.facture.numero}` : geste?.type === "accord" ? `Accord de vive voix sur ${geste.devis.numero}` : geste?.type === "reglement" ? "Noter un règlement" : geste?.type === "statut" ? (geste.vers === "actif" ? "Reprendre les relances" : "Mettre le compte en pause") : geste?.type === "echeancier" ? `Échéancier de ${geste.facture.numero}` : geste?.type === "conteste" ? `Contestation partielle de ${geste.facture.numero}` : geste?.type === "plafond" ? "Plafond d'encours" : geste?.type === "litige" && geste.ouvrir ? `Mettre ${geste.facture.numero} en litige` : "Clore le litige"}
             </DialogTitle>
             <DialogDescription>
-              {geste?.type === "commande"
+              {geste?.type === "piece"
+                ? "Le fichier est déposé dans l'espace de stockage de votre organisation et rattaché à la facture ; il rejoint le dossier de litige, d'assurance-crédit ou de recouvrement."
+                : geste?.type === "commande"
                 ? "La facture sort de la relance adressée à la comptabilité ; le service qui doit émettre le bon reçoit sa propre relance, par la file de validation, tous les sept jours. Le retard continue de courir."
                 : geste?.type === "bon_recu"
                   ? "La relance du service tombe, et la facture reprend son cycle au palier où elle en était."
@@ -419,6 +510,24 @@ export default function FicheCompte({ fiche, actions }: { fiche: Fiche; actions:
                   </div>
                   <label className="rv-libelle">Motif du blocage <span className="esp-obligatoire">(obligatoire)</span>
                     <textarea className="rv-champ" rows={2} value={motif} onChange={(e) => setMotif(e.target.value)} placeholder="Bon de commande attendu du service des achats avant mise en paiement" />
+                  </label>
+                </>
+              ) : geste?.type === "piece" ? (
+                <>
+                  <div className="esp-form-ligne">
+                    <label className="rv-libelle">Facture
+                      <select className="rv-champ" value={jointe.facture} onChange={(e) => setJointe({ ...jointe, facture: e.target.value })}>
+                        {facturesJoignables.map((p) => <option key={p.id} value={p.id}>{p.numero}</option>)}
+                      </select>
+                    </label>
+                    <label className="rv-libelle">Nature
+                      <select className="rv-champ" value={jointe.nature} onChange={(e) => setJointe({ ...jointe, nature: e.target.value as NaturePiece })}>
+                        {NATURES.map((n) => <option key={n.cle} value={n.cle}>{n.libelle}</option>)}
+                      </select>
+                    </label>
+                  </div>
+                  <label className="rv-libelle">Fichier (PDF ou image)
+                    <input className="rv-champ" type="file" accept=".pdf,image/*" onChange={(e) => setJointe({ ...jointe, fichier: e.target.files?.[0] ?? null })} />
                   </label>
                 </>
               ) : geste?.type === "bon_recu" ? null : geste?.type === "solde" ? (

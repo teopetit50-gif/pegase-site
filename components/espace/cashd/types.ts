@@ -174,7 +174,23 @@ export type Fiche = {
   pieces: Piece[];
   reglements: ReglementEtat[];
   suivi: Suivi[];
+  /* c2_05 : les réponses reçues à trancher, les pièces jointes */
+  reponses_lues?: ReponseLue[];
+  pieces_jointes?: PieceJointe[];
 };
+
+export type ReponseLue = {
+  id: string;
+  relance_id: string;
+  lecture: "contestation" | "absence" | "promesse" | "autre";
+  indice: string | null;
+  proposition: "litige" | "attente_contact" | "pause" | "aucune";
+  statut: "proposee" | "acceptee" | "ecartee";
+  cree_le: string;
+};
+
+export type NaturePiece = "facture_pdf" | "bon_livraison" | "bon_commande" | "contrat" | "autre";
+export type PieceJointe = { id: string; facture_id: string; nature: NaturePiece; chemin: string; nom: string; cree_le: string };
 
 export type EtatRelance = "a_valider" | "validee" | "refusee" | "envoyee" | "coupee" | "non_reglee" | "sans_adresse" | "bloquee" | "echec" | "preparee";
 

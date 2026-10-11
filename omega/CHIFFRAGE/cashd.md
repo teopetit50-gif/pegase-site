@@ -15,10 +15,12 @@ Construit et testé (recette locale ; à poser sur le banc) — les lacunes côt
 | G8 accord oral | devis accepté de vive voix : cadence arrêtée, relance écrite coupée ; le point du matin signale l'accord sans facture | `test_c2_05_textes` ; fiche |
 | G7 bon de commande | la facture sort de la relance à la comptabilité ; relance au service émetteur tous les 7 jours, par la file ; le retard court et se lit | `test_c2_05_textes` ; fiche + vue Relances |
 | G14 quatre vues | l'écran tient en quatre vues — Débiteurs, Relances, Envois (journal : date, destinataire, objet, canal, état), Trésorerie — aux cinq largeurs | recette écran |
+| G5 lecture des réponses | chaque réponse reçue est lue (règles fr / en, sans modèle, rien ne sort de la base) : contestation, contact parti, règlement annoncé ; elle devient une proposition (litige, attente de contact, pause) qu'une personne accepte ou écarte, au journal | `test_c2_06_reponses` ; fiche « Réponses à trancher » |
+| G20 pièces du dossier | PDF de la facture, bon de livraison, bon de commande, contrat déposés dans le stockage de l'organisation et rattachés ; le dossier d'assurance-crédit les liste et nomme les factures sans PDF | `test_c2_06_reponses` ; fiche « Pièces du dossier » |
 | G6 (en partie) | une organisation peut écrire ses textes dans toute langue (de, es…) ; le détail des pièces reste en anglais | `test_c2_05_textes` (compte allemand) |
 
-Effet sur la synthèse : **jours → B restants ≈ 28 j, dont ≈ 8,5 j dans CASHD** (G5 lecture des réponses 2,5 ; G6 fin 1 ; G10 portefeuille par chargé 1,5 ; G11 trois paliers de validation 1 ; G19 raccord commandes 1,5 ; G20 pièces assurance-crédit 1) et ≈ 19,5 j ailleurs (inchangé).
-Passent de C/D à B : P10, P12, P33, M4, M5, M6, M7, L7, L11, L12 (le seul D). **Restent à la vitrine** (aucun fichier public touché) : les quatre captures de la page viennent toujours de la maquette — l'écran a maintenant ses quatre vues, les captures sont à refaire depuis lui (P26) ; « rappel à l'échéance » (M8) et « J+3 puis J+7 » (P21) restent des écarts de texte.
+Effet sur la synthèse : **jours → B restants ≈ 24,5 j, dont ≈ 5 j dans CASHD** (G6 fin 1 ; G10 portefeuille par chargé 1,5 ; G11 trois paliers de validation 1 ; G19 raccord commandes 1,5) et ≈ 19,5 j ailleurs (inchangé).
+Passent de C/D à B : P10, P12, P33, M4, M5, M6, M7, L7, L11, L12 (le seul D), C18, C42, L4. **Restent à la vitrine** (aucun fichier public touché) : les quatre captures de la page viennent toujours de la maquette — l'écran a maintenant ses quatre vues, les captures sont à refaire depuis lui (P26) ; « rappel à l'échéance » (M8) et « J+3 puis J+7 » (P21) restent des écarts de texte.
 
 ## Synthèse
 
