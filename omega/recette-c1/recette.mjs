@@ -99,7 +99,7 @@ for (const largeur of LARGEURS) {
         ok(/^Actions sur/.test((await focus(s)) ?? ''), `Échap ferme et rend le focus au déclencheur (${await focus(s)})`);
 
         /* la fenêtre « Noter un paiement » */
-        await s.evaluer(`[...document.querySelectorAll('.v2-tableau button')].find(b => /Payer/.test(b.textContent)).click()`);
+        await s.evaluer(`[...document.querySelectorAll('.v2-tableau button')].find(b => /Noter un paiement/.test(b.textContent)).click()`);
         await s.dormir(500);
         ok(await s.evaluer(`!!document.querySelector('.v2-modale [slot=title], .v2-modale h2')`), 'la fenêtre « Noter un paiement » s\'ouvre');
         await s.capturer(`${sortie}/paiement-${largeur}-${theme}.jpg`, { qualite: 72 });
