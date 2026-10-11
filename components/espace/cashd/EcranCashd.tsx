@@ -677,7 +677,7 @@ export default function EcranCashd({ vue }: { vue?: Onglet } = {}) {
                 <button type="button" className="esp-lien-bouton" onClick={() => exporterRelances(relances, jourParis())}>
                   <Download width={14} height={14} aria-hidden="true" /> Tableur
                 </button>
-                <Link className="esp-lien-bouton" href="/espace/validations">Ouvrir la file de validation</Link>
+                <Link className="esp-lien-bouton" href="/espace2/validations">Ouvrir la file de validation</Link>
               </span>
             </div>
             {recentes.length === 0 ? (

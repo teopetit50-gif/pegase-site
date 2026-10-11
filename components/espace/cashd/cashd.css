@@ -98,6 +98,10 @@
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+/* 11/10 : la cellule porte le libellé masqué, sinon il sort du cadre défilant du tableau (+5 px de page à 390 dans /espace2) */
+.esp .c2-pieces th {
+  position: relative;
+}
 .esp .c2-reglements {
   list-style: none;
   margin: 0;

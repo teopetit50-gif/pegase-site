@@ -48,6 +48,11 @@ begin
   return next ok(exists (select 1 from public.cashd_historique_reglages h where h.client_id = v_client and h.donnees ? 'paliers_validation'),
                  'Le changement reste daté');
 
+  -- ── Les liens du point du matin vont au nouvel espace (c2_07) ──
+  return next ok(jsonb_array_length(private.cashd_point_lignes(v_client, j + 1)) > 0
+                 and not exists (select 1 from jsonb_array_elements(private.cashd_point_lignes(v_client, j + 1)) x where x ->> 'lien' is distinct from '/espace2/cashd/suivi'),
+                 'Chaque ligne du point du matin mène à /espace2/cashd/suivi, jamais à l''ancien dessin');
+
   -- ── Retour aux rôles par défaut ──
   perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
   perform public.cashd_regler_validation(v_client, '[]');

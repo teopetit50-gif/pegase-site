@@ -23,7 +23,7 @@ mkdirSync(dossier, { recursive: true });
 let echecs = 0;
 const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) echecs++; };
 const ANGLAIS = /\b(Loading|Submit|Cancel|Approve|Reject|Delete|Save|Error|Pending|Due|Invoice|Overdue|Payment|Settings|Logout|Sign in|Dashboard|Today|Yesterday|Tomorrow|Reminder|Customer)\b/;
-const CHEMIN = process.argv[3] ?? '/espace/cashd?ancien=1';
+const CHEMIN = process.argv[3] ?? '/espace2/cashd/suivi';
 const LARGEURS = [390, 768, 1024, 1440, 1700];
 const plat = (t) => (t || '').replace(/[  ]/g, ' ');
 const onglet = async (s, nom) => {
@@ -333,6 +333,8 @@ for (const largeur of [1440, 390]) {
   await s.dormir(500);
   const v = await s.evaluer(`document.querySelector('.c2-onglets [aria-selected="true"]')?.textContent.trim() + '/' + !!document.querySelector('section[aria-label="Balance âgée"]')`);
   ok(v === 'Trésorerie/true', `?vue=tresorerie ouvre la Trésorerie (${v})`);
+  const anciens = await s.evaluer(`[...document.querySelectorAll('a[href]')].map(a => a.getAttribute('href')).filter(h => /^\\/espace(\\/|$|\\?)/.test(h) || /ancien=/.test(h))`);
+  ok(Array.isArray(anciens) && anciens.length === 0, `aucun lien vers l'ancien dessin ${anciens?.length ? JSON.stringify(anciens.slice(0, 5)) : ''}`);
   await onglet(s, 'Envois');
   ok(/vue=envois/.test(await s.evaluer('location.search')), 'la vue choisie reste dans l\'adresse');
   s.fermer();

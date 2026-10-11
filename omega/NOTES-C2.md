@@ -26,6 +26,10 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
 - **Fait le 11/10 (fin d'après-midi), À POSER** : `c2_06_validation.sql` (trois paliers de validation par montant → règles
   du socle) et `test_c2_07_validation` (10). Local : 209/209 (c2_01 → c2_07), aussi avec CASHD installé. Écran : « Qui valide »
   dans Vos textes ; recette 146/146.
+- **À POSER aussi** : `c2_07_liens.sql` (le point du matin mène à /espace2/cashd/suivi, plus jamais à l'ancien dessin ;
+  seule private.cashd_point_lignes est redéfinie), assertion ajoutée à `test_c2_07_validation` (11). Écran : lien de la file
+  vers /espace2/validations ; la recette tourne désormais sur /espace2/cashd/suivi (147/147, aucun lien vers /espace ni
+  ?ancien=) ; débordement de 5 px à 390 corrigé (libellé masqué du tableau des pièces).
 - **Attend le coordinateur** : poser c2_04 puis c2_05 (dans cet ordre, après c2_03), fusionner ; décider avec C1 où vivent
   « Vos textes », les Envois et les gestes de la fiche dans /espace2.
 - **Attend Teo** : tiers inchangés (AR24, paiement, Google / Microsoft, WhatsApp) ; à la vitrine : refaire les quatre
