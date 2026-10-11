@@ -149,6 +149,16 @@ for (const largeur of [390, 1440]) {
   await s.dormir(500);
   dire(`varelo ${largeur}, dialogue des règles du groupe`, await analyser(s, `document.querySelector('[role="dialog"]')`));
 
+  /* b1_17 : déposer des ventes de caisse */
+  await s.aller(base + '/espace/varelo');
+  await s.dormir(800);
+  await s.evaluer(axe + ';true');
+  const caisses = await s.evaluer(cadres(`document.querySelector('section[aria-label="Ventes des caisses"]')`));
+  ok(cadresBons(caisses), `varelo ${largeur}, cadre des caisses : ${JSON.stringify(caisses)}`);
+  await s.evaluer(`(e => { e?.focus(); e?.click(); })([...document.querySelectorAll('section[aria-label="Ventes des caisses"] button')].find(b => /Déposer des ventes/.test(b.textContent)))`);
+  await s.dormir(500);
+  dire(`varelo ${largeur}, dialogue de dépôt des ventes`, await analyser(s, `document.querySelector('[role="dialog"]')`));
+
   /* b1_10 : brancher le logiciel d'une société */
   await s.aller(base + '/espace/varelo');
   await s.dormir(800);

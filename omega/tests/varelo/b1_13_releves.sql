@@ -16,9 +16,9 @@ declare
   v_br uuid;
   l text;
 begin
-  return next is((select count(*) from public.modeles_jeux where module = 'varelo' and version = 1), 30::bigint, 'trente modèles : six logiciels × cinq jeux');
+  return next is((select count(*) from public.modeles_jeux where module = 'varelo' and version = 1 and code <> 'ventes_caisse'), 30::bigint, 'trente modèles : six logiciels × cinq jeux');
   foreach l in array array['sage100', 'ebp', 'cegid', 'quadra', 'pennylane', 'tableur'] loop
-    return next is((select array_agg(code order by code) from public.modeles_jeux where module = 'varelo' and logiciel = l),
+    return next is((select array_agg(code order by code) from public.modeles_jeux where module = 'varelo' and logiciel = l and code <> 'ventes_caisse'),
                    array['balance_agee_clients', 'balance_agee_fournisseurs', 'balance_generale', 'clients', 'fournisseurs'], format('%s : les cinq jeux', l));
   end loop;
   return next ok(exists (select 1 from public.modeles_jeux where module = 'varelo' and code = 'fournisseurs' and (colonnes -> 'iban' ->> 'sensible')::boolean),

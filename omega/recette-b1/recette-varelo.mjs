@@ -482,6 +482,31 @@ for (const largeur of LARGEURS) {
 }
 
 {
+  const s = await ouvrirSession({ largeur: 1024, hauteur: 900, marque: 'b1-caisses', densite: 1 });
+  console.log('— les ventes des caisses (b1_17)');
+  ok(await s.aller(base + '/espace/varelo'), 'page chargée');
+  await s.dormir(500);
+  const carte = `document.querySelector('section[aria-label="Ventes des caisses"]')`;
+  const lu = await s.evaluer(`(() => { const c = ${carte}; if (!c) return null; return { lignes: [...c.querySelectorAll('tbody tr')].map(tr => tr.innerText.replace(/\\s+/g, ' ')), kpis: c.querySelector('dl')?.innerText.replace(/\\s+/g, ' ') }; })()`);
+  ok(!!lu && lu.lignes.length === 3, `trois magasins (${lu?.lignes.length})`);
+  ok(/Hier, tout le groupe 16\s690,00\s€/.test(lu?.kpis ?? '') && /Magasins muets hier 1/.test(lu?.kpis ?? ''), `compteurs : ${lu?.kpis}`);
+  ok(lu?.lignes.some(l => /Grenoble Centre/.test(l) && /-34 % sur une semaine/.test(l)) && lu?.lignes.some(l => /Annecy Vieille Ville/.test(l) && /Rien remonté hier/.test(l)), 'Grenoble en baisse, Annecy muet');
+  ok(await s.evaluer(clic('section[aria-label="Ventes des caisses"] .esp-carte-tete button', '/Déposer des ventes/')) === true, 'clic « Déposer des ventes »');
+  await s.dormir(400);
+  const hier = (() => { const d = new Date(); d.setDate(d.getDate() - 1); return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; })();
+  await s.evaluer(saisir('[role="dialog"] textarea', `Date;Magasin;CA TTC;Tickets\n${hier};Annecy Vieille Ville;3 750,00;160\n${hier};;12,00;1`));
+  await s.dormir(300);
+  ok(await s.evaluer(`(() => { const p = [...${dlg()}.querySelectorAll('.esp-pastille')].map(x => x.textContent); return p.includes('2 lignes') && p.includes('jour') && p.includes('magasin') && p.includes('ca_ttc'); })()`), 'les en-têtes du Z sont reconnus');
+  await s.evaluer(clic('[role="dialog"] button', '/^\\s*Déposer\\s*$/'));
+  await s.dormir(600);
+  ok(/1 ligne retenue, 1 rejetée : ligne 2, magasin absent/.test(await s.evaluer(`${dlg()}?.innerText`) ?? ''), 'une ligne retenue, une rejetée (magasin absent)');
+  await s.evaluer(clic('[role="dialog"] button', '/^\\s*Fermer\\s*$/'));
+  await s.dormir(400);
+  ok(/3\s750,00\s€/.test(await s.evaluer(`[...${carte}.querySelectorAll('tbody tr')].find(t => /Annecy/.test(t.innerText))?.innerText`) ?? ''), 'Annecy n\'est plus muet : 3 750 € hier');
+  s.fermer();
+}
+
+{
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b1-exports', densite: 1 });
   console.log('— les exports automatiques (b1_10)');
   ok(await s.aller(base + '/espace/varelo'), 'page chargée');
@@ -492,7 +517,7 @@ for (const largeur of LARGEURS) {
   ok(await s.evaluer(`(() => { const li = [...${carte}.querySelectorAll('li')].find(x => /Annecy/.test(x.innerText)); const b = li && li.querySelector('button'); if (!b) return null; b.click(); return true; })()`) === true, 'clic « Brancher » sur la menuiserie d\'Annecy');
   await s.dormir(400);
   const d = await s.evaluer(`(() => { const d = ${dlg()}; return { titre: d.querySelector('h2')?.textContent, cases: d.querySelectorAll('input[type="checkbox"]:checked').length, logiciel: d.querySelector('select')?.value }; })()`);
-  ok(/Brancher le logiciel — Bertin Menuiserie/.test(d.titre) && d.cases === 5 && d.logiciel === 'tableur', `le dialogue propose le tableur (logiciel de la société) et les cinq exports (${d.logiciel}, ${d.cases})`);
+  ok(/Brancher le logiciel — Bertin Menuiserie/.test(d.titre) && d.cases === 6 && d.logiciel === 'tableur', `le dialogue propose le tableur (logiciel de la société) et ses six exports (${d.logiciel}, ${d.cases})`);
   await s.evaluer(clic('[role="dialog"] button', '/Demander à la DSI/'));
   await s.dormir(600);
   const apres = await s.evaluer(`[...${carte}.querySelectorAll('li')].find(x => /Annecy/.test(x.innerText))?.innerText.replace(/\\s+/g, ' ')`);

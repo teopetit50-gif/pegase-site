@@ -1,5 +1,16 @@
 # Session B1 — VARELO, le référentiel du groupe (sociétés, pôles, rapprochement)
 
+## 11/10/2026 — les caisses (b1_17, tests b1_20)
+
+Lignes 24 et 26 du chiffrage. `b1_17_caisses.sql` : jeu `ventes_caisse` (jour, magasin, CA TTC, CA HT, tickets ;
+signature « Magasin » + « CA TTC » ; fenêtre observée sur le jour) pour tableur, lightspeed, zelty, tiller,
+sumup, cashpad ; table `grp_ventes_caisse` (société × magasin × jour, remplacée au redépôt) ; porte
+`grp_deposer_ventes` (aussi appelée par `grp_appliquer_jeu`, remplacée) ; vue `grp_ventes_magasins` (hier, J-8,
+mois) ; « Le groupe ce matin » (`grp_lignes_groupe`, remplacée) : total d'hier, société à -20 % sur une semaine,
+magasin muet. Tests b1_20 : 11 assertions ; b1_13 restreint aux cinq jeux de b1_10 (maquette : 340 ok).
+Écran : carte « Ventes des caisses » (dépôt du Z), logiciels de caisse dans « Exports automatiques ».
+Recette 193 ✓, axe 0 écart. En-têtes : hypothèses, à confirmer sur un vrai export (essai à blanc d'A1).
+
 ## 11/10/2026 — les règles du groupe, les sources validées par la DSI (b1_16, tests b1_19)
 
 Lignes 9, 23, 25 du chiffrage. `b1_16_regles_groupe.sql` : `grp_reglages` + porte `grp_regler_groupe` (gérant,
