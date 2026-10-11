@@ -17,7 +17,7 @@ import { useMemo, useState } from "react";
 import Choix from "./Choix";
 import Graphique from "./Graphique";
 import Link from "next/link";
-import { ArrowRight, CheckCheck, ChevronRight, ClipboardCheck, ListChecks, UserRound, Wrench } from "lucide-react";
+import { ArrowRight, CheckCheck, ChevronRight, ClipboardCheck, Clock, ListChecks, UserRound, Wrench } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Chiffre } from "@/components/espace2/vivant";
 import type { Ligne } from "./Tableaux";
@@ -85,36 +85,48 @@ export default function AccueilOmega({ lignes: initiales }: { lignes: Ligne[] })
 
   const heure = new Date(maintenant).getHours();
   const aFaire = c.duJour.length + c.routines.length;
+  const ratio = (n: number, sur: number) => (sur ? Math.min(1, n / sur) : 0);
   const kpis = [
-    { libelle: "Tâches faites", valeur: `${c.faites.length}`, sous: `sur ${c.taches.length} au plan`, lien: `${R}/taches` },
-    { libelle: "En retard", valeur: `${c.retard.length}`, sous: "tâches dont l'échéance est passée", lien: `${R}/point`, alerte: c.retard.length > 0 },
-    { libelle: "À valider", valeur: `${c.decisions.length}`, sous: "décisions qui t'attendent", lien: `${R}/validations` },
-    { libelle: "Clients signés", valeur: `${c.signes}`, sous: "sur un objectif de 20", lien: `${R}/demandes` },
+    { libelle: "Tâches faites", Icone: ListChecks, valeur: `${c.faites.length}`, sous: `sur ${c.taches.length} au plan`, lien: `${R}/taches`, jauge: ratio(c.faites.length, c.taches.length) },
+    { libelle: "En retard", Icone: Clock, valeur: `${c.retard.length}`, sous: c.retard.length > 1 ? "échéances passées" : "échéance passée", lien: `${R}/point` },
+    { libelle: "À valider", Icone: ClipboardCheck, valeur: `${c.decisions.length}`, sous: c.decisions.length > 1 ? "décisions en attente" : "décision en attente", lien: `${R}/validations` },
+    { libelle: "Clients signés", Icone: UserRound, valeur: `${c.signes}`, sous: "sur 20 visés", lien: `${R}/demandes`, jauge: ratio(c.signes, 20) },
   ];
 
   return (
     <div className="v2-page v2-arrivee v2-va v2-vivant">
       <h1 className="v2-sr">Vue d&apos;ensemble</h1>
-      <div className="v2-salut">
-        <div>
-          <p className="v2-salut-titre" suppressHydrationWarning>
-            {heure >= 18 ? "Bonsoir" : "Bonjour"} Teo
-            <span> — {aFaire ? `${aFaire} chose${aFaire > 1 ? "s" : ""} t'attend${aFaire > 1 ? "ent" : ""} ${heure < 12 ? "ce matin" : "aujourd'hui"}` : "rien d'urgent aujourd'hui"}</span>
-          </p>
-          <p className="v2-salut-date" suppressHydrationWarning>
-            {new Date(maintenant).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
-          </p>
-        </div>
-      </div>
+      {/* la salutation et les quatre chiffres, à la manière d'Attio (11/10/2026) : un titre sobre,
+          une ligne grise, puis quatre petites cartes — icône et libellé, chiffre, jauge fine */}
+      <header className="om-salut">
+        <p className="om-salut-titre" suppressHydrationWarning>
+          {heure >= 18 ? "Bonsoir" : "Bonjour"} Teo
+        </p>
+        <p className="om-salut-sous" suppressHydrationWarning>
+          {new Date(maintenant).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }).replace(/^./, (l) => l.toUpperCase())}
+          <span aria-hidden="true">·</span>
+          {aFaire ? `${aFaire} chose${aFaire > 1 ? "s" : ""} à faire ${heure < 12 ? "ce matin" : "aujourd'hui"}` : "rien d'urgent aujourd'hui"}
+        </p>
+      </header>
 
-      <section className="v2-va-kpis" aria-label="Chiffres clés">
-        {kpis.map((k) => (
-          <Link key={k.libelle} href={k.lien} className="v2-va-kpi" data-alerte={k.alerte ? "" : undefined}>
-            <span className="v2-va-kpi-libelle">{k.libelle}</span>
-            <strong data-alerte={k.alerte ? "" : undefined}>
-              <Chiffre valeur={k.valeur} />
-            </strong>
-            <small className="v2-gris v2-va-kpi-sous">{k.sous}</small>
+      <section className="om-stats" aria-label="Chiffres clés">
+        {kpis.map(({ Icone, ...k }) => (
+          <Link key={k.libelle} href={k.lien} className="om-stat">
+            <span className="om-stat-tete">
+              <Icone width={14} height={14} aria-hidden="true" />
+              {k.libelle}
+            </span>
+            <span className="om-stat-ligne">
+              <strong>
+                <Chiffre valeur={k.valeur} />
+              </strong>
+              <span className="om-stat-sous">{k.sous}</span>
+            </span>
+            {k.jauge !== undefined ? (
+              <span className="om-stat-jauge" aria-hidden="true">
+                <i style={{ width: `${Math.round(k.jauge * 100)}%` }} />
+              </span>
+            ) : null}
           </Link>
         ))}
       </section>
