@@ -32,6 +32,14 @@ Les commits suivants sont de la documentation seulement : 6c2edd2, 80abdb1, 6383
 - Un vrai export Logos_w ; des corpus réels par famille pour passer de B à A.
 - Décisions : médical (HDS), DWG, métré mesuré sur plan.
 
+**11/10 (reprise)** : l'outil de mesure sur corpus est fait (`lecteur/outils/mesurer.ts`, `lecteur/mesure/comparer.ts`, 5 tests). Mode d'emploi :
+1. déposer le corpus réel sur la recette ;
+2. `--squelette` sort les valeurs lues ;
+3. une personne les relit et corrige : c'est l'attendu ;
+4. `--corpus` sort le rapport : précision, rappel, vérifiées fausses, coût, écarts.
+
+Lecture seule, en clé de service ou en session de gérant.
+
 **Toute prochaine étape à la reprise.** Lire les sorties de `decoupage_reel.mjs` si le coordinateur l'a joué. Sinon, demander qu'il soit joué, puis corriger ce qui sort. Ensuite, selon les décisions de Teo : la lecture longue réelle (`analyse_reelle.sql`), puis l'outil de mesure de qualité sur corpus (1 j, `CHIFFRAGE/lecteur.md`).
 
 Branche `worker-a1`. Périmètre : `omega/functions/lecteur/`, `omega/functions/lecteur-exports/` et `omega/functions/_partage/`.
