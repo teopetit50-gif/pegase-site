@@ -10,8 +10,8 @@ n'a été touché.
 
 1. **Promesses : 69 lignes** (66 numérotées, plus 21b et 2 lignes commerciales).
    - A : 2 (zone du PLU et servitudes, relevé réel du 06/10 ; risques de la commune, relevé réel du 11/10)
-   - B : 30
-   - C : 25
+   - B : 32
+   - C : 23
    - D : 9
    - T : 3
 2. **Pour tout mettre en B : ≈ 95 jours de travail**, dont ≈ 38 relèvent du lecteur ou d'un ouvrier « dwg ». Le seul métré sur le dessin en pèse 12,5 ; A1 et B5 conseillent de le reformuler plutôt que de le construire.
@@ -151,13 +151,13 @@ des lignes déjà retirées de `lib/en-preparation.ts` (Accessibilité, Cerfa, R
 | # | Promesse (texte exact) | Où | État | Preuve | Ce qui manque | Jours | Coût externe / tiers |
 |---|---|---|---|---|---|---|---|
 | 57 | « Plans croisés, rapport PDF annoté » ; « Le rapport, en PDF annoté et en Excel » | Formules.tsx:103 ; Questions.tsx:103 | B | `rapport.ts` (PDF annoté avec cadres sur les pages citées, .xlsx à deux feuilles), recette `rapport-controle.mjs` | La pastille reste dans `lib/en-preparation.ts` : elle peut tomber une fois la lecture réelle (#1) faite | 0 / 1 | — |
-| 58 | « Export Excel par lot » | Formules.tsx:475 | C | Excel par contrôle (`rapport.ts`) | Feuille ou fichier par lot | 1 / 0,5 | — |
+| 58 | « Export Excel par lot » | Formules.tsx:475 | B | L'Excel du dossier daté a une feuille par lot (Lot 01, Lot 02…) ; l'analyse des offres a son Excel par consultation de lot (b5_26) | Les constats du contrôle du dossier n'ont pas de lot (ils portent sur les planches) : ils restent dans la feuille « Registre » | 0 / 0,5 | — |
 | 59 | « Surfaces recalculées contre le Cerfa » ; « RE2020 : attestation comparée aux plans » ; « Fonds de plan BET croisés » | Formules.tsx:193,211,580 | B | b5_12 §2 (Cerfa contre PC4, Bbio et Cep, couloir BET contre PC4) | Lecture réelle du Cerfa, de l'attestation RE2020 et du plan BET (A1) | 0 / 2 | — |
 | 60 | « Complétude du DOE à la réception » | Formules.tsx:598 | B | b5_12 §4 (liste type, « sans objet » motivé, alerte « DOE incomplet ») | — | 0 / 0,5 | — |
 | 61 | « Comptes rendus de chantier rédigés » ; FAQ « Il rédige le compte rendu de chantier à partir de vos notes et photos de visite » | Formules.tsx:616 ; Questions.tsx:83 | C | b5_11 (compte rendu tiré des notes, figé à la diffusion) | **Photos de visite** jointes au compte rendu et dans son PDF ; la rédaction se limite aux notes nettoyées, pas à une mise en forme rédigée par un modèle | 2 / 1 | modèle (rédaction) |
 | 62 | « Réserves suivies jusqu'à la fin de la GPA » ; « suit chaque réserve jusqu'à sa levée et la fin de la garantie de parfait achèvement » | Formules.tsx:634 ; Questions.tsx:83 | B | b5_10 §5-7 | — | 0 / 0,5 | — |
 | 63 | « Honoraires par phase contre temps passé » ; FAQ « le temps passé est rapporté aux honoraires de chaque élément de mission … Une phase qui consomme plus que prévu remonte » | Formules.tsx:652 ; Questions.tsx:88 | B | b5_03 (24 assertions : alertes à 80 % et en dépassement, tableau de bord) | La pastille peut tomber (le code est là depuis b5_12) | 0 / 1 | — |
-| 64 | « Dossier de défense décennale » ; « Vous gardez un dossier daté, exportable en une fois : chaque point signalé, chaque visa rendu et chaque refus » ; « Chaque contrôle est daté et conservé » | Formules.tsx:670 ; Questions.tsx:93,48 | C | Journal opposable, contrôles datés, rapport par contrôle | Export unique (archive : rapports, visas, refus, journal) | 2,5 / 1 | — |
+| 64 | « Dossier de défense décennale » ; « Vous gardez un dossier daté, exportable en une fois : chaque point signalé, chaque visa rendu et chaque refus » ; « Chaque contrôle est daté et conservé » | Formules.tsx:670 ; Questions.tsx:93,48 | B | Écran (11/10) : « Exporter le dossier daté » fabrique une archive avec le registre PDF (constats et décisions, visas rendus et refus, situations, décennales, OS, réserves, comptes rendus diffusés, offres) et l'Excel. Chaque ligne a sa date, son lot et sa pièce. Recette `dossier-date.mjs` : pdftotext et unzip | Les dates viennent des tables de Lorani, pas du journal opposable du socle ; les rapports annotés de chaque contrôle restent à exporter un par un | 0 / 1 | — |
 | 65 | « Bureaux d'études invités » | Formules.tsx:562 | C | Intervenants BET (`lorani_intervenants`) | Compte BET invité sur un projet, avec droits restreints (répondre, déposer ses fonds de plan) | 2 / 1 | — |
 
 ### Formats, logiciels, offre commerciale
@@ -200,8 +200,8 @@ Ce qui n'est pas couvert :
 | État | Lignes |
 |---|---|
 | A | 2 |
-| B | 30 |
-| C | 25 |
+| B | 32 |
+| C | 23 |
 | D | 9 |
 | T | 3 |
 
