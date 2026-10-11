@@ -15,6 +15,8 @@
    Les données sont celles de omega_lignes (tableaux « plan » et
    « ajouts ») ; tout se modifie sur place et s'enregistre aussitôt.
    « À préparer » et « Note » sont deux clés de plus dans `donnees`.
+   11/10/2026 — allégée à la demande de Teo, même dessin : plus de
+   sous-titre ni de frise des trois phases au-dessus de la liste.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
@@ -36,11 +38,6 @@ const teinte = (s?: string) => (s === "Fait" ? "gris" : s === "En cours" ? "bleu
 const debut = (n: number) => (n === 0 ? new Date(2026, 9, 9) : new Date(2026, 9, 12 + 7 * (n - 1)));
 const fin = (n: number) => (n === 0 ? new Date(2026, 9, 11) : new Date(2026, 9, 18 + 7 * (n - 1)));
 const BLOCS: [number, number][] = [[0, 0], [1, 1], [2, 2], [3, 3], [4, 4], [5, 6], [7, 8], [9, 10], [11, 13]];
-const PHASES = [
-  { num: "01", nom: "Fondations", sous: "5 clients pilotes · Mois 1", de: 0, a: 4 },
-  { num: "02", nom: "Déploiement", sous: "12 clients · Mois 2", de: 5, a: 8 },
-  { num: "03", nom: "Accélération", sous: "20 clients · Mois 3", de: 9, a: 13 },
-];
 
 const premiereSemaine = (s?: string) => Number(s?.match(/S(\d+)/)?.[1] ?? 99);
 const blocDe = (s?: string) => {
@@ -169,16 +166,12 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
     setFicheOuverte(true);
   };
 
-  const faites = compte.terminees;
-  const total = lignes.length;
-  const phaseActive = PHASES.findIndex((p) => blocCourant >= blocDe(`S${p.de}`) && blocCourant <= blocDe(`S${p.a}`));
 
   return (
     <div className="v2-page v2-arrivee om-page om-page--large om-pt">
       <div className="v2-tete om-pt-tete">
         <div>
           <h1>Tâches</h1>
-          <p>Les bonnes actions, dans le bon ordre.</p>
         </div>
         <div className="v2-actions">
           {selecteur}
@@ -189,31 +182,6 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
         </div>
       </div>
 
-      {/* ——— l'avancement : trois phases sur 90 jours ——— */}
-      <section className="v2-carte om-pt-avancement" aria-label="Avancement du plan">
-        <div className="om-pt-avancement-tete">
-          <h2>Du 9 octobre au 10 janvier</h2>
-          <p>
-            <strong>{faites}</strong> / <strong>{total}</strong> tâches terminées
-          </p>
-        </div>
-        <div className="om-pt-phases" style={{ "--om-pt-avance": `${total ? (faites / total) * 100 : 0}%` } as React.CSSProperties}>
-          <span className="om-pt-rail" aria-hidden="true">
-            <span />
-          </span>
-          <ol>
-            {PHASES.map((p, i) => (
-              <li key={p.num} data-etat={i < phaseActive ? "passee" : i === phaseActive ? "active" : "a-venir"} aria-current={i === phaseActive ? "step" : undefined}>
-                <span className="om-pt-jalon" aria-hidden="true" />
-                <span className="om-pt-phase-nom">
-                  <b>{p.num}</b> {p.nom}
-                </span>
-                <span className="om-pt-phase-sous">{p.sous}</span>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
 
       {/* ——— la barre : statuts, recherche, catégorie, affichage ——— */}
       <div className="om-pt-barre">

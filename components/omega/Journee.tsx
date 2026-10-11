@@ -8,12 +8,15 @@
    menus, la file groupée par échéance avec cases et décision en lot, la
    fiche à droite ; les cartes du point du matin. Le contenu est celui du
    tableau opérationnel (omega_lignes) : une case cochée = « Fait » en base.
+   11/10/2026 — allégés à la demande de Teo, même dessin : plus de « Ce
+   qui bloque un client » sous la décision, plus de « Chantiers des
+   moteurs » au point du matin (ils sont dans Automatisations).
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useMemo, useState } from "react";
 import Choix from "./Choix";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, CalendarDays, ChevronRight, CircleCheck, CircleDashed, Clock, Compass, FileText, Inbox, LayoutGrid, ListChecks, ListFilter, Megaphone, MoreVertical, Repeat, Search, UserRound, Wrench, X } from "lucide-react";
+import { ArrowRight, ArrowUpRight, CalendarDays, ChevronRight, CircleCheck, CircleDashed, Clock, Compass, FileText, Inbox, LayoutGrid, ListChecks, ListFilter, Megaphone, MoreVertical, Repeat, Search, UserRound, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Ligne } from "./Tableaux";
 
@@ -92,7 +95,6 @@ function Validations({ initiales }: { initiales: Ligne[] }) {
     groupes.set(g, [...(groupes.get(g) ?? []), l]);
   }
   const choisie = visibles.find((l) => l.id === choix) ?? visibles.find((l) => l.donnees["Statut"] !== "Fait") ?? null;
-  const bloquants = lignes.filter((l) => l.tableau === "moteurs" && l.donnees["Statut"] !== "Fait").slice(0, 5);
   const cochees = visibles.filter((l) => coches.includes(l.id));
 
   return (
@@ -225,24 +227,6 @@ function Validations({ initiales }: { initiales: Ligne[] }) {
             )}
           </section>
 
-          <section className="v2-carte" aria-label="Ce qui bloque un client">
-            <h2 className="v2-val-groupe">Ce qui bloque un client</h2>
-            {bloquants.length ? (
-              <ul className="v2-val-delegations">
-                {bloquants.map((l) => (
-                  <li key={l.id}>
-                    <Wrench width={18} height={18} aria-hidden="true" />
-                    <span className="v2-val-texte">
-                      <span>{l.donnees["Chantier"]}</span>
-                      <small>{[l.donnees["Échéance"], l.donnees["Statut"]].filter(Boolean).join(" · ")}</small>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="v2-val-gris v2-val-pad">Aucun chantier en attente.</p>
-            )}
-          </section>
         </div>
       </div>
     </div>
@@ -396,23 +380,6 @@ function Point({ initiales }: { initiales: Ligne[] }) {
           )}
         </Carte>
 
-        <Carte titre="Chantiers des moteurs" classe="v2-pm-large" lien={`${R}/automatisations`} pied={{ libelle: "Voir les chantiers", href: `${R}/automatisations` }}>
-          {c.moteurs.length ? (
-            <ul className="v2-pm-liste">
-              {c.moteurs.map((l) => (
-                <li key={l.id}>
-                  <Wrench width={20} height={20} aria-hidden="true" className="v2-pm-icone" />
-                  <span className="v2-pm-texte">
-                    <span>{l.donnees["Chantier"]}</span>
-                    <small>{[l.donnees["Pourquoi"], l.donnees["Échéance"]].filter(Boolean).join(" · ")}</small>
-                  </span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="v2-pm-rien">Aucun chantier en attente.</p>
-          )}
-        </Carte>
       </div>
     </div>
   );
