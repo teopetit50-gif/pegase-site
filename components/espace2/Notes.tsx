@@ -659,7 +659,7 @@ function Editeur({
           </button>
         </span>
       </div>
-      <div className="no-fenetre-corps">
+      <div className="no-fenetre-corps" data-lenis-prevent="">
         <div className="no-fenetre-outils">
           <span className="no-avatar no-avatar--grand" aria-label={`Auteur : ${auteur}`}>
             {initiale(auteur)}

@@ -10,9 +10,9 @@
    Les données sont celles de la base (omega_pages), donc partagées entre
    les appareils de Teo :
      · Stratégie, Manuel et Plan LinkedIn sont des notes de référence ;
-       elles s'ouvrent avec leur mise en forme et leurs boutons
-       « Modifier » par section (components/omega/Document) ;
-     · « Nouvelle note » crée une page « note-… », écrite librement ;
+     · « Nouvelle note » crée une page « note-… » ;
+     · toutes s'écrivent directement dans la page (EditeurRiche, 11/10 :
+       « toute la note éditable, c'est du texte ») ;
      · les modèles : trois fournis, plus ceux qu'on crée (« modele-… »).
    Les favoris sont gardés dans ce navigateur.
    ══════════════════════════════════════════════════════════════════════ */
@@ -24,7 +24,7 @@ import { Dialog, Modal, ModalOverlay } from "react-aria-components";
 import { ArrowUpDown, BookMarked, Check, Copy, FileText, LayoutGrid, Link2, List, Maximize2, Minimize2, Minus, MoreHorizontal, NotebookPen, Plus, Star, Trash2, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { ItemMenu, MenuDeroulant, SeparateurMenu } from "@/components/espace2/ui";
-import Document from "./Document";
+import EditeurRiche from "./EditeurRiche";
 import { NOTES_REFERENCE, type PageNote } from "./notes-communes";
 
 const I = { width: 16, height: 16, strokeWidth: 1.6, "aria-hidden": true } as const;
@@ -41,8 +41,6 @@ const MODELES_FOURNIS: PageNote[] = [
 
 const estReference = (slug: string) => NOTES_REFERENCE.includes(slug);
 const estModele = (slug: string) => slug.startsWith("modele-");
-/* un document de référence est rédigé en sections « ## » : on garde son affichage */
-const structure = (n: PageNote) => estReference(n.slug) || /^##\s/m.test(n.contenu);
 const apercu = (t: string) =>
   t
     .replace(/<\?claude[^>]*\?>/g, " ")
@@ -407,13 +405,26 @@ function Fenetre({
   const modele = estModele(note.slug);
   const [titre, setTitre] = useState(note.titre);
   const [texte, setTexte] = useState(note.contenu);
-  const zone = useRef<HTMLTextAreaElement>(null);
-  const ajuster = (el: HTMLTextAreaElement | null) => {
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${el.scrollHeight}px`;
+  /* le texte s'enregistre 0,7 s après la dernière frappe, et à la fermeture */
+  const [version, setVersion] = useState(0);
+  const enAttente = useRef<string | null>(null);
+  const minuteur = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const enregistrerRef = useRef(enregistrer);
+  useEffect(() => {
+    enregistrerRef.current = enregistrer;
+  });
+  const vider = () => {
+    if (minuteur.current) clearTimeout(minuteur.current);
+    if (enAttente.current !== null) void enregistrerRef.current({ contenu: enAttente.current });
+    enAttente.current = null;
   };
-  const libre = !structure(note);
+  useEffect(() => vider, []);
+  const ecrire = (md: string) => {
+    setTexte(md);
+    enAttente.current = md;
+    if (minuteur.current) clearTimeout(minuteur.current);
+    minuteur.current = setTimeout(vider, 700);
+  };
   return (
     <>
       <div className="no-fenetre-haut">
@@ -433,7 +444,7 @@ function Fenetre({
           </button>
         </span>
       </div>
-      <div className="no-fenetre-corps">
+      <div className="no-fenetre-corps" data-lenis-prevent="">
         <div className="no-fenetre-outils">
           <span className="no-avatar no-avatar--grand" aria-label={`Auteur : ${AUTEUR}`}>
             T
@@ -472,7 +483,7 @@ function Fenetre({
             ) : null}
           </MenuDeroulant>
         </div>
-        <div className="no-feuille" data-document={libre ? undefined : ""}>
+        <div className="no-feuille">
           <input
             className="no-titre"
             value={titre}
@@ -484,7 +495,6 @@ function Fenetre({
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();
-                zone.current?.focus();
                 (e.target as HTMLInputElement).blur();
               }
             }}
@@ -495,25 +505,8 @@ function Fenetre({
               {note.maj ? `Modifiée le ${dateLongue(note.maj)}` : "Modèle fourni"}
             </span>
           </div>
-          {libre ? (
-            <>
-              <textarea
-                ref={(el) => {
-                  zone.current = el;
-                  ajuster(el);
-                }}
-                className="no-texte"
-                value={texte}
-                rows={1}
-                placeholder={modele ? "Écrivez la trame du modèle" : "Commencez à écrire votre note"}
-                aria-label="Texte"
-                onChange={(e) => {
-                  setTexte(e.target.value);
-                  ajuster(e.target);
-                }}
-                onBlur={() => texte !== note.contenu && void enregistrer({ contenu: texte })}
-              />
-              {!texte && !modele ? (
+          <EditeurRiche key={version} markdown={texte} onChange={ecrire} placeholder={modele ? "Écrivez la trame du modèle" : "Commencez à écrire votre note"} etiquette={modele ? "Texte du modèle" : "Texte de la note"} />
+          {!texte && !modele ? (
                 <div className="no-suggestions">
                   <p className="no-etiquette">Modèles favoris</p>
                   {modelesFavoris.length ? (
@@ -524,6 +517,7 @@ function Fenetre({
                             type="button"
                             onClick={() => {
                               setTexte(m.contenu);
+                              setVersion((v) => v + 1);
                               if (!titre) setTitre(m.titre);
                               void enregistrer({ contenu: m.contenu, titre: titre || m.titre });
                             }}
@@ -560,10 +554,6 @@ function Fenetre({
                   </ul>
                 </div>
               ) : null}
-            </>
-          ) : (
-            <Document slug={note.slug} titre={titre || note.titre} contenu={note.contenu} onEnregistre={(c) => void enregistrer({ contenu: c })} />
-          )}
         </div>
       </div>
     </>
