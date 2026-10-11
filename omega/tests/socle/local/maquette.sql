@@ -378,3 +378,9 @@ returns table (bucket text, nom text, octets bigint, empreinte text, cree_le tim
 $$;
 revoke all on function private.a_un_role(uuid, text[]), private.perimetre_couvre(uuid, uuid, uuid), private.fichiers_de(uuid, text, text) from public;
 
+-- Battements des ouvriers (extraits du socle commun), pour le résumé des alertes (19ap).
+create table public.battements (client_id uuid not null references public.clients(id), module text not null, dernier_le timestamptz not null default now(),
+  attendu_toutes interval not null default '1 day', actif boolean not null default true, detail jsonb not null default '{}', primary key (client_id, module));
+alter table public.battements enable row level security;
+insert into private.tables_locataires (nom, ordre_effacement) values ('battements', 5) on conflict do nothing;
+
