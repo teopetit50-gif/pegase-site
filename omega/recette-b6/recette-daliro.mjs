@@ -529,5 +529,35 @@ const choisir = (sel, valeur) => `(() => { const t = document.querySelector('${s
   }
 }
 
+{
+  // b6_31 : les disponibilités des sous-traitants dans l'annuaire, noter une absence
+  const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+  const graves = (cible) => `(async () => { const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`;
+  for (const largeur of [390, 1440]) {
+    const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `b6-dispo-${largeur}`, densite: 1 });
+    console.log(`— Les Tilleuls : disponibilités des sous-traitants (${largeur})`);
+    ok(await s.aller(base + chemin), 'page chargée');
+    await s.dormir(500);
+    await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /Tilleuls/.test(b.textContent))?.click()`);
+    await s.dormir(600);
+    const bloc = `document.querySelector('[aria-label="Disponibilités des sous-traitants"]')`;
+    ok(await s.evaluer(`/Disponibilités des sous-traitants/.test(${bloc}?.innerText || '')`), 'le bloc des disponibilités est dans l\'annuaire');
+    ok(await s.evaluer(bouton('/Noter une absence/', bloc)) === true, 'clic sur « Noter une absence »');
+    await s.dormir(300);
+    ok(await s.evaluer(saisir('[aria-label="Disponibilités des sous-traitants"] input[maxlength="200"]', 'Congés')), 'motif saisi');
+    await s.dormir(150);
+    ok(await s.evaluer(bouton("/Noter l.absence/", bloc)) === true, 'clic sur « Noter l\'absence »');
+    await s.dormir(400);
+    ok(await s.evaluer(`/absent du .* \\(Congés\\)/.test(${bloc}?.innerText || '')`), 'l\'absence est affichée, avec son motif');
+    await s.evaluer(axe + ';true');
+    const g = await s.evaluer(graves(bloc));
+    ok(g.length === 0, `bloc des disponibilités : aucun écart axe grave ${g.length ? JSON.stringify(g) : ''}`);
+    const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
+    ok(deb === 0, `pas de débordement horizontal (${deb})`);
+    s.fermer();
+  }
+}
+
 console.log(echecs ? `\n${echecs} échec(s)` : '\ntout passe');
 process.exit(echecs ? 1 : 0);

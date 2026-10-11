@@ -27,14 +27,15 @@
      btp_appro_chantier (lecture), btp_ecrire_commande, btp_noter_commande, btp_noter_livraison, btp_annuler_commande (b6_22) ;
      btp_preparer_liste, btp_recevoir, btp_noter_retour (b6_23) ;
      btp_fil_chantier, btp_messages_a_ranger (lecture), btp_ranger_message, btp_ecarter_message, btp_avenant_depuis_message (b6_24) ;
-     btp_avancement_photos (lecture, b6_25) ; btp_importer_lignes (b6_28) ; btp_point_mensuel (lecture, b6_30).
+     btp_avancement_photos (lecture, b6_25) ; btp_importer_lignes (b6_28) ; btp_point_mensuel (lecture, b6_30) ;
+     btp_disponibilites (lecture), btp_noter_indisponibilite, btp_annuler_indisponibilite (b6_31).
    Les tables sans porte (chantiers, lots, tiers, dépendances, acceptations)
    s'écrivent en direct, comme le socle le prévoit (politiques du bureau).
    Si la base répond autrement, l'écran montre son message tel quel.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { AccordJ2, Appro, AvancementPhotos, PointMensuel, Chantier, FactureCandidate, HeuresChantier, MessageChantier, MeteoChantier, Recalage, Remplacant, RetourPointage, Tableau } from "./types";
+import type { AccordJ2, Appro, AvancementPhotos, Disponibilite, PointMensuel, Chantier, FactureCandidate, HeuresChantier, MessageChantier, MeteoChantier, Recalage, Remplacant, RetourPointage, Tableau } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -319,4 +320,15 @@ export async function avenantDepuisMessage(message: string, objet: string): Prom
 /* b6_30 : le point mensuel (bureau qui voit les prix, formules Chantiers et Entreprise). */
 export async function pointMensuel(client: string, mois: string): Promise<PointMensuel> {
   return rpc<PointMensuel>("btp_point_mensuel", { p_client: client, p_mois: mois });
+}
+
+/* b6_31 : les disponibilités des sous-traitants (gérant, admin, valideur). */
+export async function chargerDisponibilites(client: string, du: string, au: string): Promise<Disponibilite[]> {
+  return rpc<Disponibilite[]>("btp_disponibilites", { p_client: client, p_du: du, p_au: au });
+}
+export async function noterIndisponibilite(tiers: string, du: string, au: string, motif: string | null): Promise<string> {
+  return rpc<string>("btp_noter_indisponibilite", { p_tiers: tiers, p_du: du, p_au: au, p_motif: motif });
+}
+export async function annulerIndisponibilite(id: string): Promise<unknown> {
+  return rpc("btp_annuler_indisponibilite", { p_id: id });
 }
