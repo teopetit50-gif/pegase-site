@@ -12,6 +12,7 @@ import Formation from "./Formation";
 import ModeAppels from "./ModeAppels";
 import Semaine from "./Semaine";
 import MetaAds from "./MetaAds";
+import PlanTaches from "./PlanTaches";
 import SelecteurVue from "./SelecteurVue";
 import type { DefPage, OngletPage } from "./pages";
 import { PAR_PAGE, lireContacts, lireContactsSuivis, lireFileAppels, lireLignes, lirePage, lireProspects, type FiltresProspects } from "@/lib/omega/donnees";
@@ -25,6 +26,7 @@ export default async function EcranOmega({ page, def, actif, filtres = {} }: { p
     const [file, lignes] = await Promise.all([lireFileAppels(filtres.secteur), lireLignes(["appels", "objections"])]);
     return <ModeAppels file={file.prospects} secteurs={file.secteurs} secteur={filtres.secteur} lignes={lignes} selecteur={selecteur} />;
   }
+  if (actif.special === "taches") return <PlanTaches lignes={await lireLignes(["plan", "ajouts"])} selecteur={selecteur} />;
   if (actif.special === "meta") return <MetaAds lignes={await lireLignes(["meta", "meta-seuils", "pubs"])} selecteur={selecteur} />;
   if (actif.special === "semaine") {
     const [lignes, { echanges }, { contacts }] = await Promise.all([lireLignes(), lireContactsSuivis(), lireContacts()]);
