@@ -3,8 +3,8 @@
 ## REPRISE (pause du 06/10 ; reprise le 11/10)
 
 - **Fait** : lots a4_01 → a4_35 (plus a4_26b, a4_34b) écrits et testés ; 72 fonctions pgTAP `^test_a4_` vertes en local. Fonctions Deno `omega/functions/compta/` (25 tests) et `omega/functions/sortie/` (7 tests). Chiffrage : `omega/CHIFFRAGE/filed.md`.
-- **Recette** : posé et vert jusqu'à a4_34b inclus (test 44 vert). **a4_35 à poser** (migration puis `omega/tests/filed/a4_28_notes_frais.sql`).
-- **Attend le coordinateur** : la pose d'a4_35 ; la fusion de `worker-a4` dans main (seulement `omega/`) ; la pose en production des a4_* (a4_26b à la main) ; le déploiement des fonctions `sortie` (aucun compte tiers ; planificateur chaque minute en POST avec la clé de service ; variables `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ANON_KEY`) et `compta`.
+- **Recette** : tout FILED posé et vert jusqu'à a4_35 inclus (11/10, 15 h 05 Z ; test 44 vert ; a4_22_02 en devise d'essai XTS depuis l'arrivée des vrais taux BCE).
+- **Attend le coordinateur** : la fusion de `worker-a4` dans main (seulement `omega/`) ; la pose en production des a4_* (a4_26b à la main) ; le déploiement des fonctions `sortie` (aucun compte tiers ; planificateur chaque minute en POST avec la clé de service ; variables `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ANON_KEY`) et `compta`.
 - **Attend Teo** : les identifiants des éditeurs (Pennylane, QuickBooks/Intuit, Cegid Loop), la clé Sirene et l'application HMRC, la vérification Google (CASA) et Microsoft, la plateforme agréée de la voie 1, le prix des paliers ; les contradictions de la page (synthèse du chiffrage, ligne 3), dont « tout effacer à tout moment » (fac:287) contre la conservation de dix ans.
 - **Prochaine étape** : lignes D restantes sans tiers : durées d'historique par palier (n° 26, dépend des paliers d'A5), « rédige ce qui repart » (n° 125, à trancher par Teo : construire ou retirer).
 
