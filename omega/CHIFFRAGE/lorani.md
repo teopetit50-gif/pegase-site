@@ -10,8 +10,8 @@ n'a été touché.
 
 1. **Promesses : 69 lignes** (66 numérotées, plus 21b et 2 lignes commerciales).
    - A : 2 (zone du PLU et servitudes, relevé réel du 06/10 ; risques de la commune, relevé réel du 11/10)
-   - B : 23
-   - C : 28
+   - B : 26
+   - C : 25
    - D : 13
    - T : 3
 2. **Pour tout mettre en B : ≈ 95 jours de travail**, dont ≈ 38 relèvent du lecteur ou d'un ouvrier « dwg ». Le seul métré sur le dessin en pèse 12,5 ; A1 et B5 conseillent de le reformuler plutôt que de le construire.
@@ -29,7 +29,7 @@ n'a été touché.
 5. **Pour servir UNE première agence réelle** en formule Agence :
    - 5 vraies planches lues, puis un dossier client fiable (#1, #4 : 4,5 j, A1) ;
    - les risques par les données ouvertes (#21b : fait, prouvé en vrai le 11/10) ;
-   - le rappel J-10, « 8 jours le matin » et « constat → question » (#39, #46, #45 : construits le 11/10, b5_25 à poser) ;
+   - le rappel J-10, « 8 jours le matin » et « constat → question » (#39, #46, #45 : faits le 11/10, b5_25 posé et vert) ;
    - la région UE (#6 : 1 j) et le règlement du PLU (#20 : 0,5 j) ;
    - l'audit sur un permis déjà instruit.
 
@@ -122,7 +122,7 @@ des lignes déjà retirées de `lib/en-preparation.ts` (Accessibilité, Cerfa, R
 | 36 | « Notes de calcul et PV d'essais » | Fonctionnement.tsx:1145 | D | — | Fait partie de #35 (présence et cohérence, pas de recalcul de structure) | 1 / 1 | — |
 | 37 | « Bordereau VSO · VAO · refus » ; « Visa des fiches techniques » ; « prépare le bordereau de visa avec les observations en regard » | Fonctionnement.tsx:1125 ; Formules.tsx:295 | C | Statuts du visa (sans observation, avec observations, refus motivé) : b5_04 §4 | Bordereau imprimable, avec les observations en regard | 1 / 0,5 | — |
 | 38 | « Date butoir calée sur la commande » ; « Visas calés sur les délais de commande » ; « La date butoir de chaque visa est calée sur le délai de commande de l'ouvrage » | Fonctionnement.tsx:1165 ; Formules.tsx:331 ; FileDesPoints.tsx:70 | B | b5_04 §4 (veille ouvrée de la commande), b5_06 (échéance au registre, rappels, retard) | — | 0 / 0,5 | — |
-| 39 | « la fiche des menuiseries à dix semaines est signalée à J-10 » ; « doit être visée avant le 12 pour tenir la commande » (J-10) | Questions.tsx:68 ; Fonctionnement.tsx:1335 | C → B à la pose | b5_25 (11/10) : le visa daté par la commande est rappelé à J-10, J-3, J-1, J ; test b5_15 écrit | Poser b5_25 et b5_15 | 0 / 0,25 | — |
+| 39 | « la fiche des menuiseries à dix semaines est signalée à J-10 » ; « doit être visée avant le 12 pour tenir la commande » (J-10) | Questions.tsx:68 ; Fonctionnement.tsx:1335 | B | b5_25 (11/10) : le visa daté par la commande est rappelé à J-10, J-3, J-1, J ; test b5_15 vert sur la recette (lot h1410corr, 11/10) | — | 0 / 0,25 | — |
 | 40 | « Registre daté des visas » | Formules.tsx:688 | B | b5_06 + journal opposable | — | 0 / 0,5 | — |
 
 ### Fonctionnalités, questions et indices
@@ -134,7 +134,7 @@ des lignes déjà retirées de `lib/en-preparation.ts` (Accessibilité, Cerfa, R
 | 43 | « Une alerte dès la réception … Chaque situation, indice ou offre est lu dès sa réception, et l'écart est signalé le jour même » | FileDesPoints.tsx:68-70 | C | Passage toutes les 5 min ; alertes des situations (b5_04 §3) et du contrôle (b5_07 §5) | Les offres (#24) | voir #24 | — |
 | 44 | « Une question suivie jusqu'à la réponse » ; « Questions suivies jusqu'à la réponse » | FileDesPoints.tsx:75 ; Formules.tsx:349 | B | b5_11 (relances du socle, réponse, soldée au compte rendu suivant) | — | 0 / 0,5 | — |
 | 45 | « Chaque point part en question à l'entreprise ou au BET, avec l'extrait joint » ; « Transformer en question au BET » ; « Une question en un clic » | FileDesPoints.tsx:77 ; Dossier.tsx:532 ; Formules.tsx:439 | B | Écran Contrôle (11/10) : bouton « En faire une question » sur chaque constat ouvert. Le texte est prérempli avec l'extrait cité (pièce, page, texte lu) et la correction proposée ; il devient un point « question » des comptes rendus (b5_20/b5_11), suivi jusqu'à la réponse. Recette aux 5 largeurs (89 ✓) et accessibilité verte | L'extrait part en texte, pas en image découpée de la planche | 0 / 0,5 | — |
-| 46 | « la question qui attend depuis huit jours remonte le matin » ; « celle qui attend une réponse depuis plus de huit jours remonte le matin » ; « La question sur la trémie du R+1 attend une réponse depuis neuf jours » | FileDesPoints.tsx:77 ; Questions.tsx:68 ; Fonctionnement.tsx:1349 | C → B à la pose | b5_25 (11/10) : une section « Questions sans réponse » au point du matin du socle, pour le gérant, l'administrateur et les membres du projet, à partir de 8 jours (critique au-delà de 15) ; test b5_15 écrit | Poser b5_25 et b5_15 | 0 / 0,5 | — |
+| 46 | « la question qui attend depuis huit jours remonte le matin » ; « celle qui attend une réponse depuis plus de huit jours remonte le matin » ; « La question sur la trémie du R+1 attend une réponse depuis neuf jours » | FileDesPoints.tsx:77 ; Questions.tsx:68 ; Fonctionnement.tsx:1349 | B | b5_25 (11/10) : une section « Questions sans réponse » au point du matin du socle, pour le gérant, l'administrateur et les membres du projet, à partir de 8 jours (critique au-delà de 15) ; test b5_15 vert sur la recette (lot h1410corr, 11/10) | — | 0 / 0,5 | — |
 | 47 | « Un point écarté ne revient pas à l'indice suivant » | Questions.tsx:43 | B | b5_07 §7 (poste écarté reconduit écarté) | — | 0 / 0,5 | — |
 | 48 | « Indices suivis. Quand un indice change, seuls les écarts nouveaux remontent » ; « Revérification à chaque indice » | Dossier.tsx:631-633 ; Formules.tsx:421 | B | b5_07 §7 (indice B : ouverts, corrigés, reconduits) | — | 0 / 1 | — |
 | 49 | « Lorani compare le nouvel indice au précédent, **y compris les changements non signalés** » ; « L'indice D déplace la trémie de 60 cm sans avis » | Questions.tsx:98 ; Dossier.tsx:454 | C | Les constats sont comparés d'un indice à l'autre | Comparer toutes les valeurs lues d'un indice à l'autre, même sans constat, et lister les changements non déclarés au cartouche | 1,5 / 1 | — |
@@ -200,8 +200,8 @@ Ce qui n'est pas couvert :
 | État | Lignes |
 |---|---|
 | A | 2 |
-| B | 23 |
-| C | 28 |
+| B | 26 |
+| C | 25 |
 | D | 13 |
 | T | 3 |
 
