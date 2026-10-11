@@ -1,5 +1,15 @@
 # Session B1 — VARELO, le référentiel du groupe (sociétés, pôles, rapprochement)
 
+## 11/10/2026 — le contexte du groupe pour l'assistant (b1_18, tests b1_21)
+
+Lignes 1, 8, 18, 28 (« une seule IA ») et 33 (« chaque lecture au journal ») du chiffrage, moitié données.
+`public.grp_contexte(client, motif)` (security invoker, RLS de la personne) rend un résumé borné du groupe :
+sociétés (ventes, résultat, trésorerie, écarts), point du matin, décisions en attente, clients au-dessus du
+plafond, contrats à dénoncer sous 90 jours, réserves, reportings en retard, caisses d'hier ; aucun IBAN.
+Chaque lecture : journal `varelo.lecture.contexte` (`private.grp_noter_lecture`). Tests b1_21 : 7 assertions
+(maquette : 347 ok). Reste, hors de mon module : brancher cette porte comme outil de l'assistant
+(app/api/assistant/route.ts, appel rpc avec la session de la personne) — proposé au coordinateur.
+
 ## 11/10/2026 — les caisses (b1_17, tests b1_20)
 
 Lignes 24 et 26 du chiffrage. `b1_17_caisses.sql` : jeu `ventes_caisse` (jour, magasin, CA TTC, CA HT, tickets ;
