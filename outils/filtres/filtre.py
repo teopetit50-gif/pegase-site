@@ -68,8 +68,10 @@ def courbe(x, noir, epaule, gamma):
     return noir + (1 - noir) * x
 
 
-def etalonner(rgb, variante):
-    """rgb : sRGB float 0..1, forme (..., 3)"""
+def etalonner(rgb, variante, expo_ev=None):
+    """rgb : sRGB float 0..1, forme (..., 3) ; `expo_ev` remplace l'exposition
+    par défaut (−1,05 pour « sombre », réglé sur une photo de nuit ; une pièce
+    en plein jour en demande moins)"""
     lin = srgb_vers_lin(rgb)
 
     if variante == "sombre":
@@ -78,6 +80,8 @@ def etalonner(rgb, variante):
     else:
         balance = np.array([1.32, 0.96, 0.62])      # chaud, doré
         expo = 2 ** -0.95
+    if expo_ev is not None:
+        expo = 2 ** expo_ev
     lin = lin * balance * expo
 
     srgb = lin_vers_srgb(lin)
