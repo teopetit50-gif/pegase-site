@@ -468,5 +468,41 @@ const choisir = (sel, valeur) => `(() => { const t = document.querySelector('${s
   }
 }
 
+{
+  // b6_28 : importer le devis collé depuis Excel, sur le marché à vérifier de Maison Rolland
+  const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+  const graves = (cible) => `(async () => { const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`;
+  const tableau = 'N°\tDésignation\tU\tQté\tP.U. HT\tMontant HT\tLot\n\tTERRASSEMENT\t\t\t\t\t\n2.1\tFouilles en rigole\tm3\t14\t62,00\t868,00 €\t01\n2.2\tÉvacuation des terres\tforfait\t\t\t450,00\t99\n\tSous-total\t\t\t\t1 318,00\t\n';
+  for (const largeur of [390, 1440]) {
+    const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `b6-import-${largeur}`, densite: 1 });
+    console.log(`— Maison Rolland : importer le devis collé depuis Excel (${largeur})`);
+    ok(await s.aller(base + chemin), 'page chargée');
+    await s.dormir(500);
+    ok(await s.evaluer(`(() => { const b = [...document.querySelectorAll('.esp-item')].find(b => /Rolland/.test(b.textContent)); if (!b) return false; b.click(); return true; })()`), 'ouverture de Maison Rolland');
+    await s.dormir(500);
+    const avant = await s.evaluer(`document.querySelectorAll('section[aria-label="Marché"] tbody tr').length`);
+    ok(await s.evaluer(bouton('/Importer le devis/')) === true, 'clic sur « Importer le devis »');
+    await s.dormir(400);
+    ok(await s.evaluer(saisir('[role="dialog"] textarea', tableau)), 'tableau collé');
+    await s.dormir(300);
+    const t = await s.evaluer(`document.querySelector('[role="dialog"]')?.innerText || ''`);
+    ok(/2 lignes lues/.test(t) && /1[\s  ]318,00/.test(t) && /Lot inconnu sur ce chantier : 99/.test(t) && /1 ligne de total ou vide ignorée/.test(t),
+       'aperçu : 2 lignes, 1 318 € HT, le sous-total ignoré, le lot 99 inconnu signalé');
+    await s.evaluer(axe + ';true');
+    const g = await s.evaluer(graves(`document.querySelector('[role="dialog"]')`));
+    ok(g.length === 0, `fenêtre d'import : aucun écart axe grave ${g.length ? JSON.stringify(g) : ''}`);
+    const debDlg = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return d ? d.scrollWidth - d.clientWidth : -1; })()`);
+    ok(debDlg <= 0, `la fenêtre ne déborde pas (${debDlg})`);
+    await s.evaluer(`${dlgBouton('/Importer 2 lignes/')}?.click()`);
+    await s.dormir(700);
+    const apres = await s.evaluer(`document.querySelectorAll('section[aria-label="Marché"] tbody tr').length`);
+    ok(apres === avant + 2 && /2 lignes importées/.test(await s.evaluer('document.body.innerText')), `deux lignes ajoutées au marché (${avant} → ${apres}), message dit`);
+    const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
+    ok(deb === 0, `pas de débordement horizontal (${deb})`);
+    s.fermer();
+  }
+}
+
 console.log(echecs ? `\n${echecs} échec(s)` : '\ntout passe');
 process.exit(echecs ? 1 : 0);
