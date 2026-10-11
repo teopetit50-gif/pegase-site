@@ -1,19 +1,22 @@
 # Session B4 — TAMILA, le module des cabinets d'avocats
 
-## REPRISE — pause demandée par Teo (06/10/2026, 21 h Z)
+## REPRISE — pause demandée par Teo (11/10/2026, 15 h 40 Z)
 
-**État.** Branche worker-b4 propre, poussée. Fusionnée dans main par le coordinateur jusqu'à d181670 ; après :
-1e64795 et 988cec8 (chiffrage, `omega/CHIFFRAGE/tamila.md`), plus la présente note.
+**État.** Branche worker-b4 propre, poussée. Tout est fusionné dans main par le coordinateur jusqu'à 9fe1d9d
+(écrans), plus la présente note.
 
-**Posé et vert sur la recette** : b4_01 à b4_16 et leurs tests jusqu'au 25 (b4_15 en v2, fad9015). Les ouvriers
-tamila-coffre v2 et tamila-purge v2 (fab4e01) sont déployés, avec le cron. Point du matin (b4_14), expertises (b4_16),
-lectures longues (b4_15 + socle 19an d'A1, lecteur v28, lecteur_analyses = 'oui').
+**Posé et vert sur la recette** : b4_01 à b4_18 et leurs tests jusqu'au 27 (b4_15 en v2). Ouvriers tamila-coffre v2
+et tamila-purge v3 (genre `tamila.exporter`) déployés, avec le cron. Rien à poser.
 
-**Écrans** dans main, en `/espace2/tamila` : avis à rattacher, conflits automatiques, honoraires du cabinet, temps
-proposé et forfait, pilotage, lectures longues (citation non retrouvée mise à part), expertise. Recette 188/188 sur
-l'exemple, axe 0 écart grave.
+**Écrans** dans main, en `/espace2/tamila` : avis à rattacher, conflits, honoraires, temps proposé et forfait,
+pilotage, lectures longues (citations cliquables vers la page de la pièce), expertise, pièces attendues, archive du
+dossier ouverte en clair, journal CSV, audiences en .ics. Recette 196/196, série locale 589 ok (25 échecs connus).
+Le dessin de /espace2 est refait par C1 (omegaai.fr/omega) : ne pas toucher components/omega, aucun lien vers
+l'ancien dessin (vérifié : aucun dans components/espace/tamila). La recette ouvre encore `/espace/tamila` :
+la passer à `/espace2/tamila` si l'ancienne adresse disparaît.
 
-**Attend le coordinateur** : fusionner 1e64795 et 988cec8 (chiffrage) et cette note. Rien d'autre à poser.
+**Prochain pas sans Teo** : relevé d'office des pièces citées par le confrère (attend un type de lecture d'A1),
+dossier de plaidoirie exporté, abonnement d'agenda tenu à jour.
 
 **Attend Teo** :
 - l'activation du coffre Scaleway du banc (vrai appel Key Manager), pour la première lecture longue réelle ;
