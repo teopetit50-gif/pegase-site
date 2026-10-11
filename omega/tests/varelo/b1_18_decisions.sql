@@ -53,8 +53,9 @@ begin
                  and dc.resume like 'Dénoncer « Transport des palettes »%', format('le calcul de la dénonciation : %s', dc.calcul));
   return next is((select d.equipe_id from public.demandes_validation d where d.id = dc.demande_id), v_dj, 'la dénonciation va à la direction juridique');
   return next is((select d.equipe_id from public.demandes_validation d where d.id = dr.demande_id), v_do, 'la protestation va à la direction des opérations');
-  return next is(tests.compter('public', 'regles_validation', format('client_id = %L and module = %L', v_client, 'varelo')), 2::bigint,
-                 'les règles de routage sont posées à la première proposition');
+  return next is(tests.compter('public', 'regles_validation', format('client_id = %L and module = %L and type_action in (%L, %L) and equipe_id in (%L, %L)',
+                   v_client, 'varelo', 'varelo.denoncer_contrat', 'varelo.protester_reception', v_dj, v_do)), 2::bigint,
+                 'les règles de routage sont posées à la première proposition (une par type, avec son équipe)');
 
   -- à la main : la DF propose un plafond ; un refus des portes
   perform tests.endosser((b ->> 'daf')::uuid, 'b1-daf@essai.invalid');
