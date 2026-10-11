@@ -24,6 +24,17 @@
 2. Si un export réel arrive, le jouer par la chaîne de relevé et caler les `modeles_jeux` tiroma/logosw.
 3. Sinon, la liste « Pour tout amener en B » du chiffrage, dans l'ordre : soins à déplacer, séance longue mal placée, créneau proposé pour un plan, liste des contrôles dus, export des données.
 
+**Reprise du 11/10 : le lot « Pour tout amener en B » du chiffrage.**
+- `b3_23_complements_cabinet.sql` pose cinq portes :
+  - `tiroma_soins_a_deplacer` (titulaire) : les soins d'une demi-journée vide, et vers quel fauteuil équipé, libre, avec assistante présente ;
+  - `tiroma_seances_mal_placees` (titulaire, assistante) : une séance de 60 min ou plus, ou de chirurgie, qui sort des horaires, tombe sur un fauteuil non équipé, n'a pas d'assistante ou dont le praticien est pris ailleurs ;
+  - `tiroma_creneaux_pour_plans` : jusqu'à trois créneaux par plan signé sans rendez-vous ;
+  - `tiroma_controles_dus` : la liste complète, sans les patients « ne pas contacter » (comptés à part) ;
+  - `tiroma_exporter_donnees` (titulaire) : toutes les tables Tiroma du cabinet, avec le journal.
+- Test `24_complements_cabinet.sql`.
+- Vérifié en local : un soin seul sur le F3 part vers le F1 ; la chirurgie de 11 h 30 à 13 h a deux raisons ; la couronne est proposée seulement sur le F2 ; Nestor est listée et le patient « ne pas contacter » est compté à part ; l'export couvre 20 tables.
+- Pas d'écran dans ce lot.
+
 Base de travail locale : `/var/tmp/pgb3`, port 5499 (bases b3_rap et b3_tav). Elle sera perdue avec le conteneur, ce qui n'a aucune importance.
 
 Branche `worker-b3`. Coordinateur : session `session_01BCGFdpRKBvXKjouC75sYBg` (depuis le 06/10, 01 h 10 Z ; avant : `session_01B4JNQXyT69GytdvE9SjAnE`).
