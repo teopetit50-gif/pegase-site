@@ -429,6 +429,61 @@ Banc local : 28 tests, 312 assertions vertes, migrations posées deux fois ; tsc
 l'échéance honorée après message est comptée au suivi). Le chiffre repris compte tous les achats des 90 jours,
 sans prétendre qu'ils sont dus au seul message.
 
+## Lot c4_10 — règles en français, coupe-circuit, réponses automatiques, raison sociale mère (11/10)
+
+`omega/modules/offload/migrations/c4_10_regles_et_garde_fous.sql` :
+
+- **Règles (ligne 11)** : `public.offload_regles` (RLS, lecture dans l'organisation). Le client écrit une phrase
+  (`offload_ecrire_regle`) ; `private.offload_interpreter_regle` la lit sans modèle de langue et répond en une phrase.
+  Familles comprises :
+  - mot ou sujet interdit, montant interdit, tutoiement, longueur maximale ;
+  - formule d'appel, signature ;
+  - exclusion d'un secteur, d'un commercial ou d'un groupe (elle crée l'exclusion ; retirer la règle la lève) ;
+  - litige : comprise, mais dit « pas encore applicable » (CASHD).
+
+  Hors de ces familles : « non comprise », dite comme telle. Chaque message (reprise, échéance, retrait) passe par
+  `private.offload_regles_appliquer` : les formes sont appliquées, un message qui enfreint une règle est **retenu**
+  (motif écrit, tâche d'appel, journal `offload.message_retenu`).
+- **Coupe-circuit (ligne 38)** : `private.offload_surveiller` arrête OFFLOAD dans trois cas :
+  - plus de `seuil_non_remis_pct` (20 %) de messages non remis sur 7 jours, sur 5 au moins (statut `echec` ou
+    `envois.remise` rebond, plainte, refus) ;
+  - deux messages du même genre à la même adresse en 24 h ;
+  - un volume du jour au-delà de trois fois le plafond.
+
+  Une fois arrêté : messages en attente annulés (`annuler_envoi`), alerte critique, rien n'est préparé (cycles,
+  échéances, affaires, ouverture à la main). Seuls un gérant ou un admin relancent (`offload_reprendre`, motif
+  obligatoire) ; on suspend aussi à la main (`offload_suspendre`). La surveillance passe chaque nuit et à chaque
+  message non remis.
+- **Réponses automatiques** : `private.offload_reponse_auto` sépare l'absence (la séquence continue, journal
+  `offload.reponse_auto`) du départ. Un départ met le compte « à réattribuer », clôt la reprise en `abandon` et crée
+  la tâche « Trouver le nouvel interlocuteur » ; le système ne devine pas le successeur. Une citation dans une vraie
+  réponse n'est pas prise pour une réponse automatique.
+- **Message non remis** : le compte passe « à vérifier » (`offload_comptes.verification`). Il ne repart dans aucune
+  vague (`offload_ecarte`) ; ses affaires passent par l'appel. La vérification se lève par `offload_lever_verification`.
+- **Raison sociale mère (ligne 6)** : `public.offload_groupes` donne, par groupe, les comptes, le chiffre sur 12 mois,
+  la valeur, le pire signal, les reprises, les échéances et les affaires. Les comptes qui partagent un domaine de
+  courriel professionnel sont proposés au rattachement ; porte `offload_rattacher_groupe`.
+- Redéfinitions par copie : `offload_ecarte`, `offload_cycle`, `offload_preparer_message`, `offload_ouvrir`,
+  `offload_echeances_cycle`, `offload_relancer_affaire`, `offload_affaires_cycle`, `offload_suivre_envoi`,
+  `offload_lire_reponse`, `offload_detecter_tout`, `offload_regler`.
+- Écran :
+  - carte « Garde-fous et règles des messages » : bandeau d'arrêt, relancer / suspendre, règles avec la réponse du
+    système ;
+  - carte « Groupes clients » ;
+  - dans la fiche, le bandeau « À vérifier / À réattribuer » avec « Lever la vérification », et le groupe du compte.
+
+**Tests** : `omega/tests/offload/c4_10_regles_et_garde_fous.sql`, cinq tests :
+- `test_c4_10_lecture_des_regles`, `test_c4_10_regles_appliquees` ;
+- `test_c4_10_coupe_circuit` : les rebonds passent par `private.noter_remise` sous l'ouvrier, jamais par une écriture
+  directe dans `envois` ;
+- `test_c4_10_reponses_automatiques`, `test_c4_10_groupes`.
+
+Banc local : 33 tests, 355 assertions vertes, migrations posées deux fois.
+
+**À inscrire dans `a5_01`** : `offload_ecrire_regle(p_client uuid, p_texte text)`, `offload_retirer_regle(p_regle uuid)`,
+`offload_suspendre(p_client uuid, p_motif text)`, `offload_reprendre(p_client uuid, p_motif text)`,
+`offload_lever_verification(p_compte uuid, p_motif text)`, `offload_rattacher_groupe(p_comptes uuid[], p_groupe text)`.
+
 ## Lignes de capacité (`lib/produits/capacites/reprise.ts`, 45 lignes) — tenue et preuve
 
 Recette du 06/10, 17 h 10 Z (coordinateur) : `^test_(b3_|c4_|b4_24_|b6_16_)` → 834 ok, 0 not ok ; migrations
@@ -444,12 +499,12 @@ l'écran /espace/offload (liste par priorité avec la raison, fiche, reprise, t�
 | 3 | La fréquence d'achat habituelle d'un compte est mesurée, puis son décrochage détecté. | **prouvée (recette)** | test_c4_02_detection |
 | 4 | Les comptes sont priorisés par valeur attendue, pas par ordre alphabétique. | **prouvée (recette)** | test_c4_02_detection (« le premier de la liste est celui qui pèse le plus ») ; test_c4_04_lectures |
 | 5 | Les doublons de fiches sont rapprochés quand deux lignes désignent le même client. | **prouvée (recette)** | test_c4_05_doublons |
-| 6 | Les entités d'un même groupe client sont regroupées sous une raison sociale mère. | partielle | `groupe` lu dans les exports, plafond au groupe (test_c4_05_exclusions) ; pas de vue consolidée par raison sociale mère |
+| 6 | Les entités d'un même groupe client sont regroupées sous une raison sociale mère. | **c4_10, à poser** | test_c4_10_groupes (consolidé par groupe, rattachement proposé par domaine de courriel) ; carte « Groupes clients » |
 | 7 | Un tableur sans colonne de date est exploité à partir des dates de facture. | **prouvée (recette)** | test_c4_01_import ; test_c4_02_detection (`sans_achat` présenté à part) |
 | 8 | Les contrats et les équipements installés sont suivis jusqu'à leur échéance. | **prouvée (recette)** | test_c4_07_echeances, test_c4_07_contrats_et_parc |
 | 9 | Chaque message reprend la dernière prestation du compte et le temps écoulé depuis. | **prouvée (recette)** | test_c4_03_message |
 | 10 | Un compte sans réponse reçoit un second message, puis il sort du cycle. | **prouvée (recette)** | test_c4_03_cycle |
-| 11 | Les règles de ton et de contenu s'écrivent en français, sans case à cocher. | partielle | seule la signature se règle ; pas de règles de ton appliquées au message |
+| 11 | Les règles de ton et de contenu s'écrivent en français, sans case à cocher. | **c4_10, à poser** | test_c4_10_lecture_des_regles, test_c4_10_regles_appliquees (lecture déterministe, sans modèle de langue ; la rédaction libre reste au chiffrage) |
 | 12 | Un compte reçoit deux messages en tout, espacés d'au moins trois jours. | **prouvée (recette)** | test_c4_03_cycle (« deux messages en tout, jamais un troisième » ; contrainte `delai_relance_jours` ≥ 3) |
 | 13 | Une réponse, même négative, arrête la séquence et vous rend la conversation. | **prouvée (recette)** | test_c4_03_reponse |
 | 14 | Les comptes déjà contactés par un commercial sont écartés de la vague en cours. | **prouvée (recette)** | test_c4_05_exclusions |
@@ -476,7 +531,7 @@ l'écran /espace/offload (liste par priorité avec la raison, fiche, reprise, t�
 | 35 | Aucun prix ni aucun délai n'est avancé dans un message sans que vous l'ayez écrit. | **prouvée (recette)** | test_c4_03_message |
 | 36 | Une demande d'arrêt vaut retrait immédiat et définitif du cycle. | **prouvée (recette)** | test_c4_03_reponse |
 | 37 | Les listes d'exclusion se tiennent par compte, par secteur et par commercial. | **prouvée (recette)** | test_c4_05_exclusions |
-| 38 | Le système s'arrête de lui-même au premier doute, et vous le signale. | partielle | import douteux non appliqué et journalisé (test_c4_01_garde_fou) ; essai contre réel (test_c4_03_issues) ; verrous du socle. Pas un arrêt général du module |
+| 38 | Le système s'arrête de lui-même au premier doute, et vous le signale. | **c4_10, à poser** | test_c4_10_coupe_circuit (non remis au-delà du seuil, double message, volume ; annulation des messages en attente, alerte critique, relance par un gérant) |
 | 39 | Chaque message parti reste au journal, daté et consultable. | **prouvée (recette)** | test_c4_03_cycle (recette 17 h 25 Z, 1120 ok) |
 | 40 | Le chiffre d'affaires remis en jeu se lit vague par vague. | **prouvée (recette)** | test_c4_09_pilotage (vague du jour : comptes, en jeu, réponses, commandes, chiffre repris) |
 | 41 | Les comptes réactivés sont suivis jusqu'à leur première commande. | **prouvée (recette)** | test_c4_03_issues |
@@ -515,3 +570,4 @@ Partielles : 6, 11, 15, 38.
 - 06/10, 19 h 05 Z — recette : c4_08 posé et vert (860 ok), lignes 25 à 32 prouvées. Lot c4_09 (pilotage) : 28 tests,
   312 assertions vertes en local ; écran recetté.
 - 06/10, 20 h 45 Z — c4_09 vert sur la recette (21 ok) ; pause demandée par Teo à 21 h Z, section REPRISE écrite.
+- 11/10 — reprise sur ordre de Teo. Lot c4_10 (lignes 6, 11, 38, réponses automatiques, comptes à vérifier) : 33 tests, 355 assertions vertes en local.

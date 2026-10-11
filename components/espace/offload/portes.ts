@@ -14,13 +14,15 @@
      offload_noter_intervention (c4_07) ; lectures offload_echeances_tableau, offload_parc_compte ;
      offload_saisir_affaire, offload_retirer_affaire, offload_decider_affaire (c4_08) ;
      lectures offload_affaires_liste, offload_affaires_compte ;
-     lectures offload_pilotage, offload_arretes_liste (c4_09).
+     lectures offload_pilotage, offload_arretes_liste (c4_09) ;
+     offload_ecrire_regle, offload_retirer_regle, offload_suspendre, offload_reprendre,
+     offload_lever_verification, offload_rattacher_groupe (c4_10) ; lectures offload_garde_fous, offload_groupes.
    La décision sur un message (valider, refuser) se prend dans « À valider »,
    l'écran commun des demandes de validation du socle.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { AffaireCompte, AffairesListe, Arrete, EcheanceLigne, Fiche, ParcCompte, Pilotage, Tableau } from "./types";
+import type { AffaireCompte, AffairesListe, Arrete, EcheanceLigne, Fiche, GardeFous, Groupes, ParcCompte, Pilotage, Tableau } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -133,4 +135,39 @@ export async function chargerPilotage(depuis: string | null): Promise<Pilotage |
 export async function chargerArretes(): Promise<Arrete[]> {
   const l = await rpc<Arrete[] | null>("offload_arretes_liste", {});
   return Array.isArray(l) ? l : [];
+}
+
+/* c4_10 — règles en français, coupe-circuit, vérification, raison sociale mère */
+export async function chargerGardeFous(): Promise<GardeFous | null> {
+  const g = await rpc<GardeFous | null>("offload_garde_fous", {});
+  return g && typeof g === "object" ? g : null;
+}
+
+export function ecrireRegle(client: string, texte: string) {
+  return rpc<{ statut: string; reponse: string }>("offload_ecrire_regle", { p_client: client, p_texte: texte });
+}
+
+export function retirerRegle(regle: string) {
+  return rpc<null>("offload_retirer_regle", { p_regle: regle });
+}
+
+export function suspendre(client: string, motif: string) {
+  return rpc<number>("offload_suspendre", { p_client: client, p_motif: motif });
+}
+
+export function reprendre(client: string, motif: string) {
+  return rpc<null>("offload_reprendre", { p_client: client, p_motif: motif });
+}
+
+export function leverVerification(compte: string, motif: string) {
+  return rpc<null>("offload_lever_verification", { p_compte: compte, p_motif: motif });
+}
+
+export async function chargerGroupes(): Promise<Groupes> {
+  const g = await rpc<Groupes | null>("offload_groupes", {});
+  return g && typeof g === "object" && Array.isArray(g.groupes) ? g : { groupes: [], a_rattacher: [] };
+}
+
+export function rattacherGroupe(comptes: string[], groupe: string | null) {
+  return rpc<number>("offload_rattacher_groupe", { p_comptes: comptes, p_groupe: groupe });
 }
