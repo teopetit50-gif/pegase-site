@@ -618,7 +618,7 @@ export default function EcranVarelo() {
       </Dialog>
 
       <p className="esp-kpi-sous" style={{ marginTop: 18 }}>
-        Les lots se décident dans <Link href="/espace/validations">la file de validation</Link>, chacun par la direction que sa règle désigne ; chaque décision est inscrite au journal opposable.
+        Les lots se décident dans <Link href="/espace2/validations">la file de validation</Link>, chacun par la direction que sa règle désigne ; chaque décision est inscrite au journal opposable.
       </p>
     </>
   );
