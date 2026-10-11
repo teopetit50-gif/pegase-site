@@ -27,6 +27,7 @@ html.v2-actif .dlg-panneau {
   /* ——— jetons Geist, thème clair ——— */
   --v2-bg-100: #fff;
   --v2-bg-200: #fafafa;
+  --v2-bg-eleve: #fff;
   --v2-gray-100: #f2f2f2;
   --v2-gray-200: #ebebeb;
   --v2-gray-300: #e6e6e6;
@@ -103,10 +104,12 @@ html.v2-actif .dlg-panneau {
 /* ——— thème sombre : le choix « sombre », ou « système » sur un poste sombre ——— */
 @media (prefers-color-scheme: dark) {
   html:not([data-v2-theme="light"]) :is(.v2, .v2-jetons, .dlg-panneau) {
-    --v2-bg-100: #0a0a0a;
-    --v2-bg-200: #000;
-    --v2-gray-100: #1a1a1a;
-    --v2-gray-200: #1f1f1f;
+    /* le gris bleuté d'Attio (relevé sur ses captures, 10/10 : page #0f1112, fenêtre #17191a), plus de noir pur */
+    --v2-bg-100: #0f1112;
+    --v2-bg-200: #0f1112;
+    --v2-bg-eleve: #17191a;
+    --v2-gray-100: #1a1c1e;
+    --v2-gray-200: #1f2123;
     --v2-gray-300: #292929;
     --v2-gray-400: #2e2e2e;
     --v2-gray-500: #454545;
@@ -156,10 +159,11 @@ html.v2-actif .dlg-panneau {
   }
 }
 html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
-  --v2-bg-100: #0a0a0a;
-  --v2-bg-200: #000;
-  --v2-gray-100: #1a1a1a;
-  --v2-gray-200: #1f1f1f;
+  --v2-bg-100: #0f1112;
+  --v2-bg-200: #0f1112;
+  --v2-bg-eleve: #17191a;
+  --v2-gray-100: #1a1c1e;
+  --v2-gray-200: #1f2123;
   --v2-gray-300: #292929;
   --v2-gray-400: #2e2e2e;
   --v2-gray-500: #454545;
@@ -1537,7 +1541,7 @@ a.v2-jauge:hover {
   min-width: 200px;
   max-width: min(320px, calc(100vw - 32px));
   border-radius: 12px;
-  background: var(--v2-bg-100);
+  background: var(--v2-bg-eleve, var(--v2-bg-100));
   color: var(--v2-gray-1000);
   box-shadow: var(--v2-ombre-menu);
   outline: none;
@@ -1652,7 +1656,7 @@ a.v2-jauge:hover {
   max-height: calc(100dvh - 32px);
   overflow: auto;
   border-radius: 12px;
-  background: var(--v2-bg-100);
+  background: var(--v2-bg-eleve, var(--v2-bg-100));
   color: var(--v2-gray-1000);
   box-shadow: var(--v2-ombre-modal);
   outline: none;

@@ -29,7 +29,8 @@ const STATUTS = ["À faire", "En cours", "Bloqué", "Fait"];
 const CATEGORIES = ["Fondations", "Prospection", "Contenu", "Audits", "Clients", "Pilotage", "Pub"];
 const MOIS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
 const MOIS_LONGS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
-const teinte = (s?: string) => (s === "Fait" ? "vert" : s === "En cours" ? "bleu" : s === "Bloqué" ? "rouge" : "gris");
+/* que du noir/blanc et du bleu (Teo, 10/10) : la forme du point dit le statut — vide = à faire, bleu = en cours, plein = bloqué, gris = fait */
+const teinte = (s?: string) => (s === "Fait" ? "gris" : s === "En cours" ? "bleu" : s === "Bloqué" ? "fort" : "vide");
 
 /* ——— le calendrier du plan : S0 = du 9 au 11 octobre, puis des semaines lundi → dimanche ——— */
 const debut = (n: number) => (n === 0 ? new Date(2026, 9, 9) : new Date(2026, 9, 12 + 7 * (n - 1)));
@@ -90,7 +91,6 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
   const [vue, setVue] = useState<"liste" | "colonnes">("liste");
   const [choix, setChoix] = useState<string | null>(null);
   const [ficheOuverte, setFicheOuverte] = useState(false);
-  const [replies, setReplies] = useState<number[]>([]);
   const [faitesOuvertes, setFaitesOuvertes] = useState<number[]>([]);
   const [tout, setTout] = useState(false);
   const [etat, setEtat] = useState("");
@@ -106,6 +106,8 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
   }
 
   const blocCourant = Math.max(0, BLOCS.findIndex(([a, b]) => maintenant >= debut(a).getTime() && maintenant <= fin(b).getTime() + 86_399_999));
+  /* au départ, seule la semaine en cours est dépliée : la page reste courte */
+  const [replies, setReplies] = useState<number[]>(() => BLOCS.map((_, i) => i).filter((i) => i !== blocCourant));
 
   async function ajouter() {
     const ajouts = lignes.filter((l) => l.tableau === "ajouts");
@@ -219,9 +221,9 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
           {(
             [
               ["toutes", "Toutes", ""],
-              ["a_faire", "À faire", "gris"],
-              ["bloquees", "Bloquées", "rouge"],
-              ["terminees", "Terminées", "vert"],
+              ["a_faire", "À faire", ""],
+              ["bloquees", "Bloquées", ""],
+              ["terminees", "Terminées", ""],
             ] as [Filtre, string, string][]
           ).map(([cle, libelle, t]) => (
             <button key={cle} type="button" className="om-pt-segment" aria-pressed={filtre === cle} onClick={() => setFiltre(cle)}>

@@ -93,7 +93,7 @@
 /* ——— l'éditeur en fenêtre ——— */
 .no-voile { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 16px; background: var(--v2-voile); }
 .no-voile[data-entering] { animation: v2-fondu var(--v2-overlay) var(--v2-swift); }
-.no-fenetre { display: flex; flex-direction: column; width: min(1120px, 100%); height: min(880px, calc(100dvh - 32px)); border-radius: 12px; background: var(--v2-bg-100); color: var(--v2-gray-1000); box-shadow: var(--v2-ombre-modal); outline: none; overflow: hidden; font-family: var(--v2-sans); font-size: 14px; line-height: 20px; transition: width 0.25s var(--v2-tiroir), height 0.25s var(--v2-tiroir); }
+.no-fenetre { display: flex; flex-direction: column; width: min(1120px, 100%); height: min(880px, calc(100dvh - 32px)); border-radius: 12px; background: var(--v2-bg-eleve, var(--v2-bg-100)); color: var(--v2-gray-1000); box-shadow: var(--v2-ombre-modal); outline: none; overflow: hidden; font-family: var(--v2-sans); font-size: 14px; line-height: 20px; transition: width 0.25s var(--v2-tiroir), height 0.25s var(--v2-tiroir); }
 .no-fenetre[data-entering] { animation: v2-modale-entree var(--v2-overlay) var(--v2-swift); }
 .no-fenetre[data-agrandie] { width: 100%; height: calc(100dvh - 32px); }
 .no-dialogue { display: flex; flex-direction: column; height: 100%; outline: none; }
