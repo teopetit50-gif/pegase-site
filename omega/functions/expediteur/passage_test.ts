@@ -63,6 +63,8 @@ Deno.test("passage à vide : aucun travail, mais battre_ouvrier est appelé", as
   assertEquals(portes.appels[0].args[0], [
     "envois.brevo",
     "envois.brevo_sms",
+    "envois.meta_whatsapp",
+    "envois.ar24",
     "envois.confirmer",
   ]);
 });

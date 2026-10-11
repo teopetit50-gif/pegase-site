@@ -1,7 +1,12 @@
 // Ouvrier EXPÉDITEUR — fonction Edge appelée chaque minute (pg_cron → pg_net, clé de service).
-// Prend les travaux envois.brevo / envois.brevo_sms et les remet à Brevo. Voir passage.ts.
+// Prend les travaux envois.brevo / envois.brevo_sms (Brevo), envois.meta_whatsapp (WhatsApp Cloud API) et
+// envois.ar24 (LRE) et les remet au fournisseur. Voir passage.ts.
+// Environnement : BREVO_API_KEY ; META_ACCESS_TOKEN ; AR24_TOKEN, AR24_CLE_PRIVEE et AR24_URL (sans AR24_URL :
+// le bac à sable https://sandbox.ar24.fr/api, aucune lettre réelle ne part).
 
+import { clientAr24 } from "./ar24.ts";
 import { clientBrevo } from "./brevo.ts";
+import { clientWhatsApp } from "./meta.ts";
 import { executerPassage } from "./passage.ts";
 import { portesDepuisEnvironnement } from "./portes.ts";
 import { stockageSupabase } from "./stockage.ts";
@@ -24,6 +29,10 @@ Deno.serve(async (req: Request) => {
     return new Response("Méthode non autorisée", { status: 405 });
   }
   const cleEnvironnement = Deno.env.get("BREVO_API_KEY")?.trim() || null;
+  const jetonMeta = Deno.env.get("META_ACCESS_TOKEN")?.trim() || null;
+  const ar24Token = Deno.env.get("AR24_TOKEN")?.trim() || null;
+  const ar24Cle = Deno.env.get("AR24_CLE_PRIVEE")?.trim() || null;
+  const ar24Url = Deno.env.get("AR24_URL")?.trim() || undefined;
   const url = Deno.env.get("SUPABASE_URL") ?? "";
   const cleService = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
   const ouvrier = `expediteur@${
@@ -37,6 +46,13 @@ Deno.serve(async (req: Request) => {
     stockage: stockageSupabase(url, cleService),
     ouvrier,
     journal,
+    whatsappPour: (jeton, phoneNumberId) =>
+      clientWhatsApp(phoneNumberId, jeton),
+    jetonMeta,
+    ar24Pour: (acces) => clientAr24(acces, fetch, ar24Url),
+    accesAr24: ar24Token && ar24Cle
+      ? { token: ar24Token, clePrivee: ar24Cle }
+      : null,
   });
   journal.info("passage terminé", {
     pris: bilan.pris,

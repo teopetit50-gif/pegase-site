@@ -11,6 +11,8 @@ import type {
 import type { ClientBrevo, EmailBrevo, SmsBrevo } from "./brevo.ts";
 import type { Stockage } from "./stockage.ts";
 import type { Journal } from "./passage.ts";
+import type { ClientWhatsApp, MessageWhatsApp } from "./meta.ts";
+import type { AccesAr24, ClientAr24, MailAr24 } from "./ar24.ts";
 
 export type AppelPorte = { porte: keyof Portes; args: unknown[] };
 
@@ -231,4 +233,48 @@ export function travailExemple(
     essais: 0,
     client_id: client,
   };
+}
+
+export class WhatsAppDouble implements ClientWhatsApp {
+  messages: MessageWhatsApp[] = [];
+  medias: { nom: string; mime: string; octets: number }[] = [];
+  /** (jeton, phone_number_id) avec lesquels le client a été fabriqué. */
+  fabriques: [string, string][] = [];
+  erreur: Error | null = null;
+  // deno-lint-ignore require-await
+  async televerser(octets: Uint8Array, mime: string, nom: string) {
+    if (this.erreur) throw this.erreur;
+    this.medias.push({ nom, mime, octets: octets.length });
+    return `media-${this.medias.length}`;
+  }
+  // deno-lint-ignore require-await
+  async envoyer(message: MessageWhatsApp) {
+    if (this.erreur) throw this.erreur;
+    this.messages.push(message);
+    return `wamid.${this.messages.length}`;
+  }
+}
+
+export class Ar24Double implements ClientAr24 {
+  mails: MailAr24[] = [];
+  pieces: { idUser: string; nom: string; mime: string }[] = [];
+  acces: AccesAr24[] = [];
+  erreur: Error | null = null;
+  // deno-lint-ignore require-await
+  async televerser(
+    idUser: string,
+    nom: string,
+    _octets: Uint8Array,
+    mime: string,
+  ) {
+    if (this.erreur) throw this.erreur;
+    this.pieces.push({ idUser, nom, mime });
+    return `f${this.pieces.length}`;
+  }
+  // deno-lint-ignore require-await
+  async envoyer(mail: MailAr24) {
+    if (this.erreur) throw this.erreur;
+    this.mails.push(mail);
+    return { id: `${7000 + this.mails.length}`, statut: "waiting" };
+  }
 }

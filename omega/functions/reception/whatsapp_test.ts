@@ -147,7 +147,7 @@ Deno.test("message texte : accusé 200 immédiat, puis réception déposée (bo�
     deps,
   );
   assertEquals(reponse.status, 200);
-  assertEquals(await reponse.json(), { recus: 1 });
+  assertEquals(await reponse.json(), { recus: 1, statuts: 0 });
   const issues = await traitement!;
   assertEquals(issues[0].sortie, "nouvelle");
   const r = portes.receptions[0];
@@ -288,16 +288,56 @@ Deno.test("message vocal : rangé en pièce vocal.ogg, type audio/ogg sans param
   assertEquals((r.detail.media as Record<string, unknown>).vocal, true);
 });
 
-Deno.test("statuts de remise (value.statuses) : ignorés ; boîte inconnue : ignorée", async () => {
+Deno.test("statuts de remise : delivered → remis, failed → refuse (code et titre Meta), sent/read ignorés, wamid inconnu → remise_inconnue ; boîte inconnue : ignorée", async () => {
   const { portes, deps } = monter();
+  portes.references.add("meta_whatsapp|wamid.S");
+  portes.references.add("meta_whatsapp|wamid.F");
+  const statuses = [
+    { id: "wamid.S", status: "sent", timestamp: "1760176800" },
+    { id: "wamid.S", status: "delivered", timestamp: "1760176805" },
+    { id: "wamid.S", status: "read", timestamp: "1760176900" },
+    {
+      id: "wamid.F",
+      status: "failed",
+      timestamp: "1760176810",
+      errors: [{ code: 131047, title: "Re-engagement message" }],
+    },
+    { id: "wamid.Z", status: "delivered", timestamp: "1760176820" },
+  ];
   const { reponse, traitement } = await traiterWhatsApp(
-    await post(
-      notification([], { statuses: [{ id: "wamid.S", status: "delivered" }] }),
-    ),
+    await post(notification([], { statuses })),
     deps,
   );
-  assertEquals(await reponse.json(), { recus: 0 });
-  assertEquals(await traitement!, []);
+  assertEquals(await reponse.json(), { recus: 0, statuts: 3 });
+  assertEquals((await traitement!).map((i) => i.sortie), [
+    "remise_notee",
+    "remise_notee",
+    "remise_inconnue",
+  ]);
+  assertEquals(portes.remises, [
+    {
+      fournisseur: "meta_whatsapp",
+      reference: "wamid.S",
+      evenement: "remis",
+      detail: { code: "delivered", raison: "delivered" },
+      survenuLe: "2025-10-11T10:00:05.000Z",
+      cle: "wamid.S:delivered",
+    },
+    {
+      fournisseur: "meta_whatsapp",
+      reference: "wamid.F",
+      evenement: "refuse",
+      detail: { code: "131047", raison: "Re-engagement message" },
+      survenuLe: "2025-10-11T10:00:10.000Z",
+      cle: "wamid.F:failed",
+    },
+  ]);
+  // Meta rejoue la notification : rien de plus n'est noté.
+  await (await traiterWhatsApp(
+    await post(notification([], { statuses })),
+    deps,
+  )).traitement;
+  assertEquals(portes.remises.length, 2);
   const autre = notification([texte("wamid.X")]);
   (autre.entry[0].changes[0].value.metadata as Record<string, string>)
     .phone_number_id = "999";

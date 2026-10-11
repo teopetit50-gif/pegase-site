@@ -1,6 +1,13 @@
 // Doubles des portes et du stockage pour les tests de la réception.
 
-import type { Boite, Canal, Depot, Portes, Reception } from "./portes.ts";
+import type {
+  Boite,
+  Canal,
+  Depot,
+  EvenementRemise,
+  Portes,
+  Reception,
+} from "./portes.ts";
 import type { Journal, Stockage } from "./commun.ts";
 
 export const CLIENT = "22222222-2222-4222-8222-222222222222";
@@ -35,6 +42,39 @@ export class PortesDouble implements Portes {
     const id = this.receptions.length;
     this.cles.set(cle, id);
     return { id, nouvelle: true };
+  }
+  /** Références (fournisseur|référence) des envois connus de noter_remise. */
+  references = new Set<string>();
+  remises: {
+    fournisseur: string;
+    reference: string;
+    evenement: EvenementRemise;
+    detail: { code: string; raison: string };
+    survenuLe: string | null;
+    cle: string;
+  }[] = [];
+  // deno-lint-ignore require-await
+  async noterRemise(
+    fournisseur: string,
+    reference: string,
+    evenement: EvenementRemise,
+    detail: { code: string; raison: string },
+    survenuLe: string | null,
+    cle: string,
+  ) {
+    if (this.panne) throw this.panne;
+    if (!this.references.has(`${fournisseur}|${reference}`)) return false;
+    if (!this.remises.some((r) => r.cle === cle)) {
+      this.remises.push({
+        fournisseur,
+        reference,
+        evenement,
+        detail,
+        survenuLe,
+        cle,
+      });
+    }
+    return true;
   }
 }
 

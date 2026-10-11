@@ -1,6 +1,6 @@
-// Un passage de l'ouvrier expéditeur : prend les travaux envois.brevo et
-// envois.brevo_sms, commence chaque envoi par la porte commencer_envoi, le remet
-// à Brevo, le confirme (confirmer_envoi) ou le fait échouer (echouer_envoi), finit
+// Un passage de l'ouvrier expéditeur : prend les travaux envois.brevo, envois.brevo_sms,
+// envois.meta_whatsapp et envois.ar24, commence chaque envoi par la porte commencer_envoi, le
+// remet au fournisseur (Brevo, WhatsApp Cloud API de Meta, AR24), le confirme (confirmer_envoi) ou le fait échouer (echouer_envoi), finit
 // le travail, puis bat (battre_ouvrier) même à vide.
 //
 // Flux posé par le coordinateur (05/10/2026) :
@@ -24,6 +24,17 @@ import {
   type SmsBrevo,
 } from "./brevo.ts";
 import { type Stockage, versBase64 } from "./stockage.ts";
+import {
+  type ClientWhatsApp,
+  ErreurMeta,
+  type MessageWhatsApp,
+} from "./meta.ts";
+import {
+  type AccesAr24,
+  type ClientAr24,
+  ErreurAr24,
+  type MailAr24,
+} from "./ar24.ts";
 
 export const MODULE = "expediteur";
 /** Genre interne : confirmation différée d'un envoi accepté par Brevo (voir rapprochement). */
@@ -31,11 +42,28 @@ export const GENRE_CONFIRMATION = "envois.confirmer";
 export const GENRES = [
   "envois.brevo",
   "envois.brevo_sms",
+  "envois.meta_whatsapp",
+  "envois.ar24",
   GENRE_CONFIRMATION,
 ] as const;
-export const CANAUX_PRIS_EN_CHARGE = new Set(["email", "sms"]);
-/** Fournisseurs que cet ouvrier remet réellement (toujours par l'API Brevo). */
-export const FOURNISSEURS_REMIS = new Set(["brevo", "brevo_sms"]);
+export const CANAUX_PRIS_EN_CHARGE = new Set([
+  "email",
+  "sms",
+  "whatsapp",
+  "lre",
+]);
+/** Fournisseurs que cet ouvrier remet réellement. */
+export const FOURNISSEURS_REMIS = new Set([
+  "brevo",
+  "brevo_sms",
+  "meta_whatsapp",
+  "ar24",
+]);
+/** WhatsApp et LRE n'ont qu'un fournisseur chacun : un autre est une incohérence du socle. */
+const FOURNISSEUR_DU_CANAL: Record<string, string> = {
+  whatsapp: "meta_whatsapp",
+  lre: "ar24",
+};
 
 export type Journal = {
   info(message: string, detail?: Record<string, unknown>): void;
@@ -57,6 +85,14 @@ export type Dependances = {
   /** Pour les tests : pas d'attente entre les tentatives de confirmer_envoi. */
   attente?: (ms: number) => Promise<void>;
   maintenant?: () => Date;
+  /** WhatsApp : fabrique un client pour un jeton et un phone_number_id. Absent → non branché. */
+  whatsappPour?: (jeton: string, phoneNumberId: string) => ClientWhatsApp;
+  /** META_ACCESS_TOKEN de l'environnement (jeton d'utilisateur système), null tant qu'il n'est pas posé. */
+  jetonMeta?: string | null;
+  /** AR24 : fabrique un client pour un accès. Absent → non branché. */
+  ar24Pour?: (acces: AccesAr24) => ClientAr24;
+  /** AR24_TOKEN + AR24_CLE_PRIVEE de l'environnement, null tant qu'ils ne sont pas posés. */
+  accesAr24?: AccesAr24 | null;
 };
 
 export type Issue =
@@ -156,6 +192,8 @@ export async function executerPassage(deps: Dependances): Promise<Bilan> {
         echecs: bilan.echecs,
         duree_ms: bilan.duree_ms,
         cle_environnement: deps.cleEnvironnement !== null,
+        whatsapp_branche: !!(deps.whatsappPour && deps.jetonMeta),
+        ar24_branche: !!(deps.ar24Pour && deps.accesAr24),
       },
       deps.attendu ?? "15 minutes",
     );
@@ -264,10 +302,11 @@ export async function traiterTravail(
       "finir_travail",
       travail.id,
     );
-    journal.info("envoi remis à Brevo", {
+    journal.info("envoi remis au fournisseur", {
       travail: travail.id,
       envoi: envoi.envoi,
       canal: envoi.canal,
+      fournisseur: envoi.fournisseur,
       mode: envoi.mode,
       fournisseur_id: fournisseurId,
       confirme,
@@ -328,7 +367,15 @@ async function remettre(
   if (!CANAUX_PRIS_EN_CHARGE.has(envoi.canal)) {
     throw new ErreurRemise(
       "CANAL_NON_PRIS_EN_CHARGE",
-      `canal ${envoi.canal} : cet ouvrier ne remet que email et sms`,
+      `canal ${envoi.canal} : cet ouvrier ne remet que email, sms, whatsapp et lre`,
+      true,
+    );
+  }
+  const attendu = FOURNISSEUR_DU_CANAL[envoi.canal];
+  if (attendu && envoi.fournisseur !== attendu) {
+    throw new ErreurRemise(
+      "CANAL_NON_PRIS_EN_CHARGE",
+      `canal ${envoi.canal} par ${envoi.fournisseur} : seul ${attendu} est remis`,
       true,
     );
   }
@@ -360,6 +407,8 @@ async function remettre(
     );
   }
 
+  if (envoi.canal === "whatsapp") return await remettreWhatsApp(envoi, deps);
+  if (envoi.canal === "lre") return await remettreLre(envoi, deps);
   const cleApi = await cleFournisseur(envoi, deps);
   const brevo = deps.brevoPour(cleApi);
   return envoi.canal === "sms"
@@ -372,23 +421,8 @@ async function cleFournisseur(
   envoi: EnvoiAEnvoyer,
   deps: Dependances,
 ): Promise<string> {
-  if (envoi.expediteur.secret) {
-    let secret: string | null = null;
-    try {
-      secret = await deps.portes.secretExpediteur(envoi.envoi);
-    } catch (e) {
-      throw new ErreurRemise(
-        "SECRET_ILLISIBLE",
-        `secret_expediteur : ${String(e).slice(0, 200)}`,
-        false,
-      );
-    }
-    if (secret) return secret;
-    deps.journal.erreur(
-      "secret_expediteur n'a rien rendu, repli sur BREVO_API_KEY",
-      { envoi: envoi.envoi },
-    );
-  }
+  const secret = await secretCoffre(envoi, deps, "BREVO_API_KEY");
+  if (secret) return secret;
   if (deps.cleEnvironnement) return deps.cleEnvironnement;
   deps.journal.erreur(
     "BREVO_API_KEY absente de l'environnement : fournisseur non branché, envoi reporté",
@@ -399,6 +433,31 @@ async function cleFournisseur(
     "aucune clé Brevo : ni coffre, ni BREVO_API_KEY",
     false,
   );
+}
+
+/** Secret du coffre quand l'expéditeur en a un ; null (et un journal) s'il n'y en a pas. */
+async function secretCoffre(
+  envoi: EnvoiAEnvoyer,
+  deps: Dependances,
+  repli: string,
+): Promise<string | null> {
+  if (!envoi.expediteur.secret) return null;
+  let secret: string | null = null;
+  try {
+    secret = await deps.portes.secretExpediteur(envoi.envoi);
+  } catch (e) {
+    throw new ErreurRemise(
+      "SECRET_ILLISIBLE",
+      `secret_expediteur : ${String(e).slice(0, 200)}`,
+      false,
+    );
+  }
+  if (secret) return secret;
+  deps.journal.erreur(
+    `secret_expediteur n'a rien rendu, repli sur ${repli}`,
+    { envoi: envoi.envoi },
+  );
+  return null;
 }
 
 /** confirmer_envoi est rejouable : trois tentatives, puis on finit quand même le travail (Brevo a accepté). */
@@ -576,6 +635,20 @@ function qualifier(e: unknown): { message: string; definitive: boolean } {
       definitive: e.definitif,
     };
   }
+  if (e instanceof ErreurMeta) {
+    return {
+      message: `META_${e.statut}${e.code !== null ? `_${e.code}` : ""} : ${
+        e.corps.slice(0, 500)
+      }`,
+      definitive: e.definitif,
+    };
+  }
+  if (e instanceof ErreurAr24) {
+    return {
+      message: `AR24_${e.statut} : ${e.corps.slice(0, 500)}`,
+      definitive: e.definitif,
+    };
+  }
   return {
     message: `ERREUR_INATTENDUE : ${String(e).slice(0, 500)}`,
     definitive: false,
@@ -672,4 +745,245 @@ async function remettreSms(
     );
   }
   return String(id);
+}
+
+/** Jeton Meta : coffre (secret de l'expéditeur) sinon META_ACCESS_TOKEN. */
+async function remettreWhatsApp(
+  envoi: EnvoiAEnvoyer,
+  deps: Dependances,
+): Promise<string> {
+  const phoneNumberId = texteParametre(
+    envoi.expediteur.parametres,
+    "phone_number_id",
+  );
+  if (!phoneNumberId) {
+    throw new ErreurRemise("PHONE_NUMBER_ID_ABSENT", envoi.envoi, true);
+  }
+  const jeton = (await secretCoffre(envoi, deps, "META_ACCESS_TOKEN")) ??
+    deps.jetonMeta ?? null;
+  if (!jeton || !deps.whatsappPour) {
+    deps.journal.erreur(
+      "META_ACCESS_TOKEN absent : WhatsApp non branché, envoi reporté",
+      { envoi: envoi.envoi, mode: envoi.mode },
+    );
+    throw new ErreurRemise(
+      "FOURNISSEUR_NON_BRANCHE",
+      "aucun jeton Meta : ni coffre, ni META_ACCESS_TOKEN",
+      false,
+    );
+  }
+  if (envoi.pieces.length > 1) {
+    throw new ErreurRemise(
+      "PIECES_WHATSAPP",
+      `${envoi.pieces.length} pièces : WhatsApp n'en porte qu'une par message`,
+      true,
+    );
+  }
+  const client = deps.whatsappPour(jeton, phoneNumberId);
+  let piece: { id: string; nom: string } | null = null;
+  for (const p of envoi.pieces) {
+    piece = {
+      id: await client.televerser(
+        await lirePiece(deps.stockage, p),
+        p.mime,
+        p.nom,
+      ),
+      nom: p.nom,
+    };
+  }
+  const message = composerWhatsApp(envoi, piece);
+  if (!/^\d{8,15}$/.test(message.to)) {
+    throw new ErreurRemise("NUMERO_INVALIDE", envoi.destinataire.adresse, true);
+  }
+  return await client.envoyer(message);
+}
+
+/**
+ * Un modèle (modele_externe = nom du modèle approuvé par Meta) quand l'envoi en porte un : c'est la
+ * seule forme qui part hors de la fenêtre de 24 h. parametres_modele.components est passé tel quel ;
+ * à défaut, parametres_modele.corps (liste de textes) remplit {{1}}, {{2}}… du corps. Sans modèle : un
+ * texte libre, ou la pièce avec le texte en légende.
+ */
+export function composerWhatsApp(
+  envoi: EnvoiAEnvoyer,
+  piece: { id: string; nom: string } | null,
+): MessageWhatsApp {
+  const to = normaliserNumeroSms(envoi.destinataire.adresse);
+  if (envoi.modele_externe) {
+    const p = envoi.parametres_modele ?? {};
+    let components: Record<string, unknown>[] = [];
+    if (Array.isArray(p.components)) {
+      components = p.components as Record<string, unknown>[];
+    } else if (Array.isArray(p.corps) && p.corps.length) {
+      components = [{
+        type: "body",
+        parameters: p.corps.map((t) => ({ type: "text", text: String(t) })),
+      }];
+    }
+    if (piece && !components.some((c) => c.type === "header")) {
+      components = [{
+        type: "header",
+        parameters: [{
+          type: "document",
+          document: { id: piece.id, filename: piece.nom },
+        }],
+      }, ...components];
+    }
+    return {
+      to,
+      type: "template",
+      template: {
+        name: envoi.modele_externe,
+        language: {
+          code: envoi.langue ?? envoi.destinataire.langue ?? "fr",
+        },
+        ...(components.length ? { components } : {}),
+      },
+    };
+  }
+  if (piece) {
+    if (envoi.corps.length > 1024) {
+      throw new ErreurRemise(
+        "TEXTE_TROP_LONG",
+        `légende de ${envoi.corps.length} caractères (WhatsApp : 1024 au plus avec une pièce)`,
+        true,
+      );
+    }
+    return {
+      to,
+      type: "document",
+      document: {
+        id: piece.id,
+        filename: piece.nom,
+        ...(envoi.corps ? { caption: envoi.corps } : {}),
+      },
+    };
+  }
+  if (!envoi.corps || envoi.corps.length > 4096) {
+    throw new ErreurRemise(
+      "TEXTE_TROP_LONG",
+      `texte de ${envoi.corps.length} caractères (WhatsApp : 1 à 4096)`,
+      true,
+    );
+  }
+  return { to, type: "text", text: { body: envoi.corps, preview_url: false } };
+}
+
+/**
+ * Accès AR24 : coffre (JSON {"token", "cle_privee"}) sinon AR24_TOKEN + AR24_CLE_PRIVEE.
+ * L'identifiant de l'expéditeur chez AR24 est expediteur.parametres.id_utilisateur (exigé par
+ * preparer_expediteur). La référence de l'envoi est l'id de la LRE chez AR24.
+ */
+async function remettreLre(
+  envoi: EnvoiAEnvoyer,
+  deps: Dependances,
+): Promise<string> {
+  const idUser = texteParametre(envoi.expediteur.parametres, "id_utilisateur");
+  if (!idUser) {
+    throw new ErreurRemise("ID_UTILISATEUR_ABSENT", envoi.envoi, true);
+  }
+  let acces = deps.accesAr24 ?? null;
+  const secret = await secretCoffre(envoi, deps, "AR24_TOKEN");
+  if (secret) {
+    try {
+      const o = JSON.parse(secret);
+      if (typeof o.token === "string" && typeof o.cle_privee === "string") {
+        acces = { token: o.token, clePrivee: o.cle_privee };
+      } else throw new Error("token ou cle_privee manquant");
+    } catch (e) {
+      throw new ErreurRemise(
+        "SECRET_ILLISIBLE",
+        `secret AR24 attendu en JSON {"token","cle_privee"} : ${
+          String(e).slice(0, 100)
+        }`,
+        false,
+      );
+    }
+  }
+  if (!acces || !deps.ar24Pour) {
+    deps.journal.erreur(
+      "AR24_TOKEN / AR24_CLE_PRIVEE absents : AR24 non branché, envoi reporté",
+      { envoi: envoi.envoi, mode: envoi.mode },
+    );
+    throw new ErreurRemise(
+      "FOURNISSEUR_NON_BRANCHE",
+      "aucun accès AR24 : ni coffre, ni AR24_TOKEN + AR24_CLE_PRIVEE",
+      false,
+    );
+  }
+  const client = deps.ar24Pour(acces);
+  const pieces: string[] = [];
+  for (const p of envoi.pieces) {
+    pieces.push(
+      await client.televerser(
+        idUser,
+        p.nom,
+        await lirePiece(deps.stockage, p),
+        p.mime,
+      ),
+    );
+  }
+  const remise = await client.envoyer(composerLre(envoi, idUser, pieces));
+  return remise.id;
+}
+
+/**
+ * Destinataire professionnel → to_company = son nom ; particulier → prénom = premier mot du nom,
+ * nom = le reste (ou le nom entier s'il n'a qu'un mot). eIDAS si expediteur.parametres.eidas.
+ */
+export function composerLre(
+  envoi: EnvoiAEnvoyer,
+  idUser: string,
+  pieces: string[],
+): MailAr24 {
+  const d = envoi.destinataire;
+  const nom = (d.nom ?? "").trim();
+  if (!nom) {
+    throw new ErreurRemise(
+      "DESTINATAIRE_SANS_NOM",
+      "une LRE exige le nom du destinataire",
+      true,
+    );
+  }
+  const eidas = envoi.expediteur.parametres.eidas;
+  const mail: MailAr24 = {
+    id_user: idUser,
+    to_email: d.adresse,
+    dest_statut: d.professionnel ? "professionnel" : "particulier",
+    content: envoi.corps,
+    eidas: eidas === true || eidas === 1 || eidas === "1" ? "1" : "0",
+    ref_client: envoi.cle,
+    pieces,
+  };
+  if (d.professionnel) mail.to_company = nom;
+  else {
+    const i = nom.indexOf(" ");
+    if (i > 0) {
+      mail.to_firstname = nom.slice(0, i);
+      mail.to_lastname = nom.slice(i + 1).trim();
+    } else mail.to_lastname = nom;
+  }
+  if (envoi.objet?.id) mail.ref_dossier = envoi.objet.id.slice(0, 100);
+  return mail;
+}
+
+function texteParametre(
+  parametres: Record<string, unknown> | null | undefined,
+  cle: string,
+): string | null {
+  const v = parametres?.[cle];
+  if (typeof v === "string" && v.trim()) return v.trim();
+  if (typeof v === "number") return String(v);
+  return null;
+}
+
+async function lirePiece(
+  stockage: Stockage,
+  piece: EnvoiAEnvoyer["pieces"][number],
+): Promise<Uint8Array> {
+  try {
+    return await stockage.lirePiece(piece);
+  } catch (e) {
+    throw new ErreurRemise("PIECE_ILLISIBLE", String(e).slice(0, 300), false);
+  }
 }

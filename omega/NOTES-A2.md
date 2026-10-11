@@ -30,6 +30,7 @@ le dernier SHA est celui du commit qui pose cette section (voir `git log -1`). L
 | Script de mise en service des SMS | c1218ed | — | **Non joué** (attend les crédits SMS et l'accord de Teo) |
 | Guides : GMAIL (§ production), MICROSOFT, WHATSAPP, DEPOT, WIDGET | divers | — | Pris dans main : WHATSAPP, DEPOT, WIDGET |
 | Chiffrage des canaux `omega/CHIFFRAGE/canaux.md` | ecf5275 | — | Pour Teo |
+| Envoi WhatsApp (`meta_whatsapp`) et LRE AR24 dans `expediteur` ; accusés WhatsApp → `noter_remise` dans `reception` ; GUIDE-AR24, § envoi de GUIDE-WHATSAPP (11/10) | voir le dernier commit | B (doubles), T | Non déployé : redéployer `expediteur` et `reception` ; `branche` reste false jusqu'aux comptes |
 
 ### Ce qui attend le coordinateur
 

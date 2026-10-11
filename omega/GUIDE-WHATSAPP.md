@@ -128,6 +128,26 @@ Donnez-lui le Phone number ID.
    pour un vocal.
 3. Le journal de la fonction `reception` dit « notification WhatsApp traitée ».
 
+## Écrire en WhatsApp (envoi)
+
+L'ouvrier `expediteur` remet aussi les envois du canal `whatsapp` (travaux `envois.meta_whatsapp`).
+Il se sert du même jeton `META_ACCESS_TOKEN` et du Phone number ID de la ligne d'expéditeur
+(étape 6). Rien d'autre à créer, sauf les **modèles** :
+- dans les 24 h qui suivent le dernier message du client, un texte libre part tel quel ;
+- au-delà, Meta n'accepte qu'un **modèle approuvé** (WhatsApp Manager → Modèles de message). Un
+  texte libre hors fenêtre échoue définitivement (code Meta 131047), sans réessai.
+
+Côté Omega, un envoi par modèle porte `modele_externe` = le nom du modèle, `langue` (par défaut
+`fr`) et, dans `parametres_modele`, soit `corps` (la liste des valeurs de {{1}}, {{2}}…), soit
+`components` au format de Meta. Une pièce jointe (une seule) part en en-tête « document » du
+modèle, ou en document avec le texte en légende hors modèle.
+
+Les accusés de Meta reviennent par le même webhook. « Remis au téléphone » et « échec » sont
+notés sur l'envoi.
+
+Pour activer l'envoi, le coordinateur branche le fournisseur
+(`fournisseurs_envoi.meta_whatsapp.branche = true`).
+
 ## Si quelque chose ne va pas
 
 - **« La vérification de l'URL de rappel a échoué »** :

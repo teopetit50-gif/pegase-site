@@ -168,7 +168,14 @@ export function reponseJson(statut: number, corps: unknown): Response {
 
 export type Issue = {
   identifiant: string;
-  sortie: "nouvelle" | "deja_recue" | "boite_inconnue" | "erreur";
+  sortie:
+    | "nouvelle"
+    | "deja_recue"
+    | "boite_inconnue"
+    | "erreur"
+    /** Statut de remise WhatsApp noté sur un envoi (noter_remise), ou sans envoi connu. */
+    | "remise_notee"
+    | "remise_inconnue";
   id?: number;
   erreur?: string;
 };

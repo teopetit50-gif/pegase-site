@@ -44,9 +44,29 @@ export type Reception = {
 
 export type Depot = { id: number; nouvelle: boolean };
 
+/** Événements de remise de noter_remise (même porte que le webhook Brevo). */
+export type EvenementRemise =
+  | "remis"
+  | "rebond_temporaire"
+  | "rebond"
+  | "plainte"
+  | "refuse";
+
 export interface Portes {
   resoudreBoite(canal: Canal, boite: string): Promise<Boite | null>;
   deposerReception(reception: Reception): Promise<Depot>;
+  /**
+   * noter_remise(p_fournisseur, p_reference, p_evenement, p_detail, p_survenu_le, p_cle) → boolean :
+   * false si aucun envoi ne porte la référence ; idempotente sur p_cle.
+   */
+  noterRemise(
+    fournisseur: string,
+    reference: string,
+    evenement: EvenementRemise,
+    detail: { code: string; raison: string },
+    survenuLe: string | null,
+    cle: string,
+  ): Promise<boolean>;
 }
 
 export class ErreurPorte extends Error {
@@ -123,6 +143,27 @@ export function portesSupabase(rpc: AppelRpc): Portes {
         id: typeof o.id === "number" ? o.id : Number(o.id ?? 0),
         nouvelle: o.nouvelle === true,
       };
+    },
+    async noterRemise(
+      fournisseur,
+      reference,
+      evenement,
+      detail,
+      survenuLe,
+      cle,
+    ) {
+      const r = await rpc("noter_remise", {
+        p_fournisseur: fournisseur,
+        p_reference: reference.slice(0, 300),
+        p_evenement: evenement,
+        p_detail: {
+          code: detail.code.slice(0, 100),
+          raison: detail.raison.slice(0, 300),
+        },
+        p_survenu_le: survenuLe,
+        p_cle: cle.slice(0, 300),
+      });
+      return r === true;
     },
   };
 }

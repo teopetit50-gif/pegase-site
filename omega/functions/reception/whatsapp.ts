@@ -2,10 +2,11 @@
 //   GET  : vérification du webhook (hub.mode, hub.verify_token, hub.challenge).
 //   POST : signature X-Hub-Signature-256 = sha256=HMAC(META_APP_SECRET, corps brut), vérifiée
 //          en temps constant ; accusé 200 IMMÉDIAT, traitement après la réponse (waitUntil).
-// Les statuts de remise (value.statuses) concernent nos envois sortants : ignorés ici,
-// l'envoi WhatsApp n'est pas dans le périmètre de cet ouvrier.
+// Les statuts de remise (value.statuses) concernent nos envois sortants (ouvrier expediteur, fournisseur
+// meta_whatsapp, référence = wamid) : delivered → noter_remise « remis », failed → « refuse » ; sent et read
+// ne changent rien (l'envoi est déjà « envoye » ; la lecture n'est pas une remise de plus).
 
-import type { Portes, Reception } from "./portes.ts";
+import type { EvenementRemise, Portes, Reception } from "./portes.ts";
 import {
   hmacSha256Hex,
   type Issue,
@@ -165,6 +166,95 @@ export function lireNotification(
   return messages;
 }
 
+export type StatutWhatsApp = {
+  wamid: string;
+  statut: string;
+  evenement: EvenementRemise;
+  survenuLe: string | null;
+  code: string;
+  raison: string;
+};
+
+const EVENEMENT_DU_STATUT: Record<string, EvenementRemise> = {
+  delivered: "remis",
+  failed: "refuse",
+};
+
+/** Extrait les statuts de remise utiles (delivered, failed) d'une notification Meta. */
+export function lireStatuts(corps: unknown): StatutWhatsApp[] {
+  const statuts: StatutWhatsApp[] = [];
+  if (!corps || typeof corps !== "object") return statuts;
+  const entries = Array.isArray((corps as Objet).entry)
+    ? (corps as Objet).entry as Objet[]
+    : [];
+  for (const entry of entries) {
+    const changes = Array.isArray(entry.changes)
+      ? entry.changes as Objet[]
+      : [];
+    for (const change of changes) {
+      const value = (change.value ?? {}) as Objet;
+      const liste = Array.isArray(value.statuses)
+        ? value.statuses as Objet[]
+        : [];
+      for (const s of liste) {
+        const wamid = texte(s, "id");
+        const statut = texte(s, "status");
+        const evenement = statut ? EVENEMENT_DU_STATUT[statut] : undefined;
+        if (!wamid || !statut || !evenement) continue;
+        const ts = Number(s.timestamp);
+        const erreur = Array.isArray(s.errors) && s.errors.length
+          ? s.errors[0] as Objet
+          : null;
+        statuts.push({
+          wamid,
+          statut,
+          evenement,
+          survenuLe: Number.isFinite(ts) && ts > 1e9
+            ? new Date(ts * 1000).toISOString()
+            : null,
+          code: erreur?.code !== undefined ? String(erreur.code) : statut,
+          raison: texte(erreur, "title") ?? texte(erreur, "message") ??
+            texte((erreur?.error_data ?? null) as Objet | null, "details") ??
+            statut,
+        });
+      }
+    }
+  }
+  return statuts;
+}
+
+/** noter_remise(meta_whatsapp, wamid, …), clé <wamid>:<statut>. Rend l'issue ; ne lève jamais. */
+export async function noterStatut(
+  s: StatutWhatsApp,
+  deps: Dependances,
+): Promise<Issue> {
+  const identifiant = `${s.wamid}:${s.statut}`;
+  try {
+    const trouve = await deps.portes.noterRemise(
+      "meta_whatsapp",
+      s.wamid,
+      s.evenement,
+      { code: s.code, raison: s.raison },
+      s.survenuLe,
+      identifiant,
+    );
+    if (!trouve) {
+      deps.journal.info("statut WhatsApp sans envoi connu", {
+        wamid: s.wamid,
+        statut: s.statut,
+      });
+    }
+    return { identifiant, sortie: trouve ? "remise_notee" : "remise_inconnue" };
+  } catch (e) {
+    const erreur = String(e).slice(0, 300);
+    deps.journal.erreur("noter_remise a échoué (statut WhatsApp)", {
+      wamid: s.wamid,
+      erreur,
+    });
+    return { identifiant, sortie: "erreur", erreur };
+  }
+}
+
 function lireContenu(
   type: string,
   m: Objet,
@@ -295,13 +385,21 @@ export async function traiterWhatsApp(
     };
   }
   const messages = lireNotification(corps, deps.maintenant?.() ?? new Date());
+  const statuts = lireStatuts(corps);
   // Accusé immédiat : Meta coupe à 20 s et rejoue sinon. Le traitement suit la réponse.
   const traitement = (async () => {
     const issues: Issue[] = [];
     for (const m of messages) issues.push(await recevoirMessage(m, deps));
+    for (const s of statuts) issues.push(await noterStatut(s, deps));
     return issues;
   })();
-  return { reponse: reponseJson(200, { recus: messages.length }), traitement };
+  return {
+    reponse: reponseJson(200, {
+      recus: messages.length,
+      statuts: statuts.length,
+    }),
+    traitement,
+  };
 }
 
 export async function recevoirMessage(
