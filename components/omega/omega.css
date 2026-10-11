@@ -1052,3 +1052,15 @@ button.om-ap-bloc:focus-visible, a.om-ap-bloc:focus-visible { outline: 0; box-sh
   .om-ap-separe { display: none; }
   .om-ap-chiffres dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* Notes (10/10/2026) : un document de référence ouvert dans la fenêtre d'une
+   note se lit comme une note Attio — sections à plat, séparées d'un filet,
+   « Modifier » au survol. components/omega/NotesOmega */
+.no-feuille[data-document] .om-doc { display: grid; gap: 0; }
+.no-feuille[data-document] .om-section { padding: 20px 0; border-radius: 0; background: transparent; box-shadow: none; border-top: 1px solid var(--v2-a-400); }
+.no-feuille[data-document] .om-section:first-of-type { border-top: 0; padding-top: 0; }
+.no-feuille[data-document] .om-modifier { opacity: 0; transition: opacity 0.15s; }
+.no-feuille[data-document] .om-section:hover .om-modifier, .no-feuille[data-document] .om-modifier:focus-visible { opacity: 1; }
+.no-feuille[data-document] .om-section--edition { padding: 16px; border-radius: 8px; box-shadow: 0 0 0 1px var(--v2-a-400); border-top: 0; }
+.no-feuille[data-document] .om-ajouter { justify-self: start; margin-top: 16px; }
+.no-feuille[data-document] .om-etat:empty { display: none; }

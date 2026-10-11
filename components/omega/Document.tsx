@@ -18,7 +18,7 @@ import { Markdown, basculerCase, sections } from "./markdown";
 
 const I = { width: 14, height: 14, strokeWidth: 1.6, "aria-hidden": true } as const;
 
-export default function Document({ slug, titre, contenu: initial }: { slug: string; titre: string; contenu: string }) {
+export default function Document({ slug, titre, contenu: initial, onEnregistre }: { slug: string; titre: string; contenu: string; onEnregistre?: (contenu: string) => void }) {
   const [contenu, setContenu] = useState(initial);
   const [edition, setEdition] = useState<number | null>(null);
   const [brouillon, setBrouillon] = useState("");
@@ -35,6 +35,7 @@ export default function Document({ slug, titre, contenu: initial }: { slug: stri
       return false;
     }
     setContenu(texte);
+    onEnregistre?.(texte);
     setEtat("enregistre");
     return true;
   }

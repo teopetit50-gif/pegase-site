@@ -9,6 +9,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import type { Ligne } from "@/components/omega/Tableaux";
+import { NOTES_REFERENCE, type PageNote } from "@/components/omega/notes-communes";
 
 export async function estAdmin(): Promise<boolean> {
   const supabase = await createClient();
@@ -20,6 +21,17 @@ export async function lirePage(slug: string): Promise<{ titre: string; contenu: 
   const supabase = await createClient();
   const { data } = await supabase.from("omega_pages").select("titre, contenu").eq("slug", slug).maybeSingle();
   return data ?? null;
+}
+
+/* les notes du pilotage (10/10/2026) : les trois documents de référence, plus les
+   notes (« note-… ») et les modèles (« modele-… ») créés depuis la page Notes */
+export async function lireNotes(): Promise<PageNote[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("omega_pages")
+    .select("slug, titre, contenu, maj")
+    .or(`slug.in.(${NOTES_REFERENCE.join(",")}),slug.like.note-%,slug.like.modele-%`);
+  return (data ?? []) as PageNote[];
 }
 
 export async function lireLignes(tableaux?: string[]): Promise<Ligne[]> {

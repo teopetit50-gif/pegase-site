@@ -30,7 +30,7 @@
    défiler »). `groupe` les range par rubrique dans ce menu.
    ══════════════════════════════════════════════════════════════════════ */
 
-export type OngletPage = { cle: string; libelle: string; doc?: string; tableaux?: string[]; special?: "validations" | "point" | "prospects" | "demandes" | "contacts" | "formation" | "appels" | "semaine" | "meta" | "taches"; groupe?: string };
+export type OngletPage = { cle: string; libelle: string; doc?: string; tableaux?: string[]; special?: "validations" | "point" | "prospects" | "demandes" | "contacts" | "formation" | "appels" | "semaine" | "meta" | "taches" | "notes"; groupe?: string };
 export type DefPage = { titre: string; onglets: OngletPage[] };
 
 const NOMS_MODULES: Record<string, string> = { filed: "FILED", cashd: "CASHD", reput: "REPUT", offload: "OFFLOAD", daliro: "DALIRO", tavaro: "TAVARO", lorani: "LORANI", tamila: "TAMILA", tiroma: "TIROMA", varelo: "VARELO" };
@@ -52,14 +52,9 @@ export const PAGES_OMEGA: Record<string, DefPage> = {
       { cle: "routines", libelle: "Routines", tableaux: ["routines"] },
     ],
   },
-  notes: {
-    titre: "Notes",
-    onglets: [
-      { cle: "", libelle: "Stratégie", doc: "strategie" },
-      { cle: "manuel", libelle: "Manuel", doc: "manuel" },
-      { cle: "linkedin", libelle: "Plan LinkedIn", doc: "linkedin" },
-    ],
-  },
+  /* Notes à la manière d'Attio (10/10) : Stratégie, Manuel et Plan LinkedIn y sont des notes ;
+     les anciennes adresses /omega/notes/manuel… redirigent vers /omega/notes?note=… */
+  notes: { titre: "Notes", onglets: [{ cle: "", libelle: "Notes", special: "notes" }] },
   appels: {
     titre: "Appels",
     onglets: [

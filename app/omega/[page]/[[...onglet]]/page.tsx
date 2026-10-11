@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import EcranOmega from "@/components/omega/EcranOmega";
 import { PAGES_OMEGA } from "@/components/omega/pages";
 
@@ -17,6 +17,8 @@ export default async function Page({ params, searchParams }: Params) {
   const sp = await searchParams;
   const un = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string) : undefined);
   const def = PAGES_OMEGA[page];
+  /* les anciens onglets des Notes (Stratégie, Manuel, Plan LinkedIn) sont devenus des notes */
+  if (page === "notes" && onglet?.length === 1) redirect(`/omega/notes?note=${encodeURIComponent(onglet[0])}`);
   if (!def || (onglet && onglet.length > 1)) notFound();
   const actif = def.onglets.find((o) => o.cle === (onglet?.[0] ?? ""));
   if (!actif) notFound();

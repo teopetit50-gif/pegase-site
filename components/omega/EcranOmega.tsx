@@ -13,9 +13,10 @@ import ModeAppels from "./ModeAppels";
 import Semaine from "./Semaine";
 import MetaAds from "./MetaAds";
 import PlanTaches from "./PlanTaches";
+import NotesOmega from "./NotesOmega";
 import SelecteurVue from "./SelecteurVue";
 import type { DefPage, OngletPage } from "./pages";
-import { PAR_PAGE, lireContacts, lireContactsSuivis, lireFileAppels, lireLignes, lirePage, lireProspects, type FiltresProspects } from "@/lib/omega/donnees";
+import { PAR_PAGE, lireNotes, lireContacts, lireContactsSuivis, lireFileAppels, lireLignes, lirePage, lireProspects, type FiltresProspects } from "@/lib/omega/donnees";
 
 export default async function EcranOmega({ page, def, actif, filtres = {} }: { page: string; def: DefPage; actif: OngletPage; filtres?: FiltresProspects }) {
   /* les écrans dupliqués de /espace2 portent leur propre page, sans titre visible (il est dans la barre du haut) */
@@ -26,6 +27,7 @@ export default async function EcranOmega({ page, def, actif, filtres = {} }: { p
     const [file, lignes] = await Promise.all([lireFileAppels(filtres.secteur), lireLignes(["appels", "objections", "rdv", "ajouts"])]);
     return <ModeAppels file={file.prospects} secteurs={file.secteurs} secteur={filtres.secteur} lignes={lignes} selecteur={selecteur} />;
   }
+  if (actif.special === "notes") return <NotesOmega pages={await lireNotes()} />;
   if (actif.special === "taches") return <PlanTaches lignes={await lireLignes(["plan", "ajouts"])} selecteur={selecteur} />;
   if (actif.special === "meta") return <MetaAds lignes={await lireLignes(["meta", "meta-seuils", "pubs"])} selecteur={selecteur} />;
   if (actif.special === "semaine") {
