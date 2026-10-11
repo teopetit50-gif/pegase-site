@@ -170,7 +170,7 @@ export default function Activite() {
       <div className="no-barre">
         <div className="ac-barre-gauche">
           <MenuDeroulant
-            etiquette="Trier"
+            etiquette={`Trier : ${TRIS.find((t) => t.cle === tri)?.libelle ?? ""}`}
             classe="no-bouton"
             placement="bottom start"
             largeur={240}
@@ -189,7 +189,7 @@ export default function Activite() {
             ))}
           </MenuDeroulant>
           <MenuDeroulant
-            etiquette="Filtrer par module"
+            etiquette={`Filtrer par module : ${module ? libelleModule(module) : "Tous les modules"}`}
             classe="no-bouton"
             placement="bottom start"
             largeur={220}
@@ -211,7 +211,7 @@ export default function Activite() {
             ))}
           </MenuDeroulant>
           <MenuDeroulant
-            etiquette="Période"
+            etiquette={`Période : ${libellePeriode}`}
             classe="no-bouton"
             placement="bottom start"
             largeur={220}
@@ -299,7 +299,10 @@ export default function Activite() {
 
                 {donnees ? (
                   <div className="ac-colonne-pied">
-                    <Link href={col.tout} className="ac-voir" aria-label={col.libelleTout}>
+                    {/* le nom accessible commence par le texte visible (WCAG 2.5.3) ;
+                       un aria-label, pas un .v2-sr : en colonnes qui défilent,
+                       le texte masqué sortait du défilement et élargissait la page */}
+                    <Link href={col.tout} className="ac-voir" aria-label={`Voir tout : ${col.libelleTout.replace(/^Voir /, "")}`}>
                       Voir tout
                     </Link>
                     {reste > 0 || deplies[col.cle] ? (

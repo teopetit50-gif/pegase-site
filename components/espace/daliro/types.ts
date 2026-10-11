@@ -646,3 +646,19 @@ export type AvancementPhotos = {
   depuis?: string | null;
   motif?: string;
 };
+
+/* b6_30 : le point mensuel, travaux repérés → signés → facturés */
+export type PointChantier = {
+  chantier: string; nom: string; statut: string;
+  reperes: { nombre: number; montant_ht: number };
+  saisis: number;
+  signes: { nombre: number; montant_ht: number };
+  a_relancer: { nombre: number; montant_ht: number };
+  perdus: number;
+  signe_total: number; facture_total: number; reste_a_facturer: number;
+};
+export type PointMensuel = {
+  mois: string; du: string; au: string;
+  chantiers: PointChantier[];
+  totaux: { reperes: number; reperes_ht: number; signes: number; signes_ht: number; a_relancer: number; a_relancer_ht: number; reste_a_facturer: number };
+};

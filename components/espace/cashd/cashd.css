@@ -98,6 +98,10 @@
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+/* 11/10 : la cellule porte le libellé masqué, sinon il sort du cadre défilant du tableau (+5 px de page à 390 dans /espace2) */
+.esp .c2-pieces th {
+  position: relative;
+}
 .esp .c2-reglements {
   list-style: none;
   margin: 0;
@@ -310,4 +314,25 @@
   justify-content: space-between;
   width: 100%;
   margin-bottom: 6px;
+}
+
+/* ——— c2_06 (11/10) : les paliers de validation ——— */
+.esp .c2-palier {
+  border: 1px solid var(--r-filet, #e5e5e5);
+  border-radius: 10px;
+  padding: 8px 12px 10px;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.esp .c2-palier legend {
+  font-weight: 600;
+  font-size: 13.5px;
+  padding: 0 4px;
+}
+.esp .c2-roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
 }

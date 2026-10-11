@@ -191,7 +191,7 @@ export default function Reportings({ source, contexte, client_id, societes, onFa
                       <td>
                         <span className="esp-item-haut">
                           {d.statut === "a_faire" && peutMarquer(d) ? (
-                            <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={() => setCible(d)} aria-label={`Noter l'envoi de « ${d.intitule} » pour ${d.destinataire}, échéance du ${dateCourte(d.echeance)}`}>Envoyé…</button>
+                            <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={() => setCible(d)} aria-label={`Envoyé… : noter l'envoi de « ${d.intitule} » pour ${d.destinataire}, échéance du ${dateCourte(d.echeance)}`}>Envoyé…</button>
                           ) : null}
                           {peutArreter ? (
                             <button type="button" className="esp-lien-bouton" onClick={() => void arreter(d)} aria-label={`Ne plus suivre « ${d.intitule} » pour ${d.destinataire}`}>Ne plus suivre</button>

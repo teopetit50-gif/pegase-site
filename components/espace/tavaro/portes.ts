@@ -35,6 +35,7 @@
 import { createClient } from "@/lib/supabase/client";
 import { assemblerDossiers } from "./exemples";
 import type { FormeElectronique } from "./cii";
+import type { Operations, PointDepart } from "./operations";
 import type { Preparation } from "./FactureElectronique";
 import type { Agence, Amendement, AvisContravention, Contestation, Creneau, FicheVehicule, Flotte, Parc, SortieFlotte, Avoir, EtatDesLieux, Bareme, Categorie, Contrat, DemandeCourte, Dossier, Facture, LigneBareme, LigneFacture, LigneJournal, LigneProposition, Locataire, Proposition, Reglages, Retour, Role, Vehicule } from "./types";
 
@@ -277,3 +278,46 @@ export async function deposerPhoto(client_id: string, contrat_id: string, fichie
   if (envoi.error) throw new ErreurPorte(message(envoi.error));
   return chemin;
 }
+
+/* b2_12 à b2_16 — les opérations : chaque lecture tolère l'absence de sa migration (liste vide). */
+export async function chargerOperations(): Promise<Operations> {
+  const supabase = createClient();
+  const depuis = new Date(Date.now() - 60 * 86_400_000).toISOString();
+  const [conformite, rappels, rappelsVehicules, transferts, passages, sinistres, incidents, grille, cautions] = await Promise.all([
+    supabase.from("loc_vehicules_conformite").select("vehicule_id, critair, critair_verifie_le, ct_valide_jusqu_au").limit(1000),
+    supabase.from("loc_rappels").select("id, reference, constructeur, libelle, gravite, publie_le, cree_le").order("cree_le", { ascending: false }).limit(200),
+    supabase.from("loc_rappels_vehicules").select("id, rappel_id, vehicule_id, statut, immobilisation_id, entretien_id, fait_le").limit(2000),
+    supabase.from("loc_transferts").select("*").in("statut", ["propose", "valide", "fait"]).gte("propose_le", depuis).order("pour_le").limit(300),
+    supabase.from("loc_passages_peage").select("*").or(`statut.in.(a_payer,paye),passe_le.gte.${depuis}`).order("passe_le", { ascending: false }).limit(500),
+    supabase.from("loc_sinistres").select("*").or(`statut.neq.clos,cree_le.gte.${depuis}`).order("survenu_le", { ascending: false }).limit(200),
+    supabase.from("loc_incidents").select("id, entite_id, contrat_id, vehicule_id, canal, appelant_telephone, type_incident, description, position, recu_le, action, prestataire, arrivee_estimee_le, statut, resume, sinistre_id")
+      .or(`statut.neq.clos,recu_le.gte.${depuis}`).order("recu_le", { ascending: false }).limit(200),
+    supabase.from("loc_grille_assistance").select("id, type_incident, action, prestataire, prestataire_telephone, delai_cible_min, consignes").order("rang"),
+    supabase.from("loc_cautions").select("*").or(`statut.in.(demandee,preautorisee,capture_demandee,capturee,liberation_demandee),cree_le.gte.${depuis}`).order("cree_le", { ascending: false }).limit(300),
+  ]);
+  const ou = <T,>(r: { data: unknown; error: unknown }): T[] => (r.error ? [] : ((r.data ?? []) as T[]));
+  return {
+    conformite: ou(conformite), rappels: ou(rappels), rappelsVehicules: ou(rappelsVehicules), transferts: ou(transferts), passages: ou(passages),
+    sinistres: ou(sinistres), incidents: ou(incidents), grille: ou(grille), cautions: ou(cautions),
+  };
+}
+export const controleDepartPorte = (p_contrat: string) => rpc<PointDepart[]>("loc_controle_depart", { p_contrat });
+export const poserConformite = (p_vehicule: string, p_valeurs: Record<string, unknown>) => rpc<Record<string, unknown>>("loc_poser_conformite", { p_vehicule, p_valeurs });
+export const enregistrerRappel = (p_valeurs: Record<string, unknown>, p_vehicules: string[]) => rpc<{ rappel: string; vehicules: number; a_reaffecter: unknown[] }>("loc_enregistrer_rappel", { p_valeurs, p_vehicules });
+export const rappelFait = (p_rappel_vehicule: string) => rpc<Record<string, unknown>>("loc_rappel_fait", { p_rappel_vehicule });
+export const proposerTransferts = (p_jour: string | null) => rpc<{ pic: string; manque: number; transferts: number; tournees: Record<string, number> }>("loc_proposer_transferts", { p_jour });
+export const deciderTransferts = (p_tournee: string | null, p_valider: boolean, p_transfert: string | null) => rpc<Record<string, unknown>>("loc_decider_transferts", { p_tournee, p_valider, p_transfert });
+export const transfertFait = (p_transfert: string, p_convoyeur: string | null) => rpc<Record<string, unknown>>("loc_transfert_fait", { p_transfert, p_convoyeur });
+export const enregistrerPassages = (p_lignes: Record<string, unknown>[], p_source: "saisie" | "import") => rpc<{ nouveaux: number; deja: number; rapproches: number }>("loc_enregistrer_passages", { p_lignes, p_source });
+export const payerPassage = (p_passage: string, p_reference: string) => rpc<Record<string, unknown>>("loc_payer_passage", { p_passage, p_reference });
+export const rattacherPassage = (p_passage: string, p_contrat: string) => rpc<Record<string, unknown>>("loc_rattacher_passage", { p_passage, p_contrat });
+export const refacturerPeages = (p_contrat: string) => rpc<{ passages: number; proposition: string }>("loc_refacturer_peages", { p_contrat });
+export const passageALaCharge = (p_passage: string, p_motif: string) => rpc<Record<string, unknown>>("loc_passage_a_la_charge", { p_passage, p_motif });
+export const ouvrirSinistre = (p_valeurs: Record<string, unknown>) => rpc<{ sinistre: string; reference: string }>("loc_ouvrir_sinistre", { p_valeurs });
+export const avancerSinistre = (p_sinistre: string, p_statut: string | null, p_valeurs: Record<string, unknown>) => rpc<Record<string, unknown>>("loc_avancer_sinistre", { p_sinistre, p_statut, p_valeurs });
+export const preparerRecours = (p_sinistre: string, p_envoyer: boolean) => rpc<{ jours: number; montant: number; courrier: string; envoi: string | null }>("loc_preparer_recours", { p_sinistre, p_envoyer });
+export const poserGrilleAssistance = (p_lignes: Record<string, unknown>[]) => rpc<{ lignes: number }>("loc_poser_grille_assistance", { p_lignes });
+export const cloreIncident = (p_incident: string, p_note: string | null, p_ouvrir_sinistre: boolean) => rpc<Record<string, unknown>>("loc_clore_incident", { p_incident, p_note, p_ouvrir_sinistre });
+export const demanderPreautorisation = (p_contrat: string, p_montant_eur: number | null) => rpc<Record<string, unknown>>("loc_demander_preautorisation", { p_contrat, p_montant_eur });
+export const capturerCaution = (p_caution: string, p_facture: string, p_montant_eur: number, p_motif: string) => rpc<Record<string, unknown>>("loc_capturer_caution", { p_caution, p_facture, p_montant_eur, p_motif });
+export const libererCaution = (p_caution: string) => rpc<Record<string, unknown>>("loc_liberer_caution", { p_caution });

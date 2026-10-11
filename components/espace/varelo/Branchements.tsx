@@ -30,14 +30,23 @@ export const LOGICIELS: { cle: string; libelle: string }[] = [
   { cle: "quadra", libelle: "Quadra" },
   { cle: "pennylane", libelle: "Pennylane" },
   { cle: "tableur", libelle: "Tableur (Excel, CSV)" },
+  { cle: "lightspeed", libelle: "Lightspeed (caisse)" },
+  { cle: "zelty", libelle: "Zelty (caisse)" },
+  { cle: "tiller", libelle: "Tiller (caisse)" },
+  { cle: "sumup", libelle: "SumUp (caisse)" },
+  { cle: "cashpad", libelle: "Cashpad (caisse)" },
 ];
+const CAISSES = ["lightspeed", "zelty", "tiller", "sumup", "cashpad"];
 export const JEUX: { cle: string; libelle: string }[] = [
   { cle: "fournisseurs", libelle: "Fournisseurs" },
   { cle: "clients", libelle: "Clients" },
   { cle: "balance_agee_clients", libelle: "Balance âgée clients" },
   { cle: "balance_agee_fournisseurs", libelle: "Balance âgée fournisseurs" },
   { cle: "balance_generale", libelle: "Balance générale" },
+  { cle: "ventes_caisse", libelle: "Ventes des caisses" },
 ];
+/* les jeux qu'un logiciel sait sortir (b1_17) : une caisse, ses ventes ; un logiciel de gestion, les cinq ; un tableur, tout */
+export const jeuxDe = (logiciel: string) => JEUX.filter((j) => (CAISSES.includes(logiciel) ? j.cle === "ventes_caisse" : logiciel === "tableur" || j.cle !== "ventes_caisse"));
 
 type Jeu = { code: string; actif: boolean; dernier_recu_le: string | null; lignes: number };
 type Branchement = { id: string; entite_id: string | null; logiciel: string; libelle: string; statut: string; jeux: Jeu[] };
@@ -171,7 +180,7 @@ export default function Branchements({ source, contexte, client_id, societes, on
 
 function DialogueBrancher({ s, onFermer, brancher }: { s: Societe; onFermer: () => void; brancher: (s: Societe, logiciel: string, jeux: string[]) => Promise<void> }) {
   const [logiciel, setLogiciel] = useState(LOGICIELS.find((l) => s.logiciel && l.libelle.toLowerCase().startsWith(s.logiciel.toLowerCase().slice(0, 3)))?.cle ?? "tableur");
-  const [jeux, setJeux] = useState<string[]>(JEUX.map((j) => j.cle));
+  const [jeux, setJeux] = useState<string[]>(() => jeuxDe(LOGICIELS.find((l) => s.logiciel && l.libelle.toLowerCase().startsWith(s.logiciel.toLowerCase().slice(0, 3)))?.cle ?? "tableur").map((j) => j.cle));
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const envoyer = async () => {
@@ -197,13 +206,13 @@ function DialogueBrancher({ s, onFermer, brancher }: { s: Societe; onFermer: () 
         <DialogBody>
           <div className="esp-form">
             <label className="rv-libelle">Logiciel
-              <select className="rv-champ" value={logiciel} onChange={(x) => setLogiciel(x.target.value)}>
+              <select className="rv-champ" value={logiciel} onChange={(x) => { setLogiciel(x.target.value); setJeux(jeuxDe(x.target.value).map((j) => j.cle)); }}>
                 {LOGICIELS.map((l) => <option key={l.cle} value={l.cle}>{l.libelle}</option>)}
               </select>
             </label>
             <fieldset className="vrl-jeux">
               <legend className="rv-libelle">Exports attendus</legend>
-              {JEUX.map((j) => (
+              {jeuxDe(logiciel).map((j) => (
                 <label key={j.cle} className="vrl-case">
                   <input type="checkbox" checked={jeux.includes(j.cle)} onChange={(x) => setJeux((p) => (x.target.checked ? [...p, j.cle] : p.filter((k) => k !== j.cle)))} /> {j.libelle}
                 </label>
