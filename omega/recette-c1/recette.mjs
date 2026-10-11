@@ -71,6 +71,9 @@ for (const largeur of LARGEURS) {
     const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'recette-c1', densite: 1 });
     await s.envoyer('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: theme === 'sombre' ? 'dark' : 'light' }] });
     console.log(`\n— ${largeur} px, ${theme}`);
+    /* le thème se choisit dans le menu du compte et se garde dans le navigateur (11/10) */
+    await s.aller(base + '/espace2', { signe: `document.readyState === 'complete'` });
+    await s.evaluer(`localStorage.setItem('espace2.theme', '${theme}')`);
     try {
       for (const [nom, chemin] of ECRANS) {
         const pret = await s.aller(base + chemin, { signe: `document.readyState === 'complete' && !!document.querySelector('.v2 main h1')` });
