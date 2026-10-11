@@ -37,7 +37,7 @@ Fichiers lus : `lib/produits/factures.ts` (noté `fac`), `lib/produits/capacites
 | 10 | « Ticket de caisse froissé » | fac:75 | C | lecteur A1 (ligne cap:32, `atteste: false`) | Rattachement d'un ticket à une dépense sans fournisseur identifié : à préciser | 2 / 0,5 | — |
 | 11 | « Avoir » | fac:76 | B | `nature = avoir` (socle), écritures inversées (a4_17), rapprochement d'avoir (a4_08) | — | 0 / 0,5 | — |
 | 12 | « Relevé » | fac:77 | B (11/10) | import CAMT.053 / CSV et rapprochement des débits avec les factures (a4_34) | Le relevé déposé en PDF n'est pas lu en opérations (il faut l'export CAMT ou CSV de la banque) | 0 / 0,5 | — |
-| 13 | « Note de frais » | fac:78 | D | — | Pas de nature « note de frais », pas de circuit salarié ni de remboursement | 6 / 1 | — |
+| 13 | « Note de frais » | fac:78 | B (11/10) | note de frais déclarée, approuvée par un autre, écrite au compte du personnel, remboursée (a4_35) | Saisie depuis le téléphone du salarié (dépôt A2) et barème kilométrique | 1 / 1 | — |
 | 14 | « Facture écrite à la main » | fac:79 | C | lecteur A1 (ligne cap:32, `false`) | Preuve sur des manuscrits réels (A1) | A1 / 0,5 | — |
 | 15 | « Plusieurs pièces dans un même fichier » | fac:80 | B | a4_21 + lecteur v24 (découpage) | Passer une vraie pièce multi-factures sur le banc | 0 / 0,5 | — |
 | 16 | « Vous connectez une messagerie une fois, puis tout ce qui y arrive en ressort classé au bon fournisseur. » | fac:100 | C | identité fournisseur (a4_10), a4_20 | Même réserve que n° 2 (messagerie à soi) ; un fournisseur nouveau attend une confirmation (a4_10), il n'est pas classé d'emblée | voir n° 2 | — |
