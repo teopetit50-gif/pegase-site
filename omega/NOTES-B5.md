@@ -5,6 +5,11 @@ Dernière mise à jour : 05/10/2026, 23 h.
 
 ## REPRISE (pause demandée par Teo, 06/10/2026 à 21 h Z)
 
+**11/10, 15 h 40 Z — PAUSE demandée par Teo. Arrêt propre, tout est poussé sur worker-b5.**
+- À poser (pas encore posé) : b5_28_changements_indice.sql, puis le test b5_17_changements_indice.sql (4bff78f). Scénario local conforme ; le test n'a pas tourné, faute du socle complet en local.
+- Écran prêt, à fusionner après b5_17 vert : Controle.tsx, rapport.ts, types.ts, portes.ts (lorani_controles en select « * »), exemples.ts — le bloc « Changements depuis l'indice A ».
+- Prochain pas : lire le résultat de b5_17. Ensuite, selon la liste ci-dessous : #15, #16 et #18 (réglages du contrôle), #23 (pièces exigées par le permis), #30 à #33 (situations).
+
 **11/10, 15 h 30 Z — état de la reprise (worker-b5).**
 - Posés et verts sur la recette :
   - b5_24 : risques par les données ouvertes, prouvés en vrai à Nantes ;
