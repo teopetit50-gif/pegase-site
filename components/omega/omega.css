@@ -279,7 +279,7 @@
 
 /* la barre « Rechercher… » : angles de 6 px comme les boutons, au lieu de la pilule (Teo, 09/10) */
 .om .v2-trouver { border-radius: 6px; }
-.om .v2-trouver kbd, .om .v2-trouver .v2-kbd { border-radius: 4px; }
+.om .v2-trouver kbd, .om .v2-trouver .v2-kbd { border-radius: 4px; height: 16px; min-width: 16px; padding: 0 3px; font-size: 10.5px; }
 
 /* — le sélecteur ⌃⌄ des vues d'une page (09/10/2026), à la place des onglets — */
 .om-vue-barre { margin: -16px 0 24px; }
