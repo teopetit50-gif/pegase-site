@@ -1053,3 +1053,20 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   (banc) » doit finir « fait » avec les risques de Nantes. Seul C1 n'a pas encore confirmé sa pause.
 - C1 en pause : tableau-de-bord-v2 c632394 fusionnée (vue d'ensemble « aperçu de projet », Suivi.tsx réutilisable,
   /espace2/utilisation). Avis de Teo attendu sur ces deux pages. TOUS les ouvriers sont en pause (18/18).
+
+## Reprise du 11/10 (≈13 h 40 Z)
+- Routine trig_01PJ… réactivée, toutes les 3 h, avec une consigne d'économie de tokens.
+- 16 ouvriers réveillés (C5 reste à l'arrêt), avec la consigne : 3 lignes max, seulement quand un SHA est prêt.
+- Posé depuis worker-b5 23af6b0 : b5_24, ses 15 fichiers de données et le test b5_14. Posé depuis a6101c9 : b7_07.
+- Lot h1340b5b7 : 42 ok, 0 not ok. Comptes des tables lorani_ref conformes.
+- Relevé PLU réel à Nantes : confié à B5 (il faut la session du gérant).
+- Fonctions Edge à déployer en un seul lot :
+  - **sortie** : A4 619a04b, cron chaque minute ;
+  - **alertes-quotidiennes** : A5 42ee9db, 19ap posé ; puis les réglages et le cron de 06:17 ;
+  - **expediteur** et **reception** : A2 b69423f, branche=false sur meta_whatsapp et ar24 ; vérifier que noter_remise accepte 'meta_whatsapp'.
+- C3 3eca49f7 : la preuve en vrai mail + formulaire attend deux vrais courriels de Teo.
+- A1 : decoupage_reel.mjs suspendu (règle « jamais Supabase » maintenue).
+- 11/10, 14 h 05 Z :
+  - lot h1350b3a5 (b3, 44, 60) : 597 ok, 0 not ok ;
+  - lot h1404tout : 888 ok, 10 not ok (a4_33 ×2, a4_34, b1_18, b2_23, b2_25, b5_15, b6_22, c4_10, 44 pour filed_rapprocher_ligne), relayés aux ouvriers ;
+  - fusionnés : C1 86706a9 et B4 300bd59. Écrans B1, B5, B6 et C4 retenus tant que leurs tests sont rouges.

@@ -87,7 +87,7 @@ export async function chargerDossier(): Promise<Dossier> {
     supabase.from("lorani_controle_pieces").select("id, controle_id, piece_id, role, reference").limit(10000),
     supabase.from("lorani_constats").select("id, controle_id, nature, gravite, grandeur, objet, titre, correction, article, valeurs, statut, motif, precedent_id, corrige_au_controle, decide_par, decide_le").limit(10000),
     /* b5_17 : absente tant que la migration n'est pas posée ; le PLU est alors « non cherché » */
-    supabase.from("lorani_plu").select("id, projet_id, statut, methode, requete, point_libelle, point_score, zones, zone, document, reglement_url, prescriptions, rnu, erreur, demande_le, trouve_le").limit(1000),
+    supabase.from("lorani_plu").select("*").limit(1000),
     /* b5_18 : absente tant que la migration n'est pas posée ; les assurances sont alors vides */
     supabase.from("lorani_attestations").select("id, projet_id, intervenant_id, lot_id, piece_id, assureur, numero_police, assure, siren, activites, debut, fin, plafond_eur, statut, constats, verifie_le").limit(5000),
     /* b5_19 : absentes tant que la migration n'est pas posée */
@@ -127,7 +127,13 @@ export async function chargerDossier(): Promise<Dossier> {
     points: (points.data ?? []) as Point[],
     doe: (doe.data ?? []) as PieceDoe[],
     attestations: ((attestations.data ?? []) as Attestation[]).map((x) => ({ ...x, plafond_eur: x.plafond_eur === null ? null : Number(x.plafond_eur) })),
-    plu: ((plu.data ?? []) as Plu[]).map((x) => ({ ...x, point_score: x.point_score === null ? null : Number(x.point_score) })),
+    /* « * » : les colonnes de b5_23 (servitudes, risques) quand elles existent ; la géométrie et les identifiants d'appel ne servent pas à l'écran */
+    plu: ((plu.data ?? []) as (Plu & { geom?: unknown; complements?: unknown })[]).map((brut) => {
+      const x = { ...brut };
+      delete x.geom;
+      delete x.complements;
+      return { ...x, point_score: x.point_score === null ? null : Number(x.point_score) };
+    }),
     pieces: ((pieces.data ?? []) as (Omit<PieceProjet, "cree_le"> & { recue_le: string | null })[]).map(({ recue_le, ...x }) => ({ ...x, cree_le: recue_le ?? undefined })),
     noms,
     moi,
