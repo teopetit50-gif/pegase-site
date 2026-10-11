@@ -1053,3 +1053,10 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   (banc) » doit finir « fait » avec les risques de Nantes. Seul C1 n'a pas encore confirmé sa pause.
 - C1 en pause : tableau-de-bord-v2 c632394 fusionnée (vue d'ensemble « aperçu de projet », Suivi.tsx réutilisable,
   /espace2/utilisation). Avis de Teo attendu sur ces deux pages. TOUS les ouvriers sont en pause (18/18).
+
+## Reprise du 11/10 (≈13 h 40 Z)
+- Routine trig_01PJ… réactivée, toutes les 3 h, avec une consigne d'économie de tokens.
+- 16 ouvriers réveillés (C5 reste à l'arrêt), avec la consigne : 3 lignes max, seulement quand un SHA est prêt.
+- Posé depuis worker-b5 23af6b0 : b5_24, ses 15 fichiers de données et le test b5_14. Posé depuis a6101c9 : b7_07.
+- Lot h1340b5b7 : 42 ok, 0 not ok. Comptes des tables lorani_ref conformes.
+- Relevé PLU réel à Nantes : confié à B5 (il faut la session du gérant).
