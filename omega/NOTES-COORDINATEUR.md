@@ -1066,3 +1066,7 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   - **expediteur** et **reception** : A2 b69423f, branche=false sur meta_whatsapp et ar24 ; vérifier que noter_remise accepte 'meta_whatsapp'.
 - C3 3eca49f7 : la preuve en vrai mail + formulaire attend deux vrais courriels de Teo.
 - A1 : decoupage_reel.mjs suspendu (règle « jamais Supabase » maintenue).
+- 11/10, 14 h 05 Z :
+  - lot h1350b3a5 (b3, 44, 60) : 597 ok, 0 not ok ;
+  - lot h1404tout : 888 ok, 10 not ok (a4_33 ×2, a4_34, b1_18, b2_23, b2_25, b5_15, b6_22, c4_10, 44 pour filed_rapprocher_ligne), relayés aux ouvriers ;
+  - fusionnés : C1 86706a9 et B4 300bd59. Écrans B1, B5, B6 et C4 retenus tant que leurs tests sont rouges.
