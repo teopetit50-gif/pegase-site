@@ -90,7 +90,8 @@ begin
 
   -- ── 2. Chaque offre, ligne par ligne ──
   return next ok(o1.constats @> '[{"code": "arithmetique", "gravite": "majeur", "ref": "8_1"}]'::jsonb
-                 and o1.constats @> '[{"code": "ecart_estimation", "ref": "8_4", "texte": "Poste 8.4 : écart de 31 % à l''estimation (9 430 € contre 7 200 €)."}]'::jsonb,
+                 and exists (select 1 from jsonb_array_elements(o1.constats) k where k ->> 'code' = 'ecart_estimation' and k ->> 'ref' = '8_4'
+                             and replace(k ->> 'texte', chr(8239), ' ') = 'Poste 8.4 : écart de 31 % à l''estimation (9 430 € contre 7 200 €).'),
                  '2. Alu Ouest : 820 × 24 ≠ 19 780 €, et écart de 31 % sur le poste 8.4 : ' || o1.constats::text);
   return next ok(o2.constats @> '[{"code": "non_chiffre", "gravite": "majeur", "ref": "8_3"}]'::jsonb
                  and o2.constats @> '[{"code": "quantite", "ref": "8_1"}]'::jsonb
