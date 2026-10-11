@@ -18,7 +18,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FolderPlus, Mail, Plus, UserPlus } from "lucide-react";
+import { FileArchive, FolderPlus, Mail, Plus, UserPlus } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { PERSONNES, nomPersonne } from "../exemples/socle";
@@ -28,8 +28,11 @@ import { Avis, Chargement, Pastille, Ruban, Vide } from "../ui";
 import { dateCourte } from "../format";
 import { ETATS, FAMILLES, NATURES_INTERVENANT, NATURES_PROJET, PHASES, ROLES_PROJET, TYPES, TYPES_PIECE, famille, prochaineDate, titrePermis, type Famille } from "./etats";
 import { dossierExemple } from "./exemples";
+import { dossierDate } from "./dossier-date";
+import { telecharger } from "./rapport";
 import Chantier from "./Chantier";
 import Assurances from "./Assurances";
+import Offres from "./Offres";
 import ComptesRendus from "./ComptesRendus";
 import Doe from "./Doe";
 import OrdresService from "./OrdresService";
@@ -68,7 +71,7 @@ export default function EcranLorani() {
       setReel(await chargerDossier());
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
-      setReel({ ...dossierExemple(), projets: [], permis: [], datesLues: [], echeances: [], recours: [], lots: [], intervenants: [], membres: [], pieces: [], controles: [], controlePieces: [], constats: [], plu: [], attestations: [], ordresService: [], reserves: [], comptesRendus: [], points: [], doe: [], moi: null });
+      setReel({ ...dossierExemple(), projets: [], permis: [], datesLues: [], echeances: [], recours: [], lots: [], intervenants: [], membres: [], pieces: [], controles: [], controlePieces: [], constats: [], plu: [], attestations: [], ordresService: [], reserves: [], comptesRendus: [], points: [], doe: [], consultations: [], offres: [], moi: null });
     }
   }, []);
   useEffect(() => {
@@ -677,6 +680,17 @@ function ProjetCarte({ projet, dossier, nommer, peutEcrire, envoi, ouvrirForm, a
   const lots = dossier.lots.filter((l) => l.projet_id === projet.id);
   const intervenants = dossier.intervenants.filter((i) => i.projet_id === projet.id && i.actif);
   const gris = !peutEcrire || envoi;
+  const [exportErreur, setExportErreur] = useState<string | null>(null);
+  /* le dossier daté, exportable en une fois : registre PDF et Excel (une feuille par lot), dans une archive */
+  const exporter = () => {
+    setExportErreur(null);
+    try {
+      const r = dossierDate(projet, dossier, nommer);
+      telecharger(r.nom, r.octets, "application/zip");
+    } catch (e) {
+      setExportErreur(e instanceof Error ? e.message : "Le dossier daté n'a pas pu être fabriqué.");
+    }
+  };
   return (
     <section className="esp-carte" aria-label="Dossier du projet">
       <div className="esp-carte-tete">
@@ -697,7 +711,9 @@ function ProjetCarte({ projet, dossier, nommer, peutEcrire, envoi, ouvrirForm, a
         <div className="esp-actions">
           <button type="button" className="r-btn r-btn--noir" disabled={gris} onClick={() => ouvrirForm({ type: "courrier", projet: projet.id })}><Mail width={16} height={16} aria-hidden="true" /> Déposer un courrier de la mairie</button>
           <button type="button" className="r-btn r-btn--fil" disabled={gris} onClick={() => ouvrirForm({ type: "permis", projet: projet.id })}><Plus width={16} height={16} aria-hidden="true" /> Nouveau permis</button>
+          <button type="button" className="r-btn r-btn--fil" onClick={exporter}><FileArchive width={16} height={16} aria-hidden="true" /> Exporter le dossier daté</button>
         </div>
+        {exportErreur ? <Avis teinte="rouge" role="alert">{exportErreur}</Avis> : null}
       </div>
       <div className="esp-carte-corps">
         <div className="lor-grille-dossier">
@@ -774,6 +790,7 @@ function ProjetCarte({ projet, dossier, nommer, peutEcrire, envoi, ouvrirForm, a
       </div>
       <PluProjet projet={projet} dossier={dossier} peutEcrire={peutEcrire} agir={agir} />
       <Controle projet={projet} dossier={dossier} nommer={nommer} peutEcrire={peutEcrire} agir={agir} />
+      <Offres projet={projet} dossier={dossier} peutEcrire={peutEcrire} agir={agir} />
       <Honoraires projet={projet} dossier={dossier} nommer={nommer} peutEcrire={peutEcrire} agir={agir} />
       <Chantier projet={projet} dossier={dossier} peutEcrire={peutEcrire} agir={agir} />
       <ComptesRendus projet={projet} dossier={dossier} peutEcrire={peutEcrire} agir={agir} />

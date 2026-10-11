@@ -15,23 +15,15 @@
    Les données sont celles de omega_lignes (tableaux « plan » et
    « ajouts ») ; tout se modifie sur place et s'enregistre aussitôt.
    « À préparer » et « Note » sont deux clés de plus dans `donnees`.
-
-   11/10/2026 — retour de Teo : « trop surchargé, fais simple comme la
-   page Notes ». Sur le squelette de Notes (simple.css) : les onglets
-   (À faire, Bloquées, Terminées, Toutes), une barre (vue, recherche,
-   « Nouvelle tâche »), les semaines en listes à plat. Retirés : le grand
-   titre, la frise des trois phases, le menu « Filtres », la vue en
-   colonnes ; la fiche ne s'ouvre plus qu'au clic, en tiroir sur le côté.
+   11/10/2026 — allégée à la demande de Teo, même dessin : plus de
+   sous-titre ni de frise des trois phases au-dessus de la liste.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { CalendarDays, Check, ChevronDown, Plus, Rows3, Search, Tag, Trash2, X } from "lucide-react";
-import { Dialog, Modal, ModalOverlay } from "react-aria-components";
+import { CalendarDays, Check, ChevronDown, ChevronRight, Columns3, List, ListFilter, Plus, Rows3, Search, Tag, Trash2, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import Choix from "./Choix";
-import "@/components/espace2/notes.css";
-import "./simple.css";
 import type { Ligne } from "./Tableaux";
 
 const I = { width: 16, height: 16, strokeWidth: 1.6, "aria-hidden": true } as const;
@@ -90,9 +82,12 @@ const ouverte = (l: Ligne) => l.donnees["Statut"] !== "Fait";
 export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: Ligne[]; selecteur: React.ReactNode }) {
   const [lignes, setLignes] = useState(() => initiales.filter((l) => l.tableau === "plan" || l.tableau === "ajouts"));
   const [maintenant] = useState(() => Date.now());
-  const [filtre, setFiltre] = useState<Filtre>("a_faire");
+  const [filtre, setFiltre] = useState<Filtre>("toutes");
+  const [categorie, setCategorie] = useState("");
   const [recherche, setRecherche] = useState("");
+  const [vue, setVue] = useState<"liste" | "colonnes">("liste");
   const [choix, setChoix] = useState<string | null>(null);
+  const [ficheOuverte, setFicheOuverte] = useState(false);
   const [faitesOuvertes, setFaitesOuvertes] = useState<number[]>([]);
   const [tout, setTout] = useState(false);
   const [etat, setEtat] = useState("");
@@ -120,8 +115,9 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
     const { data, error } = await createClient().from("omega_lignes").insert({ tableau: "ajouts", ordre, donnees }).select("id, tableau, ordre, donnees, maj").single();
     if (error || !data) return setEtat("Échec de l'ajout : vérifiez votre connexion.");
     setLignes((ls) => [...ls, data as Ligne]);
-    setFiltre("a_faire");
+    setFiltre("toutes");
     setChoix((data as Ligne).id);
+    setFicheOuverte(true);
   }
 
   async function supprimer(l: Ligne) {
@@ -130,6 +126,7 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
     if (error) return setEtat("Échec de la suppression.");
     setLignes((ls) => ls.filter((x) => x.id !== l.id));
     setChoix(null);
+    setFicheOuverte(false);
   }
 
   /* « Nouveau… → Tâche » de la barre du haut arrive en /omega/taches?ajouter=plan */
@@ -144,147 +141,220 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
   }, [demande]);
 
   const compte = {
+    toutes: lignes.length,
     a_faire: lignes.filter((l) => !["Fait", "Bloqué"].includes(l.donnees["Statut"])).length,
     bloquees: lignes.filter((l) => l.donnees["Statut"] === "Bloqué").length,
     terminees: lignes.filter((l) => l.donnees["Statut"] === "Fait").length,
-    toutes: lignes.length,
   };
 
   const visibles = useMemo(() => {
     const q = recherche.trim().toLowerCase();
     return lignes
-      .filter((l) => (filtre === "a_faire" ? !["Bloqué"].includes(l.donnees["Statut"]) : filtre === "bloquees" ? l.donnees["Statut"] === "Bloqué" : filtre === "terminees" ? l.donnees["Statut"] === "Fait" : true))
+      .filter((l) => (filtre === "a_faire" ? !["Fait", "Bloqué"].includes(l.donnees["Statut"]) : filtre === "bloquees" ? l.donnees["Statut"] === "Bloqué" : filtre === "terminees" ? l.donnees["Statut"] === "Fait" : true))
+      .filter((l) => !categorie || l.donnees["Catégorie"] === categorie)
       .filter((l) => !q || `${l.donnees["Tâche"] ?? ""} ${l.donnees["N°"] ?? ""}`.toLowerCase().includes(q))
       .sort((a, b) => (echeance(a.donnees["Échéance"])?.getTime() ?? 9e15) - (echeance(b.donnees["Échéance"])?.getTime() ?? 9e15) || (a.tableau === b.tableau ? a.ordre - b.ordre : a.tableau === "plan" ? -1 : 1));
-  }, [lignes, filtre, recherche]);
+  }, [lignes, filtre, categorie, recherche]);
 
-  const filtrage = filtre === "bloquees" || filtre === "terminees" || !!recherche.trim();
+  const filtrage = filtre !== "toutes" || !!categorie || !!recherche.trim();
   const blocs = BLOCS.map((b, i) => ({ i, b, liste: visibles.filter((l) => blocDe(l.donnees["Semaine"]) === i) })).filter((x) => x.liste.length);
   const blocsAffiches = tout || filtrage ? blocs : blocs.filter((x) => x.i <= blocCourant + 1);
   const restants = blocs.length - blocsAffiches.length;
-  const choisie = choix ? lignes.find((l) => l.id === choix) ?? null : null;
+  const choisie = lignes.find((l) => l.id === choix) ?? visibles.find(ouverte) ?? null;
+  const ouvrir = (id: string) => {
+    setChoix(id);
+    setFicheOuverte(true);
+  };
+
 
   return (
-    <div className="no-page si-page v2-arrivee om-pt">
-      <h1 className="v2-sr">Tâches</h1>
-      <div className="no-onglets" role="tablist" aria-label="Filtrer par statut">
-        {(
-          [
-            ["a_faire", "À faire"],
-            ["bloquees", "Bloquées"],
-            ["terminees", "Terminées"],
-            ["toutes", "Toutes"],
-          ] as [Filtre, string][]
-        ).map(([cle, libelle]) => (
-          <button key={cle} type="button" role="tab" aria-selected={filtre === cle} className="no-onglet" onClick={() => setFiltre(cle)}>
-            {libelle}
-            <span className="no-compte">{compte[cle]}</span>
-          </button>
-        ))}
-      </div>
-
-      <div className="no-barre">
-        {selecteur ?? <span />}
-        <div className="no-barre-droite">
-          <label className="si-recherche">
-            <Search {...I} width={14} height={14} />
-            <span className="v2-sr">Rechercher une tâche</span>
-            <input type="search" value={recherche} onChange={(e) => setRecherche(e.target.value)} placeholder="Rechercher" onKeyDown={(e) => e.key === "Escape" && setRecherche("")} />
-          </label>
-          <button type="button" className="no-principal" onClick={ajouter}>
-            <Plus {...I} width={14} height={14} />
+    <div className="v2-page v2-arrivee om-page om-page--large om-pt">
+      <div className="v2-tete om-pt-tete">
+        <div>
+          <h1>Tâches</h1>
+        </div>
+        <div className="v2-actions">
+          {selecteur}
+          <button type="button" className="v2-btn v2-btn--petit v2-btn--primaire om-pt-nouvelle" onClick={ajouter}>
+            <Plus {...I} />
             Nouvelle tâche
           </button>
+        </div>
+      </div>
+
+
+      {/* ——— la barre : statuts, recherche, catégorie, affichage ——— */}
+      <div className="om-pt-barre">
+        <div className="om-pt-segments" role="group" aria-label="Filtrer par statut">
+          {(
+            [
+              ["toutes", "Toutes", ""],
+              ["a_faire", "À faire", ""],
+              ["bloquees", "Bloquées", ""],
+              ["terminees", "Terminées", ""],
+            ] as [Filtre, string, string][]
+          ).map(([cle, libelle, t]) => (
+            <button key={cle} type="button" className="om-pt-segment" aria-pressed={filtre === cle} onClick={() => setFiltre(cle)}>
+              {t ? <span className="om-pt-point" data-teinte={t} aria-hidden="true" /> : null}
+              {libelle}
+              <span className="om-pt-compte">{compte[cle]}</span>
+            </button>
+          ))}
+        </div>
+        <div className="om-pt-outils">
+          <label className="om-pt-recherche">
+            <Search {...I} />
+            <input value={recherche} onChange={(e) => setRecherche(e.target.value)} placeholder="Rechercher une tâche" aria-label="Rechercher une tâche" />
+            {recherche ? (
+              <button type="button" aria-label="Effacer la recherche" onClick={() => setRecherche("")}>
+                <X width={14} height={14} aria-hidden="true" />
+              </button>
+            ) : null}
+          </label>
+          <Choix forme="bouton" etiquette="Catégorie" icone={<ListFilter {...I} />} valeur={categorie} onChange={setCategorie} vide="Filtres" options={CATEGORIES.filter((c) => lignes.some((l) => l.donnees["Catégorie"] === c))} actif={!!categorie} />
+          <div className="om-pt-affichage" role="group" aria-label="Affichage">
+            <button type="button" aria-pressed={vue === "liste"} aria-label="En liste" onClick={() => setVue("liste")}>
+              <List {...I} />
+            </button>
+            <button type="button" aria-pressed={vue === "colonnes"} aria-label="En colonnes par statut" onClick={() => setVue("colonnes")}>
+              <Columns3 {...I} />
+            </button>
+          </div>
         </div>
       </div>
       <p className="om-etat" role="status">
         {etat}
       </p>
 
-      {blocsAffiches.length === 0 ? (
-        <section className="si-section">
-          <p className="si-vide">Aucune tâche ne correspond.</p>
-        </section>
-      ) : (
-        blocsAffiches.map(({ i, b, liste }) => {
-          const replie = replies.includes(i) && !filtrage;
-          const ouvertes = filtre === "terminees" ? liste : liste.filter(ouverte);
-          const terminees = filtre === "terminees" ? [] : liste.filter((l) => !ouverte(l));
-          const montrerFaites = faitesOuvertes.includes(i);
-          return (
-            <section key={i} className="si-section" aria-label={libelleBloc(b)}>
-              <h2 className="si-tete">
-                <button type="button" className="si-replier" aria-expanded={!replie} onClick={() => setReplies((r) => (replie ? r.filter((x) => x !== i) : [...r, i]))}>
-                  <ChevronDown {...I} width={14} height={14} className="si-chevron" />
-                  {libelleBloc(b)}
-                  {i === blocCourant ? <span className="si-maintenant">Cette semaine</span> : null}
-                  <span className="no-compte">{ouvertes.length}</span>
-                  <span className="si-dates">{datesBloc(b)}</span>
+      <div className="om-pt-grille" data-colonnes={vue === "colonnes" ? "" : undefined}>
+        <div className="om-pt-principal">
+          {vue === "colonnes" ? (
+            <div className="om-pt-tableau">
+              {STATUTS.map((s) => {
+                const liste = visibles.filter((l) => (l.donnees["Statut"] ?? "À faire") === s);
+                return (
+                  <section key={s} className="v2-carte om-pt-colonne" aria-label={s}>
+                    <h2>
+                      <span className="om-pt-point" data-teinte={teinte(s)} aria-hidden="true" />
+                      {s}
+                      <span className="om-pt-compte">{liste.length}</span>
+                    </h2>
+                    <ul>
+                      {liste.map((l) => {
+                        const { titre } = decouper(l.donnees["Tâche"]);
+                        return (
+                          <li key={l.id}>
+                            <button type="button" className="om-pt-tuile" aria-current={choisie?.id === l.id ? "true" : undefined} onClick={() => ouvrir(l.id)}>
+                              <span className="om-pt-tuile-titre">{titre || "Nouvelle tâche"}</span>
+                              <span className="om-pt-tuile-sous">
+                                {l.donnees["Catégorie"]} · {dateCourte(l.donnees["Échéance"])}
+                              </span>
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </section>
+                );
+              })}
+            </div>
+          ) : blocsAffiches.length === 0 ? (
+            <div className="v2-carte om-pt-vide">Aucune tâche ne correspond à ces filtres.</div>
+          ) : (
+            <>
+              {blocsAffiches.map(({ i, b, liste }) => {
+                const replie = replies.includes(i);
+                const ouvertes = filtre === "terminees" ? liste : liste.filter(ouverte);
+                const terminees = filtre === "terminees" ? [] : liste.filter((l) => !ouverte(l));
+                const montrerFaites = faitesOuvertes.includes(i);
+                const dominante = Object.entries(liste.reduce<Record<string, number>>((acc, l) => ({ ...acc, [l.donnees["Catégorie"]]: (acc[l.donnees["Catégorie"]] ?? 0) + 1 }), {})).sort((x, y) => y[1] - x[1])[0]?.[0];
+                return (
+                  <section key={i} className="v2-carte om-pt-semaine" aria-label={libelleBloc(b)}>
+                    <button type="button" className="om-pt-semaine-tete" aria-expanded={!replie} onClick={() => setReplies((r) => (replie ? r.filter((x) => x !== i) : [...r, i]))}>
+                      <ChevronDown {...I} className="om-pt-chevron" />
+                      <span className="om-pt-semaine-nom">{libelleBloc(b)}</span>
+                      {dominante ? <span className="om-pt-semaine-theme">{dominante}</span> : null}
+                      {i === blocCourant ? <span className="om-pt-maintenant">Cette semaine</span> : null}
+                      <span className="om-pt-semaine-dates">{datesBloc(b)}</span>
+                    </button>
+                    {replie ? null : (
+                      <ul className="om-pt-liste">
+                        {[...ouvertes, ...(montrerFaites ? terminees : [])].map((l) => (
+                          <LigneTache key={l.id} l={l} choisie={choisie?.id === l.id} maintenant={maintenant} ouvrir={() => ouvrir(l.id)} cocher={(fait) => maj(l.id, "Statut", fait ? "Fait" : "À faire")} />
+                        ))}
+                        {terminees.length ? (
+                          <li className="om-pt-terminees">
+                            <button type="button" aria-expanded={montrerFaites} onClick={() => setFaitesOuvertes((f) => (montrerFaites ? f.filter((x) => x !== i) : [...f, i]))}>
+                              <span className="om-pt-case-pleine" aria-hidden="true">
+                                <Check width={12} height={12} strokeWidth={2.5} />
+                              </span>
+                              {montrerFaites ? "Masquer" : ""} {terminees.length} tâche{terminees.length > 1 ? "s" : ""} terminée{terminees.length > 1 ? "s" : ""}
+                              <ChevronDown {...I} className="om-pt-chevron" />
+                            </button>
+                          </li>
+                        ) : null}
+                      </ul>
+                    )}
+                  </section>
+                );
+              })}
+              <div className="om-pt-pied">
+                <button type="button" className="v2-btn v2-btn--petit v2-btn--fantome" onClick={ajouter}>
+                  <Plus {...I} />
+                  Ajouter une tâche
                 </button>
-              </h2>
-              {replie ? null : (
-                <ul className="si-liste">
-                  {[...ouvertes, ...(montrerFaites ? terminees : [])].map((l) => (
-                    <LigneTache key={l.id} l={l} maintenant={maintenant} ouvrir={() => setChoix(l.id)} cocher={(fait) => maj(l.id, "Statut", fait ? "Fait" : "À faire")} />
-                  ))}
-                  {terminees.length ? (
-                    <li className="si-ligne si-ligne--discrete">
-                      <button type="button" className="si-plus" aria-expanded={montrerFaites} onClick={() => setFaitesOuvertes((f) => (montrerFaites ? f.filter((x) => x !== i) : [...f, i]))}>
-                        {montrerFaites ? "Masquer les" : ""} {terminees.length} tâche{terminees.length > 1 ? "s" : ""} terminée{terminees.length > 1 ? "s" : ""}
-                        <ChevronDown {...I} width={14} height={14} className="si-chevron" data-ouvert={montrerFaites ? "" : undefined} />
-                      </button>
-                    </li>
-                  ) : null}
-                </ul>
-              )}
-            </section>
-          );
-        })
-      )}
-      <div className="si-pied">
-        <button type="button" className="si-plus" onClick={ajouter}>
-          <Plus {...I} width={14} height={14} />
-          Ajouter une tâche
-        </button>
-        {restants > 0 || (tout && !filtrage && blocs.length > blocCourant + 2) ? (
-          <button type="button" className="si-plus" aria-expanded={tout} onClick={() => setTout((t) => !t)}>
-            {tout ? "Masquer les semaines suivantes" : `Semaines suivantes (${restants})`}
-            <ChevronDown {...I} width={14} height={14} className="si-chevron" data-ouvert={tout ? "" : undefined} />
-          </button>
-        ) : null}
-      </div>
+                {restants > 0 || (tout && !filtrage && blocs.length > blocCourant + 2) ? (
+                  <button type="button" className="v2-btn v2-btn--petit v2-btn--fantome om-pt-suivantes" aria-expanded={tout} onClick={() => setTout((t) => !t)}>
+                    {tout ? "Masquer les semaines suivantes" : `Afficher les semaines suivantes (${restants})`}
+                    <ChevronDown {...I} className="om-pt-chevron" />
+                  </button>
+                ) : null}
+              </div>
+            </>
+          )}
+        </div>
 
-      {/* la fiche : seulement quand une tâche est ouverte, en tiroir sur le côté */}
-      <ModalOverlay isOpen={!!choisie} onOpenChange={(o) => !o && setChoix(null)} isDismissable className="v2-jetons si-voile">
-        <Modal className="si-tiroir">
-          <Dialog className="si-tiroir-dialogue" aria-label="La tâche">
-            {choisie ? <Fiche key={choisie.id} l={choisie} maj={maj} supprimer={supprimer} fermer={() => setChoix(null)} /> : null}
-          </Dialog>
-        </Modal>
-      </ModalOverlay>
+        <aside className="om-pt-fiche-zone" data-ouverte={ficheOuverte ? "" : undefined} aria-label="La tâche choisie">
+          <button type="button" className="om-pt-voile" aria-label="Fermer la tâche" onClick={() => setFicheOuverte(false)} />
+          {choisie ? (
+            <Fiche key={choisie.id} l={choisie} maj={maj} supprimer={supprimer} fermer={() => { setFicheOuverte(false); setChoix(null); }} />
+          ) : (
+            <div className="v2-carte om-pt-fiche om-pt-fiche--vide">Choisis une tâche pour la voir en détail.</div>
+          )}
+        </aside>
+      </div>
     </div>
   );
 }
 
-function LigneTache({ l, maintenant, ouvrir, cocher }: { l: Ligne; maintenant: number; ouvrir: () => void; cocher: (fait: boolean) => void }) {
+function LigneTache({ l, choisie, maintenant, ouvrir, cocher }: { l: Ligne; choisie: boolean; maintenant: number; ouvrir: () => void; cocher: (fait: boolean) => void }) {
   const { titre, sous } = decouper(l.donnees["Tâche"]);
   const statut = l.donnees["Statut"] ?? "À faire";
-  const fait = statut === "Fait";
   const e = echeance(l.donnees["Échéance"]);
-  const retard = !fait && e !== null && e.getTime() < maintenant;
+  const retard = statut !== "Fait" && e !== null && e.getTime() < maintenant;
   return (
-    <li className="si-ligne" data-fait={fait ? "" : undefined}>
-      <button type="button" role="checkbox" aria-checked={fait} aria-label={`${fait ? "Rouvrir" : "Marquer faite"} : ${titre}`} className="si-case" onClick={() => cocher(!fait)}>
-        <Check width={11} height={11} strokeWidth={3} aria-hidden="true" />
-      </button>
-      <button type="button" className="si-texte" onClick={ouvrir}>
-        <strong>{titre || "Nouvelle tâche"}</strong>
-        <span>{[sous, l.donnees["Catégorie"]].filter(Boolean).join(" · ")}</span>
-      </button>
-      {statut === "Bloqué" || statut === "En cours" ? <span className="si-meta si-meta--large">{statut}</span> : null}
-      <span className="si-meta" data-retard={retard ? "" : undefined}>
-        {dateCourte(l.donnees["Échéance"])}
+    <li className="om-pt-ligne" aria-current={choisie ? "true" : undefined} data-fait={statut === "Fait" ? "" : undefined}>
+      <span className="v2-val-case om-pt-case">
+        <input type="checkbox" checked={statut === "Fait"} aria-label={`${statut === "Fait" ? "Rouvrir" : "Marquer faite"} : ${titre}`} onChange={(ev) => cocher(ev.target.checked)} />
       </span>
+      <button type="button" className="om-pt-corps" onClick={ouvrir}>
+        <span className="om-pt-texte">
+          <span className="om-pt-titre">{titre || "Nouvelle tâche"}</span>
+          {sous ? <span className="om-pt-sous">{sous}</span> : null}
+          <span className="om-pt-sous om-pt-sous--etroit">
+            {l.donnees["Catégorie"]} · {dateCourte(l.donnees["Échéance"])}
+          </span>
+        </span>
+        <span className="om-pt-etiquette">{l.donnees["Catégorie"]}</span>
+        <span className="om-pt-date" data-retard={retard ? "" : undefined}>
+          {dateCourte(l.donnees["Échéance"])}
+        </span>
+        <span className="om-pt-statut">
+          <span className="om-pt-point" data-teinte={teinte(statut)} aria-hidden="true" />
+          {statut}
+        </span>
+        <ChevronRight {...I} className="om-pt-fleche" />
+      </button>
     </li>
   );
 }

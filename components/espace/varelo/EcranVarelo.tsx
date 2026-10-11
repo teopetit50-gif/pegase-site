@@ -8,6 +8,8 @@
        du matin Varelo — contrats à dénoncer, encours, réciproques ;
      · « Le groupe sur une page » (GroupePage.tsx, b1_08) : ventes,
        résultat, trésorerie et écarts de chaque société ;
+     · « Ventes des caisses » (Caisses.tsx, b1_17) : le Z de chaque magasin,
+       hier, la semaine dernière, le mois ;
      · « Reportings dus » (Reportings.tsx, b1_09) : qui doit quoi, à qui,
        pour quand, en retard ;
      · « Réserves à émettre » (Reserves.tsx, b1_11) : les livraisons abîmées
@@ -67,6 +69,7 @@ import Reportings from "./Reportings";
 import Reserves from "./Reserves";
 import Branchements from "./Branchements";
 import ReglesGroupe from "./ReglesGroupe";
+import Caisses from "./Caisses";
 import "./varelo.css";
 
 export type Donnees = Referentiel;
@@ -464,6 +467,7 @@ export default function EcranVarelo() {
 
       {donnees && contexte ? <CeMatin source={source} client_id={client_id} actif={!!reel?.installation} codes={donnees.codes} objets={donnees.objets} /> : null}
       {donnees && contexte ? <GroupePage source={source} contexte={contexte} client_id={client_id} societes={donnees.societes} onFait={(m) => setFait(m)} /> : null}
+      {donnees && contexte ? <Caisses source={source} contexte={contexte} client_id={client_id} societes={donnees.societes} onFait={(m) => setFait(m)} /> : null}
       {donnees && contexte ? <Reportings source={source} contexte={contexte} client_id={client_id} societes={donnees.societes} onFait={(m) => setFait(m)} /> : null}
       {donnees && contexte ? <Reserves source={source} contexte={contexte} client_id={client_id} societes={donnees.societes} objets={donnees.objets} onFait={(m) => setFait(m)} /> : null}
 
