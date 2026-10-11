@@ -40,6 +40,9 @@ for (const largeur of [390, 1440]) {
   await s.dormir(800);
   await s.evaluer(axe + ';true');
   dire(`varelo ${largeur}`, await analyser(s, `document.querySelector('.esp')`));
+  /* règle expérimentale d'axe, relevée par C1 sur /espace2 : le nom accessible d'un bouton contient son texte visible */
+  const discordants = await s.evaluer(`(async () => { const r = await axe.run(document.querySelector('.esp'), { runOnly: { type: 'rule', values: ['label-content-name-mismatch'] } }); return r.violations.flatMap(v => v.nodes.map(n => n.html.slice(0, 120))); })()`);
+  ok(discordants.length === 0, `varelo ${largeur}, nom accessible et texte visible concordent : ${discordants.length} écart(s) ${discordants.slice(0, 3).join(' | ')}`);
 
   const liste = await s.evaluer(`(() => ({
     listbox: document.querySelectorAll('.esp [role="listbox"], .esp [role="option"]').length,
