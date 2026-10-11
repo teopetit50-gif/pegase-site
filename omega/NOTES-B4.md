@@ -29,12 +29,16 @@ Voir `omega/CHIFFRAGE/tamila.md`.
    dossier neuf, 4 pièces chiffrées, pré-lecture et chronologie.
 4. Donner l'id du dossier au coordinateur, puis recetter l'écran « Lectures du dossier » sur le premier résultat fini.
 
-**Ensuite, par ordre du chiffrage** :
-1. l'ouvrier `tamila.exporter` (l'archive du dossier n'est jamais produite) ;
-2. l'effacement des analyses à la clôture ;
-3. le point du matin complété (forfaits dépassés, sans diligence) ;
-4. le seuil « sans diligence » à 30 jours, comme la page ;
-5. l'export du journal des accès.
+**Fait à la reprise (11/10)** — b4_17 + test 26, tamila-purge v3 (genre `tamila.exporter`, 10 tests Deno), écran :
+1. l'archive d'un dossier : manifeste + pièces chiffrées rangés par l'ouvrier, ouverts en clair dans le navigateur
+   au téléchargement (`archive.ts`, `zip.ts`) ;
+2. le dossier de faits (lectures longues) vidé à l'effacement ;
+3. le point du matin du gérant complété (forfaits dépassés, sans diligence à 30 jours) ;
+4. le seuil « sans diligence » du pilotage aligné à 30 jours ;
+5. le journal des accès exportable en CSV ;
+6. styles des dialogues neutres vis-à-vis du thème (`/espace2` est sombre).
+Série locale 576 ok (25 échecs connus), recette 190/190. **À poser** : b4_17 + 26 ; **à redéployer** : tamila-purge (v3).
+Chiffrage mis à jour : B 15 · C 21 · D 18 · T 9, ≈ 68 j → B ; premier cabinet ≈ 3 j + tiers.
 
 **Outils** : souche PostgreSQL locale (`omega/tests/tamila/souche_locale/jouer.sh`, `chmod 711 /tmp/claude-0`
 d'abord ; 04/06/10/11 échouent en local seulement, faute des règles de procédure). Recette navigateur :

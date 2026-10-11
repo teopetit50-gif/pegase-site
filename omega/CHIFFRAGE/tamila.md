@@ -1,4 +1,4 @@
-# Chiffrage Tamila — /secteurs/avocats (session B4, 06/10/2026, demande de Teo)
+# Chiffrage Tamila — /secteurs/avocats (session B4, 06/10/2026, demande de Teo ; mis à jour le 11/10 après b4_17)
 
 Lu sur main **c0494b4** (vitrine de 15 h 55), sans rien y modifier. Toutes les phrases visibles de la page :
 `components/secteurs/avocats/textes.ts` (presque tout le texte), `app/secteurs/avocats/page.tsx` (description),
@@ -15,8 +15,8 @@ sur de vrais documents Tamila.
 
 ## Synthèse
 
-1. **63 promesses**, classées sur leur état principal : A **0** · B **10** · C **26** · D **18** · T **9**. Rien n'est prouvé en vrai : aucun cabinet réel, aucune vraie pièce lue de bout en bout, aucune qualité mesurée sur de vrais documents.
-2. **Pour tout amener en B : ≈ 74 jours**, dont ≈ 41,5 de lecture IA (jours du lecteur d'A1 + écrans B4), ≈ 24 de gestion et d'écran, ≈ 8,5 d'infrastructure (hébergeur français, lecture en UE).
+1. **63 promesses**, classées sur leur état principal : A **0** · B **15** · C **21** · D **18** · T **9**. Rien n'est prouvé en vrai : aucun cabinet réel, aucune vraie pièce lue de bout en bout, aucune qualité mesurée sur de vrais documents.
+2. **Pour tout amener en B : ≈ 68 jours** (74 le 06/10 ; b4_17 a fait l'archive, l'effacement du dossier de faits, le point du matin complété, le journal exportable), dont ≈ 41,5 de lecture IA, ≈ 18 de gestion et d'écran, ≈ 8,5 d'infrastructure.
 3. **Pour tout amener ensuite en A : ≈ 54 jours de plus**, avec un cabinet pilote et ses vraies pièces.
 4. **Tiers et achats** :
    - hébergeur français pour la base et les fichiers (aujourd'hui Supabase, région à confirmer) ;
@@ -25,11 +25,9 @@ sur de vrais documents Tamila.
    - Scaleway Key Manager activé (décision de Teo en attente) ;
    - en option, une clé Mistral OCR ;
    - contrat et DPA (art. 28 RGPD) rédigés par un avocat.
-5. **Pour un premier cabinet réel : ≈ 8,5 jours d'ouvrier**, plus les tiers ci-dessus. Il faut :
+5. **Pour un premier cabinet réel : ≈ 3 jours d'ouvrier** (8,5 le 06/10), plus les tiers ci-dessus. Il faut :
    - activer le coffre et faire tourner la pré-lecture (chronologie, contradictions, bordereau) sur un vrai dossier, avec un essai fictif à grande échelle d'abord (lignes 3-5, ≈ 2,5 j) ;
-   - écrire l'ouvrier d'export du dossier, absent aujourd'hui (3 j) ;
-   - effacer le dossier de faits à la clôture (1 j) ;
-   - compléter le point du matin (forfaits, sans diligence : 1,5 j) ;
+   - (fait le 11/10, b4_17 : l'archive du dossier, l'effacement du dossier de faits, le point du matin complété) ;
    - basculer la lecture sur Bedrock UE (0,5 j) ;
    - rendre vraie la mention d'hébergement en France, ou reformuler la page.
    Honoraires, délais et pilotage sont en B et peuvent servir.
@@ -65,9 +63,9 @@ sur de vrais documents Tamila.
 
 | # | Promesse | Où | État | Preuve | Ce qui manque | Jours → B / B → A | Coût externe |
 |---|---|---|---|---|---|---|---|
-| 17 | « Chaque matin à 7 h, avant votre première audience, un courriel réunit les délais de procédure de la semaine, les pièces que le cabinet attend encore, les forfaits dépassés et les dossiers sans diligence, chacun avec l'action à engager » | textes.ts:70 | C | b4_14 + test 23 vert sur la recette (délais, audiences, avis, expertise) ; envoi par le socle | les lignes « forfaits dépassés » et « sans diligence » dans la section ; l'heure de 7 h et le courriel vérifiés de bout en bout | 1 / 1 | expéditeur (déjà au socle) |
+| 17 | « Chaque matin à 7 h, avant votre première audience, un courriel réunit les délais de procédure de la semaine, les pièces que le cabinet attend encore, les forfaits dépassés et les dossiers sans diligence, chacun avec l'action à engager » | textes.ts:70 | B | b4_17 + test 26 (forfaits dépassés, sans diligence au point du gérant) ; b4_14 + test 23 vert sur la recette (délais, audiences, avis, expertise) ; envoi par le socle | les lignes « forfaits dépassés » et « sans diligence » dans la section ; l'heure de 7 h et le courriel vérifiés de bout en bout | 0 / 1 | expéditeur (déjà au socle) |
 | 18 | Carte « Forfaits dépassés : le temps passé est rapporté à la convention d'honoraires » | textes.ts:73-74 | B | b4_06 + b4_12, tests 15 et 21, carte Honoraires (jauge), recette | un vrai cabinet | 0 / 1 | — |
-| 19 | Carte « Sans diligence : aucun acte depuis trente jours » | textes.ts:85-86 | C | pilotage « Sans diligence » (0c0714d), seuil codé à **45** jours | aligner sur 30 jours ou rendre réglable | 0,5 / 1 | — |
+| 19 | Carte « Sans diligence : aucun acte depuis trente jours » | textes.ts:85-86 | B | seuil aligné à 30 jours (pilotage, point du matin) ; pilotage « Sans diligence » (0c0714d), seuil codé à **45** jours | aligner sur 30 jours ou rendre réglable | 0 / 1 | — |
 | 20 | Carte « Délais de procédure : lus dans les avis RPVA et classés du plus proche au plus lointain » | textes.ts:97-98 | C | classement B ; lecture de l'avis : passerelle b4_08 + lecteur (A1), saisie et avis par courriel B | lecture d'un vrai avis chiffré au coffre jamais faite | 1 / 2 | Scaleway KM |
 | 21 | Carte « Ce que le cabinet attend : des pièces du client, des pré-rapports de l'expert et des pièces citées par le confrère » | textes.ts:109-110 | C | expert : b4_16 + test 25, pilotage ; client : convention, pièce d'identité | demandes de pièces au client (liste, relance) ; pièces citées par le confrère (lecture de ses conclusions, *A1*) | 2,5 / 1,5 | IA |
 
@@ -80,7 +78,7 @@ sur de vrais documents Tamila.
 | 24 | Dossiers partagés | textes.ts:127 | D | — | import depuis un dossier partagé (Drive, SharePoint) | 3 / 2 | — |
 | 25 | Logiciel métier | textes.ts:127 | T | — | import depuis Secib, Jarvis, etc. : aucun accès aujourd'hui | 5 / 3 | partenariat éditeur |
 | 26 | Pièces scannées | textes.ts:127 | C | = 9 | = 9 | (compté) | OCR |
-| 27 | Exports | textes.ts:127 | C | export demandé et tracé (porte socle) ; factures et lectures en Word et PDF (B) | **l'ouvrier `tamila.exporter` n'existe pas** : l'archive du dossier n'est jamais produite | 3 / 1 | — |
+| 27 | Exports | textes.ts:127 | B | ouvrier tamila.exporter (tamila-purge, 10 tests Deno), archive ouverte en clair dans le navigateur (b4_17) ; export demandé et tracé (porte socle) ; factures et lectures en Word et PDF (B) | **l'ouvrier `tamila.exporter` n'existe pas** : l'archive du dossier n'est jamais produite | 0 / 1 | — |
 
 ## 5. Le secret professionnel (SECRET)
 
@@ -99,9 +97,9 @@ sur de vrais documents Tamila.
 | 38 | Fait « Statut : sous-traitant, art. 28 RGPD » | textes.ts:144 | D/T | — | DPA art. 28 | 0 / 0 | avocat |
 | 39 | « Tamila ne lit que les dossiers que vous lui ouvrez, un par un, et ne parcourt jamais votre messagerie de lui-même » | textes.ts:147 | B | analyses à la demande par dossier (b4_15, test 24) ; avis par transfert seulement | — | 0 / 1 | — |
 | 40 | « Vos pièces ne servent à entraîner aucun modèle … Cette exclusion est une clause du contrat » | textes.ts:148 | C/T | conditions API du fournisseur | la clause ; vérifier les conditions du fournisseur retenu | 0 / 0 | avocat |
-| 41 | « Lorsque vous clôturez un dossier, ses pièces et son dossier de faits sont effacés. Vous conservez l'export que vous avez téléchargé » | textes.ts:149 | C | b4_11 + test 20, tamila-purge v2 déployé (fichiers, archives, clés) | `analyses` (le dossier de faits) n'est pas dans la liste d'effacement du dossier ; l'export (= 27) | 1 / 1 | — |
+| 41 | « Lorsque vous clôturez un dossier, ses pièces et son dossier de faits sont effacés. Vous conservez l'export que vous avez téléchargé » | textes.ts:149 | B | b4_17 + test 26 : le résultat des lectures longues est vidé à l'effacement ; b4_11 + test 20, tamila-purge v2 déployé (fichiers, archives, clés) | `analyses` (le dossier de faits) n'est pas dans la liste d'effacement du dossier ; l'export (= 27) | 0 / 1 | — |
 | 42 | « Les pièces sont chiffrées pendant leur transfert et pendant leur conservation. Elles sont conservées en France. Leur lecture se fait dans l'Union européenne, et aucune copie n'y est gardée » | textes.ts:150 | T | chiffrement : B | = 36 et 30 | (compté) | — |
-| 43 | « Le journal indique qui a consulté quel dossier, et à quelle date. Vous pouvez l'exporter à tout moment » | textes.ts:151 | C | b4_02 (test 12), carte Journal des accès, base réelle § 8 | bouton d'export du journal (CSV) | 0,5 / 0,5 | — |
+| 43 | « Le journal indique qui a consulté quel dossier, et à quelle date. Vous pouvez l'exporter à tout moment » | textes.ts:151 | B | bouton « Exporter (CSV) » du journal (recette 190/190) ; b4_02 (test 12), carte Journal des accès, base réelle § 8 | bouton d'export du journal (CSV) | 0 / 0,5 | — |
 | 44 | « Tamila dispose d'un accès en lecture seule : il n'envoie aucun message, ne communique aucune pièce et ne modifie rien dans votre logiciel » | textes.ts:152 | B | aucun connecteur en écriture | — | 0 / 0 | — |
 
 ## 6. Les formules (FORMULES)
@@ -134,7 +132,7 @@ le champ matière (B). En revanche, les délais calculés ne couvrent que la pro
 
 ## Totaux (somme des lignes, arrondis)
 
-- **→ B : ≈ 74 j.** Lecture IA : 41,5 j (lignes 2, 3-5, 7, 9, 10, 21, 49-57, 60 ; part lecteur d'A1 + écrans B4). Gestion et écran : 24 j. Infrastructure : 8,5 j (lignes 29, 30, 36).
+- **→ B : ≈ 68 j.** Lecture IA : 41,5 j (lignes 2, 3-5, 7, 9, 10, 21, 49-57, 60 ; part lecteur d'A1 + écrans B4). Gestion et écran : 18 j. Infrastructure : 8,5 j (lignes 29, 30, 36).
 - **B → A : ≈ 54 j** : 24,5 de lecture IA, 26 de gestion, 3,5 d'infrastructure, avec un cabinet pilote (ses vraies pièces, ses retours).
 - Comptage : somme des colonnes « Jours » ; « (compté) » renvoie à une autre ligne et n'est pas recompté. L'état retenu est la lettre principale (« C/T » compte en C, « D / C » en D).
 - Part lecteur : chiffres d'A1 (06/10, 20 h 30 Z), repris tels quels ; part écran et porte : B4.

@@ -188,7 +188,7 @@ export default function PilotageCabinet({ ouvert, onFermer, source, clientId, do
               ) : null}
 
               {vue === "diligence" ? (
-                sd.length === 0 ? <p className="esp-kpi-sous">Chaque dossier vivant a bougé dans les 45 derniers jours.</p> : sd.map((x) => (
+                sd.length === 0 ? <p className="esp-kpi-sous">Chaque dossier vivant a bougé dans les 30 derniers jours.</p> : sd.map((x) => (
                   <div key={x.dossier.id} className="tam-ligne">
                     <div className="tam-ligne-haut">
                       {ref(x.dossier, x.clair)}

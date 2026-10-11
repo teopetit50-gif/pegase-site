@@ -473,7 +473,7 @@ for (const largeur of [1440, 390]) {
     const t3 = await vue('Pièces attendues');
     ok(/exemplaire signé de la convention/.test(t3), 'la convention signée dont l\'exemplaire manque');
     const t4 = await vue('Sans diligence');
-    ok(/jours sans diligence|a bougé dans les 45 derniers jours/.test(t4), 'la vue « sans diligence » répond');
+    ok(/jours sans diligence|a bougé dans les 30 derniers jours/.test(t4), 'la vue « sans diligence » répond');
     const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
     await s.evaluer(axe + ';true');
     await vue('Marge');
@@ -563,6 +563,19 @@ for (const largeur of [1440, 390]) {
     return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`);
   ok(g.length === 0, `axe sur le dialogue de l'expertise : ${g.length ? g.join(' ; ') : 'aucun écart grave'}`);
   await s.capturer(`${dossier}tamila-expertise-1440.jpg`, { qualite: 55 });
+  s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b4-journal', densite: 1 });
+  console.log('— le journal des accès s\'exporte (b4_17)');
+  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  await s.dormir(600);
+  await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /2026-0412/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const j = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Journal des accès"]'); const b = c && [...c.querySelectorAll('.r-btn')].find(x => /Exporter/.test(x.textContent)); return b ? { gris: b.disabled, texte: c.innerText } : null; })()`);
+  ok(j && !j.gris && /composé dans votre navigateur/.test(j.texte), 'le bouton « Exporter (CSV) » du journal est actif');
   s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
   s.fermer();
 }

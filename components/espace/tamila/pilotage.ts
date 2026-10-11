@@ -104,7 +104,7 @@ export function series(x: DonneesPilotage): Serie[] {
 export type SansDiligence = { dossier: Dossier; clair: Clair | null; derniere: string; jours: number };
 
 /** Les dossiers vivants où rien ne s'est passé depuis `seuil` jours : ni temps, ni acte, ni audience, ni avis, ni pièce. */
-export function sansDiligence(x: DonneesPilotage, maintenant: number, seuil = 45): SansDiligence[] {
+export function sansDiligence(x: DonneesPilotage, maintenant: number, seuil = 30): SansDiligence[] {
   const out: SansDiligence[] = [];
   for (const { dossier, clair } of x.dossiers) {
     if (!VIVANTS.includes(dossier.statut)) continue;
