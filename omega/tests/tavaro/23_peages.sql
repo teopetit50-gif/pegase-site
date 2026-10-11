@@ -26,12 +26,13 @@ begin
   return next is((r ->> 'deja')::int, 1, 'Rejouer l''export n''ajoute rien');
   return next throws_ok(format('select public.loc_enregistrer_passages(%L::jsonb)', jsonb_build_array(jsonb_build_object('operateur', 'Sanef', 'reference', 'B2-S-9',
                         'passe_le', now() + interval '1 day', 'immatriculation', 'GA-123-BC', 'montant_eur', 1))), '22023', null, 'Un passage daté dans le futur est refusé');
+  -- lus en administrateur : le passage sans véhicule connu n'a pas d'agence, un collaborateur ne le voit pas
+  perform tests.redevenir_admin();
   select x.id into p1 from public.loc_passages_peage x where x.client_id = v_client and x.reference = 'B2-S-1';
   select x.id into p2 from public.loc_passages_peage x where x.client_id = v_client and x.reference = 'B2-S-2';
   return next ok((select x.contrat_id = v_contrat and x.payer_avant = x.passe_le + interval '72 hours' from public.loc_passages_peage x where x.id = p1), 'Le passage porte son contrat et son échéance de 72 heures');
 
   -- Les 72 heures : l'alerte.
-  perform tests.redevenir_admin();
   return next ok(private.loc_surveiller_peages() >= 1, 'Des passages à payer hors délai lèvent une alerte');
 
   -- Refacturer : il faut un passage payé, puis la ligne PEAGE au barème.
