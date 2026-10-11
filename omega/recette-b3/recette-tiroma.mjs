@@ -1,7 +1,7 @@
 /* recette-tiroma.mjs — l'écran /espace/tiroma aux cinq largeurs (session B3,
    05/10/2026). Pour chaque largeur (390 / 768 / 1024 / 1440 / 1700) : la page
    charge, aucun débordement horizontal, aucun élément plus large que l'écran,
-   aucun mot anglais surveillé, les quatre compteurs et les cinq cartes sont
+   aucun mot anglais surveillé, les quatre compteurs et toutes les cartes sont
    là, et une capture légère (jpeg, densité 1) dans omega/recette-b3/. Puis
    trois enchaînements sur l'exemple : ajouter un fauteuil (le dialogue, le
    bouton gris sans nom, la liste qui grandit), classer un type à classer
@@ -17,7 +17,7 @@ let echecs = 0;
 const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) echecs++; };
 const ANGLAIS = /\b(Loading|Submit|Cancel|Approve|Reject|Delete|Save|Error|Pending|Due|Invoice|Supplier|Settings|Logout|Sign in|Dashboard|Today|Yesterday|Tomorrow|Chair|Patient list|Appointment)\b/;
 const LARGEURS = [390, 768, 1024, 1440, 1700];
-const CARTES = ['Créneaux à sauver', 'Plans sans rendez-vous', 'Avant les rendez-vous', 'Charge des fauteuils', 'Demi-journées vides', 'Objectifs par fauteuil', 'Absences probables', 'Équipe absente', 'Appels', 'Synthèse de la semaine', 'Réinscription', 'Pilotage', 'Rappels aux patients', "Liste d'attente", 'Règles communes', 'Le cabinet'];
+const CARTES = ['Créneaux à sauver', 'Plans sans rendez-vous', 'Avant les rendez-vous', 'Charge des fauteuils', 'Demi-journées vides', 'Objectifs par fauteuil', 'Absences probables', 'Équipe absente', 'Appels', 'Synthèse de la semaine', 'Réinscription', 'Pilotage', 'Rappels aux patients', "Liste d'attente", 'Règles communes', 'Soins à regrouper', 'Séances longues mal placées', 'Un créneau pour chaque plan', 'Contrôles dus', 'Vos données', 'Le cabinet'];
 
 for (const largeur of LARGEURS) {
   const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'b3-tiroma', densite: 1 });
