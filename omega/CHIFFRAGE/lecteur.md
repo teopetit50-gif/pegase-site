@@ -24,7 +24,7 @@ Légende : **A** prouvé sur de vrais documents en recette ; **B** testé sur do
 | Autres pièces FILED (devis, bon de commande, relevé, contrat) | C | — | Classées, champs génériques de facture seulement ; pas de champs propres | 1 | 1 | ≈ 0,015 € |
 | Attestation d'assurance (FILED) | C | — | Pas de champs propres (assureur, période, garanties) | 0,5 | 0,5 | ≈ 0,015 € |
 | Pièces juridiques Tamila (avis RPVA, 10 types) | B / **T** | — | Coffre Scaleway pour un vrai dossier ; vrais avis RPVA (exemples anonymisés de B4) | — | 1 | ≈ 0,015 € par avis |
-| Lecture longue d'un dossier Tamila (pré-lecture, chronologie, contradictions, bordereau) | B / **T** | — | Même coffre ; un dossier réel ; mesurer les citations vérifiées et les constats sans source | — | 1,5 | 1 à 5 € par dossier (≈ 0,005 € par page lue + synthèse), plafond 15 € |
+| Lecture longue d'un dossier Tamila (pré-lecture, chronologie, contradictions, bordereau) | B / **T** | essai fictif de 200 pièces / 3 000 pages : finie en 17 passages, rien perdu (11/10) | Même coffre ; un dossier réel ; mesurer les citations vérifiées et les constats sans source ; poser 19aq | — | 1,5 | 1 à 5 € par dossier (≈ 0,005 € par page lue + synthèse), plafond 15 € |
 | Courriers d'urbanisme Lorani (récépissé, ARE, arrêté, délais, pièces, affichage) | B | — | Vrais courriers de mairie et vrais ARE | — | 1 | ≈ 0,015 € |
 | Situation de travaux (Lorani) | B | — | Vraies situations | — | 0,5 | ≈ 0,02 € |
 | Plans et planches, CCTP, DPGF, métré, plan BET, notice, Cerfa, RE2020 (contrôle du dossier) | B | — | Un vrai dossier de permis ou de DCE ; mesurer les objets rapprochés entre pièces. Seules les cotes écrites sont lues | — | 2 | planche : 0,02–0,05 € ; CCTP ou DPGF de 30 pages : 0,1–0,3 € |

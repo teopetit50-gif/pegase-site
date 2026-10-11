@@ -74,6 +74,8 @@ export interface ResultatAnalyse {
   couts: { appels_ia: number; tokens_entree: number; tokens_sortie: number; cout_eur: number; modele: string };
   /** Constats écartés faute de citation retrouvée (gardés à part, jamais présentés comme établis). */
   sans_source: number;
+  /** « allegee » : grand dossier (ou synthèse tronquée), doublons fusionnés par règle, le modèle n'a rendu que le résumé. */
+  synthese?: "complete" | "allegee";
 }
 
 /** Une tranche de lecture : une pièce, ou une partie de ses pages si elle dépasse la taille d'un appel. */
@@ -84,6 +86,12 @@ interface Tranche {
 }
 
 export const CARACTERES_PAR_TRANCHE = 120_000;
+/** Tranches lues en même temps : un dossier de 200 pièces tient ainsi en une vingtaine de passages, pas soixante-dix. */
+export const PARALLELE = 4;
+/** Au-delà, la synthèse ne réécrit plus la liste (elle déborderait la sortie du modèle) : doublons fusionnés par règle,
+ *  le modèle ne rend que le résumé. */
+export const SEUIL_SYNTHESE = 150;
+const SEUIL_SYNTHESE_CARACTERES = 150_000;
 
 export function trancher(pieces: PieceDossier[], max = CARACTERES_PAR_TRANCHE): Tranche[] {
   const tranches: Tranche[] = [];
@@ -196,6 +204,8 @@ export interface OptionsAnalyse {
   maintenant?: () => number;
   /** L'état laissé par le passage précédent. */
   etat?: EtatAnalyse;
+  /** Tranches lues en même temps (PARALLELE par défaut). */
+  parallele?: number;
 }
 
 export async function analyser(client: ClientClaude, t: TypeAnalyse, pieces: PieceDossier[], options: OptionsAnalyse = {}): Promise<ResultatAnalyse> {
@@ -227,26 +237,33 @@ export async function analyser(client: ClientClaude, t: TypeAnalyse, pieces: Pie
   };
   const systeme = `Tu es le lecteur d'Omega. Analyse demandée : ${t.libelle}.\n\n${t.consigne}\n\n${REGLES}\n\nCodes de constat admis : ${t.codes.join(", ")}.`;
 
-  // 1. Une passe par tranche. Le plafond de coût atteint, on s'arrête : l'analyse est « partielle ».
+  // 1. Une passe par tranche, PARALLELE tranches à la fois. Le plafond de coût atteint, on s'arrête : l'analyse est
+  //    « partielle » (une vague commencée sous le plafond peut le dépasser de PARALLELE − 1 appels au plus).
   const tranches = trancher(pieces);
+  const aFaire = tranches.filter((tr) => !etat.tranches_faites.includes(tr.cle));
   let partielle = false;
-  for (const tr of tranches) {
-    if (etat.tranches_faites.includes(tr.cle)) continue;
+  const n = Math.max(1, options.parallele ?? PARALLELE);
+  for (let i = 0; i < aFaire.length && !partielle; i += n) {
     if (maintenant() > fin) return rendu(t, client, pieces, nbPages, etat, false);
-    const texte = `Pièce « ${tr.piece.nom} »${tr.piece.role ? ` (${tr.piece.role})` : ""}, identifiant ${tr.piece.piece}.\n\n` +
-      tr.pages.map((p) => `=== Page ${p.n} ===\n${pageNumerotee(p.texte)}`).join("\n\n");
-    let brut: unknown;
-    try {
-      brut = await appel(systeme, texte, { name: "rendre_constats", description: "Rend les constats relevés dans cette pièce, chacun cité.", schema: schemaConstats(t) });
-    } catch (e) {
-      if (e instanceof ErreurOuvrier && e.code === "PLAFOND_IA") {
+    const vague = aFaire.slice(i, i + n);
+    const issues = await Promise.allSettled(vague.map((tr) => {
+      const texte = `Pièce « ${tr.piece.nom} »${tr.piece.role ? ` (${tr.piece.role})` : ""}, identifiant ${tr.piece.piece}.\n\n` +
+        tr.pages.map((p) => `=== Page ${p.n} ===\n${pageNumerotee(p.texte)}`).join("\n\n");
+      return appel(systeme, texte, { name: "rendre_constats", description: "Rend les constats relevés dans cette pièce, chacun cité.", schema: schemaConstats(t) });
+    }));
+    // Les tranches réussies sont gardées (dans l'ordre), même si une autre de la vague a échoué : rien n'est relu.
+    let erreur: unknown = null;
+    issues.forEach((r, k) => {
+      if (r.status === "fulfilled") {
+        etat.constats.push(...verifierConstats(nettoyerConstats(r.value, t), pages));
+        etat.tranches_faites.push(vague[k].cle);
+      } else if (r.reason instanceof ErreurOuvrier && r.reason.code === "PLAFOND_IA") {
         partielle = true;
-        break;
+      } else if (erreur === null) {
+        erreur = r.reason;
       }
-      throw e;
-    }
-    etat.constats.push(...verifierConstats(nettoyerConstats(brut, t), pages));
-    etat.tranches_faites.push(tr.cle);
+    });
+    if (erreur !== null) throw erreur;
   }
   const lues = new Set(etat.tranches_faites.map((c) => c.split(":")[0]));
   const nonLues = partielle ? pieces.map((p) => p.piece).filter((p) => !lues.has(p) || tranches.some((tr) => tr.piece.piece === p && !etat.tranches_faites.includes(tr.cle))) : [];
@@ -254,19 +271,53 @@ export async function analyser(client: ClientClaude, t: TypeAnalyse, pieces: Pie
   // 2. La synthèse, sur les constats relevés (pas sur le texte).
   let resume: string | undefined;
   let constats = etat.constats;
+  let synthese: "complete" | "allegee" | undefined = t.synthese && !partielle && etat.constats.length > 0 ? "complete" : undefined;
   if (t.synthese && !partielle && etat.constats.length > 0) {
     if (maintenant() > fin) return rendu(t, client, pieces, nbPages, etat, false);
-    const liste = etat.constats.filter((c) => c.source).map((c, i) => ({ n: i + 1, ...c }));
-    const brut = await appel(
-      `${systeme}\n\nTu reçois les constats déjà relevés pièce par pièce, avec leurs citations vérifiées. Fusionne les doublons, croise les pièces (contradictions, ordre des événements), et rends la liste finale avec un résumé de cinq lignes au plus. Tu ne cites QUE des citations présentes dans la liste reçue, recopiées telles quelles.`,
-      JSON.stringify({ pieces: pieces.map((p) => ({ piece: p.piece, nom: p.nom, role: p.role })), constats: liste }),
-      { name: "rendre_synthese", description: "Rend la synthèse et la liste finale des constats.", schema: schemaSynthese(t) },
-    );
-    resume = typeof (brut as { resume?: unknown })?.resume === "string" ? String((brut as { resume: string }).resume).slice(0, 3000) : undefined;
-    constats = verifierConstats(nettoyerConstats(brut, t), pages);
+    const sources = etat.constats.filter((c) => c.source);
+    const liste = sources.map((c, i) => ({ n: i + 1, ...c }));
+    const enJson = JSON.stringify({ pieces: pieces.map((p) => ({ piece: p.piece, nom: p.nom, role: p.role })), constats: liste });
+    if (liste.length > SEUIL_SYNTHESE || enJson.length > SEUIL_SYNTHESE_CARACTERES) {
+      // Grand dossier : la liste ne repasse pas par le modèle (elle déborderait sa sortie). Doublons fusionnés par règle,
+      // le modèle ne rend que le résumé, sur les titres.
+      constats = dedoublonner(sources);
+      synthese = "allegee";
+      const titres = constats.map((c, i) => `${i + 1}. [${c.code}, ${c.gravite}] ${c.titre}${typeof c.donnees.date === "string" ? ` (${c.donnees.date})` : ""}`).join("\n");
+      const brut = await appel(
+        `${systeme}\n\nTu reçois la liste des constats déjà relevés et vérifiés, un par ligne. Rends seulement un résumé de cinq lignes au plus, sans rien ajouter qui n'y soit pas.`,
+        titres.slice(0, 400_000),
+        { name: "rendre_resume", description: "Rend le résumé du dossier.", schema: { type: "object", properties: { resume: { type: "string" } }, required: ["resume"] } },
+      );
+      resume = typeof (brut as { resume?: unknown })?.resume === "string" ? String((brut as { resume: string }).resume).slice(0, 3000) : undefined;
+    } else {
+      const brut = await appel(
+        `${systeme}\n\nTu reçois les constats déjà relevés pièce par pièce, avec leurs citations vérifiées. Fusionne les doublons, croise les pièces (contradictions, ordre des événements), et rends la liste finale avec un résumé de cinq lignes au plus. Tu ne cites QUE des citations présentes dans la liste reçue, recopiées telles quelles.`,
+        enJson,
+        { name: "rendre_synthese", description: "Rend la synthèse et la liste finale des constats.", schema: schemaSynthese(t) },
+      );
+      resume = typeof (brut as { resume?: unknown })?.resume === "string" ? String((brut as { resume: string }).resume).slice(0, 3000) : undefined;
+      constats = verifierConstats(nettoyerConstats(brut, t), pages);
+      // Une synthèse vide ou tronquée (sortie coupée) ne fait jamais perdre les constats relevés : on garde ceux-ci, dédoublonnés.
+      if (!constats.some((c) => c.source)) {
+        constats = dedoublonner(sources);
+        synthese = "allegee";
+      }
+    }
   }
   const r = rendu(t, client, pieces, nbPages, { ...etat, constats }, true, t.finaliser);
-  return { ...r, resume, statut: partielle ? "partielle" : "finie", pieces_non_lues: nonLues };
+  return { ...r, resume, statut: partielle ? "partielle" : "finie", pieces_non_lues: nonLues, ...(synthese ? { synthese } : {}) };
+}
+
+/** Deux constats sont le même s'ils ont le même code et la même première citation vérifiée (pièce, page, extrait). */
+export function dedoublonner(constats: Constat[]): Constat[] {
+  const vus = new Set<string>();
+  return constats.filter((c) => {
+    const v = c.citations.find((x) => x.verifiee) ?? c.citations[0];
+    const cle = `${c.code}|${v?.piece}|${v?.page}|${(v?.extrait ?? "").toLowerCase().replace(/\s+/g, " ").trim()}`;
+    if (vus.has(cle)) return false;
+    vus.add(cle);
+    return true;
+  });
 }
 
 function rendu(

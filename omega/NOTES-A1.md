@@ -40,6 +40,12 @@ Les commits suivants sont de la documentation seulement : 6c2edd2, 80abdb1, 6383
 
 Lecture seule, en clé de service ou en session de gérant.
 
+**11/10, lecture longue à l'échelle.** Essai fictif de 200 pièces (`tests/analyse_echelle_test.ts`). Deux défauts ont été trouvés et corrigés :
+- **Trop de paliers.** Avec une tranche à la fois, il faudrait environ 70 passages, alors que 19an coupe à 50. Les tranches sont désormais lues par vagues de 4 (`PARALLELE`) : 17 passages. Le lot **19aq** porte en plus le garde-fou à 2 paliers par pièce, 50 au moins. Il est testé en local (6/6 et 19an 40/40) et **à poser**.
+- **Synthèse trop longue.** Au-delà de 150 constats, la liste déborderait la sortie du modèle. La synthèse devient « allégée » : doublons fusionnés par règle, le modèle ne rend que le résumé. Une synthèse vide ou tronquée ne fait plus perdre les constats.
+
+Le lecteur est à redéployer.
+
 **Toute prochaine étape à la reprise.** Lire les sorties de `decoupage_reel.mjs` si le coordinateur l'a joué. Sinon, demander qu'il soit joué, puis corriger ce qui sort. Ensuite, selon les décisions de Teo : la lecture longue réelle (`analyse_reelle.sql`), puis l'outil de mesure de qualité sur corpus (1 j, `CHIFFRAGE/lecteur.md`).
 
 Branche `worker-a1`. Périmètre : `omega/functions/lecteur/`, `omega/functions/lecteur-exports/` et `omega/functions/_partage/`.

@@ -85,7 +85,7 @@ Deno.test("analyse : une passe par pièce, puis la synthèse ; une citation inve
 Deno.test("paliers : budget épuisé → non finie avec son état, puis reprise sans relire ce qui est fait", async () => {
   let t = 0;
   const premier = new ClientFactice([() => ({ constats: [constat(A, [3, 3], "Le 3 mars 2026, la société a livré le chantier.", "2026-03-03")] })]);
-  const r1 = await analyser(premier, TYPE, pieces, { budgetMs: 5, maintenant: () => (t += 4) });
+  const r1 = await analyser(premier, TYPE, pieces, { budgetMs: 5, maintenant: () => (t += 4), parallele: 1 });
   assertEquals(r1.fini, false);
   assertEquals(r1.etat!.tranches_faites, [`${A}:1-1`]);
   assertEquals(r1.constats, []);
@@ -102,7 +102,7 @@ Deno.test("paliers : budget épuisé → non finie avec son état, puis reprise 
 Deno.test("limites et plafond : dossier trop grand refusé ; plafond de coût atteint en cours de route", async () => {
   await assertRejects(() => analyser(new ClientFactice([]), { ...TYPE, limites: { ...TYPE.limites, pieces: 1 } }, pieces), Error, "dossier trop grand");
   const client = new ClientFactice([() => ({ constats: [constat(A, [3, 3], "Le 3 mars 2026, la société a livré le chantier.", "2026-03-03")] })]);
-  const r = await analyser(client, { ...TYPE, limites: { ...TYPE.limites, coutMaxEur: 0.01 } }, pieces);
+  const r = await analyser(client, { ...TYPE, limites: { ...TYPE.limites, coutMaxEur: 0.01 } }, pieces, { parallele: 1 });
   assertEquals(r.statut, "partielle", "plafond atteint : on s'arrête, sans synthèse");
   assertEquals(r.pieces_non_lues, [B]);
   assertEquals(r.constats.length, 1, "ce qui a été lu est rendu");
