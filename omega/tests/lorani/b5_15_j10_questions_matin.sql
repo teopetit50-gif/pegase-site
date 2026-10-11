@@ -20,12 +20,12 @@ begin
 
   -- ── 1. Visa daté par la commande : rappel à J-10 ──
   perform tests.b5_endosser(v_referent);
-  insert into public.lorani_visas (client_id, projet_id, document, commande_le) values (v_client, v_projet, 'Fiche des menuiseries extérieures', current_date + 30) returning id into v_v1;
+  insert into public.lorani_visas (client_id, projet_id, document, commande_le) values (v_client, v_projet, 'Fiche des menuiseries extérieures', current_date + 12) returning id into v_v1;
   insert into public.lorani_visas (client_id, projet_id, document) values (v_client, v_projet, 'Note de calcul des planchers') returning id into v_v2;
   perform tests.b5_admin();
   select * into d from public.delais where id = (select delai_id from public.lorani_visas where id = v_v1);
-  return next ok(d.echeance = private.lorani_veille_ouvree(current_date + 30) and d.rappels @> array[10, 3, 1, 0] and d.rappels <@ array[10, 3, 1, 0],
-                 '1. fiche des menuiseries, commande dans 30 jours : échéance la veille ouvrée, rappels J-10, J-3, J-1, J');
+  return next ok(d.echeance = private.lorani_veille_ouvree(current_date + 12) and d.rappels @> array[10, 3, 1, 0] and d.rappels <@ array[10, 3, 1, 0],
+                 format('1. fiche des menuiseries, commande dans 12 jours (avant les 15 jours du CCAG) : échéance la veille ouvrée, rappels J-10, J-3, J-1, J (échéance %s, rappels %s)', d.echeance, d.rappels));
   select * into d from public.delais where id = (select delai_id from public.lorani_visas where id = v_v2);
   return next ok(d.rappels @> array[3, 1, 0] and d.rappels <@ array[3, 1, 0], '1. … sans date de commande : J-3, J-1, J comme avant');
 
