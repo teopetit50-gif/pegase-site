@@ -39,6 +39,10 @@ Voir `omega/CHIFFRAGE/tamila.md`.
 6. styles des dialogues neutres vis-à-vis du thème (`/espace2` est sombre).
 Série locale 576 ok (25 échecs connus), recette 190/190. **À poser** : b4_17 + 26 ; **à redéployer** : tamila-purge (v3).
 Chiffrage mis à jour : B 15 · C 21 · D 18 · T 9, ≈ 68 j → B ; premier cabinet ≈ 3 j + tiers.
+Puis : b4_18 + test 27 (pièces attendues du client, du confrère ou d'un tiers : poser, reçue, relancée, abandonnée ;
+point du matin bloc 7 ; vue « Pièces attendues » du pilotage), carte « Pièces attendues » au dossier, audiences en .ics,
+citations cliquables (la pièce déchiffrée ouverte à la page). Série locale 589 ok (25 connus), recette 196/196.
+**À poser** : b4_18 + 27. Chiffrage : C 24 · D 15, ≈ 63,5 j → B.
 
 **Outils** : souche PostgreSQL locale (`omega/tests/tamila/souche_locale/jouer.sh`, `chmod 711 /tmp/claude-0`
 d'abord ; 04/06/10/11 échouent en local seulement, faute des règles de procédure). Recette navigateur :

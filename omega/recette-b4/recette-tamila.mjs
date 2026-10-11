@@ -472,6 +472,7 @@ for (const largeur of [1440, 390]) {
     ok(/SCI du Moulin/.test(t2) && /Même partie/.test(t2) && /2026-0430/.test(t2), 'une série : deux dossiers où figure la SCI du Moulin');
     const t3 = await vue('Pièces attendues');
     ok(/exemplaire signé de la convention/.test(t3), 'la convention signée dont l\'exemplaire manque');
+    ok(/Une pièce attendue du client/.test(t3) && /Une pièce attendue du confrère/.test(t3), 'les pièces demandées au client et au confrère (b4_18)');
     const t4 = await vue('Sans diligence');
     ok(/jours sans diligence|a bougé dans les 30 derniers jours/.test(t4), 'la vue « sans diligence » répond');
     const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
@@ -576,6 +577,30 @@ for (const largeur of [1440, 390]) {
   await s.dormir(700);
   const j = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Journal des accès"]'); const b = c && [...c.querySelectorAll('.r-btn')].find(x => /Exporter/.test(x.textContent)); return b ? { gris: b.disabled, texte: c.innerText } : null; })()`);
   ok(j && !j.gris && /composé dans votre navigateur/.test(j.texte), 'le bouton « Exporter (CSV) » du journal est actif');
+  s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b4-attentes', densite: 1 });
+  console.log('— les pièces attendues, l\'agenda (b4_18)');
+  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  await s.dormir(600);
+  await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /2026-0377/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const carte = () => s.evaluer(`document.querySelector('section[aria-label="Pièces attendues"]')?.innerText || ''`);
+  const t0 = await carte();
+  ok(/Procès-verbaux d'assemblée générale 2022 et 2023/.test(t0) && /Relance due/.test(t0), 'la carte : les PV demandés au client, relance due');
+  ok(/Pièce n° 12/.test(t0), 'la pièce réclamée au confrère');
+  await s.evaluer(`[...document.querySelectorAll('section[aria-label="Pièces attendues"] .esp-lien-bouton')].find(b => /Reçue/.test(b.textContent))?.click()`);
+  await s.dormir(600);
+  const t1 = await carte();
+  ok(!/Procès-verbaux/.test(t1) && /Pièce n° 12/.test(t1), 'les PV notés reçus sortent de la liste');
+  await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /2026-0412/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const a = await s.evaluer(`(() => { const b = [...document.querySelectorAll('.r-btn')].find(x => /Agenda \\(\\.ics\\)/.test(x.textContent)); return b ? !b.disabled : null; })()`);
+  ok(a === true, 'le bouton « Agenda (.ics) » des audiences est actif');
+  await s.capturer(`${dossier}tamila-attentes-1440.jpg`, { qualite: 55 });
   s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
   s.fermer();
 }

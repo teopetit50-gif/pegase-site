@@ -15,8 +15,8 @@ sur de vrais documents Tamila.
 
 ## Synthèse
 
-1. **63 promesses**, classées sur leur état principal : A **0** · B **15** · C **21** · D **18** · T **9**. Rien n'est prouvé en vrai : aucun cabinet réel, aucune vraie pièce lue de bout en bout, aucune qualité mesurée sur de vrais documents.
-2. **Pour tout amener en B : ≈ 68 jours** (74 le 06/10 ; b4_17 a fait l'archive, l'effacement du dossier de faits, le point du matin complété, le journal exportable), dont ≈ 41,5 de lecture IA, ≈ 18 de gestion et d'écran, ≈ 8,5 d'infrastructure.
+1. **63 promesses**, classées sur leur état principal : A **0** · B **15** · C **24** · D **15** · T **9**. Rien n'est prouvé en vrai : aucun cabinet réel, aucune vraie pièce lue de bout en bout, aucune qualité mesurée sur de vrais documents.
+2. **Pour tout amener en B : ≈ 63,5 jours** (68 le 11/10 matin ; b4_18 a fait les pièces attendues, l'agenda .ics, les renvois cliquables), dont ≈ 41,5 de lecture IA, ≈ 13,5 de gestion et d'écran, ≈ 8,5 d'infrastructure.
 3. **Pour tout amener ensuite en A : ≈ 54 jours de plus**, avec un cabinet pilote et ses vraies pièces.
 4. **Tiers et achats** :
    - hébergeur français pour la base et les fichiers (aujourd'hui Supabase, région à confirmer) ;
@@ -67,14 +67,14 @@ sur de vrais documents Tamila.
 | 18 | Carte « Forfaits dépassés : le temps passé est rapporté à la convention d'honoraires » | textes.ts:73-74 | B | b4_06 + b4_12, tests 15 et 21, carte Honoraires (jauge), recette | un vrai cabinet | 0 / 1 | — |
 | 19 | Carte « Sans diligence : aucun acte depuis trente jours » | textes.ts:85-86 | B | seuil aligné à 30 jours (pilotage, point du matin) ; pilotage « Sans diligence » (0c0714d), seuil codé à **45** jours | aligner sur 30 jours ou rendre réglable | 0 / 1 | — |
 | 20 | Carte « Délais de procédure : lus dans les avis RPVA et classés du plus proche au plus lointain » | textes.ts:97-98 | C | classement B ; lecture de l'avis : passerelle b4_08 + lecteur (A1), saisie et avis par courriel B | lecture d'un vrai avis chiffré au coffre jamais faite | 1 / 2 | Scaleway KM |
-| 21 | Carte « Ce que le cabinet attend : des pièces du client, des pré-rapports de l'expert et des pièces citées par le confrère » | textes.ts:109-110 | C | expert : b4_16 + test 25, pilotage ; client : convention, pièce d'identité | demandes de pièces au client (liste, relance) ; pièces citées par le confrère (lecture de ses conclusions, *A1*) | 2,5 / 1,5 | IA |
+| 21 | Carte « Ce que le cabinet attend : des pièces du client, des pré-rapports de l'expert et des pièces citées par le confrère » | textes.ts:109-110 | C | expert : b4_16 + test 25 ; pièces demandées au client, au confrère ou à un tiers : b4_18 + test 27, carte « Pièces attendues » (reçue, relancée, abandonnée), pilotage et point du matin | pièces citées par le confrère relevées d'office (lecture de ses conclusions, *A1*) | 1 / 1,5 | IA |
 
 ## 4. Les outils du cabinet (CONNEXIONS)
 
 | # | Promesse | Où | État | Preuve | Ce qui manque | Jours → B / B → A | Coût externe |
 |---|---|---|---|---|---|---|---|
 | 22 | « Vos outils restent en place » : Messagerie | textes.ts:125-127 | C | transfert des avis vers recu.omegaai.fr (b4_10) | lecture d'une boîte (connecteur Gmail ou Microsoft, A2) | 3 / 2 | — |
-| 23 | Agenda | textes.ts:127 | D | — | audiences vers l'agenda du cabinet (ICS ou connecteur) | 2 / 1 | — |
+| 23 | Agenda | textes.ts:127 | C | audiences prévues exportées en .ics, composé dans le navigateur (recette) | abonnement d'agenda tenu à jour (connecteur) | 0,5 / 1 | — |
 | 24 | Dossiers partagés | textes.ts:127 | D | — | import depuis un dossier partagé (Drive, SharePoint) | 3 / 2 | — |
 | 25 | Logiciel métier | textes.ts:127 | T | — | import depuis Secib, Jarvis, etc. : aucun accès aujourd'hui | 5 / 3 | partenariat éditeur |
 | 26 | Pièces scannées | textes.ts:127 | C | = 9 | = 9 | (compté) | OCR |
@@ -118,7 +118,7 @@ sur de vrais documents Tamila.
 | 54 | « Index des personnes et faits classés par moyen » | textes.ts:171 | D | — | nouveau type *(A1)* + écran | 2 / 1,5 | IA |
 | 55 | « Questions posées au dossier » | textes.ts:171-172 | D | — | questions-réponses sourcées sur le dossier *(A1)* + écran | 4 / 1,5 | IA |
 | 56 | « Premier jet de l'exposé des faits » | textes.ts:171-172 | D | — | nouveau type, export Word *(A1)* | 1,5 / 1 | IA |
-| 57 | « Dossier de plaidoirie et renvois cliquables » | textes.ts:171 | D | citations à l'écran (pièce, page, lignes), non cliquables vers la page | visionneuse de la pièce déchiffrée, ouverte à la page citée ; dossier de plaidoirie exporté | 3,5 / 1 | — |
+| 57 | « Dossier de plaidoirie et renvois cliquables » | textes.ts:171 | C | citations cliquables : la pièce déchiffrée dans le navigateur, ouverte à la page citée | dossier de plaidoirie exporté | 2 / 1 | — |
 | 58 | « Pièces adverses du jour » ; « Pièces scannées et manuscrites » | textes.ts:171 | D / C | = 2, = 9 | = 2, = 9 | (compté) | — |
 | 59 | « Export Word et PDF » | textes.ts:171-172 | B | export des lectures (7ec04ec), factures (99d0467) ; recette | export d'un vrai résultat | 0 / 0,5 | — |
 | 60 | Dommage corporel : « Chronologie des soins », « Interruptions de soins repérées », « Nomenclature Dintilhac pré-remplie », « Écarts entre rapports d'expertise », « Source de chaque poste de préjudice », « Questions posées au dossier médical », « Pièces médicales scannées » | textes.ts:172 | D (chronologie : C) | — | cinq types propres au corporel *(A1)*, écran Dintilhac ; **hébergement HDS** pour les pièces médicales | 9 / 5 | **hébergeur HDS**, OCR |

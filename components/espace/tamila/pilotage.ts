@@ -11,7 +11,7 @@
 
 import { resumer } from "./HonorairesTamila";
 import { normaliserNom } from "./index";
-import type { Audience, Avis, Clair, Delai, Dossier, Expertise, Honoraires, Personne, Piece, Vigilance } from "./types";
+import type { Attente, Audience, Avis, Clair, Delai, Dossier, Expertise, Honoraires, Personne, Piece, Vigilance } from "./types";
 
 export type DonneesPilotage = {
   dossiers: { dossier: Dossier; clair: Clair | null }[];
@@ -22,6 +22,8 @@ export type DonneesPilotage = {
   vigilances: Pick<Vigilance, "dossier_id" | "assujetti" | "identification_piece">[];
   /* les expertises en cours (b4_16) */
   expertises: Expertise[];
+  /* les pièces attendues du client, du confrère ou d'un tiers (b4_18) ; l'objet reste chiffré ici */
+  attentes?: Attente[];
   honoraires: Record<string, Honoraires>;
   personnes: Personne[];
 };
@@ -149,6 +151,12 @@ export function piecesAttendues(x: DonneesPilotage, maintenant: number): PieceAt
         out.push({ dossier, clair, quoi: `Nos dires à l'expert, au plus tard le ${fr(e.dires_jusqu_au)} (art. 276 CPC)`, gravite: dans(e.dires_jusqu_au) <= 3 ? "rouge" : "ambre" });
       if (e.rapport_attendu_le && !e.rapport_recu_le && dans(e.rapport_attendu_le) <= 0)
         out.push({ dossier, clair, quoi: `Le rapport définitif de l'expert, attendu le ${fr(e.rapport_attendu_le)}`, gravite: "rouge" });
+    }
+    const DE = { client: "du client", confrere: "du confrère", tiers: "d'un tiers" } as const;
+    for (const a of x.attentes ?? []) {
+      if (a.dossier_id !== dossier.id || a.statut !== "attendue") continue;
+      const due = !!a.relance_le && dans(a.relance_le) <= 0;
+      out.push({ dossier, clair, quoi: `Une pièce attendue ${DE[a.de]}, demandée le ${fr(a.demandee_le)}${a.relance_le ? `, relance ${due ? "due" : "prévue"} le ${fr(a.relance_le)}` : ""}${a.relances ? ` (${a.relances} relance${a.relances > 1 ? "s" : ""})` : ""}`, gravite: due ? "rouge" : "ambre" });
     }
     const ouvert = Date.parse(dossier.ouvert_le ?? dossier.cree_le);
     if (maintenant - ouvert > 7 * JOUR && !x.pieces.some((p) => p.objet_id === dossier.id)) out.push({ dossier, clair, quoi: "Aucune pièce au dossier depuis son ouverture", gravite: "ambre" });
