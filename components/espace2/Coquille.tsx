@@ -22,7 +22,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, Banknote, Building2, CheckSquare, ChevronDown, NotebookPen, Phone, Users, Workflow, Gauge, Inbox, Bell, Check, CheckCheck, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, LayoutGrid, LifeBuoy, LogOut, Menu as IconeMenu, MoreHorizontal, Search, Settings, Sparkles, Sun, X } from "lucide-react";
+import { Activity, Banknote, Building2, CheckSquare, ChevronDown, NotebookPen, Phone, Users, Workflow, Gauge, Inbox, Bell, Check, CheckCheck, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, LayoutGrid, LifeBuoy, LogOut, Menu as IconeMenu, Moon, MoreHorizontal, Search, Settings, Sparkles, Sun, X } from "lucide-react";
 import { Button, Dialog, DialogTrigger, Modal, ModalOverlay, Popover, RouterProvider } from "react-aria-components";
 import type { Utilisateur } from "@/lib/compte";
 import { createClient } from "@/lib/supabase/client";
@@ -42,6 +42,7 @@ import { useCalme } from "./mouvement";
 import { useDonnees } from "./donnees";
 import { A_PAYER, groupeDe, minuit } from "./filed/calculs";
 import "./espace2.css";
+import "./client.css";
 
 function initiales(u: Utilisateur): string {
   const i = `${(u.prenom ?? "").trim().charAt(0)}${(u.nom ?? "").trim().charAt(0)}`.toUpperCase();
@@ -60,8 +61,8 @@ export default function Coquille({ utilisateur, police, children }: { utilisateu
      variable de la police Geist doit vivre sur <html> pendant la visite */
   useEffect(() => {
     const html = document.documentElement;
-    html.classList.add(police, "v2-actif");
-    return () => html.classList.remove(police, "v2-actif");
+    html.classList.add(police, "v2-actif", "oc-actif");
+    return () => html.classList.remove(police, "v2-actif", "oc-actif");
   }, [police]);
 
   /* Les écrans repris de /espace écrivent leurs liens en dur vers /espace/… :
@@ -99,7 +100,8 @@ export default function Coquille({ utilisateur, police, children }: { utilisateu
     };
   }, [router]);
   return (
-    <div className="v2" data-lenis-prevent="">
+    /* .oc : le dessin du pilotage /omega, cloné pour le client (client.css, 11/10) */
+    <div className="v2 oc" data-lenis-prevent="">
       <SourceFournisseur connecte={!!utilisateur}>
         <RouterProvider navigate={(href, options) => router.push(versV2(href) ?? href, options)}>
           <FournisseurToasts>
@@ -263,7 +265,7 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
 type Lien = { libelle: string; href: string; icone: React.ReactNode; exact?: boolean; /** l'adresse qui allume l'entrée, quand le lien mène à une sous-page */ racine?: string; compteur?: number; sous?: { libelle: string; href: string }[]; bientot?: boolean };
 
 function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisateur: Utilisateur | null; chemin: string; ouvrirPalette: () => void; fermer?: () => void }) {
-  useTheme();
+  const [theme, changerTheme] = useTheme();
   useCalme();
   const toast = useToast();
   const { source, changer, connecte } = useSource();
@@ -377,7 +379,9 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
                  du client (CAMA, logo Renault) */}
               <span className="v2-marque-omega" aria-hidden="true">
                 {/* eslint-disable-next-line @next/next/no-img-element -- le logo Omega, déjà à sa taille */}
-                <img src="/logo-pegase-blanc.png" alt="" width={20} height={20} />
+                <img src="/logo-pegase-blanc.png" alt="" width={20} height={20} className="oc-logo-sombre" />
+                {/* eslint-disable-next-line @next/next/no-img-element -- la variante noire, pour le thème clair */}
+                <img src="/logo-pegase.png" alt="" width={20} height={20} className="oc-logo-clair" />
               </span>
               <span className="v2-marque-fois" aria-hidden="true">
                 {/* le X, à la façon de celui de X (Twitter) : une branche pleine, une branche fine */}
@@ -475,10 +479,16 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
           }
           declencheur={<MoreHorizontal {...I} />}
         >
-          <SectionMenu>
-            <ItemMenu id="ancien" href="/espace/validations?ancien=1" icone={<ExternalLink {...I} />}>
-              Ancien espace client
+          <SectionMenu titre="Apparence">
+            <ItemMenu id="sombre" textValue="Thème sombre" onAction={() => changerTheme("sombre")} icone={<Moon {...I} />} suffixe={coche(theme === "sombre")}>
+              Sombre
             </ItemMenu>
+            <ItemMenu id="clair" textValue="Thème clair" onAction={() => changerTheme("clair")} icone={<Sun {...I} />} suffixe={coche(theme === "clair")}>
+              Clair
+            </ItemMenu>
+          </SectionMenu>
+          <SeparateurMenu />
+          <SectionMenu>
             <ItemMenu id="site" href="/" icone={<ExternalLink {...I} />}>
               Retour au site
             </ItemMenu>
