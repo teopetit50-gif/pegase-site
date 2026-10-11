@@ -42,7 +42,7 @@ begin
   v_index := string_to_array(tests.a4_sortie_fichier(v_s, 'index.csv'), chr(13) || chr(10));
   return next is(cardinality(v_index), 4, 'index.csv : l''en-tête, deux lignes, la fin');
   return next ok(v_index[1] like 'reference_reception;recu_le;societe;%;empreinte_archive', 'avec ses colonnes');
-  return next ok(exists (select 1 from unnest(v_index) l where l like '%"SOR-002"%;240;%'), 'les montants de la facture');
+  return next ok(exists (select 1 from unnest(v_index) l where l ~ '"SOR-002".*;240(,00?)?;'), 'les montants de la facture');
   return next ok(tests.a4_sortie_fichier(v_s, 'fournisseurs.csv') like '%"XML";"Fournisseur structuré d''exemple";"123456782"%', 'fournisseurs.csv');
   return next ok((select bool_or(e ->> 'chemin_zip' like 'fec/%FEC%.txt' and e ->> 'contenu' like 'JournalCode%') from public.filed_sorties s, jsonb_array_elements(s.manifeste) e where s.id = v_s),
                  'Le FEC de la société qui a des écritures');
@@ -85,7 +85,8 @@ begin
   return next is(public.filed_sortie_volume(v_s, 3, v_base || '/dossier-3.zip', repeat('c', 64), 4100), 'prete', 'Au dernier, le dossier est prêt');
   reset role;
   return next ok(exists (select 1 from public.alertes a where a.client_id = (o ->> 'client')::uuid and a.cle_regroupement like '%sortie:' || v_s
-                           and a.destinataire = (o ->> 'gerant')::uuid and not a.interne), 'Le demandeur est prévenu');
+                           and coalesce(to_jsonb(a) ->> 'destinataire_id', to_jsonb(a) ->> 'destinataire') = o ->> 'gerant' and not a.interne),
+                 'Le demandeur est prévenu');
 
   reset role; perform tests.a4_comme((o ->> 'valideur')::uuid);
   return next throws_ok(format('select public.filed_sortie_lien(%L)', v_s), '42501', null, 'Un valideur n''a pas le lien');

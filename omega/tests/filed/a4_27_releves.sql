@@ -1,6 +1,6 @@
 -- Tests A4 — lot 26 (a4_34) : le relevé bancaire importé (CAMT.053, CSV) et rapproché des factures qu'il règle.
 -- pgTAP, schéma « tests » d'A5 ; utilise tests.a4_organisation, tests.a4_facture (a4_10_facture_electronique.sql) et
--- tests.a4_comme (a4_26_sortie_envois.sql), à poser avant. `select * from runtests('tests', '^test_a4_')` ;
+-- tests.a4_comme (a4_26_sortie_envois.sql), tests.a4_inserer (a4_16_rapprochement_3voies.sql), à poser avant. `select * from runtests('tests', '^test_a4_')` ;
 -- runtests() annule tout. Données d'exemple seulement (IBAN d'exemple, valides par leur clé).
 
 -- Une facture validée de p_ttc, numéro p_numero. Rend son id.
@@ -41,8 +41,9 @@ begin
   f3 := tests.a4_facture_validee(o, 'REL-003', 240);
   f4 := tests.a4_facture_validee(o, 'REL-004', 360);
   f5 := tests.a4_facture_validee(o, 'REL-005', 60);
-  insert into public.filed_fournisseurs_ibans (client_id, fournisseur_id, iban, iban_masque, statut, source)
-  values ((o ->> 'client')::uuid, (o ->> 'fournisseur')::uuid, 'FR7630006000011234567890189', 'FR76…0189', 'valide', 'saisie');
+  perform tests.a4_inserer('public.filed_fournisseurs_ibans', jsonb_build_object('client_id', o ->> 'client', 'fournisseur_id', o ->> 'fournisseur',
+    'iban', 'FR7630006000011234567890189', 'iban_masque', 'FR76…0189', 'statut', 'valide', 'source', 'saisie',
+    'empreinte', encode(sha256(convert_to('FR7630006000011234567890189', 'UTF8')), 'hex')));
 
   v_x := tests.a4_camt(
        tests.a4_camt_ntry('120.00', 'DBIT', '2026-10-05', 'FACTURE REL-001', 'Fournisseur exemple')
@@ -78,9 +79,9 @@ begin
 
   -- Une personne décide.
   reset role; perform tests.a4_comme((o ->> 'valideur')::uuid);
-  perform public.filed_rapprocher_ligne(v_l.id, f3);
+  perform public.filed_regler_par_releve(v_l.id, f3);
   return next is((select statut || ':' || (facture_id = f3)::text from public.filed_releves_lignes where id = v_l.id), 'rapprochee:true', 'Le valideur choisit la facture');
-  return next throws_ok(format('select public.filed_rapprocher_ligne(%L, %L)', v_l.id, f2), '55000', null, 'Une opération ne se rapproche qu''une fois');
+  return next throws_ok(format('select public.filed_regler_par_releve(%L, %L)', v_l.id, f2), '55000', null, 'Une opération ne se rapproche qu''une fois');
   select * into v_l from public.filed_releves_lignes where releve_id = (r ->> 'releve')::uuid and rang = 3;
   return next throws_ok(format('select public.filed_ignorer_ligne(%L, '''')', v_l.id), '22023', null, 'Mettre de côté demande un motif');
   perform public.filed_ignorer_ligne(v_l.id, 'Frais bancaires');

@@ -18,7 +18,9 @@
 --                                                RELEVE:<ligne>, donc écrit en comptabilité par le lot 19). Sinon,
 --                                                les candidats sont proposés à une personne. Un règlement déjà noté à
 --                                                la main du même montant, à sept jours près, est relié sans doublon ;
---   public.filed_rapprocher_ligne / filed_ignorer_ligne   la décision d'une personne (gérant, admin, valideur).
+--   public.filed_regler_par_releve / filed_ignorer_ligne   la décision d'une personne (gérant, admin, valideur). (Nommée
+--                                                filed_rapprocher_ligne à la première pose : ce nom est déjà celui du moteur
+--                                                d'a4_08 ; a4_34b retire l'ancienne paire.)
 -- L'IBAN d'un tiers n'est gardé que masqué. Migration idempotente ; aucune suppression.
 
 create table if not exists public.filed_releves (
@@ -252,7 +254,8 @@ returns table (facture_id uuid, points integer, reste numeric) language sql stab
          (case when char_length(coalesce(f.numero_normalise, '')) >= 3 and t.compact like '%' || upper(f.numero_normalise) || '%' then 3 else 0 end
         + case when t.iban is not null and (upper(regexp_replace(coalesce(f.iban, ''), '\s', '', 'g')) = t.iban
                  or exists (select 1 from public.filed_fournisseurs_ibans i where i.fournisseur_id = f.fournisseur_id and i.statut = 'valide'
-                              and upper(regexp_replace(coalesce(i.iban, ''), '\s', '', 'g')) = t.iban)) then 3 else 0 end
+                              and (upper(regexp_replace(coalesce(i.iban, ''), '\s', '', 'g')) = t.iban
+                                   or i.empreinte = encode(sha256(convert_to(t.iban, 'UTF8')), 'hex')))) then 3 else 0 end
         + case when exists (select 1 from public.filed_fournisseurs fo,
                               unnest(regexp_split_to_array(upper(regexp_replace(translate(lower(fo.nom), 'éèêëàâäîïôöûüç', 'eeeeaaaiioouuc'), '[^a-z0-9]+', ' ', 'g')), ' ')) m
                              where fo.id = f.fournisseur_id and char_length(m) >= 4 and m not in ('SARL', 'SOCIETE', 'GROUPE', 'FRANCE', 'SERVICES')
@@ -375,7 +378,7 @@ revoke all on function public.filed_importer_releve(uuid, uuid, text, text, text
 grant execute on function public.filed_importer_releve(uuid, uuid, text, text, text) to authenticated, service_role;
 
 -- La décision d'une personne : cette opération règle cette facture.
-create or replace function private.filed_rapprocher_ligne(p_ligne uuid, p_facture uuid)
+create or replace function private.filed_regler_par_releve(p_ligne uuid, p_facture uuid)
 returns uuid language plpgsql security definer set search_path to '' as $$
 declare v_l public.filed_releves_lignes; v_uid uuid; v_f public.filed_factures; v_reg uuid;
 begin
@@ -393,14 +396,14 @@ begin
     jsonb_build_object('ligne', p_ligne, 'reglement', v_reg, 'montant', -v_l.montant), v_l.entite_id);
   return v_reg;
 end $$;
-revoke all on function private.filed_rapprocher_ligne(uuid, uuid) from public, anon;
-grant execute on function private.filed_rapprocher_ligne(uuid, uuid) to authenticated, service_role;
+revoke all on function private.filed_regler_par_releve(uuid, uuid) from public, anon;
+grant execute on function private.filed_regler_par_releve(uuid, uuid) to authenticated, service_role;
 
-create or replace function public.filed_rapprocher_ligne(p_ligne uuid, p_facture uuid)
-returns uuid language sql set search_path to '' as $$ select private.filed_rapprocher_ligne(p_ligne, p_facture) $$;
-comment on function public.filed_rapprocher_ligne(uuid, uuid) is 'Rapproche une opération du relevé d''une facture : le règlement est noté (montant de l''opération, partiel permis). Gérant, admin, valideur.';
-revoke all on function public.filed_rapprocher_ligne(uuid, uuid) from public, anon;
-grant execute on function public.filed_rapprocher_ligne(uuid, uuid) to authenticated, service_role;
+create or replace function public.filed_regler_par_releve(p_ligne uuid, p_facture uuid)
+returns uuid language sql set search_path to '' as $$ select private.filed_regler_par_releve(p_ligne, p_facture) $$;
+comment on function public.filed_regler_par_releve(uuid, uuid) is 'Rapproche une opération du relevé d''une facture : le règlement est noté (montant de l''opération, partiel permis). Gérant, admin, valideur.';
+revoke all on function public.filed_regler_par_releve(uuid, uuid) from public, anon;
+grant execute on function public.filed_regler_par_releve(uuid, uuid) to authenticated, service_role;
 
 create or replace function private.filed_ignorer_ligne(p_ligne uuid, p_motif text)
 returns void language plpgsql security definer set search_path to '' as $$
