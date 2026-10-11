@@ -270,6 +270,16 @@ for (const largeur of LARGEURS) {
   await s.dormir(700);
   const ap = await s.evaluer(`(() => { const t = document.querySelector('.lor-controle-tete')?.closest('.esp-carte-corps')?.textContent || ''; return { cartes: document.querySelectorAll('.lor-constat').length, decides: /Décidés \\(2\\)/.test(t), motif: /Motif : Dérogation accordée par la mairie/.test(t) }; })()`);
   ok(ap.cartes === 2 && ap.decides && ap.motif, `le recul est écarté avec son motif : 2 constats ouverts, 2 décidés (${JSON.stringify(ap)})`);
+  /* b5_25 : un constat en question au BET ou à l'entreprise, avec l'extrait cité */
+  await s.evaluer(`[...document.querySelectorAll('.lor-constat .esp-lien-bouton')].find(b => b.textContent.trim() === 'En faire une question')?.click()`);
+  await s.dormir(500);
+  const qd = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const ta = d?.querySelector('textarea'); const b = [...(d?.querySelectorAll('button') || [])].find(x => /Poser la question/.test(x.textContent)); return { titre: d?.querySelector('h2')?.textContent, extrait: /p\\. \\d+/.test(ta?.value || '') && /Merci de confirmer/.test(ta?.value || ''), choix: d?.querySelectorAll('select option').length || 0, actif: b && !b.disabled }; })()`);
+  ok(qd.titre === 'En faire une question' && qd.extrait && qd.choix >= 1 && qd.actif, `dialogue « ${qd.titre} » : texte prérempli avec l’extrait (pièce, page), « Personne en particulier » + ${qd.choix - 1} intervenant(s) du projet`);
+  await s.evaluer(`(() => { const se = document.querySelector('[role="dialog"] select'); if (se.options.length > 1) Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(se, se.options[1].value); se.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(x => /Poser la question/.test(x.textContent))?.click()`);
+  await s.dormir(700);
+  ok(await s.evaluer(`!document.querySelector('[role="dialog"]') && document.querySelectorAll('.lor-constat').length === 2`), 'question posée : le dialogue se ferme, le constat reste ouvert (la question vit dans les comptes rendus)');
   await s.evaluer(`[...document.querySelectorAll('.esp-lien-bouton')].find(b => b.textContent.trim() === 'Revérifier à l’indice suivant')?.click()`);
   await s.dormir(500);
   const rv = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const i = d?.querySelectorAll('input:not([type="checkbox"])'); return { titre: d?.querySelector('h2')?.textContent, indice: i?.[1]?.value, cochees: d?.querySelectorAll('input[type="checkbox"]:checked').length }; })()`);
