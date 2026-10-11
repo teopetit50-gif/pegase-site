@@ -191,7 +191,7 @@ const CHANTIER_ROL: Chantier = {
 export const TABLEAUX_EXEMPLE: Record<string, Tableau> = {
   [TILLEULS]: {
     chantier: CHANTIER_TIL,
-    reglages: { formule: "chantiers", quota_chantiers: 20, quota_comptes_bureau: 5 },
+    reglages: { formule: "entreprise", quota_chantiers: 20, quota_comptes_bureau: 5 },
     voit_prix: true,
     lots: LOTS_TIL,
     marches: [MARCHE_TIL],
@@ -219,7 +219,7 @@ export const TABLEAUX_EXEMPLE: Record<string, Tableau> = {
   },
   [ROLLAND]: {
     chantier: CHANTIER_ROL,
-    reglages: { formule: "chantiers", quota_chantiers: 20, quota_comptes_bureau: 5 },
+    reglages: { formule: "entreprise", quota_chantiers: 20, quota_comptes_bureau: 5 },
     voit_prix: true,
     lots: [{ id: LOTR1, chantier_id: ROLLAND, code: "01", libelle: "Menuiseries et bardage", corps_etat: "menuiserie", corps_etat_libelle: "Menuiserie", rang: 1, execution: "client", tiers_id: null, equipe_id: EQUIPE_A, equipe_nom: "Pose A", exterieur: true, statut: "a_venir", acceptation: null }],
     marches: [MARCHE_ROL],
