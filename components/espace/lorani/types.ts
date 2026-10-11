@@ -518,6 +518,62 @@ export type PieceDoe = {
   motif: string | null;
 };
 
+/* b5_26 : la consultation d'un lot et les offres reçues, alignées sur la DPGF */
+export type Consultation = {
+  id: string;
+  projet_id: string;
+  lot_id: string;
+  intitule: string;
+  dpgf_piece_id: string | null;
+  estimation_ht: number | null;
+  seuil_ecart_pct: number;
+  date_limite: string | null;
+  statut: "ouverte" | "analysee" | "attribuee" | "infructueuse";
+  offre_retenue: string | null;
+  tableau: TableauOffres;
+  analysee_le: string | null;
+  cree_le: string;
+};
+export type LigneOffres = {
+  ref: string;
+  libelle: string | null;
+  quantite: number | null;
+  unite: string | null;
+  estimation: number | null;
+  mediane: number | null;
+  chiffree_par: number;
+  /* offre id → ce qu'elle chiffre sur la ligne */
+  offres: Record<string, { pu: number | null; q: number | null; montant: number | null }>;
+};
+export type TableauOffres = {
+  dpgf?: string | null;
+  estimation_ht?: number | null;
+  postes?: LigneOffres[];
+  aucune_offre?: string[];
+  une_seule_offre?: string[];
+  seuil_ecart_pct?: number;
+};
+export type ConstatOffre = { code: "non_chiffre" | "quantite" | "arithmetique" | "total" | "hors_dpgf" | "ecart_estimation" | "reserve"; gravite: "majeur" | "mineur"; ref: string | null; texte: string };
+export type Offre = {
+  id: string;
+  projet_id: string;
+  consultation_id: string;
+  piece_id: string | null;
+  intervenant_id: string | null;
+  entreprise: string;
+  siren: string | null;
+  montant_ht: number | null;
+  montant_calcule_ht: number | null;
+  montant_comparable_ht: number | null;
+  rang: number | null;
+  ecart_estimation_pct: number | null;
+  reserves: string[];
+  constats: ConstatOffre[];
+  statut: "recue" | "analysee" | "retenue" | "ecartee";
+  motif: string | null;
+  recue_le: string;
+};
+
 /* tout ce que l'écran montre, d'une source ou de l'autre */
 export type Dossier = {
   projets: Projet[];
@@ -545,6 +601,8 @@ export type Dossier = {
   comptesRendus: CompteRendu[];
   points: Point[];
   doe: PieceDoe[];
+  consultations: Consultation[];
+  offres: Offre[];
   /* user_id → nom (annuaire) */
   noms: Record<string, string>;
   /* le compte de la personne connectée (base réelle) */
