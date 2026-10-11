@@ -310,7 +310,7 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
         </div>
       </div>
 
-      <div className="esp-carte-corps" aria-label="Qui valide">
+      <div className="esp-carte-corps" role="region" aria-label="Qui valide">
         <h3 className="esp-section-titre">Qui valide les relances, selon le montant</h3>
         <p className="c2-sous">Le gérant règle jusqu&apos;à trois paliers. Une relance attend la validation d&apos;une personne d&apos;un des rôles de son palier.</p>
         <div className="esp-form">

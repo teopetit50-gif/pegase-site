@@ -275,7 +275,7 @@ export default function FicheCompte({ fiche, actions }: { fiche: Fiche; actions:
       </div>
 
       {(fiche.reponses_lues ?? []).length ? (
-        <div className="esp-carte-corps" aria-label="Réponses à trancher">
+        <div className="esp-carte-corps" role="region" aria-label="Réponses à trancher">
           <h3 className="esp-section-titre">Réponses à trancher</h3>
           <ul className="c2-reponses">
             {(fiche.reponses_lues ?? []).map((x) => (
@@ -382,7 +382,7 @@ export default function FicheCompte({ fiche, actions }: { fiche: Fiche; actions:
         )}
       </div>
 
-      <div className="esp-carte-corps" aria-label="Pièces du dossier">
+      <div className="esp-carte-corps" role="region" aria-label="Pièces du dossier">
         <div className="c2-tete-droite c2-tete-gauche">
           <h3 className="esp-section-titre">Pièces du dossier</h3>
           {facturesJoignables.length ? (
