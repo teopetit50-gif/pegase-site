@@ -8,6 +8,26 @@ version d'après** (« Chaque société dépose l'export de son logiciel… » ;
 sources, avec l'accord de la DSI, est en préparation »). Le prochain déploiement de main remettra donc les
 phrases chiffrées ci-dessous.
 
+## Mise à jour du 11/10/2026, 15 h 25 Z (B1, après la reprise)
+
+Construits, posés verts sur la recette (tests `^test_b1_1[0-9]_`, `^test_b1_2[01]_`, 44) et dans main :
+
+| Lignes | Promesse | Avant | Maintenant | Lot |
+|---|---|---|---|---|
+| 4, 30, 32 | décisions à valider, une décision proposée à la DJ avec son calcul, « rien ne part sans l'accord » | D / C | **B** | b1_15, tests b1_18 |
+| 39 | « au plus trois décisions » chaque matin | C | **B** | b1_15 (section « Décisions à valider », 3 au plus) |
+| 10 | chaque direction reçoit ses décisions avec le calcul et la pièce | C | **B** (calcul et pièce dans la ligne) | b1_15 |
+| 9 | une règle écrite une fois pour le groupe (réserve, préavis, plafond) | C | **B** | b1_16, tests b1_19 |
+| 23, 25 | la DSI garde la main ; une source se branche et se débranche avec son accord | C | **B** | b1_16 |
+| 24, 26 | les caisses | D / C | **B** (exports et dépôt ; en-têtes à confirmer) | b1_17, tests b1_20 |
+| 33 | chaque lecture inscrite au journal | C | **C+** (lectures de contexte journalisées ; pas chaque écran) | b1_18, tests b1_21 |
+| 1, 8, 18, 28 | « une seule IA », « l'IA raisonne sur les mêmes données » | C | **C+** : la porte `grp_contexte` est prête ; son branchement dans l'assistant attend Teo | b1_18 |
+
+Reste, inchangé : 2 (connecteurs API directs, tiers), 7 (source du 9 %), 11 (commentaires du point du matin,
+socle), 33 (« vos propres serveurs », A5 et Teo), 34–35 (fournisseur du modèle, écran d'hébergement), et tout
+le passage B → A (production, vrais exports, premier groupe). Jours restants → B : ≈ 10 (au lieu de ≈ 33),
+dont ≈ 3 pour l'assistant une fois Teo décidé, hors « vos propres serveurs ».
+
 ## Synthèse
 
 1. **Par état** (39 lignes) : A 2 (une statistique sourcée, les liens qui répondent) · B 15 · C 17 · D 2 ·

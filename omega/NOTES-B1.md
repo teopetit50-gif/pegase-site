@@ -1,5 +1,13 @@
 # Session B1 — VARELO, le référentiel du groupe (sociétés, pôles, rapprochement)
 
+## REPRISE (11/10/2026, 15 h 25 Z)
+
+Fait et vert sur la recette, dans main : b1_15 décisions, b1_16 règles du groupe et sources DSI, b1_17 caisses,
+b1_18 contexte (tests b1_18 à b1_21, 44 vert) ; liens des écrans vers /espace2 ; label-content-name-mismatch.
+Attend Teo : l'outil « contexte_varelo » dans l'assistant (route hors module) ; les vrais exports d'un groupe
+pour l'essai à blanc (gestion et caisses). Prochaine étape exacte : l'essai à blanc dès qu'un export réel
+arrive ; sinon, rien de Varelo n'est en cours. Chiffrage mis à jour : omega/CHIFFRAGE/varelo.md (section du 11/10).
+
 ## 11/10/2026 — le contexte du groupe pour l'assistant (b1_18, tests b1_21)
 
 Lignes 1, 8, 18, 28 (« une seule IA ») et 33 (« chaque lecture au journal ») du chiffrage, moitié données.
