@@ -57,7 +57,8 @@ il cite.
 |---|---|---|
 | `lorani_planche` | Une planche graphique : plan de masse, plans de niveaux, coupes, façades, notice (PC1 à PC8, PCMI1 à PCMI8, planches de DCE) | `reference` (« PC2 », « A-102 ») ; `indice` ; et une ligne **par mesure lue** : `mesure.<grandeur>.<objet>` |
 | `lorani_cctp` | Le cahier des clauses techniques particulières (par lot) | `lot` ; une ligne par poste décrit : `poste.<référence>` (valeur = intitulé du poste, texte = la citation) ; et les mesures écrites : `mesure.<grandeur>.<objet>` |
-| `lorani_dpgf` | La décomposition du prix global et forfaitaire (par lot) | `lot` ; une ligne par poste chiffré : `poste.<référence>` (valeur = quantité canonique, texte = la ligne) |
+| `lorani_dpgf` | La décomposition du prix global et forfaitaire (par lot) | `lot` ; une ligne par poste chiffré : `poste.<référence>` (valeur = quantité canonique, texte = la ligne) ; quand la DPGF est **chiffrée par la maîtrise d'œuvre** (l'estimation, b5_26) : `prix_unitaire.<référence>` et/ou `montant.<référence>` (€ HT, canoniques) |
+| `lorani_offre` | L'offre d'une entreprise pour un lot (DPGF remplie, devis, bordereau, en PDF ou en Excel — b5_26) | `entreprise` (raison sociale lue) ; `siren` ; `lot` (« 08 », « Lot 8 ») ; `montant_total_ht` ; par poste, **avec les références de la DPGF** : `prix_unitaire.<référence>`, `quantite.<référence>` (si l'entreprise l'écrit), `montant.<référence>`, `unite.<référence>` ; chaque réserve, variante ou exclusion écrite : `reserve.<n>` (valeur = la phrase) |
 | `lorani_metre` | Le métré d'un lot (quantités mesurées sur les plans, par l'économiste ou le lecteur) | `lot` ; par poste : `quantite.<référence>` (quantité canonique), `unite.<référence>` (« m2 », « ml », « m3 », « u ») |
 | `lorani_cerfa` | Le formulaire de la demande (Cerfa 13406, 13409…) | les surfaces et nombres déclarés en `mesure.<grandeur>.projet` : `surface_plancher_m2`, `emprise_sol_m2`, `surface_taxable_m2`, `logements_nb`, `stationnement_nb`, `niveaux_nb` |
 | `lorani_attestation_re2020` | L'attestation RE2020 (dépôt du PC ou achèvement) | par indicateur : `re2020.<indicateur>` et `re2020.<indicateur>_max` (valeurs canoniques) — `bbio`, `cep`, `cep_nr`, `ic_energie`, `ic_construction`, `dh` ; les surfaces en `mesure.sref_m2.projet`, `mesure.surface_plancher_m2.projet` |
@@ -82,6 +83,10 @@ il cite.
   socle accepte une boîte nulle, le constat cite alors la page et le texte sans cadre dans le rapport annoté.
 - Seules les cotes et quantités **écrites** sont lues (A1 ne mesure rien sur le dessin) : un métré « mesuré sur les
   plans » vient d'un métré déposé, ou des quantités écrites sur les planches.
+- Offres (b5_26) : une ligne de l'offre garde la référence de la DPGF (`8.1` → `8_1`) ; un poste ajouté par
+  l'entreprise garde sa propre référence (il ressort « hors DPGF »). Un poste laissé vide, « néant » ou « inclus »
+  n'est **pas** rendu (il ressortira « non chiffré ») ; « 0 » écrit est rendu `0`. Les montants sont HT ; une offre en
+  TTC rend ses montants HT si elle les écrit, sinon rien. Une offre de plus de 500 lignes se lit par morceaux (A1).
 - Métré contre DPGF : une DPGF rend aussi `unite.<référence>` ; une planche peut rendre `quantite.<référence>` (surface,
   longueur, volume mesuré pour ce poste sur cette planche) — le socle additionne les planches quand il n'y a pas de
   métré. Écart de plus de 5 % = constat ; DPGF sous le métré de plus de 10 % = majeur.
