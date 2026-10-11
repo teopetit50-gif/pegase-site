@@ -5,6 +5,21 @@ Dernière mise à jour : 05/10/2026, 23 h.
 
 ## REPRISE (pause demandée par Teo, 06/10/2026 à 21 h Z)
 
+**11/10, 15 h 30 Z — état de la reprise (worker-b5).**
+- Posés et verts sur la recette :
+  - b5_24 : risques par les données ouvertes, prouvés en vrai à Nantes ;
+  - b5_25 : rappel J-10 des visas, questions de plus de 8 jours au point du matin ;
+  - b5_26 : analyse des offres ;
+  - b5_27 : liens vers /espace2/lorani, alertes, point du matin et courriels de rappel compris ;
+  - tests b5_14, b5_15, b5_16 ; b5_01 (121/121).
+- Écran (espace client), parti ou partant dans main avec le coordinateur :
+  - constat → question en un clic ;
+  - onglet Analyse des offres, avec rapport d'analyse PDF et Excel ;
+  - export du dossier daté (registre PDF et Excel par lot).
+- A1 a livré le type de lecture `lorani_offre` (worker-a1 b47c89a, à redéployer). Prochaine preuve réelle : une vraie offre d'entreprise déposée par le banc.
+- Chiffrage (`omega/CHIFFRAGE/lorani.md`) : A 2, B 32, C 23, D 9, T 3.
+- Suite sans tiers, par ordre de valeur : #49 (changements non signalés d'un indice à l'autre), #15, #16, #18 (réglages du contrôle), #23 (pièces exigées par le permis), #30 à #33 (situations).
+
 **11/10, 13 h 40 Z — b5_24 posé et prouvé.**
 - Le coordinateur a posé b5_24, les 15 lots de données et b5_14 v2. Lot h1340b5b7 : 42 ok, 0 not ok. Référentiels conformes : risques 31 733, radon 32 771, sismicité 35 346, libellés 49.
 - Relevé réel sous le gérant du banc (`omega/recette-b5`, comme un client), `lorani_chercher_plu` sur 7ef5d6aa (Nantes). Résultat en 22 s : « fait », UMa, AC1, sismicité 3, radon 3, argiles recensées, 9 risques.
