@@ -5,7 +5,16 @@ Commande : `omega/AUDIT-PROMESSES.md` § 1 (CASHD absent) ; promesses : `app/pag
 sont déjà écrites », capture « qui doit de l'argent, où en est la relance, et l'encours échu au total »),
 `app/offres/relances-impayes/page.tsx`, `lib/produits/relances.ts`, `lib/produits/capacites/relances.ts` (50 lignes).
 
-## REPRISE (mise à jour du 11/10/2026)
+## REPRISE (pause demandée par Teo, 11/10/2026, 15 h 40 Z)
+
+- **Où j'en suis** : c2_01 → c2_07 posés et verts sur la recette (h1513bbc), écrans dans main (1e27e72). **À poser** :
+  `c2_08_portefeuille.sql` + `test_c2_08_portefeuille` (worker-c2 0615c803) — vérifier au test 51 que private.a_un_role est
+  admis dans une politique (liste figée d'A5). Rien d'autre en cours, arbre propre.
+- **Prochain pas** : G6 (détail des pièces dans d'autres langues, ~1 j), G19 (raccord du logiciel de commandes, avec un premier
+  client) ; puis le pilote (omega/CHIFFRAGE/cashd.md § Passage à A). Banc local : scratchpad/pg.sh relance Postgres (/tmp/pgc2,
+  port 5499, base c2b).
+
+### Historique de la reprise du 11/10
 
 - **Fait, posé, fusionné (avant la pause)** : c2_01 → c2_03, tests ^test_c2_01 → 04 verts sur la recette, banc_cashd.sql joué,
   worker-c2 fusionnée (efd478e), chiffrage d7391be.
