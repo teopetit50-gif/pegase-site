@@ -187,6 +187,42 @@ export function controler(d: Dossier, brut: unknown): { redaction: Redaction; co
   };
 }
 
+// ─── Message sans texte ────────────────────────────────────────────────
+// « Le message ne contient qu'une photo, sans un mot » (catalogue, cas tordus) : le modèle ne voit pas les
+// pièces, il ne peut que supposer. Sans texte ni objet parlant, sans message précédent dans le dossier, la
+// réponse préparée demande la précision qui manque — sans appel au modèle, donc sans coût — et attend la
+// validation comme toute réponse hors base (couverte = faux).
+
+const MOTS_DE_FICHIER = new Set(["img", "dsc", "dcim", "jpg", "jpeg", "png", "heic", "pdf", "photo", "photos", "image", "images", "scan", "pic", "fwd", "pièce", "jointe"]);
+
+function parle(t: string | null | undefined): boolean {
+  const mots = (t ?? "").toLowerCase().match(/\p{L}{3,}/gu) ?? [];
+  return mots.some((m) => !MOTS_DE_FICHIER.has(m));
+}
+
+export const CORPS_PRECISION =
+  "Merci pour votre message. Nous avons bien reçu votre pièce jointe, rattachée à votre demande, mais sans précision sur ce que vous souhaitez : pouvez-vous nous l'écrire en quelques mots ? Nous pourrons alors vous répondre.";
+
+export function sansTexte(d: Dossier): SortieRedaction | null {
+  const r = d.reception;
+  if (!r || !(r.pieces > 0) || parle(r.corps) || parle(r.sujet) || (d.precedents ?? []).length > 0) return null;
+  return {
+    redaction: {
+      sujet: "autre",
+      langue: "fr",
+      urgence: false,
+      couverte: false,
+      sources: [],
+      corps: CORPS_PRECISION,
+      raison: `Message sans texte (${r.pieces} pièce${r.pieces > 1 ? "s" : ""} jointe${r.pieces > 1 ? "s" : ""}) : précision demandée au client.`,
+    },
+    controles: ["sans_texte"],
+    usage: { tokens_entree: 0, tokens_sortie: 0 },
+    modele: "regle:sans_texte",
+    cout_eur: 0,
+  };
+}
+
 /** Coût estimé avant l'appel, pour le plafond : ~3,5 caractères par jeton, 900 jetons rendus. */
 export function estimer(client: ClientClaude, d: Dossier): number {
   const caracteres = consigne(d).length + contenuDemande(d).length + JSON.stringify(SCHEMA_OUTIL).length;

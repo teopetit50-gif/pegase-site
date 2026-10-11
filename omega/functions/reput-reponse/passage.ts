@@ -8,7 +8,7 @@ import { ErreurOuvrier } from "@partage/erreurs.ts";
 import { journal, messageDe } from "@partage/journal.ts";
 import type { Travail } from "@partage/portes.ts";
 import type { PortesReput } from "./portes_reput.ts";
-import { estimer, rediger } from "./rediger.ts";
+import { estimer, rediger, sansTexte } from "./rediger.ts";
 
 export const MODULE = "reput";
 export const GENRES = ["reput.preparer"];
@@ -80,11 +80,14 @@ export async function traiter(ctx: Contexte, t: Travail, version: string): Promi
       return "ignore";
     }
     demande = dossier.demande;
-    if (!ctx.claude) {
-      throw new ErreurOuvrier("IA_NON_BRANCHEE", "ni ANTHROPIC_API_KEY ni Bedrock : la réponse attend l'IA.");
+    let sortie = sansTexte(dossier);
+    if (!sortie) {
+      if (!ctx.claude) {
+        throw new ErreurOuvrier("IA_NON_BRANCHEE", "ni ANTHROPIC_API_KEY ni Bedrock : la réponse attend l'IA.");
+      }
+      await plafond(ctx, dossier.client, estimer(ctx.claude, dossier));
+      sortie = await rediger(ctx.claude, dossier);
     }
-    await plafond(ctx, dossier.client, estimer(ctx.claude, dossier));
-    const sortie = await rediger(ctx.claude, dossier);
     const depot = await ctx.portes.deposerReponse(demande, {
       ...sortie.redaction,
       modele: sortie.modele,

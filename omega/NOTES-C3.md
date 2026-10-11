@@ -10,6 +10,7 @@ Commencée le 06/10/2026. Je n'appelle jamais Supabase : le coordinateur pose, j
 - **Attend le coordinateur** : rien à poser ; fusionner e125ccb + ce commit (documents). Export à date fixe : non construit (mis de côté).
 - **Attend Teo** : trancher les phrases du site relevées dans le chiffrage (rendez-vous/agenda, astreinte, « réponse à 21 h », « aucun logiciel de plus », contradictions A:94/A:177/A:430 et A:426/K:122) ; clé IA en UE (Bedrock eu-west) ; compte Meta WhatsApp ; un premier client réel (mail + formulaire).
 - **11/10 (reprise)** : kit de preuve en vrai prêt — `omega/recette-c3/PREUVE-VRAIE.md` (procédure en 5 étapes), `omega/recette-c3/preuve_vraie.sql` (contrôles, lecture seule), `omega/functions/reput-reponse/outils/preuve_formulaire_reput.ts` (formulaire signé avec une vraie question). Attend : le coordinateur (étapes 0, 2, 3, 5) et Teo (1, 4).
+- **11/10** : message sans texte (photo seule) → demande de précision préparée sans modèle (`rediger.ts` `sansTexte`, Deno 14/14). **À redéployer** : Edge `reput-reponse`.
 - **Prochaine étape exacte** : faire passer le circuit mail + formulaire en « prouvé en vrai » — rouvrir la boîte du banc banc@recu.omegaai.fr, envoyer un vrai courriel, vérifier préparation < 1 min, validation dans « À valider », envoi reçu, journal ; puis, selon les choix de Teo, le bloc rendez-vous/agenda (≈ 10 j) ou l'astreinte (≈ 3 j).
 
 ## Ce que le site promet et ce que C3 rend vrai

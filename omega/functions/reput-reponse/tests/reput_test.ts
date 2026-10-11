@@ -1,6 +1,6 @@
 import { assert, assertEquals, assertStringIncludes } from "@std/assert";
 import { passage } from "../passage.ts";
-import { consigne, contenuDemande, controler, nombres } from "../rediger.ts";
+import { consigne, contenuDemande, controler, CORPS_PRECISION, nombres, sansTexte } from "../rediger.ts";
 import { ClaudeFaux, contexte, dossier, FICHE_HORAIRES, FICHE_TARIF, panne, PortesFausses, travail } from "./doubles.ts";
 
 function capturerConsole(): { lignes: string[]; rendre: () => void } {
@@ -143,4 +143,37 @@ Deno.test("un dossier sur deux canaux : les messages précédents sont joints, e
   const { redaction } = controler(d, { sujet: "horaires", langue: "fr", urgence: false, couverte: true, sources: [FICHE_HORAIRES.id],
                                        corps: "Pour vos 2 portes, nous revenons vers vous ; le samedi, nous sommes ouverts de 9 h à 12 h." });
   assertEquals(redaction.couverte, true);
+});
+
+Deno.test("une photo sans un mot : précision demandée sans appeler le modèle, hors base, rien n'est supposé", async () => {
+  const p = new PortesFausses();
+  const d = dossier("  \n-- \n", {});
+  d.reception = { ...d.reception!, sujet: "IMG_2041.jpg", pieces: 1 };
+  p.dossiers.set(42, d);
+  p.travaux.push(travail(1, 42));
+  const claude = new ClaudeFaux({ sujet: "horaires", langue: "fr", urgence: false, couverte: true, sources: [], corps: "ne doit pas servir" });
+  const c = capturerConsole();
+  let bilan;
+  try { bilan = await passage(contexte(p, claude)); } finally { c.rendre(); }
+  assertEquals(bilan.issues.preparee, 1);
+  assertEquals(claude.demandes.length, 0);
+  const r = p.depots[0].resultat;
+  assertEquals([r.sujet, r.couverte, r.sources, r.corps, r.cout_eur], ["autre", false, [], CORPS_PRECISION, 0]);
+  assertStringIncludes(String(r.raison), "1 pièce jointe");
+  assertStringIncludes(JSON.stringify(p.finis[0].resultat), "sans_texte");
+});
+
+Deno.test("sans texte mais avec un objet parlant, un dossier en cours ou sans pièce : le modèle reprend la main", () => {
+  const avecObjet = dossier("", {});
+  avecObjet.reception = { ...avecObjet.reception!, sujet: "Fuite sous l'évier", pieces: 2 };
+  assertEquals(sansTexte(avecObjet), null);
+  const avecPrecedent = dossier("", { precedents: [{ canal: "email", recu_le: "2026-10-06T19:40:00Z", sujet: null, corps: "Ma chaudière fuit.", statut: "a_valider" }] });
+  avecPrecedent.reception = { ...avecPrecedent.reception!, sujet: null, pieces: 1 };
+  assertEquals(sansTexte(avecPrecedent), null);
+  const sansPiece = dossier("", {});
+  sansPiece.reception = { ...sansPiece.reception!, sujet: null, pieces: 0 };
+  assertEquals(sansTexte(sansPiece), null);
+  const photoSeule = dossier("📷", {});
+  photoSeule.reception = { ...photoSeule.reception!, sujet: "Photo", pieces: 3 };
+  assertStringIncludes(String(sansTexte(photoSeule)?.redaction.raison), "3 pièces jointes");
 });
