@@ -16,7 +16,7 @@
 import { useMemo, useState } from "react";
 import Choix from "./Choix";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, CalendarDays, ChevronRight, CircleCheck, CircleDashed, Clock, Compass, FileText, Inbox, LayoutGrid, ListChecks, ListFilter, Megaphone, MoreVertical, Repeat, Search, UserRound, X } from "lucide-react";
+import { ArrowRight, CalendarDays, ChevronRight, CircleCheck, CircleDashed, Compass, FileText, Inbox, LayoutGrid, ListChecks, Megaphone, Search, UserRound, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Ligne } from "./Tableaux";
 
@@ -234,43 +234,40 @@ function Validations({ initiales }: { initiales: Ligne[] }) {
 }
 
 /* ══════════════════════════ Point du matin ══════════════════════════ */
+/* 11/10/2026 — allégé à la demande de Teo, sur les principes de la page
+   Notes, en gardant les cartes : une seule ligne de texte par élément,
+   plus d'icônes devant les lignes, « Fait » n'apparaît qu'au survol, le
+   titre de la carte mène à la page (plus de ⋮ ni de lien en pied), la
+   barre ne garde que la date (plus de « 7 h 00 » ni de filtre). */
 function Point({ initiales }: { initiales: Ligne[] }) {
   const { lignes, marquer } = useLignes(initiales);
   const [maintenant] = useState(() => Date.now());
-  const [filtre, setFiltre] = useState("");
 
   const c = useMemo(() => {
-    const taches = lignes.filter((l) => (l.tableau === "plan" || l.tableau === "ajouts") && l.donnees["Statut"] !== "Fait").filter((l) => !filtre || l.donnees["Catégorie"] === filtre);
+    const taches = lignes.filter((l) => (l.tableau === "plan" || l.tableau === "ajouts") && l.donnees["Statut"] !== "Fait");
     const premier = taches.filter((l) => (echeance(l.donnees["Échéance"]) ?? Infinity) < maintenant + JOUR).sort((a, b) => (echeance(a.donnees["Échéance"]) ?? 0) - (echeance(b.donnees["Échéance"]) ?? 0));
     const semaine = taches.filter((l) => {
       const e = echeance(l.donnees["Échéance"]) ?? Infinity;
       return e >= maintenant + JOUR && e < maintenant + 7 * JOUR;
     });
-    const depuis = lignes.filter((l) => l.maj && new Date(l.maj).getTime() > maintenant - JOUR).sort((a, b) => (b.maj ?? "").localeCompare(a.maj ?? ""));
+    /* « Depuis hier » : seulement ce qui a un nom (plus de « Ligne modifiée ») */
+    const depuis = lignes
+      .filter((l) => l.maj && new Date(l.maj).getTime() > maintenant - JOUR && (l.donnees["Tâche"] ?? l.donnees["Client"] ?? l.donnees["Routine"]))
+      .sort((a, b) => (b.maj ?? "").localeCompare(a.maj ?? ""));
     const routines = lignes.filter((l) => l.tableau === "routines" && /jour/i.test(l.donnees["Fréquence"] ?? ""));
     const relances = lignes.filter((l) => l.tableau === "clients" && l.donnees["Client"] && !FINIS.includes(l.donnees["Étape"]));
-    const moteurs = lignes.filter((l) => l.tableau === "moteurs" && l.donnees["Statut"] !== "Fait").slice(0, 4);
-    const categories = Array.from(new Set(lignes.filter((l) => l.tableau === "plan" || l.tableau === "ajouts").map((l) => l.donnees["Catégorie"]).filter(Boolean)));
-    return { premier, semaine, depuis, routines, relances, moteurs, categories };
-  }, [lignes, filtre, maintenant]);
+    return { premier, semaine, depuis, routines, relances };
+  }, [lignes, maintenant]);
 
   const jour = new Date(maintenant).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
 
   return (
-    <div className="v2-page v2-arrivee v2-pm v2-vivant">
+    <div className="v2-page v2-arrivee v2-pm v2-vivant om-pm-simple">
       <h1 className="v2-sr">Point du matin</h1>
       <div className="v2-val-filtres">
-        <label className="v2-val-bouton">
+        <span className="v2-val-bouton">
           <CalendarDays width={16} height={16} aria-hidden="true" />
           <span suppressHydrationWarning>{jour.charAt(0).toUpperCase() + jour.slice(1)}</span>
-        </label>
-        <span className="v2-val-bouton">
-          <Clock width={16} height={16} aria-hidden="true" />
-          <span>7 h 00</span>
-        </span>
-        <Selecteur icone={LayoutGrid} valeur={filtre} changer={setFiltre} tous="Toutes les catégories" options={c.categories.map((x) => ({ cle: x, libelle: x }))} />
-        <span className="v2-val-droite">
-          <span className="v2-pm-remise">Ton point du jour</span>
         </span>
       </div>
 
@@ -280,16 +277,13 @@ function Point({ initiales }: { initiales: Ligne[] }) {
             <ul className="v2-pm-liste">
               {c.premier.map((l) => {
                 const e = echeance(l.donnees["Échéance"]);
-                const retard = e !== null && e < maintenant;
-                const Icone = ICONE_CATEGORIE[l.donnees["Catégorie"]] ?? FileText;
                 return (
                   <li key={l.id}>
-                    <span className="v2-pm-icone" data-critique={retard ? "" : undefined}>
-                      <Icone width={22} height={22} aria-hidden="true" />
-                    </span>
                     <span className="v2-pm-texte">
                       <span>{l.donnees["Tâche"]}</span>
-                      <small>{[l.donnees["Catégorie"], quand(e, maintenant)].filter(Boolean).join(" · ")}</small>
+                    </span>
+                    <span className="om-pm-meta" data-retard={e !== null && e < maintenant ? "" : undefined}>
+                      {quand(e, maintenant)}
                     </span>
                     <button type="button" className="v2-pm-action" onClick={() => marquer(l, "Statut", "Fait")}>
                       Fait <CircleCheck width={14} height={14} aria-hidden="true" />
@@ -308,11 +302,10 @@ function Point({ initiales }: { initiales: Ligne[] }) {
             <ul className="v2-pm-liste">
               {c.depuis.slice(0, 6).map((l) => (
                 <li key={l.id}>
-                  <span className="v2-pm-icone">{l.tableau === "clients" ? <UserRound width={22} height={22} aria-hidden="true" /> : <ListChecks width={22} height={22} aria-hidden="true" />}</span>
                   <span className="v2-pm-texte">
-                    <span>{l.donnees["Tâche"] ?? l.donnees["Client"] ?? l.donnees["Chantier"] ?? l.donnees["Routine"] ?? "Ligne modifiée"}</span>
-                    <small>{l.donnees["Statut"] ?? l.donnees["Étape"] ?? l.donnees["Statut cette semaine"] ?? ""}</small>
+                    <span>{l.donnees["Tâche"] ?? l.donnees["Client"] ?? l.donnees["Routine"]}</span>
                   </span>
+                  <span className="om-pm-meta">{l.donnees["Statut"] ?? l.donnees["Étape"] ?? l.donnees["Statut cette semaine"] ?? ""}</span>
                 </li>
               ))}
             </ul>
@@ -321,19 +314,15 @@ function Point({ initiales }: { initiales: Ligne[] }) {
           )}
         </Carte>
 
-        <Carte titre="Prospects à relancer" lien={`${R}/demandes`} pied={{ libelle: "Voir dans Demandes reçues", href: `${R}/demandes` }}>
+        <Carte titre="Prospects à relancer" lien={`${R}/demandes`}>
           {c.relances.length ? (
             <ul className="v2-pm-liste">
               {c.relances.slice(0, 5).map((l) => (
                 <li key={l.id}>
-                  <UserRound width={20} height={20} aria-hidden="true" className="v2-pm-icone" />
                   <span className="v2-pm-texte">
                     <span>{l.donnees["Client"]}</span>
-                    <small>{[l.donnees["Étape"], l.donnees["Prochaine action"]].filter(Boolean).join(" · ")}</small>
                   </span>
-                  <Link href={`${R}/demandes`} className="v2-pm-action" aria-label={`Ouvrir ${l.donnees["Client"]}`}>
-                    {l.donnees["Date"] || "Ouvrir"} <ArrowUpRight width={14} height={14} aria-hidden="true" />
-                  </Link>
+                  <span className="om-pm-meta">{l.donnees["Date"]}</span>
                 </li>
               ))}
             </ul>
@@ -342,19 +331,18 @@ function Point({ initiales }: { initiales: Ligne[] }) {
           )}
         </Carte>
 
-        <Carte titre="Routines du jour" lien={`${R}/taches/routines`} pied={{ libelle: "Toutes les routines", href: `${R}/taches/routines` }}>
+        <Carte titre="Routines du jour" lien={`${R}/taches/routines`}>
           <ul className="v2-pm-liste">
             {c.routines.map((l) => {
               const fait = l.donnees["Statut cette semaine"] === "Fait";
               return (
-                <li key={l.id}>
-                  <Repeat width={20} height={20} aria-hidden="true" className="v2-pm-icone" />
+                <li key={l.id} data-fait={fait ? "" : undefined}>
                   <span className="v2-pm-texte">
                     <span>{l.donnees["Routine"]}</span>
-                    <small>{l.donnees["Moment"]}</small>
                   </span>
+                  <span className="om-pm-meta">{l.donnees["Moment"]}</span>
                   <button type="button" className="v2-pm-action" onClick={() => marquer(l, "Statut cette semaine", fait ? "À faire" : "Fait")}>
-                    {fait ? "Fait" : "À faire"} {fait ? <CircleCheck width={14} height={14} aria-hidden="true" /> : <CircleDashed width={14} height={14} aria-hidden="true" />}
+                    {fait ? "Rouvrir" : "Fait"} {fait ? <CircleDashed width={14} height={14} aria-hidden="true" /> : <CircleCheck width={14} height={14} aria-hidden="true" />}
                   </button>
                 </li>
               );
@@ -362,16 +350,15 @@ function Point({ initiales }: { initiales: Ligne[] }) {
           </ul>
         </Carte>
 
-        <Carte titre="Cette semaine" lien={`${R}/taches`} pied={{ libelle: "Voir le plan", href: `${R}/taches` }}>
+        <Carte titre="Cette semaine" lien={`${R}/taches`}>
           {c.semaine.length ? (
             <ul className="v2-pm-liste">
               {c.semaine.slice(0, 5).map((l) => (
                 <li key={l.id}>
-                  <ListFilter width={20} height={20} aria-hidden="true" className="v2-pm-icone" />
                   <span className="v2-pm-texte">
                     <span>{l.donnees["Tâche"]}</span>
-                    <small>{[l.donnees["Catégorie"], `échéance ${l.donnees["Échéance"]}`].join(" · ")}</small>
                   </span>
+                  <span className="om-pm-meta">{l.donnees["Échéance"]}</span>
                 </li>
               ))}
             </ul>
@@ -379,32 +366,29 @@ function Point({ initiales }: { initiales: Ligne[] }) {
             <p className="v2-pm-rien">Rien d&apos;autre cette semaine.</p>
           )}
         </Carte>
-
       </div>
     </div>
   );
 }
 
-function Carte({ titre, classe, lien, badge, pied, children }: { titre: string; classe?: string; lien?: string; badge?: string; pied?: { libelle: string; href: string }; children: React.ReactNode }) {
+/* une carte du point du matin : le titre mène à la page, un compte au besoin */
+function Carte({ titre, classe, lien, badge, children }: { titre: string; classe?: string; lien?: string; badge?: string; children: React.ReactNode }) {
   return (
     <section className={`v2-carte v2-pm-carte${classe ? ` ${classe}` : ""}`} aria-label={titre}>
       <div className="v2-pm-tete">
-        <h2>{titre}</h2>
+        <h2>
+          {lien ? (
+            <Link href={lien} className="om-pm-titre">
+              {titre}
+              <ChevronRight width={14} height={14} aria-hidden="true" />
+            </Link>
+          ) : (
+            titre
+          )}
+        </h2>
         {badge ? <span className="v2-pm-badge">{badge}</span> : null}
-        {lien ? (
-          <Link href={lien} className="v2-pm-kebab" aria-label={`Ouvrir : ${titre}`}>
-            <MoreVertical width={16} height={16} aria-hidden="true" />
-          </Link>
-        ) : null}
       </div>
       <div className="v2-pm-corps">{children}</div>
-      {pied ? (
-        <div className="v2-pm-pied">
-          <Link href={pied.href} className="v2-pm-action">
-            {pied.libelle} <ArrowUpRight width={14} height={14} aria-hidden="true" />
-          </Link>
-        </div>
-      ) : null}
     </section>
   );
 }
