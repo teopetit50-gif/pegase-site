@@ -1,7 +1,8 @@
 """Deux étalonnages inspirés des stories de Léo Grindars (11/10/2026).
 
-Validé par Teo sur une photo de nuit : le filtre « sombre ». Il est rangé
-dans la bibliothèque (Activité → Styles de montage → Filtre couleur).
+Le « sombre » a plu à Teo sur une photo de nuit, puis a été refusé sur
+ses vidéos : les vidéos restent en couleurs naturelles (Activité → Styles
+de montage → Ce qui a été essayé et refusé). Gardé ici au cas où.
 
   python3 outils/filtres/filtre.py photo.png
       → photo-sombre.jpg, photo-ambre.jpg, omega-sombre.cube, omega-ambre.cube
