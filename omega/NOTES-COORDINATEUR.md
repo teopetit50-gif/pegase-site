@@ -1090,3 +1090,26 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   - le coffre Scaleway, Bedrock UE et les exports réels.
 - **Recette** : une autre session a appliqué « varelo_referentiel_perf » à 15 h 28 Z, puis la base a redémarré à 15 h 29. Les identifiants de dépôt (pg_net) sont repartis à 23 ; aucune donnée perdue.
 - **Copie de travail pour les fusions** : scratchpad/wt, avec node_modules installé. Le package-lock de main est désynchronisé : `npm install`, pas `npm ci`.
+- **SHA d'arrêt (15 h 40 Z)** :
+
+  | Ouvrier | SHA |
+  |---|---|
+  | A1 | c8d755e |
+  | A2 | c2fdd1e |
+  | A3 | 517a9e4 |
+  | A4 | 4d22265 |
+  | A5 | 69ff368 |
+  | B1 | 7b0187c |
+  | B2 | 3e0dedd |
+  | B3 | 733caa4 |
+  | B4 | 60733aa |
+  | B5 | c26f7a6 |
+  | B6 | 32ee8da |
+  | B7 | 941ddd6 |
+  | C2 | b0ae2133 |
+  | C3 | 49c6799c |
+  | C4 | c567cfcb |
+  | P1 | 5d44a1e (vague 5, 200 PME, attend le feu vert de Teo) |
+
+  C1 a fusionné son lot 1 du dessin /omega (e5198b7).
+- **Question de C1 pour Teo** : faut-il retirer de la vue d'ensemble client le « Bonjour » et la rangée de chiffres, comme sur /omega ? En attendant, ils restent.
