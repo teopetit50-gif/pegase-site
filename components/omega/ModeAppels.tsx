@@ -15,6 +15,10 @@
      · les aides à la conversation : les objections les plus entendues,
        leur réponse, « +1 » pour compter celle qu'on vient d'entendre.
    Historique, Rappels et Analyse lisent les mêmes lignes.
+   11/10/2026 — allégée à la demande de Teo, même dessin : plus d'aides à
+   la conversation, de « Si ça bloque » ni des trois cartes du bas
+   (objections et méthode restent dans le sélecteur ⌃⌄ de la page,
+   l'historique dans l'onglet Historique).
    Écarts assumés avec la maquette : pas d'onglets soulignés (refusés par
    Teo, un sélecteur segmenté à la place) ; pas de carte « Transcription »,
    que rien n'enregistre aujourd'hui.
@@ -22,7 +26,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, BookOpen, Building2, CalendarDays, ChevronLeft, ChevronRight, ChevronsUpDown, History, LayoutGrid, MoreHorizontal, PenLine, Phone, Plus, SkipForward } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Building2, CalendarDays, ChevronLeft, ChevronRight, ChevronsUpDown, LayoutGrid, MoreHorizontal, PenLine, Phone, Plus, SkipForward } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { ItemMenu, MenuDeroulant, SectionMenu, SeparateurMenu } from "@/components/espace2/ui";
 import { ROLE } from "./Prospects";
@@ -34,8 +38,6 @@ const I = { width: 16, height: 16, strokeWidth: 1.6, "aria-hidden": true } as co
 const jour = (d: Date) => d.toISOString().slice(0, 10);
 const SOURCES = ["Demander la permission", "Raconter le problème", "Caler le rendez-vous", "Qualifier"];
 
-/* les questions qui ramènent au vrai blocage (Hormozi, « les 3A », Méthode de vente) */
-const RELANCES = ["« Ah ? » … et deux secondes de silence", "« Qu'est-ce qui vous fait poser cette question ? »", "« Qu'est-ce qui vous inquiète le plus ? »", "« Qu'est-ce qu'il faudrait pour que ce soit un oui ? »"];
 
 type Issue = { cle: string; libelle: string; statut: string; date?: "rdv" | "rappel" };
 const ISSUES: Issue[] = [
@@ -74,7 +76,6 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
   const [issue, setIssue] = useState<Issue | null>(null);
   const [dateRdv, setDateRdv] = useState("");
   const [etape, setEtape] = useState(0);
-  const [ouverte, setOuverte] = useState<string | null>(null);
   const [etat, setEtat] = useState("");
   const [envoi, setEnvoi] = useState(false);
   const [maintenant] = useState(() => new Date());
@@ -87,15 +88,9 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
   const decroches = appels.filter((l) => l.donnees["Issue"] !== "Pas de réponse").length;
   const rdv = appels.filter((l) => l.donnees["Issue"] === "RDV pris").length;
   const objections = lignes.filter((l) => l.tableau === "objections").sort((a, b) => Number(b.donnees["Fois"] || 0) - Number(a.donnees["Fois"] || 0));
-  const prochainRdv = lignes
-    .filter((l) => l.tableau === "rdv" && l.donnees["Statut"] === "Prévu")
-    .map((l) => ({ l, quand: (() => { const m = l.donnees["Date"]?.match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?/); return m ? new Date(Number(m[3] ?? 2026), Number(m[2]) - 1, Number(m[1])) : null; })() }))
-    .filter((x) => x.quand && x.quand.getTime() >= new Date(aujourdhui).getTime())
-    .sort((a, b) => a.quand!.getTime() - b.quand!.getTime())[0];
 
   const nom = p ? p.enseigne || p.entreprise : "";
   const dirigeant = p?.dirigeant?.replace(/\s*\(.*\)$/, "");
-  const historiqueContact = p ? tousAppels.filter((l) => l.donnees["Prospect"] === String(p.id)) : [];
   const { textes, douleurs } = textesScript(dirigeant ? dirigeant.split(" ").slice(-1)[0] : "", p?.moteurs[0]);
 
   function choisirProspect(id: number) {
@@ -159,13 +154,6 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
     if (error || !data) return setEtat("Échec de la création de la tâche.");
     setLignes((ls) => [...ls, data as Ligne]);
     setEtat(`Tâche créée : « ${donnees.Tâche} » (dans Tâches)`);
-  }
-
-  async function plusUn(o: Ligne) {
-    const donnees = { ...o.donnees, Fois: String(Number(o.donnees["Fois"] || 0) + 1), "Dernière fois": new Date().toLocaleDateString("fr-FR") };
-    setLignes((ls) => ls.map((l) => (l.id === o.id ? { ...l, donnees } : l)));
-    const { error } = await createClient().from("omega_lignes").update({ donnees, maj: new Date().toISOString() }).eq("id", o.id);
-    setEtat(error ? "Échec de l'enregistrement." : `Objection comptée : « ${o.donnees["Objection"]} »`);
   }
 
   const lien = (s?: string) => (s ? `/omega/appels?secteur=${encodeURIComponent(s)}` : "/omega/appels");
@@ -383,91 +371,6 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
               </div>
             </section>
 
-            {/* ——— aides à la conversation ——— */}
-            <section className="v2-carte om-ap-aides" aria-label="Aides à la conversation">
-              <div className="om-ap-aides-titre">
-                <h2>Aides à la conversation</h2>
-                <p>Les objections les plus entendues et la réponse qui marche.</p>
-                <Link href="/omega/appels/objections" className="om-ap-lien-gris">
-                  Toutes les objections <ArrowRight width={14} height={14} aria-hidden="true" />
-                </Link>
-              </div>
-              {objections.slice(0, 3).map((o, i) => {
-                const ouvert = ouverte ? ouverte === o.id : i === 0;
-                return (
-                  <div key={o.id} className="om-ap-objection" data-ouverte={ouvert ? "" : undefined}>
-                    <button type="button" className="om-ap-objection-tete" aria-expanded={ouvert} onClick={() => setOuverte(ouvert ? "aucune" : o.id)}>
-                      <span className="om-ap-num">{String(i + 1).padStart(2, "0")}</span>
-                      <span className="om-ap-objection-nom">{o.donnees["Objection"]}</span>
-                      <Plus {...I} className="om-ap-plus" />
-                    </button>
-                    {ouvert ? (
-                      <div className="om-ap-objection-corps">
-                        <p>{o.donnees["Réponse qui marche"] || "Réponse à écrire dans Objections entendues."}</p>
-                        <button type="button" className="om-ap-compter" onClick={() => plusUn(o)}>
-                          Entendue · {o.donnees["Fois"] || 0} fois <Plus width={12} height={12} aria-hidden="true" />
-                        </button>
-                      </div>
-                    ) : null}
-                  </div>
-                );
-              })}
-              {objections.length === 0 ? <p className="om-ap-gris">Aucune objection notée pour l&apos;instant.</p> : null}
-            </section>
-
-            <details className="om-ap-relances">
-              <summary>Si ça bloque : quatre questions pour trouver le vrai frein</summary>
-              <ul>
-                {RELANCES.map((q) => (
-                  <li key={q}>{q}</li>
-                ))}
-              </ul>
-            </details>
-
-            {/* ——— en bas : prochain rendez-vous, historique, méthode ——— */}
-            <div className="om-ap-bas">
-              <section className="v2-carte om-ap-bloc om-ap-bloc--large" aria-label="Prochain rendez-vous">
-                <CalendarDays {...I} />
-                <strong>Prochain rendez-vous</strong>
-                <span className="om-ap-separe" aria-hidden="true" />
-                {prochainRdv ? (
-                  <span className="om-ap-bloc-texte">
-                    <span>
-                      {prochainRdv.l.donnees["Entreprise"]}
-                      {prochainRdv.l.donnees["Personne"] ? <span className="om-ap-gris"> · {prochainRdv.l.donnees["Personne"]}</span> : null}
-                    </span>
-                    <small>
-                      {prochainRdv.quand!.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }).replace(/^./, (c) => c.toUpperCase())}
-                      {prochainRdv.l.donnees["Heure"] ? ` · ${prochainRdv.l.donnees["Heure"].replace(":", " h ")}` : ""}
-                    </small>
-                  </span>
-                ) : (
-                  <span className="om-ap-bloc-texte om-ap-gris">Aucun rendez-vous prévu</span>
-                )}
-                <Link href="/omega/demandes/rdv" className="v2-btn v2-btn--petit om-ap-planifier">
-                  Planifier
-                </Link>
-              </section>
-              <button type="button" className="v2-carte om-ap-bloc" onClick={() => setVue("historique")}>
-                <History {...I} />
-                <span className="om-ap-bloc-texte">
-                  <strong>Historique de ce contact</strong>
-                  <small>
-                    {historiqueContact.length} appel{historiqueContact.length > 1 ? "s" : ""}
-                    {historiqueContact[0] ? ` · dernier le ${dateCourte(historiqueContact[0].donnees["Date"])}` : " · premier appel"}
-                  </small>
-                </span>
-                <ChevronRight {...I} className="om-ap-chevron" />
-              </button>
-              <Link href="/omega/appels/methode" className="v2-carte om-ap-bloc">
-                <BookOpen {...I} />
-                <span className="om-ap-bloc-texte">
-                  <strong>Méthode de vente</strong>
-                  <small>Le script complet, les trois douleurs par métier</small>
-                </span>
-                <ChevronRight {...I} className="om-ap-chevron" />
-              </Link>
-            </div>
           </>
         ) : (
           <section className="v2-carte om-ap-vide">
