@@ -5,7 +5,10 @@
 
    DUPLIQUÉE de components/espace2/Accueil.tsx, sans la salutation ni la
    rangée de quatre chiffres (retirées le 11/10/2026 : Attio n'en a pas) ;
-   même grille (courbe + tableau à gauche,
+   11/10/2026 — allégée à la demande de Teo, même dessin : plus
+   d'« Activité récente » ni d'encart de l'audit (le bouton « Audit » est
+   dans la barre du haut).
+   Même grille (courbe + tableau à gauche,
    « Aujourd'hui » + « Activité récente » à droite), même carte du bas.
    Le contenu vient du tableau opérationnel (omega_lignes) :
      · le graphique (Graphique.tsx) = tâches, appels, RDV, vidéos par jour ;
@@ -18,7 +21,7 @@ import { useMemo, useState } from "react";
 import Choix from "./Choix";
 import Graphique from "./Graphique";
 import Link from "next/link";
-import { ArrowRight, CheckCheck, ChevronRight, ClipboardCheck, ListChecks, UserRound, Wrench } from "lucide-react";
+import { ArrowRight, ChevronRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Ligne } from "./Tableaux";
 import "@/components/espace2/habillage.css";
@@ -188,67 +191,11 @@ export default function AccueilOmega({ lignes: initiales }: { lignes: Ligne[] })
             )}
           </section>
 
-          <section className="v2-carte v2-carte-corps">
-            <div className="v2-va-titre">
-              <h2 className="v2-h2">Activité récente</h2>
-              <Link href={`${R}/taches`} className="v2-va-lien">
-                Voir tout
-              </Link>
-            </div>
-            {c.activite.length === 0 ? (
-              <p className="v2-gris" style={{ margin: 0 }}>
-                Rien pour l&apos;instant.
-              </p>
-            ) : (
-              <ul className="v2-va-liste">
-                {c.activite.map((l) => (
-                  <li key={l.id}>
-                    <span className="v2-va-pastille" aria-hidden="true">
-                      {l.tableau === "clients" ? <UserRound width={14} height={14} /> : l.tableau === "moteurs" ? <Wrench width={14} height={14} /> : l.donnees["Statut"] === "Fait" ? <CheckCheck width={14} height={14} /> : <ListChecks width={14} height={14} />}
-                    </span>
-                    <small className="v2-gris v2-va-heure" suppressHydrationWarning>
-                      {heureCourte(l.maj!)}
-                    </small>
-                    <span className="v2-va-texte">
-                      <span>{l.donnees["Tâche"] ?? l.donnees["Client"] ?? l.donnees["Chantier"] ?? l.donnees["Routine"] ?? l.donnees["Entreprise"] ?? "Ligne modifiée"}</span>
-                      <small className="v2-gris">{[NOMS[l.tableau] ?? l.tableau, l.donnees["Statut"] ?? l.donnees["Étape"] ?? l.donnees["Statut cette semaine"] ?? l.donnees["Prospection"]].filter(Boolean).join(" · ")}</small>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
         </div>
       </div>
 
-      <section className="v2-carte v2-carte-corps v2-va-ia">
-        <div>
-          <p className="v2-va-ia-marque">
-            <ClipboardCheck width={14} height={14} aria-hidden="true" /> Audit Omega
-          </p>
-          <h2 className="v2-h2">Lance l&apos;audit d&apos;un prospect pendant le rendez-vous.</h2>
-          <p className="v2-gris" style={{ margin: 0 }}>
-            Dépose son export de factures : l&apos;argent qui dort, les devis sans réponse et le retard moyen sortent en direct, avec le rapport à son nom.
-          </p>
-        </div>
-        <Link href={`${R}/audit`} className="v2-btn v2-btn--primaire">
-          Ouvrir l&apos;audit <ArrowRight width={16} height={16} aria-hidden="true" />
-        </Link>
-      </section>
     </div>
   );
-}
-
-const NOMS: Record<string, string> = { plan: "Plan", ajouts: "Plan", routines: "Routine", clients: "Prospect", moteurs: "Chantier", entreprises: "Entreprise" };
-
-function heureCourte(iso: string): string {
-  const d = new Date(iso);
-  const j = new Date();
-  const h = d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
-  if (d.toDateString() === j.toDateString()) return h;
-  j.setDate(j.getDate() - 1);
-  if (d.toDateString() === j.toDateString()) return `Hier ${h}`;
-  return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
 }
 
 /* des valeurs de démonstration (bouton « Voir un exemple ») : une montée en
