@@ -26,14 +26,9 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 - les tiers du passage en vrai : messagerie du client (A2), client pilote, annexe des prestataires, régions
   d'hébergement.
 
-**Prochaine étape exacte** (au réveil, sur ordre) : les 4 lignes partielles, dans cet ordre :
-1. 38, coupe-circuit au premier doute (2 j) ;
-2. 6, vue par raison sociale mère (2 j) ;
-3. réponses d'absence reconnues, aujourd'hui comptées comme une réponse (1 j) ;
-4. 11, règles en français (6 j, avec un modèle de langue).
-
-La ligne 15 dépend de la messagerie du client (A2). Le banc local se remonte avec `scratchpad/rejouer.sh` ; il est
-perdu si le conteneur est recyclé, et sa reconstruction est décrite dans « Méthode de vérification ».
+**Prochaine étape** : c4_10 posé et vert le 11/10 (lignes 6, 11, 38 prouvées, réponses automatiques, comptes à
+vérifier) ; 44 lignes sur 45 prouvées. Reste la ligne 15 (envoi depuis la boîte de l'entreprise), qui attend le
+branchement de la messagerie du client (A2), et les choix de Teo listés plus haut (phrases contredites, `atteste`).
 
 ## Méthode de vérification avant chaque envoi
 
@@ -499,12 +494,12 @@ l'écran /espace/offload (liste par priorité avec la raison, fiche, reprise, t�
 | 3 | La fréquence d'achat habituelle d'un compte est mesurée, puis son décrochage détecté. | **prouvée (recette)** | test_c4_02_detection |
 | 4 | Les comptes sont priorisés par valeur attendue, pas par ordre alphabétique. | **prouvée (recette)** | test_c4_02_detection (« le premier de la liste est celui qui pèse le plus ») ; test_c4_04_lectures |
 | 5 | Les doublons de fiches sont rapprochés quand deux lignes désignent le même client. | **prouvée (recette)** | test_c4_05_doublons |
-| 6 | Les entités d'un même groupe client sont regroupées sous une raison sociale mère. | **c4_10, à poser** | test_c4_10_groupes (consolidé par groupe, rattachement proposé par domaine de courriel) ; carte « Groupes clients » |
+| 6 | Les entités d'un même groupe client sont regroupées sous une raison sociale mère. | **prouvée (recette)** | test_c4_10_groupes (consolidé par groupe, rattachement proposé par domaine de courriel) ; carte « Groupes clients » |
 | 7 | Un tableur sans colonne de date est exploité à partir des dates de facture. | **prouvée (recette)** | test_c4_01_import ; test_c4_02_detection (`sans_achat` présenté à part) |
 | 8 | Les contrats et les équipements installés sont suivis jusqu'à leur échéance. | **prouvée (recette)** | test_c4_07_echeances, test_c4_07_contrats_et_parc |
 | 9 | Chaque message reprend la dernière prestation du compte et le temps écoulé depuis. | **prouvée (recette)** | test_c4_03_message |
 | 10 | Un compte sans réponse reçoit un second message, puis il sort du cycle. | **prouvée (recette)** | test_c4_03_cycle |
-| 11 | Les règles de ton et de contenu s'écrivent en français, sans case à cocher. | **c4_10, à poser** | test_c4_10_lecture_des_regles, test_c4_10_regles_appliquees (lecture déterministe, sans modèle de langue ; la rédaction libre reste au chiffrage) |
+| 11 | Les règles de ton et de contenu s'écrivent en français, sans case à cocher. | **prouvée (recette)** | test_c4_10_lecture_des_regles, test_c4_10_regles_appliquees (lecture déterministe, sans modèle de langue ; la rédaction libre reste au chiffrage) |
 | 12 | Un compte reçoit deux messages en tout, espacés d'au moins trois jours. | **prouvée (recette)** | test_c4_03_cycle (« deux messages en tout, jamais un troisième » ; contrainte `delai_relance_jours` ≥ 3) |
 | 13 | Une réponse, même négative, arrête la séquence et vous rend la conversation. | **prouvée (recette)** | test_c4_03_reponse |
 | 14 | Les comptes déjà contactés par un commercial sont écartés de la vague en cours. | **prouvée (recette)** | test_c4_05_exclusions |
@@ -531,7 +526,7 @@ l'écran /espace/offload (liste par priorité avec la raison, fiche, reprise, t�
 | 35 | Aucun prix ni aucun délai n'est avancé dans un message sans que vous l'ayez écrit. | **prouvée (recette)** | test_c4_03_message |
 | 36 | Une demande d'arrêt vaut retrait immédiat et définitif du cycle. | **prouvée (recette)** | test_c4_03_reponse |
 | 37 | Les listes d'exclusion se tiennent par compte, par secteur et par commercial. | **prouvée (recette)** | test_c4_05_exclusions |
-| 38 | Le système s'arrête de lui-même au premier doute, et vous le signale. | **c4_10, à poser** | test_c4_10_coupe_circuit (non remis au-delà du seuil, double message, volume ; annulation des messages en attente, alerte critique, relance par un gérant) |
+| 38 | Le système s'arrête de lui-même au premier doute, et vous le signale. | **prouvée (recette)** | test_c4_10_coupe_circuit (non remis au-delà du seuil, double message, volume ; annulation des messages en attente, alerte critique, relance par un gérant) |
 | 39 | Chaque message parti reste au journal, daté et consultable. | **prouvée (recette)** | test_c4_03_cycle (recette 17 h 25 Z, 1120 ok) |
 | 40 | Le chiffre d'affaires remis en jeu se lit vague par vague. | **prouvée (recette)** | test_c4_09_pilotage (vague du jour : comptes, en jeu, réponses, commandes, chiffre repris) |
 | 41 | Les comptes réactivés sont suivis jusqu'à leur première commande. | **prouvée (recette)** | test_c4_03_issues |
@@ -571,3 +566,4 @@ Partielles : 6, 11, 15, 38.
   312 assertions vertes en local ; écran recetté.
 - 06/10, 20 h 45 Z — c4_09 vert sur la recette (21 ok) ; pause demandée par Teo à 21 h Z, section REPRISE écrite.
 - 11/10 — reprise sur ordre de Teo. Lot c4_10 (lignes 6, 11, 38, réponses automatiques, comptes à vérifier) : 33 tests, 355 assertions vertes en local.
+- 11/10, 14 h 10 Z — recette : c4_10 entièrement vert ; lignes 6, 11 et 38 prouvées (44 sur 45).
