@@ -9,10 +9,13 @@
    noter un règlement, mettre le compte en pause (ou le reprendre, avec
    un motif : une décision, jamais un délai), mettre une facture en
    litige. Chacun passe par sa porte et reste au journal.
+   c2_04 : une facture attend un bon de commande (la relance va au service
+   qui l'émet), un petit solde se décide (abandonné ou réclamé), un devis
+   accepté de vive voix se consigne.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useState } from "react";
-import { Banknote, CalendarRange, FileDown, Gauge, PauseCircle, PlayCircle, Scale } from "lucide-react";
+import { Banknote, CalendarRange, ClipboardList, FileDown, Gauge, Handshake, PauseCircle, PlayCircle, Scale, Scissors } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { Avis, Def, Pastille, Vide } from "../ui";
@@ -27,7 +30,11 @@ type Geste =
   | { type: "litige"; facture: Piece; ouvrir: boolean }
   | { type: "echeancier"; facture: Piece }
   | { type: "conteste"; facture: Piece }
-  | { type: "plafond"; propose: number | null; base: string };
+  | { type: "plafond"; propose: number | null; base: string }
+  | { type: "commande"; facture: Piece }
+  | { type: "bon_recu"; facture: Piece }
+  | { type: "solde"; facture: Piece }
+  | { type: "accord"; devis: Piece };
 
 export type Actions = {
   noterReglement: (o: { montant: number; date: string; reference: string | null; mode: string | null; facture: string | null }) => Promise<string>;
@@ -38,7 +45,12 @@ export type Actions = {
   dossier: () => Promise<void>;
   proposerPlafond: () => Promise<{ propose: number | null; base: string }>;
   fixerPlafond: (plafond: number | null, motif: string) => Promise<string>;
+  attendreCommande: (facture: string, email: string | null, nom: string | null, motif: string | null) => Promise<string>;
+  deciderSolde: (facture: string, decision: "abandonne" | "reclame" | null, motif: string) => Promise<string>;
+  consignerAccord: (devis: string, note: string, le: string) => Promise<string>;
 };
+
+const ADRESSE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
 function nombre(t: string): number {
   return Number(t.replace(/[\s\u00a0\u202f€]/g, "").replace(",", "."));
@@ -81,6 +93,9 @@ export default function FicheCompte({ fiche, actions }: { fiche: Fiche; actions:
   const [lignesEch, setLignesEch] = useState<{ echeance: string; montant: string }[]>([]);
   const [plafond, setPlafond] = useState("");
   const [telecharge, setTelecharge] = useState(false);
+  const [service, setService] = useState({ email: "", nom: "" });
+  const [decision, setDecision] = useState<"abandonne" | "reclame" | "">("abandonne");
+  const [accordLe, setAccordLe] = useState(jourParis());
 
   const ouvrir = (g: Geste) => {
     setErreur(null);
@@ -88,6 +103,9 @@ export default function FicheCompte({ fiche, actions }: { fiche: Fiche; actions:
     setF({ montant: g.type === "reglement" && g.facture ? String(g.facture.reste_du) : "", date: jourParis(), reference: "", mode: "virement" });
     if (g.type === "echeancier") setLignesEch(echeancesProposees(g.facture.reste_du, 3));
     if (g.type === "plafond") setPlafond(g.propose !== null ? String(g.propose) : c.plafond_encours !== null ? String(c.plafond_encours) : "");
+    if (g.type === "commande") setService({ email: g.facture.attente_commande_email ?? "", nom: g.facture.attente_commande_nom ?? "" });
+    if (g.type === "solde") setDecision(g.facture.solde_decision === "abandonne" ? "reclame" : "abandonne");
+    if (g.type === "accord") setAccordLe(jourParis());
     setGeste(g);
   };
   const ouvrirPlafond = async () => {
@@ -120,7 +138,13 @@ export default function FicheCompte({ fiche, actions }: { fiche: Fiche; actions:
           ? motif.trim().length > 2 && valeurMontant > 0 && valeurMontant < geste.facture.reste_du
           : geste?.type === "plafond"
             ? motif.trim().length > 2 && (plafond.trim() === "" || nombre(plafond) >= 0)
-            : motif.trim().length > 2;
+            : geste?.type === "commande"
+              ? ADRESSE.test(service.email.trim()) && motif.trim().length > 2
+              : geste?.type === "bon_recu"
+                ? true
+                : geste?.type === "accord"
+                  ? motif.trim().length > 2 && accordLe >= geste.devis.date_emission && accordLe <= jourParis()
+                  : motif.trim().length > 2;
 
   const valider = async () => {
     if (!geste) return;
@@ -138,6 +162,14 @@ export default function FicheCompte({ fiche, actions }: { fiche: Fiche; actions:
         msg = await actions.contester(geste.facture.id, valeurMontant, motif.trim());
       } else if (geste.type === "plafond") {
         msg = await actions.fixerPlafond(plafond.trim() === "" ? null : nombre(plafond), motif.trim());
+      } else if (geste.type === "commande") {
+        msg = await actions.attendreCommande(geste.facture.id, service.email.trim(), service.nom.trim() || null, motif.trim());
+      } else if (geste.type === "bon_recu") {
+        msg = await actions.attendreCommande(geste.facture.id, null, null, null);
+      } else if (geste.type === "solde") {
+        msg = await actions.deciderSolde(geste.facture.id, decision || null, motif.trim());
+      } else if (geste.type === "accord") {
+        msg = await actions.consignerAccord(geste.devis.id, motif.trim(), accordLe);
       } else {
         msg = await actions.litige(geste.facture.id, geste.ouvrir, motif.trim());
       }
@@ -232,7 +264,19 @@ export default function FicheCompte({ fiche, actions }: { fiche: Fiche; actions:
                         {p.devise && p.devise !== "EUR" && p.reste_du_eur !== null && p.reste_du_eur !== undefined ? <span className="c2-sous">soit {montant(p.reste_du_eur)}</span> : null}
                       </td>
                       <td>
-                        {p.statut === "litige" ? <Pastille teinte="rouge">En litige</Pastille> : s ? (
+                        {p.attente_commande_le ? (
+                          <>
+                            <Pastille teinte="ambre">Attend un bon de commande</Pastille>
+                            <span className="c2-sous">depuis le {dateCourte(p.attente_commande_le)} · relance à {p.attente_commande_nom ?? p.attente_commande_email}</span>
+                          </>
+                        ) : p.solde_decision ? (
+                          <Pastille teinte={p.solde_decision === "abandonne" ? "gris" : "bleu"}>{p.solde_decision === "abandonne" ? "Solde abandonné" : "Solde réclamé"}</Pastille>
+                        ) : p.accord_oral_le ? (
+                          <>
+                            <Pastille teinte="vert">Accepté de vive voix</Pastille>
+                            <span className="c2-sous">le {dateCourte(p.accord_oral_le)}</span>
+                          </>
+                        ) : p.statut === "litige" ? <Pastille teinte="rouge">En litige</Pastille> : s ? (
                           <>
                             <span>{libelleSequence(s)}</span>
                             {s.palier_suivant ? <span className="c2-sous">Suivant : {libellePalier(s.palier_suivant).toLowerCase()} le {dateCourte(s.palier_suivant_le)}</span> : null}
@@ -246,7 +290,15 @@ export default function FicheCompte({ fiche, actions }: { fiche: Fiche; actions:
                             <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "echeancier", facture: p })}>Échéancier</button>
                             <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "conteste", facture: p })}>Contestation partielle</button>
                             <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "litige", facture: p, ouvrir: true })}>Litige</button>
+                            {p.attente_commande_le ? (
+                              <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "bon_recu", facture: p })}>Bon reçu</button>
+                            ) : (
+                              <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "commande", facture: p })}>Bon de commande</button>
+                            )}
+                            <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "solde", facture: p })}>Solde</button>
                           </span>
+                        ) : p.nature === "devis" && p.statut === "en_attente" ? (
+                          <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "accord", devis: p })}>Accord oral</button>
                         ) : facture && p.statut === "litige" ? (
                           <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "litige", facture: p, ouvrir: false })}>Clore le litige</button>
                         ) : null}
@@ -279,13 +331,21 @@ export default function FicheCompte({ fiche, actions }: { fiche: Fiche; actions:
         <DialogContent>
           <DialogHeader>
             <DialogIcone>
-              {geste?.type === "reglement" ? <Banknote width={18} height={18} aria-hidden="true" /> : geste?.type === "litige" || geste?.type === "conteste" ? <Scale width={18} height={18} aria-hidden="true" /> : geste?.type === "echeancier" ? <CalendarRange width={18} height={18} aria-hidden="true" /> : geste?.type === "plafond" ? <Gauge width={18} height={18} aria-hidden="true" /> : <PauseCircle width={18} height={18} aria-hidden="true" />}
+              {geste?.type === "commande" || geste?.type === "bon_recu" ? <ClipboardList width={18} height={18} aria-hidden="true" /> : geste?.type === "solde" ? <Scissors width={18} height={18} aria-hidden="true" /> : geste?.type === "accord" ? <Handshake width={18} height={18} aria-hidden="true" /> : geste?.type === "reglement" ? <Banknote width={18} height={18} aria-hidden="true" /> : geste?.type === "litige" || geste?.type === "conteste" ? <Scale width={18} height={18} aria-hidden="true" /> : geste?.type === "echeancier" ? <CalendarRange width={18} height={18} aria-hidden="true" /> : geste?.type === "plafond" ? <Gauge width={18} height={18} aria-hidden="true" /> : <PauseCircle width={18} height={18} aria-hidden="true" />}
             </DialogIcone>
             <DialogTitle>
-              {geste?.type === "reglement" ? "Noter un règlement" : geste?.type === "statut" ? (geste.vers === "actif" ? "Reprendre les relances" : "Mettre le compte en pause") : geste?.type === "echeancier" ? `Échéancier de ${geste.facture.numero}` : geste?.type === "conteste" ? `Contestation partielle de ${geste.facture.numero}` : geste?.type === "plafond" ? "Plafond d'encours" : geste?.type === "litige" && geste.ouvrir ? `Mettre ${geste.facture.numero} en litige` : "Clore le litige"}
+              {geste?.type === "commande" ? `${geste.facture.numero} attend un bon de commande` : geste?.type === "bon_recu" ? `Le bon de commande de ${geste.facture.numero} est arrivé` : geste?.type === "solde" ? `Le solde de ${geste.facture.numero}` : geste?.type === "accord" ? `Accord de vive voix sur ${geste.devis.numero}` : geste?.type === "reglement" ? "Noter un règlement" : geste?.type === "statut" ? (geste.vers === "actif" ? "Reprendre les relances" : "Mettre le compte en pause") : geste?.type === "echeancier" ? `Échéancier de ${geste.facture.numero}` : geste?.type === "conteste" ? `Contestation partielle de ${geste.facture.numero}` : geste?.type === "plafond" ? "Plafond d'encours" : geste?.type === "litige" && geste.ouvrir ? `Mettre ${geste.facture.numero} en litige` : "Clore le litige"}
             </DialogTitle>
             <DialogDescription>
-              {geste?.type === "reglement"
+              {geste?.type === "commande"
+                ? "La facture sort de la relance adressée à la comptabilité ; le service qui doit émettre le bon reçoit sa propre relance, par la file de validation, tous les sept jours. Le retard continue de courir."
+                : geste?.type === "bon_recu"
+                  ? "La relance du service tombe, et la facture reprend son cycle au palier où elle en était."
+                  : geste?.type === "solde"
+                    ? `Reste dû : ${montant(geste.facture.reste_du)}. Abandonné, il sort de toute relance et reste lisible dans l'encours ; réclamé, il est relancé même sous le seuil. La décision reste au journal.`
+                    : geste?.type === "accord"
+                      ? "Le devis passe en accepté et sa cadence s'arrête, y compris la relance déjà écrite. Le point du matin vous signalera l'accord s'il n'a donné aucune facture au bout de quinze jours."
+                      : geste?.type === "reglement"
                 ? geste.facture
                   ? `Le règlement est imputé sur ${geste.facture.numero}. La relance prête de cette facture est coupée avant l'envoi.`
                   : "Sans facture désignée, CASHD le lettre seul s'il cite un numéro de facture, ou s'il a exactement le montant d'une facture ouverte ; sinon il reste à rapprocher."
@@ -345,6 +405,42 @@ export default function FicheCompte({ fiche, actions }: { fiche: Fiche; actions:
                   <p className="c2-sous">Total : {montant(totalEch)}{Math.abs(totalEch - geste.facture.reste_du) >= 0.005 ? ` — il doit faire ${montant(geste.facture.reste_du)}` : ""}</p>
                   <label className="rv-libelle">Motif (l&apos;accord du client) <span className="esp-obligatoire">(obligatoire)</span>
                     <textarea className="rv-champ" rows={2} value={motif} onChange={(e) => setMotif(e.target.value)} placeholder="Accord par téléphone avec la comptable, confirmé par courriel" />
+                  </label>
+                </>
+              ) : geste?.type === "commande" ? (
+                <>
+                  <div className="esp-form-ligne">
+                    <label className="rv-libelle">Adresse du service <span className="esp-obligatoire">(obligatoire)</span>
+                      <input className="rv-champ" type="email" value={service.email} onChange={(e) => setService({ ...service, email: e.target.value })} placeholder="achats@client.fr" />
+                    </label>
+                    <label className="rv-libelle">Nom du service ou de la personne
+                      <input className="rv-champ" value={service.nom} onChange={(e) => setService({ ...service, nom: e.target.value })} placeholder="Service des achats" />
+                    </label>
+                  </div>
+                  <label className="rv-libelle">Motif du blocage <span className="esp-obligatoire">(obligatoire)</span>
+                    <textarea className="rv-champ" rows={2} value={motif} onChange={(e) => setMotif(e.target.value)} placeholder="Bon de commande attendu du service des achats avant mise en paiement" />
+                  </label>
+                </>
+              ) : geste?.type === "bon_recu" ? null : geste?.type === "solde" ? (
+                <>
+                  <label className="rv-libelle">Décision
+                    <select className="rv-champ" value={decision} onChange={(e) => setDecision(e.target.value as typeof decision)}>
+                      <option value="abandonne">Abandonner le solde</option>
+                      <option value="reclame">Le réclamer malgré le seuil</option>
+                      <option value="">Revenir à la règle du seuil</option>
+                    </select>
+                  </label>
+                  <label className="rv-libelle">Motif <span className="esp-obligatoire">(obligatoire)</span>
+                    <textarea className="rv-champ" rows={2} value={motif} onChange={(e) => setMotif(e.target.value)} placeholder="Écart de règlement de quelques euros, accepté" />
+                  </label>
+                </>
+              ) : geste?.type === "accord" ? (
+                <>
+                  <label className="rv-libelle">Accepté le
+                    <input className="rv-champ" type="date" min={geste.devis.date_emission} max={jourParis()} value={accordLe} onChange={(e) => setAccordLe(e.target.value)} />
+                  </label>
+                  <label className="rv-libelle">Qui, comment <span className="esp-obligatoire">(obligatoire)</span>
+                    <textarea className="rv-champ" rows={2} value={motif} onChange={(e) => setMotif(e.target.value)} placeholder="Accord de M. Lefèvre au téléphone, chantier en novembre" />
                   </label>
                 </>
               ) : geste?.type === "conteste" || geste?.type === "plafond" ? (
