@@ -1097,24 +1097,5 @@ button.om-ap-bloc:focus-visible, a.om-ap-bloc:focus-visible { outline: 0; box-sh
 }
 
 
-/* ── Vue d'ensemble : salutation et chiffres à la manière d'Attio (11/10/2026) ──
-   Plus de grand bandeau ni de halo : un titre de 16 px, une ligne grise,
-   quatre petites cartes filetées. Seul le bleu marque la progression. */
+/* ── Vue d'ensemble sans salutation ni rangée de chiffres, comme Attio (11/10/2026) ── */
 .v2.om .v2-va.v2-vivant { background-image: none; }
-.om-salut { padding: 0 2px; }
-.om-salut-titre { margin: 0; font-size: 16px; line-height: 24px; font-weight: 600; letter-spacing: -0.2px; color: var(--v2-gray-1000); }
-.om-salut-sous { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 0; font-size: 13px; line-height: 20px; color: var(--v2-gray-900); }
-.om-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-.om-stat { display: grid; grid-template-rows: auto auto 1fr; gap: 6px; min-width: 0; padding: 12px 14px; border-radius: 8px; background: var(--v2-bg-100); box-shadow: 0 0 0 1px var(--v2-a-400); color: inherit; text-decoration: none; transition: background 0.15s; }
-.om-stat:hover { background: var(--v2-gray-100); }
-.om-stat:focus-visible { outline: 2px solid var(--v2-blue-700); outline-offset: 2px; }
-.om-stat-tete { display: flex; align-items: center; gap: 6px; font-size: 12px; line-height: 16px; font-weight: 500; color: var(--v2-gray-900); }
-.om-stat-tete svg { flex: none; }
-.om-stat-ligne { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
-.om-stat strong { font-size: 20px; line-height: 24px; font-weight: 500; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: var(--v2-gray-1000); }
-.om-stat-sous { min-width: 0; overflow: hidden; font-size: 12px; color: var(--v2-gray-900); white-space: nowrap; text-overflow: ellipsis; }
-.om-stat-jauge { align-self: end; height: 3px; margin-top: 4px; border-radius: 2px; background: var(--v2-a-300); overflow: hidden; }
-.om-stat-jauge i { display: block; height: 100%; min-width: 2px; border-radius: inherit; background: var(--v2-blue-700); }
-@container principale (max-width: 719px) {
-  .om-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
