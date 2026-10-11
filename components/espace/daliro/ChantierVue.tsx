@@ -18,6 +18,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import ChiffrageLu from "./ChiffrageLu";
+import { ouverte } from "./fonctions";
 import { useMemo, useState } from "react";
 import { BookOpen, CheckCircle2, ClipboardCheck, FileSignature, FileText, Link2, MessageSquare, PenLine, Plus, RotateCcw, Unlock, Users } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
@@ -479,8 +480,8 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
                       <td>{p.intervenant_type === "tiers" ? <><Pastille teinte={k.teinte}>{k.libelle}</Pastille>{dernier ? <div className="esp-kpi-sous">{dateHeure(dernier.survenu_le)}{dernier.canal ? ` · ${dernier.canal}` : ""}{typeof dernier.detail.texte === "string" ? ` · « ${dernier.detail.texte} »` : ""}</div> : null}{p.envoi ? <div className="esp-kpi-sous">{libelleEnvoi(p.envoi, dateHeure)}</div> : null}</> : <span className="esp-kpi-sous">équipe interne</span>}</td>
                       <td>
                         {p.intervenant_type === "tiers" && p.statut === "prevu" && p.confirmation !== "non_demandee" && p.confirmation !== "confirmee" ? <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "reponse", passage: p })}>Noter la réponse</button> : null}
-                        {p.intervenant_type === "tiers" && p.statut === "prevu" && (p.confirmation === "declinee" || p.confirmation === "sans_reponse") ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "remplacants", passage: p })}>Remplaçants</button></div> : null}
-                        {p.statut === "prevu" && planningVivant ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "recaler", passage: p })}>Recaler</button></div> : null}
+                        {ouverte(tableau, "remplacants") && p.intervenant_type === "tiers" && p.statut === "prevu" && (p.confirmation === "declinee" || p.confirmation === "sans_reponse") ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "remplacants", passage: p })}>Remplaçants</button></div> : null}
+                        {p.statut === "prevu" && planningVivant && ouverte(tableau, "ordre_lots") ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "recaler", passage: p })}>Recaler</button></div> : null}
                         {p.statut === "prevu" && planningVivant && p.debut <= aujourdhui() ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "terminer", passage: p })}>Noter fait</button></div> : null}
                       </td>
                     </tr>

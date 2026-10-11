@@ -1,5 +1,5 @@
 -- b6_21 — DALIRO : l'avancement lu dans les photos, proposé à la situation (session B6, 06/10/2026), b6_25.
--- Exécutable tel quel par execute_sql sur la RECETTE, après b6_00_jeu.sql et les migrations b6_01 à b6_25b.
+-- Exécutable tel quel par execute_sql sur la RECETTE, après b6_00_jeu.sql et les migrations b6_01 à b6_27 (formule Entreprise depuis b6_27).
 -- runtests() annule tout. Le lecteur n'est pas appelé : ses lectures « avancement » (nature demandée à A1) sont
 -- posées sur les messages rangés comme public.daliro_media_lu le ferait.
 --
@@ -17,7 +17,7 @@ begin
   banc := tests.b6_banc();
   v_client := (banc ->> 'client')::uuid; v_gerant := (banc ->> 'gerant')::uuid;
   perform tests.redevenir_admin();
-  perform public.btp_installer(v_client, 'chantiers');
+  perform public.btp_installer(v_client, 'entreprise', 50, 10);  -- b6_27 : l'avancement lu dans les photos est de la formule Entreprise
   v_collab := tests.b6_compte(v_client, 'collaborateur', 'b6-avancement-collab@banc-varelo.test');
 
   perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');

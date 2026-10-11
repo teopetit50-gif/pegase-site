@@ -20,7 +20,7 @@ begin
   banc := tests.b6_banc();
   v_client := (banc ->> 'client')::uuid; v_gerant := (banc ->> 'gerant')::uuid;
   perform tests.redevenir_admin();
-  perform public.btp_installer(v_client, 'chantiers');
+  perform public.btp_installer(v_client, 'entreprise', 50, 10);  -- b6_27 : retours et bons de livraison sont de la formule Entreprise
 
   perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
   insert into public.btp_tiers (client_id, roles, nom) values (v_client, array['maitre_ouvrage'], 'MO de la liste') returning id into v_mo;
