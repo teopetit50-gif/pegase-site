@@ -258,6 +258,9 @@ for (const largeur of LARGEURS) {
   await s.evaluer(`[...document.querySelectorAll('${Q} button')].find(b => /Enregistrer les paliers/.test(b.textContent)).click()`);
   await s.dormir(400);
   ok(/Paliers enregistrés/.test(await s.evaluer(`document.querySelector('section[aria-label="Vos textes"]').innerText`)), 'les paliers s\'enregistrent');
+  await s.evaluer(`[...document.querySelectorAll('${Q} input[type="checkbox"]')].find(i => /portefeuille/.test(i.parentElement.textContent)).click()`);
+  await s.dormir(300);
+  ok(/ne voit plus que ses comptes/.test(await s.evaluer(`document.querySelector('section[aria-label="Vos textes"]').innerText`)), 'le portefeuille par chargé s\'active');
   /* les gestes de la fiche */
   await onglet(s, 'Débiteurs');
   const geste = async (numero, bouton) => {

@@ -180,6 +180,30 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
     }
   };
 
+  /* le portefeuille par chargé (c2_08) */
+  const [portefeuille, setPortefeuille] = useState(!!reglages?.portefeuille_par_charge);
+  const reglerPortefeuille = async (actif: boolean) => {
+    setEnvoi(true);
+    setErreur(null);
+    setFait(null);
+    try {
+      let sans = 0;
+      if (source === "reelle") {
+        if (!client) throw new Error("Aucun compte rattaché à cette session.");
+        sans = (await portes.reglerPortefeuille(client, actif)).comptes_sans_charge;
+        await apresReglage?.();
+      }
+      setPortefeuille(actif);
+      setFait(actif
+        ? `Chaque chargé ne voit plus que ses comptes${source === "exemple" ? " (exemple)" : ""} ; la direction, l'administration et les valideurs lisent le consolidé.${sans ? ` ${sans} compte${sans > 1 ? "s n'ont" : " n'a"} pas encore de chargé : seuls les valideurs et la direction les voient.` : ""}`
+        : `Tous les membres lisent à nouveau les comptes de leur périmètre${source === "exemple" ? " (exemple)" : ""}.`);
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : "La base a refusé ce réglage.");
+    } finally {
+      setEnvoi(false);
+    }
+  };
+
   const valeursReglage = { seuil_ton: nombre(r.seuil_ton), echelonnement_des: nombre(r.echelonnement_des) };
   const reglageValide = !Number.isNaN(valeursReglage.seuil_ton) && !Number.isNaN(valeursReglage.echelonnement_des) && r.moyens_reglement.length <= 400;
   const reglerTon = async () => {
@@ -342,6 +366,10 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
             <button type="button" className="r-btn" disabled={!paliersValides || envoi} onClick={() => void reglerPaliers(false)}>Enregistrer les paliers</button>
             {reglages?.paliers_validation ? <button type="button" className="r-btn" disabled={envoi} onClick={() => void reglerPaliers(true)}>Revenir aux rôles par défaut</button> : null}
           </div>
+          <label className="c2-coche">
+            <input type="checkbox" checked={portefeuille} disabled={envoi} onChange={(e) => void reglerPortefeuille(e.target.checked)} />
+            <span>Chaque chargé de recouvrement ne voit que son portefeuille (les comptes dont il est le chargé) ; la direction, l&apos;administration et les valideurs lisent le consolidé.</span>
+          </label>
         </div>
       </div>
     </section>

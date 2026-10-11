@@ -208,3 +208,8 @@ export async function joindrePiece(client: string, facture: string, nature: stri
 export async function reglerValidation(client: string, paliers: PalierValidation[]) {
   return rpc<{ paliers: PalierValidation[] | null; regles: string[] }>("cashd_regler_validation", { p_client: client, p_paliers: paliers });
 }
+
+/* ——— c2_08 : le portefeuille par chargé (gérant seulement) ——— */
+export async function reglerPortefeuille(client: string, actif: boolean) {
+  return rpc<{ portefeuille_par_charge: boolean; comptes_sans_charge: number }>("cashd_regler_portefeuille", { p_client: client, p_actif: actif });
+}

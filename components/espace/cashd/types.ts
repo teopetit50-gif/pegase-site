@@ -29,6 +29,8 @@ export type Reglages = {
   suivi_facturation_jours?: number;
   /* c2_06 : qui valide selon le montant */
   paliers_validation?: PalierValidation[] | null;
+  /* c2_08 : un chargé ne voit que son portefeuille */
+  portefeuille_par_charge?: boolean;
 };
 
 export type RoleValidation = "valideur" | "admin" | "gerant";

@@ -30,12 +30,15 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
   seule private.cashd_point_lignes est redéfinie), assertion ajoutée à `test_c2_07_validation` (11). Écran : lien de la file
   vers /espace2/validations ; la recette tourne désormais sur /espace2/cashd/suivi (147/147, aucun lien vers /espace ni
   ?ancien=) ; débordement de 5 px à 390 corrigé (libellé masqué du tableau des pièces).
+- **À POSER** : `c2_08_portefeuille.sql` (le chargé ne voit que son portefeuille : politiques restrictives « portefeuille du
+  charge » sur 7 tables, porte cashd_regler_portefeuille) et `test_c2_08_portefeuille` (14). Local : 224/224 (c2_01 → c2_08).
+  Écran : case dans « Qui valide » ; recette 148/148 sur /espace2/cashd/suivi.
 - **Attend le coordinateur** : poser c2_04 puis c2_05 (dans cet ordre, après c2_03), fusionner ; décider avec C1 où vivent
   « Vos textes », les Envois et les gestes de la fiche dans /espace2.
 - **Attend Teo** : tiers inchangés (AR24, paiement, Google / Microsoft, WhatsApp) ; à la vitrine : refaire les quatre
   captures depuis l'écran, trancher « J+3 puis J+7 » et « rappel à l'échéance » (omega/CHIFFRAGE/cashd.md, mise à jour).
-- **Prochaine étape** : G10 (portefeuille par chargé : les portes de lecture sont SECURITY DEFINER, à filtrer elles aussi),
-  G6 (détail des pièces dans d'autres langues), G19 (raccord du logiciel de commandes, avec un premier client). Banc local : /tmp/pgc2 (port 5499, base c2b) ; le constructeur de c2_04
+- **Prochaine étape** : G6 (détail des pièces dans d'autres langues), G19 (raccord du logiciel de commandes, avec un premier
+  client) ; puis le pilote (chiffrage § Passage à A). Banc local : /tmp/pgc2 (port 5499, base c2b) ; le constructeur de c2_04
   est dans le scratchpad (copies patchées des dernières définitions).
 
 ## Les deux jauges
