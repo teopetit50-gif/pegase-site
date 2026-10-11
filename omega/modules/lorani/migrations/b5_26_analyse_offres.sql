@@ -281,7 +281,7 @@ begin
     where p.module = 'lorani' and p.objet_type = 'lorani_projet' and p.objet_id = c.projet_id::text and p.type_piece = 'lorani_dpgf'
       and exists (select 1 from public.pieces_valeurs pv where pv.piece_id = p.id and pv.champ = 'lot' and pv.chiffre is null
                   and private.lorani_lot_comparable(pv.valeur #>> '{}') = private.lorani_lot_comparable(lo.numero))
-    order by p.depose_le desc nulls last limit 1;
+    order by p.recue_le desc nulls last limit 1;
   end if;
   if v_dpgf is not null then
     for x in
@@ -543,7 +543,7 @@ begin
     where p.module = 'lorani' and p.objet_type = 'lorani_projet' and p.objet_id = new.projet_id::text and p.type_piece = 'lorani_offre'
       and p.statut in ('lue', 'a_verifier', 'a_classer')
       and not exists (select 1 from public.lorani_offres o where o.piece_id = p.id)
-    order by p.depose_le
+    order by p.recue_le
   loop
     perform private.lorani_poser_offre_lue(r.id);
   end loop;
