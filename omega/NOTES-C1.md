@@ -2,7 +2,23 @@
 
 Branche : `tableau-de-bord-v2` (jamais main). Coordinateur : session_01BCGFdpRKBvXKjouC75sYBg.
 
-## REPRISE (pause demandée par Teo, 06/10/2026, 21 h Z)
+## REPRISE (pause demandée par Teo, 11/10/2026, 15 h 40 Z)
+
+### Priorité en cours : /espace2 sur le dessin de /omega
+- **Posé (e5198b7, branche tableau-de-bord-v2)** :
+  - `components/espace2/client.css` : la finition de /omega copiée sous la portée `.v2.oc` et `html.oc-actif` (Geist, liens 28 px, cartes 12 px sans liseré, tableaux, menus 12 px), plus des contrastes AA.
+  - Coquille : classe `oc`, choix Sombre/Clair dans le menu du compte (`theme.ts` avec useStockage, clé `espace2.theme`, amorce dans `amorce.ts`), logo selon le thème.
+  - Liens vers l'ancien espace retirés du menu du compte et de la palette.
+  - La recette C1 règle le thème par localStorage.
+- **Règle** : ne jamais importer ni modifier components/omega ou app/omega (une autre session y travaille) ; on recopie.
+- **À poser** :
+  1. La vue d'ensemble client à la manière de AccueilOmega (carte « Activité » à 4 petits graphiques, « Aujourd'hui », « Prochaines échéances »). Question posée au coordinateur : retirer « Bonjour » et la rangée de chiffres comme /omega ?
+  2. Passer chaque module (Tiroma, Tamila, Lorani, Daliro, Varelo, Tavaro, REPUT, CASHD, OFFLOAD, FILED, validations, utilisation, réglages) aux 5 largeurs en clair, pour repérer les écarts de contraste (le clair n'avait jamais été recetté).
+  3. Comparer de près avec /omega : rendre CoquilleOmega par une route temporaire locale (app/zz-…, à supprimer, et `rm -rf .next/dev` après) en bloquant *supabase.co*.
+- **Reste à d'autres** : axe tavaro td[data-negatif] (contraste).
+- **Prochain pas** : le point 1, dès que Teo a répondu sur la vue d'ensemble.
+
+## REPRISE précédente (06/10/2026, 21 h Z)
 
 ### Fait
 - **Coquille /espace2** (palier 1 + retour Teo 366b75f) : barre latérale de 255 px (organisation, « Rechercher » touche F / ⌘K, trois groupes, compte, cloche), barre du haut (portée, titre centré, « Nouveau… », « Assistant » bientôt), tiroir sous 768 px, clair/sombre, palette, toasts. Jetons Geist relevés sur vercel.com (espace2.css).
