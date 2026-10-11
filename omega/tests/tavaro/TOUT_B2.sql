@@ -1,5 +1,5 @@
 -- TOUT_B2.sql — les tests pgTAP du module TAVARO (session B2), assemblés par assembler.sh.
--- Prérequis : omega/tests/socle/00_installation.sql (A5) déjà joué ; migrations b2_01 à b2_11 posées (avec b2_05b, b2_06b, b2_09b et b2_11b).
+-- Prérequis : omega/tests/socle/00_installation.sql (A5) déjà joué ; migrations b2_01 à b2_16 posées (avec b2_05b, b2_06b, b2_09b et b2_11b).
 -- Un seul appel execute_sql sur la RECETTE ; runtests() annule tout ce que les tests écrivent.
 
 -- ═══════════════════════════ 00_jeu_tavaro.sql
@@ -1746,6 +1746,401 @@ begin
     update public.loc_vehicules set statut = 'actif' where id = v_vehicule;
     return next is((select v.statut from public.loc_vehicules v where v.id = v_vehicule), 'sorti', 'Un import qui remet « actif » un véhicule vendu ne le remet pas en service');
   end if;
+end $f$;
+
+
+-- ═══════════════════════════ 21_conformite_rappels.sql
+-- 21 — Départ, rappels du constructeur et Crit'Air (migration b2_12) : la vignette et le contrôle technique saisis par
+-- l'agence ; le contrôle du comptoir au départ (Crit'Air, rappel en cours, contrôle technique, entretien dû) ; un rappel
+-- immobilisant retire le véhicule, un rappel à planifier crée l'entretien ; les photos des états des lieux signés vont
+-- avec la facture.
+
+create or replace function tests.test_b2_21_conformite_rappels() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb; v_client uuid; v_contrat uuid; v_vehicule uuid; r jsonb; v_rv uuid; v_immo uuid; v_rappel uuid; v_prop uuid; v_edl uuid;
+begin
+  if to_regprocedure('public.loc_controle_depart(uuid)') is null then
+    return next fail('La migration b2_12 (départ, rappels, Crit''Air) n''est pas posée : public.loc_controle_depart manque');
+    return;
+  end if;
+  jeu := tests.tavaro_jeu_contrat();
+  v_client := (jeu ->> 'client')::uuid;
+  v_contrat := (jeu ->> 'contrat')::uuid;
+  select c.vehicule_id into v_vehicule from public.loc_contrats c where c.id = v_contrat;
+
+  -- La vignette inconnue : le comptoir le dit.
+  perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
+  r := public.loc_controle_depart(v_contrat);
+  return next ok(exists (select 1 from jsonb_array_elements(r) x where x ->> 'code' = 'critair' and x ->> 'niveau' = 'attention'), 'Crit''Air inconnu : le comptoir vérifie la vignette');
+  return next throws_ok(format('select public.loc_poser_conformite(%L::uuid, %L::jsonb)', v_vehicule, '{"critair":"7"}'), '22023', null, 'Une classe Crit''Air inconnue est refusée');
+  r := public.loc_poser_conformite(v_vehicule, jsonb_build_object('critair', '1', 'ct_valide_jusqu_au', (current_date - 1)::text));
+  return next is(r ->> 'critair', '1', 'La vignette est saisie');
+  r := public.loc_controle_depart(v_contrat);
+  return next ok(exists (select 1 from jsonb_array_elements(r) x where x ->> 'code' = 'critair' and x ->> 'niveau' = 'info'), 'La vignette connue est rappelée au client');
+  return next ok(exists (select 1 from jsonb_array_elements(r) x where x ->> 'code' = 'controle_technique' and x ->> 'niveau' = 'bloquant'), 'Un contrôle technique expiré bloque le départ');
+  perform public.loc_poser_conformite(v_vehicule, jsonb_build_object('ct_valide_jusqu_au', (current_date + 400)::text));
+  r := public.loc_controle_depart(v_contrat);
+  return next ok(not exists (select 1 from jsonb_array_elements(r) x where x ->> 'code' = 'controle_technique'), 'Un contrôle technique valide ne dit rien');
+
+  perform tests.endosser((jeu ->> 'autre')::uuid, 'b2-autre@essai.invalid');
+  return next throws_ok(format('select public.loc_controle_depart(%L::uuid)', v_contrat), 'P0002', null, 'Un autre loueur ne lit pas le contrôle du départ');
+  return next throws_ok(format('select public.loc_poser_conformite(%L::uuid, %L::jsonb)', v_vehicule, '{"critair":"2"}'), 'P0002', null, 'Ni ne saisit la vignette');
+
+  -- Les rappels : la direction ou un valideur.
+  perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
+  return next throws_ok(format('select public.loc_enregistrer_rappel(%L::jsonb, array[%L::uuid])', '{"reference":"RC-B2-1","libelle":"Airbag passager","gravite":"immobilisant"}', v_vehicule),
+                        '42501', null, 'Un collaborateur n''enregistre pas un rappel');
+  perform tests.endosser((jeu ->> 'referent')::uuid, 'b2-referent@essai.invalid');
+  return next throws_ok(format('select public.loc_enregistrer_rappel(%L::jsonb, array[%L::uuid])', '{"reference":"RC-B2-1","libelle":"Airbag passager","gravite":"urgent"}', v_vehicule),
+                        '22023', null, 'Une gravité inconnue est refusée');
+  r := public.loc_enregistrer_rappel(jsonb_build_object('reference', 'RC-B2-1', 'libelle', 'Airbag passager à remplacer', 'gravite', 'immobilisant',
+                                                        'constructeur', 'Renault', 'fin_prevue_le', now() + interval '2 days'), array[v_vehicule]);
+  v_rappel := (r ->> 'rappel')::uuid;
+  select x.id, x.immobilisation_id into v_rv, v_immo from public.loc_rappels_vehicules x where x.rappel_id = v_rappel;
+  return next ok(v_immo is not null, 'Un rappel immobilisant immobilise le véhicule');
+  return next ok((select i.motif = 'rappel_constructeur' and i.fin_le is null from public.loc_immobilisations i where i.id = v_immo), 'L''immobilisation porte le motif du rappel');
+  return next throws_ok(format('select public.loc_enregistrer_rappel(%L::jsonb, array[%L::uuid])', '{"reference":"RC-B2-1","libelle":"Airbag passager","gravite":"immobilisant"}', v_vehicule),
+                        '23505', null, 'Une campagne s''enregistre une fois');
+  r := public.loc_controle_depart(v_contrat);
+  return next ok(exists (select 1 from jsonb_array_elements(r) x where x ->> 'code' = 'rappel' and x ->> 'niveau' = 'bloquant'), 'Le rappel immobilisant bloque le départ');
+  r := public.loc_enregistrer_rappel(jsonb_build_object('reference', 'RC-B2-2', 'libelle', 'Mise à jour du calculateur', 'gravite', 'a_planifier',
+                                                        'echeance_le', (current_date + 60)::text), array[v_vehicule]);
+  return next ok((select x.entretien_id is not null from public.loc_rappels_vehicules x where x.rappel_id = (r ->> 'rappel')::uuid), 'Un rappel à planifier crée l''entretien');
+
+  -- Le rappel fait : l'immobilisation est levée.
+  perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
+  r := public.loc_rappel_fait(v_rv);
+  return next is(r ->> 'statut', 'fait', 'Le rappel est fait');
+  perform tests.redevenir_admin();
+  return next ok((select i.fin_le is not null from public.loc_immobilisations i where i.id = v_immo), 'L''immobilisation du rappel est levée');
+  return next ok(tests.tavaro_journal(v_client, 'tavaro.rappel_fait') >= 1, 'Le journal porte tavaro.rappel_fait');
+  perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
+  return next throws_ok(format('select public.loc_rappel_fait(%L::uuid)', v_rv), '23514', null, 'Un rappel clos ne se refait pas');
+
+  -- La surveillance du matin : un contrôle technique qui échoit.
+  perform tests.redevenir_admin();
+  update public.loc_vehicules_conformite set ct_valide_jusqu_au = current_date + 5 where client_id = v_client and vehicule_id = v_vehicule;
+  return next ok(private.loc_surveiller_conformite() >= 1, 'Un contrôle technique qui échoit lève une alerte');
+
+  -- Les photos des états des lieux signés vont avec la facture, celles du départ d'abord.
+  jeu := tests.tavaro_jeu_facture();
+  v_prop := (jeu ->> 'proposition')::uuid;
+  perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
+  v_edl := public.loc_etablir_etat((jeu ->> 'contrat')::uuid, 'depart', jsonb_build_object('km', 12000, 'carburant_8', 8,
+             'photos', '[{"vue":"avant","chemin":"edl/avant.jpg"},{"vue":"arriere","chemin":"edl/arriere.jpg"},{"vue":"flanc_gauche","chemin":"edl/gauche.jpg"},{"vue":"flanc_droit","chemin":"edl/droit.jpg"}]'::jsonb));
+  perform public.loc_signer_etat(v_edl, 'Marie Durand', 'edl/signature.png');
+  perform tests.redevenir_admin();
+  r := public.loc_pdf_a_produire(v_prop);
+  return next ok(exists (select 1 from jsonb_array_elements(r -> 'factures') f, jsonb_array_elements(f -> 'photos') p
+                         where p ->> 'legende' = 'État des lieux de départ — flanc gauche' and p ->> 'chemin' = 'edl/gauche.jpg'), 'Les photos du départ signé sont jointes à la facture, légendées');
+end $f$;
+
+
+-- ═══════════════════════════ 22_transferts.sql
+-- 22 — Transferts entre agences (migration b2_13) : au prochain pic, les réservations sans véhicule d'une agence sont
+-- couvertes par les véhicules libres d'une autre agence ; les propositions se regroupent en tournées, se valident ou se
+-- refusent par la direction ; un transfert fait déplace le véhicule ; une proposition refaite remplace, ne double pas.
+
+create or replace function tests.test_b2_22_transferts() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb; c uuid; s uuid; n uuid; cat uuid; v_jour date; v_depart timestamptz; r jsonb; v_tournee text; v_transfert uuid; v_vehicule uuid;
+begin
+  if to_regprocedure('public.loc_proposer_transferts(date)') is null then
+    return next fail('La migration b2_13 (transferts) n''est pas posée : public.loc_proposer_transferts manque');
+    return;
+  end if;
+  jeu := tests.tavaro_jeu();
+  c := (jeu ->> 'client')::uuid; s := (jeu ->> 'siege')::uuid; n := (jeu ->> 'nord')::uuid;
+  v_jour := (now() at time zone 'Europe/Paris')::date + 2;
+  v_depart := (v_jour::timestamp + time '10:00') at time zone 'Europe/Paris';
+  perform tests.redevenir_admin();
+  insert into public.loc_categories (client_id, code, libelle, rang) values (c, 'B2T-B', 'Citadine (essai B2)', 2) returning id into cat;
+  insert into public.loc_vehicules (client_id, entite_id, immatriculation, format_plaque, categorie_id)
+  select c, s, 'BT-22' || g || '-AA', 'siv', cat from generate_series(1, 3) g;
+  insert into public.loc_reservations (client_id, entite_id, ref_source, categorie_id, depart_prevu_le, retour_prevu_le, statut)
+  select c, n, 'B2T-R' || g, cat, v_depart, v_depart + interval '3 days', 'confirmee' from generate_series(1, 2) g;
+
+  perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
+  return next throws_ok(format('select public.loc_proposer_transferts(%L::date)', v_jour), '42501', null, 'Un collaborateur ne propose pas les transferts');
+
+  perform tests.endosser((jeu ->> 'referent')::uuid, 'b2-referent@essai.invalid');
+  r := public.loc_proposer_transferts(v_jour);
+  return next is((r ->> 'transferts')::int, 2, 'Deux réservations sans véhicule au Nord : deux transferts proposés depuis le siège');
+  return next is((select count(distinct t.tournee) from public.loc_transferts t where t.client_id = c and t.statut = 'propose'), 1::bigint, 'Ils forment une seule tournée');
+  return next ok((select bool_and(t.origine_entite_id = s and t.destination_entite_id = n and t.pour_le < v_depart) from public.loc_transferts t where t.client_id = c and t.statut = 'propose'),
+                 'Du siège vers le Nord, la veille du pic');
+  perform public.loc_proposer_transferts(v_jour);
+  return next is(tests.compter('public', 'loc_transferts', format('client_id = %L and statut = %L', c, 'propose')), 2::bigint, 'Proposer à nouveau remplace, ne double pas');
+
+  select t.tournee into v_tournee from public.loc_transferts t where t.client_id = c and t.statut = 'propose' limit 1;
+  perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
+  return next throws_ok(format('select public.loc_decider_transferts(%L, true)', v_tournee), '42501', null, 'Un collaborateur ne valide pas une tournée');
+  perform tests.endosser((jeu ->> 'referent')::uuid, 'b2-referent@essai.invalid');
+  r := public.loc_decider_transferts(v_tournee, true);
+  return next is((r ->> 'transferts')::int, 2, 'La tournée entière est validée');
+  return next throws_ok(format('select public.loc_decider_transferts(%L, true)', v_tournee), 'P0002', null, 'Une tournée déjà décidée ne se redécide pas');
+  r := public.loc_proposer_transferts(v_jour);
+  return next is((r ->> 'transferts')::int, 0, 'Les transferts validés comptent : plus rien à proposer');
+
+  select t.id, t.vehicule_id into v_transfert, v_vehicule from public.loc_transferts t where t.client_id = c and t.statut = 'valide' limit 1;
+  perform tests.endosser((jeu ->> 'collab_nord')::uuid, 'b2-collab-nord@essai.invalid');
+  r := public.loc_transfert_fait(v_transfert, 'Convoyeur Martin');
+  return next is(r ->> 'statut', 'fait', 'L''agence d''arrivée note le transfert fait');
+  perform tests.redevenir_admin();
+  return next is(private.loc_position_vehicule(c, v_vehicule, now()), n, 'Le véhicule est au Nord');
+  return next ok(tests.tavaro_journal(c, 'tavaro.transfert_fait') >= 1, 'Le journal porte tavaro.transfert_fait');
+  perform tests.endosser((jeu ->> 'collab_nord')::uuid, 'b2-collab-nord@essai.invalid');
+  return next throws_ok(format('select public.loc_transfert_fait(%L::uuid)', v_transfert), '23514', null, 'Un transfert fait ne se refait pas');
+  perform tests.endosser((jeu ->> 'autre')::uuid, 'b2-autre@essai.invalid');
+  return next throws_ok(format('select public.loc_transfert_fait(%L::uuid)', v_transfert), 'P0002', null, 'Un autre loueur ne voit pas le transfert');
+end $f$;
+
+
+-- ═══════════════════════════ 23_peages.sql
+-- 23 — Péages en flux libre (migration b2_14) : les passages du compte flotte, rapprochés du contrat par la plaque et
+-- l'heure ; rejouer n'ajoute rien ; payés chez l'opérateur dans les 72 heures (alerte sinon) ; refacturés au locataire
+-- par le chemin de toute facture (ligne PEAGE au montant réel, ramené hors taxes, plus FRAIS_PEAGE) ; ou gardés à la
+-- charge du loueur, motif écrit.
+
+create or replace function tests.test_b2_23_peages() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb; v_client uuid; v_contrat uuid; v_jour date; r jsonb; p1 uuid; p2 uuid; v_prop uuid; p public.loc_propositions;
+begin
+  if to_regprocedure('public.loc_enregistrer_passages(jsonb, text)') is null then
+    return next fail('La migration b2_14 (péages) n''est pas posée : public.loc_enregistrer_passages manque');
+    return;
+  end if;
+  jeu := tests.tavaro_jeu_contrat();
+  v_client := (jeu ->> 'client')::uuid;
+  v_contrat := (jeu ->> 'contrat')::uuid;
+  v_jour := (now() at time zone 'Europe/Paris')::date;
+
+  perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
+  r := public.loc_enregistrer_passages(jsonb_build_array(
+    jsonb_build_object('operateur', 'Sanef', 'reference', 'B2-S-1', 'passe_le', '2026-10-02T12:00:00+02:00', 'immatriculation', 'ga123bc', 'montant_eur', 3.60, 'portique', 'A13 Boulay'),
+    jsonb_build_object('operateur', 'Sanef', 'reference', 'B2-S-2', 'passe_le', now() - interval '80 hours', 'immatriculation', 'ZZ-999-ZZ', 'montant_eur', 2.40)), 'import');
+  return next is(r, '{"deja": 0, "nouveaux": 2, "rapproches": 1}'::jsonb, 'Deux passages reçus, celui du véhicule loué rapproché de son contrat');
+  r := public.loc_enregistrer_passages('[{"operateur":"Sanef","reference":"B2-S-1","passe_le":"2026-10-02T12:00:00+02:00","immatriculation":"GA-123-BC","montant_eur":3.60}]');
+  return next is((r ->> 'deja')::int, 1, 'Rejouer l''export n''ajoute rien');
+  return next throws_ok(format('select public.loc_enregistrer_passages(%L::jsonb)', jsonb_build_array(jsonb_build_object('operateur', 'Sanef', 'reference', 'B2-S-9',
+                        'passe_le', now() + interval '1 day', 'immatriculation', 'GA-123-BC', 'montant_eur', 1))), '22023', null, 'Un passage daté dans le futur est refusé');
+  select x.id into p1 from public.loc_passages_peage x where x.client_id = v_client and x.reference = 'B2-S-1';
+  select x.id into p2 from public.loc_passages_peage x where x.client_id = v_client and x.reference = 'B2-S-2';
+  return next ok((select x.contrat_id = v_contrat and x.payer_avant = x.passe_le + interval '72 hours' from public.loc_passages_peage x where x.id = p1), 'Le passage porte son contrat et son échéance de 72 heures');
+
+  -- Les 72 heures : l'alerte.
+  perform tests.redevenir_admin();
+  return next ok(private.loc_surveiller_peages() >= 1, 'Des passages à payer hors délai lèvent une alerte');
+
+  -- Refacturer : il faut un passage payé, puis la ligne PEAGE au barème.
+  perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
+  return next throws_ok(format('select public.loc_refacturer_peages(%L::uuid)', v_contrat), '55000', null, 'Un passage non payé ne se refacture pas');
+  return next throws_ok(format('select public.loc_payer_passage(%L::uuid, %L)', p1, ' '), '22023', null, 'Le paiement porte sa référence chez l''opérateur');
+  r := public.loc_payer_passage(p1, 'PAY-B2-1');
+  return next is(r ->> 'statut', 'paye', 'Le passage est payé');
+  return next throws_ok(format('select public.loc_payer_passage(%L::uuid, %L)', p1, 'PAY-B2-1'), '23514', null, 'Un passage payé ne se repaie pas');
+  return next throws_ok(format('select public.loc_refacturer_peages(%L::uuid)', v_contrat), '23514', null, 'Sans la ligne PEAGE au barème, la refacturation dit quoi faire');
+  perform tests.endosser((jeu ->> 'gerant')::uuid, 'b2-gerant@essai.invalid');
+  perform public.loc_publier_bareme('Barème avec péages', v_jour, tests.tavaro_bareme_lignes() || jsonb_build_array(
+    jsonb_build_object('code', 'PEAGE', 'libelle', 'Péage en flux libre', 'famille', 'frais', 'unite', 'forfait', 'regime_tva', 'taxable', 'taux_tva', 20),
+    jsonb_build_object('code', 'FRAIS_PEAGE', 'libelle', 'Frais de gestion du péage', 'famille', 'frais', 'unite', 'forfait', 'prix_eur', 5, 'regime_tva', 'taxable', 'taux_tva', 20)));
+  perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
+  r := public.loc_refacturer_peages(v_contrat);
+  v_prop := (r ->> 'proposition')::uuid;
+  return next is((r ->> 'passages')::int, 1, 'Le passage payé est refacturé');
+  perform tests.redevenir_admin();
+  select * into p from public.loc_propositions where id = v_prop;
+  return next ok(p.statut = 'calculee' and p.entrees ->> 'objet' = 'peages', 'Une proposition de péages, au chemin de toute facture');
+  return next is((select l.montant_ttc from public.loc_proposition_lignes l where l.proposition_id = v_prop and l.code = 'PEAGE'), 3.60::numeric, 'Le péage est refacturé à son montant réel TTC');
+  return next is((select l.montant_ht from public.loc_proposition_lignes l where l.proposition_id = v_prop and l.code = 'PEAGE'), 3.00::numeric, 'Ramené hors taxes sur la ligne');
+  return next is((select l.montant_ht from public.loc_proposition_lignes l where l.proposition_id = v_prop and l.code = 'FRAIS_PEAGE'), 5::numeric, 'Les frais de gestion suivent');
+  return next ok(exists (select 1 from public.travaux t where t.cle = 'tavaro:deposer:' || v_prop::text), 'La demande de validation est déposée');
+  return next ok(tests.tavaro_journal(v_client, 'tavaro.peages_refactures') >= 1, 'Le journal porte tavaro.peages_refactures');
+
+  -- À la charge du loueur : payé d'abord, motif écrit, direction pour un passage sans agence.
+  perform tests.endosser((jeu ->> 'gerant')::uuid, 'b2-gerant@essai.invalid');
+  return next throws_ok(format('select public.loc_passage_a_la_charge(%L::uuid, %L)', p2, 'Convoyage'), '55000', null, 'À la charge du loueur ne veut pas dire impayé');
+  perform public.loc_payer_passage(p2, 'PAY-B2-2');
+  return next throws_ok(format('select public.loc_passage_a_la_charge(%L::uuid, %L)', p2, 'non'), '22023', null, 'Le motif est écrit');
+  r := public.loc_passage_a_la_charge(p2, 'Convoyage vers l''agence Nord');
+  return next is(r ->> 'statut', 'a_la_charge_du_loueur', 'Le passage reste à la charge du loueur');
+  perform tests.endosser((jeu ->> 'autre')::uuid, 'b2-autre@essai.invalid');
+  return next throws_ok(format('select public.loc_payer_passage(%L::uuid, %L)', p1, 'X'), 'P0002', null, 'Un autre loueur ne voit pas les passages');
+end $f$;
+
+
+-- ═══════════════════════════ 24_sinistres.sql
+-- 24 — Sinistres (migration b2_15) : le dossier s'ouvre depuis le contrat, immobilise le véhicule, suit ses étapes ;
+-- le recours pour perte d'exploitation se chiffre (jours d'immobilisation × tarif journalier moyen × part du tiers) et
+-- part à l'assureur du tiers ; un recours sans réponse depuis trente jours se relance ; la direction règle et clôt.
+
+create or replace function tests.test_b2_24_sinistres() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb; v_client uuid; v_contrat uuid; r jsonb; v_sin uuid; v_jours numeric; v_montant numeric;
+begin
+  if to_regprocedure('public.loc_ouvrir_sinistre(jsonb)') is null then
+    return next fail('La migration b2_15 (sinistres) n''est pas posée : public.loc_ouvrir_sinistre manque');
+    return;
+  end if;
+  jeu := tests.tavaro_jeu_contrat();
+  v_client := (jeu ->> 'client')::uuid;
+  v_contrat := (jeu ->> 'contrat')::uuid;
+
+  perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
+  return next throws_ok(format('select public.loc_ouvrir_sinistre(%L::jsonb)', jsonb_build_object('contrat', v_contrat, 'survenu_le', now() + interval '2 days', 'nature', 'accident')),
+                        '22023', null, 'Un sinistre n''est pas daté dans le futur');
+  return next throws_ok(format('select public.loc_ouvrir_sinistre(%L::jsonb)', jsonb_build_object('contrat', v_contrat, 'survenu_le', now(), 'nature', 'grele')),
+                        '22023', null, 'Une nature inconnue est refusée');
+  r := public.loc_ouvrir_sinistre(jsonb_build_object('contrat', v_contrat, 'survenu_le', now() - interval '4 days', 'nature', 'accident', 'responsabilite', 'tiers',
+         'lieu', 'Carrefour de la Gare', 'immobilise', true,
+         'tiers', jsonb_build_object('nom', 'M. Tiers', 'assureur', 'Assureur du tiers', 'assureur_adresse', 'recours@assureur.invalid', 'police', 'POL-77')));
+  v_sin := (r ->> 'sinistre')::uuid;
+  return next ok(r ->> 'reference' ~ '^SIN-[0-9]{4}-[0-9]{4}$', 'Le dossier reçoit sa référence');
+  return next ok((select i.motif = 'sinistre' and i.fin_le is null from public.loc_sinistres s join public.loc_immobilisations i on i.id = s.immobilisation_id where s.id = v_sin),
+                 'Le véhicule est immobilisé depuis le sinistre');
+  r := public.loc_avancer_sinistre(v_sin, 'expertise', '{"expert":{"nom":"Cabinet Expert"},"montant_reparation_eur":"1240.50","note":"Rendez-vous lundi"}');
+  return next is(r ->> 'statut', 'expertise', 'Le dossier passe en expertise');
+  return next throws_ok(format('select public.loc_avancer_sinistre(%L::uuid, %L)', v_sin, 'clos'), '42501', null, 'Un collaborateur ne clôt pas un dossier');
+  return next throws_ok(format('select public.loc_preparer_recours(%L::uuid)', v_sin), '42501', null, 'Ni ne prépare le recours');
+
+  -- Le recours : quatre jours d'immobilisation, au tarif journalier moyen de la catégorie (45 € au contrat d'essai).
+  perform tests.endosser((jeu ->> 'referent')::uuid, 'b2-referent@essai.invalid');
+  r := public.loc_preparer_recours(v_sin);
+  v_jours := (r ->> 'jours')::numeric; v_montant := (r ->> 'montant')::numeric;
+  return next is(v_jours, 4::numeric, 'Quatre jours d''immobilisation depuis le sinistre');
+  return next is(v_montant, round(v_jours * (r ->> 'tarif_moyen')::numeric, 2), 'Le montant est jours × tarif moyen, le tiers responsable en entier');
+  return next ok(r ->> 'courrier' like '%perte d''exploitation%' and r ->> 'courrier' like '%POL-77%', 'Le courrier nomme la perte d''exploitation et le contrat du tiers');
+  return next is((select s.statut from public.loc_sinistres s where s.id = v_sin), 'recours', 'Le dossier passe en recours');
+  perform public.loc_avancer_sinistre(v_sin, null, '{"responsabilite":"partagee"}');
+  r := public.loc_preparer_recours(v_sin);
+  return next is((r ->> 'part')::numeric, 0.5, 'Responsabilité partagée : la moitié');
+
+  -- Trente jours sans réponse : la relance.
+  perform tests.redevenir_admin();
+  return next ok(private.loc_surveiller_sinistres(now() + interval '31 days') >= 1, 'Un recours sans réponse depuis trente jours se relance');
+
+  -- Régler, clore.
+  perform tests.endosser((jeu ->> 'referent')::uuid, 'b2-referent@essai.invalid');
+  return next throws_ok(format('select public.loc_avancer_sinistre(%L::uuid, %L)', v_sin, 'regle'), '22023', null, 'Un règlement porte sa date');
+  perform public.loc_avancer_sinistre(v_sin, 'regle', jsonb_build_object('regle_le', current_date, 'montant_recu_eur', v_montant / 2));
+  r := public.loc_avancer_sinistre(v_sin, 'clos');
+  return next is(r ->> 'statut', 'clos', 'La direction clôt le dossier');
+  return next throws_ok(format('select public.loc_avancer_sinistre(%L::uuid, %L)', v_sin, 'recours'), '23514', null, 'Un dossier clos ne bouge plus');
+  perform tests.redevenir_admin();
+  return next ok(jsonb_array_length((select s.historique from public.loc_sinistres s where s.id = v_sin)) >= 5, 'L''historique garde chaque étape');
+  return next ok(tests.tavaro_journal(v_client, 'tavaro.recours_prepare') >= 1, 'Le journal porte tavaro.recours_prepare');
+  perform tests.endosser((jeu ->> 'autre')::uuid, 'b2-autre@essai.invalid');
+  return next throws_ok(format('select public.loc_avancer_sinistre(%L::uuid, %L)', v_sin, 'expertise'), 'P0002', null, 'Un autre loueur ne voit pas le dossier');
+end $f$;
+
+
+-- ═══════════════════════════ 25_interfaces_tiers.sql
+-- 25 — Contrats d'interface sans fournisseur (migration b2_16) : la grille d'assistance de l'agence ; l'appel reçu par
+-- le fournisseur de voix retrouve le contrat par le numéro de l'appelant, applique la grille, prévient l'agence, et passe
+-- la main à une personne sans grille ni contrat ; les relevés constructeur comparés à l'état des lieux de retour ; la
+-- caution préautorisée, capturée sur une facture du contrat dans ses bornes, libérée. Les portes des fournisseurs sont
+-- au service seul.
+
+create or replace function tests.test_b2_25_interfaces_tiers() returns setof text
+language plpgsql as $f$
+declare
+  jeu jsonb; v_client uuid; v_contrat uuid; v_vehicule uuid; r jsonb; i1 uuid; k uuid; f uuid; v_ttc numeric;
+begin
+  if to_regprocedure('public.loc_caution_evenement(uuid, jsonb)') is null then
+    return next fail('La migration b2_16 (interfaces tiers) n''est pas posée : public.loc_caution_evenement manque');
+    return;
+  end if;
+  jeu := tests.tavaro_jeu_facture();
+  v_client := (jeu ->> 'client')::uuid;
+  v_contrat := (jeu ->> 'contrat')::uuid;
+  select c.vehicule_id into v_vehicule from public.loc_contrats c where c.id = v_contrat;
+  update public.loc_locataires l set telephone = '+33 6 12 34 56 78' from public.loc_contrats c where c.id = v_contrat and l.id = c.locataire_id;
+  update public.loc_contrats set statut = 'ouvert' where id = v_contrat;
+
+  -- Les portes des fournisseurs ne s'ouvrent pas à une personne connectée.
+  return next ok(not has_function_privilege('authenticated', 'public.loc_assistance_ouvrir(uuid, jsonb)', 'execute')
+                 and not has_function_privilege('authenticated', 'public.loc_assistance_evenement(uuid, jsonb)', 'execute')
+                 and not has_function_privilege('authenticated', 'public.loc_enregistrer_releves_constructeur(uuid, text, jsonb)', 'execute')
+                 and not has_function_privilege('authenticated', 'public.loc_caution_evenement(uuid, jsonb)', 'execute'), 'Les portes des fournisseurs sont au service seul');
+
+  -- La grille : la direction.
+  perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
+  return next throws_ok(format('select public.loc_poser_grille_assistance(%L::jsonb)', '[{"type_incident":"panne","action":"depanneuse"}]'), '42501', null, 'Un collaborateur ne règle pas la grille');
+  perform tests.endosser((jeu ->> 'gerant')::uuid, 'b2-gerant@essai.invalid');
+  return next throws_ok(format('select public.loc_poser_grille_assistance(%L::jsonb)', '[{"type_incident":"meteorite","action":"depanneuse"}]'), '22023', null, 'Un type d''incident inconnu est refusé');
+  r := public.loc_poser_grille_assistance('[{"type_incident":"panne","action":"depanneuse","prestataire":"Dépannage de la Gare","prestataire_telephone":"0100000000","delai_cible_min":45}]');
+  return next is((r ->> 'lignes')::int, 1, 'La grille est posée');
+
+  -- L'appel arrive (service).
+  perform tests.redevenir_admin();
+  r := public.loc_assistance_ouvrir(v_client, '{"fournisseur":"voix-essai","fournisseur_reference":"APPEL-1","canal":"telephone","appelant_telephone":"06 12 34 56 78","type_incident":"panne","position":"A6, sortie 12"}');
+  i1 := (r ->> 'incident')::uuid;
+  return next ok(r ->> 'contrat' = 'C-2026-0001' and r ->> 'action' = 'depanneuse' and not (r ->> 'transferer')::boolean, 'Le contrat est retrouvé par le numéro, la grille dit la dépanneuse');
+  r := public.loc_assistance_ouvrir(v_client, '{"fournisseur":"voix-essai","fournisseur_reference":"APPEL-1","type_incident":"panne"}');
+  return next ok((r ->> 'deja')::boolean and (r ->> 'incident')::uuid = i1, 'Rejouer l''appel n''ouvre pas un second dossier');
+  r := public.loc_assistance_ouvrir(v_client, '{"fournisseur":"voix-essai","fournisseur_reference":"APPEL-2","appelant_telephone":"0700000000","type_incident":"cle_perdue"}');
+  return next ok((r ->> 'transferer')::boolean and r ->> 'contrat' is null, 'Sans contrat ni grille, l''assistant passe la main à une personne');
+  return next throws_ok(format('select public.loc_assistance_ouvrir(%L::uuid, %L::jsonb)', v_client, '{"type_incident":"panne"}'), '22023', null, 'Un appel sans référence du fournisseur est refusé');
+  perform public.loc_assistance_evenement(i1, jsonb_build_object('type', 'missionne', 'prestataire', 'Dépannage de la Gare', 'arrivee_estimee_le', now() + interval '40 minutes'));
+  return next is((select x.statut from public.loc_incidents x where x.id = i1), 'missionne', 'Le dépanneur est missionné');
+  return next throws_ok(format('select public.loc_assistance_evenement(%L::uuid, %L::jsonb)', i1, '{"type":"danse"}'), '22023', null, 'Un événement inconnu est refusé');
+
+  -- L'agence clôt, et ouvre le sinistre depuis l'incident.
+  perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
+  r := public.loc_clore_incident(i1, 'Remorqué au garage', true);
+  return next ok(r ->> 'sinistre' is not null, 'L''incident clos ouvre le dossier de sinistre');
+  perform tests.endosser((jeu ->> 'autre')::uuid, 'b2-autre@essai.invalid');
+  return next throws_ok(format('select public.loc_clore_incident(%L::uuid)', i1), 'P0002', null, 'Un autre loueur ne voit pas l''incident');
+
+  -- Les relevés constructeur (service), comparés à l'état des lieux de retour.
+  perform tests.redevenir_admin();
+  r := public.loc_enregistrer_releves_constructeur(v_client, 'agregateur-essai', jsonb_build_array(
+    jsonb_build_object('immatriculation', 'GA-123-BC', 'lu_le', '2026-10-05T11:20:00+02:00', 'km', 12640, 'carburant_pct', 62.5),
+    jsonb_build_object('immatriculation', 'ZZ-000-ZZ', 'lu_le', '2026-10-05T11:20:00+02:00', 'km', 1)));
+  return next is(r, '{"releves": 1, "vehicules_inconnus": 1}'::jsonb, 'Le relevé du véhicule est gardé, l''inconnu compté');
+  return next throws_ok(format('select public.loc_enregistrer_releves_constructeur(%L::uuid, %L, %L::jsonb)', v_client, 'agregateur-essai',
+                        '[{"immatriculation":"GA-123-BC","lu_le":"2026-10-05T11:00:00+02:00","carburant_pct":140}]'), '22023', null, 'Un relevé hors bornes est refusé');
+  perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
+  r := public.loc_releve_au_retour(v_contrat);
+  return next ok((r -> 'releve' ->> 'km')::int = 12640 and (r -> 'releve' ->> 'carburant_8')::int = 5, 'Le relevé le plus proche du retour est lu, en huitièmes');
+
+  -- La caution.
+  r := public.loc_demander_preautorisation(v_contrat);
+  k := (r ->> 'caution')::uuid;
+  return next ok((r ->> 'montant_eur')::numeric > 0 and exists (select 1 from public.travaux t where t.cle = 'tavaro:caution:' || k::text || ':preautoriser'),
+                 'La préautorisation est demandée au montant du dépôt, le travail attend l''ouvrier du prestataire');
+  return next throws_ok(format('select public.loc_demander_preautorisation(%L::uuid, 100)', v_contrat), '23505', null, 'Une seule caution en cours par contrat');
+  return next throws_ok(format('select public.loc_liberer_caution(%L::uuid)', k), '23514', null, 'Une caution pas encore préautorisée ne se libère pas');
+  perform tests.redevenir_admin();
+  r := public.loc_caution_evenement(k, jsonb_build_object('type', 'preautorisee', 'prestataire', 'psp-essai', 'reference_externe', 'pi_essai_1', 'expire_le', now() + interval '7 days'));
+  return next is(r ->> 'statut', 'preautorisee', 'Le prestataire confirme la préautorisation');
+  return next ok((public.loc_caution_evenement(k, '{"type":"preautorisee"}') ->> 'ignore')::boolean, 'Un événement rejoué ne défait rien');
+  select (x ->> 'id')::uuid, (x ->> 'total_ttc')::numeric into f, v_ttc from jsonb_array_elements(jeu -> 'factures') x order by (x ->> 'total_ttc')::numeric desc limit 1;
+  perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
+  return next throws_ok(format('select public.loc_capturer_caution(%L::uuid, %L::uuid, 10, %L)', k, f, 'Rayure portière'), '42501', null, 'Un collaborateur ne capture pas la caution');
+  perform tests.endosser((jeu ->> 'referent')::uuid, 'b2-referent@essai.invalid');
+  return next throws_ok(format('select public.loc_capturer_caution(%L::uuid, %L::uuid, %s, %L)', k, f, (select x.montant_eur + 1 from public.loc_cautions x where x.id = k), 'Rayure portière'),
+                        '22023', null, 'Jamais plus que la préautorisation');
+  r := public.loc_capturer_caution(k, f, least(10, v_ttc), 'Rayure portière avant droite');
+  return next is(r ->> 'statut', 'capture_demandee', 'La capture est demandée sur une facture du contrat');
+  perform tests.redevenir_admin();
+  r := public.loc_caution_evenement(k, '{"type":"echec","erreur":"carte refusée"}');
+  return next is(r ->> 'statut', 'preautorisee', 'Un échec de capture garde la préautorisation');
+  perform tests.endosser((jeu ->> 'referent')::uuid, 'b2-referent@essai.invalid');
+  perform public.loc_capturer_caution(k, f, least(10, v_ttc), 'Rayure portière avant droite');
+  perform tests.redevenir_admin();
+  r := public.loc_caution_evenement(k, jsonb_build_object('type', 'capturee', 'montant_eur', least(10, v_ttc)));
+  return next ok(r ->> 'statut' = 'capturee' and (select x.capture_eur from public.loc_cautions x where x.id = k) = least(10, v_ttc), 'La capture est confirmée');
+  perform tests.endosser((jeu ->> 'collab')::uuid, 'b2-collab@essai.invalid');
+  r := public.loc_liberer_caution(k);
+  return next is(r ->> 'statut', 'liberation_demandee', 'Le reste se libère');
+  perform tests.redevenir_admin();
+  return next is((public.loc_caution_evenement(k, '{"type":"liberee"}') ->> 'statut'), 'liberee', 'Le prestataire confirme la libération');
+  return next ok(tests.tavaro_journal(v_client, 'tavaro.caution_capturee') >= 1, 'Le journal porte tavaro.caution_capturee');
 end $f$;
 
 
