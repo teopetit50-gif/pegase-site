@@ -131,6 +131,16 @@ for (const largeur of [390, 1440]) {
     dire(`varelo ${largeur}, dialogue ${nom}`, await analyser(s, `document.querySelector('[role="dialog"]')`));
   }
 
+  /* b1_15 : proposer un plafond à la direction financière */
+  await s.aller(base + '/espace/varelo');
+  await s.dormir(800);
+  await s.evaluer(axe + ';true');
+  await s.evaluer(`[...document.querySelectorAll('.esp-filtres button')].find(b => /^Clients$/.test(b.textContent))?.click()`);
+  await s.dormir(400);
+  await s.evaluer(`(e => { e?.focus(); e?.click(); })([...document.querySelectorAll('section tbody button')].find(b => /^Proposer$/.test(b.textContent.trim())))`);
+  await s.dormir(500);
+  dire(`varelo ${largeur}, dialogue de proposition d'un plafond`, await analyser(s, `document.querySelector('[role="dialog"]')`));
+
   /* b1_10 : brancher le logiciel d'une société */
   await s.aller(base + '/espace/varelo');
   await s.dormir(800);

@@ -17,7 +17,7 @@ import { CODES_EXEMPLE, OBJETS_EXEMPLE } from "./exemples";
 import type { CodeRef, Objet } from "./types";
 
 export type Ligne = { texte: string; gravite: "info" | "attention" | "critique"; lien: string };
-export type Matin = { groupe: Ligne[]; reserves: Ligne[]; reportings: Ligne[]; contrats: Ligne[]; encours: Ligne[]; reciproques: Ligne[] };
+export type Matin = { decisions: Ligne[]; groupe: Ligne[]; reserves: Ligne[]; reportings: Ligne[]; contrats: Ligne[]; encours: Ligne[]; reciproques: Ligne[] };
 
 const euros = (v: number | null) => (v === null ? "—" : montant(v).replace(/,00\s€$/, " €"));
 const jj = (iso: string) => iso.slice(8, 10) + "/" + iso.slice(5, 7);
@@ -81,7 +81,20 @@ export function matinExemple(codes: CodeRef[], objets: Objet[]): Matin {
       gravite: (r.etat === "aujourdhui" || r.etat === "demain" || r.etat === "depasse" ? "critique" : "attention") as Ligne["gravite"],
       lien: "/espace/varelo",
     }));
-  return { groupe, reserves, reportings, contrats, encours, reciproques };
+  /* b1_15 : les décisions à valider, d'office (contrats à 15 jours, livraisons à protester), au plus trois */
+  type Dec = { echeance: string; texte: string };
+  const decs: Dec[] = [
+    ...bruts.map((k) => echeancier(k, bruts)).filter((c) => c.statut === "actif" && c.reconduction === "tacite" && c.jours_restants >= 0 && c.jours_restants <= 15)
+      .map((c) => ({ echeance: c.date_limite, texte: `À valider : Dénoncer « ${c.intitule} » (${c.tiers}, ${c.societe}) avant le ${jj(c.date_limite)}. Échéance du ${jj(c.echeance_courante)} − préavis de ${c.preavis_valeur} ${c.preavis_unite} = date limite du ${jj(c.date_limite)}, dans ${c.jours_restants} jour${c.jours_restants > 1 ? "s" : ""}${c.montant_annuel !== null ? ` ; ${euros(c.montant_annuel)} par an` : ""}` })),
+    ...RESERVES_EXEMPLE().filter((r) => r.statut === "a_examiner")
+      .map((r) => ({ echeance: r.echeance, texte: `À valider : Protester auprès de ${r.transporteur} (livraison du ${jj(r.date_reception)}, ${r.societe}) avant le ${jj(r.echeance)}. ${r.regle_libelle} : ${r.calcul_detail}${r.montant_estime !== null ? ` ; préjudice estimé ${euros(r.montant_estime)}` : ""}` })),
+  ];
+  const j1 = new Date();
+  j1.setDate(j1.getDate() + 1);
+  const demain = `${j1.getFullYear()}-${String(j1.getMonth() + 1).padStart(2, "0")}-${String(j1.getDate()).padStart(2, "0")}`;
+  const decisions: Ligne[] = decs.sort((a, b) => a.echeance.localeCompare(b.echeance)).slice(0, 3)
+    .map((d) => ({ texte: d.texte, gravite: (d.echeance <= demain ? "critique" : "attention") as Ligne["gravite"], lien: "/espace/validations" }));
+  return { decisions, groupe, reserves, reportings, contrats, encours, reciproques };
 }
 
 /* le compteur de l'onglet VARELO en mode exemple : les lignes attention ou critique */

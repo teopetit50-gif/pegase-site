@@ -302,13 +302,15 @@ for (const largeur of LARGEURS) {
   ok(await s.aller(base + '/espace/varelo'), 'page chargée');
   await s.dormir(500);
   const m = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Ce matin"]'); if (!c) return null; return { blocs: [...c.querySelectorAll('.vrl-matin-bloc')].map(b => ({ titre: b.querySelector('h3')?.innerText.replace(/\\s+/g, ' '), lignes: [...b.querySelectorAll('li[data-gravite]')].map(li => li.dataset.gravite + ' | ' + li.innerText) })), avant: c.compareDocumentPosition(document.querySelector('section[aria-label="Objets du groupe"]')) & 4 }; })()`);
-  ok(!!m && m.blocs.length === 6 && !!m.avant, '« Ce matin » est en tête, avec ses six blocs');
-  ok(m && /Contrats à dénoncer 2/i.test(m.blocs[3].titre) && /^critique \| Avant le .* : dénoncer « Location de deux chariots élévateurs » \(Loc'Manut, Atelier Bertin — Siège \(Lyon\)\) — 7\s800\s€ par an$/.test(m.blocs[3].lignes[0]), `contrats : ${m?.blocs[3].lignes[0]}`);
-  ok(m && /Hôtel des Alpes : 79\s000\s€ d'encours pour le groupe, plafond 70\s000\s€/.test(m.blocs[4].lignes.join(' ')) && /balance clients de Bertin Menuiserie \(Annecy\) date du .* \(12 jours\)/.test(m.blocs[4].lignes.join(' ')), 'encours : le plafond dépassé et la balance ancienne');
-  ok(m && /écart de -500\s€ à expliquer/.test(m.blocs[5].lignes.join(' ')) && m.blocs[5].lignes.length === 3, `réciproques : ${m?.blocs[5].lignes.length} lignes`);
-  ok(m && /Reportings dus/i.test(m.blocs[2].titre) && m.blocs[2].lignes.some(l => /^critique \| En retard depuis le .* pour /.test(l)), `reportings : ${m?.blocs[2].lignes[0]}`);
-  ok(m && /Réserves à émettre 2/i.test(m.blocs[1].titre) && /^critique \| Avant le .* : protestation à CMA CGM \(Bertin Menuiserie \(Annecy\), livraison du .*, Vernis Lacroix\)$/.test(m.blocs[1].lignes[0]) && /^attention \| Avant le .* : protestation à Transports Deschamps/.test(m.blocs[1].lignes[1]), `réserves : ${m?.blocs[1].lignes.join(' / ')}`);
-  ok(m && m.blocs[0].lignes.length === 3 && /Agence de Grenoble : trésorerie de 18\s500\s€, sous son plancher de 25\s000\s€/.test(m.blocs[0].lignes.join(' ')) && /Bertin Menuiserie \(Annecy\) date du .* \(37 jours\)/.test(m.blocs[0].lignes.join(' ')), `le groupe ce matin : ${m?.blocs[0].lignes.join(' / ')}`);
+  ok(!!m && m.blocs.length === 7 && !!m.avant, '« Ce matin » est en tête, avec ses sept blocs');
+  ok(m && /Contrats à dénoncer 2/i.test(m.blocs[4].titre) && /^critique \| Avant le .* : dénoncer « Location de deux chariots élévateurs » \(Loc'Manut, Atelier Bertin — Siège \(Lyon\)\) — 7\s800\s€ par an$/.test(m.blocs[4].lignes[0]), `contrats : ${m?.blocs[4].lignes[0]}`);
+  ok(m && /Hôtel des Alpes : 79\s000\s€ d'encours pour le groupe, plafond 70\s000\s€/.test(m.blocs[5].lignes.join(' ')) && /balance clients de Bertin Menuiserie \(Annecy\) date du .* \(12 jours\)/.test(m.blocs[5].lignes.join(' ')), 'encours : le plafond dépassé et la balance ancienne');
+  ok(m && /écart de -500\s€ à expliquer/.test(m.blocs[6].lignes.join(' ')) && m.blocs[6].lignes.length === 3, `réciproques : ${m?.blocs[6].lignes.length} lignes`);
+  ok(m && /Reportings dus/i.test(m.blocs[3].titre) && m.blocs[3].lignes.some(l => /^critique \| En retard depuis le .* pour /.test(l)), `reportings : ${m?.blocs[3].lignes[0]}`);
+  ok(m && /Réserves à émettre 2/i.test(m.blocs[2].titre) && /^critique \| Avant le .* : protestation à CMA CGM \(Bertin Menuiserie \(Annecy\), livraison du .*, Vernis Lacroix\)$/.test(m.blocs[2].lignes[0]) && /^attention \| Avant le .* : protestation à Transports Deschamps/.test(m.blocs[2].lignes[1]), `réserves : ${m?.blocs[2].lignes.join(' / ')}`);
+  ok(m && m.blocs[1].lignes.length === 3 && /Agence de Grenoble : trésorerie de 18\s500\s€, sous son plancher de 25\s000\s€/.test(m.blocs[1].lignes.join(' ')) && /Bertin Menuiserie \(Annecy\) date du .* \(37 jours\)/.test(m.blocs[1].lignes.join(' ')), `le groupe ce matin : ${m?.blocs[1].lignes.join(' / ')}`);
+  ok(m && /Décisions à valider 3/i.test(m.blocs[0].titre) && /À valider : Dénoncer « Location de deux chariots élévateurs » .*Échéance du .* − préavis de 10 jours = date limite du .*, dans 2 jours/.test(m.blocs[0].lignes.join(' / ')) && /À valider : Protester auprès de CMA CGM/.test(m.blocs[0].lignes.join(' / ')), `décisions : ${m?.blocs[0].lignes.join(' / ')}`);
+  ok(await s.evaluer(`!!document.querySelector('section[aria-label="Ce matin"] a[href$="/validations"]')`), 'le titre « Décisions à valider » mène à la file de validation');
   ok(await s.evaluer(`(() => { const a = document.querySelector('section[aria-label="Ce matin"] a[href="#vrl-contrats"]'); return !!a && !!document.getElementById('vrl-contrats'); })()`), 'le titre « Contrats à dénoncer » mène à la carte des contrats');
   s.fermer();
 }
@@ -394,7 +396,7 @@ for (const largeur of LARGEURS) {
   const carte = `document.querySelector('section[aria-label="Réserves à émettre"]')`;
   const lire = `(() => { const c = ${carte}; if (!c) return null; return { lignes: [...c.querySelectorAll('tbody tr')].map(tr => tr.innerText.replace(/\\s+/g, ' ')), kpis: c.querySelector('dl')?.innerText.replace(/\\s+/g, ' ') }; })()`;
   const lu = await s.evaluer(lire);
-  ok(!!lu && lu.lignes.length === 2 && /CMA CGM/.test(lu.lignes[0]) && /Demain/.test(lu.lignes[0]) && /Transports Deschamps/.test(lu.lignes[1]) && /dans 2 jours/.test(lu.lignes[1]), `deux livraisons à protester, la plus pressée en tête (${lu?.lignes[0]})`);
+  ok(!!lu && lu.lignes.length === 2 && /CMA CGM/.test(lu.lignes[0]) && /Demain/.test(lu.lignes[0]) && /Transports Deschamps/.test(lu.lignes[1]) && /dans \d+ jours/.test(lu.lignes[1]), `deux livraisons à protester, la plus pressée en tête (${lu?.lignes[0]})`);
   ok(lu && /À protester 2/.test(lu.kpis) && /1 livraison/.test(lu.kpis) && /4\s440,00\s€/.test(lu.kpis), `compteurs : ${lu?.kpis}`);
   ok(/11\/12 colis/.test(lu?.lignes[1] ?? '') && /Avarie/.test(lu?.lignes[1] ?? '') && /Manquant/.test(lu?.lignes[1] ?? ''), 'avarie, manquant et colis comptés');
   ok(await s.evaluer(`(() => { const tr = [...${carte}.querySelectorAll('tbody tr')].find(t => /Deschamps/.test(t.innerText)); const b = tr && [...tr.querySelectorAll('button')].find(b => /Lettre/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`) === true, 'clic « Lettre » sur Transports Deschamps');
@@ -449,6 +451,33 @@ for (const largeur of LARGEURS) {
   await s.dormir(600);
   const fin = await s.evaluer(lire);
   ok(fin.lignes.length === 2 && fin.lignes.some(l => /Geodis/.test(l) && /dans 3 jours/.test(l) && /1 photo/.test(l)), `la livraison Geodis du jour : protester dans 3 jours (${fin.lignes.find(l => /Geodis/.test(l))})`);
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b1-decisions', densite: 1 });
+  console.log('— les décisions à valider (b1_15)');
+  ok(await s.aller(base + '/espace/varelo'), 'page chargée');
+  await s.dormir(500);
+  const contrats = `document.querySelector('section[aria-label="Contrats du groupe à dénoncer"]')`;
+  ok(await s.evaluer(`(() => { const tr = [...${contrats}.querySelectorAll('tbody tr')].find(t => /chariots/.test(t.innerText)); const b = tr && [...tr.querySelectorAll('button')].find(b => /Faire valider/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`) === true, 'clic « Faire valider » sur la location des chariots');
+  await s.dormir(600);
+  ok(/En validation \(direction juridique\)/.test(await s.evaluer(`[...${contrats}.querySelectorAll('tbody tr')].find(t => /chariots/.test(t.innerText))?.innerText`) ?? ''), 'le contrat attend la direction juridique');
+  const reserves = `document.querySelector('section[aria-label="Réserves à émettre"]')`;
+  ok(await s.evaluer(`(() => { const tr = [...${reserves}.querySelectorAll('tbody tr')].find(t => /CMA CGM/.test(t.innerText)); const b = tr && [...tr.querySelectorAll('button')].find(b => /Faire valider/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`) === true, 'clic « Faire valider » sur la livraison CMA CGM');
+  await s.dormir(600);
+  ok(/En validation \(direction des opérations\)/.test(await s.evaluer(`[...${reserves}.querySelectorAll('tbody tr')].find(t => /CMA CGM/.test(t.innerText))?.innerText`) ?? ''), 'la protestation attend la direction des opérations');
+  await s.evaluer(clic('.esp-filtres button', '/^Clients$/'));
+  await s.dormir(400);
+  const encours = `document.querySelector('section[aria-label="Encours du groupe, clients"]')`;
+  ok(await s.evaluer(`(() => { const tr = [...${encours}.querySelectorAll('tbody tr')].find(t => /Hôtel des Alpes/.test(t.innerText)); const b = tr && [...tr.querySelectorAll('button')].find(b => /^Proposer$/.test(b.textContent.trim())); if (!b) return null; b.click(); return true; })()`) === true, 'clic « Proposer » sur l\'Hôtel des Alpes');
+  await s.dormir(400);
+  ok(/Proposer un plafond — /.test(await s.evaluer(`${dlg()}?.innerText`) ?? ''), 'le dialogue de proposition s\'ouvre');
+  await s.evaluer(saisir('[role="dialog"] input.rv-champ', '90 000'));
+  await s.dormir(200);
+  await s.evaluer(clic('[role="dialog"] button', '/Envoyer à la direction financière/'));
+  await s.dormir(600);
+  ok(/En validation \(direction financière\)/.test(await s.evaluer(`[...${encours}.querySelectorAll('tbody tr')].find(t => /Hôtel des Alpes/.test(t.innerText))?.innerText`) ?? ''), 'le plafond attend la direction financière');
   s.fermer();
 }
 

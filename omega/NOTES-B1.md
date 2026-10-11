@@ -1,5 +1,20 @@
 # Session B1 — VARELO, le référentiel du groupe (sociétés, pôles, rapprochement)
 
+## 11/10/2026 — reprise : les décisions à valider (b1_15, tests b1_18)
+
+Lignes 4, 10, 30, 32 et 39 du chiffrage. `b1_15_decisions.sql` : table `grp_decisions` adossée à
+`demandes_validation` ; porte `grp_proposer_decision` (dénoncer un contrat → DJ, protester → DO, relever un
+plafond → DF ; règle de routage posée si absente) ; d'office chaque heure (`varelo-decisions`) les contrats
+tacites à 15 jours et les livraisons à protester ; exécution à la décision par l'abonnement
+`demande.decidee.varelo` → travail `varelo.decision` (cron `varelo-releves`) : plafond posé ; dénonciation /
+protestation « validée, à envoyer » ; refus de protestation → livraison classée ; point du matin « Décisions à
+valider » (ordre 1, au plus trois par destinataire, calcul et pièce) ; `grp_ce_matin` rend `decisions`.
+Remplace `grp_traiter_travaux`, `grp_ce_matin`, `grp_deposer_points`. Tests b1_18 : 24 assertions (maquette :
+306 ok, file de validation simulée). Écran : « Faire valider » (contrats, réserves), « Proposer » (plafond),
+pastille d'état ; bloc « Décisions à valider » dans « Ce matin ». Recette 181 ✓, axe 0 écart.
+À la pose : repasser aussi ^test_b1_1[0-8]_ et le 44 (fonctions privées ouvertes à authenticated :
+grp_proposer_decision et grp_lignes_decisions, toutes deux requises par une porte invoker).
+
 ## REPRISE (pause demandée par Teo, 06/10/2026, 21 h Z)
 
 **Fait, posé sur la recette et fusionné dans main** (worker-b1 fusionnée par le coordinateur, dernière fusion
