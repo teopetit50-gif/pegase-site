@@ -2919,6 +2919,8 @@ html.v2-calme .v2-vivant .v2-carte::before, html.v2-calme .v2-vivant .v2-dr-cart
 .v2 .v2-section-titre { height: 24px; }
 .v2 .v2-trouver { height: 28px; }
 .v2 .v2-equipe { height: 32px; }
-.v2 .v2-portee, .v2 .v2-btn--petit, .v2 .v2-val-bouton { height: 28px; }
-.v2 .v2-btn--petit.v2-btn--icone { width: 28px; }
+/* boutons : 26 px et texte de 13 px, comme ceux d'Attio (« Sorted by Date », « View settings », mesurés le 11/10) */
+.v2 .v2-portee, .v2 .v2-btn--petit, .v2 .v2-val-bouton { height: 26px; padding: 0 8px; gap: 6px; font-size: 13px; }
+.v2 .v2-btn--petit.v2-btn--icone { width: 26px; padding: 0; }
+.v2 .v2-btn--petit svg, .v2 .v2-val-bouton svg, .v2 .v2-portee svg { width: 14px; height: 14px; }
 .v2 .v2-val-recherche { height: 28px; }

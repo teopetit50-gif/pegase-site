@@ -1,38 +1,27 @@
 "use client";
 
 /* ══════════════════════════════════════════════════════════════════════
-   Le graphique du pilotage, d'après les tableaux de Vercel (09/10/2026,
-   « Function Invocations », « 429 Status Codes », envoyés par Teo) :
+   Le graphique du pilotage, à la manière des tuiles de PMT (11/10/2026)
 
-     · en tête à droite, les pastilles de légende (point de couleur, nom,
-       total, écart avec la période d'avant) — cliquer masque ou montre
-       la série ; et trois boutons : courbe en escalier, barres, liste ;
-     · la courbe en escalier : un trait fin, l'aire teintée dessous, les
-       séries superposées, trois repères gris à peine marqués ;
-     · au survol : une ligne de repère et une bulle (date, puis chaque
-       série et sa valeur en chiffres à chasse fixe) ;
-     · sous le graphique, le tableau des séries : moyenne, meilleur jour,
-       total et écart.
+   Demande de Teo : « exactement ceux du PMT, 1:1 ». Une tuile par série,
+   en grille, chacune comme un graphique de cours :
+     · en tête : le nom de la série, « vue d'ensemble », la valeur du jour
+       et l'écart avec la période précédente ;
+     · le tracé : un trait fin, anguleux d'un jour à l'autre (pas lissé),
+       un dégradé de la couleur sous la courbe ;
+     · l'échelle à droite, la dernière valeur dans une étiquette pleine
+       sur l'axe, reliée à la courbe par un pointillé ;
+     · les dates en bas ; au survol, un réticule et une bulle.
+   Écart assumé : PMT mêle l'orange et le bleu ; ici, tout est en bleu, la
+   seule couleur du tableau de bord (Teo, 10/10).
    ══════════════════════════════════════════════════════════════════════ */
 
-import { useState } from "react";
-import { ChartColumn, ChartLine, List } from "lucide-react";
+import { useId, useState } from "react";
 
 export type Serie = { cle: string; libelle: string; valeurs: number[]; avant: number[]; couleur?: string };
-type Mode = "courbe" | "barres" | "liste";
 const JOUR = 86_400_000;
-// Tout en bleu du dashboard (demande de Teo, 09/10 : « prends les couleurs du
-// dashboard de base, donc bleu »). Le bleu plein, puis le même bleu à 62 % et
-// 36 % (plus sombre en thème sombre, plus clair en thème clair), et le bout
-// de la gamme pour la 4e série : presque blanc en sombre, marine en clair.
-const COULEURS = [
-  "var(--v2-blue-700)",
-  "color-mix(in srgb, var(--v2-blue-700) 62%, transparent)",
-  "color-mix(in srgb, var(--v2-blue-700) 36%, transparent)",
-  "var(--v2-blue-1000)",
-];
-const L = 1000;
-const H = 220;
+const L = 600;
+const H = 160;
 
 const somme = (v: number[]) => v.reduce((a, b) => a + b, 0);
 function arrondi(max: number) {
@@ -51,167 +40,102 @@ export function Ecart({ t, a, inverse }: { t: number; a: number; inverse?: boole
   );
 }
 
-export default function Graphique({ series: brutes, debut }: { series: Serie[]; debut: number }) {
-  const series = brutes.map((s, i) => ({ ...s, couleur: s.couleur ?? COULEURS[i % COULEURS.length] }));
-  const [caches, setCaches] = useState<string[]>([]);
-  const [mode, setMode] = useState<Mode>("courbe");
+export default function Graphique({ series, debut }: { series: Serie[]; debut: number }) {
+  return (
+    <div className="om-pmt">
+      {series.map((s) => (
+        <Tuile key={s.cle} s={s} debut={debut} />
+      ))}
+    </div>
+  );
+}
+
+function Tuile({ s, debut }: { s: Serie; debut: number }) {
+  const id = useId().replace(/:/g, "");
   const [survol, setSurvol] = useState<number | null>(null);
-  const visibles = series.filter((s) => !caches.includes(s.cle));
-  const n = series[0]?.valeurs.length ?? 0;
-  const empile = (i: number) => visibles.reduce((a, s) => a + s.valeurs[i], 0);
-  const haut = arrondi(Math.max(0, ...(mode === "barres" ? Array.from({ length: n }, (_, i) => empile(i)) : visibles.flatMap((s) => s.valeurs))));
+  const v = s.valeurs;
+  const n = v.length;
+  const haut = arrondi(Math.max(1, ...v));
+  const x = (i: number) => (n > 1 ? (i / (n - 1)) * L : 0);
+  const y = (val: number) => H - (val / haut) * (H - 8) - 4;
+  const trace = v.map((val, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(val).toFixed(1)}`).join("");
+  const derniere = v[n - 1] ?? 0;
+  const veille = v[n - 2] ?? 0;
+  const ecartJour = derniere - veille;
   const date = (i: number, long = false) => new Date(debut + i * JOUR).toLocaleDateString("fr-FR", long ? { weekday: "short", day: "numeric", month: "long" } : { day: "numeric", month: "short" });
-  const reperes = n > 1 ? [0, Math.round((n - 1) / 2), n - 1] : [0];
-  const y = (v: number) => H - (v / haut) * H;
-  const escalier = (v: number[]) => v.map((x, i) => `${i ? "H" : "M0,"}${i ? `${(i / n) * L}V${y(x)}` : y(x)}`).join("") + `H${L}`;
-  const basculer = (cle: string) => setCaches((c) => (c.includes(cle) ? c.filter((x) => x !== cle) : visibles.length > 1 ? [...c, cle] : c));
+  const reperes = n > 2 ? [0, Math.round((n - 1) / 3), Math.round(((n - 1) * 2) / 3), n - 1] : [0, n - 1];
+  const graduations = [1, 0.75, 0.5, 0.25, 0].map((p) => Math.round(haut * p));
+  const total = somme(v);
 
   return (
-    <div className="om-graph">
-      <div className="om-graph-tete">
-        <div className="om-graph-legende" role="group" aria-label="Séries affichées">
-          {series.map((s) => (
-            <button key={s.cle} type="button" className="om-graph-pastille" aria-pressed={!caches.includes(s.cle)} onClick={() => basculer(s.cle)}>
-              <i style={{ background: s.couleur }} aria-hidden="true" />
-              {s.libelle}
-            </button>
+    <section className="om-pmt-tuile" aria-label={`${s.libelle} : ${total} sur la période`}>
+      <header className="om-pmt-tete">
+        <p className="om-pmt-nom">
+          <b>{s.libelle}</b>
+          <span>Vue d&apos;ensemble</span>
+        </p>
+        <p className="om-pmt-cours">
+          <span className="om-pmt-symbole">{s.libelle.split(" ")[0].toUpperCase().slice(0, 6)}</span>
+          <span className="om-pmt-unite">1J</span>
+          <b>{derniere.toLocaleString("fr-FR")}</b>
+          <span className="om-pmt-variation" data-sens={ecartJour > 0 ? "haut" : ecartJour < 0 ? "bas" : undefined}>
+            {ecartJour > 0 ? "+" : ecartJour < 0 ? "−" : ""}
+            {Math.abs(ecartJour)} ({veille ? `${ecartJour > 0 ? "+" : ecartJour < 0 ? "−" : ""}${Math.round((Math.abs(ecartJour) / veille) * 100)} %` : "—"})
+          </span>
+          <span className="om-pmt-total">
+            Total <b>{total.toLocaleString("fr-FR")}</b> <Ecart t={total} a={somme(s.avant)} />
+          </span>
+        </p>
+      </header>
+
+      <div className="om-pmt-corps">
+        <div className="om-pmt-zone" onMouseLeave={() => setSurvol(null)}>
+          {graduations.map((g) => (
+            <span key={g} className="om-pmt-grille" style={{ top: `${(y(g) / H) * 100}%` }} aria-hidden="true" />
           ))}
+          <svg className="om-pmt-svg" viewBox={`0 0 ${L} ${H}`} preserveAspectRatio="none" role="img" aria-label={`${s.libelle}, jour par jour`}>
+            <defs>
+              <linearGradient id={`d${id}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--v2-blue-700)" stopOpacity="0.42" />
+                <stop offset="100%" stopColor="var(--v2-blue-700)" stopOpacity="0.02" />
+              </linearGradient>
+            </defs>
+            <path d={`${trace}L${L},${H}L0,${H}Z`} fill={`url(#d${id})`} />
+            <path d={trace} fill="none" stroke="var(--v2-blue-700)" strokeWidth={1.25} vectorEffect="non-scaling-stroke" strokeLinejoin="miter" />
+            <line x1={0} x2={L} y1={y(derniere)} y2={y(derniere)} stroke="var(--v2-blue-700)" strokeWidth={1} strokeDasharray="2 3" vectorEffect="non-scaling-stroke" opacity={0.7} />
+            {survol !== null ? <line x1={x(survol)} x2={x(survol)} y1={0} y2={H} stroke="var(--v2-gray-700)" strokeWidth={1} strokeDasharray="3 3" vectorEffect="non-scaling-stroke" /> : null}
+          </svg>
+          {survol !== null ? <span className="om-pmt-point" style={{ left: `${(x(survol) / L) * 100}%`, top: `${(y(v[survol]) / H) * 100}%` }} aria-hidden="true" /> : null}
+          <ol className="om-pmt-cibles" aria-hidden="true">
+            {v.map((_, i) => (
+              <li key={i} onMouseEnter={() => setSurvol(i)} />
+            ))}
+          </ol>
+          {survol !== null ? (
+            <div className="om-pmt-bulle" data-bord={survol > n * 0.7 ? "droite" : undefined} style={{ left: `${(x(survol) / L) * 100}%` }} role="status">
+              <span>{date(survol, true)}</span>
+              <b>{v[survol].toLocaleString("fr-FR")}</b>
+            </div>
+          ) : null}
         </div>
-        <div className="om-graph-modes" role="group" aria-label="Affichage">
-          {(
-            [
-              ["courbe", ChartLine, "Courbe"],
-              ["barres", ChartColumn, "Barres"],
-              ["liste", List, "Liste"],
-            ] as const
-          ).map(([m, Icone, nom]) => (
-            <button key={m} type="button" aria-label={nom} title={nom} aria-pressed={mode === m} onClick={() => setMode(m)}>
-              <Icone width={15} height={15} aria-hidden="true" />
-            </button>
+        <div className="om-pmt-axe-y" aria-hidden="true">
+          {graduations.map((g) => (
+            <span key={g} style={{ top: `${(y(g) / H) * 100}%` }}>
+              {g.toLocaleString("fr-FR")}
+            </span>
+          ))}
+          <span className="om-pmt-etiquette" style={{ top: `${(y(derniere) / H) * 100}%` }}>
+            {derniere.toLocaleString("fr-FR")}
+          </span>
+        </div>
+        <div className="om-pmt-axe-x" aria-hidden="true">
+          {reperes.map((i) => (
+            <span key={i} style={{ left: `${(x(i) / L) * 100}%` }} data-bout={i === 0 ? "debut" : i === n - 1 ? "fin" : undefined}>
+              {i === n - 1 ? "Auj." : date(i)}
+            </span>
           ))}
         </div>
       </div>
-
-      {mode === "liste" ? (
-        <div className="om-graph-liste">
-          <table className="om-graph-table">
-            <thead>
-              <tr>
-                <th>Jour</th>
-                {visibles.map((s) => (
-                  <th key={s.cle}>{s.libelle}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {Array.from({ length: n }, (_, k) => n - 1 - k).map((i) => (
-                <tr key={i}>
-                  <td>{i === n - 1 ? "Aujourd'hui" : date(i, true)}</td>
-                  {visibles.map((s) => (
-                    <td key={s.cle} data-zero={s.valeurs[i] ? undefined : ""}>
-                      {s.valeurs[i].toLocaleString("fr-FR")}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <div className="om-graph-corps">
-          <div className="om-graph-axe-y" aria-hidden="true">
-            {[1, 0.5, 0].map((p) => (
-              <span key={p}>{Math.round(haut * p).toLocaleString("fr-FR")}</span>
-            ))}
-          </div>
-          <div className="om-graph-zone" onMouseLeave={() => setSurvol(null)}>
-            {[0, 0.5, 1].map((p) => (
-              <span key={p} className="om-graph-grille" style={{ bottom: `${p * 100}%` }} aria-hidden="true" />
-            ))}
-            {mode === "courbe" ? (
-              <svg key={`c${caches.join()}${n}`} className="om-graph-svg" viewBox={`0 0 ${L} ${H}`} preserveAspectRatio="none" role="img" aria-label={visibles.map((s) => `${s.libelle} : ${somme(s.valeurs)}`).join(", ")}>
-                {visibles.map((s) => {
-                  const d = escalier(s.valeurs);
-                  return (
-                    <g key={s.cle}>
-                      <path d={`${d}V${H}H0Z`} fill={s.couleur} fillOpacity={0.12} />
-                      <path d={d} fill="none" stroke={s.couleur} strokeWidth={1.5} vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
-                    </g>
-                  );
-                })}
-              </svg>
-            ) : (
-              <ol key={`b${caches.join()}${n}`} className="om-graph-barres" style={{ gap: n > 60 ? 1 : n > 20 ? 3 : 6 }}>
-                {Array.from({ length: n }, (_, i) => (
-                  <li key={i}>
-                    <span className="om-graph-pile" style={{ height: `${(empile(i) / haut) * 100}%`, animationDelay: `${Math.min(i * 6, 240)}ms` }}>
-                      {visibles.map((s) =>
-                        s.valeurs[i] ? <span key={s.cle} style={{ flexGrow: s.valeurs[i], background: s.couleur }} /> : null,
-                      )}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            )}
-            <ol className="om-graph-cibles" aria-hidden="true">
-              {Array.from({ length: n }, (_, i) => (
-                <li key={i} data-survol={survol === i ? "" : undefined} onMouseEnter={() => setSurvol(i)} />
-              ))}
-            </ol>
-            {survol !== null ? (
-              <div className="om-graph-bulle" data-bord={survol < n * 0.2 ? "gauche" : survol > n * 0.8 ? "droite" : undefined} style={{ left: `${((survol + 0.5) / n) * 100}%` }} role="status">
-                <span className="om-graph-bulle-date">{date(survol, true)}</span>
-                {visibles.map((s) => (
-                  <span key={s.cle} className="om-graph-bulle-ligne">
-                    <i style={{ background: s.couleur }} aria-hidden="true" />
-                    {s.libelle}
-                    <b>{s.valeurs[survol].toLocaleString("fr-FR")}</b>
-                  </span>
-                ))}
-              </div>
-            ) : null}
-          </div>
-          <span />
-          <div className="om-graph-axe" aria-hidden="true">
-            {reperes.map((i) => (
-              <span key={i} style={{ left: `${((i + 0.5) / n) * 100}%` }}>
-                {i === n - 1 ? "Aujourd'hui" : date(i)}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <table className="om-graph-table om-graph-resume">
-        <thead>
-          <tr>
-            <th>Série</th>
-            <th>Par jour</th>
-            <th>Meilleur jour</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {series.map((s) => {
-            const t = somme(s.valeurs);
-            const max = Math.max(0, ...s.valeurs);
-            return (
-              <tr key={s.cle} data-cache={caches.includes(s.cle) ? "" : undefined}>
-                <td>
-                  <i style={{ background: s.couleur }} aria-hidden="true" />
-                  {s.libelle}
-                </td>
-                <td>{(t / Math.max(1, n)).toLocaleString("fr-FR", { maximumFractionDigits: 1 })}</td>
-                <td>{max ? `${max} · ${date(s.valeurs.indexOf(max))}` : "—"}</td>
-                <td>
-                  <Ecart t={t} a={somme(s.avant)} />
-                  <b>{t.toLocaleString("fr-FR")}</b>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+    </section>
   );
 }
