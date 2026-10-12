@@ -16,14 +16,13 @@
 import { useMemo, useState } from "react";
 import Choix from "./Choix";
 import Link from "next/link";
-import { ArrowRight, CalendarDays, ChevronRight, CircleCheck, CircleDashed, Compass, FileText, Inbox, LayoutGrid, ListChecks, Megaphone, Search, UserRound, X } from "lucide-react";
+import { ArrowRight, CalendarDays, ChevronRight, CircleCheck, CircleDashed, FileText, Inbox, Search, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Ligne } from "./Tableaux";
 
 const R = "/omega";
 const JOUR = 86_400_000;
 const FINIS = ["Signé", "Installé", "En rodage", "En réel", "Bilan J30 fait", "SaaS métier en route", "2e offre proposée", "Engagement annuel", "Perdu"];
-const ICONE_CATEGORIE: Record<string, typeof FileText> = { Fondations: Compass, Pilotage: ListChecks, Prospection: UserRound, Contenu: Megaphone, Clients: UserRound, Audits: ListChecks, Pub: Megaphone };
 
 function echeance(texte: string | undefined): number | null {
   const m = texte?.match(/(\d{1,2})\/(\d{1,2})/);
@@ -61,6 +60,11 @@ export default function Journee({ mode, lignes }: { mode: "validations" | "point
 }
 
 /* ══════════════════════════ À valider ══════════════════════════ */
+/* 11/10/2026 — allégé à la demande de Teo, même dessin : une ligne par
+   tâche (le titre, le délai à droite), plus d'icône de catégorie ni de
+   sous-ligne ; la barre garde la vue et la recherche (plus de filtres
+   catégorie et échéance : la file est déjà rangée par échéance) ; « La
+   décision » sans la frise des trois étapes. */
 const GROUPES = [
   { cle: "retard", libelle: "En retard" },
   { cle: "semaine", libelle: "Cette semaine" },
@@ -71,8 +75,6 @@ function Validations({ initiales }: { initiales: Ligne[] }) {
   const { lignes, marquer } = useLignes(initiales);
   const [maintenant] = useState(() => Date.now());
   const [vue, setVue] = useState("a_decider");
-  const [categorie, setCategorie] = useState("");
-  const [periode, setPeriode] = useState("");
   const [recherche, setRecherche] = useState<string | null>(null);
   const [coches, setCoches] = useState<string[]>([]);
   const [choix, setChoix] = useState<string | null>(null);
@@ -82,11 +84,8 @@ function Validations({ initiales }: { initiales: Ligne[] }) {
     return e < maintenant ? "retard" : e < maintenant + 7 * JOUR ? "semaine" : "plus_tard";
   };
   const taches = lignes.filter((l) => l.tableau === "plan" || l.tableau === "ajouts");
-  const categories = Array.from(new Set(taches.map((l) => l.donnees["Catégorie"]).filter(Boolean)));
   const visibles = taches
     .filter((l) => (vue === "a_decider" ? l.donnees["Statut"] !== "Fait" && ["Fondations", "Pilotage"].includes(l.donnees["Catégorie"]) : vue === "a_faire" ? l.donnees["Statut"] !== "Fait" : vue === "faites" ? l.donnees["Statut"] === "Fait" : true))
-    .filter((l) => !categorie || l.donnees["Catégorie"] === categorie)
-    .filter((l) => !periode || groupe(l) === periode)
     .filter((l) => !recherche || (l.donnees["Tâche"] ?? "").toLowerCase().includes(recherche.toLowerCase()))
     .sort((a, b) => (echeance(a.donnees["Échéance"]) ?? 9e15) - (echeance(b.donnees["Échéance"]) ?? 9e15));
   const groupes = new Map<string, Ligne[]>();
@@ -98,12 +97,10 @@ function Validations({ initiales }: { initiales: Ligne[] }) {
   const cochees = visibles.filter((l) => coches.includes(l.id));
 
   return (
-    <div className="v2-page v2-arrivee v2-val v2-vivant">
+    <div className="v2-page v2-arrivee v2-val v2-vivant om-val-simple">
       <h1 className="v2-sr">À valider</h1>
       <div className="v2-val-filtres">
         <Selecteur icone={Inbox} valeur={vue} changer={setVue} options={[{ cle: "a_decider", libelle: "Tes décisions" }, { cle: "a_faire", libelle: "Toutes les tâches à faire" }, { cle: "faites", libelle: "Faites" }, { cle: "toutes", libelle: "Toutes" }]} />
-        <Selecteur icone={LayoutGrid} valeur={categorie} changer={setCategorie} tous="Toutes les catégories" options={categories.map((c) => ({ cle: c, libelle: c }))} />
-        <Selecteur icone={CalendarDays} valeur={periode} changer={setPeriode} tous="Toutes les échéances" options={GROUPES.map((g) => ({ cle: g.cle, libelle: g.libelle }))} />
         <span className="v2-val-droite">
           {recherche !== null ? (
             <span className="v2-val-recherche">
@@ -153,7 +150,6 @@ function Validations({ initiales }: { initiales: Ligne[] }) {
                   <h2 className="v2-val-groupe">{g.libelle}</h2>
                   <ul className="v2-val-liste">
                     {liste.map((l) => {
-                      const Icone = ICONE_CATEGORIE[l.donnees["Catégorie"]] ?? FileText;
                       const e = echeance(l.donnees["Échéance"]);
                       return (
                         <li key={l.id} className="v2-val-ligne" aria-current={choisie?.id === l.id ? "true" : undefined}>
@@ -163,14 +159,9 @@ function Validations({ initiales }: { initiales: Ligne[] }) {
                           <button type="button" className="v2-val-corps" onClick={() => setChoix(l.id)}>
                             <span className="v2-val-texte">
                               <span>{l.donnees["Tâche"]}</span>
-                              <small>{[l.donnees["Catégorie"], l.donnees["Semaine"], l.donnees["Statut"]].filter(Boolean).join(" · ")}</small>
                             </span>
-                            <span className="v2-val-module" aria-hidden="true">
-                              <Icone width={20} height={20} />
-                            </span>
-                            <span className="v2-val-montant">
-                              <span>{l.donnees["Échéance"] ?? "—"}</span>
-                              <small data-retard={l.donnees["Statut"] !== "Fait" && e !== null && e < maintenant ? "" : undefined}>{l.donnees["Statut"] === "Fait" ? "Fait" : quand(e, maintenant)}</small>
+                            <span className="om-pm-meta" data-retard={l.donnees["Statut"] !== "Fait" && e !== null && e < maintenant ? "" : undefined}>
+                              {l.donnees["Statut"] === "Fait" ? "Fait" : quand(e, maintenant)}
                             </span>
                             <ChevronRight width={16} height={16} aria-hidden="true" className="v2-val-chevron" />
                           </button>
@@ -195,21 +186,6 @@ function Validations({ initiales }: { initiales: Ligne[] }) {
                     {[choisie.donnees["Catégorie"], choisie.donnees["Semaine"], choisie.donnees["Échéance"] ? `échéance ${choisie.donnees["Échéance"]}` : null].filter(Boolean).join(" · ")}
                   </p>
                 </div>
-                <ol className="v2-val-etapes">
-                  {["À faire", "En cours", "Fait"].map((s, i) => {
-                    const rang = ["À faire", "En cours", "Fait"].indexOf(choisie.donnees["Statut"] ?? "À faire");
-                    const passe = i <= rang;
-                    return (
-                      <li key={s} data-attente={passe ? undefined : ""}>
-                        <span className="v2-val-etape-icone">{passe ? <CircleCheck width={18} height={18} /> : <CircleDashed width={18} height={18} />}</span>
-                        <span>
-                          <span className="v2-val-etape-nom">{s}</span>
-                          <small className="v2-val-gris">{passe ? (i === rang ? "Étape actuelle" : "Passée") : "À venir"}</small>
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ol>
                 <div className="om-decision-actions">
                   <button type="button" className="v2-btn v2-btn--petit" onClick={() => marquer(choisie, "Statut", "En cours")}>
                     En cours
