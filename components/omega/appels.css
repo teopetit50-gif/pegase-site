@@ -65,19 +65,30 @@
 /* le script | les notes */
 .ap2-corps { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, 34%); min-height: 0; }
 .ap2-script { min-width: 0; padding: 20px 28px 24px 24px; border-right: 1px solid var(--v2-a-400); }
-.ap2-etapes { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 24px; }
-.ap2-etapes button { display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 10px 0 6px; border: 0; border-radius: 6px; background: transparent; color: var(--v2-gray-900); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s, color 0.15s; }
-.ap2-etapes button span { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--v2-a-500); font-family: var(--v2-mono); font-size: 10px; }
-.ap2-etapes button:hover { background: var(--v2-a-100); color: var(--v2-gray-1000); }
-.ap2-etapes button[aria-selected="true"] { background: var(--v2-a-200); color: var(--v2-gray-1000); }
-.ap2-etapes button[aria-selected="true"] span { background: var(--v2-gray-1000); box-shadow: none; color: var(--v2-bg-100); }
-.ap2-etapes button:focus-visible { outline: 0; box-shadow: var(--v2-anneau); }
-.ap2-phrase { margin: 0; max-width: 62ch; font-size: 19px; line-height: 30px; font-weight: 450; letter-spacing: -0.2px; color: var(--v2-gray-1000); }
-.ap2-conseil { margin: 14px 0 0; max-width: 70ch; font-size: 13px; line-height: 20px; color: var(--v2-gray-900); }
-.ap2-pistes { display: grid; gap: 6px; margin: 16px 0 0; padding: 0 0 0 18px; font-size: 13px; line-height: 20px; color: var(--v2-gray-1000); }
-.ap2-suite { display: inline-flex; align-items: center; gap: 6px; height: 28px; margin: 18px 0 0 -8px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; color: var(--v2-gray-1000); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s; }
-.ap2-suite:hover { background: var(--v2-a-200); }
-.ap2-suite:focus-visible { outline: 0; box-shadow: var(--v2-anneau); }
+/* le déroulé : un rail vertical, une pastille par étape (passée = cochée, en cours = pleine) */
+.ap2-deroule { margin: 0; padding: 0; list-style: none; }
+.ap2-deroule > li { position: relative; padding-bottom: 6px; }
+.ap2-deroule > li:not(:last-child)::before { content: ""; position: absolute; left: 11px; top: 30px; bottom: -2px; width: 1px; background: var(--v2-a-400); }
+.ap2-deroule > li[data-etat="fait"]:not(:last-child)::before { background: var(--v2-gray-700); }
+.ap2-deroule-tete { position: relative; display: grid; grid-template-columns: 22px auto minmax(0, 1fr); align-items: center; column-gap: 12px; width: 100%; min-height: 36px; padding: 6px 8px 6px 0; border: 0; border-radius: 6px; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.ap2-deroule-tete:hover .ap2-deroule-titre { color: var(--v2-gray-1000); }
+.ap2-deroule-tete:focus-visible { outline: 0; box-shadow: var(--v2-anneau); }
+.ap2-pastille { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--v2-bg-100); box-shadow: inset 0 0 0 1px var(--v2-a-500); color: var(--v2-gray-900); font-family: var(--v2-mono); font-size: 11px; font-weight: 500; transition: background 0.15s, color 0.15s, box-shadow 0.15s; }
+li[data-etat="fait"] .ap2-pastille { background: var(--v2-gray-700); box-shadow: none; color: var(--v2-bg-100); }
+li[data-etat="actif"] .ap2-pastille { background: var(--v2-gray-1000); box-shadow: 0 0 0 4px var(--v2-a-200); color: var(--v2-bg-100); }
+.ap2-deroule-titre { font-size: 14px; font-weight: 500; color: var(--v2-gray-900); white-space: nowrap; transition: color 0.15s; }
+li[data-etat="actif"] .ap2-deroule-titre { color: var(--v2-gray-1000); }
+li[data-etat="fait"] .ap2-deroule-titre { color: var(--v2-gray-900); }
+.ap2-apercu { min-width: 0; font-size: 13px; color: var(--v2-gray-700); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+li[data-etat="fait"] .ap2-apercu { text-decoration: line-through; text-decoration-color: var(--v2-a-500); }
+.ap2-deroule-corps { padding: 6px 0 18px 34px; }
+.ap2-replique { position: relative; margin: 0; max-width: 62ch; padding: 14px 16px; border-radius: 8px; background: var(--v2-a-100); box-shadow: inset 0 0 0 1px var(--v2-a-300); font-size: 17px; line-height: 27px; font-weight: 450; letter-spacing: -0.15px; color: var(--v2-gray-1000); }
+.ap2-conseil { margin: 12px 0 0; max-width: 70ch; font-size: 13px; line-height: 20px; color: var(--v2-gray-900); }
+.ap2-pistes { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 0; padding: 0; list-style: none; }
+.ap2-pistes li { display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border-radius: 6px; box-shadow: inset 0 0 0 1px var(--v2-a-400); font-size: 13px; color: var(--v2-gray-1000); }
+.ap2-dit { display: inline-flex; align-items: center; gap: 6px; height: 28px; margin-top: 14px; padding: 0 10px; border: 0; border-radius: 6px; background: transparent; box-shadow: inset 0 0 0 1px var(--v2-a-400); color: var(--v2-gray-1000); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s; }
+.ap2-dit:hover { background: var(--v2-a-200); }
+.ap2-dit:focus-visible { outline: 0; box-shadow: var(--v2-anneau); }
 .ap2-notes { display: flex; flex-direction: column; min-width: 0; padding: 20px 20px 16px; }
 .ap2-libelle { margin-bottom: 8px; font-size: 12px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: var(--v2-gray-900); }
 .ap2-zone { flex: 1; width: 100%; min-height: 160px; padding: 10px 12px; border: 0; border-radius: 8px; background: var(--v2-a-100); box-shadow: inset 0 0 0 1px var(--v2-a-300); color: var(--v2-gray-1000); font: inherit; font-size: 14px; line-height: 22px; resize: none; transition: box-shadow 0.15s, background 0.15s; }
@@ -118,7 +129,9 @@
   .ap2-actions { flex-wrap: wrap; }
   .ap2-numero { margin-right: auto; }
   .ap2-script { padding: 16px; }
-  .ap2-phrase { font-size: 17px; line-height: 26px; }
+  .ap2-replique { font-size: 16px; line-height: 25px; }
+  .ap2-deroule-corps { padding-left: 0; }
+  .ap2-apercu { display: none; }
   .ap2-notes { padding: 16px; }
   .ap2-pied { padding: 12px 16px; }
   .ap2-enregistrer { width: 100%; justify-content: center; margin-left: 0; }
