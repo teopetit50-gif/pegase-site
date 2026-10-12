@@ -21,8 +21,11 @@
    cadre à filet fin, en deux colonnes — à gauche la file d'appels (nom,
    commune, « à rappeler »), à droite la fiche du prospect comme un
    enregistrement d'Attio (nom, ligne grise, numéro, « Appeler », « ··· »),
-   le script en quatre temps et les notes côte à côte, l'issue dans une
-   barre en bas. Styles dans appels.css (préfixe ap2-).
+   le script et les notes côte à côte, l'issue dans une barre en bas.
+   Le script (12/10, retour de Teo sur les onglets soulignés) : un déroulé
+   vertical comme les étapes d'un déploiement Vercel — étapes passées
+   cochées, l'étape en cours ouverte (la réplique, le conseil, « C'est
+   dit »), les suivantes en une ligne d'aperçu. Styles dans appels.css (préfixe ap2-).
    11/10/2026 (2) — allégée sur les principes de la page Notes, même
    dessin : plus d'avatar, d'étiquette du moteur (il passe dans la ligne
    du prospect) ni de surtitre au-dessus de la phrase ; les liens Google,
@@ -39,7 +42,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Building2, CalendarDays, ChevronLeft, ChevronRight, ChevronsUpDown, LayoutGrid, MoreHorizontal, Phone, Plus, SkipForward } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Building2, CalendarDays, Check, ChevronLeft, ChevronRight, ChevronsUpDown, LayoutGrid, MoreHorizontal, Phone, Plus, SkipForward } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import "./appels.css";
 import { ItemMenu, MenuDeroulant, SectionMenu, SeparateurMenu } from "@/components/espace2/ui";
@@ -265,7 +268,11 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
                   <h2>{nom}</h2>
                   <p>
                     {[dirigeant, p.secteur, p.commune].filter(Boolean).join(" · ")}
-                    {p.moteurs[0] ? <span className="ap2-etiquette">{p.moteurs[0].toUpperCase()}</span> : null}
+                    {p.moteurs.map((m) => (
+                      <span key={m} className="ap2-etiquette">
+                        {m.toUpperCase()}
+                      </span>
+                    ))}
                   </p>
                 </div>
                 <div className="ap2-actions">
@@ -308,30 +315,42 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
               </header>
 
               <div className="ap2-corps">
-                {/* le script, en quatre temps */}
+                {/* le script : un déroulé vertical, comme les étapes d'un déploiement Vercel */}
                 <div className="ap2-script">
-                  <div className="ap2-etapes" role="tablist" aria-label="Temps de l'appel">
-                    {ETAPES.map((e, i) => (
-                      <button key={e} type="button" role="tab" aria-selected={i === etape} onClick={() => setEtape(i)}>
-                        <span>{i + 1}</span>
-                        {e}
-                      </button>
-                    ))}
-                  </div>
-                  <blockquote className="ap2-phrase">{textes[etape]}</blockquote>
-                  <p className="ap2-conseil">{CONSEILS[etape]}</p>
-                  {etape === 3 ? (
-                    <ul className="ap2-pistes">
-                      {douleurs.map((d) => (
-                        <li key={d}>{d.charAt(0).toUpperCase() + d.slice(1)}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <button type="button" className="ap2-suite" onClick={() => setEtape(etape + 1)}>
-                      Suite : {ETAPES[etape + 1]}
-                      <ArrowRight width={14} height={14} aria-hidden="true" />
-                    </button>
-                  )}
+                  <ol className="ap2-deroule" aria-label="Le déroulé de l'appel">
+                    {ETAPES.map((e, i) => {
+                      const etat = i < etape ? "fait" : i === etape ? "actif" : "a-venir";
+                      return (
+                        <li key={e} data-etat={etat}>
+                          <button type="button" className="ap2-deroule-tete" aria-expanded={i === etape} onClick={() => setEtape(i)}>
+                            <span className="ap2-pastille" aria-hidden="true">
+                              {i < etape ? <Check width={11} height={11} strokeWidth={3} /> : i + 1}
+                            </span>
+                            <span className="ap2-deroule-titre">{e}</span>
+                            {i !== etape ? <span className="ap2-apercu">{textes[i]}</span> : null}
+                          </button>
+                          {i === etape ? (
+                            <div className="ap2-deroule-corps">
+                              <p className="ap2-replique">{textes[i]}</p>
+                              <p className="ap2-conseil">{CONSEILS[i]}</p>
+                              {i === 3 ? (
+                                <ul className="ap2-pistes" aria-label="Les douleurs à creuser">
+                                  {douleurs.map((d) => (
+                                    <li key={d}>{d.charAt(0).toUpperCase() + d.slice(1)}</li>
+                                  ))}
+                                </ul>
+                              ) : (
+                                <button type="button" className="ap2-dit" onClick={() => setEtape(i + 1)}>
+                                  <Check width={14} height={14} strokeWidth={2.2} aria-hidden="true" />
+                                  C&apos;est dit — {ETAPES[i + 1]}
+                                </button>
+                              )}
+                            </div>
+                          ) : null}
+                        </li>
+                      );
+                    })}
+                  </ol>
                 </div>
 
                 {/* les notes de l'échange */}
