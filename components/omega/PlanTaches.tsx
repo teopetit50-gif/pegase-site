@@ -15,13 +15,19 @@
    Les données sont celles de omega_lignes (tableaux « plan » et
    « ajouts ») ; tout se modifie sur place et s'enregistre aussitôt.
    « À préparer » et « Note » sont deux clés de plus dans `donnees`.
+   11/10/2026 (2) — allégée sur les principes de la page Notes, même
+   dessin : une ligne par tâche (titre, date, statut seulement s'il n'est
+   pas « À faire »), plus d'étiquette de catégorie ni de sous-ligne, plus
+   de thème à côté de la semaine, plus de bouton « Filtres » ; la fiche
+   n'apparaît à droite qu'au clic sur une tâche (sinon la liste prend
+   toute la largeur).
    11/10/2026 — allégée à la demande de Teo, même dessin : plus de
    sous-titre ni de frise des trois phases au-dessus de la liste.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { CalendarDays, Check, ChevronDown, ChevronRight, Columns3, List, ListFilter, Plus, Rows3, Search, Tag, Trash2, X } from "lucide-react";
+import { CalendarDays, Check, ChevronDown, ChevronRight, Columns3, List, Plus, Rows3, Search, Tag, Trash2, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import Choix from "./Choix";
 import type { Ligne } from "./Tableaux";
@@ -83,7 +89,6 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
   const [lignes, setLignes] = useState(() => initiales.filter((l) => l.tableau === "plan" || l.tableau === "ajouts"));
   const [maintenant] = useState(() => Date.now());
   const [filtre, setFiltre] = useState<Filtre>("toutes");
-  const [categorie, setCategorie] = useState("");
   const [recherche, setRecherche] = useState("");
   const [vue, setVue] = useState<"liste" | "colonnes">("liste");
   const [choix, setChoix] = useState<string | null>(null);
@@ -151,12 +156,11 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
     const q = recherche.trim().toLowerCase();
     return lignes
       .filter((l) => (filtre === "a_faire" ? !["Fait", "Bloqué"].includes(l.donnees["Statut"]) : filtre === "bloquees" ? l.donnees["Statut"] === "Bloqué" : filtre === "terminees" ? l.donnees["Statut"] === "Fait" : true))
-      .filter((l) => !categorie || l.donnees["Catégorie"] === categorie)
       .filter((l) => !q || `${l.donnees["Tâche"] ?? ""} ${l.donnees["N°"] ?? ""}`.toLowerCase().includes(q))
       .sort((a, b) => (echeance(a.donnees["Échéance"])?.getTime() ?? 9e15) - (echeance(b.donnees["Échéance"])?.getTime() ?? 9e15) || (a.tableau === b.tableau ? a.ordre - b.ordre : a.tableau === "plan" ? -1 : 1));
-  }, [lignes, filtre, categorie, recherche]);
+  }, [lignes, filtre, recherche]);
 
-  const filtrage = filtre !== "toutes" || !!categorie || !!recherche.trim();
+  const filtrage = filtre !== "toutes" || !!recherche.trim();
   const blocs = BLOCS.map((b, i) => ({ i, b, liste: visibles.filter((l) => blocDe(l.donnees["Semaine"]) === i) })).filter((x) => x.liste.length);
   const blocsAffiches = tout || filtrage ? blocs : blocs.filter((x) => x.i <= blocCourant + 1);
   const restants = blocs.length - blocsAffiches.length;
@@ -168,7 +172,7 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
 
 
   return (
-    <div className="v2-page v2-arrivee om-page om-page--large om-pt">
+    <div className="v2-page v2-arrivee om-page om-page--large om-pt om-pt-simple">
       <div className="v2-tete om-pt-tete">
         <div>
           <h1>Tâches</h1>
@@ -211,7 +215,6 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
               </button>
             ) : null}
           </label>
-          <Choix forme="bouton" etiquette="Catégorie" icone={<ListFilter {...I} />} valeur={categorie} onChange={setCategorie} vide="Filtres" options={CATEGORIES.filter((c) => lignes.some((l) => l.donnees["Catégorie"] === c))} actif={!!categorie} />
           <div className="om-pt-affichage" role="group" aria-label="Affichage">
             <button type="button" aria-pressed={vue === "liste"} aria-label="En liste" onClick={() => setVue("liste")}>
               <List {...I} />
@@ -226,7 +229,7 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
         {etat}
       </p>
 
-      <div className="om-pt-grille" data-colonnes={vue === "colonnes" ? "" : undefined}>
+      <div className="om-pt-grille" data-colonnes={vue === "colonnes" ? "" : undefined} data-fiche={ficheOuverte ? "" : undefined}>
         <div className="om-pt-principal">
           {vue === "colonnes" ? (
             <div className="om-pt-tableau">
@@ -267,13 +270,11 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
                 const ouvertes = filtre === "terminees" ? liste : liste.filter(ouverte);
                 const terminees = filtre === "terminees" ? [] : liste.filter((l) => !ouverte(l));
                 const montrerFaites = faitesOuvertes.includes(i);
-                const dominante = Object.entries(liste.reduce<Record<string, number>>((acc, l) => ({ ...acc, [l.donnees["Catégorie"]]: (acc[l.donnees["Catégorie"]] ?? 0) + 1 }), {})).sort((x, y) => y[1] - x[1])[0]?.[0];
                 return (
                   <section key={i} className="v2-carte om-pt-semaine" aria-label={libelleBloc(b)}>
                     <button type="button" className="om-pt-semaine-tete" aria-expanded={!replie} onClick={() => setReplies((r) => (replie ? r.filter((x) => x !== i) : [...r, i]))}>
                       <ChevronDown {...I} className="om-pt-chevron" />
                       <span className="om-pt-semaine-nom">{libelleBloc(b)}</span>
-                      {dominante ? <span className="om-pt-semaine-theme">{dominante}</span> : null}
                       {i === blocCourant ? <span className="om-pt-maintenant">Cette semaine</span> : null}
                       <span className="om-pt-semaine-dates">{datesBloc(b)}</span>
                     </button>
@@ -339,19 +340,20 @@ function LigneTache({ l, choisie, maintenant, ouvrir, cocher }: { l: Ligne; choi
       </span>
       <button type="button" className="om-pt-corps" onClick={ouvrir}>
         <span className="om-pt-texte">
-          <span className="om-pt-titre">{titre || "Nouvelle tâche"}</span>
-          {sous ? <span className="om-pt-sous">{sous}</span> : null}
-          <span className="om-pt-sous om-pt-sous--etroit">
-            {l.donnees["Catégorie"]} · {dateCourte(l.donnees["Échéance"])}
+          <span className="om-pt-titre" title={sous || undefined}>
+            {titre || "Nouvelle tâche"}
           </span>
         </span>
-        <span className="om-pt-etiquette">{l.donnees["Catégorie"]}</span>
         <span className="om-pt-date" data-retard={retard ? "" : undefined}>
           {dateCourte(l.donnees["Échéance"])}
         </span>
         <span className="om-pt-statut">
-          <span className="om-pt-point" data-teinte={teinte(statut)} aria-hidden="true" />
-          {statut}
+          {statut === "À faire" ? null : (
+            <>
+              <span className="om-pt-point" data-teinte={teinte(statut)} aria-hidden="true" />
+              {statut}
+            </>
+          )}
         </span>
         <ChevronRight {...I} className="om-pt-fleche" />
       </button>

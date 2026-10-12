@@ -15,6 +15,11 @@
      · les aides à la conversation : les objections les plus entendues,
        leur réponse, « +1 » pour compter celle qu'on vient d'entendre.
    Historique, Rappels et Analyse lisent les mêmes lignes.
+   11/10/2026 (2) — allégée sur les principes de la page Notes, même
+   dessin : plus d'avatar, d'étiquette du moteur (il passe dans la ligne
+   du prospect) ni de surtitre au-dessus de la phrase ; les liens Google,
+   Avis, Fiche passent dans « ··· » ; le compteur garde appels et
+   rendez-vous.
    11/10/2026 — allégée à la demande de Teo, même dessin : plus d'aides à
    la conversation, de « Si ça bloque » ni des trois cartes du bas
    (objections et méthode restent dans le sélecteur ⌃⌄ de la page,
@@ -26,17 +31,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Building2, CalendarDays, ChevronLeft, ChevronRight, ChevronsUpDown, LayoutGrid, MoreHorizontal, PenLine, Phone, Plus, SkipForward } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Building2, CalendarDays, ChevronLeft, ChevronRight, ChevronsUpDown, LayoutGrid, MoreHorizontal, Phone, Plus, SkipForward } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { ItemMenu, MenuDeroulant, SectionMenu, SeparateurMenu } from "@/components/espace2/ui";
-import { ROLE } from "./Prospects";
 import { CONSEILS, ETAPES, textesScript } from "./ScriptAppel";
 import type { Ligne } from "./Tableaux";
 import type { Prospect, Secteur } from "@/lib/omega/donnees";
 
 const I = { width: 16, height: 16, strokeWidth: 1.6, "aria-hidden": true } as const;
 const jour = (d: Date) => d.toISOString().slice(0, 10);
-const SOURCES = ["Demander la permission", "Raconter le problème", "Caler le rendez-vous", "Qualifier"];
 
 
 type Issue = { cle: string; libelle: string; statut: string; date?: "rdv" | "rappel" };
@@ -85,7 +88,6 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
 
   const tousAppels = lignes.filter((l) => l.tableau === "appels").sort((a, b) => (b.donnees["Date"] ?? "").localeCompare(a.donnees["Date"] ?? ""));
   const appels = tousAppels.filter((l) => (l.donnees["Date"] ?? "").startsWith(aujourdhui));
-  const decroches = appels.filter((l) => l.donnees["Issue"] !== "Pas de réponse").length;
   const rdv = appels.filter((l) => l.donnees["Issue"] === "RDV pris").length;
   const objections = lignes.filter((l) => l.tableau === "objections").sort((a, b) => Number(b.donnees["Fois"] || 0) - Number(a.donnees["Fois"] || 0));
 
@@ -160,7 +162,7 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
   const rechercheGoogle = p ? `https://www.google.com/search?q=${encodeURIComponent(`${nom} ${p.commune ?? ""}`)}` : "";
 
   return (
-    <div className="v2-page v2-arrivee om-page om-page--large om-ap">
+    <div className="v2-page v2-arrivee om-page om-page--large om-ap om-ap-simple">
       {/* ——— en-tête ——— */}
       <div className="om-ap-tete">
         <div>
@@ -206,7 +208,7 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
           ))}
         </div>
         <p className="om-ap-compteurs">
-          <strong>{appels.length}</strong> appel{appels.length > 1 ? "s" : ""} <span aria-hidden="true">·</span> <strong>{decroches}</strong> échange{decroches > 1 ? "s" : ""} <span aria-hidden="true">·</span> <strong>{rdv}</strong> rendez-vous <span className="om-ap-gris">aujourd&apos;hui</span>
+          <strong>{appels.length}</strong> appel{appels.length > 1 ? "s" : ""} <span aria-hidden="true">·</span> <strong>{rdv}</strong> rendez-vous <span className="om-ap-gris">aujourd&apos;hui</span>
         </p>
       </div>
 
@@ -249,35 +251,33 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
             {/* ——— la fiche d'appel ——— */}
             <section key={p.id} className="v2-carte om-ap-fiche" aria-label={`Appel : ${nom}`}>
               <div className="om-ap-fiche-tete">
-                <span className="om-ap-avatar" aria-hidden="true">
-                  {initiales(nom)}
-                </span>
                 <div className="om-ap-identite">
                   <h2>{nom}</h2>
-                  <p>{[dirigeant, p.secteur, p.commune, p.effectif].filter(Boolean).join(" · ")}</p>
+                  <p>{[dirigeant, p.secteur, p.commune].filter(Boolean).join(" · ")}{p.moteurs[0] ? <span className="om-ap-a-vendre"> · {p.moteurs.map((m) => m.toUpperCase()).join(", ")}</span> : null}</p>
                 </div>
-                <nav className="om-ap-liens" aria-label="Préparer l'appel">
-                  {p.site ? (
-                    <a href={p.site.startsWith("http") ? p.site : `https://${p.site}`} target="_blank" rel="noreferrer">
-                      Site web <ArrowUpRight width={12} height={12} aria-hidden="true" />
-                    </a>
-                  ) : null}
-                  <a href={rechercheGoogle} target="_blank" rel="noreferrer">
-                    Google <ArrowUpRight width={12} height={12} aria-hidden="true" />
-                  </a>
-                  <a href={`https://www.google.com/maps/search/${encodeURIComponent(`${nom} ${p.commune ?? ""}`)}`} target="_blank" rel="noreferrer">
-                    Avis <ArrowUpRight width={12} height={12} aria-hidden="true" />
-                  </a>
-                  <a href={`https://annuaire-entreprises.data.gouv.fr/rechercher?terme=${encodeURIComponent(p.entreprise)}`} target="_blank" rel="noreferrer">
-                    Fiche <ArrowUpRight width={12} height={12} aria-hidden="true" />
-                  </a>
-                </nav>
                 <span className="om-ap-numero">{p.telephone}</span>
                 <a className="v2-btn v2-btn--petit v2-btn--primaire om-ap-appeler" href={`tel:${p.telephone}`}>
                   <Phone {...I} />
                   Appeler
                 </a>
-                <MenuDeroulant etiquette="Autres actions" largeur={220} declencheur={<MoreHorizontal {...I} />}>
+                <MenuDeroulant etiquette="Préparer et autres actions" largeur={240} declencheur={<MoreHorizontal {...I} />}>
+                  <SectionMenu titre="Préparer l'appel">
+                    {p.site ? (
+                      <ItemMenu id="site" href={p.site.startsWith("http") ? p.site : `https://${p.site}`} target="_blank" icone={<ArrowUpRight {...I} />}>
+                        Site web
+                      </ItemMenu>
+                    ) : null}
+                    <ItemMenu id="google" href={rechercheGoogle} target="_blank" icone={<ArrowUpRight {...I} />}>
+                      Google
+                    </ItemMenu>
+                    <ItemMenu id="avis" href={`https://www.google.com/maps/search/${encodeURIComponent(`${nom} ${p.commune ?? ""}`)}`} target="_blank" icone={<ArrowUpRight {...I} />}>
+                      Avis
+                    </ItemMenu>
+                    <ItemMenu id="fiche" href={`https://annuaire-entreprises.data.gouv.fr/rechercher?terme=${encodeURIComponent(p.entreprise)}`} target="_blank" icone={<ArrowUpRight {...I} />}>
+                      Fiche de l&apos;entreprise
+                    </ItemMenu>
+                  </SectionMenu>
+                  <SeparateurMenu />
                   <ItemMenu id="passer" icone={<SkipForward {...I} />} onAction={() => suivant(1)}>
                     Passer sans noter
                   </ItemMenu>
@@ -290,14 +290,6 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
                 </MenuDeroulant>
               </div>
 
-              <div className="om-ap-vente">
-                {p.moteurs.map((m, i) => (
-                  <Link key={m} href={`/omega/${m.toLowerCase()}`} className="om-ap-moteur" data-premier={i === 0 ? "" : undefined}>
-                    <b>{m.toUpperCase()}</b>
-                    <span>{ROLE[m] ?? ""}</span>
-                  </Link>
-                ))}
-              </div>
 
               <div className="om-ap-corps">
                 <div className="om-ap-script">
@@ -309,7 +301,6 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
                       </button>
                     ))}
                   </div>
-                  <p className="om-ap-sur">{SOURCES[etape]}</p>
                   <blockquote className="om-ap-phrase">{textes[etape]}</blockquote>
                   <p className="om-ap-conseil">{CONSEILS[etape]}</p>
                   {etape === 3 ? (
@@ -332,7 +323,6 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
                 <div className="om-ap-notes">
                   <div className="om-ap-notes-tete">
                     <h3>Notes de l&apos;échange</h3>
-                    <PenLine {...I} />
                   </div>
                   <textarea className="om-ap-cahier" rows={6} placeholder="Ce qu'il a dit, ce qui l'intéresse, quand rappeler…" aria-label="Notes de l'échange" value={note} onChange={(e) => setNote(e.target.value)} />
                   <button type="button" className="om-ap-lien-bleu" onClick={creerTache}>
