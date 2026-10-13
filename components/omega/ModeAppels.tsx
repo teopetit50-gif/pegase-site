@@ -15,6 +15,14 @@
      · les aides à la conversation : les objections les plus entendues,
        leur réponse, « +1 » pour compter celle qu'on vient d'entendre.
    Historique, Rappels et Analyse lisent les mêmes lignes.
+   13/10/2026 — refaite encore, retour de Teo : « un truc simple, vraiment
+   simple, épuré et pro ; là il faut défiler toute la page pour tout voir ».
+   Tout tient dans un écran, sans défiler : une seule barre (vue | chiffres,
+   secteur, sélecteur ⌃⌄), puis un cadre qui remplit la hauteur — le
+   prospect sur une ligne (‹ 1 / 40 ›, numéro, « Appeler », « ··· »), le
+   script (les quatre temps sur une ligne, la réplique, « C'est dit ») et
+   les notes côte à côte, l'issue en bas. Plus de grand titre ni de file
+   à gauche. Styles dans appels.css (préfixe ap3-).
    12/10/2026 — refaite à la demande de Teo (« je n'aime pas du tout le
    design de la page Appels, fais un autre truc, sobre et propre comme
    Vercel / Attio ») : l'en-tête et les vues comme avant, puis un seul
@@ -173,27 +181,34 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
   const lien = (s?: string) => (s ? `/omega/appels?secteur=${encodeURIComponent(s)}` : "/omega/appels");
   const rechercheGoogle = p ? `https://www.google.com/search?q=${encodeURIComponent(`${nom} ${p.commune ?? ""}`)}` : "";
 
-  const jourLong = maintenant.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }).replace(/^./, (c) => c.toUpperCase());
+  const position = Math.min(file.length, Math.max(1, initiale.length - file.length + 1));
 
   return (
-    <div className="v2-page v2-arrivee om-page om-page--large om-ap ap2-page">
-      {/* ——— l'en-tête : le titre et la date ; la vue et le secteur ——— */}
-      <div className="ap2-tete">
-        <div>
-          <h1>Appels</h1>
-          <p>{jourLong}</p>
+    <div className="v2-page v2-arrivee om-ap ap3-page">
+      <h1 className="v2-sr">Appels</h1>
+
+      {/* ——— une seule barre : la vue | le secteur et les chiffres du jour ——— */}
+      <div className="ap3-barre">
+        <div className="ap3-segments" role="tablist" aria-label="Vue">
+          {VUES.map((v) => (
+            <button key={v.cle} type="button" role="tab" aria-selected={vue === v.cle} onClick={() => setVue(v.cle)}>
+              {v.libelle}
+              {v.cle === "rappels" && file.some((x) => x.statut === "Rappeler") ? <span className="ap3-compte">{file.filter((x) => x.statut === "Rappeler").length}</span> : null}
+            </button>
+          ))}
         </div>
-        <div className="ap2-tete-droite">
-          {selecteur}
+        <div className="ap3-barre-droite">
+          <p className="ap3-chiffres">
+            <b>{appels.length}</b> appel{appels.length > 1 ? "s" : ""} · <b>{rdv}</b> RDV aujourd&apos;hui
+          </p>
           <MenuDeroulant
             etiquette={`Secteur : ${actif?.secteur ?? "Tous les secteurs"}. Changer de secteur`}
-            classe="v2-portee om-portee-secteur om-ap-bouton"
+            classe="ap3-bouton"
             placement="bottom end"
-            largeur={340}
+            largeur={320}
             declencheur={
               <>
-                {actif ? <Building2 {...I} /> : <LayoutGrid {...I} />}
-                <span className="v2-portee-nom">{actif?.secteur ?? "Tous les secteurs"}</span>
+                {actif?.secteur ?? "Tous les secteurs"}
                 <ChevronsUpDown width={14} height={14} aria-hidden="true" />
               </>
             }
@@ -209,238 +224,194 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
               ))}
             </SectionMenu>
           </MenuDeroulant>
+          {selecteur}
         </div>
       </div>
 
-      {/* ——— les vues et le compteur du jour ——— */}
-      <div className="ap2-nav">
-        <div className="ap2-segments" role="tablist" aria-label="Vue">
-          {VUES.map((v) => (
-            <button key={v.cle} type="button" role="tab" aria-selected={vue === v.cle} onClick={() => setVue(v.cle)}>
-              {v.libelle}
-              {v.cle === "rappels" && file.some((x) => x.statut === "Rappeler") ? <span className="ap2-compte">{file.filter((x) => x.statut === "Rappeler").length}</span> : null}
-            </button>
-          ))}
-        </div>
-        <p className="ap2-chiffres">
-          <span>
-            <b>{appels.length}</b> appel{appels.length > 1 ? "s" : ""}
-          </span>
-          <span>
-            <b>{rdv}</b> rendez-vous
-          </span>
+      {etat ? (
+        <p className="ap3-etat" role="status">
+          {etat}
         </p>
-      </div>
-
-      <p className="om-etat ap2-etat" role="status">
-        {etat}
-      </p>
+      ) : (
+        <p className="v2-sr" role="status" />
+      )}
 
       {vue === "session" ? (
         p ? (
-          <div className="ap2">
-            {/* ——— la file : qui appeler ensuite ——— */}
-            <aside className="ap2-file" aria-label="File d'appels">
-              <div className="ap2-file-tete">
-                <span>File d&apos;appels</span>
-                <span className="ap2-compte">{file.length}</span>
-              </div>
-              <ul>
-                {file.slice(0, 40).map((x, i) => (
-                  <li key={x.id}>
-                    <button type="button" className="ap2-file-ligne" aria-current={i === 0 ? "true" : undefined} onClick={() => choisirProspect(x.id)}>
-                      <span className="ap2-file-nom">{x.enseigne || x.entreprise}</span>
-                      <span className="ap2-file-sous">
-                        {x.statut === "Rappeler" ? <span className="ap2-point" aria-hidden="true" /> : null}
-                        {x.statut === "Rappeler" ? "À rappeler · " : ""}
-                        {x.commune ?? x.secteur}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </aside>
-
-            {/* ——— la fiche du prospect ——— */}
-            <section key={p.id} className="ap2-fiche" aria-label={`Appel : ${nom}`}>
-              <header className="ap2-fiche-tete">
-                <div className="ap2-identite">
-                  <h2>{nom}</h2>
-                  <p>
-                    {[dirigeant, p.secteur, p.commune].filter(Boolean).join(" · ")}
-                    {p.moteurs.map((m) => (
-                      <span key={m} className="ap2-etiquette">
-                        {m.toUpperCase()}
-                      </span>
-                    ))}
-                  </p>
-                </div>
-                <div className="ap2-actions">
-                  <span className="ap2-fleches">
-                    <button type="button" className="ap2-icone" aria-label="Prospect précédent" onClick={() => suivant(-1)}>
-                      <ChevronLeft {...I} width={14} height={14} />
-                    </button>
-                    <button type="button" className="ap2-icone" aria-label="Prospect suivant" onClick={() => suivant(1)}>
-                      <ChevronRight {...I} width={14} height={14} />
-                    </button>
-                  </span>
-                  <span className="ap2-numero">{p.telephone}</span>
-                  <a className="ap2-appeler" href={`tel:${p.telephone}`}>
-                    <Phone {...I} width={14} height={14} />
-                    Appeler
-                  </a>
-                  <MenuDeroulant etiquette="Préparer et autres actions" classe="ap2-icone ap2-icone--cadre" largeur={240} declencheur={<MoreHorizontal {...I} />}>
-                    <SectionMenu titre="Préparer l'appel">
-                      {p.site ? (
-                        <ItemMenu id="site" href={p.site.startsWith("http") ? p.site : `https://${p.site}`} target="_blank" icone={<ArrowUpRight {...I} />}>
-                          Site web
-                        </ItemMenu>
-                      ) : null}
-                      <ItemMenu id="google" href={rechercheGoogle} target="_blank" icone={<ArrowUpRight {...I} />}>
-                        Google
-                      </ItemMenu>
-                      <ItemMenu id="avis" href={`https://www.google.com/maps/search/${encodeURIComponent(`${nom} ${p.commune ?? ""}`)}`} target="_blank" icone={<ArrowUpRight {...I} />}>
-                        Avis
-                      </ItemMenu>
-                      <ItemMenu id="fiche" href={`https://annuaire-entreprises.data.gouv.fr/rechercher?terme=${encodeURIComponent(p.entreprise)}`} target="_blank" icone={<ArrowUpRight {...I} />}>
-                        Fiche de l&apos;entreprise
-                      </ItemMenu>
-                    </SectionMenu>
-                    <SeparateurMenu />
-                    <ItemMenu id="passer" icone={<SkipForward {...I} />} onAction={() => suivant(1)}>
-                      Passer sans noter
-                    </ItemMenu>
-                  </MenuDeroulant>
-                </div>
-              </header>
-
-              <div className="ap2-corps">
-                {/* le script : un déroulé vertical, comme les étapes d'un déploiement Vercel */}
-                <div className="ap2-script">
-                  <ol className="ap2-deroule" aria-label="Le déroulé de l'appel">
-                    {ETAPES.map((e, i) => {
-                      const etat = i < etape ? "fait" : i === etape ? "actif" : "a-venir";
-                      return (
-                        <li key={e} data-etat={etat}>
-                          <button type="button" className="ap2-deroule-tete" aria-expanded={i === etape} onClick={() => setEtape(i)}>
-                            <span className="ap2-pastille" aria-hidden="true">
-                              {i < etape ? <Check width={11} height={11} strokeWidth={3} /> : i + 1}
-                            </span>
-                            <span className="ap2-deroule-titre">{e}</span>
-                            {i !== etape ? <span className="ap2-apercu">{textes[i]}</span> : null}
-                          </button>
-                          {i === etape ? (
-                            <div className="ap2-deroule-corps">
-                              <p className="ap2-replique">{textes[i]}</p>
-                              <p className="ap2-conseil">{CONSEILS[i]}</p>
-                              {i === 3 ? (
-                                <ul className="ap2-pistes" aria-label="Les douleurs à creuser">
-                                  {douleurs.map((d) => (
-                                    <li key={d}>{d.charAt(0).toUpperCase() + d.slice(1)}</li>
-                                  ))}
-                                </ul>
-                              ) : (
-                                <button type="button" className="ap2-dit" onClick={() => setEtape(i + 1)}>
-                                  <Check width={14} height={14} strokeWidth={2.2} aria-hidden="true" />
-                                  C&apos;est dit — {ETAPES[i + 1]}
-                                </button>
-                              )}
-                            </div>
-                          ) : null}
-                        </li>
-                      );
-                    })}
-                  </ol>
-                </div>
-
-                {/* les notes de l'échange */}
-                <div className="ap2-notes">
-                  <label htmlFor="ap2-notes" className="ap2-libelle">
-                    Notes
-                  </label>
-                  <textarea id="ap2-notes" className="ap2-zone" placeholder="Ce qu'il a dit, ce qui l'intéresse, quand rappeler…" value={note} onChange={(e) => setNote(e.target.value)} />
-                  <button type="button" className="ap2-lien" onClick={creerTache}>
-                    <Plus {...I} width={14} height={14} />
-                    Créer une tâche
-                  </button>
-                </div>
-              </div>
-
-              {/* l'issue de l'appel */}
-              <footer className="ap2-pied">
-                <div className="ap2-issues" role="radiogroup" aria-label="Issue de l'appel">
-                  {ISSUES.map((x) => (
-                    <button key={x.cle} type="button" role="radio" aria-checked={issue?.cle === x.cle} onClick={() => setIssue(x)}>
-                      {x.libelle}
-                    </button>
+          <section key={p.id} className="ap3" aria-label={`Appel : ${nom}`}>
+            {/* le prospect, sur une ligne */}
+            <header className="ap3-tete">
+              <div className="ap3-qui">
+                <h2>{nom}</h2>
+                <p>
+                  {[dirigeant, p.secteur, p.commune].filter(Boolean).join(" · ")}
+                  {p.moteurs.map((m) => (
+                    <span key={m} className="ap3-etiquette">
+                      {m.toUpperCase()}
+                    </span>
                   ))}
-                  <MenuDeroulant etiquette="Autres issues" classe="ap2-issue-autre" placement="top start" largeur={200} declencheur={issue && AUTRES.includes(issue) ? <span>{issue.libelle}</span> : <MoreHorizontal {...I} width={14} height={14} />}>
-                    {AUTRES.map((x) => (
-                      <ItemMenu key={x.cle} id={x.cle} onAction={() => setIssue(x)}>
-                        {x.libelle}
+                </p>
+              </div>
+              <div className="ap3-actions">
+                <span className="ap3-position">
+                  <button type="button" className="ap3-icone" aria-label="Prospect précédent" onClick={() => suivant(-1)}>
+                    <ChevronLeft {...I} width={14} height={14} />
+                  </button>
+                  <span>
+                    {position} / {Math.max(file.length, position)}
+                  </span>
+                  <button type="button" className="ap3-icone" aria-label="Prospect suivant" onClick={() => suivant(1)}>
+                    <ChevronRight {...I} width={14} height={14} />
+                  </button>
+                </span>
+                <span className="ap3-numero">{p.telephone}</span>
+                <a className="ap3-appeler" href={`tel:${p.telephone}`}>
+                  <Phone {...I} width={14} height={14} />
+                  Appeler
+                </a>
+                <MenuDeroulant etiquette="Préparer et autres actions" classe="ap3-icone" largeur={240} declencheur={<MoreHorizontal {...I} />}>
+                  <SectionMenu titre="Préparer l'appel">
+                    {p.site ? (
+                      <ItemMenu id="site" href={p.site.startsWith("http") ? p.site : `https://${p.site}`} target="_blank" icone={<ArrowUpRight {...I} />}>
+                        Site web
                       </ItemMenu>
+                    ) : null}
+                    <ItemMenu id="google" href={rechercheGoogle} target="_blank" icone={<ArrowUpRight {...I} />}>
+                      Google
+                    </ItemMenu>
+                    <ItemMenu id="avis" href={`https://www.google.com/maps/search/${encodeURIComponent(`${nom} ${p.commune ?? ""}`)}`} target="_blank" icone={<ArrowUpRight {...I} />}>
+                      Avis
+                    </ItemMenu>
+                    <ItemMenu id="fiche" href={`https://annuaire-entreprises.data.gouv.fr/rechercher?terme=${encodeURIComponent(p.entreprise)}`} target="_blank" icone={<ArrowUpRight {...I} />}>
+                      Fiche de l&apos;entreprise
+                    </ItemMenu>
+                  </SectionMenu>
+                  <SeparateurMenu />
+                  <ItemMenu id="passer" icone={<SkipForward {...I} />} onAction={() => suivant(1)}>
+                    Passer sans noter
+                  </ItemMenu>
+                </MenuDeroulant>
+              </div>
+            </header>
+
+            {/* le script | les notes */}
+            <div className="ap3-corps">
+              <div className="ap3-script">
+                <ol className="ap3-etapes" aria-label="Temps de l'appel">
+                  {ETAPES.map((e, i) => (
+                    <li key={e} data-etat={i < etape ? "fait" : i === etape ? "actif" : undefined}>
+                      <button type="button" aria-current={i === etape ? "step" : undefined} onClick={() => setEtape(i)}>
+                        <span className="ap3-rond" aria-hidden="true">
+                          {i < etape ? <Check width={10} height={10} strokeWidth={3} /> : i + 1}
+                        </span>
+                        {e}
+                      </button>
+                    </li>
+                  ))}
+                </ol>
+                <p className="ap3-replique">{textes[etape]}</p>
+                <p className="ap3-conseil">{CONSEILS[etape]}</p>
+                {etape === 3 ? (
+                  <ul className="ap3-pistes" aria-label="Les douleurs à creuser">
+                    {douleurs.map((d) => (
+                      <li key={d}>{d.charAt(0).toUpperCase() + d.slice(1)}</li>
                     ))}
-                  </MenuDeroulant>
-                </div>
-                {issue?.date ? (
-                  <label className="ap2-date">
-                    <CalendarDays {...I} width={14} height={14} />
-                    <input type="datetime-local" aria-label={issue.date === "rdv" ? "Date et heure du rendez-vous" : "Date et heure du rappel"} value={dateRdv} onChange={(e) => setDateRdv(e.target.value)} />
-                  </label>
-                ) : null}
-                <button type="button" className="ap2-enregistrer" disabled={!issue || envoi} onClick={enregistrer}>
-                  Enregistrer et suivant
-                  <ArrowRight {...I} width={14} height={14} />
+                  </ul>
+                ) : (
+                  <button type="button" className="ap3-dit" onClick={() => setEtape(etape + 1)}>
+                    C&apos;est dit
+                    <ArrowRight width={14} height={14} aria-hidden="true" />
+                  </button>
+                )}
+              </div>
+
+              <div className="ap3-notes">
+                <textarea className="ap3-zone" aria-label="Notes de l'échange" placeholder="Notes : ce qu'il a dit, quand rappeler…" value={note} onChange={(e) => setNote(e.target.value)} />
+                <button type="button" className="ap3-lien" onClick={creerTache}>
+                  <Plus {...I} width={14} height={14} />
+                  Créer une tâche
                 </button>
-              </footer>
-            </section>
-          </div>
+              </div>
+            </div>
+
+            {/* l'issue */}
+            <footer className="ap3-pied">
+              <div className="ap3-issues" role="radiogroup" aria-label="Issue de l'appel">
+                {ISSUES.map((x) => (
+                  <button key={x.cle} type="button" role="radio" aria-checked={issue?.cle === x.cle} onClick={() => setIssue(x)}>
+                    {x.libelle}
+                  </button>
+                ))}
+                <MenuDeroulant etiquette="Autres issues" classe="ap3-issue-autre" placement="top start" largeur={200} declencheur={issue && AUTRES.includes(issue) ? <span>{issue.libelle}</span> : <MoreHorizontal {...I} width={14} height={14} />}>
+                  {AUTRES.map((x) => (
+                    <ItemMenu key={x.cle} id={x.cle} onAction={() => setIssue(x)}>
+                      {x.libelle}
+                    </ItemMenu>
+                  ))}
+                </MenuDeroulant>
+              </div>
+              {issue?.date ? (
+                <label className="ap3-date">
+                  <CalendarDays {...I} width={14} height={14} />
+                  <input type="datetime-local" aria-label={issue.date === "rdv" ? "Date et heure du rendez-vous" : "Date et heure du rappel"} value={dateRdv} onChange={(e) => setDateRdv(e.target.value)} />
+                </label>
+              ) : null}
+              <button type="button" className="ap3-enregistrer" disabled={!issue || envoi} onClick={enregistrer}>
+                Enregistrer et suivant
+                <ArrowRight {...I} width={14} height={14} />
+              </button>
+            </footer>
+          </section>
         ) : (
-          <section className="ap2 ap2--vide">
+          <section className="ap3 ap3--vide">
             <p>File vide pour ce secteur : tous les établissements avec un téléphone ont été appelés.</p>
             <Link className="v2-btn v2-btn--petit" href={lien()}>
               Voir tous les secteurs
             </Link>
           </section>
         )
-      ) : vue === "historique" ? (
-        <Historique appels={tousAppels} />
-      ) : vue === "rappels" ? (
-        <section className="v2-carte om-ap-table" aria-label="Rappels">
-          {file.filter((x) => x.statut === "Rappeler").length ? (
-            <ul>
-              {file
-                .filter((x) => x.statut === "Rappeler")
-                .map((x) => (
-                  <li key={x.id}>
-                    <span className="om-ap-avatar om-ap-avatar--petit" aria-hidden="true">
-                      {initiales(x.enseigne || x.entreprise)}
-                    </span>
-                    <span className="om-ap-table-nom">
-                      <strong>{x.enseigne || x.entreprise}</strong>
-                      <small>{[x.secteur, x.commune].filter(Boolean).join(" · ")}</small>
-                    </span>
-                    <span className="om-ap-table-note">{x.note?.split("\n").slice(-1)[0] ?? ""}</span>
-                    <button
-                      type="button"
-                      className="v2-btn v2-btn--petit"
-                      onClick={() => {
-                        choisirProspect(x.id);
-                        setVue("session");
-                      }}
-                    >
-                      <Phone width={14} height={14} aria-hidden="true" />
-                      Rappeler
-                    </button>
-                  </li>
-                ))}
-            </ul>
-          ) : (
-            <p className="om-ap-vide-texte">Aucun rappel en attente dans ce secteur.</p>
-          )}
-        </section>
       ) : (
-        <Analyse appels={tousAppels} objections={objections} aujourdhui={aujourdhui} maintenant={maintenant.getTime()} />
+        <div className="ap3-autre">
+          {vue === "historique" ? (
+            <Historique appels={tousAppels} />
+          ) : vue === "rappels" ? (
+            <section className="v2-carte om-ap-table" aria-label="Rappels">
+              {file.filter((x) => x.statut === "Rappeler").length ? (
+                <ul>
+                  {file
+                    .filter((x) => x.statut === "Rappeler")
+                    .map((x) => (
+                      <li key={x.id}>
+                        <span className="om-ap-avatar om-ap-avatar--petit" aria-hidden="true">
+                          {initiales(x.enseigne || x.entreprise)}
+                        </span>
+                        <span className="om-ap-table-nom">
+                          <strong>{x.enseigne || x.entreprise}</strong>
+                          <small>{[x.secteur, x.commune].filter(Boolean).join(" · ")}</small>
+                        </span>
+                        <span className="om-ap-table-note">{x.note?.split("\n").slice(-1)[0] ?? ""}</span>
+                        <button
+                          type="button"
+                          className="v2-btn v2-btn--petit"
+                          onClick={() => {
+                            choisirProspect(x.id);
+                            setVue("session");
+                          }}
+                        >
+                          <Phone width={14} height={14} aria-hidden="true" />
+                          Rappeler
+                        </button>
+                      </li>
+                    ))}
+                </ul>
+              ) : (
+                <p className="om-ap-vide-texte">Aucun rappel en attente dans ce secteur.</p>
+              )}
+            </section>
+          ) : (
+            <Analyse appels={tousAppels} objections={objections} aujourdhui={aujourdhui} maintenant={maintenant.getTime()} />
+          )}
+        </div>
       )}
     </div>
   );
