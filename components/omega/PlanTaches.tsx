@@ -15,6 +15,11 @@
    Les données sont celles de omega_lignes (tableaux « plan » et
    « ajouts ») ; tout se modifie sur place et s'enregistre aussitôt.
    « À préparer » et « Note » sont deux clés de plus dans `donnees`.
+   13/10/2026 (2) — encore plus épurée, retour de Teo (« pas assez épuré,
+   regarde Attio ») : la page Notes / Attio telle quelle — onglets, barre
+   fine, puis la liste posée à plat sur la page, sans cadre ; en-têtes de
+   groupe discrets, lignes séparées d'un filet pleine largeur, catégorie
+   en pastille, un seul bouton bleu. Styles tk- dans taches.css.
    13/10/2026 — refaite à la manière d'Attio / Vercel, retour de Teo
    (« trop long, les sections paraissent amateur, regarde comment font
    Vercel et Attio ») : une seule barre (statut | recherche, vue,
@@ -38,6 +43,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { CalendarDays, Check, ChevronDown, Plus, Rows3, Search, Tag, Trash2, X } from "lucide-react";
 import { Dialog, Modal, ModalOverlay } from "react-aria-components";
+import "@/components/espace2/notes.css";
 import "./taches.css";
 import { createClient } from "@/lib/supabase/client";
 import Choix from "./Choix";
@@ -178,63 +184,71 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
   const cherche = !!recherche.trim();
 
   return (
-    <div className="v2-page v2-arrivee om-pt tp-page">
+    <div className="no-page om-pt tk-page v2-arrivee">
       <h1 className="v2-sr">Tâches</h1>
 
-      {/* ——— une seule barre : le statut | la recherche, la vue, « Nouvelle tâche » ——— */}
-      <div className="tp-barre">
-        <div className="tp-segments" role="tablist" aria-label="Filtrer par statut">
-          {(
-            [
-              ["a_faire", "À faire"],
-              ["bloquees", "Bloquées"],
-              ["terminees", "Terminées"],
-              ["toutes", "Toutes"],
-            ] as [Filtre, string][]
-          ).map(([cle, libelle]) => (
-            <button key={cle} type="button" role="tab" aria-selected={filtre === cle} onClick={() => setFiltre(cle)}>
-              {libelle}
-              <span className="tp-compte">{compte[cle]}</span>
-            </button>
-          ))}
+      {/* les onglets, comme Notes · Modèles */}
+      <div className="no-onglets" role="tablist" aria-label="Filtrer par statut">
+        {(
+          [
+            ["a_faire", "À faire"],
+            ["bloquees", "Bloquées"],
+            ["terminees", "Terminées"],
+            ["toutes", "Toutes"],
+          ] as [Filtre, string][]
+        ).map(([cle, libelle]) => (
+          <button key={cle} type="button" role="tab" aria-selected={filtre === cle} className="no-onglet" onClick={() => setFiltre(cle)}>
+            {libelle}
+            <span className="no-compte">{compte[cle]}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* la barre : le tri et la vue | la recherche et « Nouvelle tâche » */}
+      <div className="no-barre">
+        <div className="tk-barre-gauche">
+          <span className="no-bouton tk-tri">
+            <CalendarDays {...I} width={14} height={14} />
+            <span className="tk-gris">Groupé par</span> Échéance
+          </span>
+          {selecteur}
         </div>
-        <div className="tp-barre-droite">
-          <label className="tp-recherche">
+        <div className="no-barre-droite">
+          <label className="tk-recherche">
             <Search {...I} width={14} height={14} />
             <span className="v2-sr">Rechercher une tâche</span>
             <input type="search" value={recherche} onChange={(e) => setRecherche(e.target.value)} placeholder="Rechercher" onKeyDown={(e) => e.key === "Escape" && setRecherche("")} />
           </label>
-          {selecteur}
-          <button type="button" className="tp-nouvelle" onClick={ajouter}>
+          <button type="button" className="no-principal" onClick={ajouter}>
             <Plus {...I} width={14} height={14} />
             Nouvelle tâche
           </button>
         </div>
       </div>
       {etat ? (
-        <p className="tp-etat" role="status">
+        <p className="tk-etat" role="status">
           {etat}
         </p>
       ) : (
         <p className="v2-sr" role="status" />
       )}
 
-      {/* ——— une seule liste, groupée par échéance ——— */}
-      <div className="tp-liste">
-        {visibles.length === 0 ? (
-          <p className="tp-vide">Aucune tâche ne correspond.</p>
-        ) : (
-          GROUPES.map((g) => {
+      {/* la liste, à plat, groupée par échéance (vue Tâches d'Attio) */}
+      {visibles.length === 0 ? (
+        <p className="tk-vide">Aucune tâche ne correspond.</p>
+      ) : (
+        <div className="tk-liste">
+          {GROUPES.map((g) => {
             const liste = visibles.filter((l) => groupeDe(l) === g.cle);
             if (!liste.length) return null;
             const replie = replies.includes(g.cle) && !cherche && filtre !== "terminees";
             return (
-              <section key={g.cle} className="tp-groupe" data-groupe={g.cle} aria-label={g.libelle}>
+              <section key={g.cle} className="tk-groupe" data-groupe={g.cle} aria-label={g.libelle}>
                 <h2>
                   <button type="button" aria-expanded={!replie} onClick={() => setReplies((r) => (replie ? r.filter((x) => x !== g.cle) : [...r, g.cle]))}>
-                    <ChevronDown {...I} width={14} height={14} className="tp-chevron" />
+                    <ChevronDown {...I} width={12} height={12} className="tk-chevron" />
                     {g.libelle}
-                    <span className="tp-compte">{liste.length}</span>
+                    <span className="tk-nombre">{liste.length}</span>
                   </button>
                 </h2>
                 {replie ? null : (
@@ -246,9 +260,9 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
                 )}
               </section>
             );
-          })
-        )}
-      </div>
+          })}
+        </div>
+      )}
 
       {/* la fiche : au clic sur une tâche, en tiroir sur le côté */}
       <ModalOverlay isOpen={!!choisie} onOpenChange={(o) => !o && setChoix(null)} isDismissable className="v2-jetons tp-voile">
@@ -267,15 +281,15 @@ function LigneTache({ l, groupe, choisie, ouvrir, cocher }: { l: Ligne; groupe: 
   const statut = l.donnees["Statut"] ?? "À faire";
   const fait = statut === "Fait";
   return (
-    <li className="tp-ligne" aria-current={choisie ? "true" : undefined} data-fait={fait ? "" : undefined}>
-      <button type="button" role="checkbox" aria-checked={fait} aria-label={`${fait ? "Rouvrir" : "Marquer faite"} : ${titre}`} className="tp-case" onClick={() => cocher(!fait)}>
+    <li className="tk-ligne" aria-current={choisie ? "true" : undefined} data-fait={fait ? "" : undefined}>
+      <button type="button" role="checkbox" aria-checked={fait} aria-label={`${fait ? "Rouvrir" : "Marquer faite"} : ${titre}`} className="tk-case" onClick={() => cocher(!fait)}>
         <Check width={10} height={10} strokeWidth={3} aria-hidden="true" />
       </button>
-      <button type="button" className="tp-corps" onClick={ouvrir} title={sous || undefined}>
-        <span className="tp-titre">{titre || "Nouvelle tâche"}</span>
-        {statut === "Bloqué" || statut === "En cours" ? <span className="tp-statut" data-statut={statut}>{statut}</span> : null}
-        <span className="tp-categorie">{l.donnees["Catégorie"]}</span>
-        <span className="tp-date" data-groupe={groupe}>
+      <button type="button" className="tk-corps" onClick={ouvrir} title={sous || undefined}>
+        <span className="tk-titre">{titre || "Nouvelle tâche"}</span>
+        {statut === "Bloqué" || statut === "En cours" ? <span className="tk-pastille" data-statut={statut}>{statut}</span> : null}
+        <span className="tk-pastille tk-categorie">{l.donnees["Catégorie"]}</span>
+        <span className="tk-date" data-groupe={groupe}>
           {dateCourte(l.donnees["Échéance"])}
         </span>
       </button>
