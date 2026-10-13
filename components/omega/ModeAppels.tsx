@@ -15,6 +15,12 @@
      · les aides à la conversation : les objections les plus entendues,
        leur réponse, « +1 » pour compter celle qu'on vient d'entendre.
    Historique, Rappels et Analyse lisent les mêmes lignes.
+   13/10/2026 (2) — « pas assez épuré, regarde Attio » : la page Notes /
+   Attio telle quelle (onglets, barre fine, rien d'encadré), et la séance
+   comme une fiche d'Attio — à gauche le prospect, les quatre temps en
+   onglets de Notes, la réplique, les notes ; à droite une colonne
+   « Détails » (Appeler, téléphone, dirigeant, secteur, commune, à vendre,
+   liens) puis l'issue en liste à cocher et « Enregistrer ». Styles at-.
    13/10/2026 — refaite encore, retour de Teo : « un truc simple, vraiment
    simple, épuré et pro ; là il faut défiler toute la page pour tout voir ».
    Tout tient dans un écran, sans défiler : une seule barre (vue | chiffres,
@@ -50,10 +56,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Building2, CalendarDays, Check, ChevronLeft, ChevronRight, ChevronsUpDown, LayoutGrid, MoreHorizontal, Phone, Plus, SkipForward } from "lucide-react";
+import { ArrowRight, Building2, Check, ChevronLeft, ChevronRight, ChevronsUpDown, LayoutGrid, Phone, Plus, SkipForward } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import "@/components/espace2/notes.css";
 import "./appels.css";
-import { ItemMenu, MenuDeroulant, SectionMenu, SeparateurMenu } from "@/components/espace2/ui";
+import { ItemMenu, MenuDeroulant, SectionMenu } from "@/components/espace2/ui";
 import { CONSEILS, ETAPES, textesScript } from "./ScriptAppel";
 import type { Ligne } from "./Tableaux";
 import type { Prospect, Secteur } from "@/lib/omega/donnees";
@@ -184,30 +191,43 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
   const position = Math.min(file.length, Math.max(1, initiale.length - file.length + 1));
 
   return (
-    <div className="v2-page v2-arrivee om-ap ap3-page">
+    <div className="no-page om-ap at-page v2-arrivee">
       <h1 className="v2-sr">Appels</h1>
 
-      {/* ——— une seule barre : la vue | le secteur et les chiffres du jour ——— */}
-      <div className="ap3-barre">
-        <div className="ap3-segments" role="tablist" aria-label="Vue">
-          {VUES.map((v) => (
-            <button key={v.cle} type="button" role="tab" aria-selected={vue === v.cle} onClick={() => setVue(v.cle)}>
-              {v.libelle}
-              {v.cle === "rappels" && file.some((x) => x.statut === "Rappeler") ? <span className="ap3-compte">{file.filter((x) => x.statut === "Rappeler").length}</span> : null}
-            </button>
-          ))}
-        </div>
-        <div className="ap3-barre-droite">
-          <p className="ap3-chiffres">
-            <b>{appels.length}</b> appel{appels.length > 1 ? "s" : ""} · <b>{rdv}</b> RDV aujourd&apos;hui
-          </p>
+      {/* les onglets, comme Notes · Modèles */}
+      <div className="no-onglets" role="tablist" aria-label="Vue">
+        {VUES.map((v) => (
+          <button key={v.cle} type="button" role="tab" aria-selected={vue === v.cle} className="no-onglet" onClick={() => setVue(v.cle)}>
+            {v.libelle}
+            {v.cle === "rappels" ? <span className="no-compte">{file.filter((x) => x.statut === "Rappeler").length}</span> : null}
+          </button>
+        ))}
+      </div>
+
+      {/* la barre : la file et le secteur | les chiffres du jour */}
+      <div className="no-barre">
+        <div className="at-barre-gauche">
+          {vue === "session" && p ? (
+            <span className="at-file">
+              <button type="button" className="at-icone" aria-label="Prospect précédent" onClick={() => suivant(-1)}>
+                <ChevronLeft {...I} width={14} height={14} />
+              </button>
+              <button type="button" className="at-icone" aria-label="Prospect suivant" onClick={() => suivant(1)}>
+                <ChevronRight {...I} width={14} height={14} />
+              </button>
+              <span>
+                {position} sur {Math.max(file.length, position)}
+              </span>
+            </span>
+          ) : null}
           <MenuDeroulant
             etiquette={`Secteur : ${actif?.secteur ?? "Tous les secteurs"}. Changer de secteur`}
-            classe="ap3-bouton"
-            placement="bottom end"
+            classe="no-bouton"
+            placement="bottom start"
             largeur={320}
             declencheur={
               <>
+                <Building2 {...I} width={14} height={14} />
                 {actif?.secteur ?? "Tous les secteurs"}
                 <ChevronsUpDown width={14} height={14} aria-hidden="true" />
               </>
@@ -226,10 +246,13 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
           </MenuDeroulant>
           {selecteur}
         </div>
+        <p className="at-chiffres">
+          {appels.length} appel{appels.length > 1 ? "s" : ""} · {rdv} RDV aujourd&apos;hui
+        </p>
       </div>
 
       {etat ? (
-        <p className="ap3-etat" role="status">
+        <p className="at-etat" role="status">
           {etat}
         </p>
       ) : (
@@ -238,140 +261,147 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
 
       {vue === "session" ? (
         p ? (
-          <section key={p.id} className="ap3" aria-label={`Appel : ${nom}`}>
-            {/* le prospect, sur une ligne */}
-            <header className="ap3-tete">
-              <div className="ap3-qui">
-                <h2>{nom}</h2>
-                <p>
-                  {[dirigeant, p.secteur, p.commune].filter(Boolean).join(" · ")}
-                  {p.moteurs.map((m) => (
-                    <span key={m} className="ap3-etiquette">
-                      {m.toUpperCase()}
-                    </span>
-                  ))}
-                </p>
-              </div>
-              <div className="ap3-actions">
-                <span className="ap3-position">
-                  <button type="button" className="ap3-icone" aria-label="Prospect précédent" onClick={() => suivant(-1)}>
-                    <ChevronLeft {...I} width={14} height={14} />
-                  </button>
-                  <span>
-                    {position} / {Math.max(file.length, position)}
-                  </span>
-                  <button type="button" className="ap3-icone" aria-label="Prospect suivant" onClick={() => suivant(1)}>
-                    <ChevronRight {...I} width={14} height={14} />
-                  </button>
+          <div key={p.id} className="at-fiche">
+            {/* à gauche : le prospect, le script, les notes */}
+            <section className="at-principal" aria-label={`Appel : ${nom}`}>
+              <header className="at-tete">
+                <span className="at-avatar" aria-hidden="true">
+                  {initiales(nom)}
                 </span>
-                <span className="ap3-numero">{p.telephone}</span>
-                <a className="ap3-appeler" href={`tel:${p.telephone}`}>
-                  <Phone {...I} width={14} height={14} />
-                  Appeler
-                </a>
-                <MenuDeroulant etiquette="Préparer et autres actions" classe="ap3-icone" largeur={240} declencheur={<MoreHorizontal {...I} />}>
-                  <SectionMenu titre="Préparer l'appel">
-                    {p.site ? (
-                      <ItemMenu id="site" href={p.site.startsWith("http") ? p.site : `https://${p.site}`} target="_blank" icone={<ArrowUpRight {...I} />}>
-                        Site web
-                      </ItemMenu>
-                    ) : null}
-                    <ItemMenu id="google" href={rechercheGoogle} target="_blank" icone={<ArrowUpRight {...I} />}>
-                      Google
-                    </ItemMenu>
-                    <ItemMenu id="avis" href={`https://www.google.com/maps/search/${encodeURIComponent(`${nom} ${p.commune ?? ""}`)}`} target="_blank" icone={<ArrowUpRight {...I} />}>
-                      Avis
-                    </ItemMenu>
-                    <ItemMenu id="fiche" href={`https://annuaire-entreprises.data.gouv.fr/rechercher?terme=${encodeURIComponent(p.entreprise)}`} target="_blank" icone={<ArrowUpRight {...I} />}>
-                      Fiche de l&apos;entreprise
-                    </ItemMenu>
-                  </SectionMenu>
-                  <SeparateurMenu />
-                  <ItemMenu id="passer" icone={<SkipForward {...I} />} onAction={() => suivant(1)}>
-                    Passer sans noter
-                  </ItemMenu>
-                </MenuDeroulant>
-              </div>
-            </header>
+                <div className="at-qui">
+                  <h2>{nom}</h2>
+                  <p>{[dirigeant, p.commune].filter(Boolean).join(" · ")}</p>
+                </div>
+              </header>
 
-            {/* le script | les notes */}
-            <div className="ap3-corps">
-              <div className="ap3-script">
-                <ol className="ap3-etapes" aria-label="Temps de l'appel">
-                  {ETAPES.map((e, i) => (
-                    <li key={e} data-etat={i < etape ? "fait" : i === etape ? "actif" : undefined}>
-                      <button type="button" aria-current={i === etape ? "step" : undefined} onClick={() => setEtape(i)}>
-                        <span className="ap3-rond" aria-hidden="true">
-                          {i < etape ? <Check width={10} height={10} strokeWidth={3} /> : i + 1}
-                        </span>
-                        {e}
-                      </button>
-                    </li>
-                  ))}
-                </ol>
-                <p className="ap3-replique">{textes[etape]}</p>
-                <p className="ap3-conseil">{CONSEILS[etape]}</p>
+              <div className="at-temps" role="tablist" aria-label="Temps de l'appel">
+                {ETAPES.map((e, i) => (
+                  <button key={e} type="button" role="tab" aria-selected={i === etape} className="no-onglet" onClick={() => setEtape(i)}>
+                    {i < etape ? <Check width={12} height={12} strokeWidth={2.5} aria-hidden="true" /> : null}
+                    {e}
+                  </button>
+                ))}
+              </div>
+
+              <div className="at-script">
+                <p className="at-replique">{textes[etape]}</p>
+                <p className="at-conseil">{CONSEILS[etape]}</p>
                 {etape === 3 ? (
-                  <ul className="ap3-pistes" aria-label="Les douleurs à creuser">
+                  <div className="at-pistes">
                     {douleurs.map((d) => (
-                      <li key={d}>{d.charAt(0).toUpperCase() + d.slice(1)}</li>
+                      <span key={d} className="at-pastille">
+                        {d.charAt(0).toUpperCase() + d.slice(1)}
+                      </span>
                     ))}
-                  </ul>
+                  </div>
                 ) : (
-                  <button type="button" className="ap3-dit" onClick={() => setEtape(etape + 1)}>
-                    C&apos;est dit
+                  <button type="button" className="at-texte-bouton" onClick={() => setEtape(etape + 1)}>
+                    C&apos;est dit, suite : {ETAPES[etape + 1]}
                     <ArrowRight width={14} height={14} aria-hidden="true" />
                   </button>
                 )}
               </div>
 
-              <div className="ap3-notes">
-                <textarea className="ap3-zone" aria-label="Notes de l'échange" placeholder="Notes : ce qu'il a dit, quand rappeler…" value={note} onChange={(e) => setNote(e.target.value)} />
-                <button type="button" className="ap3-lien" onClick={creerTache}>
+              <div className="at-notes">
+                <label className="at-libelle" htmlFor="at-notes">
+                  Notes
+                </label>
+                <textarea id="at-notes" className="at-zone" placeholder="Ce qu'il a dit, ce qui l'intéresse, quand rappeler…" value={note} onChange={(e) => setNote(e.target.value)} />
+                <button type="button" className="at-texte-bouton" onClick={creerTache}>
                   <Plus {...I} width={14} height={14} />
                   Créer une tâche
                 </button>
               </div>
-            </div>
+            </section>
 
-            {/* l'issue */}
-            <footer className="ap3-pied">
-              <div className="ap3-issues" role="radiogroup" aria-label="Issue de l'appel">
-                {ISSUES.map((x) => (
+            {/* à droite : les détails et l'issue, comme la colonne d'une fiche Attio */}
+            <aside className="at-cote" aria-label="Détails et issue">
+              <a className="no-principal at-appeler" href={`tel:${p.telephone}`}>
+                <Phone {...I} width={14} height={14} />
+                Appeler {p.telephone}
+              </a>
+
+              <h3 className="at-libelle">Détails</h3>
+              <dl className="at-details">
+                <div>
+                  <dt>Téléphone</dt>
+                  <dd className="at-mono">{p.telephone}</dd>
+                </div>
+                {dirigeant ? (
+                  <div>
+                    <dt>Dirigeant</dt>
+                    <dd>{dirigeant}</dd>
+                  </div>
+                ) : null}
+                <div>
+                  <dt>Secteur</dt>
+                  <dd>{p.secteur}</dd>
+                </div>
+                {p.commune ? (
+                  <div>
+                    <dt>Commune</dt>
+                    <dd>{p.commune}</dd>
+                  </div>
+                ) : null}
+                <div>
+                  <dt>À vendre</dt>
+                  <dd className="at-pastilles">
+                    {p.moteurs.map((m) => (
+                      <span key={m} className="at-pastille">
+                        {m.toUpperCase()}
+                      </span>
+                    ))}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Préparer</dt>
+                  <dd className="at-liens">
+                    <a href={rechercheGoogle} target="_blank" rel="noreferrer">
+                      Google
+                    </a>
+                    <a href={`https://www.google.com/maps/search/${encodeURIComponent(`${nom} ${p.commune ?? ""}`)}`} target="_blank" rel="noreferrer">
+                      Avis
+                    </a>
+                    <a href={`https://annuaire-entreprises.data.gouv.fr/rechercher?terme=${encodeURIComponent(p.entreprise)}`} target="_blank" rel="noreferrer">
+                      Fiche
+                    </a>
+                  </dd>
+                </div>
+              </dl>
+
+              <h3 className="at-libelle">Issue de l&apos;appel</h3>
+              <div className="at-issues" role="radiogroup" aria-label="Issue de l'appel">
+                {[...ISSUES, ...AUTRES].map((x) => (
                   <button key={x.cle} type="button" role="radio" aria-checked={issue?.cle === x.cle} onClick={() => setIssue(x)}>
+                    <span className="at-radio" aria-hidden="true" />
                     {x.libelle}
                   </button>
                 ))}
-                <MenuDeroulant etiquette="Autres issues" classe="ap3-issue-autre" placement="top start" largeur={200} declencheur={issue && AUTRES.includes(issue) ? <span>{issue.libelle}</span> : <MoreHorizontal {...I} width={14} height={14} />}>
-                  {AUTRES.map((x) => (
-                    <ItemMenu key={x.cle} id={x.cle} onAction={() => setIssue(x)}>
-                      {x.libelle}
-                    </ItemMenu>
-                  ))}
-                </MenuDeroulant>
               </div>
               {issue?.date ? (
-                <label className="ap3-date">
-                  <CalendarDays {...I} width={14} height={14} />
-                  <input type="datetime-local" aria-label={issue.date === "rdv" ? "Date et heure du rendez-vous" : "Date et heure du rappel"} value={dateRdv} onChange={(e) => setDateRdv(e.target.value)} />
+                <label className="at-date">
+                  <span>{issue.date === "rdv" ? "Date du rendez-vous" : "Date du rappel"}</span>
+                  <input type="datetime-local" value={dateRdv} onChange={(e) => setDateRdv(e.target.value)} />
                 </label>
               ) : null}
-              <button type="button" className="ap3-enregistrer" disabled={!issue || envoi} onClick={enregistrer}>
-                Enregistrer et suivant
+              <button type="button" className="no-bouton at-enregistrer" disabled={!issue || envoi} onClick={enregistrer}>
+                Enregistrer et passer au suivant
                 <ArrowRight {...I} width={14} height={14} />
               </button>
-            </footer>
-          </section>
+              <button type="button" className="at-texte-bouton at-passer" onClick={() => suivant(1)}>
+                <SkipForward {...I} width={14} height={14} />
+                Passer sans noter
+              </button>
+            </aside>
+          </div>
         ) : (
-          <section className="ap3 ap3--vide">
-            <p>File vide pour ce secteur : tous les établissements avec un téléphone ont été appelés.</p>
-            <Link className="v2-btn v2-btn--petit" href={lien()}>
-              Voir tous les secteurs
-            </Link>
-          </section>
+          <p className="at-vide">
+            File vide pour ce secteur : tous les établissements avec un téléphone ont été appelés.{" "}
+            <Link href={lien()}>Voir tous les secteurs</Link>
+          </p>
         )
       ) : (
-        <div className="ap3-autre">
+        <div className="at-autre">
           {vue === "historique" ? (
             <Historique appels={tousAppels} />
           ) : vue === "rappels" ? (
