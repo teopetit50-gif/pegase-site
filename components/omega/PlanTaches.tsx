@@ -15,6 +15,15 @@
    Les données sont celles de omega_lignes (tableaux « plan » et
    « ajouts ») ; tout se modifie sur place et s'enregistre aussitôt.
    « À préparer » et « Note » sont deux clés de plus dans `donnees`.
+   13/10/2026 — refaite à la manière d'Attio / Vercel, retour de Teo
+   (« trop long, les sections paraissent amateur, regarde comment font
+   Vercel et Attio ») : une seule barre (statut | recherche, vue,
+   « Nouvelle tâche »), puis UNE liste dans un cadre fin qui tient dans
+   l'écran, groupée par échéance comme la vue Tâches d'Attio (En retard
+   en rouge, Aujourd'hui, Cette semaine en orange, Plus tard et Terminées
+   repliés) ; une ligne de 40 px par tâche (case ronde, titre, catégorie,
+   date). Plus de semaines en cartes ni de frise ; la fiche s'ouvre au
+   clic, en tiroir. Styles dans taches.css (préfixe tp-).
    11/10/2026 (2) — allégée sur les principes de la page Notes, même
    dessin : une ligne par tâche (titre, date, statut seulement s'il n'est
    pas « À faire »), plus d'étiquette de catégorie ni de sous-ligne, plus
@@ -27,7 +36,9 @@
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { CalendarDays, Check, ChevronDown, ChevronRight, Columns3, List, Plus, Rows3, Search, Tag, Trash2, X } from "lucide-react";
+import { CalendarDays, Check, ChevronDown, Plus, Rows3, Search, Tag, Trash2, X } from "lucide-react";
+import { Dialog, Modal, ModalOverlay } from "react-aria-components";
+import "./taches.css";
 import { createClient } from "@/lib/supabase/client";
 import Choix from "./Choix";
 import type { Ligne } from "./Tableaux";
@@ -45,18 +56,6 @@ const debut = (n: number) => (n === 0 ? new Date(2026, 9, 9) : new Date(2026, 9,
 const fin = (n: number) => (n === 0 ? new Date(2026, 9, 11) : new Date(2026, 9, 18 + 7 * (n - 1)));
 const BLOCS: [number, number][] = [[0, 0], [1, 1], [2, 2], [3, 3], [4, 4], [5, 6], [7, 8], [9, 10], [11, 13]];
 
-const premiereSemaine = (s?: string) => Number(s?.match(/S(\d+)/)?.[1] ?? 99);
-const blocDe = (s?: string) => {
-  const n = premiereSemaine(s);
-  const i = BLOCS.findIndex(([a, b]) => n >= a && n <= b);
-  return i === -1 ? BLOCS.length - 1 : i;
-};
-const libelleBloc = ([a, b]: [number, number]) => (a === b ? `Semaine ${a}` : b === a + 1 ? `Semaines ${a} et ${b}` : `Semaines ${a} à ${b}`);
-const datesBloc = ([a, b]: [number, number]) => {
-  const d = debut(a);
-  const f = fin(b);
-  return d.getMonth() === f.getMonth() ? `${d.getDate()} — ${f.getDate()} ${MOIS[f.getMonth()]}` : `${d.getDate()} ${MOIS[d.getMonth()]} — ${f.getDate()} ${MOIS[f.getMonth()]}`;
-};
 function echeance(t?: string): Date | null {
   const m = t?.match(/(\d{1,2})\/(\d{1,2})/);
   if (!m) return null;
@@ -83,18 +82,26 @@ function decouper(t = ""): { titre: string; sous: string } {
 const numero = (n?: string) => (n && /^\d+$/.test(n) ? n.padStart(2, "0") : n ?? "");
 
 type Filtre = "toutes" | "a_faire" | "bloquees" | "terminees";
-const ouverte = (l: Ligne) => l.donnees["Statut"] !== "Fait";
+
+/* les groupes d'échéance, comme la vue Tâches d'Attio groupée par date */
+type Groupe = "retard" | "aujourdhui" | "semaine" | "plus_tard" | "sans" | "terminees";
+const GROUPES: { cle: Groupe; libelle: string }[] = [
+  { cle: "retard", libelle: "En retard" },
+  { cle: "aujourdhui", libelle: "Aujourd'hui" },
+  { cle: "semaine", libelle: "Cette semaine" },
+  { cle: "plus_tard", libelle: "Plus tard" },
+  { cle: "sans", libelle: "Sans échéance" },
+  { cle: "terminees", libelle: "Terminées" },
+];
 
 export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: Ligne[]; selecteur: React.ReactNode }) {
   const [lignes, setLignes] = useState(() => initiales.filter((l) => l.tableau === "plan" || l.tableau === "ajouts"));
   const [maintenant] = useState(() => Date.now());
-  const [filtre, setFiltre] = useState<Filtre>("toutes");
+  const [filtre, setFiltre] = useState<Filtre>("a_faire");
   const [recherche, setRecherche] = useState("");
-  const [vue, setVue] = useState<"liste" | "colonnes">("liste");
   const [choix, setChoix] = useState<string | null>(null);
-  const [ficheOuverte, setFicheOuverte] = useState(false);
-  const [faitesOuvertes, setFaitesOuvertes] = useState<number[]>([]);
-  const [tout, setTout] = useState(false);
+  /* « Plus tard » et « Terminées » repliés au départ : la liste tient dans l'écran */
+  const [replies, setReplies] = useState<Groupe[]>(["plus_tard", "terminees"]);
   const [etat, setEtat] = useState("");
 
   async function maj(id: string, cle: string, valeur: string) {
@@ -108,8 +115,6 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
   }
 
   const blocCourant = Math.max(0, BLOCS.findIndex(([a, b]) => maintenant >= debut(a).getTime() && maintenant <= fin(b).getTime() + 86_399_999));
-  /* au départ, seule la semaine en cours est dépliée : la page reste courte */
-  const [replies, setReplies] = useState<number[]>(() => BLOCS.map((_, i) => i).filter((i) => i !== blocCourant));
 
   async function ajouter() {
     const ajouts = lignes.filter((l) => l.tableau === "ajouts");
@@ -120,9 +125,7 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
     const { data, error } = await createClient().from("omega_lignes").insert({ tableau: "ajouts", ordre, donnees }).select("id, tableau, ordre, donnees, maj").single();
     if (error || !data) return setEtat("Échec de l'ajout : vérifiez votre connexion.");
     setLignes((ls) => [...ls, data as Ligne]);
-    setFiltre("toutes");
     setChoix((data as Ligne).id);
-    setFicheOuverte(true);
   }
 
   async function supprimer(l: Ligne) {
@@ -131,7 +134,6 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
     if (error) return setEtat("Échec de la suppression.");
     setLignes((ls) => ls.filter((x) => x.id !== l.id));
     setChoix(null);
-    setFicheOuverte(false);
   }
 
   /* « Nouveau… → Tâche » de la barre du haut arrive en /omega/taches?ajouter=plan */
@@ -146,10 +148,22 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
   }, [demande]);
 
   const compte = {
-    toutes: lignes.length,
     a_faire: lignes.filter((l) => !["Fait", "Bloqué"].includes(l.donnees["Statut"])).length,
     bloquees: lignes.filter((l) => l.donnees["Statut"] === "Bloqué").length,
     terminees: lignes.filter((l) => l.donnees["Statut"] === "Fait").length,
+    toutes: lignes.length,
+  };
+
+  const jour0 = new Date(maintenant);
+  jour0.setHours(0, 0, 0, 0);
+  const groupeDe = (l: Ligne): Groupe => {
+    if (l.donnees["Statut"] === "Fait") return "terminees";
+    const e = echeance(l.donnees["Échéance"])?.getTime();
+    if (e === undefined) return "sans";
+    if (e < jour0.getTime()) return "retard";
+    if (e < jour0.getTime() + 86_400_000) return "aujourdhui";
+    if (e < jour0.getTime() + 7 * 86_400_000) return "semaine";
+    return "plus_tard";
   };
 
   const visibles = useMemo(() => {
@@ -160,202 +174,110 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
       .sort((a, b) => (echeance(a.donnees["Échéance"])?.getTime() ?? 9e15) - (echeance(b.donnees["Échéance"])?.getTime() ?? 9e15) || (a.tableau === b.tableau ? a.ordre - b.ordre : a.tableau === "plan" ? -1 : 1));
   }, [lignes, filtre, recherche]);
 
-  const filtrage = filtre !== "toutes" || !!recherche.trim();
-  const blocs = BLOCS.map((b, i) => ({ i, b, liste: visibles.filter((l) => blocDe(l.donnees["Semaine"]) === i) })).filter((x) => x.liste.length);
-  const blocsAffiches = tout || filtrage ? blocs : blocs.filter((x) => x.i <= blocCourant + 1);
-  const restants = blocs.length - blocsAffiches.length;
-  const choisie = lignes.find((l) => l.id === choix) ?? visibles.find(ouverte) ?? null;
-  const ouvrir = (id: string) => {
-    setChoix(id);
-    setFicheOuverte(true);
-  };
-
+  const choisie = choix ? lignes.find((l) => l.id === choix) ?? null : null;
+  const cherche = !!recherche.trim();
 
   return (
-    <div className="v2-page v2-arrivee om-page om-page--large om-pt om-pt-simple">
-      <div className="v2-tete om-pt-tete">
-        <div>
-          <h1>Tâches</h1>
+    <div className="v2-page v2-arrivee om-pt tp-page">
+      <h1 className="v2-sr">Tâches</h1>
+
+      {/* ——— une seule barre : le statut | la recherche, la vue, « Nouvelle tâche » ——— */}
+      <div className="tp-barre">
+        <div className="tp-segments" role="tablist" aria-label="Filtrer par statut">
+          {(
+            [
+              ["a_faire", "À faire"],
+              ["bloquees", "Bloquées"],
+              ["terminees", "Terminées"],
+              ["toutes", "Toutes"],
+            ] as [Filtre, string][]
+          ).map(([cle, libelle]) => (
+            <button key={cle} type="button" role="tab" aria-selected={filtre === cle} onClick={() => setFiltre(cle)}>
+              {libelle}
+              <span className="tp-compte">{compte[cle]}</span>
+            </button>
+          ))}
         </div>
-        <div className="v2-actions">
+        <div className="tp-barre-droite">
+          <label className="tp-recherche">
+            <Search {...I} width={14} height={14} />
+            <span className="v2-sr">Rechercher une tâche</span>
+            <input type="search" value={recherche} onChange={(e) => setRecherche(e.target.value)} placeholder="Rechercher" onKeyDown={(e) => e.key === "Escape" && setRecherche("")} />
+          </label>
           {selecteur}
-          <button type="button" className="v2-btn v2-btn--petit v2-btn--primaire om-pt-nouvelle" onClick={ajouter}>
-            <Plus {...I} />
+          <button type="button" className="tp-nouvelle" onClick={ajouter}>
+            <Plus {...I} width={14} height={14} />
             Nouvelle tâche
           </button>
         </div>
       </div>
+      {etat ? (
+        <p className="tp-etat" role="status">
+          {etat}
+        </p>
+      ) : (
+        <p className="v2-sr" role="status" />
+      )}
 
-
-      {/* ——— la barre : statuts, recherche, catégorie, affichage ——— */}
-      <div className="om-pt-barre">
-        <div className="om-pt-segments" role="group" aria-label="Filtrer par statut">
-          {(
-            [
-              ["toutes", "Toutes", ""],
-              ["a_faire", "À faire", ""],
-              ["bloquees", "Bloquées", ""],
-              ["terminees", "Terminées", ""],
-            ] as [Filtre, string, string][]
-          ).map(([cle, libelle, t]) => (
-            <button key={cle} type="button" className="om-pt-segment" aria-pressed={filtre === cle} onClick={() => setFiltre(cle)}>
-              {t ? <span className="om-pt-point" data-teinte={t} aria-hidden="true" /> : null}
-              {libelle}
-              <span className="om-pt-compte">{compte[cle]}</span>
-            </button>
-          ))}
-        </div>
-        <div className="om-pt-outils">
-          <label className="om-pt-recherche">
-            <Search {...I} />
-            <input value={recherche} onChange={(e) => setRecherche(e.target.value)} placeholder="Rechercher une tâche" aria-label="Rechercher une tâche" />
-            {recherche ? (
-              <button type="button" aria-label="Effacer la recherche" onClick={() => setRecherche("")}>
-                <X width={14} height={14} aria-hidden="true" />
-              </button>
-            ) : null}
-          </label>
-          <div className="om-pt-affichage" role="group" aria-label="Affichage">
-            <button type="button" aria-pressed={vue === "liste"} aria-label="En liste" onClick={() => setVue("liste")}>
-              <List {...I} />
-            </button>
-            <button type="button" aria-pressed={vue === "colonnes"} aria-label="En colonnes par statut" onClick={() => setVue("colonnes")}>
-              <Columns3 {...I} />
-            </button>
-          </div>
-        </div>
-      </div>
-      <p className="om-etat" role="status">
-        {etat}
-      </p>
-
-      <div className="om-pt-grille" data-colonnes={vue === "colonnes" ? "" : undefined} data-fiche={ficheOuverte ? "" : undefined}>
-        <div className="om-pt-principal">
-          {vue === "colonnes" ? (
-            <div className="om-pt-tableau">
-              {STATUTS.map((s) => {
-                const liste = visibles.filter((l) => (l.donnees["Statut"] ?? "À faire") === s);
-                return (
-                  <section key={s} className="v2-carte om-pt-colonne" aria-label={s}>
-                    <h2>
-                      <span className="om-pt-point" data-teinte={teinte(s)} aria-hidden="true" />
-                      {s}
-                      <span className="om-pt-compte">{liste.length}</span>
-                    </h2>
-                    <ul>
-                      {liste.map((l) => {
-                        const { titre } = decouper(l.donnees["Tâche"]);
-                        return (
-                          <li key={l.id}>
-                            <button type="button" className="om-pt-tuile" aria-current={choisie?.id === l.id ? "true" : undefined} onClick={() => ouvrir(l.id)}>
-                              <span className="om-pt-tuile-titre">{titre || "Nouvelle tâche"}</span>
-                              <span className="om-pt-tuile-sous">
-                                {l.donnees["Catégorie"]} · {dateCourte(l.donnees["Échéance"])}
-                              </span>
-                            </button>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </section>
-                );
-              })}
-            </div>
-          ) : blocsAffiches.length === 0 ? (
-            <div className="v2-carte om-pt-vide">Aucune tâche ne correspond à ces filtres.</div>
-          ) : (
-            <>
-              {blocsAffiches.map(({ i, b, liste }) => {
-                const replie = replies.includes(i);
-                const ouvertes = filtre === "terminees" ? liste : liste.filter(ouverte);
-                const terminees = filtre === "terminees" ? [] : liste.filter((l) => !ouverte(l));
-                const montrerFaites = faitesOuvertes.includes(i);
-                return (
-                  <section key={i} className="v2-carte om-pt-semaine" aria-label={libelleBloc(b)}>
-                    <button type="button" className="om-pt-semaine-tete" aria-expanded={!replie} onClick={() => setReplies((r) => (replie ? r.filter((x) => x !== i) : [...r, i]))}>
-                      <ChevronDown {...I} className="om-pt-chevron" />
-                      <span className="om-pt-semaine-nom">{libelleBloc(b)}</span>
-                      {i === blocCourant ? <span className="om-pt-maintenant">Cette semaine</span> : null}
-                      <span className="om-pt-semaine-dates">{datesBloc(b)}</span>
-                    </button>
-                    {replie ? null : (
-                      <ul className="om-pt-liste">
-                        {[...ouvertes, ...(montrerFaites ? terminees : [])].map((l) => (
-                          <LigneTache key={l.id} l={l} choisie={choisie?.id === l.id} maintenant={maintenant} ouvrir={() => ouvrir(l.id)} cocher={(fait) => maj(l.id, "Statut", fait ? "Fait" : "À faire")} />
-                        ))}
-                        {terminees.length ? (
-                          <li className="om-pt-terminees">
-                            <button type="button" aria-expanded={montrerFaites} onClick={() => setFaitesOuvertes((f) => (montrerFaites ? f.filter((x) => x !== i) : [...f, i]))}>
-                              <span className="om-pt-case-pleine" aria-hidden="true">
-                                <Check width={12} height={12} strokeWidth={2.5} />
-                              </span>
-                              {montrerFaites ? "Masquer" : ""} {terminees.length} tâche{terminees.length > 1 ? "s" : ""} terminée{terminees.length > 1 ? "s" : ""}
-                              <ChevronDown {...I} className="om-pt-chevron" />
-                            </button>
-                          </li>
-                        ) : null}
-                      </ul>
-                    )}
-                  </section>
-                );
-              })}
-              <div className="om-pt-pied">
-                <button type="button" className="v2-btn v2-btn--petit v2-btn--fantome" onClick={ajouter}>
-                  <Plus {...I} />
-                  Ajouter une tâche
-                </button>
-                {restants > 0 || (tout && !filtrage && blocs.length > blocCourant + 2) ? (
-                  <button type="button" className="v2-btn v2-btn--petit v2-btn--fantome om-pt-suivantes" aria-expanded={tout} onClick={() => setTout((t) => !t)}>
-                    {tout ? "Masquer les semaines suivantes" : `Afficher les semaines suivantes (${restants})`}
-                    <ChevronDown {...I} className="om-pt-chevron" />
+      {/* ——— une seule liste, groupée par échéance ——— */}
+      <div className="tp-liste">
+        {visibles.length === 0 ? (
+          <p className="tp-vide">Aucune tâche ne correspond.</p>
+        ) : (
+          GROUPES.map((g) => {
+            const liste = visibles.filter((l) => groupeDe(l) === g.cle);
+            if (!liste.length) return null;
+            const replie = replies.includes(g.cle) && !cherche && filtre !== "terminees";
+            return (
+              <section key={g.cle} className="tp-groupe" data-groupe={g.cle} aria-label={g.libelle}>
+                <h2>
+                  <button type="button" aria-expanded={!replie} onClick={() => setReplies((r) => (replie ? r.filter((x) => x !== g.cle) : [...r, g.cle]))}>
+                    <ChevronDown {...I} width={14} height={14} className="tp-chevron" />
+                    {g.libelle}
+                    <span className="tp-compte">{liste.length}</span>
                   </button>
-                ) : null}
-              </div>
-            </>
-          )}
-        </div>
-
-        <aside className="om-pt-fiche-zone" data-ouverte={ficheOuverte ? "" : undefined} aria-label="La tâche choisie">
-          <button type="button" className="om-pt-voile" aria-label="Fermer la tâche" onClick={() => setFicheOuverte(false)} />
-          {choisie ? (
-            <Fiche key={choisie.id} l={choisie} maj={maj} supprimer={supprimer} fermer={() => { setFicheOuverte(false); setChoix(null); }} />
-          ) : (
-            <div className="v2-carte om-pt-fiche om-pt-fiche--vide">Choisis une tâche pour la voir en détail.</div>
-          )}
-        </aside>
+                </h2>
+                {replie ? null : (
+                  <ul>
+                    {liste.map((l) => (
+                      <LigneTache key={l.id} l={l} groupe={g.cle} choisie={choisie?.id === l.id} ouvrir={() => setChoix(l.id)} cocher={(fait) => maj(l.id, "Statut", fait ? "Fait" : "À faire")} />
+                    ))}
+                  </ul>
+                )}
+              </section>
+            );
+          })
+        )}
       </div>
+
+      {/* la fiche : au clic sur une tâche, en tiroir sur le côté */}
+      <ModalOverlay isOpen={!!choisie} onOpenChange={(o) => !o && setChoix(null)} isDismissable className="v2-jetons tp-voile">
+        <Modal className="tp-tiroir">
+          <Dialog className="tp-tiroir-dialogue" aria-label="La tâche">
+            {choisie ? <Fiche key={choisie.id} l={choisie} maj={maj} supprimer={supprimer} fermer={() => setChoix(null)} /> : null}
+          </Dialog>
+        </Modal>
+      </ModalOverlay>
     </div>
   );
 }
 
-function LigneTache({ l, choisie, maintenant, ouvrir, cocher }: { l: Ligne; choisie: boolean; maintenant: number; ouvrir: () => void; cocher: (fait: boolean) => void }) {
+function LigneTache({ l, groupe, choisie, ouvrir, cocher }: { l: Ligne; groupe: Groupe; choisie: boolean; ouvrir: () => void; cocher: (fait: boolean) => void }) {
   const { titre, sous } = decouper(l.donnees["Tâche"]);
   const statut = l.donnees["Statut"] ?? "À faire";
-  const e = echeance(l.donnees["Échéance"]);
-  const retard = statut !== "Fait" && e !== null && e.getTime() < maintenant;
+  const fait = statut === "Fait";
   return (
-    <li className="om-pt-ligne" aria-current={choisie ? "true" : undefined} data-fait={statut === "Fait" ? "" : undefined}>
-      <span className="v2-val-case om-pt-case">
-        <input type="checkbox" checked={statut === "Fait"} aria-label={`${statut === "Fait" ? "Rouvrir" : "Marquer faite"} : ${titre}`} onChange={(ev) => cocher(ev.target.checked)} />
-      </span>
-      <button type="button" className="om-pt-corps" onClick={ouvrir}>
-        <span className="om-pt-texte">
-          <span className="om-pt-titre" title={sous || undefined}>
-            {titre || "Nouvelle tâche"}
-          </span>
-        </span>
-        <span className="om-pt-date" data-retard={retard ? "" : undefined}>
+    <li className="tp-ligne" aria-current={choisie ? "true" : undefined} data-fait={fait ? "" : undefined}>
+      <button type="button" role="checkbox" aria-checked={fait} aria-label={`${fait ? "Rouvrir" : "Marquer faite"} : ${titre}`} className="tp-case" onClick={() => cocher(!fait)}>
+        <Check width={10} height={10} strokeWidth={3} aria-hidden="true" />
+      </button>
+      <button type="button" className="tp-corps" onClick={ouvrir} title={sous || undefined}>
+        <span className="tp-titre">{titre || "Nouvelle tâche"}</span>
+        {statut === "Bloqué" || statut === "En cours" ? <span className="tp-statut" data-statut={statut}>{statut}</span> : null}
+        <span className="tp-categorie">{l.donnees["Catégorie"]}</span>
+        <span className="tp-date" data-groupe={groupe}>
           {dateCourte(l.donnees["Échéance"])}
         </span>
-        <span className="om-pt-statut">
-          {statut === "À faire" ? null : (
-            <>
-              <span className="om-pt-point" data-teinte={teinte(statut)} aria-hidden="true" />
-              {statut}
-            </>
-          )}
-        </span>
-        <ChevronRight {...I} className="om-pt-fleche" />
       </button>
     </li>
   );
