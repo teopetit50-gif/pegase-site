@@ -15,6 +15,12 @@
    Les données sont celles de omega_lignes (tableaux « plan » et
    « ajouts ») ; tout se modifie sur place et s'enregistre aussitôt.
    « À préparer » et « Note » sont deux clés de plus dans `donnees`.
+   13/10/2026 (3) — « encore trop de trucs, regarde Notes et Activité » :
+   comme la page Activité. Une barre fine (statut ⌄, échéance ⌄ | recherche,
+   « Nouvelle tâche »), puis UNE liste encadrée, une tâche par ligne
+   (titre et catégorie | statut | date | « Dans 3 j »). « Cette semaine »
+   au départ, retards compris : la liste reste courte. Plus d'onglets, de
+   groupes ni de cases ; on coche « Marquer faite » dans la fiche.
    13/10/2026 (2) — encore plus épurée, retour de Teo (« pas assez épuré,
    regarde Attio ») : la page Notes / Attio telle quelle — onglets, barre
    fine, puis la liste posée à plat sur la page, sans cadre ; en-têtes de
@@ -41,9 +47,11 @@
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { CalendarDays, Check, ChevronDown, Plus, Rows3, Search, Tag, Trash2, X } from "lucide-react";
+import { CalendarDays, Check, ChevronDown, ChevronRight, ListChecks, Plus, Rows3, Search, Tag, Trash2, X } from "lucide-react";
+import { ItemMenu, MenuDeroulant } from "@/components/espace2/ui";
 import { Dialog, Modal, ModalOverlay } from "react-aria-components";
 import "@/components/espace2/notes.css";
+import "./activite.css";
 import "./taches.css";
 import { createClient } from "@/lib/supabase/client";
 import Choix from "./Choix";
@@ -89,16 +97,19 @@ const numero = (n?: string) => (n && /^\d+$/.test(n) ? n.padStart(2, "0") : n ??
 
 type Filtre = "toutes" | "a_faire" | "bloquees" | "terminees";
 
-/* les groupes d'échéance, comme la vue Tâches d'Attio groupée par date */
-type Groupe = "retard" | "aujourdhui" | "semaine" | "plus_tard" | "sans" | "terminees";
-const GROUPES: { cle: Groupe; libelle: string }[] = [
-  { cle: "retard", libelle: "En retard" },
-  { cle: "aujourdhui", libelle: "Aujourd'hui" },
-  { cle: "semaine", libelle: "Cette semaine" },
-  { cle: "plus_tard", libelle: "Plus tard" },
-  { cle: "sans", libelle: "Sans échéance" },
+const FILTRES: { cle: Filtre; libelle: string }[] = [
+  { cle: "a_faire", libelle: "À faire" },
+  { cle: "bloquees", libelle: "Bloquées" },
   { cle: "terminees", libelle: "Terminées" },
+  { cle: "toutes", libelle: "Toutes" },
 ];
+type Periode = "semaine" | "mois" | "tout";
+const PERIODES: { cle: Periode; libelle: string }[] = [
+  { cle: "semaine", libelle: "Cette semaine" },
+  { cle: "mois", libelle: "30 prochains jours" },
+  { cle: "tout", libelle: "Toutes les dates" },
+];
+const TEINTES: Record<string, string> = { "En cours": "bleu", Bloqué: "rouge", Fait: "vert" };
 
 export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: Ligne[]; selecteur: React.ReactNode }) {
   const [lignes, setLignes] = useState(() => initiales.filter((l) => l.tableau === "plan" || l.tableau === "ajouts"));
@@ -106,8 +117,8 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
   const [filtre, setFiltre] = useState<Filtre>("a_faire");
   const [recherche, setRecherche] = useState("");
   const [choix, setChoix] = useState<string | null>(null);
-  /* « Plus tard » et « Terminées » repliés au départ : la liste tient dans l'écran */
-  const [replies, setReplies] = useState<Groupe[]>(["plus_tard", "terminees"]);
+  /* « Cette semaine » au départ (retards compris) : la liste reste courte */
+  const [periode, setPeriode] = useState<Periode>("semaine");
   const [etat, setEtat] = useState("");
 
   async function maj(id: string, cle: string, valeur: string) {
@@ -160,64 +171,77 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
     toutes: lignes.length,
   };
 
-  const jour0 = new Date(maintenant);
-  jour0.setHours(0, 0, 0, 0);
-  const groupeDe = (l: Ligne): Groupe => {
-    if (l.donnees["Statut"] === "Fait") return "terminees";
-    const e = echeance(l.donnees["Échéance"])?.getTime();
-    if (e === undefined) return "sans";
-    if (e < jour0.getTime()) return "retard";
-    if (e < jour0.getTime() + 86_400_000) return "aujourdhui";
-    if (e < jour0.getTime() + 7 * 86_400_000) return "semaine";
-    return "plus_tard";
-  };
-
+  const jour0 = new Date(maintenant).setHours(0, 0, 0, 0);
   const visibles = useMemo(() => {
     const q = recherche.trim().toLowerCase();
     return lignes
       .filter((l) => (filtre === "a_faire" ? !["Fait", "Bloqué"].includes(l.donnees["Statut"]) : filtre === "bloquees" ? l.donnees["Statut"] === "Bloqué" : filtre === "terminees" ? l.donnees["Statut"] === "Fait" : true))
       .filter((l) => !q || `${l.donnees["Tâche"] ?? ""} ${l.donnees["N°"] ?? ""}`.toLowerCase().includes(q))
+      /* la période ne s'applique qu'aux tâches ouvertes : un retard reste toujours visible */
+      .filter((l) => {
+        if (periode === "tout" || q || filtre === "terminees") return true;
+        const e = echeance(l.donnees["Échéance"])?.getTime();
+        return e !== undefined && e < jour0 + (periode === "semaine" ? 7 : 30) * 86_400_000;
+      })
       .sort((a, b) => (echeance(a.donnees["Échéance"])?.getTime() ?? 9e15) - (echeance(b.donnees["Échéance"])?.getTime() ?? 9e15) || (a.tableau === b.tableau ? a.ordre - b.ordre : a.tableau === "plan" ? -1 : 1));
-  }, [lignes, filtre, recherche]);
+  }, [lignes, filtre, recherche, periode, jour0]);
 
   const choisie = choix ? lignes.find((l) => l.id === choix) ?? null : null;
-  const cherche = !!recherche.trim();
+  const FILTRE = FILTRES.find((f) => f.cle === filtre)!;
+  const coche = (oui: boolean) => (oui ? <Check width={14} height={14} aria-label="choisi" /> : null);
 
   return (
-    <div className="no-page om-pt tk-page v2-arrivee">
+    <div className="no-page tk-page v2-arrivee">
       <h1 className="v2-sr">Tâches</h1>
 
-      {/* les onglets, comme Notes · Modèles */}
-      <div className="no-onglets" role="tablist" aria-label="Filtrer par statut">
-        {(
-          [
-            ["a_faire", "À faire"],
-            ["bloquees", "Bloquées"],
-            ["terminees", "Terminées"],
-            ["toutes", "Toutes"],
-          ] as [Filtre, string][]
-        ).map(([cle, libelle]) => (
-          <button key={cle} type="button" role="tab" aria-selected={filtre === cle} className="no-onglet" onClick={() => setFiltre(cle)}>
-            {libelle}
-            <span className="no-compte">{compte[cle]}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* la barre : le tri et la vue | la recherche et « Nouvelle tâche » */}
-      <div className="no-barre">
-        <div className="tk-barre-gauche">
-          <span className="no-bouton tk-tri">
-            <CalendarDays {...I} width={14} height={14} />
-            <span className="tk-gris">Groupé par</span> Échéance
-          </span>
+      {/* la barre, comme Activité : le statut et la période | la recherche et « Nouvelle tâche » */}
+      <div className="no-barre ao-barre">
+        <div className="ao-groupe">
+          <MenuDeroulant
+            etiquette={`Statut : ${FILTRE.libelle}`}
+            classe="no-bouton"
+            placement="bottom start"
+            largeur={220}
+            declencheur={
+              <>
+                <ListChecks {...I} width={14} height={14} />
+                {FILTRE.libelle}
+                <ChevronDown {...I} width={14} height={14} />
+              </>
+            }
+          >
+            {FILTRES.map((f) => (
+              <ItemMenu key={f.cle} id={f.cle} textValue={f.libelle} onAction={() => setFiltre(f.cle)} suffixe={filtre === f.cle ? coche(true) : <span className="v2-gris">{compte[f.cle]}</span>}>
+                {f.libelle}
+              </ItemMenu>
+            ))}
+          </MenuDeroulant>
+          <MenuDeroulant
+            etiquette="Échéance"
+            classe="no-bouton"
+            placement="bottom start"
+            largeur={220}
+            declencheur={
+              <>
+                <CalendarDays {...I} width={14} height={14} />
+                {PERIODES.find((x) => x.cle === periode)?.libelle}
+                <ChevronDown {...I} width={14} height={14} />
+              </>
+            }
+          >
+            {PERIODES.map((x) => (
+              <ItemMenu key={x.cle} id={x.cle} textValue={x.libelle} onAction={() => setPeriode(x.cle)} suffixe={coche(periode === x.cle)}>
+                {x.libelle}
+              </ItemMenu>
+            ))}
+          </MenuDeroulant>
           {selecteur}
         </div>
-        <div className="no-barre-droite">
-          <label className="tk-recherche">
+        <div className="ao-groupe ao-groupe--droite">
+          <label className="ao-recherche">
             <Search {...I} width={14} height={14} />
             <span className="v2-sr">Rechercher une tâche</span>
-            <input type="search" value={recherche} onChange={(e) => setRecherche(e.target.value)} placeholder="Rechercher" onKeyDown={(e) => e.key === "Escape" && setRecherche("")} />
+            <input type="search" value={recherche} placeholder="Rechercher" autoComplete="off" spellCheck={false} onChange={(e) => setRecherche(e.target.value)} onKeyDown={(e) => e.key === "Escape" && setRecherche("")} />
           </label>
           <button type="button" className="no-principal" onClick={ajouter}>
             <Plus {...I} width={14} height={14} />
@@ -233,35 +257,36 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
         <p className="v2-sr" role="status" />
       )}
 
-      {/* la liste, à plat, groupée par échéance (vue Tâches d'Attio) */}
-      {visibles.length === 0 ? (
-        <p className="tk-vide">Aucune tâche ne correspond.</p>
-      ) : (
-        <div className="tk-liste">
-          {GROUPES.map((g) => {
-            const liste = visibles.filter((l) => groupeDe(l) === g.cle);
-            if (!liste.length) return null;
-            const replie = replies.includes(g.cle) && !cherche && filtre !== "terminees";
+      {/* la liste encadrée d'Activité, une tâche par ligne, triée par échéance */}
+      {visibles.length ? (
+        <ul className="ao-liste tk-liste">
+          {visibles.map((l) => {
+            const statut = l.donnees["Statut"] || "À faire";
+            const { titre } = decouper(l.donnees["Tâche"]);
+            const quand = relatif(l.donnees["Échéance"], jour0, statut);
             return (
-              <section key={g.cle} className="tk-groupe" data-groupe={g.cle} aria-label={g.libelle}>
-                <h2>
-                  <button type="button" aria-expanded={!replie} onClick={() => setReplies((r) => (replie ? r.filter((x) => x !== g.cle) : [...r, g.cle]))}>
-                    <ChevronDown {...I} width={12} height={12} className="tk-chevron" />
-                    {g.libelle}
-                    <span className="tk-nombre">{liste.length}</span>
-                  </button>
-                </h2>
-                {replie ? null : (
-                  <ul>
-                    {liste.map((l) => (
-                      <LigneTache key={l.id} l={l} groupe={g.cle} choisie={choisie?.id === l.id} ouvrir={() => setChoix(l.id)} cocher={(fait) => maj(l.id, "Statut", fait ? "Fait" : "À faire")} />
-                    ))}
-                  </ul>
-                )}
-              </section>
+              <li key={l.id} className="ao-ligne">
+                <button type="button" onClick={() => setChoix(l.id)}>
+                  <span className="ao-ligne-titre">
+                    <strong data-vide={titre ? undefined : ""}>{titre || "Tâche sans titre"}</strong>
+                    <span>{l.donnees["Catégorie"]}</span>
+                  </span>
+                  <span className="ao-statut">
+                    <span className="ao-point" data-teinte={TEINTES[statut]} aria-hidden="true" />
+                    {statut}
+                  </span>
+                  <span className="ao-ligne-date">{dateCourte(l.donnees["Échéance"])}</span>
+                  <span className="tk-quand" data-retard={quand === "En retard" ? "" : undefined}>
+                    {quand}
+                  </span>
+                  <ChevronRight {...I} width={14} height={14} className="ao-chevron" />
+                </button>
+              </li>
             );
           })}
-        </div>
+        </ul>
+      ) : (
+        <p className="ao-vide ao-vide--liste">{recherche.trim() ? "Aucune tâche ne correspond." : periode === "tout" ? "Aucune tâche ici." : "Rien d'autre à faire sur cette période."}</p>
       )}
 
       {/* la fiche : au clic sur une tâche, en tiroir sur le côté */}
@@ -276,25 +301,13 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
   );
 }
 
-function LigneTache({ l, groupe, choisie, ouvrir, cocher }: { l: Ligne; groupe: Groupe; choisie: boolean; ouvrir: () => void; cocher: (fait: boolean) => void }) {
-  const { titre, sous } = decouper(l.donnees["Tâche"]);
-  const statut = l.donnees["Statut"] ?? "À faire";
-  const fait = statut === "Fait";
-  return (
-    <li className="tk-ligne" aria-current={choisie ? "true" : undefined} data-fait={fait ? "" : undefined}>
-      <button type="button" role="checkbox" aria-checked={fait} aria-label={`${fait ? "Rouvrir" : "Marquer faite"} : ${titre}`} className="tk-case" onClick={() => cocher(!fait)}>
-        <Check width={10} height={10} strokeWidth={3} aria-hidden="true" />
-      </button>
-      <button type="button" className="tk-corps" onClick={ouvrir} title={sous || undefined}>
-        <span className="tk-titre">{titre || "Nouvelle tâche"}</span>
-        {statut === "Bloqué" || statut === "En cours" ? <span className="tk-pastille" data-statut={statut}>{statut}</span> : null}
-        <span className="tk-pastille tk-categorie">{l.donnees["Catégorie"]}</span>
-        <span className="tk-date" data-groupe={groupe}>
-          {dateCourte(l.donnees["Échéance"])}
-        </span>
-      </button>
-    </li>
-  );
+/* « En retard », « Aujourd'hui », « Demain », « Dans 4 j » */
+function relatif(t: string | undefined, jour0: number, statut: string): string {
+  const e = echeance(t)?.getTime();
+  if (e === undefined || statut === "Fait") return "";
+  if (e < jour0) return "En retard";
+  const n = Math.floor((e - jour0) / 86_400_000);
+  return n === 0 ? "Aujourd'hui" : n === 1 ? "Demain" : `Dans ${n} j`;
 }
 
 /* ——— la fiche : tout se modifie ici ——— */

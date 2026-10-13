@@ -1,58 +1,16 @@
 /* ══════════════════════════════════════════════════════════════════════
-   Tâches — à plat, comme Attio et la page Notes (13/10/2026),
-   components/omega/PlanTaches (préfixe tk-, tiroir tp-).
+   Tâches — comme la page Activité (13/10/2026), components/omega/PlanTaches
+   (préfixe tk-, les classes ao- d'activite.css telles quelles, tiroir tp-).
 
-   Retour de Teo : « pas assez épuré, regarde Attio ». Aucun cadre : les
-   onglets et la barre de Notes (notes.css), puis la liste posée sur la
-   page, lignes séparées d'un filet pleine largeur. En-tête de groupe en
-   petit texte gris ; une ligne de 44 px : case, titre, pastilles
-   (statut, catégorie), date — rouge en retard, orange cette semaine.
+   Retour de Teo : « encore trop de trucs, regarde Notes et Activité ».
+   Une barre fine, puis une liste encadrée : titre et catégorie | statut |
+   date | « Dans 3 j » (rouge en retard). La fiche s'ouvre au clic.
    ══════════════════════════════════════════════════════════════════════ */
 
-.tk-page { padding-bottom: 48px; }
-.tk-barre-gauche { display: flex; align-items: center; gap: 8px; }
-.tk-tri { cursor: default; }
-.tk-tri > svg { color: var(--v2-gray-900); }
-.tk-gris { color: var(--v2-gray-900); font-weight: 400; }
-.no-barre .om-vue { height: 26px; padding: 0 10px; border-radius: 6px; background: var(--v2-bg-100); box-shadow: 0 0 0 1px var(--v2-a-400); font-size: 13px; }
-.tk-recherche { position: relative; display: inline-flex; align-items: center; width: 200px; height: 26px; border-radius: 6px; background: var(--v2-bg-100); box-shadow: 0 0 0 1px var(--v2-a-400); transition: box-shadow 0.15s; }
-.tk-recherche:focus-within { box-shadow: var(--v2-anneau); }
-.tk-recherche > svg { position: absolute; left: 8px; color: var(--v2-gray-900); pointer-events: none; }
-.tk-recherche input { width: 100%; height: 100%; min-width: 0; padding: 0 10px 0 28px; border: 0; outline: 0; border-radius: inherit; background: transparent; color: var(--v2-gray-1000); font: inherit; font-size: 13px; }
-.tk-recherche input::placeholder { color: var(--v2-gray-800); }
-.tk-recherche input::-webkit-search-cancel-button { display: none; }
 .tk-etat { margin: 12px 0 0; font-size: 13px; color: var(--v2-gray-900); }
-.tk-vide { margin: 0; padding: 64px 0; font-size: 14px; color: var(--v2-gray-900); text-align: center; }
-
-/* la liste à plat : pleine largeur, des filets, pas de cadre */
-.tk-liste { margin: 0 -20px; }
-.tk-groupe h2 { margin: 0; }
-.tk-groupe h2 button { display: flex; align-items: center; gap: 6px; width: 100%; height: 40px; padding: 12px 20px 0; border: 0; border-bottom: 1px solid var(--v2-a-400); background: transparent; color: var(--v2-gray-900); font: inherit; font-size: 12px; font-weight: 500; text-align: left; cursor: pointer; transition: color 0.15s; }
-.tk-groupe h2 button:hover { color: var(--v2-gray-1000); }
-.tk-groupe h2 button:focus-visible { outline: 0; box-shadow: inset var(--v2-anneau); }
-.tk-groupe[data-groupe="retard"] h2 button { color: var(--v2-red-900, var(--v2-red-700)); }
-.tk-chevron { flex: none; transition: transform 0.15s; }
-.tk-groupe h2 button[aria-expanded="false"] .tk-chevron { transform: rotate(-90deg); }
-.tk-nombre { font-variant-numeric: tabular-nums; color: var(--v2-gray-700); }
-.tk-groupe ul { margin: 0; padding: 0; list-style: none; }
-
-.tk-ligne { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 20px; border-bottom: 1px solid var(--v2-a-400); transition: background 0.12s; }
-.tk-ligne:hover { background: var(--v2-a-100); }
-.tk-ligne[aria-current="true"] { background: var(--v2-a-200); }
-.tk-case { flex: none; display: grid; place-items: center; width: 16px; height: 16px; padding: 0; border: 0; border-radius: 4px; background: transparent; box-shadow: inset 0 0 0 1px var(--v2-a-600); color: transparent; cursor: pointer; transition: background 0.15s, box-shadow 0.15s, color 0.15s; }
-.tk-case:hover { box-shadow: inset 0 0 0 1px var(--v2-gray-900); }
-.tk-case[aria-checked="true"] { background: var(--v2-blue-700); box-shadow: none; color: #fff; }
-.tk-case:focus-visible { outline: 0; box-shadow: var(--v2-anneau); }
-.tk-corps { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; height: 44px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
-.tk-corps:focus-visible { outline: 0; border-radius: 4px; box-shadow: var(--v2-anneau); }
-.tk-titre { flex: 1; min-width: 0; font-size: 14px; color: var(--v2-gray-1000); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tk-ligne[data-fait] .tk-titre { color: var(--v2-gray-900); text-decoration: line-through; text-decoration-color: var(--v2-a-500); }
-.tk-pastille { flex: none; display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 6px; background: var(--v2-a-100); box-shadow: inset 0 0 0 1px var(--v2-a-300); font-size: 12px; font-weight: 500; color: var(--v2-gray-1000); white-space: nowrap; }
-.tk-pastille[data-statut="Bloqué"] { color: var(--v2-red-900, var(--v2-red-700)); }
-.tk-pastille[data-statut="En cours"] { color: var(--v2-blue-900, var(--v2-blue-700)); }
-.tk-date { flex: none; width: 64px; font-size: 13px; color: var(--v2-gray-900); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.tk-date[data-groupe="retard"] { color: var(--v2-red-900, var(--v2-red-700)); }
-.tk-date[data-groupe="semaine"], .tk-date[data-groupe="aujourdhui"] { color: var(--v2-amber-900, var(--v2-amber-700)); }
+.tk-liste .ao-ligne button { grid-template-columns: minmax(0, 1fr) 120px 80px 96px 14px; }
+.tk-quand { min-width: 0; color: var(--v2-gray-900); white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
+.tk-quand[data-retard] { color: var(--v2-red-900, var(--v2-red-700)); }
 
 /* ——— la fiche, en tiroir ——— */
 .tp-voile { position: fixed; inset: 0; z-index: 100; display: flex; justify-content: flex-end; background: color-mix(in srgb, var(--v2-voile) 50%, transparent); }
@@ -65,18 +23,16 @@
 .tp-tiroir .om-pt-fiche::before { display: none; }
 .tp-tiroir .om-pt-fiche-haut .v2-btn { display: inline-flex; }
 
-.tk-page .no-onglets { overflow-x: auto; scrollbar-width: none; }
-.tk-page .no-onglet { flex: none; white-space: nowrap; }
+
+/* le sélecteur ⌃⌄ de la page, habillé comme les autres boutons de la barre */
+.ao-barre .om-vue { height: 26px; padding: 0 10px; border-radius: 6px; background: var(--v2-bg-100); box-shadow: 0 0 0 1px var(--v2-a-400); font-size: 13px; }
 
 /* ——— paliers ——— */
-@container principale (max-width: 899px) {
-  .tk-recherche { width: 160px; }
+@container principale (max-width: 1023px) {
+  .tk-liste .ao-ligne button { grid-template-columns: minmax(0, 1fr) 120px 96px 14px; }
 }
-@container principale (max-width: 639px) {
-  .tk-liste { margin: 0 -16px; }
-  .tk-groupe h2 button, .tk-ligne { padding-left: 16px; padding-right: 16px; }
-  .tk-categorie { display: none; }
-  .no-barre-droite { width: 100%; }
-  .tk-recherche { flex: 1; width: auto; }
+@container principale (max-width: 767px) {
+  .tk-liste .ao-ligne button { grid-template-columns: minmax(0, 1fr) auto; }
+  .tk-liste .ao-statut, .tk-liste .ao-ligne-date { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .tp-tiroir, .tp-voile { animation: none; } }

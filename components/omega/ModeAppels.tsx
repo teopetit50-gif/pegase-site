@@ -15,6 +15,13 @@
      · les aides à la conversation : les objections les plus entendues,
        leur réponse, « +1 » pour compter celle qu'on vient d'entendre.
    Historique, Rappels et Analyse lisent les mêmes lignes.
+   13/10/2026 (3) — « encore trop de trucs, regarde Notes et Activité » :
+   comme la page Activité. Une barre fine (vue À appeler / Historique /
+   Analyse, secteur | chiffres du jour, recherche), puis une liste
+   encadrée, un prospect par ligne. L'appel s'ouvre au clic dans un
+   panneau sur le côté (Appeler, script, issue, notes) ; « Enregistrer et
+   suivant » y ouvre le prospect suivant. Plus d'onglet Rappels : les
+   rappels sont en tête de liste, point bleu. Styles al- + ao-.
    13/10/2026 (2) — « pas assez épuré, regarde Attio » : la page Notes /
    Attio telle quelle (onglets, barre fine, rien d'encadré), et la séance
    comme une fiche d'Attio — à gauche le prospect, les quatre temps en
@@ -56,9 +63,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Building2, Check, ChevronLeft, ChevronRight, ChevronsUpDown, LayoutGrid, Phone, Plus, SkipForward } from "lucide-react";
+import { ArrowRight, BarChart3, Building2, Check, ChevronDown, ChevronRight, History, LayoutGrid, Phone, Plus, Search, X } from "lucide-react";
+import { Dialog, Modal, ModalOverlay } from "react-aria-components";
 import { createClient } from "@/lib/supabase/client";
 import "@/components/espace2/notes.css";
+import "./activite.css";
 import "./appels.css";
 import { ItemMenu, MenuDeroulant, SectionMenu } from "@/components/espace2/ui";
 import { CONSEILS, ETAPES, textesScript } from "./ScriptAppel";
@@ -79,29 +88,22 @@ const AUTRES: Issue[] = [
   { cle: "Pas intéressé", libelle: "Pas intéressé", statut: "Pas intéressé" },
   { cle: "Ne plus appeler", libelle: "Ne plus appeler", statut: "Ne plus contacter" },
 ];
-type Vue = "session" | "historique" | "rappels" | "analyse";
-const VUES: { cle: Vue; libelle: string }[] = [
-  { cle: "session", libelle: "Session" },
-  { cle: "historique", libelle: "Historique" },
-  { cle: "rappels", libelle: "Rappels" },
-  { cle: "analyse", libelle: "Analyse" },
+type Vue = "file" | "historique" | "analyse";
+const VUES: { cle: Vue; libelle: string; icone: typeof Phone }[] = [
+  { cle: "file", libelle: "À appeler", icone: Phone },
+  { cle: "historique", libelle: "Historique", icone: History },
+  { cle: "analyse", libelle: "Analyse", icone: BarChart3 },
 ];
 
-const initiales = (s: string) =>
-  s
-    .replace(/[^\p{L}\p{N} ]/gu, " ")
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((m) => m[0]!.toUpperCase())
-    .join("") || "?";
 const dateCourte = (iso?: string) => (iso ? new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) : "");
 const heure = (iso?: string) => (iso ? new Date(iso).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "");
 
 export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: initiales_, selecteur }: { file: Prospect[]; secteurs: Secteur[]; secteur?: string; lignes: Ligne[]; selecteur: React.ReactNode }) {
   const [file, setFile] = useState(initiale);
   const [lignes, setLignes] = useState(initiales_);
-  const [vue, setVue] = useState<Vue>("session");
+  const [vue, setVue] = useState<Vue>("file");
+  const [ouvert, setOuvert] = useState(false);
+  const [recherche, setRecherche] = useState("");
   const [note, setNote] = useState("");
   const [issue, setIssue] = useState<Issue | null>(null);
   const [dateRdv, setDateRdv] = useState("");
@@ -131,6 +133,10 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
     setIssue(null);
     setDateRdv("");
     setEtape(0);
+  }
+  function ouvrir(id: number) {
+    choisirProspect(id);
+    setOuvert(true);
   }
   function suivant(sens: 1 | -1) {
     setFile((f) => (f.length < 2 ? f : sens === 1 ? [...f.slice(1), f[0]] : [f[f.length - 1], ...f.slice(0, -1)]));
@@ -186,40 +192,40 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
   }
 
   const lien = (s?: string) => (s ? `/omega/appels?secteur=${encodeURIComponent(s)}` : "/omega/appels");
-  const rechercheGoogle = p ? `https://www.google.com/search?q=${encodeURIComponent(`${nom} ${p.commune ?? ""}`)}` : "";
 
-  const position = Math.min(file.length, Math.max(1, initiale.length - file.length + 1));
+  /* la liste garde l'ordre de la file du jour (« Rappeler » d'abord) : ouvrir un prospect ne la réordonne pas */
+  const restants = new Set(file.map((x) => x.id));
+  const q = recherche.trim().toLowerCase();
+  const liste = initiale.filter((x) => restants.has(x.id)).filter((x) => !q || `${x.enseigne ?? ""} ${x.entreprise} ${x.commune ?? ""} ${x.dirigeant ?? ""}`.toLowerCase().includes(q));
+  const VUE = VUES.find((v) => v.cle === vue)!;
+  const coche = (oui: boolean) => (oui ? <Check width={14} height={14} aria-label="choisi" /> : null);
 
   return (
-    <div className="no-page om-ap at-page v2-arrivee">
+    <div className="no-page al-page v2-arrivee">
       <h1 className="v2-sr">Appels</h1>
 
-      {/* les onglets, comme Notes · Modèles */}
-      <div className="no-onglets" role="tablist" aria-label="Vue">
-        {VUES.map((v) => (
-          <button key={v.cle} type="button" role="tab" aria-selected={vue === v.cle} className="no-onglet" onClick={() => setVue(v.cle)}>
-            {v.libelle}
-            {v.cle === "rappels" ? <span className="no-compte">{file.filter((x) => x.statut === "Rappeler").length}</span> : null}
-          </button>
-        ))}
-      </div>
-
-      {/* la barre : la file et le secteur | les chiffres du jour */}
-      <div className="no-barre">
-        <div className="at-barre-gauche">
-          {vue === "session" && p ? (
-            <span className="at-file">
-              <button type="button" className="at-icone" aria-label="Prospect précédent" onClick={() => suivant(-1)}>
-                <ChevronLeft {...I} width={14} height={14} />
-              </button>
-              <button type="button" className="at-icone" aria-label="Prospect suivant" onClick={() => suivant(1)}>
-                <ChevronRight {...I} width={14} height={14} />
-              </button>
-              <span>
-                {position} sur {Math.max(file.length, position)}
-              </span>
-            </span>
-          ) : null}
+      {/* la barre, comme Activité : la vue et le secteur | les chiffres et la recherche */}
+      <div className="no-barre ao-barre">
+        <div className="ao-groupe">
+          <MenuDeroulant
+            etiquette={`Vue : ${VUE.libelle}. Changer de vue`}
+            classe="no-bouton"
+            placement="bottom start"
+            largeur={200}
+            declencheur={
+              <>
+                <VUE.icone {...I} width={14} height={14} />
+                {VUE.libelle}
+                <ChevronDown {...I} width={14} height={14} />
+              </>
+            }
+          >
+            {VUES.map((v) => (
+              <ItemMenu key={v.cle} id={v.cle} textValue={v.libelle} icone={<v.icone {...I} width={14} height={14} />} onAction={() => setVue(v.cle)} suffixe={coche(vue === v.cle)}>
+                {v.libelle}
+              </ItemMenu>
+            ))}
+          </MenuDeroulant>
           <MenuDeroulant
             etiquette={`Secteur : ${actif?.secteur ?? "Tous les secteurs"}. Changer de secteur`}
             classe="no-bouton"
@@ -229,11 +235,11 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
               <>
                 <Building2 {...I} width={14} height={14} />
                 {actif?.secteur ?? "Tous les secteurs"}
-                <ChevronsUpDown width={14} height={14} aria-hidden="true" />
+                <ChevronDown {...I} width={14} height={14} />
               </>
             }
           >
-            <ItemMenu id="tous" href={lien()} textValue="Tous les secteurs" icone={<LayoutGrid {...I} />}>
+            <ItemMenu id="tous" href={lien()} textValue="Tous les secteurs" icone={<LayoutGrid {...I} />} suffixe={coche(!actif)}>
               Tous les secteurs
             </ItemMenu>
             <SectionMenu titre="Secteurs">
@@ -246,233 +252,183 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
           </MenuDeroulant>
           {selecteur}
         </div>
-        <p className="at-chiffres">
-          {appels.length} appel{appels.length > 1 ? "s" : ""} · {rdv} RDV aujourd&apos;hui
-        </p>
+        <div className="ao-groupe ao-groupe--droite">
+          <p className="ao-etat">
+            {appels.length} appel{appels.length > 1 ? "s" : ""} · {rdv} RDV aujourd&apos;hui
+          </p>
+          {vue === "file" ? (
+            <label className="ao-recherche">
+              <Search {...I} width={14} height={14} />
+              <span className="v2-sr">Rechercher un prospect</span>
+              <input type="search" value={recherche} placeholder="Rechercher" autoComplete="off" spellCheck={false} onChange={(e) => setRecherche(e.target.value)} onKeyDown={(e) => e.key === "Escape" && setRecherche("")} />
+            </label>
+          ) : null}
+        </div>
       </div>
-
       {etat ? (
-        <p className="at-etat" role="status">
+        <p className="al-etat" role="status">
           {etat}
         </p>
       ) : (
         <p className="v2-sr" role="status" />
       )}
 
-      {vue === "session" ? (
-        p ? (
-          <div key={p.id} className="at-fiche">
-            {/* à gauche : le prospect, le script, les notes */}
-            <section className="at-principal" aria-label={`Appel : ${nom}`}>
-              <header className="at-tete">
-                <span className="at-avatar" aria-hidden="true">
-                  {initiales(nom)}
-                </span>
-                <div className="at-qui">
-                  <h2>{nom}</h2>
-                  <p>{[dirigeant, p.commune].filter(Boolean).join(" · ")}</p>
-                </div>
-              </header>
-
-              <div className="at-temps" role="tablist" aria-label="Temps de l'appel">
-                {ETAPES.map((e, i) => (
-                  <button key={e} type="button" role="tab" aria-selected={i === etape} className="no-onglet" onClick={() => setEtape(i)}>
-                    {i < etape ? <Check width={12} height={12} strokeWidth={2.5} aria-hidden="true" /> : null}
-                    {e}
-                  </button>
-                ))}
-              </div>
-
-              <div className="at-script">
-                <p className="at-replique">{textes[etape]}</p>
-                <p className="at-conseil">{CONSEILS[etape]}</p>
-                {etape === 3 ? (
-                  <div className="at-pistes">
-                    {douleurs.map((d) => (
-                      <span key={d} className="at-pastille">
-                        {d.charAt(0).toUpperCase() + d.slice(1)}
+      {vue === "file" ? (
+        liste.length ? (
+          <ul className="ao-liste al-liste">
+            {liste.map((x) => {
+              const statut = file.find((y) => y.id === x.id)?.statut ?? x.statut;
+              return (
+                <li key={x.id} className="ao-ligne">
+                  <button type="button" onClick={() => ouvrir(x.id)}>
+                    <span className="ao-ligne-titre">
+                      <strong>{x.enseigne || x.entreprise}</strong>
+                      <span>{[x.dirigeant?.replace(/\s*\(.*\)$/, ""), x.commune].filter(Boolean).join(" · ") || x.secteur}</span>
+                    </span>
+                    <span className="ao-statut">
+                      <span className="ao-point" data-teinte={statut === "Rappeler" ? "bleu" : undefined} aria-hidden="true" />
+                      {statut === "Rappeler" ? "À rappeler" : "À appeler"}
+                    </span>
+                    <span className="ao-produit">
+                      <span className="ao-tag">
+                        <Building2 {...I} width={14} height={14} />
+                        {x.secteur}
                       </span>
-                    ))}
-                  </div>
-                ) : (
-                  <button type="button" className="at-texte-bouton" onClick={() => setEtape(etape + 1)}>
-                    C&apos;est dit, suite : {ETAPES[etape + 1]}
-                    <ArrowRight width={14} height={14} aria-hidden="true" />
+                    </span>
+                    <span className="ao-ligne-date al-tel">{x.telephone}</span>
+                    <ChevronRight {...I} width={14} height={14} className="ao-chevron" />
                   </button>
-                )}
-              </div>
-
-              <div className="at-notes">
-                <label className="at-libelle" htmlFor="at-notes">
-                  Notes
-                </label>
-                <textarea id="at-notes" className="at-zone" placeholder="Ce qu'il a dit, ce qui l'intéresse, quand rappeler…" value={note} onChange={(e) => setNote(e.target.value)} />
-                <button type="button" className="at-texte-bouton" onClick={creerTache}>
-                  <Plus {...I} width={14} height={14} />
-                  Créer une tâche
-                </button>
-              </div>
-            </section>
-
-            {/* à droite : les détails et l'issue, comme la colonne d'une fiche Attio */}
-            <aside className="at-cote" aria-label="Détails et issue">
-              <a className="no-principal at-appeler" href={`tel:${p.telephone}`}>
-                <Phone {...I} width={14} height={14} />
-                Appeler {p.telephone}
-              </a>
-
-              <h3 className="at-libelle">Détails</h3>
-              <dl className="at-details">
-                <div>
-                  <dt>Téléphone</dt>
-                  <dd className="at-mono">{p.telephone}</dd>
-                </div>
-                {dirigeant ? (
-                  <div>
-                    <dt>Dirigeant</dt>
-                    <dd>{dirigeant}</dd>
-                  </div>
-                ) : null}
-                <div>
-                  <dt>Secteur</dt>
-                  <dd>{p.secteur}</dd>
-                </div>
-                {p.commune ? (
-                  <div>
-                    <dt>Commune</dt>
-                    <dd>{p.commune}</dd>
-                  </div>
-                ) : null}
-                <div>
-                  <dt>À vendre</dt>
-                  <dd className="at-pastilles">
-                    {p.moteurs.map((m) => (
-                      <span key={m} className="at-pastille">
-                        {m.toUpperCase()}
-                      </span>
-                    ))}
-                  </dd>
-                </div>
-                <div>
-                  <dt>Préparer</dt>
-                  <dd className="at-liens">
-                    <a href={rechercheGoogle} target="_blank" rel="noreferrer">
-                      Google
-                    </a>
-                    <a href={`https://www.google.com/maps/search/${encodeURIComponent(`${nom} ${p.commune ?? ""}`)}`} target="_blank" rel="noreferrer">
-                      Avis
-                    </a>
-                    <a href={`https://annuaire-entreprises.data.gouv.fr/rechercher?terme=${encodeURIComponent(p.entreprise)}`} target="_blank" rel="noreferrer">
-                      Fiche
-                    </a>
-                  </dd>
-                </div>
-              </dl>
-
-              <h3 className="at-libelle">Issue de l&apos;appel</h3>
-              <div className="at-issues" role="radiogroup" aria-label="Issue de l'appel">
-                {[...ISSUES, ...AUTRES].map((x) => (
-                  <button key={x.cle} type="button" role="radio" aria-checked={issue?.cle === x.cle} onClick={() => setIssue(x)}>
-                    <span className="at-radio" aria-hidden="true" />
-                    {x.libelle}
-                  </button>
-                ))}
-              </div>
-              {issue?.date ? (
-                <label className="at-date">
-                  <span>{issue.date === "rdv" ? "Date du rendez-vous" : "Date du rappel"}</span>
-                  <input type="datetime-local" value={dateRdv} onChange={(e) => setDateRdv(e.target.value)} />
-                </label>
-              ) : null}
-              <button type="button" className="no-bouton at-enregistrer" disabled={!issue || envoi} onClick={enregistrer}>
-                Enregistrer et passer au suivant
-                <ArrowRight {...I} width={14} height={14} />
-              </button>
-              <button type="button" className="at-texte-bouton at-passer" onClick={() => suivant(1)}>
-                <SkipForward {...I} width={14} height={14} />
-                Passer sans noter
-              </button>
-            </aside>
-          </div>
+                </li>
+              );
+            })}
+          </ul>
         ) : (
-          <p className="at-vide">
-            File vide pour ce secteur : tous les établissements avec un téléphone ont été appelés.{" "}
-            <Link href={lien()}>Voir tous les secteurs</Link>
+          <p className="ao-vide ao-vide--liste">
+            {q ? (
+              "Aucun prospect ne correspond."
+            ) : (
+              <>
+                File vide pour ce secteur : tout le monde a été appelé.&nbsp;<Link href={lien()}>Voir tous les secteurs</Link>
+              </>
+            )}
           </p>
         )
+      ) : vue === "historique" ? (
+        <Historique appels={tousAppels} />
       ) : (
-        <div className="at-autre">
-          {vue === "historique" ? (
-            <Historique appels={tousAppels} />
-          ) : vue === "rappels" ? (
-            <section className="v2-carte om-ap-table" aria-label="Rappels">
-              {file.filter((x) => x.statut === "Rappeler").length ? (
-                <ul>
-                  {file
-                    .filter((x) => x.statut === "Rappeler")
-                    .map((x) => (
-                      <li key={x.id}>
-                        <span className="om-ap-avatar om-ap-avatar--petit" aria-hidden="true">
-                          {initiales(x.enseigne || x.entreprise)}
-                        </span>
-                        <span className="om-ap-table-nom">
-                          <strong>{x.enseigne || x.entreprise}</strong>
-                          <small>{[x.secteur, x.commune].filter(Boolean).join(" · ")}</small>
-                        </span>
-                        <span className="om-ap-table-note">{x.note?.split("\n").slice(-1)[0] ?? ""}</span>
-                        <button
-                          type="button"
-                          className="v2-btn v2-btn--petit"
-                          onClick={() => {
-                            choisirProspect(x.id);
-                            setVue("session");
-                          }}
-                        >
-                          <Phone width={14} height={14} aria-hidden="true" />
-                          Rappeler
-                        </button>
-                      </li>
-                    ))}
-                </ul>
-              ) : (
-                <p className="om-ap-vide-texte">Aucun rappel en attente dans ce secteur.</p>
-              )}
-            </section>
-          ) : (
-            <Analyse appels={tousAppels} objections={objections} aujourdhui={aujourdhui} maintenant={maintenant.getTime()} />
-          )}
+        <div className="al-analyse">
+          <Analyse appels={tousAppels} objections={objections} aujourdhui={aujourdhui} maintenant={maintenant.getTime()} />
         </div>
       )}
+
+      {/* l'appel, sur le côté comme la fiche d'Activité ; « Enregistrer » passe au suivant sans le fermer */}
+      <ModalOverlay isOpen={ouvert && !!p} onOpenChange={(o) => !o && setOuvert(false)} isDismissable className="v2-jetons ao-voile">
+        <Modal className="ao-fiche al-fiche">
+          <Dialog className="ao-fiche-dialogue" aria-label={p ? `Appel : ${nom}` : "Appel"}>
+            {p ? (
+              <>
+                <div className="ao-fiche-haut">
+                  <span className="ao-fiche-type">Appel</span>
+                  <button type="button" className="ao-icone" aria-label="Fermer" onClick={() => setOuvert(false)}>
+                    <X {...I} />
+                  </button>
+                </div>
+                <div key={p.id} className="ao-fiche-corps al-corps">
+                  <div>
+                    <h2 className="al-nom">{nom}</h2>
+                    <p className="al-sous">{[dirigeant, p.commune, p.secteur].filter(Boolean).join(" · ")}</p>
+                  </div>
+                  <a className="no-principal al-appeler" href={`tel:${p.telephone}`}>
+                    <Phone {...I} width={14} height={14} />
+                    Appeler {p.telephone}
+                  </a>
+
+                  <h3 className="ao-fiche-section">Script</h3>
+                  <div className="al-temps" role="tablist" aria-label="Temps de l'appel">
+                    {ETAPES.map((e, i) => (
+                      <button key={e} type="button" role="tab" aria-selected={i === etape} className="no-onglet" onClick={() => setEtape(i)}>
+                        {i < etape ? <Check width={12} height={12} strokeWidth={2.5} aria-hidden="true" /> : null}
+                        {e}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="al-replique">{textes[etape]}</p>
+                  <p className="al-conseil">{CONSEILS[etape]}</p>
+                  {etape === 3 ? (
+                    <p className="al-conseil">Pistes : {douleurs.join(", ")}.</p>
+                  ) : (
+                    <button type="button" className="al-texte-bouton" onClick={() => setEtape(etape + 1)}>
+                      C&apos;est dit, suite : {ETAPES[etape + 1]}
+                      <ArrowRight width={14} height={14} aria-hidden="true" />
+                    </button>
+                  )}
+
+                  <h3 className="ao-fiche-section">Issue</h3>
+                  <div className="al-issues" role="radiogroup" aria-label="Issue de l'appel">
+                    {[...ISSUES, ...AUTRES].map((x) => (
+                      <button key={x.cle} type="button" role="radio" aria-checked={issue?.cle === x.cle} onClick={() => setIssue(x)}>
+                        <span className="al-radio" aria-hidden="true" />
+                        {x.libelle}
+                      </button>
+                    ))}
+                  </div>
+                  {issue?.date ? (
+                    <label className="al-date">
+                      <span>{issue.date === "rdv" ? "Date du rendez-vous" : "Date du rappel"}</span>
+                      <input type="datetime-local" value={dateRdv} onChange={(e) => setDateRdv(e.target.value)} />
+                    </label>
+                  ) : null}
+
+                  <h3 className="ao-fiche-section">Notes</h3>
+                  <textarea className="al-zone" placeholder="Ce qu'il a dit, quand rappeler…" value={note} rows={3} aria-label="Notes" onChange={(e) => setNote(e.target.value)} />
+                  <button type="button" className="al-texte-bouton" onClick={creerTache}>
+                    <Plus {...I} width={14} height={14} />
+                    Créer une tâche
+                  </button>
+                </div>
+                <div className="ao-fiche-pied">
+                  <button type="button" className="al-texte-bouton" onClick={() => suivant(1)}>
+                    Passer
+                  </button>
+                  <button type="button" className="no-principal" disabled={!issue || envoi} onClick={enregistrer}>
+                    Enregistrer et suivant
+                    <ArrowRight {...I} width={14} height={14} />
+                  </button>
+                </div>
+              </>
+            ) : null}
+          </Dialog>
+        </Modal>
+      </ModalOverlay>
     </div>
   );
 }
 
+const TEINTE_ISSUE: Record<string, string> = { "RDV pris": "vert", Rappeler: "bleu", "Pas intéressé": "rouge", "Ne plus appeler": "rouge" };
+
 function Historique({ appels }: { appels: Ligne[] }) {
+  if (!appels.length) return <p className="ao-vide ao-vide--liste">Aucun appel enregistré pour l&apos;instant.</p>;
   return (
-    <section className="v2-carte om-ap-table" aria-label="Historique des appels">
-      {appels.length ? (
-        <ul>
-          {appels.slice(0, 60).map((l) => (
-            <li key={l.id}>
-              <span className="om-ap-table-date">
-                {dateCourte(l.donnees["Date"])}
-                <small>{heure(l.donnees["Date"])}</small>
-              </span>
-              <span className="om-ap-table-nom">
-                <strong>{l.donnees["Entreprise"]}</strong>
-                <small>{l.donnees["Secteur"]}</small>
-              </span>
-              <span className="om-ap-table-note">{l.donnees["Note"]}</span>
-              <span className="om-ap-pastille" data-rdv={l.donnees["Issue"] === "RDV pris" ? "" : undefined}>
-                {l.donnees["Issue"]}
-              </span>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="om-ap-vide-texte">Aucun appel enregistré pour l&apos;instant.</p>
-      )}
-    </section>
+    <ul className="ao-liste al-liste al-historique">
+      {appels.slice(0, 60).map((l) => (
+        <li key={l.id} className="ao-ligne">
+          <div className="al-ligne">
+            <span className="ao-ligne-titre">
+              <strong>{l.donnees["Entreprise"]}</strong>
+              <span>{l.donnees["Note"] || l.donnees["Secteur"]}</span>
+            </span>
+            <span className="ao-statut">
+              <span className="ao-point" data-teinte={TEINTE_ISSUE[l.donnees["Issue"]]} aria-hidden="true" />
+              {l.donnees["Issue"]}
+            </span>
+            <span className="ao-produit">{l.donnees["Secteur"]}</span>
+            <span className="ao-ligne-date">
+              {dateCourte(l.donnees["Date"])} · {heure(l.donnees["Date"])}
+            </span>
+          </div>
+        </li>
+      ))}
+    </ul>
   );
 }
 
