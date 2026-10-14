@@ -15,6 +15,10 @@
    Les données sont celles de omega_lignes (tableaux « plan » et
    « ajouts ») ; tout se modifie sur place et s'enregistre aussitôt.
    « À préparer » et « Note » sont deux clés de plus dans `donnees`.
+   14/10/2026 — « encore trop, pas assez épuré » : une ligne = le titre et
+   UNE date à droite (rouge si passée). Plus de catégorie sous le titre,
+   plus de « À faire » répété (le statut n'apparaît que s'il est Bloqué ou
+   En cours), plus de flèche.
    13/10/2026 (3) — « encore trop de trucs, regarde Notes et Activité » :
    comme la page Activité. Une barre fine (statut ⌄, échéance ⌄ | recherche,
    « Nouvelle tâche »), puis UNE liste encadrée, une tâche par ligne
@@ -47,7 +51,7 @@
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { CalendarDays, Check, ChevronDown, ChevronRight, ListChecks, Plus, Rows3, Search, Tag, Trash2, X } from "lucide-react";
+import { CalendarDays, Check, ChevronDown, ListChecks, Plus, Rows3, Search, Tag, Trash2, X } from "lucide-react";
 import { ItemMenu, MenuDeroulant } from "@/components/espace2/ui";
 import { Dialog, Modal, ModalOverlay } from "react-aria-components";
 import "@/components/espace2/notes.css";
@@ -109,7 +113,6 @@ const PERIODES: { cle: Periode; libelle: string }[] = [
   { cle: "mois", libelle: "30 prochains jours" },
   { cle: "tout", libelle: "Toutes les dates" },
 ];
-const TEINTES: Record<string, string> = { "En cours": "bleu", Bloqué: "rouge", Fait: "vert" };
 
 export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: Ligne[]; selecteur: React.ReactNode }) {
   const [lignes, setLignes] = useState(() => initiales.filter((l) => l.tableau === "plan" || l.tableau === "ajouts"));
@@ -263,23 +266,21 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
           {visibles.map((l) => {
             const statut = l.donnees["Statut"] || "À faire";
             const { titre } = decouper(l.donnees["Tâche"]);
-            const quand = relatif(l.donnees["Échéance"], jour0, statut);
+            const quand = quandCourt(l.donnees["Échéance"], jour0, statut);
             return (
               <li key={l.id} className="ao-ligne">
-                <button type="button" onClick={() => setChoix(l.id)}>
-                  <span className="ao-ligne-titre">
-                    <strong data-vide={titre ? undefined : ""}>{titre || "Tâche sans titre"}</strong>
-                    <span>{l.donnees["Catégorie"]}</span>
+                <button type="button" className="tk-ligne" onClick={() => setChoix(l.id)}>
+                  <span className="tk-titre" data-vide={titre ? undefined : ""}>
+                    {titre || "Tâche sans titre"}
                   </span>
-                  <span className="ao-statut">
-                    <span className="ao-point" data-teinte={TEINTES[statut]} aria-hidden="true" />
-                    {statut}
+                  {statut === "Bloqué" || statut === "En cours" ? (
+                    <span className="tk-statut" data-statut={statut}>
+                      {statut}
+                    </span>
+                  ) : null}
+                  <span className="tk-quand" data-retard={quand.retard ? "" : undefined}>
+                    {quand.texte}
                   </span>
-                  <span className="ao-ligne-date">{dateCourte(l.donnees["Échéance"])}</span>
-                  <span className="tk-quand" data-retard={quand === "En retard" ? "" : undefined}>
-                    {quand}
-                  </span>
-                  <ChevronRight {...I} width={14} height={14} className="ao-chevron" />
                 </button>
               </li>
             );
@@ -301,13 +302,14 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
   );
 }
 
-/* « En retard », « Aujourd'hui », « Demain », « Dans 4 j » */
-function relatif(t: string | undefined, jour0: number, statut: string): string {
+/* une seule date par ligne : « 11 oct. » en rouge si elle est passée, « Aujourd'hui », « Demain » */
+function quandCourt(t: string | undefined, jour0: number, statut: string): { texte: string; retard: boolean } {
   const e = echeance(t)?.getTime();
-  if (e === undefined || statut === "Fait") return "";
-  if (e < jour0) return "En retard";
+  if (e === undefined) return { texte: "", retard: false };
   const n = Math.floor((e - jour0) / 86_400_000);
-  return n === 0 ? "Aujourd'hui" : n === 1 ? "Demain" : `Dans ${n} j`;
+  if (statut !== "Fait" && n === 0) return { texte: "Aujourd'hui", retard: false };
+  if (statut !== "Fait" && n === 1) return { texte: "Demain", retard: false };
+  return { texte: dateCourte(t), retard: statut !== "Fait" && e < jour0 };
 }
 
 /* ——— la fiche : tout se modifie ici ——— */

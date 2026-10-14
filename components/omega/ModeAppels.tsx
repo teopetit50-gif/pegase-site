@@ -15,6 +15,9 @@
      · les aides à la conversation : les objections les plus entendues,
        leur réponse, « +1 » pour compter celle qu'on vient d'entendre.
    Historique, Rappels et Analyse lisent les mêmes lignes.
+   14/10/2026 — « encore trop, pas assez épuré » : une ligne = le nom, la
+   commune en gris, « À rappeler » s'il le faut, le numéro. Plus de
+   dirigeant sous le nom, de statut répété, de secteur ni de flèche.
    13/10/2026 (3) — « encore trop de trucs, regarde Notes et Activité » :
    comme la page Activité. Une barre fine (vue À appeler / Historique /
    Analyse, secteur | chiffres du jour, recherche), puis une liste
@@ -63,7 +66,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, BarChart3, Building2, Check, ChevronDown, ChevronRight, History, LayoutGrid, Phone, Plus, Search, X } from "lucide-react";
+import { ArrowRight, BarChart3, Building2, Check, ChevronDown, History, LayoutGrid, Phone, Plus, Search, X } from "lucide-react";
 import { Dialog, Modal, ModalOverlay } from "react-aria-components";
 import { createClient } from "@/lib/supabase/client";
 import "@/components/espace2/notes.css";
@@ -280,23 +283,13 @@ export default function ModeAppels({ file: initiale, secteurs, secteur, lignes: 
               const statut = file.find((y) => y.id === x.id)?.statut ?? x.statut;
               return (
                 <li key={x.id} className="ao-ligne">
-                  <button type="button" onClick={() => ouvrir(x.id)}>
-                    <span className="ao-ligne-titre">
-                      <strong>{x.enseigne || x.entreprise}</strong>
-                      <span>{[x.dirigeant?.replace(/\s*\(.*\)$/, ""), x.commune].filter(Boolean).join(" · ") || x.secteur}</span>
+                  <button type="button" className="al-ligne-file" onClick={() => ouvrir(x.id)}>
+                    <span className="al-titre">
+                      {x.enseigne || x.entreprise}
+                      {x.commune ? <span> {x.commune}</span> : null}
                     </span>
-                    <span className="ao-statut">
-                      <span className="ao-point" data-teinte={statut === "Rappeler" ? "bleu" : undefined} aria-hidden="true" />
-                      {statut === "Rappeler" ? "À rappeler" : "À appeler"}
-                    </span>
-                    <span className="ao-produit">
-                      <span className="ao-tag">
-                        <Building2 {...I} width={14} height={14} />
-                        {x.secteur}
-                      </span>
-                    </span>
-                    <span className="ao-ligne-date al-tel">{x.telephone}</span>
-                    <ChevronRight {...I} width={14} height={14} className="ao-chevron" />
+                    {statut === "Rappeler" ? <span className="al-rappel">À rappeler</span> : null}
+                    <span className="al-tel">{x.telephone}</span>
                   </button>
                 </li>
               );

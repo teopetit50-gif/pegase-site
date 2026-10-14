@@ -11,9 +11,14 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 .al-etat { margin: 12px 0 0; font-size: 13px; color: var(--v2-gray-900); }
-.al-liste .ao-ligne button, .al-ligne { grid-template-columns: minmax(0, 1fr) 120px 160px 130px 14px; }
+/* la file : une ligne = le nom, la commune en gris, le numéro (14/10) */
+.al-liste .ao-ligne { min-width: 0; }
+.al-liste .ao-ligne .al-ligne-file { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 16px; }
+.al-titre { flex: 1; min-width: 0; font-size: 14px; color: var(--v2-gray-1000); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.al-titre > span { margin-left: 6px; color: var(--v2-gray-900); }
+.al-rappel { flex: none; font-size: 12px; color: var(--v2-blue-900, var(--v2-blue-700)); }
 .al-historique .al-ligne { display: grid; grid-template-columns: minmax(0, 1fr) 130px 140px 110px; align-items: center; gap: 14px; min-height: 56px; padding: 8px 16px; font-size: 13px; }
-.al-tel { font-family: var(--v2-mono); font-size: 12px; }
+.al-tel { flex: none; font-family: var(--v2-mono); font-size: 12px; color: var(--v2-gray-900); }
 .ao-vide a { color: var(--v2-gray-1000); text-decoration: underline; text-underline-offset: 3px; }
 .al-analyse { margin-top: 16px; }
 
@@ -49,13 +54,10 @@
 .al-fiche .no-principal:disabled { opacity: 0.45; cursor: not-allowed; }
 
 /* ——— paliers ——— */
-@container principale (max-width: 1023px) {
-  .al-liste .ao-ligne button { grid-template-columns: minmax(0, 1fr) 120px 130px 14px; }
-  .al-liste .ao-produit { display: none; }
-  .al-liste .al-tel { display: block; }
-}
 @container principale (max-width: 767px) {
-  .al-liste .ao-ligne button, .al-historique .al-ligne { grid-template-columns: minmax(0, 1fr) auto; padding: 8px 12px; }
-  .al-liste .al-tel, .al-historique .ao-produit, .al-historique .ao-ligne-date { display: none; }
+  .al-liste .ao-ligne .al-ligne-file { padding: 0 12px; }
+  .al-titre > span { display: none; }
+  .al-historique .al-ligne { grid-template-columns: minmax(0, 1fr) auto; padding: 8px 12px; }
+  .al-historique .ao-produit, .al-historique .ao-ligne-date { display: none; }
 }
 @media (prefers-color-scheme: light) { .al-date input { color-scheme: light; } }
