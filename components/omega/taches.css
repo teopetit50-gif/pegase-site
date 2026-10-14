@@ -8,31 +8,21 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 .tk-etat { margin: 12px 0 0; font-size: 13px; color: var(--v2-gray-900); }
-.tk-liste .ao-ligne button { grid-template-columns: minmax(0, 1fr) 120px 80px 96px 14px; }
-.tk-quand { min-width: 0; color: var(--v2-gray-900); white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
+/* une ligne = le titre et une date (14/10) ; min-width: 0 pour que le titre se coupe au lieu de pousser la date hors du cadre */
+.tk-liste .ao-ligne { min-width: 0; }
+.tk-liste .ao-ligne .tk-ligne { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 16px; }
+.tk-titre { flex: 1; min-width: 0; font-size: 14px; color: var(--v2-gray-1000); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tk-titre[data-vide] { color: var(--v2-gray-800); }
+.tk-statut { flex: none; font-size: 12px; color: var(--v2-gray-900); }
+.tk-statut[data-statut="Bloqué"] { color: var(--v2-red-900, var(--v2-red-700)); }
+.tk-quand { flex: none; min-width: 72px; font-size: 13px; color: var(--v2-gray-900); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .tk-quand[data-retard] { color: var(--v2-red-900, var(--v2-red-700)); }
-
-/* ——— la fiche, en tiroir ——— */
-.tp-voile { position: fixed; inset: 0; z-index: 100; display: flex; justify-content: flex-end; background: color-mix(in srgb, var(--v2-voile) 50%, transparent); }
-.tp-voile[data-entering] { animation: v2-fondu var(--v2-overlay) var(--v2-swift); }
-.tp-tiroir { display: flex; width: min(440px, 100%); height: 100dvh; background: var(--v2-bg-eleve, var(--v2-bg-100)); box-shadow: -1px 0 0 var(--v2-a-400), var(--v2-ombre-modal); outline: none; }
-.tp-tiroir[data-entering] { animation: tp-entree 0.26s var(--v2-tiroir); }
-@keyframes tp-entree { from { transform: translateX(20px); opacity: 0; } to { transform: none; opacity: 1; } }
-.tp-tiroir-dialogue { width: 100%; overflow-y: auto; outline: none; font-family: var(--v2-sans); color: var(--v2-gray-1000); }
-.tp-tiroir .om-pt-fiche { position: static; align-content: start; width: 100%; min-height: 100%; max-height: none; padding: 16px 20px 24px; border-radius: 0; background: transparent; box-shadow: none; animation: none; overflow: visible; }
-.tp-tiroir .om-pt-fiche::before { display: none; }
-.tp-tiroir .om-pt-fiche-haut .v2-btn { display: inline-flex; }
-
 
 /* le sélecteur ⌃⌄ de la page, habillé comme les autres boutons de la barre */
 .ao-barre .om-vue { height: 26px; padding: 0 10px; border-radius: 6px; background: var(--v2-bg-100); box-shadow: 0 0 0 1px var(--v2-a-400); font-size: 13px; }
 
 /* ——— paliers ——— */
-@container principale (max-width: 1023px) {
-  .tk-liste .ao-ligne button { grid-template-columns: minmax(0, 1fr) 120px 96px 14px; }
-}
 @container principale (max-width: 767px) {
-  .tk-liste .ao-ligne button { grid-template-columns: minmax(0, 1fr) auto; }
-  .tk-liste .ao-statut, .tk-liste .ao-ligne-date { display: none; }
+  .tk-liste .ao-ligne .tk-ligne { padding: 0 12px; }
 }
 @media (prefers-reduced-motion: reduce) { .tp-tiroir, .tp-voile { animation: none; } }
