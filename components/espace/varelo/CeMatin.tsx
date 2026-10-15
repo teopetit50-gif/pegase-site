@@ -20,6 +20,7 @@ import { matinExemple, type Matin } from "./matin";
 import type { CodeRef, Objet } from "./types";
 
 const BLOCS: { cle: keyof Matin; titre: string; ancre: string; vide: string }[] = [
+  { cle: "decisions", titre: "Décisions à valider", ancre: "/espace2/validations", vide: "Aucune décision n'attend votre validation." },
   { cle: "groupe", titre: "Le groupe ce matin", ancre: "vrl-groupe", vide: "Trésoreries au-dessus des planchers, ventes dans les objectifs." },
   { cle: "reserves", titre: "Réserves à émettre", ancre: "vrl-reserves", vide: "Aucune livraison abîmée ou incomplète en attente de protestation." },
   { cle: "reportings", titre: "Reportings dus", ancre: "vrl-reportings", vide: "Aucun reporting en retard ni dû dans la semaine." },
@@ -37,10 +38,10 @@ export default function CeMatin({ source, client_id, actif, codes, objets }: { s
     const { data, error } = await createClient().rpc("grp_ce_matin", { p_client: client_id });
     if (error) {
       setErreur(true);
-      setReel({ groupe: [], reserves: [], reportings: [], contrats: [], encours: [], reciproques: [] });
+      setReel({ decisions: [], groupe: [], reserves: [], reportings: [], contrats: [], encours: [], reciproques: [] });
     } else {
       setErreur(false);
-      setReel({ groupe: [], reserves: [], reportings: [], ...(data as Partial<Matin>) } as Matin);
+      setReel({ decisions: [], groupe: [], reserves: [], reportings: [], ...(data as Partial<Matin>) } as Matin);
     }
   }, [client_id]);
   useEffect(() => {
@@ -51,7 +52,7 @@ export default function CeMatin({ source, client_id, actif, codes, objets }: { s
 
   const m = source === "exemple" ? exemple : reel;
   if (!m) return null;
-  const total = m.groupe.length + m.reserves.length + m.reportings.length + m.contrats.length + m.encours.length + m.reciproques.length;
+  const total = m.decisions.length + m.groupe.length + m.reserves.length + m.reportings.length + m.contrats.length + m.encours.length + m.reciproques.length;
 
   return (
     <section className="esp-carte vrl-matin" aria-label="Ce matin" style={{ marginBottom: 16 }}>
@@ -63,7 +64,7 @@ export default function CeMatin({ source, client_id, actif, codes, objets }: { s
         {BLOCS.map((b) => (
           <div key={b.cle} className="vrl-matin-bloc">
             <h3 className="esp-section-titre">
-              <a href={`#${b.ancre}`}>{b.titre}</a> {m[b.cle].length ? <Pastille teinte={m[b.cle].some((l) => l.gravite === "critique") ? "rouge" : m[b.cle].some((l) => l.gravite === "attention") ? "ambre" : "gris"}>{m[b.cle].length}</Pastille> : null}
+              <a href={b.ancre.startsWith("/") ? b.ancre : `#${b.ancre}`}>{b.titre}</a> {m[b.cle].length ? <Pastille teinte={m[b.cle].some((l) => l.gravite === "critique") ? "rouge" : m[b.cle].some((l) => l.gravite === "attention") ? "ambre" : "gris"}>{m[b.cle].length}</Pastille> : null}
             </h3>
             {m[b.cle].length ? (
               <ul className="vrl-matin-liste">

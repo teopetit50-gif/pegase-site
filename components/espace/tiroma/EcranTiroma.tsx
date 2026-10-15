@@ -24,6 +24,7 @@ import Absences from "./Absences";
 import AvantRendezVous from "./AvantRendezVous";
 import Cabinet, { type Action } from "./Cabinet";
 import ChargeFauteuils from "./ChargeFauteuils";
+import { ControlesDus, CreneauxPlans, ExportDonnees, SeancesLongues, SoinsADeplacer } from "./ComplementsCabinet";
 import Creneaux from "./Creneaux";
 import DemiJournees from "./DemiJournees";
 import EquipeAbsente, { type NouvelleAbsence } from "./EquipeAbsente";
@@ -40,7 +41,7 @@ import { LOGICIELS, libelleLogiciel } from "./libelles";
 import {
   ajouterFauteuil, ajouterFermeture, ajouterHoraire, ajouterPraticien, brancherCabinet, changerMode, changerStatut, chargerDossier,
   ajouterAttente, chercherPatients, classerType, installerCabinet, listerCabinets, monCompte, noterMutuelle, retirerAttente, retirerHoraire, type Compte,
-  noterAppel, noterContact, retirerContact, noterAbsenceMembre, retirerAbsenceMembre, fixerObjectif, alignerRegles,
+  noterAppel, noterContact, retirerContact, noterAbsenceMembre, retirerAbsenceMembre, fixerObjectif, alignerRegles, exporterDonnees,
 } from "./portes";
 import type { AbsenceEquipe, Cabinet as CabinetT, ObjectifFauteuil, CibleAppel, ContactPatient, Dossier, Logiciel, PatientCourt, RegistreAppels } from "./types";
 
@@ -308,6 +309,14 @@ export default function EcranTiroma() {
     await charger(reel?.dossier?.cabinet.id);
   }, [source, reel, charger]);
 
+  /* b3_23 : l'export des données ; en exemple, le dossier fictif lui-même */
+  const exporterLesDonnees = useCallback(async (): Promise<unknown> => {
+    const d = source === "exemple" ? local : reel?.dossier;
+    if (!d) throw new Error("Aucun cabinet chargé.");
+    if (source === "exemple") return { exporte_le: new Date().toISOString(), exemple: true, tables: { fauteuils: d.fauteuils, praticiens: d.praticiens, membres: d.membres, plans: d.plans, liste_attente: d.attente } };
+    return exporterDonnees(d.cabinet);
+  }, [source, local, reel]);
+
   /* b3_22 : aligner les autres centres sur celui-ci ; en exemple, en mémoire */
   const alignerLesRegles = useCallback(async (): Promise<number> => {
     if (source === "exemple") {
@@ -461,9 +470,14 @@ export default function EcranTiroma() {
           </div>
           {titulaire ? <Objectifs objectifs={dossier.objectifs} fixer={fixerUnObjectif} /> : null}
           <DemiJournees demiJournees={dossier.profil === "titulaire" || dossier.profil === "collaborateur" ? dossier.demiJournees : null} titulaire={titulaire} />
+          {titulaire ? <SoinsADeplacer soins={dossier.soinsADeplacer} /> : null}
+          <SeancesLongues seances={dossier.seancesLongues} />
+          <CreneauxPlans plans={dossier.creneauxPlans} />
+          <ControlesDus controles={dossier.controlesDus} />
           <Rappels rappels={dossier.rappels} peutEcrire={dossier.profil !== null && dossier.profil !== "direction"} chercher={chercher} noter={noterUnContact} retirer={retirerUnContact} />
           <ListeAttente attente={dossier.attente} praticiens={dossier.praticiens} peutEcrire={dossier.profil !== null && dossier.profil !== "direction"} chercher={chercher} inscrire={inscrire} retirer={retirer} />
           {titulaire ? <ReglesCommunes regles={dossier.reglesCommunes} entiteCourante={dossier.cabinet.entite_id} aligner={alignerLesRegles} /> : null}
+          {titulaire ? <ExportDonnees exporter={exporterLesDonnees} /> : null}
           <Cabinet dossier={dossier} agir={agir} />
           <DialogueAppel cible={cibleAppel} jour={dossier.appels?.jour ?? new Date().toISOString().slice(0, 10)} fermer={() => setCibleAppel(null)} noter={noterUnAppel} />
         </div>

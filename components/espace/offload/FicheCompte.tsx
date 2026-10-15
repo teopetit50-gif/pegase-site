@@ -19,6 +19,7 @@ import { dateCourte, montant, nombreFr } from "../format";
 import { Avis, Def, Pastille, Vide } from "../ui";
 import Courbe from "./Courbe";
 import AffairesCompte from "./AffairesCompte";
+import { Verification } from "./GardeFous";
 import ParcCompte from "./ParcCompte";
 import type { Source } from "../source";
 import { ISSUES, NIVEAUX, STATUTS_COMPTE, STATUTS_REPRISE } from "./etats";
@@ -78,6 +79,7 @@ export default function FicheCompte({ fiche, onAgir, source = "exemple" }: { fic
             <span className="esp-mono">{compte.ref}</span>
             {compte.ville ? ` · ${compte.ville}` : ""}
             {compte.commercial ? ` · suivi par ${compte.commercial}` : ""}
+            {compte.groupe ? ` · groupe ${compte.groupe}` : ""}
           </span>
         </div>
         <span className="esp-item-haut">
@@ -90,6 +92,7 @@ export default function FicheCompte({ fiche, onAgir, source = "exemple" }: { fic
       <div className="esp-carte-corps">
       {fait ? <Avis teinte="vert" role="status">{fait}</Avis> : null}
       {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+      <Verification key={`verif-${compte.id}`} compte={compte} source={source} />
 
       {signal && signal.raisons.length ? (
         <>

@@ -6,17 +6,19 @@
    ce qui ne se retrouve plus passe « corrigé à l'indice B », ce qui reste garde la décision prise. Base réelle :
    lorani_controles, lorani_controle_pieces, lorani_constats sous la RLS ; le croisement tourne dans la base
    (private.lorani_controler, porte lorani_lancer_controle), et seul quand la dernière pièce est lue. Exemple : les
-   saisies s'appliquent en mémoire, sans croisement (les constats du contrôle précédent sont reconduits). */
+   saisies s'appliquent en mémoire, sans croisement (les constats du contrôle précédent sont reconduits).
+   Un constat part en question à l'entreprise ou au BET en un clic (b5_25) : un point « question » des comptes rendus
+   (lorani_points, b5_20), avec l'extrait cité (pièce, page, texte lu) ; il est ensuite suivi jusqu'à la réponse. */
 
 import { useMemo, useState } from "react";
-import { FileDown, ScanSearch, ShieldCheck } from "lucide-react";
+import { FileDown, MessageSquareText, ScanSearch, ShieldCheck } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { Avis, Pastille } from "../ui";
 import { dateCourte } from "../format";
-import { deciderConstat, lancerControle, octetsPiece, preparerControle } from "./portes";
+import { ajouterPoints, deciderConstat, lancerControle, octetsPiece, preparerControle } from "./portes";
 import { excelControle, pdfControle, telecharger, type DonneesRapport } from "./rapport";
-import type { Constat, Controle as ControleT, ControlePiece, Dossier, PieceProjet, Projet, RolePieceControle } from "./types";
+import type { Constat, Controle as ControleT, ControlePiece, Dossier, PieceProjet, Point, Projet, RolePieceControle } from "./types";
 
 const ROLES: Record<RolePieceControle, string> = { planche: "Planche", cctp: "CCTP", dpgf: "DPGF", plu: "Règlement du PLU", metre: "Métré", cerfa: "Cerfa de la demande", re2020: "Attestation RE2020", bet: "Fond de plan BET", notice: "Notice", autre: "Autre pièce" };
 const ROLE_DU_TYPE: Record<string, RolePieceControle> = { lorani_planche: "planche", lorani_cctp: "cctp", lorani_dpgf: "dpgf", lorani_plu_reglement: "plu", lorani_metre: "metre", lorani_cerfa: "cerfa", lorani_attestation_re2020: "re2020", lorani_plan_bet: "bet", lorani_notice: "notice" };
@@ -49,6 +51,7 @@ type Choix = { piece_id: string; role: RolePieceControle; reference: string };
 type Form =
   | { type: "nouveau"; precedent: ControleT | null }
   | { type: "decider"; constat: Constat; statut: Exclude<Constat["statut"], "ouvert"> }
+  | { type: "question"; constat: Constat }
   | null;
 
 export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: {
@@ -77,7 +80,9 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
   const [nc, setNc] = useState({ intitule: "", indice: "A" });
   const [choix, setChoix] = useState<Choix[]>([]);
   const [motif, setMotif] = useState("");
+  const [nq, setNq] = useState({ intervenant: "", texte: "", echeance: "" });
   const clientId = dossier.moi?.client_id ?? "";
+  const intervenants = useMemo(() => dossier.intervenants.filter((i) => i.projet_id === projet.id && i.actif).sort((a, b) => a.organisme.localeCompare(b.organisme)), [dossier.intervenants, projet.id]);
 
   const lancer = async (reel: () => Promise<void>, local: () => Dossier) => {
     setEnvoi(true);
@@ -179,6 +184,28 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
     }
   };
 
+  /* un constat en question à l'entreprise ou au BET, l'extrait cité dans le texte */
+  const ouvrirQuestion = (k: Constat) => {
+    setErreur(null);
+    const extrait = k.valeurs.map((v) => `— ${citation(v, k.grandeur)}`).join("\n");
+    const texte = [`${k.titre}${c ? ` (contrôle « ${c.intitule} », indice ${c.indice})` : ""}`, extrait, k.correction ? `Correction proposée : ${k.correction}` : "", "Merci de confirmer ou de corriger."]
+      .filter(Boolean).join("\n").slice(0, 1000);
+    setNq({ intervenant: "", texte, echeance: "" });
+    setForm({ type: "question", constat: k });
+  };
+  const soumettreQuestion = () => {
+    if (form?.type !== "question") return;
+    const i = intervenants.find((x) => x.id === nq.intervenant);
+    const v = { client_id: clientId, entite_id: projet.entite_id, projet_id: projet.id, lot_id: i?.lot_id ?? null, intervenant_id: i?.id ?? null,
+      nature: "question" as const, texte: nq.texte.trim(), echeance: nq.echeance || null, ouvert_au_cr: null };
+    return lancer(() => ajouterPoints([v]), () => {
+      const p: Point = { id: `local-point-${Date.now()}`, projet_id: v.projet_id, lot_id: v.lot_id, intervenant_id: v.intervenant_id, nature: "question", texte: v.texte, echeance: v.echeance,
+        statut: "ouvert", reponse: null, repondu_le: null, ouvert_au_cr: null, clos_au_cr: null, cree_le: new Date().toISOString() };
+      return { ...dossier, points: [...dossier.points, p] };
+    });
+  };
+  const questionOk = form?.type === "question" && nq.texte.trim().length >= 1 && nq.texte.trim().length <= 1000;
+
   const rouvrir = (k: Constat) => lancer(() => deciderConstat(k.id, { statut: "ouvert", motif: null }), () => ({ ...dossier, constats: dossier.constats.map((x) => (x.id === k.id ? { ...x, statut: "ouvert", motif: null } : x)) }));
 
   const nouveauOk = form?.type === "nouveau" && nc.intitule.trim().length >= 1 && nc.intitule.trim().length <= 160 && /^[0-9A-Za-z.-]{1,6}$/.test(nc.indice.trim())
@@ -271,6 +298,7 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
                 <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => ouvrirDecision(k, "corrige")}>Corrigé</button>
                 <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => ouvrirDecision(k, "accepte")}>Accepter</button>
                 <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => ouvrirDecision(k, "ecarte")}>Écarter</button>
+                <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => ouvrirQuestion(k)}>En faire une question</button>
               </div>
             </div>
           ))}
@@ -351,6 +379,41 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
           </DialogBody>
           <DialogFooter>
             <button type="button" className="r-btn r-btn--noir" disabled={!nouveauOk || envoi} onClick={soumettreNouveau}>{envoi ? <Loader variant="spin" /> : null} Préparer le contrôle</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ——— un constat en question à l'entreprise ou au BET ——— */}
+      <Dialog open={form?.type === "question"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><MessageSquareText width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>En faire une question</DialogTitle>
+            <DialogDescription>
+              La question part avec l’extrait cité. Elle rejoint les points suivis des comptes rendus : sans réponse depuis huit jours, elle remonte au point du matin.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <div className="esp-form-ligne">
+                <label className="rv-libelle">À qui
+                  <select className="rv-champ" value={nq.intervenant} onChange={(e) => setNq((s) => ({ ...s, intervenant: e.target.value }))}>
+                    <option value="">Personne en particulier</option>
+                    {intervenants.map((i) => <option key={i.id} value={i.id}>{i.organisme}</option>)}
+                  </select>
+                </label>
+                <label className="rv-libelle">Réponse attendue le
+                  <input className="rv-champ" type="date" value={nq.echeance} onChange={(e) => setNq((s) => ({ ...s, echeance: e.target.value }))} />
+                </label>
+              </div>
+              <label className="rv-libelle">Question <span className="esp-obligatoire">(obligatoire)</span>
+                <textarea className="rv-champ" rows={7} maxLength={1000} value={nq.texte} onChange={(e) => setNq((s) => ({ ...s, texte: e.target.value }))} />
+              </label>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!questionOk || envoi} onClick={soumettreQuestion}>{envoi ? <Loader variant="spin" /> : null} Poser la question</button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

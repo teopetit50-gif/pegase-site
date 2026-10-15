@@ -501,3 +501,18 @@ export type Expertise = {
   rapport_recu_le: string | null;
   cree_le: string;
 };
+
+/* ——— une pièce attendue du client, du confrère ou d'un tiers (b4_18, 11/10/2026) : l'objet est chiffré ——— */
+export type Attente = {
+  id: string;
+  client_id: string;
+  dossier_id: string;
+  de: "client" | "confrere" | "tiers";
+  objet_chiffre: string;
+  demandee_le: string;
+  relance_le: string | null;
+  relances: number;
+  recue_le: string | null;
+  statut: "attendue" | "recue" | "abandonnee";
+  cree_le: string;
+};
