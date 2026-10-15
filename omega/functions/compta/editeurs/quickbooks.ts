@@ -62,13 +62,26 @@ export class QuickBooks implements ClientEditeur {
   }
 
   async fournisseur(nom: string): Promise<string> {
+    return await this.tiers("Vendor", nom);
+  }
+
+  /** Le salarié d'une note de frais (compte 42x, a4_35) : un Employee, retrouvé par son nom, créé s'il manque. */
+  async employe(nom: string): Promise<string> {
+    return await this.tiers("Employee", nom);
+  }
+
+  private async tiers(type: "Vendor" | "Employee", nom: string): Promise<string> {
     const n = nom.slice(0, 100).trim();
-    const deja = this.fournisseurs.get(n);
+    const cle = `${type}:${n}`;
+    const deja = this.fournisseurs.get(cle);
     if (deja) return deja;
-    const r = await this.requete<{ Id: string }>(`select Id from Vendor where DisplayName = ${lit(n)}`);
-    let id = r.QueryResponse?.Vendor?.[0]?.Id;
-    if (!id) id = (await this.post<{ Vendor: { Id: string } }>("/vendor", { DisplayName: n })).Vendor.Id;
-    this.fournisseurs.set(n, id);
+    const r = await this.requete<{ Id: string }>(`select Id from ${type} where DisplayName = ${lit(n)}`);
+    let id = r.QueryResponse?.[type]?.[0]?.Id;
+    if (!id) {
+      const cree = await this.post<Record<string, { Id: string }>>(`/${type.toLowerCase()}`, { DisplayName: n });
+      id = cree[type].Id;
+    }
+    this.fournisseurs.set(cle, id);
     return id;
   }
 
@@ -83,7 +96,12 @@ export class QuickBooks implements ClientEditeur {
     for (const l of e.lignes) {
       const debit = l.debit > 0;
       const detail: Record<string, unknown> = { PostingType: debit ? "Debit" : "Credit", AccountRef: { value: await this.compte(l.compte_num) } };
-      if (l.comp_aux_num) detail.Entity = { Type: "Vendor", EntityRef: { value: await this.fournisseur(l.comp_aux_lib ?? l.comp_aux_num) } };
+      if (l.comp_aux_num) {
+        // Compte du personnel (note de frais, a4_35) : le tiers est un salarié, pas un fournisseur.
+        const salarie = l.compte_num.startsWith("42");
+        const nom = l.comp_aux_lib ?? l.comp_aux_num;
+        detail.Entity = { Type: salarie ? "Employee" : "Vendor", EntityRef: { value: salarie ? await this.employe(nom) : await this.fournisseur(nom) } };
+      }
       lignes.push({
         Amount: Number(montant(debit ? l.debit : l.credit)),
         Description: l.libelle.slice(0, 4000),

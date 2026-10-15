@@ -105,14 +105,16 @@ function reseauQbo() {
       const q = new URL(a.url).searchParams.get("query")!;
       if (q.startsWith("select Id from Account")) {
         const n = q.match(/'(.*)'/)![1];
-        const ids: Record<string, string> = { "6061": "61", "44566": "66", "401": "33" };
+        const ids: Record<string, string> = { "6061": "61", "44566": "66", "401": "33", "421": "42" };
         return { json: { QueryResponse: ids[n] ? { Account: [{ Id: ids[n] }] } : {} } };
       }
       if (q.startsWith("select Id from Vendor")) return { json: { QueryResponse: {} } };
+      if (q.startsWith("select Id from Employee")) return { json: { QueryResponse: {} } };
       if (q.startsWith("select Id from JournalEntry")) return { json: { QueryResponse: { JournalEntry: [{ Id: "145" }] } } };
       return { statut: 400, texte: "requête inconnue" };
     })
     .quand("POST", /\/vendor\?/, { json: { Vendor: { Id: "58" } } })
+    .quand("POST", /\/employee\?/, { json: { Employee: { Id: "77" } } })
     .quand("POST", /\/journalentry\?/, { json: { JournalEntry: { Id: "146" } } });
 }
 
@@ -140,6 +142,24 @@ Deno.test("QuickBooks : écriture de journal idempotente (requestid), comptes pa
   );
   assertEquals(corps.Line[2].JournalEntryLineDetail.Entity, { Type: "Vendor", EntityRef: { value: "58" } });
   assertEquals(JSON.parse(reseau.vers("POST", /\/vendor\?/)[0].corps!), { DisplayName: "Papeterie Delorme" });
+});
+
+Deno.test("QuickBooks : la note de frais (compte 421) porte le salarié en Employee, pas en Vendor", async () => {
+  const portes = new PortesMemoire();
+  const reseau = reseauQbo();
+  const q = new QuickBooks(
+    jetons(portes, reseau, "quickbooks", { access_token: "a", refresh_token: "r", expires_at: "2026-10-06T12:00:00Z" }),
+    { realm_id: "9130" },
+    reseau.fetch,
+  );
+  const e = ecriture(13);
+  e.lignes[2] = { ...e.lignes[2], compte_num: "421", compte_lib: "Personnel", comp_aux_num: "NDF3F2A1B", comp_aux_lib: "Jean Dupont" };
+  await q.envoyer(e);
+  const corps = JSON.parse(reseau.vers("POST", /\/journalentry\?/)[0].corps!);
+  assertEquals(corps.Line[2].JournalEntryLineDetail.Entity, { Type: "Employee", EntityRef: { value: "77" } });
+  assertEquals(corps.Line[2].JournalEntryLineDetail.AccountRef, { value: "42" });
+  assertEquals(JSON.parse(reseau.vers("POST", /\/employee\?/)[0].corps!), { DisplayName: "Jean Dupont" });
+  assertEquals(reseau.vers("POST", /\/vendor\?/).length, 0);
 });
 
 Deno.test("QuickBooks : une reprise retrouve l'écriture par son numéro de document", async () => {

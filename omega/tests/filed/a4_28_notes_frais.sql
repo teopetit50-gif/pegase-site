@@ -110,3 +110,22 @@ begin
   return next ok((select ecriture_let from public.filed_ecritures where facture_id = v_f and origine = 'facture' and compte_num = '421') is not null,
                  'et le compte du salarié est lettré');
 end $f$;
+
+-- Lot 29 (a4_37) : dans le fichier Cegid, le bénéficiaire d'une note de frais est créé en salarié (SAL), le fournisseur
+-- en fournisseur (FOU). Utilise tests.a4_facture_comptabilisee, tests.a4_exporter, tests.a4_lignes_fichier (a4_18_envoi_comptable.sql).
+create or replace function tests.test_a4_37_01_cegid_salarie() returns setof text
+language plpgsql as $f$
+declare o jsonb := tests.a4_organisation(); fa jsonb; r jsonb; l text[];
+begin
+  perform tests.a4_facture_comptabilisee(o, 'FOUR-001');
+  fa := tests.a4_facture(o, 'ia', 'TAXI-9', 24);
+  perform tests.a4_imputer(fa, tests.a4_compte(o, '6251', 'Voyages et déplacements'), 20);
+  reset role; perform tests.a4_comme((o ->> 'gerant')::uuid);
+  perform public.filed_declarer_note_frais((fa ->> 'facture')::uuid, (o ->> 'valideur')::uuid, 'Jean Dupont');
+  reset role;
+  perform tests.a4_comptabiliser(fa);
+  r := tests.a4_exporter(o, 'cegid', date '2000-01-01', date '2100-12-31');
+  l := tests.a4_lignes_fichier(r);
+  return next ok(exists (select 1 from unnest(l) z where z like '***CAENDF%Jean Dupont%SALX421%'), 'Le salarié est créé en nature SAL, collectif 421');
+  return next ok(exists (select 1 from unnest(l) z where z like '***CAEXML%FOUX401%'), 'le fournisseur reste en FOU, collectif 401');
+end $f$;
