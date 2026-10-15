@@ -2,11 +2,11 @@
 
 Branche `worker-a3`. Dernière mise à jour : 06/10/2026, 03 h 50 Paris (reprise par la session Opus 5.5 `session_01Npbh1aR6LoEX7PZDchMSca`, à la suite de `session_01DdgwRadkJFx5u9buwh5crS`).
 
-## REPRISE (15/10)
+## REPRISE (15/10 — pause 50 % de Teo, 16 h 16 Z ; SHA d'arrêt ef5eeb4 + ce commit de notes)
 
 **Fait, poussé sur worker-a3** (tête = ce commit) :
 - 15/10 : écran **Équipe** — /espace/equipe et /espace2/equipe (Habille, comme la boîte) ; lien depuis Réglages (« Gérer l'équipe »). Annuaire, changer un rôle, sociétés visibles (perimetre_total + comptes_entites), ajouter une personne qui a déjà un compte (rattacher_membre), retirer. Recette /espace et /espace2, non-régression `equipe` 27/27, axe vert ; base réelle : gérant (4 personnes, refus « Aucun compte pour cette adresse. »), daf2 valideur (« Seuls les gérants… »). Rien écrit en base. Chiffrage espace.md mis à jour (1.3 corrigé : /bienvenue existe ; 1.4 C, 1.5 et 1.6 B).
-- À fusionner : ce lot, 1e51e14 (chiffrage), 0295d85 (onglets), d418e0a et fa23419 (scripts).
+- Fusionné : Équipe 2340dd1 (main cd8a349). À fusionner : ef5eeb4 (nom accessible de « Modifier », règle axe activée).
 - Note : un compte sans `bienvenue_faite` est renvoyé vers /bienvenue par /espace2 ; mes relectures passent par /espace/…?ancien=1.
 
 - 15/10 (remarque de C1) : « Modifier » des sociétés visibles avait un nom accessible sans son texte visible (axe label-content-name-mismatch, règle expérimentale, désormais activée dans accessibilite.mjs) → « Modifier les sociétés visibles par … ». Balayage de la règle sur mes autres écrans /espace2 : aucun écart.
