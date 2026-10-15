@@ -4,5 +4,6 @@
 
 export const CLE_THEME = "espace2.theme";
 
-/* 07/10/2026 — demande de Teo : l'espace est en sombre, sans choix. */
-export const AMORCE_THEME = `document.documentElement.dataset.v2Theme="dark"`;
+/* 11/10/2026 — le dessin du pilotage /omega, cloné pour le client : sombre
+   par défaut, « clair » retenu dans ce navigateur (menu du compte). */
+export const AMORCE_THEME = `try{document.documentElement.dataset.v2Theme=localStorage.getItem("${CLE_THEME}")==="clair"?"light":"dark"}catch(e){document.documentElement.dataset.v2Theme="dark"}`;

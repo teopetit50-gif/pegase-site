@@ -5,6 +5,10 @@
 
    DUPLIQUÉE de components/espace2/Accueil.tsx, sans la salutation ni la
    rangée de quatre chiffres (retirées le 11/10/2026 : Attio n'en a pas) ;
+   11/10/2026 (2) — allégée encore, même dessin : plus de « Voir un
+   exemple » ni de sous-titre sous « Activité » ; les échéances sans la
+   colonne « État » ni la flèche ; « Aujourd'hui » sur une ligne (le
+   titre, l'échéance ou le moment à droite).
    11/10/2026 — allégée à la demande de Teo, même dessin : plus
    d'« Activité récente » ni d'encart de l'audit (le bouton « Audit » est
    dans la barre du haut).
@@ -40,7 +44,6 @@ function echeance(texte: string | undefined): number | null {
 export default function AccueilOmega({ lignes: initiales }: { lignes: Ligne[] }) {
   const [lignes, setLignes] = useState(initiales);
   const [periode, setPeriode] = useState(30);
-  const [exemple, setExemple] = useState(false);
   const [maintenant] = useState(() => Date.now());
 
   async function faire(l: Ligne) {
@@ -88,29 +91,18 @@ export default function AccueilOmega({ lignes: initiales }: { lignes: Ligne[] })
 
   const aFaire = c.duJour.length + c.routines.length;
   return (
-    <div className="v2-page v2-arrivee v2-va v2-vivant">
+    <div className="v2-page v2-arrivee v2-va v2-vivant om-va-simple">
       <h1 className="v2-sr">Vue d&apos;ensemble</h1>
       <div className="v2-va-grille">
         <div className="v2-va-col">
           <section className="v2-carte v2-carte-corps">
             <div className="v2-va-titre" style={{ marginBottom: 16 }}>
-              <div>
-                <h2 className="v2-h2">Activité</h2>
-                <p className="v2-gris v2-va-sous">Jour par jour, comparé à la période précédente</p>
-              </div>
+              <h2 className="v2-h2">Activité</h2>
               <span className="om-barres-actions">
-                <button type="button" className="v2-val-bouton" data-actif={exemple ? "" : undefined} aria-pressed={exemple} onClick={() => setExemple((x) => !x)}>
-                  {exemple ? "Revenir aux vrais chiffres" : "Voir un exemple"}
-                </button>
                 <Choix classe="v2-va-periode" etiquette="Période" valeur={String(periode)} onChange={(v) => setPeriode(Number(v))} options={[{ cle: "7", libelle: "7 derniers jours" }, { cle: "30", libelle: "30 derniers jours" }, { cle: "90", libelle: "90 derniers jours" }]} />
               </span>
             </div>
-            {exemple ? <p className="om-barres-exemple">Exemple : des chiffres inventés pour voir le rendu, rien n&apos;est enregistré.</p> : null}
-            <Graphique
-              key={exemple ? "exemple" : "vrai"}
-              debut={c.debut}
-              series={exemple ? c.series.map((x, k) => ({ ...x, valeurs: valeursExemple(periode, k * 5, [1, 3, 0.4, 0.3][k]), avant: valeursExemple(periode, k * 5 + 3, [0.8, 2.6, 0.35, 0.3][k]) })) : c.series}
-            />
+            <Graphique debut={c.debut} series={c.series} />
           </section>
 
           <section className="v2-carte v2-carte-corps">
@@ -131,8 +123,6 @@ export default function AccueilOmega({ lignes: initiales }: { lignes: Ligne[] })
                     <tr>
                       <th>Tâche</th>
                       <th>Échéance</th>
-                      <th>État</th>
-                      <th aria-hidden="true" />
                     </tr>
                   </thead>
                   <tbody>
@@ -141,14 +131,8 @@ export default function AccueilOmega({ lignes: initiales }: { lignes: Ligne[] })
                       return (
                         <tr key={l.id}>
                           <td>{l.donnees["Tâche"]}</td>
-                          <td className="v2-gris">{l.donnees["Échéance"] ?? "—"}</td>
-                          <td>
-                            <span className="v2-etat">{e !== null && e < maintenant ? "En retard" : e !== null && e < maintenant + 7 * JOUR ? "Cette semaine" : "À venir"}</span>
-                          </td>
-                          <td>
-                            <Link href={`${R}/taches`} aria-label={`Ouvrir « ${l.donnees["Tâche"]} »`}>
-                              <ChevronRight width={16} height={16} />
-                            </Link>
+                          <td className="v2-gris" data-retard={e !== null && e < maintenant ? "" : undefined}>
+                            {l.donnees["Échéance"] ?? "—"}
                           </td>
                         </tr>
                       );
@@ -180,8 +164,8 @@ export default function AccueilOmega({ lignes: initiales }: { lignes: Ligne[] })
                     <input type="checkbox" aria-label={`Marquer « ${l.donnees["Tâche"] ?? l.donnees["Routine"]} » comme fait`} onChange={() => faire(l)} />
                     <span className="v2-va-texte">
                       <span>{l.donnees["Tâche"] ?? l.donnees["Routine"]}</span>
-                      <small className="v2-gris">{l.tableau === "routines" ? ["Routine", l.donnees["Moment"]].filter(Boolean).join(" · ") : ["Tâche", l.donnees["Catégorie"], l.donnees["Échéance"]].filter(Boolean).join(" · ")}</small>
                     </span>
+                    <span className="om-pm-meta">{l.tableau === "routines" ? l.donnees["Moment"] : l.donnees["Échéance"]}</span>
                     <Link href={l.tableau === "routines" ? `${R}/taches/routines` : `${R}/taches`} aria-label="Ouvrir">
                       <ChevronRight width={16} height={16} />
                     </Link>
@@ -196,17 +180,6 @@ export default function AccueilOmega({ lignes: initiales }: { lignes: Ligne[] })
 
     </div>
   );
-}
-
-/* des valeurs de démonstration (bouton « Voir un exemple ») : une montée en
-   régime, creux le week-end, toujours les mêmes d'un affichage à l'autre */
-function valeursExemple(n: number, graine: number, echelle: number) {
-  return Array.from({ length: n }, (_, i) => {
-    const t = i / Math.max(1, n - 1);
-    const bruit = (((i + graine) * 7919) % 13) / 13;
-    const weekEnd = (i + 2) % 7 >= 5;
-    return Math.max(0, Math.round(((1 + t * 4) * (weekEnd ? 0.3 : 1) + (bruit - 0.45) * 2.4) * echelle));
-  });
 }
 
 /* les dates saisies à la main : « 14/10 », « 14/10/2026 », « 2026-10-14… » */

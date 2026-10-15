@@ -16,14 +16,13 @@
 import { useMemo, useState } from "react";
 import Choix from "./Choix";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, CalendarDays, ChevronRight, CircleCheck, CircleDashed, Clock, Compass, FileText, Inbox, LayoutGrid, ListChecks, ListFilter, Megaphone, MoreVertical, Repeat, Search, UserRound, X } from "lucide-react";
+import { ArrowRight, CalendarDays, ChevronRight, CircleCheck, CircleDashed, FileText, Inbox, Search, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Ligne } from "./Tableaux";
 
 const R = "/omega";
 const JOUR = 86_400_000;
 const FINIS = ["Signé", "Installé", "En rodage", "En réel", "Bilan J30 fait", "SaaS métier en route", "2e offre proposée", "Engagement annuel", "Perdu"];
-const ICONE_CATEGORIE: Record<string, typeof FileText> = { Fondations: Compass, Pilotage: ListChecks, Prospection: UserRound, Contenu: Megaphone, Clients: UserRound, Audits: ListChecks, Pub: Megaphone };
 
 function echeance(texte: string | undefined): number | null {
   const m = texte?.match(/(\d{1,2})\/(\d{1,2})/);
@@ -61,6 +60,11 @@ export default function Journee({ mode, lignes }: { mode: "validations" | "point
 }
 
 /* ══════════════════════════ À valider ══════════════════════════ */
+/* 11/10/2026 — allégé à la demande de Teo, même dessin : une ligne par
+   tâche (le titre, le délai à droite), plus d'icône de catégorie ni de
+   sous-ligne ; la barre garde la vue et la recherche (plus de filtres
+   catégorie et échéance : la file est déjà rangée par échéance) ; « La
+   décision » sans la frise des trois étapes. */
 const GROUPES = [
   { cle: "retard", libelle: "En retard" },
   { cle: "semaine", libelle: "Cette semaine" },
@@ -71,8 +75,6 @@ function Validations({ initiales }: { initiales: Ligne[] }) {
   const { lignes, marquer } = useLignes(initiales);
   const [maintenant] = useState(() => Date.now());
   const [vue, setVue] = useState("a_decider");
-  const [categorie, setCategorie] = useState("");
-  const [periode, setPeriode] = useState("");
   const [recherche, setRecherche] = useState<string | null>(null);
   const [coches, setCoches] = useState<string[]>([]);
   const [choix, setChoix] = useState<string | null>(null);
@@ -82,11 +84,8 @@ function Validations({ initiales }: { initiales: Ligne[] }) {
     return e < maintenant ? "retard" : e < maintenant + 7 * JOUR ? "semaine" : "plus_tard";
   };
   const taches = lignes.filter((l) => l.tableau === "plan" || l.tableau === "ajouts");
-  const categories = Array.from(new Set(taches.map((l) => l.donnees["Catégorie"]).filter(Boolean)));
   const visibles = taches
     .filter((l) => (vue === "a_decider" ? l.donnees["Statut"] !== "Fait" && ["Fondations", "Pilotage"].includes(l.donnees["Catégorie"]) : vue === "a_faire" ? l.donnees["Statut"] !== "Fait" : vue === "faites" ? l.donnees["Statut"] === "Fait" : true))
-    .filter((l) => !categorie || l.donnees["Catégorie"] === categorie)
-    .filter((l) => !periode || groupe(l) === periode)
     .filter((l) => !recherche || (l.donnees["Tâche"] ?? "").toLowerCase().includes(recherche.toLowerCase()))
     .sort((a, b) => (echeance(a.donnees["Échéance"]) ?? 9e15) - (echeance(b.donnees["Échéance"]) ?? 9e15));
   const groupes = new Map<string, Ligne[]>();
@@ -98,12 +97,10 @@ function Validations({ initiales }: { initiales: Ligne[] }) {
   const cochees = visibles.filter((l) => coches.includes(l.id));
 
   return (
-    <div className="v2-page v2-arrivee v2-val v2-vivant">
+    <div className="v2-page v2-arrivee v2-val v2-vivant om-val-simple">
       <h1 className="v2-sr">À valider</h1>
       <div className="v2-val-filtres">
         <Selecteur icone={Inbox} valeur={vue} changer={setVue} options={[{ cle: "a_decider", libelle: "Tes décisions" }, { cle: "a_faire", libelle: "Toutes les tâches à faire" }, { cle: "faites", libelle: "Faites" }, { cle: "toutes", libelle: "Toutes" }]} />
-        <Selecteur icone={LayoutGrid} valeur={categorie} changer={setCategorie} tous="Toutes les catégories" options={categories.map((c) => ({ cle: c, libelle: c }))} />
-        <Selecteur icone={CalendarDays} valeur={periode} changer={setPeriode} tous="Toutes les échéances" options={GROUPES.map((g) => ({ cle: g.cle, libelle: g.libelle }))} />
         <span className="v2-val-droite">
           {recherche !== null ? (
             <span className="v2-val-recherche">
@@ -153,7 +150,6 @@ function Validations({ initiales }: { initiales: Ligne[] }) {
                   <h2 className="v2-val-groupe">{g.libelle}</h2>
                   <ul className="v2-val-liste">
                     {liste.map((l) => {
-                      const Icone = ICONE_CATEGORIE[l.donnees["Catégorie"]] ?? FileText;
                       const e = echeance(l.donnees["Échéance"]);
                       return (
                         <li key={l.id} className="v2-val-ligne" aria-current={choisie?.id === l.id ? "true" : undefined}>
@@ -163,14 +159,9 @@ function Validations({ initiales }: { initiales: Ligne[] }) {
                           <button type="button" className="v2-val-corps" onClick={() => setChoix(l.id)}>
                             <span className="v2-val-texte">
                               <span>{l.donnees["Tâche"]}</span>
-                              <small>{[l.donnees["Catégorie"], l.donnees["Semaine"], l.donnees["Statut"]].filter(Boolean).join(" · ")}</small>
                             </span>
-                            <span className="v2-val-module" aria-hidden="true">
-                              <Icone width={20} height={20} />
-                            </span>
-                            <span className="v2-val-montant">
-                              <span>{l.donnees["Échéance"] ?? "—"}</span>
-                              <small data-retard={l.donnees["Statut"] !== "Fait" && e !== null && e < maintenant ? "" : undefined}>{l.donnees["Statut"] === "Fait" ? "Fait" : quand(e, maintenant)}</small>
+                            <span className="om-pm-meta" data-retard={l.donnees["Statut"] !== "Fait" && e !== null && e < maintenant ? "" : undefined}>
+                              {l.donnees["Statut"] === "Fait" ? "Fait" : quand(e, maintenant)}
                             </span>
                             <ChevronRight width={16} height={16} aria-hidden="true" className="v2-val-chevron" />
                           </button>
@@ -195,21 +186,6 @@ function Validations({ initiales }: { initiales: Ligne[] }) {
                     {[choisie.donnees["Catégorie"], choisie.donnees["Semaine"], choisie.donnees["Échéance"] ? `échéance ${choisie.donnees["Échéance"]}` : null].filter(Boolean).join(" · ")}
                   </p>
                 </div>
-                <ol className="v2-val-etapes">
-                  {["À faire", "En cours", "Fait"].map((s, i) => {
-                    const rang = ["À faire", "En cours", "Fait"].indexOf(choisie.donnees["Statut"] ?? "À faire");
-                    const passe = i <= rang;
-                    return (
-                      <li key={s} data-attente={passe ? undefined : ""}>
-                        <span className="v2-val-etape-icone">{passe ? <CircleCheck width={18} height={18} /> : <CircleDashed width={18} height={18} />}</span>
-                        <span>
-                          <span className="v2-val-etape-nom">{s}</span>
-                          <small className="v2-val-gris">{passe ? (i === rang ? "Étape actuelle" : "Passée") : "À venir"}</small>
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ol>
                 <div className="om-decision-actions">
                   <button type="button" className="v2-btn v2-btn--petit" onClick={() => marquer(choisie, "Statut", "En cours")}>
                     En cours
@@ -234,43 +210,40 @@ function Validations({ initiales }: { initiales: Ligne[] }) {
 }
 
 /* ══════════════════════════ Point du matin ══════════════════════════ */
+/* 11/10/2026 — allégé à la demande de Teo, sur les principes de la page
+   Notes, en gardant les cartes : une seule ligne de texte par élément,
+   plus d'icônes devant les lignes, « Fait » n'apparaît qu'au survol, le
+   titre de la carte mène à la page (plus de ⋮ ni de lien en pied), la
+   barre ne garde que la date (plus de « 7 h 00 » ni de filtre). */
 function Point({ initiales }: { initiales: Ligne[] }) {
   const { lignes, marquer } = useLignes(initiales);
   const [maintenant] = useState(() => Date.now());
-  const [filtre, setFiltre] = useState("");
 
   const c = useMemo(() => {
-    const taches = lignes.filter((l) => (l.tableau === "plan" || l.tableau === "ajouts") && l.donnees["Statut"] !== "Fait").filter((l) => !filtre || l.donnees["Catégorie"] === filtre);
+    const taches = lignes.filter((l) => (l.tableau === "plan" || l.tableau === "ajouts") && l.donnees["Statut"] !== "Fait");
     const premier = taches.filter((l) => (echeance(l.donnees["Échéance"]) ?? Infinity) < maintenant + JOUR).sort((a, b) => (echeance(a.donnees["Échéance"]) ?? 0) - (echeance(b.donnees["Échéance"]) ?? 0));
     const semaine = taches.filter((l) => {
       const e = echeance(l.donnees["Échéance"]) ?? Infinity;
       return e >= maintenant + JOUR && e < maintenant + 7 * JOUR;
     });
-    const depuis = lignes.filter((l) => l.maj && new Date(l.maj).getTime() > maintenant - JOUR).sort((a, b) => (b.maj ?? "").localeCompare(a.maj ?? ""));
+    /* « Depuis hier » : seulement ce qui a un nom (plus de « Ligne modifiée ») */
+    const depuis = lignes
+      .filter((l) => l.maj && new Date(l.maj).getTime() > maintenant - JOUR && (l.donnees["Tâche"] ?? l.donnees["Client"] ?? l.donnees["Routine"]))
+      .sort((a, b) => (b.maj ?? "").localeCompare(a.maj ?? ""));
     const routines = lignes.filter((l) => l.tableau === "routines" && /jour/i.test(l.donnees["Fréquence"] ?? ""));
     const relances = lignes.filter((l) => l.tableau === "clients" && l.donnees["Client"] && !FINIS.includes(l.donnees["Étape"]));
-    const moteurs = lignes.filter((l) => l.tableau === "moteurs" && l.donnees["Statut"] !== "Fait").slice(0, 4);
-    const categories = Array.from(new Set(lignes.filter((l) => l.tableau === "plan" || l.tableau === "ajouts").map((l) => l.donnees["Catégorie"]).filter(Boolean)));
-    return { premier, semaine, depuis, routines, relances, moteurs, categories };
-  }, [lignes, filtre, maintenant]);
+    return { premier, semaine, depuis, routines, relances };
+  }, [lignes, maintenant]);
 
   const jour = new Date(maintenant).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
 
   return (
-    <div className="v2-page v2-arrivee v2-pm v2-vivant">
+    <div className="v2-page v2-arrivee v2-pm v2-vivant om-pm-simple">
       <h1 className="v2-sr">Point du matin</h1>
       <div className="v2-val-filtres">
-        <label className="v2-val-bouton">
+        <span className="v2-val-bouton">
           <CalendarDays width={16} height={16} aria-hidden="true" />
           <span suppressHydrationWarning>{jour.charAt(0).toUpperCase() + jour.slice(1)}</span>
-        </label>
-        <span className="v2-val-bouton">
-          <Clock width={16} height={16} aria-hidden="true" />
-          <span>7 h 00</span>
-        </span>
-        <Selecteur icone={LayoutGrid} valeur={filtre} changer={setFiltre} tous="Toutes les catégories" options={c.categories.map((x) => ({ cle: x, libelle: x }))} />
-        <span className="v2-val-droite">
-          <span className="v2-pm-remise">Ton point du jour</span>
         </span>
       </div>
 
@@ -280,16 +253,13 @@ function Point({ initiales }: { initiales: Ligne[] }) {
             <ul className="v2-pm-liste">
               {c.premier.map((l) => {
                 const e = echeance(l.donnees["Échéance"]);
-                const retard = e !== null && e < maintenant;
-                const Icone = ICONE_CATEGORIE[l.donnees["Catégorie"]] ?? FileText;
                 return (
                   <li key={l.id}>
-                    <span className="v2-pm-icone" data-critique={retard ? "" : undefined}>
-                      <Icone width={22} height={22} aria-hidden="true" />
-                    </span>
                     <span className="v2-pm-texte">
                       <span>{l.donnees["Tâche"]}</span>
-                      <small>{[l.donnees["Catégorie"], quand(e, maintenant)].filter(Boolean).join(" · ")}</small>
+                    </span>
+                    <span className="om-pm-meta" data-retard={e !== null && e < maintenant ? "" : undefined}>
+                      {quand(e, maintenant)}
                     </span>
                     <button type="button" className="v2-pm-action" onClick={() => marquer(l, "Statut", "Fait")}>
                       Fait <CircleCheck width={14} height={14} aria-hidden="true" />
@@ -308,11 +278,10 @@ function Point({ initiales }: { initiales: Ligne[] }) {
             <ul className="v2-pm-liste">
               {c.depuis.slice(0, 6).map((l) => (
                 <li key={l.id}>
-                  <span className="v2-pm-icone">{l.tableau === "clients" ? <UserRound width={22} height={22} aria-hidden="true" /> : <ListChecks width={22} height={22} aria-hidden="true" />}</span>
                   <span className="v2-pm-texte">
-                    <span>{l.donnees["Tâche"] ?? l.donnees["Client"] ?? l.donnees["Chantier"] ?? l.donnees["Routine"] ?? "Ligne modifiée"}</span>
-                    <small>{l.donnees["Statut"] ?? l.donnees["Étape"] ?? l.donnees["Statut cette semaine"] ?? ""}</small>
+                    <span>{l.donnees["Tâche"] ?? l.donnees["Client"] ?? l.donnees["Routine"]}</span>
                   </span>
+                  <span className="om-pm-meta">{l.donnees["Statut"] ?? l.donnees["Étape"] ?? l.donnees["Statut cette semaine"] ?? ""}</span>
                 </li>
               ))}
             </ul>
@@ -321,19 +290,15 @@ function Point({ initiales }: { initiales: Ligne[] }) {
           )}
         </Carte>
 
-        <Carte titre="Prospects à relancer" lien={`${R}/demandes`} pied={{ libelle: "Voir dans Demandes reçues", href: `${R}/demandes` }}>
+        <Carte titre="Prospects à relancer" lien={`${R}/demandes`}>
           {c.relances.length ? (
             <ul className="v2-pm-liste">
               {c.relances.slice(0, 5).map((l) => (
                 <li key={l.id}>
-                  <UserRound width={20} height={20} aria-hidden="true" className="v2-pm-icone" />
                   <span className="v2-pm-texte">
                     <span>{l.donnees["Client"]}</span>
-                    <small>{[l.donnees["Étape"], l.donnees["Prochaine action"]].filter(Boolean).join(" · ")}</small>
                   </span>
-                  <Link href={`${R}/demandes`} className="v2-pm-action" aria-label={`Ouvrir ${l.donnees["Client"]}`}>
-                    {l.donnees["Date"] || "Ouvrir"} <ArrowUpRight width={14} height={14} aria-hidden="true" />
-                  </Link>
+                  <span className="om-pm-meta">{l.donnees["Date"]}</span>
                 </li>
               ))}
             </ul>
@@ -342,19 +307,18 @@ function Point({ initiales }: { initiales: Ligne[] }) {
           )}
         </Carte>
 
-        <Carte titre="Routines du jour" lien={`${R}/taches/routines`} pied={{ libelle: "Toutes les routines", href: `${R}/taches/routines` }}>
+        <Carte titre="Routines du jour" lien={`${R}/taches/routines`}>
           <ul className="v2-pm-liste">
             {c.routines.map((l) => {
               const fait = l.donnees["Statut cette semaine"] === "Fait";
               return (
-                <li key={l.id}>
-                  <Repeat width={20} height={20} aria-hidden="true" className="v2-pm-icone" />
+                <li key={l.id} data-fait={fait ? "" : undefined}>
                   <span className="v2-pm-texte">
                     <span>{l.donnees["Routine"]}</span>
-                    <small>{l.donnees["Moment"]}</small>
                   </span>
+                  <span className="om-pm-meta">{l.donnees["Moment"]}</span>
                   <button type="button" className="v2-pm-action" onClick={() => marquer(l, "Statut cette semaine", fait ? "À faire" : "Fait")}>
-                    {fait ? "Fait" : "À faire"} {fait ? <CircleCheck width={14} height={14} aria-hidden="true" /> : <CircleDashed width={14} height={14} aria-hidden="true" />}
+                    {fait ? "Rouvrir" : "Fait"} {fait ? <CircleDashed width={14} height={14} aria-hidden="true" /> : <CircleCheck width={14} height={14} aria-hidden="true" />}
                   </button>
                 </li>
               );
@@ -362,16 +326,15 @@ function Point({ initiales }: { initiales: Ligne[] }) {
           </ul>
         </Carte>
 
-        <Carte titre="Cette semaine" lien={`${R}/taches`} pied={{ libelle: "Voir le plan", href: `${R}/taches` }}>
+        <Carte titre="Cette semaine" lien={`${R}/taches`}>
           {c.semaine.length ? (
             <ul className="v2-pm-liste">
               {c.semaine.slice(0, 5).map((l) => (
                 <li key={l.id}>
-                  <ListFilter width={20} height={20} aria-hidden="true" className="v2-pm-icone" />
                   <span className="v2-pm-texte">
                     <span>{l.donnees["Tâche"]}</span>
-                    <small>{[l.donnees["Catégorie"], `échéance ${l.donnees["Échéance"]}`].join(" · ")}</small>
                   </span>
+                  <span className="om-pm-meta">{l.donnees["Échéance"]}</span>
                 </li>
               ))}
             </ul>
@@ -379,32 +342,29 @@ function Point({ initiales }: { initiales: Ligne[] }) {
             <p className="v2-pm-rien">Rien d&apos;autre cette semaine.</p>
           )}
         </Carte>
-
       </div>
     </div>
   );
 }
 
-function Carte({ titre, classe, lien, badge, pied, children }: { titre: string; classe?: string; lien?: string; badge?: string; pied?: { libelle: string; href: string }; children: React.ReactNode }) {
+/* une carte du point du matin : le titre mène à la page, un compte au besoin */
+function Carte({ titre, classe, lien, badge, children }: { titre: string; classe?: string; lien?: string; badge?: string; children: React.ReactNode }) {
   return (
     <section className={`v2-carte v2-pm-carte${classe ? ` ${classe}` : ""}`} aria-label={titre}>
       <div className="v2-pm-tete">
-        <h2>{titre}</h2>
+        <h2>
+          {lien ? (
+            <Link href={lien} className="om-pm-titre">
+              {titre}
+              <ChevronRight width={14} height={14} aria-hidden="true" />
+            </Link>
+          ) : (
+            titre
+          )}
+        </h2>
         {badge ? <span className="v2-pm-badge">{badge}</span> : null}
-        {lien ? (
-          <Link href={lien} className="v2-pm-kebab" aria-label={`Ouvrir : ${titre}`}>
-            <MoreVertical width={16} height={16} aria-hidden="true" />
-          </Link>
-        ) : null}
       </div>
       <div className="v2-pm-corps">{children}</div>
-      {pied ? (
-        <div className="v2-pm-pied">
-          <Link href={pied.href} className="v2-pm-action">
-            {pied.libelle} <ArrowUpRight width={14} height={14} aria-hidden="true" />
-          </Link>
-        </div>
-      ) : null}
     </section>
   );
 }
