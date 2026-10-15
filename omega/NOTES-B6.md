@@ -95,6 +95,12 @@ L'entreprise : **Atelier Bertin** (menuiserie-agencement, Lyon — la même entr
 8. Hors périmètre B6 : ajouter `{ cle: "daliro", href: "/espace/daliro", libelle: "Chantiers", court: "Daliro" }` dans `components/espace/ecrans.ts` pour que l'onglet apparaisse.
 9. `filed_fournisseurs.siren` et `filed_factures.fournisseur_id` : confirmés tels que vus dans le test a4_01 ?
 
+## REPRISE (15/10/2026, pause à 50 % demandée par Teo via le coordinateur)
+
+- **Rien en cours.** Le lot B6 est clos depuis le 06/10 : cinq migrations posées sur la recette, tests pgTAP 154/154 et 38/38, écran /espace/daliro fusionné sur main et en ligne (omegaai.fr/espace/daliro, 200 vérifié). Arbre propre, tout est poussé sur worker-b6.
+- **Si on me réveille** : reprendre par les restes listés en tête (envoi réel du message J-2 avec un abonnement daliro + reglages_envois ; météo, livraisons calées, situation de travaux, listes du matin promises par /secteurs/btp ; nettoyage des sept chantiers « Essai B6 » du banc). Coordinateur à joindre : session_01BCGFdpRKBvXKjouC75sYBg.
+- **Pour relire en réel** : `.env.local` (URL + clé publique de la recette, non commité) à refaire, session par POST /auth/v1/token, script `omega/recette-b6/relecture-reelle-daliro.mjs` avec B6_SPKI_MANDATAIRE (voir la section « Relecture réelle »).
+
 ## Journal de session
 
 - 06/10, 00 h 55 → 01 h 35 UTC : écriture réelle complète depuis l'écran, lot « écran » fusionné sur main (d572973), parcours 153/154, b6_05 écrit (compte « à ranger » de l'import, défaut du socle).
