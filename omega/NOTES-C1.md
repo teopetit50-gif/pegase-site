@@ -21,7 +21,8 @@ Branche : `tableau-de-bord-v2` (jamais main). Coordinateur : session_01BCGFdpRKB
 - **En attente** : l'écran Équipe d'A3 (worker-a3 2340dd1, /espace2/equipe). Dès qu'il est dans main, faire pointer l'entrée « Équipe » du sous-menu Réglages (Coquille) vers /espace2/equipe.
 - **15/10, lot 2c** : Point du matin allégé comme /omega (oc-pm-simple). Une ligne par élément, le détail à droite, l'action au survol. Le titre de chaque carte mène à la page (plus de ⋮ ni de lien en pied). La barre ne garde que la date et « Exemple ». Plus de filtre module, d'heure, de mention de remise ni de « Recevoir par ». La carte « Équipe & continuité » garde sa mise en page. Recette C1 : 0 échec.
 - **15/10, Équipe** : main est fusionné (dont l'écran d'A3). L'entrée « Équipe » du sous-menu Réglages mène à /espace2/equipe, la page a son titre dans la barre du haut et elle est dans la recette C1. axe trouve 4 écarts label-content-name-mismatch dans EcranEquipe (.esp-lien-bouton des lignes), signalés à A3.
-- **Prochain pas** : lot 2d, passer les pages modules et Réglages en clair aux 5 largeurs et les comparer à /omega (Activité, Utilisation, Réglages).
+- **15/10, lot 2d** : les collections (Tâches, Notes, Appels, Entreprises, Contacts) sur le modèle de Tâches et Appels de /omega (1a2d759, 999c87f). Une barre fine (recherche toujours là, « Ajouter » à droite), puis une ligne par fiche : le titre, un détail gris, une seule date à droite (rouge si une tâche ouverte est en retard), la corbeille au survol. Les textes longs passent en infobulle et l'intro va dans l'état vide. Recette C1 : 0 échec sur mes écrans (restent les 4 écarts d'EcranEquipe, signalés à A3).
+- **Prochain pas** : comparer Activité, Utilisation et Réglages à /omega ; attendre la réponse de Teo sur « Bonjour » et les 4 chiffres de la vue d'ensemble.
 
 ## REPRISE précédente (06/10/2026, 21 h Z)
 
