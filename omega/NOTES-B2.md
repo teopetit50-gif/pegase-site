@@ -105,6 +105,12 @@ Le quota Vercel revenu, main (7c7c934 puis 6635b1c) est déployé avec les retou
 - **Livrable (90 %)** : relecture réelle des autres gestes depuis l'écran (chiffrer un retour avec photos déposées dans le bucket, litige, avoir, relance) sur un second contrat du banc ; une relecture depuis un navigateur ordinaire pour le temps réel (WebSocket) et le contrôle de date natif en français.
 - **Teo** : barème réel, mentions de l'émetteur, TVA des agences DOM, réglage d'envoi `tavaro` en production, vérifier dans sa boîte le courriel de facture du banc (remis à 00 h 26 Z) puis la relance du 09/10.
 
+## REPRISE (état d'arrêt, 15/10/2026, pause demandée par Teo)
+
+- **Tout est poussé sur `worker-b2`, l'arbre est propre, rien ne tourne.** Le coordinateur (session_01BCGFdpRKBvXKjouC75sYBg) a rejoué le 06/10 à 01 h 35 Z `^test_b2_` complet : **11/11 verts** (dont 11_relances 9/9 après 4459680, et les dix autres après a5_01 v2). Les migrations posées sur la recette : b2_01 v2 (saisi_par en tableau), b2_02 v2 (relances, sans option inconnue).
+- **Fusion de worker-b2 dans main** : l'écran et l'onglet y sont (b287d04 puis 7c7c934/6635b1c, bde6a45 reporté) ; les derniers commits de notes et le test 11 (4459680 et suivants) restent à fusionner — refusé par le filtre de permissions du coordinateur, **laissé à Teo**. Aucun fichier hors périmètre n'est touché par ces commits (omega/NOTES-B2.md, omega/tests/tavaro/11_relances.sql, TOUT_B2.sql).
+- **À reprendre dans l'ordre** : (1) vérifier la remise de la relance du banc (envoi `tavaro:relance:<FA-2026-000001>:1`, différé DELAI_MINIMAL au 09/10 02 h 26 Z : statut envoye/remis ?) ; (2) relecture réelle des autres gestes depuis l'écran (chiffrer avec photos déposées, litige, avoir) sur un second contrat du banc, par `omega/recette-b2/relecture-reelle.mjs` ; (3) ce que Teo doit fournir, listé en tête.
+
 ## 5. Ce que les tests attendent du socle (à confirmer par le coordinateur, sinon les tests le diront)
 
 - `public.loc_appliquer_releve` exécutable par le propriétaire de la base (les tests l'appellent en `postgres`, comme le ferait le connecteur en service_role).
