@@ -516,6 +516,13 @@ export async function reprendreControle(controle: string): Promise<void> {
   if (error) throw new ErreurPorte(message(error));
 }
 
+/* b5_30 : qui décide des constats d'un contrôle (nul = toute l'équipe) ; réservé au gérant, à l'admin, au chef de projet */
+export async function choisirDecideur(controle: string, personne: string | null): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.rpc("lorani_choisir_decideur", { p_controle: controle, p_personne: personne });
+  if (error) throw new ErreurPorte(message(error));
+}
+
 export async function analyserOffres(consultation: string): Promise<void> {
   const supabase = createClient();
   const { error } = await supabase.rpc("lorani_analyser_offres", { p_consultation: consultation });

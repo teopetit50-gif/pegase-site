@@ -288,6 +288,26 @@ for (const largeur of LARGEURS) {
   await s.evaluer(`[...document.querySelectorAll('.lor-controle-tete .esp-lien-bouton')].find(b => b.textContent.trim() === 'Reprendre')?.click()`);
   await s.dormir(600);
   ok(await s.evaluer(`!/Suspendu/.test(document.querySelector('.lor-controle-tete')?.innerText || '') && [...document.querySelectorAll('.lor-controle-tete .esp-lien-bouton')].some(b => b.textContent.trim() === 'Suspendre')`), 'repris : la pastille tombe, « Suspendre » revient');
+  /* b5_30 : choisir qui décide ; un autre décideur grise les décisions, « toute l'équipe » les rend */
+  const dq = await s.evaluer(`(() => { const p = [...document.querySelectorAll('.lor-sous')].find(x => /Décide des constats/.test(x.textContent)); return { texte: p?.innerText || '', bouton: [...(p?.querySelectorAll('button') || [])].some(b => b.textContent.trim() === 'Choisir qui décide' && !b.disabled) }; })()`);
+  ok(/Décide des constats : \S/.test(dq.texte) && !/toute l’équipe/.test(dq.texte) && dq.bouton, `en tête : « ${dq.texte.split('Choisir')[0].trim()} », « Choisir qui décide » proposé au chef de projet`);
+  await s.evaluer(`[...document.querySelectorAll('.lor-sous .esp-lien-bouton')].find(b => b.textContent.trim() === 'Choisir qui décide')?.click()`);
+  await s.dormir(500);
+  const dd = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const se = d?.querySelector('select'); return { titre: d?.querySelector('h2')?.textContent, options: se?.options.length || 0, gris: [...(d?.querySelectorAll('button') || [])].find(b => /Enregistrer/.test(b.textContent))?.disabled }; })()`);
+  ok(dd.titre === 'Choisir qui décide' && dd.options >= 3 && dd.gris === true, `dialogue « ${dd.titre} » : « Toute l’équipe » + ${dd.options - 1} membres du projet ; « Enregistrer » grisé tant que rien ne change`);
+  await s.evaluer(`(() => { const se = document.querySelector('[role="dialog"] select'); const o = [...se.options].find(x => x.value && x.value !== se.value); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(se, o.value); se.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(x => /Enregistrer/.test(x.textContent))?.click()`);
+  await s.dormir(600);
+  const dg = await s.evaluer(`(() => { const k = document.querySelector('.lor-constat'); const b = [...(k?.querySelectorAll('button') || [])]; return { gris: ['Corrigé', 'Accepter', 'Écarter'].every(t => b.find(x => x.textContent.trim() === t)?.disabled), question: b.find(x => x.textContent.trim() === 'En faire une question')?.disabled === false, dit: /la décision lui revient/.test(document.querySelector('.lor-controle-tete')?.parentElement?.innerText || '') }; })()`);
+  ok(dg.gris && dg.question && dg.dit, `un autre décideur : « Corrigé / Accepter / Écarter » grisés, la question reste possible (${JSON.stringify(dg)})`);
+  await s.evaluer(`[...document.querySelectorAll('.lor-sous .esp-lien-bouton')].find(b => b.textContent.trim() === 'Choisir qui décide')?.click()`);
+  await s.dormir(500);
+  await s.evaluer(`(() => { const se = document.querySelector('[role="dialog"] select'); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(se, ''); se.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(x => /Enregistrer/.test(x.textContent))?.click()`);
+  await s.dormir(600);
+  ok(await s.evaluer(`/Décide des constats : toute l’équipe du projet/.test(document.querySelector('.lor-controle-tete')?.parentElement?.innerText || '') && [...document.querySelectorAll('.lor-constat button')].find(x => x.textContent.trim() === 'Accepter')?.disabled === false`), 'rendu à toute l’équipe : les décisions se rouvrent');
   /* b5_25 : un constat en question au BET ou à l'entreprise, avec l'extrait cité */
   await s.evaluer(`[...document.querySelectorAll('.lor-constat .esp-lien-bouton')].find(b => b.textContent.trim() === 'En faire une question')?.click()`);
   await s.dormir(500);

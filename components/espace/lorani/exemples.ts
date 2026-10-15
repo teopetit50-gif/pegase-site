@@ -527,7 +527,7 @@ export const PIECES_CONTROLE_EXEMPLE: PieceProjet[] = [
 const CA = id("8", 1);
 const CB = id("8", 2);
 export const CONTROLES_EXEMPLE: Controle[] = [
-  { id: CB, projet_id: P_DUBOIS, intitule: "Dossier de permis", indice: "B", precedent_id: CA, statut: "controle", lance_le: ilYa(2), constats_nb: 3, cree_le: ilYa(2),
+  { id: CB, projet_id: P_DUBOIS, intitule: "Dossier de permis", indice: "B", precedent_id: CA, statut: "controle", lance_le: ilYa(2), constats_nb: 3, cree_le: ilYa(2), decideur: EXEMPLE_MOI,
     changements: [
       { reference: "PC3", grandeur: "largeur_m", objet: "tremie_r1", libelle: "la largeur de « tremie r1 »", unite: "m", avant: 1.2, apres: 1.8, page_avant: 1, page_apres: 1, texte_avant: "trémie 120", texte_apres: "trémie 180", releve: false },
       { reference: "PC2", grandeur: "recul_limite_m", objet: "projet", libelle: "le recul sur limite séparative", unite: "m", avant: 3.4, apres: 3.2, page_avant: 1, page_apres: 1, texte_avant: "3,40 m", texte_apres: "3,20 m", releve: true },

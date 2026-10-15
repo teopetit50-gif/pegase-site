@@ -348,6 +348,8 @@ export type Controle = {
   /* b5_29 : un contrôle suspendu ne se lance pas (absent tant que la migration n'est pas posée) */
   suspendu_le?: string | null;
   suspendu_motif?: string | null;
+  /* b5_30 : la personne qui décide des constats de ce contrôle (nul = tout membre qui écrit sur le projet) */
+  decideur?: string | null;
 };
 export type ChangementIndice = {
   reference: string;

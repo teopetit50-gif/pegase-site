@@ -8,15 +8,18 @@
    (private.lorani_controler, porte lorani_lancer_controle), et seul quand la dernière pièce est lue. Exemple : les
    saisies s'appliquent en mémoire, sans croisement (les constats du contrôle précédent sont reconduits).
    Un constat part en question à l'entreprise ou au BET en un clic (b5_25) : un point « question » des comptes rendus
-   (lorani_points, b5_20), avec l'extrait cité (pièce, page, texte lu) ; il est ensuite suivi jusqu'à la réponse. */
+   (lorani_points, b5_20), avec l'extrait cité (pièce, page, texte lu) ; il est ensuite suivi jusqu'à la réponse.
+   Qui décide (b5_30) : le gérant, un admin ou le chef de projet nomme, par contrôle, la personne qui tranche les
+   constats ; elle seule (avec le gérant et les admins) les marque corrigés, acceptés ou écartés. */
 
 import { useMemo, useState } from "react";
-import { FileDown, MessageSquareText, PauseCircle, ScanSearch, ShieldCheck } from "lucide-react";
+import { FileDown, MessageSquareText, PauseCircle, ScanSearch, ShieldCheck, UserCheck } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { Avis, Pastille } from "../ui";
 import { dateCourte } from "../format";
-import { ajouterPoints, deciderConstat, lancerControle, octetsPiece, preparerControle, reprendreControle, suspendreControle } from "./portes";
+import { ajouterPoints, choisirDecideur, deciderConstat, lancerControle, octetsPiece, preparerControle, reprendreControle, suspendreControle } from "./portes";
+import { ROLES_PROJET } from "./etats";
 import { excelControle, pdfControle, telecharger, type DonneesRapport } from "./rapport";
 import type { Constat, Controle as ControleT, ControlePiece, Dossier, PieceProjet, Point, Projet, RolePieceControle } from "./types";
 
@@ -55,6 +58,7 @@ type Form =
   | { type: "decider"; constat: Constat; statut: Exclude<Constat["statut"], "ouvert"> }
   | { type: "question"; constat: Constat }
   | { type: "suspendre" }
+  | { type: "decideur" }
   | null;
 
 export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: {
@@ -85,6 +89,13 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
   const [motif, setMotif] = useState("");
   const [nq, setNq] = useState({ intervenant: "", texte: "", echeance: "" });
   const clientId = dossier.moi?.client_id ?? "";
+  /* qui décide (b5_30) : le décideur nommé, sinon toute l'équipe qui écrit ; le gérant et les admins gardent la main */
+  const membres = useMemo(() => dossier.membres.filter((m) => m.projet_id === projet.id), [dossier.membres, projet.id]);
+  const moiId = dossier.moi?.user_id ?? null;
+  const direction = ["gerant", "admin"].includes(dossier.moi?.role ?? "");
+  const peutChoisir = peutEcrire && (direction || membres.some((m) => m.user_id === moiId && m.role_projet === "chef_projet"));
+  const peutDecider = peutEcrire && (!c?.decideur || c.decideur === moiId || direction);
+  const [decideur, setDecideur] = useState("");
   const intervenants = useMemo(() => dossier.intervenants.filter((i) => i.projet_id === projet.id && i.actif).sort((a, b) => a.organisme.localeCompare(b.organisme)), [dossier.intervenants, projet.id]);
 
   const lancer = async (reel: () => Promise<void>, local: () => Dossier) => {
@@ -224,6 +235,16 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
     if (!c) return;
     return lancer(() => reprendreControle(c.id), () => ({ ...dossier, controles: dossier.controles.map((x) => (x.id === c.id ? { ...x, suspendu_le: null, suspendu_motif: null } : x)) }));
   };
+  const ouvrirDecideur = () => {
+    setErreur(null);
+    setDecideur(c?.decideur ?? "");
+    setForm({ type: "decideur" });
+  };
+  const soumettreDecideur = () => {
+    if (!c) return;
+    const d = decideur || null;
+    return lancer(() => choisirDecideur(c.id, d), () => ({ ...dossier, controles: dossier.controles.map((x) => (x.id === c.id ? { ...x, decideur: d } : x)) }));
+  };
   const suspensionOk = form?.type === "suspendre" && motif.trim().length >= 3 && motif.trim().length <= 300;
 
   const rouvrir = (k: Constat) => lancer(() => deciderConstat(k.id, { statut: "ouvert", motif: null }), () => ({ ...dossier, constats: dossier.constats.map((x) => (x.id === k.id ? { ...x, statut: "ouvert", motif: null } : x)) }));
@@ -280,6 +301,11 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
               ? <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={reprendre}>Reprendre</button>
               : <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi || c.statut === "clos"} onClick={ouvrirSuspension}>Suspendre</button>}
           </div>
+          <p className="lor-sous">
+            Décide des constats : <strong>{c.decideur ? nommer(c.decideur) : "toute l’équipe du projet"}</strong>{" "}
+            <button type="button" className="esp-lien-bouton" disabled={!peutChoisir || envoi || c.statut === "clos"} onClick={ouvrirDecideur}>Choisir qui décide</button>
+            {c.decideur && !peutDecider ? <span> · vous pouvez préparer une question, la décision lui revient.</span> : null}
+          </p>
           {c.suspendu_le ? (
             <p className="lor-sous" role="status">Suspendu le {jour(c.suspendu_le)} : {c.suspendu_motif}. Il ne se lancera pas, même quand ses pièces seront lues, tant qu’il n’est pas repris.</p>
           ) : null}
@@ -322,9 +348,9 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
                 </ul>
               ) : null}
               <div className="esp-actions">
-                <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => ouvrirDecision(k, "corrige")}>Corrigé</button>
-                <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => ouvrirDecision(k, "accepte")}>Accepter</button>
-                <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => ouvrirDecision(k, "ecarte")}>Écarter</button>
+                <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={!peutDecider || envoi} onClick={() => ouvrirDecision(k, "corrige")}>Corrigé</button>
+                <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutDecider || envoi} onClick={() => ouvrirDecision(k, "accepte")}>Accepter</button>
+                <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutDecider || envoi} onClick={() => ouvrirDecision(k, "ecarte")}>Écarter</button>
                 <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => ouvrirQuestion(k)}>En faire une question</button>
               </div>
             </div>
@@ -362,7 +388,7 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
                     <li key={k.id}>
                       <Pastille teinte={d.teinte}>{d.libelle}</Pastille> {k.titre}
                       <span className="lor-sous"> {k.motif ? `Motif : ${k.motif}` : ""}{k.decide_par ? ` · ${nommer(k.decide_par)}, le ${jour(k.decide_le)}` : ""}</span>{" "}
-                      <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => void rouvrir(k)}>Rouvrir</button>
+                      <button type="button" className="esp-lien-bouton" disabled={!peutDecider || envoi} onClick={() => void rouvrir(k)}>Rouvrir</button>
                     </li>
                   );
                 })}
@@ -477,6 +503,32 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
           </DialogBody>
           <DialogFooter>
             <button type="button" className="r-btn r-btn--noir" disabled={!suspensionOk || envoi} onClick={soumettreSuspension}>{envoi ? <Loader variant="spin" /> : null} Suspendre</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ——— choisir qui décide ——— */}
+      <Dialog open={form?.type === "decideur"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><UserCheck width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Choisir qui décide</DialogTitle>
+            <DialogDescription>{c ? `${c.intitule}, indice ${c.indice}. ` : ""}La personne choisie marque les constats corrigés, acceptés ou écartés ; les autres membres préparent les questions. Le gérant et les admins gardent la main.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Décide des constats
+                <select className="rv-champ" value={decideur} onChange={(e) => setDecideur(e.target.value)}>
+                  <option value="">Toute l’équipe du projet</option>
+                  {membres.map((m) => <option key={m.id} value={m.user_id}>{nommer(m.user_id)} · {ROLES_PROJET[m.role_projet]}</option>)}
+                  {decideur && !membres.some((m) => m.user_id === decideur) ? <option value={decideur}>{nommer(decideur)}</option> : null}
+                </select>
+              </label>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={envoi || (decideur || null) === (c?.decideur ?? null)} onClick={soumettreDecideur}>{envoi ? <Loader variant="spin" /> : null} Enregistrer</button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
