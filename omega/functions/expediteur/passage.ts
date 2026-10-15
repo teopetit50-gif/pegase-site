@@ -93,6 +93,8 @@ export type Dependances = {
   ar24Pour?: (acces: AccesAr24) => ClientAr24;
   /** AR24_TOKEN + AR24_CLE_PRIVEE de l'environnement, null tant qu'ils ne sont pas posés. */
   accesAr24?: AccesAr24 | null;
+  /** AR24_WEBHOOK_URL : URL de webhooks/ar24 (avec son jeton), passée à chaque LRE. */
+  webhookAr24?: string | null;
 };
 
 export type Issue =
@@ -923,7 +925,9 @@ async function remettreLre(
       ),
     );
   }
-  const remise = await client.envoyer(composerLre(envoi, idUser, pieces));
+  const remise = await client.envoyer(
+    composerLre(envoi, idUser, pieces, deps.webhookAr24 ?? null),
+  );
   return remise.id;
 }
 
@@ -935,6 +939,7 @@ export function composerLre(
   envoi: EnvoiAEnvoyer,
   idUser: string,
   pieces: string[],
+  webhook: string | null = null,
 ): MailAr24 {
   const d = envoi.destinataire;
   const nom = (d.nom ?? "").trim();
@@ -964,6 +969,7 @@ export function composerLre(
     } else mail.to_lastname = nom;
   }
   if (envoi.objet?.id) mail.ref_dossier = envoi.objet.id.slice(0, 100);
+  if (webhook) mail.webhook = webhook;
   return mail;
 }
 

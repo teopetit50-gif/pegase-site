@@ -33,6 +33,7 @@ Deno.serve(async (req: Request) => {
   const ar24Token = Deno.env.get("AR24_TOKEN")?.trim() || null;
   const ar24Cle = Deno.env.get("AR24_CLE_PRIVEE")?.trim() || null;
   const ar24Url = Deno.env.get("AR24_URL")?.trim() || undefined;
+  const webhookAr24 = Deno.env.get("AR24_WEBHOOK_URL")?.trim() || null;
   const url = Deno.env.get("SUPABASE_URL") ?? "";
   const cleService = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
   const ouvrier = `expediteur@${
@@ -53,6 +54,7 @@ Deno.serve(async (req: Request) => {
     accesAr24: ar24Token && ar24Cle
       ? { token: ar24Token, clePrivee: ar24Cle }
       : null,
+    webhookAr24,
   });
   journal.info("passage terminé", {
     pris: bilan.pris,

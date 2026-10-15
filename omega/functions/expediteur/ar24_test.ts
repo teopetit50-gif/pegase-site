@@ -159,3 +159,41 @@ Deno.test("client : erreur métier en clair → définitive ; 503 → transitoir
     assertEquals(e.definitif, definitif, e.message);
   }
 });
+
+Deno.test("client : lire(id) en GET, token, date et id en paramètres, signature en en-tête, réponse déchiffrée", async () => {
+  let url = "";
+  let methode = "";
+  let signature: string | null = null;
+  const f: typeof fetch = async (entree, init) => {
+    url = String(entree);
+    methode = init!.method!;
+    signature = new Headers(init!.headers).get("signature");
+    const date = new URL(url).searchParams.get("date")!;
+    return new Response(
+      await chiffrerAr24(
+        JSON.stringify({
+          status: "SUCCESS",
+          result: { id: 123, status: "ar" },
+        }),
+        date,
+        CLE_DOC,
+      ),
+    );
+  };
+  const o = await clientAr24(ACCES, f, undefined, MAINTENANT).lire("123");
+  assertEquals(o, { id: 123, status: "ar" });
+  assertEquals(methode, "GET");
+  const q = new URL(url).searchParams;
+  assertEquals([
+    new URL(url).pathname,
+    q.get("token"),
+    q.get("date"),
+    q.get("id"),
+  ], [
+    "/api/mail",
+    "jeton-test",
+    DATE_DOC,
+    "123",
+  ]);
+  assertEquals(signature, "bDop0cbjKpkySlpvnNGvBMg7PuYFFgPPqTTS2RAHoY0=");
+});

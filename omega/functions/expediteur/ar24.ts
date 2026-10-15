@@ -23,6 +23,8 @@ export type MailAr24 = {
   eidas: "0" | "1";
   ref_dossier?: string;
   ref_client?: string;
+  /** URL appelée par AR24 à chaque changement d'état (sinon celle réglée chez AR24). */
+  webhook?: string;
   pieces: string[];
 };
 
@@ -34,6 +36,8 @@ export interface ClientAr24 {
     mime: string,
   ): Promise<string>;
   envoyer(mail: MailAr24): Promise<{ id: string; statut: string | null }>;
+  /** GET /mail?id= : l'objet LRE tel qu'AR24 le connaît (statut, dates, preuves). */
+  lire(id: string): Promise<Record<string, unknown>>;
 }
 
 export class ErreurAr24 extends Error {
@@ -161,21 +165,33 @@ export function clientAr24(
   async function appeler(
     chemin: string,
     champs: Record<string, string | Blob>,
+    methode: "POST" | "GET" = "POST",
   ): Promise<Record<string, unknown>> {
     const date = dateAr24(maintenant());
-    const corps = new FormData();
-    corps.set("token", acces.token);
-    corps.set("date", date);
-    for (const [k, v] of Object.entries(champs)) {
-      if (v instanceof Blob) corps.set(k, v, (v as File).name ?? "piece");
-      else corps.set(k, v);
+    const signature = await signatureAr24(date, acces.clePrivee);
+    let url = `${racine}${chemin}`;
+    let corps: FormData | undefined;
+    if (methode === "GET") {
+      const q = new URLSearchParams({ token: acces.token, date });
+      for (const [k, v] of Object.entries(champs)) {
+        if (typeof v === "string") q.set(k, v);
+      }
+      url += `?${q}`;
+    } else {
+      corps = new FormData();
+      corps.set("token", acces.token);
+      corps.set("date", date);
+      for (const [k, v] of Object.entries(champs)) {
+        if (v instanceof Blob) corps.set(k, v, (v as File).name ?? "piece");
+        else corps.set(k, v);
+      }
     }
     let r: Response;
     try {
-      r = await fetchImpl(`${racine}${chemin}`, {
-        method: "POST",
-        headers: { signature: await signatureAr24(date, acces.clePrivee) },
-        body: corps,
+      r = await fetchImpl(url, {
+        method: methode,
+        headers: { signature },
+        ...(corps ? { body: corps } : {}),
       });
     } catch (e) {
       throw new ErreurAr24(0, `réseau : ${String(e)}`, false);
@@ -243,6 +259,7 @@ export function clientAr24(
       if (m.to_company) champs.to_company = m.to_company;
       if (m.ref_dossier) champs.ref_dossier = m.ref_dossier;
       if (m.ref_client) champs.ref_client = m.ref_client;
+      if (m.webhook) champs.webhook = m.webhook;
       m.pieces.forEach((id, i) => (champs[`attachment[${i}]`] = id));
       const r = await appeler("/mail", champs);
       if (r.id === undefined || r.id === null) {
@@ -252,6 +269,9 @@ export function clientAr24(
         id: String(r.id),
         statut: typeof r.status === "string" ? r.status : null,
       };
+    },
+    async lire(id) {
+      return await appeler("/mail", { id }, "GET");
     },
   };
 }

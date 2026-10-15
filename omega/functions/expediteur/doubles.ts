@@ -12,7 +12,12 @@ import type { ClientBrevo, EmailBrevo, SmsBrevo } from "./brevo.ts";
 import type { Stockage } from "./stockage.ts";
 import type { Journal } from "./passage.ts";
 import type { ClientWhatsApp, MessageWhatsApp } from "./meta.ts";
-import type { AccesAr24, ClientAr24, MailAr24 } from "./ar24.ts";
+import {
+  type AccesAr24,
+  type ClientAr24,
+  ErreurAr24,
+  type MailAr24,
+} from "./ar24.ts";
 
 export type AppelPorte = { porte: keyof Portes; args: unknown[] };
 
@@ -276,5 +281,16 @@ export class Ar24Double implements ClientAr24 {
     if (this.erreur) throw this.erreur;
     this.mails.push(mail);
     return { id: `${7000 + this.mails.length}`, statut: "waiting" };
+  }
+  /** Objets LRE rendus par lire(id). */
+  objets = new Map<string, Record<string, unknown>>();
+  lectures: string[] = [];
+  // deno-lint-ignore require-await
+  async lire(id: string) {
+    this.lectures.push(id);
+    if (this.erreur) throw this.erreur;
+    const o = this.objets.get(id);
+    if (!o) throw new ErreurAr24(200, `LRE ${id} inconnue`, true);
+    return o;
   }
 }

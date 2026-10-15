@@ -56,8 +56,24 @@ Sans eIDAS, c'est une lettre recommandée électronique simple, qui part tout de
 
 Un envoi sans nom de destinataire est refusé, sans réessai.
 
-## Ce qui n'est pas encore fait
+## Les accusés (fonction `webhooks-ar24`)
 
-AR24 prévient par webhook de l'accusé de réception, du refus ou de la négligence. Le format de
-ces notifications n'est pas public. L'ouvrier sera écrit sur un premier exemple réel, pris dans
-le bac à sable. En attendant, l'état se lit sur AR24.
+AR24 prévient Omega à chaque changement d'état d'une lettre. Omega le note sur l'envoi :
+- accusé de réception (lettre ouverte) → « remis » ;
+- refus, négligence (non retirée en 15 jours), erreur AR24 ou annulation → « refusé » ;
+- adresse en erreur → « rebond ».
+
+Le lien vers la preuve AR24 est gardé avec l'événement.
+
+AR24 ne signe pas ses notifications. Omega ne les croit donc pas sur parole : il relit la lettre
+chez AR24 avec ses propres accès et ne note que ce qu'AR24 confirme.
+
+Mise en place :
+1. Vous : un secret `AR24_WEBHOOK_JETON` (une longue suite de lettres et de chiffres au hasard),
+   puis `AR24_WEBHOOK_URL` =
+   `https://<projet>.supabase.co/functions/v1/webhooks-ar24?jeton=<le même jeton>`.
+2. Le coordinateur : déployer `webhooks-ar24` avec `verify_jwt = false`. L'ouvrier
+   `expediteur` passe cette URL à chaque lettre, rien à régler chez AR24.
+
+Limite : une organisation qui a ses propres accès AR24 dans le coffre n'a pas ses accusés relus.
+Le webhook ne connaît que les accès `AR24_TOKEN` et `AR24_CLE_PRIVEE`.
