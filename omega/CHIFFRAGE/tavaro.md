@@ -11,7 +11,38 @@ recetté) · **C** partiel · **D** pas construit · **T** dépend d'un tiers, d
 **Jours** : jours de travail d'un ouvrier, écran et tests compris ; « →B » depuis l'état actuel, « →A » ensuite, de B jusqu'à
 la preuve en vrai.
 
-## Synthèse
+## Mise à jour du 15/10/2026 (B2) — ce qui a changé depuis le 06/10
+
+Posé et vert sur la recette : migrations b2_12 à b2_16, tests 21 à 25 (^test_b2_ 01 à 25 verts le 11/10). L'écran
+« Opérations » est en ligne (main 1e27e72). Les lignes du détail ci-dessous sont mises à jour ; la synthèse du 06/10 reste
+lisible en dessous, mais ses chiffres sont remplacés par ceux-ci.
+
+| Ligne | Avant | Maintenant | Ce qui a changé |
+|---|---|---|---|
+| 7 | C | B | b2_12 : les photos de l'état des lieux **de départ** signé sont jointes à la facture, avant celles du retour (test 21) |
+| 12 | C | C | l'incident est construit et rattaché au contrat (b2_16) ; la remise sans personne nommée reste possible |
+| 29 et 30 | D | C (T) | dossier d'incident, grille de l'agence, porte du fournisseur de voix, alerte, passage à une personne (b2_16, test 25) ; reste l'agent vocal lui-même |
+| 31 et 54 | D | B | b2_15 : dossier de sinistre du constat au règlement, recours chiffré (jours × tarif moyen × part du tiers), courrier, relance à 30 jours (test 24) |
+| 47 et 52 | D et C | B | b2_13 : transferts proposés au prochain pic, groupés en tournée, validés par la direction ; un véhicule immobilisé à destination est signalé (test 22) |
+| 49 | D/T | B (T) | b2_14 : passages importés ou saisis, rapprochés du contrat, payés sous 72 h (alerte), refacturés au montant réel (test 23) ; reste le compte flotte |
+| 51 | C | B | b2_12 : Crit'Air et contrôle technique par véhicule, contrôle du comptoir au départ, rappels du constructeur (test 21) ; « sort des réservations » reste à réécrire (voir 25) |
+| 55 | D/T | C (T) | contrat d'interface et porte de l'agrégateur, comparaison avec l'état des lieux de retour (b2_16) ; reste le branchement et le pré-remplissage |
+
+Contrat des fournisseurs : `omega/modules/tavaro/INTERFACES.md` (voix, agrégateur, paiement de la caution, péages).
+
+**Jours →B restants** : environ **52 j**, contre 87 le 06/10. Le reste :
+- Questions ≈ 10 j, avec un modèle de langage ;
+- comparaison d'images ≈ 8 j ;
+- branchement de l'agent vocal ≈ 10 j ;
+- branchement de l'agrégateur ≈ 3 j ;
+- outil d'audit et indicateur ≈ 4 j ;
+- connecteur du premier loueur ≈ 3 j ;
+- page du matin par agence ≈ 2 j ;
+- personne nommée sur chaque remise ≈ 1 j ;
+- fichier de désignation par lot ≈ 1,5 j ;
+- divers ≈ 10 j.
+
+## Synthèse (06/10)
 
 1. **Par état, sur 47 promesses comptées** : A 5 · B 18 · C 15 · D 7 · D/T 2. Ne sont pas comptés à part : les
    « hors produit », les renvois à B3 et les doublons. Six modules entiers ne sont pas construits : 04 Assistance,
@@ -63,7 +94,7 @@ la preuve en vrai.
 | 4 | « Un dommage non relevé au retour se facture rarement. » | textes.ts:52-54 | hors produit | constat de métier | — | — | — |
 | 5 | « Au retour du véhicule, Tavaro compare les photos de restitution à l'état des lieux de départ » | textes.ts:56 | C | b2_05 : les zones déjà notées au départ ne sont pas facturées ; écran « ne sera pas facturé » avant le clic | **une vraie comparaison d'images** (vision : dommage visible au retour et absent de la photo du départ, même angle) ; sinon, réécrire en « compare les dommages relevés » | 8 / 3 | modèle de vision : ≈ 0,01 à 0,03 € par photo |
 | 6 | « puis chiffre le carburant, le retard et les dommages selon votre barème de remise en état » | textes.ts:56 | A | banc_01 : 418,20 € (frais 238,20, dommages 180) | — | 0 / 0 | — |
-| 7 | « Chaque facture part avec les photos datées du départ et du retour, après validation de l'agence. » | textes.ts:56 | C | validation : A ; PDF et photos du **retour** joints : B (b2_08, test 17 ; tavaro-pdf déployé) | joindre aussi les photos **du départ** (l'état des lieux signé) ; courriel avec pièces à prouver sur le banc | 0,5 / 0,5 | — |
+| 7 | « Chaque facture part avec les photos datées du départ et du retour, après validation de l'agence. » | textes.ts:56 | B | validation : A ; PDF et photos du retour (b2_08, test 17) ; photos du **départ** signé jointes (b2_12, test 21) | courriel avec pièces à prouver sur le banc | 0 / 0,5 | — |
 | 8 | « Tavaro chiffre chaque restitution sur votre barème et prépare la facture avec ses preuves, que l'agence valide avant envoi. » | textes.ts:57 | B | b2_08, test 17 (PDF et photos datées) ; validation : A | prouver le courriel avec pièces jointes sur le banc | 0 / 0,5 | — |
 | 9 | « Tavaro lit ce que vos agences produisent déjà : les photos de retour, les contrats, le planning et la messagerie d'équipe. » | textes.ts:84 | C | photos (écran, bucket), contrats et réservations (relevé de l'export, A sur le banc) | **la messagerie d'équipe** n'est pas lue | 4 / 1 | T : connecteur WhatsApp Business, Slack ou Teams selon le loueur |
 | 10 | « Avant l'ouverture du comptoir, chaque agence reçoit une page qui décrit l'état de son parking et les décisions qui l'attendent. » | textes.ts:84 | C | le socle dépose chaque matin la section « Facturation des retours » (valideur) et « réseau » (gérant) | ajouter à la page du matin les remises, l'entretien, les avis et les contestations par agence | 2 / 1 | — |
@@ -85,9 +116,9 @@ la preuve en vrai.
 | 26 | « Le retour crée la tâche sur la messagerie de l'équipe, avec l'heure limite. » | textes.ts:116 | C | la tâche et l'heure limite (B) ; l'alerte part dans Omega (centre d'alertes) | l'envoi sur la messagerie d'équipe | 2 / 1 | T : comme en 9 |
 | 27 | « Le responsable est alerté dès que la remise en location risque de manquer le prochain départ. » | textes.ts:117 | B | b2_10 : cron tavaro-parc (risque, retard), alerte au responsable | prouver en vrai | 0 / 0,5 | — |
 | 28 | « Chaque anomalie de retour remonte à une personne nommée. » | textes.ts:118 | B | b2_10 : personne obligatoire, prévenue ; test 19 | — | 0 / 0,5 | — |
-| 29 | « Quand un client appelle un dimanche soir pour une panne, un accident ou une clé perdue, l'assistant de Tavaro répond, ouvre le dossier et envoie la dépanneuse selon votre grille. » | textes.ts:129 | D | — | un agent vocal, le dossier d'incident, la grille de dépannage et l'envoi au dépanneur | 12 / 4 | T : numéro et agent vocal (≈ 0,10 à 0,20 €/min) ; dépanneurs sous contrat |
-| 30 | « Il prévient l'agence, puis transfère l'appel à une personne dès que la situation sort de la grille, avec l'historique de l'échange. » | textes.ts:129 | D | — | transfert d'appel avec le résumé de l'échange | 3 / 1 | T (même fournisseur) |
-| 31 | « Le dossier d'accident est ensuite suivi jusqu'au règlement. » | textes.ts:129 | D | — | = 18 Sinistres | (en 47) | — |
+| 29 | « Quand un client appelle un dimanche soir pour une panne, un accident ou une clé perdue, l'assistant de Tavaro répond, ouvre le dossier et envoie la dépanneuse selon votre grille. » | textes.ts:129 | C (T) | — | un agent vocal, le dossier d'incident, la grille de dépannage et l'envoi au dépanneur | 12 / 4 | T : numéro et agent vocal (≈ 0,10 à 0,20 €/min) ; dépanneurs sous contrat |
+| 30 | « Il prévient l'agence, puis transfère l'appel à une personne dès que la situation sort de la grille, avec l'historique de l'échange. » | textes.ts:129 | C (T) | — | transfert d'appel avec le résumé de l'échange | 3 / 1 | T (même fournisseur) |
+| 31 | « Le dossier d'accident est ensuite suivi jusqu'au règlement. » | textes.ts:129 | B | — | = 18 Sinistres | (en 47) | — |
 | 32 | « Le pilote couvre un seul type d'incident courant, puis s'élargit. » | textes.ts:131 | hors produit | méthode | — | — | — |
 | 33 | « Le dossier est ouvert et résumé dans votre logiciel, avec l'heure et le contrat. » | textes.ts:132 | D | — | contredit « rien ne s'y branche » : le dossier peut s'ouvrir dans Omega, pas dans le logiciel du loueur ; à réécrire | (en 29) | — |
 | 34 | « Les cas difficiles passent à une personne, qui reçoit tout le contexte. » | textes.ts:133 | D | — | = 30 | (en 30) | — |
@@ -103,15 +134,15 @@ la preuve en vrai.
 | 44 | 05 « Tavaro rapproche le revenu, l'entretien, l'immobilisation et la valeur de revente de chaque véhicule pour désigner ceux qui coûtent plus qu'ils ne rapportent. » | textes.ts:166 | B | = 35 et 36 | — | 0 / (en 35) | — |
 | 45 | 06 « Posez une question en français : Tavaro répond chiffres à l'appui, avec la cause de l'écart et la décision proposée. » | textes.ts:167 | D | — | des questions en langage naturel, traduites en lectures bornées des tables de l'agence (jamais d'écriture), avec la réponse, la cause et la décision proposée | 10 / 2 | T : modèle de langage (≈ 20 à 80 €/mois) |
 | 46 | 07 Réservations à risque · 08 Montée en gamme · 09 Contrats à risque · 10 Véhicules inactifs | textes.ts:168-171 | voir B3 | branche worker-b3, b3t_01 et b3t_02 | chiffré par B3 dans son fichier | — | — |
-| 47 | 11 « Tavaro organise les transferts entre agences avant le pic de demande, en une seule tournée, selon les réservations de chaque site. » | textes.ts:172 | D | — | prévision de la demande par agence et par catégorie (réservations), proposition de transferts, tournée unique (convoyeur), validation | 7 / 2 | — |
+| 47 | 11 « Tavaro organise les transferts entre agences avant le pic de demande, en une seule tournée, selon les réservations de chaque site. » | textes.ts:172 | B | — | prévision de la demande par agence et par catégorie (réservations), proposition de transferts, tournée unique (convoyeur), validation | 7 / 2 | — |
 | 48 | 12 « L'agent est guidé angle par angle, la photo floue est refusée, puis le client signe l'état des lieux au départ comme au retour. » | textes.ts:173 | B | b2_05 (quatre vues obligatoires, signature, refus constaté), b2_07 (photo floue refusée, test 16), recette avec de vraies photos | « guidé angle par angle » : la liste des vues est montrée, mais il n'y a pas d'assistant de prise de vue pas à pas ; essai sur téléphone | 1 / 1 | — |
-| 49 | 13 « Chaque passage sous un portique sans barrière est rattaché au contrat, payé dans les 72 heures, puis refacturé au client. » | textes.ts:174 | D/T | — | récupérer les passages (compte flotte ou export de l'opérateur), les rapprocher du contrat (plaque et heure, comme les avis b2_03), suivre le paiement sous 72 h, refacturer par une ligne du barème | 8 / 2 | T : compte flotte en flux libre (A79, A13/A14…) ou badge de télépéage de flotte |
+| 49 | 13 « Chaque passage sous un portique sans barrière est rattaché au contrat, payé dans les 72 heures, puis refacturé au client. » | textes.ts:174 | B (T) | — | récupérer les passages (compte flotte ou export de l'opérateur), les rapprocher du contrat (plaque et heure, comme les avis b2_03), suivre le paiement sous 72 h, refacturer par une ligne du barème | 8 / 2 | T : compte flotte en flux libre (A79, A13/A14…) ou badge de télépéage de flotte |
 | 50 | 14 « Chaque avis de contravention est rapproché du contrat, et le locataire est désigné dans les 45 jours. Les frais de dossier lui sont refacturés. » | textes.ts:175 | B | b2_03 (rapprochement, échéance, alertes), b2_04 (identité gardée un an), b2_07 (frais refacturés), tests 12, 13, 16 | la désignation elle-même se fait sur le site de l'ANTAI : Tavaro tient le délai et prépare les données ; le fichier de désignation par lot reste à produire | 1,5 / 1 | — |
-| 51 | 15 « Un véhicule rappelé par le constructeur, ou dont le contrôle technique arrive à échéance, sort des réservations. Sa vignette Crit'Air est rappelée au comptoir. » | textes.ts:176 | C | rappel et contrôle technique : immobilisation, alerte, réservations à réaffecter (b2_10) | « sort des réservations » (voir 25) ; **Crit'Air au comptoir** pas construit (classe sur le véhicule, rappel au départ dans les zones à faibles émissions) ; les rappels se saisissent à la main | 1 / 0,5 | T facultatif : relevés constructeur (19) pour les rappels par numéro de série |
-| 52 | 16 « Chaque véhicule chez le carrossier garde une date de retour. Si cette date manque ou tombe après le pic, Tavaro propose des transferts. » | textes.ts:177 | C | date de retour obligatoire et alerte au dépassement (B) | « propose des transferts » attend 11 | (en 47) | — |
+| 51 | 15 « Un véhicule rappelé par le constructeur, ou dont le contrôle technique arrive à échéance, sort des réservations. Sa vignette Crit'Air est rappelée au comptoir. » | textes.ts:176 | B | rappel et contrôle technique : immobilisation, alerte, réservations à réaffecter (b2_10) | « sort des réservations » (voir 25) ; **Crit'Air au comptoir** pas construit (classe sur le véhicule, rappel au départ dans les zones à faibles émissions) ; les rappels se saisissent à la main | 1 / 0,5 | T facultatif : relevés constructeur (19) pour les rappels par numéro de série |
+| 52 | 16 « Chaque véhicule chez le carrossier garde une date de retour. Si cette date manque ou tombe après le pic, Tavaro propose des transferts. » | textes.ts:177 | B | date de retour obligatoire et alerte au dépassement (B) | « propose des transferts » attend 11 | (en 47) | — |
 | 53 | 17 « Quand un client conteste auprès de sa banque le débit des dommages, le dossier part en un clic : état des lieux signé, photos datées, barème appliqué et contrat. » | textes.ts:178 | B | b2_09, b2_09b, test 18 (30/30) ; PDF du dossier (tavaro-pdf v2) | envoyer un dossier réel | 0 / 1 | — |
-| 54 | 18 « Chaque accident est suivi du constat au règlement, et le recours contre l'assureur du client est préparé pour les jours d'immobilisation. » | textes.ts:179 | D | — | dossier de sinistre (constat, photos, expert, assureur, échéances) et recours chiffré (jours d'immobilisation × tarif, lus sur loc_immobilisations), courrier de recours | 10 / 2 | — |
-| 55 | 19 « Le carburant, le kilométrage et la charge de la batterie sont lus auprès du constructeur au moment du retour, puis confirment ce que montrent les photos. » | textes.ts:180 | D/T | — | contrat d'interface écrit côté module (carnet, point 4) ; branchement chez un agrégateur, puis pré-remplissage du retour | 6 / 2 | T : agrégateur (High Mobility, Mobilisights, Smartcar…), ≈ 3 à 8 € par véhicule et par mois, consentement du propriétaire |
+| 54 | 18 « Chaque accident est suivi du constat au règlement, et le recours contre l'assureur du client est préparé pour les jours d'immobilisation. » | textes.ts:179 | B | — | dossier de sinistre (constat, photos, expert, assureur, échéances) et recours chiffré (jours d'immobilisation × tarif, lus sur loc_immobilisations), courrier de recours | 10 / 2 | — |
+| 55 | 19 « Le carburant, le kilométrage et la charge de la batterie sont lus auprès du constructeur au moment du retour, puis confirment ce que montrent les photos. » | textes.ts:180 | C (T) | — | contrat d'interface écrit côté module (carnet, point 4) ; branchement chez un agrégateur, puis pré-remplissage du retour | 6 / 2 | T : agrégateur (High Mobility, Mobilisights, Smartcar…), ≈ 3 à 8 € par véhicule et par mois, consentement du propriétaire |
 | 56 | 20 Plan de flotte | textes.ts:181 | voir B3 | marqué « à venir » sur la page | chiffré par B3 | — | — |
 | 57 | « Vingt retours suffisent à mesurer ce qui n'a pas été facturé » ; « Le premier module s'installe là où l'écart est le plus grand, pour quatre semaines, et un seul indicateur est lu à la fin du mois. » | textes.ts:187-189 | C | méthode ; l'écran montre « à encaisser » | l'outil d'audit (voir 19) ; l'indicateur unique de fin de mois (€ facturés pour 100 retours, avant et après) | 1 / 0,5 | — |
 | 58 | « Il prend en charge ce qui se passe entre deux contrats : […] le garage et les rappels, les péages et les amendes, la panne du dimanche et la sortie de flotte. » | textes.ts:204 | C | garage, rappels (C), amendes (B), sortie de flotte (B) | péages (13), panne (04) | (en 49, 29) | — |
