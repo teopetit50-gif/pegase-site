@@ -10,7 +10,8 @@ Dernière mise à jour : 05/10/2026, 23 h.
 - Nouveau, à poser : b5_30_choisir_decideur.sql, puis le test b5_19 (scénario local 13/13). Écran (Controle.tsx, portes.ts, types.ts, exemples.ts : « Décide des constats » et le dialogue « Choisir qui décide ») à fusionner après b5_19 vert ; recette 97/97 et accessibilité vertes.
 - Nouveau, à poser après b5_30 : b5_31_regler_controles.sql (redéfinit private.lorani_controler et private.lorani_changements_indice), puis le test b5_20. Écran (« Régler les contrôles », Controle.tsx, portes.ts, types.ts, exemples.ts, lorani.css) à fusionner après b5_20 vert ; recette 103/103 et accessibilité vertes.
 - #23 fait, écran seul (pieces-exigees.ts, PiecesPermis.tsx, EcranLorani.tsx) : rien à poser ; recette 105/105 et accessibilité vertes. Codes du bordereau limités à ceux qu'on a vérifiés (PCMI13 = attestation parasismique, pas PPR).
-- Prochain lot : #30 à #33 (situations).
+- Nouveau, à poser après b5_31 : b5_32_avancement_constate.sql, puis le test b5_21. Écran (ComptesRendus.tsx, Chantier.tsx, avancement.ts, portes.ts — select de deux colonnes nouvelles, à fusionner seulement après la pose —, types.ts, exemples.ts) ; recette 109/109 et accessibilité vertes.
+- Prochain lot : #33 (avance, pénalités, retenue), puis #30 (situation contre compte rendu) et #31 (révision BT, compte INSEE à prévoir).
 
 **11/10, 15 h 40 Z — PAUSE demandée par Teo. Arrêt propre, tout est poussé sur worker-b5.**
 - À poser (pas encore posé) : b5_28_changements_indice.sql, puis le test b5_17_changements_indice.sql (4bff78f). Scénario local conforme ; le test n'a pas tourné, faute du socle complet en local.

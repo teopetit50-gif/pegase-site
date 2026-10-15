@@ -126,6 +126,9 @@ for (const largeur of LARGEURS) {
   await s.dormir(600);
   const ch = await s.evaluer(`(() => { const t = (document.querySelector('.lor-situation')?.closest('.esp-carte-corps')?.innerText || '').replace(/[\\u202f\\u00a0]/g, ' '); return { cartes: document.querySelectorAll('.lor-situation').length, depasse: /Situation n° 3 · Pierres de Bourgogne SARL[\\s\\S]*dépasse le marché et ses avenants de 8 100 €/.test(t), recule: /Situation n° 2 · Échafaudages Rhône[\\s\\S]*recule par rapport à la situation n° 1 \\(12 000 €\\)/.test(t), mois: /201 500 € HT cumulés sur 193 400 € \\(104 %\\) · 106 000 € ce mois/.test(t), retard: /En retard : rendre l’avis/.test(t) }; })()`);
   ok(ch.cartes === 2 && ch.depasse && ch.recule && ch.mois && ch.retard, `Façade rue Mercière : deux situations à viser, l'une dépasse le marché de 8 100 €, l'autre recule ; un visa en retard (${JSON.stringify(ch)})`);
+  /* b5_32 : l'avancement facturé contre le constaté au compte rendu */
+  const av = await s.evaluer(`(() => { const c = [...document.querySelectorAll('.lor-situation')].map(x => x.innerText.replace(/[\\u202f\\u00a0]/g, ' ')); return { echaf: /facture 45,8 % d’avancement, le chantier en est à 38 % au compte rendu n° 1/.test(c.find(x => /Échafaudages/.test(x)) || ''), pierre: /Avancement constaté : 100 % au compte rendu n° 2 .*\\(facturé 104,2 %\\)/.test(c.find(x => /Pierres de Bourgogne/.test(x)) || '') }; })()`);
+  ok(av.echaf && av.pierre, `avancement : l’échafaudage facture 45,8 % pour 38 % constatés (CR n° 1) ; la pierre, 104,2 % pour 100 % (sous 5 points) (${JSON.stringify(av)})`);
   await s.evaluer(`[...document.querySelectorAll('.lor-situation')].find(c => /Situation n° 3/.test(c.textContent))?.querySelector('.r-btn--fil')?.click()`);
   await s.dormir(500);
   await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const set = (el, v) => { const p = el.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(p, 'value').set.call(el, v); el.dispatchEvent(new Event('input', { bubbles: true })); }; set(d.querySelector('input[inputmode="decimal"]'), '190000'); set(d.querySelector('textarea'), 'Avenant n° 2 non signé : cumul ramené au marché'); })()`);
@@ -212,6 +215,19 @@ for (const largeur of LARGEURS) {
   await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Enregistrer\\s*$/.test(b.textContent))?.click()`);
   await s.dormir(700);
   ok(await s.evaluer(`(() => { const b = [...document.querySelectorAll('.lor-cr-bloc')][1]; return /En suspens \\(1\\)/i.test(b?.innerText || '') && !/Échafaudages Rhône/.test(b?.innerText || '') && /calepinage/.test(b?.innerText || ''); })()`), 'réponse reçue : la question de l’échafaudeur quitte les points en suspens, l’action reste');
+  /* b5_32 : l'avancement constaté par lot, saisi au CR n° 3 */
+  await s.evaluer(`[...document.querySelectorAll('.r-btn')].find(b => b.textContent.trim() === 'Modifier')?.click()`);
+  await s.dormir(500);
+  const fa = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const i = [...(d?.querySelectorAll('.lor-tolerances input') || [])]; return { n: i.length, leg: /Avancement constaté par lot/.test(d?.innerText || '') }; })()`);
+  ok(fa.n >= 2 && fa.leg, `CR n° 3, « Modifier » : un champ d’avancement constaté par lot (${fa.n})`);
+  const saisirAv = (v) => s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] .lor-tolerances input'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, ${JSON.stringify(v)}); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await saisirAv('120'); await s.dormir(200);
+  ok(await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Enregistrer\\s*$/.test(b.textContent))?.disabled === true`), '120 % : refusé, « Enregistrer » grisé');
+  await saisirAv('62,5'); await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Enregistrer\\s*$/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const al = await s.evaluer(`document.querySelector('.lor-avancement-lots')?.textContent || ''`);
+  ok(/^Avancement constaté : lot \S+ .+ 62,5 %$/.test(al.trim()), `enregistré : « ${al.trim()} »`);
   await s.evaluer(`[...document.querySelectorAll('.r-btn')].find(b => b.textContent.trim() === 'Diffuser')?.click()`);
   await s.dormir(700);
   const dif = await s.evaluer(`(() => { const t = document.querySelector('.lor-cr-bloc')?.closest('.esp-carte-corps')?.innerText || ''; return { diffuse: /Diffusé le/.test(t), plusDeBrouillon: ![...document.querySelectorAll('.r-btn')].some(b => b.textContent.trim() === 'Diffuser'), soldes: /Soldés depuis le CR n° 2 \\(1\\)/.test(t) }; })()`);

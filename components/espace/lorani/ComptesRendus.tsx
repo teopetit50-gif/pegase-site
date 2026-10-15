@@ -44,7 +44,7 @@ export default function ComptesRendus({ projet, dossier, peutEcrire, agir }: {
   const [form, setForm] = useState<Form>(null);
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
-  const [nc, setNc] = useState({ visite_le: auj, presents: [] as Present[], notes: "", avancement: "", prochaine_visite: "" });
+  const [nc, setNc] = useState({ visite_le: auj, presents: [] as Present[], notes: "", avancement: "", prochaine_visite: "", lots: {} as Record<string, string> });
   const [np, setNp] = useState({ nature: "question" as Point["nature"], texte: "", intervenant_id: "", lot_id: "", echeance: "" });
   const [nr, setNr] = useState("");
   const clientId = dossier.moi?.client_id ?? "";
@@ -66,12 +66,13 @@ export default function ComptesRendus({ projet, dossier, peutEcrire, agir }: {
   /* ——— le CR ——— */
   const ouvrirCr = (c: CompteRendu | null) => {
     const presents: Present[] = c?.presents ?? intervenants.map((i) => ({ nom: i.contact ?? i.organisme, organisme: i.contact ? i.organisme : null, intervenant: i.id, present: i.nature === "entreprise" }));
-    setNc({ visite_le: c?.visite_le ?? auj, presents, notes: c?.notes ?? "", avancement: c?.avancement ?? "", prochaine_visite: c?.prochaine_visite ?? "" });
+    setNc({ visite_le: c?.visite_le ?? auj, presents, notes: c?.notes ?? "", avancement: c?.avancement ?? "", prochaine_visite: c?.prochaine_visite ?? "",
+      lots: Object.fromEntries(Object.entries(c?.avancement_lots ?? {}).map(([k, v]) => [k, String(v).replace(".", ",")])) });
     ouvrir({ type: "cr", cr: c });
   };
   const soumettreCr = () => {
     if (form?.type !== "cr") return;
-    const v = { visite_le: nc.visite_le, presents: nc.presents, notes: nc.notes.trim() || null, avancement: nc.avancement.trim() || null, prochaine_visite: nc.prochaine_visite || null };
+    const v = { visite_le: nc.visite_le, presents: nc.presents, notes: nc.notes.trim() || null, avancement: nc.avancement.trim() || null, avancement_lots: avancementLots() ?? {}, prochaine_visite: nc.prochaine_visite || null };
     const prec = form.cr;
     if (prec) return lancer(() => majCompteRendu(prec.id, v), () => ({ ...dossier, comptesRendus: dossier.comptesRendus.map((c) => (c.id === prec.id ? { ...c, ...v } : c)) }));
     const numero = Math.max(0, ...crs.map((c) => c.numero)) + 1;
@@ -119,7 +120,18 @@ export default function ComptesRendus({ projet, dossier, peutEcrire, agir }: {
     telecharger(r.nom, r.octets, "application/pdf");
   };
 
-  const crOk = /^\d{4}-\d{2}-\d{2}$/.test(nc.visite_le) && (!nc.prochaine_visite || nc.prochaine_visite >= nc.visite_le) && (form?.type !== "cr" || !form.cr || form.cr.statut === "brouillon");
+  /* b5_32 : l'avancement constaté par lot, saisi en pourcentage (virgule acceptée) ; null si une saisie est invalide */
+  function avancementLots(): Record<string, number> | null {
+    const r: Record<string, number> = {};
+    for (const [k, t] of Object.entries(nc.lots)) {
+      const x = t.trim().replace(",", ".");
+      if (!x) continue;
+      if (!/^\d+(\.\d+)?$/.test(x) || Number(x) > 100) return null;
+      r[k] = Math.round(Number(x) * 10) / 10;
+    }
+    return r;
+  }
+  const crOk = avancementLots() !== null && /^\d{4}-\d{2}-\d{2}$/.test(nc.visite_le) && (!nc.prochaine_visite || nc.prochaine_visite >= nc.visite_le) && (form?.type !== "cr" || !form.cr || form.cr.statut === "brouillon");
   const pointOk = np.texte.trim().length > 0;
   const brouillon = cr?.statut === "brouillon";
   const enRetard = (l: LigneCr) => l.statut === "ouvert" && !!l.echeance && l.echeance < auj;
@@ -176,6 +188,9 @@ export default function ComptesRendus({ projet, dossier, peutEcrire, agir }: {
             <p className="lor-sous">Présents : {contenu.cr.presents.filter((p) => p.present).map((p) => `${p.nom}${p.organisme ? ` (${p.organisme})` : ""}`).join(", ") || "—"}{contenu.cr.presents.some((p) => !p.present) ? ` · excusés : ${contenu.cr.presents.filter((p) => !p.present).map((p) => p.nom).join(", ")}` : ""}</p>
           ) : null}
           {contenu.cr.avancement ? <p className="lor-sous">Avancement : {contenu.cr.avancement}</p> : null}
+          {Object.keys(cr.avancement_lots ?? {}).length ? (
+            <p className="lor-sous lor-avancement-lots">Avancement constaté : {lots.filter((l) => typeof cr.avancement_lots?.[l.id] === "number").map((l) => `lot ${l.numero} ${l.intitule} ${String(cr.avancement_lots?.[l.id]).replace(".", ",")} %`).join(" · ")}</p>
+          ) : null}
           {brouillon && cr.notes ? <p className="lor-sous">Notes de visite : {cr.notes.split("\n").filter(Boolean).length} ligne{cr.notes.split("\n").filter(Boolean).length > 1 ? "s" : ""}, à rédiger en points.</p> : null}
           {erreur && !form ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
 
@@ -232,6 +247,19 @@ export default function ComptesRendus({ projet, dossier, peutEcrire, agir }: {
               <label className="rv-libelle">Avancement
                 <textarea className="rv-champ" rows={2} maxLength={5000} value={nc.avancement} onChange={(e) => setNc((s) => ({ ...s, avancement: e.target.value }))} placeholder="Gros œuvre : planchers du R+2 coulés." />
               </label>
+              {lots.length ? (
+                <fieldset className="lor-choix-pieces">
+                  <legend className="rv-libelle">Avancement constaté par lot (%)</legend>
+                  <div className="lor-tolerances">
+                    {lots.map((l) => (
+                      <label key={l.id} className="rv-libelle">Lot {l.numero} {l.intitule}
+                        <input className="rv-champ" inputMode="decimal" value={nc.lots[l.id] ?? ""} onChange={(e) => setNc((s) => ({ ...s, lots: { ...s.lots, [l.id]: e.target.value } }))} placeholder="55" />
+                      </label>
+                    ))}
+                  </div>
+                  {avancementLots() === null ? <Avis teinte="ambre" role="status">Un avancement est un pourcentage de 0 à 100.</Avis> : null}
+                </fieldset>
+              ) : null}
               {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
             </div>
           </DialogBody>

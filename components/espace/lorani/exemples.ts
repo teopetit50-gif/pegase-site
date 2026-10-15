@@ -669,9 +669,11 @@ export const RESERVES_EXEMPLE: Reserve[] = [
 const CR = (n: number) => id("a", 100 + n);
 export const CR_EXEMPLE: CompteRendu[] = [
   { id: CR(1), projet_id: P_MERCIERE, numero: 1, visite_le: j(-21), presents: [{ nom: "Marc Roussel", organisme: "Pierres de Bourgogne SARL", intervenant: id("2", 8), present: true }, { nom: "Échafaudages Rhône", intervenant: id("2", 9), present: false }],
-    notes: null, avancement: "Façade sud : piochage des enduits terminé, purge des pierres en cours.", prochaine_visite: j(-7), statut: "diffuse", diffuse_le: ilYa(21), contenu: null },
+    notes: null, avancement: "Façade sud : piochage des enduits terminé, purge des pierres en cours.", prochaine_visite: j(-7), statut: "diffuse", diffuse_le: ilYa(21), contenu: null,
+    avancement_lots: { [id("1", 8)]: 30, [id("1", 9)]: 38 } },
   { id: CR(2), projet_id: P_MERCIERE, numero: 2, visite_le: j(-7), presents: [{ nom: "Marc Roussel", organisme: "Pierres de Bourgogne SARL", intervenant: id("2", 8), present: true }, { nom: "Échafaudages Rhône", intervenant: id("2", 9), present: true }],
-    notes: null, avancement: "Corniche : 14 pierres remplacées sur 14. Rejointoiement commencé travées 1 à 3.", prochaine_visite: j(0), statut: "diffuse", diffuse_le: ilYa(7), contenu: null },
+    notes: null, avancement: "Corniche : 14 pierres remplacées sur 14. Rejointoiement commencé travées 1 à 3.", prochaine_visite: j(0), statut: "diffuse", diffuse_le: ilYa(7), contenu: null,
+    avancement_lots: { [id("1", 8)]: 100, [id("1", 9)]: 50 } },
   { id: CR(3), projet_id: P_MERCIERE, numero: 3, visite_le: j(0), presents: [{ nom: "Marc Roussel", organisme: "Pierres de Bourgogne SARL", intervenant: id("2", 8), present: true }, { nom: "Échafaudages Rhône", intervenant: id("2", 9), present: true }],
     notes: "? @Pierres de Bourgogne planning de reprise des appuis de baies avant le " + fr(9).slice(0, 5) + "\n! relancer le bureau de contrôle sur la note de stabilité de l’échafaudage\n= dépose de l’échafaudage côté rue reportée à la fin des joints\nlot 01 ragréage des appuis de baies en cours",
     avancement: "Rejointoiement travées 1 à 5 ; appuis de baies en reprise.", prochaine_visite: j(7), statut: "brouillon", diffuse_le: null, contenu: null },

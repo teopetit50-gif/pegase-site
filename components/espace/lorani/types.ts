@@ -318,6 +318,10 @@ export type Situation = {
   cumul_admis_ht: number | null;
   observation: string | null;
   visee_le: string | null;
+  /* b5_32 : l'avancement facturé, le dernier constaté au compte rendu (et lequel) */
+  avancement_declare?: number | null;
+  avancement_constate?: number | null;
+  avancement_cr?: string | null;
 };
 export type Visa = {
   id: string;
@@ -498,6 +502,8 @@ export type CompteRendu = {
   presents: Present[];
   notes: string | null;
   avancement: string | null;
+  /* b5_32 : l'avancement constaté à la visite, par lot (identifiant du lot → pourcentage) */
+  avancement_lots?: Record<string, number>;
   prochaine_visite: string | null;
   statut: "brouillon" | "diffuse";
   diffuse_le: string | null;
