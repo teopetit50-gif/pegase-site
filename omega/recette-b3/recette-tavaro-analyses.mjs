@@ -5,7 +5,9 @@
    réservations et contrats à risque, montée en gamme, plan de flotte) sont
    là avec leurs chiffres. Puis le contrôle des pièces au comptoir sur
    l'exemple (permis non conforme → « Pièce non conforme »), et l'axe-core
-   (WCAG 2.1 A/AA) à 390 et 1440 sur les cartes et le dialogue.
+   (WCAG 2.1 A/AA) à 390 et 1440 sur les cartes et le dialogue. Depuis le
+   15/10 (b3t_05) : les véhicules du plan un par un, et une cote de revente
+   notée sur l'exemple (EF-331-KD, 7 250 €).
    usage : node omega/recette-b3/recette-tavaro-analyses.mjs [origine] */
 import { mkdirSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -88,6 +90,31 @@ for (const largeur of [390, 768, 1024, 1440, 1700]) {
   const li = await s.evaluer(`[...document.querySelectorAll('section[aria-label="Contrats à risque"] li')].find(l => /LY-2026-1043/.test(l.textContent))?.innerText || ''`);
   ok(!(await s.evaluer(`!!document.querySelector('[role="dialog"]')`)) && /Pièce non conforme/.test(li) && /Ne pas remettre les clés/.test(li), 'permis non conforme : « Pièce non conforme », pas de clés sans pièces');
   ok(/Score 10/.test(li), `le score passe de 6 à 10 (pièces à contrôler −1, non conforme +3, permis récent +2) : ${li.split('\n')[0]}`);
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b3-tavaro-cote', densite: 1 });
+  console.log('— /espace/tavaro : la cote de revente dans le plan de flotte (exemple, b3t_05)');
+  await s.aller(base + '/espace/tavaro');
+  await s.dormir(900);
+  const avant = await s.evaluer(`document.querySelector('section[aria-label="Plan de flotte"]')?.innerText || ''`);
+  ok(/Les véhicules un par un/.test(avant) && /EH-075-ZN/.test(avant) && /3\s120\s€/.test(avant), 'le plan liste les véhicules un par un, avec leur entretien');
+  ok(/Cotes à noter\s*3/.test(avant), 'trois cotes à noter');
+  ok(await s.evaluer(`(() => { const li = [...document.querySelectorAll('section[aria-label="Plan de flotte"] li')].find(l => /EF-331-KD/.test(l.textContent)); const b = li && [...li.querySelectorAll('button')].find(b => /Noter la cote/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`) === true,
+     '« Noter la cote » de EF-331-KD');
+  await s.dormir(500);
+  ok(await s.evaluer(`/Cote de revente — EF-331-KD/.test(document.querySelector('[role="dialog"]')?.textContent || '')`), 'le dialogue s\'ouvre sur le véhicule');
+  await s.evaluer(axe + ';true');
+  dire('tavaro 1440, dialogue de la cote', await analyser(s, `document.querySelector('[role="dialog"]')`));
+  await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, '7 250'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Noter la cote/.test(b.textContent))?.click()`);
+  await s.dormir(800);
+  const li = await s.evaluer(`[...document.querySelectorAll('section[aria-label="Plan de flotte"] li')].find(l => /EF-331-KD/.test(l.textContent))?.innerText || ''`);
+  const apres = await s.evaluer(`document.querySelector('section[aria-label="Plan de flotte"]')?.innerText || ''`);
+  ok(!(await s.evaluer(`!!document.querySelector('[role="dialog"]')`)) && /Cote 7\s250\s€/.test(li) && !/Cote à noter/.test(li), `EF-331-KD porte sa cote : ${li.split('\n').find((x) => /Cote/.test(x)) ?? ''}`);
+  ok(/Cotes à noter\s*2/.test(apres), 'plus que deux cotes à noter');
   s.fermer();
 }
 

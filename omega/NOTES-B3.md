@@ -37,12 +37,16 @@
 - Écran (10debab, sur worker-b3, **à fusionner** par le coordinateur) : `components/espace/tiroma/ComplementsCabinet.tsx`. Cinq cartes : Soins à regrouper (titulaire), Séances longues mal placées, Un créneau pour chaque plan, Contrôles dus, Vos données (export JSON, titulaire). Branché dans EcranTiroma, portes, types et exemple. tsc, eslint et build propres. Recette aux 5 largeurs : 104 ✓ ; axe : tout passe.
 - Info Teo (11/10) : le tableau de bord prend le dessin de omegaai.fr/omega, et C1 refait /espace2 sans changer les adresses. Interdits : tout lien vers l'ancien dessin (/espace sans le 2, ?ancien=1) et toute modification de `components/omega`. Mes écrans n'en ont pas.
 
-**Reprise du 15/10** : 10debab (l'écran b3_23) n'est pas encore dans main.
-- Lot b3t_05, **à poser** : `omega/modules/tavaro/migrations/b3t_05_couts_plan_de_flotte.sql` puis `omega/tests/tavaro/b3t_05_couts_plan.sql` (^test_b3t_05_, 16 assertions ; à jouer aussi avec ^test_b3t_).
+**Reprise du 15/10** : l'écran b3_23 (10debab) est dans main depuis le 11/10 sous 93ccc62, appliqué par patch, donc sans lien d'ancêtre.
+- Lot b3t_05 (eb5b4cd), **posé** par le coordinateur ; le test est dans le lot h1227grand : `omega/modules/tavaro/migrations/b3t_05_couts_plan_de_flotte.sql` puis `omega/tests/tavaro/b3t_05_couts_plan.sql` (^test_b3t_05_, 16 assertions ; à jouer aussi avec ^test_b3t_).
   - Table `loc_cotes_revente` : une cote par véhicule, notée par le gérant (`loc_noter_cote_revente`, journal « tavaro.cote_revente_notee »).
   - `loc_plan_de_flotte` reçoit, par catégorie, la liste `vehicules` des véhicules à vendre et à renouveler : âge, km, entretien et jours hors service (tirés de `loc_immobilisations` de B2), jours loués, entretien par jour loué, cote. Les totaux gagnent la valeur de revente, les cotes manquantes et l'entretien de la flotte. Les clés de b3t_03 ne changent pas.
   - Vérifié en local, sur les stubs.
 - Aucune cote n'est inventée : sans abonnement Argus, c'est le gérant qui la note.
+- Écran du plan de flotte (lot suivant, à fusionner) : `AnalysesParc.tsx`, `analyses.ts` et `analyses-exemple.ts`.
+  - Trois chiffres de plus : la revente des véhicules à vendre, les cotes à noter, l'entretien de la flotte.
+  - La liste « Les véhicules un par un » : décision, âge, km, entretien, jours hors service, jours loués, coût par jour loué, cote. Le bouton « Noter la cote » ouvre un dialogue (montant, source) qui appelle `loc_noter_cote_revente`.
+  - Recette `recette-tavaro-analyses.mjs` : 52 ✓, axe compris (dialogue de la cote inclus).
 
 **Prochaine étape exacte (11/10)** :
 1. Lire les notifications. Si une recette en base réelle des cartes b3_23 revient rouge, la corriger.
@@ -52,7 +56,7 @@
 Base de travail locale : `/var/tmp/pgb3`, port 5499 (bases b3_rap et b3_tav). Elle sera perdue avec le conteneur, ce qui n'a aucune importance.
 
 Branche `worker-b3`. Coordinateur : session `session_01BCGFdpRKBvXKjouC75sYBg` (depuis le 06/10, 01 h 10 Z ; avant : `session_01B4JNQXyT69GytdvE9SjAnE`).
-Dernière mise à jour : 15/10/2026 (b3t_05 à poser ; écran 10debab à fusionner).
+Dernière mise à jour : 15/10/2026 (b3t_05 posé ; écran du plan de flotte à fusionner).
 
 ## Les deux jauges
 
