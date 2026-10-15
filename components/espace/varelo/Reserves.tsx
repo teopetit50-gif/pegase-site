@@ -16,7 +16,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Camera, FileText, PackageX } from "lucide-react";
+import { Camera, FileText, PackageX, ShieldCheck } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
@@ -48,6 +48,7 @@ import {
   type Reserve,
 } from "./reserves";
 import type { Contexte, Objet, Societe } from "./types";
+import { etiquetteDecision, useDecisions } from "./decisions";
 
 type Props = { source: Source; contexte: Contexte | null; client_id: string; societes: Societe[]; objets: Objet[]; onFait: (m: string) => void };
 type Filtre = "a_examiner" | "traitees";
@@ -82,6 +83,16 @@ export default function Reserves({ source, contexte, client_id, societes, objets
 
   const role = contexte?.role;
   const peutSaisir = !!contexte && role !== "lecteur";
+  const { decisionDe, proposer } = useDecisions(source, client_id, !!contexte);
+  const faireValider = async (r: Reserve) => {
+    const calcul = `${REGLES[r.mode].libelle} : ${r.calcul_detail ?? `date limite au ${dateCourte(r.echeance)}`}${r.montant_estime !== null ? ` ; préjudice estimé ${montant(r.montant_estime)}` : ""}`;
+    try {
+      const deja = await proposer("protester_reception", r.id, `Protester auprès de ${r.transporteur} (livraison du ${dateCourte(r.date_reception)}, ${r.societe}) avant le ${dateCourte(r.echeance)}`, calcul, r.echeance);
+      onFait(deja ? `La protestation à ${r.transporteur} attend déjà la direction des opérations.` : `La protestation à ${r.transporteur} est proposée à la direction des opérations, avec son calcul et ${r.photos.length ? `${r.photos.length} photo${r.photos.length > 1 ? "s" : ""}` : "le constat"}.`);
+    } catch (e) {
+      onFait(e instanceof Error ? e.message : "La proposition n'est pas partie.");
+    }
+  };
   const peutDecider = role === "gerant" || role === "admin" || (role === "valideur" && !!contexte?.equipes.some((e) => e === "direction_operations" || e === "direction_juridique"));
 
   const [ajout, setAjout] = useState(false);
@@ -223,12 +234,19 @@ export default function Reserves({ source, contexte, client_id, societes, objets
                       </td>
                       <td>
                         <span className="esp-item-haut">
-                          <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => setPhotos(r.id)} aria-label={`Photos du constat, livraison de ${r.transporteur} du ${dateCourte(r.date_reception)} (${r.photos.length})`}><Camera width={14} height={14} aria-hidden="true" /> Photos{r.photos.length ? ` (${r.photos.length})` : ""}</button>
+                          <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => setPhotos(r.id)} aria-label={`Photos${r.photos.length ? ` (${r.photos.length})` : ""} : constat de la livraison de ${r.transporteur} du ${dateCourte(r.date_reception)}`}><Camera width={14} height={14} aria-hidden="true" /> Photos{r.photos.length ? ` (${r.photos.length})` : ""}</button>
+                          {(() => {
+                            const d = decisionDe("protester_reception", r.id);
+                            if (d) return <Pastille teinte={etiquetteDecision(d).teinte} title={d.calcul}>{etiquetteDecision(d).libelle}</Pastille>;
+                            return r.statut === "a_examiner" && peutSaisir ? (
+                              <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => void faireValider(r)} aria-label={`Faire valider la protestation à ${r.transporteur} par la direction des opérations`}><ShieldCheck width={14} height={14} aria-hidden="true" /> Faire valider</button>
+                            ) : null;
+                          })()}
                           {r.statut === "a_examiner" ? (
                             <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => void ouvrirLettre(r)} aria-label={`Préparer la lettre de protestation à ${r.transporteur}, livraison du ${dateCourte(r.date_reception)}`}><FileText width={14} height={14} aria-hidden="true" /> Lettre</button>
                           ) : null}
                           {r.statut === "a_examiner" && peutDecider ? (
-                            <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={() => setSuite(r)} aria-label={`Donner la suite de la livraison de ${r.transporteur} du ${dateCourte(r.date_reception)}`}>Suite…</button>
+                            <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={() => setSuite(r)} aria-label={`Suite… : donner la suite de la livraison de ${r.transporteur} du ${dateCourte(r.date_reception)}`}>Suite…</button>
                           ) : null}
                         </span>
                       </td>

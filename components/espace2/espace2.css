@@ -223,6 +223,16 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   outline: none;
   box-shadow: var(--v2-anneau);
 }
+/* 11/10/2026 — retour de Teo : à l'ouverture d'un menu, react-aria donne le
+   focus à la liste elle-même ; l'anneau ci-dessus l'encadrait d'un cadre
+   carré gris autour du popover arrondi. La liste n'en porte plus : au
+   clavier, c'est la ligne active qui se surligne. */
+.v2-jetons .v2-menu:focus-visible,
+.v2-jetons [role="menu"]:focus-visible,
+.v2-jetons [role="listbox"]:focus-visible,
+.v2-jetons [role="dialog"]:focus-visible {
+  box-shadow: none;
+}
 .v2-jetons a {
   color: inherit;
   text-decoration: none;
@@ -2743,6 +2753,7 @@ html.v2-calme *::after {
 .v2-marque-fois { flex: none; display: grid; place-items: center; width: 14px; height: 14px; color: var(--v2-gray-1000); margin: 0 1px; }
 .v2-marque-client { display: grid; place-items: center; width: 22px; height: 22px; flex: none; overflow: hidden; border-radius: 5px; background: var(--v2-a-200); font-size: 11px; font-weight: 600; color: var(--v2-gray-1000); }
 .v2-marque-client img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
+.v2-marque-client[data-initiale]::before { content: attr(data-initiale); }
 .v2-marque-client--svg { background: transparent; color: var(--v2-gray-1000); }
 
 /* ══ L'assistant, à la manière de Claude (07/10/2026) ═══════════════════ */

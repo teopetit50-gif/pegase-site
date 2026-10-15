@@ -37,6 +37,7 @@ import AvisVue, { type GestesAvis } from "./AvisVue";
 import ContestationsVue, { type GestesContestations } from "./ContestationsVue";
 import ParcVue, { type GestesParc } from "./ParcVue";
 import FlotteVue, { type GestesFlotte } from "./FlotteVue";
+import OperationsVue from "./OperationsVue";
 import { forcesLocales } from "./contestations";
 import { Preparation2027, type Preparation } from "./FactureElectronique";
 import { controler, docAvoir, docFacture, formeLocale, sirenValide } from "./cii";
@@ -816,6 +817,11 @@ export default function EcranTavaro() {
       <div style={{ marginTop: 16 }}>
         <ParcVue parc={monde?.parc ?? { vehicules: [], remises: [], anomalies: [], immobilisations: [], entretiens: [], membres: [] }} dossiers={dossiers} role={role} moi={moiId}
           nommer={nommer} nomAgence={nomAgenceDe} dureeMin={monde?.reglages?.remise_duree_min ?? 90} gestes={gestesParc} />
+      </div>
+
+      {/* b2_12 à b2_16 : départ et rappels, transferts, péages, sinistres, assistance, caution */}
+      <div style={{ marginTop: 16 }}>
+        <OperationsVue source={source} role={role} dossiers={dossiers} vehicules={monde?.parc.vehicules ?? []} nomAgence={nomAgenceDe} />
       </div>
 
       <div style={{ marginTop: 16 }}>

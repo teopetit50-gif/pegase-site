@@ -397,7 +397,7 @@ function ColonnesPointillees({ tranches, active }: { tranches: { cle: string; co
         {tranches.map((t) => {
           const h = Math.max(2, (t.montant / max) * 100);
           return (
-            <span key={t.cle} className="v2-cd-pcol" data-active={t.cle === active ? "" : undefined} aria-label={`${t.court} : ${montant(t.montant)}`}>
+            <span key={t.cle} className="v2-cd-pcol" role="img" data-active={t.cle === active ? "" : undefined} aria-label={`${t.court} : ${montant(t.montant)}`}>
               {t.cle === active ? <em>{court(t.montant)}</em> : null}
               <span style={{ height: `${h}%` }} />
             </span>

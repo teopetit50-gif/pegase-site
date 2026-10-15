@@ -71,7 +71,10 @@ export const MODULES: ModuleV2[] = [
     ],
     true,
   ),
-  m("cashd", "CASHD", "Relances", "Qui vous doit, depuis quand, où en est chaque relance", HandCoins),
+  m("cashd", "CASHD", "Relances", "Qui vous doit, depuis quand, où en est chaque relance", HandCoins, [
+    { libelle: "Tableau de bord", href: `${RACINE}/cashd`, exact: true },
+    { libelle: "Débiteurs et relances", href: `${RACINE}/cashd/suivi` },
+  ]),
   m("reput", "REPUT", "Demandes clients", "Demandes reçues et réponses préparées", MessageSquareText),
   m("varelo", "VARELO", "Référentiel du groupe", "Sociétés, lots et objets du groupe", Building),
   m("tavaro", "TAVARO", "Location", "Contrats, retours et barèmes", CarFront),

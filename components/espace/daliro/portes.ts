@@ -27,14 +27,14 @@
      btp_appro_chantier (lecture), btp_ecrire_commande, btp_noter_commande, btp_noter_livraison, btp_annuler_commande (b6_22) ;
      btp_preparer_liste, btp_recevoir, btp_noter_retour (b6_23) ;
      btp_fil_chantier, btp_messages_a_ranger (lecture), btp_ranger_message, btp_ecarter_message, btp_avenant_depuis_message (b6_24) ;
-     btp_avancement_photos (lecture, b6_25).
+     btp_avancement_photos (lecture, b6_25) ; btp_importer_lignes (b6_28) ; btp_point_mensuel (lecture, b6_30).
    Les tables sans porte (chantiers, lots, tiers, dépendances, acceptations)
    s'écrivent en direct, comme le socle le prévoit (politiques du bureau).
    Si la base répond autrement, l'écran montre son message tel quel.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { AccordJ2, Appro, AvancementPhotos, Chantier, FactureCandidate, HeuresChantier, MessageChantier, MeteoChantier, Recalage, Remplacant, RetourPointage, Tableau } from "./types";
+import type { AccordJ2, Appro, AvancementPhotos, PointMensuel, Chantier, FactureCandidate, HeuresChantier, MessageChantier, MeteoChantier, Recalage, Remplacant, RetourPointage, Tableau } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -91,6 +91,9 @@ export async function chargerFacturesCandidates(dejaRattachees: string[]): Promi
 /* ——— le marché (socle) ——— */
 export const ecrireMarche = (p_marche: string | null, p_chantier: string | null, p_champs: Record<string, unknown>) => rpc<string>("btp_ecrire_marche", { p_marche, p_chantier, p_champs });
 export const ecrireLigne = (p_ligne: string | null, p_marche: string | null, p_champs: Record<string, unknown>) => rpc<string>("btp_ecrire_ligne", { p_ligne, p_marche, p_champs });
+/* b6_28 : le devis importé d'un coup (chaque ligne passe par btp_ecrire_ligne). */
+export const importerLignes = (p_marche: string, p_lignes: Record<string, unknown>[]) =>
+  rpc<{ creees: number; refus: { rang: number; designation: string | null; message: string }[] }>("btp_importer_lignes", { p_marche, p_lignes });
 export const accepterEcart = (p_ligne: string, p_motif: string) => rpc("btp_accepter_ecart", { p_ligne, p_motif });
 export const verifierMarche = (p_marche: string) => rpc<Record<string, unknown>>("btp_verifier_marche", { p_marche });
 export const rouvrirMarche = (p_marche: string, p_motif: string) => rpc("btp_rouvrir_marche", { p_marche, p_motif });
@@ -311,4 +314,9 @@ export async function ecarterMessage(message: string, motif: string | null): Pro
 
 export async function avenantDepuisMessage(message: string, objet: string): Promise<string> {
   return rpc<string>("btp_avenant_depuis_message", { p_message: message, p_objet: objet });
+}
+
+/* b6_30 : le point mensuel (bureau qui voit les prix, formules Chantiers et Entreprise). */
+export async function pointMensuel(client: string, mois: string): Promise<PointMensuel> {
+  return rpc<PointMensuel>("btp_point_mensuel", { p_client: client, p_mois: mois });
 }
