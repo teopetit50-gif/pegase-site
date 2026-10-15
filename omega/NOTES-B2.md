@@ -9,7 +9,15 @@
 - **Dans main** (1e27e72) : l'écran Opérations et le lien /espace2/validations. C'est en ligne : le bundle d'omegaai.fr porte « Contrôle avant de donner les clés ».
 - **Rien n'attend d'être posé.**
 
-**Prochain pas** : les modules restants du carnet, 13, 15, 16 et 18. Ils seront affichés dans /espace2 : aucun lien vers /espace, et ne pas toucher `components/omega`.
+**Reprise du 15/10** : les modules 13, 15, 16 et 18 sont ceux que b2_12 à b2_15 ont construits. Le chiffrage est mis à jour (section « Mise à jour du 15/10 » de omega/CHIFFRAGE/tavaro.md).
+
+**Prochains petits lots**, dans cet ordre :
+1. ligne 12 : une personne nommée sur chaque remise (responsable par défaut par agence) ;
+2. ligne 10 : la page du matin par agence (remises, entretien, avis, contestations) ;
+3. ligne 50 : le fichier de désignation par lot ;
+4. lignes 19 et 57 : l'outil d'audit de vingt retours et l'indicateur de fin de mois.
+
+Les écrans vont dans /espace2 : aucun lien vers /espace, et ne pas toucher `components/omega`.
 
 ### Détail de la reprise du 11/10
 
