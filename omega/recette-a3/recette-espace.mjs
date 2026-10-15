@@ -16,7 +16,7 @@ mkdirSync(dossier, { recursive: true });
 let echecs = 0;
 const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) echecs++; };
 const ANGLAIS = /\b(Loading|Submit|Cancel|Approve|Reject|Delete|Save|Error|Pending|Due|Invoice|Supplier|Settings|Logout|Sign in|Dashboard|Today|Yesterday|Tomorrow)\b/;
-const ECRANS = [['validations', '/espace/validations'], ['filed', '/espace/filed'], ['point', '/espace/point']];
+const ECRANS = [['validations', '/espace/validations'], ['filed', '/espace/filed'], ['fournisseurs', '/espace/filed/fournisseurs'], ['a-payer', '/espace/filed/a-payer'], ['point', '/espace/point']];
 const LARGEURS = [390, 768, 1024, 1440, 1700];
 
 for (const [nom, chemin] of ECRANS) {
@@ -39,7 +39,8 @@ for (const [nom, chemin] of ECRANS) {
     ok(!anglais, anglais ? `mot anglais à l'écran : « ${anglais[0]} »` : 'aucun mot anglais surveillé à l\'écran');
     ok(!!mesure.h1, `titre : ${mesure.h1}`);
     await s.capturer(`${dossier}${nom}-${largeur}.jpg`, { qualite: 55 });
-    s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
+    /* ERR_BLOCKED_BY_ORB : le script de Vercel Analytics (va.vercel-scripts.com), chargé en dev, refusé par le mandataire du conteneur */
+    s.soucis.filter((x) => !/CERT|insights|404|favicon|ERR_BLOCKED_BY_ORB/.test(x)).forEach((x) => ok(false, x));
     s.fermer();
   }
 }
@@ -90,8 +91,26 @@ for (const [nom, chemin] of ECRANS) {
   console.log('— /espace/filed : la citation se surligne dans la pièce');
   ok(await s.aller(base + '/espace/filed'), 'page chargée');
   await s.dormir(400);
+  const ref0 = await s.evaluer(`document.querySelector('#esp-dossier .esp-mono')?.textContent`);
+  ok(ref0 === 'R2026-000016', `le document ouvert d'office est le bloqué le plus récent (${ref0})`);
+  /* le fournisseur nouveau : déposé par Sofia, « vous » le confirmez ; identité vérifiée par VIES, « Revérifier » répond */
+  const fiche = await s.evaluer(`(() => { const t = document.querySelector('#esp-dossier').innerText; return { nouveau: /Fournisseur nouveau/.test(t), vies: /Vérifiée le \\d{2}\\/\\d{2}\\/\\d{4}.* par VIES/.test(t), confirmer: !![...document.querySelectorAll('#esp-dossier .r-btn')].find(b => /Confirmer ce fournisseur/.test(b.textContent) && !b.disabled), reverifier: !![...document.querySelectorAll('#esp-dossier .r-btn')].find(b => /Revérifier auprès de VIES/.test(b.textContent)) }; })()`);
+  ok(fiche.nouveau && fiche.vies && fiche.confirmer && fiche.reverifier, `fiche fournisseur : nouveau, « Vérifiée le … par VIES », « Confirmer » actif, « Revérifier » présent (${JSON.stringify(fiche)})`);
+  await s.evaluer(`[...document.querySelectorAll('#esp-dossier .esp-actions .r-btn')].find(b => /Confirmer ce fournisseur/.test(b.textContent))?.click()`);
+  await s.dormir(500);
+  const dlgF = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return d ? { titre: d.querySelector('h2')?.textContent, avis: /ne confirme pas ce fournisseur/.test(d.textContent) } : null; })()`);
+  ok(dlgF && /Confirmer le fournisseur/.test(dlgF.titre) && dlgF.avis, `dialogue « ${dlgF?.titre} », la règle du déposant est dite`);
+  const sansLevee = await s.evaluer(`(() => { const c = [...document.querySelectorAll('#esp-dossier .esp-controle')].find(e => /fournisseur\\.a_confirmer/.test(e.textContent)); return c ? !/Lever avec un motif/.test(c.textContent) && /Confirmer ce fournisseur/.test(c.textContent) : null; })()`);
+  ok(sansLevee === true, 'le contrôle « fournisseur à confirmer » ne se lève pas : il propose de confirmer le fournisseur (a4_12)');
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Confirmer le fournisseur/.test(b.textContent))?.click()`);
+  await s.dormir(900);
+  const apres = await s.evaluer(`(() => { const t = document.querySelector('#esp-dossier').innerText; return { fait: /est confirmé/.test(t), actif: /Actif/.test(t), plusBloque: !/Fournisseur nouveau/.test(t) }; })()`);
+  ok(apres.fait && apres.actif && apres.plusBloque, `confirmé : le fournisseur passe actif, l'avis tombe (${JSON.stringify(apres)})`);
+  await s.capturer(`${dossier}filed-fournisseur-1440.jpg`, { qualite: 55 });
+  await s.evaluer(`[...document.querySelectorAll('.esp-liste button, .esp-liste a, li button')].find(b => /R2026-000009/.test(b.textContent))?.click()`);
+  await s.dormir(500);
   const ref = await s.evaluer(`document.querySelector('#esp-dossier .esp-mono')?.textContent`);
-  ok(ref === 'R2026-000009', `le document ouvert d'office est le bloqué (${ref})`);
+  ok(ref === 'R2026-000009', `le dossier R2026-000009 s'ouvre depuis la liste (${ref})`);
   const clic = await s.evaluer(`(() => { const b = [...document.querySelectorAll('.esp-valeur')].find(b => /IBAN/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`);
   ok(clic === true, 'clic sur la valeur « IBAN »');
   await s.dormir(400);
@@ -122,6 +141,130 @@ for (const [nom, chemin] of ECRANS) {
   const depot = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return d ? { titre: d.querySelector('h2')?.textContent, gris: [...d.querySelectorAll('button')].find(b => b.textContent.trim() === 'Déposer')?.disabled, natifCache: (() => { const i = d.querySelector('input[type="file"]'); if (!i) return false; const st = getComputedStyle(i); return st.opacity === '0' && st.position === 'absolute'; })() } : null; })()`);
   ok(depot && /Déposer un document/.test(depot.titre) && depot.gris === true && depot.natifCache, 'le dépôt s\'ouvre, « Déposer » gris sans fichier, le contrôle natif (libellé anglais du navigateur) est caché');
   await s.capturer(`${dossier}filed-depot-1440.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-lien', densite: 1 });
+  console.log('— /espace/validations → /espace/filed : de la demande à son dossier');
+  ok(await s.aller(base + '/espace/validations'), 'page chargée');
+  await s.dormir(500);
+  const choisie = await s.evaluer(`(() => { const b = [...document.querySelectorAll('.esp-item')].find(b => /Lever le contrôle IBAN sur R2026-000009/.test(b.textContent)); if (!b) return false; b.click(); return true; })()`);
+  ok(choisie, 'la demande « Lever le contrôle IBAN sur R2026-000009 » est ouverte');
+  await s.dormir(500);
+  const apercu = await s.evaluer(`(() => { const a = document.querySelector('.esp-apercu-filed'); if (!a) return null; return { texte: a.innerText.replace(/\\s+/g, ' '), lien: a.querySelector('a')?.getAttribute('href') }; })()`);
+  ok(apercu && /R2026-000009/.test(apercu.texte) && /Bloquée/.test(apercu.texte) && /Métallerie Roux/.test(apercu.texte), `aperçu du dossier dans la demande (${apercu?.texte})`);
+  ok(apercu?.lien === '/espace/filed?objet=facture:R2026-000009', `lien « Ouvrir le dossier » : ${apercu?.lien}`);
+  await s.capturer(`${dossier}validations-dossier-1440.jpg`, { qualite: 55 });
+  ok(await s.aller(base + '/espace/filed?objet=facture:R2026-000011'), 'FILED ouvert par l\'URL d\'une demande');
+  await s.dormir(900);
+  const ref = await s.evaluer(`document.querySelector('#esp-dossier .esp-mono')?.textContent`);
+  ok(ref === 'R2026-000011', `le dossier désigné s'ouvre d'office (${ref})`);
+  ok(await s.aller(base + '/espace/filed?objet=facture:inconnue'), 'FILED ouvert avec une cible inconnue');
+  await s.dormir(900);
+  const introuvable = await s.evaluer(`/Document introuvable/.test(document.querySelector('.esp').innerText)`);
+  ok(introuvable, 'une cible inconnue est dite, sans erreur');
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-fournisseurs', densite: 1 });
+  console.log('— /espace/filed/fournisseurs : à confirmer en tête, fiche, factures');
+  ok(await s.aller(base + '/espace/filed/fournisseurs'), 'page chargée');
+  await s.dormir(600);
+  const tete = await s.evaluer(`(() => ({ premiers: [...document.querySelectorAll('.esp-item')].slice(0, 2).map(e => e.innerText.replace(/\\s+/g, ' ')), kpi: [...document.querySelectorAll('.esp-kpi')].map(k => k.innerText.replace(/\\s+/g, ' ')) }))()`);
+  ok(tete.premiers.length === 2 && tete.premiers.every(t => /^À confirmer/.test(t)), `les fournisseurs à confirmer sont en tête (${tete.premiers.join(' / ')})`);
+  ok(/À confirmer 2/.test(tete.kpi.join(' | ')), `compteurs : ${tete.kpi.join(' | ')}`);
+  await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /Imprimerie Vidal SAS/.test(b.textContent))?.click()`);
+  await s.dormir(400);
+  const titreF = await s.evaluer(`document.querySelector('#esp-fournisseur .esp-carte-titre')?.textContent`);
+  ok(titreF === 'Imprimerie Vidal SAS', `fiche ouverte : ${titreF}`);
+  const fiche = await s.evaluer(`(() => { const t = document.querySelector('#esp-fournisseur').innerText; return { vies: /par VIES/.test(t), iban: /validé avec le fournisseur à sa confirmation/.test(t), facture: !!document.querySelector('#esp-fournisseur a[href*="objet=facture"]') }; })()`);
+  ok(fiche.vies && fiche.iban && fiche.facture, `fiche : identité VIES, IBAN proposé, lien vers la facture (${JSON.stringify(fiche)})`);
+  await s.evaluer(`[...document.querySelectorAll('#esp-fournisseur .r-btn')].find(b => /Confirmer ce fournisseur/.test(b.textContent))?.click()`);
+  await s.dormir(500);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Confirmer le fournisseur/.test(b.textContent))?.click()`);
+  await s.dormir(900);
+  const apres = await s.evaluer(`(() => { const t = document.querySelector('#esp-fournisseur').innerText; return { fait: /est confirmé/.test(t), actif: /Actif/.test(t), ibanValide: /Validé/.test(t), facture: /À valider/.test(t) }; })()`);
+  ok(apres.fait && apres.actif && apres.ibanValide && apres.facture, `confirmé : actif, IBAN validé, facture à valider (${JSON.stringify(apres)})`);
+  await s.capturer(`${dossier}fournisseurs-confirme-1440.jpg`, { qualite: 55 });
+  await s.evaluer(`(() => { const i = document.querySelector('input[type="search"]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, '512448'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(400);
+  const cherche = await s.evaluer(`[...document.querySelectorAll('.esp-item .esp-item-titre')].map(e => e.textContent)`);
+  ok(cherche.length === 1 && cherche[0] === 'Métallerie Roux SARL', `la recherche par SIREN trouve le fournisseur (${cherche.join(', ')})`);
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-identifiants', densite: 1 });
+  console.log('— /espace/filed : identifiants lus sur la pièce, non retenus');
+  ok(await s.aller(base + '/espace/filed?objet=facture:R2026-000017'), 'page chargée sur R2026-000017');
+  await s.dormir(900);
+  const bloc = await s.evaluer(`(() => { const b = document.querySelector('.esp-identifiants-lus'); if (!b) return null; return { texte: b.innerText.replace(/\\s+/g, ' '), confirmer: /Confirmer la valeur lue/.test(b.textContent) }; })()`);
+  ok(bloc && /SIREN lu 519803417 clé de Luhn invalide/.test(bloc.texte) && /TVA lu FR45519803417/.test(bloc.texte) && !bloc.confirmer, `valeurs lues non retenues, avec leur raison, sans « confirmer » une clé fausse (${bloc?.texte?.slice(0, 220)})`);
+  await s.evaluer(`[...document.querySelectorAll('.esp-identifiants-lus .r-btn')].find(b => /Saisir les vrais identifiants/.test(b.textContent))?.click()`);
+  await s.dormir(500);
+  const saisir = async (sel, val) => s.evaluer(`(() => { const t = document.querySelector('[role="dialog"] ${sel}'); const proto = t.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(proto, 'value').set.call(t, ${JSON.stringify(val)}); t.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  const gris = () => s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer/.test(b.textContent))?.disabled`);
+  await saisir('input[inputmode="numeric"]', '519 803 415');
+  await saisir('input:not([inputmode])', 'FR45519803417');
+  await saisir('textarea', 'Kbis du fournisseur reçu par courriel.');
+  await s.dormir(300);
+  ok(await gris() === true, 'une TVA qui porte un autre SIREN laisse « Enregistrer » gris');
+  await saisir('input:not([inputmode])', 'FR39519803415');
+  await s.dormir(300);
+  ok(await gris() === false, 'SIREN et TVA justes et cohérents : « Enregistrer » s\'allume');
+  await s.capturer(`${dossier}filed-identifiants-1440.jpg`, { qualite: 55 });
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer/.test(b.textContent))?.click()`);
+  await s.dormir(900);
+  const apres = await s.evaluer(`(() => ({ bloc: !!document.querySelector('.esp-identifiants-lus'), fiche: document.querySelector('#esp-dossier').innerText.includes('SIREN 519803415') || /SIREN\\s*519 ?803 ?415/.test(document.querySelector('#esp-dossier').innerText) }))()`);
+  ok(!apres.bloc && apres.fiche, `saisis : le bloc tombe, la fiche porte le SIREN (${JSON.stringify(apres)})`);
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-a-payer', densite: 1 });
+  console.log('— /espace/filed/a-payer : les factures validées par échéance');
+  ok(await s.aller(base + '/espace/filed/a-payer'), 'page chargée');
+  await s.dormir(600);
+  const r = await s.evaluer(`(() => ({ kpi: [...document.querySelectorAll('.esp-kpi')].map(k => k.innerText.replace(/\\s+/g, ' ')), groupes: [...document.querySelectorAll('section.esp-carte .esp-carte-titre')].map(e => e.textContent), lignes: [...document.querySelectorAll('.esp-a-payer tbody tr')].map(t => t.innerText.replace(/\\s+/g, ' ')), avis: [...document.querySelectorAll('.esp-avis')].map(a => a.textContent) }))()`);
+  ok(r.groupes.join(',') === 'En retard,Cette semaine,Ce mois-ci', `groupes dans l'ordre : ${r.groupes.join(', ')}`);
+  ok(/Transports Rivière/.test(r.lignes[0] ?? '') && /de retard/.test(r.lignes[0] ?? ''), `la facture en retard vient d'abord (${r.lignes[0]})`);
+  ok(r.lignes.some(l => /Cabinet Ferrand/.test(l) && /IBAN manquant/.test(l)), 'la facture sans IBAN validé le dit');
+  ok(r.avis.some(a => /1 facture sans IBAN validé/.test(a)) && r.avis.some(a => /pas encore suivi/.test(a)), 'les avis : IBAN manquant, paiement non suivi');
+  ok(r.lignes.length === 3, `${r.lignes.length} factures validées à payer`);
+  await s.capturer(`${dossier}a-payer-1440.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-lot', densite: 1 });
+  console.log('— /espace/validations : décider en lot');
+  ok(await s.aller(base + '/espace/validations'), 'page chargée');
+  await s.dormir(600);
+  await s.evaluer(`[...document.querySelectorAll('button')].find(b => /Décider en lot/.test(b.textContent))?.click()`);
+  await s.dormir(300);
+  const n = await s.evaluer(`document.querySelectorAll('.esp-item-coche input').length`);
+  ok(n >= 3, `une case par demande en attente (${n})`);
+  /* tout cocher à la main, y compris ce qu'on ne peut pas décider */
+  await s.evaluer(`[...document.querySelectorAll('.esp-item-coche input')].forEach(i => { if (!i.checked) i.click(); })`);
+  await s.dormir(300);
+  await s.evaluer(`[...document.querySelectorAll('.esp-lot-barre button')].find(b => /Approuver/.test(b.textContent))?.click()`);
+  await s.dormir(500);
+  const dlg = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); if (!d) return null; const b = [...d.querySelectorAll('button')].find(x => /Approuver \\d/.test(x.textContent)); return { retenues: d.querySelectorAll('.esp-lot-retenues li').length, ecartees: [...d.querySelectorAll('.esp-lot-ecartees li')].map(l => l.textContent), gris: b?.disabled, exige: /obligatoire/.test(d.textContent) }; })()`);
+  ok(dlg && dlg.ecartees.length >= 1 && dlg.ecartees.every(t => / — .{10,}/.test(t)), `les demandes non décidables sont écartées avec leur raison (${dlg?.ecartees.length} : ${dlg?.ecartees[0]?.slice(0, 120)})`);
+  ok(dlg?.gris === true && dlg.exige, 'sans commentaire exigé, « Approuver » reste gris');
+  await s.evaluer(`(() => { const t = document.querySelector('[role="dialog"] textarea'); Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(t, 'Lot vérifié avec les justificatifs du mois.'); t.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.capturer(`${dossier}validations-lot-1440.jpg`, { qualite: 55 });
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(x => /Approuver \\d/.test(x.textContent))?.click()`);
+  await s.dormir(1800);
+  const bilan = await s.evaluer(`[...document.querySelectorAll('[role="dialog"] .esp-lot-bilan li')].map(l => l.innerText.replace(/\\s+/g, ' '))`);
+  ok(bilan.length === dlg.retenues && bilan.every(l => /Approuvée/.test(l)), `bilan ligne à ligne : ${bilan.length} approuvées sur ${dlg.retenues}`);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(x => /Fermer/.test(x.textContent) && !x.classList.contains('dlg-fermer'))?.click()`);
+  await s.dormir(500);
+  const fait = await s.evaluer(`[...document.querySelectorAll('.esp-avis')].map(a => a.textContent).find(t => /en lot/.test(t)) ?? null`);
+  ok(!!fait, `le message de la file le dit (${fait?.slice(0, 80)})`);
   s.fermer();
 }
 

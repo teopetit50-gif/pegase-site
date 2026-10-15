@@ -38,7 +38,7 @@ const POLITIQUE = [
   "img-src 'self' data: blob: https:",
   "media-src 'self' blob: https:",
   "font-src 'self' data:",
-  `connect-src 'self' ${ARMOIRE}${ARMOIRE_ENV && ARMOIRE_ENV !== ARMOIRE ? ` ${ARMOIRE_ENV}` : ""} https://www.facebook.com https://connect.facebook.net${DEV ? " ws: https://va.vercel-scripts.com" : ""}`,
+  `connect-src 'self' ${ARMOIRE} ${ARMOIRE.replace("https://", "wss://")}${ARMOIRE_ENV && ARMOIRE_ENV !== ARMOIRE ? ` ${ARMOIRE_ENV} ${ARMOIRE_ENV.replace("https://", "wss://")}` : ""} https://www.facebook.com https://connect.facebook.net${DEV ? " ws: https://va.vercel-scripts.com" : ""}`,
   "worker-src 'self' blob:",
   "frame-src 'self'",
   "manifest-src 'self'",

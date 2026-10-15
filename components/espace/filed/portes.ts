@@ -14,6 +14,13 @@
      filed_bloquer_fournisseur(p_fournisseur, p_bloquer bool, p_motif)
      filed_rattacher_commande(p_facture, p_commande, p_motif)
      filed_apparier_ligne(p_facture, p_facture_ligne, p_commande_ligne, p_motif)
+     filed_confirmer_fournisseur(p_fournisseur, p_motif) → int (a4_10 :
+       gérant, admin, valideur ; jamais le déposant de la pièce d'origine)
+     filed_attester_identite(p_fournisseur, p_motif) (a4_10 : une personne
+       atteste l'identité quand le registre se tait)
+     identite_demander(p_client, p_registre, p_identifiant, p_fournisseur,
+       p_force) → uuid (b7_02 : « revérifier » ; l'ouvrier identite répond
+       en une à deux minutes et remplit le verdict du fournisseur)
      filed_deposer_piece(p_client, p_document, p_nom_fichier, p_mime,
        p_octets, p_sha256, p_chemin, p_entite, p_source, p_expediteur) → jsonb,
        le fichier étant d'abord mis dans le bucket omega-clients sous
@@ -23,7 +30,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { Commande, DocumentFiled, DossierFiled, Facture, Fournisseur, LigneCommande, MotifRefus, NatureDocument } from "../types";
+import type { Commande, DocumentFiled, DossierFiled, Facture, Fournisseur, IbanFournisseur, LigneCommande, MotifRefus, NatureDocument } from "../types";
 
 export class ErreurPorte extends Error {}
 
@@ -95,7 +102,17 @@ export async function chargerDossier(a: Apercu): Promise<DossierFiled> {
     pages: (pages?.data ?? []) as DossierFiled["pages"],
     valeurs: (valeurs?.data ?? []) as DossierFiled["valeurs"],
     appariements: (appar?.data ?? []) as DossierFiled["appariements"],
+    origine_deposee_par: await deposantOrigine(a),
   };
+}
+
+/* qui a déposé la pièce qui a fait naître le fournisseur (null si inconnu) */
+async function deposantOrigine(a: Apercu): Promise<string | null> {
+  const origine = a.fournisseur?.document_origine;
+  if (!origine) return null;
+  if (origine === a.document.id) return a.document.depose_par ?? null;
+  const { data } = await createClient().from("filed_documents").select("depose_par").eq("id", origine).maybeSingle();
+  return ((data as { depose_par?: string | null } | null)?.depose_par ?? null);
 }
 
 export async function chargerCommandes(): Promise<{ commandes: Commande[]; lignes: LigneCommande[] }> {
@@ -166,6 +183,50 @@ export async function chargerFournisseurs(): Promise<Fournisseur[]> {
   return (data ?? []) as Fournisseur[];
 }
 
+/* La vue « Fournisseurs » : tous les fournisseurs, leurs IBAN, leurs
+   factures (avec la référence du document), et qui a déposé la pièce
+   d'origine de chacun (il ne le confirme pas). */
+export type FactureDuFournisseur = {
+  id: string;
+  numero: string | null;
+  statut: Facture["statut"];
+  nature: Facture["nature"];
+  montant_ttc: number | null;
+  net_a_payer: number | null;
+  devise: string;
+  date_emission: string | null;
+  echeance_lue: string | null;
+  iban: string | null;
+  fournisseur_id: string | null;
+  reference: string | null;
+};
+export type VueFournisseurs = { fournisseurs: Fournisseur[]; ibans: IbanFournisseur[]; factures: FactureDuFournisseur[]; deposants: Record<string, string | null> };
+
+export async function chargerVueFournisseurs(): Promise<VueFournisseurs> {
+  const supabase = createClient();
+  const [fo, ib, fa] = await Promise.all([
+    supabase.from("filed_fournisseurs").select("*").order("nom").limit(1000),
+    supabase.from("filed_fournisseurs_ibans").select("id, fournisseur_id, iban_masque, statut, propose_le").limit(2000),
+    supabase.from("filed_factures").select("id, numero, statut, nature, montant_ttc, net_a_payer, devise, date_emission, echeance_lue, iban, fournisseur_id, document_id, version").not("fournisseur_id", "is", null).order("date_emission", { ascending: false }).limit(1000),
+  ]);
+  if (fo.error) throw new ErreurPorte(message(fo.error));
+  const fournisseurs = (fo.data ?? []) as Fournisseur[];
+  const lignes = (fa.data ?? []) as (Omit<FactureDuFournisseur, "reference"> & { document_id: string; version: number })[];
+  /* une facture par document : sa dernière version */
+  const parDocument = new Map<string, (typeof lignes)[number]>();
+  for (const l of lignes) if ((parDocument.get(l.document_id)?.version ?? -1) < l.version) parDocument.set(l.document_id, l);
+  const origines = fournisseurs.map((f) => f.document_origine).filter(Boolean) as string[];
+  const docIds = Array.from(new Set([...parDocument.keys(), ...origines]));
+  const docs = docIds.length ? await supabase.from("filed_documents").select("id, reference, depose_par").in("id", docIds) : null;
+  const doc = new Map(((docs?.data ?? []) as { id: string; reference: string; depose_par: string | null }[]).map((d) => [d.id, d]));
+  return {
+    fournisseurs,
+    ibans: (ib.data ?? []) as IbanFournisseur[],
+    factures: Array.from(parDocument.values()).map((f) => ({ id: f.id, numero: f.numero, statut: f.statut, nature: f.nature ?? "facture", montant_ttc: f.montant_ttc, net_a_payer: f.net_a_payer, devise: f.devise ?? "EUR", date_emission: f.date_emission, echeance_lue: f.echeance_lue, iban: f.iban, fournisseur_id: f.fournisseur_id, reference: doc.get(f.document_id)?.reference ?? null })),
+    deposants: Object.fromEntries(fournisseurs.map((f) => [f.id, f.document_origine ? (doc.get(f.document_origine)?.depose_par ?? null) : null])),
+  };
+}
+
 async function rpc<T = unknown>(nom: string, args: Record<string, unknown>): Promise<T> {
   const supabase = createClient();
   const { data, error } = await supabase.rpc(nom, args);
@@ -181,4 +242,8 @@ export const rattacherFournisseur = (p_facture: string, p_fournisseur: string, p
 export const proposerIban = (p_fournisseur: string, p_iban: string, p_motif: string) => rpc<string>("filed_proposer_iban", { p_fournisseur, p_iban, p_motif });
 export const bloquerFournisseur = (p_fournisseur: string, p_bloquer: boolean, p_motif: string) => rpc("filed_bloquer_fournisseur", { p_fournisseur, p_bloquer, p_motif });
 export const rattacherCommande = (p_facture: string, p_commande: string, p_motif: string) => rpc("filed_rattacher_commande", { p_facture, p_commande, p_motif });
+export const confirmerFournisseur = (p_fournisseur: string, p_motif: string) => rpc<number>("filed_confirmer_fournisseur", { p_fournisseur, p_motif: p_motif || null });
+export const attesterIdentite = (p_fournisseur: string, p_motif: string) => rpc("filed_attester_identite", { p_fournisseur, p_motif });
+export const demanderVerification = (p_client: string, p_registre: "sirene" | "vies", p_identifiant: string, p_fournisseur: string) =>
+  rpc<string>("identite_demander", { p_client, p_registre, p_identifiant, p_fournisseur, p_force: true });
 export const apparierLigne = (p_facture: string, p_facture_ligne: string, p_commande_ligne: string, p_motif: string) => rpc("filed_apparier_ligne", { p_facture, p_facture_ligne, p_commande_ligne, p_motif });

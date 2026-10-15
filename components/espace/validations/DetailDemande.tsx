@@ -16,6 +16,7 @@ import { dateCourte, dateHeure, libelleModule, montant, phrase, relatif } from "
 import type { Approbation, Delegation, Demande, Entite, EquipesContexte } from "../types";
 import { MOTIFS_REFUS, STATUTS, compteApprobations, delegationsUtilisables, exigences, groupeDe, verdict, type Decideur } from "./regles";
 import { annuler, decider, deleguer, joindrePiece, modifier } from "./portes";
+import ApercuFiled from "./ApercuFiled";
 
 type Props = {
   demande: Demande;
@@ -265,6 +266,8 @@ export default function DetailDemande(p: Props) {
           </Def>
           <Def etiquette="Politique">{d.politique_id ? "Approuvée d'office par un accord permanent" : "Décidée par des personnes"}</Def>
         </dl>
+
+        <ApercuFiled demande={d} source={p.source} />
 
         {payloadVisible.length ? (
           <div>

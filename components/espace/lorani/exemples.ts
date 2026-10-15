@@ -17,7 +17,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { EXEMPLE_CLIENT_ID, EXEMPLE_MOI, CLAIRE, SIEGE, SOFIA, YANIS, aujourdHui, ilYa } from "../exemples/socle";
-import type { CasRejet, DateLue, Dossier, Echeance, Etape, Intervenant, Lot, MembreProjet, Permis, PieceProjet, Projet, Recours } from "./types";
+import type { Attestation, CompteRendu, Consultation, Offre, OrdreService, PieceDoe, Point, Reserve, CasRejet, Constat, Controle, Plu, ControlePiece, DateLue, Dossier, Echeance, Etape, Honoraire, Intervenant, Lot, Marche, MembreProjet, Permis, PieceProjet, Projet, Recours, Situation, Temps, Visa } from "./types";
 
 const C = EXEMPLE_CLIENT_ID;
 const j = (n: number) => aujourdHui(n);
@@ -53,8 +53,9 @@ export const PROJETS_EXEMPLE: Projet[] = [
   projet({ id: P_LEMOINE, nom: "Maison Lemoine", reference: "26-014", adresse: "12 rue des Hauts-Pavés", code_postal: "44000", commune: "Nantes", code_insee: "44109", parcelles: ["AB 123", "AB 124"], nature: "maison_individuelle" }),
   projet({ id: P_ENFANCE, nom: "Pôle enfance de Vaulx-en-Velin", reference: "26-009", adresse: "4 avenue Roger-Salengro", code_postal: "69120", commune: "Vaulx-en-Velin", code_insee: "69256", parcelles: ["BK 58"], nature: "erp", marche_public: true }),
   projet({ id: P_MARTIN, nom: "Maison Martin", reference: "26-011", adresse: "27 rue Bellecombe", code_postal: "69003", commune: "Lyon 3e", code_insee: "69383", parcelles: ["AV 212"], nature: "maison_individuelle" }),
-  projet({ id: P_MERCIERE, nom: "Façade rue Mercière", reference: "25-031", adresse: "31 rue Mercière", code_postal: "69002", commune: "Lyon 2e", code_insee: "69382", parcelles: ["AC 77"], nature: "tertiaire", phase: "dce" }),
-  projet({ id: P_DUBOIS, nom: "Surélévation Dubois", reference: "26-018", adresse: "8 rue Francis-de-Pressensé", code_postal: "69100", commune: "Villeurbanne", code_insee: "69266", parcelles: ["BD 301"], nature: "logement_collectif", phase: "apd" }),
+  projet({ id: P_MERCIERE, nom: "Façade rue Mercière", reference: "25-031", adresse: "31 rue Mercière", code_postal: "69002", commune: "Lyon 2e", code_insee: "69382", parcelles: ["AC 77"], nature: "tertiaire", phase: "det", ouverture_chantier: j(-100) }),
+  projet({ id: P_DUBOIS, nom: "Surélévation Dubois", reference: "26-018", adresse: "8 rue Francis-de-Pressensé", code_postal: "69100", commune: "Villeurbanne", code_insee: "69266", parcelles: ["BD 301"], nature: "logement_collectif", phase: "apd",
+    controle_tolerances: { hauteur_faitage_m: 0.1 }, controle_familles_coupees: ["re2020"] }),
 ];
 
 /* ——— les permis et leur calendrier ——— */
@@ -124,6 +125,8 @@ export const PERMIS_EXEMPLE: Permis[] = [
     date_depot: j(-95),
     date_demande_pieces: j(-82),
     pieces_demandees: [{ code: "PC5" }, { code: "PC8" }],
+    /* deux lettres : la seconde a ajouté PC8, le délai court depuis la première (b5_07) */
+    demandes_pieces: [{ date: j(-82), pieces: [{ code: "PC5" }] }, { date: j(-78), pieces: [{ code: "PC5" }, { code: "PC8" }] }],
     etat: "pieces_demandees",
     calcul: {
       version: "lorani.m4.1",
@@ -308,7 +311,7 @@ export const PIECES_EXEMPLE: PieceProjet[] = [
   { id: PIECE_RECEPISSE, objet_id: P_LEMOINE, nom_fichier: "recepisse-depot-PC04410926A0042.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_recepisse_depot", cree_le: ilYa(93) },
   { id: PIECE_DEMANDE, objet_id: P_LEMOINE, nom_fichier: "demande-pieces-mairie-nantes.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_demande_pieces", cree_le: ilYa(80) },
   { id: PIECE_LETTRE, objet_id: P_LEMOINE, nom_fichier: "lettre-delai-majore.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_lettre_delai", cree_le: ilYa(0, 8) },
-  { id: PIECE_RECEPISSE_DP, objet_id: P_MARTIN, nom_fichier: "recepisse-DP06938326N0107.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_recepisse_depot", cree_le: ilYa(44) },
+  { id: PIECE_RECEPISSE_DP, objet_id: P_MARTIN, nom_fichier: "ARE_DP06938326N0107.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_recepisse_depot", source: "courriel", cree_le: ilYa(44) },
   { id: PIECE_ARRETE, objet_id: P_MERCIERE, nom_fichier: "arrete-PC06938225V0344.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_arrete", cree_le: ilYa(218) },
   { id: PIECE_CONSTAT, objet_id: P_MERCIERE, nom_fichier: "constat-affichage-huissier.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_constat_affichage", cree_le: ilYa(209) },
 ];
@@ -418,25 +421,27 @@ export const RECOURS_EXEMPLE: Recours[] = [
 
 /* ——— les lots, les intervenants, l'équipe ——— */
 export const LOTS_EXEMPLE: Lot[] = [
-  { id: id("1", 1), projet_id: P_LEMOINE, numero: "01", intitule: "Gros œuvre", activites_requises: ["maconnerie", "beton_arme"] },
-  { id: id("1", 2), projet_id: P_LEMOINE, numero: "02", intitule: "Charpente — couverture", activites_requises: ["charpente", "couverture"] },
-  { id: id("1", 3), projet_id: P_LEMOINE, numero: "03", intitule: "Menuiseries extérieures", activites_requises: ["menuiserie_ext"] },
-  { id: id("1", 4), projet_id: P_ENFANCE, numero: "01", intitule: "Terrassement — VRD", activites_requises: [] },
-  { id: id("1", 5), projet_id: P_ENFANCE, numero: "02", intitule: "Gros œuvre", activites_requises: ["beton_arme"] },
+  { id: id("1", 1), projet_id: P_LEMOINE, numero: "01", intitule: "Gros œuvre", activites_requises: ["maconnerie_beton_arme"] },
+  { id: id("1", 2), projet_id: P_LEMOINE, numero: "02", intitule: "Charpente — couverture", activites_requises: ["charpente_bois", "couverture"] },
+  { id: id("1", 3), projet_id: P_LEMOINE, numero: "03", intitule: "Menuiseries extérieures", activites_requises: ["menuiseries_exterieures"] },
+  { id: id("1", 4), projet_id: P_ENFANCE, numero: "01", intitule: "Terrassement — VRD", activites_requises: ["terrassement", "vrd"] },
+  { id: id("1", 5), projet_id: P_ENFANCE, numero: "02", intitule: "Gros œuvre", activites_requises: ["maconnerie_beton_arme"] },
   { id: id("1", 6), projet_id: P_ENFANCE, numero: "08", intitule: "Électricité — SSI", activites_requises: ["electricite", "ssi"] },
-  { id: id("1", 7), projet_id: P_MARTIN, numero: "01", intitule: "Maçonnerie", activites_requises: [] },
-  { id: id("1", 8), projet_id: P_MERCIERE, numero: "01", intitule: "Ravalement — pierre de taille", activites_requises: ["pierre"] },
+  { id: id("1", 7), projet_id: P_MARTIN, numero: "01", intitule: "Maçonnerie", activites_requises: ["maconnerie_beton_arme"] },
+  { id: id("1", 8), projet_id: P_MERCIERE, numero: "01", intitule: "Ravalement — pierre de taille", activites_requises: ["pierre_taille", "ravalement"] },
+  { id: id("1", 9), projet_id: P_MERCIERE, numero: "02", intitule: "Échafaudage", activites_requises: [] },
 ];
 
 export const INTERVENANTS_EXEMPLE: Intervenant[] = [
   { id: id("2", 1), projet_id: P_LEMOINE, nature: "maitre_ouvrage", organisme: "M. et Mme Lemoine", contact: "Pierre Lemoine", email: "p.lemoine@exemple.fr", telephone: "06 12 34 56 78", siren: null, lot_id: null, actif: true },
-  { id: id("2", 2), projet_id: P_LEMOINE, nature: "bet_structure", organisme: "BET Structures de Loire", contact: "Hélène Cadot", email: "h.cadot@bet-loire.exemple", telephone: null, siren: "812345678", lot_id: id("1", 1), actif: true },
+  { id: id("2", 2), projet_id: P_LEMOINE, nature: "bet_structure", organisme: "BET Structures de Loire", contact: "Hélène Cadot", email: "h.cadot@bet-loire.exemple", telephone: null, siren: "812345676", lot_id: id("1", 1), actif: true },
   { id: id("2", 3), projet_id: P_LEMOINE, nature: "geometre", organisme: "Cabinet Géomètres Nantais", contact: null, email: null, telephone: "02 40 00 00 00", siren: "423456789", lot_id: null, actif: true },
-  { id: id("2", 4), projet_id: P_ENFANCE, nature: "maitre_ouvrage", organisme: "Ville de Vaulx-en-Velin — direction du patrimoine", contact: "Nadia Benali", email: "n.benali@vaulx.exemple", telephone: null, siren: "216902563", lot_id: null, actif: true },
+  { id: id("2", 4), projet_id: P_ENFANCE, nature: "maitre_ouvrage", organisme: "Ville de Vaulx-en-Velin — direction du patrimoine", contact: "Nadia Benali", email: "n.benali@vaulx.exemple", telephone: null, siren: "216902569", lot_id: null, actif: true },
   { id: id("2", 5), projet_id: P_ENFANCE, nature: "controleur_technique", organisme: "Bureau Véritas construction", contact: "Olivier Tassin", email: null, telephone: null, siren: "775690621", lot_id: null, actif: true },
   { id: id("2", 6), projet_id: P_ENFANCE, nature: "coordonnateur_sps", organisme: "SPS Rhône", contact: null, email: null, telephone: null, siren: null, lot_id: null, actif: true },
   { id: id("2", 7), projet_id: P_MARTIN, nature: "maitre_ouvrage", organisme: "Famille Martin", contact: "Julie Martin", email: "j.martin@exemple.fr", telephone: null, siren: null, lot_id: null, actif: true },
-  { id: id("2", 8), projet_id: P_MERCIERE, nature: "entreprise", organisme: "Taille de pierre Vieux-Lyon", contact: "Marc Roussel", email: null, telephone: null, siren: "538765432", lot_id: id("1", 8), actif: true },
+  { id: id("2", 8), projet_id: P_MERCIERE, nature: "entreprise", organisme: "Pierres de Bourgogne SARL", contact: "Marc Roussel", email: null, telephone: null, siren: "538765439", lot_id: id("1", 8), actif: true },
+  { id: id("2", 9), projet_id: P_MERCIERE, nature: "entreprise", organisme: "Échafaudages Rhône", contact: null, email: null, telephone: null, siren: "412345670", lot_id: id("1", 9), actif: true },
 ];
 
 export const MEMBRES_EXEMPLE: MembreProjet[] = [
@@ -463,6 +468,315 @@ export const CAS_REJET_EXEMPLE: CasRejet[] = [
   { code: "r424_2_1", article: "R424-2-1", libelle: "Projet soumis à évaluation environnementale (demandes déposées depuis le 31/12/2025)", source_url: URL_LEGIFRANCE },
 ];
 
+/* ——— les honoraires (b5_12) : Maison Lemoine, mission complète ; Pôle enfance, conception en cours ——— */
+const H = (n: number) => id("h", n);
+export const HONORAIRES_EXEMPLE: Honoraire[] = [
+  { id: H(1), projet_id: P_LEMOINE, element: "esq", intitule: null, montant_ht: 2400, heures_prevues: 30, statut: "facturee", achevee_le: j(-150), facturee_le: j(-145) },
+  { id: H(2), projet_id: P_LEMOINE, element: "aps", intitule: null, montant_ht: 4200, heures_prevues: 52, statut: "facturee", achevee_le: j(-120), facturee_le: j(-112) },
+  { id: H(3), projet_id: P_LEMOINE, element: "apd", intitule: null, montant_ht: 5600, heures_prevues: 70, statut: "achevee", achevee_le: j(-100), facturee_le: null },
+  { id: H(4), projet_id: P_LEMOINE, element: "pc", intitule: null, montant_ht: 3800, heures_prevues: 45, statut: "en_cours", achevee_le: null, facturee_le: null },
+  { id: H(5), projet_id: P_LEMOINE, element: "pro", intitule: null, montant_ht: 7200, heures_prevues: 90, statut: "a_venir", achevee_le: null, facturee_le: null },
+  { id: H(6), projet_id: P_LEMOINE, element: "det", intitule: null, montant_ht: 9800, heures_prevues: 120, statut: "a_venir", achevee_le: null, facturee_le: null },
+  { id: H(7), projet_id: P_ENFANCE, element: "esq", intitule: null, montant_ht: 9000, heures_prevues: 110, statut: "achevee", achevee_le: j(-40), facturee_le: null },
+  { id: H(8), projet_id: P_ENFANCE, element: "aps", intitule: null, montant_ht: 14000, heures_prevues: 170, statut: "en_cours", achevee_le: null, facturee_le: null },
+];
+const T = (n: number) => id("t", n);
+export const TEMPS_EXEMPLE: Temps[] = [
+  { id: T(1), projet_id: P_LEMOINE, honoraire_id: H(1), membre: EXEMPLE_MOI, jour: j(-160), heures: 26, note: "Relevé, esquisses" },
+  { id: T(2), projet_id: P_LEMOINE, honoraire_id: H(2), membre: EXEMPLE_MOI, jour: j(-130), heures: 31, note: null },
+  { id: T(3), projet_id: P_LEMOINE, honoraire_id: H(2), membre: SOFIA, jour: j(-128), heures: 18, note: "Plans au 1/100" },
+  { id: T(4), projet_id: P_LEMOINE, honoraire_id: H(3), membre: SOFIA, jour: j(-104), heures: 62, note: "Plans au 1/50, métré" },
+  { id: T(5), projet_id: P_LEMOINE, honoraire_id: H(3), membre: EXEMPLE_MOI, jour: j(-101), heures: 14, note: "Descriptif" },
+  { id: T(6), projet_id: P_LEMOINE, honoraire_id: H(4), membre: SOFIA, jour: j(-90), heures: 24, note: "Pièces graphiques PCMI" },
+  { id: T(7), projet_id: P_LEMOINE, honoraire_id: H(4), membre: EXEMPLE_MOI, jour: j(-3), heures: 13.5, note: "Réponse à la demande de pièces" },
+  { id: T(8), projet_id: P_ENFANCE, honoraire_id: H(7), membre: YANIS, jour: j(-45), heures: 96, note: null },
+  { id: T(9), projet_id: P_ENFANCE, honoraire_id: H(8), membre: YANIS, jour: j(-6), heures: 58, note: null },
+  { id: T(10), projet_id: P_ENFANCE, honoraire_id: H(8), membre: SOFIA, jour: j(-2), heures: 41, note: "Économie, estimation" },
+];
+
+/* ——— le chantier (b5_13) : la façade rue Mercière, en travaux ——— */
+const M = (n: number) => id("m", n);
+export const MARCHES_EXEMPLE: Marche[] = [
+  { id: M(1), projet_id: P_MERCIERE, lot_id: id("1", 8), titulaire: "Pierres de Bourgogne SARL", montant_ht: 186000, avenants_ht: 7400, retenue_pct: 5, delai_verification_jours: 15, actif: true, delai_execution_jours: 180, demarrage_le: j(-100) },
+  { id: M(2), projet_id: P_MERCIERE, lot_id: id("1", 9), titulaire: "Échafaudages Rhône", montant_ht: 24000, avenants_ht: 0, retenue_pct: 5, delai_verification_jours: 15, actif: true, delai_execution_jours: 210, demarrage_le: j(-102) },
+];
+const mois = (n: number) => `${j(n).slice(0, 7)}-01`;
+export const SITUATIONS_EXEMPLE: Situation[] = [
+  { id: id("5", 1), projet_id: P_MERCIERE, marche_id: M(1), numero: 1, mois: mois(-95), cumul_ht: 42000, recue_le: j(-66), a_viser_avant: j(-51), statut: "visee", cumul_admis_ht: 42000, observation: null, visee_le: j(-60) },
+  { id: id("5", 2), projet_id: P_MERCIERE, marche_id: M(1), numero: 2, mois: mois(-65), cumul_ht: 98000, recue_le: j(-36), a_viser_avant: j(-21), statut: "rectifiee", cumul_admis_ht: 95500, observation: "Joints non réalisés sur la travée 3", visee_le: j(-30) },
+  { id: id("5", 3), projet_id: P_MERCIERE, marche_id: M(1), numero: 3, mois: mois(-35), cumul_ht: 201500, recue_le: j(-4), a_viser_avant: j(11), statut: "a_viser", cumul_admis_ht: null, observation: null, visee_le: null },
+  { id: id("5", 4), projet_id: P_MERCIERE, marche_id: M(2), numero: 1, mois: mois(-65), cumul_ht: 12000, recue_le: j(-36), a_viser_avant: j(-21), statut: "visee", cumul_admis_ht: 12000, observation: null, visee_le: j(-33) },
+  { id: id("5", 5), projet_id: P_MERCIERE, marche_id: M(2), numero: 2, mois: mois(-35), cumul_ht: 11000, recue_le: j(-9), a_viser_avant: j(6), statut: "a_viser", cumul_admis_ht: null, observation: null, visee_le: null, retenue_deduite_ht: 0 },
+];
+export const VISAS_EXEMPLE: Visa[] = [
+  { id: id("6", 1), projet_id: P_MERCIERE, lot_id: id("1", 8), document: "Calepinage des pierres — façade sud", indice: "B", recu_le: j(-2), commande_le: j(3), delai_visa_jours: 15, a_viser_avant: j(2), avis: "a_viser", observation: null, vise_le: null },
+  { id: id("6", 2), projet_id: P_MERCIERE, lot_id: id("1", 9), document: "Plan d’échafaudage et notes de calcul", indice: "A", recu_le: j(-20), commande_le: null, delai_visa_jours: 15, a_viser_avant: j(-5), avis: "a_viser", observation: null, vise_le: null },
+  { id: id("6", 3), projet_id: P_MERCIERE, lot_id: id("1", 8), document: "Fiche technique du mortier de chaux", indice: "A", recu_le: j(-25), commande_le: null, delai_visa_jours: 15, a_viser_avant: j(-10), avis: "vso", observation: null, vise_le: j(-12) },
+];
+
+/* ——— le contrôle du dossier (b5_16) : la surélévation Dubois, contrôlée à l'indice A puis revérifiée à l'indice B ——— */
+const PD = (n: number) => id("7", n);
+export const PIECES_CONTROLE_EXEMPLE: PieceProjet[] = [
+  { id: PD(1), objet_id: P_DUBOIS, nom_fichier: "PC2-plan-de-masse-indA.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_planche", cree_le: ilYa(23) },
+  { id: PD(2), objet_id: P_DUBOIS, nom_fichier: "PC3-coupe-indA.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_planche", cree_le: ilYa(23) },
+  { id: PD(3), objet_id: P_DUBOIS, nom_fichier: "PC5-facades-indA.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_planche", cree_le: ilYa(23) },
+  { id: PD(4), objet_id: P_DUBOIS, nom_fichier: "PLU-H-reglement-zone-URm1.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_plu_reglement", cree_le: ilYa(23) },
+  { id: PD(5), objet_id: P_DUBOIS, nom_fichier: "CCTP-lot-02-gros-oeuvre.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_cctp", cree_le: ilYa(22) },
+  { id: PD(6), objet_id: P_DUBOIS, nom_fichier: "DPGF-lot-02-gros-oeuvre.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_dpgf", cree_le: ilYa(22) },
+  { id: PD(7), objet_id: P_DUBOIS, nom_fichier: "PC5-facades-indB.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_planche", cree_le: ilYa(3) },
+];
+const CA = id("8", 1);
+const CB = id("8", 2);
+export const CONTROLES_EXEMPLE: Controle[] = [
+  { id: CB, projet_id: P_DUBOIS, intitule: "Dossier de permis", indice: "B", precedent_id: CA, statut: "controle", lance_le: ilYa(2), constats_nb: 3, cree_le: ilYa(2), decideur: EXEMPLE_MOI,
+    changements: [
+      { reference: "PC3", grandeur: "largeur_m", objet: "tremie_r1", libelle: "la largeur de « tremie r1 »", unite: "m", avant: 1.2, apres: 1.8, page_avant: 1, page_apres: 1, texte_avant: "trémie 120", texte_apres: "trémie 180", releve: false },
+      { reference: "PC2", grandeur: "recul_limite_m", objet: "projet", libelle: "le recul sur limite séparative", unite: "m", avant: 3.4, apres: 3.2, page_avant: 1, page_apres: 1, texte_avant: "3,40 m", texte_apres: "3,20 m", releve: true },
+    ] },
+  { id: CA, projet_id: P_DUBOIS, intitule: "Dossier de permis", indice: "A", precedent_id: null, statut: "controle", lance_le: ilYa(21), constats_nb: 6, cree_le: ilYa(21) },
+];
+const roles: [string, ControlePiece["role"], string][] = [[PD(1), "planche", "PC2"], [PD(2), "planche", "PC3"], [PD(4), "plu", "PLU-H URm1"], [PD(5), "cctp", "CCTP 02"], [PD(6), "dpgf", "DPGF 02"]];
+export const CONTROLE_PIECES_EXEMPLE: ControlePiece[] = [
+  ...[...roles, [PD(3), "planche", "PC5"] as [string, ControlePiece["role"], string]].map(([piece_id, role, reference], i) => ({ id: id("a", i + 1), controle_id: CA, piece_id, role, reference })),
+  ...[...roles, [PD(7), "planche", "PC5"] as [string, ControlePiece["role"], string]].map(([piece_id, role, reference], i) => ({ id: id("a", i + 11), controle_id: CB, piece_id, role, reference })),
+];
+const constat = (k: Partial<Constat> & Pick<Constat, "id" | "controle_id" | "nature" | "gravite" | "titre">): Constat => ({
+  grandeur: null, objet: null, correction: null, article: null, valeurs: [], statut: "ouvert", motif: null, precedent_id: null, corrige_au_controle: null, decide_par: null, decide_le: null, ...k,
+});
+const RECUL = {
+  nature: "plu" as const, gravite: "bloquant" as const, grandeur: "recul_limite_m", objet: "facade_est", article: "URm1 7",
+  titre: "Le recul sur limite séparative de « facade est » (3,2 m sur PC2, p. 1) n'atteint pas la règle du PLU (au moins 4 m, article URm1 7).",
+  correction: "Ramener le recul sur limite séparative de « facade est » à au moins 4 m (article URm1 7 du règlement), ou justifier une dérogation.",
+  valeurs: [{ piece: PD(1), reference: "PC2", page: 1, valeur: 3.2, texte: "3,20 m", boite: { x: 0.62, y: 0.41, l: 0.08, h: 0.025 } }, { reference: "PLU-H URm1", page: 41, valeur: 4, borne: "min" as const, article: "URm1 7", regle: true }],
+};
+const POSTE_24 = {
+  nature: "cctp_dpgf" as const, gravite: "mineur" as const, objet: "2_4",
+  titre: "Le poste 2.4 « Isolation thermique par l'extérieur » est décrit au CCTP (CCTP 02, p. 9) mais n'est pas chiffré à la DPGF.",
+  correction: "Ajouter le poste 2.4 à la DPGF, ou le retirer du CCTP.",
+  valeurs: [{ piece: PD(5), reference: "CCTP 02", page: 9, valeur: "Isolation thermique par l'extérieur", texte: "2.4 Isolation thermique par l'extérieur (ITE)", boite: { x: 0.12, y: 0.33, l: 0.5, h: 0.02 } }],
+};
+const METRE_22 = {
+  nature: "metre_dpgf" as const, gravite: "majeur" as const, objet: "2_2",
+  titre: "Le poste 2.2 est chiffré à 64 m2 à la DPGF (DPGF 02, p. 1) pour 78,4 m2 mesurés (PC2, p. 1 ; PC3, p. 1) : sous-estimé de 18 %.",
+  correction: "Porter la quantité du poste 2.2 à 78,4 m2 à la DPGF, ou justifier l'écart.",
+  valeurs: [
+    { piece: PD(1), reference: "PC2", page: 1, valeur: 52.6, texte: "Dalle haute R+3 : 52,60 m²", boite: { x: 0.3, y: 0.55, l: 0.18, h: 0.025 } },
+    { piece: PD(2), reference: "PC3", page: 1, valeur: 25.8, texte: "Terrasse : 25,80 m²", boite: { x: 0.44, y: 0.22, l: 0.16, h: 0.025 } },
+    { piece: PD(6), reference: "DPGF 02", page: 1, valeur: 64, texte: "2.2 Plancher béton R+3 — m2 — 64,00" },
+  ],
+};
+const POSTE_27 = {
+  nature: "cctp_dpgf" as const, gravite: "mineur" as const, objet: "2_7", statut: "ecarte" as const,
+  titre: "Le poste 2.7 est chiffré à la DPGF (DPGF 02, p. 2) sans description au CCTP.",
+  correction: "Décrire le poste 2.7 au CCTP, ou le retirer de la DPGF.", motif: "Option chiffrée à part, à la demande du maître d'ouvrage.",
+  valeurs: [{ piece: PD(6), reference: "DPGF 02", page: 2, valeur: "1", texte: "2.7 Garde-corps terrasse — option — ens 1" }],
+  decide_par: EXEMPLE_MOI,
+};
+export const CONSTATS_EXEMPLE: Constat[] = [
+  constat({
+    id: id("9", 1), controle_id: CA, nature: "incoherence", gravite: "majeur", grandeur: "hauteur_faitage_m", objet: "projet",
+    titre: "La hauteur au faîtage diffère d'une pièce à l'autre : 15,6 m sur PC3 (p. 1) ; 16,1 m sur PC5 (p. 1).",
+    correction: "Aligner la hauteur au faîtage sur une seule valeur dans toutes les pièces (écart de 0,5 m). Valeur la plus fréquente : 15,6 m.",
+    valeurs: [{ piece: PD(2), reference: "PC3", page: 1, valeur: 15.6, texte: "Faîtage +15,60", boite: { x: 0.71, y: 0.18, l: 0.12, h: 0.02 } }, { piece: PD(3), reference: "PC5", page: 1, valeur: 16.1, texte: "+16,10" }],
+    statut: "corrige", motif: "Corrigé à l'indice B.", corrige_au_controle: CB,
+  }),
+  constat({
+    id: id("9", 2), controle_id: CA, nature: "plu", gravite: "bloquant", grandeur: "hauteur_faitage_m", objet: "projet", article: "URm1 10",
+    titre: "La hauteur au faîtage (16,1 m sur PC5, p. 1) dépasse la règle du PLU (au plus 16 m, article URm1 10).",
+    correction: "Ramener la hauteur au faîtage à au plus 16 m (article URm1 10 du règlement), ou justifier une dérogation.",
+    valeurs: [{ piece: PD(3), reference: "PC5", page: 1, valeur: 16.1, texte: "+16,10" }, { reference: "PLU-H URm1", page: 44, valeur: 16, borne: "max", article: "URm1 10", regle: true }],
+    statut: "corrige", motif: "Corrigé à l'indice B.", corrige_au_controle: CB,
+  }),
+  constat({ id: id("9", 3), controle_id: CA, ...RECUL }),
+  constat({ id: id("9", 4), controle_id: CA, ...POSTE_24 }),
+  constat({ id: id("9", 5), controle_id: CA, ...POSTE_27, decide_le: ilYa(15) }),
+  constat({ id: id("9", 6), controle_id: CB, ...RECUL, precedent_id: id("9", 3) }),
+  constat({ id: id("9", 7), controle_id: CB, ...POSTE_24, precedent_id: id("9", 4) }),
+  constat({ id: id("9", 8), controle_id: CB, ...POSTE_27, precedent_id: id("9", 5), decide_le: ilYa(15) }),
+  constat({ id: id("9", 10), controle_id: CA, ...METRE_22 }),
+  constat({ id: id("9", 11), controle_id: CB, ...METRE_22, precedent_id: id("9", 10) }),
+];
+
+/* ——— le PLU trouvé depuis l'adresse (b5_17) : réponses du Géoportail de l'urbanisme, telles qu'au 06/10/2026 ——— */
+const zone = (z: Partial<Plu["zones"][number]>): Plu["zones"][number] => ({ libelle: null, libelong: null, typezone: "U", partition: null, idurba: null, nomfic: null, urlfic: null, datvalid: null, ...z });
+export const PLU_EXEMPLE: Plu[] = [
+  {
+    id: id("c", 1), projet_id: P_LEMOINE, statut: "trouve", methode: "adresse", requete: "12 rue des Hauts-Pavés 44000 Nantes", point_libelle: "Rue des Hauts Pavés 44000 Nantes", point_score: 0.822,
+    zones: [zone({ libelle: "UMa", libelong: "Secteur de développement des centralités actuelles ou en devenir", partition: "DU_244400404", idurba: "244400404_PLUI_20260518", nomfic: "244400404_reglement_20260518.pdf", urlfic: "https://metropole.nantes.fr/files/live/sites/metropolenantesfr/files/plum_appro/4_R%c3%a8glement/4-1_R%c3%a8glement_%c3%a9crit/4-1-1_R%c3%a8glement/R%c3%a8glement.pdf" })],
+    zone: "UMa", document: { du_type: "PLUi", titre: "PLUI NANTES METROPOLE", nom: "244400404_PLUi_20260518", partition: "DU_244400404" },
+    reglement_url: "https://metropole.nantes.fr/files/live/sites/metropolenantesfr/files/plum_appro/4_R%c3%a8glement/4-1_R%c3%a8glement_%c3%a9crit/4-1-1_R%c3%a8glement/R%c3%a8glement.pdf",
+    prescriptions: [
+      { libelle: "Orientation d'Aménagement et de Programmation Loire (OAP)", typepsc: "18", stypepsc: "03" },
+      { libelle: "Norme de stationnement applicable à la sous-destination Artisanat et commerce de détail", typepsc: "44", stypepsc: "00" },
+    ],
+    rnu: false, erreur: null, demande_le: ilYa(30), trouve_le: ilYa(30),
+  },
+  {
+    id: id("c", 2), projet_id: P_MERCIERE, statut: "trouve", methode: "adresse", requete: "31 rue Mercière 69002 Lyon 2e", point_libelle: "31 Rue Mercière 69002 Lyon", point_score: 0.97,
+    zones: [zone({ libelle: "UCe1b", libelong: "Tissu urbain dense à caractère patrimonial qui regroupe toutes les fonctions des centres urbains", partition: "DU_200046977", idurba: "200046977_PLUI_20260326" })],
+    zone: "UCe1b", document: { du_type: "PLUi", titre: "PLU-H MÉTROPOLE DE LYON", nom: "200046977_PLUi_20260326", partition: "DU_200046977" }, reglement_url: null,
+    prescriptions: [{ libelle: "Polarité commerciale", typepsc: "51", stypepsc: "00" }, { libelle: "Secteur de taille minimale des logements", typepsc: "23", stypepsc: "00" }],
+    rnu: false, erreur: null, demande_le: ilYa(200), trouve_le: ilYa(200),
+    /* b5_23 : relevé réel du Géoportail de l'urbanisme au 31 rue Mercière (135 abords de monuments historiques, dont trois cités) */
+    servitudes: [
+      { categorie: "AC1", libelle_categorie: "Abords de monument historique", nom: "Cathédrale Saint-Jean et ancienne manécanterie", assiette: "Périmètre des abords", acte: "AC1_Cathedrale-Saint-Jean-et-ancienne-manecanterie-I8KE0R_19140418_act.pdf" },
+      { categorie: "AC1", libelle_categorie: "Abords de monument historique", nom: "Façades", assiette: "Périmètre des abords", acte: null },
+      { categorie: "AC1", libelle_categorie: "Abords de monument historique", nom: "Maison", assiette: "Périmètre des abords", acte: null },
+      { categorie: "AC2", libelle_categorie: "Site inscrit ou classé", nom: "CENTRE HISTORIQUE DE LYON", assiette: "Enceinte du site", acte: null },
+      { categorie: "PM1", libelle_categorie: "Plan de prévention des risques naturels", nom: "PPRNi Grand Lyon secteur Lyon Villeurbanne", assiette: "Enveloppe des zonages réglementaires", acte: null },
+    ],
+    risques: { commune: ["Inondation", "Séisme"], sismicite: "2 - FAIBLE", argiles: "Exposition faible", radon: "1" },
+    secteur_protege: true, complements_statut: "fait",
+  },
+];
+
+/* ——— les décennales (b5_18) : la façade rue Mercière, chantier ouvert il y a cent jours ——— */
+export const ATTESTATIONS_EXEMPLE: Attestation[] = [
+  {
+    id: id("d", 1), projet_id: P_MERCIERE, intervenant_id: id("2", 8), lot_id: id("1", 8), piece_id: null, assureur: "SMABTP", numero_police: "123456 B 1234", assure: "PIERRES DE BOURGOGNE", siren: "538765439",
+    activites: ["maconnerie_beton_arme", "ravalement"], debut: j(-280), fin: j(85), plafond_eur: 1500000, statut: "non_conforme",
+    constats: [{ code: "activite", gravite: "bloquant", texte: "Activité du lot 01 non couverte : Taille de pierre et maçonnerie de pierre.", activites: ["pierre_taille"] }], verifie_le: ilYa(40),
+  },
+  {
+    id: id("d", 2), projet_id: P_MERCIERE, intervenant_id: id("2", 9), lot_id: id("1", 9), piece_id: null, assureur: "AXA France IARD", numero_police: "7701 4482 11", assure: "ECHAFAUDAGES RHONE", siren: "412345670",
+    activites: ["maconnerie_beton_arme"], debut: j(-377), fin: j(-12), plafond_eur: null, statut: "expiree",
+    constats: [{ code: "activites_lot", gravite: "mineur", texte: "Les activités requises du lot 02 ne sont pas renseignées : la couverture ne peut pas être vérifiée." }], verifie_le: ilYa(12),
+  },
+];
+
+/* ——— les ordres de service et les réserves (b5_19) : la façade rue Mercière ——— */
+const os = (o: Partial<OrdreService> & Pick<OrdreService, "id" | "marche_id" | "numero" | "nature" | "objet" | "emis_le">): OrdreService => ({
+  projet_id: P_MERCIERE, notifie_le: null, montant_ht: 0, delai_jours: 0, statut: "signe", reserves_entreprise: null, reserves_jusquau: null, ...o,
+});
+export const OS_EXEMPLE: OrdreService[] = [
+  os({ id: id("e", 1), marche_id: M(1), numero: 1, nature: "demarrage", objet: "Démarrage des travaux de ravalement", emis_le: j(-102), notifie_le: j(-100), reserves_jusquau: j(-85) }),
+  os({ id: id("e", 2), marche_id: M(1), numero: 2, nature: "travaux_supplementaires", objet: "Remplacement de 14 pierres de corniche", emis_le: j(-61), notifie_le: j(-60), montant_ht: 12600, delai_jours: 10, statut: "signe_reserves", reserves_entreprise: "Délai demandé : 15 jours", reserves_jusquau: j(-45) }),
+  os({ id: id("e", 3), marche_id: M(1), numero: 3, nature: "arret", objet: "Arrêt pour intempéries (gel)", emis_le: j(-40) }),
+  os({ id: id("e", 4), marche_id: M(1), numero: 4, nature: "reprise", objet: "Reprise après intempéries", emis_le: j(-33) }),
+  os({ id: id("e", 5), marche_id: M(1), numero: 5, nature: "travaux_modificatifs", objet: "Joints à la chaux teintée au lieu de la chaux blanche", emis_le: j(-3), notifie_le: j(-2), montant_ht: 4100, statut: "emis", reserves_jusquau: j(13) }),
+  os({ id: id("e", 6), marche_id: M(2), numero: 1, nature: "demarrage", objet: "Montage de l’échafaudage", emis_le: j(-103), notifie_le: j(-102), reserves_jusquau: j(-87) }),
+];
+const reserve = (r: Partial<Reserve> & Pick<Reserve, "id" | "numero" | "intitule">): Reserve => ({
+  projet_id: P_MERCIERE, lot_id: id("1", 8), marche_id: M(1), localisation: null, origine: "opr", constatee_le: j(-6), lever_avant: null, statut: "ouverte", levee_le: null, motif: null, ...r,
+});
+export const RESERVES_EXEMPLE: Reserve[] = [
+  reserve({ id: id("f", 1), numero: 1, intitule: "Épaufrure sur l’appui de la baie 3", localisation: "Façade sud, 2e étage", lever_avant: j(9) }),
+  reserve({ id: id("f", 2), numero: 2, intitule: "Coulures de laitance sous la corniche", localisation: "Façade sud, travées 4 à 6", lever_avant: j(-1) }),
+  reserve({ id: id("f", 3), numero: 3, intitule: "Joint ouvert en pied de façade", localisation: "Façade sud, soubassement", lever_avant: j(-3), statut: "levee", levee_le: j(-4) }),
+];
+
+/* ——— les comptes rendus de chantier (b5_20) : la façade rue Mercière, trois visites ——— */
+const CR = (n: number) => id("a", 100 + n);
+export const CR_EXEMPLE: CompteRendu[] = [
+  { id: CR(1), projet_id: P_MERCIERE, numero: 1, visite_le: j(-21), presents: [{ nom: "Marc Roussel", organisme: "Pierres de Bourgogne SARL", intervenant: id("2", 8), present: true }, { nom: "Échafaudages Rhône", intervenant: id("2", 9), present: false }],
+    notes: null, avancement: "Façade sud : piochage des enduits terminé, purge des pierres en cours.", prochaine_visite: j(-7), statut: "diffuse", diffuse_le: ilYa(21), contenu: null,
+    avancement_lots: { [id("1", 8)]: 30, [id("1", 9)]: 38 } },
+  { id: CR(2), projet_id: P_MERCIERE, numero: 2, visite_le: j(-7), presents: [{ nom: "Marc Roussel", organisme: "Pierres de Bourgogne SARL", intervenant: id("2", 8), present: true }, { nom: "Échafaudages Rhône", intervenant: id("2", 9), present: true }],
+    notes: null, avancement: "Corniche : 14 pierres remplacées sur 14. Rejointoiement commencé travées 1 à 3.", prochaine_visite: j(0), statut: "diffuse", diffuse_le: ilYa(7), contenu: null,
+    avancement_lots: { [id("1", 8)]: 100, [id("1", 9)]: 50 } },
+  { id: CR(3), projet_id: P_MERCIERE, numero: 3, visite_le: j(0), presents: [{ nom: "Marc Roussel", organisme: "Pierres de Bourgogne SARL", intervenant: id("2", 8), present: true }, { nom: "Échafaudages Rhône", intervenant: id("2", 9), present: true }],
+    notes: "? @Pierres de Bourgogne planning de reprise des appuis de baies avant le " + fr(9).slice(0, 5) + "\n! relancer le bureau de contrôle sur la note de stabilité de l’échafaudage\n= dépose de l’échafaudage côté rue reportée à la fin des joints\nlot 01 ragréage des appuis de baies en cours",
+    avancement: "Rejointoiement travées 1 à 5 ; appuis de baies en reprise.", prochaine_visite: j(7), statut: "brouillon", diffuse_le: null, contenu: null },
+];
+const point = (p: Partial<Point> & Pick<Point, "id" | "nature" | "texte" | "ouvert_au_cr">): Point => ({
+  projet_id: P_MERCIERE, lot_id: null, intervenant_id: null, echeance: null, statut: "ouvert", reponse: null, repondu_le: null, clos_au_cr: null, cree_le: ilYa(21), maj_le: ilYa(21), ...p,
+});
+export const POINTS_EXEMPLE: Point[] = [
+  point({ id: id("a", 201), nature: "question", texte: "Fournir la fiche technique du mortier de chaux teintée", ouvert_au_cr: CR(1), intervenant_id: id("2", 8), lot_id: id("1", 8), echeance: j(-14), statut: "repondu", reponse: "Fiche transmise par courriel, visée le " + fr(-12), repondu_le: j(-12), clos_au_cr: CR(2), maj_le: ilYa(12) }),
+  point({ id: id("a", 202), nature: "question", texte: "Confirmer la date de dépose de l’échafaudage côté cour", ouvert_au_cr: CR(1), intervenant_id: id("2", 9), lot_id: id("1", 9), echeance: j(-5) }),
+  point({ id: id("a", 203), nature: "action", texte: "Transmettre le calepinage révisé de la corniche à l’entreprise", ouvert_au_cr: CR(2), echeance: j(3), cree_le: ilYa(7), maj_le: ilYa(7) }),
+  point({ id: id("a", 204), nature: "decision", texte: "Joints à la chaux teintée, teinte « pierre de Bourgogne » retenue", ouvert_au_cr: CR(2), statut: "clos", cree_le: ilYa(7), maj_le: ilYa(7) }),
+];
+
+/* ——— le contrôle étendu (b5_21) : le pôle enfance, un ERP — RE2020, accessibilité, sécurité incendie, Cerfa ——— */
+const PE = (n: number) => id("7", 20 + n);
+export const PIECES_ERP_EXEMPLE: PieceProjet[] = [
+  { id: PE(1), objet_id: P_ENFANCE, nom_fichier: "PC4-plan-RDC-indA.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_planche", cree_le: ilYa(9) },
+  { id: PE(2), objet_id: P_ENFANCE, nom_fichier: "Cerfa-13409-pole-enfance.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_cerfa", cree_le: ilYa(9) },
+  { id: PE(3), objet_id: P_ENFANCE, nom_fichier: "Attestation-RE2020-depot.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_attestation_re2020", cree_le: ilYa(9) },
+];
+const CE = id("8", 3);
+export const CONTROLES_ERP_EXEMPLE: Controle[] = [
+  { id: CE, projet_id: P_ENFANCE, intitule: "Permis de construire", indice: "A", precedent_id: null, statut: "controle", lance_le: ilYa(8), constats_nb: 4, cree_le: ilYa(8) },
+];
+export const CONTROLE_PIECES_ERP_EXEMPLE: ControlePiece[] = [
+  { id: id("a", 31), controle_id: CE, piece_id: PE(1), role: "planche", reference: "PC4" },
+  { id: id("a", 32), controle_id: CE, piece_id: PE(2), role: "cerfa", reference: "Cerfa" },
+  { id: id("a", 33), controle_id: CE, piece_id: PE(3), role: "re2020", reference: "Attestation RE2020" },
+];
+export const CONSTATS_ERP_EXEMPLE: Constat[] = [
+  constat({ id: id("9", 31), controle_id: CE, nature: "re2020", gravite: "bloquant", grandeur: "re2020_bbio", objet: "projet", article: "RE2020, arrêté du 4 août 2021",
+    titre: "Le besoin bioclimatique (Bbio) : 78,3 sur Attestation RE2020, p. 1, au-delà de son maximum de 72.",
+    correction: "Reprendre la conception ou l’étude thermique : le besoin bioclimatique (Bbio) doit rester au plus à 72 (RE2020).",
+    valeurs: [{ piece: PE(3), reference: "Attestation RE2020", page: 1, valeur: 78.3, texte: "Bbio = 78,3" }, { reference: "Attestation RE2020", page: 1, valeur: 72, borne: "max", article: "RE2020", regle: true }] }),
+  constat({ id: id("9", 32), controle_id: CE, nature: "securite_incendie", gravite: "bloquant", grandeur: "degagements_nb", objet: "batiment", article: "règlement de sécurité ERP, art. CO 38",
+    titre: "Le nombre de dégagements de « batiment » : 1 dégagement pour un effectif de 240 (PC4, p. 1) ; il en faut au moins 2.",
+    correction: "Prévoir au moins 2 dégagements de « batiment » (règlement de sécurité ERP, art. CO 38).",
+    valeurs: [{ piece: PE(1), reference: "PC4", page: 1, valeur: 1, texte: "1 dégagement", boite: { x: 0.18, y: 0.71, l: 0.12, h: 0.025 } }, { reference: "art. CO 38", valeur: 2, borne: "min", article: "CO 38", regle: true }] }),
+  constat({ id: id("9", 33), controle_id: CE, nature: "accessibilite", gravite: "majeur", grandeur: "largeur_porte_m", objet: "porte_entree", article: "arrêté du 20 avril 2017, art. 10",
+    titre: "La largeur de passage de la porte de « porte entree » (0,83 m sur PC4, p. 1) est sous le minimum d’accessibilité (au moins 0,9 m, arrêté du 20 avril 2017, art. 10).",
+    correction: "Porter la largeur de passage de la porte de « porte entree » à au moins 0,9 m (arrêté du 20 avril 2017, art. 10).",
+    valeurs: [{ piece: PE(1), reference: "PC4", page: 1, valeur: 0.83, texte: "PL 83", boite: { x: 0.52, y: 0.84, l: 0.06, h: 0.02 } }, { reference: "arrêté du 20 avril 2017, art. 10", valeur: 0.9, borne: "min", article: "arrêté du 20 avril 2017, art. 10", regle: true }] }),
+  constat({ id: id("9", 34), controle_id: CE, nature: "incoherence", gravite: "majeur", grandeur: "surface_plancher_m2", objet: "projet",
+    titre: "La surface de plancher diffère d’une pièce à l’autre : 1212 m² sur Cerfa (p. 4) ; 1250 m² sur PC4 (p. 1).",
+    correction: "Aligner la surface de plancher sur une seule valeur dans toutes les pièces (écart de 38 m²). Valeur la plus fréquente : 1212 m².",
+    valeurs: [{ piece: PE(2), reference: "Cerfa", page: 4, valeur: 1212, texte: "1 212" }, { piece: PE(1), reference: "PC4", page: 1, valeur: 1250, texte: "SDP 1 250 m²" }] }),
+];
+
+/* ——— le DOE (b5_21) : la façade rue Mercière ——— */
+const doe = (d: Partial<PieceDoe> & Pick<PieceDoe, "id" | "nature" | "intitule">): PieceDoe => ({ projet_id: P_MERCIERE, lot_id: id("1", 8), statut: "attendu", piece_id: null, recu_le: null, motif: null, ...d });
+export const DOE_EXEMPLE: PieceDoe[] = [
+  doe({ id: id("b", 301), nature: "plans", intitule: "Plans conformes à l’exécution", statut: "recu", recu_le: j(-2) }),
+  doe({ id: id("b", 302), nature: "notices", intitule: "Notices de fonctionnement et d’entretien" }),
+  doe({ id: id("b", 303), nature: "fiches", intitule: "Fiches techniques des matériaux et équipements", statut: "recu", recu_le: j(-12) }),
+  doe({ id: id("b", 304), nature: "pv_essais", intitule: "Procès-verbaux d’essais et d’autocontrôle" }),
+  doe({ id: id("b", 305), nature: "garanties", intitule: "Garanties des fabricants", statut: "sans_objet", motif: "Aucun équipement sous garantie : pierre et chaux" }),
+  doe({ id: id("b", 306), lot_id: id("1", 9), nature: "plans", intitule: "Plans conformes à l’exécution", statut: "sans_objet", motif: "Ouvrage provisoire (échafaudage)" }),
+  doe({ id: id("b", 307), lot_id: null, nature: "diuo", intitule: "Dossier d’intervention ultérieure sur l’ouvrage (DIUO)" }),
+];
+
+/* ——— l'analyse des offres (b5_26) : la Maison Lemoine, lot 03, trois offres alignées sur la DPGF ——— */
+const CONS = id("c", 400);
+const OF = (n: number) => id("c", 400 + n);
+export const CONSULTATIONS_EXEMPLE: Consultation[] = [{
+  id: CONS, projet_id: P_LEMOINE, lot_id: id("1", 3), intitule: "DCE lot 03", dpgf_piece_id: null, estimation_ht: null, seuil_ecart_pct: 20,
+  date_limite: j(-3), statut: "analysee", offre_retenue: null, analysee_le: `${j(-1)}T09:12:00`, cree_le: `${j(-24)}T10:00:00`,
+  tableau: {
+    estimation_ht: 39800, seuil_ecart_pct: 20, aucune_offre: [], une_seule_offre: ["3_3"],
+    postes: [
+      { ref: "3_1", libelle: "3.1 Fenêtres aluminium 120 × 135", quantite: 24, unite: "u", estimation: 20400, mediane: 19780, chiffree_par: 3,
+        offres: { [OF(1)]: { pu: 820, q: 24, montant: 19780 }, [OF(2)]: { pu: 800, q: 22, montant: 17600 }, [OF(3)]: { pu: null, q: null, montant: 21600 } } },
+      { ref: "3_2", libelle: "3.2 Portes-fenêtres", quantite: 6, unite: "u", estimation: 9000, mediane: 9200, chiffree_par: 3,
+        offres: { [OF(1)]: { pu: null, q: null, montant: 8400 }, [OF(2)]: { pu: null, q: null, montant: 9200 }, [OF(3)]: { pu: null, q: null, montant: 9300 } } },
+      { ref: "3_3", libelle: "3.3 Porte d’entrée", quantite: 1, unite: "u", estimation: 3200, mediane: 3200, chiffree_par: 1,
+        offres: { [OF(1)]: { pu: null, q: null, montant: 3200 } } },
+      { ref: "3_4", libelle: "3.4 Volets roulants", quantite: 18, unite: "u", estimation: 7200, mediane: 7000, chiffree_par: 3,
+        offres: { [OF(1)]: { pu: null, q: null, montant: 9430 }, [OF(2)]: { pu: null, q: null, montant: 6800 }, [OF(3)]: { pu: null, q: null, montant: 7000 } } },
+    ],
+  },
+}];
+const offre = (o: Partial<Offre> & Pick<Offre, "id" | "entreprise">): Offre => ({ projet_id: P_LEMOINE, consultation_id: CONS, piece_id: null, intervenant_id: null, siren: null,
+  montant_ht: null, montant_calcule_ht: null, montant_comparable_ht: null, rang: null, ecart_estimation_pct: null, reserves: [], constats: [], statut: "analysee", motif: null, recue_le: j(-4), ...o });
+export const OFFRES_EXEMPLE: Offre[] = [
+  offre({ id: OF(1), entreprise: "Alu Ouest", montant_ht: 40810, montant_calcule_ht: 40810, montant_comparable_ht: 40810, rang: 2, ecart_estimation_pct: 2.54,
+    constats: [
+      { code: "arithmetique", gravite: "majeur", ref: "3_1", texte: "Poste 3.1 : 820 × 24 = 19 680 €, l’offre écrit 19 780 €." },
+      { code: "ecart_estimation", gravite: "mineur", ref: "3_4", texte: "Poste 3.4 : écart de 31 % à l’estimation (9 430 € contre 7 200 €)." },
+    ] }),
+  offre({ id: OF(2), entreprise: "Menuiseries de Loire", montant_ht: 33600, montant_calcule_ht: 33600, montant_comparable_ht: 36800, rang: 1, ecart_estimation_pct: -7.54,
+    reserves: ["Hors pose des appuis de fenêtre"],
+    constats: [
+      { code: "non_chiffre", gravite: "majeur", ref: "3_3", texte: "Poste 3.3 non chiffré (3.3 Porte d’entrée)." },
+      { code: "quantite", gravite: "mineur", ref: "3_1", texte: "Poste 3.1 : quantité 22 au lieu de 24 à la DPGF." },
+      { code: "reserve", gravite: "majeur", ref: null, texte: "Réserve : Hors pose des appuis de fenêtre" },
+    ] }),
+  offre({ id: OF(3), entreprise: "Ateliers Bois", montant_ht: 38500, montant_calcule_ht: 38500, montant_comparable_ht: 41700, rang: 3, ecart_estimation_pct: 4.77, recue_le: j(-3),
+    constats: [
+      { code: "non_chiffre", gravite: "majeur", ref: "3_3", texte: "Poste 3.3 non chiffré (3.3 Porte d’entrée)." },
+      { code: "hors_dpgf", gravite: "mineur", ref: "3_5", texte: "Poste 3.5 ajouté par l’entreprise, absent de la DPGF." },
+    ] }),
+];
+
 export function dossierExemple(): Dossier {
   return {
     projets: PROJETS_EXEMPLE,
@@ -474,7 +788,24 @@ export function dossierExemple(): Dossier {
     intervenants: INTERVENANTS_EXEMPLE,
     membres: MEMBRES_EXEMPLE,
     casRejet: CAS_REJET_EXEMPLE,
-    pieces: PIECES_EXEMPLE,
+    pieces: [...PIECES_EXEMPLE, ...PIECES_CONTROLE_EXEMPLE, ...PIECES_ERP_EXEMPLE],
+    controles: [...CONTROLES_EXEMPLE, ...CONTROLES_ERP_EXEMPLE],
+    controlePieces: [...CONTROLE_PIECES_EXEMPLE, ...CONTROLE_PIECES_ERP_EXEMPLE],
+    constats: [...CONSTATS_EXEMPLE, ...CONSTATS_ERP_EXEMPLE],
+    doe: DOE_EXEMPLE,
+    consultations: CONSULTATIONS_EXEMPLE,
+    offres: OFFRES_EXEMPLE,
+    plu: PLU_EXEMPLE,
+    attestations: ATTESTATIONS_EXEMPLE,
+    ordresService: OS_EXEMPLE,
+    comptesRendus: CR_EXEMPLE,
+    points: POINTS_EXEMPLE,
+    reserves: RESERVES_EXEMPLE,
+    honoraires: HONORAIRES_EXEMPLE,
+    temps: TEMPS_EXEMPLE,
+    marches: MARCHES_EXEMPLE,
+    situations: SITUATIONS_EXEMPLE,
+    visas: VISAS_EXEMPLE,
     noms: {},
     moi: { user_id: EXEMPLE_MOI, client_id: C, role: "valideur" },
   };

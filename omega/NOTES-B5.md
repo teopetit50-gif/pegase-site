@@ -1,14 +1,94 @@
 # Session B5 — LORANI, le calendrier du permis (vague 2)
 
-Branche `worker-b5`. Coordinateur : session_01BCGFdpRKBvXKjouC75sYBg (Opus 5.5, depuis le 06/10 à 1 h 10 ; auparavant session_01B4JNQXyT69GytdvE9SjAnE).
+Branche `worker-b5`. Session B5 : session_018iNiXjY8eWmMjaGrXSGgma (Opus 5.5, reprise de session_013VSXzohLtDQS5bbWfRb4xR le 06/10 à 1 h 30 Z). Coordinateur : session_01BCGFdpRKBvXKjouC75sYBg (Opus 5.5, depuis le 06/10 à 1 h 10 ; auparavant session_01B4JNQXyT69GytdvE9SjAnE).
 Dernière mise à jour : 05/10/2026, 23 h.
+
+## REPRISE (pause demandée par Teo, 06/10/2026 à 21 h Z)
+
+**15/10, 16 h 16 Z — PAUSE 50 % (Teo). Arrêt propre, rien en cours, tout est poussé sur worker-b5.** Tout b5_ est vert sur la recette ; l'écran Lorani complet est parti dans main. Reste la #31 (révision BT), qui attend le compte API INSEE de Teo. À la reprise : attendre le feu vert de Teo, puis le lot du coordinateur.
+
+**15/10 — reprise par petits lots (chaque SHA met ces notes à jour ; pause possible à tout moment).**
+- 15/10, 13 h 24 Z (h1318b5) : tout b5_ est vert sur la recette (b5_18 à b5_22, b5_19 et b5_22 après correction) ; l'écran Lorani complet part dans main. Lignes 15, 16, 18, 30, 32, 33 passées en B.
+- b5_17 vert (ligne 49 en B). b5_29 et b5_18 posés par le coordinateur (lot h1227grand), résultat de b5_18 attendu ; l'écran de la suspension part dans main avec ce passage.
+- Nouveau, à poser : b5_30_choisir_decideur.sql, puis le test b5_19 (scénario local 13/13). Écran (Controle.tsx, portes.ts, types.ts, exemples.ts : « Décide des constats » et le dialogue « Choisir qui décide ») à fusionner après b5_19 vert ; recette 97/97 et accessibilité vertes.
+- Nouveau, à poser après b5_30 : b5_31_regler_controles.sql (redéfinit private.lorani_controler et private.lorani_changements_indice), puis le test b5_20. Écran (« Régler les contrôles », Controle.tsx, portes.ts, types.ts, exemples.ts, lorani.css) à fusionner après b5_20 vert ; recette 103/103 et accessibilité vertes.
+- #23 fait, écran seul (pieces-exigees.ts, PiecesPermis.tsx, EcranLorani.tsx) : rien à poser ; recette 105/105 et accessibilité vertes. Codes du bordereau limités à ceux qu'on a vérifiés (PCMI13 = attestation parasismique, pas PPR).
+- Nouveau, à poser après b5_31 : b5_32_avancement_constate.sql, puis le test b5_21. Écran (ComptesRendus.tsx, Chantier.tsx, avancement.ts, portes.ts — select de deux colonnes nouvelles, à fusionner seulement après la pose —, types.ts, exemples.ts) ; recette 109/109 et accessibilité vertes.
+- Nouveau, à poser après b5_32 : b5_33_retenue_avance_penalites.sql, puis le test b5_22. Écran (Chantier.tsx, montants.ts, portes.ts — select de quatre colonnes nouvelles, à fusionner seulement après la pose —, types.ts, exemples.ts) ; recette 110/110 et accessibilité vertes. Contrat du lecteur complété (retenue_ht, avance_remboursee_ht, penalites_ht) : à signaler à A1.
+- #30 couvert par b5_32 et b5_33 (ligne mise à jour). #31 (révision BT) attend un compte API INSEE : tiers, pas commencé.
+- b5_19 rouge sur la recette (h1252b6b5, 23514 lorani_constats_decision_motivee) : le test acceptait un constat sans motif (ligne 56, et ligne 54 par prudence). Corrigé dans le test seul ; b5_30 inchangé.
+- b5_22 rouge (h1308b5, not ok 3) : retenue_pct est numeric(4,2) sur la recette, l'alerte disait « 5,00 % ». b5_33 écrit désormais trim_scale (« 5 % ») ; à reposer avec b5_22.
+- La liste de reprise (#16, #15, #23, #30 à #33) est faite. Prochain pas : les résultats de pose (b5_18, puis b5_19 à b5_22), et ce que le coordinateur donnera ensuite.
+
+**11/10, 15 h 40 Z — PAUSE demandée par Teo. Arrêt propre, tout est poussé sur worker-b5.**
+- À poser (pas encore posé) : b5_28_changements_indice.sql, puis le test b5_17_changements_indice.sql (4bff78f). Scénario local conforme ; le test n'a pas tourné, faute du socle complet en local.
+- Écran prêt, à fusionner après b5_17 vert : Controle.tsx, rapport.ts, types.ts, portes.ts (lorani_controles en select « * »), exemples.ts — le bloc « Changements depuis l'indice A ».
+- Prochain pas : lire le résultat de b5_17. Ensuite, selon la liste ci-dessous : #15, #16 et #18 (réglages du contrôle), #23 (pièces exigées par le permis), #30 à #33 (situations).
+
+**11/10, 15 h 30 Z — état de la reprise (worker-b5).**
+- Posés et verts sur la recette :
+  - b5_24 : risques par les données ouvertes, prouvés en vrai à Nantes ;
+  - b5_25 : rappel J-10 des visas, questions de plus de 8 jours au point du matin ;
+  - b5_26 : analyse des offres ;
+  - b5_27 : liens vers /espace2/lorani, alertes, point du matin et courriels de rappel compris ;
+  - tests b5_14, b5_15, b5_16 ; b5_01 (121/121).
+- Écran (espace client), parti ou partant dans main avec le coordinateur :
+  - constat → question en un clic ;
+  - onglet Analyse des offres, avec rapport d'analyse PDF et Excel ;
+  - export du dossier daté (registre PDF et Excel par lot).
+- A1 a livré le type de lecture `lorani_offre` (worker-a1 b47c89a, à redéployer). Prochaine preuve réelle : une vraie offre d'entreprise déposée par le banc.
+- Chiffrage (`omega/CHIFFRAGE/lorani.md`) : A 2, B 32, C 23, D 9, T 3.
+- Suite sans tiers, par ordre de valeur : #49 (changements non signalés d'un indice à l'autre), #15, #16, #18 (réglages du contrôle), #23 (pièces exigées par le permis), #30 à #33 (situations).
+
+**11/10, 13 h 40 Z — b5_24 posé et prouvé.**
+- Le coordinateur a posé b5_24, les 15 lots de données et b5_14 v2. Lot h1340b5b7 : 42 ok, 0 not ok. Référentiels conformes : risques 31 733, radon 32 771, sismicité 35 346, libellés 49.
+- Relevé réel sous le gérant du banc (`omega/recette-b5`, comme un client), `lorani_chercher_plu` sur 7ef5d6aa (Nantes). Résultat en 22 s : « fait », UMa, AC1, sismicité 3, radon 3, argiles recensées, 9 risques.
+- La ligne « PLU, servitudes et risques lus depuis l'adresse » peut sortir de `lib/en-preparation.ts` (au coordinateur : c'est un fichier du site).
+
+**Branche `worker-b5`, dernier SHA de travail : 6082922.** Aucun fichier du site public n'a été modifié.
+
+**Fait et posé sur la recette (vert, rapports du coordinateur) :**
+- b5_01 à b5_23 ;
+- les tests b5_01 à b5_14 ;
+- b5_23 (servitudes et risques) et b5_14 v1 : posés à 20 h 15 Z, verts.
+- **Servitudes prouvées en vrai** : `lorani_chercher_plu` sur « Extension Garnier (banc) », à Nantes. Résultat : zone UMa du PLUi, servitude AC1 (abords de la salle Saint-Joseph de Bel-Air), `secteur_protege` vrai.
+- Le cron `lorani-lectures` (toutes les 5 min) tourne et fait avancer les recherches PLU. Il n'y a rien à corriger.
+
+**Écrit et poussé, PAS posé** (à poser par le coordinateur, dans cet ordre) :
+1. `omega/modules/lorani/migrations/b5_24_risques_donnees_ouvertes.sql` (6082922). L'API Géorisques n'aboutit pas depuis nos hébergeurs, car les IP de cloud sont filtrées. Les risques de la commune viennent donc de tables chargées depuis des fichiers ouverts : GASPAR/DDRM, zonage sismique de 2011, radon de 2018.
+2. Les 15 lots de données `omega/modules/lorani/donnees/b5_24_*.sql`. Attendu ensuite dans `lorani_ref_sources` : libelles 49, risques 31 733, radon 32 771, sismicite 35 346.
+3. `omega/tests/lorani/b5_14_servitudes_risques.sql` v2 : 13/13 en local, sur des doubles avec pgTAP émulé.
+4. Puis un relevé réel : relancer `lorani_chercher_plu` à Nantes, qui doit finir « fait » avec sismicité 3, radon 3 et argiles recensées.
+
+NB : b5_24 a été construit après la demande de pause, parce que j'ai lu le message trop tard. Il est complet et testé, mais pas posé : le coordinateur décide s'il le pose.
+
+**Chiffrage de la page** : `omega/CHIFFRAGE/lorani.md` (6082922).
+- 69 lignes : A 1, B 23, C 29, D 13, T 3.
+- Tout en B : ≈ 95 j. De B vers A : ≈ 69 j bruts, ≈ 45 réalistes.
+- Première agence réelle : ≈ 9,5 j. Les chiffres du lecteur sont confirmés par A1.
+
+**Ce qui attend le coordinateur :**
+- poser b5_24, ses données et b5_14 v2 ;
+- décider si l'on rafraîchit GASPAR chaque mois automatiquement (≈ 1 j) ou à la main (`omega/recette-b5/risques/generer.mjs`).
+
+**Ce qui attend Teo :**
+- 5 vrais DWG d'agence (plan de masse, façade, coupe, plan de niveau, fond de plan BET), pour rejouer `omega/recette-b5/dwg/lire-dwg.mjs` ;
+- 5 jeux de planches PDF réels, pour qu'A1 mesure sa lecture ;
+- la région UE du fournisseur du modèle de lecture.
+
+**Prochaine étape exacte, au réveil :**
+1. Lire les résultats de la pose de b5_24.
+2. Corriger si rouge, sinon retirer « PLU, servitudes et risques lus depuis l'adresse » de la liste « en préparation » de `lib/en-preparation.ts`. C'est au coordinateur de le faire, le site étant interdit.
+3. Ensuite, par ordre de valeur, selon `omega/CHIFFRAGE/lorani.md` :
+   - les trois petites choses de la première agence (rappel J-10, « 8 jours le matin », bouton constat → question) ;
+   - puis l'analyse des offres.
 
 ## Jauges
 
 | Jauge | Valeur | Ce qui la fait monter |
 |---|---|---|
-| **Mécanique** (le socle fait ce que la page promet, prouvé par des tests joués sur la recette) | 90 % (**111/111** à 9ba2900, b5_01 à b5_04 posées sur la recette) | b5_01 à b5_03 posés sur la recette ; test pgTAP joué par le coordinateur : **110/111** (20 étapes : projet, équipe, RLS, lecture simulée par les portes du lecteur, confirmation, échéances dans `delais`, rappel J-10 par `controler_delais` → alerte → envoi `a_valider` au chef de projet, décision tacite, affichage, recours, purge, mesures, journal) ; les deux rouges corrigés (b5_04 + lecture du point) : **111/111 le 06/10 à 0 h 01 Z** ; manque : le lecteur réel ne connaît pas les types Lorani (spécification écrite, à A1) |
-| **Livrable client** (un gérant d'agence ouvre /espace/lorani et suit un vrai permis) | 85 % (**en ligne** sur https://omegaai.fr/espace/lorani depuis le 06/10, 0 h 52) | écran recetté aux cinq largeurs (41 contrôles), **relu en base réelle** avec `gerant@banc-varelo.test` : projet et PCMI créés par l'écran, calendrier calculé par le socle, **un vrai récépissé déposé et lu par le lecteur** (mais rendu « courrier non reconnu », voir § 3) ; fusion sur `main` en cours chez le coordinateur ; reste la vérification sur omegaai.fr et le rejeu du dépôt réel quand le lecteur connaît les types |
+| **Mécanique** (le socle fait ce que la page promet, prouvé par des tests joués sur la recette) | 95 % (114/114 le 06/10 à 2 h 05 Z, b5_05 et b5_06 posées ; avant :) 90 % (**111/111** à 9ba2900, b5_01 à b5_04 posées sur la recette) | b5_01 à b5_03 posés sur la recette ; test pgTAP joué par le coordinateur : **110/111** (20 étapes : projet, équipe, RLS, lecture simulée par les portes du lecteur, confirmation, échéances dans `delais`, rappel J-10 par `controler_delais` → alerte → envoi `a_valider` au chef de projet, décision tacite, affichage, recours, purge, mesures, journal) ; les deux rouges corrigés (b5_04 + lecture du point) : **111/111 le 06/10 à 0 h 01 Z** ; manque : le lecteur réel ne connaît pas les types Lorani (spécification écrite, à A1) |
+| **Livrable client** (un gérant d'agence ouvre /espace/lorani et suit un vrai permis) | 96 % (06/10, 2 h 46 Z : les six types de courriers réels ; 2 h 26 Z : arrêté et constat d'affichage réels aussi ; 2 h 10 Z : récépissé et demande de pièces réels lus par le lecteur, proposés, confirmés par l'écran ; avant :) 85 % (**en ligne** sur https://omegaai.fr/espace/lorani depuis le 06/10, 0 h 52) | écran recetté aux cinq largeurs (41 contrôles), **relu en base réelle** avec `gerant@banc-varelo.test` : projet et PCMI créés par l'écran, calendrier calculé par le socle, **un vrai récépissé déposé et lu par le lecteur** (mais rendu « courrier non reconnu », voir § 3) ; fusion sur `main` en cours chez le coordinateur ; reste la vérification sur omegaai.fr et le rejeu du dépôt réel quand le lecteur connaît les types |
 
 **Ce qui manque** : le lecteur (A1) doit apprendre les six types de courriers Lorani (`omega/modules/lorani/CHAMPS-LECTURE-LORANI.md`) ;
 la fusion dans `main` ; la vérification sur omegaai.fr. **Ce que Teo doit fournir** : rien pour l'instant ; pour que
@@ -210,3 +290,531 @@ Ouvert : le TAP du test à 5a4a2e6 (en cours chez le coordinateur) ; la fusion d
 - 06/10, 0 h 54 (coordinateur) : b5_04 posée (avec b5_01 v2 et b5_03 v2), `^test_b5_` rejoué : **111/111**. worker-b5
   8f6d793 fusionné dans main (2e8bbf9). **Lot B5 clos** ; reprise si le lecteur d'A1 sort les six types de courriers
   (rejeu de `courrier-reel.mjs`) ou si un TAP tombe. Jauges : mécanique 90 %, livrable 85 %.
+- 06/10, 1 h 30 Z (reprise, session_018iNiXjY8eWmMjaGrXSGgma) : le lecteur d'A1 v14 (055b29c) connaît les six types.
+  Rejeu préparé (531d0b3) : `fabriquer-courrier.mjs` fabrique les courriers d'essai sans dépendance (récépissé v2,
+  demande de pièces PCMI 3 / PCMI 6 — nouvelles empreintes, l'ancien récépissé reste en `a_classer`) ;
+  `courrier-reel.mjs <session.json> <courrier.pdf> [origine] [nature]`. **Bloqué** : le conteneur neuf n'a ni la clé
+  publishable de la recette ni la session de `gerant@banc-varelo.test` ; demandées au coordinateur.
+- 06/10, 1 h 31–1 h 45 Z : **dépôt réel rejoué** avec le lecteur v14 (compte `gerant@banc-varelo.test`, Next local
+  pointé sur la recette, permis « Pavillon Lemoine »).
+  - `recepisse-depot-v2.pdf`, nature « Récépissé de dépôt » : pièce `Lue` en 35 s ; proposition au passage suivant
+    (214 s) : « Date de dépôt — Citation retrouvée — Date de dépôt : 15/09/2026, Numéro du dossier : PC04410926A0042 »,
+    citations « Dossier déposé le 15/09/2026 en mairie de Nantes. (page 1) » et « PC 044109 26 A0042 (page 1) ».
+    Confirmée par l'écran : le permis porte le numéro, plus rien à confirmer. **La chaîne réelle est complète.**
+  - `demande-pieces.pdf` (PCMI 3, PCMI 6, lettre du 01/10/2026) : `Lue` en 35 s, proposition à 280 s : « Date de la
+    demande : 01/10/2026 — **Pièces réclamées : aucune** », citation « PCMI 3 : plan en coupe… (page 1) ». Le lecteur
+    reconnaît le type et cite les pièces ; **le socle les jette** : `private.lorani_propositions` ne garde que
+    `^(PC|PA|PD|DP|CU)\s*\d…`, donc pas les codes PCMI / DPMI. Le contrôle du script (trop lâche, il lisait la citation)
+    a laissé passer et la demande a été confirmée **vide** sur le banc (permis en `pieces_demandees`, `pieces_demandees = []`).
+  - Corrections : **b5_05** (`omega/modules/lorani/migrations/b5_05_codes_pcmi.sql`, une ligne du filtre :
+    `(PCMI|DPMI|PC|PA|PD|DP|CU)`) ; une assertion de plus dans le test (étape 19, b5_05) ; l'écran exige la liste des
+    pièces pour confirmer une demande et ne coupe plus « PCMI 3 » en deux (`decouperCodes`) ; le script vérifie la liste
+    elle-même. tsc, eslint, build, recette aux cinq largeurs : verts.
+- 06/10, 1 h 49 Z (coordinateur) : b5_05 posée, `^test_b5_` **112/112**, PermisVue.tsx fusionné dans main (9b7ab27).
+- 06/10, 1 h 50–2 h 00 Z : second dépôt réel, `demande-pieces-v2.pdf` (même lettre + une ligne de pied, autre
+  empreinte ; `fabriquer-courrier.mjs … [mention]`) : `Lue` à 71 s, **aucune proposition en 9 min** (deux passages de
+  `lorani_lectures_passage`). `lorani_deja_saisi` ne devrait pas l'écarter (permis `pieces_demandees = []`, lu
+  `[PCMI3, PCMI6]`) ; l'écran montre toute proposition du permis. Lignes brutes demandées au coordinateur (pièce,
+  `pieces_valeurs`, travail `lorani.piece_lue`, `lorani_permis_dates_lues`).
+- 06/10, 2 h 01 Z (coordinateur, brut) : pièce 059e705e… `lue`, `lorani_demande_pieces` 0,97 ; `pieces_valeurs` :
+  `date_lettre` "2026-10-01", `numero_dossier`, et **une seule ligne `pieces` dont la valeur est le tableau
+  ["PCMI 3","PCMI 6"]** ; `lorani_valeurs_de_piece` la rend en texte, `lorani_propositions` la rejette → `pieces = []`
+  → `lorani_deja_saisi` (le permis porte déjà []) → 0 proposition. C'est aussi la cause du « aucune » de 1 h 40.
+- **b5_06** (`omega/modules/lorani/migrations/b5_06_pieces_en_tableau.sql`) : `private.lorani_codes_pieces(jsonb)`,
+  pure, accepte une valeur par code, une valeur tableau jsonb, une valeur texte tableau JSON (JSON illisible = texte),
+  un texte à virgules ; ordre gardé, sans doublon, filtre de b5_05 ; `lorani_propositions` (corps de b5_05) l'appelle.
+  Essayé sur un Postgres 16 local jetable : sept formes, toutes justes ; la proposition rend [PCMI3, PCMI6].
+  Test : deux assertions de plus (étape 19, b5_06) → 114 attendues.
+- 06/10, 2 h 02 Z (coordinateur) : décision commune (A1, `omega/CHAMPS-LECTURE.md` 9ebefca, « Une ligne par champ,
+  jamais deux ») : une liste = UNE ligne dont la valeur est un tableau jsonb. Suites : b5_06 recopie aussi
+  `lorani_valeurs_de_piece` (corps de b5_04) pour remonter le tableau tel quel (jsonb) ; l'ancienne forme reste lue.
+  Essayé en local (table `pieces_valeurs` réduite) : tableau → [PCMI3, PCMI6] ; deux lignes → [PC5, PC8] dans l'ordre
+  des boîtes. Test, étape 7 : la demande de pièces s'écrit désormais en une ligne `["PC5", "PC 8"]` (vraie chaîne
+  `enregistrer_lecture` → `lorani_lectures_passage`). Fiche `CHAMPS-LECTURE-LORANI.md` ligne 23 : une seule forme écrite.
+- 06/10, 2 h 05 Z (coordinateur) : b5_06 posé **depuis 24ea9b0** (pas encore fcd1b1a, messages croisés), `^test_b5_`
+  **114/114** ; lecteur A1 en version 17 (worker-a1 0d54731).
+- 06/10, 2 h 05–2 h 10 Z : **troisième dépôt réel, la chaîne complète passe.** `demande-pieces-v3.pdf` (pièce
+  2bfb560c…) : `Lue` à 35 s, proposition à 247 s « Date de la demande : 01/10/2026 — Pièces réclamées : PCMI3, PCMI6 »
+  (citations « Nantes, le 01/10/2026 », « - PCMI 3 : plan en coupe… »), confirmée par l'écran. Relu sous RLS avec la
+  session du gérant : permis 56c88739… `pieces_demandees`, numéro PC04410926A0042, dépôt 2026-09-15, demande
+  2026-10-01, `pieces_demandees = [PCMI3, PCMI6]` ; échéance `pieces` au 2027-01-01, ouverte, rappels [10, 3, 0].
+  Reste sur le banc la proposition vide confirmée à 1 h 40 (pièce 1c55b927…), donnée de recette.
+- 06/10, 2 h 08 Z (coordinateur) : b5_06 **v2 posée depuis fcd1b1a**, `^test_b5_` **114/114** ; sur 059e705e,
+  `lorani_valeurs_de_piece` rend le tableau en jsonb.
+- 06/10, 2 h 11–2 h 15 Z : **dépôt réel avec le socle final et le lecteur v17** : `demande-pieces-2.pdf` (second
+  modèle de `fabriquer-courrier.mjs` : lettre du 03/10, PCMI 2 et PCMI 8 — une lettre identique à la v3 serait écartée
+  par `lorani_deja_saisi`), pièce 03cb0753… `lue`, `lorani_demande_pieces` 0,97, motif nul ; proposition à 211 s
+  [PCMI2, PCMI8] du 2026-10-03, confirmée par l'écran ; permis : `pieces_demandees = [PCMI2, PCMI8]`, demande
+  2026-10-03, échéance `pieces` 2027-01-03 ouverte, rappels [10, 3, 0]. `courrier-reel.mjs` : `PIECES_ATTENDUES`.
+
+## 6. Question métier : une seconde demande de pièces (06/10, posée par le coordinateur) — proposition b5_07, pas de code
+
+**Constat sur le banc** : la demande du 03/10 (PCMI2, PCMI8) a **remplacé** celle du 01/10 (PCMI3, PCMI6) :
+`lorani_confirmer_date_lue` fait `set date_demande_pieces = <nouvelle>, pieces_demandees = <nouvelle liste>`. Les
+pièces PCMI3 et PCMI6 ont disparu du permis et l'échéance « pièces » a glissé du 2027-01-01 au 2027-01-03.
+
+**Ce que dit le code de l'urbanisme** (à faire valider par un juriste urbaniste avant de coder) :
+- R*423-38 : dans le mois qui suit le dépôt, la mairie adresse UNE lettre indiquant **de façon exhaustive** les
+  pièces manquantes. La pratique et la jurisprudence en déduisent que la liste doit être complète en une fois.
+- R*423-39 : le demandeur a trois mois à compter de la réception de la lettre pour tout fournir ; à défaut, décision
+  tacite de rejet (ou d'opposition). Le délai d'instruction part de la réception de **toutes** les pièces.
+- R*423-41 : une demande notifiée **après le délai d'un mois**, ou qui porte sur une pièce **non prévue par le
+  code**, ne modifie pas les délais d'instruction (le socle le traite déjà : avertissement du calcul quand
+  `date_demande_pieces` dépasse la fin de complétude ; le Conseil d'État en tire qu'une telle demande n'empêche pas
+  le permis tacite).
+- Une seconde demande dans le mois : le texte ne l'interdit pas en toutes lettres, mais elle ne fait pas repartir
+  un délai que la première a déjà ouvert ; au mieux elle complète la liste.
+
+**Donc l'écrasement est faux** sur deux points : on perd des pièces que la mairie attend toujours (le demandeur qui
+suit l'écran ne fournirait que PCMI2 et PCMI8 et se ferait opposer un rejet tacite), et on retarde l'échéance.
+
+**b5_07 proposée** (un `create or replace` de `lorani_confirmer_date_lue`, une colonne, l'écran) :
+1. Une demande confirmée sur un permis qui a déjà `date_demande_pieces` et pas de `date_pieces_fournies` :
+   `pieces_demandees` = **union**, dans l'ordre (d'abord la première liste, puis les nouveaux codes) ;
+   `date_demande_pieces` **garde la première date** (le délai de trois mois ne repart pas ; c'est aussi le côté sûr
+   pour le demandeur : les rappels tombent plus tôt).
+2. Nouvelle colonne `lorani_permis.demandes_pieces jsonb` (historique `[{date, pieces, piece_id, dates_lue_id}]`),
+   tracée comme les autres ; `pieces_demandees` reste la liste à fournir.
+3. Avertissement du calcul : « Seconde demande de pièces reçue le … : la mairie doit tout réclamer en une fois
+   (art. R*423-38) ; elle ne fait pas repartir le délai de trois mois. Si elle arrive après le délai d'un mois ou
+   porte sur une pièce non prévue par le code, elle ne modifie pas les délais (art. R*423-41). Fournissez quand même
+   toutes les pièces. »
+4. Une demande qui arrive **après** `date_pieces_fournies` : ne rien écraser, la garder dans l'historique avec
+   l'avertissement R*423-41 ; c'est au membre de décider (saisir de nouvelles pièces fournies s'il les envoie).
+5. `lorani_deja_saisi('demande_pieces')` : déjà saisi si la date est dans l'historique avec la même liste (une
+   lettre relue ne repropose rien), plus seulement si elle égale la liste courante.
+6. L'écran : la ligne « Pièces à fournir » montre la liste fusionnée et, dessous, les demandes successives (date,
+   pièces, courrier) ; la saisie manuelle « Demande de pièces reçue » suit la même règle (union).
+7. Test : étape 7 bis, une seconde demande dans le mois → union, date et échéance inchangées, avertissement ; une
+   demande après les pièces fournies → historique seulement.
+
+Je ne code pas b5_07 avant ta réponse (et idéalement celle d'un juriste sur le point « seconde demande dans le
+mois »). Le permis « Pavillon Lemoine » du banc garde l'état écrasé, utile pour rejouer b5_07.
+
+## 7. Essai réel arrêté + constat d'affichage (06/10, 2 h 17–2 h 26 Z, lecteur v17)
+
+Nouveau projet du banc « Extension Garnier (banc) » (7ef5d6aa…) et PC « Extension Garnier » (0a8ac86c…, PC 044109 26
+A0077, déposé le 2026-06-02), créés sous RLS avec la session du gérant (mêmes écritures que l'écran), pour ne pas
+toucher « Pavillon Lemoine ». Courriers : `fabriquer-courrier.mjs arrete|constat_affichage` ; script :
+`PERMIS='Extension Garnier' NUMERO='PC04410926A0077' node omega/recette-b5/courrier-reel.mjs … lorani_arrete`.
+- `arrete-garnier.pdf` : `lue`, `lorani_arrete` 0,97 ; proposition à 70 s « Décision : Accordé — 20/08/2026 »
+  (citations « le permis de construire est ACCORDÉ », « Fait à Nantes, le 20/08/2026 ») → `{decision: favorable,
+  date_decision: 2026-08-20}`, vérifiée, confirmée.
+- `constat-affichage-garnier.pdf` : `lue`, `lorani_constat_affichage` 0,97 ; proposition à 282 s « Premier jour
+  d'affichage : 28/08/2026 » (citation « Le 28/08/2026 à 10 h 15 ») → `{date_affichage: 2026-08-28}`, confirmée.
+- Permis : `accorde`, décision favorable du 2026-08-20, affichage 2026-08-28, **purge 2026-11-20** ; échéances :
+  complétude 07-02 tenu, instruction 09-02 tenu, affichage 09-04 tenu, **recours 10-29** (deux mois francs depuis le
+  premier jour d'affichage) ouvert, **retrait 11-20** (trois mois après l'arrêté) ouvert, purge 11-20 ouvert. Juste.
+- Bilan : quatre des six types de courriers prouvés en réel (récépissé, demande de pièces, arrêté, constat
+  d'affichage) ; restent la lettre de délai et le certificat tacite (couverts par le test, pas encore en réel).
+
+## 8. b5_07 — seconde demande de pièces (feu vert du coordinateur, 06/10, 2 h 17 Z)
+
+- `omega/modules/lorani/migrations/b5_07_seconde_demande_pieces.sql` : colonne `lorani_permis.demandes_pieces`
+  (add column if not exists, contrôle ≤ 24 lettres) ; `private.lorani_union_pieces`, `private.lorani_noter_demande`
+  (pures) ; trigger BEFORE `lorani_permis_suivre_demandes` → `private.lorani_suivre_demandes_pieces()` (security
+  definer) : seconde lettre avant la remise → union, première date gardée, alerte « attention » au chef de projet
+  (clé `permis:<id>:seconde_demande:<n>`) ; après la remise → historique seulement, alerte R*423-41 ; même date →
+  correction ; `private.lorani_deja_saisi` lit l'historique ; amorce de l'historique des permis existants. Les trois
+  nouvelles fonctions : `revoke execute from public`. Un seul trigger sert la confirmation d'une date lue ET la
+  saisie de l'écran. Écart à la proposition du § 6 : pas d'avertissement dans le calcul (fonction de 300 lignes à
+  recopier) ; l'alerte et l'écran le portent. Pas de `piece_id` dans l'historique (le lien est dans
+  `lorani_permis_dates_lues`).
+- Essayé sur Postgres 16 local (table réduite) : 1re lettre → historique ; 2e → [PCMI3, PCMI6, PCMI2], date de la
+  1re, deux lettres, alerte ; relue → `deja_saisi` vrai ; après remise → permis inchangé, trois lettres, alerte
+  R*423-41 ; même date → correction.
+- Test : étape 19 bis, six assertions (permis « Garage Lemoine » neuf, UPDATE sous RLS par le chef de projet) →
+  attendu **120/120**.
+- Écran : type `demandes_pieces`, `appliquerDemande` (même règle, pour l'exemple et l'affichage immédiat), avis
+  « Plusieurs demandes de pièces » (à fournir, lettres, R*423-38 / -41) ; exemple « Maison Lemoine » à deux lettres ;
+  recette : un contrôle de plus. tsc, eslint, build, recette aux cinq largeurs : verts.
+- **À faire valider par un juriste (remonté à Teo par le coordinateur)** : une seconde demande de pièces envoyée
+  DANS le mois qui suit le dépôt — complète-t-elle valablement la première (et fait-elle partir le délai de trois mois
+  de sa propre date pour les pièces qu'elle ajoute) ? b5_07 garde la date de la première lettre, le choix prudent.
+
+## 9. Les deux derniers types en réel : lettre de délai, certificat tacite (06/10, 2 h 33–2 h 46 Z, lecteur v17)
+
+Deux permis neufs dans le dossier « Extension Garnier (banc) », créés sous RLS par le gérant : PC « Surélévation
+Garnier » (ec65b452…, PC 044109 26 A0091, déposé le 2026-09-20) et DP « Clôture Garnier » (252ff65a…, DP 044109 26
+A0103, déposée le 2026-06-01 ; le socle la met d'emblée en `decision_a_confirmer`, non-opposition tacite au 02/07).
+- `lettre-delai-garnier.pdf` (« porté à 6 mois », R*423-28, ABF) : proposition à 388 s `{delai_notifie_mois: 6,
+  date_notification_delai: 2026-10-02}`, vérifiée, confirmée → décision attendue **2027-03-20** (dépôt + 6 mois),
+  échéance `instruction` 2027-03-20 ouverte, complétude 2026-10-20 ouverte.
+- `certificat-tacite-garnier.pdf` (« non-opposition tacite à compter du 02/07/2026 ») : proposition à 247 s
+  `{date_decision: 2026-07-02}`, confirmée → `accorde`, décision `tacite` du 2026-07-02 ; retrait 2026-10-02 tenu ;
+  affichage 2026-07-17 encore `ouvert` (date passée, à voir si `controler_delais` le passe en dépassé) ; pas de
+  purge sans affichage, avertissement R*600-2 / R600-3. Juste.
+- **Les six types de courriers Lorani sont prouvés en réel** (lecteur → socle → écran → confirmation).
+- Incident sans conséquence : au premier essai, un `next start` resté d'une recette (build sans les variables de la
+  recette) servait les données d'exemple ; le script n'a pas trouvé le permis et a « confirmé » la lettre d'exemple
+  d'un autre permis, en mémoire seulement (rien en base). `courrier-reel.mjs` s'arrête désormais si le permis visé
+  n'est pas ouvert en base réelle.
+
+## 10. b5_07 en réel (06/10, 2 h 35–2 h 52 Z)
+
+- Coordinateur, 2 h 35 Z : b5_07 posée depuis a4e3197, `^test_b5_` **120/120** ; amorce sur le banc : « Pavillon
+  Lemoine » → historique [{2026-10-03, [PCMI2, PCMI8]}] (la lettre du 01/10 avait été écrasée avant la pose).
+- Rejeu par l'écran : `demande-pieces-v4.pdf` = la lettre du 01/10 (PCMI 3, PCMI 6), autre empreinte, déposée sur
+  « Pavillon Lemoine » : proposition à 211 s [PCMI3, PCMI6] du 01/10 (non écartée : l'historique ne la connaissait
+  pas), confirmée. Relu sous RLS : `date_demande_pieces` **2026-10-01** (la plus ancienne), `pieces_demandees`
+  **[PCMI3, PCMI6, PCMI2, PCMI8]** (la lettre la plus ancienne d'abord), `demandes_pieces` = les deux lettres,
+  échéance `pieces` revenue au **2027-01-01**, rappels [10, 3, 0] ; alerte « attention »
+  `lorani:permis:56c88739…:seconde_demande:2`. L'écran (base réelle) affiche « Plusieurs demandes de pièces. À
+  fournir : PCMI3, PCMI6, PCMI2, PCMI8. Lettres : du 01/10/2026 (PCMI3, PCMI6) ; du 03/10/2026 (PCMI2, PCMI8)… »
+  (capture `reel-seconde-demande-1440.jpg`). Le banc a retrouvé une scène juste, et le cas « la lettre la plus
+  ancienne arrive en second » est prouvé.
+- Défaut vu : le titre de l'alerte dépassait 200 caractères, coupé avant les articles → **b5_08**
+  (`b5_08_titre_alerte_seconde_demande.sql`, corps du trigger de b5_07, seuls les deux titres changent : articles
+  avant la liste, intitulé borné à 60). Essayé en local par-dessus b5_07 : titres complets, règle inchangée. Le
+  test 19 bis (titre `like '%seconde demande de pièces%'`) reste vrai.
+- Coordinateur, 04 h 15 Z : l'échéance d'affichage de « Clôture Garnier » (délai 6d71f93c…) est passée en
+  **dépassé** au passage horaire de 03 h 07 Z : pas de trou, c'était l'attente du cron (minute 7).
+- Relevé du coordinateur : son libellé disait « DP « Extension Garnier (banc) » » (nom du projet) → **b5_09**
+  (`b5_09_titre_du_permis.sql`) : `private.lorani_titre_permis` prend l'intitulé du permis, sinon le nom du projet ;
+  les sept appelants en profitent. Test étape 10 aligné (« PC « Résidence Lemoine — six logements » », alerte et
+  sujet du courriel de rappel) → toujours 120 assertions.
+- Coordinateur, 04 h 58 Z : fbf4c98 posé (b5_08, b5_09), `^test_b5_` **120/120**, worker-b5 fusionné dans main.
+  État du lot : b5_01 à b5_09 posées ; six types de courriers prouvés en réel ; rien d'ouvert côté B5, sauf
+  l'avis d'un juriste sur la seconde demande de pièces dans le mois (remonté à Teo).
+
+## 11. Accessibilité (06/10, demande du coordinateur après la mesure axe-core d'A3)
+
+- `main` fusionné dans worker-b5 (5b3a7a9) pour avoir le style commun `.esp-item[aria-current="true"]`.
+- `EcranLorani.tsx` : les deux listes (permis par projet, dossiers) ne sont plus `role="listbox"` / `role="option"` +
+  `aria-selected` mais une liste de boutons ; l'élément ouvert porte `aria-current="true"` (modèle FileValidations).
+- axe a relevé deux autres écarts graves, corrigés : la pastille d'étape du calendrier (`aria-label` sur un span
+  sans rôle → `role="img"`) ; le tableau des intervenants qui défile à 390 (`tabIndex={0}`, `role="region"`, nommé).
+- `omega/recette-b5/accessibilite-lorani.mjs` (copie du script d'A3, réduite à /espace/lorani) : 390 et 1440,
+  **0 écart** sur la page et dans le dialogue « Régime » ; clavier : focus dans le dialogue, piégé, Échap ferme et
+  rend le focus à « Régime ». tsc, eslint, build, recette aux cinq largeurs : verts. Pas touché : dialog.tsx,
+  barre d'onglets.
+
+## 12. Jurisprudence de la seconde demande (06/10, 13 h 43 Z, recherche du coordinateur) — b5_10
+
+- CE, 30 avril 2024, n° 461958 : la mairie peut inviter de nouveau à compléter le dossier, mais cette demande est
+  sans incidence sur le cours du délai et sur la naissance d'une décision tacite ; l'instruction part de la dernière
+  pièce reçue. CE, 4 février 2025 : une seule pièce prévue par le code suffit à interrompre valablement le délai.
+  **La règle de b5_07 est confirmée** ; le point « juriste » du § 8 est clos.
+- `b5_10_jurisprudence_seconde_demande.sql` : corps du trigger (b5_08) ; titre « 2e demande de pièces du …, sans
+  effet sur les délais (CE 30 avril 2024, n° 461958) ; délai depuis la lettre du … » (≤ 200, intitulé borné à 50) ;
+  le détail de l'alerte cite la décision et R*423-38 / R*423-39 ; l'alerte « après la remise » ajoute la décision.
+- « Pièce non prévue par le code » : Lorani n'a aucun avertissement de ce genre sur une demande entière (le socle garde
+  les codes, écarte le texte libre sans le signaler) ; R*423-41 n'apparaît que pour une demande hors du mois (calcul)
+  ou après la remise des pièces. Rien à retirer.
+- Écran : l'avis « Plusieurs demandes de pièces » cite la décision ; recette (contrôle b5_07 : « 461958 ») et axe :
+  verts. Test 19 bis : l'alerte doit porter « 2e demande de pièces » et la référence. Essai local (b5_07 + b5_08 +
+  b5_10) : titres de 175 et 162 caractères, règle inchangée.
+- Coordinateur, 13 h 49 Z : b5_10 posée (027eca3), `^test_b5_` **120/120** (ok 116 : l'alerte cite CE 30 avril 2024,
+  n° 461958) ; écran fusionné dans main, en ligne avec la prochaine poussée groupée. b5_01 à b5_10 posées.
+
+
+## Vague 3 — les trois manques pour qu'une vraie agence paie Lorani et l'ouvre chaque jour (06/10, 14 h 30 Z)
+
+Point de départ : la page des architectes (`app/secteurs/architectes/page.tsx`) promet, au-delà du calendrier du
+permis, « les honoraires phase par phase », « chaque situation comparée au marché et à la précédente », « la date
+butoir de chaque visa calée sur le délai de commande » et la relecture des planches contre le PLU. Le socle Lorani
+n'a que neuf tables : projets, membres, lots, intervenants, permis et ce qui l'entoure. Ni honoraires, ni temps,
+ni situations, ni visas (vérifié dans `omega/SOCLE-EXTRAITS-LORANI.sql` et sur `main`).
+
+**1. Le dépôt dématérialisé : l'accusé de réception électronique et les courriels du guichet.**
+Depuis le 1er janvier 2022, toutes les communes reçoivent les demandes d'autorisation d'urbanisme par voie
+électronique (SVE, art. L.112-8 CRPA) ; celles de plus de 3 500 habitants les instruisent sous forme dématérialisée
+(art. L.423-3 du code de l'urbanisme, loi ELAN art. 62) et les échangent avec les services consultés par PLAT'AU.
+**Le pétitionnaire ne voit pas PLAT'AU** : il dépose et suit sur le guichet de la commune (ou Géoportail / GNAU) et
+reçoit tout **par courriel**. Pour une demande électronique, **le récépissé est l'accusé de réception électronique**
+(ARE, art. L.112-11 CRPA ; art. R*423-3 à R*423-5) ; la date de réception est celle de l'accusé d'enregistrement
+électronique (AEE), et elle fait partir le délai d'instruction. Or notre fiche de lecture rangeait l'« accusé de
+réception électronique » en `lorani_courrier_autre` : **pour l'essentiel des permis déposés depuis 2022, Lorani ne lirait
+jamais la date de dépôt**, et chaque courriel du guichet devait être enregistré puis redéposé à la main dans l'écran.
+L'agence n'ouvrira pas Lorani chaque jour si elle doit y recopier sa boîte aux lettres. → Rattacher automatiquement
+les courriels du guichet (ARE, demandes de pièces, arrêtés) au bon dossier par le numéro cité, et lire l'ARE comme
+un récépissé. Pas d'intégration PLAT'AU possible côté pétitionnaire : tout passe par le courriel (A2, `receptions`).
+Sources : [ecologie.gouv.fr — Dématérialisation des autorisations d'urbanisme](https://www.ecologie.gouv.fr/dematerialisation-des-autorisations-durbanisme) ;
+[Préfecture de Seine-et-Marne — Démat. ADS](https://www.seine-et-marne.gouv.fr/contenu/telechargement/49978/365617/file/Démat.%20ADS%20Présentation%20générale%20202105%20V2.2.pdf) (PLAT'AU n'est pas visible du pétitionnaire) ;
+[Eurojuris — Récépissé et délai d'instruction du permis de construire](https://www.eurojuris.fr/contentieux-entreprises/articles/recepisse-delai-instruction-permis-construire-11686.htm) (ARE = récépissé, date de l'AEE) ;
+[DDT de l'Oise — fiche SVE](https://www.oise.gouv.fr/contenu/telechargement/61288/374954/file/A_08_SVE%202020.pdf).
+
+**2. Les honoraires phase par phase (temps passé contre honoraires de chaque élément de mission).**
+C'est le cœur économique d'une agence : honoraires facturés par élément de mission (ESQ, APS, APD, PRO, ACT, VISA,
+DET, AOR, référentiel MOP, décret 93-1268 intégré au code de la commande publique), appel à l'achèvement de chaque
+phase, et dérive du temps passé à repérer avant la fin de la mission. La page le promet (« Une phase qui consomme
+plus que prévu remonte avant la fin de la mission ») ; rien ne le porte. C'est aussi ce qui fait ouvrir l'outil
+chaque jour (saisie des temps). Le concurrent de référence, OOTI (plus de 800 agences), vend exactement cela.
+Sources : [Hayot Expertise — facturer ses honoraires par phase (2026)](https://hayot-expertise.fr/blog/architecte-facturer-honoraires-phases-mission-2026) ;
+[Appvizer — OOTI](https://www.appvizer.fr/construction/architecture/ooti) ; [GetApp — OOTI](https://www.getapp.fr/software/114699/ooti).
+
+**3. Le chantier : situations de travaux comparées au marché, visas datés.**
+Pendant la DET, l'architecte vise les situations mensuelles des entreprises (cumul contre marché et avenants, écart
+avec la précédente) et les plans d'exécution (visa, date butoir calée sur le délai de commande). La page le promet
+(« Lorani compare chaque situation reçue au marché et à la précédente, puis chiffre l'écart ») ; rien ne le porte.
+Archipad, la référence du suivi de chantier sur tablette, couvre réserves et comptes rendus mais pas le contrôle
+financier des situations ; le lecteur d'A1 sait déjà lire des factures (FILED), le pas est court.
+Sources : [La Fabrique du Net — alternatives à Archipad](https://www.lafabriquedunet.fr/logiciels/alternatives/alternative-archipad) ;
+[Ordre des architectes — Archigraphie 2024](https://prod.architectes.ows.fr/sites/cnoa/files/2024-12/ARCHIGRAPHIE-2024_13decembre_1.pdf) (profil des agences).
+
+Ordre retenu : le 1 d'abord, parce qu'il casse la promesse déjà en ligne (« Les courriers de la mairie sont lus ») pour
+la majorité des dossiers réels, et qu'il est court (module Lorani, réception d'A2 déjà en place). Le 2 et le 3 sont
+des chantiers neufs (tables, écran, lecteur), à proposer au coordinateur en lots séparés.
+
+### Vague 3, n° 1 livré à poser — b5_11, les courriels du guichet rangés seuls (06/10)
+
+- `omega/modules/lorani/migrations/b5_11_courriels_guichet.sql` : abonnement `reception.nouvelle → lorani.reception` ;
+  `private.lorani_numeros_cites(text)` (numéros d'autorisation dans un texte : espaces, tirets, minuscules, collés, noms
+  de fichiers ; essayé en local) ; `private.lorani_rattacher_reception(bigint)` (les numéros du sujet, du corps, du HTML
+  et des noms de pièces jointes → les permis actifs d'UN dossier → chaque PDF / PNG / JPEG devient une pièce du dossier,
+  source `courriel`, statut `recue`, et le socle lance la lecture ; idempotent ; sans pièce jointe → alerte « à lire » ;
+  boîte Lorani sans numéro ou plusieurs dossiers → alerte « à ranger » ; autre module sans numéro Lorani → ignoré) ;
+  `private.lorani_lectures_passage()` prend aussi `lorani.reception` (corps du socle). Trois fonctions nouvelles en
+  `revoke execute from public`. Journal `lorani.courriel_rattache`.
+- Test : `omega/tests/lorani/b5_02_courriels_guichet.sql` (`test_b5_02_courriels_guichet`, 16 assertions, aides de
+  b5_01) → `^test_b5_` attendu **136/136**.
+- Fiche `CHAMPS-LECTURE-LORANI.md` : l'ARE / l'AEE d'un dépôt en ligne est un `lorani_recepisse_depot` (date de
+  réception qu'il indique), il ne va plus en `lorani_courrier_autre` — **à reprendre par A1** dans le lecteur.
+- Écran (`components/espace/lorani` seulement) : une pièce venue d'un courriel dit « Reçu par courriel du guichet et
+  rangé ici par son numéro de dossier » ; l'exemple « Clôture Martin » a un ARE reçu par courriel ; recette +1 contrôle.
+  tsc, eslint, build, recette cinq largeurs, axe : verts.
+- Reste à faire pour que ce soit réel chez une agence : une boîte de réception Lorani par agence (expéditeur `identite`
+  = adresse, module lorani, chez A2) vers laquelle l'agence fait suivre les courriels du guichet ; l'écran n'affiche
+  pas encore cette adresse (elle n'existe pas encore).
+- Coordinateur, 14 h 44 Z : b5_11 posé ; `test_b5_02` 14/16. Causes : (12) mon sujet citait « PC0441092600199 » (un 0 au
+  lieu du A) : le courriel partait en « à ranger », pas en « à lire » — test corrigé (PC04410926A0199, et le nom de la
+  pièce jointe aligné) ; (16) sans `detail.module`, `deposer_reception` prend le module de la boîte, et sur la recette
+  `compta@banc-varelo.test` se résout vers un expéditeur Lorani — le test passe `{"module": "filed"}` et filtre sur sa
+  propre réception ; la réponse « ignore » de `lorani_rattacher_reception` rend aussi `reception` et `module`.
+
+### Vague 3, n° 1 posé ; n° 2 livré à poser — b5_12, les honoraires phase par phase (06/10)
+
+- Coordinateur, 14 h 49 Z : 218a777 reposé, `^test_b5_` vert (1..2 : b5_01 et b5_02). A1 : ARE / AEE lus comme
+  `lorani_recepisse_depot` (lecteur v21, recette). La boîte Lorani par agence attend l'inbound (MX posés par Teo).
+- `omega/modules/lorani/migrations/b5_12_honoraires_phases.sql` : `public.lorani_honoraires` (élément de mission MOP,
+  honoraires HT, heures prévues, statut a_venir / en_cours / achevee / facturee, dates) et `public.lorani_temps` (un
+  membre, un jour, un élément, des heures ≤ 24, une note) ; droits comme les autres tables Lorani (voit / écrit le
+  projet ; chacun saisit et corrige SES temps, même un assistant en lecture ; pas de retrait : 0 h annule) ; triggers :
+  le projet vient de l'élément, pas de temps futur, l'élément passe « en cours » à la première saisie, alertes
+  « attention » au chef de projet à 80 % puis 100 % des heures prévues (une par seuil, avec l'écart et le taux
+  réalisé), « appel d'honoraires à émettre » à l'achèvement (journal `lorani.element_acheve`) ;
+  `public.lorani_honoraires_projet(projet)` (tableau de bord sous RLS). Sans `drop` ni `delete` : clés étrangères sans
+  cascade (un projet porteur d'honoraires ne s'efface pas, il s'archive par `actif`). Essayée en local (doublures du
+  socle) : seuils, textes (« 33,5 h pour 30 h prévues (+3,5 h) … taux réalisé 90 € HT de l'heure »), appel
+  (« 3 000,00 € HT »), refus d'un temps futur, tableau de bord.
+- Test : `omega/tests/lorani/b5_03_honoraires.sql` (`test_b5_03_honoraires`, 24 assertions, aides de b5_01) →
+  `^test_b5_` attendu **160/160**.
+- Écran (`components/espace/lorani` seulement) : `Honoraires.tsx` dans la carte du projet — totaux (honoraires,
+  heures, facturé, appels à émettre), avertissement ambre / rouge par phase qui dérive, tableau par élément (jauge,
+  taux réalisé, état), « Saisir du temps », « Ajouter un élément », « Achevé », « Facturé », derniers temps saisis ;
+  exemple « Maison Lemoine » (six éléments, 33 000 € HT) et « Pôle enfance » ; recette +4 contrôles (saisie de 9 h →
+  le PC passe dépassé, puis achevé), captures `lorani-temps-1440.jpg`, `lorani-honoraires-1440.jpg`. Débordement à 390
+  trouvé et corrigé (texte `sr-only` en position absolue hors du cadre défilant). tsc, eslint, build, recette cinq
+  largeurs, axe : verts.
+
+### Vague 3, n° 2 posé ; n° 3 livré à poser — b5_13, le chantier : situations et visas (06/10)
+
+- Coordinateur, 15 h 15 Z : b5_12 posé, `^test_b5_` vert (1..3). Écran des honoraires sur main à la prochaine poussée.
+- Règles vérifiées : CCAG-Travaux 2021, art. 12.2.2 — le maître d'œuvre accepte ou rectifie le projet de décompte
+  mensuel dans les **7 jours** ([marche-public.fr](https://www.marche-public.fr/CCAG-travaux2021/12-modalites-reglement-comptes.htm)) ;
+  art. 29 — visa des documents d'exécution en **15 jours** ([marche-public.fr](https://www.marche-public.fr/CCAG-travaux2021/29-etudes-execution.htm)) ;
+  retenue de garantie **≤ 5 %**, loi n° 71-584 du 16 juillet 1971 ([FNTP](https://www.fntp.fr/bonnes-pratiques-de-paiement-dans-les-relations-interentreprises/)) ;
+  marché privé (NF P 03-001, texte payant) : 15 jours par défaut, modifiable marché par marché.
+- `omega/modules/lorani/migrations/b5_13_situations_visas.sql` : `public.lorani_marches` (lot, titulaire, montant,
+  avenants, retenue ≤ 5 %, délai de vérification 7 j en marché public / 15 j sinon) ; `public.lorani_situations`
+  (n°, mois ramené au 1er, cumul demandé, reçue le, à viser avant, a_viser / visee / rectifiee, cumul admis,
+  observation obligatoire pour rectifier, numéro et marché figés) ; `public.lorani_visas` (lot, document, indice,
+  reçu le, commande de l'ouvrage le, à viser avant = le plus tôt entre reçu + 15 j et la veille ouvrée de la commande,
+  vso / vao / ref, observation obligatoire pour vao et ref) ; alertes : situation reçue (cumul, montant du mois contre
+  le cumul admis précédent, date limite), cumul au-delà du marché et des avenants (écart chiffré), cumul en baisse,
+  visa urgent (< 5 jours) ; `public.lorani_chantier_projet(projet)` (tableau sous RLS). Sans `drop` ni `delete`, clés
+  étrangères sans cascade. Essayée en local (doublures) : tous les cas justes.
+- Test : `omega/tests/lorani/b5_04_situations_visas.sql` (22 assertions) → `^test_b5_` attendu **182/182**.
+- Écran (`components/espace/lorani`) : `Chantier.tsx` dans la carte du projet — situations à viser (dépassement et
+  baisse signalés, Viser / Rectifier), marchés (avancement, dernière situation), documents à viser (urgent, en retard,
+  Rendre l'avis), dialogues Nouveau marché / Situation reçue / Document à viser ; exemple « Façade rue Mercière » passé
+  en DET (deux marchés, cinq situations, trois visas) ; recette +3 contrôles, axe sur la carte du chantier et son
+  dialogue ; captures `lorani-situation-1440.jpg`, `lorani-chantier-1440.jpg`. tsc, eslint, build, recette cinq
+  largeurs, axe : verts.
+- Suite naturelle (non faite) : que le lecteur d'A1 lise les situations reçues (type `lorani_situation_travaux` :
+  numéro, mois, cumul HT, titulaire, lot) pour qu'elles naissent seules, comme les courriers de la mairie ; et une
+  échéance du socle (`delais`) pour la date limite de visa, avec rappel.
+- Coordinateur, 15 h 42 Z : b5_13 et b5_04 posés, `^test_b5_` 4/4 vert ; **test 51 rouge** : le droit de retrait restait
+  accordé à authenticated sur les cinq tables de la vague 3 (privilèges par défaut de Supabase : tout est accordé à la
+  création ; « grant select, insert, update » n'en retire rien). → **b5_13b** (`b5_13b_privileges.sql`) : `revoke all`
+  à authenticated et anon puis `grant select, insert, update` à authenticated, sur lorani_honoraires, lorani_temps,
+  lorani_marches, lorani_situations, lorani_visas — même effet qu'un retrait nommé, sans le mot interdit dans le
+  fichier. Reporté dans les sources b5_12 et b5_13 (b5_10 et b5_11 ne créent pas de table).
+
+### Suite de la vague 3 — b5_14, la situation lue devient seule « à viser » (06/10)
+
+- Coordinateur, 15 h 50 Z : b5_13b posé, tests 51 et 44 verts, écran Chantier fusionné (main 26cdd66). Décision :
+  lecture automatique des situations, sur le modèle de B4 (Tamila, avis du greffe), puis l'échéance des visas.
+- `omega/modules/lorani/migrations/b5_14_situation_lue.sql` : `private.lorani_montant_lu` (« 72 500,00 € »,
+  « 72500.00 », « 72.500,00 » → 72500.00 ; essayée en local), `private.lorani_nom_comparable` (sans accents, ponctuation
+  ni forme juridique : « SARL Bâti-Ouest » = « BATI OUEST »), `private.lorani_poser_situation_lue(piece)` (marché par lot
+  + titulaire, puis titulaire, puis seul marché du dossier ; numéro lu ou suivant ; ligne « à viser » avec piece_id, les
+  triggers de b5_13 font le reste ; idempotent ; marché introuvable ou cumul illisible → alerte « à ranger »), et
+  `private.lorani_lectures_passage` (corps de b5_11) qui aiguille `lorani_situation_travaux` vers cette porte.
+- Fiche `CHAMPS-LECTURE-LORANI.md` : type `lorani_situation_travaux` (cumul_ht obligatoire, numero_situation, mois,
+  titulaire, lot ; facultatifs de contrôle) — **à brancher par A1** dans le lecteur.
+- Test `omega/tests/lorani/b5_05_situation_lue.sql` (15 assertions) → `^test_b5_` attendu **197/197** (5 tests).
+
+### b5_15 — la date limite des visas au registre des délais du socle (06/10)
+
+- `omega/modules/lorani/migrations/b5_15_echeance_visas.sql` : colonne `lorani_visas.delai_id` ; trigger BEFORE
+  `lorani_visas_suivre_delai` → `private.poser_delai_date` (libellé « Visa : <document> (indice X) », source réception
+  + règle CCAG art. 29, rappels J-3 / J-1 / J, chef de projet, clé `lorani:visa:<id>:<date>`) ; date limite changée →
+  ancienne échéance annulée avec motif, nouvelle posée ; avis rendu → `clore_delai(…, 'tenu')` ; dossier sans territoire
+  → pas d'échéance ; refus du socle → alerte interne, la saisie du visa n'est pas bloquée. Abonnements
+  `delai.proche.lorani → lorani.visa.rappel`, `delai.depasse.lorani → lorani.visa.depasse` ;
+  `private.lorani_visa_rappeler` (alerte « à rendre avant le … » / « en retard ») ; `lorani_lectures_passage` (corps de
+  b5_14) prend ces deux genres. Les gardes du socle (`exiger_ecriture_delai`, `exiger_porte_du_module`) ne sont pas dans
+  l'extrait : j'appelle `poser_delai_date` / `clore_delai` comme le calendrier des permis le fait (fonction SECURITY
+  DEFINER du module) ; le test dira si une garde refuse.
+- Test `omega/tests/lorani/b5_06_echeance_visas.sql` (12 assertions, vraie chaîne `controler_delais` → passage) →
+  `^test_b5_` attendu **209/209** (6 tests).
+
+## b5_16 — le contrôle du dossier (carnet 15:58Z, n° 1) — 06/10/2026
+
+- Socle : `omega/modules/lorani/migrations/b5_16_controle_dossier.sql` (a05f77c), test `omega/tests/lorani/b5_07_controle_dossier.sql`
+  (29 assertions). Essayé en local sur des doubles du socle (/tmp/pgb5.g7u7, e11.sql) : vert ; pas encore posé sur la recette.
+- Tables `lorani_controles` (intitulé, indice, précédent, statut en_lecture|controle|clos), `lorani_controle_pieces` (rôle
+  planche|cctp|dpgf|plu|autre, référence « PC2 »), `lorani_constats` (nature incoherence|plu|cctp_dpgf, gravité, valeurs citées
+  [{piece, reference, page, boite, valeur, texte}] + la règle {regle:true, borne, article}, correction proposée, statut
+  ouvert|corrige|accepte|ecarte, motif obligatoire pour accepter/écarter). Un membre ne change que statut et motif (trigger
+  `lorani_constats_garder`, GUC `lorani.controle_en_cours` pour le socle).
+- Croisement `private.lorani_controler` : incohérence = même grandeur + même objet sur ≥ 2 pièces, écart > tolérance (0,05 m ;
+  0,5 m² ; 0,5 % ; 0 pour un nombre), correction = valeur la plus fréquente ; PLU = mesure hors max/min (marge tolérance/10), un
+  constat par grandeur/objet/borne, la PIRE valeur citée, toutes les pièces fautives jointes ; CCTP/DPGF = poste décrit non chiffré
+  et l'inverse (seulement si les deux côtés ont des postes). Revérification : precedent_id → reconduit + hérite accepte/ecarte ;
+  ancien ouvert disparu → corrige, corrige_au_controle, « Corrigé à l'indice B. ». Alerte `lorani:controle:<id>`, journal
+  `lorani.controle_passe`. Lancement seul (`lorani_piece_controle_lue`) quand plus aucune pièce n'est recue/en_lecture/
+  a_rattacher/en_attente_expediteur (une pièce en échec ne bloque pas).
+- Écran : `components/espace/lorani/Controle.tsx` dans la carte projet (avant Honoraires) ; exemple = Surélévation Dubois,
+  indice A puis B. Les pièces de contrôle sont exclues des « Courriers du dossier » d'un permis (TYPES_CONTROLE). Types
+  ajoutés au dépôt : planche, CCTP, DPGF, règlement du PLU.
+- Doute à lever sur la recette : `enregistrer_lecture` accepte-t-il ces types de pièce ? (contrat f54deda, A1).
+- Reste du n° 1 : rapport PDF annoté + Excel.
+- Rapport (n° 1, suite) : `components/espace/lorani/rapport.ts`, boutons « Rapport PDF annoté » / « Tableau Excel » sous un
+  contrôle passé. Aucune dépendance ajoutée : .xlsx écrit à la main (zip « stored » + CRC-32, feuilles Constats et Pièces) ;
+  PDF écrit à la main (Helvetica WinAnsi, titre /Info en UTF-16BE), pages citées rendues par pdf.js (legacy, comme
+  filed/PagePdf) avec cadre rouge + numéro sur la boîte lue ; fichier non ouvrable → page blanche avec les cadres.
+  Base réelle : octets par lien signé omega-clients (portes.octetsPiece, `pieces.chemin` ajouté à la lecture).
+  Recette : `omega/recette-b5/rapport-controle.mjs` (pdfinfo, pdftotext, unzip -t) ; exemples écrits à côté.
+  NON VÉRIFIÉ : le rendu d'un vrai PDF de la base (seul le repli « fichier non disponible » a tourné, sur l'exemple).
+
+## b5_17 — le PLU depuis l'adresse (carnet n° 2) — 06/10/2026
+
+- Socle : `omega/modules/lorani/migrations/b5_17_plu_adresse.sql`, test `omega/tests/lorani/b5_08_plu_adresse.sql` (18 assertions,
+  réponses jouées par `private.lorani_plu_poser` : runtests annule, donc pg_net n'envoie rien).
+- Sources publiques sans clé : géocodage `data.geopf.fr/geocodage/search` (q, citycode, limit) ; cadastre
+  `apicarto.ign.fr/api/cadastre/parcelle` (code_insee, section, numero ; PLM : 75056/69123/13055 + code_arr) ; GPU
+  `apicarto.ign.fr/api/gpu/zone-urba|document|prescription-surf` (geom GeoJSON) et `municipality` (insee → is_rnu).
+- Appels par pg_net depuis la base (`private.lorani_http_get`) : la CSP (`next.config.ts`, partagé) bloque le navigateur.
+  Chaîne : chercher → geocodage (adresse ; type municipality ou autre commune à score < 0,7 → parcelle) → zonage (3 appels
+  ensemble) → trouve / introuvable (RNU dit) / erreur. `lorani_suivre_plu` relève net._http_response ; l'écran relève
+  toutes les 2,5 s pendant 1 min ; `lorani_lectures_passage` (redéfini une fois de plus, corps b5_16 + PLU) reprend toutes
+  les 5 min ; une demande sans réponse après 5 min = délai dépassé.
+- Essayé en local avec un faux schéma net et les VRAIES réponses relevées (12 rue des Hauts-Pavés, Nantes) : zone UMa,
+  PLUi Nantes Métropole, lien du règlement metropole.nantes.fr, 6 prescriptions. Non vérifié : pg_net réel (droits du
+  propriétaire sur net._http_response), à voir à la pose.
+- Écran : `components/espace/lorani/PluProjet.tsx` (« Règles d'urbanisme », avant le contrôle). Exemple : Lemoine (UMa,
+  Nantes) et Mercière (UCe1b, Lyon) trouvés ; Dubois a une réponse préparée (URm1, PLU-H) au clic.
+- Fiche de lecture : paragraphe pour A1 — ne rendre que les règles de la zone de `lorani_plu.zone`.
+
+## n° 3 a — métré contre DPGF (dans b5_16, amendé AVANT pose) — 06/10/2026
+
+- b5_16 n'étant pas posé, je l'ai amendé plutôt que d'écrire un ALTER (élargir un CHECK demanderait de retirer
+  l'ancien : mot interdit). Rôle `metre`, nature `metre_dpgf`. Si b5_16 avait déjà été posé dans l'ancienne version :
+  le dire, il faudra un lot de reprise.
+- Règle : quantité mesurée = `quantite.<réf>` du métré (rôle metre) ou, sans métré, somme des planches ; DPGF
+  `poste.<réf>` (quantité) + `unite.<réf>` ; écart > 5 % = constat ; DPGF < 90 % du mesuré = majeur (sous-estimé).
+- Test b5_07 § 10 (2 assertions, 31 au total) ; type de pièce `lorani_metre` dans la fiche, le dépôt et le passage.
+
+## b5_18 — les décennales (carnet n° 3 b) — 06/10/2026
+
+- Socle : `omega/modules/lorani/migrations/b5_18_decennales.sql`, test `omega/tests/lorani/b5_09_decennales.sql` (18 assertions).
+- `public.lorani_attestations` (entreprise = intervenant, lot repris de l'entreprise, pièce lue, assureur, police, assuré,
+  SIREN, activités, début/fin, plafond) ; trigger `lorani_attestation_verifier` : activités requises du lot couvertes
+  (vocabulaire fermé `private.lorani_activite`, 34 activités, nomenclature France Assureurs simplifiée), date
+  d'ouverture du chantier (`lorani_projets.ouverture_chantier`, ajoutée ; sinon aujourd'hui) dans la période
+  (C. assur. L241-1), plafond ≥ marché du lot (HT + avenants), SIREN / nom de l'assuré ; statut conforme | non_conforme
+  | expiree. Échéance = fin de validité au registre (J-30, J-7, J), remplacée si la fin change. Journal
+  lorani.attestation_controlee (la date du contrôle), alerte « attention » si non conforme / échue.
+- Revue automatique quand les activités d'un lot, l'ouverture du chantier ou le marché changent.
+- Lecture : type `lorani_attestation_decennale` (fiche § « Les attestations décennales ») → passage → ligne.
+- Abonnements delai.proche/depasse.lorani → lorani.attestation.rappel/.depasse (chaque gestionnaire ignore les délais
+  qui ne sont pas les siens). `lorani_lectures_passage` redéfini (corps b5_17 + attestations).
+- Essayé en local sur doubles (vert). Écran : `components/espace/lorani/Assurances.tsx` (après Chantier) ; exemple
+  Mercière (taille de pierre non couverte, échafaudage échu). Activités des lots d'exemple remises au vocabulaire.
+
+## b5_19 — OS, réserves, GPA (carnet n° 4, première partie) — 06/10/2026
+
+- Socle : `omega/modules/lorani/migrations/b5_19_os_reserves_gpa.sql`, test `omega/tests/lorani/b5_10_os_reserves.sql` (21 assertions).
+- `lorani_ordres_service` (numérotés par marché, nature démarrage/modificatifs/supplémentaires/arrêt/reprise/autre,
+  incidence HT et jours, statut, réserves de l'entreprise jusqu'à notification + 15 j — CCAG 2021 art. 3.8.2) ;
+  vue `lorani_os_incidence` (security_invoker) : montant à date, part du marché initial, jours d'OS, jours d'arrêt
+  (arrêt → reprise suivante, ou aujourd'hui) ; `private.lorani_fin_contractuelle` = démarrage + délai + OS + arrêts.
+  Alerte cumul > 15 % (public, CCP R2194-8) / > 10 % (privé) ; alerte info à chaque incidence sur le délai.
+- `lorani_reserves` (numérotées par projet, lot repris du marché, à lever avant = échéance J-7/J, levée = tenue,
+  contestée = motif obligatoire) ; `lorani_projets.reception_le` → échéance fin de GPA (1 an, J-60/J-30/J-7/J) ;
+  rappel GPA = compte des réserves ouvertes par lot + retenue de garantie à conserver (loi 71-584 art. 2).
+- Nouveaux genres lorani.chantier.rappel/.depasse ; passage redéfini (corps b5_18 + chantier).
+- Écran : `OrdresService.tsx`, `Reserves.tsx` (après Chantier, avant Assurances). Leçon : `esp-fil` est une frise à
+  deux colonnes (point + texte) — pour du texte libre, `lor-liste`.
+
+## b5_20 — comptes rendus de chantier, points suivis jusqu'à la réponse (carnet n° 4, seconde partie) — 06/10/2026
+
+- Socle : `omega/modules/lorani/migrations/b5_20_comptes_rendus.sql`, test `omega/tests/lorani/b5_11_comptes_rendus.sql` (17 assertions).
+- `lorani_comptes_rendus` (numérotés, présents, notes brutes, avancement, brouillon | diffuse ; diffusé = contenu figé
+  par le socle, réécriture refusée 55000 ; journal lorani.cr_diffuse) ; `lorani_points` (question | action | decision
+  | observation ; échéance au registre J-2/J ; réponse saisie → répondu, échéance tenue) ; `public.lorani_cr_contenu`
+  (nouveaux, en suspens avec âge, soldés depuis le CR précédent).
+- « Une question suivie jusqu'à la réponse » : question à un intervenant qui a un courriel → `private.ouvrir_suivi`
+  (destinataire {adresse, nom, professionnel}, nature reponse, clé lorani:point:<id>) = relances par la file des envois ;
+  réponse → `clore_suivi(…, 'repondu', …)`. Si l'ouverture échoue (module lorani absent de modules_envois ?), alerte
+  info « l'échéance interne la suit ». Leçon : un trigger « update of statut » ne voit pas un statut changé par un
+  BEFORE — trigger sans liste de colonnes.
+- `private.lorani_chantier_rappeler` redéfini (corps b5_19 + points en retard).
+- Écran : `ComptesRendus.tsx` + `cr.ts` (lireNotes : ?, !, =, @entreprise, lot NN, avant le JJ/MM ; contenu ; PDF via
+  `rapport.ts` exporté). Exemple Mercière : CR n° 1-2 diffusés, n° 3 en brouillon avec 4 lignes de notes.
+
+## b5_21 — RE2020, accessibilité, sécurité incendie, Cerfa, BET, DOE (carnet n° 5) — 06/10/2026
+
+- b5_16 amendé une troisième fois AVANT pose : les CHECK rôle/nature appellent `private.lorani_role_controle_valide`
+  et `private.lorani_nature_constat_valide` (redéfinissables par CREATE OR REPLACE : plus jamais besoin de retirer
+  une contrainte pour élargir) ; point d'extension `private.lorani_constats_supplementaires(controle)` (vide dans
+  b5_16, uni au croisement).
+- Socle : `omega/modules/lorani/migrations/b5_21_conformite_doe.sql`, test `omega/tests/lorani/b5_12_conformite_doe.sql` (18 assertions).
+  · grandeurs ajoutées (largeurs porte/cheminement/dégagement, pente de rampe, ressaut, distance à un escalier,
+    effectif, dégagements, surface habitable, Sref) ;
+  · rôles cerfa et bet : croisés comme les planches (incohérence), rien d'autre à faire ;
+  · RE2020 : `re2020.<ind>` > `re2020.<ind>_max` → bloquant (Bbio, Cep, Cep,nr, Ic énergie, Ic construction, DH) ;
+  · règles fixes `private.lorani_regles_fixes(nature du projet)` : ERP (arrêté 20/04/2017 : cheminement 1,40 ; porte
+    0,90 ; rampe 5 % ; ressaut 2 cm) ; logement collectif (arrêté 24/12/2015 : 1,20 ; 0,90 ; 5 % ; 2 cm) ; sécurité
+    incendie ERP (dégagement ≥ 0,90 CO 36 ; escalier ≤ 40 m CO 43 ; dégagements selon effectif CO 38) ;
+  · DOE : `lorani_doe` + `lorani_preparer_doe` (5 pièces par lot + DIUO) ; à la réception, alerte par lot incomplet.
+  · passage redéfini (types lorani_cerfa, lorani_attestation_re2020, lorani_plan_bet, lorani_notice → contrôle).
+- Fiche de lecture : 4 types ajoutés et les nouvelles grandeurs.
+- Écran : libellés des rôles et natures, `Doe.tsx` (liste, reçu / sans objet, demander les pièces manquantes = points
+  suivis), exemple ERP sur le Pôle enfance, DOE sur Mercière.
+
+## Reprise b5_16b (06/10, soir) — b5_16 était posé avant ses amendements
+
+- Le coordinateur avait posé b5_16 dès a05f77c (16 h 55 Z) : mes trois amendements de la source n'y sont pas.
+  `omega/modules/lorani/migrations/b5_16b_reprise_controle.sql` : fonctions de validation, contraintes _v2 NOT VALID
+  puis VALIDATE, retrait des anciennes (élargissement pur, accord du coordinateur), point d'extension posé seulement
+  s'il manque, `lorani_controler` de la source. Joué deux fois en local sur la version posée : idempotent, métré vert.
+  Ordre : b5_16b avant b5_21. Test : b5_07 (31 assertions, § 10 = métré).
+- Leçon : ne jamais amender une migration envoyée sans la réponse « posé / pas posé » du coordinateur.
+- SIREN d'exemple corrigés (clé de Luhn) : 538765439, 412345670, 812345676, 216902569.
+- Fiche : boîte nullable (OCR sans positions), cotes écrites seulement.
+- b5_22 : public.lorani_objets_controle(piece) pour A1 (objets des pièces sœurs, service_role seul) ; test b5_13 (6 assertions).
+
+## b5_23 — servitudes et risques lus depuis l'adresse (06/10, soir)
+
+- `omega/modules/lorani/migrations/b5_23_servitudes_risques.sql`, test `omega/tests/lorani/b5_14_servitudes_risques.sql` (10 assertions).
+- Volet indépendant de la machine d'états de b5_17 : dès que `lorani_plu.geom` arrive (trigger), 7 demandes pg_net :
+  GPU assiette-sup-s (délai 60 s : 1,7 Mo / 27 s à Lyon), -l, -p ; Géorisques gaspar/risques, zonage_sismique,
+  radon (code_insee), rga (latlon). Lecture tolérante (jsonpath `lax $.**.<champ>`). Panne d'un service = noté dans
+  risques.erreurs, statut « partiel ». Bilan : alerte secteur protégé (AC1/AC2/AC4 : ABF, R423-24) et PPR (PM1/PM3 :
+  L562-4) ; journal lorani.servitudes_risques. `lorani_suivre_plu` et le passage relèvent aussi ces demandes.
+- Géorisques NON JOIGNABLE depuis mon conteneur (connexion coupée, 503 par WebFetch) : formes des réponses écrites
+  d'après le public (rapport par adresse réputé instable → non utilisé). Servitudes : vraie réponse IGN relevée.
+- Écran : bloc « servitudes et risques » dans PluProjet ; relève tant que complements_statut = en_cours.

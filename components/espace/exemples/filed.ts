@@ -197,9 +197,10 @@ function fr(iso: string): string {
   return `${`${d.getDate()}`.padStart(2, "0")}/${`${d.getMonth() + 1}`.padStart(2, "0")}/${d.getFullYear()}`;
 }
 
-const ROUX = { nom: "Métallerie Roux SARL", siren: "512 448 109", tva: "FR 41 512448109", adresse: "ZI des Bruyères, 69800 Saint-Priest", iban: "FR76 3000 4000 0512 3456 7890 143", code: "ROUX" };
-const DURAND = { nom: "Papeterie Durand", siren: "398 772 540", tva: "FR 22 398772540", adresse: "4 place Bellecour, 69002 Lyon", iban: "FR76 1027 8060 0100 0203 0450 183", code: "DURAND" };
-const TECHPRO = { nom: "TechPro Informatique", siren: "833 110 254", tva: "FR 65 833110254", adresse: "12 rue de la République, 38000 Grenoble", iban: "FR76 1820 6000 7865 4321 0987 612", code: "TECHPRO" };
+const ROUX = { nom: "Métallerie Roux SARL", siren: "512 448 101", tva: "FR 45 512448101", adresse: "ZI des Bruyères, 69800 Saint-Priest", iban: "FR76 3000 4000 0512 3456 7890 143", code: "ROUX" };
+const DURAND = { nom: "Papeterie Durand", siren: "398 772 541", tva: "FR 48 398772541", adresse: "4 place Bellecour, 69002 Lyon", iban: "FR76 1027 8060 0100 0203 0450 183", code: "DURAND" };
+const TECHPRO = { nom: "TechPro Informatique", siren: "833 110 257", tva: "FR 71 833110257", adresse: "12 rue de la République, 38000 Grenoble", iban: "FR76 1820 6000 7865 4321 0987 612", code: "TECHPRO" };
+const VIDAL = { nom: "Imprimerie Vidal SAS", siren: "421 937 053", tva: "FR 68 421937053", adresse: "7 rue Juiverie, 69005 Lyon", iban: "FR76 1009 6180 1100 0456 7812 044", code: "VIDAL" };
 const EDL = { nom: "Électricité de Lyon", siren: "552 081 317", tva: "FR 03 552081317", adresse: "22 avenue Jean Jaurès, 69007 Lyon", iban: "FR76 3000 3030 2000 0500 0123 456", code: "EDL" };
 
 function doc(n: number, o: Partial<DossierFiled["document"]> & { reference: string; nom_fichier: string; recu_le: string; etat: DossierFiled["document"]["etat"] }): DossierFiled["document"] {
@@ -276,7 +277,7 @@ const D14: DossierFiled = {
   controles: [
     ctrl(f14.facture.id, "mentions.numero_present", "bloquant", "ok", "Numéro de facture présent et unique chez ce fournisseur."),
     ctrl(f14.facture.id, "mentions.date_present", "bloquant", "ok", "Date d'émission lisible."),
-    ctrl(f14.facture.id, "fournisseur.siren_valide", "bloquant", "ok", "SIREN valide (clé de Luhn) et actif au registre.", null, { siren: "398772540" }),
+    ctrl(f14.facture.id, "fournisseur.siren_valide", "bloquant", "ok", "SIREN valide (clé de Luhn) et actif au registre.", null, { siren: "398772541" }),
     ctrl(f14.facture.id, "fournisseur.iban_connu", "bloquant", "ok", "IBAN identique à celui validé le 12/03/2026.", null, { iban_masque: "FR76 •••• 0183" }),
     ctrl(f14.facture.id, "tva.coherence", "bloquant", "ok", "405,17 € × 20 % = 81,03 € : la TVA correspond.", null, { base: 405.17, taux: 20, attendu: 81.03, lu: 81.03 }),
     ctrl(f14.facture.id, "totaux.ht_tva_ttc", "bloquant", "ok", "HT + TVA = TTC, au centime."),
@@ -295,7 +296,8 @@ const D14: DossierFiled = {
     hist("integration", "Intégrée : demande de paiement créée dans la file de validation.", ilYa(4, 10)),
   ],
 };
-D14.facture!.statut = "a_valider";
+/* approuvée dans la file (demande « Payer la facture R2026-000014 ») : validée, à payer */
+D14.facture!.statut = "validee";
 
 /* ——— 2. R2026-000009 — Métallerie Roux : IBAN changé → bloquée ——— */
 const f09 = facture(9, {
@@ -556,6 +558,129 @@ const D08: DossierFiled = {
 };
 D08.facture!.statut = "a_valider";
 
+/* ——— 9. R2026-000016 — Imprimerie Vidal : fournisseur nouveau, à confirmer ———
+   Déposée par Sofia Carvalho : une autre personne confirme le fournisseur
+   (filed_confirmer_fournisseur). Son identité est déjà confirmée par VIES. */
+const f16 = facture(16, {
+  fournisseur: { ...VIDAL, statut: "a_confirmer" },
+  numero: "IV-2026-1187",
+  emission: fr(ilYa(1)),
+  echeance: fr(dans(29)),
+  ht: 640,
+  tva: 128,
+  ttc: 768,
+  taux: 20,
+  lignes: [{ designation: "Brochures A5, 16 pages, 500 exemplaires", quantite: 500, unite: "pièce", pu: 1.28 }],
+  verifiees: true,
+});
+f16.facture.statut = "bloquee";
+f16.facture.anomalies = ["fournisseur.a_confirmer"];
+f16.facture.nb_bloquants = 1;
+const D16: DossierFiled = {
+  document: doc(16, { reference: "R2026-000016", nom_fichier: "IV-2026-1187.pdf", recu_le: ilYa(1, 10), etat: "a_traiter", source: "depot", expediteur: "sofia.carvalho@atelier-bertin.fr", depose_par: SOFIA }),
+  ...f16,
+  fournisseur: {
+    ...f16.fournisseur,
+    document_origine: u("dd", 16),
+    identite_verifiee_le: ilYa(1, 10),
+    identite_source: "vies",
+    identite_verdict: { resultat: "valide", registre: "vies", identifiant: "FR68421937053", preuve: { nom: "IMPRIMERIE VIDAL", adresse: "7 RUE JUIVERIE 69005 LYON" } },
+  },
+  controles: [
+    ctrl(f16.facture.id, "mentions.numero_present", "bloquant", "ok", "Numéro de facture présent."),
+    ctrl(f16.facture.id, "identite.registre", "attention", "ok", "Identité confirmée par VIES le " + fr(ilYa(1)) + "."),
+    ctrl(f16.facture.id, "fournisseur.a_confirmer", "bloquant", "anomalie", "Fournisseur nouveau (IMPRIMERIE VIDAL SAS) : une personne confirme qu'il s'agit bien d'un fournisseur de l'entreprise.", null, { fournisseur: "Imprimerie Vidal SAS" }),
+    ctrl(f16.facture.id, "tva.coherence", "bloquant", "ok", "640,00 € × 20 % = 128,00 €."),
+    ctrl(f16.facture.id, "totaux.ht_tva_ttc", "bloquant", "ok", "HT + TVA = TTC."),
+  ],
+  levees: [],
+  ibans: [{ id: u("ib", 16), fournisseur_id: f16.fournisseur.id, iban_masque: "FR76 •••• •••• •••• 2044", statut: "propose", propose_le: ilYa(1, 10) }],
+  appariements: [],
+  rapprochement: null,
+  origine_deposee_par: SOFIA,
+  historique: [
+    hist("reception", "Déposée depuis l'espace par Sofia Carvalho.", ilYa(1, 10), "Sofia Carvalho"),
+    hist("lecture", "Lue en 4 s — PDF natif, 1 page.", ilYa(1, 10)),
+    hist("controles", "5 contrôles : fournisseur nouveau, à confirmer.", ilYa(1, 10)),
+    hist("identite", "Identité confirmée par VIES (IMPRIMERIE VIDAL).", ilYa(1, 10)),
+  ],
+};
+
+/* ——— 10. R2026-000017 — Fournitures Lebrun : identifiants lus, non retenus ———
+   Le lecteur a lu un SIREN et une TVA dont les clés sont fausses (comme sur
+   la première vraie facture du banc) : ils restent sous
+   fournisseur_lu.non_verifie, la fiche est « sans identifiant ». */
+const LEBRUN = { nom: "Fournitures Lebrun", siren: "519 803 417", tva: "FR 45 519803417", adresse: "18 cours Gambetta, 69003 Lyon", iban: "FR76 1027 8073 0000 0204 1180 125", code: "LEBRUN" };
+const f17 = facture(17, {
+  fournisseur: { ...LEBRUN, statut: "a_confirmer" },
+  numero: "FL-26-0098",
+  emission: fr(ilYa(2)),
+  echeance: fr(dans(28)),
+  ht: 212.5,
+  tva: 42.5,
+  ttc: 255,
+  taux: 20,
+  lignes: [{ designation: "Classeurs à levier, dos 80 mm", quantite: 50, unite: "pièce", pu: 4.25 }],
+  verifiees: true,
+});
+f17.facture.statut = "bloquee";
+f17.facture.anomalies = ["fournisseur.a_confirmer", "identite.siren"];
+f17.facture.nb_bloquants = 1;
+f17.facture.nb_attention = 1;
+f17.facture.fournisseur_lu = { nom: LEBRUN.nom, adresse: LEBRUN.adresse, non_verifie: { siren: "519803417", tva: "FR45519803417" } };
+f17.valeurs = f17.valeurs.map((v) => (v.champ === "fournisseur.siren" || v.champ === "fournisseur.tva" ? { ...v, verifiee: false, source: "ia" as const, confiance: 0.88 } : v));
+const D17: DossierFiled = {
+  document: doc(17, { reference: "R2026-000017", nom_fichier: "FL-26-0098.pdf", recu_le: ilYa(2, 9), etat: "a_traiter", expediteur: "facturation@fournitures-lebrun.fr" }),
+  ...f17,
+  fournisseur: { ...f17.fournisseur, siren: null, tva: null, document_origine: u("dd", 17) },
+  controles: [
+    ctrl(f17.facture.id, "mentions.numero_present", "bloquant", "ok", "Numéro de facture présent."),
+    ctrl(f17.facture.id, "identite.siren", "attention", "anomalie", "SIREN lu (519803417) non vérifié : sa clé est invalide.", null, { non_verifie: "519803417" }),
+    ctrl(f17.facture.id, "fournisseur.a_confirmer", "bloquant", "anomalie", "Fournisseur nouveau (FOURNITURES LEBRUN) : une personne le confirme avant tout paiement."),
+    ctrl(f17.facture.id, "totaux.ht_tva_ttc", "bloquant", "ok", "HT + TVA = TTC."),
+  ],
+  levees: [],
+  ibans: [],
+  appariements: [],
+  rapprochement: null,
+  origine_deposee_par: null,
+  historique: [
+    hist("reception", "Reçue par courriel de facturation@fournitures-lebrun.fr.", ilYa(2, 9)),
+    hist("lecture", "Lue en 5 s — PDF natif, 1 page ; SIREN et TVA lus, clés invalides.", ilYa(2, 9)),
+    hist("controles", "4 contrôles : fournisseur nouveau, SIREN non vérifié.", ilYa(2, 9)),
+  ],
+};
+
+/* ——— 11 et 12. Deux factures validées, à payer : l'une en retard, l'autre
+   sans IBAN connu (pour l'écran « À payer ») ——— */
+function validee(n: number, o: { fournisseur: typeof DURAND; numero: string; emission: string; echeance: string; ht: number; designation: string; iban: boolean; expediteur: string }): DossierFiled {
+  const tva = Math.round(o.ht * 20) / 100;
+  const f = facture(n, { fournisseur: o.fournisseur, numero: o.numero, emission: o.emission, echeance: o.echeance, ht: o.ht, tva, ttc: Math.round((o.ht + tva) * 100) / 100, taux: 20, lignes: [{ designation: o.designation, quantite: 1, unite: "forfait", pu: o.ht }], verifiees: true });
+  f.facture.statut = "validee";
+  if (!o.iban) f.facture.iban = null;
+  return {
+    document: doc(n, { reference: `R2026-0000${n}`, nom_fichier: `${o.numero}.pdf`, recu_le: ilYa(12, 9), etat: "integre", expediteur: o.expediteur, traite_le: ilYa(10, 11) }),
+    ...f,
+    controles: [ctrl(f.facture.id, "totaux.ht_tva_ttc", "bloquant", "ok", "HT + TVA = TTC.")],
+    levees: [],
+    ibans: o.iban ? [{ id: u("ib", n), fournisseur_id: f.fournisseur.id, iban_masque: masque(o.fournisseur.iban), statut: "valide", propose_le: ilYa(300) }] : [],
+    appariements: [],
+    rapprochement: null,
+    historique: [
+      hist("reception", `Reçue par courriel de ${o.expediteur}.`, ilYa(12, 9)),
+      hist("validee", "Validée par 1 personne(s) : classée, empreinte au journal.", ilYa(10, 11)),
+    ],
+  };
+}
+function masque(iban: string) {
+  const c = iban.replace(/\s+/g, "");
+  return `${c.slice(0, 4)} •••• •••• •••• ${c.slice(-4)}`;
+}
+const RIVIERE = { nom: "Transports Rivière", siren: "734 205 180", tva: "FR 80 734205180", adresse: "5 quai Perrache, 69002 Lyon", iban: "FR76 1468 9000 0100 2233 4455 618", code: "RIVIERE" };
+const FERRAND = { nom: "Cabinet Ferrand, expertise comptable", siren: "488 102 633", tva: "FR 82 488102633", adresse: "40 rue de la Charité, 69002 Lyon", iban: "", code: "FERRAND" };
+const D18 = validee(18, { fournisseur: RIVIERE, numero: "TR-2026-0712", emission: fr(ilYa(35)), echeance: fr(ilYa(5)), ht: 1840, designation: "Transport de mobilier — 2 rotations Lyon ↔ Grenoble", iban: true, expediteur: "compta@transports-riviere.fr" });
+const D19 = validee(19, { fournisseur: FERRAND, numero: "CF-26-118", emission: fr(ilYa(25)), echeance: fr(dans(3)), ht: 950, designation: "Honoraires — situation intermédiaire au 30/09", iban: false, expediteur: "cabinet@ferrand-expertise.fr" });
+
 /* Les commandes connues (filed_commandes) et leurs lignes : celles que les
    factures d'exemple citent, plus une ouverte sans facture. */
 export const COMMANDES_EXEMPLE: Commande[] = [
@@ -572,9 +697,9 @@ export const LIGNES_COMMANDE_EXEMPLE: LigneCommande[] = [
   { id: u("cl", 6), commande_id: u("bc", 80), rang: 1, designation: "Agencement comptoir d'accueil — chêne massif, fourniture et pose", quantite: 1, unite: "forfait", prix_unitaire: 4850, montant_ht: 4850 },
 ];
 
-export const DOSSIERS_EXEMPLE: DossierFiled[] = [D15, D09, D11, D13, D12, D14, D10, D08];
+export const DOSSIERS_EXEMPLE: DossierFiled[] = [D15, D16, D17, D09, D18, D19, D11, D13, D12, D14, D10, D08];
 
-/* Le fournisseur d'exemple pour « rattacher » : les quatre connus. */
-export const FOURNISSEURS_EXEMPLE = [D14, D09, D11, D08].map((d) => d.fournisseur!);
+/* Les fournisseurs d'exemple pour « rattacher » : les six connus. */
+export const FOURNISSEURS_EXEMPLE = [D14, D09, D11, D08, D16, D17].map((d) => d.fournisseur!);
 
 export { SOFIA as EXEMPLE_SOFIA };

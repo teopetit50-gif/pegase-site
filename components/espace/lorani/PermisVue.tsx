@@ -28,7 +28,7 @@ import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
 import { Avis, Pastille } from "../ui";
 import { dateCourte, dateHeure } from "../format";
-import { DECISIONS, ETATS, ISSUES_RECOURS, NATURES_DATE_LUE, NATURES_RECOURS, STATUTS_ETAPE, TYPES, libelleRappel, libelleTypePiece, titrePermis } from "./etats";
+import { DECISIONS, ETATS, ISSUES_RECOURS, NATURES_DATE_LUE, NATURES_RECOURS, STATUTS_ETAPE, TYPES, TYPES_CONTROLE, libelleRappel, libelleTypePiece, titrePermis } from "./etats";
 import { clore_recours, confirmerDateLue, confirmerDecisionImplicite, ecarterDateLue, saisirPermis, saisirRecours, type SaisiePermis } from "./portes";
 import type { Calcul, DateLue, Dossier, Echeance, Etape, Permis, PieceProjet, Projet, Recours } from "./types";
 
@@ -44,6 +44,21 @@ type Props = {
   /* en base réelle : relire */
   relire: () => Promise<void>;
 };
+
+/* « PCMI 3, PC8 » ou « PCMI 3 PC 8 » → [PCMI3, PC8] : un espace suivi d'un chiffre reste dans le code */
+const decouperCodes = (brut: string) => brut.split(/[,;]+|\s+(?=[A-Za-z])/).map((c) => c.replace(/\s/g, "").toUpperCase()).filter(Boolean);
+
+/* Une lettre de demande de pièces, appliquée comme le fait le socle (b5_07, trigger lorani_permis_suivre_demandes) :
+   une seconde lettre complète la première (union, date de la première gardée) ; après la remise des pièces, elle ne va
+   qu'à l'historique ; à la même date, elle corrige la liste. */
+const unionPieces = (a: { code: string }[], b: { code: string }[]) => [...a, ...b.filter((x) => !a.some((y) => y.code === x.code))];
+function appliquerDemande(p: Permis, date: string, pieces: { code: string }[]): Partial<Permis> {
+  const hist = [...(p.demandes_pieces ?? (p.date_demande_pieces ? [{ date: p.date_demande_pieces, pieces: p.pieces_demandees }] : [])).filter((h) => h.date !== date), { date, pieces }].sort((x, y) => x.date.localeCompare(y.date));
+  if (!p.date_demande_pieces || p.date_demande_pieces === date) return { date_demande_pieces: date, pieces_demandees: pieces, demandes_pieces: hist, etat: "pieces_demandees" };
+  if (p.date_pieces_fournies) return { demandes_pieces: hist };
+  const premiere = date < p.date_demande_pieces;
+  return { date_demande_pieces: premiere ? date : p.date_demande_pieces, pieces_demandees: premiere ? unionPieces(pieces, p.pieces_demandees) : unionPieces(p.pieces_demandees, pieces), demandes_pieces: hist, etat: "pieces_demandees" };
+}
 
 type Quoi = "pieces_fournies" | "affichage" | "decision" | "delai" | "depot" | "demande_pieces";
 
@@ -110,7 +125,7 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
   const decidees = datesLues.filter((d) => d.statut !== "proposee").sort((a, b) => (b.decide_le ?? "").localeCompare(a.decide_le ?? ""));
   const echeances = useMemo(() => dossier.echeances.filter((e) => e.permis_id === p.id).sort((a, b) => a.echeance.localeCompare(b.echeance)), [dossier.echeances, p.id]);
   const recours = useMemo(() => dossier.recours.filter((r) => r.permis_id === p.id), [dossier.recours, p.id]);
-  const pieces = useMemo(() => dossier.pieces.filter((x) => x.objet_id === p.projet_id), [dossier.pieces, p.projet_id]);
+  const pieces = useMemo(() => dossier.pieces.filter((x) => x.objet_id === p.projet_id && !TYPES_CONTROLE.includes(x.type_piece ?? "")), [dossier.pieces, p.projet_id]);
   const etat = ETATS[p.etat] ?? ETATS.a_deposer;
   const dp = p.type_autorisation === "dp";
   const accorde = p.decision === "favorable" || p.decision === "tacite";
@@ -161,7 +176,7 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
     setErreur(null);
     setForm({ type: "confirmer", date: d });
   };
-  const confirmationComplete = form?.type === "confirmer" && NATURES_DATE_LUE[form.date.nature].champs.every((ch) => ch.type === "pieces" || ch.cle === "numero" || ch.cle === "date_notification_delai" || (valeurs[ch.cle] ?? "").trim() !== "") && !!permisVise;
+  const confirmationComplete = form?.type === "confirmer" && NATURES_DATE_LUE[form.date.nature].champs.every((ch) => ch.cle === "numero" || ch.cle === "date_notification_delai" || (valeurs[ch.cle] ?? "").trim() !== "") && !!permisVise;
 
   const soumettreConfirmation = async () => {
     if (form?.type !== "confirmer") return;
@@ -171,7 +186,7 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
     for (const ch of NATURES_DATE_LUE[d.nature].champs) {
       const brut = (valeurs[ch.cle] ?? "").trim();
       let x: unknown;
-      if (ch.type === "pieces") x = brut ? brut.split(/[,;\s]+/).filter(Boolean).map((code) => ({ code: code.toUpperCase().replace(/\s/g, "") })) : [];
+      if (ch.type === "pieces") x = brut ? decouperCodes(brut).map((code) => ({ code })) : [];
       else if (ch.type === "entier") x = brut ? Number(brut) : null;
       else x = brut || null;
       if (JSON.stringify(x) !== JSON.stringify(d.proposition[ch.cle] ?? null)) corrige = true;
@@ -188,7 +203,10 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
         calcul: cible ? { ...cible.calcul, regime: cible.calcul.regime ? { ...cible.calcul.regime, delai_notifie_mois: v.delai_notifie_mois as number } : undefined } : undefined,
       });
     }
-    if (d.nature === "demande_pieces") Object.assign(patch, { date_demande_pieces: v.date_demande_pieces as string, pieces_demandees: (v.pieces as { code: string }[]) ?? [], etat: "pieces_demandees" as const });
+    if (d.nature === "demande_pieces") {
+      const cible = dossier.permis.find((x) => x.id === permisVise);
+      if (cible) Object.assign(patch, appliquerDemande(cible, v.date_demande_pieces as string, (v.pieces as { code: string }[]) ?? []));
+    }
     if (d.nature === "decision") Object.assign(patch, { decision: v.decision as Permis["decision"], date_decision: v.date_decision as string, etat: v.decision === "favorable" ? ("accorde" as const) : ("refuse" as const) });
     if (d.nature === "decision_tacite") Object.assign(patch, { decision: "tacite" as const, date_decision: v.date_decision as string, etat: "accorde" as const });
     if (d.nature === "affichage") Object.assign(patch, { date_affichage: v.date_affichage as string });
@@ -265,8 +283,8 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
       message = "Dépôt saisi : la mairie a un mois pour réclamer des pièces.";
     } else if (q === "demande_pieces") {
       v.date_demande_pieces = date;
-      v.pieces_demandees = saisie.pieces.split(/[,;\s]+/).filter(Boolean).map((code) => ({ code: code.toUpperCase() }));
-      Object.assign(patch, { date_demande_pieces: date, pieces_demandees: v.pieces_demandees, etat: "pieces_demandees" as const });
+      v.pieces_demandees = decouperCodes(saisie.pieces).map((code) => ({ code }));
+      Object.assign(patch, appliquerDemande(p, date, v.pieces_demandees as { code: string }[]));
       message = "Demande de pièces saisie : trois mois pour les adresser à la mairie.";
     }
     await appliquer(() => saisirPermis(p.id, v), () => majPermis(dossier, p.id, patch), message);
@@ -496,6 +514,16 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
         </div>
       </section>
 
+      {/* ——— 4 bis. les lettres de demande de pièces (b5_07) ——— */}
+      {(p.demandes_pieces?.length ?? 0) > 1 ? (
+        <Avis teinte="ambre">
+          <strong>Plusieurs demandes de pièces.</strong> À fournir : {p.pieces_demandees.map((x) => x.code).join(", ") || "—"}.{" "}
+          Lettres : {p.demandes_pieces!.map((h) => `du ${dateCourte(`${h.date}T12:00:00`)} (${h.pieces.map((x) => x.code).join(", ") || "aucune pièce"})`).join(" ; ")}.{" "}
+          Une nouvelle invitation à compléter le dossier est sans incidence sur le cours du délai et sur la naissance d’une décision tacite (CE, 30 avril 2024, n° 461958 ; art. R*423-38) : le délai de trois mois court depuis la première lettre
+          {p.date_pieces_fournies ? " ; une lettre reçue après la remise des pièces ne modifie pas les délais (art. R*423-41)" : ""}.
+        </Avis>
+      ) : null}
+
       {/* ——— 5. les avertissements ——— */}
       {c.avertissements?.length ? (
         <div style={{ display: "grid", gap: 8 }}>
@@ -597,7 +625,7 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
                   </label>
                 ) : null}
                 {NATURES_DATE_LUE[form.date.nature].champs.map((ch) => (
-                  <label key={ch.cle} className="rv-libelle">{ch.libelle}{ch.type === "pieces" || ch.cle === "numero" || ch.cle === "date_notification_delai" ? null : <> <span className="esp-obligatoire">(obligatoire)</span></>}
+                  <label key={ch.cle} className="rv-libelle">{ch.libelle}{ch.cle === "numero" || ch.cle === "date_notification_delai" ? null : <> <span className="esp-obligatoire">(obligatoire)</span></>}
                     {ch.type === "decision" ? (
                       <select className="rv-champ" value={valeurs[ch.cle] ?? ""} onChange={(e) => setValeurs((v) => ({ ...v, [ch.cle]: e.target.value }))}>
                         <option value="favorable">{dp ? "Non-opposition" : "Accordé"}</option>
@@ -824,7 +852,7 @@ function EtapeLigne({ e, avant }: { e: Etape; avant: React.ReactNode }) {
           {e.date ? dateCourte(`${e.date}T12:00:00`) : "—"}
           <small>{e.date ? (e.statut === "fait" ? "fait" : quand(e.date)) : "sans date"}{prevision && e.date ? " · prévision" : ""}</small>
         </div>
-        <span className="lor-etape-point" data-teinte={s.teinte} data-prevision={prevision} aria-label={s.libelle} />
+        <span className="lor-etape-point" data-teinte={s.teinte} data-prevision={prevision} role="img" aria-label={s.libelle} />
         <div className="lor-etape-texte">
           {e.libelle}
           {e.statut === "manque" ? <> <Pastille teinte="rouge">En retard</Pastille></> : null}
@@ -888,7 +916,7 @@ function PieceLigne({ piece, decisions, nommer }: { piece: PieceProjet; decision
           <Pastille teinte={teinte}>{piece.statut === "lue" ? "Lue" : piece.statut === "en_lecture" ? "En lecture" : piece.statut === "a_verifier" ? "À vérifier" : piece.statut === "a_classer" ? "Courrier non reconnu" : piece.statut === "echec" ? "Illisible" : piece.statut === "rejetee" ? "Rejetée" : "Reçue"}</Pastille>
         </div>
         <div className="esp-fil-meta">
-          {piece.cree_le ? `Déposé le ${dateHeure(piece.cree_le)}. ` : ""}
+          {piece.cree_le ? `${piece.source === "courriel" ? "Reçu par courriel du guichet et rangé ici par son numéro de dossier, le" : "Déposé le"} ${dateHeure(piece.cree_le)}. ` : ""}
           {piece.statut === "a_classer" ? `Le lecteur n'a pas reconnu un courrier de la mairie${piece.motif ? ` : « ${piece.motif} »` : ""}. Aucune date n'en est proposée ; saisissez-la à la main. ` : ""}
           {piece.statut === "echec" && piece.motif ? `Motif : « ${piece.motif} ». ` : ""}
           {decisions.map((d) => (
