@@ -74,3 +74,39 @@ begin
   return next ok(not has_function_privilege('authenticated', 'private.filed_compte_tiers(uuid)', 'execute')
              and not has_function_privilege('authenticated', 'private.filed_ecriture_note_frais()', 'execute'), 'Le moteur n''est pas ouvert aux membres');
 end $f$;
+
+-- Lot 28 (a4_36) : une note de frais en devise est soldée à sa valeur d'achat ; l'écart de change va au 766 / 666.
+create or replace function tests.test_a4_36_01_note_frais_devise() returns setof text
+language plpgsql as $f$
+declare o jsonb := tests.a4_organisation(); fa jsonb; v_f uuid; v_note uuid;
+begin
+  -- XTS : le code ISO 4217 réservé aux essais (aucun taux BCE réel).
+  set local role service_role;
+  perform public.filed_poser_taux_change('XTS', date '2026-09-28', 1.1);
+  perform public.filed_poser_taux_change('XTS', current_date, 1.2);
+  reset role;
+  fa := tests.a4_facture(o, 'ia', 'HOTEL-XTS', 120);
+  v_f := (fa ->> 'facture')::uuid;
+  -- La pièce imprime sa TVA en euros (18,00 € et non 20 / 1,1 = 18,18 €) : la dette en euros n'est plus TTC / taux.
+  update public.filed_factures set devise = 'XTS', montant_ht = 100, montant_tva = 20, montant_ttc = 120, date_emission = date '2026-09-28',
+         mentions = coalesce(mentions, '{}'::jsonb) || '{"contre_valeur": {"montant_tva_eur": "18.00"}}'::jsonb where id = v_f;
+  perform tests.a4_imputer(fa, tests.a4_compte(o, '6256', 'Missions'), 100);
+  reset role; perform tests.a4_comme((o ->> 'gerant')::uuid);
+  v_note := public.filed_declarer_note_frais(v_f, (o ->> 'valideur')::uuid, 'Jean Dupont');
+  reset role;
+  update public.filed_factures set statut = 'validee' where id = v_f;
+  update public.filed_factures set statut = 'comptabilisee' where id = v_f;
+  return next is((select credit from public.filed_ecritures where facture_id = v_f and origine = 'facture' and compte_num = '421'), 108.91::numeric,
+                 'La dette envers le salarié : 90,91 € de charge et 18,00 € de TVA lue');
+  reset role; perform tests.a4_comme((o ->> 'gerant')::uuid);
+  perform public.filed_rembourser_note_frais(v_note, current_date, 'virement');
+  reset role;
+  return next is((select debit from public.filed_ecritures where facture_id = v_f and origine = 'reglement' and compte_num = '421'), 108.91::numeric,
+                 'Le remboursement solde le 421 à sa valeur d''achat, pas à TTC / taux (109,09)');
+  return next is((select credit from public.filed_ecritures where facture_id = v_f and origine = 'reglement' and compte_num = '512'), 100.00::numeric,
+                 'la banque au taux du jour (1,2)');
+  return next is((select credit from public.filed_ecritures where facture_id = v_f and origine = 'reglement' and compte_num = '766'), 8.91::numeric,
+                 'l''écart en gain de change');
+  return next ok((select ecriture_let from public.filed_ecritures where facture_id = v_f and origine = 'facture' and compte_num = '421') is not null,
+                 'et le compte du salarié est lettré');
+end $f$;
