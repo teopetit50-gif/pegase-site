@@ -13,6 +13,7 @@ Commencée le 06/10/2026. Je n'appelle jamais Supabase : le coordinateur pose, j
 - **11/10** : message sans texte (photo seule) → demande de précision préparée sans modèle (`rediger.ts` `sansTexte`, Deno 14/14). **À redéployer** : Edge `reput-reponse`.
 - **Pause du 11/10 15 h 40 Z** : arbre propre. À poser : rien (aucune migration nouvelle). À faire par le coordinateur : redéployer l'Edge `reput-reponse` (15a01a67) ; jouer PREUVE-VRAIE.md avec Teo. Écran REPUT déjà monté dans /espace2/reput (C1), sans lien vers l'ancien dessin.
 - **15/10** : c3_09 — un transfert nomme le service qui reprend la demande (base en vigueur : `service` par sujet routé ; consigne du modèle). Souche 268/268, Deno 15/15. **Posé et vert** (recette 15/10 : c3_09, 44, 46, 51) ; **à redéployer** : Edge `reput-reponse` (porte aussi 15a01a67).
+- **Pause 50 % du 15/10 (16 h 15 Z)** : arbre propre, rien en cours. Attend : redéploiement de l'Edge `reput-reponse` (15a01a67 + c3_09), preuve en vrai avec Teo, choix du coordinateur entre « valider depuis le mail » et « entité site ».
 - **Prochaine étape exacte** : faire passer le circuit mail + formulaire en « prouvé en vrai » — rouvrir la boîte du banc banc@recu.omegaai.fr, envoyer un vrai courriel, vérifier préparation < 1 min, validation dans « À valider », envoi reçu, journal ; puis, selon les choix de Teo, le bloc rendez-vous/agenda (≈ 10 j) ou l'astreinte (≈ 3 j).
 
 ## Ce que le site promet et ce que C3 rend vrai
