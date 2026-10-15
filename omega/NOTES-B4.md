@@ -12,8 +12,9 @@ et tamila-purge v3 (genre `tamila.exporter`) déployés, avec le cron. Rien à p
 pilotage, lectures longues (citations cliquables vers la page de la pièce), expertise, pièces attendues, archive du
 dossier ouverte en clair, journal CSV, audiences en .ics. Recette 196/196, série locale 589 ok (25 échecs connus).
 Le dessin de /espace2 est refait par C1 (omegaai.fr/omega) : ne pas toucher components/omega, aucun lien vers
-l'ancien dessin (vérifié : aucun dans components/espace/tamila). La recette ouvre encore `/espace/tamila` :
-la passer à `/espace2/tamila` si l'ancienne adresse disparaît.
+l'ancien dessin (vérifié : aucun dans components/espace/tamila). Reprise du 15/10 : main fusionnée dans worker-b4,
+la recette ouvre désormais `/espace2/tamila` (nouveau dessin) : 196/196. Les commits a5c6280 … 60733aa ne sont pas
+encore dans main (à fusionner par le coordinateur).
 
 **Prochain pas sans Teo** : relevé d'office des pièces citées par le confrère (attend un type de lecture d'A1),
 dossier de plaidoirie exporté, abonnement d'agenda tenu à jour.

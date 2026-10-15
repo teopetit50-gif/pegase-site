@@ -33,7 +33,7 @@ const LARGEURS = [390, 768, 1024, 1440, 1700];
 for (const largeur of LARGEURS) {
   const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'b4-tamila', densite: 1 });
   console.log(`— /espace/tamila à ${largeur}`);
-  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  ok(await s.aller(base + '/espace2/tamila'), 'page chargée');
   await s.dormir(700);
   const mesure = await s.evaluer(`(() => {
     const w = document.documentElement.clientWidth;
@@ -58,7 +58,7 @@ for (const largeur of LARGEURS) {
 {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b4-delai', densite: 1 });
   console.log('— le calcul d\'un délai, sa confirmation, l\'acte déposé');
-  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  ok(await s.aller(base + '/espace2/tamila'), 'page chargée');
   await s.dormir(500);
   const ref = await s.evaluer(`document.querySelector('#esp-dossier .esp-carte-titre .esp-mono')?.textContent`);
   ok(ref === '2026-0377', `le dossier ouvert d'office est celui qui presse : échéance à J-6 (${ref})`);
@@ -97,7 +97,7 @@ for (const largeur of LARGEURS) {
 {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b4-muraille', densite: 1 });
   console.log('— la muraille et le nouveau dossier');
-  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  ok(await s.aller(base + '/espace2/tamila'), 'page chargée');
   await s.dormir(500);
   await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /2026-0412/.test(b.textContent))?.click()`);
   await s.dormir(400);
@@ -132,7 +132,7 @@ for (const largeur of LARGEURS) {
 {
   const s = await ouvrirSession({ largeur: 390, hauteur: 844, marque: 'b4-coffre', densite: 1 });
   console.log('— le coffre à clés (à 390 : le dialogue doit tenir sur un téléphone)');
-  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  ok(await s.aller(base + '/espace2/tamila'), 'page chargée');
   await s.dormir(500);
   const bouton = await s.evaluer(`[...document.querySelectorAll('.esp-tete .r-btn')].find(b => /Coffre/.test(b.textContent))?.textContent?.trim()`);
   ok(bouton === 'Coffre à clés', `le gérant voit le bouton du coffre (${bouton})`);
@@ -167,7 +167,7 @@ for (const largeur of LARGEURS) {
 {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b4-honoraires', densite: 1 });
   console.log('— les honoraires (b4_06)');
-  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  ok(await s.aller(base + '/espace2/tamila'), 'page chargée');
   await s.dormir(500);
   await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /2026-0412/.test(b.textContent))?.click()`);
   await s.dormir(500);
@@ -210,7 +210,7 @@ for (const largeur of LARGEURS) {
 {
   const s = await ouvrirSession({ largeur: 390, hauteur: 844, marque: 'b4-honoraires-390', densite: 1 });
   console.log('— la carte des honoraires à 390');
-  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  ok(await s.aller(base + '/espace2/tamila'), 'page chargée');
   await s.dormir(500);
   await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /2026-0412/.test(b.textContent))?.click()`);
   await s.dormir(600);
@@ -225,7 +225,7 @@ for (const largeur of LARGEURS) {
 {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b4-conflits', densite: 1 });
   console.log('— les conflits d\'intérêts et la vigilance (b4_07)');
-  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  ok(await s.aller(base + '/espace2/tamila'), 'page chargée');
   await s.dormir(500);
   await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /2026-0430/.test(b.textContent))?.click()`);
   await s.dormir(600);
@@ -268,7 +268,7 @@ for (const largeur of LARGEURS) {
 {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b4-facture-imprimee', densite: 1 });
   console.log('— la facture imprimable (b4_09)');
-  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  ok(await s.aller(base + '/espace2/tamila'), 'page chargée');
   await s.dormir(500);
   await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /2026-0412/.test(b.textContent))?.click()`);
   await s.dormir(600);
@@ -299,7 +299,7 @@ for (const largeur of LARGEURS) {
 {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b4-avis-entrants', densite: 1 });
   console.log('— les avis RPVA reçus par courriel, à rattacher (b4_10)');
-  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  ok(await s.aller(base + '/espace2/tamila'), 'page chargée');
   await s.dormir(600);
   const carte = () => s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Avis RPVA à rattacher"]'); return c ? { texte: c.innerText, lignes: c.querySelectorAll('.tam-ligne').length } : null; })()`);
   const c0 = await carte();
@@ -337,7 +337,7 @@ for (const largeur of LARGEURS) {
 {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b4-temps-propose', densite: 1 });
   console.log('— le temps proposé à la saisie, le forfait consommé (b4_12)');
-  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  ok(await s.aller(base + '/espace2/tamila'), 'page chargée');
   await s.dormir(600);
   const hono = () => s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Honoraires"]'); return c ? c.innerText : ''; })()`);
   const ref = await s.evaluer(`document.querySelector('#esp-dossier .esp-carte-titre .esp-mono')?.textContent`);
@@ -383,7 +383,7 @@ for (const largeur of LARGEURS) {
 {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b4-conflit-auto', densite: 1 });
   console.log('— le contrôle des conflits, automatique à l\'ajout d\'une partie');
-  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  ok(await s.aller(base + '/espace2/tamila'), 'page chargée');
   await s.dormir(500);
   await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /2026-0398/.test(b.textContent))?.click()`);
   await s.dormir(600);
@@ -415,7 +415,7 @@ for (const largeur of LARGEURS) {
 for (const largeur of [1440, 390]) {
   const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'b4-hono-cabinet', densite: 1 });
   console.log(`— le tableau des honoraires du cabinet à ${largeur}`);
-  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  ok(await s.aller(base + '/espace2/tamila'), 'page chargée');
   await s.dormir(600);
   await s.evaluer(`(e => { e?.focus(); e?.click(); })([...document.querySelectorAll('.esp-tete .r-btn')].find(b => /Honoraires du cabinet/.test(b.textContent)))`);
   await s.dormir(800);
@@ -453,7 +453,7 @@ for (const largeur of [1440, 390]) {
 for (const largeur of [1440, 390]) {
   const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'b4-pilotage', densite: 1 });
   console.log(`— le pilotage du cabinet à ${largeur}`);
-  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  ok(await s.aller(base + '/espace2/tamila'), 'page chargée');
   await s.dormir(600);
   await s.evaluer(`(e => { e?.focus(); e?.click(); })([...document.querySelectorAll('.esp-tete .r-btn')].find(b => /Pilotage/.test(b.textContent)))`);
   await s.dormir(900);
@@ -492,7 +492,7 @@ for (const largeur of [1440, 390]) {
 for (const largeur of [1440, 390]) {
   const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'b4-analyses', densite: 1 });
   console.log(`— les lectures longues du dossier à ${largeur}`);
-  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  ok(await s.aller(base + '/espace2/tamila'), 'page chargée');
   await s.dormir(600);
   await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /2026-0412/.test(b.textContent))?.click()`);
   await s.dormir(700);
@@ -534,7 +534,7 @@ for (const largeur of [1440, 390]) {
 {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b4-expertise', densite: 1 });
   console.log('— l\'expertise et ses pièces attendues (b4_16)');
-  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  ok(await s.aller(base + '/espace2/tamila'), 'page chargée');
   await s.dormir(600);
   await s.evaluer(`[...document.querySelectorAll('.esp-tete .r-btn')].find(b => /Pilotage/.test(b.textContent))?.click()`);
   await s.dormir(900);
@@ -571,7 +571,7 @@ for (const largeur of [1440, 390]) {
 {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b4-journal', densite: 1 });
   console.log('— le journal des accès s\'exporte (b4_17)');
-  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  ok(await s.aller(base + '/espace2/tamila'), 'page chargée');
   await s.dormir(600);
   await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /2026-0412/.test(b.textContent))?.click()`);
   await s.dormir(700);
@@ -584,7 +584,7 @@ for (const largeur of [1440, 390]) {
 {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b4-attentes', densite: 1 });
   console.log('— les pièces attendues, l\'agenda (b4_18)');
-  ok(await s.aller(base + '/espace/tamila'), 'page chargée');
+  ok(await s.aller(base + '/espace2/tamila'), 'page chargée');
   await s.dormir(600);
   await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /2026-0377/.test(b.textContent))?.click()`);
   await s.dormir(700);
