@@ -709,7 +709,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
             <SignatureLienDialog key={`${form.type}-${form.avenant.id}`} mode={form.type === "sur_place" ? "preparer" : "preuve"} avenant={form.avenant} source={source} />
           ) : null}
           {form?.type === "import" ? (
-            <ImportDevisDialog key={`import-${form.marche.id}`} marche={form.marche} lots={lots} source={source} fermer={fermer}
+            <ImportDevisDialog key={`import-${form.marche.id}`} client={c.client_id} marche={form.marche} lots={lots} source={source} fermer={fermer}
                                apresReel={async (m) => { await relire(); setFait(m); }}
                                appliquerLocal={(nouvelles, m) => {
                                  const m2 = { ...form.marche, lignes: [...form.marche.lignes, ...nouvelles] };
