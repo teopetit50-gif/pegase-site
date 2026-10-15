@@ -1,5 +1,9 @@
 # Session B2 — TAVARO, le module des loueurs (contrats, retours, barèmes, factures, avoirs, litiges)
 
+## PAUSE 50 % (Teo, 15/10 à 16 h 16 Z)
+
+Arbre propre, tout est poussé, rien en cours. L'état et le prochain pas sont dans la section REPRISE ci-dessous. Reste à fusionner : d95c6ff, la prise de vue guidée. Le reste attend Teo ou un tiers.
+
 ## REPRISE — pause demandée par Teo (11/10/2026, 15 h 40 Z)
 
 **Branche** : `worker-b2`. Arbre propre, tout est poussé. Aucun fichier du site public modifié.
