@@ -1,0 +1,27 @@
+{
+  "regions": [
+    "fra1"
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "worker-a1": false,
+      "worker-a2": false,
+      "worker-a3": false,
+      "worker-a4": false,
+      "worker-a5": false,
+      "worker-b1": false,
+      "worker-b2": false,
+      "worker-b3": false,
+      "worker-b4": false,
+      "worker-b5": false,
+      "worker-b6": false,
+      "worker-b7": false,
+      "worker-b8": false,
+      "worker-b9": false,
+      "worker-c2": false,
+      "worker-c3": false,
+      "worker-c4": false,
+      "worker-c5": false
+    }
+  }
+}

@@ -1,6 +1,23 @@
 # Session A3 — l'écran client (validations, FILED, point du matin)
 
-Branche `worker-a3`. Dernière mise à jour : 05/10/2026.
+Branche `worker-a3`. Dernière mise à jour : 06/10/2026, 03 h 50 Paris (reprise par la session Opus 5.5 `session_01Npbh1aR6LoEX7PZDchMSca`, à la suite de `session_01DdgwRadkJFx5u9buwh5crS`).
+
+## REPRISE (pause demandée par Teo, 06/10 21 h Z)
+
+**Fait, poussé sur worker-a3** (tête = ce commit de notes, au-dessus de fa23419) :
+- Fusionné dans main par le coordinateur : facture électronique + Comptabilité/FEC (5091088), boîte FILED (fd6df00), Demandes reçues + Réglages (journal CSV, export complet, aperçu d'effacement) + marquer une réception (fed6368).
+- **À fusionner** : 0295d85 (onglets REPUT et CASHD dans ECRANS ; libellés longs à 2240 px, treize onglets) ; d418e0a et fa23419 (scripts de recette : PREFIXE / CAPTURES / SAUTER, sélecteurs neutres pour « À payer » et la boucle des largeurs). Recette /espace et /espace2 (09a02c7) : tout passe ; accessibilité : tout passe ; non-régression : tout est là. Rien n'est en ligne : quota Vercel.
+- Aucun fichier du site public touché.
+
+**Attend le coordinateur / A5** :
+- export-complet sur la recette : la fonction appelle public.exporter_client (404, la porte n'existe pas sous ce nom) ; origine http://localhost:3010 à autoriser sur la recette pour relire le bouton de bout en bout.
+- OFFLOAD dans ECRANS : oui ou non (dit « plus tard »).
+
+**Attend Teo** : rien de mon côté.
+
+**Pas commencé** : le chiffrage omega/CHIFFRAGE/espace.md (demandé à 18 h 26 Z). Relevé déjà fait, à reprendre : ce site n'a ni page de connexion (l'espace renvoie au « cockpit », application à part ; /auth/confirm redirige vers /compte, absent ici) ni écran d'invitation (la porte rattacher_membre existe, aucun écran ne l'appelle) ni écran des rôles (la politique UPDATE de comptes le permet) ; tout ce qui est livré l'est sur la recette (aucune preuve avec un vrai compte client en production).
+
+**Prochaine étape exacte** : écrire omega/CHIFFRAGE/espace.md (synthèse 6 lignes ; connexion, installation, invitation, rôles, validations, réglages, export, effacement, mobile, accessibilité ; chaque promesse du site sur l'espace client avec état A/B/C/D/T, manque, jours actuel→B et B→A), en relevant les promesses dans lib/produits/**, app/vos-donnees, app/tarifs, app/installation et CAPACITES-A-VALIDER.md ; puis le SHA au coordinateur.
 
 ## Fait
 
@@ -95,6 +112,575 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
   la pièce, veille du point, annulation, délégations, appariements,
   commande, dépôt). Captures légères dans `omega/recette-a3/`.
 
+## Lot du 06/10 — la fiche fournisseur de FILED (a4_10, b7_02)
+
+- **Fiche « Fournisseur »** dans le dossier (`DossierVue.tsx → FicheFournisseur`),
+  entre les valeurs lues et les contrôles : nom et statut (À confirmer /
+  Actif / Bloqué / Refusé), SIREN et TVA, **identité** lue sur
+  `filed_fournisseurs.identite_verifiee_le / identite_source /
+  identite_verdict` (contrat de B7, NOTES-B7 § 9 b) : « Vérifiée le
+  JJ/MM/AAAA HH:MM par VIES / Sirene », « Attestée par une personne … »,
+  « Registre indisponible … », « Invalide : <motif> », « Non vérifiée ».
+- **Confirmer ce fournisseur** → `filed_confirmer_fournisseur(p_fournisseur,
+  p_motif)` (motif facultatif). Le bouton est **gris, avec la raison**, pour
+  la personne qui a déposé la pièce d'origine (`fournisseur.document_origine`
+  → `filed_documents.depose_par`, lu par `chargerDossier`) : même règle que
+  la porte (42501). Il est aussi posé sur le contrôle `fournisseur.a_confirmer`.
+- **Revérifier auprès de VIES / Sirene** → `identite_demander(client,
+  'vies', tva | 'sirene', siren, fournisseur, p_force = true)` ; VIES quand
+  le fournisseur a une TVA, Sirene sinon (comme le balayage de B7). Posé
+  aussi sur le contrôle `identite.registre`. L'écran dit « la réponse arrive
+  en une à deux minutes » et se relit seul (Realtime sur
+  `filed_fournisseurs` ajouté à l'écoute ; sans publication, au prochain
+  changement d'une table publiée).
+- **Attester l'identité** → `filed_attester_identite(p_fournisseur, p_motif)`
+  (motif ≥ 3 caractères), proposé quand l'identité n'est pas « valide ».
+- Après une action, le dossier ouvert **reste ouvert** même s'il change de
+  rang (une facture débloquée passait derrière les bloquées et l'écran
+  sautait sur une autre) — vrai aussi pour « Lever avec un motif ».
+- Exemple : dossier `R2026-000016` (Imprimerie Vidal, fictive), déposé par
+  Sofia, fournisseur à confirmer, identité confirmée par VIES.
+- **Relecture réelle** (06/10, 01 h 35–01 h 45 Z, compte gérant, Next local
+  sur la recette, `omega/recette-a3/relecture-fournisseur.mjs`) : dossier
+  `R2026-000004` → fiche « ORANGE SA · À confirmer », « Vérifiée … par
+  VIES », **« Confirmer » gris** (le gérant a déposé la pièce : la règle est
+  dite avant le clic), aucun refus en console. **« Revérifier » rejoué deux
+  fois** : `identite_demander` accepté, l'ouvrier `identite` a répondu en
+  moins de quatre minutes, la fiche est passée de « 01:39 » à « 01:43 »
+  (capture `reel-fournisseur-reverifie-1440.jpg`).
+- Note de conteneur : le Chromium de recette refusait la recette
+  (`ERR_CERT_AUTHORITY_INVALID`) — le magasin NSS de root était vide ; la CA
+  du mandataire y est ajoutée (`certutil -A … -t "C,,"`, pas de
+  contournement TLS). À refaire dans un conteneur neuf.
+- Validation : tsc ✓, eslint ✓, build ✓, recette aux cinq largeurs ✓
+  (103 contrôles, dont l'enchaînement « confirmer le fournisseur »).
+
+### Rejoué en réel après la fusion (c2ee390), 06/10 01 h 53–01 h 55 Z
+
+- **Confirmer** (`daf@banc-varelo.test`, valideur, fourni par le
+  coordinateur ; `relecture-fournisseur.mjs … --confirmer`) : « Confirmer ce
+  fournisseur » actif pour daf, ORANGE SA → **Actif** (`confirme_par` = daf,
+  01:53:30 Z), la facture FAC-2026-10-0471 passe de `bloquee` à
+  **`a_valider`** (0 bloquant, 0 attention) et la demande
+  `filed.valider_fournisseur` est annulée d'office. Capture
+  `reel-fournisseur-confirme-1440.jpg`.
+- **Annuler ma demande** : la demande du gérant est née par l'écran — le
+  gérant propose un IBAN à ORANGE SA, désormais actif (`--iban=`, l'IBAN
+  d'exemple public FR76 3000 6000 0112 3456 7890 189) → `filed.valider_iban`
+  avec `demandeur_id` = gérant (le déclencheur `preparer_demande` lit
+  `auth.uid()` même sous une porte security definer). Puis
+  `relecture-annulation.mjs` : la demande est trouvée, « Annuler ma
+  demande » est offert, l'annulation passe (« Votre demande est annulée »),
+  `statut = annulee` en base. L'IBAN d'essai reste `propose` sur le banc,
+  sans demande (voir plus bas).
+- Le dossier se relit à 1, 2 et 4 minutes après « Revérifier » (le
+  coordinateur ne peut pas publier `filed_fournisseurs` : laissé à Teo).
+
+- **a4_12** (A4, posé sur la recette) : la levée de `fournisseur.a_confirmer`
+  est refusée à tous (42501). L'écran ne propose plus « Lever avec un motif »
+  sur ce contrôle : seulement « Confirmer ce fournisseur », et pour le
+  déposant le bouton gris avec la phrase « Vous avez déposé la pièce
+  d'origine : une autre personne confirme ce fournisseur. » Recette : 104
+  contrôles, dont celui-ci.
+
+### Reste
+
+- Publication Realtime de `filed_fournisseurs` (Teo).
+- Pour A4 / le coordinateur : (a) la demande `filed.valider_facture` née du
+  recontrôle lancé par la confirmation est **attribuée à daf**
+  (`demandeur_type = utilisateur`, `demandeur_id` = daf) et non au système —
+  `auth.uid()` dans `preparer_demande` ; daf ne pourra pas la valider
+  (séparation saisie / approbation) alors qu'il ne l'a pas saisie ; (b) un
+  IBAN `propose` dont la demande est annulée reste `propose` sans demande
+  ouverte (ici FR76 •••• 0189 d'ORANGE SA sur le banc) : rien ne le refuse ni
+  ne le repropose. (Le point « levable par le déposant » est fermé par a4_12.)
+- À voir par A4 / le coordinateur, pas par l'écran : `fournisseur.a_confirmer`
+  porte « Lever avec un motif » comme tout contrôle ; si le déposant peut le
+  lever, il contourne la séparation de `filed_confirmer_fournisseur`.
+
+## Lot du 06/10 (2) — de la demande à son dossier ; la chaîne FILED complète en réel
+
+- **Validations → FILED** : une demande dont l'objet est FILED (`filed_facture`,
+  `filed_document`, `filed_fournisseur`, `filed_iban` → son fournisseur) montre
+  « Le dossier » (`validations/ApercuFiled.tsx`) : référence, statut de la
+  facture, bloquants / à vérifier / levés, n°, fournisseur, TTC (lus sous RLS
+  en base réelle, dans les dossiers d'exemple sinon), et **« Ouvrir le
+  dossier »** → `/espace/filed?objet=facture:<id>` (`filed/lien.ts`).
+  L'écran FILED ouvre d'office le dossier désigné, et garde la cible tant
+  qu'elle n'est pas trouvée (la source passe de l'exemple à la base réelle
+  juste après le chargement) ; une cible absente est dite (« Document
+  introuvable »).
+- **Défaut réel trouvé et corrigé** : une facture validée a le statut
+  `validee` (`filed_factures_statut_v2` d'a4_02 : aussi `refusee`,
+  `comptabilisee`) ; l'écran n'en connaissait que quatre et **le dossier
+  plantait**. Les trois statuts sont ajoutés (`refusee` va en « litige »), et
+  un statut ou un état de document inconnu s'affiche tel quel au lieu de
+  casser (`statutFacture`, `etatDocument`). À signaler à B6 :
+  `daliro/ChantierVue.tsx` affiche le statut brut (« validee ») pour ces trois.
+- **Chaîne complète en réel** (06/10, 02 h 03–02 h 04 Z,
+  `relecture-decision.mjs`, compte `daf2@`, valideur — pas daf, demandeur de
+  la demande, voir plus haut) : la demande « Valider la facture
+  FAC-2026-10-0471 de ORANGE SA : 288,00 € TTC » montre son dossier
+  (R2026-000004, À valider, contrôles passés) ; **approuvée** avec
+  commentaire (02:03:20 Z), **exécutée** par le socle (02:04:00 Z) ; la
+  facture est **`validee`**, le fil dit « Archivée : empreinte … inscrite au
+  journal (ligne 76967) » puis « Validée par 1 personne(s) : classée ». Le
+  lien de la demande ouvre ce dossier (capture `reel-decision-dossier-1440.jpg`).
+  La première vraie facture du banc a donc fait tout le parcours : dépôt par
+  l'écran → lecture → contrôles → identité VIES → fournisseur confirmé par une
+  autre personne → validée par une troisième → archivée.
+- Recette aux cinq largeurs : 112 contrôles ✓ (dont « de la demande à son
+  dossier » : aperçu, lien, ouverture par l'URL, cible inconnue).
+
+## Lot du 06/10 (3) — la vue « Fournisseurs » de FILED
+
+- **/espace/filed/fournisseurs** (`app/espace/filed/fournisseurs/page.tsx`,
+  `components/espace/filed/EcranFournisseurs.tsx`), lien « Fournisseurs »
+  dans l'en-tête de FILED et retour « Documents reçus » ; sous
+  /espace/filed, l'onglet FILED reste allumé — la barre n'est pas touchée.
+- Compteurs (à confirmer, bloqués, actifs, refusés, filtrants), recherche
+  par nom / SIREN / TVA / code, liste triée (à confirmer, bloqués, puis par
+  nom) avec statut, identité, « n IBAN à valider », factures en cours.
+- Fiche : la même que dans le dossier (`FicheFournisseur.tsx`, sortie de
+  DossierVue) — confirmer (gris pour le déposant de la pièce d'origine),
+  revérifier (relu à 1, 2, 4 min), attester ; plus proposer un IBAN,
+  bloquer / débloquer. Les IBAN avec leur statut (un IBAN proposé d'un
+  fournisseur actif renvoie à la file « À valider ») et les factures du
+  fournisseur, chacune liée à son dossier (`/espace/filed?objet=facture:…`).
+- Lecture : `chargerVueFournisseurs` (`portes.ts`) — fournisseurs, IBAN,
+  dernière version de chaque facture avec la référence de son document, et
+  le déposant de la pièce d'origine. Realtime : `filed_fournisseurs`,
+  `filed_fournisseurs_ibans`, `filed_factures`.
+- Exemple : les fournisseurs des dossiers d'exemple réunis par leur code
+  (un même fournisseur y avait un identifiant par dossier).
+- **Relu en réel** (daf2@, 06/10 ~02 h 15 Z) : 1 à confirmer (Papeterie
+  Delorme SAS, « Sans identifiant », facture R2026-000003 bloquée, IBAN
+  …0189 proposé « validé avec le fournisseur à sa confirmation »), 1 actif
+  (ORANGE SA, identité vérifiée, l'IBAN d'essai à valider) ; aucun refus.
+  Capture `reel-fournisseurs-1440.jpg`.
+- Recette : la vue aux cinq largeurs et un enchaînement (à confirmer en
+  tête, fiche, confirmation → actif, IBAN validé, facture à valider ;
+  recherche par SIREN) — **143 contrôles ✓**. La recette ignore désormais
+  `ERR_BLOCKED_BY_ORB` : c'est le script Vercel Analytics
+  (`va.vercel-scripts.com`) chargé en dev, refusé par le mandataire du
+  conteneur, pas l'écran.
+
+## Lot du 06/10 (4) — identifiants lus non retenus ; les clés de « Corriger une valeur »
+
+- **Bloc « Identifiants lus sur la pièce, non retenus »** dans le dossier
+  (sous la fiche fournisseur), quand `filed_factures.fournisseur_lu.non_verifie`
+  porte un SIREN ou une TVA que la fiche n'a pas : la valeur, sa raison
+  (clé de Luhn invalide ; TVA FR : forme, Luhn du SIREN porté, clé
+  `(12 + 3 × (SIREN mod 97)) mod 97`), « Voir sur la pièce ».
+  « Confirmer la valeur lue » (`filed_confirmer_valeurs`) n'est proposé
+  **que si la clé est juste** — la porte ne contrôle pas la clé (lu sur la
+  recette par le coordinateur) ; a4_14 refuse désormais une valeur humain à
+  clé fausse (22023), le message s'afficherait tel quel. « Saisir les vrais
+  identifiants » → `filed_corriger_facture(p_facture, {"fournisseur.siren",
+  "fournisseur.tva"}, motif)` ; le navigateur vérifie les clés et la
+  cohérence SIREN ↔ TVA avant l'envoi (`filed/identifiants.ts`). Le bouton
+  général « Confirmer les N valeurs non vérifiées » n'emporte plus un SIREN
+  ou une TVA à clé fausse.
+- **Défaut existant corrigé** : « Corriger une valeur » envoyait les noms de
+  colonne (`date_emission`, `echeance_lue`, `iban`) ; la porte attend
+  `date`, `echeance`, `fournisseur.iban` (clés relues par le coordinateur) —
+  ces trois corrections étaient refusées en réel (22023). `CHAMPS_CORRIGEABLES`
+  porte désormais la clé de porte. **Prouvé en réel** (daf2@, R2026-000003,
+  02 h 4x Z) : l'échéance relue à l'identique (2026-11-04) est acceptée,
+  `pieces_valeurs` porte la ligne `echeance` source humain avec le motif.
+- **Relecture réelle** (daf2@, R2026-000003, lecture seule) : « SIREN lu
+  842115763 — clé de Luhn invalide », « TVA lu FR42842115763 — le SIREN
+  qu'elle porte a une clé invalide », pas de « confirmer », « Saisir les vrais
+  identifiants » offert. Rien n'a été saisi sur Delorme : pas de SIREN
+  inventé sur le banc (capture `reel-identifiants-lus-1440.jpg`).
+- Exemple : dossier R2026-000017 (Fournitures Lebrun, fictive), identifiants
+  lus à clé fausse. Au passage, les SIREN d'exemple qui ne passaient pas la
+  clé de Luhn (Durand, Roux, TechPro, Vidal) sont remplacés par des numéros
+  à clé juste, TVA recalculées.
+- Recette : 149 contrôles ✓ (dont l'enchaînement « identifiants lus » :
+  raison affichée, pas de confirmation d'une clé fausse, TVA d'un autre
+  SIREN refusée avant l'envoi, saisie qui fait tomber le bloc).
+
+## Lot du 06/10 (5) — « À payer » dans FILED
+
+- **/espace/filed/a-payer** (`app/espace/filed/a-payer/page.tsx`,
+  `components/espace/filed/EcranAPayer.tsx`), liens « À payer » dans les
+  en-têtes de FILED et de Fournisseurs ; sous /espace/filed, la barre
+  d'onglets n'est pas touchée.
+- Les factures `validee` et `comptabilisee` (dernière version par document),
+  groupées par échéance — en retard, cette semaine (≤ 7 j), ce mois-ci
+  (≤ 30 j), plus tard, sans échéance — avec compteurs filtrants et total par
+  groupe et par devise. Montant à payer = net à payer, sinon TTC ; un avoir
+  vient en déduction. Par ligne : jours de retard ou restants, fournisseur
+  (« bloqué : ne pas payer »), lien vers le dossier, IBAN validé (masqué) /
+  « IBAN à valider » / « IBAN manquant » (et l'IBAN lu sur la facture, masqué).
+- Lecture seule, sans nouvelle porte : `chargerVueFournisseurs` lit en plus
+  `nature`, `net_a_payer`, `echeance_lue`, `iban`. **FILED ne suit pas le
+  paiement** (aucun statut « payée », aucune porte) : l'écran le dit ; une
+  facture payée reste dans la liste. À brancher quand un statut ou une porte
+  de paiement existera.
+- Exemple : R2026-000014 (Durand) passe `validee` (sa demande « Payer la
+  facture R2026-000014 » existe dans les validations d'exemple) ; deux
+  dossiers validés ajoutés : R2026-000018 (Transports Rivière, en retard,
+  IBAN validé) et R2026-000019 (Cabinet Ferrand, cette semaine, sans IBAN).
+- **Relu en réel** (daf2@) : FAC-2026-10-0471 d'ORANGE SA, 288,00 €,
+  échéance 01/11/2026 (« Ce mois-ci »), « IBAN à valider » (l'IBAN …0189
+  re-proposé par a4_13) ; aucun refus. Capture `reel-a-payer-1440.jpg`.
+- Recette : 180 contrôles ✓ (la vue aux cinq largeurs et l'enchaînement :
+  ordre des groupes, retard d'abord, IBAN manquant dit, avis).
+
+## Lot du 06/10 (6) — décider en lot dans /espace/validations
+
+- **« Décider en lot »** dans l'en-tête de la file (dès deux demandes en
+  attente) : une case par demande en attente, une barre « n cochées sur m
+  décidables par vous », « Cocher les décidables », « Approuver (n) »,
+  « Refuser (n) » (`validations/DecisionLot.tsx`, `FileValidations.tsx`).
+- **Avant le clic**, chaque demande cochée repasse par `verdict()` (séparation
+  saisie / approbation, déjà décidé, équipe, rôle, délégation — la même règle
+  qu'à l'unité) ; une demande qui exige une pièce jointe se décide une par
+  une. Les écartées sont listées avec leur raison ; le commentaire est
+  exigé dès qu'une demande retenue l'exige, le motif l'est pour un refus. Une
+  décision sous délégation est dite (« au nom de … »).
+- **Après** : une approbation par demande (INSERT dans `approbations`, comme
+  à l'unité, aucune porte nouvelle), puis un **bilan ligne à ligne** —
+  approuvée / refusée par la base avec son message tel quel ; les refusées
+  restent cochées dans la file. La liste est figée à l'ouverture du
+  dialogue (chaque décision fait sortir sa demande de la file).
+- **Défaut transversal corrigé** : les dialogues (`components/ui/dialog`)
+  sont rendus dans un portail **hors de `.esp`** ; les styles de l'espace n'y
+  valaient pas (boutons verts / rouges et leur état gris, fil, avis,
+  pastilles, formulaires, « obligatoire ») — vrai aussi pour « Approuver »
+  à l'unité et pour les dialogues des autres écrans /espace. 51 règles de
+  `espace.css` sont doublées pour `.dlg-panneau.resa`.
+- **Relu en réel** (referent@, 06/10 05 h 03 Z, `relecture-lot.mjs`), avec
+  l'accord du coordinateur pour **deux** demandes seulement : « rattacher 32
+  codes clients » et « rattacher 50 codes clients » cochées (et rien
+  d'autre : 2 cochées sur 8 décidables), retenues toutes deux, bilan
+  « Approuvée » ×2 ; en base : `executee` à 05:04:00 Z, sans motif d'échec.
+  **5 demandes VARELO restent en attente**, comme demandé.
+- Recette : l'enchaînement « décider en lot » (cases, exclusion motivée de
+  2 demandes saisies par vous, « Approuver » gris sans le commentaire exigé,
+  bilan 5/5, message de la file) — **186 contrôles ✓**.
+
+## Lot du 06/10 (7) — accessibilité de l'espace client
+
+- **`omega/recette-a3/accessibilite.mjs`** : axe-core (celui de
+  `node_modules`, tiré par eslint-plugin-jsx-a11y, 4.12.1) sur la zone `.esp`
+  de cinq écrans (validations, FILED, fournisseurs, à payer, point) à 390 et
+  1440 px, règles WCAG 2.1 A et AA ; puis sur un dialogue ouvert par écran ;
+  puis le **clavier** : le focus entre dans le dialogue, Tab y reste, Échap
+  le ferme et rend le focus au bouton qui l'a ouvert. Un écart « serious » ou
+  « critical » fait échouer. **22 contrôles ✓.**
+- Ce qu'axe a trouvé, et corrigé :
+  - les trois files (validations, FILED, fournisseurs) : `ul role="listbox"`
+    › `li` › `button role="option"` est invalide (listitem, required-children,
+    required-parent : 3 écarts critiques ou graves par écran). Les listes sont
+    redevenues des listes de boutons ; l'élément ouvert porte
+    `aria-current="true"` (le style suit, `espace.css`) ;
+  - le numéro de page de la visionneuse (`.esp-page-numero`) : contraste 2,5:1
+    → #6b6b75, 5:1 ;
+  - le point du matin : `aria-label` sur un `span` sans rôle (11 pastilles de
+    gravité) → `role="img"` quand la pastille dit quelque chose,
+    `aria-hidden` sinon.
+- **Focus rendu à la fermeture des dialogues** (`components/ui/dialog.tsx`,
+  composant partagé du site) : Radix rend le focus au `DialogTrigger`, mais
+  presque tous nos dialogues s'ouvrent en mode contrôlé, sans Trigger ; le
+  focus tombait sur `<body>`. `DialogContent` retient l'élément focalisé à
+  l'ouverture et le lui rend (sauf `preventDefault` de l'appelant). Vaut pour
+  tous les dialogues du site.
+- Recette générale inchangée : 186 contrôles ✓.
+- À signaler aux B : leurs écrans (lorani, tavaro, tiroma, tamila, daliro,
+  varelo) reprennent `role="listbox"` / `role="option"` sur des `li` — même
+  écart axe ; je n'y ai pas touché.
+
+## Lot du 06/10 (8) — noter un paiement dans « À payer » (a4_15)
+
+- **`filed_noter_paiement`** (p_facture, p_date, p_montant — vide = le reste —,
+  p_moyen ∈ virement, prelevement, cheque, carte, especes, compensation,
+  autre, p_reference ; gérant, admin, valideur) et **`filed_etat_paiement`**
+  (du, regle, reste, etat a_payer | partielle | payee, dernier_le,
+  nb_reglements ; rendu en **ligne de table** — l'écran normalise objet ou
+  tableau) — `filed/portes.ts`.
+- « À payer » : le montant affiché est le **reste** (avec « sur X · Y
+  réglés » dès qu'un règlement existe), l'état « Payée en partie » / « Payée »,
+  la date du dernier règlement ; « **Noter un paiement** » par ligne (date au
+  plus aujourd'hui, montant proposé = le reste et refusé au-delà, moyen —
+  virement si un IBAN est validé, sinon « autre » —, référence). Une facture
+  **payée sort de la liste** ; « Afficher les payées (n) » la fait revenir.
+  Les totaux sont des restes. Le paiement est **noté, pas exécuté** : le
+  dialogue le dit. Un refus de la base (rôle collaborateur, 55000, 22023)
+  s'affiche tel quel.
+- Exemple : R2026-000018 (Rivière) porte un règlement partiel de 1 000 €.
+- **Relu en réel** (daf2@, 06/10 ~05 h 30 Z, `relecture-paiement.mjs`),
+  **partiel** comme demandé : 100 € par virement, référence « essai-a3 », sur
+  FAC-2026-10-0471 → « C'est fait. 100,00 € notés sur R2026-000004
+  (virement) ; reste 188,00 € », ligne « 188,00 € sur 288,00 € · 100,00 €
+  réglés · Payée en partie » ; `filed_etat_paiement` : du 288, regle 100,
+  reste 188, partielle, 1 règlement.
+- Recette 190 ✓ (règlement partiel visible ; montant au-delà du reste
+  refusé ; paiement complet → la facture sort, « Afficher les payées (1) ») ;
+  accessibilité 26 ✓ (dont le dialogue de paiement au clavier).
+
+## Lot du 06/10 (9) — vérifier le site servi : `verifier-en-ligne.mjs`
+
+- `node omega/recette-a3/verifier-en-ligne.mjs [origine]` (défaut
+  https://omegaai.fr), lecture seule, sans session : les onze écrans de
+  l'espace (A3 : validations, filed, filed?objet=…R2026-000017, fournisseurs,
+  à payer, point ; B : varelo, tavaro, tiroma, tamila, lorani, daliro) —
+  200, titre, débordement aux cinq largeurs, axe à 390 et 1440, et pour A3
+  une phrase de chaque lot de la nuit. Un défaut A3 fait échouer ; un défaut
+  B est un constat listé à la fin.
+- Essai contre le Next local (06/10 ~05 h 45 Z) : **écrans d'A3, tout passe
+  (157 ✓)** ; **12 constats sur les B**, tous axe, aucun débordement :
+  varelo, tavaro, tamila, lorani, daliro — `listbox`/`option` sur des `li`
+  (required-children, required-parent, listitem) ; tiroma et lorani —
+  `aria-prohibited-attr` (aria-label sur un élément sans rôle) ; tavaro,
+  lorani, daliro à 390 — `scrollable-region-focusable` (une zone qui défile
+  sans être atteignable au clavier : `tabIndex={0}` sur le cadre).
+- À jouer contre omegaai.fr au retour du quota Vercel (07/10 ~04 h 30
+  Paris), au signal du coordinateur.
+
+## Lot du 06/10 (10) — cadres qui défilent, atteignables au clavier (remarque de B6)
+
+- Les deux cadres de tableau qui défilent dans mes écrans (lignes de la
+  facture dans le dossier FILED, tableaux de « À payer ») portent
+  `tabIndex={0}`, `role="region"` et un `aria-label` ; leur focus se voit
+  (`.esp-tableau-cadre:focus-visible`). Validations, fournisseurs et point
+  n'ont pas de cadre défilant.
+- Contrôle ajouté à 390 px dans `accessibilite.mjs` et `verifier-en-ligne.mjs` :
+  toute zone qui défile (overflow auto/scroll et contenu plus grand) doit
+  avoir tabIndex ≥ 0 avec un rôle et un nom, ou contenir un élément
+  focalisable. Mes cinq écrans passent ; le contrôle relève bien, comme axe,
+  les cadres de tavaro, lorani et daliro.
+- `verifier-en-ligne.mjs` nomme désormais l'écran dans chaque constat. Contre
+  le Next local : écrans d'A3 tout passe ; 15 constats sur les B (12 axe +
+  3 cadres défilants). Recette 190 ✓, accessibilité ✓.
+
+## Vérifié en ligne (06/10, ~06 h 15 Z) — omegaai.fr, main 99c37b6
+
+`node omega/recette-a3/verifier-en-ligne.mjs https://omegaai.fr`, après
+reprise de main : **181 ✓, 0 échec, 0 constat** — les onze écrans (A3 et
+B) répondent 200, sans débordement aux cinq largeurs, sans écart axe grave
+à 390 et 1440, zones défilantes atteignables ; les phrases des lots de la
+nuit sont dans les pages servies (« Décider en lot », « Le dossier »,
+« Ouvrir le dossier », « Fournisseurs », « À payer », « Identifiants lus sur
+la pièce, non retenus », « Saisir les vrais identifiants », « Les
+fournisseurs que FILED connaît », « Noter un paiement », « Payée en
+partie »…). Sortie brute : `omega/recette-a3/en-ligne-2026-10-06.txt`.
+Correctif du script : sur le site servi (plus lent), attendre que l'espace
+soit rendu (`.esp h1`) plutôt qu'un délai fixe ; un axe qui ne tourne pas est
+dit au lieu de planter.
+
+## Lot du 06/10 (11) — la vue Fournisseurs en temps réel (filed_fournisseurs publiée)
+
+- `filed_fournisseurs` est dans la publication `supabase_realtime` (accord de
+  Teo, 06/10). La vue Fournisseurs écoutait déjà la table ; elle écoute aussi
+  `filed_historique` (publiée), qui reçoit une ligne à chaque IBAN proposé,
+  confirmation ou attestation — c'est elle qui fait apparaître un nouvel IBAN
+  tant que `filed_fournisseurs_ibans` n'est pas publiée (**à publier**).
+- `useTempsReel` rend désormais l'état du canal (`inactif` | `connexion` |
+  `en_direct` | `coupe`) ; la vue Fournisseurs l'affiche : « En direct »
+  (point vert) ou, si le réseau refuse le WebSocket, « Relue toutes les
+  30 s » — dans ce cas l'écran **se relit seul toutes les 30 s**
+  (`RELECTURE_SANS_DIRECT_MS`), pour que « sans recharger » reste vrai. Vaut
+  pour tous les écrans qui utilisent `useTempsReel`.
+- **`omega/recette-a3/relecture-temps-reel.mjs`** : deux navigateurs ; A
+  (daf2@) ouvre la fiche d'ORANGE SA et ne recharge jamais ; B (gérant)
+  clique « Revérifier » ; A doit voir la ligne « Identité » changer.
+  **Joué le 06/10 à 13 h 54 Z** : ce conteneur refuse le WebSocket (le
+  mandataire ne fait pas d'Upgrade : `…supabase.co/realtime/v1/websocket` →
+  500) ; canal « coupe », témoin « Relue toutes les 30 s », et la fiche de A
+  a changé **en 55 s sans rechargement** (une seule navigation). L'événement
+  Realtime lui-même n'est **pas vérifiable d'ici** : rejouer le script depuis
+  un poste ordinaire (il dit laquelle des deux voies a servi).
+- **Défaut trouvé chez B7 (VIES)** pendant l'essai : le service VIES français
+  était saturé ; l'API répond **HTTP 200** avec `{"actionSucceed": false,
+  "errorWrappers": [{"error": "MS_MAX_CONCURRENT_REQ"}]}` — sans `valid` ni
+  `userError`. `lireReponseVies` (omega/functions/identite/vies.ts) ne lit
+  que `userError` : la réponse devient **« invalide »** au lieu
+  d'« indisponible ». Effet réel sur le banc : ORANGE SA (4 réponses
+  « valide » cette nuit, la dernière à 13 h 49) est passée « Invalide : VIES
+  ne reconnaît pas ce numéro de TVA » à 13 h 55 et 13 h 57, alors que
+  Sirene le dit actif dans la même réponse. Sa facture (validée) n'est pas
+  touchée ; une prochaine facture serait bloquée. Transmis au coordinateur
+  pour B7 ; un « Revérifier » quand VIES répond remettra le verdict.
+- Recette 190 ✓.
+
+## Lot du 06/10 (12) — suite de non-régression pour la migration vers /espace2
+
+- **`omega/recette-a3/non-regression.mjs [préfixe] [origine]`** — demandée par
+  le coordinateur pour le nouveau tableau de bord de C1 (/espace2). Le même
+  parcours se joue contre `/espace` et `/espace2` et dit ce qui MANQUE. Il ne
+  lit aucune classe CSS, seulement ce que voit l'utilisateur : h1, textes
+  clés, nom accessible des commandes, dialogues (role="dialog" et titre),
+  parcours clavier (Tab), axe-core, débordement à 390. Données d'exemple,
+  sans connexion. `NR_ECRANS=filed,varelo` pour n'en jouer que certains.
+- Douze écrans : validations, filed (dossier R2026-000016, par
+  `?objet=facture:…`), filed-identifiants (R2026-000017), fournisseurs, à
+  payer, varelo, tavaro, tiroma, tamila, lorani, daliro, point. Pour chaque
+  action : présente, visible, active, atteinte au clavier ; un « dialogue »
+  s'ouvre au bon titre, le focus y entre, Échap ferme et rend le focus ; un
+  « lien » mène à la bonne page **sous le même préfixe**.
+- Les attentes ont été relevées sur /espace (inventaire des commandes et
+  sonde des dialogues, 06/10 ~14 h 45 Z). **Contre /espace : 368/368**
+  (`non-regression-espace-2026-10-06.txt`). Contre un préfixe absent
+  (/espace2 sur ma branche), « À payer » sort 4/12 avec chaque manque nommé
+  : la suite sait échouer.
+- Je ne touche pas la branche de C1 (tableau-de-bord-v2).
+
+## 06/10 — service pour A1 : le vrai Factur-X déposé par l'écran
+
+- Le banc d'A1 (`omega/banc/facturx_reel.mjs`, worker-a1 883ee39) exige la
+  clé de service pour toutes ses lectures : je ne l'ai pas, je ne l'ai pas
+  jouée. Le dépôt est passé **par l'écran FILED**, au nom du gérant
+  (`omega/recette-a3/relecture-depot.mjs` : « Déposer un document », champ
+  fichier rempli par DOM.setFileInputFiles), avec la pièce
+  `EN16931_Einfach.pdf` lue à ce SHA (37 897 octets, sha256 05b5a382…d1d0).
+- 14:44:15 Z reçu **R2026-000005** ; 14:45:01 pièce **lue** — facture,
+  `methode xml`, 2 pages, `version_lecteur lecteur/2026-10-06/sans-ia`, sans
+  motif ; 14:46:00 document `integre`.
+- Relu sous la session du gérant (RLS) — mêmes contrôles que le script
+  d'A1 : 17 valeurs, une par champ, toutes `xml` confiance 1 ; lignes ×2,
+  ventilation TVA ×2 ; numéro 471102 ; HT 473, TVA 56.87 ; TTC 529.87 page 2,
+  avec boîte, « lu dans CII GrandTotalAmount ; concorde avec le PDF page 2 ».
+- Non lisible par le gérant (42501, voulu) : `travaux` (appels_ia du travail
+  lecteur.lire) et `consommation_ia_jour` — **contrôles SQL du coordinateur**
+  (`omega/banc/facturx_reel_controle.sql`).
+- FILED : facture 471102 du 15/11/2024 **bloquée** (3 bloquants, 2 à
+  vérifier : date.ancienne, fournisseur.a_confirmer, identite.siren,
+  identite.tva_intracom, tva.taux) — attendu pour un exemple allemand fictif
+  (TVA DE123456789, taux 7 % / 19 %), rien à corriger côté lecteur.
+
+## Lot du 06/10 (13) — l'écran FILED de la facture électronique (fiche d'A4, aa2e1fc)
+
+Dans `/espace/filed` seulement, la coquille et la barre ne bougent pas.
+- **Provenance** : pastille « Facture électronique » (structurée + reçue par
+  la plateforme : `filed_pa_flux` entrant déposé), « Fichier structuré »,
+  « Lue sur la pièce », « Saisie » ; repli `structuree` si une valeur xml
+  porte sur le numéro ou le TTC. Les valeurs xml disent « du fichier ».
+- **Corriger** : les champs xml sont grisés dans le dialogue (« — du fichier,
+  fait foi ») ; le bouton est grisé si tout fait foi. À côté : « Ouvrir un
+  litige » et « Refuser » (lien vers la file, à valider ou bloquée).
+- **Onglets** du dossier : Dossier · Cycle de vie (n) · Écritures. Frise de
+  `filed_cycle_vie_facture` (sens/erreur rapprochés de `filed_cycle_vie`),
+  « obligatoire » d'après `filed_cycle_vie_statuts`. Écritures : tableau
+  Journal · N° · Date · Compte · Libellé · Débit · Crédit · Lettrage, et
+  « Transmettre à la comptabilité » (`filed_comptabiliser_facture`).
+- **Litige** : motif normalisé (`filed_cycle_vie_motifs`, statut 207 ; AUTRE
+  = l'option vide), `p_motif = 'CODE : texte'` ; bandeau « En litige depuis… »
+  et « Clore le litige » (`filed_clore_litige`).
+- **Nouvelle page `/espace/filed/comptabilite`** (lien « Comptabilité » en
+  tête de FILED) : export FEC (`filed_exporter_fec`), titre et sous-titre
+  obligatoires, contenu téléchargé TEL QUEL (CRLF, UTF-8), bilan lignes /
+  écritures / débit = crédit ; les cinq comptes de FILED, « Modifier » pour
+  gérant/admin (`filed_regler_compte_systeme`, 3 à 12 chiffres).
+- Recette : `recette-espace.mjs` (+ comptabilité aux 5 largeurs, + deux
+  enchaînements : facture électronique, FEC/compte) tout passe ;
+  `accessibilite.mjs` tout passe ; `non-regression.mjs` 411/411 avec deux
+  écrans nouveaux (`filed-electronique`, `comptabilite`).
+- **Base réelle** (`relecture-facture-electronique.mjs`, gérant, R2026-000005) :
+  « Fichier structuré », 6 valeurs « du fichier », frise 204 « À transmettre
+  au fournisseur », Écritures vide, 12 motifs lus en base (le doublon
+  « Autre motif » corrigé à chaud), cinq comptes par défaut, export FEC
+  `500000013FEC20261231.txt` : 0 ligne (aucune écriture au banc). Rien
+  d'autre écrit (le litige n'a pas été ouvert ; l'export s'inscrit au journal).
+  « Corriger » reste actif sur R2026-000005 : certains champs n'y viennent pas
+  du xml — conforme.
+
+## Lot du 06/10 (14) — point avec C1, puis la boîte de réception de FILED
+
+- **C1** (session_013U6ss7Vw2rKrDY5C7ax656) a reçu la liste de mes écrans, des
+  enchaînements de `recette-espace.mjs`, des relectures et des pièges connus,
+  et la commande pour jouer `non-regression.mjs` contre `/espace2`.
+- **Nouvelle page `/espace/filed/boite` « Boîte de réception »** (lien en tête
+  de FILED) : les courriels de `public.receptions` (canal email, module
+  filed), lecture seule sous la politique du périmètre. L'adresse de la boîte
+  (expediteurs, gérant/admin ; sinon la boîte des réceptions) avec « Copier
+  l'adresse » ; compteurs Nouveaux / Lus / Traités / Écartés (filtres) ;
+  recherche ; détail : De / À / Reçu le, pièces jointes (lien signé
+  `omega-clients`), « Devenue le document R… » par rapprochement (source
+  courriel + même expéditeur + même nom + ±2 jours, faute de lien en base),
+  pièces écartées (`detail.pieces_ignorees`), texte du message (jamais le
+  HTML). Le titre n'est pas « Documents reçus » : c'est déjà le h1 de
+  `/espace/filed` (les documents numérotés) ; la boîte montre les courriels
+  d'où ils viennent.
+- Aucune porte ne change le statut d'une réception côté client : la page ne
+  marque rien (ni « lu », ni « indésirable »). À demander si on le veut.
+- Recette : + boîte aux 5 largeurs et un enchaînement (adresse, 13 courriels,
+  pièce → R2026-000014, pièce écartée, filtre Écartés) ; accessibilité tout
+  passe ; non-régression 433/433 (écran `boite` nouveau, lien depuis `filed`).
+- Base réelle (`relecture-boite.mjs`, gérant et daf2) : boîte
+  factures@essai.omegaai.fr, 1 courriel « Facture 123 » (réception d'essai
+  id 1), Nouveau, sans pièce, texte lu. Rien écrit.
+
+## Lot du 06/10 (15) — Demandes reçues, Réglages (journal CSV, export complet, sortie), marquer une réception
+
+Audit des promesses § 0 et § 1, accord du coordinateur pour `ecrans.ts`.
+- **Onglets** : « Demandes reçues » (`demandes`) et « Réglages » (`reglages`)
+  à droite de Point. Avec onze onglets, les libellés longs ne passent plus à
+  1700 px : ils s'affichent à partir de 1920 px (espace.css), en dessous les
+  libellés courts. REPUT / CASHD : pas encore dans main, ajoutés quand ils
+  seront fusionnés.
+- **/espace/demandes** : `EcranBoite portee="toutes"` — toutes les réceptions,
+  tous canaux, SAUF le module tiroma (données de santé) ; filtre « Enseigne
+  (boîte) » ; pastille du canal ; champs d'un formulaire (`detail`, sans les
+  clés techniques).
+- **Marquer** (boîte FILED et demandes) : « Marquer comme lu », « Écarter »,
+  « Remettre en nouveau » → `reception_marquer` (socle 19am). Rien pour une
+  réception traitée ou indésirable.
+- **/espace/reglages** :
+  - « Exporter mon journal (CSV) » : `journal_opposable` par pages de 1 000,
+    CSV `;` UTF-8 avec BOM, CRLF, empreintes en hexadécimal (gérant/admin) ;
+  - « Exporter toutes mes données » : fonction Edge `export-complet` (A5,
+    19aj) par `functions.invoke` avec le jeton de la personne ; lien 24 h,
+    mot de passe montré une fois (copier), avertissement AES-256 / macOS
+    (7-Zip, Keka, WinRAR), fichiers manquants, SHA-256 ;
+  - « Préparer l'effacement » : `apercu_effacement` (19am) — lignes, tables,
+    comptes, fichiers ; rien n'est effacé.
+- Recette : + demandes et réglages aux 5 largeurs, enchaînements (enseigne,
+  champs de formulaire ; marquer lu/écarter ; CSV lu octet par octet, BOM
+  compris ; export complet et mot de passe ; aperçu) : tout passe ;
+  accessibilité : tout passe ; non-régression 468/468.
+- **Base réelle** (gérant) : demandes 1 (aucune tiroma), 3 boîtes ; marquer
+  lu puis remettre en nouveau sur la réception 1 (Nouveau → Lu → Nouveau,
+  deux lignes au journal) ; journal 3 127 lignes en CSV avec empreintes ;
+  aperçu d'effacement 5 879 lignes / 94 tables / 4 comptes / 21 fichiers ;
+  daf2 (valideur) : les trois gestes refusés avec la raison.
+- **Bloqué, pas par l'écran** :
+  1. `export-complet` refuse l'origine http://localhost:3010 (CORS :
+     EXPORT_ORIGINES = https://omegaai.fr) : non vérifiable depuis la recette
+     locale ;
+  2. appelée directement (curl, jeton du gérant), la fonction répond
+     « exporter_client : HTTP 404 Could not find the function
+     public.exporter_client(p_client) » : la fonction appelle une porte qui
+     n'existe pas sous ce nom (la porte publique est exporter_donnees_client,
+     service seulement). À corriger chez A5. La demande d'export laissée
+     « en cours » peut bloquer la suivante (55P03 → 409).
+  3. Un premier passage a montré « Cette page n'a pas pu s'afficher » sur
+     Réglages : l'écran attendait la forme de preparer_effacement, alors
+     qu'apercu_effacement (posée entre-temps) rend une autre forme. Corrigé
+     (forme de 19am, lectures défensives).
+
+## 06/10 — mes scripts joués contre /espace2 (C1, tableau-de-bord-v2 @ 1ac8de9)
+
+`recette-espace.mjs` et `accessibilite.mjs` prennent désormais PREFIXE=/espace2,
+CAPTURES=<dossier> (pour ne pas écraser les captures de /espace) et
+SAUTER=a,b (enchaînements d'écrans absents). Build de production de 1ac8de9
+dans un arbre à part (node_modules en liens durs : un lien symbolique hors
+de la racine fait paniquer Turbopack), `next start -p 3020`.
+- accessibilité : tout passe ;
+- recette : tout passe SAUF « À payer », que C1 a réécrit
+  (components/espace2/filed/APayer, sans `.esp`) : mon enchaînement lit des
+  classes .esp-*, il ne s'y applique pas. Rejoué à la main avec des
+  sélecteurs neutres : mêmes groupes, mêmes lignes, dialogue « Noter un
+  paiement » au reste (1140), moyen « autre » sans IBAN, 5000 → bouton gris,
+  payée → sort de la liste, « Afficher les payées (1) ». Seule différence :
+  pas de message « C'est fait… la facture est payée ».
+- absents de 1ac8de9 (normal, plus récents) : boîte FILED, Demandes reçues,
+  mes Réglages. /espace2/reglages existe chez C1 (Apparence, Données,
+  Compte) : mes trois gestes (journal, export complet, effacement) sont à
+  mettre dans sa section Données.
+
 ## Bloqué / contourné
 
 - **Outil Supabase (MCP)** : la permission d'exécuter du SQL a été refusée
@@ -155,9 +741,24 @@ RLS, portes RPC). Sans session, l'interrupteur est gris et l'exemple reste.
    75 GRANT en face des policies. Délégation et révocation vérifiées.
    `comptes` DELETE, `entites` INSERT + DELETE, `regles_validation`
    INSERT + UPDATE + DELETE : voulus par le socle (policies `ALL`), pas
-   touchés. **Reste à demander** : un mot de passe pour `referent` (membre de
-   « Référent données ») ou `daf` pour rejouer approuver / refuser, et une
-   demande saisie par le gérant pour rejouer l'annulation.
+   touchés. Approuver / refuser rejoués avec `referent`. **Reste** : une
+   demande saisie par le gérant pour rejouer l'annulation (promise au
+   prochain point).
+11. **Vu sur la première vraie facture** (05/10, 20:05) — pour A1 / le
+   coordinateur, pas pour l'écran : le contrôle `identite.siren` dit
+   « Aucun SIREN sur la pièce ni sur le fournisseur » alors que
+   `pieces_valeurs` porte `fournisseur.siren = "SIREN 842 115 763"` (et
+   `fournisseur.tva`) — le contrôle ne lit pas la valeur lue, ou la valeur
+   n'est pas remontée sur `filed_factures.fournisseur_lu`. Et le contrôle
+   bloquant `fournisseur.a_confirmer` demande qu'« une personne confirme »
+   le fournisseur nouveau : **il n'y a pas de porte pour ça** —
+   `filed_bloquer_fournisseur(false)` débloque un bloqué, ce n'est pas
+   confirmer un `a_confirmer`. Proposition : `filed_confirmer_fournisseur
+   (p_fournisseur, p_motif)` (statut `actif`, `confirme_le`/`confirme_par`),
+   que j'ajoute à l'écran dès qu'elle existe.
+12. **Contrat des champs de lecture** : `omega/CHAMPS-LECTURE.md` n'est pas
+   sur `main` ; la visionneuse lit aujourd'hui les deux jeux de noms. Un
+   seul jeu, écrit, éviterait les repli.
 9. **Realtime** — posé en partie (socle_lot19h, 05/10 18:25) :
    `demandes_validation`, `approbations`, `filed_documents`, `filed_factures`
    sont dans la publication `supabase_realtime`. Les écrans écoutent déjà
@@ -218,10 +819,27 @@ sur la recette, cookie de session posé par
   et le dit AVANT le clic (règle « · équipe : Référent données », avis
   ambre, boutons gris ; « À décider par moi » vide à juste titre), une
   délégation d'un membre rouvrant la décision — même ordre que le trigger.
-  **Approuver / refuser restent à rejouer** avec un compte membre
-  (referent c2 pour « Référent données », daf/daf2 pour « Direction
-  financière ») : il leur faut un mot de passe. **Annuler sa demande**
-  demande une demande saisie par la personne : aucune sur le banc.
+  **Approuver et refuser rejoués à 20:09 UTC avec `referent`** (membre de
+  « Référent données », mot de passe posé par le coordinateur) : une
+  demande VARELO approuvée (passée `executee` par le trigger, l'action du
+  module a tourné), une refusée avec motif (`rejetee`) ; les deux lignes
+  d'`approbations` portent le commentaire. Le message « C'est fait » est
+  désormais dit au-dessus de la file, parce que la demande décidée quitte
+  la vue quand la file se relit. **Annuler sa demande** reste à rejouer :
+  le coordinateur fournit une demande saisie par le gérant au prochain
+  point.
+- **FILED, première vraie facture** (`R2026-000003`, F-2026-0413 de
+  Papeterie Delorme, lue par l'ouvrier lecteur à 20:05) : le dossier se
+  lit, le PDF réel se dessine avec ses onze boîtes, 18 contrôles (4
+  échoués dont « fournisseur à confirmer » bloquant), le fil. Trois
+  retouches à chaud : les **noms de champ du lecteur réel** (`numero`,
+  `date`, `echeance`, `montant_*`, `fournisseur.iban`, `fournisseur.siren`)
+  diffèrent du gabarit (`facture.numero`, `totaux.*`, `paiement.iban`) —
+  la visionneuse lit les deux par notion, et une valeur absente de la
+  facture retombe sur le texte cité (le SIREN lu sur la pièce s'affiche) ;
+  le **motif officiel n'est plus dit sur un contrôle passé** (c'est celui
+  qui vaudrait s'il échouait) ; les familles du lecteur réel (`identite`,
+  `date`, `exercice`, `montant`, `lecture`) ont leur libellé.
 - `apercu_point(p_client, p_user, p_jour)` répond 200 avec
   `{jour, du_le, fuseau, motifs: [], prevu_le, sections: []}` pour le banc
   (aucun gabarit de point posé) : l'écran dit « Pas de point ce jour-là »
@@ -236,6 +854,16 @@ sur la recette, cookie de session posé par
   identifiants d'un lot VARELO) se résument à leur compte et leurs trois
   premiers éléments ; une panne réseau à `getUser` n'est plus dite
   « Aucune session ouverte ».
+
+## Reprise du 06/10 (01 h 50 Paris)
+
+La pause de la veille est tombée après le dernier push : rien d'inachevé,
+`worker-a3` (03ba1c9) est entièrement dans `main`, omegaai.fr le sert.
+**Prochaine étape** : rejouer « Annuler ma demande » dès qu'une demande
+saisie par le gérant existe sur le banc (aucune au 06/10 01 h 50) ; brancher
+`filed_confirmer_fournisseur` quand la porte existera (demande 11) — **fait
+le 06/10, voir « Lot du 06/10 »**. Je ne
+touche pas à `components/espace/ecrans.ts` (B3/B5 y ajoutent leurs onglets).
 
 ## Demain
 

@@ -14,6 +14,13 @@
      filed_bloquer_fournisseur(p_fournisseur, p_bloquer bool, p_motif)
      filed_rattacher_commande(p_facture, p_commande, p_motif)
      filed_apparier_ligne(p_facture, p_facture_ligne, p_commande_ligne, p_motif)
+     filed_confirmer_fournisseur(p_fournisseur, p_motif) → int (a4_10 :
+       gérant, admin, valideur ; jamais le déposant de la pièce d'origine)
+     filed_attester_identite(p_fournisseur, p_motif) (a4_10 : une personne
+       atteste l'identité quand le registre se tait)
+     identite_demander(p_client, p_registre, p_identifiant, p_fournisseur,
+       p_force) → uuid (b7_02 : « revérifier » ; l'ouvrier identite répond
+       en une à deux minutes et remplit le verdict du fournisseur)
      filed_deposer_piece(p_client, p_document, p_nom_fichier, p_mime,
        p_octets, p_sha256, p_chemin, p_entite, p_source, p_expediteur) → jsonb,
        le fichier étant d'abord mis dans le bucket omega-clients sous
@@ -23,7 +30,8 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { Commande, DocumentFiled, DossierFiled, Facture, Fournisseur, LigneCommande, MotifRefus, NatureDocument } from "../types";
+import { chargerFactureElectronique } from "./factureElectronique";
+import type { Commande, DocumentFiled, DossierFiled, Facture, Fournisseur, IbanFournisseur, LigneCommande, MotifRefus, NatureDocument } from "../types";
 
 export class ErreurPorte extends Error {}
 
@@ -95,7 +103,18 @@ export async function chargerDossier(a: Apercu): Promise<DossierFiled> {
     pages: (pages?.data ?? []) as DossierFiled["pages"],
     valeurs: (valeurs?.data ?? []) as DossierFiled["valeurs"],
     appariements: (appar?.data ?? []) as DossierFiled["appariements"],
+    origine_deposee_par: await deposantOrigine(a),
+    ...(await chargerFactureElectronique(a.document.id, fid ?? null).catch(() => ({}))),
   };
+}
+
+/* qui a déposé la pièce qui a fait naître le fournisseur (null si inconnu) */
+async function deposantOrigine(a: Apercu): Promise<string | null> {
+  const origine = a.fournisseur?.document_origine;
+  if (!origine) return null;
+  if (origine === a.document.id) return a.document.depose_par ?? null;
+  const { data } = await createClient().from("filed_documents").select("depose_par").eq("id", origine).maybeSingle();
+  return ((data as { depose_par?: string | null } | null)?.depose_par ?? null);
 }
 
 export async function chargerCommandes(): Promise<{ commandes: Commande[]; lignes: LigneCommande[] }> {
@@ -148,15 +167,17 @@ export async function deposerDocument(o: { client_id: string; entite_id: string 
   return { document_id: texte(r.document) ?? document_id, reference: texte(r.reference), etat: texte(r.etat), doublon_de: texte(r.doublon_de) };
 }
 
-export async function monClient(): Promise<{ user_id: string; client_id: string; email: string | null; entites: { id: string; nom: string }[] } | null> {
+export async function monClient(): Promise<{ user_id: string; client_id: string; email: string | null; role: string | null; entites: { id: string; nom: string; siren?: string | null }[] } | null> {
   const supabase = createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return null;
-  const { data } = await supabase.from("comptes").select("client_id").eq("user_id", auth.user.id).limit(1);
-  const c = (data ?? [])[0] as { client_id: string } | undefined;
+  const { data } = await supabase.from("comptes").select("client_id, role").eq("user_id", auth.user.id).limit(1);
+  const c = (data ?? [])[0] as { client_id: string; role: string | null } | undefined;
   if (!c) return null;
-  const e = await supabase.from("entites").select("id, nom").eq("client_id", c.client_id).order("principale", { ascending: false });
-  return { user_id: auth.user.id, client_id: c.client_id, email: auth.user.email ?? null, entites: (e.data ?? []) as { id: string; nom: string }[] };
+  const e = await supabase.from("entites").select("id, nom, siren").eq("client_id", c.client_id).order("principale", { ascending: false });
+  /* le SIREN n'est peut-être pas lisible : on retombe sur id et nom */
+  const ent = e.error ? await supabase.from("entites").select("id, nom").eq("client_id", c.client_id).order("principale", { ascending: false }) : e;
+  return { user_id: auth.user.id, client_id: c.client_id, email: auth.user.email ?? null, role: c.role ?? null, entites: (ent.data ?? []) as { id: string; nom: string; siren?: string | null }[] };
 }
 
 export async function chargerFournisseurs(): Promise<Fournisseur[]> {
@@ -164,6 +185,50 @@ export async function chargerFournisseurs(): Promise<Fournisseur[]> {
   const { data, error } = await supabase.from("filed_fournisseurs").select("*").order("nom").limit(500);
   if (error) throw new ErreurPorte(message(error));
   return (data ?? []) as Fournisseur[];
+}
+
+/* La vue « Fournisseurs » : tous les fournisseurs, leurs IBAN, leurs
+   factures (avec la référence du document), et qui a déposé la pièce
+   d'origine de chacun (il ne le confirme pas). */
+export type FactureDuFournisseur = {
+  id: string;
+  numero: string | null;
+  statut: Facture["statut"];
+  nature: Facture["nature"];
+  montant_ttc: number | null;
+  net_a_payer: number | null;
+  devise: string;
+  date_emission: string | null;
+  echeance_lue: string | null;
+  iban: string | null;
+  fournisseur_id: string | null;
+  reference: string | null;
+};
+export type VueFournisseurs = { fournisseurs: Fournisseur[]; ibans: IbanFournisseur[]; factures: FactureDuFournisseur[]; deposants: Record<string, string | null> };
+
+export async function chargerVueFournisseurs(): Promise<VueFournisseurs> {
+  const supabase = createClient();
+  const [fo, ib, fa] = await Promise.all([
+    supabase.from("filed_fournisseurs").select("*").order("nom").limit(1000),
+    supabase.from("filed_fournisseurs_ibans").select("id, fournisseur_id, iban_masque, statut, propose_le").limit(2000),
+    supabase.from("filed_factures").select("id, numero, statut, nature, montant_ttc, net_a_payer, devise, date_emission, echeance_lue, iban, fournisseur_id, document_id, version").not("fournisseur_id", "is", null).order("date_emission", { ascending: false }).limit(1000),
+  ]);
+  if (fo.error) throw new ErreurPorte(message(fo.error));
+  const fournisseurs = (fo.data ?? []) as Fournisseur[];
+  const lignes = (fa.data ?? []) as (Omit<FactureDuFournisseur, "reference"> & { document_id: string; version: number })[];
+  /* une facture par document : sa dernière version */
+  const parDocument = new Map<string, (typeof lignes)[number]>();
+  for (const l of lignes) if ((parDocument.get(l.document_id)?.version ?? -1) < l.version) parDocument.set(l.document_id, l);
+  const origines = fournisseurs.map((f) => f.document_origine).filter(Boolean) as string[];
+  const docIds = Array.from(new Set([...parDocument.keys(), ...origines]));
+  const docs = docIds.length ? await supabase.from("filed_documents").select("id, reference, depose_par").in("id", docIds) : null;
+  const doc = new Map(((docs?.data ?? []) as { id: string; reference: string; depose_par: string | null }[]).map((d) => [d.id, d]));
+  return {
+    fournisseurs,
+    ibans: (ib.data ?? []) as IbanFournisseur[],
+    factures: Array.from(parDocument.values()).map((f) => ({ id: f.id, numero: f.numero, statut: f.statut, nature: f.nature ?? "facture", montant_ttc: f.montant_ttc, net_a_payer: f.net_a_payer, devise: f.devise ?? "EUR", date_emission: f.date_emission, echeance_lue: f.echeance_lue, iban: f.iban, fournisseur_id: f.fournisseur_id, reference: doc.get(f.document_id)?.reference ?? null })),
+    deposants: Object.fromEntries(fournisseurs.map((f) => [f.id, f.document_origine ? (doc.get(f.document_origine)?.depose_par ?? null) : null])),
+  };
 }
 
 async function rpc<T = unknown>(nom: string, args: Record<string, unknown>): Promise<T> {
@@ -181,4 +246,22 @@ export const rattacherFournisseur = (p_facture: string, p_fournisseur: string, p
 export const proposerIban = (p_fournisseur: string, p_iban: string, p_motif: string) => rpc<string>("filed_proposer_iban", { p_fournisseur, p_iban, p_motif });
 export const bloquerFournisseur = (p_fournisseur: string, p_bloquer: boolean, p_motif: string) => rpc("filed_bloquer_fournisseur", { p_fournisseur, p_bloquer, p_motif });
 export const rattacherCommande = (p_facture: string, p_commande: string, p_motif: string) => rpc("filed_rattacher_commande", { p_facture, p_commande, p_motif });
+export const confirmerFournisseur = (p_fournisseur: string, p_motif: string) => rpc<number>("filed_confirmer_fournisseur", { p_fournisseur, p_motif: p_motif || null });
+export const attesterIdentite = (p_fournisseur: string, p_motif: string) => rpc("filed_attester_identite", { p_fournisseur, p_motif });
+export const demanderVerification = (p_client: string, p_registre: "sirene" | "vies", p_identifiant: string, p_fournisseur: string) =>
+  rpc<string>("identite_demander", { p_client, p_registre, p_identifiant, p_fournisseur, p_force: true });
+/* a4_15 : le paiement d'une facture validée. filed_etat_paiement est une
+   lecture sous RLS ; sa forme (objet ou ligne de table) est normalisée. */
+export type EtatPaiement = { du: number; regle: number; reste: number; etat: "a_payer" | "partielle" | "payee"; dernier_le: string | null; nb_reglements: number };
+export const MOYENS_PAIEMENT = ["virement", "prelevement", "cheque", "carte", "especes", "compensation", "autre"] as const;
+export type MoyenPaiement = (typeof MOYENS_PAIEMENT)[number];
+export async function etatPaiement(p_facture: string): Promise<EtatPaiement | null> {
+  const r = await rpc<unknown>("filed_etat_paiement", { p_facture });
+  const o = (Array.isArray(r) ? r[0] : r) as Record<string, unknown> | null | undefined;
+  if (!o || typeof o !== "object") return null;
+  const n = (v: unknown) => (typeof v === "number" ? v : Number(v ?? 0));
+  return { du: n(o.du), regle: n(o.regle), reste: n(o.reste), etat: (o.etat as EtatPaiement["etat"]) ?? "a_payer", dernier_le: (o.dernier_le as string | null) ?? null, nb_reglements: n(o.nb_reglements) };
+}
+export const noterPaiement = (o: { facture: string; date: string | null; montant: number | null; moyen: MoyenPaiement | null; reference: string | null }) =>
+  rpc<string>("filed_noter_paiement", { p_facture: o.facture, p_date: o.date, p_montant: o.montant, p_moyen: o.moyen, p_reference: o.reference });
 export const apparierLigne = (p_facture: string, p_facture_ligne: string, p_commande_ligne: string, p_motif: string) => rpc("filed_apparier_ligne", { p_facture, p_facture_ligne, p_commande_ligne, p_motif });

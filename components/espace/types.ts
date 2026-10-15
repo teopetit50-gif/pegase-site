@@ -1,3 +1,5 @@
+import type { Ecriture, LigneCycle, Litige } from "./filed/factureElectronique";
+
 /* ══════════════════════════════════════════════════════════════════════
    Les formes partagées des trois écrans client (05/10/2026)
 
@@ -163,13 +165,18 @@ export type DocumentFiled = {
   motif: string | null;
   lu_le: string | null;
   traite_le: string | null;
+  depose_par?: string | null;
 };
 
-export type StatutFacture = "a_completer" | "bloquee" | "a_valider" | "ecartee";
+/* filed_factures_statut_v2 (a4_02) : après la validation, la facture est
+   validée, refusée ou comptabilisée */
+export type StatutFacture = "a_completer" | "bloquee" | "a_valider" | "ecartee" | "validee" | "refusee" | "comptabilisee";
 
 export type Facture = {
   id: string;
   document_id: string;
+  /* a4_16 : structuree | lue | saisie ; nulle avant le lot 9 (voir filed/factureElectronique.ts) */
+  provenance?: "structuree" | "lue" | "saisie" | null;
   nature: "facture" | "avoir";
   version: number;
   numero: string | null;
@@ -255,6 +262,23 @@ export type Fournisseur = {
   pays: string | null;
   statut: "a_confirmer" | "actif" | "bloque" | "refuse";
   regime_tva: string | null;
+  /* a4_10 : la pièce qui l'a fait naître, sa confirmation, et le verdict
+     sur son identité (registre public ou personne) */
+  document_origine?: string | null;
+  confirme_le?: string | null;
+  confirme_par?: string | null;
+  identite_verifiee_le?: string | null;
+  identite_source?: "sirene" | "vies" | "humain" | null;
+  identite_verdict?: VerdictIdentite | null;
+};
+
+export type VerdictIdentite = {
+  resultat?: "valide" | "invalide" | "indisponible" | string;
+  registre?: string;
+  identifiant?: string;
+  source?: string;
+  verifie_le?: string;
+  preuve?: Record<string, unknown> | null;
 };
 
 export type IbanFournisseur = {
@@ -359,6 +383,15 @@ export type DossierFiled = {
   piece: Piece | null;
   pages: PagePiece[];
   valeurs: ValeurPiece[];
+  /* qui a déposé la pièce d'origine du fournisseur : cette personne ne le
+     confirme pas (filed_confirmer_fournisseur, a4_10) */
+  origine_deposee_par?: string | null;
+  /* la facture électronique (a4_16 à a4_18) : reçue par la plateforme
+     agréée, son cycle de vie, ses litiges, ses écritures */
+  recuePlateforme?: boolean;
+  cycle?: LigneCycle[];
+  litiges?: Litige[];
+  ecritures?: Ecriture[];
 };
 
 /* ——— le point du matin ——— */

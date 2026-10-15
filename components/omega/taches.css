@@ -1,0 +1,28 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Tâches — comme la page Activité (13/10/2026), components/omega/PlanTaches
+   (préfixe tk-, les classes ao- d'activite.css telles quelles, tiroir tp-).
+
+   Retour de Teo : « encore trop de trucs, regarde Notes et Activité ».
+   Une barre fine, puis une liste encadrée : titre et catégorie | statut |
+   date | « Dans 3 j » (rouge en retard). La fiche s'ouvre au clic.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.tk-etat { margin: 12px 0 0; font-size: 13px; color: var(--v2-gray-900); }
+/* une ligne = le titre et une date (14/10) ; min-width: 0 pour que le titre se coupe au lieu de pousser la date hors du cadre */
+.tk-liste .ao-ligne { min-width: 0; }
+.tk-liste .ao-ligne .tk-ligne { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 16px; }
+.tk-titre { flex: 1; min-width: 0; font-size: 14px; color: var(--v2-gray-1000); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tk-titre[data-vide] { color: var(--v2-gray-800); }
+.tk-statut { flex: none; font-size: 12px; color: var(--v2-gray-900); }
+.tk-statut[data-statut="Bloqué"] { color: var(--v2-red-900, var(--v2-red-700)); }
+.tk-quand { flex: none; min-width: 72px; font-size: 13px; color: var(--v2-gray-900); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.tk-quand[data-retard] { color: var(--v2-red-900, var(--v2-red-700)); }
+
+/* le sélecteur ⌃⌄ de la page, habillé comme les autres boutons de la barre */
+.ao-barre .om-vue { height: 26px; padding: 0 10px; border-radius: 6px; background: var(--v2-bg-100); box-shadow: 0 0 0 1px var(--v2-a-400); font-size: 13px; }
+
+/* ——— paliers ——— */
+@container principale (max-width: 767px) {
+  .tk-liste .ao-ligne .tk-ligne { padding: 0 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .tp-tiroir, .tp-voile { animation: none; } }
