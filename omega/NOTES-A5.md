@@ -7,9 +7,9 @@ Depuis la reprise du 11/10 :
   par le coordinateur : déploiement de la fonction, réglages alertes_destinataire / alertes_expediteur, cron 06:17 UTC
   (SQL dans omega/functions/alertes-quotidiennes/README.md).
 - 19aq EXECUTE sur les six private.offload_* de c4_10 (5e33f3b) : POSÉ, offload_* ne sort plus au test 44.
-- 19ar EXECUTE sur private.filed_rapprocher_ligne (714d748) : EN ATTENTE, ne pas poser tel quel — A4 renomme sa porte
-  (filed_regler_par_releve) et retire l'homonyme. Prochain pas : relire a4_34 corrigé sur worker-a4, réécrire 19ar sur la
-  nouvelle fonction si le test 44 la donne encore « manquante », sinon abandonner 19ar.
+- 19ar : ABANDONNÉ et retiré le 15/10. A4 a renommé sa porte en filed_regler_par_releve (worker-a4 bfdbfe78) et
+  a4_34 accorde lui-même EXECUTE à authenticated sur private.filed_regler_par_releve : rien à ajouter côté socle.
+  Si le test 44 reste rouge après la pose d'a4_34 v2 et d'a4_34b, regarder la fonction qu'il nomme.
 - Test 44 encore rouge sur la recette à cause de cette seule fonction (lot h1404tout).
 
 Le reste de la section ci-dessous (6/10) vaut toujours : gel et tag prod-* attendent le coordinateur ; workflow de
