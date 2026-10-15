@@ -274,6 +274,20 @@ for (const largeur of LARGEURS) {
   await s.dormir(700);
   const ap = await s.evaluer(`(() => { const t = document.querySelector('.lor-controle-tete')?.closest('.esp-carte-corps')?.textContent || ''; return { cartes: document.querySelectorAll('.lor-constat').length, decides: /Décidés \\(2\\)/.test(t), motif: /Motif : Dérogation accordée par la mairie/.test(t) }; })()`);
   ok(ap.cartes === 2 && ap.decides && ap.motif, `le recul est écarté avec son motif : 2 constats ouverts, 2 décidés (${JSON.stringify(ap)})`);
+  /* b5_29 : suspendre le contrôle (motif obligatoire), puis le reprendre */
+  await s.evaluer(`[...document.querySelectorAll('.lor-controle-tete .esp-lien-bouton')].find(b => b.textContent.trim() === 'Suspendre')?.click()`);
+  await s.dormir(500);
+  const su = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const b = [...(d?.querySelectorAll('button') || [])].find(x => /^\\s*Suspendre\\s*$/.test(x.textContent)); return { titre: d?.querySelector('h2')?.textContent, gris: b?.disabled }; })()`);
+  ok(su.titre === 'Suspendre le contrôle' && su.gris === true, `dialogue « ${su.titre} » : sans motif, « Suspendre » reste grisé`);
+  await s.evaluer(`(() => { const ta = document.querySelector('[role="dialog"] textarea'); Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(ta, 'En attente de l’indice C des façades'); ta.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(x => /^\\s*Suspendre\\s*$/.test(x.textContent))?.click()`);
+  await s.dormir(600);
+  const su2 = await s.evaluer(`(() => { const t = document.querySelector('.lor-controle-tete'); const b = [...(t?.querySelectorAll('.esp-lien-bouton') || [])]; return { pastille: /Suspendu/.test(t?.innerText || ''), lancerGris: b.find(x => /Relancer|Lancer/.test(x.textContent))?.disabled, reprendre: b.some(x => x.textContent.trim() === 'Reprendre'), motif: /Suspendu le .* : En attente de l’indice C des façades/.test(t?.parentElement?.innerText || '') }; })()`);
+  ok(su2.pastille && su2.lancerGris && su2.reprendre && su2.motif, `suspendu : pastille, motif dit, « Relancer » grisé, « Reprendre » proposé (${JSON.stringify(su2)})`);
+  await s.evaluer(`[...document.querySelectorAll('.lor-controle-tete .esp-lien-bouton')].find(b => b.textContent.trim() === 'Reprendre')?.click()`);
+  await s.dormir(600);
+  ok(await s.evaluer(`!/Suspendu/.test(document.querySelector('.lor-controle-tete')?.innerText || '') && [...document.querySelectorAll('.lor-controle-tete .esp-lien-bouton')].some(b => b.textContent.trim() === 'Suspendre')`), 'repris : la pastille tombe, « Suspendre » revient');
   /* b5_25 : un constat en question au BET ou à l'entreprise, avec l'extrait cité */
   await s.evaluer(`[...document.querySelectorAll('.lor-constat .esp-lien-bouton')].find(b => b.textContent.trim() === 'En faire une question')?.click()`);
   await s.dormir(500);

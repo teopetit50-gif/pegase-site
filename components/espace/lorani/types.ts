@@ -345,6 +345,9 @@ export type Controle = {
   cree_le: string;
   /* b5_28 : les valeurs lues qui ont changé depuis l'indice précédent (absent tant que la migration n'est pas posée) */
   changements?: ChangementIndice[];
+  /* b5_29 : un contrôle suspendu ne se lance pas (absent tant que la migration n'est pas posée) */
+  suspendu_le?: string | null;
+  suspendu_motif?: string | null;
 };
 export type ChangementIndice = {
   reference: string;

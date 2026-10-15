@@ -80,7 +80,7 @@ des lignes déjà retirées de `lib/en-preparation.ts` (Accessibilité, Cerfa, R
 | 15 | « Régler les contrôles » | Produit.tsx (menu) | C | Les tolérances existent, mais elles sont fixées dans le code (b5_16) | Tolérances et règles activables par projet, dans l'écran | 1 / 0,5 | — |
 | 16 | « Choisir qui décide » | Produit.tsx:304 | C | b5_07 §6 : le chef de projet décide (corrigé, accepté, écarté avec motif) | Désigner un autre décideur par projet | 0,5 / 0,5 | — |
 | 17 | « Inviter l'équipe » | Produit.tsx:324 | C | Membres de projet (`lorani_membres_projet`, RLS) | Invitation depuis l'écran Lorani (à vérifier si le socle l'offre déjà) | 1 / 0,5 | — |
-| 18 | « Suspendre un contrôle » | Produit.tsx:364 | D | — | Statut « suspendu » ; le passage des lectures doit l'ignorer | 0,5 / 0,5 | — |
+| 18 | « Suspendre un contrôle » | Produit.tsx:364 | D → B à la pose | b5_29 (15/10) : suspendre (motif obligatoire) puis reprendre. Un contrôle suspendu ne se lance ni à la main ni à la lecture de sa dernière pièce ; repris, il se lance si ses pièces sont lues. Journal. Écran : Suspendre / Reprendre, recette 5 largeurs verte. Test b5_18 écrit | Poser b5_29 et b5_18 | 0 / 0,5 | — |
 
 ### Permis et PLU
 

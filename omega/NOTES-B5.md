@@ -5,6 +5,11 @@ Dernière mise à jour : 05/10/2026, 23 h.
 
 ## REPRISE (pause demandée par Teo, 06/10/2026 à 21 h Z)
 
+**15/10 — reprise par petits lots (chaque SHA met ces notes à jour ; pause possible à tout moment).**
+- b5_17 (changements d'indice) en test chez le coordinateur (lot h1218b6b5).
+- Nouveau, à poser : b5_29_suspendre_controle.sql, puis le test b5_18. L'écran (Controle.tsx, portes.ts, types.ts) est à fusionner après b5_18 vert.
+- Prochain lot : #16 (choisir qui décide), puis #15 (régler les contrôles), #23, #30 à #33.
+
 **11/10, 15 h 40 Z — PAUSE demandée par Teo. Arrêt propre, tout est poussé sur worker-b5.**
 - À poser (pas encore posé) : b5_28_changements_indice.sql, puis le test b5_17_changements_indice.sql (4bff78f). Scénario local conforme ; le test n'a pas tourné, faute du socle complet en local.
 - Écran prêt, à fusionner après b5_17 vert : Controle.tsx, rapport.ts, types.ts, portes.ts (lorani_controles en select « * »), exemples.ts — le bloc « Changements depuis l'indice A ».

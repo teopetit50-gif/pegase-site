@@ -502,6 +502,20 @@ export async function ouvrirConsultation(v: { client_id: string; projet_id: stri
   return (data as { id: string }).id;
 }
 
+/* ——— suspendre ou reprendre un contrôle (b5_29) ——— */
+
+export async function suspendreControle(controle: string, motif: string): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.rpc("lorani_suspendre_controle", { p_controle: controle, p_motif: motif });
+  if (error) throw new ErreurPorte(message(error));
+}
+
+export async function reprendreControle(controle: string): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.rpc("lorani_reprendre_controle", { p_controle: controle });
+  if (error) throw new ErreurPorte(message(error));
+}
+
 export async function analyserOffres(consultation: string): Promise<void> {
   const supabase = createClient();
   const { error } = await supabase.rpc("lorani_analyser_offres", { p_consultation: consultation });
