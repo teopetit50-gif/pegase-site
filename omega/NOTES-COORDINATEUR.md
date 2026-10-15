@@ -1135,3 +1135,10 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   - preuve en vrai de C3 ;
   - premier client (CASHD G19).
 - En cours : C1, lot 2e (Activité, Utilisation, Réglages).
+
+## REPRISE — pause 50 % du 15/10, 16 h 12 Z
+- Ordre « PAUSE 50 % (Teo) » reçu à 16 h 12 Z (forfait hebdo à 49 %). Tous les ouvriers ont commit, poussé, mis REPRISE à jour, puis silence.
+- Routine « Point coordinateur Omega » déjà coupée ; aucun rappel send_later actif. Ne rien relancer avant le feu vert de Teo.
+- SHA d'arrêt (sessions actives) : A1 c51c6de, A2 8c0e608, A3 34b8589, A4 d5db287, A5 798255f4, B1 f46b2c3, B2 0d675bf, B3 bcd02f6, B4 cd77750, B5 e8a95b9, B6 84df2e6, B7 0e1c2bb, C1 66930e4, C2 b0d8131d, C3 09dffb99, C4 a0e59013, P1 5d44a1e. C5 reste à l'arrêt.
+- À la reprise, d'abord : fusionner C1 lot 2e (diff 650424a..66930e4, limité à app/espace2 et components/espace2) et A3 ef5eeb4 ; déployer en Edge reput-reponse (C3 8699ed0), webhooks-ar24 et expediteur (A2 8c0e608).
+- Rien posé ni fusionné entre 15 h 15 et 16 h 12 Z ; dernier main fonctionnel 8f4106b.
