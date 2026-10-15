@@ -13,7 +13,7 @@
 
 **Prochains petits lots**, dans cet ordre :
 1. ligne 12 : une personne nommée sur chaque remise. Base faite : b2_17 et test 26, 94f57cc, à poser. Écran fait : 854523b, carte Parc, recette 142, axe 60, à fusionner ;
-2. ligne 10 : la page du matin par agence (remises, entretien, avis, contestations) ;
+2. ligne 10 : la page du matin par agence. b2_18 et test 27, b20fdfd, à poser (cron tavaro-parking) ;
 3. ligne 50 : le fichier de désignation par lot ;
 4. lignes 19 et 57 : l'outil d'audit de vingt retours et l'indicateur de fin de mois.
 
