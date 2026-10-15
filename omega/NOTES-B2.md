@@ -22,6 +22,8 @@ Les écrans vont dans /espace2 : aucun lien vers /espace, et ne pas toucher `com
 
 **État au 15/10, fin du lot** : tout ce qui ne dépend pas d'un tiers est construit.
 
+**Coordinateur, 15/10 à 12 h 51 Z** : b2_17, b2_18 et b2_19 sont posés ; tout b2_ est vert (610 contrôles). La carte Parc est dans main (129d014). La carte Audit part dans main. Reste à fusionner : d95c6ff, la prise de vue guidée.
+
 À poser par le coordinateur :
 - b2_17 (94f57cc), b2_18 (b20fdfd), b2_19 (8838677), avec TOUT_B2 à 28 tests.
 
