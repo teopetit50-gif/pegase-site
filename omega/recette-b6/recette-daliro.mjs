@@ -489,6 +489,8 @@ const choisir = (sel, valeur) => `(() => { const t = document.querySelector('${s
     const avant = await s.evaluer(`document.querySelectorAll('section[aria-label="Marché"] tbody tr').length`);
     ok(await s.evaluer(bouton('/Importer le devis/')) === true, 'clic sur « Importer le devis »');
     await s.dormir(400);
+    ok(await s.evaluer(`/Ou le devis en PDF/.test(document.querySelector('[role="dialog"]')?.innerText || '') && !!document.querySelector('[role="dialog"] input[accept*="pdf"]')`),
+       'la voie « devis en PDF » est proposée (b6_33)');
     ok(await s.evaluer(saisir('[role="dialog"] textarea', tableau)), 'tableau collé');
     await s.dormir(300);
     const t = await s.evaluer(`document.querySelector('[role="dialog"]')?.innerText || ''`);

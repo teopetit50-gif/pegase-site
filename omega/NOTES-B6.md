@@ -7,11 +7,11 @@ Dernière mise à jour : 06/10/2026, 03 h 00 Paris — lot B6 terminé.
 
 **Posé et vert sur la recette, écrans dans main** : b6_01 → b6_30 (dernier passage : ^test_b6_ vert jusqu'à b6_26 ; écrans jusqu'au point mensuel, 1e27e72). Ce jour : b6_26 chiffrage lu (prix validé retrouvé), b6_27 fonctions par formule, b6_28 import du devis (Excel/CSV), b6_29 J-2 en deux temps (matin / soir), b6_30 point mensuel. Météo MET Norway : état A.
 
-**À poser (coordinateur)** : b6_31 + b6_27_disponibilites (43353c4, en test le 15/10) ; b6_32 + b6_28_reserve (voir journal). Écrans à fusionner ensuite (DisponibilitesBloc, ReceptionCarte, ChantierVue, portes, types).
+**À poser (coordinateur)** : b6_32 + b6_28_reserve (c416463) ; b6_33 + b6_29_devis_pdf (voir journal). Écrans à fusionner ensuite (DisponibilitesBloc, ReceptionCarte, ChantierVue, portes, types).
 
 **Attend Teo** : WhatsApp Business (Meta), transcription des vocaux, accord permanent J-2, région des données (Supabase ; vercel.json sans région). Phrases à corriger sur la page : CHIFFRAGE/daliro.md (fin) — « une journée pour remplacer » et « disponibilités » sont désormais vraies une fois b6_29/b6_31 posés.
 
-**Prochain pas** : selon CHIFFRAGE/daliro.md, restants : prévenir l'aval quand un lot est recalé (1 j, envoi par le socle), nouvel ordre de la semaine sur pluie (3 j), assistant « questions » (3 j), relevé d'audit (2 j), lecture du devis PDF (lecteur d'A1). Puis, WhatsApp branché : une vraie photo de chantier jusqu'à l'avenant chiffré et l'avancement (état A).
+**Prochain pas** : selon CHIFFRAGE/daliro.md, restants : prévenir l'aval quand un lot est recalé (1 j, envoi par le socle), nouvel ordre de la semaine sur pluie (3 j), assistant « questions » (3 j), relevé d'audit (2 j). Puis, WhatsApp branché : une vraie photo de chantier jusqu'à l'avenant chiffré et l'avancement (état A).
 
 ## Les deux jauges
 
@@ -132,6 +132,7 @@ Repère du marché : Graneet, Obat, Batappli, Tolteck, Extrabat font tous des **
 
 ## Journal de session
 
+- 15/10, 13 h 45 UTC : b6_27 vert (disponibilités et point mensuel partent dans main). A1 lit le devis PDF (lecteur v34, c51c6de). b6_33 : public.btp_deposer_devis (PDF sous <client>/btp_marche/<marché>/, pièce daliro type daliro_devis, marché à vérifier, bureau) et public.btp_devis_lu (statut, lignes, montant_total_ht). Écran : « Ou le devis en PDF » dans Importer le devis (dépôt, relecture toutes les 4 s, même aperçu, puis btp_importer_lignes). Test b6_29_devis_pdf (12). Recette 258 verte. Non prouvé en vrai : il faut un PDF réel lu par le lecteur sur la recette.
 - 15/10, 13 h UTC : reprise (Teo) ; b6_27 en test chez le coordinateur. Main fusionnée dans worker-b6 (445f2cc, b6_31 gardée). b6_32 réserve hors devis : btp_reserves.avenant_id, public.btp_avenant_depuis_reserve (avenant brouillon, origine « reception », recherche de prix b6_26), private.btp_ouvrir_avenant n'ouvre sur un chantier réceptionné que l'avenant d'une réserve. Écran : « Hors devis : ouvrir un avenant » dans la carte de réception. Test b6_28_reserve (12). Recette 256 verte.
 - 11/10, 17 h 30 UTC : b6_26 vert, point mensuel dans main (1e27e72). b6_31 disponibilités : table btp_indisponibilites (absences annulées, jamais effacées ; RLS lecture membres), portes btp_noter_indisponibilite / btp_annuler_indisponibilite / btp_disponibilites (gérant, admin, valideur), private.btp_proposer_remplacants ne propose plus qu'un sous-traitant libre (ni autre passage prévu qui recoupe, ni absence). Écran : DisponibilitesBloc dans l'annuaire (30 jours, noter / annuler une absence), remplaçants d'exemple filtrés. Test b6_27_disponibilites (9). Recette 252 verte.
 - 11/10, 16 h 45 UTC : b6_01 à b6_04 et b6_25 verts (J-2 en deux temps). b6_30 point mensuel : public.btp_point_mensuel(client, mois) — par chantier : repérés par le lecteur, saisis, signés, à relancer (> 14 j), perdus, signé / facturé (dernière situation validée), reste à facturer ; bureau qui voit les prix ; fonction point_mensuel. Écran : PointMensuelCarte sur la liste (ce mois / mois dernier ; exemple calculé sur les tableaux). Test b6_26_point_mensuel (8). Recette 236 verte.

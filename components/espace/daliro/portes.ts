@@ -28,7 +28,8 @@
      btp_preparer_liste, btp_recevoir, btp_noter_retour (b6_23) ;
      btp_fil_chantier, btp_messages_a_ranger (lecture), btp_ranger_message, btp_ecarter_message, btp_avenant_depuis_message (b6_24) ;
      btp_avancement_photos (lecture, b6_25) ; btp_importer_lignes (b6_28) ; btp_point_mensuel (lecture, b6_30) ;
-     btp_disponibilites (lecture), btp_noter_indisponibilite, btp_annuler_indisponibilite (b6_31) ; btp_avenant_depuis_reserve (b6_32).
+     btp_disponibilites (lecture), btp_noter_indisponibilite, btp_annuler_indisponibilite (b6_31) ; btp_avenant_depuis_reserve (b6_32) ;
+     btp_deposer_devis, btp_devis_lu (lecture, b6_33).
    Les tables sans porte (chantiers, lots, tiers, dépendances, acceptations)
    s'écrivent en direct, comme le socle le prévoit (politiques du bureau).
    Si la base répond autrement, l'écran montre son message tel quel.
@@ -336,4 +337,24 @@ export async function annulerIndisponibilite(id: string): Promise<unknown> {
 /* b6_32 : la réserve hors devis devient un avenant brouillon. */
 export async function avenantDepuisReserve(reserve: string): Promise<string> {
   return rpc<string>("btp_avenant_depuis_reserve", { p_reserve: reserve, p_objet: null });
+}
+
+/* b6_33 : le devis en PDF, déposé sur le marché puis lu par le lecteur d'A1 (lignes dans pieces_valeurs). */
+export type LigneDevisLue = { numero?: string | null; lot?: string | null; designation?: string | null; unite?: string | null;
+                              quantite?: number | null; prix_unitaire?: number | null; montant?: number | null };
+export type DevisLu = { piece: string | null; nom?: string; statut?: string; lignes?: LigneDevisLue[] | null; lignes_verifiees?: boolean | null;
+                        montant_total_ht?: number | string | null };
+export async function deposerDevis(client: string, marche: string, fichier: File): Promise<string> {
+  const supabase = createClient();
+  const nom = fichier.name.normalize("NFKD").replace(/[^\w.-]+/g, "-").replace(/-+/g, "-").slice(0, 120) || "devis.pdf";
+  const chemin = `${client}/btp_marche/${marche}/${Date.now()}-${nom}`;
+  const envoi = await supabase.storage.from("omega-clients").upload(chemin, fichier, { contentType: "application/pdf", upsert: false });
+  if (envoi.error) throw new ErreurPorte(message(envoi.error));
+  const h = await crypto.subtle.digest("SHA-256", await fichier.arrayBuffer());
+  const sha = Array.from(new Uint8Array(h)).map((b) => b.toString(16).padStart(2, "0")).join("");
+  return rpc<string>("btp_deposer_devis", { p_marche: marche, p_nom_fichier: fichier.name.slice(0, 200), p_mime: "application/pdf",
+                                             p_octets: fichier.size, p_sha256: sha, p_chemin: chemin });
+}
+export async function devisLu(marche: string): Promise<DevisLu> {
+  return rpc<DevisLu>("btp_devis_lu", { p_marche: marche });
 }
