@@ -15,23 +15,50 @@
    Les données sont celles de omega_lignes (tableaux « plan » et
    « ajouts ») ; tout se modifie sur place et s'enregistre aussitôt.
    « À préparer » et « Note » sont deux clés de plus dans `donnees`.
-
-   11/10/2026 — retour de Teo : « trop surchargé, fais simple comme la
-   page Notes ». Sur le squelette de Notes (simple.css) : les onglets
-   (À faire, Bloquées, Terminées, Toutes), une barre (vue, recherche,
-   « Nouvelle tâche »), les semaines en listes à plat. Retirés : le grand
-   titre, la frise des trois phases, le menu « Filtres », la vue en
-   colonnes ; la fiche ne s'ouvre plus qu'au clic, en tiroir sur le côté.
+   14/10/2026 — « encore trop, pas assez épuré » : une ligne = le titre et
+   UNE date à droite (rouge si passée). Plus de catégorie sous le titre,
+   plus de « À faire » répété (le statut n'apparaît que s'il est Bloqué ou
+   En cours), plus de flèche.
+   13/10/2026 (3) — « encore trop de trucs, regarde Notes et Activité » :
+   comme la page Activité. Une barre fine (statut ⌄, échéance ⌄ | recherche,
+   « Nouvelle tâche »), puis UNE liste encadrée, une tâche par ligne
+   (titre et catégorie | statut | date | « Dans 3 j »). « Cette semaine »
+   au départ, retards compris : la liste reste courte. Plus d'onglets, de
+   groupes ni de cases ; on coche « Marquer faite » dans la fiche.
+   13/10/2026 (2) — encore plus épurée, retour de Teo (« pas assez épuré,
+   regarde Attio ») : la page Notes / Attio telle quelle — onglets, barre
+   fine, puis la liste posée à plat sur la page, sans cadre ; en-têtes de
+   groupe discrets, lignes séparées d'un filet pleine largeur, catégorie
+   en pastille, un seul bouton bleu. Styles tk- dans taches.css.
+   13/10/2026 — refaite à la manière d'Attio / Vercel, retour de Teo
+   (« trop long, les sections paraissent amateur, regarde comment font
+   Vercel et Attio ») : une seule barre (statut | recherche, vue,
+   « Nouvelle tâche »), puis UNE liste dans un cadre fin qui tient dans
+   l'écran, groupée par échéance comme la vue Tâches d'Attio (En retard
+   en rouge, Aujourd'hui, Cette semaine en orange, Plus tard et Terminées
+   repliés) ; une ligne de 40 px par tâche (case ronde, titre, catégorie,
+   date). Plus de semaines en cartes ni de frise ; la fiche s'ouvre au
+   clic, en tiroir. Styles dans taches.css (préfixe tp-).
+   11/10/2026 (2) — allégée sur les principes de la page Notes, même
+   dessin : une ligne par tâche (titre, date, statut seulement s'il n'est
+   pas « À faire »), plus d'étiquette de catégorie ni de sous-ligne, plus
+   de thème à côté de la semaine, plus de bouton « Filtres » ; la fiche
+   n'apparaît à droite qu'au clic sur une tâche (sinon la liste prend
+   toute la largeur).
+   11/10/2026 — allégée à la demande de Teo, même dessin : plus de
+   sous-titre ni de frise des trois phases au-dessus de la liste.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { CalendarDays, Check, ChevronDown, Plus, Rows3, Search, Tag, Trash2, X } from "lucide-react";
+import { CalendarDays, Check, ChevronDown, ListChecks, Plus, Rows3, Search, Tag, Trash2, X } from "lucide-react";
+import { ItemMenu, MenuDeroulant } from "@/components/espace2/ui";
 import { Dialog, Modal, ModalOverlay } from "react-aria-components";
+import "@/components/espace2/notes.css";
+import "./activite.css";
+import "./taches.css";
 import { createClient } from "@/lib/supabase/client";
 import Choix from "./Choix";
-import "@/components/espace2/notes.css";
-import "./simple.css";
 import type { Ligne } from "./Tableaux";
 
 const I = { width: 16, height: 16, strokeWidth: 1.6, "aria-hidden": true } as const;
@@ -47,18 +74,6 @@ const debut = (n: number) => (n === 0 ? new Date(2026, 9, 9) : new Date(2026, 9,
 const fin = (n: number) => (n === 0 ? new Date(2026, 9, 11) : new Date(2026, 9, 18 + 7 * (n - 1)));
 const BLOCS: [number, number][] = [[0, 0], [1, 1], [2, 2], [3, 3], [4, 4], [5, 6], [7, 8], [9, 10], [11, 13]];
 
-const premiereSemaine = (s?: string) => Number(s?.match(/S(\d+)/)?.[1] ?? 99);
-const blocDe = (s?: string) => {
-  const n = premiereSemaine(s);
-  const i = BLOCS.findIndex(([a, b]) => n >= a && n <= b);
-  return i === -1 ? BLOCS.length - 1 : i;
-};
-const libelleBloc = ([a, b]: [number, number]) => (a === b ? `Semaine ${a}` : b === a + 1 ? `Semaines ${a} et ${b}` : `Semaines ${a} à ${b}`);
-const datesBloc = ([a, b]: [number, number]) => {
-  const d = debut(a);
-  const f = fin(b);
-  return d.getMonth() === f.getMonth() ? `${d.getDate()} — ${f.getDate()} ${MOIS[f.getMonth()]}` : `${d.getDate()} ${MOIS[d.getMonth()]} — ${f.getDate()} ${MOIS[f.getMonth()]}`;
-};
 function echeance(t?: string): Date | null {
   const m = t?.match(/(\d{1,2})\/(\d{1,2})/);
   if (!m) return null;
@@ -85,7 +100,19 @@ function decouper(t = ""): { titre: string; sous: string } {
 const numero = (n?: string) => (n && /^\d+$/.test(n) ? n.padStart(2, "0") : n ?? "");
 
 type Filtre = "toutes" | "a_faire" | "bloquees" | "terminees";
-const ouverte = (l: Ligne) => l.donnees["Statut"] !== "Fait";
+
+const FILTRES: { cle: Filtre; libelle: string }[] = [
+  { cle: "a_faire", libelle: "À faire" },
+  { cle: "bloquees", libelle: "Bloquées" },
+  { cle: "terminees", libelle: "Terminées" },
+  { cle: "toutes", libelle: "Toutes" },
+];
+type Periode = "semaine" | "mois" | "tout";
+const PERIODES: { cle: Periode; libelle: string }[] = [
+  { cle: "semaine", libelle: "Cette semaine" },
+  { cle: "mois", libelle: "30 prochains jours" },
+  { cle: "tout", libelle: "Toutes les dates" },
+];
 
 export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: Ligne[]; selecteur: React.ReactNode }) {
   const [lignes, setLignes] = useState(() => initiales.filter((l) => l.tableau === "plan" || l.tableau === "ajouts"));
@@ -93,8 +120,8 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
   const [filtre, setFiltre] = useState<Filtre>("a_faire");
   const [recherche, setRecherche] = useState("");
   const [choix, setChoix] = useState<string | null>(null);
-  const [faitesOuvertes, setFaitesOuvertes] = useState<number[]>([]);
-  const [tout, setTout] = useState(false);
+  /* « Cette semaine » au départ (retards compris) : la liste reste courte */
+  const [periode, setPeriode] = useState<Periode>("semaine");
   const [etat, setEtat] = useState("");
 
   async function maj(id: string, cle: string, valeur: string) {
@@ -108,8 +135,6 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
   }
 
   const blocCourant = Math.max(0, BLOCS.findIndex(([a, b]) => maintenant >= debut(a).getTime() && maintenant <= fin(b).getTime() + 86_399_999));
-  /* au départ, seule la semaine en cours est dépliée : la page reste courte */
-  const [replies, setReplies] = useState<number[]>(() => BLOCS.map((_, i) => i).filter((i) => i !== blocCourant));
 
   async function ajouter() {
     const ajouts = lignes.filter((l) => l.tableau === "ajouts");
@@ -120,7 +145,6 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
     const { data, error } = await createClient().from("omega_lignes").insert({ tableau: "ajouts", ordre, donnees }).select("id, tableau, ordre, donnees, maj").single();
     if (error || !data) return setEtat("Échec de l'ajout : vérifiez votre connexion.");
     setLignes((ls) => [...ls, data as Ligne]);
-    setFiltre("a_faire");
     setChoix((data as Ligne).id);
   }
 
@@ -150,46 +174,77 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
     toutes: lignes.length,
   };
 
+  const jour0 = new Date(maintenant).setHours(0, 0, 0, 0);
   const visibles = useMemo(() => {
     const q = recherche.trim().toLowerCase();
     return lignes
-      .filter((l) => (filtre === "a_faire" ? !["Bloqué"].includes(l.donnees["Statut"]) : filtre === "bloquees" ? l.donnees["Statut"] === "Bloqué" : filtre === "terminees" ? l.donnees["Statut"] === "Fait" : true))
+      .filter((l) => (filtre === "a_faire" ? !["Fait", "Bloqué"].includes(l.donnees["Statut"]) : filtre === "bloquees" ? l.donnees["Statut"] === "Bloqué" : filtre === "terminees" ? l.donnees["Statut"] === "Fait" : true))
       .filter((l) => !q || `${l.donnees["Tâche"] ?? ""} ${l.donnees["N°"] ?? ""}`.toLowerCase().includes(q))
+      /* la période ne s'applique qu'aux tâches ouvertes : un retard reste toujours visible */
+      .filter((l) => {
+        if (periode === "tout" || q || filtre === "terminees") return true;
+        const e = echeance(l.donnees["Échéance"])?.getTime();
+        return e !== undefined && e < jour0 + (periode === "semaine" ? 7 : 30) * 86_400_000;
+      })
       .sort((a, b) => (echeance(a.donnees["Échéance"])?.getTime() ?? 9e15) - (echeance(b.donnees["Échéance"])?.getTime() ?? 9e15) || (a.tableau === b.tableau ? a.ordre - b.ordre : a.tableau === "plan" ? -1 : 1));
-  }, [lignes, filtre, recherche]);
+  }, [lignes, filtre, recherche, periode, jour0]);
 
-  const filtrage = filtre === "bloquees" || filtre === "terminees" || !!recherche.trim();
-  const blocs = BLOCS.map((b, i) => ({ i, b, liste: visibles.filter((l) => blocDe(l.donnees["Semaine"]) === i) })).filter((x) => x.liste.length);
-  const blocsAffiches = tout || filtrage ? blocs : blocs.filter((x) => x.i <= blocCourant + 1);
-  const restants = blocs.length - blocsAffiches.length;
   const choisie = choix ? lignes.find((l) => l.id === choix) ?? null : null;
+  const FILTRE = FILTRES.find((f) => f.cle === filtre)!;
+  const coche = (oui: boolean) => (oui ? <Check width={14} height={14} aria-label="choisi" /> : null);
 
   return (
-    <div className="no-page si-page v2-arrivee om-pt">
+    <div className="no-page tk-page v2-arrivee">
       <h1 className="v2-sr">Tâches</h1>
-      <div className="no-onglets" role="tablist" aria-label="Filtrer par statut">
-        {(
-          [
-            ["a_faire", "À faire"],
-            ["bloquees", "Bloquées"],
-            ["terminees", "Terminées"],
-            ["toutes", "Toutes"],
-          ] as [Filtre, string][]
-        ).map(([cle, libelle]) => (
-          <button key={cle} type="button" role="tab" aria-selected={filtre === cle} className="no-onglet" onClick={() => setFiltre(cle)}>
-            {libelle}
-            <span className="no-compte">{compte[cle]}</span>
-          </button>
-        ))}
-      </div>
 
-      <div className="no-barre">
-        {selecteur ?? <span />}
-        <div className="no-barre-droite">
-          <label className="si-recherche">
+      {/* la barre, comme Activité : le statut et la période | la recherche et « Nouvelle tâche » */}
+      <div className="no-barre ao-barre">
+        <div className="ao-groupe">
+          <MenuDeroulant
+            etiquette={`Statut : ${FILTRE.libelle}`}
+            classe="no-bouton"
+            placement="bottom start"
+            largeur={220}
+            declencheur={
+              <>
+                <ListChecks {...I} width={14} height={14} />
+                {FILTRE.libelle}
+                <ChevronDown {...I} width={14} height={14} />
+              </>
+            }
+          >
+            {FILTRES.map((f) => (
+              <ItemMenu key={f.cle} id={f.cle} textValue={f.libelle} onAction={() => setFiltre(f.cle)} suffixe={filtre === f.cle ? coche(true) : <span className="v2-gris">{compte[f.cle]}</span>}>
+                {f.libelle}
+              </ItemMenu>
+            ))}
+          </MenuDeroulant>
+          <MenuDeroulant
+            etiquette="Échéance"
+            classe="no-bouton"
+            placement="bottom start"
+            largeur={220}
+            declencheur={
+              <>
+                <CalendarDays {...I} width={14} height={14} />
+                {PERIODES.find((x) => x.cle === periode)?.libelle}
+                <ChevronDown {...I} width={14} height={14} />
+              </>
+            }
+          >
+            {PERIODES.map((x) => (
+              <ItemMenu key={x.cle} id={x.cle} textValue={x.libelle} onAction={() => setPeriode(x.cle)} suffixe={coche(periode === x.cle)}>
+                {x.libelle}
+              </ItemMenu>
+            ))}
+          </MenuDeroulant>
+          {selecteur}
+        </div>
+        <div className="ao-groupe ao-groupe--droite">
+          <label className="ao-recherche">
             <Search {...I} width={14} height={14} />
             <span className="v2-sr">Rechercher une tâche</span>
-            <input type="search" value={recherche} onChange={(e) => setRecherche(e.target.value)} placeholder="Rechercher" onKeyDown={(e) => e.key === "Escape" && setRecherche("")} />
+            <input type="search" value={recherche} placeholder="Rechercher" autoComplete="off" spellCheck={false} onChange={(e) => setRecherche(e.target.value)} onKeyDown={(e) => e.key === "Escape" && setRecherche("")} />
           </label>
           <button type="button" className="no-principal" onClick={ajouter}>
             <Plus {...I} width={14} height={14} />
@@ -197,67 +252,48 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
           </button>
         </div>
       </div>
-      <p className="om-etat" role="status">
-        {etat}
-      </p>
-
-      {blocsAffiches.length === 0 ? (
-        <section className="si-section">
-          <p className="si-vide">Aucune tâche ne correspond.</p>
-        </section>
+      {etat ? (
+        <p className="tk-etat" role="status">
+          {etat}
+        </p>
       ) : (
-        blocsAffiches.map(({ i, b, liste }) => {
-          const replie = replies.includes(i) && !filtrage;
-          const ouvertes = filtre === "terminees" ? liste : liste.filter(ouverte);
-          const terminees = filtre === "terminees" ? [] : liste.filter((l) => !ouverte(l));
-          const montrerFaites = faitesOuvertes.includes(i);
-          return (
-            <section key={i} className="si-section" aria-label={libelleBloc(b)}>
-              <h2 className="si-tete">
-                <button type="button" className="si-replier" aria-expanded={!replie} onClick={() => setReplies((r) => (replie ? r.filter((x) => x !== i) : [...r, i]))}>
-                  <ChevronDown {...I} width={14} height={14} className="si-chevron" />
-                  {libelleBloc(b)}
-                  {i === blocCourant ? <span className="si-maintenant">Cette semaine</span> : null}
-                  <span className="no-compte">{ouvertes.length}</span>
-                  <span className="si-dates">{datesBloc(b)}</span>
-                </button>
-              </h2>
-              {replie ? null : (
-                <ul className="si-liste">
-                  {[...ouvertes, ...(montrerFaites ? terminees : [])].map((l) => (
-                    <LigneTache key={l.id} l={l} maintenant={maintenant} ouvrir={() => setChoix(l.id)} cocher={(fait) => maj(l.id, "Statut", fait ? "Fait" : "À faire")} />
-                  ))}
-                  {terminees.length ? (
-                    <li className="si-ligne si-ligne--discrete">
-                      <button type="button" className="si-plus" aria-expanded={montrerFaites} onClick={() => setFaitesOuvertes((f) => (montrerFaites ? f.filter((x) => x !== i) : [...f, i]))}>
-                        {montrerFaites ? "Masquer les" : ""} {terminees.length} tâche{terminees.length > 1 ? "s" : ""} terminée{terminees.length > 1 ? "s" : ""}
-                        <ChevronDown {...I} width={14} height={14} className="si-chevron" data-ouvert={montrerFaites ? "" : undefined} />
-                      </button>
-                    </li>
-                  ) : null}
-                </ul>
-              )}
-            </section>
-          );
-        })
+        <p className="v2-sr" role="status" />
       )}
-      <div className="si-pied">
-        <button type="button" className="si-plus" onClick={ajouter}>
-          <Plus {...I} width={14} height={14} />
-          Ajouter une tâche
-        </button>
-        {restants > 0 || (tout && !filtrage && blocs.length > blocCourant + 2) ? (
-          <button type="button" className="si-plus" aria-expanded={tout} onClick={() => setTout((t) => !t)}>
-            {tout ? "Masquer les semaines suivantes" : `Semaines suivantes (${restants})`}
-            <ChevronDown {...I} width={14} height={14} className="si-chevron" data-ouvert={tout ? "" : undefined} />
-          </button>
-        ) : null}
-      </div>
 
-      {/* la fiche : seulement quand une tâche est ouverte, en tiroir sur le côté */}
-      <ModalOverlay isOpen={!!choisie} onOpenChange={(o) => !o && setChoix(null)} isDismissable className="v2-jetons si-voile">
-        <Modal className="si-tiroir">
-          <Dialog className="si-tiroir-dialogue" aria-label="La tâche">
+      {/* la liste encadrée d'Activité, une tâche par ligne, triée par échéance */}
+      {visibles.length ? (
+        <ul className="ao-liste tk-liste">
+          {visibles.map((l) => {
+            const statut = l.donnees["Statut"] || "À faire";
+            const { titre } = decouper(l.donnees["Tâche"]);
+            const quand = quandCourt(l.donnees["Échéance"], jour0, statut);
+            return (
+              <li key={l.id} className="ao-ligne">
+                <button type="button" className="tk-ligne" onClick={() => setChoix(l.id)}>
+                  <span className="tk-titre" data-vide={titre ? undefined : ""}>
+                    {titre || "Tâche sans titre"}
+                  </span>
+                  {statut === "Bloqué" || statut === "En cours" ? (
+                    <span className="tk-statut" data-statut={statut}>
+                      {statut}
+                    </span>
+                  ) : null}
+                  <span className="tk-quand" data-retard={quand.retard ? "" : undefined}>
+                    {quand.texte}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <p className="ao-vide ao-vide--liste">{recherche.trim() ? "Aucune tâche ne correspond." : periode === "tout" ? "Aucune tâche ici." : "Rien d'autre à faire sur cette période."}</p>
+      )}
+
+      {/* la fiche : au clic sur une tâche, en tiroir sur le côté */}
+      <ModalOverlay isOpen={!!choisie} onOpenChange={(o) => !o && setChoix(null)} isDismissable className="v2-jetons tp-voile">
+        <Modal className="tp-tiroir">
+          <Dialog className="tp-tiroir-dialogue" aria-label="La tâche">
             {choisie ? <Fiche key={choisie.id} l={choisie} maj={maj} supprimer={supprimer} fermer={() => setChoix(null)} /> : null}
           </Dialog>
         </Modal>
@@ -266,27 +302,14 @@ export default function PlanTaches({ lignes: initiales, selecteur }: { lignes: L
   );
 }
 
-function LigneTache({ l, maintenant, ouvrir, cocher }: { l: Ligne; maintenant: number; ouvrir: () => void; cocher: (fait: boolean) => void }) {
-  const { titre, sous } = decouper(l.donnees["Tâche"]);
-  const statut = l.donnees["Statut"] ?? "À faire";
-  const fait = statut === "Fait";
-  const e = echeance(l.donnees["Échéance"]);
-  const retard = !fait && e !== null && e.getTime() < maintenant;
-  return (
-    <li className="si-ligne" data-fait={fait ? "" : undefined}>
-      <button type="button" role="checkbox" aria-checked={fait} aria-label={`${fait ? "Rouvrir" : "Marquer faite"} : ${titre}`} className="si-case" onClick={() => cocher(!fait)}>
-        <Check width={11} height={11} strokeWidth={3} aria-hidden="true" />
-      </button>
-      <button type="button" className="si-texte" onClick={ouvrir}>
-        <strong>{titre || "Nouvelle tâche"}</strong>
-        <span>{[sous, l.donnees["Catégorie"]].filter(Boolean).join(" · ")}</span>
-      </button>
-      {statut === "Bloqué" || statut === "En cours" ? <span className="si-meta si-meta--large">{statut}</span> : null}
-      <span className="si-meta" data-retard={retard ? "" : undefined}>
-        {dateCourte(l.donnees["Échéance"])}
-      </span>
-    </li>
-  );
+/* une seule date par ligne : « 11 oct. » en rouge si elle est passée, « Aujourd'hui », « Demain » */
+function quandCourt(t: string | undefined, jour0: number, statut: string): { texte: string; retard: boolean } {
+  const e = echeance(t)?.getTime();
+  if (e === undefined) return { texte: "", retard: false };
+  const n = Math.floor((e - jour0) / 86_400_000);
+  if (statut !== "Fait" && n === 0) return { texte: "Aujourd'hui", retard: false };
+  if (statut !== "Fait" && n === 1) return { texte: "Demain", retard: false };
+  return { texte: dateCourte(t), retard: statut !== "Fait" && e < jour0 };
 }
 
 /* ——— la fiche : tout se modifie ici ——— */

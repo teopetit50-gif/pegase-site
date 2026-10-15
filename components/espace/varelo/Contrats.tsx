@@ -276,7 +276,7 @@ export default function Contrats({ source, contexte, client_id, societes, objets
                             ) : null;
                           })()}
                           {c.statut === "actif" && peutDenoncer && c.reconduction !== "aucune" ? (
-                            <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={() => setDenonce(c)} aria-label={`Noter la dénonciation de « ${c.intitule} »`}>Dénoncé…</button>
+                            <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={() => setDenonce(c)} aria-label={`Dénoncé… : noter la dénonciation de « ${c.intitule} »`}>Dénoncé…</button>
                           ) : null}
                           {c.statut !== "archive" && peutSaisir ? (
                             <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => setEdition(c)} aria-label={`Corriger « ${c.intitule} »`}>Corriger</button>

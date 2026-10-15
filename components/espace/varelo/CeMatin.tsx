@@ -20,7 +20,7 @@ import { matinExemple, type Matin } from "./matin";
 import type { CodeRef, Objet } from "./types";
 
 const BLOCS: { cle: keyof Matin; titre: string; ancre: string; vide: string }[] = [
-  { cle: "decisions", titre: "Décisions à valider", ancre: "/espace/validations", vide: "Aucune décision n'attend votre validation." },
+  { cle: "decisions", titre: "Décisions à valider", ancre: "/espace2/validations", vide: "Aucune décision n'attend votre validation." },
   { cle: "groupe", titre: "Le groupe ce matin", ancre: "vrl-groupe", vide: "Trésoreries au-dessus des planchers, ventes dans les objectifs." },
   { cle: "reserves", titre: "Réserves à émettre", ancre: "vrl-reserves", vide: "Aucune livraison abîmée ou incomplète en attente de protestation." },
   { cle: "reportings", titre: "Reportings dus", ancre: "vrl-reportings", vide: "Aucun reporting en retard ni dû dans la semaine." },

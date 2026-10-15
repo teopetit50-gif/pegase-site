@@ -511,3 +511,34 @@
 .esp .lor-doe-ligne .lor-point-actions {
   margin-left: 6px;
 }
+
+/* ——— l'analyse des offres (b5_26) ——— */
+.esp .lor-offres-tete {
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.esp .lor-offre-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.esp .lor-offres td {
+  font-variant-numeric: tabular-nums;
+}
+.esp .lor-offres-postes caption {
+  caption-side: top;
+  text-align: left;
+  padding: 0 0 6px;
+}
+.esp .lor-offres-postes th[scope="row"] {
+  font-weight: 500;
+  text-align: left;
+}
+.esp .lor-offres td[data-etat="manque"] {
+  background: var(--esp-rouge-fond);
+  color: var(--esp-rouge);
+  font-weight: 600;
+}
+.esp .lor-offres td[data-etat="ecart"] {
+  background: var(--esp-ambre-fond);
+}

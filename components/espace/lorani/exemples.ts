@@ -17,7 +17,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { EXEMPLE_CLIENT_ID, EXEMPLE_MOI, CLAIRE, SIEGE, SOFIA, YANIS, aujourdHui, ilYa } from "../exemples/socle";
-import type { Attestation, CompteRendu, OrdreService, PieceDoe, Point, Reserve, CasRejet, Constat, Controle, Plu, ControlePiece, DateLue, Dossier, Echeance, Etape, Honoraire, Intervenant, Lot, Marche, MembreProjet, Permis, PieceProjet, Projet, Recours, Situation, Temps, Visa } from "./types";
+import type { Attestation, CompteRendu, Consultation, Offre, OrdreService, PieceDoe, Point, Reserve, CasRejet, Constat, Controle, Plu, ControlePiece, DateLue, Dossier, Echeance, Etape, Honoraire, Intervenant, Lot, Marche, MembreProjet, Permis, PieceProjet, Projet, Recours, Situation, Temps, Visa } from "./types";
 
 const C = EXEMPLE_CLIENT_ID;
 const j = (n: number) => aujourdHui(n);
@@ -728,6 +728,48 @@ export const DOE_EXEMPLE: PieceDoe[] = [
   doe({ id: id("b", 307), lot_id: null, nature: "diuo", intitule: "Dossier d’intervention ultérieure sur l’ouvrage (DIUO)" }),
 ];
 
+/* ——— l'analyse des offres (b5_26) : la Maison Lemoine, lot 03, trois offres alignées sur la DPGF ——— */
+const CONS = id("c", 400);
+const OF = (n: number) => id("c", 400 + n);
+export const CONSULTATIONS_EXEMPLE: Consultation[] = [{
+  id: CONS, projet_id: P_LEMOINE, lot_id: id("1", 3), intitule: "DCE lot 03", dpgf_piece_id: null, estimation_ht: null, seuil_ecart_pct: 20,
+  date_limite: j(-3), statut: "analysee", offre_retenue: null, analysee_le: `${j(-1)}T09:12:00`, cree_le: `${j(-24)}T10:00:00`,
+  tableau: {
+    estimation_ht: 39800, seuil_ecart_pct: 20, aucune_offre: [], une_seule_offre: ["3_3"],
+    postes: [
+      { ref: "3_1", libelle: "3.1 Fenêtres aluminium 120 × 135", quantite: 24, unite: "u", estimation: 20400, mediane: 19780, chiffree_par: 3,
+        offres: { [OF(1)]: { pu: 820, q: 24, montant: 19780 }, [OF(2)]: { pu: 800, q: 22, montant: 17600 }, [OF(3)]: { pu: null, q: null, montant: 21600 } } },
+      { ref: "3_2", libelle: "3.2 Portes-fenêtres", quantite: 6, unite: "u", estimation: 9000, mediane: 9200, chiffree_par: 3,
+        offres: { [OF(1)]: { pu: null, q: null, montant: 8400 }, [OF(2)]: { pu: null, q: null, montant: 9200 }, [OF(3)]: { pu: null, q: null, montant: 9300 } } },
+      { ref: "3_3", libelle: "3.3 Porte d’entrée", quantite: 1, unite: "u", estimation: 3200, mediane: 3200, chiffree_par: 1,
+        offres: { [OF(1)]: { pu: null, q: null, montant: 3200 } } },
+      { ref: "3_4", libelle: "3.4 Volets roulants", quantite: 18, unite: "u", estimation: 7200, mediane: 7000, chiffree_par: 3,
+        offres: { [OF(1)]: { pu: null, q: null, montant: 9430 }, [OF(2)]: { pu: null, q: null, montant: 6800 }, [OF(3)]: { pu: null, q: null, montant: 7000 } } },
+    ],
+  },
+}];
+const offre = (o: Partial<Offre> & Pick<Offre, "id" | "entreprise">): Offre => ({ projet_id: P_LEMOINE, consultation_id: CONS, piece_id: null, intervenant_id: null, siren: null,
+  montant_ht: null, montant_calcule_ht: null, montant_comparable_ht: null, rang: null, ecart_estimation_pct: null, reserves: [], constats: [], statut: "analysee", motif: null, recue_le: j(-4), ...o });
+export const OFFRES_EXEMPLE: Offre[] = [
+  offre({ id: OF(1), entreprise: "Alu Ouest", montant_ht: 40810, montant_calcule_ht: 40810, montant_comparable_ht: 40810, rang: 2, ecart_estimation_pct: 2.54,
+    constats: [
+      { code: "arithmetique", gravite: "majeur", ref: "3_1", texte: "Poste 3.1 : 820 × 24 = 19 680 €, l’offre écrit 19 780 €." },
+      { code: "ecart_estimation", gravite: "mineur", ref: "3_4", texte: "Poste 3.4 : écart de 31 % à l’estimation (9 430 € contre 7 200 €)." },
+    ] }),
+  offre({ id: OF(2), entreprise: "Menuiseries de Loire", montant_ht: 33600, montant_calcule_ht: 33600, montant_comparable_ht: 36800, rang: 1, ecart_estimation_pct: -7.54,
+    reserves: ["Hors pose des appuis de fenêtre"],
+    constats: [
+      { code: "non_chiffre", gravite: "majeur", ref: "3_3", texte: "Poste 3.3 non chiffré (3.3 Porte d’entrée)." },
+      { code: "quantite", gravite: "mineur", ref: "3_1", texte: "Poste 3.1 : quantité 22 au lieu de 24 à la DPGF." },
+      { code: "reserve", gravite: "majeur", ref: null, texte: "Réserve : Hors pose des appuis de fenêtre" },
+    ] }),
+  offre({ id: OF(3), entreprise: "Ateliers Bois", montant_ht: 38500, montant_calcule_ht: 38500, montant_comparable_ht: 41700, rang: 3, ecart_estimation_pct: 4.77, recue_le: j(-3),
+    constats: [
+      { code: "non_chiffre", gravite: "majeur", ref: "3_3", texte: "Poste 3.3 non chiffré (3.3 Porte d’entrée)." },
+      { code: "hors_dpgf", gravite: "mineur", ref: "3_5", texte: "Poste 3.5 ajouté par l’entreprise, absent de la DPGF." },
+    ] }),
+];
+
 export function dossierExemple(): Dossier {
   return {
     projets: PROJETS_EXEMPLE,
@@ -744,6 +786,8 @@ export function dossierExemple(): Dossier {
     controlePieces: [...CONTROLE_PIECES_EXEMPLE, ...CONTROLE_PIECES_ERP_EXEMPLE],
     constats: [...CONSTATS_EXEMPLE, ...CONSTATS_ERP_EXEMPLE],
     doe: DOE_EXEMPLE,
+    consultations: CONSULTATIONS_EXEMPLE,
+    offres: OFFRES_EXEMPLE,
     plu: PLU_EXEMPLE,
     attestations: ATTESTATIONS_EXEMPLE,
     ordresService: OS_EXEMPLE,

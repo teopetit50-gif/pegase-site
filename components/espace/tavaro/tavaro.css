@@ -62,8 +62,10 @@
   color: #ffffff;
   border-color: #050505;
 }
+/* la couleur du bloc, adoucie : reste lisible si l'habillage v2 inverse le fond */
 .esp .tav-total[data-fort="true"] span:first-child {
-  color: rgba(255, 255, 255, 0.7);
+  color: inherit;
+  opacity: 0.78;
 }
 .esp .tav-facture {
   display: grid;
@@ -211,6 +213,7 @@
   border: 1px solid #e4e4e7;
   border-radius: 12px;
   background: #fafafa;
+  color: #18181b;
 }
 .tav-xml pre {
   margin: 0;
@@ -376,7 +379,7 @@
 
 /* La flotte (b2_11) : le tableau des fiches, la fiche détaillée, la saisie de la cote. */
 .esp .tav-flotte td[data-negatif="oui"] {
-  color: var(--r-rouge, #c62828);
+  color: var(--esp-rouge);
   font-weight: 600;
 }
 .esp .tav-flotte th[scope="row"] {
@@ -423,5 +426,33 @@
 }
 /* le libellé masqué d'une colonne est en position absolue : le cadre le contient, sinon il élargit la page */
 .esp .tav-flotte-cadre {
+  position: relative;
+}
+
+/* b2_12 à b2_16 — les opérations */
+.esp .tav-courrier {
+  margin-top: 6px;
+  font-size: 13px;
+}
+.esp .tav-courrier summary {
+  cursor: pointer;
+}
+.esp .tav-courrier pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: inherit;
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--esp-gris-fond);
+}
+.esp .tav-choix-vehicules {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 6px;
+  max-height: 220px;
+  overflow-y: auto;
   position: relative;
 }

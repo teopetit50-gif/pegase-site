@@ -266,7 +266,7 @@ export default function DossierContrat({ dossier, source, role, moi, bareme, reg
                     <>
                       <strong>Devant l&apos;agence.</strong> {demande.approbations_requises} accord{demande.approbations_requises > 1 ? "s" : ""} requis ({demande.roles_autorises.join(", ")}), échéance {relatif(demande.echeance)}.{" "}
                       {aiChiffre ? "Vous avez chiffré ce retour : une autre personne décide (séparation saisie / approbation). " : null}
-                      <Link href="/espace/validations" className="esp-lien-bouton">Ouvrir la file « À valider »</Link>
+                      <Link href="/espace2/validations" className="esp-lien-bouton">Ouvrir la file « À valider »</Link>
                     </>
                   ) : demande.statut === "rejetee" ? <><strong>Refusée par l&apos;agence.</strong> Rechiffrez le retour si une facture reste due.</> : <><strong>Décidée</strong> ({demande.statut === "executee" ? "exécutée" : demande.statut}).</>}
                 </Avis>
