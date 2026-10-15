@@ -788,3 +788,85 @@ html.v2-actif .dlg-sortie:hover:not(:disabled) {
 .v2 .esp .esp-kpi[data-teinte="bleu"] .esp-kpi-etiquette::before {
   background: var(--v2-blue-700);
 }
+
+/* ——— FILED, les lignes de la facture (dossier ouvert) : en cartes sous
+   640 px de colonne, au lieu d'un tableau de 528 px qui défile. Le tableau
+   n'a pas d'étiquette par cellule : ses colonnes sont fixes (#, Désignation,
+   Qté, P.U. HT, Montant HT, TVA, Commande, action), les étiquettes sont
+   posées par position. Rien ne change dans components/espace/filed. ——— */
+@container principale (max-width: 639px) {
+  .v2 .esp .esp-tableau-cadre[aria-label="Lignes de la facture"] {
+    overflow: visible;
+  }
+  .v2 .esp [aria-label="Lignes de la facture"] .esp-tableau,
+  .v2 .esp [aria-label="Lignes de la facture"] .esp-tableau tbody {
+    display: block;
+    width: 100%;
+  }
+  .v2 .esp [aria-label="Lignes de la facture"] .esp-tableau thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .v2 .esp [aria-label="Lignes de la facture"] .esp-tableau tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--v2-a-400);
+  }
+  .v2 .esp [aria-label="Lignes de la facture"] .esp-tableau tbody tr:last-child {
+    border-bottom: 0;
+  }
+  .v2 .esp [aria-label="Lignes de la facture"] .esp-tableau td {
+    display: block;
+    padding: 0;
+    border: 0;
+    text-align: left;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .v2 .esp [aria-label="Lignes de la facture"] .esp-tableau td:nth-child(1),
+  .v2 .esp [aria-label="Lignes de la facture"] .esp-tableau td:nth-child(2),
+  .v2 .esp [aria-label="Lignes de la facture"] .esp-tableau td:nth-child(7),
+  .v2 .esp [aria-label="Lignes de la facture"] .esp-tableau td:nth-child(8) {
+    grid-column: 1 / -1;
+  }
+  .v2 .esp [aria-label="Lignes de la facture"] .esp-tableau td:nth-child(1) {
+    font-size: 12px;
+    color: var(--v2-gray-900);
+  }
+  .v2 .esp [aria-label="Lignes de la facture"] .esp-tableau td:nth-child(1)::before {
+    content: "Ligne ";
+  }
+  .v2 .esp [aria-label="Lignes de la facture"] .esp-tableau td:nth-child(2) {
+    font-weight: 500;
+  }
+  .v2 .esp [aria-label="Lignes de la facture"] .esp-tableau td:nth-child(8):empty {
+    display: none;
+  }
+  .v2 .esp [aria-label="Lignes de la facture"] .esp-tableau td:nth-child(n + 3):nth-child(-n + 7)::before {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--v2-gray-900);
+  }
+  .v2 .esp [aria-label="Lignes de la facture"] .esp-tableau td:nth-child(3)::before {
+    content: "Qté";
+  }
+  .v2 .esp [aria-label="Lignes de la facture"] .esp-tableau td:nth-child(4)::before {
+    content: "P.U. HT";
+  }
+  .v2 .esp [aria-label="Lignes de la facture"] .esp-tableau td:nth-child(5)::before {
+    content: "Montant HT";
+  }
+  .v2 .esp [aria-label="Lignes de la facture"] .esp-tableau td:nth-child(6)::before {
+    content: "TVA";
+  }
+  .v2 .esp [aria-label="Lignes de la facture"] .esp-tableau td:nth-child(7)::before {
+    content: "Commande";
+  }
+}

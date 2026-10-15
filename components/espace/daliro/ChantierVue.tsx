@@ -17,8 +17,10 @@
    elles sont appliquées en mémoire pour que l'enchaînement se voie.
    ══════════════════════════════════════════════════════════════════════ */
 
+import ChiffrageLu from "./ChiffrageLu";
+import { ouverte } from "./fonctions";
 import { useMemo, useState } from "react";
-import { BookOpen, CheckCircle2, ClipboardCheck, FileSignature, FileText, Link2, MessageSquare, PenLine, Plus, RotateCcw, Unlock, Users } from "lucide-react";
+import { BookOpen, CheckCircle2, ClipboardCheck, FileSignature, FileText, FileUp, Link2, MessageSquare, PenLine, Plus, RotateCcw, Unlock, Users } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
@@ -26,6 +28,7 @@ import SituationsCarte from "./SituationsCarte";
 import ReceptionCarte from "./ReceptionCarte";
 import HeuresCarte from "./HeuresCarte";
 import RecalageDialog from "./RecalageDialog";
+import ImportDevisDialog from "./ImportDevisDialog";
 import SignatureLienDialog from "./SignatureLienDialog";
 import MeteoCarte from "./MeteoCarte";
 import ApproCarte from "./ApproCarte";
@@ -43,6 +46,7 @@ type Form =
   | { type: "ecart"; ligne: LigneMarche }
   | { type: "lot_ligne"; ligne: LigneMarche }
   | { type: "ligne"; marche: Marche }
+  | { type: "import"; marche: Marche }
   | { type: "marche" }
   | { type: "rouvrir"; marche: Marche }
   | { type: "verifier"; marche: Marche }
@@ -401,6 +405,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
             {!marche ? <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={() => ouvrir({ type: "marche" })}><FileText width={14} height={14} aria-hidden="true" /> Saisir le marché</button> : null}
             {marche?.statut === "a_verifier" ? <>
               <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "ligne", marche })}><Plus width={14} height={14} aria-hidden="true" /> Ajouter une ligne</button>
+              <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "import", marche })}><FileUp width={14} height={14} aria-hidden="true" /> Importer le devis</button>
               <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={() => ouvrir({ type: "verifier", marche })} disabled={marche.controles.some((k) => k.bloquant)} title={marche.controles.some((k) => k.bloquant) ? "Des contrôles bloquants restent" : undefined}><ClipboardCheck width={14} height={14} aria-hidden="true" /> Vérifier le marché</button>
             </> : null}
             {marche?.statut === "verifie" ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "rouvrir", marche })}><RotateCcw width={14} height={14} aria-hidden="true" /> Rouvrir (gérant)</button> : null}
@@ -478,8 +483,8 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
                       <td>{p.intervenant_type === "tiers" ? <><Pastille teinte={k.teinte}>{k.libelle}</Pastille>{dernier ? <div className="esp-kpi-sous">{dateHeure(dernier.survenu_le)}{dernier.canal ? ` · ${dernier.canal}` : ""}{typeof dernier.detail.texte === "string" ? ` · « ${dernier.detail.texte} »` : ""}</div> : null}{p.envoi ? <div className="esp-kpi-sous">{libelleEnvoi(p.envoi, dateHeure)}</div> : null}</> : <span className="esp-kpi-sous">équipe interne</span>}</td>
                       <td>
                         {p.intervenant_type === "tiers" && p.statut === "prevu" && p.confirmation !== "non_demandee" && p.confirmation !== "confirmee" ? <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "reponse", passage: p })}>Noter la réponse</button> : null}
-                        {p.intervenant_type === "tiers" && p.statut === "prevu" && (p.confirmation === "declinee" || p.confirmation === "sans_reponse") ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "remplacants", passage: p })}>Remplaçants</button></div> : null}
-                        {p.statut === "prevu" && planningVivant ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "recaler", passage: p })}>Recaler</button></div> : null}
+                        {ouverte(tableau, "remplacants") && p.intervenant_type === "tiers" && p.statut === "prevu" && (p.confirmation === "declinee" || p.confirmation === "sans_reponse") ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "remplacants", passage: p })}>Remplaçants</button></div> : null}
+                        {p.statut === "prevu" && planningVivant && ouverte(tableau, "ordre_lots") ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "recaler", passage: p })}>Recaler</button></div> : null}
                         {p.statut === "prevu" && planningVivant && p.debut <= aujourdhui() ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "terminer", passage: p })}>Noter fait</button></div> : null}
                       </td>
                     </tr>
@@ -519,6 +524,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
               </div>
               <div className="esp-controle-message">{a.objet}</div>
               {a.origine?.texte || a.origine?.canal ? <div className="esp-kpi-sous">Origine : {a.origine.canal === "vocal" ? "vocal" : a.origine.canal === "photo" ? "photo" : a.origine.canal === "visite" ? "visite" : a.origine.canal ?? "—"}{a.origine.auteur ? ` de ${a.origine.auteur}` : ""}{a.origine.date ? ` le ${dateCourte(String(a.origine.date))}` : ""}{a.origine.texte ? ` — « ${a.origine.texte} »` : ""}</div> : null}
+              <ChiffrageLu chiffrage={a.origine?.chiffrage} chiffree={a.lignes.some((l) => l.origine_prix === "bibliotheque")} voitPrix={!!voit_prix} />
               {a.lignes.length ? (
                 <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Lignes de l'avenant (tableau qui défile)" style={{ marginTop: 6 }}>
                   <table className="esp-tableau">
@@ -698,6 +704,16 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
           ) : null}
           {form?.type === "sur_place" || form?.type === "preuve" ? (
             <SignatureLienDialog key={`${form.type}-${form.avenant.id}`} mode={form.type === "sur_place" ? "preparer" : "preuve"} avenant={form.avenant} source={source} />
+          ) : null}
+          {form?.type === "import" ? (
+            <ImportDevisDialog key={`import-${form.marche.id}`} marche={form.marche} lots={lots} source={source} fermer={fermer}
+                               apresReel={async (m) => { await relire(); setFait(m); }}
+                               appliquerLocal={(nouvelles, m) => {
+                                 const m2 = { ...form.marche, lignes: [...form.marche.lignes, ...nouvelles] };
+                                 m2.total_ht_lignes = totalLignes(m2);
+                                 onLocal(avecMarche({ ...m2, controles: controlesMarche(m2) }));
+                                 setFait(m);
+                               }} />
           ) : null}
           {form?.type === "recaler" || form?.type === "terminer" ? (
             <RecalageDialog key={`${form.type}-${form.passage.id}`} mode={form.type} passage={form.passage} tableau={tableau} source={source} onLocal={onLocal} relire={relire}

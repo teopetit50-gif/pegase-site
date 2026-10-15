@@ -47,6 +47,7 @@ import {
   type ResultatEncours,
 } from "./encours";
 import type { CodeRef, Contexte, Nature, Objet, ResultatDepot, Societe } from "./types";
+import { etiquetteDecision, useDecisions } from "./decisions";
 
 type Props = {
   source: Source;
@@ -124,6 +125,18 @@ export default function Encours({ source, contexte, client_id, nature, societes,
 
   const peutDeposer = !!contexte && (contexte.role === "gerant" || contexte.role === "admin");
   const peutPlafond = peutDeposer || (contexte?.role === "valideur" && contexte.equipes.includes("direction_financiere"));
+  const peutProposer = !!contexte && contexte.role !== "lecteur";
+  const { decisionDe, proposer } = useDecisions(source, client_id, !!contexte);
+  const [proposition, setProposition] = useState<EncoursGroupe | null>(null);
+  const proposerIci = useCallback(
+    async (g: EncoursGroupe, valeur: number | null, _echu: number | null, motif: string) => {
+      if (valeur === null) return false;
+      const calcul = `Encours du groupe ${montant(g.total)} (dont ${montant(g.echu)} échus), ${g.plafond !== null ? `pour un plafond de ${montant(g.plafond)}` : "sans plafond"} : plafond proposé ${montant(valeur)}${motif.trim() ? ` — ${motif.trim()}` : ""}`;
+      await proposer("relever_plafond", g.objet_id, `Porter le plafond d'encours de ${g.nom_groupe} (${g.code_groupe}) à ${montant(valeur)}`, calcul, null, { plafond: valeur, motif: motif.trim() || null });
+      return g.total > valeur;
+    },
+    [proposer],
+  );
   const libelle = nature === "client" ? { des: "clients", un: "client", le: "Client du groupe" } : { des: "fournisseurs", un: "fournisseur", le: "Fournisseur du groupe" };
 
   /* ——— le plafond ——— */
@@ -278,7 +291,7 @@ export default function Encours({ source, contexte, client_id, nature, societes,
                     <th className="esp-num">&gt; 90 j</th>
                     {nature === "client" ? <th className="esp-num">Plafond</th> : null}
                     <th>État</th>
-                    {nature === "client" && peutPlafond ? <th><span className="vrl-masque">Action</span></th> : null}
+                    {nature === "client" && peutProposer ? <th><span className="vrl-masque">Action</span></th> : null}
                   </tr>
                 </thead>
                 <tbody>
@@ -304,11 +317,19 @@ export default function Encours({ source, contexte, client_id, nature, societes,
                           {!g.depasse && !g.intragroupe && !g.provisoire ? <Pastille teinte="gris" contour>{g.societes > 1 ? `${g.societes} sociétés` : "une société"}</Pastille> : null}
                         </span>
                       </td>
-                      {nature === "client" && peutPlafond ? (
+                      {nature === "client" && peutProposer ? (
                         <td>
-                          {g.intragroupe ? null : (
-                            <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => setPlafond(g)} aria-label={`Régler le plafond de ${g.nom_groupe}`}>Plafond</button>
-                          )}
+                          {g.intragroupe ? null : (() => {
+                            const d = decisionDe("relever_plafond", g.objet_id);
+                            return (
+                              <span className="esp-item-haut">
+                                {d && d.statut === "en_attente" ? <Pastille teinte={etiquetteDecision(d).teinte} title={d.calcul}>{etiquetteDecision(d).libelle}</Pastille> : (
+                                  <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => setProposition(g)} aria-label={`Proposer un plafond pour ${g.nom_groupe} à la direction financière`}>Proposer</button>
+                                )}
+                                {peutPlafond ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => setPlafond(g)} aria-label={`Régler le plafond de ${g.nom_groupe}`}>Plafond</button> : null}
+                              </span>
+                            );
+                          })()}
                         </td>
                       ) : null}
                     </tr>
@@ -331,13 +352,14 @@ export default function Encours({ source, contexte, client_id, nature, societes,
       )}
 
       {plafond ? <DialoguePlafond g={plafond} onFermer={() => setPlafond(null)} regler={reglerIci} onFait={onFait} /> : null}
+      {proposition ? <DialoguePlafond g={proposition} proposer onFermer={() => setProposition(null)} regler={proposerIci} onFait={onFait} /> : null}
       <DialogueBalance ouvert={depot} onFermer={() => setDepot(false)} societes={societes} natureDefaut={nature} deposer={deposerIci} onFait={onFait} />
     </section>
   );
 }
 
 /* ——— régler le plafond d'un client du groupe ——— */
-function DialoguePlafond({ g, onFermer, regler, onFait }: { g: EncoursGroupe; onFermer: () => void; regler: (g: EncoursGroupe, plafond: number | null, echu: number | null, motif: string) => Promise<boolean>; onFait: (m: string) => void }) {
+function DialoguePlafond({ g, proposer = false, onFermer, regler, onFait }: { g: EncoursGroupe; proposer?: boolean; onFermer: () => void; regler: (g: EncoursGroupe, plafond: number | null, echu: number | null, motif: string) => Promise<boolean>; onFait: (m: string) => void }) {
   const [valeur, setValeur] = useState(g.plafond !== null ? String(g.plafond).replace(".", ",") : "");
   const [echu, setEchu] = useState(g.plafond_echu !== null ? String(g.plafond_echu).replace(".", ",") : "");
   const [motif, setMotif] = useState("");
@@ -352,6 +374,11 @@ function DialoguePlafond({ g, onFermer, regler, onFait }: { g: EncoursGroupe; on
     setErreur(null);
     try {
       const depasse = await regler(g, retirer ? null : v, retirer ? null : e, motif);
+      if (proposer) {
+        onFait(`Le plafond de ${montant(v)} pour ${g.nom_groupe} est proposé à la direction financière, avec son calcul. Il sera posé à sa validation.`);
+        onFermer();
+        return;
+      }
       onFait(retirer ? `Le plafond de ${g.nom_groupe} est retiré.` : `Plafond de ${g.nom_groupe} : ${montant(v)}${e !== null ? `, échu ${montant(e)} au plus` : ""}. ${depasse ? "L'encours du groupe le dépasse : une alerte est levée." : "L'encours du groupe est en dessous."}`);
       onFermer();
     } catch (x) {
@@ -366,8 +393,8 @@ function DialoguePlafond({ g, onFermer, regler, onFait }: { g: EncoursGroupe; on
       <DialogContent>
         <DialogHeader>
           <DialogIcone><Gauge width={18} height={18} aria-hidden="true" /></DialogIcone>
-          <DialogTitle>Plafond d&apos;encours — {g.nom_groupe}</DialogTitle>
-          <DialogDescription>Un plafond pour tout le groupe : la somme de ce que ce client doit à chaque société. Au-dessus, une alerte est levée chez vous, une seule, et se ferme d&apos;elle-même quand l&apos;encours redescend. Chaque réglage est inscrit au journal.</DialogDescription>
+          <DialogTitle>{proposer ? "Proposer un plafond" : "Plafond d’encours"} — {g.nom_groupe}</DialogTitle>
+          <DialogDescription>{proposer ? "La proposition part à la direction financière avec son calcul (encours du groupe, échu, plafond actuel) ; le plafond est posé à sa validation, et la décision est inscrite au journal. " : null}Un plafond pour tout le groupe : la somme de ce que ce client doit à chaque société. Au-dessus, une alerte est levée chez vous, une seule, et se ferme d&apos;elle-même quand l&apos;encours redescend. Chaque réglage est inscrit au journal.</DialogDescription>
         </DialogHeader>
         <DialogBody>
           <div className="esp-form">
@@ -376,9 +403,9 @@ function DialoguePlafond({ g, onFermer, regler, onFait }: { g: EncoursGroupe; on
               <label className="rv-libelle">Plafond total <span className="esp-obligatoire">(obligatoire)</span>
                 <input className="rv-champ" inputMode="decimal" value={valeur} placeholder="100 000" onChange={(x) => setValeur(x.target.value)} />
               </label>
-              <label className="rv-libelle">Plafond de l&apos;échu
+              {proposer ? null : <label className="rv-libelle">Plafond de l&apos;échu
                 <input className="rv-champ" inputMode="decimal" value={echu} placeholder="facultatif" onChange={(x) => setEchu(x.target.value)} />
-              </label>
+              </label>}
             </div>
             <label className="rv-libelle">Motif
               <input className="rv-champ" value={motif} maxLength={500} placeholder="couverture de l'assurance-crédit, garantie reçue…" onChange={(x) => setMotif(x.target.value)} />
@@ -388,8 +415,8 @@ function DialoguePlafond({ g, onFermer, regler, onFait }: { g: EncoursGroupe; on
           </div>
         </DialogBody>
         <DialogFooter>
-          {g.plafond !== null ? <button type="button" className="r-btn r-btn--fil" disabled={envoi} onClick={() => envoyer(true)}>Retirer le plafond</button> : null}
-          <button type="button" className="r-btn r-btn--noir" disabled={!valide || envoi} onClick={() => envoyer(false)}>{envoi ? <Loader variant="spin" /> : null} Enregistrer</button>
+          {g.plafond !== null && !proposer ? <button type="button" className="r-btn r-btn--fil" disabled={envoi} onClick={() => envoyer(true)}>Retirer le plafond</button> : null}
+          <button type="button" className="r-btn r-btn--noir" disabled={!valide || envoi} onClick={() => envoyer(false)}>{envoi ? <Loader variant="spin" /> : null} {proposer ? "Envoyer à la direction financière" : "Enregistrer"}</button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -20,7 +20,19 @@ export type Reglages = {
   seuil_relance: number;
   seuil_direction?: number | null;
   heure_relances?: string;
+  /* c2_04 : le ton, les moyens de règlement, le métier */
+  seuil_ton?: number | null;
+  moyens_reglement?: string | null;
+  echelonnement_des?: number | null;
+  metier?: "general" | "btp";
+  relance_commande_jours?: number;
+  suivi_facturation_jours?: number;
+  /* c2_06 : qui valide selon le montant */
+  paliers_validation?: PalierValidation[] | null;
 };
+
+export type RoleValidation = "valideur" | "admin" | "gerant";
+export type PalierValidation = { montant: number; roles: RoleValidation[] };
 
 export type Totaux = {
   encours: number;
@@ -139,6 +151,15 @@ export type Piece = {
   reste_relancable?: number;
   echeance_origine?: string | null;
   reste_du_eur?: number | null;
+  /* c2_04 (fiche du compte) */
+  solde_decision?: "abandonne" | "reclame" | null;
+  solde_decision_motif?: string | null;
+  accord_oral_le?: string | null;
+  accord_note?: string | null;
+  attente_commande_le?: string | null;
+  attente_commande_email?: string | null;
+  attente_commande_nom?: string | null;
+  attente_commande_motif?: string | null;
 };
 
 /* La séquence d'une pièce (vue cashd_suivi) */
@@ -158,7 +179,23 @@ export type Fiche = {
   pieces: Piece[];
   reglements: ReglementEtat[];
   suivi: Suivi[];
+  /* c2_05 : les réponses reçues à trancher, les pièces jointes */
+  reponses_lues?: ReponseLue[];
+  pieces_jointes?: PieceJointe[];
 };
+
+export type ReponseLue = {
+  id: string;
+  relance_id: string;
+  lecture: "contestation" | "absence" | "promesse" | "autre";
+  indice: string | null;
+  proposition: "litige" | "attente_contact" | "pause" | "aucune";
+  statut: "proposee" | "acceptee" | "ecartee";
+  cree_le: string;
+};
+
+export type NaturePiece = "facture_pdf" | "bon_livraison" | "bon_commande" | "contrat" | "autre";
+export type PieceJointe = { id: string; facture_id: string; nature: NaturePiece; chemin: string; nom: string; cree_le: string };
 
 export type EtatRelance = "a_valider" | "validee" | "refusee" | "envoyee" | "coupee" | "non_reglee" | "sans_adresse" | "bloquee" | "echec" | "preparee";
 
@@ -183,10 +220,42 @@ export type Relance = {
   demande_id: string | null;
   envoi_id: string | null;
   envoye_le: string | null;
+  canal?: string | null;
+  gabarit?: string | null;
+  variante?: number | null;
   pieces: { facture_id: string; numero: string; palier: string; reste_du: number; retard_jours: number; penalites: number; indemnite: number }[];
 };
 
 export type Proposition = {
   raison: "montant_exact" | "plus_anciennes";
   factures: { id: string; numero: string; compte?: string; reste_du: number; echeance: string | null }[];
+};
+
+/* c2_04 — les textes de l'organisation (porte cashd_gabarits) */
+export type CleGabarit = "rappel" | "relance" | "mise_en_demeure" | "devis_rappel" | "devis_relance";
+export type Gabarit = {
+  cle: CleGabarit;
+  langue: string;
+  variante: number;
+  personnalise: boolean;
+  sujet: string;
+  corps: string;
+  defaut_sujet: string | null;
+  defaut_corps: string | null;
+  maj_le: string | null;
+};
+export type Gabarits = { gabarits: Gabarit[]; variables: Record<string, string> };
+
+/* c2_04 — la relance adressée au service qui émet un bon de commande (table cashd_relances_commande) */
+export type RelanceCommande = {
+  id: string;
+  facture_id: string;
+  compte_id: string;
+  jour: string;
+  destinataire_adresse: string;
+  destinataire_nom: string | null;
+  sujet: string | null;
+  corps: string | null;
+  statut: "preparee" | "a_valider" | "non_reglee" | "bloquee" | "coupee" | "echec";
+  motif: string | null;
 };

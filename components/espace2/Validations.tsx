@@ -400,7 +400,7 @@ export default function Validations({ utilisateur }: { utilisateur: Utilisateur 
                     {libelleModule(demande.module)} · {circuit.faites} sur {demande.approbations_requises} approbation{demande.approbations_requises > 1 ? "s" : ""}
                   </p>
                 </div>
-                <div className="v2-val-jauge" role="progressbar" aria-valuemin={0} aria-valuemax={demande.approbations_requises} aria-valuenow={circuit.faites}>
+                <div className="v2-val-jauge" role="progressbar" aria-label="Approbations obtenues" aria-valuemin={0} aria-valuemax={demande.approbations_requises} aria-valuenow={circuit.faites}>
                   <span style={{ width: `${Math.min(100, (circuit.faites / Math.max(1, demande.approbations_requises)) * 100)}%` }} />
                 </div>
                 <ol className="v2-val-etapes">
