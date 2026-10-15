@@ -112,6 +112,8 @@ export const FICHES_EXEMPLE: Fiche[] = [
       piece(21, hotel.id, { numero: "F-2026-050", date_emission: decale(-130), echeance: decale(-100), montant_ttc: 3600, avoirs_imputes: 600 }),
       piece(22, hotel.id, { nature: "avoir", numero: "A-2026-007", date_emission: decale(-20), montant_ttc: 600, statut: "soldee", statut_motif: "avoir entièrement imputé" }),
     ],
+    reponses_lues: [{ id: id(901), relance_id: id(202), lecture: "promesse", indice: "le virement a ete effectue", proposition: "pause", statut: "proposee", cree_le: `${decale(0)}T08:12:00Z` }],
+    pieces_jointes: [],
     reglements: [],
     suivi: [suivi(id(21), { palier_atteint: "mise_en_demeure", palier_atteint_le: decale(0), derniere_relance_statut: "a_valider", etat_sequence: "sequence_terminee" })],
   },

@@ -18,7 +18,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FilePlus2, Send } from "lucide-react";
+import { FilePlus2, Send, ShieldCheck } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { EXEMPLE_CLIENT_ID, EXEMPLE_MOI } from "../exemples/socle";
@@ -42,6 +42,7 @@ import {
   type UnitePreavis,
 } from "./contrats";
 import type { Contexte, Objet, Societe } from "./types";
+import { etiquetteDecision, useDecisions } from "./decisions";
 
 type Props = {
   source: Source;
@@ -99,6 +100,16 @@ export default function Contrats({ source, contexte, client_id, societes, objets
 
   const role = contexte?.role;
   const peutSaisir = !!contexte && role !== "lecteur";
+  const { decisionDe, proposer } = useDecisions(source, client_id, !!contexte);
+  const faireValider = async (c: Contrat) => {
+    const calcul = `Échéance du ${dateCourte(c.echeance_courante)} − préavis de ${c.preavis_valeur} ${c.preavis_unite} = date limite du ${dateCourte(c.date_limite)}, dans ${c.jours_restants} jour${c.jours_restants > 1 ? "s" : ""}`;
+    try {
+      const deja = await proposer("denoncer_contrat", c.id, `Dénoncer « ${c.intitule} » (${c.tiers ?? "tiers"}, ${c.societe}) avant le ${dateCourte(c.date_limite)}`, calcul, c.date_limite);
+      onFait(deja ? `La dénonciation de « ${c.intitule} » attend déjà la direction juridique.` : `La dénonciation de « ${c.intitule} » est proposée à la direction juridique, avec son calcul : ${calcul}.`);
+    } catch (e) {
+      onFait(e instanceof Error ? e.message : "La proposition n'est pas partie.");
+    }
+  };
   const peutDenoncer = role === "gerant" || role === "admin" || (role === "valideur" && !!contexte?.equipes.some((e) => e === "direction_juridique" || e === "direction_financiere"));
   const peutArchiver = role === "gerant" || role === "admin";
 
@@ -257,8 +268,15 @@ export default function Contrats({ source, contexte, client_id, societes, objets
                       </td>
                       <td>
                         <span className="esp-item-haut">
+                          {(() => {
+                            const d = decisionDe("denoncer_contrat", c.id);
+                            if (d) return <Pastille teinte={etiquetteDecision(d).teinte} title={d.calcul}>{etiquetteDecision(d).libelle}</Pastille>;
+                            return c.statut === "actif" && c.reconduction === "tacite" && c.jours_restants >= 0 && peutSaisir ? (
+                              <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => void faireValider(c)} aria-label={`Faire valider la dénonciation de « ${c.intitule} » par la direction juridique`}><ShieldCheck width={14} height={14} aria-hidden="true" /> Faire valider</button>
+                            ) : null;
+                          })()}
                           {c.statut === "actif" && peutDenoncer && c.reconduction !== "aucune" ? (
-                            <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={() => setDenonce(c)} aria-label={`Noter la dénonciation de « ${c.intitule} »`}>Dénoncé…</button>
+                            <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={() => setDenonce(c)} aria-label={`Dénoncé… : noter la dénonciation de « ${c.intitule} »`}>Dénoncé…</button>
                           ) : null}
                           {c.statut !== "archive" && peutSaisir ? (
                             <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => setEdition(c)} aria-label={`Corriger « ${c.intitule} »`}>Corriger</button>

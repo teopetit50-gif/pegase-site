@@ -25,7 +25,8 @@ import { aujourdHui } from "../exemples/socle";
 import type { Source } from "../source";
 import { dateCourte } from "../format";
 import { Avis, Pastille, type Teinte } from "../ui";
-import { annulerCommande, chargerAppro, ecrireCommande, noterCommande, noterRetour, preparerListe, recevoir } from "./portes";
+import { annulerCommande, chargerAppro, ecrireCommande, noterCommande, noterLivraison, noterRetour, preparerListe, recevoir } from "./portes";
+import { formuleQuiOuvre, ouverte } from "./fonctions";
 import { jourOuvre } from "./recalage";
 import type { Appro, Commande, EtatCommande, Tableau } from "./types";
 
@@ -117,6 +118,9 @@ function exemple(tableau: Tableau): Omit<Commande, "echeances">[] {
 type Form = { type: "nouvelle" } | { type: "commandee"; k: Commande } | { type: "recue"; k: Commande } | { type: "rendu"; k: Commande } | { type: "annuler"; k: Commande } | null;
 
 export default function ApproCarte({ tableau, source }: { tableau: Tableau; source: Source }) {
+  const bons = ouverte(tableau, "bons_livraison");
+  const retours = ouverte(tableau, "retours");
+  const listeOuverte = ouverte(tableau, "liste_cadencee");
   const c = tableau.chantier;
   const [reel, setReel] = useState<Appro | null>(null);
   const [local, setLocal] = useState(() => exemple(tableau));
@@ -219,7 +223,8 @@ export default function ApproCarte({ tableau, source }: { tableau: Tableau; sour
   const recue = (k: Commande) => {
     const q = ch("qte").trim() ? Number(ch("qte").replace(",", ".")) : null;
     return agir(
-      () => recevoir(k.id, ch("le") || auj, q, ch("bon") || null, ch("note") || null),
+      () => (bons ? recevoir(k.id, ch("le") || auj, q, ch("bon") || null, ch("note") || null)
+                  : noterLivraison(k.id, ch("le") || auj, ch("complete") !== "non", ch("note") || null)),
       () => {
         if ((ch("le") || auj) > auj) throw new Error("Une livraison ne se note pas dans le futur.");
         if (q !== null && (Number.isNaN(q) || q <= 0)) throw new Error("La quantité reçue est positive.");
@@ -265,8 +270,8 @@ export default function ApproCarte({ tableau, source }: { tableau: Tableau; sour
           Approvisionnement — {commandes.filter((k) => k.statut !== "annulee").length} commande{commandes.filter((k) => k.statut !== "annulee").length > 1 ? "s" : ""}{aSurveiller ? `, ${aSurveiller} à surveiller` : ""}
         </div>
         <div className="esp-actions" style={{ marginTop: 0 }}>
-          <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={envoi || !enCours || !devisVerifie} onClick={() => void liste()}
-                  title={!devisVerifie ? "La liste se prépare depuis le marché vérifié" : undefined}>
+          <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={envoi || !enCours || !devisVerifie || !listeOuverte} onClick={() => void liste()}
+                  title={!listeOuverte ? `Comprise dans la formule ${formuleQuiOuvre("liste_cadencee")}` : !devisVerifie ? "La liste se prépare depuis le marché vérifié" : undefined}>
             <ListChecks width={14} height={14} aria-hidden="true" /> Préparer la liste depuis le devis
           </button>
           <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={envoi || !enCours} onClick={() => ouvrir({ type: "nouvelle" }, { delai: "5" })}>
@@ -297,7 +302,7 @@ export default function ApproCarte({ tableau, source }: { tableau: Tableau; sour
                   <td>
                     {k.statut === "a_commander" || k.statut === "commandee" ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "commandee", k }, { le: k.commandee_le ?? auj, promise: k.livraison_prevue ?? "", reference: k.reference ?? "" })}>{k.statut === "a_commander" ? "Noter commandée" : "Changer la date promise"}</button></div> : null}
                     {k.statut === "commandee" || k.statut === "livree_partielle" ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "recue", k }, { le: auj, complete: "oui" })}>Noter reçue</button></div> : null}
-                    {k.a_retourner && !k.retourne_le && (k.statut === "livree" || k.statut === "livree_partielle") ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "rendu", k }, { le: auj })}>Noter rendu</button></div> : null}
+                    {retours && k.a_retourner && !k.retourne_le && (k.statut === "livree" || k.statut === "livree_partielle") ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "rendu", k }, { le: auj })}>Noter rendu</button></div> : null}
                     {k.statut !== "livree" && k.statut !== "annulee" ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "annuler", k })}>Annuler</button></div> : null}
                   </td>
                 </tr>
@@ -315,6 +320,7 @@ export default function ApproCarte({ tableau, source }: { tableau: Tableau; sour
             <DialogDescription>
               {form?.type === "nouvelle" ? "Rattachée au passage qui en a besoin, elle se recale avec lui ; le délai du fournisseur se compte en jours ouvrés."
                 : form?.type === "commandee" ? `À livrer avant le ${dateCourte(form.k.echeances.livrer_avant)}.`
+                : form?.type === "recue" && !bons ? `La livraison est notée ; le rapprochement du bon avec la commande est compris dans la formule ${formuleQuiOuvre("bons_livraison")}.`
                 : form?.type === "recue" ? (form.k.quantite != null ? `Commandé : ${qte(form.k.quantite, form.k.unite)}. La quantité du bon est comparée à la commande ; ce qui manque reste attendu.` : "Une livraison partielle laisse la commande ouverte pour le reste.")
                 : form?.type === "rendu" ? "Le matériel quitte le chantier : la location s'arrête."
                 : "La commande reste visible, marquée annulée."}
@@ -350,11 +356,11 @@ export default function ApproCarte({ tableau, source }: { tableau: Tableau; sour
               {form?.type === "recue" ? <>
                 <div className="esp-form-ligne">
                   <label className="rv-libelle">Reçu le<input className="rv-champ" type="date" max={auj} value={ch("le")} onChange={(e) => pose("le", e.target.value)} /></label>
-                  {form.k.quantite != null
+                  {bons && form.k.quantite != null
                     ? <label className="rv-libelle">Quantité reçue ({form.k.unite ? UNITES[form.k.unite] ?? form.k.unite : "u"})<input className="rv-champ" inputMode="decimal" value={ch("qte")} onChange={(e) => pose("qte", e.target.value)} /></label>
                     : <label className="rv-libelle">Livraison<select className="rv-champ" value={ch("complete")} onChange={(e) => pose("complete", e.target.value)}><option value="oui">Complète</option><option value="non">En partie (le reste est attendu)</option></select></label>}
                 </div>
-                <label className="rv-libelle">N° du bon de livraison<input className="rv-champ" maxLength={60} value={ch("bon")} onChange={(e) => pose("bon", e.target.value)} placeholder="BL-5531" /></label>
+                {bons ? <label className="rv-libelle">N° du bon de livraison<input className="rv-champ" maxLength={60} value={ch("bon")} onChange={(e) => pose("bon", e.target.value)} placeholder="BL-5531" /></label> : null}
                 <label className="rv-libelle">Note (bon de livraison, manquants)<input className="rv-champ" maxLength={500} value={ch("note")} onChange={(e) => pose("note", e.target.value)} placeholder="10 châssis sur 14" /></label>
               </> : null}
               {form?.type === "rendu" ? <label className="rv-libelle">Rendu le<input className="rv-champ" type="date" max={auj} value={ch("le")} onChange={(e) => pose("le", e.target.value)} /></label> : null}

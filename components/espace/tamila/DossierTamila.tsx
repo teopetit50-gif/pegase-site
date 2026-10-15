@@ -35,6 +35,8 @@ import {
 import type { Audience, CalculDelai, Delai, DemandeTamila, DossierComplet, Partie, Personne, RegleProcedure, Reglages } from "./types";
 import HonorairesTamila from "./HonorairesTamila";
 import AnalysesTamila from "./AnalysesTamila";
+import AttentesTamila from "./AttentesTamila";
+import { ouvrirArchive } from "./archive";
 import ExpertiseTamila from "./ExpertiseTamila";
 import ConformiteTamila from "./ConformiteTamila";
 
@@ -417,8 +419,20 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
     try {
       if (source === "reelle") {
         const chemin = await portes.telechargerExport(x.id);
-        const url = await portes.urlArchive(chemin);
-        window.open(url, "_blank", "noopener");
+        if (cle) {
+          /* b4_17 : l'archive est chiffrée ; le navigateur l'ouvre avec la clé du dossier et rend la même en clair */
+          const { zip, pieces: n, rates } = await ouvrirArchive(await portes.telecharger(chemin), cle);
+          const url = URL.createObjectURL(new Blob([zip.slice()], { type: "application/zip" }));
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `dossier-${(clair?.reference ?? d.id.slice(0, 8)).replace(/[^A-Za-z0-9-]+/g, "-")}.zip`;
+          a.click();
+          window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+          setFait(`Archive ouverte dans votre navigateur : ${n} pièce${n > 1 ? "s" : ""} déchiffrée${n > 1 ? "s" : ""}${rates.length ? `, ${rates.length} élément(s) non déchiffré(s) (voir LISEZMOI)` : ""}. Le téléchargement est tracé.`);
+        } else {
+          window.open(await portes.urlArchive(chemin), "_blank", "noopener");
+          setFait("Archive téléchargée chiffrée : ouvrez la clé du dossier (phrase ou coffre) pour la recevoir en clair.");
+        }
         await relire();
       } else {
         onLocal({ ...complet, exports: exports.map((e) => (e.id === x.id ? { ...e, telechargements: e.telechargements + 1, telecharge_le: maintenant() } : e)), lectures: [{ user_id: moi?.user_id ?? MOI, lu_le: maintenant(), contexte: "export.telechargement" }, ...lectures] });
@@ -427,6 +441,42 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "L'archive n'a pas pu être ouverte.");
     }
+  };
+
+  /* les audiences prévues, pour l'agenda du cabinet (RFC 5545) : composé dans le navigateur, rien ne part au serveur */
+  const exporterAgenda = () => {
+    const echap = (t: string) => t.replace(/\\/g, "\\\\").replace(/[,;]/g, (c) => `\\${c}`).replace(/\n/g, "\\n");
+    const utc = (iso: string) => new Date(iso).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+    const ref = clair?.reference ?? "dossier";
+    const evts = audiences.filter((a) => a.statut === "prevue").map((a) => {
+      const debut = new Date(a.date_heure);
+      const fin = new Date(debut.getTime() + (a.heure_connue ? 2 : 1) * 3600_000);
+      return ["BEGIN:VEVENT", `UID:tamila-${a.id}@omegaai.fr`, `DTSTAMP:${utc(new Date().toISOString())}`,
+        a.heure_connue ? `DTSTART:${utc(a.date_heure)}` : `DTSTART;VALUE=DATE:${a.date_heure.slice(0, 10).replace(/-/g, "")}`,
+        a.heure_connue ? `DTEND:${utc(fin.toISOString())}` : "",
+        `SUMMARY:${echap(`${NATURES_AUDIENCE[a.nature] ?? "Audience"} — ${ref}`)}`,
+        a.juridiction || a.chambre ? `LOCATION:${echap([a.juridiction, a.chambre].filter(Boolean).join(", "))}` : "",
+        "END:VEVENT"].filter(Boolean).join("\r\n");
+    });
+    const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Omega//Tamila//FR", "CALSCALE:GREGORIAN", ...evts, "END:VCALENDAR"].join("\r\n") + "\r\n";
+    const url = URL.createObjectURL(new Blob([ics], { type: "text/calendar;charset=utf-8" }));
+    const lien = document.createElement("a");
+    lien.href = url;
+    lien.download = `audiences-${ref.replace(/[^A-Za-z0-9-]+/g, "-")}.ics`;
+    lien.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
+  /* le journal des accès, exporté tel qu'il est lu (promesse « Vous pouvez l'exporter à tout moment ») */
+  const exporterJournal = () => {
+    const champ = (v: string) => `"${v.replace(/"/g, '""')}"`;
+    const lignes = [["Date et heure", "Personne", "Contexte"], ...lectures.map((l) => [new Date(l.lu_le).toLocaleString("fr-FR"), nomDe(l.user_id), l.contexte ?? ""])];
+    const url = URL.createObjectURL(new Blob(["\ufeff" + lignes.map((r) => r.map(champ).join(";")).join("\r\n")], { type: "text/csv;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `journal-acces-${(clair?.reference ?? d.id.slice(0, 8)).replace(/[^A-Za-z0-9-]+/g, "-")}.csv`;
+    a.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
   const calculer = async () => {
@@ -641,7 +691,10 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
       <section className="esp-carte" aria-label="Audiences">
         <div className="esp-carte-tete">
           <h2 className="esp-carte-titre">Audiences</h2>
-          <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutEcrire} onClick={() => { ouvrir({ type: "audience" }); poser("juridiction", d.juridiction ?? ""); }}><CalendarPlus width={14} height={14} aria-hidden="true" /> Ajouter</button>
+          <div className="esp-actions">
+            <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!audiences.some((a) => a.statut === "prevue")} title="Les audiences prévues, pour votre agenda (fichier .ics composé ici)" onClick={exporterAgenda}>Agenda (.ics)</button>
+            <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutEcrire} onClick={() => { ouvrir({ type: "audience" }); poser("juridiction", d.juridiction ?? ""); }}><CalendarPlus width={14} height={14} aria-hidden="true" /> Ajouter</button>
+          </div>
         </div>
         <div className="esp-carte-corps">
           {audiencesTriees.length === 0 ? <p className="esp-kpi-sous">Aucune audience.</p> : audiencesTriees.map((a) => {
@@ -669,6 +722,9 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
           })}
         </div>
       </section>
+
+      {/* ——— les pièces attendues (b4_18) ——— */}
+      <AttentesTamila dossier={d} source={source} cle={cle} peutEcrire={peutEcrire} />
 
       {/* ——— l'expertise (b4_16) ——— */}
       <ExpertiseTamila dossier={d} source={source} peutEcrire={peutEcrire} />
@@ -818,8 +874,9 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
       <section className="esp-carte" aria-label="Journal des accès">
         <div className="esp-carte-tete">
           <h2 className="esp-carte-titre">Journal des accès</h2>
-          <span className="esp-kpi-sous">Qui a consulté le dossier, et quand</span>
+          <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={lectures.length === 0} onClick={exporterJournal}>Exporter (CSV)</button>
         </div>
+        <p className="esp-kpi-sous tam-notice">Qui a consulté le dossier, et quand. L&apos;export est composé dans votre navigateur.</p>
         <div className="esp-carte-corps">
           {lectures.length === 0 ? <p className="esp-kpi-sous">{source === "reelle" ? "Aucune lecture rendue par la porte tamila_journal_acces (ou porte non posée)." : "Aucune lecture."}</p> : (
             <ul className="esp-fil">

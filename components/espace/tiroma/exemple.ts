@@ -348,4 +348,37 @@ export const DOSSIER_EXEMPLE: Dossier = {
       { praticien_id: P1, praticien: "Dr Ambre Lacour", jour: aujourdHui(9), moment: "matin", source: "habitude", ouvert_min: 240, prevu_min: 40, libre_min: 200, taux: 0.167, attente: 4 },
     ],
   },
+  /* b3_23 : un soin seul sur le Fauteuil 3 après-demain matin, une chirurgie qui chevauche midi, des créneaux pour les plans, les contrôles dus */
+  soinsADeplacer: {
+    seuil: 0.2,
+    demi_journees: [
+      { jour: aujourdHui(2), moment: "matin", fauteuil_id: F3, fauteuil: "Fauteuil 3", taux: 0.083, libere: true,
+        soins: [{ rendez_vous_id: "rdv-30", debut: a(2, 11), fin: a(2, 11, 20), patient_nom: "Kévin Bazile", soin: "Soin composite",
+          vers: [{ fauteuil_id: F1, fauteuil: "Fauteuil 1", taux: 0.62, assistante: "Élodie" }] }] },
+      { jour: aujourdHui(2), moment: "apres_midi", fauteuil_id: F2, fauteuil: "Fauteuil 2", taux: 0.1, libere: false,
+        soins: [{ rendez_vous_id: "rdv-31", debut: a(2, 14), fin: a(2, 14, 30), patient_nom: "Sylvie Rigoulet", soin: "Détartrage", vers: [] }] },
+    ],
+  },
+  seancesLongues: [
+    { rendez_vous_id: "rdv-32", debut: a(3, 11, 30), fin: a(3, 13), minutes: 90, fauteuil: "Fauteuil 1", praticien: "Dr Ambre Lacour", patient_nom: "Christiane Laurent", soin: "Implant — chirurgie",
+      raisons: ["sort des horaires du Fauteuil 1 (pause de midi ou fermeture)", "le Fauteuil 1 n'est pas équipé pour la chirurgie"] },
+  ],
+  creneauxPlans: [
+    { plan_id: "pl-1", patient_nom: "Marguerite Delannoy", devis_numero: "D-2026-0412", duree_min: 45, praticien: "Dr Ambre Lacour",
+      seance: { rang: 1, libelle: "Couronne céramique 26 — préparation", famille: "prothese_preparation", duree_min: 45, seance: 1 },
+      creneaux: [{ debut: a(1, 15), fin: a(1, 15, 45), fauteuil_id: F2, fauteuil: "Fauteuil 2" }, { debut: a(4, 9), fin: a(4, 9, 45), fauteuil_id: F2, fauteuil: "Fauteuil 2" }] },
+    { plan_id: "pl-3", patient_nom: "Nadège Hilaire", devis_numero: "D-2026-0501", duree_min: 60, praticien: "Dr Ambre Lacour",
+      seance: { rang: 1, libelle: "Bridge 44-46 — préparation", famille: "prothese_preparation", duree_min: 60, seance: 1 },
+      creneaux: [{ debut: a(4, 10), fin: a(4, 11), fauteuil_id: F2, fauteuil: "Fauteuil 2" }] },
+    { plan_id: "pl-2", patient_nom: "Patrice Zami", devis_numero: "D-2026-0458", duree_min: 60, praticien: "Dr Mathis Rousseau",
+      seance: { rang: 2, libelle: "Traitement de racine 36 — séance 2", famille: "endodontie", duree_min: 60, seance: 2 }, creneaux: [] },
+  ],
+  controlesDus: {
+    seuil_mois: 12, total: 3, ne_pas_contacter: 1,
+    patients: [
+      { patient_id: "pa-20", patient_nom: "Henri Calvaire", dernier_controle_le: null, derniere_venue: aujourdHui(-200), mois_depuis: null, praticien: "Dr Mathis Rousseau" },
+      { patient_id: "pa-3", patient_nom: "Rosalie Nestor", dernier_controle_le: aujourdHui(-430), derniere_venue: aujourdHui(-300), mois_depuis: 14, praticien: "Dr Ambre Lacour" },
+      { patient_id: "pa-5", patient_nom: "Sylvie Rigoulet", dernier_controle_le: aujourdHui(-395), derniere_venue: aujourdHui(-395), mois_depuis: 12, praticien: "Dr Ambre Lacour" },
+    ],
+  },
 };

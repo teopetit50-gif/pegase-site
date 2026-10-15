@@ -13,7 +13,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { Fiche, Proposition, Relance, StatutCompte, Suivi, Tableau } from "./types";
+import type { Fiche, Gabarits, PalierValidation, Proposition, Relance, RelanceCommande, StatutCompte, Suivi, Tableau } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -144,4 +144,67 @@ export async function chargerPilotage(client: string): Promise<{ reponses: Repon
   if (r.error) throw new ErreurPorte(message(r.error));
   if (a.error) throw new ErreurPorte(message(a.error));
   return { reponses: (r.data ?? []) as Reponse[], arretes: (a.data ?? []) as Arrete[] };
+}
+
+/* ——— c2_04 : les textes, les réglages des relances, trois gestes de la fiche ——— */
+
+export async function chargerGabarits(client: string): Promise<Gabarits> {
+  const g = await rpc<Gabarits | null>("cashd_gabarits", { p_client: client });
+  if (!g || !Array.isArray(g.gabarits)) throw new ErreurPorte("Les textes n'ont pas pu être lus.");
+  return g;
+}
+
+export async function ecrireGabarit(o: { client: string; cle: string; langue: string; variante: number; sujet: string; corps: string; actif: boolean }) {
+  return rpc<{ id: string }>("cashd_ecrire_gabarit", {
+    p_client: o.client, p_cle: o.cle, p_langue: o.langue, p_variante: o.variante, p_sujet: o.sujet, p_corps: o.corps, p_actif: o.actif,
+  });
+}
+
+export async function reglerRelances(client: string, champs: Record<string, unknown>) {
+  return rpc<Record<string, unknown>>("cashd_regler_relances", { p_client: client, p_champs: champs });
+}
+
+export async function attendreCommande(facture: string, email: string | null, nom: string | null, motif: string | null) {
+  return rpc<{ attente_commande_le: string | null; relances_coupees: number }>("cashd_attendre_commande", { p_facture: facture, p_email: email, p_nom: nom, p_motif: motif });
+}
+
+export async function deciderSolde(facture: string, decision: "abandonne" | "reclame" | null, motif: string) {
+  return rpc<{ decision: string | null; relances_coupees: number }>("cashd_decider_solde", { p_facture: facture, p_decision: decision, p_motif: motif });
+}
+
+export async function consignerAccord(devis: string, note: string, le: string | null) {
+  return rpc<{ statut: string; accord_oral_le: string; relances_coupees: number }>("cashd_consigner_accord", { p_devis: devis, p_note: note, p_le: le });
+}
+
+export async function chargerRelancesCommande(client: string): Promise<RelanceCommande[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("cashd_relances_commande")
+    .select("id, facture_id, compte_id, jour, destinataire_adresse, destinataire_nom, sujet, corps, statut, motif")
+    .eq("client_id", client)
+    .order("jour", { ascending: false })
+    .limit(20);
+  if (error) throw new ErreurPorte(message(error));
+  return (data ?? []) as RelanceCommande[];
+}
+
+/* ——— c2_05 : trancher une réponse lue, joindre une pièce ——— */
+
+export async function trancherReponse(reponse: string, accepter: boolean, motif: string | null) {
+  return rpc<{ statut: string; proposition: string; effets: number }>("cashd_trancher_reponse", { p_reponse: reponse, p_accepter: accepter, p_motif: motif });
+}
+
+/* Le fichier part dans le stockage de l'organisation (omega-clients/<client>/cashd/<facture>/…), puis la porte le rattache. */
+export async function joindrePiece(client: string, facture: string, nature: string, fichier: File) {
+  const supabase = createClient();
+  const nom = fichier.name.normalize("NFD").replace(/[^\w.-]+/g, "_").slice(-120);
+  const chemin = `${client}/cashd/${facture}/${Date.now()}-${nom}`;
+  const { error } = await supabase.storage.from("omega-clients").upload(chemin, fichier, { upsert: false, contentType: fichier.type || undefined });
+  if (error) throw new ErreurPorte(message(error));
+  return rpc<{ id: string }>("cashd_joindre_piece", { p_facture: facture, p_nature: nature, p_chemin: chemin, p_nom: fichier.name, p_actif: true });
+}
+
+/* ——— c2_06 : qui valide selon le montant (gérant seulement) ——— */
+export async function reglerValidation(client: string, paliers: PalierValidation[]) {
+  return rpc<{ paliers: PalierValidation[] | null; regles: string[] }>("cashd_regler_validation", { p_client: client, p_paliers: paliers });
 }

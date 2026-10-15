@@ -18,8 +18,8 @@ import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
 import { Avis, Pastille } from "../ui";
 import { dateCourte } from "../format";
-import { TYPES_ANALYSE, htmlAnalyse, libelleCode, libelleType, lignesDe, lireResultat, resumeDonnees, type ResultatAnalyse } from "./analyses";
-import { dechiffrer } from "./chiffrement";
+import { TYPES_ANALYSE, type Citation, htmlAnalyse, libelleCode, libelleType, lignesDe, lireResultat, resumeDonnees, type ResultatAnalyse } from "./analyses";
+import { dechiffrer, dechiffrerOctets } from "./chiffrement";
 import { DOSSIERS_EXEMPLE } from "./exemples";
 import * as portes from "./portes";
 import type { Clair, Dossier, Piece } from "./types";
@@ -93,6 +93,26 @@ export default function AnalysesTamila({ dossier: d, source, cle, pieces, clair,
   if (liste === null) return null;
 
   const nomPiece = (id: string) => pieces.find((p) => p.id === id)?.nom_fichier ?? "pièce";
+  /* le renvoi cliquable : la pièce déchiffrée dans le navigateur, ouverte à la page citée */
+  const ouvrirPiece = async (id: string, page: number) => {
+    const p = pieces.find((x) => x.id === id);
+    if (!p || !cle) return;
+    try {
+      const octets = await dechiffrerOctets(cle, await portes.telecharger(p.chemin));
+      if (!octets) throw new Error("La clé de ce dossier n'ouvre pas cette pièce.");
+      const url = URL.createObjectURL(new Blob([octets.slice()], { type: p.mime || "application/pdf" }));
+      window.open(`${url}#page=${page}`, "_blank", "noopener");
+      window.setTimeout(() => URL.revokeObjectURL(url), 120_000);
+    } catch (e) {
+      setOuverte((o) => (o ? { ...o, erreur: e instanceof Error ? e.message : "La pièce ne s'ouvre pas." } : o));
+    }
+  };
+  const renvoi = (x: Citation) => {
+    const texte = `${nomPiece(x.piece)}, p. ${x.page}${lignesDe(x) ? `, ${lignesDe(x)}` : ""}`;
+    return source === "reelle" && cle && pieces.some((p) => p.id === x.piece)
+      ? <button type="button" className="esp-lien-bouton esp-mono" title="Ouvrir la pièce à cette page (déchiffrée ici)" onClick={() => void ouvrirPiece(x.piece, x.page)}>{texte}</button>
+      : <span className="esp-mono">{texte}</span>;
+  };
   const vivant = ["attente", "ouvert", "audit"].includes(d.statut);
 
   const demander = async (type: portes.TypeAnalyse) => {
@@ -201,7 +221,7 @@ export default function AnalysesTamila({ dossier: d, source, cle, pieces, clair,
                         <ul className="tam-citations">
                           {c.citations.filter((x) => x.verifiee).map((x, j) => (
                             <li key={j}>
-                              <span className="esp-mono">{nomPiece(x.piece)}, p. {x.page}{lignesDe(x) ? `, ${lignesDe(x)}` : ""}</span> — « {x.extrait} » <Pastille teinte="vert">Vérifiée</Pastille>
+                              {renvoi(x)} — « {x.extrait} » <Pastille teinte="vert">Vérifiée</Pastille>
                             </li>
                           ))}
                         </ul>
@@ -210,7 +230,7 @@ export default function AnalysesTamila({ dossier: d, source, cle, pieces, clair,
                             {c.citations.filter((x) => !x.verifiee).map((x, j) => (
                               <li key={j}>
                                 <Pastille teinte="ambre">Non retrouvée dans la pièce, ne vaut pas preuve</Pastille>{" "}
-                                <span className="esp-mono">{nomPiece(x.piece)}, p. {x.page}{lignesDe(x) ? `, ${lignesDe(x)}` : ""}</span> — « {x.extrait} »
+                                {renvoi(x)} — « {x.extrait} »
                               </li>
                             ))}
                           </ul>

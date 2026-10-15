@@ -30,13 +30,33 @@ import { ETATS_RELANCE, STATUTS_COMPTE, TRANCHES, libellePalier } from "./etats"
 import { JEUX, LIBELLES_CHAMPS, lireDepot, type Jeu } from "./depot";
 import * as portes from "./portes";
 import FicheCompte, { type Actions } from "./FicheCompte";
-import type { Fiche, Proposition, Relance, ReglementEtat, Tableau } from "./types";
+import Textes from "./Textes";
+import type { Fiche, Proposition, Relance, RelanceCommande, ReglementEtat, Tableau } from "./types";
 import "./cashd.css";
 
 type Filtre = "echu" | "plus_90" | "pause" | null;
+/* Les quatre vues de l'espace (11/10, c2_04) : celles que la page produit montre. */
+export type Onglet = "debiteurs" | "relances" | "envois" | "tresorerie";
+const ONGLETS: { cle: Onglet; libelle: string }[] = [
+  { cle: "debiteurs", libelle: "Débiteurs" },
+  { cle: "relances", libelle: "Relances" },
+  { cle: "envois", libelle: "Envois" },
+  { cle: "tresorerie", libelle: "Trésorerie" },
+];
+const ETATS_COMMANDE: Record<RelanceCommande["statut"], { libelle: string; teinte: "ambre" | "gris" | "rouge" }> = {
+  preparee: { libelle: "En préparation", teinte: "gris" },
+  a_valider: { libelle: "À valider", teinte: "ambre" },
+  non_reglee: { libelle: "Écrite — envoi à régler", teinte: "ambre" },
+  bloquee: { libelle: "Bloquée", teinte: "rouge" },
+  coupee: { libelle: "Coupée", teinte: "gris" },
+  echec: { libelle: "Échec", teinte: "rouge" },
+};
 type Reel = { client: portes.MonClient | null; tableau: Tableau | null; relances: Relance[]; fiches: Record<string, Fiche> };
 
-export default function EcranCashd() {
+const estOnglet = (v: string | null | undefined): v is Onglet => !!v && ONGLETS.some((o) => o.cle === v);
+
+/* `vue` (ou `?vue=` dans l'adresse) ouvre une des quatre vues : debiteurs, relances, envois, tresorerie. */
+export default function EcranCashd({ vue }: { vue?: Onglet } = {}) {
   const { source } = useSource();
   const [fiches, setFiches] = useState<Fiche[]>(FICHES_EXEMPLE);
   const [sansCompte, setSansCompte] = useState<ReglementEtat[]>(SANS_COMPTE_EXEMPLE);
@@ -49,6 +69,23 @@ export default function EcranCashd() {
   const [fait, setFait] = useState<string | null>(null);
   const [previsionReelle, setPrevisionReelle] = useState<portes.Prevision | null>(null);
   const [pilotageReel, setPilotageReel] = useState<{ reponses: portes.Reponse[]; arretes: portes.Arrete[] } | null>(null);
+  const [onglet, setOngletEtat] = useState<Onglet>(vue ?? "debiteurs");
+  useEffect(() => {
+    if (vue) return;
+    const v = new URLSearchParams(window.location.search).get("vue");
+    if (!estOnglet(v)) return;
+    const t = window.setTimeout(() => setOngletEtat(v), 0);
+    return () => window.clearTimeout(t);
+  }, [vue]);
+  /* la vue choisie reste dans l'adresse : un lien la rouvre */
+  const setOnglet = (o: Onglet) => {
+    setOngletEtat(o);
+    const u = new URL(window.location.href);
+    u.searchParams.set("vue", o);
+    window.history.replaceState(window.history.state, "", u);
+  };
+  const [commandesReelles, setCommandesReelles] = useState<RelanceCommande[]>([]);
+  const [commandesLocales, setCommandesLocales] = useState<RelanceCommande[]>([]);
 
   const charger = useCallback(async () => {
     await Promise.resolve();
@@ -64,6 +101,7 @@ export default function EcranCashd() {
       setReel({ client, tableau, relances, fiches: {} });
       setPrevisionReelle(await portes.prevision(client.client_id).catch(() => null));
       setPilotageReel(await portes.chargerPilotage(client.client_id).catch(() => null));
+      setCommandesReelles(await portes.chargerRelancesCommande(client.client_id).catch(() => []));
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
       setReel({ client: null, tableau: null, relances: [], fiches: {} });
@@ -82,11 +120,12 @@ export default function EcranCashd() {
     try {
       const [tableau, relances] = await Promise.all([portes.chargerTableau(client.client_id), portes.chargerRelances(client.client_id)]);
       setReel((prev) => (prev ? { ...prev, tableau, relances, fiches: {} } : prev));
+      setCommandesReelles(await portes.chargerRelancesCommande(client.client_id).catch(() => []));
     } catch {
       /* la prochaine lecture à la main dira l'erreur */
     }
   }, [reel?.client]);
-  useTempsReel(["cashd_factures", "cashd_reglements", "cashd_relances", "cashd_comptes"], source === "reelle", relire);
+  useTempsReel(["cashd_factures", "cashd_reglements", "cashd_relances", "cashd_comptes", "cashd_relances_commande"], source === "reelle", relire);
 
   const tableau: Tableau | null = useMemo(() => {
     if (source === "exemple") return tableauDe(fiches, { reglages: REGLAGES_EXEMPLE, dernier_import: DERNIER_IMPORT_EXEMPLE }, sansCompte);
@@ -192,14 +231,17 @@ export default function EcranCashd() {
           setRelancesLocales((prev) => prev.map((x) => (x.etat === "a_valider" && x.pieces.some((p) => p.facture_id === facture) ? { ...x, etat: "coupee", statut: "coupee", motif: `contestation partielle : ${motif}` } : x)));
           return `${montant(montantConteste)} contestés sortent du cycle (exemple) ; le reste continue d'être relancé.`;
         },
-        dossier: async () => {
+        dossier: async (motif = "litige") => {
           if (source === "reelle") {
-            const d = await portes.dossier(fiche.compte.id, "litige");
-            exporterJson(`dossier-${fiche.compte.reference}-${jourParis()}.json`, d);
+            const d = await portes.dossier(fiche.compte.id, motif);
+            exporterJson(`dossier-${motif === "assurance_credit" ? "assurance-credit-" : ""}${fiche.compte.reference}-${jourParis()}.json`, d);
             return;
           }
-          exporterJson(`dossier-${fiche.compte.reference}-${jourParis()}.json`, {
-            motif: "litige", constitue_le: new Date().toISOString(), debiteur: fiche.compte, balance: balanceDe(fiche),
+          const jointes = fiche.pieces_jointes ?? [];
+          exporterJson(`dossier-${motif === "assurance_credit" ? "assurance-credit-" : ""}${fiche.compte.reference}-${jourParis()}.json`, {
+            motif, constitue_le: new Date().toISOString(), debiteur: fiche.compte, balance: balanceDe(fiche),
+            pieces_jointes: jointes,
+            pdf_manquants: fiche.pieces.filter((p) => (p.nature === "facture" || p.nature === "acompte") && p.statut !== "soldee" && !jointes.some((x) => x.facture_id === p.id && x.nature === "facture_pdf")).map((p) => p.numero),
             pieces: fiche.pieces.map((p) => etatPiece(p)), reglements: fiche.reglements, relances: relancesLocales.filter((x) => x.compte_id === fiche.compte.id),
           });
         },
@@ -235,6 +277,89 @@ export default function EcranCashd() {
           }
           majFiche(fiche.compte.id, (f) => ({ ...f, pieces: f.pieces.map((p) => (p.id === facture ? { ...p, statut: ouvrir ? "litige" : "ouverte", statut_motif: motif } : p)) }));
           return ouvrir ? "Facture en litige (exemple) : elle sort du cycle." : "Litige clos (exemple).";
+        },
+        attendreCommande: async (facture, email, nom, motif) => {
+          if (source === "reelle") {
+            setChoix(fiche.compte.id);
+            const r = await portes.attendreCommande(facture, email, nom, motif);
+            await relire();
+            return email
+              ? `La facture attend son bon de commande : ${nom ?? email} recevra sa relance, par la file de validation. ${r.relances_coupees ? "La relance adressée à la comptabilité est coupée." : ""}`
+              : "Bon de commande reçu : la facture reprend son cycle.";
+          }
+          const piece = fiche.pieces.find((p) => p.id === facture);
+          majFiche(fiche.compte.id, (y) => ({
+            ...y,
+            pieces: y.pieces.map((p) => (p.id === facture
+              ? { ...p, attente_commande_le: email ? jourParis() : null, attente_commande_email: email, attente_commande_nom: nom, attente_commande_motif: motif }
+              : p)),
+          }));
+          if (email && piece) {
+            setRelancesLocales((prev) => prev.map((x) => (x.etat === "a_valider" && x.pieces.some((p) => p.facture_id === facture) ? { ...x, etat: "coupee", statut: "coupee", motif: "en attente d'un bon de commande" } : x)));
+            setCommandesLocales((prev) => [{
+              id: crypto.randomUUID(), facture_id: facture, compte_id: fiche.compte.id, jour: jourParis(), destinataire_adresse: email, destinataire_nom: nom,
+              sujet: `Atelier Bertin — bon de commande attendu pour la facture ${piece.numero}`, corps: null, statut: "a_valider", motif: null,
+            }, ...prev]);
+          } else {
+            setCommandesLocales((prev) => prev.map((x) => (x.facture_id === facture && x.statut === "a_valider" ? { ...x, statut: "coupee", motif: "bon de commande reçu" } : x)));
+          }
+          return email ? `La facture attend son bon de commande (exemple) : ${nom ?? email} reçoit sa relance.` : "Bon de commande reçu (exemple) : la facture reprend son cycle.";
+        },
+        deciderSolde: async (facture, decision, motif) => {
+          if (source === "reelle") {
+            setChoix(fiche.compte.id);
+            const r = await portes.deciderSolde(facture, decision, motif);
+            await relire();
+            return decision === "abandonne" ? `Solde abandonné : il sort de toute relance${r.relances_coupees ? ", la relance prête est coupée" : ""}.` : decision === "reclame" ? "Solde réclamé : il sera relancé malgré le seuil." : "La règle du seuil reprend.";
+          }
+          majFiche(fiche.compte.id, (y) => ({ ...y, pieces: y.pieces.map((p) => (p.id === facture ? { ...p, solde_decision: decision, solde_decision_motif: motif } : p)) }));
+          if (decision === "abandonne") setRelancesLocales((prev) => prev.map((x) => (x.etat === "a_valider" && x.pieces.some((p) => p.facture_id === facture) ? { ...x, etat: "coupee", statut: "coupee", motif: `solde abandonné : ${motif}` } : x)));
+          return decision === "abandonne" ? "Solde abandonné (exemple)." : decision === "reclame" ? "Solde réclamé (exemple)." : "La règle du seuil reprend (exemple).";
+        },
+        trancherReponse: async (x, accepter) => {
+          if (source === "reelle") {
+            setChoix(fiche.compte.id);
+            const r = await portes.trancherReponse(x.id, accepter, null);
+            await relire();
+            return !accepter ? "Proposition écartée : rien ne change ; la décision reste au journal."
+              : x.proposition === "litige" ? `${r.effets} facture${r.effets > 1 ? "s" : ""} en litige ; leurs relances prêtes sont coupées.`
+              : x.proposition === "attente_contact" ? "Le compte attend un nouveau contact : désignez-le avant toute reprise."
+              : "Le compte est en pause le temps du règlement annoncé ; il reprend sur votre décision.";
+          }
+          majFiche(fiche.compte.id, (y) => {
+            const reponses_lues = (y.reponses_lues ?? []).filter((z) => z.id !== x.id);
+            if (!accepter) return { ...y, reponses_lues };
+            if (x.proposition === "litige") {
+              const ids = relancesLocales.find((r) => r.id === x.relance_id)?.pieces.map((p) => p.facture_id) ?? [];
+              return { ...y, reponses_lues, pieces: y.pieces.map((p) => (ids.includes(p.id) ? { ...p, statut: "litige", statut_motif: "contestation écrite du client" } : p)) };
+            }
+            const statut = x.proposition === "attente_contact" ? "attente_contact" : "pause";
+            return { ...y, reponses_lues, compte: { ...y.compte, statut, statut_motif: x.proposition === "pause" ? "le client annonce son règlement" : "l'interlocuteur a quitté l'entreprise", statut_le: new Date().toISOString() } };
+          });
+          if (accepter && x.proposition !== "aucune") setRelancesLocales((prev) => prev.map((r) => (r.compte_id === fiche.compte.id && r.etat === "a_valider" ? { ...r, etat: "coupee", statut: "coupee", motif: "réponse du client tranchée" } : r)));
+          return accepter ? "Proposition acceptée (exemple)." : "Proposition écartée (exemple) : rien ne change.";
+        },
+        joindrePiece: async (facture, nature, fichier) => {
+          if (source === "reelle") {
+            if (!reel?.client) throw new Error("Aucun compte rattaché à cette session.");
+            setChoix(fiche.compte.id);
+            await portes.joindrePiece(reel.client.client_id, facture, nature, fichier);
+            setReel((prev) => (prev ? { ...prev, fiches: Object.fromEntries(Object.entries(prev.fiches).filter(([k]) => k !== fiche.compte.id)) } : prev));
+            return `${fichier.name} est joint à la facture ; il rejoint ses dossiers.`;
+          }
+          majFiche(fiche.compte.id, (y) => ({ ...y, pieces_jointes: [...(y.pieces_jointes ?? []), { id: crypto.randomUUID(), facture_id: facture, nature, chemin: `exemple/${fichier.name}`, nom: fichier.name, cree_le: new Date().toISOString() }] }));
+          return `${fichier.name} est joint à la facture (exemple, rien n'est envoyé).`;
+        },
+        consignerAccord: async (devis, note, le) => {
+          if (source === "reelle") {
+            setChoix(fiche.compte.id);
+            await portes.consignerAccord(devis, note, le);
+            await relire();
+            return "Accord consigné : le devis est accepté, sa cadence s'arrête. Le point du matin suivra la facture à venir.";
+          }
+          majFiche(fiche.compte.id, (y) => ({ ...y, pieces: y.pieces.map((p) => (p.id === devis ? { ...p, statut: "accepte", accord_oral_le: le, accord_note: note } : p)) }));
+          setRelancesLocales((prev) => prev.map((x) => (x.etat === "a_valider" && x.pieces.some((p) => p.facture_id === devis) ? { ...x, etat: "coupee", statut: "coupee", motif: `devis accepté de vive voix le ${dateCourte(le)}` } : x)));
+          return "Accord consigné (exemple) : le devis est accepté, sa cadence s'arrête.";
         },
       }
     : null;
@@ -377,7 +502,9 @@ export default function EcranCashd() {
     return { a_30_jours: somme(dans(30)), a_60_jours: somme(dans(60)), au_dela: 0, tenu_a_part: 0 };
   }, [source, previsionReelle, fiches]);
   const aValider = relances.filter((r) => r.etat === "a_valider" || r.etat === "non_reglee").length;
-  const recentes = relances.slice(0, 12);
+  const recentes = relances.filter((r) => r.etat !== "envoyee").slice(0, 12);
+  const parties = relances.filter((r) => r.etat === "envoyee" || r.envoye_le);
+  const commandes = source === "exemple" ? commandesLocales : commandesReelles;
   const essai = tableau?.reglages?.mode !== "reel";
   const total = t ? Math.max(t.encours, 0.01) : 1;
 
@@ -420,11 +547,11 @@ export default function EcranCashd() {
               <span className="esp-kpi-valeur c2-kpi-montant">{montant(t?.echu_plus_90 ?? 0)}</span>
               <span className="esp-kpi-sous">le plus difficile à rattraper</span>
             </button>
-            <a className="esp-kpi" href="#c2-relances" data-teinte={aValider ? "ambre" : undefined}>
+            <button type="button" className="esp-kpi" data-teinte={aValider ? "ambre" : undefined} onClick={() => setOnglet("relances")}>
               <span className="esp-kpi-etiquette">Relances à valider</span>
               <span className="esp-kpi-valeur">{aValider}</span>
               <span className="esp-kpi-sous">écrites ce matin, rien n&apos;est parti</span>
-            </a>
+            </button>
             <button type="button" className="esp-kpi" data-teinte={(tableau?.comptes ?? []).some((b) => b.statut !== "actif") ? "ambre" : undefined} aria-pressed={filtre === "pause"} onClick={() => setFiltre(filtre === "pause" ? null : "pause")}>
               <span className="esp-kpi-etiquette">Hors cycle</span>
               <span className="esp-kpi-valeur">{(tableau?.comptes ?? []).filter((b) => b.statut !== "actif").length}</span>
@@ -432,7 +559,17 @@ export default function EcranCashd() {
             </button>
           </div>
 
-          {t && t.encours > 0 ? (
+          <div className="esp-onglets c2-onglets" role="tablist" aria-label="Les vues de CASHD">
+            {ONGLETS.map((o) => (
+              <button key={o.cle} type="button" role="tab" id={`c2-onglet-${o.cle}`} aria-controls="c2-vue" aria-selected={onglet === o.cle} className="esp-onglet" onClick={() => setOnglet(o.cle)}>
+                {o.libelle}
+                {o.cle === "relances" && aValider ? <span className="c2-compte">{aValider}</span> : null}
+              </button>
+            ))}
+          </div>
+
+          <div id="c2-vue" role="tabpanel" aria-labelledby={`c2-onglet-${onglet}`}>
+          {onglet === "tresorerie" && t && t.encours > 0 ? (
             <section className="esp-carte c2-balance" aria-label="Balance âgée">
               <div className="esp-carte-tete">
                 <h2 className="esp-carte-titre">Balance âgée</h2>
@@ -463,7 +600,7 @@ export default function EcranCashd() {
             </section>
           ) : null}
 
-          {source === "exemple" || (reel?.tableau?.reglages && essai) ? (
+          {(onglet === "debiteurs" || onglet === "relances") && (source === "exemple" || (reel?.tableau?.reglages && essai)) ? (
             <div style={{ marginBottom: 14 }}>
               <Avis teinte="bleu">
                 <strong>Mode essai.</strong> Les relances validées partent vers l&apos;adresse d&apos;essai d&apos;Omega, jamais chez vos clients, tant que le gérant n&apos;a pas basculé en réel.
@@ -471,6 +608,7 @@ export default function EcranCashd() {
             </div>
           ) : null}
 
+          {onglet === "debiteurs" ? (
           <div className="esp-grille">
             <section className="esp-carte" aria-label="Débiteurs">
               <div className="esp-carte-tete">
@@ -528,7 +666,10 @@ export default function EcranCashd() {
               )}
             </section>
           </div>
+          ) : null}
 
+          {onglet === "relances" ? (
+          <>
           <section id="c2-relances" className="esp-carte c2-section" aria-label="Relances">
             <div className="esp-carte-tete">
               <h2 className="esp-carte-titre">Relances écrites</h2>
@@ -536,7 +677,7 @@ export default function EcranCashd() {
                 <button type="button" className="esp-lien-bouton" onClick={() => exporterRelances(relances, jourParis())}>
                   <Download width={14} height={14} aria-hidden="true" /> Tableur
                 </button>
-                <Link className="esp-lien-bouton" href="/espace/validations">Ouvrir la file de validation</Link>
+                <Link className="esp-lien-bouton" href="/espace2/validations">Ouvrir la file de validation</Link>
               </span>
             </div>
             {recentes.length === 0 ? (
@@ -575,7 +716,83 @@ export default function EcranCashd() {
             )}
           </section>
 
-          {pilotage && (pilotage.reponses.length || pilotage.arretes.length) ? (
+          {commandes.length ? (
+            <section className="esp-carte c2-section" aria-label="Bons de commande attendus">
+              <div className="esp-carte-tete">
+                <h2 className="esp-carte-titre">Bons de commande attendus</h2>
+                <span className="esp-kpi-sous">la relance va au service qui émet le bon, pas à la comptabilité</span>
+              </div>
+              <ul className="c2-relances">
+                {commandes.map((x) => (
+                  <li key={x.id}>
+                    <span className="esp-item-haut">
+                      <strong>{x.destinataire_nom ?? x.destinataire_adresse}</strong>
+                      <Pastille teinte={ETATS_COMMANDE[x.statut].teinte}>{ETATS_COMMANDE[x.statut].libelle}</Pastille>
+                    </span>
+                    <span className="c2-relance-ligne"><span>{x.sujet ?? "—"}</span></span>
+                    <span className="c2-sous">Écrite le {dateCourte(x.jour)} pour {x.destinataire_adresse}{x.motif ? ` · ${x.motif}` : ""}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+
+          <Textes
+            key={`${source}:${reel?.client?.client_id ?? ""}`}
+            source={source}
+            client={reel?.client?.client_id ?? null}
+            reglages={tableau?.reglages ?? null}
+            apresReglage={relire}
+          />
+          </>
+          ) : null}
+
+          {onglet === "envois" ? (
+            <section className="esp-carte c2-section" aria-label="Envois">
+              <div className="esp-carte-tete">
+                <h2 className="esp-carte-titre">Envois</h2>
+                <span className="c2-tete-droite">
+                  <span className="esp-kpi-sous">chaque relance partie, datée, avec son destinataire, son objet et son canal</span>
+                  <button type="button" className="esp-lien-bouton" onClick={() => exporterRelances(parties, jourParis())}>
+                    <Download width={14} height={14} aria-hidden="true" /> Tableur
+                  </button>
+                </span>
+              </div>
+              {parties.length === 0 ? (
+                <Vide titre="Rien n'est encore parti">Une relance part une fois validée dans la file ; elle s&apos;inscrit ici avec son heure, son destinataire et son canal.</Vide>
+              ) : (
+                <div className="esp-tableau-cadre">
+                  <table className="esp-tableau c2-envois">
+                    <thead>
+                      <tr>
+                        <th scope="col">Partie le</th>
+                        <th scope="col">Destinataire</th>
+                        <th scope="col">Objet</th>
+                        <th scope="col">Canal</th>
+                        <th scope="col">État</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {parties.map((r) => {
+                        const e = ETATS_RELANCE[r.etat] ?? ETATS_RELANCE.preparee;
+                        return (
+                          <tr key={r.id}>
+                            <td>{r.envoye_le ? dateHeure(r.envoye_le) : dateCourte(r.jour)}</td>
+                            <td><strong>{r.compte}</strong><span className="c2-sous">{r.destinataire_adresse ?? "—"}</span></td>
+                            <td>{r.sujet ?? "—"}<span className="c2-sous">{libellePalier(r.palier)} · {montant(r.montant)}</span></td>
+                            <td>{r.canal === "lre" ? "Recommandé électronique" : r.canal === "whatsapp" ? "WhatsApp" : "Courriel"}</td>
+                            <td><Pastille teinte={e.teinte}>{e.libelle}</Pastille></td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
+          ) : null}
+
+          {onglet === "tresorerie" && pilotage && (pilotage.reponses.length || pilotage.arretes.length) ? (
             <section className="esp-carte c2-section" aria-label="Pilotage">
               <div className="esp-carte-tete">
                 <h2 className="esp-carte-titre">Pilotage</h2>
@@ -616,7 +833,7 @@ export default function EcranCashd() {
             </section>
           ) : null}
 
-          {(tableau?.a_imputer ?? []).length ? (
+          {onglet === "tresorerie" && (tableau?.a_imputer ?? []).length ? (
             <section className="esp-carte c2-section" aria-label="Règlements à rapprocher">
               <div className="esp-carte-tete">
                 <h2 className="esp-carte-titre">Règlements à rapprocher</h2>
@@ -650,6 +867,10 @@ export default function EcranCashd() {
               </ul>
             </section>
           ) : null}
+          {onglet === "tresorerie" && !(t && t.encours > 0) ? (
+            <div className="esp-carte"><Vide titre="Aucun encours">La balance âgée, la prévision d&apos;encaissement et les arrêtés s&apos;affichent dès le premier export lu.</Vide></div>
+          ) : null}
+          </div>
         </>
       )}
 

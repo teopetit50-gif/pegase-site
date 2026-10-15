@@ -285,6 +285,10 @@ export type Dossier = {
   demiJournees: DemiJournees | null;
   objectifs: Objectifs | null;
   reglesCommunes: ReglesCommunes | null;
+  soinsADeplacer: SoinsADeplacer | null;
+  seancesLongues: SeanceMalPlacee[] | null;
+  creneauxPlans: PlanCreneaux[] | null;
+  controlesDus: ControlesDus | null;
 };
 
 /* ——— le registre des appels (b3_12) ——— */
@@ -528,3 +532,25 @@ export type ReglesCommunes = {
   centres: { entite_id: string; nom: string; regles: Record<string, unknown> }[];
   ecarts: string[];
 };
+
+/* ——— les compléments du cabinet (b3_23) ——— */
+
+export type FauteuilVers = { fauteuil_id: string; fauteuil: string; taux: number | null; assistante: string | null };
+export type SoinADeplacer = { rendez_vous_id: string; debut: string; fin: string; patient_nom: string; soin: string | null; vers: FauteuilVers[] };
+export type DemiJourneeADeplacer = { jour: string; moment: "matin" | "apres_midi"; fauteuil_id: string; fauteuil: string; taux: number | null; soins: SoinADeplacer[]; libere: boolean };
+export type SoinsADeplacer = { seuil: number | null; demi_journees: DemiJourneeADeplacer[] };
+
+export type SeanceMalPlacee = {
+  rendez_vous_id: string; debut: string; fin: string; minutes: number; fauteuil: string | null;
+  praticien: string | null; patient_nom: string; soin: string | null; raisons: string[];
+};
+
+export type CreneauPlan = { debut: string; fin: string; fauteuil_id: string; fauteuil: string };
+export type PlanCreneaux = {
+  plan_id: string; patient_nom: string; devis_numero: string | null; duree_min: number; praticien: string | null;
+  seance: { rang: number; libelle: string | null; famille: string | null; duree_min: number | null; seance: number | null } | null;
+  creneaux: CreneauPlan[];
+};
+
+export type ControleDu = { patient_id: string; patient_nom: string; dernier_controle_le: string | null; derniere_venue: string | null; mois_depuis: number | null; praticien: string | null };
+export type ControlesDus = { seuil_mois: number; total: number; ne_pas_contacter: number; patients: ControleDu[] };
