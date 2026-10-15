@@ -308,6 +308,24 @@ for (const largeur of LARGEURS) {
   await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(x => /Enregistrer/.test(x.textContent))?.click()`);
   await s.dormir(600);
   ok(await s.evaluer(`/Décide des constats : toute l’équipe du projet/.test(document.querySelector('.lor-controle-tete')?.parentElement?.innerText || '') && [...document.querySelectorAll('.lor-constat button')].find(x => x.textContent.trim() === 'Accepter')?.disabled === false`), 'rendu à toute l’équipe : les décisions se rouvrent');
+  /* b5_31 : régler les contrôles du projet (tolérances, familles) */
+  ok(await s.evaluer(`/Réglages du projet : 1 tolérance propre · ne tourne pas : RE2020\./.test(document.querySelector('.lor-reglages')?.textContent || '')`), 'réglages du projet dits sous le titre : 1 tolérance propre, RE2020 coupée');
+  await s.evaluer(`[...document.querySelectorAll('.esp-lien-bouton')].find(b => b.textContent.trim() === 'Régler les contrôles')?.click()`);
+  await s.dormir(500);
+  const rg = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const champs = [...(d?.querySelectorAll('.lor-tolerances input') || [])]; const cases = [...(d?.querySelectorAll('input[type="checkbox"]') || [])]; return { titre: d?.querySelector('h2')?.textContent, champs: champs.length, faitage: champs[0]?.value, cases: cases.length, coupees: cases.filter(c => !c.checked).length }; })()`);
+  ok(rg.titre === 'Régler les contrôles' && rg.champs === 12 && rg.faitage === '0,1' && rg.cases === 7 && rg.coupees === 1, `dialogue « ${rg.titre} » : 12 écarts (faîtage ${rg.faitage}), 7 familles dont 1 coupée`);
+  const saisir = (v) => s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] .lor-tolerances input'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, ${JSON.stringify(v)}); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  const bouton = () => s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer/.test(b.textContent))?.disabled`);
+  await saisir('3'); await s.dormir(200);
+  ok(await bouton() === true && await s.evaluer(`/hors des bornes/.test(document.querySelector('[role="dialog"]')?.innerText || '')`), '3 m sur le faîtage : hors bornes, « Enregistrer » grisé');
+  await saisir('0,2'); await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] input[type="checkbox"]')].find(c => /CCTP et DPGF/.test(c.parentElement.textContent)).click()`);
+  await s.dormir(200);
+  ok(await bouton() === false, '0,2 m et « CCTP et DPGF » décoché : « Enregistrer » actif');
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer/.test(b.textContent))?.click()`);
+  await s.dormir(600);
+  const rg2 = await s.evaluer(`document.querySelector('.lor-reglages')?.textContent || ''`);
+  ok(/1 tolérance propre · ne tournent pas : CCTP et DPGF, RE2020\./.test(rg2), `enregistré : « ${rg2.trim()} »`);
   /* b5_25 : un constat en question au BET ou à l'entreprise, avec l'extrait cité */
   await s.evaluer(`[...document.querySelectorAll('.lor-constat .esp-lien-bouton')].find(b => b.textContent.trim() === 'En faire une question')?.click()`);
   await s.dormir(500);
@@ -394,6 +412,12 @@ for (const largeur of LARGEURS) {
   const d = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const r = d?.getBoundingClientRect(); const larges = [...(d?.querySelectorAll('*') || [])].filter(e => { const x = e.getBoundingClientRect(); return x.width > 0 && x.right > r.right + 1; }).length; return { ouvert: !!d, larges }; })()`);
   ok(d.ouvert && d.larges === 0, `dialogue de revérification à 390 : rien ne dépasse (${JSON.stringify(d)})`);
   await s.capturer(`${dossier}lorani-controle-dialogue-390.jpg`, { qualite: 55 });
+  await s.evaluer(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`);
+  await s.dormir(400);
+  await s.evaluer(`[...document.querySelectorAll('.esp-lien-bouton')].find(b => b.textContent.trim() === 'Régler les contrôles')?.click()`);
+  await s.dormir(500);
+  const dr = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const r = d?.getBoundingClientRect(); const larges = [...(d?.querySelectorAll('*') || [])].filter(e => { const x = e.getBoundingClientRect(); return x.width > 0 && x.right > r.right + 1; }).length; return { titre: d?.querySelector('h2')?.textContent, larges }; })()`);
+  ok(dr.titre === 'Régler les contrôles' && dr.larges === 0, `dialogue « Régler les contrôles » à 390 : rien ne dépasse (${JSON.stringify(dr)})`);
   s.fermer();
 }
 

@@ -51,6 +51,9 @@ export type Projet = {
   ouverture_chantier?: string | null;
   /* la réception (b5_19) : la garantie de parfait achèvement court un an */
   reception_le?: string | null;
+  /* b5_31 : les réglages des contrôles du projet — écart toléré par grandeur (et « metre_dpgf_pct »), familles coupées */
+  controle_tolerances?: Record<string, number>;
+  controle_familles_coupees?: Constat["nature"][];
   cree_le: string;
   maj_le: string;
 };

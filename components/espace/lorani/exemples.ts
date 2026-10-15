@@ -54,7 +54,8 @@ export const PROJETS_EXEMPLE: Projet[] = [
   projet({ id: P_ENFANCE, nom: "Pôle enfance de Vaulx-en-Velin", reference: "26-009", adresse: "4 avenue Roger-Salengro", code_postal: "69120", commune: "Vaulx-en-Velin", code_insee: "69256", parcelles: ["BK 58"], nature: "erp", marche_public: true }),
   projet({ id: P_MARTIN, nom: "Maison Martin", reference: "26-011", adresse: "27 rue Bellecombe", code_postal: "69003", commune: "Lyon 3e", code_insee: "69383", parcelles: ["AV 212"], nature: "maison_individuelle" }),
   projet({ id: P_MERCIERE, nom: "Façade rue Mercière", reference: "25-031", adresse: "31 rue Mercière", code_postal: "69002", commune: "Lyon 2e", code_insee: "69382", parcelles: ["AC 77"], nature: "tertiaire", phase: "det", ouverture_chantier: j(-100) }),
-  projet({ id: P_DUBOIS, nom: "Surélévation Dubois", reference: "26-018", adresse: "8 rue Francis-de-Pressensé", code_postal: "69100", commune: "Villeurbanne", code_insee: "69266", parcelles: ["BD 301"], nature: "logement_collectif", phase: "apd" }),
+  projet({ id: P_DUBOIS, nom: "Surélévation Dubois", reference: "26-018", adresse: "8 rue Francis-de-Pressensé", code_postal: "69100", commune: "Villeurbanne", code_insee: "69266", parcelles: ["BD 301"], nature: "logement_collectif", phase: "apd",
+    controle_tolerances: { hauteur_faitage_m: 0.1 }, controle_familles_coupees: ["re2020"] }),
 ];
 
 /* ——— les permis et leur calendrier ——— */
