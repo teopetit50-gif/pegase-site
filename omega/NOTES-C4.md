@@ -9,8 +9,8 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 État au 11/10 : c4_01 à c4_10 posés sur la recette et verts ; écrans fusionnés dans main. 44 lignes sur 45
 prouvées ; la ligne 15 attend la messagerie du client (A2). Rien à poser. Aucun travail en cours. Prochain pas :
 reprise le 15/10 : les phrases du site restent, le produit se met à leur hauteur, par petits lots. c4_11 (impayés,
-CASHD) et c4_12 (canal unique, vague de la semaine) faits, à poser. Suivants : jeu d'import « contacts », levée de
-l'opposition du socle en un geste, puis modèles « chantiers » et « missions ». « Un message par trimestre » attend Teo
+CASHD), c4_12 (canal unique, vague de la semaine) et c4_13 (contacts importés, remise en un geste) faits, à poser.
+Suivant : modèles « chantiers » et « missions » (bâtiment, conseil). « Un message par trimestre » attend Teo
 (contredit la ligne 12).
 
 ### Pause précédente (06/10, 21 h Z)
@@ -433,6 +433,22 @@ Banc local : 28 tests, 312 assertions vertes, migrations posées deux fois ; tsc
 l'échéance honorée après message est comptée au suivi). Le chiffre repris compte tous les achats des 90 jours,
 sans prétendre qu'ils sont dus au seul message.
 
+## Lot c4_13 — le dernier contact lu dans vos outils, la remise dans le circuit en un geste (15/10)
+
+`omega/modules/offload/migrations/c4_13_contacts_et_remise.sql` :
+- **Contacts importés** (chiffrage n° 62). Un modèle d'export « contacts » (code client, date, canal, par, note) est
+  posé, et `declarer_jeu` l'ajoute aux branchements existants. `offload_appliquer_releve` l'écrit dans
+  `offload_contacts` (colonnes `source`, `jeu_id`, `cle`, sans doublon au réimport) ; `dernier_contact` suit. Le compte
+  contacté récemment sort de la vague en cours, par la quarantaine de c4_05.
+- **Remise dans le circuit** (n° 73). Remettre en « suivi » un compte retiré à sa demande lève aussi, dans le même geste,
+  l'opposition du socle sur son adresse (`private.lever_opposition`). Le geste reste réservé au gérant ou à l'admin,
+  avec un motif (`offload_changer_statut`).
+
+**Tests** : `omega/tests/offload/c4_13_contacts_et_remise.sql` (`test_c4_13_contacts_importes`,
+`test_c4_13_remise_dans_le_circuit`). Banc local : 38 tests, 374 ok. À vérifier sur la recette :
+`private.lever_opposition` accepte bien l'appel d'un gérant à travers la porte OFFLOAD (son corps n'est pas dans les
+extraits).
+
 ## Lot c4_12 — un seul canal à la fois, et la vague de la semaine (15/10)
 
 `omega/modules/offload/migrations/c4_12_canal_et_vague.sql` :
@@ -625,3 +641,4 @@ Partielles : 6, 11, 15, 38.
 - 11/10, 14 h 10 Z — recette : c4_10 entièrement vert ; lignes 6, 11 et 38 prouvées (44 sur 45).
 - 15/10 — reprise. Lot c4_11 (impayés lus dans CASHD) : 34 tests, 361 ok en local.
 - 15/10 — lot c4_12 (canal unique, vague de la semaine) : 36 tests, 368 ok en local.
+- 15/10 — lot c4_13 (contacts importés, remise dans le circuit en un geste) : 38 tests, 374 ok en local.
