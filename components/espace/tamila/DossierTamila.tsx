@@ -18,7 +18,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useMemo, useState } from "react";
-import { Archive, Ban, CalendarClock, CalendarPlus, Check, FileSignature, Gavel, Lock, Pencil, ShieldOff, Upload, UserPlus, Users, X } from "lucide-react";
+import { Archive, Ban, CalendarClock, CalendarPlus, Check, FileSignature, Gavel, Lock, Pencil, Printer, ShieldOff, Upload, UserPlus, Users, X } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
@@ -36,6 +36,7 @@ import type { Audience, CalculDelai, Delai, DemandeTamila, DossierComplet, Parti
 import HonorairesTamila from "./HonorairesTamila";
 import AnalysesTamila from "./AnalysesTamila";
 import AttentesTamila from "./AttentesTamila";
+import BordereauImprimable from "./BordereauImprimable";
 import { ouvrirArchive } from "./archive";
 import ExpertiseTamila from "./ExpertiseTamila";
 import ConformiteTamila from "./ConformiteTamila";
@@ -88,6 +89,7 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
   const [fichier, setFichier] = useState<File | null>(null);
   const [form, setForm] = useState<Form>(null);
   const [envoi, setEnvoi] = useState(false);
+  const [bordereau, setBordereau] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [fait, setFait] = useState<string | null>(null);
   const [deplie, setDeplie] = useState<string | null>(null);
@@ -736,8 +738,19 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
       <section className="esp-carte" aria-label="Pièces">
         <div className="esp-carte-tete">
           <h2 className="esp-carte-titre">Pièces</h2>
+          <div className="esp-actions">
+          <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={pieces.length === 0 || !clairLisible} title={!clairLisible ? "La clé du dossier est nécessaire pour lire les noms" : "Bordereau de communication de pièces, composé ici"} onClick={() => setBordereau(true)}><Printer width={14} height={14} aria-hidden="true" /> Bordereau</button>
           <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutEcrire || (source === "reelle" && !cle)} title={source === "reelle" && !cle ? "La phrase du cabinet est nécessaire pour chiffrer la pièce" : undefined} onClick={() => ouvrir({ type: "piece" })}><Upload width={14} height={14} aria-hidden="true" /> Déposer</button>
+          </div>
         </div>
+        {bordereau ? (
+          <BordereauImprimable
+            ouvert onFermer={() => setBordereau(false)} pieces={pieces} entete={reglages?.facture_entete ?? {}}
+            dossier={{ reference: clair?.reference ?? "Dossier", intitule: clair?.intitule ?? "", numero_rg: clair?.numero_rg ?? null, juridiction: d.juridiction ?? null }}
+            pour={parties.filter((p) => p.qualite === "client").map((p) => complet.partiesClair[p.id]?.nom ?? "").filter(Boolean)}
+            contre={parties.filter((p) => p.qualite === "adverse").map((p) => complet.partiesClair[p.id]?.nom ?? "").filter(Boolean)}
+          />
+        ) : null}
         <div className="esp-carte-corps">
           {pieces.length === 0 ? <p className="esp-kpi-sous">Aucune pièce. Chaque pièce est chiffrée dans votre navigateur avec la clé du dossier avant de partir ; le socle n&apos;en voit que des octets.</p> : pieces.map((pc) => (
             <div key={pc.id} className="tam-ligne">

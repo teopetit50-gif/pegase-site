@@ -9,22 +9,37 @@
    les mêmes contrôles qu'une saisie à la main. Le marché reste à vérifier.
    ══════════════════════════════════════════════════════════════════════ */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FileUp } from "lucide-react";
 import { DialogBody, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
 import { montant, nombreFr } from "../format";
 import { Avis } from "../ui";
-import { champsPorte, lireDevis, type LigneLue } from "./devis";
-import { importerLignes } from "./portes";
+import { champsPorte, lireDevis, type DevisLu as DevisColle, type LigneLue } from "./devis";
+import { deposerDevis, devisLu, importerLignes, type LigneDevisLue } from "./portes";
 import type { LigneMarche, Lot, Marche } from "./types";
 
 const UNITE: Record<string, string> = { "m²": "m2", m2: "m2", "m³": "m3", m3: "m3", ml: "ml", m: "ml", u: "u", un: "u", "pce": "u", ens: "ens", ft: "forfait", fft: "forfait", forfait: "forfait", kg: "kg", t: "t", l: "l", h: "h", j: "j" };
 const uniteCle = (u: string | null) => (u ? UNITE[u.toLowerCase().replace(/\s/g, "")] ?? null : null);
 const nid = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
 
+/* Les lignes rendues par le lecteur (CHAMPS-LECTURE.md, § Daliro), dans la forme de l'aperçu. Le « lot » lu est un
+   code de lot du chantier, sinon un titre de section. */
+function depuisLecteur(lignes: LigneDevisLue[], lots: Lot[]): DevisColle {
+  const sortie: LigneLue[] = lignes.filter((l) => (l.designation ?? "").trim()).map((l, k) => {
+    const lot = l.lot && lots.some((x) => x.code === l.lot) ? l.lot : null;
+    const forfait = l.quantite == null && l.prix_unitaire == null;
+    return { rang: k + 1, numero: l.numero ?? null, section: lot ? null : l.lot ?? null, designation: (l.designation ?? "").trim().slice(0, 2000),
+             unite: l.unite ?? (forfait ? "forfait" : null), quantite: forfait ? null : l.quantite ?? null, pu: forfait ? null : l.prix_unitaire ?? null,
+             montant: l.montant ?? (l.quantite != null && l.prix_unitaire != null ? Math.round(l.quantite * l.prix_unitaire * 100) / 100 : null),
+             lot, nature: forfait ? "forfait" : "ouvrage" };
+  });
+  return { colonnes: { designation: 0 }, lignes: sortie, ignorees: lignes.length - sortie.length, erreur: sortie.length ? null : "Le lecteur n'a trouvé aucune ligne chiffrée dans ce PDF." };
+}
+
 type Props = {
+  client: string;
   marche: Marche;
   lots: Lot[];
   source: Source;
@@ -34,12 +49,37 @@ type Props = {
   fermer: () => void;
 };
 
-export default function ImportDevisDialog({ marche, lots, source, apresReel, appliquerLocal, fermer }: Props) {
+export default function ImportDevisDialog({ client, marche, lots, source, apresReel, appliquerLocal, fermer }: Props) {
   const [texte, setTexte] = useState("");
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [refus, setRefus] = useState<{ rang: number; designation: string | null; message: string }[]>([]);
-  const lu = useMemo(() => (texte.trim() ? lireDevis(texte) : null), [texte]);
+  const [pdf, setPdf] = useState<{ etat: "envoi" | "lecture" | "lu" | "echec"; nom: string; lu?: DevisColle; message?: string } | null>(null);
+  const lu = useMemo(() => (pdf?.lu ? pdf.lu : texte.trim() ? lireDevis(texte) : null), [texte, pdf]);
+
+  // Le lecteur lit le PDF en quelques dizaines de secondes : on relit toutes les 4 s, trois minutes au plus.
+  useEffect(() => {
+    if (pdf?.etat !== "lecture") return;
+    let tours = 0;
+    const t = window.setInterval(() => {
+      tours++;
+      void devisLu(marche.id).then((d) => {
+        if (d.lignes && d.lignes.length) { setPdf((p) => (p ? { ...p, etat: "lu", lu: depuisLecteur(d.lignes ?? [], lots) } : p)); }
+        else if (d.statut === "echec" || d.statut === "rejetee" || d.statut === "a_classer" || tours > 45) {
+          setPdf((p) => (p ? { ...p, etat: "echec", message: tours > 45 ? "Le lecteur n'a pas encore rendu ce devis : revenez dans quelques minutes, ou collez le tableau." : "Le lecteur n'a pas su lire ce PDF en lignes : collez le tableau ou exportez-le en CSV." } : p));
+        }
+      }).catch(() => undefined);
+    }, 4000);
+    return () => window.clearInterval(t);
+  }, [pdf?.etat, marche.id, lots]);
+
+  const choisirPdf = async (f: File) => {
+    setErreur(null);
+    if (source !== "reelle") { setPdf({ etat: "echec", nom: f.name, message: "En exemple, le PDF n'est pas envoyé au lecteur : collez le tableau du devis." }); return; }
+    setPdf({ etat: "envoi", nom: f.name });
+    try { await deposerDevis(client, marche.id, f); setPdf({ etat: "lecture", nom: f.name }); }
+    catch (e) { setPdf({ etat: "echec", nom: f.name, message: e instanceof Error ? e.message : "Le dépôt a échoué." }); }
+  };
   const lotDe = (l: LigneLue) => (l.lot ? lots.find((x) => x.code === l.lot || x.libelle.toLowerCase() === l.lot!.toLowerCase())?.id ?? null : null);
   const lotsInconnus = lu ? [...new Set(lu.lignes.filter((l) => l.lot && !lotDe(l)).map((l) => l.lot as string))] : [];
   const total = lu ? Math.round(lu.lignes.reduce((t, l) => t + (l.montant ?? 0), 0) * 100) / 100 : 0;
@@ -98,12 +138,21 @@ export default function ImportDevisDialog({ marche, lots, source, apresReel, app
       <DialogBody>
         <div className="esp-form" style={{ gridTemplateColumns: "minmax(0, 1fr)" }}>
           <label className="rv-libelle">Tableau collé
-            <textarea className="rv-champ" rows={5} value={texte} onChange={(e) => setTexte(e.target.value)}
+            <textarea className="rv-champ" rows={5} value={texte} onChange={(e) => { setPdf(null); setTexte(e.target.value); }}
                       placeholder={"N°\tDésignation\tU\tQté\tP.U. HT\tMontant HT\tLot\n1.1\tChape ciment\tm²\t38\t48,00\t1 824,00\t02"} />
           </label>
           <label className="rv-libelle">Ou un fichier CSV
-            <input className="rv-champ" type="file" accept=".csv,.txt,.tsv,text/csv,text/plain" onChange={(e) => { const f = e.target.files?.[0]; if (f) void lireFichier(f); }} />
+            <input className="rv-champ" type="file" accept=".csv,.txt,.tsv,text/csv,text/plain" onChange={(e) => { const f = e.target.files?.[0]; if (f) { setPdf(null); void lireFichier(f); } }} />
           </label>
+          <label className="rv-libelle">Ou le devis en PDF (lu par Daliro)
+            <input className="rv-champ" type="file" accept=".pdf,application/pdf" onChange={(e) => { const f = e.target.files?.[0]; if (f) void choisirPdf(f); }} />
+          </label>
+          {pdf && pdf.etat !== "lu" ? (
+            <Avis teinte={pdf.etat === "echec" ? "ambre" : "bleu"} role="status">
+              {pdf.etat === "envoi" ? `Envoi de « ${pdf.nom} »…` : pdf.etat === "lecture" ? `« ${pdf.nom} » est en lecture : les lignes apparaissent ici dès qu'elles sont lues.` : pdf.message}
+            </Avis>
+          ) : null}
+          {pdf?.etat === "lu" ? <p className="esp-kpi-sous" style={{ margin: 0 }}>Lignes lues dans « {pdf.nom} » : relisez-les avant d&apos;importer.</p> : null}
           {lu?.erreur ? <Avis teinte="ambre" role="status">{lu.erreur}</Avis> : null}
           {lu && lu.lignes.length ? (
             <>

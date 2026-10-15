@@ -177,13 +177,14 @@ async function chargerFlotte(): Promise<Flotte | null> {
 async function chargerParc(): Promise<Parc> {
   const supabase = createClient();
   const depuis = new Date(Date.now() - 30 * 86_400_000).toISOString();
-  const [vehicules, remises, anomalies, immobilisations, entretiens, membres] = await Promise.all([
+  const [vehicules, remises, anomalies, immobilisations, entretiens, membres, responsables] = await Promise.all([
     supabase.from("loc_vehicules").select("id, immatriculation, modele, categorie_id, energie, reservoir_l, statut, km_dernier, entite_id").neq("statut", "sorti").is("disparu_le", null).order("immatriculation").limit(500),
     supabase.from("loc_remises").select("*").or(`statut.in.(a_faire,en_cours),cree_le.gte.${depuis}`).order("retour_le", { ascending: false }).limit(300),
     supabase.from("loc_anomalies_retour").select("*").or(`statut.eq.ouverte,signalee_le.gte.${depuis}`).order("signalee_le", { ascending: false }).limit(300),
     supabase.from("loc_immobilisations").select("*").or(`fin_le.is.null,fin_le.gte.${depuis}`).order("debut_le", { ascending: false }).limit(300),
     supabase.from("loc_entretiens").select("*").or(`statut.in.(a_planifier,planifie),fait_le.gte.${depuis}`).order("echeance_le").limit(300),
     supabase.from("comptes").select("user_id, role"),
+    supabase.from("loc_responsables_agence").select("entite_id, remise_responsable"),
   ]);
   return {
     vehicules: vehicules.error ? [] : ((vehicules.data ?? []) as Parc["vehicules"]),
@@ -192,6 +193,7 @@ async function chargerParc(): Promise<Parc> {
     immobilisations: immobilisations.error ? [] : ((immobilisations.data ?? []) as Parc["immobilisations"]),
     entretiens: entretiens.error ? [] : ((entretiens.data ?? []) as Parc["entretiens"]),
     membres: membres.error ? [] : ((membres.data ?? []) as Parc["membres"]),
+    responsables: responsables.error ? [] : ((responsables.data ?? []) as NonNullable<Parc["responsables"]>),
   };
 }
 
@@ -254,6 +256,7 @@ export const deciderSortie = (p_sortie: string, p_valider: boolean, p_motif: str
 export const conclureSortie = (p_sortie: string, p_prix_vente_eur: number, p_vendu_le: string | null, p_acheteur: string | null) =>
   rpc<Record<string, unknown>>("loc_conclure_sortie", { p_sortie, p_prix_vente_eur, p_vendu_le, p_acheteur });
 export const annulerSortie = (p_sortie: string, p_motif: string) => rpc<Record<string, unknown>>("loc_annuler_sortie", { p_sortie, p_motif });
+export const poserResponsableRemise = (p_entite: string, p_responsable: string) => rpc<Record<string, unknown>>("loc_poser_responsable_remise", { p_entite, p_responsable });
 export const anonymiserLocataire = (p_locataire: string) => rpc<Record<string, unknown>>("loc_anonymiser_locataire", { p_locataire, p_motif: "demande" });
 
 /* Les réglages du module : la seule écriture directe, ouverte par la RLS au gérant. */
@@ -321,3 +324,23 @@ export const cloreIncident = (p_incident: string, p_note: string | null, p_ouvri
 export const demanderPreautorisation = (p_contrat: string, p_montant_eur: number | null) => rpc<Record<string, unknown>>("loc_demander_preautorisation", { p_contrat, p_montant_eur });
 export const capturerCaution = (p_caution: string, p_facture: string, p_montant_eur: number, p_motif: string) => rpc<Record<string, unknown>>("loc_capturer_caution", { p_caution, p_facture, p_montant_eur, p_motif });
 export const libererCaution = (p_caution: string) => rpc<Record<string, unknown>>("loc_liberer_caution", { p_caution });
+
+/* b2_19 — l'audit des retours (simulation) et l'indicateur du mois ; tolère l'absence de la migration (null). */
+export type LigneAudit = { id: string; audit_id: string; contrat_id: string; facture_historique_ttc: number; chiffre_ttc: number; statut_chiffrage: string;
+  lignes: { code: string; famille: string; libelle: string; montant_ttc: number; statut: string }[] };
+export type Audit = { id: string; libelle: string; statut: "ouvert" | "clos"; cree_le: string; clos_le: string | null };
+export type Indicateur = { mois: string; retours: number; factures_ttc: number; avoirs_ttc: number; pour_100_retours: number | null; avant_pour_100_retours: number | null; audit: string | null };
+export async function chargerAudits(): Promise<{ audits: Audit[]; lignes: LigneAudit[]; indicateur: Indicateur | null } | null> {
+  const supabase = createClient();
+  const [audits, lignes, indicateur] = await Promise.all([
+    supabase.from("loc_audits").select("id, libelle, statut, cree_le, clos_le").order("cree_le", { ascending: false }).limit(20),
+    supabase.from("loc_audit_lignes").select("id, audit_id, contrat_id, facture_historique_ttc, chiffre_ttc, statut_chiffrage, lignes").limit(2000),
+    supabase.rpc("loc_indicateur_mois", {}),
+  ]);
+  if (audits.error) return null;
+  return { audits: (audits.data ?? []) as Audit[], lignes: lignes.error ? [] : ((lignes.data ?? []) as LigneAudit[]), indicateur: indicateur.error ? null : (indicateur.data as Indicateur) };
+}
+export const ouvrirAudit = (p_libelle: string) => rpc<{ audit: string }>("loc_ouvrir_audit", { p_libelle });
+export const auditerRetour = (p_audit: string, p_contrat: string, p_retour: Retour, p_facture_historique_ttc: number) =>
+  rpc<{ chiffre_ttc: number; ecart_ttc: number }>("loc_auditer_retour", { p_audit, p_contrat, p_retour, p_facture_historique_ttc });
+export const cloreAudit = (p_audit: string) => rpc<Record<string, unknown>>("loc_resultat_audit", { p_audit, p_clore: true });
