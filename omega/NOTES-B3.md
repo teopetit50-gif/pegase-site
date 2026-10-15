@@ -38,7 +38,7 @@
 - Info Teo (11/10) : le tableau de bord prend le dessin de omegaai.fr/omega, et C1 refait /espace2 sans changer les adresses. Interdits : tout lien vers l'ancien dessin (/espace sans le 2, ?ancien=1) et toute modification de `components/omega`. Mes écrans n'en ont pas.
 
 **Reprise du 15/10** : l'écran b3_23 (10debab) est dans main depuis le 11/10 sous 93ccc62, appliqué par patch, donc sans lien d'ancêtre.
-- Lot b3t_05 (eb5b4cd), **posé** par le coordinateur ; le test est dans le lot h1227grand : `omega/modules/tavaro/migrations/b3t_05_couts_plan_de_flotte.sql` puis `omega/tests/tavaro/b3t_05_couts_plan.sql` (^test_b3t_05_, 16 assertions ; à jouer aussi avec ^test_b3t_).
+- Lot b3t_05 (eb5b4cd), **posé et vert** : lot h1227grand, tout ^test_b3t_ vert (b3t_03 compris) : `omega/modules/tavaro/migrations/b3t_05_couts_plan_de_flotte.sql` puis `omega/tests/tavaro/b3t_05_couts_plan.sql` (^test_b3t_05_, 16 assertions ; à jouer aussi avec ^test_b3t_).
   - Table `loc_cotes_revente` : une cote par véhicule, notée par le gérant (`loc_noter_cote_revente`, journal « tavaro.cote_revente_notee »).
   - `loc_plan_de_flotte` reçoit, par catégorie, la liste `vehicules` des véhicules à vendre et à renouveler : âge, km, entretien et jours hors service (tirés de `loc_immobilisations` de B2), jours loués, entretien par jour loué, cote. Les totaux gagnent la valeur de revente, les cotes manquantes et l'entretien de la flotte. Les clés de b3t_03 ne changent pas.
   - Vérifié en local, sur les stubs.
@@ -47,6 +47,12 @@
   - Trois chiffres de plus : la revente des véhicules à vendre, les cotes à noter, l'entretien de la flotte.
   - La liste « Les véhicules un par un » : décision, âge, km, entretien, jours hors service, jours loués, coût par jour loué, cote. Le bouton « Noter la cote » ouvre un dialogue (montant, source) qui appelle `loc_noter_cote_revente`.
   - Recette `recette-tavaro-analyses.mjs` : 52 ✓, axe compris (dialogue de la cote inclus).
+
+**Ce qui reste du « B » attend des éléments de Teo** (rien à coder seul sans inventer un format) :
+- la mutuelle lue dans l'export : il faut un export réel qui la porte ;
+- un second logiciel de cabinet : il faut un export ou la documentation de ce logiciel ;
+- le contrôle automatique des pièces chez Tavaro : il faut un prestataire d'identité ou un accès ANTS.
+Le reste (temps quasi réel, HDS) relève du « A ».
 
 **Prochaine étape exacte (11/10)** :
 1. Lire les notifications. Si une recette en base réelle des cartes b3_23 revient rouge, la corriger.
