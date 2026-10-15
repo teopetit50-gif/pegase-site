@@ -14,6 +14,7 @@ import { Avis, Pastille } from "../ui";
 import { dateCourte } from "../format";
 import { poserMarche, recevoirDocument, recevoirSituation, rendreVisa, viserSituation } from "./portes";
 import { ECART_AVANCEMENT, avancementSituation, pct } from "./avancement";
+import { montantsSituation, euros as eurosMt } from "./montants";
 import type { Dossier, Marche, Projet, Situation, Visa } from "./types";
 
 const euros = (n: number) => `${n.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} €`;
@@ -68,8 +69,8 @@ export default function Chantier({ projet, dossier, peutEcrire, agir }: {
   const [form, setForm] = useState<Form>(null);
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
-  const [nm, setNm] = useState({ lot_id: "", titulaire: "", montant: "", avenants: "", retenue: "5" });
-  const [ns, setNs] = useState({ marche_id: "", numero: "", mois: auj.slice(0, 7), cumul: "", recue_le: auj });
+  const [nm, setNm] = useState({ lot_id: "", titulaire: "", montant: "", avenants: "", retenue: "5", avance: "0", penalite: "" });
+  const [ns, setNs] = useState({ marche_id: "", numero: "", mois: auj.slice(0, 7), cumul: "", recue_le: auj, retenue: "", avance: "", penalites: "" });
   const [nv, setNv] = useState({ cumul: "", observation: "" });
   const [nd, setNd] = useState({ lot_id: "", document: "", indice: "A", recu_le: auj, commande_le: "" });
   const [na, setNa] = useState({ avis: "vso" as "vso" | "vao" | "ref", observation: "" });
@@ -91,13 +92,15 @@ export default function Chantier({ projet, dossier, peutEcrire, agir }: {
 
   /* ——— les soumissions ——— */
   const soumettreMarche = () => {
-    const v = { client_id: clientId, projet_id: projet.id, lot_id: nm.lot_id, titulaire: nm.titulaire.trim().replace(/\s+/g, " "), montant_ht: nombre(nm.montant), avenants_ht: nombre(nm.avenants || "0"), retenue_pct: nombre(nm.retenue || "5") };
+    const v = { client_id: clientId, projet_id: projet.id, lot_id: nm.lot_id, titulaire: nm.titulaire.trim().replace(/\s+/g, " "), montant_ht: nombre(nm.montant), avenants_ht: nombre(nm.avenants || "0"), retenue_pct: nombre(nm.retenue || "5"), avance_pct: nombre(nm.avance || "0"), penalite_jour_ht: nm.penalite.trim() ? nombre(nm.penalite) : null };
     return lancer(() => poserMarche(v), () => ({ ...dossier, marches: [...dossier.marches, { id: `local-${Date.now()}`, ...v, delai_verification_jours: projet.marche_public ? 7 : 15, actif: true }] }));
   };
   const soumettreSituation = () => {
     const m = marcheDe(ns.marche_id);
-    const v = { client_id: clientId, projet_id: projet.id, marche_id: ns.marche_id, numero: Number(ns.numero), mois: `${ns.mois}-01`, cumul_ht: nombre(ns.cumul), recue_le: ns.recue_le };
-    return lancer(() => recevoirSituation(v), () => ({ ...dossier, situations: [...dossier.situations, { id: `local-${Date.now()}`, projet_id: projet.id, marche_id: v.marche_id, numero: v.numero, mois: v.mois, cumul_ht: v.cumul_ht, recue_le: v.recue_le, a_viser_avant: plus(v.recue_le, m?.delai_verification_jours ?? 15), statut: "a_viser", cumul_admis_ht: null, observation: null, visee_le: null }] }));
+    const optionnel = (t: string) => (t.trim() ? nombre(t) : null);
+    const v = { client_id: clientId, projet_id: projet.id, marche_id: ns.marche_id, numero: Number(ns.numero), mois: `${ns.mois}-01`, cumul_ht: nombre(ns.cumul), recue_le: ns.recue_le,
+      retenue_deduite_ht: optionnel(ns.retenue), avance_remboursee_ht: optionnel(ns.avance), penalites_ht: optionnel(ns.penalites) };
+    return lancer(() => recevoirSituation(v), () => ({ ...dossier, situations: [...dossier.situations, { id: `local-${Date.now()}`, projet_id: projet.id, marche_id: v.marche_id, numero: v.numero, mois: v.mois, cumul_ht: v.cumul_ht, recue_le: v.recue_le, retenue_deduite_ht: v.retenue_deduite_ht, avance_remboursee_ht: v.avance_remboursee_ht, penalites_ht: v.penalites_ht, a_viser_avant: plus(v.recue_le, m?.delai_verification_jours ?? 15), statut: "a_viser", cumul_admis_ht: null, observation: null, visee_le: null }] }));
   };
   const soumettreVisa = () => {
     if (form?.type !== "viser") return;
@@ -118,8 +121,10 @@ export default function Chantier({ projet, dossier, peutEcrire, agir }: {
     return lancer(() => rendreVisa(form.visa.id, v), () => ({ ...dossier, visas: dossier.visas.map((x) => (x.id === form.visa.id ? { ...x, ...v, vise_le: auj } : x)) }));
   };
 
-  const marcheOk = !!nm.lot_id && nm.titulaire.trim().length > 0 && nombre(nm.montant) > 0 && !Number.isNaN(nombre(nm.avenants || "0")) && nombre(nm.montant) + nombre(nm.avenants || "0") > 0 && nombre(nm.retenue || "5") >= 0 && nombre(nm.retenue || "5") <= 5;
-  const situationOk = !!ns.marche_id && Number(ns.numero) >= 1 && !situations.some((x) => x.marche_id === ns.marche_id && x.numero === Number(ns.numero)) && /^\d{4}-\d{2}$/.test(ns.mois) && nombre(ns.cumul) >= 0 && ns.cumul.trim() !== "" && /^\d{4}-\d{2}-\d{2}$/.test(ns.recue_le);
+  const marcheOk = !!nm.lot_id && nm.titulaire.trim().length > 0 && nombre(nm.montant) > 0 && !Number.isNaN(nombre(nm.avenants || "0")) && nombre(nm.montant) + nombre(nm.avenants || "0") > 0 && nombre(nm.retenue || "5") >= 0 && nombre(nm.retenue || "5") <= 5
+    && nombre(nm.avance || "0") >= 0 && nombre(nm.avance || "0") <= 30 && (!nm.penalite.trim() || nombre(nm.penalite) >= 0);
+  const situationOk = !!ns.marche_id && Number(ns.numero) >= 1 && !situations.some((x) => x.marche_id === ns.marche_id && x.numero === Number(ns.numero)) && /^\d{4}-\d{2}$/.test(ns.mois) && nombre(ns.cumul) >= 0 && ns.cumul.trim() !== "" && /^\d{4}-\d{2}-\d{2}$/.test(ns.recue_le)
+    && [ns.retenue, ns.avance, ns.penalites].every((t) => !t.trim() || nombre(t) >= 0);
   const viserOk = form?.type === "viser" && (!form.rectifier || (nv.cumul.trim() !== "" && nombre(nv.cumul) >= 0 && nv.observation.trim().length >= 3));
   const documentOk = nd.document.trim().length > 0 && /^[0-9A-Za-z.-]{1,6}$/.test(nd.indice.trim()) && /^\d{4}-\d{2}-\d{2}$/.test(nd.recu_le) && (!nd.commande_le || nd.commande_le >= nd.recu_le);
   const avisOk = na.avis === "vso" || na.observation.trim().length >= 3;
@@ -132,11 +137,11 @@ export default function Chantier({ projet, dossier, peutEcrire, agir }: {
           <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi || !marches.length} onClick={() => {
             const m = marches[0];
             const n = m ? Math.max(0, ...situations.filter((x) => x.marche_id === m.id).map((x) => x.numero)) + 1 : 1;
-            setNs({ marche_id: m?.id ?? "", numero: String(n), mois: auj.slice(0, 7), cumul: "", recue_le: auj });
+            setNs({ marche_id: m?.id ?? "", numero: String(n), mois: auj.slice(0, 7), cumul: "", recue_le: auj, retenue: "", avance: "", penalites: "" });
             ouvrir({ type: "situation" });
           }}>Situation reçue</button>
           <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => { setNd({ lot_id: lots[0]?.id ?? "", document: "", indice: "A", recu_le: auj, commande_le: "" }); ouvrir({ type: "document" }); }}>Document à viser</button>
-          <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi || !lots.length} onClick={() => { setNm({ lot_id: lots[0]?.id ?? "", titulaire: "", montant: "", avenants: "", retenue: "5" }); ouvrir({ type: "marche" }); }}>Nouveau marché</button>
+          <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi || !lots.length} onClick={() => { setNm({ lot_id: lots[0]?.id ?? "", titulaire: "", montant: "", avenants: "", retenue: "5", avance: "0", penalite: "" }); ouvrir({ type: "marche" }); }}>Nouveau marché</button>
         </span>
       </div>
 
@@ -166,6 +171,16 @@ export default function Chantier({ projet, dossier, peutEcrire, agir }: {
               return a.declare - a.constate > ECART_AVANCEMENT
                 ? <Avis teinte="ambre">La situation facture <strong>{pct(a.declare)}</strong> d’avancement, le chantier en est à <strong>{pct(a.constate)}</strong> au compte rendu n° {a.cr.numero} du {jour(a.cr.visite_le)} : à rectifier, ou à justifier par l’entreprise.</Avis>
                 : <div className="lor-sous lor-avancement">Avancement constaté : {pct(a.constate)} au compte rendu n° {a.cr.numero} du {jour(a.cr.visite_le)} (facturé {pct(a.declare)}).</div>;
+            })()}
+            {(() => {
+              /* b5_33 : retenue, avance et pénalités recalculées */
+              const mt = montantsSituation(s, m, projet);
+              return (
+                <>
+                  {mt.ecarts.map((e) => <Avis key={e.nature} teinte="ambre">{e.texte.charAt(0).toUpperCase() + e.texte.slice(1)}.</Avis>)}
+                  <div className="lor-sous lor-montants">Recalcul : retenue {eurosMt(mt.retenue_attendue)}{mt.avance ? ` · avance à rembourser ${eurosMt(mt.avance_a_rembourser)} sur ${eurosMt(mt.avance)}` : ""}{mt.penalites_applicables ? ` · pénalités ${eurosMt(mt.penalites_applicables)} (${mt.jours_retard} j)` : ""} · net attendu {eurosMt(mt.net_attendu)} HT</div>
+                </>
+              );
             })()}
             {p && s.cumul_ht < retenu(p) ? <Avis teinte="ambre">Le cumul recule par rapport à la situation n° {p.numero} ({euros(retenu(p))}) : à vérifier avec l’entreprise.</Avis> : null}
             <div className="esp-actions">
@@ -272,7 +287,15 @@ export default function Chantier({ projet, dossier, peutEcrire, agir }: {
                   <input className="rv-champ" inputMode="decimal" value={nm.retenue} onChange={(e) => setNm((s) => ({ ...s, retenue: e.target.value }))} />
                 </label>
               </div>
-              <p className="lor-sous">La retenue de garantie ne dépasse pas 5 % (loi n° 71-584 du 16 juillet 1971).</p>
+              <div className="esp-form-ligne">
+                <label className="rv-libelle">Avance (% du montant)
+                  <input className="rv-champ" inputMode="decimal" value={nm.avance} onChange={(e) => setNm((s) => ({ ...s, avance: e.target.value }))} placeholder="0" />
+                </label>
+                <label className="rv-libelle">Pénalité de retard par jour HT (€)
+                  <input className="rv-champ" inputMode="decimal" value={nm.penalite} onChange={(e) => setNm((s) => ({ ...s, penalite: e.target.value }))} placeholder={projet.marche_public ? "1/3000 du marché" : "selon le marché"} />
+                </label>
+              </div>
+              <p className="lor-sous">La retenue de garantie ne dépasse pas 5 % (loi n° 71-584 du 16 juillet 1971). L’avance se rembourse de 65 % à 80 % d’exécution ; sans pénalité saisie, un marché public applique 1/3000 du montant par jour de retard (CCAG-Travaux 2021).</p>
               {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
             </div>
           </DialogBody>
@@ -316,6 +339,20 @@ export default function Chantier({ projet, dossier, peutEcrire, agir }: {
                   <input className="rv-champ" type="date" max={auj} value={ns.recue_le} onChange={(e) => setNs((s) => ({ ...s, recue_le: e.target.value }))} />
                 </label>
               </div>
+              <fieldset className="lor-choix-pieces">
+                <legend className="rv-libelle">Ce que la situation déduit, en cumul HT (€) — facultatif</legend>
+                <div className="lor-tolerances">
+                  <label className="rv-libelle">Retenue de garantie
+                    <input className="rv-champ" inputMode="decimal" value={ns.retenue} onChange={(e) => setNs((s) => ({ ...s, retenue: e.target.value }))} placeholder="3 625" />
+                  </label>
+                  <label className="rv-libelle">Avance remboursée
+                    <input className="rv-champ" inputMode="decimal" value={ns.avance} onChange={(e) => setNs((s) => ({ ...s, avance: e.target.value }))} placeholder="0" />
+                  </label>
+                  <label className="rv-libelle">Pénalités
+                    <input className="rv-champ" inputMode="decimal" value={ns.penalites} onChange={(e) => setNs((s) => ({ ...s, penalites: e.target.value }))} placeholder="0" />
+                  </label>
+                </div>
+              </fieldset>
               {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
             </div>
           </DialogBody>
