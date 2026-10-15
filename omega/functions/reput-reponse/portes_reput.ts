@@ -20,6 +20,8 @@ export interface Sujet {
   code: string;
   libelle: string;
   description: string | null;
+  /** Le service (équipe du socle) qui reprend ce sujet, s'il est routé (c3_09). */
+  service?: string | null;
   autorisable: boolean;
 }
 

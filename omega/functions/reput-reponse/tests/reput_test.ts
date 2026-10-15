@@ -177,3 +177,12 @@ Deno.test("sans texte mais avec un objet parlant, un dossier en cours ou sans pi
   photoSeule.reception = { ...photoSeule.reception!, sujet: "Photo", pieces: 3 };
   assertStringIncludes(String(sansTexte(photoSeule)?.redaction.raison), "3 pièces jointes");
 });
+
+Deno.test("un sujet routé : le service est donné au modèle, qui le nomme dans un transfert", () => {
+  const d = dossier();
+  d.base = { ...d.base!, sujets: d.base!.sujets.map((s) => (s.code === "horaires" ? { ...s, service: "Atelier" } : s)) };
+  const q = contenuDemande(d);
+  assertStringIncludes(q, '"service":"Atelier"');
+  assert(!contenuDemande(dossier()).includes('"service"'), "sans routage, aucun service n'est inventé");
+  assertStringIncludes(consigne(d), "champ « service »");
+});
