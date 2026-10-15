@@ -304,6 +304,9 @@ export type Marche = {
   /* b5_19 : le délai contractuel et la date de l'OS de démarrage */
   delai_execution_jours?: number | null;
   demarrage_le?: string | null;
+  /* b5_33 : l'avance (% du montant initial) et la pénalité de retard par jour prévue au marché */
+  avance_pct?: number;
+  penalite_jour_ht?: number | null;
 };
 export type Situation = {
   id: string;
@@ -322,6 +325,11 @@ export type Situation = {
   avancement_declare?: number | null;
   avancement_constate?: number | null;
   avancement_cr?: string | null;
+  /* b5_33 : ce que la situation déduit (en cumul), et le recalcul de la base */
+  retenue_deduite_ht?: number | null;
+  avance_remboursee_ht?: number | null;
+  penalites_ht?: number | null;
+  montants?: Record<string, unknown>;
 };
 export type Visa = {
   id: string;

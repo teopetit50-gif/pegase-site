@@ -11,7 +11,8 @@ Dernière mise à jour : 05/10/2026, 23 h.
 - Nouveau, à poser après b5_30 : b5_31_regler_controles.sql (redéfinit private.lorani_controler et private.lorani_changements_indice), puis le test b5_20. Écran (« Régler les contrôles », Controle.tsx, portes.ts, types.ts, exemples.ts, lorani.css) à fusionner après b5_20 vert ; recette 103/103 et accessibilité vertes.
 - #23 fait, écran seul (pieces-exigees.ts, PiecesPermis.tsx, EcranLorani.tsx) : rien à poser ; recette 105/105 et accessibilité vertes. Codes du bordereau limités à ceux qu'on a vérifiés (PCMI13 = attestation parasismique, pas PPR).
 - Nouveau, à poser après b5_31 : b5_32_avancement_constate.sql, puis le test b5_21. Écran (ComptesRendus.tsx, Chantier.tsx, avancement.ts, portes.ts — select de deux colonnes nouvelles, à fusionner seulement après la pose —, types.ts, exemples.ts) ; recette 109/109 et accessibilité vertes.
-- Prochain lot : #33 (avance, pénalités, retenue), puis #30 (situation contre compte rendu) et #31 (révision BT, compte INSEE à prévoir).
+- Nouveau, à poser après b5_32 : b5_33_retenue_avance_penalites.sql, puis le test b5_22. Écran (Chantier.tsx, montants.ts, portes.ts — select de quatre colonnes nouvelles, à fusionner seulement après la pose —, types.ts, exemples.ts) ; recette 110/110 et accessibilité vertes. Contrat du lecteur complété (retenue_ht, avance_remboursee_ht, penalites_ht) : à signaler à A1.
+- Prochain lot : #30 (situation contre compte rendu), puis #31 (révision BT, compte INSEE à prévoir).
 
 **11/10, 15 h 40 Z — PAUSE demandée par Teo. Arrêt propre, tout est poussé sur worker-b5.**
 - À poser (pas encore posé) : b5_28_changements_indice.sql, puis le test b5_17_changements_indice.sql (4bff78f). Scénario local conforme ; le test n'a pas tourné, faute du socle complet en local.

@@ -82,7 +82,7 @@ export async function chargerDossier(): Promise<Dossier> {
     supabase.from("lorani_temps").select("id, projet_id, honoraire_id, membre, jour, heures, note").order("jour", { ascending: false }).limit(5000),
     /* b5_13 : absentes tant que la migration n'est pas posée ; le chantier est alors vide */
     supabase.from("lorani_marches").select("*").limit(2000),
-    supabase.from("lorani_situations").select("id, projet_id, marche_id, numero, mois, cumul_ht, recue_le, a_viser_avant, statut, cumul_admis_ht, observation, visee_le, avancement_declare, avancement_constate, avancement_cr").order("numero").limit(5000),
+    supabase.from("lorani_situations").select("id, projet_id, marche_id, numero, mois, cumul_ht, recue_le, a_viser_avant, statut, cumul_admis_ht, observation, visee_le, avancement_declare, avancement_constate, avancement_cr, retenue_deduite_ht, avance_remboursee_ht, penalites_ht, montants").order("numero").limit(5000),
     supabase.from("lorani_visas").select("id, projet_id, lot_id, document, indice, recu_le, commande_le, delai_visa_jours, a_viser_avant, avis, observation, vise_le").order("recu_le", { ascending: false }).limit(5000),
     /* b5_16 : absentes tant que la migration n'est pas posée ; le contrôle du dossier est alors vide */
     /* « * » : la colonne changements (b5_28) quand elle existe */
@@ -313,13 +313,13 @@ export async function saisirTemps(v: { client_id: string; projet_id: string; hon
 
 /* ——— le chantier (b5_13) ——— */
 
-export async function poserMarche(v: { client_id: string; projet_id: string; lot_id: string; titulaire: string; montant_ht: number; avenants_ht: number; retenue_pct: number }): Promise<void> {
+export async function poserMarche(v: { client_id: string; projet_id: string; lot_id: string; titulaire: string; montant_ht: number; avenants_ht: number; retenue_pct: number; avance_pct: number; penalite_jour_ht: number | null }): Promise<void> {
   const supabase = createClient();
   const { error } = await supabase.from("lorani_marches").insert(v);
   if (error) throw new ErreurPorte(message(error));
 }
 
-export async function recevoirSituation(v: { client_id: string; projet_id: string; marche_id: string; numero: number; mois: string; cumul_ht: number; recue_le: string }): Promise<void> {
+export async function recevoirSituation(v: { client_id: string; projet_id: string; marche_id: string; numero: number; mois: string; cumul_ht: number; recue_le: string; retenue_deduite_ht: number | null; avance_remboursee_ht: number | null; penalites_ht: number | null }): Promise<void> {
   const supabase = createClient();
   const { error } = await supabase.from("lorani_situations").insert(v);
   if (error) throw new ErreurPorte(message(error));
