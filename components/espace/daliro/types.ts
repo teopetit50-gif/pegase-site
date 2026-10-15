@@ -662,3 +662,10 @@ export type PointMensuel = {
   chantiers: PointChantier[];
   totaux: { reperes: number; reperes_ht: number; signes: number; signes_ht: number; a_relancer: number; a_relancer_ht: number; reste_a_facturer: number };
 };
+
+/* b6_31 : les disponibilités des sous-traitants */
+export type Disponibilite = {
+  tiers: string; nom: string;
+  absences: { id: string; du: string; au: string; motif: string | null }[];
+  passages: { passage: string; chantier: string; tache: string | null; debut: string; fin: string }[];
+};
