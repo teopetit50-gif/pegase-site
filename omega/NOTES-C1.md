@@ -2,7 +2,11 @@
 
 Branche : `tableau-de-bord-v2` (jamais main). Coordinateur : session_01BCGFdpRKBvXKjouC75sYBg.
 
-## REPRISE (pause demandée par Teo, 11/10/2026, 15 h 40 Z)
+## REPRISE (pause « 50 % » demandée par Teo, 15/10/2026, 16 h 15 Z)
+
+Arrêt sur 650424a, arbre propre, rien en cours. Lots 2a à 2d faits (vue d'ensemble, À valider, Point du matin, collections) et Équipe reliée ; le détail est plus bas. **Au feu vert** : `git fetch origin main` puis fusion, et recette C1 (les 4 écarts d'EcranEquipe sont corrigés chez A3, ef5eeb4). Ensuite, selon les réponses de Teo : (1) « Bonjour » et les 4 chiffres de la vue d'ensemble, à retirer comme sur /omega ou non ; (2) Activité, en colonnes (validé par Teo) ou en une seule liste comme /omega. Utilisation et Réglages ont déjà le dessin du lot 1 : leur contenu /omega est propre à Teo, rien à cloner.
+
+### Historique de la reprise du 11/10/2026, 15 h 40 Z
 
 ### Priorité en cours : /espace2 sur le dessin de /omega
 - **Posé (e5198b7, branche tableau-de-bord-v2)** :
