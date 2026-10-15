@@ -24,8 +24,8 @@ begin
   i := private.offload_interpreter_regle('Ne propose aucune remise aux anciens clients.');
   return next ok(i ->> 'famille' = 'interdit' and i -> 'parametres' ->> 'mot' = 'remise', 'Ne propose aucune remise : la remise est interdite (' || (i -> 'parametres' ->> 'mot') || ')');
   i := private.offload_interpreter_regle('Ne relance jamais un compte en litige.');
-  return next ok(i ->> 'famille' = 'litige' and i ->> 'statut' = 'en_attente' and i ->> 'reponse' like '%CASHD%',
-                 'Le litige est compris, et le système dit qu''il ne peut pas encore l''appliquer');
+  return next ok(i ->> 'famille' = 'litige' and i ->> 'statut' in ('en_attente', 'appliquee') and i ->> 'reponse' like '%CASHD%',
+                 'Le litige est compris, et le système dit d''où vient l''information (CASHD) : ' || (i ->> 'reponse'));
   i := private.offload_interpreter_regle('Ne relance jamais le secteur BTP.');
   return next ok(i ->> 'famille' = 'exclusion' and i -> 'parametres' ->> 'type' = 'secteur' and i -> 'parametres' ->> 'valeur' = 'BTP',
                  'Une exclusion de secteur est lue');

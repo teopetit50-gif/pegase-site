@@ -8,7 +8,9 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 
 État au 11/10 : c4_01 à c4_10 posés sur la recette et verts ; écrans fusionnés dans main. 44 lignes sur 45
 prouvées ; la ligne 15 attend la messagerie du client (A2). Rien à poser. Aucun travail en cours. Prochain pas :
-seulement sur décision de Teo (phrases du site à construire ou non ; Teo a demandé de ne pas corriger le texte).
+reprise le 15/10 : les phrases du site restent, le produit se met à leur hauteur, par petits lots. c4_11 (impayés,
+CASHD) fait, à poser. Suivants : canal unique (un appel seulement sans courriel), plafond « une séquence par trimestre »,
+vague hebdomadaire réglable (jour et heure), puis jeu d'import « contacts » et modèles « chantiers » et « missions ».
 
 ### Pause précédente (06/10, 21 h Z)
 
@@ -430,6 +432,27 @@ Banc local : 28 tests, 312 assertions vertes, migrations posées deux fois ; tsc
 l'échéance honorée après message est comptée au suivi). Le chiffre repris compte tous les achats des 90 jours,
 sans prétendre qu'ils sont dus au seul message.
 
+## Lot c4_11 — impayés : un compte en litige ou en retard sort de la vague commerciale (15/10)
+
+`omega/modules/offload/migrations/c4_11_impayes.sql` : `private.offload_impaye(compte)` lit CASHD (même organisation,
+même code client), dynamiquement : OFFLOAD se pose sans CASHD. Trois cas écartent le compte :
+- compte CASHD en litige ou en recouvrement ;
+- facture en litige ;
+- facture échue non réglée (`cashd_factures_etat.retard_jours > 0`).
+
+Redéfinitions par copie :
+- `offload_ecarte` donne la raison « Impayé : … ne se croisent jamais. » avant toute reprise ou échéance ;
+- `offload_interpreter_regle` rend la règle « litige » applicable (les règles déjà écrites sont mises à jour).
+
+Le rappel de retrait d'une affaire n'est pas commercial et part quand même. Promesses tenues : « Jamais un compte en
+litige », cas tordu « le compte a une facture en retard » (chiffrage n° 19, 23, 69).
+
+**Tests** : `omega/tests/offload/c4_11_impayes.sql` (`test_c4_11_impayes`, 6 assertions ; insère un compte et des
+factures CASHD sur le banc, annulés par runtests). Une assertion de `test_c4_10_lecture_des_regles` accepte désormais la
+règle « litige » appliquée. Banc local : 34 tests, 361 ok.
+
+**Ordre de pose** : `c4_11_impayes.sql`, puis les tests c4_10 (fichier modifié) et c4_11.
+
 ## Lot c4_10 — règles en français, coupe-circuit, réponses automatiques, raison sociale mère (11/10)
 
 `omega/modules/offload/migrations/c4_10_regles_et_garde_fous.sql` :
@@ -573,3 +596,4 @@ Partielles : 6, 11, 15, 38.
 - 06/10, 20 h 45 Z — c4_09 vert sur la recette (21 ok) ; pause demandée par Teo à 21 h Z, section REPRISE écrite.
 - 11/10 — reprise sur ordre de Teo. Lot c4_10 (lignes 6, 11, 38, réponses automatiques, comptes à vérifier) : 33 tests, 355 assertions vertes en local.
 - 11/10, 14 h 10 Z — recette : c4_10 entièrement vert ; lignes 6, 11 et 38 prouvées (44 sur 45).
+- 15/10 — reprise. Lot c4_11 (impayés lus dans CASHD) : 34 tests, 361 ok en local.
