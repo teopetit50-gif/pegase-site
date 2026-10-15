@@ -1099,3 +1099,54 @@ button.om-ap-bloc:focus-visible, a.om-ap-bloc:focus-visible { outline: 0; box-sh
 
 /* ── Vue d'ensemble sans salutation ni rangée de chiffres, comme Attio (11/10/2026) ── */
 .v2.om .v2-va.v2-vivant { background-image: none; }
+
+/* ——— Point du matin allégé (11/10/2026), même dessin : une ligne par élément,
+   la date à droite, « Fait » au survol, le titre de la carte mène à la page ——— */
+.om-pm-simple .v2-pm-liste li { align-items: center; gap: 12px; }
+.om-pm-simple .v2-pm-texte > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.om-pm-simple .v2-pm-liste li[data-fait] .v2-pm-texte > span { color: var(--v2-gray-900); text-decoration: line-through; text-decoration-color: var(--v2-a-600); }
+.om-pm-meta { flex: none; font-size: 12px; color: var(--v2-gray-900); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.om-pm-meta[data-retard] { color: var(--v2-red-900, var(--v2-red-700)); }
+.om-pm-simple .v2-pm-action { opacity: 0; transition: opacity 0.15s, color 0.15s; }
+.om-pm-simple .v2-pm-liste li:hover .v2-pm-action, .om-pm-simple .v2-pm-action:focus-visible { opacity: 1; }
+@media (hover: none) { .om-pm-simple .v2-pm-action { opacity: 1; } }
+.om-pm-simple .v2-pm-corps { padding-bottom: 6px; }
+.v2 .om-pm-titre { display: inline-flex; align-items: center; gap: 4px; color: inherit; text-decoration: none; }
+.v2 .om-pm-titre svg { color: var(--v2-gray-700); transition: color 0.15s, transform 0.15s; }
+.v2 .om-pm-titre:hover svg { color: var(--v2-gray-1000); transform: translateX(2px); }
+.v2 .om-pm-titre:focus-visible { outline: 0; border-radius: 4px; box-shadow: var(--v2-anneau); }
+
+/* ——— À valider allégé (11/10/2026), même dessin : une ligne par tâche, le délai à droite,
+   la flèche seulement au survol ——— */
+.om-val-simple .v2-val-corps { grid-template-columns: minmax(0, 1fr) auto 16px; min-height: 44px; }
+.om-val-simple .v2-val-chevron { opacity: 0; transition: opacity 0.15s; }
+.om-val-simple .v2-val-ligne:hover .v2-val-chevron, .om-val-simple .v2-val-corps:focus-visible .v2-val-chevron { opacity: 1; }
+@media (hover: none) { .om-val-simple .v2-val-chevron { opacity: 1; } }
+
+/* ——— Tâches allégée (11/10/2026), même dessin : une ligne par tâche (titre, date, statut s'il
+   n'est pas « À faire »), la fiche à droite seulement après un clic ——— */
+.om-pt-simple .om-pt-corps { grid-template-columns: minmax(0, 1fr) 64px 96px 16px; }
+.om-pt-simple .om-pt-titre { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.om-pt-simple .om-pt-fleche { opacity: 0; transition: opacity 0.15s; }
+.om-pt-simple .om-pt-ligne:hover .om-pt-fleche, .om-pt-simple .om-pt-corps:focus-visible .om-pt-fleche { opacity: 1; }
+.om-pt-simple .om-pt-grille:not([data-fiche]) { grid-template-columns: minmax(0, 1fr); }
+.om-pt-simple .om-pt-grille:not([data-fiche]) .om-pt-fiche-zone { display: none; }
+.om-pt-simple .om-pt-fiche-haut .v2-btn { display: inline-flex; }
+@media (hover: none) { .om-pt-simple .om-pt-fleche { opacity: 1; } }
+@container principale (max-width: 639px) {
+  .om-pt-simple .om-pt-corps { grid-template-columns: minmax(0, 1fr) auto 16px; }
+  .om-pt-simple .om-pt-date { display: block; }
+}
+
+/* ——— Appels allégée (11/10/2026), même dessin : le moteur à vendre dans la ligne du prospect ——— */
+.om-ap-simple .om-ap-a-vendre { color: var(--v2-gray-1000); font-weight: 500; }
+.om-ap-simple .om-ap-numero { margin-left: auto; }
+
+/* ——— Vue d'ensemble allégée (11/10/2026), même dessin : « Aujourd'hui » sur une ligne,
+   la flèche au survol, les échéances en retard en rouge ——— */
+.om-va-simple .v2-va-liste li { align-items: center; }
+.om-va-simple .v2-va-texte > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.om-va-simple .v2-va-liste li > a { opacity: 0; transition: opacity 0.15s; }
+.om-va-simple .v2-va-liste li:hover > a, .om-va-simple .v2-va-liste li > a:focus-visible { opacity: 1; }
+.om-va-simple .v2-va-table td[data-retard] { color: var(--v2-red-900, var(--v2-red-700)); }
+@media (hover: none) { .om-va-simple .v2-va-liste li > a { opacity: 1; } }

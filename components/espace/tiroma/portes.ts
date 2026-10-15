@@ -22,7 +22,7 @@
 import { createClient } from "@/lib/supabase/client";
 import type {
   Attente, Cabinet, CapaciteLue, Charge, Creneau, Dossier, Fauteuil, Fermeture, Horaire, Logiciel, Membre, PatientCourt, PlanSansRdv, Praticien, Profil,
-  Regles, Releve, TypeRdv, Verification, RegistreAppels, CibleAppel, IssueAppel, Pilotage, Rappels, CanalPatient, ContactPatient, Synthese, Reinscription, AbsenceProbable, AbsenceEquipe, MotifAbsenceMembre, DemiJournees, Objectifs, ReglesCommunes,
+  Regles, Releve, TypeRdv, Verification, RegistreAppels, CibleAppel, IssueAppel, Pilotage, Rappels, CanalPatient, ContactPatient, Synthese, Reinscription, AbsenceProbable, AbsenceEquipe, MotifAbsenceMembre, DemiJournees, Objectifs, ReglesCommunes, SoinsADeplacer, SeanceMalPlacee, PlanCreneaux, ControlesDus,
 } from "./types";
 
 export class ErreurPorte extends Error {}
@@ -128,8 +128,17 @@ export async function chargerDossier(cabinet: Cabinet, compte: Compte): Promise<
   const objectifs = profil === "titulaire" ? await quiet(rpc<Objectifs | null>("tiroma_objectifs_fauteuils", { p_client: c, p_entite: e, p_semaines: 4 }, null), null, "objectifs par fauteuil") : null;
   /* b3_22 : les règles de priorité de tous les centres dont la personne est titulaire */
   const reglesCommunes = profil === "titulaire" ? await quiet(rpc<ReglesCommunes | null>("tiroma_regles_communes", { p_client: c }, null), null, "règles communes") : null;
+  /* b3_23 : les soins à regrouper (titulaire), les séances longues mal placées, les créneaux pour les plans et les contrôles dus
+     (titulaire, assistante, collaborateur) */
+  const soignant = profil === "titulaire" || profil === "assistante" || profil === "collaborateur";
+  const [soinsADeplacer, seancesLongues, creneauxPlans, controlesDus] = await Promise.all([
+    profil === "titulaire" ? quiet(rpc<SoinsADeplacer | null>("tiroma_soins_a_deplacer", { p_client: c, p_entite: e, p_jours: 2 }, null), null, "soins à déplacer") : null,
+    soignant ? quiet(rpc<SeanceMalPlacee[] | null>("tiroma_seances_mal_placees", { p_client: c, p_entite: e, p_jours: 7 }, null), null, "séances longues") : null,
+    soignant ? quiet(rpc<PlanCreneaux[] | null>("tiroma_creneaux_pour_plans", { p_client: c, p_entite: e, p_jours: 14, p_max: 3 }, null), null, "créneaux pour les plans") : null,
+    soignant ? quiet(rpc<ControlesDus | null>("tiroma_controles_dus", { p_client: c, p_entite: e, p_limite: 200 }, null), null, "contrôles dus") : null,
+  ]);
   return {
-    dossier: { cabinet, profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, attente, creneaux, plans, verifications, charge, appels, pilotage, rappels, synthese, reinscription, absences, equipe, demiJournees, objectifs, reglesCommunes },
+    dossier: { cabinet, profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, attente, creneaux, plans, verifications, charge, appels, pilotage, rappels, synthese, reinscription, absences, equipe, demiJournees, objectifs, reglesCommunes, soinsADeplacer, seancesLongues, creneauxPlans, controlesDus },
     avis,
   };
 }
@@ -214,6 +223,14 @@ export async function ajouterFauteuil(cabinet: Cabinet, f: { nom: string; capaci
 }
 
 /** b3_22 : recopier les règles de priorité de ce centre sur les autres centres dont on est titulaire. */
+/** b3_23 : toutes les données du cabinet, en un seul fichier (titulaire seul ; l'export est noté au journal). */
+export async function exporterDonnees(cabinet: Cabinet): Promise<unknown> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc("tiroma_exporter_donnees", { p_client: cabinet.client_id, p_entite: cabinet.entite_id });
+  if (error) throw new ErreurPorte(message(error));
+  return data;
+}
+
 export async function alignerRegles(cabinet: Cabinet): Promise<number> {
   const supabase = createClient();
   const { data, error } = await supabase.rpc("tiroma_aligner_regles", { p_client: cabinet.client_id, p_source: cabinet.entite_id, p_cibles: null });

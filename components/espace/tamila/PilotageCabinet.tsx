@@ -16,7 +16,7 @@ import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
 import { Avis, Pastille } from "../ui";
 import { dateCourte } from "../format";
-import { conformiteExemple, expertisesExemple, honorairesExemple } from "./exemples";
+import { attentesExemple, conformiteExemple, expertisesExemple, honorairesExemple } from "./exemples";
 import { charges, marges, piecesAttendues, sansDiligence, series, type DonneesPilotage } from "./pilotage";
 import * as portes from "./portes";
 import { libelleMatiere } from "./regles";
@@ -72,6 +72,7 @@ export default function PilotageCabinet({ ouvert, onFermer, source, clientId, do
               pieces: exemple.flatMap((c) => c.pieces.map((p) => ({ objet_id: c.dossier.id, recue_le: p.recue_le, type_piece: p.type_piece }))),
               vigilances: exemple.flatMap((c) => { const v = conformiteExemple(c.dossier.id).vigilance; return v ? [v] : []; }),
               expertises: exemple.flatMap((c) => expertisesExemple(c.dossier.id)),
+              attentes: exemple.flatMap((c) => attentesExemple(c.dossier.id)),
             }
           : await portes.chargerPilotage(clientId);
         if (actif) setLu({ x, le: Date.now() });
@@ -188,7 +189,7 @@ export default function PilotageCabinet({ ouvert, onFermer, source, clientId, do
               ) : null}
 
               {vue === "diligence" ? (
-                sd.length === 0 ? <p className="esp-kpi-sous">Chaque dossier vivant a bougé dans les 45 derniers jours.</p> : sd.map((x) => (
+                sd.length === 0 ? <p className="esp-kpi-sous">Chaque dossier vivant a bougé dans les 30 derniers jours.</p> : sd.map((x) => (
                   <div key={x.dossier.id} className="tam-ligne">
                     <div className="tam-ligne-haut">
                       {ref(x.dossier, x.clair)}

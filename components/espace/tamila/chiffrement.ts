@@ -122,6 +122,16 @@ export async function dechiffrer(cle: CryptoKey, hex: string | null | undefined)
   }
 }
 
+/** Un fichier chiffré par chiffrerOctets, rendu en clair ; null si la clé ne l'ouvre pas. */
+export async function dechiffrerOctets(cle: CryptoKey, b: Uint8Array): Promise<Uint8Array | null> {
+  if (b.length < 29 || b[0] !== VERSION) return null;
+  try {
+    return new Uint8Array(await crypto.subtle.decrypt({ name: "AES-GCM", iv: tampon(b.slice(1, 13)) }, cle, tampon(b.slice(13))));
+  } catch {
+    return null;
+  }
+}
+
 async function cleDePhrase(phrase: string, sel: Uint8Array): Promise<CryptoKey> {
   const base = await crypto.subtle.importKey("raw", tampon(enc.encode(phrase.normalize("NFKC"))), "PBKDF2", false, ["deriveKey"]);
   return crypto.subtle.deriveKey({ name: "PBKDF2", salt: tampon(sel), iterations: TOURS, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);

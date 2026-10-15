@@ -128,7 +128,7 @@ export default function Lots({ donnees, actions }: { donnees: Donnees; actions: 
                 {demande ? (
                   <span className="esp-item-haut">
                     <Pastille teinte={TEINTE_DEMANDE[demande.statut] ?? "gris"}>{LIBELLE_STATUT[demande.statut] ?? demande.statut}</Pastille>
-                    <Link href="/espace/validations" className="r-btn r-btn--fil r-btn--petit">Décider dans la file</Link>
+                    <Link href="/espace2/validations" className="r-btn r-btn--fil r-btn--petit">Décider dans la file</Link>
                   </span>
                 ) : null}
               </div>

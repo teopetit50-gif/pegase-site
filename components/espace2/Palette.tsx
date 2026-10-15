@@ -8,7 +8,7 @@
    fermeture. */
 
 import { useRouter } from "next/navigation";
-import { ArrowRight, CornerDownLeft, Link2, Search, ExternalLink } from "lucide-react";
+import { ArrowRight, CornerDownLeft, Link2, Search } from "lucide-react";
 import { Autocomplete, Dialog, Input, Menu, Modal, ModalOverlay, TextField, useFilter } from "react-aria-components";
 import { ItemMenu, Kbd, SectionMenu } from "./ui";
 import { MODULES, ONGLETS_ORGANISATION } from "./modules";
@@ -28,7 +28,7 @@ export default function Palette({ ouverte, changer }: { ouverte: boolean; change
         () => toast("Lien copié", "vert"),
         () => toast("Impossible de copier le lien. Réessayez.", "rouge"),
       );
-    } else if (c === "ancien") router.push("/espace/validations?ancien=1");
+    }
   };
 
   return (
@@ -62,9 +62,6 @@ export default function Palette({ ouverte, changer }: { ouverte: boolean; change
               <SectionMenu titre="Actions">
                 <ItemMenu id="copier" textValue="Copier le lien de la page" icone={<Link2 width={16} height={16} aria-hidden="true" />}>
                   Copier le lien de la page
-                </ItemMenu>
-                <ItemMenu id="ancien" textValue="Ouvrir l'ancien espace client" icone={<ExternalLink width={16} height={16} aria-hidden="true" />}>
-                  Ouvrir l&apos;ancien espace client
                 </ItemMenu>
               </SectionMenu>
             </Menu>

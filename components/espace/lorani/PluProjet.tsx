@@ -35,6 +35,9 @@ function reponseExemple(p: Plu, projet: Projet): Plu {
     zones: [{ libelle: "URm1", libelong: "Zone urbaine mixte de formes compactes", typezone: "U", partition: "DU_200046977", idurba: "200046977_PLUI_20260326", nomfic: null, urlfic: null, datvalid: null }],
     document: { du_type: "PLUi", titre: "PLU-H MÉTROPOLE DE LYON", nom: "200046977_PLUi_20260326", partition: "DU_200046977" },
     prescriptions: [{ libelle: "Périmètre de mixité sociale", typepsc: "17", stypepsc: "00" }],
+    servitudes: [{ categorie: "T5", libelle_categorie: "Dégagement aéronautique", nom: "Aérodrome de Lyon-Bron", assiette: "Surface de dégagement", acte: null }],
+    risques: { commune: ["Inondation", "Séisme", "Transport de marchandises dangereuses"], sismicite: "2 - FAIBLE", argiles: "Exposition faible", radon: "1" },
+    secteur_protege: false, complements_statut: "fait",
   };
 }
 
@@ -49,11 +52,13 @@ export default function PluProjet({ projet, dossier, peutEcrire, agir }: {
   const [erreur, setErreur] = useState<string | null>(null);
   const [suivis, setSuivis] = useState(0);
   const enCours = !!plu && EN_COURS.includes(plu.statut);
+  /* les servitudes et les risques arrivent après la zone (b5_23) : on relève tant qu'ils sont en route */
+  const aRelever = enCours || plu?.complements_statut === "en_cours";
   const localisable = !!projet.adresse?.trim() || projet.parcelles.length > 0;
 
   /* le suivi : une relève toutes les 2,5 s tant que la recherche tourne, une minute au plus */
   useEffect(() => {
-    if (!enCours || suivis >= SUIVIS_MAX) return;
+    if (!aRelever || suivis >= SUIVIS_MAX) return;
     const t = window.setTimeout(() => {
       setSuivis((n) => n + 1);
       void agir(
@@ -62,7 +67,7 @@ export default function PluProjet({ projet, dossier, peutEcrire, agir }: {
       ).catch(() => undefined);
     }, 2500);
     return () => window.clearTimeout(t);
-  }, [enCours, suivis, agir, dossier, projet]);
+  }, [aRelever, suivis, agir, dossier, projet]);
 
   const chercher = async () => {
     setEnvoi(true);
@@ -133,6 +138,7 @@ export default function PluProjet({ projet, dossier, peutEcrire, agir }: {
               <span className="lor-sous">Le Géoportail ne donne pas de lien direct vers le règlement de ce document : déposez-le comme pièce « Règlement du PLU ».</span>
             )}
           </div>
+          <ServitudesRisques plu={plu} />
           {plu.prescriptions.length ? (
             <details className="lor-temps-recents">
               <summary>Prescriptions à cet endroit ({plu.prescriptions.length})</summary>
@@ -146,6 +152,42 @@ export default function PluProjet({ projet, dossier, peutEcrire, agir }: {
         <Avis teinte={plu.statut === "erreur" ? "rouge" : "ambre"}>{plu.erreur ?? ETAPES[plu.statut]}</Avis>
       )}
       {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+    </div>
+  );
+}
+
+/* Les servitudes d'utilité publique et les risques (b5_23). */
+function ServitudesRisques({ plu }: { plu: Plu }) {
+  const sup = plu.servitudes ?? [];
+  const r = plu.risques ?? {};
+  if (plu.complements_statut === "en_cours") return <p className="lor-sous" role="status"><Loader variant="spin" /> Servitudes et risques en cours de lecture (Géoportail de l’urbanisme, Géorisques)…</p>;
+  if (!plu.complements_statut || plu.complements_statut === "a_faire") return null;
+  const groupes = new Map<string, string[]>();
+  for (const s of sup) groupes.set(s.libelle_categorie, [...(groupes.get(s.libelle_categorie) ?? []), s.nom ?? s.categorie]);
+  const ppr = sup.some((s) => s.categorie === "PM1" || s.categorie === "PM3");
+  const risques = [
+    r.commune?.length ? `risques recensés dans la commune : ${r.commune.join(", ")}` : null,
+    r.sismicite ? `sismicité ${r.sismicite.toLowerCase()}` : null,
+    r.argiles ? `argiles : ${r.argiles.toLowerCase()}` : null,
+    r.radon ? `radon : potentiel de catégorie ${r.radon}` : null,
+  ].filter(Boolean);
+  return (
+    <div className="lor-servitudes">
+      {plu.secteur_protege ? <Avis teinte="ambre">Secteur protégé : l’avis de l’architecte des Bâtiments de France est requis et le délai d’instruction est majoré (C. urb., art. R423-24).</Avis> : null}
+      {ppr ? <Avis teinte="ambre">Plan de prévention des risques : son règlement s’impose au projet (C. env., art. L562-4).</Avis> : null}
+      <div className="lor-sous">
+        {sup.length ? `${sup.length} servitude${sup.length > 1 ? "s" : ""} d’utilité publique à cet endroit.` : "Aucune servitude d’utilité publique publiée à cet endroit."}
+        {risques.length ? ` Risques : ${risques.join(" · ")}.` : ""}
+        {r.erreurs?.length ? ` Non lus : ${r.erreurs.join(" ; ")}.` : ""}
+      </div>
+      {groupes.size ? (
+        <details className="lor-temps-recents">
+          <summary>Servitudes ({sup.length})</summary>
+          <ul className="lor-liste">
+            {[...groupes.entries()].map(([cat, noms]) => <li key={cat}><strong>{cat}</strong>{noms.length > 1 ? ` (${noms.length})` : ""} : {noms.slice(0, 6).join(", ")}{noms.length > 6 ? `, et ${noms.length - 6} autre${noms.length - 6 > 1 ? "s" : ""}` : ""}</li>)}
+          </ul>
+        </details>
+      ) : null}
     </div>
   );
 }

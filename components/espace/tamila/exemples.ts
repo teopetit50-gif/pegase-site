@@ -13,7 +13,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { dans, ilYa } from "../exemples/socle";
-import type { Audience, CalculDelai, Conformite, Delai, Dossier, DossierComplet, Expertise, Export, Honoraires, Membre, Partie, Personne, Piece, RegleProcedure, Reglages } from "./types";
+import type { Audience, CalculDelai, Conformite, Delai, Dossier, DossierComplet, Attente, Expertise, Export, Honoraires, Membre, Partie, Personne, Piece, RegleProcedure, Reglages } from "./types";
 
 export const EXEMPLE_CLIENT = "00000000-0000-4000-8000-00000000000b";
 export const EXEMPLE_ENTITE = "00000000-0000-4000-8000-0000000000e1";
@@ -305,3 +305,17 @@ export function expertisesExemple(dossier: string): Expertise[] {
     rapport_attendu_le: jour(dans(60)), rapport_recu_le: null, cree_le: ilYa(70),
   }];
 }
+
+/* ——— les pièces attendues d'exemple (b4_18) : 2026-0377, des relevés du client à relancer aujourd'hui, une pièce
+   citée par le confrère ; l'objet, chiffré en base, se lit ici en clair (ATTENTES_OBJETS_EXEMPLE) ——— */
+export function attentesExemple(dossier: string): Attente[] {
+  if (dossier !== D3) return [];
+  return [
+    { id: `${D3}-at1`, client_id: C, dossier_id: D3, de: "client", objet_chiffre: CHIFFRE, demandee_le: jour(ilYa(21)), relance_le: jour(ilYa(0)), relances: 1, recue_le: null, statut: "attendue", cree_le: ilYa(21) },
+    { id: `${D3}-at2`, client_id: C, dossier_id: D3, de: "confrere", objet_chiffre: CHIFFRE, demandee_le: jour(ilYa(18)), relance_le: jour(dans(4)), relances: 0, recue_le: null, statut: "attendue", cree_le: ilYa(18) },
+  ];
+}
+export const ATTENTES_OBJETS_EXEMPLE: Record<string, string> = {
+  [`${D3}-at1`]: "Procès-verbaux d'assemblée générale 2022 et 2023",
+  [`${D3}-at2`]: "Pièce n° 12 citée dans les conclusions adverses, jamais communiquée",
+};

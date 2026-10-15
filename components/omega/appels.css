@@ -1,0 +1,63 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Appels — comme la page Activité (13/10/2026), components/omega/ModeAppels
+   (préfixe al-, et les classes ao- d'activite.css telles quelles).
+
+   Retour de Teo : « encore trop de trucs, regarde Notes et Activité ».
+   La page n'est plus qu'une barre fine et une liste encadrée : un
+   prospect par ligne (nom, dirigeant · commune | statut | secteur |
+   téléphone). L'appel s'ouvre au clic, sur le côté comme la fiche
+   d'Activité : Appeler, le script, l'issue, les notes ; « Enregistrer et
+   suivant » ouvre le prospect suivant sans fermer le panneau.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.al-etat { margin: 12px 0 0; font-size: 13px; color: var(--v2-gray-900); }
+/* la file : une ligne = le nom, la commune en gris, le numéro (14/10) */
+.al-liste .ao-ligne { min-width: 0; }
+.al-liste .ao-ligne .al-ligne-file { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 16px; }
+.al-titre { flex: 1; min-width: 0; font-size: 14px; color: var(--v2-gray-1000); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.al-titre > span { margin-left: 6px; color: var(--v2-gray-900); }
+.al-rappel { flex: none; font-size: 12px; color: var(--v2-blue-900, var(--v2-blue-700)); }
+.al-historique .al-ligne { display: grid; grid-template-columns: minmax(0, 1fr) 130px 140px 110px; align-items: center; gap: 14px; min-height: 56px; padding: 8px 16px; font-size: 13px; }
+.al-tel { flex: none; font-family: var(--v2-mono); font-size: 12px; color: var(--v2-gray-900); }
+.ao-vide a { color: var(--v2-gray-1000); text-decoration: underline; text-underline-offset: 3px; }
+.al-analyse { margin-top: 16px; }
+
+/* le sélecteur ⌃⌄ de la page, habillé comme les autres boutons de la barre */
+.ao-barre .om-vue { height: 26px; padding: 0 10px; border-radius: 6px; background: var(--v2-bg-100); box-shadow: 0 0 0 1px var(--v2-a-400); font-size: 13px; }
+
+/* le panneau de l'appel */
+.al-corps { gap: 10px; }
+.al-nom { margin: 0; font-size: 20px; line-height: 28px; font-weight: 600; letter-spacing: -0.3px; color: var(--v2-gray-1000); }
+.al-sous { margin: 2px 0 0; font-size: 13px; color: var(--v2-gray-900); }
+.v2 .al-appeler { justify-content: center; height: 32px; margin-top: 4px; text-decoration: none; font-variant-numeric: tabular-nums; }
+.al-temps { display: flex; flex-wrap: wrap; gap: 4px; }
+.al-temps .no-onglet svg { color: var(--v2-gray-900); }
+.al-replique { margin: 4px 0 0; font-size: 15px; line-height: 23px; color: var(--v2-gray-1000); }
+.al-conseil { margin: 0; font-size: 12px; line-height: 18px; color: var(--v2-gray-900); }
+.al-texte-bouton { justify-self: start; display: inline-flex; align-items: center; gap: 6px; height: 28px; margin-left: -8px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; color: var(--v2-gray-900); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s, color 0.15s; }
+.al-texte-bouton:hover { background: var(--v2-a-200); color: var(--v2-gray-1000); }
+.al-texte-bouton:focus-visible { outline: 0; box-shadow: var(--v2-anneau); }
+.ao-fiche-pied .al-texte-bouton { margin-left: -8px; }
+
+.al-issues { display: grid; gap: 2px; margin: 0 -8px; }
+.al-issues button { display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; color: var(--v2-gray-1000); font: inherit; font-size: 13px; text-align: left; cursor: pointer; transition: background 0.15s; }
+.al-issues button:hover, .al-issues button[aria-checked="true"] { background: var(--v2-a-100); }
+.al-issues button:focus-visible { outline: 0; box-shadow: var(--v2-anneau); }
+.al-radio { flex: none; width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--v2-a-600); transition: box-shadow 0.15s; }
+.al-issues button[aria-checked="true"] .al-radio { box-shadow: inset 0 0 0 4px var(--v2-blue-700); }
+.al-date { display: grid; gap: 6px; font-size: 12px; color: var(--v2-gray-900); }
+.al-date input { height: 30px; padding: 0 8px; border: 0; border-radius: 6px; background: var(--v2-bg-100); box-shadow: 0 0 0 1px var(--v2-a-400); color: var(--v2-gray-1000); font: inherit; font-size: 13px; color-scheme: dark; }
+.al-date input:focus { outline: 0; box-shadow: var(--v2-anneau); }
+.al-zone { width: 100%; padding: 8px 10px; border: 0; border-radius: 6px; background: var(--v2-bg-100); box-shadow: 0 0 0 1px var(--v2-a-400); color: var(--v2-gray-1000); font: inherit; font-size: 13px; line-height: 20px; resize: vertical; }
+.al-zone::placeholder { color: var(--v2-gray-700); }
+.al-zone:focus { outline: 0; box-shadow: var(--v2-anneau); }
+.al-fiche .no-principal:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ——— paliers ——— */
+@container principale (max-width: 767px) {
+  .al-liste .ao-ligne .al-ligne-file { padding: 0 12px; }
+  .al-titre > span { display: none; }
+  .al-historique .al-ligne { grid-template-columns: minmax(0, 1fr) auto; padding: 8px 12px; }
+  .al-historique .ao-produit, .al-historique .ao-ligne-date { display: none; }
+}
+@media (prefers-color-scheme: light) { .al-date input { color-scheme: light; } }
