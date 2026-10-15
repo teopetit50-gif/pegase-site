@@ -605,5 +605,32 @@ for (const largeur of [1440, 390]) {
   s.fermer();
 }
 
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b4-bordereau', densite: 1 });
+  console.log('— le bordereau de pièces');
+  ok(await s.aller(base + '/espace2/tamila'), 'page chargée');
+  await s.dormir(600);
+  await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /2026-0412/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  await s.evaluer(`(e => { e?.focus(); e?.click(); })([...document.querySelectorAll('section[aria-label="Pièces"] .r-btn')].find(b => /Bordereau/.test(b.textContent)))`);
+  await s.dormir(700);
+  const doc = () => s.evaluer(`document.querySelector('[role="dialog"] iframe')?.srcdoc || ''`);
+  const h0 = await doc();
+  ok(/Bordereau de communication de pièces/.test(h0) && /declaration-appel/.test(h0) && /Pièce n° 3/.test(h0) && /RG n° 26\/01234/.test(h0), 'le bordereau : trois pièces numérotées, le n° RG');
+  ok(h0.indexOf('declaration-appel') < h0.indexOf('ordonnance-cme'), 'numérotées dans l\'ordre du dépôt');
+  await s.evaluer(`document.querySelector('[role="dialog"] .tam-bordereau-ligne input[type="checkbox"]')?.click()`);
+  await s.dormir(300);
+  const h1 = await doc();
+  ok(!/declaration-appel/.test(h1) && /Pièce n° 2/.test(h1) && !/Pièce n° 3/.test(h1), 'une pièce écartée, la numérotation suit');
+  const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+  await s.evaluer(axe + ';true');
+  const g = await s.evaluer(`(async () => { const r = await axe.run(document.querySelector('[role="dialog"]'), { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`);
+  ok(g.length === 0, `axe sur le bordereau : ${g.length ? g.join(' ; ') : 'aucun écart grave'}`);
+  await s.capturer(`${dossier}tamila-bordereau-1440.jpg`, { qualite: 55 });
+  s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
+  s.fermer();
+}
+
 console.log(echecs ? `\n${echecs} échec(s)` : '\ntout passe');
 process.exit(echecs ? 1 : 0);

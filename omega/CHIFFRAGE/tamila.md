@@ -16,7 +16,7 @@ sur de vrais documents Tamila.
 ## Synthèse
 
 1. **63 promesses**, classées sur leur état principal : A **0** · B **15** · C **24** · D **15** · T **9**. Rien n'est prouvé en vrai : aucun cabinet réel, aucune vraie pièce lue de bout en bout, aucune qualité mesurée sur de vrais documents.
-2. **Pour tout amener en B : ≈ 63,5 jours** (68 le 11/10 matin ; b4_18 a fait les pièces attendues, l'agenda .ics, les renvois cliquables), dont ≈ 41,5 de lecture IA, ≈ 13,5 de gestion et d'écran, ≈ 8,5 d'infrastructure.
+2. **Pour tout amener en B : ≈ 63 jours** (68 le 11/10 matin ; b4_18 a fait les pièces attendues, l'agenda .ics, les renvois cliquables ; le 15/10, le bordereau de pièces), dont ≈ 41,5 de lecture IA, ≈ 13 de gestion et d'écran, ≈ 8,5 d'infrastructure.
 3. **Pour tout amener ensuite en A : ≈ 54 jours de plus**, avec un cabinet pilote et ses vraies pièces.
 4. **Tiers et achats** :
    - hébergeur français pour la base et les fichiers (aujourd'hui Supabase, région à confirmer) ;
@@ -118,7 +118,7 @@ sur de vrais documents Tamila.
 | 54 | « Index des personnes et faits classés par moyen » | textes.ts:171 | D | — | nouveau type *(A1)* + écran | 2 / 1,5 | IA |
 | 55 | « Questions posées au dossier » | textes.ts:171-172 | D | — | questions-réponses sourcées sur le dossier *(A1)* + écran | 4 / 1,5 | IA |
 | 56 | « Premier jet de l'exposé des faits » | textes.ts:171-172 | D | — | nouveau type, export Word *(A1)* | 1,5 / 1 | IA |
-| 57 | « Dossier de plaidoirie et renvois cliquables » | textes.ts:171 | C | citations cliquables : la pièce déchiffrée dans le navigateur, ouverte à la page citée | dossier de plaidoirie exporté | 2 / 1 | — |
+| 57 | « Dossier de plaidoirie et renvois cliquables » | textes.ts:171 | C | citations cliquables : la pièce déchiffrée dans le navigateur, ouverte à la page citée ; bordereau de communication de pièces composé et imprimé dans le navigateur (recette) | dossier de plaidoirie assemblé (pièces numérotées en un seul PDF) | 1,5 / 1 | — |
 | 58 | « Pièces adverses du jour » ; « Pièces scannées et manuscrites » | textes.ts:171 | D / C | = 2, = 9 | = 2, = 9 | (compté) | — |
 | 59 | « Export Word et PDF » | textes.ts:171-172 | B | export des lectures (7ec04ec), factures (99d0467) ; recette | export d'un vrai résultat | 0 / 0,5 | — |
 | 60 | Dommage corporel : « Chronologie des soins », « Interruptions de soins repérées », « Nomenclature Dintilhac pré-remplie », « Écarts entre rapports d'expertise », « Source de chaque poste de préjudice », « Questions posées au dossier médical », « Pièces médicales scannées » | textes.ts:172 | D (chronologie : C) | — | cinq types propres au corporel *(A1)*, écran Dintilhac ; **hébergement HDS** pour les pièces médicales | 9 / 5 | **hébergeur HDS**, OCR |

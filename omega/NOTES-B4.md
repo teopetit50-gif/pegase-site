@@ -15,9 +15,11 @@ Le dessin de /espace2 est refait par C1 (omegaai.fr/omega) : ne pas toucher comp
 l'ancien dessin (vérifié : aucun dans components/espace/tamila). Reprise du 15/10 : main fusionnée dans worker-b4,
 la recette ouvre désormais `/espace2/tamila` (nouveau dessin) : 196/196. Les commits a5c6280 … 60733aa ne sont pas
 encore dans main (à fusionner par le coordinateur).
+Puis le bordereau de communication de pièces (`bordereau.ts`, `BordereauImprimable.tsx`, bouton « Bordereau » de la
+carte Pièces) : choix et ordre des pièces, composé et imprimé dans le navigateur ; recette 201/201. Rien à poser.
 
 **Prochain pas sans Teo** : relevé d'office des pièces citées par le confrère (attend un type de lecture d'A1),
-dossier de plaidoirie exporté, abonnement d'agenda tenu à jour.
+dossier de plaidoirie assemblé en un PDF, abonnement d'agenda tenu à jour.
 
 **Attend Teo** :
 - l'activation du coffre Scaleway du banc (vrai appel Key Manager), pour la première lecture longue réelle ;
