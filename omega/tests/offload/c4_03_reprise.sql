@@ -102,15 +102,17 @@ begin
   return next ok(exists (select 1 from public.demandes_validation d where d.id = e.demande_id and d.type_action = 'envoi.email'
                          and d.module = 'offload' and d.statut = 'en_attente'),
                  'Une demande de validation attend une personne : rien ne part sans elle');
-  select * into t from public.offload_taches x where x.reprise_id = r.id and x.type = 'appel';
-  return next ok(t.id is not null and t.commercial = 'Sophie' and t.statut = 'a_faire', 'Une tâche d''appel est posée pour la commerciale du compte');
-  return next ok(t.detail like '%Il achetait en moyenne tous les 30 jours%' and t.detail like '%Dernière commande :%',
-                 'La tâche dit pourquoi appeler et rappelle la dernière commande');
-  return next ok(t.echeance <= current_date + 3, 'L''appel est daté au plus tard sous trois jours, et avant la clôture');
+  return next ok(not exists (select 1 from public.offload_taches x where x.reprise_id = r.id and x.type = 'appel'),
+                 'Le message part : pas d''appel en même temps (un seul canal à la fois, c4_12)');
 
   r := tests.c4_reprise(v_n);
   return next ok(r.statut = 'appel' and r.envoi1_id is null and r.motif like 'Pas de courriel%',
                  'Sans courriel, la reprise passe par l''appel seul');
+  select * into t from public.offload_taches x where x.reprise_id = r.id and x.type = 'appel';
+  return next ok(t.id is not null and t.statut = 'a_faire', 'Une tâche d''appel est posée pour le commercial du compte');
+  return next ok(t.detail ilike '%il achetait en moyenne tous les 30 jours%' and t.detail like '%Dernière commande :%',
+                 'La tâche dit pourquoi appeler et rappelle la dernière commande');
+  return next ok(t.echeance <= current_date + 3, 'L''appel est daté au plus tard sous trois jours, et avant la clôture');
   return next ok(tests.c4_reprise(v_x) is null or (tests.c4_reprise(v_x)).id is null, 'Le compte suivi en direct ne reçoit aucune reprise');
   r := tests.c4_reprise(v_b);
   return next is(r.statut, 'a_valider', 'Un client existant sans accord noté : OFFLOAD note son consentement (Q3), le message va en validation');
@@ -253,8 +255,8 @@ begin
   perform private.offload_cycle(v_client, null);
   r := tests.c4_reprise(v_c);
   return next ok(r.statut = 'close' and r.issue = 'commande', 'Une commande arrivée clôt la reprise : « commande »');
-  return next ok((select t.statut from public.offload_taches t where t.reprise_id = r.id and t.type = 'appel') = 'abandonnee',
-                 'La tâche d''appel est abandonnée, avec son motif');
+  return next ok(not exists (select 1 from public.offload_taches t where t.reprise_id = r.id and t.type = 'appel' and t.statut = 'a_faire'),
+                 'Aucun appel ne reste à faire sur une reprise close par une commande');
 
   -- Le message est refusé en validation : la reprise s'arrête.
   r := tests.c4_reprise(v_r);

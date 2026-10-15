@@ -25,7 +25,7 @@ begin
   return next is((t -> 'compteurs' ->> 'decroche')::integer, 1, 'Compteur : un compte décroche');
   return next is((t -> 'compteurs' ->> 'a_valider')::integer, 1, 'Compteur : un message attend sa validation');
   return next ok((t -> 'a_valider' -> 0 ->> 'corps') like 'Bonjour Martin,%', 'Le message à valider est lisible depuis l''écran');
-  return next is(jsonb_array_length(t -> 'taches'), 1, 'La tâche d''appel est servie');
+  return next is(jsonb_array_length(t -> 'taches'), 0, 'Un message part : aucune tâche d''appel en double (un seul canal à la fois, c4_12)');
   f := public.offload_fiche(v_d);
   return next is(jsonb_array_length(f -> 'mois'), 24, 'La courbe porte 24 mois');
   return next ok((select sum((m ->> 'montant')::numeric) from jsonb_array_elements(f -> 'mois') m) > 0, 'La courbe a des montants');

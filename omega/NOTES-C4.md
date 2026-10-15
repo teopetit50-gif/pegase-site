@@ -9,8 +9,9 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 État au 11/10 : c4_01 à c4_10 posés sur la recette et verts ; écrans fusionnés dans main. 44 lignes sur 45
 prouvées ; la ligne 15 attend la messagerie du client (A2). Rien à poser. Aucun travail en cours. Prochain pas :
 reprise le 15/10 : les phrases du site restent, le produit se met à leur hauteur, par petits lots. c4_11 (impayés,
-CASHD) fait, à poser. Suivants : canal unique (un appel seulement sans courriel), plafond « une séquence par trimestre »,
-vague hebdomadaire réglable (jour et heure), puis jeu d'import « contacts » et modèles « chantiers » et « missions ».
+CASHD) et c4_12 (canal unique, vague de la semaine) faits, à poser. Suivants : jeu d'import « contacts », levée de
+l'opposition du socle en un geste, puis modèles « chantiers » et « missions ». « Un message par trimestre » attend Teo
+(contredit la ligne 12).
 
 ### Pause précédente (06/10, 21 h Z)
 
@@ -432,6 +433,32 @@ Banc local : 28 tests, 312 assertions vertes, migrations posées deux fois ; tsc
 l'échéance honorée après message est comptée au suivi). Le chiffre repris compte tous les achats des 90 jours,
 sans prétendre qu'ils sont dus au seul message.
 
+## Lot c4_12 — un seul canal à la fois, et la vague de la semaine (15/10)
+
+`omega/modules/offload/migrations/c4_12_canal_et_vague.sql` :
+- **Un seul canal à la fois** (chiffrage n° 41) : une reprise passe par un message ou par un appel, jamais les deux.
+  La tâche d'appel n'est posée que si le message ne part pas : pas de courriel, message retenu par une règle ou
+  bloqué par le socle. Elle l'est aussi plus tard, quand un message ne part finalement pas (bloqué, annulé, expiré,
+  en échec, non remis ; `offload_suivre_envoi`).
+- **La vague de la semaine** (n° 51, 52) : `offload_reglages.vague_jour`, de 1 (lundi) à 7 (dimanche), réglable par
+  `offload_regler`. Vide, la vague passe chaque jour, comme avant. Les nouvelles reprises ne s'ouvrent que ce jour-là :
+  préparées la nuit, prêtes à valider au matin. Le socle n'a pas d'envoi à heure fixe : le message part à la
+  validation, dans les plages horaires du socle. Les relances, les échéances et les retraits gardent leur calendrier.
+- Redéfinitions par copie : `offload_ouvrir`, `offload_suivre_envoi`, `offload_cycle`, `offload_regler`.
+
+**Tests** : `omega/tests/offload/c4_12_canal_et_vague.sql` (`test_c4_12_canal_unique`,
+`test_c4_12_vague_de_la_semaine`). Assertions mises à jour, dont l'ancienne règle « message et appel » :
+- `test_c4_03_cycle` : l'appel est vérifié sur le compte sans courriel, et aucun appel n'accompagne un message ;
+- `test_c4_04_lectures` : aucune tâche servie quand le message part.
+
+Banc local : 36 tests, 368 ok.
+
+**Ordre de pose** : `c4_12_canal_et_vague.sql`, puis les tests c4_03 et c4_04 (fichiers modifiés), puis c4_12.
+
+**Pour Teo** : « un message par trimestre au plus » (n° 17, 40) contredit la ligne 12 du catalogue, elle aussi sur la
+page (« deux messages en tout »). Le code ne peut pas tenir les deux : la quarantaine de 90 jours donne une séquence par
+trimestre, pas un message. Il faut choisir laquelle des deux phrases vaut.
+
 ## Lot c4_11 — impayés : un compte en litige ou en retard sort de la vague commerciale (15/10)
 
 `omega/modules/offload/migrations/c4_11_impayes.sql` : `private.offload_impaye(compte)` lit CASHD (même organisation,
@@ -597,3 +624,4 @@ Partielles : 6, 11, 15, 38.
 - 11/10 — reprise sur ordre de Teo. Lot c4_10 (lignes 6, 11, 38, réponses automatiques, comptes à vérifier) : 33 tests, 355 assertions vertes en local.
 - 11/10, 14 h 10 Z — recette : c4_10 entièrement vert ; lignes 6, 11 et 38 prouvées (44 sur 45).
 - 15/10 — reprise. Lot c4_11 (impayés lus dans CASHD) : 34 tests, 361 ok en local.
+- 15/10 — lot c4_12 (canal unique, vague de la semaine) : 36 tests, 368 ok en local.
