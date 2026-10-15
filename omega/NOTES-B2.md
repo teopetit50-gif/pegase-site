@@ -20,6 +20,26 @@
 
 Les écrans vont dans /espace2 : aucun lien vers /espace, et ne pas toucher `components/omega`.
 
+**État au 15/10, fin du lot** : tout ce qui ne dépend pas d'un tiers est construit.
+
+À poser par le coordinateur :
+- b2_17 (94f57cc), b2_18 (b20fdfd), b2_19 (8838677), avec TOUT_B2 à 28 tests.
+
+À fusionner :
+- 854523b : responsable des remises ;
+- b6ce1cd : audit ;
+- d95c6ff : prise de vue guidée.
+
+Le reste attend Teo ou un tiers :
+- le gabarit ANTAI de la désignation par lot ;
+- le connecteur, qui attend l'export du premier loueur ;
+- la messagerie d'équipe ;
+- l'agent vocal ;
+- l'agrégateur ;
+- le modèle de langage (Questions) ;
+- la vision (comparaison d'images) ;
+- les phrases de la vitrine à réécrire (lignes 25 et 33, fichiers publics, hors de mon périmètre).
+
 ### Détail de la reprise du 11/10
 
 - **Posé et vert sur la recette** (^test_b2_ 01 à 25) :
