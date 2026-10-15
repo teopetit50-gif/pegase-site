@@ -16,7 +16,8 @@ Branche : `tableau-de-bord-v2` (jamais main). Coordinateur : session_01BCGFdpRKB
   2. Passer chaque module (Tiroma, Tamila, Lorani, Daliro, Varelo, Tavaro, REPUT, CASHD, OFFLOAD, FILED, validations, utilisation, réglages) aux 5 largeurs en clair, pour repérer les écarts de contraste (le clair n'avait jamais été recetté).
   3. Comparer de près avec /omega : rendre CoquilleOmega par une route temporaire locale (app/zz-…, à supprimer, et `rm -rf .next/dev` après) en bloquant *supabase.co*.
 - **Reste à d'autres** : axe tavaro td[data-negatif] (contraste).
-- **Prochain pas** : le point 1, dès que Teo a répondu sur la vue d'ensemble.
+- **15/10, lot 2a** (main fusionné, dont ad51268, le logo seul en haut de la barre) : la vue d'ensemble client est allégée comme celle de /omega (e432eeb) : une ligne par élément, la date à droite (rouge si dépassée), la flèche au survol, plus d'icônes, d'avatars, de colonne « État » ni de bandeau de l'assistant ; les noms de fournisseur sont des liens (axe : un tableau qui défile doit contenir un élément focalisable). « Bonjour » et les quatre chiffres restent en attendant la réponse de Teo. Recette C1 : 0 échec.
+- **Prochain pas** : lot 2b, À valider allégé comme /omega (om-val-simple : une ligne par demande, le délai à droite, la flèche au survol, sans filtres ni frise des étapes), puis le Point du matin (4ce65c3).
 
 ## REPRISE précédente (06/10/2026, 21 h Z)
 
