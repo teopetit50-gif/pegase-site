@@ -9,6 +9,7 @@ import { CHAMPS_FACTURE, SCHEMA_OUTIL_LECTURE, TYPES_PIECE } from "./facture.ts"
 import { SCHEMA_LORANI } from "./lorani.ts";
 import { SCHEMA_TAMILA } from "./tamila.ts";
 import { CHAMPS_VARELO, TYPE_BON_LIVRAISON_VARELO } from "./varelo.ts";
+import { SCHEMA_DALIRO } from "./daliro.ts";
 
 export type TypeChampDeclare = "texte" | "nombre" | "entier" | "date" | "dateheure" | "mois" | "booleen" | "choix" | "liste";
 
@@ -64,6 +65,8 @@ export interface SchemaModule {
   lignes: boolean;
   /** Les familles de champs à nom composé. */
   familles?: FamilleChamps[];
+  /** Les colonnes gardées pour une ligne de détail (CHAMPS_LIGNE des factures par défaut). */
+  colonnesLigne?: string[];
 }
 
 /** FILED, construit depuis schemas/facture.ts pour ne rien dupliquer. */
@@ -106,6 +109,7 @@ export const SCHEMAS_PAR_MODULE: Record<string, SchemaModule> = {
   lorani: SCHEMA_LORANI,
   tamila: SCHEMA_TAMILA,
   varelo: SCHEMA_VARELO,
+  daliro: SCHEMA_DALIRO,
 };
 
 /** Le schéma d'un module ; FILED pour un module sans schéma propre (les factures se lisent partout). */
@@ -171,6 +175,10 @@ export function schemaOutilPour(module: string | null | undefined): Record<strin
   if (!s.lignes) {
     delete props.lignes;
     delete props.tva_ventilation;
+  } else if (s.colonnesLigne?.includes("lot")) {
+    const l = props.lignes as { description?: string; items: { properties: Record<string, unknown> } };
+    l.description = "TOUTES les lignes chiffrées du document, dans l'ordre ; pour chacune, le lot ou la section dont elle relève.";
+    l.items.properties.lot = { type: ["string", "null"], description: "le lot ou le titre de section (« Lot 02 Gros œuvre », « Menuiseries »)" };
   }
   const decoupage = props.decoupage as Record<string, unknown>;
   const dItems = decoupage.items as Record<string, unknown>;

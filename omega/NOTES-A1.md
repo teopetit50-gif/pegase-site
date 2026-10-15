@@ -57,6 +57,8 @@ Le lecteur est à redéployer.
   - le premier corpus réel, pour `decoupage_reel.mjs` et `outils/mesurer.ts` ;
   - les décisions de Teo : lecture longue Tamila, Bedrock UE, Mistral, médical, DWG, nouveaux types Tamila.
 
+**15/10, devis Daliro (b6_28).** Module `daliro` : `daliro_devis` avec `lignes` (le lot compris), lu par morceaux s'il est long (`schemas/daliro.ts`). Le lot vient de `colonnesLigne` du schéma ; FILED est inchangé. Aucune pose. À redéployer. B6 doit déposer le PDF comme pièce `daliro` et relire `lignes` pour son import.
+
 **Toute prochaine étape à la reprise.** Lire les sorties de `decoupage_reel.mjs` si le coordinateur l'a joué. Sinon, demander qu'il soit joué, puis corriger ce qui sort. Ensuite, selon les décisions de Teo : la lecture longue réelle (`analyse_reelle.sql`), puis l'outil de mesure de qualité sur corpus (1 j, `CHIFFRAGE/lecteur.md`).
 
 Branche `worker-a1`. Périmètre : `omega/functions/lecteur/`, `omega/functions/lecteur-exports/` et `omega/functions/_partage/`.

@@ -295,13 +295,18 @@ function nettoyerLigne(l: LigneBrute, colonnes: readonly string[]): Record<strin
 }
 
 /** Les lignes de détail : une seule valeur « lignes », tableau jsonb, vérifiée si chaque libellé se retrouve sur sa page. */
-export function valeurLignes(brutes: LigneBrute[] | undefined, pages: PageLue[], source: "ia" | "tableur" = "ia"): ValeurLue | null {
+export function valeurLignes(
+  brutes: LigneBrute[] | undefined,
+  pages: PageLue[],
+  source: "ia" | "tableur" = "ia",
+  colonnes: readonly string[] = CHAMPS_LIGNE,
+): ValeurLue | null {
   if (!Array.isArray(brutes) || brutes.length === 0) return null;
   const parNumero = new Map(pages.map((p) => [p.n, p]));
   const lignes = brutes.slice(0, MAX_LIGNES).filter((l) => l && typeof l === "object");
   let retrouvees = 0;
   const nettoyees = lignes.map((l) => {
-    const n = nettoyerLigne(l, CHAMPS_LIGNE);
+    const n = nettoyerLigne(l, colonnes);
     const page = Number.isInteger(l.page) ? parNumero.get(l.page as number) : undefined;
     if (page && typeof n.designation === "string" && retrouver(n.designation, page.texte).trouve) retrouvees++;
     return n;

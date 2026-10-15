@@ -494,7 +494,10 @@ async function extraireDepuisTexte(
   // Un long tableau à champs composés (offre, DPGF, CCTP de plusieurs centaines de lignes) : une valeur citée par cellule
   // déborderait la sortie d'un seul appel. On le lit par morceaux de lignes, puis on réunit (la première valeur d'un champ
   // l'emporte, comme dans un seul appel). Les citations se vérifient toujours sur la page entière.
-  const morceaux = (schemaPour(piece.module).familles?.length ?? 0) > 0 ? morceauxDeLignes(pages) : [];
+  const schemaModule = schemaPour(piece.module);
+  // FILED garde sa lecture d'un seul tenant (ses factures sont courtes, et les morceaux se lisent ailleurs).
+  const parMorceaux = (schemaModule.familles?.length ?? 0) > 0 || (schemaModule.module !== "filed" && schemaModule.lignes);
+  const morceaux = parMorceaux ? morceauxDeLignes(pages) : [];
   if (morceaux.length > 1) {
     const sorties: SortieIa[] = [];
     for (const m of morceaux) {
@@ -551,6 +554,9 @@ export function reunir(sorties: SortieIa[]): SortieIa {
       confiance_type: sure.brut.confiance_type,
       motif: sorties.every((s) => !s.brut.lisible) ? sure.brut.motif : undefined,
       valeurs: sorties.flatMap((s) => s.brut.valeurs ?? []),
+      // Les lignes de détail se suivent d'un morceau à l'autre ; la ventilation de TVA vient du premier qui en rend une.
+      lignes: sorties.flatMap((s) => s.brut.lignes ?? []),
+      tva_ventilation: sorties.find((s) => (s.brut.tva_ventilation ?? []).length > 0)?.brut.tva_ventilation,
     },
     usage: sorties.reduce((u, s) => ({ tokens_entree: u.tokens_entree + s.usage.tokens_entree, tokens_sortie: u.tokens_sortie + s.usage.tokens_sortie }), { tokens_entree: 0, tokens_sortie: 0 }),
     modele: sure.modele,
@@ -606,7 +612,7 @@ export function assembler(
   const verif = verifierValeurs(brut.valeurs, pages, pagesPdf, "ia", champsPour(module, type_piece), typeDeclare?.cles ?? []);
   const valeurs: ValeurLue[] = [...verif.valeurs];
   if (schema.lignes) {
-    const lignes = valeurLignes(brut.lignes, pages);
+    const lignes = valeurLignes(brut.lignes, pages, "ia", schema.colonnesLigne);
     if (lignes) valeurs.push(lignes);
     const ventilation = valeurVentilation(brut.tva_ventilation, pages);
     if (ventilation) valeurs.push(ventilation);
