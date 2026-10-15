@@ -172,6 +172,19 @@ Dialog de `components/ui`, temps réel sur les quatre tables publiées.
 
 Ouvert : le TAP du test à 5a4a2e6 (en cours chez le coordinateur) ; la fusion de l'écran sur `main`.
 
+## REPRISE (pause du 15/10/2026, 16 h 15 UTC, demandée par Teo)
+
+- **Rien en cours** : le lot B5 est clos, fusionné dans `main` (2e8bbf9), en ligne sur https://omegaai.fr/espace/lorani ;
+  test pgTAP 111/111 sur la recette, migrations b5_01 à b5_04 posées. Arbre propre, dernier commit = ce fichier.
+- **À la reprise, dans l'ordre** : (1) lire les messages du coordinateur (session_01BCGFdpRKBvXKjouC75sYBg) ;
+  (2) si le lecteur d'A1 rend les six types de courriers (`omega/modules/lorani/CHAMPS-LECTURE-LORANI.md`), rejouer
+  le dépôt réel : `npm run dev` pointé sur la recette (NEXT_PUBLIC_SUPABASE_URL + clé publique de la recette), session
+  de `gerant@banc-varelo.test` dans un fichier hors dépôt, puis `node omega/recette-b5/courrier-reel.mjs <session.json>
+  <recepisse.pdf>` (le PDF d'essai se refabrique en Python, voir § 3) ; attendu : proposition « Date de dépôt » puis
+  confirmation qui pose le numéro PC04410926A0042 sur « Pavillon Lemoine » ; (3) sinon, rien à faire.
+- **Données laissées sur le banc** (recette) : projet « Maison Lemoine (banc) », PCMI « Pavillon Lemoine », pièce
+  9cde2003-451d-46d9-a6df-e8cf4fe0ab19 (`a_classer`). Le coordinateur décide de leur sort ; je n'y touche pas.
+
 ## 5. Journal de bord
 
 - 05/10 soir : lecture du cadre, scénario écrit et envoyé ; test pgTAP, migrations b5_01/02/03, écran, recette ;
