@@ -15,17 +15,22 @@
    la contrainte de filed_levees).
    ══════════════════════════════════════════════════════════════════════ */
 
-import { useMemo, useState } from "react";
-import { AlertTriangle, Ban, Check, CheckCircle2, ClipboardList, FolderInput, Landmark, Link2, Pencil, ShieldCheck, Unlock } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { AlertTriangle, Ban, BadgeCheck, BookOpen, Check, CheckCircle2, ClipboardList, FolderInput, Landmark, Link2, Pencil, RefreshCw, Scale, ShieldCheck, Unlock, UserCheck, X } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
 import { Avis, Def, Pastille } from "../ui";
 import { dateCourte, dateHeure, masquerIban, montant, nombreFr, pourcent } from "../format";
 import type { Commande, Controle, DossierFiled, Fournisseur, LigneCommande, LigneFacture, MotifRefus, NatureDocument } from "../types";
-import { CHAMPS_CORRIGEABLES, CHAMP_PAR_COLONNE, ETATS, FAMILLES_CONTROLE, NATURES, STATUTS_FACTURE, grouperControles, libelleChamp } from "./etats";
-import { apparierLigne, bloquerFournisseur, classerDocument, confirmerValeurs, corrigerFacture, leverAnomalie, proposerIban, rattacherCommande, rattacherFournisseur } from "./portes";
+import { CHAMPS_CORRIGEABLES, CHAMPS_PAR_NOTION, FAMILLES_CONTROLE, NATURES, NOTION_PAR_COLONNE, etatDocument, grouperControles, libelleChamp, statutFacture } from "./etats";
+import { apparierLigne, attesterIdentite, bloquerFournisseur, classerDocument, confirmerFournisseur, confirmerValeurs, corrigerFacture, demanderVerification, leverAnomalie, proposerIban, rattacherCommande, rattacherFournisseur } from "./portes";
 import VisionneusePiece from "./VisionneusePiece";
+import FicheFournisseur, { registreDe } from "./FicheFournisseur";
+import { analyserTva, chiffres, sirenValide, tvaPropre } from "./identifiants";
+import { AIDE_FAIT_FOI, MOTIFS_207, chargerMotifsLitige, cloreLitige, comptabiliserFacture, ouvrirLitige, pastilleProvenance, provenanceDe, quand, type MotifLitige } from "./factureElectronique";
+import { CycleDeVie, EcrituresFacture } from "./CycleEcritures";
 
 type Props = {
   dossier: DossierFiled;
@@ -36,6 +41,9 @@ type Props = {
   lignesCommande: LigneCommande[];
   onLocal: (d: DossierFiled) => void;
   relire: () => Promise<void>;
+  /* la personne connectée (exemple : « vous ») — celle qui a déposé la pièce
+     d'origine d'un fournisseur ne le confirme pas */
+  moi: string | null;
 };
 
 type Form =
@@ -48,11 +56,17 @@ type Form =
   | { type: "bloquer"; bloquer: boolean }
   | { type: "commande" }
   | { type: "apparier"; ligne: LigneFacture }
+  | { type: "confirmer_fournisseur" }
+  | { type: "attester" }
+  | { type: "identifiants" }
+  | { type: "litige" }
+  | { type: "clore_litige"; litige: string }
+  | { type: "comptabiliser" }
   | null;
 
 const maintenant = () => new Date().toISOString();
 
-export default function DossierVue({ dossier, source, motifs, fournisseurs, commandes, lignesCommande, onLocal, relire }: Props) {
+export default function DossierVue({ dossier, source, motifs, fournisseurs, commandes, lignesCommande, onLocal, relire, moi }: Props) {
   const { document: doc, facture, fournisseur } = dossier;
   const [actif, setActif] = useState<string | null>(null);
   const [form, setForm] = useState<Form>(null);
@@ -67,17 +81,40 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
   const [iban, setIban] = useState("");
   const [commandeChoisie, setCommandeChoisie] = useState("");
   const [ligneCommandeChoisie, setLigneCommandeChoisie] = useState("");
+  const [onglet, setOnglet] = useState<"dossier" | "cycle" | "ecritures">("dossier");
+  const [motifsLitige, setMotifsLitige] = useState<MotifLitige[]>(MOTIFS_207);
+  const [codeLitige, setCodeLitige] = useState("");
+  const [sirenSaisi, setSirenSaisi] = useState("");
+  const [tvaSaisie, setTvaSaisie] = useState("");
 
   const groupes = useMemo(() => grouperControles(dossier.controles), [dossier.controles]);
   const motifOfficiel = (code: string | null) => (code ? motifs.find((m) => m.code === code) ?? { code, libelle: code.replace(/_/g, " ").toLowerCase(), description: null } : null);
 
-  /* une valeur de l'en-tête → la boîte citée dans la pièce */
-  const valeurDe = (champPiece: string) => dossier.valeurs.find((v) => v.champ === champPiece) ?? null;
-  const citer = (champPiece: string) => {
-    const v = valeurDe(champPiece);
+  /* une notion de l'en-tête → la valeur citée dans la pièce, sous l'un de
+     ses noms possibles (lecteur réel ou gabarit) ; un nom de champ exact
+     passe aussi (preuve d'un contrôle) */
+  const valeurDe = (notion: string) => {
+    const noms = CHAMPS_PAR_NOTION[notion] ?? [notion];
+    for (const nom of noms) {
+      const v = dossier.valeurs.find((x) => x.champ === nom);
+      if (v) return v;
+    }
+    return null;
+  };
+  const citer = (notion: string) => {
+    const v = valeurDe(notion);
     setActif((a) => (v && a !== v.id ? v.id : null));
   };
-  const nonVerifiees = dossier.valeurs.filter((v) => !v.verifiee);
+  /* la valeur de la facture, sinon le texte cité dans la pièce */
+  const ou = (valeur: string | null | undefined, v: DossierFiled["valeurs"][number] | null) => (valeur && valeur !== "—" ? valeur : (v?.texte ?? "—"));
+  /* un SIREN ou une TVA lus dont la clé est fausse ne se confirment pas en bloc : ils se corrigent */
+  const cleFausse = (v: DossierFiled["valeurs"][number]) => {
+    const brut = String(v.valeur ?? v.texte ?? "");
+    if (CHAMPS_PAR_NOTION.siren.includes(v.champ)) return !sirenValide(brut);
+    if (CHAMPS_PAR_NOTION.tva_intracom.includes(v.champ)) return analyserTva(brut).valide === false;
+    return false;
+  };
+  const nonVerifiees = dossier.valeurs.filter((v) => !v.verifiee && !cleFausse(v));
 
   const ouvrir = (f: Form) => {
     setErreur(null);
@@ -128,13 +165,13 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
     if (!facture) return;
     const def = CHAMPS_CORRIGEABLES.find((c) => c.cle === champ)!;
     const brut = valeur.trim();
-    const val: unknown = def.type === "montant" ? Number(brut.replace(/\s/g, "").replace(",", ".")) : brut;
+    const val: unknown = def.type === "montant" ? Number(brut.replace(/\s/g, "").replace(",", ".")) : def.porte === "fournisseur.iban" ? brut.replace(/\s+/g, "").toUpperCase() : brut;
     return envoyer(
-      () => corrigerFacture(facture.id, { [champ]: val }, motif.trim()).then(() => undefined),
+      () => corrigerFacture(facture.id, { [def.porte]: val }, motif.trim()).then(() => undefined),
       () => {
-        const f = { ...facture, [champ]: val, version: facture.version + 1, champs_douteux: facture.champs_douteux.filter((c) => c !== CHAMP_PAR_COLONNE[champ]) };
-        const champPiece = CHAMP_PAR_COLONNE[champ];
-        const valeurs = dossier.valeurs.map((v) => (v.champ === champPiece ? { ...v, texte: def.type === "montant" ? montant(val as number) : brut, valeur: val, source: "humain" as const, verifiee: true, confiance: 1 } : v));
+        const cite = valeurDe(NOTION_PAR_COLONNE[champ] ?? champ);
+        const f = { ...facture, [champ]: val, version: facture.version + 1, champs_douteux: facture.champs_douteux.filter((c) => c !== cite?.champ) };
+        const valeurs = dossier.valeurs.map((v) => (cite && v.id === cite.id ? { ...v, texte: def.type === "montant" ? montant(val as number) : brut, valeur: val, source: "humain" as const, verifiee: true, confiance: 1 } : v));
         return ajouterFil({ ...dossier, facture: f, valeurs }, "correction", `${def.libelle} corrigé(e) : ${brut} — ${motif.trim()}`);
       },
       "La valeur est corrigée ; les contrôles vont être rejoués sur la nouvelle version.",
@@ -242,7 +279,190 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
     );
   };
 
-  const e = ETATS[doc.etat];
+  /* ——— le fournisseur : confirmer (a4_10), attester, revérifier (b7_02) ——— */
+  const deposantOrigine = !!fournisseur && fournisseur.statut === "a_confirmer" && !!moi && dossier.origine_deposee_par === moi;
+  /* le registre qu'on interroge : VIES si le fournisseur a une TVA, sinon Sirene (comme le balayage de B7) */
+  const registre = fournisseur ? registreDe(fournisseur) : null;
+
+  /* le contrôle « fournisseur à confirmer » tombe, la facture avance (en exemple seulement : la base recontrôle) */
+  const sansControle = (d: DossierFiled, code: string, message: string): DossierFiled => {
+    if (!d.facture) return d;
+    const controles = d.controles.map((x) => (x.code === code && x.resultat === "anomalie" ? { ...x, resultat: "ok" as const, message } : x));
+    const restants = controles.filter((x) => x.resultat === "anomalie");
+    const nb_bloquants = restants.filter((x) => x.gravite === "bloquant").length;
+    const nb_attention = restants.filter((x) => x.gravite === "attention").length;
+    return { ...d, controles, facture: { ...d.facture, nb_bloquants, nb_attention, anomalies: restants.map((x) => x.code), statut: nb_bloquants ? "bloquee" : "a_valider" } };
+  };
+
+  const soumettreConfirmationFournisseur = () => {
+    if (!fournisseur) return;
+    return envoyer(
+      () => confirmerFournisseur(fournisseur.id, motif.trim()).then(() => undefined),
+      () => {
+        const quand = maintenant();
+        const d = sansControle(dossier, "fournisseur.a_confirmer", "Fournisseur confirmé par une personne.");
+        const ibans = d.ibans.map((i) => (i.statut === "propose" ? { ...i, statut: "valide" as const } : i));
+        return ajouterFil({ ...d, ibans, fournisseur: { ...fournisseur, statut: "actif", confirme_le: quand, confirme_par: moi } }, "confirmation", `Fournisseur confirmé par une personne${motif.trim() ? ` : ${motif.trim()}` : "."}`);
+      },
+      `${fournisseur.nom} est confirmé ; ses factures bloquées sont recontrôlées.`,
+    );
+  };
+
+  const soumettreAttestation = () => {
+    if (!fournisseur) return;
+    return envoyer(
+      () => attesterIdentite(fournisseur.id, motif.trim()).then(() => undefined),
+      () => {
+        const quand = maintenant();
+        const d = sansControle(dossier, "identite.registre", "Identité attestée par une personne.");
+        return ajouterFil(
+          { ...d, fournisseur: { ...fournisseur, identite_verifiee_le: quand, identite_source: "humain", identite_verdict: { resultat: "valide", registre: "humain", preuve: { par: moi, motif: motif.trim() } } } },
+          "identite_attestee",
+          `Identité attestée par une personne : ${motif.trim()}`,
+        );
+      },
+      "L'identité est attestée, avec votre motif ; les factures du fournisseur sont recontrôlées.",
+    );
+  };
+
+  /* la réponse du registre arrive en une à deux minutes (cron de l'ouvrier
+     identite) : sans attendre l'événement Realtime (filed_fournisseurs n'est
+     pas encore publiée), le dossier se relit à 1, 2 et 4 minutes */
+  const relectures = useRef<number[]>([]);
+  useEffect(() => () => relectures.current.forEach((t) => window.clearTimeout(t)), []);
+  const relireApres = () => {
+    relectures.current.forEach((t) => window.clearTimeout(t));
+    relectures.current = [60, 120, 240].map((sec) => window.setTimeout(() => void relire().catch(() => undefined), sec * 1000));
+  };
+
+  const reverifier = () => {
+    if (!fournisseur || !registre) return;
+    const nom = registre.nom === "vies" ? "VIES" : "Sirene";
+    return envoyer(
+      () => demanderVerification(doc.client_id, registre.nom, registre.identifiant, fournisseur.id).then(() => relireApres()),
+      () => {
+        const quand = maintenant();
+        return ajouterFil(
+          { ...dossier, fournisseur: { ...fournisseur, identite_verifiee_le: quand, identite_source: registre.nom, identite_verdict: { resultat: "valide", registre: registre.nom, identifiant: registre.identifiant.replace(/\s+/g, "") } } },
+          "identite",
+          `Identité revérifiée : confirmée par ${nom}.`,
+        );
+      },
+      source === "reelle"
+        ? `La vérification est demandée à ${nom} ; la réponse arrive en une à deux minutes et l'écran se relit seul.`
+        : `Identité confirmée par ${nom} (en exemple, la réponse est immédiate ; en base réelle elle arrive en une à deux minutes).`,
+    );
+  };
+
+  /* ——— les identifiants lus sur la pièce mais non retenus (a4_10 :
+     fournisseur_lu.non_verifie) : une personne confirme la valeur lue si
+     sa clé est juste, ou saisit les vrais identifiants ——— */
+  const nonVerifie = (facture?.fournisseur_lu?.non_verifie ?? null) as { siren?: string; tva?: string } | null;
+  const lus = [
+    nonVerifie?.siren && !fournisseur?.siren ? { notion: "siren", libelle: "SIREN", valeur: nonVerifie.siren, juste: sirenValide(nonVerifie.siren), raison: sirenValide(nonVerifie.siren) ? "clé juste" : "clé de Luhn invalide" } : null,
+    nonVerifie?.tva && !fournisseur?.tva ? (() => { const a = analyserTva(nonVerifie.tva!); return { notion: "tva_intracom", libelle: "TVA", valeur: nonVerifie.tva!, juste: a.valide === true, raison: a.raison }; })() : null,
+  ].filter(Boolean) as { notion: string; libelle: string; valeur: string; juste: boolean; raison: string }[];
+
+  const confirmerLu = (notion: string) => {
+    if (!facture) return;
+    const v = valeurDe(notion);
+    if (!v) return;
+    return envoyer(
+      () => confirmerValeurs(facture.id, [v.champ]).then(() => undefined),
+      () => ajouterFil({ ...dossier, valeurs: dossier.valeurs.map((x) => (x.id === v.id ? { ...x, verifiee: true } : x)) }, "confirmation", `${libelleChamp(v.champ)} lu confirmé sur la pièce : ${v.texte}`),
+      "La valeur lue est confirmée ; les contrôles vont la reprendre.",
+    );
+  };
+
+  const sirenNet = chiffres(sirenSaisi);
+  const tvaNette = tvaPropre(tvaSaisie);
+  const avisTva = tvaNette ? analyserTva(tvaNette) : null;
+  const identifiantsOk =
+    (!!sirenNet || !!tvaNette) &&
+    (!sirenNet || sirenValide(sirenNet)) &&
+    (!avisTva || avisTva.valide !== false) &&
+    (!sirenNet || !avisTva?.siren || avisTva.siren === sirenNet);
+  const soumettreIdentifiants = () => {
+    if (!facture) return;
+    const valeurs: Record<string, string> = {};
+    if (sirenNet) valeurs["fournisseur.siren"] = sirenNet;
+    if (tvaNette) valeurs["fournisseur.tva"] = tvaNette;
+    return envoyer(
+      () => corrigerFacture(facture.id, valeurs, motif.trim()).then(() => undefined),
+      () => {
+        const siren = sirenNet || avisTva?.siren || null;
+        const lu = { ...facture.fournisseur_lu, siren: siren ?? facture.fournisseur_lu?.siren, tva: tvaNette || facture.fournisseur_lu?.tva };
+        delete (lu as Record<string, unknown>).non_verifie;
+        return ajouterFil(
+          { ...dossier, facture: { ...facture, version: facture.version + 1, fournisseur_lu: lu }, fournisseur: fournisseur ? { ...fournisseur, siren: fournisseur.siren ?? siren, tva: fournisseur.tva ?? (tvaNette || null) } : fournisseur },
+          "correction",
+          `Identifiants du fournisseur saisis : ${[sirenNet ? `SIREN ${sirenNet}` : null, tvaNette ? `TVA ${tvaNette}` : null].filter(Boolean).join(", ")} — ${motif.trim()}`,
+        );
+      },
+      "Les identifiants sont saisis ; les contrôles et la vérification au registre vont être rejoués.",
+    );
+  };
+
+  /* ——— la facture électronique (fiche d'A4, a4_16 à a4_18) ——— */
+  const provenance = pastilleProvenance(dossier);
+  const structuree = provenanceDe(dossier) === "structuree";
+  /* une valeur du fichier structuré fait foi : elle ne se corrige pas (la base refuse, 22023) */
+  const faitFoi = (cle: string) => {
+    const notion = NOTION_PAR_COLONNE[cle] ?? cle;
+    const v = valeurDe(notion);
+    return v?.source === "xml";
+  };
+  const toutFaitFoi = CHAMPS_CORRIGEABLES.every((c) => faitFoi(c.cle));
+  const litigeOuvert = (dossier.litiges ?? []).find((l) => !l.clos_le) ?? null;
+
+  const ouvrirFormLitige = () => {
+    ouvrir({ type: "litige" });
+    setCodeLitige("");
+    if (source === "reelle") void chargerMotifsLitige().then(setMotifsLitige);
+  };
+  const soumettreLitige = () => {
+    if (!facture) return;
+    const libelle = motifsLitige.find((m) => m.code === codeLitige)?.libelle;
+    return envoyer(
+      () => ouvrirLitige(facture.id, codeLitige || null, motif).then(() => undefined),
+      () => {
+        const quandIso = maintenant();
+        const texte = codeLitige ? `${codeLitige} : ${motif.trim()}` : motif.trim();
+        const cycle = [...(dossier.cycle ?? []), { code: 207, libelle: "En litige", survenu_le: quandIso, motif_code: codeLitige || "AUTRE", motif_libelle: libelle ?? "Autre", motif: motif.trim(), montant: null, etat: structuree ? "a_emettre" : "sans_objet", emis_le: null, sens: "emis" as const, erreur: null, obligatoire: false }];
+        return ajouterFil({ ...dossier, cycle, litiges: [{ id: `litige-${Date.now()}`, ouvert_le: quandIso, motif: texte, clos_le: null, issue: null }, ...(dossier.litiges ?? [])] }, "litige", `Litige ouvert${libelle ? ` (${libelle})` : ""} : ${motif.trim()}`);
+      },
+      "Le litige est ouvert ; le statut « En litige » part au fournisseur.",
+    );
+  };
+  const soumettreClotureLitige = (id: string) =>
+    envoyer(
+      () => cloreLitige(id, motif.trim()),
+      () => ajouterFil({ ...dossier, litiges: (dossier.litiges ?? []).map((l) => (l.id === id ? { ...l, clos_le: maintenant(), issue: motif.trim() } : l)) }, "litige", `Litige clos : ${motif.trim()}`),
+      "Le litige est clos, avec son issue.",
+    );
+  const soumettreComptabilisation = () => {
+    if (!facture) return;
+    return envoyer(
+      () => comptabiliserFacture(facture.id, motif.trim() || null).then(() => undefined),
+      () => {
+        const ht = facture.montant_ht ?? 0;
+        const tva = facture.montant_tva ?? 0;
+        const ttc = facture.montant_ttc ?? ht + tva;
+        const num = 1 + Math.max(0, ...(dossier.ecritures ?? []).map((x) => x.ecriture_num));
+        const base = { journal_code: "HA", journal_lib: "Achats", ecriture_num: num, ecriture_date: maintenant().slice(0, 10), comp_aux_num: null, ecriture_let: null, date_let: null };
+        const ecritures = [
+          ...(dossier.ecritures ?? []),
+          { ...base, compte_num: "606", compte_lib: "Achats non stockés", debit: ht, credit: 0 },
+          { ...base, compte_num: "44566", compte_lib: "TVA déductible sur autres biens et services", debit: tva, credit: 0 },
+          { ...base, compte_num: "401", compte_lib: "Fournisseurs", comp_aux_num: fournisseur?.code ?? null, debit: 0, credit: ttc },
+        ];
+        return ajouterFil({ ...dossier, ecritures, facture: { ...facture, statut: "comptabilisee" } }, "comptabilisation", "Transmise à la comptabilité : écriture d'achat passée.");
+      },
+      "La facture est transmise à la comptabilité ; ses écritures sont passées.",
+    );
+  };
+
+  const e = etatDocument(doc.etat);
 
   return (
     <div className="esp-dossier" style={{ display: "grid", gap: 14 }}>
@@ -251,7 +471,9 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
           <div className="esp-item-haut">
             <span className="esp-mono" style={{ fontWeight: 700, fontSize: 15 }}>{doc.reference}</span>
             <Pastille teinte={e.teinte}>{e.libelle}</Pastille>
-            {facture ? <Pastille teinte={STATUTS_FACTURE[facture.statut].teinte}>{STATUTS_FACTURE[facture.statut].libelle}</Pastille> : null}
+            {facture ? <Pastille teinte={statutFacture(facture.statut).teinte}>{statutFacture(facture.statut).libelle}</Pastille> : null}
+            {facture ? <Pastille teinte={provenance.cle === "electronique" ? "noir" : provenance.cle === "structure" ? "bleu" : undefined} contour={provenance.cle === "lue" || provenance.cle === "saisie"} title={provenance.aide}>{provenance.libelle}</Pastille> : null}
+            {litigeOuvert ? <Pastille teinte="ambre">En litige</Pastille> : null}
             {doc.nature ? <Pastille contour>{NATURES[doc.nature]}{doc.nature_source === "humain" ? " · classé à la main" : ""}</Pastille> : <Pastille teinte="ambre">Nature à classer</Pastille>}
             {facture ? <Pastille contour>version {facture.version}</Pastille> : null}
           </div>
@@ -261,6 +483,36 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
         <div className="esp-dossier-grille">
           {/* ——— colonne dossier ——— */}
           <div className="esp-carte-corps" style={{ display: "grid", gap: 16 }}>
+            {facture ? (
+              <div className="esp-onglets" role="tablist" aria-label="Le dossier de la facture">
+                {([["dossier", "Dossier"], ["cycle", `Cycle de vie${dossier.cycle?.length ? ` (${dossier.cycle.length})` : ""}`], ["ecritures", `Écritures${dossier.ecritures?.length ? ` (${dossier.ecritures.length})` : ""}`]] as const).map(([cle, libelle]) => (
+                  <button key={cle} type="button" role="tab" aria-selected={onglet === cle} className="esp-onglet" onClick={() => { setOnglet(cle); setFait(null); }}>{libelle}</button>
+                ))}
+              </div>
+            ) : null}
+            {onglet !== "dossier" && facture ? (
+              <>
+                {fait ? <Avis teinte="vert" role="status"><strong>C&apos;est fait.</strong> {fait}</Avis> : null}
+                {erreur && !form ? <Avis teinte="rouge" role="alert"><strong>Refusé par la base.</strong> {erreur}</Avis> : null}
+                {onglet === "cycle" ? (
+                  <CycleDeVie lignes={dossier.cycle ?? []} />
+                ) : (
+                  <EcrituresFacture
+                    ecritures={dossier.ecritures ?? []}
+                    peutTransmettre={facture.statut === "validee"}
+                    envoi={envoi}
+                    onTransmettre={() => ouvrir({ type: "comptabiliser" })}
+                  />
+                )}
+              </>
+            ) : (
+            <>
+            {litigeOuvert ? (
+              <Avis teinte="ambre">
+                <strong>En litige depuis le {quand(litigeOuvert.ouvert_le)}.</strong> {litigeOuvert.motif}{" "}
+                <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "clore_litige", litige: litigeOuvert.id })}>Clore le litige</button>
+              </Avis>
+            ) : null}
             {doc.etat === "doublon" ? (
               <Avis teinte="gris"><strong>Doublon.</strong> {doc.motif ?? "Ce document a déjà été reçu."}</Avis>
             ) : null}
@@ -279,19 +531,28 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
                 <div>
                   <div className="esp-section-titre">Valeurs lues — cliquer pour voir la citation dans la pièce</div>
                   <div className="esp-valeurs">
-                    <Valeur champ="fournisseur.nom" texte={fournisseur?.nom ?? String(facture.fournisseur_lu?.nom ?? "—")} v={valeurDe("fournisseur.nom")} actif={actif} onClick={() => citer("fournisseur.nom")} douteux={facture.champs_douteux.includes("fournisseur.nom")} />
-                    <Valeur champ="facture.numero" texte={facture.numero ?? "—"} v={valeurDe("facture.numero")} actif={actif} onClick={() => citer("facture.numero")} douteux={facture.champs_douteux.includes("facture.numero")} />
-                    <Valeur champ="facture.date_emission" texte={dateCourte(facture.date_emission)} v={valeurDe("facture.date_emission")} actif={actif} onClick={() => citer("facture.date_emission")} douteux={false} />
-                    <Valeur champ="facture.echeance" texte={dateCourte(facture.echeance_lue)} v={valeurDe("facture.echeance")} actif={actif} onClick={() => citer("facture.echeance")} douteux={false} />
-                    <Valeur champ="totaux.ht" texte={montant(facture.montant_ht, facture.devise)} v={valeurDe("totaux.ht")} actif={actif} onClick={() => citer("totaux.ht")} douteux={false} />
-                    <Valeur champ="totaux.tva" texte={montant(facture.montant_tva, facture.devise)} v={valeurDe("totaux.tva")} actif={actif} onClick={() => citer("totaux.tva")} douteux={false} />
-                    <Valeur champ="totaux.ttc" texte={montant(facture.montant_ttc, facture.devise)} v={valeurDe("totaux.ttc")} actif={actif} onClick={() => citer("totaux.ttc")} douteux={false} />
-                    <Valeur champ="paiement.iban" texte={masquerIban(facture.iban)} v={valeurDe("paiement.iban")} actif={actif} onClick={() => citer("paiement.iban")} douteux={facture.champs_douteux.includes("paiement.iban")} />
-                    <Valeur champ="fournisseur.siren" texte={fournisseur?.siren ?? String(facture.fournisseur_lu?.siren ?? "—")} v={valeurDe("fournisseur.siren")} actif={actif} onClick={() => citer("fournisseur.siren")} douteux={false} />
+                    {(
+                      [
+                        ["fournisseur", fournisseur?.nom ?? String(facture.fournisseur_lu?.nom ?? ""), facture.champs_douteux.some((c) => /fournisseur\.nom|^fournisseur$/.test(c))],
+                        ["numero", facture.numero ?? "", facture.champs_douteux.some((c) => /numero/.test(c))],
+                        ["date_emission", facture.date_emission ? dateCourte(facture.date_emission) : "", false],
+                        ["echeance_lue", facture.echeance_lue ? dateCourte(facture.echeance_lue) : "", false],
+                        ["montant_ht", facture.montant_ht !== null ? montant(facture.montant_ht, facture.devise) : "", false],
+                        ["montant_tva", facture.montant_tva !== null ? montant(facture.montant_tva, facture.devise) : "", false],
+                        ["montant_ttc", facture.montant_ttc !== null ? montant(facture.montant_ttc, facture.devise) : "", false],
+                        ["iban", facture.iban ? masquerIban(facture.iban) : "", facture.champs_douteux.some((c) => /iban/.test(c))],
+                        ["siren", fournisseur?.siren ?? String(facture.fournisseur_lu?.siren ?? ""), false],
+                      ] as [string, string, boolean][]
+                    ).map(([notion, texte, douteux]) => {
+                      const v = valeurDe(notion);
+                      return <Valeur key={notion} champ={v?.champ ?? CHAMPS_PAR_NOTION[notion][0]} texte={ou(texte, v)} v={v} actif={actif} onClick={() => citer(notion)} douteux={douteux} />;
+                    })}
                   </div>
                   <div className="esp-actions" style={{ marginTop: 10 }}>
-                    <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "corriger" })}><Pencil width={13} height={13} aria-hidden="true" /> Corriger une valeur</button>
-                    <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!nonVerifiees.length} onClick={() => ouvrir({ type: "confirmer" })}><ShieldCheck width={13} height={13} aria-hidden="true" /> Confirmer les {nonVerifiees.length || ""} valeurs non vérifiées</button>
+                    <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={toutFaitFoi} title={toutFaitFoi ? AIDE_FAIT_FOI : undefined} onClick={() => { ouvrir({ type: "corriger" }); const libre = CHAMPS_CORRIGEABLES.find((c) => !faitFoi(c.cle)); if (libre) setChamp(libre.cle); }}><Pencil width={13} height={13} aria-hidden="true" /> Corriger une valeur</button>
+                    {!litigeOuvert ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={ouvrirFormLitige}><Scale width={13} height={13} aria-hidden="true" /> Ouvrir un litige</button> : null}
+                    {structuree && (facture.statut === "a_valider" || facture.statut === "bloquee") ? <Link href="/espace/validations" className="r-btn r-btn--fil r-btn--petit" title="La facture se refuse dans la file de validation, avec son motif."><X width={13} height={13} aria-hidden="true" /> Refuser</Link> : null}
+                    <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!nonVerifiees.length} onClick={() => ouvrir({ type: "confirmer" })}><ShieldCheck width={13} height={13} aria-hidden="true" /> {nonVerifiees.length ? `Confirmer ${nonVerifiees.length > 1 ? `les ${nonVerifiees.length} valeurs non vérifiées` : "la valeur non vérifiée"}` : "Valeurs lues vérifiées"}</button>
                     <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "rattacher" })}><Link2 width={13} height={13} aria-hidden="true" /> Rattacher à un fournisseur</button>
                     <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!commandes.length} onClick={() => ouvrir({ type: "commande" })}><ClipboardList width={13} height={13} aria-hidden="true" /> {commandeRetenue ? `Commande ${commandeRetenue.numero} · changer` : "Désigner une commande"}</button>
                     {fournisseur ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "iban" })}><Landmark width={13} height={13} aria-hidden="true" /> Proposer un IBAN</button> : null}
@@ -303,12 +564,54 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
                   </div>
                 </div>
 
+                {fournisseur ? (
+                  <FicheFournisseur
+                    fournisseur={fournisseur}
+                    deposantOrigine={deposantOrigine}
+                    registre={registre?.nom ?? null}
+                    envoi={envoi && !form}
+                    onConfirmer={() => ouvrir({ type: "confirmer_fournisseur" })}
+                    onAttester={() => ouvrir({ type: "attester" })}
+                    onReverifier={() => { setFait(null); void reverifier(); }}
+                  />
+                ) : null}
+
+                {lus.length ? (
+                  <div className="esp-identifiants-lus">
+                    <Avis teinte="ambre">
+                      <strong>Identifiants lus sur la pièce, non retenus.</strong> Le lecteur les a trouvés sans pouvoir les vérifier : ils ne montent pas sur la fiche du fournisseur tant qu&apos;une personne ne les a pas confirmés ou corrigés.
+                    </Avis>
+                    <ul className="esp-fil" style={{ marginTop: 10 }}>
+                      {lus.map((l) => (
+                        <li key={l.notion}>
+                          <span className="esp-fil-point" data-teinte={l.juste ? "bleu" : "rouge"} />
+                          <div>
+                            <div className="esp-fil-texte esp-item-haut">
+                              <span>{l.libelle} lu</span>
+                              <span className="esp-mono">{l.valeur}</span>
+                              <Pastille teinte={l.juste ? "bleu" : "rouge"}>{l.raison}</Pastille>
+                            </div>
+                            <div className="esp-actions" style={{ marginTop: 6 }}>
+                              {valeurDe(l.notion) ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => citer(l.notion)}>Voir sur la pièce</button> : null}
+                              {l.juste && valeurDe(l.notion) ? <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={envoi} onClick={() => { setFait(null); void confirmerLu(l.notion); }}><ShieldCheck width={12} height={12} aria-hidden="true" /> Confirmer la valeur lue</button> : null}
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="esp-actions">
+                      <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={() => { ouvrir({ type: "identifiants" }); setSirenSaisi(""); setTvaSaisie(""); }}><Pencil width={13} height={13} aria-hidden="true" /> Saisir les vrais identifiants</button>
+                    </div>
+                  </div>
+                ) : null}
+
                 <div>
                   <div className="esp-section-titre">
                     Contrôles — {groupes.passes.length} passé{groupes.passes.length > 1 ? "s" : ""}, {groupes.echoues.length} échoué{groupes.echoues.length > 1 ? "s" : ""}, {groupes.leves.length} levé{groupes.leves.length > 1 ? "s" : ""}
                   </div>
                   {[...groupes.echoues, ...groupes.leves, ...groupes.passes].map((c) => {
-                    const m = motifOfficiel(c.motif_officiel);
+                    /* le motif officiel est celui qui VAUDRAIT si le contrôle échouait : on ne le dit que sur une anomalie ou une levée */
+                    const m = c.resultat === "ok" ? null : motifOfficiel(c.motif_officiel);
                     const levee = c.levee_id ? dossier.levees.find((l) => l.id === c.levee_id) : null;
                     const preuve = Object.entries(c.preuve ?? {});
                     return (
@@ -340,8 +643,12 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
                           {levee ? <div className="esp-controle-motif">Levé par <b>{levee.leve_par_nom ?? "une personne habilitée"}</b> le {dateHeure(levee.leve_le)} : {levee.motif}</div> : null}
                           {c.resultat === "anomalie" ? (
                             <div className="esp-controle-actions">
-                              <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "lever", controle: c })}><Unlock width={12} height={12} aria-hidden="true" /> Lever avec un motif</button>
+                              {/* a4_12 : « fournisseur à confirmer » ne se lève pas (42501 pour tous) — on confirme le fournisseur */}
+                              {c.code !== "fournisseur.a_confirmer" ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "lever", controle: c })}><Unlock width={12} height={12} aria-hidden="true" /> Lever avec un motif</button> : null}
                               {c.preuve?.champ ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => citer(String(c.preuve.champ))}>Voir dans la pièce</button> : null}
+                              {c.code === "fournisseur.a_confirmer" && fournisseur?.statut === "a_confirmer" ? <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={deposantOrigine} title={deposantOrigine ? "Vous avez déposé la pièce d'origine : une autre personne confirme." : undefined} onClick={() => ouvrir({ type: "confirmer_fournisseur" })}><UserCheck width={12} height={12} aria-hidden="true" /> Confirmer ce fournisseur</button> : null}
+                              {c.code === "fournisseur.a_confirmer" && deposantOrigine ? <span className="esp-kpi-sous">Vous avez déposé la pièce d&apos;origine : une autre personne confirme ce fournisseur.</span> : null}
+                              {c.code === "identite.registre" && fournisseur && registre ? <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={envoi} onClick={() => { setFait(null); void reverifier(); }}><RefreshCw width={12} height={12} aria-hidden="true" /> Revérifier</button> : null}
                               {c.code === "fournisseur.iban_connu" && fournisseur ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "iban" })}><Landmark width={12} height={12} aria-hidden="true" /> Proposer cet IBAN</button> : null}
                             </div>
                           ) : null}
@@ -355,7 +662,8 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
                 {dossier.lignes.length ? (
                   <div>
                     <div className="esp-section-titre">Lignes</div>
-                    <div className="esp-tableau-cadre">
+                    {/* un cadre qui défile se rejoint au clavier (axe : scrollable-region-focusable) */}
+                    <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Lignes de la facture">
                       <table className="esp-tableau">
                         <thead>
                           <tr><th>#</th><th>Désignation</th><th className="esp-num">Qté</th><th className="esp-num">P.U. HT</th><th className="esp-num">Montant HT</th><th className="esp-num">TVA</th><th>Commande</th><th aria-label="Apparier" /></tr>
@@ -454,6 +762,8 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
                 {!dossier.historique.length ? <li><span className="esp-fil-point" /><div className="esp-fil-meta">Aucun évènement.</div></li> : null}
               </ul>
             </div>
+            </>
+            )}
           </div>
 
           {/* ——— colonne pièce ——— */}
@@ -475,9 +785,10 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
             <div className="esp-form">
               <label className="rv-libelle">Champ
                 <select className="rv-champ" value={champ} onChange={(e2) => setChamp(e2.target.value)}>
-                  {CHAMPS_CORRIGEABLES.map((c) => <option key={c.cle} value={c.cle}>{c.libelle}</option>)}
+                  {CHAMPS_CORRIGEABLES.map((c) => <option key={c.cle} value={c.cle} disabled={faitFoi(c.cle)}>{c.libelle}{faitFoi(c.cle) ? " — du fichier, fait foi" : ""}</option>)}
                 </select>
               </label>
+              {structuree ? <Avis teinte="bleu">{AIDE_FAIT_FOI} Un champ absent du fichier se complète normalement.</Avis> : null}
               <label className="rv-libelle">Nouvelle valeur <span className="esp-obligatoire">(obligatoire)</span>
                 <input className="rv-champ" type={CHAMPS_CORRIGEABLES.find((c) => c.cle === champ)?.type === "date" ? "date" : "text"} inputMode={CHAMPS_CORRIGEABLES.find((c) => c.cle === champ)?.type === "montant" ? "decimal" : undefined} value={valeur} onChange={(e2) => setValeur(e2.target.value)} />
               </label>
@@ -667,6 +978,145 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
         </DialogContent>
       </Dialog>
 
+      <Dialog open={form?.type === "confirmer_fournisseur"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><UserCheck width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Confirmer le fournisseur</DialogTitle>
+            <DialogDescription>Vous confirmez que {fournisseur?.nom} est bien un fournisseur de l&apos;entreprise. Il devient actif, l&apos;IBAN proposé avec sa première facture est validé, et ses factures bloquées sont recontrôlées.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <Avis teinte="ambre">La personne qui a déposé la pièce d&apos;origine ne confirme pas ce fournisseur : une autre personne décide. La confirmation est réservée au gérant, à l&apos;administrateur et au valideur ; elle est conservée avec votre nom et l&apos;heure.</Avis>
+              <label className="rv-libelle">
+                Motif <span className="esp-kpi-sous">(facultatif)</span>
+                <textarea className="rv-champ" value={motif} onChange={(e2) => setMotif(e2.target.value)} maxLength={500} placeholder="Ce que vous avez vérifié : bon de commande, appel au numéro connu, contrat…" />
+              </label>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={envoi || deposantOrigine} onClick={soumettreConfirmationFournisseur}>{envoi ? <Loader variant="spin" /> : null} Confirmer le fournisseur</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={form?.type === "identifiants"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><Pencil width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Saisir les identifiants du fournisseur</DialogTitle>
+            <DialogDescription>Les valeurs saisies remplacent celles lues sur la pièce : une nouvelle version de la facture est créée, ses contrôles sont rejoués et l&apos;identité est demandée au registre public.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">SIREN
+                <input className="rv-champ esp-mono" inputMode="numeric" value={sirenSaisi} onChange={(e2) => setSirenSaisi(e2.target.value)} placeholder="9 chiffres" autoComplete="off" />
+              </label>
+              {sirenNet && !sirenValide(sirenNet) ? <Avis teinte="ambre">Ce SIREN n&apos;a pas une clé juste (neuf chiffres, clé de Luhn) : vérifiez-le sur un document officiel du fournisseur.</Avis> : null}
+              <label className="rv-libelle">TVA intracommunautaire
+                <input className="rv-champ esp-mono" value={tvaSaisie} onChange={(e2) => setTvaSaisie(e2.target.value)} placeholder="FR + 2 + SIREN" autoComplete="off" />
+              </label>
+              {avisTva && avisTva.valide === false ? <Avis teinte="ambre">TVA : {avisTva.raison}.</Avis> : null}
+              {sirenNet && avisTva?.siren && avisTva.siren !== sirenNet ? <Avis teinte="ambre">La TVA porte le SIREN {avisTva.siren}, pas {sirenNet}.</Avis> : null}
+              <ChampMotif motif={motif} onChange={setMotif} aide="Où vous avez lu ces identifiants : Kbis, papier à en-tête, annuaire des entreprises…" />
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!identifiantsOk || !motifOk || envoi} onClick={soumettreIdentifiants}>{envoi ? <Loader variant="spin" /> : null} Enregistrer</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={form?.type === "litige"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><Scale width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Ouvrir un litige</DialogTitle>
+            <DialogDescription>Le litige suspend la facture : elle n&apos;entre plus dans l&apos;échéancier tant qu&apos;il est ouvert{structuree ? ", et le statut « En litige » part au fournisseur avec son motif" : ""}.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Motif du litige
+                <select className="rv-champ" value={codeLitige} onChange={(e2) => setCodeLitige(e2.target.value)}>
+                  <option value="">Autre motif</option>
+                  {motifsLitige.filter((m) => m.code !== "AUTRE").map((m) => <option key={m.code} value={m.code}>{m.libelle}</option>)}
+                </select>
+              </label>
+              <label className="rv-libelle">Précisez pour le fournisseur <span className="esp-obligatoire">(obligatoire, 3 caractères au moins)</span>
+                <textarea className="rv-champ" value={motif} onChange={(e2) => setMotif(e2.target.value)} maxLength={480} placeholder="Ce qui ne va pas, et ce que vous attendez (avoir, facture rectificative…)." />
+              </label>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!motifOk || envoi} onClick={soumettreLitige}>{envoi ? <Loader variant="spin" /> : null} Ouvrir le litige</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={form?.type === "clore_litige"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><Scale width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Clore le litige</DialogTitle>
+            <DialogDescription>La facture revient dans l&apos;échéancier. L&apos;issue est conservée avec votre nom et l&apos;heure.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Issue du litige <span className="esp-obligatoire">(obligatoire, 3 caractères au moins)</span>
+                <textarea className="rv-champ" value={motif} onChange={(e2) => setMotif(e2.target.value)} maxLength={480} placeholder="Avoir reçu, facture rectifiée, accord trouvé…" />
+              </label>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!motifOk || envoi} onClick={() => form?.type === "clore_litige" && soumettreClotureLitige(form.litige)}>{envoi ? <Loader variant="spin" /> : null} Clore le litige</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={form?.type === "comptabiliser"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><BookOpen width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Transmettre à la comptabilité</DialogTitle>
+            <DialogDescription>FILED passe l&apos;écriture d&apos;achat de la facture (journal Achats) d&apos;après ses imputations validées. Une écriture ne se modifie plus : une erreur se corrige par une écriture de correction.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Motif <span className="esp-kpi-sous">(facultatif)</span>
+                <textarea className="rv-champ" value={motif} onChange={(e2) => setMotif(e2.target.value)} maxLength={480} />
+              </label>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}{/imputation/i.test(erreur) ? " Complétez l'imputation de la facture, puis recommencez." : ""}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={envoi} onClick={soumettreComptabilisation}>{envoi ? <Loader variant="spin" /> : null} Transmettre</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={form?.type === "attester"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><BadgeCheck width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Attester l&apos;identité</DialogTitle>
+            <DialogDescription>Quand le registre ne répond pas, ou pour un fournisseur étranger hors registre, vous attestez que {fournisseur?.nom} est bien l&apos;entreprise qu&apos;il dit être.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <ChampMotif motif={motif} onChange={setMotif} aide="Sur quoi l'attestation se fonde : extrait Kbis reçu, registre étranger consulté, contrat signé…" />
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!motifOk || envoi} onClick={soumettreAttestation}>{envoi ? <Loader variant="spin" /> : null} Attester</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={form?.type === "bloquer"} onOpenChange={(o) => !o && setForm(null)}>
         <DialogContent>
           <DialogHeader>
@@ -697,7 +1147,7 @@ function Valeur({ champ, texte, v, actif, onClick, douteux }: { champ: string; t
         {v?.verifiee ? <span className="esp-coche" title="Vérifiée"><CheckCircle2 width={14} height={14} aria-label="vérifiée" /></span> : null}
       </span>
       <span className="esp-valeur-texte">{texte}</span>
-      <span className="esp-valeur-cite">{v ? `p. ${v.page ?? 1} · ${v.source === "humain" ? "saisie" : v.source === "regle" ? "règle" : v.source.toUpperCase()}${v.confiance !== null && v.source !== "humain" ? ` · ${Math.round(v.confiance * 100)} %` : ""}` : douteux ? "douteux" : "non cité"}</span>
+      <span className="esp-valeur-cite">{v?.source === "xml" ? "du fichier" : v ? `p. ${v.page ?? 1} · ${v.source === "humain" ? "saisie" : v.source === "regle" ? "règle" : v.source.toUpperCase()}${v.confiance !== null && v.source !== "humain" ? ` · ${Math.round(v.confiance * 100)} %` : ""}` : douteux ? "douteux" : "non cité"}</span>
     </button>
   );
 }

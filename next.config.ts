@@ -38,9 +38,10 @@ const POLITIQUE = [
   "img-src 'self' data: blob: https:",
   "media-src 'self' blob: https:",
   "font-src 'self' data:",
-  `connect-src 'self' ${ARMOIRE}${ARMOIRE_ENV && ARMOIRE_ENV !== ARMOIRE ? ` ${ARMOIRE_ENV}` : ""} https://www.facebook.com https://connect.facebook.net${DEV ? " ws: https://va.vercel-scripts.com" : ""}`,
+  `connect-src 'self' ${ARMOIRE} ${ARMOIRE.replace("https://", "wss://")}${ARMOIRE_ENV && ARMOIRE_ENV !== ARMOIRE ? ` ${ARMOIRE_ENV} ${ARMOIRE_ENV.replace("https://", "wss://")}` : ""} https://www.facebook.com https://connect.facebook.net${DEV ? " ws: https://va.vercel-scripts.com" : ""}`,
   "worker-src 'self' blob:",
-  "frame-src 'self'",
+  /* 09/10/2026 — les lecteurs vidéo de la page Formation du pilotage (/omega/aide) */
+  "frame-src 'self' https://www.youtube-nocookie.com https://www.loom.com https://player.vimeo.com",
   "manifest-src 'self'",
   "frame-ancestors 'none'",
   "base-uri 'self'",

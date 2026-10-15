@@ -13,6 +13,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { EXEMPLE_CLIENT_ID, EXEMPLE_MOI, YANIS, aujourdHui, ilYa } from "../exemples/socle";
+import { ouvrirLocale, recalculer } from "./situations";
 import type { Avenant, Chantier, Controle, Lot, Marche, Passage, Prix, Tableau, Tiers } from "./types";
 
 const id = (n: string) => `00000000-0000-4000-8000-00000000d${n.padStart(3, "0")}`;
@@ -104,17 +105,20 @@ const MARCHE_ROL: Marche = {
 
 const PASSAGES_TIL: Passage[] = [
   { id: P4, chantier_id: TILLEULS, lot_id: LOT2, lot_code: "02", lot_libelle: "Garde-corps", equipe_id: null, tiers_id: DUMONT, intervenant_type: "tiers", intervenant_lu: "Dumont Serrurerie SARL", intervenant_nom: "Serrurerie Dumont", rapprochement: "ressemblance", tache: "Relevé des cotes garde-corps", debut: aujourdHui(2), fin: aujourdHui(2), exterieur: true, statut: "prevu", confirmation: "confirmee", confirmation_le: ilYa(0, 8), source: "tableur", source_ref: "P4", version: 1,
+    envoi: { id: id("251"), canal: "whatsapp", mode: "reel", statut: "envoye", verrou: null, cree_le: ilYa(1, 17), envoye_le: ilYa(1, 17), remise: "remis", remise_le: ilYa(1, 17) },
     confirmations: [
       { id: id("201"), passage_id: P4, evenement: "demandee", canal: "whatsapp", cle: "demande:P4", detail: {}, survenu_le: ilYa(1, 17) },
       { id: id("202"), passage_id: P4, evenement: "confirmee", canal: "whatsapp", cle: "wa:msg-0001", detail: { texte: "OK pour mercredi 7 h 30" }, survenu_le: ilYa(0, 8) },
     ] },
   { id: P7, chantier_id: TILLEULS, lot_id: LOT2, lot_code: "02", lot_libelle: "Garde-corps", equipe_id: null, tiers_id: DUMONT, intervenant_type: "tiers", intervenant_lu: "Serrurerie Dumont", intervenant_nom: "Serrurerie Dumont", rapprochement: "identique", tache: "Pose des platines", debut: aujourdHui(1), fin: aujourdHui(1), exterieur: true, statut: "prevu", confirmation: "sans_reponse", confirmation_le: ilYa(0, 17), source: "tableur", source_ref: "P7", version: 1,
+    envoi: { id: id("252"), canal: "whatsapp", mode: "reel", statut: "envoye", verrou: null, cree_le: ilYa(2, 17), envoye_le: ilYa(2, 17), remise: null, remise_le: null },
     confirmations: [
       { id: id("203"), passage_id: P7, evenement: "demandee", canal: "whatsapp", cle: "demande:P7", detail: {}, survenu_le: ilYa(2, 17) },
       { id: id("204"), passage_id: P7, evenement: "sans_reponse", canal: null, cle: "sans_reponse:P7", detail: { remplacants: [{ tiers: ROCHAT, nom: "Métallerie Rochat", canal: "sms", vigilance: "a_renouveler" }] }, survenu_le: ilYa(0, 17) },
     ] },
   { id: P1, chantier_id: TILLEULS, lot_id: LOT1, lot_code: "01", lot_libelle: "Menuiseries extérieures", equipe_id: EQUIPE_A, tiers_id: null, intervenant_type: "equipe", intervenant_lu: "Pose A", intervenant_nom: "Pose A", rapprochement: "identique", tache: "Pose des fenêtres", debut: aujourdHui(4), fin: aujourdHui(11), exterieur: false, statut: "prevu", confirmation: "non_demandee", confirmation_le: null, source: "tableur", source_ref: "P1", version: 2, confirmations: [] },
   { id: P2, chantier_id: TILLEULS, lot_id: LOT2, lot_code: "02", lot_libelle: "Garde-corps", equipe_id: null, tiers_id: DUMONT, intervenant_type: "tiers", intervenant_lu: "Serrurerie Dumont", intervenant_nom: "Serrurerie Dumont", rapprochement: "identique", tache: "Pose des garde-corps", debut: aujourdHui(12), fin: aujourdHui(16), exterieur: true, statut: "prevu", confirmation: "declinee", confirmation_le: ilYa(0, 11), source: "tableur", source_ref: "P2", version: 1,
+    envoi: { id: id("253"), canal: "whatsapp", mode: "reel", statut: "envoye", verrou: null, cree_le: ilYa(0, 9), envoye_le: ilYa(0, 9), remise: "remis", remise_le: ilYa(0, 9) },
     confirmations: [
       { id: id("205"), passage_id: P2, evenement: "demandee", canal: "whatsapp", cle: "demande:P2", detail: {}, survenu_le: ilYa(0, 9) },
       { id: id("206"), passage_id: P2, evenement: "declinee", canal: "whatsapp", cle: "wa:msg-0003", detail: { texte: "Impossible la semaine 42, équipe sur Vénissieux" }, survenu_le: ilYa(0, 11) },
@@ -125,7 +129,9 @@ const PASSAGES_TIL: Passage[] = [
 
 const AVENANTS_TIL: Avenant[] = [
   { id: AV1, chantier_id: TILLEULS, marche_id: M1, numero: 1, objet: "Garde-corps supplémentaires sur les balcons du R+3 (12 ml), demandés par le maître d'ouvrage en visite",
-    origine: { canal: "vocal", auteur: "Chef d'équipe Pose A", date: aujourdHui(-2), texte: "Lefèvre veut aussi des garde-corps au R+3, douze mètres." },
+    origine: { canal: "vocal", auteur: "Chef d'équipe Pose A", date: aujourdHui(-2), texte: "Lefèvre veut aussi des garde-corps au R+3, douze mètres.", lecteur: true,
+              chiffrage: { etat: "trouve", designation: "Garde-corps acier laqué, hauteur 1,00 m", prix_unitaire_ht: 142, unite: "ml",
+                           proche_du_marche: { designation: "Garde-corps acier laqué, hauteur 1,00 m", unite: "ml" } } },
     statut: "soumis", demande_id: id("301"), demande_statut: "approuvee", piece_id: null, soumis_le: ilYa(1, 10), signe_le: null, signe_par: null, signe_libelle: null, motif: null, cree_le: ilYa(2, 15), nb_lignes: 2, montant_ht: 1884,
     lignes: [
       { id: id("311"), avenant_id: AV1, lot_id: LOT2, prix_id: PRIX_GC, ordre: 1, designation: "Garde-corps acier laqué, hauteur 1,00 m", unite: "ml", quantite: 12, sens: 1, nature: "ouvrage", origine_prix: "bibliotheque", prix_unitaire_ht: 142, montant_ht: 1704 },
@@ -185,7 +191,7 @@ const CHANTIER_ROL: Chantier = {
 export const TABLEAUX_EXEMPLE: Record<string, Tableau> = {
   [TILLEULS]: {
     chantier: CHANTIER_TIL,
-    reglages: { formule: "chantiers", quota_chantiers: 20, quota_comptes_bureau: 5 },
+    reglages: { formule: "entreprise", quota_chantiers: 20, quota_comptes_bureau: 5 },
     voit_prix: true,
     lots: LOTS_TIL,
     marches: [MARCHE_TIL],
@@ -213,7 +219,7 @@ export const TABLEAUX_EXEMPLE: Record<string, Tableau> = {
   },
   [ROLLAND]: {
     chantier: CHANTIER_ROL,
-    reglages: { formule: "chantiers", quota_chantiers: 20, quota_comptes_bureau: 5 },
+    reglages: { formule: "entreprise", quota_chantiers: 20, quota_comptes_bureau: 5 },
     voit_prix: true,
     lots: [{ id: LOTR1, chantier_id: ROLLAND, code: "01", libelle: "Menuiseries et bardage", corps_etat: "menuiserie", corps_etat_libelle: "Menuiserie", rang: 1, execution: "client", tiers_id: null, equipe_id: EQUIPE_A, equipe_nom: "Pose A", exterieur: true, statut: "a_venir", acceptation: null }],
     marches: [MARCHE_ROL],
@@ -233,6 +239,17 @@ export const TABLEAUX_EXEMPLE: Record<string, Tableau> = {
     bibliotheque: BIBLIOTHEQUE,
   },
 };
+
+/* La situation n° 1 des Tilleuls, validée le mois dernier (b6_12) : de quoi voir la suite repartir de son avancement. */
+{
+  const t = TABLEAUX_EXEMPLE[TILLEULS];
+  let n = 0;
+  const s1 = ouvrirLocale({ ...t, situations: [] }, aujourdHui(-6), null, () => id(String(300 + ++n)));
+  const pct = (d: string) => (/fenêtre/i.test(d) ? 35 : /garde-corps/i.test(d) ? 20 : /installation/i.test(d) ? 100 : 0);
+  const validee = recalculer({ ...s1, lignes: s1.lignes.map((l) => ({ ...l, avancement: pct(l.designation) })) });
+  t.situations = [{ ...validee, statut: "validee", demande_id: id("399"), demande_statut: "executee", soumise_le: ilYa(5, 16), validee_le: ilYa(4, 10), validee_libelle: "Claire Morel", echeance: aujourdHui(26), penalites_taux: null, paiements: [] }];
+  TABLEAUX_EXEMPLE[ROLLAND].situations = [];
+}
 
 export const LISTE_EXEMPLE: Chantier[] = [CHANTIER_TIL, CHANTIER_ROL];
 

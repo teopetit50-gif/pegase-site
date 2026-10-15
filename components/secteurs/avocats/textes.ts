@@ -60,7 +60,7 @@ export const FONCTIONNALITES = {
     { titre: "Chronologie sourcée", texte: "Chaque fait est daté, résumé et rattaché à la page de sa pièce." },
     { titre: "Bordereau contrôlé", texte: "Chaque prétention est rapprochée des pièces invoquées et de leur numérotation." },
     { titre: "Contradictions relevées", texte: "Quand deux pièces divergent, Tamila les présente côte à côte et vous laisse trancher." },
-    { titre: "Secret professionnel", texte: "L'éditeur est français, et vos pièces sont hébergées en France." },
+    { titre: "Secret professionnel", texte: "L'éditeur est français, et vos pièces sont chiffrées sur votre poste avant d'être conservées dans l'UE." },
   ],
 };
 
@@ -133,8 +133,8 @@ export const CONNEXIONS = {
 export const SECRET = {
   titreAvant: "Confier vos pièces à un logiciel engage",
   titreMot: "votre secret professionnel",
-  texte: "Vos pièces relèvent de l'article 66-5 de la loi du 31 décembre 1971. Tamila les stocke en France, chez un hébergeur français, et les lit en Europe, sans rien en conserver. Chacun de nos engagements figure dans le contrat que vous signez.",
-  badge: "Français, hébergé en France",
+  texte: "Vos pièces relèvent de l'article 66-5 de la loi du 31 décembre 1971. Tamila les chiffre sur votre poste, les conserve dans l'Union européenne, et les lit en Europe, sans rien en conserver. Chacun de nos engagements figure dans le contrat que vous signez.",
+  badge: "Français, hébergé dans l'UE",
   accroche: "Le contrat précise les dossiers que Tamila lit, le lieu où les pièces sont conservées et la date de leur effacement.",
   faits: [
     ["Éditeur", "France"],

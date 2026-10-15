@@ -28,6 +28,9 @@ import { TABLEAUX_EXEMPLE } from "./exemples";
 import { chargerListe, chargerTableau, monClient } from "./portes";
 import type { Chantier, Tableau } from "./types";
 import ChantierVue from "./ChantierVue";
+import AccordJ2 from "./AccordJ2";
+import ARangerCarte from "./ARangerCarte";
+import PointMensuelCarte from "./PointMensuelCarte";
 
 type Reel = { liste: Chantier[]; tableaux: Record<string, Tableau>; client: { client_id: string; user_id: string; role: string } | null };
 
@@ -253,6 +256,11 @@ export default function EcranDaliro() {
         ))}
       </div>
 
+      <AccordJ2 key={`${source}:${reel?.client?.client_id ?? ""}`} source={source} client={source === "reelle" ? reel?.client ?? null : null} />
+      <ARangerCarte key={`fil-${source}:${reel?.client?.client_id ?? ""}`} source={source} client={source === "reelle" ? reel?.client?.client_id ?? null : null} chantiers={liste} relire={relire} />
+      <PointMensuelCarte key={`point-${source}:${reel?.client?.client_id ?? ""}`} source={source} client={source === "reelle" ? reel?.client?.client_id ?? null : null}
+                         tableaux={source === "exemple" ? Object.values(local) : Object.values(reel?.tableaux ?? {})} />
+
       {erreur ? (
         <div style={{ marginBottom: 14 }}>
           <Avis teinte="rouge" role="alert"><strong>La base réelle n&apos;a pas répondu.</strong> {erreur}</Avis>
@@ -270,7 +278,7 @@ export default function EcranDaliro() {
           ) : visibles.length === 0 ? (
             <Vide titre="Aucun chantier">{filtre ? "Rien dans cette famille." : "Créez votre premier chantier : son nom, son adresse, son maître d'ouvrage."}</Vide>
           ) : (
-            <ul className="esp-liste" role="listbox" aria-label="Chantiers">
+            <ul className="esp-liste" aria-label="Chantiers">
               {visibles.map((c) => {
                 const s = STATUTS_CHANTIER[c.statut];
                 const p = c.prochain_passage;
@@ -278,8 +286,7 @@ export default function EcranDaliro() {
                   <li key={c.id}>
                     <button
                       type="button"
-                      role="option"
-                      aria-selected={choisi === c.id}
+                      aria-current={choisi === c.id ? "true" : undefined}
                       className="esp-item"
                       onClick={() => {
                         setChoix(c.id);

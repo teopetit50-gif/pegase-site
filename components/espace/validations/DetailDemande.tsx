@@ -16,6 +16,7 @@ import { dateCourte, dateHeure, libelleModule, montant, phrase, relatif } from "
 import type { Approbation, Delegation, Demande, Entite, EquipesContexte } from "../types";
 import { MOTIFS_REFUS, STATUTS, compteApprobations, delegationsUtilisables, exigences, groupeDe, verdict, type Decideur } from "./regles";
 import { annuler, decider, deleguer, joindrePiece, modifier } from "./portes";
+import ApercuFiled from "./ApercuFiled";
 
 type Props = {
   demande: Demande;
@@ -36,6 +37,9 @@ type Props = {
   onAnnulationLocale: (id: string) => void;
   onDelegationLocale: (g: Delegation) => void;
   recharger: () => Promise<void>;
+  /* en base réelle, la file se relit après une décision et la demande
+     décidée quitte la vue : le message de succès remonte à la file */
+  onFait?: (message: string) => void;
 };
 
 type Formulaire = "approuver" | "refuser" | "modifier" | "deleguer" | "annuler" | null;
@@ -122,6 +126,7 @@ export default function DetailDemande(p: Props) {
     try {
       await action();
       setFait(message);
+      p.onFait?.(message);
       setForm(null);
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base a refusé l'opération.");
@@ -262,6 +267,8 @@ export default function DetailDemande(p: Props) {
           <Def etiquette="Politique">{d.politique_id ? "Approuvée d'office par un accord permanent" : "Décidée par des personnes"}</Def>
         </dl>
 
+        <ApercuFiled demande={d} source={p.source} />
+
         {payloadVisible.length ? (
           <div>
             <div className="esp-section-titre">Ce que porte la demande</div>
@@ -355,11 +362,11 @@ export default function DetailDemande(p: Props) {
 
       {/* ——— Approuver ——— */}
       <Dialog open={form === "approuver"} onOpenChange={(o) => !o && setForm(null)}>
-        <DialogContent>
+        <DialogContent onOpenAutoFocus={focusSurLeTexte}>
           <DialogHeader>
             <DialogIcone><Check width={18} height={18} aria-hidden="true" /></DialogIcone>
             <DialogTitle>Approuver</DialogTitle>
-            <DialogDescription>{d.resume}{d.montant !== null ? ` — ${montant(d.montant, d.devise)}` : ""}</DialogDescription>
+            <DialogDescription>{resumeAvecMontant(d.resume, d.montant !== null ? montant(d.montant, d.devise) : null)}</DialogDescription>
           </DialogHeader>
           <DialogBody>
             <div className="esp-form">
@@ -392,7 +399,7 @@ export default function DetailDemande(p: Props) {
 
       {/* ——— Refuser ——— */}
       <Dialog open={form === "refuser"} onOpenChange={(o) => !o && setForm(null)}>
-        <DialogContent>
+        <DialogContent onOpenAutoFocus={focusSurLeTexte}>
           <DialogHeader>
             <DialogIcone><X width={18} height={18} aria-hidden="true" /></DialogIcone>
             <DialogTitle>Refuser</DialogTitle>
@@ -538,6 +545,29 @@ export default function DetailDemande(p: Props) {
       </Dialog>
     </div>
   );
+}
+
+/* 06/10 (retour de Teo) : à l'ouverture, le focus allait à la liste
+   « Décider » et son anneau la faisait paraître encadrée deux fois. On le
+   pose dans le champ de texte, celui qu'on remplit de toute façon. */
+function focusSurLeTexte(e: Event) {
+  const zone = e.target instanceof HTMLElement ? e.target.querySelector("textarea") : null;
+  if (zone) {
+    e.preventDefault();
+    zone.focus();
+  }
+}
+
+/* Le résumé d'une demande porte souvent déjà son montant (« facture …,
+   12 480,00 € ») : on ne le répète pas. Les espaces de milliers deviennent
+   insécables, pour qu'un montant ne se coupe pas en fin de ligne. */
+function resumeAvecMontant(resume: string, montantTexte: string | null): string {
+  const insecable = (t: string) => t.replace(/(\d)[ \u00a0\u202f](?=\d{3}(?:\D|$))/g, "$1\u202f");
+  const r = insecable(resume);
+  if (!montantTexte) return r;
+  const m = insecable(montantTexte);
+  const chiffres = (t: string) => t.replace(/\D/g, "");
+  return chiffres(r).includes(chiffres(m)) ? r : `${r} — ${m}`;
 }
 
 /* Le champ de pièce jointe : le contrôle natif est caché (son libellé est
