@@ -20,7 +20,8 @@ Branche : `tableau-de-bord-v2` (jamais main). Coordinateur : session_01BCGFdpRKB
 - **15/10, lot 2b** : À valider allégé comme /omega (oc-val-simple) : une ligne par demande, le montant et le délai à droite (rouge si dépassé), la flèche au survol ; plus de filtres catégorie et échéance. On garde la vue, le module, la recherche et le circuit d'approbation, qui est la vraie chaîne des approbateurs du client et pas la frise de statut de /omega. Recette C1 : 0 échec.
 - **En attente** : l'écran Équipe d'A3 (worker-a3 2340dd1, /espace2/equipe). Dès qu'il est dans main, faire pointer l'entrée « Équipe » du sous-menu Réglages (Coquille) vers /espace2/equipe.
 - **15/10, lot 2c** : Point du matin allégé comme /omega (oc-pm-simple). Une ligne par élément, le détail à droite, l'action au survol. Le titre de chaque carte mène à la page (plus de ⋮ ni de lien en pied). La barre ne garde que la date et « Exemple ». Plus de filtre module, d'heure, de mention de remise ni de « Recevoir par ». La carte « Équipe & continuité » garde sa mise en page. Recette C1 : 0 échec.
-- **Prochain pas** : lot 2d, passer les pages modules et Réglages en clair aux 5 largeurs et comparer à /omega (Activité, Utilisation, Réglages). Relier Équipe quand A3 sera dans main.
+- **15/10, Équipe** : main est fusionné (dont l'écran d'A3). L'entrée « Équipe » du sous-menu Réglages mène à /espace2/equipe, la page a son titre dans la barre du haut et elle est dans la recette C1. axe trouve 4 écarts label-content-name-mismatch dans EcranEquipe (.esp-lien-bouton des lignes), signalés à A3.
+- **Prochain pas** : lot 2d, passer les pages modules et Réglages en clair aux 5 largeurs et les comparer à /omega (Activité, Utilisation, Réglages).
 
 ## REPRISE précédente (06/10/2026, 21 h Z)
 
