@@ -26,6 +26,7 @@ const ECRANS = [
   ['boite', P + '/filed/boite', null],
   ['demandes', P + '/demandes', null],
   ['reglages', P + '/reglages', null],
+  ['equipe', P + '/equipe', `[...document.querySelectorAll('button')].find(b => /Ajouter une personne/.test(b.textContent))?.click()`],
   ['point', P + '/point', null],
 ];
 
@@ -52,7 +53,7 @@ function dire(nom, violations) {
   ok(graves.length === 0, `${nom} : ${graves.length} écart(s) grave(s), ${violations.length - graves.length} mineur(s)`);
 }
 
-for (const [nom, chemin, ouvrir] of ECRANS) {
+for (const [nom, chemin, ouvrir] of ECRANS.filter(([n]) => !process.env.SEUL || n === process.env.SEUL)) {
   for (const largeur of [390, 1440]) {
     const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `a3-axe-${nom}`, densite: 1 });
     console.log(`— ${chemin} à ${largeur}`);

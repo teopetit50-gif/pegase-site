@@ -21,7 +21,7 @@ mkdirSync(dossier, { recursive: true });
 let echecs = 0;
 const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) echecs++; };
 const ANGLAIS = /\b(Loading|Submit|Cancel|Approve|Reject|Delete|Save|Error|Pending|Due|Invoice|Supplier|Settings|Logout|Sign in|Dashboard|Today|Yesterday|Tomorrow)\b/;
-const ECRANS = [['validations', P + '/validations'], ['filed', P + '/filed'], ['fournisseurs', P + '/filed/fournisseurs'], ['a-payer', P + '/filed/a-payer'], ['comptabilite', P + '/filed/comptabilite'], ['boite', P + '/filed/boite'], ['demandes', P + '/demandes'], ['reglages', P + '/reglages'], ['point', P + '/point']];
+const ECRANS = [['validations', P + '/validations'], ['filed', P + '/filed'], ['fournisseurs', P + '/filed/fournisseurs'], ['a-payer', P + '/filed/a-payer'], ['comptabilite', P + '/filed/comptabilite'], ['boite', P + '/filed/boite'], ['demandes', P + '/demandes'], ['reglages', P + '/reglages'], ['equipe', P + '/equipe'], ['point', P + '/point']];
 const LARGEURS = [390, 768, 1024, 1440, 1700];
 
 for (const [nom, chemin] of ECRANS.filter(([n]) => !SAUTER.has(n))) {
@@ -446,6 +446,49 @@ if (!SAUTER.has('reglages')) {
   await s.dormir(600);
   ok(/Liste prête\. 1284 lignes dans 5 tables, 4 comptes et 12 fichiers/.test(await s.evaluer(`[...document.querySelectorAll('.esp-avis')].map(a => a.textContent).join(' | ')`)), 'préparation de l\'effacement : la liste, rien d\'effacé');
   await s.capturer(`${dossier}reglages-exports-1440.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+if (!SAUTER.has('equipe')) {
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-equipe', densite: 1 });
+  console.log(`— ${P}/equipe : rôles, sociétés visibles, ajouter, retirer`);
+  ok(await s.aller(base + P + '/equipe'), 'page chargée');
+  await s.dormir(600);
+  const n0 = await s.evaluer(`document.querySelectorAll('tbody tr').length`);
+  ok(n0 === 4, `${n0} personnes`);
+  const roleYanis = `document.querySelector('select[aria-label="Rôle de Yanis Dupré"]')`;
+  await s.evaluer(`(() => { const sel = ${roleYanis}; Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(sel, 'lecteur'); sel.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+  await s.dormir(300);
+  ok(/Yanis Dupré est maintenant lecteur/.test(await s.evaluer(`[...document.querySelectorAll('[role="status"]')].map(a => a.textContent).join(' ')`)), 'changer un rôle : dit en clair');
+  await s.evaluer(`[...document.querySelectorAll('button')].find(b => b.getAttribute('aria-label') === 'Sociétés visibles par Sofia Carvalho').click()`);
+  await s.dormir(400);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] input[type="radio"]')][1].click()`);
+  await s.dormir(200);
+  ok(await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer/.test(b.textContent)).disabled`) === true, 'sans société cochée, « Enregistrer » reste gris');
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] input[type="checkbox"]')][1].click()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer/.test(b.textContent)).click()`);
+  await s.dormir(400);
+  const sofia = await s.evaluer(`[...document.querySelectorAll('tbody tr')].find(t => /Sofia/.test(t.textContent)).innerText.replace(/\\s+/g, ' ')`);
+  ok(/Grenoble/.test(sofia) && !/Toutes/.test(sofia), `périmètre : ${sofia.slice(0, 120)}`);
+  await s.evaluer(`[...document.querySelectorAll('button')].find(b => /Ajouter une personne/.test(b.textContent)).click()`);
+  await s.dormir(400);
+  const ajout = (v) => s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input[type="email"]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, ${JSON.stringify(v)}); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await ajout('pas-une-adresse');
+  await s.dormir(200);
+  ok(await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Ajouter\\s*$/.test(b.textContent)).disabled`) === true, 'adresse invalide : « Ajouter » gris');
+  await ajout('lea.martin@atelier-bertin.fr');
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Ajouter\\s*$/.test(b.textContent)).click()`);
+  await s.dormir(400);
+  ok(await s.evaluer(`document.querySelectorAll('tbody tr').length`) === 5, 'ajoutée : cinq personnes');
+  await s.evaluer(`[...document.querySelectorAll('button')].find(b => b.getAttribute('aria-label') === 'Retirer Marc Lévy').click()`);
+  await s.dormir(400);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Retirer\\s*$/.test(b.textContent)).click()`);
+  await s.dormir(400);
+  const fin = await s.evaluer(`({ n: document.querySelectorAll('tbody tr').length, moi: !document.querySelector('button[aria-label="Retirer Claire Morel"]') && !document.querySelector('select[aria-label="Rôle de Claire Morel"]') })`);
+  ok(fin.n === 4 && fin.moi, `retiré : ${fin.n} personnes ; on ne se retire pas soi-même et on ne change pas son propre rôle`);
+  await s.capturer(`${dossier}equipe-1440.jpg`, { qualite: 55 });
   s.fermer();
 }
 

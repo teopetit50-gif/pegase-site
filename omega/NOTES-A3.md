@@ -2,16 +2,15 @@
 
 Branche `worker-a3`. Dernière mise à jour : 06/10/2026, 03 h 50 Paris (reprise par la session Opus 5.5 `session_01Npbh1aR6LoEX7PZDchMSca`, à la suite de `session_01DdgwRadkJFx5u9buwh5crS`).
 
-## REPRISE (pause de Teo, 11/10 15 h 40 Z)
+## REPRISE (15/10)
 
-**Fait, poussé sur worker-a3** (tête = ce commit, au-dessus de 1e51e14) :
-- 11/10 : chiffrage `omega/CHIFFRAGE/espace.md` (≈ 23 j ; aucun A ; le parcours d'entrée — connexion dans l'espace, installation, invitation, rôles, périmètres — n'existe pas ; deux « espaces clients » coexistent : app.omegaai.fr et omegaai.fr/espace).
-- À fusionner par le coordinateur : 1e51e14 (chiffrage), 0295d85 (onglets REPUT/CASHD, libellés longs à 2240 px), d418e0a et fa23419 (scripts de recette : PREFIXE, CAPTURES, SAUTER, sélecteurs neutres).
-- Déjà fusionnés : 5091088, fd6df00, fed6368.
+**Fait, poussé sur worker-a3** (tête = ce commit) :
+- 15/10 : écran **Équipe** — /espace/equipe et /espace2/equipe (Habille, comme la boîte) ; lien depuis Réglages (« Gérer l'équipe »). Annuaire, changer un rôle, sociétés visibles (perimetre_total + comptes_entites), ajouter une personne qui a déjà un compte (rattacher_membre), retirer. Recette /espace et /espace2, non-régression `equipe` 27/27, axe vert ; base réelle : gérant (4 personnes, refus « Aucun compte pour cette adresse. »), daf2 valideur (« Seuls les gérants… »). Rien écrit en base. Chiffrage espace.md mis à jour (1.3 corrigé : /bienvenue existe ; 1.4 C, 1.5 et 1.6 B).
+- À fusionner : ce lot, 1e51e14 (chiffrage), 0295d85 (onglets), d418e0a et fa23419 (scripts).
+- Note : un compte sans `bienvenue_faite` est renvoyé vers /bienvenue par /espace2 ; mes relectures passent par /espace/…?ancien=1.
 
-**Attend le coordinateur / A5** : export-complet (porte public.exporter_client absente ; origine localhost:3010 sur la recette) ; OFFLOAD dans ECRANS oui/non.
-**Attend Teo** : lequel des deux espaces clients est le bon (CHIFFRAGE/espace.md § 1.1).
-**Prochain pas** : attendre la relance ; si le coordinateur le demande, construire le parcours d'entrée chiffré (1.2 « Se connecter » dans la coquille, 1.4 « Équipe » avec rattacher_membre, 1.5 rôles, 1.6 périmètres).
+**Attend** : A5 (export-complet : porte absente) ; Teo (lequel des deux espaces) ; C1 (prévenu : /espace2/equipe ajouté selon son motif).
+**Prochain pas** : invitation d'une personne sans compte (1.4, fonction côté service à demander à A5) ; brancher /bienvenue sur les portes (1.3) si le coordinateur le confie.
 
 ## Fait
 
