@@ -103,19 +103,19 @@ les 14 tests sont verts sur la recette, les trois migrations sont posées,
 /espace/varelo est sur main (b287d04) et **en ligne sur omegaai.fr**. Le
 coordinateur lit ce fichier.
 
-## REPRISE (pause demandée par Teo le 15/10/2026, 16 h 15 UTC)
+## REPRISE (pause « 50 % » demandée par Teo le 15/10/2026, 16 h 15 UTC) — état exact
 
-**État exact à l'arrêt** : B1 est clos. Les 14 tests pgTAP sont verts sur la
-recette, les migrations varelo_b1_01, _02, _03 sont posées sur la recette,
-/espace/varelo est fusionné sur main (b287d04) et en ligne sur omegaai.fr
-(vérifié le 06/10). Aucun travail en cours, arbre propre.
+Une section ajoutée ici à 16 h 15 par une autre session (commit 6cded6e) décrivait l'état du 06/10 au matin
+(b1_01 à b1_03 seulement) : elle est **périmée** et remplacée par celle-ci.
 
-**Prochaine étape si Teo relance** : (1) reposer les trois migrations en
-production (`omega/modules/varelo/migrations/`, dans l'ordre) et ajouter les
-quatre `private.grp_*` de b1_02 à la liste figée d'A5 ; (2) trancher le
-périmètre de la promesse du site (contrats, réserves, reportings ne sont pas
-dans le socle VARELO) ; (3) en option, rejouer sur le banc un dépôt d'export
-et un passage depuis l'écran (`omega/recette-b1/relecture-reelle-varelo.mjs`).
+**État à l'arrêt** : arbre propre, rien en cours. Toutes les migrations Varelo b1_01 à b1_18 (et b1_11b) sont
+posées vertes sur la recette ; tests b1_01 à b1_21 et socle 44/46/51/55 verts (dernier relevé : 11/10, h1513bbc) ;
+écrans fusionnés dans main (décisions, règles du groupe, caisses, liens /espace2). Seuls restent sur worker-b1,
+non fusionnés : documents (chiffrage mis à jour, PRODUCTION.md, ces notes).
+
+**Prochaine étape si Teo relance** : (1) la production au gel avec A5, selon `omega/modules/varelo/PRODUCTION.md`
+(16 migrations dans l'ordre, 6 crons) ; (2) la décision de Teo sur l'outil « contexte_varelo » de l'assistant ;
+(3) l'essai à blanc des modèles d'export (gestion et caisses) dès qu'un vrai export arrive.
 Coordinateur en poste : session_01BCGFdpRKBvXKjouC75sYBg.
 
 ## Les deux jauges
