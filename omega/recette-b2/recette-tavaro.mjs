@@ -213,6 +213,8 @@ for (const largeur of LARGEURS) {
   await s.dormir(500);
   const gris = await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer et faire signer/.test(b.textContent))?.disabled`);
   ok(gris === true, 'sans les quatre côtés en photo, « Enregistrer et faire signer » reste gris');
+  const guide0 = await s.evaluer(`document.querySelector('[role="dialog"] .tav-guide')?.innerText ?? ''`);
+  ok(/0 \/ 7/.test(guide0) && /Avant/.test(guide0) && /trois pas devant/.test(guide0), 'la prise de vue est guidée : d\'abord l\'avant, avec sa consigne de cadrage');
   const photo = new URL('photos/nette.jpg', import.meta.url).pathname;
   const floue = new URL('photos/floue.jpg', import.meta.url).pathname;
   /* envoyer rend le message CDP entier : le résultat est sous .result */
@@ -230,6 +232,8 @@ for (const largeur of LARGEURS) {
     await s.envoyer('DOM.setFileInputFiles', { nodeId, files: [photo] });
   }
   await s.dormir(300);
+  const guide4 = await s.evaluer(`document.querySelector('[role="dialog"] .tav-guide')?.innerText ?? ''`);
+  ok(/4 \/ 7/.test(guide4) && /Compteur \(facultatif\)/.test(guide4), 'les quatre côtés pris, le guide passe au compteur, facultatif');
   await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer et faire signer/.test(b.textContent))?.click()`);
   await s.dormir(700);
   const signature = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return { canvas: !!d.querySelector('canvas'), nom: d.querySelector('input')?.value, gris: [...d.querySelectorAll('button')].find(b => /Signer l.état/.test(b.textContent))?.disabled }; })()`);
