@@ -7,11 +7,11 @@ Dernière mise à jour : 06/10/2026, 03 h 00 Paris — lot B6 terminé.
 
 **Posé et vert sur la recette, écrans dans main** : b6_01 → b6_35 (dernier passage : 36 ok, MeteoCarte et l'échange météo dans main). Météo MET Norway : état A.
 
-**À poser (coordinateur)** : rien. Relevé du chantier (écran seul : releve.ts, ReleveDialog, bouton dans l'en-tête du chantier) à fusionner.
+**À poser (coordinateur)** : rien. Relevé du chantier (0aeb024) part dans main.
 
 **Attend Teo** : WhatsApp Business (Meta), transcription des vocaux, accord permanent J-2, région des données (Supabase ; vercel.json sans région). Phrases à corriger sur la page : CHIFFRAGE/daliro.md (fin) — « une journée pour remplacer » et « disponibilités » sont désormais vraies une fois b6_29/b6_31 posés.
 
-**Prochain pas** : selon CHIFFRAGE/daliro.md, reste l'assistant « questions » (3 j) ; relevé d'audit fait côté écran (l'import d'un export WhatsApp attend Teo). Puis, WhatsApp branché : une vraie photo de chantier jusqu'à l'avenant chiffré et l'avancement (état A).
+**Prochain pas** : rien côté B6 sans Teo. L'assistant « questions » (3 j, CHIFFRAGE/daliro.md) appelle un modèle d'IA : choix du fournisseur à Teo (promesse « en Europe, sans entraînement ») — ne pas le coder avant. Relevé d'audit fait côté écran (l'import d'un export WhatsApp attend Teo). Puis, WhatsApp branché : une vraie photo de chantier jusqu'à l'avenant chiffré et l'avancement (état A).
 
 ## Les deux jauges
 
@@ -132,6 +132,7 @@ Repère du marché : Graneet, Obat, Batappli, Tolteck, Extrabat font tous des **
 
 ## Journal de session
 
+- 15/10, 14 h 15 UTC : relevé dans main (coordinateur). Assistant « questions » suspendu : fournisseur du modèle à choisir par Teo.
 - 15/10, 17 h UTC : relevé du chantier, écran seul (rien à poser) : components/espace/daliro/releve.ts (sections marché, travaux en plus, facturation si voit_prix, planning, à reprendre ; gravités à traiter / à surveiller ; page HTML imprimable) + ReleveDialog (« Imprimer ou enregistrer en PDF »), bouton « Relevé du chantier » dans l'en-tête de ChantierVue. Recette 270 ✓ (bloc relevé à 390 et 1440, axe sans écart grave).
 - 15/10, 16 h UTC : 311 tests verts (b6_30 compris), RecalageDialog dans main. b6_35 ordre météo : private.btp_jours_secs, public.btp_ordre_meteo (passage extérieur menacé d'une équipe ↔ passage intérieur de la même équipe, même durée, sans dépendance, jours secs, ≤ 7 j), public.btp_echanger_passages (le conducteur valide, tout est revérifié, journal daliro.ordre_meteo). Écran : « Nouvel ordre proposé » + « Échanger » dans MeteoCarte (l'exemple ne porte pas de cas : aucune équipe n'y a un extérieur menacé). Banc hr vert ; test b6_31_ordre_meteo (9). Recette 258 verte.
 - 15/10, 15 h UTC : b6_29 vert, devis PDF dans main. b6_34 décalage prévenu : btp_appliquer_recalage publie daliro.passage_decale pour un sous-traitant déjà sollicité (demandée/confirmée) dont le début change ; abonnement → travail daliro.decalage ; private.btp_texte_decalage + btp_envoyer_decalage (preparer_envoi, clé daliro:decale:<passage>:<date>) ; btp_ouvrier prend daliro.decalage. Écran : note dans RecalageDialog. Test b6_30_decalage (8). Recette 258 verte (une première passe bloquée au délai, la seconde entière).
