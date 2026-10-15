@@ -10,7 +10,9 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 prouvées ; la ligne 15 attend la messagerie du client (A2). Rien à poser. Aucun travail en cours. Prochain pas :
 reprise le 15/10 : les phrases du site restent, le produit se met à leur hauteur, par petits lots. c4_11 (impayés,
 CASHD), c4_12 (canal unique, vague de la semaine) et c4_13 (contacts importés, remise en un geste) faits, à poser.
-Suivant : modèles « chantiers » et « missions » (bâtiment, conseil). « Un message par trimestre » attend Teo
+c4_14 (chantiers, missions) fait, à poser. Restent du chiffrage : le message qui joint la dernière facture et
+l'échéance (n° 25), la restitution et l'effacement à la sortie (n° 58, côté socle : les migrations n'ont pas le droit au
+DELETE), et les connecteurs directs (CRM, ERP), qui sont des tiers. « Un message par trimestre » attend Teo
 (contredit la ligne 12).
 
 ### Pause précédente (06/10, 21 h Z)
@@ -433,6 +435,20 @@ Banc local : 28 tests, 312 assertions vertes, migrations posées deux fois ; tsc
 l'échéance honorée après message est comptée au suivi). Le chiffre repris compte tous les achats des 90 jours,
 sans prétendre qu'ils sont dus au seul message.
 
+## Lot c4_14 — chantiers réceptionnés et missions closes (15/10)
+
+`omega/modules/offload/migrations/c4_14_chantiers_et_missions.sql` : deux modèles d'export, avec `declarer_jeu` sur les
+branchements existants :
+- « chantiers » : code client, référence, date de réception, libellé, montant HT ;
+- « missions » : code client, référence, date de clôture, libellé, honoraires.
+
+Chaque ligne devient un passage du compte dans `offload_achats` (nature « commande », libellé « Chantier « … »
+réceptionné » ou « Mission « … » close »). La détection (silence au-delà du délai fixé) et le message (« je retrouve
+votre … ») s'appuient dessus. Le montant n'est pas compté deux fois : 0 € si une pièce de même référence existe déjà.
+Chiffrage n° 34 (bâtiment) et 35 (conseil).
+
+**Tests** : `omega/tests/offload/c4_14_chantiers_et_missions.sql` (5 assertions). Banc local : 39 tests, 379 ok.
+
 ## Lot c4_13 — le dernier contact lu dans vos outils, la remise dans le circuit en un geste (15/10)
 
 `omega/modules/offload/migrations/c4_13_contacts_et_remise.sql` :
@@ -642,3 +658,4 @@ Partielles : 6, 11, 15, 38.
 - 15/10 — reprise. Lot c4_11 (impayés lus dans CASHD) : 34 tests, 361 ok en local.
 - 15/10 — lot c4_12 (canal unique, vague de la semaine) : 36 tests, 368 ok en local.
 - 15/10 — lot c4_13 (contacts importés, remise dans le circuit en un geste) : 38 tests, 374 ok en local.
+- 15/10 — lot c4_14 (chantiers réceptionnés, missions closes) : 39 tests, 379 ok en local.
