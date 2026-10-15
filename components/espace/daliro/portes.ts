@@ -27,14 +27,14 @@
      btp_appro_chantier (lecture), btp_ecrire_commande, btp_noter_commande, btp_noter_livraison, btp_annuler_commande (b6_22) ;
      btp_preparer_liste, btp_recevoir, btp_noter_retour (b6_23) ;
      btp_fil_chantier, btp_messages_a_ranger (lecture), btp_ranger_message, btp_ecarter_message, btp_avenant_depuis_message (b6_24) ;
-     btp_avancement_photos (lecture, b6_25) ; btp_importer_lignes (b6_28).
+     btp_avancement_photos (lecture, b6_25) ; btp_importer_lignes (b6_28) ; btp_point_mensuel (lecture, b6_30).
    Les tables sans porte (chantiers, lots, tiers, dépendances, acceptations)
    s'écrivent en direct, comme le socle le prévoit (politiques du bureau).
    Si la base répond autrement, l'écran montre son message tel quel.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { AccordJ2, Appro, AvancementPhotos, Chantier, FactureCandidate, HeuresChantier, MessageChantier, MeteoChantier, Recalage, Remplacant, RetourPointage, Tableau } from "./types";
+import type { AccordJ2, Appro, AvancementPhotos, PointMensuel, Chantier, FactureCandidate, HeuresChantier, MessageChantier, MeteoChantier, Recalage, Remplacant, RetourPointage, Tableau } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -314,4 +314,9 @@ export async function ecarterMessage(message: string, motif: string | null): Pro
 
 export async function avenantDepuisMessage(message: string, objet: string): Promise<string> {
   return rpc<string>("btp_avenant_depuis_message", { p_message: message, p_objet: objet });
+}
+
+/* b6_30 : le point mensuel (bureau qui voit les prix, formules Chantiers et Entreprise). */
+export async function pointMensuel(client: string, mois: string): Promise<PointMensuel> {
+  return rpc<PointMensuel>("btp_point_mensuel", { p_client: client, p_mois: mois });
 }

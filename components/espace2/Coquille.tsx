@@ -374,26 +374,18 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
           largeur={260}
           declencheur={
             <>
-              {/* 07/10 — demande de Teo : « Omega × l'entreprise », comme un
-                 partenariat — le logo Omega, un ×, puis le logo et le nom
-                 du client (CAMA, logo Renault) */}
+              {/* 14/10 — demande de Teo : « mets juste le logo Omega là, enlève
+                 le reste ». Le × , le logo et le nom du client, les chevrons
+                 ne s'affichent plus ; le menu (organisation, données) reste
+                 ouvert au clic sur le logo. Le nom de l'organisation reste
+                 lisible par les lecteurs d'écran. */}
               <span className="v2-marque-omega" aria-hidden="true">
                 {/* eslint-disable-next-line @next/next/no-img-element -- le logo Omega, déjà à sa taille */}
                 <img src="/logo-pegase-blanc.png" alt="" width={20} height={20} className="oc-logo-sombre" />
                 {/* eslint-disable-next-line @next/next/no-img-element -- la variante noire, pour le thème clair */}
                 <img src="/logo-pegase.png" alt="" width={20} height={20} className="oc-logo-clair" />
               </span>
-              <span className="v2-marque-fois" aria-hidden="true">
-                {/* le X, à la façon de celui de X (Twitter) : une branche pleine, une branche fine */}
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
-                  <path d="M3 2h5.2l12.8 20h-5.2z" />
-                  <path d="M19.6 2h1.7L4.4 22H2.7z" />
-                </svg>
-              </span>
-              <LogoClient chemin={utilisateur?.logo ?? null} nom={organisation} demo={!utilisateur} />
-              {/* en démonstration, le logo Renault suffit (Teo, 07/10) */}
-              {utilisateur ? <span className="v2-equipe-nom">{organisation}</span> : <span className="v2-sr">{organisation}</span>}
-              <ChevronsUpDown width={14} height={14} aria-hidden="true" className="v2-equipe-chevrons" />
+              <span className="v2-sr">{organisation}</span>
             </>
           }
         >
