@@ -4,6 +4,9 @@
 
 Au 11/10 15 h 40 Z : tout est posé et vert (`^test_b7_` jusqu'à 14 compris), taux-bce conforme. Rien à poser.
 Prochain pas unique : l'essai HMRC en bac à sable dès que Teo a posé les identifiants (section 13, GUIDE-HMRC.md).
+15/10 12 h 20 Z : reprise lue ; les secrets HMRC restent une décision de Teo (NOTES-COORDINATEUR). Rien d'autre d'ouvert
+chez B7 : en attente, sans lot inventé. Pistes si le coordinateur en veut une : Norvège (Brønnøysund, sans clé, même
+chemin que uid_ch, nouvelle valeur de registre à admettre par A4), GLEIF pour les grands fournisseurs SaaS.
 
 Branche `worker-b7`, rien en cours, arbre propre. Session : session_01967jUehrY7tLAXLn9pBaSw (Opus 5.5).
 
