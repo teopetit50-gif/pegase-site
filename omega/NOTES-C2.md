@@ -7,9 +7,8 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
 
 ## REPRISE (15/10/2026)
 
-- **Posé et vert** : c2_01 → c2_08 (h1527c2, 238 ok) ; écrans dans main.
-- **À poser** : `c2_09_lignes.sql` + `test_c2_09_lignes` (6) — lignes de pièces dans la langue du compte ; un compte étranger sans
-  texte propre reçoit l'anglais (avant : le français). Local 230/230 (c2_01 → c2_09) ; recette écran 150/150 sur /espace2/cashd/suivi.
+- **Posé et vert** : c2_01 → c2_09 (h1232ccb, CASHD vert sur la recette) ; écrans dans main. c2_09 : lignes de pièces dans
+  la langue du compte, un compte étranger sans texte propre reçoit l'anglais. Rien à poser.
 - **Prochain pas** : CASHD ne garde qu'une lacune construisible seule, G19 (raccord d'un logiciel de commandes réel à
   cashd_verifier_commande) — elle attend un premier client ; puis le pilote (omega/CHIFFRAGE/cashd.md § Passage à A).
   Banc local : scratchpad/pg.sh (Postgres /tmp/pgc2, port 5499, base c2b).
