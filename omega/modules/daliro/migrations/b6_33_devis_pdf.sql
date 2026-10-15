@@ -82,15 +82,15 @@ begin
     raise exception 'Marché introuvable.' using errcode = 'P0002';
   end if;
   perform private.btp_exiger_bureau(m.client_id, m.entite_id);
-  select x.id, x.nom_fichier, x.statut, x.type_piece, x.cree_le into p
+  select x.id, x.nom_fichier, x.statut, x.type_piece, x.recue_le into p
   from public.pieces x
   where x.client_id = m.client_id and x.module = 'daliro' and x.objet_type = 'btp_marche' and x.objet_id = m.id::text
-  order by x.cree_le desc limit 1;
+  order by x.recue_le desc, x.id desc limit 1;
   if p.id is null then
     return jsonb_build_object('piece', null);
   end if;
   return jsonb_build_object(
-    'piece', p.id, 'nom', p.nom_fichier, 'statut', p.statut, 'type_piece', p.type_piece, 'depose_le', p.cree_le,
+    'piece', p.id, 'nom', p.nom_fichier, 'statut', p.statut, 'type_piece', p.type_piece, 'depose_le', p.recue_le,
     'lignes', (select v.valeur from public.pieces_valeurs v where v.piece_id = p.id and v.champ = 'lignes' order by v.cree_le desc limit 1),
     'lignes_verifiees', (select v.verifiee from public.pieces_valeurs v where v.piece_id = p.id and v.champ = 'lignes' order by v.cree_le desc limit 1),
     'montant_total_ht', (select v.valeur from public.pieces_valeurs v where v.piece_id = p.id and v.champ = 'montant_total_ht' order by v.cree_le desc limit 1),
