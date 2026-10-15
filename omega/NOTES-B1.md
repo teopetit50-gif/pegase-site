@@ -1,5 +1,12 @@
 # Session B1 — VARELO, le référentiel du groupe (sociétés, pôles, rapprochement)
 
+## REPRISE (15/10/2026)
+
+Reprise demandée par Teo : petits lots fermés. Lot 1 : `omega/modules/varelo/PRODUCTION.md`, la liste ordonnée
+des 16 migrations Varelo de b1_04 à b1_18 pour la production (crons, prérequis du socle, contrôles en lecture
+seule, retour arrière), pour A5 au gel. Document seul, rien à poser. Toujours en attente de Teo : « contexte_varelo »
+dans l'assistant, des exports réels pour l'essai à blanc.
+
 ## REPRISE (11/10/2026, 15 h 40 Z — pause demandée par Teo)
 
 Arrêté proprement : arbre propre, rien en cours. Tout ce qui suit est posé vert sur la recette et dans main ; le
