@@ -355,3 +355,9 @@
 .tam-citations--doute {
   font-style: italic;
 }
+
+/* le bordereau de pièces (15/10) */
+.tam-bordereau-liste { list-style: none; margin: 0 0 12px; padding: 0; max-height: 220px; overflow: auto; }
+.tam-bordereau-ligne { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 0; border-bottom: 1px solid color-mix(in srgb, currentColor 10%, transparent); }
+.tam-bordereau-choix { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.tam-bordereau-choix span { overflow-wrap: anywhere; }
