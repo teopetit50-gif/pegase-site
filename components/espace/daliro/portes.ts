@@ -28,7 +28,7 @@
      btp_preparer_liste, btp_recevoir, btp_noter_retour (b6_23) ;
      btp_fil_chantier, btp_messages_a_ranger (lecture), btp_ranger_message, btp_ecarter_message, btp_avenant_depuis_message (b6_24) ;
      btp_avancement_photos (lecture, b6_25) ; btp_importer_lignes (b6_28) ; btp_point_mensuel (lecture, b6_30) ;
-     btp_disponibilites (lecture), btp_noter_indisponibilite, btp_annuler_indisponibilite (b6_31).
+     btp_disponibilites (lecture), btp_noter_indisponibilite, btp_annuler_indisponibilite (b6_31) ; btp_avenant_depuis_reserve (b6_32).
    Les tables sans porte (chantiers, lots, tiers, dépendances, acceptations)
    s'écrivent en direct, comme le socle le prévoit (politiques du bureau).
    Si la base répond autrement, l'écran montre son message tel quel.
@@ -331,4 +331,9 @@ export async function noterIndisponibilite(tiers: string, du: string, au: string
 }
 export async function annulerIndisponibilite(id: string): Promise<unknown> {
   return rpc("btp_annuler_indisponibilite", { p_id: id });
+}
+
+/* b6_32 : la réserve hors devis devient un avenant brouillon. */
+export async function avenantDepuisReserve(reserve: string): Promise<string> {
+  return rpc<string>("btp_avenant_depuis_reserve", { p_reserve: reserve, p_objet: null });
 }
