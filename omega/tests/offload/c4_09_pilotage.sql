@@ -152,9 +152,11 @@ begin
   perform tests.endosser((banc ->> 'gerant')::uuid, 'gerant@banc-varelo.test');
   l := public.offload_arretes_liste(v_client);
   perform tests.redevenir_admin();
-  return next ok(jsonb_array_length(l) = 1 and (l -> 0 -> 'pilotage') ? 'vagues' and (l -> 0 -> 'pilotage') ? 'suivi'
-                 and (l -> 0 -> 'pilotage') ? 'entites',
+  -- Le banc de la recette garde les arrêtés réels posés par la nuit : on cherche celui du test, par sa date.
+  return next ok(exists (select 1 from jsonb_array_elements(l) x where (x ->> 'jour')::date = v_mois + 5
+                         and (x -> 'pilotage') ? 'vagues' and (x -> 'pilotage') ? 'suivi' and (x -> 'pilotage') ? 'entites'),
                  'L''arrêté porte les tableaux du pilotage, prêts pour le tableur');
+  return next diag('arrêtés lus : ' || coalesce((select string_agg(x ->> 'jour', ', ') from jsonb_array_elements(l) x), 'aucun'));
   return next throws_ok(format('select public.offload_regler(%L::uuid, %L)', v_client, '{"arrete_jour": 31}'), '23514', null,
                         'Le jour d''arrêté reste entre 1 et 28');
   return next ok(exists (select 1 from public.journal_opposable j where j.client_id = v_client and j.action = 'offload.arrete'),
