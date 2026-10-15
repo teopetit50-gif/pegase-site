@@ -5,6 +5,21 @@ les 14 tests sont verts sur la recette, les trois migrations sont posées,
 /espace/varelo est sur main (b287d04) et **en ligne sur omegaai.fr**. Le
 coordinateur lit ce fichier.
 
+## REPRISE (pause demandée par Teo le 15/10/2026, 16 h 15 UTC)
+
+**État exact à l'arrêt** : B1 est clos. Les 14 tests pgTAP sont verts sur la
+recette, les migrations varelo_b1_01, _02, _03 sont posées sur la recette,
+/espace/varelo est fusionné sur main (b287d04) et en ligne sur omegaai.fr
+(vérifié le 06/10). Aucun travail en cours, arbre propre.
+
+**Prochaine étape si Teo relance** : (1) reposer les trois migrations en
+production (`omega/modules/varelo/migrations/`, dans l'ordre) et ajouter les
+quatre `private.grp_*` de b1_02 à la liste figée d'A5 ; (2) trancher le
+périmètre de la promesse du site (contrats, réserves, reportings ne sont pas
+dans le socle VARELO) ; (3) en option, rejouer sur le banc un dépôt d'export
+et un passage depuis l'écran (`omega/recette-b1/relecture-reelle-varelo.mjs`).
+Coordinateur en poste : session_01BCGFdpRKBvXKjouC75sYBg.
+
 ## Les deux jauges
 
 | Jauge | Où on en est | Ce qui manque pour 100 % |
