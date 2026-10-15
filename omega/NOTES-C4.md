@@ -10,7 +10,7 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 prouvées ; la ligne 15 attend la messagerie du client (A2). Rien à poser. Aucun travail en cours. Prochain pas :
 reprise le 15/10 : les phrases du site restent, le produit se met à leur hauteur, par petits lots. c4_11 (impayés,
 CASHD), c4_12 (canal unique, vague de la semaine) et c4_13 (contacts importés, remise en un geste) faits, à poser.
-c4_14 (chantiers, missions) et c4_15 (message ancré sur l'échéance) faits, à poser. Restent du chiffrage : la restitution et l'effacement à la sortie (n° 58, côté socle : les migrations n'ont pas le droit au
+c4_14 (chantiers, missions) et c4_15 (message ancré sur l'échéance) faits. Recette du 15/10, 12 h 32 Z : c4_01 à c4_15 tous verts. Restent du chiffrage : la restitution et l'effacement à la sortie (n° 58, côté socle : les migrations n'ont pas le droit au
 DELETE), et les connecteurs directs (CRM, ERP), qui sont des tiers. « Un message par trimestre » attend Teo
 (contredit la ligne 12).
 
@@ -673,3 +673,4 @@ Partielles : 6, 11, 15, 38.
 - 15/10 — lot c4_13 (contacts importés, remise dans le circuit en un geste) : 38 tests, 374 ok en local.
 - 15/10 — lot c4_14 (chantiers réceptionnés, missions closes) : 39 tests, 379 ok en local.
 - 15/10 — lot c4_15 (message de reprise ancré sur l'échéance qui revient) : 40 tests, 382 ok en local.
+- 15/10, 12 h 32 Z — recette : c4_01 à c4_15 verts (c4_09 compris après 1dcd066d). Question « un message par trimestre » transmise à Teo.
