@@ -324,3 +324,23 @@ export const cloreIncident = (p_incident: string, p_note: string | null, p_ouvri
 export const demanderPreautorisation = (p_contrat: string, p_montant_eur: number | null) => rpc<Record<string, unknown>>("loc_demander_preautorisation", { p_contrat, p_montant_eur });
 export const capturerCaution = (p_caution: string, p_facture: string, p_montant_eur: number, p_motif: string) => rpc<Record<string, unknown>>("loc_capturer_caution", { p_caution, p_facture, p_montant_eur, p_motif });
 export const libererCaution = (p_caution: string) => rpc<Record<string, unknown>>("loc_liberer_caution", { p_caution });
+
+/* b2_19 — l'audit des retours (simulation) et l'indicateur du mois ; tolère l'absence de la migration (null). */
+export type LigneAudit = { id: string; audit_id: string; contrat_id: string; facture_historique_ttc: number; chiffre_ttc: number; statut_chiffrage: string;
+  lignes: { code: string; famille: string; libelle: string; montant_ttc: number; statut: string }[] };
+export type Audit = { id: string; libelle: string; statut: "ouvert" | "clos"; cree_le: string; clos_le: string | null };
+export type Indicateur = { mois: string; retours: number; factures_ttc: number; avoirs_ttc: number; pour_100_retours: number | null; avant_pour_100_retours: number | null; audit: string | null };
+export async function chargerAudits(): Promise<{ audits: Audit[]; lignes: LigneAudit[]; indicateur: Indicateur | null } | null> {
+  const supabase = createClient();
+  const [audits, lignes, indicateur] = await Promise.all([
+    supabase.from("loc_audits").select("id, libelle, statut, cree_le, clos_le").order("cree_le", { ascending: false }).limit(20),
+    supabase.from("loc_audit_lignes").select("id, audit_id, contrat_id, facture_historique_ttc, chiffre_ttc, statut_chiffrage, lignes").limit(2000),
+    supabase.rpc("loc_indicateur_mois", {}),
+  ]);
+  if (audits.error) return null;
+  return { audits: (audits.data ?? []) as Audit[], lignes: lignes.error ? [] : ((lignes.data ?? []) as LigneAudit[]), indicateur: indicateur.error ? null : (indicateur.data as Indicateur) };
+}
+export const ouvrirAudit = (p_libelle: string) => rpc<{ audit: string }>("loc_ouvrir_audit", { p_libelle });
+export const auditerRetour = (p_audit: string, p_contrat: string, p_retour: Retour, p_facture_historique_ttc: number) =>
+  rpc<{ chiffre_ttc: number; ecart_ttc: number }>("loc_auditer_retour", { p_audit, p_contrat, p_retour, p_facture_historique_ttc });
+export const cloreAudit = (p_audit: string) => rpc<Record<string, unknown>>("loc_resultat_audit", { p_audit, p_clore: true });

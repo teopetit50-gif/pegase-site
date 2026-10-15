@@ -568,5 +568,45 @@ for (const largeur of LARGEURS) {
   s.fermer();
 }
 
+/* b2_19 : l'audit des retours (exemple) — ouvrir, ajouter un retour passé chiffré par simulation, l'écart ; la clôture
+   réservée à la direction ; la carte sans débordement à 390. */
+{
+  const sect = `document.querySelector('section[aria-label="Audit des retours"]')`;
+  const dialogue = `document.querySelector('[role="dialog"]')`;
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b2-audit', densite: 1 });
+  console.log('— /espace/tavaro : audit des retours (exemple, b2_19)');
+  ok(await s.aller(base + '/espace/tavaro'), 'page chargée');
+  await s.dormir(800);
+  const poser = (sel, valeur) => s.evaluer(`(() => { const e = ${sel}; const proto = e.tagName === 'SELECT' ? HTMLSelectElement.prototype : HTMLInputElement.prototype;
+    Object.getOwnPropertyDescriptor(proto, 'value').set.call(e, ${JSON.stringify(valeur)}); e.dispatchEvent(new Event(e.tagName === 'SELECT' ? 'change' : 'input', { bubbles: true })); })()`);
+  const cliquer = (portee, re) => s.evaluer(`[...${portee}.querySelectorAll('button')].find(b => ${re}.test(b.textContent.trim())).click()`);
+  ok(/à mesurer par un audit clos/.test(await s.evaluer(`${sect}.innerText`)), 'sans audit clos, l\'« avant » est à mesurer');
+  await cliquer(sect, /^Ouvrir un audit$/);
+  await s.dormir(300);
+  await poser(`${dialogue}.querySelector('input')`, 'Vingt retours de septembre');
+  await cliquer(dialogue, /^Ouvrir$/);
+  await s.dormir(400);
+  await cliquer(sect, /^Ajouter un retour$/);
+  await s.dormir(300);
+  const champs = `${dialogue}.querySelectorAll('input, select')`;
+  await poser(`${dialogue}.querySelector('select')`, await s.evaluer(`[...${dialogue}.querySelector('select').options].find(o => /C-2026-0412/.test(o.textContent)).value`));
+  await poser(`${champs}[1]`, '0');
+  await poser(`${champs}[2]`, await s.evaluer(`(() => { const d = new Date(Date.now() - 86400000); d.setHours(11, 0, 0, 0); const p = (n) => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T11:00'; })()`));
+  await poser(`${champs}[4]`, '8');
+  await poser(`${champs}[5]`, '5');
+  await cliquer(dialogue, /Chiffrer et ajouter$/);
+  await s.dormir(600);
+  const r = await s.evaluer(`(() => ({ fait: ${sect}.querySelector('[role="status"]')?.innerText ?? '', liste: ${sect}.querySelector('ul[aria-label="Retours de l\\'audit"]')?.innerText ?? '' }))()`);
+  ok(/C-2026-0412/.test(r.fait) && /sur le barème/.test(r.fait) && /C-2026-0412/.test(r.liste), `le retour passé est chiffré sur le barème, face aux 0 € de l'époque`);
+  ok(await s.evaluer(`[...${sect}.querySelectorAll('button')].find(b => /Clore l.audit/.test(b.textContent)).disabled`), 'la clôture est réservée à la direction (« Vous » est valideur)');
+  s.fermer();
+  const s390 = await ouvrirSession({ largeur: 390, hauteur: 844, marque: 'b2-audit-390', densite: 1 });
+  ok(await s390.aller(base + '/espace/tavaro'), 'page chargée à 390');
+  await s390.dormir(800);
+  const m = await s390.evaluer(`(() => { const w = document.documentElement.clientWidth; return [...${sect}.querySelectorAll('*')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > w + 1; }).length; })()`);
+  ok(m === 0, `la carte de l'audit tient à 390 (${m} élément(s) trop large(s))`);
+  s390.fermer();
+}
+
 console.log(echecs ? `\n${echecs} échec(s)` : '\ntout passe');
 process.exit(echecs ? 1 : 0);

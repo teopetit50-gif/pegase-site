@@ -38,6 +38,7 @@ import ContestationsVue, { type GestesContestations } from "./ContestationsVue";
 import ParcVue, { type GestesParc } from "./ParcVue";
 import FlotteVue, { type GestesFlotte } from "./FlotteVue";
 import OperationsVue from "./OperationsVue";
+import AuditVue from "./AuditVue";
 import { forcesLocales } from "./contestations";
 import { Preparation2027, type Preparation } from "./FactureElectronique";
 import { controler, docAvoir, docFacture, formeLocale, sirenValide } from "./cii";
@@ -832,6 +833,15 @@ export default function EcranTavaro() {
       {/* b2_12 à b2_16 : départ et rappels, transferts, péages, sinistres, assistance, caution */}
       <div style={{ marginTop: 16 }}>
         <OperationsVue source={source} role={role} dossiers={dossiers} vehicules={monde?.parc.vehicules ?? []} nomAgence={nomAgenceDe} />
+      </div>
+
+      {/* b2_19 : l'audit des retours et l'indicateur du mois (direction et valideurs) */}
+      <div style={{ marginTop: 16 }}>
+        <AuditVue source={source} role={role} moi={moiId} dossiers={dossiers} reglages={monde?.reglages ?? null}
+          bareme={(() => {
+            const enVigueur = [...(monde?.baremes ?? [])].filter((b) => b.statut === "publie").sort((x, y) => y.date_effet.localeCompare(x.date_effet))[0];
+            return (monde?.lignesBareme ?? []).filter((l) => l.bareme_id === enVigueur?.id);
+          })()} />
       </div>
 
       <div style={{ marginTop: 16 }}>
