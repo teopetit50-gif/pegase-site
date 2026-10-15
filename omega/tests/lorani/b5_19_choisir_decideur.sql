@@ -51,9 +51,9 @@ begin
   return next throws_ok(format('update public.lorani_constats set statut = %L, motif = %L where id = %L', 'ecarte', 'Faîtage à reprendre', v_k), '42501', null,
                         '2. le dessinateur ne tranche pas un constat d''un contrôle qui a un décideur');
   perform tests.b5_endosser(v_referent);
-  return next throws_ok(format('update public.lorani_constats set statut = %L where id = %L', 'accepte', v_k), '42501', null, '2. le chef de projet non plus');
+  return next throws_ok(format('update public.lorani_constats set statut = %L, motif = %L where id = %L', 'accepte', 'Faîtage justifié', v_k), '42501', null, '2. le chef de projet non plus');
   perform tests.b5_endosser(v_daf2);
-  update public.lorani_constats set statut = 'accepte' where id = v_k;
+  update public.lorani_constats set statut = 'accepte', motif = 'Faîtage justifié par la coupe PC5' where id = v_k;
   perform tests.b5_admin();
   return next ok((select statut = 'accepte' and decide_par = v_daf2 from public.lorani_constats where id = v_k), '2. l''associé choisi tranche ; la décision porte son nom');
   perform tests.b5_endosser(v_gerant);
