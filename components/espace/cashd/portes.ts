@@ -213,3 +213,8 @@ export async function reglerValidation(client: string, paliers: PalierValidation
 export async function reglerPortefeuille(client: string, actif: boolean) {
   return rpc<{ portefeuille_par_charge: boolean; comptes_sans_charge: number }>("cashd_regler_portefeuille", { p_client: client, p_actif: actif });
 }
+
+/* ——— c2_09 : la ligne d'une facture ou d'un devis dans la langue du compte ——— */
+export async function ecrireLigne(client: string, langue: string, nature: "facture" | "devis", modele: string | null, actif: boolean) {
+  return rpc<{ id: string }>("cashd_ecrire_ligne", { p_client: client, p_langue: langue, p_nature: nature, p_modele: modele, p_actif: actif });
+}

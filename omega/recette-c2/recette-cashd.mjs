@@ -244,6 +244,20 @@ for (const largeur of LARGEURS) {
   v = await lire();
   ok(/date d.intervention/.test(v.apercu) && !/relance/i.test(v.apercu), 'au métier du bâtiment, le rappel de devis parle chantier et date d\'intervention, sans le mot « relance »');
   await s.capturer(`${dossier}cashd-textes-1440.jpg`, { qualite: 55 });
+  /* une autre langue : le texte et la ligne de facture en allemand */
+  await s.evaluer(saisir(`${T} input[aria-label="Nouvelle langue (deux lettres)"]`, 'de', 'HTMLInputElement'));
+  await s.dormir(150);
+  await s.evaluer(`[...document.querySelectorAll('${T} button')].find(b => /autre langue/.test(b.textContent)).click()`);
+  await s.dormir(300);
+  await s.evaluer(saisir(`${T} .c2-lignes-langue input`, 'Rechnung {numero} vom {date}', 'HTMLInputElement'));
+  await s.dormir(200);
+  let lg = await s.evaluer(`(() => { const z = document.querySelector('${T} .c2-lignes-langue'); return { motif: z?.querySelector('.c2-motif')?.textContent || '', gris: z?.querySelector('button')?.disabled }; })()`);
+  ok(/\{reste\}/.test(lg.motif) && lg.gris === true, 'en allemand, une ligne de facture sans {reste} ne s\'enregistre pas');
+  await s.evaluer(saisir(`${T} .c2-lignes-langue input`, 'Rechnung {numero} vom {date}: {reste} offen', 'HTMLInputElement'));
+  await s.dormir(200);
+  await s.evaluer(`document.querySelector('${T} .c2-lignes-langue button').click()`);
+  await s.dormir(300);
+  ok(/Ligne de facture en DE enregistrée/.test(await s.evaluer(`document.querySelector('${T}').innerText`)), 'la ligne de facture en allemand s\'enregistre');
   /* qui valide : trois paliers, un palier sans rôle refusé */
   const Q = 'section[aria-label="Vos textes"] [aria-label="Qui valide"]';
   const q = () => s.evaluer(`(() => { const t = document.querySelector('${Q}'); return { paliers: t.querySelectorAll('fieldset').length, avis: t.querySelector('.esp-avis')?.innerText || '', gris: [...t.querySelectorAll('button')].find(b => /Enregistrer les paliers/.test(b.textContent))?.disabled }; })()`);

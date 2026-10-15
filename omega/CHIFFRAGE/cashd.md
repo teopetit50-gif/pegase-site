@@ -19,10 +19,10 @@ Construit et testé (recette locale ; à poser sur le banc) — les lacunes côt
 | G20 pièces du dossier | PDF de la facture, bon de livraison, bon de commande, contrat déposés dans le stockage de l'organisation et rattachés ; le dossier d'assurance-crédit les liste et nomme les factures sans PDF | `test_c2_06_reponses` ; fiche « Pièces du dossier » |
 | G11 paliers de validation | jusqu'à trois paliers {montant, rôles} réglés par le gérant (chargé de compte, responsable crédit, direction), écrits en règles de validation du socle ; ils remplacent le seuil de direction ; les anciennes règles passent inactives | `test_c2_07_validation` ; « Qui valide » dans Vos textes |
 | G10 portefeuille par chargé | activé par le gérant : un chargé ne lit que ses comptes (et leurs factures, règlements, relances), son tableau est celui de son portefeuille ; direction, administration et valideurs lisent le consolidé — politiques RLS restrictives, sans rien retirer | `test_c2_08_portefeuille` ; case dans « Qui valide » |
-| G6 (en partie) | une organisation peut écrire ses textes dans toute langue (de, es…) ; le détail des pièces reste en anglais | `test_c2_05_textes` (compte allemand) |
+| G6 langues | une organisation écrit ses textes ET les lignes de pièces dans toute langue (de, es…) ; sans texte propre, un compte étranger reçoit la version anglaise (avant c2_09 : française) | `test_c2_05_textes`, `test_c2_09_lignes` ; Vos textes |
 
-Effet sur la synthèse : **jours → B restants ≈ 22 j, dont ≈ 2,5 j dans CASHD** (G6 fin 1 : le détail des pièces dans d'autres langues ; G19 raccord du logiciel de commandes 1,5, avec un premier client) et ≈ 19,5 j ailleurs (inchangé).
-Passent de C/D à B : P10, P12, P33, M4, M5, M6, M7, L7, L11, L12 (le seul D), C18, C42, L4, E3, E1. **Restent à la vitrine** (aucun fichier public touché) : les quatre captures de la page viennent toujours de la maquette — l'écran a maintenant ses quatre vues, les captures sont à refaire depuis lui (P26) ; « rappel à l'échéance » (M8) et « J+3 puis J+7 » (P21) restent des écarts de texte.
+Effet sur la synthèse : **jours → B restants ≈ 21 j, dont ≈ 1,5 j dans CASHD** (G19 : raccord du logiciel de commandes d'un premier client à cashd_verifier_commande) et ≈ 19,5 j ailleurs (inchangé).
+Passent de C/D à B : P10, P12, P33, M4, M5, M6, M7, L7, L11, L12 (le seul D), C18, C42, L4, E3, E1, C17. **Restent à la vitrine** (aucun fichier public touché) : les quatre captures de la page viennent toujours de la maquette — l'écran a maintenant ses quatre vues, les captures sont à refaire depuis lui (P26) ; « rappel à l'échéance » (M8) et « J+3 puis J+7 » (P21) restent des écarts de texte.
 
 ## Synthèse
 

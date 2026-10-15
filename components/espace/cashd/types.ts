@@ -246,7 +246,8 @@ export type Gabarit = {
   defaut_corps: string | null;
   maj_le: string | null;
 };
-export type Gabarits = { gabarits: Gabarit[]; variables: Record<string, string> };
+export type LigneGabarit = { langue: string; nature: "facture" | "devis"; modele: string; maj_le: string | null };
+export type Gabarits = { gabarits: Gabarit[]; variables: Record<string, string>; lignes?: LigneGabarit[] };
 
 /* c2_04 — la relance adressée au service qui émet un bon de commande (table cashd_relances_commande) */
 export type RelanceCommande = {

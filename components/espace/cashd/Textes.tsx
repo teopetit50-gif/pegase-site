@@ -21,7 +21,7 @@ import { Avis, Chargement, Pastille } from "../ui";
 import { montant } from "../format";
 import * as portes from "./portes";
 import { apercu, GABARITS_EXEMPLE, PALIERS_GABARIT, VARIABLES, verifier } from "./gabarits";
-import type { CleGabarit, Gabarit, PalierValidation, Reglages, RoleValidation } from "./types";
+import type { CleGabarit, Gabarit, LigneGabarit, PalierValidation, Reglages, RoleValidation } from "./types";
 
 /* les trois rôles que le socle admet en validation : le chargé de compte ou le responsable crédit valident s'ils portent le rôle valideur */
 const ROLES: { cle: RoleValidation; libelle: string }[] = [
@@ -54,6 +54,8 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
 }) {
   const [liste, setListe] = useState<Gabarit[] | null>(source === "exemple" ? GABARITS_EXEMPLE : null);
   const [variables, setVariables] = useState<Record<string, string>>(VARIABLES);
+  const [lignes, setLignes] = useState<LigneGabarit[]>([]);
+  const [ligneSaisie, setLigneSaisie] = useState<{ facture: string; devis: string }>({ facture: "", devis: "" });
   const [cle, setCle] = useState<CleGabarit>("rappel");
   const [langue, setLangue] = useState("fr");
   const [variante, setVariante] = useState(1);
@@ -77,6 +79,7 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
       const g = await portes.chargerGabarits(client);
       setListe(g.gabarits);
       setVariables(g.variables);
+      setLignes(g.lignes ?? []);
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "Les textes n'ont pas pu être lus.");
       setListe([]);
@@ -115,6 +118,35 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- le créneau se charge une fois, à l'arrivée de la liste ; ensuite c'est la personne qui le choisit
   }, [liste, initialise]);
+
+  /* les lignes de pièces d'une langue étrangère (c2_09) */
+  const etrangere = langue !== "fr" && langue !== "en";
+  const ligneDe = (nature: "facture" | "devis") => lignes.find((x) => x.langue === langue && x.nature === nature)?.modele ?? "";
+  const refusLigne = (nature: "facture" | "devis", m: string) =>
+    !m.trim() ? null
+      : !m.includes("{numero}") || (nature === "facture" && !m.includes("{reste}")) ? `La ligne d'${nature === "facture" ? "une facture porte {numero} et {reste}" : "un devis porte {numero}"}.`
+      : [...m.matchAll(/\{([a-z_]+)\}/g)].some((x) => !(nature === "facture" ? ["numero", "date", "montant", "echeance", "retard", "reste"] : ["numero", "date", "montant"]).includes(x[1])) ? "Variable inconnue pour cette ligne."
+      : null;
+  const enregistrerLigne = async (nature: "facture" | "devis") => {
+    const m = (ligneSaisie[nature] || ligneDe(nature)).trim();
+    setEnvoi(true);
+    setErreur(null);
+    setFait(null);
+    try {
+      if (source === "reelle") {
+        if (!client) throw new Error("Aucun compte rattaché à cette session.");
+        await portes.ecrireLigne(client, langue, nature, m, true);
+        await charger();
+      } else {
+        setLignes((prev) => [...prev.filter((x) => !(x.langue === langue && x.nature === nature)), { langue, nature, modele: m, maj_le: new Date().toISOString() }]);
+      }
+      setFait(`Ligne ${nature === "facture" ? "de facture" : "de devis"} en ${langue.toUpperCase()} enregistrée${source === "exemple" ? " (exemple)" : ""}.`);
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : "La base a refusé cette ligne.");
+    } finally {
+      setEnvoi(false);
+    }
+  };
 
   const refus = verifier(cle, sujet, corps, variables);
   const vu = apercu(cle, sujet, corps, {
@@ -289,6 +321,27 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
               </button>
             </span>
           </div>
+          {etrangere ? (
+            <div className="c2-lignes-langue">
+              <p className="c2-sous">Le détail des pièces en {langue.toUpperCase()} — sans ligne propre, il part en anglais.</p>
+              {(["facture", "devis"] as const).map((nature) => {
+                const valeur = ligneSaisie[nature] || ligneDe(nature);
+                const refusL = refusLigne(nature, valeur);
+                return (
+                  <div key={nature} className="esp-form-ligne">
+                    <label className="rv-libelle">{nature === "facture" ? "Ligne d'une facture ({numero} {date} {montant} {echeance} {retard} {reste})" : "Ligne d'un devis ({numero} {date} {montant})"}
+                      <input className="rv-champ" value={valeur} maxLength={300} placeholder={nature === "facture" ? "Rechnung {numero} vom {date}, fällig am {echeance}: {reste} offen" : "Angebot {numero} vom {date}: {montant}"}
+                        onChange={(e) => setLigneSaisie({ ...ligneSaisie, [nature]: e.target.value })} />
+                    </label>
+                    <span className="c2-gestes">
+                      <button type="button" className="r-btn" disabled={!valeur.trim() || !!refusL || envoi} onClick={() => void enregistrerLigne(nature)}>Enregistrer la ligne</button>
+                      {refusL ? <span className="c2-sous c2-motif">{refusL}</span> : null}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          ) : null}
           {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
           {fait ? <Avis teinte="vert" role="status">{fait}</Avis> : null}
         </div>

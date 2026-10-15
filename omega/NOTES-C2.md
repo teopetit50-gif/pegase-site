@@ -5,14 +5,14 @@ Commande : `omega/AUDIT-PROMESSES.md` § 1 (CASHD absent) ; promesses : `app/pag
 sont déjà écrites », capture « qui doit de l'argent, où en est la relance, et l'encours échu au total »),
 `app/offres/relances-impayes/page.tsx`, `lib/produits/relances.ts`, `lib/produits/capacites/relances.ts` (50 lignes).
 
-## REPRISE (pause demandée par Teo, 11/10/2026, 15 h 40 Z)
+## REPRISE (15/10/2026)
 
-- **Où j'en suis** : c2_01 → c2_07 posés et verts sur la recette (h1513bbc), écrans dans main (1e27e72). **À poser** :
-  `c2_08_portefeuille.sql` + `test_c2_08_portefeuille` (worker-c2 0615c803) — vérifier au test 51 que private.a_un_role est
-  admis dans une politique (liste figée d'A5). Rien d'autre en cours, arbre propre.
-- **Prochain pas** : G6 (détail des pièces dans d'autres langues, ~1 j), G19 (raccord du logiciel de commandes, avec un premier
-  client) ; puis le pilote (omega/CHIFFRAGE/cashd.md § Passage à A). Banc local : scratchpad/pg.sh relance Postgres (/tmp/pgc2,
-  port 5499, base c2b).
+- **Posé et vert** : c2_01 → c2_08 (h1527c2, 238 ok) ; écrans dans main.
+- **À poser** : `c2_09_lignes.sql` + `test_c2_09_lignes` (6) — lignes de pièces dans la langue du compte ; un compte étranger sans
+  texte propre reçoit l'anglais (avant : le français). Local 230/230 (c2_01 → c2_09) ; recette écran 150/150 sur /espace2/cashd/suivi.
+- **Prochain pas** : CASHD ne garde qu'une lacune construisible seule, G19 (raccord d'un logiciel de commandes réel à
+  cashd_verifier_commande) — elle attend un premier client ; puis le pilote (omega/CHIFFRAGE/cashd.md § Passage à A).
+  Banc local : scratchpad/pg.sh (Postgres /tmp/pgc2, port 5499, base c2b).
 
 ### Historique de la reprise du 11/10
 
