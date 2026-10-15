@@ -9,7 +9,8 @@ Dernière mise à jour : 05/10/2026, 23 h.
 - b5_17 vert (ligne 49 en B). b5_29 et b5_18 posés par le coordinateur (lot h1227grand), résultat de b5_18 attendu ; l'écran de la suspension part dans main avec ce passage.
 - Nouveau, à poser : b5_30_choisir_decideur.sql, puis le test b5_19 (scénario local 13/13). Écran (Controle.tsx, portes.ts, types.ts, exemples.ts : « Décide des constats » et le dialogue « Choisir qui décide ») à fusionner après b5_19 vert ; recette 97/97 et accessibilité vertes.
 - Nouveau, à poser après b5_30 : b5_31_regler_controles.sql (redéfinit private.lorani_controler et private.lorani_changements_indice), puis le test b5_20. Écran (« Régler les contrôles », Controle.tsx, portes.ts, types.ts, exemples.ts, lorani.css) à fusionner après b5_20 vert ; recette 103/103 et accessibilité vertes.
-- Prochain lot : #23 (pièces exigées par le permis), puis #30 à #33 (situations).
+- #23 fait, écran seul (pieces-exigees.ts, PiecesPermis.tsx, EcranLorani.tsx) : rien à poser ; recette 105/105 et accessibilité vertes. Codes du bordereau limités à ceux qu'on a vérifiés (PCMI13 = attestation parasismique, pas PPR).
+- Prochain lot : #30 à #33 (situations).
 
 **11/10, 15 h 40 Z — PAUSE demandée par Teo. Arrêt propre, tout est poussé sur worker-b5.**
 - À poser (pas encore posé) : b5_28_changements_indice.sql, puis le test b5_17_changements_indice.sql (4bff78f). Scénario local conforme ; le test n'a pas tourné, faute du socle complet en local.

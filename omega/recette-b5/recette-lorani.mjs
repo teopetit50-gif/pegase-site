@@ -326,6 +326,10 @@ for (const largeur of LARGEURS) {
   await s.dormir(600);
   const rg2 = await s.evaluer(`document.querySelector('.lor-reglages')?.textContent || ''`);
   ok(/1 tolérance propre · ne tournent pas : CCTP et DPGF, RE2020\./.test(rg2), `enregistré : « ${rg2.trim()} »`);
+  /* ligne 23 : les pièces que le permis exigera, rapprochées des pièces déposées */
+  const pe = await s.evaluer(`(() => { const l = [...document.querySelectorAll('.lor-pieces-exigees li')]; const de = (c) => l.find(x => x.querySelector('strong')?.textContent === c)?.querySelector('.esp-pastille')?.textContent; return { n: l.length, pc1: de('PC1'), pc2: de('PC2'), pc5: de('PC5'), re: de('PC16-1'), erp: !!de('PC39'), resume: document.querySelector('.lor-pieces-exigees')?.previousElementSibling?.textContent }; })()`);
+  ok(pe.n === 9 && pe.pc1 === 'À déposer' && pe.pc2 === 'Déposée' && pe.pc5 === 'Déposée' && pe.re === 'À confirmer' && !pe.erp && /6 pièces sur 9/.test(pe.resume || ''),
+     `pièces exigées (PC, logement collectif) : 9, PC2 et PC5 déposées, PC1 à déposer, RE2020 à confirmer, pas de dossier ERP (${JSON.stringify(pe)})`);
   /* b5_25 : un constat en question au BET ou à l'entreprise, avec l'extrait cité */
   await s.evaluer(`[...document.querySelectorAll('.lor-constat .esp-lien-bouton')].find(b => b.textContent.trim() === 'En faire une question')?.click()`);
   await s.dormir(500);
@@ -391,6 +395,8 @@ for (const largeur of LARGEURS) {
   await s.dormir(700);
   const erp = await s.evaluer(`(() => { const c = [...document.querySelectorAll('.lor-constat')].filter(x => x.closest('.esp-carte-corps')?.querySelector('.lor-controle-tete')); const t = c.map(x => x.innerText).join(' | '); return { n: c.length, re: /RE2020[\\s\\S]*Bbio\\) : 78,3/.test(t), si: /Sécurité incendie[\\s\\S]*il en faut au moins 2/.test(t), acc: /Accessibilité[\\s\\S]*arrêté du 20 avril 2017, art\\. 10/.test(t), cerfa: /Entre les pièces[\\s\\S]*1212 m² sur Cerfa/.test(t), pieces: /Cerfa de la demande/.test(document.querySelector('.lor-controle-pieces')?.innerText || '') }; })()`);
   ok(erp.n === 4 && erp.re && erp.si && erp.acc && erp.cerfa && erp.pieces, `4 constats : RE2020 (Bbio), sécurité incendie (dégagements), accessibilité (porte), Cerfa contre PC4 (${JSON.stringify(erp)})`);
+  const pq = await s.evaluer(`(() => { const l = [...document.querySelectorAll('.lor-pieces-exigees li')]; const de = (c) => l.find(x => x.querySelector('strong')?.textContent === c)?.querySelector('.esp-pastille')?.textContent; return { n: l.length, pc4: de('PC4'), pc39: de('PC39'), pc40: de('PC40'), motif: /établissement recevant du public/.test(l.find(x => /PC39/.test(x.textContent))?.textContent || '') }; })()`);
+  ok(pq.n === 11 && pq.pc4 === 'Déposée' && pq.pc39 === 'À déposer' && pq.pc40 === 'À déposer' && pq.motif, `pièces exigées (ERP) : PC39 accessibilité et PC40 sécurité ajoutées, PC4 déposée (${JSON.stringify(pq)})`);
   await s.evaluer(`document.querySelector('.lor-controle-tete')?.scrollIntoView({ block: 'start' })`);
   await s.dormir(300);
   await s.capturer(`${dossier}lorani-erp-1440.jpg`, { qualite: 55 });
