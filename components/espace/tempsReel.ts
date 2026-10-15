@@ -16,10 +16,22 @@
    (demande au coordinateur).
    ══════════════════════════════════════════════════════════════════════ */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-export function useTempsReel(tables: string[], actif: boolean, onChangement: () => void, delaiMs = 800) {
+/* l'état du canal, pour qu'un écran puisse dire « en direct » (06/10/2026) :
+   « connexion » tant que le serveur n'a pas accepté l'abonnement,
+   « en_direct » quand il l'a accepté (SUBSCRIBED), « coupe » s'il l'a
+   refusé, fermé ou laissé expirer — l'écran se relit alors à la main. */
+export type EtatTempsReel = "inactif" | "connexion" | "en_direct" | "coupe";
+
+/* canal coupé (un réseau d'entreprise ou un mandataire qui refuse le
+   WebSocket, vu dans le conteneur de recette le 06/10) : l'écran se relit
+   seul à ce rythme, pour que « sans recharger » reste vrai, en moins vite */
+export const RELECTURE_SANS_DIRECT_MS = 30_000;
+
+export function useTempsReel(tables: string[], actif: boolean, onChangement: () => void, delaiMs = 800): EtatTempsReel {
+  const [etat, setEtat] = useState<EtatTempsReel>("inactif");
   /* la dernière fonction de relecture, sans rouvrir le canal quand elle change */
   const rappel = useRef(onChangement);
   useEffect(() => {
@@ -41,10 +53,25 @@ export function useTempsReel(tables: string[], actif: boolean, onChangement: () 
         }, delaiMs);
       });
     }
-    canal.subscribe();
+    let vivant = true;
+    let repli: number | null = null;
+    canal.subscribe((statut) => {
+      if (!vivant) return;
+      const e: EtatTempsReel = statut === "SUBSCRIBED" ? "en_direct" : statut === "CHANNEL_ERROR" || statut === "TIMED_OUT" || statut === "CLOSED" ? "coupe" : "connexion";
+      setEtat(e);
+      if (e === "coupe" && repli === null) repli = window.setInterval(() => rappel.current(), RELECTURE_SANS_DIRECT_MS);
+      if (e === "en_direct" && repli !== null) {
+        window.clearInterval(repli);
+        repli = null;
+      }
+    });
     return () => {
+      vivant = false;
+      if (repli !== null) window.clearInterval(repli);
       if (minuterie) window.clearTimeout(minuterie);
       void supabase.removeChannel(canal);
     };
   }, [actif, cle, delaiMs]);
+  /* hors base réelle, le canal n'existe pas : l'état affiché est « inactif » */
+  return actif && cle ? etat : "inactif";
 }

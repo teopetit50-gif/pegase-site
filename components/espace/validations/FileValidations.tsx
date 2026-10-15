@@ -33,6 +33,7 @@ import type { Approbation, Delegation, Demande, Entite, Role } from "../types";
 import { GROUPES, STATUTS, compteApprobations, groupeDe, trier, verdict, type Decideur } from "./regles";
 import { chargerContexte, chargerFile, type ContexteSocle } from "./portes";
 import DetailDemande from "./DetailDemande";
+import DecisionLot, { Coche, eligibilite } from "./DecisionLot";
 import MesDelegations from "./MesDelegations";
 
 type Etat = {
@@ -68,6 +69,12 @@ export default function FileValidations({ utilisateur }: { utilisateur: Utilisat
   const [choix, setChoix] = useState<string | null>(null);
   /* le dernier succès, dit au-dessus de la file (la demande décidée a pu quitter la vue) */
   const [fait, setFait] = useState<string | null>(null);
+  /* décider en lot : les demandes cochées, et la décision en cours */
+  const [lot, setLot] = useState(false);
+  const [coches, setCoches] = useState<string[]>([]);
+  /* la décision en cours, avec les demandes cochées au moment du clic (figées :
+     chaque décision fait sortir sa demande de la file) */
+  const [decisionLot, setDecisionLot] = useState<{ decision: "approuve" | "rejete"; demandes: Demande[]; cle: number } | null>(null);
 
   const etat = source === "exemple" ? local : reel;
 
@@ -175,6 +182,19 @@ export default function FileValidations({ utilisateur }: { utilisateur: Utilisat
   const choisie = choix && visibles.some((d) => d.id === choix) ? choix : (visibles[0]?.id ?? null);
 
   const demande = useMemo(() => etat?.demandes.find((d) => d.id === choisie) ?? null, [etat, choisie]);
+
+  /* ——— le lot : seules les demandes en attente encore visibles comptent ——— */
+  const enAttenteVisibles = useMemo(() => visibles.filter((d) => d.statut === "en_attente"), [visibles]);
+  const cochees = useMemo(() => enAttenteVisibles.filter((d) => coches.includes(d.id)), [enAttenteVisibles, coches]);
+  const decidables = useMemo(
+    () => (etat ? enAttenteVisibles.filter((d) => eligibilite(d, moi, etat.approbations, etat.delegations, equipes).ok) : []),
+    [enAttenteVisibles, etat, moi, equipes],
+  );
+  const cocher = (id: string, v: boolean) => setCoches((c) => (v ? [...c.filter((x) => x !== id), id] : c.filter((x) => x !== id)));
+  const quitterLot = () => {
+    setLot(false);
+    setCoches([]);
+  };
 
   /* ——— compteurs ——— */
   const compteurs = useMemo(() => {
@@ -292,7 +312,14 @@ export default function FileValidations({ utilisateur }: { utilisateur: Utilisat
           <section className="esp-carte" aria-label="File des demandes">
             <div className="esp-carte-tete">
               <h2 className="esp-carte-titre">File</h2>
-              <span className="esp-kpi-sous">{visibles.length} demande{visibles.length > 1 ? "s" : ""}</span>
+              <span className="esp-item-haut">
+                <span className="esp-kpi-sous">{visibles.length} demande{visibles.length > 1 ? "s" : ""}</span>
+                {enAttenteVisibles.length > 1 || lot ? (
+                  <button type="button" className="esp-filtre" aria-pressed={lot} onClick={() => (lot ? quitterLot() : setLot(true))}>
+                    {lot ? "Quitter le lot" : "Décider en lot"}
+                  </button>
+                ) : null}
+              </span>
             </div>
             <div className="esp-carte-corps" style={{ display: "grid", gap: 8 }}>
               <div className="esp-filtres" role="group" aria-label="Filtrer la file">
@@ -314,6 +341,20 @@ export default function FileValidations({ utilisateur }: { utilisateur: Utilisat
                   ))}
                 </div>
               ) : null}
+              {lot ? (
+                <div className="esp-lot-barre" role="group" aria-label="Décision en lot">
+                  <span className="esp-kpi-sous">
+                    {cochees.length} cochée{cochees.length > 1 ? "s" : ""} sur {decidables.length} décidable{decidables.length > 1 ? "s" : ""} par vous
+                  </span>
+                  <span className="esp-item-haut">
+                    <button type="button" className="esp-lien-bouton" disabled={!decidables.length} onClick={() => setCoches(cochees.length === decidables.length && decidables.length ? [] : decidables.map((d) => d.id))}>
+                      {cochees.length === decidables.length && decidables.length ? "Tout décocher" : "Cocher les décidables"}
+                    </button>
+                    <button type="button" className="r-btn r-btn--vert r-btn--petit" disabled={!cochees.length} onClick={() => setDecisionLot({ decision: "approuve", demandes: cochees, cle: Date.now() })}>Approuver ({cochees.length})</button>
+                    <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!cochees.length} onClick={() => setDecisionLot({ decision: "rejete", demandes: cochees, cle: Date.now() })}>Refuser ({cochees.length})</button>
+                  </span>
+                </div>
+              ) : null}
             </div>
 
             {!etat ? (
@@ -333,17 +374,19 @@ export default function FileValidations({ utilisateur }: { utilisateur: Utilisat
                         <span>{g.libelle}</span>
                         <span>{liste.length}</span>
                       </div>
-                      <ul className="esp-liste" role="listbox" aria-label={g.libelle}>
+                      <ul className="esp-liste" aria-label={g.libelle}>
                         {liste.map((d) => {
                           const c = compteApprobations(d, etat.approbations);
                           const grp = groupeDe(d);
                           const moiDemandeur = d.demandeur_type === "utilisateur" && d.demandeur_id === moi.id;
                           return (
-                            <li key={d.id}>
+                            <li key={d.id} className={lot && d.statut === "en_attente" ? "esp-li-lot" : undefined}>
+                              {lot && d.statut === "en_attente" ? (
+                                <Coche coche={coches.includes(d.id)} onChange={(v) => cocher(d.id, v)} libelle={`Cocher : ${d.resume}`} />
+                              ) : null}
                               <button
                                 type="button"
-                                role="option"
-                                aria-selected={choisie === d.id}
+                                aria-current={choisie === d.id ? "true" : undefined}
                                 className="esp-item"
                                 onClick={() => {
                                   setChoix(d.id);
@@ -380,6 +423,32 @@ export default function FileValidations({ utilisateur }: { utilisateur: Utilisat
             <MesDelegations delegations={etat.delegations} moi={moi.id} source={source} nommer={nommer} onRevocationLocale={revoquerLocal} recharger={charger} />
           ) : null}
         </div>
+
+        {etat && decisionLot ? (
+          <DecisionLot
+            key={decisionLot.cle}
+            ouvert
+            decision={decisionLot.decision}
+            choisies={decisionLot.demandes}
+            moi={moi}
+            source={source}
+            approbations={etat.approbations}
+            delegations={etat.delegations}
+            equipes={equipes}
+            nommer={nommer}
+            onDecisionLocale={appliquerLocal}
+            recharger={relire}
+            onFermer={(bilan) => {
+              const decision = decisionLot.decision;
+              setDecisionLot(null);
+              if (bilan?.length) {
+                const ok = bilan.filter((l) => l.ok).length;
+                setFait(`${ok} demande${ok > 1 ? "s" : ""} ${decision === "approuve" ? "approuvée" : "refusée"}${ok > 1 ? "s" : ""} en lot${bilan.length > ok ? ` ; ${bilan.length - ok} refusée${bilan.length - ok > 1 ? "s" : ""} par la base, restée${bilan.length - ok > 1 ? "s" : ""} dans la file` : ""}.`);
+                setCoches((c) => c.filter((id) => bilan.some((l) => !l.ok && l.demande.id === id)));
+              }
+            }}
+          />
+        ) : null}
 
         <section id="esp-detail" className="esp-detail-mobile" aria-label="Détail de la demande">
           {etat && demande ? (

@@ -131,6 +131,12 @@
 .dlg-corps {
   min-width: 0;
   margin-top: 18px;
+  /* 06/10 (retour de Teo) : le défilement coupe tout ce qui dépasse, donc
+     l'anneau de focus des champs était rogné sur les côtés et ressemblait à
+     un double cadre. 4 px de marge intérieure, repris par une marge
+     négative : la mise en page ne bouge pas, l'anneau se voit en entier. */
+  padding: 4px;
+  margin-inline: -4px;
   /* le formulaire défile, le titre et le pied restent : c'est ce qui
      permet six champs sur un téléphone sans perdre le bouton.
 

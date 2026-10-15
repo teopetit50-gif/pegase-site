@@ -235,7 +235,7 @@ export default function PointDuMatin() {
                     </div>
                   ) : (
                     <div key={l.id} className="esp-point-ligne">
-                      <span className="esp-point-gravite" data-gravite={l.gravite ?? undefined} data-sante={l.sante} aria-label={l.gravite ?? (l.sante ? "va bien" : undefined)} />
+                      <span className="esp-point-gravite" data-gravite={l.gravite ?? undefined} data-sante={l.sante} {...(l.gravite || l.sante ? { role: "img", "aria-label": l.gravite ?? "va bien" } : { "aria-hidden": true })} />
                       <div>
                         {l.entite_nom ? <div className="esp-point-entite">{l.entite_nom}</div> : null}
                         <div className="esp-point-texte">

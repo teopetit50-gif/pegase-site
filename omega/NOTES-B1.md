@@ -1,5 +1,103 @@
 # Session B1 — VARELO, le référentiel du groupe (sociétés, pôles, rapprochement)
 
+## REPRISE (15/10/2026)
+
+Reprise demandée par Teo : petits lots fermés. Lot 1 : `omega/modules/varelo/PRODUCTION.md`, la liste ordonnée
+des 16 migrations Varelo de b1_04 à b1_18 pour la production (crons, prérequis du socle, contrôles en lecture
+seule, retour arrière), pour A5 au gel. Document seul, rien à poser. Toujours en attente de Teo : « contexte_varelo »
+dans l'assistant, des exports réels pour l'essai à blanc.
+
+## REPRISE (11/10/2026, 15 h 40 Z — pause demandée par Teo)
+
+Arrêté proprement : arbre propre, rien en cours. Tout ce qui suit est posé vert sur la recette et dans main ; le
+seul commit non fusionné est le chiffrage mis à jour et cette note (documents, rien à poser). Prochain pas : un
+export réel pour l'essai à blanc, ou la décision de Teo sur l'outil « contexte_varelo » de l'assistant.
+
+## REPRISE (11/10/2026, 15 h 25 Z)
+
+Fait et vert sur la recette, dans main : b1_15 décisions, b1_16 règles du groupe et sources DSI, b1_17 caisses,
+b1_18 contexte (tests b1_18 à b1_21, 44 vert) ; liens des écrans vers /espace2 ; label-content-name-mismatch.
+Attend Teo : l'outil « contexte_varelo » dans l'assistant (route hors module) ; les vrais exports d'un groupe
+pour l'essai à blanc (gestion et caisses). Prochaine étape exacte : l'essai à blanc dès qu'un export réel
+arrive ; sinon, rien de Varelo n'est en cours. Chiffrage mis à jour : omega/CHIFFRAGE/varelo.md (section du 11/10).
+
+## 11/10/2026 — le contexte du groupe pour l'assistant (b1_18, tests b1_21)
+
+Lignes 1, 8, 18, 28 (« une seule IA ») et 33 (« chaque lecture au journal ») du chiffrage, moitié données.
+`public.grp_contexte(client, motif)` (security invoker, RLS de la personne) rend un résumé borné du groupe :
+sociétés (ventes, résultat, trésorerie, écarts), point du matin, décisions en attente, clients au-dessus du
+plafond, contrats à dénoncer sous 90 jours, réserves, reportings en retard, caisses d'hier ; aucun IBAN.
+Chaque lecture : journal `varelo.lecture.contexte` (`private.grp_noter_lecture`). Tests b1_21 : 7 assertions
+(maquette : 347 ok). Reste, hors de mon module : brancher cette porte comme outil de l'assistant
+(app/api/assistant/route.ts, appel rpc avec la session de la personne) — proposé au coordinateur.
+
+## 11/10/2026 — les caisses (b1_17, tests b1_20)
+
+Lignes 24 et 26 du chiffrage. `b1_17_caisses.sql` : jeu `ventes_caisse` (jour, magasin, CA TTC, CA HT, tickets ;
+signature « Magasin » + « CA TTC » ; fenêtre observée sur le jour) pour tableur, lightspeed, zelty, tiller,
+sumup, cashpad ; table `grp_ventes_caisse` (société × magasin × jour, remplacée au redépôt) ; porte
+`grp_deposer_ventes` (aussi appelée par `grp_appliquer_jeu`, remplacée) ; vue `grp_ventes_magasins` (hier, J-8,
+mois) ; « Le groupe ce matin » (`grp_lignes_groupe`, remplacée) : total d'hier, société à -20 % sur une semaine,
+magasin muet. Tests b1_20 : 11 assertions ; b1_13 restreint aux cinq jeux de b1_10 (maquette : 340 ok).
+Écran : carte « Ventes des caisses » (dépôt du Z), logiciels de caisse dans « Exports automatiques ».
+Recette 193 ✓, axe 0 écart. En-têtes : hypothèses, à confirmer sur un vrai export (essai à blanc d'A1).
+
+## 11/10/2026 — les règles du groupe, les sources validées par la DSI (b1_16, tests b1_19)
+
+Lignes 9, 23, 25 du chiffrage. `b1_16_regles_groupe.sql` : `grp_reglages` + porte `grp_regler_groupe` (gérant,
+admin) — préavis par défaut (repris par `grp_enregistrer_contrat`), délai de proposition de la dénonciation
+(repris par `grp_proposer_du_jour`), plafond d'encours par défaut (vue `grp_encours_groupe`, colonne
+`plafond_source`), délai interne de réserve (déclencheur avant insertion sur `grp_receptions`, l'échéance
+légale reste dans le calcul). Équipe `dsi` ; `grp_sources_demandes` + porte `grp_demander_source` (brancher,
+débrancher) → demande `varelo.brancher|debrancher` routée à la DSI → exécutée par `grp_executer_source`
+(branché par `private.brancher` ou réactivé ; débranché par statut). Tests b1_19 : 23 assertions (maquette :
+329 ok). Écran : carte « Règles du groupe », « Exports automatiques » par demande à la DSI (brancher,
+débrancher). Recette 185 ✓, axe 0 écart.
+
+## 11/10/2026 — reprise : les décisions à valider (b1_15, tests b1_18)
+
+Lignes 4, 10, 30, 32 et 39 du chiffrage. `b1_15_decisions.sql` : table `grp_decisions` adossée à
+`demandes_validation` ; porte `grp_proposer_decision` (dénoncer un contrat → DJ, protester → DO, relever un
+plafond → DF ; règle de routage posée si absente) ; d'office chaque heure (`varelo-decisions`) les contrats
+tacites à 15 jours et les livraisons à protester ; exécution à la décision par l'abonnement
+`demande.decidee.varelo` → travail `varelo.decision` (cron `varelo-releves`) : plafond posé ; dénonciation /
+protestation « validée, à envoyer » ; refus de protestation → livraison classée ; point du matin « Décisions à
+valider » (ordre 1, au plus trois par destinataire, calcul et pièce) ; `grp_ce_matin` rend `decisions`.
+Remplace `grp_traiter_travaux`, `grp_ce_matin`, `grp_deposer_points`. Tests b1_18 : 24 assertions (maquette :
+306 ok, file de validation simulée). Écran : « Faire valider » (contrats, réserves), « Proposer » (plafond),
+pastille d'état ; bloc « Décisions à valider » dans « Ce matin ». Recette 181 ✓, axe 0 écart.
+À la pose : repasser aussi ^test_b1_1[0-8]_ et le 44 (fonctions privées ouvertes à authenticated :
+grp_proposer_decision et grp_lignes_decisions, toutes deux requises par une porte invoker).
+
+## REPRISE (pause demandée par Teo, 06/10/2026, 21 h Z)
+
+**Fait, posé sur la recette et fusionné dans main** (worker-b1 fusionnée par le coordinateur, dernière fusion
+après d794f00) : b1_01 à b1_03 (référentiel), b1_04 encours, b1_05 contrats, b1_06 réciproques, b1_07 point
+du matin, b1_08 groupe sur une page, b1_09 reportings, b1_10 + b1_14 exports lus (modèles et signatures),
+b1_11 + b1_11b réserves, b1_12 photos du constat, b1_13 une pièce une livraison. Tests b1_07 à b1_17 verts
+sur la recette (dernier relevé : 1120 ok, plus b1_13 à b1_17 verts à 18 h 25 Z ; socle 44, 46, 51, 55 :
+34 ok). Écran /espace/varelo complet ; plus aucune ligne Varelo dans lib/en-preparation.ts.
+
+**Non fusionné, rien à poser** : 7197df1 — `omega/CHIFFRAGE/varelo.md` (chiffrage de /secteurs/groupes,
+39 promesses ; document seul, aucun fichier du site). À fusionner quand le coordinateur le souhaite.
+
+**Attend le coordinateur / A5** : la production. Seuls b1_01 à b1_03 sont au plan de
+`MISE-EN-PRODUCTION.md` ; b1_04 à b1_14 (dans cet ordre, b1_11b après b1_11) restent à reposer en
+production au gel, avec leurs crons (varelo-contrats, -matin, -reportings, -releves, -reserves).
+
+**Attend Teo** (voir le chiffrage, synthèse) : la formulation de la page (« branche la même IA » ou
+« dépose l'export ») ; un premier groupe réel et un vrai export de chacun de ses logiciels pour l'essai à
+blanc du lecteur ; s'il veut « une seule IA » au sens d'un assistant : le fournisseur de modèle UE (DPA,
+sans entraînement) ; les accès API (Pennylane, Cegid, Sage) et les éditeurs de caisses si l'on branche.
+
+**Prochaine étape exacte** : à la reprise, lire la réponse de Teo au chiffrage. Sans décision nouvelle, le
+premier geste est l'essai à blanc des modèles `varelo` sur un vrai export (avec A1), puis, dans l'ordre du
+chiffrage : décisions validables depuis le point du matin (demandes_validation pour dénoncer, protester,
+relever un plafond), réglages du groupe (règles écrites une fois), débrancher avec accord DSI.
+Rien n'est en cours : arbre propre, aucun serveur lancé. Maquette locale (PG16, port 5499) et scripts dans
+le scratchpad de la session : jetables, tout ce qui compte est dans le dépôt.
+
+
 Branche `worker-b1`. Dernière mise à jour : 06/10/2026, 03 h UTC — **terminé** :
 les 14 tests sont verts sur la recette, les trois migrations sont posées,
 /espace/varelo est sur main (b287d04) et **en ligne sur omegaai.fr**. Le
@@ -202,3 +300,443 @@ déploiements par jour, consommés par les prévisualisations des branches
 worker-*, coupées depuis). **À vérifier en ligne dès que le déploiement passe** :
 « Référentiel du groupe » et le ruban « Données d'exemple » sur
 omegaai.fr/espace/varelo.
+
+## 6. Accessibilité (06/10, demande du coordinateur après la mesure axe-core d'A3)
+
+Session Opus 5.5 (`session_018XzgEK2qPbPzZBtrX7BdWB`), reprise de
+`session_01CrMrfRwPXbEdP2cxzcaCNh`. La liste des objets d'`EcranVarelo.tsx`
+était un `role="listbox"` dont les boutons portaient `role="option"` dans des
+`<li>` (écart critique) : c'est maintenant une liste de boutons, l'objet ouvert
+porte `aria-current="true"` (même style que `.esp-item[aria-selected]`, déjà
+prévu dans `espace.css`). Aucun autre listbox/option dans le module.
+Vérifié : tsc ✓, eslint ✓, build ✓, `recette-varelo.mjs` aux cinq largeurs ✓,
+`omega/recette-b1/accessibilite-varelo.mjs` (axe-core WCAG 2.1 A/AA à 390 et
+1440) : 0 écart, un seul objet courant, il suit le choix.
+
+**Suite (06/10, remarque de B6, axe `scrollable-region-focusable` à 390 px)** :
+les deux cadres `.esp-tableau-cadre` qui défilent — codes locaux de l'objet
+(`ObjetDetail.tsx`) et lignes rejetées d'un dépôt (`Depot.tsx`) — portent
+`tabIndex={0}`, `role="region"` et un `aria-label` (modèle
+`daliro/ChantierVue.tsx`). `accessibilite-varelo.mjs` contrôle les deux cadres
+et repasse axe sur le dialogue du dépôt avec son tableau des rejets, à 390 et
+1440 : 0 écart. tsc ✓ eslint ✓ build ✓, recette cinq largeurs ✓.
+
+## Vague 3 — les trois manques pour qu'un groupe paie Varelo et l'ouvre chaque matin (06/10/2026)
+
+Demande du coordinateur (14 h 31 Z). Constat de départ : Varelo range les
+codes (le référentiel) mais ne porte **aucun montant ni aucune échéance** ;
+or `/secteurs/groupes` promet « le groupe sur une page », « un seuil
+d'encours », « les contrats à dénoncer ». Un référentiel seul se paie une
+fois (projet de nettoyage) ; ce qui se paie tous les mois, c'est ce que le
+groupe en tire chaque matin.
+
+| # | Manque | Pourquoi un client paie, chaque jour | Concurrents et réglementation |
+|---|---|---|---|
+| **1** | **L'encours du groupe par tiers, avec un plafond groupe** : chaque société dépose sa balance âgée ; Varelo additionne ce qu'un même client doit à toutes les sociétés (grâce au référentiel), montre l'échu et l'ancienneté, alerte quand un plafond groupe est dépassé. | Le risque client d'un groupe est consolidé ou n'est pas : un client à 60 k€ dans une filiale et 50 k€ dans une autre est à 110 k€ pour le groupe, et personne ne le voit. C'est la première chose que l'assurance-crédit et la DAF demandent. Alerte quotidienne, pas un projet. | Les outils de credit management le vendent au niveau groupe : Agicap (DSO et balance âgée « au niveau du groupe, d'une filiale ou d'un client ») ; Atradius Credit Power (analyse du poste clients « par entreprise, groupe d'entreprises ») ; HighRadius Credit Cloud (limites de crédit). Aucun ne s'appuie sur un référentiel qui relie les codes locaux. Réglementation : délais de paiement plafonnés (60 jours date de facture ou 45 jours fin de mois, art. L441-10 C. com.), amende jusqu'à 2 M€ pour une personne morale (art. L441-16) — l'échu par tranche est ce qui le montre. |
+| **2** | **Les contrats du groupe à dénoncer** : registre des contrats de chaque société rattachés au fournisseur du groupe, échéance, préavis, reconduction tacite, date limite de dénonciation ; la liste du matin « à dénoncer avant le … ». | Promis sur la page (« les contrats à dénoncer »), absent du socle. Un même fournisseur sous cinq contrats dans cinq sociétés = une négociation groupe manquée et des reconductions subies. | Contrats à durée déterminée : la reconduction tacite produit un nouveau contrat (art. 1215 C. civ.) — d'où la date limite de préavis à tenir. Outils CLM (gestion de contrats) du marché : aucun n'est branché au référentiel tiers d'un groupe. |
+| **3** | **Les comptes réciproques intragroupe à la clôture** : les dettes et créances entre sociétés du groupe (le référentiel les marque déjà « intragroupe ») rapprochées des deux côtés, avec les écarts à expliquer avant la consolidation. | La clôture : chaque écart intragroupe se règle aujourd'hui par Excel et courriel. Le manque n° 1 apporte déjà les soldes par code ; le n° 3 les met face à face. | Règlement ANC 2020-01 : les créances et dettes réciproques sont éliminées en consolidation (intégration globale et proportionnelle) ; les éditeurs de consolidation vendent un module de rapprochement intragroupe à part (Lefebvre-Dalloz, Fiducial, Sigma Conso), qui réduit la clôture de moitié selon eux. |
+
+Sources : [Agicap — poste client](https://agicap.com/fr/produits/poste-client/) ;
+[Atradius Credit Power](https://atradius-fr-ts1.opc.oracleoutsourcing.com/rapports/atradius-france---credit-power---fiche-produit-ecran-%282%29.pdf) ;
+[HighRadius Credit Cloud](https://highradius.com/fr/software/order-to-cash-ar/credit-cloud/) ;
+[délais de paiement, L441-10 et L441-16](https://www.swim.legal/blog/delai-paiement-facture-entreprises-regles-lme-sanctions)
+et [DREETS Nouvelle-Aquitaine](https://nouvelle-aquitaine.dreets.gouv.fr/sites/nouvelle-aquitaine.dreets.gouv.fr/IMG/pdf/brochure-delais-paiments.pdf) ;
+[art. 1215 C. civ., tacite reconduction](https://www.weblex.fr/fiches-conseils/renouvellement-tacite-reconduction) ;
+[règlement ANC 2020-01](https://www.anc.gouv.fr/files/anc/files/1_Normes_fran%C3%A7aises/recueil/REGLT-2020_01-VERSION-RECUEIL2026.pdf)
+et [Lefebvre-Dalloz, réconciliation intercos](https://formation.lefebvre-dalloz.fr/actualite/reconciliation-intercos-cycle-essentiel-de-la-cloture-des-comptes) ;
+[Paperjam / Sigma Conso](https://paperjam.lu/article/accelerer-rapprochement-interc).
+Écarté de la liste : la fraude au changement de RIB (la France est le pays
+européen le plus ciblé, [Clubic / baromètre Allianz](https://clubic.com//dossier-610123-l-arnaque-au-faux-fournisseur-une-fraude-qui-cible-les-pme-et-detourne-les-virements.html)) :
+Varelo a déjà sa règle « IBAN différent → deux approbations de la DF », et
+la vérification des tiers est le terrain de B7 ; « les réserves à émettre »
+(art. L133-3 C. com., trois jours pour protester auprès du transporteur)
+demandent des bons de réception qu'aucun module ne lit encore.
+
+### N° 1 codé — l'encours du groupe par tiers (b1_04)
+
+- **Migration** `omega/modules/varelo/migrations/b1_04_encours_groupe.sql` :
+  tables `grp_encours_depots` (une balance âgée d'une société, d'une nature,
+  à une date d'arrêté ; le courant = le dernier arrêté, rien ne s'efface),
+  `grp_encours_lignes` (non échu, 1–30, 31–60, 61–90, > 90, échu sans
+  ancienneté ; total et échu calculés), `grp_encours_plafonds` (clients
+  seulement, total et échu, retiré = `actif false`) ; vues security_invoker
+  `grp_encours_courant`, `grp_encours_par_code`, `grp_encours_groupe` ;
+  portes `grp_deposer_encours` (gérant, admin) et `grp_regler_plafond`
+  (gérant, admin, valideur de la DF) ; `private.grp_montant` (montants à la
+  française), `private.grp_controler_encours` (une alerte « attention »
+  `varelo:encours.<objet>` par client au-dessus de son plafond, fermée
+  d'elle-même) ; journal `varelo.encours.depot | plafond | depassement`.
+  Un code inconnu d'une balance (avec un nom) est inscrit au référentiel par
+  `private.grp_deposer_codes` ; un code connu n'est jamais réécrit.
+  Sans drop ni delete ; rejouable (deux poses de suite essayées).
+- **À inscrire dans la liste figée d'A5** (exécutables par authenticated) :
+  `private.grp_deposer_encours(uuid, uuid, text, date, jsonb, text)`,
+  `private.grp_regler_plafond(uuid, numeric, numeric, text)`.
+  `grp_montant` et `grp_controler_encours` : service_role seulement.
+- **Tests** `omega/tests/varelo/b1_07_encours.sql` (motif `^test_b1_07_`) :
+  `test_b1_07_depot` (23), `test_b1_07_plafond` (19), `test_b1_07_perimetre`
+  (16). Joués ici sur une **maquette locale** du socle (PostgreSQL 16,
+  `grp_rapprocher` simulé : même SIREN ⇒ code proposé sur l'objet ; aides
+  d'A5 et pgTAP décalqués) : **58/58**. Ce qui peut différer sur la recette :
+  le vrai passage (placement d'office par SIREN pour des clients, marquage
+  intragroupe), l'index d'unicité des alertes, le compte des travaux.
+- **Écran** `components/espace/varelo/Encours.tsx` + `encours.ts` (et
+  `lireTableau` dans `csv.ts`) : pour les clients et les fournisseurs, la
+  carte « Encours du groupe » — totaux hors intragroupe, la balance de
+  chaque société et son ancienneté (> 7 jours : « ancienne »), le tableau
+  par objet du groupe (encours, échu, > 90 j, plafond, « Au-dessus du
+  plafond » / « Provisoire » / « Intragroupe »), le dialogue du plafond, le
+  dépôt d'une balance âgée (en-têtes Sage/EBP/Cegid reconnus : « Non échu »,
+  « 1-30 », « > 90 », « Solde »…). tsc ✓ eslint ✓ build ✓ ;
+  `recette-varelo.mjs` cinq largeurs ✓ (+ 14 vérifications « encours ») ;
+  `accessibilite-varelo.mjs` : carte et dialogue du plafond, 0 écart à 390
+  et 1440.
+- Ni coquille de l'espace ni fichier partagé touchés.
+
+### Retour de la recette sur b1_04 (coordinateur, 06/10, 15 h 08 Z)
+
+Posé (dépôt 4633, test 4634) : `^test_b1_` + socle 46/51 : **19/19 verts**, dont
+test_b1_07_depot, _perimetre, _plafond, test_46 (vues security_invoker) et
+test_51 (politiques et droits). La liste figée d'A5 se calcule en base : rien
+à y ajouter (test 44 vert).
+
+### N° 2 codé — les contrats du groupe à dénoncer (b1_05)
+
+- **Migration** `omega/modules/varelo/migrations/b1_05_contrats_groupe.sql` :
+  table `grp_contrats` (société, tiers du référentiel ou libellé, intitulé,
+  catégorie, échéance, reconduction tacite/expresse/aucune, durée d'une
+  reconduction, préavis en jours ou en mois, montant annuel ; statut actif →
+  denonce | archive, rien ne s'efface) ; vue security_invoker
+  `grp_contrats_echeancier` (échéance courante : un contrat tacite échu sans
+  dénonciation avance d'une période — art. 1215 C. civ. ; date limite =
+  échéance − préavis ; jours restants ; état depasse/urgent ≤ 30 j/bientot
+  ≤ 90 j/large/sans_objet ; contrats actifs du même tiers dans le groupe) ;
+  portes `grp_enregistrer_contrat` (créer ou corriger ; gérant, admin,
+  valideur, collaborateur, dans son périmètre), `grp_denoncer_contrat`
+  (gérant, admin, valideur DJ ou DF ; date ≤ aujourd'hui ; hors délai dit),
+  `grp_archiver_contrat` (gérant, admin) ; `grp_controler_contrats` (une
+  alerte par contrat tacite dont la date limite est à ≤ 30 j, « critique »
+  à ≤ 7 j, clé `varelo:contrats.<id>`, fermée au dénoncé/archivé/délai
+  passé) et cron **`varelo-contrats`** (`17 5 * * *`,
+  `private.grp_controler_contrats_tous()`) ; journal
+  `varelo.contrat.enregistre | denonce | archive`. Les deux fonctions de dates
+  (`grp_contrat_echeance`, `grp_contrat_limite`) sont exécutables par
+  authenticated : la vue les appelle.
+- **Défaut trouvé et corrigé avant envoi** : la contrainte « un tiers » laissait
+  passer un tiers nul (un CHECK à NULL passe) → `coalesce(…, 0) >= 1`.
+- **Tests** `omega/tests/varelo/b1_08_contrats.sql` (motif `^test_b1_08_`) :
+  `_echeances` (12), `_denonciation` (18), `_perimetre` (10) — dates relatives
+  à current_date. Maquette locale : **40/40** (et b1_07 toujours 58/58).
+- **Écran** `Contrats.tsx` + `contrats.ts` : carte « Contrats du groupe à
+  dénoncer » (sous 30 j, sous 90 j, montant en jeu, reconduits ; filtres À
+  surveiller / Dénoncés / Tous ; tableau par date limite ; pastille « N
+  contrats chez ce tiers, M sociétés » ; dialogues Ajouter/Corriger et Noter
+  la dénonciation ; Archiver). Recette `recette-varelo.mjs` : 104 contrôles,
+  cinq largeurs ✓ ; axe 0 écart à 390 et 1440 (carte et dialogue d'ajout).
+- **Corrigé au passage** : l'en-tête masqué « Action » (`.vrl-masque`) était
+  en position absolue et sortait du cadre qui défile : débordement de la page
+  à 390 et 768 en vue clients (carte Encours, déjà sur 786017e) et sous la
+  carte Contrats. Passé en bloc en ligne de 1 px.
+
+### Retour de la recette sur b1_05 (coordinateur, 06/10, 15 h 34 Z)
+
+b1_05 posé, `^test_b1_` **20/20 verts** ; carte Contrats fusionnée dans main
+(1f6427c) et poussée.
+
+### N° 3 codé — les comptes réciproques intragroupe (b1_06)
+
+- **Migration** `omega/modules/varelo/migrations/b1_06_reciproques.sql` (après
+  b1_04) : vue security_invoker `grp_reciproques` — pour chaque paire
+  (créancier, débiteur) de sociétés du groupe, la créance vue du créancier (sa
+  balance clients, codes dont l'objet est intragroupe = le débiteur) face à la
+  dette vue du débiteur (sa balance fournisseurs), les deux arrêtés, l'écart, et
+  l'état concorde (< 1 €, même arrêté) / ecart / justifie / dates_differentes /
+  manque_creancier / manque_debiteur ; table `grp_reciproques_justifs` (cause
+  en_transit, change, litige, decalage_periode, erreur_saisie, autre + motif),
+  valable pour l'écart ET les deux arrêtés du moment — un nouveau dépôt qui
+  change l'écart la rend caduque ; portes `grp_justifier_ecart` (gérant, admin,
+  valideur DF ; seulement un état ecart ou dates_differentes) et
+  `grp_exporter_reciproques` (gérant, admin, valideur ; CSV protégé par
+  `private.grp_csv`, montants à la française) ; journal
+  `varelo.reciproques.justification | export`.
+- **Défaut de b1_04 trouvé et corrigé ici** : deux dépôts d'une même transaction
+  avaient le même `now()` et le même arrêté → le « dépôt courant » tiré au
+  hasard. `alter table grp_encours_depots alter column depose_le set default
+  clock_timestamp()` en tête de b1_06.
+- **Tests** `omega/tests/varelo/b1_09_reciproques.sql` (motif `^test_b1_09_`) :
+  `_paires` (15), `_export_isolement` (10). Maquette locale : 25/25 (b1_07 et
+  b1_08 toujours verts, 122 assertions en tout). La maquette pose maintenant
+  `intragroupe_entite_id` comme `private.grp_marquer_intragroupe`.
+- **Écran** `Reciproques.tsx` + `reciproques.ts` : carte « Comptes réciproques
+  intragroupe » (paires, concordantes ou justifiées, à traiter avant la clôture
+  avec le montant ; tableau créancier → débiteur, créance et arrêté, dette
+  reconnue et arrêté, écart, état ; dialogue Justifier ; Exporter (CSV)).
+  `recette-varelo.mjs` : 114 contrôles, cinq largeurs ✓ ; axe 0 écart à 390 et
+  1440 (carte et dialogue de justification).
+- Limite dite : au périmètre partiel, on ne voit que le côté de ses sociétés
+  (l'autre apparaît « manquant ») ; le tableau de clôture se lit au périmètre
+  total.
+
+### Retour de la recette sur b1_06 (coordinateur, 06/10, 15 h 47 Z)
+
+b1_06 + test b1_09 posés : `^test_b1_09_` **2/2 verts**. Écran Réciproques
+fusionné après le vert du test 51. Suite décidée par le coordinateur : le point
+du matin et l'onglet reprennent les trois listes ; prod au gel avec A5.
+
+### Le point du matin Varelo (b1_07)
+
+- **Migration** `omega/modules/varelo/migrations/b1_07_point_du_matin.sql` :
+  `private.grp_lignes_matin(client, 'contrats'|'encours'|'reciproques')`
+  (SECURITY INVOKER, lit les vues de b1_04–b1_06 : contrats tacites à dénoncer
+  ≤ 30 j — critique ≤ 7 j ; clients au-dessus du plafond, balances de plus de
+  7 jours ; réciproques en écart, non reconnues ou à arrêtés différents) ;
+  `public.grp_ce_matin(client)` (les trois listes au périmètre de la personne,
+  pour l'écran) ; `private.grp_deposer_points(maintenant)` (dès 5 h, heure de
+  l'entité principale : « Contrats à dénoncer », « Encours du groupe »,
+  « Réciproques intragroupe » au rôle gérant et à l'équipe direction_financiere,
+  « Contrats à dénoncer » à direction_juridique, par `private.deposer_section` ;
+  section vide retirée ; battement `varelo_matin` ; erreur → alerte) ;
+  `private.grp_euros` (montants à la française) ; cron **`varelo-matin`**
+  (`*/30 * * * *`). Aucune donnée de santé.
+- **Tests** `omega/tests/varelo/b1_10_point_du_matin.sql` (motif
+  `^test_b1_10_`, après b1_08 et b1_09 dont il reprend les aides) : `_ce_matin`
+  (10), `_depot` (11). Maquette locale : 21/21, 143 assertions en tout de b1_07
+  à b1_10.
+- **Écran** `CeMatin.tsx` : le bloc « Ce matin » en tête de /espace/varelo,
+  mêmes phrases que le point du matin, trois blocs avec renvoi à leur carte
+  (`#vrl-contrats`, `#vrl-encours`, `#vrl-reciproques`). Recette 120 contrôles,
+  cinq largeurs ✓, axe 0 écart.
+- **Pour l'onglet de la barre** (fichier partagé de la coquille, chez C1) : un
+  compteur sur l'onglet VARELO se lit par `rpc('grp_ce_matin', {p_client})` —
+  nombre de lignes de gravité attention ou critique dans les trois listes.
+  Je n'ai pas touché la coquille.
+
+### Carnet de l'audit des promesses (coordinateur, 06/10, 15 h 58 Z)
+
+Ordre décidé (omega/AUDIT-PROMESSES.md § 2 Varelo) : 1. « le groupe sur une
+page » ; 2. les reportings dus ; 3. un modèle `modeles_jeux` Varelo pour le
+lecteur d'exports d'A1 ; 4. les réserves à émettre, avec A1. « Une seule IA » :
+reformulé par C5.
+
+### 1. Le groupe sur une page (b1_08)
+
+- **Source** : la balance générale de chaque société (tous les logiciels la
+  sortent). Plan comptable (ANC 2014-03) : ventes = − Σ 70, résultat = − Σ
+  classes 6 et 7, trésorerie = Σ 51 et 53 (519 compris). Chiffres sociaux, non
+  consolidés (dit à l'écran).
+- **Migration** `omega/modules/varelo/migrations/b1_08_groupe_page.sql` :
+  `grp_balances_depots` / `grp_balances_lignes` (une balance à un arrêté, avec
+  le début de l'exercice ; la courante = la dernière ; déséquilibre dit, pas
+  refusé ; `depose_le` = clock_timestamp), `grp_objectifs` (objectif de ventes
+  de l'exercice, plancher de trésorerie) ; vue `grp_groupe_page` (ventes,
+  résultat, trésorerie ; N-1 à la même date si déposée ; objectif au prorata
+  des jours ; sous plancher ; ancienneté) ; portes `grp_deposer_balance`
+  (gérant, admin) et `grp_regler_objectif` (gérant, admin, valideur DF) ;
+  alerte `varelo:tresorerie.<entité>` levée/fermée d'elle-même ; journal
+  `varelo.balance.depot | objectif.regle | tresorerie.plancher`. Le point du
+  matin gagne « Le groupe ce matin » (trésorerie sous plancher, ventes à plus
+  de 10 % sous l'objectif à date, balance de plus de 35 jours ; au gérant, à la
+  DF, à la présidence) : `grp_ce_matin` et `grp_deposer_points` remplacés
+  (create or replace), le reste de b1_07 inchangé.
+- **Tests** `omega/tests/varelo/b1_11_groupe_page.sql` (motif `^test_b1_11_`) :
+  `_page` (16), `_droits` (12). Maquette : 28/28 ; 171 assertions de b1_07 à
+  b1_11.
+- **Écran** `GroupePage.tsx` + `groupe.ts` : carte « Le groupe sur une page »
+  sous « Ce matin » (totaux, tableau par société : ventes à date, sur l'an
+  dernier, sur l'objectif, résultat, trésorerie et plancher, ancienneté ;
+  dialogues Objectifs et Déposer une balance générale — en-têtes Sage « N°
+  compte », « Solde débit/crédit » reconnus). « Ce matin » passe à quatre blocs.
+  Recette 133 contrôles, cinq largeurs ✓ ; axe 0 écart.
+
+### 2. Les reportings dus (b1_09)
+
+- **Promesse** : « Les reportings attendus par chaque marque, rangés par
+  échéance ». Une obligation = une société doit, à un destinataire (marque,
+  banque, réseau ; objet du référentiel s'il y est), tel reporting, à telle
+  périodicité (hebdomadaire, mensuelle, trimestrielle, annuelle — périodes
+  calendaires), tant de jours après la fin de la période, par tel canal, sous
+  la responsabilité de quelqu'un.
+- **Migration** `omega/modules/varelo/migrations/b1_09_reportings.sql` :
+  `grp_reportings` (actif → arrêté, rien ne s'efface), `grp_reportings_echeances`
+  (une par période, créée d'avance jusqu'à 45 jours par
+  `private.grp_generer_echeances` ; à faire → envoyé | dispensé motivé ; un
+  délai corrigé recale les échéances à faire), vue `grp_reportings_dus` (état
+  en_retard / aujourdhui / semaine / a_venir / envoye / envoye_en_retard /
+  dispense) ; portes `grp_enregistrer_reporting` (toute personne de la société
+  sauf lecteur), `grp_marquer_reporting` (le responsable, ou gérant/admin/
+  valideur de la société), `grp_arreter_reporting` (gérant, admin) ; alerte par
+  échéance en retard adressée au responsable (`varelo:reporting.<échéance>`),
+  fermée à l'envoi ; journal `varelo.reporting.*` ; cron **`varelo-reportings`**
+  (`23 4 * * *`). Point du matin : « Reportings dus » au gérant, à la DF et à la
+  direction des opérations, « Mes reportings dus » au responsable nommé
+  (`grp_ce_matin`, `grp_deposer_points` remplacés).
+- **Tests** `omega/tests/varelo/b1_12_reportings.sql` (motif `^test_b1_12_`) :
+  `_echeances` (24), `_droits` (11) ; le nombre d'échéances attendu se calcule
+  dans le test. Maquette : 35/35 ; 206 assertions de b1_07 à b1_12.
+- **Écran** `Reportings.tsx` + `reportings.ts` : carte « Reportings dus » (en
+  retard, 7 jours, obligations ; filtres À faire / Envoyés ou dispensés / Tous ;
+  dialogues Ajouter un reporting et Noter l'envoi ; Ne plus suivre). « Ce
+  matin » passe à cinq blocs. Recette 144 contrôles, cinq largeurs ✓ ; axe 0
+  écart.
+- Limite : le responsable se désigne « moi » à l'écran (la liste des comptes
+  n'est pas lisible par un membre) ; la porte accepte tout compte de
+  l'organisation.
+
+### 3. Les exports lus d'eux-mêmes (b1_10)
+
+- **La chaîne du socle** (lue dans SOCLE-EXTRAITS-COMMUN et NOTES-A1) : un
+  export arrive (`recevoir_releve`, courriel ou passerelle) → le lecteur
+  d'exports d'A1 le lit d'après les jeux du branchement (`branchements_jeux`,
+  copiés de `modeles_jeux` par `brancher`) et dépose ses lignes
+  (`instantanes_lignes`, valeurs en texte par clé de colonne) → le socle publie
+  `releve.pret.<module>` → l'abonné applique, puis `acquitter_instantane`.
+- **Migration** `omega/modules/varelo/migrations/b1_10_releves.sql` : 30
+  `modeles_jeux` (module varelo × sage100, ebp, cegid, quadra, pennylane,
+  tableur × fournisseurs, clients, balance_agee_clients,
+  balance_agee_fournisseurs, balance_generale ; montants en `texte`, lus par
+  `grp_montant` ; IBAN `sensible` ; reconnaissance par nom de fichier puis par
+  en-têtes signature) ; abonnement `releve.pret.varelo → varelo.appliquer_releve`
+  ; `private.grp_appliquer_jeu` (verse un jeu dans grp_deposer_codes /
+  grp_deposer_encours / grp_deposer_balance ; arrêté = jour de réception, heure
+  de la société) ; `private.grp_appliquer_releve` (instantanés « a_appliquer »,
+  tiers d'abord ; jeu inconnu ou société non inscrite → « douteux » motivé ;
+  journal `varelo.releve.applique`) ; `private.grp_traiter_travaux` et cron
+  **`varelo-releves`** (chaque minute, comme tiroma-releves).
+- **À faire par A1 / le coordinateur** : les en-têtes des modèles sont des
+  hypothèses (exports usuels) ; à confirmer par l'essai à blanc d'A1 (`deno task
+  essai`) sur un vrai fichier de chaque logiciel. Les deux balances âgées ont la
+  même signature d'en-têtes : sous un nom de fichier neutre, elles partent « à
+  classer » (le nom les départage : `balance_agee_clients_…`, `bac_…`).
+- **Tests** `omega/tests/varelo/b1_13_releves.sql` (motif `^test_b1_13_`) :
+  `_modeles` (13 : les 30 modèles passent les contrôles du socle, abonnement,
+  `public.brancher` déclare les cinq jeux, un collaborateur ne branche pas),
+  `_application` (6). Maquette : 19/19 ; 225 assertions de b1_07 à b1_13. La
+  chaîne complète se joue par l'essai réel (un `recevoir_releve` sur un
+  branchement Varelo de la recette).
+- **Écran** `Branchements.tsx` : carte « Exports automatiques » (chaque
+  société, son logiciel branché, ses jeux et leur dernier export ; « Brancher »
+  par la porte du socle `public.brancher`, voie `exports`, cinq jeux cochés).
+  Recette 149 contrôles, cinq largeurs ✓ ; axe 0 écart.
+
+### 4. Les réserves à émettre — scénario (écrit avant le code) et besoin pour A1
+
+**Promesse** : « Une livraison reçue avec avarie : le transport, les colis et
+les photos du constat » ; « Le compte à rebours de la réserve : trois jours pour
+l'adresser au transporteur ».
+
+**Le droit** (sources) :
+- transport routier national : la réception éteint toute action contre le
+  voiturier pour avarie ou perte partielle si, dans les **trois jours, non
+  compris les jours fériés**, qui suivent la réception, le destinataire n'a pas
+  notifié par acte extrajudiciaire ou **lettre recommandée** sa **protestation
+  motivée** (C. com., art. L133-3 ; [Légifrance](https://www.legifrance.gouv.fr/codes/id/LEGIARTI000020899366/2009-07-25/),
+  [CMS](https://cms.law/en/fra/publication/avarie-ou-perte-partielle)) ;
+- routier international (CMR, art. 30) : réserves écrites dans les **7 jours,
+  dimanches et jours fériés non compris**, pour les dommages non apparents
+  ([Swim Legal](https://www.swim.legal/blog/responsabilite-transport-international-cmr-indemnisation)) ;
+- maritime (règles de La Haye-Visby) : **3 jours** après la livraison pour les
+  dommages non apparents ([Swim Legal](https://www.swim.legal/blog/contentieux-transport-responsabilites-reserves-recours)) —
+  le cas courant des groupes des Antilles, qui importent par conteneur ;
+- aérien (convention de Montréal, art. 31) : **14 jours** pour une avarie.
+Les délais se calculent par le moteur du socle (`regles_delais`,
+`public.echeance_de`) : jours ouvrables, fériés **du territoire de la société**
+(Guadeloupe, Martinique… ont leurs fériés propres).
+
+**Le scénario** : 1. le magasin reçoit une livraison avec avarie ou manquant ;
+il la saisit dans /espace/varelo (ou, plus tard, la pièce — bon de livraison,
+lettre de voiture, photos — est lue par A1) : société, date de réception, mode
+de transport, transporteur, n° de lettre de voiture ou de connaissement,
+fournisseur (référentiel), colis attendus/reçus, avarie/manquant, description,
+réserves écrites ou non sur le bon. 2. Varelo calcule la date limite de la
+protestation et la montre en compte à rebours ; alerte (critique à J-1) et
+point du matin « Réserves à émettre » au gérant et à la direction des
+opérations. 3. Varelo prépare la **lettre de protestation motivée** (date,
+document de transport, constat, montant estimé) à envoyer en recommandé.
+4. On note l'envoi (date, moyen : LRAR, acte, LRE) ; hors délai dit. 5. Une
+livraison sans suite se classe, motivée. Journal à chaque étape.
+
+**Ce qu'il faudra à A1** (lecture des pièces, après ce lot) : un type de pièce
+`bon_livraison` du module varelo, champs `transporteur`, `document_transport`
+(n° de lettre de voiture, CMR ou connaissement), `date_livraison`,
+`colis_annonces`, `colis_recus`, `reserves_ecrites` (texte porté sur le bon,
+« sous réserve de déballage » ne vaut pas réserve), `expediteur`
+(nom, SIREN si présent), `mode` (routier, maritime, aérien) ; à l'arrivée de la
+lecture (`piece_lue.varelo`), Varelo pré-remplit la réception par
+`grp_enregistrer_reception` (la porte de ce lot). Je n'écris rien chez A1.
+
+### 4 codé — b1_11, tests b1_14, carte « Réserves à émettre »
+
+- Migration `omega/modules/varelo/migrations/b1_11_reserves.sql` : les
+  quatre règles dans `regles_delais` (`varelo.reserves.routier` 3 jours
+  ouvrables, L133-3 ; `.cmr` 7 ouvrables, CMR art. 30 ; `.maritime` 3
+  calendaires, La Haye-Visby ; `.aerien` 14, Montréal art. 31), la table
+  `grp_receptions` (échéance par `public.echeance_de`, fériés du
+  territoire de la société), la vue `grp_reserves` (état dépassé /
+  aujourd'hui / demain / à venir / protestée / hors délai / sans suite),
+  le contrôle horaire `varelo-reserves` (alerte attention, critique à
+  J-1), les portes `grp_enregistrer_reception`, `grp_lettre_reserve`,
+  `grp_noter_protestation` (avertit si courriel ou portail en routier),
+  `grp_classer_reception` (motif obligatoire, gérant / DO / DJ), la ligne
+  « Réserves à émettre » du point du matin (gérant, DO, DJ ; pas DF).
+  Remplace `grp_ce_matin` et `grp_deposer_points` : repasser aussi
+  `^test_b1_10_`, `^test_b1_11_`, `^test_b1_12_`.
+- Tests `omega/tests/varelo/b1_14_reserves.sql` : 33 assertions, vertes
+  sur la maquette locale (258 au total, 07 à 14).
+- Écran : `Reserves.tsx` / `reserves.ts` (après « Reportings dus ») ;
+  bloc « Réserves à émettre » dans « Ce matin » (six blocs) ; recette
+  164 ✓ aux cinq largeurs, axe 0 écart sur les trois dialogues.
+- Pour A1 : le type de pièce `bon_livraison` (transporteur,
+  document_transport, date_livraison, colis_annonces, colis_recus,
+  reserves_ecrites, expediteur, mode) et, à la lecture, l'appel de
+  `private.grp_enregistrer_reception` — rien n'est branché tant que A1
+  n'a pas posé le type.
+
+### 4 bis. Les photos du constat (b1_12, tests b1_15) — ce qui restait sur la page
+
+La page groupes (`components/secteurs/groupes/textes.ts`, survol-reserves)
+promet « le transport, les colis et les photos du constat » ; b1_11 n'avait
+pas les photos. b1_12 : colonne `grp_receptions.photos` (20 au plus), vue
+`grp_reserves` qui la rend (en dernière colonne), porte
+`grp_joindre_photo(reception, chemin, nom)` — le fichier est d'abord déposé
+dans `omega-clients/<client>/grp_receptions/<livraison>/…` (politique Storage
+INSERT 19o du socle), la porte vérifie le chemin, l'objet dans
+`storage.objects` et son type (image), l'inscrit et journalise
+`varelo.reception.photo_jointe` ; la lettre dit « N photographies du constat
+sont jointes à la présente ». Écran : champ photos à l'enregistrement,
+bouton « Photos (n) » par livraison, dialogue avec vignettes (adresses
+signées 10 min) et ajout. Tests b1_15 : 11 assertions (maquette : 269 ok au
+total, storage.objects simulé). Recette 171 ✓, axe 0 écart sur le dialogue.
+Avec cela, la ligne « Les réserves à émettre » de `lib/en-preparation.ts`
+peut tomber (fichier partagé : retrait par le coordinateur à la pose).
+
+### Une pièce, une livraison (b1_13, tests b1_16) — demande d'A1, 17 h 10 Z
+
+Le lecteur v27 d'A1 (6f57d5e) lit le bon de livraison déposé sur
+`grp_societes/<entité>` et appelle `private.grp_enregistrer_reception` avec
+`piece_id`. b1_13 : index unique `grp_receptions_piece_key (client_id,
+piece_id)` ; la porte refuse une pièce d'une autre organisation (22023), et
+une pièce déjà enregistrée rend la livraison existante (`deja` = true), sans
+écrire ni journaliser ; une course de deux lectures bute sur l'index et rend
+la même livraison. Tests b1_16 : 9 assertions (maquette : 278 ok au total).
+
+### Les signatures des exports Varelo, essayées contre le lecteur d'A1 (b1_14, tests b1_17)
+
+Coordinateur 17 h 25 Z : « le modèle modeles_jeux Varelo pour lire les exports
+(avec A1, lecteur v28) ». Les modèles existent depuis b1_10 (posés, verts) ;
+j'ai rejoué le choix de jeu du lecteur (worker-a1,
+`omega/functions/lecteur-exports/lire_export.ts` choisirJeu + `entetes.ts`,
+recopiés sous tsx : motif du nom de fichier d'abord, sinon le seul jeu dont la
+signature est couverte) sur 13 fichiers types. Avec b1_10, **3 KO** : une
+balance âgée au nom quelconque (« BALAGEE.txt ») n'était pas reconnue — les
+deux balances âgées avaient la même signature (« Non échu », « Total »), et
+une balance avec « Code client » + « Raison sociale » couvrait aussi celle de
+clients. b1_14 : balances âgées signées « Code client » / « Code fournisseur »
++ « Non échu » + « Total » (chacune perd l'alias de l'autre côté) ; fichiers
+tiers + « Code postal ». Après : **13/13 reconnus**. Test b1_17 : aucun fichier
+d'un jeu (tous les alias de ses colonnes, normalisés comme le lecteur) ne
+couvre la signature d'un autre ; rouge sur l'état b1_10, vert après ; b1_14
+rejoué ne réécrit rien (24 modèles + les branchements déjà déclarés au
+premier passage, 0 ensuite). Limites dites : un fichier tiers au nom
+quelconque sans « Code postal », ou une balance âgée dont la colonne tiers
+s'appelle seulement « Compte tiers », ne se reconnaît que par son nom de
+fichier (motif) ou par le jeu donné au dépôt.
