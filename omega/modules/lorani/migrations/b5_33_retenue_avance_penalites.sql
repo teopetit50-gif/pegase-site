@@ -103,7 +103,7 @@ begin
 
   if m.retenue_pct > 0 and d_retenue is not null and d_retenue < v_retenue - 1 then
     v_ecarts := v_ecarts || jsonb_build_object('nature', 'retenue', 'attendu', v_retenue, 'deduit', d_retenue,
-      'texte', case when d_retenue = 0 then format('la retenue de garantie (%s %%) n''est pas déduite du cumul', replace(m.retenue_pct::text, '.', ','))
+      'texte', case when d_retenue = 0 then format('la retenue de garantie (%s %%) n''est pas déduite du cumul', replace(trim_scale(m.retenue_pct)::text, '.', ','))
                     else format('retenue de garantie déduite %s au lieu de %s', private.lorani_euros(d_retenue), private.lorani_euros(v_retenue)) end);
   end if;
   if v_remb > 0 and coalesce(d_avance, 0) < v_remb - 1 then

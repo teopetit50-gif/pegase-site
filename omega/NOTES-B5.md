@@ -14,6 +14,7 @@ Dernière mise à jour : 05/10/2026, 23 h.
 - Nouveau, à poser après b5_32 : b5_33_retenue_avance_penalites.sql, puis le test b5_22. Écran (Chantier.tsx, montants.ts, portes.ts — select de quatre colonnes nouvelles, à fusionner seulement après la pose —, types.ts, exemples.ts) ; recette 110/110 et accessibilité vertes. Contrat du lecteur complété (retenue_ht, avance_remboursee_ht, penalites_ht) : à signaler à A1.
 - #30 couvert par b5_32 et b5_33 (ligne mise à jour). #31 (révision BT) attend un compte API INSEE : tiers, pas commencé.
 - b5_19 rouge sur la recette (h1252b6b5, 23514 lorani_constats_decision_motivee) : le test acceptait un constat sans motif (ligne 56, et ligne 54 par prudence). Corrigé dans le test seul ; b5_30 inchangé.
+- b5_22 rouge (h1308b5, not ok 3) : retenue_pct est numeric(4,2) sur la recette, l'alerte disait « 5,00 % ». b5_33 écrit désormais trim_scale (« 5 % ») ; à reposer avec b5_22.
 - La liste de reprise (#16, #15, #23, #30 à #33) est faite. Prochain pas : les résultats de pose (b5_18, puis b5_19 à b5_22), et ce que le coordinateur donnera ensuite.
 
 **11/10, 15 h 40 Z — PAUSE demandée par Teo. Arrêt propre, tout est poussé sur worker-b5.**
