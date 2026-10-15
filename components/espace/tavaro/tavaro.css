@@ -472,3 +472,16 @@
   width: 100%;
   max-width: 340px;
 }
+/* la prise de vue guidée de l'état des lieux */
+.esp .tav-guide {
+  display: grid;
+  gap: 4px;
+  justify-items: start;
+  padding: 12px 14px;
+  border: 1px solid var(--r-filet);
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+.esp .tav-guide p {
+  margin: 0 0 6px;
+}
