@@ -15,7 +15,7 @@
 1. ligne 12 : une personne nommée sur chaque remise. Base faite : b2_17 et test 26, 94f57cc, à poser. Écran fait : 854523b, carte Parc, recette 142, axe 60, à fusionner ;
 2. ligne 10 : la page du matin par agence. b2_18 et test 27, b20fdfd, à poser (cron tavaro-parking) ;
 3. ligne 50 : le fichier de désignation par lot ;
-4. lignes 19 et 57 : l'outil d'audit de vingt retours et l'indicateur de fin de mois. Base faite : b2_19 et test 28, 8838677, à poser. Reste l'écran (audit, indicateur).
+4. lignes 19 et 57 : l'outil d'audit de vingt retours et l'indicateur de fin de mois. Base faite : b2_19 et test 28, 8838677, à poser. Écran fait : b6ce1cd, carte « Audit des retours », recette 148, axe 66, à fusionner.
 
 Les écrans vont dans /espace2 : aucun lien vers /espace, et ne pas toucher `components/omega`.
 
