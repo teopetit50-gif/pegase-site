@@ -4,7 +4,13 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 `components/espace/offload/`, `app/espace/offload/`, et ce fichier. Coordinateur : session
 `session_01BCGFdpRKBvXKjouC75sYBg`. Je n'appelle jamais Supabase : le coordinateur pose, je reçois les sorties brutes.
 
-## REPRISE (nouvelle pause demandée par Teo le 11/10, 15 h 40 Z)
+## REPRISE (pause demandée par Teo le 15/10, 16 h 14 Z)
+
+État au 15/10 : c4_01 à c4_15 posés et verts sur la recette. Aucun travail en cours, rien à poser. Prochain pas : seulement
+sur feu vert de Teo. En attente de sa décision : « un message par trimestre » contre la ligne 12 (deux messages en tout).
+Hors OFFLOAD : restitution et effacement (socle), messagerie du client (A2), connecteurs CRM ou ERP (tiers).
+
+### Pause du 11/10, 15 h 40 Z
 
 État au 11/10 : c4_01 à c4_10 posés sur la recette et verts ; écrans fusionnés dans main. 44 lignes sur 45
 prouvées ; la ligne 15 attend la messagerie du client (A2). Rien à poser. Aucun travail en cours. Prochain pas :
