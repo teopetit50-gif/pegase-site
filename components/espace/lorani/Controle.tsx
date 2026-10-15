@@ -8,15 +8,20 @@
    (private.lorani_controler, porte lorani_lancer_controle), et seul quand la dernière pièce est lue. Exemple : les
    saisies s'appliquent en mémoire, sans croisement (les constats du contrôle précédent sont reconduits).
    Un constat part en question à l'entreprise ou au BET en un clic (b5_25) : un point « question » des comptes rendus
-   (lorani_points, b5_20), avec l'extrait cité (pièce, page, texte lu) ; il est ensuite suivi jusqu'à la réponse. */
+   (lorani_points, b5_20), avec l'extrait cité (pièce, page, texte lu) ; il est ensuite suivi jusqu'à la réponse.
+   Qui décide (b5_30) : le gérant, un admin ou le chef de projet nomme, par contrôle, la personne qui tranche les
+   constats ; elle seule (avec le gérant et les admins) les marque corrigés, acceptés ou écartés.
+   Régler les contrôles (b5_31) : par projet, l'écart toléré de chaque grandeur et entre métré et DPGF, et les familles
+   de constats coupées ; les réglages valent au prochain passage. */
 
 import { useMemo, useState } from "react";
-import { FileDown, MessageSquareText, PauseCircle, ScanSearch, ShieldCheck } from "lucide-react";
+import { FileDown, MessageSquareText, PauseCircle, ScanSearch, ShieldCheck, SlidersHorizontal, UserCheck } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { Avis, Pastille } from "../ui";
 import { dateCourte } from "../format";
-import { ajouterPoints, deciderConstat, lancerControle, octetsPiece, preparerControle, reprendreControle, suspendreControle } from "./portes";
+import { ajouterPoints, choisirDecideur, deciderConstat, lancerControle, octetsPiece, preparerControle, reglerControles, reprendreControle, suspendreControle } from "./portes";
+import { ROLES_PROJET } from "./etats";
 import { excelControle, pdfControle, telecharger, type DonneesRapport } from "./rapport";
 import type { Constat, Controle as ControleT, ControlePiece, Dossier, PieceProjet, Point, Projet, RolePieceControle } from "./types";
 
@@ -48,6 +53,23 @@ const unite = (g: string | null) => (!g ? "" : g.endsWith("_m2") ? " m²" : g ==
 /* une valeur d'un indice : « 1,8 m », ou « absente » */
 const valeurIndice = (v: number | null, u: string | null) => (v === null ? "absente" : `${String(v).replace(".", ",")}${u ? ` ${u}` : ""}`);
 const pluriel = (n: number, s: string) => `${n} ${s}${n > 1 ? "s" : ""}`;
+/* les grandeurs réglables à l'écran, avec la tolérance du code (private.lorani_grandeur) ; « metre_dpgf_pct » en plus */
+const REGLABLES: { cle: string; libelle: string; unite: string; defaut: number }[] = [
+  { cle: "hauteur_faitage_m", libelle: "Hauteur au faîtage", unite: "m", defaut: 0.05 },
+  { cle: "hauteur_egout_m", libelle: "Hauteur à l’égout", unite: "m", defaut: 0.05 },
+  { cle: "hauteur_acrotere_m", libelle: "Hauteur à l’acrotère", unite: "m", defaut: 0.05 },
+  { cle: "recul_voie_m", libelle: "Recul sur voie", unite: "m", defaut: 0.05 },
+  { cle: "recul_limite_m", libelle: "Recul sur limite séparative", unite: "m", defaut: 0.05 },
+  { cle: "emprise_sol_m2", libelle: "Emprise au sol", unite: "m²", defaut: 0.5 },
+  { cle: "surface_plancher_m2", libelle: "Surface de plancher", unite: "m²", defaut: 0.5 },
+  { cle: "espaces_verts_pct", libelle: "Part d’espaces verts", unite: "%", defaut: 0.5 },
+  { cle: "longueur_m", libelle: "Longueurs", unite: "m", defaut: 0.05 },
+  { cle: "largeur_m", libelle: "Largeurs", unite: "m", defaut: 0.05 },
+  { cle: "cote_altimetrique_m", libelle: "Cotes altimétriques", unite: "m NGF", defaut: 0.05 },
+  { cle: "metre_dpgf_pct", libelle: "Écart entre métré et DPGF", unite: "%", defaut: 5 },
+];
+const borneMax = (r: (typeof REGLABLES)[number]) => (r.cle === "metre_dpgf_pct" ? 50 : Math.min(50, Math.max(10 * r.defaut, 1)));
+const nombreFr = (n: number) => String(n).replace(".", ",");
 
 type Choix = { piece_id: string; role: RolePieceControle; reference: string };
 type Form =
@@ -55,6 +77,8 @@ type Form =
   | { type: "decider"; constat: Constat; statut: Exclude<Constat["statut"], "ouvert"> }
   | { type: "question"; constat: Constat }
   | { type: "suspendre" }
+  | { type: "decideur" }
+  | { type: "regler" }
   | null;
 
 export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: {
@@ -85,6 +109,16 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
   const [motif, setMotif] = useState("");
   const [nq, setNq] = useState({ intervenant: "", texte: "", echeance: "" });
   const clientId = dossier.moi?.client_id ?? "";
+  /* qui décide (b5_30) : le décideur nommé, sinon toute l'équipe qui écrit ; le gérant et les admins gardent la main */
+  const membres = useMemo(() => dossier.membres.filter((m) => m.projet_id === projet.id), [dossier.membres, projet.id]);
+  const moiId = dossier.moi?.user_id ?? null;
+  const direction = ["gerant", "admin"].includes(dossier.moi?.role ?? "");
+  const peutChoisir = peutEcrire && (direction || membres.some((m) => m.user_id === moiId && m.role_projet === "chef_projet"));
+  const peutDecider = peutEcrire && (!c?.decideur || c.decideur === moiId || direction);
+  const [decideur, setDecideur] = useState("");
+  /* réglages (b5_31) : saisis en texte (virgule acceptée) ; vide = la tolérance du code */
+  const [tol, setTol] = useState<Record<string, string>>({});
+  const [coupees, setCoupees] = useState<Constat["nature"][]>([]);
   const intervenants = useMemo(() => dossier.intervenants.filter((i) => i.projet_id === projet.id && i.actif).sort((a, b) => a.organisme.localeCompare(b.organisme)), [dossier.intervenants, projet.id]);
 
   const lancer = async (reel: () => Promise<void>, local: () => Dossier) => {
@@ -224,6 +258,44 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
     if (!c) return;
     return lancer(() => reprendreControle(c.id), () => ({ ...dossier, controles: dossier.controles.map((x) => (x.id === c.id ? { ...x, suspendu_le: null, suspendu_motif: null } : x)) }));
   };
+  const ouvrirDecideur = () => {
+    setErreur(null);
+    setDecideur(c?.decideur ?? "");
+    setForm({ type: "decideur" });
+  };
+  const soumettreDecideur = () => {
+    if (!c) return;
+    const d = decideur || null;
+    return lancer(() => choisirDecideur(c.id, d), () => ({ ...dossier, controles: dossier.controles.map((x) => (x.id === c.id ? { ...x, decideur: d } : x)) }));
+  };
+  const ouvrirReglages = () => {
+    setErreur(null);
+    setTol(Object.fromEntries(Object.entries(projet.controle_tolerances ?? {}).map(([k, v]) => [k, nombreFr(v)])));
+    setCoupees(projet.controle_familles_coupees ?? []);
+    setForm({ type: "regler" });
+  };
+  /* les tolérances saisies : celles hors de l'écran (posées ailleurs) sont gardées ; une saisie invalide rend null */
+  const tolerancesSaisies = (): Record<string, number> | null => {
+    const r: Record<string, number> = Object.fromEntries(Object.entries(projet.controle_tolerances ?? {}).filter(([k]) => !REGLABLES.some((x) => x.cle === k)));
+    for (const g of REGLABLES) {
+      const t = (tol[g.cle] ?? "").trim().replace(",", ".");
+      if (!t) continue;
+      if (!/^\d+(\.\d+)?$/.test(t)) return null;
+      const n = Number(t);
+      if (n > borneMax(g) || (g.cle === "metre_dpgf_pct" && n < 1)) return null;
+      r[g.cle] = n;
+    }
+    return r;
+  };
+  const reglagesOk = form?.type === "regler" && tolerancesSaisies() !== null && coupees.length < Object.keys(NATURES).length;
+  const soumettreReglages = () => {
+    const t = tolerancesSaisies();
+    if (!t) return;
+    const f = [...coupees].sort();
+    return lancer(() => reglerControles(projet.id, t, f), () => ({ ...dossier, projets: dossier.projets.map((x) => (x.id === projet.id ? { ...x, controle_tolerances: t, controle_familles_coupees: f } : x)) }));
+  };
+  const reglesPropres = Object.keys(projet.controle_tolerances ?? {}).length;
+  const famillesCoupees = projet.controle_familles_coupees ?? [];
   const suspensionOk = form?.type === "suspendre" && motif.trim().length >= 3 && motif.trim().length <= 300;
 
   const rouvrir = (k: Constat) => lancer(() => deciderConstat(k.id, { statut: "ouvert", motif: null }), () => ({ ...dossier, constats: dossier.constats.map((x) => (x.id === k.id ? { ...x, statut: "ouvert", motif: null } : x)) }));
@@ -246,8 +318,15 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
         <span className="esp-item-haut">
           {c ? <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => ouvrirNouveau(c)}>Revérifier à l’indice suivant</button> : null}
           <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi || piecesProjet.length < 2} onClick={() => ouvrirNouveau(null)}>Nouveau contrôle</button>
+          <button type="button" className="esp-lien-bouton" disabled={!peutChoisir || envoi} onClick={ouvrirReglages}>Régler les contrôles</button>
         </span>
       </div>
+      {reglesPropres || famillesCoupees.length ? (
+        <p className="lor-sous lor-reglages">
+          Réglages du projet : {reglesPropres ? `${pluriel(reglesPropres, "tolérance")} propre${reglesPropres > 1 ? "s" : ""}` : "tolérances du code"}
+          {famillesCoupees.length ? ` · ne tourne${famillesCoupees.length > 1 ? "nt" : ""} pas : ${famillesCoupees.map((f) => NATURES[f]).join(", ")}` : ""}.
+        </p>
+      ) : null}
 
       {!c ? (
         <div className="lor-tableau-vide">
@@ -280,6 +359,11 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
               ? <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={reprendre}>Reprendre</button>
               : <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi || c.statut === "clos"} onClick={ouvrirSuspension}>Suspendre</button>}
           </div>
+          <p className="lor-sous">
+            Décide des constats : <strong>{c.decideur ? nommer(c.decideur) : "toute l’équipe du projet"}</strong>{" "}
+            <button type="button" className="esp-lien-bouton" disabled={!peutChoisir || envoi || c.statut === "clos"} onClick={ouvrirDecideur}>Choisir qui décide</button>
+            {c.decideur && !peutDecider ? <span> · vous pouvez préparer une question, la décision lui revient.</span> : null}
+          </p>
           {c.suspendu_le ? (
             <p className="lor-sous" role="status">Suspendu le {jour(c.suspendu_le)} : {c.suspendu_motif}. Il ne se lancera pas, même quand ses pièces seront lues, tant qu’il n’est pas repris.</p>
           ) : null}
@@ -322,9 +406,9 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
                 </ul>
               ) : null}
               <div className="esp-actions">
-                <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => ouvrirDecision(k, "corrige")}>Corrigé</button>
-                <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => ouvrirDecision(k, "accepte")}>Accepter</button>
-                <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => ouvrirDecision(k, "ecarte")}>Écarter</button>
+                <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={!peutDecider || envoi} onClick={() => ouvrirDecision(k, "corrige")}>Corrigé</button>
+                <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutDecider || envoi} onClick={() => ouvrirDecision(k, "accepte")}>Accepter</button>
+                <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutDecider || envoi} onClick={() => ouvrirDecision(k, "ecarte")}>Écarter</button>
                 <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => ouvrirQuestion(k)}>En faire une question</button>
               </div>
             </div>
@@ -362,7 +446,7 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
                     <li key={k.id}>
                       <Pastille teinte={d.teinte}>{d.libelle}</Pastille> {k.titre}
                       <span className="lor-sous"> {k.motif ? `Motif : ${k.motif}` : ""}{k.decide_par ? ` · ${nommer(k.decide_par)}, le ${jour(k.decide_le)}` : ""}</span>{" "}
-                      <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => void rouvrir(k)}>Rouvrir</button>
+                      <button type="button" className="esp-lien-bouton" disabled={!peutDecider || envoi} onClick={() => void rouvrir(k)}>Rouvrir</button>
                     </li>
                   );
                 })}
@@ -477,6 +561,73 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
           </DialogBody>
           <DialogFooter>
             <button type="button" className="r-btn r-btn--noir" disabled={!suspensionOk || envoi} onClick={soumettreSuspension}>{envoi ? <Loader variant="spin" /> : null} Suspendre</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ——— régler les contrôles du projet ——— */}
+      <Dialog open={form?.type === "regler"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><SlidersHorizontal width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Régler les contrôles</DialogTitle>
+            <DialogDescription>{projet.nom}. L’écart toléré entre deux pièces avant qu’un constat ne soit relevé, et les familles de contrôle qui tournent. Vide : la tolérance par défaut. Les réglages valent au prochain passage.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <fieldset className="lor-choix-pieces">
+                <legend className="rv-libelle">Écarts tolérés</legend>
+                <div className="lor-tolerances">
+                  {REGLABLES.map((g) => (
+                    <label key={g.cle} className="rv-libelle">{g.libelle} <span className="esp-kpi-sous">({g.unite}, jusqu’à {nombreFr(borneMax(g))})</span>
+                      <input className="rv-champ" inputMode="decimal" value={tol[g.cle] ?? ""} onChange={(e) => setTol((s) => ({ ...s, [g.cle]: e.target.value }))} placeholder={nombreFr(g.defaut)} />
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+              <fieldset className="lor-choix-pieces">
+                <legend className="rv-libelle">Familles de contrôle</legend>
+                <div className="lor-activites">
+                  {(Object.entries(NATURES) as [Constat["nature"], string][]).map(([cle, libelle]) => (
+                    <label key={cle} className="lor-choix-case">
+                      <input type="checkbox" checked={!coupees.includes(cle)} onChange={(e) => setCoupees((l) => (e.target.checked ? l.filter((x) => x !== cle) : [...l, cle]))} /> <span>{libelle}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+              {form?.type === "regler" && tolerancesSaisies() === null ? <Avis teinte="ambre" role="status">Une tolérance est hors des bornes ou n’est pas un nombre.</Avis> : null}
+              {coupees.length >= Object.keys(NATURES).length ? <Avis teinte="ambre" role="status">Gardez au moins une famille de contrôle.</Avis> : null}
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!reglagesOk || envoi} onClick={soumettreReglages}>{envoi ? <Loader variant="spin" /> : null} Enregistrer</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ——— choisir qui décide ——— */}
+      <Dialog open={form?.type === "decideur"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><UserCheck width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Choisir qui décide</DialogTitle>
+            <DialogDescription>{c ? `${c.intitule}, indice ${c.indice}. ` : ""}La personne choisie marque les constats corrigés, acceptés ou écartés ; les autres membres préparent les questions. Le gérant et les admins gardent la main.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Décide des constats
+                <select className="rv-champ" value={decideur} onChange={(e) => setDecideur(e.target.value)}>
+                  <option value="">Toute l’équipe du projet</option>
+                  {membres.map((m) => <option key={m.id} value={m.user_id}>{nommer(m.user_id)} · {ROLES_PROJET[m.role_projet]}</option>)}
+                  {decideur && !membres.some((m) => m.user_id === decideur) ? <option value={decideur}>{nommer(decideur)}</option> : null}
+                </select>
+              </label>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={envoi || (decideur || null) === (c?.decideur ?? null)} onClick={soumettreDecideur}>{envoi ? <Loader variant="spin" /> : null} Enregistrer</button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

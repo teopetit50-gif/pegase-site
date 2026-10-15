@@ -13,6 +13,7 @@ import { Loader } from "@/components/ui/loader";
 import { Avis, Pastille } from "../ui";
 import { dateCourte } from "../format";
 import { poserMarche, recevoirDocument, recevoirSituation, rendreVisa, viserSituation } from "./portes";
+import { ECART_AVANCEMENT, avancementSituation, pct } from "./avancement";
 import type { Dossier, Marche, Projet, Situation, Visa } from "./types";
 
 const euros = (n: number) => `${n.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} €`;
@@ -158,6 +159,14 @@ export default function Chantier({ projet, dossier, peutEcrire, agir }: {
             </div>
             <div className="lor-sous">{euros(s.cumul_ht)} HT cumulés sur {euros(total)} ({Math.round((100 * s.cumul_ht) / total)} %) · {euros(mois)} ce mois · retenue de garantie {euros(Math.round(mois * m.retenue_pct) / 100)}</div>
             {s.cumul_ht > total ? <Avis teinte="rouge">Le cumul dépasse le marché et ses avenants de <strong>{euros(s.cumul_ht - total)}</strong> : un avenant manque, ou la situation est à rectifier.</Avis> : null}
+            {(() => {
+              /* b5_32 : l'avancement facturé contre le dernier constaté au compte rendu */
+              const a = avancementSituation(s, m, dossier);
+              if (a.constate === null || !a.cr) return <div className="lor-sous lor-avancement">Avancement constaté : aucun compte rendu diffusé ne le donne pour ce lot avant la réception.</div>;
+              return a.declare - a.constate > ECART_AVANCEMENT
+                ? <Avis teinte="ambre">La situation facture <strong>{pct(a.declare)}</strong> d’avancement, le chantier en est à <strong>{pct(a.constate)}</strong> au compte rendu n° {a.cr.numero} du {jour(a.cr.visite_le)} : à rectifier, ou à justifier par l’entreprise.</Avis>
+                : <div className="lor-sous lor-avancement">Avancement constaté : {pct(a.constate)} au compte rendu n° {a.cr.numero} du {jour(a.cr.visite_le)} (facturé {pct(a.declare)}).</div>;
+            })()}
             {p && s.cumul_ht < retenu(p) ? <Avis teinte="ambre">Le cumul recule par rapport à la situation n° {p.numero} ({euros(retenu(p))}) : à vérifier avec l’entreprise.</Avis> : null}
             <div className="esp-actions">
               <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => { setNv({ cumul: "", observation: "" }); ouvrir({ type: "viser", situation: s, rectifier: false }); }}>Viser</button>
