@@ -537,6 +537,31 @@ const choisir = (sel, valeur) => `(() => { const t = document.querySelector('${s
 }
 
 {
+  // Relevé du chantier : ce qui est à reprendre, imprimable (écran seul)
+  const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+  const graves = (cible) => `(async () => { const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`;
+  for (const largeur of [390, 1440]) {
+    const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `b6-releve-${largeur}`, densite: 1 });
+    console.log(`— Le relevé du chantier (${largeur})`);
+    ok(await s.aller(base + chemin), 'page chargée');
+    await s.dormir(500);
+    ok(await s.evaluer(`(() => { const b = [...document.querySelectorAll('.esp-item')].find(b => /Tilleuls/.test(b.textContent)); if (!b) return false; b.click(); return true; })()`), 'ouverture des Tilleuls');
+    await s.dormir(500);
+    ok(await s.evaluer(bouton('/Relevé du chantier/')) === true, 'clic sur « Relevé du chantier »');
+    await s.dormir(400);
+    const t = await s.evaluer(`document.querySelector('[role="dialog"]')?.innerText || ''`);
+    ok(/Le marché/.test(t) && /Le planning/.test(t) && /À reprendre/.test(t) && /Imprimer ou enregistrer en PDF/.test(t), 'le relevé : marché, planning, à reprendre, et l\'impression');
+    await s.evaluer(axe + ';true');
+    const g = await s.evaluer(graves(`document.querySelector('[role="dialog"]')`));
+    ok(g.length === 0, `fenêtre du relevé : aucun écart axe grave ${g.length ? JSON.stringify(g) : ''}`);
+    const debDlg = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return d ? d.scrollWidth - d.clientWidth : -1; })()`);
+    ok(debDlg <= 0, `la fenêtre ne déborde pas (${debDlg})`);
+    s.fermer();
+  }
+}
+
+{
   // b6_31 : les disponibilités des sous-traitants dans l'annuaire, noter une absence
   const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
   const graves = (cible) => `(async () => { const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
