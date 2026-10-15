@@ -3,7 +3,7 @@
 Branche `worker-b6`. Coordinateur : session `session_01B4JNQXyT69GytdvE9SjAnE` (Fable, jusqu'au 06/10 03 h 10 Paris), puis `session_01BCGFdpRKBvXKjouC75sYBg` (Opus 5.5) — passation reçue le 06/10 à 03 h 10 : « B6 est clos et fusionné ; rien n'est attendu ».
 Dernière mise à jour : 06/10/2026, 03 h 00 Paris — lot B6 terminé.
 
-## REPRISE — reprise par petits lots (15/10/2026, 17 h UTC)
+## REPRISE — pause 50 % demandée par Teo (15/10/2026, 16 h 15 UTC) ; reprendre ici au feu vert
 
 **Posé et vert sur la recette, écrans dans main** : b6_01 → b6_35 (dernier passage : 36 ok, MeteoCarte et l'échange météo dans main). Météo MET Norway : état A.
 
@@ -132,6 +132,7 @@ Repère du marché : Graneet, Obat, Batappli, Tolteck, Extrabat font tous des **
 
 ## Journal de session
 
+- 15/10, 16 h 15 UTC : PAUSE 50 % (Teo). Rien en cours ; arrêt propre.
 - 15/10, 14 h 15 UTC : relevé dans main (coordinateur). Assistant « questions » suspendu : fournisseur du modèle à choisir par Teo.
 - 15/10, 17 h UTC : relevé du chantier, écran seul (rien à poser) : components/espace/daliro/releve.ts (sections marché, travaux en plus, facturation si voit_prix, planning, à reprendre ; gravités à traiter / à surveiller ; page HTML imprimable) + ReleveDialog (« Imprimer ou enregistrer en PDF »), bouton « Relevé du chantier » dans l'en-tête de ChantierVue. Recette 270 ✓ (bloc relevé à 390 et 1440, axe sans écart grave).
 - 15/10, 16 h UTC : 311 tests verts (b6_30 compris), RecalageDialog dans main. b6_35 ordre météo : private.btp_jours_secs, public.btp_ordre_meteo (passage extérieur menacé d'une équipe ↔ passage intérieur de la même équipe, même durée, sans dépendance, jours secs, ≤ 7 j), public.btp_echanger_passages (le conducteur valide, tout est revérifié, journal daliro.ordre_meteo). Écran : « Nouvel ordre proposé » + « Échanger » dans MeteoCarte (l'exemple ne porte pas de cas : aucune équipe n'y a un extérieur menacé). Banc hr vert ; test b6_31_ordre_meteo (9). Recette 258 verte.
