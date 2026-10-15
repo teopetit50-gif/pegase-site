@@ -10,8 +10,7 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 prouvées ; la ligne 15 attend la messagerie du client (A2). Rien à poser. Aucun travail en cours. Prochain pas :
 reprise le 15/10 : les phrases du site restent, le produit se met à leur hauteur, par petits lots. c4_11 (impayés,
 CASHD), c4_12 (canal unique, vague de la semaine) et c4_13 (contacts importés, remise en un geste) faits, à poser.
-c4_14 (chantiers, missions) fait, à poser. Restent du chiffrage : le message qui joint la dernière facture et
-l'échéance (n° 25), la restitution et l'effacement à la sortie (n° 58, côté socle : les migrations n'ont pas le droit au
+c4_14 (chantiers, missions) et c4_15 (message ancré sur l'échéance) faits, à poser. Restent du chiffrage : la restitution et l'effacement à la sortie (n° 58, côté socle : les migrations n'ont pas le droit au
 DELETE), et les connecteurs directs (CRM, ERP), qui sont des tiers. « Un message par trimestre » attend Teo
 (contredit la ligne 12).
 
@@ -435,6 +434,20 @@ Banc local : 28 tests, 312 assertions vertes, migrations posées deux fois ; tsc
 l'échéance honorée après message est comptée au suivi). Le chiffre repris compte tous les achats des 90 jours,
 sans prétendre qu'ils sont dus au seul message.
 
+## Lot c4_15 — le message de reprise s'ancre aussi sur l'échéance qui revient (15/10)
+
+`omega/modules/offload/migrations/c4_15_message_et_echeance.sql` répond au chiffrage n° 25, la carte « Chaque client
+reçoit son propre message ». Le premier message d'une reprise reprend déjà la dernière ligne de facturation. Il ajoute
+désormais l'échéance du compte, quand il en a une :
+- échéance dans les deux mois, hors semaine qui vient : « L'entretien de votre Four à sole (Fournil) est à refaire
+  d'ici le … : souhaitez-vous que nous convenions d'un créneau ? » ;
+- échéance tombée sans intervention : même phrase, au passé.
+
+Aucun créneau n'est fixé à la place du client. Une échéance de la semaine a déjà son propre message (c4_07) : elle
+n'est pas répétée. Redéfinition par copie : `offload_message`.
+
+**Tests** : `omega/tests/offload/c4_15_message_et_echeance.sql` (3 assertions). Banc local : 40 tests, 382 ok.
+
 ## Lot c4_14 — chantiers réceptionnés et missions closes (15/10)
 
 `omega/modules/offload/migrations/c4_14_chantiers_et_missions.sql` : deux modèles d'export, avec `declarer_jeu` sur les
@@ -659,3 +672,4 @@ Partielles : 6, 11, 15, 38.
 - 15/10 — lot c4_12 (canal unique, vague de la semaine) : 36 tests, 368 ok en local.
 - 15/10 — lot c4_13 (contacts importés, remise dans le circuit en un geste) : 38 tests, 374 ok en local.
 - 15/10 — lot c4_14 (chantiers réceptionnés, missions closes) : 39 tests, 379 ok en local.
+- 15/10 — lot c4_15 (message de reprise ancré sur l'échéance qui revient) : 40 tests, 382 ok en local.
