@@ -17,7 +17,9 @@ Branche : `tableau-de-bord-v2` (jamais main). Coordinateur : session_01BCGFdpRKB
   3. Comparer de près avec /omega : rendre CoquilleOmega par une route temporaire locale (app/zz-…, à supprimer, et `rm -rf .next/dev` après) en bloquant *supabase.co*.
 - **Reste à d'autres** : axe tavaro td[data-negatif] (contraste).
 - **15/10, lot 2a** (main fusionné, dont ad51268, le logo seul en haut de la barre) : la vue d'ensemble client est allégée comme celle de /omega (e432eeb) : une ligne par élément, la date à droite (rouge si dépassée), la flèche au survol, plus d'icônes, d'avatars, de colonne « État » ni de bandeau de l'assistant ; les noms de fournisseur sont des liens (axe : un tableau qui défile doit contenir un élément focalisable). « Bonjour » et les quatre chiffres restent en attendant la réponse de Teo. Recette C1 : 0 échec.
-- **Prochain pas** : lot 2b, À valider allégé comme /omega (om-val-simple : une ligne par demande, le délai à droite, la flèche au survol, sans filtres ni frise des étapes), puis le Point du matin (4ce65c3).
+- **15/10, lot 2b** : À valider allégé comme /omega (oc-val-simple) : une ligne par demande, le montant et le délai à droite (rouge si dépassé), la flèche au survol ; plus de filtres catégorie et échéance. On garde la vue, le module, la recherche et le circuit d'approbation, qui est la vraie chaîne des approbateurs du client et pas la frise de statut de /omega. Recette C1 : 0 échec.
+- **En attente** : l'écran Équipe d'A3 (worker-a3 2340dd1, /espace2/equipe). Dès qu'il est dans main, faire pointer l'entrée « Équipe » du sous-menu Réglages (Coquille) vers /espace2/equipe.
+- **Prochain pas** : lot 2c, le Point du matin comme /omega (4ce65c3 : une ligne par élément, titre à gauche et date à droite, plus d'icônes, « Fait » au survol, le titre de la carte mène à la page, la barre ne garde que la date).
 
 ## REPRISE précédente (06/10/2026, 21 h Z)
 
