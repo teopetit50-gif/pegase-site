@@ -458,7 +458,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
       </section>
 
       {/* ——— météo des passages extérieurs (b6_21) ——— */}
-      <MeteoCarte key={`meteo-${c.id}`} tableau={tableau} source={source} />
+      <MeteoCarte key={`meteo-${c.id}`} tableau={tableau} source={source} onLocal={onLocal} relire={relire} />
 
       {/* ——— planning ——— */}
       <section className="esp-carte" aria-label="Planning">

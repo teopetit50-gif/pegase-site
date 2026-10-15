@@ -29,7 +29,7 @@
      btp_fil_chantier, btp_messages_a_ranger (lecture), btp_ranger_message, btp_ecarter_message, btp_avenant_depuis_message (b6_24) ;
      btp_avancement_photos (lecture, b6_25) ; btp_importer_lignes (b6_28) ; btp_point_mensuel (lecture, b6_30) ;
      btp_disponibilites (lecture), btp_noter_indisponibilite, btp_annuler_indisponibilite (b6_31) ; btp_avenant_depuis_reserve (b6_32) ;
-     btp_deposer_devis, btp_devis_lu (lecture, b6_33).
+     btp_deposer_devis, btp_devis_lu (lecture, b6_33) ; btp_ordre_meteo (lecture), btp_echanger_passages (b6_35).
    Les tables sans porte (chantiers, lots, tiers, dépendances, acceptations)
    s'écrivent en direct, comme le socle le prévoit (politiques du bureau).
    Si la base répond autrement, l'écran montre son message tel quel.
@@ -357,4 +357,15 @@ export async function deposerDevis(client: string, marche: string, fichier: File
 }
 export async function devisLu(marche: string): Promise<DevisLu> {
   return rpc<DevisLu>("btp_devis_lu", { p_marche: marche });
+}
+
+/* b6_35 : sur pluie annoncée, l'échange proposé entre un passage extérieur menacé et un intérieur de la même équipe. */
+export type EchangeMeteo = { exterieur: string; exterieur_tache: string | null; exterieur_chantier: string; exterieur_debut: string;
+                             interieur: string; interieur_tache: string | null; interieur_chantier: string; interieur_debut: string;
+                             risque: string; texte: string };
+export async function ordreMeteo(client: string): Promise<{ propositions: EchangeMeteo[] }> {
+  return rpc<{ propositions: EchangeMeteo[] }>("btp_ordre_meteo", { p_client: client });
+}
+export async function echangerPassages(exterieur: string, interieur: string, motif: string | null): Promise<unknown> {
+  return rpc("btp_echanger_passages", { p_exterieur: exterieur, p_interieur: interieur, p_motif: motif });
 }
