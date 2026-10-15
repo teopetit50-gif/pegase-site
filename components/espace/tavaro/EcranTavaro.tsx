@@ -26,7 +26,7 @@ import { dateCourte, montant } from "../format";
 import { chiffrerLocal } from "./calcul";
 import { FAMILLES, STATUTS_CONTRAT, STATUTS_PROPOSITION, famille, nomLocataire, propositionVivante, resteDu, type Famille } from "./etats";
 import { AGENCES_EXEMPLE, AVIS_EXEMPLE, CONTESTATIONS_EXEMPLE, FLOTTE_EXEMPLE, PARC_EXEMPLE, BAREME_EXEMPLE, BAREME_RETIRE_EXEMPLE, CATEGORIES_EXEMPLE, DOSSIERS_EXEMPLE, LIGNES_BAREME_EXEMPLE, REGLAGES_EXEMPLE, nomPersonneTavaro } from "./exemples";
-import { amenderContrat, annulerSortie, assignerRemise, conclureSortie, deciderSortie, poserEconomie, proposerSortie, avoirElectronique, chargerMonde, creneauxEntretien, entretienFait, envoyerDossier, etapeRemise, immobiliser, leverImmobilisation, planifierEntretien, prevoirEntretien, signalerAnomalie, traiterAnomalie, issueContestation, lienDossier, ouvrirContestation, produireDossier, chiffrerRetour, classerAvis, completerContrat, completerLocataire, constaterRefus, factureElectronique, preparation2027, refacturerAvis, etablirEtat, leverCaution, signerEtat, demanderAvoir, deposerPhoto, designerConducteur, enregistrerAvis, marquerLitige, marquerReglee, monCompte, publierBareme, rattacherAvis, relancerFacture, retirerBareme, type Moi, type Monde } from "./portes";
+import { poserResponsableRemise, amenderContrat, annulerSortie, assignerRemise, conclureSortie, deciderSortie, poserEconomie, proposerSortie, avoirElectronique, chargerMonde, creneauxEntretien, entretienFait, envoyerDossier, etapeRemise, immobiliser, leverImmobilisation, planifierEntretien, prevoirEntretien, signalerAnomalie, traiterAnomalie, issueContestation, lienDossier, ouvrirContestation, produireDossier, chiffrerRetour, classerAvis, completerContrat, completerLocataire, constaterRefus, factureElectronique, preparation2027, refacturerAvis, etablirEtat, leverCaution, signerEtat, demanderAvoir, deposerPhoto, designerConducteur, enregistrerAvis, marquerLitige, marquerReglee, monCompte, publierBareme, rattacherAvis, relancerFacture, retirerBareme, type Moi, type Monde } from "./portes";
 import type { AvisContravention, Avoir, Contestation, Creneau, SortieFlotte, Entretien, Immobilisation, Parc, Remise, Bareme, EtatDesLieux, Dossier, Facture, LigneBareme, LigneJournal, Retour, Role } from "./types";
 import DossierContrat, { type Gestes } from "./DossierContrat";
 import type { GestesEtats } from "./EtatsDesLieux";
@@ -653,6 +653,16 @@ export default function EcranTavaro() {
         if (source === "reelle") return void (await reel(() => entretienFait(e.id, km, cout))());
         await attendre();
         changerParc((p) => ({ ...p, entretiens: p.entretiens.map((x) => (x.id === e.id ? { ...x, statut: "fait", fait_le: maintenant(), km_fait: km, cout_eur: cout } : x)) }));
+      },
+      responsable: async (entite_id, personne) => {
+        if (source === "reelle") return void (await reel(() => poserResponsableRemise(entite_id, personne))());
+        await attendre();
+        if (role !== "gerant" && role !== "admin") throw new Error("Le responsable des remises se règle par la direction.");
+        changerParc((p) => ({
+          ...p,
+          responsables: [...(p.responsables ?? []).filter((x) => x.entite_id !== entite_id), { entite_id, remise_responsable: personne }],
+          remises: p.remises.map((x) => (x.entite_id === entite_id && !x.responsable && (x.statut === "a_faire" || x.statut === "en_cours") ? { ...x, responsable: personne } : x)),
+        }));
       },
     };
   }, [source, local, moiId, role, relire]);

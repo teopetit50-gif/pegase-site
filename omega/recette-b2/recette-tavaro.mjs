@@ -503,6 +503,10 @@ for (const largeur of LARGEURS) {
   await s.dormir(400);
   const pts = await s.evaluer(`${sect}.querySelector('ul[aria-label="Points à vérifier au départ"]')?.innerText ?? ''`);
   ok(/RC-2026-118/.test(pts) && /n'est pas connue/.test(pts), 'le contrôle du départ dit le rappel en cours et la vignette à vérifier');
+  /* b2_17 : le responsable des remises, par agence (direction seule : « Vous » est valideur, le choix est gris) */
+  const resp = await s.evaluer(`(() => { const g = document.querySelector('[aria-label="Responsable des remises, par agence"]'); const sel = g?.querySelector('select');
+    return { texte: g?.innerText ?? '', gris: !!sel?.disabled, choisi: sel?.selectedOptions[0]?.textContent ?? '' }; })()`);
+  ok(/Lyon Part-Dieu/.test(resp.texte) && resp.gris && /Claire/.test(resp.choisi), `les remises de Lyon reviennent d'office à ${resp.choisi}, réglage réservé à la direction`);
   await cliquer(`${sect}.querySelector('ul[aria-label="Rappels en cours"]')`, /^Fait$/);
   await s.dormir(400);
   ok(/Le rappel est fait sur GP-654-KL/.test(await fait()), 'le rappel est fait');
