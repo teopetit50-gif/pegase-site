@@ -343,6 +343,26 @@ export type Controle = {
   lance_le: string | null;
   constats_nb: number;
   cree_le: string;
+  /* b5_28 : les valeurs lues qui ont changé depuis l'indice précédent (absent tant que la migration n'est pas posée) */
+  changements?: ChangementIndice[];
+  /* b5_29 : un contrôle suspendu ne se lance pas (absent tant que la migration n'est pas posée) */
+  suspendu_le?: string | null;
+  suspendu_motif?: string | null;
+};
+export type ChangementIndice = {
+  reference: string;
+  grandeur: string;
+  objet: string;
+  libelle: string;
+  unite: string | null;
+  avant: number | null;
+  apres: number | null;
+  page_avant: number | null;
+  page_apres: number | null;
+  texte_avant: string | null;
+  texte_apres: string | null;
+  /* un constat du nouveau contrôle porte sur la même grandeur et le même objet */
+  releve: boolean;
 };
 export type ControlePiece = {
   id: string;

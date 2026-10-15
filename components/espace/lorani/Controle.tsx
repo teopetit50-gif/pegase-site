@@ -11,12 +11,12 @@
    (lorani_points, b5_20), avec l'extrait cité (pièce, page, texte lu) ; il est ensuite suivi jusqu'à la réponse. */
 
 import { useMemo, useState } from "react";
-import { FileDown, MessageSquareText, ScanSearch, ShieldCheck } from "lucide-react";
+import { FileDown, MessageSquareText, PauseCircle, ScanSearch, ShieldCheck } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { Avis, Pastille } from "../ui";
 import { dateCourte } from "../format";
-import { ajouterPoints, deciderConstat, lancerControle, octetsPiece, preparerControle } from "./portes";
+import { ajouterPoints, deciderConstat, lancerControle, octetsPiece, preparerControle, reprendreControle, suspendreControle } from "./portes";
 import { excelControle, pdfControle, telecharger, type DonneesRapport } from "./rapport";
 import type { Constat, Controle as ControleT, ControlePiece, Dossier, PieceProjet, Point, Projet, RolePieceControle } from "./types";
 
@@ -45,6 +45,8 @@ const jour = (d: string | null) => (d ? dateCourte(d.length === 10 ? `${d}T12:00
 const indiceSuivant = (i: string) => (/^[A-Y]$/.test(i) ? String.fromCharCode(i.charCodeAt(0) + 1) : /^\d+$/.test(i) ? String(Number(i) + 1) : "");
 /* l'unité d'une grandeur du contrat de lecture, d'après son suffixe (hauteur_faitage_m, emprise_sol_m2, espaces_verts_pct…) */
 const unite = (g: string | null) => (!g ? "" : g.endsWith("_m2") ? " m²" : g === "cote_altimetrique_m" ? " m NGF" : g.endsWith("_m") ? " m" : g.endsWith("_pct") ? " %" : "");
+/* une valeur d'un indice : « 1,8 m », ou « absente » */
+const valeurIndice = (v: number | null, u: string | null) => (v === null ? "absente" : `${String(v).replace(".", ",")}${u ? ` ${u}` : ""}`);
 const pluriel = (n: number, s: string) => `${n} ${s}${n > 1 ? "s" : ""}`;
 
 type Choix = { piece_id: string; role: RolePieceControle; reference: string };
@@ -52,6 +54,7 @@ type Form =
   | { type: "nouveau"; precedent: ControleT | null }
   | { type: "decider"; constat: Constat; statut: Exclude<Constat["statut"], "ouvert"> }
   | { type: "question"; constat: Constat }
+  | { type: "suspendre" }
   | null;
 
 export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: {
@@ -206,6 +209,23 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
   };
   const questionOk = form?.type === "question" && nq.texte.trim().length >= 1 && nq.texte.trim().length <= 1000;
 
+  /* suspendre (motif obligatoire) ou reprendre : un contrôle suspendu ne se lance pas, même quand sa dernière pièce est lue */
+  const ouvrirSuspension = () => {
+    setErreur(null);
+    setMotif("");
+    setForm({ type: "suspendre" });
+  };
+  const soumettreSuspension = () => {
+    if (!c) return;
+    const m = motif.trim().replace(/\s+/g, " ");
+    return lancer(() => suspendreControle(c.id, m), () => ({ ...dossier, controles: dossier.controles.map((x) => (x.id === c.id ? { ...x, suspendu_le: new Date().toISOString(), suspendu_motif: m } : x)) }));
+  };
+  const reprendre = () => {
+    if (!c) return;
+    return lancer(() => reprendreControle(c.id), () => ({ ...dossier, controles: dossier.controles.map((x) => (x.id === c.id ? { ...x, suspendu_le: null, suspendu_motif: null } : x)) }));
+  };
+  const suspensionOk = form?.type === "suspendre" && motif.trim().length >= 3 && motif.trim().length <= 300;
+
   const rouvrir = (k: Constat) => lancer(() => deciderConstat(k.id, { statut: "ouvert", motif: null }), () => ({ ...dossier, constats: dossier.constats.map((x) => (x.id === k.id ? { ...x, statut: "ouvert", motif: null } : x)) }));
 
   const nouveauOk = form?.type === "nouveau" && nc.intitule.trim().length >= 1 && nc.intitule.trim().length <= 160 && /^[0-9A-Za-z.-]{1,6}$/.test(nc.indice.trim())
@@ -254,8 +274,15 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
               {c.lance_le ? `passé le ${jour(c.lance_le)}` : "en attente de la lecture des pièces"}
               {precedent ? ` · revérifie l’indice ${precedent.indice}` : ""}
             </span>
-            <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi || c.statut === "clos"} onClick={relancer}>{envoi ? <Loader variant="spin" /> : null} {c.lance_le ? "Relancer" : "Lancer"}</button>
+            {c.suspendu_le ? <Pastille teinte="ambre">Suspendu</Pastille> : null}
+            <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi || c.statut === "clos" || !!c.suspendu_le} onClick={relancer}>{envoi ? <Loader variant="spin" /> : null} {c.lance_le ? "Relancer" : "Lancer"}</button>
+            {c.suspendu_le
+              ? <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={reprendre}>Reprendre</button>
+              : <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi || c.statut === "clos"} onClick={ouvrirSuspension}>Suspendre</button>}
           </div>
+          {c.suspendu_le ? (
+            <p className="lor-sous" role="status">Suspendu le {jour(c.suspendu_le)} : {c.suspendu_motif}. Il ne se lancera pas, même quand ses pièces seront lues, tant qu’il n’est pas repris.</p>
+          ) : null}
           {c.lance_le ? (
             <p className="lor-sous" role="status">
               {ouverts.length ? `${pluriel(ouverts.length, "constat")} ouvert${ouverts.length > 1 ? "s" : ""}, dont ${pluriel(bloquants, "bloquant")}.` : "Aucun constat ouvert."}
@@ -303,6 +330,20 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
             </div>
           ))}
 
+          {c.changements?.length ? (
+            <details className="lor-temps-recents" open={c.changements.some((x) => !x.releve)}>
+              <summary>Changements depuis l’indice {precedent?.indice ?? "précédent"} ({c.changements.length}{c.changements.some((x) => !x.releve) ? `, dont ${c.changements.filter((x) => !x.releve).length} non relevé${c.changements.filter((x) => !x.releve).length > 1 ? "s" : ""}` : ""})</summary>
+              <ul className="lor-liste">
+                {c.changements.map((x, i) => (
+                  <li key={i}>
+                    <Pastille teinte={x.releve ? "gris" : "ambre"}>{x.releve ? "Relevé" : "Non relevé"}</Pastille>{" "}
+                    <strong>{x.reference}</strong> · {x.libelle.charAt(0).toUpperCase() + x.libelle.slice(1)} : {valeurIndice(x.avant, x.unite)} → {valeurIndice(x.apres, x.unite)}
+                    <span className="lor-sous"> {x.page_apres ? `p. ${x.page_apres}` : ""}{x.texte_apres ? ` · « ${x.texte_apres} »` : ""}</span>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          ) : null}
           {corrigesIci.length ? (
             <details className="lor-temps-recents">
               <summary>Corrigés depuis l’indice {precedent?.indice ?? "précédent"} ({corrigesIci.length})</summary>
@@ -414,6 +455,28 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
           </DialogBody>
           <DialogFooter>
             <button type="button" className="r-btn r-btn--noir" disabled={!questionOk || envoi} onClick={soumettreQuestion}>{envoi ? <Loader variant="spin" /> : null} Poser la question</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ——— suspendre le contrôle ——— */}
+      <Dialog open={form?.type === "suspendre"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><PauseCircle width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Suspendre le contrôle</DialogTitle>
+            <DialogDescription>{c ? `${c.intitule}, indice ${c.indice}. ` : ""}Suspendu, il ne se lance plus, même quand sa dernière pièce est lue. Ses constats restent ; vous le reprenez quand vous voulez.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Motif <span className="esp-obligatoire">(obligatoire)</span>
+                <textarea className="rv-champ" rows={3} maxLength={300} value={motif} onChange={(e) => setMotif(e.target.value)} placeholder="En attente de l’indice B des façades" />
+              </label>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!suspensionOk || envoi} onClick={soumettreSuspension}>{envoi ? <Loader variant="spin" /> : null} Suspendre</button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

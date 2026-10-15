@@ -85,7 +85,8 @@ export async function chargerDossier(): Promise<Dossier> {
     supabase.from("lorani_situations").select("id, projet_id, marche_id, numero, mois, cumul_ht, recue_le, a_viser_avant, statut, cumul_admis_ht, observation, visee_le").order("numero").limit(5000),
     supabase.from("lorani_visas").select("id, projet_id, lot_id, document, indice, recu_le, commande_le, delai_visa_jours, a_viser_avant, avis, observation, vise_le").order("recu_le", { ascending: false }).limit(5000),
     /* b5_16 : absentes tant que la migration n'est pas posée ; le contrôle du dossier est alors vide */
-    supabase.from("lorani_controles").select("id, projet_id, intitule, indice, precedent_id, statut, lance_le, constats_nb, cree_le").order("cree_le", { ascending: false }).limit(1000),
+    /* « * » : la colonne changements (b5_28) quand elle existe */
+    supabase.from("lorani_controles").select("*").order("cree_le", { ascending: false }).limit(1000),
     supabase.from("lorani_controle_pieces").select("id, controle_id, piece_id, role, reference").limit(10000),
     supabase.from("lorani_constats").select("id, controle_id, nature, gravite, grandeur, objet, titre, correction, article, valeurs, statut, motif, precedent_id, corrige_au_controle, decide_par, decide_le").limit(10000),
     /* b5_17 : absente tant que la migration n'est pas posée ; le PLU est alors « non cherché » */
@@ -499,6 +500,20 @@ export async function ouvrirConsultation(v: { client_id: string; projet_id: stri
   const { data, error } = await supabase.from("lorani_consultations").insert(v).select("id").single();
   if (error) throw new ErreurPorte(message(error));
   return (data as { id: string }).id;
+}
+
+/* ——— suspendre ou reprendre un contrôle (b5_29) ——— */
+
+export async function suspendreControle(controle: string, motif: string): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.rpc("lorani_suspendre_controle", { p_controle: controle, p_motif: motif });
+  if (error) throw new ErreurPorte(message(error));
+}
+
+export async function reprendreControle(controle: string): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.rpc("lorani_reprendre_controle", { p_controle: controle });
+  if (error) throw new ErreurPorte(message(error));
 }
 
 export async function analyserOffres(consultation: string): Promise<void> {
