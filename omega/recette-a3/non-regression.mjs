@@ -131,7 +131,7 @@ const ECRANS = [
     textes: ['Les personnes', 'Ce que chaque rôle permet', 'Sociétés visibles', 'Claire Morel'],
     actions: [
       { nom: 'Ajouter une personne', dialogue: 'Ajouter une personne' },
-      { nom: 'Sociétés visibles par Yanis', dialogue: 'Sociétés visibles' },
+      { nom: 'Modifier les sociétés visibles par Yanis', dialogue: 'Sociétés visibles' },
       { nom: 'Retirer Sofia', dialogue: "Retirer de l'organisation" },
     ],
   },

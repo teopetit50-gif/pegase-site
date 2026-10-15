@@ -9,6 +9,8 @@ Branche `worker-a3`. Dernière mise à jour : 06/10/2026, 03 h 50 Paris (reprise
 - À fusionner : ce lot, 1e51e14 (chiffrage), 0295d85 (onglets), d418e0a et fa23419 (scripts).
 - Note : un compte sans `bienvenue_faite` est renvoyé vers /bienvenue par /espace2 ; mes relectures passent par /espace/…?ancien=1.
 
+- 15/10 (remarque de C1) : « Modifier » des sociétés visibles avait un nom accessible sans son texte visible (axe label-content-name-mismatch, règle expérimentale, désormais activée dans accessibilite.mjs) → « Modifier les sociétés visibles par … ». Balayage de la règle sur mes autres écrans /espace2 : aucun écart.
+
 **Attend** : A5 (export-complet : porte absente) ; Teo (lequel des deux espaces) ; C1 (prévenu : /espace2/equipe ajouté selon son motif).
 **Prochain pas** : invitation d'une personne sans compte (1.4, fonction côté service à demander à A5) ; brancher /bienvenue sur les portes (1.3) si le coordinateur le confie.
 

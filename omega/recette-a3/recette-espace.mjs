@@ -460,7 +460,7 @@ if (!SAUTER.has('equipe')) {
   await s.evaluer(`(() => { const sel = ${roleYanis}; Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(sel, 'lecteur'); sel.dispatchEvent(new Event('change', { bubbles: true })); })()`);
   await s.dormir(300);
   ok(/Yanis Dupré est maintenant lecteur/.test(await s.evaluer(`[...document.querySelectorAll('[role="status"]')].map(a => a.textContent).join(' ')`)), 'changer un rôle : dit en clair');
-  await s.evaluer(`[...document.querySelectorAll('button')].find(b => b.getAttribute('aria-label') === 'Sociétés visibles par Sofia Carvalho').click()`);
+  await s.evaluer(`[...document.querySelectorAll('button')].find(b => b.getAttribute('aria-label') === 'Modifier les sociétés visibles par Sofia Carvalho').click()`);
   await s.dormir(400);
   await s.evaluer(`[...document.querySelectorAll('[role="dialog"] input[type="radio"]')][1].click()`);
   await s.dormir(200);
