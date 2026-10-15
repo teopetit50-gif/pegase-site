@@ -129,3 +129,19 @@ html[data-v2-theme="light"] .v2.oc :is(.v2-section-titre, .v2-cote-groupe) { col
 .v2.oc .oc-pm-simple .v2-pm-texte { flex: 1 1 auto; }
 .v2.oc .oc-pm-simple .oc-meta { flex: 0 100 auto; min-width: 3.5em; overflow: hidden; text-overflow: ellipsis; }
 .v2.oc .oc-pm-simple .v2-pm-action { flex: none; }
+
+/* — les collections (Tâches, Notes, Appels, Entreprises, Contacts), 15/10,
+   comme Tâches et Appels du pilotage : une barre fine, puis une ligne par
+   fiche (titre, détail gris, date à droite), la corbeille au survol — */
+.v2.oc .oc-barre { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.v2.oc .oc-barre-recherche { flex: 1; min-width: 0; height: 32px; }
+.v2.oc .oc-barre-recherche svg { flex: none; color: var(--v2-gray-900); }
+.v2.oc .oc-barre-recherche input { min-width: 0; }
+.v2.oc .oc-barre > .v2-btn { flex: none; }
+.v2.oc .oc-collection .v2-liste-item { min-height: 44px; padding-top: 8px; padding-bottom: 8px; }
+.v2.oc .oc-collection .v2-liste-texte { flex: 1; min-width: 0; }
+.v2.oc .oc-collection .v2-liste-texte > span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2.oc .oc-collection-detail { color: var(--v2-gray-900); font-weight: 400; }
+.v2.oc .oc-collection .v2-liste-item > button { opacity: 0; transition: opacity 0.15s; }
+.v2.oc .oc-collection .v2-liste-item:hover > button, .v2.oc .oc-collection .v2-liste-item > button:focus-visible { opacity: 1; }
+@media (hover: none) { .v2.oc .oc-collection .v2-liste-item > button { opacity: 1; } }
