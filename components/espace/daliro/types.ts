@@ -353,6 +353,8 @@ export type Reserve = {
   description: string;
   statut: "ouverte" | "levee";
   levee_le: string | null;
+  /* b6_32 : la réserve reconnue hors devis porte son avenant */
+  avenant_id?: string | null;
 };
 export type Reception = {
   id: string;

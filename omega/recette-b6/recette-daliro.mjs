@@ -294,6 +294,11 @@ const choisir = (sel, valeur) => `(() => { const t = document.querySelector('${s
     ok(await s.evaluer(bouton('/Lever la réserve/', carte)) === true, 'clic sur « Lever la réserve »');
     await s.dormir(400);
     ok(await s.evaluer(`/1 réserve ouverte/i.test(${carte}?.innerText || '') && /Levée le/.test(${carte}?.innerText || '')`), 'une réserve levée, une ouverte');
+    // b6_32 : la réserve restante est hors devis : elle ouvre un avenant
+    ok(await s.evaluer(bouton('/Hors devis : ouvrir un avenant/', carte)) === true, 'clic sur « Hors devis : ouvrir un avenant »');
+    await s.dormir(400);
+    ok(await s.evaluer(`/avenant n° \\d+ ouvert \\(hors devis\\)/.test(${carte}?.innerText || '') && /Reprise hors devis demandée à la réception : Rayure/.test(document.querySelector('#esp-dossier')?.innerText || '')`),
+       'la réserve porte son avenant, brouillon visible dans les avenants');
     ok(await s.evaluer(bouton('/Noter une opposition/', carte)) === true, 'clic sur « Noter une opposition »');
     await s.dormir(400);
     await s.evaluer(saisir('[role="dialog"] input:not([type="date"])', 'Rayure sur la porte palière non reprise'));

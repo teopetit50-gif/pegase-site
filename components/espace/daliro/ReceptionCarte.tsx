@@ -16,7 +16,7 @@ import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
 import { dateCourte, montant } from "../format";
 import { Avis, Pastille } from "../ui";
-import { envoyerDecompte, leverReserve, libererRetenue, opposerRetenue, preparerDecompte, prononcerReception, repondreDecompte } from "./portes";
+import { avenantDepuisReserve, envoyerDecompte, leverReserve, libererRetenue, opposerRetenue, preparerDecompte, prononcerReception, repondreDecompte } from "./portes";
 import type { Reception, Tableau } from "./types";
 
 type Props = { tableau: Tableau; source: Source; onLocal: (t: Tableau) => void; relire: () => Promise<void> };
@@ -136,6 +136,23 @@ export default function ReceptionCarte({ tableau, source, onLocal, relire }: Pro
     () => avec({ ...r, reserves: r.reserves.map((v) => (v.id === id ? { ...v, statut: "levee", levee_le: jour } : v)) }),
     "Réserve levée.",
   );
+  const horsDevis = (id: string) => {
+    const v = r.reserves.find((x) => x.id === id);
+    if (!v) return;
+    return agir(
+      () => avenantDepuisReserve(id),
+      () => {
+        const av = { id: `av-${id}`, chantier_id: tableau.chantier.id, marche_id: tableau.marches.find((m) => m.statut === "verifie")?.id ?? null,
+                     numero: Math.max(0, ...tableau.avenants.map((a) => a.numero)) + 1, objet: `Reprise hors devis demandée à la réception : ${v.description}`.slice(0, 500),
+                     origine: { canal: "reception", reserve: id, date: r.date_reception, texte: v.description }, statut: "brouillon" as const,
+                     demande_id: null, demande_statut: null, piece_id: null, soumis_le: null, signe_le: null, signe_par: null, signe_libelle: null, motif: null,
+                     cree_le: new Date().toISOString(), nb_lignes: 0, montant_ht: 0, lignes: [] };
+        const t = avec({ ...r, reserves: r.reserves.map((x) => (x.id === id ? { ...x, avenant_id: av.id } : x)) });
+        return { ...t, avenants: [...t.avenants, av] };
+      },
+      "Avenant ouvert en brouillon depuis la réserve : chiffrez-le, puis faites-le signer.",
+    );
+  };
   const opposer = () => agir(
     () => opposerRetenue(r.id, texte.trim(), date),
     () => {
@@ -193,7 +210,9 @@ export default function ReceptionCarte({ tableau, source, onLocal, relire }: Pro
               <span className="esp-fil-point" data-teinte={v.statut === "levee" ? "vert" : "ambre"} />
               <div>
                 <div>{v.description}</div>
-                <div className="esp-kpi-sous">{v.statut === "levee" ? `Levée le ${dateCourte(v.levee_le)}` : "Ouverte"}{v.statut === "ouverte" ? <> · <button type="button" className="esp-lien-bouton" onClick={() => void lever(v.id)} disabled={envoi}>Lever la réserve</button></> : null}</div>
+                <div className="esp-kpi-sous">{v.statut === "levee" ? `Levée le ${dateCourte(v.levee_le)}` : "Ouverte"}{v.statut === "ouverte" ? <> · <button type="button" className="esp-lien-bouton" onClick={() => void lever(v.id)} disabled={envoi}>Lever la réserve</button></> : null}
+                  {v.avenant_id ? <> · avenant n° {tableau.avenants.find((a) => a.id === v.avenant_id)?.numero ?? "?"} ouvert (hors devis)</>
+                    : v.statut === "ouverte" ? <> · <button type="button" className="esp-lien-bouton" onClick={() => void horsDevis(v.id)} disabled={envoi}>Hors devis : ouvrir un avenant</button></> : null}</div>
               </div>
             </li>
           ))}
