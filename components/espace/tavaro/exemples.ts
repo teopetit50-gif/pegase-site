@@ -438,6 +438,7 @@ export const PARC_EXEMPLE: Parc = {
       debut_le: ilYa(10, 8), fin_le: ilYa(10, 10), atelier_nom: "Garage Lumière", atelier_adresse: null, envoi_id: null, immobilisation_id: null, fait_le: ilYa(10, 10), km_fait: 11980, cout_eur: 312, notes: null },
   ] satisfies Entretien[],
   membres: Object.entries(PERSONNES_TAVARO).map(([user_id, p]) => ({ user_id, role: p.role })),
+  responsables: [{ entite_id: LYON, remise_responsable: CLAIRE }],
 };
 
 /* ——— la flotte (b2_11) : six fiches économiques sur douze mois. Le Master coûte plus qu'il ne rapporte (carrosserie,
