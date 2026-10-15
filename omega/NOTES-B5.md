@@ -5,6 +5,8 @@ Dernière mise à jour : 05/10/2026, 23 h.
 
 ## REPRISE (pause demandée par Teo, 06/10/2026 à 21 h Z)
 
+**15/10, 16 h 16 Z — PAUSE 50 % (Teo). Arrêt propre, rien en cours, tout est poussé sur worker-b5.** Tout b5_ est vert sur la recette ; l'écran Lorani complet est parti dans main. Reste la #31 (révision BT), qui attend le compte API INSEE de Teo. À la reprise : attendre le feu vert de Teo, puis le lot du coordinateur.
+
 **15/10 — reprise par petits lots (chaque SHA met ces notes à jour ; pause possible à tout moment).**
 - 15/10, 13 h 24 Z (h1318b5) : tout b5_ est vert sur la recette (b5_18 à b5_22, b5_19 et b5_22 après correction) ; l'écran Lorani complet part dans main. Lignes 15, 16, 18, 30, 32, 33 passées en B.
 - b5_17 vert (ligne 49 en B). b5_29 et b5_18 posés par le coordinateur (lot h1227grand), résultat de b5_18 attendu ; l'écran de la suspension part dans main avec ce passage.
