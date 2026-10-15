@@ -29,6 +29,7 @@ export const ONGLETS_ORGANISATION: Onglet[] = [
   { libelle: "Automatisations", href: `${RACINE}/automatisations` },
   { libelle: "Utilisation", href: `${RACINE}/utilisation` },
   { libelle: "Réglages", href: `${RACINE}/reglages` },
+  { libelle: "Équipe", href: `${RACINE}/equipe` },
 ];
 
 export type ModuleV2 = {
