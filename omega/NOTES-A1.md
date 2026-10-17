@@ -75,6 +75,8 @@ Le lecteur est à redéployer.
 
 **17/10, socle 19as : envoi interne (pour C3).** `public.envoyer_interne(p_client, p_module, p_objet_type, p_objet_id, p_canal, p_membre, p_gabarit, p_variables, p_cle_idempotence, p_entite)` (serveur seul) ; `private.envoyer_interne` appelable depuis le SQL d'un module. Le destinataire est un membre (`public.comptes`). Le gabarit est validé, fermé (aucune variable « texte »), transactionnel et sans santé. L'envoi naît par `creer_envoi` avec direct = true et prepare_par = null : pas de demande de validation, mêmes verrous, et c'est l'expéditeur A2 qui l'envoie. Test `test_socle_19as_` : 7/7 en local sur des doubles, il manque un membre sur le banc. **À poser.**
 
+**17/10, lecture longue PROUVÉE en recette (essai, v37)** : analyse 8d85b76b finie en 6 min ; 10 pièces sur 10, 15 constats (13 info, 2 attention), tous sourcés et vérifiés (sans_source 0) ; 11 appels, 0,17 €, claude-sonnet-5-5. Lot clos.
+
 **Toute prochaine étape à la reprise.** Lire les sorties de `decoupage_reel.mjs` si le coordinateur l'a joué. Sinon, demander qu'il soit joué, puis corriger ce qui sort. Ensuite, selon les décisions de Teo : la lecture longue réelle (`analyse_reelle.sql`), puis l'outil de mesure de qualité sur corpus (1 j, `CHIFFRAGE/lecteur.md`).
 
 Branche `worker-a1`. Périmètre : `omega/functions/lecteur/`, `omega/functions/lecteur-exports/` et `omega/functions/_partage/`.
