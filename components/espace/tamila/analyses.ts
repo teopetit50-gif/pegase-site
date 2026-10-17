@@ -28,11 +28,12 @@ export const TYPES_ANALYSE: Record<string, { libelle: string; aide: string }> = 
   chronologie: { libelle: "Chronologie", aide: "Les événements datés, chacun sourcé page et ligne" },
   contradictions: { libelle: "Contradictions", aide: "Ce qu'une pièce affirme et qu'une autre contredit" },
   bordereau: { libelle: "Bordereau", aide: "Les pièces numérotées dans l'ordre chronologique (art. 954 et 768 CPC)" },
+  pieces_citees: { libelle: "Pièces citées", aide: "Les pièces que les écritures adverses invoquent, et celles qui ne vous ont pas été communiquées" },
 };
 export const libelleType = (type: string) => TYPES_ANALYSE[type.replace(/^tamila\./, "")]?.libelle ?? type;
 
 const CODES: Record<string, string> = {
-  fait: "Fait", pretention: "Prétention", moyen: "Moyen", piece_visee: "Pièce visée", evenement: "Événement", contradiction: "Contradiction", piece: "Pièce",
+  fait: "Fait", pretention: "Prétention", moyen: "Moyen", piece_visee: "Pièce visée", evenement: "Événement", contradiction: "Contradiction", piece: "Pièce", piece_citee: "Pièce citée",
 };
 export const libelleCode = (c: string) => CODES[c] ?? c;
 
@@ -52,6 +53,15 @@ const NATURES: Record<string, string> = {
   fait: "fait", acte: "acte", procedure: "procédure", paiement: "paiement", courrier: "courrier", contrat: "contrat", facture: "facture", constat: "constat",
   attestation: "attestation", decision: "décision", conclusions: "conclusions", expertise: "expertise", photo: "photographie", autre: "autre",
 };
+/** tamila.pieces_citees (format proposé à A1, 17/10) : une pièce invoquée qu'on ne retrouve pas parmi celles du dossier. */
+export const aReclamer = (type: string, c: Constat) => type.replace(/^tamila\./, "") === "pieces_citees" && c.code === "piece_citee" && c.donnees?.communiquee === false;
+/** L'objet de la pièce attendue : « Pièce n° 12 : relevé de compte… (citée par la partie adverse) » */
+export const objetReclamation = (c: Constat) => {
+  const d = c.donnees ?? {};
+  const intitule = String(d.intitule ?? c.titre);
+  return d.numero !== undefined && d.numero !== null ? `Pièce n° ${d.numero} : ${intitule}` : intitule;
+};
+
 const nature = (v: unknown) => NATURES[String(v)] ?? String(v);
 
 const dateFr = (iso: unknown) => (typeof iso === "string" && /^\d{4}-\d{2}-\d{2}/.test(iso) ? new Date(`${iso.slice(0, 10)}T12:00:00`).toLocaleDateString("fr-FR") : null);
@@ -73,6 +83,10 @@ export function resumeDonnees(type: string, d: Record<string, unknown> | undefin
     if (date) parts.push(date);
     if (d.pages) parts.push(`${d.pages} p.`);
     if (d.deja_communiquee) parts.push("déjà communiquée");
+  } else if (t === "pieces_citees") {
+    if (d.numero !== undefined && d.numero !== null) parts.push(`Pièce n° ${d.numero}`);
+    if (d.citee_par) parts.push(`citée par ${ACTEURS[String(d.citee_par)] ?? d.citee_par}`);
+    parts.push(d.communiquee === false ? "non communiquée" : "communiquée");
   } else if (t === "contradictions") {
     if (d.sujet) parts.push(String(d.sujet));
     if (d.portee) parts.push(`porte sur : ${d.portee}`);

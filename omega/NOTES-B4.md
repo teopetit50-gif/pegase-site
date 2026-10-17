@@ -17,8 +17,12 @@ la recette ouvre désormais `/espace2/tamila` (nouveau dessin) : 196/196. Les co
 encore dans main (à fusionner par le coordinateur).
 Puis le bordereau de communication de pièces (`bordereau.ts`, `BordereauImprimable.tsx`, bouton « Bordereau » de la
 carte Pièces) : choix et ordre des pièces, composé et imprimé dans le navigateur ; recette 201/201. Rien à poser.
+17/10 (oui de Teo aux pièces citées, A1 construit le type) : b4_19 + test 28 (la porte accepte `pieces_citees`),
+écran : type « Pièces citées », bouton « Réclamer au confrère » sur chaque pièce non communiquée → pièce attendue
+(b4_18), objet chiffré. Format proposé à A1 : constats `piece_citee`, données { numero?, intitule, citee_par,
+citee_dans, communiquee, piece? }. Recette 204/204. **À poser** : b4_19 + 28 (après b4_15).
 
-**Prochain pas sans Teo** : relevé d'office des pièces citées par le confrère (attend un type de lecture d'A1),
+**Prochain pas sans Teo** : recetter le relevé sur le premier vrai résultat d'A1 (pièces fictives sur la recette),
 dossier de plaidoirie assemblé en un PDF, abonnement d'agenda tenu à jour.
 
 **Attend Teo** :

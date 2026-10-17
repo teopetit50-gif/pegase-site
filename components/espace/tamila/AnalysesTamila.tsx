@@ -18,8 +18,8 @@ import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
 import { Avis, Pastille } from "../ui";
 import { dateCourte } from "../format";
-import { TYPES_ANALYSE, type Citation, htmlAnalyse, libelleCode, libelleType, lignesDe, lireResultat, resumeDonnees, type ResultatAnalyse } from "./analyses";
-import { dechiffrer, dechiffrerOctets } from "./chiffrement";
+import { TYPES_ANALYSE, aReclamer, type Citation, htmlAnalyse, objetReclamation, libelleCode, libelleType, lignesDe, lireResultat, resumeDonnees, type ResultatAnalyse } from "./analyses";
+import { chiffrer, dechiffrer, dechiffrerOctets } from "./chiffrement";
 import { DOSSIERS_EXEMPLE } from "./exemples";
 import * as portes from "./portes";
 import type { Clair, Dossier, Piece } from "./types";
@@ -60,9 +60,24 @@ function exemple(d: Dossier): { analyses: portes.Analyse[]; resultats: Record<st
         citations: [{ piece: p2, page: 1, lignes: [2, 3], extrait: "jugement rendu le 3 mars 2026", verifiee: true }] },
     ],
   };
+  /* le relevé des pièces citées (b4_19) : les conclusions adverses invoquent deux pièces, l'une n'a pas été communiquée */
+  const id2 = `${d.id}-an2`;
+  const pc = `${d.id}-pc2`;
+  const releve: ResultatAnalyse = {
+    type: "tamila.pieces_citees", statut: "finie", pieces_lues: 1, pages_lues: 14, sans_source: 0,
+    resume: "Les conclusions adverses invoquent 2 pièces ; l'une ne figure pas parmi celles qui vous ont été communiquées.",
+    constats: [
+      { code: "piece_citee", titre: "Rapport d'expertise amiable du 12 mai 2023", gravite: "attention", texte: "Invoquée à l'appui de la date des désordres ; absente des pièces reçues.",
+        donnees: { numero: 12, intitule: "Rapport d'expertise amiable du 12 mai 2023", citee_par: "adverse", citee_dans: pc, communiquee: false },
+        citations: [{ piece: pc, page: 7, lignes: [3, 5], extrait: "ainsi qu'il ressort du rapport d'expertise amiable (pièce n° 12)", verifiee: true }] },
+      { code: "piece_citee", titre: "Constat d'huissier du 2 mars 2023", gravite: "info",
+        donnees: { numero: 4, intitule: "Constat d'huissier du 2 mars 2023", citee_par: "adverse", citee_dans: pc, communiquee: true, piece: `${d.id}-pc3` },
+        citations: [{ piece: pc, page: 4, lignes: [10, 11], extrait: "le constat dressé le 2 mars 2023 (pièce n° 4)", verifiee: true }] },
+    ],
+  };
   return {
-    analyses: [{ id, type: "tamila.chronologie", statut: "finie", comptes: { info: 2, attention: 1, critique: 0 }, sans_source: 0, pieces: [p1, p2], pieces_lues: 2, pieces_non_lues: [], cout_eur: 0.42, motif: null, demandee_le: new Date(Date.now() - 3 * 3600_000).toISOString(), finie_le: new Date(Date.now() - 2 * 3600_000).toISOString(), resultat_chiffre: null }],
-    resultats: { [id]: resultat },
+    analyses: [{ id, type: "tamila.chronologie", statut: "finie", comptes: { info: 2, attention: 1, critique: 0 }, sans_source: 0, pieces: [p1, p2], pieces_lues: 2, pieces_non_lues: [], cout_eur: 0.42, motif: null, demandee_le: new Date(Date.now() - 3 * 3600_000).toISOString(), finie_le: new Date(Date.now() - 2 * 3600_000).toISOString(), resultat_chiffre: null }, { id: id2, type: "tamila.pieces_citees", statut: "finie", comptes: { info: 1, attention: 1, critique: 0 }, sans_source: 0, pieces: [pc], pieces_lues: 1, pieces_non_lues: [], cout_eur: 0.18, motif: null, demandee_le: new Date(Date.now() - 1 * 3600_000).toISOString(), finie_le: new Date(Date.now() - 1800_000).toISOString(), resultat_chiffre: null }],
+    resultats: { [id]: resultat, [id2]: releve },
   };
 }
 
@@ -75,6 +90,7 @@ export default function AnalysesTamila({ dossier: d, source, cle, pieces, clair,
   const [fait, setFait] = useState<string | null>(null);
   const [ouverte, setOuverte] = useState<{ analyse: portes.Analyse; resultat: ResultatAnalyse | null; erreur: string | null } | null>(null);
   const cadre = useRef<HTMLIFrameElement>(null);
+  const [reclamees, setReclamees] = useState<Set<string>>(new Set());
 
   const relire = async () => setListe(await portes.chargerAnalyses(d.id));
   useEffect(() => {
@@ -114,6 +130,18 @@ export default function AnalysesTamila({ dossier: d, source, cle, pieces, clair,
       : <span className="esp-mono">{texte}</span>;
   };
   const vivant = ["attente", "ouvert", "audit"].includes(d.statut);
+  /* une pièce invoquée et jamais communiquée : réclamée au confrère, en pièce attendue (b4_18) */
+  const reclamer = async (cleConstat: string, objet: string) => {
+    try {
+      if (source === "reelle") {
+        if (!cle) throw new Error("La clé du dossier est nécessaire pour chiffrer l'objet.");
+        await portes.poserAttente(d.id, "confrere", await chiffrer(cle, objet), null);
+      }
+      setReclamees((x) => new Set(x).add(cleConstat));
+    } catch (e) {
+      setOuverte((o) => (o ? { ...o, erreur: e instanceof Error ? e.message : "La base a refusé la pièce attendue." } : o));
+    }
+  };
 
   const demander = async (type: portes.TypeAnalyse) => {
     setEnvoi(true);
@@ -218,6 +246,13 @@ export default function AnalysesTamila({ dossier: d, source, cle, pieces, clair,
                         </div>
                         {meta ? <div className="tam-ligne-meta"><span>{meta}</span></div> : null}
                         {c.texte ? <p className="tam-constat-texte">{c.texte}</p> : null}
+                        {r && aReclamer(r.type, c) ? (
+                          <div className="esp-actions">
+                            {reclamees.has(`${ouverte.analyse.id}:${i}`)
+                              ? <Pastille teinte="vert">Ajoutée aux pièces attendues</Pastille>
+                              : <button type="button" className="esp-lien-bouton" disabled={!peutDemander || !vivant || (source === "reelle" && !cle)} onClick={() => void reclamer(`${ouverte.analyse.id}:${i}`, objetReclamation(c))}>Réclamer au confrère</button>}
+                          </div>
+                        ) : null}
                         <ul className="tam-citations">
                           {c.citations.filter((x) => x.verifiee).map((x, j) => (
                             <li key={j}>

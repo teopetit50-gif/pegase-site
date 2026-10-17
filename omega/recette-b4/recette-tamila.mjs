@@ -524,6 +524,18 @@ for (const largeur of [1440, 390]) {
     await s.dormir(700);
     const t2 = await carte();
     ok(/Bordereau demandée/.test(t2) && /Bordereau[\s\S]*Demandée/.test(t2), 'le bordereau est demandé au lecteur');
+    // b4_19 : le relevé des pièces citées, et la pièce jamais communiquée réclamée au confrère
+    await s.evaluer(`(e => { e?.focus(); e?.click(); })([...document.querySelectorAll('section[aria-label="Lectures du dossier"] .tam-ligne')].find(l => /Pièces citées/.test(l.textContent))?.querySelector('.esp-lien-bouton'))`);
+    await s.dormir(700);
+    const t3 = await s.evaluer(`document.querySelector('[role="dialog"]')?.innerText || ''`);
+    ok(/Pièces citées — 2026-0412/.test(t3) && /Pièce n° 12/.test(t3) && /non communiquée/.test(t3) && /citée par la partie adverse/.test(t3), 'le relevé : la pièce n° 12 invoquée, non communiquée');
+    const nb = await s.evaluer(`[...document.querySelectorAll('[role="dialog"] .esp-lien-bouton')].filter(b => /Réclamer au confrère/.test(b.textContent)).length`);
+    ok(nb === 1, `une seule pièce à réclamer (${nb})`);
+    await s.evaluer(`[...document.querySelectorAll('[role="dialog"] .esp-lien-bouton')].find(b => /Réclamer au confrère/.test(b.textContent))?.click()`);
+    await s.dormir(400);
+    const t4 = await s.evaluer(`document.querySelector('[role="dialog"]')?.innerText || ''`);
+    ok(/Ajoutée aux pièces attendues/.test(t4), 'réclamée : ajoutée aux pièces attendues');
+    await s.capturer(`${dossier}tamila-pieces-citees-1440.jpg`, { qualite: 55 });
   } else {
     await s.capturer(`${dossier}tamila-analyse-390.jpg`, { qualite: 55 });
   }

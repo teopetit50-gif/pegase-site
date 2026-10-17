@@ -16,7 +16,7 @@ sur de vrais documents Tamila.
 ## Synthèse
 
 1. **63 promesses**, classées sur leur état principal : A **0** · B **15** · C **24** · D **15** · T **9**. Rien n'est prouvé en vrai : aucun cabinet réel, aucune vraie pièce lue de bout en bout, aucune qualité mesurée sur de vrais documents.
-2. **Pour tout amener en B : ≈ 63 jours** (68 le 11/10 matin ; b4_18 a fait les pièces attendues, l'agenda .ics, les renvois cliquables ; le 15/10, le bordereau de pièces), dont ≈ 41,5 de lecture IA, ≈ 13 de gestion et d'écran, ≈ 8,5 d'infrastructure.
+2. **Pour tout amener en B : ≈ 62,5 jours** (68 le 11/10 matin ; b4_18 a fait les pièces attendues, l'agenda .ics, les renvois cliquables ; le 15/10, le bordereau de pièces ; le 17/10, la porte et l'écran des pièces citées), dont ≈ 41,5 de lecture IA, ≈ 12,5 de gestion et d'écran, ≈ 8,5 d'infrastructure.
 3. **Pour tout amener ensuite en A : ≈ 54 jours de plus**, avec un cabinet pilote et ses vraies pièces.
 4. **Tiers et achats** :
    - hébergeur français pour la base et les fichiers (aujourd'hui Supabase, région à confirmer) ;
@@ -67,7 +67,7 @@ sur de vrais documents Tamila.
 | 18 | Carte « Forfaits dépassés : le temps passé est rapporté à la convention d'honoraires » | textes.ts:73-74 | B | b4_06 + b4_12, tests 15 et 21, carte Honoraires (jauge), recette | un vrai cabinet | 0 / 1 | — |
 | 19 | Carte « Sans diligence : aucun acte depuis trente jours » | textes.ts:85-86 | B | seuil aligné à 30 jours (pilotage, point du matin) ; pilotage « Sans diligence » (0c0714d), seuil codé à **45** jours | aligner sur 30 jours ou rendre réglable | 0 / 1 | — |
 | 20 | Carte « Délais de procédure : lus dans les avis RPVA et classés du plus proche au plus lointain » | textes.ts:97-98 | C | classement B ; lecture de l'avis : passerelle b4_08 + lecteur (A1), saisie et avis par courriel B | lecture d'un vrai avis chiffré au coffre jamais faite | 1 / 2 | Scaleway KM |
-| 21 | Carte « Ce que le cabinet attend : des pièces du client, des pré-rapports de l'expert et des pièces citées par le confrère » | textes.ts:109-110 | C | expert : b4_16 + test 25 ; pièces demandées au client, au confrère ou à un tiers : b4_18 + test 27, carte « Pièces attendues » (reçue, relancée, abandonnée), pilotage et point du matin | pièces citées par le confrère relevées d'office (lecture de ses conclusions, *A1*) | 1 / 1,5 | IA |
+| 21 | Carte « Ce que le cabinet attend : des pièces du client, des pré-rapports de l'expert et des pièces citées par le confrère » | textes.ts:109-110 | C | expert : b4_16 + test 25 ; pièces demandées au client, au confrère ou à un tiers : b4_18 + test 27, carte « Pièces attendues » (reçue, relancée, abandonnée), pilotage et point du matin ; relevé d'office : porte b4_19 + test 28, écran (« Réclamer au confrère » → pièce attendue) sur l'exemple | le type `tamila.pieces_citees` au lecteur (*A1*, oui de Teo le 17/10) | 0,5 / 1,5 | IA |
 
 ## 4. Les outils du cabinet (CONNEXIONS)
 
