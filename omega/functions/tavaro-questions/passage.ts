@@ -1,19 +1,19 @@
 // Un passage de l'ouvrier des Questions : prendre les travaux tavaro.question (déposés par loc_poser_question),
 // choisir les lectures, les faire par la porte, répondre, déposer la réponse, battre. Sous le plafond d'IA du jour du
-// client, comme le lecteur et REPUT. Aucun contenu (ni la question, ni la réponse, ni les chiffres lus) ne va au journal
+// client, commun à tous les ouvriers (_partage/plafond.ts, voir _partage/IA.md) ; le coût va dans cout_eur du travail.
+// Aucun contenu (ni la question, ni la réponse, ni les chiffres lus) ne va au journal
 // ni dans le résultat du travail : des identifiants, des noms de lectures, des jetons, un coût.
 
 import { type ClientClaude, coutEur } from "@partage/claude.ts";
 import { ErreurOuvrier } from "@partage/erreurs.ts";
 import { journal, messageDe } from "@partage/journal.ts";
+import { controlerPlafond } from "@partage/plafond.ts";
 import type { Travail } from "@partage/portes.ts";
 import type { PortesQuestions } from "./portes_questions.ts";
 import { choisir, estimer, repondre } from "./repondre.ts";
 
 export const MODULE = "tavaro";
 export const GENRES = ["tavaro.question"];
-export const CLE_PLAFOND = "plafond_ia_jour_client";
-export const PLAFOND_PAR_DEFAUT_EUR = 5;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export interface Contexte {
@@ -49,20 +49,6 @@ export function versionOuvrier(maintenant: Date, modele: string | null): string 
   return `tavaro-questions/${maintenant.toISOString().slice(0, 10)}/${modele ?? "sans-ia"}`;
 }
 
-async function plafond(ctx: Contexte, client: string, estimation: number): Promise<void> {
-  const p = await ctx.portes.lireParametre(CLE_PLAFOND);
-  let max = p === null ? NaN : Number(String(p).replace(",", "."));
-  if (!Number.isFinite(max)) {
-    const e = ctx.env.get("PLAFOND_IA_JOUR_CLIENT_EUR");
-    max = e === undefined ? PLAFOND_PAR_DEFAUT_EUR : Number(e.replace(",", "."));
-    if (!Number.isFinite(max)) max = PLAFOND_PAR_DEFAUT_EUR;
-  }
-  const consomme = await ctx.portes.consommationIaDuJour(client);
-  if (max <= 0 || consomme + estimation > max) {
-    throw new ErreurOuvrier("PLAFOND_IA", `plafond ${max.toFixed(2)} € par jour : ${consomme.toFixed(4)} € consommés, ${estimation.toFixed(4)} € estimés.`);
-  }
-}
-
 export async function traiter(ctx: Contexte, t: Travail, version: string): Promise<Issue> {
   const question = typeof t.charge.question === "string" ? t.charge.question : "";
   try {
@@ -76,7 +62,7 @@ export async function traiter(ctx: Contexte, t: Travail, version: string): Promi
       return "ignore";
     }
     if (!ctx.claude) throw new ErreurOuvrier("IA_NON_BRANCHEE", "ni ANTHROPIC_API_KEY ni Bedrock : la question attend l'IA.");
-    await plafond(ctx, d.client, estimer(ctx.claude, d));
+    await controlerPlafond(ctx.portes, ctx.env, d.client, estimer(ctx.claude, d));
     const c = await choisir(ctx.claude, d);
     const lus = [];
     for (const x of c.choix) lus.push({ ...x, resultat: await ctx.portes.lire(question, x.lecture, x.parametres) });
