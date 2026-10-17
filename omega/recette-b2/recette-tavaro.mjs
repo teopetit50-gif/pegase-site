@@ -612,5 +612,31 @@ for (const largeur of LARGEURS) {
   s390.fermer();
 }
 
+/* b2_20 : les Questions (exemple) — deux réponses montrées avec chiffres, cause et décision ; une question posée
+   en exemple n'appelle aucune IA et le dit ; la carte tient à 390. */
+{
+  const sect = `document.querySelector('section[aria-label="Questions"]')`;
+  for (const largeur of [1440, 390]) {
+    const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `b2-questions-${largeur}`, densite: 1 });
+    console.log(`— /espace/tavaro : questions à ${largeur} (exemple, b2_20)`);
+    ok(await s.aller(base + '/espace/tavaro'), 'page chargée');
+    await s.dormir(800);
+    const t = await s.evaluer(`${sect}?.innerText ?? ''`);
+    ok(/Décision proposée/.test(t) && /Cause/.test(t) && /Retours sans facture/.test(t), 'les réponses d\'exemple portent chiffres, cause et décision');
+    if (largeur === 1440) {
+      await s.evaluer(`(() => { const e = ${sect}.querySelector('textarea'); Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(e, 'Combien de contestations sont ouvertes ?'); e.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+      await s.dormir(200);
+      await s.evaluer(`[...${sect}.querySelectorAll('button')].find(b => /Poser la question/.test(b.textContent)).click()`);
+      await s.dormir(500);
+      const f = await s.evaluer(`${sect}.querySelector('[role="status"]')?.innerText ?? ''`);
+      ok(/aucune IA n'est appelée/.test(f) && /contestations sont ouvertes/.test(await s.evaluer(`${sect}.innerText`)), 'en exemple, la question posée n\'appelle aucune IA et le dit');
+    } else {
+      const m = await s.evaluer(`(() => { const w = document.documentElement.clientWidth; return [...${sect}.querySelectorAll('*')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > w + 1; }).length; })()`);
+      ok(m === 0, `la carte des questions tient à 390 (${m})`);
+    }
+    s.fermer();
+  }
+}
+
 console.log(echecs ? `\n${echecs} échec(s)` : '\ntout passe');
 process.exit(echecs ? 1 : 0);

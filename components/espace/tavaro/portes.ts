@@ -344,3 +344,16 @@ export const ouvrirAudit = (p_libelle: string) => rpc<{ audit: string }>("loc_ou
 export const auditerRetour = (p_audit: string, p_contrat: string, p_retour: Retour, p_facture_historique_ttc: number) =>
   rpc<{ chiffre_ttc: number; ecart_ttc: number }>("loc_auditer_retour", { p_audit, p_contrat, p_retour, p_facture_historique_ttc });
 export const cloreAudit = (p_audit: string) => rpc<Record<string, unknown>>("loc_resultat_audit", { p_audit, p_clore: true });
+
+/* b2_20 — les Questions : la question se pose par la porte ; l'ouvrier tavaro-questions répond. */
+export type Question = {
+  id: string; entite_id: string | null; question: string; statut: "a_traiter" | "en_cours" | "repondue" | "echec";
+  reponse: { reponse: string; chiffres: { libelle: string; valeur: string }[]; cause: string | null; decision: string | null } | null;
+  erreur: string | null; posee_par: string | null; posee_le: string; repondue_le: string | null;
+};
+export async function chargerQuestions(): Promise<Question[] | null> {
+  const supabase = createClient();
+  const r = await supabase.from("loc_questions").select("id, entite_id, question, statut, reponse, erreur, posee_par, posee_le, repondue_le").order("posee_le", { ascending: false }).limit(20);
+  return r.error ? null : ((r.data ?? []) as Question[]);
+}
+export const poserQuestion = (p_question: string) => rpc<{ question: string }>("loc_poser_question", { p_question });
