@@ -39,3 +39,26 @@ begin
   return next ok(not has_table_privilege('authenticated', 'public.filed_conservation', 'select')
              and not has_function_privilege('authenticated', 'public.filed_exporter_conservation(uuid, text)', 'execute'), 'Le dépôt est fermé aux membres');
 end $f$;
+
+-- Lot 33 (a4_41) : à son dernier terme, le dépôt d'une organisation part en entier ; avant, rien ne part.
+create or replace function tests.test_a4_41_01_purge_au_terme() returns setof text
+language plpgsql as $f$
+declare v_echu uuid := gen_random_uuid(); v_vivant uuid := gen_random_uuid(); n integer;
+begin
+  -- Deux dépôts d'exemple posés directement (organisations déjà effacées) : l'un échu hier, l'autre dans dix ans.
+  insert into public.filed_conservation (client_id, nature, source_id, donnees, conserver_jusqu_au, cause, empreinte)
+  values (v_echu, 'registre', 'r1', '{}', current_date - 1, 'effacement_organisation', repeat('a', 64)),
+         (v_echu, 'ecriture', 'e1', '{}', current_date - 2, 'effacement_organisation', repeat('b', 64)),
+         (v_vivant, 'registre', 'r2', '{}', current_date + 3650, 'effacement_organisation', repeat('c', 64));
+  insert into public.filed_conservation_clients (client_id, nom, conserver_jusqu_au, lignes, empreinte)
+  values (v_echu, 'Échue', current_date - 1, 2, repeat('b', 64)), (v_vivant, 'Vivante', current_date + 3650, 1, repeat('c', 64));
+  n := private.filed_purger_conservation();
+  return next ok(n >= 2, 'La purge retire les lignes échues : ' || n);
+  return next is((select count(*) from public.filed_conservation where client_id = v_echu), 0::bigint, 'Le dépôt échu est parti en entier');
+  return next is((select count(*) from public.filed_conservation_clients where client_id = v_echu), 0::bigint, 'avec son en-tête');
+  return next is((select lignes || ':' || empreinte from public.filed_conservation_purges where client_id = v_echu), '2:' || repeat('b', 64),
+                 'Un constat reste, sans donnée');
+  return next is((select count(*) from public.filed_conservation where client_id = v_vivant), 1::bigint, 'Le dépôt vivant reste');
+  return next ok(pg_get_functiondef('private.filed_produire_exports(date)'::regprocedure) like '%filed_purger_conservation%',
+                 'Le balayage des exports purge');
+end $f$;
