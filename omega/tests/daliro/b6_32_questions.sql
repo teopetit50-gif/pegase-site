@@ -1,5 +1,5 @@
 -- b6_32 — DALIRO : l'assistant « questions » sur le chantier (session B6, 17/10/2026), b6_36.
--- Exécutable tel quel par execute_sql sur la RECETTE, après b6_00_jeu.sql et les migrations b6_01 à b6_36.
+-- Exécutable tel quel par execute_sql sur la RECETTE, après b6_00_jeu.sql et les migrations b6_01 à b6_36b.
 -- runtests() annule tout. Le modèle n'est pas appelé : la fonction Edge daliro-questions est jouée ici par ses portes,
 -- comme le serveur d'Omega les appelle (clé de service ; postgres pour la recette).
 --
@@ -34,6 +34,8 @@ begin
              and not has_function_privilege('authenticated', 'public.btp_question_deposer(uuid, jsonb, text)', 'execute')
              and not has_function_privilege('authenticated', 'public.btp_question_echec(uuid, text)', 'execute'),
                  'Les portes de l''ouvrier restent au serveur');
+  return next ok(has_function_privilege('authenticated', 'private.btp_est_serveur()', 'execute'),
+                 'b6_36b : les vues du chantier gardent private.btp_est_serveur sous le rôle de la personne');
 
   -- ── Le gérant pose une question ──
   return next throws_ok(format('select public.btp_poser_question(%L, %L)', v_ch, 'ok'), '22023', null, 'Une question de moins de 3 caractères est refusée');

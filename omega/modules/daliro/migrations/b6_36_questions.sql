@@ -76,16 +76,7 @@ do $do$ begin
   end if;
 end $do$;
 
--- Le serveur d'Omega (clé de service, ou postgres pour la recette), jamais une personne.
-create or replace function private.btp_est_serveur()
- returns boolean
- language sql
- stable
- set search_path to ''
-as $function$
-  select (select auth.uid()) is null
-     and coalesce(nullif(current_setting('role', true), 'none'), session_user::text) in ('service_role', 'postgres')
-$function$;
+-- private.btp_est_serveur() : celle du socle (b6_03), inchangée.
 
 -- ─────────────────────────────────────────────────────────────────────────
 create or replace function public.btp_poser_question(p_chantier uuid, p_question text)
@@ -250,9 +241,6 @@ begin
 end $function$;
 
 -- ─── Droits ─────────────────────────────────────────────────────────────
-revoke execute on function private.btp_est_serveur() from public, anon, authenticated;
-grant execute on function private.btp_est_serveur() to service_role;
-
 revoke execute on function public.btp_poser_question(uuid, text) from public, anon;
 revoke execute on function public.btp_questions_du_chantier(uuid) from public, anon;
 grant execute on function public.btp_poser_question(uuid, text) to authenticated, service_role;
