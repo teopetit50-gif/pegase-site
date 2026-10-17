@@ -53,8 +53,8 @@ const NATURES: Record<string, string> = {
   fait: "fait", acte: "acte", procedure: "procédure", paiement: "paiement", courrier: "courrier", contrat: "contrat", facture: "facture", constat: "constat",
   attestation: "attestation", decision: "décision", conclusions: "conclusions", expertise: "expertise", photo: "photographie", autre: "autre",
 };
-/* ——— tamila.pieces_citees (contrat d'A1, 17/10) : constats piece_citee, données { numero (« 12 », « 4 bis »), intitule,
-   date?, partie (qui produit la pièce), ecriture (l'écriture qui la cite), ecritures[] }. Le lecteur ne juge pas la
+/* ——— tamila.pieces_citees (contrat d'A1, 17/10 ; lecteur v38) : constats piece_citee, données { numero (« 12 », « 4 bis »),
+   intitule, date?, partie? (qui produit la pièce), citee_par?, citee_dans?, ecriture?, ecritures[], communiquee?, piece? }. Le lecteur ne juge pas la
    communication : la comparaison se fait ici, en clair, avec les pièces du dossier et les pièces déjà attendues. ——— */
 export type EtatCitee = "nous" | "retrouvee" | "attendue" | "absente";
 const norm = (x: unknown) => String(x ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
@@ -63,9 +63,12 @@ const motsUtiles = (x: string) => norm(x).split(" ").filter((m) => m.length >= 4
 const numeroDe = (c: Constat) => norm(c.donnees?.numero ?? "");
 
 /** Où en est une pièce citée : produite par notre client, retrouvée parmi les pièces du dossier, déjà attendue, ou absente. */
-export function etatPieceCitee(c: Constat, pieces: { nom_fichier: string }[], attentes: string[]): { etat: EtatCitee; nom?: string } {
+export function etatPieceCitee(c: Constat, pieces: { id?: string; nom_fichier: string }[], attentes: string[]): { etat: EtatCitee; nom?: string } {
   const d = c.donnees ?? {};
   if (norm(d.partie) === "client") return { etat: "nous" };
+  // lecteur v38 (A1 9e4cdfd) : communiquee et piece, quand il les rend, priment sur la comparaison faite ici
+  const liee = d.piece ? pieces.find((p) => p.id === d.piece) : undefined;
+  if (liee || d.communiquee === true) return { etat: "retrouvee", nom: liee?.nom_fichier ?? "pièce du dossier" };
   const num = numeroDe(c);
   const mots = motsUtiles(String(d.intitule ?? c.titre));
   const parNumero = num ? new RegExp(`(^|\\b(piece|pc|p) (n )?)0*${num}( |$)`) : null;
@@ -116,6 +119,7 @@ export function resumeDonnees(type: string, d: Record<string, unknown> | undefin
     const date = dateFr(d.date);
     if (date) parts.push(date);
     if (d.partie) parts.push(`produite par ${ACTEURS[String(d.partie)] ?? d.partie}`);
+    else if (d.citee_par) parts.push(`citée par ${ACTEURS[String(d.citee_par)] ?? d.citee_par}`);
     if (Array.isArray(d.ecritures) && d.ecritures.length > 1) parts.push(`citée dans ${d.ecritures.length} écritures`);
   } else if (t === "contradictions") {
     if (d.sujet) parts.push(String(d.sujet));

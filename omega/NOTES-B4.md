@@ -23,7 +23,8 @@ carte Pièces) : choix et ordre des pièces, composé et imprimé dans le naviga
 { numero, intitule, date?, partie, ecriture, ecritures[] } ; le lecteur ne juge pas la communication, l'écran compare
 en clair (`etatPieceCitee`, analyses.ts) : produite par notre client / retrouvée parmi les pièces (numéro ou mots de
 l'intitulé dans le nom de fichier) / déjà attendue / absente → « Réclamer au confrère ». Heuristique à éprouver sur
-le premier vrai résultat. Recette 205/205. **À poser** : b4_19 + 28 (après b4_15).
+le premier vrai résultat. Lecteur v38 (A1 9e4cdfd) rend aussi citee_par, citee_dans, communiquee, piece : acceptés,
+ils priment sur la comparaison locale. Recette 205/205. b4_19 + 28 posés verts (17/10).
 
 **Prochain pas sans Teo** : recetter le relevé sur le premier vrai résultat d'A1 (pièces fictives sur la recette),
 dossier de plaidoirie assemblé en un PDF, abonnement d'agenda tenu à jour.
