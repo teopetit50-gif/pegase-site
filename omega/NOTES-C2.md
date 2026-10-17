@@ -5,10 +5,15 @@ Commande : `omega/AUDIT-PROMESSES.md` § 1 (CASHD absent) ; promesses : `app/pag
 sont déjà écrites », capture « qui doit de l'argent, où en est la relance, et l'encours échu au total »),
 `app/offres/relances-impayes/page.tsx`, `lib/produits/relances.ts`, `lib/produits/capacites/relances.ts` (50 lignes).
 
-## REPRISE (15/10/2026)
+## REPRISE (17/10/2026)
 
-- **Posé et vert** : c2_01 → c2_09 (h1232ccb, CASHD vert sur la recette) ; écrans dans main. c2_09 : lignes de pièces dans
-  la langue du compte, un compte étranger sans texte propre reçoit l'anglais. Rien à poser.
+- **Posé et vert** : c2_01 → c2_09 (h1232ccb) ; écrans dans main.
+- **À poser** : `c2_10_cadence.sql` + `test_c2_10_cadence` (16), et `c2_03_moteur.sql` (test ajusté : le point du matin
+  attend le rappel du jour d'échéance de F-2026-140). Cadence du site par défaut (Teo, 17/10) : facture J 0 (rappel
+  courtois le jour de l'échéance), J+7, J+21, J+30 ; devis J+3 puis J+7. Une facture déjà échue saute le J 0. Les
+  organisations restées sur l'ancien défaut passent au nouveau. Le texte du J 0 n'est pas encore personnalisable
+  (contrainte de cashd_gabarits). Local 246/246 ; recette écran verte.
+- **Ensuite** : 4 captures de l'écran réel (390 et 1440) dans omega/captures/cashd/, sans toucher au site.
 - **Prochain pas** : CASHD ne garde qu'une lacune construisible seule, G19 (raccord d'un logiciel de commandes réel à
   cashd_verifier_commande) — elle attend un premier client ; puis le pilote (omega/CHIFFRAGE/cashd.md § Passage à A).
   Banc local : scratchpad/pg.sh (Postgres /tmp/pgc2, port 5499, base c2b).
