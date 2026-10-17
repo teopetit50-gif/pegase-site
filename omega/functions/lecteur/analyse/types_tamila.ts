@@ -161,6 +161,10 @@ export const TAMILA_PIECES_CITEES: TypeAnalyse = {
   },
 };
 
-export const TYPES_ANALYSE: Record<string, TypeAnalyse> = Object.fromEntries(
-  [TAMILA_PRELECTURE, TAMILA_CHRONOLOGIE, TAMILA_CONTRADICTIONS, TAMILA_BORDEREAU, TAMILA_PIECES_CITEES].map((t) => [t.type, t]),
-);
+const TYPES_TAMILA = [TAMILA_PRELECTURE, TAMILA_CHRONOLOGIE, TAMILA_CONTRADICTIONS, TAMILA_BORDEREAU, TAMILA_PIECES_CITEES];
+
+/** Les mêmes analyses pour le module « essai », en clair : la preuve de la chaîne sur des pièces fictives du banc,
+ *  sans coffre (une analyse Tamila est toujours chiffrée, et le coffre en repli local ne donne pas la clé au serveur). */
+const TYPES_ESSAI = TYPES_TAMILA.map((t) => ({ ...t, type: t.type.replace(/^tamila\./, "essai.") }));
+
+export const TYPES_ANALYSE: Record<string, TypeAnalyse> = Object.fromEntries([...TYPES_TAMILA, ...TYPES_ESSAI].map((t) => [t.type, t]));

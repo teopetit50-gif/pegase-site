@@ -61,6 +61,8 @@ Le lecteur est à redéployer.
 
 **17/10, décisions de Teo** : médical NON, DWG NON, métré mesuré NON. OUI aux nouveaux types Tamila et à une première lecture longue sur la recette avec des pièces fictives. Fait : le type `tamila.pieces_citees` (relevé d'office des pièces citées, pour B4).
 
+**17/10, preuve en clair** : types `essai.*` (copies en clair des types Tamila) et script `omega/banc/analyse_reelle_claire.sql`, que le coordinateur joue sur les pièces lues du banc. Raison : une analyse Tamila est toujours chiffrée, et un coffre en repli local ne donne pas la clé au serveur ; elle finirait en échec.
+
 **Toute prochaine étape à la reprise.** Lire les sorties de `decoupage_reel.mjs` si le coordinateur l'a joué. Sinon, demander qu'il soit joué, puis corriger ce qui sort. Ensuite, selon les décisions de Teo : la lecture longue réelle (`analyse_reelle.sql`), puis l'outil de mesure de qualité sur corpus (1 j, `CHIFFRAGE/lecteur.md`).
 
 Branche `worker-a1`. Périmètre : `omega/functions/lecteur/`, `omega/functions/lecteur-exports/` et `omega/functions/_partage/`.

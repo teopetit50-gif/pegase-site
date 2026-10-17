@@ -91,7 +91,6 @@ finit en `echec` motivé, sans reprise.
 | `tamila.chronologie` | evenement | date, precision, evenement, acteur, acteur_libelle?, nature ; triés par date | 200 pièces |
 | `tamila.contradictions` | contradiction | sujet, portee, affirmation_a, piece_a, affirmation_b, piece_b ; « critique » seulement si les deux citations sont vérifiées | 200 pièces |
 | `tamila.bordereau` | piece | numero (continu, ordre chronologique), intitule, date?, nature, piece, pages, deja_communiquee?, observations? | 200 pièces |
-
 | `tamila.pieces_citees` | piece_citee | numero (« 12 », « 4 bis »), intitule, date?, partie (qui produit la pièce), ecriture (l'écriture qui la cite), ecritures[] ; une ligne par pièce et par partie (citations réunies), triées par numéro ; pas de synthèse. La base compare avec les bordereaux (« jamais communiquée », « attendue ») | 200 pièces |
 
 Toutes : 3 000 pages, 400 pages par pièce, 15 € par analyse (sous `plafond_ia_jour_client`).

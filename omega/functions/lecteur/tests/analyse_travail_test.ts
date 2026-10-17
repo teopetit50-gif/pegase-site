@@ -199,3 +199,8 @@ Deno.test("types Tamila : pièces citées — une ligne par pièce et par partie
   assertEquals(numeroDePiece("P.7"), "7");
   assertEquals(TYPES_ANALYSE["tamila.pieces_citees"].synthese, false);
 });
+
+Deno.test("types essai : les mêmes analyses en clair, pour la preuve sur le banc", () => {
+  assertEquals(TYPES_ANALYSE["essai.chronologie"].limites, TYPES_ANALYSE["tamila.chronologie"].limites);
+  assertEquals(TYPES_ANALYSE["essai.pieces_citees"].codes, ["piece_citee"]);
+});
