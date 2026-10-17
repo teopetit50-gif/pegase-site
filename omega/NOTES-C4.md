@@ -4,7 +4,12 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 `components/espace/offload/`, `app/espace/offload/`, et ce fichier. Coordinateur : session
 `session_01BCGFdpRKBvXKjouC75sYBg`. Je n'appelle jamais Supabase : le coordinateur pose, je reçois les sorties brutes.
 
-## REPRISE (pause demandée par Teo le 15/10, 16 h 14 Z)
+## REPRISE (reprise du 17/10)
+
+17/10 : Teo tranche, « un message par trimestre » prévaut. c4_16 fait, à poser. La réécriture dans le CRM attend un
+connecteur : ne pas la faire. Rien d'autre en cours.
+
+### Pause du 15/10, 16 h 14 Z
 
 État au 15/10 : c4_01 à c4_15 posés et verts sur la recette. Aucun travail en cours, rien à poser. Prochain pas : seulement
 sur feu vert de Teo. En attente de sa décision : « un message par trimestre » contre la ligne 12 (deux messages en tout).
@@ -440,6 +445,20 @@ Banc local : 28 tests, 312 assertions vertes, migrations posées deux fois ; tsc
 l'échéance honorée après message est comptée au suivi). Le chiffre repris compte tous les achats des 90 jours,
 sans prétendre qu'ils sont dus au seul message.
 
+## Lot c4_16 — un message par compte et par trimestre (décision de Teo, 17/10)
+
+`omega/modules/offload/migrations/c4_16_un_message.sql` :
+- une reprise envoie un seul message écrit, par un seul canal (c4_12), et la quarantaine de 90 jours est gardée ;
+- `offload_reglages.relance_ecrite` est éteint par défaut (`offload_regler` le rallume). Éteint, un message sans réponse
+  après le délai de relance clôt la reprise (« sans_reponse »).
+
+Redéfinitions : `offload_cycle`, `offload_regler`. Tests : `omega/tests/offload/c4_16_un_message.sql` (5 assertions).
+`test_c4_03_cycle` allume la relance avant d'éprouver la séquence à deux messages. Banc local : 41 tests, 387 ok.
+
+Ligne 12 du catalogue (« deux messages en tout ») : elle n'est plus le comportement par défaut. Son libellé est à revoir
+par le coordinateur ou Teo ; c'est un fichier public, je n'y touche pas. `atteste` réel : 11 et 38 prouvées, 15 fausse
+tant que la messagerie (A2) n'est pas branchée.
+
 ## Lot c4_15 — le message de reprise s'ancre aussi sur l'échéance qui revient (15/10)
 
 `omega/modules/offload/migrations/c4_15_message_et_echeance.sql` répond au chiffrage n° 25, la carte « Chaque client
@@ -680,3 +699,4 @@ Partielles : 6, 11, 15, 38.
 - 15/10 — lot c4_14 (chantiers réceptionnés, missions closes) : 39 tests, 379 ok en local.
 - 15/10 — lot c4_15 (message de reprise ancré sur l'échéance qui revient) : 40 tests, 382 ok en local.
 - 15/10, 12 h 32 Z — recette : c4_01 à c4_15 verts (c4_09 compris après 1dcd066d). Question « un message par trimestre » transmise à Teo.
+- 17/10 — lot c4_16 (un message par trimestre, relance écrite éteinte par défaut) : 41 tests, 387 ok en local.

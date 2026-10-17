@@ -126,6 +126,8 @@ begin
   return next is((select count(*)::integer from public.offload_reprises x where x.client_id = v_client), 3,
                  'Rejouer le cycle n''ouvre rien de plus');
 
+  -- La relance écrite est un réglage, éteint par défaut depuis c4_16 : on l'allume pour éprouver la séquence à deux messages.
+  perform public.offload_regler(v_client, '{"relance_ecrite": true}');
   -- Le message part (le socle publie envoi.envoye.offload) ; sept jours plus tard, la relance est préparée.
   r := tests.c4_reprise(v_d);
   perform tests.c4_evenement_envoi(r.envoi1_id, 'envoye');
