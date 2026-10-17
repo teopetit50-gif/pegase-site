@@ -6,7 +6,7 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 
 ## REPRISE (reprise du 17/10)
 
-17/10 : Teo tranche, « un message par trimestre » prévaut. c4_16 fait, à poser. La réécriture dans le CRM attend un
+17/10 : Teo tranche, « un message par trimestre » prévaut. c4_16 posé et vert (recette : test_c4_* 421 ok). Aucun prochain pas sans Teo ou tiers. La réécriture dans le CRM attend un
 connecteur : ne pas la faire. Rien d'autre en cours.
 
 ### Pause du 15/10, 16 h 14 Z
