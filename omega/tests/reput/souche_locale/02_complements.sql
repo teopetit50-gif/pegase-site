@@ -192,3 +192,47 @@ begin
 end $$;
 alter table public.equipes_membres add column if not exists client_id uuid;
 alter table public.equipes add column if not exists cle text;
+
+-- ── Gabarits et envoi interne (socle 19as, A1), imités : un membre, un gabarit validé fermé, sans validation ──
+create table if not exists public.gabarits_messages (
+  id uuid primary key default gen_random_uuid(), client_id uuid, module text not null, code text not null, langue text not null,
+  version integer not null, canal text not null, libelle text, sujet text, corps text not null, variables jsonb not null default '{}',
+  transactionnel boolean not null default true, donnees_sante boolean not null default false, espacement boolean not null default false,
+  statut text not null default 'brouillon', note text, unique nulls not distinct (client_id, code, langue, version));
+alter table public.envois add column if not exists destinataire_membre uuid;
+alter table public.envois add column if not exists direct boolean not null default false;
+create or replace function public.valider_gabarit(p_gabarit uuid, p_note text) returns void
+language plpgsql security definer set search_path to '' as $$
+begin
+  if current_user <> 'service_role' and current_user <> 'postgres' then
+    raise exception 'Un gabarit se valide par le serveur.' using errcode = '42501';
+  end if;
+  update public.gabarits_messages set statut = 'valide', note = p_note where id = p_gabarit and statut = 'brouillon';
+end $$;
+grant execute on function public.valider_gabarit(uuid, text) to service_role;
+create or replace function private.envoyer_interne(p_client uuid, p_module text, p_objet_type text, p_objet_id text, p_canal text,
+  p_membre uuid, p_gabarit text, p_variables jsonb default '{}', p_cle_idempotence text default null, p_entite uuid default null) returns uuid
+language plpgsql security definer set search_path to '' as $$
+declare v_id uuid; g public.gabarits_messages; v_corps text; v_sujet text; k text; v text;
+begin
+  select e.id into v_id from public.envois e where e.client_id = p_client and e.cle_idempotence = p_cle_idempotence;
+  if v_id is not null then return v_id; end if;
+  if not exists (select 1 from public.comptes c where c.client_id = p_client and c.user_id = p_membre) then
+    raise exception 'Le destinataire n''est pas membre de l''organisation.' using errcode = '23503';
+  end if;
+  select * into g from public.gabarits_messages x where x.code = p_gabarit and x.module = p_module and x.statut = 'valide'
+    and (x.client_id = p_client or x.client_id is null) order by x.client_id nulls last, x.version desc limit 1;
+  if g.id is null then raise exception 'Aucun gabarit validé « % ».', p_gabarit using errcode = 'P0002'; end if;
+  if exists (select 1 from jsonb_each_text(g.variables) w where w.value = 'texte') then
+    raise exception 'Gabarit non fermé.' using errcode = '22023';
+  end if;
+  v_sujet := g.sujet; v_corps := g.corps;
+  for k, v in select * from jsonb_each_text(coalesce(p_variables, '{}') || jsonb_build_object('organisation', (select c.nom from public.clients c where c.id = p_client))) loop
+    v_sujet := replace(v_sujet, '{{' || k || '}}', v); v_corps := replace(v_corps, '{{' || k || '}}', v);
+  end loop;
+  insert into public.envois (client_id, entite_id, module, objet_type, objet_id, canal, sujet, corps, transactionnel, donnees_sante,
+    statut, cle_idempotence, destinataire_membre, direct)
+  values (p_client, p_entite, p_module, p_objet_type, p_objet_id, p_canal, v_sujet, v_corps, true, false, 'pret', p_cle_idempotence, p_membre, true)
+  returning id into v_id;
+  return v_id;
+end $$;

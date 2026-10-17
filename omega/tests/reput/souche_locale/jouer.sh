@@ -38,7 +38,7 @@ charger "$TAMILA/01_socle.sql" 01_socle_b4
 charger "$ICI/02_complements.sql" 02_complements
 for m in "$RACINE"/omega/modules/reput/migrations/c3_*.sql; do charger "$m" "$(basename "$m")"; done
 charger "$TAMILA/03_pgtap.sql" 03_pgtap
-git -C "$RACINE" show origin/worker-a5:omega/tests/socle/00_installation.sql | sed -n '6,433p' > "$DIR/a5.sql"
+git -C "$RACINE" show "${A5_REF:-699b5ba1}":omega/tests/socle/00_installation.sql | sed -n '6,433p' > "$DIR/a5.sql"
 charger "$DIR/a5.sql" a5_installation
 charger "$RACINE/omega/tests/reput/c3_00_jeu.sql" c3_00_jeu
 charger "$ICI/04_banc.sql" 04_banc
