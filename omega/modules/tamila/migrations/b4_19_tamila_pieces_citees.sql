@@ -2,10 +2,10 @@
 --
 -- POURQUOI. Teo a dit oui (17/10) au relevé d'office des pièces que les écritures adverses invoquent ; A1 construit
 -- le type tamila.pieces_citees au lecteur. La porte de b4_15 ne connaît que quatre types : elle apprend le cinquième.
--- Format attendu du résultat (proposé à A1) : constats de code piece_citee, données { numero?, intitule, citee_par
--- (adverse | client | juge | expert | tiers), citee_dans (id de la pièce qui la cite), communiquee (booléen : retrouvée
--- parmi les pièces du dossier), piece? (id de la pièce retrouvée) }. L'écran propose de réclamer au confrère, en
--- pièce attendue (b4_18), chaque pièce non communiquée.
+-- Format du résultat (contrat d'A1, worker-a1 86db3a8) : constats piece_citee, données { numero (« 12 », « 4 bis »),
+-- intitule, date?, partie (qui produit la pièce), ecriture, ecritures[] }. Le lecteur ne juge pas la communication :
+-- l'écran compare en clair avec les pièces du dossier et les pièces attendues (b4_18), et propose de réclamer au
+-- confrère celle qu'il ne retrouve pas.
 --
 -- CE QUE ÇA POSE. private.tamila_demander_analyse remplacée : corps de b4_15, la liste des types gagne
 -- pieces_citees (200 pièces au plus, comme les autres). Signature, droits et politiques inchangés. Si le socle (19an)

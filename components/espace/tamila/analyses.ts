@@ -28,7 +28,7 @@ export const TYPES_ANALYSE: Record<string, { libelle: string; aide: string }> = 
   chronologie: { libelle: "Chronologie", aide: "Les événements datés, chacun sourcé page et ligne" },
   contradictions: { libelle: "Contradictions", aide: "Ce qu'une pièce affirme et qu'une autre contredit" },
   bordereau: { libelle: "Bordereau", aide: "Les pièces numérotées dans l'ordre chronologique (art. 954 et 768 CPC)" },
-  pieces_citees: { libelle: "Pièces citées", aide: "Les pièces que les écritures adverses invoquent, et celles qui ne vous ont pas été communiquées" },
+  pieces_citees: { libelle: "Pièces citées", aide: "Les pièces que les écritures invoquent, comparées ici à celles du dossier : à réclamer si absentes" },
 };
 export const libelleType = (type: string) => TYPES_ANALYSE[type.replace(/^tamila\./, "")]?.libelle ?? type;
 
@@ -53,13 +53,41 @@ const NATURES: Record<string, string> = {
   fait: "fait", acte: "acte", procedure: "procédure", paiement: "paiement", courrier: "courrier", contrat: "contrat", facture: "facture", constat: "constat",
   attestation: "attestation", decision: "décision", conclusions: "conclusions", expertise: "expertise", photo: "photographie", autre: "autre",
 };
-/** tamila.pieces_citees (format proposé à A1, 17/10) : une pièce invoquée qu'on ne retrouve pas parmi celles du dossier. */
-export const aReclamer = (type: string, c: Constat) => type.replace(/^tamila\./, "") === "pieces_citees" && c.code === "piece_citee" && c.donnees?.communiquee === false;
-/** L'objet de la pièce attendue : « Pièce n° 12 : relevé de compte… (citée par la partie adverse) » */
+/* ——— tamila.pieces_citees (contrat d'A1, 17/10) : constats piece_citee, données { numero (« 12 », « 4 bis »), intitule,
+   date?, partie (qui produit la pièce), ecriture (l'écriture qui la cite), ecritures[] }. Le lecteur ne juge pas la
+   communication : la comparaison se fait ici, en clair, avec les pièces du dossier et les pièces déjà attendues. ——— */
+export type EtatCitee = "nous" | "retrouvee" | "attendue" | "absente";
+const norm = (x: unknown) => String(x ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+const VIDES = new Set(["piece", "pieces", "les", "des", "du", "de", "la", "le", "et", "aux", "pour", "avec", "sur", "une", "dans"]);
+const motsUtiles = (x: string) => norm(x).split(" ").filter((m) => m.length >= 4 && !VIDES.has(m) && !/^\d+$/.test(m));
+const numeroDe = (c: Constat) => norm(c.donnees?.numero ?? "");
+
+/** Où en est une pièce citée : produite par notre client, retrouvée parmi les pièces du dossier, déjà attendue, ou absente. */
+export function etatPieceCitee(c: Constat, pieces: { nom_fichier: string }[], attentes: string[]): { etat: EtatCitee; nom?: string } {
+  const d = c.donnees ?? {};
+  if (norm(d.partie) === "client") return { etat: "nous" };
+  const num = numeroDe(c);
+  const mots = motsUtiles(String(d.intitule ?? c.titre));
+  const parNumero = num ? new RegExp(`(^|\\b(piece|pc|p) (n )?)0*${num}( |$)`) : null;
+  for (const p of pieces) {
+    const n = norm(p.nom_fichier.replace(/\.[A-Za-z0-9]{1,5}$/, ""));
+    if (parNumero?.test(n)) return { etat: "retrouvee", nom: p.nom_fichier };
+    const noms = new Set(n.split(" "));
+    if (mots.length >= 2 && mots.filter((m) => noms.has(m)).length / mots.length >= 0.6) return { etat: "retrouvee", nom: p.nom_fichier };
+    // ou l'inverse : tous les mots utiles du nom de fichier sont dans l'intitulé (« ordonnance-cme.pdf »)
+    const motsNom = motsUtiles(n);
+    if (motsNom.length >= 1 && motsNom.every((m) => mots.includes(m))) return { etat: "retrouvee", nom: p.nom_fichier };
+  }
+  const objet = norm(objetReclamation(c));
+  if (attentes.some((x) => { const y = norm(x); return (num && y.includes(`piece n ${num}`)) || y.includes(objet); })) return { etat: "attendue" };
+  return { etat: "absente" };
+}
+export const estPieceCitee = (type: string, c: Constat) => type.replace(/^tamila\./, "") === "pieces_citees" && c.code === "piece_citee";
+/** L'objet de la pièce attendue : « Pièce n° 12 : rapport d'expertise amiable » */
 export const objetReclamation = (c: Constat) => {
   const d = c.donnees ?? {};
   const intitule = String(d.intitule ?? c.titre);
-  return d.numero !== undefined && d.numero !== null ? `Pièce n° ${d.numero} : ${intitule}` : intitule;
+  return d.numero !== undefined && d.numero !== null && String(d.numero) !== "" ? `Pièce n° ${d.numero} : ${intitule}` : intitule;
 };
 
 const nature = (v: unknown) => NATURES[String(v)] ?? String(v);
@@ -84,9 +112,11 @@ export function resumeDonnees(type: string, d: Record<string, unknown> | undefin
     if (d.pages) parts.push(`${d.pages} p.`);
     if (d.deja_communiquee) parts.push("déjà communiquée");
   } else if (t === "pieces_citees") {
-    if (d.numero !== undefined && d.numero !== null) parts.push(`Pièce n° ${d.numero}`);
-    if (d.citee_par) parts.push(`citée par ${ACTEURS[String(d.citee_par)] ?? d.citee_par}`);
-    parts.push(d.communiquee === false ? "non communiquée" : "communiquée");
+    if (d.numero !== undefined && d.numero !== null && String(d.numero) !== "") parts.push(`Pièce n° ${d.numero}`);
+    const date = dateFr(d.date);
+    if (date) parts.push(date);
+    if (d.partie) parts.push(`produite par ${ACTEURS[String(d.partie)] ?? d.partie}`);
+    if (Array.isArray(d.ecritures) && d.ecritures.length > 1) parts.push(`citée dans ${d.ecritures.length} écritures`);
   } else if (t === "contradictions") {
     if (d.sujet) parts.push(String(d.sujet));
     if (d.portee) parts.push(`porte sur : ${d.portee}`);

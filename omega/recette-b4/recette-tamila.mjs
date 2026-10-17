@@ -528,13 +528,14 @@ for (const largeur of [1440, 390]) {
     await s.evaluer(`(e => { e?.focus(); e?.click(); })([...document.querySelectorAll('section[aria-label="Lectures du dossier"] .tam-ligne')].find(l => /Pièces citées/.test(l.textContent))?.querySelector('.esp-lien-bouton'))`);
     await s.dormir(700);
     const t3 = await s.evaluer(`document.querySelector('[role="dialog"]')?.innerText || ''`);
-    ok(/Pièces citées — 2026-0412/.test(t3) && /Pièce n° 12/.test(t3) && /non communiquée/.test(t3) && /citée par la partie adverse/.test(t3), 'le relevé : la pièce n° 12 invoquée, non communiquée');
+    ok(/Pièces citées — 2026-0412/.test(t3) && /Pièce n° 12/.test(t3) && /produite par la partie adverse/.test(t3), 'le relevé : la pièce n° 12 produite par la partie adverse');
+    ok(/Produite par votre client/.test(t3) && /Retrouvée : ordonnance-cme\.pdf/.test(t3) && /Absente des pièces du dossier/.test(t3), 'comparé ici : la nôtre, la retrouvée, l\'absente');
     const nb = await s.evaluer(`[...document.querySelectorAll('[role="dialog"] .esp-lien-bouton')].filter(b => /Réclamer au confrère/.test(b.textContent)).length`);
     ok(nb === 1, `une seule pièce à réclamer (${nb})`);
     await s.evaluer(`[...document.querySelectorAll('[role="dialog"] .esp-lien-bouton')].find(b => /Réclamer au confrère/.test(b.textContent))?.click()`);
     await s.dormir(400);
     const t4 = await s.evaluer(`document.querySelector('[role="dialog"]')?.innerText || ''`);
-    ok(/Ajoutée aux pièces attendues/.test(t4), 'réclamée : ajoutée aux pièces attendues');
+    ok(/Déjà dans les pièces attendues/.test(t4) && !/Absente des pièces du dossier/.test(t4), 'réclamée : la pièce passe dans les pièces attendues');
     await s.capturer(`${dossier}tamila-pieces-citees-1440.jpg`, { qualite: 55 });
   } else {
     await s.capturer(`${dossier}tamila-analyse-390.jpg`, { qualite: 55 });
