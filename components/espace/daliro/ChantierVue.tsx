@@ -38,6 +38,7 @@ import { Avis, Def, Pastille } from "../ui";
 import { dateCourte, dateHeure, montant, nombreFr, pourcent } from "../format";
 import { ACCEPTATIONS, CONFIRMATIONS, CONTROLES_LIGNE, EXECUTIONS, GRAVITES, ROLES_TIERS, STATUTS_AVENANT, STATUTS_CHANTIER, UNITES, VIGILANCES, familleControle, libelleEnvoi, libelleStatutFacture, libelleUnite } from "./etats";
 import { FACTURES_CANDIDATES_EXEMPLE } from "./exemples";
+import ReleveDialog from "./ReleveDialog";
 import { abandonnerAvenant, accepterEcart, changerStatutChantier, chargerFacturesCandidates, chiffrerLigneAvenant, confirmerDependance, detacherFacture, ecrireLigne, ecrireMarche, ouvrirAvenant, poserPrix, proposerDependances, proposerRemplacants, rattacherFacture, repondreConfirmation, retirerLigneAvenant, rouvrirMarche, signerAvenant, soumettreAvenant, validerPrix, verifierMarche } from "./portes";
 import type { Avenant, FactureCandidate, LigneAvenant, LigneMarche, Marche, Passage, Prix, Remplacant, Tableau } from "./types";
 
@@ -48,6 +49,7 @@ type Form =
   | { type: "lot_ligne"; ligne: LigneMarche }
   | { type: "ligne"; marche: Marche }
   | { type: "import"; marche: Marche }
+  | { type: "releve" }
   | { type: "marche" }
   | { type: "rouvrir"; marche: Marche }
   | { type: "verifier"; marche: Marche }
@@ -329,7 +331,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
             <h2 className="esp-carte-titre">{c.nom}</h2>
             <div className="esp-kpi-sous">{c.reference ? `${c.reference} · ` : ""}{c.adresse ? `${c.adresse}, ` : ""}{c.code_postal} {c.commune}</div>
           </div>
-          <span className="esp-item-haut"><Pastille teinte={s.teinte}>{s.libelle}</Pastille>{c.marche_verifie || marches.some((m) => m.statut === "verifie") ? <Pastille teinte="vert" contour>Marché vérifié</Pastille> : <Pastille teinte="ambre" contour>Marché à vérifier</Pastille>}</span>
+          <span className="esp-item-haut"><Pastille teinte={s.teinte}>{s.libelle}</Pastille>{c.marche_verifie || marches.some((m) => m.statut === "verifie") ? <Pastille teinte="vert" contour>Marché vérifié</Pastille> : <Pastille teinte="ambre" contour>Marché à vérifier</Pastille>}<button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "releve" })}><ClipboardCheck width={14} height={14} aria-hidden="true" /> Relevé du chantier</button></span>
         </div>
         <dl className="esp-def esp-def--trois">
           <Def etiquette="Maître d'ouvrage" fort>{c.maitre_ouvrage_nom ?? <span className="esp-obligatoire">à désigner</span>}</Def>
@@ -458,7 +460,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
       </section>
 
       {/* ——— météo des passages extérieurs (b6_21) ——— */}
-      <MeteoCarte key={`meteo-${c.id}`} tableau={tableau} source={source} />
+      <MeteoCarte key={`meteo-${c.id}`} tableau={tableau} source={source} onLocal={onLocal} relire={relire} />
 
       {/* ——— planning ——— */}
       <section className="esp-carte" aria-label="Planning">
@@ -708,6 +710,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
           {form?.type === "sur_place" || form?.type === "preuve" ? (
             <SignatureLienDialog key={`${form.type}-${form.avenant.id}`} mode={form.type === "sur_place" ? "preparer" : "preuve"} avenant={form.avenant} source={source} />
           ) : null}
+          {form?.type === "releve" ? <ReleveDialog tableau={tableau} /> : null}
           {form?.type === "import" ? (
             <ImportDevisDialog key={`import-${form.marche.id}`} client={c.client_id} marche={form.marche} lots={lots} source={source} fermer={fermer}
                                apresReel={async (m) => { await relire(); setFait(m); }}

@@ -166,7 +166,7 @@ export default function EcranEquipe() {
                       <td>
                         {m.perimetre_total ? "Toutes" : m.entites.length ? m.entites.map(nomSociete).join(", ") : <Pastille teinte="ambre">aucune</Pastille>}
                         {touche(m) && vue.societes.length > 1 ? (
-                          <> <button type="button" className="esp-lien-bouton" aria-label={`Sociétés visibles par ${m.nom}`} onClick={() => ouvrir({ type: "perimetre", membre: m })}>Modifier</button></>
+                          <> <button type="button" className="esp-lien-bouton" aria-label={`Modifier les sociétés visibles par ${m.nom}`} onClick={() => ouvrir({ type: "perimetre", membre: m })}>Modifier</button></>
                         ) : null}
                       </td>
                       <td className="esp-num">
