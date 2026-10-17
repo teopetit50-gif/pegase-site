@@ -11,7 +11,9 @@
    une ligne par élément, le titre à gauche, la date à droite ; plus
    d'icônes, de sous-lignes ni d'avatars ; la flèche au survol ; les
    échéances sans colonne « État » (une date dépassée passe au rouge) ; plus
-   de bandeau de l'assistant, le bouton « Assistant » est en haut. */
+   de bandeau de l'assistant, le bouton « Assistant » est en haut.
+   17/10/2026 — décision de Teo : plus de salutation ni de rangée de quatre
+   chiffres, comme la vue d'ensemble du pilotage. */
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
@@ -23,8 +25,6 @@ import { RACINE } from "./modules";
 import { useDonnees } from "./donnees";
 import { evenements } from "./evenements";
 import { ecrireStockage, useStockage } from "./Collection";
-import { useOrganisation } from "./organisation";
-import { Chiffre, EnDirect } from "./vivant";
 import "./habillage.css";
 
 const CLE_TACHES = "espace2-collection-taches";
@@ -90,50 +90,12 @@ export default function Accueil() {
   }, [brut]);
   const duJour = taches.filter((t) => !t.fait).slice(0, 4);
   const cocher = (id: string) => ecrireStockage(CLE_TACHES, JSON.stringify(taches.map((t) => (t.id === id ? { ...t, fait: true } : t))));
-  const { prenom } = useOrganisation();
-  const aFaire = (c?.actions.length ?? 0) + duJour.length;
-  const heureJour = new Date().getHours();
-  const salut = heureJour >= 18 ? "Bonsoir" : "Bonjour";
-  const enRetard = taches.filter((t) => !t.fait && t.echeance && new Date(t.echeance).getTime() < aujourdhui).length;
 
-  const kpis = [
-    { libelle: "Reste à payer", valeur: c?.totalARegler, sous: c ? `${c.aRegler.length} facture${c.aRegler.length > 1 ? "s" : ""} validée${c.aRegler.length > 1 ? "s" : ""}` : "", lien: `${RACINE}/filed/a-payer` },
-    { libelle: "En retard", valeur: c?.totalRetard, sous: c ? `${c.retard.length} échéance${c.retard.length > 1 ? "s" : ""} dépassée${c.retard.length > 1 ? "s" : ""}` : "", lien: `${RACINE}/filed/a-payer`, alerte: !!c?.retard.length },
-    { libelle: "À valider", valeur: c ? String(c.aValider) : undefined, sous: "demandes en attente de votre accord", lien: `${RACINE}/validations` },
-    { libelle: "Tâches en retard", valeur: String(enRetard), sous: `${duJour.length} tâche${duJour.length > 1 ? "s" : ""} ouverte${duJour.length > 1 ? "s" : ""}`, lien: `${RACINE}/taches` },
-  ];
 
   return (
     <div className="v2-page v2-arrivee v2-va v2-vivant oc-va-simple">
       <h1 className="v2-sr">Vue d&apos;ensemble</h1>
-      {/* 08/10 — la salutation : qui est là, et combien de choses l'attendent */}
-      <div className="v2-salut">
-        <div>
-          <p className="v2-salut-titre" suppressHydrationWarning>
-            {salut}
-            {prenom ? ` ${prenom}` : ""}
-            {c ? (
-              <span>
-                {" "}
-                — {aFaire ? `${aFaire} chose${aFaire > 1 ? "s" : ""} vous attend${aFaire > 1 ? "ent" : ""} ${new Date().getHours() < 12 ? "ce matin" : "aujourd'hui"}` : "rien d'urgent aujourd'hui"}
-              </span>
-            ) : null}
-          </p>
-          <p className="v2-salut-date" suppressHydrationWarning>{new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}</p>
-        </div>
-        <EnDirect />
-      </div>
       {erreur ? <p className="v2-gris">La base n&apos;a pas répondu : {erreur}</p> : null}
-
-      <section className="v2-va-kpis" aria-label="Chiffres clés">
-        {kpis.map((k) => (
-          <Link key={k.libelle} href={k.lien} className="v2-va-kpi" data-alerte={k.alerte ? "" : undefined}>
-            <span className="v2-va-kpi-libelle">{k.libelle}</span>
-            {k.valeur === undefined ? <Squelette largeur={120} hauteur={32} /> : <strong data-alerte={k.alerte ? "" : undefined}><Chiffre valeur={k.valeur} /></strong>}
-            <small className="v2-gris v2-va-kpi-sous">{k.sous}</small>
-          </Link>
-        ))}
-      </section>
 
       <div className="v2-va-grille">
         <div className="v2-va-col">
