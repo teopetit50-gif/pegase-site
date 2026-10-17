@@ -1169,3 +1169,11 @@ Principe commun : les phrases du site font foi, le produit s'y met ; aucun prix 
 - Refusés : `atteste` de C4 (lib/produits = site public, gardé pour Teo) ; b6_36 de B6 tel quel (il réécrivait consommation_ia_jour par-dessus 19ar).
 - C3 lot 2 : choix (a), l'envoi interne vers un membre est ajouté au socle par A1 (gabarit fermé, sans texte libre) ; pas d'accord permanent.
 - app/api/assistant (B1) fusionné : route réservée aux personnes connectées, appelée seulement par components/espace2/Assistant.tsx ; ce n'est pas une page publique.
+
+### Suite du 17/10 (15 h 30 → 17 h 00 Z), recette (niveau 1)
+- Posés et verts : c2_10 cadence (256 ok, lot long ~8 min) ; a4_38 à a4_42 (FILED : réponses fournisseurs, GB sans HMRC, conservation légale 10 ans, purge au terme, bilan) ; socle 19as_envoi_interne (A1) ; socle 19as_effacement_fichiers_gardes (A5 : effacer_* ne bloquent plus sur les fichiers gardés, code identique hors contrôle 55000) ; b6_36 + b6_36b (B6 718 ok après une régression de droit corrigée) ; c3_11 prévenir les décideurs (9/9 après correction).
+- Déployés : tavaro-questions v2 (B2 dcd98d50 + _partage d'A1 9e4cdfd), daliro-questions v1 + cron (B6 6c6ab11 + _partage A1).
+- Preuve réelle (modèle réel, données fictives du banc) : question Tavaro 097ac6f4, répondue, 1 lecture, 0,008 €.
+- Refusé : transmettre une clé ou un mot de passe à B2 ; la preuve est passée par un script SQL joué par le coordinateur.
+- Pause de sécurité déplacée au 18/10, 07 h 30 Z (trig_01Pf8UuVk3CbaUTTsH184TEb), sur ordre de Teo.
+- 2e fusion main : C1 (vue d'ensemble sans « Bonjour » ni les 4 chiffres, c4701a5), B2 carte Questions (47a209c), B4 pièces citées (45d4216), B6 carte Questions (98a7d12).
