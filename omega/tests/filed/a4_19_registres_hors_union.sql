@@ -23,8 +23,8 @@ begin
                  'uid_ch CHE116281710 true', 'IDE suisse : forme, suffixe MWST et clé modulo 11');
   return next is((select cle_verifiee from private.filed_identifiant_etranger('CHE-116.281.711')), false, 'une clé fausse est vue');
   return next is((select format_ok from private.filed_identifiant_etranger('CHE-116.281')), false, 'une forme courte aussi');
-  return next is((select registre || ' ' || identifiant || ' ' || cle_verifiee from private.filed_identifiant_etranger('GB 980 7806 84')),
-                 'hmrc GB980780684 true', 'TVA britannique : clé modulo 97');
+  return next is((select coalesce(registre, 'sans registre') || ' ' || identifiant || ' ' || cle_verifiee from private.filed_identifiant_etranger('GB 980 7806 84')),
+                 'sans registre GB980780684 true', 'TVA britannique : clé modulo 97, sans registre (HMRC abandonné, a4_39)');
   return next is((select cle_verifiee from private.filed_identifiant_etranger('GB980780685')), false, 'une clé fausse est vue');
   return next ok((select format_ok and cle_verifiee is null from private.filed_identifiant_etranger('GBGD001')), 'GD + 3 chiffres : forme seule');
   return next ok((select registre is null and pays = 'NO' from private.filed_identifiant_etranger('NO 923609016 MVA')), 'Norvège : pas de registre');
@@ -60,16 +60,22 @@ end $f$;
 
 create or replace function tests.test_a4_26_03_royaume_uni() returns setof text
 language plpgsql as $f$
-declare o jsonb := tests.a4_organisation(); fa jsonb; v_f uuid; v_v uuid;
+declare o jsonb := tests.a4_organisation(); fa jsonb; v_f uuid;
 begin
+  -- Depuis a4_39 (17/10) : plus de HMRC ; la clé est contrôlée, l'identité attestée par une personne.
   fa := tests.a4_facture_etrangere(o, 'GB-001', 'GB', 'GB980780684');
   v_f := (fa ->> 'facture')::uuid;
   perform private.filed_controler_facture(v_f);
-  select id into v_v from public.filed_verifications_tiers where client_id = (o ->> 'client')::uuid and registre = 'hmrc' and identifiant = 'GB980780684';
-  return next ok(v_v is not null, 'GB : la vérification est demandée à HMRC');
-  perform private.filed_repondre_verification(v_v, 'invalide', '{}');
+  return next ok(not exists (select 1 from public.filed_verifications_tiers where client_id = (o ->> 'client')::uuid and identifiant like 'GB%'),
+                 'GB : aucun registre n''est interrogé');
   return next ok(exists (select 1 from public.filed_controles where facture_id = v_f and code = 'identite.registre' and resultat = 'anomalie'
-                           and gravite = 'bloquant' and message like 'HMRC ne reconnaît pas%'), 'Un refus de HMRC bloque');
+                           and gravite = 'attention' and message like '%à attester par une personne%'), 'GB : identité à attester par une personne');
+  return next ok(exists (select 1 from public.filed_controles where facture_id = v_f and code = 'identite.tva_intracom' and resultat <> 'anomalie'),
+                 'la clé correcte passe');
+  fa := tests.a4_facture_etrangere(o, 'GB-002', 'GB', 'GB980780685');
+  perform private.filed_controler_facture((fa ->> 'facture')::uuid);
+  return next ok(exists (select 1 from public.filed_controles where facture_id = (fa ->> 'facture')::uuid and code = 'identite.tva_intracom'
+                           and resultat = 'anomalie' and gravite = 'bloquant'), 'une clé britannique fausse bloque toujours');
 end $f$;
 
 create or replace function tests.test_a4_26_04_sans_registre() returns setof text
