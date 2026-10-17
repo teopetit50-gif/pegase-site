@@ -11,8 +11,8 @@ Depuis la reprise du 11/10 :
   a4_34 accorde lui-même EXECUTE à authenticated sur private.filed_regler_par_releve : rien à ajouter côté socle.
   Si le test 44 reste rouge après la pose d'a4_34 v2 et d'a4_34b, regarder la fonction qu'il nomme.
 - Test 44 encore rouge sur la recette à cause de cette seule fonction (lot h1404tout).
-- 17/10 — 19as effacement, fichiers gardés (décision de Teo : « tout effacer sauf ce que la loi impose ») : À POSER par
-  le coordinateur, puis test 61 (^test_61_). private.fichiers_gardes / fichiers_a_effacer ; preparer_effacement exclut
+- 17/10 — 19as effacement, fichiers gardés (décision de Teo : « tout effacer sauf ce que la loi impose ») : POSÉ
+  sur la recette (0555d1e6) ; test 61 et a4_40/41/42 : 56 ok, 0 échec. Lot clos. private.fichiers_gardes / fichiers_a_effacer ; preparer_effacement exclut
   les fichiers des pièces FILED (pieces.module = 'filed' ; filed_archives seulement si une colonne chemin apparaît) et
   les liste au manifeste (manifeste.gardes) ; effacer_client / effacer_objet repris À L'IDENTIQUE du texte de la recette
   du 17/10 (envoyé par le coordinateur), sauf le contrôle 55000, qui passe sur fichiers_a_effacer. fichiers_de est
