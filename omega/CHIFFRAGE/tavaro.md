@@ -27,11 +27,11 @@ lisible en dessous, mais ses chiffres sont remplacés par ceux-ci.
 | 49 | D/T | B (T) | b2_14 : passages importés ou saisis, rapprochés du contrat, payés sous 72 h (alerte), refacturés au montant réel (test 23) ; reste le compte flotte |
 | 51 | C | B | b2_12 : Crit'Air et contrôle technique par véhicule, contrôle du comptoir au départ, rappels du constructeur (test 21) ; « sort des réservations » reste à réécrire (voir 25) |
 | 55 | D/T | C (T) | contrat d'interface et porte de l'agrégateur, comparaison avec l'état des lieux de retour (b2_16) ; reste le branchement et le pré-remplissage |
+| 45 (17/10) | D | A | Questions : b2_20, ouvrier tavaro-questions et carte ; prouvé sur la recette (API Anthropic, plafond commun) |
 
 Contrat des fournisseurs : `omega/modules/tavaro/INTERFACES.md` (voix, agrégateur, paiement de la caution, péages).
 
-**Jours →B restants** : environ **52 j**, contre 87 le 06/10. Le reste :
-- Questions ≈ 10 j, avec un modèle de langage ;
+**Jours →B restants** : environ **42 j**, contre 87 le 06/10. Le reste :
 - comparaison d'images ≈ 8 j ;
 - branchement de l'agent vocal ≈ 10 j ;
 - branchement de l'agrégateur ≈ 3 j ;
@@ -132,7 +132,7 @@ Contrat des fournisseurs : `omega/modules/tavaro/INTERFACES.md` (voix, agrégate
 | 42 | 03 « Tavaro place les révisions dans les creux du planning, hors des réservations, et prévient l'atelier à l'avance. » | textes.ts:164 | B | b2_10 : créneaux ; atelier prévenu par courriel (preparer_envoi, validation) | un courriel d'atelier réel | 0 / 0,5 | — |
 | 43 | 04 « L'assistant répond à l'appel, ouvre le dossier, envoie la dépanneuse selon votre grille et prévient l'agence. » | textes.ts:165 | D/T | — | = 29 et 30 | (en 29) | T (en 29) |
 | 44 | 05 « Tavaro rapproche le revenu, l'entretien, l'immobilisation et la valeur de revente de chaque véhicule pour désigner ceux qui coûtent plus qu'ils ne rapportent. » | textes.ts:166 | B | = 35 et 36 | — | 0 / (en 35) | — |
-| 45 | 06 « Posez une question en français : Tavaro répond chiffres à l'appui, avec la cause de l'écart et la décision proposée. » | textes.ts:167 | D | — | des questions en langage naturel, traduites en lectures bornées des tables de l'agence (jamais d'écriture), avec la réponse, la cause et la décision proposée | 10 / 2 | T : modèle de langage (≈ 20 à 80 €/mois) |
+| 45 | 06 « Posez une question en français : Tavaro répond chiffres à l'appui, avec la cause de l'écart et la décision proposée. » | textes.ts:167 | A | b2_20 (catalogue fermé de 8 lectures en lecture seule, test 29), ouvrier tavaro-questions (plafond commun _partage), carte « Questions » ; question réelle sur la recette le 17/10 (097ac6f4 : répondue, 0,0084 €) | réponses sur un plus grand banc de données ; d'autres lectures si les questions des agences le demandent | 0 / 0 | T : modèle de langage (≈ 20 à 80 €/mois) |
 | 46 | 07 Réservations à risque · 08 Montée en gamme · 09 Contrats à risque · 10 Véhicules inactifs | textes.ts:168-171 | voir B3 | branche worker-b3, b3t_01 et b3t_02 | chiffré par B3 dans son fichier | — | — |
 | 47 | 11 « Tavaro organise les transferts entre agences avant le pic de demande, en une seule tournée, selon les réservations de chaque site. » | textes.ts:172 | B | — | prévision de la demande par agence et par catégorie (réservations), proposition de transferts, tournée unique (convoyeur), validation | 7 / 2 | — |
 | 48 | 12 « L'agent est guidé angle par angle, la photo floue est refusée, puis le client signe l'état des lieux au départ comme au retour. » | textes.ts:173 | B | b2_05 (quatre vues obligatoires, signature, refus constaté), b2_07 (photo floue refusée, test 16), recette avec de vraies photos | « guidé angle par angle » : la liste des vues est montrée, mais il n'y a pas d'assistant de prise de vue pas à pas ; essai sur téléphone | 1 / 1 | — |
