@@ -13,7 +13,7 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
   courtois le jour de l'échéance), J+7, J+21, J+30 ; devis J+3 puis J+7. Une facture déjà échue saute le J 0. Les
   organisations restées sur l'ancien défaut passent au nouveau. Le texte du J 0 n'est pas encore personnalisable
   (contrainte de cashd_gabarits). Local 246/246 ; recette écran verte.
-- **Ensuite** : 4 captures de l'écran réel (390 et 1440) dans omega/captures/cashd/, sans toucher au site.
+- **Captures** : omega/captures/cashd/ — Débiteurs et Relances à 1440 et 390 (script captures.mjs), faites le 17/10.
 - **Prochain pas** : CASHD ne garde qu'une lacune construisible seule, G19 (raccord d'un logiciel de commandes réel à
   cashd_verifier_commande) — elle attend un premier client ; puis le pilote (omega/CHIFFRAGE/cashd.md § Passage à A).
   Banc local : scratchpad/pg.sh (Postgres /tmp/pgc2, port 5499, base c2b).
