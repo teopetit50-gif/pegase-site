@@ -6,7 +6,7 @@ Teo, 17/10 : même fournisseur et mêmes garde-fous que le lecteur, c'est-à-dir
 
 1. Base : b2_20, b2_20b (socle) et test 29, 89e2814, à poser.
 2. Ouvrier omega/functions/tavaro-questions : 348e22a, 6 tests Deno verts. À déployer avec les secrets du lecteur (ANTHROPIC_API_KEY) et un cron chaque minute, comme tavaro-pdf.
-3. Écran : à faire.
+3. Écran : 47a209c, carte « Questions », recette 156, axe 66, à fusionner. Reste la preuve en vrai : une question réelle sur la recette, une fois l'ouvrier déployé.
 
 ## PAUSE 50 % (Teo, 15/10 à 16 h 16 Z)
 
