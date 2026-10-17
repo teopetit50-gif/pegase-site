@@ -7,12 +7,9 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
 
 ## REPRISE (17/10/2026)
 
-- **Posé et vert** : c2_01 → c2_09 (h1232ccb) ; écrans dans main.
-- **À poser** : `c2_10_cadence.sql` + `test_c2_10_cadence` (16), et `c2_03_moteur.sql` (test ajusté : le point du matin
-  attend le rappel du jour d'échéance de F-2026-140). Cadence du site par défaut (Teo, 17/10) : facture J 0 (rappel
-  courtois le jour de l'échéance), J+7, J+21, J+30 ; devis J+3 puis J+7. Une facture déjà échue saute le J 0. Les
-  organisations restées sur l'ancien défaut passent au nouveau. Le texte du J 0 n'est pas encore personnalisable
-  (contrainte de cashd_gabarits). Local 246/246 ; recette écran verte.
+- **Posé et vert** : c2_01 → c2_10 (7a5678f0, test_c2_* 256 ok sur la recette ; le lot y tourne ~8 min) ; écrans dans main.
+  c2_10 : cadence du site par défaut — facture J 0 (rappel le jour de l'échéance, sauté si déjà échue), J+7, J+21, J+30 ;
+  devis J+3 puis J+7. Le texte du J 0 n'est pas encore personnalisable (contrainte de cashd_gabarits). Rien à poser.
 - **Captures** : omega/captures/cashd/ — Débiteurs et Relances à 1440 et 390 (script captures.mjs), faites le 17/10.
 - **Prochain pas** : CASHD ne garde qu'une lacune construisible seule, G19 (raccord d'un logiciel de commandes réel à
   cashd_verifier_commande) — elle attend un premier client ; puis le pilote (omega/CHIFFRAGE/cashd.md § Passage à A).
