@@ -110,6 +110,57 @@ export const TAMILA_BORDEREAU: TypeAnalyse = {
   finaliser: (constats) => parDate(constats).map((c, i) => ({ ...c, donnees: { ...c.donnees, numero: i + 1 } })),
 };
 
+/** Le numéro d'une pièce tel que la base le compare : « Pièce n° 12 », « pièce 12 », « P.12 » → « 12 ». */
+export function numeroDePiece(v: unknown): string | null {
+  if (typeof v !== "string" && typeof v !== "number") return null;
+  const m = String(v).match(/(\d+(?:[.-]\d+)*(?:\s*(?:bis|ter))?)/i);
+  return m ? m[1].replace(/\s+/g, " ").toLowerCase() : null;
+}
+
+export const TAMILA_PIECES_CITEES: TypeAnalyse = {
+  type: "tamila.pieces_citees",
+  libelle: "relevé des pièces citées dans les écritures",
+  consigne:
+    "Tu lis des écritures (conclusions, assignation, dires) et tu relèves CHAQUE pièce qu'elles invoquent : « (pièce n° 12) », « cf. pièce adverse 4 », « voir le constat du 3 mars (pièce 7) ». Une ligne par pièce citée : son numéro tel qu'écrit, son intitulé ou ce qu'en dit l'écriture, sa date si elle est donnée, la partie qui la produit (celle qui l'invoque, sauf « pièce adverse ») et l'identifiant de l'écriture où elle est citée. Cite la phrase où elle apparaît. Tu ne juges pas si elle a été communiquée : la base le compare avec les bordereaux.",
+  codes: ["piece_citee"],
+  schemaDonnees: {
+    properties: {
+      numero: { type: "string", description: "le numéro de la pièce tel qu'écrit (« 12 », « 4 bis ») ; vide s'il n'y en a pas" },
+      intitule: { type: "string", description: "ce que l'écriture en dit (« contrat de construction du 3 mars 2024 »)" },
+      date: DATE,
+      partie: { type: "string", enum: PARTIES, description: "la partie qui produit la pièce" },
+      ecriture: { type: "string", description: "l'identifiant de l'écriture (pièce du dossier) où elle est citée" },
+    },
+    required: ["intitule", "partie", "ecriture"],
+  },
+  synthese: false,
+  limites: LIMITES,
+  // Une pièce citée plusieurs fois (dans plusieurs écritures ou paragraphes) ne fait qu'une ligne : même partie et même
+  // numéro, ou, sans numéro, même intitulé. Ses autres citations restent jointes, et l'ordre suit les numéros.
+  finaliser: (constats) => {
+    const parCle = new Map<string, Constat>();
+    for (const c of constats) {
+      const num = numeroDePiece(c.donnees.numero);
+      const cle = `${c.donnees.partie ?? "?"}|${num ?? String(c.donnees.intitule ?? "").toLowerCase().replace(/\s+/g, " ").trim()}`;
+      const deja = parCle.get(cle);
+      if (deja) {
+        deja.citations = [...deja.citations, ...c.citations];
+        const ecritures = new Set([...(deja.donnees.ecritures as string[] ?? [deja.donnees.ecriture]), c.donnees.ecriture].filter(Boolean) as string[]);
+        deja.donnees = { ...deja.donnees, ecritures: [...ecritures] };
+      } else {
+        parCle.set(cle, { ...c, donnees: { ...c.donnees, numero: num ?? undefined, ecritures: [c.donnees.ecriture].filter(Boolean) } });
+      }
+    }
+    const n = (c: Constat) => {
+      const x = parseFloat(String(c.donnees.numero ?? ""));
+      return Number.isFinite(x) ? x : Infinity;
+    };
+    return [...parCle.values()].map((c, i) => ({ c, i })).sort((a, b) =>
+      String(a.c.donnees.partie).localeCompare(String(b.c.donnees.partie)) || n(a.c) - n(b.c) || a.i - b.i
+    ).map((x) => x.c);
+  },
+};
+
 export const TYPES_ANALYSE: Record<string, TypeAnalyse> = Object.fromEntries(
-  [TAMILA_PRELECTURE, TAMILA_CHRONOLOGIE, TAMILA_CONTRADICTIONS, TAMILA_BORDEREAU].map((t) => [t.type, t]),
+  [TAMILA_PRELECTURE, TAMILA_CHRONOLOGIE, TAMILA_CONTRADICTIONS, TAMILA_BORDEREAU, TAMILA_PIECES_CITEES].map((t) => [t.type, t]),
 );

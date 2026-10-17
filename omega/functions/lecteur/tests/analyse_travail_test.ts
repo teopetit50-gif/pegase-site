@@ -7,7 +7,7 @@ import type { ClientClaude, DemandeConverse, ReponseConverse } from "@partage/cl
 import type { Travail } from "@partage/portes.ts";
 import { analyserTravail, type DossierAnalyse, type ResultatTravailAnalyse } from "../analyse/travail.ts";
 import type { Constat } from "../analyse/moteur.ts";
-import { TAMILA_BORDEREAU, TAMILA_CHRONOLOGIE, TAMILA_CONTRADICTIONS } from "../analyse/types_tamila.ts";
+import { numeroDePiece, TAMILA_BORDEREAU, TAMILA_CHRONOLOGIE, TAMILA_CONTRADICTIONS, TAMILA_PIECES_CITEES, TYPES_ANALYSE } from "../analyse/types_tamila.ts";
 import { type ClePiece, chiffrerTexte, type CoffreTamila, dechiffrerTexte } from "../coffre.ts";
 
 const CLE = () => Uint8Array.from({ length: 32 }, (_, i) => (i * 11 + 5) & 0xff);
@@ -170,4 +170,32 @@ Deno.test("types Tamila : bordereau numéroté par date, contradiction à une se
   const k = TAMILA_CONTRADICTIONS.finaliser!([c(undefined, "critique", 1), c(undefined, "critique", 2)]);
   assertEquals(k.map((x) => x.gravite), ["attention", "critique"]);
   assertEquals(TAMILA_CHRONOLOGIE.limites.pages, 3000);
+});
+
+Deno.test("types Tamila : pièces citées — une ligne par pièce et par partie, citations et écritures réunies, triées par numéro", () => {
+  const c = (numero: string | undefined, partie: string, ecriture: string, intitule = "x"): Constat => ({
+    code: "piece_citee",
+    titre: "",
+    texte: "",
+    gravite: "info",
+    donnees: { numero, partie, ecriture, intitule },
+    citations: [{ piece: ecriture, page: 1, lignes: [1, 1], extrait: "x", verifiee: true }],
+  });
+  const r = TAMILA_PIECES_CITEES.finaliser!([
+    c("Pièce n° 12", "adverse", A),
+    c("4 bis", "adverse", A),
+    c("pièce 12", "adverse", B),
+    c(undefined, "adverse", B, "Constat d'huissier du 3 mars"),
+    c("12", "client", A),
+  ]);
+  assertEquals(r.map((x) => [x.donnees.partie, x.donnees.numero ?? x.donnees.intitule]), [
+    ["adverse", "4 bis"],
+    ["adverse", "12"],
+    ["adverse", "Constat d'huissier du 3 mars"],
+    ["client", "12"],
+  ]);
+  assertEquals(r[1].citations.length, 2, "la pièce 12 citée dans deux écritures : une ligne, deux citations");
+  assertEquals(r[1].donnees.ecritures, [A, B]);
+  assertEquals(numeroDePiece("P.7"), "7");
+  assertEquals(TYPES_ANALYSE["tamila.pieces_citees"].synthese, false);
 });
