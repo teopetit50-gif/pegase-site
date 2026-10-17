@@ -39,6 +39,7 @@ import ParcVue, { type GestesParc } from "./ParcVue";
 import FlotteVue, { type GestesFlotte } from "./FlotteVue";
 import OperationsVue from "./OperationsVue";
 import AuditVue from "./AuditVue";
+import QuestionsVue from "./QuestionsVue";
 import { forcesLocales } from "./contestations";
 import { Preparation2027, type Preparation } from "./FactureElectronique";
 import { controler, docAvoir, docFacture, formeLocale, sirenValide } from "./cii";
@@ -833,6 +834,11 @@ export default function EcranTavaro() {
       {/* b2_12 à b2_16 : départ et rappels, transferts, péages, sinistres, assistance, caution */}
       <div style={{ marginTop: 16 }}>
         <OperationsVue source={source} role={role} dossiers={dossiers} vehicules={monde?.parc.vehicules ?? []} nomAgence={nomAgenceDe} />
+      </div>
+
+      {/* b2_20 : les Questions (module 06) */}
+      <div style={{ marginTop: 16 }}>
+        <QuestionsVue source={source} role={role} />
       </div>
 
       {/* b2_19 : l'audit des retours et l'indicateur du mois (direction et valideurs) */}
