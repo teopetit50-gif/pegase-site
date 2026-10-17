@@ -73,7 +73,7 @@ begin
     continue when exists (select 1 from public.envois e where e.client_id = x.client_id and e.cle_idempotence = v_cle);
     begin
       perform private.envoyer_interne(
-        x.client_id, 'reput', 'reput_reponses', null, 'email', x.user_id, 'reput.a_valider',
+        x.client_id, 'reput', null, null, 'email', x.user_id, 'reput.a_valider',   -- un compteur : aucun objet
         jsonb_build_object('jour', to_char(p_maintenant at time zone 'Europe/Paris', 'YYYY-MM-DD'), 'attente', x.attente),
         v_cle, null);
       n := n + 1;

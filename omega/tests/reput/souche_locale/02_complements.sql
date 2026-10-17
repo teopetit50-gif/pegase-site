@@ -217,6 +217,9 @@ declare v_id uuid; g public.gabarits_messages; v_corps text; v_sujet text; k tex
 begin
   select e.id into v_id from public.envois e where e.client_id = p_client and e.cle_idempotence = p_cle_idempotence;
   if v_id is not null then return v_id; end if;
+  if (p_objet_type is null) <> (p_objet_id is null) then
+    raise exception 'Un objet se désigne par son type et son identifiant.' using errcode = '22023';
+  end if;
   if not exists (select 1 from public.comptes c where c.client_id = p_client and c.user_id = p_membre) then
     raise exception 'Le destinataire n''est pas membre de l''organisation.' using errcode = '23503';
   end if;
