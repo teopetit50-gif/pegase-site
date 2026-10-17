@@ -49,6 +49,13 @@ for (const largeur of LARGEURS) {
       verifier(!d.scroll && d.elements.length === 0, `${largeur} : aucun débordement (${onglet}) ${d.elements.join(' | ')}`);
       await s.capturer(`${DOSSIER}/reput-${onglet.split(' ')[0].toLowerCase()}-${largeur}.jpg`, { pleine: true });
     }
+    // c3_10 : le lien du point du matin (?demande=<id>) ouvre cette demande d'emblée.
+    const lien = await s.aller(`${BASE}/espace/reput?demande=00000000-0000-4000-8000-0000000c3d03`, { signe: `document.readyState === 'complete' && document.body.innerText.includes('Demandes clients')` });
+    verifier(lien, `${largeur} : le lien direct se charge`);
+    await s.dormir(400);
+    verifier(await s.evaluer(`(document.querySelector('.esp-item[aria-current="true"]')?.textContent ?? '').includes('Luc Martin')`), `${largeur} : le lien direct ouvre la demande de Luc Martin`);
+    d = await s.evaluer(DEBORDE);
+    verifier(!d.scroll && d.elements.length === 0, `${largeur} : aucun débordement (lien direct) ${d.elements.join(' | ')}`);
     // Hors Vercel, /_vercel/insights rend 404 (le même sur /espace/daliro) : seules comptent les autres ressources en 404.
     const autres404 = await s.evaluer(`performance.getEntriesByType('resource').filter((e) => e.responseStatus === 404 && !e.name.includes('/_vercel/')).map((e) => e.name)`);
     const soucis = s.soucis.filter((x) => !/favicon|_vercel|analytics|Failed to load resource/i.test(x)).concat(autres404 ?? []);
