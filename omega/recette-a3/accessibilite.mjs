@@ -42,7 +42,7 @@ const DEFILANTES = `(() => [...(document.querySelector('.esp') ?? document.query
 }).map(e => e.tagName + '.' + [...e.classList].join('.')))()`;
 
 const analyser = (s, cible) => s.evaluer(`(async () => {
-  const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+  const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'], rules: { 'label-content-name-mismatch': { enabled: true } } });
   return r.violations.map(v => ({ id: v.id, impact: v.impact, n: v.nodes.length, aide: v.help, cibles: v.nodes.slice(0, 3).map(n => n.target.join(' ')) }));
 })()`);
 
