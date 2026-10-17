@@ -54,7 +54,8 @@ export const PROJETS_EXEMPLE: Projet[] = [
   projet({ id: P_ENFANCE, nom: "Pôle enfance de Vaulx-en-Velin", reference: "26-009", adresse: "4 avenue Roger-Salengro", code_postal: "69120", commune: "Vaulx-en-Velin", code_insee: "69256", parcelles: ["BK 58"], nature: "erp", marche_public: true }),
   projet({ id: P_MARTIN, nom: "Maison Martin", reference: "26-011", adresse: "27 rue Bellecombe", code_postal: "69003", commune: "Lyon 3e", code_insee: "69383", parcelles: ["AV 212"], nature: "maison_individuelle" }),
   projet({ id: P_MERCIERE, nom: "Façade rue Mercière", reference: "25-031", adresse: "31 rue Mercière", code_postal: "69002", commune: "Lyon 2e", code_insee: "69382", parcelles: ["AC 77"], nature: "tertiaire", phase: "det", ouverture_chantier: j(-100) }),
-  projet({ id: P_DUBOIS, nom: "Surélévation Dubois", reference: "26-018", adresse: "8 rue Francis-de-Pressensé", code_postal: "69100", commune: "Villeurbanne", code_insee: "69266", parcelles: ["BD 301"], nature: "logement_collectif", phase: "apd" }),
+  projet({ id: P_DUBOIS, nom: "Surélévation Dubois", reference: "26-018", adresse: "8 rue Francis-de-Pressensé", code_postal: "69100", commune: "Villeurbanne", code_insee: "69266", parcelles: ["BD 301"], nature: "logement_collectif", phase: "apd",
+    controle_tolerances: { hauteur_faitage_m: 0.1 }, controle_familles_coupees: ["re2020"] }),
 ];
 
 /* ——— les permis et leur calendrier ——— */
@@ -505,7 +506,7 @@ export const SITUATIONS_EXEMPLE: Situation[] = [
   { id: id("5", 2), projet_id: P_MERCIERE, marche_id: M(1), numero: 2, mois: mois(-65), cumul_ht: 98000, recue_le: j(-36), a_viser_avant: j(-21), statut: "rectifiee", cumul_admis_ht: 95500, observation: "Joints non réalisés sur la travée 3", visee_le: j(-30) },
   { id: id("5", 3), projet_id: P_MERCIERE, marche_id: M(1), numero: 3, mois: mois(-35), cumul_ht: 201500, recue_le: j(-4), a_viser_avant: j(11), statut: "a_viser", cumul_admis_ht: null, observation: null, visee_le: null },
   { id: id("5", 4), projet_id: P_MERCIERE, marche_id: M(2), numero: 1, mois: mois(-65), cumul_ht: 12000, recue_le: j(-36), a_viser_avant: j(-21), statut: "visee", cumul_admis_ht: 12000, observation: null, visee_le: j(-33) },
-  { id: id("5", 5), projet_id: P_MERCIERE, marche_id: M(2), numero: 2, mois: mois(-35), cumul_ht: 11000, recue_le: j(-9), a_viser_avant: j(6), statut: "a_viser", cumul_admis_ht: null, observation: null, visee_le: null },
+  { id: id("5", 5), projet_id: P_MERCIERE, marche_id: M(2), numero: 2, mois: mois(-35), cumul_ht: 11000, recue_le: j(-9), a_viser_avant: j(6), statut: "a_viser", cumul_admis_ht: null, observation: null, visee_le: null, retenue_deduite_ht: 0 },
 ];
 export const VISAS_EXEMPLE: Visa[] = [
   { id: id("6", 1), projet_id: P_MERCIERE, lot_id: id("1", 8), document: "Calepinage des pierres — façade sud", indice: "B", recu_le: j(-2), commande_le: j(3), delai_visa_jours: 15, a_viser_avant: j(2), avis: "a_viser", observation: null, vise_le: null },
@@ -527,7 +528,11 @@ export const PIECES_CONTROLE_EXEMPLE: PieceProjet[] = [
 const CA = id("8", 1);
 const CB = id("8", 2);
 export const CONTROLES_EXEMPLE: Controle[] = [
-  { id: CB, projet_id: P_DUBOIS, intitule: "Dossier de permis", indice: "B", precedent_id: CA, statut: "controle", lance_le: ilYa(2), constats_nb: 3, cree_le: ilYa(2) },
+  { id: CB, projet_id: P_DUBOIS, intitule: "Dossier de permis", indice: "B", precedent_id: CA, statut: "controle", lance_le: ilYa(2), constats_nb: 3, cree_le: ilYa(2), decideur: EXEMPLE_MOI,
+    changements: [
+      { reference: "PC3", grandeur: "largeur_m", objet: "tremie_r1", libelle: "la largeur de « tremie r1 »", unite: "m", avant: 1.2, apres: 1.8, page_avant: 1, page_apres: 1, texte_avant: "trémie 120", texte_apres: "trémie 180", releve: false },
+      { reference: "PC2", grandeur: "recul_limite_m", objet: "projet", libelle: "le recul sur limite séparative", unite: "m", avant: 3.4, apres: 3.2, page_avant: 1, page_apres: 1, texte_avant: "3,40 m", texte_apres: "3,20 m", releve: true },
+    ] },
   { id: CA, projet_id: P_DUBOIS, intitule: "Dossier de permis", indice: "A", precedent_id: null, statut: "controle", lance_le: ilYa(21), constats_nb: 6, cree_le: ilYa(21) },
 ];
 const roles: [string, ControlePiece["role"], string][] = [[PD(1), "planche", "PC2"], [PD(2), "planche", "PC3"], [PD(4), "plu", "PLU-H URm1"], [PD(5), "cctp", "CCTP 02"], [PD(6), "dpgf", "DPGF 02"]];
@@ -664,9 +669,11 @@ export const RESERVES_EXEMPLE: Reserve[] = [
 const CR = (n: number) => id("a", 100 + n);
 export const CR_EXEMPLE: CompteRendu[] = [
   { id: CR(1), projet_id: P_MERCIERE, numero: 1, visite_le: j(-21), presents: [{ nom: "Marc Roussel", organisme: "Pierres de Bourgogne SARL", intervenant: id("2", 8), present: true }, { nom: "Échafaudages Rhône", intervenant: id("2", 9), present: false }],
-    notes: null, avancement: "Façade sud : piochage des enduits terminé, purge des pierres en cours.", prochaine_visite: j(-7), statut: "diffuse", diffuse_le: ilYa(21), contenu: null },
+    notes: null, avancement: "Façade sud : piochage des enduits terminé, purge des pierres en cours.", prochaine_visite: j(-7), statut: "diffuse", diffuse_le: ilYa(21), contenu: null,
+    avancement_lots: { [id("1", 8)]: 30, [id("1", 9)]: 38 } },
   { id: CR(2), projet_id: P_MERCIERE, numero: 2, visite_le: j(-7), presents: [{ nom: "Marc Roussel", organisme: "Pierres de Bourgogne SARL", intervenant: id("2", 8), present: true }, { nom: "Échafaudages Rhône", intervenant: id("2", 9), present: true }],
-    notes: null, avancement: "Corniche : 14 pierres remplacées sur 14. Rejointoiement commencé travées 1 à 3.", prochaine_visite: j(0), statut: "diffuse", diffuse_le: ilYa(7), contenu: null },
+    notes: null, avancement: "Corniche : 14 pierres remplacées sur 14. Rejointoiement commencé travées 1 à 3.", prochaine_visite: j(0), statut: "diffuse", diffuse_le: ilYa(7), contenu: null,
+    avancement_lots: { [id("1", 8)]: 100, [id("1", 9)]: 50 } },
   { id: CR(3), projet_id: P_MERCIERE, numero: 3, visite_le: j(0), presents: [{ nom: "Marc Roussel", organisme: "Pierres de Bourgogne SARL", intervenant: id("2", 8), present: true }, { nom: "Échafaudages Rhône", intervenant: id("2", 9), present: true }],
     notes: "? @Pierres de Bourgogne planning de reprise des appuis de baies avant le " + fr(9).slice(0, 5) + "\n! relancer le bureau de contrôle sur la note de stabilité de l’échafaudage\n= dépose de l’échafaudage côté rue reportée à la fin des joints\nlot 01 ragréage des appuis de baies en cours",
     avancement: "Rejointoiement travées 1 à 5 ; appuis de baies en reprise.", prochaine_visite: j(7), statut: "brouillon", diffuse_le: null, contenu: null },

@@ -1113,3 +1113,32 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
 
   C1 a fusionné son lot 1 du dessin /omega (e5198b7).
 - **Question de C1 pour Teo** : faut-il retirer de la vue d'ensemble client le « Bonjour » et la rangée de chiffres, comme sur /omega ? En attendant, ils restent.
+
+## Reprise du 15/10 (12 h 18 → 15 h 15 Z), plafond 50 % du forfait
+- Réveil sur ordre de Teo, relayé par la routine « Relance du build (15/10) ».
+- Posé et testé vert sur la recette :
+  - c2_04 → c2_09 (CASHD complet hors G19) ;
+  - c4_11 → c4_15 (OFFLOAD complet) ;
+  - b2_17 → b2_19 ;
+  - a4_36 et a4_37 ;
+  - b3t_05 ; c3_09 ;
+  - b5_28 → b5_33 ;
+  - b6_31 → b6_35.
+- Lecteur v34 (c51c6de).
+- Fusionnés dans main (dernier 8f4106b) : écrans C2, B5, B6, B4, B3, B2, A3 (Équipe), C1 lots 2a à 2d (dessin /omega).
+- Restent à déployer en Edge : reput-reponse (C3 8699ed0), webhooks-ar24 et expediteur (A2 8c0e608).
+- En attente de Teo :
+  - « un message par trimestre » contre « deux messages en tout » (C4) ;
+  - Bonjour et les 4 chiffres de la vue d'ensemble (C1) ;
+  - fournisseur de modèle (assistants B1 et B6) ;
+  - gabarit ANTAI (B2) ; compte INSEE (B5) ; secrets HMRC et AR24 ;
+  - preuve en vrai de C3 ;
+  - premier client (CASHD G19).
+- En cours : C1, lot 2e (Activité, Utilisation, Réglages).
+
+## REPRISE — pause 50 % du 15/10, 16 h 12 Z
+- Ordre « PAUSE 50 % (Teo) » reçu à 16 h 12 Z (forfait hebdo à 49 %). Tous les ouvriers ont commit, poussé, mis REPRISE à jour, puis silence.
+- Routine « Point coordinateur Omega » déjà coupée ; aucun rappel send_later actif. Ne rien relancer avant le feu vert de Teo.
+- SHA d'arrêt (sessions actives) : A1 c51c6de, A2 8c0e608, A3 34b8589, A4 d5db287, A5 798255f4, B1 f46b2c3, B2 0d675bf, B3 bcd02f6, B4 cd77750, B5 e8a95b9, B6 84df2e6, B7 0e1c2bb, C1 66930e4, C2 b0d8131d, C3 09dffb99, C4 a0e59013, P1 5d44a1e. C5 reste à l'arrêt.
+- À la reprise, d'abord : fusionner C1 lot 2e (diff 650424a..66930e4, limité à app/espace2 et components/espace2) et A3 ef5eeb4 ; déployer en Edge reput-reponse (C3 8699ed0), webhooks-ar24 et expediteur (A2 8c0e608).
+- Rien posé ni fusionné entre 15 h 15 et 16 h 12 Z ; dernier main fonctionnel 8f4106b.

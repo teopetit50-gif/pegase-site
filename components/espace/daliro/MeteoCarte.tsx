@@ -7,6 +7,9 @@
    par le service réglé dans private.reglages : MET Norway, b6_21b) et les passages extérieurs
    qu'elle met en risque : pluie, rafales, gel, chaleur — seuils du passage,
    sinon 5 mm, 60 km/h, 0 °C. En exemple, une prévision fictive.
+   b6_35 : pour un passage extérieur menacé de l'équipe, l'échange proposé
+   avec un passage intérieur de la même équipe, un jour sec ; le
+   conducteur valide (« Échanger ») ou laisse.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -16,7 +19,7 @@ import { aujourdHui } from "../exemples/socle";
 import type { Source } from "../source";
 import { dateHeure } from "../format";
 import { Avis } from "../ui";
-import { chargerMeteo } from "./portes";
+import { chargerMeteo, echangerPassages, ordreMeteo, type EchangeMeteo } from "./portes";
 import type { JourMeteo, MeteoChantier, RisqueMeteo, Tableau } from "./types";
 
 const JOURS = ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."];
@@ -24,6 +27,29 @@ const JOURS_LONGS = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendred
 const nf = (v: number) => new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 }).format(v);
 const jourDe = (iso: string) => { const [a, m, j] = iso.split("-").map(Number); return new Date(a, m - 1, j); };
 const plus = (iso: string, n: number) => { const d = jourDe(iso); d.setDate(d.getDate() + n); return `${d.getFullYear()}-${`${d.getMonth() + 1}`.padStart(2, "0")}-${`${d.getDate()}`.padStart(2, "0")}`; };
+
+/* L'échange en exemple, même règle que public.btp_ordre_meteo : même équipe, intérieur, même durée, jours secs. */
+function echangesExemple(tableau: Tableau, m: MeteoChantier): EchangeMeteo[] {
+  const sec = (du: string, au: string) => {
+    const jours = m.prevision.filter((d) => d.jour >= du && d.jour <= au);
+    return jours.length > 0 && jours.every((d) => (d.pluie_mm ?? 0) < 5 && (d.vent_kmh ?? 0) < 40 && (d.tmin ?? 99) >= 0);
+  };
+  const duree = (a: string, b: string) => Math.round((jourDe(b).getTime() - jourDe(a).getTime()) / 86400000);
+  const sortie: EchangeMeteo[] = [];
+  for (const r of m.risques) {
+    const x = tableau.passages.find((p) => p.id === r.passage_id);
+    if (!x || !x.equipe_id) continue;
+    const i = tableau.passages
+      .filter((p) => p.statut === "prevu" && !p.exterieur && p.equipe_id === x.equipe_id && p.id !== x.id && p.debut > aujourdHui()
+                     && p.debut <= plus(aujourdHui(), 6) && duree(p.debut, p.fin) === duree(x.debut, x.fin) && sec(p.debut, p.fin))
+      .sort((a, b) => Math.abs(duree(a.debut, x.debut)) - Math.abs(duree(b.debut, x.debut)))[0];
+    if (!i) continue;
+    sortie.push({ exterieur: x.id, exterieur_tache: x.tache, exterieur_chantier: tableau.chantier.nom, exterieur_debut: x.debut,
+                  interieur: i.id, interieur_tache: i.tache, interieur_chantier: tableau.chantier.nom, interieur_debut: i.debut, risque: r.texte,
+                  texte: `Échanger « ${x.tache ?? "passage"} » (extérieur, ${x.debut.slice(8, 10)}/${x.debut.slice(5, 7)}) avec « ${i.tache ?? "passage"} » (intérieur, ${i.debut.slice(8, 10)}/${i.debut.slice(5, 7)}) : l'extérieur passe au sec, l'intérieur prend le jour de pluie.` });
+  }
+  return sortie;
+}
 
 /* L'exemple : une averse après-demain, des rafales le jour suivant. */
 function meteoExemple(tableau: Tableau): MeteoChantier {
@@ -53,7 +79,7 @@ function meteoExemple(tableau: Tableau): MeteoChantier {
   return { localise: true, ouverte: true, prevision, recue_le: new Date().toISOString(), erreur: null, risques, fournisseur: "met_norway" };
 }
 
-export default function MeteoCarte({ tableau, source }: { tableau: Tableau; source: Source }) {
+export default function MeteoCarte({ tableau, source, onLocal, relire }: { tableau: Tableau; source: Source; onLocal?: (t: Tableau) => void; relire?: () => Promise<void> }) {
   const c = tableau.chantier;
   const [reel, setReel] = useState<MeteoChantier | null>(null);
   const [chargement, setChargement] = useState(source === "reelle");
@@ -76,6 +102,29 @@ export default function MeteoCarte({ tableau, source }: { tableau: Tableau; sour
   }, [source, lire]);
 
   const m = useMemo(() => (source === "reelle" ? reel : meteoExemple(tableau)), [source, reel, tableau]);
+  const [echangesReels, setEchangesReels] = useState<EchangeMeteo[] | null>(null);
+  const [envoi, setEnvoi] = useState(false);
+  const [fait, setFait] = useState<string | null>(null);
+  useEffect(() => {
+    if (source !== "reelle" || !reel?.risques.length) return;
+    let vivant = true;
+    void ordreMeteo(c.client_id).then((r) => { if (vivant) setEchangesReels(r.propositions.filter((e) => reel.risques.some((x) => x.passage_id === e.exterieur))); })
+      .catch(() => { if (vivant) setEchangesReels([]); });
+    return () => { vivant = false; };
+  }, [source, reel, c.client_id]);
+  const echanges = source === "reelle" ? echangesReels ?? [] : m ? echangesExemple(tableau, m) : [];
+  const echanger = async (e: EchangeMeteo) => {
+    setEnvoi(true); setErreur(null);
+    try {
+      if (source === "reelle") { await echangerPassages(e.exterieur, e.interieur, "Pluie annoncée"); await relire?.(); await lire(); }
+      else onLocal?.({ ...tableau, passages: tableau.passages.map((p) => {
+        const x = tableau.passages.find((q) => q.id === e.exterieur)!; const i = tableau.passages.find((q) => q.id === e.interieur)!;
+        return p.id === x.id ? { ...p, debut: i.debut, fin: i.fin } : p.id === i.id ? { ...p, debut: x.debut, fin: x.fin } : p;
+      }) });
+      setFait(`« ${e.exterieur_tache ?? "Le passage extérieur"} » passe au ${e.interieur_debut.slice(8, 10)}/${e.interieur_debut.slice(5, 7)}, « ${e.interieur_tache ?? "le passage intérieur"} » au ${e.exterieur_debut.slice(8, 10)}/${e.exterieur_debut.slice(5, 7)}.`);
+    } catch (x) { setErreur(x instanceof Error ? x.message : "La base a refusé l'échange."); }
+    finally { setEnvoi(false); }
+  };
   if (c.statut !== "ouvert" && c.statut !== "suspendu") return null;
 
   return (
@@ -105,6 +154,20 @@ export default function MeteoCarte({ tableau, source }: { tableau: Tableau; sour
             </div>
             {m.risques.length ? m.risques.map((r) => <div key={r.passage_id} style={{ marginTop: 8 }}><Avis teinte="ambre">{r.texte}</Avis></div>)
               : <div style={{ marginTop: 8 }}><Avis teinte="vert">Aucun passage extérieur menacé dans les 7 jours.</Avis></div>}
+            {fait ? <div style={{ marginTop: 8 }}><Avis teinte="vert" role="status">{fait}</Avis></div> : null}
+            {echanges.length ? (
+              <div style={{ marginTop: 8 }} aria-label="Nouvel ordre proposé">
+                <div className="esp-kpi-sous" style={{ fontWeight: 600 }}>Nouvel ordre proposé pour la semaine — rien ne bouge sans vous</div>
+                <ul style={{ margin: "4px 0 0", paddingLeft: 18 }}>
+                  {echanges.map((e) => (
+                    <li key={`${e.exterieur}-${e.interieur}`} className="esp-kpi-sous">
+                      {e.texte}{" "}
+                      <button type="button" className="esp-lien-bouton" disabled={envoi} onClick={() => void echanger(e)}>Échanger</button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
             <p className="esp-kpi-sous" style={{ marginTop: 6 }}>
               {m.fournisseur === "met_norway"
                 ? <>Données météo : <a href="https://api.met.no/" target="_blank" rel="noreferrer">MET Norway</a>, licence <a href="https://creativecommons.org/licenses/by/4.0/deed.fr" target="_blank" rel="noreferrer">CC BY 4.0</a></>

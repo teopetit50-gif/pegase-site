@@ -446,6 +446,14 @@ export async function pdfControle(d: DonneesRapport): Promise<{ nom: string; oct
     if (k.statut !== "ouvert" && k.motif) m.texte(`Motif : ${k.motif}${k.decide_par ? ` (${d.nommer(k.decide_par)}, le ${dateFr(k.decide_le)})` : ""}`, { retrait: 14, gris: true, taille: 9 });
     m.texte("", { apres: 4 });
   });
+  if (d.precedent && d.controle.changements?.length) {
+    m.filet();
+    m.texte(`Changements depuis l'indice ${d.precedent.indice}`, { gras: true });
+    for (const x of d.controle.changements) {
+      const v = (n: number | null) => (n === null ? "absente" : `${String(n).replace(".", ",")}${x.unite ? ` ${x.unite}` : ""}`);
+      m.texte(`· ${x.reference} · ${x.libelle} : de ${v(x.avant)} à ${v(x.apres)}${x.page_apres ? `, p. ${x.page_apres}` : ""} · ${x.releve ? "relevé par un constat" : "non relevé par le contrôle"}`, { retrait: 10, gris: x.releve, rouge: !x.releve });
+    }
+  }
   if (d.precedent && d.corriges.length) {
     m.filet();
     m.texte(`Corrigés depuis l'indice ${d.precedent.indice}`, { gras: true });
