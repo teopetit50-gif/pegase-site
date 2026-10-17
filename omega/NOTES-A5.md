@@ -1,6 +1,6 @@
 # NOTES — session A5 (garde-fous)
 
-## REPRISE — mise à jour du 11/10/2026, 15 h 40 Z (nouvelle pause de Teo)
+## REPRISE — mise à jour du 17/10/2026 (lot 19as)
 
 Depuis la reprise du 11/10 :
 - 19ap résumé quotidien des alertes + fonction Edge alertes-quotidiennes (42ee9db) : POSÉ, test 60 vert. Restent à poser
@@ -11,6 +11,15 @@ Depuis la reprise du 11/10 :
   a4_34 accorde lui-même EXECUTE à authenticated sur private.filed_regler_par_releve : rien à ajouter côté socle.
   Si le test 44 reste rouge après la pose d'a4_34 v2 et d'a4_34b, regarder la fonction qu'il nomme.
 - Test 44 encore rouge sur la recette à cause de cette seule fonction (lot h1404tout).
+- 17/10 — 19as effacement, fichiers gardés (décision de Teo : « tout effacer sauf ce que la loi impose ») : À POSER par
+  le coordinateur, puis test 61 (^test_61_). private.fichiers_gardes / fichiers_a_effacer ; preparer_effacement exclut
+  les fichiers des pièces FILED (pieces.module = 'filed' ; filed_archives seulement si une colonne chemin apparaît) et
+  les liste au manifeste (manifeste.gardes) ; effacer_client / effacer_objet repris À L'IDENTIQUE du texte de la recette
+  du 17/10 (envoyé par le coordinateur), sauf le contrôle 55000, qui passe sur fichiers_a_effacer. fichiers_de est
+  inchangée, pour que l'export et l'aperçu voient tout. Le fichier contient les suppressions déjà présentes dans ces deux
+  fonctions, qui ne s'exécutent pas à la pose. Maquette 61/61 ; la partie effacer_objet du test ne tourne que sur la
+  recette.
+- Pause du 15/10 levée par le message du 17/10. Sauvegarde : GitHub chiffrée dès que Teo pose les deux secrets.
 
 Le reste de la section ci-dessous (6/10) vaut toujours : gel et tag prod-* attendent le coordinateur ; workflow de
 sauvegarde Scaleway non fusionné (payant, après le premier client).

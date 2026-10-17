@@ -371,10 +371,16 @@ $$;
 create or replace function private.perimetre_couvre(p_user uuid, p_client uuid, p_entite uuid) returns boolean language sql stable security definer set search_path = '' as $$
   select exists (select 1 from public.comptes c where c.user_id = p_user and c.client_id = p_client)
 $$;
+-- Buckets des locataires et manifestes d'effacement (socle commun ; fichiers_de au texte de la recette du 17/10).
+create table private.buckets_locataires (bucket text primary key);
+insert into private.buckets_locataires (bucket) values ('omega-clients');
+create table private.manifestes_effacement (cle text primary key, manifeste jsonb not null, cree_le timestamptz not null default now());
 create or replace function private.fichiers_de(p_client uuid, p_objet_type text default null, p_objet_id text default null)
 returns table (bucket text, nom text, octets bigint, empreinte text, cree_le timestamptz) language sql stable security definer set search_path = '' as $$
-  select o.bucket_id, o.name, coalesce((o.metadata ->> 'size')::bigint, 0), o.metadata ->> 'eTag', o.created_at
-  from storage.objects o where o.name like p_client::text || '/%'
+  select o.bucket_id, o.name, nullif(o.metadata ->> 'size', '')::bigint, o.metadata ->> 'eTag', o.created_at
+  from storage.objects o join private.buckets_locataires b on b.bucket = o.bucket_id
+  where starts_with(o.name, p_client::text || '/' || case when p_objet_type is null then '' else p_objet_type || '/' || p_objet_id || '/' end)
+  order by o.bucket_id, o.name
 $$;
 revoke all on function private.a_un_role(uuid, text[]), private.perimetre_couvre(uuid, uuid, uuid), private.fichiers_de(uuid, text, text) from public;
 
