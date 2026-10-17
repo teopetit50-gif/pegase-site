@@ -11,7 +11,7 @@ Dernière mise à jour : 06/10/2026, 03 h 00 Paris — lot B6 terminé.
 
 **Attend Teo** : WhatsApp Business (Meta), transcription des vocaux, accord permanent J-2, région des données (Supabase ; vercel.json sans région). Phrases à corriger sur la page : CHIFFRAGE/daliro.md (fin) — « une journée pour remplacer » et « disponibilités » sont désormais vraies une fois b6_29/b6_31 posés.
 
-**Prochain pas** : lot 2 de l'assistant — l'écran (carte « Questions » dans ChantierVue : poser, attendre la réponse, sources, « à vérifier »), portes.ts, exemples, recette. WhatsApp, voix : rien tant que Teo n'a pas ouvert les comptes.
+**Prochain pas** : une fois b6_36 posé et la fonction déployée, une vraie question sur le chantier du banc (relecture réelle). WhatsApp, voix : rien tant que Teo n'a pas ouvert les comptes.
 
 ## Les deux jauges
 
@@ -132,6 +132,7 @@ Repère du marché : Graneet, Obat, Batappli, Tolteck, Extrabat font tous des **
 
 ## Journal de session
 
+- 17/10, 16 h 30 UTC : lot 2 de l'assistant, l'écran : QuestionsCarte dans ChantierVue (trois questions de la démonstration, question libre, relecture toutes les 5 s tant qu'une question attend, « Lu dans le chantier » / « À vérifier » / motif lisible du plafond ou de l'IA absente ; en exemple, réponses calculées sur le tableau), portes poserQuestion / questionsDuChantier, type QuestionChantier. Recette 288 ✓ (bloc questions à 390 et 1440).
 - 17/10, 15 h 30 UTC : reprise (Teo : même fournisseur et mêmes garde-fous que le lecteur, aucun autre). Lot 1 de l'assistant « questions » : b6_36 (table btp_questions lue par son auteur ; btp_poser_question fige le contexte avec les droits de la personne — tableau du chantier, prix masqués et situations/réception/factures/déboursé retirés sans voir_prix, 40 derniers messages du fil ; 3 en attente, 30 par jour ; travail daliro.question ; portes serveur commencer/deposer/echec ; btp_questions_du_chantier ; consommation_ia_jour compte daliro.question). Fonction Edge daliro-questions sur _partage/fournisseur_ia (Anthropic, Bedrock sinon), plafond plafond_ia_jour_client, contrôles : aucun chiffre hors contexte (sinon « à vérifier »), aucun montant sans voir_prix ; deno test 12/12. Test pgTAP b6_32.
 - 15/10, 16 h 15 UTC : PAUSE 50 % (Teo). Rien en cours ; arrêt propre.
 - 15/10, 14 h 15 UTC : relevé dans main (coordinateur). Assistant « questions » suspendu : fournisseur du modèle à choisir par Teo.
