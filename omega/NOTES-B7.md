@@ -3,7 +3,9 @@
 ## REPRISE (pause demandée par Teo, 6/10 21 h Z, puis 11/10 15 h 40 Z) — lire d'abord
 
 Au 11/10 15 h 40 Z : tout est posé et vert (`^test_b7_` jusqu'à 14 compris), taux-bce conforme. Rien à poser.
-Prochain pas unique : l'essai HMRC en bac à sable dès que Teo a posé les identifiants (section 13, GUIDE-HMRC.md).
+~~Prochain pas : l'essai HMRC en bac à sable~~ — **HMRC ABANDONNÉ (Teo, 17/10)** : un fournisseur GB est « non vérifiable
+automatiquement », vérification humaine (attestation d'A4). Plus rien n'attend chez B7. L'adaptateur hmrc.ts reste dans
+le code, inerte (sans secrets, une demande hmrc est reportée) ; GUIDE-HMRC.md est caduc.
 15/10 12 h 20 Z : reprise lue ; les secrets HMRC restent une décision de Teo (NOTES-COORDINATEUR). Rien d'autre d'ouvert
 chez B7 : en attente, sans lot inventé. Pistes si le coordinateur en veut une : Norvège (Brønnøysund, sans clé, même
 chemin que uid_ch, nouvelle valeur de registre à admettre par A4), GLEIF pour les grands fournisseurs SaaS.
@@ -29,9 +31,7 @@ Branche `worker-b7`, rien en cours, arbre propre. Session : session_01967jUehrY7
 - fusionner `worker-b7` sur main quand il le jugera bon.
 
 **Attend Teo :**
-- les identifiants HMRC (`omega/GUIDE-HMRC.md`) : compte développeur, application de test, `HMRC_CLIENT_ID` et
-  `HMRC_CLIENT_SECRET`, puis demande de production (environ deux semaines). Sans eux, les fournisseurs GB restent
-  « indisponible » ;
+- ~~les identifiants HMRC~~ : abandonné le 17/10, fournisseurs GB vérifiés par une personne ;
 - la clé Sirene (`SIRENE_API_KEY`) est posée depuis le 6/10 vers 13 h 55 Z : rien d'autre à fournir.
 
 **Attend A3 :** le bouton « revérifier » et l'affichage « vérifié le … par … » sur la fiche fournisseur (section 9 b),
