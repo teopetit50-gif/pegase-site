@@ -3,15 +3,15 @@
 Branche `worker-b6`. Coordinateur : session `session_01B4JNQXyT69GytdvE9SjAnE` (Fable, jusqu'au 06/10 03 h 10 Paris), puis `session_01BCGFdpRKBvXKjouC75sYBg` (Opus 5.5) — passation reçue le 06/10 à 03 h 10 : « B6 est clos et fusionné ; rien n'est attendu ».
 Dernière mise à jour : 06/10/2026, 03 h 00 Paris — lot B6 terminé.
 
-## REPRISE — pause 50 % demandée par Teo (15/10/2026, 16 h 15 UTC) ; reprendre ici au feu vert
+## REPRISE — reprise du 17/10/2026 (Teo) : assistant « questions », par petits lots
 
 **Posé et vert sur la recette, écrans dans main** : b6_01 → b6_35 (dernier passage : 36 ok, MeteoCarte et l'échange météo dans main). Météo MET Norway : état A.
 
-**À poser (coordinateur)** : rien. Relevé du chantier (0aeb024) part dans main.
+**À poser (coordinateur)** : b6_36_questions.sql puis tests/daliro/b6_32_questions.sql ; déployer la fonction Edge omega/functions/daliro-questions (verify_jwt true, mêmes secrets que le lecteur), puis omega/recette-b6/cron_daliro_questions.sql.
 
 **Attend Teo** : WhatsApp Business (Meta), transcription des vocaux, accord permanent J-2, région des données (Supabase ; vercel.json sans région). Phrases à corriger sur la page : CHIFFRAGE/daliro.md (fin) — « une journée pour remplacer » et « disponibilités » sont désormais vraies une fois b6_29/b6_31 posés.
 
-**Prochain pas** : rien côté B6 sans Teo. L'assistant « questions » (3 j, CHIFFRAGE/daliro.md) appelle un modèle d'IA : choix du fournisseur à Teo (promesse « en Europe, sans entraînement ») — ne pas le coder avant. Relevé d'audit fait côté écran (l'import d'un export WhatsApp attend Teo). Puis, WhatsApp branché : une vraie photo de chantier jusqu'à l'avenant chiffré et l'avancement (état A).
+**Prochain pas** : lot 2 de l'assistant — l'écran (carte « Questions » dans ChantierVue : poser, attendre la réponse, sources, « à vérifier »), portes.ts, exemples, recette. WhatsApp, voix : rien tant que Teo n'a pas ouvert les comptes.
 
 ## Les deux jauges
 
@@ -132,6 +132,7 @@ Repère du marché : Graneet, Obat, Batappli, Tolteck, Extrabat font tous des **
 
 ## Journal de session
 
+- 17/10, 15 h 30 UTC : reprise (Teo : même fournisseur et mêmes garde-fous que le lecteur, aucun autre). Lot 1 de l'assistant « questions » : b6_36 (table btp_questions lue par son auteur ; btp_poser_question fige le contexte avec les droits de la personne — tableau du chantier, prix masqués et situations/réception/factures/déboursé retirés sans voir_prix, 40 derniers messages du fil ; 3 en attente, 30 par jour ; travail daliro.question ; portes serveur commencer/deposer/echec ; btp_questions_du_chantier ; consommation_ia_jour compte daliro.question). Fonction Edge daliro-questions sur _partage/fournisseur_ia (Anthropic, Bedrock sinon), plafond plafond_ia_jour_client, contrôles : aucun chiffre hors contexte (sinon « à vérifier »), aucun montant sans voir_prix ; deno test 12/12. Test pgTAP b6_32.
 - 15/10, 16 h 15 UTC : PAUSE 50 % (Teo). Rien en cours ; arrêt propre.
 - 15/10, 14 h 15 UTC : relevé dans main (coordinateur). Assistant « questions » suspendu : fournisseur du modèle à choisir par Teo.
 - 15/10, 17 h UTC : relevé du chantier, écran seul (rien à poser) : components/espace/daliro/releve.ts (sections marché, travaux en plus, facturation si voit_prix, planning, à reprendre ; gravités à traiter / à surveiller ; page HTML imprimable) + ReleveDialog (« Imprimer ou enregistrer en PDF »), bouton « Relevé du chantier » dans l'en-tête de ChantierVue. Recette 270 ✓ (bloc relevé à 390 et 1440, axe sans écart grave).
