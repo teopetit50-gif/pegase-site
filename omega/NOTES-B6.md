@@ -7,7 +7,7 @@ Dernière mise à jour : 06/10/2026, 03 h 00 Paris — lot B6 terminé.
 
 **Posé et vert sur la recette, écrans dans main** : b6_01 → b6_35 (dernier passage : 36 ok, MeteoCarte et l'échange météo dans main). Météo MET Norway : état A.
 
-**À poser (coordinateur)** : b6_36_questions.sql puis tests/daliro/b6_32_questions.sql ; déployer la fonction Edge omega/functions/daliro-questions (verify_jwt true, mêmes secrets que le lecteur), puis omega/recette-b6/cron_daliro_questions.sql.
+**À poser (coordinateur)** : rien. b6_36 + b6_36b posés (test_b6_* 718 ok, 0 échec), daliro-questions v1 + cron actifs, écran 98a7d12 dans la fusion main.
 
 **Attend Teo** : WhatsApp Business (Meta), transcription des vocaux, accord permanent J-2, région des données (Supabase ; vercel.json sans région). Phrases à corriger sur la page : CHIFFRAGE/daliro.md (fin) — « une journée pour remplacer » et « disponibilités » sont désormais vraies une fois b6_29/b6_31 posés.
 
@@ -132,6 +132,7 @@ Repère du marché : Graneet, Obat, Batappli, Tolteck, Extrabat font tous des **
 
 ## Journal de session
 
+- 17/10, 17 h 15 UTC : lot de l'assistant clos (coordinateur) : 718 ok, fonction et cron actifs. En attente de Teo (WhatsApp, voix).
 - 17/10, 17 h UTC : régression b6_36 (8 rouges b6_01…b6_10, 42501 sur btp_est_serveur) : b6_36 redéfinissait private.btp_est_serveur et retirait l'execute à authenticated, que les vues du chantier utilisent. b6_36b rétablit le droit (b6_03) ; b6_36 ne touche plus la fonction ; b6_32 vérifie le droit. Leçon : vérifier qu'une fonction n'existe pas déjà avant de la « créer ».
 - 17/10, 16 h 45 UTC : b6_36 refusé tel quel (coordinateur) : il redéfinissait private.consommation_ia_jour depuis c3_04 et aurait écrasé le socle 19ar d'A1 (635c4cc, qui compte déjà tous les genres + registre consommations_ia). Bloc retiré de b6_36, assertion retirée de b6_32.
 - 17/10, 16 h 30 UTC : lot 2 de l'assistant, l'écran : QuestionsCarte dans ChantierVue (trois questions de la démonstration, question libre, relecture toutes les 5 s tant qu'une question attend, « Lu dans le chantier » / « À vérifier » / motif lisible du plafond ou de l'IA absente ; en exemple, réponses calculées sur le tableau), portes poserQuestion / questionsDuChantier, type QuestionChantier. Recette 288 ✓ (bloc questions à 390 et 1440).
