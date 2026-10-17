@@ -51,6 +51,9 @@ export type Projet = {
   ouverture_chantier?: string | null;
   /* la réception (b5_19) : la garantie de parfait achèvement court un an */
   reception_le?: string | null;
+  /* b5_31 : les réglages des contrôles du projet — écart toléré par grandeur (et « metre_dpgf_pct »), familles coupées */
+  controle_tolerances?: Record<string, number>;
+  controle_familles_coupees?: Constat["nature"][];
   cree_le: string;
   maj_le: string;
 };
@@ -301,6 +304,9 @@ export type Marche = {
   /* b5_19 : le délai contractuel et la date de l'OS de démarrage */
   delai_execution_jours?: number | null;
   demarrage_le?: string | null;
+  /* b5_33 : l'avance (% du montant initial) et la pénalité de retard par jour prévue au marché */
+  avance_pct?: number;
+  penalite_jour_ht?: number | null;
 };
 export type Situation = {
   id: string;
@@ -315,6 +321,15 @@ export type Situation = {
   cumul_admis_ht: number | null;
   observation: string | null;
   visee_le: string | null;
+  /* b5_32 : l'avancement facturé, le dernier constaté au compte rendu (et lequel) */
+  avancement_declare?: number | null;
+  avancement_constate?: number | null;
+  avancement_cr?: string | null;
+  /* b5_33 : ce que la situation déduit (en cumul), et le recalcul de la base */
+  retenue_deduite_ht?: number | null;
+  avance_remboursee_ht?: number | null;
+  penalites_ht?: number | null;
+  montants?: Record<string, unknown>;
 };
 export type Visa = {
   id: string;
@@ -343,6 +358,28 @@ export type Controle = {
   lance_le: string | null;
   constats_nb: number;
   cree_le: string;
+  /* b5_28 : les valeurs lues qui ont changé depuis l'indice précédent (absent tant que la migration n'est pas posée) */
+  changements?: ChangementIndice[];
+  /* b5_29 : un contrôle suspendu ne se lance pas (absent tant que la migration n'est pas posée) */
+  suspendu_le?: string | null;
+  suspendu_motif?: string | null;
+  /* b5_30 : la personne qui décide des constats de ce contrôle (nul = tout membre qui écrit sur le projet) */
+  decideur?: string | null;
+};
+export type ChangementIndice = {
+  reference: string;
+  grandeur: string;
+  objet: string;
+  libelle: string;
+  unite: string | null;
+  avant: number | null;
+  apres: number | null;
+  page_avant: number | null;
+  page_apres: number | null;
+  texte_avant: string | null;
+  texte_apres: string | null;
+  /* un constat du nouveau contrôle porte sur la même grandeur et le même objet */
+  releve: boolean;
 };
 export type ControlePiece = {
   id: string;
@@ -473,6 +510,8 @@ export type CompteRendu = {
   presents: Present[];
   notes: string | null;
   avancement: string | null;
+  /* b5_32 : l'avancement constaté à la visite, par lot (identifiant du lot → pourcentage) */
+  avancement_lots?: Record<string, number>;
   prochaine_visite: string | null;
   statut: "brouillon" | "diffuse";
   diffuse_le: string | null;

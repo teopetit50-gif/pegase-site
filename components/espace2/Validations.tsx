@@ -22,7 +22,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
-  CalendarDays,
   ChevronRight,
   ChevronDown,
   CircleCheck,
@@ -30,12 +29,7 @@ import {
   CircleX,
   FileText,
   Inbox,
-  KeyRound,
   LayoutGrid,
-  ListFilter,
-  MessageCircle,
-  ReceiptText,
-  RefreshCw,
   Search,
   X,
 } from "lucide-react";
@@ -53,7 +47,7 @@ import DetailDemande from "@/components/espace/validations/DetailDemande";
 import DecisionLot, { eligibilite } from "@/components/espace/validations/DecisionLot";
 import MesDelegations from "@/components/espace/validations/MesDelegations";
 import { Note } from "./ui";
-import { EnDirect, IconeModule, Initiales } from "./vivant";
+import { EnDirect, Initiales } from "./vivant";
 import { useToast } from "./Toasts";
 import "@/components/espace/espace.css";
 import "./habillage.css";
@@ -66,29 +60,6 @@ const ONGLETS: { cle: Filtre; libelle: string }[] = [
   { cle: "en_attente", libelle: "Toutes en attente" },
   { cle: "decidees", libelle: "Décidées" },
 ];
-
-/* l'icône de la colonne du milieu, par module */
-const ICONES: Record<string, typeof FileText> = {
-  cashd: RefreshCw,
-  filed: ReceiptText,
-  reput: MessageCircle,
-  offload: MessageCircle,
-  tavaro: KeyRound,
-};
-
-/* la nature d'une demande, dite comme on la dit (sinon : la clé en phrase) */
-const NATURES: Record<string, string> = {
-  virement_fournisseur: "Virement à approuver",
-  payer_facture: "Facture à payer",
-  lever_anomalie: "Anomalie à lever",
-  commande: "Commande à approuver",
-  conge: "Congé à accorder",
-  decouvert: "Découvert à autoriser",
-  prelevement_sepa: "Prélèvement SEPA",
-  remboursement_caution: "Caution à rembourser",
-};
-const nature = (cle: string | null | undefined) => (cle ? (NATURES[cle] ?? phrase(cle)) : "Décision");
-const categorie_libelle = (cle: string) => (NATURES[cle] ? NATURES[cle].replace(/ à .*$/, "") : phrase(cle));
 
 const NATURE_DOSSIER: Record<string, string> = { filed_facture: "Facture fournisseur" };
 const RANGS = ["Première", "Seconde", "Troisième", "Quatrième", "Cinquième"];
@@ -114,8 +85,6 @@ export default function Validations({ utilisateur }: { utilisateur: Utilisateur 
   const [erreur, setErreur] = useState<string | null>(null);
   const [filtre, setFiltre] = useState<Filtre>("a_decider");
   const [module, setModule] = useState("");
-  const [categorie, setCategorie] = useState("");
-  const [echeance, setEcheance] = useState("");
   const [recherche, setRecherche] = useState<string | null>(null);
   const [choix, setChoix] = useState<string | null>(null);
   const [coches, setCoches] = useState<string[]>([]);
@@ -189,25 +158,22 @@ export default function Validations({ utilisateur }: { utilisateur: Utilisateur 
 
   /* ——— la file : onglet, filtres, recherche ——— */
   const modules = useMemo(() => Array.from(new Set((etat?.demandes ?? []).map((d) => d.module))).sort(), [etat]);
-  const categories = useMemo(() => Array.from(new Set((etat?.demandes ?? []).map((d) => d.type_action).filter(Boolean))).sort(), [etat]);
 
   const visibles = useMemo(() => {
     if (!etat) return [];
     const q = (recherche ?? "").trim().toLowerCase();
     const base = etat.demandes.filter((d) => {
       if (module && d.module !== module) return false;
-      if (categorie && d.type_action !== categorie) return false;
       if (q && !`${d.resume} ${libelleModule(d.module)} ${d.objet_id ?? ""}`.toLowerCase().includes(q)) return false;
       if (filtre === "decidees") return d.statut !== "en_attente";
       if (d.statut !== "en_attente") return false;
-      if (echeance && groupeDe(d) !== echeance) return false;
       if (filtre === "en_attente") return true;
       if (etat.approbations.some((a) => a.demande_id === d.id && a.user_id === moi.id)) return false;
       if (d.demandeur_type === "utilisateur" && d.demandeur_id === moi.id) return true;
       return verdict(d, moi, etat.approbations, etat.delegations, new Date(), equipes).peut;
     });
     return trier(base);
-  }, [etat, filtre, module, categorie, echeance, recherche, moi, equipes]);
+  }, [etat, filtre, module, recherche, moi, equipes]);
 
   const groupes = useMemo(() => {
     const m = new Map<string, Demande[]>();
@@ -272,21 +238,17 @@ export default function Validations({ utilisateur }: { utilisateur: Utilisateur 
     return (etat?.delegations ?? []).filter((g) => !g.revoquee_le && g.fin >= maintenant && (g.delegant === moi.id || g.delegataire === moi.id));
   }, [etat, moi.id]);
 
-  const sousTitre = (d: Demande) => {
-    if (d.statut !== "en_attente") return `${libelleModule(d.module)} · ${STATUTS[d.statut].libelle}`;
-    return `${libelleModule(d.module)} · ${nature(d.type_action)}`;
-  };
 
   return (
-    <div className="v2-page v2-arrivee v2-val v2-vivant">
+    <div className="v2-page v2-arrivee v2-val v2-vivant oc-val-simple">
       <h1 className="v2-sr">À valider</h1>
 
-      {/* ——— la vue et les filtres, en menus ; la recherche à droite ——— */}
+      {/* ——— la vue et le module, en menus ; la recherche à droite.
+         15/10 — allégée comme le pilotage /omega : plus de filtres catégorie
+         et échéance (la file est déjà rangée par échéance) ——— */}
       <div className="v2-val-filtres">
         <Selecteur icone={Inbox} valeur={filtre} changer={(v) => setFiltre(v as Filtre)} options={ONGLETS.map((o) => ({ cle: o.cle, libelle: o.libelle }))} />
         <Selecteur icone={LayoutGrid} valeur={module} changer={setModule} tous="Tous les modules" options={modules.map((m) => ({ cle: m, libelle: libelleModule(m) }))} />
-        <Selecteur icone={ListFilter} valeur={categorie} changer={setCategorie} tous="Toutes les catégories" options={categories.map((c) => ({ cle: c, libelle: categorie_libelle(c) }))} />
-        <Selecteur icone={CalendarDays} valeur={echeance} changer={setEcheance} tous="Toutes les échéances" options={GROUPES.map((g) => ({ cle: g.cle, libelle: g.libelle }))} />
         <span className="v2-val-droite">
           <EnDirect />
           {recherche !== null ? (
@@ -349,7 +311,6 @@ export default function Validations({ utilisateur }: { utilisateur: Utilisateur 
                   <h2 className="v2-val-groupe">{g.libelle}</h2>
                   <ul className="v2-val-liste">
                     {liste.map((d) => {
-                      const Icone = ICONES[d.module] ?? FileText;
                       const decidable = decidables.some((x) => x.id === d.id);
                       const quand = d.statut !== "en_attente" ? (d.decide_le ? jourRelatif(d.decide_le) : "") : d.echeance ? jourRelatif(d.echeance) : "";
                       return (
@@ -365,16 +326,12 @@ export default function Validations({ utilisateur }: { utilisateur: Utilisateur 
                             />
                           </span>
                           <button type="button" className="v2-val-corps" onClick={() => setChoix(d.id)}>
+                            {/* 15/10 — une ligne : le résumé, puis le montant et le délai à droite */}
                             <span className="v2-val-texte">
                               <span>{d.resume}</span>
-                              <small>{sousTitre(d)}</small>
                             </span>
-                            <span className="v2-val-module" aria-hidden="true">
-                              <IconeModule cle={d.module} icone={Icone} taille={20} />
-                            </span>
-                            <span className="v2-val-montant">
-                              <span>{d.montant !== null ? montant(d.montant, d.devise) : "—"}</span>
-                              <small data-retard={d.statut === "en_attente" && groupeDe(d) === "retard" ? "" : undefined}>{quand}</small>
+                            <span className="oc-meta" data-retard={d.statut === "en_attente" && groupeDe(d) === "retard" ? "" : undefined}>
+                              {[d.montant !== null ? montant(d.montant, d.devise) : null, d.statut !== "en_attente" ? STATUTS[d.statut].libelle : quand].filter(Boolean).join(" · ")}
                             </span>
                             <ChevronRight width={16} height={16} aria-hidden="true" className="v2-val-chevron" />
                           </button>

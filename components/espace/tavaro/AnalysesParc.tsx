@@ -11,18 +11,20 @@
      noté ici au comptoir.
    · Montée en gamme : à qui proposer la catégorie supérieure libre.
    · Plan de flotte (gérant, admin) : agence par agence, à acheter,
-     renouveler, vendre ou déplacer l'an prochain.
+     renouveler, vendre ou déplacer l'an prochain ; puis (b3t_05, 15/10)
+     les véhicules à vendre et à renouveler un par un, avec leur entretien,
+     leurs jours hors service et leur cote de revente, notée ici.
    Chaque ligne dit ses raisons : ce sont des règles, pas une boîte noire.
    Deux sources : l'exemple (analyses-exemple.ts, le contrôle s'y note en
    mémoire) ou la base réelle (analyses.ts). */
 
 import { useCallback, useEffect, useState } from "react";
-import { IdCard } from "lucide-react";
+import { IdCard, Tag } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { Avis, Chargement, Pastille, Vide } from "../ui";
 import { ANALYSES_EXEMPLE } from "./analyses-exemple";
-import { chargerAnalyses, noterControle, type Analyses, type Conformite, type ContratRisque } from "./analyses";
+import { chargerAnalyses, noterControle, noterCote, type Analyses, type Conformite, type ContratRisque, type SourceCote, type VehiculePlan } from "./analyses";
 import type { Moi } from "./portes";
 import type { Role } from "./types";
 
@@ -41,6 +43,73 @@ function quand(iso: string): string {
 function pct(v: number | null | undefined): string {
   if (v === null || v === undefined) return "—";
   return `${Math.round(v * 100)} %`;
+}
+
+function euros(v: number | null | undefined): string {
+  if (v === null || v === undefined) return "—";
+  return `${new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(v)} €`;
+}
+
+const SOURCES_COTE: [SourceCote, string][] = [["argus", "Argus"], ["reprise_concession", "Reprise d'une concession"], ["saisie", "Estimation interne"], ["autre", "Autre"]];
+
+function DialogueCote({ vehicule, fermer, noter }: { vehicule: VehiculePlan | null; fermer: () => void; noter: (v: VehiculePlan, valeur: number, source: SourceCote) => Promise<void> }) {
+  const [valeur, setValeur] = useState("");
+  const [source, setSource] = useState<SourceCote>("argus");
+  const [occupe, setOccupe] = useState(false);
+  const [erreur, setErreur] = useState<string | null>(null);
+  useEffect(() => {
+    if (!vehicule) return;
+    const t = window.setTimeout(() => {
+      setValeur(vehicule.cote_eur ? String(vehicule.cote_eur) : "");
+      setSource(vehicule.cote_source ?? "argus");
+      setErreur(null);
+    }, 0);
+    return () => window.clearTimeout(t);
+  }, [vehicule]);
+  const montant = Number(valeur.replace(/\s/g, "").replace(",", "."));
+  const valide = valeur.trim() !== "" && Number.isFinite(montant) && montant > 0 && montant < 10_000_000;
+  const confirmer = async () => {
+    if (!vehicule || !valide) return;
+    setOccupe(true);
+    setErreur(null);
+    try {
+      await noter(vehicule, Math.round(montant * 100) / 100, source);
+      fermer();
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
+    } finally {
+      setOccupe(false);
+    }
+  };
+  return (
+    <Dialog open={vehicule !== null} onOpenChange={(o) => { if (!o) fermer(); }}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogIcone><Tag width={18} height={18} aria-hidden="true" /></DialogIcone>
+          <DialogTitle>Cote de revente{vehicule ? ` — ${vehicule.immatriculation}` : ""}</DialogTitle>
+          <DialogDescription>
+            Le montant qu&apos;on obtiendrait aujourd&apos;hui en revendant ce véhicule. Tavaro n&apos;invente aucune cote : notez celle d&apos;Argus, un devis de reprise ou votre estimation. La nouvelle remplace l&apos;ancienne.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogBody>
+          <div className="esp-form">
+            <label className="rv-libelle">Montant en euros
+              <input className="rv-champ" inputMode="decimal" value={valeur} onChange={(e) => setValeur(e.target.value)} placeholder="7 400" />
+            </label>
+            <label className="rv-libelle">D&apos;où vient la cote
+              <select className="rv-champ" value={source} onChange={(e) => setSource(e.target.value as SourceCote)}>
+                {SOURCES_COTE.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+              </select>
+            </label>
+            {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+          </div>
+        </DialogBody>
+        <DialogFooter>
+          <button type="button" className="r-btn r-btn--noir" disabled={occupe || !valide} onClick={confirmer}>{occupe ? <Loader variant="spin" /> : null} Noter la cote</button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 function DialogueControle({ contrat, fermer, noter }: { contrat: ContratRisque | null; fermer: () => void; noter: (c: ContratRisque, i: Conformite, p: Conformite, r: boolean | null) => Promise<void> }) {
@@ -116,6 +185,7 @@ export default function AnalysesParc({ source, moi, role }: { source: "exemple" 
   const [reel, setReel] = useState<Analyses | null>(null);
   const [erreurs, setErreurs] = useState<string[]>([]);
   const [cible, setCible] = useState<ContratRisque | null>(null);
+  const [vehiculeCote, setVehiculeCote] = useState<VehiculePlan | null>(null);
   /* les dates de l'exemple suivent l'horloge du navigateur : rien n'est rendu côté serveur (pas d'écart à l'hydratation) */
   const [monte, setMonte] = useState(false);
   useEffect(() => {
@@ -158,6 +228,32 @@ export default function AnalysesParc({ source, moi, role }: { source: "exemple" 
       return;
     }
     await noterControle(c.contrat_id, identite, permis, recent);
+    await charger();
+  }, [source, charger]);
+
+  /* b3t_05 : la cote d'un véhicule du plan ; en exemple, en mémoire */
+  const noterUneCote = useCallback(async (v: VehiculePlan, valeur: number, src: SourceCote) => {
+    if (source === "exemple") {
+      await new Promise((r) => setTimeout(r, 250));
+      setLocal((prev) => {
+        if (!prev.plan) return prev;
+        const jour = new Date().toISOString().slice(0, 10);
+        const agences = prev.plan.agences.map((ag) => ({ ...ag, categories: ag.categories.map((l) => {
+          if (!l.vehicules?.some((x) => x.vehicule_id === v.vehicule_id)) return l;
+          const vehicules = l.vehicules.map((x) => x.vehicule_id !== v.vehicule_id ? x : {
+            ...x, cote_eur: valeur, cote_source: src, cote_le: jour, cote_ancienne: false,
+            raison: x.raison.split(" ; ").filter((r) => r !== "cote de revente à noter").join(" ; "),
+          });
+          return { ...l, vehicules, valeur_revente_eur: vehicules.filter((x) => x.decision === "vendre").reduce((n, x) => n + (x.cote_eur ?? 0), 0) };
+        }) }));
+        const tous = agences.flatMap((ag) => ag.categories);
+        return { ...prev, plan: { ...prev.plan, agences, totaux: { ...prev.plan.totaux,
+          valeur_revente_a_vendre_eur: tous.reduce((n, l) => n + (l.valeur_revente_eur ?? 0), 0),
+          cotes_manquantes: tous.flatMap((l) => l.vehicules ?? []).filter((x) => x.cote_eur === null).length } } };
+      });
+      return;
+    }
+    await noterCote(v.vehicule_id, valeur, src);
     await charger();
   }, [source, charger]);
 
@@ -297,6 +393,13 @@ export default function AnalysesParc({ source, moi, role }: { source: "exemple" 
                   <div className="esp-kpi"><span className="esp-kpi-etiquette">À vendre</span><span className="esp-kpi-valeur">{a.plan.totaux.vendre}</span><span className="esp-kpi-sous">en trop sur le réseau</span></div>
                   <div className="esp-kpi"><span className="esp-kpi-etiquette">À déplacer</span><span className="esp-kpi-valeur">{a.plan.totaux.deplacer}</span><span className="esp-kpi-sous">d&apos;une agence à l&apos;autre</span></div>
                 </div>
+                {a.plan.totaux.entretien_flotte_eur !== undefined ? (
+                  <div className="esp-kpis" style={{ marginBottom: 0 }}>
+                    <div className="esp-kpi"><span className="esp-kpi-etiquette">Revente des véhicules à vendre</span><span className="esp-kpi-valeur">{euros(a.plan.totaux.valeur_revente_a_vendre_eur)}</span><span className="esp-kpi-sous">d&apos;après les cotes notées</span></div>
+                    <div className="esp-kpi" data-teinte={a.plan.totaux.cotes_manquantes ? "ambre" : undefined}><span className="esp-kpi-etiquette">Cotes à noter</span><span className="esp-kpi-valeur">{a.plan.totaux.cotes_manquantes ?? 0}</span><span className="esp-kpi-sous">véhicules à vendre ou renouveler</span></div>
+                    <div className="esp-kpi"><span className="esp-kpi-etiquette">Entretien de la flotte</span><span className="esp-kpi-valeur">{euros(a.plan.totaux.entretien_flotte_eur)}</span><span className="esp-kpi-sous">sur les {a.plan.periode.mois} derniers mois</span></div>
+                  </div>
+                ) : null}
                 <div className="esp-tableau-cadre" style={{ position: "relative" }} tabIndex={0} role="region" aria-label="Plan de flotte par agence et par catégorie (tableau qui défile)">
                   <table className="esp-tableau">
                     <thead>
@@ -319,6 +422,33 @@ export default function AnalysesParc({ source, moi, role }: { source: "exemple" 
                     </tbody>
                   </table>
                 </div>
+                {a.plan.agences.some((ag) => ag.categories.some((l) => l.vehicules?.length)) ? (
+                  <>
+                    <h3 className="esp-carte-titre" style={{ fontSize: 14 }}>Les véhicules un par un</h3>
+                    <ul className="esp-liste" aria-label="Véhicules à vendre ou à renouveler">
+                      {a.plan.agences.flatMap((ag) => ag.categories.flatMap((l) => (l.vehicules ?? []).map((v) => (
+                        <li key={v.vehicule_id} className="esp-item" style={{ cursor: "default" }}>
+                          <span className="esp-item-haut">
+                            <Pastille teinte={v.decision === "vendre" ? "rouge" : "ambre"}>{v.decision === "vendre" ? "À vendre" : "À renouveler"}</Pastille>
+                            <Pastille teinte="gris">{ag.agence} · {l.categorie}</Pastille>
+                            {v.cote_eur === null ? <Pastille teinte="ambre" contour>Cote à noter</Pastille> : v.cote_ancienne ? <Pastille teinte="gris" contour>Cote de plus de 90 jours</Pastille> : null}
+                          </span>
+                          <span className="esp-item-titre">{v.immatriculation}{v.age_ans !== null ? ` — ${String(v.age_ans).replace(".", ",")} ans` : ""}{v.km !== null ? `, ${new Intl.NumberFormat("fr-FR").format(v.km)} km` : ""}</span>
+                          <span className="esp-item-bas">
+                            <span>Entretien {euros(v.entretien_eur)}{v.interventions ? ` (${v.interventions} passage${v.interventions > 1 ? "s" : ""}, ${v.jours_hors_service} j hors service)` : ""}</span>
+                            <span>{v.jours_loues} j loués{v.entretien_par_jour_loue !== null ? `, ${euros(v.entretien_par_jour_loue)} d'entretien par jour loué` : ""}</span>
+                            <span>{v.cote_eur !== null ? `Cote ${euros(v.cote_eur)} (${SOURCES_COTE.find(([k]) => k === v.cote_source)?.[1] ?? "—"}, ${v.cote_le ? new Date(`${v.cote_le}T12:00:00`).toLocaleDateString("fr-FR") : "—"})` : "Aucune cote notée"}</span>
+                          </span>
+                          {direction || source === "exemple" ? (
+                            <div className="esp-actions">
+                              <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => setVehiculeCote(v)}>{v.cote_eur === null ? "Noter la cote" : "Mettre à jour la cote"}</button>
+                            </div>
+                          ) : null}
+                        </li>
+                      ))))}
+                    </ul>
+                  </>
+                ) : null}
                 {source === "exemple" ? <p className="esp-fil-meta">Dans votre espace, seuls le gérant et l&apos;administrateur voient le plan de flotte : il porte sur tout le réseau.</p> : null}
                 <p className="esp-fil-meta">Le besoin est le plus grand de deux chiffres : le nombre de contrats en cours au plus fort de l&apos;année (95e centile), et ce qu&apos;il faut pour louer autant de jours à l&apos;utilisation visée. Les excédents d&apos;une agence couvrent d&apos;abord les manques d&apos;une autre ; la décision reste à la direction.</p>
               </div>
@@ -327,6 +457,7 @@ export default function AnalysesParc({ source, moi, role }: { source: "exemple" 
         </>
       )}
       <DialogueControle contrat={cible} fermer={() => setCible(null)} noter={noter} />
+      <DialogueCote vehicule={vehiculeCote} fermer={() => setVehiculeCote(null)} noter={noterUneCote} />
     </div>
   );
 }

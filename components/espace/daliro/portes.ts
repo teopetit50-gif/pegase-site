@@ -27,14 +27,16 @@
      btp_appro_chantier (lecture), btp_ecrire_commande, btp_noter_commande, btp_noter_livraison, btp_annuler_commande (b6_22) ;
      btp_preparer_liste, btp_recevoir, btp_noter_retour (b6_23) ;
      btp_fil_chantier, btp_messages_a_ranger (lecture), btp_ranger_message, btp_ecarter_message, btp_avenant_depuis_message (b6_24) ;
-     btp_avancement_photos (lecture, b6_25) ; btp_importer_lignes (b6_28) ; btp_point_mensuel (lecture, b6_30).
+     btp_avancement_photos (lecture, b6_25) ; btp_importer_lignes (b6_28) ; btp_point_mensuel (lecture, b6_30) ;
+     btp_disponibilites (lecture), btp_noter_indisponibilite, btp_annuler_indisponibilite (b6_31) ; btp_avenant_depuis_reserve (b6_32) ;
+     btp_deposer_devis, btp_devis_lu (lecture, b6_33) ; btp_ordre_meteo (lecture), btp_echanger_passages (b6_35).
    Les tables sans porte (chantiers, lots, tiers, dépendances, acceptations)
    s'écrivent en direct, comme le socle le prévoit (politiques du bureau).
    Si la base répond autrement, l'écran montre son message tel quel.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { AccordJ2, Appro, AvancementPhotos, PointMensuel, Chantier, FactureCandidate, HeuresChantier, MessageChantier, MeteoChantier, Recalage, Remplacant, RetourPointage, Tableau } from "./types";
+import type { AccordJ2, Appro, AvancementPhotos, Disponibilite, PointMensuel, Chantier, FactureCandidate, HeuresChantier, MessageChantier, MeteoChantier, Recalage, Remplacant, RetourPointage, Tableau } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -319,4 +321,51 @@ export async function avenantDepuisMessage(message: string, objet: string): Prom
 /* b6_30 : le point mensuel (bureau qui voit les prix, formules Chantiers et Entreprise). */
 export async function pointMensuel(client: string, mois: string): Promise<PointMensuel> {
   return rpc<PointMensuel>("btp_point_mensuel", { p_client: client, p_mois: mois });
+}
+
+/* b6_31 : les disponibilités des sous-traitants (gérant, admin, valideur). */
+export async function chargerDisponibilites(client: string, du: string, au: string): Promise<Disponibilite[]> {
+  return rpc<Disponibilite[]>("btp_disponibilites", { p_client: client, p_du: du, p_au: au });
+}
+export async function noterIndisponibilite(tiers: string, du: string, au: string, motif: string | null): Promise<string> {
+  return rpc<string>("btp_noter_indisponibilite", { p_tiers: tiers, p_du: du, p_au: au, p_motif: motif });
+}
+export async function annulerIndisponibilite(id: string): Promise<unknown> {
+  return rpc("btp_annuler_indisponibilite", { p_id: id });
+}
+
+/* b6_32 : la réserve hors devis devient un avenant brouillon. */
+export async function avenantDepuisReserve(reserve: string): Promise<string> {
+  return rpc<string>("btp_avenant_depuis_reserve", { p_reserve: reserve, p_objet: null });
+}
+
+/* b6_33 : le devis en PDF, déposé sur le marché puis lu par le lecteur d'A1 (lignes dans pieces_valeurs). */
+export type LigneDevisLue = { numero?: string | null; lot?: string | null; designation?: string | null; unite?: string | null;
+                              quantite?: number | null; prix_unitaire?: number | null; montant?: number | null };
+export type DevisLu = { piece: string | null; nom?: string; statut?: string; lignes?: LigneDevisLue[] | null; lignes_verifiees?: boolean | null;
+                        montant_total_ht?: number | string | null };
+export async function deposerDevis(client: string, marche: string, fichier: File): Promise<string> {
+  const supabase = createClient();
+  const nom = fichier.name.normalize("NFKD").replace(/[^\w.-]+/g, "-").replace(/-+/g, "-").slice(0, 120) || "devis.pdf";
+  const chemin = `${client}/btp_marche/${marche}/${Date.now()}-${nom}`;
+  const envoi = await supabase.storage.from("omega-clients").upload(chemin, fichier, { contentType: "application/pdf", upsert: false });
+  if (envoi.error) throw new ErreurPorte(message(envoi.error));
+  const h = await crypto.subtle.digest("SHA-256", await fichier.arrayBuffer());
+  const sha = Array.from(new Uint8Array(h)).map((b) => b.toString(16).padStart(2, "0")).join("");
+  return rpc<string>("btp_deposer_devis", { p_marche: marche, p_nom_fichier: fichier.name.slice(0, 200), p_mime: "application/pdf",
+                                             p_octets: fichier.size, p_sha256: sha, p_chemin: chemin });
+}
+export async function devisLu(marche: string): Promise<DevisLu> {
+  return rpc<DevisLu>("btp_devis_lu", { p_marche: marche });
+}
+
+/* b6_35 : sur pluie annoncée, l'échange proposé entre un passage extérieur menacé et un intérieur de la même équipe. */
+export type EchangeMeteo = { exterieur: string; exterieur_tache: string | null; exterieur_chantier: string; exterieur_debut: string;
+                             interieur: string; interieur_tache: string | null; interieur_chantier: string; interieur_debut: string;
+                             risque: string; texte: string };
+export async function ordreMeteo(client: string): Promise<{ propositions: EchangeMeteo[] }> {
+  return rpc<{ propositions: EchangeMeteo[] }>("btp_ordre_meteo", { p_client: client });
+}
+export async function echangerPassages(exterieur: string, interieur: string, motif: string | null): Promise<unknown> {
+  return rpc("btp_echanger_passages", { p_exterieur: exterieur, p_interieur: interieur, p_motif: motif });
 }
