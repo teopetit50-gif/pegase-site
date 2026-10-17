@@ -8,7 +8,7 @@ import type { Travail } from "@partage/portes.ts";
 import { ErreurOuvrier } from "@partage/erreurs.ts";
 import { analyserTravail, type DossierAnalyse, type ResultatTravailAnalyse } from "../analyse/travail.ts";
 import type { Constat } from "../analyse/moteur.ts";
-import { numeroDePiece, TAMILA_BORDEREAU, TAMILA_CHRONOLOGIE, TAMILA_CONTRADICTIONS, TAMILA_PIECES_CITEES, TYPES_ANALYSE } from "../analyse/types_tamila.ts";
+import { numeroDePiece, pieceDuNumero, TAMILA_BORDEREAU, TAMILA_CHRONOLOGIE, TAMILA_CONTRADICTIONS, TAMILA_PIECES_CITEES, TYPES_ANALYSE } from "../analyse/types_tamila.ts";
 import { type ClePiece, chiffrerTexte, type CoffreTamila, dechiffrerTexte } from "../coffre.ts";
 
 const CLE = () => Uint8Array.from({ length: 32 }, (_, i) => (i * 11 + 5) & 0xff);
@@ -166,38 +166,46 @@ Deno.test("types Tamila : bordereau numéroté par date, contradiction à une se
     donnees: date ? { date } : {},
     citations: Array.from({ length: 2 }, (_, i) => ({ piece: A, page: 1, lignes: [1, 1] as [number, number], extrait: "x", verifiee: i < verifiees })),
   });
-  const b = TAMILA_BORDEREAU.finaliser!([c("2026-05-01", "info", 1), c(undefined, "info", 1), c("2026-01-15", "info", 1)]);
+  const b = TAMILA_BORDEREAU.finaliser!([c("2026-05-01", "info", 1), c(undefined, "info", 1), c("2026-01-15", "info", 1)], []);
   assertEquals(b.map((x) => [x.donnees.date, x.donnees.numero]), [["2026-01-15", 1], ["2026-05-01", 2], [undefined, 3]]);
-  const k = TAMILA_CONTRADICTIONS.finaliser!([c(undefined, "critique", 1), c(undefined, "critique", 2)]);
+  const k = TAMILA_CONTRADICTIONS.finaliser!([c(undefined, "critique", 1), c(undefined, "critique", 2)], []);
   assertEquals(k.map((x) => x.gravite), ["attention", "critique"]);
   assertEquals(TAMILA_CHRONOLOGIE.limites.pages, 3000);
 });
 
-Deno.test("types Tamila : pièces citées — une ligne par pièce et par partie, citations et écritures réunies, triées par numéro", () => {
-  const c = (numero: string | undefined, partie: string, ecriture: string, intitule = "x"): Constat => ({
+Deno.test("types Tamila : pièces citées (format b4_19) — une ligne par pièce et par citant, communiquée si une seule pièce du dossier porte le numéro", () => {
+  const C = "cccccccc-0000-4000-8000-000000000003";
+  const c = (numero: string | undefined, citee_par: string, citee_dans: string, intitule = "x"): Constat => ({
     code: "piece_citee",
     titre: "",
     texte: "",
     gravite: "info",
-    donnees: { numero, partie, ecriture, intitule },
-    citations: [{ piece: ecriture, page: 1, lignes: [1, 1], extrait: "x", verifiee: true }],
+    donnees: { numero, citee_par, citee_dans, intitule },
+    citations: [{ piece: citee_dans, page: 1, lignes: [1, 1], extrait: "x", verifiee: true }],
   });
+  const dossier = [
+    { piece: A, nom: "Conclusions adverses n° 2.pdf", pages: [] },
+    { piece: B, nom: "Assignation.pdf", pages: [] },
+    { piece: C, nom: "Pièce 12 - contrat de construction.pdf", pages: [] },
+    { piece: "d", nom: "P4 bis constat.pdf", pages: [] },
+  ];
   const r = TAMILA_PIECES_CITEES.finaliser!([
     c("Pièce n° 12", "adverse", A),
     c("4 bis", "adverse", A),
     c("pièce 12", "adverse", B),
     c(undefined, "adverse", B, "Constat d'huissier du 3 mars"),
-    c("12", "client", A),
-  ]);
-  assertEquals(r.map((x) => [x.donnees.partie, x.donnees.numero ?? x.donnees.intitule]), [
-    ["adverse", "4 bis"],
-    ["adverse", "12"],
-    ["adverse", "Constat d'huissier du 3 mars"],
-    ["client", "12"],
+    c("31", "client", A),
+  ], dossier);
+  assertEquals(r.map((x) => [x.donnees.citee_par, x.donnees.numero ?? x.donnees.intitule, x.donnees.communiquee, x.donnees.piece]), [
+    ["adverse", "4 bis", true, "d"],
+    ["adverse", "12", true, C],
+    ["adverse", "Constat d'huissier du 3 mars", false, undefined],
+    ["client", "31", false, undefined],
   ]);
   assertEquals(r[1].citations.length, 2, "la pièce 12 citée dans deux écritures : une ligne, deux citations");
   assertEquals(r[1].donnees.ecritures, [A, B]);
   assertEquals(numeroDePiece("P.7"), "7");
+  assertEquals(pieceDuNumero("2", dossier, [A]), null, "l'écriture qui cite n'est pas la pièce citée");
   assertEquals(TYPES_ANALYSE["tamila.pieces_citees"].synthese, false);
 });
 

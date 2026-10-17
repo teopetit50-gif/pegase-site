@@ -39,7 +39,8 @@ export interface TypeAnalyse {
   synthese: boolean;
   limites: { pieces: number; pages: number; pagesParPiece?: number; coutMaxEur: number };
   /** Le tri et les règles propres au type, appliqués aux constats finaux (ordre chronologique, numérotation…). */
-  finaliser?: (constats: Constat[]) => Constat[];
+  /** Mise en forme finale ; reçoit aussi les pièces du périmètre (nom, rôle) pour les rapprochements. */
+  finaliser?: (constats: Constat[], pieces: PieceDossier[]) => Constat[];
 }
 
 export interface PieceDossier {
@@ -327,7 +328,7 @@ function rendu(
   nbPages: number,
   etat: EtatAnalyse,
   fini: boolean,
-  finaliser?: (c: Constat[]) => Constat[],
+  finaliser?: (c: Constat[], p: PieceDossier[]) => Constat[],
 ): ResultatAnalyse {
   const sources = etat.constats.filter((c) => c.source);
   return {
@@ -335,7 +336,7 @@ function rendu(
     fini,
     statut: fini ? "finie" : "en_cours",
     pieces_non_lues: [],
-    constats: fini ? (finaliser ? finaliser(sources) : sources) : [],
+    constats: fini ? (finaliser ? finaliser(sources, _pieces) : sources) : [],
     pieces_lues: new Set(etat.tranches_faites.map((c) => c.split(":")[0])).size,
     pages_lues: nbPages,
     ...(fini ? {} : { etat }),

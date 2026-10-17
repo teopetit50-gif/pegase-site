@@ -71,6 +71,8 @@ Le lecteur est à redéployer.
 
 **17/10, v35 corrigé** : le travail 10075 était en échec avec « ctx.portes.commencerAnalyse is not a function ». Le passage recopiait l'instance `PortesAnalyseRpc` par « ... », ce qui ne copie pas ses méthodes ; elles sont maintenant reliées une à une. Un test passe désormais par la vraie classe. Le lot 19ar compte déjà tous les genres de travaux (`lecteur.analyser`, `tavaro.question`…).
 
+**17/10, v37 et 19ar posés** (48658a4). **`tamila.pieces_citees` au format de B4 (b4_19)** : données `numero?`, `intitule`, `date?`, `citee_par` (adverse | client | juge | expert | tiers), `citee_dans`, `ecritures[]`, `communiquee`, `piece?`. La pièce citée est retrouvée par son numéro dans le nom des pièces du dossier (une seule correspondance, hors écritures citantes) ; `finaliser` reçoit désormais les pièces. Pas de pose, mais il faut redéployer. Lot suivant (C3) : l'envoi interne du socle vers un membre de l'organisation (gabarit fermé, sans texte libre, exempté de validation, expéditeur A2).
+
 **Toute prochaine étape à la reprise.** Lire les sorties de `decoupage_reel.mjs` si le coordinateur l'a joué. Sinon, demander qu'il soit joué, puis corriger ce qui sort. Ensuite, selon les décisions de Teo : la lecture longue réelle (`analyse_reelle.sql`), puis l'outil de mesure de qualité sur corpus (1 j, `CHIFFRAGE/lecteur.md`).
 
 Branche `worker-a1`. Périmètre : `omega/functions/lecteur/`, `omega/functions/lecteur-exports/` et `omega/functions/_partage/`.
