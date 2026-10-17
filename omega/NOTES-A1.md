@@ -69,6 +69,8 @@ Le lecteur est à redéployer.
 - Lecture longue : le coût rendu est celui du palier seul (le cumul est dans `cout_total_eur`), et le plafond est réservé (0,5 €) avant chaque palier.
 - Médias : `cout_eur` est désormais rangé au premier niveau du résultat.
 
+**17/10, v35 corrigé** : le travail 10075 était en échec avec « ctx.portes.commencerAnalyse is not a function ». Le passage recopiait l'instance `PortesAnalyseRpc` par « ... », ce qui ne copie pas ses méthodes ; elles sont maintenant reliées une à une. Un test passe désormais par la vraie classe. Le lot 19ar compte déjà tous les genres de travaux (`lecteur.analyser`, `tavaro.question`…).
+
 **Toute prochaine étape à la reprise.** Lire les sorties de `decoupage_reel.mjs` si le coordinateur l'a joué. Sinon, demander qu'il soit joué, puis corriger ce qui sort. Ensuite, selon les décisions de Teo : la lecture longue réelle (`analyse_reelle.sql`), puis l'outil de mesure de qualité sur corpus (1 j, `CHIFFRAGE/lecteur.md`).
 
 Branche `worker-a1`. Périmètre : `omega/functions/lecteur/`, `omega/functions/lecteur-exports/` et `omega/functions/_partage/`.

@@ -69,7 +69,13 @@ export async function passage(ctx: Contexte, options: Partial<OptionsPassage> = 
         const reste = Math.max(5_000, o.budgetMs - (Date.now() - debut) - 15_000);
         const issue = await analyserTravail(
           {
-            portes: { ...ctx.portesAnalyse, finirTravail: (id, r) => ctx.portes.finirTravail(id, r), echouerTravail: (id, e, rep) => ctx.portes.echouerTravail(id, e, rep) },
+            // Méthodes reliées une à une : PortesAnalyseRpc est une classe, « ...instance » n'en copierait aucune.
+            portes: {
+              commencerAnalyse: (a) => ctx.portesAnalyse!.commencerAnalyse(a),
+              terminerAnalyse: (a, r, v) => ctx.portesAnalyse!.terminerAnalyse(a, r, v),
+              finirTravail: (id, r) => ctx.portes.finirTravail(id, r),
+              echouerTravail: (id, e, rep) => ctx.portes.echouerTravail(id, e, rep),
+            },
             claude: ctx.claude ?? null,
             coffre: ctx.coffre ?? null,
             maintenant: ctx.maintenant,

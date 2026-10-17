@@ -232,3 +232,20 @@ Deno.test("plafond : réservé avant chaque palier ; chaque travail ne compte qu
   assertEquals(r, "repris");
   assertEquals(refuse.termines.length, 0, "rien n'est lu au-delà du plafond");
 });
+
+Deno.test("passage : les portes des analyses (classe PortesAnalyseRpc) atteignent bien commencer_analyse", async () => {
+  const { contexteDeTest } = await import("./doubles.ts");
+  const { passage } = await import("../passage.ts");
+  const { PortesAnalyseRpc } = await import("../analyse/travail.ts");
+  const { ctx, portes } = contexteDeTest();
+  const appels: string[] = [];
+  const f = ((u: string | URL | Request) => {
+    appels.push(String(u).split("/rpc/")[1]);
+    return Promise.resolve(new Response("null", { status: 200 }));
+  }) as typeof fetch;
+  ctx.portesAnalyse = new PortesAnalyseRpc({ url: "https://x.supabase.co", cleService: "k" }, f);
+  portes.travaux.push({ id: 77, client_id: "c", module: "essai", genre: "lecteur.analyser", charge: { analyse: "an-1" }, cle: null, essais: 1, essais_max: 5 });
+  await passage(ctx);
+  assertEquals(appels, ["commencer_analyse"]);
+  assertEquals(portes.finis[0].resultat, { ignore: "plus rien à analyser" });
+});
