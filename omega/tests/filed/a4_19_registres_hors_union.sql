@@ -3,13 +3,14 @@
 -- À jouer APRÈS a4_26b (retrait des anciennes contraintes) : sinon uid_ch et hmrc sont encore refusés.
 -- `select * from runtests('tests', '^test_a4_')` ; runtests() annule tout. Données d'exemple seulement.
 
--- Une facture de l'organisation d'exemple, rattachée à un fournisseur étranger créé pour l'occasion. Rend {facture, fournisseur}.
+-- Une facture de l'organisation d'exemple, rattachée à un fournisseur étranger créé pour l'occasion (un code par facture :
+-- le code d'un fournisseur est unique dans l'organisation). Rend {facture, fournisseur}.
 create or replace function tests.a4_facture_etrangere(p_org jsonb, p_numero text, p_pays text, p_tva text) returns jsonb
 language plpgsql as $$
 declare fa jsonb := tests.a4_facture(p_org, 'ia', p_numero, 120); v_four uuid;
 begin
   insert into public.filed_fournisseurs (client_id, code, nom, nom_normalise, pays, statut, source, tva)
-  values ((p_org ->> 'client')::uuid, 'ETR' || p_pays, 'Fournisseur étranger ' || p_pays, 'fournisseur etranger ' || lower(p_pays), p_pays, 'actif', 'saisie', p_tva)
+  values ((p_org ->> 'client')::uuid, 'ETR' || upper(regexp_replace(p_numero, '[^A-Za-z0-9]', '', 'g')), 'Fournisseur étranger ' || p_pays, 'fournisseur etranger ' || lower(p_pays), p_pays, 'actif', 'saisie', p_tva)
   returning id into v_four;
   update public.filed_factures set fournisseur_id = v_four, fournisseur_lu = jsonb_build_object('tva', p_tva), regime_tva = 'hors_ue'
    where id = (fa ->> 'facture')::uuid;
