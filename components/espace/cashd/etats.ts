@@ -26,6 +26,7 @@ export const ETATS_RELANCE: Record<EtatRelance, { libelle: string; teinte: Teint
 };
 
 const PALIERS: Record<string, string> = {
+  echeance: "Rappel du jour d'échéance",
   rappel: "Rappel courtois",
   relance: "Relance ferme",
   mise_en_demeure: "Mise en demeure",

@@ -149,6 +149,8 @@ begin
   return next is((select x.statut from public.cashd_relances x where x.id = r.id), 'coupee', 'Le devis accepté : sa relance est coupée avant l''envoi');
 
   -- ── Le point du matin ──
+  -- (c2_10) F-2026-140 reçoit son rappel courtois le jour de son échéance, et l'attend dans la file.
+  perform private.cashd_preparer_relances(v_client, j + 20, null);
   v_items := private.cashd_point_lignes(v_client, j);
   return next ok(exists (select 1 from jsonb_array_elements(v_items) x where tests.c2_plat(x ->> 'texte') like 'Hôtel des Brotteaux doit 3 000,00 € échus%'),
                  'Le point du matin dit qui doit quoi');
