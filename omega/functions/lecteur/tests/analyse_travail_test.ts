@@ -5,6 +5,7 @@
 import { assert, assertEquals } from "@std/assert";
 import type { ClientClaude, DemandeConverse, ReponseConverse } from "@partage/claude.ts";
 import type { Travail } from "@partage/portes.ts";
+import { ErreurOuvrier } from "@partage/erreurs.ts";
 import { analyserTravail, type DossierAnalyse, type ResultatTravailAnalyse } from "../analyse/travail.ts";
 import type { Constat } from "../analyse/moteur.ts";
 import { numeroDePiece, TAMILA_BORDEREAU, TAMILA_CHRONOLOGIE, TAMILA_CONTRADICTIONS, TAMILA_PIECES_CITEES, TYPES_ANALYSE } from "../analyse/types_tamila.ts";
@@ -203,4 +204,31 @@ Deno.test("types Tamila : pièces citées — une ligne par pièce et par partie
 Deno.test("types essai : les mêmes analyses en clair, pour la preuve sur le banc", () => {
   assertEquals(TYPES_ANALYSE["essai.chronologie"].limites, TYPES_ANALYSE["tamila.chronologie"].limites);
   assertEquals(TYPES_ANALYSE["essai.pieces_citees"].codes, ["piece_citee"]);
+});
+
+Deno.test("plafond : réservé avant chaque palier ; chaque travail ne compte que le coût de SON palier", async () => {
+  const d = await dossierChiffre();
+  const reserves: [string, number][] = [];
+  const plafond = (client: string, e: number) => {
+    reserves.push([client, e]);
+    return Promise.resolve();
+  };
+  const p1 = portes(d);
+  await analyserTravail({ portes: p1, claude: new Client([]), coffre: coffre("scaleway"), maintenant: () => new Date(), plafond }, travail, -1);
+  const p2 = portes({ ...d, etat_chiffre: p1.termines[0].r.etat_chiffre });
+  const c2 = new Client([
+    { constats: [evenement(A, 2, "Le 3 mars 2026, la société Dupont a livré le chantier.", "2026-03-03")] },
+    { constats: [evenement(B, 2, "La réception a eu lieu le 10 avril 2026.", "2026-04-10")] },
+    { resume: "r", constats: [evenement(B, 2, "La réception a eu lieu le 10 avril 2026.", "2026-04-10")] },
+  ]);
+  await analyserTravail({ portes: p2, claude: c2, coffre: coffre("scaleway"), maintenant: () => new Date(), plafond }, travail, 60_000);
+  assertEquals(reserves, [["c", 0.5], ["c", 0.5]]);
+  const f1 = p1.finis[0] as { cout_eur: number; cout_total_eur: number };
+  const f2 = p2.finis[0] as { cout_eur: number; cout_total_eur: number };
+  assertEquals(f1.cout_eur, 0, "premier palier sans appel");
+  assertEquals(f2.cout_eur, f2.cout_total_eur, "second palier : tout le coût est le sien");
+  const refuse = portes(d);
+  const r = await analyserTravail({ portes: refuse, claude: new Client([]), coffre: coffre("scaleway"), maintenant: () => new Date(), plafond: () => Promise.reject(new ErreurOuvrier("PLAFOND_IA", "plafond atteint", true)) }, travail, 60_000);
+  assertEquals(r, "repris");
+  assertEquals(refuse.termines.length, 0, "rien n'est lu au-delà du plafond");
 });

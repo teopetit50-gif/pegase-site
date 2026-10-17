@@ -5,6 +5,7 @@ import { journal, messageDe } from "@partage/journal.ts";
 import { analyserTravail, GENRE_ANALYSE } from "./analyse/travail.ts";
 import { type Contexte, type Issue, lirePiece, versionLecteur } from "./lire_piece.ts";
 import { GENRE_MEDIA, lireMedia } from "./media/lire_media.ts";
+import { controlerPlafond } from "@partage/plafond.ts";
 
 export const MODULE = "lecteur";
 /** Les lectures de pièces et des photos / vocaux reçus ; les lectures longues seulement si leurs portes sont branchées. */
@@ -67,7 +68,13 @@ export async function passage(ctx: Contexte, options: Partial<OptionsPassage> = 
         // Le temps qui reste au passage, moins une marge pour rendre l'état ; la suite au passage suivant.
         const reste = Math.max(5_000, o.budgetMs - (Date.now() - debut) - 15_000);
         const issue = await analyserTravail(
-          { portes: { ...ctx.portesAnalyse, finirTravail: (id, r) => ctx.portes.finirTravail(id, r), echouerTravail: (id, e, rep) => ctx.portes.echouerTravail(id, e, rep) }, claude: ctx.claude ?? null, coffre: ctx.coffre ?? null, maintenant: ctx.maintenant },
+          {
+            portes: { ...ctx.portesAnalyse, finirTravail: (id, r) => ctx.portes.finirTravail(id, r), echouerTravail: (id, e, rep) => ctx.portes.echouerTravail(id, e, rep) },
+            claude: ctx.claude ?? null,
+            coffre: ctx.coffre ?? null,
+            maintenant: ctx.maintenant,
+            plafond: (client, estimation) => controlerPlafond(ctx.portes, ctx.env, client, estimation),
+          },
           t,
           reste,
         );

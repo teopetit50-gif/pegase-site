@@ -18,7 +18,7 @@ import type { Portes, Travail } from "@partage/portes.ts";
 import { retrouver } from "@partage/texte.ts";
 import { detecter } from "../detecter.ts";
 import { LIMITE_IMAGE_OCTETS } from "../ia.ts";
-import { controlerPlafond } from "../plafond.ts";
+import { controlerPlafond } from "@partage/plafond.ts";
 import type { Transcripteur } from "./transcription.ts";
 
 export const GENRE_MEDIA = "lecteur.media";
@@ -307,7 +307,8 @@ export async function lireMedia(ctx: ContexteMedia, travail: Travail): Promise<"
         journal("alerte", "photos et vocaux lus mais non rendus au module : lecture gardée dans le résultat", { ...trace, porte: c.retour });
       }
     }
-    await ctx.portes.finirTravail(travail.id, { lecture, retour, ...(retourErreur ? { retour_erreur: retourErreur } : {}) });
+    // cout_eur au premier niveau : consommation_ia_jour le compte dans le plafond du jour.
+    await ctx.portes.finirTravail(travail.id, { cout_eur: lecture.cout_eur, lecture, retour, ...(retourErreur ? { retour_erreur: retourErreur } : {}) });
     journal("info", "photos et vocaux lus", { ...trace, medias: medias.length, demandes: lecture.demandes.length, cout_eur: lecture.cout_eur, retour });
     return "lu";
   } catch (e) {

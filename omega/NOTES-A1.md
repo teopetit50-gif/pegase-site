@@ -63,6 +63,12 @@ Le lecteur est à redéployer.
 
 **17/10, preuve en clair** : types `essai.*` (copies en clair des types Tamila) et script `omega/banc/analyse_reelle_claire.sql`, que le coordinateur joue sur les pièces lues du banc. Raison : une analyse Tamila est toujours chiffrée, et un coffre en repli local ne donne pas la clé au serveur ; elle finirait en échec.
 
+**17/10, plafond commun.**
+- Le plafond est déplacé dans `_partage/plafond.ts`, avec un mode d'emploi pour les assistants : `_partage/IA.md`.
+- Socle **19ar** (testé en local, 4/4, rejouable) : `consommation_ia_jour` compte tous les genres de travaux faits du jour, plus le registre `consommations_ia` alimenté par `noter_consommation_ia` (service_role). **À poser.**
+- Lecture longue : le coût rendu est celui du palier seul (le cumul est dans `cout_total_eur`), et le plafond est réservé (0,5 €) avant chaque palier.
+- Médias : `cout_eur` est désormais rangé au premier niveau du résultat.
+
 **Toute prochaine étape à la reprise.** Lire les sorties de `decoupage_reel.mjs` si le coordinateur l'a joué. Sinon, demander qu'il soit joué, puis corriger ce qui sort. Ensuite, selon les décisions de Teo : la lecture longue réelle (`analyse_reelle.sql`), puis l'outil de mesure de qualité sur corpus (1 j, `CHIFFRAGE/lecteur.md`).
 
 Branche `worker-a1`. Périmètre : `omega/functions/lecteur/`, `omega/functions/lecteur-exports/` et `omega/functions/_partage/`.

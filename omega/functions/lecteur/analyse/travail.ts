@@ -84,7 +84,12 @@ export interface ContexteAnalyse {
   coffre: CoffreTamila | null;
   maintenant: () => Date;
   types?: Record<string, TypeAnalyse>;
+  /** Le plafond d'IA du jour du client (_partage/plafond.ts) ; levé = repris plus tard, comme pour une pièce. */
+  plafond?: (client: string, estimation: number) => Promise<unknown>;
 }
+
+/** Ce qu'un palier peut coûter au plus, réservé sur le plafond du jour avant de commencer. */
+export const ESTIMATION_PALIER_EUR = 0.5;
 
 function comptes(r: ResultatAnalyse) {
   const c = { info: 0, attention: 0, critique: 0 };
@@ -152,7 +157,11 @@ export async function analyserTravail(ctx: ContexteAnalyse, travail: Travail, bu
     }
     const etat = d.etat_chiffre && cle ? JSON.parse(await dechiffrerTexte(cle, d.etat_chiffre)) as EtatAnalyse : d.etat ?? undefined;
 
+    if (ctx.plafond) await ctx.plafond(d.client, Math.min(ESTIMATION_PALIER_EUR, Math.max(0, t.limites.coutMaxEur - (etat?.cout_eur ?? 0))));
     const r = await analyser(ctx.claude, t, pieces, { budgetMs, etat });
+    // Le coût de CE palier seulement : l'état porte le cumul des paliers précédents, déjà comptés dans leurs travaux
+    // (consommation_ia_jour somme les cout_eur des travaux finis du jour).
+    const coutPalier = Math.round((r.couts.cout_eur - (etat?.cout_eur ?? 0)) * 1e6) / 1e6;
     const sortie: ResultatTravailAnalyse = {
       statut: r.statut,
       type: t.type,
@@ -177,7 +186,8 @@ export async function analyserTravail(ctx: ContexteAnalyse, travail: Travail, bu
       statut: r.statut,
       type: t.type,
       constats: r.constats.length,
-      cout_eur: r.couts.cout_eur,
+      cout_eur: coutPalier,
+      cout_total_eur: r.couts.cout_eur,
       appels_ia: r.couts.appels_ia,
       modele: r.couts.modele,
     });

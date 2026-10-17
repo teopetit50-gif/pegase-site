@@ -1,10 +1,10 @@
-// Le plafond d'IA par client et par jour : réglage `plafond_ia_jour_client`
-// (en euros) lu par la porte lire_parametre, sinon la variable d'environnement
-// PLAFOND_IA_JOUR_CLIENT_EUR, sinon 5 €. La consommation du jour vient de la
-// porte consommation_ia_jour.
+// Le plafond d'IA par client et par jour, commun à tous les ouvriers et assistants : réglage `plafond_ia_jour_client`
+// (en euros) lu par la porte lire_parametre, sinon la variable d'environnement PLAFOND_IA_JOUR_CLIENT_EUR, sinon 5 €.
+// La consommation du jour vient de la porte consommation_ia_jour : la somme des cout_eur des travaux finis du jour
+// (tous genres, socle 19ar) et des consommations notées hors travaux (noter_consommation_ia). Voir _partage/IA.md.
 
-import { ErreurOuvrier } from "@partage/erreurs.ts";
-import type { Portes } from "@partage/portes.ts";
+import { ErreurOuvrier } from "./erreurs.ts";
+import type { Portes } from "./portes.ts";
 
 export const CLE_PLAFOND = "plafond_ia_jour_client";
 export const PLAFOND_PAR_DEFAUT_EUR = 5;
@@ -16,7 +16,7 @@ export interface EtatPlafond {
   source: "reglage" | "environnement" | "defaut";
 }
 
-export async function lirePlafond(portes: Portes, env: { get(n: string): string | undefined }): Promise<Pick<EtatPlafond, "plafond" | "source">> {
+export async function lirePlafond(portes: Pick<Portes, "lireParametre">, env: { get(n: string): string | undefined }): Promise<Pick<EtatPlafond, "plafond" | "source">> {
   const p = await portes.lireParametre(CLE_PLAFOND);
   const np = p === null ? NaN : Number(String(p).replace(",", "."));
   if (Number.isFinite(np)) return { plafond: np, source: "reglage" };
@@ -28,7 +28,7 @@ export async function lirePlafond(portes: Portes, env: { get(n: string): string 
 
 /** Lève PLAFOND_IA (non définitif) si la lecture ferait dépasser le plafond du jour. */
 export async function controlerPlafond(
-  portes: Portes,
+  portes: Pick<Portes, "lireParametre" | "consommationIaDuJour">,
   env: { get(n: string): string | undefined },
   client: string,
   estimation: number,

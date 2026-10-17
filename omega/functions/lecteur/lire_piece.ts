@@ -13,7 +13,7 @@ import { LIMITE_DOCUMENT_OCTETS } from "./ia.ts";
 import { decouperSousLimite, PAGES_PAR_MORCEAU } from "./pdf_decouper.ts";
 import type { Ocr } from "./ocr.ts";
 import { analyserPdf, type PagePdf, pageSansTexte } from "./pdf.ts";
-import { controlerPlafond } from "./plafond.ts";
+import { controlerPlafond } from "@partage/plafond.ts";
 import { champsPour, schemaPour } from "./schemas/modules.ts";
 import type { ClientClaude } from "@partage/claude.ts";
 import type { PortesAnalyse } from "./analyse/travail.ts";
