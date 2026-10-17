@@ -103,6 +103,22 @@ les 14 tests sont verts sur la recette, les trois migrations sont posées,
 /espace/varelo est sur main (b287d04) et **en ligne sur omegaai.fr**. Le
 coordinateur lit ce fichier.
 
+## 17/10/2026 — « contexte_varelo » dans l'assistant (accord de Teo ; b1_19, tests b1_22, fonction varelo-assistant)
+
+Teo, 17/10 : oui, lecture seule, sous la session de la personne, chaque lecture au journal, aucun IBAN ; le
+fournisseur du lecteur (_partage, commutable) ; un plafond par client et par jour.
+- `b1_19_assistant.sql` : `grp_assistant_client()` (le groupe Varelo de la personne), `grp_assistant_budget` et
+  `grp_assistant_noter` (clé de service seulement : dépense du jour = consommation du lecteur + réponses de
+  l'assistant, plafond `plafond_ia_jour_client`, journal `varelo.assistant.reponse`). Tests b1_22 : 8 assertions
+  (maquette : 355 ok).
+- `omega/functions/varelo-assistant` (Deno) : jeton vérifié par /auth/v1/user ; contexte lu par
+  `grp_contexte` sous la session de la personne ; plafond avant tout appel ; modèle par
+  `clientClaudeDepuisEnv` (_partage) ; réponse par l'outil « repondre » ; coût noté. deno test 6/6, check, lint.
+- `lib/varelo/assistant.ts` + deux lignes dans `app/api/assistant/route.ts` : si la personne a Varelo, la question
+  part à la fonction ; sinon (ou fonction absente) l'assistant général répond comme avant.
+- À faire par le coordinateur : poser b1_19 + b1_22, déployer la fonction `varelo-assistant` (secrets du lecteur :
+  ANTHROPIC_API_KEY sur la recette, Bedrock plus tard), fusionner la route.
+
 ## REPRISE (pause « 50 % » demandée par Teo le 15/10/2026, 16 h 15 UTC) — état exact
 
 Une section ajoutée ici à 16 h 15 par une autre session (commit 6cded6e) décrivait l'état du 06/10 au matin
