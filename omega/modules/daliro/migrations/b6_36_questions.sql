@@ -18,8 +18,7 @@
 --   · Portes de l'ouvrier daliro-questions (fonction Edge, clé de service seulement) : btp_question_commencer,
 --     btp_question_deposer, btp_question_echec.
 --   · public.btp_questions_du_chantier(chantier) : mes 20 dernières questions sur ce chantier, sans le contexte.
---   · private.consommation_ia_jour (SOCLE, définition c3_04) : le plafond compte aussi daliro.question.
---     Un seul changement : le genre ajouté. Signature, droits et propriétaire inchangés.
+--   · Le plafond : private.consommation_ia_jour du socle 19ar (A1) compte déjà tous les genres ; rien à changer ici.
 --   · NON FAIT ICI : le cron de la fonction Edge (omega/recette-b6/cron_daliro_questions.sql, à poser APRÈS son
 --     déploiement, comme omega-reput).
 --
@@ -248,24 +247,6 @@ begin
   end if;
   update public.btp_questions set statut = 'echec', motif = left(coalesce(p_motif, 'échec'), 500), repondu_le = now()
    where id = p_question and statut = 'en_attente';
-end $function$;
-
--- ─── SOCLE : le plafond du jour compte aussi les questions Daliro ───────
-CREATE OR REPLACE FUNCTION private.consommation_ia_jour(p_client uuid)
- RETURNS numeric
- LANGUAGE plpgsql
- STABLE SECURITY DEFINER
- SET search_path TO ''
-AS $function$
-declare v numeric;
-begin
-  perform private.exiger_ouvrier();
-  select coalesce(sum((t.resultat ->> 'cout_eur')::numeric), 0) into v
-  from public.travaux t
-  where t.client_id = p_client and t.genre in ('lecteur.lire', 'reput.preparer', 'daliro.question') and t.etat = 'fait'
-    and t.fini_le >= date_trunc('day', now() at time zone 'Europe/Paris') at time zone 'Europe/Paris'
-    and (t.resultat ->> 'cout_eur') ~ '^[0-9.]+$';
-  return v;
 end $function$;
 
 -- ─── Droits ─────────────────────────────────────────────────────────────

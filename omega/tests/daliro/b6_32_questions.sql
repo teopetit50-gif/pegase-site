@@ -34,8 +34,6 @@ begin
              and not has_function_privilege('authenticated', 'public.btp_question_deposer(uuid, jsonb, text)', 'execute')
              and not has_function_privilege('authenticated', 'public.btp_question_echec(uuid, text)', 'execute'),
                  'Les portes de l''ouvrier restent au serveur');
-  return next ok(pg_get_functiondef('private.consommation_ia_jour(uuid)'::regprocedure) like '%''daliro.question''%',
-                 'Le plafond d''IA du jour compte aussi les questions Daliro');
 
   -- ── Le gérant pose une question ──
   return next throws_ok(format('select public.btp_poser_question(%L, %L)', v_ch, 'ok'), '22023', null, 'Une question de moins de 3 caractères est refusée');

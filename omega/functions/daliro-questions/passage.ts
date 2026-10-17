@@ -2,7 +2,7 @@
 // btp_poser_question), répondre à chacune, déposer la réponse par la porte, battre. Appelé chaque minute.
 // Aucun contenu (ni la question, ni la réponse) ne va au journal ni dans le résultat du travail : des
 // identifiants, des états, des jetons, un coût. Le plafond d'IA est celui du lecteur et de REPUT
-// (plafond_ia_jour_client, consommation_ia_jour compte daliro.question depuis b6_36).
+// (plafond_ia_jour_client ; consommation_ia_jour du socle 19ar compte tous les genres).
 
 import type { ClientClaude } from "@partage/claude.ts";
 import { ErreurOuvrier } from "@partage/erreurs.ts";
