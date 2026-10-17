@@ -1142,3 +1142,30 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
 - SHA d'arrêt (sessions actives) : A1 c51c6de, A2 8c0e608, A3 34b8589, A4 d5db287, A5 798255f4, B1 f46b2c3, B2 0d675bf, B3 bcd02f6, B4 cd77750, B5 e8a95b9, B6 84df2e6, B7 0e1c2bb, C1 66930e4, C2 b0d8131d, C3 09dffb99, C4 a0e59013, P1 5d44a1e. C5 reste à l'arrêt.
 - À la reprise, d'abord : fusionner C1 lot 2e (diff 650424a..66930e4, limité à app/espace2 et components/espace2) et A3 ef5eeb4 ; déployer en Edge reput-reponse (C3 8699ed0), webhooks-ar24 et expediteur (A2 8c0e608).
 - Rien posé ni fusionné entre 15 h 15 et 16 h 12 Z ; dernier main fonctionnel 8f4106b.
+
+## Reprise du 17/10 (15 h 05 Z) et décisions de Teo du 17/10
+- Feu vert de Teo relayé par sa session bureau. Première vague : plafond 95 %, « PAUSE (Teo) » attendue vers 85 % ; pause de sécurité à 19 h 00 Z (rappel trig_01Pf8UuVk3CbaUTTsH184TEb). Seconde vague vers 02 h 20 Z (plafond 50 %). Au plus 2 pushes sur main par jour. Ne contacter que les sessions Opus 5.5 (colonne de gauche de la table), plus C1 à C4 et P1.
+- C1 lot 2e : rien à fusionner (66930e4 = notes seulement). A3 ef5eeb4 : le correctif d'EcranEquipe était déjà dans main (0cc4dfb8) ; seuls les scripts de recette A3 sont repris.
+- Déployés en Edge sur la recette : reput-reponse v4 (C3 8699ed0), expediteur v15 et webhooks-ar24 v1, verify_jwt false (A2 8c0e608). Les trois démarrent ; webhooks-ar24 répond « webhook non configuré » tant que les secrets AR24 manquent.
+
+### Décisions de Teo du 17/10 (déléguées à sa session bureau ; valent feu vert)
+Principe commun : les phrases du site font foi, le produit s'y met ; aucun prix dans le produit ; rien n'est acheté ni ouvert sans Teo.
+1. C1 : retirer « Bonjour » et la rangée de 4 chiffres de la vue d'ensemble, comme /omega.
+2. C4 OFFLOAD : « un message par trimestre » prévaut (une reprise = un seul message écrit, un seul canal, quarantaine 90 j gardée ; relance écrite = réglage désactivé par défaut). Réécriture CRM : attend un connecteur. `atteste` = état réel (faux pour la ligne 15 tant que la messagerie A2 n'est pas branchée).
+3. C2 CASHD : cadence du site = défaut réglable par organisation (devis J+3 puis J+7 après envoi, plus J+10 ; rappel courtois le jour de l'échéance des factures). Quatre captures depuis l'écran réel (390 et 1440) dans omega/captures/cashd/, sans toucher au site.
+4. C3 REPUT : validation AVANT envoi sauf sujets autorisés d'avance ; pas de relecture « le lendemain » (A:177) ; K:122 = transmission au service planning, pas d'agenda, bloc RDV non construit avant un premier client ; « réponse à 21 h » = vrai sur sujet autorisé, accusé sinon. Prochain bloc (choix du coordinateur) : valider depuis le mail de notification par lien signé (ligne 15) ; astreinte après le compte de téléphonie.
+5. A4 FILED : après le n° 26 (historique complet pour tous, aucune limite), « rédige ce qui repart » (n° 125) en minimal, brouillon toujours validé par un humain. Effacement : tout sauf ce que la loi oblige à garder ; archive probante et registre 10 ans, scellés, exportables, et l'écran le dit. Paliers = réglages techniques, aucun prix.
+6. B1 Varelo : OUI à contexte_varelo (lecture seule, session de la personne, journal, aucun IBAN).
+7. A1 lecteur : médical NON (pas d'HDS) ; DWG NON (PDF des planches) ; métré mesuré NON ; nouveaux types Tamila OUI (B4) ; première lecture longue Tamila OUI sur la recette (coffre en repli local, pièces fictives), puis Key Manager avec le compte Scaleway.
+8. Assistants « Questions » (Varelo, Daliro, Tavaro) et contexte_varelo : même fournisseur et garde-fous que le lecteur (plafond par client et par jour), même abstraction commutable ; recette = API Anthropic ; production = Bedrock Francfort avec le compte AWS ; aucun autre fournisseur.
+9. Vercel Pro : le jour du premier client.
+10. Sauvegarde : Scaleway Paris le jour du premier client ; d'ici là GitHub chiffrée dès que Teo pose les deux secrets ; workflow Scaleway écrit par une session autorisée à ce moment-là, pas par A5.
+11. HMRC et fournisseurs britanniques : ABANDONNÉ ; GB = « non vérifiable automatiquement », vérification humaine (B7, A4). Retiré des listes d'attente.
+- Teo ouvre en parallèle AR24, Meta, Google, Microsoft, Scaleway, éditeurs comptables, Mistral, INSEE, AWS : ne rien présumer posé avant de le voir dans les secrets.
+- Décisions relayées le 17/10 vers 15 h 20 Z à C1, C2, C3, C4, A1, A2, A4, A5, B1, B2, B4, B6, B7 ; B3, B5, A3 et P1 restent en silence.
+- Posé et vert sur la recette le 17/10 (niveau 1) : c4_16 (421 ok) ; b2_20 + b2_20b (621 ok) ; socle 19ar consommation IA (tous genres + registre) avec c3_* et b2_29 relancés (verts) ; c3_10 (281 ok) ; b1_19 + b4_19 + test 44 (1405 ok). a4_38 : 2 rouges sur a3fa4be, corrigé et reposé avec a4_39 en 90a2cd1 (tests en cours).
+- Déployés sur la recette : lecteur v38 (A1 9e4cdfd), tavaro-questions v1 + cron omega-tavaro-questions (B2 348e22a), varelo-assistant v1 (B1 b62f7dd).
+- Première lecture longue réelle (modèle réel, pièces fictives du banc, module essai) : analyse 8d85b76b finie, 10/10 pièces, 15 constats tous sourcés et vérifiés, 0,17 €.
+- Refusés : `atteste` de C4 (lib/produits = site public, gardé pour Teo) ; b6_36 de B6 tel quel (il réécrivait consommation_ia_jour par-dessus 19ar).
+- C3 lot 2 : choix (a), l'envoi interne vers un membre est ajouté au socle par A1 (gabarit fermé, sans texte libre) ; pas d'accord permanent.
+- app/api/assistant (B1) fusionné : route réservée aux personnes connectées, appelée seulement par components/espace2/Assistant.tsx ; ce n'est pas une page publique.
