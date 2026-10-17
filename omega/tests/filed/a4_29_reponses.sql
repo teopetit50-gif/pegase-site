@@ -3,8 +3,9 @@
 -- tests.a4_comme (a4_26_sortie_envois.sql), tests.a4_inserer (a4_16_rapprochement_3voies.sql), à poser avant. `select * from runtests('tests', '^test_a4_')` ;
 -- runtests() annule tout. Données d'exemple seulement.
 --
--- Sur une base où l'envoi par courriel existe (recette), le courriel est préparé adossé à la demande : il doit être
--- « a_valider » tant qu'aucune personne n'a approuvé. Ailleurs, le brouillon est « non_reglee » (à envoyer à la main).
+-- Sur une base où l'envoi par courriel existe (recette), le courriel est préparé adossé à la demande : il est
+-- « a_valider » tant qu'aucune personne n'a approuvé, ou « bloque » si le socle le verrouille d'emblée (adresse,
+-- réglage) — jamais en route. Ailleurs, le brouillon est « non_reglee » (à envoyer à la main).
 
 -- Le statut de l'envoi d'une réponse (null s'il n'y en a pas, ou si la base n'a pas d'envois).
 create or replace function tests.a4_statut_envoi(p_reponse uuid) returns text language plpgsql stable as $$
@@ -52,7 +53,11 @@ begin
   return next ok(v_rep.statut in ('a_valider', 'non_reglee'), 'Il attend une personne : ' || v_rep.statut);
   return next is((select type_action || ':' || statut from public.demandes_validation where id = v_rep.demande_id), 'filed.repondre:en_attente',
                  'Une demande de validation « filed.repondre » est déposée');
-  return next ok(coalesce(tests.a4_statut_envoi(v_r), 'a_valider') = 'a_valider', 'Aucun courriel n''est parti avant la validation');
+  -- Avant la validation, le courriel attend (a_valider) ou le socle l'a déjà verrouillé (bloque) : jamais en route.
+  return next ok(coalesce(tests.a4_statut_envoi(v_r), 'a_valider') in ('a_valider', 'bloque'),
+                 'Aucun courriel n''est parti avant la validation : ' || coalesce(tests.a4_statut_envoi(v_r), 'pas d''envoi'));
+  return next ok(tests.a4_statut_envoi(v_r) is distinct from 'bloque' or v_rep.statut = 'non_reglee',
+                 'Un courriel verrouillé par le socle laisse le brouillon « à envoyer à la main »');
   if to_regclass('private.actions_sans_accord') is not null then
     return next ok(exists (select 1 from private.actions_sans_accord a where a.module = 'filed' and a.type_action = 'filed.repondre'),
                    'Aucun accord permanent ne couvre filed.repondre');
@@ -84,7 +89,8 @@ begin
   perform tests.a4_decider_reponse(o, v_r, 'rejete', 'On appelle plutôt le fournisseur.');
   return next is((select statut || ':' || motif from public.filed_reponses where id = v_r), 'refusee:On appelle plutôt le fournisseur.',
                  'Refusée : rien ne part, le motif reste');
-  return next ok(coalesce(tests.a4_statut_envoi(v_r), 'refuse') in ('refuse', 'annule'), 'Le courriel adossé est clos sans partir');
+  return next ok(coalesce(tests.a4_statut_envoi(v_r), 'refuse') in ('refuse', 'annule', 'bloque', 'expire'),
+                 'Le courriel adossé est clos sans partir : ' || coalesce(tests.a4_statut_envoi(v_r), 'pas d''envoi'));
 end $f$;
 
 create or replace function tests.test_a4_38_03_confirmation_et_droits() returns setof text

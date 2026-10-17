@@ -10,8 +10,8 @@
 -- personne), range le brouillon dans filed_reponses et dépose une demande de validation « filed.repondre » — inscrite
 -- aux actions qu'aucun accord permanent ne couvre (private.actions_sans_accord). Le courriel est préparé par
 -- private.preparer_envoi ADOSSÉ à cette demande (comme CASHD) : il ne part que si une personne l'approuve ; refusée,
--- expirée ou annulée, il ne part pas. Si l'envoi par courriel n'est pas réglé pour FILED, le brouillon reste
--- validable et lisible (statut non_reglee) : la personne l'envoie elle-même. La décision est exécutée par
+-- expirée ou annulée, il ne part pas. Si l'envoi par courriel n'est pas réglé pour FILED, ou si le socle verrouille
+-- le courriel d'emblée (statut bloque), le brouillon reste validable et lisible (non_reglee) : la personne l'envoie elle-même. La décision est exécutée par
 -- private.filed_executer_decision (texte d'a4_08, une branche ajoutée ; gen38.py).
 -- Migration idempotente ; aucune suppression.
 
@@ -126,6 +126,7 @@ returns uuid language plpgsql security definer set search_path to '' as $$
 declare
   v_d public.filed_documents; v_f public.filed_factures; v_uid uuid; v_t record; v_id uuid := gen_random_uuid(); v_adresse text;
   v_nom text; v_dem uuid; v_dstatut text; v_dpol uuid; v_envoi uuid; v_err text; v_sujet text; v_corps text;
+  v_estatut text; v_everrou text; v_emotif text;
 begin
   select * into v_d from public.filed_documents where id = p_document;
   if not found then raise exception 'Document introuvable.' using errcode = 'P0002'; end if;
@@ -173,6 +174,15 @@ begin
         using v_d.client_id, v_d.id::text, jsonb_build_object('adresse', v_adresse, 'nom', coalesce(v_nom, v_adresse), 'professionnel', true),
               v_sujet, v_corps, 'filed:reponse:' || v_id::text, v_d.entite_id, now() + interval '30 days', jsonb_build_object('demande', v_dem);
       update public.filed_reponses set envoi_id = v_envoi where id = v_id;
+      -- Le socle peut refuser le courriel d'emblée (verrou : adresse, réglage, opposition…) : il est alors clos sans
+      -- partir ; le brouillon reste validable et la personne l'envoie elle-même.
+      execute 'select statut, verrou, motif from public.envois where id = $1' into v_estatut, v_everrou, v_emotif using v_envoi;
+      if v_estatut = 'bloque' then
+        update public.filed_reponses set statut = 'non_reglee',
+               motif = left(format('Le courriel ne peut pas partir (%s%s) : le brouillon reste à valider, puis à envoyer par la personne.',
+                                   coalesce(v_everrou, 'bloqué'), coalesce(' : ' || v_emotif, '')), 500)
+         where id = v_id;
+      end if;
     exception when others then
       v_err := left(sqlstate || ' ' || sqlerrm, 400);
       update public.filed_reponses set statut = 'non_reglee',
