@@ -25,7 +25,8 @@ begin
   return next is((b -> 'garde' ->> 'ecritures')::bigint, n_ecr, 'et les écritures');
   return next ok((b ->> 'garde_jusqu_au')::date >= (current_date + interval '10 years')::date, 'Gardé au moins dix ans : ' || (b ->> 'garde_jusqu_au'));
   return next ok(b ->> 'texte' like 'Tout ce que FILED tient pour vous est effacé, sauf ce que la loi oblige à garder.%'
-                 and b ->> 'texte' like '%scellés%exportables sur demande%', 'La phrase de l''écran le dit');
+                 and b ->> 'texte' like '%fichiers des pièces sont gardés 10 ans%scellés%exportables sur demande%', 'La phrase de l''écran le dit (a4_42 : fichiers compris)');
+  return next ok(b ->> 'fichiers' like 'Les fichiers des pièces sont gardés dix ans, scellés, exportables%', 'et la ligne des fichiers');
   return next ok(b -> 'efface' ? 'filed_fournisseurs', 'Le bilan dit ce qui part (les fournisseurs)');
 
   return next ok(exists (select 1 from pg_trigger where tgrelid = 'public.filed_conservation'::regclass and tgname = 'filed_conservation_scellee'
