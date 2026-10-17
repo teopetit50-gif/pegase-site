@@ -10,7 +10,7 @@
    puis, si on le demande, joue un geste réel (--geste=<nom>) et relève la
    réponse de la porte. Une capture par étape.
 
-   usage : node omega/recette-b2/relecture-reelle.mjs <session.json> [origine] [--geste=completer|litige|aucun]
+   usage : node omega/recette-b2/relecture-reelle.mjs <session.json> [origine] [--geste=completer|question|aucun] [--question="…"]
    Le fichier de session ne se commite jamais. */
 import { readFileSync } from 'node:fs';
 import { ouvrirSession } from '../../outils/chrome.mjs';
@@ -95,6 +95,25 @@ if (geste === 'completer' && releve.items > 0) {
   const issue = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return d ? { erreur: d.querySelector('.esp-avis[data-teinte="rouge"]')?.textContent } : { fait: document.querySelector('#esp-dossier .esp-avis[data-teinte="vert"]')?.textContent }; })()`);
   console.log('    réponse de la base :', JSON.stringify(issue));
   await s.capturer(`${dossier}reel-tavaro-completer-1440.jpg`, { qualite: 55 });
+}
+if (geste === 'question') {
+  /* b2_20 : une question réelle par l'écran ; l'ouvrier tavaro-questions répond dans la minute (cron) */
+  const texte = (args.find((a) => a.startsWith('--question=')) ?? '--question=Combien de retours ne sont pas encore facturés, et que faire ?').slice(11);
+  const sect = `document.querySelector('section[aria-label="Questions"]')`;
+  console.log('— geste réel : poser une question');
+  await s.evaluer(`(() => { const e = ${sect}.querySelector('textarea'); Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(e, ${JSON.stringify(texte)}); e.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(300);
+  await s.evaluer(`[...${sect}.querySelectorAll('button')].find(b => /Poser la question/.test(b.textContent))?.click()`);
+  let premiere = null;
+  for (let i = 0; i < 60; i++) {
+    await s.dormir(5000);
+    premiere = await s.evaluer(`(() => { const li = ${sect}.querySelector('ul[aria-label="Questions posées"] > li'); return li ? { statut: li.querySelector('.esp-pastille, [class*="pastille"]')?.textContent ?? '', texte: li.innerText } : null; })()`);
+    if (premiere && !/en attente|en cours/.test(premiere.statut)) break;
+  }
+  console.log('    réponse :', JSON.stringify(premiere));
+  ok(!!premiere && /répondue/.test(premiere.statut), `la question réelle est ${premiere?.statut ?? 'sans trace'}`);
+  await s.evaluer(`${sect}.scrollIntoView({ block: 'start' })`);
+  await s.capturer(`${dossier}reel-tavaro-question-1440.jpg`, { qualite: 55 });
 }
 s.fermer();
 console.log(echecs ? `\n${echecs} échec(s)` : '\ntout passe');
