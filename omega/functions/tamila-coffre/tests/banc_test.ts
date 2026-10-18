@@ -100,3 +100,31 @@ Deno.test("pdf : un PDF d'une page, xref aux bons décalages", () => {
   assertEquals(t.slice(decal, decal + 4), "xref");
   assert(t.includes("(Bonjour \\(essai\\)) Tj"));
 });
+
+Deno.test("pdf : plusieurs pages au-delà de 52 lignes ; accents et apostrophes en WinAnsi ; lignes coupées à 92", async () => {
+  const { couper } = await import("../banc.ts");
+  const long = Array.from({ length: 130 }, (_, i) => `Ligne ${i + 1} : l’arrêt attaqué, rendu à Versailles — « attendu »`).join("\n");
+  const lignes = couper(long);
+  const o = pdf(lignes);
+  const t = new TextDecoder("latin1").decode(o);
+  assert(t.includes("/Count 3"), "130 lignes → 3 pages");
+  assert(o.includes(0x92) && o.includes(0xe9) && o.includes(0xab) && o.includes(0x97), "’ é « — en WinAnsi");
+  assert(couper("mot ".repeat(100)).every((l) => l.length <= 92));
+  const decal = Number(/startxref\n(\d+)/.exec(t)![1]);
+  assertEquals(t.slice(decal, decal + 4), "xref");
+});
+
+Deno.test("banc_semer : des pièces fournies remplacent les fictives ; mal formées, 400 sans rien appeler", async () => {
+  const c = await cabinetAuBanc();
+  const mal = await traiter(c.ctx, serveur, { action: "banc_semer", client: CLIENT, nouvelle: c.nouvelle, pieces: [{ nom: "../x.pdf", texte: "a" }] });
+  assertEquals(mal.statut, 400);
+  const r = await traiter(c.ctx, serveur, {
+    action: "banc_semer",
+    client: CLIENT,
+    nouvelle: c.nouvelle,
+    pieces: [{ nom: "decision-1.pdf", texte: "Première décision.\nDeuxième ligne." }, { nom: "decision-2.pdf", texte: "Seconde décision." }],
+  });
+  assertEquals(r.statut, 200);
+  assertEquals((r.corps.pieces as unknown[]).length, 2);
+  assertEquals(c.fichiers.size, 2);
+});

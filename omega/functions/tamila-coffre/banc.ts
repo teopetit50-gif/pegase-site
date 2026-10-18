@@ -62,18 +62,78 @@ export const PIECES_FICTIVES: [string, string[]][] = [
   ]],
 ];
 
-/** Un PDF d'une page, du vrai texte (Helvetica, latin-1), que le lecteur sait extraire. */
+/** Windows-1252 (WinAnsiEncoding) : ce que Helvetica sait écrire ; le reste devient « ? ». */
+const CP1252: Record<number, number> = {
+  0x20ac: 0x80,
+  0x201a: 0x82,
+  0x0192: 0x83,
+  0x201e: 0x84,
+  0x2026: 0x85,
+  0x2020: 0x86,
+  0x2021: 0x87,
+  0x02c6: 0x88,
+  0x2030: 0x89,
+  0x0160: 0x8a,
+  0x2039: 0x8b,
+  0x0152: 0x8c,
+  0x017d: 0x8e,
+  0x2018: 0x91,
+  0x2019: 0x92,
+  0x201c: 0x93,
+  0x201d: 0x94,
+  0x2022: 0x95,
+  0x2013: 0x96,
+  0x2014: 0x97,
+  0x02dc: 0x98,
+  0x2122: 0x99,
+  0x0161: 0x9a,
+  0x203a: 0x9b,
+  0x0153: 0x9c,
+  0x017e: 0x9e,
+  0x0178: 0x9f,
+};
+const versAnsi = (s: string) =>
+  Array.from(s, (c) => {
+    const u = c.codePointAt(0)!;
+    return String.fromCharCode(u < 0x80 || (u >= 0xa0 && u <= 0xff) ? u : CP1252[u] ?? 0x3f);
+  }).join("");
+
+/** Coupe un texte en lignes d'au plus `largeur` caractères (aux espaces). */
+export function couper(texteBrut: string, largeur = 92): string[] {
+  const lignes: string[] = [];
+  for (const paragraphe of texteBrut.replace(/\r/g, "").split("\n")) {
+    let l = "";
+    for (const mot of paragraphe.split(/\s+/).filter(Boolean)) {
+      if (l && l.length + 1 + mot.length > largeur) {
+        lignes.push(l);
+        l = "";
+      }
+      l = l ? `${l} ${mot}` : mot.slice(0, largeur);
+    }
+    lignes.push(l);
+  }
+  // pas plus d'une ligne vide de suite
+  return lignes.filter((l, i) => l !== "" || lignes[i - 1] !== "");
+}
+
+/** Un PDF texte (Helvetica, WinAnsi), autant de pages qu'il faut (52 lignes par page), que le lecteur sait extraire. */
 export function pdf(lignes: string[]): Uint8Array {
-  const latin1 = (s: string) => Uint8Array.from(s, (c) => c.charCodeAt(0) & 0xff);
-  const esc = (t: string) => t.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
-  const flux = `BT /F1 11 Tf 56 790 Td 14 TL ${lignes.map((l) => `(${esc(l)}) Tj T*`).join(" ")} ET`;
+  const esc = (t: string) => versAnsi(t).replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+  const PAR_PAGE = 52;
+  const pages: string[][] = [];
+  for (let i = 0; i < Math.max(1, lignes.length); i += PAR_PAGE) pages.push(lignes.slice(i, i + PAR_PAGE));
+  // 1 catalogue, 2 pages, 3 police, puis (page, contenu) par page
+  const kids = pages.map((_, i) => `${4 + 2 * i} 0 R`).join(" ");
   const objets = [
     "<< /Type /Catalog /Pages 2 0 R >>",
-    "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>",
-    `<< /Length ${flux.length} >>\nstream\n${flux}\nendstream`,
+    `<< /Type /Pages /Kids [${kids}] /Count ${pages.length} >>`,
     "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>",
   ];
+  pages.forEach((p, i) => {
+    const flux = `BT /F1 10 Tf 50 800 Td 14.5 TL ${p.map((l) => `(${esc(l)}) Tj T*`).join(" ")} ET`;
+    objets.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents ${5 + 2 * i} 0 R >>`);
+    objets.push(`<< /Length ${flux.length} >>\nstream\n${flux}\nendstream`);
+  });
   let corps = "%PDF-1.4\n";
   const offs: number[] = [];
   objets.forEach((o, i) => {
@@ -83,7 +143,7 @@ export function pdf(lignes: string[]): Uint8Array {
   const xref = corps.length;
   corps += `xref\n0 ${objets.length + 1}\n0000000000 65535 f \n${offs.map((o) => `${String(o).padStart(10, "0")} 00000 n \n`).join("")}`;
   corps += `trailer\n<< /Size ${objets.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
-  return latin1(corps);
+  return Uint8Array.from(corps, (c) => c.charCodeAt(0) & 0xff);
 }
 
 async function sha256Hex(o: Uint8Array): Promise<string> {
@@ -101,6 +161,8 @@ interface DemandeSemer extends Demande {
   reference?: unknown;
   intitule?: unknown;
   numero_rg?: unknown;
+  /** des pièces à semer à la place des quatre fictives : [{nom, texte}] (6 au plus, 150 000 caractères chacune) */
+  pieces?: unknown;
 }
 
 export async function bancSemer(ctx: Contexte, d: DemandeSemer): Promise<Reponse> {
@@ -113,6 +175,16 @@ export async function bancSemer(ctx: Contexte, d: DemandeSemer): Promise<Reponse
   if (!dossier || !Number.isInteger(journal) || n.reference !== `scaleway:${region}:${cleMaitre}`) {
     return refus(400, "NOUVELLE_ILLISIBLE", "nouvelle attendue : ce que rend tamila_coffre_pour_nouvelle_cle");
   }
+  let aSemer: [string, string[]][] = PIECES_FICTIVES;
+  if (d.pieces !== undefined) {
+    const l = Array.isArray(d.pieces) ? d.pieces : [];
+    const ok = l.length >= 1 && l.length <= 6 &&
+      l.every((p) =>
+        p && typeof p.nom === "string" && /^[\w.\-]{1,80}\.pdf$/.test(p.nom) && typeof p.texte === "string" && p.texte.length > 0 && p.texte.length <= 150_000
+      );
+    if (!ok) return refus(400, "PIECES_ILLISIBLES", "pièces attendues : 1 à 6 × {nom: « x.pdf », texte (≤ 150 000 caractères)}");
+    aSemer = l.map((p: { nom: string; texte: string }) => [p.nom, couper(p.texte)]);
+  }
   if (!ctx.km) throw new ErreurCoffre("KM_ABSENT", "coffre non configuré : SCALEWAY_SECRET_KEY et SCALEWAY_PROJECT_ID absentes");
   if (ctx.km.region !== region) throw new ErreurCoffre("KM_ABSENT", `la clé maître est en ${region}, le coffre est réglé sur ${ctx.km.region}`);
   const cle = crypto.getRandomValues(new Uint8Array(LONGUEUR_CLE));
@@ -121,7 +193,7 @@ export async function bancSemer(ctx: Contexte, d: DemandeSemer): Promise<Reponse
     await ctx.portes.conclure(journal, "emise", { par: "banc" });
     const champ = async (v: unknown) => (typeof v === "string" && v.trim() ? `\\x${versHex(await chiffrerTamila(cle, texte(v.trim())))}` : null);
     const pieces = [];
-    for (const [nom, lignes] of PIECES_FICTIVES) {
+    for (const [nom, lignes] of aSemer) {
       const chiffre = await chiffrerTamila(cle, pdf(lignes));
       const sha = await sha256Hex(chiffre);
       const chemin = `${b.client}/tamila_dossier/${dossier}/${nom}.${sha.slice(0, 12)}.chiffre`;
