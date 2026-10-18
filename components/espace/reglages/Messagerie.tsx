@@ -21,6 +21,7 @@ import { Loader } from "@/components/ui/loader";
 import { createClient } from "@/lib/supabase/client";
 import { Avis, Pastille } from "../ui";
 import { dateHeure } from "../format";
+import { ilYa } from "../exemples/socle";
 
 type Connexion = { id: string; fournisseur: "gmail" | "microsoft"; adresse: string | null; etat: "active" | "a_reconnecter" | "deconnexion" | "revoquee"; erreur: string | null; portees: string[] | null; connecte_le: string | null };
 
@@ -39,7 +40,7 @@ function droits(portees: string[] | null): string {
   return d.length ? d.join(", ") : "—";
 }
 
-const EXEMPLE: Connexion = { id: "ex-gmail", fournisseur: "gmail", adresse: "factures@atelier-bertin.fr", etat: "active", erreur: null, portees: ["https://www.googleapis.com/auth/gmail.readonly", "https://www.googleapis.com/auth/gmail.compose"], connecte_le: new Date(Date.now() - 5 * 86_400_000).toISOString() };
+const EXEMPLE: Connexion = { id: "ex-gmail", fournisseur: "gmail", adresse: "factures@atelier-bertin.fr", etat: "active", erreur: null, portees: ["https://www.googleapis.com/auth/gmail.readonly", "https://www.googleapis.com/auth/gmail.compose"], connecte_le: ilYa(5, 9) };
 
 export default function Messagerie({ source, client, gere, pret }: { source: "exemple" | "reelle"; client: string | null; gere: boolean; pret: boolean }) {
   const [exemple, setExemple] = useState<Connexion[]>([EXEMPLE]);
