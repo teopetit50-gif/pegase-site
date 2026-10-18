@@ -34,8 +34,9 @@ const ARRET_HEURE = new Date(process.env.ARRET_HEURE ?? `${new Date().toISOStrin
 const COUT_PAGE_EUR = Number(process.env.COUT_PAGE_EUR ?? 0.04);
 const MAX_PAR_DCE = Number(process.env.MAX_PAR_DCE ?? 4);
 const MAX_MO = 20;
-const CATEGORIES = { neuf: 'DCE réels — construction neuve', renovation: 'DCE réels — rénovation', vrd: 'DCE réels — VRD' };
-const DEVIS = /\bdpgf\b|\bdqe\b|\bbpu\b|devis|detail estimatif|decomposition du prix/;
+/* les VRD d'abord : leurs DPGF sont courts ; les CCTP-DPGF de rénovation sont plus longs */
+const CATEGORIES = { vrd: 'DCE réels — VRD', renovation: 'DCE réels — rénovation', neuf: 'DCE réels — construction neuve' };
+const DEVIS = /dpgf|\bdqe\b|\bbpu\b|devis|detail estimatif|decomposition du prix/;
 
 const norme = (n) => n.normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[_.\-]+/g, ' ');
 const pdfs = (rep) => readdirSync(rep).flatMap((n) => { const p = join(rep, n); return statSync(p).isDirectory() ? pdfs(p) : /\.pdf$/i.test(n) ? [p] : []; });
