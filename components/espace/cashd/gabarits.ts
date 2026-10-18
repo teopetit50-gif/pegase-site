@@ -11,6 +11,7 @@
 import type { CleGabarit, Gabarit } from "./types";
 
 export const PALIERS_GABARIT: { cle: CleGabarit; libelle: string; variantes: number }[] = [
+  { cle: "echeance", libelle: "Rappel du jour d'échéance", variantes: 3 },
   { cle: "rappel", libelle: "Rappel courtois", variantes: 3 },
   { cle: "relance", libelle: "Relance ferme", variantes: 3 },
   { cle: "mise_en_demeure", libelle: "Mise en demeure", variantes: 1 },
@@ -39,6 +40,7 @@ export const VARIABLES: Record<string, string> = {
 };
 
 const OBLIGATOIRES: Record<CleGabarit, string[]> = {
+  echeance: ["lignes"],
   rappel: ["lignes"],
   relance: ["lignes", "total"],
   mise_en_demeure: ["lignes", "total", "limite"],
@@ -61,6 +63,10 @@ const D = (cle: CleGabarit, variante: number, sujet: string, corps: string): Gab
   cle, langue: "fr", variante, personnalise: false, sujet, corps, defaut_sujet: sujet, defaut_corps: corps, maj_le: null,
 });
 export const GABARITS_EXEMPLE: Gabarit[] = [
+  D("echeance", 1, "{emetteur} — {objet} : échéance du jour",
+    "{bonjour}\n\nPetit rappel : {dues} aujourd'hui sur votre compte {compte} :\n{lignes}\n{ton_montant}Si le règlement est déjà parti, merci de ne pas tenir compte de ce message. Pour toute question sur cette facture, il vous suffit de répondre à ce courriel.\n{reglement}"),
+  D("echeance", 2, "{emetteur} — {objet}, à régler aujourd'hui",
+    "{bonjour}\n\nNous nous permettons de vous signaler que {dues} ce jour (compte {compte}) :\n{lignes}\n{ton_montant}Si vous avez déjà procédé au règlement, nos messages se sont simplement croisés. Une question ? Répondez simplement à ce courriel.\n{reglement}"),
   D("rappel", 1, "{emetteur} — rappel : {objet}",
     "{bonjour}\n\nSauf erreur de notre part, {dues} sur votre compte {compte} :\n{lignes}\n{ton_montant}{oubli}Si le règlement est déjà parti, merci de ne pas tenir compte de ce message. Pour toute question sur cette facture, il vous suffit de répondre à ce courriel.\n{reglement}"),
   D("rappel", 2, "{emetteur} — {objet}, pour rappel",
@@ -94,13 +100,14 @@ export function apercu(
   r: { metier?: string; seuil_ton?: number | null; moyens_reglement?: string | null; echelonnement_des?: number | null; emetteur?: string },
 ): { sujet: string; corps: string } {
   const devis = cle.startsWith("devis");
+  const ech = cle === "echeance";
   const total = 12000;
   let reglement = "";
-  if (cle === "rappel" || cle === "relance") {
+  if (ech || cle === "rappel" || cle === "relance") {
     if (r.moyens_reglement) reglement += `Vous pouvez régler ${r.moyens_reglement.replace(/[.\s]+$/, "")}.\n`;
     if (r.echelonnement_des !== null && r.echelonnement_des !== undefined && total >= r.echelonnement_des) reglement += "Si un règlement en plusieurs fois vous aide, répondez-nous : nous pouvons convenir d'un échéancier.\n";
   }
-  const ton = (cle === "rappel" || cle === "relance") && r.seuil_ton !== null && r.seuil_ton !== undefined && total >= r.seuil_ton
+  const ton = (ech || cle === "rappel" || cle === "relance") && r.seuil_ton !== null && r.seuil_ton !== undefined && total >= r.seuil_ton
     ? "Compte tenu du montant en jeu, merci de nous indiquer dès à présent la date de règlement prévue. " : "";
   const v: Record<string, string> = {
     bonjour: "Bonjour Mme Lefèvre,",
@@ -108,15 +115,17 @@ export function apercu(
     compte: "C-LEFEVRE, secteur Immobilier",
     lignes: devis
       ? "  • Devis D-2026-033 du 01/10/2026 : 4 800,00 €\n"
-      : "  • Facture F-2026-101 du 27/07/2026, 12 000,00 € TTC, échue le 26/08/2026 (45 jours de retard) : 12 000,00 € restant dus\n",
+      : ech
+        ? "  • Facture F-2026-101 du 27/07/2026, 12 000,00 € TTC, à régler le 26/08/2026 : 12 000,00 €\n"
+        : "  • Facture F-2026-101 du 27/07/2026, 12 000,00 € TTC, échue le 26/08/2026 (45 jours de retard) : 12 000,00 € restant dus\n",
     total: devis ? "4 800,00 €" : "12 000,00 €",
     limite: "19 octobre 2026",
     delai: "8",
     nb: "1",
     numero: devis ? "D-2026-033" : "F-2026-101",
-    retard_max: "45",
-    objet: devis ? " D-2026-033" : "facture F-2026-101 échue",
-    dues: cle === "rappel" ? "la somme suivante reste due" : cle === "relance" ? "la somme suivante reste impayée" : devis ? "le devis suivant" : "les sommes suivantes restent dues",
+    retard_max: ech ? "0" : "45",
+    objet: devis ? " D-2026-033" : ech ? "facture F-2026-101" : "facture F-2026-101 échue",
+    dues: ech ? "la facture suivante arrive à échéance" : cle === "rappel" ? "la somme suivante reste due" : cle === "relance" ? "la somme suivante reste impayée" : devis ? "le devis suivant" : "les sommes suivantes restent dues",
     oubli: cle === "rappel" && !ton ? "Il s'agit sans doute d'un simple oubli. " : "",
     ton_montant: ton,
     droits: cle === "relance"

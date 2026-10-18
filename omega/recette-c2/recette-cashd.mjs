@@ -405,5 +405,21 @@ for (const largeur of [1440, 390]) {
   s.fermer();
 }
 
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'c2-ech', densite: 1 });
+  console.log('— /espace/cashd : le texte du rappel du jour d\'échéance (exemple)');
+  ok(await s.aller(base + CHEMIN), 'page chargée');
+  await s.dormir(600);
+  await onglet(s, 'Relances');
+  const T = 'section[aria-label="Vos textes"]';
+  const opts = await s.evaluer(`[...document.querySelectorAll('${T} select')[0].options].map(o => o.textContent).join('|')`);
+  ok(/^Rappel du jour d'échéance\|Rappel courtois/.test(opts), `le palier « Rappel du jour d'échéance » est proposé (${opts.slice(0, 60)}…)`);
+  await s.evaluer(saisir(`${T} select`, 'echeance', 'HTMLSelectElement'));
+  await s.dormir(300);
+  const ap = await s.evaluer(`document.querySelector('${T} pre.c2-corps')?.innerText || ''`);
+  ok(/échéance du jour/.test(ap) && /à régler le/.test(ap) && !/jours de retard/.test(ap), 'son aperçu dit « à régler », sans retard');
+  s.fermer();
+}
+
 console.log(echecs ? `\n${echecs} échec(s)` : '\nRecette CASHD : tout est vert.');
 process.exit(echecs ? 1 : 0);

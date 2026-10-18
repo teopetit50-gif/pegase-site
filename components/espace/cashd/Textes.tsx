@@ -383,7 +383,7 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
 
       <div className="esp-carte-corps">
         <h3 className="esp-section-titre">Aperçu sur un exemple</h3>
-        <p className="c2-sous">La SCI Lefèvre, une facture de {montant(12000)} en retard de 45 jours.</p>
+        <p className="c2-sous">{cle === "echeance" ? <>La SCI Lefèvre, une facture de {montant(12000)} à régler ce jour.</> : <>La SCI Lefèvre, une facture de {montant(12000)} en retard de 45 jours.</>}</p>
         <pre className="c2-corps"><strong>{vu.sujet}</strong>{"\n\n"}{vu.corps}</pre>
         <details className="c2-variables">
           <summary>Les variables</summary>

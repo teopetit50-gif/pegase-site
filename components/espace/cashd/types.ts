@@ -235,7 +235,7 @@ export type Proposition = {
 };
 
 /* c2_04 — les textes de l'organisation (porte cashd_gabarits) */
-export type CleGabarit = "rappel" | "relance" | "mise_en_demeure" | "devis_rappel" | "devis_relance";
+export type CleGabarit = "echeance" | "rappel" | "relance" | "mise_en_demeure" | "devis_rappel" | "devis_relance";
 export type Gabarit = {
   cle: CleGabarit;
   langue: string;

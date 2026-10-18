@@ -13,8 +13,10 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
 - **Posés et verts (18/10)** : c2_11 envoi à la main (842f9c25) ; c2_12 v2 modèle 2 (5ee5fd10, ^test_c2_ 12/12) — rappels
   des paliers 1 et 2 sous accord permanent du socle, relance ferme / devis / mise en demeure (seule à pouvoir partir en
   LRE) dans actions_sans_accord. Aucun accord créé ; Omega reste « coupe ».
-- **À poser** : `c2_13_point_auto.sql` puis test `c2_12_envoi_auto` (18) — le point du matin dit les rappels approuvés
-  d'office par l'accord (combien, montant), lien vers les envois. Local 276/276.
+- **Posé (18/10)** : c2_13 point du matin des rappels sous accord (6a98ff42).
+- **À poser** : `c2_14_texte_echeance.sql` puis tests `c2_14_texte_echeance` (9) et `c2_05_textes` (ajusté : 11 textes par
+  langue) — le texte du rappel du jour d'échéance s'écrit aussi (table jumelle cashd_gabarits_echeance, lue avec les
+  autres par private.cashd_gabarits_de) ; écran : le palier dans Vos textes, aperçu « à régler ». Local 285/285.
 - **Omega client CASHD (18/10, recette)** : `omega/banc/cashd_omega.sql` — installe CASHD (essai), coupe l'envoi du
   module cashd (relances rédigées et validables, envoyées à la main), charge les factures d'un bloc VALUES que le
   coordinateur remplit à partir des PDF de Teo (copie locale non commitée : vraies données). CASHD ne lit pas les PDF.

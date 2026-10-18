@@ -27,9 +27,9 @@ begin
   return next throws_ok(format('select public.cashd_ecrire_gabarit(%L, %L, %L, 1, %L, %L)', v_client, 'rappel', 'fr', 'Objet', '{lignes}'),
                         '42501', null, 'Un collaborateur n''écrit pas les textes de l''organisation');
   v_r := public.cashd_gabarits(v_client);
-  return next ok(jsonb_array_length(v_r -> 'gabarits') = 18 and not exists (select 1 from jsonb_array_elements(v_r -> 'gabarits') x where (x ->> 'personnalise')::boolean)
+  return next ok(jsonb_array_length(v_r -> 'gabarits') = 22 and not exists (select 1 from jsonb_array_elements(v_r -> 'gabarits') x where (x ->> 'personnalise')::boolean)
                  and (v_r -> 'variables') ? 'lignes',
-                 'Il lit les textes par défaut : 9 par langue (deux variantes par palier, une pour la mise en demeure), et leurs variables');
+                 'Il lit les textes par défaut : 11 par langue (deux variantes par palier, jour d''échéance compris depuis c2_14 ; une pour la mise en demeure), et leurs variables');
   perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
   perform tests.redevenir_admin();
   return next ok(not has_function_privilege('authenticated', 'private.cashd_relancer_commandes(uuid, date)', 'execute')
