@@ -18,7 +18,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Loader } from "@/components/ui/loader";
 import { Avis, Chargement, Pastille } from "../ui";
-import { montant } from "../format";
+import { dateCourte, montant } from "../format";
 import * as portes from "./portes";
 import { apercu, GABARITS_EXEMPLE, PALIERS_GABARIT, VARIABLES, verifier } from "./gabarits";
 import type { CleGabarit, Gabarit, LigneGabarit, PalierValidation, Reglages, RoleValidation } from "./types";
@@ -236,6 +236,40 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
     }
   };
 
+  /* les rappels des paliers 1 et 2 envoyés sans validation, sous accord permanent (c2_12) */
+  const [auto, setAuto] = useState<portes.EnvoiAuto>({ actif: false, accord: null });
+  const [plafondAuto, setPlafondAuto] = useState("5000");
+  useEffect(() => {
+    if (source !== "reelle" || !client) return;
+    let actif = true;
+    void portes.chargerEnvoiAuto(client).then((x) => { if (actif) setAuto(x); }, () => undefined);
+    return () => { actif = false; };
+  }, [source, client]);
+  const reglerAuto = async (actif: boolean) => {
+    setEnvoi(true);
+    setErreur(null);
+    setFait(null);
+    try {
+      const plafond = nombre(plafondAuto);
+      if (actif && (Number.isNaN(plafond) || !plafond || plafond <= 0)) throw new Error("Le plafond d'un rappel envoyé seul est un montant positif.");
+      if (source === "reelle") {
+        if (!client) throw new Error("Aucun compte rattaché à cette session.");
+        setAuto(await portes.reglerEnvoiAuto(client, actif, plafond));
+      } else {
+        setAuto(actif
+          ? { actif: false, accord: { id: "exemple", statut: "a_valider", plafond: plafond as number, debut: new Date().toISOString(), fin: new Date(Date.now() + 365 * 86400000).toISOString(), demande_id: null } }
+          : { actif: false, accord: null });
+      }
+      setFait(actif
+        ? `Accord proposé${source === "exemple" ? " (exemple)" : ""} : une seconde personne l'active dans la file de validation ; ensuite, les rappels jusqu'à ${montant(plafond as number)} partent seuls.`
+        : `Envoi automatique coupé${source === "exemple" ? " (exemple)" : ""} : chaque rappel attend de nouveau une validation.`);
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : "La base a refusé ce réglage.");
+    } finally {
+      setEnvoi(false);
+    }
+  };
+
   const valeursReglage = { seuil_ton: nombre(r.seuil_ton), echelonnement_des: nombre(r.echelonnement_des) };
   const reglageValide = !Number.isNaN(valeursReglage.seuil_ton) && !Number.isNaN(valeursReglage.echelonnement_des) && r.moyens_reglement.length <= 400;
   const reglerTon = async () => {
@@ -423,6 +457,31 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
             <input type="checkbox" checked={portefeuille} disabled={envoi} onChange={(e) => void reglerPortefeuille(e.target.checked)} />
             <span>Chaque chargé de recouvrement ne voit que son portefeuille (les comptes dont il est le chargé) ; la direction, l&apos;administration et les valideurs lisent le consolidé.</span>
           </label>
+          <div className="c2-auto" role="group" aria-labelledby="c2-auto-titre">
+            <p id="c2-auto-titre" className="c2-auto-titre">Rappels envoyés sans validation</p>
+            <p className="c2-sous">
+              Le rappel du jour de l&apos;échéance et le rappel J+7 peuvent partir seuls, jusqu&apos;à un plafond par rappel. La relance ferme, la mise en demeure et la lettre recommandée attendent toujours une personne. L&apos;accord dure un an ; une seconde personne l&apos;active dans la file de validation.
+            </p>
+            <p className="c2-auto-etat">
+              {auto.actif && auto.accord
+                ? <><Pastille teinte="vert">Actif</Pastille> jusqu&apos;à {montant(auto.accord.plafond)} par rappel, jusqu&apos;au {dateCourte(auto.accord.fin)}</>
+                : auto.accord?.statut === "a_valider"
+                  ? <><Pastille teinte="ambre">Proposé</Pastille> en attente d&apos;activation, plafond {montant(auto.accord.plafond)}</>
+                  : <><Pastille teinte="gris">Coupé</Pastille> chaque rappel attend une validation</>}
+            </p>
+            <div className="esp-actions">
+              {auto.accord ? (
+                <button type="button" className="r-btn" disabled={envoi} onClick={() => void reglerAuto(false)}>Couper l&apos;envoi automatique</button>
+              ) : (
+                <>
+                  <label className="rv-libelle c2-auto-plafond">Plafond par rappel (€)
+                    <input className="rv-champ" inputMode="decimal" value={plafondAuto} onChange={(e) => setPlafondAuto(e.target.value)} />
+                  </label>
+                  <button type="button" className="r-btn" disabled={envoi} onClick={() => void reglerAuto(true)}>Proposer l&apos;envoi automatique</button>
+                </>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </section>

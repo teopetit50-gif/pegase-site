@@ -223,3 +223,13 @@ export async function ecrireLigne(client: string, langue: string, nature: "factu
 export async function noterEnvoiMain(relance: string, canal: string, note: string | null) {
   return rpc<{ id: string; canal: string; envoye_le: string }>("cashd_noter_envoi_main", { p_relance: relance, p_canal: canal, p_le: null, p_note: note });
 }
+
+/* ——— c2_12 : les rappels des paliers 1 et 2 envoyés sans validation, sous accord permanent ——— */
+export type EnvoiAuto = { actif: boolean; accord: { id: string; statut: "active" | "a_valider"; plafond: number; debut: string; fin: string; demande_id: string | null } | null };
+export async function chargerEnvoiAuto(client: string) {
+  return rpc<EnvoiAuto>("cashd_envoi_auto", { p_client: client });
+}
+export async function reglerEnvoiAuto(client: string, actif: boolean, plafond: number | null) {
+  return rpc<EnvoiAuto & { propose: string | null; revoques: number }>("cashd_regler_envoi_auto", { p_client: client, p_actif: actif, p_plafond: plafond ?? 5000 });
+}
+

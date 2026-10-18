@@ -343,3 +343,9 @@
 .esp .c2-envoi-main-canal { display: inline-flex; align-items: center; gap: 8px; }
 .esp .c2-envoi-main-canal .rv-champ { width: auto; min-width: 0; }
 
+/* c2_12 — les rappels envoyés sans validation (réglage) */
+.esp .c2-auto { margin-top: 16px; padding: 12px 0 0; border: 0; border-top: 1px solid var(--r-filet); min-width: 0; }
+.esp .c2-auto-etat { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 8px 0; }
+.esp .c2-auto-plafond { max-width: 220px; }
+
+.esp .c2-auto-titre { font-weight: 600; margin: 0; }

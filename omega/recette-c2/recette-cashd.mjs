@@ -382,5 +382,28 @@ for (const largeur of [1440, 390]) {
   s.fermer();
 }
 
+for (const largeur of [1440, 390]) {
+  const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'c2-auto', densite: 1 });
+  console.log(`— /espace/cashd : rappels envoyés sans validation, sous accord (exemple, ${largeur})`);
+  ok(await s.aller(base + CHEMIN), 'page chargée');
+  await s.dormir(600);
+  await onglet(s, 'Relances');
+  const etat = () => s.evaluer(`document.querySelector('.c2-auto .c2-auto-etat')?.textContent.replace(/\\s+/g, ' ').trim() || ''`);
+  const e0 = await etat();
+  ok(/^Coupé/.test(e0), `par défaut, coupé (${e0.slice(0, 60)})`);
+  const t = await s.evaluer(`document.querySelector('.c2-auto')?.textContent || ''`);
+  ok(/mise en demeure/.test(t) && /lettre recommandée/.test(t) && /seconde personne/.test(t), 'le réglage dit que la mise en demeure et la LRE attendent toujours une personne, et qu\'une seconde personne active l\'accord');
+  await s.evaluer(`[...document.querySelectorAll('.c2-auto button')].find(b => b.textContent.includes('Proposer'))?.click()`);
+  await s.dormir(300);
+  const e1 = await etat();
+  ok(/^Proposé/.test(e1), `proposé, en attente d'activation (${e1.slice(0, 70)})`);
+  const m = await s.evaluer(DEBORDE);
+  ok(m.deb === 0 && m.larges.length === 0, `pas de débordement (${m.deb}) ${m.larges.length ? JSON.stringify(m.larges) : ''}`);
+  await s.evaluer(`[...document.querySelectorAll('.c2-auto button')].find(b => b.textContent.includes('Couper'))?.click()`);
+  await s.dormir(300);
+  ok(/^Coupé/.test(await etat()), 'coupé de nouveau');
+  s.fermer();
+}
+
 console.log(echecs ? `\n${echecs} échec(s)` : '\nRecette CASHD : tout est vert.');
 process.exit(echecs ? 1 : 0);
