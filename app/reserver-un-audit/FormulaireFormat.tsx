@@ -267,9 +267,6 @@ export default function FormulaireFormat() {
         </span>
       </button>
 
-      <p className="rdv-petit">
-        Sans JavaScript, écrivez-nous directement à {COURRIEL}.
-      </p>
 
       {envoi === "ok" && confirmation ? (
         <p className="rdv-confirmation" role="status">
