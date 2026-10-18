@@ -527,3 +527,19 @@
     font-size: 116px;
   }
 }
+
+/* ─── Pied de page noir sous la bande ───
+   Teo, 18/10 : « c'est blanc en bas alors que ça doit être noir ». Le pied est
+   partagé (components/Footer.tsx, blanc partout) et suit .rdv dans <main> :
+   le sélecteur frère le noircit sur cette page seulement, rien ne change
+   ailleurs. Référence : pied noir, mentions en gris, blanc au survol. */
+.rdv ~ footer {
+  background: #000;
+  border-top-color: rgba(255, 255, 255, 0.12);
+}
+.rdv ~ footer .text-neutral-500 {
+  color: rgba(255, 255, 255, 0.6);
+}
+.rdv ~ footer a:hover {
+  color: #fff;
+}
