@@ -1,4 +1,4 @@
-import { assertEquals, assertMatch } from "@std/assert";
+import { assert, assertEquals, assertMatch } from "@std/assert";
 import { creerOAuth } from "./oauth.ts";
 import { GmailDouble, journalMuet, PortesDouble } from "./doubles.ts";
 
@@ -221,4 +221,24 @@ Deno.test("adresse de retour sur omegaai.fr : même URI au consentement et à l'
   assertEquals(g.retoursEchange, [
     "https://omegaai.fr/api/messagerie/google/retour",
   ]);
+});
+
+Deno.test("page de fin sans écran : texte UTF-8 avec BOM (la passerelle Supabase sert le HTML en text/plain)", async () => {
+  const servir = creerOAuth({
+    portes: new PortesDouble(),
+    messageries: {},
+    base: "https://projet.supabase.co/functions/v1/messagerie-oauth",
+    journal: journalMuet,
+  });
+  const r = await servir(
+    new Request(
+      "https://projet.supabase.co/functions/v1/messagerie-oauth/google/debut?etat=x",
+    ),
+  );
+  assertEquals(r.headers.get("content-type"), "text/plain; charset=utf-8");
+  const octets = new Uint8Array(await r.arrayBuffer());
+  assertEquals([...octets.slice(0, 3)], [0xef, 0xbb, 0xbf]);
+  const texte = new TextDecoder().decode(octets);
+  assert(texte.includes("Connexion indisponible"));
+  assert(!texte.includes("<"));
 });

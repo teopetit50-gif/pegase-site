@@ -31,25 +31,21 @@ export type DependancesOAuth = {
   journal: { erreur(message: string, detail?: Record<string, unknown>): void };
 };
 
+/**
+ * Page de fin quand il n'y a pas d'écran où revenir. En TEXTE : la passerelle des fonctions Supabase sert le
+ * HTML de *.supabase.co en text/plain (le navigateur montrait la source, accents cassés). Le BOM UTF-8 en tête
+ * fait lire l'UTF-8 même si l'en-tête perd son charset. L'écran d'Omega (MESSAGERIE_ECRAN ou p_retour_ecran,
+ * sur omegaai.fr) reste la vraie fin de parcours.
+ */
 function page(statut: number, titre: string, texte: string): Response {
-  const echapper = (v: string) =>
-    v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  return new Response(
-    `<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width">` +
-      `<title>${
-        echapper(titre)
-      }</title><body style="font-family:system-ui,sans-serif;max-width:36rem;margin:3rem auto;padding:0 1rem">` +
-      `<h1 style="font-size:1.4rem">${echapper(titre)}</h1><p>${
-        echapper(texte)
-      }</p></body></html>`,
-    {
-      status: statut,
-      headers: {
-        "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "no-store",
-      },
+  return new Response(`\uFEFF${titre}\n\n${texte}\n`, {
+    status: statut,
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+      "Cache-Control": "no-store",
+      "X-Content-Type-Options": "nosniff",
     },
-  );
+  });
 }
 
 function redirection(url: string): Response {
