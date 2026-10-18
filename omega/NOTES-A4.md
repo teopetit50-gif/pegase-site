@@ -2,9 +2,9 @@
 
 ## REPRISE (reprise du 18/10, 21 h 16 Z — Teo)
 
-- **Fait** : lots a4_01 → a4_45 posés et verts sur la recette (86/86, 18/10 22 h 23 Z ; « 19 % » vu au recontrôle du banc) ; a4_46 écrit (historique FILED chaîné : rang, empreinte de la précédente, `filed_verifier_historique`, `filed_sceau_historique` ; chiffrage n° 114 ; test `a4_34_historique_chaine.sql`, rouge avant, vert après ; 87/87 en local).
-- **En cours** : a4_46 à poser par le coordinateur.
-- **Prochain pas** : paquet 3 du banc relevé et classé (aucun nouveau défaut) ; `montant.lignes` attend un champ « remise au pied » du lecteur (CHAMPS-LECTURE). Restent au coordinateur et à Teo : fusion, production, déploiements `sortie` / `compta`, écran d'effacement, garde des fichiers (A5), identifiants des éditeurs, clé Sirene, prix des paliers.
+- **Fait** : lots a4_01 → a4_46 posés et verts sur la recette (^test_a4_ 87/87, 18/10 22 h 40 Z) ; a4_46 vérifié sur le banc (chaîne intacte, 340 lignes antérieures, la chaîne part de la prochaine ligne).
+- **En cours** : rien.
+- **Prochain pas** : sans compte tiers, il ne reste que des choix à trancher (rôle « comptabilisation » distinct, n° 111 ; catégories propres à l'organisation, n° 31 ; envoi périodique du sceau d'historique au client, n° 114) ; `montant.lignes` attend un champ « remise au pied » du lecteur (CHAMPS-LECTURE). Restent au coordinateur et à Teo : fusion, production, déploiements `sortie` / `compta`, écran d'effacement, garde des fichiers (A5), identifiants des éditeurs, clé Sirene, prix des paliers.
 
 ## Banc, chantier 3 (18/10) — exemples de la norme lus par FILED (PAS de vraies factures)
 
