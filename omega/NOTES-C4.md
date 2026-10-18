@@ -6,9 +6,9 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 
 ## REPRISE (18/10, 22 h Z — modèle 2 : envoi automatique)
 
-- Fait : c4_01 à c4_17 verts sur la recette ; c4_18 (envoi automatique par défaut, accord de Teo dans la session C4) écrit, local 412 ok.
+- Fait : c4_01 à c4_17 verts sur la recette ; c4_18 (envoi automatique) remis au coordinateur ; c4_19 (effacement d'une personne) écrit, local 422 ok.
 - En cours : rien. La liste Guadeloupe reste hors git et hors recette ; scratchpad seulement.
-- Prochain pas : poser c4_18 ; côté socle (coordinateur) : offload/envoi.email sur activation_seul_autorisee, offload/offload.message_retenu sur actions_sans_accord.
+- Prochain pas : poser c4_18 puis c4_19 ; Teo doit trancher : règles appliquées par un modèle de langue ?, fichier des lignes « atteste », branche Gmail (compte tiers) ; côté socle (coordinateur) : offload/envoi.email sur activation_seul_autorisee, offload/offload.message_retenu sur actions_sans_accord.
 
 ### Reprise du 17/10
 
@@ -451,6 +451,16 @@ Banc local : 28 tests, 312 assertions vertes, migrations posées deux fois ; tsc
 l'échéance honorée après message est comptée au suivi). Le chiffre repris compte tous les achats des 90 jours,
 sans prétendre qu'ils sont dus au seul message.
 
+## Lot c4_19 — effacement des données d'une personne (19/10)
+
+Liste de Teo (point 9). L'effacement de l'organisation relève du socle : toutes les tables offload_* sont en
+client_id … on delete cascade (vérifié par le test sur le catalogue). Ici, la demande d'une personne :
+`public.offload_effacer_compte(p_compte, p_motif)` (gérant/admin, origine obligatoire). Le nom, l'interlocuteur, le
+courriel, le téléphone, la ville et le groupe sont rendus anonymes ; les notes de contact et le détail des tâches sont
+vidés ; le compte passe à « arrete » ; ses envois à valider ou prêts sont annulés. L'historique d'achats est gardé.
+Le déclencheur `offload_comptes_garder_efface` empêche qu'un import ou une saisie réécrive le compte. L'action est au
+journal, sans les données effacées. Pas de DELETE. Test : `omega/tests/offload/c4_19_effacement.sql` (10 assertions). Banc local : 44 tests, 422 ok.
+
 ## Lot c4_18 — envoi automatique par défaut, « modèle 2 » (18/10)
 
 Teo (relayé à 21 h 20 Z, confirmé dans la session : « offload a le droit de répondre automatiquement ») : les messages
@@ -738,3 +748,4 @@ Partielles : 6, 11, 15, 38.
 - 18/10, 21 h 30 Z — reprise (coordinateur) : lot c4_17 (restitution des données) : 42 tests, 393 ok en local.
 - 18/10, 21 h 35 Z — c4_17 : la date du journal opposable s'appelle survenu_le (recette : 42703) ; corrigé, local 393 ok.
 - 18/10, 22 h Z — lot c4_18 (envoi automatique par défaut, modèle 2) : 43 tests, 412 ok en local (session en Europe/Paris).
+- 19/10 — lot c4_19 (effacement des données d'une personne) : 44 tests, 422 ok en local.
