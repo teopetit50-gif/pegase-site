@@ -21,6 +21,7 @@ import { useSource } from "../source";
 import { Avis, Ruban } from "../ui";
 import { dateHeure } from "../format";
 import { monClient } from "../filed/portes";
+import Messagerie from "./Messagerie";
 import {
   NonBranche,
   apercuEffacement,
@@ -177,6 +178,8 @@ export default function EcranReglages() {
       </div>
 
       <div style={{ display: "grid", gap: 16 }}>
+        <Messagerie source={source} client={client} gere={exporteur} pret={source === "exemple" || lu} />
+
         <section className="esp-carte" aria-labelledby="titre-equipe">
           <div className="esp-carte-tete">
             <h2 className="esp-carte-titre" id="titre-equipe">L&apos;équipe</h2>

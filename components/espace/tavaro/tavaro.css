@@ -485,3 +485,14 @@
 .esp .tav-guide p {
   margin: 0 0 6px;
 }
+/* les chiffres d'une réponse aux Questions */
+.esp .tav-chiffres-reponse {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 8px 0;
+}
+.esp .tav-chiffres-reponse dd {
+  margin: 0;
+  font-weight: 600;
+}

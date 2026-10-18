@@ -127,6 +127,15 @@ const ECRANS = [
     ],
   },
   {
+    cle: 'equipe', chemin: '/equipe', titre: 'Équipe',
+    textes: ['Les personnes', 'Ce que chaque rôle permet', 'Sociétés visibles', 'Claire Morel'],
+    actions: [
+      { nom: 'Ajouter une personne', dialogue: 'Ajouter une personne' },
+      { nom: 'Modifier les sociétés visibles par Yanis', dialogue: 'Sociétés visibles' },
+      { nom: 'Retirer Sofia', dialogue: "Retirer de l'organisation" },
+    ],
+  },
+  {
     cle: 'fournisseurs', chemin: '/filed/fournisseurs', titre: 'Fournisseurs',
     textes: ['À confirmer', 'Bloqués', 'Actifs', 'IBAN', 'Factures'],
     actions: [

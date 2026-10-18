@@ -38,6 +38,8 @@ import { Avis, Def, Pastille } from "../ui";
 import { dateCourte, dateHeure, montant, nombreFr, pourcent } from "../format";
 import { ACCEPTATIONS, CONFIRMATIONS, CONTROLES_LIGNE, EXECUTIONS, GRAVITES, ROLES_TIERS, STATUTS_AVENANT, STATUTS_CHANTIER, UNITES, VIGILANCES, familleControle, libelleEnvoi, libelleStatutFacture, libelleUnite } from "./etats";
 import { FACTURES_CANDIDATES_EXEMPLE } from "./exemples";
+import { aujourdHui } from "../exemples/socle";
+import QuestionsCarte from "./QuestionsCarte";
 import ReleveDialog from "./ReleveDialog";
 import { abandonnerAvenant, accepterEcart, changerStatutChantier, chargerFacturesCandidates, chiffrerLigneAvenant, confirmerDependance, detacherFacture, ecrireLigne, ecrireMarche, ouvrirAvenant, poserPrix, proposerDependances, proposerRemplacants, rattacherFacture, repondreConfirmation, retirerLigneAvenant, rouvrirMarche, signerAvenant, soumettreAvenant, validerPrix, verifierMarche } from "./portes";
 import type { Avenant, FactureCandidate, LigneAvenant, LigneMarche, Marche, Passage, Prix, Remplacant, Tableau } from "./types";
@@ -458,6 +460,9 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
           </>
         ) : <Avis teinte="ambre">Aucun marché : les avenants et les situations ne peuvent pas être chiffrés tant que le marché signé n&apos;est pas saisi puis vérifié ligne à ligne.</Avis>}
       </section>
+
+      {/* ——— questions sur le chantier (b6_36) ——— */}
+      <QuestionsCarte key={`questions-${source}-${c.id}`} tableau={tableau} source={source} aujourdhui={aujourdHui()} />
 
       {/* ——— météo des passages extérieurs (b6_21) ——— */}
       <MeteoCarte key={`meteo-${c.id}`} tableau={tableau} source={source} onLocal={onLocal} relire={relire} />

@@ -108,6 +108,10 @@ const choisir = (sel, valeur) => `(() => { const t = document.querySelector('${s
   await s.dormir(500);
   const signerGris = await s.evaluer(`[...document.querySelectorAll('#esp-dossier button')].filter(b => /^\\s*Signer\\s*$/.test(b.textContent)).map(b => b.disabled)`);
   ok(signerGris.length === 1 && signerGris[0] === false, 'l\'avenant n° 1 (validé par la file) propose « Signer » ; le n° 2 (brouillon) non');
+  // b6_26 : l'avenant n° 1, ouvert par le lecteur, dit sur quel prix validé il a été chiffré et quelle ligne du marché lui ressemble
+  ok(await s.evaluer(`/Chiffré par Daliro sur votre prix validé « Garde-corps acier laqué, hauteur 1,00 m »/.test(document.querySelector('#esp-dossier')?.innerText || '')
+                      && /Proche de la ligne du marché/.test(document.querySelector('#esp-dossier')?.innerText || '')`),
+     'avenant n° 1 : chiffré par Daliro sur le prix validé, ligne du marché proche signalée');
   ok(await s.evaluer(bouton('/Chiffrer une ligne/')) !== null, 'clic sur « Chiffrer une ligne » (avenant n° 2)');
   await s.dormir(400);
   const choixPrix = await s.evaluer(`[...document.querySelectorAll('[role="dialog"] select')[1].options].map(o => o.textContent)`);
@@ -290,6 +294,11 @@ const choisir = (sel, valeur) => `(() => { const t = document.querySelector('${s
     ok(await s.evaluer(bouton('/Lever la réserve/', carte)) === true, 'clic sur « Lever la réserve »');
     await s.dormir(400);
     ok(await s.evaluer(`/1 réserve ouverte/i.test(${carte}?.innerText || '') && /Levée le/.test(${carte}?.innerText || '')`), 'une réserve levée, une ouverte');
+    // b6_32 : la réserve restante est hors devis : elle ouvre un avenant
+    ok(await s.evaluer(bouton('/Hors devis : ouvrir un avenant/', carte)) === true, 'clic sur « Hors devis : ouvrir un avenant »');
+    await s.dormir(400);
+    ok(await s.evaluer(`/avenant n° \\d+ ouvert \\(hors devis\\)/.test(${carte}?.innerText || '') && /Reprise hors devis demandée à la réception : Rayure/.test(document.querySelector('#esp-dossier')?.innerText || '')`),
+       'la réserve porte son avenant, brouillon visible dans les avenants');
     ok(await s.evaluer(bouton('/Noter une opposition/', carte)) === true, 'clic sur « Noter une opposition »');
     await s.dormir(400);
     await s.evaluer(saisir('[role="dialog"] input:not([type="date"])', 'Rayure sur la porte palière non reprise'));
@@ -458,6 +467,154 @@ const choisir = (sel, valeur) => `(() => { const t = document.querySelector('${s
     await s.evaluer(axe + ';true');
     const c1 = await s.evaluer(graves(carte));
     ok(c1.length === 0, `carte météo : aucun écart axe grave ${c1.length ? JSON.stringify(c1) : ''}`);
+    const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
+    ok(deb === 0, `pas de débordement horizontal (${deb})`);
+    s.fermer();
+  }
+}
+
+{
+  // b6_28 : importer le devis collé depuis Excel, sur le marché à vérifier de Maison Rolland
+  const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+  const graves = (cible) => `(async () => { const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`;
+  const tableau = 'N°\tDésignation\tU\tQté\tP.U. HT\tMontant HT\tLot\n\tTERRASSEMENT\t\t\t\t\t\n2.1\tFouilles en rigole\tm3\t14\t62,00\t868,00 €\t01\n2.2\tÉvacuation des terres\tforfait\t\t\t450,00\t99\n\tSous-total\t\t\t\t1 318,00\t\n';
+  for (const largeur of [390, 1440]) {
+    const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `b6-import-${largeur}`, densite: 1 });
+    console.log(`— Maison Rolland : importer le devis collé depuis Excel (${largeur})`);
+    ok(await s.aller(base + chemin), 'page chargée');
+    await s.dormir(500);
+    ok(await s.evaluer(`(() => { const b = [...document.querySelectorAll('.esp-item')].find(b => /Rolland/.test(b.textContent)); if (!b) return false; b.click(); return true; })()`), 'ouverture de Maison Rolland');
+    await s.dormir(500);
+    const avant = await s.evaluer(`document.querySelectorAll('section[aria-label="Marché"] tbody tr').length`);
+    ok(await s.evaluer(bouton('/Importer le devis/')) === true, 'clic sur « Importer le devis »');
+    await s.dormir(400);
+    ok(await s.evaluer(`/Ou le devis en PDF/.test(document.querySelector('[role="dialog"]')?.innerText || '') && !!document.querySelector('[role="dialog"] input[accept*="pdf"]')`),
+       'la voie « devis en PDF » est proposée (b6_33)');
+    ok(await s.evaluer(saisir('[role="dialog"] textarea', tableau)), 'tableau collé');
+    await s.dormir(300);
+    const t = await s.evaluer(`document.querySelector('[role="dialog"]')?.innerText || ''`);
+    ok(/2 lignes lues/.test(t) && /1[\s  ]318,00/.test(t) && /Lot inconnu sur ce chantier : 99/.test(t) && /1 ligne de total ou vide ignorée/.test(t),
+       'aperçu : 2 lignes, 1 318 € HT, le sous-total ignoré, le lot 99 inconnu signalé');
+    await s.evaluer(axe + ';true');
+    const g = await s.evaluer(graves(`document.querySelector('[role="dialog"]')`));
+    ok(g.length === 0, `fenêtre d'import : aucun écart axe grave ${g.length ? JSON.stringify(g) : ''}`);
+    const debDlg = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return d ? d.scrollWidth - d.clientWidth : -1; })()`);
+    ok(debDlg <= 0, `la fenêtre ne déborde pas (${debDlg})`);
+    await s.evaluer(`${dlgBouton('/Importer 2 lignes/')}?.click()`);
+    await s.dormir(700);
+    const apres = await s.evaluer(`document.querySelectorAll('section[aria-label="Marché"] tbody tr').length`);
+    ok(apres === avant + 2 && /2 lignes importées/.test(await s.evaluer('document.body.innerText')), `deux lignes ajoutées au marché (${avant} → ${apres}), message dit`);
+    const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
+    ok(deb === 0, `pas de débordement horizontal (${deb})`);
+    s.fermer();
+  }
+}
+
+{
+  // b6_30 : le point du mois, sur la liste des chantiers
+  const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+  const graves = (cible) => `(async () => { const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`;
+  for (const largeur of [390, 1440]) {
+    const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `b6-point-${largeur}`, densite: 1 });
+    console.log(`— Le point du mois (${largeur})`);
+    ok(await s.aller(base + chemin), 'page chargée');
+    await s.dormir(600);
+    const carte = `document.querySelector('section[aria-label="Point du mois"]')`;
+    const t = await s.evaluer(`${carte}?.innerText || ''`);
+    ok(/Point du mois/.test(t) && /repéré/.test(t) && /reste à facturer/i.test(t) && /Résidence Les Tilleuls/.test(t), 'le point du mois : repérés, signés, reste à facturer, par chantier');
+    ok(await s.evaluer(bouton('/Mois dernier/', carte)) === true, 'clic sur « Mois dernier »');
+    await s.dormir(300);
+    ok(await s.evaluer(`[...${carte}.querySelectorAll('button[aria-pressed="true"]')].map(b => b.textContent).join() === 'Mois dernier'`), 'le mois dernier est choisi');
+    await s.evaluer(axe + ';true');
+    const g = await s.evaluer(graves(carte));
+    ok(g.length === 0, `carte du point : aucun écart axe grave ${g.length ? JSON.stringify(g) : ''}`);
+    const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
+    ok(deb === 0, `pas de débordement horizontal (${deb})`);
+    s.fermer();
+  }
+}
+
+{
+  // b6_36 : l'assistant « questions » (en exemple, les trois questions de la démonstration)
+  const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+  const graves = (cible) => `(async () => { const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`;
+  for (const largeur of [390, 1440]) {
+    const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `b6-questions-${largeur}`, densite: 1 });
+    console.log(`— Questions sur le chantier (${largeur})`);
+    ok(await s.aller(base + chemin), 'page chargée');
+    await s.dormir(500);
+    ok(await s.evaluer(`(() => { const b = [...document.querySelectorAll('.esp-item')].find(b => /Tilleuls/.test(b.textContent)); if (!b) return false; b.click(); return true; })()`), 'ouverture des Tilleuls');
+    await s.dormir(500);
+    const carte = `document.querySelector('section[aria-label="Questions sur le chantier"]')`;
+    ok(await s.evaluer(`!!${carte}`), 'la carte « Questions sur le chantier » est là');
+    ok(await s.evaluer(bouton(`/n'est pas au devis/`, carte)) === true, 'clic sur « Qu\'est-ce qui n\'est pas au devis ? »');
+    await s.dormir(300);
+    const t = await s.evaluer(`${carte}?.innerText || ''`);
+    ok(/Hors devis sur ce chantier/.test(t) && /Avenant n° 1/.test(t) && /Lu dans le chantier/.test(t) && /Lu : avenant n° 1/.test(t), 'réponse : les avenants, sourcée, lue dans le chantier');
+    ok(await s.evaluer(bouton('/Préparer la réunion/', carte)) === true, 'clic sur « Préparer la réunion de chantier »');
+    await s.dormir(300);
+    ok(/Points à aborder|Rien d.ouvert/.test(await s.evaluer(`${carte}?.innerText || ''`)), 'réunion : les points ouverts');
+    await s.evaluer(axe + ';true');
+    const g = await s.evaluer(graves(carte));
+    ok(g.length === 0, `carte des questions : aucun écart axe grave ${g.length ? JSON.stringify(g) : ''}`);
+    const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
+    ok(deb === 0, `pas de débordement horizontal (${deb})`);
+    s.fermer();
+  }
+}
+
+{
+  // Relevé du chantier : ce qui est à reprendre, imprimable (écran seul)
+  const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+  const graves = (cible) => `(async () => { const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`;
+  for (const largeur of [390, 1440]) {
+    const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `b6-releve-${largeur}`, densite: 1 });
+    console.log(`— Le relevé du chantier (${largeur})`);
+    ok(await s.aller(base + chemin), 'page chargée');
+    await s.dormir(500);
+    ok(await s.evaluer(`(() => { const b = [...document.querySelectorAll('.esp-item')].find(b => /Tilleuls/.test(b.textContent)); if (!b) return false; b.click(); return true; })()`), 'ouverture des Tilleuls');
+    await s.dormir(500);
+    ok(await s.evaluer(bouton('/Relevé du chantier/')) === true, 'clic sur « Relevé du chantier »');
+    await s.dormir(400);
+    const t = await s.evaluer(`document.querySelector('[role="dialog"]')?.innerText || ''`);
+    ok(/Le marché/.test(t) && /Le planning/.test(t) && /À reprendre/.test(t) && /Imprimer ou enregistrer en PDF/.test(t), 'le relevé : marché, planning, à reprendre, et l\'impression');
+    await s.evaluer(axe + ';true');
+    const g = await s.evaluer(graves(`document.querySelector('[role="dialog"]')`));
+    ok(g.length === 0, `fenêtre du relevé : aucun écart axe grave ${g.length ? JSON.stringify(g) : ''}`);
+    const debDlg = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return d ? d.scrollWidth - d.clientWidth : -1; })()`);
+    ok(debDlg <= 0, `la fenêtre ne déborde pas (${debDlg})`);
+    s.fermer();
+  }
+}
+
+{
+  // b6_31 : les disponibilités des sous-traitants dans l'annuaire, noter une absence
+  const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+  const graves = (cible) => `(async () => { const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`;
+  for (const largeur of [390, 1440]) {
+    const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `b6-dispo-${largeur}`, densite: 1 });
+    console.log(`— Les Tilleuls : disponibilités des sous-traitants (${largeur})`);
+    ok(await s.aller(base + chemin), 'page chargée');
+    await s.dormir(500);
+    await s.evaluer(`[...document.querySelectorAll('.esp-item')].find(b => /Tilleuls/.test(b.textContent))?.click()`);
+    await s.dormir(600);
+    const bloc = `document.querySelector('[aria-label="Disponibilités des sous-traitants"]')`;
+    ok(await s.evaluer(`/Disponibilités des sous-traitants/.test(${bloc}?.innerText || '')`), 'le bloc des disponibilités est dans l\'annuaire');
+    ok(await s.evaluer(bouton('/Noter une absence/', bloc)) === true, 'clic sur « Noter une absence »');
+    await s.dormir(300);
+    ok(await s.evaluer(saisir('[aria-label="Disponibilités des sous-traitants"] input[maxlength="200"]', 'Congés')), 'motif saisi');
+    await s.dormir(150);
+    ok(await s.evaluer(bouton("/Noter l.absence/", bloc)) === true, 'clic sur « Noter l\'absence »');
+    await s.dormir(400);
+    ok(await s.evaluer(`/absent du .* \\(Congés\\)/.test(${bloc}?.innerText || '')`), 'l\'absence est affichée, avec son motif');
+    await s.evaluer(axe + ';true');
+    const g = await s.evaluer(graves(bloc));
+    ok(g.length === 0, `bloc des disponibilités : aucun écart axe grave ${g.length ? JSON.stringify(g) : ''}`);
     const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
     ok(deb === 0, `pas de débordement horizontal (${deb})`);
     s.fermer();

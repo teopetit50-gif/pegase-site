@@ -671,3 +671,17 @@ export type Disponibilite = {
   absences: { id: string; du: string; au: string; motif: string | null }[];
   passages: { passage: string; chantier: string; tache: string | null; debut: string; fin: string }[];
 };
+
+/* b6_36 : une question posée à l'assistant sur un chantier (lue par son auteur seul). */
+export type QuestionChantier = {
+  id: string;
+  question: string;
+  statut: "en_attente" | "repondue" | "echec";
+  reponse: string | null;
+  couverte: boolean | null;
+  sources: string[];
+  raison: string | null;
+  motif: string | null;
+  cree_le: string;
+  repondu_le: string | null;
+};
