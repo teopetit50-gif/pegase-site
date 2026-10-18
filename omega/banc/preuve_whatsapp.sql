@@ -7,8 +7,15 @@
 -- Chemin : gabarit daliro.preuve_whatsapp validé → preparer_envoi(p_gabarit) → validation → tache_envois →
 -- travail envois.meta_whatsapp → POST /{phone_number_id}/messages → confirmer_envoi(wamid) → statuts par
 -- reception/whatsapp → noter_remise.
--- Le numéro de Teo (+33768163443) est dans la liste de test Meta. Le réglage daliro du banc est passé en
--- reel/whatsapp par le coordinateur le temps de l'envoi, puis remis en essai (partie 4).
+-- Le numéro de Teo (+33768163443) est dans la liste de test Meta.
+-- Premier essai (envoi 7a6fc9bc, cle :1) : bloque CONSENTEMENT_ABSENT et mode « essai ». Corrigé ici :
+--   · WhatsApp exige un accord préalable (canaux_envoi.consentement_toujours) : partie 1 bis, porte
+--     noter_consentement, au nom du gérant du banc, source « ecrit » (Teo l'a demandé lui-même) ;
+--   · le mode effectif (reglages_envois_effectifs) vaut « essai » dès que la ligne ORGANISATION (module null) est
+--     en essai, et cette ligne ne peut pas être « reel » (contrainte reglages_envois_reel_par_module) : pour un
+--     envoi réel, la ligne organisation passe à mode NULL (aucune contrainte ; « coupe » et « essai » des autres
+--     modules restent les leurs) et daliro à reel, le temps de l'envoi ; partie 4 remet les deux en essai ;
+--   · nouvelle clé banc:a2:preuve-whatsapp:2 (le mode est figé à la préparation).
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 0. Contrôles (lecture seule)
@@ -39,6 +46,38 @@ select id, code, langue, canal, statut, modele_externe from public.gabarits_mess
 -- Attendu : valide, modele_externe hello_world@en_US.
 
 -- ───────────────────────────────────────────────────────────────────────────
+-- 1 bis. L'accord WhatsApp de Teo (porte noter_consentement, au nom du gérant du banc)
+-- ───────────────────────────────────────────────────────────────────────────
+do $$
+declare
+  v_gerant uuid := (select id from auth.users where email = 'gerant@banc-varelo.test');
+  v_id uuid;
+begin
+  perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
+  v_id := public.noter_consentement('cccccccc-0000-4000-8000-00000000000c', 'whatsapp', '+33768163443', 'ecrit',
+            'transactionnel',
+            'Teo (Omega) a demandé par écrit le 18/10/2026 à recevoir le message d''essai WhatsApp sur ce numéro.',
+            null, 'daliro');
+  perform tests.redevenir_admin();
+  raise notice 'consentement %', v_id;
+end $$;
+select canal, adresse, portee, source, module, retire_le from public.consentements
+ where client_id = 'cccccccc-0000-4000-8000-00000000000c' and canal = 'whatsapp';
+-- Attendu : une ligne whatsapp, transactionnel, ecrit, non retirée.
+
+-- ───────────────────────────────────────────────────────────────────────────
+-- 1 ter. Mode réel le temps de l'envoi : organisation à NULL, daliro à reel (canal whatsapp)
+-- ───────────────────────────────────────────────────────────────────────────
+-- Noter d'abord la valeur actuelle de la ligne organisation pour la remettre en partie 4 (attendu : essai).
+select mode from public.reglages_envois where client_id = 'cccccccc-0000-4000-8000-00000000000c' and module is null;
+update public.reglages_envois set mode = null
+ where client_id = 'cccccccc-0000-4000-8000-00000000000c' and module is null and mode = 'essai';
+update public.reglages_envois set mode = 'reel', canaux = array['whatsapp']
+ where client_id = 'cccccccc-0000-4000-8000-00000000000c' and module = 'daliro';
+select private.reglages_envois_effectifs('cccccccc-0000-4000-8000-00000000000c', 'daliro') ->> 'mode' as mode_effectif;
+-- Attendu : reel. Sinon, s'arrêter.
+
+-- ───────────────────────────────────────────────────────────────────────────
 -- 2. L'envoi, validé puis confié
 -- ───────────────────────────────────────────────────────────────────────────
 do $$
@@ -54,7 +93,7 @@ begin
     p_client => v_client, p_module => 'daliro', p_objet_type => null, p_objet_id => null, p_canal => 'whatsapp',
     p_destinataire => jsonb_build_object('adresse', v_numero, 'nom', 'Teo', 'langue', 'fr'),
     p_gabarit => 'daliro.preuve_whatsapp', p_variables => '{}'::jsonb,
-    p_cle_idempotence => 'banc:a2:preuve-whatsapp:1', p_entite => v_entite, p_transactionnel => true);
+    p_cle_idempotence => 'banc:a2:preuve-whatsapp:2', p_entite => v_entite, p_transactionnel => true);
   select statut || coalesce(' / ' || verrou || ' : ' || motif, '') into v_statut from public.envois where id = v_envoi;
   if v_statut like 'a_valider%' then
     v_statut := private.envoi_valide(v_envoi);
@@ -69,23 +108,27 @@ end $$;
 select e.id, e.statut, e.mode, e.verrou, e.motif, e.fournisseur, g.modele_externe, e.destinataire_adresse,
        e.reference_externe, e.erreur, e.essais, e.envoye_le, e.remise
   from public.envois e left join public.gabarits_messages g on g.id = e.gabarit_id
- where e.client_id = 'cccccccc-0000-4000-8000-00000000000c' and e.cle_idempotence = 'banc:a2:preuve-whatsapp:1';
+ where e.client_id = 'cccccccc-0000-4000-8000-00000000000c' and e.cle_idempotence = 'banc:a2:preuve-whatsapp:2';
 -- Attendu : mode reel, fournisseur meta_whatsapp, statut envoye, reference_externe = wamid.…
 select t.id, t.genre, t.etat, t.essais, t.resultat, t.erreur, t.fini_le from public.travaux t
  where t.genre = 'envois.meta_whatsapp'
    and t.charge ->> 'envoi' = (select e.id::text from public.envois e
                                where e.client_id = 'cccccccc-0000-4000-8000-00000000000c'
-                                 and e.cle_idempotence = 'banc:a2:preuve-whatsapp:1');
+                                 and e.cle_idempotence = 'banc:a2:preuve-whatsapp:2');
 -- Attendu : fini, resultat {fournisseur_id: wamid…, remis_a}. Erreurs : META_400_131030 numéro non autorisé ;
 -- META_400_132001 modèle absent dans cette langue (expediteur pas en v16 : il enverrait « hello_world@en_US »
 -- tel quel, ou la langue fr) ; META_401_190 jeton.
 select v.type, v.survenu_le, v.detail, v.recu_le from public.envois_evenements v
   join public.envois e on e.id = v.envoi_id
- where e.cle_idempotence = 'banc:a2:preuve-whatsapp:1' order by v.recu_le;
+ where e.cle_idempotence = 'banc:a2:preuve-whatsapp:2' order by v.recu_le;
 -- Attendu, si le webhook Meta pointe sur …/functions/v1/reception/whatsapp (champ « messages » abonné) :
 -- un événement « remis » (code delivered). « sent » et « read » ne sont pas notés.
 
 -- ───────────────────────────────────────────────────────────────────────────
--- 4. Après la preuve : remettre le réglage daliro du banc en essai (comme convenu) ; le gabarit peut rester.
+-- 4. Après la preuve (dès l'envoi « envoye » ou en échec) : remettre l'organisation et daliro en essai.
+--    Le gabarit et l'accord de Teo peuvent rester.
 -- ───────────────────────────────────────────────────────────────────────────
--- update public.reglages_envois set mode = 'essai' where client_id = 'cccccccc-0000-4000-8000-00000000000c' and module = 'daliro';
+update public.reglages_envois set mode = 'essai'
+ where client_id = 'cccccccc-0000-4000-8000-00000000000c' and (module is null or module = 'daliro');
+select module, mode from public.reglages_envois
+ where client_id = 'cccccccc-0000-4000-8000-00000000000c' and (module is null or module = 'daliro');
