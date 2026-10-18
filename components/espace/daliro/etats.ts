@@ -135,7 +135,7 @@ export function libelleStatutFacture(s: string | null | undefined): string {
 
 /* Où en est la demande J-2 d'un passage (l'envoi du socle), en une ligne. */
 export function libelleEnvoi(e: EnvoiPassage, date: (iso: string) => string): string {
-  const essai = e.mode === "essai" ? " (essai)" : "";
+  const essai = (e.mode === "essai" ? " (essai)" : "") + (e.accord ? ` · approuvée par l'accord permanent${e.accord.active_le ? ` du ${date(e.accord.active_le)}` : ""}` : "");
   if (e.remise === "remis") return `Demande remise${e.remise_le ? ` le ${date(e.remise_le)}` : ""}${essai}`;
   if (e.remise === "rebond" || e.remise === "plainte" || e.remise === "refuse") return `Demande non remise (${e.remise === "rebond" ? "adresse en échec" : e.remise === "plainte" ? "signalée comme indésirable" : "refusée"})${essai}`;
   if (e.statut === "envoye") return `Demande envoyée${e.envoye_le ? ` le ${date(e.envoye_le)}` : ""}${essai}`;

@@ -110,7 +110,7 @@ export default function BaremeVue({ baremes, lignes, categories, role, onPublier
         ) : (
           <>
             <p className="esp-kpi-sous" style={{ marginBottom: 8 }}>{montre.libelle} · {lignesMontrees.length} lignes{montre.motif_retrait ? ` · retiré : ${montre.motif_retrait}` : ""}</p>
-            <div className="esp-tableau-cadre">
+            <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Lignes du barème">
               <table className="esp-tableau">
                 <thead><tr><th>Code</th><th>Libellé</th><th>Famille</th><th>Unité</th><th className="esp-num">Prix</th><th>TVA</th><th>Catégorie</th></tr></thead>
                 <tbody>

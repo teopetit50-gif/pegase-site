@@ -22,8 +22,11 @@ import type { Source } from "../source";
 import { Avis, Def, Pastille } from "../ui";
 import { dateCourte, dateHeure, montant, nombreFr, relatif } from "../format";
 import { AMENDEMENTS, AVERTISSEMENTS_CONTRAT, FAMILLES_LIGNE, MODES_REGLEMENT, POLITIQUES, STATUTS_AVOIR, STATUTS_CONTRAT, STATUTS_FACTURE, STATUTS_PROPOSITION, UNITES, libelleAvertissement, nomLocataire, propositionVivante, resteDu } from "./etats";
-import type { Dossier, Facture, LigneBareme, LigneProposition, Reglages, Retour, Role } from "./types";
+import type { Avoir, Dossier, Facture, LigneBareme, LigneProposition, Reglages, Retour, Role } from "./types";
 import FormulaireRetour from "./FormulaireRetour";
+import EtatsDesLieux, { type GestesEtats } from "./EtatsDesLieux";
+import { BoutonFactureElectronique } from "./FactureElectronique";
+import type { FormeElectronique } from "./cii";
 
 export type Gestes = {
   completer: (valeurs: Record<string, unknown>) => Promise<void>;
@@ -33,6 +36,10 @@ export type Gestes = {
   regler: (facture: Facture, mode: string, le: string | null) => Promise<void>;
   avoir: (facture: Facture, motif: string, montant_ttc: number | null) => Promise<void>;
   relancer: (facture: Facture) => Promise<void>;
+  /* b2_06 : la forme électronique d'une pièce, et le SIREN du client à compléter */
+  electronique: (facture: Facture) => Promise<FormeElectronique>;
+  electroniqueAvoir: (avoir: Avoir) => Promise<FormeElectronique>;
+  completerClient: (valeurs: Record<string, string>) => Promise<void>;
 };
 
 type Form =
@@ -91,7 +98,7 @@ function Preuves({ preuves }: { preuves: LigneProposition["preuves"] }) {
   );
 }
 
-export default function DossierContrat({ dossier, source, role, moi, bareme, reglages, agences, nommer, gestes }: {
+export default function DossierContrat({ dossier, source, role, moi, bareme, reglages, agences, nommer, gestes, gestesEtats }: {
   dossier: Dossier;
   source: Source;
   role: Role | null;
@@ -101,6 +108,7 @@ export default function DossierContrat({ dossier, source, role, moi, bareme, reg
   agences: { entite_id: string; code: string; nom?: string }[];
   nommer: (id: string | null | undefined) => string;
   gestes: Gestes;
+  gestesEtats: GestesEtats;
 }) {
   const { contrat: c, locataire, vehicule, categorie } = dossier;
   const [form, setForm] = useState<Form>(null);
@@ -230,6 +238,9 @@ export default function DossierContrat({ dossier, source, role, moi, bareme, reg
         </div>
       </div>
 
+      {/* ——— les états des lieux (b2_05) ——— */}
+      <EtatsDesLieux dossier={dossier} role={role} bareme={bareme} nommer={nommer} gestes={gestesEtats} onFait={(m) => setFait(m)} netteteMin={reglages?.nettete_min} />
+
       {/* ——— le chiffrage ——— */}
       <div className="esp-carte">
         <div className="esp-carte-tete">
@@ -255,7 +266,7 @@ export default function DossierContrat({ dossier, source, role, moi, bareme, reg
                     <>
                       <strong>Devant l&apos;agence.</strong> {demande.approbations_requises} accord{demande.approbations_requises > 1 ? "s" : ""} requis ({demande.roles_autorises.join(", ")}), échéance {relatif(demande.echeance)}.{" "}
                       {aiChiffre ? "Vous avez chiffré ce retour : une autre personne décide (séparation saisie / approbation). " : null}
-                      <Link href="/espace/validations" className="esp-lien-bouton">Ouvrir la file « À valider »</Link>
+                      <Link href="/espace2/validations" className="esp-lien-bouton">Ouvrir la file « À valider »</Link>
                     </>
                   ) : demande.statut === "rejetee" ? <><strong>Refusée par l&apos;agence.</strong> Rechiffrez le retour si une facture reste due.</> : <><strong>Décidée</strong> ({demande.statut === "executee" ? "exécutée" : demande.statut}).</>}
                 </Avis>
@@ -267,7 +278,7 @@ export default function DossierContrat({ dossier, source, role, moi, bareme, reg
                 <div className="tav-total" data-fort="true"><span>Total TTC</span><span>{montant(p.total_ttc)}</span></div>
               </div>
               {lignes.length ? (
-                <div className="esp-tableau-cadre">
+                <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Lignes de la proposition">
                   <table className="esp-tableau">
                     <thead><tr><th>Poste</th><th className="esp-num">Quantité</th><th className="esp-num">HT</th><th className="esp-num">TVA</th><th className="esp-num">TTC</th><th>Preuves</th></tr></thead>
                     <tbody>
@@ -328,7 +339,7 @@ export default function DossierContrat({ dossier, source, role, moi, bareme, reg
                     <Def etiquette="Échéance">{new Date(f.echeance_le) <= new Date(f.date_facture) ? "à réception" : dateCourte(f.echeance_le)}</Def>
                     <Def etiquette="Reste dû" fort>{f.statut === "reglee" || f.statut === "avoir" ? montant(0) : montant(reste)}</Def>
                     <Def etiquette="Destinataire">{f.destinataire.raison_sociale || f.destinataire.nom || "inconnu"}{f.destinataire.email ? ` · ${f.destinataire.email}` : ""}</Def>
-                    <Def etiquette="Courriel">{f.statut === "envoyee" || f.statut === "reglee" ? "parti" : f.envoi_id ? "préparé" : "à envoyer vous-même"}</Def>
+                    <Def etiquette="Courriel">{f.statut === "envoyee" || f.statut === "reglee" ? "parti" : f.envoi_id ? "préparé" : "à envoyer vous-même"}{f.pdf_piece_id ? " · PDF et photos datées joints" : f.statut === "emise" && !f.envoi_id ? " · PDF en préparation" : ""}</Def>
                     {f.regle_le ? <Def etiquette="Réglée">{dateCourte(f.regle_le)} · {MODES_REGLEMENT.find((m) => m.cle === f.mode_reglement)?.libelle ?? f.mode_reglement}</Def> : null}
                     {f.litige_motif ? <Def etiquette="Contestation">{f.litige_motif}</Def> : null}
                     {typeof f.mentions.tva === "string" ? <Def etiquette="TVA">{f.mentions.tva}</Def> : null}
@@ -336,7 +347,7 @@ export default function DossierContrat({ dossier, source, role, moi, bareme, reg
                   <div>
                     <button type="button" className="esp-lien-bouton" onClick={() => setLignesOuvertes(lignesOuvertes === f.id ? null : f.id)}>{lignesOuvertes === f.id ? "Masquer les lignes" : `Voir les ${lf.length} ligne${lf.length > 1 ? "s" : ""}`}</button>
                     {lignesOuvertes === f.id ? (
-                      <div className="esp-tableau-cadre" style={{ marginTop: 8 }}>
+                      <div className="esp-tableau-cadre" style={{ marginTop: 8 }} tabIndex={0} role="region" aria-label={`Lignes de la facture ${f.reference}`}>
                         <table className="esp-tableau">
                           <thead><tr><th>Ligne</th><th className="esp-num">Quantité</th><th className="esp-num">HT</th><th className="esp-num">TTC</th><th>Preuves</th></tr></thead>
                           <tbody>{lf.map((l) => <tr key={l.id}><td>{l.libelle}</td><td className="esp-num">{nombreFr(l.quantite)}{l.unite ? ` ${UNITES[l.unite]}` : ""}</td><td className="esp-num">{montant(l.montant_ht)}</td><td className="esp-num">{montant(l.montant_ttc)}</td><td><Preuves preuves={l.preuves} /></td></tr>)}</tbody>
@@ -349,6 +360,7 @@ export default function DossierContrat({ dossier, source, role, moi, bareme, reg
                     <button type="button" className="r-btn r-btn--vert r-btn--petit" disabled={!peutAgir || !(f.statut === "emise" || f.statut === "envoyee" || f.statut === "litige")} onClick={() => ouvrir({ type: "regler", facture: f })}><BadgeEuro width={14} height={14} aria-hidden="true" /> Réglée</button>
                     <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutAgir || f.statut === "avoir" || reste <= 0 || avoirEnAttente} onClick={() => ouvrir({ type: "avoir", facture: f })}><RotateCcw width={14} height={14} aria-hidden="true" /> Demander un avoir</button>
                     <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutAgir || !(f.statut === "emise" || f.statut === "envoyee") || reste <= 0} onClick={() => ouvrir({ type: "relancer", facture: f })}><Send width={14} height={14} aria-hidden="true" /> Relancer</button>
+                    <BoutonFactureElectronique piece={f.reference} charger={() => gestes.electronique(f)} completer={peutAgir && locataire && !locataire.anonymise_le ? (v) => gestes.completerClient(v) : null} />
                   </div>
                 </div>
               );
@@ -375,6 +387,7 @@ export default function DossierContrat({ dossier, source, role, moi, bareme, reg
                   <Def etiquette="Demandé par">{nommer(a.demande_par)} le {dateCourte(a.cree_le)}</Def>
                   <Def etiquette={a.statut === "emis" ? "Émis le" : "Décision"}>{a.statut === "emis" ? dateCourte(a.date_avoir) : a.statut === "a_valider" ? "direction seule, sous 48 h" : STATUTS_AVOIR[a.statut].libelle}</Def>
                 </dl>
+                {a.statut === "emis" && a.reference ? <div className="esp-actions"><BoutonFactureElectronique piece={a.reference} charger={() => gestes.electroniqueAvoir(a)} completer={null} /></div> : null}
               </div>
             ))}
           </div>

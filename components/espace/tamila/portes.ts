@@ -29,12 +29,25 @@
      tamila_demander_export / tamila_demander_export_cabinet / tamila_telecharger_export
      tamila_demander_cloture / tamila_annuler_cloture / tamila_convertir_audit
      tamila_registre_hors_vue(p_client) → int
+     tamila_coffre_etat(p_client) → jsonb (b4_05) ; la fonction Edge « tamila-coffre » (actions activer,
+       nouvelle_cle, cle_dossier, reenvelopper) au nom de la personne connectée : elle déballe les clés
+       des dossiers d'un cabinet passé au coffre Scaleway, chaque déballage journalisé
+     les honoraires (b4_06) : tamila_poser_convention, tamila_signer_convention, tamila_saisir_temps,
+       tamila_annuler_temps, tamila_demander_provision, tamila_provision_recue, tamila_emettre_facture,
+       tamila_facture_payee, tamila_annuler_facture ; lecture des tables tamila_conventions, tamila_temps,
+       tamila_provisions, tamila_factures (RLS : qui voit le dossier)
+     les conflits et la vigilance (b4_07) : tamila_index_cle, tamila_poser_index_cle, tamila_indexer_partie,
+       tamila_controler_conflits, tamila_decider_conflit, tamila_poser_vigilance, tamila_conformite
+     les avis reçus par courriel (b4_10) : lecture de tamila_avis_entrants et des réceptions (socle),
+       tamila_rattacher_avis, tamila_ecarter_avis ; les pièces jointes se lisent au bucket
+     le temps proposé et le forfait prévu (b4_12) : tamila_temps_ecartes, tamila_saisir_temps_propose,
+       tamila_ecarter_proposition, tamila_prevoir_forfait
    Si la base répond autrement, l'écran montre son message tel quel.
    Les bytea partent en hexadécimal (« \x01… », chiffrement.ts).
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { Appel, Audience, Avis, CalculDelai, Cle, Delai, DemandeTamila, Dossier, DossierComplet, Export, Lecture, Membre, Muraille, Partie, Personne, Piece, RegleProcedure, Reglages } from "./types";
+import type { Appel, Audience, Avis, CalculDelai, Cle, Conformite, EnteteFacture, ControleConflits, Convention, Delai, DemandeTamila, Dossier, DossierComplet, Export, Facture, Honoraires, Lecture, Membre, ModeHonoraires, ModeReglement, Muraille, NatureTemps, Partie, Personne, Piece, Provision, RegleProcedure, Reglages, Temps, Vigilance, Expertise, Attente } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -75,6 +88,8 @@ export type Cabinet = {
   personnes: Personne[];
   regles: RegleProcedure[];
   horsVue: number | null;
+  /* le coffre à clés du cabinet (b4_05) ; null si la porte n'existe pas sur cette base */
+  coffre: EtatCoffre | null;
 };
 
 export async function chargerCabinet(): Promise<Cabinet> {
@@ -105,6 +120,7 @@ export async function chargerCabinet(): Promise<Cabinet> {
     const { data } = await supabase.rpc("tamila_registre_hors_vue", { p_client: moi.client_id });
     horsVue = typeof data === "number" ? data : null;
   }
+  const coffreCabinet = await etatCoffre(moi.client_id);
   return {
     moi,
     installe: !!r.data,
@@ -117,6 +133,7 @@ export async function chargerCabinet(): Promise<Cabinet> {
     personnes,
     regles: (rg.data ?? []) as RegleProcedure[],
     horsVue,
+    coffre: coffreCabinet,
   };
 }
 
@@ -173,7 +190,7 @@ export type NouveauDossier = {
   p_dossier: string;
   p_reference: string;
   p_intitule: string;
-  p_cle_fournisseur: "local";
+  p_cle_fournisseur: "local" | "scaleway";
   p_cle_reference: string;
   p_cle_enveloppe: string;
   p_numero_rg: string | null;
@@ -219,6 +236,37 @@ export const avisLu = (p_client: string, p_dossier: string, p_type: string, p_va
 
 export const consulter = (p_dossier: string, p_contexte = "dossier") => rpc<string>("tamila_consulter", { p_dossier, p_contexte });
 /** L'enveloppe de la clé d'un dossier pour un membre qui n'est pas associé (migration b4_03) ; null sans porte ou sans clé active. */
+/* ——— le coffre à clés (b4_05) ——— */
+export type EtatCoffre = { statut: "local" | "bascule" | "scaleway"; region: string | null; dossiers_locaux: number; dossiers_scaleway: number };
+
+/** null : la porte n'existe pas sur cette base (b4_05 non posée) ; l'écran reste en mode phrase. */
+export async function etatCoffre(p_client: string): Promise<EtatCoffre | null> {
+  try {
+    return await rpc<EtatCoffre>("tamila_coffre_etat", { p_client });
+  } catch {
+    return null;
+  }
+}
+
+const MESSAGES_COFFRE: Record<string, string> = {
+  KM_ABSENT: "Le coffre n'est pas encore branché : les secrets Scaleway ne sont pas posés.",
+  KM_INDISPONIBLE: "Le coffre Scaleway ne répond pas pour l'instant ; réessayez dans un moment.",
+  CLE_FAUSSE: "Cette clé n'ouvre pas le dossier : la phrase n'est pas la bonne, rien n'a changé.",
+};
+
+/** Un geste du coffre (fonction Edge tamila-coffre), au nom de la personne connectée. */
+export async function coffre<T>(action: "activer" | "nouvelle_cle" | "cle_dossier" | "reenvelopper" | "nouvelle_cle_index" | "cle_index", corps: Record<string, unknown>): Promise<T> {
+  const supabase = createClient();
+  const { data, error } = await supabase.functions.invoke("tamila-coffre", { body: { action, ...corps } });
+  if (error) {
+    let detail: { erreur?: string; message?: string } = {};
+    const ctx = (error as { context?: unknown }).context;
+    if (ctx instanceof Response) detail = await ctx.json().catch(() => ({}));
+    throw new ErreurPorte((detail.erreur && MESSAGES_COFFRE[detail.erreur]) || detail.message || "Le coffre n'a pas répondu.");
+  }
+  return data as T;
+}
+
 export const cleDossier = (p_dossier: string) => rpc<string | null>("tamila_cle_dossier", { p_dossier }).catch(() => null);
 
 export const poserMuraille = (p_dossier: string, p_user: string, p_motif: string | null) => rpc<string>("tamila_poser_muraille", { p_dossier, p_user, p_motif });
@@ -248,3 +296,205 @@ export async function urlArchive(chemin: string): Promise<string> {
   if (error) throw new ErreurPorte(message(error));
   return data.signedUrl;
 }
+
+/* ——— les honoraires (b4_06) ——— */
+
+/** null : les tables n'existent pas sur cette base (b4_06 non posée) ; la carte ne s'affiche pas. */
+export async function chargerHonoraires(p_dossier: string): Promise<Honoraires | null> {
+  const supabase = createClient();
+  const [c, t, p, f] = await Promise.all([
+    supabase.from("tamila_conventions").select("*").eq("dossier_id", p_dossier).order("cree_le", { ascending: false }),
+    supabase.from("tamila_temps").select("*").eq("dossier_id", p_dossier).order("jour", { ascending: false }).order("cree_le", { ascending: false }),
+    supabase.from("tamila_provisions").select("*").eq("dossier_id", p_dossier).order("demandee_le", { ascending: false }),
+    supabase.from("tamila_factures").select("*").eq("dossier_id", p_dossier).order("cree_le", { ascending: false }),
+  ]);
+  if (c.error || t.error || p.error || f.error) return null;
+  const conventions = (c.data ?? []) as Convention[];
+  /* b4_12 : ce que j'ai ignoré ; sans la table, rien */
+  const e = await supabase.from("tamila_temps_ecartes").select("origine").eq("dossier_id", p_dossier);
+  return {
+    conventions,
+    convention: conventions.find((x) => x.statut !== "resiliee") ?? null,
+    temps: (t.data ?? []) as Temps[],
+    provisions: (p.data ?? []) as Provision[],
+    factures: (f.data ?? []) as Facture[],
+    ecartes: e.error ? [] : ((e.data ?? []) as { origine: string }[]).map((x) => x.origine),
+  };
+}
+
+/** Les honoraires de tous les dossiers que je vois (RLS), par dossier ; null si b4_06 n'est pas posée. */
+export async function chargerHonorairesCabinet(p_client: string): Promise<Record<string, Honoraires> | null> {
+  const supabase = createClient();
+  const [c, t, p, f] = await Promise.all([
+    supabase.from("tamila_conventions").select("*").eq("client_id", p_client).order("cree_le", { ascending: false }),
+    supabase.from("tamila_temps").select("*").eq("client_id", p_client).neq("statut", "annule").limit(20000),
+    supabase.from("tamila_provisions").select("*").eq("client_id", p_client),
+    supabase.from("tamila_factures").select("*").eq("client_id", p_client),
+  ]);
+  if (c.error || t.error || p.error || f.error) return null;
+  const par: Record<string, Honoraires> = {};
+  const de = (id: string) => (par[id] ??= { convention: null, conventions: [], temps: [], provisions: [], factures: [] });
+  for (const x of (c.data ?? []) as Convention[]) de(x.dossier_id).conventions.push(x);
+  for (const x of (t.data ?? []) as Temps[]) de(x.dossier_id).temps.push(x);
+  for (const x of (p.data ?? []) as Provision[]) de(x.dossier_id).provisions.push(x);
+  for (const x of (f.data ?? []) as Facture[]) de(x.dossier_id).factures.push(x);
+  for (const h of Object.values(par)) h.convention = h.conventions.find((x) => x.statut !== "resiliee") ?? null;
+  return par;
+}
+
+/** Ce que le pilotage lit en plus des dossiers, délais et audiences du cabinet (RLS) : les honoraires, les dates des
+ *  avis et des pièces, la vigilance. Ce qui manque sur la base (lot non posé) revient vide. */
+export async function chargerPilotage(p_client: string): Promise<{ honoraires: Record<string, Honoraires>; avis: Pick<Avis, "dossier_id" | "date_avis">[]; pieces: Pick<Piece, "objet_id" | "recue_le" | "type_piece">[]; vigilances: Pick<Vigilance, "dossier_id" | "assujetti" | "identification_piece">[]; expertises: Expertise[]; attentes: Attente[] }> {
+  const supabase = createClient();
+  const [h, a, p, v, x, at] = await Promise.all([
+    chargerHonorairesCabinet(p_client),
+    supabase.from("tamila_avis").select("dossier_id, date_avis").eq("client_id", p_client).limit(20000),
+    supabase.from("pieces").select("objet_id, recue_le, type_piece").eq("client_id", p_client).eq("objet_type", "tamila_dossier").limit(20000),
+    supabase.from("tamila_vigilances").select("dossier_id, assujetti, identification_piece").eq("client_id", p_client),
+    supabase.from("tamila_expertises").select("*").eq("client_id", p_client).eq("statut", "en_cours"),
+    supabase.from("tamila_attentes").select("*").eq("client_id", p_client).eq("statut", "attendue"),
+  ]);
+  return {
+    honoraires: h ?? {},
+    avis: a.error ? [] : ((a.data ?? []) as Pick<Avis, "dossier_id" | "date_avis">[]),
+    pieces: p.error ? [] : ((p.data ?? []) as Pick<Piece, "objet_id" | "recue_le" | "type_piece">[]),
+    vigilances: v.error ? [] : ((v.data ?? []) as Pick<Vigilance, "dossier_id" | "assujetti" | "identification_piece">[]),
+    expertises: x.error ? [] : ((x.data ?? []) as Expertise[]),
+    attentes: at.error ? [] : ((at.data ?? []) as Attente[]),
+  };
+}
+
+export const poserConvention = (p_dossier: string, p_mode: ModeHonoraires, p_taux_horaire_cents: number | null, p_forfait_cents: number | null, p_complement_pct: number | null, p_taux_tva: number, p_urgence: boolean) =>
+  rpc<string>("tamila_poser_convention", { p_dossier, p_mode, p_taux_horaire_cents, p_forfait_cents, p_complement_pct, p_taux_tva, p_urgence });
+export const signerConvention = (p_convention: string, p_signee_le: string, p_piece: string | null) => rpc<void>("tamila_signer_convention", { p_convention, p_signee_le, p_piece });
+export const saisirTemps = (p_dossier: string, p_jour: string, p_minutes: number, p_nature: NatureTemps, p_description: string | null, p_facturable: boolean) =>
+  rpc<string>("tamila_saisir_temps", { p_dossier, p_jour, p_minutes, p_nature, p_description, p_facturable });
+export const annulerTemps = (p_temps: string) => rpc<void>("tamila_annuler_temps", { p_temps });
+export const demanderProvision = (p_dossier: string, p_montant_ttc_cents: number) => rpc<string>("tamila_demander_provision", { p_dossier, p_montant_ttc_cents });
+export const provisionRecue = (p_provision: string, p_recue_le: string, p_mode: ModeReglement) => rpc<void>("tamila_provision_recue", { p_provision, p_recue_le, p_mode });
+export const emettreFacture = (p_dossier: string, p_jusqu_au: string, p_debours_cents: number, p_definitif: boolean) =>
+  rpc<{ numero: string; total_ttc_cents: number; reste_du_cents: number }>("tamila_emettre_facture", { p_dossier, p_jusqu_au, p_debours_cents, p_definitif });
+export const facturePayee = (p_facture: string, p_payee_le: string, p_mode: ModeReglement) => rpc<void>("tamila_facture_payee", { p_facture, p_payee_le, p_mode });
+export const annulerFacture = (p_facture: string, p_motif: string) => rpc<void>("tamila_annuler_facture", { p_facture, p_motif });
+
+/* ——— conflits d'intérêts et vigilance (b4_07) ——— */
+
+/** null : la porte n'existe pas sur cette base (b4_07 non posée) ; la carte ne s'affiche pas. */
+export async function conformite(p_dossier: string): Promise<Conformite | null> {
+  try {
+    return await rpc<Conformite>("tamila_conformite", { p_dossier });
+  } catch {
+    return null;
+  }
+}
+export const indexCle = (p_client: string) => rpc<{ fournisseur: "local" | "scaleway"; reference: string; enveloppe: string | null } | null>("tamila_index_cle", { p_client });
+export const poserIndexCle = (p_client: string, p_enveloppe: string) => rpc<void>("tamila_poser_index_cle", { p_client, p_reference: null, p_enveloppe });
+export const indexerPartie = (p_partie: string, p_empreintes: string[]) => rpc<number>("tamila_indexer_partie", { p_partie, p_empreintes });
+export const controlerConflits = (p_client: string, p_dossier: string | null, p_qualite: string, p_empreintes: string[]) =>
+  rpc<ControleConflits>("tamila_controler_conflits", { p_client, p_dossier, p_qualite, p_empreintes });
+export const deciderConflit = (p_controle: string, p_decision: string, p_motif: string) => rpc<void>("tamila_decider_conflit", { p_controle, p_decision, p_motif });
+export const poserVigilance = (p_dossier: string, p_assujetti: boolean, p_activite: string | null, p_identification_le: string | null, p_identification_piece: string | null, p_beneficiaire_effectif_le: string | null, p_risque: string | null) =>
+  rpc<void>("tamila_poser_vigilance", { p_dossier, p_assujetti, p_activite, p_identification_le, p_identification_piece, p_beneficiaire_effectif_le, p_risque });
+
+/* ——— l'en-tête des factures du cabinet (b4_09) ——— */
+export const poserEnteteFacture = (p_client: string, p_entete: EnteteFacture) => rpc<EnteteFacture>("tamila_poser_entete_facture", { p_client, p_entete });
+
+/* ——— les pièces attendues (b4_18) ——— */
+/** null : la table n'existe pas sur cette base (b4_18 non posée). */
+export async function chargerAttentes(p_dossier: string): Promise<Attente[] | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase.from("tamila_attentes").select("*").eq("dossier_id", p_dossier).order("demandee_le", { ascending: false });
+  if (error) return null;
+  return (data ?? []) as Attente[];
+}
+export const poserAttente = (p_dossier: string, p_de: Attente["de"], p_objet: string, p_relance_le: string | null) => rpc<string>("tamila_poser_attente", { p_dossier, p_de, p_objet, p_relance_le });
+export const noterAttente = (p_attente: string, p_evenement: "recue" | "relancee" | "abandon", p_le: string | null = null, p_prochaine_relance: string | null = null) =>
+  rpc<void>("tamila_noter_attente", { p_attente, p_evenement, p_le, p_prochaine_relance });
+
+/* ——— l'expertise (b4_16) ——— */
+/** null : la table n'existe pas sur cette base (b4_16 non posée). */
+export async function chargerExpertises(p_dossier: string): Promise<Expertise[] | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase.from("tamila_expertises").select("*").eq("dossier_id", p_dossier).order("cree_le", { ascending: false });
+  if (error) return null;
+  return (data ?? []) as Expertise[];
+}
+export type ChampsExpertise = Partial<Pick<Expertise, "mission" | "ordonnee_le" | "consignation_avant" | "premiere_reunion_le" | "pre_rapport_attendu_le" | "dires_jusqu_au" | "rapport_attendu_le">>;
+export const poserExpertise = (p_dossier: string, p_expertise: string | null, p_champs: ChampsExpertise) => rpc<string>("tamila_poser_expertise", { p_dossier, p_expertise, p_champs });
+export type EtapeExpertise = "consignation_versee" | "pre_rapport_recu" | "dires_deposes" | "rapport_recu" | "abandon";
+export const noterExpertise = (p_expertise: string, p_evenement: EtapeExpertise, p_le: string | null = null) => rpc<void>("tamila_noter_expertise", { p_expertise, p_evenement, p_le });
+
+/* ——— les lectures longues d'un dossier (b4_15, socle 19an, lecteur d'A1) ——— */
+export type TypeAnalyse = "prelecture" | "chronologie" | "contradictions" | "bordereau" | "pieces_citees";
+export type Analyse = {
+  id: string;
+  type: string;
+  statut: "demandee" | "en_cours" | "finie" | "partielle" | "echec";
+  comptes: { info?: number; attention?: number; critique?: number } | null;
+  sans_source: number | null;
+  pieces: string[];
+  pieces_lues: number | null;
+  pieces_non_lues: string[] | null;
+  cout_eur: number | null;
+  motif: string | null;
+  demandee_le: string;
+  finie_le: string | null;
+  /* hexadécimal « \x01… » : le JSON du résultat, chiffré sous la clé du dossier */
+  resultat_chiffre: string | null;
+};
+/** null : la table des analyses n'existe pas sur cette base. */
+export async function chargerAnalyses(p_dossier: string): Promise<Analyse[] | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase.from("analyses")
+    .select("id, type, statut, comptes, sans_source, pieces, pieces_lues, pieces_non_lues, cout_eur, motif, demandee_le, finie_le, resultat_chiffre")
+    .eq("module", "tamila").eq("objet_type", "tamila_dossier").eq("objet_id", p_dossier).order("demandee_le", { ascending: false }).limit(30);
+  if (error) return null;
+  return (data ?? []) as Analyse[];
+}
+export const demanderAnalyse = (p_dossier: string, p_type: TypeAnalyse, p_pieces: string[] | null = null) =>
+  rpc<string>("tamila_demander_analyse", { p_dossier, p_type, p_pieces });
+
+/* ——— le temps proposé à la saisie, le forfait prévu (b4_12) ——— */
+export const saisirTempsPropose = (p_dossier: string, p_origine: string, p_jour: string, p_minutes: number, p_nature: NatureTemps, p_description: string | null, p_facturable: boolean) =>
+  rpc<string>("tamila_saisir_temps_propose", { p_dossier, p_origine, p_jour, p_minutes, p_nature, p_description, p_facturable });
+export const ecarterProposition = (p_dossier: string, p_origine: string) => rpc<void>("tamila_ecarter_proposition", { p_dossier, p_origine });
+export const prevoirForfait = (p_dossier: string, p_minutes: number | null) => rpc<void>("tamila_prevoir_forfait", { p_dossier, p_minutes });
+
+/* ——— les avis RPVA reçus par courriel, à rattacher (b4_10) ——— */
+export type PieceRecue = { nom: string; mime: string; taille: number; chemin: string };
+export type AvisEntrant = {
+  id: string;
+  reception_id: number;
+  recu_le: string;
+  type_suppose: string | null;
+  nb_pieces: number;
+  statut: "a_rattacher" | "rattache" | "ecarte" | "expire";
+  expire_le: string;
+  /* la réception (socle, RLS) : en clair le temps du rattachement */
+  reception: { sujet: string | null; corps: string | null; de_nom: string | null; de_adresse: string | null; pieces: PieceRecue[] } | null;
+};
+
+/** null : la table n'existe pas sur cette base (b4_10 non posée) ; la file ne s'affiche pas. */
+export async function chargerAvisEntrants(): Promise<AvisEntrant[] | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase.from("tamila_avis_entrants").select("id, reception_id, recu_le, type_suppose, nb_pieces, statut, expire_le")
+    .eq("statut", "a_rattacher").order("recu_le", { ascending: false }).limit(50);
+  if (error) return null;
+  const lignes = (data ?? []) as Omit<AvisEntrant, "reception">[];
+  if (!lignes.length) return [];
+  const { data: recs } = await supabase.from("receptions").select("id, sujet, corps, de_nom, de_adresse, pieces").in("id", lignes.map((l) => l.reception_id));
+  const par = new Map(((recs ?? []) as { id: number; sujet: string | null; corps: string | null; de_nom: string | null; de_adresse: string | null; pieces: PieceRecue[] }[]).map((r) => [r.id, r]));
+  return lignes.map((l) => {
+    const r = par.get(l.reception_id);
+    return { ...l, reception: r ? { sujet: r.sujet, corps: r.corps, de_nom: r.de_nom, de_adresse: r.de_adresse, pieces: Array.isArray(r.pieces) ? r.pieces : [] } : null };
+  });
+}
+
+export async function telecharger(chemin: string): Promise<Uint8Array> {
+  const supabase = createClient();
+  const { data, error } = await supabase.storage.from("omega-clients").download(chemin);
+  if (error || !data) throw new ErreurPorte(error ? message(error) : "Pièce jointe introuvable au bucket.");
+  return new Uint8Array(await data.arrayBuffer());
+}
+export const rattacherAvis = (p_entrant: string, p_dossier: string, p_pieces: string[]) => rpc<{ pieces: number }>("tamila_rattacher_avis", { p_entrant, p_dossier, p_pieces });
+export const ecarterAvis = (p_entrant: string, p_motif: string) => rpc<void>("tamila_ecarter_avis", { p_entrant, p_motif });

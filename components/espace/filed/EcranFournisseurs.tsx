@@ -98,7 +98,10 @@ export default function EcranFournisseurs() {
     const t = window.setTimeout(() => void charger(), 0);
     return () => window.clearTimeout(t);
   }, [source, charger]);
-  useTempsReel(["filed_fournisseurs", "filed_fournisseurs_ibans", "filed_factures"], source === "reelle", charger);
+  /* filed_fournisseurs (confirmation, blocage, verdict d'identité) est publiée depuis le 06/10 ;
+     filed_historique aussi, et reçoit une ligne à chaque IBAN proposé, confirmation ou attestation
+     — c'est elle qui fait apparaître un nouvel IBAN tant que filed_fournisseurs_ibans n'est pas publiée */
+  const direct = useTempsReel(["filed_fournisseurs", "filed_historique", "filed_fournisseurs_ibans", "filed_factures"], source === "reelle", charger);
 
   /* après « Revérifier », la réponse du registre arrive en une à deux minutes : relire à 1, 2 et 4 min */
   const relectures = useRef<number[]>([]);
@@ -220,6 +223,12 @@ export default function EcranFournisseurs() {
           </p>
         </div>
         <div className="esp-item-haut">
+          {direct !== "inactif" ? (
+            <span className="esp-direct" data-etat={direct} role="status" title={direct === "en_direct" ? "Les changements arrivent sans recharger la page." : direct === "coupe" ? "Votre réseau refuse le canal temps réel : la vue se relit seule toutes les 30 secondes." : "Connexion au temps réel…"}>
+              <span className="esp-direct-point" aria-hidden="true" />
+              {direct === "en_direct" ? "En direct" : direct === "coupe" ? "Relue toutes les 30 s" : "Connexion…"}
+            </span>
+          ) : null}
           <Link href="/espace/filed" className="r-btn r-btn--fil"><FileText width={15} height={15} aria-hidden="true" /> Documents reçus</Link>
           <Link href="/espace/filed/a-payer" className="r-btn r-btn--fil"><Wallet width={15} height={15} aria-hidden="true" /> À payer</Link>
           <Ruban source={source} />

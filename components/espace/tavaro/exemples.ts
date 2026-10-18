@@ -12,7 +12,8 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { EXEMPLE_CLIENT_ID, EXEMPLE_MOI, dans, ilYa } from "../exemples/socle";
-import type { Agence, Amendement, Avoir, Bareme, Categorie, Contrat, DemandeCourte, Dossier, Facture, LigneBareme, LigneFacture, LigneJournal, LigneProposition, Locataire, Proposition, Reglages, Vehicule } from "./types";
+import type { Agence, AnomalieRetour, FicheVehicule, Flotte, Amendement, AvisContravention, Avoir, Contestation, Entretien, Immobilisation, Parc, Remise, EtatDesLieux, Bareme, Categorie, Contrat, DemandeCourte, Dossier, Facture, LigneBareme, LigneFacture, LigneJournal, LigneProposition, Locataire, Proposition, Reglages, Vehicule } from "./types";
+import { forcesLocales } from "./contestations";
 
 const C = EXEMPLE_CLIENT_ID;
 const u = (p: string, n: number) => `00000000-0000-4000-8000-0000000${p}${n.toString(16).padStart(3, "0")}`;
@@ -49,7 +50,9 @@ export const REGLAGES_EXEMPLE: Reglages = {
   tolerance_retard_min: 59,
   echeance_pro_jours: 30,
   tva_sur_debits: false,
-  emetteur: { adresse: "18 rue de la Villette, 69003 Lyon", numero_tva: "FR42 512 345 678", rcs: "RCS Lyon 512 345 678", email: "facturation@autoloc-bertin.example" },
+  emetteur: { adresse: "18 rue de la Villette, 69003 Lyon", numero_tva: "FR75 512 345 679", rcs: "RCS Lyon 512 345 679", email: "facturation@autoloc-bertin.example" },
+  contestation_delai_jours: 7,
+  contestation_adresse: "contestations@acquereur.example",
 };
 
 export const CATEGORIES_EXEMPLE: Categorie[] = [
@@ -206,9 +209,9 @@ export const LIGNES_EXEMPLE: LigneProposition[] = [
 ];
 
 const fac = (n: number, o: Partial<Facture> & Pick<Facture, "contrat_id" | "contrat_numero" | "proposition_id" | "nature" | "reference" | "emise_le" | "echeance_le" | "statut" | "total_ht" | "total_tva" | "total_ttc" | "destinataire">): Facture => ({
-  id: u("fa", n), demande_id: u("de", n), date_facture: o.emise_le.slice(0, 10), a_debiter_avant: null, emetteur: { nom: "Autoloc Bertin", siren: "512345678", ...REGLAGES_EXEMPLE.emetteur },
+  id: u("fa", n), demande_id: u("de", n), date_facture: o.emise_le.slice(0, 10), a_debiter_avant: null, emetteur: { nom: "Autoloc Bertin", siren: "512345679", ...REGLAGES_EXEMPLE.emetteur },
   mentions: { mandat: "Facture établie par Omega au nom et pour le compte de Autoloc Bertin.", objet: o.nature === "frais" ? "Frais complémentaires de location" : "Dommages constatés à la restitution", contrat: o.contrat_numero, ...(o.nature === "dommages" ? { tva: "Indemnité hors du champ de la TVA (BOI-TVA-BASE-10-10-50, § 300)." } : {}) },
-  regle_le: null, mode_reglement: null, litige_motif: null, envoi_id: u("en", n), relances: 0, relance_le: null, ...o,
+  regle_le: null, mode_reglement: null, litige_motif: null, envoi_id: u("en", n), pdf_piece_id: u("pd", n), relances: 0, relance_le: null, ...o,
 });
 
 const dest = (l: Locataire) => ({ type: l.type, nom: [l.prenom, l.nom].filter(Boolean).join(" "), raison_sociale: l.raison_sociale ?? "", adresse: l.adresse ?? "", email: l.email ?? "" });
@@ -222,7 +225,8 @@ export const FACTURES_EXEMPLE: Facture[] = [
     mentions: { mandat: "Facture établie par Omega au nom et pour le compte de Autoloc Bertin.", objet: "Frais complémentaires de location", contrat: "C-2026-0322", penalites: "En cas de retard de paiement : pénalités au taux de la BCE majoré de 10 points, et indemnité forfaitaire de recouvrement de 40 € (C. com. L441-10)." } }),
 ];
 
-const lf = (n: number, facture_id: string, rang: number, l: LigneProposition): LigneFacture => ({ id: u("fl", n), facture_id, rang, code: l.code, libelle: l.libelle, famille: l.famille, unite: l.unite, quantite: l.quantite, prix_unitaire: l.prix_unitaire, montant_ht: l.montant_ht, regime_tva: l.regime_tva, taux_tva: l.taux_tva, montant_tva: l.montant_tva, montant_ttc: l.montant_ttc, preuves: l.preuves });
+const lf = (n: number, facture_id: string, rang: number, l: LigneProposition): LigneFacture => ({ id: u("fl", n), facture_id, rang, code: l.code, libelle: l.libelle, famille: l.famille, unite: l.unite, quantite: l.quantite, prix_unitaire: l.prix_unitaire, montant_ht: l.montant_ht, regime_tva: l.regime_tva, taux_tva: l.taux_tva, montant_tva: l.montant_tva, montant_ttc: l.montant_ttc, preuves: l.preuves,
+  bareme_ligne_id: l.hors_bareme ? null : (LIGNES_BAREME_EXEMPLE.find((b) => b.code === l.code)?.id ?? null) });
 export const LIGNES_FACTURES_EXEMPLE: LigneFacture[] = [
   lf(1, u("fa", 41), 1, LIGNES_EXEMPLE[6]), lf(2, u("fa", 41), 2, LIGNES_EXEMPLE[7]), lf(3, u("fa", 41), 3, LIGNES_EXEMPLE[8]),
   lf(4, u("fa", 42), 1, LIGNES_EXEMPLE[9]),
@@ -272,7 +276,7 @@ export const JOURNAL_EXEMPLE: LigneJournal[] = [
 /* ——— les dossiers assemblés ——— */
 export function assemblerDossiers(contrats: Contrat[], o: {
   locataires: Locataire[]; vehicules: Vehicule[]; categories: Categorie[]; amendements: Amendement[]; propositions: Proposition[]; lignes: LigneProposition[];
-  factures: Facture[]; lignesFactures: LigneFacture[]; avoirs: Avoir[]; demandes: DemandeCourte[]; journal: LigneJournal[];
+  factures: Facture[]; lignesFactures: LigneFacture[]; avoirs: Avoir[]; demandes: DemandeCourte[]; journal: LigneJournal[]; etats?: EtatDesLieux[];
 }): Dossier[] {
   return contrats.map((contrat) => {
     const propositions = o.propositions.filter((p) => p.contrat_id === contrat.id);
@@ -294,12 +298,193 @@ export function assemblerDossiers(contrats: Contrat[], o: {
       avoirs,
       demandes: o.demandes.filter((d) => demandeIds.has(d.id)),
       journal: o.journal.filter((l) => (l.objet_id && ids.has(l.objet_id)) || (typeof l.donnees.contrat === "string" && ids.has(l.donnees.contrat))).sort((a, b) => a.survenu_le.localeCompare(b.survenu_le)),
+      etats: (o.etats ?? []).filter((e) => e.contrat_id === contrat.id),
     };
   });
 }
 
+/* ——— les états des lieux (b2_05) : le départ signé de la Clio avec une rayure déjà là et une caution prise ; le départ
+   signé de la Yaris (C-2026-0351, en litige : le pare-brise n'y figure pas) ; le départ et le retour signés de la Golf,
+   caution levée ; le départ signé du contrat en cours. ——— */
+const vues = (n: number, quand: string) => ["avant", "arriere", "flanc_gauche", "flanc_droit", "compteur", "jauge"].map((vue) => ({ vue, chemin: `${C}/loc_contrat/${u("co", n)}/${vue}.jpg`, prise_le: quand }));
+const etat = (n: number, contrat: number, o: Partial<EtatDesLieux> & Pick<EtatDesLieux, "moment" | "releve_le" | "entite_id">): EtatDesLieux => ({
+  id: u("ed", n), client_id: C, contrat_id: u("co", contrat), statut: "signe", km: null, carburant_8: 8, charge_pct: null, photos: vues(contrat, o.releve_le), dommages: [],
+  observations: null, caution_eur: null, caution_mode: null, caution_reference: null, caution_statut: null, caution_levee_le: null, caution_motif: null,
+  signataire_nom: null, signature_chemin: null, signe_le: o.releve_le, empreinte: null, refus_motif: null, refuse_le: null, etabli_par: SOFIA, cree_le: o.releve_le, ...o,
+});
+export const ETATS_EXEMPLE: EtatDesLieux[] = [
+  etat(1, 1, { moment: "depart", entite_id: LYON, releve_le: ilYa(4, 9), km: 12000, signataire_nom: "Marie Durand", empreinte: "3f2a9c41d07be6a15c88e2f0b4d93a7e61c5f08b2d4e7a9c13f6b80d52e4a7c9",
+    caution_eur: 800, caution_mode: "empreinte_carte", caution_reference: "AUT-448812", caution_statut: "prise",
+    dommages: [{ zone: "flanc_droit", code: "RAYURE_PORTIERE", description: "Rayure de 6 cm sur la portière arrière droite", preuves: [{ chemin: `${C}/loc_contrat/${u("co", 1)}/rayure-depart.jpg`, prise_le: ilYa(4, 9) }] }] }),
+  etat(4, 4, { moment: "depart", entite_id: LYON, releve_le: ilYa(16, 9), km: 7500, signataire_nom: "Samir Haddad", empreinte: "a81c07f3e95d2b46c0f1e8a7d3b5926e4c0a1f7d8e2b3c95a6f04d7e1b8c2a39",
+    caution_eur: 500, caution_mode: "empreinte_carte", caution_reference: "AUT-440190", caution_statut: "prise", observations: "Pare-brise contrôlé : aucun impact." }),
+  etat(5, 5, { moment: "depart", entite_id: LYON, releve_le: ilYa(21, 9), km: 33000, signataire_nom: "Camille Roux", empreinte: "5be0c2a9f41d73e8b6a05c9d2e7f13b84a6c0d95e2f17b3a8c4d60e9f2a1b7c5",
+    caution_eur: 800, caution_mode: "empreinte_carte", caution_reference: "AUT-437720", caution_statut: "levee", caution_levee_le: ilYa(16, 9), caution_motif: "Factures réglées par carte." }),
+  etat(6, 5, { moment: "retour", entite_id: LYON, releve_le: ilYa(18, 10), km: 33400, carburant_8: 2, signataire_nom: "Camille Roux", empreinte: "c4d81e2a07f9b35d6e0a1c8f72b4e93d5a6f0c1e8b2d7a94f3c05e6b1d8a2f70" }),
+  etat(7, 7, { moment: "depart", entite_id: LYON, releve_le: ilYa(1, 15), km: 5100, signataire_nom: "Luc Berger", empreinte: "e09b4c7a21d58f36a0c2e1b9d7f4a83c65e0b2d1f9a7c48e3b6d05a2c1f8e9b4",
+    caution_eur: 800, caution_mode: "cheque", caution_reference: "Chèque n° 0046612", caution_statut: "prise" }),
+];
+
 export const DOSSIERS_EXEMPLE: Dossier[] = assemblerDossiers(CONTRATS_EXEMPLE, {
   locataires: LOCATAIRES_EXEMPLE, vehicules: VEHICULES_EXEMPLE, categories: CATEGORIES_EXEMPLE, amendements: AMENDEMENTS_EXEMPLE,
   propositions: PROPOSITIONS_EXEMPLE, lignes: LIGNES_EXEMPLE, factures: FACTURES_EXEMPLE, lignesFactures: LIGNES_FACTURES_EXEMPLE,
-  avoirs: AVOIRS_EXEMPLE, demandes: DEMANDES_EXEMPLE, journal: JOURNAL_EXEMPLE,
+  avoirs: AVOIRS_EXEMPLE, demandes: DEMANDES_EXEMPLE, journal: JOURNAL_EXEMPLE, etats: ETATS_EXEMPLE,
 });
+
+/* ——— les avis de contravention (b2_03) : un à désigner bientôt (société), un à désigner, un à rapprocher en urgence,
+   un désigné, un classé, un désigné il y a plus d'un an dont l'identité est effacée (b2_04). L'échéance est la date d'envoi plus 45 jours, comme la base la calcule. ——— */
+const jourIso = (iso: string) => iso.slice(0, 10);
+const plus = (jour: string, n: number) => new Date(Date.parse(jour + "T12:00:00Z") + n * 86_400_000).toISOString().slice(0, 10);
+const avis = (n: number, o: Partial<AvisContravention> & Pick<AvisContravention, "numero_avis" | "immatriculation" | "infraction_le" | "avis_envoye_le" | "statut">): AvisContravention => ({
+  id: u("pv", n), client_id: C, entite_id: null, vehicule_id: null, lieu: null, nature: null, montant_eur: null, recu_le: o.avis_envoye_le,
+  echeance_le: plus(o.avis_envoye_le, 45), contrat_id: null, locataire_id: null, rapprochement: null, candidats: 0, designation: null,
+  mode_designation: null, reference_designation: null, designe_le: null, designe_par: null, hors_delai: null, motif_classement: null,
+  classe_le: null, classe_par: null, source: "saisie", cree_par: SOFIA, cree_le: o.avis_envoye_le + "T09:00:00Z", ...o,
+});
+export const AVIS_EXEMPLE: AvisContravention[] = [
+  avis(1, { numero_avis: "2026 0819 4471 02", immatriculation: VEHICULES_EXEMPLE[2].immatriculation, infraction_le: ilYa(48, 11), avis_envoye_le: jourIso(ilYa(40)), recu_le: jourIso(ilYa(37)),
+    lieu: "A48, Voreppe", nature: "Excès de vitesse inférieur à 20 km/h (limite 110)", montant_eur: 135, statut: "a_designer", entite_id: GRENOBLE,
+    vehicule_id: VEHICULES_EXEMPLE[2].id, contrat_id: u("co", 6), locataire_id: LOCATAIRES_EXEMPLE[5].id, rapprochement: "auto", candidats: 1 }),
+  avis(2, { numero_avis: "2026 0917 1023 88", immatriculation: VEHICULES_EXEMPLE[5].immatriculation, infraction_le: ilYa(20, 17), avis_envoye_le: jourIso(ilYa(12)), recu_le: jourIso(ilYa(9)),
+    lieu: "Lyon 3e, cours Gambetta", nature: "Franchissement de feu rouge", montant_eur: 135, statut: "a_designer", entite_id: LYON,
+    vehicule_id: VEHICULES_EXEMPLE[5].id, contrat_id: u("co", 5), locataire_id: LOCATAIRES_EXEMPLE[6].id, rapprochement: "auto", candidats: 1 }),
+  avis(3, { numero_avis: "2026 0822 5530 17", immatriculation: VEHICULES_EXEMPLE[3].immatriculation, infraction_le: ilYa(46, 8), avis_envoye_le: jourIso(ilYa(43)), recu_le: jourIso(ilYa(3)),
+    lieu: "Villeurbanne, boulevard du 11-Novembre", nature: "Stationnement gênant", montant_eur: 35, statut: "a_rapprocher", entite_id: LYON, vehicule_id: VEHICULES_EXEMPLE[3].id }),
+  avis(4, { numero_avis: "2026 0924 0310 45", immatriculation: VEHICULES_EXEMPLE[3].immatriculation, infraction_le: ilYa(14, 10), avis_envoye_le: jourIso(ilYa(9)), recu_le: jourIso(ilYa(6)),
+    lieu: "A43, Saint-Quentin-Fallavier", nature: "Excès de vitesse inférieur à 20 km/h (limite 90)", montant_eur: 68, statut: "designe", entite_id: LYON,
+    vehicule_id: VEHICULES_EXEMPLE[3].id, contrat_id: u("co", 4), locataire_id: LOCATAIRES_EXEMPLE[4].id, rapprochement: "auto", candidats: 1,
+    designation: { type: "personne", nom: "Haddad", prenom: "Samir", date_naissance: "1979-11-04", lieu_naissance: "Marseille", adresse: "45 avenue Berthelot, 69007 Lyon", permis_numero: "790469200123" },
+    mode_designation: "antai_en_ligne", reference_designation: "DES-2026-118842", designe_le: ilYa(2, 10), designe_par: EXEMPLE_MOI, hors_delai: false }),
+  avis(5, { numero_avis: "2026 0801 7712 30", immatriculation: VEHICULES_EXEMPLE[1].immatriculation, infraction_le: ilYa(60, 7), avis_envoye_le: jourIso(ilYa(55)), recu_le: jourIso(ilYa(50)),
+    lieu: "Grenoble, rocade sud", nature: "Excès de vitesse inférieur à 20 km/h (limite 90)", montant_eur: 68, statut: "classe", entite_id: GRENOBLE, vehicule_id: VEHICULES_EXEMPLE[1].id,
+    motif_classement: "Usurpation de plaque : la photo du radar montre une autre voiture, la Peugeot était au parc. Requête en exonération envoyée à l'ANTAI avec le dépôt de plainte.", classe_le: ilYa(48, 15), classe_par: CLAIRE }),
+  avis(6, { numero_avis: "2025 0812 6604 51", immatriculation: VEHICULES_EXEMPLE[0].immatriculation, infraction_le: ilYa(400, 16), avis_envoye_le: jourIso(ilYa(395)), recu_le: jourIso(ilYa(392)),
+    lieu: "A7, Vienne", nature: "Excès de vitesse inférieur à 20 km/h (limite 130)", montant_eur: 135, statut: "designe", entite_id: LYON, vehicule_id: VEHICULES_EXEMPLE[0].id,
+    rapprochement: "auto", candidats: 1, designation: { type: "personne", effacee_le: ilYa(20, 3) }, designation_effacee_le: ilYa(20, 3),
+    mode_designation: "antai_en_ligne", reference_designation: "DES-2025-074410", designe_le: ilYa(385, 10), designe_par: CLAIRE, hors_delai: false }),
+];
+
+/* ——— les contestations bancaires (b2_09) : la facture de dommages FA-2026-000105, débitée par carte, contestée par le
+   client auprès de sa banque — dossier prêt, réponse due dans deux jours ; la facture de frais FA-2026-000104, dossier
+   envoyé il y a neuf jours, en attente de la décision de la banque. ——— */
+const contestation = (n: number, facture: Facture, o: Partial<Contestation> & Pick<Contestation, "reference_banque" | "motif_banque" | "recue_le" | "repondre_avant" | "statut">): Contestation => {
+  const d = DOSSIERS_EXEMPLE.find((x) => x.contrat.id === facture.contrat_id)!;
+  return {
+    id: u("cb", n), client_id: C, entite_id: d.contrat.entite_id, facture_id: facture.id, contrat_id: facture.contrat_id, montant_eur: facture.total_ttc,
+    adresse_banque: "contestations@acquereur.example", forces: forcesLocales(d, facture), dossier_piece_id: null, dossier_sha256: null, dossier_pages: null,
+    dossier_le: null, dossier_chemin: null, envoi_id: null, envoyee_le: null, envoyee_par: null, issue_le: null, issue_par: null, issue_note: null, notes: null,
+    cree_par: SOFIA, cree_le: o.recue_le + "T09:30:00Z", ...o,
+  };
+};
+const FA105 = FACTURES_EXEMPLE.find((f) => f.reference === "FA-2026-000105")!;
+const FA104 = FACTURES_EXEMPLE.find((f) => f.reference === "FA-2026-000104")!;
+export const CONTESTATIONS_EXEMPLE: Contestation[] = [
+  contestation(1, FA105, { reference_banque: "CB-2026-88412", motif_banque: "13.1 — Prestation non conforme (le client dit la rayure antérieure)", recue_le: jourIso(ilYa(5)), repondre_avant: plus(jourIso(ilYa(5)), 7),
+    statut: "dossier_pret", dossier_piece_id: u("pc", 1), dossier_sha256: "7d1e0c4b9a2f83e65c0d1b7a4f9e2c38d6a5b10f7e3c9d24a8b6f01e5c7d3a92", dossier_pages: 6, dossier_le: ilYa(5, 10),
+    dossier_chemin: `${C}/loc_contestations/${u("cb", 1)}/dossier-CB-2026-88412.pdf` }),
+  contestation(2, FA104, { reference_banque: "CB-2026-87105", motif_banque: "13.6 — Crédit non traité (le client cite l'avoir AV-2026-000007)", montant_eur: 126, recue_le: jourIso(ilYa(12)), repondre_avant: plus(jourIso(ilYa(12)), 7),
+    statut: "envoyee", dossier_piece_id: u("pc", 2), dossier_sha256: "c08f3a7e19d24b56a0e7c1d93f5b28a46e0d7c3b91f5a2e48d6c0b7a3e1f9d25", dossier_pages: 5, dossier_le: ilYa(12, 10),
+    dossier_chemin: `${C}/loc_contestations/${u("cb", 2)}/dossier-CB-2026-87105.pdf`, envoi_id: u("en", 90), envoyee_le: ilYa(9, 11), envoyee_par: SOFIA,
+    notes: "Le client a déjà reçu un avoir de 72 € : seuls 126 € restent contestés." }),
+];
+
+/* ——— le parc (b2_10) : deux remises en location en cours (la Clio rendue, qui risque de manquer son départ dans
+   50 minutes ; la 308, pour un départ demain matin), trois remises finies (2 h 31, 2 h 48, 3 h 10 : la médiane
+   affichée est 2 h 48), une anomalie confiée à Yanis, le Master chez le carrossier, la Golf sous rappel du
+   constructeur, une révision à planifier, un contrôle technique planifié, des pneus faits. ——— */
+const YANIS = "00000000-0000-4000-8000-0000000000a3";
+const minutes = (m: number) => new Date(Date.now() + m * 60_000).toISOString();
+const plusMinutes = (iso: string, m: number) => new Date(Date.parse(iso) + m * 60_000).toISOString();
+const V = (n: number) => VEHICULES_EXEMPLE[n - 1].id;
+const remise = (n: number, o: Partial<Remise> & Pick<Remise, "vehicule_id" | "contrat_id" | "retour_le" | "statut">): Remise => ({
+  id: u("rm", n), client_id: C, entite_id: LYON, prochain_depart_le: null, prochain_depart_source: null, prochain_depart_ref: null, limite_le: null,
+  responsable: null, inspection_le: null, inspection_par: null, nettoyage_le: null, nettoyage_par: null, energie_le: null, energie_par: null, prete_le: null,
+  immobilisation_id: null, alerte: null, annulee_motif: null, cree_le: o.retour_le, ...o,
+});
+const finie = (n: number, vehicule: number, contrat: number, retour: string, duree: number): Remise => remise(n, {
+  vehicule_id: V(vehicule), contrat_id: u("co", contrat), retour_le: retour, statut: "prete", inspection_le: plusMinutes(retour, 20), inspection_par: SOFIA,
+  nettoyage_le: plusMinutes(retour, duree - 30), nettoyage_par: SOFIA, energie_le: plusMinutes(retour, duree), energie_par: EXEMPLE_MOI, prete_le: plusMinutes(retour, duree),
+});
+export const PARC_EXEMPLE: Parc = {
+  vehicules: VEHICULES_EXEMPLE.map((v, i) => ({ ...v, entite_id: i === 1 || i === 2 ? (i === 2 ? GRENOBLE : LYON) : LYON })),
+  remises: [
+    remise(1, { vehicule_id: V(1), contrat_id: u("co", 1), retour_le: minutes(-25), statut: "en_cours", prochain_depart_le: minutes(80), prochain_depart_source: "reservation",
+      prochain_depart_ref: "R-55102", limite_le: minutes(50), responsable: SOFIA, inspection_le: minutes(-10), inspection_par: SOFIA, alerte: "risque", immobilisation_id: u("im", 1) }),
+    remise(2, { vehicule_id: V(2), contrat_id: u("co", 2), retour_le: minutes(-90), statut: "a_faire", prochain_depart_le: dans(1, 9), prochain_depart_source: "categorie",
+      prochain_depart_ref: "R-55120", limite_le: plusMinutes(dans(1, 9), -30), immobilisation_id: u("im", 2) }),
+    finie(3, 4, 4, ilYa(12, 9), 168),
+    finie(4, 6, 5, ilYa(18, 10), 151),
+    finie(5, 3, 6, ilYa(45, 18), 190),
+  ],
+  anomalies: [
+    { id: u("an", 1), entite_id: LYON, remise_id: u("rm", 1), vehicule_id: V(1), type: "voyant", description: "Voyant de pression des pneus allumé au retour", responsable: YANIS,
+      statut: "ouverte", signalee_par: SOFIA, signalee_le: minutes(-8), traitee_le: null, traitee_par: null, note: null } satisfies AnomalieRetour,
+  ],
+  immobilisations: [
+    { id: u("im", 1), entite_id: LYON, vehicule_id: V(1), motif: "preparation", debut_le: minutes(-25), fin_prevue_le: null, fin_le: null, contrat_id: u("co", 1), prestataire: null, cout_eur: null, notes: null, cree_le: minutes(-25) },
+    { id: u("im", 2), entite_id: LYON, vehicule_id: V(2), motif: "preparation", debut_le: minutes(-90), fin_prevue_le: null, fin_le: null, contrat_id: u("co", 2), prestataire: null, cout_eur: null, notes: null, cree_le: minutes(-90) },
+    { id: u("im", 3), entite_id: GRENOBLE, vehicule_id: V(3), motif: "carrosserie", debut_le: ilYa(2, 9), fin_prevue_le: dans(3, 17), fin_le: null, contrat_id: null,
+      prestataire: "Carrosserie du Parc", cout_eur: 1350, notes: "Pare-chocs arrière et feu", cree_le: ilYa(2, 9) },
+    { id: u("im", 4), entite_id: LYON, vehicule_id: V(6), motif: "rappel_constructeur", debut_le: ilYa(0, 8), fin_prevue_le: dans(1, 18), fin_le: null, contrat_id: null,
+      prestataire: "Concession Volkswagen Lyon Est", cout_eur: 0, notes: "Rappel airbag passager", cree_le: ilYa(0, 8) },
+  ] satisfies Immobilisation[],
+  entretiens: [
+    { id: u("et", 1), entite_id: LYON, vehicule_id: V(2), nature: "revision", libelle: "Révision 50 000 km", echeance_le: null, echeance_km: 50000, duree_h: 6, statut: "a_planifier",
+      debut_le: null, fin_le: null, atelier_nom: null, atelier_adresse: null, envoi_id: null, immobilisation_id: null, fait_le: null, km_fait: null, cout_eur: null, notes: null },
+    { id: u("et", 2), entite_id: LYON, vehicule_id: V(4), nature: "controle_technique", libelle: "Contrôle technique", echeance_le: jourIso(dans(20, 9)), echeance_km: null, duree_h: 2, statut: "planifie",
+      debut_le: dans(4, 8), fin_le: dans(4, 10), atelier_nom: "Garage Lumière", atelier_adresse: "atelier@garage-lumiere.example", envoi_id: u("en", 91), immobilisation_id: null,
+      fait_le: null, km_fait: null, cout_eur: null, notes: null },
+    { id: u("et", 3), entite_id: LYON, vehicule_id: V(1), nature: "pneus", libelle: "Pneus avant", echeance_le: null, echeance_km: 12000, duree_h: 2, statut: "fait",
+      debut_le: ilYa(10, 8), fin_le: ilYa(10, 10), atelier_nom: "Garage Lumière", atelier_adresse: null, envoi_id: null, immobilisation_id: null, fait_le: ilYa(10, 10), km_fait: 11980, cout_eur: 312, notes: null },
+  ] satisfies Entretien[],
+  membres: Object.entries(PERSONNES_TAVARO).map(([user_id, p]) => ({ user_id, role: p.role })),
+  responsables: [{ entite_id: LYON, remise_responsable: CLAIRE }],
+};
+
+/* ——— la flotte (b2_11) : six fiches économiques sur douze mois. Le Master coûte plus qu'il ne rapporte (carrosserie,
+   utilitaire peu loué) : à sortir aux enchères ; la 308 approche 50 000 km ; la Golf est en LLD jusqu'au mois prochain :
+   à restituer ; la Clio, la Yaris et la C3 sont à garder. La Clio a une cote ; la C3 n'en a pas encore. Une sortie est
+   proposée (le Master) par Yanis, en attente de la direction. ——— */
+const fiche = (n: number, o: Partial<FicheVehicule> & Pick<FicheVehicule, "avis" | "canal" | "canal_raison">): FicheVehicule => {
+  const v = VEHICULES_EXEMPLE[n - 1];
+  const revenu = o.revenu ?? { location: 0, frais: 0, total: 0, jours_loues: 0, contrats_sans_tarif: 0 };
+  const couts = o.couts ?? { atelier: 0, financement: 0, perte_valeur: null, total: 0 };
+  return {
+    vehicule: v.id, immatriculation: v.immatriculation, modele: v.modele, utilitaire: false,
+    periode: { du: jourIso(ilYa(365)), au: jourIso(ilYa(0)), jours: 365 }, revenu, couts, marge: Math.round((revenu.total - couts.total) * 100) / 100,
+    utilisation_pct: Math.round((revenu.jours_loues / 365) * 1000) / 10, jours_immobilises: 0, km: v.km_dernier, km_an: null, age_mois: null,
+    financement: "achat", fin_contrat_le: null, cote: null, valeur_comptable: null, ecart_cote_comptable: null, raisons: [], moment: null, moment_le: null, complet: false, ...o,
+  };
+};
+const FICHES_EXEMPLE: FicheVehicule[] = [
+  fiche(1, { avis: "garder", canal: "reprise_concession", canal_raison: "récent et peu roulé : une reprise en concession, contre un véhicule neuf, valorise au mieux la cote",
+    revenu: { location: 9180, frais: 312, total: 9492, jours_loues: 204, contrats_sans_tarif: 0 }, couts: { atelier: 312, financement: 0, perte_valeur: 1785, total: 2097 },
+    km_an: 21400, age_mois: 14, cote: { eur: 11900, source: "argus", le: jourIso(ilYa(6)) }, valeur_comptable: 10450, ecart_cote_comptable: 1450,
+    moment: "avant 100 000 km, vers le 05/09/2030 au rythme actuel", complet: true }),
+  fiche(2, { avis: "surveiller", canal: "marchand", canal_raison: "un marchand règle vite au prix de la cote, sans annonce ni essais",
+    revenu: { location: 11960, frais: 238, total: 12198, jours_loues: 230, contrats_sans_tarif: 0 }, couts: { atelier: 640, financement: 0, perte_valeur: 2130, total: 2770 },
+    km_an: 26300, age_mois: 31, raisons: ["31 mois, près du seuil de 36 mois", "révision des 50 000 km à planifier"], cote: { eur: 14200, source: "la_centrale", le: jourIso(ilYa(20)) },
+    valeur_comptable: 12100, ecart_cote_comptable: 2100, moment: "avant 50 000 km, vers le 12/11/2026 au rythme actuel", complet: true }),
+  fiche(3, { avis: "sortir", canal: "encheres", canal_raison: "utilitaire ou kilométrage élevé : les ventes aux enchères professionnelles donnent le meilleur prix sans délai",
+    utilitaire: true, revenu: { location: 7200, frais: 0, total: 7200, jours_loues: 80, contrats_sans_tarif: 0 }, couts: { atelier: 4380, financement: 0, perte_valeur: 3150, total: 7530 },
+    jours_immobilises: 23, km_an: 31200, age_mois: 52, raisons: ["il a coûté 330 € de plus qu'il n'a rapporté sur douze mois", "52 mois, au-delà de votre seuil de 36 mois", "loué 21,9 % du temps", "23 jours chez le carrossier et au garage"],
+    cote: { eur: 21000, source: "offre_marchand", le: jourIso(ilYa(3)) }, valeur_comptable: 17800, ecart_cote_comptable: 3200, moment: "dès maintenant", moment_le: jourIso(ilYa(0)), complet: true }),
+  fiche(4, { avis: "garder", canal: "reprise_concession", canal_raison: "récent et peu roulé : une reprise en concession, contre un véhicule neuf, valorise au mieux la cote",
+    revenu: { location: 6750, frais: 120, total: 6870, jours_loues: 150, contrats_sans_tarif: 0 }, couts: { atelier: 89, financement: 0, perte_valeur: 2400, total: 2489 },
+    km_an: 9800, age_mois: 9, cote: { eur: 16000, source: "argus", le: jourIso(ilYa(30)) }, valeur_comptable: 17100, ecart_cote_comptable: -1100, complet: true }),
+  fiche(5, { avis: "garder", canal: "reprise_concession", canal_raison: "récent et peu roulé : une reprise en concession, contre un véhicule neuf, valorise au mieux la cote",
+    revenu: { location: 1890, frais: 0, total: 1890, jours_loues: 42, contrats_sans_tarif: 1 }, couts: { atelier: 0, financement: 0, perte_valeur: null, total: 0 }, age_mois: 3 }),
+  fiche(6, { avis: "restituer", canal: "restitution_loueur", canal_raison: "véhicule financé : il se restitue au loueur financier, sans frais de remise en état au-delà de l'usure normale",
+    financement: "lld", fin_contrat_le: jourIso(dans(38, 9)), revenu: { location: 10900, frais: 160, total: 11060, jours_loues: 218, contrats_sans_tarif: 0 },
+    couts: { atelier: 0, financement: 5160, perte_valeur: 0, total: 5160 }, km_an: 18900, age_mois: 35, raisons: [`le contrat de LLD finit le ${jourIso(dans(38, 9)).split("-").reverse().join("/")}`],
+    moment: "dès maintenant", moment_le: jourIso(ilYa(0)), complet: true }),
+];
+export const FLOTTE_EXEMPLE: Flotte = {
+  fiches: FICHES_EXEMPLE,
+  sorties: [
+    { id: u("sf", 1), vehicule_id: VEHICULES_EXEMPLE[2].id, statut: "proposee", canal: "encheres", prix_vise_eur: 21000, mise_en_vente_le: null,
+      motif: "Utilitaire loué un jour sur cinq, 4 380 € d'atelier et de carrosserie en douze mois, 52 mois : il coûte plus qu'il ne rapporte.",
+      fiche: FICHES_EXEMPLE[2], propose_par: YANIS, propose_le: ilYa(1, 16), decide_par: null, decide_le: null, refus_motif: null, prix_vente_eur: null, vendu_le: null, acheteur: null },
+  ],
+};
+

@@ -17,7 +17,7 @@ let echecs = 0;
 const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) echecs++; };
 const ANGLAIS = /\b(Loading|Submit|Cancel|Approve|Reject|Delete|Save|Error|Pending|Due|Invoice|Supplier|Settings|Logout|Sign in|Dashboard|Today|Yesterday|Tomorrow|Chair|Patient list|Appointment)\b/;
 const LARGEURS = [390, 768, 1024, 1440, 1700];
-const CARTES = ['Créneaux à sauver', 'Plans sans rendez-vous', 'Avant les rendez-vous', 'Charge des fauteuils', "Liste d'attente", 'Le cabinet'];
+const CARTES = ['Créneaux à sauver', 'Plans sans rendez-vous', 'Avant les rendez-vous', 'Charge des fauteuils', 'Demi-journées vides', 'Objectifs par fauteuil', 'Absences probables', 'Équipe absente', 'Appels', 'Synthèse de la semaine', 'Réinscription', 'Pilotage', 'Rappels aux patients', "Liste d'attente", 'Règles communes', 'Le cabinet'];
 
 for (const largeur of LARGEURS) {
   const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'b3-tiroma', densite: 1 });
@@ -30,7 +30,7 @@ for (const largeur of LARGEURS) {
     const larges = [...document.querySelectorAll('.esp *')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > w + 1 && !dansCadre(e); })
       .slice(0, 5).map(e => e.tagName + '.' + [...e.classList].join('.') + '→' + Math.round(e.getBoundingClientRect().right));
     return { deb: document.documentElement.scrollWidth - w, larges, texte: document.querySelector('.esp')?.innerText || '', h1: document.querySelector('.esp h1')?.textContent,
-             kpis: document.querySelectorAll('.esp-kpi').length,
+             kpis: document.querySelector('.esp-kpis')?.querySelectorAll('.esp-kpi').length ?? 0,
              cartes: [...document.querySelectorAll('.esp-carte[aria-label]')].map(e => e.getAttribute('aria-label')),
              ruban: document.querySelector('.esp-ruban')?.textContent };
   })()`);
@@ -40,7 +40,7 @@ for (const largeur of LARGEURS) {
   ok(!anglais, anglais ? `mot anglais à l'écran : « ${anglais[0]} »` : 'aucun mot anglais surveillé à l\'écran');
   ok(mesure.h1 === 'Cabinet dentaire', `titre : ${mesure.h1}`);
   ok(mesure.kpis === 4, `quatre compteurs (${mesure.kpis})`);
-  ok(CARTES.every((c) => mesure.cartes.includes(c)), `les six cartes : ${mesure.cartes.join(' · ')}`);
+  ok(CARTES.every((c) => mesure.cartes.includes(c)), `les seize cartes : ${mesure.cartes.join(' · ')}`);
   ok(mesure.ruban === "Données d'exemple", `ruban : ${mesure.ruban}`);
   ok(/Marguerite Delannoy/.test(mesure.texte) && /Plan accepté/.test(mesure.texte), 'un créneau à sauver porte son premier candidat (plan accepté)');
   ok(/Fauteuil 2/.test(mesure.texte) && /Après-midi vide/.test(mesure.texte), 'la charge dit la demi-journée vide du fauteuil 2');
@@ -108,7 +108,7 @@ for (const largeur of LARGEURS) {
   await s.dormir(400);
   await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input.rv-champ'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, 'Nes'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
   await s.dormir(600);
-  const choixPat = await s.evaluer(`(() => { const b = [...document.querySelectorAll('[role="dialog"] [role="option"]')].find(b => /Rosalie Nestor/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`);
+  const choixPat = await s.evaluer(`(() => { const b = [...document.querySelectorAll('[role="dialog"] ul[aria-label="Patients trouvés"] button')].find(b => /Rosalie Nestor/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`);
   ok(choixPat === true, 'la recherche propose Rosalie Nestor, choisie');
   await s.dormir(200);
   await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Inscrire/.test(b.textContent))?.click()`);
@@ -124,6 +124,149 @@ for (const largeur of LARGEURS) {
   await s.evaluer(`document.getElementById('tiroma-attente')?.scrollIntoView({ block: 'start' })`);
   await s.dormir(400);
   await s.capturer(`${dossier}tiroma-attente-1440.jpg`, { qualite: 55 });
+
+  console.log('— /espace/tiroma : noter un appel depuis un créneau à sauver (exemple, b3_12)');
+  const avantApp = await s.evaluer(`document.querySelectorAll('section[aria-label="Appels"] ul[aria-label="Appels à reprendre"] > li').length`);
+  ok(await s.evaluer(`(() => { const li = [...document.querySelectorAll('section[aria-label="Créneaux à sauver"] ol > li')].find(l => /Rosalie Nestor/.test(l.textContent)); const b = li && [...li.querySelectorAll('button')].find(b => /Noter l.appel/.test(b.textContent)); if (!b) return null; b.focus(); b.click(); return true; })()`) === true, 'bouton « Noter l\'appel » de Rosalie Nestor (créneau) cliqué');
+  await s.dormir(500);
+  ok(await s.evaluer(`!!document.querySelector('[role="dialog"]') && /Rosalie Nestor/.test(document.querySelector('[role="dialog"]').textContent)`), 'le dialogue « Noter l\'appel » s\'ouvre sur elle');
+  await s.evaluer(`document.querySelector('[role="dialog"] input[type="radio"][value="rappeler"]')?.click()`);
+  await s.dormir(300);
+  ok(await s.evaluer(`!!document.querySelector('[role="dialog"] input[type="date"]')`), '« À rappeler » demande une date');
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Noter/.test(b.textContent))?.click()`);
+  await s.dormir(900);
+  const apresApp = await s.evaluer(`document.querySelectorAll('section[aria-label="Appels"] ul[aria-label="Appels à reprendre"] > li').length`);
+  ok(apresApp === avantApp + 1, `les appels à reprendre passent de ${avantApp} à ${apresApp} (en mémoire)`);
+  ok(await s.evaluer(`(() => { const li = [...document.querySelectorAll('section[aria-label="Créneaux à sauver"] ol > li')].find(l => /Rosalie Nestor/.test(l.textContent)); return li ? /À rappeler/.test(li.textContent) : null; })()`) === true, 'le créneau dit « À rappeler » sous Rosalie Nestor');
+  await s.evaluer(`document.getElementById('tiroma-appels')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(400);
+  await s.capturer(`${dossier}tiroma-appels-1440.jpg`, { qualite: 55 });
+
+  console.log('— /espace/tiroma : les absences probables (exemple, b3_17)');
+  const abs = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Absences probables"]'); if (!c) return null;
+    const li = [...c.querySelectorAll('ul[aria-label="Rendez-vous à risque d\\'absence"] > li')];
+    return { n: li.length, premier: li[0]?.innerText || '', texte: c.innerText }; })()`);
+  ok(abs && abs.n === 3, `trois rendez-vous à risque (${abs?.n})`);
+  ok(abs && /A annoncé son absence/.test(abs.premier), 'l\'absence annoncée vient en tête');
+  ok(abs && /2 rendez-vous manqués en 18 mois/.test(abs.texte), 'chaque risque dit sa raison');
+  await s.evaluer(`document.getElementById('tiroma-absences')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(400);
+  await s.capturer(`${dossier}tiroma-absences-1440.jpg`, { qualite: 55 });
+
+  console.log('— /espace/tiroma : l\'équipe absente, les soins à basculer (exemple, b3_18)');
+  const eq = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Équipe absente"]'); if (!c) return null;
+    return { n: c.querySelectorAll('ul[aria-label^="Soins à basculer"] > li').length, texte: c.innerText }; })()`);
+  ok(eq && eq.n === 2, `deux soins à basculer pendant l'absence d'Élodie (${eq?.n})`);
+  ok(eq && /Vers Fauteuil 2 \(avec Karine\)/.test(eq.texte), 'le soin de Sylvie Marlin bascule vers le Fauteuil 2, avec Karine');
+  ok(eq && /Aucun fauteuil libre/.test(eq.texte), 'la chirurgie sans fauteuil libre le dit');
+  await s.evaluer(`[...document.querySelectorAll('section[aria-label="Équipe absente"] button')].find(b => /Noter une absence/.test(b.textContent))?.click()`);
+  await s.dormir(500);
+  ok(await s.evaluer(`/Noter une absence/.test(document.querySelector('[role="dialog"]')?.textContent || '')`), 'le dialogue « Noter une absence » s\'ouvre');
+  await s.evaluer(`(() => { const sel = document.querySelector('[role="dialog"] select.rv-champ'); const set = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set; set.call(sel, 'm-2'); sel.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+  await s.evaluer(`document.querySelector('[role="dialog"] input[type="radio"][value="maladie"]')?.click()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Noter/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const eq2 = await s.evaluer(`document.querySelector('section[aria-label="Équipe absente"]')?.innerText || ''`);
+  ok(!(await s.evaluer(`!!document.querySelector('[role="dialog"]')`)) && /Karine — Fauteuil 2/.test(eq2) && /Arrêt/.test(eq2), 'l\'absence de Karine (arrêt) est notée, le dialogue se ferme');
+  await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Équipe absente"]'); const b = [...c.querySelectorAll('button')].filter(b => /Clore l.absence/.test(b.textContent)).pop(); b?.click(); })()`);
+  await s.dormir(400);
+  ok(!/Karine — Fauteuil 2/.test(await s.evaluer(`document.querySelector('section[aria-label="Équipe absente"]')?.innerText || ''`)), '« Clore l\'absence » la retire');
+  await s.evaluer(`document.getElementById('tiroma-equipe')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(400);
+  await s.capturer(`${dossier}tiroma-equipe-1440.jpg`, { qualite: 55 });
+
+  console.log('— /espace/tiroma : les demi-journées vides (exemple, b3_19)');
+  const dj = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Demi-journées vides"]'); if (!c) return null;
+    return { n: c.querySelectorAll('ul[aria-label="Demi-journées à remplir"] > li').length, texte: c.innerText }; })()`);
+  ok(dj && dj.n === 3, `trois demi-journées à remplir (${dj?.n})`);
+  ok(dj && /Dr Mathis Rousseau/.test(dj.texte) && /4 h 30 libres sur 5 h/.test(dj.texte), 'le titulaire voit le praticien et les heures libres');
+  ok(dj && /3 patients en liste d'attente/.test(dj.texte) && /habituelles/.test(dj.texte), 'la liste d\'attente et la source « habitude » sont dites');
+  await s.evaluer(`document.getElementById('tiroma-demi-journees')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(400);
+  await s.capturer(`${dossier}tiroma-demi-journees-1440.jpg`, { qualite: 55 });
+
+  console.log('— /espace/tiroma : les objectifs par fauteuil (exemple, b3_20)');
+  const obj = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Objectifs par fauteuil"]'); if (!c) return null;
+    return { lignes: c.querySelectorAll('tbody tr').length, cols: c.querySelectorAll('thead th').length, texte: c.innerText }; })()`);
+  ok(obj && obj.lignes === 3 && obj.cols === 10, `trois fauteuils, six semaines (${obj?.lignes} lignes, ${obj?.cols} colonnes)`);
+  ok(obj && /Cette semaine/.test(obj.texte) && /3\/4/.test(obj.texte), 'la semaine en cours et le compte des semaines tenues');
+  await s.evaluer(`(() => { const tr = [...document.querySelectorAll('section[aria-label="Objectifs par fauteuil"] tbody tr')].find(t => /Fauteuil 2/.test(t.textContent)); [...tr.querySelectorAll('button')].find(b => /Changer/.test(b.textContent))?.click(); })()`);
+  await s.dormir(500);
+  ok(await s.evaluer(`/Objectif — Fauteuil 2/.test(document.querySelector('[role="dialog"]')?.textContent || '')`), 'le dialogue « Objectif — Fauteuil 2 » s\'ouvre');
+  await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input.rv-champ'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, '65'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const obj2 = await s.evaluer(`(() => { const tr = [...document.querySelectorAll('section[aria-label="Objectifs par fauteuil"] tbody tr')].find(t => /Fauteuil 2/.test(t.textContent)); return tr ? tr.innerText : ''; })()`);
+  ok(!(await s.evaluer(`!!document.querySelector('[role="dialog"]')`)) && /65 %/.test(obj2) && /4\/4/.test(obj2), 'objectif ramené à 65 % : le Fauteuil 2 tient ses quatre semaines');
+  await s.evaluer(`document.getElementById('tiroma-objectifs')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(400);
+  await s.capturer(`${dossier}tiroma-objectifs-1440.jpg`, { qualite: 55 });
+
+  console.log('— /espace/tiroma : les règles communes à deux centres (exemple, b3_22)');
+  const rc = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Règles communes"]'); if (!c) return null;
+    return { lignes: c.querySelectorAll('tbody tr').length, texte: c.innerText }; })()`);
+  ok(rc && rc.lignes === 2 && /2 écarts/.test(rc.texte) && /attente → plan → contrôle/.test(rc.texte), `deux règles diffèrent entre les centres (${rc?.lignes})`);
+  await s.evaluer(`[...document.querySelectorAll('section[aria-label="Règles communes"] button')].find(b => /Aligner sur ce centre/.test(b.textContent))?.click()`);
+  await s.dormir(500);
+  ok(await s.evaluer(`/Aligner sur/.test(document.querySelector('[role="dialog"]')?.textContent || '')`), 'le dialogue « Aligner sur … » s\'ouvre');
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Aligner/.test(b.textContent))?.click()`);
+  await s.dormir(700);
+  const rc2 = await s.evaluer(`document.querySelector('section[aria-label="Règles communes"]')?.innerText || ''`);
+  ok(/Mêmes règles partout/.test(rc2) && /1 centre aligné/.test(rc2), 'après l\'alignement : mêmes règles partout, un centre aligné');
+  await s.evaluer(`document.getElementById('tiroma-regles-communes')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}tiroma-regles-communes-1440.jpg`, { qualite: 55 });
+
+  console.log('— /espace/tiroma : la synthèse de la semaine (exemple, b3_15)');
+  const syn = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Synthèse de la semaine"]'); if (!c) return null;
+    return { lignes: c.querySelectorAll('tbody tr').length, texte: c.innerText }; })()`);
+  ok(syn && syn.lignes === 2, `deux centres dans la synthèse (${syn?.lignes})`);
+  ok(syn && /4,2 %/.test(syn.texte) && !/(Dorville|Delannoy|Bazile)/.test(syn.texte), 'le taux de manqués des deux centres (4,2 %), sans nom de patient');
+  await s.evaluer(`document.getElementById('tiroma-synthese')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(400);
+  await s.capturer(`${dossier}tiroma-synthese-1440.jpg`, { qualite: 55 });
+
+  console.log('— /espace/tiroma : la réinscription (exemple, b3_16)');
+  const rei = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Réinscription"]'); if (!c) return null;
+    return { texte: c.innerText, sans: c.querySelectorAll('ul[aria-label="Patients vus sans prochain rendez-vous"] > li').length }; })()`);
+  ok(rei && /74,6 %/.test(rei.texte) && /\+2,8 pt sur la période d'avant/.test(rei.texte), 'le taux de réinscription (74,6 %) et son écart (+2,8 pt)');
+  ok(rei && rei.sans === 3, `trois patients vus sans prochain rendez-vous (${rei?.sans})`);
+  await s.evaluer(`document.getElementById('tiroma-reinscription')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(400);
+  await s.capturer(`${dossier}tiroma-reinscription-1440.jpg`, { qualite: 55 });
+
+  console.log('— /espace/tiroma : le pilotage du titulaire (exemple, b3_13)');
+  const pil = await s.evaluer(`(() => { const c = document.querySelector('section[aria-label="Pilotage"]'); if (!c) return null;
+    return { texte: c.innerText, relancer: c.querySelectorAll('ul[aria-label="Devis à relancer"] > li').length, tableaux: c.querySelectorAll('table').length }; })()`);
+  ok(pil && /Devis acceptés/.test(pil.texte) && /63,2 %/.test(pil.texte), 'le taux d\'acceptation des devis est affiché (63,2 %)');
+  ok(pil && /\+7,3 pts sur la période d'avant/.test(pil.texte), 'avec l\'écart sur la période d\'avant (+7,3 pts)');
+  ok(pil && pil.tableaux === 2, 'deux tableaux : par panier, manqués par praticien');
+  ok(pil && pil.relancer === 3, `trois devis à relancer (${pil?.relancer})`);
+  await s.evaluer(`document.getElementById('tiroma-pilotage')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(400);
+  await s.capturer(`${dossier}tiroma-pilotage-1440.jpg`, { qualite: 55 });
+
+  console.log('— /espace/tiroma : noter le moyen de contact d\'un patient (exemple, b3_14)');
+  const avantCt = await s.evaluer(`document.querySelectorAll('section[aria-label="Rappels aux patients"] ul[aria-label="Moyens de contact"] > li').length`);
+  ok(await s.evaluer(`(() => { const b = [...document.querySelectorAll('section[aria-label="Rappels aux patients"] button')].find(b => /Ajouter un moyen de contact/.test(b.textContent)); if (!b) return null; b.focus(); b.click(); return true; })()`) === true, 'bouton « Ajouter un moyen de contact » cliqué');
+  await s.dormir(400);
+  await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input.rv-champ'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, 'Nes'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(700);
+  ok(await s.evaluer(`(() => { const b = [...document.querySelectorAll('[role="dialog"] ul[aria-label="Patients trouvés pour le contact"] button')].find(b => /Rosalie Nestor/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`) === true, 'Rosalie Nestor trouvée, choisie');
+  await s.dormir(200);
+  await s.evaluer(`(() => { const i = [...document.querySelectorAll('[role="dialog"] input.rv-champ')].find(x => x.getAttribute('inputmode') === 'email'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, 'rosalie.nestor@exemple.test'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Noter/.test(b.textContent))?.click()`);
+  await s.dormir(900);
+  const apresCt = await s.evaluer(`document.querySelectorAll('section[aria-label="Rappels aux patients"] ul[aria-label="Moyens de contact"] > li').length`);
+  ok(apresCt === avantCt + 1, `les moyens de contact passent de ${avantCt} à ${apresCt} (en mémoire)`);
+  ok(await s.evaluer(`/Essai/.test(document.querySelector('section[aria-label="Rappels aux patients"] .esp-carte-tete')?.innerText || '')`), 'la carte dit le mode « Essai »');
+  ok(await s.evaluer(`/aucun prestataire agréé HDS/.test(document.querySelector('section[aria-label="Rappels aux patients"]')?.innerText || '')`), 'un rappel retenu dit pourquoi : « aucun prestataire agréé HDS »');
+  await s.evaluer(`document.getElementById('tiroma-rappels')?.scrollIntoView({ block: 'start' })`);
+  await s.dormir(400);
+  await s.capturer(`${dossier}tiroma-rappels-1440.jpg`, { qualite: 55 });
 
   console.log('— /espace/tiroma : repasser à blanc puis en mode réel (exemple)');
   await s.evaluer(`[...document.querySelectorAll('section[aria-label="Le cabinet"] button')].find(b => /Repasser à blanc/.test(b.textContent))?.click()`);

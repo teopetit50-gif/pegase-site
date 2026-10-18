@@ -13,6 +13,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { EXEMPLE_CLIENT_ID, EXEMPLE_MOI, YANIS, aujourdHui, ilYa } from "../exemples/socle";
+import { ouvrirLocale, recalculer } from "./situations";
 import type { Avenant, Chantier, Controle, Lot, Marche, Passage, Prix, Tableau, Tiers } from "./types";
 
 const id = (n: string) => `00000000-0000-4000-8000-00000000d${n.padStart(3, "0")}`;
@@ -128,7 +129,9 @@ const PASSAGES_TIL: Passage[] = [
 
 const AVENANTS_TIL: Avenant[] = [
   { id: AV1, chantier_id: TILLEULS, marche_id: M1, numero: 1, objet: "Garde-corps supplémentaires sur les balcons du R+3 (12 ml), demandés par le maître d'ouvrage en visite",
-    origine: { canal: "vocal", auteur: "Chef d'équipe Pose A", date: aujourdHui(-2), texte: "Lefèvre veut aussi des garde-corps au R+3, douze mètres." },
+    origine: { canal: "vocal", auteur: "Chef d'équipe Pose A", date: aujourdHui(-2), texte: "Lefèvre veut aussi des garde-corps au R+3, douze mètres.", lecteur: true,
+              chiffrage: { etat: "trouve", designation: "Garde-corps acier laqué, hauteur 1,00 m", prix_unitaire_ht: 142, unite: "ml",
+                           proche_du_marche: { designation: "Garde-corps acier laqué, hauteur 1,00 m", unite: "ml" } } },
     statut: "soumis", demande_id: id("301"), demande_statut: "approuvee", piece_id: null, soumis_le: ilYa(1, 10), signe_le: null, signe_par: null, signe_libelle: null, motif: null, cree_le: ilYa(2, 15), nb_lignes: 2, montant_ht: 1884,
     lignes: [
       { id: id("311"), avenant_id: AV1, lot_id: LOT2, prix_id: PRIX_GC, ordre: 1, designation: "Garde-corps acier laqué, hauteur 1,00 m", unite: "ml", quantite: 12, sens: 1, nature: "ouvrage", origine_prix: "bibliotheque", prix_unitaire_ht: 142, montant_ht: 1704 },
@@ -188,7 +191,7 @@ const CHANTIER_ROL: Chantier = {
 export const TABLEAUX_EXEMPLE: Record<string, Tableau> = {
   [TILLEULS]: {
     chantier: CHANTIER_TIL,
-    reglages: { formule: "chantiers", quota_chantiers: 20, quota_comptes_bureau: 5 },
+    reglages: { formule: "entreprise", quota_chantiers: 20, quota_comptes_bureau: 5 },
     voit_prix: true,
     lots: LOTS_TIL,
     marches: [MARCHE_TIL],
@@ -216,7 +219,7 @@ export const TABLEAUX_EXEMPLE: Record<string, Tableau> = {
   },
   [ROLLAND]: {
     chantier: CHANTIER_ROL,
-    reglages: { formule: "chantiers", quota_chantiers: 20, quota_comptes_bureau: 5 },
+    reglages: { formule: "entreprise", quota_chantiers: 20, quota_comptes_bureau: 5 },
     voit_prix: true,
     lots: [{ id: LOTR1, chantier_id: ROLLAND, code: "01", libelle: "Menuiseries et bardage", corps_etat: "menuiserie", corps_etat_libelle: "Menuiserie", rang: 1, execution: "client", tiers_id: null, equipe_id: EQUIPE_A, equipe_nom: "Pose A", exterieur: true, statut: "a_venir", acceptation: null }],
     marches: [MARCHE_ROL],
@@ -236,6 +239,17 @@ export const TABLEAUX_EXEMPLE: Record<string, Tableau> = {
     bibliotheque: BIBLIOTHEQUE,
   },
 };
+
+/* La situation n° 1 des Tilleuls, validée le mois dernier (b6_12) : de quoi voir la suite repartir de son avancement. */
+{
+  const t = TABLEAUX_EXEMPLE[TILLEULS];
+  let n = 0;
+  const s1 = ouvrirLocale({ ...t, situations: [] }, aujourdHui(-6), null, () => id(String(300 + ++n)));
+  const pct = (d: string) => (/fenêtre/i.test(d) ? 35 : /garde-corps/i.test(d) ? 20 : /installation/i.test(d) ? 100 : 0);
+  const validee = recalculer({ ...s1, lignes: s1.lignes.map((l) => ({ ...l, avancement: pct(l.designation) })) });
+  t.situations = [{ ...validee, statut: "validee", demande_id: id("399"), demande_statut: "executee", soumise_le: ilYa(5, 16), validee_le: ilYa(4, 10), validee_libelle: "Claire Morel", echeance: aujourdHui(26), penalites_taux: null, paiements: [] }];
+  TABLEAUX_EXEMPLE[ROLLAND].situations = [];
+}
 
 export const LISTE_EXEMPLE: Chantier[] = [CHANTIER_TIL, CHANTIER_ROL];
 

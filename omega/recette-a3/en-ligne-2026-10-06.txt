@@ -1,0 +1,195 @@
+— /espace/validations
+  ✓ validations · répond 200
+  ✓ validations · 390 : titre « À valider »
+  ✓ validations · 390 : pas de débordement (0)
+  ✓ validations · 390 : zones qui défilent atteignables au clavier
+  ✓ validations · 390 : axe, 0 écart(s) grave(s)
+  ✓ validations · 768 : titre « À valider »
+  ✓ validations · 768 : pas de débordement (0)
+  ✓ validations · 1024 : titre « À valider »
+  ✓ validations · 1024 : pas de débordement (0)
+  ✓ validations · 1440 : titre « À valider »
+  ✓ validations · 1440 : pas de débordement (0)
+  ✓ validations · la page dit « Décider en lot »
+  ✓ validations · la page dit « Le dossier »
+  ✓ validations · la page dit « Ouvrir le dossier »
+  ✓ validations · 1440 : axe, 0 écart(s) grave(s)
+  ✓ validations · 1700 : titre « À valider »
+  ✓ validations · 1700 : pas de débordement (0)
+— /espace/filed
+  ✓ filed · répond 200
+  ✓ filed · 390 : titre « Documents reçus »
+  ✓ filed · 390 : pas de débordement (0)
+  ✓ filed · 390 : zones qui défilent atteignables au clavier
+  ✓ filed · 390 : axe, 0 écart(s) grave(s)
+  ✓ filed · 768 : titre « Documents reçus »
+  ✓ filed · 768 : pas de débordement (0)
+  ✓ filed · 1024 : titre « Documents reçus »
+  ✓ filed · 1024 : pas de débordement (0)
+  ✓ filed · 1440 : titre « Documents reçus »
+  ✓ filed · 1440 : pas de débordement (0)
+  ✓ filed · la page dit « Fournisseurs »
+  ✓ filed · la page dit « À payer »
+  ✓ filed · la page dit « Déposer un document »
+  ✓ filed · 1440 : axe, 0 écart(s) grave(s)
+  ✓ filed · 1700 : titre « Documents reçus »
+  ✓ filed · 1700 : pas de débordement (0)
+— /espace/filed?objet=facture:R2026-000017
+  ✓ filed-identifiants · répond 200
+  ✓ filed-identifiants · 390 : titre « Documents reçus »
+  ✓ filed-identifiants · 390 : pas de débordement (0)
+  ✓ filed-identifiants · 390 : zones qui défilent atteignables au clavier
+  ✓ filed-identifiants · 390 : axe, 0 écart(s) grave(s)
+  ✓ filed-identifiants · 768 : titre « Documents reçus »
+  ✓ filed-identifiants · 768 : pas de débordement (0)
+  ✓ filed-identifiants · 1024 : titre « Documents reçus »
+  ✓ filed-identifiants · 1024 : pas de débordement (0)
+  ✓ filed-identifiants · 1440 : titre « Documents reçus »
+  ✓ filed-identifiants · 1440 : pas de débordement (0)
+  ✓ filed-identifiants · la page dit « Identifiants lus sur la pièce, non retenus »
+  ✓ filed-identifiants · la page dit « Saisir les vrais identifiants »
+  ✓ filed-identifiants · 1440 : axe, 0 écart(s) grave(s)
+  ✓ filed-identifiants · 1700 : titre « Documents reçus »
+  ✓ filed-identifiants · 1700 : pas de débordement (0)
+— /espace/filed/fournisseurs
+  ✓ fournisseurs · répond 200
+  ✓ fournisseurs · 390 : titre « Fournisseurs »
+  ✓ fournisseurs · 390 : pas de débordement (0)
+  ✓ fournisseurs · 390 : zones qui défilent atteignables au clavier
+  ✓ fournisseurs · 390 : axe, 0 écart(s) grave(s)
+  ✓ fournisseurs · 768 : titre « Fournisseurs »
+  ✓ fournisseurs · 768 : pas de débordement (0)
+  ✓ fournisseurs · 1024 : titre « Fournisseurs »
+  ✓ fournisseurs · 1024 : pas de débordement (0)
+  ✓ fournisseurs · 1440 : titre « Fournisseurs »
+  ✓ fournisseurs · 1440 : pas de débordement (0)
+  ✓ fournisseurs · la page dit « Les fournisseurs que FILED connaît »
+  ✓ fournisseurs · la page dit « À confirmer »
+  ✓ fournisseurs · 1440 : axe, 0 écart(s) grave(s)
+  ✓ fournisseurs · 1700 : titre « Fournisseurs »
+  ✓ fournisseurs · 1700 : pas de débordement (0)
+— /espace/filed/a-payer
+  ✓ a-payer · répond 200
+  ✓ a-payer · 390 : titre « À payer »
+  ✓ a-payer · 390 : pas de débordement (0)
+  ✓ a-payer · 390 : zones qui défilent atteignables au clavier
+  ✓ a-payer · 390 : axe, 0 écart(s) grave(s)
+  ✓ a-payer · 768 : titre « À payer »
+  ✓ a-payer · 768 : pas de débordement (0)
+  ✓ a-payer · 1024 : titre « À payer »
+  ✓ a-payer · 1024 : pas de débordement (0)
+  ✓ a-payer · 1440 : titre « À payer »
+  ✓ a-payer · 1440 : pas de débordement (0)
+  ✓ a-payer · la page dit « Noter un paiement »
+  ✓ a-payer · la page dit « Payée en partie »
+  ✓ a-payer · 1440 : axe, 0 écart(s) grave(s)
+  ✓ a-payer · 1700 : titre « À payer »
+  ✓ a-payer · 1700 : pas de débordement (0)
+— /espace/point
+  ✓ point · répond 200
+  ✓ point · 390 : titre « Point du matin »
+  ✓ point · 390 : pas de débordement (0)
+  ✓ point · 390 : zones qui défilent atteignables au clavier
+  ✓ point · 390 : axe, 0 écart(s) grave(s)
+  ✓ point · 768 : titre « Point du matin »
+  ✓ point · 768 : pas de débordement (0)
+  ✓ point · 1024 : titre « Point du matin »
+  ✓ point · 1024 : pas de débordement (0)
+  ✓ point · 1440 : titre « Point du matin »
+  ✓ point · 1440 : pas de débordement (0)
+  ✓ point · la page dit « Point du matin »
+  ✓ point · 1440 : axe, 0 écart(s) grave(s)
+  ✓ point · 1700 : titre « Point du matin »
+  ✓ point · 1700 : pas de débordement (0)
+— /espace/varelo (écran des B : constats)
+  ✓ varelo · répond 200
+  ✓ varelo · 390 : titre « Référentiel du groupe »
+  ✓ varelo · 390 : pas de débordement (0)
+  ✓ varelo · 390 : zones qui défilent atteignables au clavier
+  ✓ varelo · 390 : axe, 0 écart(s) grave(s)
+  ✓ varelo · 768 : titre « Référentiel du groupe »
+  ✓ varelo · 768 : pas de débordement (0)
+  ✓ varelo · 1024 : titre « Référentiel du groupe »
+  ✓ varelo · 1024 : pas de débordement (0)
+  ✓ varelo · 1440 : titre « Référentiel du groupe »
+  ✓ varelo · 1440 : pas de débordement (0)
+  ✓ varelo · 1440 : axe, 0 écart(s) grave(s)
+  ✓ varelo · 1700 : titre « Référentiel du groupe »
+  ✓ varelo · 1700 : pas de débordement (0)
+— /espace/tavaro (écran des B : constats)
+  ✓ tavaro · répond 200
+  ✓ tavaro · 390 : titre « Location : retours et factures »
+  ✓ tavaro · 390 : pas de débordement (0)
+  ✓ tavaro · 390 : zones qui défilent atteignables au clavier
+  ✓ tavaro · 390 : axe, 0 écart(s) grave(s)
+  ✓ tavaro · 768 : titre « Location : retours et factures »
+  ✓ tavaro · 768 : pas de débordement (0)
+  ✓ tavaro · 1024 : titre « Location : retours et factures »
+  ✓ tavaro · 1024 : pas de débordement (0)
+  ✓ tavaro · 1440 : titre « Location : retours et factures »
+  ✓ tavaro · 1440 : pas de débordement (0)
+  ✓ tavaro · 1440 : axe, 0 écart(s) grave(s)
+  ✓ tavaro · 1700 : titre « Location : retours et factures »
+  ✓ tavaro · 1700 : pas de débordement (0)
+— /espace/tiroma (écran des B : constats)
+  ✓ tiroma · répond 200
+  ✓ tiroma · 390 : titre « Cabinet dentaire »
+  ✓ tiroma · 390 : pas de débordement (0)
+  ✓ tiroma · 390 : zones qui défilent atteignables au clavier
+  ✓ tiroma · 390 : axe, 0 écart(s) grave(s)
+  ✓ tiroma · 768 : titre « Cabinet dentaire »
+  ✓ tiroma · 768 : pas de débordement (0)
+  ✓ tiroma · 1024 : titre « Cabinet dentaire »
+  ✓ tiroma · 1024 : pas de débordement (0)
+  ✓ tiroma · 1440 : titre « Cabinet dentaire »
+  ✓ tiroma · 1440 : pas de débordement (0)
+  ✓ tiroma · 1440 : axe, 0 écart(s) grave(s)
+  ✓ tiroma · 1700 : titre « Cabinet dentaire »
+  ✓ tiroma · 1700 : pas de débordement (0)
+— /espace/tamila (écran des B : constats)
+  ✓ tamila · répond 200
+  ✓ tamila · 390 : titre « Dossiers du cabinet »
+  ✓ tamila · 390 : pas de débordement (0)
+  ✓ tamila · 390 : zones qui défilent atteignables au clavier
+  ✓ tamila · 390 : axe, 0 écart(s) grave(s)
+  ✓ tamila · 768 : titre « Dossiers du cabinet »
+  ✓ tamila · 768 : pas de débordement (0)
+  ✓ tamila · 1024 : titre « Dossiers du cabinet »
+  ✓ tamila · 1024 : pas de débordement (0)
+  ✓ tamila · 1440 : titre « Dossiers du cabinet »
+  ✓ tamila · 1440 : pas de débordement (0)
+  ✓ tamila · 1440 : axe, 0 écart(s) grave(s)
+  ✓ tamila · 1700 : titre « Dossiers du cabinet »
+  ✓ tamila · 1700 : pas de débordement (0)
+— /espace/lorani (écran des B : constats)
+  ✓ lorani · répond 200
+  ✓ lorani · 390 : titre « Calendrier des permis »
+  ✓ lorani · 390 : pas de débordement (0)
+  ✓ lorani · 390 : zones qui défilent atteignables au clavier
+  ✓ lorani · 390 : axe, 0 écart(s) grave(s)
+  ✓ lorani · 768 : titre « Calendrier des permis »
+  ✓ lorani · 768 : pas de débordement (0)
+  ✓ lorani · 1024 : titre « Calendrier des permis »
+  ✓ lorani · 1024 : pas de débordement (0)
+  ✓ lorani · 1440 : titre « Calendrier des permis »
+  ✓ lorani · 1440 : pas de débordement (0)
+  ✓ lorani · 1440 : axe, 0 écart(s) grave(s)
+  ✓ lorani · 1700 : titre « Calendrier des permis »
+  ✓ lorani · 1700 : pas de débordement (0)
+— /espace/daliro (écran des B : constats)
+  ✓ daliro · répond 200
+  ✓ daliro · 390 : titre « Chantiers »
+  ✓ daliro · 390 : pas de débordement (0)
+  ✓ daliro · 390 : zones qui défilent atteignables au clavier
+  ✓ daliro · 390 : axe, 0 écart(s) grave(s)
+  ✓ daliro · 768 : titre « Chantiers »
+  ✓ daliro · 768 : pas de débordement (0)
+  ✓ daliro · 1024 : titre « Chantiers »
+  ✓ daliro · 1024 : pas de débordement (0)
+  ✓ daliro · 1440 : titre « Chantiers »
+  ✓ daliro · 1440 : pas de débordement (0)
+  ✓ daliro · 1440 : axe, 0 écart(s) grave(s)
+  ✓ daliro · 1700 : titre « Chantiers »
+  ✓ daliro · 1700 : pas de débordement (0)
+
+écrans d'A3 : tout passe

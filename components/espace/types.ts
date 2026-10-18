@@ -1,3 +1,5 @@
+import type { Ecriture, LigneCycle, Litige } from "./filed/factureElectronique";
+
 /* ══════════════════════════════════════════════════════════════════════
    Les formes partagées des trois écrans client (05/10/2026)
 
@@ -173,6 +175,8 @@ export type StatutFacture = "a_completer" | "bloquee" | "a_valider" | "ecartee" 
 export type Facture = {
   id: string;
   document_id: string;
+  /* a4_16 : structuree | lue | saisie ; nulle avant le lot 9 (voir filed/factureElectronique.ts) */
+  provenance?: "structuree" | "lue" | "saisie" | null;
   nature: "facture" | "avoir";
   version: number;
   numero: string | null;
@@ -382,6 +386,12 @@ export type DossierFiled = {
   /* qui a déposé la pièce d'origine du fournisseur : cette personne ne le
      confirme pas (filed_confirmer_fournisseur, a4_10) */
   origine_deposee_par?: string | null;
+  /* la facture électronique (a4_16 à a4_18) : reçue par la plateforme
+     agréée, son cycle de vie, ses litiges, ses écritures */
+  recuePlateforme?: boolean;
+  cycle?: LigneCycle[];
+  litiges?: Litige[];
+  ecritures?: Ecriture[];
 };
 
 /* ——— le point du matin ——— */
