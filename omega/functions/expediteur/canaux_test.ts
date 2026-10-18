@@ -15,6 +15,7 @@ import {
   composerWhatsApp,
   type Dependances,
   executerPassage,
+  lireModeleExterne,
 } from "./passage.ts";
 import { ErreurMeta } from "./meta.ts";
 import { ErreurAr24 } from "./ar24.ts";
@@ -421,4 +422,43 @@ Deno.test("LRE : sans accès → reporté ; sans id_utilisateur ou sans nom → 
     /^AR24_200 : .*invalid_email/,
   );
   assert(!d.portes.confirmes.has(LRE));
+});
+
+Deno.test("modèle « nom@langue Meta » (gabarit du socle, langue à deux lettres) ; paramètres en liste (rendre_gabarit)", () => {
+  assertEquals(lireModeleExterne("hello_world@en_US"), {
+    nom: "hello_world",
+    langue: "en_US",
+  });
+  assertEquals(lireModeleExterne("relance_facture"), {
+    nom: "relance_facture",
+    langue: null,
+  });
+  const m = composerWhatsApp(
+    envoiWa({
+      modele_externe: "hello_world@en_US",
+      langue: "fr",
+      parametres_modele: ["F-12"] as unknown as Record<string, unknown>,
+    }),
+    null,
+  );
+  assertEquals(m, {
+    to: "33612345678",
+    type: "template",
+    template: {
+      name: "hello_world",
+      language: { code: "en_US" },
+      components: [{
+        type: "body",
+        parameters: [{ type: "text", text: "F-12" }],
+      }],
+    },
+  });
+  const vide = composerWhatsApp(
+    envoiWa({
+      modele_externe: "hello_world@en_US",
+      parametres_modele: [] as unknown as Record<string, unknown>,
+    }),
+    null,
+  );
+  assertEquals(vide.type === "template" && vide.template.components, undefined);
 });

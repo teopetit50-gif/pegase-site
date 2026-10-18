@@ -1,13 +1,14 @@
--- Preuve d'envoi WhatsApp sur la RECETTE (ygwbgpowzlbdaajlsqkn) — A2, 18/10/2026.
--- À JOUER PAR LE COORDINATEUR, partie par partie (execute_sql). Idempotent ; aucun DROP.
--- UN envoi par le chemin normal : preparer_envoi → validation → tache_envois (confier_envoi) → travail
--- envois.meta_whatsapp → expediteur v15 → POST /{phone_number_id}/messages (modèle hello_world, en_US)
--- → confirmer_envoi(wamid) ; puis les statuts sent/delivered reviennent par reception/whatsapp → noter_remise.
--- expediteur v15 envoie un MODÈLE quand l'envoi porte modele_externe : langue = envois.langue, sinon la
--- langue du destinataire, sinon fr. hello_world n'a pas de variable.
--- Le numéro de Teo se pose ligne « v_numero » de la partie 2 (format international, ex. +33612345678).
--- Avec le numéro de test Meta, le destinataire doit figurer dans la liste des numéros autorisés de l'app
--- (WhatsApp → Configuration de l'API → « À »), sinon Meta répond 131030 (échec définitif, rien ne part).
+-- Preuve d'envoi WhatsApp sur la RECETTE (ygwbgpowzlbdaajlsqkn) — A2, 18/10/2026 (corrigé le 18/10 après le refus
+-- du garde : sur la recette, preparer_envoi prend p_gabarit/p_variables et public.envois n'a pas de modele_externe).
+-- À JOUER PAR LE COORDINATEUR, partie par partie (execute_sql). Idempotent ; aucun DROP. AUCUNE MIGRATION :
+-- le socle porte déjà les modèles WhatsApp par les gabarits — gabarits_messages.modele_externe, que
+-- commencer_envoi rend à l'expéditeur avec la langue du gabarit. La langue d'un gabarit n'a que deux lettres ;
+-- expediteur v16 (à déployer d'abord, SHA de ce commit) lit « nom@langue Meta » : hello_world@en_US.
+-- Chemin : gabarit daliro.preuve_whatsapp validé → preparer_envoi(p_gabarit) → validation → tache_envois →
+-- travail envois.meta_whatsapp → POST /{phone_number_id}/messages → confirmer_envoi(wamid) → statuts par
+-- reception/whatsapp → noter_remise.
+-- Le numéro de Teo (+33768163443) est dans la liste de test Meta. Le réglage daliro du banc est passé en
+-- reel/whatsapp par le coordinateur le temps de l'envoi, puis remis en essai (partie 4).
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 0. Contrôles (lecture seule)
@@ -16,62 +17,44 @@ select fournisseur, canal, branche from private.fournisseurs_envoi where fournis
 -- Attendu : branche = true.
 select id, module, identite, parametres, statut from public.expediteurs where id::text like 'ab8778d8%';
 -- Attendu : daliro, +15551998680, phone_number_id 1304208509431404, actif.
-select module, mode, canaux, delai_min from public.reglages_envois
+select module, mode, canaux from public.reglages_envois
  where client_id = 'cccccccc-0000-4000-8000-00000000000c' and (module is null or module = 'daliro');
--- Le mode effectif est le plus prudent de l'organisation (module null) et du module. En « essai », le socle
--- remplace le destinataire par l'adresse d'essai (un e-mail) : l'envoi WhatsApp échouerait. La partie 1
--- crée un réglage daliro « reel » s'il n'existe pas ; s'il existe en essai ou coupé, elle s'arrête.
--- Les arguments 7 et 8 de preparer_envoi doivent être le modèle externe et ses paramètres (vérifié en partie 2) :
-select pg_get_function_arguments('private.preparer_envoi'::regproc);
+-- Attendu pendant l'envoi : daliro reel, canaux avec whatsapp ; organisation (module null) pas en essai ni coupé.
+-- En essai, le socle remplace le destinataire par l'adresse d'essai (un e-mail) : l'envoi ne serait pas un WhatsApp.
 
 -- ───────────────────────────────────────────────────────────────────────────
--- 1. Le module daliro du banc en mode réel pour WhatsApp
+-- 1. Le gabarit daliro.preuve_whatsapp (modèle Meta hello_world, en_US), validé
 -- ───────────────────────────────────────────────────────────────────────────
-do $$
-declare v_mode text;
-begin
-  select g.mode into v_mode from public.reglages_envois g
-   where g.client_id = 'cccccccc-0000-4000-8000-00000000000c' and g.module = 'daliro';
-  if v_mode is null then
-    insert into public.reglages_envois (client_id, module, mode, plages, feries, delai_min,
-                                        plafond_destinataire_jour, plafond_jour, canaux)
-    values ('cccccccc-0000-4000-8000-00000000000c', 'daliro', 'reel',
-            '[{"jours":[1,2,3,4,5,6,7],"debut":"00:00","fin":"23:59"}]'::jsonb, true, interval '0', 5, 20,
-            array['whatsapp']);
-    raise notice 'réglage daliro créé (reel, whatsapp)';
-  elsif v_mode <> 'reel' then
-    raise exception 'Le réglage daliro du banc est « % » : rien n''est changé. Le passer en reel (canal whatsapp) d''abord, sur accord.', v_mode;
-  else
-    raise notice 'réglage daliro déjà en reel';
-  end if;
-end $$;
+insert into public.gabarits_messages (client_id, module, code, langue, canal, libelle, corps, transactionnel, modele_externe)
+select 'cccccccc-0000-4000-8000-00000000000c', 'daliro', 'daliro.preuve_whatsapp', 'fr', 'whatsapp',
+       'Preuve WhatsApp (modèle Meta hello_world)',
+       'Hello World (modèle Meta hello_world, preuve d''envoi WhatsApp du banc A2).', true, 'hello_world@en_US'
+where not exists (select 1 from public.gabarits_messages g
+                  where g.client_id = 'cccccccc-0000-4000-8000-00000000000c' and g.code = 'daliro.preuve_whatsapp');
+select public.valider_gabarit(g.id, 'coordinateur (preuve WhatsApp, banc A2)')
+  from public.gabarits_messages g
+ where g.client_id = 'cccccccc-0000-4000-8000-00000000000c' and g.code = 'daliro.preuve_whatsapp' and g.statut = 'brouillon';
+select id, code, langue, canal, statut, modele_externe from public.gabarits_messages
+ where client_id = 'cccccccc-0000-4000-8000-00000000000c' and code = 'daliro.preuve_whatsapp';
+-- Attendu : valide, modele_externe hello_world@en_US.
 
 -- ───────────────────────────────────────────────────────────────────────────
--- 2. L'envoi (modèle hello_world, en_US), validé puis confié
+-- 2. L'envoi, validé puis confié
 -- ───────────────────────────────────────────────────────────────────────────
 do $$
 declare
-  v_numero text := '+33XXXXXXXXX';   -- ← le portable de Teo, format international
+  v_numero text := '+33768163443';   -- le portable de Teo (liste de test Meta)
   v_client uuid := 'cccccccc-0000-4000-8000-00000000000c';
   v_entite uuid := (select e.id from public.entites e where e.client_id = 'cccccccc-0000-4000-8000-00000000000c' and e.principale limit 1);
-  v_noms text[] := (select p.proargnames from pg_proc p where p.oid = 'private.preparer_envoi'::regproc);
   v_envoi uuid;
   v_statut text;
 begin
-  if v_numero !~ '^\+[1-9][0-9]{7,14}$' then
-    raise exception 'Écrire le numéro de Teo au format international (+33…) avant de jouer ce bloc.';
-  end if;
-  if v_noms is null or v_noms[7] !~ 'modele' or v_noms[8] !~ 'param' then
-    raise exception 'preparer_envoi n''a pas modèle/paramètres en 7e et 8e position (%, %) : rien n''est fait, en parler à A2.',
-      v_noms[7], v_noms[8];
-  end if;
   perform tests.redevenir_admin();
-  v_envoi := private.preparer_envoi(v_client, 'daliro', null, null, 'whatsapp',
-    jsonb_build_object('adresse', v_numero, 'nom', 'Teo', 'langue', 'en_US'),
-    'hello_world', '{}'::jsonb,
-    null,
-    'Modèle Meta hello_world (preuve d''envoi WhatsApp, banc A2).',
-    null, 'banc:a2:preuve-whatsapp:1', v_entite, true, false, null, '{}'::jsonb);
+  v_envoi := private.preparer_envoi(
+    p_client => v_client, p_module => 'daliro', p_objet_type => null, p_objet_id => null, p_canal => 'whatsapp',
+    p_destinataire => jsonb_build_object('adresse', v_numero, 'nom', 'Teo', 'langue', 'fr'),
+    p_gabarit => 'daliro.preuve_whatsapp', p_variables => '{}'::jsonb,
+    p_cle_idempotence => 'banc:a2:preuve-whatsapp:1', p_entite => v_entite, p_transactionnel => true);
   select statut || coalesce(' / ' || verrou || ' : ' || motif, '') into v_statut from public.envois where id = v_envoi;
   if v_statut like 'a_valider%' then
     v_statut := private.envoi_valide(v_envoi);
@@ -83,21 +66,26 @@ end $$;
 -- ───────────────────────────────────────────────────────────────────────────
 -- 3. Lectures, une à deux minutes plus tard (cron omega-expediteur)
 -- ───────────────────────────────────────────────────────────────────────────
-select e.id, e.statut, e.verrou, e.motif, e.fournisseur, e.modele_externe, e.langue, e.reference_externe,
-       e.erreur, e.essais, e.envoye_le, e.remise
-  from public.envois e
+select e.id, e.statut, e.mode, e.verrou, e.motif, e.fournisseur, g.modele_externe, e.destinataire_adresse,
+       e.reference_externe, e.erreur, e.essais, e.envoye_le, e.remise
+  from public.envois e left join public.gabarits_messages g on g.id = e.gabarit_id
  where e.client_id = 'cccccccc-0000-4000-8000-00000000000c' and e.cle_idempotence = 'banc:a2:preuve-whatsapp:1';
--- Attendu : fournisseur meta_whatsapp, langue en_US (ou null), statut envoye, reference_externe = wamid.…
--- Si langue vaut autre chose que en_US : Meta répond 132001 (modèle absent dans cette langue) ; en parler à A2.
+-- Attendu : mode reel, fournisseur meta_whatsapp, statut envoye, reference_externe = wamid.…
 select t.id, t.genre, t.etat, t.essais, t.resultat, t.erreur, t.fini_le from public.travaux t
  where t.genre = 'envois.meta_whatsapp'
    and t.charge ->> 'envoi' = (select e.id::text from public.envois e
                                where e.client_id = 'cccccccc-0000-4000-8000-00000000000c'
                                  and e.cle_idempotence = 'banc:a2:preuve-whatsapp:1');
--- Attendu : fini, resultat {fournisseur_id: wamid…, remis_a}. Erreur META_400_131030 : numéro non autorisé (voir en-tête).
+-- Attendu : fini, resultat {fournisseur_id: wamid…, remis_a}. Erreurs : META_400_131030 numéro non autorisé ;
+-- META_400_132001 modèle absent dans cette langue (expediteur pas en v16 : il enverrait « hello_world@en_US »
+-- tel quel, ou la langue fr) ; META_401_190 jeton.
 select v.type, v.survenu_le, v.detail, v.recu_le from public.envois_evenements v
   join public.envois e on e.id = v.envoi_id
  where e.cle_idempotence = 'banc:a2:preuve-whatsapp:1' order by v.recu_le;
 -- Attendu, si le webhook Meta pointe sur …/functions/v1/reception/whatsapp (champ « messages » abonné) :
--- un événement « remis » (code delivered) quand le téléphone a reçu le message. « sent » et « read » ne
--- sont pas notés (l'envoi est déjà « envoye »).
+-- un événement « remis » (code delivered). « sent » et « read » ne sont pas notés.
+
+-- ───────────────────────────────────────────────────────────────────────────
+-- 4. Après la preuve : remettre le réglage daliro du banc en essai (comme convenu) ; le gabarit peut rester.
+-- ───────────────────────────────────────────────────────────────────────────
+-- update public.reglages_envois set mode = 'essai' where client_id = 'cccccccc-0000-4000-8000-00000000000c' and module = 'daliro';

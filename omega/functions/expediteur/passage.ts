@@ -806,13 +806,30 @@ async function remettreWhatsApp(
  * à défaut, parametres_modele.corps (liste de textes) remplit {{1}}, {{2}}… du corps. Sans modèle : un
  * texte libre, ou la pièce avec le texte en légende.
  */
+/**
+ * modele_externe d'un gabarit : « nom » ou « nom@langue Meta » (hello_world@en_US). La langue d'un gabarit
+ * du socle n'a que deux lettres ; Meta distingue en, en_US, pt_BR… : le suffixe la donne exactement.
+ */
+export function lireModeleExterne(
+  modele: string,
+): { nom: string; langue: string | null } {
+  const m = modele.trim().match(/^([a-z0-9_]+)@([a-z]{2,3}(?:_[A-Z]{2})?)$/);
+  return m ? { nom: m[1], langue: m[2] } : { nom: modele.trim(), langue: null };
+}
+
 export function composerWhatsApp(
   envoi: EnvoiAEnvoyer,
   piece: { id: string; nom: string } | null,
 ): MessageWhatsApp {
   const to = normaliserNumeroSms(envoi.destinataire.adresse);
   if (envoi.modele_externe) {
-    const p = envoi.parametres_modele ?? {};
+    const { nom, langue } = lireModeleExterne(envoi.modele_externe);
+    const brut: unknown = envoi.parametres_modele ?? {};
+    // rendre_gabarit rend une liste de valeurs ({{1}}, {{2}}…) ; à défaut, un objet corps / components.
+    const p = (Array.isArray(brut) ? { corps: brut } : brut) as Record<
+      string,
+      unknown
+    >;
     let components: Record<string, unknown>[] = [];
     if (Array.isArray(p.components)) {
       components = p.components as Record<string, unknown>[];
@@ -835,9 +852,9 @@ export function composerWhatsApp(
       to,
       type: "template",
       template: {
-        name: envoi.modele_externe,
+        name: nom,
         language: {
-          code: envoi.langue ?? envoi.destinataire.langue ?? "fr",
+          code: langue ?? envoi.langue ?? envoi.destinataire.langue ?? "fr",
         },
         ...(components.length ? { components } : {}),
       },
