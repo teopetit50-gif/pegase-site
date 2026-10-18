@@ -1,13 +1,14 @@
 "use client";
 
+import { useEffect, useRef, useState, type SyntheticEvent } from "react";
 import { useRouter } from "next/navigation";
-import type { SyntheticEvent } from "react";
 import { ArrowRight } from "lucide-react";
 import {
   useEstimationUrl,
   useModeleUrl,
   useSiteUrl,
 } from "@/components/reservation/ModeleUrl";
+import MenuSobre from "@/app/reserver-un-audit/MenuSobre";
 import { SECTEURS } from "@/lib/creneaux";
 import { enregistrerPrereservation } from "@/lib/prereservation";
 import { lienReservation, type Formule } from "@/lib/reservation";
@@ -20,6 +21,12 @@ import { lienReservation, type Formule } from "@/lib/reservation";
    puis deux menus pleine largeur (« Quelle description correspond à votre
    entreprise ? », « Comment avez-vous connu Omega ? ») ; puis le format.
    Tout est obligatoire, comme sur la référence.
+
+   VALIDATION : le formulaire ne passe pas par les bulles natives du
+   navigateur (noValidate), qui se placent mal sur les menus dessinés. Au
+   clic sur « Continuer », chaque champ vide reçoit « Ce champ est
+   obligatoire. » en rouge, comme sur la référence, et le focus va sur le
+   premier. Un e-mail mal formé reçoit le même traitement.
 
    CE QUI SE PASSE À L'ENVOI : les coordonnées sont rangées dans la session
    du navigateur (lib/prereservation.ts), puis le visiteur arrive sur
@@ -51,6 +58,21 @@ const PAYS = [
   "Autre pays",
 ];
 
+/* Tous les champs de la page, dans l'ordre où ils s'affichent. */
+const OBLIGATOIRES = [
+  "prenom",
+  "nom",
+  "entreprise",
+  "fonction",
+  "email",
+  "pays",
+  "secteur",
+  "origine",
+  "format",
+];
+
+const E_MAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
 type Props = { formules: Formule[] };
 
 export default function FormulaireFormat({ formules }: Props) {
@@ -58,11 +80,32 @@ export default function FormulaireFormat({ formules }: Props) {
   const slug = useModeleUrl();
   const { postes, pieces } = useEstimationUrl();
   const site = useSiteUrl();
+  const formulaire = useRef<HTMLFormElement>(null);
+  const [manquants, setManquants] = useState<string[]>([]);
+  const [mailFaux, setMailFaux] = useState(false);
+
+  /* après un envoi refusé, le focus va sur le premier champ en erreur */
+  useEffect(() => {
+    if (manquants.length) {
+      formulaire.current?.querySelector<HTMLElement>(".rdv-champ--erreur")?.focus();
+    }
+  }, [manquants]);
 
   function envoyer(e: SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     const d = new FormData(e.currentTarget);
     const texte = (cle: string) => String(d.get(cle) ?? "").trim();
+
+    const sansValeur = OBLIGATOIRES.filter((cle) => !texte(cle));
+    const mailMalForme = !sansValeur.includes("email") && !E_MAIL.test(texte("email"));
+    const refus = mailMalForme ? [...sansValeur, "email"] : sansValeur;
+    if (refus.length) {
+      setManquants(refus);
+      setMailFaux(mailMalForme);
+      return;
+    }
+    setManquants([]);
+    setMailFaux(false);
 
     enregistrerPrereservation({
       prenom: texte("prenom"),
@@ -90,31 +133,55 @@ export default function FormulaireFormat({ formules }: Props) {
     );
   }
 
+  const erreur = (cle: string) => manquants.includes(cle);
+
   return (
-    <form action="/reserver" method="get" onSubmit={envoyer} className="rdv-formulaire">
+    <form
+      ref={formulaire}
+      action="/reserver"
+      method="get"
+      noValidate
+      onSubmit={envoyer}
+      className="rdv-formulaire"
+    >
       <div className="rdv-champs">
-        <Saisie nom="prenom" libelle="Prénom" autoComplete="given-name" />
-        <Saisie nom="nom" libelle="Nom" autoComplete="family-name" />
-        <Saisie nom="entreprise" libelle="Entreprise" autoComplete="organization" />
-        <Saisie nom="fonction" libelle="Fonction" autoComplete="organization-title" />
-        <Saisie nom="email" libelle="E-mail professionnel" type="email" autoComplete="email" />
-        <Liste nom="pays" libelle="Pays" options={PAYS.map((p) => ({ valeur: p, libelle: p }))} />
-        <Liste
+        <Saisie nom="prenom" libelle="Prénom" autoComplete="given-name" erreur={erreur("prenom")} />
+        <Saisie nom="nom" libelle="Nom" autoComplete="family-name" erreur={erreur("nom")} />
+        <Saisie nom="entreprise" libelle="Entreprise" autoComplete="organization" erreur={erreur("entreprise")} />
+        <Saisie nom="fonction" libelle="Fonction" autoComplete="organization-title" erreur={erreur("fonction")} />
+        <Saisie
+          nom="email"
+          libelle="E-mail professionnel"
+          type="email"
+          autoComplete="email"
+          erreur={erreur("email")}
+          messageErreur={mailFaux ? "Adresse e-mail invalide." : undefined}
+        />
+        <MenuSobre
+          nom="pays"
+          libelle="Pays"
+          erreur={erreur("pays")}
+          options={PAYS.map((p) => ({ valeur: p, libelle: p }))}
+        />
+        <MenuSobre
           nom="secteur"
           libelle="Quelle description correspond à votre entreprise ?"
           pleine
+          erreur={erreur("secteur")}
           options={SECTEURS.map((s) => ({ valeur: s.valeur, libelle: s.libelle }))}
         />
-        <Liste
+        <MenuSobre
           nom="origine"
           libelle="Comment avez-vous connu Omega ?"
           pleine
+          erreur={erreur("origine")}
           options={ORIGINES.map((o) => ({ valeur: o, libelle: o }))}
         />
-        <Liste
+        <MenuSobre
           nom="format"
           libelle="Format d'audit"
           pleine
+          erreur={erreur("format")}
           options={formules.map((f) => ({ valeur: f.id, libelle: `${f.nom} · ${f.duree}` }))}
         />
       </div>
@@ -140,11 +207,15 @@ function Saisie({
   libelle,
   type = "text",
   autoComplete,
+  erreur,
+  messageErreur,
 }: {
   nom: string;
   libelle: string;
   type?: "text" | "email";
   autoComplete?: string;
+  erreur?: boolean;
+  messageErreur?: string;
 }) {
   return (
     <div className="rdv-champ-bloc">
@@ -158,45 +229,10 @@ function Saisie({
         required
         autoComplete={autoComplete}
         placeholder={`${libelle}*`}
-        className="rdv-champ"
+        aria-invalid={erreur ? true : undefined}
+        className={`rdv-champ${erreur ? " rdv-champ--erreur" : ""}`}
       />
-    </div>
-  );
-}
-
-/* Un menu : la première ligne sert d'intitulé (désactivée, comme la référence). */
-function Liste({
-  nom,
-  libelle,
-  options,
-  pleine,
-}: {
-  nom: string;
-  libelle: string;
-  options: { valeur: string; libelle: string }[];
-  pleine?: boolean;
-}) {
-  return (
-    <div className={pleine ? "rdv-champ-bloc rdv-champ-bloc--pleine" : "rdv-champ-bloc"}>
-      <label htmlFor={`rdv-${nom}`} className="rdv-sr">
-        {libelle}
-      </label>
-      <select
-        id={`rdv-${nom}`}
-        name={nom}
-        required
-        defaultValue=""
-        className="rdv-champ rdv-champ--menu"
-      >
-        <option value="" disabled>
-          {libelle}*
-        </option>
-        {options.map((o) => (
-          <option key={o.valeur} value={o.valeur}>
-            {o.libelle}
-          </option>
-        ))}
-      </select>
+      {erreur ? <p className="rdv-erreur">{messageErreur ?? "Ce champ est obligatoire."}</p> : null}
     </div>
   );
 }

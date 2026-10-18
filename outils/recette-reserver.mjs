@@ -42,31 +42,42 @@ try {
   verifier('carte cloud-slate', t.carte === 'rgb(131, 156, 178)', t.carte);
   verifier('police du site (General Sans)', /omega/i.test(t.police), t.police);
 
-  /* ——— logos : quatre outils, puis trois outils, en masque ——— */
+  /* ——— logos : trois rangées, de 4, 3 puis 4 outils, en masque ——— */
   const logos = await s.evaluer(`(() => {
     const m = document.querySelector('.rdv-marque');
     const st = getComputedStyle(m);
     return {
-      systemes: document.querySelectorAll('.rdv-logos--quatre li .rdv-marque').length,
-      metiers: document.querySelectorAll('.rdv-logos--trois li .rdv-marque').length,
+      rangees: [...document.querySelectorAll('.rdv-logos')].map(ul => ul.querySelectorAll('.rdv-marque').length),
       masque: st.maskImage !== 'none' || st.webkitMaskImage !== 'none',
     };
   })()`);
-  verifier('logos : quatre outils puis trois outils', logos.systemes === 4 && logos.metiers === 3, `${logos.systemes} + ${logos.metiers}`);
+  verifier('logos : rangées de 4, 3 et 4 outils', JSON.stringify(logos.rangees) === '[4,3,4]', JSON.stringify(logos.rangees));
   verifier('logos en masque, couleur d\u2019encre', logos.masque === true);
 
   /* ——— formulaire : neuf champs comme la référence, tous obligatoires ——— */
   const f = await s.evaluer(`(() => {
     const champs = [...document.querySelectorAll('.rdv-formulaire input, .rdv-formulaire select')];
     return {
-      total: champs.length,
-      obligatoires: champs.filter(c => c.required).length,
+      total: document.querySelectorAll('.rdv-formulaire .rdv-champ').length,
+      obligatoires: document.querySelectorAll('.rdv-formulaire input[required]').length + document.querySelectorAll('.rdv-menu-bouton').length,
       hauteur: Math.round(champs[0].getBoundingClientRect().height),
       cartes: document.querySelectorAll('.rdv-format').length,
       phare: document.querySelectorAll('.rdv-format--phare').length,
     };
   })()`);
   verifier('neuf champs, tous obligatoires', f.total === 9 && f.obligatoires === 9, `${f.total} champs, ${f.obligatoires} obligatoires`);
+
+  /* ——— envoi vide : neuf messages « Ce champ est obligatoire. », focus sur le premier ——— */
+  const vide = await s.evaluer(`(async () => {
+    document.querySelector('.rdv-formulaire button[type=submit]').click();
+    await new Promise(r => setTimeout(r, 300));
+    return {
+      messages: document.querySelectorAll('.rdv-erreur').length,
+      focus: document.activeElement?.id ?? '',
+      reste: location.pathname,
+    };
+  })()`);
+  verifier('envoi vide : neuf erreurs et focus sur le premier champ', vide.messages === 9 && vide.focus === 'rdv-prenom' && vide.reste === '/reserver-un-audit', `${vide.messages} erreur(s), focus ${vide.focus}`);
   verifier('champs de 46 px', f.hauteur === 46, `${f.hauteur} px`);
   verifier('trois cartes de format, une recommandée', f.cartes === 3 && f.phare === 1, `${f.cartes} carte(s), ${f.phare} recommandée(s)`);
 

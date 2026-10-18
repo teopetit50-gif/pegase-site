@@ -86,7 +86,8 @@ const NOMS_POSTES: Record<string, string> = Object.fromEntries(
    Stripe (kit de logos Stripe), Vercel (triangle de la page Geist de Vercel).
    Claude et Supabase : leurs pages de marque ne donnent que le pictogramme
    (le logo Claude complet n'est pas proposé en fichier) ; ces deux signes
-   viennent du paquet simple-icons déjà installé. `largeur` garde les
+   viennent du paquet simple-icons déjà installé. Tailwind : logotype officiel
+   de tailwindcss.com. `largeur` garde les
    proportions de chaque fichier, à hauteur égale de 36 px. Autorisés par Teo, qui
    précise : ils disent quels outils Omega utilise, pas une collaboration. */
 const RANGEE_UN = [
@@ -100,6 +101,17 @@ const RANGEE_DEUX = [
   { nom: "Resend", fichier: "/logos/outils/resend.svg", largeur: 170 },
   { nom: "Stripe", fichier: "/logos/outils/stripe.svg", largeur: 86 },
 ];
+/* Preuves dans le code : lib/visio.ts crée des salles Google Meet, GSAP est importé
+   par des composants, Tailwind est dans globals.css, React est le framework. Pour
+   React, GSAP et Google Meet, la page de marque ne donne pas de fichier : pictogramme
+   du paquet simple-icons. */
+const RANGEE_TROIS = [
+  { nom: "Google Meet", fichier: "/logos/outils/googlemeet.svg", largeur: 36 },
+  { nom: "Tailwind CSS", fichier: "/logos/outils/tailwind.svg", largeur: 286 },
+  { nom: "React", fichier: "/logos/outils/react.svg", largeur: 36 },
+  { nom: "GSAP", fichier: "/logos/outils/gsap.svg", largeur: 36 },
+];
+const RANGEES = [RANGEE_UN, RANGEE_DEUX, RANGEE_TROIS];
 
 /* Un logo en masque : le PNG est transparent, la couleur vient du CSS. */
 function Marque({ nom, fichier, largeur }: { nom: string; fichier: string; largeur: number }) {
@@ -221,20 +233,15 @@ export default function ReserverUnAuditPage() {
 
                 <div className="rdv-logos-bloc">
                   <p className="rdv-mono rdv-centre">Les outils que nous utilisons</p>
-                  <ul className="rdv-logos rdv-logos--quatre">
-                    {RANGEE_UN.map((m) => (
-                      <li key={m.nom}>
-                        <Marque nom={m.nom} fichier={m.fichier} largeur={m.largeur} />
-                      </li>
-                    ))}
-                  </ul>
-                  <ul className="rdv-logos rdv-logos--trois">
-                    {RANGEE_DEUX.map((m) => (
-                      <li key={m.nom}>
-                        <Marque nom={m.nom} fichier={m.fichier} largeur={m.largeur} />
-                      </li>
-                    ))}
-                  </ul>
+                  {RANGEES.map((rangee, n) => (
+                    <ul key={n} className="rdv-logos">
+                      {rangee.map((m) => (
+                        <li key={m.nom}>
+                          <Marque nom={m.nom} fichier={m.fichier} largeur={m.largeur} />
+                        </li>
+                      ))}
+                    </ul>
+                  ))}
                 </div>
               </div>
             </div>
