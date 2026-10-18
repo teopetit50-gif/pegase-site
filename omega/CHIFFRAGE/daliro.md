@@ -128,7 +128,7 @@ renvoient aux n° 2, 16, 21, 22 et 18.
 Trois DCE publiés par leurs communes (téléchargement direct, sources dans `omega/banc/dce-reels/*/SOURCE-*.md`,
 sha256 vérifiés) ont été déposés comme devis Daliro du banc par `omega/banc/dce_daliro.mjs`, connecté comme le
 gérant, sous RLS. Le chemin est celui de l'écran : `btp_deposer_devis` (b6_33), puis le lecteur (v38). Coût estimé
-1,84 € (40 pages × 0,04 €, estimation prudente) ; le coût exact vient de `dce_daliro.sql`, bloc 3.
+1,84 € (46 pages × 0,04 €, estimation prudente) ; le coût exact vient de `dce_daliro.sql`, bloc 3.
 
 | DCE | Pièce | Pages | Lignes lues | Libellés retrouvés sur leur page |
 |---|---|---|---|---|
