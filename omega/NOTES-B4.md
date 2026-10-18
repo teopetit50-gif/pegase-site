@@ -26,6 +26,18 @@ l'intitulé dans le nom de fichier) / déjà attendue / absente → « Réclamer
 le premier vrai résultat. Lecteur v38 (A1 9e4cdfd) rend aussi citee_par, citee_dans, communiquee, piece : acceptés,
 ils priment sur la comparaison locale. Recette 205/205. b4_19 + 28 posés verts (17/10).
 
+**18/10, 15 h 38 Z — NIVEAU 2 ATTEINT : le coffre Tamila sur le vrai Key Manager Scaleway** (recette, tamila-coffre v15
+sur bb7ea12, coffre_reel.sql joué par le coordinateur). Activation au nom du gérant du banc : 200, statut `bascule`
+(3 dossiers locaux), région fr-par, clé maître `9bb47abb-f0dc-47ab-8208-9411a8e88fe1` créée chez Scaleway. Sonde : 200,
+enveloppe de 65 octets, clé fictive relue, pièce fictive (87 octets chiffrés) relue, enveloppe présentée au nom d'un
+autre dossier refusée par Scaleway. La forme réelle des réponses est donc confirmée (keys[], id, ciphertext, plaintext ;
+associated_data en chaîne nue accepté).
+**Puis (même jour) — la lecture longue au coffre réel, prête à jouer** : `omega/banc/lecture_coffre_reel.sql`.
+Trouvé en la préparant : la porte du lecteur (b4_05) ne rendait la clé que pour une pièce « à lire » ; une lecture
+longue porte sur des pièces lues → **b4_20 + test 29** (la clé revient au lecteur tant qu'une analyse qui couvre la
+pièce est demandée ou en cours). tamila-coffre : actions `banc_semer` / `banc_lire`, ouvertes seulement par le secret
+`TAMILA_BANC_CLIENT` (recette), 32 tests Deno.
+
 **18/10 — coffre réel du banc** (secrets Scaleway posés par Teo) : `omega/banc/coffre_reel.sql` (gérant par la porte
 normale, puis activation et sonde par tamila-coffre via pg_net, lectures de preuve). tamila-coffre **à redéployer** :
 liste des clés avec `scheduled_for_deletion=false` (paramètre requis du schéma officiel), état `scheduled_for_deletion`
