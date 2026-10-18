@@ -1,10 +1,10 @@
 # NOTES — worker A4 (FILED : comptabilité, archivage, pilotage, circuit de validation)
 
-## REPRISE (pause du 18/10, 17 h 15 Z — Teo : le focus passe au grand groupe et à l'architecture)
+## REPRISE (reprise du 18/10, 21 h 16 Z — Teo)
 
-- **Fait** : lots a4_01 → a4_43 posés et verts sur la recette (^test_a4_ 84/84, 18/10 17 h 13 Z) ; chantier 3 du banc clos : les 36 exemples de la norme Factur-X / ZUGFeRD 2 (pas de vraies factures) lus par FILED, 0 € d'IA, écarts classés ci-dessous ; les trois défauts trouvés corrigés par a4_43 et prouvés par recontrôle (000022, 000025 écartées ; identite.siren levé hors de France).
-- **En cours** : rien.
-- **Prochain pas** : aucun sans consigne. Restent au coordinateur et à Teo : fusion de `worker-a4` (seulement `omega/`), pose en production des a4_* (a4_26b, a4_41 à la main), déploiement des fonctions `sortie` et `compta`, écran d'effacement (C1/A3), garde des fichiers dans `preparer_effacement` (A5) ; identifiants des éditeurs, clé Sirene, prix des paliers.
+- **Fait** : lots a4_01 → a4_43 posés et verts sur la recette (84/84) ; a4_44 écrit (tva.taux : « TVA étrangère » pour un fournisseur établi hors de France ; test `a4_32_tva_etrangere_libelle.sql`, rouge avant, vert après ; 85/85 en local) ; origin/main fusionnée.
+- **En cours** : a4_44 à poser par le coordinateur.
+- **Prochain pas** : relevé (blocs 2/3) du paquet 3 du banc (000028 → 000043), jamais reçu ; `montant.lignes` attend un champ « remise au pied » du lecteur (CHAMPS-LECTURE). Restent au coordinateur et à Teo : fusion, production, déploiements `sortie` / `compta`, écran d'effacement, garde des fichiers (A5), identifiants des éditeurs, clé Sirene, prix des paliers.
 
 ## Banc, chantier 3 (18/10) — exemples de la norme lus par FILED (PAS de vraies factures)
 
@@ -22,7 +22,7 @@ FeRD EN16931) déposé à 16 h 50 Z. Vérifié contre le XML embarqué (`pdfdeta
 | `mentions.indemnite`, `mentions.penalites`, `mentions.escompte` | FNFE sauf 000008 | **Juste** au regard du XML : aucune de ces mentions dans les notes (`IncludedNote`) ; seule « Franco de port ». À revoir si le lecteur lit aussi le visuel. |
 | `tva.sans_mention`, `tva.taux` (attention) | 000010, 000012, 000014 | **Juste** : le profil MINIMUM ne ventile pas la TVA. |
 | `identite.tva_intracom` (bloquant) | « Lieferant GmbH » | **Juste** : DE123456789, clé allemande attendue 8, lue 9 (numéro fictif). |
-| `tva.taux` (bloquant, 19 % / 7 %) | 000015 → 000017 | Effet du banc : facture allemande à un acheteur allemand ; pour un client français, une TVA allemande facturée est bien à arrêter. Le libellé « n'existe pas en France » pourrait dire « TVA étrangère : autoliquidation attendue ». |
+| `tva.taux` (bloquant, 19 % / 7 %) | 000015 → 000017 | Effet du banc : facture allemande à un acheteur allemand ; pour un client français, une TVA allemande facturée est bien à arrêter. Libellé corrigé par **a4_44** : « TVA étrangère facturée … par un fournisseur établi hors de France ». |
 | `identite.siren` (attention « Aucun SIREN ») | 000015 → 000017 | **Défaut de FILED** : le SIREN est demandé à un fournisseur allemand. Le contrôle (a4_39) ne regarde pas le pays ; il devrait se taire quand le fournisseur (pays ou préfixe de TVA) n'est pas français. Lot correctif à proposer. |
 | `montant.lignes` (attention) | 000016 (avoir) | Comportement voulu mais perfectible : lignes −7,90, remise au pied −0,23, HT −7,67 ; le contrôle ignore les remises et frais de pied, que le lecteur ne rend pas (aucun champ dans CHAMPS-LECTURE). |
 | `avoir.origine` | 000016 | **Juste** : la facture corrigée n'est pas au banc. |
