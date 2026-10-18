@@ -50,8 +50,8 @@ Fichiers lus : `lib/produits/factures.ts` (noté `fac`), `lib/produits/capacites
 | # | Promesse (texte exact) | Où | État | Preuve | Ce qui manque | Jours → B / → A | Coût externe |
 |---|---|---|---|---|---|---|---|
 | 20 | Prix des paliers (« à définir ») | fac:135, 149, 165 | T | — | Décision de Teo | — | — |
-| 21 | « Vous payez les pièces, pas les utilisateurs. » / « Le prix suit le nombre de pièces qui passent » / « Vous changez de palier d'un mois sur l'autre. » | page:424-426 | D | — | Compteur de pièces facturables par mois et par organisation, palier, changement de palier, facturation (AUDIT : « aucun compteur de facturation », A5) | 5 (A5) / 1 | prestataire de paiement (Stripe : ~1,5 % + 0,25 € par paiement) |
-| 22 | « 20 / 100 / 500 factures par mois » | fac:140, 155, 171 | D | — | Quota par palier : compter, prévenir à 80 %, décider au dépassement (bloquer ou facturer) | 2 / 0,5 | — |
+| 21 | « Vous payez les pièces, pas les utilisateurs. » / « Le prix suit le nombre de pièces qui passent » / « Vous changez de palier d'un mois sur l'autre. » | page:424-426 | C | compteur de pièces par mois et par organisation, paliers sans prix, changement au 1er du mois suivant, hors-quota compté (a4_50) | Les prix (Teo) et la facturation elle-même (prestataire de paiement, A5) | 3 (A5) / 1 | prestataire de paiement (Stripe : ~1,5 % + 0,25 € par paiement) |
+| 22 | « 20 / 100 / 500 factures par mois » | fac:140, 155, 171 | B | quotas 20 / 100 / 500 par palier, alerte à 80 %, dépassement « prévenir » ou « facturer » (a4_50) | Le blocage au dépassement n'est pas proposé (il ferait perdre une facture) : décision de Teo | 0 / 0,5 | — |
 | 23 | « Une boîte mail connectée » / « Deux boîtes » / « Boîtes mail illimitées » | fac:141, 156, 172 | C | adresse dédiée par organisation (socle) | Plusieurs boîtes par organisation, et la limite par palier | 1,5 / 0,5 | — |
 | 24 | « Classement par fournisseur » | fac:142 | B | a4_10, socle F2 | — | 0 / 0,5 | — |
 | 25 | « Export mensuel pour la comptabilité » | fac:143 | B (11/10) | exports programmés en tableur (a4_06) ; envoi comptable à date fixe, FEC ou format de l'éditeur (a4_33) | — | 0 / 0,5 | — |
