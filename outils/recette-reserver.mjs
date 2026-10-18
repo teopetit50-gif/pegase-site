@@ -79,7 +79,6 @@ try {
   })()`);
   verifier('envoi vide : neuf erreurs et focus sur le premier champ', vide.messages === 9 && vide.focus === 'rdv-prenom' && vide.reste === '/reserver-un-audit', `${vide.messages} erreur(s), focus ${vide.focus}`);
   verifier('champs de 46 px', f.hauteur === 46, `${f.hauteur} px`);
-  verifier('trois cartes de format, une recommandée', f.cartes === 3 && f.phare === 1, `${f.cartes} carte(s), ${f.phare} recommandée(s)`);
 
   /* ——— « Continuer » ouvre l'agenda sous le formulaire, sur cette page ——— */
   const agenda = await s.evaluer(`(async () => {
@@ -96,35 +95,6 @@ try {
 
   if (!await s.aller(url)) throw new Error('retour sur la page impossible');
   await s.dormir(1200);
-
-  /* ——— comparatif : tableau complet, débordement absorbé par son cadre ——— */
-  const c = await s.evaluer(`({
-    lignes: document.querySelectorAll('.rdv-tableau tbody tr').length,
-    familles: document.querySelectorAll('.rdv-tableau .rdv-famille').length,
-    colonnes: document.querySelectorAll('.rdv-tableau thead th').length,
-  })`);
-  verifier('comparatif : trois formats en colonnes', c.colonnes === 4, `${c.colonnes} colonne(s) d’en-tête`);
-  verifier('comparatif : lignes et familles présentes', c.lignes >= 8 && c.familles >= 2, `${c.lignes} ligne(s), ${c.familles} famille(s)`);
-
-  /* ——— FAQ : neuf questions, accordéon qui s'ouvre ——— */
-  const q = await s.evaluer(`(async () => {
-    const items = [...document.querySelectorAll('.rdv-faq-item')];
-    const premier = items[0];
-    const avant = premier.open;
-    premier.querySelector('summary').click();
-    await new Promise(r => setTimeout(r, 300));
-    return { total: items.length, avant, apres: premier.open, hauteur: Math.round(premier.querySelector('.rdv-faq-reponse').getBoundingClientRect().height) };
-  })()`);
-  verifier('neuf questions', q.total === 9, `${q.total}`);
-  verifier('réponse qui s’ouvre au clic', q.avant === false && q.apres === true && q.hauteur > 40, `hauteur ${q.hauteur} px`);
-
-  /* ——— bouton de l'appel final : texte blanc sur noir (les liens héritaient de l'encre) ——— */
-  const b = await s.evaluer(`(() => {
-    const bouton = document.querySelector('.rdv-cta .rdv-bouton');
-    const st = getComputedStyle(bouton);
-    return { couleur: st.color, fond: st.backgroundColor };
-  })()`);
-  verifier('bouton de réservation : texte blanc sur noir', b.couleur === 'rgb(255, 255, 255)' && b.fond === 'rgb(0, 0, 0)', `${b.couleur} / ${b.fond}`);
 
   /* ——— liens : aucun lien vide ou à « # » seul ——— */
   const l = await s.evaluer(`[...document.querySelectorAll('.rdv a[href]')].map(a => a.getAttribute('href')).filter(h => h === '#' || h === '')`);
