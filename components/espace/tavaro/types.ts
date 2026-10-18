@@ -55,6 +55,8 @@ export type Locataire = {
   nom: string | null;
   prenom: string | null;
   raison_sociale: string | null;
+  /* b2_06 : le SIREN d'un client professionnel (facture électronique) */
+  siren?: string | null;
   email: string | null;
   telephone: string | null;
   adresse: string | null;
@@ -183,6 +185,8 @@ export type Facture = {
   mode_reglement: ModeReglement | null;
   litige_motif: string | null;
   envoi_id: string | null;
+  /* b2_08 : le PDF de la facture, joint au courriel avec les photos datées */
+  pdf_piece_id?: string | null;
   /* b2_02 */
   relances?: number;
   relance_le?: string | null;
@@ -203,6 +207,8 @@ export type LigneFacture = {
   taux_tva: number | null;
   montant_tva: number;
   montant_ttc: number;
+  /* la ligne du barème appliquée (null : hors barème, sur devis) */
+  bareme_ligne_id?: string | null;
   preuves: Preuve[];
 };
 
@@ -259,6 +265,14 @@ export type Reglages = {
   echeance_pro_jours: number;
   tva_sur_debits: boolean;
   emetteur: Record<string, string>;
+  /* b2_07 : netteté minimale d'une photo d'état des lieux (absente tant que la migration n'est pas posée) */
+  nettete_min?: number;
+  /* b2_09 : le délai laissé par la banque pour répondre à une contestation, et l'adresse de son service */
+  contestation_delai_jours?: number;
+  contestation_adresse?: string | null;
+  /* b2_10 : durée d'une remise en location, marge avant le prochain départ */
+  remise_duree_min?: number;
+  remise_marge_min?: number;
 };
 
 /* l'état d'une demande de validation du socle, tel que l'écran le montre */
@@ -355,12 +369,14 @@ export type AvisContravention = {
   source: "saisie" | "lecture";
   cree_par: string | null;
   cree_le: string;
+  /* b2_07 : la proposition qui refacture les frais de dossier au locataire */
+  refacture_proposition_id?: string | null;
 };
 
 /* ——— l'état des lieux contradictoire (migration b2_05, vague 3) ——— */
 export type ZoneDommage = "avant" | "arriere" | "flanc_gauche" | "flanc_droit" | "toit" | "pare_brise" | "vitres" | "jantes" | "interieur" | "coffre";
-export type PhotoEtat = { vue: string; chemin: string; prise_le?: string };
-export type DommageConstate = { zone: ZoneDommage; code?: string; description: string; preuves: { chemin: string; prise_le?: string }[] };
+export type PhotoEtat = { vue: string; chemin: string; prise_le?: string; nettete?: number };
+export type DommageConstate = { zone: ZoneDommage; code?: string; description: string; preuves: { chemin: string; prise_le?: string; nettete?: number }[] };
 export type EtatDesLieux = {
   id: string;
   client_id: string;
@@ -390,3 +406,180 @@ export type EtatDesLieux = {
   etabli_par: string | null;
   cree_le: string;
 };
+
+/* b2_09 : les contestations bancaires d'une facture (rétrofacturation) et le dossier de réponse envoyé à la banque */
+export type StatutContestation = "ouverte" | "dossier_pret" | "envoyee" | "gagnee" | "perdue" | "abandonnee";
+export type ForceDossier = { code: "contrat" | "edl_depart" | "edl_retour" | "photos" | "bareme" | "contradictoire" | "envoi"; ok: boolean; libelle: string };
+export type Contestation = {
+  id: string;
+  client_id: string;
+  entite_id: string;
+  facture_id: string;
+  contrat_id: string;
+  reference_banque: string;
+  motif_banque: string;
+  montant_eur: number;
+  recue_le: string;
+  repondre_avant: string;
+  adresse_banque: string | null;
+  statut: StatutContestation;
+  forces: ForceDossier[];
+  dossier_piece_id: string | null;
+  dossier_sha256: string | null;
+  dossier_pages: number | null;
+  dossier_le: string | null;
+  dossier_chemin: string | null;
+  envoi_id: string | null;
+  envoyee_le: string | null;
+  envoyee_par: string | null;
+  issue_le: string | null;
+  issue_par: string | null;
+  issue_note: string | null;
+  notes: string | null;
+  cree_par: string | null;
+  cree_le: string;
+};
+
+/* b2_10 : la remise en location créée au retour, ses anomalies, les immobilisations et l'entretien */
+export type EtapeRemise = "inspection" | "nettoyage" | "energie";
+export type Remise = {
+  id: string;
+  client_id: string;
+  entite_id: string;
+  vehicule_id: string;
+  contrat_id: string;
+  retour_le: string;
+  prochain_depart_le: string | null;
+  prochain_depart_source: "reservation" | "contrat" | "categorie" | null;
+  prochain_depart_ref: string | null;
+  limite_le: string | null;
+  responsable: string | null;
+  statut: "a_faire" | "en_cours" | "prete" | "annulee";
+  inspection_le: string | null;
+  inspection_par: string | null;
+  nettoyage_le: string | null;
+  nettoyage_par: string | null;
+  energie_le: string | null;
+  energie_par: string | null;
+  prete_le: string | null;
+  immobilisation_id: string | null;
+  alerte: "risque" | "retard" | null;
+  annulee_motif: string | null;
+  cree_le: string;
+};
+export type TypeAnomalie = "voyant" | "dommage" | "proprete" | "objet_oublie" | "pneu" | "cle_papiers" | "equipement" | "autre";
+export type AnomalieRetour = {
+  id: string;
+  entite_id: string;
+  remise_id: string;
+  vehicule_id: string;
+  type: TypeAnomalie;
+  description: string;
+  responsable: string;
+  statut: "ouverte" | "traitee";
+  signalee_par: string | null;
+  signalee_le: string;
+  traitee_le: string | null;
+  traitee_par: string | null;
+  note: string | null;
+};
+export type MotifImmobilisation = "preparation" | "entretien" | "carrosserie" | "controle_technique" | "sinistre" | "attente_pieces" | "rappel_constructeur" | "autre";
+export type Immobilisation = {
+  id: string;
+  entite_id: string | null;
+  vehicule_id: string;
+  motif: MotifImmobilisation;
+  debut_le: string;
+  fin_prevue_le: string | null;
+  fin_le: string | null;
+  contrat_id: string | null;
+  prestataire: string | null;
+  cout_eur: number | null;
+  notes: string | null;
+  cree_le: string;
+};
+export type NatureEntretien = "revision" | "vidange" | "controle_technique" | "pneus" | "freins" | "climatisation" | "autre";
+export type Entretien = {
+  id: string;
+  entite_id: string | null;
+  vehicule_id: string;
+  nature: NatureEntretien;
+  libelle: string | null;
+  echeance_le: string | null;
+  echeance_km: number | null;
+  duree_h: number;
+  statut: "a_planifier" | "planifie" | "fait" | "annule";
+  debut_le: string | null;
+  fin_le: string | null;
+  atelier_nom: string | null;
+  atelier_adresse: string | null;
+  envoi_id: string | null;
+  immobilisation_id: string | null;
+  fait_le: string | null;
+  km_fait: number | null;
+  cout_eur: number | null;
+  notes: string | null;
+};
+export type Creneau = { debut: string; fin: string; avant_echeance: boolean };
+export type Parc = {
+  vehicules: (Vehicule & { entite_id?: string | null })[];
+  remises: Remise[];
+  anomalies: AnomalieRetour[];
+  immobilisations: Immobilisation[];
+  entretiens: Entretien[];
+  /* les personnes de l'organisation à qui confier une remise ou une anomalie */
+  membres: { user_id: string; role: string }[];
+  /* b2_17 : à qui revient d'office chaque remise, par agence */
+  responsables?: { entite_id: string; remise_responsable: string }[];
+};
+
+/* b2_11 : la fiche économique d'un véhicule et les sorties de flotte */
+export type AvisFlotte = "sortir" | "surveiller" | "garder" | "restituer";
+export type CanalSortie = "reprise_concession" | "marchand" | "encheres" | "particulier" | "restitution_loueur";
+export type SourceCote = "argus" | "la_centrale" | "offre_reprise" | "offre_marchand" | "estimation";
+export type FicheVehicule = {
+  vehicule: string;
+  immatriculation: string;
+  modele: string | null;
+  utilitaire: boolean;
+  periode: { du: string; au: string; jours: number };
+  revenu: { location: number; frais: number; total: number; jours_loues: number; contrats_sans_tarif: number };
+  couts: { atelier: number; financement: number; perte_valeur: number | null; total: number };
+  marge: number;
+  utilisation_pct: number;
+  jours_immobilises: number;
+  km: number | null;
+  km_an: number | null;
+  age_mois: number | null;
+  financement: "achat" | "credit" | "lld" | "loa";
+  fin_contrat_le: string | null;
+  cote: { eur: number; source: SourceCote; le: string } | null;
+  valeur_comptable: number | null;
+  ecart_cote_comptable: number | null;
+  avis: AvisFlotte;
+  raisons: string[];
+  moment: string | null;
+  moment_le: string | null;
+  canal: CanalSortie;
+  canal_raison: string;
+  complet: boolean;
+};
+export type SortieFlotte = {
+  id: string;
+  vehicule_id: string;
+  statut: "proposee" | "validee" | "refusee" | "vendue" | "annulee";
+  canal: CanalSortie;
+  prix_vise_eur: number | null;
+  mise_en_vente_le: string | null;
+  motif: string;
+  fiche: FicheVehicule;
+  propose_par: string;
+  propose_le: string;
+  decide_par: string | null;
+  decide_le: string | null;
+  refus_motif: string | null;
+  prix_vente_eur: number | null;
+  vendu_le: string | null;
+  acheteur: string | null;
+};
+export type Flotte = { fiches: FicheVehicule[]; sorties: SortieFlotte[] };

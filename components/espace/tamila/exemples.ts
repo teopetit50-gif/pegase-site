@@ -13,7 +13,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { dans, ilYa } from "../exemples/socle";
-import type { Audience, CalculDelai, Conformite, Delai, Dossier, DossierComplet, Export, Honoraires, Membre, Partie, Personne, Piece, RegleProcedure, Reglages } from "./types";
+import type { Audience, CalculDelai, Conformite, Delai, Dossier, DossierComplet, Attente, Expertise, Export, Honoraires, Membre, Partie, Personne, Piece, RegleProcedure, Reglages } from "./types";
 
 export const EXEMPLE_CLIENT = "00000000-0000-4000-8000-00000000000b";
 export const EXEMPLE_ENTITE = "00000000-0000-4000-8000-0000000000e1";
@@ -32,7 +32,13 @@ export const PERSONNES_EXEMPLE: Personne[] = [
   { user_id: MARCHAND, role: "lecteur", nom: "Théo Marchand" },
 ];
 
-export const REGLAGES_EXEMPLE: Reglages = { id: "00000000-0000-4000-8000-0000000000r1", client_id: EXEMPLE_CLIENT, delai_cloture_jours: 7, conservation_audit_jours: 30, conservation_exports_jours: 7, maj_le: ilYa(40) };
+export const REGLAGES_EXEMPLE: Reglages = { id: "00000000-0000-4000-8000-0000000000r1", client_id: EXEMPLE_CLIENT, delai_cloture_jours: 7, conservation_audit_jours: 30, conservation_exports_jours: 7, maj_le: ilYa(40),
+  facture_entete: {
+    nom: "Delorme & Associés", forme: "SELARL d'avocats", adresse: "12 rue de la Paix", code_postal_ville: "75002 Paris", siren: "552100554",
+    tva_intracom: "FR40552100554", barreau: "Paris", toque: "P 0123", telephone: "01 42 00 00 00", courriel: "cabinet@delorme.example",
+    iban: "FR76 3000 6000 0112 3456 7890 189", bic: "AGRIFRPP", delai_paiement_jours: 30,
+  },
+};
 
 /* Les règles de procédure telles que le socle les porte (tamila_regles_procedure) — l'exemple en montre quatre du régime cpc. */
 export const REGLES_EXEMPLE: RegleProcedure[] = [
@@ -238,6 +244,7 @@ export const DESCRIPTIONS_TEMPS_EXEMPLE: Record<string, string> = {
 };
 
 export function honorairesExemple(dossier: string): Honoraires {
+  if (dossier === D3) return forfaitExemple();
   if (dossier !== D1) return { convention: null, conventions: [], temps: [], provisions: [], factures: [] };
   const convention = {
     id: `${D1}-hc`, client_id: C, dossier_id: D1, mode: "temps_passe" as const, taux_horaire_cents: 25000, forfait_cents: null, complement_resultat_pct: 10, taux_tva: 20,
@@ -261,6 +268,21 @@ export function honorairesExemple(dossier: string): Honoraires {
   };
 }
 
+/* Le dossier 2026-0377 est au forfait (3 000 € HT, prévu pour 20 heures) : 17 heures passées, 85 % (b4_12). */
+function forfaitExemple(): Honoraires {
+  const convention = {
+    id: `${D3}-hc`, client_id: C, dossier_id: D3, mode: "forfait" as const, taux_horaire_cents: null, forfait_cents: 300000, complement_resultat_pct: null, taux_tva: 20,
+    urgence: false, statut: "signee" as const, signee_le: jour(ilYa(84)), piece_id: null, cree_par: MOI, cree_le: ilYa(85), resiliee_le: null, minutes_prevues: 1200,
+  };
+  const temps = (n: number, user_id: string, il: number, minutes: number, nature: Honoraires["temps"][number]["nature"]) => ({
+    id: `${D3}-h${n}`, client_id: C, dossier_id: D3, user_id, jour: jour(ilYa(il)), minutes, nature, description_chiffree: null, facturable: true, statut: "saisi" as const, facture_id: null, cree_le: ilYa(il),
+  });
+  return {
+    convention, conventions: [convention], provisions: [], factures: [],
+    temps: [temps(1, MOI, 6, 240, "redaction"), temps(2, BENALI, 10, 300, "recherche"), temps(3, MOI, 30, 180, "redaction"), temps(4, BENALI, 60, 120, "recherche"), temps(5, MOI, 80, 180, "consultation")],
+  };
+}
+
 /* ——— la conformité d'exemple (b4_07) : l'index est en place ; le premier dossier a sa vigilance (non assujetti) ——— */
 export function conformiteExemple(dossier: string): Conformite {
   const c = DOSSIERS_EXEMPLE.find((x) => x.dossier.id === dossier);
@@ -271,3 +293,29 @@ export function conformiteExemple(dossier: string): Conformite {
     vigilance_a_faire: dossier !== D1 && !!c && ["attente", "ouvert", "audit"].includes(c.dossier.statut),
   };
 }
+
+/* ——— l'expertise d'exemple (b4_16) : 2026-0398, expertise médicale ordonnée il y a 70 jours ; le pré-rapport est en
+   retard de quatre jours, les dires sont à adresser dans douze jours ——— */
+export function expertisesExemple(dossier: string): Expertise[] {
+  if (dossier !== D2) return [];
+  return [{
+    id: `${D2}-ex1`, client_id: C, dossier_id: D2, mission: "judiciaire", statut: "en_cours",
+    ordonnee_le: jour(ilYa(70)), consignation_avant: jour(ilYa(40)), consignation_versee_le: jour(ilYa(45)), premiere_reunion_le: jour(ilYa(30)),
+    pre_rapport_attendu_le: jour(ilYa(4)), pre_rapport_recu_le: null, dires_jusqu_au: jour(dans(12)), dires_deposes_le: null,
+    rapport_attendu_le: jour(dans(60)), rapport_recu_le: null, cree_le: ilYa(70),
+  }];
+}
+
+/* ——— les pièces attendues d'exemple (b4_18) : 2026-0377, des relevés du client à relancer aujourd'hui, une pièce
+   citée par le confrère ; l'objet, chiffré en base, se lit ici en clair (ATTENTES_OBJETS_EXEMPLE) ——— */
+export function attentesExemple(dossier: string): Attente[] {
+  if (dossier !== D3) return [];
+  return [
+    { id: `${D3}-at1`, client_id: C, dossier_id: D3, de: "client", objet_chiffre: CHIFFRE, demandee_le: jour(ilYa(21)), relance_le: jour(ilYa(0)), relances: 1, recue_le: null, statut: "attendue", cree_le: ilYa(21) },
+    { id: `${D3}-at2`, client_id: C, dossier_id: D3, de: "confrere", objet_chiffre: CHIFFRE, demandee_le: jour(ilYa(18)), relance_le: jour(dans(4)), relances: 0, recue_le: null, statut: "attendue", cree_le: ilYa(18) },
+  ];
+}
+export const ATTENTES_OBJETS_EXEMPLE: Record<string, string> = {
+  [`${D3}-at1`]: "Procès-verbaux d'assemblée générale 2022 et 2023",
+  [`${D3}-at2`]: "Pièce n° 12 citée dans les conclusions adverses, jamais communiquée",
+};

@@ -17,17 +17,30 @@
    elles sont appliquées en mémoire pour que l'enchaînement se voie.
    ══════════════════════════════════════════════════════════════════════ */
 
+import ChiffrageLu from "./ChiffrageLu";
+import { ouverte } from "./fonctions";
 import { useMemo, useState } from "react";
-import { BookOpen, CheckCircle2, ClipboardCheck, FileSignature, FileText, Link2, MessageSquare, PenLine, Plus, RotateCcw, Unlock, Users } from "lucide-react";
+import { BookOpen, CheckCircle2, ClipboardCheck, FileSignature, FileText, FileUp, Link2, MessageSquare, PenLine, Plus, RotateCcw, Unlock, Users } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
 import SituationsCarte from "./SituationsCarte";
 import ReceptionCarte from "./ReceptionCarte";
+import HeuresCarte from "./HeuresCarte";
+import RecalageDialog from "./RecalageDialog";
+import ImportDevisDialog from "./ImportDevisDialog";
+import DisponibilitesBloc from "./DisponibilitesBloc";
+import SignatureLienDialog from "./SignatureLienDialog";
+import MeteoCarte from "./MeteoCarte";
+import ApproCarte from "./ApproCarte";
+import FilCarte from "./FilCarte";
 import { Avis, Def, Pastille } from "../ui";
 import { dateCourte, dateHeure, montant, nombreFr, pourcent } from "../format";
 import { ACCEPTATIONS, CONFIRMATIONS, CONTROLES_LIGNE, EXECUTIONS, GRAVITES, ROLES_TIERS, STATUTS_AVENANT, STATUTS_CHANTIER, UNITES, VIGILANCES, familleControle, libelleEnvoi, libelleStatutFacture, libelleUnite } from "./etats";
 import { FACTURES_CANDIDATES_EXEMPLE } from "./exemples";
+import { aujourdHui } from "../exemples/socle";
+import QuestionsCarte from "./QuestionsCarte";
+import ReleveDialog from "./ReleveDialog";
 import { abandonnerAvenant, accepterEcart, changerStatutChantier, chargerFacturesCandidates, chiffrerLigneAvenant, confirmerDependance, detacherFacture, ecrireLigne, ecrireMarche, ouvrirAvenant, poserPrix, proposerDependances, proposerRemplacants, rattacherFacture, repondreConfirmation, retirerLigneAvenant, rouvrirMarche, signerAvenant, soumettreAvenant, validerPrix, verifierMarche } from "./portes";
 import type { Avenant, FactureCandidate, LigneAvenant, LigneMarche, Marche, Passage, Prix, Remplacant, Tableau } from "./types";
 
@@ -37,11 +50,17 @@ type Form =
   | { type: "ecart"; ligne: LigneMarche }
   | { type: "lot_ligne"; ligne: LigneMarche }
   | { type: "ligne"; marche: Marche }
+  | { type: "import"; marche: Marche }
+  | { type: "releve" }
   | { type: "marche" }
   | { type: "rouvrir"; marche: Marche }
   | { type: "verifier"; marche: Marche }
   | { type: "reponse"; passage: Passage }
   | { type: "remplacants"; passage: Passage }
+  | { type: "recaler"; passage: Passage }
+  | { type: "sur_place"; avenant: Avenant }
+  | { type: "preuve"; avenant: Avenant }
+  | { type: "terminer"; passage: Passage }
   | { type: "avenant" }
   | { type: "chiffrer"; avenant: Avenant }
   | { type: "soumettre"; avenant: Avenant }
@@ -60,6 +79,7 @@ const nid = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? cry
 export default function ChantierVue({ tableau, source, onLocal, relire }: Props) {
   const { chantier: c, lots, marches, passages, avenants, factures, debourse, tiers, bibliotheque, voit_prix } = tableau;
   const [form, setForm] = useState<Form>(null);
+  const planningVivant = c.statut === "ouvert" || c.statut === "suspendu";
   const [champs, setChamps] = useState<Record<string, string>>({});
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -85,7 +105,8 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
         try { setRemplacants(await proposerRemplacants(f.passage.id)); } catch (e) { setErreur(e instanceof Error ? e.message : "La base n'a pas répondu."); setRemplacants([]); }
       } else {
         const lot = lots.find((l) => l.id === f.passage.lot_id);
-        setRemplacants(tiers.filter((t) => t.actif && t.roles.includes("sous_traitant") && t.id !== f.passage.tiers_id && (!lot?.corps_etat || t.corps_etat.includes(lot.corps_etat)) && !["absente", "echue"].includes(t.vigilance ?? "")).map((t) => ({ tiers_id: t.id, nom: t.nom, telephone: t.telephone, email: t.email, canal: t.canal ?? "email", vigilance: t.vigilance ?? "sans_objet", corps_commun: true, departement_ok: t.departements.length === 0 || t.departements.includes(c.departement) })));
+        setRemplacants(tiers.filter((t) => t.actif && t.roles.includes("sous_traitant") && t.id !== f.passage.tiers_id && (!lot?.corps_etat || t.corps_etat.includes(lot.corps_etat)) && !["absente", "echue"].includes(t.vigilance ?? "")
+          && !passages.some((o) => o.tiers_id === t.id && o.id !== f.passage.id && o.statut === "prevu" && o.debut <= f.passage.fin && o.fin >= f.passage.debut)).map((t) => ({ tiers_id: t.id, nom: t.nom, telephone: t.telephone, email: t.email, canal: t.canal ?? "email", vigilance: t.vigilance ?? "sans_objet", corps_commun: true, departement_ok: t.departements.length === 0 || t.departements.includes(c.departement) })));
       }
     }
     if (f?.type === "facture") {
@@ -312,7 +333,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
             <h2 className="esp-carte-titre">{c.nom}</h2>
             <div className="esp-kpi-sous">{c.reference ? `${c.reference} · ` : ""}{c.adresse ? `${c.adresse}, ` : ""}{c.code_postal} {c.commune}</div>
           </div>
-          <span className="esp-item-haut"><Pastille teinte={s.teinte}>{s.libelle}</Pastille>{c.marche_verifie || marches.some((m) => m.statut === "verifie") ? <Pastille teinte="vert" contour>Marché vérifié</Pastille> : <Pastille teinte="ambre" contour>Marché à vérifier</Pastille>}</span>
+          <span className="esp-item-haut"><Pastille teinte={s.teinte}>{s.libelle}</Pastille>{c.marche_verifie || marches.some((m) => m.statut === "verifie") ? <Pastille teinte="vert" contour>Marché vérifié</Pastille> : <Pastille teinte="ambre" contour>Marché à vérifier</Pastille>}<button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "releve" })}><ClipboardCheck width={14} height={14} aria-hidden="true" /> Relevé du chantier</button></span>
         </div>
         <dl className="esp-def esp-def--trois">
           <Def etiquette="Maître d'ouvrage" fort>{c.maitre_ouvrage_nom ?? <span className="esp-obligatoire">à désigner</span>}</Def>
@@ -390,6 +411,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
             {!marche ? <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={() => ouvrir({ type: "marche" })}><FileText width={14} height={14} aria-hidden="true" /> Saisir le marché</button> : null}
             {marche?.statut === "a_verifier" ? <>
               <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "ligne", marche })}><Plus width={14} height={14} aria-hidden="true" /> Ajouter une ligne</button>
+              <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "import", marche })}><FileUp width={14} height={14} aria-hidden="true" /> Importer le devis</button>
               <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={() => ouvrir({ type: "verifier", marche })} disabled={marche.controles.some((k) => k.bloquant)} title={marche.controles.some((k) => k.bloquant) ? "Des contrôles bloquants restent" : undefined}><ClipboardCheck width={14} height={14} aria-hidden="true" /> Vérifier le marché</button>
             </> : null}
             {marche?.statut === "verifie" ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "rouvrir", marche })}><RotateCcw width={14} height={14} aria-hidden="true" /> Rouvrir (gérant)</button> : null}
@@ -439,6 +461,12 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
         ) : <Avis teinte="ambre">Aucun marché : les avenants et les situations ne peuvent pas être chiffrés tant que le marché signé n&apos;est pas saisi puis vérifié ligne à ligne.</Avis>}
       </section>
 
+      {/* ——— questions sur le chantier (b6_36) ——— */}
+      <QuestionsCarte key={`questions-${source}-${c.id}`} tableau={tableau} source={source} aujourdhui={aujourdHui()} />
+
+      {/* ——— météo des passages extérieurs (b6_21) ——— */}
+      <MeteoCarte key={`meteo-${c.id}`} tableau={tableau} source={source} onLocal={onLocal} relire={relire} />
+
       {/* ——— planning ——— */}
       <section className="esp-carte" aria-label="Planning">
         <div className="esp-carte-tete">
@@ -458,13 +486,15 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
                   return (
                     <tr key={p.id}>
                       <td>{dateCourte(p.debut)}{p.fin !== p.debut ? ` → ${dateCourte(p.fin)}` : ""}{p.exterieur ? <span className="esp-kpi-sous"> · extérieur</span> : null}</td>
-                      <td>{p.tache ?? "—"}{p.statut === "fait" ? <span className="esp-kpi-sous"> · fait</span> : null}</td>
+                      <td>{p.tache ?? "—"}{p.statut === "fait" ? <span className="esp-kpi-sous"> · fait</span> : p.statut === "prevu" && p.fin < aujourdhui() ? <div><Pastille teinte="ambre" contour>En retard</Pastille></div> : null}</td>
                       <td>{p.lot_code ? <span className="esp-mono">{p.lot_code}</span> : <span className="esp-obligatoire">aucun</span>}</td>
                       <td>{p.intervenant_nom ?? p.intervenant_lu ?? "—"}{p.intervenant_type === "inconnu" ? <div><Pastille teinte="ambre" contour>À ranger</Pastille></div> : p.rapprochement === "ressemblance" ? <div className="esp-kpi-sous">lu « {p.intervenant_lu} »</div> : null}</td>
                       <td>{p.intervenant_type === "tiers" ? <><Pastille teinte={k.teinte}>{k.libelle}</Pastille>{dernier ? <div className="esp-kpi-sous">{dateHeure(dernier.survenu_le)}{dernier.canal ? ` · ${dernier.canal}` : ""}{typeof dernier.detail.texte === "string" ? ` · « ${dernier.detail.texte} »` : ""}</div> : null}{p.envoi ? <div className="esp-kpi-sous">{libelleEnvoi(p.envoi, dateHeure)}</div> : null}</> : <span className="esp-kpi-sous">équipe interne</span>}</td>
                       <td>
                         {p.intervenant_type === "tiers" && p.statut === "prevu" && p.confirmation !== "non_demandee" && p.confirmation !== "confirmee" ? <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "reponse", passage: p })}>Noter la réponse</button> : null}
-                        {p.intervenant_type === "tiers" && p.statut === "prevu" && (p.confirmation === "declinee" || p.confirmation === "sans_reponse") ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "remplacants", passage: p })}>Remplaçants</button></div> : null}
+                        {ouverte(tableau, "remplacants") && p.intervenant_type === "tiers" && p.statut === "prevu" && (p.confirmation === "declinee" || p.confirmation === "sans_reponse") ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "remplacants", passage: p })}>Remplaçants</button></div> : null}
+                        {p.statut === "prevu" && planningVivant && ouverte(tableau, "ordre_lots") ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "recaler", passage: p })}>Recaler</button></div> : null}
+                        {p.statut === "prevu" && planningVivant && p.debut <= aujourdhui() ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "terminer", passage: p })}>Noter fait</button></div> : null}
                       </td>
                     </tr>
                   );
@@ -485,6 +515,9 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
         ) : null}
       </section>
 
+      {/* ——— approvisionnement (b6_22) ——— */}
+      <ApproCarte key={`appro-${c.id}`} tableau={tableau} source={source} />
+
       {/* ——— avenants ——— */}
       <section className="esp-carte" aria-label="Avenants">
         <div className="esp-section-titre">Travaux supplémentaires — {avenants.length ? `${avenants.length} avenant(s), ${avenants.filter((a) => a.statut === "signe").length} signé(s)` : "aucun avenant"}</div>
@@ -500,6 +533,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
               </div>
               <div className="esp-controle-message">{a.objet}</div>
               {a.origine?.texte || a.origine?.canal ? <div className="esp-kpi-sous">Origine : {a.origine.canal === "vocal" ? "vocal" : a.origine.canal === "photo" ? "photo" : a.origine.canal === "visite" ? "visite" : a.origine.canal ?? "—"}{a.origine.auteur ? ` de ${a.origine.auteur}` : ""}{a.origine.date ? ` le ${dateCourte(String(a.origine.date))}` : ""}{a.origine.texte ? ` — « ${a.origine.texte} »` : ""}</div> : null}
+              <ChiffrageLu chiffrage={a.origine?.chiffrage} chiffree={a.lignes.some((l) => l.origine_prix === "bibliotheque")} voitPrix={!!voit_prix} />
               {a.lignes.length ? (
                 <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Lignes de l'avenant (tableau qui défile)" style={{ marginTop: 6 }}>
                   <table className="esp-tableau">
@@ -520,7 +554,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
                   </table>
                 </div>
               ) : <div className="esp-kpi-sous">Aucune ligne : chiffrez les travaux sur un prix validé de la bibliothèque.</div>}
-              {a.signe_le ? <div className="esp-kpi-sous" style={{ marginTop: 6 }}>Signé le {dateCourte(a.signe_le)}{a.signe_libelle ? ` par ${a.signe_libelle}` : ""}.</div> : null}
+              {a.signe_le ? <div className="esp-kpi-sous" style={{ marginTop: 6 }}>Signé le {dateCourte(a.signe_le)}{a.signe_libelle ? (a.signe_libelle.startsWith("Signé sur place") ? ` : ${a.signe_libelle.charAt(0).toLowerCase()}${a.signe_libelle.slice(1)}` : ` par ${a.signe_libelle}`) : ""}.{a.signe_libelle?.startsWith("Signé sur place") && voit_prix ? <> <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "preuve", avenant: a })}>Voir la preuve</button></> : null}</div> : null}
               {a.motif ? <div className="esp-kpi-sous" style={{ marginTop: 6 }}>Motif : {a.motif}</div> : null}
               <div className="esp-controle-actions" style={{ marginTop: 8 }}>
                 {a.statut === "brouillon" ? <>
@@ -530,6 +564,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
                 </> : null}
                 {a.statut === "soumis" ? <>
                   <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={() => ouvrir({ type: "signer", avenant: a })} disabled={a.demande_statut !== "approuvee" && a.demande_statut !== "executee"} title={a.demande_statut !== "approuvee" && a.demande_statut !== "executee" ? "La demande de validation n'est pas encore approuvée" : undefined}><PenLine width={14} height={14} aria-hidden="true" /> Signer</button>
+                  {a.demande_statut === "approuvee" && voit_prix ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "sur_place", avenant: a })}><FileSignature width={14} height={14} aria-hidden="true" /> Faire signer sur place</button> : null}
                   <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "abandonner", avenant: a })}>Abandonner</button>
                 </> : null}
                 {a.statut === "refuse" ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "soumettre", avenant: a })}>Resoumettre</button> : null}
@@ -540,8 +575,14 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
         {!avenants.length ? <div className="esp-kpi-sous">Un travail supplémentaire repéré (vocal, photo, visite) devient un avenant chiffré sur vos prix, signé avant exécution.</div> : null}
       </section>
 
+      {/* ——— fil du chantier : photos, vocaux, messages (b6_24) ——— */}
+      <FilCarte key={`fil-${c.id}`} tableau={tableau} source={source} relire={relire} />
+
       {/* ——— situations de travaux (b6_12) ——— */}
       <SituationsCarte tableau={tableau} source={source} onLocal={onLocal} relire={relire} />
+
+      {/* ——— heures pointées et rentabilité (b6_17) ——— */}
+      <HeuresCarte key={tableau.chantier.id} tableau={tableau} source={source} />
 
       {/* ——— réception, réserves, retenue, décompte (b6_13) ——— */}
       <ReceptionCarte tableau={tableau} source={source} onLocal={onLocal} relire={relire} />
@@ -582,6 +623,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
             <li key={t.id}><span className="esp-fil-point" data-teinte={t.vigilance === "a_jour" ? "vert" : t.vigilance === "absente" || t.vigilance === "echue" ? "rouge" : undefined} /><div><div className="esp-fil-texte"><strong>{t.nom}</strong> — {t.roles.map((r) => ROLES_TIERS[r] ?? r).join(", ")}</div><div className="esp-fil-meta">{t.commune ?? ""}{t.telephone ? ` · ${t.telephone}` : ""}{t.email ? ` · ${t.email}` : ""}{t.roles.includes("sous_traitant") && t.vigilance ? <> · <Pastille teinte={VIGILANCES[t.vigilance].teinte} contour>{VIGILANCES[t.vigilance].libelle}</Pastille></> : null}</div></div></li>
           ))}
         </ul>
+        <DisponibilitesBloc tableau={tableau} source={source} />
         <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Bibliothèque de prix (tableau qui défile)" style={{ marginTop: 10 }}>
           <table className="esp-tableau">
             <thead><tr><th>Désignation</th><th>Unité</th>{voit_prix ? <th className="esp-num">PU HT</th> : null}<th>Origine</th><th>Statut</th><th></th></tr></thead>
@@ -670,9 +712,27 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
               <DialogFooter><button type="button" className="r-btn r-btn--noir" disabled={envoi} onClick={() => faireReponse(form.passage)}>{envoi ? <Loader variant="spin" /> : null} Noter</button></DialogFooter>
             </>
           ) : null}
+          {form?.type === "sur_place" || form?.type === "preuve" ? (
+            <SignatureLienDialog key={`${form.type}-${form.avenant.id}`} mode={form.type === "sur_place" ? "preparer" : "preuve"} avenant={form.avenant} source={source} />
+          ) : null}
+          {form?.type === "releve" ? <ReleveDialog tableau={tableau} /> : null}
+          {form?.type === "import" ? (
+            <ImportDevisDialog key={`import-${form.marche.id}`} client={c.client_id} marche={form.marche} lots={lots} source={source} fermer={fermer}
+                               apresReel={async (m) => { await relire(); setFait(m); }}
+                               appliquerLocal={(nouvelles, m) => {
+                                 const m2 = { ...form.marche, lignes: [...form.marche.lignes, ...nouvelles] };
+                                 m2.total_ht_lignes = totalLignes(m2);
+                                 onLocal(avecMarche({ ...m2, controles: controlesMarche(m2) }));
+                                 setFait(m);
+                               }} />
+          ) : null}
+          {form?.type === "recaler" || form?.type === "terminer" ? (
+            <RecalageDialog key={`${form.type}-${form.passage.id}`} mode={form.type} passage={form.passage} tableau={tableau} source={source} onLocal={onLocal} relire={relire}
+                            fermer={(m) => { if (m) setFait(m); fermer(); }} />
+          ) : null}
           {form?.type === "remplacants" ? (
             <>
-              <DialogHeader><DialogIcone><Users width={18} height={18} aria-hidden="true" /></DialogIcone><DialogTitle>Remplaçants possibles</DialogTitle><DialogDescription>Sous-traitants du même corps d&apos;état, du même département, joignables, à jour de vigilance, qui n&apos;ont pas décliné ce passage.</DialogDescription></DialogHeader>
+              <DialogHeader><DialogIcone><Users width={18} height={18} aria-hidden="true" /></DialogIcone><DialogTitle>Remplaçants possibles</DialogTitle><DialogDescription>Sous-traitants du même corps d&apos;état, du même département, joignables, à jour de vigilance, libres ces jours-là (ni autre passage, ni absence notée), qui n&apos;ont pas décliné ce passage.</DialogDescription></DialogHeader>
               <DialogBody>
                 {remplacants === null ? <Loader variant="spin" /> : remplacants.length ? (
                   <ul className="esp-fil">{remplacants.map((r) => <li key={r.tiers_id}><span className="esp-fil-point" data-teinte={r.vigilance === "a_jour" ? "vert" : undefined} /><div><div className="esp-fil-texte"><strong>{r.nom}</strong>{r.telephone ? ` · ${r.telephone}` : ""}{r.email ? ` · ${r.email}` : ""}</div><div className="esp-fil-meta">{r.canal} · <Pastille teinte={VIGILANCES[r.vigilance].teinte} contour>{VIGILANCES[r.vigilance].libelle}</Pastille>{!r.departement_ok ? " · hors de ses départements" : ""}</div></div></li>)}</ul>

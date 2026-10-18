@@ -11,15 +11,20 @@ import { mkdirSync } from 'node:fs';
 import { ouvrirSession } from '../../outils/chrome.mjs';
 
 const base = process.argv[2] ?? 'http://localhost:3010';
-const dossier = new URL('.', import.meta.url).pathname;
+/* le préfixe de l'espace : /espace (défaut) ou /espace2 (le tableau de bord de C1) */
+const P = (process.env.PREFIXE ?? '/espace').replace(/\/$/, '');
+/* SAUTER=boite,demandes : les enchaînements d'écrans absents de la version jouée */
+const SAUTER = new Set((process.env.SAUTER ?? '').split(',').filter(Boolean));
+/* contre un autre préfixe, les captures vont ailleurs (CAPTURES), pas sur celles de /espace */
+const dossier = process.env.CAPTURES ? process.env.CAPTURES.replace(/\/?$/, '/') : new URL('.', import.meta.url).pathname;
 mkdirSync(dossier, { recursive: true });
 let echecs = 0;
 const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) echecs++; };
 const ANGLAIS = /\b(Loading|Submit|Cancel|Approve|Reject|Delete|Save|Error|Pending|Due|Invoice|Supplier|Settings|Logout|Sign in|Dashboard|Today|Yesterday|Tomorrow)\b/;
-const ECRANS = [['validations', '/espace/validations'], ['filed', '/espace/filed'], ['fournisseurs', '/espace/filed/fournisseurs'], ['a-payer', '/espace/filed/a-payer'], ['comptabilite', '/espace/filed/comptabilite'], ['point', '/espace/point']];
+const ECRANS = [['validations', P + '/validations'], ['filed', P + '/filed'], ['fournisseurs', P + '/filed/fournisseurs'], ['a-payer', P + '/filed/a-payer'], ['comptabilite', P + '/filed/comptabilite'], ['boite', P + '/filed/boite'], ['demandes', P + '/demandes'], ['reglages', P + '/reglages'], ['equipe', P + '/equipe'], ['point', P + '/point']];
 const LARGEURS = [390, 768, 1024, 1440, 1700];
 
-for (const [nom, chemin] of ECRANS) {
+for (const [nom, chemin] of ECRANS.filter(([n]) => !SAUTER.has(n))) {
   for (const largeur of LARGEURS) {
     const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `a3-${nom}`, densite: 1 });
     console.log(`— ${chemin} à ${largeur}`);
@@ -27,11 +32,12 @@ for (const [nom, chemin] of ECRANS) {
     await s.dormir(600);
     const mesure = await s.evaluer(`(() => {
       const w = document.documentElement.clientWidth;
-      /* un élément dans un cadre qui défile (tableau des lignes) n'est pas un débordement */
-      const dansCadre = (e) => !!e.closest('.esp-tableau-cadre') && e !== e.closest('.esp-tableau-cadre');
-      const larges = [...document.querySelectorAll('.esp *')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > w + 1 && !dansCadre(e); })
+      /* un élément dans un cadre qui défile (tableau des lignes, .esp-tableau-cadre ou .v2-tableau-cadre) n'est pas un débordement */
+      const dansCadre = (e) => { for (let a = e.parentElement; a && a !== document.body; a = a.parentElement) { if (/(auto|scroll)/.test(getComputedStyle(a).overflowX)) return true; } return false; };
+      const zone = document.querySelector('.esp') ?? document.querySelector('main') ?? document.body;
+      const larges = [...zone.querySelectorAll('*')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > w + 1 && !dansCadre(e); })
         .slice(0, 5).map(e => e.tagName + '.' + [...e.classList].join('.') + '→' + Math.round(e.getBoundingClientRect().right));
-      return { deb: document.documentElement.scrollWidth - w, larges, texte: document.querySelector('.esp')?.innerText || '', h1: document.querySelector('.esp h1')?.textContent };
+      return { deb: document.documentElement.scrollWidth - w, larges, texte: zone.innerText || '', h1: (document.querySelector('.esp h1') ?? zone.querySelector('h1'))?.textContent };
     })()`);
     ok(mesure.deb === 0, `pas de débordement horizontal (${mesure.deb})`);
     ok(mesure.larges.length === 0, `aucun élément plus large que l'écran ${mesure.larges.length ? JSON.stringify(mesure.larges) : ''}`);
@@ -39,8 +45,9 @@ for (const [nom, chemin] of ECRANS) {
     ok(!anglais, anglais ? `mot anglais à l'écran : « ${anglais[0]} »` : 'aucun mot anglais surveillé à l\'écran');
     ok(!!mesure.h1, `titre : ${mesure.h1}`);
     await s.capturer(`${dossier}${nom}-${largeur}.jpg`, { qualite: 55 });
-    /* ERR_BLOCKED_BY_ORB : le script de Vercel Analytics (va.vercel-scripts.com), chargé en dev, refusé par le mandataire du conteneur */
-    s.soucis.filter((x) => !/CERT|insights|404|favicon|ERR_BLOCKED_BY_ORB/.test(x)).forEach((x) => ok(false, x));
+    /* ERR_SSL_PROTOCOL_ERROR : un build de production servi en http local (next start) porte upgrade-insecure-requests ;
+       ERR_BLOCKED_BY_ORB : le script de Vercel Analytics (va.vercel-scripts.com), chargé en dev, refusé par le mandataire du conteneur */
+    s.soucis.filter((x) => !/CERT|insights|404|favicon|ERR_BLOCKED_BY_ORB|ERR_SSL_PROTOCOL_ERROR/.test(x)).forEach((x) => ok(false, x));
     s.fermer();
   }
 }
@@ -48,7 +55,7 @@ for (const [nom, chemin] of ECRANS) {
 {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-approuver', densite: 1 });
   console.log('— /espace/validations : la règle exige un commentaire');
-  ok(await s.aller(base + '/espace/validations'), 'page chargée');
+  ok(await s.aller(base + P + '/validations'), 'page chargée');
   await s.dormir(400);
   const avant = await s.evaluer(`(() => { const b = [...document.querySelectorAll('.esp-actions .r-btn')].find(b => /Approuver/.test(b.textContent)); if (!b) return null; b.click(); return true; })()`);
   ok(avant === true, 'bouton « Approuver » cliqué sur la demande en retard (12 480 €, 2 approbations)');
@@ -89,7 +96,7 @@ for (const [nom, chemin] of ECRANS) {
 {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-piece', densite: 1 });
   console.log('— /espace/filed : la citation se surligne dans la pièce');
-  ok(await s.aller(base + '/espace/filed'), 'page chargée');
+  ok(await s.aller(base + P + '/filed'), 'page chargée');
   await s.dormir(400);
   const ref0 = await s.evaluer(`document.querySelector('#esp-dossier .esp-mono')?.textContent`);
   ok(ref0 === 'R2026-000016', `le document ouvert d'office est le bloqué le plus récent (${ref0})`);
@@ -147,20 +154,20 @@ for (const [nom, chemin] of ECRANS) {
 {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-lien', densite: 1 });
   console.log('— /espace/validations → /espace/filed : de la demande à son dossier');
-  ok(await s.aller(base + '/espace/validations'), 'page chargée');
+  ok(await s.aller(base + P + '/validations'), 'page chargée');
   await s.dormir(500);
   const choisie = await s.evaluer(`(() => { const b = [...document.querySelectorAll('.esp-item')].find(b => /Lever le contrôle IBAN sur R2026-000009/.test(b.textContent)); if (!b) return false; b.click(); return true; })()`);
   ok(choisie, 'la demande « Lever le contrôle IBAN sur R2026-000009 » est ouverte');
   await s.dormir(500);
   const apercu = await s.evaluer(`(() => { const a = document.querySelector('.esp-apercu-filed'); if (!a) return null; return { texte: a.innerText.replace(/\\s+/g, ' '), lien: a.querySelector('a')?.getAttribute('href') }; })()`);
   ok(apercu && /R2026-000009/.test(apercu.texte) && /Bloquée/.test(apercu.texte) && /Métallerie Roux/.test(apercu.texte), `aperçu du dossier dans la demande (${apercu?.texte})`);
-  ok(apercu?.lien === '/espace/filed?objet=facture:R2026-000009', `lien « Ouvrir le dossier » : ${apercu?.lien}`);
+  ok(apercu?.lien === P + '/filed?objet=facture:R2026-000009', `lien « Ouvrir le dossier » : ${apercu?.lien}`);
   await s.capturer(`${dossier}validations-dossier-1440.jpg`, { qualite: 55 });
-  ok(await s.aller(base + '/espace/filed?objet=facture:R2026-000011'), 'FILED ouvert par l\'URL d\'une demande');
+  ok(await s.aller(base + P + '/filed?objet=facture:R2026-000011'), 'FILED ouvert par l\'URL d\'une demande');
   await s.dormir(900);
   const ref = await s.evaluer(`document.querySelector('#esp-dossier .esp-mono')?.textContent`);
   ok(ref === 'R2026-000011', `le dossier désigné s'ouvre d'office (${ref})`);
-  ok(await s.aller(base + '/espace/filed?objet=facture:inconnue'), 'FILED ouvert avec une cible inconnue');
+  ok(await s.aller(base + P + '/filed?objet=facture:inconnue'), 'FILED ouvert avec une cible inconnue');
   await s.dormir(900);
   const introuvable = await s.evaluer(`/Document introuvable/.test(document.querySelector('.esp').innerText)`);
   ok(introuvable, 'une cible inconnue est dite, sans erreur');
@@ -170,7 +177,7 @@ for (const [nom, chemin] of ECRANS) {
 {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-fournisseurs', densite: 1 });
   console.log('— /espace/filed/fournisseurs : à confirmer en tête, fiche, factures');
-  ok(await s.aller(base + '/espace/filed/fournisseurs'), 'page chargée');
+  ok(await s.aller(base + P + '/filed/fournisseurs'), 'page chargée');
   await s.dormir(600);
   const tete = await s.evaluer(`(() => ({ premiers: [...document.querySelectorAll('.esp-item')].slice(0, 2).map(e => e.innerText.replace(/\\s+/g, ' ')), kpi: [...document.querySelectorAll('.esp-kpi')].map(k => k.innerText.replace(/\\s+/g, ' ')) }))()`);
   ok(tete.premiers.length === 2 && tete.premiers.every(t => /^À confirmer/.test(t)), `les fournisseurs à confirmer sont en tête (${tete.premiers.join(' / ')})`);
@@ -198,7 +205,7 @@ for (const [nom, chemin] of ECRANS) {
 {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-identifiants', densite: 1 });
   console.log('— /espace/filed : identifiants lus sur la pièce, non retenus');
-  ok(await s.aller(base + '/espace/filed?objet=facture:R2026-000017'), 'page chargée sur R2026-000017');
+  ok(await s.aller(base + P + '/filed?objet=facture:R2026-000017'), 'page chargée sur R2026-000017');
   await s.dormir(900);
   const bloc = await s.evaluer(`(() => { const b = document.querySelector('.esp-identifiants-lus'); if (!b) return null; return { texte: b.innerText.replace(/\\s+/g, ' '), confirmer: /Confirmer la valeur lue/.test(b.textContent) }; })()`);
   ok(bloc && /SIREN lu 519803417 clé de Luhn invalide/.test(bloc.texte) && /TVA lu FR45519803417/.test(bloc.texte) && !bloc.confirmer, `valeurs lues non retenues, avec leur raison, sans « confirmer » une clé fausse (${bloc?.texte?.slice(0, 220)})`);
@@ -222,40 +229,45 @@ for (const [nom, chemin] of ECRANS) {
   s.fermer();
 }
 
-{
+if (!SAUTER.has('a-payer')) {
+  /* sélecteurs neutres (06/10, demande de C1) : le même enchaînement joue sur /espace et sur /espace2,
+     dont « À payer » est réécrit — groupes = h2, lignes = tbody tr, dialogue = [role=dialog], message = [role=status] */
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-a-payer', densite: 1 });
-  console.log('— /espace/filed/a-payer : les factures validées par échéance');
-  ok(await s.aller(base + '/espace/filed/a-payer'), 'page chargée');
-  await s.dormir(600);
-  const r = await s.evaluer(`(() => ({ kpi: [...document.querySelectorAll('.esp-kpi')].map(k => k.innerText.replace(/\\s+/g, ' ')), groupes: [...document.querySelectorAll('section.esp-carte .esp-carte-titre')].map(e => e.textContent), lignes: [...document.querySelectorAll('.esp-a-payer tbody tr')].map(t => t.innerText.replace(/\\s+/g, ' ')), avis: [...document.querySelectorAll('.esp-avis')].map(a => a.textContent) }))()`);
-  ok(r.groupes.join(',') === 'En retard,Cette semaine,Ce mois-ci', `groupes dans l'ordre : ${r.groupes.join(', ')}`);
-  ok(/Transports Rivière/.test(r.lignes[0] ?? '') && /de retard/.test(r.lignes[0] ?? ''), `la facture en retard vient d'abord (${r.lignes[0]})`);
+  console.log(`— ${P}/filed/a-payer : les factures validées par échéance`);
+  ok(await s.aller(base + P + '/filed/a-payer'), 'page chargée');
+  await s.dormir(800);
+  const LIGNES = `[...document.querySelectorAll('tbody tr')].filter(t => /R20\\d\\d-\\d{6}/.test(t.textContent))`;
+  const r = await s.evaluer(`(() => ({ groupes: [...document.querySelectorAll('h2')].map(e => (e.textContent.trim().match(/^(En retard|Cette semaine|Ce mois-ci|Plus tard)/) ?? [])[1]).filter(Boolean), lignes: ${LIGNES}.map(t => t.innerText.replace(/\\s+/g, ' ')), texte: document.body.innerText }))()`);
+  ok(r.groupes.slice(0, 3).join(',') === 'En retard,Cette semaine,Ce mois-ci', `groupes dans l'ordre : ${r.groupes.join(', ')}`);
+  ok(/Transports Rivière/.test(r.lignes[0] ?? '') && /de retard/.test(r.lignes[0] ?? ''), `la facture en retard vient d'abord (${r.lignes[0]?.slice(0, 80)})`);
   ok(r.lignes.some(l => /Cabinet Ferrand/.test(l) && /IBAN manquant/.test(l)), 'la facture sans IBAN validé le dit');
-  ok(r.avis.some(a => /1 facture sans IBAN validé/.test(a)), "l'avis IBAN manquant");
+  ok(/1 facture sans IBAN validé/.test(r.texte), "l'avis IBAN manquant");
   ok(r.lignes.length === 3, `${r.lignes.length} factures validées à payer`);
   ok(/Payée en partie/.test(r.lignes[0] ?? '') && /1 000,00 € réglés/.test(r.lignes[0] ?? '') && /1 208,00 €/.test(r.lignes[0] ?? ''), `le règlement partiel se voit : reste, réglé, état (${r.lignes[0]?.slice(0, 160)})`);
   await s.capturer(`${dossier}a-payer-1440.jpg`, { qualite: 55 });
   /* noter tout le reste sur la facture de Cabinet Ferrand : elle sort de la liste */
-  await s.evaluer(`[...document.querySelectorAll('.esp-a-payer tbody tr')].find(t => /Cabinet Ferrand/.test(t.textContent))?.querySelector('button')?.click()`);
+  await s.evaluer(`${LIGNES}.find(t => /Cabinet Ferrand/.test(t.textContent))?.querySelector('button')?.click()`);
   await s.dormir(500);
-  const dlgP = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); if (!d) return null; const i = d.querySelector('input[inputmode="decimal"]'); return { titre: d.querySelector('h2')?.textContent, montant: i?.value, moyen: d.querySelector('select')?.value }; })()`);
+  const MONTANT = `(document.querySelector('[role="dialog"] input[inputmode="decimal"]'))`;
+  const dlgP = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); if (!d) return null; return { titre: d.querySelector('h2')?.textContent, montant: ${MONTANT}?.value, moyen: d.querySelector('select')?.value }; })()`);
   ok(dlgP && /Noter un paiement/.test(dlgP.titre) && dlgP.montant === '1140', `le dialogue propose le reste (${dlgP?.montant}) et, sans IBAN validé, le moyen « ${dlgP?.moyen} »`);
-  await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input[inputmode="decimal"]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, '5000'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  const saisir = (v) => s.evaluer(`(() => { const i = ${MONTANT}; Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, ${JSON.stringify(v)}); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await saisir('5000');
   await s.dormir(200);
   ok(await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Noter le paiement/.test(b.textContent))?.disabled`) === true, 'un montant au-delà du reste laisse le bouton gris');
-  await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input[inputmode="decimal"]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, ''); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await saisir('');
   await s.dormir(200);
   await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Noter le paiement/.test(b.textContent))?.click()`);
-  await s.dormir(800);
-  const apresP = await s.evaluer(`({ lignes: [...document.querySelectorAll('.esp-a-payer tbody tr')].map(t => t.textContent), fait: [...document.querySelectorAll('.esp-avis')].map(a => a.textContent).find(t => /C'est fait/.test(t)) ?? '', payees: [...document.querySelectorAll('.esp-filtre')].map(b => b.textContent).find(t => /payées/.test(t)) ?? '' })`);
-  ok(apresP.lignes.length === 2 && !apresP.lignes.some(t => /Cabinet Ferrand/.test(t)) && /la facture est payée/.test(apresP.fait) && /Afficher les payées \(1\)/.test(apresP.payees), `payée : elle sort de la liste, « ${apresP.payees} » (${apresP.fait.slice(0, 90)})`);
+  await s.dormir(900);
+  const apresP = await s.evaluer(`({ lignes: ${LIGNES}.map(t => t.textContent), fait: [...document.querySelectorAll('[role="status"]')].map(a => a.textContent).find(t => /C'est fait/.test(t)) ?? '', payees: [...document.querySelectorAll('button')].map(b => b.textContent).find(t => /payées/.test(t)) ?? '' })`);
+  ok(apresP.lignes.length === 2 && !apresP.lignes.some(t => /Cabinet Ferrand/.test(t)) && /la facture est payée/.test(apresP.fait) && /Afficher les payées \(1\)/.test(apresP.payees), `payée : elle sort de la liste, « ${apresP.payees.trim()} » (${apresP.fait.slice(0, 90)})`);
   s.fermer();
 }
 
 {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-lot', densite: 1 });
   console.log('— /espace/validations : décider en lot');
-  ok(await s.aller(base + '/espace/validations'), 'page chargée');
+  ok(await s.aller(base + P + '/validations'), 'page chargée');
   await s.dormir(600);
   await s.evaluer(`[...document.querySelectorAll('button')].find(b => /Décider en lot/.test(b.textContent))?.click()`);
   await s.dormir(300);
@@ -286,7 +298,7 @@ for (const [nom, chemin] of ECRANS) {
 {
   const s = await ouvrirSession({ largeur: 1024, hauteur: 900, marque: 'a3-point', densite: 1 });
   console.log('— /espace/point : reculer d\'un jour');
-  ok(await s.aller(base + '/espace/point'), 'page chargée');
+  ok(await s.aller(base + P + '/point'), 'page chargée');
   await s.dormir(400);
   const j1 = await s.evaluer(`document.querySelector('.esp-point-jour')?.textContent`);
   await s.evaluer(`document.querySelector('.esp-point-nav button[aria-label="Jour précédent"]').click()`);
@@ -298,10 +310,10 @@ for (const [nom, chemin] of ECRANS) {
   s.fermer();
 }
 
-{
+if (!SAUTER.has('filed-electronique')) {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-electronique', densite: 1 });
   console.log('— /espace/filed : la facture électronique R2026-000014');
-  ok(await s.aller(base + '/espace/filed?objet=facture:R2026-000014'), 'page chargée');
+  ok(await s.aller(base + P + '/filed?objet=facture:R2026-000014'), 'page chargée');
   await s.dormir(700);
   const r = await s.evaluer(`(() => { const d = document.querySelector('#esp-dossier'); const c = [...d.querySelectorAll('button')].find(b => /Corriger une valeur/.test(b.textContent));
     return { pastille: /Facture électronique/.test(d.innerText), fichier: (d.innerText.match(/du fichier/g) ?? []).length, corriger: c?.disabled, aide: c?.title, onglets: [...d.querySelectorAll('[role="tab"]')].map(t => t.textContent) }; })()`);
@@ -333,15 +345,15 @@ for (const [nom, chemin] of ECRANS) {
   s.fermer();
 }
 
-{
+if (!SAUTER.has('comptabilite')) {
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-fec', densite: 1 });
   console.log('— /espace/filed/comptabilite : exporter le FEC, régler un compte');
-  ok(await s.aller(base + '/espace/filed/comptabilite'), 'page chargée');
+  ok(await s.aller(base + P + '/filed/comptabilite'), 'page chargée');
   await s.dormir(600);
   await s.evaluer(`[...document.querySelectorAll('.esp button')].find(b => /Exporter le FEC/.test(b.textContent)).click()`);
   await s.dormir(800);
   const av = await s.evaluer(`[...document.querySelectorAll('.esp-avis')].map(a => a.textContent).join(' | ')`);
-  ok(/lignes/.test(av) && /écritures/.test(av) && /crédit/.test(av), `bilan de l'export : ${av.slice(0, 140)}`);
+  ok(/lignes?/.test(av) && /écritures?/.test(av) && /crédit/.test(av), `bilan de l'export : ${av.slice(0, 140)}`);
   await s.evaluer(`[...document.querySelectorAll('.esp button')].find(b => /^Modifier le compte : Banque/.test(b.getAttribute('aria-label') ?? '')).click()`);
   await s.dormir(400);
   await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, '51'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
@@ -355,6 +367,128 @@ for (const [nom, chemin] of ECRANS) {
   const ligne = await s.evaluer(`[...document.querySelectorAll('.esp-tableau tbody tr')].map(t => t.innerText.replace(/\\s+/g, ' ')).find(t => /Banque/.test(t)) ?? ''`);
   ok(/512100/.test(ligne) && !/par défaut/.test(ligne), `le compte banque devient 512100 (${ligne})`);
   await s.capturer(`${dossier}comptabilite-fec-1440.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+if (!SAUTER.has('boite')) {
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-boite', densite: 1 });
+  console.log('— /espace/filed/boite : les courriels reçus');
+  ok(await s.aller(base + P + '/filed/boite'), 'page chargée');
+  await s.dormir(600);
+  const r = await s.evaluer(`(() => ({ boite: document.querySelector('.esp-avis strong.esp-mono')?.textContent, kpi: [...document.querySelectorAll('.esp-kpi')].map(k => k.innerText.replace(/\\s+/g, ' ')), lignes: [...document.querySelectorAll('.esp-liste .esp-item')].map(t => t.innerText.replace(/\\s+/g, ' ')), detail: document.querySelector('#esp-courriel')?.innerText ?? '' }))()`);
+  ok(/@/.test(r.boite ?? ''), `l'adresse de la boîte est dite (${r.boite})`);
+  ok(r.lignes.length >= 8, `${r.lignes.length} courriels, du plus récent au plus ancien`);
+  ok(/Pièces jointes/i.test(r.detail) && /Message/i.test(r.detail), 'le détail du premier courriel : pièces et message');
+  /* la facture de Papeterie Durand : sa pièce est devenue R2026-000014 */
+  await s.evaluer(`[...document.querySelectorAll('.esp-liste .esp-item')].find(b => /PD-2026-1187/.test(b.textContent) && !/Relance/.test(b.textContent))?.click()`);
+  await s.dormir(300);
+  const lien = await s.evaluer(`[...document.querySelectorAll('#esp-courriel a')].map(a => ({ t: a.textContent, h: a.getAttribute('href') })).find(a => /R2026-000014/.test(a.t)) ?? null`);
+  ok(!!lien && /objet=document:/.test(lien.h), `la pièce mène à son document FILED (${lien?.t} → ${lien?.h})`);
+  /* la pièce écartée se dit */
+  await s.evaluer(`[...document.querySelectorAll('.esp-liste .esp-item')].find(b => /photos de la livraison/.test(b.textContent))?.click()`);
+  await s.dormir(300);
+  ok(/n.a pas été gardée/.test(await s.evaluer(`document.querySelector('#esp-courriel').innerText`)), 'une pièce écartée à la réception est signalée');
+  /* marquer lu, puis écarter (reception_marquer ; ici en local, données d'exemple) */
+  await s.evaluer(`[...document.querySelectorAll('#esp-courriel button')].find(b => /Marquer comme lu/.test(b.textContent)).click()`);
+  await s.dormir(300);
+  const m1 = await s.evaluer(`({ statut: document.querySelector('#esp-courriel .esp-carte-tete .esp-pastille')?.textContent, boutons: [...document.querySelectorAll('#esp-courriel .esp-actions button')].map(b => b.textContent.trim()) })`);
+  ok(m1.statut === 'Lu' && m1.boutons.join('|') === 'Écarter|Remettre en nouveau', `marqué lu : ${m1.statut}, gestes ${m1.boutons.join(', ')}`);
+  await s.evaluer(`[...document.querySelectorAll('#esp-courriel button')].find(b => /Écarter/.test(b.textContent)).click()`);
+  await s.dormir(300);
+  const m2 = await s.evaluer(`({ statut: document.querySelector('#esp-courriel .esp-carte-tete .esp-pastille')?.textContent, ecartes: [...document.querySelectorAll('.esp-kpi')].find(k => /Écartés/.test(k.textContent))?.querySelector('.esp-kpi-valeur')?.textContent })`);
+  ok(m2.statut === 'Ignoré' && m2.ecartes === '2', `écarté : ${m2.statut}, Écartés = ${m2.ecartes}`);
+  /* filtre « Écartés » */
+  await s.evaluer(`[...document.querySelectorAll('.esp-kpi')].find(b => /Écartés/.test(b.textContent)).click()`);
+  await s.dormir(300);
+  const ec = await s.evaluer(`[...document.querySelectorAll('.esp-liste .esp-item')].map(t => t.innerText.replace(/\\s+/g, ' '))`);
+  ok(ec.length === 2 && ec.some(t => /Indésirable/.test(t)) && ec.some(t => /Ignoré/.test(t)), `filtre « Écartés » : ${ec.join(' / ').slice(0, 120)}`);
+  await s.capturer(`${dossier}boite-detail-1440.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+if (!SAUTER.has('demandes')) {
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-demandes', densite: 1 });
+  console.log('— /espace/demandes : toutes les demandes reçues, par enseigne');
+  ok(await s.aller(base + P + '/demandes'), 'page chargée');
+  await s.dormir(600);
+  const r = await s.evaluer(`(() => ({ n: document.querySelectorAll('.esp-liste .esp-item').length, canaux: [...new Set([...document.querySelectorAll('.esp-liste .esp-pastille--contour')].map(p => p.textContent.trim()))], boites: [...document.querySelectorAll('.esp select option')].map(o => o.textContent) }))()`);
+  ok(r.n >= 15, `${r.n} demandes`);
+  ok(['Courriel', 'WhatsApp', 'Formulaire du site'].every(c => r.canaux.includes(c)), `canaux affichés : ${r.canaux.join(', ')}`);
+  ok(r.boites.length >= 4, `filtre par enseigne : ${r.boites.join(' / ')}`);
+  await s.evaluer(`(() => { const sel = document.querySelector('.esp select'); const o = [...sel.options].find(x => /atelier-bertin\\.fr/.test(x.textContent)); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(sel, o.value); sel.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+  await s.dormir(300);
+  const f = await s.evaluer(`(() => ({ lignes: [...document.querySelectorAll('.esp-liste .esp-item')].map(t => t.innerText.replace(/\\s+/g, ' ')), detail: document.querySelector('#esp-courriel').innerText.replace(/\\s+/g, ' ') }))()`);
+  ok(f.lignes.length === 1 && /devis/i.test(f.lignes[0]), `une enseigne : ${f.lignes[0]?.slice(0, 80)}`);
+  ok(/Champs du formulaire/i.test(f.detail) && /06 12 34 56 78/.test(f.detail), 'les champs du formulaire sont lus (téléphone, ville, budget)');
+  await s.capturer(`${dossier}demandes-detail-1440.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+if (!SAUTER.has('reglages')) {
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-reglages', densite: 1 });
+  console.log('— /espace/reglages : exporter le journal, tout exporter, préparer l\'effacement');
+  ok(await s.aller(base + P + '/reglages'), 'page chargée');
+  await s.dormir(500);
+  /* le contenu téléchargé se lit au passage (URL.createObjectURL) */
+  await s.evaluer(`(() => { window.__blobs = []; const o = URL.createObjectURL; URL.createObjectURL = (b) => { b.arrayBuffer().then(a => window.__blobs.push(new TextDecoder('utf-8', { ignoreBOM: true }).decode(a))); return o(b); }; })()`);
+  await s.evaluer(`[...document.querySelectorAll('.esp button')].find(b => /Exporter mon journal/.test(b.textContent)).click()`);
+  await s.dormir(800);
+  const j = await s.evaluer(`({ avis: [...document.querySelectorAll('.esp-avis')].map(a => a.textContent).join(' | '), csv: window.__blobs[0] ?? '' })`);
+  const lignesCsv = j.csv.split('\r\n').filter(Boolean);
+  ok(/journal-omega-\d{8}\.csv téléchargé : 6 lignes/.test(j.avis), `bilan : ${j.avis.slice(0, 120)}`);
+  ok(j.csv.startsWith('﻿') && /^﻿n°;survenu_le;acteur_type/.test(j.csv) && lignesCsv.length === 7 && /;"\{""commentaire""/.test(j.csv), `CSV : BOM, en-tête, 6 lignes, JSON échappé (${lignesCsv[3]?.slice(0, 90)})`);
+  await s.evaluer(`[...document.querySelectorAll('.esp button')].find(b => /Exporter toutes mes données/.test(b.textContent)).click()`);
+  await s.dormir(800);
+  const e = await s.evaluer(`({ avis: [...document.querySelectorAll('.esp-avis')].map(a => a.textContent).join(' | '), lien: [...document.querySelectorAll('.esp a')].find(a => /Télécharger l.archive/.test(a.textContent))?.getAttribute('href'), mdp: [...document.querySelectorAll('.esp .esp-mono')].map(x => x.textContent).find(t => /^[A-Za-z0-9]{4}(-[A-Za-z0-9]{4}){3}$/.test(t)), texte: document.querySelector('.esp').innerText })`);
+  ok(/Votre archive est prête\. 12 fichiers, 4,5 Mo\. 1 fichier introuvable/.test(e.avis) && !!e.lien, `export complet : ${e.avis.match(/Votre archive[^|]*/)?.[0]?.slice(0, 110)}`);
+  ok(!!e.mdp && /montré qu.une fois/.test(e.texte) && /7-Zip/.test(e.texte) && /macOS/.test(e.texte), `le mot de passe est montré une fois (${e.mdp}), avec les outils qui ouvrent l'archive`);
+  await s.evaluer(`[...document.querySelectorAll('.esp button')].find(b => /Préparer l.effacement/.test(b.textContent)).click()`);
+  await s.dormir(600);
+  ok(/Liste prête\. 1284 lignes dans 5 tables, 4 comptes et 12 fichiers/.test(await s.evaluer(`[...document.querySelectorAll('.esp-avis')].map(a => a.textContent).join(' | ')`)), 'préparation de l\'effacement : la liste, rien d\'effacé');
+  await s.capturer(`${dossier}reglages-exports-1440.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+if (!SAUTER.has('equipe')) {
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-equipe', densite: 1 });
+  console.log(`— ${P}/equipe : rôles, sociétés visibles, ajouter, retirer`);
+  ok(await s.aller(base + P + '/equipe'), 'page chargée');
+  await s.dormir(600);
+  const n0 = await s.evaluer(`document.querySelectorAll('tbody tr').length`);
+  ok(n0 === 4, `${n0} personnes`);
+  const roleYanis = `document.querySelector('select[aria-label="Rôle de Yanis Dupré"]')`;
+  await s.evaluer(`(() => { const sel = ${roleYanis}; Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(sel, 'lecteur'); sel.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+  await s.dormir(300);
+  ok(/Yanis Dupré est maintenant lecteur/.test(await s.evaluer(`[...document.querySelectorAll('[role="status"]')].map(a => a.textContent).join(' ')`)), 'changer un rôle : dit en clair');
+  await s.evaluer(`[...document.querySelectorAll('button')].find(b => b.getAttribute('aria-label') === 'Modifier les sociétés visibles par Sofia Carvalho').click()`);
+  await s.dormir(400);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] input[type="radio"]')][1].click()`);
+  await s.dormir(200);
+  ok(await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer/.test(b.textContent)).disabled`) === true, 'sans société cochée, « Enregistrer » reste gris');
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] input[type="checkbox"]')][1].click()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer/.test(b.textContent)).click()`);
+  await s.dormir(400);
+  const sofia = await s.evaluer(`[...document.querySelectorAll('tbody tr')].find(t => /Sofia/.test(t.textContent)).innerText.replace(/\\s+/g, ' ')`);
+  ok(/Grenoble/.test(sofia) && !/Toutes/.test(sofia), `périmètre : ${sofia.slice(0, 120)}`);
+  await s.evaluer(`[...document.querySelectorAll('button')].find(b => /Ajouter une personne/.test(b.textContent)).click()`);
+  await s.dormir(400);
+  const ajout = (v) => s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input[type="email"]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, ${JSON.stringify(v)}); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await ajout('pas-une-adresse');
+  await s.dormir(200);
+  ok(await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Ajouter\\s*$/.test(b.textContent)).disabled`) === true, 'adresse invalide : « Ajouter » gris');
+  await ajout('lea.martin@atelier-bertin.fr');
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Ajouter\\s*$/.test(b.textContent)).click()`);
+  await s.dormir(400);
+  ok(await s.evaluer(`document.querySelectorAll('tbody tr').length`) === 5, 'ajoutée : cinq personnes');
+  await s.evaluer(`[...document.querySelectorAll('button')].find(b => b.getAttribute('aria-label') === 'Retirer Marc Lévy').click()`);
+  await s.dormir(400);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Retirer\\s*$/.test(b.textContent)).click()`);
+  await s.dormir(400);
+  const fin = await s.evaluer(`({ n: document.querySelectorAll('tbody tr').length, moi: !document.querySelector('button[aria-label="Retirer Claire Morel"]') && !document.querySelector('select[aria-label="Rôle de Claire Morel"]') })`);
+  ok(fin.n === 4 && fin.moi, `retiré : ${fin.n} personnes ; on ne se retire pas soi-même et on ne change pas son propre rôle`);
+  await s.capturer(`${dossier}equipe-1440.jpg`, { qualite: 55 });
   s.fermer();
 }
 

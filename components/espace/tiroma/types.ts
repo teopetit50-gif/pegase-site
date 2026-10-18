@@ -277,6 +277,18 @@ export type Dossier = {
   charge: Charge | null;
   appels: RegistreAppels | null;
   pilotage: Pilotage | null;
+  rappels: Rappels | null;
+  synthese: Synthese | null;
+  reinscription: Reinscription | null;
+  absences: AbsenceProbable[] | null;
+  equipe: AbsenceEquipe[] | null;
+  demiJournees: DemiJournees | null;
+  objectifs: Objectifs | null;
+  reglesCommunes: ReglesCommunes | null;
+  soinsADeplacer: SoinsADeplacer | null;
+  seancesLongues: SeanceMalPlacee[] | null;
+  creneauxPlans: PlanCreneaux[] | null;
+  controlesDus: ControlesDus | null;
 };
 
 /* ——— le registre des appels (b3_12) ——— */
@@ -355,3 +367,190 @@ export type Pilotage = {
   };
   appels: { appels: number; rdv_pris: number };
 };
+
+/* ——— les rappels aux patients (b3_14) ——— */
+
+/** Le courriel seul : pas de SMS dans un contexte de santé (décision D6). */
+export type CanalPatient = "email";
+
+export type ContactPatient = {
+  id: string;
+  patient_id: string;
+  patient_nom: string;
+  canal: CanalPatient;
+  adresse: string;
+  rappels: boolean;
+  relances: boolean;
+  source: "oral" | "ecrit" | "formulaire";
+  cree_le: string;
+};
+
+export type EnvoiRappel = {
+  id: string;
+  type: "j2" | "plan" | "devis";
+  canal: CanalPatient;
+  mode: "essai" | "reel";
+  statut: string;
+  verrou: string | null;
+  cree_le: string;
+  envoye_le: string | null;
+  patient_nom: string;
+};
+
+export type ReponseRappel = {
+  id: string;
+  reponse: "confirme" | "annule" | "a_lire" | "autre_adresse";
+  recue_le: string;
+  rendez_vous_id: string | null;
+  debut: string | null;
+  patient_nom: string;
+};
+
+export type Rappels = {
+  reglage: { mode: "coupe" | "essai" | "reel"; essai: boolean; canaux: string[] | null } | null;
+  contacts: ContactPatient[];
+  envois: EnvoiRappel[];
+  reponses: ReponseRappel[];
+};
+
+/* ——— la synthèse de la semaine (b3_15) ——— */
+
+export type SyntheseCabinet = {
+  entite_id: string;
+  nom: string;
+  rdv: { passes: number; honores: number; manques: number; annules: number; taux_manques: number | null };
+  creneaux: { liberes: number };
+  devis: { presentes: number; signes: number; taux: number | null; montant_signe: number };
+  plans_sans_rdv: { nombre: number; montant: number };
+  appels: { appels: number; rdv_pris: number; confirmes: number };
+  rappels: { prepares: number; envoyes: number; retenus: number };
+  reinscription?: { visites: number; reinscrits: number; taux: number | null };
+  precedent?: { taux_manques: number | null; devis_signes: number | null; devis_taux: number | null; passes: number | null; reinscription_taux?: number | null };
+};
+
+export type Synthese = {
+  semaine: { du: string; au: string };
+  cabinets: SyntheseCabinet[];
+  total: {
+    passes: number; manques: number; taux_manques: number | null; creneaux_liberes: number; devis_presentes: number; devis_signes: number;
+    montant_signe: number; plans_sans_rdv: number; montant_plans_sans_rdv: number; appels: number; rdv_confirmes: number;
+    visites?: number; reinscrits?: number; reinscription_taux?: number | null;
+  };
+};
+
+/* ——— la réinscription (b3_16) ——— */
+
+export type Reinscription = {
+  periode: { du: string; au: string; jours: number };
+  visites: number;
+  reinscrits: number;
+  taux: number | null;
+  precedent: { taux: number | null; visites: number | null };
+  par_praticien: { praticien_id: string | null; nom: string | null; visites: number; reinscrits: number; taux: number | null }[];
+  sans_suite: { patient_id: string; patient_nom: string; derniere_visite: string; praticien: string | null }[];
+};
+
+/* ——— les absences probables (b3_17) ——— */
+
+export type AbsenceProbable = {
+  rendez_vous_id: string;
+  debut: string;
+  patient_id: string;
+  patient_nom: string;
+  praticien_nom: string | null;
+  fauteuil_nom: string | null;
+  score: number;
+  niveau: "fort" | "moyen" | "annonce";
+  raisons: string[];
+  annonce: boolean;
+};
+
+/* ——— assistante absente : les soins à basculer (b3_18) ——— */
+
+export type MotifAbsenceMembre = "conge" | "maladie" | "formation" | "autre";
+
+export type SoinABasculer = {
+  rendez_vous_id: string;
+  debut: string;
+  fin: string;
+  patient_nom: string;
+  soin: string | null;
+  vers: { fauteuil_id: string; fauteuil_nom: string; assistante: string }[];
+};
+
+export type AbsenceEquipe = {
+  absence_id: string;
+  membre_id: string;
+  membre: string;
+  motif: MotifAbsenceMembre;
+  debut: string;
+  fin: string;
+  fauteuil_id: string | null;
+  fauteuil_nom: string | null;
+  soins: SoinABasculer[];
+};
+
+/* ——— les demi-journées vides des praticiens (b3_19) ——— */
+
+export type DemiJourneeVide = {
+  praticien_id: string;
+  praticien: string;
+  jour: string;
+  moment: "matin" | "apres_midi";
+  source: "horaires" | "habitude";
+  ouvert_min: number;
+  prevu_min: number;
+  libre_min: number;
+  taux: number;
+  attente: number;
+};
+
+export type DemiJournees = { du: string; au: string; seuil: number | null; demi_journees: DemiJourneeVide[] };
+
+/* ——— les objectifs par fauteuil (b3_20) ——— */
+
+export type SemaineFauteuil = { lundi: string; ouvert_min: number; occupe_min: number; taux: number | null; atteint: boolean | null };
+
+export type ObjectifFauteuil = {
+  fauteuil_id: string;
+  nom: string;
+  objectif: number | null;
+  semaines: SemaineFauteuil[];
+  moyenne: number | null;
+  atteintes: number;
+  comptees: number;
+};
+
+export type Objectifs = {
+  semaines: { lundi: string; nature: "realisee" | "prevue"; en_cours: boolean }[];
+  fauteuils: ObjectifFauteuil[];
+};
+
+/* ——— les règles de priorité communes à plusieurs centres (b3_22) ——— */
+
+export type ReglesCommunes = {
+  centres: { entite_id: string; nom: string; regles: Record<string, unknown> }[];
+  ecarts: string[];
+};
+
+/* ——— les compléments du cabinet (b3_23) ——— */
+
+export type FauteuilVers = { fauteuil_id: string; fauteuil: string; taux: number | null; assistante: string | null };
+export type SoinADeplacer = { rendez_vous_id: string; debut: string; fin: string; patient_nom: string; soin: string | null; vers: FauteuilVers[] };
+export type DemiJourneeADeplacer = { jour: string; moment: "matin" | "apres_midi"; fauteuil_id: string; fauteuil: string; taux: number | null; soins: SoinADeplacer[]; libere: boolean };
+export type SoinsADeplacer = { seuil: number | null; demi_journees: DemiJourneeADeplacer[] };
+
+export type SeanceMalPlacee = {
+  rendez_vous_id: string; debut: string; fin: string; minutes: number; fauteuil: string | null;
+  praticien: string | null; patient_nom: string; soin: string | null; raisons: string[];
+};
+
+export type CreneauPlan = { debut: string; fin: string; fauteuil_id: string; fauteuil: string };
+export type PlanCreneaux = {
+  plan_id: string; patient_nom: string; devis_numero: string | null; duree_min: number; praticien: string | null;
+  seance: { rang: number; libelle: string | null; famille: string | null; duree_min: number | null; seance: number | null } | null;
+  creneaux: CreneauPlan[];
+};
+
+export type ControleDu = { patient_id: string; patient_nom: string; dernier_controle_le: string | null; derniere_venue: string | null; mois_depuis: number | null; praticien: string | null };
+export type ControlesDus = { seuil_mois: number; total: number; ne_pas_contacter: number; patients: ControleDu[] };

@@ -13,10 +13,15 @@
    portes ; en base réelle, chaque geste passe par sa porte et la base
    reste juge (son message s'affiche tel quel). Sans b4_06 sur la base,
    la carte ne s'affiche pas.
+
+   Le temps proposé (b4_12) : les audiences tenues, actes déposés et avis
+   reçus du dossier sont proposés à la saisie (temps.ts) ; « Saisir »
+   ouvre le formulaire pré-rempli, « Ignorer » ne le propose plus. Un
+   forfait se suit contre le temps prévu, avec son taux horaire effectif.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useMemo, useState } from "react";
-import { Banknote, Clock, FileSignature, ReceiptText } from "lucide-react";
+import { Banknote, Clock, FileSignature, Gauge, Printer, ReceiptText } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
@@ -24,9 +29,11 @@ import { Avis, Def, Pastille } from "../ui";
 import { dateCourte } from "../format";
 import { chiffrer, dechiffrer } from "./chiffrement";
 import { DESCRIPTIONS_TEMPS_EXEMPLE, honorairesExemple } from "./exemples";
+import FactureImprimable from "./FactureImprimable";
 import * as portes from "./portes";
 import type { Moi } from "./regles";
-import type { Convention, Dossier, Facture, Honoraires, ModeHonoraires, ModeReglement, NatureTemps, Personne, Piece, Provision, Temps } from "./types";
+import { consommationForfait, proposerTemps, type Proposition } from "./temps";
+import type { Audience, Avis as AvisRpva, Clair, Convention, Delai, Dossier, EnteteFacture, Facture, Honoraires, ModeHonoraires, ModeReglement, NatureTemps, Personne, Piece, Provision, Temps } from "./types";
 
 type Props = {
   dossier: Dossier;
@@ -39,10 +46,19 @@ type Props = {
   peutGerer: boolean;
   /* un associé du cabinet, ou celui qui gère le dossier : il note les encaissements */
   peutEncaisser: boolean;
+  /* pour la facture imprimable (b4_09) */
+  clientId: string;
+  gerant: boolean;
+  entete: EnteteFacture;
+  clair: Clair | null;
+  clientNom: string | null;
+  /* les événements du dossier dont le temps se propose (b4_12) */
+  evenements: { audiences: Audience[]; delais: Delai[]; avis: AvisRpva[] };
 };
 
 type Form =
-  | { type: "temps" }
+  | { type: "temps"; proposition?: Proposition }
+  | { type: "forfait" }
   | { type: "convention" }
   | { type: "signer"; convention: Convention }
   | { type: "provision" }
@@ -92,7 +108,7 @@ export function resumer(h: Honoraires, d: Dossier, maintenant = Date.now()) {
   };
 }
 
-export default function HonorairesTamila({ dossier: d, source, moi, personnes, pieces, cle, peutEcrire, peutGerer, peutEncaisser }: Props) {
+export default function HonorairesTamila({ dossier: d, source, moi, personnes, pieces, cle, peutEcrire, peutGerer, peutEncaisser, clientId, gerant, entete, clair, clientNom, evenements }: Props) {
   /* undefined : lecture en cours ; null : la base n'a pas les honoraires (b4_06 non posée) */
   const [h, setH] = useState<Honoraires | null | undefined>(() => (source === "exemple" ? honorairesExemple(d.id) : undefined));
   const [descriptions, setDescriptions] = useState<Record<string, string>>(() => (source === "exemple" ? DESCRIPTIONS_TEMPS_EXEMPLE : {}));
@@ -101,6 +117,7 @@ export default function HonorairesTamila({ dossier: d, source, moi, personnes, p
   const [erreur, setErreur] = useState<string | null>(null);
   const [fait, setFait] = useState<string | null>(null);
   const [tout, setTout] = useState(false);
+  const [imprimee, setImprimee] = useState<Facture | null>(null);
   const [f, setF] = useState<Record<string, string>>({});
   const champ = (k: string, defaut = "") => f[k] ?? defaut;
   const poser = (k: string, v: string) => setF((p) => ({ ...p, [k]: v }));
@@ -146,10 +163,10 @@ export default function HonorairesTamila({ dossier: d, source, moi, personnes, p
 
   const r = useMemo(() => (h ? resumer(h, d) : null), [h, d]);
 
-  const ouvrir = (x: Form) => {
+  const ouvrir = (x: Form, init: Record<string, string> = {}) => {
     setErreur(null);
     setFait(null);
-    setF({});
+    setF(init);
     setForm(x);
   };
 
@@ -175,6 +192,12 @@ export default function HonorairesTamila({ dossier: d, source, moi, personnes, p
   }
 
   const conv = h?.convention ?? null;
+  const propositions = useMemo(() => (h && peutEcrire && ["ouvert", "audit"].includes(d.statut) ? proposerTemps(evenements, h, moi?.user_id) : []), [h, peutEcrire, d.statut, evenements, moi?.user_id]);
+  const forfait = useMemo(() => (h ? consommationForfait(conv, h) : null), [h, conv]);
+  const saisirProposition = (p: Proposition) =>
+    ouvrir({ type: "temps", proposition: p }, { jour: p.jour, nature: p.nature, heures: String(Math.floor(p.minutes / 60)), minutes: String(p.minutes % 60), description: p.libelle });
+  const ignorer = (p: Proposition) =>
+    envoyer(() => portes.ecarterProposition(d.id, p.origine), (x) => ({ ...x, ecartes: [...(x.ecartes ?? []), p.origine] }), `« ${p.libelle} » ne vous sera plus proposé.`);
   const tempsVisibles = h ? h.temps.filter((t) => t.statut !== "annule").slice(0, tout ? undefined : 6) : [];
   const nbTemps = h ? h.temps.filter((t) => t.statut !== "annule").length : 0;
 
@@ -189,12 +212,28 @@ export default function HonorairesTamila({ dossier: d, source, moi, personnes, p
     if (jour > aujourdhui()) return setErreur("Le jour est passé ou du jour.");
     if (texte && source === "reelle" && !cle) return setErreur("La clé du dossier est nécessaire pour chiffrer la description.");
     const id = crypto.randomUUID();
+    const origine = form?.type === "temps" ? (form.proposition?.origine ?? null) : null;
     await envoyer(
-      async () => portes.saisirTemps(d.id, jour, minutes, nature, texte && cle ? await chiffrer(cle, texte) : null, facturable),
-      (x) => ({ ...x, temps: [{ id, client_id: d.client_id, dossier_id: d.id, user_id: moi?.user_id ?? "", jour, minutes, nature, description_chiffree: texte ? "\\x01" : null, facturable, statut: "saisi", facture_id: null, cree_le: new Date().toISOString() }, ...x.temps] }),
+      async () => {
+        const description = texte && cle ? await chiffrer(cle, texte) : null;
+        return origine ? portes.saisirTempsPropose(d.id, origine, jour, minutes, nature, description, facturable) : portes.saisirTemps(d.id, jour, minutes, nature, description, facturable);
+      },
+      (x) => ({ ...x, temps: [{ id, client_id: d.client_id, dossier_id: d.id, user_id: moi?.user_id ?? "", jour, minutes, nature, description_chiffree: texte ? "\\x01" : null, facturable, statut: "saisi", facture_id: null, cree_le: new Date().toISOString(), origine }, ...x.temps] }),
       `${duree(minutes)} de ${NATURES_TEMPS[nature].toLowerCase()} saisies au ${dateCourte(jour)}.`,
     );
     if (texte && source === "exemple") setDescriptions((p) => ({ ...p, [id]: texte }));
+  };
+
+  const soumettreForfait = async () => {
+    const t = champ("heures_prevues").trim().replace(",", ".");
+    const heures = t ? parseFloat(t) : NaN;
+    if (!Number.isFinite(heures) || heures < 0.25 || heures > 2000) return setErreur("Un temps prévu de 15 minutes à 2 000 heures.");
+    const minutes = Math.round(heures * 60);
+    await envoyer(
+      () => portes.prevoirForfait(d.id, minutes),
+      (x) => ({ ...x, convention: x.convention ? { ...x.convention, minutes_prevues: minutes } : x.convention, conventions: x.conventions.map((c) => (c.id === x.convention?.id ? { ...c, minutes_prevues: minutes } : c)) }),
+      `Forfait prévu pour ${duree(minutes)} : le temps passé se compte contre ce prévu.`,
+    );
   };
 
   const soumettreConvention = async () => {
@@ -337,7 +376,7 @@ export default function HonorairesTamila({ dossier: d, source, moi, personnes, p
   if (h === null) return null;
 
   const titre: Record<NonNullable<Form>["type"], string> = {
-    temps: "Saisir du temps passé", convention: "La convention d'honoraires", signer: "Enregistrer la signature", provision: "Demander une provision",
+    temps: "Saisir du temps passé", forfait: "Le temps prévu au forfait", convention: "La convention d'honoraires", signer: "Enregistrer la signature", provision: "Demander une provision",
     recue: "Provision reçue", facturer: "Émettre une facture", payee: "Facture payée", annuler_facture: "Annuler une facture",
   };
 
@@ -391,6 +430,45 @@ export default function HonorairesTamila({ dossier: d, source, moi, personnes, p
               )}
             </div>
 
+            {forfait ? (
+              <div className="tam-ligne tam-forfait">
+                <div className="tam-ligne-haut">
+                  <span className="tam-ligne-titre"><Gauge width={14} height={14} aria-hidden="true" /> Forfait consommé</span>
+                  {forfait.pct !== null ? <Pastille teinte={forfait.teinte}>{forfait.pct} % du temps prévu</Pastille> : <Pastille teinte="gris">Temps prévu non posé</Pastille>}
+                </div>
+                {forfait.pct !== null ? (
+                  <div className="tam-jauge" role="meter" aria-label="Forfait consommé" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.min(forfait.pct, 100)} aria-valuetext={`${forfait.pct} %`} data-teinte={forfait.teinte}>
+                    <span style={{ width: `${Math.min(forfait.pct, 100)}%` }} />
+                  </div>
+                ) : null}
+                <div className="tam-ligne-meta">
+                  <span>{duree(forfait.minutes)} passées{forfait.prevues ? ` sur ${duree(forfait.prevues)} prévues` : ""}</span>
+                  {forfait.tauxEffectifCents ? <span>soit {euros(forfait.tauxEffectifCents)} HT de l&apos;heure</span> : null}
+                  {peutGerer ? <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "forfait" }, { heures_prevues: forfait.prevues ? String(forfait.prevues / 60).replace(".", ",") : "" })}>{forfait.prevues ? "Modifier le temps prévu" : "Prévoir le temps du forfait"}</button> : null}
+                </div>
+                {forfait.pct !== null && forfait.pct >= 100 ? <Avis teinte="rouge">Le forfait est dépassé : le temps passé n&apos;est plus payé. Un avenant à la convention se propose au client (loi du 31/12/1971, art. 10).</Avis> : forfait.pct !== null && forfait.pct >= 80 ? <Avis teinte="ambre">Plus de 80 % du temps prévu est passé : le moment d&apos;en parler au client.</Avis> : null}
+              </div>
+            ) : null}
+
+            {propositions.length ? (
+              <div className="tam-propositions" role="group" aria-label="Temps proposé à la saisie">
+                <h3 className="tam-sous-titre">Proposé à la saisie <span className="esp-kpi-sous">· tiré du dossier, à corriger avant d&apos;enregistrer</span></h3>
+                {propositions.slice(0, 5).map((p) => (
+                  <div key={p.origine} className="tam-ligne">
+                    <div className="tam-ligne-haut">
+                      <span className="tam-ligne-titre">{p.libelle}</span>
+                      <Pastille teinte="bleu" contour>{duree(p.minutes)} · {NATURES_TEMPS[p.nature].toLowerCase()}</Pastille>
+                    </div>
+                    <div className="tam-ligne-meta">
+                      <span>{dateCourte(p.jour)}</span>
+                      <button type="button" className="esp-lien-bouton" onClick={() => saisirProposition(p)}>Saisir</button>
+                      <button type="button" className="esp-lien-bouton" disabled={envoi} onClick={() => void ignorer(p)}>Ignorer</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+
             <h3 className="tam-sous-titre">Temps passé</h3>
             {tempsVisibles.length === 0 ? <p className="esp-kpi-sous">Aucun temps saisi. Chacun saisit le sien ; la description est chiffrée avec la clé du dossier.</p> : tempsVisibles.map((t) => (
               <div key={t.id} className="tam-ligne">
@@ -433,6 +511,7 @@ export default function HonorairesTamila({ dossier: d, source, moi, personnes, p
                 <div className="tam-ligne-meta">
                   <span>Émise le {dateCourte(fa.emise_le)}</span>
                   <span>{duree(fa.minutes)} · honoraires {euros(fa.total_ht_cents)} HT · TVA {euros(fa.tva_cents)}{fa.debours_cents ? ` · déboursés ${euros(fa.debours_cents)}` : ""}{fa.provisions_imputees_cents ? ` · provisions ${euros(fa.provisions_imputees_cents)}` : ""}</span>
+                  {fa.statut !== "annulee" ? <button type="button" className="esp-lien-bouton" onClick={() => setImprimee(fa)}><Printer width={12} height={12} aria-hidden="true" /> Imprimer</button> : null}
                   {fa.statut === "emise" && peutEncaisser ? <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "payee", facture: fa })}>Payée</button> : null}
                   {fa.statut === "emise" && peutGerer ? <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "annuler_facture", facture: fa })}>Annuler</button> : null}
                 </div>
@@ -442,15 +521,33 @@ export default function HonorairesTamila({ dossier: d, source, moi, personnes, p
         )}
       </div>
 
+      {imprimee && h ? (
+        <FactureImprimable
+          ouvert
+          onFermer={() => setImprimee(null)}
+          source={source}
+          clientId={clientId}
+          facture={imprimee}
+          convention={h.conventions.find((c) => c.statut !== "resiliee") ?? h.conventions[0] ?? null}
+          temps={h.temps.filter((t) => t.facture_id === imprimee.id)}
+          descriptions={descriptions}
+          entete={entete}
+          clientNom={clientNom}
+          dossier={clair ? { reference: clair.reference, intitule: clair.intitule } : null}
+          gerant={gerant}
+        />
+      ) : null}
+
       <Dialog open={!!form} onOpenChange={(o) => !o && setForm(null)}>
         <DialogContent>
           {form ? (
             <>
               <DialogHeader>
-                <DialogIcone>{form.type === "temps" ? <Clock width={18} height={18} aria-hidden="true" /> : form.type === "convention" || form.type === "signer" ? <FileSignature width={18} height={18} aria-hidden="true" /> : form.type === "facturer" || form.type === "annuler_facture" ? <ReceiptText width={18} height={18} aria-hidden="true" /> : <Banknote width={18} height={18} aria-hidden="true" />}</DialogIcone>
+                <DialogIcone>{form.type === "temps" ? <Clock width={18} height={18} aria-hidden="true" /> : form.type === "forfait" ? <Gauge width={18} height={18} aria-hidden="true" /> : form.type === "convention" || form.type === "signer" ? <FileSignature width={18} height={18} aria-hidden="true" /> : form.type === "facturer" || form.type === "annuler_facture" ? <ReceiptText width={18} height={18} aria-hidden="true" /> : <Banknote width={18} height={18} aria-hidden="true" />}</DialogIcone>
                 <DialogTitle>{titre[form.type]}</DialogTitle>
                 <DialogDescription>
-                  {form.type === "temps" ? "Votre temps, au jour où vous l'avez passé. La description est chiffrée dans votre navigateur avec la clé du dossier." : null}
+                  {form.type === "temps" ? (form.proposition ? `Proposé d'après le dossier (${form.proposition.libelle}) : corrigez la durée, la nature et la description avant d'enregistrer. La description est chiffrée dans votre navigateur.` : "Votre temps, au jour où vous l'avez passé. La description est chiffrée dans votre navigateur avec la clé du dossier.") : null}
+                  {form.type === "forfait" ? "Le temps que le forfait est censé couvrir. Tout le temps saisi au dossier, par chacun, se compte contre lui." : null}
                   {form.type === "convention" ? "Écrite et signée sauf urgence (loi du 31/12/1971, art. 10). Une nouvelle convention remplace la précédente, qui reste au dossier." : null}
                   {form.type === "signer" ? "La date de signature, et l'exemplaire signé s'il est déposé parmi les pièces du dossier." : null}
                   {form.type === "provision" ? "Une provision sur honoraires, imputée sur la prochaine facture une fois reçue." : null}
@@ -475,6 +572,9 @@ export default function HonorairesTamila({ dossier: d, source, moi, personnes, p
                       <label className="rv-libelle">Ce qui a été fait<textarea className="rv-champ" rows={2} value={champ("description")} onChange={(e) => poser("description", e.target.value)} /></label>
                       <label className="rv-libelle">Facturable<select className="rv-champ" value={champ("facturable", "oui")} onChange={(e) => poser("facturable", e.target.value)}><option value="oui">Oui</option><option value="non">Non (temps interne)</option></select></label>
                     </>
+                  ) : null}
+                  {form.type === "forfait" ? (
+                    <label className="rv-libelle">Temps prévu (heures)<input className="rv-champ" inputMode="decimal" value={champ("heures_prevues")} onChange={(e) => poser("heures_prevues", e.target.value)} /></label>
                   ) : null}
                   {form.type === "convention" ? (
                     <>
@@ -536,6 +636,7 @@ export default function HonorairesTamila({ dossier: d, source, moi, personnes, p
                   disabled={envoi}
                   onClick={() => {
                     if (form.type === "temps") void soumettreTemps();
+                    else if (form.type === "forfait") void soumettreForfait();
                     else if (form.type === "convention") void soumettreConvention();
                     else if (form.type === "signer") void soumettreSignature(form.convention);
                     else if (form.type === "provision") void soumettreProvision();
@@ -546,7 +647,7 @@ export default function HonorairesTamila({ dossier: d, source, moi, personnes, p
                   }}
                 >
                   {envoi ? <Loader variant="spin" /> : null}{" "}
-                  {form.type === "temps" ? "Saisir" : form.type === "convention" ? "Poser la convention" : form.type === "signer" ? "Enregistrer" : form.type === "provision" ? "Demander" : form.type === "recue" ? "Noter reçue" : form.type === "facturer" ? (champ("definitif", "non") === "oui" ? "Émettre le compte définitif" : "Émettre la facture") : form.type === "payee" ? "Noter payée" : "Annuler la facture"}
+                  {form.type === "temps" ? "Saisir" : form.type === "forfait" ? "Enregistrer" : form.type === "convention" ? "Poser la convention" : form.type === "signer" ? "Enregistrer" : form.type === "provision" ? "Demander" : form.type === "recue" ? "Noter reçue" : form.type === "facturer" ? (champ("definitif", "non") === "oui" ? "Émettre le compte définitif" : "Émettre la facture") : form.type === "payee" ? "Noter payée" : "Annuler la facture"}
                 </button>
               </DialogFooter>
             </>

@@ -14,9 +14,14 @@
 
    La vigilance LCB-FT (CMF art. L.561-3) : le dossier est-il assujetti,
    le client et le bénéficiaire effectif sont-ils identifiés, quel risque.
+
+   Le contrôle AUTOMATIQUE (06/10, demande du coordinateur) : dès qu'un
+   client ou un adversaire entre au dossier, il est indexé et contrôlé
+   sans geste, si la clé d'index s'ouvre ; un conflit s'affiche aussitôt.
+   Les parties jamais indexées sont signalées.
    ══════════════════════════════════════════════════════════════════════ */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ScanSearch, ShieldCheck } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
@@ -114,6 +119,9 @@ export default function ConformiteTamila({ dossier: d, source, clientId, parties
   const [f, setF] = useState<Record<string, string>>({});
   const champ = (k: string, defaut = "") => f[k] ?? defaut;
   const poser = (k: string, v: string) => setF((p) => ({ ...p, [k]: v }));
+  /* les parties présentes à l'ouverture de la carte : seules les suivantes se contrôlent d'elles-mêmes */
+  const vues = useRef<Set<string> | null>(null);
+  if (vues.current === null) vues.current = new Set(parties.map((p) => p.id));
 
   useEffect(() => {
     if (source !== "reelle") return;
@@ -127,8 +135,6 @@ export default function ConformiteTamila({ dossier: d, source, clientId, parties
       window.clearTimeout(t);
     };
   }, [source, d.id]);
-
-  if (conf === null) return null;
 
   const relire = async () => setConf(await portes.conformite(d.id));
   const aControler = parties.filter((p) => (p.qualite === "client" || p.qualite === "adverse") && partiesClair[p.id]?.nom);
@@ -167,15 +173,16 @@ export default function ConformiteTamila({ dossier: d, source, clientId, parties
     }, "La clé d'index du cabinet est créée : les parties peuvent être indexées et contrôlées.");
 
   /* ——— le contrôle : indexer les parties du dossier, puis les comparer à tout le cabinet ——— */
-  const controler = () =>
+  const controler = () => controlerParties(aControler, false);
+  const controlerParties = (liste: Partie[], auto: boolean) =>
     geste(async () => {
       const sortie: Resultat[] = [];
       if (source === "exemple") {
         await new Promise((r) => setTimeout(r, 400));
-        for (const p of aControler) sortie.push({ partie: p, nom: partiesClair[p.id].nom, controle: controleExemple(d.id, p, partiesClair[p.id].nom), decision: null });
+        for (const p of liste) sortie.push({ partie: p, nom: partiesClair[p.id].nom, controle: controleExemple(d.id, p, partiesClair[p.id].nom), decision: null });
       } else {
         const cle = await obtenirCleIndex(clientId);
-        for (const p of aControler) {
+        for (const p of liste) {
           const nom = partiesClair[p.id].nom;
           const empreintes = await empreintesDe(cle, nom);
           if (!empreintes.length) continue;
@@ -184,12 +191,33 @@ export default function ConformiteTamila({ dossier: d, source, clientId, parties
         }
         await relire();
       }
-      setResultats(sortie);
+      setResultats((avant) => (auto && avant ? [...sortie, ...avant.filter((x) => !sortie.some((y) => y.partie.id === x.partie.id))] : sortie));
       if (source === "exemple") {
         const conflits = sortie.reduce((s, r) => s + r.controle.conflits, 0);
-        setConf((c) => (c ? { ...c, controles: c.controles + sortie.length, conflits_sans_decision: conflits, dernier_controle: { le: new Date().toISOString(), correspondances: sortie.reduce((s, r) => s + r.controle.correspondances, 0), conflits, decision: null } } : c));
+        setConf((c) => (c ? { ...c, controles: c.controles + sortie.length, parties: c.parties + (auto ? sortie.length : 0), parties_indexees: c.parties_indexees + (auto ? sortie.length : 0), conflits_sans_decision: auto ? c.conflits_sans_decision + conflits : conflits, dernier_controle: { le: new Date().toISOString(), correspondances: sortie.reduce((s, r) => s + r.controle.correspondances, 0), conflits, decision: null } } : c));
       }
-    }, "Contrôle fait : chaque partie a été comparée à tous les dossiers du cabinet, sans qu'aucun nom ne quitte votre navigateur.");
+      if (auto) {
+        const conflits = sortie.reduce((s, r) => s + r.controle.conflits, 0);
+        const noms = sortie.map((r) => `« ${r.nom} »`).join(", ");
+        if (conflits) throw new Error(`Contrôle automatique de ${noms} : ${conflits} conflit${conflits > 1 ? "s" : ""} d'intérêts. Avant d'aller plus loin, levez-le (accord écrit des clients) ou refusez le dossier (RIN art. 4).`);
+      }
+    }, auto ? "Nouvelle partie contrôlée d'elle-même : aucun conflit d'intérêts dans le cabinet, anciens dossiers compris." : "Contrôle fait : chaque partie a été comparée à tous les dossiers du cabinet, sans qu'aucun nom ne quitte votre navigateur.");
+
+  /* ——— le contrôle automatique d'une partie qui vient d'entrer ——— */
+  useEffect(() => {
+    if (!conf?.index || envoi) return;
+    const nouvelles = aControler.filter((p) => !vues.current?.has(p.id));
+    if (!nouvelles.length) return;
+    const t = window.setTimeout(() => {
+      for (const p of nouvelles) vues.current?.add(p.id);
+      void controlerParties(nouvelles, true);
+    }, 0);
+    return () => window.clearTimeout(t);
+  });
+  /* les parties retirées de la vue, ou illisibles, ne se contrôlent pas ; elles restent signalées ci-dessous */
+  const jamaisIndexees = conf ? Math.max(0, conf.parties - conf.parties_indexees) : 0;
+
+  if (conf === null) return null;
 
   const decider = (r: Resultat) =>
     geste(async () => {
@@ -258,6 +286,9 @@ export default function ConformiteTamila({ dossier: d, source, clientId, parties
             ) : null}
             {conf.conflits_sans_decision ? (
               <Avis teinte="rouge" role="alert"><strong>{conf.conflits_sans_decision} conflit{conf.conflits_sans_decision > 1 ? "s" : ""} sans décision.</strong> Avant d&apos;accepter le dossier, levez-le (accord écrit des clients) ou refusez le dossier (RIN art. 4).</Avis>
+            ) : null}
+            {conf.index && jamaisIndexees ? (
+              <Avis teinte="ambre">{jamaisIndexees} partie{jamaisIndexees > 1 ? "s" : ""} de ce dossier n&apos;{jamaisIndexees > 1 ? "ont" : "a"} jamais été contrôlée{jamaisIndexees > 1 ? "s" : ""}{nomsLisibles ? " : « Contrôler les conflits » les indexe et les compare." : " : ouvrez la clé du dossier pour les contrôler."}</Avis>
             ) : null}
             {conf.vigilance_a_faire ? (
               <Avis teinte="ambre">{!v ? "La vigilance LCB-FT n'est pas posée : dites si le dossier est assujetti (CMF art. L.561-3)." : "Dossier assujetti : identifiez le client et le bénéficiaire effectif, et notez le niveau de risque."}</Avis>

@@ -261,6 +261,26 @@ export type Reglages = {
   conservation_audit_jours: number;
   conservation_exports_jours: number;
   maj_le: string;
+  /* b4_09 : l'en-tête des factures du cabinet (absent avant la pose) */
+  facture_entete?: EnteteFacture;
+};
+
+/* L'en-tête des factures du cabinet (b4_09) : ses mentions publiques, les mêmes pour toutes ses factures. */
+export type EnteteFacture = {
+  nom?: string;
+  forme?: string;
+  adresse?: string;
+  code_postal_ville?: string;
+  siren?: string;
+  tva_intracom?: string;
+  barreau?: string;
+  toque?: string;
+  telephone?: string;
+  courriel?: string;
+  iban?: string;
+  bic?: string;
+  delai_paiement_jours?: number;
+  mention_tva?: string;
 };
 
 export type RegleProcedure = {
@@ -356,6 +376,8 @@ export type Convention = {
   cree_par: string | null;
   cree_le: string;
   resiliee_le: string | null;
+  /* le temps prévu au forfait, en minutes (b4_12) */
+  minutes_prevues?: number | null;
 };
 
 export type Temps = {
@@ -372,6 +394,8 @@ export type Temps = {
   statut: "saisi" | "facture" | "annule";
   facture_id: string | null;
   cree_le: string;
+  /* l'événement du dossier dont ce temps a été proposé (b4_12) : « audience:<id> », « acte:<id> », « avis:<id> » */
+  origine?: string | null;
 };
 
 export type Provision = {
@@ -420,6 +444,8 @@ export type Honoraires = {
   temps: Temps[];
   provisions: Provision[];
   factures: Facture[];
+  /* les propositions de temps que je ne veux plus voir (b4_12) */
+  ecartes?: string[];
 };
 
 /* ——— conflits d'intérêts et vigilance LCB-FT (b4_07, 06/10/2026) ——— */
@@ -455,3 +481,38 @@ export type Conformite = {
 /* Une correspondance rendue par tamila_controler_conflits. */
 export type Trouve = { dossier: string | null; qualite: QualitePartie; statut: string | null; nature: "conflit" | "meme_cote" | "information" };
 export type ControleConflits = { controle: string; correspondances: number; conflits: number; hors_vue: number; trouves: Trouve[] };
+
+/* ——— l'expertise d'un dossier (b4_16, 06/10/2026) : des dates, aucun nom ——— */
+export type Expertise = {
+  id: string;
+  client_id: string;
+  dossier_id: string;
+  mission: "judiciaire" | "amiable";
+  statut: "en_cours" | "deposee" | "abandonnee";
+  ordonnee_le: string | null;
+  consignation_avant: string | null;
+  consignation_versee_le: string | null;
+  premiere_reunion_le: string | null;
+  pre_rapport_attendu_le: string | null;
+  pre_rapport_recu_le: string | null;
+  dires_jusqu_au: string | null;
+  dires_deposes_le: string | null;
+  rapport_attendu_le: string | null;
+  rapport_recu_le: string | null;
+  cree_le: string;
+};
+
+/* ——— une pièce attendue du client, du confrère ou d'un tiers (b4_18, 11/10/2026) : l'objet est chiffré ——— */
+export type Attente = {
+  id: string;
+  client_id: string;
+  dossier_id: string;
+  de: "client" | "confrere" | "tiers";
+  objet_chiffre: string;
+  demandee_le: string;
+  relance_le: string | null;
+  relances: number;
+  recue_le: string | null;
+  statut: "attendue" | "recue" | "abandonnee";
+  cree_le: string;
+};

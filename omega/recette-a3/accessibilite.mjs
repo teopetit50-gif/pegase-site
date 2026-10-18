@@ -10,24 +10,29 @@ import { createRequire } from 'node:module';
 import { ouvrirSession } from '../../outils/chrome.mjs';
 
 const base = process.argv[2] ?? 'http://localhost:3010';
+/* le préfixe de l'espace : /espace (défaut) ou /espace2 (le tableau de bord de C1) */
+const P = (process.env.PREFIXE ?? '/espace').replace(/\/$/, '');
 const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
 let echecs = 0;
 const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) echecs++; };
 
 const ECRANS = [
-  ['validations', '/espace/validations', `[...document.querySelectorAll('.esp-actions .r-btn')].find(b => /^\\s*Approuver/.test(b.textContent))?.click()`],
-  ['filed', '/espace/filed', `[...document.querySelectorAll('#esp-dossier .r-btn')].find(b => /Confirmer ce fournisseur/.test(b.textContent))?.click()`],
-  ['fournisseurs', '/espace/filed/fournisseurs', `[...document.querySelectorAll('#esp-fournisseur .r-btn')].find(b => /Proposer un IBAN/.test(b.textContent))?.click()`],
-  ['a-payer', '/espace/filed/a-payer', `[...document.querySelectorAll('.esp-a-payer .r-btn')].find(b => /Noter un paiement/.test(b.textContent))?.click()`],
-  ['comptabilite', '/espace/filed/comptabilite', `[...document.querySelectorAll('.esp button')].find(b => /^Modifier le compte/.test(b.getAttribute('aria-label') ?? ''))?.click()`],
-  ['filed-electronique', '/espace/filed?objet=facture:R2026-000014', `[...document.querySelectorAll('#esp-dossier .r-btn')].find(b => /Ouvrir un litige/.test(b.textContent))?.click()`],
-  ['point', '/espace/point', null],
+  ['validations', P + '/validations', `[...document.querySelectorAll('.esp-actions .r-btn')].find(b => /^\\s*Approuver/.test(b.textContent))?.click()`],
+  ['filed', P + '/filed', `[...document.querySelectorAll('#esp-dossier .r-btn')].find(b => /Confirmer ce fournisseur/.test(b.textContent))?.click()`],
+  ['fournisseurs', P + '/filed/fournisseurs', `[...document.querySelectorAll('#esp-fournisseur .r-btn')].find(b => /Proposer un IBAN/.test(b.textContent))?.click()`],
+  ['a-payer', P + '/filed/a-payer', `[...document.querySelectorAll('button')].find(b => /Noter un paiement/.test((b.getAttribute('aria-label') ?? '') + ' ' + b.textContent))?.click()`],
+  ['comptabilite', P + '/filed/comptabilite', `[...document.querySelectorAll('.esp button')].find(b => /^Modifier le compte/.test(b.getAttribute('aria-label') ?? ''))?.click()`],
+  ['filed-electronique', P + '/filed?objet=facture:R2026-000014', `[...document.querySelectorAll('#esp-dossier .r-btn')].find(b => /Ouvrir un litige/.test(b.textContent))?.click()`],
+  ['boite', P + '/filed/boite', null],
+  ['demandes', P + '/demandes', null],
+  ['reglages', P + '/reglages', null],
+  ['point', P + '/point', null],
 ];
 
 /* une zone qui défile (horizontalement ou verticalement) doit se rejoindre au
    clavier : elle a tabIndex ≥ 0 (et alors un rôle et un nom), ou contient un
    élément focalisable — ce que mesure aussi axe (scrollable-region-focusable) */
-const DEFILANTES = `(() => [...document.querySelectorAll('.esp *')].filter(e => {
+const DEFILANTES = `(() => [...(document.querySelector('.esp') ?? document.querySelector('main') ?? document.body).querySelectorAll('*')].filter(e => {
   const st = getComputedStyle(e);
   const defile = (/(auto|scroll)/.test(st.overflowX) && e.scrollWidth > e.clientWidth + 1) || (/(auto|scroll)/.test(st.overflowY) && e.scrollHeight > e.clientHeight + 1);
   if (!defile) return false;
@@ -37,7 +42,7 @@ const DEFILANTES = `(() => [...document.querySelectorAll('.esp *')].filter(e => 
 }).map(e => e.tagName + '.' + [...e.classList].join('.')))()`;
 
 const analyser = (s, cible) => s.evaluer(`(async () => {
-  const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+  const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'], rules: { 'label-content-name-mismatch': { enabled: true } } });
   return r.violations.map(v => ({ id: v.id, impact: v.impact, n: v.nodes.length, aide: v.help, cibles: v.nodes.slice(0, 3).map(n => n.target.join(' ')) }));
 })()`);
 
@@ -54,7 +59,9 @@ for (const [nom, chemin, ouvrir] of ECRANS) {
     await s.aller(base + chemin);
     await s.dormir(800);
     await s.evaluer(axe + ';true');
-    dire(`${nom} ${largeur}`, await analyser(s, `document.querySelector('.esp')`));
+    /* la zone de l'écran : .esp (/espace), sinon main (un écran réécrit pour /espace2) */
+    if (!(await s.evaluer(`!!document.querySelector('h1')`))) { ok(false, `${nom} ${largeur} : écran absent (pas de titre)`); s.fermer(); continue; }
+    dire(`${nom} ${largeur}`, await analyser(s, `(document.querySelector('.esp') ?? document.querySelector('main') ?? document.body)`));
     if (largeur === 390) { const d = await s.evaluer(DEFILANTES); ok(d.length === 0, `${nom} 390 : zones qui défilent atteignables au clavier${d.length ? ' — sauf ' + d.join(', ') : ''}`); }
     if (ouvrir) {
       /* comme au clavier : le bouton a le focus quand on l'active */

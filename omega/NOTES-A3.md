@@ -2,6 +2,23 @@
 
 Branche `worker-a3`. Dernière mise à jour : 06/10/2026, 03 h 50 Paris (reprise par la session Opus 5.5 `session_01Npbh1aR6LoEX7PZDchMSca`, à la suite de `session_01DdgwRadkJFx5u9buwh5crS`).
 
+## REPRISE (pause demandée par Teo, 06/10 21 h Z)
+
+**Fait, poussé sur worker-a3** (tête = ce commit de notes, au-dessus de fa23419) :
+- Fusionné dans main par le coordinateur : facture électronique + Comptabilité/FEC (5091088), boîte FILED (fd6df00), Demandes reçues + Réglages (journal CSV, export complet, aperçu d'effacement) + marquer une réception (fed6368).
+- **À fusionner** : 0295d85 (onglets REPUT et CASHD dans ECRANS ; libellés longs à 2240 px, treize onglets) ; d418e0a et fa23419 (scripts de recette : PREFIXE / CAPTURES / SAUTER, sélecteurs neutres pour « À payer » et la boucle des largeurs). Recette /espace et /espace2 (09a02c7) : tout passe ; accessibilité : tout passe ; non-régression : tout est là. Rien n'est en ligne : quota Vercel.
+- Aucun fichier du site public touché.
+
+**Attend le coordinateur / A5** :
+- export-complet sur la recette : la fonction appelle public.exporter_client (404, la porte n'existe pas sous ce nom) ; origine http://localhost:3010 à autoriser sur la recette pour relire le bouton de bout en bout.
+- OFFLOAD dans ECRANS : oui ou non (dit « plus tard »).
+
+**Attend Teo** : rien de mon côté.
+
+**Pas commencé** : le chiffrage omega/CHIFFRAGE/espace.md (demandé à 18 h 26 Z). Relevé déjà fait, à reprendre : ce site n'a ni page de connexion (l'espace renvoie au « cockpit », application à part ; /auth/confirm redirige vers /compte, absent ici) ni écran d'invitation (la porte rattacher_membre existe, aucun écran ne l'appelle) ni écran des rôles (la politique UPDATE de comptes le permet) ; tout ce qui est livré l'est sur la recette (aucune preuve avec un vrai compte client en production).
+
+**Prochaine étape exacte** : écrire omega/CHIFFRAGE/espace.md (synthèse 6 lignes ; connexion, installation, invitation, rôles, validations, réglages, export, effacement, mobile, accessibilité ; chaque promesse du site sur l'espace client avec état A/B/C/D/T, manque, jours actuel→B et B→A), en relevant les promesses dans lib/produits/**, app/vos-donnees, app/tarifs, app/installation et CAPACITES-A-VALIDER.md ; puis le SHA au coordinateur.
+
 ## Fait
 
 Trois écrans pour une personne connectée, sur la charte du site (monde
@@ -569,6 +586,100 @@ Dans `/espace/filed` seulement, la coquille et la barre ne bougent pas.
   d'autre écrit (le litige n'a pas été ouvert ; l'export s'inscrit au journal).
   « Corriger » reste actif sur R2026-000005 : certains champs n'y viennent pas
   du xml — conforme.
+
+## Lot du 06/10 (14) — point avec C1, puis la boîte de réception de FILED
+
+- **C1** (session_013U6ss7Vw2rKrDY5C7ax656) a reçu la liste de mes écrans, des
+  enchaînements de `recette-espace.mjs`, des relectures et des pièges connus,
+  et la commande pour jouer `non-regression.mjs` contre `/espace2`.
+- **Nouvelle page `/espace/filed/boite` « Boîte de réception »** (lien en tête
+  de FILED) : les courriels de `public.receptions` (canal email, module
+  filed), lecture seule sous la politique du périmètre. L'adresse de la boîte
+  (expediteurs, gérant/admin ; sinon la boîte des réceptions) avec « Copier
+  l'adresse » ; compteurs Nouveaux / Lus / Traités / Écartés (filtres) ;
+  recherche ; détail : De / À / Reçu le, pièces jointes (lien signé
+  `omega-clients`), « Devenue le document R… » par rapprochement (source
+  courriel + même expéditeur + même nom + ±2 jours, faute de lien en base),
+  pièces écartées (`detail.pieces_ignorees`), texte du message (jamais le
+  HTML). Le titre n'est pas « Documents reçus » : c'est déjà le h1 de
+  `/espace/filed` (les documents numérotés) ; la boîte montre les courriels
+  d'où ils viennent.
+- Aucune porte ne change le statut d'une réception côté client : la page ne
+  marque rien (ni « lu », ni « indésirable »). À demander si on le veut.
+- Recette : + boîte aux 5 largeurs et un enchaînement (adresse, 13 courriels,
+  pièce → R2026-000014, pièce écartée, filtre Écartés) ; accessibilité tout
+  passe ; non-régression 433/433 (écran `boite` nouveau, lien depuis `filed`).
+- Base réelle (`relecture-boite.mjs`, gérant et daf2) : boîte
+  factures@essai.omegaai.fr, 1 courriel « Facture 123 » (réception d'essai
+  id 1), Nouveau, sans pièce, texte lu. Rien écrit.
+
+## Lot du 06/10 (15) — Demandes reçues, Réglages (journal CSV, export complet, sortie), marquer une réception
+
+Audit des promesses § 0 et § 1, accord du coordinateur pour `ecrans.ts`.
+- **Onglets** : « Demandes reçues » (`demandes`) et « Réglages » (`reglages`)
+  à droite de Point. Avec onze onglets, les libellés longs ne passent plus à
+  1700 px : ils s'affichent à partir de 1920 px (espace.css), en dessous les
+  libellés courts. REPUT / CASHD : pas encore dans main, ajoutés quand ils
+  seront fusionnés.
+- **/espace/demandes** : `EcranBoite portee="toutes"` — toutes les réceptions,
+  tous canaux, SAUF le module tiroma (données de santé) ; filtre « Enseigne
+  (boîte) » ; pastille du canal ; champs d'un formulaire (`detail`, sans les
+  clés techniques).
+- **Marquer** (boîte FILED et demandes) : « Marquer comme lu », « Écarter »,
+  « Remettre en nouveau » → `reception_marquer` (socle 19am). Rien pour une
+  réception traitée ou indésirable.
+- **/espace/reglages** :
+  - « Exporter mon journal (CSV) » : `journal_opposable` par pages de 1 000,
+    CSV `;` UTF-8 avec BOM, CRLF, empreintes en hexadécimal (gérant/admin) ;
+  - « Exporter toutes mes données » : fonction Edge `export-complet` (A5,
+    19aj) par `functions.invoke` avec le jeton de la personne ; lien 24 h,
+    mot de passe montré une fois (copier), avertissement AES-256 / macOS
+    (7-Zip, Keka, WinRAR), fichiers manquants, SHA-256 ;
+  - « Préparer l'effacement » : `apercu_effacement` (19am) — lignes, tables,
+    comptes, fichiers ; rien n'est effacé.
+- Recette : + demandes et réglages aux 5 largeurs, enchaînements (enseigne,
+  champs de formulaire ; marquer lu/écarter ; CSV lu octet par octet, BOM
+  compris ; export complet et mot de passe ; aperçu) : tout passe ;
+  accessibilité : tout passe ; non-régression 468/468.
+- **Base réelle** (gérant) : demandes 1 (aucune tiroma), 3 boîtes ; marquer
+  lu puis remettre en nouveau sur la réception 1 (Nouveau → Lu → Nouveau,
+  deux lignes au journal) ; journal 3 127 lignes en CSV avec empreintes ;
+  aperçu d'effacement 5 879 lignes / 94 tables / 4 comptes / 21 fichiers ;
+  daf2 (valideur) : les trois gestes refusés avec la raison.
+- **Bloqué, pas par l'écran** :
+  1. `export-complet` refuse l'origine http://localhost:3010 (CORS :
+     EXPORT_ORIGINES = https://omegaai.fr) : non vérifiable depuis la recette
+     locale ;
+  2. appelée directement (curl, jeton du gérant), la fonction répond
+     « exporter_client : HTTP 404 Could not find the function
+     public.exporter_client(p_client) » : la fonction appelle une porte qui
+     n'existe pas sous ce nom (la porte publique est exporter_donnees_client,
+     service seulement). À corriger chez A5. La demande d'export laissée
+     « en cours » peut bloquer la suivante (55P03 → 409).
+  3. Un premier passage a montré « Cette page n'a pas pu s'afficher » sur
+     Réglages : l'écran attendait la forme de preparer_effacement, alors
+     qu'apercu_effacement (posée entre-temps) rend une autre forme. Corrigé
+     (forme de 19am, lectures défensives).
+
+## 06/10 — mes scripts joués contre /espace2 (C1, tableau-de-bord-v2 @ 1ac8de9)
+
+`recette-espace.mjs` et `accessibilite.mjs` prennent désormais PREFIXE=/espace2,
+CAPTURES=<dossier> (pour ne pas écraser les captures de /espace) et
+SAUTER=a,b (enchaînements d'écrans absents). Build de production de 1ac8de9
+dans un arbre à part (node_modules en liens durs : un lien symbolique hors
+de la racine fait paniquer Turbopack), `next start -p 3020`.
+- accessibilité : tout passe ;
+- recette : tout passe SAUF « À payer », que C1 a réécrit
+  (components/espace2/filed/APayer, sans `.esp`) : mon enchaînement lit des
+  classes .esp-*, il ne s'y applique pas. Rejoué à la main avec des
+  sélecteurs neutres : mêmes groupes, mêmes lignes, dialogue « Noter un
+  paiement » au reste (1140), moyen « autre » sans IBAN, 5000 → bouton gris,
+  payée → sort de la liste, « Afficher les payées (1) ». Seule différence :
+  pas de message « C'est fait… la facture est payée ».
+- absents de 1ac8de9 (normal, plus récents) : boîte FILED, Demandes reçues,
+  mes Réglages. /espace2/reglages existe chez C1 (Apparence, Données,
+  Compte) : mes trois gestes (journal, export complet, effacement) sont à
+  mettre dans sa section Données.
 
 ## Bloqué / contourné
 

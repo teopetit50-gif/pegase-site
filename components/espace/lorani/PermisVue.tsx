@@ -28,7 +28,7 @@ import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
 import { Avis, Pastille } from "../ui";
 import { dateCourte, dateHeure } from "../format";
-import { DECISIONS, ETATS, ISSUES_RECOURS, NATURES_DATE_LUE, NATURES_RECOURS, STATUTS_ETAPE, TYPES, libelleRappel, libelleTypePiece, titrePermis } from "./etats";
+import { DECISIONS, ETATS, ISSUES_RECOURS, NATURES_DATE_LUE, NATURES_RECOURS, STATUTS_ETAPE, TYPES, TYPES_CONTROLE, libelleRappel, libelleTypePiece, titrePermis } from "./etats";
 import { clore_recours, confirmerDateLue, confirmerDecisionImplicite, ecarterDateLue, saisirPermis, saisirRecours, type SaisiePermis } from "./portes";
 import type { Calcul, DateLue, Dossier, Echeance, Etape, Permis, PieceProjet, Projet, Recours } from "./types";
 
@@ -125,7 +125,7 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
   const decidees = datesLues.filter((d) => d.statut !== "proposee").sort((a, b) => (b.decide_le ?? "").localeCompare(a.decide_le ?? ""));
   const echeances = useMemo(() => dossier.echeances.filter((e) => e.permis_id === p.id).sort((a, b) => a.echeance.localeCompare(b.echeance)), [dossier.echeances, p.id]);
   const recours = useMemo(() => dossier.recours.filter((r) => r.permis_id === p.id), [dossier.recours, p.id]);
-  const pieces = useMemo(() => dossier.pieces.filter((x) => x.objet_id === p.projet_id), [dossier.pieces, p.projet_id]);
+  const pieces = useMemo(() => dossier.pieces.filter((x) => x.objet_id === p.projet_id && !TYPES_CONTROLE.includes(x.type_piece ?? "")), [dossier.pieces, p.projet_id]);
   const etat = ETATS[p.etat] ?? ETATS.a_deposer;
   const dp = p.type_autorisation === "dp";
   const accorde = p.decision === "favorable" || p.decision === "tacite";

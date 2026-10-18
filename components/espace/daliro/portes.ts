@@ -18,14 +18,26 @@
      btp_annuler_situation (b6_12) ;
      btp_prononcer_reception, btp_lever_reserve, btp_opposer_retenue, btp_liberer_retenue,
      btp_preparer_decompte, btp_envoyer_decompte, btp_repondre_decompte (b6_13) ;
-     btp_noter_paiement, btp_fixer_echeance (b6_16).
+     btp_noter_paiement, btp_fixer_echeance (b6_16) ;
+     btp_heures_chantier (lecture), btp_pointer, btp_pointer_equipe, btp_poser_cout_horaire (b6_17) ;
+     btp_proposer_recalage (lecture), btp_recaler, btp_terminer_passage (b6_19) ;
+     btp_preparer_signature, btp_preuve_signature (b6_20 ; la page /signer/<jeton> appelle btp_lire_a_signer et
+     btp_signer_sur_place sans compte) ;
+     btp_meteo_chantier (lecture, b6_21) ;
+     btp_appro_chantier (lecture), btp_ecrire_commande, btp_noter_commande, btp_noter_livraison, btp_annuler_commande (b6_22) ;
+     btp_preparer_liste, btp_recevoir, btp_noter_retour (b6_23) ;
+     btp_fil_chantier, btp_messages_a_ranger (lecture), btp_ranger_message, btp_ecarter_message, btp_avenant_depuis_message (b6_24) ;
+     btp_avancement_photos (lecture, b6_25) ; btp_importer_lignes (b6_28) ; btp_point_mensuel (lecture, b6_30) ;
+     btp_disponibilites (lecture), btp_noter_indisponibilite, btp_annuler_indisponibilite (b6_31) ; btp_avenant_depuis_reserve (b6_32) ;
+     btp_deposer_devis, btp_devis_lu (lecture, b6_33) ; btp_ordre_meteo (lecture), btp_echanger_passages (b6_35) ;
+     btp_poser_question, btp_questions_du_chantier (lecture, b6_36).
    Les tables sans porte (chantiers, lots, tiers, dépendances, acceptations)
    s'écrivent en direct, comme le socle le prévoit (politiques du bureau).
    Si la base répond autrement, l'écran montre son message tel quel.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { AccordJ2, Chantier, FactureCandidate, Remplacant, Tableau } from "./types";
+import type { AccordJ2, Appro, AvancementPhotos, Disponibilite, PointMensuel, Chantier, FactureCandidate, HeuresChantier, MessageChantier, MeteoChantier, QuestionChantier, Recalage, Remplacant, RetourPointage, Tableau } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -82,6 +94,9 @@ export async function chargerFacturesCandidates(dejaRattachees: string[]): Promi
 /* ——— le marché (socle) ——— */
 export const ecrireMarche = (p_marche: string | null, p_chantier: string | null, p_champs: Record<string, unknown>) => rpc<string>("btp_ecrire_marche", { p_marche, p_chantier, p_champs });
 export const ecrireLigne = (p_ligne: string | null, p_marche: string | null, p_champs: Record<string, unknown>) => rpc<string>("btp_ecrire_ligne", { p_ligne, p_marche, p_champs });
+/* b6_28 : le devis importé d'un coup (chaque ligne passe par btp_ecrire_ligne). */
+export const importerLignes = (p_marche: string, p_lignes: Record<string, unknown>[]) =>
+  rpc<{ creees: number; refus: { rang: number; designation: string | null; message: string }[] }>("btp_importer_lignes", { p_marche, p_lignes });
 export const accepterEcart = (p_ligne: string, p_motif: string) => rpc("btp_accepter_ecart", { p_ligne, p_motif });
 export const verifierMarche = (p_marche: string) => rpc<Record<string, unknown>>("btp_verifier_marche", { p_marche });
 export const rouvrirMarche = (p_marche: string, p_motif: string) => rpc("btp_rouvrir_marche", { p_marche, p_motif });
@@ -161,6 +176,10 @@ export async function validerSituation(situation: string): Promise<unknown> {
 export async function annulerSituation(situation: string, motif: string | null): Promise<unknown> {
   return rpc("btp_annuler_situation", { p_situation: situation, p_motif: motif });
 }
+/* b6_25 : l'avancement lu dans les photos, proposé (jamais appliqué seul) ; reprise par avancerSituation. */
+export async function avancementPhotos(situation: string): Promise<AvancementPhotos> {
+  return rpc<AvancementPhotos>("btp_avancement_photos", { p_situation: situation });
+}
 
 /* La réception, les réserves, la retenue, le décompte (b6_13). */
 export async function prononcerReception(chantier: string, date: string, reserves: { description: string; lot_id?: string | null }[]): Promise<string> {
@@ -188,4 +207,175 @@ export async function repondreDecompte(reception: string, accepte: boolean, moti
 /* L'encaissement des situations (b6_16). */
 export async function noterPaiement(situation: string, montant: number, date: string, reference: string | null): Promise<unknown> {
   return rpc("btp_noter_paiement", { p_situation: situation, p_montant: montant, p_date: date, p_reference: reference });
+}
+
+/* b6_17 : les heures et la rentabilité */
+export async function chargerHeures(chantier: string, lundi: string): Promise<HeuresChantier | null> {
+  const h = await rpc<HeuresChantier | null>("btp_heures_chantier", { p_chantier: chantier, p_lundi: lundi });
+  return h && typeof h === "object" ? h : null;
+}
+
+export async function pointer(chantier: string, intervenant: string, jour: string, heures: number, lot: string | null, note: string | null): Promise<RetourPointage> {
+  return rpc<RetourPointage>("btp_pointer", { p_chantier: chantier, p_intervenant: intervenant, p_jour: jour, p_heures: heures, p_lot: lot, p_note: note });
+}
+
+export async function pointerEquipe(chantier: string, equipe: string, jour: string, heures: number, lot: string | null): Promise<{ pointes: number; alertes: string[] }> {
+  return rpc("btp_pointer_equipe", { p_chantier: chantier, p_equipe: equipe, p_jour: jour, p_heures: heures, p_lot: lot });
+}
+
+export async function poserCoutHoraire(client: string, intervenant: string | null, cout: number, depuis: string): Promise<unknown> {
+  return rpc("btp_poser_cout_horaire", { p_client: client, p_intervenant: intervenant, p_cout: cout, p_depuis: depuis });
+}
+
+/* b6_19 : le recalage du planning */
+export async function proposerRecalage(passage: string, nouvelleFin: string): Promise<Recalage> {
+  return rpc<Recalage>("btp_proposer_recalage", { p_passage: passage, p_nouvelle_fin: nouvelleFin });
+}
+
+export async function recaler(passage: string, nouvelleFin: string, motif: string | null): Promise<Recalage> {
+  return rpc<Recalage>("btp_recaler", { p_passage: passage, p_nouvelle_fin: nouvelleFin, p_motif: motif });
+}
+
+export async function terminerPassage(passage: string, finReelle: string): Promise<unknown> {
+  return rpc("btp_terminer_passage", { p_passage: passage, p_fin_reelle: finReelle });
+}
+
+/* b6_20 : la signature sur place */
+export async function preparerSignature(avenant: string, heures: number): Promise<{ signature_id: string; jeton: string; lien: string; expire_le: string; empreinte: string }> {
+  return rpc("btp_preparer_signature", { p_avenant: avenant, p_heures: heures });
+}
+
+export type PreuveSignature = {
+  signature_id: string; statut: "ouverte" | "signee" | "annulee"; empreinte: string; expire_le: string; prepare_le: string;
+  signataire_nom: string | null; signataire_qualite: string | null; trace: string | null; trace_empreinte: string | null;
+  appareil: string | null; signee_le: string | null; preuve_empreinte: string | null; annulee_motif: string | null;
+};
+
+export async function preuveSignature(avenant: string): Promise<PreuveSignature | null> {
+  return rpc<PreuveSignature | null>("btp_preuve_signature", { p_avenant: avenant });
+}
+
+/* b6_21 : la météo du chantier */
+export async function chargerMeteo(chantier: string): Promise<MeteoChantier | null> {
+  const m = await rpc<MeteoChantier | null>("btp_meteo_chantier", { p_chantier: chantier });
+  return m && typeof m === "object" ? m : null;
+}
+
+/* b6_22 : l'approvisionnement */
+export async function chargerAppro(chantier: string): Promise<Appro | null> {
+  const a = await rpc<Appro | null>("btp_appro_chantier", { p_chantier: chantier });
+  return a && typeof a === "object" ? a : null;
+}
+
+export async function ecrireCommande(commande: string | null, chantier: string, champs: Record<string, unknown>): Promise<string> {
+  return rpc<string>("btp_ecrire_commande", { p_commande: commande, p_chantier: chantier, p_champs: champs });
+}
+
+export async function noterCommande(commande: string, livraisonPrevue: string, commandeeLe: string, reference: string | null): Promise<unknown> {
+  return rpc("btp_noter_commande", { p_commande: commande, p_livraison_prevue: livraisonPrevue, p_commandee_le: commandeeLe, p_reference: reference });
+}
+
+export async function noterLivraison(commande: string, livreeLe: string, complete: boolean, note: string | null): Promise<unknown> {
+  return rpc("btp_noter_livraison", { p_commande: commande, p_livree_le: livreeLe, p_complete: complete, p_note: note });
+}
+
+export async function annulerCommande(commande: string, motif: string): Promise<unknown> {
+  return rpc("btp_annuler_commande", { p_commande: commande, p_motif: motif });
+}
+
+/* b6_23 : la liste depuis le devis, les bons de livraison, les retours */
+export async function preparerListe(chantier: string): Promise<{ creees: number; deja: number }> {
+  return rpc("btp_preparer_liste", { p_chantier: chantier });
+}
+
+export async function recevoir(commande: string, livreeLe: string, quantite: number | null, bon: string | null, note: string | null): Promise<{ rapprochement: string; etat: string; ecart: number | null }> {
+  return rpc("btp_recevoir", { p_commande: commande, p_livree_le: livreeLe, p_quantite: quantite, p_bon_reference: bon, p_piece: null, p_note: note });
+}
+
+export async function noterRetour(commande: string, renduLe: string | null, retourPrevu: string | null): Promise<unknown> {
+  return rpc("btp_noter_retour", { p_commande: commande, p_rendu_le: renduLe, p_retour_prevu: retourPrevu });
+}
+
+/* b6_24 : le fil du chantier */
+export async function chargerFil(chantier: string): Promise<MessageChantier[]> {
+  const f = await rpc<MessageChantier[] | null>("btp_fil_chantier", { p_chantier: chantier, p_nombre: 50 });
+  return Array.isArray(f) ? f : [];
+}
+
+export async function messagesARanger(client: string): Promise<MessageChantier[]> {
+  const f = await rpc<MessageChantier[] | null>("btp_messages_a_ranger", { p_client: client });
+  return Array.isArray(f) ? f : [];
+}
+
+export async function rangerMessage(message: string, chantier: string): Promise<unknown> {
+  return rpc("btp_ranger_message", { p_message: message, p_chantier: chantier });
+}
+
+export async function ecarterMessage(message: string, motif: string | null): Promise<unknown> {
+  return rpc("btp_ecarter_message", { p_message: message, p_motif: motif });
+}
+
+export async function avenantDepuisMessage(message: string, objet: string): Promise<string> {
+  return rpc<string>("btp_avenant_depuis_message", { p_message: message, p_objet: objet });
+}
+
+/* b6_30 : le point mensuel (bureau qui voit les prix, formules Chantiers et Entreprise). */
+export async function pointMensuel(client: string, mois: string): Promise<PointMensuel> {
+  return rpc<PointMensuel>("btp_point_mensuel", { p_client: client, p_mois: mois });
+}
+
+/* b6_31 : les disponibilités des sous-traitants (gérant, admin, valideur). */
+export async function chargerDisponibilites(client: string, du: string, au: string): Promise<Disponibilite[]> {
+  return rpc<Disponibilite[]>("btp_disponibilites", { p_client: client, p_du: du, p_au: au });
+}
+export async function noterIndisponibilite(tiers: string, du: string, au: string, motif: string | null): Promise<string> {
+  return rpc<string>("btp_noter_indisponibilite", { p_tiers: tiers, p_du: du, p_au: au, p_motif: motif });
+}
+export async function annulerIndisponibilite(id: string): Promise<unknown> {
+  return rpc("btp_annuler_indisponibilite", { p_id: id });
+}
+
+/* b6_32 : la réserve hors devis devient un avenant brouillon. */
+export async function avenantDepuisReserve(reserve: string): Promise<string> {
+  return rpc<string>("btp_avenant_depuis_reserve", { p_reserve: reserve, p_objet: null });
+}
+
+/* b6_33 : le devis en PDF, déposé sur le marché puis lu par le lecteur d'A1 (lignes dans pieces_valeurs). */
+export type LigneDevisLue = { numero?: string | null; lot?: string | null; designation?: string | null; unite?: string | null;
+                              quantite?: number | null; prix_unitaire?: number | null; montant?: number | null };
+export type DevisLu = { piece: string | null; nom?: string; statut?: string; lignes?: LigneDevisLue[] | null; lignes_verifiees?: boolean | null;
+                        montant_total_ht?: number | string | null };
+export async function deposerDevis(client: string, marche: string, fichier: File): Promise<string> {
+  const supabase = createClient();
+  const nom = fichier.name.normalize("NFKD").replace(/[^\w.-]+/g, "-").replace(/-+/g, "-").slice(0, 120) || "devis.pdf";
+  const chemin = `${client}/btp_marche/${marche}/${Date.now()}-${nom}`;
+  const envoi = await supabase.storage.from("omega-clients").upload(chemin, fichier, { contentType: "application/pdf", upsert: false });
+  if (envoi.error) throw new ErreurPorte(message(envoi.error));
+  const h = await crypto.subtle.digest("SHA-256", await fichier.arrayBuffer());
+  const sha = Array.from(new Uint8Array(h)).map((b) => b.toString(16).padStart(2, "0")).join("");
+  return rpc<string>("btp_deposer_devis", { p_marche: marche, p_nom_fichier: fichier.name.slice(0, 200), p_mime: "application/pdf",
+                                             p_octets: fichier.size, p_sha256: sha, p_chemin: chemin });
+}
+export async function devisLu(marche: string): Promise<DevisLu> {
+  return rpc<DevisLu>("btp_devis_lu", { p_marche: marche });
+}
+
+/* b6_35 : sur pluie annoncée, l'échange proposé entre un passage extérieur menacé et un intérieur de la même équipe. */
+export type EchangeMeteo = { exterieur: string; exterieur_tache: string | null; exterieur_chantier: string; exterieur_debut: string;
+                             interieur: string; interieur_tache: string | null; interieur_chantier: string; interieur_debut: string;
+                             risque: string; texte: string };
+export async function ordreMeteo(client: string): Promise<{ propositions: EchangeMeteo[] }> {
+  return rpc<{ propositions: EchangeMeteo[] }>("btp_ordre_meteo", { p_client: client });
+}
+export async function echangerPassages(exterieur: string, interieur: string, motif: string | null): Promise<unknown> {
+  return rpc("btp_echanger_passages", { p_exterieur: exterieur, p_interieur: interieur, p_motif: motif });
+}
+
+/* b6_36 : l'assistant « questions ». La réponse arrive par l'ouvrier daliro-questions (chaque minute). */
+export async function poserQuestion(chantier: string, question: string): Promise<string> {
+  return rpc<string>("btp_poser_question", { p_chantier: chantier, p_question: question });
+}
+export async function questionsDuChantier(chantier: string): Promise<QuestionChantier[]> {
+  const l = await rpc<QuestionChantier[] | null>("btp_questions_du_chantier", { p_chantier: chantier });
+  return Array.isArray(l) ? l : [];
 }

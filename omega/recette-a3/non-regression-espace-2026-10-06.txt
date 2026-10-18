@@ -80,6 +80,9 @@
   ✓ « À payer » : présente
   ✓ « À payer » : atteignable au clavier (Tab)
   ✓ « À payer » : mène à /espace/filed/a-payer (arrivé sur /espace/filed/a-payer)
+  ✓ « Boîte de réception » : présente
+  ✓ « Boîte de réception » : atteignable au clavier (Tab)
+  ✓ « Boîte de réception » : mène à /espace/filed/boite (arrivé sur /espace/filed/boite)
   ✓ axe 1440 : aucun écart grave
   ✓ axe 390 : aucun écart grave
   ✓ 390 : pas de débordement horizontal (0)
@@ -141,6 +144,63 @@
   ✓ « À payer » : présente
   ✓ « À payer » : atteignable au clavier (Tab)
   ✓ « À payer » : mène à /espace/filed/a-payer (arrivé sur /espace/filed/a-payer)
+  ✓ axe 1440 : aucun écart grave
+  ✓ axe 390 : aucun écart grave
+  ✓ 390 : pas de débordement horizontal (0)
+— /espace/filed/boite
+  ✓ la page se charge
+  ✓ titre « Boîte de réception » (h1 : Boîte de réception)
+  ✓ texte « Vos fournisseurs envoient leurs factures à »
+  ✓ texte « Nouveaux »
+  ✓ texte « Écartés »
+  ✓ texte « Pièces jointes »
+  ✓ texte « Devenue le document »
+  ✓ « Copier l'adresse » : présente
+  ✓ « Copier l'adresse » : atteignable au clavier (Tab)
+  ✓ « Marquer comme lu » : présente
+  ✓ « Marquer comme lu » : atteignable au clavier (Tab)
+  ✓ « Écarter » : présente
+  ✓ « Écarter » : atteignable au clavier (Tab)
+  ✓ « Ouvrir la pièce » : présente
+  ✓ « Ouvrir la pièce » : atteignable au clavier (Tab)
+  ✓ « Documents reçus » : présente
+  ✓ « Documents reçus » : atteignable au clavier (Tab)
+  ✓ « Documents reçus » : mène à /espace/filed (arrivé sur /espace/filed)
+  ✓ « Comptabilité » : présente
+  ✓ « Comptabilité » : atteignable au clavier (Tab)
+  ✓ « Comptabilité » : mène à /espace/filed/comptabilite (arrivé sur /espace/filed/comptabilite)
+  ✓ « Toutes les demandes » : présente
+  ✓ « Toutes les demandes » : atteignable au clavier (Tab)
+  ✓ « Toutes les demandes » : mène à /espace/demandes (arrivé sur /espace/demandes)
+  ✓ axe 1440 : aucun écart grave
+  ✓ axe 390 : aucun écart grave
+  ✓ 390 : pas de débordement horizontal (0)
+— /espace/demandes
+  ✓ la page se charge
+  ✓ titre « Demandes reçues » (h1 : Demandes reçues)
+  ✓ texte « Formulaire du site »
+  ✓ texte « WhatsApp »
+  ✓ texte « Enseigne »
+  ✓ texte « Toutes les demandes »
+  ✓ « Boîte de FILED » : présente
+  ✓ « Boîte de FILED » : atteignable au clavier (Tab)
+  ✓ « Boîte de FILED » : mène à /espace/filed/boite (arrivé sur /espace/filed/boite)
+  ✓ axe 1440 : aucun écart grave
+  ✓ axe 390 : aucun écart grave
+  ✓ 390 : pas de débordement horizontal (0)
+— /espace/reglages
+  ✓ la page se charge
+  ✓ titre « Réglages » (h1 : Réglages)
+  ✓ texte « Le journal »
+  ✓ texte « Export complet »
+  ✓ texte « Quitter Omega »
+  ✓ texte « l'export puis l'effacement »
+  ✓ « Exporter mon journal » : présente
+  ✓ « Exporter mon journal » : atteignable au clavier (Tab)
+  ✓ « Exporter toutes mes données » : présente
+  ✓ « Exporter toutes mes données » : atteignable au clavier (Tab)
+  ✓ « Préparer l'effacement » : présente
+  ✓ « Préparer l'effacement » : atteignable au clavier (Tab)
   ✓ axe 1440 : aucun écart grave
   ✓ axe 390 : aucun écart grave
   ✓ 390 : pas de débordement horizontal (0)
@@ -426,10 +486,13 @@
 
 ══ Bilan /espace (http://localhost:3010) ══
 ✓ validations          39/39
-✓ filed                44/44
+✓ filed                47/47
 ✓ filed-identifiants   15/15
 ✓ filed-electronique   20/20
 ✓ comptabilite         23/23
+✓ boite                27/27
+✓ demandes             12/12
+✓ reglages             15/15
 ✓ fournisseurs         25/25
 ✓ a-payer              19/19
 ✓ varelo               41/41

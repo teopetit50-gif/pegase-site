@@ -9,18 +9,22 @@
    chantier (autoliquidée en sous-traitance, CGI 283-2 nonies). Soumise à
    la validation du socle (deux personnes), puis validée : montants et
    mentions figés. Réservé à qui voit les prix.
+   b6_25 : sur une situation en préparation, l'avancement lu dans les
+   photos du chantier depuis la situation précédente est proposé ligne à
+   ligne ; rien ne s'applique sans « Reprendre ».
    ══════════════════════════════════════════════════════════════════════ */
 
-import { useState } from "react";
-import { FileSpreadsheet, Plus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Camera, FileSpreadsheet, Plus } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
-import { dateCourte, montant, pourcent } from "../format";
+import { dateCourte, dateHeure, montant, pourcent } from "../format";
 import { Avis, Pastille, type Teinte } from "../ui";
-import { annulerSituation, avancerSituation, noterPaiement, ouvrirSituation, soumettreSituation, validerSituation } from "./portes";
-import { encaissement, ouvrirLocale, recalculer, tauxZone } from "./situations";
-import type { Situation, StatutSituation, Tableau } from "./types";
+import { urlSigneeMedia } from "@/app/espace/daliro/actions";
+import { annulerSituation, avancementPhotos, avancerSituation, noterPaiement, ouvrirSituation, soumettreSituation, validerSituation } from "./portes";
+import { avancementPhotosExemple, encaissement, ouvrirLocale, recalculer, tauxZone } from "./situations";
+import type { AvancementPhotos, Situation, StatutSituation, Tableau } from "./types";
 
 const STATUTS: Record<StatutSituation, { libelle: string; teinte: Teinte }> = {
   brouillon: { libelle: "En préparation", teinte: "gris" },
@@ -57,6 +61,18 @@ export default function SituationsCarte({ tableau, source, onLocal, relire }: Pr
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [fait, setFait] = useState<string | null>(null);
+  const [photosReelles, setPhotosReelles] = useState<{ cle: string; lu: AvancementPhotos } | null>(null);
+
+  const enPreparation = voit_prix ? situations.find((s) => s.statut === "brouillon" || s.statut === "refusee") ?? null : null;
+  const clePhotos = enPreparation ? `${enPreparation.id}:${enPreparation.lignes.map((l) => l.avancement).join(",")}` : null;
+  useEffect(() => {
+    if (source !== "reelle" || !enPreparation || !clePhotos) return;
+    let vivant = true;
+    avancementPhotos(enPreparation.id)
+      .then((lu) => { if (vivant) setPhotosReelles({ cle: clePhotos, lu }); })
+      .catch(() => { if (vivant) setPhotosReelles({ cle: clePhotos, lu: { propositions: [], non_rattaches: [] } }); });
+    return () => { vivant = false; };
+  }, [source, clePhotos]); // eslint-disable-line react-hooks/exhaustive-deps -- clePhotos porte la situation et ses avancements
 
   if (!voit_prix) {
     return (
@@ -183,7 +199,20 @@ export default function SituationsCarte({ tableau, source, onLocal, relire }: Pr
     if (ok) setPayer(null);
   };
 
+  const reprendre = (s: Situation, ligneId: string, v: number, auteur: string | null) => {
+    const ligne = s.lignes.find((l) => l.id === ligneId);
+    if (!ligne) return;
+    void agir(
+      () => avancerSituation(ligneId, v),
+      () => avecSituation(recalculer({ ...s, lignes: s.lignes.map((l) => (l.id === ligneId ? { ...l, avancement: v } : l)) })),
+      `« ${ligne.designation} » : ${pourcent(v)} cumulés, repris de la photo${auteur ? ` de ${auteur}` : ""}.`,
+    );
+  };
+
   const modifiable = enCours && (enCours.statut === "brouillon" || enCours.statut === "refusee");
+  const photos = !modifiable || !enCours ? null
+    : source === "reelle" ? (photosReelles?.cle === clePhotos ? photosReelles.lu : null)
+    : avancementPhotosExemple(enCours, lotCode);
   const approuvee = enCours?.demande_statut === "approuvee" || enCours?.demande_statut === "executee";
 
   return (
@@ -238,6 +267,28 @@ export default function SituationsCarte({ tableau, source, onLocal, relire }: Pr
               </tbody>
             </table>
           </div>
+          {photos && (photos.propositions.length || photos.non_rattaches.length) ? (
+            <div style={{ marginTop: 10 }} aria-label="Avancement lu dans les photos">
+              <div className="esp-kpi-sous" style={{ fontWeight: 600 }}>
+                <Camera width={13} height={13} aria-hidden="true" style={{ verticalAlign: "-2px" }} /> Lu dans les photos du chantier{photos.depuis ? ` depuis le ${dateCourte(photos.depuis)}` : ""}{source !== "reelle" ? " (exemple fictif)" : ""} — une estimation à contrôler, rien n&apos;est appliqué sans vous
+              </div>
+              <ul style={{ margin: "4px 0 0", paddingLeft: 18 }}>
+                {photos.propositions.map((p) => (
+                  <li key={`${p.message}-${p.ligne}`} className="esp-kpi-sous">
+                    « {p.designation} » : {pourcent(p.propose ?? p.pourcentage)} lu{p.de_nom ? ` sur la photo de ${p.de_nom}` : ""} du {dateHeure(p.le)} (aujourd&apos;hui {pourcent(p.actuel ?? 0)}){p.extrait ? ` — « ${p.extrait} »` : ""}
+                    {p.photo ? <> <PhotoLien chemin={p.photo} /></> : null}{" "}
+                    <button type="button" className="esp-lien-bouton" disabled={envoi || !p.ligne} onClick={() => p.ligne && reprendre(enCours, p.ligne, p.propose ?? p.pourcentage, p.de_nom)}>Reprendre</button>
+                  </li>
+                ))}
+                {photos.non_rattaches.map((p, k) => (
+                  <li key={`n-${p.message}-${k}`} className="esp-kpi-sous">
+                    « {p.ouvrage ?? "ouvrage non nommé"} »{p.lot_code ? ` (lot ${p.lot_code})` : ""} : {pourcent(p.pourcentage)} lu le {dateHeure(p.le)}, sans ligne de la situation qui lui corresponde : à reporter à la main.
+                    {p.photo ? <> <PhotoLien chemin={p.photo} /></> : null}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
           <dl className="esp-situation-totaux" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: "4px 16px", margin: "10px 0 0" }}>
             <dt>Cumul des travaux HT</dt><dd className="esp-num" style={{ margin: 0 }}>{montant(enCours.cumul_ht)}</dd>
             <dt>Situations précédentes HT</dt><dd className="esp-num" style={{ margin: 0 }}>− {montant(enCours.precedent_ht)}</dd>
@@ -374,5 +425,20 @@ export default function SituationsCarte({ tableau, source, onLocal, relire }: Pr
         </DialogContent>
       </Dialog>
     </section>
+  );
+}
+
+/* Le lien vers la photo citée : une adresse signée pour quelques minutes, demandée au clic. */
+function PhotoLien({ chemin }: { chemin: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+  const [attente, setAttente] = useState(false);
+  const [erreur, setErreur] = useState<string | null>(null);
+  if (erreur) return <span>({erreur})</span>;
+  if (url) return <a href={url} target="_blank" rel="noreferrer">Ouvrir la photo</a>;
+  return (
+    <button type="button" className="esp-lien-bouton" disabled={attente} onClick={() => {
+      setAttente(true);
+      void urlSigneeMedia(chemin).then((r) => { setAttente(false); if ("url" in r) setUrl(r.url); else setErreur(r.erreur); });
+    }}>{attente ? "Photo…" : "Voir la photo"}</button>
   );
 }

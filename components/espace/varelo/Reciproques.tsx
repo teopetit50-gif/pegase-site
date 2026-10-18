@@ -112,7 +112,7 @@ export default function Reciproques({ source, contexte, client_id, onFait }: Pro
   }, [source, client_id, locales, onFait]);
 
   return (
-    <section className="esp-carte" aria-label="Comptes réciproques intragroupe" style={{ marginTop: 16 }}>
+    <section id="vrl-reciproques" className="esp-carte" aria-label="Comptes réciproques intragroupe" style={{ marginTop: 16 }}>
       <div className="esp-carte-tete">
         <div>
           <h2 className="esp-carte-titre">Comptes réciproques intragroupe</h2>

@@ -353,6 +353,8 @@ export type Reserve = {
   description: string;
   statut: "ouverte" | "levee";
   levee_le: string | null;
+  /* b6_32 : la réserve reconnue hors devis porte son avenant */
+  avenant_id?: string | null;
 };
 export type Reception = {
   id: string;
@@ -456,4 +458,230 @@ export type AccordJ2 = {
   canaux: CanalAccordJ2[];
   /* b6_09 : le lecteur est-il le seul décideur (gérant, admin, valideur) de l'organisation ? */
   seul_decideur?: boolean;
+};
+
+/* b6_17 : le pointage des heures et la rentabilité du chantier (public.btp_heures_chantier) */
+export type IntervenantHeures = {
+  id: string;
+  nom: string;
+  role_terrain: "chef_equipe" | "compagnon" | "conducteur" | "autre";
+  actif: boolean;
+  equipe_id: string | null;
+  equipe_nom: string | null;
+};
+export type Pointage = {
+  id: string;
+  intervenant_id: string;
+  jour: string;
+  lot_id: string | null;
+  heures: number;
+  note: string | null;
+  source: "saisie" | "equipe" | "message";
+};
+export type RentabiliteLot = {
+  lot_id: string | null;
+  code: string | null;
+  libelle: string;
+  vendu_ht: number;
+  facture_ht: number;
+  heures: number;
+  main_oeuvre_ht: number;
+  heures_sans_cout: number;
+  achats_ht: number;
+  debourse_ht: number;
+  marge_ht: number;
+};
+export type Rentabilite = {
+  vendu_ht: number;
+  facture_ht: number;
+  heures: number;
+  heures_sans_cout: number;
+  main_oeuvre_ht: number;
+  achats_ht: number;
+  debourse_ht: number;
+  marge_ht: number;
+  marge_taux: number | null;
+  lots: RentabiliteLot[];
+};
+export type HeuresChantier = {
+  chantier_id: string;
+  lundi: string;
+  jours: string[];
+  intervenants: IntervenantHeures[];
+  equipes: { id: string; nom: string }[];
+  pointages: Pointage[];
+  semaine_heures: number;
+  total_heures: number;
+  voit_prix: boolean;
+  cout_defaut: number | null;
+  rentabilite: Rentabilite | null;
+};
+/* Le retour d'un pointage : les totaux de l'intervenant et les alertes du Code du travail. */
+export type RetourPointage = { jour_total: number; semaine_total: number; alertes: string[] };
+
+/* b6_19 : le recalage du planning (public.btp_proposer_recalage, btp_recaler, btp_terminer_passage) */
+export type DeplacementPassage = {
+  passage_id: string;
+  tache: string | null;
+  lot_id: string | null;
+  intervenant: string | null;
+  ancien_debut: string;
+  ancien_fin: string;
+  nouveau_debut: string;
+  nouveau_fin: string;
+  reconfirmer: boolean;
+  exterieur: boolean;
+};
+export type Recalage = {
+  passage_id: string;
+  chantier_id: string;
+  nouvelle_fin: string;
+  deplaces: DeplacementPassage[];
+  nombre: number;
+  fin_planning: string | null;
+  fin_prevue_chantier: string | null;
+};
+
+/* b6_21 : la météo du chantier (public.btp_meteo_chantier) */
+export type JourMeteo = { jour: string; pluie_mm: number | null; rafales_kmh: number | null; vent_kmh?: number | null; tmin: number | null; tmax: number | null };
+export type RisqueMeteo = { passage_id: string; tache: string | null; chantier_id: string; jour: string; motifs: string[]; texte: string };
+export type MeteoChantier = { localise: boolean; ouverte: boolean; prevision: JourMeteo[]; recue_le: string | null; erreur: string | null; risques: RisqueMeteo[]; fournisseur?: "met_norway" | "open_meteo" | null };
+
+/* b6_22 : l'approvisionnement (public.btp_appro_chantier) */
+export type EtatCommande = "a_commander" | "a_commander_vite" | "commande_en_retard" | "commandee" | "livraison_tardive" | "livraison_trop_tot" | "livraison_attendue" | "livree_partielle" | "livree" | "annulee";
+export type Commande = {
+  id: string;
+  chantier_id: string;
+  lot_id: string | null;
+  lot_code?: string | null;
+  passage_id: string | null;
+  passage_tache?: string | null;
+  fournisseur_id: string | null;
+  fournisseur_nom: string | null;
+  objet: string;
+  quantite_texte: string | null;
+  reference: string | null;
+  delai_jours: number;
+  besoin_le: string | null;
+  statut: "a_commander" | "commandee" | "livree_partielle" | "livree" | "annulee";
+  commandee_le: string | null;
+  livraison_prevue: string | null;
+  livree_le: string | null;
+  note: string | null;
+  motif: string | null;
+  /* b6_23 : quantité du devis, matériel à rendre, bons de livraison */
+  ligne_marche_id?: string | null;
+  quantite?: number | null;
+  unite?: string | null;
+  a_retourner?: boolean;
+  retour_prevu?: string | null;
+  retourne_le?: string | null;
+  livraisons?: LivraisonCommande[];
+  echeances: {
+    besoin_le: string | null; livrer_avant: string | null; livrer_le?: string | null; commander_avant: string | null; etat: EtatCommande;
+    quantite_commandee?: number | null; quantite_livree?: number | null; ecart?: number | null;
+    retour_prevu?: string | null; retour?: "sur_chantier" | "a_rendre" | "rendu" | null;
+  };
+};
+export type LivraisonCommande = { id: string; livree_le: string; quantite: number | null; bon_reference: string | null; piece_id: string | null; note: string | null };
+export type Appro = { commandes: Commande[]; fournisseurs: { id: string; nom: string }[]; devis_verifie?: boolean };
+
+/* b6_24 : le fil du chantier — messages, photos, vocaux du terrain */
+export type PieceMessage = { nom: string; mime: string | null; taille: number | null; chemin: string; vocal: boolean };
+export type MessageChantier = {
+  id: string;
+  reception_id: number;
+  chantier_id: string | null;
+  canal: "whatsapp" | "sms" | "email";
+  de_nom: string | null;
+  de_adresse: string | null;
+  intervenant_id: string | null;
+  tiers_id: string | null;
+  texte: string | null;
+  pieces: PieceMessage[];
+  rangement: "nom" | "passage" | "passage_proche" | "manuel" | null;
+  statut: "a_ranger" | "range" | "ecarte";
+  avenant_id: string | null;
+  recu_le: string;
+  /* b6_24b : la lecture rendue par le lecteur (CONTRAT-MEDIA d'A1) */
+  lecture?: LectureMedia | null;
+  lu_le?: string | null;
+  avenants?: string[];
+};
+export type DemandeLue = {
+  nature: "travail_supplementaire" | "probleme" | "question" | "information" | "avancement";
+  texte?: string | null;
+  /* b6_25 : nature « avancement » — l'ouvrage vu sur la photo, son lot, le pourcentage estimé */
+  ouvrage?: string | null;
+  lot_code?: string | null;
+  pourcentage?: number | null;
+  quantite?: number | null;
+  unite?: string | null;
+  lieu?: string | null;
+  source?: { media: number; extrait: string };
+  verifiee: boolean;
+};
+export type LectureMedia = {
+  resume?: string | null;
+  medias?: { n: number; chemin?: string; nature: "vocal" | "photo" | string; statut: string; transcription?: string | null; duree_s?: number | null }[];
+  demandes?: DemandeLue[];
+};
+
+/* b6_25 : l'avancement lu dans les photos, proposé ligne à ligne sur une situation en préparation */
+export type PropositionAvancement = {
+  message: string;
+  le: string;
+  de_nom: string | null;
+  ouvrage: string | null;
+  lot_code: string | null;
+  pourcentage: number;
+  extrait: string | null;
+  photo: string | null;
+  ligne?: string;
+  designation?: string;
+  actuel?: number;
+  propose?: number;
+};
+export type AvancementPhotos = {
+  propositions: PropositionAvancement[];
+  non_rattaches: PropositionAvancement[];
+  depuis?: string | null;
+  motif?: string;
+};
+
+/* b6_30 : le point mensuel, travaux repérés → signés → facturés */
+export type PointChantier = {
+  chantier: string; nom: string; statut: string;
+  reperes: { nombre: number; montant_ht: number };
+  saisis: number;
+  signes: { nombre: number; montant_ht: number };
+  a_relancer: { nombre: number; montant_ht: number };
+  perdus: number;
+  signe_total: number; facture_total: number; reste_a_facturer: number;
+};
+export type PointMensuel = {
+  mois: string; du: string; au: string;
+  chantiers: PointChantier[];
+  totaux: { reperes: number; reperes_ht: number; signes: number; signes_ht: number; a_relancer: number; a_relancer_ht: number; reste_a_facturer: number };
+};
+
+/* b6_31 : les disponibilités des sous-traitants */
+export type Disponibilite = {
+  tiers: string; nom: string;
+  absences: { id: string; du: string; au: string; motif: string | null }[];
+  passages: { passage: string; chantier: string; tache: string | null; debut: string; fin: string }[];
+};
+
+/* b6_36 : une question posée à l'assistant sur un chantier (lue par son auteur seul). */
+export type QuestionChantier = {
+  id: string;
+  question: string;
+  statut: "en_attente" | "repondue" | "echec";
+  reponse: string | null;
+  couverte: boolean | null;
+  sources: string[];
+  raison: string | null;
+  motif: string | null;
+  cree_le: string;
+  repondu_le: string | null;
 };

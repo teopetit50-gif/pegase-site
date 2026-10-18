@@ -1,7 +1,7 @@
 /* Le calcul d'une situation de travaux — pur, le même que private.btp_recalculer_situation (b6_12).
    Sert à l'exemple (en mémoire) ; en base réelle, la base calcule et l'écran relit. */
 
-import type { Chantier, LigneSituation, Situation, Tableau } from "./types";
+import type { AvancementPhotos, Chantier, LigneSituation, Situation, Tableau } from "./types";
 
 const arrondi = (v: number) => Math.round(v * 100) / 100;
 
@@ -77,4 +77,18 @@ export function encaissement(s: Situation, jour: string): Encaissement {
   const taux = s.penalites_taux ?? null;
   const penalites = !taux || !ech ? 0 : arrondi((taux / 365) * (paiements.reduce((t, p) => t + p.montant * Math.max(jours(p.recu_le, ech), 0), 0) + reste * Math.max(jours(jour, ech), 0)));
   return { echeance: ech, encaisse, reste, payeeLe, retard, etat, indemnite: ech && retard > 0 ? 40 : 0, penalites };
+}
+
+/* L'avancement lu dans les photos (b6_25), en exemple : la première ligne qui n'est pas finie, vue plus avancée
+   sur une photo d'hier ; un ouvrage qui ne se rattache à aucune ligne. En base réelle : btp_avancement_photos. */
+export function avancementPhotosExemple(s: Situation, lotCode: (id: string | null) => string): AvancementPhotos {
+  const hier = new Date(Date.now() - 86400000).toISOString();
+  const l = s.lignes.find((x) => x.avancement < 100);
+  const lu = l ? Math.min(100, Math.ceil((l.avancement + 25) / 5) * 5) : null;
+  return {
+    propositions: l && lu !== null ? [{ message: "exemple-1", le: hier, de_nom: "Chef d'équipe", ouvrage: l.designation, lot_code: lotCode(l.lot_id),
+                                       pourcentage: lu, extrait: "photo de la façade", photo: null, ligne: l.id, designation: l.designation, actuel: l.avancement, propose: lu }] : [],
+    non_rattaches: [{ message: "exemple-1", le: hier, de_nom: "Chef d'équipe", ouvrage: "Carrelage de l'entrée", lot_code: null, pourcentage: 30, extrait: null, photo: null }],
+    depuis: null,
+  };
 }

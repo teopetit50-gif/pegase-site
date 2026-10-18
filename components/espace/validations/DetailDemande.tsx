@@ -362,11 +362,11 @@ export default function DetailDemande(p: Props) {
 
       {/* ——— Approuver ——— */}
       <Dialog open={form === "approuver"} onOpenChange={(o) => !o && setForm(null)}>
-        <DialogContent>
+        <DialogContent onOpenAutoFocus={focusSurLeTexte}>
           <DialogHeader>
             <DialogIcone><Check width={18} height={18} aria-hidden="true" /></DialogIcone>
             <DialogTitle>Approuver</DialogTitle>
-            <DialogDescription>{d.resume}{d.montant !== null ? ` — ${montant(d.montant, d.devise)}` : ""}</DialogDescription>
+            <DialogDescription>{resumeAvecMontant(d.resume, d.montant !== null ? montant(d.montant, d.devise) : null)}</DialogDescription>
           </DialogHeader>
           <DialogBody>
             <div className="esp-form">
@@ -399,7 +399,7 @@ export default function DetailDemande(p: Props) {
 
       {/* ——— Refuser ——— */}
       <Dialog open={form === "refuser"} onOpenChange={(o) => !o && setForm(null)}>
-        <DialogContent>
+        <DialogContent onOpenAutoFocus={focusSurLeTexte}>
           <DialogHeader>
             <DialogIcone><X width={18} height={18} aria-hidden="true" /></DialogIcone>
             <DialogTitle>Refuser</DialogTitle>
@@ -545,6 +545,29 @@ export default function DetailDemande(p: Props) {
       </Dialog>
     </div>
   );
+}
+
+/* 06/10 (retour de Teo) : à l'ouverture, le focus allait à la liste
+   « Décider » et son anneau la faisait paraître encadrée deux fois. On le
+   pose dans le champ de texte, celui qu'on remplit de toute façon. */
+function focusSurLeTexte(e: Event) {
+  const zone = e.target instanceof HTMLElement ? e.target.querySelector("textarea") : null;
+  if (zone) {
+    e.preventDefault();
+    zone.focus();
+  }
+}
+
+/* Le résumé d'une demande porte souvent déjà son montant (« facture …,
+   12 480,00 € ») : on ne le répète pas. Les espaces de milliers deviennent
+   insécables, pour qu'un montant ne se coupe pas en fin de ligne. */
+function resumeAvecMontant(resume: string, montantTexte: string | null): string {
+  const insecable = (t: string) => t.replace(/(\d)[ \u00a0\u202f](?=\d{3}(?:\D|$))/g, "$1\u202f");
+  const r = insecable(resume);
+  if (!montantTexte) return r;
+  const m = insecable(montantTexte);
+  const chiffres = (t: string) => t.replace(/\D/g, "");
+  return chiffres(r).includes(chiffres(m)) ? r : `${r} — ${m}`;
 }
 
 /* Le champ de pièce jointe : le contrôle natif est caché (son libellé est

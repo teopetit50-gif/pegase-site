@@ -406,7 +406,7 @@ export default function ServiceDetail({ service }: { service: string }) {
             Réserver une démo
           </Link>
           <Link
-            href="/reserver-un-audit#faq"
+            href="/contact?sujet=avant#ecrire"
             className="rounded-[var(--radius-btn)] border border-black/15 px-7 py-3.5 text-[16px] font-medium text-[#0f1013] transition hover:border-black/40"
           >
             Poser une question
