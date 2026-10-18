@@ -83,12 +83,12 @@ begin
   perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
   perform public.reput_regler(v_client, null, '{"lien_avis": "https://g.page/r/sogexal-banc/review"}'::jsonb);
   perform tests.endosser(v_collab, 'c3-avis-collab@banc-varelo.test');
-  return next throws_ok(format('select public.reput_programmer_avis(%L, %L, %L, null, null, %L)', v_client, 'email', 'avis@exemple.test', current_date + 1),
+  return next throws_ok(format('select public.reput_programmer_avis(%L, %L, %L, null, null, %L)', v_client, 'email', 'avis@exemple.test', (now() at time zone 'Europe/Paris')::date + 1),
                         '22023', null, 'Un règlement à venir est refusé');
-  v_av := public.reput_programmer_avis(v_client, 'email', 'Avis@Exemple.test', 'Mme Avis', 'F-2026-118', current_date - 5);
+  v_av := public.reput_programmer_avis(v_client, 'email', 'Avis@Exemple.test', 'Mme Avis', 'F-2026-118', (now() at time zone 'Europe/Paris')::date - 5);
   v_a := (v_av ->> 'avis')::uuid;
   return next is(v_av ->> 'statut', 'programme', 'Un collaborateur programme la demande d''avis après un règlement');
-  return next is(public.reput_programmer_avis(v_client, 'email', 'avis@exemple.test', null, null, current_date) ->> 'statut', 'ecarte',
+  return next is(public.reput_programmer_avis(v_client, 'email', 'avis@exemple.test', null, null, (now() at time zone 'Europe/Paris')::date) ->> 'statut', 'ecarte',
                  'La même personne n''est pas sollicitée deux fois');
   perform tests.endosser(v_autre, 'a5-gerant-a@essai.invalid');
   return next throws_ok(format('select public.reput_programmer_avis(%L, %L, %L)', v_client, 'email', 'x@exemple.test'), '42501', null,
@@ -111,7 +111,7 @@ begin
   perform private.reput_ouvrier(20);
   return next is((select cardinality(a.envois) || ' / ' || a.statut from public.reput_avis a where a.id = v_a), '3 / termine',
                  'Une demande et deux relances au plus, puis terminé');
-  v_av := public.reput_programmer_avis(v_client, 'whatsapp', '+33611112222', 'M. Content', null, current_date);
+  v_av := public.reput_programmer_avis(v_client, 'whatsapp', '+33611112222', 'M. Content', null, (now() at time zone 'Europe/Paris')::date);
   perform public.reput_avis_recu((v_av ->> 'avis')::uuid);
   update public.reput_avis set prochain_le = now() - interval '1 minute' where id = (v_av ->> 'avis')::uuid;
   perform private.reput_ouvrier(20);
