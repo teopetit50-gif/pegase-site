@@ -1177,3 +1177,8 @@ Principe commun : les phrases du site font foi, le produit s'y met ; aucun prix 
 - Refusé : transmettre une clé ou un mot de passe à B2 ; la preuve est passée par un script SQL joué par le coordinateur.
 - Pause de sécurité déplacée au 18/10, 07 h 30 Z (trig_01Pf8UuVk3CbaUTTsH184TEb), sur ordre de Teo.
 - 2e fusion main : C1 (vue d'ensemble sans « Bonjour » ni les 4 chiffres, c4701a5), B2 carte Questions (47a209c), B4 pièces citées (45d4216), B6 carte Questions (98a7d12).
+
+## 18/10 (02 h 20 Z) : nouvelle semaine, plafond 50 % (pause attendue vers 40 % ; sécurité 07 h 30 Z)
+- Secrets Google posés par Teo sur la recette. Déployés depuis worker-a2 53acbbc : messagerie v1 (verify_jwt true), messagerie-oauth v1 (verify_jwt false, retour = URL de la fonction) ; cron omega-messagerie ; fournisseurs_envoi.gmail branche = true (microsoft false). Démarrage vérifié (400 « Lien invalide » sans état).
+- WhatsApp test Meta : expéditeur ab8778d8 (daliro, +15551998680, phone_number_id 1304208509431404) posé par omega/banc/expediteur_whatsapp.sql (7d631e7) ; meta_whatsapp reste branche = false jusqu'à META_ACCESS_TOKEN.
+- Écran Messagerie (A3 b0becc5) fusionné dans Réglages. Attention : omegaai.fr pointe sur la prod, où ni les fonctions ni les secrets Google ne sont posés ; l'essai Gmail de Teo se fait sur la recette, par le lien d'omega/banc/connexion_gmail.sql (A2, valable 15 min) que joue le coordinateur.
