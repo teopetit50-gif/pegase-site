@@ -2,8 +2,8 @@
 
 ## REPRISE (reprise du 18/10, 21 h 16 Z — Teo)
 
-- **Fait** : lots a4_01 → a4_43 posés et verts sur la recette (84/84) ; a4_44 écrit (tva.taux : « TVA étrangère » pour un fournisseur établi hors de France ; test `a4_32_tva_etrangere_libelle.sql`, rouge avant, vert après ; 85/85 en local) ; origin/main fusionnée.
-- **En cours** : a4_44 à poser par le coordinateur.
+- **Fait** : lots a4_01 → a4_44 posés et verts sur la recette (85/85, 18/10 21 h 40 Z ; recontrôle du banc joué) ; a4_45 écrit (taux lisibles « 7,5 % », « 19 % » au lieu de « 19.000 % » dans tva.taux ; clé et preuve inchangées ; test `a4_33_taux_lisibles.sql`, rouge avant, vert après ; 86/86 en local) ; a4_44 rendu rejouable après a4_45 (reconnaît sa marque).
+- **En cours** : a4_45 à poser par le coordinateur.
 - **Prochain pas** : paquet 3 du banc relevé et classé (aucun nouveau défaut) ; `montant.lignes` attend un champ « remise au pied » du lecteur (CHAMPS-LECTURE). Restent au coordinateur et à Teo : fusion, production, déploiements `sortie` / `compta`, écran d'effacement, garde des fichiers (A5), identifiants des éditeurs, clé Sirene, prix des paliers.
 
 ## Banc, chantier 3 (18/10) — exemples de la norme lus par FILED (PAS de vraies factures)

@@ -23,7 +23,8 @@ $o$;
 $n$;
 begin
   v_def := pg_get_functiondef('private.filed_controler_facture(uuid)'::regprocedure);
-  if position(v_nouveau in v_def) > 0 then
+  -- Déjà posé : le texte d'a4_44, ou sa marque si a4_45 a depuis réécrit l'écriture des taux.
+  if position(v_nouveau in v_def) > 0 or position('-- a4_44' in v_def) > 0 then
     raise notice 'a4_44 : private.filed_controler_facture(uuid) déjà corrigée.';
     return;
   end if;
