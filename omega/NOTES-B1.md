@@ -103,6 +103,13 @@ les 14 tests sont verts sur la recette, les trois migrations sont posées,
 /espace/varelo est sur main (b287d04) et **en ligne sur omegaai.fr**. Le
 coordinateur lit ce fichier.
 
+## REPRISE (18/10/2026, 07 h 30 Z — pause de sécurité demandée par Teo)
+
+Arbre propre, rien en cours. Dernier lot : contexte_varelo dans l'assistant (b62f7dd) — b1_19 posé, test b1_22 et
+44 verts, fonction varelo-assistant v1 déployée sur la recette ; route et lib/varelo/assistant.ts à la prochaine
+fusion main. Prochain pas : un essai de bout en bout sur le banc (une vraie question, un vrai coût) quand Teo
+le décide ; la production au gel (PRODUCTION.md, ajouter b1_19 et la fonction) ; l'essai à blanc des exports.
+
 ## 17/10/2026 — « contexte_varelo » dans l'assistant (accord de Teo ; b1_19, tests b1_22, fonction varelo-assistant)
 
 Teo, 17/10 : oui, lecture seule, sous la session de la personne, chaque lecture au journal, aucun IBAN ; le
