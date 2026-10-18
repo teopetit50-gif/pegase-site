@@ -6,10 +6,9 @@
 -- Ce script le vérifie sur la recette (le code en base peut différer des extraits) ; il ne change rien
 -- si la vérification passe.
 
--- 1. La définition en base : aucune condition sur statut attendue dans le where.
-select pg_get_functiondef('private.resoudre_boite(text,text)'::regprocedure) ~* 'statut\s*(=|<>|in)\s*' as filtre_statut_present;
--- Attendu : false (seul « order by (e.statut = 'actif') desc » contient statut, sans opérateur de filtre dans le where :
--- si true, lire la définition et en parler à A2 avant la partie 2).
+-- 1. La définition en base, à lire : le where ne doit porter que sur canal et identité / phone_number_id
+--    (statut n'apparaît que dans l'order by).
+select pg_get_functiondef('private.resoudre_boite(text,text)'::regprocedure);
 
 -- 2. L'épreuve : en rôle service (resoudre_boite exige l'ouvrier).
 set local role service_role;
