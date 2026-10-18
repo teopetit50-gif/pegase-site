@@ -232,7 +232,7 @@ export default function ReserverUnAuditPage() {
                 <hr className="rdv-filet" />
 
                 <div className="rdv-logos-bloc">
-                  <p className="rdv-mono rdv-centre">Les outils que nous utilisons</p>
+                  <p className="rdv-mono rdv-centre">Nous travaillons avec</p>
                   {RANGEES.map((rangee, n) => (
                     <ul key={n} className="rdv-logos">
                       {rangee.map((m) => (
