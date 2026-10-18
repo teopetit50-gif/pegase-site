@@ -89,3 +89,11 @@ create or replace function vault.update_secret(secret_id uuid, new_secret text d
 create or replace view vault.decrypted_secrets as select id, name, description, secret, secret as decrypted_secret from vault.secrets;
 
 alter table public.filed_fournisseurs add constraint filed_fournisseurs_tva_check check (tva ~ '^[A-Z]{2}[0-9A-Z]{2,13}$');
+
+-- a4_51 : public.expediteurs (les boîtes et identités d'envoi du socle), colonnes de omega/SOCLE-EXTRAITS-COMMUN.sql,
+-- sans son déclencheur de préparation.
+create table if not exists public.expediteurs (id uuid primary key default gen_random_uuid(), client_id uuid not null references public.clients(id) on delete cascade,
+  module text check (module ~ '^[a-z][a-z_]{1,29}$'), canal text not null check (canal in ('email','whatsapp','sms','lre','appel')),
+  fournisseur text not null check (fournisseur ~ '^[a-z][a-z0-9_]{1,30}$'), identite text not null, nom_affiche text, repondre_a text,
+  parametres jsonb not null default '{}', secret_nom text, statut text not null default 'a_verifier' check (statut in ('a_verifier','actif','suspendu')),
+  verifie_le timestamptz, cree_le timestamptz not null default now(), maj_le timestamptz not null default now(), unique (client_id, id));
