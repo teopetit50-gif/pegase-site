@@ -14,9 +14,13 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
   des paliers 1 et 2 sous accord permanent du socle, relance ferme / devis / mise en demeure (seule à pouvoir partir en
   LRE) dans actions_sans_accord. Aucun accord créé ; Omega reste « coupe ».
 - **Posé (18/10)** : c2_13 point du matin des rappels sous accord (6a98ff42).
-- **À poser** : `c2_14_texte_echeance.sql` puis tests `c2_14_texte_echeance` (9) et `c2_05_textes` (ajusté : 11 textes par
-  langue) — le texte du rappel du jour d'échéance s'écrit aussi (table jumelle cashd_gabarits_echeance, lue avec les
-  autres par private.cashd_gabarits_de) ; écran : le palier dans Vos textes, aperçu « à régler ». Local 285/285.
+- **Posé (18/10)** : c2_14 texte du jour d'échéance (05e9bf82, ^test_c2_ 14/14).
+- **Liste de Teo (18/10, 23 h 41 Z)** : G2, G3, G7, G8, G9, G10, G11, G20, G21, G14 déjà construits et posés (c2_04 → c2_09,
+  écran) ; restait G17.
+- **À poser** : `c2_15_taux_bce.sql` puis tests `c2_15_taux_bce` (11), `c2_07_validation` et `c2_12_envoi_auto` (ajustés) —
+  G17 : taux BCE demandés chaque jour ouvré (pg_net, API publique data-api.ecb.europa.eu, sans compte), rangés en source
+  « bce » ; le taux saisi par une organisation garde la priorité. Crons cashd-taux-bce (15 h 35 UTC) et -lire. Local 296/296.
+  À savoir : cashd_factures_etat (c2_03) préfère le taux saisi par l'organisation, même ancien, au taux BCE récent.
 - **Omega client CASHD (18/10, recette)** : `omega/banc/cashd_omega.sql` — installe CASHD (essai), coupe l'envoi du
   module cashd (relances rédigées et validables, envoyées à la main), charge les factures d'un bloc VALUES que le
   coordinateur remplit à partir des PDF de Teo (copie locale non commitée : vraies données). CASHD ne lit pas les PDF.

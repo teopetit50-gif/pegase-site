@@ -80,7 +80,7 @@ begin
                     and a.type_action in ('cashd.relance', 'cashd.devis', 'cashd.mise_en_demeure')) = 3,
                    'Relance ferme, devis et mise en demeure : aucun accord ne peut les couvrir (actions_sans_accord)');
   else
-    return next pass('actions_sans_accord absente du banc local');
+    return next ok(true, 'actions_sans_accord absente du banc local');
   end if;
 
   -- ── Coupé par le gérant : l'accord est révoqué, les rappels attendent de nouveau ──

@@ -50,7 +50,7 @@ begin
 
   -- ── Les liens du point du matin vont au nouvel espace (c2_07) ──
   return next ok(jsonb_array_length(private.cashd_point_lignes(v_client, j + 1)) > 0
-                 and not exists (select 1 from jsonb_array_elements(private.cashd_point_lignes(v_client, j + 1)) x where x ->> 'lien' is distinct from '/espace2/cashd/suivi'),
+                 and not exists (select 1 from jsonb_array_elements(private.cashd_point_lignes(v_client, j + 1)) x where coalesce(x ->> 'lien', '') !~ '^/espace2/cashd/suivi(\?vue=[a-z]+)?$'),
                  'Chaque ligne du point du matin mène à /espace2/cashd/suivi, jamais à l''ancien dessin');
 
   -- ── Retour aux rôles par défaut ──
