@@ -1,5 +1,10 @@
 # NOTES-A1 — ouvrier LECTEUR (session worker A1)
 
+## ARRÊT — pause du 18/10, 17 h 13 Z (Teo : priorité au grand groupe et à l'architecture)
+- **Fait** : socle 19as posé ; `pieces_citees` au format B4 (lecteur à redéployer) ; 5 DCE réels publics avec SOURCE et sha256 ; `CHIFFRAGE/lecteur.md` mis à jour (lectures du 18/10, arrêt sur crédit API épuisé).
+- **En cours** : rien. La lecture des 5 DCE est interrompue, il faut que Teo recharge le crédit API ; j'attendais encore les chemins des 5 dossiers Tamila de B4.
+- **Prochain pas** : quand le crédit sera rechargé, finir les lectures, faire relire un attendu, mesurer avec `mesurer.ts`, puis faire passer les lignes de B à A.
+
 ## 18/10, chantiers 2 et 3 (reprise à 16 h 05 Z, arrêt avant 19 h 30 Z)
 - **DCE réels** (`omega/banc/dce-reels/`) : 5 dossiers en téléchargement direct, chacun avec un `SOURCE-*.md` (URL et sha256). Les fichiers sont dans le scratchpad, pas dans git ; B5 et B6 les rechargent vers le stockage du banc.
   - Neuf : Castres-Gironde, complet avec plans.
