@@ -123,6 +123,45 @@ nulle part sur la page. Une seule action n'est pas construite : « Fournisseur a
 Aucun message ne part vers un fournisseur ; il faudrait 1,5 j →B et 0,5 j →A, plus un canal. Les autres fiches
 renvoient aux n° 2, 16, 21, 22 et 18.
 
+## Épreuve sur DCE publics réels (B6, 18/10/2026)
+
+Trois DCE publiés par leurs communes (téléchargement direct, sources dans `omega/banc/dce-reels/*/SOURCE-*.md`,
+sha256 vérifiés) ont été déposés comme devis Daliro du banc par `omega/banc/dce_daliro.mjs`, connecté comme le
+gérant, sous RLS. Le chemin est celui de l'écran : `btp_deposer_devis` (b6_33), puis le lecteur (v38). Coût estimé
+1,84 € (40 pages × 0,04 €, estimation prudente) ; le coût exact vient de `dce_daliro.sql`, bloc 3.
+
+| DCE | Pièce | Pages | Lignes lues | Libellés retrouvés sur leur page |
+|---|---|---|---|---|
+| VRD — Luzarches (95), place de la République | DPGF lot 1 VRD | 4 | 52 | 52 / 52 (vérifiée) |
+| | DPGF lot 2 espaces verts | 2 | 9 | 9 / 9 (vérifiée) |
+| Rénovation — Touët-de-l'Escarène (06), salle rurale | DPGF lot 1 | 10 | 58 | 52 / 58 |
+| | DPGF lot 2 (3 ouvrages, contrôlé à la main : complet) | 4 | 3 | 2 / 3 |
+| | DPGF lot 5 | 4 | 13 | lu, à vérifier |
+| VRD — Pencran (29) | BPU (prix unitaires sans quantités) | 22 | 0 | classé `daliro_piece_autre` |
+
+Lecture : 135 lignes de DPGF réels, avec désignation, unité, quantité et lot. Aucun total HT n'est lu, et c'est
+normal : un DPGF de DCE est vierge de prix, et la pièce reste « à vérifier » faute de cette clé. Les libellés non
+retrouvés sont signalés et ne sont pas posés seuls. Exemple, Touët lot 2 : « h sous arc 320 cm » ne figure pas
+dans le texte de la page, qui dit 220 cm.
+
+**Lignes qui changent d'état :**
+- **n° 44** (« nous raccordons vos devis ») : la partie devis passe de C à **A pour le PDF**. Le collage et le
+  CSV d'un export Excel restent prouvés par le test b6_24.
+- **n° 12** (« Logiciel à remplacer : 0 ») : C → **A**. Le devis ne se saisit plus ligne à ligne.
+- **n° 52** : la phrase « Daliro lit vos devis là où ils sont, depuis votre logiciel ou un export » passe de D à
+  **A** (PDF, CSV, collage). « Vous repartez avec ce que nous y avons relevé » est à B : le relevé du chantier
+  est à l'écran (0aeb024). Il reste à C pour l'import d'un export WhatsApp, qui attend Teo.
+- **Lignes B** : aucune ne passe à A par cette épreuve seule. Le n° 38 (« liste cadencée depuis le devis ») et
+  le n° 17 demandent encore un planning et des commandes réels sur ces lignes.
+
+**Ce que l'épreuve a trouvé :**
+1. Un **BPU** (bordereau de prix unitaires, sans quantités) n'est pas reconnu comme devis : 22 pages lues pour
+   rien. C'est à faire chez A1 (type `daliro_devis` sans quantité, ou type `daliro_bpu`).
+2. Un **DPGF en xlsx** (Castres-Gironde, neuf) ne passe pas par le lecteur. `btp_deposer_devis` n'accepte que le
+   PDF, et l'écran propose de coller le tableau ou de déposer un CSV. Rien n'a été converti à la main.
+3. Les **CCTP-DPGF réunis** (Le Boulou, 13 à 21 pages par lot, surtout du CCTP) n'ont pas été lus, pour tenir le
+   budget. Il faudrait que le lecteur ne paie que les pages de DPGF.
+
 ## Phrases à corriger sur la page (sans code)
 
 1. « vous avez une journée pour le remplacer » (n° 6) : c'est la veille à 17 h.

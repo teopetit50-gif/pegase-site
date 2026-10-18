@@ -7,7 +7,7 @@ Dernière mise à jour : 06/10/2026, 03 h 00 Paris — lot B6 terminé.
 
 **Posé et vert sur la recette, écrans dans main** : b6_01 → b6_35 (dernier passage : 36 ok, MeteoCarte et l'échange météo dans main). Météo MET Norway : état A.
 
-**À poser (coordinateur)** : omega/banc/dce_daliro.sql bloc 1 (MO public + trois chantiers « DCE réels — … »). Puis B6 lance `node omega/banc/dce_daliro.mjs` (gérant du banc, clé publique, RLS) dès que des DCE sont sur worker-a1 (dce-reels/<neuf|renovation|vrd>/<dossier>/) ; bloc 3 pour le coût exact ; noter les lignes B → A dans CHIFFRAGE/daliro.md.
+**À poser (coordinateur)** : rien ; bloc 3 de omega/banc/dce_daliro.sql pour le coût exact des lectures des DCE.
 
 **Attend Teo** : WhatsApp Business (Meta), transcription des vocaux, accord permanent J-2, région des données (Supabase ; vercel.json sans région). Phrases à corriger sur la page : CHIFFRAGE/daliro.md (fin) — « une journée pour remplacer » et « disponibilités » sont désormais vraies une fois b6_29/b6_31 posés.
 
@@ -132,6 +132,7 @@ Repère du marché : Graneet, Obat, Batappli, Tolteck, Extrabat font tous des **
 
 ## Journal de session
 
+- 18/10, 17 h 05 UTC : chantier 3 joué par B6 (gérant du banc, RLS) : Luzarches VRD (2 DPGF, 61 lignes vérifiées), Touët rénovation (3 DPGF, 74 lignes, 68 libellés retrouvés), Pencran VRD (BPU non reconnu : daliro_piece_autre). Castres (DPGF xlsx) non déposé ; Le Boulou (CCTP-DPGF longs) écarté pour le budget. Coût estimé 1,84 €. CHIFFRAGE/daliro.md : section « Épreuve sur DCE publics réels » (n° 12, 44, 52 → A pour le devis ; aucune ligne B → A seule).
 - 18/10, 16 h 50 UTC : chantier 3 : dce_daliro.mjs réécrit sur le modèle de dce_lorani.mjs (B5) — gérant du banc, clé publique, sous RLS ; un marché DCE-<dossier> par DCE (btp_ecrire_marche) sur le chantier de sa catégorie ; DPGF/DQE/BPU/devis PDF téléversés puis btp_deposer_devis ; lecture attendue pièce par pièce ; coût estimé à la page (0,04 €, le gérant ne lit pas les coûts), arrêt à 2 € estimés ou 19 h 30 Z. Bloc 1 SQL réduit au MO et aux trois chantiers. Connexion du gérant vérifiée (200). DCE pas encore sur worker-a1 (A1 attend le téléchargement par une personne).
 - 18/10, 16 h 30 UTC : chantier 2 (Teo) : dce_daliro.sql (MO public, trois chantiers et marchés à vérifier DCE-NEUF / DCE-RENO / DCE-VRD sur le banc ; contrôles lignes, total, coût) + dce_daliro.mjs (téléverse le DPGF/devis PDF de chaque DCE puis btp_deposer_devis : la pièce reçue déclenche la lecture ; refuse au-delà de 2 € consommés ce jour ; attend 10 min, coût total). Un SQL seul ne peut pas poser les octets dans le stockage. DCE pas encore sur worker-a1.
 - 18/10, 07 h 32 UTC : PAUSE de sécurité (Teo). Rien en cours ; arrêt propre.
