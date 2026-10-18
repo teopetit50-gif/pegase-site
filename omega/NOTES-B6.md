@@ -3,15 +3,11 @@
 Branche `worker-b6`. Coordinateur : session `session_01B4JNQXyT69GytdvE9SjAnE` (Fable, jusqu'au 06/10 03 h 10 Paris), puis `session_01BCGFdpRKBvXKjouC75sYBg` (Opus 5.5) — passation reçue le 06/10 à 03 h 10 : « B6 est clos et fusionné ; rien n'est attendu ».
 Dernière mise à jour : 06/10/2026, 03 h 00 Paris — lot B6 terminé.
 
-## REPRISE — chantier 3 (Teo, 18/10/2026) : jusqu'à 30 DCE réels lus comme devis, arrêt à 2 € ou 19 h 30 Z
+## REPRISE — pause (Teo, 18/10/2026, 17 h 00 Z : focus grand groupe et architecture) ; arrêt 6468906
 
-**Posé et vert sur la recette, écrans dans main** : b6_01 → b6_35 (dernier passage : 36 ok, MeteoCarte et l'échange météo dans main). Météo MET Norway : état A.
-
-**À poser (coordinateur)** : rien ; bloc 3 de omega/banc/dce_daliro.sql pour le coût exact des lectures des DCE.
-
-**Attend Teo** : WhatsApp Business (Meta), transcription des vocaux, accord permanent J-2, région des données (Supabase ; vercel.json sans région). Phrases à corriger sur la page : CHIFFRAGE/daliro.md (fin) — « une journée pour remplacer » et « disponibilités » sont désormais vraies une fois b6_29/b6_31 posés.
-
-**Prochain pas** : une fois b6_36 posé et la fonction déployée, une vraie question sur le chantier du banc (relecture réelle). WhatsApp, voix : rien tant que Teo n'a pas ouvert les comptes.
+**Fait** : b6_01 → b6_36b posés et verts (718 ok), assistant « questions » en service, relevé du chantier, épreuve DCE réels (135 lignes de DPGF lues, 0,42 € ; CHIFFRAGE/daliro.md § Épreuve).
+**En attente** : Le Boulou lot 12 et Touët lot 3 déposés, lecture à la reprise du crédit Anthropic (bloc 3 de omega/banc/dce_daliro.sql) ; pour A1 : BPU sans quantités, DPGF xlsx.
+**Attend Teo** : WhatsApp Business, vocaux, accord permanent J-2, région des données.
 
 ## Les deux jauges
 
