@@ -15,6 +15,9 @@
          « depot »), au nom du gérant du banc. Le lecteur lit la pièce, FILED la contrôle.
          --voir : ce qui serait déposé, sans rien déposer.
 
+   Les exemples de la norme Factur-X / ZUGFeRD 2 (FNFE-MPE, FeRD) — décision du coordinateur, 18/10 — sont déposés avec
+   l'expéditeur « exemple-norme:… » : ce ne sont PAS de vraies factures, et le relevé les distingue.
+
    Garde-fous : au plus MAX_PIECES (50) pièces et MAX_MO (80) Mo par passage ; refus de tourner après HEURE_LIMITE
    (19:30 Z par défaut) ; rejouable (un fichier dont l'empreinte est déjà un document du banc n'est pas redéposé). Le
    coût de lecture se relève avec omega/banc/factures_opendata.sql (bloc 2) : le chantier s'arrête à 1 € — on dépose
@@ -129,7 +132,7 @@ for (const f of choisis) {
   if (!up.ok) { console.log(`  ✗ Storage refuse ${f.fichier} : HTTP ${up.status} ${(await up.text()).slice(0, 200)}`); continue; }
   const r = await rest('POST', 'rpc/filed_deposer_piece', {
     p_client: CLIENT, p_document: document, p_nom_fichier: f.fichier.slice(0, 200), p_mime: 'application/pdf', p_octets: f.octets.length,
-    p_sha256: f.empreinte, p_chemin: chemin, p_entite: null, p_source: 'depot', p_expediteur: `opendata:${(f.editeur || 'collectivite').slice(0, 80)}`,
+    p_sha256: f.empreinte, p_chemin: chemin, p_entite: null, p_source: 'depot', p_expediteur: `${/EXEMPLE/i.test(f.jeu ?? '') ? 'exemple-norme' : 'opendata'}:${(f.editeur || 'collectivite').slice(0, 80)}`,
   });
   console.log(`  ✓ déposée : ${f.fichier} → ${r?.reference ?? r?.document ?? document}${r?.doublon_de ? ' (doublon reconnu)' : ''}`);
   n++;

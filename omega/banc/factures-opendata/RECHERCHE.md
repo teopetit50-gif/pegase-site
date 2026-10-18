@@ -21,3 +21,12 @@ Le script `omega/banc/factures_opendata.mjs` (recherche, dépôt, plafonds, heur
 - les factures d'exemple Factur-X publiées avec la norme (FNFE-MPE) : de vrais PDF/A-3 avec leur XML, mais des
   exemples, pas des factures payées ;
 - une collectivité qui publie ses pièces sur son propre site (à trouver et vérifier une par une : licence ouverte).
+
+## Décision et source retenue (18/10, coordinateur)
+
+Les EXEMPLES DE LA NORME Factur-X / ZUGFeRD 2 — **ce ne sont pas de vraies factures** : 7 exemples Factur-X de la FNFE-MPE
+(`ZUGFeRDv2/correct/FNFE-factur-x-examples`) et 29 exemples ZUGFeRD 2.0 de FeRD réalisés par intarsys
+(`ZUGFeRDv2/correct/intarsys/…`), pris dans le corpus ZUGFeRD (github.com/ZUGFeRD/corpus, licence Apache-2.0, commit
+82e886fb2136). La page de la FNFE ne les donne qu'après un formulaire de courriel : non rempli. Chaque fichier, son
+adresse et son SHA-256 sont dans `SOURCE.tsv` ; les PDF ne sont pas dans git. Sur le banc, leur expéditeur est
+« exemple-norme:… ». Aucune collectivité retenue : aucune trouvée qui publie ses pièces sous licence ouverte.
