@@ -75,8 +75,8 @@ for (const largeur of LARGEURS) {
     const anglaisVue = m.texte.match(ANGLAIS);
     ok(!anglaisVue, anglaisVue ? `${vue} : mot anglais « ${anglaisVue[0]} »` : `${vue} : aucun mot anglais surveillé`);
     const n = String(await s.evaluer(compte));
-    const attendu = { Relances: '4/true', Envois: '1', 'Trésorerie': '4/true' }[vue];
-    ok(n === attendu, `${vue} : ${n} (attendu ${attendu}${vue === 'Relances' ? ' — quatre relances écrites, et vos textes' : vue === 'Envois' ? ' — la relance partie' : ' — quatre tranches, le pilotage'})`);
+    const attendu = { Relances: '5/true', Envois: '1', 'Trésorerie': '4/true' }[vue];
+    ok(n === attendu, `${vue} : ${n} (attendu ${attendu}${vue === 'Relances' ? ' — cinq relances écrites, et vos textes' : vue === 'Envois' ? ' — la relance partie' : ' — quatre tranches, le pilotage'})`);
     if (largeur === 390 || largeur === 1440) await s.capturer(`${dossier}cashd-${vue.toLowerCase().normalize('NFD').replace(/[^a-z]/g, '')}-${largeur}.jpg`, { qualite: 55 });
   }
   s.soucis.filter((x) => !/CERT|insights|404|favicon/.test(x)).forEach((x) => ok(false, x));
@@ -354,6 +354,31 @@ for (const largeur of [1440, 390]) {
   ok(Array.isArray(anciens) && anciens.length === 0, `aucun lien vers l'ancien dessin ${anciens?.length ? JSON.stringify(anciens.slice(0, 5)) : ''}`);
   await onglet(s, 'Envois');
   ok(/vue=envois/.test(await s.evaluer('location.search')), 'la vue choisie reste dans l\'adresse');
+  s.fermer();
+}
+
+for (const largeur of [1440, 390]) {
+  const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'c2-main', densite: 1 });
+  console.log(`— /espace/cashd : une relance validée, envoyée à la main (exemple, ${largeur})`);
+  ok(await s.aller(base + CHEMIN), 'page chargée');
+  await s.dormir(600);
+  await onglet(s, 'Relances');
+  await s.evaluer(`[...document.querySelectorAll('#c2-relances li')].find(li => li.textContent.includes('Peintures Giraud') && li.textContent.includes('Validée'))?.querySelector('summary')?.click()`);
+  await s.dormir(300);
+  const g = await s.evaluer(`(() => { const b = document.querySelector('.c2-envoi-main'); return b ? [...b.querySelectorAll('button')].map(x => x.textContent.trim()).join('|') + '/' + !!b.querySelector('select') : ''; })()`);
+  ok(g === "Copier le texte|Noter l'envoi à la main/true", `la relance validée offre copier, le canal et « noter l'envoi » (${g})`);
+  const m = await s.evaluer(DEBORDE);
+  ok(m.deb === 0 && m.larges.length === 0, `pas de débordement (${m.deb}) ${m.larges.length ? JSON.stringify(m.larges) : ''}`);
+  await s.evaluer(`(() => { const sel = document.querySelector('.c2-envoi-main select'); const set = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set; set.call(sel, 'courrier'); sel.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+  await s.dormir(150);
+  await s.evaluer(`[...document.querySelectorAll('.c2-envoi-main button')].find(b => b.textContent.includes('Noter'))?.click()`);
+  await s.dormir(400);
+  const reste = await s.evaluer(`[...document.querySelectorAll('#c2-relances li')].some(li => li.textContent.includes('Peintures Giraud') && li.textContent.includes('Validée'))`);
+  ok(reste === false, 'notée, elle quitte les relances à envoyer');
+  await onglet(s, 'Envois');
+  const e = await s.evaluer(`[...document.querySelectorAll('section[aria-label="Envois"] tbody tr')].map(tr => tr.textContent).join(' || ')`);
+  ok(/Peintures Giraud.*Courrier, à la main/.test(e || ''), `elle figure dans les envois, « Courrier, à la main » (${(e || '').slice(0, 120)}…)`);
+  if (largeur === 390) await s.capturer(`${dossier}cashd-envoi-main-390.jpg`, { qualite: 55 });
   s.fermer();
 }
 

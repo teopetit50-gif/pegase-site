@@ -336,3 +336,10 @@
   flex-wrap: wrap;
   gap: 6px 16px;
 }
+
+/* c2_11 — l'envoi à la main d'une relance validée */
+.esp .c2-envoi-main { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--r-filet); }
+.esp .c2-envoi-main-gestes { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 8px; }
+.esp .c2-envoi-main-canal { display: inline-flex; align-items: center; gap: 8px; }
+.esp .c2-envoi-main-canal .rv-champ { width: auto; min-width: 0; }
+

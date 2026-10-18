@@ -501,6 +501,21 @@ export default function EcranCashd({ vue }: { vue?: Onglet } = {}) {
     const somme = (limite: string) => ouvertes.filter((p) => (p.echeance ?? jour) <= limite).reduce((s, p) => s + p.reste_du - (p.montant_conteste ?? 0), 0);
     return { a_30_jours: somme(dans(30)), a_60_jours: somme(dans(60)), au_dela: 0, tenu_a_part: 0 };
   }, [source, previsionReelle, fiches]);
+  // c2_11 : une relance validée, envoyée par la personne elle-même, se note ; elle passe alors dans les envois.
+  const noterEnvoi = async (r: Relance, canal: string) => {
+    setErreur(null);
+    try {
+      if (source === "reelle") {
+        await portes.noterEnvoiMain(r.id, canal, null);
+        await relire();
+      } else {
+        const le = new Date().toISOString();
+        setRelancesLocales((prev) => prev.map((x) => (x.id === r.id ? { ...x, etat: "envoyee", envoye_le: le, envoi_main: { canal, envoye_le: le, note: null } } : x)));
+      }
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : "L'envoi n'a pas pu être noté.");
+    }
+  };
   const aValider = relances.filter((r) => r.etat === "a_valider" || r.etat === "non_reglee").length;
   const recentes = relances.filter((r) => r.etat !== "envoyee").slice(0, 12);
   const parties = relances.filter((r) => r.etat === "envoyee" || r.envoye_le);
@@ -708,6 +723,7 @@ export default function EcranCashd({ vue }: { vue?: Onglet } = {}) {
                           {r.motif ? <span className="c2-sous c2-motif">{r.motif}</span> : null}
                         </summary>
                         {r.corps ? <pre className="c2-corps">{r.corps}</pre> : <p className="c2-sous">Le texte est dans la file de validation.</p>}
+                        {r.etat === "validee" ? <EnvoiMain relance={r} noter={noterEnvoi} /> : null}
                       </details>
                     </li>
                   );
@@ -780,7 +796,7 @@ export default function EcranCashd({ vue }: { vue?: Onglet } = {}) {
                             <td>{r.envoye_le ? dateHeure(r.envoye_le) : dateCourte(r.jour)}</td>
                             <td><strong>{r.compte}</strong><span className="c2-sous">{r.destinataire_adresse ?? "—"}</span></td>
                             <td>{r.sujet ?? "—"}<span className="c2-sous">{libellePalier(r.palier)} · {montant(r.montant)}</span></td>
-                            <td>{r.canal === "lre" ? "Recommandé électronique" : r.canal === "whatsapp" ? "WhatsApp" : "Courriel"}</td>
+                            <td>{r.envoi_main ? `${CANAUX_MAIN[r.envoi_main.canal] ?? r.envoi_main.canal}, à la main` : r.canal === "lre" ? "Recommandé électronique" : r.canal === "whatsapp" ? "WhatsApp" : "Courriel"}</td>
                             <td><Pastille teinte={e.teinte}>{e.libelle}</Pastille></td>
                           </tr>
                         );
@@ -926,3 +942,38 @@ export default function EcranCashd({ vue }: { vue?: Onglet } = {}) {
     </>
   );
 }
+
+const CANAUX_MAIN: Record<string, string> = { email: "Courriel", courrier: "Courrier", telephone: "Téléphone", autre: "Autre" };
+
+/* c2_11 — une relance validée qu'on envoie soi-même : copier le texte, puis noter l'envoi (canal). */
+function EnvoiMain({ relance, noter }: { relance: Relance; noter: (r: Relance, canal: string) => Promise<void> }) {
+  const [canal, setCanal] = useState("email");
+  const [copie, setCopie] = useState(false);
+  const [envoi, setEnvoi] = useState(false);
+  return (
+    <div className="c2-envoi-main" role="group" aria-label="Envoi à la main">
+      <p className="c2-sous">Validée. Si vous l&apos;envoyez vous-même, notez-le ici : la relance comptera comme partie, à cette date.</p>
+      <div className="c2-envoi-main-gestes">
+        <button
+          type="button"
+          className="esp-lien-bouton"
+          onClick={() => {
+            void navigator.clipboard?.writeText(`${relance.sujet ?? ""}\n\n${relance.corps ?? ""}`).then(() => setCopie(true), () => setCopie(false));
+          }}
+        >
+          {copie ? "Texte copié" : "Copier le texte"}
+        </button>
+        <label className="c2-envoi-main-canal">
+          Envoyée par
+          <select className="rv-champ" value={canal} onChange={(e) => setCanal(e.target.value)}>
+            {Object.entries(CANAUX_MAIN).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+          </select>
+        </label>
+        <button type="button" className="r-btn r-btn--noir" disabled={envoi} onClick={() => { setEnvoi(true); void noter(relance, canal).finally(() => setEnvoi(false)); }}>
+          Noter l&apos;envoi à la main
+        </button>
+      </div>
+    </div>
+  );
+}
+

@@ -223,6 +223,7 @@ export type Relance = {
   envoi_id: string | null;
   envoye_le: string | null;
   canal?: string | null;
+  envoi_main?: { canal: string; envoye_le: string; note: string | null } | null;
   gabarit?: string | null;
   variante?: number | null;
   pieces: { facture_id: string; numero: string; palier: string; reste_du: number; retard_jours: number; penalites: number; indemnite: number }[];

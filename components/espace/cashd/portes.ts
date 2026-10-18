@@ -218,3 +218,8 @@ export async function reglerPortefeuille(client: string, actif: boolean) {
 export async function ecrireLigne(client: string, langue: string, nature: "facture" | "devis", modele: string | null, actif: boolean) {
   return rpc<{ id: string }>("cashd_ecrire_ligne", { p_client: client, p_langue: langue, p_nature: nature, p_modele: modele, p_actif: actif });
 }
+
+/* ——— c2_11 : la relance validée, envoyée à la main ——— */
+export async function noterEnvoiMain(relance: string, canal: string, note: string | null) {
+  return rpc<{ id: string; canal: string; envoye_le: string }>("cashd_noter_envoi_main", { p_relance: relance, p_canal: canal, p_le: null, p_note: note });
+}
