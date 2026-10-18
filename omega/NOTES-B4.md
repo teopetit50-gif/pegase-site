@@ -26,6 +26,15 @@ l'intitulé dans le nom de fichier) / déjà attendue / absente → « Réclamer
 le premier vrai résultat. Lecteur v38 (A1 9e4cdfd) rend aussi citee_par, citee_dans, communiquee, piece : acceptés,
 ils priment sur la comparaison locale. Recette 205/205. b4_19 + 28 posés verts (17/10).
 
+**18/10 — coffre réel du banc** (secrets Scaleway posés par Teo) : `omega/banc/coffre_reel.sql` (gérant par la porte
+normale, puis activation et sonde par tamila-coffre via pg_net, lectures de preuve). tamila-coffre **à redéployer** :
+liste des clés avec `scheduled_for_deletion=false` (paramètre requis du schéma officiel), état `scheduled_for_deletion`
+(et non `pending_deletion`), clé de même nom désactivée → refus sans en créer une seconde, `associated_data` en chaîne
+nue puis repli `{value}` sur un 400 qui la vise ; activation au nom du serveur avec le gérant désigné (la porte le
+vérifie) ; action `sonde` (clé et pièce fictives relues, autre dossier refusé). 28 tests Deno.
+`TAMILA_ACTIVER_COFFRE` n'est pas un secret serveur (variable de analyse-reelle.mjs). Prochain pas : relire les réponses
+brutes du banc, puis la première lecture longue réelle (dossier neuf au coffre).
+
 **Prochain pas sans Teo** : recetter le relevé sur le premier vrai résultat d'A1 (pièces fictives sur la recette),
 dossier de plaidoirie assemblé en un PDF, abonnement d'agenda tenu à jour.
 
