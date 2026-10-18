@@ -62,8 +62,8 @@ Fichiers lus : `lib/produits/factures.ts` (noté `fac`), `lib/produits/capacites
 | 30 | « File de validation partagée » | fac:173 | B | demandes de validation (socle), circuit (a4_07), écran A3 « À valider » | — | 0 / 0,5 | — |
 | 31 | « Catégories d'achat sur mesure » | fac:174 | B (côté FILED) | liste propre à l'organisation (a4_47 : `filed_categories`, liste de départ, portes, rangement après contrôle — proposition du lecteur dans la liste, sinon habitude du fournisseur —, choix humain qui tient, dépenses par catégorie) | Le lecteur (A1) doit proposer dans cette liste : `private.filed_categories_lecteur(organisation)` la lui donne ; l'écran de la liste et du rangement | 0,5 (A1) / 0,5 | — |
 | 32 | « Journal de tout ce qui a été lu » | fac:176, 239 | B | `journal_opposable`, `filed_historique` immuable, `filed_journal_continuite` (a4_31) | — | 0 / 0,5 | — |
-| 33 | Cabinet : « Un espace par dossier client » | fac:188 | D | une organisation = un client (socle) | Un cabinet qui voit plusieurs organisations (comptes multi-organisations, bascule, droits) | 5 (socle, A3) / 1 | — |
-| 34 | « Vue d'ensemble sur tous les dossiers » | fac:189 | D | — | Tableau consolidé multi-organisations | 3 / 0,5 | — |
+| 33 | Cabinet : « Un espace par dossier client » | fac:188 | C | une organisation = un dossier ; une personne a un rôle dans chaque dossier (comptes du socle) ; vue d'ensemble et dossiers épinglés (a4_52) | Inviter un cabinet dans un dossier en un geste et la bascule à l'écran (socle, A3) | 3 (socle, A3) / 1 | — |
+| 34 | « Vue d'ensemble sur tous les dossiers » | fac:189 | B | `filed_vue_ensemble` : chaque dossier suivi, pièces du mois et quota, en cours, à payer sous 30 jours, retards, dernière pièce (a4_52) | L'écran | 0 / 0,5 | — |
 | 35 | « Marque du cabinet » | fac:190 | D | — | Marque blanche (logo, adresse d'envoi, domaine) | 3 / 0,5 | domaine du cabinet |
 | 36 | « Reversement sur les abonnements » | fac:191 | D | — | Commissionnement (dépend du n° 21) | 2 / 0,5 | — |
 
