@@ -9,8 +9,8 @@ begin
   -- Un fournisseur allemand (numéro fictif à clé juste) qui facture 19 % de TVA allemande.
   de := tests.a4_facture_etrangere(o, 'DE-44-001', 'DE', 'DE136695976');
   update public.filed_factures set regime_tva = null, montant_ht = 100, montant_tva = 19, montant_ttc = 119 where id = (de ->> 'facture')::uuid;
-  insert into public.filed_factures_tva (client_id, facture_id, document_id, taux, base, montant)
-  values ((o ->> 'client')::uuid, (de ->> 'facture')::uuid, (de ->> 'document')::uuid, 19, 100, 19);
+  insert into public.filed_factures_tva (client_id, facture_id, document_id, categorie, taux, base, montant, source)
+  values ((o ->> 'client')::uuid, (de ->> 'facture')::uuid, (de ->> 'document')::uuid, 'S', 19, 100, 19, 'xml');
   perform private.filed_controler_facture((de ->> 'facture')::uuid);
   return next ok(exists (select 1 from public.filed_controles where facture_id = (de ->> 'facture')::uuid and code = 'tva.taux'
                            and resultat = 'anomalie' and gravite = 'bloquant'
@@ -20,8 +20,8 @@ begin
   -- Le même taux chez un fournisseur français : le message d'avant.
   fr := tests.a4_facture(o, 'ia', 'FR-44-001', 119);
   update public.filed_factures set montant_ht = 100, montant_tva = 19, montant_ttc = 119 where id = (fr ->> 'facture')::uuid;
-  insert into public.filed_factures_tva (client_id, facture_id, document_id, taux, base, montant)
-  values ((o ->> 'client')::uuid, (fr ->> 'facture')::uuid, (fr ->> 'document')::uuid, 19, 100, 19);
+  insert into public.filed_factures_tva (client_id, facture_id, document_id, categorie, taux, base, montant, source)
+  values ((o ->> 'client')::uuid, (fr ->> 'facture')::uuid, (fr ->> 'document')::uuid, 'S', 19, 100, 19, 'xml');
   perform private.filed_controler_facture((fr ->> 'facture')::uuid);
   return next ok(exists (select 1 from public.filed_controles where facture_id = (fr ->> 'facture')::uuid and code = 'tva.taux'
                            and resultat = 'anomalie' and message like 'Taux de TVA qui n''existe pas en France : 19 %%'),
