@@ -6,7 +6,10 @@ de `session_01B4JNQXyT69GytdvE9SjAnE`).
 
 ## REPRISE — pause de sécurité du 18/10/2026, 07 h 30 Z (pauses précédentes : 06/10, 11/10, 15/10)
 
-**En attente au 18/10** :
+**Au 18/10, 15 h 50 Z** : Gmail et l'envoi WhatsApp sont prouvés en vrai (niveau 2, voir le tableau). Reste à Teo le
+jeton Meta permanent (le jeton actuel expire sous 24 h). Ci-dessous, l'état d'avant :
+
+**En attente au 18/10 (matin)** :
 - preuve WhatsApp `omega/banc/preuve_whatsapp.sql` (0796edd) : le coordinateur la joue dès que Teo donne
   son numéro (à autoriser aussi dans l'app Meta). Secrets Meta posés, `meta_whatsapp` branché, expéditeur
   ab8778d8 actif ;
@@ -44,6 +47,8 @@ section (voir `git log -1`). Avant : `c2fdd1e`, `b69423f` (envoi WhatsApp et AR2
 | Banc : `omega/banc/preuve_whatsapp.sql` — un envoi WhatsApp réel par le chemin normal, meta_whatsapp branché le 18/10. 0796edd arrêté par son garde (la recette prend p_gabarit, pas de modele_externe sur envois) ; corrigé : gabarit daliro.preuve_whatsapp (modele_externe hello_world@en_US) + expediteur lit « nom@langue Meta » et les paramètres en liste | voir le dernier commit | B (doubles) | Déployer expediteur v16 puis jouer |
 | Preuve WhatsApp, 2e essai (envoi 7a6fc9bc bloqué CONSENTEMENT_ABSENT, mode essai) : accord par `noter_consentement` (gérant du banc, source ecrit) ; mode réel = ligne organisation à NULL (elle ne peut pas être reel, et essai l'emporte) + daliro reel, puis retour en essai ; clé :2 | 72a738f3 | **Niveau 1** | Joué le 18/10 |
 | Preuve WhatsApp, résultat (18/10) : envoi 56a6c622 en mode reel, parti vers Meta par toute la chaîne Omega (gabarit, accord, verrous, travail, expediteur) ; Meta refuse : META_400_100 subcode 33 « Object with ID '1304208509431404' does not exist, cannot be loaded due to missing permissions » (fbtrace Ae4nsJIczvQCnXg_G86XsrI). Cause : le jeton système (META_ACCESS_TOKEN) n'a pas accès au numéro / WABA 2123888648549888 — à corriger côté Meta par Teo (utilisateur système avec le WABA assigné et les droits whatsapp_business_messaging). Rien à coder. Réglages remis en essai | — | Niveau 1 : envoi réel tenté, refus d'accès Meta | Attend Teo (droits du jeton) |
+| **WhatsApp envoi PROUVÉ en vrai (niveau 2), 18/10** : envoi f737cfe1 (clé banc:a2:preuve-whatsapp:5, mode reel), modèle hello_world (gabarit daliro.preuve_whatsapp, hello_world@en_US) vers +33768163443 ; statut envoye 15:48:03 Z, wamid.HBgLMzM3NjgxNjM0NDMVAgARGBI0MTRFRDc5MEIxM0FDNUY5MDUA ; événement « remis » 15:48:05 Z noté par reception/whatsapp (statuts → noter_remise). Jeton de 24 h (page « Étape 1 ») : le jeton permanent de l'utilisateur système reste à corriger par Teo d'ici 24 h. Réglages banc remis en essai | — | **Niveau 2** | Jeton permanent (Teo) |
+| **Gmail PROUVÉ en vrai (niveau 2), 18/10** : messagerie 259b8938 connectée par OAuth (régime Test, gmail.readonly + gmail.compose), active | — | **Niveau 2** | Écran Messagerie (A3) |
 | Gmail connecté pour de vrai sur la recette le 18/10 (messagerie 259b8938, 2 portées). Page de fin de `messagerie-oauth` : la passerelle Supabase sert le HTML de *.supabase.co en text/plain → page en texte UTF-8 avec BOM | voir le dernier commit | B | Redéployer `messagerie-oauth` ; la vraie fin reste l'écran A3 (MESSAGERIE_ECRAN) |
 
 ### Ce qui attend le coordinateur
