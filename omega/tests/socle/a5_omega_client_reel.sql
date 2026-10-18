@@ -1,6 +1,6 @@
 -- a5_omega — Omega, son propre client réel SUR LA RECETTE (décision de Teo, 18/10/2026 ; client créé par A3, slug
 -- 'omega'). Ce test prouve, pour ce client :
---   1. tous ses réglages d'envoi sont en essai (aucun en « reel »), chacun avec une adresse d'essai ;
+--   1. tous ses réglages d'envoi sont en essai, chacun avec une adresse d'essai, ou coupés (plus strict) ; aucun en « reel » ;
 --   2. aucun envoi « reel » n'est possible : aucun n'existe, et pour chaque module connu le réglage effectif du socle
 --      (private.reglages_envois_effectifs, celui que lisent preparer_envoi et verrous_envoi) n'est jamais « reel » ;
 --   3. les comptes OFFLOAD importés sont dormants (aucun envoi ne leur est parti en réel) et sans consentement
@@ -25,10 +25,10 @@ begin
   select c.id into omega from public.clients c where coalesce(to_jsonb(c) ->> 'slug', to_jsonb(c) -> 'config' ->> 'slug') = 'omega';
 
   -- ── 1. Réglages d'envoi : tous en essai ──
-  select count(*), count(*) filter (where g.mode <> 'essai' or g.essai_adresse is null) into n, m
+  select count(*), count(*) filter (where g.mode not in ('essai', 'coupe') or (g.mode = 'essai' and g.essai_adresse is null)) into n, m
   from public.reglages_envois g where g.client_id = omega;
   return next ok(n > 0, format('Omega a des réglages d''envoi (%s ligne(s))', n));
-  return next is(m, 0::bigint, 'tous les réglages d''envoi d''Omega sont en essai, avec une adresse d''essai');
+  return next is(m, 0::bigint, 'tous les réglages d''envoi d''Omega sont en essai (avec une adresse d''essai) ou coupés');
 
   -- ── 2. Aucun envoi réel possible ──
   select count(*) into n from public.envois e where e.client_id = omega and e.mode = 'reel';

@@ -28,6 +28,7 @@ Depuis la reprise du 11/10 :
   config ->> 'slug'). « Dormant » = aucun envoi réel vers le compte importé (offload_comptes.statut n'a pas de valeur
   « dormant »). Vérifié sur la maquette avec des tables d'appoint dans une transaction annulée (11 ok ; un réglage
   « reel » et une adresse partagée avec une autre organisation font bien échouer).
+  Lancé par le coordinateur : 9/11 ; le 6 attend l'import OFFLOAD (Teo) ; le 3 accepte désormais « coupe » (cashd, C2).
 - Pause du 15/10 levée par le message du 17/10. Sauvegarde : GitHub chiffrée dès que Teo pose les deux secrets.
 
 Le reste de la section ci-dessous (6/10) vaut toujours : gel et tag prod-* attendent le coordinateur ; workflow de
