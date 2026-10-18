@@ -3,7 +3,7 @@
 Branche `worker-b6`. Coordinateur : session `session_01B4JNQXyT69GytdvE9SjAnE` (Fable, jusqu'au 06/10 03 h 10 Paris), puis `session_01BCGFdpRKBvXKjouC75sYBg` (Opus 5.5) — passation reçue le 06/10 à 03 h 10 : « B6 est clos et fusionné ; rien n'est attendu ».
 Dernière mise à jour : 06/10/2026, 03 h 00 Paris — lot B6 terminé.
 
-## REPRISE — reprise du 17/10/2026 (Teo) : assistant « questions », par petits lots
+## REPRISE — pause de sécurité demandée par Teo (18/10/2026, 07 h 30 UTC) ; reprendre ici au feu vert
 
 **Posé et vert sur la recette, écrans dans main** : b6_01 → b6_35 (dernier passage : 36 ok, MeteoCarte et l'échange météo dans main). Météo MET Norway : état A.
 
@@ -132,6 +132,7 @@ Repère du marché : Graneet, Obat, Batappli, Tolteck, Extrabat font tous des **
 
 ## Journal de session
 
+- 18/10, 07 h 32 UTC : PAUSE de sécurité (Teo). Rien en cours ; arrêt propre.
 - 17/10, 17 h 15 UTC : lot de l'assistant clos (coordinateur) : 718 ok, fonction et cron actifs. En attente de Teo (WhatsApp, voix).
 - 17/10, 17 h UTC : régression b6_36 (8 rouges b6_01…b6_10, 42501 sur btp_est_serveur) : b6_36 redéfinissait private.btp_est_serveur et retirait l'execute à authenticated, que les vues du chantier utilisent. b6_36b rétablit le droit (b6_03) ; b6_36 ne touche plus la fonction ; b6_32 vérifie le droit. Leçon : vérifier qu'une fonction n'existe pas déjà avant de la « créer ».
 - 17/10, 16 h 45 UTC : b6_36 refusé tel quel (coordinateur) : il redéfinissait private.consommation_ia_jour depuis c3_04 et aurait écrasé le socle 19ar d'A1 (635c4cc, qui compte déjà tous les genres + registre consommations_ia). Bloc retiré de b6_36, assertion retirée de b6_32.
