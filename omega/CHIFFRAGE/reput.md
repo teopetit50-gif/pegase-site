@@ -98,7 +98,7 @@ l'état actuel, « →A » de B à prouvé en vrai.
 | 70 | « Une réclamation est identifiée comme telle et sort du traitement courant. » | K:85, K:133 | B | Sujet protégé, jamais autorisable, alerte | — | 0 / ½ | — |
 | 71 | « Un client en litige ouvert ne reçoit aucune réponse automatisée. » | K:86, K:125 | B | c3_06 private.reput_en_litige → cashd_contact_en_litige (C2 8b8fbb4) | Ne connaît que les litiges tenus dans CASHD | 0 / 1 | — |
 | 72 | « La demande de parler à une personne est honorée sans discussion. » | K:87, K:157 | B | Sujet protégé « humain » | « le client sait à qui il parle désormais » : depuis c3_09 le service est nommé s'il est routé ; le nom de la personne non (C) | 1 / ½ | — |
-| 73 | « Le volume de demandes se lit par canal, par service et par heure de la journée. » | K:95 | B | Vues reput_indicateurs, reput_volumes_heure | — | 0 / ½ | — |
+| 73 | « Le volume de demandes se lit par canal, par service et par heure de la journée. » | K:95 | B | Par canal et par heure : vues reput_indicateurs, reput_volumes_heure (c3_05) ; par service : vue reput_indicateurs_services (c3_12, 18/10 ; pgTAP 7/7) | Brancher la vue à l'écran Indicateurs | ½ / ½ | — |
 | 74 | « Le délai de première réponse est mesuré, demande par demande. » | K:96 | B | reput_indicateurs | — | 0 / ½ | — |
 | 75 | « La part des demandes traitées sans intervention humaine est suivie dans le temps. » | K:97 | B | reput_indicateurs (envoyées seules / mois) | — | 0 / ½ | — |
 | 76 | « Les sujets qui reviennent sont remontés, et ils nourrissent la base de connaissances. » | K:98 | B | c3_06 sujets récurrents au point du matin ; c3_08 fiche proposée (11 tests) | — | 0 / ½ | — |

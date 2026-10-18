@@ -145,20 +145,34 @@ begin
   return new;
 end $function$;
 
--- ── Points du matin (lot 15) imités ──
-create table if not exists public.points_sections (client_id uuid, module text, jour date, role text, titre text, items jsonb, ordre int,
-  primary key (client_id, module, jour, role, titre));
+-- ── Points du matin : la souche commune (01_socle, B4) porte points_sections et points_items. Sa deposer_section
+--    refuse toute ligne qui désigne un objet, « le pire cas » ; le vrai socle ne refuse le texte libre que sur un objet
+--    CHIFFRÉ (private.objets_chiffres, lot 14b), et reput_demandes n'en est pas un. On rend ici la règle réelle :
+--    objet_type et objet_id vont ensemble, et l'objet n'est pas chiffré. ──
+create table if not exists private.objets_chiffres (objet_type text primary key);
 create or replace function private.deposer_section(p_client uuid, p_module text, p_jour date, p_destinataire uuid, p_role text, p_titre text, p_items jsonb,
   p_entite uuid default null, p_equipe uuid default null, p_sante boolean default false, p_donnees_du timestamptz default null,
   p_incomplete boolean default false, p_ordre integer default 100) returns uuid language plpgsql security definer set search_path to '' as $$
+declare v_id uuid;
 begin
-  insert into public.points_sections values (p_client, p_module, p_jour, p_role, p_titre, p_items, p_ordre)
-  on conflict (client_id, module, jour, role, titre) do update set items = excluded.items;
-  return gen_random_uuid();
+  if num_nonnulls(p_destinataire, p_role, p_equipe) <> 1 then raise exception 'un seul destinataire' using errcode = '22023'; end if;
+  if exists (select 1 from jsonb_array_elements(p_items) e
+             where (e ? 'objet_type') <> (e ? 'objet_id')
+                or (e ? 'objet_type' and exists (select 1 from private.objets_chiffres oc where oc.objet_type = e ->> 'objet_type'))
+                or coalesce(e ->> 'gravite', '') not in ('info', 'attention', 'critique')
+                or left(e ->> 'lien', 1) <> '/' or char_length(e ->> 'texte') > 300) then
+    raise exception 'ligne refusée par la souche' using errcode = '22023';
+  end if;
+  insert into public.points_sections (client_id, module, jour, destinataire, role, titre, ordre, nb_items)
+  values (p_client, p_module, p_jour, p_destinataire, p_role, p_titre, p_ordre, jsonb_array_length(p_items))
+  on conflict (client_id, module, jour, destinataire, role, titre) do update set nb_items = excluded.nb_items, maj_le = now()
+  returning id into v_id;
+  delete from public.points_items where section_id = v_id;
+  insert into public.points_items (client_id, section_id, rang, texte, lien, gravite, objet_type, objet_id)
+  select p_client, v_id, x.n, x.e ->> 'texte', x.e ->> 'lien', x.e ->> 'gravite', x.e ->> 'objet_type', x.e ->> 'objet_id'
+  from jsonb_array_elements(p_items) with ordinality x(e, n);
+  return v_id;
 end $$;
-create or replace function private.retirer_section(p_client uuid, p_module text, p_jour date, p_destinataire uuid, p_role text, p_titre text,
-  p_entite uuid, p_equipe uuid) returns void language sql security definer set search_path to '' as $$
-  update public.points_sections set items = '[]' where client_id = p_client and module = p_module and jour = p_jour and role = p_role and titre = p_titre $$;
 create or replace function private.battre_ouvrier(p_module text, p_genres text[], p_detail jsonb, p_attendu interval default '15 minutes')
 returns integer language sql as $$ select 0 $$;
 create or replace function private.echouer_travail(p_id bigint, p_err text, p_reprendre boolean) returns text language sql as $$
