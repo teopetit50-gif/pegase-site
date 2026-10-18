@@ -2,8 +2,8 @@
 
 ## REPRISE (reprise du 18/10, 21 h 16 Z — Teo)
 
-- **Fait** : lots a4_01 → a4_46 posés et verts sur la recette (^test_a4_ 87/87, 18/10 22 h 40 Z) ; a4_46 vérifié sur le banc (chaîne intacte, 340 lignes antérieures, la chaîne part de la prochaine ligne).
-- **En cours** : a4_47 posé et vert (90/90, 18/10 23 h 06 Z). a4_48 écrit (comptabilisation réservée et séparation des tâches, chiffrage n° 111, voie b du coordinateur : FILED seul, désactivé par défaut ; test `a4_36_comptabilisation_reservee.sql`, rouge avant, vert après ; 90/90 en local), à poser. Pour A1 : `private.filed_categories_lecteur(organisation)` (service_role) rend la liste des catégories à proposer ; FILED lit `pieces_valeurs`, champ `categorie`.
+- **Fait** : lots a4_01 → a4_48 posés et verts sur la recette (^test_a4_ et test_44 : 91/91, 18/10 23 h 16 Z). Derniers : a4_46 historique chaîné (n° 114), a4_47 catégories d'achat (n° 31), a4_48 comptabilisation réservée et séparation des tâches (n° 111, FILED seul, désactivées par défaut).
+- **En cours** : rien. Pour A1 : `private.filed_categories_lecteur(organisation)` (service_role) rend la liste des catégories à proposer ; FILED lit `pieces_valeurs`, champ `categorie`.
 - **Prochain pas** : sans compte tiers, il ne reste que des choix à trancher (envoi périodique du sceau d'historique au client, n° 114) ; `montant.lignes` attend un champ « remise au pied » du lecteur (CHAMPS-LECTURE). Restent au coordinateur et à Teo : fusion, production, déploiements `sortie` / `compta`, écran d'effacement, garde des fichiers (A5), identifiants des éditeurs, clé Sirene, prix des paliers.
 
 ## Banc, chantier 3 (18/10) — exemples de la norme lus par FILED (PAS de vraies factures)
