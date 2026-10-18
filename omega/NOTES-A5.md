@@ -1,5 +1,12 @@
 # NOTES — session A5 (garde-fous)
 
+## ARRÊT — 18/10/2026, 17 h Z (pause de Teo)
+
+Cause probable des « Run failed » (0 job, à chaque push) : omega-repetition-ci.yml met `${{ runner.temp }}` dans le `env:` du job (ligne 61), où le contexte `runner` n'est pas permis ; GitHub rejette alors tout le fichier, à chaque push, quels que soient ses déclencheurs. omega-sauvegarde.yml a le même défaut (ligne 98, `TRAVAIL`) et échouerait de même une fois fusionné. Correctif à faire plus tard, quand on me le demandera : `$RUNNER_TEMP` dans les étapes. Je n'ai touché à aucun workflow.
+- Fait : 19as posé (fichiers gardés à l'effacement) ; sauvegarde 7712bcd5 revue (seule écriture en prod : la preuve ; message IPv6/pooler) ; test a5_omega (c26305f7), 9/11 sur la recette, le 6 attend l'import OFFLOAD.
+- En cours : rien. La fusion de la sauvegarde dans main attend l'accord de Teo, et le défaut `runner.temp` ci-dessus est à corriger avant.
+- Prochain pas : sur feu vert, corriger `runner.temp` dans les deux workflows, puis rejouer test_a5_omega_ après l'import OFFLOAD.
+
 ## REPRISE — mise à jour du 17/10/2026 (lot 19as)
 
 Depuis la reprise du 11/10 :
