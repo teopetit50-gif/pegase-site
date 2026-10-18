@@ -4,6 +4,8 @@ Branche `worker-a3`. Dernière mise à jour : 06/10/2026, 03 h 50 Paris (reprise
 
 ## REPRISE (15/10 — pause 50 % de Teo, 16 h 16 Z ; SHA d'arrêt ef5eeb4 + ce commit de notes)
 
+- 18/10 : carte **Messagerie** dans Réglages (components/espace/reglages/Messagerie.tsx, montée dans EcranReglages, donc /espace/reglages et la section Données de /espace2/reglages, sans toucher aux fichiers de C1). Portes d'A2 (19al) : messagerie_preparer → messagerie-oauth/google/debut ; retour ?erreur= dit en clair puis retiré de l'adresse ; public.messageries (gérant/admin) : connectée / à reconnecter / non connectée, adresse, droits accordés ; « Déconnecter » → messagerie_revoquer (+ a_faire_par_le_client). Microsoft « bientôt ». L'adresse de retour n'est donnée que sur omegaai.fr (messagerie_hotes_retour). Recette 5 largeurs verte ; base réelle (gérant) : lecture, puis « Connecter Gmail » mène jusqu'à la page de connexion de Google (rien d'accordé). `relecture-messagerie.mjs` (CONNECTER=1).
+
 **Fait, poussé sur worker-a3** (tête = ce commit) :
 - 15/10 : écran **Équipe** — /espace/equipe et /espace2/equipe (Habille, comme la boîte) ; lien depuis Réglages (« Gérer l'équipe »). Annuaire, changer un rôle, sociétés visibles (perimetre_total + comptes_entites), ajouter une personne qui a déjà un compte (rattacher_membre), retirer. Recette /espace et /espace2, non-régression `equipe` 27/27, axe vert ; base réelle : gérant (4 personnes, refus « Aucun compte pour cette adresse. »), daf2 valideur (« Seuls les gérants… »). Rien écrit en base. Chiffrage espace.md mis à jour (1.3 corrigé : /bienvenue existe ; 1.4 C, 1.5 et 1.6 B).
 - Fusionné : Équipe 2340dd1 (main cd8a349). À fusionner : ef5eeb4 (nom accessible de « Modifier », règle axe activée).
