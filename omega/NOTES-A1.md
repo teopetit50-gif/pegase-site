@@ -1,5 +1,13 @@
 # NOTES-A1 — ouvrier LECTEUR (session worker A1)
 
+## REPRISE — pause de sécurité demandée par Teo le 18/10/2026, 07 h 30 Z
+
+**Branche `worker-a1`. Le commit d'arrêt est le dernier, « NOTES-A1 : REPRISE (pause du 18/10) ».** Tout est commité et poussé : rien en cours, aucun fichier public touché.
+- **En recette** : lecteur v37 (48658a4) ; socle 19aq, 19ar et 19as posés, tests verts. La lecture longue est prouvée sur l'essai 8d85b76b (10 pièces sur 10, 15 constats sourcés, 0,17 €).
+- **Pas encore déployé** : 9e4cdfd4, `tamila.pieces_citees` au format de B4 (b4_19). Le lecteur est à redéployer, il n'y a rien à poser.
+- **En attente** : C3 branche REPUT sur `envoyer_interne`, et B4 relit `pieces_citees`. Côté A1, il faut encore un corpus réel pour `decoupage_reel.mjs` et `outils/mesurer.ts`.
+- **À la reprise** : redemander le redéploiement du lecteur s'il n'est pas fait, puis attendre le lot suivant du coordinateur.
+
 ## REPRISE — pause demandée par Teo le 06/10/2026, 21 h Z
 
 **Branche `worker-a1`, tête au moment de la pause : voir le dernier commit (« NOTES-A1 : section REPRISE »).**
