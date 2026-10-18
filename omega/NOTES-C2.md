@@ -10,6 +10,11 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
 - **Posé et vert** : c2_01 → c2_10 (7a5678f0, test_c2_* 256 ok sur la recette ; le lot y tourne ~8 min) ; écrans dans main.
   c2_10 : cadence du site par défaut — facture J 0 (rappel le jour de l'échéance, sauté si déjà échue), J+7, J+21, J+30 ;
   devis J+3 puis J+7. Le texte du J 0 n'est pas encore personnalisable (contrainte de cashd_gabarits). Rien à poser.
+- **À poser (18/10, modèle 2)** : `c2_12_envoi_auto.sql` puis tests `c2_12_envoi_auto` (17) et `c2_03_moteur` (ajusté :
+  un rappel porte le type cashd.rappel). Les rappels des paliers 1 et 2 partent sans validation SOUS ACCORD PERMANENT du
+  socle (proposé par le gérant, activé par une seconde personne, un an, plafond par rappel) ; relance ferme, devis, mise
+  en demeure et LRE toujours retenues (actions_sans_accord + blocage). Aucun accord ni mode d'envoi créé ; Omega reste
+  « coupe ». Local 275/275 (socle réduit complété des accords, scratchpad) ; recette écran verte.
 - **À poser (18/10, reprise)** : `c2_11_envoi_main.sql` + `test_c2_11_envoi_main` (12) — noter qu'une relance validée est
   partie à la main (envoi du module coupé, cas d'Omega) ; elle compte alors comme partie. Écran : « Copier le texte » et
   « Noter l'envoi à la main » sur une relance validée. Aucun mode d'envoi changé. Local 258/258, recette écran verte.
