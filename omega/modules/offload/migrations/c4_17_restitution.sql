@@ -37,8 +37,8 @@ begin
     v_donnees := v_donnees || jsonb_build_object(replace(t, 'offload_', ''), v_lignes);
     v_resume := v_resume || jsonb_build_object(replace(t, 'offload_', ''), jsonb_array_length(v_lignes));
   end loop;
-  select coalesce(jsonb_agg(jsonb_build_object('le', j.le, 'action', j.action, 'objet_type', j.objet_type, 'objet_id', j.objet_id,
-                                               'donnees', j.donnees) order by j.le), '[]'::jsonb)
+  select coalesce(jsonb_agg(jsonb_build_object('le', j.survenu_le, 'action', j.action, 'objet_type', j.objet_type, 'objet_id', j.objet_id,
+                                               'donnees', j.donnees) order by j.survenu_le), '[]'::jsonb)
     into v_lignes
   from public.journal_opposable j where j.client_id = p_client and j.action like 'offload.%';
   v_donnees := v_donnees || jsonb_build_object('journal', v_lignes);

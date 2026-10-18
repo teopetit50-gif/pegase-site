@@ -6,9 +6,9 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 
 ## REPRISE (18/10, 21 h 30 Z — reprise d'OFFLOAD, lot technique sans compte tiers)
 
-- Fait : c4_01 à c4_16 posés et verts sur la recette (421 ok) ; c4_17 (restitution des données) écrit, vert en local (393 ok), à poser.
+- Fait : c4_01 à c4_16 verts sur la recette (421 ok) ; c4_17 posé, corrigé (journal : survenu_le), à rejouer ; local 393 ok.
 - En cours : rien. La liste Guadeloupe reste hors git et hors recette (consigne du coordinateur, 18/10) ; elle est dans le scratchpad seulement.
-- Prochain pas : poser c4_17 sur la recette ; aucun mode d'envoi ne change sans confirmation de Teo.
+- Prochain pas : lot « modèle 2 » (envoi automatique) prêt en plan, non écrit : il attend le feu vert de Teo dans cette session.
 
 ### Reprise du 17/10
 
@@ -717,3 +717,4 @@ Partielles : 6, 11, 15, 38.
 - 15/10, 12 h 32 Z — recette : c4_01 à c4_15 verts (c4_09 compris après 1dcd066d). Question « un message par trimestre » transmise à Teo.
 - 17/10 — lot c4_16 (un message par trimestre, relance écrite éteinte par défaut) : 41 tests, 387 ok en local.
 - 18/10, 21 h 30 Z — reprise (coordinateur) : lot c4_17 (restitution des données) : 42 tests, 393 ok en local.
+- 18/10, 21 h 35 Z — c4_17 : la date du journal opposable s'appelle survenu_le (recette : 42703) ; corrigé, local 393 ok.
