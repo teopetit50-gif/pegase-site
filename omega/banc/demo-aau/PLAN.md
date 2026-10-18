@@ -46,6 +46,19 @@ Recherche du 18/10, 17 h 20 Z, comme demandé, sans contourner quoi que ce soit 
   crédit IA**, sur un jeu de planches public ou fabriqué de même taille. Repère de coût : environ 0,04 € la page, soit
   environ 0,60 € pour un PCMI de 15 pages.
 
+### Les courriers d'essai du PCMI (prêts le 18/10, non déposés : leur lecture demande le crédit IA)
+
+- `courrier-essai-recepisse.pdf` : récépissé de dépôt, dossier PC 971103 26 A0018, déposé le 05/10/2026 ; il signale le
+  délai majoré (abords de monument historique, comme le relevé réel du terrain).
+- `courrier-essai-demande-pieces.pdf` : demande de pièces du 26/10/2026, PCMI 5 et PCMI 7.
+- Fabriqués par `omega/recette-b5/fabriquer-courrier.mjs gpe_recepisse|gpe_demande_pieces`. En-tête neutre (« Service
+  urbanisme, courrier d'essai »), sans nom, logo ni signature de la mairie ; la mention « DOCUMENT D'ESSAI » en tête et en
+  pied. Au retour du crédit : `node omega/recette-b5/courrier-reel.mjs <session> <pdf> <origine> lorani_recepisse_depot`
+  sur le projet AAU-DEMO-PCMI, au nom du gérant de démo (mot de passe à poser par le coordinateur).
+- Attendu à l'écran : date de dépôt 05/10/2026 et numéro proposés puis confirmés ; échéances recalculées ; après la
+  demande, pièces réclamées PCMI5 et PCMI7, nouveau délai de trois mois ; bordereau PCMI (#23) avec PCMI5 et PCMI7 « demandées
+  par la mairie ».
+
 ## 4. Le chemin de démo, six écrans
 
 | # | Écran | Ce qu'on montre | Ce qu'il faut (IA ?) |

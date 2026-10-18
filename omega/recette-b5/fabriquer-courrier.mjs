@@ -3,7 +3,7 @@
    passent), offsets de la table xref calculés. Sert à courrier-reel.mjs : chaque nature donne un fichier
    d'empreinte différente (la base refuse deux fois le même sha256 sur un même projet).
 
-   usage : node omega/recette-b5/fabriquer-courrier.mjs <recepisse|demande_pieces|demande_pieces_2|arrete|constat_affichage|lettre_delai|certificat_tacite> <sortie.pdf> [mention]
+   usage : node omega/recette-b5/fabriquer-courrier.mjs <recepisse|demande_pieces|demande_pieces_2|arrete|constat_affichage|lettre_delai|certificat_tacite|gpe_recepisse|gpe_demande_pieces> <sortie.pdf> [mention]
    mention : une ligne de plus en pied de page (« Réf. 2 »…), pour redéposer le même courrier sous une autre empreinte. */
 import { writeFileSync } from 'node:fs';
 
@@ -135,6 +135,58 @@ MODELES.certificat_tacite = [
   [11, 'à compter du 02/07/2026.'],
   [0, ''],
   [12, 'Fait à Nantes, le 15/09/2026'],
+];
+
+/* la démo de Guadeloupe (omega/banc/demo-aau/PLAN.md, 18/10/2026) : un PCMI à Baie-Mahault. L'en-tête ne reprend pas
+   celui de la mairie (ni nom, ni logo, ni signature) : le courrier est fabriqué, et le dit en tête et en pied. */
+const ESSAI_GPE = [9, 'DOCUMENT D\'ESSAI, fabriqué pour une démonstration de Lorani. Sans valeur administrative.'];
+MODELES.gpe_recepisse = [
+  ESSAI_GPE,
+  [16, 'SERVICE URBANISME (courrier d\'essai)'],
+  [11, 'Autorisations du droit des sols'],
+  [0, ''],
+  [14, 'RÉCÉPISSÉ DE DÉPÔT D\'UNE DEMANDE DE PERMIS DE CONSTRUIRE'],
+  [11, 'pour une maison individuelle et/ou ses annexes (Cerfa n° 13406)'],
+  [0, ''],
+  [12, 'Dossier n° PC 971103 26 A0018'],
+  [12, 'Demandeur : demandeur de démonstration'],
+  [12, 'Terrain : rue Jean Jaurès, 97122 Baie-Mahault (Guadeloupe)'],
+  [12, 'Objet : construction d\'une maison individuelle'],
+  [0, ''],
+  [12, 'Dossier déposé le 05/10/2026 au service urbanisme.'],
+  [0, ''],
+  [11, 'Le délai d\'instruction de droit commun est de deux mois à compter de la date de dépôt.'],
+  [11, 'Il peut être majoré : le terrain est situé dans les abords d\'un monument historique.'],
+  [11, 'Si vous ne recevez aucun courrier de l\'administration dans ce délai, vous bénéficierez'],
+  [11, 'd\'un permis tacite (articles R*423-23 et R*424-1 du code de l\'urbanisme).'],
+  [0, ''],
+  ESSAI_GPE,
+];
+MODELES.gpe_demande_pieces = [
+  ESSAI_GPE,
+  [16, 'SERVICE URBANISME (courrier d\'essai)'],
+  [11, 'Autorisations du droit des sols'],
+  [0, ''],
+  [12, 'Le 26/10/2026'],
+  [12, 'Lettre recommandée avec accusé de réception'],
+  [0, ''],
+  [14, 'Objet : demande de pièces complémentaires - dossier incomplet'],
+  [12, 'Dossier n° PC 971103 26 A0018 - demandeur de démonstration'],
+  [0, ''],
+  [11, 'Madame, Monsieur,'],
+  [11, 'Après examen, votre demande de permis de construire déposée le 05/10/2026 est incomplète.'],
+  [11, 'Pour que son instruction puisse commencer, vous devez fournir les pièces suivantes :'],
+  [11, '  - PCMI 5 : plan des façades et des toitures ;'],
+  [11, '  - PCMI 7 : photographie permettant de situer le terrain dans l\'environnement proche.'],
+  [0, ''],
+  [11, 'Vous disposez d\'un délai de trois mois à compter de la réception de ce courrier pour les'],
+  [11, 'transmettre (article R*423-39 du code de l\'urbanisme). À défaut, votre demande fera'],
+  [11, 'l\'objet d\'une décision tacite de rejet. Le délai d\'instruction partira de la réception'],
+  [11, 'des pièces complètes.'],
+  [0, ''],
+  [11, 'Le service instructeur'],
+  [0, ''],
+  ESSAI_GPE,
 ];
 
 const [nature, sortie, mention] = process.argv.slice(2);
