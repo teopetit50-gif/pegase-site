@@ -1,107 +1,57 @@
 import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
-import FormulesGrille from "@/components/reservation/FormulesGrille";
-import TableauFormats from "@/components/reservation/TableauFormats";
-import UnSeulAudit from "@/components/reservation/UnSeulAudit";
-import Protocole from "@/components/reservation/Protocole";
-import AppelCreneau from "@/components/reservation/AppelCreneau";
-import FaqAudit from "@/components/reservation/FaqAudit";
-import { FAQ, lienContact } from "@/lib/reservation";
-import { MODELES } from "@/components/modeles/donnees";
-import { POSTES } from "@/lib/paliers";
 import {
+  EstimationRetenue,
   ModeleRetenu,
   SiteRetenu,
-  EstimationRetenue,
 } from "@/components/reservation/ModeleUrl";
+import { MODELES } from "@/components/modeles/donnees";
+import { POSTES } from "@/lib/paliers";
+import FormulaireFormat from "./FormulaireFormat";
+import "./reserver.css";
 
 /* ══════════════════════════════════════════════════════════════════════
-   /reserver-un-audit — « Réserver un audit » (26/07/2026)
+   /reserver-un-audit — « Réserver un audit » (refonte du 18/10/2026)
 
-   Quatrième page de référence demandée par Teo : la page tarifs de Qonto
-   (qonto.com/en/pricing, profil « solo », facturation annuelle). Mêmes
-   sections dans le même ordre, mêmes proportions, même typographie —
-   relevé au computed style sur viewport 1280, tokens dans le bloc `.resa`
-   de globals.css.
+   Teo : « change-la complètement, fais-la comme scale.com/demo, mêmes
+   finitions ». Le modèle est la page de démo de Scale : un titre, un
+   chapô et un formulaire à gauche ; une carte gris bleu à droite, avec la
+   citation, un filet et une étiquette de bas de carte. Le relevé des
+   valeurs est dans reserver.css (en-tête), pris au getComputedStyle à
+   390, 768, 1024, 1440 et 1700 px.
 
-   Ce qui change : le SUJET. On ne compare pas des abonnements, on fait
-   choisir un format d'audit et réserver un créneau. Textes, formats et
-   chiffres sont ceux de Omega.
+   CE QUI EST GARDÉ, mot pour mot, de la version d'avant : le titre et le
+   chapô. Teo, 18/10 au soir : « enlève toutes les sections à part celle du
+   haut » — comme la référence, la page tient en une seule section (titre,
+   chapô, formulaire, carte) suivie du pied de page. Les trois formats, le
+   comparatif, le périmètre, le protocole, la FAQ et l'appel final ont été
+   retirés d'ici ; leurs textes restent dans lib/reservation (PROFILS,
+   COMPARATIF, FAQ) et dans l'historique git de ce fichier.
 
-   Deux emplacements de la référence n'ont PAS d'équivalent honnête ici et
-   ont été remplacés plutôt que meublés (règle refs-qonto/NOTES-DESIGN.md,
-   « aucun chiffre de preuve sociale inventé, aucun avis client ») :
-     · la colonne « Loved & trusted by +600,000 businesses » + note
-       Trustpilot → les deux faits qui décident vraiment (c'est gratuit,
-       c'est finançable par le Chèque TIC) ;
-     · le carrousel de témoignages clients → les engagements du protocole
-       d'audit, cités tels qu'ils sont tenus.
+   CE QUI CHANGE :
+   · la citation de la carte n'est PAS une citation client : c'est le
+     principe de l'audit, dit par nous (règle de regles-maison : aucune
+     preuve sociale inventée) ;
+   · les logos de la carte sont ceux d'Omega (systèmes et logiciels
+     métiers), en grand, comme la référence. Pas de marques tierces : un
+     logo de client ou d'outil se lit comme un partenariat ;
+   · le formulaire reprend les champs de la référence (prénom, nom,
+     entreprise, fonction, e-mail, pays, secteur, origine, format). Il est la
+     dernière page avant le mail : il envoie la demande (/api/audit/demande),
+     et le visiteur reçoit une confirmation avec le lien pour choisir son
+     créneau ;
+   · la recherche dans la FAQ et le simulateur ont disparu avec le reste
+     de l'ancienne mise en page — la FAQ tient en neuf questions, en
+     accordéon.
 
-   16/09/2026 — DEUX SECTIONS SUPPRIMÉES (Teo : « supprime ces deux
-   sections »). Le déroulé en trois temps (« Comment se passe l'audit »,
-   #deroule) et les compléments (« Compléter votre audit », #complements)
-   ne sont plus sur la page. Rien ne pointait sur leurs ancres — vérifié
-   par grep avant la coupe.
+   LES COMPOSANTS D'AVANT (FormulesGrille, TableauFormats, UnSeulAudit,
+   Protocole, AppelCreneau, FaqAudit, GarantiesAudit et leurs CSS) ne sont
+   plus importés ici. Ils restent dans components/reservation/ jusqu'à
+   décision de les retirer.
 
-   Dans la foulée, la page est ENTIÈREMENT CLAIRE. Le comparatif était la
-   dernière bande sombre ; une fois seul de son espèce au milieu de sept
-   sections claires, il ne faisait plus un rythme mais un trou (Teo :
-   « trop sombre cette section »). Il repasse dans le monde clair — le
-   détail du retournement est en tête de ComparerFormats.css. Le rythme
-   est désormais porté par les fonds de bande (#f5f5f5 de `.resa` ↔
-   `.r-blanc`) et par les cartes, comme sur la référence Qonto.
-   `.resa .r-nuit` reste écrit dans globals.css : plus rien ne le porte
-   sur cette page, mais c'est la gamme de référence si on y remet un jour
-   une bande sombre.
-   Le texte des compléments est retiré de lib/reservation.ts avec eux ;
-   les trois temps se relisent dans l'historique (commit f40e687).
-
-   27/09/2026 — TOUT CE QUI SUIT LA PREMIÈRE SECTION EST REFAIT EN
-   COMPOSANTS (Teo : « la page audit est mal faite ; il n'y a que la
-   première section qui ne doit pas être touchée, après refais tout
-   proprement avec des composants » — skill methode-site, composants
-   repris de 21st.dev, registres ouverts lus le jour même) :
-     · comparatif      → <TableauFormats>  (@7ovr comparison-3)
-     · simulateur      → <CalculCout>      (@radu pricing-slider-loops) —
-                          REMPLACÉ le même jour par <UnSeulAudit>
-                          (Tailark integrations-5), voir plus bas
-     · engagements     → <Protocole>       (Aceternity feature-section-
-                                            with-hover-effects)
-     · appel final     → <AppelCreneau>    (efferd cta-3)
-     · FAQ             → <QuestionsAudit>  (@tommyjepsen faq-section) —
-                          REMPLACÉ le même jour par <FaqAudit>
-                          (@preetsuthar17 faq-block : recherche, thèmes,
-                          réponses numérotées, liens) — Teo : « trouves-en
-                          un plus détaillé et pro »
-   Le bandeau d'orientation, qui faisait une section à lui seul, se range
-   au pied du tableau. Les fonds alternent désormais d'une section à
-   l'autre (gris de `.resa`, puis blanc, puis gris…) au lieu de deux
-   bandes grises de suite. <FormulesGrille>, la première section, est
-   importée ici directement : l'assembleur <Formules> ne portait plus
-   qu'elle. Les détails de chaque reprise sont en tête de chaque
-   composant.
-
-   27/09/2026, après-midi — LE SIMULATEUR SORT, ET LA PAGE A SA VERSION
-   MOBILE. Teo, sur capture : « remplace cette section complet, je veux
-   pas de comparateur », puis « oublie pas de faire la version mobile de
-   la page ». À sa place, <UnSeulAudit> : ce qu'un seul audit passe en
-   revue — les quatre systèmes et le sur-mesure autour d'Omega, avec la
-   ligne du menu de chacun et un lien vers sa page ; rien à régler. Pour
-   le téléphone : sections à 48 px de marge (le barème relevé sur
-   scale.com le 16/09 dit 40 à 48, elles en avaient 64), titres de
-   section tous à 24 px, articles du protocole compactés. Une barre de
-   réservation flottante a été posée puis RETIRÉE le même jour : Teo avait
-   fait retirer la même de l'accueil le 16/09 (commentaire en tête de
-   app/page.tsx) — ne pas la remettre sans lui demander.
-
-   27/09/2026, fin d'après-midi — le bandeau sous les cartes de formats
-   (« Gratuit, sans engagement | Chèque TIC ») et sa note deviennent
-   <GarantiesAudit>, dans <FormulesGrille> (Teo : « change ça par un
-   component plus pro »).
-
-   Le chrome reste celui du site : header caméléon (les sections claires
-   portent data-monde="clair") et footer sombre hérités de PageShell.
+   LES RAPPELS (modèle, formule de site, estimation) restent en tête du
+   formulaire : ils viennent de l'URL et portent le choix fait ailleurs.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
@@ -111,37 +61,55 @@ export const metadata: Metadata = {
     "Trois formats d'audit, gratuits à partir du cadrage de 45 minutes, pour mesurer ce que votre processus le plus coûteux représente. Sans engagement.",
 };
 
-
-/* ══════════════════════════════════════════════════════════════════════
-   15/09/2026 — ?modele=<slug> EST ENFIN LU, ET LA PAGE RESTE STATIQUE.
-
-   « Choisir ce modèle » (les cartes de /modeles et le mur de
-   /tarifs/site) menait ici depuis le 14/09 avec le modèle en paramètre,
-   « pour le jour où le formulaire le lira ». Personne ne le lisait : la
-   page l'ignorait, ses boutons repartaient sur /reserver sans lui, et le
-   choix se perdait — ces boutons valaient « Réserver un audit ».
-
-   Il est maintenant annoncé en tête de page et repart avec chaque bouton
-   de réservation, jusqu'au message de la demande (voir PriseDeCreneau).
-
-   La première version lisait `searchParams` : la page passait en ƒ,
-   rendue à chaque visite pour une ligne de rappel. Elle est revenue en ○
-   le jour même — le paramètre se lit au montage, côté client
-   (components/reservation/ModeleUrl.tsx), et le serveur ne fournit que
-   la table slug → nom pour que rien d'inventé ne s'affiche. C'est cette
-   table, et elle seule, qui vérifie le slug. */
+/* Les noms des modèles et des postes sont fournis par le serveur aux
+   rappels : la vérification du slug se fait côté client, mais la table des
+   noms n'a pas à entrer dans le paquet d'une page d'entrée. */
 const NOMS_MODELES: Record<string, string> = Object.fromEntries(
   MODELES.map((m) => [m.slug, m.nom]),
 );
 
-/* 15/09/2026 — les noms des quatre postes, fournis par le SERVEUR au
-   rappel d'estimation. Même raison que pour les modèles : la vérification
-   se fait côté client, mais la table des noms n'a pas à entrer dans le
-   paquet d'une page d'entrée — ici elle est minuscule, et le motif reste
-   le même d'un rappel à l'autre. */
 const NOMS_POSTES: Record<string, string> = Object.fromEntries(
   POSTES.map((p) => [p.id, `${p.system} · ${p.nom}`]),
 );
+
+/* Les logos de la carte sont ceux d'Omega : les quatre systèmes, puis les six
+   logiciels métiers (Teo, 18/10 au soir : « remplace les logos d'outils par les
+   logos Omega »). Les signes carrés de public/logos/<produit>-mark.png, en masque
+   à 36 px, le nom en mono dessous ; 4 puis 3 et 3, comme la référence. Aucune
+   marque tierce : un logo d'outil se lit comme un partenariat, et le site ne
+   nomme pas ses éditeurs d'IA. */
+const RANGEE_UN = [
+  { nom: "CASHD", fichier: "/logos/cashd-mark.png", largeur: 36 },
+  { nom: "OFFLOAD", fichier: "/logos/offload-mark.png", largeur: 36 },
+  { nom: "REPUT", fichier: "/logos/reput-mark.png", largeur: 36 },
+  { nom: "FILED", fichier: "/logos/filed-mark.png", largeur: 36 },
+];
+const RANGEE_DEUX = [
+  { nom: "Varelo", fichier: "/logos/varelo-mark.png", largeur: 36 },
+  { nom: "Tavaro", fichier: "/logos/tavaro-mark.png", largeur: 36 },
+  { nom: "Lorani", fichier: "/logos/lorani-mark.png", largeur: 36 },
+];
+const RANGEE_TROIS = [
+  { nom: "Tiroma", fichier: "/logos/tiroma-mark.png", largeur: 36 },
+  { nom: "Tamila", fichier: "/logos/tamila-mark.png", largeur: 36 },
+  { nom: "Daliro", fichier: "/logos/daliro-mark.png", largeur: 36 },
+];
+const RANGEES = [RANGEE_UN, RANGEE_DEUX, RANGEE_TROIS];
+
+/* Un logo en masque : le PNG est transparent, la couleur vient du CSS. */
+function Marque({ nom, fichier, largeur }: { nom: string; fichier: string; largeur: number }) {
+  return (
+    <span className="rdv-marque-bloc">
+      <span
+        role="img"
+        aria-label={nom}
+        className="rdv-marque"
+        style={{ width: largeur, WebkitMaskImage: `url(${fichier})`, maskImage: `url(${fichier})` }}
+      />
+      <span className="rdv-marque-nom">{nom}</span>
+    </span>
+  );
+}
 
 export default function ReserverUnAuditPage() {
   return (
@@ -149,33 +117,70 @@ export default function ReserverUnAuditPage() {
       {/* couche motion commune : lenis + reveals GSAP */}
       <PageMotion />
 
-      <div className="resa">
-        {/* ═══ 0 — ce que le visiteur apporte : le modèle de site retenu,
-               et l'estimation faite sur /tarifs ═══ */}
-        <ModeleRetenu noms={NOMS_MODELES} />
-        <SiteRetenu />
-        <EstimationRetenue noms={NOMS_POSTES} />
+      <div className="rdv">
+        {/* ═══ 1 — tête : titre, chapô, formulaire de format, carte ═══ */}
+        <section data-monde="clair" className="rdv-hero">
+          <div className="rdv-wrap">
+            <div className="rdv-hero-grille">
+              <div className="rdv-hero-gauche">
+                <div className="rdv-entete">
+                  <h1 className="rdv-h1">Un audit à la mesure de votre organisation</h1>
+                  <p className="rdv-lead">
+                    Plusieurs services, plusieurs validateurs&nbsp;: nous mesurons
+                    d&apos;abord, et le devis est établi à partir de vos volumes. Trois
+                    formats, du cadrage de 45 minutes à la journée dans vos locaux.
+                  </p>
+                </div>
 
-        {/* ═══ 1 — titre, trois formats, financement : INCHANGÉE (Teo,
-               27/09 : « la première section ne doit pas être touchée ») ═══ */}
-        <FormulesGrille />
+                <div className="rdv-notes">
+                  <ModeleRetenu noms={NOMS_MODELES} />
+                  <SiteRetenu />
+                  <EstimationRetenue noms={NOMS_POSTES} />
+                </div>
 
-        {/* ═══ 2 — comparatif, et l'orientation à son pied ═══ */}
-        <TableauFormats />
+                <FormulaireFormat />
+              </div>
 
-        {/* ═══ 3 — ce qu'un seul audit passe en revue (remplace le
-               simulateur, 27/09) ═══ */}
-        <UnSeulAudit />
+              <div className="rdv-carte">
+                <blockquote className="rdv-citation">
+                  <p>
+                    Un système ne se justifie que si la difficulté qu&apos;il traite coûte
+                    plus cher que lui. Nous chiffrons avant de recommander, jamais
+                    l&apos;inverse.
+                  </p>
+                  <footer className="rdv-signature">
+                    <span>Omega.AI</span>
+                    <span>Le principe de l&apos;audit</span>
+                  </footer>
+                </blockquote>
 
-        {/* ═══ 4 — protocole d'audit (emplacement des témoignages de la
-               référence) ═══ */}
-        <Protocole />
+                <hr className="rdv-filet" />
 
-        {/* ═══ 5 — appel final ═══ */}
-        <AppelCreneau />
+                <div className="rdv-logos-bloc">
+                  <p className="rdv-mono rdv-centre">Nos systèmes et nos logiciels métiers</p>
+                  {RANGEES.map((rangee, n) => (
+                    <ul key={n} className="rdv-logos">
+                      {rangee.map((m) => (
+                        <li key={m.nom}>
+                          <Marque nom={m.nom} fichier={m.fichier} largeur={m.largeur} />
+                        </li>
+                      ))}
+                    </ul>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-        {/* ═══ 6 — FAQ : recherche, thèmes, liens (27/09, second passage) ═══ */}
-        <FaqAudit questions={FAQ} contact={lienContact("avant")} />
+        {/* ═══ 2 — bande de fin : la phrase, en très grand, blanc sur noir.
+           C'est le pied de page de la référence (scale.com/demo) ramené à sa
+           phrase ; Teo, 18/10 : « sur cette page seulement ». ═══ */}
+        <section className="rdv-bande" aria-label="Le principe de l'audit, en une phrase">
+          <div className="rdv-wrap">
+            <p className="rdv-bande-phrase">Chiffrer d&apos;abord, recommander ensuite.</p>
+          </div>
+        </section>
       </div>
     </PageShell>
   );

@@ -1,0 +1,545 @@
+/* ══════════════════════════════════════════════════════════════════════
+   /reserver-un-audit — refonte calquée sur scale.com/demo (18/10/2026)
+
+   Relevé au getComputedStyle sur scale.com/demo, rechargé à chaque largeur :
+   390, 768, 1024, 1440 et 1700 px. Les valeurs ci-dessous sont celles de la
+   référence. Les écarts sont écrits à côté de la règle qu'ils touchent.
+
+   Portée : tout est sous `.rdv`. Les jetons de `.resa` (globals.css) restent
+   ceux des autres pages qui le partagent : rien ne sort d'ici.
+
+   Police : General Sans (`--font-omega`), le sosie d'Aeonik Pro retenu pour
+   le site (app/_polices/index.ts). Étiquettes et chiffres : Geist Mono
+   (`--font-omega-mono`), qui fait la paire.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.rdv {
+  --rdv-ink: #212121; /* text-scale-gray-10 : titres, citations */
+  --rdv-texte: #575757; /* text-scale-gray-30 : chapôs, notes */
+  --rdv-filet: rgba(0, 0, 0, 0.15); /* hr de la référence */
+  --rdv-champ: #d1d5db; /* bordure des champs */
+  --rdv-carte: #839cb2; /* bg-cloud-slate */
+  --rdv-texte-carte: rgba(0, 0, 0, 0.7); /* sur la carte, le gris 50 ne passe pas le contraste */
+
+  background: #fff;
+  color: var(--rdv-ink);
+  font-family: var(--font-omega), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.rdv *,
+.rdv *::before,
+.rdv *::after {
+  box-sizing: border-box;
+}
+
+/* :where(a) — spécificité nulle, pour que .rdv-bouton (lien ou non) garde sa couleur. */
+.rdv :where(a) {
+  color: inherit;
+}
+
+.rdv :focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 3px;
+}
+
+.rdv-wrap {
+  max-width: 1472px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Sections : 72 px de haut et de bas au téléphone, 120 px dès 768 (référence :
+   py-[72px] md:py-[120px]). La première section porte pt-24 (96 px) pour passer
+   sous l'en-tête fixe. */
+.rdv-section {
+  padding: 72px 0;
+}
+
+@media (min-width: 768px) {
+  .rdv-section {
+    padding: 120px 0;
+  }
+}
+
+.rdv-mono {
+  margin: 0;
+  font-family: var(--font-omega-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 13px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.rdv-h1,
+.rdv-h2 {
+  margin: 0;
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1.05; /* 25,2 px pour 24 px */
+  letter-spacing: -0.02em;
+}
+
+.rdv-lead {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.35; /* 18,9 px pour 14 px */
+  letter-spacing: -0.01em;
+  color: var(--rdv-texte);
+}
+
+.rdv-petit {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--rdv-texte);
+}
+
+@media (min-width: 768px) {
+  .rdv-h1,
+  .rdv-h2 {
+    font-size: 40px;
+    line-height: 1.25; /* 50 px pour 40 px */
+  }
+
+  .rdv-lead {
+    font-size: 16px;
+    line-height: 1.5; /* 24 px */
+  }
+}
+
+/* ─── 1 · Tête : titre, format, carte de citation ─── */
+
+.rdv-hero {
+  padding: 96px 0 72px;
+}
+
+@media (min-width: 768px) {
+  .rdv-hero {
+    padding-bottom: 120px;
+  }
+}
+
+/* stretch : la carte prend la hauteur de la colonne de gauche, et sa citation
+   reste en haut pendant que l'étiquette des métiers descend en bas — la
+   composition de la référence (sa carte fait 555 px à 1440, la nôtre 382 sans
+   cela). */
+.rdv-hero-grille {
+  display: grid;
+  gap: 16px;
+  align-items: start;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Deux colonnes dès 1024 — 1.1fr / 0.9fr, carte 360 px au plus étroit. */
+@media (min-width: 1024px) {
+  .rdv-hero-grille {
+    grid-template-columns: minmax(0, 1.1fr) minmax(360px, 0.9fr);
+  }
+}
+
+/* La colonne de gauche n'est plus une boîte (display: contents) : ses blocs
+   (titre, rappels, formulaire, agenda) deviennent des cases de la grille. L'agenda
+   occupe ainsi toute la largeur, sous le formulaire et la carte. */
+.rdv-hero-gauche {
+  display: contents;
+}
+
+.rdv-entete,
+.rdv-notes,
+.rdv-formulaire {
+  min-width: 0;
+  padding: 0 8px;
+}
+
+@media (min-width: 768px) {
+  .rdv-entete,
+  .rdv-notes,
+  .rdv-formulaire {
+    padding: 0 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .rdv-hero-grille {
+    row-gap: 40px;
+  }
+
+  .rdv-entete,
+  .rdv-notes,
+  .rdv-formulaire {
+    grid-column: 1;
+  }
+
+  .rdv-carte {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+}
+
+.rdv-entete {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Rappels venus de /modeles, /tarifs/site et /tarifs : rien à afficher la plupart du temps. */
+.rdv-notes:empty {
+  display: none;
+}
+
+.rdv-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rdv-notes section {
+  padding: 0;
+}
+
+.rdv-notes .r-note {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--rdv-texte);
+}
+
+.rdv-notes strong {
+  font-weight: 500;
+  color: var(--rdv-ink);
+}
+
+.rdv-notes a {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* Carte de citation : la référence la porte en cloud-slate, 16 px de rayon. */
+.rdv-carte {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 32px;
+  padding: 32px;
+  border-radius: 16px;
+  background: var(--rdv-carte);
+  color: var(--rdv-ink);
+}
+
+@media (min-width: 768px) {
+  .rdv-carte {
+    padding: 40px;
+  }
+}
+
+.rdv-citation {
+  margin: 0;
+}
+
+.rdv-citation p {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.375; /* 30,25 px */
+  letter-spacing: -0.02em;
+}
+
+.rdv-signature {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 32px;
+  font-size: 14px;
+  line-height: 21px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.rdv-signature span:last-child {
+  font-weight: 400;
+  color: var(--rdv-texte-carte);
+}
+
+@media (min-width: 768px) {
+  .rdv-citation p {
+    font-size: 24px;
+    line-height: 1.375; /* 33 px */
+  }
+}
+
+.rdv-filet {
+  width: 100%;
+  height: 1px;
+  margin: 0;
+  border: 0;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.rdv-logos-bloc {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+}
+
+.rdv-centre {
+  text-align: center;
+}
+
+/* Deux rangées centrées, comme la référence (4 logos puis 3). Chaque logo garde
+   sa largeur réelle : un flex enroulé, pas une grille à colonnes égales. */
+.rdv-logos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 28px 40px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Un logo en masque : la couleur est celle de l'encre, la forme vient du PNG Omega. */
+.rdv-marque-bloc {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.rdv-marque-nom {
+  font-family: var(--font-omega-mono), ui-monospace, monospace;
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--rdv-texte-carte);
+}
+
+.rdv-marque {
+  display: block;
+  max-width: 100%;
+  height: 36px;
+  background: #212121;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+/* ─── Formulaire : mêmes champs que la référence, 46 px de haut, bordure et rayon des siens ─── */
+
+.rdv-formulaire {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.rdv-champs {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px 16px;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .rdv-champs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.rdv-champ-bloc {
+  min-width: 0;
+}
+
+.rdv-champ-bloc--pleine {
+  grid-column: 1 / -1;
+}
+
+.rdv-champ {
+  width: 100%;
+  height: 46px;
+  padding: 12px 16px;
+  border: 1px solid var(--rdv-champ);
+  border-radius: 8px;
+  background: #fff;
+  color: #171717;
+  font: 400 14px/19.25px var(--font-omega), ui-sans-serif, system-ui, sans-serif;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 0.2s ease;
+}
+
+.rdv-champ::placeholder {
+  color: #737373;
+  opacity: 1;
+}
+
+.rdv-champ:hover {
+  border-color: #9ca3af;
+}
+
+.rdv-champ:focus {
+  border-color: #000;
+}
+
+/* ─── Menu sobre : même hauteur et même bordure que les champs, liste blanche ─── */
+
+.rdv-menu {
+  position: relative;
+}
+
+.rdv-menu-bouton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.rdv-menu-bouton[aria-expanded="true"] {
+  border-color: #000;
+}
+
+.rdv-menu-vide {
+  color: #737373;
+}
+
+.rdv-menu-fleche {
+  flex: none;
+  color: #171717;
+  transition: transform 0.2s ease;
+}
+
+.rdv-menu-bouton[aria-expanded="true"] .rdv-menu-fleche {
+  transform: rotate(180deg);
+}
+
+.rdv-menu-liste {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  max-height: 280px;
+  margin: 0;
+  padding: 4px;
+  overflow-y: auto;
+  list-style: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+}
+
+.rdv-menu-liste:focus {
+  outline: none;
+}
+
+.rdv-menu-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 19px;
+  color: #171717;
+  cursor: pointer;
+}
+
+.rdv-menu-option:hover,
+.rdv-menu-option:focus {
+  background: #f3f4f6;
+  outline: none;
+}
+
+.rdv-menu-option[aria-selected="true"] {
+  font-weight: 500;
+}
+
+/* ─── Erreurs : bordure rouge et message sous le champ, comme la référence ─── */
+
+.rdv-champ--erreur {
+  border-color: #c0392b;
+}
+
+.rdv-erreur {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: #c0392b;
+}
+
+/* Le message de fin d'envoi : vert pour la confirmation, rouge pour un refus. */
+.rdv-message {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 21px;
+}
+
+/* ─── Mouvement réduit : pas de transition, pour qui le demande ─── */
+
+@media (prefers-reduced-motion: reduce) {
+  .rdv *,
+  .rdv *::before,
+  .rdv *::after {
+    transition: none !important;
+  }
+}
+
+/* ─── 2 · Bande de fin : la phrase en très grand sur noir ───
+   Relevé de scale.com/demo (le <p> du pied de page), getComputedStyle le
+   18/10/2026 à 390, 768, 1024, 1440 et 1700 : 116 px / 116 px, -1.16 px
+   (-0.01em), graisse 400, blanc sur #000 dès 768 ; 40 px / 40 px, -0.4 px à
+   390. Gouttière 24 px, la même que .rdv-wrap.
+   Écart assumé : la référence place 160 px et ses colonnes de liens au-dessus
+   de la phrase, puis 200 px dessous (réseaux, copyright). Ici la bande n'a que
+   la phrase : 72 px / 120 px de haut et de bas, comme .rdv-section. */
+.rdv-bande {
+  padding: 72px 0;
+  background: #000;
+  color: #fff;
+}
+.rdv-bande-phrase {
+  margin: 0;
+  font-size: 40px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  font-weight: 400;
+  text-wrap: balance;
+}
+@media (min-width: 768px) {
+  .rdv-bande {
+    padding: 120px 0;
+  }
+  .rdv-bande-phrase {
+    font-size: 116px;
+  }
+}
+
+/* ─── Pied de page noir sous la bande ───
+   Teo, 18/10 : « c'est blanc en bas alors que ça doit être noir ». Le pied est
+   partagé (components/Footer.tsx, blanc partout) et suit .rdv dans <main> :
+   le sélecteur frère le noircit sur cette page seulement, rien ne change
+   ailleurs. Référence : pied noir, mentions en gris, blanc au survol. */
+.rdv ~ footer {
+  background: #000;
+  border-top-color: rgba(255, 255, 255, 0.12);
+}
+.rdv ~ footer .text-neutral-500 {
+  color: rgba(255, 255, 255, 0.6);
+}
+.rdv ~ footer a:hover {
+  color: #fff;
+}
