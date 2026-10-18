@@ -21,17 +21,26 @@
 --
 -- Règles de pose : create or replace ; insertions gardées ; jamais de DROP ni de DELETE ; revoke execute de public.
 
+-- La table du socle n'est connue ici que par son nom : on remplit les colonnes qu'elle a (module, type_action, et toute
+-- colonne texte obligatoire sans défaut — un motif, par exemple), comme FILED (a4_38).
 do $do$
-declare t text;
+declare t text; v_cols text := 'module, type_action'; v_vals text := '$1, $2'; c record;
 begin
-  if to_regclass('private.actions_sans_accord') is not null then
-    foreach t in array array['cashd.relance', 'cashd.devis', 'cashd.mise_en_demeure'] loop
-      begin
-        execute 'insert into private.actions_sans_accord (module, type_action) select $1, $2
-                 where not exists (select 1 from private.actions_sans_accord a where a.module = $1 and a.type_action = $2)' using 'cashd', t;
-      exception when others then raise notice 'actions_sans_accord (%) : % (à inscrire à la main)', t, sqlerrm; end;
-    end loop;
-  end if;
+  if to_regclass('private.actions_sans_accord') is null then return; end if;
+  for c in select x.column_name from information_schema.columns x
+           where x.table_schema = 'private' and x.table_name = 'actions_sans_accord' and x.column_name not in ('module', 'type_action')
+             and x.is_nullable = 'NO' and x.column_default is null and x.data_type in ('text', 'character varying')
+           order by x.ordinal_position loop
+    v_cols := v_cols || ', ' || quote_ident(c.column_name);
+    v_vals := v_vals || ', ' || quote_literal('CASHD : seuls les rappels des paliers 1 et 2 partent sous accord permanent ; une personne décide chaque fois (c2_12).');
+  end loop;
+  foreach t in array array['cashd.relance', 'cashd.devis', 'cashd.mise_en_demeure'] loop
+    begin
+      execute format('insert into private.actions_sans_accord (%s) select %s
+                      where not exists (select 1 from private.actions_sans_accord a where a.module = $1 and a.type_action = $2)', v_cols, v_vals)
+        using 'cashd', t;
+    exception when others then raise warning 'actions_sans_accord (%) non inscrite : % — à inscrire à la main', t, sqlerrm; end;
+  end loop;
 end $do$;
 
 -- L'état de l'envoi automatique des rappels pour une organisation : l'accord actif ou proposé.
