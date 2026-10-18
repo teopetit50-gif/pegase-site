@@ -9,8 +9,8 @@ fichier de la page n'a changé depuis le chiffrage du 06/10 (c0494b4). Les 66 li
 toujours la page. Six phrases ne sont pas dans le HTML servi parce qu'elles sont dans les réponses de la FAQ, que la
 page n'affiche qu'à l'ouverture (`Questions.tsx`) : #7, #21b, #22, #23, #47, #56.
 
-**En bref, sur 67 lignes** : 6 au niveau 2, en tout ou en partie (#14, #21, #21b, #24 et #42 pour la DPGF, #31 dès le
-premier relevé) ; 47 au niveau 1 ; 14 au niveau 0. Le niveau 2 des promesses centrales (planches, CCTP, DPGF croisés)
+**En bref, sur 67 lignes** : 6 au niveau 2, en tout ou en partie (#14, #21, #21b, #24 et #42 pour la DPGF, #31 depuis
+le relevé réel du 18/10) ; 47 au niveau 1 ; 14 au niveau 0. Le niveau 2 des promesses centrales (planches, CCTP, DPGF croisés)
 attend la lecture du CCTP de Luzarches et de Touët, donc le retour du crédit IA.
 
 ## Niveaux
@@ -58,7 +58,7 @@ attend la lecture du CCTP de Luzarches et de Touët, donc le retour du crédit I
 | 28 | Métré des plans contre la DPGF | 1 (quantités cotées) | b5_07 §10 | Promesse d'une mesure sur le dessin : reformuler, ou DWG (#66) | oui |
 | 29 | Décennales contrôlées contre le lot | 1 | b5_09 | Une vraie attestation lue | oui |
 | 30 | Situation contre marché, précédente et compte rendu | 1 | b5_04, b5_05, b5_32/b5_21, b5_33/b5_22 | Une vraie situation d'entreprise lue | oui |
-| 31 | Marché, avenants et révision BT | 1 ; **2** dès le premier relevé du cron | b5_34, b5_23 (459 ok), cron `lorani-index` | Lire le premier vrai relevé BDM (série BT01, mois 2026-08 = 139,4) | non |
+| 31 | Marché, avenants et révision BT | **2** | b5_34, b5_23 (459 ok). **Relevé réel le 18/10 à 18 h 23 Z** par le cron `lorani-index` : la série TP01 (001711007) de 2025-06 à 2026-08, prise sur l'API publique INSEE BDM. Sur le marché d'essai du banc (BANC-DCE-VRD, mois zéro 2025-09), la situation d'août 2026 donne I0 130,7, In 141,2, coefficient 1,0683, révision 1 366,00 € sur 20 000 €, conforme au calcul fait à part | L'écran n'affiche pas encore la formule ni la révision | non |
 | 32 | Avancement déclaré contre constaté | 1 | b5_32, b5_21 | Saisie sur un vrai compte rendu | non |
 | 33 | Retenue, avance et pénalités recalculées | 1 | b5_33, b5_22 | Une vraie situation lue avec ses déductions | oui |
 | 34 | Ordres de service : montant et délai | 1 | b5_10 §2-4 | Un vrai OS | non |
@@ -97,8 +97,7 @@ attend la lecture du CCTP de Luzarches et de Touët, donc le retour du crédit I
 
 ## Ce qu'on peut prouver maintenant, sans crédit IA (lots suivants, dans l'ordre)
 
-1. **#31 révision BT, niveau 2** : lire le premier relevé réel du cron `lorani-index` (BT01) et une situation révisée
-   sur un marché du banc. Requête de lecture au coordinateur.
+1. ~~#31 révision BT, niveau 2~~ : fait le 18/10 (TP01, situation révisée sur le banc).
 2. **Le banc « DCE réel » de Luzarches, sans IA** : la DPGF réelle est lue. Il reste à vérifier sous la RLS ce que
    l'écran en montre (postes, lot, unités), et à préparer l'analyse des offres sur cette DPGF : l'estimation est saisie
    à la main, l'offre sera lue au retour du crédit.
