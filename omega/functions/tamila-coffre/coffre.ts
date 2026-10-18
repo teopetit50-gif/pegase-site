@@ -4,7 +4,7 @@
 // Il ne garde rien : la clé de dossier n'existe qu'en mémoire, le temps d'une requête, et n'est jamais
 // écrite au journal de la fonction.
 
-import { LONGUEUR_CLE, ouvre } from "./aesgcm.ts";
+import { chiffrer as chiffrerTamila, dechiffrer as dechiffrerTamila, LONGUEUR_CLE, ouvre } from "./aesgcm.ts";
 import { ErreurCoffre, type KeyManager, nomCleMaitre } from "./keymanager.ts";
 import { depuisBase64, depuisHex, versBase64, versHex } from "./octets.ts";
 import { ErreurPorte, type PortesCoffre, type Remise } from "./portes.ts";
@@ -17,6 +17,8 @@ export interface Demande {
   dossier?: unknown;
   piece?: unknown;
   cle?: unknown;
+  /** activer au nom du serveur : le gérant qui l'a demandé (la base vérifie qu'il l'est) */
+  par?: unknown;
 }
 
 export interface Reponse {
@@ -83,21 +85,29 @@ async function deballer(ctx: Contexte, remise: Remise): Promise<Uint8Array> {
 
 export async function traiter(ctx: Contexte, appelant: Appelant, d: Demande): Promise<Reponse> {
   const action = typeof d.action === "string" ? d.action : "";
-  const pourServeur = action === "cle_piece";
-  if (!["activer", "nouvelle_cle", "cle_dossier", "cle_piece", "reenvelopper", "nouvelle_cle_index", "cle_index"].includes(action)) {
-    return refus(400, "ACTION_INCONNUE", "action attendue : activer, nouvelle_cle, cle_dossier, cle_piece, reenvelopper, nouvelle_cle_index ou cle_index");
+  const pourServeur = action === "cle_piece" || action === "sonde";
+  if (!["activer", "nouvelle_cle", "cle_dossier", "cle_piece", "reenvelopper", "nouvelle_cle_index", "cle_index", "sonde"].includes(action)) {
+    return refus(
+      400,
+      "ACTION_INCONNUE",
+      "action attendue : activer, nouvelle_cle, cle_dossier, cle_piece, reenvelopper, nouvelle_cle_index, cle_index ou sonde",
+    );
   }
-  if (pourServeur !== (appelant.type === "serveur")) {
+  // activer se fait au nom du gérant (son jeton) ou, pour le banc, au nom du serveur avec le gérant désigné (par)
+  const lesDeux = action === "activer";
+  if (!lesDeux && pourServeur !== (appelant.type === "serveur")) {
     return refus(
       403,
       "APPELANT_REFUSE",
-      pourServeur ? "cle_piece est réservée au lecteur (clé de service)" : "ce geste se fait au nom d'une personne connectée",
+      pourServeur ? `${action} est réservée au serveur (clé de service)` : "ce geste se fait au nom d'une personne connectée",
     );
   }
   try {
     switch (action) {
       case "activer":
-        return await activer(ctx, (appelant as { jeton: string }).jeton, d);
+        return appelant.type === "serveur" ? await activerParServeur(ctx, d) : await activer(ctx, appelant.jeton, d);
+      case "sonde":
+        return await sonde(ctx, d);
       case "nouvelle_cle":
         return await nouvelleCle(ctx, (appelant as { jeton: string }).jeton, d);
       case "cle_dossier":
@@ -128,6 +138,66 @@ async function activer(ctx: Contexte, jeton: string, d: Demande): Promise<Repons
   const r = await ctx.portes.activer(client, ctx.km.region, cleMaitre, a.par);
   ctx.journal("info", "coffre activé", { client, statut: r.statut, dossiers_locaux: r.dossiers_locaux ?? null });
   return { statut: 200, corps: { statut: r.statut, deja: r.deja, dossiers_locaux: r.dossiers_locaux ?? 0 } };
+}
+
+// Le banc (omega/banc/coffre_reel.sql) : la clé de service active le coffre au nom du gérant désigné. Le serveur
+// peut déjà tout en base ; la porte tamila_coffre_activer vérifie que « par » est bien le gérant du cabinet. Le nom
+// de la clé maître ne dépend que du cabinet : un second appel retrouve la même clé, il n'en crée pas d'autre.
+async function activerParServeur(ctx: Contexte, d: Demande): Promise<Reponse> {
+  const client = uuid(d.client);
+  const par = uuid(d.par);
+  if (!client || !par) return refus(400, "CLIENT_ILLISIBLE", "client et par attendus (uuid)");
+  if (!ctx.km) throw new ErreurCoffre("KM_ABSENT", "coffre non configuré : SCALEWAY_SECRET_KEY et SCALEWAY_PROJECT_ID absentes");
+  const cleMaitre = await ctx.km.trouverOuCreerCle(nomCleMaitre(client), "Omega Tamila : clé maître du cabinet (enveloppe les clés de dossier)");
+  const r = await ctx.portes.activer(client, ctx.km.region, cleMaitre, par);
+  ctx.journal("info", "coffre activé (serveur)", { client, statut: r.statut, dossiers_locaux: r.dossiers_locaux ?? null });
+  return { statut: 200, corps: { statut: r.statut, deja: r.deja, dossiers_locaux: r.dossiers_locaux ?? 0, region: ctx.km.region, cle_maitre: cleMaitre } };
+}
+
+// La sonde du banc : la chaîne réelle de bout en bout, sans rien écrire ni rien rendre de secret. Une clé de dossier
+// fictive (32 octets tirés ici) est enveloppée sous la clé maître du cabinet avec un dossier fictif en données
+// associées, déballée, comparée ; une pièce fictive est chiffrée au format Tamila avec la clé d'origine et relue avec
+// la clé déballée ; l'enveloppe présentée au nom d'un autre dossier doit être refusée par Scaleway.
+async function sonde(ctx: Contexte, d: Demande): Promise<Reponse> {
+  const client = uuid(d.client);
+  if (!client) return refus(400, "CLIENT_ILLISIBLE", "client attendu (uuid)");
+  if (!ctx.km) throw new ErreurCoffre("KM_ABSENT", "coffre non configuré : SCALEWAY_SECRET_KEY et SCALEWAY_PROJECT_ID absentes");
+  const cleMaitre = await ctx.km.trouverCle(nomCleMaitre(client));
+  if (!cleMaitre) return refus(409, "COFFRE_LOCAL", "aucune clé maître pour ce cabinet chez Scaleway : activer d'abord");
+  const dossier = crypto.randomUUID();
+  const cle = crypto.getRandomValues(new Uint8Array(LONGUEUR_CLE));
+  let relue: Uint8Array | null = null;
+  try {
+    const enveloppe = await ctx.km.chiffrer(cleMaitre, cle, dossier);
+    relue = await ctx.km.dechiffrer(cleMaitre, enveloppe, dossier);
+    const memeCle = relue.length === cle.length && relue.every((o, i) => o === cle[i]);
+    const piece = new TextEncoder().encode(`Pièce fictive du banc Tamila — ${new Date().toISOString()}`);
+    const chiffree = await chiffrerTamila(cle, piece);
+    const relu = memeCle ? await dechiffrerTamila(relue, chiffree) : new Uint8Array();
+    const pieceRelue = relu.length === piece.length && relu.every((o, i) => o === piece[i]);
+    let autreDossierRefuse = false;
+    try {
+      (await ctx.km.dechiffrer(cleMaitre, enveloppe, crypto.randomUUID())).fill(0);
+    } catch (e) {
+      autreDossierRefuse = e instanceof ErreurCoffre && e.code === "KM_REFUS";
+    }
+    ctx.journal("info", "sonde du coffre", { client, memeCle, pieceRelue, autreDossierRefuse });
+    return {
+      statut: memeCle && pieceRelue && autreDossierRefuse ? 200 : 500,
+      corps: {
+        region: ctx.km.region,
+        cle_maitre: cleMaitre,
+        enveloppe_octets: enveloppe.length,
+        cle_relue: memeCle,
+        piece_chiffree_octets: chiffree.length,
+        piece_relue: pieceRelue,
+        autre_dossier_refuse: autreDossierRefuse,
+      },
+    };
+  } finally {
+    cle.fill(0);
+    relue?.fill(0);
+  }
 }
 
 // Une clé pour un dossier qui va s'ouvrir : tirée ici, enveloppée sous la clé maître avec l'identifiant

@@ -32,6 +32,12 @@ export class FauxKeyManager implements KeyManager {
     if (this.panne) throw this.panne;
   }
 
+  async trouverCle(nom: string): Promise<string | null> {
+    this.appels.push({ op: "trouver" });
+    this.verifier();
+    return this.noms.get(nom) ?? null;
+  }
+
   async trouverOuCreerCle(nom: string): Promise<string> {
     this.appels.push({ op: "trouver_ou_creer" });
     this.verifier();

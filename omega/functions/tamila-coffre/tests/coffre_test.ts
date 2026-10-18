@@ -217,3 +217,29 @@ Deno.test("clé d'index : un cabinet local est renvoyé à la phrase ; sans clé
   const emise = await traiter(c.ctx, personne(GERANT), { action: "nouvelle_cle_index", client: CLIENT });
   assertEquals(emise.statut, 409, "un cabinet local ne fait pas émettre de clé d'index au coffre");
 });
+
+Deno.test("banc : la clé de service active au nom du gérant désigné ; un autre « par » est refusé par la porte", async () => {
+  const c = contexte();
+  const refuse = await traiter(c.ctx, serveur, { action: "activer", client: CLIENT, par: "22222222-2222-4222-8222-222222222222" });
+  assertEquals(refuse.statut, 403);
+  const r = await traiter(c.ctx, serveur, { action: "activer", client: CLIENT, par: "11111111-1111-4111-8111-111111111111" });
+  assertEquals(r.statut, 200);
+  assertEquals(r.corps.deja, false);
+  const encore = await traiter(c.ctx, serveur, { action: "activer", client: CLIENT, par: "11111111-1111-4111-8111-111111111111" });
+  assertEquals(encore.corps.deja, true);
+  assertEquals(encore.corps.cle_maitre, r.corps.cle_maitre, "la même clé maître, pas une seconde");
+  assertEquals((await traiter(c.ctx, serveur, { action: "activer", client: CLIENT })).statut, 400);
+});
+
+Deno.test("sonde : réservée au serveur ; avant activation 409 ; après, clé et pièce fictives relues, autre dossier refusé", async () => {
+  const c = contexte();
+  assertEquals((await traiter(c.ctx, personne(GERANT), { action: "sonde", client: CLIENT })).statut, 403);
+  assertEquals((await traiter(c.ctx, serveur, { action: "sonde", client: CLIENT })).statut, 409);
+  await traiter(c.ctx, personne(GERANT), { action: "activer", client: CLIENT });
+  const s = await traiter(c.ctx, serveur, { action: "sonde", client: CLIENT });
+  assertEquals(s.statut, 200);
+  assertEquals(s.corps.cle_relue, true);
+  assertEquals(s.corps.piece_relue, true);
+  assertEquals(s.corps.autre_dossier_refuse, true);
+  assertFalse(JSON.stringify(s.corps).includes('cle":"'), "aucune clé dans la réponse");
+});

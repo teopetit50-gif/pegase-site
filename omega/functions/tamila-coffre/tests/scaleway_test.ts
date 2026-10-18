@@ -38,7 +38,7 @@ Deno.test("trouverOuCreerCle : retrouve la clé du cabinet par son nom, sinon la
   );
   const km = new ScalewayKeyManager("SCW-SECRET", "projet-1", "fr-par", f);
   assertEquals(await km.trouverOuCreerCle("omega-tamila-x", "clé maître"), CLE);
-  assertEquals(appels[0].url, `${BASE}/keys?project_id=projet-1&name=omega-tamila-x`);
+  assertEquals(appels[0].url, `${BASE}/keys?project_id=projet-1&name=omega-tamila-x&scheduled_for_deletion=false`);
   assertEquals(appels[0].entetes["X-Auth-Token"], "SCW-SECRET");
   assertEquals(appels[1].url, `${BASE}/keys`);
   assertEquals(appels[1].corps!.usage, { symmetric_encryption: "aes_256_gcm" });
@@ -48,6 +48,35 @@ Deno.test("trouverOuCreerCle : retrouve la clé du cabinet par son nom, sinon la
   const deja = fauxFetch(() => ({ statut: 200, corps: { keys: [{ id: CLE, name: "omega-tamila-x", state: "enabled" }] } }));
   assertEquals(await new ScalewayKeyManager("s", "p", "fr-par", deja.f).trouverOuCreerCle("omega-tamila-x", "d"), CLE);
   assertEquals(deja.appels.length, 1, "pas de seconde clé maître");
+
+  // une clé de même nom désactivée : refus, pas de seconde clé ; un nom voisin (filtre non exact) est ignoré
+  const desactivee = fauxFetch(() => ({ statut: 200, corps: { keys: [{ id: CLE, name: "omega-tamila-x", state: "disabled" }], total_count: 1 } }));
+  const e = await assertRejects(() => new ScalewayKeyManager("s", "p", "fr-par", desactivee.f).trouverOuCreerCle("omega-tamila-x", "d"), ErreurCoffre);
+  assertEquals(e.code, "KM_REFUS");
+  assertEquals(desactivee.appels.length, 1);
+  const voisin = fauxFetch(() => ({ statut: 200, corps: { keys: [{ id: CLE, name: "omega-tamila-x2", state: "enabled" }] } }));
+  assertEquals(await new ScalewayKeyManager("s", "p", "fr-par", voisin.f).trouverCle("omega-tamila-x"), null);
+});
+
+Deno.test("associated_data : chaîne nue d'abord ; sur un 400 qui la vise, une seule reprise en {value}, retenue ensuite", async () => {
+  const cle = crypto.getRandomValues(new Uint8Array(32));
+  const { f, appels } = fauxFetch((a) =>
+    typeof a.corps?.associated_data === "string"
+      ? { statut: 400, corps: { message: "invalid argument(s)", details: [{ argument_name: "associated_data", reason: "constraint" }] } }
+      : a.url.endsWith("/encrypt")
+      ? { statut: 200, corps: { key_id: CLE, ciphertext: versBase64(texte("ENV")) } }
+      : { statut: 200, corps: { key_id: CLE, plaintext: versBase64(cle) } }
+  );
+  const km = new ScalewayKeyManager("s", "p", "fr-par", f);
+  const env = await km.chiffrer(CLE, cle, "dossier-1");
+  assertEquals(appels.length, 2);
+  assertEquals(appels[1].corps!.associated_data, { value: versBase64(texte("dossier-1")) });
+  assertEquals(await km.dechiffrer(CLE, env, "dossier-1"), cle);
+  assertEquals(appels.length, 3, "la forme retenue sert directement");
+  // un 400 qui ne vise pas associated_data ne relance pas
+  const autre = fauxFetch(() => ({ statut: 400, corps: { message: "plaintext too long" } }));
+  await assertRejects(() => new ScalewayKeyManager("s", "p", "fr-par", autre.f).chiffrer(CLE, cle, "d"), ErreurCoffre);
+  assertEquals(autre.appels.length, 1);
 });
 
 Deno.test("chiffrer / dechiffrer : base64, données associées = identifiant du dossier", async () => {
