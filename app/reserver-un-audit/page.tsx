@@ -47,9 +47,10 @@ import "./reserver.css";
      métiers), en grand, comme la référence. Pas de marques tierces : un
      logo de client ou d'outil se lit comme un partenariat ;
    · le formulaire reprend les champs de la référence (prénom, nom,
-     entreprise, fonction, e-mail, pays, secteur, origine, format). Ses
-     coordonnées passent à /reserver (lib/prereservation.ts) : le visiteur
-     ne les retape pas dans le formulaire de réservation ;
+     entreprise, fonction, e-mail, pays, secteur, origine, format). Il est la
+     dernière page avant le mail : il envoie la demande (/api/audit/demande),
+     et le visiteur reçoit une confirmation avec le lien pour choisir son
+     créneau ;
    · la recherche dans la FAQ et le simulateur ont disparu avec le reste
      de l'ancienne mise en page — la FAQ tient en neuf questions, en
      accordéon.
@@ -213,7 +214,7 @@ export default function ReserverUnAuditPage() {
                   <EstimationRetenue noms={NOMS_POSTES} />
                 </div>
 
-                <FormulaireFormat formules={formules} />
+                <FormulaireFormat />
               </div>
 
               <div className="rdv-carte">

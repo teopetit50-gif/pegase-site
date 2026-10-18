@@ -454,6 +454,27 @@
   color: #c0392b;
 }
 
+/* Le message de fin d'envoi : vert pour la confirmation, rouge pour un refus. */
+.rdv-message {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.rdv-message--ok {
+  border: 1px solid #9fd3b0;
+  background: #e9f6ee;
+  color: #14532d;
+}
+
+.rdv-message--erreur {
+  border: 1px solid #f5b7b1;
+  background: #fdecea;
+  color: #8a1c12;
+}
+
 /* Bouton noir, icône blanche dans un carré : celui de la référence. */
 .rdv-bouton {
   display: inline-flex;

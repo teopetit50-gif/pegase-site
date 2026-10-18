@@ -1,88 +1,43 @@
 "use client";
 
 import { useEffect, useRef, useState, type SyntheticEvent } from "react";
-import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
-import {
-  useEstimationUrl,
-  useModeleUrl,
-  useSiteUrl,
-} from "@/components/reservation/ModeleUrl";
 import MenuSobre from "@/app/reserver-un-audit/MenuSobre";
 import { SECTEURS } from "@/lib/creneaux";
-import { enregistrerPrereservation } from "@/lib/prereservation";
-import { lienReservation, type Formule } from "@/lib/reservation";
+import { FORMATS, ORIGINES, PAYS, controlerDemande } from "@/lib/demande-audit";
+import { COURRIEL } from "@/lib/reservation";
 
 /* ══════════════════════════════════════════════════════════════════════
-   <FormulaireFormat> — le formulaire de la tête de page (18/10/2026)
+   <FormulaireFormat> — la dernière page avant le mail d'audit (18/10/2026)
 
    Mêmes champs que la page de démo de Scale, dans le même ordre : deux
    colonnes pour prénom et nom, entreprise et fonction, e-mail et pays ;
-   puis deux menus pleine largeur (« Quelle description correspond à votre
-   entreprise ? », « Comment avez-vous connu Omega ? ») ; puis le format.
-   Tout est obligatoire, comme sur la référence.
+   puis deux menus pleine largeur, puis le format. Tout est obligatoire.
 
-   VALIDATION : le formulaire ne passe pas par les bulles natives du
-   navigateur (noValidate), qui se placent mal sur les menus dessinés. Au
-   clic sur « Continuer », chaque champ vide reçoit « Ce champ est
-   obligatoire. » en rouge, comme sur la référence, et le focus va sur le
-   premier. Un e-mail mal formé reçoit le même traitement.
+   CE QUI SE PASSE À L'ENVOI : la demande part vers /api/audit/demande, qui
+   envoie un mail à Omega et un mail de confirmation au visiteur. Le
+   formulaire n'affiche le message vert, avec l'adresse, que si ce second mail
+   est bien parti. Rien ne quitte la page sans ce message.
 
-   CE QUI SE PASSE À L'ENVOI : les coordonnées sont rangées dans la session
-   du navigateur (lib/prereservation.ts), puis le visiteur arrive sur
-   /reserver avec le format choisi. Le calendrier s'ouvre, et le formulaire
-   de réservation reprend nom, entreprise, e-mail et secteur. Aucune donnée
-   personnelle ne passe par l'adresse de la page.
+   VALIDATION : pas de bulles natives (noValidate) : elles se placent mal sur
+   les menus dessinés. Chaque champ vide reçoit « Ce champ est obligatoire. » en
+   rouge, comme sur la référence, et le focus va sur le premier.
 
-   SANS JAVASCRIPT, le formulaire ne peut pas enregistrer les coordonnées :
-   la navigation native part en GET sur /reserver avec le seul format. Le
-   visiteur retapera ses coordonnées là-bas, ce qui reste acceptable.
+   SANS JAVASCRIPT, la demande ne part pas, et le formulaire ne met aucune donnée
+   dans l'adresse de la page : le texte sous le bouton donne donc l'adresse de
+   contact.
    ══════════════════════════════════════════════════════════════════════ */
 
-/* Les réponses proposées pour « Comment avez-vous connu Omega ? ». */
-const ORIGINES = [
-  "Une recommandation",
-  "LinkedIn",
-  "Instagram ou Facebook",
-  "Une recherche en ligne",
-  "Autre",
-];
-
-/* Les collectivités et pays où Omega travaille : Omega est basé aux Antilles
-   françaises, ce menu ne reprend donc pas la liste mondiale de la référence. */
-const PAYS = [
-  "Guadeloupe",
-  "Martinique",
-  "Autre collectivité française",
-  "France hexagonale",
-  "Autre pays",
-];
-
-/* Tous les champs de la page, dans l'ordre où ils s'affichent. */
-const OBLIGATOIRES = [
-  "prenom",
-  "nom",
-  "entreprise",
-  "fonction",
-  "email",
-  "pays",
-  "secteur",
-  "origine",
-  "format",
-];
-
+/* Le libellé de chaque champ obligatoire, pour les messages. */
 const E_MAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
-type Props = { formules: Formule[] };
-
-export default function FormulaireFormat({ formules }: Props) {
-  const router = useRouter();
-  const slug = useModeleUrl();
-  const { postes, pieces } = useEstimationUrl();
-  const site = useSiteUrl();
+export default function FormulaireFormat() {
   const formulaire = useRef<HTMLFormElement>(null);
   const [manquants, setManquants] = useState<string[]>([]);
   const [mailFaux, setMailFaux] = useState(false);
+  const [envoi, setEnvoi] = useState<"repos" | "envoi" | "ok" | "erreur">("repos");
+  const [destinataire, setDestinataire] = useState("");
+  const [motif, setMotif] = useState("");
 
   /* après un envoi refusé, le focus va sur le premier champ en erreur */
   useEffect(() => {
@@ -91,59 +46,47 @@ export default function FormulaireFormat({ formules }: Props) {
     }
   }, [manquants]);
 
-  function envoyer(e: SyntheticEvent<HTMLFormElement>) {
+  async function envoyer(e: SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
-    const d = new FormData(e.currentTarget);
-    const texte = (cle: string) => String(d.get(cle) ?? "").trim();
+    if (envoi === "envoi" || envoi === "ok") return;
 
-    const sansValeur = OBLIGATOIRES.filter((cle) => !texte(cle));
-    const mailMalForme = !sansValeur.includes("email") && !E_MAIL.test(texte("email"));
-    const refus = mailMalForme ? [...sansValeur, "email"] : sansValeur;
-    if (refus.length) {
-      setManquants(refus);
-      setMailFaux(mailMalForme);
+    const brut = Object.fromEntries(new FormData(e.currentTarget).entries()) as Record<string, unknown>;
+    const controle = controlerDemande(brut);
+    if (!controle.ok) {
+      setManquants(controle.champs);
+      /* un e-mail rempli mais mal formé : « invalide », pas « obligatoire » */
+      setMailFaux(controle.champs.includes("email") && !!String(brut.email ?? "").trim() && !E_MAIL.test(String(brut.email)));
       return;
     }
     setManquants([]);
     setMailFaux(false);
+    setEnvoi("envoi");
 
-    enregistrerPrereservation({
-      prenom: texte("prenom"),
-      nom: texte("nom"),
-      entreprise: texte("entreprise"),
-      email: texte("email"),
-      secteur: texte("secteur"),
-      lignes: [
-        `Fonction : ${texte("fonction")}`,
-        `Pays : ${texte("pays")}`,
-        `Connu d'Omega par : ${texte("origine")}`,
-      ],
-    });
-
-    router.push(
-      lienReservation(
-        texte("format"),
-        slug || undefined,
-        {
-          postes: postes.length ? postes.join(",") : undefined,
-          pieces: pieces ? String(pieces) : undefined,
-        },
-        site?.id,
-      ),
-    );
+    try {
+      const r = await fetch("/api/audit/demande", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(brut),
+      });
+      const j = (await r.json().catch(() => null)) as { ok?: boolean; motif?: string } | null;
+      if (r.ok && j?.ok) {
+        setDestinataire(controle.demande.email);
+        setEnvoi("ok");
+        return;
+      }
+      setMotif(j?.motif ?? "");
+      setEnvoi("erreur");
+    } catch {
+      setMotif("reseau");
+      setEnvoi("erreur");
+    }
   }
 
   const erreur = (cle: string) => manquants.includes(cle);
+  const bloque = envoi === "envoi" || envoi === "ok";
 
   return (
-    <form
-      ref={formulaire}
-      action="/reserver"
-      method="get"
-      noValidate
-      onSubmit={envoyer}
-      className="rdv-formulaire"
-    >
+    <form ref={formulaire} noValidate onSubmit={envoyer} className="rdv-formulaire">
       <div className="rdv-champs">
         <Saisie nom="prenom" libelle="Prénom" autoComplete="given-name" erreur={erreur("prenom")} />
         <Saisie nom="nom" libelle="Nom" autoComplete="family-name" erreur={erreur("nom")} />
@@ -182,20 +125,39 @@ export default function FormulaireFormat({ formules }: Props) {
           libelle="Format d'audit"
           pleine
           erreur={erreur("format")}
-          options={formules.map((f) => ({ valeur: f.id, libelle: `${f.nom} · ${f.duree}` }))}
+          options={FORMATS.map((f) => ({ valeur: f.id, libelle: `${f.nom} · ${f.duree}` }))}
         />
       </div>
 
-      <button type="submit" className="rdv-bouton">
-        Continuer
+      {/* pot de miel : invisible pour une personne, rempli par un robot */}
+      <input type="text" name="site_web" tabIndex={-1} autoComplete="off" aria-hidden="true" className="rdv-sr" />
+
+      <button type="submit" className="rdv-bouton" disabled={bloque}>
+        {envoi === "envoi" ? "Envoi en cours…" : envoi === "ok" ? "Demande envoyée" : "Continuer"}
         <span aria-hidden className="rdv-bouton-icone">
           <ArrowRight strokeWidth={1.8} size={18} />
         </span>
       </button>
 
       <p className="rdv-petit">
-        Vos coordonnées vous attendent sur la page suivante, où vous choisissez votre créneau.
+        Vous recevrez un e-mail avec le lien pour choisir votre créneau. Sans JavaScript, écrivez-nous
+        directement à {COURRIEL}.
       </p>
+
+      {envoi === "ok" ? (
+        <p className="rdv-message rdv-message--ok" role="status">
+          Nous vous confirmons avoir envoyé un mail à <strong>{destinataire}</strong>. Vérifiez vos
+          courriers indésirables si vous ne le voyez pas.
+        </p>
+      ) : null}
+
+      {envoi === "erreur" ? (
+        <p className="rdv-message rdv-message--erreur" role="alert">
+          {motif === "limite"
+            ? `Trop de demandes pour l'instant. Réessayez dans un moment, ou écrivez-nous à ${COURRIEL}.`
+            : `Nous n'avons pas pu envoyer votre demande. Réessayez, ou écrivez-nous à ${COURRIEL}.`}
+        </p>
+      ) : null}
     </form>
   );
 }
