@@ -1,107 +1,64 @@
+import { Fragment } from "react";
 import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
-import FormulesGrille from "@/components/reservation/FormulesGrille";
-import TableauFormats from "@/components/reservation/TableauFormats";
-import UnSeulAudit from "@/components/reservation/UnSeulAudit";
-import Protocole from "@/components/reservation/Protocole";
-import AppelCreneau from "@/components/reservation/AppelCreneau";
-import FaqAudit from "@/components/reservation/FaqAudit";
-import { FAQ, lienContact } from "@/lib/reservation";
-import { MODELES } from "@/components/modeles/donnees";
-import { POSTES } from "@/lib/paliers";
 import {
+  BoutonReservation,
+  EstimationRetenue,
   ModeleRetenu,
   SiteRetenu,
-  EstimationRetenue,
 } from "@/components/reservation/ModeleUrl";
+import { MODELES } from "@/components/modeles/donnees";
+import { MENU } from "@/lib/menu";
+import { POSTES } from "@/lib/paliers";
+import {
+  COMPARATIF,
+  COURRIEL,
+  FAQ,
+  PROFILS,
+  lienContact,
+  type Point,
+} from "@/lib/reservation";
+import FormulaireFormat from "./FormulaireFormat";
+import "./reserver.css";
 
 /* ══════════════════════════════════════════════════════════════════════
-   /reserver-un-audit — « Réserver un audit » (26/07/2026)
+   /reserver-un-audit — « Réserver un audit » (refonte du 18/10/2026)
 
-   Quatrième page de référence demandée par Teo : la page tarifs de Qonto
-   (qonto.com/en/pricing, profil « solo », facturation annuelle). Mêmes
-   sections dans le même ordre, mêmes proportions, même typographie —
-   relevé au computed style sur viewport 1280, tokens dans le bloc `.resa`
-   de globals.css.
+   Teo : « change-la complètement, fais-la comme scale.com/demo, mêmes
+   finitions ». Le modèle est la page de démo de Scale : un titre, un
+   chapô et un formulaire à gauche ; une carte gris bleu à droite, avec la
+   citation, un filet et une étiquette de bas de carte. Le relevé des
+   valeurs est dans reserver.css (en-tête), pris au getComputedStyle à
+   390, 768, 1024, 1440 et 1700 px.
 
-   Ce qui change : le SUJET. On ne compare pas des abonnements, on fait
-   choisir un format d'audit et réserver un créneau. Textes, formats et
-   chiffres sont ceux de Omega.
+   CE QUI EST GARDÉ, mot pour mot, de la version d'avant : le titre et le
+   chapô, les trois formats et leurs listes, le comparatif, le périmètre
+   (les quatre systèmes et le sur-mesure, lus dans lib/menu), le protocole
+   d'audit, la FAQ (lue dans lib/reservation) et l'appel final.
 
-   Deux emplacements de la référence n'ont PAS d'équivalent honnête ici et
-   ont été remplacés plutôt que meublés (règle refs-qonto/NOTES-DESIGN.md,
-   « aucun chiffre de preuve sociale inventé, aucun avis client ») :
-     · la colonne « Loved & trusted by +600,000 businesses » + note
-       Trustpilot → les deux faits qui décident vraiment (c'est gratuit,
-       c'est finançable par le Chèque TIC) ;
-     · le carrousel de témoignages clients → les engagements du protocole
-       d'audit, cités tels qu'ils sont tenus.
+   CE QUI CHANGE :
+   · la citation de la carte n'est PAS une citation client : c'est le
+     principe de l'audit, dit par nous (règle de regles-maison : aucune
+     preuve sociale inventée) ;
+   · l'étiquette « Trusted by… » devient la liste des métiers couverts —
+     un fait, pas un compteur de traction ;
+   · le formulaire ne demande que le format. Les coordonnées restent sur
+     /reserver, où elles se prennent avec le créneau : une seconde saisie
+     ici aurait envoyé deux demandes pour une seule réservation ;
+   · la recherche dans la FAQ et le simulateur ont disparu avec le reste
+     de l'ancienne mise en page — la FAQ tient en neuf questions, en
+     accordéon.
 
-   16/09/2026 — DEUX SECTIONS SUPPRIMÉES (Teo : « supprime ces deux
-   sections »). Le déroulé en trois temps (« Comment se passe l'audit »,
-   #deroule) et les compléments (« Compléter votre audit », #complements)
-   ne sont plus sur la page. Rien ne pointait sur leurs ancres — vérifié
-   par grep avant la coupe.
+   LES COMPOSANTS D'AVANT (FormulesGrille, TableauFormats, UnSeulAudit,
+   Protocole, AppelCreneau, FaqAudit, GarantiesAudit et leurs CSS) ne sont
+   plus importés ici. Ils restent dans components/reservation/ jusqu'à
+   décision de les retirer.
 
-   Dans la foulée, la page est ENTIÈREMENT CLAIRE. Le comparatif était la
-   dernière bande sombre ; une fois seul de son espèce au milieu de sept
-   sections claires, il ne faisait plus un rythme mais un trou (Teo :
-   « trop sombre cette section »). Il repasse dans le monde clair — le
-   détail du retournement est en tête de ComparerFormats.css. Le rythme
-   est désormais porté par les fonds de bande (#f5f5f5 de `.resa` ↔
-   `.r-blanc`) et par les cartes, comme sur la référence Qonto.
-   `.resa .r-nuit` reste écrit dans globals.css : plus rien ne le porte
-   sur cette page, mais c'est la gamme de référence si on y remet un jour
-   une bande sombre.
-   Le texte des compléments est retiré de lib/reservation.ts avec eux ;
-   les trois temps se relisent dans l'historique (commit f40e687).
-
-   27/09/2026 — TOUT CE QUI SUIT LA PREMIÈRE SECTION EST REFAIT EN
-   COMPOSANTS (Teo : « la page audit est mal faite ; il n'y a que la
-   première section qui ne doit pas être touchée, après refais tout
-   proprement avec des composants » — skill methode-site, composants
-   repris de 21st.dev, registres ouverts lus le jour même) :
-     · comparatif      → <TableauFormats>  (@7ovr comparison-3)
-     · simulateur      → <CalculCout>      (@radu pricing-slider-loops) —
-                          REMPLACÉ le même jour par <UnSeulAudit>
-                          (Tailark integrations-5), voir plus bas
-     · engagements     → <Protocole>       (Aceternity feature-section-
-                                            with-hover-effects)
-     · appel final     → <AppelCreneau>    (efferd cta-3)
-     · FAQ             → <QuestionsAudit>  (@tommyjepsen faq-section) —
-                          REMPLACÉ le même jour par <FaqAudit>
-                          (@preetsuthar17 faq-block : recherche, thèmes,
-                          réponses numérotées, liens) — Teo : « trouves-en
-                          un plus détaillé et pro »
-   Le bandeau d'orientation, qui faisait une section à lui seul, se range
-   au pied du tableau. Les fonds alternent désormais d'une section à
-   l'autre (gris de `.resa`, puis blanc, puis gris…) au lieu de deux
-   bandes grises de suite. <FormulesGrille>, la première section, est
-   importée ici directement : l'assembleur <Formules> ne portait plus
-   qu'elle. Les détails de chaque reprise sont en tête de chaque
-   composant.
-
-   27/09/2026, après-midi — LE SIMULATEUR SORT, ET LA PAGE A SA VERSION
-   MOBILE. Teo, sur capture : « remplace cette section complet, je veux
-   pas de comparateur », puis « oublie pas de faire la version mobile de
-   la page ». À sa place, <UnSeulAudit> : ce qu'un seul audit passe en
-   revue — les quatre systèmes et le sur-mesure autour d'Omega, avec la
-   ligne du menu de chacun et un lien vers sa page ; rien à régler. Pour
-   le téléphone : sections à 48 px de marge (le barème relevé sur
-   scale.com le 16/09 dit 40 à 48, elles en avaient 64), titres de
-   section tous à 24 px, articles du protocole compactés. Une barre de
-   réservation flottante a été posée puis RETIRÉE le même jour : Teo avait
-   fait retirer la même de l'accueil le 16/09 (commentaire en tête de
-   app/page.tsx) — ne pas la remettre sans lui demander.
-
-   27/09/2026, fin d'après-midi — le bandeau sous les cartes de formats
-   (« Gratuit, sans engagement | Chèque TIC ») et sa note deviennent
-   <GarantiesAudit>, dans <FormulesGrille> (Teo : « change ça par un
-   component plus pro »).
-
-   Le chrome reste celui du site : header caméléon (les sections claires
-   portent data-monde="clair") et footer sombre hérités de PageShell.
+   LES RAPPELS (modèle, formule de site, estimation) restent en tête du
+   formulaire : ils viennent de l'URL et portent le choix fait ailleurs.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
@@ -111,71 +68,360 @@ export const metadata: Metadata = {
     "Trois formats d'audit, gratuits à partir du cadrage de 45 minutes, pour mesurer ce que votre processus le plus coûteux représente. Sans engagement.",
 };
 
-
-/* ══════════════════════════════════════════════════════════════════════
-   15/09/2026 — ?modele=<slug> EST ENFIN LU, ET LA PAGE RESTE STATIQUE.
-
-   « Choisir ce modèle » (les cartes de /modeles et le mur de
-   /tarifs/site) menait ici depuis le 14/09 avec le modèle en paramètre,
-   « pour le jour où le formulaire le lira ». Personne ne le lisait : la
-   page l'ignorait, ses boutons repartaient sur /reserver sans lui, et le
-   choix se perdait — ces boutons valaient « Réserver un audit ».
-
-   Il est maintenant annoncé en tête de page et repart avec chaque bouton
-   de réservation, jusqu'au message de la demande (voir PriseDeCreneau).
-
-   La première version lisait `searchParams` : la page passait en ƒ,
-   rendue à chaque visite pour une ligne de rappel. Elle est revenue en ○
-   le jour même — le paramètre se lit au montage, côté client
-   (components/reservation/ModeleUrl.tsx), et le serveur ne fournit que
-   la table slug → nom pour que rien d'inventé ne s'affiche. C'est cette
-   table, et elle seule, qui vérifie le slug. */
+/* Les noms des modèles et des postes sont fournis par le serveur aux
+   rappels : la vérification du slug se fait côté client, mais la table des
+   noms n'a pas à entrer dans le paquet d'une page d'entrée. */
 const NOMS_MODELES: Record<string, string> = Object.fromEntries(
   MODELES.map((m) => [m.slug, m.nom]),
 );
 
-/* 15/09/2026 — les noms des quatre postes, fournis par le SERVEUR au
-   rappel d'estimation. Même raison que pour les modèles : la vérification
-   se fait côté client, mais la table des noms n'a pas à entrer dans le
-   paquet d'une page d'entrée — ici elle est minuscule, et le motif reste
-   le même d'un rappel à l'autre. */
 const NOMS_POSTES: Record<string, string> = Object.fromEntries(
   POSTES.map((p) => [p.id, `${p.system} · ${p.nom}`]),
 );
 
+/* Les métiers couverts : la liste des secteurs de /secteurs, en mots — pas
+   des logos de clients, qu'on n'a pas le droit de montrer. */
+const METIERS = ["Avocats", "Architectes", "BTP", "Loueurs", "Dentaires", "Groupes"];
+
+/* Le protocole : texte repris au mot près de l'ancienne section. */
+const ARTICLES: { intitule: string; texte: string }[] = [
+  {
+    intitule: "Chiffrage",
+    texte:
+      "Aucun audit ne se termine par une plaquette. Il se termine par un montant en euros ou en heures par mois, vérifiable dans vos propres documents.",
+  },
+  {
+    intitule: "Recommandation",
+    texte:
+      "Si le calcul ne justifie pas de déployer un système, la recommandation est de ne rien installer. C'est une conclusion valable, et elle arrive.",
+  },
+  {
+    intitule: "Confidentialité",
+    texte:
+      "Les chiffres que vous montrez pendant l'audit ne sortent pas de l'entretien. Ils ne servent ni d'exemple commercial, ni de référence auprès d'un autre client.",
+  },
+  {
+    intitule: "Durée tenue",
+    texte:
+      "L'entretien se termine à l'heure annoncée. Si le sujet mérite davantage, c'est vous qui décidez de la suite.",
+  },
+  {
+    intitule: "Réponse le jour même",
+    texte: "Toute demande obtient une réponse le jour même, y compris pour dire non.",
+  },
+  {
+    intitule: "Aucun engagement",
+    texte:
+      "La recommandation vous appartient, que vous installiez un système ou non. Sans suite de votre part, le dossier se ferme : aucune relance commerciale.",
+  },
+];
+
+/* Les quatre systèmes et le sur-mesure : les entrées de « Nos offres » qui
+   mènent à /offres/…, lues dans lib/menu. */
+const OFFRES = (MENU.find((r) => r.label === "Nos offres")?.entrees ?? []).filter((e) =>
+  e.href.startsWith("/offres/"),
+);
+
+/* Un point de liste avec son passage en gras (le `fort` de lib/reservation). */
+function PointListe({ p }: { p: Point }) {
+  const i = p.fort ? p.texte.indexOf(p.fort) : -1;
+  if (!p.fort || i < 0) return <>{p.texte}</>;
+  return (
+    <>
+      {p.texte.slice(0, i)}
+      <strong>{p.fort}</strong>
+      {p.texte.slice(i + p.fort.length)}
+    </>
+  );
+}
+
 export default function ReserverUnAuditPage() {
+  /* PROFILS[1] est le seul profil affiché depuis le 28/08 : cette page ne
+     parle qu'aux organisations. Ses trois formats sont dans l'ordre
+     Cadrage, Audit process, Audit + atelier — celui des colonnes de
+     COMPARATIF. */
+  const formules = PROFILS[1].formules;
+
   return (
     <PageShell>
       {/* couche motion commune : lenis + reveals GSAP */}
       <PageMotion />
 
-      <div className="resa">
-        {/* ═══ 0 — ce que le visiteur apporte : le modèle de site retenu,
-               et l'estimation faite sur /tarifs ═══ */}
-        <ModeleRetenu noms={NOMS_MODELES} />
-        <SiteRetenu />
-        <EstimationRetenue noms={NOMS_POSTES} />
+      <div className="rdv">
+        {/* ═══ 1 — tête : titre, chapô, formulaire de format, carte ═══ */}
+        <section data-monde="clair" className="rdv-hero">
+          <div className="rdv-wrap">
+            <div className="rdv-hero-grille">
+              <div className="rdv-hero-gauche">
+                <div className="rdv-entete">
+                  <h1 className="rdv-h1">Un audit à la mesure de votre organisation</h1>
+                  <p className="rdv-lead">
+                    Plusieurs services, plusieurs validateurs&nbsp;: nous mesurons
+                    d&apos;abord, et le devis est établi à partir de vos volumes. Trois
+                    formats, du cadrage de 45 minutes à la journée dans vos locaux.
+                  </p>
+                </div>
 
-        {/* ═══ 1 — titre, trois formats, financement : INCHANGÉE (Teo,
-               27/09 : « la première section ne doit pas être touchée ») ═══ */}
-        <FormulesGrille />
+                <div className="rdv-notes">
+                  <ModeleRetenu noms={NOMS_MODELES} />
+                  <SiteRetenu />
+                  <EstimationRetenue noms={NOMS_POSTES} />
+                </div>
 
-        {/* ═══ 2 — comparatif, et l'orientation à son pied ═══ */}
-        <TableauFormats />
+                <FormulaireFormat formules={formules} />
+              </div>
 
-        {/* ═══ 3 — ce qu'un seul audit passe en revue (remplace le
-               simulateur, 27/09) ═══ */}
-        <UnSeulAudit />
+              <div className="rdv-carte">
+                <blockquote className="rdv-citation">
+                  <p>
+                    Un système ne se justifie que si la difficulté qu&apos;il traite coûte
+                    plus cher que lui. Nous chiffrons avant de recommander, jamais
+                    l&apos;inverse.
+                  </p>
+                  <footer className="rdv-signature">
+                    <span>Omega.AI</span>
+                    <span>Le principe de l&apos;audit</span>
+                  </footer>
+                </blockquote>
 
-        {/* ═══ 4 — protocole d'audit (emplacement des témoignages de la
-               référence) ═══ */}
-        <Protocole />
+                <hr className="rdv-filet" />
 
-        {/* ═══ 5 — appel final ═══ */}
-        <AppelCreneau />
+                <div className="rdv-metiers">
+                  <p className="rdv-mono">Métiers couverts</p>
+                  <ul className="rdv-metiers-liste">
+                    {METIERS.map((m) => (
+                      <li key={m}>{m}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-        {/* ═══ 6 — FAQ : recherche, thèmes, liens (27/09, second passage) ═══ */}
-        <FaqAudit questions={FAQ} contact={lienContact("avant")} />
+        {/* ═══ 2 — les trois formats ═══ */}
+        <section id="formats" data-monde="clair" className="rdv-section">
+          <div className="rdv-wrap">
+            <div className="rdv-tete">
+              <p className="rdv-mono">Les trois formats</p>
+              <h2 className="rdv-h2">Chiffrer d&apos;abord, recommander ensuite</h2>
+              <p className="rdv-lead">
+                Du cadrage de 45 minutes à la journée dans vos locaux&nbsp;: ce qui change
+                d&apos;un format à l&apos;autre, c&apos;est la profondeur de l&apos;entretien
+                et l&apos;endroit où il se tient.
+              </p>
+            </div>
+
+            <div className="rdv-formats">
+              {formules.map((f) => (
+                <article
+                  key={f.id}
+                  className={`rdv-format${f.phare ? " rdv-format--phare" : ""}`}
+                >
+                  <div className="rdv-format-tete">
+                    <h3 className="rdv-format-nom">{f.nom}</h3>
+                    {f.badge ? <span className="rdv-badge">{f.badge}</span> : null}
+                  </div>
+                  <p className="rdv-format-duree">{f.duree}</p>
+                  <p className="rdv-format-meta">
+                    {f.suffixe} · {f.conditions}
+                  </p>
+                  <p className="rdv-format-promesse">{f.promesse}</p>
+                  <div className="rdv-format-liste">
+                    <p className="rdv-mono">{f.enteteListe}</p>
+                    <ul>
+                      {f.points.map((p) => (
+                        <li key={p.texte}>
+                          <PointListe p={p} />
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            <p className="rdv-mention">
+              Cadrage et Audit process sont gratuits, sans engagement. Le format dans vos
+              locaux est déduit de l&apos;installation si vous décidez d&apos;aller plus
+              loin. L&apos;éligibilité au Chèque TIC est vérifiée pendant l&apos;audit,
+              avant tout engagement.
+            </p>
+          </div>
+        </section>
+
+        {/* ═══ 3 — comparatif ═══ */}
+        <section id="comparatif" data-monde="clair" className="rdv-section">
+          <div className="rdv-wrap">
+            <div className="rdv-tete">
+              <p className="rdv-mono">Comparatif</p>
+              <h2 className="rdv-h2">Ce qui change d&apos;un format à l&apos;autre</h2>
+            </div>
+
+            <div className="rdv-tableau-cadre">
+              <table className="rdv-tableau">
+                <caption className="rdv-sr">Comparatif des trois formats d&apos;audit</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">
+                      <span className="rdv-sr">Critère</span>
+                    </th>
+                    {formules.map((f) => (
+                      <th scope="col" key={f.id}>
+                        {f.nom}
+                        <span className="rdv-tableau-duree">{f.duree}</span>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {COMPARATIF.map((famille) => (
+                    <Fragment key={famille.titre}>
+                      <tr className="rdv-famille">
+                        <th scope="colgroup" colSpan={formules.length + 1}>
+                          {famille.titre}
+                        </th>
+                      </tr>
+                      {famille.lignes.map((l) => (
+                        <tr key={l.libelle}>
+                          <th scope="row">
+                            {l.libelle}
+                            {l.aide ? <span className="rdv-tableau-aide">{l.aide}</span> : null}
+                          </th>
+                          {l.valeurs.map((v, i) => (
+                            <td key={i}>{v}</td>
+                          ))}
+                        </tr>
+                      ))}
+                    </Fragment>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══ 4 — périmètre : tout se combine ═══ */}
+        <section id="perimetre" data-monde="clair" className="rdv-section">
+          <div className="rdv-wrap rdv-deux">
+            <div className="rdv-tete">
+              <p className="rdv-mono">Périmètre</p>
+              <h2 className="rdv-h2">Tout se combine, sur un seul audit</h2>
+              <p className="rdv-lead">
+                Le même entretien passe en revue les quatre systèmes et ce qui n&apos;entre
+                dans aucune case. Vous repartez avec une seule recommandation, dans l&apos;ordre
+                où la déployer.
+              </p>
+            </div>
+
+            <ul className="rdv-offres">
+              {OFFRES.map((o) => (
+                <li key={o.href}>
+                  <Link href={o.href} className="rdv-offre">
+                    <span className="rdv-offre-corps">
+                      <span className="rdv-offre-nom">{o.label}</span>
+                      {o.texte ? <span className="rdv-offre-texte">{o.texte}</span> : null}
+                    </span>
+                    <ArrowUpRight aria-hidden strokeWidth={1.6} className="rdv-offre-fleche" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        {/* ═══ 5 — protocole d'audit ═══ */}
+        <section id="engagements" data-monde="clair" className="rdv-section">
+          <div className="rdv-wrap">
+            <div className="rdv-tete">
+              <p className="rdv-mono">Protocole d&apos;audit</p>
+              <h2 className="rdv-h2">Ce qui est écrit noir sur blanc</h2>
+              <p className="rdv-lead">Six règles, appliquées à tous les formats, sans exception.</p>
+            </div>
+
+            <ol className="rdv-articles">
+              {ARTICLES.map((a, i) => (
+                <li key={a.intitule} className="rdv-article">
+                  <span className="rdv-mono">{String(i + 1).padStart(2, "0")}</span>
+                  <h3 className="rdv-article-titre">{a.intitule}</h3>
+                  <p className="rdv-article-texte">{a.texte}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        {/* ═══ 6 — questions fréquentes ═══ */}
+        <section id="faq" data-monde="clair" className="rdv-section">
+          <div className="rdv-wrap rdv-deux">
+            <div className="rdv-tete">
+              <p className="rdv-mono">Questions fréquentes</p>
+              <h2 className="rdv-h2">Avant de réserver</h2>
+              <p className="rdv-lead">
+                Une question qui manque&nbsp;?{" "}
+                <Link href={lienContact("avant")} className="rdv-lien">
+                  Écrivez-nous
+                </Link>
+                , nous répondons le jour même.
+              </p>
+            </div>
+
+            <div className="rdv-faq">
+              {FAQ.map((f) => (
+                <details key={f.q} className="rdv-faq-item">
+                  <summary>
+                    <span>
+                      <span className="rdv-mono">{f.theme}</span>
+                      <span className="rdv-faq-q">{f.q}</span>
+                    </span>
+                  </summary>
+                  <div className="rdv-faq-reponse">
+                    {f.r.map((paragraphe) => (
+                      <p key={paragraphe}>{paragraphe}</p>
+                    ))}
+                    {f.liens?.length ? (
+                      <p className="rdv-faq-liens">
+                        {f.liens.map((l) => (
+                          <Link key={l.href} href={l.href}>
+                            {l.label}
+                          </Link>
+                        ))}
+                      </p>
+                    ) : null}
+                  </div>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ═══ 7 — appel final ═══ */}
+        <section data-monde="clair" className="rdv-section">
+          <div className="rdv-wrap">
+            <div className="rdv-cta">
+              <h2 className="rdv-h2">Réservez votre créneau en deux minutes</h2>
+              <p className="rdv-lead">
+                L&apos;agenda montre les créneaux réellement libres, en heure de Guadeloupe.
+                Vous en choisissez un, il est bloqué à l&apos;instant même, et vous recevez la
+                confirmation le jour même, avec le lien de la visioconférence.
+              </p>
+              <div className="rdv-boutons">
+                <BoutonReservation formule="process" className="rdv-bouton">
+                  Réserver l&apos;audit gratuit
+                  <span aria-hidden className="rdv-bouton-icone">
+                    <ArrowRight strokeWidth={1.8} size={18} />
+                  </span>
+                </BoutonReservation>
+                <Link href="/tarifs" className="rdv-bouton rdv-bouton--fil">
+                  Estimer votre prix
+                </Link>
+              </div>
+              <p className="rdv-petit">
+                Ou par e-mail&nbsp;: <span>{COURRIEL}</span>
+              </p>
+            </div>
+          </div>
+        </section>
       </div>
     </PageShell>
   );
