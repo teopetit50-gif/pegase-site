@@ -55,6 +55,9 @@ begin
   return next ok(rb.palier = 'echeance' and (select d.statut = 'approuvee' and d.politique_id = v_pol from public.demandes_validation d where d.id = rb.demande_id),
                  'Le rappel du jour d''échéance (palier 1) aussi');
   return next is((select x.etat from public.cashd_relances_etat x where x.id = ra.id), 'validee', 'Il est validé, prêt pour le moteur d''envoi (selon le réglage d''envoi)');
+  return next ok(exists (select 1 from jsonb_array_elements(private.cashd_point_lignes(v_client, j)) x
+                        where tests.c2_plat(x ->> 'texte') like '2 rappels courtois approuvés d''office par l''accord permanent%2 000,00 €%'),
+                 'Le point du matin dit les deux rappels partis sans validation, et leur montant (c2_13)');
 
   -- ── Au-delà du plafond, la personne décide ──
   select * into rc from public.cashd_relances x where x.compte_id = v_c and x.jour = j;
