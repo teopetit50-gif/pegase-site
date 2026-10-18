@@ -145,8 +145,10 @@ export default function FormulaireFormat() {
       </p>
 
       {envoi === "ok" ? (
-        <p className="rdv-message rdv-message--ok" role="status">
-          Nous vous confirmons avoir envoyé un mail à <strong>{destinataire}</strong>. Vérifiez vos
+        <p className="rdv-confirmation" role="status">
+          Nous vous confirmons avoir envoyé un mail à <strong>{destinataire}</strong>. Ouvrez-le et
+          choisissez vous-même votre créneau, parmi les disponibilités réelles de l&apos;agenda. Vous
+          recevrez ensuite une confirmation avec la date et le lien de visioconférence. Vérifiez vos
           courriers indésirables si vous ne le voyez pas.
         </p>
       ) : null}

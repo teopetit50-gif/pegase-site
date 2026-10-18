@@ -463,10 +463,16 @@
   line-height: 21px;
 }
 
-.rdv-message--ok {
-  border: 1px solid #9fd3b0;
-  background: #e9f6ee;
-  color: #14532d;
+/* La confirmation : du texte, sans carte. */
+.rdv-confirmation {
+  margin: 0;
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--rdv-ink);
+}
+
+.rdv-confirmation strong {
+  font-weight: 500;
 }
 
 .rdv-message--erreur {

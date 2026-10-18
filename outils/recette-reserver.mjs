@@ -108,7 +108,7 @@ try {
     v('email', 'essai@example.com'); v('pays', 'Guadeloupe'); v('secteur', 'btp'); v('origine', 'LinkedIn'); v('format', 'cadrage');
     document.querySelector('.rdv-formulaire button[type=submit]').click();
     await new Promise(r => setTimeout(r, 500));
-    const vert = document.querySelector('.rdv-message--ok');
+    const vert = document.querySelector('.rdv-confirmation');
     window.fetch = reel;
     return { cible, prenom: corps && corps.prenom, vert: vert ? vert.textContent : null, chemin: location.pathname + location.search };
   })()`);
