@@ -3,8 +3,8 @@
 ## REPRISE (reprise du 18/10, 21 h 16 Z — Teo)
 
 - **Fait** : lots a4_01 → a4_46 posés et verts sur la recette (^test_a4_ 87/87, 18/10 22 h 40 Z) ; a4_46 vérifié sur le banc (chaîne intacte, 340 lignes antérieures, la chaîne part de la prochaine ligne).
-- **En cours** : rien.
-- **Prochain pas** : sans compte tiers, il ne reste que des choix à trancher (rôle « comptabilisation » distinct, n° 111 ; catégories propres à l'organisation, n° 31 ; envoi périodique du sceau d'historique au client, n° 114) ; `montant.lignes` attend un champ « remise au pied » du lecteur (CHAMPS-LECTURE). Restent au coordinateur et à Teo : fusion, production, déploiements `sortie` / `compta`, écran d'effacement, garde des fichiers (A5), identifiants des éditeurs, clé Sirene, prix des paliers.
+- **En cours** : a4_47 écrit (catégories d'achat propres à l'organisation, chiffrage n° 31 ; test `a4_35_categories_achat.sql`, rouge avant, vert après ; 89/89 en local), à poser par le coordinateur. Pour A1 : `private.filed_categories_lecteur(organisation)` (service_role) rend la liste à proposer ; FILED lit la proposition dans `pieces_valeurs`, champ `categorie` (ou `categorie_achat`, `depense.categorie`).
+- **Prochain pas** : sans compte tiers, il ne reste que des choix à trancher (rôle « comptabilisation » distinct, n° 111 (après a4_47, accord du coordinateur) ; envoi périodique du sceau d'historique au client, n° 114) ; `montant.lignes` attend un champ « remise au pied » du lecteur (CHAMPS-LECTURE). Restent au coordinateur et à Teo : fusion, production, déploiements `sortie` / `compta`, écran d'effacement, garde des fichiers (A5), identifiants des éditeurs, clé Sirene, prix des paliers.
 
 ## Banc, chantier 3 (18/10) — exemples de la norme lus par FILED (PAS de vraies factures)
 
