@@ -1,5 +1,14 @@
 # Session B1 — VARELO, le référentiel du groupe (sociétés, pôles, rapprochement)
 
+## REPRISE (18/10/2026, 20 h 00 Z — pause de sécurité)
+
+Arbre propre, tout est poussé sur worker-b1. Posé et vert sur la recette : les 3 groupes publics (737bd0b), b1_20
+et le test b1_23 (38fe581), la présidence et le point de 7 h (a371689 : prevu_le du 19/10 = 05:00 Z pour les 3 gérants).
+À la reprise : lire le relevé `points_du_jour` et `points_sections` du 19/10 (05 h 10 Z, requêtes en fin de
+`omega/banc/varelo_presidence_7h.sql`), puis mettre à jour la ligne 11 de `omega/CHIFFRAGE/varelo-chaine.md`.
+Groupe Parfait : la liste est dans `omega/banc/parfait-societes.md` (470020b). Rien à faire tant que Teo n'a pas
+décidé. Pas d'IA tant que le crédit API de la recette n'est pas rechargé.
+
 ## REPRISE (18/10/2026, 17 h 45 Z — niveau 2, la page du matin de la présidence)
 
 Teo (17 h Z) : B1 continue, à rythme lent, sans IA (plus de crédit API sur la recette). La liste phrase par phrase
