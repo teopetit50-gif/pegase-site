@@ -1,5 +1,16 @@
 # NOTES — session A5 (garde-fous)
 
+## REPRISE — 18/10/2026, 23 h 45 Z (décision de Teo : G18 puis G12, un lot à la fois, recette seulement)
+
+- origin/main fusionné (correctif CI d00c2485) : workflow et vercel.json pris de main, MISE-EN-PRODUCTION.md gardé de worker-a5.
+- G18 — lot 19at (sceau, vérification de sceau, export daté du journal opposable ; private.journal_sceaux en ajout seul) :
+  À POSER par le coordinateur, puis test 62 (^test_62_). Le journal était déjà chaîné (hash, hash_precedent) : le lot ne
+  réécrit rien, il rend visible de l'extérieur un retrait ou une réécriture de la fin de la chaîne. Maquette 62/62.
+  Horodatage qualifié eIDAS : non branché (payant, prestataire à choisir).
+- G12 (interface pour un tiers) : à faire après la pose de 19at.
+- Reste vrai : omega-sauvegarde.yml a `${{ runner.temp }}` dans le env: du job (ligne 98), le même défaut que la
+  répétition CI ; à corriger avant de le fusionner dans main, quand on me le demandera.
+
 ## ARRÊT — 18/10/2026, 17 h Z (pause de Teo)
 
 Cause probable des « Run failed » (0 job, à chaque push) : omega-repetition-ci.yml met `${{ runner.temp }}` dans le `env:` du job (ligne 61), où le contexte `runner` n'est pas permis ; GitHub rejette alors tout le fichier, à chaque push, quels que soient ses déclencheurs. omega-sauvegarde.yml a le même défaut (ligne 98, `TRAVAIL`) et échouerait de même une fois fusionné. Correctif à faire plus tard, quand on me le demandera : `$RUNNER_TEMP` dans les étapes. Je n'ai touché à aucun workflow.

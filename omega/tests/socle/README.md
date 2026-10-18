@@ -26,7 +26,7 @@ la fin du test, y compris en cas d'échec. Aucune donnée d'essai ne reste.
 
 ## Fichiers groupés pour le coordinateur
 
-- `TOUT.sql` : `00_installation.sql` suivi des 61 tests (la règle « pas de
+- `TOUT.sql` : `00_installation.sql` suivi des 62 tests (la règle « pas de
   DELETE en clair » est levée depuis que les fichiers sont posés depuis le
   dépôt), terminé par un seul `runtests()` qui rend une ligne `ok` / `not ok`
   par test. Un seul appel.
@@ -35,7 +35,7 @@ la fin du test, y compris en cas d'échec. Aucune donnée d'essai ne reste.
   un seul appel est trop gros.
 - Ils sont générés depuis les fichiers numérotés ; pour les refaire après une
   modification d'un test, relancer le script de la section « Régénérer ».
-- Validés sur la maquette locale : `TOUT.sql` rend `1..61`, 61 `ok`.
+- Validés sur la maquette locale : `TOUT.sql` rend `1..62`, 62 `ok`.
 
 ## Ce que chaque test vérifie
 
@@ -74,6 +74,7 @@ la fin du test, y compris en cas d'échec. Aucune donnée d'essai ne reste.
 | 59 | Lot 19am. **`apercu_effacement`** : réservé au gérant (un collaborateur et le gérant d'un autre client reçoivent 42501). Il liste les tables locataires, les comptes et les fichiers, sans rien effacer ni écrire de manifeste. **`reception_marquer`** : lue, ecartee (inscrit « ignoree »), nouvelle. Un même statut ne change rien. Le muré et le client B reçoivent la même réponse qu'une réception introuvable (P0002) ; une réception traitée renvoie 55000 ; un autre statut, 22023. Chaque changement donne une ligne de journal `reception.marquee`. 18/18 sur la maquette |
 | 60 | Lot 19ap : **résumé quotidien des alertes**. Il réunit les alertes internes critiques et à surveiller non envoyées, les ouvriers silencieux, les tâches en échec et une sauvegarde en retard. Une alerte destinée au client n'y figure pas. Une alerte est marquée envoyée une seule fois, et seulement si elle est interne ; elle ne revient pas. Les portes sont réservées au service. 9/9 sur la maquette |
 | 61 | Lot 19as : **les fichiers gardés par la loi**. `preparer_effacement` exclut les fichiers des pièces FILED de la liste à effacer et les liste « gardés » au manifeste, avec leur motif. `fichiers_de` voit toujours tout (export, aperçu). Un objet dont le seul fichier restant est gardé n'a plus rien à effacer. Sur la recette : `effacer_objet` refuse (55000) tant qu'un fichier ordinaire reste, accepte quand seul un fichier gardé reste, et le fichier gardé demeure au stockage. 8/8 sur la maquette (la partie `effacer_objet` ne tourne que sur la recette) |
+| 62 | Lot 19at : **sceau et export du journal opposable**. Réservés au gérant ou à un admin (un membre et le gérant d'un autre client reçoivent 42501), ou au service. Le sceau rend la dernière ligne, son empreinte et une chaîne intacte, et s'inscrit dans `private.journal_sceaux` (ajout seul). Le sceau se vérifie (« confirme »). L'export porte toutes les lignes, sa date et l'empreinte de son contenu. Une dernière ligne réécrite, déclencheurs coupés, est révélée par un sceau noté plus tôt (« reecrit »). 11/11 sur la maquette |
 
 ## Mécanique réelle du socle prise en compte (retours de la recette du 5 octobre)
 
