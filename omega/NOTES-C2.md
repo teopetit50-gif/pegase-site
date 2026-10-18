@@ -10,6 +10,9 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
 - **Posé et vert** : c2_01 → c2_10 (7a5678f0, test_c2_* 256 ok sur la recette ; le lot y tourne ~8 min) ; écrans dans main.
   c2_10 : cadence du site par défaut — facture J 0 (rappel le jour de l'échéance, sauté si déjà échue), J+7, J+21, J+30 ;
   devis J+3 puis J+7. Le texte du J 0 n'est pas encore personnalisable (contrainte de cashd_gabarits). Rien à poser.
+- **À poser (18/10, reprise)** : `c2_11_envoi_main.sql` + `test_c2_11_envoi_main` (12) — noter qu'une relance validée est
+  partie à la main (envoi du module coupé, cas d'Omega) ; elle compte alors comme partie. Écran : « Copier le texte » et
+  « Noter l'envoi à la main » sur une relance validée. Aucun mode d'envoi changé. Local 258/258, recette écran verte.
 - **Omega client CASHD (18/10, recette)** : `omega/banc/cashd_omega.sql` — installe CASHD (essai), coupe l'envoi du
   module cashd (relances rédigées et validables, envoyées à la main), charge les factures d'un bloc VALUES que le
   coordinateur remplit à partir des PDF de Teo (copie locale non commitée : vraies données). CASHD ne lit pas les PDF.
