@@ -1,5 +1,13 @@
 # Session B1 — VARELO, le référentiel du groupe (sociétés, pôles, rapprochement)
 
+## REPRISE (18/10/2026, 17 h 45 Z — niveau 2, la page du matin de la présidence)
+
+Teo (17 h Z) : B1 continue, à rythme lent, sans IA (plus de crédit API sur la recette). La liste phrase par phrase
+est dans `omega/CHIFFRAGE/varelo-chaine.md`. Lot 1 : b1_20_page_presidence (grp_lignes_groupe : le total, une
+ligne par société, pas de « à redéposer » pour des comptes publiés), test b1_23. Vert en local : 361 ok, 0 NOT OK.
+À poser. Lot 2 : membres de `presidence` et réglage du point à 7 h pour les 3 groupes. Il me faut d'abord
+`\d public.points_reglages` et la définition de `private.points_manquants`, demandées au coordinateur.
+
 ## REPRISE (18/10/2026, 17 h Z — chantier 3, sources publiques)
 
 Trois vrais petits groupes chargés en balances générales d'après les comptes annuels publiés :
