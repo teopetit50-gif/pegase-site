@@ -425,7 +425,7 @@ export type EtapeExpertise = "consignation_versee" | "pre_rapport_recu" | "dires
 export const noterExpertise = (p_expertise: string, p_evenement: EtapeExpertise, p_le: string | null = null) => rpc<void>("tamila_noter_expertise", { p_expertise, p_evenement, p_le });
 
 /* ——— les lectures longues d'un dossier (b4_15, socle 19an, lecteur d'A1) ——— */
-export type TypeAnalyse = "prelecture" | "chronologie" | "contradictions" | "bordereau";
+export type TypeAnalyse = "prelecture" | "chronologie" | "contradictions" | "bordereau" | "pieces_citees";
 export type Analyse = {
   id: string;
   type: string;
