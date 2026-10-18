@@ -148,8 +148,7 @@
 
 .rdv-entete,
 .rdv-notes,
-.rdv-formulaire,
-.rdv-agenda {
+.rdv-formulaire {
   min-width: 0;
   padding: 0 8px;
 }
@@ -157,8 +156,7 @@
 @media (min-width: 768px) {
   .rdv-entete,
   .rdv-notes,
-  .rdv-formulaire,
-  .rdv-agenda {
+  .rdv-formulaire {
     padding: 0 16px;
   }
 }
@@ -172,10 +170,6 @@
   .rdv-notes,
   .rdv-formulaire {
     grid-column: 1;
-  }
-
-  .rdv-agenda {
-    grid-column: 1 / -1;
   }
 
   .rdv-carte {
@@ -492,17 +486,6 @@
   border-radius: 8px;
   font-size: 14px;
   line-height: 21px;
-}
-
-/* ─── L'agenda de réservation, sous le formulaire : même composant que /reserver ─── */
-
-.rdv .rdv-agenda .resa {
-  background: #fff;
-  padding: 0;
-}
-
-.rdv-agenda {
-  margin-top: 16px;
 }
 
 /* ─── Mouvement réduit : pas de transition, pour qui le demande ─── */

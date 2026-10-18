@@ -30,9 +30,11 @@ type Props = {
   options: Choix[];
   erreur?: boolean;
   pleine?: boolean;
+  /* prévenu à chaque choix : le formulaire s'en sert pour afficher la suite */
+  onChoix?: (valeur: string) => void;
 };
 
-export default function MenuSobre({ nom, libelle, options, erreur, pleine }: Props) {
+export default function MenuSobre({ nom, libelle, options, erreur, pleine, onChoix }: Props) {
   const id = useId();
   const racine = useRef<HTMLDivElement>(null);
   const bouton = useRef<HTMLButtonElement>(null);
@@ -71,6 +73,7 @@ export default function MenuSobre({ nom, libelle, options, erreur, pleine }: Pro
 
   function choisir(i: number) {
     setValeur(options[i].valeur);
+    onChoix?.(options[i].valeur);
     fermer();
   }
 

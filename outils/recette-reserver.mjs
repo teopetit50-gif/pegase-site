@@ -80,18 +80,34 @@ try {
   verifier('envoi vide : neuf erreurs et focus sur le premier champ', vide.messages === 9 && vide.focus === 'rdv-prenom' && vide.reste === '/reserver-un-audit', `${vide.messages} erreur(s), focus ${vide.focus}`);
   verifier('champs de 46 px', f.hauteur === 46, `${f.hauteur} px`);
 
-  /* ——— « Continuer » ouvre l'agenda sous le formulaire, sur cette page ——— */
-  const agenda = await s.evaluer(`(async () => {
+  /* ——— le format de visio révèle le jour et l'horaire ; le devis n'en a pas ———
+     Les clics passent par le vrai menu. Aucun envoi réel : la recette ne bloque
+     jamais de créneau. Le dernier format choisi reste « Cadrage », et l'envoi
+     s'arrête sur le jour et l'horaire manquants, avant la réservation. */
+  const choix = await s.evaluer(`(async () => {
+    const attendre = (ms) => new Promise(r => setTimeout(r, ms));
+    const menuFormat = document.querySelectorAll('.rdv-menu-bouton')[3];
+    const choisir = async (libelle) => {
+      menuFormat.click(); await attendre(200);
+      [...document.querySelectorAll('.rdv-menu-option')].find(o => o.textContent.startsWith(libelle)).click();
+      await attendre(400);
+    };
+    await choisir('Cadrage');
+    const visio = { jour: !!document.querySelector('[name=jour]'), horaire: !!document.querySelector('[name=horaire]') };
+    await choisir('Audit + atelier');
+    const devis = { jour: !!document.querySelector('[name=jour]') };
+    await choisir('Cadrage');
     const v = (nom, valeur) => { document.querySelector('[name=' + nom + ']').value = valeur; };
     v('prenom', 'Essai'); v('nom', 'Recette'); v('entreprise', 'Atelier Essai'); v('fonction', 'Gérante');
-    v('email', 'essai@example.com'); v('pays', 'Guadeloupe'); v('secteur', 'btp'); v('origine', 'LinkedIn'); v('format', 'cadrage');
+    v('email', 'essai@example.com'); v('pays', 'Guadeloupe'); v('secteur', 'btp'); v('origine', 'LinkedIn');
     document.querySelector('.rdv-formulaire button[type=submit]').click();
-    await new Promise(r => setTimeout(r, 1500));
-    const bloc = document.querySelector('#rdv-agenda');
-    return { present: !!bloc, titre: bloc ? (bloc.querySelector('h3')?.textContent ?? '') : '', chemin: location.pathname + location.search };
+    await attendre(300);
+    return { visio, devis, erreurs: document.querySelectorAll('.rdv-erreur').length, confirme: !!document.querySelector('.rdv-confirmation'), chemin: location.pathname + location.search };
   })()`);
-  verifier('« Continuer » ouvre l’agenda sous le formulaire', agenda.present && agenda.titre.includes('Choisissez votre créneau'), agenda.titre || 'pas d’agenda');
-  verifier('la page ne change pas d’adresse', agenda.chemin === '/reserver-un-audit', agenda.chemin);
+  verifier('format de visio : jour et horaire apparaissent', choix.visio.jour && choix.visio.horaire, JSON.stringify(choix.visio));
+  verifier('format sur devis : pas d’horaire à choisir', choix.devis.jour === false, JSON.stringify(choix.devis));
+  verifier('sans jour ni horaire : rien n’est réservé', choix.confirme === false && choix.erreurs >= 1, `${choix.erreurs} erreur(s)`);
+  verifier('la page ne change pas d’adresse', choix.chemin === '/reserver-un-audit', choix.chemin);
 
   if (!await s.aller(url)) throw new Error('retour sur la page impossible');
   await s.dormir(1200);
