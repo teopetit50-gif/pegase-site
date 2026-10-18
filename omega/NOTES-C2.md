@@ -10,6 +10,10 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
 - **Posé et vert** : c2_01 → c2_10 (7a5678f0, test_c2_* 256 ok sur la recette ; le lot y tourne ~8 min) ; écrans dans main.
   c2_10 : cadence du site par défaut — facture J 0 (rappel le jour de l'échéance, sauté si déjà échue), J+7, J+21, J+30 ;
   devis J+3 puis J+7. Le texte du J 0 n'est pas encore personnalisable (contrainte de cashd_gabarits). Rien à poser.
+- **Omega client CASHD (18/10, recette)** : `omega/banc/cashd_omega.sql` — installe CASHD (essai), coupe l'envoi du
+  module cashd (relances rédigées et validables, envoyées à la main), charge les factures d'un bloc VALUES que le
+  coordinateur remplit à partir des PDF de Teo (copie locale non commitée : vraies données). CASHD ne lit pas les PDF.
+  Essayé en local (2 passages, sans doublon ; relance a_valider, mode_envoi coupe).
 - **Captures** : omega/captures/cashd/ — Débiteurs et Relances à 1440 et 390 (script captures.mjs), faites le 17/10.
 - **Prochain pas** : CASHD ne garde qu'une lacune construisible seule, G19 (raccord d'un logiciel de commandes réel à
   cashd_verifier_commande) — elle attend un premier client ; puis le pilote (omega/CHIFFRAGE/cashd.md § Passage à A).
