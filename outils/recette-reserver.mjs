@@ -81,40 +81,18 @@ try {
   verifier('champs de 46 px', f.hauteur === 46, `${f.hauteur} px`);
   verifier('trois cartes de format, une recommandée', f.cartes === 3 && f.phare === 1, `${f.cartes} carte(s), ${f.phare} recommandée(s)`);
 
-  /* ——— envoi : la demande part vers /api/audit/demande, réponse simulée ——— */
-  const refus = await s.evaluer(`(async () => {
-    const reel = window.fetch;
-    window.fetch = async () => new Response(JSON.stringify({ ok: false, motif: 'indisponible' }), { status: 503, headers: { 'Content-Type': 'application/json' } });
+  /* ——— « Continuer » ouvre l'agenda sous le formulaire, sur cette page ——— */
+  const agenda = await s.evaluer(`(async () => {
     const v = (nom, valeur) => { document.querySelector('[name=' + nom + ']').value = valeur; };
     v('prenom', 'Essai'); v('nom', 'Recette'); v('entreprise', 'Atelier Essai'); v('fonction', 'Gérante');
     v('email', 'essai@example.com'); v('pays', 'Guadeloupe'); v('secteur', 'btp'); v('origine', 'LinkedIn'); v('format', 'cadrage');
     document.querySelector('.rdv-formulaire button[type=submit]').click();
-    await new Promise(r => setTimeout(r, 500));
-    const msg = document.querySelector('.rdv-message--erreur');
-    window.fetch = reel;
-    return msg ? msg.textContent : null;
+    await new Promise(r => setTimeout(r, 1500));
+    const bloc = document.querySelector('#rdv-agenda');
+    return { present: !!bloc, titre: bloc ? (bloc.querySelector('h3')?.textContent ?? '') : '', chemin: location.pathname + location.search };
   })()`);
-  verifier('refus du serveur : message rouge', typeof refus === 'string' && refus.includes('pas pu envoyer'), refus ?? 'pas de message');
-
-  if (!await s.aller(url)) throw new Error('retour sur la page impossible');
-  await s.dormir(1200);
-
-  const envoi = await s.evaluer(`(async () => {
-    const reel = window.fetch;
-    let cible = null, corps = null;
-    window.fetch = async (url, opts) => { cible = url; corps = JSON.parse(opts.body); return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } }); };
-    const v = (nom, valeur) => { document.querySelector('[name=' + nom + ']').value = valeur; };
-    v('prenom', 'Essai'); v('nom', 'Recette'); v('entreprise', 'Atelier Essai'); v('fonction', 'Gérante');
-    v('email', 'essai@example.com'); v('pays', 'Guadeloupe'); v('secteur', 'btp'); v('origine', 'LinkedIn'); v('format', 'cadrage');
-    document.querySelector('.rdv-formulaire button[type=submit]').click();
-    await new Promise(r => setTimeout(r, 500));
-    const vert = document.querySelector('.rdv-confirmation');
-    window.fetch = reel;
-    return { cible, prenom: corps && corps.prenom, vert: vert ? vert.textContent : null, chemin: location.pathname + location.search };
-  })()`);
-  verifier('envoi : la demande part vers /api/audit/demande', envoi.cible === '/api/audit/demande' && envoi.prenom === 'Essai', String(envoi.cible));
-  verifier('succès : message vert avec l’adresse du visiteur', !!envoi.vert && envoi.vert.includes('essai@example.com'), envoi.vert ?? 'pas de message');
-  verifier('la page ne change pas d’adresse', envoi.chemin === '/reserver-un-audit', envoi.chemin);
+  verifier('« Continuer » ouvre l’agenda sous le formulaire', agenda.present && agenda.titre.includes('Choisissez votre créneau'), agenda.titre || 'pas d’agenda');
+  verifier('la page ne change pas d’adresse', agenda.chemin === '/reserver-un-audit', agenda.chemin);
 
   if (!await s.aller(url)) throw new Error('retour sur la page impossible');
   await s.dormir(1200);

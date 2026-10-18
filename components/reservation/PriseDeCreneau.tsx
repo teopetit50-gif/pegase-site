@@ -159,6 +159,18 @@ type Props = {
      de la demande : l'audit démarre sur les chiffres du visiteur. Ce n'est
      pas un montant dû — la demande d'audit ne fige aucun prix. */
   estimation?: string;
+  /* 18/10/2026 — les coordonnées déjà saisies sur la page d'audit, reprises
+     ici pour ne pas les retaper. Passées par le parent, lues une seule fois au
+     montage : rien n'est stocké ni mis dans l'adresse. `lignes` : les
+     informations sans champ ici (fonction, pays, origine), une par ligne. */
+  coordonnees?: {
+    prenom: string;
+    nom: string;
+    email: string;
+    entreprise: string;
+    secteur: string;
+    lignes: string[];
+  };
 };
 
 export default function PriseDeCreneau({
@@ -171,6 +183,7 @@ export default function PriseDeCreneau({
   modeleNom,
   formuleSite,
   estimation,
+  coordonnees,
 }: Props) {
   /* ——— le verrou compte (02/09 ; étendu le 15/09 au matin, REPLIÉ le
      15/09 au soir) ———
@@ -291,11 +304,11 @@ export default function PriseDeCreneau({
     /* 02/09 — déjà connecté à l'arrivée (installation) : l'e-mail du
        compte, et ce qui a été rangé sur le profil (à la création du
        compte sur /connexion, ou après une précédente réservation) */
-    prenom: util?.prenom ?? "",
-    nom: util?.nom ?? "",
-    email: util?.email ?? "",
-    entreprise: util?.entreprise ?? "",
-    secteur: "",
+    prenom: util?.prenom || coordonnees?.prenom || "",
+    nom: util?.nom || coordonnees?.nom || "",
+    email: util?.email || coordonnees?.email || "",
+    entreprise: util?.entreprise || coordonnees?.entreprise || "",
+    secteur: coordonnees?.secteur || "",
     telephone: util?.telephone ?? "",
     commune: "",
     /* Le modèle retenu ouvre le message. Écrit une seule fois, à
@@ -305,6 +318,8 @@ export default function PriseDeCreneau({
       modeleNom ? `Modèle de site retenu : ${modeleNom}.` : null,
       formuleSite,
       estimation,
+      /* les informations sans champ ici : « Fonction : » vide n'est pas repris */
+      ...(coordonnees?.lignes ?? []).filter((l) => !l.endsWith(" : ")),
     ]
       .filter(Boolean)
       .map((l) => `${l}\n`)

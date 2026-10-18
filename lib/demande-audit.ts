@@ -1,12 +1,9 @@
 /* ══════════════════════════════════════════════════════════════════════
    La demande d'audit envoyée depuis /reserver-un-audit (18/10/2026).
 
-   Un seul contrôle, pour le formulaire (champs en erreur) et pour la route
-   (ce qui arrive vraiment du navigateur). Les deux ne peuvent pas diverger :
-   ce qui passe ici passe partout.
+   Un seul contrôle : le formulaire le lance au clic sur « Continuer », avant
+   d'ouvrir l'agenda. Les listes ci-dessous sont celles qu'il affiche.
 
-   Les listes ci-dessous sont celles que le formulaire affiche. Une valeur hors
-   liste est refusée côté serveur, même si le navigateur a été trafiqué.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { SECTEURS } from "@/lib/creneaux";
