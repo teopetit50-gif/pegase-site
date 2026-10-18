@@ -144,6 +144,12 @@ normal : un DPGF de DCE est vierge de prix, et la pièce reste « à vérifier �
 retrouvés sont signalés et ne sont pas posés seuls. Exemple, Touët lot 2 : « h sous arc 320 cm » ne figure pas
 dans le texte de la page, qui dit 220 cm.
 
+Deuxième passage, arrêté à 17 h 00 Z (l'API Anthropic de la recette n'a plus de crédit) :
+- **Le Boulou, CCTP-DPGF lot 01** (21 p.) : classé `daliro_piece_autre`, mais 20 lignes lues et vérifiées. Le
+  mélange CCTP et DPGF brouille le type de la pièce.
+- **Le Boulou lot 12** et **Touët lot 3** : déposés, lecture en attente du crédit. Le lecteur les reprendra seul.
+  Touët lot 4 n'a pas été déposé.
+
 **Lignes qui changent d'état :**
 - **n° 44** (« nous raccordons vos devis ») : la partie devis passe de C à **A pour le PDF**. Le collage et le
   CSV d'un export Excel restent prouvés par le test b6_24.
