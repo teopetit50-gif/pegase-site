@@ -5,6 +5,8 @@ Dernière mise à jour : 05/10/2026, 23 h.
 
 ## REPRISE (pause demandée par Teo, 06/10/2026 à 21 h Z)
 
+**18/10, 17 h 15 Z — Teo : B5 et B1 continuent, un lot à la fois, sans sous-agent ; but : niveau 2 sur la page des architectes.** Lot 1 : omega/CHIFFRAGE/lorani-preuves.md (chaque promesse : niveau 0/1/2, preuve, ce qui manque, IA ou non). Prochains lots sans IA : #31 premier relevé BDM, écran de la DPGF réelle de Luzarches, #51, #23, #6, #37.
+
 **18/10, 17 h Z — chantier DCE arrêté (crédit IA de la recette épuisé).** BANC-DCE-VRD (Luzarches, lot 1) : DPGF lue (4 p., 39 postes, 0,1569 €), CCTP bloqué (« credit balance is too low »). Rien d'autre déposé. Les fichiers vérifiés et les manifestes sont dans le scratchpad de la session (perdus avec le conteneur ; ils se retéléchargent depuis les SOURCE d'A1). À la reprise, après la recharge : CCTP Luzarches relu par le socle, puis Touët (le seul avec des plans), à 0,04 € la page.
 
 **18/10 — chantier 2 (Teo) : trois DCE publics réels lus sur le banc.** omega/banc/dce_lorani.mjs (dépôt comme un client : Storage puis lorani_deposer_piece au nom du gérant du banc, un dossier par passage, 12 pièces et 60 Mo au plus, contrôle « DCE réel » qui passe seul à la dernière lecture) et omega/banc/dce_lorani.sql (lecture seule : prérequis, lecture et coût, valeurs et constats). Attend les fichiers d'A1 dans omega/banc/dce-reels/<dossier>/ (worker-a1). Budget 5 € : coût relevé entre deux dossiers. Après lecture : noter dans CHIFFRAGE les lignes B → A.
