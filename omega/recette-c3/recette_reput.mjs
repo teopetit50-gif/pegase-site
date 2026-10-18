@@ -38,6 +38,12 @@ for (const largeur of LARGEURS) {
     await s.dormir(300);
     verifier(await s.evaluer(`!!document.querySelector('textarea')`), `${largeur} : l'éditeur est là`);
     await s.evaluer(cliquer('Annuler'));
+    verifier(await s.evaluer(cliquer('Hélène Roux', '.esp-item')), `${largeur} : ouvrir la demande d'Hélène Roux (pièce jointe)`);
+    await s.dormir(300);
+    verifier(await s.evaluer(`!!document.querySelector('[data-pieces-jointes]') && document.body.innerText.includes('Pièces jointes conservées (1)') && document.body.innerText.includes('photo-dressing.jpg')`), `${largeur} : la pièce jointe est listée, avec sa nature`);
+    d = await s.evaluer(DEBORDE);
+    verifier(!d.scroll && d.elements.length === 0, `${largeur} : aucun débordement (pièces jointes) ${d.elements.join(' | ')}`);
+    await s.capturer(`${DOSSIER}/reput-pieces-${largeur}.jpg`);
     await s.dormir(200);
     verifier(await s.evaluer(cliquer('Valider et envoyer')), `${largeur} : clic sur Valider et envoyer`);
     await s.dormir(400);

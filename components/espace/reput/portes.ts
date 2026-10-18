@@ -117,3 +117,16 @@ export const avisRecu = (avis: string) => rpc("reput_avis_recu", { p_avis: avis 
 export const fixerDelai = (client: string, sujet: string, heures: number) => rpc("reput_fixer_delai", { p_client: client, p_sujet: sujet, p_heures: heures });
 export const routerSujet = (client: string, sujet: string, equipe: string | null) =>
   rpc("reput_router_sujet", { p_client: client, p_sujet: sujet, p_equipe: equipe });
+
+/* Les pièces jointes d'une demande (c3_14) : la liste, puis l'ouverture — la base
+   journalise et rend le chemin, le navigateur signe un lien de 5 minutes. */
+export type PieceDemande = { rang: number; nom: string; mime: string; taille: number | null; nature: "image" | "pdf" | "texte" | "audio" | "video" | "autre"; affichable: boolean; disponible: boolean };
+export const piecesDemande = (demande: string) =>
+  rpc<{ pieces: PieceDemande[]; ignorees: string[] }>("reput_pieces", { p_demande: demande });
+export async function ouvrirPiece(demande: string, rang: number): Promise<{ url: string; nom: string; nature: PieceDemande["nature"]; affichable: boolean }> {
+  const o = await rpc<{ bucket: string; chemin: string; duree: number; nom: string; nature: PieceDemande["nature"]; affichable: boolean }>(
+    "reput_ouvrir_piece", { p_demande: demande, p_rang: rang });
+  const { data, error } = await createClient().storage.from(o.bucket).createSignedUrl(o.chemin, o.duree, o.affichable ? undefined : { download: o.nom });
+  if (error || !data?.signedUrl) throw new ErreurPorte("Le fichier n'est pas dans le stockage : il n'a peut-être pas été reçu.");
+  return { url: data.signedUrl, nom: o.nom, nature: o.nature, affichable: o.affichable };
+}

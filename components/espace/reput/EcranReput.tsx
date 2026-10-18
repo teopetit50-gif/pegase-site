@@ -23,6 +23,7 @@ import { useTempsReel } from "../tempsReel";
 import { Avis, Chargement, Pastille, Ruban, Vide, type Teinte } from "../ui";
 import { dateHeure, relatif } from "../format";
 import BaseConnaissances from "./BaseConnaissances";
+import PiecesJointes from "./PiecesJointes";
 import ReglagesAvis from "./ReglagesAvis";
 import SujetsAutorises from "./SujetsAutorises";
 import { mondeExemple } from "./exemples";
@@ -338,11 +339,7 @@ function DemandeVue({ demande, monde, decideur, source, relire, modifierLocal }:
         })()}
         {rec?.sujet ? <p style={{ fontWeight: 600, marginBottom: 6 }}>{rec.sujet}</p> : null}
         <p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{rec?.corps || "(message sans texte)"}</p>
-        {Array.isArray(rec?.pieces) && rec.pieces.length ? (
-          <p className="esp-kpi-sous" style={{ marginTop: 8, overflowWrap: "anywhere" }}>
-            Pièces jointes conservées : {(rec.pieces as { nom?: string }[]).map((x) => x?.nom ?? "pièce").join(", ")}
-          </p>
-        ) : null}
+        <PiecesJointes key={demande.id} demande={demande.id} pieces={rec?.pieces ?? null} source={source} />
       </div>
 
       <div className="esp-carte-corps">
