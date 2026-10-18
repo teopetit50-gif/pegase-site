@@ -2,7 +2,7 @@
 
 Branche `worker-a3`. Dernière mise à jour : 06/10/2026, 03 h 50 Paris (reprise par la session Opus 5.5 `session_01Npbh1aR6LoEX7PZDchMSca`, à la suite de `session_01DdgwRadkJFx5u9buwh5crS`).
 
-## REPRISE (15/10 — pause 50 % de Teo, 16 h 16 Z ; SHA d'arrêt ef5eeb4 + ce commit de notes)
+## REPRISE (pause de sécurité, 18/10 07 h 30 Z ; rien en cours ; Messagerie b0becc5 fusionnée dans main 47ec59ea, Équipe et son correctif fusionnés)
 
 - 18/10 : carte **Messagerie** dans Réglages (components/espace/reglages/Messagerie.tsx, montée dans EcranReglages, donc /espace/reglages et la section Données de /espace2/reglages, sans toucher aux fichiers de C1). Portes d'A2 (19al) : messagerie_preparer → messagerie-oauth/google/debut ; retour ?erreur= dit en clair puis retiré de l'adresse ; public.messageries (gérant/admin) : connectée / à reconnecter / non connectée, adresse, droits accordés ; « Déconnecter » → messagerie_revoquer (+ a_faire_par_le_client). Microsoft « bientôt ». L'adresse de retour n'est donnée que sur omegaai.fr (messagerie_hotes_retour). Recette 5 largeurs verte ; base réelle (gérant) : lecture, puis « Connecter Gmail » mène jusqu'à la page de connexion de Google (rien d'accordé). `relecture-messagerie.mjs` (CONNECTER=1).
 
