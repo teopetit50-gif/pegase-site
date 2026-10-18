@@ -1196,3 +1196,55 @@ Principe commun : les phrases du site font foi, le produit s'y met ; aucun prix 
 - **Coffre Tamila sur le vrai Key Manager Scaleway (niveau 2, pièces fictives)** : tamila-coffre v15 (B4 bb7ea12, déployé par le bureau) ; activation 200 « bascule », clé maître 9bb47abb-f0dc-47ab-8208-9411a8e88fe1 (fr-par), 3 dossiers locaux ; sonde 200 : clé relue, pièce relue, autre dossier refusé.
 - Posés et verts : b5_34 révision BT par l'API INSEE BDM publique, sans clé (459 ok, cron lorani-index :23) ; b4_20 clé d'analyse au coffre (test_b4_* 760 ok, 2 rouges b4_19 dus aux réceptions Gmail réelles du banc, B4 corrige).
 - En attente du bureau de Teo : redéployer tamila-coffre depuis B4 ccb6d69 et poser le secret TAMILA_BANC_CLIENT (recette) ; mes déploiements Edge bloquent sur une autorisation. Microsoft reporté par Teo.
+
+## 18/10, 16 h 18 → 17 h 15 Z : Omega client de lui-même, sources publiques, puis PAUSE ciblée
+
+**Posé sur la recette (niveau 1)** :
+- **Client « Omega »** 633470bc-0ccd-4b4a-934c-692024c3a419 (config->>'slug'='omega'). Teo est gérant, avec un compte auth au mot de passe aléatoire (« mot de passe oublié »). Les 10 réglages d'envoi sont en essai, cashd est coupé. Posé par A3 c21a14d.
+- **Boîtes de réception** : omega@recu.omegaai.fr (reput) et factures-omega@recu.omegaai.fr (filed), par A2 08fb5c47. resoudre_boite route bien les boîtes suspendues.
+- **Modules d'Omega** : FILED installé (A4 956fcf8), REPUT avec 16 fiches en brouillon (C3 afa2c1d6), CASHD (C2 8c69cbc7). test_a5_omega_ (A5 c26305f7) : 10/11 ; le 6 reste rouge tant qu'OFFLOAD n'est pas importé.
+- **OFFLOAD** : 11 896 comptes, dont 1 933 entrepreneurs individuels. NON importé : le garde-fou de C4 refuse ces données personnelles, il faut l'accord écrit de Teo.
+- **DCE réels** (A1 3b581dd9 et 71c6637b, téléchargement direct ; PLACE et Mégalis exigent une acceptation de CGU par une personne) :
+  - Daliro : 6 pièces lues pour 0,42 €, n° 12, 44 et 52 en A pour la partie devis (B6, arrêt 6468906) ;
+  - Lorani : 1 DPGF lu pour 0,16 € (B5 348f89c) ;
+  - aucune ligne ne passe de B à A sans attendu relu.
+- **FILED** : 36 exemples de la norme Factur-X (pas de vraies factures) lus par le XML, 0 €. a4_43 (f2034de) corrige trois défauts : SIREN réclamé hors de France, doublon comparé à la première pièce seulement, blancs dans les noms. ^test_a4_ 84/84, recontrôle joué (000022 et 000025 écartées).
+- **Varelo** : 3 groupes réels issus des comptes publiés INPI/BCE (EDH, Ankama, Normaxis ; 19 balances), prouvés sous la session de chaque gérant (B1 737bd0b et 009a6bb). Caisses fictives.
+- **REPUT métiers** : 62 fiches en brouillon depuis des sources réutilisables (C3 3130c656), faq.ada.fr exclu.
+- **Tamila** : bloqué. Le garde-fou de B4 refuse les décisions DILA (données personnelles) ; il faut l'accord de Teo.
+- **Arrêt IA** : depuis 17 h 00 Z, l'API Anthropic de la recette répond HTTP 400 « credit balance is too low ». Teo doit recharger.
+- **CI** : .github/workflows/omega-repetition-ci.yml est rejeté à chaque push, 0 job (${{ runner.temp }} dans le env: du job, ligne 61) ; omega-sauvegarde.yml a le même défaut (ligne 98). Ma désactivation et celle d'A5 ont été refusées par le contrôle des sessions : **Teo désactive les deux dans GitHub → Actions**.
+
+### REPRISE (pause ciblée de Teo, 17 h 00 Z : « le focus est le grand groupe et l'architecture »)
+SHA d'arrêt :
+
+| Ouvrier | SHA |
+|---|---|
+| A1 | 5d6856c2 |
+| A2 | ef88f351 |
+| A3 | 96965cb |
+| A4 | 86670ba |
+| A5 | be0f4227 |
+| B2 | cff734cb |
+| B3 | bcd02f6 |
+| B4 | 9aba87e |
+| B6 | 6468906 |
+| B7 | 9388a1b6 |
+| C1 | c4701a5 |
+| C2 | e6298e94 |
+| C3 | 3130c656 |
+| C4 | 1349e9fd |
+
+**Seuls B1 (Varelo, /secteurs/groupes) et B5 (Lorani, /secteurs/architectes) continuent**, un lot à la fois, sans sous-agent. Leur objectif est la chaîne de leur page prouvée sur la recette, au niveau 2 dès que possible. La routine 3 h est désactivée par la session bureau : ne pas la réarmer.
+
+En attente de Teo :
+- la recharge du crédit API Anthropic de la recette ;
+- la désactivation des deux workflows ;
+- l'accord OFFLOAD (données personnelles) ;
+- l'accord Tamila DILA ;
+- les PDF CASHD ;
+- un mail test à omega@recu.omegaai.fr ;
+- le lien Gmail d'Omega (receptions_omega.sql partie 3, A2 08fb5c47) ;
+- tamila-coffre a7a0f9d avec le secret TAMILA_BANC_CLIENT ;
+- reput-reponse 15a01a67 + c3_09 ;
+- sur main, l'écran Varelo « non publiée » (worker-b1 737bd0b, components/espace/varelo).
