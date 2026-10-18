@@ -12,7 +12,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { EXEMPLE_CLIENT_ID, EXEMPLE_MOI, dans, ilYa } from "../exemples/socle";
-import type { Agence, Amendement, AvisContravention, Avoir, Contestation, EtatDesLieux, Bareme, Categorie, Contrat, DemandeCourte, Dossier, Facture, LigneBareme, LigneFacture, LigneJournal, LigneProposition, Locataire, Proposition, Reglages, Vehicule } from "./types";
+import type { Agence, AnomalieRetour, FicheVehicule, Flotte, Amendement, AvisContravention, Avoir, Contestation, Entretien, Immobilisation, Parc, Remise, EtatDesLieux, Bareme, Categorie, Contrat, DemandeCourte, Dossier, Facture, LigneBareme, LigneFacture, LigneJournal, LigneProposition, Locataire, Proposition, Reglages, Vehicule } from "./types";
 import { forcesLocales } from "./contestations";
 
 const C = EXEMPLE_CLIENT_ID;
@@ -387,4 +387,104 @@ export const CONTESTATIONS_EXEMPLE: Contestation[] = [
     dossier_chemin: `${C}/loc_contestations/${u("cb", 2)}/dossier-CB-2026-87105.pdf`, envoi_id: u("en", 90), envoyee_le: ilYa(9, 11), envoyee_par: SOFIA,
     notes: "Le client a déjà reçu un avoir de 72 € : seuls 126 € restent contestés." }),
 ];
+
+/* ——— le parc (b2_10) : deux remises en location en cours (la Clio rendue, qui risque de manquer son départ dans
+   50 minutes ; la 308, pour un départ demain matin), trois remises finies (2 h 31, 2 h 48, 3 h 10 : la médiane
+   affichée est 2 h 48), une anomalie confiée à Yanis, le Master chez le carrossier, la Golf sous rappel du
+   constructeur, une révision à planifier, un contrôle technique planifié, des pneus faits. ——— */
+const YANIS = "00000000-0000-4000-8000-0000000000a3";
+const minutes = (m: number) => new Date(Date.now() + m * 60_000).toISOString();
+const plusMinutes = (iso: string, m: number) => new Date(Date.parse(iso) + m * 60_000).toISOString();
+const V = (n: number) => VEHICULES_EXEMPLE[n - 1].id;
+const remise = (n: number, o: Partial<Remise> & Pick<Remise, "vehicule_id" | "contrat_id" | "retour_le" | "statut">): Remise => ({
+  id: u("rm", n), client_id: C, entite_id: LYON, prochain_depart_le: null, prochain_depart_source: null, prochain_depart_ref: null, limite_le: null,
+  responsable: null, inspection_le: null, inspection_par: null, nettoyage_le: null, nettoyage_par: null, energie_le: null, energie_par: null, prete_le: null,
+  immobilisation_id: null, alerte: null, annulee_motif: null, cree_le: o.retour_le, ...o,
+});
+const finie = (n: number, vehicule: number, contrat: number, retour: string, duree: number): Remise => remise(n, {
+  vehicule_id: V(vehicule), contrat_id: u("co", contrat), retour_le: retour, statut: "prete", inspection_le: plusMinutes(retour, 20), inspection_par: SOFIA,
+  nettoyage_le: plusMinutes(retour, duree - 30), nettoyage_par: SOFIA, energie_le: plusMinutes(retour, duree), energie_par: EXEMPLE_MOI, prete_le: plusMinutes(retour, duree),
+});
+export const PARC_EXEMPLE: Parc = {
+  vehicules: VEHICULES_EXEMPLE.map((v, i) => ({ ...v, entite_id: i === 1 || i === 2 ? (i === 2 ? GRENOBLE : LYON) : LYON })),
+  remises: [
+    remise(1, { vehicule_id: V(1), contrat_id: u("co", 1), retour_le: minutes(-25), statut: "en_cours", prochain_depart_le: minutes(80), prochain_depart_source: "reservation",
+      prochain_depart_ref: "R-55102", limite_le: minutes(50), responsable: SOFIA, inspection_le: minutes(-10), inspection_par: SOFIA, alerte: "risque", immobilisation_id: u("im", 1) }),
+    remise(2, { vehicule_id: V(2), contrat_id: u("co", 2), retour_le: minutes(-90), statut: "a_faire", prochain_depart_le: dans(1, 9), prochain_depart_source: "categorie",
+      prochain_depart_ref: "R-55120", limite_le: plusMinutes(dans(1, 9), -30), immobilisation_id: u("im", 2) }),
+    finie(3, 4, 4, ilYa(12, 9), 168),
+    finie(4, 6, 5, ilYa(18, 10), 151),
+    finie(5, 3, 6, ilYa(45, 18), 190),
+  ],
+  anomalies: [
+    { id: u("an", 1), entite_id: LYON, remise_id: u("rm", 1), vehicule_id: V(1), type: "voyant", description: "Voyant de pression des pneus allumé au retour", responsable: YANIS,
+      statut: "ouverte", signalee_par: SOFIA, signalee_le: minutes(-8), traitee_le: null, traitee_par: null, note: null } satisfies AnomalieRetour,
+  ],
+  immobilisations: [
+    { id: u("im", 1), entite_id: LYON, vehicule_id: V(1), motif: "preparation", debut_le: minutes(-25), fin_prevue_le: null, fin_le: null, contrat_id: u("co", 1), prestataire: null, cout_eur: null, notes: null, cree_le: minutes(-25) },
+    { id: u("im", 2), entite_id: LYON, vehicule_id: V(2), motif: "preparation", debut_le: minutes(-90), fin_prevue_le: null, fin_le: null, contrat_id: u("co", 2), prestataire: null, cout_eur: null, notes: null, cree_le: minutes(-90) },
+    { id: u("im", 3), entite_id: GRENOBLE, vehicule_id: V(3), motif: "carrosserie", debut_le: ilYa(2, 9), fin_prevue_le: dans(3, 17), fin_le: null, contrat_id: null,
+      prestataire: "Carrosserie du Parc", cout_eur: 1350, notes: "Pare-chocs arrière et feu", cree_le: ilYa(2, 9) },
+    { id: u("im", 4), entite_id: LYON, vehicule_id: V(6), motif: "rappel_constructeur", debut_le: ilYa(0, 8), fin_prevue_le: dans(1, 18), fin_le: null, contrat_id: null,
+      prestataire: "Concession Volkswagen Lyon Est", cout_eur: 0, notes: "Rappel airbag passager", cree_le: ilYa(0, 8) },
+  ] satisfies Immobilisation[],
+  entretiens: [
+    { id: u("et", 1), entite_id: LYON, vehicule_id: V(2), nature: "revision", libelle: "Révision 50 000 km", echeance_le: null, echeance_km: 50000, duree_h: 6, statut: "a_planifier",
+      debut_le: null, fin_le: null, atelier_nom: null, atelier_adresse: null, envoi_id: null, immobilisation_id: null, fait_le: null, km_fait: null, cout_eur: null, notes: null },
+    { id: u("et", 2), entite_id: LYON, vehicule_id: V(4), nature: "controle_technique", libelle: "Contrôle technique", echeance_le: jourIso(dans(20, 9)), echeance_km: null, duree_h: 2, statut: "planifie",
+      debut_le: dans(4, 8), fin_le: dans(4, 10), atelier_nom: "Garage Lumière", atelier_adresse: "atelier@garage-lumiere.example", envoi_id: u("en", 91), immobilisation_id: null,
+      fait_le: null, km_fait: null, cout_eur: null, notes: null },
+    { id: u("et", 3), entite_id: LYON, vehicule_id: V(1), nature: "pneus", libelle: "Pneus avant", echeance_le: null, echeance_km: 12000, duree_h: 2, statut: "fait",
+      debut_le: ilYa(10, 8), fin_le: ilYa(10, 10), atelier_nom: "Garage Lumière", atelier_adresse: null, envoi_id: null, immobilisation_id: null, fait_le: ilYa(10, 10), km_fait: 11980, cout_eur: 312, notes: null },
+  ] satisfies Entretien[],
+  membres: Object.entries(PERSONNES_TAVARO).map(([user_id, p]) => ({ user_id, role: p.role })),
+  responsables: [{ entite_id: LYON, remise_responsable: CLAIRE }],
+};
+
+/* ——— la flotte (b2_11) : six fiches économiques sur douze mois. Le Master coûte plus qu'il ne rapporte (carrosserie,
+   utilitaire peu loué) : à sortir aux enchères ; la 308 approche 50 000 km ; la Golf est en LLD jusqu'au mois prochain :
+   à restituer ; la Clio, la Yaris et la C3 sont à garder. La Clio a une cote ; la C3 n'en a pas encore. Une sortie est
+   proposée (le Master) par Yanis, en attente de la direction. ——— */
+const fiche = (n: number, o: Partial<FicheVehicule> & Pick<FicheVehicule, "avis" | "canal" | "canal_raison">): FicheVehicule => {
+  const v = VEHICULES_EXEMPLE[n - 1];
+  const revenu = o.revenu ?? { location: 0, frais: 0, total: 0, jours_loues: 0, contrats_sans_tarif: 0 };
+  const couts = o.couts ?? { atelier: 0, financement: 0, perte_valeur: null, total: 0 };
+  return {
+    vehicule: v.id, immatriculation: v.immatriculation, modele: v.modele, utilitaire: false,
+    periode: { du: jourIso(ilYa(365)), au: jourIso(ilYa(0)), jours: 365 }, revenu, couts, marge: Math.round((revenu.total - couts.total) * 100) / 100,
+    utilisation_pct: Math.round((revenu.jours_loues / 365) * 1000) / 10, jours_immobilises: 0, km: v.km_dernier, km_an: null, age_mois: null,
+    financement: "achat", fin_contrat_le: null, cote: null, valeur_comptable: null, ecart_cote_comptable: null, raisons: [], moment: null, moment_le: null, complet: false, ...o,
+  };
+};
+const FICHES_EXEMPLE: FicheVehicule[] = [
+  fiche(1, { avis: "garder", canal: "reprise_concession", canal_raison: "récent et peu roulé : une reprise en concession, contre un véhicule neuf, valorise au mieux la cote",
+    revenu: { location: 9180, frais: 312, total: 9492, jours_loues: 204, contrats_sans_tarif: 0 }, couts: { atelier: 312, financement: 0, perte_valeur: 1785, total: 2097 },
+    km_an: 21400, age_mois: 14, cote: { eur: 11900, source: "argus", le: jourIso(ilYa(6)) }, valeur_comptable: 10450, ecart_cote_comptable: 1450,
+    moment: "avant 100 000 km, vers le 05/09/2030 au rythme actuel", complet: true }),
+  fiche(2, { avis: "surveiller", canal: "marchand", canal_raison: "un marchand règle vite au prix de la cote, sans annonce ni essais",
+    revenu: { location: 11960, frais: 238, total: 12198, jours_loues: 230, contrats_sans_tarif: 0 }, couts: { atelier: 640, financement: 0, perte_valeur: 2130, total: 2770 },
+    km_an: 26300, age_mois: 31, raisons: ["31 mois, près du seuil de 36 mois", "révision des 50 000 km à planifier"], cote: { eur: 14200, source: "la_centrale", le: jourIso(ilYa(20)) },
+    valeur_comptable: 12100, ecart_cote_comptable: 2100, moment: "avant 50 000 km, vers le 12/11/2026 au rythme actuel", complet: true }),
+  fiche(3, { avis: "sortir", canal: "encheres", canal_raison: "utilitaire ou kilométrage élevé : les ventes aux enchères professionnelles donnent le meilleur prix sans délai",
+    utilitaire: true, revenu: { location: 7200, frais: 0, total: 7200, jours_loues: 80, contrats_sans_tarif: 0 }, couts: { atelier: 4380, financement: 0, perte_valeur: 3150, total: 7530 },
+    jours_immobilises: 23, km_an: 31200, age_mois: 52, raisons: ["il a coûté 330 € de plus qu'il n'a rapporté sur douze mois", "52 mois, au-delà de votre seuil de 36 mois", "loué 21,9 % du temps", "23 jours chez le carrossier et au garage"],
+    cote: { eur: 21000, source: "offre_marchand", le: jourIso(ilYa(3)) }, valeur_comptable: 17800, ecart_cote_comptable: 3200, moment: "dès maintenant", moment_le: jourIso(ilYa(0)), complet: true }),
+  fiche(4, { avis: "garder", canal: "reprise_concession", canal_raison: "récent et peu roulé : une reprise en concession, contre un véhicule neuf, valorise au mieux la cote",
+    revenu: { location: 6750, frais: 120, total: 6870, jours_loues: 150, contrats_sans_tarif: 0 }, couts: { atelier: 89, financement: 0, perte_valeur: 2400, total: 2489 },
+    km_an: 9800, age_mois: 9, cote: { eur: 16000, source: "argus", le: jourIso(ilYa(30)) }, valeur_comptable: 17100, ecart_cote_comptable: -1100, complet: true }),
+  fiche(5, { avis: "garder", canal: "reprise_concession", canal_raison: "récent et peu roulé : une reprise en concession, contre un véhicule neuf, valorise au mieux la cote",
+    revenu: { location: 1890, frais: 0, total: 1890, jours_loues: 42, contrats_sans_tarif: 1 }, couts: { atelier: 0, financement: 0, perte_valeur: null, total: 0 }, age_mois: 3 }),
+  fiche(6, { avis: "restituer", canal: "restitution_loueur", canal_raison: "véhicule financé : il se restitue au loueur financier, sans frais de remise en état au-delà de l'usure normale",
+    financement: "lld", fin_contrat_le: jourIso(dans(38, 9)), revenu: { location: 10900, frais: 160, total: 11060, jours_loues: 218, contrats_sans_tarif: 0 },
+    couts: { atelier: 0, financement: 5160, perte_valeur: 0, total: 5160 }, km_an: 18900, age_mois: 35, raisons: [`le contrat de LLD finit le ${jourIso(dans(38, 9)).split("-").reverse().join("/")}`],
+    moment: "dès maintenant", moment_le: jourIso(ilYa(0)), complet: true }),
+];
+export const FLOTTE_EXEMPLE: Flotte = {
+  fiches: FICHES_EXEMPLE,
+  sorties: [
+    { id: u("sf", 1), vehicule_id: VEHICULES_EXEMPLE[2].id, statut: "proposee", canal: "encheres", prix_vise_eur: 21000, mise_en_vente_le: null,
+      motif: "Utilitaire loué un jour sur cinq, 4 380 € d'atelier et de carrosserie en douze mois, 52 mois : il coûte plus qu'il ne rapporte.",
+      fiche: FICHES_EXEMPLE[2], propose_par: YANIS, propose_le: ilYa(1, 16), decide_par: null, decide_le: null, refus_motif: null, prix_vente_eur: null, vendu_le: null, acheteur: null },
+  ],
+};
 

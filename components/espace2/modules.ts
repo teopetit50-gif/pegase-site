@@ -19,8 +19,17 @@ export const ONGLETS_ORGANISATION: Onglet[] = [
   { libelle: "Vue d'ensemble", href: RACINE, exact: true },
   { libelle: "À valider", href: `${RACINE}/validations` },
   { libelle: "Point du matin", href: `${RACINE}/point` },
+  { libelle: "Demandes reçues", href: `${RACINE}/demandes` },
   { libelle: "Activité", href: `${RACINE}/activite` },
+  { libelle: "Tâches", href: `${RACINE}/taches` },
+  { libelle: "Notes", href: `${RACINE}/notes` },
+  { libelle: "Appels", href: `${RACINE}/appels` },
+  { libelle: "Entreprises", href: `${RACINE}/entreprises` },
+  { libelle: "Contacts", href: `${RACINE}/contacts` },
+  { libelle: "Automatisations", href: `${RACINE}/automatisations` },
+  { libelle: "Utilisation", href: `${RACINE}/utilisation` },
   { libelle: "Réglages", href: `${RACINE}/reglages` },
+  { libelle: "Équipe", href: `${RACINE}/equipe` },
 ];
 
 export type ModuleV2 = {
@@ -63,6 +72,10 @@ export const MODULES: ModuleV2[] = [
     ],
     true,
   ),
+  m("cashd", "CASHD", "Relances", "Qui vous doit, depuis quand, où en est chaque relance", HandCoins, [
+    { libelle: "Tableau de bord", href: `${RACINE}/cashd`, exact: true },
+    { libelle: "Débiteurs et relances", href: `${RACINE}/cashd/suivi` },
+  ]),
   m("reput", "REPUT", "Demandes clients", "Demandes reçues et réponses préparées", MessageSquareText),
   m("varelo", "VARELO", "Référentiel du groupe", "Sociétés, lots et objets du groupe", Building),
   m("tavaro", "TAVARO", "Location", "Contrats, retours et barèmes", CarFront),
@@ -70,12 +83,32 @@ export const MODULES: ModuleV2[] = [
   m("tiroma", "TIROMA", "Cabinet dentaire", "Créneaux, fauteuils et liste d'attente", Smile),
   m("tamila", "TAMILA", "Dossiers du cabinet", "Dossiers chiffrés et pièces", FolderLock),
   m("daliro", "DALIRO", "Chantiers", "Chantiers, envois et accords", HardHat),
+  m("offload", "OFFLOAD", "Clients qui décrochent", "Rythme d'achat, décrochages et reprises de contact", UserMinus),
 ];
+
+/* 07/10/2026 — demande de Teo : la barre ne montre que les quatre
+   modules communs, puis LE module du métier de l'entreprise (un seul).
+   Les autres restent atteignables par « Tous les modules », en haut. */
+export const MODULES_PRINCIPAUX = ["filed", "cashd", "reput", "offload"];
+
+/** Le module métier d'un secteur (valeurs de SECTEURS, lib/creneaux) ;
+    sans compte (démo), celui du BTP. */
+export function moduleMetier(secteur: string | undefined, connecte: boolean): string | null {
+  if (!connecte) return "daliro";
+  const table: Record<string, string> = {
+    btp: "daliro",
+    archi: "lorani",
+    location: "tavaro",
+    dentaire: "tiroma",
+    avocats: "tamila",
+    groupe: "varelo",
+    immo: "varelo",
+  };
+  return (secteur && table[secteur]) || null;
+}
 
 /* les modules annoncés, sans écran encore : une place dans la navigation, sans lien */
 export const MODULES_A_VENIR: { cle: string; nom: string; libelle: string; icone: LucideIcon }[] = [
-  { cle: "cashd", nom: "CASHD", libelle: "Relances d'impayés", icone: HandCoins },
-  { cle: "offload", nom: "OFFLOAD", libelle: "Clients qui décrochent", icone: UserMinus },
 ];
 
 export const moduleDe = (cle: string | undefined) => MODULES.find((x) => x.cle === cle);

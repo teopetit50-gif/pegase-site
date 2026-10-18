@@ -25,15 +25,21 @@ import { Avis, Chargement, Pastille, Ruban, Vide } from "../ui";
 import { dateCourte, montant } from "../format";
 import { chiffrerLocal } from "./calcul";
 import { FAMILLES, STATUTS_CONTRAT, STATUTS_PROPOSITION, famille, nomLocataire, propositionVivante, resteDu, type Famille } from "./etats";
-import { AGENCES_EXEMPLE, AVIS_EXEMPLE, CONTESTATIONS_EXEMPLE, BAREME_EXEMPLE, BAREME_RETIRE_EXEMPLE, CATEGORIES_EXEMPLE, DOSSIERS_EXEMPLE, LIGNES_BAREME_EXEMPLE, REGLAGES_EXEMPLE, nomPersonneTavaro } from "./exemples";
-import { amenderContrat, avoirElectronique, chargerMonde, envoyerDossier, issueContestation, lienDossier, ouvrirContestation, produireDossier, chiffrerRetour, classerAvis, completerContrat, completerLocataire, constaterRefus, factureElectronique, preparation2027, refacturerAvis, etablirEtat, leverCaution, signerEtat, demanderAvoir, deposerPhoto, designerConducteur, enregistrerAvis, marquerLitige, marquerReglee, monCompte, publierBareme, rattacherAvis, relancerFacture, retirerBareme, type Moi, type Monde } from "./portes";
-import type { AvisContravention, Avoir, Contestation, Bareme, EtatDesLieux, Dossier, Facture, LigneBareme, LigneJournal, Retour, Role } from "./types";
+import { AGENCES_EXEMPLE, AVIS_EXEMPLE, CONTESTATIONS_EXEMPLE, FLOTTE_EXEMPLE, PARC_EXEMPLE, BAREME_EXEMPLE, BAREME_RETIRE_EXEMPLE, CATEGORIES_EXEMPLE, DOSSIERS_EXEMPLE, LIGNES_BAREME_EXEMPLE, REGLAGES_EXEMPLE, nomPersonneTavaro } from "./exemples";
+import { poserResponsableRemise, amenderContrat, annulerSortie, assignerRemise, conclureSortie, deciderSortie, poserEconomie, proposerSortie, avoirElectronique, chargerMonde, creneauxEntretien, entretienFait, envoyerDossier, etapeRemise, immobiliser, leverImmobilisation, planifierEntretien, prevoirEntretien, signalerAnomalie, traiterAnomalie, issueContestation, lienDossier, ouvrirContestation, produireDossier, chiffrerRetour, classerAvis, completerContrat, completerLocataire, constaterRefus, factureElectronique, preparation2027, refacturerAvis, etablirEtat, leverCaution, signerEtat, demanderAvoir, deposerPhoto, designerConducteur, enregistrerAvis, marquerLitige, marquerReglee, monCompte, publierBareme, rattacherAvis, relancerFacture, retirerBareme, type Moi, type Monde } from "./portes";
+import type { AvisContravention, Avoir, Contestation, Creneau, SortieFlotte, Entretien, Immobilisation, Parc, Remise, Bareme, EtatDesLieux, Dossier, Facture, LigneBareme, LigneJournal, Retour, Role } from "./types";
 import DossierContrat, { type Gestes } from "./DossierContrat";
 import type { GestesEtats } from "./EtatsDesLieux";
 import { appliquerEtats, empreinte } from "./edl";
 import BaremeVue from "./BaremeVue";
+import AnalysesParc from "./AnalysesParc";
 import AvisVue, { type GestesAvis } from "./AvisVue";
 import ContestationsVue, { type GestesContestations } from "./ContestationsVue";
+import ParcVue, { type GestesParc } from "./ParcVue";
+import FlotteVue, { type GestesFlotte } from "./FlotteVue";
+import OperationsVue from "./OperationsVue";
+import AuditVue from "./AuditVue";
+import QuestionsVue from "./QuestionsVue";
 import { forcesLocales } from "./contestations";
 import { Preparation2027, type Preparation } from "./FactureElectronique";
 import { controler, docAvoir, docFacture, formeLocale, sirenValide } from "./cii";
@@ -49,6 +55,8 @@ const MONDE_EXEMPLE: Monde = {
   entites: AGENCES_EXEMPLE.map((a) => ({ id: a.entite_id, nom: a.nom })),
   avis: AVIS_EXEMPLE,
   contestations: CONTESTATIONS_EXEMPLE,
+  parc: PARC_EXEMPLE,
+  flotte: FLOTTE_EXEMPLE,
 };
 
 const ids = () => crypto.randomUUID();
@@ -78,7 +86,7 @@ export default function EcranTavaro() {
       setMoi(compte);
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
-      setReel({ dossiers: [], agences: [], categories: [], baremes: [], lignesBareme: [], reglages: null, entites: [], avis: [], contestations: [] });
+      setReel({ dossiers: [], agences: [], categories: [], baremes: [], lignesBareme: [], reglages: null, entites: [], avis: [], contestations: [], parc: { vehicules: [], remises: [], anomalies: [], immobilisations: [], entretiens: [], membres: [] }, flotte: null });
     }
   }, []);
 
@@ -124,7 +132,7 @@ export default function EcranTavaro() {
   }, [local]);
   const preparation = source === "exemple" ? prepExemple : prepReelle;
 
-  useTempsReel(["loc_contrats", "loc_propositions", "loc_factures", "loc_avoirs", "loc_avis_contravention", "loc_etats_des_lieux", "loc_contestations"], source === "reelle", relire);
+  useTempsReel(["loc_contrats", "loc_propositions", "loc_factures", "loc_avoirs", "loc_avis_contravention", "loc_etats_des_lieux", "loc_contestations", "loc_remises", "loc_anomalies_retour", "loc_immobilisations", "loc_entretiens", "loc_sorties_flotte"], source === "reelle", relire);
 
   const nommer = useCallback((id: string | null | undefined) => {
     if (!id) return "Système";
@@ -550,6 +558,168 @@ export default function EcranTavaro() {
     };
   }, [source, local, moiId, role, relire]);
 
+  /* ——— le parc : la porte en base réelle ; en exemple, les mêmes règles en mémoire (créneaux hors contrats et immobilisations) ——— */
+  const gestesParc: GestesParc = useMemo(() => {
+    const changerParc = (f: (p: Parc) => Parc) => setLocal((prev) => ({ ...prev, parc: f(prev.parc) }));
+    const attendre = () => new Promise((r) => setTimeout(r, 300));
+    const direction = role === "gerant" || role === "admin" || role === "valideur";
+    const reel = <T,>(f: () => Promise<T>) => async () => { const r = await f(); await relire(); return r; };
+    return {
+      etape: async (r, etape, fait) => {
+        if (source === "reelle") return void (await reel(() => etapeRemise(r.id, etape, fait))());
+        await attendre();
+        changerParc((p) => {
+          const remises = p.remises.map((x) => {
+            if (x.id !== r.id) return x;
+            const y: Remise = { ...x, [`${etape}_le`]: fait ? maintenant() : null, [`${etape}_par`]: fait ? moiId : null };
+            const toutes = !!(y.inspection_le && y.nettoyage_le && y.energie_le);
+            return { ...y, statut: (toutes ? "prete" : "en_cours") as Remise["statut"], prete_le: toutes ? maintenant() : null, alerte: toutes ? null : y.alerte };
+          });
+          const prete = remises.find((x) => x.id === r.id)?.statut === "prete";
+          return { ...p, remises, immobilisations: prete ? p.immobilisations.map((i) => (i.id === r.immobilisation_id ? { ...i, fin_le: maintenant() } : i)) : p.immobilisations };
+        });
+      },
+      assigner: async (r, responsable) => {
+        if (source === "reelle") return void (await reel(() => assignerRemise(r.id, responsable))());
+        await attendre();
+        changerParc((p) => ({ ...p, remises: p.remises.map((x) => (x.id === r.id ? { ...x, responsable } : x)) }));
+      },
+      signaler: async (r, type, description, responsable) => {
+        if (source === "reelle") return void (await reel(() => signalerAnomalie(r.id, type, description, responsable))());
+        await attendre();
+        changerParc((p) => ({ ...p, anomalies: [...p.anomalies, { id: ids(), entite_id: r.entite_id, remise_id: r.id, vehicule_id: r.vehicule_id, type, description, responsable,
+          statut: "ouverte", signalee_par: moiId, signalee_le: maintenant(), traitee_le: null, traitee_par: null, note: null }] }));
+      },
+      traiter: async (a, note) => {
+        if (source === "reelle") return void (await reel(() => traiterAnomalie(a.id, note))());
+        await attendre();
+        if (a.responsable !== moiId && !direction) throw new Error("Cette anomalie est confiée à une autre personne : elle, ou la direction, la clôt.");
+        changerParc((p) => ({ ...p, anomalies: p.anomalies.map((x) => (x.id === a.id ? { ...x, statut: "traitee", traitee_le: maintenant(), traitee_par: moiId, note } : x)) }));
+      },
+      immobiliser: async (vehicule_id, valeurs) => {
+        if (source === "reelle") return reel(() => immobiliser(vehicule_id, valeurs))();
+        await attendre();
+        const i: Immobilisation = { id: ids(), entite_id: local.parc.vehicules.find((v) => v.id === vehicule_id)?.entite_id ?? null, vehicule_id, motif: valeurs.motif as Immobilisation["motif"],
+          debut_le: maintenant(), fin_prevue_le: (valeurs.fin_prevue_le as string) ?? null, fin_le: null, contrat_id: null, prestataire: (valeurs.prestataire as string) ?? null,
+          cout_eur: null, notes: (valeurs.notes as string) ?? null, cree_le: maintenant() };
+        const fin = i.fin_prevue_le ? Date.parse(i.fin_prevue_le) : Infinity;
+        const a_reaffecter = local.dossiers.filter((d) => d.contrat.vehicule_id === vehicule_id && d.contrat.statut === "ouvert" && Date.parse(d.contrat.depart_le) < fin
+          && Date.parse(d.contrat.retour_prevu_le) > Date.now()).map((d) => ({ quoi: "contrat", ref: d.contrat.numero, debut: d.contrat.depart_le }));
+        changerParc((p) => ({ ...p, immobilisations: [i, ...p.immobilisations] }));
+        return { immobilisation: i.id, a_reaffecter };
+      },
+      lever: async (i, cout, notes) => {
+        if (source === "reelle") return void (await reel(() => leverImmobilisation(i.id, cout, notes))());
+        await attendre();
+        changerParc((p) => ({ ...p, immobilisations: p.immobilisations.map((x) => (x.id === i.id ? { ...x, fin_le: maintenant(), cout_eur: cout ?? x.cout_eur } : x)) }));
+      },
+      prevoir: async (vehicule_id, valeurs) => {
+        if (source === "reelle") return void (await reel(() => prevoirEntretien(vehicule_id, valeurs))());
+        await attendre();
+        const e: Entretien = { id: ids(), entite_id: local.parc.vehicules.find((v) => v.id === vehicule_id)?.entite_id ?? null, vehicule_id, nature: valeurs.nature as Entretien["nature"],
+          libelle: (valeurs.libelle as string) ?? null, echeance_le: (valeurs.echeance_le as string) ?? null, echeance_km: (valeurs.echeance_km as number) ?? null,
+          duree_h: (valeurs.duree_h as number) ?? 4, statut: "a_planifier", debut_le: null, fin_le: null, atelier_nom: null, atelier_adresse: null, envoi_id: null,
+          immobilisation_id: null, fait_le: null, km_fait: null, cout_eur: null, notes: null };
+        changerParc((p) => ({ ...p, entretiens: [...p.entretiens, e] }));
+      },
+      creneaux: async (e) => {
+        if (source === "reelle") return (await creneauxEntretien(e.id)).creneaux;
+        await attendre();
+        const pris = [
+          ...local.dossiers.filter((d) => d.contrat.vehicule_id === e.vehicule_id && d.contrat.statut !== "annule")
+            .map((d) => [Date.parse(d.contrat.depart_le), Date.parse(d.contrat.retour_reel_le ?? d.contrat.retour_prevu_le)]),
+          ...local.parc.immobilisations.filter((i) => i.vehicule_id === e.vehicule_id && !i.fin_le && i.id !== e.immobilisation_id)
+            .map((i) => [Date.parse(i.debut_le), i.fin_prevue_le ? Date.parse(i.fin_prevue_le) : i.motif === "preparation" ? Math.max(Date.now(), Date.parse(i.debut_le)) + 12 * 3_600_000 : Infinity]),
+        ];
+        const res: Creneau[] = [];
+        for (let j = 1; j <= 60 && res.length < 3; j++) {
+          const d = new Date();
+          d.setDate(d.getDate() + j);
+          d.setHours(8, 0, 0, 0);
+          const debut = d.getTime();
+          const fin = debut + e.duree_h * 3_600_000;
+          if (pris.some(([a, b]) => a < fin + 3_600_000 && b > debut - 3_600_000)) continue;
+          res.push({ debut: new Date(debut).toISOString(), fin: new Date(fin).toISOString(), avant_echeance: !e.echeance_le || new Date(fin).toISOString().slice(0, 10) <= e.echeance_le });
+        }
+        return res;
+      },
+      planifier: async (e, debut, atelierNom, atelierAdresse) => {
+        if (source === "reelle") return reel(() => planifierEntretien(e.id, debut, atelierNom, atelierAdresse))();
+        await attendre();
+        const fin = new Date(Date.parse(debut) + e.duree_h * 3_600_000).toISOString();
+        changerParc((p) => ({ ...p, entretiens: p.entretiens.map((x) => (x.id === e.id ? { ...x, statut: "planifie", debut_le: debut, fin_le: fin, atelier_nom: atelierNom ?? x.atelier_nom,
+          atelier_adresse: atelierAdresse ?? x.atelier_adresse, envoi_id: atelierAdresse ? ids() : x.envoi_id } : x)) }));
+        return { statut: "planifie", atelier_prevenu: !!atelierAdresse };
+      },
+      fait: async (e, km, cout) => {
+        if (source === "reelle") return void (await reel(() => entretienFait(e.id, km, cout))());
+        await attendre();
+        changerParc((p) => ({ ...p, entretiens: p.entretiens.map((x) => (x.id === e.id ? { ...x, statut: "fait", fait_le: maintenant(), km_fait: km, cout_eur: cout } : x)) }));
+      },
+      responsable: async (entite_id, personne) => {
+        if (source === "reelle") return void (await reel(() => poserResponsableRemise(entite_id, personne))());
+        await attendre();
+        if (role !== "gerant" && role !== "admin") throw new Error("Le responsable des remises se règle par la direction.");
+        changerParc((p) => ({
+          ...p,
+          responsables: [...(p.responsables ?? []).filter((x) => x.entite_id !== entite_id), { entite_id, remise_responsable: personne }],
+          remises: p.remises.map((x) => (x.entite_id === entite_id && !x.responsable && (x.statut === "a_faire" || x.statut === "en_cours") ? { ...x, responsable: personne } : x)),
+        }));
+      },
+    };
+  }, [source, local, moiId, role, relire]);
+
+  /* ——— la flotte : la porte en base réelle ; en exemple, la fiche suit la cote saisie, la sortie suit la direction ——— */
+  const gestesFlotte: GestesFlotte = useMemo(() => {
+    const attendre = () => new Promise((r) => setTimeout(r, 300));
+    const changer = (f: (s: SortieFlotte[]) => SortieFlotte[], fiches?: (l: NonNullable<Monde["flotte"]>["fiches"]) => NonNullable<Monde["flotte"]>["fiches"]) =>
+      setLocal((prev) => (prev.flotte ? { ...prev, flotte: { sorties: f(prev.flotte.sorties), fiches: fiches ? fiches(prev.flotte.fiches) : prev.flotte.fiches } } : prev));
+    const directionStricte = role === "gerant" || role === "admin";
+    return {
+      poserEconomie: async (vehicule, valeurs) => {
+        if (source === "reelle") { await poserEconomie(vehicule, valeurs); await relire(); return; }
+        await attendre();
+        const cote = typeof valeurs.cote_eur === "number" ? valeurs.cote_eur : null;
+        changer((s) => s, (l) => l.map((f) => {
+          if (f.vehicule !== vehicule) return f;
+          const perte = cote !== null && f.financement === "achat" ? Math.round(cote * 0.15 * 100) / 100 : f.couts.perte_valeur;
+          const couts = { ...f.couts, perte_valeur: perte, total: Math.round((f.couts.atelier + f.couts.financement + (perte ?? 0)) * 100) / 100 };
+          const comptable = typeof valeurs.valeur_comptable_eur === "number" ? valeurs.valeur_comptable_eur : f.valeur_comptable;
+          return { ...f, couts, marge: Math.round((f.revenu.total - couts.total) * 100) / 100, valeur_comptable: comptable,
+            cote: cote !== null ? { eur: cote, source: valeurs.cote_source as NonNullable<typeof f.cote>["source"], le: String(valeurs.cote_le) } : null,
+            ecart_cote_comptable: cote !== null && comptable !== null ? cote - comptable : null, complet: cote !== null };
+        }));
+      },
+      proposer: async (vehicule, valeurs) => {
+        if (source === "reelle") { await proposerSortie(vehicule, valeurs); await relire(); return; }
+        await attendre();
+        const f = local.flotte?.fiches.find((x) => x.vehicule === vehicule);
+        if (!f) throw new Error("Véhicule introuvable.");
+        changer((s) => [{ id: ids(), vehicule_id: vehicule, statut: "proposee", canal: (valeurs.canal as SortieFlotte["canal"]) ?? f.canal,
+          prix_vise_eur: typeof valeurs.prix_vise_eur === "number" ? valeurs.prix_vise_eur : f.cote?.eur ?? null, mise_en_vente_le: null, motif: String(valeurs.motif), fiche: f,
+          propose_par: moiId, propose_le: maintenant(), decide_par: null, decide_le: null, refus_motif: null, prix_vente_eur: null, vendu_le: null, acheteur: null }, ...s]);
+      },
+      decider: async (sortie, valider, motif) => {
+        if (source === "reelle") { await deciderSortie(sortie.id, valider, motif); await relire(); return; }
+        await attendre();
+        if (!directionStricte) throw new Error("La direction seule valide une mise en vente.");
+        if (sortie.propose_par === moiId) throw new Error("Une autre personne de la direction valide ce que vous avez proposé.");
+        changer((s) => s.map((x) => (x.id === sortie.id ? { ...x, statut: valider ? "validee" : "refusee", decide_par: moiId, decide_le: maintenant(), refus_motif: valider ? null : motif } : x)));
+      },
+      conclure: async (sortie, prix, le, acheteur) => {
+        if (source === "reelle") { await conclureSortie(sortie.id, prix, le, acheteur); await relire(); return; }
+        await attendre();
+        changer((s) => s.map((x) => (x.id === sortie.id ? { ...x, statut: "vendue", prix_vente_eur: prix, vendu_le: le ?? maintenant().slice(0, 10), acheteur } : x)),
+          (l) => l.filter((f) => f.vehicule !== sortie.vehicule_id));
+      },
+      annuler: async (sortie, motif) => {
+        if (source === "reelle") { await annulerSortie(sortie.id, motif); await relire(); return; }
+        await attendre();
+        changer((s) => s.map((x) => (x.id === sortie.id ? { ...x, statut: "annulee" } : x)));
+      },
+    };
+  }, [source, local, moiId, role, relire]);
+
   const agences = monde?.agences ?? [];
   const nomAgenceDe = (entite_id: string) => agences.find((a) => a.entite_id === entite_id)?.nom ?? agences.find((a) => a.entite_id === entite_id)?.code ?? entite_id.slice(0, 8);
 
@@ -657,12 +827,47 @@ export default function EcranTavaro() {
       </div>
 
       <div style={{ marginTop: 16 }}>
+        <ParcVue parc={monde?.parc ?? { vehicules: [], remises: [], anomalies: [], immobilisations: [], entretiens: [], membres: [] }} dossiers={dossiers} role={role} moi={moiId}
+          nommer={nommer} nomAgence={nomAgenceDe} dureeMin={monde?.reglages?.remise_duree_min ?? 90} gestes={gestesParc} />
+      </div>
+
+      {/* b2_12 à b2_16 : départ et rappels, transferts, péages, sinistres, assistance, caution */}
+      <div style={{ marginTop: 16 }}>
+        <OperationsVue source={source} role={role} dossiers={dossiers} vehicules={monde?.parc.vehicules ?? []} nomAgence={nomAgenceDe} />
+      </div>
+
+      {/* b2_20 : les Questions (module 06) */}
+      <div style={{ marginTop: 16 }}>
+        <QuestionsVue source={source} role={role} />
+      </div>
+
+      {/* b2_19 : l'audit des retours et l'indicateur du mois (direction et valideurs) */}
+      <div style={{ marginTop: 16 }}>
+        <AuditVue source={source} role={role} moi={moiId} dossiers={dossiers} reglages={monde?.reglages ?? null}
+          bareme={(() => {
+            const enVigueur = [...(monde?.baremes ?? [])].filter((b) => b.statut === "publie").sort((x, y) => y.date_effet.localeCompare(x.date_effet))[0];
+            return (monde?.lignesBareme ?? []).filter((l) => l.bareme_id === enVigueur?.id);
+          })()} />
+      </div>
+
+      <div style={{ marginTop: 16 }}>
         <AvisVue avis={monde?.avis ?? []} dossiers={dossiers} role={role} nommer={nommer} nomAgence={nomAgenceDe} gestes={gestesAvis} />
       </div>
 
       <div style={{ marginTop: 16 }}>
         <ContestationsVue contestations={monde?.contestations ?? []} dossiers={dossiers} reglages={monde?.reglages ?? null} role={role} nommer={nommer} nomAgence={nomAgenceDe} gestes={gestesContestations} />
       </div>
+
+      {/* b3t_01 à b3t_03 (renfort B3) : véhicules inactifs, réservations et contrats à risque, montée en gamme, plan de flotte */}
+      <div style={{ marginTop: 16 }}>
+        <AnalysesParc source={source} moi={moi} role={role} />
+      </div>
+
+      {role === "gerant" || role === "admin" || role === "valideur" ? (
+        <div style={{ marginTop: 16 }}>
+          <FlotteVue flotte={monde?.flotte ?? null} role={role} moi={moiId} nommer={nommer} gestes={gestesFlotte} />
+        </div>
+      ) : null}
 
       {role === "gerant" || role === "admin" || role === "valideur" ? (
         <div style={{ marginTop: 16 }}>

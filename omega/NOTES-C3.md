@@ -3,6 +3,14 @@
 Branche `worker-c3`. Coordinateur : `session_01BCGFdpRKBvXKjouC75sYBg`.
 Commencée le 06/10/2026. Je n'appelle jamais Supabase : le coordinateur pose, je lis les sorties brutes.
 
+## REPRISE (pause demandée par Teo, 06/10/2026 21 h Z)
+
+- **Fait et posé sur la recette, vert** : c3_01 → c3_08 (migrations + tests pgTAP, dernier lot c3_08 bb153a2 vert, socle 44/46/51 verts, worker-c3 fusionnée par le coordinateur) ; Edge `reput-reponse` déployée (Deno 12/12) ; écran `app/espace/reput` + `components/espace/reput` ; souche locale 264/264.
+- **Dernier commit** : e125ccb — chiffrage `omega/CHIFFRAGE/reput.md` (document seul, rien à poser) ; ce commit-ci ajoute cette section.
+- **Attend le coordinateur** : rien à poser ; fusionner e125ccb + ce commit (documents). Export à date fixe : non construit (mis de côté).
+- **Attend Teo** : trancher les phrases du site relevées dans le chiffrage (rendez-vous/agenda, astreinte, « réponse à 21 h », « aucun logiciel de plus », contradictions A:94/A:177/A:430 et A:426/K:122) ; clé IA en UE (Bedrock eu-west) ; compte Meta WhatsApp ; un premier client réel (mail + formulaire).
+- **Prochaine étape exacte** : faire passer le circuit mail + formulaire en « prouvé en vrai » — rouvrir la boîte du banc banc@recu.omegaai.fr, envoyer un vrai courriel, vérifier préparation < 1 min, validation dans « À valider », envoi reçu, journal ; puis, selon les choix de Teo, le bloc rendez-vous/agenda (≈ 10 j) ou l'astreinte (≈ 3 j).
+
 ## Ce que le site promet et ce que C3 rend vrai
 
 La réception existe (A2 : courriel Brevo sur recu.omegaai.fr, formulaire signé, WhatsApp → `public.receptions`,
@@ -214,6 +222,14 @@ Test `omega/tests/reput/c3_06_cashd_escalade.sql` (27 ; souche 233/233). Il pose
 Test `omega/tests/reput/c3_07_dossiers.sql` (20 ; souche 253/253) ; c3_03 ajusté (type de file `reput.transferer.tarifs`).
 Fonction Edge : 12/12 Deno, **à redéployer** (precedents dans la question).
 
+## c3_08 — les réponses de vos équipes nourrissent la base
+
+Une demande hors base à laquelle une personne a répondu elle-même (Corriger) et dont la réponse est partie devient
+une **fiche proposée** : brouillon de `reput_connaissances` (sujet de la demande, question du client, contenu = la
+réponse écrite, source « Réponse de <courriel> du <date> »), au nom de la personne, une seule par réponse. Elle
+n'entre dans la base qu'une fois validée (onglet Base de connaissances, « Brouillon à valider »). Ouvrier de base,
+chaque minute. Test `omega/tests/reput/c3_08_fiches.sql` (11 ; souche 264/264). Aucun changement d'écran.
+
 ## Lignes de capacité (`lib/produits/capacites/accueil.ts`) : tenues et preuves
 
 | Ligne | État | Preuve |
@@ -238,7 +254,7 @@ Fonction Edge : 12/12 Deno, **à redéployer** (precedents dans la question).
 | Un client en litige ouvert ne reçoit aucune réponse automatisée. | **tenue** (c3_06, avec la fonction de C2) | c3_06 « en litige : toujours relue » |
 | Le client est reconnu à partir de son numéro ou de son adresse avant toute réponse. | **tenue** (historique des demandes ; le contrat et les interventions restent hors REPUT) | c3_06 « client reconnu » |
 | Chaque type de demande porte un délai de traitement que vous fixez. / Le délai dépassé fait remonter la demande au responsable du service. | **tenues** | c3_06 « délai de 2 h dépassé : la demande remonte » |
-| Les sujets qui reviennent sont remontés, et ils nourrissent la base de connaissances. | **tenue** | c3_06 point du matin |
+| Les sujets qui reviennent sont remontés, et ils nourrissent la base de connaissances. | **tenue** | c3_06 point du matin ; c3_08 fiche proposée depuis la réponse d'une personne |
 | Les avis obtenus après intervention sont comptés par service et par site. | **tenue** | vue reput_avis_indicateurs |
 | Les pièces jointes sont conservées et rattachées à la demande. | **tenue** (A2 les dépose ; l'écran les montre) | écran |
 | Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe. | **tenue à la demande** (CSV « ; », UTF-8, depuis l'écran) ; à date fixe : non | écran « Exporter vers un tableur » |

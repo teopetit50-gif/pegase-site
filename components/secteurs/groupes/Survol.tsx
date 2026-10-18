@@ -3,7 +3,6 @@
 import { Fragment, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { SiEnPreparation } from "@/components/ui/en-preparation";
 import { AUDIT, SURVOL } from "./textes";
 
 /* 3. Le survol — leur `highlights grid-bg` (hoverHighlights) : à gauche
@@ -40,7 +39,6 @@ export default function Survol() {
               {/* une espace insécable : la flèche ne part jamais seule à
                   la ligne (chez eux, une espace simple) */}
               <span>{"\u00a0↗"}</span>
-              <SiEnPreparation pour="varelo" t={e.texte} />
             </button>
             <Link href={AUDIT} aria-label={`${SURVOL.lien} : ${e.texte}`}>
               {SURVOL.lien}

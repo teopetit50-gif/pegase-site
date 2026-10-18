@@ -76,7 +76,6 @@ import { IconeApp } from "./marque";
 import { IllusBordereau, IllusChronologie, IllusContradictions, IllusPieces, IllusSecret } from "./Illustrations";
 import { APPEL, CONNEXIONS, CONTACT, FONCTIONNALITES, PIECES, POINT } from "./textes";
 import { cn } from "@/lib/cn";
-import { SiEnPreparation } from "@/components/ui/en-preparation";
 
 /* ─── « Trusted by leading brands » → les familles de pièces lues (aucun logo de client inventé) ─── */
 const iconesPieces = [Gavel, FileStack, Paperclip, FileSearch, FileCheck2, Stamp, AtSign, Inbox, ScanText];
@@ -141,10 +140,9 @@ export function Fonctionnalites() {
             >
               <MagicCard className="p-4 lg:p-6 lg:rounded-3xl">
                 <div className="flex items-center space-x-4 mb-4">
-                  <h3 className="text-xl font-semibold flex flex-wrap items-center gap-2">
+                  <h3 className="text-xl font-semibold flex items-center gap-2">
                     <I className="size-5" aria-hidden="true" />
                     {c.titre}
-                    <SiEnPreparation pour="tamila" t={c.titre} style={{ marginLeft: 0 }} />
                   </h3>
                 </div>
                 <p className="text-sm text-[#737373]">{c.texte}</p>
@@ -171,10 +169,7 @@ export function PointDuMatin() {
             <br />
             <span className="avocats-accent italic">{POINT.titreMot}</span>
           </h2>
-          <p className="text-base md:text-lg text-[#171717]/80 mt-4">
-            {POINT.texte}
-            <SiEnPreparation pour="tamila" t="Point du matin à 7 h" />
-          </p>
+          <p className="text-base md:text-lg text-[#171717]/80 mt-4">{POINT.texte}</p>
         </div>
       </AnimationContainer>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative w-full">

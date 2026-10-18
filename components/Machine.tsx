@@ -47,7 +47,7 @@ export default function Machine() {
               {[
                 "Validation humaine : aucun message ne part vers un client sans votre accord explicite.",
                 "Aucune exploitation : vos données ne sont ni revendues, ni utilisées pour autre chose que la tâche du moteur.",
-                "Traitement au strict nécessaire : les modèles d'intelligence artificielle ne reçoivent que la pièce à lire, jamais le reste de votre espace.",
+                "Traitement au strict nécessaire : les modèles d'intelligence artificielle n'accèdent qu'aux éléments requis par chaque tâche, jamais à l'intégralité d'un fichier.",
               ].map((pt) => (
                 <li key={pt} className="flex gap-3">
                   <span aria-hidden className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-gold" />

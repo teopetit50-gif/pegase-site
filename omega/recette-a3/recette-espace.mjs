@@ -21,7 +21,7 @@ mkdirSync(dossier, { recursive: true });
 let echecs = 0;
 const ok = (c, m) => { console.log(`${c ? '  ✓' : '  ✗'} ${m}`); if (!c) echecs++; };
 const ANGLAIS = /\b(Loading|Submit|Cancel|Approve|Reject|Delete|Save|Error|Pending|Due|Invoice|Supplier|Settings|Logout|Sign in|Dashboard|Today|Yesterday|Tomorrow)\b/;
-const ECRANS = [['validations', P + '/validations'], ['filed', P + '/filed'], ['fournisseurs', P + '/filed/fournisseurs'], ['a-payer', P + '/filed/a-payer'], ['comptabilite', P + '/filed/comptabilite'], ['boite', P + '/filed/boite'], ['demandes', P + '/demandes'], ['reglages', P + '/reglages'], ['point', P + '/point']];
+const ECRANS = [['validations', P + '/validations'], ['filed', P + '/filed'], ['fournisseurs', P + '/filed/fournisseurs'], ['a-payer', P + '/filed/a-payer'], ['comptabilite', P + '/filed/comptabilite'], ['boite', P + '/filed/boite'], ['demandes', P + '/demandes'], ['reglages', P + '/reglages'], ['equipe', P + '/equipe'], ['point', P + '/point']];
 const LARGEURS = [390, 768, 1024, 1440, 1700];
 
 for (const [nom, chemin] of ECRANS.filter(([n]) => !SAUTER.has(n))) {
@@ -32,11 +32,12 @@ for (const [nom, chemin] of ECRANS.filter(([n]) => !SAUTER.has(n))) {
     await s.dormir(600);
     const mesure = await s.evaluer(`(() => {
       const w = document.documentElement.clientWidth;
-      /* un élément dans un cadre qui défile (tableau des lignes) n'est pas un débordement */
-      const dansCadre = (e) => !!e.closest('.esp-tableau-cadre') && e !== e.closest('.esp-tableau-cadre');
-      const larges = [...document.querySelectorAll('.esp *')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > w + 1 && !dansCadre(e); })
+      /* un élément dans un cadre qui défile (tableau des lignes, .esp-tableau-cadre ou .v2-tableau-cadre) n'est pas un débordement */
+      const dansCadre = (e) => { for (let a = e.parentElement; a && a !== document.body; a = a.parentElement) { if (/(auto|scroll)/.test(getComputedStyle(a).overflowX)) return true; } return false; };
+      const zone = document.querySelector('.esp') ?? document.querySelector('main') ?? document.body;
+      const larges = [...zone.querySelectorAll('*')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > w + 1 && !dansCadre(e); })
         .slice(0, 5).map(e => e.tagName + '.' + [...e.classList].join('.') + '→' + Math.round(e.getBoundingClientRect().right));
-      return { deb: document.documentElement.scrollWidth - w, larges, texte: document.querySelector('.esp')?.innerText || '', h1: document.querySelector('.esp h1')?.textContent };
+      return { deb: document.documentElement.scrollWidth - w, larges, texte: zone.innerText || '', h1: (document.querySelector('.esp h1') ?? zone.querySelector('h1'))?.textContent };
     })()`);
     ok(mesure.deb === 0, `pas de débordement horizontal (${mesure.deb})`);
     ok(mesure.larges.length === 0, `aucun élément plus large que l'écran ${mesure.larges.length ? JSON.stringify(mesure.larges) : ''}`);
@@ -44,8 +45,9 @@ for (const [nom, chemin] of ECRANS.filter(([n]) => !SAUTER.has(n))) {
     ok(!anglais, anglais ? `mot anglais à l'écran : « ${anglais[0]} »` : 'aucun mot anglais surveillé à l\'écran');
     ok(!!mesure.h1, `titre : ${mesure.h1}`);
     await s.capturer(`${dossier}${nom}-${largeur}.jpg`, { qualite: 55 });
-    /* ERR_BLOCKED_BY_ORB : le script de Vercel Analytics (va.vercel-scripts.com), chargé en dev, refusé par le mandataire du conteneur */
-    s.soucis.filter((x) => !/CERT|insights|404|favicon|ERR_BLOCKED_BY_ORB/.test(x)).forEach((x) => ok(false, x));
+    /* ERR_SSL_PROTOCOL_ERROR : un build de production servi en http local (next start) porte upgrade-insecure-requests ;
+       ERR_BLOCKED_BY_ORB : le script de Vercel Analytics (va.vercel-scripts.com), chargé en dev, refusé par le mandataire du conteneur */
+    s.soucis.filter((x) => !/CERT|insights|404|favicon|ERR_BLOCKED_BY_ORB|ERR_SSL_PROTOCOL_ERROR/.test(x)).forEach((x) => ok(false, x));
     s.fermer();
   }
 }
@@ -228,32 +230,37 @@ for (const [nom, chemin] of ECRANS.filter(([n]) => !SAUTER.has(n))) {
 }
 
 if (!SAUTER.has('a-payer')) {
+  /* sélecteurs neutres (06/10, demande de C1) : le même enchaînement joue sur /espace et sur /espace2,
+     dont « À payer » est réécrit — groupes = h2, lignes = tbody tr, dialogue = [role=dialog], message = [role=status] */
   const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-a-payer', densite: 1 });
-  console.log('— /espace/filed/a-payer : les factures validées par échéance');
+  console.log(`— ${P}/filed/a-payer : les factures validées par échéance`);
   ok(await s.aller(base + P + '/filed/a-payer'), 'page chargée');
-  await s.dormir(600);
-  const r = await s.evaluer(`(() => ({ kpi: [...document.querySelectorAll('.esp-kpi')].map(k => k.innerText.replace(/\\s+/g, ' ')), groupes: [...document.querySelectorAll('section.esp-carte .esp-carte-titre')].map(e => e.textContent), lignes: [...document.querySelectorAll('.esp-a-payer tbody tr')].map(t => t.innerText.replace(/\\s+/g, ' ')), avis: [...document.querySelectorAll('.esp-avis')].map(a => a.textContent) }))()`);
-  ok(r.groupes.join(',') === 'En retard,Cette semaine,Ce mois-ci', `groupes dans l'ordre : ${r.groupes.join(', ')}`);
-  ok(/Transports Rivière/.test(r.lignes[0] ?? '') && /de retard/.test(r.lignes[0] ?? ''), `la facture en retard vient d'abord (${r.lignes[0]})`);
+  await s.dormir(800);
+  const LIGNES = `[...document.querySelectorAll('tbody tr')].filter(t => /R20\\d\\d-\\d{6}/.test(t.textContent))`;
+  const r = await s.evaluer(`(() => ({ groupes: [...document.querySelectorAll('h2')].map(e => (e.textContent.trim().match(/^(En retard|Cette semaine|Ce mois-ci|Plus tard)/) ?? [])[1]).filter(Boolean), lignes: ${LIGNES}.map(t => t.innerText.replace(/\\s+/g, ' ')), texte: document.body.innerText }))()`);
+  ok(r.groupes.slice(0, 3).join(',') === 'En retard,Cette semaine,Ce mois-ci', `groupes dans l'ordre : ${r.groupes.join(', ')}`);
+  ok(/Transports Rivière/.test(r.lignes[0] ?? '') && /de retard/.test(r.lignes[0] ?? ''), `la facture en retard vient d'abord (${r.lignes[0]?.slice(0, 80)})`);
   ok(r.lignes.some(l => /Cabinet Ferrand/.test(l) && /IBAN manquant/.test(l)), 'la facture sans IBAN validé le dit');
-  ok(r.avis.some(a => /1 facture sans IBAN validé/.test(a)), "l'avis IBAN manquant");
+  ok(/1 facture sans IBAN validé/.test(r.texte), "l'avis IBAN manquant");
   ok(r.lignes.length === 3, `${r.lignes.length} factures validées à payer`);
   ok(/Payée en partie/.test(r.lignes[0] ?? '') && /1 000,00 € réglés/.test(r.lignes[0] ?? '') && /1 208,00 €/.test(r.lignes[0] ?? ''), `le règlement partiel se voit : reste, réglé, état (${r.lignes[0]?.slice(0, 160)})`);
   await s.capturer(`${dossier}a-payer-1440.jpg`, { qualite: 55 });
   /* noter tout le reste sur la facture de Cabinet Ferrand : elle sort de la liste */
-  await s.evaluer(`[...document.querySelectorAll('.esp-a-payer tbody tr')].find(t => /Cabinet Ferrand/.test(t.textContent))?.querySelector('button')?.click()`);
+  await s.evaluer(`${LIGNES}.find(t => /Cabinet Ferrand/.test(t.textContent))?.querySelector('button')?.click()`);
   await s.dormir(500);
-  const dlgP = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); if (!d) return null; const i = d.querySelector('input[inputmode="decimal"]'); return { titre: d.querySelector('h2')?.textContent, montant: i?.value, moyen: d.querySelector('select')?.value }; })()`);
+  const MONTANT = `(document.querySelector('[role="dialog"] input[inputmode="decimal"]'))`;
+  const dlgP = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); if (!d) return null; return { titre: d.querySelector('h2')?.textContent, montant: ${MONTANT}?.value, moyen: d.querySelector('select')?.value }; })()`);
   ok(dlgP && /Noter un paiement/.test(dlgP.titre) && dlgP.montant === '1140', `le dialogue propose le reste (${dlgP?.montant}) et, sans IBAN validé, le moyen « ${dlgP?.moyen} »`);
-  await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input[inputmode="decimal"]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, '5000'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  const saisir = (v) => s.evaluer(`(() => { const i = ${MONTANT}; Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, ${JSON.stringify(v)}); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await saisir('5000');
   await s.dormir(200);
   ok(await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Noter le paiement/.test(b.textContent))?.disabled`) === true, 'un montant au-delà du reste laisse le bouton gris');
-  await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input[inputmode="decimal"]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, ''); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await saisir('');
   await s.dormir(200);
   await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Noter le paiement/.test(b.textContent))?.click()`);
-  await s.dormir(800);
-  const apresP = await s.evaluer(`({ lignes: [...document.querySelectorAll('.esp-a-payer tbody tr')].map(t => t.textContent), fait: [...document.querySelectorAll('.esp-avis')].map(a => a.textContent).find(t => /C'est fait/.test(t)) ?? '', payees: [...document.querySelectorAll('.esp-filtre')].map(b => b.textContent).find(t => /payées/.test(t)) ?? '' })`);
-  ok(apresP.lignes.length === 2 && !apresP.lignes.some(t => /Cabinet Ferrand/.test(t)) && /la facture est payée/.test(apresP.fait) && /Afficher les payées \(1\)/.test(apresP.payees), `payée : elle sort de la liste, « ${apresP.payees} » (${apresP.fait.slice(0, 90)})`);
+  await s.dormir(900);
+  const apresP = await s.evaluer(`({ lignes: ${LIGNES}.map(t => t.textContent), fait: [...document.querySelectorAll('[role="status"]')].map(a => a.textContent).find(t => /C'est fait/.test(t)) ?? '', payees: [...document.querySelectorAll('button')].map(b => b.textContent).find(t => /payées/.test(t)) ?? '' })`);
+  ok(apresP.lignes.length === 2 && !apresP.lignes.some(t => /Cabinet Ferrand/.test(t)) && /la facture est payée/.test(apresP.fait) && /Afficher les payées \(1\)/.test(apresP.payees), `payée : elle sort de la liste, « ${apresP.payees.trim()} » (${apresP.fait.slice(0, 90)})`);
   s.fermer();
 }
 
@@ -439,6 +446,49 @@ if (!SAUTER.has('reglages')) {
   await s.dormir(600);
   ok(/Liste prête\. 1284 lignes dans 5 tables, 4 comptes et 12 fichiers/.test(await s.evaluer(`[...document.querySelectorAll('.esp-avis')].map(a => a.textContent).join(' | ')`)), 'préparation de l\'effacement : la liste, rien d\'effacé');
   await s.capturer(`${dossier}reglages-exports-1440.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+if (!SAUTER.has('equipe')) {
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'a3-equipe', densite: 1 });
+  console.log(`— ${P}/equipe : rôles, sociétés visibles, ajouter, retirer`);
+  ok(await s.aller(base + P + '/equipe'), 'page chargée');
+  await s.dormir(600);
+  const n0 = await s.evaluer(`document.querySelectorAll('tbody tr').length`);
+  ok(n0 === 4, `${n0} personnes`);
+  const roleYanis = `document.querySelector('select[aria-label="Rôle de Yanis Dupré"]')`;
+  await s.evaluer(`(() => { const sel = ${roleYanis}; Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(sel, 'lecteur'); sel.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+  await s.dormir(300);
+  ok(/Yanis Dupré est maintenant lecteur/.test(await s.evaluer(`[...document.querySelectorAll('[role="status"]')].map(a => a.textContent).join(' ')`)), 'changer un rôle : dit en clair');
+  await s.evaluer(`[...document.querySelectorAll('button')].find(b => b.getAttribute('aria-label') === 'Modifier les sociétés visibles par Sofia Carvalho').click()`);
+  await s.dormir(400);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] input[type="radio"]')][1].click()`);
+  await s.dormir(200);
+  ok(await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer/.test(b.textContent)).disabled`) === true, 'sans société cochée, « Enregistrer » reste gris');
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] input[type="checkbox"]')][1].click()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer/.test(b.textContent)).click()`);
+  await s.dormir(400);
+  const sofia = await s.evaluer(`[...document.querySelectorAll('tbody tr')].find(t => /Sofia/.test(t.textContent)).innerText.replace(/\\s+/g, ' ')`);
+  ok(/Grenoble/.test(sofia) && !/Toutes/.test(sofia), `périmètre : ${sofia.slice(0, 120)}`);
+  await s.evaluer(`[...document.querySelectorAll('button')].find(b => /Ajouter une personne/.test(b.textContent)).click()`);
+  await s.dormir(400);
+  const ajout = (v) => s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input[type="email"]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(i, ${JSON.stringify(v)}); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await ajout('pas-une-adresse');
+  await s.dormir(200);
+  ok(await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Ajouter\\s*$/.test(b.textContent)).disabled`) === true, 'adresse invalide : « Ajouter » gris');
+  await ajout('lea.martin@atelier-bertin.fr');
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Ajouter\\s*$/.test(b.textContent)).click()`);
+  await s.dormir(400);
+  ok(await s.evaluer(`document.querySelectorAll('tbody tr').length`) === 5, 'ajoutée : cinq personnes');
+  await s.evaluer(`[...document.querySelectorAll('button')].find(b => b.getAttribute('aria-label') === 'Retirer Marc Lévy').click()`);
+  await s.dormir(400);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Retirer\\s*$/.test(b.textContent)).click()`);
+  await s.dormir(400);
+  const fin = await s.evaluer(`({ n: document.querySelectorAll('tbody tr').length, moi: !document.querySelector('button[aria-label="Retirer Claire Morel"]') && !document.querySelector('select[aria-label="Rôle de Claire Morel"]') })`);
+  ok(fin.n === 4 && fin.moi, `retiré : ${fin.n} personnes ; on ne se retire pas soi-même et on ne change pas son propre rôle`);
+  await s.capturer(`${dossier}equipe-1440.jpg`, { qualite: 55 });
   s.fermer();
 }
 

@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import Coquille from "@/components/espace2/Coquille";
 import { AMORCE_THEME } from "@/components/espace2/amorce";
+import { redirect } from "next/navigation";
 import { utilisateurCourant } from "@/lib/supabase/server";
+import { bienvenueAFaire } from "@/app/bienvenue/etat";
 
 /* ══════════════════════════════════════════════════════════════════════
    /espace2 — la prévisualisation du nouveau design de l'espace client
@@ -21,10 +23,16 @@ const geist = Geist({ subsets: ["latin"], variable: "--font-geist", display: "sw
 export const metadata: Metadata = {
   title: { default: "Espace client Omega (nouveau design)", template: "%s | Espace client Omega" },
   robots: { index: false, follow: false },
+  /* l'onglet du navigateur : le logo blanc sur fond noir (demande de Teo, 09/10 — l'icône noire disparaissait dans la barre sombre) */
+  icons: { icon: [{ url: "/omega-icone-pilotage.png", type: "image/png", sizes: "64x64" }], apple: [{ url: "/omega-icone-pilotage-apple.png", sizes: "180x180" }] },
 };
 
 export default async function LayoutEspace2({ children }: { children: React.ReactNode }) {
   const utilisateur = await utilisateurCourant();
+  /* 07/10/2026 — un client qui entre pour la première fois (lien reçu
+     après la signature) remplit d'abord /bienvenue. Sans session : rien ne
+     change, l'exemple s'affiche. */
+  if (utilisateur && (await bienvenueAFaire())) redirect("/bienvenue");
   return (
     <div className={geist.variable}>
       {/* le thème choisi est posé avant la première peinture : pas d'éclair blanc en sombre */}

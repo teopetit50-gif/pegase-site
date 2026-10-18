@@ -4,4 +4,6 @@
 
 export const CLE_THEME = "espace2.theme";
 
-export const AMORCE_THEME = `try{var t=localStorage.getItem(${JSON.stringify(CLE_THEME)});if(t==="sombre")document.documentElement.dataset.v2Theme="dark";else if(t==="clair")document.documentElement.dataset.v2Theme="light"}catch(e){}`;
+/* 11/10/2026 — le dessin du pilotage /omega, cloné pour le client : sombre
+   par défaut, « clair » retenu dans ce navigateur (menu du compte). */
+export const AMORCE_THEME = `try{document.documentElement.dataset.v2Theme=localStorage.getItem("${CLE_THEME}")==="clair"?"light":"dark"}catch(e){document.documentElement.dataset.v2Theme="dark"}`;

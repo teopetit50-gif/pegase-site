@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { SystemSigne } from "@/components/logos";
-import { EnPreparation } from "@/components/ui/en-preparation";
 import {
   PatternCard,
   PatternCardBody,
@@ -346,9 +345,6 @@ export type TuileCatalogue = {
      Facultative : une tuile sans version courte garde `texte` partout. */
   court?: string;
   href: string;
-  /* 06/10/2026 (C5, omega/AUDIT-PROMESSES.md § 3 point 13) — pastille
-     « En préparation » à côté du nom, tant que le module n'est pas livré. */
-  preparation?: boolean;
 };
 
 export function TuilesCatalogue({
@@ -404,9 +400,6 @@ export function TuilesCatalogue({
                 style={{ fontFamily: "var(--font-jakarta)" }}
               >
                 {t.nom}
-                {t.preparation ? (
-                  <EnPreparation style={{ textTransform: "none", letterSpacing: "0.02em", fontWeight: 500 }} />
-                ) : null}
               </span>
 
               <h3

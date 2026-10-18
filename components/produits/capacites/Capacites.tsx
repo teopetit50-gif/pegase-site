@@ -13,11 +13,6 @@
    `EchelleGroupe`    six cartes : ce qui change quand plusieurs services
                       valident.
 
-   06/10/2026 (C5, omega/AUDIT-PROMESSES.md § 3, point 13) : une ligne à
-   `atteste: false` porte la pastille « En préparation ». La promesse reste
-   écrite ; la pastille tombe d'elle-même quand le coordinateur bascule la
-   ligne à `true` sur preuve de l'ouvrier.
-
    Trois précautions du parc appliquées ici :
    · les icônes arrivent par NOM (voir `icones.tsx`) ;
    · le style est en CSS scopé, jamais en utilitaires, parce qu'une peau de
@@ -33,7 +28,6 @@ import * as Accordion from "@radix-ui/react-accordion";
 
 import type { BlocCasLimites, BlocEchelle, Catalogue } from "@/lib/produits/capacites/types";
 import { compterCapacites } from "@/lib/produits/capacites/types";
-import { EnPreparation } from "@/components/ui/en-preparation";
 import { Icone } from "./icones";
 import "./capacites.css";
 
@@ -114,10 +108,7 @@ export function GrilleCapacites({ donnees }: { donnees: Catalogue }) {
               {f.lignes.map((l) => (
                 <li key={l.t}>
                   <Coche />
-                  <span>
-                    {l.t}
-                    {l.atteste ? null : <EnPreparation />}
-                  </span>
+                  <span>{l.t}</span>
                 </li>
               ))}
             </ul>

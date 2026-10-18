@@ -270,6 +270,9 @@ export type Reglages = {
   /* b2_09 : le délai laissé par la banque pour répondre à une contestation, et l'adresse de son service */
   contestation_delai_jours?: number;
   contestation_adresse?: string | null;
+  /* b2_10 : durée d'une remise en location, marge avant le prochain départ */
+  remise_duree_min?: number;
+  remise_marge_min?: number;
 };
 
 /* l'état d'une demande de validation du socle, tel que l'écran le montre */
@@ -436,3 +439,147 @@ export type Contestation = {
   cree_par: string | null;
   cree_le: string;
 };
+
+/* b2_10 : la remise en location créée au retour, ses anomalies, les immobilisations et l'entretien */
+export type EtapeRemise = "inspection" | "nettoyage" | "energie";
+export type Remise = {
+  id: string;
+  client_id: string;
+  entite_id: string;
+  vehicule_id: string;
+  contrat_id: string;
+  retour_le: string;
+  prochain_depart_le: string | null;
+  prochain_depart_source: "reservation" | "contrat" | "categorie" | null;
+  prochain_depart_ref: string | null;
+  limite_le: string | null;
+  responsable: string | null;
+  statut: "a_faire" | "en_cours" | "prete" | "annulee";
+  inspection_le: string | null;
+  inspection_par: string | null;
+  nettoyage_le: string | null;
+  nettoyage_par: string | null;
+  energie_le: string | null;
+  energie_par: string | null;
+  prete_le: string | null;
+  immobilisation_id: string | null;
+  alerte: "risque" | "retard" | null;
+  annulee_motif: string | null;
+  cree_le: string;
+};
+export type TypeAnomalie = "voyant" | "dommage" | "proprete" | "objet_oublie" | "pneu" | "cle_papiers" | "equipement" | "autre";
+export type AnomalieRetour = {
+  id: string;
+  entite_id: string;
+  remise_id: string;
+  vehicule_id: string;
+  type: TypeAnomalie;
+  description: string;
+  responsable: string;
+  statut: "ouverte" | "traitee";
+  signalee_par: string | null;
+  signalee_le: string;
+  traitee_le: string | null;
+  traitee_par: string | null;
+  note: string | null;
+};
+export type MotifImmobilisation = "preparation" | "entretien" | "carrosserie" | "controle_technique" | "sinistre" | "attente_pieces" | "rappel_constructeur" | "autre";
+export type Immobilisation = {
+  id: string;
+  entite_id: string | null;
+  vehicule_id: string;
+  motif: MotifImmobilisation;
+  debut_le: string;
+  fin_prevue_le: string | null;
+  fin_le: string | null;
+  contrat_id: string | null;
+  prestataire: string | null;
+  cout_eur: number | null;
+  notes: string | null;
+  cree_le: string;
+};
+export type NatureEntretien = "revision" | "vidange" | "controle_technique" | "pneus" | "freins" | "climatisation" | "autre";
+export type Entretien = {
+  id: string;
+  entite_id: string | null;
+  vehicule_id: string;
+  nature: NatureEntretien;
+  libelle: string | null;
+  echeance_le: string | null;
+  echeance_km: number | null;
+  duree_h: number;
+  statut: "a_planifier" | "planifie" | "fait" | "annule";
+  debut_le: string | null;
+  fin_le: string | null;
+  atelier_nom: string | null;
+  atelier_adresse: string | null;
+  envoi_id: string | null;
+  immobilisation_id: string | null;
+  fait_le: string | null;
+  km_fait: number | null;
+  cout_eur: number | null;
+  notes: string | null;
+};
+export type Creneau = { debut: string; fin: string; avant_echeance: boolean };
+export type Parc = {
+  vehicules: (Vehicule & { entite_id?: string | null })[];
+  remises: Remise[];
+  anomalies: AnomalieRetour[];
+  immobilisations: Immobilisation[];
+  entretiens: Entretien[];
+  /* les personnes de l'organisation à qui confier une remise ou une anomalie */
+  membres: { user_id: string; role: string }[];
+  /* b2_17 : à qui revient d'office chaque remise, par agence */
+  responsables?: { entite_id: string; remise_responsable: string }[];
+};
+
+/* b2_11 : la fiche économique d'un véhicule et les sorties de flotte */
+export type AvisFlotte = "sortir" | "surveiller" | "garder" | "restituer";
+export type CanalSortie = "reprise_concession" | "marchand" | "encheres" | "particulier" | "restitution_loueur";
+export type SourceCote = "argus" | "la_centrale" | "offre_reprise" | "offre_marchand" | "estimation";
+export type FicheVehicule = {
+  vehicule: string;
+  immatriculation: string;
+  modele: string | null;
+  utilitaire: boolean;
+  periode: { du: string; au: string; jours: number };
+  revenu: { location: number; frais: number; total: number; jours_loues: number; contrats_sans_tarif: number };
+  couts: { atelier: number; financement: number; perte_valeur: number | null; total: number };
+  marge: number;
+  utilisation_pct: number;
+  jours_immobilises: number;
+  km: number | null;
+  km_an: number | null;
+  age_mois: number | null;
+  financement: "achat" | "credit" | "lld" | "loa";
+  fin_contrat_le: string | null;
+  cote: { eur: number; source: SourceCote; le: string } | null;
+  valeur_comptable: number | null;
+  ecart_cote_comptable: number | null;
+  avis: AvisFlotte;
+  raisons: string[];
+  moment: string | null;
+  moment_le: string | null;
+  canal: CanalSortie;
+  canal_raison: string;
+  complet: boolean;
+};
+export type SortieFlotte = {
+  id: string;
+  vehicule_id: string;
+  statut: "proposee" | "validee" | "refusee" | "vendue" | "annulee";
+  canal: CanalSortie;
+  prix_vise_eur: number | null;
+  mise_en_vente_le: string | null;
+  motif: string;
+  fiche: FicheVehicule;
+  propose_par: string;
+  propose_le: string;
+  decide_par: string | null;
+  decide_le: string | null;
+  refus_motif: string | null;
+  prix_vente_eur: number | null;
+  vendu_le: string | null;
+  acheteur: string | null;
+};
+export type Flotte = { fiches: FicheVehicule[]; sorties: SortieFlotte[] };

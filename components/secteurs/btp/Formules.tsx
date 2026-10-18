@@ -33,7 +33,6 @@ import * as React from "react";
 import { Check, ChevronDown, Minus } from "lucide-react";
 import Lien from "@/components/Lien";
 import { cn } from "@/lib/cn";
-import { SiEnPreparation } from "@/components/ui/en-preparation";
 import { Button } from "./bouton";
 import { insecable } from "./insecable";
 import { CONTACT, FORMULES, type Valeur } from "./textes";
@@ -177,10 +176,7 @@ export function Pricing() {
                 {g.features.map((f) => (
                   <div key={f.name} className="border-t px-6 py-4">
                     <div className="flex items-start gap-x-2">
-                      <div className="font-medium text-[#171717] text-sm">
-                        {insecable(f.name)}
-                        <SiEnPreparation pour="daliro" t={f.name} />
-                      </div>
+                      <div className="font-medium text-[#171717] text-sm">{insecable(f.name)}</div>
                       <Bulle texte={f.description} className="flex size-6 shrink-0">
                         <span className="m-auto flex size-4 items-center justify-center rounded-full bg-[#171717]/10 text-[#171717]/65 text-sm">?</span>
                       </Bulle>
@@ -220,10 +216,7 @@ export function Pricing() {
                     </div>
                     {g.features.map((f) => (
                       <div key={f.name} className="flex h-14 items-center border-t text-[#737373] last:h-[calc(3.5rem+1px)] last:border-b">
-                        <div className="text-sm">
-                          {insecable(f.name)}
-                          <SiEnPreparation pour="daliro" t={f.name} />
-                        </div>
+                        <div className="text-sm">{insecable(f.name)}</div>
                         <Bulle texte={f.description} className="flex size-7 shrink-0">
                           <span className="m-auto flex size-4 items-center justify-center rounded-full bg-[#171717]/10 text-[#171717]/65 text-sm">?</span>
                         </Bulle>

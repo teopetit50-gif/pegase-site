@@ -33,7 +33,7 @@
   margin-top: 8px;
   padding: 10px 12px;
   border-radius: 10px;
-  background: #f6f6f4;
+  background: color-mix(in srgb, currentColor 7%, transparent);
   border: 1px solid var(--r-filet);
   font-size: 13.5px;
   line-height: 1.5;
@@ -182,7 +182,7 @@
   margin-top: 4px;
   padding: 10px 12px;
   border-radius: 10px;
-  background: #f6f6f4;
+  background: color-mix(in srgb, currentColor 7%, transparent);
   border: 1px solid var(--r-filet);
 }
 
@@ -245,7 +245,7 @@
   margin: 0;
   padding: 10px 12px;
   border-left: 3px solid var(--r-filet, #d9d9d4);
-  background: #f6f6f4;
+  background: color-mix(in srgb, currentColor 7%, transparent);
   font-size: 13px;
   line-height: 1.5;
   white-space: pre-line;
@@ -310,7 +310,7 @@
 }
 .tam-cabinet-table th {
   font-weight: 600;
-  background: #f6f6f4;
+  background: color-mix(in srgb, currentColor 7%, transparent);
 }
 .tam-cabinet-table .tam-num {
   text-align: right;
@@ -353,5 +353,11 @@
   pointer-events: none;
 }
 .tam-citations--doute {
-  color: #6b6b66;
+  font-style: italic;
 }
+
+/* le bordereau de pièces (15/10) */
+.tam-bordereau-liste { list-style: none; margin: 0 0 12px; padding: 0; max-height: 220px; overflow: auto; }
+.tam-bordereau-ligne { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 0; border-bottom: 1px solid color-mix(in srgb, currentColor 10%, transparent); }
+.tam-bordereau-choix { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.tam-bordereau-choix span { overflow-wrap: anywhere; }

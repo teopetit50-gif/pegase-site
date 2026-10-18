@@ -72,7 +72,8 @@ begin
   return next ok(exists (select 1 from public.alertes a where a.client_id = v_client and a.source = 'daliro_meteo' and a.titre like 'Météo — Chantier de la météo, %Couverture%'),
                  'Une alerte « Météo » est levée');
   perform private.btp_alerter_meteo(v_ch);
-  return next is((select count(*)::int from public.alertes a where a.client_id = v_client and a.source = 'daliro_meteo' and a.acquittee_le is null), 1, 'Relancer n''en lève pas une deuxième');
+  return next is((select count(*)::int from public.alertes a where a.client_id = v_client and a.source = 'daliro_meteo' and a.acquittee_le is null
+                    and a.titre like 'Météo — Chantier de la météo, %'), 1, 'Relancer n''en lève pas une deuxième (les alertes du banc déjà levées ne comptent pas)');
   return next ok(exists (select 1 from jsonb_array_elements(private.btp_point_matin_lignes(v_client, v_j)) x where x ->> 'texte' like 'Chantier de la météo, %pluie 12,4 mm%' and x ->> 'gravite' = 'attention'),
                  'Le point du matin la porte');
 

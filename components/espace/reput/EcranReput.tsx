@@ -99,6 +99,18 @@ export default function EcranReput() {
   }, [source, charger]);
   useTempsReel(["reput_demandes", "reput_reponses", "reput_connaissances"], source === "reelle", () => void charger());
 
+  /* Un lien du point du matin (?demande=<id>, c3_10) ouvre cette demande, avec sa réponse et ses boutons. */
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get("demande");
+    if (!id) return;
+    const t = window.setTimeout(() => {
+      setOnglet("demandes");
+      setFiltre(null);
+      setChoix(id);
+    }, 0);
+    return () => window.clearTimeout(t);
+  }, []);
+
   const monde: Monde | null = source === "exemple" ? local : (reel?.monde ?? null);
   const client = source === "reelle" ? (reel?.client ?? null) : null;
   const role = source === "exemple" ? "valideur" : (client?.role ?? "lecteur");

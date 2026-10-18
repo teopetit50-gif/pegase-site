@@ -8,11 +8,10 @@
    fermeture. */
 
 import { useRouter } from "next/navigation";
-import { ArrowRight, CornerDownLeft, Laptop, Link2, Moon, Search, Sun, ExternalLink } from "lucide-react";
+import { ArrowRight, CornerDownLeft, Link2, Search } from "lucide-react";
 import { Autocomplete, Dialog, Input, Menu, Modal, ModalOverlay, TextField, useFilter } from "react-aria-components";
 import { ItemMenu, Kbd, SectionMenu } from "./ui";
 import { MODULES, ONGLETS_ORGANISATION } from "./modules";
-import { changerTheme } from "./theme";
 import { useToast } from "./Toasts";
 
 export default function Palette({ ouverte, changer }: { ouverte: boolean; changer: (v: boolean) => void }) {
@@ -24,15 +23,12 @@ export default function Palette({ ouverte, changer }: { ouverte: boolean; change
     const c = String(cle);
     changer(false);
     if (c.startsWith("aller:")) router.push(c.slice(6));
-    else if (c === "theme:clair") changerTheme("clair");
-    else if (c === "theme:sombre") changerTheme("sombre");
-    else if (c === "theme:systeme") changerTheme("systeme");
     else if (c === "copier") {
       navigator.clipboard?.writeText(window.location.href).then(
         () => toast("Lien copié", "vert"),
         () => toast("Impossible de copier le lien. Réessayez.", "rouge"),
       );
-    } else if (c === "ancien") router.push("/espace/validations?ancien=1");
+    }
   };
 
   return (
@@ -64,20 +60,8 @@ export default function Palette({ ouverte, changer }: { ouverte: boolean; change
                 ))}
               </SectionMenu>
               <SectionMenu titre="Actions">
-                <ItemMenu id="theme:clair" textValue="Thème clair" icone={<Sun width={16} height={16} aria-hidden="true" />}>
-                  Passer au thème clair
-                </ItemMenu>
-                <ItemMenu id="theme:sombre" textValue="Thème sombre" icone={<Moon width={16} height={16} aria-hidden="true" />}>
-                  Passer au thème sombre
-                </ItemMenu>
-                <ItemMenu id="theme:systeme" textValue="Thème du système" icone={<Laptop width={16} height={16} aria-hidden="true" />}>
-                  Suivre le thème du système
-                </ItemMenu>
                 <ItemMenu id="copier" textValue="Copier le lien de la page" icone={<Link2 width={16} height={16} aria-hidden="true" />}>
                   Copier le lien de la page
-                </ItemMenu>
-                <ItemMenu id="ancien" textValue="Ouvrir l'ancien espace client" icone={<ExternalLink width={16} height={16} aria-hidden="true" />}>
-                  Ouvrir l&apos;ancien espace client
                 </ItemMenu>
               </SectionMenu>
             </Menu>

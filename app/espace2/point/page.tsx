@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import PointDuMatin from "@/components/espace/point/PointDuMatin";
-import Habille from "@/components/espace2/Habille";
+import Point from "@/components/espace2/Point";
 
-/* /espace2/point — l'écran de /espace/point, repris tel quel dans le nouvel espace. */
+/* /espace2/point — le Point du matin, redessiné au dessin de la maquette
+   de Teo (07/10/2026). Les données restent celles de /espace/point. */
 
 export const metadata: Metadata = {
   title: "Point du matin",
@@ -10,9 +10,5 @@ export const metadata: Metadata = {
 };
 
 export default function PagePoint() {
-  return (
-    <Habille>
-      <PointDuMatin />
-    </Habille>
-  );
+  return <Point />;
 }

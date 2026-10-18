@@ -47,7 +47,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { Appel, Audience, Avis, CalculDelai, Cle, Conformite, EnteteFacture, ControleConflits, Convention, Delai, DemandeTamila, Dossier, DossierComplet, Export, Facture, Honoraires, Lecture, Membre, ModeHonoraires, ModeReglement, Muraille, NatureTemps, Partie, Personne, Piece, Provision, RegleProcedure, Reglages, Temps, Vigilance, Expertise } from "./types";
+import type { Appel, Audience, Avis, CalculDelai, Cle, Conformite, EnteteFacture, ControleConflits, Convention, Delai, DemandeTamila, Dossier, DossierComplet, Export, Facture, Honoraires, Lecture, Membre, ModeHonoraires, ModeReglement, Muraille, NatureTemps, Partie, Personne, Piece, Provision, RegleProcedure, Reglages, Temps, Vigilance, Expertise, Attente } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -344,14 +344,15 @@ export async function chargerHonorairesCabinet(p_client: string): Promise<Record
 
 /** Ce que le pilotage lit en plus des dossiers, délais et audiences du cabinet (RLS) : les honoraires, les dates des
  *  avis et des pièces, la vigilance. Ce qui manque sur la base (lot non posé) revient vide. */
-export async function chargerPilotage(p_client: string): Promise<{ honoraires: Record<string, Honoraires>; avis: Pick<Avis, "dossier_id" | "date_avis">[]; pieces: Pick<Piece, "objet_id" | "recue_le" | "type_piece">[]; vigilances: Pick<Vigilance, "dossier_id" | "assujetti" | "identification_piece">[]; expertises: Expertise[] }> {
+export async function chargerPilotage(p_client: string): Promise<{ honoraires: Record<string, Honoraires>; avis: Pick<Avis, "dossier_id" | "date_avis">[]; pieces: Pick<Piece, "objet_id" | "recue_le" | "type_piece">[]; vigilances: Pick<Vigilance, "dossier_id" | "assujetti" | "identification_piece">[]; expertises: Expertise[]; attentes: Attente[] }> {
   const supabase = createClient();
-  const [h, a, p, v, x] = await Promise.all([
+  const [h, a, p, v, x, at] = await Promise.all([
     chargerHonorairesCabinet(p_client),
     supabase.from("tamila_avis").select("dossier_id, date_avis").eq("client_id", p_client).limit(20000),
     supabase.from("pieces").select("objet_id, recue_le, type_piece").eq("client_id", p_client).eq("objet_type", "tamila_dossier").limit(20000),
     supabase.from("tamila_vigilances").select("dossier_id, assujetti, identification_piece").eq("client_id", p_client),
     supabase.from("tamila_expertises").select("*").eq("client_id", p_client).eq("statut", "en_cours"),
+    supabase.from("tamila_attentes").select("*").eq("client_id", p_client).eq("statut", "attendue"),
   ]);
   return {
     honoraires: h ?? {},
@@ -359,6 +360,7 @@ export async function chargerPilotage(p_client: string): Promise<{ honoraires: R
     pieces: p.error ? [] : ((p.data ?? []) as Pick<Piece, "objet_id" | "recue_le" | "type_piece">[]),
     vigilances: v.error ? [] : ((v.data ?? []) as Pick<Vigilance, "dossier_id" | "assujetti" | "identification_piece">[]),
     expertises: x.error ? [] : ((x.data ?? []) as Expertise[]),
+    attentes: at.error ? [] : ((at.data ?? []) as Attente[]),
   };
 }
 
@@ -397,6 +399,18 @@ export const poserVigilance = (p_dossier: string, p_assujetti: boolean, p_activi
 /* ——— l'en-tête des factures du cabinet (b4_09) ——— */
 export const poserEnteteFacture = (p_client: string, p_entete: EnteteFacture) => rpc<EnteteFacture>("tamila_poser_entete_facture", { p_client, p_entete });
 
+/* ——— les pièces attendues (b4_18) ——— */
+/** null : la table n'existe pas sur cette base (b4_18 non posée). */
+export async function chargerAttentes(p_dossier: string): Promise<Attente[] | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase.from("tamila_attentes").select("*").eq("dossier_id", p_dossier).order("demandee_le", { ascending: false });
+  if (error) return null;
+  return (data ?? []) as Attente[];
+}
+export const poserAttente = (p_dossier: string, p_de: Attente["de"], p_objet: string, p_relance_le: string | null) => rpc<string>("tamila_poser_attente", { p_dossier, p_de, p_objet, p_relance_le });
+export const noterAttente = (p_attente: string, p_evenement: "recue" | "relancee" | "abandon", p_le: string | null = null, p_prochaine_relance: string | null = null) =>
+  rpc<void>("tamila_noter_attente", { p_attente, p_evenement, p_le, p_prochaine_relance });
+
 /* ——— l'expertise (b4_16) ——— */
 /** null : la table n'existe pas sur cette base (b4_16 non posée). */
 export async function chargerExpertises(p_dossier: string): Promise<Expertise[] | null> {
@@ -411,7 +425,7 @@ export type EtapeExpertise = "consignation_versee" | "pre_rapport_recu" | "dires
 export const noterExpertise = (p_expertise: string, p_evenement: EtapeExpertise, p_le: string | null = null) => rpc<void>("tamila_noter_expertise", { p_expertise, p_evenement, p_le });
 
 /* ——— les lectures longues d'un dossier (b4_15, socle 19an, lecteur d'A1) ——— */
-export type TypeAnalyse = "prelecture" | "chronologie" | "contradictions" | "bordereau";
+export type TypeAnalyse = "prelecture" | "chronologie" | "contradictions" | "bordereau" | "pieces_citees";
 export type Analyse = {
   id: string;
   type: string;

@@ -29,7 +29,6 @@
    ══════════════════════════════════════════════════════════════════════ */
 /* eslint-disable @next/next/no-img-element -- photos 16/7 et glyphes SVG repris tels quels de la source (images statiques déjà dimensionnées). */
 import React from "react";
-import { EnPreparation } from "@/components/ui/en-preparation";
 
 export default function Metiers() {
   return (
@@ -427,7 +426,6 @@ export default function Metiers() {
             <div className="relative">
               <p className="mb-8 text-center font-mono text-[11px] uppercase tracking-[0.22em] text-[#0a0a0a]/40">
                 Les plans de vos logiciels, lus en PDF ou en DWG
-                <EnPreparation style={{ letterSpacing: "0.08em" }} />
               </p>
               <div className="overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
                 <div className="flex w-max items-center animate-[architectes-trusted-marquee_40s_linear_infinite] hover:[animation-play-state:paused] motion-reduce:animate-none">

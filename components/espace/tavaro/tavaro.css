@@ -62,8 +62,10 @@
   color: #ffffff;
   border-color: #050505;
 }
+/* la couleur du bloc, adoucie : reste lisible si l'habillage v2 inverse le fond */
 .esp .tav-total[data-fort="true"] span:first-child {
-  color: rgba(255, 255, 255, 0.7);
+  color: inherit;
+  opacity: 0.78;
 }
 .esp .tav-facture {
   display: grid;
@@ -211,6 +213,7 @@
   border: 1px solid #e4e4e7;
   border-radius: 12px;
   background: #fafafa;
+  color: #18181b;
 }
 .tav-xml pre {
   margin: 0;
@@ -269,4 +272,227 @@
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* Le parc (b2_10) : les chiffres, les étapes de la remise, les anomalies, les créneaux d'atelier. */
+.esp .tav-parc-chiffres {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+.esp .tav-parc-chiffres > div {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid var(--r-filet);
+  border-radius: 12px;
+  min-width: 0;
+}
+.esp .tav-parc-chiffres strong {
+  font-size: 20px;
+  font-weight: 600;
+}
+.esp .tav-parc-titre {
+  margin: 18px 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.esp .tav-avis[data-alerte="risque"],
+.esp .tav-avis[data-alerte="retard"] {
+  border-color: var(--r-rouge, #c62828);
+}
+.esp .tav-etapes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+.esp .tav-etape {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 6px 12px;
+  border: 1px solid var(--r-filet);
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+}
+.esp .tav-etape[aria-pressed="true"] {
+  border-color: var(--r-vert, #2e7d32);
+  background: color-mix(in srgb, var(--r-vert, #2e7d32) 8%, transparent);
+}
+.esp .tav-etape:focus-visible {
+  outline: 2px solid var(--r-encre, currentColor);
+  outline-offset: 2px;
+}
+.esp .tav-etape:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.esp .tav-confier {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+.esp .tav-confier .rv-champ {
+  min-width: 0;
+  width: auto;
+  max-width: 100%;
+}
+.esp .tav-anomalies {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.esp .tav-anomalies > li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.esp .tav-creneaux {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.esp .tav-creneau {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 6px 10px;
+  border: 1px solid var(--r-filet);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+/* La flotte (b2_11) : le tableau des fiches, la fiche détaillée, la saisie de la cote. */
+.esp .tav-flotte td[data-negatif="oui"] {
+  color: var(--esp-rouge);
+  font-weight: 600;
+}
+.esp .tav-flotte th[scope="row"] {
+  white-space: nowrap;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--r-texte);
+  vertical-align: top;
+  padding-top: 8px;
+}
+.esp .tav-fiche {
+  display: grid;
+  grid-template-columns: minmax(120px, max-content) 1fr;
+  gap: 6px 14px;
+  margin: 0;
+  font-size: 13px;
+}
+.esp .tav-fiche dt {
+  color: var(--r-gris, #666);
+}
+.esp .tav-fiche dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 520px) {
+  .esp .tav-fiche {
+    grid-template-columns: 1fr;
+  }
+  .esp .tav-fiche dd {
+    margin-bottom: 6px;
+  }
+}
+.esp .tav-saisie-cote {
+  border: 1px solid var(--r-filet);
+  border-radius: 12px;
+  margin: 0;
+  padding: 10px 12px 12px;
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+/* le libellé masqué d'une colonne est en position absolue : le cadre le contient, sinon il élargit la page */
+.esp .tav-flotte-cadre {
+  position: relative;
+}
+
+/* b2_12 à b2_16 — les opérations */
+.esp .tav-courrier {
+  margin-top: 6px;
+  font-size: 13px;
+}
+.esp .tav-courrier summary {
+  cursor: pointer;
+}
+.esp .tav-courrier pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: inherit;
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--esp-gris-fond);
+}
+.esp .tav-choix-vehicules {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+  position: relative;
+}
+.esp .tav-responsables {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 12px 0 4px;
+}
+.esp .tav-responsables .tav-confier {
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+}
+.esp .tav-responsables .rv-champ {
+  min-width: 0;
+  width: 100%;
+  max-width: 340px;
+}
+/* la prise de vue guidée de l'état des lieux */
+.esp .tav-guide {
+  display: grid;
+  gap: 4px;
+  justify-items: start;
+  padding: 12px 14px;
+  border: 1px solid var(--r-filet);
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+.esp .tav-guide p {
+  margin: 0 0 6px;
+}
+/* les chiffres d'une réponse aux Questions */
+.esp .tav-chiffres-reponse {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 8px 0;
+}
+.esp .tav-chiffres-reponse dd {
+  margin: 0;
+  font-weight: 600;
 }

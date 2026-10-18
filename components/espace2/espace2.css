@@ -27,6 +27,7 @@ html.v2-actif .dlg-panneau {
   /* ——— jetons Geist, thème clair ——— */
   --v2-bg-100: #fff;
   --v2-bg-200: #fafafa;
+  --v2-bg-eleve: #fff;
   --v2-gray-100: #f2f2f2;
   --v2-gray-200: #ebebeb;
   --v2-gray-300: #e6e6e6;
@@ -103,10 +104,12 @@ html.v2-actif .dlg-panneau {
 /* ——— thème sombre : le choix « sombre », ou « système » sur un poste sombre ——— */
 @media (prefers-color-scheme: dark) {
   html:not([data-v2-theme="light"]) :is(.v2, .v2-jetons, .dlg-panneau) {
-    --v2-bg-100: #0a0a0a;
-    --v2-bg-200: #000;
-    --v2-gray-100: #1a1a1a;
-    --v2-gray-200: #1f1f1f;
+    /* les gris d'Attio (relevés sur ses captures, 10/10) : page #0f1112, barre latérale #0c0b0e, ligne active #161819, fenêtre #17191a */
+    --v2-bg-100: #0f1112;
+    --v2-bg-200: #0c0b0e;
+    --v2-bg-eleve: #17191a;
+    --v2-gray-100: #161819;
+    --v2-gray-200: #1f2123;
     --v2-gray-300: #292929;
     --v2-gray-400: #2e2e2e;
     --v2-gray-500: #454545;
@@ -156,10 +159,11 @@ html.v2-actif .dlg-panneau {
   }
 }
 html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
-  --v2-bg-100: #0a0a0a;
-  --v2-bg-200: #000;
-  --v2-gray-100: #1a1a1a;
-  --v2-gray-200: #1f1f1f;
+  --v2-bg-100: #0f1112;
+  --v2-bg-200: #0c0b0e;
+  --v2-bg-eleve: #17191a;
+  --v2-gray-100: #161819;
+  --v2-gray-200: #1f2123;
   --v2-gray-300: #292929;
   --v2-gray-400: #2e2e2e;
   --v2-gray-500: #454545;
@@ -218,6 +222,16 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
 .v2-jetons :focus-visible {
   outline: none;
   box-shadow: var(--v2-anneau);
+}
+/* 11/10/2026 — retour de Teo : à l'ouverture d'un menu, react-aria donne le
+   focus à la liste elle-même ; l'anneau ci-dessus l'encadrait d'un cadre
+   carré gris autour du popover arrondi. La liste n'en porte plus : au
+   clavier, c'est la ligne active qui se surligne. */
+.v2-jetons .v2-menu:focus-visible,
+.v2-jetons [role="menu"]:focus-visible,
+.v2-jetons [role="listbox"]:focus-visible,
+.v2-jetons [role="dialog"]:focus-visible {
+  box-shadow: none;
 }
 .v2-jetons a {
   color: inherit;
@@ -395,10 +409,41 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   display: grid;
   gap: 1px;
 }
-.v2-groupe + .v2-groupe {
-  margin-top: 8px;
-  padding-top: 8px;
+/* 07/10/2026 — sections titrées et repliables ; un filet seulement
+   avant une section sans titre (le bas : Aide, Réglages) */
+.v2-section + .v2-section {
+  margin-top: 12px;
+}
+.v2-section:last-child:not(:has(.v2-section-titre)) {
+  padding-top: 12px;
   border-top: 1px solid var(--v2-a-400);
+}
+.v2-section-titre {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  height: 28px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--v2-gray-900);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+.v2-section-titre:hover {
+  color: var(--v2-gray-1000);
+  background: var(--v2-a-100);
+}
+.v2-section-titre svg {
+  transition: transform 0.15s;
+}
+.v2-section-titre[aria-expanded="false"] svg {
+  transform: rotate(-90deg);
 }
 .v2-lien {
   display: flex;
@@ -473,7 +518,7 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
 .v2-sous-menu[data-ouvert] {
   grid-template-rows: 1fr;
 }
-.v2-sous-menu > ul {
+.v2-sous-menu > * {
   min-height: 0;
   overflow: hidden;
   list-style: none;
@@ -790,7 +835,9 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   height: 32px;
   padding: 0 8px;
 }
-.v2-btn--primaire {
+.v2-btn--primaire,
+.v2 a.v2-btn--primaire {
+  /* « .v2 a » (couleur héritée) l'emporterait sur un lien-bouton */
   background: var(--v2-gray-1000);
   color: var(--v2-bg-100);
   box-shadow: none;
@@ -1504,7 +1551,7 @@ a.v2-jauge:hover {
   min-width: 200px;
   max-width: min(320px, calc(100vw - 32px));
   border-radius: 12px;
-  background: var(--v2-bg-100);
+  background: var(--v2-bg-eleve, var(--v2-bg-100));
   color: var(--v2-gray-1000);
   box-shadow: var(--v2-ombre-menu);
   outline: none;
@@ -1619,7 +1666,7 @@ a.v2-jauge:hover {
   max-height: calc(100dvh - 32px);
   overflow: auto;
   border-radius: 12px;
-  background: var(--v2-bg-100);
+  background: var(--v2-bg-eleve, var(--v2-bg-100));
   color: var(--v2-gray-1000);
   box-shadow: var(--v2-ombre-modal);
   outline: none;
@@ -1928,3 +1975,963 @@ a.v2-jauge:hover {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ══ Les pages de suivi (la page « Usage » de la référence) ═════════════ */
+.v2-suivi-tete {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--v2-a-400);
+}
+.v2-suivi-ligne + .v2-suivi-ligne {
+  border-top: 1px solid var(--v2-a-400);
+}
+.v2-suivi-bouton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 16px;
+  border: 0;
+  background: transparent;
+  color: var(--v2-gray-1000);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+button.v2-suivi-bouton:hover {
+  background: var(--v2-a-100);
+}
+.v2-suivi-bouton[aria-expanded="true"] .v2-lien-chevron {
+  transform: rotate(90deg);
+}
+.v2-suivi-libelle {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.v2-suivi-libelle small {
+  font-size: 13px;
+  color: var(--v2-gray-900);
+}
+.v2-suivi-valeur {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.v2-suivi-detail {
+  padding: 4px 16px 16px 46px;
+}
+.v2-barres {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.v2-barres li {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 2fr) auto;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+.v2-barres-libelle {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--v2-gray-900);
+}
+.v2-barres-rail {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--v2-gray-200);
+  overflow: hidden;
+}
+.v2-barres-rail span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--v2-blue-700);
+  transition: width 0.3s var(--v2-doux);
+}
+@media (max-width: 767px) {
+  .v2-suivi-detail {
+    padding-left: 16px;
+  }
+  .v2-barres li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .v2-barres-rail {
+    grid-column: 1 / -1;
+    order: 3;
+  }
+}
+
+/* ══ La vue d'ensemble, sur le modèle de l'aperçu d'un projet ═══════════ */
+.v2-apercu-tete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.v2-apercu-nom {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.v2-apercu-nom h1 {
+  margin: 0;
+  font-size: 32px;
+  line-height: 40px;
+  letter-spacing: -1.28px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2-vedette {
+  margin-bottom: 32px;
+}
+.v2-vedette-corps {
+  display: grid;
+  gap: 24px;
+  padding: 24px;
+  grid-template-columns: minmax(0, 1fr);
+}
+@container principale (min-width: 768px) {
+  .v2-vedette-corps {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 32px;
+  }
+}
+/* l'aperçu : le haut de la pièce, cadré comme la capture d'un déploiement */
+.v2-vedette-apercu {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--v2-gray-100);
+  box-shadow: 0 0 0 1px var(--v2-a-400);
+}
+.v2 .v2-vedette-page.resa.esp {
+  position: absolute;
+  inset: 12px 12px auto 12px;
+}
+.v2 .v2-vedette-page .esp-page {
+  border-radius: 4px;
+  box-shadow: 0 1px 2px #0000001a;
+}
+.v2-vedette-vide {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--v2-gray-700);
+}
+.v2-vedette-fiche {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  min-width: 0;
+}
+.v2-fiche {
+  margin: 0;
+  display: grid;
+  gap: 16px;
+}
+.v2-fiche > div {
+  display: grid;
+  gap: 4px;
+}
+.v2-fiche dt {
+  font-size: 13px;
+  color: var(--v2-gray-900);
+}
+.v2-fiche dd {
+  margin: 0;
+  font-size: 14px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.v2-fiche-ligne {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.v2-lien-souligne {
+  text-decoration: underline;
+  text-decoration-color: var(--v2-a-500);
+  text-underline-offset: 3px;
+}
+.v2-lien-souligne:hover {
+  text-decoration-color: currentColor;
+}
+.v2-vedette-pied {
+  flex-wrap: wrap;
+}
+@media (min-width: 1024px) {
+  .v2-accueil--apercu {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  }
+}
+
+/* ══ Réglages : intertitres des rubriques, mode calme (07/10/2026) ═════ */
+.v2-cote-groupe {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .v2-cote-groupe {
+    display: block;
+    margin: 12px 12px 4px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--v2-gray-700);
+  }
+  .v2-cote-groupe:first-child {
+    margin-top: 0;
+  }
+}
+html.v2-calme *,
+html.v2-calme *::before,
+html.v2-calme *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* ══ L'assistant : panneau à droite (07/10/2026) ═══════════════════════ */
+.v2-voile.v2-voile--assistant {
+  place-items: stretch end;
+  padding: 0;
+  background: #00000066;
+}
+.v2-assistant {
+  width: min(420px, 100vw);
+  height: 100dvh;
+  outline: none;
+  background: var(--v2-bg-100);
+  font-family: var(--v2-sans);
+  font-size: 14px;
+  line-height: 20px;
+  box-shadow: var(--v2-ombre-modal);
+}
+.v2-assistant[data-entering] {
+  animation: v2-assistant-entree 0.3s var(--v2-tiroir);
+}
+.v2-assistant[data-exiting] {
+  animation: v2-assistant-entree 0.2s ease reverse forwards;
+}
+@keyframes v2-assistant-entree {
+  from {
+    transform: translateX(100%);
+  }
+}
+.v2-assistant-corps {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.v2-assistant-tete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 64px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--v2-a-400);
+}
+.v2-assistant-fil {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+.v2-assistant-bulle {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--v2-gray-1000);
+}
+.v2-assistant-bulle[data-role="user"] {
+  justify-self: end;
+  max-width: 85%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--v2-a-200);
+}
+.v2-assistant-saisie {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 12px 16px 16px;
+  border-top: 1px solid var(--v2-a-400);
+}
+
+/* ══ Vue d'ensemble, refonte (07/10/2026) ═══════════════════════════════
+   Comme la maquette de Teo : pleine largeur, cartes à peine arrondies
+   (6 px) et presque collées (12 px). */
+.v2-page.v2-va { display: grid; gap: 12px; max-width: none; padding: 16px 16px 48px; }
+.v2-va-tete { display: flex; align-items: center; gap: 12px; padding: 4px 4px 0; }
+.v2-va .v2-carte { border-radius: 6px; box-shadow: 0 0 0 1px var(--v2-a-400); background: var(--v2-bg-100); }
+.v2-va .v2-carte-corps { padding: 20px 24px; }
+
+/* le bandeau des chiffres : quatre cellules en ligne, filets entre elles */
+.v2-va-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-radius: 6px; box-shadow: 0 0 0 1px var(--v2-a-400); background: var(--v2-bg-100); overflow: hidden; }
+.v2-va-kpi { display: grid; gap: 2px; padding: 14px 24px; color: inherit; transition: background 0.15s; position: relative; }
+.v2-va-kpi + .v2-va-kpi::after { content: ""; position: absolute; left: 0; top: 14px; bottom: 14px; width: 1px; background: var(--v2-a-400); }
+.v2-va-kpi:hover { background: var(--v2-a-100); }
+.v2-va-kpi-libelle { font-size: 12px; font-weight: 500; color: var(--v2-gray-900); }
+.v2-va-kpi strong { font-size: 20px; line-height: 28px; font-weight: 500; letter-spacing: -0.4px; color: var(--v2-gray-1000); font-variant-numeric: tabular-nums; }
+.v2-va-kpi strong[data-alerte] { color: var(--v2-gray-1000); }
+.v2-va-kpi-sous { font-size: 12px; }
+
+/* deux colonnes collées, un filet entre elles ; chaque panneau a son filet bas */
+.v2-va-grille { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr); gap: 12px; align-items: start; }
+.v2-va-col { display: grid; gap: 12px; align-content: start; min-width: 0; }
+
+.v2-va-titre { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.v2-va-sous { margin: 2px 0 0; font-size: 13px; }
+.v2-va-periode { height: 32px; padding: 0 8px; width: auto; }
+.v2-va-periode select { font-size: 13px; }
+.v2-va-pastille { display: grid; place-items: center; width: 28px; height: 28px; flex-shrink: 0; border-radius: 999px; background: var(--v2-a-200); color: var(--v2-gray-900); }
+.v2-va-courbe { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; }
+.v2-va-axe-y { display: flex; flex-direction: column; justify-content: space-between; height: 200px; font-size: 11px; color: var(--v2-gray-900); text-align: right; margin-top: -7px; }
+.v2-va-axe-y span { line-height: 14px; }
+.v2 .v2-va-lien { display: inline-flex; align-items: center; gap: 4px; color: var(--v2-blue-700); font-size: 13px; font-weight: 500; }
+.v2 .v2-va-lien:hover { color: var(--v2-blue-900); }
+.v2-va-liste { list-style: none; margin: 0; padding: 0; }
+.v2-va-liste li { display: flex; align-items: center; gap: 12px; padding: 12px 0; }
+.v2-va-liste li + li { border-top: 1px solid var(--v2-a-400); }
+.v2-va-liste input { width: 16px; height: 16px; flex-shrink: 0; }
+.v2-va-liste a { color: var(--v2-gray-900); display: flex; }
+.v2-va-texte { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.v2-va-texte > * { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2-va-texte > span { font-size: 14px; color: var(--v2-gray-1000); }
+.v2-va-texte > small { font-size: 12px; }
+.v2-va-heure { width: 64px; flex-shrink: 0; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.v2-va-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.v2-va-table th { text-align: left; font-weight: 500; font-size: 12px; color: var(--v2-gray-900); padding: 0 8px 8px 0; }
+.v2-va-table td { padding: 10px 8px 10px 0; border-top: 1px solid var(--v2-a-400); white-space: nowrap; }
+.v2-va-table a { color: var(--v2-gray-900); display: flex; }
+.v2-va-fournisseur { display: inline-flex; align-items: center; gap: 10px; color: var(--v2-gray-1000); }
+.v2-va-fournisseur svg { color: var(--v2-gray-900); flex-shrink: 0; }
+.v2-va-axe { position: relative; height: 20px; margin-top: 6px; font-size: 12px; color: var(--v2-gray-900); }
+.v2-va-axe span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.v2-va-axe span:first-child { transform: none; }
+.v2-va-axe span:last-child { transform: translateX(-100%); }
+.v2-va-ia { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.v2-va-ia > div { display: grid; gap: 4px; }
+.v2-va-ia-marque { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 12px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: var(--v2-blue-700); }
+@media (max-width: 1023px) {
+  .v2-va-grille { grid-template-columns: minmax(0, 1fr); }
+  .v2-va-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .v2-va-kpi:nth-child(3)::after { display: none; }
+  .v2-va-kpi:nth-child(n + 3) { border-top: 1px solid var(--v2-a-400); }
+}
+
+/* ══ À valider, redessiné (07/10/2026) — la maquette de Teo, à l'identique ═ */
+.v2-page.v2-val { display: grid; gap: 12px; max-width: none; padding: 16px 16px 48px; }
+.v2-val .v2-carte { border-radius: 6px; box-shadow: 0 0 0 1px var(--v2-a-400); background: var(--v2-bg-100); }
+.v2-val-gris { color: var(--v2-gray-900); }
+.v2-val-pad { margin: 0; padding: 14px 16px 16px; font-size: 12px; }
+
+/* les boutons, à la finition d'Attio : 32 px, filet fin, coins 6 px,
+   icône · libellé · chevron ; c'est le modèle des boutons de l'espace */
+.v2-val-filtres { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.v2-val-droite { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.v2-val-bouton { position: relative; display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 10px; border-radius: 6px; background: var(--v2-bg-100); box-shadow: 0 0 0 1px var(--v2-a-400); color: var(--v2-gray-1000); font: inherit; font-size: 13px; font-weight: 500; white-space: nowrap; cursor: pointer; border: 0; transition: background 0.15s, box-shadow 0.15s; }
+.v2-val-bouton:hover { background: var(--v2-a-200); box-shadow: 0 0 0 1px var(--v2-a-500, var(--v2-a-400)); }
+.v2-val-bouton > svg { color: var(--v2-gray-900); flex-shrink: 0; }
+.v2-val-bouton[data-actif] { box-shadow: 0 0 0 1px var(--v2-blue-700); }
+.v2-val-bouton[data-actif] > svg:first-child { color: var(--v2-blue-700); }
+.v2-val-bouton-chevron { margin-left: -2px; }
+.v2-val-bouton select { position: absolute; inset: 0; opacity: 0; cursor: pointer; font-size: 16px; }
+.v2-val-bouton:focus-within { box-shadow: var(--v2-anneau); }
+.v2-val-bouton--icone { width: 30px; padding: 0; justify-content: center; }
+.v2-val-recherche { display: inline-flex; align-items: center; gap: 8px; width: 240px; height: 30px; padding: 0 8px 0 10px; border-radius: 6px; background: var(--v2-bg-100); box-shadow: var(--v2-anneau); color: var(--v2-gray-900); }
+.v2-val-recherche input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--v2-gray-1000); font: inherit; font-size: 13px; }
+.v2-val-icone { display: grid; place-items: center; border: 0; background: none; color: var(--v2-gray-900); cursor: pointer; padding: 2px; }
+
+/* la barre du lot */
+.v2-val-lot { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 12px; padding: 8px 14px; border-radius: 6px; background: var(--v2-a-200); font-size: 13px; }
+/* Les boutons du lot (Annuler · Bloquées · Faites) se touchaient : aucun écart défini (09/10). */
+.v2-val-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+/* la grille : la file à gauche, le circuit à droite */
+.v2-val-grille { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr); gap: 12px; align-items: start; }
+.v2-val-col { display: grid; gap: 12px; min-width: 0; }
+.v2-val-cote { position: sticky; top: 80px; }
+.v2-val-vide { padding: 20px 16px; color: var(--v2-gray-900); font-size: 13px; }
+.v2-val-groupe { margin: 0; padding: 12px 16px 10px; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: -0.1px; color: var(--v2-gray-1000); border-bottom: 1px solid var(--v2-a-400); }
+
+/* une ligne de la file */
+.v2-val-liste { list-style: none; margin: 0; padding: 0; }
+.v2-val-ligne { display: flex; align-items: stretch; transition: background 0.15s; }
+.v2-val-ligne + .v2-val-ligne { border-top: 1px solid var(--v2-a-400); }
+.v2-val-ligne:hover { background: var(--v2-a-100); }
+.v2-val-ligne[aria-current] { background: var(--v2-a-200); }
+.v2-val-ligne:last-child { border-radius: 0 0 6px 6px; }
+.v2-val-case { display: grid; place-items: center; width: 52px; flex-shrink: 0; }
+.v2-val-case input { appearance: none; -webkit-appearance: none; display: grid; place-items: center; width: 16px; height: 16px; margin: 0; border: 1.5px solid var(--v2-gray-900); border-radius: 4px; background: transparent; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+.v2-val-case input:hover:not(:disabled) { border-color: var(--v2-gray-1000); }
+.v2-val-case input:checked { background: var(--v2-gray-1000); border-color: var(--v2-gray-1000); }
+.v2-val-case input:checked::after { content: ""; width: 4px; height: 8px; margin-top: -2px; border: solid var(--v2-bg-100); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.v2-val-case input:focus-visible { box-shadow: var(--v2-anneau); }
+.v2-val-case input:disabled { cursor: not-allowed; opacity: 0.4; }
+.v2-val-corps { flex: 1; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) 64px 140px 20px; align-items: center; gap: 12px; padding: 9px 16px 9px 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.v2-val-texte { min-width: 0; display: grid; gap: 4px; }
+.v2-val-texte > * { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2-val-texte > span { font-size: 13px; font-weight: 500; color: var(--v2-gray-1000); }
+.v2-val-texte > small { font-size: 12px; color: var(--v2-gray-900); }
+.v2-val-module { display: grid; place-items: center; color: var(--v2-gray-1000); }
+.v2-val-montant { display: grid; gap: 4px; text-align: right; font-variant-numeric: tabular-nums; }
+.v2-val-montant > span { font-size: 13px; color: var(--v2-gray-1000); }
+.v2-val-montant > small { font-size: 12px; color: var(--v2-gray-900); }
+.v2-val-montant > small[data-retard] { color: var(--v2-gray-1000); font-weight: 500; }
+.v2-val-chevron { color: var(--v2-gray-900); }
+
+/* le circuit d'approbation */
+.v2-val-circuit { display: grid; gap: 14px; padding: 14px 16px 16px; }
+.v2-val-circuit p { margin: 0; }
+.v2-val-circuit-titre { font-size: 13px; font-weight: 500; color: var(--v2-gray-1000); margin-bottom: 4px !important; }
+.v2-val-circuit .v2-val-gris { font-size: 12px; }
+.v2-val-jauge { height: 6px; border-radius: 999px; background: var(--v2-a-300, var(--v2-a-400)); overflow: hidden; }
+.v2-val-jauge span { display: block; height: 100%; border-radius: 999px; background: var(--v2-gray-1000); transition: width 0.3s; }
+.v2-val-etapes { list-style: none; margin: 0; padding: 0 0 4px; display: grid; gap: 0; border-bottom: 1px solid var(--v2-a-400); }
+.v2-val-etapes li { position: relative; display: flex; gap: 16px; padding: 8px 0 20px; }
+.v2-val-etapes li:last-child { padding-bottom: 16px; }
+.v2-val-etapes li:not(:last-child)::after { content: ""; position: absolute; left: 10px; top: 36px; bottom: 4px; width: 1px; background: var(--v2-a-500, var(--v2-a-400)); }
+.v2-val-etapes li > span:last-child { display: grid; gap: 4px; }
+.v2-val-etape-icone { display: grid; place-items: center; width: 20px; height: 20px; margin-top: 2px; color: var(--v2-gray-1000); flex-shrink: 0; }
+.v2-val-etape-icone[data-refus] { color: var(--v2-gray-900); }
+.v2-val-etapes li[data-attente] .v2-val-etape-icone { color: var(--v2-gray-900); }
+.v2-val-etape-nom { font-size: 13px; font-weight: 500; color: var(--v2-gray-1000); }
+.v2-val-etapes small { font-size: 12px; }
+.v2-val-dossier { display: grid; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid var(--v2-a-400); }
+.v2-val-dossier > p { font-size: 12px; }
+.v2-val-dossier-ligne { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--v2-gray-1000); }
+.v2-val-dossier-ligne small { margin-left: auto; font-size: 12px; }
+.v2 .v2-val-lien { display: inline-flex; align-items: center; gap: 8px; width: fit-content; padding: 0; border: 0; background: none; color: var(--v2-gray-1000); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; }
+.v2 .v2-val-lien:hover { color: var(--v2-blue-700); }
+.v2 .v2-val-lien--petit { font-size: 12px; color: var(--v2-gray-1000); gap: 6px; flex-shrink: 0; }
+
+/* les délégations */
+.v2-val-delegations { list-style: none; margin: 0; padding: 0 16px; }
+.v2-val-delegations li { display: flex; align-items: center; gap: 14px; padding: 12px 0; color: var(--v2-gray-1000); }
+.v2-val-delegations li + li { border-top: 1px solid var(--v2-a-400); }
+.v2-val-delegations li > svg { color: var(--v2-gray-900); flex-shrink: 0; }
+.v2-val-delegations .v2-val-texte { flex: 1; }
+
+/* le panneau du détail : plus large que l'assistant */
+.v2-val-panneau { width: min(560px, 100vw); }
+.v2.v2-val-panneau-corps { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; background: transparent; }
+
+@media (max-width: 1023px) {
+  .v2-val-grille { grid-template-columns: minmax(0, 1fr); }
+  .v2-val-cote { position: static; }
+}
+@media (max-width: 640px) {
+  .v2-val-corps { grid-template-columns: minmax(0, 1fr) 110px 18px; padding-right: 12px; }
+  .v2-val-module { display: none; }
+  .v2-val-case { width: 44px; }
+  .v2-val-recherche { width: 180px; }
+}
+
+/* ══ Point du matin, redessiné (07/10/2026) — la maquette de Teo ═════════ */
+.v2-page.v2-pm { display: grid; gap: 12px; max-width: none; padding: 16px 16px 48px; }
+.v2-pm .v2-carte { border-radius: 6px; box-shadow: 0 0 0 1px var(--v2-a-400); background: var(--v2-bg-100); }
+.v2-pm-remise { font-size: 12px; color: var(--v2-gray-900); }
+.v2-pm-grille { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: stretch; }
+.v2-pm-large { grid-column: span 2; }
+.v2-pm-haut { align-self: start; }
+.v2-pm-carte { display: flex; flex-direction: column; min-width: 0; }
+.v2-pm-tete { display: flex; align-items: center; gap: 8px; padding: 12px 16px 4px; }
+.v2-pm-tete h2 { margin: 0; flex: 1; font-size: 14px; line-height: 20px; font-weight: 500; color: var(--v2-gray-1000); }
+.v2-pm-badge { padding: 1px 8px; border-radius: 6px; box-shadow: 0 0 0 1px var(--v2-a-400); font-size: 12px; color: var(--v2-gray-900); }
+.v2 .v2-pm-kebab { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 6px; color: var(--v2-gray-900); }
+.v2 .v2-pm-kebab:hover { background: var(--v2-a-200); color: var(--v2-gray-1000); }
+.v2-pm-corps { flex: 1; padding: 0 16px; }
+.v2-pm-pied { display: flex; justify-content: flex-end; padding: 10px 16px 12px; border-top: 1px solid var(--v2-a-400); margin: 0 16px; padding-left: 0; padding-right: 0; }
+.v2-pm-rien { margin: 8px 0 16px; font-size: 13px; color: var(--v2-gray-900); }
+.v2-pm-liste { list-style: none; margin: 0; padding: 0; }
+.v2-pm-liste li { display: flex; align-items: flex-start; gap: 14px; padding: 10px 0; }
+.v2-pm-liste li + li { border-top: 1px solid var(--v2-a-400); }
+.v2-pm-icone { flex-shrink: 0; margin-top: 1px; color: var(--v2-gray-1000); }
+.v2-pm-icone[data-critique] { color: var(--v2-gray-1000); }
+.v2-pm-texte { flex: 1; min-width: 0; display: grid; gap: 3px; }
+.v2-pm-texte > span { font-size: 13px; font-weight: 500; color: var(--v2-gray-1000); }
+.v2-pm-texte > small { font-size: 12px; color: var(--v2-gray-900); }
+.v2-pm-montant { font-size: 20px; line-height: 28px; font-weight: 500; letter-spacing: -0.4px; color: var(--v2-gray-1000); font-variant-numeric: tabular-nums; }
+.v2 .v2-pm-action { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; align-self: center; font-size: 12px; font-weight: 500; color: var(--v2-gray-1000); white-space: nowrap; }
+.v2 .v2-pm-action:hover { color: var(--v2-blue-700); }
+.v2-pm-qualite { display: grid; gap: 10px; padding: 8px 0 12px; }
+.v2-pm-qualite p { margin: 0 0 3px; font-size: 13px; font-weight: 500; color: var(--v2-gray-1000); }
+.v2-pm-qualite small { font-size: 12px; color: var(--v2-gray-900); }
+.v2-pm-equipe { display: grid; }
+.v2-pm-equipe-ligne { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; padding: 10px 0; }
+.v2-pm-equipe-qui { display: flex; gap: 14px; padding-right: 16px; border-right: 1px solid var(--v2-a-400); }
+.v2-pm-equipe-remp { align-content: start; }
+.v2-pm-equipe-pied { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0 12px; border-top: 1px solid var(--v2-a-400); font-size: 12px; color: var(--v2-gray-900); }
+@media (max-width: 1023px) {
+  .v2-pm-grille { grid-template-columns: minmax(0, 1fr); }
+  .v2-pm-large { grid-column: auto; }
+}
+
+/* un état, sobre : pas de couleur, un filet fin (Teo, 07/10 : « pas de couleurs comme ça ») */
+.v2-etat { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 6px; box-shadow: 0 0 0 1px var(--v2-a-400); font-size: 12px; font-weight: 500; color: var(--v2-gray-1000); white-space: nowrap; }
+
+/* ══ CASHD, tableau de bord (07/10/2026) — la maquette de Teo, en gris ═══ */
+.v2-cd { display: grid; gap: 20px; margin-bottom: 24px; }
+/* la carte : un filet très fin et quatre coins marqués */
+.v2-cd-carte {
+  --coin: var(--v2-gray-700);
+  position: relative; min-width: 0; padding: 16px 20px; background-color: var(--v2-bg-100);
+  box-shadow: 0 0 0 1px var(--v2-a-300, var(--v2-a-400));
+  background-image:
+    linear-gradient(var(--coin), var(--coin)), linear-gradient(var(--coin), var(--coin)),
+    linear-gradient(var(--coin), var(--coin)), linear-gradient(var(--coin), var(--coin)),
+    linear-gradient(var(--coin), var(--coin)), linear-gradient(var(--coin), var(--coin)),
+    linear-gradient(var(--coin), var(--coin)), linear-gradient(var(--coin), var(--coin));
+  background-repeat: no-repeat;
+  background-size: 8px 1px, 1px 8px, 8px 1px, 1px 8px, 8px 1px, 1px 8px, 8px 1px, 1px 8px;
+  background-position: 0 0, 0 0, 100% 0, 100% 0, 0 100%, 0 100%, 100% 100%, 100% 100%;
+}
+.v2-cd-vide { color: var(--v2-gray-900); font-size: 13px; }
+.v2-cd-etiquette { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 13px; color: var(--v2-gray-900); }
+.v2-cd-etiquette > span { margin-left: auto; }
+.v2-cd-grand { margin: 0; font-size: 26px; line-height: 32px; font-weight: 600; letter-spacing: -0.6px; color: var(--v2-gray-1000); font-variant-numeric: tabular-nums; }
+.v2-cd-grand--moyen { font-size: 22px; line-height: 28px; }
+.v2-cd-moyen { margin: 0; font-size: 15px; font-weight: 600; color: var(--v2-gray-1000); }
+.v2-cd-sous { margin: 4px 0 0; font-size: 12px; color: var(--v2-gray-900); }
+.v2-cd-tete { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+.v2-cd-droite { display: grid; justify-items: end; align-content: start; gap: 8px; }
+.v2-cd-legende { display: flex; align-items: center; gap: 6px; margin: 10px 0 0; font-size: 12px; color: var(--v2-gray-900); }
+.v2-cd-legende span { width: 8px; height: 8px; border-radius: 999px; background: var(--v2-gray-900); }
+.v2-cd-legende span[data-teinte="clair"] { margin-left: 10px; background: var(--v2-a-500, var(--v2-gray-700)); opacity: 0.6; }
+.v2-cd-bascule { display: inline-flex; padding: 2px; border-radius: 6px; box-shadow: 0 0 0 1px var(--v2-a-400); }
+.v2-cd-bascule button { height: 26px; padding: 0 10px; border: 0; border-radius: 4px; background: none; color: var(--v2-gray-900); font: inherit; font-size: 12px; font-weight: 500; cursor: pointer; }
+.v2-cd-bascule button[aria-checked="true"] { background: var(--v2-a-200); color: var(--v2-gray-1000); }
+
+/* les quatre chiffres */
+.v2-cd-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+.v2-cd-kpi { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.v2-cd-kpi-valeur { margin: 6px 0 0; font-size: 24px; line-height: 30px; font-weight: 600; letter-spacing: -0.5px; color: var(--v2-gray-1000); font-variant-numeric: tabular-nums; }
+.v2-cd-mini { display: flex; align-items: flex-end; gap: 3px; flex-shrink: 0; }
+.v2-cd-mini > span { display: grid; gap: 2px; }
+.v2-cd-mini i { display: block; width: 6px; height: 5px; border-radius: 1px; background: var(--v2-a-300, var(--v2-a-400)); }
+.v2-cd-mini i[data-plein] { background: var(--v2-a-500, var(--v2-gray-700)); }
+.v2-cd-mini > span[data-fort] i[data-plein] { background: var(--v2-gray-1000); }
+
+/* les lignes de cartes */
+.v2-cd-ligne { display: grid; gap: 20px; }
+.v2-cd-ligne--2-1 { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+.v2-cd-ligne--1-1 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.v2-cd-ligne--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+/* les colonnes en pastilles */
+.v2-cd-barres { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; }
+.v2-cd-axe-y { display: flex; flex-direction: column; justify-content: space-between; height: 232px; padding-bottom: 0; font-size: 11px; color: var(--v2-gray-900); text-align: right; }
+.v2-cd-barres-zone { min-width: 0; }
+.v2-cd-barres-cols { display: flex; align-items: flex-end; gap: 10px; height: 232px; padding: 0 4px; background-image: repeating-linear-gradient(to bottom, var(--v2-a-300, var(--v2-a-400)) 0 1px, transparent 1px 58px); }
+.v2-cd-col { flex: 1; max-width: 56px; height: 100%; display: flex; align-items: flex-end; padding: 0; border: 0; border-radius: 4px; background: none; cursor: pointer; }
+.v2-cd-col[data-choisi] { background: var(--v2-a-100); }
+.v2-cd-col-pile { display: flex; flex-direction: column; gap: 3px; width: 100%; padding: 0 4px; }
+.v2-cd-col-pile i { display: block; height: 6px; border-radius: 2px; background: var(--v2-a-400); }
+.v2-cd-col-pile i[data-fonce] { background: var(--v2-gray-700); }
+.v2-cd-col[data-choisi] .v2-cd-col-pile i[data-fonce] { background: var(--v2-gray-900); }
+.v2-cd-axe-x { display: flex; gap: 10px; padding: 8px 4px 0; }
+.v2-cd-axe-x span { flex: 1; max-width: 56px; font-size: 11px; color: var(--v2-gray-900); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* les colonnes pointillées */
+.v2-cd-pointillees-cols { display: flex; align-items: flex-end; justify-content: space-around; height: 232px; background-image: repeating-linear-gradient(to bottom, var(--v2-a-300, var(--v2-a-400)) 0 1px, transparent 1px 58px); }
+.v2-cd-pcol { position: relative; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; width: 28px; height: 100%; }
+.v2-cd-pcol > span { width: 4px; background: repeating-linear-gradient(to bottom, var(--v2-gray-700) 0 5px, transparent 5px 8px); }
+.v2-cd-pcol[data-active] > span { width: 28px; background: repeating-linear-gradient(to bottom, var(--v2-gray-900) 0 5px, transparent 5px 8px); border-radius: 2px; }
+.v2-cd-pcol em { margin-bottom: 8px; font-style: normal; font-size: 12px; font-weight: 600; color: var(--v2-gray-1000); white-space: nowrap; }
+.v2-cd-pointillees-x { display: flex; justify-content: space-around; padding-top: 8px; font-size: 11px; color: var(--v2-gray-900); }
+.v2-cd-pointillees-x span { width: 48px; text-align: center; }
+
+/* l'entonnoir */
+.v2-cd-entonnoir { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0 -20px -16px; border-top: 1px solid var(--v2-a-400); }
+.v2-cd-etape { position: relative; display: grid; justify-items: center; padding: 16px 0 14px; }
+.v2-cd-etape + .v2-cd-etape { border-left: 1px solid var(--v2-a-400); }
+.v2-cd-etape strong { font-size: 15px; font-weight: 600; color: var(--v2-gray-1000); }
+.v2-cd-etape svg { width: 100%; height: 200px; margin: 8px 0; display: block; }
+.v2-cd-etape-pct { position: absolute; top: calc(16px + 22px + 8px + 100px - 12px); padding: 2px 10px; border-radius: 999px; background: var(--v2-gray-1000); color: var(--v2-bg-100); font-size: 12px; font-weight: 600; }
+.v2-cd-etape small { font-size: 12px; color: var(--v2-gray-900); }
+
+/* le camembert */
+.v2-cd-camembert { display: grid; grid-template-columns: minmax(160px, 220px) minmax(0, 1fr); align-items: center; gap: 28px; padding: 8px 0; }
+.v2-cd-camembert svg { width: 100%; height: auto; }
+.v2-cd-camembert-legende { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.v2-cd-camembert-legende li { display: grid; grid-template-columns: 12px minmax(0, 1fr) auto auto; align-items: center; gap: 12px; font-size: 13px; color: var(--v2-gray-1000); font-variant-numeric: tabular-nums; }
+.v2-cd-camembert-legende li > span:nth-child(3), .v2-cd-camembert-legende li > span:nth-child(4) { color: var(--v2-gray-900); text-align: right; }
+.v2-cd-carre { width: 10px; height: 10px; border-radius: 2px; background: var(--v2-gray-700); }
+.v2-cd-carre[data-i="0"] { background: var(--v2-a-500, var(--v2-gray-700)); }
+.v2-cd-carre[data-i="1"] { background: var(--v2-gray-700); }
+.v2-cd-carre[data-i="2"] { background: var(--v2-gray-900); }
+.v2-cd-carre[data-i="3"] { background: var(--v2-gray-1000); opacity: 0.8; }
+.v2-cd-carre[data-i="4"] { background: var(--v2-gray-1000); }
+
+/* la liste à pointillés */
+.v2-cd-pointilles { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 16px; }
+.v2-cd-pointilles-tete { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--v2-gray-1000); }
+.v2-cd-pointilles-tete span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2-cd-pointilles-tete span:last-child { color: var(--v2-gray-900); font-variant-numeric: tabular-nums; }
+.v2-cd-pointilles-barre { display: flex; gap: 2px; margin-top: 8px; }
+.v2-cd-pointilles-barre i { flex: 1; height: 3px; border-radius: 2px; background: var(--v2-a-300, var(--v2-a-400)); }
+.v2-cd-pointilles-barre i[data-plein] { background: var(--v2-gray-900); }
+
+/* la carte du milieu (relances du jour) */
+.v2-cd-centre { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.v2-cd-centre .v2-cd-etiquette { align-self: stretch; }
+.v2-cd-pile { display: flex; margin: 28px 0 14px; }
+.v2-cd-pile span { display: grid; place-items: center; width: 44px; height: 44px; margin-left: -10px; border-radius: 999px; background: var(--v2-a-200); box-shadow: 0 0 0 3px var(--v2-bg-100); font-size: 13px; font-weight: 600; color: var(--v2-gray-1000); }
+.v2-cd-pile span:first-child { margin-left: 0; }
+.v2-cd-pile span:nth-child(2) { background: var(--v2-gray-1000); color: var(--v2-bg-100); }
+.v2-cd-centre-titre { margin: 0; font-size: 14px; font-weight: 600; color: var(--v2-gray-1000); }
+.v2-cd-centre-texte { margin: 6px 0 16px; max-width: 240px; font-size: 13px; line-height: 19px; color: var(--v2-gray-900); }
+
+/* la carte de chaleur */
+.v2-cd-chaleur-tete { display: flex; justify-content: space-between; gap: 8px; margin: 16px 0 14px; }
+.v2-cd-chaleur { display: grid; gap: 3px; }
+.v2-cd-chaleur-ligne { display: grid; grid-template-columns: 32px repeat(5, minmax(0, 1fr)); gap: 3px; align-items: center; }
+.v2-cd-chaleur-ligne > span { font-size: 11px; color: var(--v2-gray-900); }
+.v2-cd-chaleur-ligne i, .v2-cd-echelle i { display: block; height: 18px; border-radius: 2px; background: var(--v2-a-100); }
+.v2-cd-chaleur-ligne i[data-n="1"], .v2-cd-echelle i[data-n="1"] { background: var(--v2-a-300, var(--v2-a-400)); }
+.v2-cd-chaleur-ligne i[data-n="2"], .v2-cd-echelle i[data-n="2"] { background: var(--v2-a-500, var(--v2-gray-700)); }
+.v2-cd-chaleur-ligne i[data-n="3"], .v2-cd-echelle i[data-n="3"] { background: var(--v2-gray-700); }
+.v2-cd-chaleur-ligne i[data-n="4"], .v2-cd-echelle i[data-n="4"] { background: var(--v2-gray-900); }
+.v2-cd-chaleur-ligne i[data-n="5"], .v2-cd-echelle i[data-n="5"] { background: var(--v2-gray-1000); }
+.v2-cd-chaleur-x small { font-size: 10px; color: var(--v2-gray-900); text-align: center; }
+.v2-cd-echelle { display: flex; align-items: center; gap: 4px; margin: 14px 0 0; font-size: 11px; color: var(--v2-gray-900); }
+.v2-cd-echelle i { width: 10px; height: 10px; }
+
+/* les raccourcis */
+.v2-cd-raccourcis { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 4px; }
+.v2-cd-raccourcis a, .v2-cd-raccourcis button { display: flex; align-items: center; gap: 14px; width: 100%; padding: 10px 6px; margin: 0 -6px; border: 0; border-radius: 6px; background: none; color: var(--v2-gray-1000); font: inherit; text-align: left; cursor: pointer; transition: background 0.15s; }
+.v2-cd-raccourcis a:hover, .v2-cd-raccourcis button:hover { background: var(--v2-a-100); }
+.v2-cd-raccourcis svg { flex-shrink: 0; color: var(--v2-gray-1000); }
+.v2-cd-raccourcis svg:last-child { margin-left: auto; color: var(--v2-gray-900); }
+.v2-cd-raccourcis a > span, .v2-cd-raccourcis button > span { display: grid; gap: 2px; min-width: 0; }
+.v2-cd-raccourcis a > span > span, .v2-cd-raccourcis button > span > span { font-size: 13px; font-weight: 500; }
+.v2-cd-raccourcis small { font-size: 12px; color: var(--v2-gray-900); }
+
+@media (max-width: 1279px) {
+  .v2-cd-ligne--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 1023px) {
+  .v2-cd-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .v2-cd-ligne--2-1, .v2-cd-ligne--1-1 { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .v2-cd-kpis, .v2-cd-ligne--4 { grid-template-columns: minmax(0, 1fr); }
+  .v2-cd-camembert { grid-template-columns: minmax(0, 1fr); }
+  .v2-cd-camembert svg { max-width: 220px; justify-self: center; }
+}
+/* sous le tableau de bord, l'écran de travail ne répète pas ses compteurs
+   ni sa balance âgée en couleurs : le tableau de bord les porte déjà */
+.v2-cd ~ .resa .esp-kpis,
+.v2-cd ~ .resa .c2-balance { display: none; }
+
+/* ══ Demandes reçues, vue d'ensemble (07/10/2026) — la maquette de Teo ═══ */
+.v2-dr { display: grid; gap: 16px; margin-bottom: 24px; }
+.v2-dr-carte { display: block; min-width: 0; padding: 18px 20px; border-radius: 6px; background: var(--v2-bg-100); box-shadow: 0 0 0 1px var(--v2-a-400); color: inherit; }
+.v2-dr-carte h3 { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 15px; font-weight: 500; color: var(--v2-gray-1000); }
+.v2-dr-vide { color: var(--v2-gray-900); font-size: 13px; }
+.v2-dr-sous { margin: 4px 0 0; font-size: 13px; color: var(--v2-gray-900); }
+.v2-dr-sous strong { font-weight: 500; color: var(--v2-gray-1000); }
+.v2-dr-titre { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.v2-dr-titre h2 { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: -0.4px; color: var(--v2-gray-1000); }
+.v2-dr-trois { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.v2-dr-deux { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+
+/* les cartes à jauge */
+.v2-dr-jauge { display: grid; gap: 12px; transition: box-shadow 0.15s; }
+.v2-dr-jauge:hover { box-shadow: 0 0 0 1px var(--v2-a-500, var(--v2-gray-700)); }
+.v2-dr-jauge-tete { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--v2-gray-900); }
+.v2-dr-jauge-tete svg:last-child { margin-left: auto; }
+.v2-dr-jauge-valeur { margin-top: 14px; font-size: 18px; color: var(--v2-gray-900); font-variant-numeric: tabular-nums; }
+.v2-dr-jauge-valeur strong { font-weight: 600; color: var(--v2-gray-1000); }
+.v2-dr-jauge-barre { display: flex; gap: 2px; }
+.v2-dr-jauge-barre i { flex: 1; height: 10px; border-radius: 3px; background: var(--v2-a-300, var(--v2-a-400)); }
+.v2-dr-jauge-barre i[data-plein] { background: var(--v2-gray-900); }
+.v2-dr-jauge small { font-size: 12px; color: var(--v2-gray-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* l'activité */
+.v2-dr-pic { display: flex; align-items: center; gap: 6px; margin: 6px 0 18px; font-family: var(--v2-mono, ui-monospace, monospace); font-size: 13px; color: var(--v2-gray-1000); }
+.v2-dr-pic > span { color: var(--v2-gray-900); }
+.v2-dr-pic svg { color: var(--v2-gray-900); }
+.v2-dr-chaleur-grille { display: grid; gap: 4px; align-items: center; }
+.v2-dr-chaleur-mois { font-size: 12px; color: var(--v2-gray-1000); white-space: nowrap; overflow: visible; }
+.v2-dr-chaleur-jour { font-size: 12px; color: var(--v2-gray-1000); }
+.v2-dr-chaleur-grille i, .v2-dr-echelle i { display: block; aspect-ratio: 1; max-height: 16px; border-radius: 3px; background: var(--v2-a-200); }
+.v2-dr-chaleur-grille i[data-n="-1"] { background: transparent; }
+.v2-dr-chaleur-grille i[data-n="1"], .v2-dr-echelle i[data-n="1"] { background: var(--v2-a-400); }
+.v2-dr-chaleur-grille i[data-n="2"], .v2-dr-echelle i[data-n="2"] { background: var(--v2-gray-700); }
+.v2-dr-chaleur-grille i[data-n="3"], .v2-dr-echelle i[data-n="3"] { background: var(--v2-gray-900); }
+.v2-dr-chaleur-grille i[data-n="4"], .v2-dr-echelle i[data-n="4"] { background: var(--v2-gray-1000); }
+.v2-dr-echelle { display: flex; align-items: center; gap: 4px; margin: 20px 0 0; font-size: 13px; color: var(--v2-gray-1000); }
+.v2-dr-echelle svg { color: var(--v2-gray-900); margin-right: 6px; }
+.v2-dr-echelle i { width: 16px; }
+
+/* la courbe et les colonnes */
+.v2-dr-courbe, .v2-dr-colonnes { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; margin-top: 20px; }
+.v2-dr-axe-y { display: flex; flex-direction: column; justify-content: space-between; height: 220px; margin-top: -7px; font-size: 12px; color: var(--v2-gray-900); text-align: right; }
+.v2-dr-courbe svg { width: 100%; height: 220px; display: block; }
+.v2-dr-axe-x { position: relative; height: 22px; margin-top: 8px; font-size: 12px; color: var(--v2-gray-900); }
+.v2-dr-axe-x span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.v2-dr-axe-x span:first-child { transform: none; }
+.v2-dr-colonnes-zone { display: flex; align-items: flex-end; justify-content: space-around; gap: 12px; height: 220px; border-left: 1px solid var(--v2-a-400); border-bottom: 1px solid var(--v2-a-400); padding: 0 12px; }
+.v2-dr-col { flex: 1; max-width: 44px; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 8px; color: var(--v2-gray-1000); }
+.v2-dr-col > span { width: 100%; border-radius: 8px 8px 0 0; background: var(--v2-gray-700); }
+.v2-dr-col[data-max] > span { background: var(--v2-gray-1000); opacity: 0.85; }
+.v2-dr-note { display: flex; align-items: center; gap: 8px; margin: 14px 0 0; font-size: 13px; color: var(--v2-gray-1000); }
+.v2-dr-note strong { font-weight: 500; }
+.v2-dr-note span { color: var(--v2-gray-900); }
+
+/* les raccourcis */
+.v2-dr-raccourcis { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 28px; margin-top: 16px; }
+.v2-dr-raccourcis > a, .v2-dr-raccourcis > button { display: inline-flex; align-items: center; gap: 8px; padding: 6px 0; border: 0; background: none; color: var(--v2-gray-900); font: inherit; font-size: 13px; cursor: pointer; transition: color 0.15s; }
+.v2-dr-raccourcis > a:hover, .v2-dr-raccourcis > button:hover { color: var(--v2-gray-1000); }
+.v2 .v2-dr-raccourcis .v2-dr-principal { margin-left: auto; height: 32px; padding: 0 14px; border-radius: 6px; background: var(--v2-gray-1000); color: var(--v2-bg-100); font-weight: 500; }
+.v2 .v2-dr-raccourcis .v2-dr-principal:hover { color: var(--v2-bg-100); opacity: 0.9; }
+
+/* les boîtes et les canaux */
+.v2-dr-carte--liste { padding: 0; }
+.v2-dr-liste-tete { padding: 18px 20px 16px; border-bottom: 1px solid var(--v2-a-400); }
+.v2-dr-liste { list-style: none; margin: 0; padding: 12px; display: grid; gap: 4px; }
+.v2-dr-liste li { display: flex; align-items: center; gap: 14px; padding: 12px; border-radius: 6px; color: var(--v2-gray-1000); }
+.v2-dr-liste li[data-premier] { background: var(--v2-a-100); }
+.v2-dr-liste li > svg { flex-shrink: 0; color: var(--v2-gray-900); }
+.v2-dr-liste li > span { flex: 1; min-width: 0; display: grid; gap: 3px; }
+.v2-dr-liste li > span > span { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2-dr-liste li > span > small { font-size: 12px; color: var(--v2-gray-900); }
+.v2 .v2-dr-liste li > a:not(.v2-val-bouton) { display: grid; place-items: center; color: var(--v2-gray-900); }
+
+/* l'écran de travail, dessous, ne répète pas ses compteurs */
+.v2-dr ~ .resa .esp-kpis { display: none; }
+
+@media (max-width: 1023px) {
+  .v2-dr-trois, .v2-dr-deux { grid-template-columns: minmax(0, 1fr); }
+}
+.v2-page.v2-cd-page { max-width: none; padding: 16px 16px 48px; }
+/* 07/10 — moins de défilement : toute la largeur, une ligne de titre qui
+   porte les raccourcis, deux cartes à vues (flèches au bord) */
+.v2-page:has(> .v2-dr) { max-width: none; padding: 16px 16px 48px; }
+.v2-dr-titre-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.v2 .v2-dr-titre-actions .v2-dr-principal { display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px; border-radius: 6px; background: var(--v2-gray-1000); color: var(--v2-bg-100); font-size: 13px; font-weight: 500; white-space: nowrap; }
+.v2-dr-principale { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(320px, 1fr); gap: 16px; align-items: stretch; }
+.v2-dr-carrousel { display: flex; flex-direction: column; }
+.v2-dr-carrousel-tete { display: flex; align-items: center; gap: 12px; }
+.v2-dr-carrousel-tete h3 { flex: 1; }
+.v2-dr-points { display: flex; gap: 5px; }
+.v2-dr-points i { width: 6px; height: 6px; border-radius: 999px; background: var(--v2-a-400); }
+.v2-dr-points i[data-actif] { background: var(--v2-gray-1000); }
+.v2-dr-fleches { display: flex; gap: 6px; }
+.v2-dr-carrousel-corps { flex: 1; min-height: 0; }
+.v2-dr-carrousel--liste .v2-dr-liste { padding: 12px 0 0; }
+.v2-dr-trois .v2-dr-jauge-valeur { margin-top: 6px; }
+@media (max-width: 1023px) {
+  .v2-dr-principale { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* « Omega × l'entreprise » en tête de la barre (07/10/2026) */
+.v2-equipe { gap: 7px; }
+.v2-marque-omega { display: grid; place-items: center; width: 24px; height: 24px; flex: none; }
+.v2-marque-omega img { width: 22px; height: 22px; object-fit: contain; }
+.v2-marque-fois { flex: none; display: grid; place-items: center; width: 14px; height: 14px; color: var(--v2-gray-1000); margin: 0 1px; }
+.v2-marque-client { display: grid; place-items: center; width: 22px; height: 22px; flex: none; overflow: hidden; border-radius: 5px; background: var(--v2-a-200); font-size: 11px; font-weight: 600; color: var(--v2-gray-1000); }
+.v2-marque-client img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
+.v2-marque-client[data-initiale]::before { content: attr(data-initiale); }
+.v2-marque-client--svg { background: transparent; color: var(--v2-gray-1000); }
+
+/* ══ L'assistant, à la manière de Claude (07/10/2026) ═══════════════════ */
+.v2-ia-tete { display: flex; align-items: center; gap: 8px; height: 56px; padding: 0 14px; }
+.v2-ia-tete .v2-val-bouton[aria-pressed="true"] { background: var(--v2-a-200); }
+.v2-ia-gris { margin: 0; font-size: 12px; color: var(--v2-gray-900); }
+.v2-ia-note { text-align: center; margin-top: 14px; }
+.v2-ia-etoile { color: var(--v2-gray-1000); flex-shrink: 0; }
+
+/* l'accueil : la salutation et la barre au centre */
+.v2-ia-accueil { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: stretch; padding: 0 16px 40px; }
+.v2-ia-accueil .v2-ia-etoile { align-self: center; margin-bottom: 14px; }
+.v2-ia-accueil h2 { margin: 0 0 24px; text-align: center; font-family: var(--v2-sans); font-size: 20px; line-height: 28px; font-weight: 500; letter-spacing: -0.3px; color: var(--v2-gray-1000); }
+.v2-ia-idees { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; }
+.v2-ia-idees .v2-val-bouton { height: auto; min-height: 30px; padding: 6px 12px; white-space: normal; text-align: left; font-weight: 400; color: var(--v2-gray-900); }
+.v2-ia-idees .v2-val-bouton:hover { color: var(--v2-gray-1000); }
+
+/* la barre de saisie */
+.v2-ia-saisie { display: grid; gap: 6px; padding: 10px 10px 8px 12px; border-radius: 6px; background: var(--v2-bg-100); box-shadow: 0 0 0 1px var(--v2-a-400); transition: box-shadow 0.15s; }
+.v2-ia-saisie:focus-within { box-shadow: var(--v2-anneau); }
+.v2-ia-saisie textarea { width: 100%; border: 0; outline: 0; resize: none; background: transparent; color: var(--v2-gray-1000); font: inherit; font-size: 14px; line-height: 20px; max-height: 200px; }
+.v2-ia-saisie textarea::placeholder { color: var(--v2-gray-900); }
+.v2-ia-saisie-pied { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.v2-ia-saisie-pied > span { font-size: 11px; color: var(--v2-gray-900); }
+.v2-ia-envoyer { display: grid; place-items: center; width: 30px; height: 30px; border: 0; border-radius: 6px; background: var(--v2-gray-1000); color: var(--v2-bg-100); cursor: pointer; transition: opacity 0.15s; }
+.v2-ia-envoyer:disabled { opacity: 0.35; cursor: default; }
+
+/* la conversation */
+.v2-ia-fil { flex: 1; overflow-y: auto; padding: 8px 16px 16px; display: grid; align-content: start; gap: 20px; }
+.v2-ia-moi { justify-self: end; max-width: 85%; padding: 8px 12px; border-radius: 12px; background: var(--v2-a-200); color: var(--v2-gray-1000); font-size: 14px; line-height: 21px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.v2-ia-lui { display: flex; gap: 12px; font-size: 14px; line-height: 22px; color: var(--v2-gray-1000); }
+.v2-ia-lui .v2-ia-etoile { margin-top: 3px; }
+.v2-ia-lui > div { white-space: pre-wrap; overflow-wrap: anywhere; min-width: 0; }
+.v2-ia-points { letter-spacing: 3px; color: var(--v2-gray-900); animation: v2-ia-pulse 1.2s ease-in-out infinite; }
+@keyframes v2-ia-pulse { 50% { opacity: 0.3; } }
+.v2-ia-bas { padding: 0 16px 16px; }
+
+/* l'historique */
+.v2-ia-historique { flex: 1; overflow-y: auto; padding: 4px 14px 20px; }
+.v2-ia-historique-titre { margin: 8px 6px 10px; font-size: 13px; font-weight: 500; color: var(--v2-gray-1000); }
+.v2-ia-historique ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.v2-ia-historique li { display: flex; align-items: center; border-radius: 8px; transition: background 0.15s; }
+.v2-ia-historique li:hover, .v2-ia-historique li[data-actif] { background: var(--v2-a-100); }
+.v2-ia-historique li > button:first-child { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; padding: 10px; border: 0; background: none; color: var(--v2-gray-1000); font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
+.v2-ia-historique li > button:first-child svg { color: var(--v2-gray-900); flex-shrink: 0; }
+.v2-ia-historique li > button:first-child span { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2-ia-historique li small { font-size: 11px; color: var(--v2-gray-900); flex-shrink: 0; }
+.v2-ia-suppr { display: grid; place-items: center; width: 28px; height: 28px; margin-right: 6px; border: 0; border-radius: 6px; background: none; color: var(--v2-gray-900); cursor: pointer; opacity: 0; }
+.v2-ia-historique li:hover .v2-ia-suppr, .v2-ia-suppr:focus-visible { opacity: 1; }
+.v2-ia-suppr:hover { background: var(--v2-a-200); color: var(--v2-gray-1000); }
+.v2-marque-renault { display: inline-flex; align-items: center; gap: 4px; flex: none; color: var(--v2-gray-1000); }
+.v2-marque-renault > span { font-size: 9.5px; font-weight: 700; letter-spacing: 0.06em; line-height: 1; }
+
+/* ══ Le vivant (08/10/2026) : mouvement, repères colorés, profondeur ═════ */
+/* un halo très doux en haut des quatre pages principales */
+.v2-vivant { background-image: radial-gradient(ellipse 70% 260px at 50% -40px, color-mix(in srgb, var(--v2-gray-1000) 5%, transparent), transparent 70%); background-repeat: no-repeat; }
+/* les cartes arrivent l'une après l'autre */
+@keyframes v2-arrive { from { opacity: 0; transform: translateY(6px); } }
+.v2-vivant .v2-carte, .v2-vivant .v2-dr-carte, .v2-vivant .v2-va-kpis { animation: v2-arrive 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
+.v2-vivant .v2-va-grille .v2-carte:nth-child(2), .v2-vivant .v2-val-col .v2-carte:nth-child(2), .v2-vivant .v2-pm-grille > :nth-child(2), .v2-vivant .v2-dr-trois > :nth-child(2) { animation-delay: 60ms; }
+.v2-vivant .v2-val-col .v2-carte:nth-child(3), .v2-vivant .v2-pm-grille > :nth-child(3), .v2-vivant .v2-dr-trois > :nth-child(3) { animation-delay: 120ms; }
+.v2-vivant .v2-pm-grille > :nth-child(4), .v2-vivant .v2-val-col .v2-carte:nth-child(4), .v2-vivant .v2-dr-principale > :nth-child(1) { animation-delay: 180ms; }
+.v2-vivant .v2-pm-grille > :nth-child(n + 5), .v2-vivant .v2-dr-principale > :nth-child(2) { animation-delay: 240ms; }
+/* au survol, la carte se soulève à peine */
+.v2-vivant .v2-carte, .v2-vivant .v2-dr-carte { transition: box-shadow 0.2s, transform 0.2s; }
+.v2-vivant .v2-carte:hover, .v2-vivant .v2-dr-carte:hover { box-shadow: 0 0 0 1px var(--v2-a-500, var(--v2-gray-700)), 0 8px 24px rgba(0, 0, 0, 0.28); }
+/* les courbes se dessinent */
+@keyframes v2-trace { from { stroke-dashoffset: 1; } }
+.v2-trace { stroke-dasharray: 1; stroke-dashoffset: 0; animation: v2-trace 1.1s cubic-bezier(0.3, 0.6, 0.2, 1) both; }
+/* les colonnes et les jauges montent */
+@keyframes v2-monte { from { transform: scaleY(0); } }
+@keyframes v2-pousse { from { transform: scaleX(0); } }
+.v2-vivant .v2-dr-col > span { transform-origin: bottom; animation: v2-monte 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.v2-vivant .v2-dr-col:nth-child(2) > span { animation-delay: 60ms; }
+.v2-vivant .v2-dr-col:nth-child(3) > span { animation-delay: 120ms; }
+.v2-vivant .v2-dr-col:nth-child(4) > span { animation-delay: 180ms; }
+.v2-vivant .v2-dr-jauge-barre, .v2-vivant .v2-val-jauge span { transform-origin: left; animation: v2-pousse 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.v2-chiffre { font-variant-numeric: tabular-nums; }
+
+/* « En direct » qui pulse ; « Exemple » qui ne pulse pas */
+.v2-direct { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 9px; border-radius: 999px; box-shadow: 0 0 0 1px var(--v2-a-400); font-size: 12px; font-weight: 500; color: var(--v2-gray-1000); white-space: nowrap; }
+.v2-direct i { position: relative; width: 7px; height: 7px; border-radius: 999px; background: var(--v2-blue-700); }
+.v2-direct i::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: inherit; animation: v2-pulse 1.8s ease-out infinite; }
+@keyframes v2-pulse { to { transform: scale(2.6); opacity: 0; } }
+.v2-direct[data-exemple] { color: var(--v2-gray-900); }
+.v2-direct[data-exemple] i { background: var(--v2-gray-700); }
+.v2-direct[data-exemple] i::after { animation: none; }
+
+/* l'icône d'un module dans son carré de couleur (comme Attio) */
+.v2-icone-module { display: inline-grid; place-items: center; flex: none; border-radius: 5px; color: #fff; }
+/* une personne, un fournisseur */
+.v2-initiales { display: inline-grid; place-items: center; flex: none; border-radius: 999px; font-weight: 600; letter-spacing: 0.02em; color: var(--v2-gray-1000); background: var(--v2-a-200); box-shadow: inset 0 0 0 1px var(--v2-a-400); }
+.v2-initiales[data-n="1"] { background: var(--v2-a-300, var(--v2-a-200)); }
+.v2-initiales[data-n="2"] { background: var(--v2-a-100); }
+
+/* la salutation de la Vue d'ensemble */
+.v2-salut { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding: 4px 4px 0; }
+.v2-salut-titre { margin: 0; font-size: 20px; line-height: 28px; font-weight: 600; letter-spacing: -0.4px; color: var(--v2-gray-1000); }
+.v2-salut-titre span { font-weight: 400; color: var(--v2-gray-900); }
+.v2-salut-date { margin: 2px 0 0; font-size: 13px; color: var(--v2-gray-900); text-transform: capitalize; }
+
+/* les avatars du circuit d'approbation */
+.v2-val-etape-avatar { position: relative; width: 22px; height: 22px; }
+.v2-val-etape-avatar > i { position: absolute; right: -4px; bottom: -4px; display: grid; place-items: center; width: 14px; height: 14px; border-radius: 999px; background: var(--v2-bg-100); color: var(--v2-gray-1000); }
+.v2-val-etapes li:not(:last-child)::after { left: 11px; }
+.v2-pm-icone { display: inline-grid; place-items: center; }
+
+/* 08/10 — le bleu de la courbe de la Vue d'ensemble, seule couleur d'accent */
+.v2-vivant .v2-dr-jauge-barre i[data-plein] { background: var(--v2-blue-700); }
+.v2-vivant .v2-dr-col[data-max] > span { background: var(--v2-blue-700); opacity: 1; }
+.v2-vivant .v2-dr-courbe path.v2-trace { stroke: var(--v2-blue-700); }
+.v2-vivant .v2-val-jauge span { background: var(--v2-blue-700); }
+.v2-vivant .v2-dr-chaleur-grille i[data-n="3"], .v2-vivant .v2-dr-echelle i[data-n="3"] { background: color-mix(in srgb, var(--v2-blue-700) 70%, var(--v2-bg-100)); }
+.v2-vivant .v2-dr-chaleur-grille i[data-n="4"], .v2-vivant .v2-dr-echelle i[data-n="4"] { background: var(--v2-blue-700); }
+.v2-vivant .v2-dr-points i[data-actif] { background: var(--v2-blue-700); }
+
+/* ══ Le liseré lumineux (08/10/2026) — demande de Teo : « une ligne
+   derrière, en dégradé, effet LED, le même bleu, léger » ══════════════
+   Un filet de 0,5 px (affiné le 08/10) tracé par un dégradé conique : un arc bleu qui fait
+   lentement le tour de la carte, le reste transparent (le filet gris de
+   la carte reste visible dessous). Fixe si l'on réduit les animations. */
+@property --v2-led { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@keyframes v2-led { to { --v2-led: 360deg; } }
+.v2-vivant .v2-carte,
+.v2-vivant .v2-dr-carte,
+.v2-vivant .v2-va-kpis { position: relative; }
+.v2-vivant .v2-carte::before,
+.v2-vivant .v2-dr-carte::before,
+.v2-vivant .v2-va-kpis::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  padding: 0.5px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: conic-gradient(
+    from var(--v2-led),
+    transparent 0deg,
+    color-mix(in srgb, var(--v2-blue-700) 12%, transparent) 20deg,
+    color-mix(in srgb, var(--v2-blue-700) 38%, transparent) 55deg,
+    color-mix(in srgb, var(--v2-blue-700) 12%, transparent) 100deg,
+    transparent 150deg,
+    transparent 210deg,
+    color-mix(in srgb, var(--v2-blue-700) 15%, transparent) 255deg,
+    transparent 310deg
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: v2-led 9s linear infinite;
+}
+/* chaque carte commence son tour ailleurs, pour que ça ne clignote pas en rang */
+.v2-vivant :nth-child(2n) > .v2-carte::before, .v2-vivant .v2-carte:nth-child(2n)::before, .v2-vivant .v2-dr-carte:nth-child(2n)::before { animation-delay: -3s; }
+.v2-vivant .v2-carte:nth-child(3n)::before, .v2-vivant .v2-dr-carte:nth-child(3n)::before { animation-delay: -6s; }
+/* et une lueur très douce, à peine visible, sous la carte */
+.v2-vivant .v2-carte, .v2-vivant .v2-dr-carte, .v2-vivant .v2-va-kpis { box-shadow: 0 0 0 1px var(--v2-a-400); }
+.v2-vivant .v2-carte:hover, .v2-vivant .v2-dr-carte:hover { box-shadow: 0 0 0 1px var(--v2-a-500, var(--v2-gray-700)); }
+@media (prefers-reduced-motion: reduce) { .v2-vivant .v2-carte::before, .v2-vivant .v2-dr-carte::before, .v2-vivant .v2-va-kpis::before { animation: none; --v2-led: 220deg; } }
+html.v2-calme .v2-vivant .v2-carte::before, html.v2-calme .v2-vivant .v2-dr-carte::before, html.v2-calme .v2-vivant .v2-va-kpis::before { animation: none; --v2-led: 220deg; }
+/* 08/10 — le halo flou est retiré : pendant l'apparition des cartes il
+   passait au premier plan et voilait la page de bleu. Reste le liseré. */
+
+/* ══════════════════════════════════════════════════════════════════════
+   Finition Attio (10/10/2026) — relevée sur les captures d'Attio envoyées
+   par Teo, à la même échelle que les nôtres : lignes du menu de 28 px,
+   contrôles de 28 px, barre du haut de 48 px, ligne active pleine
+   (#161819) plutôt que voilée. Vaut pour /espace2 et /omega.
+   ══════════════════════════════════════════════════════════════════════ */
+.v2 .v2-haut { height: 48px; padding: 0 16px; }
+.v2 .v2-lien { height: 28px; gap: 8px; border-radius: 6px; }
+.v2 .v2-lien[aria-current="page"], .v2 .v2-lien[data-dedans] { background: var(--v2-gray-100); }
+.v2 .v2-section-titre { height: 24px; }
+.v2 .v2-trouver { height: 28px; }
+.v2 .v2-equipe { height: 32px; }
+/* boutons : 26 px et texte de 13 px, comme ceux d'Attio (« Sorted by Date », « View settings », mesurés le 11/10) */
+.v2 .v2-portee, .v2 .v2-btn--petit, .v2 .v2-val-bouton { height: 26px; padding: 0 8px; gap: 6px; font-size: 13px; }
+.v2 .v2-btn--petit.v2-btn--icone { width: 26px; padding: 0; }
+.v2 .v2-btn--petit svg, .v2 .v2-val-bouton svg, .v2 .v2-portee svg { width: 14px; height: 14px; }
+.v2 .v2-val-recherche { height: 28px; }

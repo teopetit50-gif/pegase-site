@@ -179,6 +179,28 @@ export function excelControle(d: DonneesRapport): { nom: string; octets: Uint8Ar
   return { nom: nomFichier(d, "xlsx"), octets };
 }
 
+/* une archive .zip de fichiers déjà fabriqués (le dossier daté du projet) */
+export function archive(fichiers: { nom: string; donnees: Uint8Array }[]): Uint8Array {
+  return zip(fichiers);
+}
+
+/* un classeur de N feuilles (première ligne en en-tête, filtrée, figée) : le même format que excelControle */
+export function classeur(feuilles: { nom: string; lignes: (string | number | null)[][]; largeurs: number[] }[], titre: string): Uint8Array {
+  const enc = new TextEncoder();
+  const f = (nom: string, s: string) => ({ nom, donnees: enc.encode(s) });
+  const n = feuilles.length;
+  const idx = feuilles.map((_, i) => i + 1);
+  return zip([
+    f("[Content_Types].xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>${idx.map((i) => `<Override PartName="/xl/worksheets/sheet${i}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join("")}<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>`),
+    f("_rels/.rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>`),
+    f("docProps/core.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>${xml(titre.slice(0, 250))}</dc:title><dc:creator>Lorani</dc:creator><dcterms:created xsi:type="dcterms:W3CDTF">${new Date().toISOString().slice(0, 19)}Z</dcterms:created></cp:coreProperties>`),
+    f("xl/workbook.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${feuilles.map((x, i) => `<sheet name="${xml(x.nom.slice(0, 31))}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join("")}</sheets></workbook>`),
+    f("xl/_rels/workbook.xml.rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${idx.map((i) => `<Relationship Id="rId${i}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i}.xml"/>`).join("")}<Relationship Id="rId${n + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`),
+    f("xl/styles.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFEDEDED"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf></cellXfs></styleSheet>`),
+    ...feuilles.map((x, i) => f(`xl/worksheets/sheet${i + 1}.xml`, feuille(x.lignes, x.largeurs))),
+  ]);
+}
+
 /* ——— le PDF ——— */
 
 /* largeurs Helvetica (millièmes d'em) de l'espace (32) au tilde (126) */
@@ -424,6 +446,14 @@ export async function pdfControle(d: DonneesRapport): Promise<{ nom: string; oct
     if (k.statut !== "ouvert" && k.motif) m.texte(`Motif : ${k.motif}${k.decide_par ? ` (${d.nommer(k.decide_par)}, le ${dateFr(k.decide_le)})` : ""}`, { retrait: 14, gris: true, taille: 9 });
     m.texte("", { apres: 4 });
   });
+  if (d.precedent && d.controle.changements?.length) {
+    m.filet();
+    m.texte(`Changements depuis l'indice ${d.precedent.indice}`, { gras: true });
+    for (const x of d.controle.changements) {
+      const v = (n: number | null) => (n === null ? "absente" : `${String(n).replace(".", ",")}${x.unite ? ` ${x.unite}` : ""}`);
+      m.texte(`· ${x.reference} · ${x.libelle} : de ${v(x.avant)} à ${v(x.apres)}${x.page_apres ? `, p. ${x.page_apres}` : ""} · ${x.releve ? "relevé par un constat" : "non relevé par le contrôle"}`, { retrait: 10, gris: x.releve, rouge: !x.releve });
+    }
+  }
   if (d.precedent && d.corriges.length) {
     m.filet();
     m.texte(`Corrigés depuis l'indice ${d.precedent.indice}`, { gras: true });

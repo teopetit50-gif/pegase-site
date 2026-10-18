@@ -129,7 +129,7 @@ export const CAS_LIMITES: BlocCasLimites = {
     },
     {
       q: "La facture est libellée dans une autre devise.",
-      r: "Les montants sont lus tels qu'ils figurent sur la pièce, avec la devise et le taux. L'écriture porte la contre-valeur en euros, au taux de la pièce ou au cours BCE du jour d'émission, et l'écart de change ; sans taux connu, la pièce attend au lieu d'être comptabilisée.",
+      r: "Les montants sont lus tels qu'ils figurent sur la pièce, sans conversion. La contre-valeur en euros reste à la charge de votre comptabilité.",
     },
     {
       q: "La facture porte un taux de TVA inhabituel.",

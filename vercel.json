@@ -1,4 +1,7 @@
 {
+  "regions": [
+    "fra1"
+  ],
   "git": {
     "deploymentEnabled": {
       "worker-a1": false,

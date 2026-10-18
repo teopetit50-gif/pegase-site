@@ -31,7 +31,6 @@ import Link from "next/link";
 import { Ban, EyeOff, FileLock2, FolderLock, History, Trash2 } from "lucide-react";
 import AnimationContainer from "./apparition";
 import { Drapeau, Tricolore } from "./drapeau";
-import { EnPreparation } from "@/components/ui/en-preparation";
 import { CONTACT, SECRET } from "./textes";
 
 /* Section ajoutée le 24/09 à la demande de Teo : pour un cabinet d'avocats, la fuite d'une pièce est le pire
@@ -39,9 +38,8 @@ import { CONTACT, SECRET } from "./textes";
    Composée dans l'idiome de la référence : en-tête centré à mot en italique, puis un grand cadre
    rounded-3xl liseré de foreground/10 avec une lueur bleue, comme les formules et l'appel final.
    Le drapeau aux teintes officielles (#000091, #E1000F), repris de filed-site/components/ui/drapeau.tsx.
-   06/10/2026 (C5) : « hébergé en France, lu en Europe » devient « chiffré sur votre poste, conservé dans l'UE,
-   clés chez un prestataire français, modèle interrogé hors d'Europe » — voir l'en-tête de textes.ts et
-   omega/NOTES-C5.md. Les engagements pas encore livrés portent <EnPreparation />.
+   Hébergement en France (décision de Teo du 24/09, hébergeur français pour Tamila) ; lecture en Europe,
+   sans conservation (décision du 28/09).
    24/09 au soir (registre d'un cabinet, avocats.css) : la tache bleue floue du cadre est retirée ; la colonne
    de gauche s'ouvre sur la grille du Palais de justice de Paris, « Liberté · Fraternité » et les écussons RF
    (Nathan Cima, Unsplash) — le droit français en image, à côté du drapeau et de la mention des textes. */
@@ -104,10 +102,7 @@ export default function Secret() {
                   <span className="grid size-10 place-items-center rounded-full bg-linear-to-b from-[#171717]/10 to-transparent ring-1 ring-[#171717]/10">
                     <I className="size-5" aria-hidden="true" />
                   </span>
-                  <h3 className="text-base font-semibold">
-                    {e.titre}
-                    {e.preparation ? <EnPreparation /> : null}
-                  </h3>
+                  <h3 className="text-base font-semibold">{e.titre}</h3>
                   <p className="text-sm text-[#737373] leading-relaxed">{e.texte}</p>
                 </li>
               );

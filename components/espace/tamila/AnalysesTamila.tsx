@@ -18,9 +18,9 @@ import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
 import { Avis, Pastille } from "../ui";
 import { dateCourte } from "../format";
-import { TYPES_ANALYSE, htmlAnalyse, libelleCode, libelleType, lignesDe, lireResultat, resumeDonnees, type ResultatAnalyse } from "./analyses";
-import { dechiffrer } from "./chiffrement";
-import { DOSSIERS_EXEMPLE } from "./exemples";
+import { TYPES_ANALYSE, estPieceCitee, etatPieceCitee, type Citation, htmlAnalyse, objetReclamation, libelleCode, libelleType, lignesDe, lireResultat, resumeDonnees, type ResultatAnalyse } from "./analyses";
+import { chiffrer, dechiffrer, dechiffrerOctets } from "./chiffrement";
+import { ATTENTES_OBJETS_EXEMPLE, DOSSIERS_EXEMPLE, attentesExemple } from "./exemples";
 import * as portes from "./portes";
 import type { Clair, Dossier, Piece } from "./types";
 
@@ -60,9 +60,27 @@ function exemple(d: Dossier): { analyses: portes.Analyse[]; resultats: Record<st
         citations: [{ piece: p2, page: 1, lignes: [2, 3], extrait: "jugement rendu le 3 mars 2026", verifiee: true }] },
     ],
   };
+  /* le relevé des pièces citées (b4_19) : les conclusions adverses invoquent deux pièces, l'une n'a pas été communiquée */
+  const id2 = `${d.id}-an2`;
+  const pc = `${d.id}-pc2`;
+  const releve: ResultatAnalyse = {
+    type: "tamila.pieces_citees", statut: "finie", pieces_lues: 1, pages_lues: 14, sans_source: 0,
+    resume: "Les conclusions adverses invoquent 3 pièces.",
+    constats: [
+      { code: "piece_citee", titre: "Constat d'huissier du 2 mars 2023", gravite: "info",
+        donnees: { numero: "4", intitule: "Constat d'huissier du 2 mars 2023", date: "2023-03-02", partie: "client", ecriture: pc, ecritures: [pc] },
+        citations: [{ piece: pc, page: 4, lignes: [10, 11], extrait: "le constat dressé le 2 mars 2023 (pièce n° 4)", verifiee: true }] },
+      { code: "piece_citee", titre: "Ordonnance du conseiller de la mise en état", gravite: "info",
+        donnees: { numero: "9", intitule: "Ordonnance du conseiller de la mise en état", partie: "adverse", ecriture: pc, ecritures: [pc] },
+        citations: [{ piece: pc, page: 9, lignes: [2, 2], extrait: "l'ordonnance du conseiller de la mise en état (pièce n° 9)", verifiee: true }] },
+      { code: "piece_citee", titre: "Rapport d'expertise amiable du 12 mai 2023", gravite: "info",
+        donnees: { numero: "12", intitule: "Rapport d'expertise amiable du 12 mai 2023", date: "2023-05-12", partie: "adverse", ecriture: pc, ecritures: [pc] },
+        citations: [{ piece: pc, page: 7, lignes: [3, 5], extrait: "ainsi qu'il ressort du rapport d'expertise amiable (pièce n° 12)", verifiee: true }] },
+    ],
+  };
   return {
-    analyses: [{ id, type: "tamila.chronologie", statut: "finie", comptes: { info: 2, attention: 1, critique: 0 }, sans_source: 0, pieces: [p1, p2], pieces_lues: 2, pieces_non_lues: [], cout_eur: 0.42, motif: null, demandee_le: new Date(Date.now() - 3 * 3600_000).toISOString(), finie_le: new Date(Date.now() - 2 * 3600_000).toISOString(), resultat_chiffre: null }],
-    resultats: { [id]: resultat },
+    analyses: [{ id, type: "tamila.chronologie", statut: "finie", comptes: { info: 2, attention: 1, critique: 0 }, sans_source: 0, pieces: [p1, p2], pieces_lues: 2, pieces_non_lues: [], cout_eur: 0.42, motif: null, demandee_le: new Date(Date.now() - 3 * 3600_000).toISOString(), finie_le: new Date(Date.now() - 2 * 3600_000).toISOString(), resultat_chiffre: null }, { id: id2, type: "tamila.pieces_citees", statut: "finie", comptes: { info: 3, attention: 0, critique: 0 }, sans_source: 0, pieces: [pc], pieces_lues: 1, pieces_non_lues: [], cout_eur: 0.18, motif: null, demandee_le: new Date(Date.now() - 1 * 3600_000).toISOString(), finie_le: new Date(Date.now() - 1800_000).toISOString(), resultat_chiffre: null }],
+    resultats: { [id]: resultat, [id2]: releve },
   };
 }
 
@@ -75,6 +93,9 @@ export default function AnalysesTamila({ dossier: d, source, cle, pieces, clair,
   const [fait, setFait] = useState<string | null>(null);
   const [ouverte, setOuverte] = useState<{ analyse: portes.Analyse; resultat: ResultatAnalyse | null; erreur: string | null } | null>(null);
   const cadre = useRef<HTMLIFrameElement>(null);
+  const [reclamees, setReclamees] = useState<Set<string>>(new Set());
+  /* les objets des pièces déjà attendues, en clair (pour le relevé des pièces citées) */
+  const [attendues, setAttendues] = useState<string[]>([]);
 
   const relire = async () => setListe(await portes.chargerAnalyses(d.id));
   useEffect(() => {
@@ -93,7 +114,39 @@ export default function AnalysesTamila({ dossier: d, source, cle, pieces, clair,
   if (liste === null) return null;
 
   const nomPiece = (id: string) => pieces.find((p) => p.id === id)?.nom_fichier ?? "pièce";
+  /* le renvoi cliquable : la pièce déchiffrée dans le navigateur, ouverte à la page citée */
+  const ouvrirPiece = async (id: string, page: number) => {
+    const p = pieces.find((x) => x.id === id);
+    if (!p || !cle) return;
+    try {
+      const octets = await dechiffrerOctets(cle, await portes.telecharger(p.chemin));
+      if (!octets) throw new Error("La clé de ce dossier n'ouvre pas cette pièce.");
+      const url = URL.createObjectURL(new Blob([octets.slice()], { type: p.mime || "application/pdf" }));
+      window.open(`${url}#page=${page}`, "_blank", "noopener");
+      window.setTimeout(() => URL.revokeObjectURL(url), 120_000);
+    } catch (e) {
+      setOuverte((o) => (o ? { ...o, erreur: e instanceof Error ? e.message : "La pièce ne s'ouvre pas." } : o));
+    }
+  };
+  const renvoi = (x: Citation) => {
+    const texte = `${nomPiece(x.piece)}, p. ${x.page}${lignesDe(x) ? `, ${lignesDe(x)}` : ""}`;
+    return source === "reelle" && cle && pieces.some((p) => p.id === x.piece)
+      ? <button type="button" className="esp-lien-bouton esp-mono" title="Ouvrir la pièce à cette page (déchiffrée ici)" onClick={() => void ouvrirPiece(x.piece, x.page)}>{texte}</button>
+      : <span className="esp-mono">{texte}</span>;
+  };
   const vivant = ["attente", "ouvert", "audit"].includes(d.statut);
+  /* une pièce invoquée et jamais communiquée : réclamée au confrère, en pièce attendue (b4_18) */
+  const reclamer = async (cleConstat: string, objet: string) => {
+    try {
+      if (source === "reelle") {
+        if (!cle) throw new Error("La clé du dossier est nécessaire pour chiffrer l'objet.");
+        await portes.poserAttente(d.id, "confrere", await chiffrer(cle, objet), null);
+      }
+      setReclamees((x) => new Set(x).add(cleConstat));
+    } catch (e) {
+      setOuverte((o) => (o ? { ...o, erreur: e instanceof Error ? e.message : "La base a refusé la pièce attendue." } : o));
+    }
+  };
 
   const demander = async (type: portes.TypeAnalyse) => {
     setEnvoi(true);
@@ -116,10 +169,16 @@ export default function AnalysesTamila({ dossier: d, source, cle, pieces, clair,
   };
 
   const ouvrir = async (a: portes.Analyse) => {
+    if (source === "exemple") setAttendues(attentesExemple(d.id).filter((x) => x.statut === "attendue").map((x) => ATTENTES_OBJETS_EXEMPLE[x.id] ?? ""));
     if (source === "exemple") return setOuverte({ analyse: a, resultat: ex?.resultats[a.id] ?? null, erreur: ex?.resultats[a.id] ? null : "Résultat d'exemple absent." });
     if (!cle) return setOuverte({ analyse: a, resultat: null, erreur: "La clé du dossier n'est pas ouverte dans ce navigateur : le résultat reste chiffré." });
     const r = lireResultat(await dechiffrer(cle, a.resultat_chiffre));
     setOuverte({ analyse: a, resultat: r, erreur: r ? null : "Le résultat ne se déchiffre pas avec la clé de ce dossier." });
+    if (r && r.type.endsWith("pieces_citees")) {
+      const at = (await portes.chargerAttentes(d.id)) ?? [];
+      const objets = await Promise.all(at.filter((x) => x.statut === "attendue").map((x) => dechiffrer(cle, x.objet_chiffre)));
+      setAttendues(objets.filter((x): x is string => !!x));
+    }
   };
 
   const doc = ouverte?.resultat ? htmlAnalyse(ouverte.resultat, nomPiece, clair, dateCourte(ouverte.analyse.finie_le ?? ouverte.analyse.demandee_le)) : "";
@@ -198,10 +257,25 @@ export default function AnalysesTamila({ dossier: d, source, cle, pieces, clair,
                         </div>
                         {meta ? <div className="tam-ligne-meta"><span>{meta}</span></div> : null}
                         {c.texte ? <p className="tam-constat-texte">{c.texte}</p> : null}
+                        {r && estPieceCitee(r.type, c) ? (() => {
+                          const cleC = `${ouverte.analyse.id}:${i}`;
+                          const e = reclamees.has(cleC) ? { etat: "attendue" as const } : etatPieceCitee(c, pieces, attendues);
+                          return (
+                            <div className="esp-actions">
+                              {e.etat === "nous" ? <Pastille teinte="gris">Produite par votre client</Pastille>
+                                : e.etat === "retrouvee" ? <Pastille teinte="vert">Retrouvée : {e.nom}</Pastille>
+                                : e.etat === "attendue" ? <Pastille teinte="bleu">Déjà dans les pièces attendues</Pastille>
+                                : <>
+                                    <Pastille teinte="ambre">Absente des pièces du dossier</Pastille>
+                                    <button type="button" className="esp-lien-bouton" disabled={!peutDemander || !vivant || (source === "reelle" && !cle)} onClick={() => void reclamer(cleC, objetReclamation(c))}>Réclamer au confrère</button>
+                                  </>}
+                            </div>
+                          );
+                        })() : null}
                         <ul className="tam-citations">
                           {c.citations.filter((x) => x.verifiee).map((x, j) => (
                             <li key={j}>
-                              <span className="esp-mono">{nomPiece(x.piece)}, p. {x.page}{lignesDe(x) ? `, ${lignesDe(x)}` : ""}</span> — « {x.extrait} » <Pastille teinte="vert">Vérifiée</Pastille>
+                              {renvoi(x)} — « {x.extrait} » <Pastille teinte="vert">Vérifiée</Pastille>
                             </li>
                           ))}
                         </ul>
@@ -210,7 +284,7 @@ export default function AnalysesTamila({ dossier: d, source, cle, pieces, clair,
                             {c.citations.filter((x) => !x.verifiee).map((x, j) => (
                               <li key={j}>
                                 <Pastille teinte="ambre">Non retrouvée dans la pièce, ne vaut pas preuve</Pastille>{" "}
-                                <span className="esp-mono">{nomPiece(x.piece)}, p. {x.page}{lignesDe(x) ? `, ${lignesDe(x)}` : ""}</span> — « {x.extrait} »
+                                {renvoi(x)} — « {x.extrait} »
                               </li>
                             ))}
                           </ul>

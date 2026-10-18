@@ -4,6 +4,37 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 `components/espace/offload/`, `app/espace/offload/`, et ce fichier. Coordinateur : session
 `session_01BCGFdpRKBvXKjouC75sYBg`. Je n'appelle jamais Supabase : le coordinateur pose, je reçois les sorties brutes.
 
+## REPRISE (pause demandée par Teo le 06/10, 21 h Z)
+
+**Fait** (branche `worker-c4`, tout poussé) :
+- c4_01 à c4_09 sont posés sur la recette et verts. Dernière recette : `^test_c4_09_` 21 ok, 0 not ok.
+- c4_07 (échéances) `5f2cc7e`, c4_08 (affaires en plan) `e4365bf`, c4_09 (pilotage) `ed946d2a`, avec les corrections du test
+  `910c2672` et `8b71a98a`.
+- 41 lignes sur 45 sont prouvées sur la recette ; 4 sont partielles (6, 11, 15, 38).
+- Accessibilité : `role="img"` sur les barres de la courbe, `d41125a3` (axe : 0 violation).
+- Chiffrage des promesses de la page : `omega/CHIFFRAGE/offload.md`, `5cbbc113`.
+
+**Attend le coordinateur** : fusionner dans main tout ce qui suit `efd478e` sur `worker-c4` :
+- l'écran Pilotage (`Pilotage.tsx`, `tableur.ts`, `EcranOffload.tsx`, `portes.ts`, `types.ts`) ;
+- `role="img"` dans `Courbe.tsx` ;
+- les notes et le chiffrage.
+
+**Attend Teo** :
+- choisir, pour les cinq phrases de la page qui contredisent le produit (vague du mardi, un message par trimestre, un
+  seul canal, compte en litige, réécriture dans le CRM), entre construire (3,5 j) ou corriger le texte ;
+- repasser en `atteste: false` les lignes 11, 15 et 38 du catalogue ;
+- les tiers du passage en vrai : messagerie du client (A2), client pilote, annexe des prestataires, régions
+  d'hébergement.
+
+**Prochaine étape exacte** (au réveil, sur ordre) : les 4 lignes partielles, dans cet ordre :
+1. 38, coupe-circuit au premier doute (2 j) ;
+2. 6, vue par raison sociale mère (2 j) ;
+3. réponses d'absence reconnues, aujourd'hui comptées comme une réponse (1 j) ;
+4. 11, règles en français (6 j, avec un modèle de langue).
+
+La ligne 15 dépend de la messagerie du client (A2). Le banc local se remonte avec `scratchpad/rejouer.sh` ; il est
+perdu si le conteneur est recyclé, et sa reconstruction est décrite dans « Méthode de vérification ».
+
 ## Méthode de vérification avant chaque envoi
 
 Un Postgres 16 local (dans le conteneur de la session, jamais Supabase) porte un **socle factice** : les tables et
@@ -360,12 +391,50 @@ tsc, eslint, build verts ; recette 5 largeurs sans débordement.
 **À inscrire dans `a5_01`** : `offload_saisir_affaire(p_compte uuid, p_reference text, p_disponible_le date, p_champs jsonb)`,
 `offload_retirer_affaire(p_affaire uuid, p_retire_le date)`, `offload_decider_affaire(p_affaire uuid, p_decision text, p_motif text)`.
 
+## Lot c4_09 — pilotage (06/10, après c4_08 posé et vert)
+
+`omega/modules/offload/migrations/c4_09_pilotage.sql` :
+
+- `offload_reprises.valeur_en_jeu` et `segment` : instantané à l'ouverture (déclencheur
+  `offload_reprises_instantane` : valeur annuelle attendue du signal, secteur du compte) ; reprises existantes
+  complétées au mieux ; `offload_affaires.repondu_le` (la réponse à un rappel de retrait est datée) ;
+- `private.offload_pilotage_calcul(client, depuis)` (12 mois par défaut) :
+  - **vagues** (une vague = le passage d'un jour) : comptes, chiffre en jeu, messages, appels, réponses, taux,
+    commandes reprises, chiffre repris (achats du compte dans les 90 jours qui suivent l'ouverture) ;
+  - **taux** de réponse par segment (secteur), niveau du signal, canal (courriel, appel), message (premier message,
+    relance, rappel de retrait) ;
+  - **suivi** mois par mois : échéances honorées (dont après un message), commandes reprises et chiffre, affaires
+    retirées après relance et valeur libérée ;
+  - **entités** : par société (une entité `societe`, ou le parent d'un `site` / `etablissement`), par site, consolidé ;
+- `public.offload_pilotage(client, depuis)` → `private.offload_pilotage` (gérant, admin, valideur : la vue consolidée
+  couvre toutes les entités ; 42501 sinon) ;
+- à date fixe : `public.offload_arretes` (RLS : la direction lit) posé par la nuit (`offload_detecter_tout` →
+  `private.offload_arreter`) une fois par mois, au jour `offload_reglages.arrete_jour` (1 à 28, 1 par défaut) ou au
+  premier passage qui suit ; `public.offload_arretes_liste(client)` ;
+- redéfinitions par copie : `offload_reponse_affaire`, `offload_detecter_tout`, `offload_regler` ;
+- écran : carte « Pilotage » à onglets (Vagues, Taux de réponse, Suivi, Entités et sites, Arrêtés) ; chaque onglet
+  « Exporter vers un tableur » (CSV au point-virgule, BOM UTF-8, cellules protégées contre l'injection de formule,
+  `components/espace/offload/tableur.ts`) ; chaque arrêté « Télécharger en tableur » (les quatre tableaux à la suite).
+
+**Tests** : `omega/tests/offload/c4_09_pilotage.sql` — `test_c4_09_pilotage`, `test_c4_09_arretes` (18 assertions).
+Banc local : 28 tests, 312 assertions vertes, migrations posées deux fois ; tsc, eslint, build verts ; recette
+5 largeurs sans débordement.
+
+**Ordre de pose** : `c4_09_pilotage.sql`, puis `omega/tests/offload/c4_09_pilotage.sql`
+(`runtests('tests', '^test_c4_09_')`). Le test crée une entité `site` sur le banc (annulée par runtests).
+
+**À inscrire dans `a5_01`** : `offload_pilotage(p_client uuid, p_depuis date)`.
+
+**Limites** : le taux par message ne compte pas les messages d'échéance (pas de réponse rattachée à une échéance ;
+l'échéance honorée après message est comptée au suivi). Le chiffre repris compte tous les achats des 90 jours,
+sans prétendre qu'ils sont dus au seul message.
+
 ## Lignes de capacité (`lib/produits/capacites/reprise.ts`, 45 lignes) — tenue et preuve
 
 Recette du 06/10, 17 h 10 Z (coordinateur) : `^test_(b3_|c4_|b4_24_|b6_16_)` → 834 ok, 0 not ok ; migrations
 c4_01 à c4_06 posées ; `banc_offload.sql` joué (essai, branché, jeux « clients, ventes ») ; écran fusionné dans main.
-Le fichier compte 45 lignes (8+8+8+8+7+6), et non 46 comme l’audit l’indiquait. Bilan au 06/10 après c4_07 : **28 prouvées sur la recette** (ligne 39 et lignes 8, 17 à 24 comprises), 8 construites par
-c4_08 à poser (25 à 32), 4 partielles, 5 non construites. Rien n'est basculé `atteste: true` par moi ; c'est au coordinateur. Les lignes prouvées se voient à
+Le fichier compte 45 lignes (8+8+8+8+7+6), et non 46 comme l’audit l’indiquait. Bilan au 06/10 après c4_08 (recette 19 h 05 Z) : **36 prouvées sur la recette**, 5 construites par c4_09 à poser
+(40, 42 à 45), 4 partielles (6, 11, 15, 38). Rien n'est basculé `atteste: true` par moi ; c'est au coordinateur. Les lignes prouvées se voient à
 l'écran /espace/offload (liste par priorité avec la raison, fiche, reprise, tâches, doublons, reprise en main, contact).
 
 | # | Ligne | État | Preuve |
@@ -394,14 +463,14 @@ l'écran /espace/offload (liste par priorité avec la raison, fiche, reprise, t�
 | 22 | Les équipements installés sont rattachés au compte qui les exploite. | **prouvée (recette)** | test_c4_07_import_et_groupe |
 | 23 | Un parc réparti sur plusieurs sites se lit site par site et en consolidé. | **prouvée (recette)** | test_c4_07_contrats_et_parc (offload_parc) |
 | 24 | Les échéances réglementaires sont distinguées des échéances commerciales. | **prouvée (recette)** | test_c4_07_echeances |
-| 25 | Les commandes arrivées qu'aucun client n'est venu reprendre sont listées. | **c4_08, à poser** | test_c4_08_cycle (liste, jours, compte) ; test_c4_08_import |
-| 26 | Les interventions terminées et non retirées sont relancées après le délai que vous fixez. | **c4_08, à poser** | test_c4_08_inactif_et_reponse (intervention relancée) ; test_c4_08_cycle (délai `delai_retrait_jours`, rien avant) |
-| 27 | Le stock immobilisé par une commande non reprise est chiffré. | **c4_08, à poser** | test_c4_08_cycle (total HT de la liste, point du matin) |
-| 28 | Une pièce commandée pour un compte inactif est rattachée à sa fiche. | **c4_08, à poser** | test_c4_08_inactif_et_reponse (`offload_affaires_compte`, compte éteint prévenu quand même) |
-| 29 | Les affaires closes sans suite sont distinguées de celles qui attendent encore. | **c4_08, à poser** | test_c4_08_cycle (`close_sans_suite` compté à part) ; test_c4_08_import (« plus vue », jamais close d'office) |
-| 30 | Un compte relancé deux fois sans réponse passe en décision manuelle. | **c4_08, à poser** | test_c4_08_cycle (deux relances, puis décision avec le montant ; jamais de troisième) |
-| 31 | La relance de retrait ne porte aucune mention de paiement, qui relève de CASHD. | **c4_08, à poser** | test_c4_08_cycle (aucun paiement, prix, montant, €, facture, règlement) |
-| 32 | Le magasin voit en une liste ce qui dort et depuis combien de temps. | **c4_08, à poser** | test_c4_08_cycle (la plus ancienne en tête, jours d'attente) |
+| 25 | Les commandes arrivées qu'aucun client n'est venu reprendre sont listées. | **prouvée (recette)** | test_c4_08_cycle (liste, jours, compte) ; test_c4_08_import |
+| 26 | Les interventions terminées et non retirées sont relancées après le délai que vous fixez. | **prouvée (recette)** | test_c4_08_inactif_et_reponse (intervention relancée) ; test_c4_08_cycle (délai `delai_retrait_jours`, rien avant) |
+| 27 | Le stock immobilisé par une commande non reprise est chiffré. | **prouvée (recette)** | test_c4_08_cycle (total HT de la liste, point du matin) |
+| 28 | Une pièce commandée pour un compte inactif est rattachée à sa fiche. | **prouvée (recette)** | test_c4_08_inactif_et_reponse (`offload_affaires_compte`, compte éteint prévenu quand même) |
+| 29 | Les affaires closes sans suite sont distinguées de celles qui attendent encore. | **prouvée (recette)** | test_c4_08_cycle (`close_sans_suite` compté à part) ; test_c4_08_import (« plus vue », jamais close d'office) |
+| 30 | Un compte relancé deux fois sans réponse passe en décision manuelle. | **prouvée (recette)** | test_c4_08_cycle (deux relances, puis décision avec le montant ; jamais de troisième) |
+| 31 | La relance de retrait ne porte aucune mention de paiement, qui relève de CASHD. | **prouvée (recette)** | test_c4_08_cycle (aucun paiement, prix, montant, €, facture, règlement) |
+| 32 | Le magasin voit en une liste ce qui dort et depuis combien de temps. | **prouvée (recette)** | test_c4_08_cycle (la plus ancienne en tête, jours d'attente) |
 | 33 | Un compte suivi en direct par un commercial est exclu du cycle automatique. | **prouvée (recette)** | test_c4_05_reprise_en_main ; test_c4_03_cycle |
 | 34 | Le commercial en charge reprend la main sur un compte d'un seul geste. | **prouvée (recette)** | test_c4_05_reprise_en_main |
 | 35 | Aucun prix ni aucun délai n'est avancé dans un message sans que vous l'ayez écrit. | **prouvée (recette)** | test_c4_03_message |
@@ -409,16 +478,15 @@ l'écran /espace/offload (liste par priorité avec la raison, fiche, reprise, t�
 | 37 | Les listes d'exclusion se tiennent par compte, par secteur et par commercial. | **prouvée (recette)** | test_c4_05_exclusions |
 | 38 | Le système s'arrête de lui-même au premier doute, et vous le signale. | partielle | import douteux non appliqué et journalisé (test_c4_01_garde_fou) ; essai contre réel (test_c4_03_issues) ; verrous du socle. Pas un arrêt général du module |
 | 39 | Chaque message parti reste au journal, daté et consultable. | **prouvée (recette)** | test_c4_03_cycle (recette 17 h 25 Z, 1120 ok) |
-| 40 | Le chiffre d'affaires remis en jeu se lit vague par vague. | non construite | — |
+| 40 | Le chiffre d'affaires remis en jeu se lit vague par vague. | **prouvée (recette)** | test_c4_09_pilotage (vague du jour : comptes, en jeu, réponses, commandes, chiffre repris) |
 | 41 | Les comptes réactivés sont suivis jusqu'à leur première commande. | **prouvée (recette)** | test_c4_03_issues |
-| 42 | Le taux de réponse se compare par segment, par canal et par message. | non construite | — |
-| 43 | Les échéances honorées et les commandes reprises alimentent un tableau de suivi. | non construite | — |
-| 44 | Les résultats se lisent par entité, par site et en consolidé. | non construite | — |
-| 45 | Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe. | non construite | — |
+| 42 | Le taux de réponse se compare par segment, par canal et par message. | **prouvée (recette)** | test_c4_09_pilotage (segment, canal, message, niveau) |
+| 43 | Les échéances honorées et les commandes reprises alimentent un tableau de suivi. | **prouvée (recette)** | test_c4_09_pilotage (suivi du mois) |
+| 44 | Les résultats se lisent par entité, par site et en consolidé. | **prouvée (recette)** | test_c4_09_pilotage (site, entité, consolidé) |
+| 45 | Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe. | **prouvée (recette)** | à la demande : bouton « Exporter vers un tableur » de chaque onglet (CSV) ; à date fixe : test_c4_09_arretes (arrêté mensuel) |
 
-Non construites : les cinq lignes de « Pilotage » (chiffre remis en jeu par vague, taux de réponse par segment,
-tableau des échéances et commandes reprises, résultats par entité, export tableur). Les huit lignes « Affaires restées
-en plan » sont construites par c4_08, à poser. Partielles : 6, 11, 15, 38.
+Toutes les lignes sont construites. Les cinq de « Pilotage » (40, 42 à 45) sont prouvées sur la recette (c4_09, 21 ok).
+Partielles : 6, 11, 15, 38.
 
 ## Journal
 
@@ -444,3 +512,6 @@ en plan » sont construites par c4_08, à poser. Partielles : 6, 11, 15, 38.
   dans les deux cas. Local : 20 tests, 221 assertions vertes.
 - 06/10 — c4_07 posé et vert sur la recette (lignes 8, 17 à 24 prouvées). Lot c4_08 (affaires restées en plan) : 26 tests,
   294 assertions vertes en local ; écran recetté.
+- 06/10, 19 h 05 Z — recette : c4_08 posé et vert (860 ok), lignes 25 à 32 prouvées. Lot c4_09 (pilotage) : 28 tests,
+  312 assertions vertes en local ; écran recetté.
+- 06/10, 20 h 45 Z — c4_09 vert sur la recette (21 ok) ; pause demandée par Teo à 21 h Z, section REPRISE écrite.

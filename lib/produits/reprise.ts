@@ -154,7 +154,7 @@ export const FONCTIONNALITES = {
      pour toutes ; le reste de la page s'y adosse sans les redire en bloc. */
   titre: "Une relance se lit dans votre historique.",
   suite:
-    "OFFLOAD y cherche le compte qui n'a plus commandé et l'entretien redevenu dû. L'affaire restée en plan s'y ajoutera ensuite : sa lecture est en préparation.",
+    "OFFLOAD y cherche le compte qui n'a plus commandé, l'entretien redevenu dû et l'affaire restée en plan.",
 
   /* ── Carte 1 · la lecture du fichier ────────────────────────────────── */
   carteCarte: {
@@ -170,7 +170,7 @@ export const FONCTIONNALITES = {
          Garder ces valeurs COURTES : l'étiquette est en `whitespace-nowrap`
          et celle posée à 68 % sort du cadre au-delà de ~30 signes au total. */
       { gauche: "18%", haut: "38%", delai: 0, drapeau: "18 mois", texte: "Entretien sauté deux fois" },
-      { gauche: "44%", haut: "24%", delai: 200, drapeau: "6 sem.", texte: "Rythme de commande rompu" },
+      { gauche: "44%", haut: "24%", delai: 200, drapeau: "6 sem.", texte: "Pièce arrivée, jamais posée" },
       { gauche: "68%", haut: "46%", delai: 400, drapeau: "3 ans", texte: "4 200 € puis plus rien" },
     ],
   },
@@ -190,10 +190,10 @@ export const FONCTIONNALITES = {
       { code: "€€", texte: "Au moins 300 € d'achats cumulés" },
       { code: "RDV", texte: "Entretien annuel redevenu dû" },
       { code: "PCE", texte: "Pièce arrivée, jamais reprise" },
-      { code: "2×", texte: "Deux messages au plus par compte" },
-      { code: "@", texte: "Par courriel, après votre validation" },
+      { code: "1/T", texte: "Un message par trimestre au plus" },
+      { code: "@", texte: "Par courriel, depuis votre adresse" },
       { code: "×", texte: "Jamais un compte en litige" },
-      { code: "1×", texte: "Un seul cycle par compte" },
+      { code: "1×", texte: "Jamais deux fois le même compte" },
     ],
   },
 
@@ -205,7 +205,7 @@ export const FONCTIONNALITES = {
      relances. */
   citation: {
     texte:
-      "« Vos interdits sont posés avant la première vague : comptes en litige, comptes suivis par un commercial, secteurs écartés. Le système n'en sort pas, et un import douteux n'est jamais appliqué. »",
+      "« Vos règles de ton, vos interdits et vos tournures sont écrits avant la première vague. Le système n'en sort pas, et il s'arrête au premier doute. »",
     signataire: "La règle qui ne se négocie pas",
     role: "Sur OFFLOAD comme sur tout le système Omega.AI",
   },
@@ -214,7 +214,7 @@ export const FONCTIONNALITES = {
   carteLangue: {
     titre: "Vous dictez les règles en français.",
     suite:
-      "Vous n'aurez aucune case à cocher : une phrase suffira, et le système l'appliquera à chaque relance. Ces règles écrites en français sont en préparation ; vos exclusions par compte, par secteur et par commercial s'appliquent déjà.",
+      "Vous n'avez aucune case à cocher : une phrase suffit, et le système l'applique ensuite à chaque relance.",
     /* `role: "moteur"` est une clé technique de composant, pas un mot rendu :
        elle ne se renomme pas (doctrine partie III, §18). */
     echanges: [
@@ -238,7 +238,7 @@ export const FONCTIONNALITES = {
     phrase: "Bonjour Martin, je retrouve votre",
     phraseCitee: "passage du 14 mars 2025, réf. 4821, 615 €",
     nbSources: 3,
-    fin: " : l'entretien annuel qui va avec est à refaire. Voulez-vous que nous le planifiions ?",
+    fin: " : l'entretien annuel qui va avec est à refaire. Je vous garde un créneau ?",
   },
 };
 
@@ -305,7 +305,7 @@ export const METIERS = {
       echappe:
         "La révision d'un client tombe pendant un mois chargé, personne ne l'appelle, et il finit par la faire dans un centre auto en passant.",
       cherche:
-        "OFFLOAD suit les entretiens qui arrivent à échéance et repère les comptes silencieux. Le suivi des commandes que personne n'a reprises est en préparation.",
+        "OFFLOAD suit les entretiens qui arrivent à échéance, puis il repère les comptes silencieux et les commandes que personne n'a reprises.",
       reste:
         "Votre planning d'atelier et votre stock de pièces restent dans votre DMS, parce qu'OFFLOAD ne s'y substitue pas : il le lit, puis il écrit ailleurs.",
     },
@@ -329,7 +329,7 @@ export const METIERS = {
       echappe:
         "L'entretien annuel saute une année, puis il saute la suivante, et le contrat s'éteint sans que personne l'ait jamais résilié.",
       cherche:
-        "OFFLOAD tient la liste de vos installations et la date à laquelle l'entretien de chacune redevient dû, puis il prépare le message au client la semaine d'avant. Un contrat qui s'éteint faute de reconduction vous est signalé.",
+        "OFFLOAD tient la liste de vos installations et la date à laquelle l'entretien de chacune redevient dû, puis il écrit au client la semaine d'avant.",
       reste: "Vous gardez l'intervention, le déplacement et le prix que vous facturez.",
     },
     {
@@ -374,11 +374,11 @@ export const QUESTIONS = {
   items: [
     {
       q: "Qu'est-ce qu'OFFLOAD, concrètement ?",
-      r: "OFFLOAD lit votre base clients tous les matins, et il en sort deux listes : les comptes qui n'ont plus commandé depuis le délai que vous fixez, les plus précieux d'abord, et les entretiens qui redeviennent dus. Pour chacun, il rédige un message ancré sur son dernier passage, que vous validez avant qu'il parte. Une troisième liste est en préparation : les affaires restées en plan, comme une pièce arrivée que personne n'est venu chercher.",
+      r: "OFFLOAD lit votre base clients tous les matins, et il en sort trois listes : les comptes qui n'ont plus commandé depuis le délai que vous fixez, les entretiens qui redeviennent dus, et les affaires restées en plan comme une pièce arrivée que personne n'est venu chercher. Pour chacun, il rédige un message ancré sur son dernier passage, et ce message part de votre adresse. Vous ne changez pas d'outil, puisque tout vous arrive dans votre messagerie.",
     },
     {
       q: "Nos clients vont-ils se sentir sollicités de trop près ?",
-      r: "C'est précisément ce que le plafond empêche : deux messages au plus par compte, espacés d'au moins trois jours, par courriel seulement. Dès qu'une réponse arrive, même négative, la séquence s'arrête et la conversation revient à votre commercial. Un compte qui ne répond jamais sort du cycle au lieu d'y tourner en boucle, parce qu'une base clients s'épuise vite.",
+      r: "C'est précisément ce que le plafond empêche : un message par compte et par trimestre, un seul canal à la fois, jamais les deux. Dès qu'une réponse arrive, même négative, la séquence s'arrête et la conversation revient à votre commercial. Un compte qui ne répond jamais sort du cycle au lieu d'y tourner en boucle, parce qu'une base clients s'épuise vite.",
     },
     {
       q: "Combien de comptes faut-il dans la base pour que cela se justifie ?",
@@ -390,11 +390,11 @@ export const QUESTIONS = {
     },
     {
       q: "OFFLOAD peut-il écrire n'importe quoi à nos clients ?",
-      r: "Non, et c'est la première question qui nous est posée. Aucun prix ni aucun délai n'est avancé sans que vous l'ayez écrit, et vos exclusions s'appliquent à chaque vague. Les règles de ton écrites en français, comme les sujets interdits, les remises ou la longueur, sont en préparation. Vos équipes relisent la première vague nom par nom, puis vous décidez ce qui part seul et ce qui attend votre accord.",
+      r: "Non, et c'est la première question qui nous est posée. Vous posez les règles en français, comme le ton, les sujets interdits, les remises ou la longueur, et elles s'appliquent à chaque message : jamais un prix ni un délai inventé, jamais de tutoiement. Vos équipes relisent la première vague nom par nom, puis vous décidez ce qui part seul et ce qui attend votre accord.",
     },
     {
       q: "Que se passe-t-il si quelque chose déraille ?",
-      r: "Le système s'arrête de lui-même. Un compte ne reçoit jamais plus de deux messages, un nom que vous avez retiré ne revient dans aucune vague, chaque envoi est horodaté dans un journal, et un import douteux n'est jamais appliqué. Nous préférons un mardi sans vague à un mardi où le même client reçoit un message de trop.",
+      r: "Le système s'arrête de lui-même. Un compte ne reçoit jamais deux relances, un nom que vous avez retiré ne revient dans aucune vague, chaque envoi est horodaté dans un journal, et au premier doute la coupure est automatique. Nous préférons un mardi sans vague à un mardi où le même client reçoit deux messages.",
     },
   ],
 };

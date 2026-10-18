@@ -30,7 +30,7 @@ const BOITE_EXEMPLE = "factures@atelier-bertin.recu.omegaai.fr";
 /* l'exemple : un courriel par document FILED reçu par courriel, plus ce
    qu'une vraie boîte reçoit aussi (une relance sans pièce, une publicité,
    une pièce écartée) */
-function vueExemple(portee: Portee): VueBoite {
+export function vueExemple(portee: Portee): VueBoite {
   const documents = DOSSIERS_EXEMPLE.filter((d) => d.document.source === "courriel" && d.document.expediteur).map((d) => ({
     id: d.document.id,
     reference: d.document.reference,

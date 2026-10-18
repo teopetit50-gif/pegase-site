@@ -38,7 +38,7 @@ for (const largeur of LARGEURS) {
       .slice(0, 5).map(e => e.tagName + '.' + [...e.classList].join('.') + '→' + Math.round(e.getBoundingClientRect().right));
     return { deb: document.documentElement.scrollWidth - w, larges, texte: document.querySelector('.esp')?.innerText || '', h1: document.querySelector('.esp h1')?.textContent,
              kpis: [...document.querySelectorAll('.esp-kpi')].map(k => (k.querySelector('.esp-kpi-etiquette')?.textContent + ' = ' + k.querySelector('.esp-kpi-valeur')?.textContent)),
-             items: document.querySelectorAll('.esp-item').length, bareme: document.querySelectorAll('section[aria-label="Barème de remise en état"] tbody tr').length };
+             items: document.querySelectorAll('ul[aria-label="Contrats de location"] .esp-item').length, bareme: document.querySelectorAll('section[aria-label="Barème de remise en état"] tbody tr').length };
   })()`);
   ok(mesure.deb === 0, `pas de débordement horizontal (${mesure.deb})`);
   ok(mesure.larges.length === 0, `aucun élément plus large que l'écran ${mesure.larges.length ? JSON.stringify(mesure.larges) : ''}`);
@@ -213,6 +213,8 @@ for (const largeur of LARGEURS) {
   await s.dormir(500);
   const gris = await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer et faire signer/.test(b.textContent))?.disabled`);
   ok(gris === true, 'sans les quatre côtés en photo, « Enregistrer et faire signer » reste gris');
+  const guide0 = await s.evaluer(`document.querySelector('[role="dialog"] .tav-guide')?.innerText ?? ''`);
+  ok(/0 \/ 7/.test(guide0) && /Avant/.test(guide0) && /trois pas devant/.test(guide0), 'la prise de vue est guidée : d\'abord l\'avant, avec sa consigne de cadrage');
   const photo = new URL('photos/nette.jpg', import.meta.url).pathname;
   const floue = new URL('photos/floue.jpg', import.meta.url).pathname;
   /* envoyer rend le message CDP entier : le résultat est sous .result */
@@ -230,6 +232,8 @@ for (const largeur of LARGEURS) {
     await s.envoyer('DOM.setFileInputFiles', { nodeId, files: [photo] });
   }
   await s.dormir(300);
+  const guide4 = await s.evaluer(`document.querySelector('[role="dialog"] .tav-guide')?.innerText ?? ''`);
+  ok(/4 \/ 7/.test(guide4) && /Compteur \(facultatif\)/.test(guide4), 'les quatre côtés pris, le guide passe au compteur, facultatif');
   await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer et faire signer/.test(b.textContent))?.click()`);
   await s.dormir(700);
   const signature = await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); return { canvas: !!d.querySelector('canvas'), nom: d.querySelector('input')?.value, gris: [...d.querySelectorAll('button')].find(b => /Signer l.état/.test(b.textContent))?.disabled }; })()`);
@@ -355,6 +359,283 @@ for (const largeur of LARGEURS) {
   await s.dormir(300);
   await s.capturer(`${dossier}tavaro-contestations-1440.jpg`, { qualite: 55 });
   s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b2-parc', densite: 1 });
+  console.log('— /espace/tavaro : parc, remise en location et entretien (exemple, b2_10)');
+  ok(await s.aller(base + '/espace/tavaro'), 'page chargée');
+  await s.dormir(400);
+  const sect = `document.querySelector('section[aria-label="Parc : remise en location et entretien"]')`;
+  const etat = await s.evaluer(`(() => { const c = ${sect}; const r = [...c.querySelectorAll('ul[aria-label^="Remises"] > li')]; return { n: r.length, premier: r[0]?.innerText ?? '', chiffres: c.querySelector('.tav-parc-chiffres')?.innerText ?? '', tete: c.querySelector('.esp-carte-tete').innerText }; })()`);
+  ok(etat.n === 2, `${etat.n} remises en cours (2 attendues)`);
+  ok(/GA-123-BC/.test(etat.premier) && /risque de manquer le départ/.test(etat.premier) && /R-55102/.test(etat.premier), 'la première est la Clio, qui risque de manquer son départ R-55102');
+  ok(/2 h 48/.test(etat.chiffres) && /3 \/ 3/.test(etat.chiffres), `la médiane de remise en location (2 h 48) et les prêtes à temps se lisent : « ${etat.chiffres.replace(/\s+/g, ' ').slice(0, 120)} »`);
+  ok(/1 en risque/.test(etat.tete), 'la tête de la carte compte la remise en risque');
+  /* l'anomalie confiée à Yanis : « Vous » êtes valideur, vous pouvez la clore */
+  await s.evaluer(`[...${sect}.querySelectorAll('.tav-anomalies .r-btn')].find(b => /Traitée/.test(b.textContent)).click()`);
+  await s.dormir(600);
+  ok(/traitée/.test(await s.evaluer(`${sect}.querySelector('.tav-anomalies')?.innerText ?? ''`)), 'l\'anomalie confiée à Yanis Dupré est close par un valideur');
+  /* signaler une anomalie sur la 308 : bouton gris tant qu'il manque la personne */
+  await s.evaluer(`(() => { const li = [...${sect}.querySelectorAll('ul[aria-label^="Remises"] > li')].find(x => /GH-456-DE/.test(x.innerText)); [...li.querySelectorAll('.r-btn')].find(b => /Signaler une anomalie/.test(b.textContent)).click(); })()`);
+  await s.dormir(400);
+  await s.evaluer(`(() => { const d = document.querySelector('[role="dialog"]'); const t = d.querySelector('textarea'); const set = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set; set.call(t, 'Gilet de sécurité absent du coffre'); t.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  ok(await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Signaler\\s*$/.test(b.textContent)).disabled`), 'sans personne nommée, « Signaler » reste gris');
+  await s.evaluer(`(() => { const sel = [...document.querySelectorAll('[role="dialog"] select')][1]; const o = [...sel.options].find(x => /Claire Morel/.test(x.textContent)); const set = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set; set.call(sel, o.value); sel.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Signaler\\s*$/.test(b.textContent)).click()`);
+  await s.dormir(700);
+  const anomalie = await s.evaluer(`(() => ({ fait: ${sect}.querySelector('.esp-avis')?.innerText ?? '', li: [...${sect}.querySelectorAll('ul[aria-label^="Remises"] > li')].find(x => /GH-456-DE/.test(x.innerText))?.innerText ?? '' }))()`);
+  ok(/confiée à Claire Morel/.test(anomalie.fait) && /Gilet de sécurité/.test(anomalie.li), 'l\'anomalie est confiée à Claire Morel, nommée sur la remise');
+  /* finir la Clio : nettoyage, plein → prête, elle quitte la liste */
+  for (const etape of ['Nettoyage', 'Plein']) {
+    await s.evaluer(`(() => { const li = [...${sect}.querySelectorAll('ul[aria-label^="Remises"] > li')].find(x => /GA-123-BC/.test(x.innerText)); [...li.querySelectorAll('.tav-etape')].find(b => b.textContent.includes('${etape}')).click(); })()`);
+    await s.dormir(500);
+  }
+  const apres = await s.evaluer(`(() => ({ n: ${sect}.querySelectorAll('ul[aria-label^="Remises"] > li').length, chiffres: ${sect}.querySelector('.tav-parc-chiffres').innerText }))()`);
+  ok(apres.n === 1 && /4 retours/.test(apres.chiffres), 'les trois étapes faites : la Clio est prête, elle quitte la liste et entre dans la médiane');
+  /* immobiliser la 308 chez le carrossier : la date de retour est obligatoire */
+  await s.evaluer(`[...${sect}.querySelectorAll('.esp-carte-tete .r-btn')].find(b => /Immobiliser/.test(b.textContent)).click()`);
+  await s.dormir(400);
+  await s.evaluer(`(() => { const sel = document.querySelector('[role="dialog"] select'); const o = [...sel.options].find(x => /GH-456-DE/.test(x.textContent)); const set = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set; set.call(sel, o.value); sel.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+  await s.dormir(200);
+  ok(await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Immobiliser\\s*$/.test(b.textContent)).disabled`), 'carrosserie sans date de retour : « Immobiliser » reste gris');
+  await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input[type="datetime-local"]'); const d = new Date(Date.now() + 4 * 86400000); const v = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') + 'T17:00'; const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, v); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /^\\s*Immobiliser\\s*$/.test(b.textContent)).click()`);
+  await s.dormir(700);
+  const immo = await s.evaluer(`(() => ({ fait: ${sect}.querySelector('.esp-avis')?.innerText ?? '', n: ${sect}.querySelectorAll('ul[aria-label="Véhicules immobilisés"] > li').length }))()`);
+  ok(/GH-456-DE est immobilisé \(carrosserie\)/.test(immo.fait) && immo.n === 3, `la 308 part chez le carrossier avec sa date de retour : « ${immo.fait.slice(0, 90)} »`);
+  /* planifier la révision de la 308 dans un creux, atelier prévenu */
+  await s.evaluer(`(() => { const li = [...${sect}.querySelectorAll('ul[aria-label^="Entretiens"] > li')].find(x => /Révision 50 000 km/.test(x.innerText)); [...li.querySelectorAll('.r-btn')].find(b => /Trouver un créneau/.test(b.textContent)).click(); })()`);
+  await s.dormir(900);
+  const creneaux = await s.evaluer(`document.querySelectorAll('[role="dialog"] .tav-creneau').length`);
+  ok(creneaux === 3, `${creneaux} créneaux proposés dans les creux (3 attendus), hors de l'immobilisation chez le carrossier`);
+  const premier = await s.evaluer(`document.querySelector('[role="dialog"] .tav-creneau')?.innerText ?? ''`);
+  const saisir = (k, v) => s.evaluer(`(() => { const i = [...document.querySelectorAll('[role="dialog"] input:not([type="radio"])')][${k}]; const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, '${v}'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await saisir(0, 'Garage Lumière');
+  await saisir(1, 'pas-une-adresse');
+  await s.dormir(200);
+  ok(await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Planifier/.test(b.textContent)).disabled`), 'une adresse d\'atelier fausse : « Planifier » reste gris');
+  await saisir(1, 'atelier@garage-lumiere.example');
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Planifier/.test(b.textContent)).click()`);
+  await s.dormir(700);
+  const plan = await s.evaluer(`${sect}.querySelector('.esp-avis')?.innerText ?? ''`);
+  ok(/planifié le/.test(plan) && /l'atelier est prévenu/.test(plan), `la révision est planifiée dans un creux, l'atelier prévenu (${premier.trim().slice(0, 40)})`);
+  await s.evaluer(`${sect}.scrollIntoView({ block: 'start' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}tavaro-parc-1440.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+{
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b2-flotte', densite: 1 });
+  console.log('— /espace/tavaro : flotte, sortie de flotte (exemple, b2_11)');
+  ok(await s.aller(base + '/espace/tavaro'), 'page chargée');
+  await s.dormir(400);
+  const sect = `document.querySelector('section[aria-label="Flotte : garder, vendre ou renouveler"]')`;
+  const etat = await s.evaluer(`(() => { const c = ${sect}; if (!c) return null; const l = [...c.querySelectorAll('tbody tr')]; return { n: l.length, premier: l[0]?.innerText ?? '', tete: c.querySelector('.esp-carte-tete').innerText,
+    valider: [...c.querySelectorAll('.r-btn')].find(b => /Valider la mise en vente/.test(b.textContent))?.disabled }; })()`);
+  ok(etat && etat.n === 6, `${etat?.n} fiches de véhicules (6 attendues)`);
+  ok(/GK-789-FG/.test(etat?.premier ?? '') && /À sortir/.test(etat?.premier ?? '') && /-330,00/.test((etat?.premier ?? '').replace(/\s/g, '')), 'le premier est le Master : à sortir, marge négative sur douze mois');
+  ok(/1 à sortir/.test(etat?.tete ?? '') && /1 à restituer/.test(etat?.tete ?? '') && /1 mise en vente à valider/.test(etat?.tete ?? ''), 'la tête compte : à sortir, à restituer, à valider');
+  ok(etat?.valider === true, 'un valideur ne valide pas une mise en vente (bouton gris)');
+  /* la C3 : saisir la cote réelle, la fiche se recalcule */
+  await s.evaluer(`[...${sect}.querySelectorAll('.r-btn')].find(b => b.getAttribute('aria-label') === 'Fiche de GP-654-KL').click()`);
+  await s.dormir(400);
+  ok(/inconnue : saisissez la cote réelle/.test(await s.evaluer(`document.querySelector('[role="dialog"]').innerText`)), 'sans cote, la perte de valeur est dite inconnue');
+  await s.evaluer(`(() => { const i = document.querySelector('[role="dialog"] input[inputmode="decimal"]'); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(i, '12500'); i.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await s.dormir(200);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Enregistrer et recalculer/.test(b.textContent)).click()`);
+  await s.dormir(600);
+  const c3 = await s.evaluer(`(() => ({ fait: ${sect}.querySelector('.esp-avis')?.innerText ?? '', ligne: [...${sect}.querySelectorAll('tbody tr')].find(t => /GP-654-KL/.test(t.innerText))?.innerText ?? '' }))()`);
+  ok(/recalculée/.test(c3.fait) && /12\s?500,00/.test(c3.ligne), 'la cote réelle est saisie et la fiche recalculée');
+  /* la 308 : proposer la mise en vente, motif prérempli depuis la fiche */
+  await s.evaluer(`[...${sect}.querySelectorAll('.r-btn')].find(b => b.getAttribute('aria-label') === 'Fiche de GH-456-DE').click()`);
+  await s.dormir(400);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Proposer la mise en vente/.test(b.textContent)).click()`);
+  await s.dormir(300);
+  const motif = await s.evaluer(`document.querySelector('[role="dialog"] textarea')?.value ?? ''`);
+  ok(/31 mois/.test(motif), `le motif est prérempli depuis la fiche : « ${motif.slice(0, 60)} »`);
+  await s.evaluer(`[...document.querySelectorAll('[role="dialog"] button')].find(b => /Proposer à la direction/.test(b.textContent)).click()`);
+  await s.dormir(600);
+  const prop = await s.evaluer(`(() => ({ fait: ${sect}.querySelector('.esp-avis')?.innerText ?? '', ventes: ${sect}.querySelector('ul[aria-label="Mises en vente"]')?.innerText ?? '' }))()`);
+  ok(/proposée : la direction la valide/.test(prop.fait) && /GH-456-DE/.test(prop.ventes), 'la mise en vente de la 308 est proposée à la direction');
+  /* la retirer : la personne qui l'a proposée le peut */
+  await s.evaluer(`(() => { const li = [...${sect}.querySelectorAll('ul[aria-label="Mises en vente"] > li')].find(x => /GH-456-DE/.test(x.innerText)); [...li.querySelectorAll('.r-btn')].find(b => /Retirer/.test(b.textContent)).click(); })()`);
+  await s.dormir(600);
+  ok(!/GH-456-DE/.test(await s.evaluer(`${sect}.querySelector('ul[aria-label="Mises en vente"]')?.innerText ?? ''`)), 'la personne qui a proposé retire sa proposition');
+  await s.evaluer(`${sect}.scrollIntoView({ block: 'start' })`);
+  await s.dormir(300);
+  await s.capturer(`${dossier}tavaro-flotte-1440.jpg`, { qualite: 55 });
+  s.fermer();
+}
+
+/* b2_12 à b2_16 : les opérations (exemple) — départ et rappels, transferts, péages, sinistres, assistance, caution ;
+   chaque volet sans débordement à 390, les gestes principaux à 1440. */
+{
+  const sect = `document.querySelector('section[aria-label="Opérations"]')`;
+  const volet = (nom) => `[...${sect}.querySelectorAll('.esp-filtre')].find(b => b.textContent.startsWith(${JSON.stringify(nom)})).click()`;
+  const VOLETS_OPS = ['Départ et rappels', 'Transferts', 'Péages', 'Sinistres', 'Assistance', 'Caution'];
+  const s390 = await ouvrirSession({ largeur: 390, hauteur: 844, marque: 'b2-operations-390', densite: 1 });
+  console.log('— /espace/tavaro : opérations à 390');
+  ok(await s390.aller(base + '/espace/tavaro'), 'page chargée');
+  await s390.dormir(800);
+  for (const v of VOLETS_OPS) {
+    await s390.evaluer(volet(v));
+    await s390.dormir(250);
+    const m = await s390.evaluer(`(() => { const w = document.documentElement.clientWidth; return { deb: document.documentElement.scrollWidth - w,
+      larges: [...${sect}.querySelectorAll('*')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > w + 1; }).slice(0, 3).map(e => e.tagName + '.' + [...e.classList].join('.')) }; })()`);
+    ok(m.deb === 0 && m.larges.length === 0, `volet « ${v} » sans débordement à 390 ${m.larges.length ? JSON.stringify(m.larges) : ''}`);
+  }
+  s390.fermer();
+
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b2-operations', densite: 1 });
+  console.log('— /espace/tavaro : opérations (exemple, b2_12 à b2_16)');
+  ok(await s.aller(base + '/espace/tavaro'), 'page chargée');
+  await s.dormir(800);
+  const poser = (sel, valeur) => s.evaluer(`(() => { const e = ${sel}; const proto = e.tagName === 'SELECT' ? HTMLSelectElement.prototype : e.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+    Object.getOwnPropertyDescriptor(proto, 'value').set.call(e, ${JSON.stringify(valeur)}); e.dispatchEvent(new Event(e.tagName === 'SELECT' ? 'change' : 'input', { bubbles: true })); })()`);
+  const cliquer = (portee, texte) => s.evaluer(`[...${portee}.querySelectorAll('button')].find(b => ${texte}.test(b.textContent)).click()`);
+  const fait = () => s.evaluer(`${sect}.querySelector('.esp-avis[role="status"], [role="status"]')?.innerText ?? ''`);
+  const dialogue = `document.querySelector('[role="dialog"]')`;
+
+  /* le contrôle du départ du contrat ouvert : le rappel à planifier, la vignette inconnue */
+  await poser(`${sect}.querySelector('select')`, (await s.evaluer(`[...${sect}.querySelector('select').options].find(o => /C-2026-0430/.test(o.textContent)).value`)));
+  await s.dormir(400);
+  const pts = await s.evaluer(`${sect}.querySelector('ul[aria-label="Points à vérifier au départ"]')?.innerText ?? ''`);
+  ok(/RC-2026-118/.test(pts) && /n'est pas connue/.test(pts), 'le contrôle du départ dit le rappel en cours et la vignette à vérifier');
+  /* b2_17 : le responsable des remises, par agence (direction seule : « Vous » est valideur, le choix est gris) */
+  const resp = await s.evaluer(`(() => { const g = document.querySelector('[aria-label="Responsable des remises, par agence"]'); const sel = g?.querySelector('select');
+    return { texte: g?.innerText ?? '', gris: !!sel?.disabled, choisi: sel?.selectedOptions[0]?.textContent ?? '' }; })()`);
+  ok(/Lyon Part-Dieu/.test(resp.texte) && resp.gris && /Claire/.test(resp.choisi), `les remises de Lyon reviennent d'office à ${resp.choisi}, réglage réservé à la direction`);
+  await cliquer(`${sect}.querySelector('ul[aria-label="Rappels en cours"]')`, /^Fait$/);
+  await s.dormir(400);
+  ok(/Le rappel est fait sur GP-654-KL/.test(await fait()), 'le rappel est fait');
+  ok(!/RC-2026-118/.test(await s.evaluer(`${sect}.querySelector('ul[aria-label="Points à vérifier au départ"]')?.innerText ?? ''`)), 'le contrôle du départ ne le dit plus');
+  await s.evaluer(`${sect}.scrollIntoView({ block: 'start' })`);
+  await s.dormir(200);
+  await s.capturer(`${dossier}tavaro-operations-1440.jpg`, { qualite: 55 });
+
+  /* les transferts : la tournée validée */
+  await s.evaluer(volet('Transferts'));
+  await s.dormir(250);
+  await cliquer(sect, /Valider la tournée/);
+  await s.dormir(400);
+  ok(/est validée/.test(await fait()) && /Arrivé/.test(await s.evaluer(`${sect}.innerText`)), 'la tournée est validée, chaque véhicule attend son arrivée');
+
+  /* les péages : payer, puis refacturer */
+  await s.evaluer(volet('Péages'));
+  await s.dormir(250);
+  await s.evaluer(`(() => { const li = [...${sect}.querySelectorAll('ul[aria-label="Passages à payer ou payés"] > li')].find(x => /APRR/.test(x.innerText)); [...li.querySelectorAll('button')].find(b => /^Payé$/.test(b.textContent)).click(); })()`);
+  await s.dormir(400);
+  await cliquer(dialogue, /C'est payé/);
+  await s.dormir(200);
+  ok(/obligatoire/.test(await s.evaluer(`${dialogue}?.innerText ?? ''`)), 'sans référence du paiement, le passage n\'est pas payé');
+  await poser(`${dialogue}.querySelector('input')`, 'CB-1204');
+  await cliquer(dialogue, /C'est payé/);
+  await s.dormir(500);
+  ok(/APRR-77120 est payé/.test(await fait()), 'le passage est payé');
+  await s.evaluer(`(() => { const li = [...${sect}.querySelectorAll('ul[aria-label="Contrats aux péages payés, à refacturer"] > li')].find(x => /C-2026-0430/.test(x.innerText)); li.querySelector('button').click(); })()`);
+  await s.dormir(500);
+  ok(/refacturés/.test(await fait()), 'les péages du contrat sont refacturés au locataire');
+
+  /* le sinistre : le recours chiffré, le courrier dans le dossier */
+  await s.evaluer(volet('Sinistres'));
+  await s.dormir(250);
+  await cliquer(sect, /Préparer le recours/);
+  await s.dormir(400);
+  await cliquer(dialogue, /Préparer le recours/);
+  await s.dormir(500);
+  ok(/Recours de/.test(await fait()) && /perte d'exploitation/.test(await s.evaluer(`${sect}.querySelector('.tav-courrier pre')?.textContent ?? ''`)), 'le recours est chiffré, le courrier est au dossier');
+
+  /* l'assistance : l'incident clos */
+  await s.evaluer(volet('Assistance'));
+  await s.dormir(250);
+  await cliquer(`${sect}.querySelector('ul[aria-label="Incidents d\\'assistance"]')`, /^Clore$/);
+  await s.dormir(400);
+  await poser(`${dialogue}.querySelector('textarea')`, 'Roue changée sur l\'aire, client reparti.');
+  await cliquer(dialogue, /^\s*Clore$/);
+  await s.dormir(500);
+  ok(/L'incident est clos/.test(await fait()), 'l\'incident est clos');
+
+  /* la caution : libérer */
+  await s.evaluer(volet('Caution'));
+  await s.dormir(250);
+  await cliquer(`${sect}.querySelector('ul[aria-label="Cautions"]')`, /^Libérer$/);
+  await s.dormir(500);
+  ok(/libération est demandée/.test(await fait()), 'la libération de la caution est demandée au prestataire');
+  const anglais = (await s.evaluer(`${sect}.innerText`)).match(ANGLAIS);
+  ok(!anglais, anglais ? `mot anglais : « ${anglais[0]} »` : 'aucun mot anglais surveillé dans les opérations');
+  s.fermer();
+}
+
+/* b2_19 : l'audit des retours (exemple) — ouvrir, ajouter un retour passé chiffré par simulation, l'écart ; la clôture
+   réservée à la direction ; la carte sans débordement à 390. */
+{
+  const sect = `document.querySelector('section[aria-label="Audit des retours"]')`;
+  const dialogue = `document.querySelector('[role="dialog"]')`;
+  const s = await ouvrirSession({ largeur: 1440, hauteur: 900, marque: 'b2-audit', densite: 1 });
+  console.log('— /espace/tavaro : audit des retours (exemple, b2_19)');
+  ok(await s.aller(base + '/espace/tavaro'), 'page chargée');
+  await s.dormir(800);
+  const poser = (sel, valeur) => s.evaluer(`(() => { const e = ${sel}; const proto = e.tagName === 'SELECT' ? HTMLSelectElement.prototype : HTMLInputElement.prototype;
+    Object.getOwnPropertyDescriptor(proto, 'value').set.call(e, ${JSON.stringify(valeur)}); e.dispatchEvent(new Event(e.tagName === 'SELECT' ? 'change' : 'input', { bubbles: true })); })()`);
+  const cliquer = (portee, re) => s.evaluer(`[...${portee}.querySelectorAll('button')].find(b => ${re}.test(b.textContent.trim())).click()`);
+  ok(/à mesurer par un audit clos/.test(await s.evaluer(`${sect}.innerText`)), 'sans audit clos, l\'« avant » est à mesurer');
+  await cliquer(sect, /^Ouvrir un audit$/);
+  await s.dormir(300);
+  await poser(`${dialogue}.querySelector('input')`, 'Vingt retours de septembre');
+  await cliquer(dialogue, /^Ouvrir$/);
+  await s.dormir(400);
+  await cliquer(sect, /^Ajouter un retour$/);
+  await s.dormir(300);
+  const champs = `${dialogue}.querySelectorAll('input, select')`;
+  await poser(`${dialogue}.querySelector('select')`, await s.evaluer(`[...${dialogue}.querySelector('select').options].find(o => /C-2026-0412/.test(o.textContent)).value`));
+  await poser(`${champs}[1]`, '0');
+  await poser(`${champs}[2]`, await s.evaluer(`(() => { const d = new Date(Date.now() - 86400000); d.setHours(11, 0, 0, 0); const p = (n) => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T11:00'; })()`));
+  await poser(`${champs}[4]`, '8');
+  await poser(`${champs}[5]`, '5');
+  await cliquer(dialogue, /Chiffrer et ajouter$/);
+  await s.dormir(600);
+  const r = await s.evaluer(`(() => ({ fait: ${sect}.querySelector('[role="status"]')?.innerText ?? '', liste: ${sect}.querySelector('ul[aria-label="Retours de l\\'audit"]')?.innerText ?? '' }))()`);
+  ok(/C-2026-0412/.test(r.fait) && /sur le barème/.test(r.fait) && /C-2026-0412/.test(r.liste), `le retour passé est chiffré sur le barème, face aux 0 € de l'époque`);
+  ok(await s.evaluer(`[...${sect}.querySelectorAll('button')].find(b => /Clore l.audit/.test(b.textContent)).disabled`), 'la clôture est réservée à la direction (« Vous » est valideur)');
+  s.fermer();
+  const s390 = await ouvrirSession({ largeur: 390, hauteur: 844, marque: 'b2-audit-390', densite: 1 });
+  ok(await s390.aller(base + '/espace/tavaro'), 'page chargée à 390');
+  await s390.dormir(800);
+  const m = await s390.evaluer(`(() => { const w = document.documentElement.clientWidth; return [...${sect}.querySelectorAll('*')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > w + 1; }).length; })()`);
+  ok(m === 0, `la carte de l'audit tient à 390 (${m} élément(s) trop large(s))`);
+  s390.fermer();
+}
+
+/* b2_20 : les Questions (exemple) — deux réponses montrées avec chiffres, cause et décision ; une question posée
+   en exemple n'appelle aucune IA et le dit ; la carte tient à 390. */
+{
+  const sect = `document.querySelector('section[aria-label="Questions"]')`;
+  for (const largeur of [1440, 390]) {
+    const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `b2-questions-${largeur}`, densite: 1 });
+    console.log(`— /espace/tavaro : questions à ${largeur} (exemple, b2_20)`);
+    ok(await s.aller(base + '/espace/tavaro'), 'page chargée');
+    await s.dormir(800);
+    const t = await s.evaluer(`${sect}?.innerText ?? ''`);
+    ok(/Décision proposée/.test(t) && /Cause/.test(t) && /Retours sans facture/.test(t), 'les réponses d\'exemple portent chiffres, cause et décision');
+    if (largeur === 1440) {
+      await s.evaluer(`(() => { const e = ${sect}.querySelector('textarea'); Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(e, 'Combien de contestations sont ouvertes ?'); e.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+      await s.dormir(200);
+      await s.evaluer(`[...${sect}.querySelectorAll('button')].find(b => /Poser la question/.test(b.textContent)).click()`);
+      await s.dormir(500);
+      const f = await s.evaluer(`${sect}.querySelector('[role="status"]')?.innerText ?? ''`);
+      ok(/aucune IA n'est appelée/.test(f) && /contestations sont ouvertes/.test(await s.evaluer(`${sect}.innerText`)), 'en exemple, la question posée n\'appelle aucune IA et le dit');
+    } else {
+      const m = await s.evaluer(`(() => { const w = document.documentElement.clientWidth; return [...${sect}.querySelectorAll('*')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > w + 1; }).length; })()`);
+      ok(m === 0, `la carte des questions tient à 390 (${m})`);
+    }
+    s.fermer();
+  }
 }
 
 console.log(echecs ? `\n${echecs} échec(s)` : '\ntout passe');

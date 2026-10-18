@@ -58,7 +58,7 @@ const E = (nom: string, l: number, h: number, alt: string): Ecran => ({
 export const HEROS = {
   titre: "Une seule IA pour tout le groupe.",
   chapo:
-    "Chaque société dépose l'export de son logiciel et de ses tableurs ; Varelo le lit sans rien y écrire. Chaque matin, la même IA dit à chaque direction ce qu'elle doit décider.",
+    "Varelo branche la même IA sur les logiciels et les tableurs de chaque société, en lecture seule. Chaque matin, elle dit à chaque direction ce qu'elle doit décider.",
   bouton: "Réserver un audit",
   legende:
     "Le point du matin d'une direction financière, sur des données d'exemple.",
@@ -100,7 +100,7 @@ export const ENONCE_1 = {
   /* 26/09 — la réponse au constat, avant le collage : le socle commun,
      les règles écrites une fois, puis ce que chacun reçoit. */
   paragraphes: [
-    "Varelo réunit ces usages sur un seul socle. Chaque société dépose l'export de son logiciel ; la même IA le lit sans rien y écrire et range les données de toutes les sociétés sous un seul référentiel.",
+    "Varelo réunit ces usages sur un seul socle. La même IA lit les logiciels et les tableurs de toutes les sociétés, en lecture seule, et range leurs données sous un seul référentiel.",
     "Une règle s'écrit une fois pour le groupe et s'applique dans chaque filiale, qu'il s'agisse d'un délai de réserve, d'un préavis de contrat ou d'un seuil d'encours.",
     "Chaque matin, la présidence lit le groupe sur une page, et chaque direction reçoit ses décisions avec le calcul et la pièce qui les justifient.",
   ],
@@ -234,7 +234,7 @@ export const ACCORDEON = {
     {
       titre: "Lecture seule",
       texte:
-        "Chaque société dépose l'export de son logiciel de gestion, de ses caisses et de ses tableurs ; Varelo le lit sans jamais rien y écrire. La lecture automatique des sources, avec l'accord de la DSI, est en préparation.",
+        "Varelo lit vos logiciels de gestion, vos caisses et vos tableurs sans jamais rien y écrire. Chaque source se branche avec l'accord de la DSI et se débranche de la même façon.",
       lien: { texte: "Où vivent vos données", href: DONNEES },
       ecran: E(
         "systemes-lecture-seule",
@@ -270,7 +270,7 @@ export const ACCORDEON = {
     {
       titre: "Données en Europe",
       texte:
-        "Les données restent dans l'Union européenne ou, sur étude, sur vos propres serveurs, chiffrées, et chaque lecture est inscrite au journal. Aucune d'elles ne sert à entraîner un modèle.",
+        "Les données restent dans l'Union européenne ou sur vos propres serveurs, chiffrées, et chaque lecture est inscrite au journal. Aucune d'elles ne sert à entraîner un modèle.",
       lien: { texte: "Où vivent vos données", href: DONNEES },
       ecran: E(
         "systemes-europe",

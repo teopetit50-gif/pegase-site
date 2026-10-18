@@ -1010,3 +1010,241 @@ B5 (rejouer un courrier de mairie réel, le lecteur connaît les types Lorani) ;
   → B3 ; écran B3 non fusionné. 44/46/51/55/57 verts. btp_meteo_demander() = 0 (aucun passage extérieur au banc).
   Main : fusion b5, b6, b2, a4, c2, c3, a3, c5, c4. Pastilles retirées : alerte météo, 6 lignes Lorani, remise en
   location et entretien. Restent volontairement : métré (phrase trop forte), PLU servitudes/risques, vocaux.
+- 19 h 40 Z — DÉCISION DE TEO (19 h 20) : sur omegaai.fr, aucune modification, aucune pastille « En préparation ».
+  Fait : composants EnPreparation / SiEnPreparation neutralisés (88d2402) ; puis, avec son accord explicite, les 42
+  fichiers de la vitrine remis à leur état de a6b5e7a (15 h 55), SAUF trois phrases inexactes corrigées avec son accord
+  (6f2a957) : Tamila « hébergé dans l'UE » au lieu de « en France » ; Tiroma « point du matin dans l'espace sécurisé »
+  au lieu de « sur WhatsApp » ; Tiroma « ne contacte un patient qu'avec un message validé ». 0 mention « préparation »
+  sur 34 pages publiques. C5 arrêté sur la vitrine ; sa passe 8 (972ccfda) n'est PAS fusionnée. Routine horaire
+  réécrite en conséquence. Poses : c3_08 (bb153a2), a4_32 (19d98ea), b2_10 v2 (66d8199), b2_11 (a8f17be), 19ao
+  (f10a4b0) ; lots h1915tav 501/0, h1930lot 85/0 (44/46/51/56 compris). Fusion c3, a4, b2, b3 (espace client).
+  worker-a5 non fusionnée (omega-sauvegarde.yml, non approuvé). Vercel toujours limité : en ligne demain.
+
+## REPRISE — pause demandée par Teo le 06/10 à 21 h Z
+
+- Routine horaire trig_01PJKxdeE5XGx3n8QTMoWwVe DÉSACTIVÉE (enabled = false) ; son texte porte la règle de Teo
+  sur la vitrine. Le déclencheur unique de 02 h 32 Z (redéploiement de main) reste actif.
+- Ouvriers en pause, chacun avec une section « REPRISE » en tête de sa NOTES : A1 6022838, A3 66cf791, A4 ac31278,
+  A5 8abc536, B1 41e86e5, B2 528034d, B3 0ea8ec5, B4 52ecf3b, B6 a418d1f, C2 abbefb4, C3 6a815f2, C4 b639da2,
+  C5 c4ff2736. Pas encore de réponse à la pause : A2, B5, B7, C1.
+- Main (dab9e49 + ce commit) : fusion a3, a4, b1, b2, b3, b4, b6, c2, c3, c4. NON fusionnées : worker-a1
+  (vercel.json propre à la branche ; le code tourne depuis le SHA déployé, lecteur v31 e0932e3), worker-a2
+  (fonctions servies depuis leurs SHA), worker-a5 (omega-sauvegarde.yml non approuvé), worker-c5 (passes de vitrine
+  annulées par Teo), worker-b5 et tableau-de-bord-v2 (attendre leur SHA de pause). Vitrine : 0 fichier modifié
+  depuis 6f2a957.
+- Recette : tout est posé et vert jusqu'à b6_25b, c4_09, b2_11b, b5_23, c3_08, a4_32, 19ao. Déployés : lecteur v31,
+  reception v12, widget v1, export-complet v2, reput-reponse v2. Réglages recette : lecteur_analyses = oui,
+  export_origines_recette = http://localhost:3010, MET Norway.
+- À la reprise : (1) lire omega/CHIFFRAGE/SYNTHESE.md avec Teo et choisir le premier module à mettre en vrai ;
+  (2) la production (omega/CHIFFRAGE/production.md : Supabase Pro, Vercel Pro, Bedrock UE, secrets) ;
+  (3) débordement de 9 px à 390 sur /espace2/cashd (C1/C2) ; (4) Géorisques injoignable (B5 : relais Vercel puis
+  data.gouv) ; (5) Teo a dit NON à toute modification de la vitrine, phrases fausses comprises (relevé dans
+  transversal.md et les fichiers par module).
+- Prospection Guadeloupe : session P1 (session_01Lv8Yz477zkrpiu5TWReysT), branche prospection-guadeloupe,
+  sources ouvertes seulement (SIRENE, Annuaire Santé, ordres, sites officiels).
+- Pauses reçues ensuite : A2 e067bc6 (à fusionner : GUIDE-GMAIL, GUIDE-MICROSOFT, banc/mise_en_service_sms.sql ;
+  à déployer quand les secrets Google/Microsoft existent : messagerie + messagerie-oauth + cron omega-messagerie) ;
+  B7 68a01aa (à la reprise : poser omega/tests/identite/b7_07_etrangers.sql depuis a6101c9, rejouer ^test_b7_13,
+  lui rendre le résultat et le premier bilan taux-bce ; HMRC attend Teo). Restent sans réponse : B5, C1.
+- B5 (pause, dernier lot terminé avant l'arrêt) : worker-b5 6082922 — risques par données ouvertes (GASPAR, sismicité,
+  radon ; Géorisques et BRGM filtrent les IP de cloud). À la reprise : poser b5_24_risques_donnees_ouvertes.sql, puis
+  les 15 fichiers omega/modules/lorani/donnees/b5_24_*.sql (lorani_ref_sources attendu : libelles 49, risques 31 733,
+  radon 32 771, sismicite 35 346), puis test b5_14 v2 ; relevé réel : lorani_chercher_plu sur « Extension Garnier
+  (banc) » doit finir « fait » avec les risques de Nantes. Seul C1 n'a pas encore confirmé sa pause.
+- C1 en pause : tableau-de-bord-v2 c632394 fusionnée (vue d'ensemble « aperçu de projet », Suivi.tsx réutilisable,
+  /espace2/utilisation). Avis de Teo attendu sur ces deux pages. TOUS les ouvriers sont en pause (18/18).
+
+## Reprise du 11/10 (≈13 h 40 Z)
+- Routine trig_01PJ… réactivée, toutes les 3 h, avec une consigne d'économie de tokens.
+- 16 ouvriers réveillés (C5 reste à l'arrêt), avec la consigne : 3 lignes max, seulement quand un SHA est prêt.
+- Posé depuis worker-b5 23af6b0 : b5_24, ses 15 fichiers de données et le test b5_14. Posé depuis a6101c9 : b7_07.
+- Lot h1340b5b7 : 42 ok, 0 not ok. Comptes des tables lorani_ref conformes.
+- Relevé PLU réel à Nantes : confié à B5 (il faut la session du gérant).
+- Fonctions Edge à déployer en un seul lot :
+  - **sortie** : A4 619a04b, cron chaque minute ;
+  - **alertes-quotidiennes** : A5 42ee9db, 19ap posé ; puis les réglages et le cron de 06:17 ;
+  - **expediteur** et **reception** : A2 b69423f, branche=false sur meta_whatsapp et ar24 ; vérifier que noter_remise accepte 'meta_whatsapp'.
+- C3 3eca49f7 : la preuve en vrai mail + formulaire attend deux vrais courriels de Teo.
+- A1 : decoupage_reel.mjs suspendu (règle « jamais Supabase » maintenue).
+- 11/10, 14 h 05 Z :
+  - lot h1350b3a5 (b3, 44, 60) : 597 ok, 0 not ok ;
+  - lot h1404tout : 888 ok, 10 not ok (a4_33 ×2, a4_34, b1_18, b2_23, b2_25, b5_15, b6_22, c4_10, 44 pour filed_rapprocher_ligne), relayés aux ouvriers ;
+  - fusionnés : C1 86706a9 et B4 300bd59. Écrans B1, B5, B6 et C4 retenus tant que leurs tests sont rouges.
+
+## REPRISE — pause du 11/10, 15 h 40 Z (demande de Teo : « économiser les tokens »)
+- **Routines coupées** : trig_01PJKxdeE5XGx3n8QTMoWwVe (point toutes les 3 h) est désactivée. Pour repartir : update_trigger enabled=true.
+- **Pause** : les 16 ouvriers et P1 ont reçu la consigne de pause (commit, push, REPRISE dans leurs NOTES, puis silence). C5 reste à l'arrêt.
+- **main** = 1e27e72. Les écrans d'aujourd'hui sont fusionnés : Varelo, Daliro, CASHD, Tavaro, Tamila, Tiroma, Lorani, OFFLOAD, FILED et C1.
+- **Posé sur la recette, test pas encore lu** :
+  - h1527c2 (c2_ + 44 ; C2 0615c80, portefeuille par chargé) : à lire dans private.sorties_tests ;
+  - à lancer : ^test_(b6_(0[1-3]|25|27)_|b5_17_). b6_31 et b6_27 sont posés depuis 43353c4, b5_28 et b5_17 depuis 4bff78f.
+- **Écrans à fusionner une fois ces tests verts** :
+  - C2 : d01be6e..worker-c2, sur cashd ;
+  - B5 : eada47c..worker-b5, sur lorani ;
+  - B6 : cb55002..worker-b6, sur daliro.
+- **Priorité de Teo (15 h Z)** : l'espace client /espace2 doit prendre le dessin de /omega, recopié et sans rien de propre à Teo. C1 est dessus, sur tableau-de-bord-v2 après dc963df ; rien n'est encore fusionné.
+- **Décisions qui reviennent à Teo** :
+  - l'outil « contexte_varelo » pour l'assistant (B1, 357fcb2) ;
+  - la preuve en vrai mail + formulaire de C3 (deux vrais courriels) ;
+  - les secrets AR24 et HMRC ;
+  - le coffre Scaleway, Bedrock UE et les exports réels.
+- **Recette** : une autre session a appliqué « varelo_referentiel_perf » à 15 h 28 Z, puis la base a redémarré à 15 h 29. Les identifiants de dépôt (pg_net) sont repartis à 23 ; aucune donnée perdue.
+- **Copie de travail pour les fusions** : scratchpad/wt, avec node_modules installé. Le package-lock de main est désynchronisé : `npm install`, pas `npm ci`.
+- **SHA d'arrêt (15 h 40 Z)** :
+
+  | Ouvrier | SHA |
+  |---|---|
+  | A1 | c8d755e |
+  | A2 | c2fdd1e |
+  | A3 | 517a9e4 |
+  | A4 | 4d22265 |
+  | A5 | 69ff368 |
+  | B1 | 7b0187c |
+  | B2 | 3e0dedd |
+  | B3 | 733caa4 |
+  | B4 | 60733aa |
+  | B5 | c26f7a6 |
+  | B6 | 32ee8da |
+  | B7 | 941ddd6 |
+  | C2 | b0ae2133 |
+  | C3 | 49c6799c |
+  | C4 | c567cfcb |
+  | P1 | 5d44a1e (vague 5, 200 PME, attend le feu vert de Teo) |
+
+  C1 a fusionné son lot 1 du dessin /omega (e5198b7).
+- **Question de C1 pour Teo** : faut-il retirer de la vue d'ensemble client le « Bonjour » et la rangée de chiffres, comme sur /omega ? En attendant, ils restent.
+
+## Reprise du 15/10 (12 h 18 → 15 h 15 Z), plafond 50 % du forfait
+- Réveil sur ordre de Teo, relayé par la routine « Relance du build (15/10) ».
+- Posé et testé vert sur la recette :
+  - c2_04 → c2_09 (CASHD complet hors G19) ;
+  - c4_11 → c4_15 (OFFLOAD complet) ;
+  - b2_17 → b2_19 ;
+  - a4_36 et a4_37 ;
+  - b3t_05 ; c3_09 ;
+  - b5_28 → b5_33 ;
+  - b6_31 → b6_35.
+- Lecteur v34 (c51c6de).
+- Fusionnés dans main (dernier 8f4106b) : écrans C2, B5, B6, B4, B3, B2, A3 (Équipe), C1 lots 2a à 2d (dessin /omega).
+- Restent à déployer en Edge : reput-reponse (C3 8699ed0), webhooks-ar24 et expediteur (A2 8c0e608).
+- En attente de Teo :
+  - « un message par trimestre » contre « deux messages en tout » (C4) ;
+  - Bonjour et les 4 chiffres de la vue d'ensemble (C1) ;
+  - fournisseur de modèle (assistants B1 et B6) ;
+  - gabarit ANTAI (B2) ; compte INSEE (B5) ; secrets HMRC et AR24 ;
+  - preuve en vrai de C3 ;
+  - premier client (CASHD G19).
+- En cours : C1, lot 2e (Activité, Utilisation, Réglages).
+
+## REPRISE — pause 50 % du 15/10, 16 h 12 Z
+- Ordre « PAUSE 50 % (Teo) » reçu à 16 h 12 Z (forfait hebdo à 49 %). Tous les ouvriers ont commit, poussé, mis REPRISE à jour, puis silence.
+- Routine « Point coordinateur Omega » déjà coupée ; aucun rappel send_later actif. Ne rien relancer avant le feu vert de Teo.
+- SHA d'arrêt (sessions actives) : A1 c51c6de, A2 8c0e608, A3 34b8589, A4 d5db287, A5 798255f4, B1 f46b2c3, B2 0d675bf, B3 bcd02f6, B4 cd77750, B5 e8a95b9, B6 84df2e6, B7 0e1c2bb, C1 66930e4, C2 b0d8131d, C3 09dffb99, C4 a0e59013, P1 5d44a1e. C5 reste à l'arrêt.
+- À la reprise, d'abord : fusionner C1 lot 2e (diff 650424a..66930e4, limité à app/espace2 et components/espace2) et A3 ef5eeb4 ; déployer en Edge reput-reponse (C3 8699ed0), webhooks-ar24 et expediteur (A2 8c0e608).
+- Rien posé ni fusionné entre 15 h 15 et 16 h 12 Z ; dernier main fonctionnel 8f4106b.
+
+## Reprise du 17/10 (15 h 05 Z) et décisions de Teo du 17/10
+- Feu vert de Teo relayé par sa session bureau. Première vague : plafond 95 %, « PAUSE (Teo) » attendue vers 85 % ; pause de sécurité à 19 h 00 Z (rappel trig_01Pf8UuVk3CbaUTTsH184TEb). Seconde vague vers 02 h 20 Z (plafond 50 %). Au plus 2 pushes sur main par jour. Ne contacter que les sessions Opus 5.5 (colonne de gauche de la table), plus C1 à C4 et P1.
+- C1 lot 2e : rien à fusionner (66930e4 = notes seulement). A3 ef5eeb4 : le correctif d'EcranEquipe était déjà dans main (0cc4dfb8) ; seuls les scripts de recette A3 sont repris.
+- Déployés en Edge sur la recette : reput-reponse v4 (C3 8699ed0), expediteur v15 et webhooks-ar24 v1, verify_jwt false (A2 8c0e608). Les trois démarrent ; webhooks-ar24 répond « webhook non configuré » tant que les secrets AR24 manquent.
+
+### Décisions de Teo du 17/10 (déléguées à sa session bureau ; valent feu vert)
+Principe commun : les phrases du site font foi, le produit s'y met ; aucun prix dans le produit ; rien n'est acheté ni ouvert sans Teo.
+1. C1 : retirer « Bonjour » et la rangée de 4 chiffres de la vue d'ensemble, comme /omega.
+2. C4 OFFLOAD : « un message par trimestre » prévaut (une reprise = un seul message écrit, un seul canal, quarantaine 90 j gardée ; relance écrite = réglage désactivé par défaut). Réécriture CRM : attend un connecteur. `atteste` = état réel (faux pour la ligne 15 tant que la messagerie A2 n'est pas branchée).
+3. C2 CASHD : cadence du site = défaut réglable par organisation (devis J+3 puis J+7 après envoi, plus J+10 ; rappel courtois le jour de l'échéance des factures). Quatre captures depuis l'écran réel (390 et 1440) dans omega/captures/cashd/, sans toucher au site.
+4. C3 REPUT : validation AVANT envoi sauf sujets autorisés d'avance ; pas de relecture « le lendemain » (A:177) ; K:122 = transmission au service planning, pas d'agenda, bloc RDV non construit avant un premier client ; « réponse à 21 h » = vrai sur sujet autorisé, accusé sinon. Prochain bloc (choix du coordinateur) : valider depuis le mail de notification par lien signé (ligne 15) ; astreinte après le compte de téléphonie.
+5. A4 FILED : après le n° 26 (historique complet pour tous, aucune limite), « rédige ce qui repart » (n° 125) en minimal, brouillon toujours validé par un humain. Effacement : tout sauf ce que la loi oblige à garder ; archive probante et registre 10 ans, scellés, exportables, et l'écran le dit. Paliers = réglages techniques, aucun prix.
+6. B1 Varelo : OUI à contexte_varelo (lecture seule, session de la personne, journal, aucun IBAN).
+7. A1 lecteur : médical NON (pas d'HDS) ; DWG NON (PDF des planches) ; métré mesuré NON ; nouveaux types Tamila OUI (B4) ; première lecture longue Tamila OUI sur la recette (coffre en repli local, pièces fictives), puis Key Manager avec le compte Scaleway.
+8. Assistants « Questions » (Varelo, Daliro, Tavaro) et contexte_varelo : même fournisseur et garde-fous que le lecteur (plafond par client et par jour), même abstraction commutable ; recette = API Anthropic ; production = Bedrock Francfort avec le compte AWS ; aucun autre fournisseur.
+9. Vercel Pro : le jour du premier client.
+10. Sauvegarde : Scaleway Paris le jour du premier client ; d'ici là GitHub chiffrée dès que Teo pose les deux secrets ; workflow Scaleway écrit par une session autorisée à ce moment-là, pas par A5.
+11. HMRC et fournisseurs britanniques : ABANDONNÉ ; GB = « non vérifiable automatiquement », vérification humaine (B7, A4). Retiré des listes d'attente.
+- Teo ouvre en parallèle AR24, Meta, Google, Microsoft, Scaleway, éditeurs comptables, Mistral, INSEE, AWS : ne rien présumer posé avant de le voir dans les secrets.
+- Décisions relayées le 17/10 vers 15 h 20 Z à C1, C2, C3, C4, A1, A2, A4, A5, B1, B2, B4, B6, B7 ; B3, B5, A3 et P1 restent en silence.
+- Posé et vert sur la recette le 17/10 (niveau 1) : c4_16 (421 ok) ; b2_20 + b2_20b (621 ok) ; socle 19ar consommation IA (tous genres + registre) avec c3_* et b2_29 relancés (verts) ; c3_10 (281 ok) ; b1_19 + b4_19 + test 44 (1405 ok). a4_38 : 2 rouges sur a3fa4be, corrigé et reposé avec a4_39 en 90a2cd1 (tests en cours).
+- Déployés sur la recette : lecteur v38 (A1 9e4cdfd), tavaro-questions v1 + cron omega-tavaro-questions (B2 348e22a), varelo-assistant v1 (B1 b62f7dd).
+- Première lecture longue réelle (modèle réel, pièces fictives du banc, module essai) : analyse 8d85b76b finie, 10/10 pièces, 15 constats tous sourcés et vérifiés, 0,17 €.
+- Refusés : `atteste` de C4 (lib/produits = site public, gardé pour Teo) ; b6_36 de B6 tel quel (il réécrivait consommation_ia_jour par-dessus 19ar).
+- C3 lot 2 : choix (a), l'envoi interne vers un membre est ajouté au socle par A1 (gabarit fermé, sans texte libre) ; pas d'accord permanent.
+- app/api/assistant (B1) fusionné : route réservée aux personnes connectées, appelée seulement par components/espace2/Assistant.tsx ; ce n'est pas une page publique.
+
+### Suite du 17/10 (15 h 30 → 17 h 00 Z), recette (niveau 1)
+- Posés et verts : c2_10 cadence (256 ok, lot long ~8 min) ; a4_38 à a4_42 (FILED : réponses fournisseurs, GB sans HMRC, conservation légale 10 ans, purge au terme, bilan) ; socle 19as_envoi_interne (A1) ; socle 19as_effacement_fichiers_gardes (A5 : effacer_* ne bloquent plus sur les fichiers gardés, code identique hors contrôle 55000) ; b6_36 + b6_36b (B6 718 ok après une régression de droit corrigée) ; c3_11 prévenir les décideurs (9/9 après correction).
+- Déployés : tavaro-questions v2 (B2 dcd98d50 + _partage d'A1 9e4cdfd), daliro-questions v1 + cron (B6 6c6ab11 + _partage A1).
+- Preuve réelle (modèle réel, données fictives du banc) : question Tavaro 097ac6f4, répondue, 1 lecture, 0,008 €.
+- Refusé : transmettre une clé ou un mot de passe à B2 ; la preuve est passée par un script SQL joué par le coordinateur.
+- Pause de sécurité déplacée au 18/10, 07 h 30 Z (trig_01Pf8UuVk3CbaUTTsH184TEb), sur ordre de Teo.
+- 2e fusion main : C1 (vue d'ensemble sans « Bonjour » ni les 4 chiffres, c4701a5), B2 carte Questions (47a209c), B4 pièces citées (45d4216), B6 carte Questions (98a7d12).
+
+## 18/10 (02 h 20 Z) : nouvelle semaine, plafond 50 % (pause attendue vers 40 % ; sécurité 07 h 30 Z)
+- Secrets Google posés par Teo sur la recette. Déployés depuis worker-a2 53acbbc : messagerie v1 (verify_jwt true), messagerie-oauth v1 (verify_jwt false, retour = URL de la fonction) ; cron omega-messagerie ; fournisseurs_envoi.gmail branche = true (microsoft false). Démarrage vérifié (400 « Lien invalide » sans état).
+- WhatsApp test Meta : expéditeur ab8778d8 (daliro, +15551998680, phone_number_id 1304208509431404) posé par omega/banc/expediteur_whatsapp.sql (7d631e7) ; meta_whatsapp reste branche = false jusqu'à META_ACCESS_TOKEN.
+- Écran Messagerie (A3 b0becc5) fusionné dans Réglages. Attention : omegaai.fr pointe sur la prod, où ni les fonctions ni les secrets Google ne sont posés ; l'essai Gmail de Teo se fait sur la recette, par le lien d'omega/banc/connexion_gmail.sql (A2, valable 15 min) que joue le coordinateur.
+
+## REPRISE — pause de sécurité du 18/10, 07 h 30 Z
+- Aucun « PAUSE (Teo) » reçu avant 07 h 30 Z : pause faite par le coordinateur, sessions Opus 5.5 actives seulement. Routine trig_01PJKxdeE5XGx3n8QTMoWwVe coupée. Ne rien relancer avant le feu vert de Teo.
+- SHA d'arrêt : A1 bc83f994, A2 39845c7, A3 7535987, A4 246b20f, A5 fa0357a0, B1 38a88c5, B2 cff734cb, B3 bcd02f62, B4 9ea8d0d, B5 3fd6df97, B6 46c9596, B7 9388a1b6, C1 c4701a5, C2 b6916856, C3 b0c8508b, C4 47acffc1, P1 5d44a1e. C5 à l'arrêt.
+- Depuis 02 h 20 Z : Gmail branché sur la recette (messagerie + messagerie-oauth, cron, gmail branche = true) ; WhatsApp test Meta branché (meta_whatsapp branche = true, expéditeur ab8778d8, secrets Meta posés par Teo) ; écran Messagerie fusionné (47ec59ea, en ligne 6459f136).
+- En attente de Teo : (1) son numéro de destinataire de test Meta → jouer omega/banc/preuve_whatsapp.sql (A2 0796edd, ligne v_numero), modèle hello_world, relever sent/delivered ; (2) « prêt pour Gmail » → jouer omega/banc/connexion_gmail.sql (lien 15 min) ; la réception WhatsApp réelle attend le passage « En ligne » de l'app Meta.
+
+## 18/10 (14 h 20 → 15 h 50 Z) : relance de Teo, preuves réelles (niveau 2)
+- **Gmail prouvé en vrai** : messagerie 259b8938 (teopetit50@gmail.com, readonly + compose) connectée 14 h 27 Z ; courriel « test Omega » de petitteo50@gmail.com reçu en réception 668 (14 h 29 Z), relevé par l'ouvrier messagerie à 14 h 31 Z. Recette, régime Test Google.
+- **WhatsApp prouvé en vrai (envoi)** : envoi f737cfe1 (banc:a2:preuve-whatsapp:5, mode reel), modèle Meta hello_world vers +33768163443 depuis +1 555 199-8680 ; envoye 15 h 48 m 03 Z, wamid.HBgLMzM3NjgxNjM0NDMVAgARGBI0MTRFRDc5MEIxM0FDNUY5MDUA ; « remis » 15 h 48 m 05 Z par le webhook. Avec le jeton 24 h de la page Étape 1 de l'app OMEGA ; **le jeton permanent de l'utilisateur système reste à corriger d'ici 24 h** (deux essais refusés par Meta, 100/33 sur 1304208509431404 : accès au WABA de test ou jeton d'une autre app). Accord WhatsApp de Teo enregistré (noter_consentement, source écrit). Réception réelle : attend le passage « En ligne » de l'app Meta.
+- Pour un envoi réel sur le banc : la ligne organisation (module null) ne peut pas être reel (contrainte) → la passer à NULL, daliro à reel/whatsapp, le temps du passage du cron omega-expediteur (le contrôle se refait à l'envoi), puis tout remettre en essai. Fait ; tous les modules du banc sont en essai.
+- **Coffre Tamila sur le vrai Key Manager Scaleway (niveau 2, pièces fictives)** : tamila-coffre v15 (B4 bb7ea12, déployé par le bureau) ; activation 200 « bascule », clé maître 9bb47abb-f0dc-47ab-8208-9411a8e88fe1 (fr-par), 3 dossiers locaux ; sonde 200 : clé relue, pièce relue, autre dossier refusé.
+- Posés et verts : b5_34 révision BT par l'API INSEE BDM publique, sans clé (459 ok, cron lorani-index :23) ; b4_20 clé d'analyse au coffre (test_b4_* 760 ok, 2 rouges b4_19 dus aux réceptions Gmail réelles du banc, B4 corrige).
+- En attente du bureau de Teo : redéployer tamila-coffre depuis B4 ccb6d69 et poser le secret TAMILA_BANC_CLIENT (recette) ; mes déploiements Edge bloquent sur une autorisation. Microsoft reporté par Teo.
+
+## 18/10, 16 h 18 → 17 h 15 Z : Omega client de lui-même, sources publiques, puis PAUSE ciblée
+
+**Posé sur la recette (niveau 1)** :
+- **Client « Omega »** 633470bc-0ccd-4b4a-934c-692024c3a419 (config->>'slug'='omega'). Teo est gérant, avec un compte auth au mot de passe aléatoire (« mot de passe oublié »). Les 10 réglages d'envoi sont en essai, cashd est coupé. Posé par A3 c21a14d.
+- **Boîtes de réception** : omega@recu.omegaai.fr (reput) et factures-omega@recu.omegaai.fr (filed), par A2 08fb5c47. resoudre_boite route bien les boîtes suspendues.
+- **Modules d'Omega** : FILED installé (A4 956fcf8), REPUT avec 16 fiches en brouillon (C3 afa2c1d6), CASHD (C2 8c69cbc7). test_a5_omega_ (A5 c26305f7) : 10/11 ; le 6 reste rouge tant qu'OFFLOAD n'est pas importé.
+- **OFFLOAD** : 11 896 comptes, dont 1 933 entrepreneurs individuels. NON importé : le garde-fou de C4 refuse ces données personnelles, il faut l'accord écrit de Teo.
+- **DCE réels** (A1 3b581dd9 et 71c6637b, téléchargement direct ; PLACE et Mégalis exigent une acceptation de CGU par une personne) :
+  - Daliro : 6 pièces lues pour 0,42 €, n° 12, 44 et 52 en A pour la partie devis (B6, arrêt 6468906) ;
+  - Lorani : 1 DPGF lu pour 0,16 € (B5 348f89c) ;
+  - aucune ligne ne passe de B à A sans attendu relu.
+- **FILED** : 36 exemples de la norme Factur-X (pas de vraies factures) lus par le XML, 0 €. a4_43 (f2034de) corrige trois défauts : SIREN réclamé hors de France, doublon comparé à la première pièce seulement, blancs dans les noms. ^test_a4_ 84/84, recontrôle joué (000022 et 000025 écartées).
+- **Varelo** : 3 groupes réels issus des comptes publiés INPI/BCE (EDH, Ankama, Normaxis ; 19 balances), prouvés sous la session de chaque gérant (B1 737bd0b et 009a6bb). Caisses fictives.
+- **REPUT métiers** : 62 fiches en brouillon depuis des sources réutilisables (C3 3130c656), faq.ada.fr exclu.
+- **Tamila** : bloqué. Le garde-fou de B4 refuse les décisions DILA (données personnelles) ; il faut l'accord de Teo.
+- **Arrêt IA** : depuis 17 h 00 Z, l'API Anthropic de la recette répond HTTP 400 « credit balance is too low ». Teo doit recharger.
+- **CI** : .github/workflows/omega-repetition-ci.yml est rejeté à chaque push, 0 job (${{ runner.temp }} dans le env: du job, ligne 61) ; omega-sauvegarde.yml a le même défaut (ligne 98). Ma désactivation et celle d'A5 ont été refusées par le contrôle des sessions : **Teo désactive les deux dans GitHub → Actions**.
+
+### REPRISE (pause ciblée de Teo, 17 h 00 Z : « le focus est le grand groupe et l'architecture »)
+SHA d'arrêt :
+
+| Ouvrier | SHA |
+|---|---|
+| A1 | 5d6856c2 |
+| A2 | ef88f351 |
+| A3 | 96965cb |
+| A4 | 86670ba |
+| A5 | be0f4227 |
+| B2 | cff734cb |
+| B3 | bcd02f6 |
+| B4 | 9aba87e |
+| B6 | 6468906 |
+| B7 | 9388a1b6 |
+| C1 | c4701a5 |
+| C2 | e6298e94 |
+| C3 | 3130c656 |
+| C4 | 1349e9fd |
+
+**Seuls B1 (Varelo, /secteurs/groupes) et B5 (Lorani, /secteurs/architectes) continuent**, un lot à la fois, sans sous-agent. Leur objectif est la chaîne de leur page prouvée sur la recette, au niveau 2 dès que possible. La routine 3 h est désactivée par la session bureau : ne pas la réarmer.
+
+En attente de Teo :
+- la recharge du crédit API Anthropic de la recette ;
+- la désactivation des deux workflows ;
+- l'accord OFFLOAD (données personnelles) ;
+- l'accord Tamila DILA ;
+- les PDF CASHD ;
+- un mail test à omega@recu.omegaai.fr ;
+- le lien Gmail d'Omega (receptions_omega.sql partie 3, A2 08fb5c47) ;
+- tamila-coffre a7a0f9d avec le secret TAMILA_BANC_CLIENT ;
+- reput-reponse 15a01a67 + c3_09 ;
+- sur main, l'écran Varelo « non publiée » (worker-b1 737bd0b, components/espace/varelo).
