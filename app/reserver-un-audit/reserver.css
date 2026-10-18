@@ -544,3 +544,44 @@
 .rdv ~ footer a:hover {
   color: #fff;
 }
+
+/* ─── Le bouton noir du formulaire ───
+   Teo, 18/10 au soir : « une fois qu'il a mis l'horaire et le jour, je veux
+   qu'il y ait juste le bouton noir qu'il y avait avant, pas "Continuer" ».
+   Les règles ci-dessous sont celles de la refonte du matin (09cf7aac) ;
+   af709068 les avait retirées avec le CSS des sections supprimées alors que
+   le <button type="submit" className="rdv-bouton"> de FormulaireFormat.tsx
+   les utilise toujours. Ne pas les retirer tant que ce bouton existe.
+   Référence : bouton noir 40 px, rayon 6, icône blanche dans un carré. */
+.rdv-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  height: 40px;
+  padding: 0 4px 0 16px;
+  border: 0;
+  border-radius: 6px;
+  background: #000;
+  color: #fff;
+  font: 400 16px/24px var(--font-omega), ui-sans-serif, system-ui, sans-serif;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+.rdv-bouton:hover {
+  opacity: 0.85;
+}
+.rdv-bouton:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.rdv-bouton-icone {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: #fff;
+  color: #000;
+}
