@@ -1,6 +1,6 @@
 # Varelo — passer en production (B1, 15/10/2026)
 
-Pour A5 et le coordinateur, au gel. Complète `omega/MISE-EN-PRODUCTION.md` (§ 1.3, où seuls b1_01 à b1_03
+Pour A5 et le coordinateur, au gel (mis à jour le 18/10 : b1_19, b1_20 et la fonction Edge). Complète `omega/MISE-EN-PRODUCTION.md` (§ 1.3, où seuls b1_01 à b1_03
 figurent). Règle du § 1.1 : rejouer **la séquence de la recette, version pour version**. L'ordre ci-dessous est
 celui des poses du coordinateur (NOTES-COORDINATEUR, 06/10 et 11/10) ; les numéros de version sont ceux de
 `schema_migrations` sur la recette.
@@ -25,12 +25,22 @@ celui des poses du coordinateur (NOTES-COORDINATEUR, 06/10 et 11/10) ; les numé
 | 14 | `b1_16_regles_groupe.sql` | 11/10 | règles du groupe, équipe `dsi`, sources validées | — |
 | 15 | `b1_17_caisses.sql` | 11/10 | ventes des caisses, 6 modèles `ventes_caisse` | — |
 | 16 | `b1_18_contexte.sql` | 11/10 | contexte du groupe pour l'assistant | — |
+| 17 | `b1_19_assistant.sql` | 17/10 | l'assistant Varelo : client, budget du jour, coût au journal (avec la fonction Edge ci-dessous) | — |
+| 18 | `b1_20_page_presidence.sql` | 18/10 | la page du groupe dans le point du matin de la présidence | — |
 
 Chacune est idempotente (`create … if not exists`, `create or replace`, `on conflict do nothing`) et ne supprime
 rien. Deux fichiers du dépôt diffèrent du texte posé sur la recette : `b1_10` (signatures de b1_14 déjà
 intégrées) et `b1_11` (droit de b1_11b déjà intégré). Rejoués dans l'ordre, b1_11b et b1_14 ne réécrivent alors
 rien : l'état final est le même. Pour la règle « version pour version », prendre de préférence le texte exporté
 de la recette (§ 1.5).
+
+### La fonction Edge `varelo-assistant` (après b1_19)
+
+`omega/functions/varelo-assistant/` (index.ts, assistant.ts, deno.json, deno.lock), déployée sur la recette le
+17/10 (v1). Secrets : `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` et ceux du fournisseur du
+lecteur (recette : API Anthropic ; production : Bedrock Francfort, à brancher par l'abstraction de `_partage`).
+Elle lit sous la session de la personne. Le budget et le coût passent par le service. Aucun IBAN. Côté site :
+`lib/varelo/assistant.ts` et `app/api/assistant/route.ts`, qui reviennent à l'assistant général si la fonction répond 404.
 
 ## 2. Ce que le socle doit avoir avant
 
@@ -51,8 +61,8 @@ select evenement, genre from private.abonnements where module = 'varelo' order b
 -- aucune fonction privée Varelo ouverte à authenticated hors des requises : le test 44 du socle
 ```
 
-Tests à passer sur la répétition : `^test_b1_` (b1_00_aides puis b1_01 à b1_21), puis 44, 46, 51 et 55.
-Dernier relevé sur la recette : tout vert le 11/10 (h1513bbc).
+Tests à passer sur la répétition : `^test_b1_` (b1_00_aides puis b1_01 à b1_23), puis 44, 46, 51 et 55.
+Dernier relevé sur la recette : tout vert le 11/10 (h1513bbc) ; b1_22 et 44 verts le 17/10 ; b1_20, b1_23 et 44 verts le 18/10.
 
 ## 4. Ce qu'il ne faut pas emporter
 
