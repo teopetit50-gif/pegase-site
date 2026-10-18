@@ -3,10 +3,10 @@
 /* ══════════════════════════════════════════════════════════════════════
    Les sujets autorisés d'avance (06/10/2026, session C3, c3_03)
 
-   Par défaut, toute réponse attend votre validation. Sujet par sujet, le
-   gérant ou un administrateur peut donner un accord permanent (une
-   politique du socle, d'un an, révocable) : les réponses de ce sujet,
-   quand elles sont entièrement tirées de la base, partent alors seules.
+   Modèle 2 (c3_13, 18/10) : l'envoi automatique est voulu par défaut ; un
+   geste du gérant donne l'accord permanent (politique du socle, d'un an,
+   révocable) de tous les sujets autorisables, et les réponses entièrement
+   tirées de la base y partent seules. Sujet par sujet reste possible.
    L'accord s'active par un autre décideur dans « À valider » — ou par le
    gérant lui-même s'il est le seul décideur de l'organisation.
    Réclamations, urgences, demandes de parler à quelqu'un et hors sujet ne
@@ -17,7 +17,7 @@ import { useState } from "react";
 import { Loader } from "@/components/ui/loader";
 import { dateCourte } from "../format";
 import { Avis, Pastille, type Teinte } from "../ui";
-import { activerAccordSeul, donnerAccord, fixerDelai, revoquerAccord, routerSujet } from "./portes";
+import { activerAccordSeul, donnerAccord, envoiAutomatique, fixerDelai, revoquerAccord, routerSujet } from "./portes";
 import type { AccordSujet, Client, Monde } from "./types";
 
 const ETATS: Record<AccordSujet["statut"], { libelle: string; teinte: Teinte }> = {
@@ -82,6 +82,38 @@ export default function SujetsAutorises({ monde, source, client, role, relire, m
     }
   };
 
+  const auto = monde.reglages?.envoi_auto ?? true;
+  const basculerAuto = async (actif: boolean) => {
+    let motif = "";
+    if (!actif) {
+      motif = window.prompt("Pourquoi couper l'envoi automatique ? Toutes les réponses attendront de nouveau votre validation.") ?? "";
+      if (!motif.trim()) return;
+    }
+    setEnvoi("__auto__");
+    setErreur(null);
+    try {
+      if (source === "reelle" && client) {
+        const r = await envoiAutomatique(client.client_id, actif, motif.trim() || undefined);
+        await relire();
+        setFait(!actif ? `Envoi automatique coupé : ${r.revoques} accord${r.revoques > 1 ? "s" : ""} révoqué${r.revoques > 1 ? "s" : ""}, tout est de nouveau relu.`
+          : r.a_activer_par_un_autre ? `Envoi automatique demandé sur ${r.proposes} sujet${r.proposes > 1 ? "s" : ""} : un autre décideur l'active dans « À valider ».`
+            : "Envoi automatique activé : les réponses tirées de votre base partent seules, sauf retenue.");
+      } else {
+        modifierLocal((m) => ({
+          ...m,
+          reglages: m.reglages ? { ...m.reglages, envoi_auto: actif } : m.reglages,
+          accords: { ...m.accords, sujets: m.accords.sujets.map((a) => (a.autorisable && a.genre !== "message"
+            ? { ...a, statut: actif ? "active" : "revoquee", fin: actif ? new Date(Date.now() + 365 * 86_400_000).toISOString() : a.fin } : a)) },
+        }));
+        setFait(actif ? "Envoi automatique activé : les réponses tirées de votre base partent seules, sauf retenue." : "Envoi automatique coupé : tout est de nouveau relu.");
+      }
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
+    } finally {
+      setEnvoi(null);
+    }
+  };
+
   const changerDelai = async (sujet: string, actuel: number) => {
     const saisi = window.prompt("Délai de traitement en heures (1 à 720) : passé ce délai, la demande remonte au responsable.", String(actuel));
     const heures = Number(saisi);
@@ -108,10 +140,33 @@ export default function SujetsAutorises({ monde, source, client, role, relire, m
       </div>
       <div className="esp-carte-corps">
         <p className="esp-kpi-sous">
-          Par défaut, rien ne part sans votre validation. Sur un sujet que vous autorisez, une réponse entièrement tirée de votre base part seule, dans la minute ; une réponse hors base ou corrigée est toujours relue. L&apos;accord dure un an et se révoque à tout moment.
+          Une réponse entièrement tirée de votre base part seule, dans la minute, sur chaque sujet dont l&apos;accord est actif ; une réponse hors base, urgente ou corrigée est toujours relue. L&apos;accord dure un an et se révoque à tout moment, sujet par sujet ou d&apos;un coup.
         </p>
         {fait ? <div style={{ marginTop: 10 }}><Avis teinte="vert" role="status">{fait}</Avis></div> : null}
         {erreur ? <div style={{ marginTop: 10 }}><Avis teinte="rouge" role="alert">{erreur}</Avis></div> : null}
+      </div>
+      <div className="esp-carte-corps" aria-label="Envoi automatique">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", justifyContent: "space-between" }}>
+          <span style={{ display: "grid", gap: 4, minWidth: 0 }}>
+            <span className="esp-item-haut">
+              <strong>Envoi automatique</strong>
+              {auto ? <Pastille teinte="vert">Voulu</Pastille> : <Pastille teinte="gris">Coupé</Pastille>}
+            </span>
+            <span className="esp-kpi-sous">
+              Une réponse tirée de votre base part seule sur les sujets autorisés. Elle est retenue pour une personne quand l&apos;IA doute (hors base, chiffre absent de vos fiches), quand le message est urgent, ou quand le sujet est toujours relu.
+            </span>
+          </span>
+          {dirige ? (
+            <button type="button" className={auto ? "r-btn" : "r-btn r-btn--noir"} disabled={envoi !== null} onClick={() => void basculerAuto(!auto)}>
+              {envoi === "__auto__" ? <Loader variant="spin" /> : null} {auto ? "Couper l'envoi automatique" : "Activer l'envoi automatique"}
+            </button>
+          ) : null}
+        </div>
+        {auto && dirige ? (
+          <p className="esp-kpi-sous" style={{ marginTop: 8 }}>
+            Pour qu&apos;il s&apos;applique, chaque sujet autorisable doit avoir son accord actif : <button type="button" className="esp-lien-bouton" disabled={envoi !== null} onClick={() => void basculerAuto(true)}>tout autoriser d&apos;un coup</button>.
+          </p>
+        ) : null}
       </div>
       <div className="esp-carte-corps">
         <ul style={{ display: "grid", gap: 12 }}>

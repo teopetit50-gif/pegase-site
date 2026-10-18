@@ -123,6 +123,8 @@ export type Reglages = {
   lien_avis: string | null;
   texte_avis: string;
   avis_auto_reglement?: boolean;
+  /** Modèle 2 (c3_13) : l'organisation veut l'envoi automatique (vrai par défaut). */
+  envoi_auto?: boolean;
 };
 
 export type Avis = {

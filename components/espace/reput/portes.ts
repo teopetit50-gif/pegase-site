@@ -102,6 +102,9 @@ export const retirerFiche = (id: string, motif: string) => rpc("reput_retirer_co
 export const donnerAccord = (client: string, sujet: string) => rpc("reput_donner_accord", { p_client: client, p_sujet: sujet });
 export const revoquerAccord = (client: string, sujet: string, motif: string) =>
   rpc("reput_revoquer_accord", { p_client: client, p_sujet: sujet, p_motif: motif });
+export type ResultatEnvoiAuto = { actif: boolean; proposes: number; actives: number; revoques: number; a_activer_par_un_autre: boolean };
+export const envoiAutomatique = (client: string, actif: boolean, motif?: string) =>
+  rpc<ResultatEnvoiAuto>("reput_envoi_automatique", { p_client: client, p_actif: actif, p_motif: motif ?? null });
 export const activerAccordSeul = (client: string, sujet: string) => rpc("reput_activer_accord_seul", { p_client: client, p_sujet: sujet });
 
 export const regler = (client: string, reglages: Partial<Reglages>) =>

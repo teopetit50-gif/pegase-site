@@ -248,6 +248,17 @@ export default function EcranReput() {
   );
 }
 
+/* Modèle 2 (c3_13) : pourquoi une réponse attend une personne au lieu de partir seule. */
+function raisonRetenue(rep: Reponse, demande: Demande, monde: Monde): string | null {
+  if (rep.statut !== "a_valider") return null;
+  if (demande.urgence) return "message urgent : une personne le relit toujours.";
+  if (!rep.couverte) return "l'IA doute — la réponse n'est pas entièrement tirée de votre base.";
+  const accord = monde.accords.sujets.find((a) => a.sujet === demande.sujet);
+  if (accord && !accord.autorisable) return "sujet toujours relu (réclamation, urgence, parler à quelqu'un, hors sujet).";
+  if (!accord || accord.statut !== "active") return "sujet pas encore autorisé d'avance : activez l'envoi automatique dans « Sujets autorisés ».";
+  return null;
+}
+
 function DemandeVue({ demande, monde, decideur, source, relire, modifierLocal }: {
   demande: Demande; monde: Monde; decideur: boolean; source: "exemple" | "reelle";
   relire: () => Promise<void>; modifierLocal: (f: (m: Monde) => Monde) => void;
@@ -350,6 +361,10 @@ function DemandeVue({ demande, monde, decideur, source, relire, modifierLocal }:
               {rep.redigee_par ? <Pastille contour>Corrigée par une personne</Pastille> : null}
             </p>
             {rep.raison && !rep.couverte ? <p className="esp-kpi-sous" style={{ marginBottom: 8 }}>{rep.raison}</p> : null}
+            {(() => {
+              const r = raisonRetenue(rep, demande, monde);
+              return r ? <p className="esp-kpi-sous" style={{ marginBottom: 8 }}><strong>Retenue :</strong> {r}</p> : null;
+            })()}
             {rep.objet ? <p style={{ fontWeight: 600, marginBottom: 6 }}>Objet : {rep.objet}</p> : null}
             {mode === "corriger" ? (
               <label className="rv-libelle">Votre version

@@ -33,6 +33,7 @@ for (const largeur of LARGEURS) {
     verifier(await s.evaluer(cliquer('Marie Durand', '.esp-item')), `${largeur} : ouvrir la demande de Marie Durand`);
     await s.dormir(300);
     verifier(await s.evaluer(`document.body.innerText.includes('Valider et envoyer') && document.body.innerText.includes('Exporter vers un tableur') && document.body.innerText.toLowerCase().includes('ses sources dans la base')`), `${largeur} : réponse prête, sources, Valider`);
+    verifier(await s.evaluer(`document.body.innerText.includes('Retenue :')`), `${largeur} : la raison de la retenue est visible`);
     verifier(await s.evaluer(cliquer('Corriger')), `${largeur} : Corriger ouvre l'éditeur`);
     await s.dormir(300);
     verifier(await s.evaluer(`!!document.querySelector('textarea')`), `${largeur} : l'éditeur est là`);
@@ -49,6 +50,20 @@ for (const largeur of LARGEURS) {
       verifier(!d.scroll && d.elements.length === 0, `${largeur} : aucun débordement (${onglet}) ${d.elements.join(' | ')}`);
       await s.capturer(`${DOSSIER}/reput-${onglet.split(' ')[0].toLowerCase()}-${largeur}.jpg`, { pleine: true });
     }
+    // c3_13 : l'envoi automatique se coupe et se rallume depuis « Sujets autorisés ».
+    verifier(await s.evaluer(cliquer('Sujets autorisés', '[role=tab]')), `${largeur} : onglet Sujets autorisés (envoi automatique)`);
+    await s.dormir(300);
+    verifier(await s.evaluer(`document.body.innerText.includes('Envoi automatique') && document.body.innerText.includes("Couper l'envoi automatique")`), `${largeur} : l'envoi automatique est voulu par défaut`);
+    await s.evaluer(`window.prompt = () => 'Essai de recette'`);
+    verifier(await s.evaluer(cliquer("Couper l'envoi automatique")), `${largeur} : couper l'envoi automatique`);
+    await s.dormir(300);
+    verifier(await s.evaluer(`document.body.innerText.includes("Activer l'envoi automatique") && document.body.innerText.includes('tout est de nouveau relu')`), `${largeur} : coupé, tout est relu`);
+    verifier(await s.evaluer(cliquer("Activer l'envoi automatique")), `${largeur} : rallumer l'envoi automatique`);
+    await s.dormir(300);
+    verifier(await s.evaluer(`document.body.innerText.includes('partent seules')`), `${largeur} : rallumé`);
+    d = await s.evaluer(DEBORDE);
+    verifier(!d.scroll && d.elements.length === 0, `${largeur} : aucun débordement (envoi automatique) ${d.elements.join(' | ')}`);
+    await s.capturer(`${DOSSIER}/reput-envoi-auto-${largeur}.jpg`, { pleine: true });
     // c3_10 : le lien du point du matin (?demande=<id>) ouvre cette demande d'emblée.
     const lien = await s.aller(`${BASE}/espace/reput?demande=00000000-0000-4000-8000-0000000c3d03`, { signe: `document.readyState === 'complete' && document.body.innerText.includes('Demandes clients')` });
     verifier(lien, `${largeur} : le lien direct se charge`);

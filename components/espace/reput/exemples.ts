@@ -107,6 +107,7 @@ export function mondeExemple(): Monde {
       lien_avis: "https://g.page/r/atelier-bertin/review",
       texte_avis: "Merci de nous avoir fait confiance. Votre avis aide d'autres clients à nous choisir : il prend une minute.",
       avis_auto_reglement: true,
+      envoi_auto: true,
     },
     avis: [
       { id: "00000000-0000-4000-8000-00000000c3b1", canal: "email", adresse: "m.lefevre@exemple.fr", nom: "M. Lefèvre", reference: "F-2026-118",
