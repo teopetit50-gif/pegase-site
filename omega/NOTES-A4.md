@@ -4,7 +4,7 @@
 
 - **Fait** : lots a4_01 → a4_43 posés et verts sur la recette (84/84) ; a4_44 écrit (tva.taux : « TVA étrangère » pour un fournisseur établi hors de France ; test `a4_32_tva_etrangere_libelle.sql`, rouge avant, vert après ; 85/85 en local) ; origin/main fusionnée.
 - **En cours** : a4_44 à poser par le coordinateur.
-- **Prochain pas** : relevé (blocs 2/3) du paquet 3 du banc (000028 → 000043), jamais reçu ; `montant.lignes` attend un champ « remise au pied » du lecteur (CHAMPS-LECTURE). Restent au coordinateur et à Teo : fusion, production, déploiements `sortie` / `compta`, écran d'effacement, garde des fichiers (A5), identifiants des éditeurs, clé Sirene, prix des paliers.
+- **Prochain pas** : paquet 3 du banc relevé et classé (aucun nouveau défaut) ; `montant.lignes` attend un champ « remise au pied » du lecteur (CHAMPS-LECTURE). Restent au coordinateur et à Teo : fusion, production, déploiements `sortie` / `compta`, écran d'effacement, garde des fichiers (A5), identifiants des éditeurs, clé Sirene, prix des paliers.
 
 ## Banc, chantier 3 (18/10) — exemples de la norme lus par FILED (PAS de vraies factures)
 
@@ -38,6 +38,19 @@ Paquet 2 (000018 → 000027), relevé à 16 h 52 Z ; paquet 3 (000028 → 000043
 | `iban.invalide` (bloquant) | 000020, 000023 | **Juste** : DE12123456781234567890 a une clé fausse, DE5467894567876500 n'a que 18 caractères (22 en Allemagne). |
 | Saut de ligne dans le nom du fournisseur | 000026 (et Rechnungskorrektur : « GLN … \nLief-Nr … ») | Le XML de la norme porte ce saut de ligne. **À nettoyer par FILED** : le nom du fournisseur devrait avoir ses espaces repliés (`\s+` → une espace) à sa création. |
 | `identite.siren` | tous les allemands | Défaut de FILED confirmé (voir paquet 1). |
+
+Paquet 3 (000028 → 000043), relevé par le coordinateur le 18/10 à 21 h 20 Z (16 lues, 0 €), vérifié contre le XML :
+
+| Écart | Pièces | Verdict |
+|---|---|---|
+| `doublon.exact`, **écartée** | 029, 033 (de 024, 9314110911/00/M/00/N), 034, 041 (avoir RK21012345, de 016), 036 (471102 à 529,87, de 020), 043 (MINIMUM de 015) | **Juste** : même numéro, même date, même montant. |
+| `doublon.exact`, **bloquée** | 032 (471102 du 05/06/2018 à 215,07 contre 197,65 en 018), 037 (00.123.456.7-2018-1 du 18/04 à 1 163,40 contre 220,00 le 11/03 en 028) | **Juste** : même numéro dans l'année pour une autre facture ; un numéro ne sert qu'une fois. |
+| `identite.tva_intracom` | DE123456789, DE234567891, GB123456789, GB999999999 | **Juste** : numéros fictifs aux clés fausses (DE : 8 attendu ; GB : modulo 97). 031 (DE136695976, clé juste) n'en a pas. |
+| `iban.invalide` | 030, 038, 039 | **Juste** : DE12123456789012345678 et DE1212344321987600 ont une clé fausse (le second a aussi 18 caractères). |
+| `tva.taux` | allemands à 19 % / 7 % ; pas 043 (MINIMUM), ni 031, 028, 037 (exonérés, 0 %) | Effet du banc ; libellé « TVA étrangère » depuis a4_44 (après recontrôle). |
+| `identite.registre` | 029, 031, 033 | Effet du banc : entreprises fictives. |
+
+Aucun nouveau défaut de FILED au paquet 3.
 
 Lot correctif **a4_43** (écrit, à poser ; tests `a4_31_corrections_banc.sql`, verts en local) : `identite.siren` passe hors de France (préfixe de TVA autre que FR, ou pays hors France et DROM) ; `doublon.exact` préfère la pièce de même date et même montant ; nom du fournisseur aux blancs repliés (création, et noms déjà posés). Pose « par repère » sur les corps en base : un repère introuvable arrête la migration sans rien poser. La souche locale reçoit `filed_creer_fournisseur` (extrait du socle) et une approximation de `filed_normaliser_nom`.
 
