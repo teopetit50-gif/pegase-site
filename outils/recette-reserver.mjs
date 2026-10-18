@@ -42,30 +42,46 @@ try {
   verifier('carte cloud-slate', t.carte === 'rgb(131, 156, 178)', t.carte);
   verifier('police du site (General Sans)', /omega/i.test(t.police), t.police);
 
-  /* ——— formats : trois lignes de choix, « Audit process » coché par défaut ——— */
-  const f = await s.evaluer(`(() => {
-    const radios = [...document.querySelectorAll('.rdv-option input')];
+  /* ——— logos : quatre outils, puis trois outils, en masque ——— */
+  const logos = await s.evaluer(`(() => {
+    const m = document.querySelector('.rdv-marque');
+    const st = getComputedStyle(m);
     return {
-      nombre: radios.length,
-      coche: radios.find(r => r.checked)?.value ?? null,
+      systemes: document.querySelectorAll('.rdv-logos--quatre li .rdv-marque').length,
+      metiers: document.querySelectorAll('.rdv-logos--trois li .rdv-marque').length,
+      masque: st.maskImage !== 'none' || st.webkitMaskImage !== 'none',
+    };
+  })()`);
+  verifier('logos : quatre outils puis trois outils', logos.systemes === 4 && logos.metiers === 3, `${logos.systemes} + ${logos.metiers}`);
+  verifier('logos en masque, couleur d\u2019encre', logos.masque === true);
+
+  /* ——— formulaire : neuf champs comme la référence, tous obligatoires ——— */
+  const f = await s.evaluer(`(() => {
+    const champs = [...document.querySelectorAll('.rdv-formulaire input, .rdv-formulaire select')];
+    return {
+      total: champs.length,
+      obligatoires: champs.filter(c => c.required).length,
+      hauteur: Math.round(champs[0].getBoundingClientRect().height),
       cartes: document.querySelectorAll('.rdv-format').length,
       phare: document.querySelectorAll('.rdv-format--phare').length,
     };
   })()`);
-  verifier('trois formats au choix', f.nombre === 3, `${f.nombre} ligne(s)`);
-  verifier('format recommandé coché par défaut', f.coche === 'process', String(f.coche));
+  verifier('neuf champs, tous obligatoires', f.total === 9 && f.obligatoires === 9, `${f.total} champs, ${f.obligatoires} obligatoires`);
+  verifier('champs de 46 px', f.hauteur === 46, `${f.hauteur} px`);
   verifier('trois cartes de format, une recommandée', f.cartes === 3 && f.phare === 1, `${f.cartes} carte(s), ${f.phare} recommandée(s)`);
 
-  /* ——— envoi : le format part vers /reserver, rien de personnel dans l'URL ——— */
+  /* ——— envoi : les coordonnées passent à /reserver, le format part dans l'adresse ——— */
   const envoi = await s.evaluer(`(async () => {
-    [...document.querySelectorAll('.rdv-option input')].find(r => r.value === 'cadrage').click();
+    const v = (nom, valeur) => { document.querySelector('[name=' + nom + ']').value = valeur; };
+    v('prenom', 'Essai'); v('nom', 'Recette'); v('entreprise', 'Atelier Essai'); v('fonction', 'Gérante');
+    v('email', 'essai@example.com'); v('pays', 'Guadeloupe'); v('secteur', 'btp'); v('origine', 'LinkedIn'); v('format', 'cadrage');
     document.querySelector('.rdv-formulaire button[type=submit]').click();
-    /* 4 s : au premier passage après un démarrage à froid, /reserver se compile encore */
     await new Promise(r => setTimeout(r, 4000));
-    return location.pathname + location.search;
+    return { chemin: location.pathname + location.search, reste: sessionStorage.getItem('omega.reserver.pre') };
   })()`);
-  verifier('le format choisi part vers /reserver', envoi === '/reserver?formule=cadrage', envoi);
-  verifier('aucune donnée personnelle dans l’URL', !/@|%40|prenom|nom=/i.test(envoi), envoi);
+  verifier('le format choisi part vers /reserver', envoi.chemin === '/reserver?formule=cadrage', envoi.chemin);
+  verifier('/reserver a repris les coordonnées (clé lue, puis effacée)', envoi.reste === null, String(envoi.reste));
+  verifier('aucune donnée personnelle dans l\u2019URL', !/Essai|essai@|Recette/.test(envoi.chemin), envoi.chemin);
 
   if (!await s.aller(url)) throw new Error('retour sur la page impossible');
   await s.dormir(1200);

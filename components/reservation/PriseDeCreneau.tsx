@@ -71,6 +71,7 @@ import { suivrePixel } from "@/lib/pixel";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ConnexionInline from "@/components/compte/ConnexionInline";
 import { messageErreur, ouvrirEnregistrementPaiement } from "@/lib/abonnement";
+import { lirePrereservation } from "@/lib/prereservation";
 import { signalerSession, utilisateurDepuis, type Utilisateur } from "@/lib/compte";
 import { Loader } from "@/components/ui/loader";
 import { createClient } from "@/lib/supabase/client";
@@ -313,6 +314,27 @@ export default function PriseDeCreneau({
   });
   const maj = (cle: keyof typeof c) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setC((prev) => ({ ...prev, [cle]: e.target.value }));
+
+  /* 18/10/2026 — la page d'audit a déjà demandé nom, entreprise, e-mail et
+     secteur (voir lib/prereservation.ts). On les reprend, une seule fois, et
+     seulement dans les champs encore vides : ce que le visiteur a tapé ici
+     ou ce que son compte fournit passe avant. Les informations sans champ
+     ici (fonction, pays, origine) rejoignent le message, modifiable. */
+  useEffect(() => {
+    const pre = lirePrereservation();
+    if (!pre) return;
+    /* une seule lecture d'un stockage externe au montage : pas de cascade de rendus */
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setC((prev) => ({
+      ...prev,
+      prenom: prev.prenom || pre.prenom,
+      nom: prev.nom || pre.nom,
+      email: prev.email || pre.email,
+      entreprise: prev.entreprise || pre.entreprise,
+      secteur: prev.secteur || pre.secteur,
+      message: pre.lignes.reduce((m, l) => (l.endsWith(" : ") ? m : `${m}${l}\n`), prev.message),
+    }));
+  }, []);
 
   /* 02/09 — la connexion (inline, ou dans un autre onglet) : on retient
      l'utilisateur ET on remplit le formulaire — l'e-mail est celui du

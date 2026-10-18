@@ -43,11 +43,13 @@ import "./reserver.css";
    · la citation de la carte n'est PAS une citation client : c'est le
      principe de l'audit, dit par nous (règle de regles-maison : aucune
      preuve sociale inventée) ;
-   · l'étiquette « Trusted by… » devient la liste des métiers couverts —
-     un fait, pas un compteur de traction ;
-   · le formulaire ne demande que le format. Les coordonnées restent sur
-     /reserver, où elles se prennent avec le créneau : une seconde saisie
-     ici aurait envoyé deux demandes pour une seule réservation ;
+   · les logos de la carte sont ceux d'Omega (systèmes et logiciels
+     métiers), en grand, comme la référence. Pas de marques tierces : un
+     logo de client ou d'outil se lit comme un partenariat ;
+   · le formulaire reprend les champs de la référence (prénom, nom,
+     entreprise, fonction, e-mail, pays, secteur, origine, format). Ses
+     coordonnées passent à /reserver (lib/prereservation.ts) : le visiteur
+     ne les retape pas dans le formulaire de réservation ;
    · la recherche dans la FAQ et le simulateur ont disparu avec le reste
      de l'ancienne mise en page — la FAQ tient en neuf questions, en
      accordéon.
@@ -79,9 +81,40 @@ const NOMS_POSTES: Record<string, string> = Object.fromEntries(
   POSTES.map((p) => [p.id, `${p.system} · ${p.nom}`]),
 );
 
-/* Les métiers couverts : la liste des secteurs de /secteurs, en mots — pas
-   des logos de clients, qu'on n'a pas le droit de montrer. */
-const METIERS = ["Avocats", "Architectes", "BTP", "Loueurs", "Dentaires", "Groupes"];
+/* Les outils de la carte : ceux que le code appelle vraiment. Logos officiels :
+   Anthropic (pied de page d'anthropic.com), Next.js (nextjs.org), Resend (resend.com),
+   Stripe (kit de logos Stripe), Vercel (triangle de la page Geist de Vercel).
+   Claude et Supabase : leurs pages de marque ne donnent que le pictogramme
+   (le logo Claude complet n'est pas proposé en fichier) ; ces deux signes
+   viennent du paquet simple-icons déjà installé. `largeur` garde les
+   proportions de chaque fichier, à hauteur égale de 36 px. Autorisés par Teo, qui
+   précise : ils disent quels outils Omega utilise, pas une collaboration. */
+const RANGEE_UN = [
+  { nom: "Claude", fichier: "/logos/outils/claude.svg", largeur: 36 },
+  { nom: "Anthropic", fichier: "/logos/outils/anthropic.svg", largeur: 52 },
+  { nom: "Supabase", fichier: "/logos/outils/supabase.svg", largeur: 36 },
+  { nom: "Vercel", fichier: "/logos/outils/vercel.svg", largeur: 36 },
+];
+const RANGEE_DEUX = [
+  { nom: "Next.js", fichier: "/logos/outils/nextjs.svg", largeur: 179 },
+  { nom: "Resend", fichier: "/logos/outils/resend.svg", largeur: 170 },
+  { nom: "Stripe", fichier: "/logos/outils/stripe.svg", largeur: 86 },
+];
+
+/* Un logo en masque : le PNG est transparent, la couleur vient du CSS. */
+function Marque({ nom, fichier, largeur }: { nom: string; fichier: string; largeur: number }) {
+  return (
+    <span className="rdv-marque-bloc">
+      <span
+        role="img"
+        aria-label={nom}
+        className="rdv-marque"
+        style={{ width: largeur, WebkitMaskImage: `url(${fichier})`, maskImage: `url(${fichier})` }}
+      />
+      <span className="rdv-marque-nom">{nom}</span>
+    </span>
+  );
+}
 
 /* Le protocole : texte repris au mot près de l'ancienne section. */
 const ARTICLES: { intitule: string; texte: string }[] = [
@@ -186,11 +219,20 @@ export default function ReserverUnAuditPage() {
 
                 <hr className="rdv-filet" />
 
-                <div className="rdv-metiers">
-                  <p className="rdv-mono">Métiers couverts</p>
-                  <ul className="rdv-metiers-liste">
-                    {METIERS.map((m) => (
-                      <li key={m}>{m}</li>
+                <div className="rdv-logos-bloc">
+                  <p className="rdv-mono rdv-centre">Les outils que nous utilisons</p>
+                  <ul className="rdv-logos rdv-logos--quatre">
+                    {RANGEE_UN.map((m) => (
+                      <li key={m.nom}>
+                        <Marque nom={m.nom} fichier={m.fichier} largeur={m.largeur} />
+                      </li>
+                    ))}
+                  </ul>
+                  <ul className="rdv-logos rdv-logos--trois">
+                    {RANGEE_DEUX.map((m) => (
+                      <li key={m.nom}>
+                        <Marque nom={m.nom} fichier={m.fichier} largeur={m.largeur} />
+                      </li>
                     ))}
                   </ul>
                 </div>
