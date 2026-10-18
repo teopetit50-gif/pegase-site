@@ -2,7 +2,10 @@
 
 Branche `worker-a3`. Dernière mise à jour : 06/10/2026, 03 h 50 Paris (reprise par la session Opus 5.5 `session_01Npbh1aR6LoEX7PZDchMSca`, à la suite de `session_01DdgwRadkJFx5u9buwh5crS`).
 
-## REPRISE (pause de sécurité, 18/10 07 h 30 Z ; rien en cours ; Messagerie b0becc5 fusionnée dans main 47ec59ea, Équipe et son correctif fusionnés)
+## REPRISE (pause de Teo, 18/10 17 h Z — focus grand groupe et architecture)
+- **Fait** : Équipe, Messagerie (fusionnés), client_omega.sql posé (Omega = 633470bc-0ccd-4b4a-934c-692024c3a419 ; 0 abonnement, sans effet : rien ne lit abonnements_modules).
+- **En cours** : rien.
+- **Prochain pas** : invitation d'une personne sans compte (fonction côté service, A5) ; brancher /bienvenue sur les portes — sur demande seulement.
 
 - 18/10 16 h Z : `omega/banc/client_omega.sql` (à poser par le coordinateur, recette seulement — garde sur private.reglages environnement) : organisation « Omega » (config.slug = 'omega', aucune colonne slug), compte de Teo s'il manque (mot de passe aléatoire bcrypt, jamais écrit), gérant par rattacher_membre en service_role, modules FILED…OFFLOAD dans abonnements_modules (codes présents dans moteurs_reconnus), reglages_envois en « essai » vers teopetit50@gmail.com ; select final : id. Pas de porte « créer une organisation » dans le socle ; les installations par module (filed_installer…) restent à faire avec l'id. Non exécuté par moi.
 
