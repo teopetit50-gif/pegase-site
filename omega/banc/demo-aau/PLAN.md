@@ -23,7 +23,7 @@ Recherche du 18/10, 17 h 20 Z, comme demandé, sans contourner quoi que ce soit 
 
 - `clients` : « Atelier d'Architecture et d'Urbanisme (démo) », `secteur = 'archi'` (la barre de /espace2 montre alors
   Lorani comme module du métier), commune Baie-Mahault.
-- `entites` : l'entité principale, `fuseau = 'America/Guadeloupe'`, `territoire = 'guadeloupe'` (les délais du permis
+- `entites` : l'entité principale, `fuseau = 'America/Guadeloupe'`, `territoire = 'GP'` (code ISO ; les délais du permis
   suivent le territoire : le moteur du calendrier connaît la Guadeloupe).
 - `comptes` : un gérant de démo. Le compte de connexion (auth) se crée d'abord par l'administration de la recette (adresse
   `demo-aau@banc-varelo.test`) ; le SQL le rattache.

@@ -25,9 +25,10 @@ begin
   insert into public.comptes (user_id, client_id, role, perimetre_total) values (v_gerant, v_client, 'gerant', true)
   on conflict do nothing;
   -- l'entité principale (créée par le trigger clients_entite_principale) : le fuseau et le territoire de la Guadeloupe
-  update public.entites set nom = 'Atelier d''Architecture et d''Urbanisme (démo)', fuseau = 'America/Guadeloupe', territoire = 'guadeloupe'
+  -- (entites.territoire suit le code ISO 3166 : « GP » ; le projet Lorani, lui, déduit « guadeloupe » de son code INSEE)
+  update public.entites set nom = 'Atelier d''Architecture et d''Urbanisme (démo)', fuseau = 'America/Guadeloupe', territoire = 'GP'
   where client_id = v_client and principale
-    and (nom, fuseau, territoire) is distinct from ('Atelier d''Architecture et d''Urbanisme (démo)', 'America/Guadeloupe', 'guadeloupe');
+    and (nom, fuseau, territoire) is distinct from ('Atelier d''Architecture et d''Urbanisme (démo)', 'America/Guadeloupe', 'GP');
   -- les envois Lorani en essai, comme sur le banc
   insert into public.reglages_envois (client_id, module, mode, essai_adresse, plages, feries, delai_min, plafond_destinataire_jour,
                                       plafond_jour, fenetre_doublon, canaux, pause_reponse, pause_sensible, sante)
