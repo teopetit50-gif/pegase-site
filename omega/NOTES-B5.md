@@ -5,6 +5,8 @@ Dernière mise à jour : 05/10/2026, 23 h.
 
 ## REPRISE (pause demandée par Teo, 06/10/2026 à 21 h Z)
 
+**18/10, 17 h 35 Z — LOT PRIORITAIRE : démo Guadeloupe** (omega/banc/demo-aau/PLAN.md). Aucun DCE antillais en téléchargement libre : guadeloupe.gouv.fr refuse cet environnement, et les communes passent par des plateformes à compte. Teo télécharge. Écran 2 prouvé en vrai sans IA : PLU de Baie-Mahault, zone UCa, deux AC1, sismicité 5, en 4 s (projet banc BANC-GPE-BAIE-MAHAULT). Suite : omega/banc/demo_aau.sql (client de démo), le PCMI, le courrier d'essai. Le lot #31 (marché d'essai TP01 sur BANC-DCE-VRD, relevé à 18 h 23) passe après.
+
 **18/10, 17 h 15 Z — Teo : B5 et B1 continuent, un lot à la fois, sans sous-agent ; but : niveau 2 sur la page des architectes.** Lot 1 : omega/CHIFFRAGE/lorani-preuves.md (chaque promesse : niveau 0/1/2, preuve, ce qui manque, IA ou non). Prochains lots sans IA : #31 premier relevé BDM, écran de la DPGF réelle de Luzarches, #51, #23, #6, #37.
 
 **18/10, 17 h Z — chantier DCE arrêté (crédit IA de la recette épuisé).** BANC-DCE-VRD (Luzarches, lot 1) : DPGF lue (4 p., 39 postes, 0,1569 €), CCTP bloqué (« credit balance is too low »). Rien d'autre déposé. Les fichiers vérifiés et les manifestes sont dans le scratchpad de la session (perdus avec le conteneur ; ils se retéléchargent depuis les SOURCE d'A1). À la reprise, après la recharge : CCTP Luzarches relu par le socle, puis Touët (le seul avec des plans), à 0,04 € la page.
