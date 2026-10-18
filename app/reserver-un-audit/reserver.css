@@ -514,3 +514,33 @@
     transition: none !important;
   }
 }
+
+/* ─── 2 · Bande de fin : la phrase en très grand sur noir ───
+   Relevé de scale.com/demo (le <p> du pied de page), getComputedStyle le
+   18/10/2026 à 390, 768, 1024, 1440 et 1700 : 116 px / 116 px, -1.16 px
+   (-0.01em), graisse 400, blanc sur #000 dès 768 ; 40 px / 40 px, -0.4 px à
+   390. Gouttière 24 px, la même que .rdv-wrap.
+   Écart assumé : la référence place 160 px et ses colonnes de liens au-dessus
+   de la phrase, puis 200 px dessous (réseaux, copyright). Ici la bande n'a que
+   la phrase : 72 px / 120 px de haut et de bas, comme .rdv-section. */
+.rdv-bande {
+  padding: 72px 0;
+  background: #000;
+  color: #fff;
+}
+.rdv-bande-phrase {
+  margin: 0;
+  font-size: 40px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  font-weight: 400;
+  text-wrap: balance;
+}
+@media (min-width: 768px) {
+  .rdv-bande {
+    padding: 120px 0;
+  }
+  .rdv-bande-phrase {
+    font-size: 116px;
+  }
+}

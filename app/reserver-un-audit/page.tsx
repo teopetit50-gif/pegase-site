@@ -181,6 +181,14 @@ export default function ReserverUnAuditPage() {
           </div>
         </section>
 
+        {/* ═══ 2 — bande de fin : la phrase, en très grand, blanc sur noir.
+           C'est le pied de page de la référence (scale.com/demo) ramené à sa
+           phrase ; Teo, 18/10 : « sur cette page seulement ». ═══ */}
+        <section className="rdv-bande" aria-label="Le principe de l'audit, en une phrase">
+          <div className="rdv-wrap">
+            <p className="rdv-bande-phrase">Chiffrer d&apos;abord, recommander ensuite.</p>
+          </div>
+        </section>
       </div>
     </PageShell>
   );
