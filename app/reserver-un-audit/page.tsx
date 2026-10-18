@@ -72,37 +72,26 @@ const NOMS_POSTES: Record<string, string> = Object.fromEntries(
   POSTES.map((p) => [p.id, `${p.system} · ${p.nom}`]),
 );
 
-/* Les outils de la carte : ceux que le code appelle vraiment. Logos officiels :
-   Anthropic (pied de page d'anthropic.com), Next.js (nextjs.org), Resend (resend.com),
-   Stripe (kit de logos Stripe), Vercel (triangle de la page Geist de Vercel).
-   Claude et Supabase : leurs pages de marque ne donnent que le pictogramme
-   (le logo Claude complet n'est pas proposé en fichier) ; ces deux signes
-   viennent du paquet simple-icons déjà installé. Tailwind : logotype officiel
-   de tailwindcss.com. `largeur` garde les
-   proportions de chaque fichier, à hauteur égale de 36 px. Autorisés par Teo, qui
-   précise : ils disent quels outils Omega utilise, pas une collaboration. */
+/* Les outils de la carte : six, les plus connus d'un dirigeant (Teo, 18/10 au
+   soir : « il y a peut-être trop de logos, mets-en moins et les plus pro »).
+   Partis : Claude (doublon d'Anthropic), Resend, Tailwind, React, GSAP, des
+   outils de développeur. Logos officiels : Anthropic (pied de page
+   d'anthropic.com), Stripe (kit de logos Stripe), Vercel (triangle de la page
+   Geist), Next.js (nextjs.org), Supabase et Google Meet (pictogrammes du paquet
+   simple-icons). `largeur` garde les proportions de chaque fichier, à hauteur
+   égale de 36 px. Autorisés par Teo, qui précise : ils disent quels outils
+   Omega utilise, pas une collaboration. Deux rangées de trois. */
 const RANGEE_UN = [
-  { nom: "Claude", fichier: "/logos/outils/claude.svg", largeur: 36 },
   { nom: "Anthropic", fichier: "/logos/outils/anthropic.svg", largeur: 52 },
-  { nom: "Supabase", fichier: "/logos/outils/supabase.svg", largeur: 36 },
+  { nom: "Stripe", fichier: "/logos/outils/stripe.svg", largeur: 86 },
   { nom: "Vercel", fichier: "/logos/outils/vercel.svg", largeur: 36 },
 ];
 const RANGEE_DEUX = [
   { nom: "Next.js", fichier: "/logos/outils/nextjs.svg", largeur: 179 },
-  { nom: "Resend", fichier: "/logos/outils/resend.svg", largeur: 170 },
-  { nom: "Stripe", fichier: "/logos/outils/stripe.svg", largeur: 86 },
-];
-/* Preuves dans le code : lib/visio.ts crée des salles Google Meet, GSAP est importé
-   par des composants, Tailwind est dans globals.css, React est le framework. Pour
-   React, GSAP et Google Meet, la page de marque ne donne pas de fichier : pictogramme
-   du paquet simple-icons. */
-const RANGEE_TROIS = [
+  { nom: "Supabase", fichier: "/logos/outils/supabase.svg", largeur: 36 },
   { nom: "Google Meet", fichier: "/logos/outils/googlemeet.svg", largeur: 36 },
-  { nom: "Tailwind CSS", fichier: "/logos/outils/tailwind.svg", largeur: 286 },
-  { nom: "React", fichier: "/logos/outils/react.svg", largeur: 36 },
-  { nom: "GSAP", fichier: "/logos/outils/gsap.svg", largeur: 36 },
 ];
-const RANGEES = [RANGEE_UN, RANGEE_DEUX, RANGEE_TROIS];
+const RANGEES = [RANGEE_UN, RANGEE_DEUX];
 
 /* Un logo en masque : le PNG est transparent, la couleur vient du CSS. */
 function Marque({ nom, fichier, largeur }: { nom: string; fichier: string; largeur: number }) {
