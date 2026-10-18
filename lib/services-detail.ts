@@ -159,7 +159,7 @@ const ANSWR: ServiceDetail = {
     },
     {
       q: "Ça gère plusieurs langues ?",
-      a: "[ANSWR : réponse multilingue à confirmer]",
+      a: "Pour l'instant, ANSWR répond en français. Les autres langues ne sont pas encore disponibles.",
     },
   ],
   ctaTitre: "Voir ANSWR répondre sur vos propres demandes",
