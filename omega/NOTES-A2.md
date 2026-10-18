@@ -32,6 +32,7 @@ section (voir `git log -1`). Avant : `c2fdd1e`, `b69423f` (envoi WhatsApp et AR2
 | Chiffrage des canaux `omega/CHIFFRAGE/canaux.md` | ecf5275 | — | Pour Teo |
 | Envoi WhatsApp (`meta_whatsapp`) et LRE AR24 dans `expediteur` ; accusés WhatsApp → `noter_remise` dans `reception` ; GUIDE-AR24, § envoi de GUIDE-WHATSAPP (11/10) | b69423f | B (doubles), T | **Déployé** : `expediteur` v14, `reception` v13 ; `noter_remise` accepte `meta_whatsapp` ; `meta_whatsapp` et `ar24` restent `branche = false` |
 | Accusés AR24 : fonction `webhooks-ar24` (jeton dans l'URL, relecture signée GET /mail avant `noter_remise`), `lire(id)` du client AR24, URL de webhook passée à chaque LRE (15/10) | 8c0e608 | B (doubles), T | **Déployé** (17/10) : `expediteur` v15, `webhooks-ar24` v1 (verify_jwt false, « webhook non configuré » tant que les secrets manquent) ; secrets `AR24_WEBHOOK_JETON`, `AR24_WEBHOOK_URL` (Teo) |
+| Banc : `omega/banc/expediteur_whatsapp.sql` (ligne meta_whatsapp du numéro de test Meta, daliro, branche reste false) et `omega/banc/connexion_gmail.sql` (état OAuth au nom du gérant du banc + lien de départ, faute d'écran « Messagerie » sur omegaai.fr) (18/10) | voir le dernier commit | — | À jouer par le coordinateur |
 
 ### Ce qui attend le coordinateur
 
