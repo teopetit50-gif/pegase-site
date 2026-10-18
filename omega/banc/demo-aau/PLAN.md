@@ -1,5 +1,9 @@
 # Démo Lorani pour un architecte de Guadeloupe — plan (B5, 18/10/2026)
 
+> **Échéance (Teo, 18/10, 18 h Z) : rencontre la semaine du 28 octobre ; tout le chemin de démo prêt ET répété le
+> lundi 27 octobre 2026.** Le compte de Teo, rattaché par erreur à aa01, ne sert pas à la démo : son retrait attend une
+> confirmation humaine.
+
 Demande de la session bureau (18/10, 17 h 13 Z, par le coordinateur) : Teo rencontre la semaine prochaine un architecte de
 Guadeloupe. On ne cherche rien sur lui et on ne le contacte pas. Il faut un client de démo sur la recette, un chemin de
 démo en six écrans au plus, avec une capture par écran, le temps réel de lecture, et la liste honnête de ce qui ne marche
