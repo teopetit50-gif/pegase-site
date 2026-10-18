@@ -56,9 +56,14 @@ function pdfs(rep) {
 
 const URL_SB = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://ygwbgpowzlbdaajlsqkn.supabase.co').replace(/\/+$/, '');
 const CLE = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? 'sb_publishable_a12GN1jHf0IJR4xcKvPTXw_NlPb51zl';
-const EMAIL = process.env.BANC_EMAIL ?? 'gerant@banc-varelo.test';
-const MOT = process.env.BANC_MOT_DE_PASSE ?? 'Recette-Omega-2026';
-const CLIENT = 'cccccccc-0000-4000-8000-00000000000c';
+/* le client : le banc par défaut ; LORANI_CLIENT pour un autre (la démo de Guadeloupe : …aa01). Hors du banc, la
+   connexion vient de variables d'environnement posées en local (LORANI_EMAIL, LORANI_MOT_DE_PASSE) : aucun mot de passe
+   n'est écrit dans le dépôt. */
+const BANC = 'cccccccc-0000-4000-8000-00000000000c';
+const CLIENT = process.env.LORANI_CLIENT ?? BANC;
+const EMAIL = process.env.LORANI_EMAIL ?? process.env.BANC_EMAIL ?? (CLIENT === BANC ? 'gerant@banc-varelo.test' : null);
+const MOT = process.env.LORANI_MOT_DE_PASSE ?? process.env.BANC_MOT_DE_PASSE ?? (CLIENT === BANC ? 'Recette-Omega-2026' : null);
+if (!voir && (!EMAIL || !MOT)) { console.error(`client ${CLIENT} : posez LORANI_EMAIL et LORANI_MOT_DE_PASSE en local`); process.exit(2); }
 const MAX_PIECES = Number(process.env.MAX_PIECES ?? 12);
 const MAX_MO = Number(process.env.MAX_MO ?? 60);
 /* le plafond du chantier (coordinateur, 18/10) : 400 pages lues au total sur les projets DCE, environ 4 € */
@@ -66,7 +71,7 @@ const MAX_PAGES = Number(process.env.MAX_PAGES ?? 400);
 /* les pages d'un PDF, estimées sans le lire : les objets /Type /Page, ou la taille si elle en dit davantage */
 const pagesDe = (octets) => Math.max(1, (octets.toString('latin1').match(/\/Type\s*\/Page(?![s\w])/g) ?? []).length,
   Math.round(octets.length / 150000)); // un plan compressé peut cacher ses pages : on prend aussi la taille (≈ 150 Ko la page)
-const REFERENCE = `BANC-DCE-${CLE_DOSSIER.toUpperCase().replace(/[^A-Z0-9]+/g, '-')}`.slice(0, 40);
+const REFERENCE = `${CLIENT === BANC ? 'BANC' : 'DEMO'}-DCE-${CLE_DOSSIER.toUpperCase().replace(/[^A-Z0-9]+/g, '-')}`.slice(0, 40);
 
 /* le type et le rôle au contrôle, devinés du nom du fichier */
 function deviner(nom) {
@@ -100,7 +105,7 @@ async function rest(methode, chemin, corps, entetes = {}) {
 }
 /* les pages des pièces DCE déjà déposées : lues (nb_pages), ou estimées tant qu'elles sont en lecture */
 async function pagesDeposees() {
-  const tous = await rest('GET', `lorani_projets?client_id=eq.${CLIENT}&reference=like.BANC-DCE-*&select=id`);
+  const tous = await rest('GET', `lorani_projets?client_id=eq.${CLIENT}&reference=like.${CLIENT === BANC ? 'BANC' : 'DEMO'}-DCE-*&select=id`);
   if (!tous.length) return { pieces: [], pages: 0 };
   const pieces = await rest('GET', `pieces?module=eq.lorani&objet_type=eq.lorani_projet&objet_id=in.(${tous.map((x) => x.id).join(',')})&select=statut,nb_pages,octets`);
   return { pieces, pages: pieces.reduce((n, x) => n + (x.nb_pages ?? Math.max(1, Math.round((x.octets ?? 0) / 200000))), 0) };

@@ -19,6 +19,23 @@ Recherche du 18/10, 17 h 20 Z, comme demandé, sans contourner quoi que ce soit 
   le croisement planches/CCTP/DPGF ne tourne pas). Formats PDF ; une DPGF en .xlsx ne se lit pas encore (à imprimer en PDF).
   Ensuite : `node omega/banc/dce_lorani.mjs <dossier>` (manifeste et sha256 comme pour les DCE d'A1).
 
+### Téléchargés par la session bureau le 18/10 (branche bureau-dce-gpe, 17bc35fd)
+
+Deux marchés de l'État à l'Hôtel de police de Pointe-à-Pitre, pièces publiques de guadeloupe.gouv.fr. Les sha256 de
+`SOURCES-GUADELOUPE.md` sont vérifiés par B5 (10 fichiers sur 10).
+- **gpe-relamping** (installations électriques, éclairage LED de la DTPN) : CCTP (9 p.), DPGF imprimée en PDF (3 p.), et
+  quatre plans de récolement électrique, un par niveau (1 p. chacun). Soit 16 pages, environ 0,65 € de lecture.
+- **gpe-videosurveillance** (rénovation du système) : CCTP (30 p.) et DPGF (2 p.), sans plan. Soit 32 pages, environ 1,30 €.
+
+**À dire honnêtement** : ce sont des **lots techniques** (électricité, courants faibles), pas des planches d'architecte.
+Les plans sont des plans de récolement électrique, pas des plans de façades, de coupes ou de masse. Le croisement qu'ils
+permettent : CCTP contre DPGF (postes décrits et non chiffrés, et l'inverse), et les luminaires ou les circuits repérés
+sur les plans contre les quantités de la DPGF, si le lecteur les relève. Pas de PLU, de surface ni de hauteur.
+
+Dépôt au retour du crédit, sur le client de démo, sans mot de passe dans le dépôt :
+`LORANI_CLIENT=cccccccc-0000-4000-8000-00000000aa01 LORANI_EMAIL=… LORANI_MOT_DE_PASSE=… node omega/banc/dce_lorani.mjs <dossier>`
+(les deux variables sont posées en local par la session bureau ; le projet prend la référence DEMO-DCE-<dossier>).
+
 ## 2. Le client de démo (SQL du coordinateur : `omega/banc/demo_aau.sql`)
 
 - `clients` : « Atelier d'Architecture et d'Urbanisme (démo) », `secteur = 'archi'` (la barre de /espace2 montre alors
@@ -58,6 +75,26 @@ Recherche du 18/10, 17 h 20 Z, comme demandé, sans contourner quoi que ce soit 
 - Attendu à l'écran : date de dépôt 05/10/2026 et numéro proposés puis confirmés ; échéances recalculées ; après la
   demande, pièces réclamées PCMI5 et PCMI7, nouveau délai de trois mois ; bordereau PCMI (#23) avec PCMI5 et PCMI7 « demandées
   par la mairie ».
+
+### Un compte dans deux organisations : l'écran Lorani ne sait pas choisir (constaté le 18/10)
+
+- `chargerDossier` prend le **premier compte trouvé** (`comptes … limit(1)`, sans ordre) : avec un compte chez Omega et
+  chez aa01, l'organisation retenue est arbitraire. Les **écritures** (projet, permis, dépôt) partent alors sous ce
+  client-là.
+- Les **lectures** des tables Lorani ne filtrent pas l'organisation : la RLS renvoie les lignes de toutes les
+  organisations du compte, et l'écran mêle donc les projets d'Omega et ceux de la démo.
+- /espace2 n'a pas de vrai sélecteur d'organisation : le menu affiche le nom de l'organisation du profil.
+- **Pour la démo** : un compte qui n'appartient qu'à aa01. Par exemple un alias de Teo, ou le gérant de démo
+  demo-aau@banc-varelo.test avec un mot de passe posé par le bureau hors du dépôt. Sinon, il faut un lot écran qui
+  choisisse l'organisation (paramètre, ou celle de l'espace) et filtre chaque lecture par `client_id`.
+
+### Le dépôt d'un courrier sans mot de passe dans le dépôt
+
+`courrier-reel.mjs` ne lit aucun mot de passe : il prend un fichier de session (le jeton d'une connexion), passé en
+argument. La session bureau se connecte une fois à l'adresse de démo, exporte la session dans un fichier local hors du
+dépôt, puis lance `node omega/recette-b5/courrier-reel.mjs <session.json> omega/banc/demo-aau/courrier-essai-recepisse.pdf
+<adresse de démo> lorani_recepisse_depot`. Autre voie : les variables LORANI_EMAIL et LORANI_MOT_DE_PASSE en local, comme
+pour `dce_lorani.mjs`.
 
 ## 4. Le chemin de démo, six écrans
 
