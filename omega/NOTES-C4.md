@@ -4,7 +4,13 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 `components/espace/offload/`, `app/espace/offload/`, et ce fichier. Coordinateur : session
 `session_01BCGFdpRKBvXKjouC75sYBg`. Je n'appelle jamais Supabase : le coordinateur pose, je reçois les sorties brutes.
 
-## REPRISE (reprise du 17/10)
+## REPRISE (pause du 18/10, 17 h Z — focus grand groupe et architecture)
+
+- Fait : c4_01 à c4_16 posés et verts sur la recette (421 ok) ; 44 lignes sur 45 prouvées (15 attend la messagerie A2).
+- En cours : import « Omega client OFFLOAD » (prospects Guadeloupe, 11 896 comptes dormants), écrit et vérifié, NON poussé (données personnelles ; décision de Teo attendue) ; fichier hors dépôt, dans le scratchpad de la session.
+- Prochain pas : sur décision de Teo, pousser ce fichier ou livrer le seul générateur (sans données) ; rien d'autre côté OFFLOAD.
+
+### Reprise du 17/10
 
 17/10 : Teo tranche, « un message par trimestre » prévaut. c4_16 posé et vert (recette : test_c4_* 421 ok). Aucun prochain pas sans Teo ou tiers. La réécriture dans le CRM attend un
 connecteur : ne pas la faire. Rien d'autre en cours.
