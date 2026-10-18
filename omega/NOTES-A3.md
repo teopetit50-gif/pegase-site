@@ -4,6 +4,8 @@ Branche `worker-a3`. Dernière mise à jour : 06/10/2026, 03 h 50 Paris (reprise
 
 ## REPRISE (pause de sécurité, 18/10 07 h 30 Z ; rien en cours ; Messagerie b0becc5 fusionnée dans main 47ec59ea, Équipe et son correctif fusionnés)
 
+- 18/10 16 h Z : `omega/banc/client_omega.sql` (à poser par le coordinateur, recette seulement — garde sur private.reglages environnement) : organisation « Omega » (config.slug = 'omega', aucune colonne slug), compte de Teo s'il manque (mot de passe aléatoire bcrypt, jamais écrit), gérant par rattacher_membre en service_role, modules FILED…OFFLOAD dans abonnements_modules (codes présents dans moteurs_reconnus), reglages_envois en « essai » vers teopetit50@gmail.com ; select final : id. Pas de porte « créer une organisation » dans le socle ; les installations par module (filed_installer…) restent à faire avec l'id. Non exécuté par moi.
+
 - 18/10 : carte **Messagerie** dans Réglages (components/espace/reglages/Messagerie.tsx, montée dans EcranReglages, donc /espace/reglages et la section Données de /espace2/reglages, sans toucher aux fichiers de C1). Portes d'A2 (19al) : messagerie_preparer → messagerie-oauth/google/debut ; retour ?erreur= dit en clair puis retiré de l'adresse ; public.messageries (gérant/admin) : connectée / à reconnecter / non connectée, adresse, droits accordés ; « Déconnecter » → messagerie_revoquer (+ a_faire_par_le_client). Microsoft « bientôt ». L'adresse de retour n'est donnée que sur omegaai.fr (messagerie_hotes_retour). Recette 5 largeurs verte ; base réelle (gérant) : lecture, puis « Connecter Gmail » mène jusqu'à la page de connexion de Google (rien d'accordé). `relecture-messagerie.mjs` (CONNECTER=1).
 
 **Fait, poussé sur worker-a3** (tête = ce commit) :
