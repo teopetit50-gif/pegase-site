@@ -4,7 +4,15 @@ Session worker A2, branche `worker-a2`. Dernière mise à jour : 11/10/2026.
 Coordinateur depuis le 06/10 : session `session_01BCGFdpRKBvXKjouC75sYBg` (passation
 de `session_01B4JNQXyT69GytdvE9SjAnE`).
 
-## REPRISE — reprise du 15/10/2026 (pauses : 06/10 21 h Z, 11/10 15 h 40 Z)
+## REPRISE — pause de sécurité du 18/10/2026, 07 h 30 Z (pauses précédentes : 06/10, 11/10, 15/10)
+
+**En attente au 18/10** :
+- preuve WhatsApp `omega/banc/preuve_whatsapp.sql` (0796edd) : le coordinateur la joue dès que Teo donne
+  son numéro (à autoriser aussi dans l'app Meta). Secrets Meta posés, `meta_whatsapp` branché, expéditeur
+  ab8778d8 actif ;
+- Gmail : secrets Google posés, `messagerie` et `messagerie-oauth` v1 déployées, `gmail` branché ; reste
+  l'essai de Teo par `omega/banc/connexion_gmail.sql` (lien direct, faute d'écran : contrat des portes
+  envoyé à A3 le 18/10).
 
 Petits lots fermés, NOTES à jour à chaque SHA : on peut s'arrêter à tout moment. Rien n'est en
 cours entre deux lots. Branche `worker-a2` ; le dernier SHA est celui du commit qui touche cette
@@ -33,7 +41,7 @@ section (voir `git log -1`). Avant : `c2fdd1e`, `b69423f` (envoi WhatsApp et AR2
 | Envoi WhatsApp (`meta_whatsapp`) et LRE AR24 dans `expediteur` ; accusés WhatsApp → `noter_remise` dans `reception` ; GUIDE-AR24, § envoi de GUIDE-WHATSAPP (11/10) | b69423f | B (doubles), T | **Déployé** : `expediteur` v14, `reception` v13 ; `noter_remise` accepte `meta_whatsapp` ; `meta_whatsapp` et `ar24` restent `branche = false` |
 | Accusés AR24 : fonction `webhooks-ar24` (jeton dans l'URL, relecture signée GET /mail avant `noter_remise`), `lire(id)` du client AR24, URL de webhook passée à chaque LRE (15/10) | 8c0e608 | B (doubles), T | **Déployé** (17/10) : `expediteur` v15, `webhooks-ar24` v1 (verify_jwt false, « webhook non configuré » tant que les secrets manquent) ; secrets `AR24_WEBHOOK_JETON`, `AR24_WEBHOOK_URL` (Teo) |
 | Banc : `omega/banc/expediteur_whatsapp.sql` (ligne meta_whatsapp du numéro de test Meta, daliro, branche reste false) et `omega/banc/connexion_gmail.sql` (état OAuth au nom du gérant du banc + lien de départ, faute d'écran « Messagerie » sur omegaai.fr) (18/10) | 7d631e7 | — | **Joués** (expéditeur ab8778d8) |
-| Banc : `omega/banc/preuve_whatsapp.sql` — un envoi WhatsApp réel par le chemin normal (modèle hello_world, en_US), meta_whatsapp branché par le coordinateur le 18/10 | voir le dernier commit | — | À jouer (numéro de Teo à écrire) |
+| Banc : `omega/banc/preuve_whatsapp.sql` — un envoi WhatsApp réel par le chemin normal (modèle hello_world, en_US), meta_whatsapp branché par le coordinateur le 18/10 | 0796edd | — | À jouer (numéro de Teo à écrire) |
 
 ### Ce qui attend le coordinateur
 
