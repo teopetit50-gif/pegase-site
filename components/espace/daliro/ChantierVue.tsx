@@ -29,6 +29,7 @@ import ReceptionCarte from "./ReceptionCarte";
 import HeuresCarte from "./HeuresCarte";
 import RecalageDialog from "./RecalageDialog";
 import ImportDevisDialog from "./ImportDevisDialog";
+import DisponibilitesBloc from "./DisponibilitesBloc";
 import SignatureLienDialog from "./SignatureLienDialog";
 import MeteoCarte from "./MeteoCarte";
 import ApproCarte from "./ApproCarte";
@@ -37,6 +38,9 @@ import { Avis, Def, Pastille } from "../ui";
 import { dateCourte, dateHeure, montant, nombreFr, pourcent } from "../format";
 import { ACCEPTATIONS, CONFIRMATIONS, CONTROLES_LIGNE, EXECUTIONS, GRAVITES, ROLES_TIERS, STATUTS_AVENANT, STATUTS_CHANTIER, UNITES, VIGILANCES, familleControle, libelleEnvoi, libelleStatutFacture, libelleUnite } from "./etats";
 import { FACTURES_CANDIDATES_EXEMPLE } from "./exemples";
+import { aujourdHui } from "../exemples/socle";
+import QuestionsCarte from "./QuestionsCarte";
+import ReleveDialog from "./ReleveDialog";
 import { abandonnerAvenant, accepterEcart, changerStatutChantier, chargerFacturesCandidates, chiffrerLigneAvenant, confirmerDependance, detacherFacture, ecrireLigne, ecrireMarche, ouvrirAvenant, poserPrix, proposerDependances, proposerRemplacants, rattacherFacture, repondreConfirmation, retirerLigneAvenant, rouvrirMarche, signerAvenant, soumettreAvenant, validerPrix, verifierMarche } from "./portes";
 import type { Avenant, FactureCandidate, LigneAvenant, LigneMarche, Marche, Passage, Prix, Remplacant, Tableau } from "./types";
 
@@ -47,6 +51,7 @@ type Form =
   | { type: "lot_ligne"; ligne: LigneMarche }
   | { type: "ligne"; marche: Marche }
   | { type: "import"; marche: Marche }
+  | { type: "releve" }
   | { type: "marche" }
   | { type: "rouvrir"; marche: Marche }
   | { type: "verifier"; marche: Marche }
@@ -100,7 +105,8 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
         try { setRemplacants(await proposerRemplacants(f.passage.id)); } catch (e) { setErreur(e instanceof Error ? e.message : "La base n'a pas répondu."); setRemplacants([]); }
       } else {
         const lot = lots.find((l) => l.id === f.passage.lot_id);
-        setRemplacants(tiers.filter((t) => t.actif && t.roles.includes("sous_traitant") && t.id !== f.passage.tiers_id && (!lot?.corps_etat || t.corps_etat.includes(lot.corps_etat)) && !["absente", "echue"].includes(t.vigilance ?? "")).map((t) => ({ tiers_id: t.id, nom: t.nom, telephone: t.telephone, email: t.email, canal: t.canal ?? "email", vigilance: t.vigilance ?? "sans_objet", corps_commun: true, departement_ok: t.departements.length === 0 || t.departements.includes(c.departement) })));
+        setRemplacants(tiers.filter((t) => t.actif && t.roles.includes("sous_traitant") && t.id !== f.passage.tiers_id && (!lot?.corps_etat || t.corps_etat.includes(lot.corps_etat)) && !["absente", "echue"].includes(t.vigilance ?? "")
+          && !passages.some((o) => o.tiers_id === t.id && o.id !== f.passage.id && o.statut === "prevu" && o.debut <= f.passage.fin && o.fin >= f.passage.debut)).map((t) => ({ tiers_id: t.id, nom: t.nom, telephone: t.telephone, email: t.email, canal: t.canal ?? "email", vigilance: t.vigilance ?? "sans_objet", corps_commun: true, departement_ok: t.departements.length === 0 || t.departements.includes(c.departement) })));
       }
     }
     if (f?.type === "facture") {
@@ -327,7 +333,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
             <h2 className="esp-carte-titre">{c.nom}</h2>
             <div className="esp-kpi-sous">{c.reference ? `${c.reference} · ` : ""}{c.adresse ? `${c.adresse}, ` : ""}{c.code_postal} {c.commune}</div>
           </div>
-          <span className="esp-item-haut"><Pastille teinte={s.teinte}>{s.libelle}</Pastille>{c.marche_verifie || marches.some((m) => m.statut === "verifie") ? <Pastille teinte="vert" contour>Marché vérifié</Pastille> : <Pastille teinte="ambre" contour>Marché à vérifier</Pastille>}</span>
+          <span className="esp-item-haut"><Pastille teinte={s.teinte}>{s.libelle}</Pastille>{c.marche_verifie || marches.some((m) => m.statut === "verifie") ? <Pastille teinte="vert" contour>Marché vérifié</Pastille> : <Pastille teinte="ambre" contour>Marché à vérifier</Pastille>}<button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "releve" })}><ClipboardCheck width={14} height={14} aria-hidden="true" /> Relevé du chantier</button></span>
         </div>
         <dl className="esp-def esp-def--trois">
           <Def etiquette="Maître d'ouvrage" fort>{c.maitre_ouvrage_nom ?? <span className="esp-obligatoire">à désigner</span>}</Def>
@@ -455,8 +461,11 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
         ) : <Avis teinte="ambre">Aucun marché : les avenants et les situations ne peuvent pas être chiffrés tant que le marché signé n&apos;est pas saisi puis vérifié ligne à ligne.</Avis>}
       </section>
 
+      {/* ——— questions sur le chantier (b6_36) ——— */}
+      <QuestionsCarte key={`questions-${source}-${c.id}`} tableau={tableau} source={source} aujourdhui={aujourdHui()} />
+
       {/* ——— météo des passages extérieurs (b6_21) ——— */}
-      <MeteoCarte key={`meteo-${c.id}`} tableau={tableau} source={source} />
+      <MeteoCarte key={`meteo-${c.id}`} tableau={tableau} source={source} onLocal={onLocal} relire={relire} />
 
       {/* ——— planning ——— */}
       <section className="esp-carte" aria-label="Planning">
@@ -614,6 +623,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
             <li key={t.id}><span className="esp-fil-point" data-teinte={t.vigilance === "a_jour" ? "vert" : t.vigilance === "absente" || t.vigilance === "echue" ? "rouge" : undefined} /><div><div className="esp-fil-texte"><strong>{t.nom}</strong> — {t.roles.map((r) => ROLES_TIERS[r] ?? r).join(", ")}</div><div className="esp-fil-meta">{t.commune ?? ""}{t.telephone ? ` · ${t.telephone}` : ""}{t.email ? ` · ${t.email}` : ""}{t.roles.includes("sous_traitant") && t.vigilance ? <> · <Pastille teinte={VIGILANCES[t.vigilance].teinte} contour>{VIGILANCES[t.vigilance].libelle}</Pastille></> : null}</div></div></li>
           ))}
         </ul>
+        <DisponibilitesBloc tableau={tableau} source={source} />
         <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Bibliothèque de prix (tableau qui défile)" style={{ marginTop: 10 }}>
           <table className="esp-tableau">
             <thead><tr><th>Désignation</th><th>Unité</th>{voit_prix ? <th className="esp-num">PU HT</th> : null}<th>Origine</th><th>Statut</th><th></th></tr></thead>
@@ -705,8 +715,9 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
           {form?.type === "sur_place" || form?.type === "preuve" ? (
             <SignatureLienDialog key={`${form.type}-${form.avenant.id}`} mode={form.type === "sur_place" ? "preparer" : "preuve"} avenant={form.avenant} source={source} />
           ) : null}
+          {form?.type === "releve" ? <ReleveDialog tableau={tableau} /> : null}
           {form?.type === "import" ? (
-            <ImportDevisDialog key={`import-${form.marche.id}`} marche={form.marche} lots={lots} source={source} fermer={fermer}
+            <ImportDevisDialog key={`import-${form.marche.id}`} client={c.client_id} marche={form.marche} lots={lots} source={source} fermer={fermer}
                                apresReel={async (m) => { await relire(); setFait(m); }}
                                appliquerLocal={(nouvelles, m) => {
                                  const m2 = { ...form.marche, lignes: [...form.marche.lignes, ...nouvelles] };
@@ -721,7 +732,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
           ) : null}
           {form?.type === "remplacants" ? (
             <>
-              <DialogHeader><DialogIcone><Users width={18} height={18} aria-hidden="true" /></DialogIcone><DialogTitle>Remplaçants possibles</DialogTitle><DialogDescription>Sous-traitants du même corps d&apos;état, du même département, joignables, à jour de vigilance, qui n&apos;ont pas décliné ce passage.</DialogDescription></DialogHeader>
+              <DialogHeader><DialogIcone><Users width={18} height={18} aria-hidden="true" /></DialogIcone><DialogTitle>Remplaçants possibles</DialogTitle><DialogDescription>Sous-traitants du même corps d&apos;état, du même département, joignables, à jour de vigilance, libres ces jours-là (ni autre passage, ni absence notée), qui n&apos;ont pas décliné ce passage.</DialogDescription></DialogHeader>
               <DialogBody>
                 {remplacants === null ? <Loader variant="spin" /> : remplacants.length ? (
                   <ul className="esp-fil">{remplacants.map((r) => <li key={r.tiers_id}><span className="esp-fil-point" data-teinte={r.vigilance === "a_jour" ? "vert" : undefined} /><div><div className="esp-fil-texte"><strong>{r.nom}</strong>{r.telephone ? ` · ${r.telephone}` : ""}{r.email ? ` · ${r.email}` : ""}</div><div className="esp-fil-meta">{r.canal} · <Pastille teinte={VIGILANCES[r.vigilance].teinte} contour>{VIGILANCES[r.vigilance].libelle}</Pastille>{!r.departement_ok ? " · hors de ses départements" : ""}</div></div></li>)}</ul>

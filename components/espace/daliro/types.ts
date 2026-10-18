@@ -353,6 +353,8 @@ export type Reserve = {
   description: string;
   statut: "ouverte" | "levee";
   levee_le: string | null;
+  /* b6_32 : la réserve reconnue hors devis porte son avenant */
+  avenant_id?: string | null;
 };
 export type Reception = {
   id: string;
@@ -661,4 +663,25 @@ export type PointMensuel = {
   mois: string; du: string; au: string;
   chantiers: PointChantier[];
   totaux: { reperes: number; reperes_ht: number; signes: number; signes_ht: number; a_relancer: number; a_relancer_ht: number; reste_a_facturer: number };
+};
+
+/* b6_31 : les disponibilités des sous-traitants */
+export type Disponibilite = {
+  tiers: string; nom: string;
+  absences: { id: string; du: string; au: string; motif: string | null }[];
+  passages: { passage: string; chantier: string; tache: string | null; debut: string; fin: string }[];
+};
+
+/* b6_36 : une question posée à l'assistant sur un chantier (lue par son auteur seul). */
+export type QuestionChantier = {
+  id: string;
+  question: string;
+  statut: "en_attente" | "repondue" | "echec";
+  reponse: string | null;
+  couverte: boolean | null;
+  sources: string[];
+  raison: string | null;
+  motif: string | null;
+  cree_le: string;
+  repondu_le: string | null;
 };

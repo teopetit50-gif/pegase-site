@@ -148,6 +148,9 @@ export default function RecalageDialog({ mode, passage: p, tableau, source, onLo
                     </tbody>
                   </table>
                 </div>
+                {apercu.deplaces.some((d) => d.reconfirmer) ? (
+                  <p className="esp-kpi-sous" style={{ margin: "6px 0" }}>Les sous-traitants déjà sollicités pour l&apos;ancienne date reçoivent un message de décalage ; leur confirmation est redemandée à J-2.</p>
+                ) : null}
                 {apercu.fin_planning ? (
                   <Avis teinte={apercu.fin_prevue_chantier && apercu.fin_planning > apercu.fin_prevue_chantier ? "ambre" : "bleu"}>
                     Dernier passage le {dateCourte(apercu.fin_planning)}

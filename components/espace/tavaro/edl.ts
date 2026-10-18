@@ -38,6 +38,18 @@ export const VUES_UTILES = [
   { cle: "interieur", libelle: "Intérieur" },
 ] as const;
 
+/* la prise de vue guidée (b2, 15/10) : où se placer pour chaque vue, dans l'ordre du tour du véhicule */
+export const CONSIGNES_VUES: Record<string, string> = {
+  avant: "Placez-vous à trois pas devant le véhicule, au centre : la plaque, les deux phares et le pare-chocs entier dans le cadre.",
+  flanc_droit: "Longez le côté droit à trois pas : de la roue avant à la roue arrière, les deux portières et les jantes.",
+  arriere: "À trois pas derrière, au centre : la plaque, les feux et le pare-chocs entier.",
+  flanc_gauche: "Côté gauche, à trois pas : de la roue arrière à la roue avant, les deux portières et les jantes.",
+  compteur: "Contact mis, le kilométrage lisible et net, sans reflet.",
+  jauge: "La jauge de carburant ou la charge de la batterie, net, contact mis.",
+  interieur: "Depuis la portière avant, les sièges avant et arrière et les tapis.",
+};
+export const ORDRE_VUES = ["avant", "flanc_droit", "arriere", "flanc_gauche", "compteur", "jauge", "interieur"] as const;
+
 export const MODES_CAUTION = [
   { cle: "empreinte_carte", libelle: "Empreinte de carte" },
   { cle: "cheque", libelle: "Chèque" },

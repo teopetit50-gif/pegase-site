@@ -355,7 +355,7 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
           sous: [
             { libelle: "Accessibilité", href: `${RACINE}/reglages#accessibilite` },
             { libelle: "Données", href: `${RACINE}/reglages#donnees` },
-            { libelle: "Équipe", href: `${RACINE}/reglages#compte` },
+            { libelle: "Équipe", href: `${RACINE}/equipe` },
           ],
         },
       ],

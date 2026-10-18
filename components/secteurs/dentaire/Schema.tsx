@@ -130,7 +130,7 @@ export default function Schema() {
   return (
     <div className="overflow-x-auto">
       <div className="mx-auto min-w-[280px] max-w-[360px] py-2">
-        <Noeud titre="Tiroma" icone={<MarqueTiroma className="h-full w-full text-[24px]" />} vedette />
+        <Noeud titre="Tiroma" icone={<MarqueTiroma className="h-full w-full text-white" />} vedette />
         <Branches nombre={2} sens="separe" />
         <div className="grid grid-cols-2 gap-2">
           <Noeud petit titre="Agenda" sous="votre logiciel" Icone={CalendarDays} />

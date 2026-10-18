@@ -5,11 +5,19 @@
    jour, les factures à payer en priorité, l'activité récente, et un
    bandeau qui ouvre l'assistant. Tout est lu dans les mêmes données que
    « À payer » et « Activité » (exemple ou base réelle) ; aucune variation
-   inventée : un chiffre sans historique n'affiche pas de flèche. */
+   inventée : un chiffre sans historique n'affiche pas de flèche.
+
+   15/10/2026 — allégée sur le dessin du pilotage /omega (validé par Teo) :
+   une ligne par élément, le titre à gauche, la date à droite ; plus
+   d'icônes, de sous-lignes ni d'avatars ; la flèche au survol ; les
+   échéances sans colonne « État » (une date dépassée passe au rouge) ; plus
+   de bandeau de l'assistant, le bouton « Assistant » est en haut.
+   17/10/2026 — décision de Teo : plus de salutation ni de rangée de quatre
+   chiffres, comme la vue d'ensemble du pilotage. */
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Banknote, CheckCheck, ChevronRight, FileText, ListChecks, Sparkles } from "lucide-react";
+import { ArrowRight, ChevronRight } from "lucide-react";
 import { dateCourte, montant, relatif } from "@/components/espace/format";
 import { A_PAYER, aPayer, groupeDe, minuit, totaux } from "./filed/calculs";
 import { Squelette } from "./ui";
@@ -17,8 +25,6 @@ import { RACINE } from "./modules";
 import { useDonnees } from "./donnees";
 import { evenements } from "./evenements";
 import { ecrireStockage, useStockage } from "./Collection";
-import { useOrganisation } from "./organisation";
-import { Chiffre, EnDirect, Initiales } from "./vivant";
 import "./habillage.css";
 
 const CLE_TACHES = "espace2-collection-taches";
@@ -52,10 +58,10 @@ export default function Accueil() {
     const actions = [
       ...aRegler
         .filter((f) => ["retard", "semaine"].includes(groupeDe(f, aujourdhui)))
-        .map((f) => ({ id: f.id, titre: `Payer ${nomFournisseur(f.fournisseur_id)}`, sous: `${groupeDe(f, aujourdhui) === "retard" ? "En retard" : "Échéance"} · ${f.echeance_lue ? dateCourte(f.echeance_lue) : ""}`, lien: `${RACINE}/filed/a-payer` })),
+        .map((f) => ({ id: f.id, titre: `Payer ${nomFournisseur(f.fournisseur_id)}`, quand: f.echeance_lue ? dateCourte(f.echeance_lue) : "", retard: groupeDe(f, aujourdhui) === "retard", lien: `${RACINE}/filed/a-payer` })),
       ...donnees.demandes
         .filter((d) => d.statut === "en_attente")
-        .map((d) => ({ id: d.id, titre: `Valider : ${d.resume}`, sous: d.montant !== null ? `À valider · ${montant(d.montant, d.devise)}` : "À valider", lien: `${RACINE}/validations` })),
+        .map((d) => ({ id: d.id, titre: `Valider : ${d.resume}`, quand: d.montant !== null ? montant(d.montant, d.devise) : "", retard: false, lien: `${RACINE}/validations` })),
     ];
     return {
       aRegler,
@@ -84,59 +90,18 @@ export default function Accueil() {
   }, [brut]);
   const duJour = taches.filter((t) => !t.fait).slice(0, 4);
   const cocher = (id: string) => ecrireStockage(CLE_TACHES, JSON.stringify(taches.map((t) => (t.id === id ? { ...t, fait: true } : t))));
-  const { prenom } = useOrganisation();
-  const aFaire = (c?.actions.length ?? 0) + duJour.length;
-  const heureJour = new Date().getHours();
-  const salut = heureJour >= 18 ? "Bonsoir" : "Bonjour";
-  const enRetard = taches.filter((t) => !t.fait && t.echeance && new Date(t.echeance).getTime() < aujourdhui).length;
 
-  const kpis = [
-    { libelle: "Reste à payer", valeur: c?.totalARegler, sous: c ? `${c.aRegler.length} facture${c.aRegler.length > 1 ? "s" : ""} validée${c.aRegler.length > 1 ? "s" : ""}` : "", lien: `${RACINE}/filed/a-payer` },
-    { libelle: "En retard", valeur: c?.totalRetard, sous: c ? `${c.retard.length} échéance${c.retard.length > 1 ? "s" : ""} dépassée${c.retard.length > 1 ? "s" : ""}` : "", lien: `${RACINE}/filed/a-payer`, alerte: !!c?.retard.length },
-    { libelle: "À valider", valeur: c ? String(c.aValider) : undefined, sous: "demandes en attente de votre accord", lien: `${RACINE}/validations` },
-    { libelle: "Tâches en retard", valeur: String(enRetard), sous: `${duJour.length} tâche${duJour.length > 1 ? "s" : ""} ouverte${duJour.length > 1 ? "s" : ""}`, lien: `${RACINE}/taches` },
-  ];
 
   return (
-    <div className="v2-page v2-arrivee v2-va v2-vivant">
+    <div className="v2-page v2-arrivee v2-va v2-vivant oc-va-simple">
       <h1 className="v2-sr">Vue d&apos;ensemble</h1>
-      {/* 08/10 — la salutation : qui est là, et combien de choses l'attendent */}
-      <div className="v2-salut">
-        <div>
-          <p className="v2-salut-titre" suppressHydrationWarning>
-            {salut}
-            {prenom ? ` ${prenom}` : ""}
-            {c ? (
-              <span>
-                {" "}
-                — {aFaire ? `${aFaire} chose${aFaire > 1 ? "s" : ""} vous attend${aFaire > 1 ? "ent" : ""} ${new Date().getHours() < 12 ? "ce matin" : "aujourd'hui"}` : "rien d'urgent aujourd'hui"}
-              </span>
-            ) : null}
-          </p>
-          <p className="v2-salut-date" suppressHydrationWarning>{new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}</p>
-        </div>
-        <EnDirect />
-      </div>
       {erreur ? <p className="v2-gris">La base n&apos;a pas répondu : {erreur}</p> : null}
-
-      <section className="v2-va-kpis" aria-label="Chiffres clés">
-        {kpis.map((k) => (
-          <Link key={k.libelle} href={k.lien} className="v2-va-kpi" data-alerte={k.alerte ? "" : undefined}>
-            <span className="v2-va-kpi-libelle">{k.libelle}</span>
-            {k.valeur === undefined ? <Squelette largeur={120} hauteur={32} /> : <strong data-alerte={k.alerte ? "" : undefined}><Chiffre valeur={k.valeur} /></strong>}
-            <small className="v2-gris v2-va-kpi-sous">{k.sous}</small>
-          </Link>
-        ))}
-      </section>
 
       <div className="v2-va-grille">
         <div className="v2-va-col">
         <section className="v2-carte v2-carte-corps">
           <div className="v2-va-titre" style={{ marginBottom: 16 }}>
-            <div>
-              <h2 className="v2-h2">Factures reçues</h2>
-              <p className="v2-gris v2-va-sous">Montant reçu sur 7 jours glissants</p>
-            </div>
+            <h2 className="v2-h2">Factures reçues</h2>
             <span className="v2-champ v2-va-periode">
               <select value={periode} onChange={(e) => setPeriode(Number(e.target.value))} aria-label="Période">
                 <option value={7}>7 derniers jours</option>
@@ -159,16 +124,17 @@ export default function Accueil() {
             <div className="v2-tableau-cadre">
               <table className="v2-va-table">
                 <thead>
-                  <tr><th>Fournisseur</th><th>Échéance</th><th>État</th><th style={{ textAlign: "right" }}>Reste à payer</th><th aria-hidden="true" /></tr>
+                  <tr><th>Fournisseur</th><th>Échéance</th><th style={{ textAlign: "right" }}>Reste à payer</th></tr>
                 </thead>
                 <tbody>
                   {c.priorite.map(({ f, nom, groupe, reste }) => (
                     <tr key={f.id}>
-                      <td><span className="v2-va-fournisseur"><Initiales nom={nom} taille={24} />{nom}</span></td>
-                      <td className="v2-gris">{f.echeance_lue ? dateCourte(f.echeance_lue) : "—"}</td>
-                      <td><span className="v2-etat">{groupe === "retard" ? "En retard" : groupe === "semaine" ? "Cette semaine" : "À venir"}</span></td>
+                      <td><Link href={`${RACINE}/filed/a-payer`}>{nom}</Link></td>
+                      <td className="v2-gris" data-retard={groupe === "retard" ? "" : undefined}>
+                        {f.echeance_lue ? dateCourte(f.echeance_lue) : "—"}
+                        {groupe === "retard" ? <span className="v2-sr"> (en retard)</span> : null}
+                      </td>
                       <td style={{ textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{montant(reste, f.devise)}</td>
-                      <td><Link href={`${RACINE}/filed/a-payer`} aria-label={`Ouvrir la facture de ${nom}`}><ChevronRight width={16} height={16} /></Link></td>
                     </tr>
                   ))}
                 </tbody>
@@ -195,18 +161,17 @@ export default function Accueil() {
                   <input type="checkbox" aria-label={`Marquer « ${t.titre} » comme faite`} onChange={() => cocher(t.id)} />
                   <span className="v2-va-texte">
                     <span>{t.titre}</span>
-                    <small className="v2-gris">{["Tâche", t.qui, t.echeance ? dateCourte(t.echeance) : null].filter(Boolean).join(" · ")}</small>
                   </span>
+                  {t.echeance ? <span className="oc-meta" data-retard={new Date(t.echeance).getTime() < aujourdhui ? "" : undefined}>{dateCourte(t.echeance)}</span> : null}
                   <Link href={`${RACINE}/taches`} aria-label="Ouvrir les tâches"><ChevronRight width={16} height={16} /></Link>
                 </li>
               ))}
               {c.actions.slice(0, Math.max(0, 5 - duJour.length)).map((x) => (
                 <li key={x.id}>
-                  <span className="v2-va-pastille" aria-hidden="true">{x.titre.startsWith("Payer") ? <Banknote width={14} height={14} /> : <CheckCheck width={14} height={14} />}</span>
                   <span className="v2-va-texte">
                     <span>{x.titre}</span>
-                    <small className="v2-gris">{x.sous}</small>
                   </span>
+                  {x.quand ? <span className="oc-meta" data-retard={x.retard ? "" : undefined}>{x.quand}{x.retard ? <span className="v2-sr"> (en retard)</span> : null}</span> : null}
                   <Link href={x.lien} aria-label={`Ouvrir : ${x.titre}`}><ChevronRight width={16} height={16} /></Link>
                 </li>
               ))}
@@ -225,12 +190,10 @@ export default function Accueil() {
             <ul className="v2-va-liste">
               {c.activite.map((e) => (
                 <li key={e.id}>
-                  <span className="v2-va-pastille" aria-hidden="true">{e.quoi === "Document reçu" ? <FileText width={14} height={14} /> : e.quoi === "Décision" ? <ListChecks width={14} height={14} /> : <CheckCheck width={14} height={14} />}</span>
-                  <small className="v2-gris v2-va-heure" title={relatif(e.quand)}>{heureCourte(e.quand)}</small>
                   <span className="v2-va-texte">
-                    <span>{e.quoi}</span>
-                    <small className="v2-gris">{e.detail}{e.par ? ` · par ${e.par}` : ""}</small>
+                    <span>{e.quoi} : {e.detail}</span>
                   </span>
+                  <span className="oc-meta" title={relatif(e.quand)}>{heureCourte(e.quand)}</span>
                 </li>
               ))}
             </ul>
@@ -239,16 +202,6 @@ export default function Accueil() {
         </div>
       </div>
 
-      <section className="v2-carte v2-carte-corps v2-va-ia">
-        <div>
-          <p className="v2-va-ia-marque"><Sparkles width={14} height={14} aria-hidden="true" /> Assistant Omega</p>
-          <h2 className="v2-h2">Demandez à l&apos;assistant de préparer votre journée.</h2>
-          <p className="v2-gris" style={{ margin: 0 }}>Rédiger une relance, résumer un document, organiser vos tâches : posez la question, il répond en quelques secondes.</p>
-        </div>
-        <button type="button" className="v2-btn v2-btn--primaire" onClick={() => window.dispatchEvent(new Event("espace2-assistant"))}>
-          Ouvrir l&apos;assistant <ArrowRight width={16} height={16} aria-hidden="true" />
-        </button>
-      </section>
     </div>
   );
 }
