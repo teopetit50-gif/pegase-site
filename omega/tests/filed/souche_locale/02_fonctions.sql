@@ -1321,3 +1321,58 @@ end $$;
 create or replace function private.effacement_en_cours(p_client uuid) returns boolean language sql stable as $$
   select p_client::text = coalesce(current_setting('omega.effacement_client', true), '')
       or coalesce(current_setting('omega.effacement_objet', true), '') = 'oui' $$;
+
+
+-- a4_43 : private.filed_creer_fournisseur, texte de omega/SOCLE-EXTRAITS-COMMUN.sql ; private.filed_normaliser_nom,
+-- absente des extraits, est ici une approximation de souche (minuscules, sans accents ni ponctuation).
+create or replace function private.filed_normaliser_nom(p text) returns text
+language sql immutable set search_path to '' as $$
+  select nullif(btrim(regexp_replace(lower(translate(coalesce(p, ''), 'ÉÈÊËÀÂÄÎÏÔÖÛÜÇéèêëàâäîïôöûüç', 'EEEEAAAIIOOUUCeeeeaaaiioouuc')), '[^a-z0-9]+', ' ', 'g')), '')
+$$;
+
+CREATE OR REPLACE FUNCTION private.filed_creer_fournisseur(p_client uuid, p_identite jsonb, p_source text, p_document uuid DEFAULT NULL::uuid)
+ RETURNS filed_fournisseurs
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare
+  v_f public.filed_fournisseurs;
+  v_nom text;
+  v_numero integer;
+  v_pays text;
+begin
+  v_nom := coalesce(nullif(btrim(p_identite ->> 'nom'), ''),
+                    'Fournisseur ' || coalesce('SIREN ' || (p_identite ->> 'siren'), 'TVA ' || (p_identite ->> 'tva'),
+                                               p_identite ->> 'id_etranger', 'sans nom'));
+  v_pays := coalesce(p_identite ->> 'pays',
+                     case when p_identite ? 'siren' then 'FR'
+                          when p_identite ? 'tva' then replace(left(p_identite ->> 'tva', 2), 'EL', 'GR') end);
+  v_numero := private.filed_prochain_numero(p_client, 'fournisseur', 0::smallint);
+  insert into public.filed_fournisseurs (client_id, code, nom, nom_normalise, siren, siret, tva, id_etranger, pays, statut,
+                                         source, document_origine, regime_tva, confirme_le, confirme_par)
+  values (p_client, coalesce(nullif(upper(btrim(p_identite ->> 'code')), ''), 'F' || lpad(v_numero::text, 5, '0')),
+          left(v_nom, 200), private.filed_normaliser_nom(v_nom), p_identite ->> 'siren', p_identite ->> 'siret',
+          p_identite ->> 'tva', p_identite ->> 'id_etranger', v_pays,
+          case when p_source = 'import' then 'actif' else 'a_confirmer' end, p_source, p_document,
+          nullif(p_identite ->> 'regime_tva', ''),
+          case when p_source = 'import' then now() end, case when p_source = 'import' then (select auth.uid()) end)
+  returning * into v_f;
+
+  if p_source <> 'import' then
+    perform private.filed_deposer_demande(p_client, null, 'filed.valider_fournisseur', 'filed_fournisseur', v_f.id::text,
+      'Nouveau fournisseur : ' || private.filed_libelle_fournisseur(v_f)
+        || coalesce(', IBAN ' || private.filed_masquer_iban(p_identite ->> 'iban'), ''),
+      null,
+      jsonb_build_object('fournisseur', v_f.id, 'nom', v_f.nom, 'siren', v_f.siren, 'tva', v_f.tva, 'pays', v_f.pays,
+                         'iban', case when p_identite ? 'iban' then private.filed_masquer_iban(p_identite ->> 'iban') end,
+                         'iban_empreinte', case when p_identite ? 'iban'
+                                                then encode(sha256(convert_to(p_identite ->> 'iban', 'UTF8')), 'hex') end,
+                         'document', p_document, 'source', p_source),
+      'filed:fournisseur:' || v_f.id::text);
+    perform private.filed_historiser(p_client, null, 'filed_fournisseur', v_f.id::text, 'cree',
+      'Fournisseur nouveau, né d''une pièce : une personne le confirme avant tout paiement.',
+      jsonb_build_object('document', p_document, 'code', v_f.code));
+  end if;
+  return v_f;
+end $function$;

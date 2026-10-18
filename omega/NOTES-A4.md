@@ -2,7 +2,7 @@
 
 ## REPRISE (pauses du 06/10, 11/10, 15/10, 18/10 ; reprise le 18/10 à 16 h 20 Z)
 
-- **Fait** : lots a4_01 → a4_42 (plus a4_26b, a4_34b) écrits et testés ; 77 fonctions pgTAP `^test_a4_` vertes en local. Fonctions Deno `omega/functions/compta/` (26 tests) et `omega/functions/sortie/` (7 tests). Chiffrage : `omega/CHIFFRAGE/filed.md`.
+- **Fait** : lots a4_01 → a4_43 (plus a4_26b, a4_34b) écrits et testés ; 84 fonctions pgTAP `^test_a4_` vertes en local. Fonctions Deno `omega/functions/compta/` (26 tests) et `omega/functions/sortie/` (7 tests). Chiffrage : `omega/CHIFFRAGE/filed.md`.
 - **Recette** : tout FILED posé et vert jusqu'à a4_42 inclus (17/10, 15 h 46 Z ; a4_41 posé à la main).
 - **Attend le coordinateur** : A5 adapte `preparer_effacement` et le contrôle 55000 d'`effacer_*` aux fichiers gardés ; l'écran d'effacement (C1/A3) branché sur `filed_bilan_effacement` ; la garde des fichiers des pièces dans `preparer_effacement` (A5/socle) ;  la fusion de `worker-a4` dans main (seulement `omega/`) ; la pose en production des a4_* (a4_26b à la main) ; le déploiement des fonctions `sortie` (aucun compte tiers ; planificateur chaque minute en POST avec la clé de service ; variables `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ANON_KEY`) et `compta`.
 - **Attend Teo** : les identifiants des éditeurs (Pennylane, QuickBooks/Intuit, Cegid Loop), la clé Sirene et l'application HMRC, la vérification Google (CASA) et Microsoft, la plateforme agréée de la voie 1, le prix des paliers ; les contradictions de la page (synthèse du chiffrage, ligne 3), dont « tout effacer à tout moment » (fac:287) contre la conservation de dix ans.
@@ -42,7 +42,7 @@ Paquet 2 (000018 → 000027), relevé à 16 h 52 Z ; paquet 3 (000028 → 000043
 | Saut de ligne dans le nom du fournisseur | 000026 (et Rechnungskorrektur : « GLN … \nLief-Nr … ») | Le XML de la norme porte ce saut de ligne. **À nettoyer par FILED** : le nom du fournisseur devrait avoir ses espaces repliés (`\s+` → une espace) à sa création. |
 | `identite.siren` | tous les allemands | Défaut de FILED confirmé (voir paquet 1). |
 
-Lot correctif proposé (a4_43) : `identite.siren` muet hors de France ; `doublon.exact` préfère la pièce de même date et même montant ; nom du fournisseur aux espaces repliés.
+Lot correctif **a4_43** (écrit, à poser ; tests `a4_31_corrections_banc.sql`, verts en local) : `identite.siren` passe hors de France (préfixe de TVA autre que FR, ou pays hors France et DROM) ; `doublon.exact` préfère la pièce de même date et même montant ; nom du fournisseur aux blancs repliés (création, et noms déjà posés). Pose « par repère » sur les corps en base : un repère introuvable arrête la migration sans rien poser. La souche locale reçoit `filed_creer_fournisseur` (extrait du socle) et une approximation de `filed_normaliser_nom`.
 
 
 Branche `worker-a4`. Périmètre : `omega/migrations/a4_*.sql`, `omega/tests/filed/`.
