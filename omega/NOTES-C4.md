@@ -4,11 +4,11 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 `components/espace/offload/`, `app/espace/offload/`, et ce fichier. Coordinateur : session
 `session_01BCGFdpRKBvXKjouC75sYBg`. Je n'appelle jamais Supabase : le coordinateur pose, je reçois les sorties brutes.
 
-## REPRISE (18/10, 21 h 30 Z — reprise d'OFFLOAD, lot technique sans compte tiers)
+## REPRISE (18/10, 22 h Z — modèle 2 : envoi automatique)
 
-- Fait : c4_01 à c4_16 verts sur la recette (421 ok) ; c4_17 posé, corrigé (journal : survenu_le), à rejouer ; local 393 ok.
-- En cours : rien. La liste Guadeloupe reste hors git et hors recette (consigne du coordinateur, 18/10) ; elle est dans le scratchpad seulement.
-- Prochain pas : lot « modèle 2 » (envoi automatique) prêt en plan, non écrit : il attend le feu vert de Teo dans cette session.
+- Fait : c4_01 à c4_17 verts sur la recette ; c4_18 (envoi automatique par défaut, accord de Teo dans la session C4) écrit, local 412 ok.
+- En cours : rien. La liste Guadeloupe reste hors git et hors recette ; scratchpad seulement.
+- Prochain pas : poser c4_18 ; côté socle (coordinateur) : offload/envoi.email sur activation_seul_autorisee, offload/offload.message_retenu sur actions_sans_accord.
 
 ### Reprise du 17/10
 
@@ -451,6 +451,25 @@ Banc local : 28 tests, 312 assertions vertes, migrations posées deux fois ; tsc
 l'échéance honorée après message est comptée au suivi). Le chiffre repris compte tous les achats des 90 jours,
 sans prétendre qu'ils sont dus au seul message.
 
+## Lot c4_18 — envoi automatique par défaut, « modèle 2 » (18/10)
+
+Teo (relayé à 21 h 20 Z, confirmé dans la session : « offload a le droit de répondre automatiquement ») : les messages
+d'OFFLOAD partent sans validation par défaut, sauf doute ou sujet non autorisé ; réglable par organisation. Un message
+par trimestre et la quarantaine de 90 jours restent.
+
+`omega/modules/offload/migrations/c4_18_envoi_automatique.sql` :
+- `offload_reglages.envoi_auto` (vrai par défaut) et `sujets_auto` (reprise, echeance, affaire), via `offload_regler` ;
+- le message part par `private.offload_envoyer` : seul quand l'accord permanent du socle (politique offload / envoi.email)
+  est actif ; sinon « À valider » comme avant ;
+- `private.offload_retenue` : envoi automatique éteint, sujet non autorisé, compte à vérifier, adresse générique,
+  moins de trois achats (reprise) → demande « offload.message_retenu » à laquelle l'envoi s'adosse ; une personne décide ;
+- `public.offload_donner_accord_auto` (gérant/admin, une personne), `offload_revoquer_accord_auto`, `offload_envoi_auto` ;
+  éteindre `envoi_auto` révoque l'accord.
+Redéfinitions : `offload_preparer_message`, `offload_echeances_cycle`, `offload_relancer_affaire`, `offload_regler`.
+Test : `omega/tests/offload/c4_18_envoi_automatique.sql` (19 assertions). Banc local : 43 tests, 412 ok.
+Attention : entre 22 h et minuit Z, les tests c4 qui comparent current_date (UTC) aux dates de Paris tombent ; lancer
+la suite hors de cette heure, ou la session en Europe/Paris.
+
 ## Lot c4_17 — restitution des données OFFLOAD d'une organisation (18/10)
 
 `omega/modules/offload/migrations/c4_17_restitution.sql` : `public.offload_restitution(p_client uuid)` rend en un seul
@@ -718,3 +737,4 @@ Partielles : 6, 11, 15, 38.
 - 17/10 — lot c4_16 (un message par trimestre, relance écrite éteinte par défaut) : 41 tests, 387 ok en local.
 - 18/10, 21 h 30 Z — reprise (coordinateur) : lot c4_17 (restitution des données) : 42 tests, 393 ok en local.
 - 18/10, 21 h 35 Z — c4_17 : la date du journal opposable s'appelle survenu_le (recette : 42703) ; corrigé, local 393 ok.
+- 18/10, 22 h Z — lot c4_18 (envoi automatique par défaut, modèle 2) : 43 tests, 412 ok en local (session en Europe/Paris).
