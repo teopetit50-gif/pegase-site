@@ -3,7 +3,7 @@
 -- Pour chaque groupe (Groupe EDH, Ankama, Normaxis) :
 --   · son gérant rejoint l'équipe « presidence » : il recevra la section « Le groupe ce matin » (b1_20) au titre de
 --     la présidence, en plus de ce qu'il reçoit comme gérant ;
---   · le point du matin du groupe est réglé à 7 h, heure de Paris (territoire FR), du lundi au vendredi, jours
+--   · le point du matin du groupe est réglé à 7 h, heure de Paris (territoire metropole), du lundi au vendredi, jours
 --     fériés exceptés, contenu complet, canal email (les adresses en .test ne reçoivent rien : la preuve se lit
 --     dans points_du_jour, pas dans une boîte).
 -- Idempotent (not exists) ; rien n'est supprimé ; un réglage déjà présent n'est pas touché.
@@ -26,7 +26,7 @@ begin
     select g.client_id, v_equipe, g.gerant
     where not exists (select 1 from public.equipes_membres m where m.equipe_id = v_equipe and m.user_id = g.gerant);
     insert into public.points_reglages (client_id, user_id, actif, heure, territoire, jours, sauf_feries, canal, contenu, si_vide)
-    select g.client_id, null, true, time '07:00', 'FR', array[1, 2, 3, 4, 5]::smallint[], true, 'email', 'complet', 'court'
+    select g.client_id, null, true, time '07:00', 'metropole', array[1, 2, 3, 4, 5]::smallint[], true, 'email', 'complet', 'court'
     where not exists (select 1 from public.points_reglages r where r.client_id = g.client_id and r.user_id is null);
   end loop;
 end $banc$;
