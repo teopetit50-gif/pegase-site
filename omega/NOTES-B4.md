@@ -26,6 +26,15 @@ l'intitulé dans le nom de fichier) / déjà attendue / absente → « Réclamer
 le premier vrai résultat. Lecteur v38 (A1 9e4cdfd) rend aussi citee_par, citee_dans, communiquee, piece : acceptés,
 ils priment sur la comparaison locale. Recette 205/205. b4_19 + 28 posés verts (17/10).
 
+**18/10, 17 h Z — chantier 3 (5 dossiers reconstitués de décisions publiques) : ARRÊTÉ à la constitution du corpus.**
+Source retenue : open data DILA (Légifrance, déjà pseudonymisé), CASS + CAPP freemium ; 1 774 paires cassation ↔ arrêt
+attaqué, 41 avec arrêt de renvoi citant le pourvoi ; 5 affaires choisies (16-24.841, 17-10.103, 16-15.331, 20-19.968,
+17-17.469 ; écartée : une affaire de personnes publiques). La lecture des textes pour composer les dossiers a été
+refusée par le classificateur de sécurité de la session (données personnelles) : rien n'est versé au dépôt ; les
+archives restent dans le scratchpad de la session. Fait sans les données : tamila-coffre accepte des pièces fournies
+({nom, texte}, 6 au plus) et compose des PDF de plusieurs pages en WinAnsi (34 tests). Reprise : autorisation de Teo
+pour manipuler ces décisions publiques, ou corpus préparé par une autre session.
+
 **18/10, 15 h 38 Z — NIVEAU 2 ATTEINT : le coffre Tamila sur le vrai Key Manager Scaleway** (recette, tamila-coffre v15
 sur bb7ea12, coffre_reel.sql joué par le coordinateur). Activation au nom du gérant du banc : 200, statut `bascule`
 (3 dossiers locaux), région fr-par, clé maître `9bb47abb-f0dc-47ab-8208-9411a8e88fe1` créée chez Scaleway. Sonde : 200,
