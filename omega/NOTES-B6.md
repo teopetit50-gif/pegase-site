@@ -3,11 +3,11 @@
 Branche `worker-b6`. Coordinateur : session `session_01B4JNQXyT69GytdvE9SjAnE` (Fable, jusqu'au 06/10 03 h 10 Paris), puis `session_01BCGFdpRKBvXKjouC75sYBg` (Opus 5.5) — passation reçue le 06/10 à 03 h 10 : « B6 est clos et fusionné ; rien n'est attendu ».
 Dernière mise à jour : 06/10/2026, 03 h 00 Paris — lot B6 terminé.
 
-## REPRISE — chantier 2 (Teo, 18/10/2026) : DCE réels lus par le lecteur
+## REPRISE — chantier 3 (Teo, 18/10/2026) : jusqu'à 30 DCE réels lus comme devis, arrêt à 2 € ou 19 h 30 Z
 
 **Posé et vert sur la recette, écrans dans main** : b6_01 → b6_35 (dernier passage : 36 ok, MeteoCarte et l'échange météo dans main). Météo MET Norway : état A.
 
-**À poser (coordinateur)** : omega/banc/dce_daliro.sql bloc 1 ; puis `node omega/banc/dce_daliro.mjs` (clé de service, une fois les DCE d'A1 dans omega/banc/dce-reels/) ; puis bloc 3 (contrôles, coût). Ensuite : noter dans CHIFFRAGE/daliro.md les lignes qui passent de B à A.
+**À poser (coordinateur)** : omega/banc/dce_daliro.sql bloc 1 (MO public + trois chantiers « DCE réels — … »). Puis B6 lance `node omega/banc/dce_daliro.mjs` (gérant du banc, clé publique, RLS) dès que des DCE sont sur worker-a1 (dce-reels/<neuf|renovation|vrd>/<dossier>/) ; bloc 3 pour le coût exact ; noter les lignes B → A dans CHIFFRAGE/daliro.md.
 
 **Attend Teo** : WhatsApp Business (Meta), transcription des vocaux, accord permanent J-2, région des données (Supabase ; vercel.json sans région). Phrases à corriger sur la page : CHIFFRAGE/daliro.md (fin) — « une journée pour remplacer » et « disponibilités » sont désormais vraies une fois b6_29/b6_31 posés.
 
@@ -132,6 +132,7 @@ Repère du marché : Graneet, Obat, Batappli, Tolteck, Extrabat font tous des **
 
 ## Journal de session
 
+- 18/10, 16 h 50 UTC : chantier 3 : dce_daliro.mjs réécrit sur le modèle de dce_lorani.mjs (B5) — gérant du banc, clé publique, sous RLS ; un marché DCE-<dossier> par DCE (btp_ecrire_marche) sur le chantier de sa catégorie ; DPGF/DQE/BPU/devis PDF téléversés puis btp_deposer_devis ; lecture attendue pièce par pièce ; coût estimé à la page (0,04 €, le gérant ne lit pas les coûts), arrêt à 2 € estimés ou 19 h 30 Z. Bloc 1 SQL réduit au MO et aux trois chantiers. Connexion du gérant vérifiée (200). DCE pas encore sur worker-a1 (A1 attend le téléchargement par une personne).
 - 18/10, 16 h 30 UTC : chantier 2 (Teo) : dce_daliro.sql (MO public, trois chantiers et marchés à vérifier DCE-NEUF / DCE-RENO / DCE-VRD sur le banc ; contrôles lignes, total, coût) + dce_daliro.mjs (téléverse le DPGF/devis PDF de chaque DCE puis btp_deposer_devis : la pièce reçue déclenche la lecture ; refuse au-delà de 2 € consommés ce jour ; attend 10 min, coût total). Un SQL seul ne peut pas poser les octets dans le stockage. DCE pas encore sur worker-a1.
 - 18/10, 07 h 32 UTC : PAUSE de sécurité (Teo). Rien en cours ; arrêt propre.
 - 17/10, 17 h 15 UTC : lot de l'assistant clos (coordinateur) : 718 ok, fonction et cron actifs. En attente de Teo (WhatsApp, voix).
