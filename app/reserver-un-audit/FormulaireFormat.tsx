@@ -54,7 +54,9 @@ function dateDecalee(annee: number, mois: number, jour: number, decalage: number
   return { annee: d.getUTCFullYear(), mois: d.getUTCMonth() + 1, jour: d.getUTCDate() };
 }
 
-export default function FormulaireFormat() {
+/* `retard` : le formulaire arrive en bloc après le chapô, sur la cadence que la
+   page pose (cascade d'entrée, o-bloc-apparait). */
+export default function FormulaireFormat({ retard = 0 }: { retard?: number }) {
   const formulaire = useRef<HTMLFormElement>(null);
   const [manquants, setManquants] = useState<string[]>([]);
   const [mailFaux, setMailFaux] = useState(false);
@@ -181,7 +183,13 @@ export default function FormulaireFormat() {
   const bloque = envoi === "envoi" || envoi === "ok";
 
   return (
-    <form ref={formulaire} noValidate onSubmit={envoyer} className="rdv-formulaire">
+    <form
+      ref={formulaire}
+      noValidate
+      onSubmit={envoyer}
+      className="rdv-formulaire o-bloc-apparait"
+      style={{ "--o-mot-d": `${retard}ms` } as React.CSSProperties}
+    >
       <div className="rdv-champs">
         <Saisie nom="prenom" libelle="Prénom" autoComplete="given-name" erreur={erreur("prenom")} />
         <Saisie nom="nom" libelle="Nom" autoComplete="family-name" erreur={erreur("nom")} />

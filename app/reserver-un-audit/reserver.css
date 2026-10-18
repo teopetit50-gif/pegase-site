@@ -585,3 +585,15 @@
   background: #fff;
   color: #000;
 }
+
+/* ─── L'entrée au chargement (cascade du hero, hero-section.css) ───
+   Ces classes finissent sur transform et filter. Avec « forwards », ces
+   deux propriétés resteraient après la fin de la cascade et feraient du
+   formulaire et de la carte un contexte d'empilement permanent, sans raison.
+   « backwards » ne tient que pendant le délai et l'animation ; l'opacité de
+   base revient à 1 pour que le texte reste là une fois la cascade finie. */
+.rdv .o-mot,
+.rdv .o-bloc-apparait {
+  opacity: 1;
+  animation-fill-mode: backwards;
+}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
+import { MotsReveles } from "@/components/ui/hero-section";
 import {
   EstimationRetenue,
   ModeleRetenu,
@@ -112,6 +113,19 @@ function Marque({ nom, fichier, largeur }: { nom: string; fichier: string; large
   );
 }
 
+/* ─── L'entrée au chargement : la cadence du hero de l'accueil ───
+   Le titre se peint mot à mot (.o-mot, hero-section.css), départ 220 ms et
+   pas de 70 ms, comme app/page.tsx. Le chapô part 140 ms après le dernier mot
+   du titre, comme les sections de l'accueil (components/accueil/Apparition.tsx).
+   La colonne de droite part avec lui ; les rappels et le formulaire, 160 ms
+   plus tard. Tout est en CSS : sans JavaScript ou en mouvement réduit, le
+   texte est là sans attendre. */
+const TITRE = "Un audit à la mesure de votre organisation";
+const DEPART_TITRE = 220;
+const PAS_MOT = 70;
+const DELAI_CHAPO = DEPART_TITRE + PAS_MOT * (TITRE.split(/\s+/).length - 1) + 140;
+const DELAI_SUITE = DELAI_CHAPO + 160;
+
 export default function ReserverUnAuditPage() {
   return (
     <PageShell>
@@ -125,24 +139,35 @@ export default function ReserverUnAuditPage() {
             <div className="rdv-hero-grille">
               <div className="rdv-hero-gauche">
                 <div className="rdv-entete">
-                  <h1 className="rdv-h1">Un audit à la mesure de votre organisation</h1>
-                  <p className="rdv-lead">
+                  <h1 className="rdv-h1">
+                    <MotsReveles lignes={TITRE} depart={DEPART_TITRE} pas={PAS_MOT} />
+                  </h1>
+                  <p
+                    className="rdv-lead o-bloc-apparait"
+                    style={{ "--o-mot-d": `${DELAI_CHAPO}ms` } as React.CSSProperties}
+                  >
                     Plusieurs services, plusieurs validateurs&nbsp;: nous mesurons
                     d&apos;abord, et le devis est établi à partir de vos volumes. Trois
                     formats, du cadrage de 45 minutes à la journée dans vos locaux.
                   </p>
                 </div>
 
-                <div className="rdv-notes">
+                <div
+                  className="rdv-notes o-bloc-apparait"
+                  style={{ "--o-mot-d": `${DELAI_SUITE}ms` } as React.CSSProperties}
+                >
                   <ModeleRetenu noms={NOMS_MODELES} />
                   <SiteRetenu />
                   <EstimationRetenue noms={NOMS_POSTES} />
                 </div>
 
-                <FormulaireFormat />
+                <FormulaireFormat retard={DELAI_SUITE} />
               </div>
 
-              <div className="rdv-carte">
+              <div
+                className="rdv-carte o-bloc-apparait"
+                style={{ "--o-mot-d": `${DELAI_CHAPO}ms` } as React.CSSProperties}
+              >
                 <blockquote className="rdv-citation">
                   <p>
                     Un système ne se justifie que si la difficulté qu&apos;il traite coûte
