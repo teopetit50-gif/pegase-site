@@ -5,6 +5,10 @@ Dernière mise à jour : 05/10/2026, 23 h.
 
 ## REPRISE (pause demandée par Teo, 06/10/2026 à 21 h Z)
 
+**18/10, 20 h 00 Z — PAUSE DE SÉCURITÉ (coordinateur). Rien en cours, tout est poussé sur worker-b5.**
+- Démo Guadeloupe pour le lundi 27/10, prête et répétée (omega/banc/demo-aau/PLAN.md). Client aa01 posé, PCMI de Baie-Mahault, PLU, servitudes et risques relevés en vrai, courriers d'essai prêts ; ne pas utiliser le compte de Teo (rattaché par erreur à aa01) ; il faut un compte propre à aa01, ou un lot écran qui choisit l'organisation.
+- Crédit IA de la recette épuisé : rien n'est à déposer avant sa recharge. À la recharge, dans l'ordre : le CCTP de Luzarches à relire, les courriers d'essai du PCMI, puis les DCE de l'Hôtel de police (branche bureau-dce-gpe ; relamping 16 p., vidéosurveillance 32 p. ; LORANI_CLIENT, LORANI_EMAIL et LORANI_MOT_DE_PASSE en local), et le chronométrage du dépôt en direct.
+
 **18/10, 17 h 35 Z — LOT PRIORITAIRE : démo Guadeloupe** (omega/banc/demo-aau/PLAN.md). Aucun DCE antillais en téléchargement libre : guadeloupe.gouv.fr refuse cet environnement, et les communes passent par des plateformes à compte. Teo télécharge. Écran 2 prouvé en vrai sans IA : PLU de Baie-Mahault, zone UCa, deux AC1, sismicité 5, en 4 s (projet banc BANC-GPE-BAIE-MAHAULT). Suite : omega/banc/demo_aau.sql (client de démo), le PCMI, le courrier d'essai. Le lot #31 (marché d'essai TP01 sur BANC-DCE-VRD, relevé à 18 h 23) passe après.
 
 **18/10, 17 h 15 Z — Teo : B5 et B1 continuent, un lot à la fois, sans sous-agent ; but : niveau 2 sur la page des architectes.** Lot 1 : omega/CHIFFRAGE/lorani-preuves.md (chaque promesse : niveau 0/1/2, preuve, ce qui manque, IA ou non). Prochains lots sans IA : #31 premier relevé BDM, écran de la DPGF réelle de Luzarches, #51, #23, #6, #37.
