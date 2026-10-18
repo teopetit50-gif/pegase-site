@@ -1,13 +1,10 @@
 # NOTES — worker A4 (FILED : comptabilité, archivage, pilotage, circuit de validation)
 
-## REPRISE (pauses du 06/10, 11/10, 15/10, 18/10 ; reprise le 18/10 à 16 h 20 Z)
+## REPRISE (pause du 18/10, 17 h 15 Z — Teo : le focus passe au grand groupe et à l'architecture)
 
-- **Fait** : lots a4_01 → a4_43 (plus a4_26b, a4_34b) écrits et testés ; 84 fonctions pgTAP `^test_a4_` vertes en local. Fonctions Deno `omega/functions/compta/` (26 tests) et `omega/functions/sortie/` (7 tests). Chiffrage : `omega/CHIFFRAGE/filed.md`.
-- **Recette** : tout FILED posé et vert jusqu'à a4_42 inclus (17/10, 15 h 46 Z ; a4_41 posé à la main).
-- **Attend le coordinateur** : A5 adapte `preparer_effacement` et le contrôle 55000 d'`effacer_*` aux fichiers gardés ; l'écran d'effacement (C1/A3) branché sur `filed_bilan_effacement` ; la garde des fichiers des pièces dans `preparer_effacement` (A5/socle) ;  la fusion de `worker-a4` dans main (seulement `omega/`) ; la pose en production des a4_* (a4_26b à la main) ; le déploiement des fonctions `sortie` (aucun compte tiers ; planificateur chaque minute en POST avec la clé de service ; variables `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ANON_KEY`) et `compta`.
-- **Attend Teo** : les identifiants des éditeurs (Pennylane, QuickBooks/Intuit, Cegid Loop), la clé Sirene et l'application HMRC, la vérification Google (CASA) et Microsoft, la plateforme agréée de la voie 1, le prix des paliers ; les contradictions de la page (synthèse du chiffrage, ligne 3), dont « tout effacer à tout moment » (fac:287) contre la conservation de dix ans.
-- **Prochaine étape** : aucune sans consigne ; l'effacement côté FILED est complet (garde, scellé, export, purge, bilan).
-- **Chantier 3 (banc, 18/10)** : 36 EXEMPLES DE LA NORME Factur-X / ZUGFeRD 2 (corpus ZUGFeRD Apache-2.0, commit 82e886fb2136 ; PAS de vraies factures) dans `omega/banc/factures-opendata/SOURCE.tsv` avec leur sha256 ; aucune collectivité ne publie ses factures en PDF sous licence ouverte (RECHERCHE.md). Paquet 1 déposé à 16 h 39 Z par `omega/banc/factures_opendata.mjs` au nom du gérant du banc : 10 pièces, R2026-000008 → 000017, expéditeur `exemple-norme:…`. Suite : le coordinateur joue `omega/banc/factures_opendata.sql` (blocs 2, 3) ; puis `MAX_PIECES=10` jusqu'aux 26 restantes, sous 1 € et avant 19 h 30 Z.
+- **Fait** : lots a4_01 → a4_43 posés et verts sur la recette (^test_a4_ 84/84, 18/10 17 h 13 Z) ; chantier 3 du banc clos : les 36 exemples de la norme Factur-X / ZUGFeRD 2 (pas de vraies factures) lus par FILED, 0 € d'IA, écarts classés ci-dessous ; les trois défauts trouvés corrigés par a4_43 et prouvés par recontrôle (000022, 000025 écartées ; identite.siren levé hors de France).
+- **En cours** : rien.
+- **Prochain pas** : aucun sans consigne. Restent au coordinateur et à Teo : fusion de `worker-a4` (seulement `omega/`), pose en production des a4_* (a4_26b, a4_41 à la main), déploiement des fonctions `sortie` et `compta`, écran d'effacement (C1/A3), garde des fichiers dans `preparer_effacement` (A5) ; identifiants des éditeurs, clé Sirene, prix des paliers.
 
 ## Banc, chantier 3 (18/10) — exemples de la norme lus par FILED (PAS de vraies factures)
 
