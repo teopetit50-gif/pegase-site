@@ -5,6 +5,8 @@ Dernière mise à jour : 05/10/2026, 23 h.
 
 ## REPRISE (pause demandée par Teo, 06/10/2026 à 21 h Z)
 
+**18/10 — petit lot fermé (Teo, par le coordinateur) : #31 révision BT.** b5_34_revision_bt.sql + test b5_23 : séries INSEE (BT01 001710986, TP01 001711007), relevé horaire par pg_net sur l'API publique BDM (cron lorani-index), formule par marché, révision par situation. Scénario local conforme avec une vraie réponse INSEE. À poser après b5_33. L'écran ne montre pas encore la révision.
+
 **15/10, 16 h 16 Z — PAUSE 50 % (Teo). Arrêt propre, rien en cours, tout est poussé sur worker-b5.** Tout b5_ est vert sur la recette ; l'écran Lorani complet est parti dans main. Reste la #31 (révision BT), qui attend le compte API INSEE de Teo. À la reprise : attendre le feu vert de Teo, puis le lot du coordinateur.
 
 **15/10 — reprise par petits lots (chaque SHA met ces notes à jour ; pause possible à tout moment).**
