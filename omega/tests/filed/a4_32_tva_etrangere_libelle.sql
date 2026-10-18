@@ -1,6 +1,7 @@
 -- Tests A4 — lot 36 (a4_44) : le message de tva.taux pour un fournisseur établi hors de France. Données fictives.
 -- pgTAP, schéma « tests » d'A5 ; utilise tests.a4_organisation, tests.a4_facture (a4_10_facture_electronique.sql) et
 -- tests.a4_facture_etrangere (a4_19_registres_hors_union.sql), à poser avant. Ce fichier ne supprime rien.
+-- Le taux s'écrit « 19 » en local et « 19.000 » sur la recette (numeric(…,3)) : les motifs le tolèrent.
 
 create or replace function tests.test_a4_44_01_tva_etrangere() returns setof text
 language plpgsql as $f$
@@ -14,7 +15,7 @@ begin
   perform private.filed_controler_facture((de ->> 'facture')::uuid);
   return next ok(exists (select 1 from public.filed_controles where facture_id = (de ->> 'facture')::uuid and code = 'tva.taux'
                            and resultat = 'anomalie' and gravite = 'bloquant'
-                           and message like 'TVA étrangère facturée (19 %) par un fournisseur établi hors de France%'),
+                           and message like 'TVA étrangère facturée (19%) par un fournisseur établi hors de France%'),
                  'Fournisseur allemand à 19 % : « TVA étrangère », toujours bloquant');
 
   -- Le même taux chez un fournisseur français : le message d'avant.
@@ -24,6 +25,6 @@ begin
   values ((o ->> 'client')::uuid, (fr ->> 'facture')::uuid, (fr ->> 'document')::uuid, 'S', 19, 100, 19, 'xml');
   perform private.filed_controler_facture((fr ->> 'facture')::uuid);
   return next ok(exists (select 1 from public.filed_controles where facture_id = (fr ->> 'facture')::uuid and code = 'tva.taux'
-                           and resultat = 'anomalie' and message like 'Taux de TVA qui n''existe pas en France : 19 %%'),
+                           and resultat = 'anomalie' and message like 'Taux de TVA qui n''existe pas en France : 19%'),
                  'Fournisseur français à 19 % : « n''existe pas en France »');
 end $f$;
