@@ -4,11 +4,11 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 `components/espace/offload/`, `app/espace/offload/`, et ce fichier. Coordinateur : session
 `session_01BCGFdpRKBvXKjouC75sYBg`. Je n'appelle jamais Supabase : le coordinateur pose, je reçois les sorties brutes.
 
-## REPRISE (pause du 18/10, 17 h Z — focus grand groupe et architecture)
+## REPRISE (18/10, 21 h 30 Z — reprise d'OFFLOAD, lot technique sans compte tiers)
 
-- Fait : c4_01 à c4_16 posés et verts sur la recette (421 ok) ; 44 lignes sur 45 prouvées (15 attend la messagerie A2).
-- En cours : import « Omega client OFFLOAD » (prospects Guadeloupe, 11 896 comptes dormants), écrit et vérifié, NON poussé (données personnelles ; décision de Teo attendue) ; fichier hors dépôt, dans le scratchpad de la session.
-- Prochain pas : sur décision de Teo, pousser ce fichier ou livrer le seul générateur (sans données) ; rien d'autre côté OFFLOAD.
+- Fait : c4_01 à c4_16 posés et verts sur la recette (421 ok) ; c4_17 (restitution des données) écrit, vert en local (393 ok), à poser.
+- En cours : rien. La liste Guadeloupe reste hors git et hors recette (consigne du coordinateur, 18/10) ; elle est dans le scratchpad seulement.
+- Prochain pas : poser c4_17 sur la recette ; aucun mode d'envoi ne change sans confirmation de Teo.
 
 ### Reprise du 17/10
 
@@ -451,6 +451,16 @@ Banc local : 28 tests, 312 assertions vertes, migrations posées deux fois ; tsc
 l'échéance honorée après message est comptée au suivi). Le chiffre repris compte tous les achats des 90 jours,
 sans prétendre qu'ils sont dus au seul message.
 
+## Lot c4_17 — restitution des données OFFLOAD d'une organisation (18/10)
+
+`omega/modules/offload/migrations/c4_17_restitution.sql` : `public.offload_restitution(p_client uuid)` rend en un seul
+JSON toutes les lignes OFFLOAD de l'organisation (seize tables, sans `client_id`) et les lignes `offload.%` du journal
+opposable, avec un résumé des comptes par table. Gérant ou admin seulement ; la restitution est elle-même au journal
+(`offload.restitution`) et ne modifie rien. L'effacement reste au socle. Aucun mode d'envoi touché.
+
+Test : `omega/tests/offload/c4_17_restitution.sql` (données fictives). Banc local : 42 tests, 393 ok.
+À ajouter à a5_01 : `offload_restitution(p_client uuid)`.
+
 ## Lot c4_16 — un message par compte et par trimestre (décision de Teo, 17/10)
 
 `omega/modules/offload/migrations/c4_16_un_message.sql` :
@@ -706,3 +716,4 @@ Partielles : 6, 11, 15, 38.
 - 15/10 — lot c4_15 (message de reprise ancré sur l'échéance qui revient) : 40 tests, 382 ok en local.
 - 15/10, 12 h 32 Z — recette : c4_01 à c4_15 verts (c4_09 compris après 1dcd066d). Question « un message par trimestre » transmise à Teo.
 - 17/10 — lot c4_16 (un message par trimestre, relance écrite éteinte par défaut) : 41 tests, 387 ok en local.
+- 18/10, 21 h 30 Z — reprise (coordinateur) : lot c4_17 (restitution des données) : 42 tests, 393 ok en local.
