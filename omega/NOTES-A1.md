@@ -1,5 +1,16 @@
 # NOTES-A1 — ouvrier LECTEUR (session worker A1)
 
+## 18/10, chantiers 2 et 3 (reprise à 16 h 05 Z, arrêt avant 19 h 30 Z)
+- **DCE réels** (`omega/banc/dce-reels/`) : 5 dossiers en téléchargement direct, chacun avec un `SOURCE-*.md` (URL et sha256). Les fichiers sont dans le scratchpad, pas dans git ; B5 et B6 les rechargent vers le stockage du banc.
+  - Neuf : Castres-Gironde, complet avec plans.
+  - Rénovation : Touët-de-l'Escarène, complet avec plans ; Le Boulou, 7 lots.
+  - VRD : Luzarches ; Pencran, partiel.
+- **Bloqué**
+  - PLACE et Mégalis demandent un formulaire d'acceptation des CGU : c'est pour Teo, voir `CANDIDATS.md`.
+  - Antilles : aucune source sans compte trouvée.
+- **Tamila** : j'attends de B4 les chemins des 5 dossiers reconstitués.
+- **Coût IA du chantier** : 0 €, rien n'a encore été lu.
+
 ## REPRISE — pause de sécurité demandée par Teo le 18/10/2026, 07 h 30 Z
 
 **Branche `worker-a1`. Le commit d'arrêt est le dernier, « NOTES-A1 : REPRISE (pause du 18/10) ».** Tout est commité et poussé : rien en cours, aucun fichier public touché.
