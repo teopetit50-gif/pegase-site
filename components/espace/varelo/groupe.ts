@@ -42,6 +42,10 @@ export type PageSociete = {
 
 export type LigneBalance = { compte: string; solde: number };
 
+// Une balance tirée des comptes annuels publiés (INPI, omega/banc/varelo_groupes_publics.py) : chiffres réels,
+// mais le jeu ouvert ne publie ni la trésorerie ni le détail des comptes.
+export const comptesPublies = (source: string | null) => /^Comptes annuels publiés/.test(source ?? "");
+
 /* grp_deposer_balance → jsonb */
 export type ResultatBalance = {
   depot: string;

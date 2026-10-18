@@ -27,6 +27,7 @@ import {
   GABARIT_BALANCE_GENERALE,
   SYNONYMES_BALANCE_GENERALE,
   chargerPage,
+  comptesPublies,
   deposerBalance,
   ligneDePage,
   reglerObjectif,
@@ -66,8 +67,9 @@ export default function GroupePage({ source, contexte, client_id, societes, onFa
   const total = useMemo(() => ({
     ventes: lignes.reduce((s, l) => s + l.ventes, 0),
     resultat: lignes.reduce((s, l) => s + l.resultat, 0),
-    tresorerie: lignes.reduce((s, l) => s + l.tresorerie, 0),
+    tresorerie: lignes.reduce((s, l) => s + (comptesPublies(l.source) ? 0 : l.tresorerie), 0),
     sous: lignes.filter((l) => l.sous_plancher).length,
+    publies: lignes.filter((l) => comptesPublies(l.source)).length,
   }), [lignes]);
 
   const role = contexte?.role;
@@ -154,8 +156,11 @@ export default function GroupePage({ source, contexte, client_id, societes, onFa
           <dl className="esp-def esp-def--trois" style={{ marginTop: 10 }}>
             <div><dt>Ventes du groupe (sociales)</dt><dd className="esp-def-fort">{montant(total.ventes)}</dd></div>
             <div><dt>Résultat cumulé</dt><dd className="esp-def-fort">{montant(total.resultat)}</dd></div>
-            <div><dt>Trésorerie</dt><dd className="esp-def-fort">{montant(total.tresorerie)} {total.sous ? <Pastille teinte="rouge">{total.sous} sous plancher</Pastille> : null}</dd></div>
+            <div><dt>Trésorerie</dt><dd className="esp-def-fort">{total.publies === lignes.length ? "non publiée" : montant(total.tresorerie)} {total.publies && total.publies < lignes.length ? <span className="vrl-paire-sous">hors {total.publies} société{total.publies > 1 ? "s" : ""} aux comptes publiés</span> : null} {total.sous ? <Pastille teinte="rouge">{total.sous} sous plancher</Pastille> : null}</dd></div>
           </dl>
+          {total.publies ? (
+            <Avis teinte="bleu"><strong>Chiffres réels, tirés des comptes annuels publiés à l&apos;INPI</strong> (jeu ouvert « Ratios financiers BCE / INPI », licence ouverte) : les ventes et le résultat de l&apos;exercice clos. La trésorerie n&apos;y figure pas ; le bilan non plus.</Avis>
+          ) : null}
           <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Le groupe par société (tableau qui défile)" style={{ marginTop: 12 }}>
             <table className="esp-tableau">
               <thead>
@@ -179,12 +184,13 @@ export default function GroupePage({ source, contexte, client_id, societes, onFa
                     <td className="esp-num">{l.ecart_objectif === null ? <span className="vrl-paire-sous">pas d&apos;objectif</span> : <>{signe(l.ecart_objectif)}<span className="vrl-paire-sous">objectif à date {montant(l.objectif_a_date)}</span></>}</td>
                     <td className="esp-num">{montant(l.resultat)}</td>
                     <td className="esp-num">
-                      {montant(l.tresorerie)}
+                      {comptesPublies(l.source) ? <span className="vrl-paire-sous">non publiée</span> : montant(l.tresorerie)}
                       {l.tresorerie_plancher !== null ? <span className="vrl-paire-sous">plancher {montant(l.tresorerie_plancher)}</span> : null}
                       {l.sous_plancher ? <Pastille teinte="rouge">Sous le plancher</Pastille> : null}
                     </td>
                     <td>
                       au {dateCourte(l.arrete_le)}
+                      {comptesPublies(l.source) ? <span className="vrl-paire-sous">comptes annuels publiés</span> : null}
                       <span className="vrl-paire-sous">{l.age_jours > 35 ? <Pastille teinte="ambre">ancienne de {l.age_jours} jours</Pastille> : `il y a ${l.age_jours} jour${l.age_jours > 1 ? "s" : ""}`}</span>
                     </td>
                     {peutObjectif ? (

@@ -1,5 +1,17 @@
 # Session B1 — VARELO, le référentiel du groupe (sociétés, pôles, rapprochement)
 
+## REPRISE (18/10/2026, 17 h Z — chantier 3, sources publiques)
+
+Trois vrais petits groupes chargés en balances générales d'après les comptes annuels publiés :
+`omega/banc/varelo_groupes_publics.sql` (écrit par `varelo_groupes_publics.py`, à poser par le coordinateur sur
+la recette ; rejoué vert deux fois sur la maquette locale : 10 sociétés, 19 balances, aucun doublon). Groupe EDH
+(3 sociétés, clôture 31/08), Ankama (4), Normaxis (3, Arkenor sans N-1). Chiffres : « Ratios financiers BCE /
+INPI » (data.economie.gouv.fr, Licence Ouverte, lignes publiques, comptes sociaux) ; liens mère-filiales :
+Wikidata P749 (l'INPI ne les ouvre pas ; data.inpi.fr répond 403 d'ici). La trésorerie n'est pas dans le jeu
+ouvert : l'écran dit « non publiée » (GroupePage, `comptesPublies`). Caisses : celles du banc Sogexal prennent
+« Z fictif (banc) » dans leur source, l'écran l'affiche (Caisses). Coût IA : 0 €. Reste : mots de passe des
+trois gérants (`gerant-edh|ankama|normaxis@banc-varelo.test`) par l'API d'administration, relecture écran.
+
 ## REPRISE (15/10/2026)
 
 Reprise demandée par Teo : petits lots fermés. Lot 1 : `omega/modules/varelo/PRODUCTION.md`, la liste ordonnée

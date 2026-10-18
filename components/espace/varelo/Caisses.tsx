@@ -52,8 +52,12 @@ export default function Caisses({ source, contexte, client_id, societes, onFait 
   const [locaux, setLocaux] = useState<Magasin[]>(EXEMPLE);
   const [reels, setReels] = useState<Magasin[] | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
+  const [fictives, setFictives] = useState(false);
   const charger = useCallback(async () => {
     const { data, error } = await createClient().from("grp_ventes_magasins").select("*").eq("client_id", client_id).limit(2000);
+    // des Z inventés pour le banc portent « fictif » dans leur source (omega/banc/varelo_groupes_publics.py)
+    const f = await createClient().from("grp_ventes_caisse").select("id", { count: "exact", head: true }).eq("client_id", client_id).ilike("source", "%fictif%");
+    setFictives((f.count ?? 0) > 0);
     if (error) {
       setErreur(error.message);
       setReels([]);
@@ -117,6 +121,7 @@ export default function Caisses({ source, contexte, client_id, societes, onFait 
         {peutDeposer ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => setDepot(true)}><Upload width={14} height={14} aria-hidden="true" /> Déposer des ventes</button> : null}
       </div>
       {erreur ? <Avis teinte="rouge" role="alert"><strong>Les ventes n&apos;ont pas pu être lues.</strong> {erreur}</Avis> : null}
+      {source === "reelle" && fictives ? <Avis teinte="ambre"><strong>Ventes de caisse fictives.</strong> Aucun logiciel de caisse réel n&apos;est branché sur ce groupe : ces Z sont inventés pour la démonstration, à la différence des balances.</Avis> : null}
       <dl className="esp-def esp-def--trois" style={{ marginTop: 10 }}>
         <div><dt>Hier, tout le groupe</dt><dd className="esp-def-fort">{montant(hier)}</dd></div>
         <div><dt>Même jour, semaine dernière</dt><dd>{avant ? `${montant(avant)} (${hier >= avant ? "+" : ""}${Math.round((100 * (hier - avant)) / avant)} %)` : "—"}</dd></div>
