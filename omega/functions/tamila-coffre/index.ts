@@ -4,10 +4,11 @@
 // ré-enveloppe les clés locales. Les droits sont ceux des portes de b4_05. Voir omega/NOTES-B4.md § 10.
 //
 // Secrets : SCALEWAY_SECRET_KEY, SCALEWAY_PROJECT_ID, SCALEWAY_REGION (fr-par par défaut) ; facultatif :
-// TAMILA_COFFRE_ORIGINES. Fournis par Supabase : SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_ANON_KEY.
+// TAMILA_COFFRE_ORIGINES ; TAMILA_BANC_CLIENT (recette seulement : ouvre banc_semer et banc_lire pour ce cabinet). Fournis par Supabase : SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_ANON_KEY.
 
 import type { Contexte } from "./coffre.ts";
 import { ORIGINES_PAR_DEFAUT, type ReglagesHttp, repondre } from "./http.ts";
+import { bancDepuisEnv } from "./banc.ts";
 import { keyManagerDepuisEnv } from "./keymanager.ts";
 import { PortesCoffreRpc } from "./portes.ts";
 
@@ -24,7 +25,7 @@ function demarrer(): { ctx: Contexte; reglages: ReglagesHttp } {
   if (!km) journal("alerte", "SCALEWAY_SECRET_KEY / SCALEWAY_PROJECT_ID absentes : le coffre répond 503 (KM_ABSENT) à tout déballage");
   const origines = (Deno.env.get("TAMILA_COFFRE_ORIGINES") ?? "").split(",").map((o) => o.trim()).filter(Boolean);
   return {
-    ctx: { portes: new PortesCoffreRpc({ url, cleService, clePublique }), km, journal },
+    ctx: { portes: new PortesCoffreRpc({ url, cleService, clePublique }), km, journal, banc: bancDepuisEnv(Deno.env, url, cleService) },
     reglages: { cleService, origines: origines.length ? origines : ORIGINES_PAR_DEFAUT },
   };
 }

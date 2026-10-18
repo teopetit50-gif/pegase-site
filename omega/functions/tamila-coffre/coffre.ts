@@ -5,6 +5,7 @@
 // écrite au journal de la fonction.
 
 import { chiffrer as chiffrerTamila, dechiffrer as dechiffrerTamila, LONGUEUR_CLE, ouvre } from "./aesgcm.ts";
+import { type Banc, bancLire, bancSemer } from "./banc.ts";
 import { ErreurCoffre, type KeyManager, nomCleMaitre } from "./keymanager.ts";
 import { depuisBase64, depuisHex, versBase64, versHex } from "./octets.ts";
 import { ErreurPorte, type PortesCoffre, type Remise } from "./portes.ts";
@@ -19,6 +20,8 @@ export interface Demande {
   cle?: unknown;
   /** activer au nom du serveur : le gérant qui l'a demandé (la base vérifie qu'il l'est) */
   par?: unknown;
+  /** le banc (banc.ts) lit ses propres champs */
+  [champ: string]: unknown;
 }
 
 export interface Reponse {
@@ -31,6 +34,8 @@ export interface Contexte {
   /** null : les secrets SCALEWAY_* ne sont pas posés ; le coffre répond 503 sans rien tenter. */
   km: KeyManager | null;
   journal: (niveau: "info" | "alerte" | "erreur", message: string, detail?: Record<string, unknown>) => void;
+  /** le banc de recette (TAMILA_BANC_CLIENT) ; absent en production */
+  banc?: Banc | null;
 }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
@@ -85,8 +90,12 @@ async function deballer(ctx: Contexte, remise: Remise): Promise<Uint8Array> {
 
 export async function traiter(ctx: Contexte, appelant: Appelant, d: Demande): Promise<Reponse> {
   const action = typeof d.action === "string" ? d.action : "";
-  const pourServeur = action === "cle_piece" || action === "sonde";
-  if (!["activer", "nouvelle_cle", "cle_dossier", "cle_piece", "reenvelopper", "nouvelle_cle_index", "cle_index", "sonde"].includes(action)) {
+  const pourServeur = ["cle_piece", "sonde", "banc_semer", "banc_lire"].includes(action);
+  if (
+    !["activer", "nouvelle_cle", "cle_dossier", "cle_piece", "reenvelopper", "nouvelle_cle_index", "cle_index", "sonde", "banc_semer", "banc_lire"].includes(
+      action,
+    )
+  ) {
     return refus(
       400,
       "ACTION_INCONNUE",
@@ -108,6 +117,10 @@ export async function traiter(ctx: Contexte, appelant: Appelant, d: Demande): Pr
         return appelant.type === "serveur" ? await activerParServeur(ctx, d) : await activer(ctx, appelant.jeton, d);
       case "sonde":
         return await sonde(ctx, d);
+      case "banc_semer":
+        return await bancSemer(ctx, d);
+      case "banc_lire":
+        return await bancLire(ctx, d as Demande & { remise?: Remise }, (r) => deballer(ctx, r));
       case "nouvelle_cle":
         return await nouvelleCle(ctx, (appelant as { jeton: string }).jeton, d);
       case "cle_dossier":
