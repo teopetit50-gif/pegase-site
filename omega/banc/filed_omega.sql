@@ -5,7 +5,10 @@
 -- fait des documents FILED d'Omega dès que FILED y est installé — rien d'autre à brancher).
 -- Ce script, idempotent (le rejouer ne crée rien deux fois) :
 --   1. retrouve l'organisation par son slug « omega » (colonne slug, sinon config ->> 'slug') ; s'arrête si absente ;
---   2. installe FILED (public.filed_installer) ;
+--   2. installe FILED (public.filed_installer : la ligne de réglages de l'organisation, aux valeurs par défaut du socle —
+--      tolérance des totaux 0,05 €, fenêtre de doublon 3 jours, etc.) et, choix neutre, ouvre l'exercice civil en cours
+--      (1er janvier – 31 décembre) de la société principale s'il n'en existe aucun à cette date ; aucun plan comptable
+--      n'est posé (les imputations attendront qu'Omega pose le sien) ;
 --   3. pose les fournisseurs attendus : Vercel, Supabase, Scaleway, OVH, Brevo, Meta — nom et pays seulement : leurs
 --      SIREN / TVA viendront de leur première facture lue (identité contrôlée comme pour tout fournisseur), plutôt que
 --      d'être saisis ici de mémoire ;
@@ -18,7 +21,7 @@ set local role service_role;
 
 do $$
 declare
-  v_cl uuid; v_nom text; v_n integer := 0; v_boite boolean; f record;
+  v_cl uuid; v_nom text; v_n integer := 0; v_boite text; f record; v_ent uuid; v_ex boolean := false;
 begin
   if exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'clients' and column_name = 'slug') then
     execute 'select id, nom from public.clients where slug = $1' into v_cl, v_nom using 'omega';
@@ -29,8 +32,15 @@ begin
     raise exception 'Organisation « omega » introuvable : A3 doit la créer avant ce banc.' using errcode = 'P0002';
   end if;
 
-  -- 2. FILED installé (réglages, exercice, plan comptable, comptes système selon filed_installer).
+  -- 2. FILED installé (réglages par défaut) ; l'exercice civil en cours, s'il n'y en a pas.
   perform public.filed_installer(v_cl);
+  select e.id into v_ent from public.entites e where e.client_id = v_cl and e.principale;
+  if v_ent is not null and not exists (select 1 from public.filed_exercices x where x.client_id = v_cl
+       and (x.entite_id = v_ent or x.entite_id is null) and current_date between x.debut and x.fin) then
+    perform public.filed_ouvrir_exercice(v_cl, v_ent, date_trunc('year', current_date::timestamp)::date,
+                                         (date_trunc('year', current_date::timestamp) + interval '1 year - 1 day')::date, null);
+    v_ex := true;
+  end if;
 
   -- 3. Les fournisseurs attendus d'Omega.
   for f in select * from (values
@@ -54,11 +64,13 @@ begin
   on conflict (client_id, module) do update set mode = 'essai', maj_le = now();
 
   -- 5. Le constat.
-  v_boite := exists (select 1 from public.expediteurs e where e.client_id = v_cl and e.module = 'filed' and e.identite ilike 'factures-omega@recu.omegaai.fr');
-  raise notice 'FILED — organisation % (%) : FILED installé ; % fournisseur(s) posé(s) (6 attendus au total) ; envois FILED en mode essai.',
-    v_nom, v_cl, v_n;
+  select e.statut into v_boite from public.expediteurs e where e.client_id = v_cl and e.module = 'filed' and e.identite ilike 'factures-omega@recu.omegaai.fr' limit 1;
+  raise notice 'FILED — organisation % (%) : FILED installé ; exercice civil % ; % fournisseur(s) posé(s) (6 attendus au total) ; envois FILED en mode essai.',
+    v_nom, v_cl, case when v_ex then 'ouvert' else 'déjà présent' end, v_n;
   raise notice 'FILED — boîte factures-omega@recu.omegaai.fr (module filed) : %.',
-    case when v_boite then 'déclarée' else 'PAS ENCORE DÉCLARÉE (A2) — les factures reçues ne seront rattachées qu''une fois la boîte en place' end;
+    case when v_boite is null then 'PAS ENCORE DÉCLARÉE (A2) — les factures reçues ne seront rattachées qu''une fois la boîte en place'
+         when v_boite = 'actif' then 'déclarée, active'
+         else format('déclarée, statut « %s » : à activer (A2) pour que les factures arrivent', v_boite) end;
   if not exists (select 1 from public.reglages_envois r where r.client_id = v_cl and r.module = 'filed' and r.essai_adresse is not null)
      and not exists (select 1 from public.reglages_envois r where r.client_id = v_cl and r.module is null and r.essai_adresse is not null) then
     raise notice 'FILED — aucune adresse d''essai posée : les courriels d''essai n''ont nulle part où aller tant qu''un gérant ne la règle pas.';
