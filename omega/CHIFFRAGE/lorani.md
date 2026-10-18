@@ -40,6 +40,20 @@ n'a été touché.
 des lignes déjà retirées de `lib/en-preparation.ts` (Accessibilité, Cerfa, RE2020, décennales, fonds BET, DOE). Sur main c0494b4,
 `components/ui/en-preparation.tsx` ne rend plus rien. **La page servie n'est donc pas c0494b4.**
 
+## Banc : DCE publics réels (18/10/2026)
+
+Chantier 2/3 (Teo) : des DCE publiés par des communes, sans formulaire ni conditions (sources et sha256 : A1,
+`omega/banc/dce-reels/*/SOURCE-*.md` sur worker-a1), déposés comme un client sur le banc par `omega/banc/dce_lorani.mjs`.
+- VRD, place de la République à Luzarches, lot 1 (projet BANC-DCE-VRD) : **la DPGF réelle est lue** (4 pages,
+  39 postes avec leur unité et leur lot, lecteur du 18/10, 0,1569 €). **Le CCTP (75 pages) est bloqué** : l'API IA de la
+  recette répond « credit balance is too low » (essai 3 sur 5). Le contrôle « DCE réel » attend donc encore sa dernière
+  pièce : aucun croisement CCTP/DPGF n'a tourné sur des pièces réelles.
+- Prêts, non déposés (le crédit dépend de Teo) : Touët-de-l'Escarène (plans, CCTP et DPGF du lot 1, 57 p.), Le Boulou
+  (4 lots CCTP-DPGF, 76 p.), Castres-Gironde (CCTP et plans, 173 p.). Pencran est écarté (budget).
+- Coût observé : environ 0,04 € par page, quatre fois l'hypothèse de départ. Le budget Lorani de 4 € couvre donc environ
+  100 pages, pas 400.
+- **Aucune ligne ne passe de B à A** : une DPGF lue ne prouve pas le contrôle du dossier sur un vrai DCE.
+
 ## Légende
 
 - **État**
