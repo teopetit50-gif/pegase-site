@@ -1,6 +1,6 @@
 # NOTES — worker A4 (FILED : comptabilité, archivage, pilotage, circuit de validation)
 
-## REPRISE (pauses du 06/10, du 11/10 et du 15/10 ; reprise le 17/10)
+## REPRISE (pauses du 06/10, 11/10, 15/10 ; pause de sécurité du 18/10 à 07 h 30 Z ; rien en cours)
 
 - **Fait** : lots a4_01 → a4_42 (plus a4_26b, a4_34b) écrits et testés ; 77 fonctions pgTAP `^test_a4_` vertes en local. Fonctions Deno `omega/functions/compta/` (26 tests) et `omega/functions/sortie/` (7 tests). Chiffrage : `omega/CHIFFRAGE/filed.md`.
 - **Recette** : tout FILED posé et vert jusqu'à a4_42 inclus (17/10, 15 h 46 Z ; a4_41 posé à la main).
