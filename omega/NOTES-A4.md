@@ -9,6 +9,28 @@
 - **Prochaine étape** : aucune sans consigne ; l'effacement côté FILED est complet (garde, scellé, export, purge, bilan).
 - **Chantier 3 (banc, 18/10)** : 36 EXEMPLES DE LA NORME Factur-X / ZUGFeRD 2 (corpus ZUGFeRD Apache-2.0, commit 82e886fb2136 ; PAS de vraies factures) dans `omega/banc/factures-opendata/SOURCE.tsv` avec leur sha256 ; aucune collectivité ne publie ses factures en PDF sous licence ouverte (RECHERCHE.md). Paquet 1 déposé à 16 h 39 Z par `omega/banc/factures_opendata.mjs` au nom du gérant du banc : 10 pièces, R2026-000008 → 000017, expéditeur `exemple-norme:…`. Suite : le coordinateur joue `omega/banc/factures_opendata.sql` (blocs 2, 3) ; puis `MAX_PIECES=10` jusqu'aux 26 restantes, sous 1 € et avant 19 h 30 Z.
 
+## Banc, chantier 3 (18/10) — exemples de la norme lus par FILED (PAS de vraies factures)
+
+Paquet 1 (R2026-000008 → 000017) relevé par le coordinateur à 16 h 52 Z : 10 lues, méthode `xml` (Factur-X
+embarqué, 0 € d'IA), 10 `filed_factures` ; 3 écartées `doublon.exact`, 7 bloquées. Paquet 2 (000018 → 000027,
+FeRD EN16931) déposé à 16 h 50 Z. Vérifié contre le XML embarqué (`pdfdetach`) et le texte des contrôles.
+
+| Écart | Pièces | Verdict |
+|---|---|---|
+| `doublon.exact` | 000010, 000012, 000014 | **Juste** : les versions MINIMUM répètent les factures BASICWL (même numéro, même fournisseur, même montant). |
+| `fournisseur.a_confirmer` (bloquant) | toutes | Effet du banc : fournisseur inconnu, à confirmer par une personne (voulu, a4_12). |
+| `destinataire.societe` (bloquant) | 000008 → 000012 | Effet du banc : facture adressée à l'acheteur fictif de la norme, pas au client du banc. 000013/14 : acheteur hors France, sans SIREN, non jugé. |
+| `identite.registre` (bloquant) | « Au bon moulin » | Effet du banc : SIREN fictif, absent du registre. |
+| `date.ancienne`, `rapprochement.commande_inconnue` | toutes | Effet du banc (pièces de 2017, aucune commande). |
+| `mentions.indemnite`, `mentions.penalites`, `mentions.escompte` | FNFE sauf 000008 | **Juste** au regard du XML : aucune de ces mentions dans les notes (`IncludedNote`) ; seule « Franco de port ». À revoir si le lecteur lit aussi le visuel. |
+| `tva.sans_mention`, `tva.taux` (attention) | 000010, 000012, 000014 | **Juste** : le profil MINIMUM ne ventile pas la TVA. |
+| `identite.tva_intracom` (bloquant) | « Lieferant GmbH » | **Juste** : DE123456789, clé allemande attendue 8, lue 9 (numéro fictif). |
+| `tva.taux` (bloquant, 19 % / 7 %) | 000015 → 000017 | Effet du banc : facture allemande à un acheteur allemand ; pour un client français, une TVA allemande facturée est bien à arrêter. Le libellé « n'existe pas en France » pourrait dire « TVA étrangère : autoliquidation attendue ». |
+| `identite.siren` (attention « Aucun SIREN ») | 000015 → 000017 | **Défaut de FILED** : le SIREN est demandé à un fournisseur allemand. Le contrôle (a4_39) ne regarde pas le pays ; il devrait se taire quand le fournisseur (pays ou préfixe de TVA) n'est pas français. Lot correctif à proposer. |
+| `montant.lignes` (attention) | 000016 (avoir) | Comportement voulu mais perfectible : lignes −7,90, remise au pied −0,23, HT −7,67 ; le contrôle ignore les remises et frais de pied, que le lecteur ne rend pas (aucun champ dans CHAMPS-LECTURE). |
+| `avoir.origine` | 000016 | **Juste** : la facture corrigée n'est pas au banc. |
+| `iban.absent` (info) | 7 pièces | Juste : pas d'IBAN dans ces exemples. |
+
 Branche `worker-a4`. Périmètre : `omega/migrations/a4_*.sql`, `omega/tests/filed/`.
 Recette seulement (omega-recette) ; la production est au coordinateur.
 
