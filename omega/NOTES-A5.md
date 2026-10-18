@@ -23,6 +23,11 @@ Depuis la reprise du 11/10 :
   (l'appel à private.verifier_sauvegardes() est retiré) ; contrôle clair si l'URL est la connexion directe IPv6
   (db.<ref>.supabase.co), le Transaction pooler (6543), ou si le réseau est injoignable : « prendre la Session pooler ».
   Le fichier n'existe que sur worker-a5 : il faut le fusionner sur main pour le lancer (cron et lancement à la main).
+- 18/10 — test « Omega, son propre client réel » (omega/tests/socle/a5_omega_client_reel.sql, ^test_a5_omega_) :
+  À LANCER par le coordinateur après les poses d'A3/A2/C2/C3/C4/A4. Client trouvé par slug (clients.slug, sinon
+  config ->> 'slug'). « Dormant » = aucun envoi réel vers le compte importé (offload_comptes.statut n'a pas de valeur
+  « dormant »). Vérifié sur la maquette avec des tables d'appoint dans une transaction annulée (11 ok ; un réglage
+  « reel » et une adresse partagée avec une autre organisation font bien échouer).
 - Pause du 15/10 levée par le message du 17/10. Sauvegarde : GitHub chiffrée dès que Teo pose les deux secrets.
 
 Le reste de la section ci-dessous (6/10) vaut toujours : gel et tag prod-* attendent le coordinateur ; workflow de
