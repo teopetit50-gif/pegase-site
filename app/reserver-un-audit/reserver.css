@@ -532,10 +532,11 @@
    Teo, 18/10 : « c'est blanc en bas alors que ça doit être noir ». Le pied est
    partagé (components/Footer.tsx, blanc partout) et suit .rdv dans <main> :
    le sélecteur frère le noircit sur cette page seulement, rien ne change
-   ailleurs. Référence : pied noir, mentions en gris, blanc au survol. */
+   ailleurs. Référence : pied noir, mentions en gris, blanc au survol ;
+   aucun filet entre la bande et le pied. */
 .rdv ~ footer {
   background: #000;
-  border-top-color: rgba(255, 255, 255, 0.12);
+  border-top-color: #000; /* Teo, 18/10 : pas de filet entre la bande et le pied */
 }
 .rdv ~ footer .text-neutral-500 {
   color: rgba(255, 255, 255, 0.6);
