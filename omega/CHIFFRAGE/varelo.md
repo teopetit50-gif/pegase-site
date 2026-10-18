@@ -8,6 +8,26 @@ version d'après** (« Chaque société dépose l'export de son logiciel… » ;
 sources, avec l'accord de la DSI, est en préparation »). Le prochain déploiement de main remettra donc les
 phrases chiffrées ci-dessous.
 
+## Mise à jour du 18/10/2026, 17 h Z (chantier 3 : données publiques réelles)
+
+**Niveau 1 : données publiques réelles, caisses fictives.** Trois vrais petits groupes sont sur la recette
+(script `omega/banc/varelo_groupes_publics.sql`, SHA 737bd0b, posé par le coordinateur). Chacun a sa balance
+N et N-1 tirée des comptes annuels publiés : « Ratios financiers BCE / INPI », Licence Ouverte, lignes
+publiques, comptes sociaux. Les liens mère-filiales viennent de Wikidata (P749).
+Preuve relevée par le coordinateur sous la session de chaque gérant (sociétés / balances / « non publiée » /
+trésorerie non nulle) :
+
+| Groupe | Sociétés | Balances | « non publiée » | Trésorerie ≠ 0 | Ventes | Résultat |
+|---|---|---|---|---|---|---|
+| Groupe EDH | 3 | 6 | 3 | 0 | 30 931 351 € | 11 904 813 € |
+| Ankama | 4 | 8 | 4 | 0 | 47 276 403 € | 1 905 225 € |
+| Normaxis | 3 | 5 | 3 | 0 | 1 855 147 € | 125 175 € |
+
+19 balances au total. Le cloisonnement entre groupes tient : chaque gérant ne lit que le sien. Le jeu ouvert ne
+publie ni la trésorerie ni le bilan. L'écran le dit (« non publiée ») au lieu d'afficher 0 €. Les caisses
+restent fictives (« Z fictif (banc) ») et l'écran l'affiche. Ces deux changements d'écran attendent une fusion
+sur main. Coût IA : 0 €. Ce n'est pas encore A : il manque un vrai export de logiciel et un vrai client.
+
 ## Mise à jour du 11/10/2026, 15 h 25 Z (B1, après la reprise)
 
 Construits, posés verts sur la recette (tests `^test_b1_1[0-9]_`, `^test_b1_2[01]_`, 44) et dans main :
