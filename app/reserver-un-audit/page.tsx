@@ -72,26 +72,30 @@ const NOMS_POSTES: Record<string, string> = Object.fromEntries(
   POSTES.map((p) => [p.id, `${p.system} · ${p.nom}`]),
 );
 
-/* Les outils de la carte : six, les plus connus d'un dirigeant (Teo, 18/10 au
-   soir : « il y a peut-être trop de logos, mets-en moins et les plus pro »).
-   Partis : Claude (doublon d'Anthropic), Resend, Tailwind, React, GSAP, des
-   outils de développeur. Logos officiels : Anthropic (pied de page
-   d'anthropic.com), Stripe (kit de logos Stripe), Vercel (triangle de la page
-   Geist), Next.js (nextjs.org), Supabase et Google Meet (pictogrammes du paquet
-   simple-icons). `largeur` garde les proportions de chaque fichier, à hauteur
-   égale de 36 px. Autorisés par Teo, qui précise : ils disent quels outils
-   Omega utilise, pas une collaboration. Deux rangées de trois. */
+/* Les outils de la carte : la liste des onze de ce matin, moins les quatre
+   que Teo a retirés le 18/10 au soir (« enlève Google Meet, Stripe, Supabase,
+   Vercel »). Restent Claude, Anthropic, Next.js, Resend, Tailwind CSS, React
+   et GSAP. Logos officiels : Anthropic (pied de page d'anthropic.com), Next.js
+   (nextjs.org), Resend (resend.com), Tailwind (logotype de tailwindcss.com) ;
+   Claude, React et GSAP viennent du paquet simple-icons déjà installé.
+   `largeur` garde les proportions de chaque fichier, à hauteur égale de 36 px.
+   Autorisés par Teo : ils disent quels outils Omega utilise, pas une
+   collaboration. Trois rangées (3, 2, 2) pour que le logotype Tailwind, le
+   plus large, ne casse pas la ligne dans la carte. */
 const RANGEE_UN = [
+  { nom: "Claude", fichier: "/logos/outils/claude.svg", largeur: 36 },
   { nom: "Anthropic", fichier: "/logos/outils/anthropic.svg", largeur: 52 },
-  { nom: "Stripe", fichier: "/logos/outils/stripe.svg", largeur: 86 },
-  { nom: "Vercel", fichier: "/logos/outils/vercel.svg", largeur: 36 },
+  { nom: "Next.js", fichier: "/logos/outils/nextjs.svg", largeur: 179 },
 ];
 const RANGEE_DEUX = [
-  { nom: "Next.js", fichier: "/logos/outils/nextjs.svg", largeur: 179 },
-  { nom: "Supabase", fichier: "/logos/outils/supabase.svg", largeur: 36 },
-  { nom: "Google Meet", fichier: "/logos/outils/googlemeet.svg", largeur: 36 },
+  { nom: "Resend", fichier: "/logos/outils/resend.svg", largeur: 170 },
+  { nom: "Tailwind CSS", fichier: "/logos/outils/tailwind.svg", largeur: 286 },
 ];
-const RANGEES = [RANGEE_UN, RANGEE_DEUX];
+const RANGEE_TROIS = [
+  { nom: "React", fichier: "/logos/outils/react.svg", largeur: 36 },
+  { nom: "GSAP", fichier: "/logos/outils/gsap.svg", largeur: 36 },
+];
+const RANGEES = [RANGEE_UN, RANGEE_DEUX, RANGEE_TROIS];
 
 /* Un logo en masque : le PNG est transparent, la couleur vient du CSS. */
 function Marque({ nom, fichier, largeur }: { nom: string; fichier: string; largeur: number }) {
