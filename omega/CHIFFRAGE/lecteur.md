@@ -38,6 +38,13 @@ Légende : **A** prouvé sur de vrais documents en recette ; **B** testé sur do
 | Offres d'entreprises (Excel, PDF : prix par poste) | B (11/10, b5_26) | — | `lorani_offre` fait ; un long tableau se lit par morceaux de 80 lignes. Il manque de vraies offres pour la mesure | — | 1 | ≈ 0,25 € par tranche de 100 lignes (une valeur citée par cellule coûte en sortie) ; 0,02–0,05 € pour un devis court |
 | Métré mesuré sur les plans (surfaces et longueurs prises sur le dessin) | **D** | — | Seule la géométrie vectorielle (PDF ou DWG) peut le donner : tracés, échelle du cartouche, pièces. La vision ne donne que des ordres de grandeur. À ne pas promettre avant | 10–15 | ? | 0 € (géométrie) |
 
+## 18/10/2026 — premières lectures de pièces réelles publiques (chantiers 2 et 3), arrêtées
+- **Corpus** : 5 DCE publics en téléchargement direct (`omega/banc/dce-reels/`, avec SOURCE et sha256) : Castres-Gironde (neuf), Touët-de-l'Escarène et Le Boulou (rénovation), Luzarches et Pencran (VRD).
+- **Lu sur la recette** (chiffres du coordinateur) : Daliro, 6 pièces pour 0,42 € ; Lorani, 1 DPGF pour 0,16 €.
+- **Arrêt** le 18/10 à 17 h 00 Z : l'API Anthropic de la recette n'a plus de crédit (HTTP 400 « credit balance is too low »), au moment de lire le CCTP de Luzarches. Aucune lecture IA n'est possible avant que Teo recharge le crédit.
+- **Aucune ligne ne passe de B à A** : il n'y a pas encore d'attendu relu ni de mesure `outils/mesurer.ts`. Ces lectures prouvent seulement que la chaîne tourne sur des pièces réelles. Le coût d'une DPGF (0,16 €) est dans la fourchette annoncée ; celui des pièces Daliro revient à environ 0,07 € la pièce.
+- **À la reprise** : finir la lecture des 5 DCE, faire relire un attendu par une personne (squelette de `mesurer.ts`), puis mesurer. C'est seulement à ce moment-là que les lignes « Plans et planches, CCTP, DPGF », « Offres d'entreprises » et « Autres pièces FILED (devis) » peuvent passer en A.
+
 ## Ce qui vaut pour toutes les lignes
 - **Où tourne le modèle** : la recette appelle aujourd'hui l'API Anthropic en direct. L'hébergement en UE n'est pas garanti, et il n'y a pas de non-conservation contractuelle sans accord avec Anthropic. Toute promesse « lu en Europe, sans conservation » est donc **T** : le code sait déjà passer par AWS Bedrock en région UE (profil `eu.anthropic…`). Il suffit de retirer la clé Anthropic et de poser les identifiants AWS, soit 0,5 jour pour basculer et vérifier, avec un compte AWS et l'accès au modèle.
 - Chaque valeur cite sa page et son texte ; elle n'est « vérifiée » que si la citation se retrouve dans la pièce. Une pièce passe « à vérifier » dès qu'une clé manque.
