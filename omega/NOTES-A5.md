@@ -19,6 +19,10 @@ Depuis la reprise du 11/10 :
   inchangée, pour que l'export et l'aperçu voient tout. Le fichier contient les suppressions déjà présentes dans ces deux
   fonctions, qui ne s'exécutent pas à la pose. Maquette 61/61 ; la partie effacer_objet du test ne tourne que sur la
   recette.
+- 18/10 — omega-sauvegarde.yml revu (secrets posés par Teo) : la seule écriture en production est la ligne de preuve
+  (l'appel à private.verifier_sauvegardes() est retiré) ; contrôle clair si l'URL est la connexion directe IPv6
+  (db.<ref>.supabase.co), le Transaction pooler (6543), ou si le réseau est injoignable : « prendre la Session pooler ».
+  Le fichier n'existe que sur worker-a5 : il faut le fusionner sur main pour le lancer (cron et lancement à la main).
 - Pause du 15/10 levée par le message du 17/10. Sauvegarde : GitHub chiffrée dès que Teo pose les deux secrets.
 
 Le reste de la section ci-dessous (6/10) vaut toujours : gel et tag prod-* attendent le coordinateur ; workflow de

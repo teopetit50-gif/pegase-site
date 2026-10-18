@@ -123,7 +123,30 @@ jobs:
         id: source
         run: |
           set -euo pipefail
-          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -Atc "select version()" | sed 's/ on .*//'
+          conseil="Prendre la chaîne « Session pooler » (Supabase → Connect → Session pooler : hôte aws-0-<région>.pooler.supabase.com, port 5432, utilisateur postgres.<ref>) et la reposer dans le secret SUPABASE_DB_URL."
+          hote="$(printf '%s' "$SUPABASE_DB_URL" | sed -n 's#^[a-z]*://[^@]*@\([^:/?]*\).*#\1#p')"
+          port="$(printf '%s' "$SUPABASE_DB_URL" | sed -n 's#^[a-z]*://[^@]*@[^:/?]*:\([0-9]*\).*#\1#p')"
+          # Connexion directe db.<ref>.supabase.co : IPv6 seulement, injoignable depuis les runners GitHub (IPv4).
+          if printf '%s' "$hote" | grep -Eq '^db\.[a-z0-9]+\.supabase\.co$'; then
+            echo "::error title=SUPABASE_DB_URL est la connexion directe (IPv6)::Les runners GitHub n'ont pas d'IPv6. $conseil"
+            exit 1
+          fi
+          # Pooler en mode transaction (6543) : pg_dump n'y fonctionne pas.
+          if [ "$port" = "6543" ]; then
+            echo "::error title=SUPABASE_DB_URL est le Transaction pooler (port 6543)::pg_dump exige une session. $conseil"
+            exit 1
+          fi
+          if ! psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -Atc "select version()" > "$TRAVAIL/version.txt" 2> "$TRAVAIL/connexion.log"; then
+            if grep -Eqi 'network is unreachable|cannot assign requested address|could not translate host|no route to host' "$TRAVAIL/connexion.log"; then
+              echo "::error title=Production injoignable (réseau, probablement IPv6)::$conseil"
+            else
+              echo "::error title=Connexion à la production refusée::Voir le journal ci-dessous (mot de passe masqué). Si l'hôte est db.<ref>.supabase.co : $conseil"
+            fi
+            cat "$TRAVAIL/connexion.log"
+            exit 1
+          fi
+          sed 's/ on .*//' "$TRAVAIL/version.txt"
+          # Lecture seule pour tout ce qui suit, sauf la ligne de preuve (étape « Écrire la preuve »).
           # Comptage exact de chaque table public/private : c'est la référence pour juger la restauration.
           psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -At -F $'\t' -c "
             select table_schema, table_name,
@@ -277,8 +300,8 @@ jobs:
             values (now(), :octets, :'sha', :'verdict', :'detail'::jsonb, :'execution');
           SQL
           echo "Preuve écrite : restauration=$VERDICT, $OCTETS octets, sha256 $SHA256, $EXECUTION_URL"
-          # Lance le contrôle tout de suite pour acquitter l'alerte sans attendre 08:07 UTC (s'il existe).
-          psql "$SUPABASE_DB_URL" -Atc "select private.verifier_sauvegardes()" >/dev/null 2>&1 && echo "verifier_sauvegardes() rejoué." || echo "verifier_sauvegardes() non rejoué (absente ou non appelable ici) : le contrôle de 08:07 UTC fera foi."
+          # Seule écriture en production : cette ligne de preuve. Le contrôle private.verifier_sauvegardes() reste
+          # celui du cron de 08:07 UTC (cette tâche ne l'appelle pas).
 
       - name: Garder l'artefact chiffré 30 jours
         if: always() && steps.chiffrer.outcome == 'success'
