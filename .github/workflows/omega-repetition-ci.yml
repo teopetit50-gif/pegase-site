@@ -58,7 +58,7 @@ jobs:
     env:
       ADMIN_URL: postgresql://supabase_admin:repetition@localhost:5432/postgres
       BASE_URL: postgresql://postgres:repetition@localhost:5432/postgres
-      SORTIE: ${{ runner.temp }}/repetition
+      SORTIE: /tmp/repetition # pas de contexte runner dans env: au niveau du job (GitHub : « Unrecognized named-value: runner »)
     steps:
       - uses: actions/checkout@v4
 
