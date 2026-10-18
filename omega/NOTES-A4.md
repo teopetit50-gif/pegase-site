@@ -31,6 +31,20 @@ FeRD EN16931) déposé à 16 h 50 Z. Vérifié contre le XML embarqué (`pdfdeta
 | `avoir.origine` | 000016 | **Juste** : la facture corrigée n'est pas au banc. |
 | `iban.absent` (info) | 7 pièces | Juste : pas d'IBAN dans ces exemples. |
 
+Paquet 2 (000018 → 000027), relevé à 16 h 52 Z ; paquet 3 (000028 → 000043, 16 pièces) déposé à 16 h 53 Z : les 36 exemples sont au banc.
+
+| Écart | Pièces | Verdict |
+|---|---|---|
+| `doublon.exact` bloquée et non écartée | 000018, 000020 | **Juste** : les exemples FeRD réutilisent le numéro 471102 pour des montants et des dates différents (235,62 le 05/03 ; 197,65 le 05/06 ; 529,87 le 05/03) ; un numéro ne sert qu'une fois. |
+| `doublon.exact` bloquée et non écartée | 000022, 000025 | **Défaut de FILED** : 000022 (471102, 05/03/2018, 529,87) est le doublon exact de 000020, mais la recherche (a4_11) prend la PREMIÈRE pièce du même numéro (000015, 235,62) et ne regarde qu'elle ; elle devrait préférer celle de même date et même montant. |
+| `tva.taux` (bloquant) | tous les allemands sauf 000026 | Effet du banc, comme au paquet 1 : 19 % et 7 % ne sont pas des taux français, même si le numéro de TVA (ELEKTRON, DE136695976) est valide. 000026 est exonéré (catégorie E, 0 %). |
+| `iban.invalide` (bloquant) | 000020, 000023 | **Juste** : DE12123456781234567890 a une clé fausse, DE5467894567876500 n'a que 18 caractères (22 en Allemagne). |
+| Saut de ligne dans le nom du fournisseur | 000026 (et Rechnungskorrektur : « GLN … \nLief-Nr … ») | Le XML de la norme porte ce saut de ligne. **À nettoyer par FILED** : le nom du fournisseur devrait avoir ses espaces repliés (`\s+` → une espace) à sa création. |
+| `identite.siren` | tous les allemands | Défaut de FILED confirmé (voir paquet 1). |
+
+Lot correctif proposé (a4_43) : `identite.siren` muet hors de France ; `doublon.exact` préfère la pièce de même date et même montant ; nom du fournisseur aux espaces repliés.
+
+
 Branche `worker-a4`. Périmètre : `omega/migrations/a4_*.sql`, `omega/tests/filed/`.
 Recette seulement (omega-recette) ; la production est au coordinateur.
 
