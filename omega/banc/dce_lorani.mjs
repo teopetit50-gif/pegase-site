@@ -15,20 +15,42 @@
    "source", "fichiers": [{ "fichier", "type_piece", "role", "reference" }] } ; sans lui, les PDF du dossier sont pris
    dans l'ordre alphabétique et le type vient du nom.
 
-   usage : node omega/banc/dce_lorani.mjs <dossier> [--voir]
+   Le dossier peut aussi être un chemin hors du dépôt (les DCE pèsent 20 à 150 Mo : A1 les garde hors git) ou
+   contenir le zip du DCE tel que la plateforme le donne : il est décompressé dans un dossier temporaire, et les PDF
+   sont cherchés dans tous les sous-dossiers.
+
+   usage : node omega/banc/dce_lorani.mjs <dossier|chemin> [--voir]
      --voir : liste ce qui serait déposé (taille, type, rôle), sans rien déposer.
    Connexion : BANC_EMAIL / BANC_MOT_DE_PASSE (par défaut le gérant du banc), NEXT_PUBLIC_SUPABASE_URL et
    NEXT_PUBLIC_SUPABASE_ANON_KEY (par défaut la recette). Aucune valeur secrète n'est affichée. */
+import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { basename, join } from 'node:path';
+import { existsSync, mkdtempSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { basename, isAbsolute, join, relative } from 'node:path';
 
 const [dossier, option] = process.argv.slice(2);
 if (!dossier) { console.error('usage : node omega/banc/dce_lorani.mjs <dossier> [--voir]'); process.exit(2); }
 const voir = option === '--voir';
 const RACINE = new URL('./dce-reels/', import.meta.url).pathname;
-const REP = join(RACINE, dossier);
+const REP = isAbsolute(dossier) || dossier.startsWith('.') ? dossier : join(RACINE, dossier);
 if (!existsSync(REP)) { console.error(`dossier introuvable : ${REP}`); process.exit(2); }
+const CLE_DOSSIER = basename(REP);
+
+/* les PDF du dossier, sous-dossiers compris ; un zip est décompressé à part (le dossier source n'est pas touché) */
+function pdfs(rep) {
+  return readdirSync(rep, { withFileTypes: true }).flatMap((e) => {
+    const c = join(rep, e.name);
+    if (e.isDirectory()) return pdfs(c);
+    if (/\.pdf$/i.test(e.name)) return [c];
+    if (/\.zip$/i.test(e.name)) {
+      const dest = mkdtempSync(join(tmpdir(), 'dce-'));
+      execFileSync('unzip', ['-qq', '-o', c, '-d', dest]);
+      return pdfs(dest);
+    }
+    return [];
+  });
+}
 
 const URL_SB = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://ygwbgpowzlbdaajlsqkn.supabase.co').replace(/\/+$/, '');
 const CLE = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? 'sb_publishable_a12GN1jHf0IJR4xcKvPTXw_NlPb51zl';
@@ -37,7 +59,7 @@ const MOT = process.env.BANC_MOT_DE_PASSE ?? 'Recette-Omega-2026';
 const CLIENT = 'cccccccc-0000-4000-8000-00000000000c';
 const MAX_PIECES = Number(process.env.MAX_PIECES ?? 12);
 const MAX_MO = Number(process.env.MAX_MO ?? 60);
-const REFERENCE = `BANC-DCE-${dossier.toUpperCase().replace(/[^A-Z0-9]+/g, '-')}`.slice(0, 40);
+const REFERENCE = `BANC-DCE-${CLE_DOSSIER.toUpperCase().replace(/[^A-Z0-9]+/g, '-')}`.slice(0, 40);
 
 /* le type et le rôle au contrôle, devinés du nom du fichier */
 function deviner(nom) {
@@ -52,8 +74,9 @@ function deviner(nom) {
 const manifeste = existsSync(join(REP, 'manifeste.json')) ? JSON.parse(readFileSync(join(REP, 'manifeste.json'), 'utf8')) : {};
 const fichiers = (manifeste.fichiers?.length
   ? manifeste.fichiers.map((f) => ({ ...deviner(f.fichier), ...f }))
-  : readdirSync(REP).filter((f) => /\.pdf$/i.test(f)).sort().map((f) => ({ fichier: f, ...deviner(f) })))
-  .map((f) => ({ ...f, chemin: join(REP, f.fichier), octets: statSync(join(REP, f.fichier)).size }));
+  .map((f) => ({ ...f, chemin: join(REP, f.fichier) }))
+  : pdfs(REP).sort((a, b) => basename(a).localeCompare(basename(b))).map((c) => ({ fichier: basename(c), chemin: c, ...deviner(basename(c)) })))
+  .map((f) => ({ ...f, octets: statSync(f.chemin).size }));
 
 let choisis = [];
 let total = 0;
@@ -63,7 +86,7 @@ for (const f of fichiers) {
   choisis.push(f);
   total += f.octets;
 }
-console.log(`— ${dossier} : ${fichiers.length} PDF, ${choisis.length} retenus (${(total / 1048576).toFixed(1)} Mo ; plafonds ${MAX_PIECES} pièces, ${MAX_MO} Mo)`);
+console.log(`— ${CLE_DOSSIER} : ${fichiers.length} PDF, ${choisis.length} retenus (${(total / 1048576).toFixed(1)} Mo ; plafonds ${MAX_PIECES} pièces, ${MAX_MO} Mo)`);
 for (const f of choisis) console.log(`  · ${f.fichier} — ${(f.octets / 1048576).toFixed(2)} Mo — ${f.type_piece ?? 'type au lecteur'} — rôle ${f.role}${f.reference ? ` (${f.reference})` : ''}`);
 for (const f of fichiers.filter((x) => !choisis.includes(x))) console.log(`  · écarté (plafond) : ${f.fichier}`);
 if (voir || !choisis.length) process.exit(0);
@@ -86,7 +109,7 @@ async function rest(methode, chemin, corps, entetes = {}) {
 let [projet] = await rest('GET', `lorani_projets?client_id=eq.${CLIENT}&reference=eq.${REFERENCE}&select=id,nom`);
 if (!projet) {
   [projet] = await rest('POST', 'lorani_projets', {
-    client_id: CLIENT, reference: REFERENCE, nom: (manifeste.nom ?? `DCE réel — ${dossier} (banc)`).slice(0, 160),
+    client_id: CLIENT, reference: REFERENCE, nom: (manifeste.nom ?? `DCE réel — ${CLE_DOSSIER} (banc)`).slice(0, 160),
     nature: manifeste.nature ?? 'autre', adresse: manifeste.adresse ?? null, code_postal: manifeste.code_postal ?? null,
     commune: manifeste.commune ?? null, code_insee: manifeste.code_insee ?? null, parcelles: [], marche_public: true,
   });
@@ -131,4 +154,8 @@ if (croisables.length >= 2) {
 } else {
   console.log('— moins de deux pièces croisables : pas de contrôle');
 }
-console.log(`\n${deposees.length} pièce(s) sur le projet ${REFERENCE}. Relevé et coût : omega/banc/dce_lorani.sql, bloc 2.`);
+/* ce que le gérant peut relever lui-même : les pages lues sur tous les projets DCE (le coût, lui, est dans les travaux :
+   bloc 2 de dce_lorani.sql, côté serveur) */
+const tous = await rest('GET', `lorani_projets?client_id=eq.${CLIENT}&reference=like.BANC-DCE-*&select=id`);
+const lues = tous.length ? await rest('GET', `pieces?module=eq.lorani&objet_type=eq.lorani_projet&objet_id=in.(${tous.map((x) => x.id).join(',')})&select=statut,nb_pages`) : [];
+console.log(`\n${deposees.length} pièce(s) sur le projet ${REFERENCE}. Tous projets DCE : ${lues.length} pièces, ${lues.filter((x) => !['recue', 'en_lecture'].includes(x.statut)).length} lues, ${lues.reduce((n, x) => n + (x.nb_pages ?? 0), 0)} pages. Coût : dce_lorani.sql, bloc 2.`);
