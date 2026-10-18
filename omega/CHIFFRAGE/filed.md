@@ -87,7 +87,7 @@ Fichiers lus : `lib/produits/factures.ts` (noté `fac`), `lib/produits/capacites
 | 50 | FAQ « HT, TVA et TTC sont recoupés entre eux ; si les trois ne tombent pas juste, la pièce est mise de côté et vous est signalée. Rien n'entre en silence dans votre comptabilité. » | fac:283 | A | voir n° 17 | — | 0 / 0 | — |
 | 51 | FAQ « Sur des serveurs situés dans l'Union européenne. » | fac:287 | B / T | base à Francfort (fr:20) | La lecture passe par un service d'IA **hors UE** (fr:23-25) : la phrase ne vaut que pour le stockage. Lecteur en région UE (Bedrock eu-central, déjà dans `_partage`, A1) | A1 / 0,5 | tarif IA en région UE |
 | 52 | FAQ « vous pouvez les récupérer ou tout effacer à tout moment » | fac:287 | B (17/10) | dossier de sortie (a4_33) ; effacement : tout sauf ce que la loi garde, au dépôt légal scellé dix ans, exportable (a4_40), bilan pour l'écran | Écran (C1/A3) ; fichiers des pièces dans le parcours du socle (A5) ; texte de la FAQ à aligner (« sauf ce que la loi oblige à garder ») | 0 / 0,5 | — |
-| 53 | FAQ « Puis-je arrêter à tout moment ? Oui, sans préavis. Vous repartez avec vos pièces. » | fac:294-295 | C | — | Résiliation dans le produit + export groupé (n° 43) | 1 / 0,5 | — |
+| 53 | FAQ « Puis-je arrêter à tout moment ? Oui, sans préavis. Vous repartez avec vos pièces. » | fac:294-295 | C | dossier de sortie complet : pièces, index, fournisseurs, FEC, empreintes et toutes les données FILED en JSON Lines (a4_33, a4_49) | Résiliation dans le produit (écran, socle) ; déployer la fonction `sortie` | 0,5 / 0,5 | — |
 | 54 | Clôture « une messagerie connectée suffit à remettre l'ensemble en ordre » | fac:312 | C | voir n° 2 | voir n° 2 | — | — |
 
 ## 4. Le périmètre — catalogue (`lib/produits/capacites/factures.ts`)

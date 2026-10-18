@@ -3,7 +3,7 @@
 ## REPRISE (reprise du 18/10, 21 h 16 Z — Teo)
 
 - **Fait** : lots a4_01 → a4_48 posés et verts sur la recette (^test_a4_ et test_44 : 91/91, 18/10 23 h 16 Z). Derniers : a4_46 historique chaîné (n° 114), a4_47 catégories d'achat (n° 31), a4_48 comptabilisation réservée et séparation des tâches (n° 111, FILED seul, désactivées par défaut).
-- **En cours** : rien. Pour A1 : `private.filed_categories_lecteur(organisation)` (service_role) rend la liste des catégories à proposer ; FILED lit `pieces_valeurs`, champ `categorie`.
+- **En cours** : chantier de Teo (18/10, 23 h 41 Z), sept lots dans l'ordre : (1) sortie complète — a4_49 écrit (donnees/ : toutes les tables FILED en JSON Lines, sceau, LISEZMOI ; test `a4_37_sortie_complete.sql` ; 91/91 en local) ; (2) compteur et quotas par palier ; (3) plusieurs boîtes ; (4) export comptable à date fixe — déjà fait (a4_33, `filed_programmer_envoi`, tests a4_33_*) ; (5) multi-dossiers cabinet ; (6) notes de frais (barème kilométrique ; a4_35 existe) ; (7) durées d'historique par palier (contredit la décision du 17/10 « historique complet pour tous » : à confirmer). Pour A1 : `private.filed_categories_lecteur(organisation)`.
 - **Prochain pas** : sans compte tiers, il ne reste que des choix à trancher (envoi périodique du sceau d'historique au client, n° 114) ; `montant.lignes` attend un champ « remise au pied » du lecteur (CHAMPS-LECTURE). Restent au coordinateur et à Teo : fusion, production, déploiements `sortie` / `compta`, écran d'effacement, garde des fichiers (A5), identifiants des éditeurs, clé Sirene, prix des paliers.
 
 ## Banc, chantier 3 (18/10) — exemples de la norme lus par FILED (PAS de vraies factures)
