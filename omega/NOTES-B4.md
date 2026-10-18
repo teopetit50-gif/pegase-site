@@ -1,6 +1,6 @@
 # Session B4 — TAMILA, le module des cabinets d'avocats
 
-## REPRISE — pause demandée par Teo (15/10/2026, 16 h 16 Z ; précédente le 11/10)
+## REPRISE — pause de sécurité demandée par Teo (18/10/2026, 07 h 30 Z ; précédentes le 15/10 et le 11/10)
 
 **État.** Branche worker-b4 propre, poussée. Tout est fusionné dans main par le coordinateur jusqu'à 9fe1d9d
 (écrans), plus la présente note.
