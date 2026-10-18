@@ -1,5 +1,9 @@
 # Session B2 — TAVARO, le module des loueurs (contrats, retours, barèmes, factures, avoirs, litiges)
 
+## PAUSE de sécurité (Teo, 18/10 à 07 h 30 Z)
+
+Arbre propre, tout est poussé, rien en cours. Les Questions sont prouvées sur la recette (17/10). Le prochain pas est dans la section « Reprise du 17/10 » ci-dessous. Le reste attend Teo ou un tiers, dont le gabarit ANTAI.
+
 ## Reprise du 17/10 — les Questions (module 06)
 
 Teo, 17/10 : même fournisseur et mêmes garde-fous que le lecteur, c'est-à-dire l'abstraction commutable de functions/_partage (API Anthropic sur la recette) et le plafond par client et par jour ; aucun autre fournisseur. ANTAI toujours en attente.
