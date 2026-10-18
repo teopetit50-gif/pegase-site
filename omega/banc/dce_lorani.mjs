@@ -6,7 +6,9 @@
    avec le type deviné du nom : CCTP, DPGF, plan, notice), que le lecteur lira ; puis un contrôle du dossier « en
    lecture » réunit les pièces : il se lance seul quand la dernière est lue (b5_16).
 
-   Un dossier par passage, pour tenir le coût : au plus MAX_PIECES pièces (12 par défaut) et MAX_MO mégaoctets (60).
+   Un dossier par passage, pour tenir le coût : au plus MAX_PIECES pièces (12 par défaut) et MAX_MO mégaoctets (60),
+   et jamais plus de MAX_PAGES pages (400) sur l'ensemble des projets DCE, déjà déposées comprises (pages estimées
+   dans le PDF avant le dépôt, lues par le lecteur ensuite).
    Le coordinateur relève le coût de chaque passage (omega/banc/dce_lorani.sql, bloc 2) avant le suivant ; budget du
    chantier : 5 € au total. Rejouable : une pièce déjà déposée (même sha256 sur le projet) n'est pas redéposée.
    Mode essai : le banc a reglages_envois lorani en essai ; rien ne part vers un tiers.
@@ -59,6 +61,11 @@ const MOT = process.env.BANC_MOT_DE_PASSE ?? 'Recette-Omega-2026';
 const CLIENT = 'cccccccc-0000-4000-8000-00000000000c';
 const MAX_PIECES = Number(process.env.MAX_PIECES ?? 12);
 const MAX_MO = Number(process.env.MAX_MO ?? 60);
+/* le plafond du chantier (coordinateur, 18/10) : 400 pages lues au total sur les projets DCE, environ 4 € */
+const MAX_PAGES = Number(process.env.MAX_PAGES ?? 400);
+/* les pages d'un PDF, estimées sans le lire : les objets /Type /Page, ou la taille si elle en dit davantage */
+const pagesDe = (octets) => Math.max(1, (octets.toString('latin1').match(/\/Type\s*\/Page(?![s\w])/g) ?? []).length,
+  Math.round(octets.length / 150000)); // un plan compressé peut cacher ses pages : on prend aussi la taille (≈ 150 Ko la page)
 const REFERENCE = `BANC-DCE-${CLE_DOSSIER.toUpperCase().replace(/[^A-Z0-9]+/g, '-')}`.slice(0, 40);
 
 /* le type et le rôle au contrôle, devinés du nom du fichier */
@@ -76,23 +83,10 @@ const fichiers = (manifeste.fichiers?.length
   ? manifeste.fichiers.map((f) => ({ ...deviner(f.fichier), ...f }))
   .map((f) => ({ ...f, chemin: join(REP, f.fichier) }))
   : pdfs(REP).sort((a, b) => basename(a).localeCompare(basename(b))).map((c) => ({ fichier: basename(c), chemin: c, ...deviner(basename(c)) })))
-  .map((f) => ({ ...f, octets: statSync(f.chemin).size }));
+  .map((f) => ({ ...f, octets: statSync(f.chemin).size, pages: pagesDe(readFileSync(f.chemin)) }));
 
-let choisis = [];
-let total = 0;
-for (const f of fichiers) {
-  if (choisis.length >= MAX_PIECES) break;
-  if (total + f.octets > MAX_MO * 1024 * 1024) continue;
-  choisis.push(f);
-  total += f.octets;
-}
-console.log(`— ${CLE_DOSSIER} : ${fichiers.length} PDF, ${choisis.length} retenus (${(total / 1048576).toFixed(1)} Mo ; plafonds ${MAX_PIECES} pièces, ${MAX_MO} Mo)`);
-for (const f of choisis) console.log(`  · ${f.fichier} — ${(f.octets / 1048576).toFixed(2)} Mo — ${f.type_piece ?? 'type au lecteur'} — rôle ${f.role}${f.reference ? ` (${f.reference})` : ''}`);
-for (const f of fichiers.filter((x) => !choisis.includes(x))) console.log(`  · écarté (plafond) : ${f.fichier}`);
-if (voir || !choisis.length) process.exit(0);
-
-/* ——— connexion du gérant du banc ——— */
-const jeton = await (async () => {
+/* ——— connexion du gérant du banc (avant le choix : les pages déjà lues comptent dans le plafond) ——— */
+const jeton = voir ? null : await (async () => {
   const r = await fetch(`${URL_SB}/auth/v1/token?grant_type=password`, { method: 'POST', headers: { apikey: CLE, 'Content-Type': 'application/json' }, body: JSON.stringify({ email: EMAIL, password: MOT }) });
   if (!r.ok) { console.error(`connexion refusée : HTTP ${r.status}`); process.exit(1); }
   return (await r.json()).access_token;
@@ -104,6 +98,30 @@ async function rest(methode, chemin, corps, entetes = {}) {
   if (!r.ok) throw new Error(`${methode} ${chemin.split('?')[0]} : HTTP ${r.status} ${t.slice(0, 300)}`);
   return t ? JSON.parse(t) : null;
 }
+/* les pages des pièces DCE déjà déposées : lues (nb_pages), ou estimées tant qu'elles sont en lecture */
+async function pagesDeposees() {
+  const tous = await rest('GET', `lorani_projets?client_id=eq.${CLIENT}&reference=like.BANC-DCE-*&select=id`);
+  if (!tous.length) return { pieces: [], pages: 0 };
+  const pieces = await rest('GET', `pieces?module=eq.lorani&objet_type=eq.lorani_projet&objet_id=in.(${tous.map((x) => x.id).join(',')})&select=statut,nb_pages,octets`);
+  return { pieces, pages: pieces.reduce((n, x) => n + (x.nb_pages ?? Math.max(1, Math.round((x.octets ?? 0) / 200000))), 0) };
+}
+const avant = voir ? { pages: 0 } : await pagesDeposees();
+
+let choisis = [];
+let total = 0;
+let pages = 0;
+for (const f of fichiers) {
+  if (choisis.length >= MAX_PIECES) break;
+  if (total + f.octets > MAX_MO * 1024 * 1024) continue;
+  if (avant.pages + pages + f.pages > MAX_PAGES) continue;
+  choisis.push(f);
+  total += f.octets;
+  pages += f.pages;
+}
+console.log(`— ${CLE_DOSSIER} : ${fichiers.length} PDF, ${choisis.length} retenus (${(total / 1048576).toFixed(1)} Mo, ≈ ${pages} pages ; déjà ${avant.pages} pages sur les projets DCE ; plafonds ${MAX_PIECES} pièces, ${MAX_MO} Mo, ${MAX_PAGES} pages au total)`);
+for (const f of choisis) console.log(`  · ${f.fichier} — ${(f.octets / 1048576).toFixed(2)} Mo, ≈ ${f.pages} p. — ${f.type_piece ?? 'type au lecteur'} — rôle ${f.role}${f.reference ? ` (${f.reference})` : ''}`);
+for (const f of fichiers.filter((x) => !choisis.includes(x))) console.log(`  · écarté (plafond) : ${f.fichier}`);
+if (voir || !choisis.length) process.exit(0);
 
 /* ——— le projet ——— */
 let [projet] = await rest('GET', `lorani_projets?client_id=eq.${CLIENT}&reference=eq.${REFERENCE}&select=id,nom`);
@@ -156,6 +174,5 @@ if (croisables.length >= 2) {
 }
 /* ce que le gérant peut relever lui-même : les pages lues sur tous les projets DCE (le coût, lui, est dans les travaux :
    bloc 2 de dce_lorani.sql, côté serveur) */
-const tous = await rest('GET', `lorani_projets?client_id=eq.${CLIENT}&reference=like.BANC-DCE-*&select=id`);
-const lues = tous.length ? await rest('GET', `pieces?module=eq.lorani&objet_type=eq.lorani_projet&objet_id=in.(${tous.map((x) => x.id).join(',')})&select=statut,nb_pages`) : [];
-console.log(`\n${deposees.length} pièce(s) sur le projet ${REFERENCE}. Tous projets DCE : ${lues.length} pièces, ${lues.filter((x) => !['recue', 'en_lecture'].includes(x.statut)).length} lues, ${lues.reduce((n, x) => n + (x.nb_pages ?? 0), 0)} pages. Coût : dce_lorani.sql, bloc 2.`);
+const apres = await pagesDeposees();
+console.log(`\n${deposees.length} pièce(s) sur le projet ${REFERENCE}. Tous projets DCE : ${apres.pieces.length} pièces, ${apres.pieces.filter((x) => !['recue', 'en_lecture'].includes(x.statut)).length} lues, ≈ ${apres.pages} pages sur ${MAX_PAGES}. Coût : dce_lorani.sql, bloc 2.`);
