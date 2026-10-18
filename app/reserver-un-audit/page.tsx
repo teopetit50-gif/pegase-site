@@ -72,27 +72,35 @@ const NOMS_POSTES: Record<string, string> = Object.fromEntries(
   POSTES.map((p) => [p.id, `${p.system} · ${p.nom}`]),
 );
 
-/* Les logos de la carte sont ceux d'Omega : les quatre systèmes, puis les six
-   logiciels métiers (Teo, 18/10 au soir : « remplace les logos d'outils par les
-   logos Omega »). Les signes carrés de public/logos/<produit>-mark.png, en masque
-   à 36 px, le nom en mono dessous ; 4 puis 3 et 3, comme la référence. Aucune
-   marque tierce : un logo d'outil se lit comme un partenariat, et le site ne
-   nomme pas ses éditeurs d'IA. */
+/* Les outils de la carte : ceux que le code appelle vraiment. Logos officiels :
+   Anthropic (pied de page d'anthropic.com), Next.js (nextjs.org), Resend (resend.com),
+   Stripe (kit de logos Stripe), Vercel (triangle de la page Geist de Vercel).
+   Claude et Supabase : leurs pages de marque ne donnent que le pictogramme
+   (le logo Claude complet n'est pas proposé en fichier) ; ces deux signes
+   viennent du paquet simple-icons déjà installé. Tailwind : logotype officiel
+   de tailwindcss.com. `largeur` garde les
+   proportions de chaque fichier, à hauteur égale de 36 px. Autorisés par Teo, qui
+   précise : ils disent quels outils Omega utilise, pas une collaboration. */
 const RANGEE_UN = [
-  { nom: "CASHD", fichier: "/logos/cashd-mark.png", largeur: 36 },
-  { nom: "OFFLOAD", fichier: "/logos/offload-mark.png", largeur: 36 },
-  { nom: "REPUT", fichier: "/logos/reput-mark.png", largeur: 36 },
-  { nom: "FILED", fichier: "/logos/filed-mark.png", largeur: 36 },
+  { nom: "Claude", fichier: "/logos/outils/claude.svg", largeur: 36 },
+  { nom: "Anthropic", fichier: "/logos/outils/anthropic.svg", largeur: 52 },
+  { nom: "Supabase", fichier: "/logos/outils/supabase.svg", largeur: 36 },
+  { nom: "Vercel", fichier: "/logos/outils/vercel.svg", largeur: 36 },
 ];
 const RANGEE_DEUX = [
-  { nom: "Varelo", fichier: "/logos/varelo-mark.png", largeur: 36 },
-  { nom: "Tavaro", fichier: "/logos/tavaro-mark.png", largeur: 36 },
-  { nom: "Lorani", fichier: "/logos/lorani-mark.png", largeur: 36 },
+  { nom: "Next.js", fichier: "/logos/outils/nextjs.svg", largeur: 179 },
+  { nom: "Resend", fichier: "/logos/outils/resend.svg", largeur: 170 },
+  { nom: "Stripe", fichier: "/logos/outils/stripe.svg", largeur: 86 },
 ];
+/* Preuves dans le code : lib/visio.ts crée des salles Google Meet, GSAP est importé
+   par des composants, Tailwind est dans globals.css, React est le framework. Pour
+   React, GSAP et Google Meet, la page de marque ne donne pas de fichier : pictogramme
+   du paquet simple-icons. */
 const RANGEE_TROIS = [
-  { nom: "Tiroma", fichier: "/logos/tiroma-mark.png", largeur: 36 },
-  { nom: "Tamila", fichier: "/logos/tamila-mark.png", largeur: 36 },
-  { nom: "Daliro", fichier: "/logos/daliro-mark.png", largeur: 36 },
+  { nom: "Google Meet", fichier: "/logos/outils/googlemeet.svg", largeur: 36 },
+  { nom: "Tailwind CSS", fichier: "/logos/outils/tailwind.svg", largeur: 286 },
+  { nom: "React", fichier: "/logos/outils/react.svg", largeur: 36 },
+  { nom: "GSAP", fichier: "/logos/outils/gsap.svg", largeur: 36 },
 ];
 const RANGEES = [RANGEE_UN, RANGEE_DEUX, RANGEE_TROIS];
 
@@ -157,7 +165,7 @@ export default function ReserverUnAuditPage() {
                 <hr className="rdv-filet" />
 
                 <div className="rdv-logos-bloc">
-                  <p className="rdv-mono rdv-centre">Nos systèmes et nos logiciels métiers</p>
+                  <p className="rdv-mono rdv-centre">Nous travaillons avec</p>
                   {RANGEES.map((rangee, n) => (
                     <ul key={n} className="rdv-logos">
                       {rangee.map((m) => (
