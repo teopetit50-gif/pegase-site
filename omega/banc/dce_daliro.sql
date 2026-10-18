@@ -59,7 +59,7 @@ select m.reference, p.nom_fichier, p.statut, p.type_piece, p.nb_pages,
  order by m.reference, p.recue_le;
 
 -- Ce que l'écran en ferait : la porte de lecture du devis (b6_33), par marché.
-select m.reference, d ->> 'statut' as statut, jsonb_array_length(coalesce(d -> 'lignes', '[]'::jsonb)) as lignes,
+select m.reference, d ->> 'statut' as statut, case when jsonb_typeof(d -> 'lignes') = 'array' then jsonb_array_length(d -> 'lignes') end as lignes,
        d ->> 'lignes_verifiees' as verifiees, d ->> 'montant_total_ht' as total_ht
   from public.btp_marches m cross join lateral public.btp_devis_lu(m.id) d
  where m.client_id = 'cccccccc-0000-4000-8000-00000000000c' and m.reference like 'DCE-%'
