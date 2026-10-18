@@ -28,7 +28,12 @@ begin
   perform private.publier_evenement(v_client, 'reception.nouvelle', jsonb_build_object('reception', (select id from public.receptions where identifiant_externe = 'b4-m4'), 'module', 'reput'), 'reception:m4');
 
   r := private.tamila_receptions_passage();
-  return next is((r ->> 'receptions')::int, 4, 'le passage prend les quatre réceptions');
+  -- Le passage prend toute la file des travaux tamila.reception (une base vivante y a aussi ses vraies réceptions) :
+  -- on vérifie qu'il a pris au moins les quatre du test, puis qu'il a traité chacune des nôtres.
+  return next ok((r ->> 'receptions')::int >= 4 and not exists (
+                   select 1 from public.travaux w where w.genre = 'tamila.reception' and w.etat in ('a_faire', 'en_cours')
+                      and (w.charge ->> 'reception')::bigint in (v_rec, v_rec2, v_rec3)),
+                 'le passage prend les quatre réceptions du test (et celles déjà en file)');
   return next is((select count(*) from public.tamila_avis_entrants where client_id = v_client), 3::bigint, 'trois entrent dans la file (l''autre module est ignoré)');
   select * into v_e from public.tamila_avis_entrants where reception_id = v_rec;
   return next is(v_e.type_suppose, 'rpva_avis_fixation', 'le type supposé, tiré du sujet : un code');
@@ -101,7 +106,7 @@ begin
   select id into v_e3 from public.tamila_avis_entrants where reception_id = v_rec3;
   update public.tamila_avis_entrants set expire_le = now() - interval '1 minute' where id = v_e3;
   r := private.tamila_receptions_passage();
-  return next is((r ->> 'expires')::int, 1, 'le passage fait expirer l''avis resté sept jours');
+  return next ok((r ->> 'expires')::int >= 1, 'le passage fait expirer l''avis resté sept jours (et les autres échus de la base)');
   return next ok((select statut = 'expire' and purge_demandee_le is not null from public.tamila_avis_entrants where id = v_e3)
                  and exists (select 1 from public.alertes a where a.client_id = v_client and a.niveau = 'critique' and a.cle_regroupement like '%avis_expire:%'),
                  'expiré : purge et alerte critique (« retrouvez-le sur e-barreau »)');
