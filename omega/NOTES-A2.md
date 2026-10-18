@@ -4,6 +4,12 @@ Session worker A2, branche `worker-a2`. Dernière mise à jour : 11/10/2026.
 Coordinateur depuis le 06/10 : session `session_01BCGFdpRKBvXKjouC75sYBg` (passation
 de `session_01B4JNQXyT69GytdvE9SjAnE`).
 
+## ARRÊT — 18/10/2026, 17 h 00 Z (Teo : focus grand groupe et architecture)
+
+- **Fait** : Gmail connecté et envoi WhatsApp réel remis (niveau 2) ; accusés AR24 (webhooks-ar24 v1) ; boîtes de réception Omega posées (633470bc, omega@ → reput, factures-omega@ → filed).
+- **En cours** : rien. Vérification `omega/banc/receptions_omega_verif.sql` (5c0018ab) livrée, à jouer par le coordinateur ; lien Gmail Omega chez la session bureau.
+- **Prochain pas** : premier courriel réel à omega@recu.omegaai.fr (preuve inbound) ; jeton Meta permanent (Teo) ; écran Messagerie (A3, MESSAGERIE_ECRAN).
+
 ## REPRISE — pause de sécurité du 18/10/2026, 07 h 30 Z (pauses précédentes : 06/10, 11/10, 15/10)
 
 **Au 18/10, 15 h 50 Z** : Gmail et l'envoi WhatsApp sont prouvés en vrai (niveau 2, voir le tableau). Reste à Teo le
