@@ -1,0 +1,359 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Les portes TAVARO — côté navigateur, sous RLS (06/10/2026, session B2)
+
+   Lecture : les tables loc_* du socle, telles que la RLS les montre à la
+   personne connectée (ses agences, le réseau si elle est de la direction),
+   plus demandes_validation (module tavaro) et le journal opposable.
+   Écriture : UNIQUEMENT par les portes publiques — jamais d'UPDATE :
+     loc_completer_contrat(p_contrat, p_valeurs jsonb) → jsonb
+     loc_amender_contrat(p_contrat, p_type, p_retour_prevu_le, p_km_inclus, p_motif) → uuid
+     loc_chiffrer_retour(p_contrat, p_retour jsonb) → uuid (la proposition)
+     loc_marquer_litige(p_facture, p_motif) → void
+     loc_marquer_reglee(p_facture, p_mode, p_le) → void
+     loc_demander_avoir(p_facture, p_motif, p_montant_ttc) → uuid (l'avoir)
+     loc_relancer_facture(p_facture) → jsonb (migration b2_02)
+     loc_publier_bareme(p_libelle, p_date_effet, p_lignes jsonb) → uuid
+     loc_retirer_bareme(p_bareme, p_motif) → void
+     loc_anonymiser_locataire(p_locataire, p_motif) → jsonb
+     loc_enregistrer_avis(p_valeurs jsonb) → jsonb (migration b2_03)
+     loc_rattacher_avis(p_avis, p_contrat) → jsonb
+     loc_designer_conducteur(p_avis, p_designation jsonb, p_mode, p_reference) → jsonb
+     loc_classer_avis(p_avis, p_motif) → jsonb
+     loc_etablir_etat(p_contrat, p_moment, p_valeurs jsonb) → uuid (migration b2_05)
+     loc_signer_etat(p_etat, p_signataire, p_signature) → jsonb
+     loc_constater_refus(p_etat, p_motif) → jsonb
+     loc_lever_caution(p_contrat, p_motif) → jsonb
+     loc_facture_electronique(p_facture) / loc_avoir_electronique(p_avoir) → jsonb (migration b2_06)
+     loc_completer_locataire(p_locataire, p_valeurs jsonb) → jsonb
+     loc_preparation_2027() → jsonb
+   Deux exceptions, que le socle ouvre par une politique RLS au gérant
+   seul : loc_reglages (INSERT/UPDATE) et loc_agences (INSERT/UPDATE).
+   Signatures lues dans omega/SOCLE-EXTRAITS-TAVARO.sql ; si la base
+   répond autrement, l'écran montre son message tel quel.
+   ══════════════════════════════════════════════════════════════════════ */
+
+import { createClient } from "@/lib/supabase/client";
+import { assemblerDossiers } from "./exemples";
+import type { FormeElectronique } from "./cii";
+import type { Operations, PointDepart } from "./operations";
+import type { Preparation } from "./FactureElectronique";
+import type { Agence, Amendement, AvisContravention, Contestation, Creneau, FicheVehicule, Flotte, Parc, SortieFlotte, Avoir, EtatDesLieux, Bareme, Categorie, Contrat, DemandeCourte, Dossier, Facture, LigneBareme, LigneFacture, LigneJournal, LigneProposition, Locataire, Proposition, Reglages, Retour, Role, Vehicule } from "./types";
+
+export class ErreurPorte extends Error {}
+
+function message(e: unknown): string {
+  if (e && typeof e === "object" && "message" in e && typeof (e as { message: unknown }).message === "string") return (e as { message: string }).message;
+  return "La base n'a pas répondu.";
+}
+
+export type Moi = { user_id: string; client_id: string; role: Role; email: string | null; entites: { id: string; nom: string }[] };
+
+export async function monCompte(): Promise<Moi | null> {
+  const supabase = createClient();
+  const { data: auth, error } = await supabase.auth.getUser();
+  if (error) throw new ErreurPorte(message(error));
+  if (!auth.user) return null;
+  const { data } = await supabase.from("comptes").select("client_id, role").eq("user_id", auth.user.id).limit(1);
+  const c = (data ?? [])[0] as { client_id: string; role: Role } | undefined;
+  if (!c) return null;
+  const e = await supabase.from("entites").select("id, nom").eq("client_id", c.client_id).order("principale", { ascending: false });
+  return { user_id: auth.user.id, client_id: c.client_id, role: c.role, email: auth.user.email ?? null, entites: (e.data ?? []) as { id: string; nom: string }[] };
+}
+
+export type Monde = {
+  dossiers: Dossier[];
+  agences: (Agence & { nom?: string })[];
+  categories: Categorie[];
+  baremes: Bareme[];
+  lignesBareme: LigneBareme[];
+  reglages: Reglages | null;
+  entites: { id: string; nom: string }[];
+  /* les avis de contravention (b2_03) : vide sans erreur tant que la migration n'est pas posée */
+  avis: AvisContravention[];
+  /* les contestations bancaires (b2_09) : vide sans erreur tant que la migration n'est pas posée */
+  contestations: Contestation[];
+  /* le parc (b2_10) : remises en location, anomalies, immobilisations, entretiens — vide sans erreur avant la migration */
+  parc: Parc;
+  /* la flotte (b2_11) : fiches économiques et sorties — null pour qui n'est ni direction ni valideur, ou avant la migration */
+  flotte: Flotte | null;
+};
+
+/* Tout le parking en une passe : les tables sont petites par client, et la RLS
+   ne rend que ce que la personne a le droit de voir. */
+export async function chargerMonde(): Promise<Monde> {
+  const supabase = createClient();
+  const [contrats, agences, categories, baremes, lignesBareme, reglages, entites] = await Promise.all([
+    supabase.from("loc_contrats").select("*").is("disparu_le", null).order("depart_le", { ascending: false }).limit(300),
+    supabase.from("loc_agences").select("id, entite_id, code, taux_tva, actif"),
+    supabase.from("loc_categories").select("id, code, libelle"),
+    supabase.from("loc_baremes").select("*").order("date_effet", { ascending: false }),
+    supabase.from("loc_bareme_lignes").select("*").order("rang"),
+    supabase.from("loc_reglages").select("*").limit(1),
+    supabase.from("entites").select("id, nom"),
+  ]);
+  const [avisLus, contestationsLues, parc, flotte] = await Promise.all([
+    supabase.from("loc_avis_contravention").select("*").order("echeance_le").limit(500),
+    supabase.from("loc_contestations").select("*").order("repondre_avant").limit(300),
+    chargerParc(),
+    chargerFlotte(),
+  ]);
+  if (contrats.error) throw new ErreurPorte(message(contrats.error));
+  const liste = (contrats.data ?? []) as Contrat[];
+  const ids = liste.map((c) => c.id);
+  const vide = { data: [] as unknown[] };
+  const [locataires, vehicules, amendements, propositions, factures, avoirs] = ids.length
+    ? await Promise.all([
+        supabase.from("loc_locataires").select("id, type, nom, prenom, raison_sociale, siren, email, telephone, adresse, anonymise_le").in("id", liste.map((c) => c.locataire_id).filter(Boolean) as string[]),
+        supabase.from("loc_vehicules").select("id, immatriculation, modele, categorie_id, energie, reservoir_l, statut, km_dernier").in("id", liste.map((c) => c.vehicule_id).filter(Boolean) as string[]),
+        supabase.from("loc_contrats_amendements").select("*").in("contrat_id", ids).order("accorde_le"),
+        supabase.from("loc_propositions").select("*").in("contrat_id", ids).order("version"),
+        supabase.from("loc_factures").select("*").in("contrat_id", ids).order("numero"),
+        supabase.from("loc_avoirs").select("*").in("contrat_id", ids).order("cree_le"),
+      ])
+    : [vide, vide, vide, vide, vide, vide];
+  const props = (propositions.data ?? []) as Proposition[];
+  const facs = (factures.data ?? []) as Facture[];
+  const avs = (avoirs.data ?? []) as Avoir[];
+  const demandeIds = [...props.map((p) => p.demande_id), ...avs.map((a) => a.demande_id)].filter(Boolean) as string[];
+  /* les états des lieux (b2_05) : vides sans erreur tant que la migration n'est pas posée */
+  const etatsLus = ids.length ? await supabase.from("loc_etats_des_lieux").select("*").in("contrat_id", ids) : { data: [], error: null };
+  const [lignes, lignesFactures, demandes, journal] = await Promise.all([
+    props.length ? supabase.from("loc_proposition_lignes").select("*").in("proposition_id", props.map((p) => p.id)).order("rang") : vide,
+    facs.length ? supabase.from("loc_facture_lignes").select("*").in("facture_id", facs.map((f) => f.id)).order("rang") : vide,
+    demandeIds.length ? supabase.from("demandes_validation").select("id, type_action, statut, approbations_requises, roles_autorises, echeance, demandeur_id").in("id", demandeIds) : vide,
+    /* le journal : lisible par la direction (politique du socle) ; pour les autres, la liste reste vide sans erreur */
+    supabase.from("journal_opposable").select("*").like("action", "tavaro.%").order("survenu_le", { ascending: false }).limit(500).then((r) => ({ data: r.error ? [] : (r.data ?? []) })),
+  ]);
+  const journalLignes = ((journal as { data: unknown[] }).data as Record<string, unknown>[]).map((l) => ({
+    id: (l.id as string) ?? crypto.randomUUID(),
+    action: String(l.action ?? l.evenement ?? ""),
+    objet_type: (l.objet_type as string) ?? null,
+    objet_id: (l.objet_id as string) ?? null,
+    donnees: ((l.donnees ?? l.detail ?? l.payload ?? {}) as Record<string, unknown>),
+    survenu_le: String(l.survenu_le ?? l.cree_le ?? l.le ?? ""),
+  })) as LigneJournal[];
+  const dossiers = assemblerDossiers(liste, {
+    locataires: (locataires.data ?? []) as Locataire[],
+    vehicules: (vehicules.data ?? []) as Vehicule[],
+    categories: (categories.data ?? []) as Categorie[],
+    amendements: (amendements.data ?? []) as Amendement[],
+    propositions: props,
+    lignes: (lignes.data ?? []) as LigneProposition[],
+    factures: facs,
+    lignesFactures: (lignesFactures.data ?? []) as LigneFacture[],
+    avoirs: avs,
+    demandes: (demandes.data ?? []) as DemandeCourte[],
+    journal: journalLignes,
+    etats: etatsLus.error ? [] : ((etatsLus.data ?? []) as EtatDesLieux[]),
+  });
+  const ents = (entites.data ?? []) as { id: string; nom: string }[];
+  return {
+    dossiers,
+    agences: ((agences.data ?? []) as Agence[]).map((a) => ({ ...a, nom: ents.find((e) => e.id === a.entite_id)?.nom })),
+    categories: (categories.data ?? []) as Categorie[],
+    baremes: (baremes.data ?? []) as Bareme[],
+    lignesBareme: (lignesBareme.data ?? []) as LigneBareme[],
+    reglages: ((reglages.data ?? [])[0] as Reglages | undefined) ?? null,
+    entites: ents,
+    avis: avisLus.error ? [] : ((avisLus.data ?? []) as AvisContravention[]),
+    contestations: contestationsLues.error ? [] : ((contestationsLues.data ?? []) as Contestation[]),
+    parc,
+    flotte,
+  };
+}
+
+async function chargerFlotte(): Promise<Flotte | null> {
+  const supabase = createClient();
+  const [fiches, sorties] = await Promise.all([
+    supabase.rpc("loc_fiches_flotte", {}),
+    supabase.from("loc_sorties_flotte").select("*").order("propose_le", { ascending: false }).limit(200),
+  ]);
+  if (fiches.error) return null;
+  return { fiches: ((fiches.data ?? []) as FicheVehicule[]).filter(Boolean), sorties: sorties.error ? [] : ((sorties.data ?? []) as SortieFlotte[]) };
+}
+
+/* Le parc : chaque lecture tolère l'absence de la migration b2_10 (liste vide). Les remises closes depuis plus de
+   trente jours et les immobilisations levées depuis plus de trente jours ne sont pas relues. */
+async function chargerParc(): Promise<Parc> {
+  const supabase = createClient();
+  const depuis = new Date(Date.now() - 30 * 86_400_000).toISOString();
+  const [vehicules, remises, anomalies, immobilisations, entretiens, membres, responsables] = await Promise.all([
+    supabase.from("loc_vehicules").select("id, immatriculation, modele, categorie_id, energie, reservoir_l, statut, km_dernier, entite_id").neq("statut", "sorti").is("disparu_le", null).order("immatriculation").limit(500),
+    supabase.from("loc_remises").select("*").or(`statut.in.(a_faire,en_cours),cree_le.gte.${depuis}`).order("retour_le", { ascending: false }).limit(300),
+    supabase.from("loc_anomalies_retour").select("*").or(`statut.eq.ouverte,signalee_le.gte.${depuis}`).order("signalee_le", { ascending: false }).limit(300),
+    supabase.from("loc_immobilisations").select("*").or(`fin_le.is.null,fin_le.gte.${depuis}`).order("debut_le", { ascending: false }).limit(300),
+    supabase.from("loc_entretiens").select("*").or(`statut.in.(a_planifier,planifie),fait_le.gte.${depuis}`).order("echeance_le").limit(300),
+    supabase.from("comptes").select("user_id, role"),
+    supabase.from("loc_responsables_agence").select("entite_id, remise_responsable"),
+  ]);
+  return {
+    vehicules: vehicules.error ? [] : ((vehicules.data ?? []) as Parc["vehicules"]),
+    remises: remises.error ? [] : ((remises.data ?? []) as Parc["remises"]),
+    anomalies: anomalies.error ? [] : ((anomalies.data ?? []) as Parc["anomalies"]),
+    immobilisations: immobilisations.error ? [] : ((immobilisations.data ?? []) as Parc["immobilisations"]),
+    entretiens: entretiens.error ? [] : ((entretiens.data ?? []) as Parc["entretiens"]),
+    membres: membres.error ? [] : ((membres.data ?? []) as Parc["membres"]),
+    responsables: responsables.error ? [] : ((responsables.data ?? []) as NonNullable<Parc["responsables"]>),
+  };
+}
+
+async function rpc<T = unknown>(nom: string, args: Record<string, unknown>): Promise<T> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc(nom, args);
+  if (error) throw new ErreurPorte(message(error));
+  return data as T;
+}
+
+export const completerContrat = (p_contrat: string, p_valeurs: Record<string, unknown>) => rpc<Record<string, unknown>>("loc_completer_contrat", { p_contrat, p_valeurs });
+export const amenderContrat = (p_contrat: string, p_type: string, p_retour_prevu_le: string | null, p_km_inclus: number | null, p_motif: string | null) =>
+  rpc<string>("loc_amender_contrat", { p_contrat, p_type, p_retour_prevu_le, p_km_inclus, p_motif });
+export const chiffrerRetour = (p_contrat: string, p_retour: Retour) => rpc<string>("loc_chiffrer_retour", { p_contrat, p_retour });
+export const marquerLitige = (p_facture: string, p_motif: string) => rpc("loc_marquer_litige", { p_facture, p_motif });
+export const marquerReglee = (p_facture: string, p_mode: string, p_le: string | null) => rpc("loc_marquer_reglee", p_le ? { p_facture, p_mode, p_le } : { p_facture, p_mode });
+export const demanderAvoir = (p_facture: string, p_motif: string, p_montant_ttc: number | null) => rpc<string>("loc_demander_avoir", p_montant_ttc === null ? { p_facture, p_motif } : { p_facture, p_motif, p_montant_ttc });
+export const relancerFacture = (p_facture: string) => rpc<Record<string, unknown>>("loc_relancer_facture", { p_facture });
+export const publierBareme = (p_libelle: string, p_date_effet: string, p_lignes: Record<string, unknown>[]) => rpc<string>("loc_publier_bareme", { p_libelle, p_date_effet, p_lignes });
+export const retirerBareme = (p_bareme: string, p_motif: string) => rpc("loc_retirer_bareme", { p_bareme, p_motif });
+export const enregistrerAvis = (p_valeurs: Record<string, unknown>) => rpc<Record<string, unknown>>("loc_enregistrer_avis", { p_valeurs });
+export const rattacherAvis = (p_avis: string, p_contrat: string) => rpc<Record<string, unknown>>("loc_rattacher_avis", { p_avis, p_contrat });
+export const designerConducteur = (p_avis: string, p_designation: Record<string, unknown>, p_mode: string, p_reference: string | null) =>
+  rpc<Record<string, unknown>>("loc_designer_conducteur", { p_avis, p_designation, p_mode, p_reference });
+export const classerAvis = (p_avis: string, p_motif: string) => rpc<Record<string, unknown>>("loc_classer_avis", { p_avis, p_motif });
+export const etablirEtat = (p_contrat: string, p_moment: "depart" | "retour", p_valeurs: Record<string, unknown>) => rpc<string>("loc_etablir_etat", { p_contrat, p_moment, p_valeurs });
+export const signerEtat = (p_etat: string, p_signataire: string, p_signature: string | null) => rpc<Record<string, unknown>>("loc_signer_etat", { p_etat, p_signataire, p_signature });
+export const constaterRefus = (p_etat: string, p_motif: string) => rpc<Record<string, unknown>>("loc_constater_refus", { p_etat, p_motif });
+export const leverCaution = (p_contrat: string, p_motif: string | null) => rpc<Record<string, unknown>>("loc_lever_caution", { p_contrat, p_motif });
+export const factureElectronique = (p_facture: string) => rpc<FormeElectronique>("loc_facture_electronique", { p_facture });
+export const avoirElectronique = (p_avoir: string) => rpc<FormeElectronique>("loc_avoir_electronique", { p_avoir });
+export const completerLocataire = (p_locataire: string, p_valeurs: Record<string, unknown>) => rpc<Record<string, unknown>>("loc_completer_locataire", { p_locataire, p_valeurs });
+export const preparation2027 = () => rpc<Preparation>("loc_preparation_2027", {});
+export const refacturerAvis = (p_avis: string) => rpc<Record<string, unknown>>("loc_refacturer_avis", { p_avis });
+export const ouvrirContestation = (p_facture: string, p_valeurs: Record<string, unknown>) => rpc<Record<string, unknown>>("loc_ouvrir_contestation", { p_facture, p_valeurs });
+export const produireDossier = (p_contestation: string) => rpc<Record<string, unknown>>("loc_produire_dossier", { p_contestation });
+export const envoyerDossier = (p_contestation: string, p_adresse: string | null) => rpc<Record<string, unknown>>("loc_envoyer_dossier", { p_contestation, p_adresse });
+export const issueContestation = (p_contestation: string, p_issue: string, p_note: string | null) => rpc<Record<string, unknown>>("loc_issue_contestation", { p_contestation, p_issue, p_note });
+/* Le dossier composé par l'ouvrier, par un lien signé de dix minutes (politique Storage du bucket omega-clients). */
+export async function lienDossier(chemin: string): Promise<string> {
+  const supabase = createClient();
+  const r = await supabase.storage.from("omega-clients").createSignedUrl(chemin, 600, { download: true });
+  if (r.error || !r.data?.signedUrl) throw new ErreurPorte(r.error ? message(r.error) : "Le lien du dossier n'a pas pu être fait.");
+  return r.data.signedUrl;
+}
+export const etapeRemise = (p_remise: string, p_etape: string, p_fait: boolean) => rpc<Record<string, unknown>>("loc_etape_remise", { p_remise, p_etape, p_fait });
+export const assignerRemise = (p_remise: string, p_responsable: string | null) => rpc<Record<string, unknown>>("loc_assigner_remise", { p_remise, p_responsable });
+export const signalerAnomalie = (p_remise: string, p_type: string, p_description: string, p_responsable: string) => rpc<Record<string, unknown>>("loc_signaler_anomalie", { p_remise, p_type, p_description, p_responsable });
+export const traiterAnomalie = (p_anomalie: string, p_note: string | null) => rpc<Record<string, unknown>>("loc_traiter_anomalie", { p_anomalie, p_note });
+export const immobiliser = (p_vehicule: string, p_valeurs: Record<string, unknown>) => rpc<Record<string, unknown>>("loc_immobiliser", { p_vehicule, p_valeurs });
+export const leverImmobilisation = (p_immobilisation: string, p_cout_eur: number | null, p_notes: string | null) => rpc<Record<string, unknown>>("loc_lever_immobilisation", { p_immobilisation, p_cout_eur, p_notes });
+export const prevoirEntretien = (p_vehicule: string, p_valeurs: Record<string, unknown>) => rpc<Record<string, unknown>>("loc_prevoir_entretien", { p_vehicule, p_valeurs });
+export const creneauxEntretien = (p_entretien: string) => rpc<{ creneaux: Creneau[]; duree_h: number }>("loc_creneaux_entretien", { p_entretien, p_nombre: 3 });
+export const planifierEntretien = (p_entretien: string, p_debut: string, p_atelier_nom: string | null, p_atelier_adresse: string | null) =>
+  rpc<Record<string, unknown>>("loc_planifier_entretien", { p_entretien, p_debut, p_atelier_nom, p_atelier_adresse });
+export const entretienFait = (p_entretien: string, p_km: number | null, p_cout_eur: number | null) => rpc<Record<string, unknown>>("loc_entretien_fait", { p_entretien, p_km, p_cout_eur });
+export const poserEconomie = (p_vehicule: string, p_valeurs: Record<string, unknown>) => rpc<FicheVehicule>("loc_poser_economie", { p_vehicule, p_valeurs });
+export const proposerSortie = (p_vehicule: string, p_valeurs: Record<string, unknown>) => rpc<Record<string, unknown>>("loc_proposer_sortie", { p_vehicule, p_valeurs });
+export const deciderSortie = (p_sortie: string, p_valider: boolean, p_motif: string | null) => rpc<Record<string, unknown>>("loc_decider_sortie", { p_sortie, p_valider, p_motif });
+export const conclureSortie = (p_sortie: string, p_prix_vente_eur: number, p_vendu_le: string | null, p_acheteur: string | null) =>
+  rpc<Record<string, unknown>>("loc_conclure_sortie", { p_sortie, p_prix_vente_eur, p_vendu_le, p_acheteur });
+export const annulerSortie = (p_sortie: string, p_motif: string) => rpc<Record<string, unknown>>("loc_annuler_sortie", { p_sortie, p_motif });
+export const poserResponsableRemise = (p_entite: string, p_responsable: string) => rpc<Record<string, unknown>>("loc_poser_responsable_remise", { p_entite, p_responsable });
+export const anonymiserLocataire = (p_locataire: string) => rpc<Record<string, unknown>>("loc_anonymiser_locataire", { p_locataire, p_motif: "demande" });
+
+/* Les réglages du module : la seule écriture directe, ouverte par la RLS au gérant. */
+export async function poserReglages(client_id: string, r: Partial<Reglages>): Promise<void> {
+  const supabase = createClient();
+  const existe = await supabase.from("loc_reglages").select("id").eq("client_id", client_id).limit(1);
+  const id = (existe.data ?? [])[0]?.id as string | undefined;
+  const q = id ? supabase.from("loc_reglages").update(r).eq("id", id) : supabase.from("loc_reglages").insert({ client_id, ...r });
+  const { error } = await q;
+  if (error) throw new ErreurPorte(message(error));
+}
+
+/* Une photo de retour part dans le bucket omega-clients sous
+   <client>/loc_contrat/<contrat>/<nom> ; la porte reçoit son chemin dans les
+   preuves. Si la politique Storage ne l'autorise pas encore (demande au
+   coordinateur, 06/10), la base répond et l'écran le dit. */
+export async function deposerPhoto(client_id: string, contrat_id: string, fichier: File): Promise<string> {
+  const supabase = createClient();
+  const nom = fichier.name.replace(/[^\w.\-]+/g, "_").slice(0, 120);
+  const chemin = `${client_id}/loc_contrat/${contrat_id}/${Date.now()}-${nom}`;
+  const envoi = await supabase.storage.from("omega-clients").upload(chemin, fichier, { upsert: false, contentType: fichier.type || "application/octet-stream" });
+  if (envoi.error) throw new ErreurPorte(message(envoi.error));
+  return chemin;
+}
+
+/* b2_12 à b2_16 — les opérations : chaque lecture tolère l'absence de sa migration (liste vide). */
+export async function chargerOperations(): Promise<Operations> {
+  const supabase = createClient();
+  const depuis = new Date(Date.now() - 60 * 86_400_000).toISOString();
+  const [conformite, rappels, rappelsVehicules, transferts, passages, sinistres, incidents, grille, cautions] = await Promise.all([
+    supabase.from("loc_vehicules_conformite").select("vehicule_id, critair, critair_verifie_le, ct_valide_jusqu_au").limit(1000),
+    supabase.from("loc_rappels").select("id, reference, constructeur, libelle, gravite, publie_le, cree_le").order("cree_le", { ascending: false }).limit(200),
+    supabase.from("loc_rappels_vehicules").select("id, rappel_id, vehicule_id, statut, immobilisation_id, entretien_id, fait_le").limit(2000),
+    supabase.from("loc_transferts").select("*").in("statut", ["propose", "valide", "fait"]).gte("propose_le", depuis).order("pour_le").limit(300),
+    supabase.from("loc_passages_peage").select("*").or(`statut.in.(a_payer,paye),passe_le.gte.${depuis}`).order("passe_le", { ascending: false }).limit(500),
+    supabase.from("loc_sinistres").select("*").or(`statut.neq.clos,cree_le.gte.${depuis}`).order("survenu_le", { ascending: false }).limit(200),
+    supabase.from("loc_incidents").select("id, entite_id, contrat_id, vehicule_id, canal, appelant_telephone, type_incident, description, position, recu_le, action, prestataire, arrivee_estimee_le, statut, resume, sinistre_id")
+      .or(`statut.neq.clos,recu_le.gte.${depuis}`).order("recu_le", { ascending: false }).limit(200),
+    supabase.from("loc_grille_assistance").select("id, type_incident, action, prestataire, prestataire_telephone, delai_cible_min, consignes").order("rang"),
+    supabase.from("loc_cautions").select("*").or(`statut.in.(demandee,preautorisee,capture_demandee,capturee,liberation_demandee),cree_le.gte.${depuis}`).order("cree_le", { ascending: false }).limit(300),
+  ]);
+  const ou = <T,>(r: { data: unknown; error: unknown }): T[] => (r.error ? [] : ((r.data ?? []) as T[]));
+  return {
+    conformite: ou(conformite), rappels: ou(rappels), rappelsVehicules: ou(rappelsVehicules), transferts: ou(transferts), passages: ou(passages),
+    sinistres: ou(sinistres), incidents: ou(incidents), grille: ou(grille), cautions: ou(cautions),
+  };
+}
+export const controleDepartPorte = (p_contrat: string) => rpc<PointDepart[]>("loc_controle_depart", { p_contrat });
+export const poserConformite = (p_vehicule: string, p_valeurs: Record<string, unknown>) => rpc<Record<string, unknown>>("loc_poser_conformite", { p_vehicule, p_valeurs });
+export const enregistrerRappel = (p_valeurs: Record<string, unknown>, p_vehicules: string[]) => rpc<{ rappel: string; vehicules: number; a_reaffecter: unknown[] }>("loc_enregistrer_rappel", { p_valeurs, p_vehicules });
+export const rappelFait = (p_rappel_vehicule: string) => rpc<Record<string, unknown>>("loc_rappel_fait", { p_rappel_vehicule });
+export const proposerTransferts = (p_jour: string | null) => rpc<{ pic: string; manque: number; transferts: number; tournees: Record<string, number> }>("loc_proposer_transferts", { p_jour });
+export const deciderTransferts = (p_tournee: string | null, p_valider: boolean, p_transfert: string | null) => rpc<Record<string, unknown>>("loc_decider_transferts", { p_tournee, p_valider, p_transfert });
+export const transfertFait = (p_transfert: string, p_convoyeur: string | null) => rpc<Record<string, unknown>>("loc_transfert_fait", { p_transfert, p_convoyeur });
+export const enregistrerPassages = (p_lignes: Record<string, unknown>[], p_source: "saisie" | "import") => rpc<{ nouveaux: number; deja: number; rapproches: number }>("loc_enregistrer_passages", { p_lignes, p_source });
+export const payerPassage = (p_passage: string, p_reference: string) => rpc<Record<string, unknown>>("loc_payer_passage", { p_passage, p_reference });
+export const rattacherPassage = (p_passage: string, p_contrat: string) => rpc<Record<string, unknown>>("loc_rattacher_passage", { p_passage, p_contrat });
+export const refacturerPeages = (p_contrat: string) => rpc<{ passages: number; proposition: string }>("loc_refacturer_peages", { p_contrat });
+export const passageALaCharge = (p_passage: string, p_motif: string) => rpc<Record<string, unknown>>("loc_passage_a_la_charge", { p_passage, p_motif });
+export const ouvrirSinistre = (p_valeurs: Record<string, unknown>) => rpc<{ sinistre: string; reference: string }>("loc_ouvrir_sinistre", { p_valeurs });
+export const avancerSinistre = (p_sinistre: string, p_statut: string | null, p_valeurs: Record<string, unknown>) => rpc<Record<string, unknown>>("loc_avancer_sinistre", { p_sinistre, p_statut, p_valeurs });
+export const preparerRecours = (p_sinistre: string, p_envoyer: boolean) => rpc<{ jours: number; montant: number; courrier: string; envoi: string | null }>("loc_preparer_recours", { p_sinistre, p_envoyer });
+export const poserGrilleAssistance = (p_lignes: Record<string, unknown>[]) => rpc<{ lignes: number }>("loc_poser_grille_assistance", { p_lignes });
+export const cloreIncident = (p_incident: string, p_note: string | null, p_ouvrir_sinistre: boolean) => rpc<Record<string, unknown>>("loc_clore_incident", { p_incident, p_note, p_ouvrir_sinistre });
+export const demanderPreautorisation = (p_contrat: string, p_montant_eur: number | null) => rpc<Record<string, unknown>>("loc_demander_preautorisation", { p_contrat, p_montant_eur });
+export const capturerCaution = (p_caution: string, p_facture: string, p_montant_eur: number, p_motif: string) => rpc<Record<string, unknown>>("loc_capturer_caution", { p_caution, p_facture, p_montant_eur, p_motif });
+export const libererCaution = (p_caution: string) => rpc<Record<string, unknown>>("loc_liberer_caution", { p_caution });
+
+/* b2_19 — l'audit des retours (simulation) et l'indicateur du mois ; tolère l'absence de la migration (null). */
+export type LigneAudit = { id: string; audit_id: string; contrat_id: string; facture_historique_ttc: number; chiffre_ttc: number; statut_chiffrage: string;
+  lignes: { code: string; famille: string; libelle: string; montant_ttc: number; statut: string }[] };
+export type Audit = { id: string; libelle: string; statut: "ouvert" | "clos"; cree_le: string; clos_le: string | null };
+export type Indicateur = { mois: string; retours: number; factures_ttc: number; avoirs_ttc: number; pour_100_retours: number | null; avant_pour_100_retours: number | null; audit: string | null };
+export async function chargerAudits(): Promise<{ audits: Audit[]; lignes: LigneAudit[]; indicateur: Indicateur | null } | null> {
+  const supabase = createClient();
+  const [audits, lignes, indicateur] = await Promise.all([
+    supabase.from("loc_audits").select("id, libelle, statut, cree_le, clos_le").order("cree_le", { ascending: false }).limit(20),
+    supabase.from("loc_audit_lignes").select("id, audit_id, contrat_id, facture_historique_ttc, chiffre_ttc, statut_chiffrage, lignes").limit(2000),
+    supabase.rpc("loc_indicateur_mois", {}),
+  ]);
+  if (audits.error) return null;
+  return { audits: (audits.data ?? []) as Audit[], lignes: lignes.error ? [] : ((lignes.data ?? []) as LigneAudit[]), indicateur: indicateur.error ? null : (indicateur.data as Indicateur) };
+}
+export const ouvrirAudit = (p_libelle: string) => rpc<{ audit: string }>("loc_ouvrir_audit", { p_libelle });
+export const auditerRetour = (p_audit: string, p_contrat: string, p_retour: Retour, p_facture_historique_ttc: number) =>
+  rpc<{ chiffre_ttc: number; ecart_ttc: number }>("loc_auditer_retour", { p_audit, p_contrat, p_retour, p_facture_historique_ttc });
+export const cloreAudit = (p_audit: string) => rpc<Record<string, unknown>>("loc_resultat_audit", { p_audit, p_clore: true });
+
+/* b2_20 — les Questions : la question se pose par la porte ; l'ouvrier tavaro-questions répond. */
+export type Question = {
+  id: string; entite_id: string | null; question: string; statut: "a_traiter" | "en_cours" | "repondue" | "echec";
+  reponse: { reponse: string; chiffres: { libelle: string; valeur: string }[]; cause: string | null; decision: string | null } | null;
+  erreur: string | null; posee_par: string | null; posee_le: string; repondue_le: string | null;
+};
+export async function chargerQuestions(): Promise<Question[] | null> {
+  const supabase = createClient();
+  const r = await supabase.from("loc_questions").select("id, entite_id, question, statut, reponse, erreur, posee_par, posee_le, repondue_le").order("posee_le", { ascending: false }).limit(20);
+  return r.error ? null : ((r.data ?? []) as Question[]);
+}
+export const poserQuestion = (p_question: string) => rpc<{ question: string }>("loc_poser_question", { p_question });

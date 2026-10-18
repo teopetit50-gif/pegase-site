@@ -9,16 +9,32 @@ import { homedir } from 'node:os';
 import { join } from 'node:path';
 
 /** Le binaire de Playwright est versionné dans son chemin : le découvrir,
- *  jamais le coder en dur — il change à chaque mise à jour. */
+ *  jamais le coder en dur — il change à chaque mise à jour.
+ *
+ *  05/10/2026 — LINUX. Les sessions de recette distantes tournent dans un
+ *  conteneur Linux où Chromium est préinstallé sous PLAYWRIGHT_BROWSERS_PATH
+ *  (/opt/pw-browsers, binaires `chrome-linux/headless_shell` et
+ *  `chrome-linux/chrome`) ; ce fichier ne connaissait que le cache macOS et
+ *  /Applications et levait « Aucun Chromium trouvé ». La variable est lue
+ *  d'abord, puis les caches Playwright des deux systèmes, puis les
+ *  emplacements système. */
 export function trouverChrome() {
-  const cache = join(homedir(), 'Library/Caches/ms-playwright');
-  if (existsSync(cache)) {
+  const caches = [
+    process.env.PLAYWRIGHT_BROWSERS_PATH,
+    '/opt/pw-browsers',
+    join(homedir(), '.cache/ms-playwright'),
+    join(homedir(), 'Library/Caches/ms-playwright'),
+  ].filter(Boolean);
+  for (const cache of caches) {
+    if (!existsSync(cache)) continue;
     const dossiers = readdirSync(cache)
       .filter((d) => d.startsWith('chromium'))
       .sort()
       .reverse();
     for (const d of dossiers) {
-      for (const sous of ['chrome-headless-shell-mac-arm64/chrome-headless-shell',
+      for (const sous of ['chrome-linux/headless_shell',
+                          'chrome-linux/chrome',
+                          'chrome-headless-shell-mac-arm64/chrome-headless-shell',
                           'chrome-headless-shell-mac-x64/chrome-headless-shell',
                           'chrome-mac/Chromium.app/Contents/MacOS/Chromium']) {
         const p = join(cache, d, sous);
@@ -29,8 +45,29 @@ export function trouverChrome() {
   for (const p of [
     '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
     '/Applications/Chromium.app/Contents/MacOS/Chromium',
+    '/usr/bin/chromium',
+    '/usr/bin/chromium-browser',
+    '/usr/bin/google-chrome',
   ]) if (existsSync(p)) return p;
-  throw new Error("Aucun Chromium trouvé (ni cache Playwright, ni /Applications).");
+  throw new Error("Aucun Chromium trouvé (ni PLAYWRIGHT_BROWSERS_PATH, ni cache Playwright, ni /Applications, ni /usr/bin).");
+}
+
+/** Sous Linux en root (conteneur), Chromium refuse de démarrer sans
+ *  --no-sandbox ; et sans carte graphique, --disable-gpu évite une attente
+ *  inutile. Et quand la machine sort par un mandataire (HTTPS_PROXY posé,
+ *  cas du conteneur de recette), Chromium ne le lit pas de lui-même en
+ *  headless : sans --proxy-server il sort en direct et tombe sur un
+ *  certificat qu'il ne connaît pas (ERR_CERT_AUTHORITY_INVALID) ; on le lui
+ *  donne, en laissant localhost en direct. Ailleurs, rien n'est ajouté. */
+function drapeauxSysteme() {
+  if (process.platform !== 'linux') return [];
+  const root = typeof process.getuid === 'function' && process.getuid() === 0;
+  const mandataire = process.env.HTTPS_PROXY || process.env.https_proxy;
+  return [
+    ...(root ? ['--no-sandbox'] : []),
+    '--disable-gpu',
+    ...(mandataire ? [`--proxy-server=${mandataire}`, '--proxy-bypass-list=<local>;localhost;127.0.0.1'] : []),
+  ];
 }
 
 /** Ouvre une session CDP attachée à un onglet neuf.
@@ -55,6 +92,7 @@ export async function ouvrirSession({ largeur = 1440, hauteur = 900,
     `--remote-debugging-port=${port}`, '--headless=new',
     '--use-angle=swiftshader', '--enable-unsafe-swiftshader',
     '--no-first-run', '--no-default-browser-check', '--hide-scrollbars',
+    ...drapeauxSysteme(),
     ...flags,
     `--user-data-dir=/tmp/cdp-${marque}-${port}`, 'about:blank',
   ], { stdio: ['ignore', 'ignore', 'pipe'] });
@@ -141,7 +179,23 @@ export async function ouvrirSession({ largeur = 1440, hauteur = 900,
     return false;
   };
 
+  /** Capture (jpeg par défaut, léger) → chemin écrit. `pleine` : toute la
+   *  page, plafonnée à 6 000 px de haut. 05/10/2026, posé pour la recette des
+   *  écrans client (omega/recette-a3). */
+  const capturer = async (chemin, { pleine = false, qualite = 70, format = 'jpeg' } = {}) => {
+    const { writeFileSync } = await import('node:fs');
+    const params = { format, captureBeyondViewport: pleine };
+    if (format === 'jpeg') params.quality = qualite;
+    if (pleine) {
+      const h = await evaluer('document.documentElement.scrollHeight');
+      params.clip = { x: 0, y: 0, width: largeur, height: Math.min(h, 6000), scale: 1 };
+    }
+    const r = await envoyer('Page.captureScreenshot', params);
+    writeFileSync(chemin, Buffer.from(r.result.data, 'base64'));
+    return chemin;
+  };
+
   const fermer = () => { try { ws.close(); } catch {} proc.kill(); };
 
-  return { envoyer, evaluer, aller, fermer, soucis, dormir };
+  return { envoyer, evaluer, aller, capturer, fermer, soucis, dormir };
 }
