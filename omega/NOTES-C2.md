@@ -5,11 +5,11 @@ Commande : `omega/AUDIT-PROMESSES.md` § 1 (CASHD absent) ; promesses : `app/pag
 sont déjà écrites », capture « qui doit de l'argent, où en est la relance, et l'encours échu au total »),
 `app/offres/relances-impayes/page.tsx`, `lib/produits/relances.ts`, `lib/produits/capacites/relances.ts` (50 lignes).
 
-## REPRISE (pause du 19/10, 00 h 21 Z — reprise samedi 25/10 après 02 h Z)
+## REPRISE (19/10, 14 h 18 Z, feu vert de Teo)
 
-- **Fait** : c2_10 → c2_15 posés sur la recette (cadence, envoi à la main, modèle 2, point des rappels, texte du jour d'échéance, taux BCE) ; liste de Teo (G2…G21, G14, G17) complète.
-- **En cours** : rien ; test_c2_15_taux_bce posé mais pas encore joué (la recette redémarrait sur le lot groupé).
-- **Prochain pas** : faire jouer ^test_c2_ (15 fichiers) et vérifier le premier passage réel du cron cashd-taux-bce ; puis charger les factures d'Omega (cashd_omega.sql) et G19 avec un premier client.
+- **Fait** : c2_10 → c2_15 posés ; liste de Teo complète (G2…G21, G14, G17).
+- **À poser** : `c2_16_taux_recent.sql` puis test `c2_16_taux_recent` (6) — le taux le plus récent l'emporte (la BCE du jour sur une saisie ancienne ; le même jour, la saisie de l'organisation). Local 302/302.
+- **Prochain pas** : charger les factures d'Omega (cashd_omega.sql) quand Teo envoie ses PDF ; G19 avec un premier client.
 
 - **Posés et verts (18/10)** : c2_11 envoi à la main (842f9c25) ; c2_12 v2 modèle 2 (5ee5fd10, ^test_c2_ 12/12) — rappels
   des paliers 1 et 2 sous accord permanent du socle, relance ferme / devis / mise en demeure (seule à pouvoir partir en
