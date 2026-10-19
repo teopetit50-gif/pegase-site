@@ -184,6 +184,20 @@ Exemple (devis Lafarge) : `[{"code":"OMR","libelle":"OMR","taux":2,"montant":14.
 
 `bon_commande`, `bon_livraison`, `devis`, `releve`, `contrat`, `attestation_assurance` : le lecteur rend les mêmes noms quand ils ont un sens (`numero`, `date`, `fournisseur.*`, `acheteur.*`, `montant_*`, `lignes`, `commande.reference`, `livraison.date`…). Le statut est `lue` dès qu'au moins une valeur est vérifiée. Les champs propres à ces natures (dates de validité d'un devis, période d'un relevé, garanties d'une attestation) ne sont **pas encore** rendus : à définir avec A4 quand les moteurs correspondants les liront.
 
+## Documents de chantier lus par FILED, pour Daliro (19/10, B6 DEMANDE-SOCLE-documents-chantier § 1)
+
+Ils arrivent par FILED, dont le schéma les reconnaît. Leurs types sont hors `TYPES_PIECE`, donc les natures de facture ne changent pas. FILED les classe en `document_chantier` (A4 ou le socle, § 2 de la demande), puis Daliro les reçoit. Varelo et Daliro ne les lisent pas.
+
+| `type_piece` | Champs | Clé (statut « lue ») |
+|---|---|---|
+| `chantier_pv_reserves` | `date_pv` (date), `maitre_ouvrage`, `operation`, `redacteur`, **`reserves`** | `reserves` |
+| `chantier_plan` | `titre`, `numero_plan`, `indice`, `date`, `echelle`, `phase`, `maitre_ouvrage`, `auteur` | `titre` |
+| `chantier_note_technique` | `titre`, `date`, `auteur`, `maitre_ouvrage`, **`dispositions`** | `titre` |
+
+Les listes sont **une seule valeur** (tableau jsonb). Chaque élément porte sa `page`, et la liste est vérifiée si chaque texte principal (description, texte) se retrouve sur sa page.
+- `reserves` : `[{numero, localisation, lot, entreprise, description, echeance, delai, page}]`. `echeance` est une date AAAA-MM-JJ, gardée **seulement si elle est écrite** ; `delai` est repris tel qu'écrit. Une réserve sans description n'est pas rendue.
+- `dispositions` : `[{texte, reference, page}]`. `reference` est la norme ou l'article cité, s'il est écrit.
+
 ## Module Lorani — urbanisme (en service)
 
 Six types, plus `lorani_courrier_autre`, tels que `private.lorani_propositions` les attend (B5, `omega/modules/lorani/CHAMPS-LECTURE-LORANI.md`). Le lecteur choisit la table des types selon `pieces.module` (`omega/functions/lecteur/schemas/modules.ts`) ; une pièce Lorani d'un autre type (une facture, une photo) part en `a_classer`. `numero_dossier` est attendu sur tous les types. Les dates sont en `AAAA-MM-JJ`, les boîtes en fractions de page avec `y` depuis le haut.

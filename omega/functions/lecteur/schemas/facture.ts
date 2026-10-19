@@ -136,6 +136,31 @@ export const CHAMPS_LIGNE = [
 /** Les colonnes d'une ligne de ventilation de TVA (filed_factures_tva). */
 export const CHAMPS_VENTILATION = ["categorie", "taux", "base", "montant", "motif"] as const;
 
+/**
+ * Les documents de chantier (19/10, décision de Teo : ils vont à Daliro ; B6, DEMANDE-SOCLE-documents-chantier § 1).
+ * Ils arrivent par FILED, dont le schéma les reconnaît ; FILED les classe, Daliro les reçoit. Hors TYPES_PIECE :
+ * les natures de facture ne changent pas.
+ */
+export const TYPES_CHANTIER = ["chantier_pv_reserves", "chantier_plan", "chantier_note_technique"] as const;
+
+/** Les champs scalaires des documents de chantier (« date » est celui des factures, même sens). */
+export const CHAMPS_CHANTIER: ChampFacture[] = [
+  { champ: "date_pv", type: "date", description: "PV de réserves : date du procès-verbal (OPR, réception, levée), en AAAA-MM-JJ." },
+  { champ: "maitre_ouvrage", type: "texte", max: 200, description: "Document de chantier : le maître d'ouvrage, tel qu'écrit." },
+  { champ: "operation", type: "texte", max: 200, description: "PV de réserves : l'opération ou le bâtiment, tel qu'écrit." },
+  { champ: "redacteur", type: "texte", max: 200, description: "PV de réserves : le rédacteur (maître d'œuvre), tel qu'écrit." },
+  { champ: "titre", type: "texte", max: 300, description: "Plan ou note technique : le titre, tel qu'écrit (cartouche ou en-tête)." },
+  { champ: "numero_plan", type: "texte", max: 60, description: "Plan : le numéro du plan, tel qu'écrit dans le cartouche." },
+  { champ: "indice", type: "texte", max: 20, description: "Plan : l'indice de révision (A, B, 02…)." },
+  { champ: "echelle", type: "texte", max: 30, description: "Plan : l'échelle, telle qu'écrite (« 1/50 »)." },
+  { champ: "phase", type: "texte", max: 30, description: "Plan : la phase (ESQ, APS, APD, PRO, DCE, EXE…), telle qu'écrite." },
+  { champ: "auteur", type: "texte", max: 200, description: "Plan ou note technique : l'auteur (architecte, bureau d'études), tel qu'écrit." },
+];
+
+/** Les colonnes d'une réserve (valeur « reserves ») et d'une disposition (valeur « dispositions »). */
+export const CHAMPS_RESERVE = ["numero", "localisation", "lot", "entreprise", "description", "echeance", "delai"] as const;
+export const CHAMPS_DISPOSITION = ["texte", "reference"] as const;
+
 /** Les colonnes d'une taxe hors TVA (octroi de mer…), valeur « taxes.autres » (nom convenu avec A4, a4_58). */
 export const CHAMPS_TAXE = ["code", "libelle", "base", "taux", "montant"] as const;
 export const CODES_TAXE = ["OMR", "OMRI", "autre"] as const;
@@ -178,7 +203,12 @@ export const SCHEMA_OUTIL_LECTURE: Record<string, unknown> = {
       description: "false si le document est vide, flou ou illisible au point qu'aucune valeur ne peut être citée.",
     },
     motif: { type: "string", description: "Si lisible est false, ou si le type est incertain : pourquoi, en une phrase (≤ 300 caractères)." },
-    type_piece: { type: "string", enum: [...TYPES_PIECE], description: "La nature du document." },
+    type_piece: {
+      type: "string",
+      enum: [...TYPES_PIECE, ...TYPES_CHANTIER],
+      description:
+        "La nature du document. Documents de chantier : chantier_pv_reserves = PV de réserves (OPR, réception, levée) ; chantier_plan = plan ou cartouche de plan ; chantier_note_technique = note technique ou de calcul, dispositions constructives.",
+    },
     confiance_type: { type: "number", minimum: 0, maximum: 1 },
     manuscrit: { type: "boolean", description: "true si l'essentiel du document est écrit à la main." },
     pages: {
@@ -204,7 +234,7 @@ export const SCHEMA_OUTIL_LECTURE: Record<string, unknown> = {
         required: ["champ", "valeur", "texte", "page"],
         additionalProperties: false,
         properties: {
-          champ: { type: "string", enum: CHAMPS_FACTURE.map((c) => c.champ) },
+          champ: { type: "string", enum: [...CHAMPS_FACTURE, ...CHAMPS_CHANTIER].map((c) => c.champ) },
           valeur: {
             type: ["string", "number", "boolean"],
             description: "Nombre pour les montants (point décimal), AAAA-MM-JJ pour les dates, booléen pour les mentions, texte sinon.",
@@ -268,6 +298,38 @@ export const SCHEMA_OUTIL_LECTURE: Record<string, unknown> = {
           base: nombreOuTexte,
           montant: nombreOuTexte,
           motif: { type: ["string", "null"], description: "Motif d'exonération imprimé, s'il y en a un." },
+          page: { type: "integer", minimum: 1 },
+        },
+      },
+    },
+    reserves: {
+      type: "array",
+      description:
+        "PV de réserves seulement : chaque réserve, dans l'ordre du document. Rien de deviné : une échéance seulement si une date est écrite ; un délai tel qu'écrit (« 15 jours ») ; pas de lot ni d'entreprise déduits d'ailleurs.",
+      items: {
+        type: "object",
+        required: ["description", "page"],
+        properties: {
+          numero: { type: ["string", "null"], description: "Le numéro de la réserve, tel qu'écrit." },
+          localisation: { type: ["string", "null"], description: "Le logement, la pièce ou l'ouvrage concerné." },
+          lot: { type: ["string", "null"], description: "Le lot, tel qu'écrit." },
+          entreprise: { type: ["string", "null"], description: "L'entreprise désignée, telle qu'écrite." },
+          description: { type: "string", description: "La réserve, telle qu'écrite." },
+          echeance: { type: ["string", "null"], description: "La date de levée, en AAAA-MM-JJ, seulement si elle est écrite." },
+          delai: { type: ["string", "null"], description: "Le délai tel qu'écrit (« 15 jours »)." },
+          page: { type: "integer", minimum: 1 },
+        },
+      },
+    },
+    dispositions: {
+      type: "array",
+      description: "Note technique seulement : chaque disposition constructive prescrite, dans l'ordre, avec la norme ou l'article cité s'il est écrit.",
+      items: {
+        type: "object",
+        required: ["texte", "page"],
+        properties: {
+          texte: { type: "string", description: "La disposition, telle qu'écrite." },
+          reference: { type: ["string", "null"], description: "La norme ou l'article cité (« Eurocode 8 », « NF P 06-013 »), s'il est écrit." },
           page: { type: "integer", minimum: 1 },
         },
       },

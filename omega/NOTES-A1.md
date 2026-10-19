@@ -7,7 +7,8 @@
 - Quand le modèle les omet, ces valeurs sont relevées sur le texte (`completerDepuisTexte`).
 - Les noms de champs sont ceux convenus avec A4 (a4_58) : `taxes.autres` (avec `code`) et `mention.exoneration`. Une pièce exonérée reçoit une `tva.ventilation` avec la base en catégorie E.
 - Complément : 9 chiffres sous « SIRET » sont rangés en SIREN, et un SIRET de 14 chiffres donne son SIREN. « FR » + 2 chiffres + 23 caractères est un IBAN, jamais une TVA. Le modèle et le relevé de secours suivent ces mêmes règles (`reclasserIdentifiants`).
-- 14 tests sur doublures, 167 au total. **La consigne et le schéma changent : la fonction Edge lecteur est à redéployer** (session bureau). Aucun SQL côté lecteur.
+- 14 tests sur doublures, 167 au total.
+- Documents de chantier (décision de Teo : ils vont à Daliro) : trois types dans le schéma FILED, `chantier_pv_reserves`, `chantier_plan` et `chantier_note_technique`, avec les listes `reserves` et `dispositions`. 6 tests, 173 au total. Reste côté A4 ou socle : la nature `document_chantier` et son routage vers Daliro (§ 2 de la demande de B6). **La consigne et le schéma changent : la fonction Edge lecteur est à redéployer** (session bureau). Aucun SQL côté lecteur.
 
 ## ARRÊT — pause du 18/10, 17 h 13 Z (Teo : priorité au grand groupe et à l'architecture)
 - **Fait** : socle 19as posé ; `pieces_citees` au format B4 (lecteur à redéployer) ; 5 DCE réels publics avec SOURCE et sha256 ; `CHIFFRAGE/lecteur.md` mis à jour (lectures du 18/10, arrêt sur crédit API épuisé).

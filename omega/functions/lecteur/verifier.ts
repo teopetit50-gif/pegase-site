@@ -579,3 +579,49 @@ export function reclasserIdentifiants(valeurs: ValeurLue[], champs: { has(champ:
   }
   return sortie;
 }
+
+/**
+ * Une liste d'objets lus (les réserves d'un PV, les dispositions d'une note) : une seule valeur, chaque élément
+ * avec sa page. Un élément sans son texte principal n'est pas rendu ; une échéance n'est gardée que si c'est une
+ * date écrite. La liste est vérifiée si chaque texte principal se retrouve sur sa page.
+ */
+export function valeurListeObjets(
+  champ: string,
+  brutes: LigneBrute[] | undefined,
+  pages: PageLue[],
+  colonnes: readonly string[],
+  principal: string,
+): ValeurLue | null {
+  if (!Array.isArray(brutes) || brutes.length === 0) return null;
+  const parNumero = new Map(pages.map((p) => [p.n, p]));
+  let retrouves = 0;
+  const elements: Record<string, unknown>[] = [];
+  for (const l of brutes.slice(0, MAX_LIGNES)) {
+    if (!l || typeof l !== "object") continue;
+    const e: Record<string, unknown> = {};
+    for (const c of colonnes) {
+      const v = l[c];
+      if (v === undefined || v === null || String(v).trim() === "") continue;
+      if (c === "echeance") {
+        const d = dateIso(v);
+        if (d) e[c] = d;
+      } else {
+        e[c] = String(v).trim().slice(0, 2000);
+      }
+    }
+    if (typeof e[principal] !== "string") continue;
+    const page = Number.isInteger(l.page) ? parNumero.get(l.page as number) : undefined;
+    if (page) e.page = page.n;
+    if (page && retrouver(e[principal] as string, page.texte).trouve) retrouves++;
+    elements.push(e);
+  }
+  if (elements.length === 0) return null;
+  return {
+    champ,
+    valeur: elements,
+    page: elements.find((e) => typeof e.page === "number")?.page as number | undefined,
+    source: "ia",
+    verifiee: retrouves === elements.length,
+    controle: `${retrouves}/${elements.length} éléments retrouvés sur leur page`,
+  };
+}

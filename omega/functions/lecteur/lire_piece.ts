@@ -15,11 +15,12 @@ import type { Ocr } from "./ocr.ts";
 import { analyserPdf, type PagePdf, pageSansTexte } from "./pdf.ts";
 import { controlerPlafond } from "@partage/plafond.ts";
 import { champsPour, schemaPour } from "./schemas/modules.ts";
+import { CHAMPS_DISPOSITION, CHAMPS_RESERVE } from "./schemas/facture.ts";
 import type { ClientClaude } from "@partage/claude.ts";
 import type { PortesAnalyse } from "./analyse/travail.ts";
 import { type BilanAvis, chiffrerLecture, type CoffreTamila, depotDechiffrant, poserAvisTamila } from "./coffre.ts";
 import { lireCsv, lireXlsx } from "./tableur.ts";
-import { completerDepuisTexte, reclasserIdentifiants, valeurLignes, valeurTaxes, valeurVentilation, ventilationExoneree, verifierValeurs } from "./verifier.ts";
+import { completerDepuisTexte, reclasserIdentifiants, valeurListeObjets, valeurLignes, valeurTaxes, valeurVentilation, ventilationExoneree, verifierValeurs } from "./verifier.ts";
 import { estXmlFacture, lireXmlFacture } from "./xml_facture.ts";
 import { type BilanDecoupage, creerPiecesFilles } from "./decoupage.ts";
 import { concorder } from "./concordance.ts";
@@ -558,6 +559,8 @@ export function reunir(sorties: SortieIa[]): SortieIa {
       lignes: sorties.flatMap((s) => s.brut.lignes ?? []),
       tva_ventilation: sorties.find((s) => (s.brut.tva_ventilation ?? []).length > 0)?.brut.tva_ventilation,
       taxes_autres: sorties.find((s) => (s.brut.taxes_autres ?? []).length > 0)?.brut.taxes_autres,
+      reserves: sorties.flatMap((s) => s.brut.reserves ?? []),
+      dispositions: sorties.flatMap((s) => s.brut.dispositions ?? []),
     },
     usage: sorties.reduce((u, s) => ({ tokens_entree: u.tokens_entree + s.usage.tokens_entree, tokens_sortie: u.tokens_sortie + s.usage.tokens_sortie }), { tokens_entree: 0, tokens_sortie: 0 }),
     modele: sure.modele,
@@ -624,6 +627,14 @@ export function assembler(
     const exoneree = ventilationExoneree(valeurs);
     if (exoneree) valeurs.push(exoneree);
   }
+  // Les documents de chantier (vers Daliro) : leurs listes, une seule valeur chacune.
+  if (type_piece === "chantier_pv_reserves") {
+    const reserves = valeurListeObjets("reserves", brut.reserves, pages, CHAMPS_RESERVE, "description");
+    if (reserves) valeurs.push(reserves);
+  } else if (type_piece === "chantier_note_technique") {
+    const dispositions = valeurListeObjets("dispositions", brut.dispositions, pages, CHAMPS_DISPOSITION, "texte");
+    if (dispositions) valeurs.push(dispositions);
+  }
 
   let statut: StatutLecture;
   let motif: string | undefined;
@@ -634,10 +645,12 @@ export function assembler(
         ? `Type de pièce non reconnu pour le module ${schema.module} : une personne le tranche.`
         : `Type « ${type_piece} » incertain (${Math.round(brut.confiance_type * 100)} %) : une personne le tranche.`);
   } else if (typeDeclare.cles.length > 0) {
-    if (verif.clesDouteuses.length === 0) statut = "lue";
+    // Les clés comptent toutes les valeurs, listes comprises (« reserves » d'un PV).
+    const douteuses = typeDeclare.cles.filter((c) => !valeurs.some((v) => v.champ === c && v.verifiee));
+    if (douteuses.length === 0) statut = "lue";
     else {
       statut = "a_verifier";
-      motif = `À vérifier : ${verif.clesDouteuses.join(", ")}.`;
+      motif = `À vérifier : ${douteuses.join(", ")}.`;
     }
   } else {
     statut = typeDeclare.lueSansValeur || valeurs.some((v) => v.verifiee) ? "lue" : "a_verifier";

@@ -5,7 +5,7 @@
 // Le schéma d'outil et la consigne de Claude se construisent à partir d'ici,
 // ainsi que les règles de statut (champs clés d'un type).
 
-import { CHAMPS_FACTURE, SCHEMA_OUTIL_LECTURE, TYPES_PIECE } from "./facture.ts";
+import { CHAMPS_CHANTIER, CHAMPS_FACTURE, SCHEMA_OUTIL_LECTURE, TYPES_PIECE } from "./facture.ts";
 import { SCHEMA_LORANI } from "./lorani.ts";
 import { SCHEMA_TAMILA } from "./tamila.ts";
 import { CHAMPS_VARELO, TYPE_BON_LIVRAISON_VARELO } from "./varelo.ts";
@@ -90,9 +90,32 @@ export const SCHEMA_FILED: SchemaModule = {
     champs: CHAMPS_FACTURE.map((c) => c.champ),
     cles: t === "facture" || t === "avoir" ? CHAMPS_FACTURE.filter((c) => c.cle).map((c) => c.champ) : [],
   })),
-  champs: CHAMPS_FACTURE.map((c) => ({ champ: c.champ, type: c.type, description: c.description, max: c.max })),
+  champs: [...CHAMPS_FACTURE, ...CHAMPS_CHANTIER].map((c) => ({ champ: c.champ, type: c.type, description: c.description, max: c.max })),
   lignes: true,
 };
+SCHEMA_FILED.types.push(
+  {
+    type: "chantier_pv_reserves",
+    libelle: "PV de réserves",
+    description: "un procès-verbal de réserves (OPR, réception, levée de réserves) : la liste des réserves par logement, ouvrage ou lot",
+    champs: ["date_pv", "maitre_ouvrage", "operation", "redacteur", "reserves"],
+    cles: ["reserves"],
+  },
+  {
+    type: "chantier_plan",
+    libelle: "plan",
+    description: "un plan ou un cartouche de plan (architecte, structure, réseaux)",
+    champs: ["titre", "numero_plan", "indice", "date", "echelle", "phase", "maitre_ouvrage", "auteur"],
+    cles: ["titre"],
+  },
+  {
+    type: "chantier_note_technique",
+    libelle: "note technique",
+    description: "une note technique ou de calcul, des dispositions constructives (parasismique, thermique, incendie…)",
+    champs: ["titre", "date", "auteur", "maitre_ouvrage", "dispositions"],
+    cles: ["titre"],
+  },
+);
 
 /** Varelo : les pièces de FILED, le bon de livraison avec ses champs de réception (schemas/varelo.ts). */
 export const SCHEMA_VARELO: SchemaModule = {
@@ -100,8 +123,8 @@ export const SCHEMA_VARELO: SchemaModule = {
   module: "varelo",
   presentation:
     "une plateforme qui lit les pièces des sociétés d'un groupe de distribution (factures, avoirs, bons de livraison et lettres de voiture, devis, relevés, contrats)",
-  types: SCHEMA_FILED.types.map((t) => t.type === "bon_livraison" ? TYPE_BON_LIVRAISON_VARELO : t),
-  champs: [...SCHEMA_FILED.champs, ...CHAMPS_VARELO],
+  types: SCHEMA_FILED.types.filter((t) => !t.type.startsWith("chantier_")).map((t) => t.type === "bon_livraison" ? TYPE_BON_LIVRAISON_VARELO : t),
+  champs: [...CHAMPS_FACTURE.map((c) => ({ champ: c.champ, type: c.type, description: c.description, max: c.max })), ...CHAMPS_VARELO],
 };
 
 export const SCHEMAS_PAR_MODULE: Record<string, SchemaModule> = {
@@ -172,6 +195,8 @@ export function schemaOutilPour(module: string | null | undefined): Record<strin
       (s.champs.some((c) => c.type === "dateheure") ? ", AAAA-MM-JJTHH:MM (heure locale, sans fuseau) pour une date et heure, AAAA-MM-JJ seul si l'heure n'est pas imprimée" : "") +
       ", nombre entier pour les durées, rangs et numéros de passage, l'une des valeurs admises pour un choix, tableau de textes pour une liste, texte sinon.",
   };
+  delete props.reserves; // les documents de chantier ne se lisent que par le schéma FILED
+  delete props.dispositions;
   if (!s.lignes) {
     delete props.lignes;
     delete props.tva_ventilation;
