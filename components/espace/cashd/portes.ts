@@ -233,3 +233,12 @@ export async function reglerEnvoiAuto(client: string, actif: boolean, plafond: n
   return rpc<EnvoiAuto & { propose: string | null; revoques: number }>("cashd_regler_envoi_auto", { p_client: client, p_actif: actif, p_plafond: plafond ?? 5000 });
 }
 
+/* ——— c2_15 / c2_16 : les taux de change (BCE chaque jour ouvré, ou saisis par l'organisation) ——— */
+export type TauxConnu = { devise: string; jour: string | null; taux: number | null; source: "bce" | "saisie" | null };
+export async function chargerTaux(client: string) {
+  return rpc<TauxConnu[]>("cashd_taux_connus", { p_client: client });
+}
+export async function poserTaux(client: string, devise: string, jour: string, taux: number) {
+  return rpc<{ devise: string; jour: string; taux: number; source: string }>("cashd_poser_taux", { p_devise: devise, p_jour: jour, p_taux: taux, p_client: client });
+}
+

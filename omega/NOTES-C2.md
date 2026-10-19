@@ -8,7 +8,8 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
 ## REPRISE (19/10, 14 h 18 Z, feu vert de Teo)
 
 - **Fait** : c2_10 → c2_15 posés ; liste de Teo complète (G2…G21, G14, G17).
-- **À poser** : `c2_16_taux_recent.sql` puis test `c2_16_taux_recent` (6) — le taux le plus récent l'emporte (la BCE du jour sur une saisie ancienne ; le même jour, la saisie de l'organisation). Local 302/302.
+- **Posés et verts (19/10)** : c2_15 (11/11 seul), c2_16 (taux le plus récent).
+- **Écran (19/10)** : section « Taux de change » de la vue Trésorerie (TauxChange.tsx) — le taux retenu de chaque devise des factures et sa source (BCE / saisi), saisie d'un taux par cashd_poser_taux. Rien à poser en base.
 - **Prochain pas** : charger les factures d'Omega (cashd_omega.sql) quand Teo envoie ses PDF ; G19 avec un premier client.
 
 - **Posés et verts (18/10)** : c2_11 envoi à la main (842f9c25) ; c2_12 v2 modèle 2 (5ee5fd10, ^test_c2_ 12/12) — rappels

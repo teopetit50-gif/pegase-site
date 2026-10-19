@@ -31,6 +31,7 @@ import { JEUX, LIBELLES_CHAMPS, lireDepot, type Jeu } from "./depot";
 import * as portes from "./portes";
 import FicheCompte, { type Actions } from "./FicheCompte";
 import Textes from "./Textes";
+import TauxChange from "./TauxChange";
 import type { Fiche, Proposition, Relance, RelanceCommande, ReglementEtat, Tableau } from "./types";
 import "./cashd.css";
 
@@ -847,6 +848,10 @@ export default function EcranCashd({ vue }: { vue?: Onglet } = {}) {
                 </div>
               </div>
             </section>
+          ) : null}
+
+          {onglet === "tresorerie" ? (
+            <TauxChange key={`${source}:${reel?.client?.client_id ?? ""}`} source={source} client={reel?.client?.client_id ?? null} />
           ) : null}
 
           {onglet === "tresorerie" && (tableau?.a_imputer ?? []).length ? (

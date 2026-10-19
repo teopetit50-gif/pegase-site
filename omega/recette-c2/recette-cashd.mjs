@@ -421,5 +421,26 @@ for (const largeur of [1440, 390]) {
   s.fermer();
 }
 
+for (const largeur of [1440, 390]) {
+  const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: 'c2-taux', densite: 1 });
+  console.log(`— /espace/cashd : les taux de change, vue Trésorerie (exemple, ${largeur})`);
+  ok(await s.aller(base + CHEMIN), 'page chargée');
+  await s.dormir(600);
+  await onglet(s, 'Trésorerie');
+  const S = 'section[aria-label="Taux de change"]';
+  const l0 = await s.evaluer(`[...document.querySelectorAll('${S} .c2-taux li')].map(li => li.innerText.replace(/\\s+/g, ' ')).join(' | ')`);
+  ok(/CHF.*BCE/.test(l0) && /USD.*Saisi/.test(l0), `les taux retenus, avec leur source (${l0.slice(0, 90)})`);
+  await s.evaluer(saisir(`${S} input[maxlength="3"]`, 'gbp', 'HTMLInputElement'));
+  await s.evaluer(saisir(`${S} input[inputmode="decimal"]`, '1,1588', 'HTMLInputElement'));
+  await s.dormir(150);
+  await s.evaluer(`[...document.querySelectorAll('${S} button')].find(b => b.textContent.includes('Saisir'))?.click()`);
+  await s.dormir(300);
+  const l1 = await s.evaluer(`document.querySelector('${S}').innerText`);
+  ok(/GBP/.test(l1) && /1 GBP = 1,1588 €/.test(l1) && /l'emporte sur la BCE/.test(l1), 'un taux saisi s\'ajoute, et l\'écran dit qu\'il l\'emporte ce jour-là');
+  const m = await s.evaluer(DEBORDE);
+  ok(m.deb === 0 && m.larges.length === 0, `pas de débordement (${m.deb}) ${m.larges.length ? JSON.stringify(m.larges) : ''}`);
+  s.fermer();
+}
+
 console.log(echecs ? `\n${echecs} échec(s)` : '\nRecette CASHD : tout est vert.');
 process.exit(echecs ? 1 : 0);
