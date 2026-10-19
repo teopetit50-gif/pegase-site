@@ -89,8 +89,8 @@ Sur un **avoir**, les montants sont rendus avec le signe du document (souvent n�
 |---|---|---|---|---|
 | `fournisseur.nom` | texte (≤ 200) | oui | raison sociale | `"ATELIERS BRINDILLE SAS"` |
 | `fournisseur.siren` | texte, 9 chiffres | | SIREN (clé Luhn vérifiée). S'il n'est imprimé que dans le RCS (« RC Pointe-à-Pitre B 303 120 638 »), il en est tiré, par le modèle ou, à défaut, sur le texte si la pièce ne porte qu'un seul RCS (hors SIREN de l'acheteur) | `"812345676"` |
-| `fournisseur.siret` | texte, 14 chiffres | | SIRET (clé Luhn vérifiée) | `"81234567600031"` |
-| `fournisseur.tva` | texte | | numéro de TVA intracommunautaire, sans espaces, majuscules (clé FR vérifiée) | `"FR19812345676"` |
+| `fournisseur.siret` | texte, 14 chiffres | | SIRET (clé Luhn vérifiée). 9 chiffres sous l'étiquette « SIRET » sont rangés en `fournisseur.siren` ; un SIRET de 14 chiffres donne aussi son SIREN (ses 9 premiers chiffres) | `"81234567600031"` |
+| `fournisseur.tva` | texte | | numéro de TVA intracommunautaire, sans espaces, majuscules (clé FR vérifiée). Une TVA FR, c'est FR + 2 caractères + 9 chiffres : « FR » + 2 chiffres + 23 caractères est un IBAN, reclassé en `fournisseur.iban` (ou écarté) | `"FR19812345676"` |
 | `fournisseur.id_legal` | texte (≤ 60) | | identifiant légal d'un émetteur étranger sans SIREN ni TVA | `"HRB 12345"` |
 | `fournisseur.pays` | texte, 2 lettres | | pays ISO | `"FR"` |
 | `fournisseur.iban` | texte | | IBAN de règlement, sans espaces, majuscules ; clé modulo 97 vérifiée. Un IBAN en partie masqué ou coupé est gardé tel qu'imprimé (`•`, `*`, `X`, `…`), `verifiee = false`, « partiellement masqué : à compléter » | `"FR7630006000011234567890189"` |

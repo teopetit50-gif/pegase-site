@@ -400,6 +400,8 @@ export function valeurTaxes(brutes: LigneBrute[] | undefined, pages: PageLue[], 
 // absent, qu'une seule lecture possible, et la citation est le texte même de la page.
 const RE_RCS = /\bR\.?\s?C\.?\s?S?\.?\s+([A-ZÀ-Ÿa-zà-ÿ' -]{2,40}?)\s+(?:[AB]\s+)?(\d{3}\s?\d{3}\s?\d{3})(?!\s?\d)/g;
 const RE_IBAN = /\bIBAN\b\s*[:.]?\s*([A-Z]{2}\s?\d{2}(?:[\s\-]?[A-Z0-9•*…·]{1,4}){2,9}(?:\.{3})?)/g;
+const RE_SIREN_SIRET = /\bSIRE[NT]\b\s*(?:n[°o]\s*)?[:.]?\s*(\d{3}\s?\d{3}\s?\d{3}(?:\s?\d{5})?)(?!\s?\d)/gi;
+const RE_IBAN_FR_NU = /\bFR\d{2}(?:\s?[0-9A-Z]{4}){5}\s?[0-9A-Z]{3}\b/g;
 const RE_EXONERATION = /[^\n]*(?:exon[ée]r[ée]?(?:ation)?s?\b[^\n]*\bTVA\b|\bTVA\b[^\n]*exon[ée]r|art(?:icle|\.)?\s*(?:295|262\s*ter|261|275)\b[^\n]*\bCGI\b)[^\n]*/gi;
 
 function seulesLectures(pages: PageLue[], re: RegExp, groupe: number): { valeur: string; texte: string; page: number }[] {
@@ -439,8 +441,31 @@ export function completerDepuisTexte(valeurs: ValeurLue[], pages: PageLue[], cha
     }
   }
 
+  if (absent("fournisseur.siren") && !ajouts.some((a) => a.champ === "fournisseur.siren")) {
+    // « SIREN 413 130 972 », « SIRET 413 130 972 » (9 chiffres : un SIREN), « SIRET 413 130 972 00018 » (ses 9 premiers).
+    const acheteur = valeurs.find((v) => v.champ === "acheteur.siren")?.valeur;
+    const lus = seulesLectures(pages, RE_SIREN_SIRET, 1)
+      .map((r) => ({ ...r, valeur: r.valeur.replace(/\s/g, "").slice(0, 9) }))
+      .filter((r) => r.valeur !== acheteur);
+    const distincts = [...new Set(lus.map((r) => r.valeur))];
+    if (distincts.length === 1) {
+      const valide = sirenValide(distincts[0]);
+      ajouts.push({
+        champ: "fournisseur.siren",
+        valeur: distincts[0],
+        texte: lus[0].texte,
+        page: lus[0].page,
+        source: "ia",
+        verifiee: valide,
+        controle: `relevé sur le texte de la page ${lus[0].page}${valide ? "" : " ; clé SIREN invalide"}`,
+      });
+    }
+  }
+
   if (absent("fournisseur.iban")) {
-    const ibans = seulesLectures(pages, RE_IBAN, 1);
+    let ibans = seulesLectures(pages, RE_IBAN, 1);
+    // Sans étiquette « IBAN » : FR + 2 chiffres + 23 caractères, jamais lu comme une TVA.
+    if (ibans.length === 0) ibans = seulesLectures(pages, RE_IBAN_FR_NU, 0);
     if (ibans.length === 1) {
       const t = typerValeur("fournisseur.iban", ibans[0].valeur, new Map([["fournisseur.iban", { type: "texte" }]]));
       const forme = regleDeForme("fournisseur.iban", t.valeur);
@@ -493,4 +518,64 @@ export function ventilationExoneree(valeurs: ValeurLue[]): ValeurLue | null {
     verifiee: ht.verifiee && mention.verifiee,
     controle: "déduite de la mention d'exonération et du total HT (catégorie E)",
   };
+}
+
+const TVA_FR = /^FR[0-9A-Z]{2}\d{9}$/;
+const IBAN_FR = /^FR\d{2}[0-9A-Z]{23}$/;
+
+function citationRetrouvee(v: ValeurLue): boolean {
+  return v.controle?.startsWith("citation retrouvée") === true || v.controle?.startsWith("relevé") === true;
+}
+
+/**
+ * Les identifiants rangés sous la mauvaise étiquette (NOBAT, 19/10) : 9 chiffres sous « SIRET » sont un SIREN ;
+ * un SIRET de 14 chiffres donne son SIREN ; « FR76 » suivi de 23 caractères est un IBAN, jamais une TVA
+ * (une TVA FR, c'est FR + 2 caractères + 9 chiffres).
+ */
+export function reclasserIdentifiants(valeurs: ValeurLue[], champs: { has(champ: string): boolean }): ValeurLue[] {
+  const sortie = [...valeurs];
+  const trouver = (c: string) => sortie.find((v) => v.champ === c);
+  for (const partie of ["fournisseur", "acheteur"]) {
+    const siret = trouver(`${partie}.siret`);
+    if (siret && champs.has(`${partie}.siren`)) {
+      const chiffres = String(siret.valeur).replace(/\D/g, "");
+      if (chiffres.length === 9 && !trouver(`${partie}.siren`)) {
+        const valide = sirenValide(chiffres);
+        sortie[sortie.indexOf(siret)] = {
+          ...siret,
+          champ: `${partie}.siren`,
+          valeur: chiffres,
+          verifiee: citationRetrouvee(siret) && valide,
+          controle: `${siret.controle?.split(" ; ")[0] ?? ""} ; 9 chiffres sous « SIRET » : rangé en SIREN${valide ? "" : " ; clé SIREN invalide"}`.slice(0, 300),
+        };
+      } else if (chiffres.length === 14 && !trouver(`${partie}.siren`)) {
+        const siren = chiffres.slice(0, 9);
+        sortie.push({
+          champ: `${partie}.siren`,
+          valeur: siren,
+          texte: siret.texte,
+          page: siret.page,
+          source: siret.source,
+          verifiee: siret.verifiee && sirenValide(siren),
+          controle: "déduit des 9 premiers chiffres du SIRET",
+        });
+      }
+    }
+    const tva = trouver(`${partie}.tva`);
+    if (tva && IBAN_FR.test(String(tva.valeur)) && !TVA_FR.test(String(tva.valeur))) {
+      const iban = `${partie}.iban`;
+      if (champs.has(iban) && !trouver(iban)) {
+        const forme = regleDeForme(iban, tva.valeur);
+        sortie[sortie.indexOf(tva)] = {
+          ...tva,
+          champ: iban,
+          verifiee: citationRetrouvee(tva) && forme === null,
+          controle: `${tva.controle?.split(" ; ")[0] ?? ""} ; FR + 25 caractères : un IBAN, pas une TVA${forme ? ` ; ${forme}` : ""}`.slice(0, 300),
+        };
+      } else {
+        sortie.splice(sortie.indexOf(tva), 1); // un IBAN n'est jamais une TVA
+      }
+    }
+  }
+  return sortie;
 }

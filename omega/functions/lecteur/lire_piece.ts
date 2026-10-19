@@ -19,7 +19,7 @@ import type { ClientClaude } from "@partage/claude.ts";
 import type { PortesAnalyse } from "./analyse/travail.ts";
 import { type BilanAvis, chiffrerLecture, type CoffreTamila, depotDechiffrant, poserAvisTamila } from "./coffre.ts";
 import { lireCsv, lireXlsx } from "./tableur.ts";
-import { completerDepuisTexte, valeurLignes, valeurTaxes, valeurVentilation, ventilationExoneree, verifierValeurs } from "./verifier.ts";
+import { completerDepuisTexte, reclasserIdentifiants, valeurLignes, valeurTaxes, valeurVentilation, ventilationExoneree, verifierValeurs } from "./verifier.ts";
 import { estXmlFacture, lireXmlFacture } from "./xml_facture.ts";
 import { type BilanDecoupage, creerPiecesFilles } from "./decoupage.ts";
 import { concorder } from "./concordance.ts";
@@ -612,7 +612,8 @@ export function assembler(
   const type_piece = typeDeclare ? typeDeclare.type : "autre";
   const champs = champsPour(module, type_piece);
   const verif = verifierValeurs(brut.valeurs, pages, pagesPdf, "ia", champs, typeDeclare?.cles ?? []);
-  const valeurs: ValeurLue[] = [...verif.valeurs, ...completerDepuisTexte(verif.valeurs, pages, champs)];
+  const classees = reclasserIdentifiants(verif.valeurs, champs);
+  const valeurs: ValeurLue[] = [...classees, ...completerDepuisTexte(classees, pages, champs)];
   if (schema.lignes) {
     const lignes = valeurLignes(brut.lignes, pages, "ia", schema.colonnesLigne);
     if (lignes) valeurs.push(lignes);

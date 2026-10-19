@@ -6,7 +6,7 @@ import type { PageLue } from "@partage/portes.ts";
 import type { SortieIa, SortieOutil } from "../ia.ts";
 import { assembler } from "../lire_piece.ts";
 import { schemaOutilPour } from "../schemas/modules.ts";
-import { completerDepuisTexte, ibanMasque, ibanValide, verifierValeurs } from "../verifier.ts";
+import { completerDepuisTexte, ibanMasque, ibanValide, reclasserIdentifiants, verifierValeurs } from "../verifier.ts";
 import { CHAMPS_PAR_NOM } from "../schemas/facture.ts";
 
 function ia(brut: Partial<SortieOutil>): SortieIa {
@@ -142,7 +142,11 @@ Deno.test("RCS : deux SIREN différents (émetteur et client) → on ne choisit 
   assertEquals(completerDepuisTexte([], [deux], CHAMPS_PAR_NOM).filter((a) => a.champ === "fournisseur.siren"), []);
   const acheteur = [{ champ: "acheteur.siren", valeur: "732829320", source: "ia" as const, verifiee: true }];
   assertEquals(completerDepuisTexte(acheteur, [deux], CHAMPS_PAR_NOM).find((a) => a.champ === "fournisseur.siren")?.valeur, "552100554");
-  assertEquals(completerDepuisTexte([], [page("SIRET 552 100 554 00012")], CHAMPS_PAR_NOM), [], "un SIRET n'est pas un RCS");
+  assertEquals(
+    completerDepuisTexte([], [page("SIRET 552 100 554 00012")], CHAMPS_PAR_NOM).find((a) => a.champ === "fournisseur.siren")?.valeur,
+    "552100554",
+    "un SIRET donne son SIREN",
+  );
 });
 
 Deno.test("franchise 293 B : pas de mention d'exonération en double", () => {
@@ -171,4 +175,46 @@ Deno.test("format de lecture : taxes_autres dans l'outil FILED et ses dérivés,
   assert("taxes_autres" in props("filed"));
   assert("taxes_autres" in props("nobat"), "un module sans schéma propre lit comme FILED");
   assert(!("taxes_autres" in props("tamila")));
+});
+
+// Valeurs de doublure (SIREN 552 100 554 à clé valide ; IBAN d'exemple FR76 3000 6000 0112 3456 7890 189).
+const IBAN_DOUBLURE = "FR76 3000 6000 0112 3456 7890 189";
+
+Deno.test("SIRET à 9 chiffres : rangé en fournisseur.siren, sans fausse alerte", () => {
+  const p = page("Société Essai SAS — SIRET 552 100 554");
+  const verif = verifierValeurs([{ champ: "fournisseur.siret", valeur: "552 100 554", texte: "SIRET 552 100 554", page: 1 }], [p], null);
+  assert(!verif.valeurs[0].verifiee, "9 chiffres ne font pas un SIRET");
+  const r = reclasserIdentifiants(verif.valeurs, CHAMPS_PAR_NOM);
+  assertEquals(r.map((v) => v.champ), ["fournisseur.siren"]);
+  assertEquals(r[0].valeur, "552100554");
+  assert(r[0].verifiee, r[0].controle);
+});
+
+Deno.test("SIRET à 14 chiffres : gardé, et son SIREN s'en déduit", () => {
+  const p = page("SIRET 552 100 554 00012");
+  const verif = verifierValeurs([{ champ: "fournisseur.siret", valeur: "552 100 554 00012", texte: "SIRET 552 100 554 00012", page: 1 }], [p], null);
+  const r = reclasserIdentifiants(verif.valeurs, CHAMPS_PAR_NOM);
+  assertEquals(r.map((v) => [v.champ, v.valeur]), [["fournisseur.siret", "55210055400012"], ["fournisseur.siren", "552100554"]]);
+});
+
+Deno.test("relevé de secours : « SIRET nnn nnn nnn » (9 chiffres) donne fournisseur.siren", () => {
+  const ajouts = completerDepuisTexte([], [page("Fournisseur — SIRET 552 100 554 — Tél. 0590 00 00 00")], CHAMPS_PAR_NOM);
+  assertEquals(ajouts.find((a) => a.champ === "fournisseur.siren")?.valeur, "552100554");
+});
+
+Deno.test("FR76 + 23 caractères rangé en TVA : reclassé en IBAN ; une vraie TVA FR reste une TVA", () => {
+  const p = page(`TVA FR96 552 100 554\nRèglement : ${IBAN_DOUBLURE}`);
+  const verif = verifierValeurs([{ champ: "fournisseur.tva", valeur: IBAN_DOUBLURE, texte: IBAN_DOUBLURE, page: 1 }], [p], null);
+  const r = reclasserIdentifiants(verif.valeurs, CHAMPS_PAR_NOM);
+  assertEquals(r.map((v) => v.champ), ["fournisseur.iban"]);
+  assertEquals(r[0].valeur, "FR7630006000011234567890189");
+  assert(r[0].verifiee, r[0].controle);
+  const vraie = verifierValeurs([{ champ: "fournisseur.tva", valeur: "FR96552100554", texte: "FR96 552 100 554", page: 1 }], [p], null);
+  assertEquals(reclasserIdentifiants(vraie.valeurs, CHAMPS_PAR_NOM).map((v) => v.champ), ["fournisseur.tva"]);
+});
+
+Deno.test("relevé de secours : un IBAN FR sans étiquette est un IBAN, jamais une TVA", () => {
+  const ajouts = completerDepuisTexte([], [page(`Coordonnées bancaires ${IBAN_DOUBLURE}`)], CHAMPS_PAR_NOM);
+  assertEquals(ajouts.find((a) => a.champ === "fournisseur.iban")?.valeur, "FR7630006000011234567890189");
+  assertEquals(ajouts.filter((a) => a.champ.endsWith(".tva")), []);
 });
