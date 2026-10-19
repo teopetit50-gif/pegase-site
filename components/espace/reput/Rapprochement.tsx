@@ -17,7 +17,7 @@ import { relatif } from "../format";
 import { ecarterRapprochement, rapprocher, separer } from "./portes";
 import type { Demande, Monde } from "./types";
 
-const CANAUX: Record<string, string> = { email: "courriel", whatsapp: "WhatsApp", sms: "SMS", formulaire: "formulaire du site" };
+const CANAUX: Record<string, string> = { email: "courriel", whatsapp: "WhatsApp", sms: "SMS", formulaire: "formulaire du site", appel: "appel manqué" };
 
 export default function Rapprochement({ demande, monde, traite, source, relire, modifierLocal }: {
   demande: Demande; monde: Monde; traite: boolean; source: "exemple" | "reelle";

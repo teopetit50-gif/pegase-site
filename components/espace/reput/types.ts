@@ -4,7 +4,7 @@
 
 export type StatutDemande = "a_preparer" | "a_valider" | "a_traiter" | "validee" | "envoyee" | "refusee" | "bloquee" | "ignoree";
 export type StatutReponse = "a_valider" | "approuvee" | "envoyee" | "refusee" | "bloquee" | "remplacee" | "sans_envoi";
-export type Canal = "email" | "whatsapp" | "sms" | "formulaire";
+export type Canal = "email" | "whatsapp" | "sms" | "formulaire" | "appel";
 
 export type Reception = {
   id: number;

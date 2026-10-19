@@ -49,7 +49,7 @@ export const STATUTS: Record<StatutDemande, { libelle: string; teinte: Teinte }>
   ignoree: { libelle: "Ignorée", teinte: "gris" },
 };
 
-const CANAUX: Record<string, string> = { email: "Courriel", whatsapp: "WhatsApp", sms: "SMS", formulaire: "Formulaire du site" };
+const CANAUX: Record<string, string> = { email: "Courriel", whatsapp: "WhatsApp", sms: "SMS", formulaire: "Formulaire du site", appel: "Appel manqué (message transcrit)" };
 
 const FAMILLES: { cle: Famille; libelle: string; sous: string; teinte: Teinte }[] = [
   { cle: "a_valider", libelle: "À valider", sous: "réponses prêtes", teinte: "ambre" },
