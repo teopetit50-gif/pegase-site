@@ -1,0 +1,14 @@
+fichier	url	sha256
+BT-01-D03.pdf	https://huggingface.co/datasets/djo33350/french-synthetic-document-test-samples/resolve/main/samples/construction/pdf/BT-01-D03.pdf	e8507f32df47414e829d59b1c78bc8f3814d2b72315845cb6ec774ac4b79404d
+BT-01-D03.json	https://huggingface.co/datasets/djo33350/french-synthetic-document-test-samples/resolve/main/samples/construction/ground_truth/BT-01-D03.json	5ce8f43bea23208bda666f6fdd010b56512e6c59845718b277ab4f49471884dc
+BT-07-D02.pdf	https://huggingface.co/datasets/djo33350/french-synthetic-document-test-samples/resolve/main/samples/construction/pdf/BT-07-D02.pdf	adcce5d6269cf9a66753a3b53429023d80058b74e0f1d2576dc7394babf7ab68
+BT-07-D02.json	https://huggingface.co/datasets/djo33350/french-synthetic-document-test-samples/resolve/main/samples/construction/ground_truth/BT-07-D02.json	994aef1311cf16e9d4f7a856d04ead308a0e7213ad0b118d0f4cefe62bd6bd75
+EC-01-D03.pdf	https://huggingface.co/datasets/djo33350/french-synthetic-document-test-samples/resolve/main/samples/ecommerce/pdf/EC-01-D03.pdf	26af8aed6c1e539d604e742b14094a530fbcded077b17207b2c0a6178b7e1332
+EC-01-D03.json	https://huggingface.co/datasets/djo33350/french-synthetic-document-test-samples/resolve/main/samples/ecommerce/ground_truth/EC-01-D03.json	d089f03079ab70d34eb3c7fa2af6e208daf9c1efc32dfd85f99c63e5eeac91c1
+EC-07-D02.pdf	https://huggingface.co/datasets/djo33350/french-synthetic-document-test-samples/resolve/main/samples/ecommerce/pdf/EC-07-D02.pdf	047f541ee7123576de85b1e9dbd23190ad677187a2e2d4f47ad4c52666002cd1
+EC-07-D02.json	https://huggingface.co/datasets/djo33350/french-synthetic-document-test-samples/resolve/main/samples/ecommerce/ground_truth/EC-07-D02.json	c34ad47cda658d53c090e6fbc31abd0c99d5811a3a3935fb68fb9f09d282cf35
+RE-01-D03.pdf	https://huggingface.co/datasets/djo33350/french-synthetic-document-test-samples/resolve/main/samples/restaurant/pdf/RE-01-D03.pdf	e952b05b262b3cc6dc11f1c93c55bf7f1a038cd89a8534f4b7f2ddf4b282f42c
+RE-01-D03.json	https://huggingface.co/datasets/djo33350/french-synthetic-document-test-samples/resolve/main/samples/restaurant/ground_truth/RE-01-D03.json	4c36bb3a6973e22424241bb47858112aa151438f465b7ebe6608bc8262f8c316
+RE-07-D02.pdf	https://huggingface.co/datasets/djo33350/french-synthetic-document-test-samples/resolve/main/samples/restaurant/pdf/RE-07-D02.pdf	1cd85c7da09b9f72656343277103aaab0a6d8974bfcce3a8dbc0410e297da0d6
+RE-07-D02.json	https://huggingface.co/datasets/djo33350/french-synthetic-document-test-samples/resolve/main/samples/restaurant/ground_truth/RE-07-D02.json	24e61ddc1db7b7374314a315d03018690e54d9074c0a3b531b8953db0c17a781
+einvoi-factur-x-coherence-cases-2026-v1.json	https://static.data.gouv.fr/resources/jeu-de-tests-factur-x-1-09-2-tva-montants-doublons-et-coherence-pdf-xml/20260822-132030/einvoi-factur-x-coherence-cases-2026-v1.json	3c353e4b3ea6dc472e190a4b76b3ce606a7864485618dd19740f558185a8650a

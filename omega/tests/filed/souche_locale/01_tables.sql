@@ -118,3 +118,6 @@ create table if not exists public.btp_reglages (id uuid primary key default gen_
   installe_le timestamptz not null default now(), maj_le timestamptz not null default now());
 grant select on public.btp_reglages to authenticated, service_role;
 grant all on public.btp_reglages to service_role;
+
+-- a4_62 : la date de réception de la pièce, comme sur la recette.
+alter table public.pieces add column if not exists recue_le timestamptz not null default now();
