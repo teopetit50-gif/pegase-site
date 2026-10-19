@@ -7,7 +7,11 @@
   À POSER par le coordinateur, puis test 62 (^test_62_). Le journal était déjà chaîné (hash, hash_precedent) : le lot ne
   réécrit rien, il rend visible de l'extérieur un retrait ou une réécriture de la fin de la chaîne. Maquette 62/62.
   Horodatage qualifié eIDAS : non branché (payant, prestataire à choisir).
-- G12 (interface pour un tiers) : à faire après la pose de 19at.
+- 19at POSÉ (30b9fc7a), test 62 vert sur la recette.
+- G12 — lot 19au (interface pour un tiers : catalogue private.api_portes vide par défaut + api_documentation ; clés
+  private.cles_api, secret montré une fois, SHA-256 gardé ; portées ; quota par jour ; révocation ; journal) : À POSER,
+  puis test 63 (^test_63_). Maquette 63/63. Reste à faire, en lot à part : la passerelle HTTP (fonction Edge) qui
+  appelle api_authentifier puis la porte autorisée avec le service, et l'inscription des portes cashd_* par C2.
 - Reste vrai : omega-sauvegarde.yml a `${{ runner.temp }}` dans le env: du job (ligne 98), le même défaut que la
   répétition CI ; à corriger avant de le fusionner dans main, quand on me le demandera.
 
