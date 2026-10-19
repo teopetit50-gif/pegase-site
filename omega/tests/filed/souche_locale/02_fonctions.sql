@@ -1376,3 +1376,99 @@ begin
   end if;
   return v_f;
 end $function$;
+
+-- a4_61 : doublures des trois petites fonctions du socle (non extraites ; leurs correspondances ici sont celles de la
+-- contrainte des natures, pas une copie de la recette). filed_libelle_nature est en « language sql » pour éprouver
+-- l'autre forme de garde d'a4_61. Puis filed_integrer_piece telle qu'extraite (SOCLE-EXTRAITS-COMMUN.sql, 5/10).
+create or replace function private.filed_nature_de(p_type text) returns text language plpgsql immutable set search_path to '' as $function$
+begin
+  return case when p_type in ('facture', 'avoir', 'bon_commande', 'bon_livraison', 'devis', 'releve', 'contrat', 'attestation_assurance') then p_type end;
+end $function$;
+create or replace function private.filed_etat_de(p_nature text) returns text language plpgsql immutable set search_path to '' as $function$
+begin
+  if p_nature is null then
+    return 'a_classer';
+  end if;
+  return case when p_nature in ('facture', 'avoir', 'bon_commande', 'bon_livraison') then 'a_traiter' else 'classe' end;
+end $function$;
+create or replace function private.filed_libelle_nature(p_nature text) returns text language sql immutable set search_path to '' as $function$
+  select case p_nature when 'facture' then 'facture' when 'avoir' then 'avoir' when 'devis' then 'devis' else coalesce(p_nature, 'pièce') end;
+$function$;
+CREATE OR REPLACE FUNCTION private.filed_integrer_piece(p_piece uuid)
+ RETURNS text
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare
+  v_doc public.filed_documents;
+  v_p public.pieces;
+  v_nature text;
+  v_etat text;
+  v_motif text;
+begin
+  select * into v_doc from public.filed_documents where piece_id = p_piece for update;
+  if not found then
+    return 'hors_filed';
+  end if;
+  if v_doc.etat = 'doublon' then
+    return 'doublon';
+  end if;
+  select * into v_p from public.pieces where id = p_piece;
+  if v_p.statut not in ('lue', 'a_verifier', 'a_classer', 'rejetee', 'echec') then
+    return 'pas_encore_lue';
+  end if;
+
+  if v_doc.nature_source = 'humain' then
+    v_nature := v_doc.nature;
+    v_etat := private.filed_etat_de(v_nature);
+    v_motif := case when v_p.statut in ('rejetee', 'echec')
+                    then coalesce(v_p.motif, 'La pièce n''a pas pu être lue.') end;
+  elsif v_p.statut in ('rejetee', 'echec') then
+    v_nature := null;
+    v_etat := 'illisible';
+    v_motif := coalesce(v_p.motif, 'La pièce n''a pas pu être lue.');
+  elsif v_p.statut = 'a_classer' then
+    v_nature := null;
+    v_etat := 'a_classer';
+    v_motif := coalesce(v_p.motif, 'Type incertain : une personne le tranche.');
+  else
+    v_nature := private.filed_nature_de(v_p.type_piece);
+    v_etat := private.filed_etat_de(v_nature);
+    v_motif := case when v_nature is null then coalesce(v_p.motif, 'Type non reconnu : une personne le tranche.') end;
+  end if;
+
+  -- Une facture, un avoir, un bon de commande ou de livraison passe tout de
+  -- suite à son moteur, dans la même transaction : son document est « integre ».
+  if v_nature in ('facture', 'avoir', 'bon_commande', 'bon_livraison') then
+    v_etat := 'integre';
+  end if;
+
+  if not (v_doc.etat is not distinct from v_etat and v_doc.nature is not distinct from v_nature
+          and v_doc.motif is not distinct from v_motif) then
+    update public.filed_documents
+       set etat = v_etat, nature = v_nature,
+           nature_source = case when v_nature is null then null
+                                when v_doc.nature_source = 'humain' then 'humain' else 'lecteur' end,
+           motif = v_motif, lu_le = coalesce(v_p.lue_le, now()), traite_le = now()
+     where id = v_doc.id;
+    perform private.filed_historiser(v_doc.client_id, v_doc.id, 'filed_document', v_doc.id::text,
+      case v_etat when 'illisible' then 'illisible' when 'a_classer' then 'a_classer' else 'lu' end,
+      case v_etat
+        when 'illisible' then 'Pièce illisible : ' || v_motif
+        when 'a_classer' then 'À classer : ' || v_motif
+        when 'classe' then 'Lue et rangée : ' || private.filed_libelle_nature(v_nature) || '.'
+        else 'Lue : ' || private.filed_libelle_nature(v_nature) || '.' end,
+      jsonb_build_object('statut_lecture', v_p.statut, 'type_piece', v_p.type_piece, 'nature', v_nature,
+                         'version_lecteur', v_p.version_lecteur));
+  end if;
+
+  if v_nature in ('facture', 'avoir') then
+    return 'facture:' || private.filed_integrer_facture(v_doc.id);
+  elsif v_nature = 'bon_commande' then
+    return private.filed_integrer_commande(v_doc.id);
+  elsif v_nature = 'bon_livraison' then
+    return private.filed_integrer_reception(v_doc.id);
+  end if;
+  return v_etat;
+end $function$;

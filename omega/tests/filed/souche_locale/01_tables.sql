@@ -103,3 +103,18 @@ alter table public.pieces add column if not exists type_piece text check (type_p
 
 -- a4_51 (correctif) : comme sur la recette, un seul expéditeur actif par organisation, canal et module.
 create unique index if not exists expediteurs_un_actif_idx on public.expediteurs (client_id, canal, coalesce(module, '')) where statut = 'actif';
+
+-- a4_61 : ce que filed_integrer_piece lit, la contrainte des natures (recette du 5/10) et la présence de Daliro.
+alter table public.pieces add column if not exists version_lecteur text;
+alter table public.pieces add column if not exists motif text;
+alter table public.pieces add column if not exists lue_le timestamptz;
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'filed_documents_nature_check') then
+    alter table public.filed_documents add constraint filed_documents_nature_check CHECK ((nature = ANY (ARRAY['facture'::text, 'avoir'::text, 'bon_commande'::text, 'bon_livraison'::text, 'devis'::text, 'releve'::text, 'contrat'::text, 'attestation_assurance'::text, 'autre'::text])));
+  end if;
+end $$;
+create table if not exists public.btp_reglages (id uuid primary key default gen_random_uuid(), client_id uuid not null unique references public.clients(id) on delete cascade,
+  formule text not null check (formule in ('demarrage', 'chantiers', 'entreprise')), quota_chantiers integer not null, quota_comptes_bureau integer not null,
+  installe_le timestamptz not null default now(), maj_le timestamptz not null default now());
+grant select on public.btp_reglages to authenticated, service_role;
+grant all on public.btp_reglages to service_role;
