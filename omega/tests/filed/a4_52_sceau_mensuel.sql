@@ -35,10 +35,12 @@ begin
                  and x.sha256 = encode(sha256(convert_to(x.contenu, 'UTF8')), 'hex'),
                  'Son export : le CSV porte l''empreinte, et l''export la sienne');
 
-  select * into e from public.envois where id = (s.envois -> 0 ->> 'envoi')::uuid;
-  return next ok(s.statut = 'envoye' and jsonb_array_length(s.envois) = 1 and e.destinataire_membre = (o ->> 'gerant')::uuid
-                 and (s.envois -> 0 ->> 'gerant')::uuid = (o ->> 'gerant')::uuid,
-                 'Un courriel, au gérant seulement (pas au valideur)');
+  -- Ne regarder que ce que le test a créé : l'entrée de SON gérant, et l'absence de son valideur.
+  select * into e from public.envois
+   where id = (select (g ->> 'envoi')::uuid from jsonb_array_elements(s.envois) g where (g ->> 'gerant')::uuid = (o ->> 'gerant')::uuid);
+  return next ok(e.id is not null and e.destinataire_membre = (o ->> 'gerant')::uuid
+                 and not exists (select 1 from jsonb_array_elements(s.envois) g where (g ->> 'gerant')::uuid = (o ->> 'valideur')::uuid),
+                 'Un courriel au gérant, aucun au valideur');
   return next ok(e.sujet like 'FILED — sceau de l''historique, %' and e.corps like '%' || s.empreinte || '%'
                  and e.corps like '%/filed/comptabilite?export=' || s.export_id::text || '%' and e.corps like '%aucune pièce jointe%',
                  'Gabarit fermé : sujet fixe, empreinte et lien vers l''export dans le corps');

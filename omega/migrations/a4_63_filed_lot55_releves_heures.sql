@@ -5,9 +5,12 @@
 --
 --   · La pièce : pieces.type_piece = 'releve_heures'. filed_nature_de la range en « autre » (rien à changer : tout
 --     type inconnu de FILED y va), filed_etat_de en « classe ».
---   · Sa fiche : public.filed_releves_heures, une par document, lue des valeurs du lecteur (champs pour A1 :
---     releve.heures, releve.periode_debut, releve.periode_fin, releve.signe, releve.reference, fournisseur.nom,
---     fournisseur.siren). Une personne la corrige (public.filed_poser_releve_heures).
+--   · Sa fiche : public.filed_releves_heures, une par document, lue des valeurs du lecteur, aux noms d'A1
+--     (worker-a1 4a4ad9e1, CHAMPS-LECTURE.md) : agence (le fournisseur), interimaire, client, periode_du, periode_au,
+--     total_heures (le total écrit ; à défaut, la somme des lignes), signature_client (booléen), lignes [{date, heures,
+--     taux, page}] ; le SIREN de l'agence par fournisseur.siren s'il est écrit. Les noms de la v1 (releve.heures,
+--     releve.periode_debut, releve.periode_fin, releve.signe, releve.reference, fournisseur.nom) restent en repli.
+--     Une personne corrige la fiche (public.filed_poser_releve_heures).
 --   · Le rapprochement, au contrôle de chaque facture : les relevés libres du même fournisseur dont la période
 --     finit dans les 62 jours avant la facture (ou 7 jours après) s'y rattachent, du plus ancien au plus récent,
 --     tant que les heures facturées ne sont pas couvertes ; une facture peut en porter plusieurs (relevés
@@ -32,6 +35,8 @@ create table if not exists public.filed_releves_heures (
   periode_fin date,
   heures numeric(9,2) check (heures is null or heures >= 0),
   signe boolean,
+  interimaire text check (char_length(interimaire) <= 200),
+  lignes jsonb not null default '[]' check (jsonb_typeof(lignes) = 'array'),
   facture_id uuid references public.filed_factures(id) on delete set null,
   lien text not null default 'libre' check (lien in ('libre', 'rapproche', 'ecarte')),
   source text not null default 'lecture' check (source in ('lecture', 'humain')),
@@ -40,6 +45,9 @@ create table if not exists public.filed_releves_heures (
   check ((lien = 'rapproche') = (facture_id is not null) or lien = 'ecarte'),
   check (periode_fin is null or periode_debut is null or periode_fin >= periode_debut)
 );
+-- v2 (noms d'A1) : l'intérimaire et les lignes du relevé, pour une table déjà créée par la v1.
+alter table public.filed_releves_heures add column if not exists interimaire text check (char_length(interimaire) <= 200);
+alter table public.filed_releves_heures add column if not exists lignes jsonb not null default '[]' check (jsonb_typeof(lignes) = 'array');
 create index if not exists filed_releves_heures_facture_idx on public.filed_releves_heures (facture_id) where facture_id is not null;
 create index if not exists filed_releves_heures_libres_idx on public.filed_releves_heures (client_id, fournisseur_id) where lien = 'libre';
 alter table public.filed_releves_heures enable row level security;
@@ -72,6 +80,7 @@ grant execute on function private.filed_releve_dans_fenetre(public.filed_releves
 create or replace function private.filed_lire_releve_heures(p_document uuid)
 returns uuid language plpgsql security definer set search_path to '' as $$
 declare d public.filed_documents; r public.filed_releves_heures; v jsonb; v_id uuid; v_four uuid; v_agence text; v_siren text; v_signe text;
+        v_lignes jsonb; v_heures numeric;
 begin
   select * into d from public.filed_documents where id = p_document;
   if not found or not exists (select 1 from public.pieces p where p.id = d.piece_id and p.type_piece = 'releve_heures') then
@@ -80,9 +89,14 @@ begin
   select * into r from public.filed_releves_heures where document_id = p_document;
   if r.id is not null and r.source = 'humain' then return r.id; end if;
   v := coalesce(private.filed_valeurs(d.piece_id), '{}'::jsonb);
-  v_agence := left(nullif(btrim(coalesce(v -> 'fournisseur.nom' ->> 'valeur', '')), ''), 200);
+  -- Les noms d'A1 d'abord, ceux de la v1 en repli.
+  v_agence := left(nullif(btrim(coalesce(v -> 'agence' ->> 'valeur', v -> 'fournisseur.nom' ->> 'valeur', '')), ''), 200);
   v_siren := nullif(regexp_replace(coalesce(v -> 'fournisseur.siren' ->> 'valeur', ''), '\D', '', 'g'), '');
-  v_signe := lower(coalesce(v -> 'releve.signe' ->> 'valeur', ''));
+  v_signe := lower(coalesce(v -> 'signature_client' ->> 'valeur', v -> 'releve.signe' ->> 'valeur', ''));
+  v_lignes := case when jsonb_typeof(v -> 'lignes' -> 'valeur') = 'array' then v -> 'lignes' -> 'valeur' else '[]'::jsonb end;
+  v_heures := coalesce(private.filed_montant_lu(v -> 'total_heures' ->> 'valeur'), private.filed_montant_lu(v -> 'releve.heures' ->> 'valeur'),
+                       (select sum(private.filed_montant_lu(e ->> 'heures')) from jsonb_array_elements(v_lignes) e
+                         where jsonb_array_length(v_lignes) > 0));
   if v_siren is not null then
     select f.id into v_four from public.filed_fournisseurs f where f.client_id = d.client_id and f.siren = left(v_siren, 9) limit 1;
   end if;
@@ -91,16 +105,18 @@ begin
      where f.client_id = d.client_id and f.nom_normalise = private.filed_normaliser_nom(v_agence) limit 1;
   end if;
   insert into public.filed_releves_heures (client_id, entite_id, document_id, fournisseur_id, agence, reference, periode_debut, periode_fin,
-                                           heures, signe, source)
+                                           heures, signe, interimaire, lignes, source)
   values (d.client_id, d.entite_id, d.id, v_four, v_agence,
           left(nullif(btrim(coalesce(v -> 'releve.reference' ->> 'valeur', '')), ''), 100),
-          private.filed_date_lue(v -> 'releve.periode_debut' ->> 'valeur'), private.filed_date_lue(v -> 'releve.periode_fin' ->> 'valeur'),
-          private.filed_montant_lu(v -> 'releve.heures' ->> 'valeur'),
-          case when v_signe in ('oui', 'true', 'vrai', '1') then true when v_signe in ('non', 'false', 'faux', '0') then false end, 'lecture')
+          coalesce(private.filed_date_lue(v -> 'periode_du' ->> 'valeur'), private.filed_date_lue(v -> 'releve.periode_debut' ->> 'valeur')),
+          coalesce(private.filed_date_lue(v -> 'periode_au' ->> 'valeur'), private.filed_date_lue(v -> 'releve.periode_fin' ->> 'valeur')),
+          v_heures,
+          case when v_signe in ('oui', 'true', 'vrai', '1') then true when v_signe in ('non', 'false', 'faux', '0') then false end,
+          left(nullif(btrim(coalesce(v -> 'interimaire' ->> 'valeur', '')), ''), 200), v_lignes, 'lecture')
   on conflict (document_id) do update
     set fournisseur_id = excluded.fournisseur_id, agence = excluded.agence, reference = excluded.reference,
         periode_debut = excluded.periode_debut, periode_fin = excluded.periode_fin, heures = excluded.heures, signe = excluded.signe,
-        maj_le = now()
+        interimaire = excluded.interimaire, lignes = excluded.lignes, maj_le = now()
   returning id into v_id;
   perform private.filed_historiser(d.client_id, d.id, 'filed_document', d.id::text, 'releve_heures',
     format('Relevé d''heures lu%s%s.', coalesce(' : ' || v_agence, ''),

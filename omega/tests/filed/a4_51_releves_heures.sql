@@ -3,7 +3,10 @@
 -- à poser avant. Ce fichier ne supprime rien.
 
 -- Un relevé d'heures lu (valeurs du lecteur), rangé par FILED (nature autre, classe). Rend l'id du document.
-create or replace function tests.a4_releve_heures(p_org jsonb, p_heures numeric, p_du date, p_au date, p_signe boolean, p_siren text default '123456782')
+-- Noms d'A1 (4a4ad9e1) : agence, interimaire, periode_du, periode_au, total_heures, signature_client, lignes ; le SIREN
+-- de l'agence par fournisseur.siren s'il est écrit. p_noms = 'v1' : les noms de la première version, en repli.
+create or replace function tests.a4_releve_heures_lu(p_org jsonb, p_heures numeric, p_du date, p_au date, p_signe boolean,
+                                                  p_siren text default '123456782', p_noms text default 'a1', p_lignes jsonb default null)
 returns uuid language plpgsql as $$
 declare v_cl uuid := (p_org ->> 'client')::uuid; v_piece uuid; v_doc uuid; v_n int := (floor(random() * 900000) + 100000)::int;
 begin
@@ -13,10 +16,17 @@ begin
   returning id into v_piece;
   insert into public.pieces_valeurs (client_id, piece_id, champ, valeur, texte, source, confiance, verifiee)
   select v_cl, v_piece, c.champ, c.valeur, c.valeur #>> '{}', 'ia', 1, true
-  from (values ('releve.heures', to_jsonb(p_heures)), ('releve.periode_debut', to_jsonb(p_du::text)), ('releve.periode_fin', to_jsonb(p_au::text)),
-               ('releve.signe', to_jsonb(case when p_signe then 'oui' else 'non' end)), ('fournisseur.siren', to_jsonb(p_siren)),
-               ('fournisseur.nom', to_jsonb('Agence d''intérim d''exemple'::text))) c(champ, valeur)
-  where c.valeur is not null;
+  from (values
+    (case when p_noms = 'a1' then 'total_heures' else 'releve.heures' end, to_jsonb(p_heures)),
+    (case when p_noms = 'a1' then 'periode_du' else 'releve.periode_debut' end, to_jsonb(p_du::text)),
+    (case when p_noms = 'a1' then 'periode_au' else 'releve.periode_fin' end, to_jsonb(p_au::text)),
+    (case when p_noms = 'a1' then 'signature_client' else 'releve.signe' end,
+     case when p_noms = 'a1' then to_jsonb(p_signe) else to_jsonb(case when p_signe then 'oui' else 'non' end) end),
+    ('fournisseur.siren', to_jsonb(p_siren)),
+    (case when p_noms = 'a1' then 'agence' else 'fournisseur.nom' end, to_jsonb('Fournisseur structuré d''exemple'::text)),
+    ('interimaire', case when p_noms = 'a1' then to_jsonb('Intérimaire d''exemple'::text) end),
+    ('lignes', p_lignes)) c(champ, valeur)
+  where c.valeur is not null and jsonb_typeof(c.valeur) <> 'null';
   insert into public.filed_documents (client_id, entite_id, annee_reception, numero_reception, piece_id, source, nom_fichier, sha256, recu_le, etat)
   values (v_cl, (p_org ->> 'entite')::uuid, 2026, v_n, v_piece, 'depot', 'releve-' || v_n || '.pdf', md5('rh' || v_n) || md5(v_n || 'rh'), now(), 'a_traiter')
   returning id into v_doc;
@@ -40,11 +50,16 @@ declare o jsonb := tests.a4_organisation(); d1 uuid; d2 uuid; d3 uuid; d4 uuid; 
         c public.filed_controles;
 begin
   -- Deux relevés hebdomadaires signés (17,5 h + 17,5 h), puis la facture mensuelle de 35 h : rapprochés, contrôle juste.
-  d1 := tests.a4_releve_heures(o, 17.5, date '2026-09-07', date '2026-09-13', true);
-  d2 := tests.a4_releve_heures(o, 17.5, date '2026-09-14', date '2026-09-20', true);
+  d1 := tests.a4_releve_heures_lu(o, 17.5, date '2026-09-07', date '2026-09-13', true);
+  d2 := tests.a4_releve_heures_lu(o, null, date '2026-09-14', date '2026-09-20', true, null, 'a1',
+          '[{"date": "2026-09-14", "heures": 7.5, "page": 1}, {"date": "2026-09-15", "heures": 10, "page": 1}]');
+  select * into r from public.filed_releves_heures where document_id = d2;
+  return next ok(r.heures = 17.5 and r.fournisseur_id = (o ->> 'fournisseur')::uuid and jsonb_array_length(r.lignes) = 2,
+                 'Sans total écrit : la somme des lignes (7h30 + 10 h) ; sans SIREN : l''agence reconnue par son nom');
   select * into r from public.filed_releves_heures where document_id = d1;
-  return next ok(r.id is not null and r.heures = 17.5 and r.signe and r.fournisseur_id = (o ->> 'fournisseur')::uuid and r.lien = 'libre',
-                 'Le relevé lu a sa fiche : 17,5 h, signé, l''agence reconnue par son SIREN, libre');
+  return next ok(r.id is not null and r.heures = 17.5 and r.signe and r.fournisseur_id = (o ->> 'fournisseur')::uuid and r.lien = 'libre'
+                 and r.periode_debut = date '2026-09-07' and r.interimaire = 'Intérimaire d''exemple',
+                 'Noms d''A1 : 17,5 h (total_heures), signé (signature_client), période, intérimaire, l''agence par son SIREN, libre');
   return next is((select nature from public.filed_documents where id = d1), 'autre', 'Il est rangé en nature « autre »');
   f1 := tests.a4_facture_heures(o, 'INT-001', 35);
   perform private.filed_controler_facture(f1);
@@ -53,7 +68,9 @@ begin
   return next is((select count(*)::int from public.filed_releves_heures where facture_id = f1 and lien = 'rapproche'), 2, 'Les deux relevés sont rattachés à la facture');
 
   -- Une facture de 40 h pour un relevé de 35 h signé : écart, en attention, jamais bloquant.
-  d3 := tests.a4_releve_heures(o, 35, date '2026-08-03', date '2026-08-30', true);
+  d3 := tests.a4_releve_heures_lu(o, 35, date '2026-08-03', date '2026-08-30', true, '123456782', 'v1');
+  return next is((select heures from public.filed_releves_heures where document_id = d3), 35.00::numeric(9,2),
+                 'Les noms de la première version restent lus en repli');
   f2 := tests.a4_facture_heures(o, 'INT-002', 40);
   update public.filed_factures set date_emission = date '2026-09-01' where id = f2;
   perform private.filed_controler_facture(f2);
@@ -67,7 +84,7 @@ begin
   perform private.filed_controler_facture(f3);
   return next is((select resultat from public.filed_controles where facture_id = f3 and code = 'rapprochement.heures'), 'anomalie',
                  'Facture en heures d''une agence qui envoie des relevés, sans relevé : signalée');
-  d4 := tests.a4_releve_heures(o, 20, date '2026-10-19', date '2026-10-25', false);
+  d4 := tests.a4_releve_heures_lu(o, 20, date '2026-10-19', date '2026-10-25', false);
   select * into r from public.filed_releves_heures where document_id = d4;
   return next ok(r.facture_id = f3 and r.lien = 'rapproche', 'Le relevé arrivé après se rattache à la facture ouverte');
   return next ok((select message from public.filed_controles where facture_id = f3 and code = 'rapprochement.heures') like '%sans signature reconnue%',
