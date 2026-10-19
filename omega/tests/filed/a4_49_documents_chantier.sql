@@ -44,7 +44,7 @@ begin
 
   -- Daliro installé : le travail daliro.document est déposé, la pièce reste à FILED.
   insert into public.btp_reglages (client_id, formule, quota_chantiers, quota_comptes_bureau)
-  values ((o ->> 'client')::uuid, 'chantiers', 10, 3);
+  values ((o ->> 'client')::uuid, 'chantiers', 20, 5);
   b := tests.a4_piece_lue(o, 'chantier_plan', 'plan-structure-exemple.jpg');
   perform private.filed_integrer_piece((b ->> 'piece')::uuid);
   return next ok(exists (select 1 from public.travaux t where t.client_id = (o ->> 'client')::uuid and t.module = 'daliro'

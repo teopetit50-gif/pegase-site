@@ -116,6 +116,15 @@ end $$;
 create table if not exists public.btp_reglages (id uuid primary key default gen_random_uuid(), client_id uuid not null unique references public.clients(id) on delete cascade,
   formule text not null check (formule in ('demarrage', 'chantiers', 'entreprise')), quota_chantiers integer not null, quota_comptes_bureau integer not null,
   installe_le timestamptz not null default now(), maj_le timestamptz not null default now());
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'btp_reglages_quotas_de_la_formule') then
+    -- Comme sur la recette (relevé du coordinateur, 19/10) : entreprise libre (1-5000), demarrage 5/2, chantiers 20/5.
+    alter table public.btp_reglages add constraint btp_reglages_quotas_de_la_formule check (
+      (formule = 'entreprise' and quota_chantiers between 1 and 5000 and quota_comptes_bureau between 1 and 5000)
+      or (formule = 'demarrage' and quota_chantiers = 5 and quota_comptes_bureau = 2)
+      or (formule = 'chantiers' and quota_chantiers = 20 and quota_comptes_bureau = 5));
+  end if;
+end $$;
 grant select on public.btp_reglages to authenticated, service_role;
 grant all on public.btp_reglages to service_role;
 
