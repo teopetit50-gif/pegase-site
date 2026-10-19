@@ -1,0 +1,457 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Écosystème — la page interne du compte gérant d'Omega (18/10/2026)
+
+   Tout est préfixé `eco-` et s'appuie sur les jetons `--v2-*` de
+   components/espace2/espace2.css (clair et sombre). Les cartes sont à
+   peine arrondies (6 px) et presque collées (12 px), pleine largeur,
+   comme « À valider ».
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2-page.eco {
+  display: grid;
+  gap: 12px;
+  max-width: none;
+  padding: 16px 16px 48px;
+}
+
+/* ——— la tête ——— */
+.eco-tete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding: 4px 0 4px;
+}
+.eco-tete h1 {
+  margin: 0;
+  font-size: 20px;
+  line-height: 28px;
+  letter-spacing: -0.4px;
+  font-weight: 600;
+}
+.eco-tete p {
+  margin: 4px 0 0;
+  max-width: 760px;
+  color: var(--v2-gray-900);
+  font-size: 13px;
+  line-height: 18px;
+}
+.eco-legende {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.eco-legende-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--v2-gray-900);
+  font-variant-numeric: tabular-nums;
+}
+
+/* le quatrième niveau, « production » : plein, comme un bouton principal */
+.v2-badge[data-teinte="noir"] {
+  background: var(--v2-gray-1000);
+  color: var(--v2-bg-100);
+}
+
+/* ——— les compteurs par moteur (un par onglet) ——— */
+.eco-moteurs {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (min-width: 1024px) {
+  .eco-moteurs {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+.eco-moteur {
+  border-radius: 6px;
+  gap: 8px;
+}
+.eco-moteur-nom {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--v2-gray-1000);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.eco-moteur-nom small {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--v2-gray-900);
+}
+.eco-compte {
+  font-size: 24px;
+  line-height: 32px;
+  letter-spacing: -0.96px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.eco-compte small {
+  font-size: 13px;
+  letter-spacing: 0;
+  font-weight: 400;
+  color: var(--v2-gray-900);
+}
+.eco-niveaux {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* ——— les cartes ——— */
+.eco-carte {
+  background: var(--v2-bg-100);
+  border-radius: 6px;
+  box-shadow: var(--v2-ombre-petite);
+  min-width: 0;
+}
+.eco-moteur-tete {
+  display: grid;
+  gap: 14px;
+  padding: 14px 16px 16px;
+}
+.eco-moteur-tete h2 {
+  margin: 0;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.32px;
+  font-weight: 600;
+}
+.eco-moteur-tete h2 small {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--v2-gray-900);
+}
+.eco-but {
+  margin: -6px 0 0;
+  max-width: 920px;
+  color: var(--v2-gray-900);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+/* le flux : cinq étapes numérotées, reliées par un filet */
+.eco-flux {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  counter-reset: etape;
+}
+.eco-flux li {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  padding: 10px 12px 12px;
+  border-radius: 6px;
+  background: var(--v2-bg-200);
+  box-shadow: 0 0 0 1px var(--v2-a-400);
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--v2-gray-900);
+}
+.eco-flux li strong {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--v2-gray-1000);
+}
+.eco-flux li strong::before {
+  counter-increment: etape;
+  content: counter(etape);
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--v2-gray-1000);
+  color: var(--v2-bg-100);
+  font-size: 11px;
+  font-weight: 500;
+}
+.eco-flux li + li::before {
+  content: "";
+  position: absolute;
+  left: -10px;
+  top: 19px;
+  width: 10px;
+  height: 1px;
+  background: var(--v2-a-600);
+}
+@media (max-width: 1023px) {
+  .eco-flux {
+    grid-template-columns: 1fr;
+  }
+  .eco-flux li + li::before {
+    left: 20px;
+    top: -10px;
+    width: 1px;
+    height: 10px;
+  }
+}
+
+.eco-infos {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  gap: 8px 16px;
+  font-size: 13px;
+  line-height: 18px;
+}
+.eco-infos dt {
+  color: var(--v2-gray-900);
+}
+.eco-infos dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.eco-infos ul {
+  margin: 0;
+  padding-left: 16px;
+  display: grid;
+  gap: 2px;
+}
+@media (max-width: 767px) {
+  .eco-infos {
+    grid-template-columns: 1fr;
+    gap: 2px 0;
+  }
+  .eco-infos dd + dt {
+    margin-top: 8px;
+  }
+}
+
+/* ——— les filtres ——— */
+.eco-filtres {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.eco-compteur-filtre {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.eco-filtres .v2-val-bouton[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+@media (max-width: 767px) {
+  .eco-filtres .v2-val-recherche {
+    width: 100%;
+  }
+}
+
+/* ——— les familles et les lignes ——— */
+.eco-groupe {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px 10px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  letter-spacing: -0.1px;
+  color: var(--v2-gray-1000);
+  border-bottom: 1px solid var(--v2-a-400);
+}
+.eco-groupe small {
+  flex: none;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--v2-gray-900);
+  font-variant-numeric: tabular-nums;
+}
+.eco-groupe-desc {
+  margin: 0;
+  padding: 10px 16px;
+  font-size: 13px;
+  color: var(--v2-gray-900);
+  border-bottom: 1px solid var(--v2-a-400);
+}
+.eco-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.eco-ligne + .eco-ligne {
+  border-top: 1px solid var(--v2-a-400);
+}
+.eco-ligne:last-child {
+  border-radius: 0 0 6px 6px;
+  overflow: hidden;
+}
+.eco-ligne-tete {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr) auto 20px;
+  grid-template-areas: "niv txt chips chev";
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 9px 16px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.eco-ligne-tete:hover {
+  background: var(--v2-a-100);
+}
+.eco-ligne-tete:focus-visible {
+  outline: none;
+  box-shadow: inset var(--v2-anneau);
+}
+.eco-ligne[data-ouvert] .eco-ligne-tete {
+  background: var(--v2-a-200);
+}
+.eco-niv {
+  grid-area: niv;
+}
+.eco-texte {
+  grid-area: txt;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.eco-texte > span {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--v2-gray-1000);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.eco-texte > small {
+  font-size: 12px;
+  color: var(--v2-gray-900);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.eco-ligne[data-ouvert] .eco-texte > span {
+  white-space: normal;
+}
+.eco-chips {
+  grid-area: chips;
+  display: flex;
+  gap: 4px;
+}
+.eco-chevron {
+  grid-area: chev;
+  color: var(--v2-gray-900);
+  transition: transform 0.15s;
+}
+.eco-ligne[data-ouvert] .eco-chevron {
+  transform: rotate(90deg);
+}
+.eco-corps {
+  padding: 2px 16px 14px 132px;
+  font-size: 13px;
+  line-height: 18px;
+}
+.eco-corps dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  gap: 8px 16px;
+}
+.eco-corps dt {
+  color: var(--v2-gray-900);
+}
+.eco-corps dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.eco-manques {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.eco-manques li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.eco-manques .v2-badge {
+  flex: none;
+  margin-top: 1px;
+}
+.eco-code {
+  font-family: var(--v2-mono);
+  font-size: 12px;
+}
+.eco-vide {
+  padding: 20px 16px;
+  color: var(--v2-gray-900);
+  font-size: 13px;
+}
+
+@media (max-width: 767px) {
+  .eco-ligne-tete {
+    grid-template-columns: minmax(0, 1fr) 20px;
+    grid-template-areas:
+      "niv chev"
+      "txt txt"
+      "chips chips";
+    row-gap: 6px;
+  }
+  .eco-chips:empty {
+    display: none;
+  }
+  .eco-texte > span {
+    white-space: normal;
+  }
+  .eco-corps {
+    padding-left: 16px;
+  }
+  .eco-corps dl {
+    grid-template-columns: 1fr;
+    gap: 2px 0;
+  }
+  .eco-corps dd + dt {
+    margin-top: 8px;
+  }
+}
+
+/* ——— la porte (sans le compte gérant d'Omega) ——— */
+.eco-porte {
+  max-width: 560px;
+  margin: 0;
+  padding: 20px;
+  display: grid;
+  gap: 8px;
+  font-size: 14px;
+}
+.eco-porte strong {
+  font-weight: 500;
+}
+.eco-porte p {
+  margin: 0;
+  color: var(--v2-gray-900);
+}
+.eco-porte .v2-btn {
+  justify-self: start;
+  margin-top: 4px;
+}
