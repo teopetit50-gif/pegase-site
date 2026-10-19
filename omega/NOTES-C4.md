@@ -4,11 +4,11 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 `components/espace/offload/`, `app/espace/offload/`, et ce fichier. Coordinateur : session
 `session_01BCGFdpRKBvXKjouC75sYBg`. Je n'appelle jamais Supabase : le coordinateur pose, je reçois les sorties brutes.
 
-## REPRISE (pause du 19/10, 00 h 25 Z — reprise samedi 25/10 après 02 h Z)
+## REPRISE (19/10, 14 h 50 Z — reprise du 19/10, feu vert de Teo)
 
-- Fait : c4_01 à c4_17 verts sur la recette ; c4_18 (envoi automatique) et c4_19 (effacement d'une personne) poussés, verts en local (422 ok), PAS encore posés.
-- En cours : rien. Gmail attend l'accord de Teo dans cette session ; règles par modèle de langue : non pour l'instant ; ligne « atteste » retirée.
-- Prochain pas : le coordinateur pose c4_18 puis c4_19 (hors 22 h–minuit Z) ; corriger ce que la recette signale. La liste Guadeloupe reste hors git.
+- Fait : c4_01 à c4_17 verts sur la recette ; c4_18 et c4_19 en pose par le coordinateur ; écran c4_20 (envoi automatique, données, effacement) poussé.
+- En cours : rien. Gmail attend l'accord de Teo dans cette session ; aucun import de données personnelles sans accord écrit de Teo.
+- Prochain pas : corriger ce que la recette de c4_18 et c4_19 signale ; la liste Guadeloupe reste hors git.
 
 ### Reprise du 17/10
 
@@ -451,6 +451,15 @@ Banc local : 28 tests, 312 assertions vertes, migrations posées deux fois ; tsc
 l'échéance honorée après message est comptée au suivi). Le chiffre repris compte tous les achats des 90 jours,
 sans prétendre qu'ils sont dus au seul message.
 
+## Lot c4_20 — l'écran de l'envoi automatique, de la restitution et de l'effacement (19/10)
+
+`components/espace/offload/EnvoiAuto.tsx` : carte « Envoi automatique et données » (état du réglage et de l'accord,
+sujets cochés, donner ou révoquer l'accord, éteindre ou rallumer, messages retenus en attente, téléchargement JSON de la
+restitution) ; `Effacement` dans la fiche (« Données de la personne », origine de la demande obligatoire). Portes :
+offload_envoi_auto, offload_regler, offload_donner_accord_auto, offload_revoquer_accord_auto, offload_restitution,
+offload_effacer_compte. Vérifié : tsc, eslint, build, recette aux cinq largeurs (aucun débordement ; axe : seul « region »
+sur .v2-evitement, déjà là avant).
+
 ## Lot c4_19 — effacement des données d'une personne (19/10)
 
 Liste de Teo (point 9). L'effacement de l'organisation relève du socle : toutes les tables offload_* sont en
@@ -749,3 +758,4 @@ Partielles : 6, 11, 15, 38.
 - 18/10, 21 h 35 Z — c4_17 : la date du journal opposable s'appelle survenu_le (recette : 42703) ; corrigé, local 393 ok.
 - 18/10, 22 h Z — lot c4_18 (envoi automatique par défaut, modèle 2) : 43 tests, 412 ok en local (session en Europe/Paris).
 - 19/10 — lot c4_19 (effacement des données d'une personne) : 44 tests, 422 ok en local.
+- 19/10, 14 h 50 Z — reprise ; écran c4_20 (envoi automatique, données, effacement) : build vert, cinq largeurs.

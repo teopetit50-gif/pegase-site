@@ -270,3 +270,13 @@ export type Groupes = {
   groupes: Groupe[];
   a_rattacher: { domaine: string; comptes: { id: string; nom: string; groupe: string | null }[] }[];
 };
+
+/* c4_18 : l'envoi automatique (réglage, accord permanent du socle, messages retenus). */
+export type SujetAuto = "reprise" | "echeance" | "affaire";
+export type EnvoiAuto = {
+  envoi_auto: boolean;
+  sujets_auto: SujetAuto[];
+  accord: "actif" | "a_valider" | "absent";
+  politiques: { id: string; statut: string; nombre_mensuel: number | null; debut: string; fin: string; donne_par: string | null; demande: string | null }[];
+  retenus_en_attente: number;
+};
