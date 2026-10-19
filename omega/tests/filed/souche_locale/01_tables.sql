@@ -100,3 +100,6 @@ create table if not exists public.expediteurs (id uuid primary key default gen_r
 
 -- a4_55 : pieces.type_piece (le type que le lecteur donne à la pièce), comme sur la recette.
 alter table public.pieces add column if not exists type_piece text check (type_piece ~ '^[a-z][a-z0-9_]{1,59}$');
+
+-- a4_51 (correctif) : comme sur la recette, un seul expéditeur actif par organisation, canal et module.
+create unique index if not exists expediteurs_un_actif_idx on public.expediteurs (client_id, canal, coalesce(module, '')) where statut = 'actif';

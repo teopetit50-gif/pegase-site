@@ -2,10 +2,12 @@
 -- pgTAP, schéma « tests » d'A5 ; utilise tests.a4_organisation (a4_10_facture_electronique.sql), tests.a4_comme
 -- (a4_26_sortie_envois.sql) et tests.a4_reception (a4_13_reception_courriel.sql), à poser avant. Ne supprime rien.
 
--- Une boîte FILED du socle (comme A2 la crée). Rend son id.
+-- Une boîte de réception FILED du socle (comme A2 la crée). Le socle n'admet qu'un expéditeur ACTIF par organisation,
+-- canal et module (expediteurs_un_actif_idx) : une boîte qui ne fait que recevoir reste « a_verifier » ;
+-- public.resoudre_boite la trouve quel que soit son statut. Rend son id.
 create or replace function tests.a4_boite(p_org jsonb, p_adresse text) returns uuid language sql as $$
   insert into public.expediteurs (client_id, module, canal, fournisseur, identite, statut)
-  values ((p_org ->> 'client')::uuid, 'filed', 'email', 'brevo', p_adresse, 'actif') returning id
+  values ((p_org ->> 'client')::uuid, 'filed', 'email', 'brevo', p_adresse, 'a_verifier') returning id
 $$;
 
 create or replace function tests.test_a4_51_01_boites() returns setof text

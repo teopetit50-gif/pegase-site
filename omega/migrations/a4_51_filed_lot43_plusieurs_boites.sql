@@ -1,8 +1,10 @@
 -- FILED, lot 43 (a4_51) — plusieurs boîtes de réception par organisation, et la limite du palier (Teo, 18/10 ;
 -- chiffrage n° 23 : « une boîte mail connectée » / « deux boîtes » / « boîtes mail illimitées »).
 --
--- Les boîtes sont celles du socle (public.expediteurs, canal email, module filed ; A2 les crée et les active) : le socle
--- en admet déjà plusieurs par organisation. FILED tient la sienne :
+-- Les boîtes sont celles du socle (public.expediteurs, canal email, module filed ; A2 les crée). Le socle n'admet qu'un
+-- expéditeur ACTIF par organisation, canal et module (expediteurs_un_actif_idx) : c'est l'identité d'envoi. Une boîte
+-- qui ne fait que recevoir reste donc non active (« a_verifier ») ; public.resoudre_boite la trouve quel que soit son
+-- statut. FILED n'exige aucun statut à la déclaration et tient la liste :
 --   · public.filed_boites : chaque boîte FILED déclarée, la société où ses factures sont rangées, un libellé ;
 --   · la limite du palier (filed_paliers.boites, a4_50) s'applique à la déclaration ; sans abonnement, pas de limite ;
 --   · le rattachement d'un courriel (private.filed_rattacher_reception, a4_20) range les pièces dans la société de la
