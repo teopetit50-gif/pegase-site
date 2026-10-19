@@ -62,6 +62,9 @@ export function mondeExemple(): Monde {
                                                                                   de_empreinte: "exemple-roux", litige: true, escaladee_le: ilYa(0, 12) });
   const d5 = demande(5, "formulaire", "Bernard", null, ilYa(0, 6), { objet: "Formulaire du site", sujet: "rendez_vous", statut: "a_traiter", couverte: false,
                                                                      motif: "Aucune adresse de réponse : à traiter par une personne." });
+  /* c3_15 : même nom, autre canal, sans clé commune → le rapprochement est proposé, une personne décide */
+  const d6 = demande(6, "whatsapp", "Martin Luc", "+33 6 00 00 00 06", ilYa(0, 5), { sujet: "devis", statut: "a_preparer", couverte: null, preparee_le: null,
+                                                                                    rapprochement_propose: d3.id });
   const receptions: Record<number, Reception> = {
     9001: { id: 9001, canal: "email", de_nom: "Marie Durand", de_adresse: "marie.durand@exemple.fr", sujet: "Ouverts samedi ?", recu_le: d1.recu_le, pieces: [],
             corps: "Bonjour,\nJe voudrais passer voir les échantillons de plans de travail. Êtes-vous ouverts samedi matin ?\nMerci,\nMarie" },
@@ -74,6 +77,8 @@ export function mondeExemple(): Monde {
             pieces: [{ nom: "photo-dressing.jpg" }] },
     9005: { id: 9005, canal: "formulaire", de_nom: "Bernard", de_adresse: null, sujet: "Formulaire du site", recu_le: d5.recu_le, pieces: [],
             corps: "Rappelez-moi pour un rendez-vous, au 06 00 00 00 00." },
+    9006: { id: 9006, canal: "whatsapp", de_nom: "Martin Luc", de_adresse: "+33 6 00 00 00 06", sujet: null, recu_le: d6.recu_le, pieces: [],
+            corps: "Pour la cuisine, j'ai pris les mesures : 4,20 m exactement." },
   };
   const reponses: Reponse[] = [
     reponse(1, d1, "Oui, l'atelier vous accueille le samedi de 9 h à 12 h ; les échantillons de plans de travail sont exposés au showroom.",
@@ -118,7 +123,7 @@ export function mondeExemple(): Monde {
         regle_le: ilYa(40).slice(0, 10), statut: "avis_recu", motif: null, prochain_le: null, envois: ["y", "z"], cree_le: ilYa(40) },
     ],
     indicateurs: { recues: 41, repondues: 33, parties_seules: 14, hors_base: 6, delai_median_minutes: 47 },
-    demandes: [d1, d2, d3, d4, d5],
+    demandes: [d1, d2, d3, d4, d5, d6],
     receptions,
     reponses,
     fiches,

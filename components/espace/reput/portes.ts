@@ -130,3 +130,8 @@ export async function ouvrirPiece(demande: string, rang: number): Promise<{ url:
   if (error || !data?.signedUrl) throw new ErreurPorte("Le fichier n'est pas dans le stockage : il n'a peut-être pas été reçu.");
   return { url: data.signedUrl, nom: o.nom, nature: o.nature, affichable: o.affichable };
 }
+
+/* Une même personne sur deux canaux (c3_15) : une personne rapproche, écarte la proposition, ou sépare. */
+export const rapprocher = (demande: string, avec: string) => rpc("reput_rapprocher", { p_demande: demande, p_avec: avec });
+export const ecarterRapprochement = (demande: string) => rpc("reput_ecarter_rapprochement", { p_demande: demande });
+export const separer = (demande: string) => rpc("reput_separer", { p_demande: demande });

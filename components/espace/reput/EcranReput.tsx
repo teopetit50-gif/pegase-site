@@ -24,6 +24,7 @@ import { Avis, Chargement, Pastille, Ruban, Vide, type Teinte } from "../ui";
 import { dateHeure, relatif } from "../format";
 import BaseConnaissances from "./BaseConnaissances";
 import PiecesJointes from "./PiecesJointes";
+import Rapprochement from "./Rapprochement";
 import ReglagesAvis from "./ReglagesAvis";
 import SujetsAutorises from "./SujetsAutorises";
 import { mondeExemple } from "./exemples";
@@ -226,7 +227,7 @@ export default function EcranReput() {
             </section>
             <section id="esp-dossier" className="esp-detail-mobile" aria-label="La demande">
               {demande ? (
-                <DemandeVue key={demande.id} demande={demande} monde={monde} decideur={decideur} source={source}
+                <DemandeVue key={demande.id} demande={demande} monde={monde} decideur={decideur} traite={role !== "lecteur"} source={source}
                   relire={charger} modifierLocal={modifierLocal} />
               ) : (
                 <div className="esp-carte"><Vide titre="Choisissez une demande">Le message reçu et la réponse préparée s&apos;affichent ici.</Vide></div>
@@ -260,8 +261,8 @@ function raisonRetenue(rep: Reponse, demande: Demande, monde: Monde): string | n
   return null;
 }
 
-function DemandeVue({ demande, monde, decideur, source, relire, modifierLocal }: {
-  demande: Demande; monde: Monde; decideur: boolean; source: "exemple" | "reelle";
+function DemandeVue({ demande, monde, decideur, traite, source, relire, modifierLocal }: {
+  demande: Demande; monde: Monde; decideur: boolean; traite: boolean; source: "exemple" | "reelle";
   relire: () => Promise<void>; modifierLocal: (f: (m: Monde) => Monde) => void;
 }) {
   const rec = monde.receptions[demande.reception_id];
@@ -337,6 +338,7 @@ function DemandeVue({ demande, monde, decideur, source, relire, modifierLocal }:
             </p>
           ) : null;
         })()}
+        <Rapprochement demande={demande} monde={monde} traite={traite} source={source} relire={relire} modifierLocal={modifierLocal} />
         {rec?.sujet ? <p style={{ fontWeight: 600, marginBottom: 6 }}>{rec.sujet}</p> : null}
         <p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{rec?.corps || "(message sans texte)"}</p>
         <PiecesJointes key={demande.id} demande={demande.id} pieces={rec?.pieces ?? null} source={source} />
