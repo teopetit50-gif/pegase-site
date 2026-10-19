@@ -3,11 +3,11 @@
 Branche `worker-c3`. Coordinateur : `session_01BCGFdpRKBvXKjouC75sYBg`.
 Commencée le 06/10/2026. Je n'appelle jamais Supabase : le coordinateur pose, je lis les sorties brutes.
 
-## REPRISE (pause du coordinateur, 19/10/2026 00 h 30 Z — forfait à 29 % ; reprise samedi 25/10 après 02 h Z)
+## REPRISE (arrêt du 19/10/2026 14 h 45 Z — plus de lot construisible sans Twilio ni Teo)
 
-- **Arrêt** : les 8 lots sont faits, verts et poussés (c3_14 → c3_21 ; le lot 8 était déjà poussé, b6bc11ce, quand la pause est arrivée). Arbre propre, rien en cours.
-- **Posé** : c3_14 (son test tourne). **Pas posés** : c3_15 → c3_21 (dans l'ordre, avec leurs tests) ; Edge `reput-reponse` à redéployer (c3_16, c3_20). À vérifier : `perimetre_total` des gérants (c3_17), objet `reput_rdv` accepté par le socle (c3_21).
-- **Reprise** : deux lots ajoutés par Teo — astreinte téléphonique, et appels non décrochés transcrits (Twilio en test, compte à ouvrir par Teo).
+- **Arrêt** : lots 1 à 10 faits, verts, poussés ; posés et verts sur la recette jusqu'à c3_23 (c3_23a socle relu et posé par le coordinateur). Arbre propre, rien en cours.
+- **À faire par d'autres** : déployer les Edge reput-reponse, reput-astreinte, reput-appels (session bureau) ; compte Twilio de test (Teo) + secrets + cron x-reput-jeton ; point RGPD/HDS de la reconnaissance vocale Twilio (Teo).
+- **Reprise** : preuve en vrai (mail + formulaire, puis astreinte et appels quand Twilio est ouvert) ; restent hors de portée sans accès tiers : connecteur agenda, réseaux sociaux, lecture des avis Google, logiciels métier.
 
 - **Fait et posé sur la recette, vert** : c3_01 → c3_08 (migrations + tests pgTAP, dernier lot c3_08 bb153a2 vert, socle 44/46/51 verts, worker-c3 fusionnée par le coordinateur) ; Edge `reput-reponse` déployée (Deno 12/12) ; écran `app/espace/reput` + `components/espace/reput` ; souche locale 264/264.
 - **Dernier commit** : e125ccb — chiffrage `omega/CHIFFRAGE/reput.md` (document seul, rien à poser) ; ce commit-ci ajoute cette section.
