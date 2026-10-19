@@ -97,3 +97,6 @@ create table if not exists public.expediteurs (id uuid primary key default gen_r
   fournisseur text not null check (fournisseur ~ '^[a-z][a-z0-9_]{1,30}$'), identite text not null, nom_affiche text, repondre_a text,
   parametres jsonb not null default '{}', secret_nom text, statut text not null default 'a_verifier' check (statut in ('a_verifier','actif','suspendu')),
   verifie_le timestamptz, cree_le timestamptz not null default now(), maj_le timestamptz not null default now(), unique (client_id, id));
+
+-- a4_55 : pieces.type_piece (le type que le lecteur donne à la pièce), comme sur la recette.
+alter table public.pieces add column if not exists type_piece text check (type_piece ~ '^[a-z][a-z0-9_]{1,59}$');
