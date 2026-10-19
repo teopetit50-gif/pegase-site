@@ -253,3 +253,19 @@ begin
   returning id into v_id;
   return v_id;
 end $$;
+
+-- ── Entités lisibles au périmètre (socle : grant SELECT + politique « membres lisent les entites de leur perimetre ») ──
+create or replace function private.voit_entite(p_client uuid, p_entite uuid) returns boolean
+language sql stable security definer set search_path to '' as $$
+  select exists (select 1 from public.comptes c where c.user_id = (select auth.uid()) and c.client_id = p_client
+                 and (c.perimetre_total or exists (select 1 from public.comptes_entites ce
+                                                   where ce.user_id = c.user_id and ce.client_id = p_client and ce.entite_id = p_entite)))
+$$;
+alter table public.entites enable row level security;
+grant select on public.entites to authenticated;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'entites' and policyname = 'membres lisent les entites de leur perimetre') then
+    create policy "membres lisent les entites de leur perimetre" on public.entites for select to authenticated
+      using (client_id in (select private.mes_clients()) and private.voit_entite(client_id, id));
+  end if;
+end $$;
