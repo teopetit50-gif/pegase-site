@@ -319,3 +319,83 @@ begin
   execute replace(v_def, v_ancien,
     E'      perform private.filed_identification_par_nom(v_f.id);   -- a4_67 : le SIREN ou la TVA de la pièce, proposés à une personne\n');
 end $$;
+
+-- ═══ Complément (demande d'A1, b7773e70 ; coordinateur, 19/10 18 h 34 Z) : l'IBAN partiellement masqué ═══
+-- filed_integrer_facture ne reprend pas un IBAN qui n'a pas la forme d'un IBAN (un IBAN masqué : « FR76 **** … 189 ») ;
+-- le contrôle disait alors « iban.absent ». Désormais, quand la pièce porte un fournisseur.iban non vide mais
+-- incomplet, le contrôle « iban.masque » (attention) le remplace : « IBAN partiellement masqué sur la pièce : à
+-- compléter avant paiement. » L'IBAN n'est jamais repris d'office. Tant que ce contrôle est ouvert (ni levé par une
+-- personne, ni résolu par un IBAN complet), noter un paiement par virement (ou sans moyen dit) est refusé.
+
+-- Ce que la pièce porte comme IBAN quand ce n'en est pas un complet ; nul sinon.
+create or replace function private.filed_iban_masque_lu(p_facture uuid)
+returns text language plpgsql stable security definer set search_path to '' as $$
+declare v_piece uuid; v_brut text; v_compact text;
+begin
+  select d.piece_id into v_piece from public.filed_factures f join public.filed_documents d on d.id = f.document_id where f.id = p_facture;
+  if v_piece is null then return null; end if;
+  v_brut := nullif(btrim(coalesce(private.filed_valeurs(v_piece) -> 'fournisseur.iban' ->> 'valeur', '')), '');
+  if v_brut is null then return null; end if;
+  v_compact := upper(regexp_replace(v_brut, '\s', '', 'g'));
+  if v_compact ~ '^[A-Z]{2}[0-9]{2}[A-Z0-9]{10,30}$' then return null; end if;   -- complet : son cas est ailleurs (iban.invalide)
+  if char_length(v_compact) < 4 then return null; end if;
+  return left(v_brut, 60);
+end $$;
+revoke all on function private.filed_iban_masque_lu(uuid) from public, anon, authenticated;
+grant execute on function private.filed_iban_masque_lu(uuid) to service_role;
+
+-- Un IBAN masqué non résolu interdit de noter un virement.
+create or replace function private.filed_iban_masque_ouvert(p_facture uuid)
+returns boolean language sql stable security definer set search_path to '' as $$
+  select exists (select 1 from public.filed_controles c where c.facture_id = p_facture and c.code = 'iban.masque' and c.resultat = 'anomalie')
+$$;
+revoke all on function private.filed_iban_masque_ouvert(uuid) from public, anon;
+grant execute on function private.filed_iban_masque_ouvert(uuid) to authenticated, service_role;
+
+-- 3. Le contrôle : iban.masque remplace iban.absent quand la pièce porte un IBAN incomplet.
+do $$
+declare
+  v_def text;
+  v_ancien constant text := E'    perform private.filed_poser_resultat(v_f, ''iban.absent'', ''info'', true,\n'
+                         || E'      ''Aucun IBAN sur la facture ni au référentiel : le paiement passera par un autre moyen.'');\n';
+  v_n int;
+begin
+  v_def := pg_get_functiondef('private.filed_controler_facture(uuid)'::regprocedure);
+  if position('iban.masque' in v_def) > 0 then
+    return;
+  end if;
+  v_n := (length(v_def) - length(replace(v_def, v_ancien, ''))) / length(v_ancien);
+  if v_n <> 1 then
+    raise exception 'a4_67 : repère iban.absent trouvé % fois (1 attendu)', v_n;
+  end if;
+  execute replace(v_def, v_ancien,
+       E'    if private.filed_iban_masque_lu(v_f.id) is not null then   -- a4_67 : IBAN masqué sur la pièce, jamais repris\n'
+    || E'      perform private.filed_poser_resultat(v_f, ''iban.masque'', ''attention'', true,\n'
+    || E'        ''IBAN partiellement masqué sur la pièce : à compléter avant paiement.'', ''COORD_BANC_ERR'',\n'
+    || E'        jsonb_build_object(''lu'', private.filed_iban_masque_lu(v_f.id)));\n'
+    || E'    else\n'
+    || regexp_replace(v_ancien, E'^    ', '      ', 'gn')
+    || E'    end if;\n');
+end $$;
+
+-- 4. Noter un paiement : pas de virement tant que l'IBAN masqué n'est pas résolu.
+do $$
+declare
+  v_def text;
+  v_repere constant text := E'  return private.filed_marquer_reglee(p_facture, p_date, p_montant, p_moyen, p_reference);\n';
+  v_n int;
+begin
+  v_def := pg_get_functiondef('public.filed_noter_paiement(uuid,date,numeric,text,text)'::regprocedure);
+  if position('filed_iban_masque_ouvert' in v_def) > 0 then
+    return;
+  end if;
+  v_n := (length(v_def) - length(replace(v_def, v_repere, ''))) / length(v_repere);
+  if v_n <> 1 then
+    raise exception 'a4_67 : repère de filed_noter_paiement trouvé % fois (1 attendu)', v_n;
+  end if;
+  execute replace(v_def, v_repere,
+       E'  if coalesce(p_moyen, ''virement'') = ''virement'' and private.filed_iban_masque_ouvert(p_facture) then   -- a4_67\n'
+    || E'    raise exception ''IBAN partiellement masqué sur la pièce : à compléter avant paiement.'' using errcode = ''55000'';\n'
+    || E'  end if;\n'
+    || v_repere);
+end $$;

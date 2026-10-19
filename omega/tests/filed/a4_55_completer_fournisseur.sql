@@ -86,3 +86,37 @@ begin
                  and not has_table_privilege('anon', 'public.filed_fournisseurs_completions', 'select'),
                  'Ni les propositions ni la confirmation ne sont ouvertes aux anonymes');
 end $f$;
+
+-- Complément (A1, b7773e70) : l'IBAN partiellement masqué sur la pièce.
+create or replace function tests.test_a4_67_02_iban_masque() returns setof text
+language plpgsql as $f$
+declare o jsonb := tests.a4_organisation(); a jsonb; b jsonb; v_f uuid;
+begin
+  a := tests.a4_facture(o, 'ia', 'MASQ-001', 120);
+  v_f := (a ->> 'facture')::uuid;
+  insert into public.pieces_valeurs (client_id, piece_id, champ, valeur, texte, source, confiance, verifiee)
+  values ((o ->> 'client')::uuid, (a ->> 'piece')::uuid, 'fournisseur.iban', to_jsonb('FR76 **** **** **** **** **** 189'::text),
+          'IBAN FR76 **** **** **** **** **** 189', 'ia', 0.9, true);
+  perform private.filed_controler_facture(v_f);
+  return next ok((select resultat = 'anomalie' and gravite = 'attention' and message = 'IBAN partiellement masqué sur la pièce : à compléter avant paiement.'
+                    from public.filed_controles where facture_id = v_f and code = 'iban.masque')
+                 and not exists (select 1 from public.filed_controles where facture_id = v_f and code = 'iban.absent'),
+                 'IBAN masqué sur la pièce : iban.masque (attention) remplace iban.absent');
+  return next ok((select iban from public.filed_factures where id = v_f) is null, 'L''IBAN masqué n''est jamais repris');
+
+  -- Avant paiement : pas de virement noté tant qu'il n'est pas complété ; un chèque, oui.
+  update public.filed_factures set statut = 'validee' where id = v_f;
+  perform tests.a4_comme((o ->> 'gerant')::uuid);
+  return next throws_ok(format('select public.filed_noter_paiement(%L, null, 10, %L)', v_f, 'virement'), '55000',
+                        'IBAN partiellement masqué sur la pièce : à compléter avant paiement.', 'Un virement est refusé');
+  return next throws_ok(format('select public.filed_noter_paiement(%L, null, 10)', v_f), '55000', null, 'Sans moyen dit aussi');
+  return next lives_ok(format('select public.filed_noter_paiement(%L, null, 10, %L)', v_f, 'cheque'), 'Un chèque se note');
+  reset role; perform set_config('request.jwt.claims', '', true);
+
+  -- Sans IBAN du tout sur la pièce : iban.absent, comme avant.
+  b := tests.a4_facture(o, 'ia', 'MASQ-002', 120);
+  perform private.filed_controler_facture((b ->> 'facture')::uuid);
+  return next ok(exists (select 1 from public.filed_controles where facture_id = (b ->> 'facture')::uuid and code = 'iban.absent')
+                 and not exists (select 1 from public.filed_controles where facture_id = (b ->> 'facture')::uuid and code = 'iban.masque'),
+                 'Rien sur la pièce : iban.absent reste');
+end $f$;
