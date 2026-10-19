@@ -6,7 +6,7 @@ dont on connaît la bonne réponse. Décision de Teo, 19/10, 15 h 22 Z.
 ## Poser, puis rejouer
 
 1. `omega/migrations/a4_62_filed_lot54_banc_de_reference.sql` : les tables `private.filed_banc_*` et les fonctions.
-2. `omega/banc/banc_reference_cas.sql` : les 37 cas. Il est écrit par `node omega/banc/banc_reference.mjs --preparer`.
+2. `omega/banc/banc_reference_cas.sql` : les 39 cas. Il est écrit par `node omega/banc/banc_reference.mjs --preparer`.
 3. `node omega/banc/banc_reference.mjs --deposer` : les six PDF synthétiques sur le client du banc. Ensuite le
    lecteur lit et FILED contrôle.
 4. Sur la recette, en service_role :
@@ -32,8 +32,8 @@ Les empreintes de tous les fichiers sources sont dans `banc_reference_SOURCE.tsv
 ## Première note, en local (souche A4, 19/10)
 
 Seuls les scénarios Einvoi sont joués. Les PDF ne sont pas déposés en local, donc champs et pièces sont « non joués ».
-Il y a 27 verdicts joués, dont 24 justes. Les trois faux sont de vrais écarts de FILED, gardés au banc ; un quatrième
-cas attend ses empreintes :
+Il y a 29 verdicts joués, dont 24 justes. Trois faux sont de vrais écarts de FILED ; les deux autres sont les cas devis ↔ facture,
+notés 0 tant que le contrôle n'existe pas :
 
 - **EINVOI-COH-FXC-002, `tva.ventilation`** : FILED compare la somme de la ventilation au total de TVA, mais ne vérifie
   pas base × taux = montant. Une ventilation « 100 × 20 % = 19 » passe.
@@ -42,8 +42,8 @@ cas attend ses empreintes :
 - **EINVOI-COH-FXC-016, `lecture.complete`** : une facture structurée sans vendeur est rangée par a4_55 chez « Tickets
   de caisse ». Le fournisseur ne manque donc plus. Il faudrait qu'une pièce XML ou Factur-X ne soit jamais tenue pour
   un ticket.
-- **NOBAT-DOSSIER1-FACTURE, `rapprochement.devis`** : non joué tant que le coordinateur n'a pas posé les empreintes.
-  Ce contrôle n'existe pas encore (voir ci-dessous).
+- **OMEGA-DEVIS-ARTICLES-DIFFERENTS / OMEGA-DEVIS-MEMES-ARTICLES et NOBAT-DOSSIER1-FACTURE, `rapprochement.devis`** :
+  le contrôle n'existe pas encore (voir ci-dessous).
 
 Les huit cas Einvoi hors périmètre visent le lecteur ou l'import XML : PDF/XML contradictoires, devise absente ou
 mêlée, XML hostile, avoir reconnu. Ils sont aussi au banc, et leur raison est dans `filed_banc_cas.note`. Un point à
@@ -64,5 +64,11 @@ deux voies devis ↔ facture doit donc exister :
   devis). Une personne le confirme quand plusieurs devis conviennent. Un devis non signé n'engage rien : jamais
   bloquant.
 
-Au banc, c'est le cas attendu `NOBAT-DOSSIER1-FACTURE` (lié à `NOBAT-DOSSIER1-DEVIS`). Sa note vaut 0 tant que ce
-contrôle n'existe pas.
+Au banc :
+- `NOBAT-DOSSIER1-FACTURE` (lié à `NOBAT-DOSSIER1-DEVIS`) : le devis et la facture n'ont aucun article en commun
+  (151,10 / 148,75 €). Le devis doit seulement être **proposé à confirmer** : anomalie d'attention ou d'info, jamais
+  « rapproché ».
+- `OMEGA-DEVIS-ARTICLES-DIFFERENTS` : le même cas en scénario. Le résultat attendu est « proposé à confirmer, pas rapproché ».
+- `OMEGA-DEVIS-MEMES-ARTICLES` : son pendant. Mêmes articles et même montant, le contrôle doit être `ok` (rapproché).
+
+Leur note vaut 0 tant que ce contrôle n'existe pas.

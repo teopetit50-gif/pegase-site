@@ -51,6 +51,8 @@ begin
                  'juste', 'Pièce : les contrôles de sa facture sont jugés');
   return next ok((select bool_and(verdict = 'non_joue' and motif = 'pièce pas encore déposée') from private.filed_banc_verdicts
                   where releve_id = v_rel and cas_code = 'TEST-ABSENTE'), 'Pièce pas déposée : non jouée, avec le motif');
+  return next ok(not exists (select 1 from private.filed_banc_verdicts where releve_id = v_rel and motif like 'scénario en erreur%'),
+                 'Aucun scénario ne meurt en route (contraintes de la recette respectées)');
   return next is((select verdict from private.filed_banc_verdicts where releve_id = v_rel and cas_code = 'TEST-HORS'),
                  'non_joue', 'Hors périmètre : non joué');
 

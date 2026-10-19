@@ -130,3 +130,10 @@ grant all on public.btp_reglages to service_role;
 
 -- a4_62 : la date de réception de la pièce, comme sur la recette.
 alter table public.pieces add column if not exists recue_le timestamptz not null default now();
+do $$ begin
+  -- a4_62 (correctif) : comme sur la recette, les valeurs admises de filed_factures.fournisseur_identification.
+  if not exists (select 1 from pg_constraint where conname = 'filed_factures_fournisseur_identification_check') then
+    alter table public.filed_factures add constraint filed_factures_fournisseur_identification_check
+      CHECK ((fournisseur_identification = ANY (ARRAY['siren'::text, 'tva'::text, 'id_etranger'::text, 'nom'::text, 'creation'::text, 'humain'::text])));
+  end if;
+end $$;

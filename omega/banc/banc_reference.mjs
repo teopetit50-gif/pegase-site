@@ -74,6 +74,8 @@ async function fichier(nom, url) {
 
 /* ——— Einvoi → FILED. Un cas : le scénario joué à blanc et les contrôles attendus. Les montants qu'Einvoi ne donne
    pas (« complété par A4 ») sont choisis cohérents avec le cas ; ils ne changent pas ce que le cas éprouve. ——— */
+// « Proposé à confirmer » : le contrôle est posé en anomalie d'attention ou d'info (une personne tranche), jamais bloquante.
+const PROPOSE = { resultat: 'anomalie', gravites: ['attention', 'info'] };
 const sain = { 'famille:montant': { resultat: 'pas_anomalie' }, 'lecture.complete': { resultat: 'ok' } };
 const fx = (o = {}) => ({ numero: 'BANC-FX-001', date: -10, ht: 100, tva: 20, ttc: 120, ventilation: [{ taux: 20, base: 100, montant: 20 }], ...o });
 const TRADUCTION = {
@@ -161,10 +163,29 @@ if (args[0] === '--preparer') {
   lignes.push(cas({ code: 'NOBAT-DOSSIER1-DEVIS', source: 'nobat', licence: 'pièce client (recette)', attribution: null, genre: 'piece',
     intitule: 'Devis du dossier 1 (même fournisseur que la facture du dossier 1)', note: 'Empreinte et champs remplis par le coordinateur sur la recette.' }));
   lignes.push(cas({ code: 'NOBAT-DOSSIER1-FACTURE', source: 'nobat', licence: 'pièce client (recette)', attribution: null, genre: 'piece',
-    lie_a: 'NOBAT-DOSSIER1-DEVIS', intitule: 'Facture du dossier 1, à rapprocher de son devis',
-    controles: { 'rapprochement.devis': { resultat: 'present' } },
-    note: 'Attendu : FILED rapproche la facture du devis du même fournisseur (aujourd’hui : « Sans commande : rien à rapprocher »). '
-        + 'Empreinte et montant TTC remplis par le coordinateur sur la recette.' }));
+    lie_a: 'NOBAT-DOSSIER1-DEVIS', intitule: 'Facture du dossier 1 : devis du même fournisseur, aucun article en commun',
+    controles: { 'rapprochement.devis': PROPOSE },
+    note: 'Attendu : FILED propose le devis du même fournisseur, à confirmer, sans le rapprocher (aucun article en commun ; '
+        + 'aujourd’hui : « Sans commande : rien à rapprocher »). Empreinte et champs remplis par le coordinateur sur la recette.' }));
+  // 4. Devis ↔ facture, en scénario : articles différents → proposé à confirmer ; mêmes articles → rapproché.
+  const devis = (lignes, ttc) => ({ document: 'devis', numero: 'BANC-DV-001', date: -30, ttc, lignes });
+  lignes.push(cas({ code: 'OMEGA-DEVIS-ARTICLES-DIFFERENTS', source: 'omega', licence: 'A4', attribution: null, genre: 'scenario',
+    intitule: 'Devis et facture du même fournisseur, aucun article en commun : proposé à confirmer, pas rapproché',
+    scenario: { factures: [
+      devis([{ designation: 'Disques à tronçonner', montant: 60 }, { designation: 'Traceurs de chantier', montant: 40 },
+             { designation: 'Pointes', montant: 25.92 }], 151.10),
+      fx({ numero: 'BANC-FA-001', ht: 123.96, tva: 24.79, ttc: 148.75, lignes: [{ designation: 'Chaussures de sécurité (5 paires)', montant: 123.96 }],
+           ventilation: [{ taux: 20, base: 123.96, montant: 24.79 }] })] },
+    controles: { 'rapprochement.devis': PROPOSE },
+    note: 'Modèle du dossier NOBAT 1, montants voisins (151,10 / 148,75 €), articles sans rapport : le devis est proposé, '
+        + 'une personne confirme ou écarte. Le contrôle n’existe pas encore.' }));
+  lignes.push(cas({ code: 'OMEGA-DEVIS-MEMES-ARTICLES', source: 'omega', licence: 'A4', attribution: null, genre: 'scenario',
+    intitule: 'Devis et facture du même fournisseur, mêmes articles, même montant : rapproché',
+    scenario: { factures: [
+      devis([{ designation: 'Disques à tronçonner', montant: 60 }, { designation: 'Pointes', montant: 40 }], 120),
+      fx({ numero: 'BANC-FA-002', lignes: [{ designation: 'Disques à tronçonner', montant: 60 }, { designation: 'Pointes', montant: 40 }] })] },
+    controles: { 'rapprochement.devis': { resultat: 'ok' } },
+    note: 'Le pendant du cas précédent. Le contrôle n’existe pas encore.' }));
 
   const sql = `-- banc_reference_cas.sql — les cas du banc de référence FILED (a4_62), écrit par omega/banc/banc_reference.mjs --preparer.
 -- Ne pas modifier à la main : relancer le script. À poser après a4_62. Rejouable : un cas existant est remis à jour,

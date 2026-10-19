@@ -174,17 +174,22 @@ begin
 end $$;
 
 -- ─── Un scénario, à blanc : rend les résultats des contrôles de la facture visée ────
--- scenario = {"factures": [{nature, numero, date (décalage en jours depuis aujourd'hui), echeance (décalage),
---             devise, ht, tva, ttc, net, prepaye, lignes: [montants HT], ventilation: [{taux, base, montant}],
---             fournisseur (false : sans fournisseur), source}], "cible": rang (1 = la première ; défaut : la dernière)}
+-- scenario = {"factures": [élément…], "cible": rang parmi les factures (1 = la première ; défaut : la dernière)}.
+-- Un élément est une facture : {nature, numero, date (décalage en jours depuis aujourd'hui), echeance (décalage),
+--   devise, ht, tva, ttc, net, prepaye, lignes: [montant HT | {designation, montant}], ventilation: [{taux, base,
+--   montant}], fournisseur (false : sans fournisseur), source}
+-- ou un autre document du même fournisseur, lu mais sans facture : {document: "devis" | "bon_commande" | …, numero,
+--   date, ttc, lignes: [{designation, montant}]} (ses valeurs vont dans pieces_valeurs, comme le lecteur les écrit).
 create or replace function private.filed_banc_scenario(p_client uuid, p_scenario jsonb) returns jsonb
 language plpgsql security definer set search_path to '' as $$
 declare
   v_ent uuid;
   v_four uuid;
+  v_nom text;
   v_annee smallint := extract(year from now())::smallint;
   v_base int := 900000 + (floor(random() * 90000))::int;
-  v_cible int := coalesce((p_scenario ->> 'cible')::int, jsonb_array_length(p_scenario -> 'factures'));
+  v_cible int := coalesce((p_scenario ->> 'cible')::int,
+                          (select count(*)::int from jsonb_array_elements(p_scenario -> 'factures') e where not e ? 'document'));
   v_factures uuid[] := '{}';
   v_resultats jsonb;
   x jsonb;
@@ -195,9 +200,10 @@ begin
   if v_ent is null then
     raise exception 'filed_banc_scenario : client % sans entité', p_client;
   end if;
+  v_nom := 'Fournisseur du banc ' || v_base;
   begin
     insert into public.filed_fournisseurs (client_id, code, nom, nom_normalise, pays, statut, source, siren)
-    values (p_client, 'BANC-' || v_base, 'Fournisseur du banc ' || v_base, 'fournisseur du banc ' || v_base, 'FR', 'actif', 'saisie', null)
+    values (p_client, 'BANC-' || v_base, v_nom, lower(v_nom), 'FR', 'actif', 'saisie', null)
     returning id into v_four;
     for x in select * from jsonb_array_elements(p_scenario -> 'factures') loop
       i := i + 1;
@@ -207,6 +213,18 @@ begin
               md5('banc' || v_base || i) || md5(i || 'banc' || v_base), p_client::text || '/filed_document/banc/' || v_base || '-' || i,
               'filed_document', 'banc-' || v_base || '-' || i, 'lue')
       returning id into v_piece;
+      if x ? 'document' then
+        insert into public.filed_documents (client_id, entite_id, annee_reception, numero_reception, piece_id, source, nom_fichier,
+                                            sha256, recu_le, etat, nature, nature_source)
+        values (p_client, v_ent, v_annee, v_base + i, v_piece, 'depot', 'banc-' || v_base || '-' || i || '.xml',
+                md5('banc' || v_base || i) || md5(i || 'banc' || v_base), now(), 'classe', x ->> 'document', 'lecteur');
+        insert into public.pieces_valeurs (client_id, piece_id, champ, valeur, texte, source, confiance, verifiee)
+        select p_client, v_piece, c.champ, c.valeur, c.valeur #>> '{}', 'regle', 1, true
+        from (values ('numero', x -> 'numero'), ('date', to_jsonb(to_char(current_date + (x ->> 'date')::int, 'YYYY-MM-DD'))),
+                     ('montant_ttc', x -> 'ttc'), ('fournisseur.nom', to_jsonb(v_nom)), ('lignes', x -> 'lignes')) c(champ, valeur)
+        where c.valeur is not null and jsonb_typeof(c.valeur) <> 'null';
+        continue;
+      end if;
       insert into public.filed_documents (client_id, entite_id, annee_reception, numero_reception, piece_id, source, nom_fichier,
                                           sha256, recu_le, etat, nature, nature_source)
       values (p_client, v_ent, v_annee, v_base + i, v_piece, coalesce(x ->> 'source', 'depot'), 'banc-' || v_base || '-' || i || '.xml',
@@ -221,10 +239,14 @@ begin
               coalesce(x ->> 'devise', 'EUR'), (x ->> 'ht')::numeric, (x ->> 'tva')::numeric, (x ->> 'ttc')::numeric,
               (x ->> 'net')::numeric, (x ->> 'prepaye')::numeric,
               case when coalesce((x ->> 'fournisseur')::boolean, true) then v_four end,
-              case when coalesce((x ->> 'fournisseur')::boolean, true) then 'saisie' end, 'a_completer')
+              -- « humain » : le fournisseur du banc est tenu pour confirmé (valeurs admises : siren, tva, id_etranger, nom, creation, humain).
+              case when coalesce((x ->> 'fournisseur')::boolean, true) then 'humain' end, 'a_completer')
       returning id into v_f;
       insert into public.filed_factures_lignes (client_id, facture_id, document_id, rang, designation, quantite, prix_unitaire, montant_ht, source)
-      select p_client, v_f, v_doc, l.rang, 'Ligne ' || l.rang, 1, (l.m #>> '{}')::numeric, (l.m #>> '{}')::numeric, 'regle'
+      select p_client, v_f, v_doc, l.rang,
+             case when jsonb_typeof(l.m) = 'object' then l.m ->> 'designation' else 'Ligne ' || l.rang end, 1,
+             case when jsonb_typeof(l.m) = 'object' then (l.m ->> 'montant')::numeric else (l.m #>> '{}')::numeric end,
+             case when jsonb_typeof(l.m) = 'object' then (l.m ->> 'montant')::numeric else (l.m #>> '{}')::numeric end, 'regle'
       from jsonb_array_elements(coalesce(x -> 'lignes', '[]')) with ordinality l(m, rang);
       insert into public.filed_factures_tva (client_id, facture_id, document_id, categorie, taux, base, montant, source)
       select p_client, v_f, v_doc, 'S', (t ->> 'taux')::numeric, (t ->> 'base')::numeric, (t ->> 'montant')::numeric, 'regle'
