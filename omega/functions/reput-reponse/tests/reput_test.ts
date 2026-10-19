@@ -186,3 +186,21 @@ Deno.test("un sujet routé : le service est donné au modèle, qui le nomme dans
   assert(!contenuDemande(dossier()).includes('"service"'), "sans routage, aucun service n'est inventé");
   assertStringIncludes(consigne(d), "champ « service »");
 });
+
+Deno.test("deux sujets : le premier concerné reste le sujet, le second est noté après la réponse ; un second invalide est écarté", async () => {
+  const p = new PortesFausses();
+  p.dossiers.set(42, dossier());
+  p.travaux.push(travail(1, 42));
+  const claude = new ClaudeFaux({ sujet: "tarifs", sujet_secondaire: "horaires", langue: "fr", urgence: false, couverte: false, sources: [],
+                                  corps: "Nous transmettons votre question.", raison: "Prix absent." });
+  const c = capturerConsole();
+  try { await passage(contexte(p, claude)); } finally { c.rendre(); }
+  assertEquals(p.depots[0].resultat.sujet, "tarifs");
+  assertEquals(p.secondaires, [{ demande: p.depots[0].demande, sujet: "horaires" }]);
+  assertStringIncludes(JSON.stringify(p.finis[0].resultat), "\"second_service_prevenus\":1");
+  const d = dossier();
+  assertEquals(controler(d, { sujet: "tarifs", sujet_secondaire: "tarifs", langue: "fr", couverte: false, sources: [], corps: "x" }).redaction.sujet_secondaire, undefined);
+  const r = controler(d, { sujet: "tarifs", sujet_secondaire: "inconnu", langue: "fr", couverte: false, sources: [], corps: "x" });
+  assertEquals(r.redaction.sujet_secondaire, undefined);
+  assert(r.controles.includes("sujet_secondaire_ecarte"));
+});

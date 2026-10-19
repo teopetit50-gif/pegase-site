@@ -95,11 +95,22 @@ export async function traiter(ctx: Contexte, t: Travail, version: string): Promi
       tokens_sortie: sortie.usage.tokens_sortie,
       cout_eur: sortie.cout_eur,
     }, version);
+    // c3_16 : le second sujet, noté après la réponse ; un échec ici ne défait pas la réponse déposée.
+    let prevenus: number | null = null;
+    if (sortie.redaction.sujet_secondaire) {
+      try {
+        prevenus = (await ctx.portes.noterSujetSecondaire(demande, sortie.redaction.sujet_secondaire)).prevenus ?? 0;
+      } catch (e) {
+        journal("alerte", "sujet secondaire non noté", { travail: t.id, demande, erreur: messageDe(e).slice(0, 200) });
+      }
+    }
     await ctx.portes.finirTravail(t.id, {
       demande,
       reponse: depot.reponse ?? null,
       statut: depot.statut,
       sujet: depot.sujet ?? sortie.redaction.sujet,
+      sujet_secondaire: sortie.redaction.sujet_secondaire ?? null,
+      second_service_prevenus: prevenus,
       couverte: depot.couverte ?? sortie.redaction.couverte,
       controles: sortie.controles,
       envoi: depot.envoi ?? null,

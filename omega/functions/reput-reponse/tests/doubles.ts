@@ -80,6 +80,11 @@ export class PortesFausses implements PortesReput {
     return Promise.resolve({ statut: "a_valider", demande, reponse: "rrrrrrrr-0000-4000-8000-000000000001", sujet: resultat.sujet, couverte: resultat.couverte, envoi: "eeee", envoi_statut: "a_valider" });
   }
   marquerEchec(demande: string, motif: string): Promise<void> { this.echecs.push({ demande, motif }); return Promise.resolve(); }
+  secondaires: { demande: string; sujet: string }[] = [];
+  noterSujetSecondaire(demande: string, sujet: string): Promise<{ prevenus?: number }> {
+    this.secondaires.push({ demande, sujet });
+    return Promise.resolve({ prevenus: 1 });
+  }
 }
 
 export function travail(id: number, reception: number, module: string | null = "reput"): Travail {

@@ -68,6 +68,7 @@ export interface Dossier {
 /** Ce que le modèle rend, contrôlé, et ce qu'on y ajoute pour la porte. */
 export interface ResultatReponse {
   sujet: string;
+  sujet_secondaire?: string;
   langue: string;
   urgence: boolean;
   couverte: boolean;
@@ -101,6 +102,8 @@ export interface PortesReput extends Pick<Portes, "prendreTravaux" | "finirTrava
   commencer(reception: number): Promise<Dossier>;
   deposerReponse(demande: string, resultat: ResultatReponse, version: string): Promise<Depot>;
   marquerEchec(demande: string, motif: string): Promise<void>;
+  /** c3_16 : le second sujet ; la base prévient le second service s'il en a un autre. */
+  noterSujetSecondaire(demande: string, sujet: string): Promise<{ prevenus?: number }>;
 }
 
 export class PortesReputRpc extends PortesRpc implements PortesReput {
@@ -118,6 +121,10 @@ export class PortesReputRpc extends PortesRpc implements PortesReput {
       p_resultat: resultat,
       p_version: version.slice(0, 80),
     });
+  }
+
+  async noterSujetSecondaire(demande: string, sujet: string): Promise<{ prevenus?: number }> {
+    return await rpc<{ prevenus?: number }>(this.config, this.fetchR, "reput_noter_sujet_secondaire", { p_demande: demande, p_sujet: sujet });
   }
 
   async marquerEchec(demande: string, motif: string): Promise<void> {
