@@ -204,3 +204,22 @@ Deno.test("deux sujets : le premier concerné reste le sujet, le second est not�
   assertEquals(r.redaction.sujet_secondaire, undefined);
   assert(r.controles.includes("sujet_secondaire_ecarte"));
 });
+
+Deno.test("la base a déjà demandé la précision (c3_20) : le travail est clos sans appeler le modèle", async () => {
+  const p = new PortesFausses();
+  p.dossiers.set(42, { statut: "preparee", demande: "dddddddd-0000-4000-8000-000000000020", motif: "précision demandée sans modèle (pièce sans texte)" });
+  p.travaux.push(travail(1, 42));
+  const claude = new ClaudeFaux({ sujet: "autre", langue: "fr", urgence: false, couverte: false, sources: [], corps: "x" });
+  const c = capturerConsole();
+  let bilan;
+  try { bilan = await passage(contexte(p, claude)); } finally { c.rendre(); }
+  assertEquals(bilan.issues.ignore, 1);
+  assertEquals(p.depots.length, 0);
+  assertEquals(claude.demandes.length, 0);
+});
+
+Deno.test("« Envoyé de mon iPhone » ne parle pas : une photo ainsi signée reste un message sans texte", () => {
+  const d = dossier("\n\nEnvoyé de mon iPhone", {});
+  d.reception = { ...d.reception!, sujet: null, pieces: 1 };
+  assert(sansTexte(d) !== null);
+});

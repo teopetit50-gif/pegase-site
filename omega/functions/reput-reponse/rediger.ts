@@ -204,8 +204,11 @@ export function controler(d: Dossier, brut: unknown): { redaction: Redaction; co
 
 const MOTS_DE_FICHIER = new Set(["img", "dsc", "dcim", "jpg", "jpeg", "png", "heic", "pdf", "photo", "photos", "image", "images", "scan", "pic", "fwd", "pièce", "jointe"]);
 
+// Les signatures automatiques des téléphones et messageries ne disent rien de la demande (comme c3_20, côté base).
+const SIGNATURE_AUTO = /(envoy[ée] (de|depuis) mon|sent from my|get outlook for|téléchargez outlook pour)[^\n]*/gu;
+
 function parle(t: string | null | undefined): boolean {
-  const mots = (t ?? "").toLowerCase().match(/\p{L}{3,}/gu) ?? [];
+  const mots = (t ?? "").toLowerCase().replace(SIGNATURE_AUTO, " ").match(/\p{L}{3,}/gu) ?? [];
   return mots.some((m) => !MOTS_DE_FICHIER.has(m));
 }
 

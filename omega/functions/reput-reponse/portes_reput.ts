@@ -42,7 +42,8 @@ export interface Base {
 }
 
 export interface Dossier {
-  statut: "a_preparer" | "ignore" | "deja";
+  /** « preparee » (c3_20) : la base a déjà préparé la réponse (pièce sans texte) ; l'ouvrier n'appelle pas l'IA. */
+  statut: "a_preparer" | "ignore" | "deja" | "preparee";
   motif?: string;
   demande?: string;
   client?: string;
