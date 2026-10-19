@@ -1377,22 +1377,22 @@ begin
   return v_f;
 end $function$;
 
--- a4_61 : doublures des trois petites fonctions du socle (non extraites ; leurs correspondances ici sont celles de la
--- contrainte des natures, pas une copie de la recette). filed_libelle_nature est en « language sql » pour éprouver
+-- a4_61 : doublures des trois petites fonctions du socle (non extraites ; correspondances décrites par le coordinateur
+-- d'après la recette, 19/10 15 h 15 Z). filed_libelle_nature est en « language sql » pour éprouver
 -- l'autre forme de garde d'a4_61. Puis filed_integrer_piece telle qu'extraite (SOCLE-EXTRAITS-COMMUN.sql, 5/10).
 create or replace function private.filed_nature_de(p_type text) returns text language plpgsql immutable set search_path to '' as $function$
 begin
-  return case when p_type in ('facture', 'avoir', 'bon_commande', 'bon_livraison', 'devis', 'releve', 'contrat', 'attestation_assurance') then p_type end;
-end $function$;
-create or replace function private.filed_etat_de(p_nature text) returns text language plpgsql immutable set search_path to '' as $function$
-begin
-  if p_nature is null then
-    return 'a_classer';
+  if p_type is null then
+    return null;
   end if;
-  return case when p_nature in ('facture', 'avoir', 'bon_commande', 'bon_livraison') then 'a_traiter' else 'classe' end;
+  return case when p_type in ('facture', 'avoir', 'bon_commande', 'bon_livraison', 'devis', 'releve', 'contrat', 'attestation_assurance') then p_type else 'autre' end;
 end $function$;
+create or replace function private.filed_etat_de(p_nature text) returns text language sql immutable set search_path to '' as $function$
+  select case when p_nature is null then 'a_classer' when p_nature in ('facture', 'avoir', 'bon_commande', 'bon_livraison') then 'a_traiter' else 'classe' end;
+$function$;
 create or replace function private.filed_libelle_nature(p_nature text) returns text language sql immutable set search_path to '' as $function$
-  select case p_nature when 'facture' then 'facture' when 'avoir' then 'avoir' when 'devis' then 'devis' else coalesce(p_nature, 'pièce') end;
+  select case p_nature when 'facture' then 'facture' when 'avoir' then 'avoir' when 'bon_commande' then 'bon de commande' when 'bon_livraison' then 'bon de livraison'
+    when 'devis' then 'devis' when 'releve' then 'relevé' when 'contrat' then 'contrat' when 'attestation_assurance' then 'attestation d''assurance' else 'autre document' end;
 $function$;
 CREATE OR REPLACE FUNCTION private.filed_integrer_piece(p_piece uuid)
  RETURNS text

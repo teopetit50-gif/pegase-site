@@ -10,16 +10,16 @@
 --   2. private.filed_nature_de : chantier_pv_reserves, chantier_plan et
 --      chantier_note_technique donnent document_chantier ;
 --      private.filed_libelle_nature('document_chantier') donne « document de
---      chantier » ; private.filed_etat_de('document_chantier') donne « classe »
---      (rangé dans FILED, FILED n'a rien à en faire).
+--      chantier ». private.filed_etat_de n'est pas touchée : sur la recette, tout
+--      ce qui n'est ni nul ni une des quatre natures moteur donne déjà « classe ».
 --   3. private.filed_integrer_piece : un document de chantier dépose le travail
 --      daliro.document, seulement si Daliro est installé chez le client
 --      (public.btp_reglages). La pièce reste celle de FILED.
 --
--- Ces quatre fonctions du socle ne sont pas toutes extraites dans
+-- Ces fonctions du socle ne sont pas toutes extraites dans
 -- omega/SOCLE-EXTRAITS-*.sql : rien n'est réécrit en entier. Chacune est posée
 -- par repère sur sa définition servie (pg_get_functiondef) : une garde en tête
--- pour les trois petites, un « elsif » après la branche bon_livraison pour
+-- pour les deux petites, un « elsif » après la branche bon_livraison pour
 -- filed_integrer_piece (définition de référence : SOCLE-EXTRAITS-COMMUN.sql,
 -- photographie du 5/10). Si un repère manque, la pose s'arrête sans rien
 -- changer. Rejouable : chaque étape se reconnaît à sa marque « a4_61 ».
@@ -106,7 +106,6 @@ begin
   perform pg_temp.a4_61_garde('private.filed_nature_de(text)',
     array['chantier_pv_reserves', 'chantier_plan', 'chantier_note_technique'], 'document_chantier');
   perform pg_temp.a4_61_garde('private.filed_libelle_nature(text)', array['document_chantier'], 'document de chantier');
-  perform pg_temp.a4_61_garde('private.filed_etat_de(text)', array['document_chantier'], 'classe');
 end $$;
 
 -- ─── 3. filed_integrer_piece : le travail daliro.document ──────────────────
