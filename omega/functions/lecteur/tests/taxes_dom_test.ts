@@ -218,3 +218,43 @@ Deno.test("relevé de secours : un IBAN FR sans étiquette est un IBAN, jamais u
   assertEquals(ajouts.find((a) => a.champ === "fournisseur.iban")?.valeur, "FR7630006000011234567890189");
   assertEquals(ajouts.filter((a) => a.champ.endsWith(".tva")), []);
 });
+
+// IBAN en partie couvert sur une photo (19/10) : doublure tirée de l'IBAN d'exemple, jamais l'IBAN réel.
+const MASQUE_ATTENDU = "IBAN partiellement masqué : à compléter";
+
+Deno.test("IBAN coupé par le modèle, avec ou sans marque de masque : rendu, à vérifier, « partiellement masqué »", () => {
+  for (const imprime of ["FR76 3000 6000 0112 3456 7890 …", "FR76 3000 6000 0112 3456 7890 ...", "FR76 3000 6000 0112 3456 7890", "FR76 3000 6000 0112 3456 7890 [masqué]"]) {
+    const p = page(`Règlement par virement — IBAN : ${imprime}`);
+    const v = verifierValeurs([{ champ: "fournisseur.iban", valeur: imprime, texte: imprime, page: 1 }], [p], null).valeurs[0];
+    assert(v, imprime);
+    assertEquals(v.valeur, "FR763000600001123456 7890…".replace(" ", ""), imprime);
+    assert(!v.verifiee, imprime);
+    assert(v.controle?.endsWith(MASQUE_ATTENDU), `${imprime} → ${v.controle}`);
+  }
+});
+
+Deno.test("IBAN masqué omis par le modèle : relevé sur le texte (étiquette en minuscules, sans étiquette)", () => {
+  for (const texte of ["Iban : FR76 3000 6000 0112 3456 7890 ...", "Coordonnées bancaires FR76 3000 6000 0112 3456 7890 ••••", "RIB FR76 3000 6000 0112 3456 [masqué]"]) {
+    const ajout = completerDepuisTexte([], [page(texte)], CHAMPS_PAR_NOM).find((a) => a.champ === "fournisseur.iban");
+    assert(ajout, texte);
+    assert(String(ajout.valeur).startsWith("FR7630006000"), texte);
+    assert(ibanMasque(String(ajout.valeur)), String(ajout.valeur));
+    assert(!ajout.verifiee);
+    assert(ajout.controle?.includes(MASQUE_ATTENDU), ajout.controle);
+  }
+});
+
+Deno.test("IBAN masqué rangé en TVA par le modèle : reclassé en IBAN, à vérifier", () => {
+  const imprime = "FR76 3000 6000 0112 3456 7890 …";
+  const verif = verifierValeurs([{ champ: "fournisseur.tva", valeur: imprime, texte: imprime, page: 1 }], [page(`IBAN ${imprime}`)], null);
+  const r = reclasserIdentifiants(verif.valeurs, CHAMPS_PAR_NOM);
+  assertEquals(r.map((v) => v.champ), ["fournisseur.iban"]);
+  assert(String(r[0].valeur).endsWith("…"));
+  assert(!r[0].verifiee && r[0].controle?.includes(MASQUE_ATTENDU), r[0].controle);
+});
+
+Deno.test("IBAN : un FR entier garde sa clé contrôlée ; un FR trop long est mal formé", () => {
+  const v = (x: string) => verifierValeurs([{ champ: "fournisseur.iban", valeur: x, texte: x, page: 1 }], [page(`IBAN ${x}`)], null).valeurs[0];
+  assert(v(IBAN_DOUBLURE).verifiee);
+  assert(v(IBAN_DOUBLURE + "1").controle?.includes("IBAN mal formé"));
+});

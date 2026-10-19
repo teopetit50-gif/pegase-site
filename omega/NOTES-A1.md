@@ -1,5 +1,10 @@
 # NOTES-A1 — ouvrier LECTEUR (session worker A1)
 
+## 19/10, 18 h 30 Z, lot « IBAN masqué » (feu vert de Teo, sur 4a4ad9e1)
+- Un IBAN en partie couvert sort toujours en `fournisseur.iban`, avec `verifiee = false` et « partiellement masqué : à compléter », qu'il soit coupé avec ou sans marque, `[masqué]`, `...`, mis par erreur en TVA, ou omis par le modèle.
+- **Côté FILED (A4)** : `filed_integrer_facture` met `v_iban` à null s'il n'est pas complet, et le contrôle dit alors « Aucun IBAN ». Il faut un repère « IBAN partiellement masqué » au lieu de `iban.absent` quand la pièce porte un `fournisseur.iban` incomplet.
+- 4 tests, 182 au total.
+
 ## 19/10, lot « relevé d'heures » (décision du bureau par délégation de Teo, sur be522355)
 - Le schéma FILED gagne `releve_heures` : `agence`, `interimaire`, `client`, `periode_du`, `periode_au`, `total_heures`, `signature_client`, et `lignes` [{date, heures, taux si écrit, page}]. La liste est vérifiée si chaque jour se retrouve sur sa page et si la somme égale le total écrit.
 - 5 tests, 178 au total. L'Edge lecteur est à redéployer.

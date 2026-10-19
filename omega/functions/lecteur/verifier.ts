@@ -163,11 +163,29 @@ export function typerValeur(
       if (champ.endsWith(".siren") || champ.endsWith(".siret")) s = s.replace(/\s/g, "");
       if (champ.endsWith(".tva")) s = s.replace(/[\s.\-]/g, "").toUpperCase();
       // Un IBAN garde ses caractères masqués (•, *, X…) : « FR76… » reste visible comme coupé.
-      if (champ.endsWith(".iban")) s = s.replace(/\.{3}/g, "…").replace(/[\s.\-]/g, "").toUpperCase();
+      if (champ.endsWith(".iban")) s = normaliserIban(s);
       if (champ.endsWith(".pays") || champ === "devise") s = s.toUpperCase();
       return s === "" ? { valeur: s, ok: false, detail: "vide" } : { valeur: s, ok: true };
     }
   }
+}
+
+/** La longueur d'un IBAN complet, pour les pays qu'on rencontre (ISO 13616). */
+const LONGUEUR_IBAN: Record<string, number> = {
+  FR: 27, MC: 27, IT: 27, DE: 22, GB: 22, BE: 16, NL: 18, LU: 20, CH: 21, ES: 24, PT: 25, AT: 20, IE: 22,
+};
+
+/**
+ * Un IBAN tel qu'imprimé, sans espaces : ses caractères masqués sont gardés (« … », « • », « [masqué] » → « … »),
+ * et un IBAN coupé sans marque (plus court que la longueur de son pays) reçoit « … » : il reste visible comme
+ * incomplet, jamais pris pour un IBAN entier à la clé fausse.
+ */
+export function normaliserIban(brut: string): string {
+  let s = brut.replace(/\[[^\]]{0,30}\]/g, "…").replace(/\.{3}/g, "…").replace(/[\s.\-]/g, "").toUpperCase();
+  s = s.replace(/…+/g, "…");
+  const attendu = LONGUEUR_IBAN[s.slice(0, 2)];
+  if (attendu && /^[A-Z]{2}\d{2}[A-Z0-9]+$/.test(s) && s.length < attendu) s += "…";
+  return s;
 }
 
 /** Un IBAN dont une partie est cachée ou coupée à l'impression (•, *, …, XXX). */
@@ -196,6 +214,8 @@ function regleDeForme(champ: string, valeur: unknown): string | null {
   if (champ.endsWith(".iban")) {
     if (ibanMasque(s)) return "IBAN partiellement masqué : à compléter";
     if (!/^[A-Z]{2}\d{2}[A-Z0-9]{10,30}$/.test(s)) return "IBAN mal formé";
+    const attendu = LONGUEUR_IBAN[s.slice(0, 2)];
+    if (attendu && s.length !== attendu) return "IBAN mal formé";
     if (!ibanValide(s)) return "clé IBAN invalide";
   }
   return null;
@@ -399,7 +419,10 @@ export function valeurTaxes(brutes: LigneBrute[] | undefined, pages: PageLue[], 
 // Ce que le modèle a laissé de côté alors que le texte le porte en toutes lettres. On ne complète qu'un champ
 // absent, qu'une seule lecture possible, et la citation est le texte même de la page.
 const RE_RCS = /\bR\.?\s?C\.?\s?S?\.?\s+([A-ZÀ-Ÿa-zà-ÿ' -]{2,40}?)\s+(?:[AB]\s+)?(\d{3}\s?\d{3}\s?\d{3})(?!\s?\d)/g;
-const RE_IBAN = /\bIBAN\b\s*[:.]?\s*([A-Z]{2}\s?\d{2}(?:[\s\-]?[A-Z0-9•*…·]{1,4}){2,9}(?:\.{3})?)/g;
+const MASQUE_IBAN = String.raw`(?:\s?(?:…|\.{3}|\[[^\]]{0,30}\]|[•*·]{2,}|X{3,}))`;
+const RE_IBAN = new RegExp(String.raw`\bI\.?B\.?A\.?N\.?\b\s*[:.]?\s*([A-Z]{2}\s?\d{2}(?:[\s\-]?[A-Z0-9•*…·]{1,4}){2,9}${MASQUE_IBAN}?)`, "gi");
+// Sans étiquette : un IBAN FR coupé ou masqué (FR + 2 chiffres + au moins 12 caractères, puis une marque de masque).
+const RE_IBAN_FR_MASQUE = new RegExp(String.raw`\bFR\d{2}(?:\s?[0-9A-Z]{4}){3,5}(?:\s?[0-9A-Z]{1,3})?${MASQUE_IBAN}`, "g");
 const RE_SIREN_SIRET = /\bSIRE[NT]\b\s*(?:n[°o]\s*)?[:.]?\s*(\d{3}\s?\d{3}\s?\d{3}(?:\s?\d{5})?)(?!\s?\d)/gi;
 const RE_IBAN_FR_NU = /\bFR\d{2}(?:\s?[0-9A-Z]{4}){5}\s?[0-9A-Z]{3}\b/g;
 const RE_EXONERATION = /[^\n]*(?:exon[ée]r[ée]?(?:ation)?s?\b[^\n]*\bTVA\b|\bTVA\b[^\n]*exon[ée]r|art(?:icle|\.)?\s*(?:295|262\s*ter|261|275)\b[^\n]*\bCGI\b)[^\n]*/gi;
@@ -466,6 +489,7 @@ export function completerDepuisTexte(valeurs: ValeurLue[], pages: PageLue[], cha
     let ibans = seulesLectures(pages, RE_IBAN, 1);
     // Sans étiquette « IBAN » : FR + 2 chiffres + 23 caractères, jamais lu comme une TVA.
     if (ibans.length === 0) ibans = seulesLectures(pages, RE_IBAN_FR_NU, 0);
+    if (ibans.length === 0) ibans = seulesLectures(pages, RE_IBAN_FR_MASQUE, 0);
     if (ibans.length === 1) {
       const t = typerValeur("fournisseur.iban", ibans[0].valeur, new Map([["fournisseur.iban", { type: "texte" }]]));
       const forme = regleDeForme("fournisseur.iban", t.valeur);
@@ -521,7 +545,8 @@ export function ventilationExoneree(valeurs: ValeurLue[]): ValeurLue | null {
 }
 
 const TVA_FR = /^FR[0-9A-Z]{2}\d{9}$/;
-const IBAN_FR = /^FR\d{2}[0-9A-Z]{23}$/;
+// Un IBAN FR entier, ou coupé ou masqué : FR + 2 chiffres + au moins 12 caractères (une TVA FR n'en a que 11).
+const IBAN_FR = /^FR\d{2}[0-9A-Z]{12}[0-9A-Z•*…·]*$/;
 
 function citationRetrouvee(v: ValeurLue): boolean {
   return v.controle?.startsWith("citation retrouvée") === true || v.controle?.startsWith("relevé") === true;
@@ -562,15 +587,17 @@ export function reclasserIdentifiants(valeurs: ValeurLue[], champs: { has(champ:
       }
     }
     const tva = trouver(`${partie}.tva`);
-    if (tva && IBAN_FR.test(String(tva.valeur)) && !TVA_FR.test(String(tva.valeur))) {
+    const tvaBrute = tva ? normaliserIban(String(tva.valeur)) : "";
+    if (tva && IBAN_FR.test(tvaBrute) && !TVA_FR.test(String(tva.valeur))) {
       const iban = `${partie}.iban`;
       if (champs.has(iban) && !trouver(iban)) {
-        const forme = regleDeForme(iban, tva.valeur);
+        const forme = regleDeForme(iban, tvaBrute);
         sortie[sortie.indexOf(tva)] = {
           ...tva,
           champ: iban,
+          valeur: tvaBrute,
           verifiee: citationRetrouvee(tva) && forme === null,
-          controle: `${tva.controle?.split(" ; ")[0] ?? ""} ; FR + 25 caractères : un IBAN, pas une TVA${forme ? ` ; ${forme}` : ""}`.slice(0, 300),
+          controle: `${tva.controle?.split(" ; ")[0] ?? ""} ; FR + 2 chiffres + plus de 11 caractères : un IBAN, pas une TVA${forme ? ` ; ${forme}` : ""}`.slice(0, 300),
         };
       } else {
         sortie.splice(sortie.indexOf(tva), 1); // un IBAN n'est jamais une TVA

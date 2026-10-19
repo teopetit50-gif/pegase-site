@@ -93,7 +93,7 @@ Sur un **avoir**, les montants sont rendus avec le signe du document (souvent n�
 | `fournisseur.tva` | texte | | numéro de TVA intracommunautaire, sans espaces, majuscules (clé FR vérifiée). Une TVA FR, c'est FR + 2 caractères + 9 chiffres : « FR » + 2 chiffres + 23 caractères est un IBAN, reclassé en `fournisseur.iban` (ou écarté) | `"FR19812345676"` |
 | `fournisseur.id_legal` | texte (≤ 60) | | identifiant légal d'un émetteur étranger sans SIREN ni TVA | `"HRB 12345"` |
 | `fournisseur.pays` | texte, 2 lettres | | pays ISO | `"FR"` |
-| `fournisseur.iban` | texte | | IBAN de règlement, sans espaces, majuscules ; clé modulo 97 vérifiée. Un IBAN en partie masqué ou coupé est gardé tel qu'imprimé (`•`, `*`, `X`, `…`), `verifiee = false`, « partiellement masqué : à compléter » | `"FR7630006000011234567890189"` |
+| `fournisseur.iban` | texte | | IBAN de règlement, sans espaces, majuscules ; clé modulo 97 vérifiée. Un IBAN en partie masqué ou coupé est gardé tel qu'imprimé (`•`, `*`, `X`, `…`). Un IBAN coupé sans marque, plus court que la longueur de son pays (FR : 27), reçoit `…`, et `[masqué]` devient `…`. Il sort avec `verifiee = false` et « partiellement masqué : à compléter », même s'il manque au modèle : il est alors relevé sur le texte, avec ou sans étiquette « IBAN » | `"FR7630006000011234567890189"` |
 
 ### Acheteur (le destinataire)
 
