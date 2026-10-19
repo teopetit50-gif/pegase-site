@@ -137,3 +137,11 @@ do $$ begin
       CHECK ((fournisseur_identification = ANY (ARRAY['siren'::text, 'tva'::text, 'id_etranger'::text, 'nom'::text, 'creation'::text, 'humain'::text])));
   end if;
 end $$;
+
+-- a4_64 : les réglages du socle (hors secrets) et un registre d'envois minimal, pour la doublure de preparer_envoi.
+create table if not exists private.reglages (cle text primary key, valeur text);
+insert into private.reglages (cle, valeur) values ('espace_url', 'https://app.omegaai.fr/espace') on conflict (cle) do nothing;
+create table if not exists public.envois (id uuid primary key default gen_random_uuid(), client_id uuid not null, entite_id uuid, module text not null,
+  objet_type text, objet_id text, canal text not null, destinataire_adresse text, destinataire_membre uuid, sujet text, corps text not null,
+  pieces uuid[] not null default '{}', transactionnel boolean not null default false, statut text not null default 'a_valider', verrou text, motif text,
+  cle_idempotence text, cree_le timestamptz not null default now(), unique (client_id, cle_idempotence));

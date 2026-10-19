@@ -1472,3 +1472,36 @@ begin
   end if;
   return v_etat;
 end $function$;
+
+-- a4_64 : doublure de private.preparer_envoi (signature de la recette, 17 arguments), pour le sceau seulement : comme le
+-- socle, le destinataire est un membre ou une adresse, les options sont direct, repondre_a, demande, espacement ; l'envoi
+-- est rangé « a_valider », « bloque » sans adresse ou si elle contient « bloque ». Rien ne part. Pour tout autre objet,
+-- elle échoue comme une base sans envois (les réponses d'a4_38 ont un cycle adossé aux demandes, non simulé ici).
+create or replace function private.preparer_envoi(p_client uuid, p_module text, p_objet_type text, p_objet_id text, p_canal text, p_destinataire jsonb,
+  p_gabarit text, p_variables jsonb, p_sujet text, p_corps text, p_pieces uuid[], p_cle text, p_entite uuid, p_transactionnel boolean,
+  p_donnees_sante boolean, p_echeance timestamptz, p_options jsonb) returns uuid language plpgsql security definer set search_path to '' as $function$
+declare v uuid; k text; v_adresse text;
+begin
+  if p_objet_type is distinct from 'filed_sceau' then
+    raise exception 'souche : pas d''envoi pour %', p_objet_type;
+  end if;
+  for k in select jsonb_object_keys(coalesce(p_options, '{}')) loop
+    if k not in ('direct', 'repondre_a', 'demande', 'espacement') then raise exception 'Option inconnue : « % ».', k; end if;
+  end loop;
+  for k in select jsonb_object_keys(p_destinataire) loop
+    if k not in ('membre', 'adresse', 'nom', 'ref', 'fuseau', 'territoire', 'professionnel', 'langue') then
+      raise exception 'Clé inconnue dans le destinataire : « % ».', k;
+    end if;
+  end loop;
+  v_adresse := coalesce(p_destinataire ->> 'adresse', (select u.email from auth.users u where u.id = (p_destinataire ->> 'membre')::uuid));
+  select e.id into v from public.envois e where e.client_id = p_client and e.cle_idempotence = p_cle;
+  if v is not null then return v; end if;
+  insert into public.envois (client_id, entite_id, module, objet_type, objet_id, canal, destinataire_adresse, destinataire_membre, sujet, corps,
+                             pieces, transactionnel, statut, verrou, cle_idempotence)
+  values (p_client, p_entite, p_module, p_objet_type, p_objet_id, p_canal, v_adresse, (p_destinataire ->> 'membre')::uuid, p_sujet, p_corps,
+          coalesce(p_pieces, '{}'), coalesce(p_transactionnel, false),
+          case when v_adresse is null or v_adresse like '%bloque%' then 'bloque' else 'a_valider' end,
+          case when v_adresse is null or v_adresse like '%bloque%' then 'ADRESSE' end, p_cle)
+  returning id into v;
+  return v;
+end $function$;
