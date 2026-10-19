@@ -5,11 +5,12 @@ Commande : `omega/AUDIT-PROMESSES.md` § 1 (CASHD absent) ; promesses : `app/pag
 sont déjà écrites », capture « qui doit de l'argent, où en est la relance, et l'encours échu au total »),
 `app/offres/relances-impayes/page.tsx`, `lib/produits/relances.ts`, `lib/produits/capacites/relances.ts` (50 lignes).
 
-## REPRISE (17/10/2026)
+## REPRISE (pause du 19/10, 00 h 21 Z — reprise samedi 25/10 après 02 h Z)
 
-- **Posé et vert** : c2_01 → c2_10 (7a5678f0, test_c2_* 256 ok sur la recette ; le lot y tourne ~8 min) ; écrans dans main.
-  c2_10 : cadence du site par défaut — facture J 0 (rappel le jour de l'échéance, sauté si déjà échue), J+7, J+21, J+30 ;
-  devis J+3 puis J+7. Le texte du J 0 n'est pas encore personnalisable (contrainte de cashd_gabarits). Rien à poser.
+- **Fait** : c2_10 → c2_15 posés sur la recette (cadence, envoi à la main, modèle 2, point des rappels, texte du jour d'échéance, taux BCE) ; liste de Teo (G2…G21, G14, G17) complète.
+- **En cours** : rien ; test_c2_15_taux_bce posé mais pas encore joué (la recette redémarrait sur le lot groupé).
+- **Prochain pas** : faire jouer ^test_c2_ (15 fichiers) et vérifier le premier passage réel du cron cashd-taux-bce ; puis charger les factures d'Omega (cashd_omega.sql) et G19 avec un premier client.
+
 - **Posés et verts (18/10)** : c2_11 envoi à la main (842f9c25) ; c2_12 v2 modèle 2 (5ee5fd10, ^test_c2_ 12/12) — rappels
   des paliers 1 et 2 sous accord permanent du socle, relance ferme / devis / mise en demeure (seule à pouvoir partir en
   LRE) dans actions_sans_accord. Aucun accord créé ; Omega reste « coupe ».
