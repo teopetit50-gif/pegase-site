@@ -24,18 +24,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
-  Archive,
   CalendarDays,
   ChevronDown,
-  Clock,
-  FileText,
-  Landmark,
-  LayoutGrid,
-  ListChecks,
-  Mail,
-  MessageCircle,
-  MoreVertical,
-  Send,
+  ChevronRight,
   User,
 } from "lucide-react";
 import { pointExemple } from "@/components/espace/exemples/point";
@@ -46,8 +37,7 @@ import { libelleModule } from "@/components/espace/format";
 import type { LignePoint, PointDuJour } from "@/components/espace/types";
 import { apercuPoint, lirePoint, listerPoints, monCompte } from "@/components/espace/point/portes";
 import { Note } from "./ui";
-import { Chiffre, EnDirect, IconeModule, Initiales } from "./vivant";
-import { useToast } from "./Toasts";
+import { Chiffre, EnDirect, Initiales } from "./vivant";
 import { RACINE } from "./modules";
 
 type Contenu = { point: PointDuJour | null; lignes: LignePoint[]; apercu?: boolean; motifs?: unknown[] };
@@ -91,13 +81,9 @@ function encaissement(texte: string | null) {
   return { qui, montant: `${m[1].trim()} €`, notes };
 }
 
-const ICONE_MODULE: Record<string, typeof FileText> = { filed: FileText, cashd: Landmark, reput: MessageCircle, socle: ListChecks, rh: User };
-
 export default function Point() {
   const { source } = useSource();
-  const toast = useToast();
   const [decalage, setDecalage] = useState(0);
-  const [module, setModule] = useState("");
   const [points, setPoints] = useState<PointDuJour[] | null>(null);
   const [contenus, setContenus] = useState<Record<string, Contenu>>({});
   const [erreur, setErreur] = useState<string | null>(null);
@@ -176,14 +162,12 @@ export default function Point() {
 
   const p = contenu?.point ?? null;
   const motifs = (contenu?.motifs ?? p?.motifs ?? []) as Motif[];
-  const modules = useMemo(() => Array.from(new Set((contenu?.lignes ?? []).map((l) => l.module).filter((m): m is string => !!m))).sort(), [contenu]);
 
   /* ——— ranger chaque ligne dans une carte ——— */
   const cartes = useMemo(() => {
     const c = { qualite: [] as LignePoint[], equipe: [] as LignePoint[], encaissements: [] as LignePoint[], documents: [] as LignePoint[], premier: [] as LignePoint[], depuis: [] as LignePoint[] };
     for (const l of contenu?.lignes ?? []) {
       if (l.rang === 0) continue;
-      if (module && l.module !== module) continue;
       if (l.section_incomplete && l.gravite !== "info") c.qualite.push(l);
       else if (l.module === "rh" || /d[ée]l[ée]gation/i.test(l.texte ?? "")) c.equipe.push(l);
       else if (l.module === "cashd" && l.gravite !== "critique") c.encaissements.push(l);
@@ -193,7 +177,7 @@ export default function Point() {
     }
     c.premier.sort((a, b) => Number(b.gravite === "critique") - Number(a.gravite === "critique"));
     return c;
-  }, [contenu, module]);
+  }, [contenu]);
 
   const heure = (p?.heure ?? "07:00").slice(0, 5).replace(":", " h ");
   const fuseau = p?.fuseau ?? "Europe/Paris";
@@ -208,10 +192,11 @@ export default function Point() {
   const vide = !enCours && !(contenu?.lignes ?? []).length;
 
   return (
-    <div className="v2-page v2-arrivee v2-pm v2-vivant">
+    <div className="v2-page v2-arrivee v2-pm v2-vivant oc-pm-simple">
       <h1 className="v2-sr">Point du matin</h1>
 
-      {/* ——— les menus, la remise ——— */}
+      {/* ——— la barre : la date seule (15/10, comme le pilotage /omega ; l'heure
+         et le canal de remise sont dans « Prochaine édition ») ——— */}
       <div className="v2-val-filtres">
         <label className="v2-val-bouton">
           <CalendarDays width={16} height={16} aria-hidden="true" />
@@ -225,34 +210,8 @@ export default function Point() {
             ))}
           </select>
         </label>
-        <Link href={`${RACINE}/reglages`} className="v2-val-bouton" title="L'heure du point se règle dans Réglages">
-          <Clock width={16} height={16} aria-hidden="true" />
-          <span>{heure}</span>
-        </Link>
-        <label className="v2-val-bouton" data-actif={module ? "" : undefined}>
-          <LayoutGrid width={16} height={16} aria-hidden="true" />
-          <span>{module ? libelleModule(module) : "Tous les modules"}</span>
-          <ChevronDown width={14} height={14} aria-hidden="true" className="v2-val-bouton-chevron" />
-          <select value={module} onChange={(e) => setModule(e.target.value)} aria-label="Modules">
-            <option value="">Tous les modules</option>
-            {modules.map((m) => (
-              <option key={m} value={m}>
-                {libelleModule(m)}
-              </option>
-            ))}
-          </select>
-        </label>
         <span className="v2-val-droite">
           <EnDirect />
-          <span className="v2-pm-remise">{p?.remis_le ? `Remis par ${canal}` : contenu?.apercu ? "Aperçu, non remis" : "Pas encore remis"}</span>
-          <button
-            type="button"
-            className="v2-val-bouton"
-            onClick={() => toast(`Le point vous est remis chaque matin à ${heure} par ${canal}. L'heure et le canal se règlent dans Réglages.`)}
-          >
-            <Mail width={16} height={16} aria-hidden="true" />
-            <span>Recevoir par {canal}</span>
-          </button>
         </span>
       </div>
 
@@ -283,17 +242,14 @@ export default function Point() {
               <ul className="v2-pm-liste">
                 {cartes.premier.map((l) => {
                   const { titre, detail } = couper(l.texte);
-                  const Icone = ICONE_MODULE[l.module ?? ""] ?? FileText;
                   const lien = lienV2(l.lien);
                   const action = l.module === "socle" ? { libelle: "À valider", icone: ArrowRight } : l.gravite === "critique" ? { libelle: "Ouvrir", icone: ArrowUpRight } : { libelle: "Examiner", icone: ArrowUpRight };
                   return (
                     <li key={l.id}>
-                      <span className="v2-pm-icone" data-critique={l.gravite === "critique" ? "" : undefined}><IconeModule cle={l.module} icone={Icone} taille={22} /></span>
                       <span className="v2-pm-texte">
-                        <span>{titre}</span>
-                        {l.entite_nom || l.objet_id ? <small>{[l.entite_nom, l.objet_id].filter(Boolean).join(" · ")}</small> : null}
-                        {detail ? <small>{detail}</small> : null}
+                        <span title={detail ?? undefined}>{titre}</span>
                       </span>
+                      {l.entite_nom || l.objet_id ? <span className="oc-meta" data-retard={l.gravite === "critique" ? "" : undefined}>{l.entite_nom || l.objet_id}</span> : null}
                       {lien ? (
                         <Link href={lien} className="v2-pm-action">
                           {action.libelle} <action.icone width={14} height={14} aria-hidden="true" />
@@ -314,14 +270,12 @@ export default function Point() {
               <ul className="v2-pm-liste">
                 {cartes.depuis.map((l) => {
                   const { titre, detail } = couper(l.texte);
-                  const Icone = l.module === "cashd" ? Send : (ICONE_MODULE[l.module ?? ""] ?? FileText);
                   return (
                     <li key={l.id}>
-                      <span className="v2-pm-icone"><IconeModule cle={l.module} icone={Icone} taille={22} /></span>
                       <span className="v2-pm-texte">
-                        <span>{titre}</span>
-                        <small>{[libelleModule(l.module), detail].filter(Boolean).join(" · ")}</small>
+                        <span title={detail ?? undefined}>{titre}</span>
                       </span>
+                      {l.module ? <span className="oc-meta">{libelleModule(l.module)}</span> : null}
                     </li>
                   );
                 })}
@@ -339,19 +293,16 @@ export default function Point() {
                   const e = /encaissement/i.test(l.texte ?? "") ? encaissement(l.texte) : null;
                   return (
                     <li key={l.id}>
-                      <Landmark width={20} height={20} aria-hidden="true" className="v2-pm-icone" />
                       {e ? (
-                        <span className="v2-pm-texte">
-                          {e.qui ? <small>{e.qui}</small> : null}
-                          <strong className="v2-pm-montant"><Chiffre valeur={e.montant} /></strong>
-                          {e.notes.map((n) => (
-                            <small key={n}>{n}</small>
-                          ))}
-                        </span>
+                        <>
+                          <span className="v2-pm-texte">
+                            <span title={e.notes.join(" · ") || undefined}>{e.qui || "Encaissement"}</span>
+                          </span>
+                          <strong className="oc-meta oc-meta--fort"><Chiffre valeur={e.montant} /></strong>
+                        </>
                       ) : (
                         <span className="v2-pm-texte">
-                          <span>{couper(l.texte).titre}</span>
-                          {couper(l.texte).detail ? <small>{couper(l.texte).detail}</small> : null}
+                          <span title={couper(l.texte).detail ?? undefined}>{couper(l.texte).titre}</span>
                         </span>
                       )}
                     </li>
@@ -382,14 +333,12 @@ export default function Point() {
                     const note = m.match(/\(([^)]*)\)/)?.[1];
                     const libelle = m.replace(/\s*\([^)]*\)/, "");
                     const nom = /lecture/i.test(libelle) ? `${libelle.replace(/^(\d+)\s+en/, "$1 pièce en")}` : /classer/i.test(libelle) ? libelle.replace(/^(\d+)\s+à/, "$1 scan à") : libelle;
-                    const Icone = /classer/i.test(libelle) ? Archive : FileText;
                     return (
                       <li key={`${l.id}-${i}`}>
-                        <Icone width={20} height={20} aria-hidden="true" className="v2-pm-icone" />
                         <span className="v2-pm-texte">
                           <span>{nom}</span>
-                          {note ? <small>{note.charAt(0).toUpperCase() + note.slice(1)}</small> : null}
                         </span>
+                        {note ? <span className="oc-meta">{note.charAt(0).toUpperCase() + note.slice(1)}</span> : null}
                         {lien ? (
                           <Link href={lien} className="v2-pm-action" aria-label={`Ouvrir : ${nom}`}>
                             <ArrowRight width={14} height={14} aria-hidden="true" />
@@ -491,12 +440,10 @@ export default function Point() {
           <Carte titre="Prochaine édition" classe="v2-pm-haut">
             <ul className="v2-pm-liste">
               <li>
-                <CalendarDays width={20} height={20} aria-hidden="true" className="v2-pm-icone" />
                 <span className="v2-pm-texte">
-                  <span>Demain à {heure}</span>
-                  <small>
-                    {fuseau} · {canal}
-                  </small>
+                  <span title={fuseau}>
+                    Demain à {heure}, par {canal}
+                  </span>
                 </span>
                 <Link href={`${RACINE}/reglages`} className="v2-pm-action">
                   Personnaliser <ArrowRight width={14} height={14} aria-hidden="true" />
@@ -525,25 +472,24 @@ function Carte({
   pied?: { libelle: string; href: string };
   children: React.ReactNode;
 }) {
+  const cible = lien ?? pied?.href;
   return (
+    /* 15/10 — comme le pilotage /omega : le titre de la carte mène à la page
+       (plus de « ⋮ » ni de lien en pied) */
     <section className={`v2-carte v2-pm-carte${classe ? ` ${classe}` : ""}`} aria-label={titre}>
       <div className="v2-pm-tete">
-        <h2>{titre}</h2>
+        <h2>
+          {cible ? (
+            <Link href={cible} className="oc-pm-titre">
+              {titre} <ChevronRight width={14} height={14} aria-hidden="true" />
+            </Link>
+          ) : (
+            titre
+          )}
+        </h2>
         {badge ? <span className="v2-pm-badge">{badge}</span> : null}
-        {lien ? (
-          <Link href={lien} className="v2-pm-kebab" aria-label={`Ouvrir : ${titre}`}>
-            <MoreVertical width={16} height={16} aria-hidden="true" />
-          </Link>
-        ) : null}
       </div>
       <div className="v2-pm-corps">{children}</div>
-      {pied ? (
-        <div className="v2-pm-pied">
-          <Link href={pied.href} className="v2-pm-action">
-            {pied.libelle} <ArrowUpRight width={14} height={14} aria-hidden="true" />
-          </Link>
-        </div>
-      ) : null}
     </section>
   );
 }

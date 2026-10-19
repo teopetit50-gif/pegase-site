@@ -529,6 +529,8 @@ export type Parc = {
   entretiens: Entretien[];
   /* les personnes de l'organisation à qui confier une remise ou une anomalie */
   membres: { user_id: string; role: string }[];
+  /* b2_17 : à qui revient d'office chaque remise, par agence */
+  responsables?: { entite_id: string; remise_responsable: string }[];
 };
 
 /* b2_11 : la fiche économique d'un véhicule et les sorties de flotte */

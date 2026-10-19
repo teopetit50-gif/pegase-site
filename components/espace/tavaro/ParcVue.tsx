@@ -32,6 +32,7 @@ export type GestesParc = {
   creneaux: (e: Entretien) => Promise<Creneau[]>;
   planifier: (e: Entretien, debut: string, atelierNom: string | null, atelierAdresse: string | null) => Promise<Record<string, unknown>>;
   fait: (e: Entretien, km: number | null, cout: number | null) => Promise<void>;
+  responsable: (entite_id: string, personne: string) => Promise<void>;
 };
 
 const MOTIFS: Record<MotifImmobilisation, string> = {
@@ -94,6 +95,7 @@ export default function ParcVue({ parc, dossiers, role, moi, nommer, nomAgence, 
 
   const direction = role === "gerant" || role === "admin" || role === "valideur";
   const agence = direction || role === "collaborateur";
+  const directionStricte = role === "gerant" || role === "admin";
   const vehicule = (id: string) => parc.vehicules.find((v) => v.id === id) ?? dossiers.find((d) => d.vehicule?.id === id)?.vehicule ?? null;
   const contrat = (id: string | null) => (id ? dossiers.find((d) => d.contrat.id === id)?.contrat ?? null : null);
 
@@ -169,6 +171,20 @@ export default function ParcVue({ parc, dossiers, role, moi, nommer, nomAgence, 
           <div role="listitem"><span className="esp-kpi-etiquette">Prêtes à temps</span><strong>{finies.length ? `${aTemps} / ${finies.length}` : "—"}</strong><span className="esp-kpi-sous">avant l&apos;heure limite</span></div>
           <div role="listitem"><span className="esp-kpi-etiquette">Immobilisés</span><strong>{immobilises.length}</strong><span className="esp-kpi-sous">hors préparation</span></div>
           <div role="listitem"><span className="esp-kpi-etiquette">Entretiens</span><strong>{entretiens.length}</strong><span className="esp-kpi-sous">{entretiens.filter((e) => e.statut === "a_planifier").length} à planifier</span></div>
+        </div>
+        <div className="tav-responsables" role="group" aria-label="Responsable des remises, par agence">
+          {[...new Set([...parc.vehicules.map((v) => v.entite_id).filter((x): x is string => !!x), ...(parc.responsables ?? []).map((x) => x.entite_id)])].map((entite) => {
+            const actuel = (parc.responsables ?? []).find((x) => x.entite_id === entite)?.remise_responsable ?? "";
+            return (
+              <label key={entite} className="rv-libelle tav-confier">Remises de {nomAgence(entite)}, confiées d&apos;office à
+                <select className="rv-champ" value={actuel} disabled={!directionStricte || envoi !== null} title={directionStricte ? undefined : "La direction règle le responsable des remises"}
+                  onChange={(ev) => ev.target.value && agir(`resp:${entite}`, async () => { await gestes.responsable(entite, ev.target.value); return `Les remises de ${nomAgence(entite)} reviennent d'office à ${nommer(ev.target.value)}.`; })}>
+                  {actuel ? null : <option value="">Personne : la direction est prévenue à chaque retour</option>}
+                  {parc.membres.map((m) => <option key={m.user_id} value={m.user_id}>{nommer(m.user_id)}</option>)}
+                </select>
+              </label>
+            );
+          })}
         </div>
         {fait ? <div style={{ margin: "10px 0" }}><Avis teinte="vert" role="status"><strong>C&apos;est fait.</strong> {fait}</Avis></div> : null}
         {erreur && !anomalie && !immo && !retour && !prevision && !plan && !cloture ? <div style={{ margin: "10px 0" }}><Avis teinte="rouge" role="alert">{erreur}</Avis></div> : null}

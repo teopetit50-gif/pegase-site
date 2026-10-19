@@ -13,13 +13,15 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useState } from "react";
-import { Copy, Download, FileSpreadsheet, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { Copy, Download, FileSpreadsheet, Trash2, Users } from "lucide-react";
 import { Loader } from "@/components/ui/loader";
 import { EXEMPLE_CLIENT_ID, ilYa } from "../exemples/socle";
 import { useSource } from "../source";
 import { Avis, Ruban } from "../ui";
 import { dateHeure } from "../format";
 import { monClient } from "../filed/portes";
+import Messagerie from "./Messagerie";
 import {
   NonBranche,
   apercuEffacement,
@@ -176,6 +178,20 @@ export default function EcranReglages() {
       </div>
 
       <div style={{ display: "grid", gap: 16 }}>
+        <Messagerie source={source} client={client} gere={exporteur} pret={source === "exemple" || lu} />
+
+        <section className="esp-carte" aria-labelledby="titre-equipe">
+          <div className="esp-carte-tete">
+            <h2 className="esp-carte-titre" id="titre-equipe">L&apos;équipe</h2>
+          </div>
+          <div className="esp-carte-corps" style={{ display: "grid", gap: 12 }}>
+            <p className="esp-kpi-sous" style={{ margin: 0 }}>Qui a accès à votre organisation, avec quel rôle, et sur quelles sociétés.</p>
+            <div className="esp-actions">
+              <Link href="/espace/equipe" className="r-btn r-btn--fil"><Users width={15} height={15} aria-hidden="true" /> Gérer l&apos;équipe</Link>
+            </div>
+          </div>
+        </section>
+
         <section className="esp-carte" aria-labelledby="titre-journal">
           <div className="esp-carte-tete">
             <h2 className="esp-carte-titre" id="titre-journal">Le journal</h2>

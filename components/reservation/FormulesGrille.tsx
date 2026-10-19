@@ -1,6 +1,5 @@
 import { BoutonReservation } from "./ModeleUrl";
 import { Check } from "lucide-react";
-import Partage from "@/components/Partage";
 import { ICONES_FORMAT, ICONE_DEFAUT } from "./icones";
 import GarantiesAudit from "./GarantiesAudit";
 import {
@@ -52,8 +51,7 @@ import "./FormulesGrille.css";
    CE QUI EST CONSERVÉ DE LA VERSION D'AVANT : tous les textes au mot
    près, la teinte or de la carte phare (.r-carte--phare de globals.css),
    le surlignage du premier point, la promesse fantôme (Teo, 02/08 : « la
-   phrase disparaît, l'espace reste »), la pastille « Sur mesure » qui
-   VOYAGE depuis /commencer (Partage), et les rôles d'arrivée
+   phrase disparaît, l'espace reste »), et les rôles d'arrivée
    (data-arrivee) qui cadencent la cascade du premier écran.
 
    La colonne de gauche de l'ancienne grille (« Gratuit, sans engagement »
@@ -159,16 +157,6 @@ export default function FormulesGrille() {
   return (
     <section data-monde="clair" className="r-wrap fg pb-10 pt-12 sm:pb-14 sm:pt-14">
       <div className="fg-entete-section">
-        {/* 01/09 — transitions : la pastille « Sur mesure » ARRIVE de la
-            carte « Organisations & équipes » de /commencer (objet
-            partagé), titre puis chapô puis colonnes entrent en cascade. */}
-        <Partage
-          nom="kicker-audit"
-          share="voyage-audit"
-          className="cm-kicker cm-kicker--violet cm-kicker--page"
-        >
-          Sur mesure
-        </Partage>
         <h1 data-arrivee="titre" className="r-h1 fg-titre">
           Un audit à la mesure de votre organisation
         </h1>

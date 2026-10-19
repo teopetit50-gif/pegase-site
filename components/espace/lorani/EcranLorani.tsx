@@ -39,6 +39,7 @@ import OrdresService from "./OrdresService";
 import Reserves from "./Reserves";
 import Controle from "./Controle";
 import PluProjet from "./PluProjet";
+import PiecesPermis from "./PiecesPermis";
 import Honoraires from "./Honoraires";
 import PermisVue from "./PermisVue";
 import { ajouterIntervenant, ajouterLot, ajouterMembre, chargerDossier, deposerCourrier, ouvrirPermis, ouvrirProjet } from "./portes";
@@ -789,6 +790,7 @@ function ProjetCarte({ projet, dossier, nommer, peutEcrire, envoi, ouvrirForm, a
         )}
       </div>
       <PluProjet projet={projet} dossier={dossier} peutEcrire={peutEcrire} agir={agir} />
+      <PiecesPermis projet={projet} dossier={dossier} />
       <Controle projet={projet} dossier={dossier} nommer={nommer} peutEcrire={peutEcrire} agir={agir} />
       <Offres projet={projet} dossier={dossier} peutEcrire={peutEcrire} agir={agir} />
       <Honoraires projet={projet} dossier={dossier} nommer={nommer} peutEcrire={peutEcrire} agir={agir} />

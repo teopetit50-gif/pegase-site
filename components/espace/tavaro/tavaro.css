@@ -456,3 +456,43 @@
   overflow-y: auto;
   position: relative;
 }
+.esp .tav-responsables {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 12px 0 4px;
+}
+.esp .tav-responsables .tav-confier {
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+}
+.esp .tav-responsables .rv-champ {
+  min-width: 0;
+  width: 100%;
+  max-width: 340px;
+}
+/* la prise de vue guidée de l'état des lieux */
+.esp .tav-guide {
+  display: grid;
+  gap: 4px;
+  justify-items: start;
+  padding: 12px 14px;
+  border: 1px solid var(--r-filet);
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+.esp .tav-guide p {
+  margin: 0 0 6px;
+}
+/* les chiffres d'une réponse aux Questions */
+.esp .tav-chiffres-reponse {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 8px 0;
+}
+.esp .tav-chiffres-reponse dd {
+  margin: 0;
+  font-weight: 600;
+}

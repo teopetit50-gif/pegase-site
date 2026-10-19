@@ -20,7 +20,7 @@ import { Loader } from "@/components/ui/loader";
 import { Avis, Pastille } from "../ui";
 import { dateHeure, montant, nombreFr } from "../format";
 import { nomLocataire } from "./etats";
-import { MODES_CAUTION, VUES_OBLIGATOIRES, VUES_UTILES, ZONES, etatDe, libelleZone } from "./edl";
+import { CONSIGNES_VUES, MODES_CAUTION, ORDRE_VUES, VUES_OBLIGATOIRES, VUES_UTILES, ZONES, etatDe, libelleZone } from "./edl";
 import { NETTETE_MIN_DEFAUT, mesurerNettete } from "./nettete";
 import type { Dossier, EtatDesLieux, LigneBareme, Role, ZoneDommage } from "./types";
 
@@ -267,12 +267,32 @@ export default function EtatsDesLieux({ dossier, role, bareme, nommer, gestes, o
                     </select>
                   </label>
                 </div>
+                {(() => {
+                  /* la prise de vue guidée : le tour du véhicule, une vue après l'autre */
+                  const toutes = [...VUES_OBLIGATOIRES, ...VUES_UTILES];
+                  const ordre = ORDRE_VUES.map((cle) => toutes.find((v) => v.cle === cle)).filter((v): v is (typeof toutes)[number] => !!v);
+                  const faites = ordre.filter((v) => photos[v.cle]?.length).length;
+                  const prochaine = ordre.find((v) => !photos[v.cle]?.length) ?? null;
+                  const obligatoire = prochaine ? VUES_OBLIGATOIRES.some((o) => o.cle === prochaine.cle) : false;
+                  return (
+                    <div className="tav-guide" aria-live="polite">
+                      <span className="esp-kpi-etiquette">Tour du véhicule · {faites} / {ordre.length}</span>
+                      {prochaine ? (
+                        <>
+                          <strong>{prochaine.libelle}{obligatoire ? "" : " (facultatif)"}</strong>
+                          <p className="esp-kpi-sous">{CONSIGNES_VUES[prochaine.cle]}</p>
+                          <label htmlFor={`edl-${prochaine.cle}`} className="r-btn r-btn--noir r-btn--petit" style={{ cursor: "pointer" }}>Photographier : {prochaine.libelle.toLowerCase()}</label>
+                        </>
+                      ) : <strong>Toutes les vues sont prises.</strong>}
+                    </div>
+                  );
+                })()}
                 <fieldset className="tav-edl-vues">
                   <legend className="rv-libelle">Photos du véhicule — les quatre côtés sont obligatoires</legend>
                   {[...VUES_OBLIGATOIRES, ...VUES_UTILES].map((v) => (
                     <div key={v.cle} className="esp-fichier">
                       <input id={`edl-${v.cle}`} type="file" className="esp-fichier-natif" accept="image/*" capture="environment" multiple onChange={(e) => { const fs = Array.from(e.target.files ?? []); void retenir(fs, v.libelle).then((g) => setPhotos((p) => ({ ...p, [v.cle]: g }))); }} />
-                      <label htmlFor={`edl-${v.cle}`} className="r-btn r-btn--fil r-btn--petit" style={{ cursor: "pointer" }}>{v.libelle}{VUES_OBLIGATOIRES.some((o) => o.cle === v.cle) ? " *" : ""}</label>
+                      <label htmlFor={`edl-${v.cle}`} className="r-btn r-btn--fil r-btn--petit" style={{ cursor: "pointer" }}>{photos[v.cle]?.length ? <span aria-hidden="true">✓ </span> : null}{v.libelle}{VUES_OBLIGATOIRES.some((o) => o.cle === v.cle) ? " *" : ""}</label>
                       <span className="esp-kpi-sous">{photos[v.cle]?.length ? photos[v.cle].map((f) => f.name).join(", ") : "aucune photo"}</span>
                     </div>
                   ))}

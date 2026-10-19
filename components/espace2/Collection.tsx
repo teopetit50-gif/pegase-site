@@ -9,7 +9,7 @@
    passent en base, seul `lire`/`ecrire` change. */
 
 import { useMemo, useState, useSyncExternalStore, type FormEvent } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Search, Trash2 } from "lucide-react";
 import { Note } from "./ui";
 import { useToast } from "./Toasts";
 
@@ -117,12 +117,25 @@ export default function Collection({ config }: { config: ConfigCollection }) {
   }, [fiches, filtre, champs, config.coche]);
 
   const [principal, ...autres] = champs;
+  /* 15/10 — une ligne par fiche, comme Tâches et Appels du pilotage /omega :
+     le titre, un détail court en gris, une seule date à droite (rouge si
+     elle est passée pour une tâche ouverte) ; les textes longs passent en
+     infobulle */
+  const detail = autres.find((c) => !c.type || c.type === "tel" || c.type === "email");
+  const date = autres.find((c) => c.type === "date");
+  const longs = autres.filter((c) => c.type === "long");
+  const aujourdhui = new Date().setHours(0, 0, 0, 0);
 
   return (
     <div className="v2-page v2-page--etroite v2-arrivee">
       <h1 className="v2-sr">{config.titre}</h1>
-      <div className="v2-tete" style={{ alignItems: "center" }}>
-        <p style={{ margin: 0 }}>{config.intro}</p>
+      {/* 15/10 — une barre fine (la recherche, l'ajout) puis une seule liste
+         encadrée, comme Activité et le pilotage /omega */}
+      <div className="oc-barre">
+        <label className="v2-champ oc-barre-recherche">
+          <Search width={16} height={16} aria-hidden="true" />
+          <input placeholder="Rechercher…" value={filtre} onChange={(e) => setFiltre(e.target.value)} aria-label={`Rechercher : ${config.titre}`} />
+        </label>
         <button type="button" className="v2-btn v2-btn--petit v2-btn--primaire" onClick={() => setOuvert((v) => !v)} aria-expanded={ouvert}>
           <Plus width={16} height={16} aria-hidden="true" /> Ajouter {config.une}
         </button>
@@ -160,18 +173,12 @@ export default function Collection({ config }: { config: ConfigCollection }) {
         </form>
       ) : null}
 
-      {fiches && fiches.length > 3 ? (
-        <div className="v2-champ" style={{ marginBottom: 16 }}>
-          <input placeholder="Filtrer…" value={filtre} onChange={(e) => setFiltre(e.target.value)} aria-label={`Filtrer : ${config.titre}`} />
-        </div>
-      ) : null}
-
       {fiches === null ? null : visibles.length === 0 ? (
         <div className="v2-carte v2-carte-corps">
-          <p className="v2-gris" style={{ margin: 0 }}>{filtre ? "Rien ne correspond à ce filtre." : config.vide}</p>
+          <p className="v2-gris" style={{ margin: 0 }}>{filtre ? "Rien ne correspond à cette recherche." : `${config.vide} ${config.intro}`}</p>
         </div>
       ) : (
-        <ul className="v2-carte v2-liste">
+        <ul className="v2-carte v2-liste oc-collection">
           {visibles.map((f) => (
             <li key={f.id} className="v2-liste-item">
               {config.coche ? (
@@ -183,22 +190,26 @@ export default function Collection({ config }: { config: ConfigCollection }) {
                   style={{ width: 16, height: 16, flexShrink: 0 }}
                 />
               ) : null}
-              <span className="v2-liste-texte">
-                <span style={f.fait ? { textDecoration: "line-through", color: "var(--v2-gray-900)" } : undefined}>{String(f[principal.cle] || "—")}</span>
-                <small>
-                  {autres
-                    .map((c) => {
-                      const v = String(f[c.cle] ?? "");
-                      return v ? (c.type === "date" ? `${c.libelle} : ${dateFr(v)}` : v) : "";
-                    })
-                    .filter(Boolean)
-                    .join(" · ") || `Ajouté le ${dateFr(f.cree)}`}
-                </small>
+              <span className="v2-liste-texte" title={longs.map((c) => String(f[c.cle] ?? "")).filter(Boolean).join("\n") || undefined}>
+                <span style={f.fait ? { textDecoration: "line-through", color: "var(--v2-gray-900)" } : undefined}>
+                  {String(f[principal.cle] || "—")}
+                  {detail && f[detail.cle] ? <span className="oc-collection-detail"> {String(f[detail.cle])}</span> : null}
+                </span>
               </span>
+              {(() => {
+                const v = date ? String(f[date.cle] ?? "") : "";
+                const passee = !!v && config.coche && !f.fait && new Date(v).getTime() < aujourdhui;
+                return (
+                  <span className="oc-meta" data-retard={passee ? "" : undefined}>
+                    {v ? dateFr(v) : dateFr(f.cree)}
+                    {passee ? <span className="v2-sr"> (en retard)</span> : null}
+                  </span>
+                );
+              })()}
               <button
                 type="button"
                 className="v2-btn v2-btn--petit v2-btn--icone v2-btn--fantome"
-                aria-label="Supprimer"
+                aria-label={`Supprimer « ${String(f[principal.cle] || "")} »`}
                 onClick={() => {
                   maj((fiches ?? []).filter((x) => x.id !== f.id));
                   toast("Supprimé");

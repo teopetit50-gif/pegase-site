@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { utilisateurCourant } from "@/lib/supabase/server";
+import { reponseVarelo } from "@/lib/varelo/assistant";
 
 /* L'assistant de l'espace client (07/10/2026).
 
@@ -29,7 +30,6 @@ type Entree = { role: "user" | "assistant"; content: string };
 export async function POST(req: Request) {
   const utilisateur = await utilisateurCourant();
   if (!utilisateur) return Response.json({ erreur: "Connectez-vous pour utiliser l'assistant." }, { status: 401 });
-  if (!process.env.ANTHROPIC_API_KEY) return Response.json({ erreur: "L'assistant n'est pas encore branché (clé API absente)." }, { status: 503 });
 
   let messages: Entree[];
   try {
@@ -44,6 +44,11 @@ export async function POST(req: Request) {
   if (!messages.length || messages[0].role !== "user" || messages[messages.length - 1].role !== "user") {
     return Response.json({ erreur: "La conversation doit commencer et finir par votre message." }, { status: 400 });
   }
+
+  /* un groupe qui a Varelo : la réponse s'appuie sur ses données, lues sous la session de la personne (B1) */
+  const varelo = await reponseVarelo(messages);
+  if (varelo) return varelo;
+  if (!process.env.ANTHROPIC_API_KEY) return Response.json({ erreur: "L'assistant n'est pas encore branché (clé API absente)." }, { status: 503 });
 
   const flux = client.beta.messages.stream({
     model: MODELE,

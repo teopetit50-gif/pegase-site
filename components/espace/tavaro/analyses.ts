@@ -94,6 +94,30 @@ export type LignePlan = {
   a_vendre: string[];
   renouveler: number;
   raison: string;
+  /* b3t_05 : les véhicules à vendre et à renouveler, un par un, avec leur coût et leur cote */
+  vehicules?: VehiculePlan[];
+  valeur_revente_eur?: number;
+};
+
+export type SourceCote = "saisie" | "argus" | "reprise_concession" | "autre";
+
+export type VehiculePlan = {
+  vehicule_id: string;
+  immatriculation: string;
+  decision: "vendre" | "renouveler";
+  mise_en_circulation: string | null;
+  age_ans: number | null;
+  km: number | null;
+  entretien_eur: number;
+  interventions: number;
+  jours_hors_service: number;
+  jours_loues: number;
+  entretien_par_jour_loue: number | null;
+  cote_eur: number | null;
+  cote_source: SourceCote | null;
+  cote_le: string | null;
+  cote_ancienne: boolean;
+  raison: string;
 };
 
 export type PlanDeFlotte = {
@@ -101,7 +125,7 @@ export type PlanDeFlotte = {
   periode: { du: string; au: string; mois: number };
   cible_utilisation: number;
   agences: { entite_id: string; agence: string; nom: string; categories: LignePlan[] }[];
-  totaux: { acheter: number; vendre: number; deplacer: number; renouveler: number };
+  totaux: { acheter: number; vendre: number; deplacer: number; renouveler: number; valeur_revente_a_vendre_eur?: number; cotes_manquantes?: number; entretien_flotte_eur?: number };
 };
 
 export type Analyses = {
@@ -147,4 +171,9 @@ export async function chargerAnalyses(client_id: string, plan: boolean): Promise
 
 export async function noterControle(contrat_id: string, identite: Conformite, permis: Conformite, permis_recent: boolean | null): Promise<void> {
   await rpc<string>("loc_noter_controle_conducteur", { p_contrat: contrat_id, p_identite: identite, p_permis: permis, p_permis_recent: permis_recent });
+}
+
+/** b3t_05 : la cote de revente d'un véhicule, notée par le gérant (la nouvelle remplace l'ancienne). */
+export async function noterCote(vehicule_id: string, valeur: number, source: SourceCote): Promise<void> {
+  await rpc<string>("loc_noter_cote_revente", { p_vehicule: vehicule_id, p_valeur: valeur, p_source: source, p_cote_le: null });
 }
