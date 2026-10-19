@@ -759,3 +759,4 @@ Partielles : 6, 11, 15, 38.
 - 18/10, 22 h Z — lot c4_18 (envoi automatique par défaut, modèle 2) : 43 tests, 412 ok en local (session en Europe/Paris).
 - 19/10 — lot c4_19 (effacement des données d'une personne) : 44 tests, 422 ok en local.
 - 19/10, 14 h 50 Z — reprise ; écran c4_20 (envoi automatique, données, effacement) : build vert, cinq largeurs.
+- 19/10, 14 h 40 Z — recette c4_18 : 42501 au révoquer (le socle exige une personne gérante) ; le test éteint désormais en gérant. Local 422 ok.

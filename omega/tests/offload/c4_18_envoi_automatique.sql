@@ -88,7 +88,11 @@ begin
                         'Seuls reprise, échéance et affaire sont des sujets');
 
   -- Éteindre l'envoi automatique révoque l'accord ; chaque message repasse par une personne.
+  -- Le socle ne laisse révoquer un accord permanent que par une personne (gérant ou administrateur) : c'est le gérant
+  -- qui éteint, comme à l'écran.
+  perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
   perform public.offload_regler(v_client, '{"envoi_auto": false, "sujets_auto": ["reprise", "echeance", "affaire"]}');
+  perform tests.redevenir_admin();
   return next ok(not exists (select 1 from public.politiques p where p.client_id = v_client and p.module = 'offload' and p.statut in ('a_valider', 'active'))
                  and exists (select 1 from public.politiques p where p.client_id = v_client and p.module = 'offload' and p.statut = 'revoquee'),
                  'Éteint, l''accord permanent d''OFFLOAD est révoqué');
