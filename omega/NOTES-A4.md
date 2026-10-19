@@ -3,7 +3,7 @@
 ## REPRISE (pause du 19/10, 00 h 25 Z — reprise samedi 25/10 après 02 h Z)
 
 - **Fait** : a4_01 → a4_49 posés et verts sur la recette ; a4_50 posé, son test (a4_38) pas encore joué. Écrits, testés en local (97/97), NON posés : a4_51 boîtes, a4_52 vue cabinet, a4_53 frais kilométriques (barème vérifié BOFiP 20/07/2023, revenus 2022), a4_54 historique par palier ; le (4) du chantier existait (a4_33).
-- **En cours** : reprise du 19/10 (14 h 18 Z) ; a4_55 écrit (tickets de caisse, n° 10 ; test `a4_43_tickets_de_caisse.sql` ; la souche reçoit `pieces.type_piece` ; 98/98 en local), à poser après a4_51 → a4_54.
+- **En cours** : a4_51 → a4_55 posés et verts (19/10). a4_56 écrit (contrats : fiche lue ou posée, échéance de résiliation, alertes 30/7 j, reconduction tacite ; test `a4_44_contrats.sql` ; 99/99 en local), à poser. Pour A1 : champs « contrat.* » (liste en tête d'a4_56) et `private.filed_categories_lecteur`.
 - **Prochain pas** : à la reprise, le coordinateur joue a4_38 (test d'a4_50), puis pose a4_51 → a4_54 dans l'ordre avec a4_39 → a4_42 ; corriger ce que la recette refuse (inserts de test dans expediteurs, entites). Ouverts : blocage au dépassement (Teo), barème kilométrique de l'année (opérateur), saisie téléphone (A2), invitation cabinet et bascule (A3).
 
 ## Banc, chantier 3 (18/10) — exemples de la norme lus par FILED (PAS de vraies factures)
