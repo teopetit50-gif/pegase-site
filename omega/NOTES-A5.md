@@ -1,5 +1,11 @@
 # NOTES — session A5 (garde-fous)
 
+## ARRÊT — 19/10/2026, 00 h 25 Z (pause, forfait à 29 % ; reprise samedi 25/10 après 02 h Z)
+
+- Fait : 19at (G18) posé, test 62 vert sur la recette ; 19au (G12) écrit, commité et poussé (bd8ed0e6), 63/63 sur la maquette.
+- En cours : rien. 19au n'est pas encore posé sur la recette (test 63 à lancer après la pose).
+- Prochain pas : à la reprise, faire poser 19au et lancer le test 63, puis la passerelle HTTP (fonction Edge) en lot à part. Corriger `runner.temp` (ligne 98) dans omega-sauvegarde.yml avant sa fusion dans main.
+
 ## REPRISE — 18/10/2026, 23 h 45 Z (décision de Teo : G18 puis G12, un lot à la fois, recette seulement)
 
 - origin/main fusionné (correctif CI d00c2485) : workflow et vercel.json pris de main, MISE-EN-PRODUCTION.md gardé de worker-a5.
