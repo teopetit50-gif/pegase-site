@@ -6,9 +6,9 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 
 ## REPRISE (19/10, 14 h 50 Z — reprise du 19/10, feu vert de Teo)
 
-- Fait : c4_01 à c4_19 verts sur la recette ; écran c4_20 ; c4_21 (réécriture par règles écrites, sans modèle de langue) poussé, local 430 ok.
+- Fait : c4_01 à c4_19 verts sur la recette ; écran c4_20 ; c4_21 (réécriture par règles écrites) et c4_22 (branche Gmail) poussés, local 435 ok.
 - En cours : rien. Gmail attend l'accord de Teo dans cette session ; aucun import de données personnelles sans accord écrit de Teo.
-- Prochain pas : décisions du bureau du 19/10 (délégation de Teo) : Gmail sur la boîte de test en essai, puis script d'import des seules personnes morales (exécuté par le coordinateur). Liste brute hors git.
+- Prochain pas : point 7 du bureau, script d'import des seules personnes morales (exécuté par le coordinateur). Liste brute hors git.
 
 ### Reprise du 17/10
 
@@ -451,6 +451,16 @@ Banc local : 28 tests, 312 assertions vertes, migrations posées deux fois ; tsc
 l'échéance honorée après message est comptée au suivi). Le chiffre repris compte tous les achats des 90 jours,
 sans prétendre qu'ils sont dus au seul message.
 
+## Lot c4_22 — la branche Gmail (19/10)
+
+Décision du bureau (délégation de Teo) : Gmail sur la recette, boîte de test, mode essai. Le branchement est au socle
+(19al, A2 : boîte connectée = expéditeur préféré, dépôt en brouillon « brouillon_depose », relève des réponses).
+`c4_22_gmail.sql` : abonnement « envoi.brouillon_depose.offload » ; offload_suivre_envoi traite un brouillon déposé
+comme un message parti (reprise, échéance, affaire) et le journalise (« offload.brouillon_depose ») ;
+`public.offload_messagerie(p_client)` (gérant/admin) : mode, boîtes connectées, dépôt en brouillon ou en envoi selon
+les portées accordées. Les réponses relevées arrivent par reception.nouvelle, déjà lues (lien à l'envoi ou adresse).
+Test : `omega/tests/offload/c4_22_gmail.sql` (5 assertions). Banc local : 46 tests, 435 ok.
+
 ## Lot c4_21 — réécriture par règles et formules écrites (19/10)
 
 Point 1 de Teo, tranché par le bureau (pas de modèle de langue). `c4_21_reecriture.sql` redéfinit
@@ -773,3 +783,4 @@ Partielles : 6, 11, 15, 38.
 - 19/10, 14 h 40 Z — recette c4_18 : 42501 au révoquer (le socle exige une personne gérante) ; le test éteint désormais en gérant. Local 422 ok.
 - 19/10, 14 h 36 Z — recette : c4_18 et c4_19 verts. La liste de Teo est couverte ; restent ses décisions.
 - 19/10, 16 h 30 Z — reprise (bureau) : lot c4_21 (réécriture par règles écrites) : 45 tests, 430 ok en local.
+- 19/10 — lot c4_22 (branche Gmail, brouillons déposés) : 46 tests, 435 ok en local.
