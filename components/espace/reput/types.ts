@@ -58,6 +58,8 @@ export type Demande = {
   regroupee_avec?: string | null;
   rapprochement_propose?: string | null;
   sujet_secondaire?: string | null;
+  urgence_prise_le?: string | null;
+  astreinte_epuisee_le?: string | null;
   motif: string | null;
   recu_le: string;
   preparee_le: string | null;

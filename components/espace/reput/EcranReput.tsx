@@ -23,6 +23,7 @@ import { useTempsReel } from "../tempsReel";
 import { Avis, Chargement, Pastille, Ruban, Vide, type Teinte } from "../ui";
 import { dateHeure, relatif } from "../format";
 import BaseConnaissances from "./BaseConnaissances";
+import Astreinte from "./Astreinte";
 import PiecesJointes from "./PiecesJointes";
 import Rapprochement from "./Rapprochement";
 import RendezVous from "./RendezVous";
@@ -340,6 +341,7 @@ function DemandeVue({ demande, monde, decideur, traite, client, source, relire, 
             </p>
           ) : null;
         })()}
+        <Astreinte key={`astreinte:${demande.id}`} demande={demande} traite={traite} source={source} />
         <SujetSecondaire demande={demande} monde={monde} traite={traite} source={source} relire={relire} modifierLocal={modifierLocal} />
         <Rapprochement demande={demande} monde={monde} traite={traite} source={source} relire={relire} modifierLocal={modifierLocal} />
         {rec?.sujet ? <p style={{ fontWeight: 600, marginBottom: 6 }}>{rec.sujet}</p> : null}

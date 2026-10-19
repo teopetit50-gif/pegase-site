@@ -194,3 +194,12 @@ export const creneauxLibres = (client: string, entite: string | null, type: stri
 export const poserRdv = (client: string, entite: string | null, type: string, debut: string, demande: string) =>
   rpc<{ pose: boolean; rdv?: string; motif?: string; suivants?: Creneau[] }>("reput_poser_rdv",
     { p_client: client, p_entite: entite, p_type: type, p_debut: debut, p_demande: demande, p_nom: null });
+
+/* L'astreinte (c3_22) : les appels d'une urgence (sans numéro), et la prise depuis l'espace. */
+export type AppelAstreinte = { id: string; rang: number; statut: string; cree_le: string; issue_le: string | null };
+export async function chargerAppels(demande: string): Promise<AppelAstreinte[]> {
+  const { data, error } = await createClient().from("reput_appels").select("id, rang, statut, cree_le, issue_le").eq("demande_id", demande).order("rang");
+  if (error) throw new ErreurPorte(message(error));
+  return (data ?? []) as AppelAstreinte[];
+}
+export const prendreUrgence = (demande: string) => rpc<{ prise: boolean }>("reput_prendre_urgence", { p_demande: demande });

@@ -50,6 +50,15 @@ for (const largeur of LARGEURS) {
     d = await s.evaluer(DEBORDE);
     verifier(!d.scroll && d.elements.length === 0, `${largeur} : aucun débordement (sujet secondaire) ${d.elements.join(' | ')}`);
     await s.capturer(`${DOSSIER}/reput-secondaire-${largeur}.jpg`);
+    verifier(await s.evaluer(cliquer('Sophie Garnier', '.esp-item')), `${largeur} : ouvrir l'urgence de Sophie Garnier`);
+    await s.dormir(300);
+    verifier(await s.evaluer(`!!document.querySelector('[data-astreinte]') && document.body.innerText.includes('astreinte appelée (rang 2)')`), `${largeur} : l'astreinte et son rang sont dits`);
+    d = await s.evaluer(DEBORDE);
+    verifier(!d.scroll && d.elements.length === 0, `${largeur} : aucun débordement (astreinte) ${d.elements.join(' | ')}`);
+    await s.capturer(`${DOSSIER}/reput-astreinte-${largeur}.jpg`);
+    verifier(await s.evaluer(cliquer("Je prends l'urgence")), `${largeur} : « Je prends l'urgence »`);
+    await s.dormir(300);
+    verifier(await s.evaluer(`document.body.innerText.includes("les appels d'astreinte sont arrêtés")`), `${largeur} : l'urgence est prise`);
     verifier(await s.evaluer(cliquer('Bernard', '.esp-item')), `${largeur} : ouvrir la demande de rendez-vous de Bernard`);
     await s.dormir(300);
     verifier(await s.evaluer(`!!document.querySelector('[data-rendez-vous]') && document.querySelectorAll('[data-rendez-vous] button').length === 6`), `${largeur} : six créneaux libres proposés`);
