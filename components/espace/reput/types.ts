@@ -57,6 +57,7 @@ export type Demande = {
   dossier_id?: string | null;
   regroupee_avec?: string | null;
   rapprochement_propose?: string | null;
+  sujet_secondaire?: string | null;
   motif: string | null;
   recu_le: string;
   preparee_le: string | null;

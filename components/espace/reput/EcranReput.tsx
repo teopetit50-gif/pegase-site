@@ -25,6 +25,7 @@ import { dateHeure, relatif } from "../format";
 import BaseConnaissances from "./BaseConnaissances";
 import PiecesJointes from "./PiecesJointes";
 import Rapprochement from "./Rapprochement";
+import SujetSecondaire from "./SujetSecondaire";
 import ReglagesAvis from "./ReglagesAvis";
 import SujetsAutorises from "./SujetsAutorises";
 import { mondeExemple } from "./exemples";
@@ -338,6 +339,7 @@ function DemandeVue({ demande, monde, decideur, traite, source, relire, modifier
             </p>
           ) : null;
         })()}
+        <SujetSecondaire demande={demande} monde={monde} traite={traite} source={source} relire={relire} modifierLocal={modifierLocal} />
         <Rapprochement demande={demande} monde={monde} traite={traite} source={source} relire={relire} modifierLocal={modifierLocal} />
         {rec?.sujet ? <p style={{ fontWeight: 600, marginBottom: 6 }}>{rec.sujet}</p> : null}
         <p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{rec?.corps || "(message sans texte)"}</p>

@@ -135,3 +135,7 @@ export async function ouvrirPiece(demande: string, rang: number): Promise<{ url:
 export const rapprocher = (demande: string, avec: string) => rpc("reput_rapprocher", { p_demande: demande, p_avec: avec });
 export const ecarterRapprochement = (demande: string) => rpc("reput_ecarter_rapprochement", { p_demande: demande });
 export const separer = (demande: string) => rpc("reput_separer", { p_demande: demande });
+
+/* Le second sujet d'une demande (c3_16) : le second service est prévenu s'il en a un autre. */
+export const noterSujetSecondaire = (demande: string, sujet: string | null) =>
+  rpc<{ prevenus?: number }>("reput_noter_sujet_secondaire", { p_demande: demande, p_sujet: sujet });

@@ -44,6 +44,12 @@ for (const largeur of LARGEURS) {
     d = await s.evaluer(DEBORDE);
     verifier(!d.scroll && d.elements.length === 0, `${largeur} : aucun débordement (pièces jointes) ${d.elements.join(' | ')}`);
     await s.capturer(`${DOSSIER}/reput-pieces-${largeur}.jpg`);
+    verifier(await s.evaluer(cliquer('Luc Martin', '.esp-item')), `${largeur} : ouvrir la demande de Luc Martin (deux sujets)`);
+    await s.dormir(300);
+    verifier(await s.evaluer(`document.body.innerText.includes('Concerne aussi : Rendez-vous · service Pose et SAV prévenu') && !!document.querySelector('[data-sujet-secondaire] select')`), `${largeur} : le second sujet et son service sont dits`);
+    d = await s.evaluer(DEBORDE);
+    verifier(!d.scroll && d.elements.length === 0, `${largeur} : aucun débordement (sujet secondaire) ${d.elements.join(' | ')}`);
+    await s.capturer(`${DOSSIER}/reput-secondaire-${largeur}.jpg`);
     verifier(await s.evaluer(cliquer('Martin Luc', '.esp-item')), `${largeur} : ouvrir la demande de Martin Luc (WhatsApp)`);
     await s.dormir(300);
     verifier(await s.evaluer(`document.body.innerText.includes('Peut-être la même personne que') && document.body.innerText.includes('Rien n’est regroupé sans vous') || document.body.innerText.includes("Rien n'est regroupé sans vous")`), `${largeur} : le rapprochement par le nom est proposé, pas fait`);

@@ -34,7 +34,9 @@ export const SUJETS_EXEMPLE: Sujet[] = [
   ["avis", "Avis et retours", true], ["reclamation", "Réclamation", false], ["urgence", "Urgence", false],
   ["humain", "Parler à une personne", false], ["autre", "Autre", false],
 ].map(([code, libelle, autorisable], i) => ({ code: code as string, libelle: libelle as string, description: null, autorisable: autorisable as boolean, actif: true, ordre: (i + 1) * 10,
-               delai_heures: code === "urgence" ? 1 : code === "reclamation" || code === "humain" ? 4 : 24 }));
+               delai_heures: code === "urgence" ? 1 : code === "reclamation" || code === "humain" ? 4 : 24,
+               /* c3_16 : les rendez-vous vont à l'équipe Pose et SAV (le second service prévenu dans l'exemple) */
+               equipe_id: code === "rendez_vous" ? "00000000-0000-4000-8000-00000000c3c2" : null }));
 
 function demande(n: number, canal: Demande["canal"], nom: string, adresse: string | null, recu: string, extra: Partial<Demande>): Demande {
   return {
@@ -57,7 +59,7 @@ function reponse(n: number, d: Demande, corps: string, extra: Partial<Reponse>):
 export function mondeExemple(): Monde {
   const d1 = demande(1, "email", "Marie Durand", "marie.durand@exemple.fr", ilYa(1, 21), { objet: "Ouverts samedi ?", sujet: "horaires" });
   const d2 = demande(2, "whatsapp", "Karim B.", "+33 6 12 34 56 78", ilYa(1, 19), { sujet: "tarifs", statut: "envoyee", decidee_le: ilYa(1, 19), envoyee_le: ilYa(1, 19) });
-  const d3 = demande(3, "formulaire", "Luc Martin", "luc.martin@exemple.fr", ilYa(0, 7), { objet: "Formulaire du site", sujet: "devis", couverte: false });
+  const d3 = demande(3, "formulaire", "Luc Martin", "luc.martin@exemple.fr", ilYa(0, 7), { objet: "Formulaire du site", sujet: "devis", couverte: false, sujet_secondaire: "rendez_vous" });
   const d4 = demande(4, "email", "Hélène Roux", "h.roux@exemple.fr", ilYa(0, 8), { objet: "Pose non terminée", sujet: "reclamation", urgence: false,
                                                                                   de_empreinte: "exemple-roux", litige: true, escaladee_le: ilYa(0, 12) });
   const d5 = demande(5, "formulaire", "Bernard", null, ilYa(0, 6), { objet: "Formulaire du site", sujet: "rendez_vous", statut: "a_traiter", couverte: false,
