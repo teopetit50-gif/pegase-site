@@ -26,6 +26,7 @@ export interface SortieOutil {
   valeurs: ValeurBrute[];
   lignes?: LigneBrute[];
   tva_ventilation?: LigneBrute[];
+  taxes_hors_tva?: LigneBrute[];
   decoupage?: { pages: number[]; type_piece?: string; numero?: string | null }[];
 }
 
@@ -204,6 +205,7 @@ export function normaliserSortie(x: unknown): SortieOutil {
     valeurs: tableau<ValeurBrute>(o.valeurs).filter((v) => v && typeof v === "object"),
     lignes: tableau<LigneBrute>(o.lignes),
     tva_ventilation: tableau<LigneBrute>(o.tva_ventilation),
+    taxes_hors_tva: tableau<LigneBrute>(o.taxes_hors_tva),
     decoupage: tableau<{ pages: number[]; type_piece?: string; numero?: string | null }>(o.decoupage).filter((d) =>
       d && Array.isArray(d.pages) && d.pages.length > 0
     ),

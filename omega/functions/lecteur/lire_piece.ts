@@ -19,7 +19,7 @@ import type { ClientClaude } from "@partage/claude.ts";
 import type { PortesAnalyse } from "./analyse/travail.ts";
 import { type BilanAvis, chiffrerLecture, type CoffreTamila, depotDechiffrant, poserAvisTamila } from "./coffre.ts";
 import { lireCsv, lireXlsx } from "./tableur.ts";
-import { valeurLignes, valeurVentilation, verifierValeurs } from "./verifier.ts";
+import { completerDepuisTexte, valeurLignes, valeurTaxes, valeurVentilation, verifierValeurs } from "./verifier.ts";
 import { estXmlFacture, lireXmlFacture } from "./xml_facture.ts";
 import { type BilanDecoupage, creerPiecesFilles } from "./decoupage.ts";
 import { concorder } from "./concordance.ts";
@@ -557,6 +557,7 @@ export function reunir(sorties: SortieIa[]): SortieIa {
       // Les lignes de détail se suivent d'un morceau à l'autre ; la ventilation de TVA vient du premier qui en rend une.
       lignes: sorties.flatMap((s) => s.brut.lignes ?? []),
       tva_ventilation: sorties.find((s) => (s.brut.tva_ventilation ?? []).length > 0)?.brut.tva_ventilation,
+      taxes_hors_tva: sorties.find((s) => (s.brut.taxes_hors_tva ?? []).length > 0)?.brut.taxes_hors_tva,
     },
     usage: sorties.reduce((u, s) => ({ tokens_entree: u.tokens_entree + s.usage.tokens_entree, tokens_sortie: u.tokens_sortie + s.usage.tokens_sortie }), { tokens_entree: 0, tokens_sortie: 0 }),
     modele: sure.modele,
@@ -609,13 +610,16 @@ export function assembler(
   const schema = schemaPour(module);
   const typeDeclare = schema.types.find((t) => t.type === brut.type_piece);
   const type_piece = typeDeclare ? typeDeclare.type : "autre";
-  const verif = verifierValeurs(brut.valeurs, pages, pagesPdf, "ia", champsPour(module, type_piece), typeDeclare?.cles ?? []);
-  const valeurs: ValeurLue[] = [...verif.valeurs];
+  const champs = champsPour(module, type_piece);
+  const verif = verifierValeurs(brut.valeurs, pages, pagesPdf, "ia", champs, typeDeclare?.cles ?? []);
+  const valeurs: ValeurLue[] = [...verif.valeurs, ...completerDepuisTexte(verif.valeurs, pages, champs)];
   if (schema.lignes) {
     const lignes = valeurLignes(brut.lignes, pages, "ia", schema.colonnesLigne);
     if (lignes) valeurs.push(lignes);
     const ventilation = valeurVentilation(brut.tva_ventilation, pages);
     if (ventilation) valeurs.push(ventilation);
+    const taxes = valeurTaxes(brut.taxes_hors_tva, pages);
+    if (taxes) valeurs.push(taxes);
   }
 
   let statut: StatutLecture;

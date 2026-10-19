@@ -88,12 +88,12 @@ Sur un **avoir**, les montants sont rendus avec le signe du document (souvent n�
 | Champ | Type | Clé | Description | Exemple |
 |---|---|---|---|---|
 | `fournisseur.nom` | texte (≤ 200) | oui | raison sociale | `"ATELIERS BRINDILLE SAS"` |
-| `fournisseur.siren` | texte, 9 chiffres | | SIREN (clé Luhn vérifiée) | `"812345676"` |
+| `fournisseur.siren` | texte, 9 chiffres | | SIREN (clé Luhn vérifiée). S'il n'est imprimé que dans le RCS (« RC Pointe-à-Pitre B 303 120 638 »), il en est tiré, par le modèle ou, à défaut, sur le texte si la pièce ne porte qu'un seul RCS (hors SIREN de l'acheteur) | `"812345676"` |
 | `fournisseur.siret` | texte, 14 chiffres | | SIRET (clé Luhn vérifiée) | `"81234567600031"` |
 | `fournisseur.tva` | texte | | numéro de TVA intracommunautaire, sans espaces, majuscules (clé FR vérifiée) | `"FR19812345676"` |
 | `fournisseur.id_legal` | texte (≤ 60) | | identifiant légal d'un émetteur étranger sans SIREN ni TVA | `"HRB 12345"` |
 | `fournisseur.pays` | texte, 2 lettres | | pays ISO | `"FR"` |
-| `fournisseur.iban` | texte | | IBAN de règlement, sans espaces, majuscules | `"FR7630006000011234567890189"` |
+| `fournisseur.iban` | texte | | IBAN de règlement, sans espaces, majuscules ; clé modulo 97 vérifiée. Un IBAN en partie masqué ou coupé est gardé tel qu'imprimé (`•`, `*`, `X`, `…`), `verifiee = false`, « partiellement masqué : à compléter » | `"FR7630006000011234567890189"` |
 
 ### Acheteur (le destinataire)
 
@@ -123,6 +123,7 @@ Sur un **avoir**, les montants sont rendus avec le signe du document (souvent n�
 |---|---|---|
 | `mention.autoliquidation` | booléen | la pièce porte « autoliquidation » (TVA due par le preneur) |
 | `mention.franchise_293b` | booléen | la pièce porte « TVA non applicable, art. 293 B du CGI » |
+| `mention.exoneration_tva` | texte (≤ 300) | la mention d'exonération telle qu'imprimée (« Exonération de TVA conformément à l'article 295 du CGI », art. 262 ter I…), hors 293 B ; relevée sur le texte si le modèle l'omet |
 
 Si le lecteur ne les rend pas, FILED les détecte lui-même par expression régulière dans le texte des pages.
 
@@ -168,6 +169,10 @@ Exemple : `[{"designation":"Pose de cloisons placo","quantite":12,"prix_unitaire
 **`tva.ventilation`** : une seule valeur par pièce, tableau d'objets `{categorie, taux, base, montant, motif}` (un par taux). `motif` = motif d'exonération imprimé, s'il y en a un.
 
 Exemple : `[{"taux":20,"base":1234.4,"montant":246.88}]`
+
+**`taxes.hors_tva`** (19/10, Antilles) : une seule valeur par pièce, tableau d'objets `{nature, libelle, base, taux, montant}`, une entrée par taxe facturée en plus de la TVA. `nature` vaut `OMR` (octroi de mer), `OMRI` (octroi de mer régional) ou `autre`. `montant_tva` ne compte que la TVA ; on a donc `montant_ht + montant_tva + Σ taxes.hors_tva.montant = montant_ttc`. `verifiee` est vraie si chaque montant se retrouve sur sa page.
+
+Exemple (devis Lafarge) : `[{"nature":"OMR","libelle":"OMR","taux":2,"montant":14.24},{"nature":"OMRI","libelle":"OMRI","taux":2.5,"montant":17.81}]`
 
 ### Résultat du travail (`travaux.resultat`, pour les tableaux de bord)
 

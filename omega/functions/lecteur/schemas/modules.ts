@@ -175,6 +175,7 @@ export function schemaOutilPour(module: string | null | undefined): Record<strin
   if (!s.lignes) {
     delete props.lignes;
     delete props.tva_ventilation;
+    delete props.taxes_hors_tva;
   } else if (s.colonnesLigne?.includes("lot")) {
     const l = props.lignes as { description?: string; items: { properties: Record<string, unknown> } };
     l.description = "TOUTES les lignes chiffrées du document, dans l'ordre ; pour chacune, le lot ou la section dont elle relève.";

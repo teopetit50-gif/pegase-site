@@ -31,7 +31,12 @@ export const CHAMPS_FACTURE: ChampFacture[] = [
   { champ: "echeance", type: "date", description: "Date d'échéance de paiement, en AAAA-MM-JJ." },
   { champ: "devise", type: "texte", max: 3, description: "Devise ISO 4217 à trois lettres ; EUR si rien n'est dit." },
   { champ: "montant_ht", type: "nombre", cle: true, description: "Total hors taxes." },
-  { champ: "montant_tva", type: "nombre", cle: true, description: "Total de TVA." },
+  {
+    champ: "montant_tva",
+    type: "nombre",
+    cle: true,
+    description: "Total de TVA, et rien d'autre : l'octroi de mer (OMR, OMRI) et les autres taxes hors TVA vont dans taxes_hors_tva.",
+  },
   { champ: "montant_ttc", type: "nombre", cle: true, description: "Total toutes taxes comprises." },
   { champ: "net_a_payer", type: "nombre", description: "Net à payer s'il diffère du TTC (acompte déduit, retenue…)." },
   { champ: "montant_prepaye", type: "nombre", description: "Acompte ou montant déjà réglé, déduit du net à payer." },
@@ -39,7 +44,12 @@ export const CHAMPS_FACTURE: ChampFacture[] = [
   { champ: "cadre_facturation", type: "texte", max: 10, description: "Cadre de facturation (B1, S1…) s'il est imprimé." },
 
   { champ: "fournisseur.nom", type: "texte", max: 200, cle: true, description: "Raison sociale de l'émetteur de la facture." },
-  { champ: "fournisseur.siren", type: "texte", description: "SIREN de l'émetteur : 9 chiffres (clé Luhn)." },
+  {
+    champ: "fournisseur.siren",
+    type: "texte",
+    description:
+      "SIREN de l'émetteur : 9 chiffres (clé Luhn). Souvent seulement dans le RCS (« RCS Lyon 552 100 554 », « RC Pointe-à-Pitre B 303 120 638 ») ou en tête du SIRET : rends les 9 chiffres, avec ce passage pour citation.",
+  },
   { champ: "fournisseur.siret", type: "texte", description: "SIRET de l'émetteur : 14 chiffres." },
   { champ: "fournisseur.tva", type: "texte", description: "Numéro de TVA intracommunautaire de l'émetteur (FRxx + 9 chiffres pour la France)." },
   {
@@ -49,10 +59,15 @@ export const CHAMPS_FACTURE: ChampFacture[] = [
     description: "Identifiant légal d'un émetteur étranger sans SIREN ni TVA (numéro de registre, EIN…).",
   },
   { champ: "fournisseur.pays", type: "texte", max: 2, description: "Pays de l'émetteur, code ISO à deux lettres." },
-  { champ: "fournisseur.iban", type: "texte", description: "IBAN de règlement indiqué par l'émetteur." },
+  {
+    champ: "fournisseur.iban",
+    type: "texte",
+    description:
+      "IBAN de règlement indiqué par l'émetteur. S'il est en partie masqué ou coupé (« FR76 •••• 1234 », « FR76 3000… »), rends-le quand même tel qu'imprimé, caractères masqués compris : il sera marqué à vérifier.",
+  },
 
   { champ: "acheteur.nom", type: "texte", max: 200, description: "Raison sociale du destinataire (le client facturé)." },
-  { champ: "acheteur.siren", type: "texte", description: "SIREN du destinataire, 9 chiffres." },
+  { champ: "acheteur.siren", type: "texte", description: "SIREN du destinataire, 9 chiffres (aussi dans son RCS ou en tête de son SIRET)." },
   { champ: "acheteur.siret", type: "texte", description: "SIRET du destinataire, 14 chiffres." },
   { champ: "acheteur.tva", type: "texte", description: "Numéro de TVA intracommunautaire du destinataire." },
   { champ: "acheteur.pays", type: "texte", max: 2, description: "Pays du destinataire, code ISO à deux lettres." },
@@ -67,6 +82,13 @@ export const CHAMPS_FACTURE: ChampFacture[] = [
 
   { champ: "mention.autoliquidation", type: "booleen", description: "true si la pièce porte la mention « autoliquidation » (TVA due par le preneur)." },
   { champ: "mention.franchise_293b", type: "booleen", description: "true si la pièce porte « TVA non applicable, art. 293 B du CGI »." },
+  {
+    champ: "mention.exoneration_tva",
+    type: "texte",
+    max: 300,
+    description:
+      "La mention d'exonération de TVA, telle qu'imprimée (« Exonération de TVA conformément à l'article 295 du CGI », « art. 262 ter I du CGI »…), hors franchise 293 B.",
+  },
   {
     champ: "mention.tva_debits",
     type: "booleen",
@@ -113,6 +135,10 @@ export const CHAMPS_LIGNE = [
 
 /** Les colonnes d'une ligne de ventilation de TVA (filed_factures_tva). */
 export const CHAMPS_VENTILATION = ["categorie", "taux", "base", "montant", "motif"] as const;
+
+/** Les colonnes d'une taxe hors TVA (octroi de mer…), valeur « taxes.hors_tva ». */
+export const CHAMPS_TAXE = ["nature", "libelle", "base", "taux", "montant"] as const;
+export const NATURES_TAXE = ["OMR", "OMRI", "autre"] as const;
 
 /** Les natures de pièce que private.filed_nature_de reconnaît ; tout autre type devient « autre ». */
 export const TYPES_PIECE = [
@@ -241,6 +267,23 @@ export const SCHEMA_OUTIL_LECTURE: Record<string, unknown> = {
           base: nombreOuTexte,
           montant: nombreOuTexte,
           motif: { type: ["string", "null"], description: "Motif d'exonération imprimé, s'il y en a un." },
+          page: { type: "integer", minimum: 1 },
+        },
+      },
+    },
+    taxes_hors_tva: {
+      type: "array",
+      description:
+        "Les taxes et droits facturés EN PLUS de la TVA, une entrée par taxe imprimée : octroi de mer (OMR), octroi de mer régional (OMRI), autre taxe (éco-contribution, taxe spéciale…). Jamais la TVA elle-même.",
+      items: {
+        type: "object",
+        required: ["nature", "montant", "page"],
+        properties: {
+          nature: { type: "string", enum: [...NATURES_TAXE], description: "OMR = octroi de mer ; OMRI = octroi de mer régional ; autre = toute autre taxe hors TVA." },
+          libelle: { type: ["string", "null"], description: "Le libellé imprimé (« OMR », « Octroi de mer régional »)." },
+          base: nombreOuTexte,
+          taux: { ...nombreOuTexte, description: "Le taux en pourcentage (2,5 pour « 2,5 % »)." },
+          montant: { ...nombreOuTexte, description: "Le montant de la taxe." },
           page: { type: "integer", minimum: 1 },
         },
       },

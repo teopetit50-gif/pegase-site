@@ -6,7 +6,7 @@
 import type { Boite, PageLue, ValeurLue } from "@partage/portes.ts";
 import { dateIso, nombreDepuisTexte, retrouver, sirenValide, tvaFrValide } from "@partage/texte.ts";
 import { boiteDe, type PagePdf } from "./pdf.ts";
-import { CHAMPS_LIGNE, CHAMPS_PAR_NOM, CHAMPS_VENTILATION, MAX_LIGNES } from "./schemas/facture.ts";
+import { CHAMPS_LIGNE, CHAMPS_PAR_NOM, CHAMPS_TAXE, CHAMPS_VENTILATION, MAX_LIGNES } from "./schemas/facture.ts";
 import type { ChampDeclare } from "./schemas/modules.ts";
 
 export interface ValeurBrute {
@@ -161,11 +161,27 @@ export function typerValeur(
       if (valeur === null || valeur === undefined) return { valeur, ok: false, detail: "vide" };
       let s = String(valeur).trim();
       if (champ.endsWith(".siren") || champ.endsWith(".siret")) s = s.replace(/\s/g, "");
-      if (champ.endsWith(".tva") || champ.endsWith(".iban")) s = s.replace(/[\s.\-]/g, "").toUpperCase();
+      if (champ.endsWith(".tva")) s = s.replace(/[\s.\-]/g, "").toUpperCase();
+      // Un IBAN garde ses caractères masqués (•, *, X…) : « FR76… » reste visible comme coupé.
+      if (champ.endsWith(".iban")) s = s.replace(/\.{3}/g, "…").replace(/[\s.\-]/g, "").toUpperCase();
       if (champ.endsWith(".pays") || champ === "devise") s = s.toUpperCase();
       return s === "" ? { valeur: s, ok: false, detail: "vide" } : { valeur: s, ok: true };
     }
   }
+}
+
+/** Un IBAN dont une partie est cachée ou coupée à l'impression (•, *, …, XXX). */
+export function ibanMasque(s: string): boolean {
+  return /^[A-Z]{2}\d{2}/.test(s) && (/[•*…·]/.test(s) || /X{3,}/.test(s.slice(4)));
+}
+
+/** La clé d'un IBAN (ISO 13616, modulo 97). */
+export function ibanValide(s: string): boolean {
+  if (!/^[A-Z]{2}\d{2}[A-Z0-9]{10,30}$/.test(s)) return false;
+  const chiffres = (s.slice(4) + s.slice(0, 4)).replace(/[A-Z]/g, (c) => String(c.charCodeAt(0) - 55));
+  let reste = 0;
+  for (const c of chiffres) reste = (reste * 10 + Number(c)) % 97;
+  return reste === 1;
 }
 
 /** Les règles de forme que FILED applique ensuite : autant douter tout de suite. */
@@ -177,7 +193,11 @@ function regleDeForme(champ: string, valeur: unknown): string | null {
   if (champ.endsWith(".tva") && s.startsWith("FR") && !tvaFrValide(s)) return "clé de TVA invalide";
   if (champ.endsWith(".pays") && !/^[A-Z]{2}$/.test(s)) return "code pays attendu sur deux lettres";
   if (champ === "devise" && !/^[A-Z]{3}$/.test(s)) return "devise ISO attendue sur trois lettres";
-  if (champ.endsWith(".iban") && !/^[A-Z]{2}\d{2}[A-Z0-9]{10,30}$/.test(s)) return "IBAN mal formé";
+  if (champ.endsWith(".iban")) {
+    if (ibanMasque(s)) return "IBAN partiellement masqué : à compléter";
+    if (!/^[A-Z]{2}\d{2}[A-Z0-9]{10,30}$/.test(s)) return "IBAN mal formé";
+    if (!ibanValide(s)) return "clé IBAN invalide";
+  }
   return null;
 }
 
@@ -349,4 +369,107 @@ export function valeurVentilation(brutes: LigneBrute[] | undefined, pages: PageL
 export function montantFr(n: number): string {
   const [ent, dec = ""] = Math.abs(n).toFixed(2).split(".");
   return `${n < 0 ? "-" : ""}${ent.replace(/\B(?=(\d{3})+(?!\d))/g, " ")},${dec}`;
+}
+
+/** Les taxes hors TVA (octroi de mer…) : une seule valeur « taxes.hors_tva », vérifiée si chaque montant se retrouve sur sa page. */
+export function valeurTaxes(brutes: LigneBrute[] | undefined, pages: PageLue[], source: "ia" | "tableur" = "ia"): ValeurLue | null {
+  if (!Array.isArray(brutes) || brutes.length === 0) return null;
+  const parNumero = new Map(pages.map((p) => [p.n, p]));
+  let retrouvees = 0;
+  const taxes = brutes.filter((l) => l && typeof l === "object").map((l) => {
+    const n = nettoyerLigne(l, CHAMPS_TAXE);
+    const nature = String(n.nature ?? "").toUpperCase().replace(/[^A-Z]/g, "");
+    n.nature = nature === "OMR" || nature === "OMRI" ? nature : "autre";
+    const page = Number.isInteger(l.page) ? parNumero.get(l.page as number) : undefined;
+    if (page && typeof n.montant === "number" && retrouver(montantFr(n.montant), page.texte).trouve) retrouvees++;
+    return n;
+  }).filter((n) => typeof n.montant === "number");
+  if (taxes.length === 0) return null;
+  const premierePage = brutes.find((l) => Number.isInteger(l?.page))?.page as number | undefined;
+  return {
+    champ: "taxes.hors_tva",
+    valeur: taxes,
+    page: premierePage,
+    source,
+    verifiee: retrouvees === taxes.length,
+    controle: `${retrouvees}/${taxes.length} montants de taxe retrouvés sur leur page`,
+  };
+}
+
+// Ce que le modèle a laissé de côté alors que le texte le porte en toutes lettres. On ne complète qu'un champ
+// absent, qu'une seule lecture possible, et la citation est le texte même de la page.
+const RE_RCS = /\bR\.?\s?C\.?\s?S?\.?\s+([A-ZÀ-Ÿa-zà-ÿ' -]{2,40}?)\s+(?:[AB]\s+)?(\d{3}\s?\d{3}\s?\d{3})(?!\s?\d)/g;
+const RE_IBAN = /\bIBAN\b\s*[:.]?\s*([A-Z]{2}\s?\d{2}(?:[\s\-]?[A-Z0-9•*…·]{1,4}){2,9}(?:\.{3})?)/g;
+const RE_EXONERATION = /[^\n]*(?:exon[ée]r[ée]?(?:ation)?s?\b[^\n]*\bTVA\b|\bTVA\b[^\n]*exon[ée]r|art(?:icle|\.)?\s*(?:295|262\s*ter|261|275)\b[^\n]*\bCGI\b)[^\n]*/gi;
+
+function seulesLectures(pages: PageLue[], re: RegExp, groupe: number): { valeur: string; texte: string; page: number }[] {
+  const vues = new Map<string, { valeur: string; texte: string; page: number }>();
+  for (const p of pages) {
+    for (const m of p.texte.matchAll(re)) {
+      const v = (m[groupe] ?? m[0]).trim();
+      if (!vues.has(v)) vues.set(v, { valeur: v, texte: m[0].trim(), page: p.n });
+    }
+  }
+  return [...vues.values()];
+}
+
+/** Le SIREN, l'IBAN et la mention d'exonération quand le modèle les a omis : relevés sur le texte des pages. */
+export function completerDepuisTexte(valeurs: ValeurLue[], pages: PageLue[], champs: { has(champ: string): boolean }): ValeurLue[] {
+  const ajouts: ValeurLue[] = [];
+  const absent = (champ: string) => champs.has(champ) && !valeurs.some((v) => v.champ === champ);
+
+  if (absent("fournisseur.siren")) {
+    const acheteur = valeurs.find((v) => v.champ === "acheteur.siren")?.valeur;
+    const rcs = seulesLectures(pages, RE_RCS, 2)
+      .map((r) => ({ ...r, valeur: r.valeur.replace(/\s/g, "") }))
+      .filter((r) => r.valeur !== acheteur);
+    const distincts = [...new Set(rcs.map((r) => r.valeur))];
+    if (distincts.length === 1) {
+      const r = rcs[0];
+      const valide = sirenValide(r.valeur);
+      ajouts.push({
+        champ: "fournisseur.siren",
+        valeur: r.valeur,
+        texte: r.texte,
+        page: r.page,
+        source: "ia",
+        verifiee: valide,
+        controle: `tiré du RCS imprimé page ${r.page}${valide ? "" : " ; clé SIREN invalide"}`,
+      });
+    }
+  }
+
+  if (absent("fournisseur.iban")) {
+    const ibans = seulesLectures(pages, RE_IBAN, 1);
+    if (ibans.length === 1) {
+      const t = typerValeur("fournisseur.iban", ibans[0].valeur, new Map([["fournisseur.iban", { type: "texte" }]]));
+      const forme = regleDeForme("fournisseur.iban", t.valeur);
+      ajouts.push({
+        champ: "fournisseur.iban",
+        valeur: t.valeur,
+        texte: ibans[0].texte,
+        page: ibans[0].page,
+        source: "ia",
+        verifiee: forme === null,
+        controle: `relevé sur le texte de la page ${ibans[0].page}${forme ? ` ; ${forme}` : ""}`,
+      });
+    }
+  }
+
+  if (absent("mention.exoneration_tva") && !valeurs.some((v) => v.champ === "mention.franchise_293b" && v.valeur === true)) {
+    const mentions = seulesLectures(pages, RE_EXONERATION, 0).filter((m) => !/293\s*B/i.test(m.texte));
+    if (mentions.length > 0) {
+      const m = mentions[0];
+      ajouts.push({
+        champ: "mention.exoneration_tva",
+        valeur: m.texte.slice(0, 300),
+        texte: m.texte.slice(0, 2000),
+        page: m.page,
+        source: "ia",
+        verifiee: true,
+        controle: `relevée sur le texte de la page ${m.page}`,
+      });
+    }
+  }
+  return ajouts;
 }
