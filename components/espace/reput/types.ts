@@ -122,6 +122,8 @@ export type Reglages = {
   actif: boolean;
   accuse: boolean;
   texte_accuse: string;
+  /** c3_18 : la phrase de l'accusé quand le sujet va à un service ({service} = son nom) ; nulle = aucune. */
+  phrase_transfert?: string | null;
   lien_avis: string | null;
   texte_avis: string;
   avis_auto_reglement?: boolean;

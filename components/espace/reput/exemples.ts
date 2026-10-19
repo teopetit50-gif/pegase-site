@@ -111,6 +111,7 @@ export function mondeExemple(): Monde {
       id: "00000000-0000-4000-8000-00000000c3a1", signature: "L'équipe de l'Atelier Bertin", formule_appel: "Bonjour,", formule_politesse: "Bien cordialement,",
       ton: "vouvoiement", mention_automatisee: MENTION, langues: ["fr", "en"], actif: true, accuse: true,
       texte_accuse: "Nous avons bien reçu votre message. Notre équipe vous répond au plus vite.",
+      phrase_transfert: "Votre demande est transmise au service {service}, qui revient vers vous.",
       lien_avis: "https://g.page/r/atelier-bertin/review",
       texte_avis: "Merci de nous avoir fait confiance. Votre avis aide d'autres clients à nous choisir : il prend une minute.",
       avis_auto_reglement: true,

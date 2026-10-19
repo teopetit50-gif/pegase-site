@@ -75,6 +75,7 @@ for (const largeur of LARGEURS) {
       verifier(!d.scroll && d.elements.length === 0, `${largeur} : aucun débordement (${onglet}) ${d.elements.join(' | ')}`);
       await s.capturer(`${DOSSIER}/reput-${onglet.split(' ')[0].toLowerCase()}-${largeur}.jpg`, { pleine: true });
     }
+    verifier(await s.evaluer(`(document.querySelector('[data-phrase-transfert]')?.value ?? '').includes('{service}')`), `${largeur} : la phrase de transfert de l'accusé se règle`);
     // c3_17 : les réglages par site, sur l'onglet Réglages et avis (le dernier ouvert).
     verifier(await s.evaluer(`!!document.querySelector('[data-reglages-sites]') && document.body.innerText.includes("Suit l'organisation") && document.body.innerText.includes('Réglages propres')`), `${largeur} : les sites, d'où viennent leurs réglages`);
     verifier(await s.evaluer(cliquer('Régler ce site')), `${largeur} : « Régler ce site »`);
