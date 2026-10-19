@@ -8,7 +8,7 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 
 - Fait : c4_01 à c4_19 verts sur la recette ; écran c4_20 ; c4_21 (réécriture par règles écrites) et c4_22 (branche Gmail) poussés, local 435 ok.
 - En cours : rien. Gmail attend l'accord de Teo dans cette session ; aucun import de données personnelles sans accord écrit de Teo.
-- Prochain pas : point 7 du bureau, script d'import des seules personnes morales (exécuté par le coordinateur). Liste brute hors git.
+- Prochain pas : le coordinateur joue le script d'import des personnes morales sur la recette (ma garde a refusé que je le lance sur la vraie liste : données personnelles). Rien d'autre.
 
 ### Reprise du 17/10
 
@@ -451,6 +451,17 @@ Banc local : 28 tests, 312 assertions vertes, migrations posées deux fois ; tsc
 l'échéance honorée après message est comptée au suivi). Le chiffre repris compte tous les achats des 90 jours,
 sans prétendre qu'ils sont dus au seul message.
 
+## Point 7 du bureau — script d'import des comptes d'Omega, personnes morales seulement (19/10)
+
+`omega/modules/offload/outils/offload_omega_personnes_morales.py` : AUCUNE donnée dans le fichier. Il lit
+omega/prospection/guadeloupe.csv (branche prospection-guadeloupe), garde personne_physique = « non » seulement (écarte
+« oui » = entrepreneurs individuels, et les lignes sans valeur), dédoublonne par SIRET, ne reprend ni dirigeant ni
+adresse ni site, retire les courriels de forme prénom.nom (garde contact@, devis@…), et écrit un SQL rejouable :
+OFFLOAD installé en essai, réglage offload remis en essai s'il était réel, comptes en « exclu » avec motif, aucun achat,
+contrôle final. Testé sur un fichier FICTIF (6 lignes : 3 gardées, 1 EI, 1 forme inconnue, 1 doublon, 1 courriel retiré ;
+joué deux fois dans une transaction annulée : 3 comptes, 0 achat, 0 reprise, 0 envoi, essai). Ma garde a refusé que je
+le lance sur la vraie liste (données personnelles) : je ne l'ai pas contournée ; c'est le coordinateur qui l'exécute.
+
 ## Lot c4_22 — la branche Gmail (19/10)
 
 Décision du bureau (délégation de Teo) : Gmail sur la recette, boîte de test, mode essai. Le branchement est au socle
@@ -784,3 +795,4 @@ Partielles : 6, 11, 15, 38.
 - 19/10, 14 h 36 Z — recette : c4_18 et c4_19 verts. La liste de Teo est couverte ; restent ses décisions.
 - 19/10, 16 h 30 Z — reprise (bureau) : lot c4_21 (réécriture par règles écrites) : 45 tests, 430 ok en local.
 - 19/10 — lot c4_22 (branche Gmail, brouillons déposés) : 46 tests, 435 ok en local.
+- 19/10 — point 7 : script d'import des personnes morales écrit, testé sur un fichier fictif ; non lancé sur la vraie liste (garde).
