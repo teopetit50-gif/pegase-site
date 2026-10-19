@@ -1312,3 +1312,12 @@ Attend Teo :
 
 ### REPRISE (19/10, 17 h 50 Z) : versions d'arrêt
 A1 4a4ad9e1 · A4 ca5e4aa0 · B6 7a0ff42e · C2 879dce0c · C3 4ab27cb0 · C4 6f0a05b2. Routine 3 h coupée. Reprise samedi 25/10 après 02 h Z ou au feu vert de Teo.
+
+## 19/10 18 h 30 Z → 18 h 50 Z : deux correctifs NOBAT, puis PAUSE (Teo) à 37 %
+
+- Fait par le bureau : Edge lecteur déployé depuis worker-a1 4a4ad9e1 puis b7773e70 ; reput-reponse v26 ; reput-appels v5 (chaîne REPUT prouvée par un appel simulé). NOBAT relu : octroi de mer, exonération, SIREN, IBAN au bon champ.
+- Posé et vert (niveau 1) : a4_67 (worker-a4 55c0cfa2 : compléter la fiche fournisseur sur proposition confirmée ; iban.masque au lieu d'iban.absent, virement non notable tant qu'il est ouvert), ^test_a4_ 111/111. Boulogne Matériaux et LEADER MAT : fiches déjà au SIREN, factures relues identifiées par SIREN.
+- Nouvelles pièces NOBAT R2026-000065 → 000077 (chantier SOFIJAR, facture LEADER MAT à trois taux) : déposées par le bureau, à traiter à la reprise.
+
+### REPRISE (19/10, 18 h 50 Z) : versions d'arrêt
+A1 b7773e70 · A4 55c0cfa2 · B6 7a0ff42e · C2 879dce0c · C3 4ab27cb0 · C4 6f0a05b2. Routine 3 h coupée. Reprise samedi 25/10 après 02 h Z ou au feu vert de Teo. Ces notes sont sur la branche notes-coordinateur (les 2 pushes du jour sur main sont faits) : à fusionner dans main au prochain push.
