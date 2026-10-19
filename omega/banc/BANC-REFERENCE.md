@@ -69,6 +69,7 @@ Au banc :
   (151,10 / 148,75 €). Le devis doit seulement être **proposé à confirmer** : anomalie d'attention ou d'info, jamais
   « rapproché ».
 - `OMEGA-DEVIS-ARTICLES-DIFFERENTS` : le même cas en scénario. Le résultat attendu est « proposé à confirmer, pas rapproché ».
-- `OMEGA-DEVIS-MEMES-ARTICLES` : son pendant. Mêmes articles et même montant, le contrôle doit être `ok` (rapproché).
+- `OMEGA-DEVIS-MEMES-ARTICLES` : son pendant. Mêmes articles et même montant : proposé, concordant (info), à confirmer.
+  Jamais `ok` sans une personne (décision du bureau, 19/10 ; a4_66).
 
-Leur note vaut 0 tant que ce contrôle n'existe pas.
+Le contrôle existe depuis a4_66 (lot 58).

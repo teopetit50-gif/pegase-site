@@ -74,8 +74,10 @@ async function fichier(nom, url) {
 
 /* ——— Einvoi → FILED. Un cas : le scénario joué à blanc et les contrôles attendus. Les montants qu'Einvoi ne donne
    pas (« complété par A4 ») sont choisis cohérents avec le cas ; ils ne changent pas ce que le cas éprouve. ——— */
-// « Proposé à confirmer » : le contrôle est posé en anomalie d'attention ou d'info (une personne tranche), jamais bloquante.
-const PROPOSE = { resultat: 'anomalie', gravites: ['attention', 'info'] };
+// Devis ↔ facture (décision du bureau, 19/10 : proposé et confirmé par une personne, jamais seul) : sans personne, le
+// contrôle n'est jamais « ok ». Proposé discordant → attention (à vérifier) ; proposé concordant → info (à confirmer).
+const PROPOSE = { resultat: 'anomalie', gravites: ['attention'] };
+const PROPOSE_CONCORDANT = { resultat: 'anomalie', gravites: ['info'] };
 const sain = { 'famille:montant': { resultat: 'pas_anomalie' }, 'lecture.complete': { resultat: 'ok' } };
 const fx = (o = {}) => ({ numero: 'BANC-FX-001', date: -10, ht: 100, tva: 20, ttc: 120, ventilation: [{ taux: 20, base: 100, montant: 20 }], ...o });
 const TRADUCTION = {
@@ -178,14 +180,14 @@ if (args[0] === '--preparer') {
            ventilation: [{ taux: 20, base: 123.96, montant: 24.79 }] })] },
     controles: { 'rapprochement.devis': PROPOSE },
     note: 'Modèle du dossier NOBAT 1, montants voisins (151,10 / 148,75 €), articles sans rapport : le devis est proposé, '
-        + 'une personne confirme ou écarte. Le contrôle n’existe pas encore.' }));
+        + 'à vérifier (attention) ; une personne confirme ou écarte (a4_66).' }));
   lignes.push(cas({ code: 'OMEGA-DEVIS-MEMES-ARTICLES', source: 'omega', licence: 'A4', attribution: null, genre: 'scenario',
-    intitule: 'Devis et facture du même fournisseur, mêmes articles, même montant : rapproché',
+    intitule: 'Devis et facture du même fournisseur, mêmes articles, même montant : proposé, concordant, à confirmer',
     scenario: { factures: [
       devis([{ designation: 'Disques à tronçonner', montant: 60 }, { designation: 'Pointes', montant: 40 }], 120),
       fx({ numero: 'BANC-FA-002', lignes: [{ designation: 'Disques à tronçonner', montant: 60 }, { designation: 'Pointes', montant: 40 }] })] },
-    controles: { 'rapprochement.devis': { resultat: 'ok' } },
-    note: 'Le pendant du cas précédent. Le contrôle n’existe pas encore.' }));
+    controles: { 'rapprochement.devis': PROPOSE_CONCORDANT },
+    note: 'Le pendant du cas précédent : concordant, mais jamais rapproché sans une personne (décision du bureau, 19/10).' }));
 
   const sql = `-- banc_reference_cas.sql — les cas du banc de référence FILED (a4_62), écrit par omega/banc/banc_reference.mjs --preparer.
 -- Ne pas modifier à la main : relancer le script. À poser après a4_62. Rejouable : un cas existant est remis à jour,
