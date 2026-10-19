@@ -3,11 +3,11 @@
 Branche `worker-b6`. Coordinateur : session `session_01B4JNQXyT69GytdvE9SjAnE` (Fable, jusqu'au 06/10 03 h 10 Paris), puis `session_01BCGFdpRKBvXKjouC75sYBg` (Opus 5.5) — passation reçue le 06/10 à 03 h 10 : « B6 est clos et fusionné ; rien n'est attendu ».
 Dernière mise à jour : 06/10/2026, 03 h 00 Paris — lot B6 terminé.
 
-## REPRISE — pause (Teo, 18/10/2026, 17 h 00 Z : focus grand groupe et architecture) ; arrêt 6468906
+## REPRISE — lot unique du 19/10 (Teo : les documents de chantier vont à Daliro), puis arrêt
 
-**Fait** : b6_01 → b6_36b posés et verts (718 ok), assistant « questions » en service, relevé du chantier, épreuve DCE réels (135 lignes de DPGF lues, 0,42 € ; CHIFFRAGE/daliro.md § Épreuve).
-**En attente** : Le Boulou lot 12 et Touët lot 3 déposés, lecture à la reprise du crédit Anthropic (bloc 3 de omega/banc/dce_daliro.sql) ; pour A1 : BPU sans quantités, DPGF xlsx.
-**Attend Teo** : WhatsApp Business, vocaux, accord permanent J-2, région des données.
+**À poser (coordinateur), dans l'ordre** : omega/modules/daliro/migrations/b6_37_documents_chantier.sql, puis omega/tests/daliro/b6_33_documents_chantier.sql.
+**À relire** : omega/modules/daliro/DEMANDE-SOCLE-documents-chantier.md (types chantier_* du lecteur, A1 ; nature document_chantier routée par FILED, A4 ; rejeu des 6 pièces NOBAT, voie A ou B).
+**Attend Teo** : WhatsApp Business, vocaux, accord permanent J-2, région des données ; crédit Anthropic de la recette.
 
 ## Les deux jauges
 
@@ -128,6 +128,7 @@ Repère du marché : Graneet, Obat, Batappli, Tolteck, Extrabat font tous des **
 
 ## Journal de session
 
+- 19/10, 15 h 45 UTC : lot documents de chantier. b6_37 : btp_documents (pv_reserves / plan / note_technique, rattaché ou à rattacher), btp_reserves_a_lever (échéance écrite, ou date du PV + délai écrit en jours, sinon absente), btp_references_marche (plans, notes, dispositions, marché du chantier) ; chaque élément cite pièce et page, garde verifiee du lecteur ; rattachement seul si un seul chantier correspond ; portes btp_prendre_document, btp_rattacher_document, btp_lever_reserve_lue, btp_documents_chantier ; btp_ouvrier prend daliro.document. Noms vérifiés absents de main. Scénario rejoué sur le banc local. Test b6_33 sur doublures. Demande socle séparée.
 - 18/10, 17 h 05 UTC : coût exact du 1er passage 0,4158 € (bloc 3). 2e passage arrêté (plus de crédit Anthropic sur la recette, 17 h 00 Z) : Le Boulou lot 01 lu (daliro_piece_autre, 20 lignes vérifiées) ; Le Boulou lot 12 et Touët lot 3 déposés, lecture en attente du crédit ; plus aucun dépôt.
 - 18/10, 17 h 05 UTC : chantier 3 joué par B6 (gérant du banc, RLS) : Luzarches VRD (2 DPGF, 61 lignes vérifiées), Touët rénovation (3 DPGF, 74 lignes, 68 libellés retrouvés), Pencran VRD (BPU non reconnu : daliro_piece_autre). Castres (DPGF xlsx) non déposé ; Le Boulou (CCTP-DPGF longs) écarté pour le budget. Coût estimé 1,84 €. CHIFFRAGE/daliro.md : section « Épreuve sur DCE publics réels » (n° 12, 44, 52 → A pour le devis ; aucune ligne B → A seule).
 - 18/10, 16 h 50 UTC : chantier 3 : dce_daliro.mjs réécrit sur le modèle de dce_lorani.mjs (B5) — gérant du banc, clé publique, sous RLS ; un marché DCE-<dossier> par DCE (btp_ecrire_marche) sur le chantier de sa catégorie ; DPGF/DQE/BPU/devis PDF téléversés puis btp_deposer_devis ; lecture attendue pièce par pièce ; coût estimé à la page (0,04 €, le gérant ne lit pas les coûts), arrêt à 2 € estimés ou 19 h 30 Z. Bloc 1 SQL réduit au MO et aux trois chantiers. Connexion du gérant vérifiée (200). DCE pas encore sur worker-a1 (A1 attend le téléchargement par une personne).
