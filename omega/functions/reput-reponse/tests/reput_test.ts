@@ -223,3 +223,11 @@ Deno.test("« Envoyé de mon iPhone » ne parle pas : une photo ainsi signée re
   d.reception = { ...d.reception!, sujet: null, pieces: 1 };
   assert(sansTexte(d) !== null);
 });
+
+Deno.test("un appel transcrit : le modèle sait que c'est un message vocal, peut-être mal reconnu, et que la réponse part par SMS", () => {
+  const d = dossier("Bonjour je voudrais un rendez-vous pour le diagnostic", {});
+  d.reception = { ...d.reception!, canal: "appel" };
+  const q = contenuDemande(d);
+  assertStringIncludes(q, "message vocal laissé quand personne n'a décroché, transcrit automatiquement");
+  assertStringIncludes(q, "la réponse part par SMS");
+});

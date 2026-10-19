@@ -105,7 +105,7 @@ export function contenuDemande(d: Dossier): string {
     ...(precedents.length
       ? ["MESSAGES PRÉCÉDENTS DU MÊME CLIENT (même dossier, encore sans réponse envoyée ou déjà traités) : une seule réponse doit couvrir tout le dossier.", ...precedents, ""]
       : []),
-    `MESSAGE REÇU par ${r.canal}${r.pieces ? `, avec ${r.pieces} pièce(s) jointe(s) que tu ne vois pas` : ""}${r.en_reponse_a ? ", en réponse à un message de l'entreprise" : ""} :`,
+    `MESSAGE REÇU par ${r.canal === "appel" ? "téléphone (message vocal laissé quand personne n'a décroché, transcrit automatiquement : des mots peuvent être mal reconnus ; la réponse part par SMS, courte)" : r.canal}${r.pieces ? `, avec ${r.pieces} pièce(s) jointe(s) que tu ne vois pas` : ""}${r.en_reponse_a ? ", en réponse à un message de l'entreprise" : ""} :`,
     "<message>",
     r.de_nom ? `De : ${r.de_nom}` : "",
     r.sujet ? `Objet : ${r.sujet}` : "",
