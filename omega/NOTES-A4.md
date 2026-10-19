@@ -1,11 +1,10 @@
 # NOTES — worker A4 (FILED : comptabilité, archivage, pilotage, circuit de validation)
 
-## REPRISE (pause du 19/10, 00 h 25 Z — reprise samedi 25/10 après 02 h Z)
+## REPRISE (pause du 19/10, 17 h 50 Z — reprise samedi 25/10 après 02 h Z)
 
-- **Fait** : a4_01 → a4_49 posés et verts sur la recette ; a4_50 posé, son test (a4_38) pas encore joué. Écrits, testés en local (97/97), NON posés : a4_51 boîtes, a4_52 vue cabinet, a4_53 frais kilométriques (barème vérifié BOFiP 20/07/2023, revenus 2022), a4_54 historique par palier ; le (4) du chantier existait (a4_33).
-- **En cours** : a4_01 → a4_62 posés (banc : relevé 4, contrôles 25/30, champs 16/18). Reprise 19/10 16 h 14 Z, quatre lots du bureau, un à la fois : (1) a4_63 v2 relevé d'heures ↔ facture d'intérim, aux noms d'A1 (4a4ad9e1 : agence, interimaire, periode_du/au, total_heures, signature_client, lignes ; v1 en repli), test `a4_51_releves_heures.sql` ; (2) a4_64 (posé) sceau mensuel au gérant (dbc61cd7, test `a4_52_sceau_mensuel.sql` ; l'envoi d'un moteur attend une personne sauf accord permanent) ; (3) a4_65 (posé) quota sans blocage, alertes au gérant à 80 % et 100 %, « au-delà » visible, aucun prix (a9bf150f, test `a4_53_quota_sans_blocage.sql`) ; (4) a4_66 rapprochement.devis, proposé par FILED (info si concordant, attention sinon), confirmé ou écarté par une personne, jamais seul (test `a4_54_rapprochement_devis.sql`, 109/109 ; banc local 26/29, les deux cas devis justes).
-- **Recette ≠ souche** : `alertes.destinataire_id` (la souche dit `destinataire`) ; la fixture de la recette peut porter plus d'un gérant : les tests ne regardent que ce qu'ils créent.
-- **Prochain pas** : à la reprise, le coordinateur joue a4_38 (test d'a4_50), puis pose a4_51 → a4_54 dans l'ordre avec a4_39 → a4_42 ; corriger ce que la recette refuse (inserts de test dans expediteurs, entites). Ouverts : blocage au dépassement (Teo), barème kilométrique de l'année (opérateur), saisie téléphone (A2), invitation cabinet et bascule (A3).
+- **Fait** : a4_01 → a4_66 posés et verts sur la recette (^test_a4_ 109/109) : a4_61 documents de chantier → Daliro, a4_62 banc de référence (39 cas), a4_63 v2 relevés d'heures (noms d'A1), a4_64 sceau mensuel, a4_65 quota sans blocage, a4_66 rapprochement.devis proposé / confirmé par une personne.
+- **Ouvert** : banc — écarts réels COH-FXC-002 (base × taux), 005 (net à payer), 016 (facture sans vendeur prise pour un ticket, a4_55) ; PDF HF non déposés (script `banc_reference.mjs --deposer`, à lancer par le coordinateur) ; sceau : l'envoi attend un accord permanent du gérant ; écran des exports à faire sur ma branche ; écart recette a4_61 (garde filed_etat_de posée, sans effet).
+- **Recette ≠ souche** : `alertes.destinataire_id` (souche : `destinataire`) ; la fixture peut porter plus d'un gérant ; `envois` a ses propres colonnes (destinataire_membre…) : les tests ne regardent que ce qu'ils créent.
 
 ## Banc, chantier 3 (18/10) — exemples de la norme lus par FILED (PAS de vraies factures)
 
