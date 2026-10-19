@@ -50,6 +50,15 @@ for (const largeur of LARGEURS) {
     d = await s.evaluer(DEBORDE);
     verifier(!d.scroll && d.elements.length === 0, `${largeur} : aucun débordement (sujet secondaire) ${d.elements.join(' | ')}`);
     await s.capturer(`${DOSSIER}/reput-secondaire-${largeur}.jpg`);
+    verifier(await s.evaluer(cliquer('Bernard', '.esp-item')), `${largeur} : ouvrir la demande de rendez-vous de Bernard`);
+    await s.dormir(300);
+    verifier(await s.evaluer(`!!document.querySelector('[data-rendez-vous]') && document.querySelectorAll('[data-rendez-vous] button').length === 6`), `${largeur} : six créneaux libres proposés`);
+    d = await s.evaluer(DEBORDE);
+    verifier(!d.scroll && d.elements.length === 0, `${largeur} : aucun débordement (rendez-vous) ${d.elements.join(' | ')}`);
+    await s.capturer(`${DOSSIER}/reput-rdv-${largeur}.jpg`);
+    verifier(await s.evaluer(`(() => { const b = document.querySelector('[data-rendez-vous] button'); if (!b) return false; b.click(); return true; })()`), `${largeur} : poser le premier créneau`);
+    await s.dormir(300);
+    verifier(await s.evaluer(`document.body.innerText.includes('Rendez-vous posé :') && !document.querySelector('[data-rendez-vous] button')`), `${largeur} : le rendez-vous est posé`);
     verifier(await s.evaluer(cliquer('Martin Luc', '.esp-item')), `${largeur} : ouvrir la demande de Martin Luc (WhatsApp)`);
     await s.dormir(300);
     verifier(await s.evaluer(`document.body.innerText.includes('Peut-être la même personne que') && document.body.innerText.includes('Rien n’est regroupé sans vous') || document.body.innerText.includes("Rien n'est regroupé sans vous")`), `${largeur} : le rapprochement par le nom est proposé, pas fait`);

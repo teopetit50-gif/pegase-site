@@ -25,6 +25,7 @@ import { dateHeure, relatif } from "../format";
 import BaseConnaissances from "./BaseConnaissances";
 import PiecesJointes from "./PiecesJointes";
 import Rapprochement from "./Rapprochement";
+import RendezVous from "./RendezVous";
 import SujetSecondaire from "./SujetSecondaire";
 import ReglagesAvis from "./ReglagesAvis";
 import SujetsAutorises from "./SujetsAutorises";
@@ -228,7 +229,7 @@ export default function EcranReput() {
             </section>
             <section id="esp-dossier" className="esp-detail-mobile" aria-label="La demande">
               {demande ? (
-                <DemandeVue key={demande.id} demande={demande} monde={monde} decideur={decideur} traite={role !== "lecteur"} source={source}
+                <DemandeVue key={demande.id} demande={demande} monde={monde} decideur={decideur} traite={role !== "lecteur"} client={client} source={source}
                   relire={charger} modifierLocal={modifierLocal} />
               ) : (
                 <div className="esp-carte"><Vide titre="Choisissez une demande">Le message reçu et la réponse préparée s&apos;affichent ici.</Vide></div>
@@ -262,8 +263,8 @@ function raisonRetenue(rep: Reponse, demande: Demande, monde: Monde): string | n
   return null;
 }
 
-function DemandeVue({ demande, monde, decideur, traite, source, relire, modifierLocal }: {
-  demande: Demande; monde: Monde; decideur: boolean; traite: boolean; source: "exemple" | "reelle";
+function DemandeVue({ demande, monde, decideur, traite, client, source, relire, modifierLocal }: {
+  demande: Demande; monde: Monde; decideur: boolean; traite: boolean; client: Client | null; source: "exemple" | "reelle";
   relire: () => Promise<void>; modifierLocal: (f: (m: Monde) => Monde) => void;
 }) {
   const rec = monde.receptions[demande.reception_id];
@@ -345,6 +346,8 @@ function DemandeVue({ demande, monde, decideur, traite, source, relire, modifier
         <p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{rec?.corps || "(message sans texte)"}</p>
         <PiecesJointes key={demande.id} demande={demande.id} pieces={rec?.pieces ?? null} source={source} />
       </div>
+
+      <RendezVous key={`rdv:${demande.id}`} demande={demande} client={client} traite={traite} source={source} />
 
       <div className="esp-carte-corps">
         <div className="esp-section-titre">{rep ? `La réponse préparée${rep.version > 1 ? ` (version ${rep.version})` : ""}` : "La réponse"}</div>

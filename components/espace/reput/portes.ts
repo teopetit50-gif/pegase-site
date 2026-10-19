@@ -174,3 +174,23 @@ export async function contenuExport(id: string): Promise<string> {
 }
 export const programmerExport = (client: string, frequence: ProgrammeExport["frequence"], jour: number, actif: boolean) =>
   rpc("reput_programmer_export", { p_client: client, p_frequence: frequence, p_jour: jour, p_entite: null, p_destinataires: null, p_actif: actif });
+
+/* Les rendez-vous côté base (c3_21) : types, créneaux libres, poser — sans agenda externe. */
+export type TypeRdv = { code: string; libelle: string; duree_minutes: number; actif: boolean };
+export type Creneau = { debut: string; fin: string };
+export type Rdv = { id: string; type_code: string; debut: string; fin: string; statut: string; demande_id: string | null };
+export async function chargerRdv(client: string, demande: string): Promise<{ types: TypeRdv[]; rdv: Rdv[] }> {
+  const supabase = createClient();
+  const [t, r] = await Promise.all([
+    supabase.from("reput_rdv_types").select("code, libelle, duree_minutes, actif").eq("client_id", client).eq("actif", true).order("libelle"),
+    supabase.from("reput_rdv").select("id, type_code, debut, fin, statut, demande_id").eq("demande_id", demande).order("debut"),
+  ]);
+  if (t.error) throw new ErreurPorte(message(t.error));
+  if (r.error) throw new ErreurPorte(message(r.error));
+  return { types: (t.data ?? []) as TypeRdv[], rdv: (r.data ?? []) as Rdv[] };
+}
+export const creneauxLibres = (client: string, entite: string | null, type: string) =>
+  rpc<{ creneaux: Creneau[] }>("reput_creneaux_libres", { p_client: client, p_entite: entite, p_type: type, p_du: null, p_nombre: 6 });
+export const poserRdv = (client: string, entite: string | null, type: string, debut: string, demande: string) =>
+  rpc<{ pose: boolean; rdv?: string; motif?: string; suivants?: Creneau[] }>("reput_poser_rdv",
+    { p_client: client, p_entite: entite, p_type: type, p_debut: debut, p_demande: demande, p_nom: null });
