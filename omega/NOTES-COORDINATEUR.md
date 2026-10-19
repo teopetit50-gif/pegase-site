@@ -1248,3 +1248,32 @@ En attente de Teo :
 - tamila-coffre a7a0f9d avec le secret TAMILA_BANC_CLIENT ;
 - reput-reponse 15a01a67 + c3_09 ;
 - sur main, l'écran Varelo « non publiée » (worker-b1 737bd0b, components/espace/varelo).
+
+## 18/10 21 h Z → 19/10 00 h 20 Z : quatre SaaS, puis PAUSE à 29 % (reprise samedi 25/10 après 02 h Z)
+
+Posés et verts sur la recette (niveau 1) :
+- **FILED** : a4_44 à a4_49, ^test_a4_ à 91 ok. Au programme : libellé de TVA étrangère, « 19 % » lisible, historique chaîné, catégories d'achat, comptabilisation réservée, sortie complète.
+- **CASHD** : c2_11 à c2_14 (envoi à la main, modèle 2 sur les rappels des paliers 1 et 2, point du matin, texte du jour d'échéance), ^test_c2_ 14/14. LRE et mise en demeure toujours retenues.
+- **REPUT** : c3_12 (indicateurs par service), c3_13 (envoi automatique, retenue doute / urgence / sujet), test c3_05 en heure de Paris ; ^test_c3_ 12/12.
+- **OFFLOAD** : c4_17 (restitution), vert.
+- **Socle** : 19at (sceau et export du journal, A5 30b9fc7a), test_62 vert.
+
+Posés, tests non joués : c2_15 (taux BCE), a4_50 (quotas), c3_14 (pièces jointes). **Le lot de tests groupé h2357mx fait redémarrer la recette à chaque essai** (« server restarted » 23 h 56, 23 h 59, 00 h 05, 00 h 10 Z) ; il est désactivé. test_62 seul passe. Bissection à reprendre : ^test_c3_1[234], puis ^test_c2_15, puis ^test_a4_, un à la fois. Coupure possiblement liée, de 21 h 41 à 22 h 16 Z.
+
+À poser à la reprise, dans l'ordre :
+- c4_18 (4391d8b4), avec (offload, envoi.email) dans private.activation_seul_autorisee (seul décideur seulement, comme 19af) et (offload, offload.message_retenu) dans private.actions_sans_accord ;
+- c4_19 (a879098a) ;
+- a4_51 (d2f7aed), a4_52 (3dd98c6), a4_53 (422f40d, barème BOFiP 2022 vérifié), a4_54 (9476916) ;
+- c3_15 (fb071172), c3_16 (4477c6e3, plus le redéploiement de reput-reponse), c3_17 (d13ea1d5), c3_18 (d98c272b).
+
+Décisions de Teo en attente :
+- OFFLOAD : réécriture par modèle de langue ou interpréteur ; branche Gmail, accord à donner dans la session C4 ;
+- FILED : envoi mensuel du sceau ;
+- blocage au dépassement du quota ;
+- prix des paliers.
+REPUT à ajouter : astreinte téléphonique et appels non décrochés transcrits (Twilio en test, compte à ouvrir par Teo).
+
+Pas sur main : l'écran REPUT de l'envoi automatique (worker-c3 e06d6ca7), car omegaai.fr est branché sur la prod, où c3_13 n'existe pas. Le compte de Teo a été retiré de aa01 par la session bureau.
+
+### REPRISE (19/10, 00 h 25 Z) : têtes de branche à l'arrêt
+A1 5d6856c2 · A2 ef88f351 · A3 96965cbf · A4 422f40d0 · A5 30b9fc7a · B1 41924b93 · B2 cff734cb · B3 bcd02f62 · B4 9aba87ef · B5 528b933f · B6 0ba479ad · B7 9388a1b6 · C2 2278f180 · C3 d98c272b · C4 a879098a. Routine 3 h désactivée.
