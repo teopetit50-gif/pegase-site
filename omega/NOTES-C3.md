@@ -3,7 +3,11 @@
 Branche `worker-c3`. Coordinateur : `session_01BCGFdpRKBvXKjouC75sYBg`.
 Commencée le 06/10/2026. Je n'appelle jamais Supabase : le coordinateur pose, je lis les sorties brutes.
 
-## REPRISE (pause demandée par Teo, 06/10/2026 21 h Z)
+## REPRISE (pause du coordinateur, 19/10/2026 00 h 30 Z — forfait à 29 % ; reprise samedi 25/10 après 02 h Z)
+
+- **Arrêt** : les 8 lots sont faits, verts et poussés (c3_14 → c3_21 ; le lot 8 était déjà poussé, b6bc11ce, quand la pause est arrivée). Arbre propre, rien en cours.
+- **Posé** : c3_14 (son test tourne). **Pas posés** : c3_15 → c3_21 (dans l'ordre, avec leurs tests) ; Edge `reput-reponse` à redéployer (c3_16, c3_20). À vérifier : `perimetre_total` des gérants (c3_17), objet `reput_rdv` accepté par le socle (c3_21).
+- **Reprise** : deux lots ajoutés par Teo — astreinte téléphonique, et appels non décrochés transcrits (Twilio en test, compte à ouvrir par Teo).
 
 - **Fait et posé sur la recette, vert** : c3_01 → c3_08 (migrations + tests pgTAP, dernier lot c3_08 bb153a2 vert, socle 44/46/51 verts, worker-c3 fusionnée par le coordinateur) ; Edge `reput-reponse` déployée (Deno 12/12) ; écran `app/espace/reput` + `components/espace/reput` ; souche locale 264/264.
 - **Dernier commit** : e125ccb — chiffrage `omega/CHIFFRAGE/reput.md` (document seul, rien à poser) ; ce commit-ci ajoute cette section.
