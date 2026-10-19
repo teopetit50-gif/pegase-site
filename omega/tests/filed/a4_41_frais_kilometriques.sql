@@ -5,11 +5,11 @@
 create or replace function tests.test_a4_53_01_bareme() returns setof text
 language plpgsql as $f$
 begin
-  -- Voiture 5 CV : 0,636 € par km jusqu'à 5 000 km ; 0,357 × d + 1 395 de 5 001 à 20 000 km ; continu à 5 000 km.
-  return next is(private.filed_bareme_km(2025, 'voiture', 5, 100), 63.60::numeric, '100 km en 5 CV : 63,60 €');
-  return next is(private.filed_bareme_km(2025, 'voiture', 5, 5000), 3180.00::numeric, '5 000 km : 3 180 €');
-  return next is(private.filed_bareme_km(2025, 'voiture', 5, 6000), round(6000 * 0.357 + 1395, 2), '6 000 km : la deuxième tranche');
-  return next is(private.filed_bareme_km(2025, 'moto', 4, 1000), 468.00::numeric, 'Moto 4 CV : 1 000 km à 0,468');
+  -- Barème BOFiP revenus 2022 (BOI-BAREME-000001 du 20/07/2023). Voiture 5 CV : 0,636 € par km jusqu'à 5 000 km ; 0,357 × d + 1 395 de 5 001 à 20 000 km ; continu à 5 000 km.
+  return next is(private.filed_bareme_km(2022, 'voiture', 5, 100), 63.60::numeric, '100 km en 5 CV : 63,60 €');
+  return next is(private.filed_bareme_km(2022, 'voiture', 5, 5000), 3180.00::numeric, '5 000 km : 3 180 €');
+  return next is(private.filed_bareme_km(2022, 'voiture', 5, 6000), round(6000 * 0.357 + 1395, 2), '6 000 km : la deuxième tranche');
+  return next is(private.filed_bareme_km(2022, 'moto', 4, 1000), 468.00::numeric, 'Moto 4 CV : 1 000 km à 0,468');
   return next throws_ok($$select private.filed_bareme_km(1999, 'voiture', 5, 10)$$, '22023', null, 'Sans barème pour l''année : refus clair');
 end $f$;
 
@@ -37,7 +37,7 @@ begin
   e := public.filed_etat_frais_km(v_cl, v, v_le);
   reset role;
   return next is((select montant from public.filed_trajets_km where id = t3),
-                 round((private.filed_bareme_km(2025, 'voiture', 5, 5000) - private.filed_bareme_km(2025, 'voiture', 5, 4900)) * 1.2, 2),
+                 round((private.filed_bareme_km(2022, 'voiture', 5, 5000) - private.filed_bareme_km(2022, 'voiture', 5, 4900)) * 1.2, 2),
                  'Électrique : +20 %, et le trajet refusé ne compte plus dans le cumul');
   return next is((e ->> 'total_approuve')::numeric, 3116.40::numeric, 'L''état du mois : seul l''approuvé compte dans le total');
   return next ok(e ->> 'contenu' like 'date;depart;arrivee;motif;km;%' and e ->> 'contenu' like '%Lyon%' and e ->> 'contenu' not like '%domicile%',

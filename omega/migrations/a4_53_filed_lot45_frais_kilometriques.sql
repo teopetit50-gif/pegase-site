@@ -3,8 +3,12 @@
 -- a4_35 fait des notes de frais à justificatif (ticket, facture). Manquait le trajet fait avec son propre véhicule,
 -- remboursé au barème fiscal : il n'a pas de facture. Ce lot pose :
 --   · public.filed_baremes_km : le barème par année, véhicule (voiture, moto, cyclomoteur), puissance et tranche de
---     distance annuelle (d × coef + fixe), majoré de 20 % pour un véhicule électrique. Barème publié en 2024
---     (BOI-BAREME-000001), reconduit pour 2025 : l'opérateur le met à jour chaque année (filed_regler_bareme_km) ;
+--     distance annuelle (d × coef + fixe), majoré de 20 % pour un véhicule électrique. Source vérifiée le
+--     19/10/2026, coefficient par coefficient : BOFiP BOI-BAREME-000001, version du 20/07/2023, barèmes « revenus
+--     2022 » (§ 10 automobiles, § 20 cyclomoteurs, § 30 motocyclettes ; § 5 majoration de 20 % des véhicules
+--     électriques, CGI ann. IV art. 6 B), https://bofip.impots.gouv.fr/bofip/2185-PGP.html/identifiant=BOI-BAREME-000001-20230720
+--     — le dernier barème publié que j'ai pu lire ; il est posé sous l'année 2022. Un trajet prend le barème de son
+--     année, sinon le plus récent posé : l'opérateur pose chaque nouveau barème quand il paraît (filed_regler_bareme_km) ;
 --   · public.filed_trajets_km : chaque trajet déclaré (date, départ, arrivée, motif, km, véhicule) ; son montant est
 --     la part du barème annuel qu'il ajoute : barème(cumul de l'année + km) − barème(cumul de l'année) — le changement
 --     de tranche en cours d'année est ainsi juste ;
@@ -29,7 +33,7 @@ create table if not exists public.filed_baremes_km (
 comment on table public.filed_baremes_km is
   'Lot 45 (a4_53) : le barème kilométrique fiscal (d × coef + fixe), par année, véhicule, puissance et tranche annuelle. Opérateur.';
 insert into public.filed_baremes_km (annee, vehicule, cv_min, cv_max, km_min, km_max, coef, fixe, source)
-select 2025, v, cmin, cmax, kmin, kmax, coef, fixe, 'Barème publié en 2024 (BOI-BAREME-000001), reconduit pour 2025 ; à vérifier chaque année'
+select 2022, v, cmin, cmax, kmin, kmax, coef, fixe, 'BOFiP BOI-BAREME-000001 du 20/07/2023, barème revenus 2022 (§ 10, 20, 30), https://bofip.impots.gouv.fr/bofip/2185-PGP.html/identifiant=BOI-BAREME-000001-20230720 ; vérifié le 19/10/2026'
 from (values
   ('voiture', 0, 3, 0, 5000, 0.529, 0), ('voiture', 0, 3, 5000, 20000, 0.316, 1065), ('voiture', 0, 3, 20000, null, 0.370, 0),
   ('voiture', 4, 4, 0, 5000, 0.606, 0), ('voiture', 4, 4, 5000, 20000, 0.340, 1330), ('voiture', 4, 4, 20000, null, 0.407, 0),
