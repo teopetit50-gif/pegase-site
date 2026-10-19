@@ -39,6 +39,7 @@ import { dateCourte, dateHeure, montant, nombreFr, pourcent } from "../format";
 import { ACCEPTATIONS, CONFIRMATIONS, CONTROLES_LIGNE, EXECUTIONS, GRAVITES, ROLES_TIERS, STATUTS_AVENANT, STATUTS_CHANTIER, UNITES, VIGILANCES, familleControle, libelleEnvoi, libelleStatutFacture, libelleUnite } from "./etats";
 import { FACTURES_CANDIDATES_EXEMPLE } from "./exemples";
 import { aujourdHui } from "../exemples/socle";
+import DocumentsCarte from "./DocumentsCarte";
 import QuestionsCarte from "./QuestionsCarte";
 import ReleveDialog from "./ReleveDialog";
 import { abandonnerAvenant, accepterEcart, changerStatutChantier, chargerFacturesCandidates, chiffrerLigneAvenant, confirmerDependance, detacherFacture, ecrireLigne, ecrireMarche, ouvrirAvenant, poserPrix, proposerDependances, proposerRemplacants, rattacherFacture, repondreConfirmation, retirerLigneAvenant, rouvrirMarche, signerAvenant, soumettreAvenant, validerPrix, verifierMarche } from "./portes";
@@ -514,6 +515,9 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
           </div>
         ) : null}
       </section>
+
+      {/* ——— documents du chantier : réserves à lever, références du marché (b6_37) ——— */}
+      <DocumentsCarte key={`documents-${source}-${c.id}`} tableau={tableau} source={source} aujourdhui={aujourdHui()} />
 
       {/* ——— approvisionnement (b6_22) ——— */}
       <ApproCarte key={`appro-${c.id}`} tableau={tableau} source={source} />

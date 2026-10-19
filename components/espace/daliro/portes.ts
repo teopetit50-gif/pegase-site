@@ -30,14 +30,15 @@
      btp_avancement_photos (lecture, b6_25) ; btp_importer_lignes (b6_28) ; btp_point_mensuel (lecture, b6_30) ;
      btp_disponibilites (lecture), btp_noter_indisponibilite, btp_annuler_indisponibilite (b6_31) ; btp_avenant_depuis_reserve (b6_32) ;
      btp_deposer_devis, btp_devis_lu (lecture, b6_33) ; btp_ordre_meteo (lecture), btp_echanger_passages (b6_35) ;
-     btp_poser_question, btp_questions_du_chantier (lecture, b6_36).
+     btp_poser_question, btp_questions_du_chantier (lecture, b6_36) ;
+     btp_documents_chantier (lecture), btp_rattacher_document, btp_lever_reserve_lue (b6_37) ; btp_documents à rattacher lus sous RLS.
    Les tables sans porte (chantiers, lots, tiers, dépendances, acceptations)
    s'écrivent en direct, comme le socle le prévoit (politiques du bureau).
    Si la base répond autrement, l'écran montre son message tel quel.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { AccordJ2, Appro, AvancementPhotos, Disponibilite, PointMensuel, Chantier, FactureCandidate, HeuresChantier, MessageChantier, MeteoChantier, QuestionChantier, Recalage, Remplacant, RetourPointage, Tableau } from "./types";
+import type { AccordJ2, Appro, AvancementPhotos, Disponibilite, PointMensuel, Chantier, FactureCandidate, HeuresChantier, MessageChantier, MeteoChantier, QuestionChantier, DocumentsChantier, DocumentARattacher, Recalage, Remplacant, RetourPointage, Tableau } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -378,4 +379,23 @@ export async function poserQuestion(chantier: string, question: string): Promise
 export async function questionsDuChantier(chantier: string): Promise<QuestionChantier[]> {
   const l = await rpc<QuestionChantier[] | null>("btp_questions_du_chantier", { p_chantier: chantier });
   return Array.isArray(l) ? l : [];
+}
+
+/* b6_37 : les documents de chantier (PV de réserves, plans, notes techniques). */
+export async function documentsChantier(chantier: string): Promise<DocumentsChantier> {
+  const d = await rpc<DocumentsChantier | null>("btp_documents_chantier", { p_chantier: chantier });
+  return { documents: d?.documents ?? [], reserves: d?.reserves ?? [], references: d?.references ?? [] };
+}
+export async function documentsARattacher(client: string): Promise<DocumentARattacher[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase.from("btp_documents").select("id, piece_id, sous_type, titre, maitre_ouvrage, date_document, motif")
+    .eq("client_id", client).eq("statut", "a_rattacher").order("cree_le", { ascending: false }).limit(20);
+  if (error) throw new ErreurPorte(message(error));
+  return (data ?? []) as DocumentARattacher[];
+}
+export async function rattacherDocument(document: string, chantier: string): Promise<unknown> {
+  return rpc("btp_rattacher_document", { p_document: document, p_chantier: chantier });
+}
+export async function leverReserveLue(reserve: string, le: string | null): Promise<unknown> {
+  return rpc("btp_lever_reserve_lue", { p_reserve: reserve, p_le: le });
 }

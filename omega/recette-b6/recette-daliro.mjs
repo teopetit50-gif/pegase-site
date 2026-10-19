@@ -537,6 +537,36 @@ const choisir = (sel, valeur) => `(() => { const t = document.querySelector('${s
 }
 
 {
+  // b6_37 : les documents du chantier (en exemple : un PV de réserves, un plan, une note), aux cinq largeurs
+  const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
+  const graves = (cible) => `(async () => { const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });
+    return r.violations.filter(v => v.impact === 'serious' || v.impact === 'critical').map(v => v.id + ' ' + v.nodes.slice(0, 2).map(n => n.target.join(' ')).join(' | ')); })()`;
+  for (const largeur of [390, 768, 1024, 1440, 1700]) {
+    const s = await ouvrirSession({ largeur, hauteur: largeur < 768 ? 844 : 900, marque: `b6-documents-${largeur}`, densite: 1 });
+    console.log(`— Documents du chantier (${largeur})`);
+    ok(await s.aller(base + chemin), 'page chargée');
+    await s.dormir(500);
+    ok(await s.evaluer(`(() => { const b = [...document.querySelectorAll('.esp-item')].find(b => /Tilleuls/.test(b.textContent)); if (!b) return false; b.click(); return true; })()`), 'ouverture des Tilleuls');
+    await s.dormir(500);
+    const carte = `document.querySelector('section[aria-label="Documents du chantier"]')`;
+    const t = await s.evaluer(`${carte}?.innerText || ''`);
+    ok(/3 réserves à lever/.test(t) && /Échue le/.test(t) && /date du PV \+ 30 jours/.test(t) && /Sans échéance écrite/.test(t),
+       'réserves : échue, échéance calculée sur le délai écrit, sans échéance écrite');
+    ok(/PV-OPR-bat-A\.jpg, page 1/.test(t) && /à vérifier/.test(t) && /Plan — Plan des fondations · n° S-02 · 1\/50/.test(t) && /Eurocode 8/.test(t),
+       'chaque élément dit sa pièce et sa page ; plan et disposition parmi les références');
+    ok(await s.evaluer(bouton('/Marquer levée/', carte)) === true, 'clic sur « Marquer levée »');
+    await s.dormir(300);
+    ok(/2 réserves à lever/.test(await s.evaluer(`${carte}?.innerText || ''`)) && /Levée le/.test(await s.evaluer(`${carte}?.innerText || ''`)), 'la réserve est levée');
+    await s.evaluer(axe + ';true');
+    const g = await s.evaluer(graves(carte));
+    ok(g.length === 0, `carte des documents : aucun écart axe grave ${g.length ? JSON.stringify(g) : ''}`);
+    const deb = await s.evaluer(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
+    ok(deb === 0, `pas de débordement horizontal (${deb})`);
+    s.fermer();
+  }
+}
+
+{
   // b6_36 : l'assistant « questions » (en exemple, les trois questions de la démonstration)
   const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
   const graves = (cible) => `(async () => { const r = await axe.run(${cible}, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }, resultTypes: ['violations'] });

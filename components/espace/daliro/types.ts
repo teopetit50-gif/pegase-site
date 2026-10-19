@@ -685,3 +685,55 @@ export type QuestionChantier = {
   cree_le: string;
   repondu_le: string | null;
 };
+
+/* b6_37 : les documents de chantier reçus par Daliro, chaque élément avec sa pièce et sa page. */
+export type SousTypeDocument = "pv_reserves" | "plan" | "note_technique";
+export type DocumentChantier = {
+  id: string;
+  piece: string;
+  sous_type: SousTypeDocument;
+  classe_par: "lecteur" | "humain";
+  titre: string | null;
+  numero: string | null;
+  indice: string | null;
+  date: string | null;
+  maitre_ouvrage: string | null;
+  nom_fichier: string | null;
+  rattache_le: string | null;
+};
+export type ReserveALever = {
+  id: string;
+  document_id: string;
+  piece_id: string;
+  page: number | null;
+  ordre: number;
+  numero: string | null;
+  localisation: string | null;
+  lot_texte: string | null;
+  entreprise: string | null;
+  description: string;
+  delai_texte: string | null;
+  echeance: string | null;
+  echeance_source: "ecrite" | "calculee" | null;
+  verifiee: boolean;
+  statut: "a_lever" | "levee";
+  levee_le: string | null;
+};
+export type ReferenceMarche = {
+  id: string;
+  document_id: string;
+  piece_id: string;
+  page: number | null;
+  ordre: number;
+  nature: "plan" | "note_technique" | "disposition";
+  titre: string | null;
+  numero: string | null;
+  indice: string | null;
+  date_document: string | null;
+  echelle: string | null;
+  texte: string | null;
+  reference_normative: string | null;
+  verifiee: boolean;
+};
+export type DocumentsChantier = { documents: DocumentChantier[]; reserves: ReserveALever[]; references: ReferenceMarche[] };
+export type DocumentARattacher = { id: string; piece_id: string; sous_type: SousTypeDocument; titre: string | null; maitre_ouvrage: string | null; date_document: string | null; motif: string | null };
