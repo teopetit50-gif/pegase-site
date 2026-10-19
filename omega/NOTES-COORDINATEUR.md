@@ -1277,3 +1277,20 @@ Pas sur main : l'écran REPUT de l'envoi automatique (worker-c3 e06d6ca7), car o
 
 ### REPRISE (19/10, 00 h 25 Z) : têtes de branche à l'arrêt
 A1 5d6856c2 · A2 ef88f351 · A3 96965cbf · A4 422f40d0 · A5 30b9fc7a · B1 41924b93 · B2 cff734cb · B3 bcd02f62 · B4 9aba87ef · B5 528b933f · B6 0ba479ad · B7 9388a1b6 · C2 2278f180 · C3 d98c272b · C4 a879098a. Routine 3 h désactivée.
+
+## 19/10 14 h 22 Z → 14 h 55 Z : relance de Teo (plafond 40 %), quatre moteurs au bout de ce qui se construit seul
+
+Bissection : chaque lot passe seul (^test_c3_1[234] 3/3, ^test_c2_15 11/11, ^test_a4_ 92/92). C'est le groupement des tests qui fait redémarrer la recette : **un job de tests à la fois**.
+
+Posés et verts sur la recette (niveau 1) :
+- **OFFLOAD** : c4_18 (envoi automatique ; test corrigé c676d17f, le gérant éteint), avec (offload, envoi.email) dans activation_seul_autorisee et (offload, offload.message_retenu) dans actions_sans_accord ; c4_19 (effacement). c4_20 : écran seul.
+- **CASHD** : c2_16 (le taux le plus récent l'emporte). Écran « Taux de change » : 879dce0c.
+- **REPUT** : c3_15 → c3_21 (7/7), c3_22 astreinte (tâche cron reput-astreinte), c3_23a socle (canal 'appel' dans receptions_canal_check et private.deposer_reception ; relu : identique à la liste des canaux près), c3_23 appels transcrits.
+- **FILED** : a4_51 → a4_59 (test a4_39 corrigé 596c34cf ; contrats, courriers, tickets, octroi de mer, exonération art. 295) ; ^test_a4_ 102/102.
+
+NOBAT (6 vraies pièces, client banc) : le lecteur A1 8596e165 relève taxes.autres (OMR/OMRI), mention.exoneration, SIREN du RCS et IBAN partiel. **Il attend le redéploiement de l'Edge lecteur** (session bureau) ; il faudra ensuite relire R2026-000045 et 000047, un job à la fois. Avec l'ancienne lecture, la facture Gedimat reste bloquée (tva.sans_mention, identite.siren). Relevé d'heures : avis A4 « releve_heures », nature autre (décision de Teo).
+
+À déployer (session bureau) : Edge lecteur, reput-reponse, reput-astreinte, reput-appels (Twilio en doublures, compte à ouvrir par Teo). Point RGPD/HDS : la reconnaissance vocale Twilio se fait hors UE.
+
+### Arrêt (19/10, 14 h 55 Z) : versions d'arrêt
+A1 8596e165 · A4 89599be6 · C2 879dce0c · C3 a67a4e04 · C4 db647d2f. A2, A3, A5, les B et C1 n'ont pas été réveillés.
