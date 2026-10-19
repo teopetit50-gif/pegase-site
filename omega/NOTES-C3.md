@@ -3,10 +3,10 @@
 Branche `worker-c3`. Coordinateur : `session_01BCGFdpRKBvXKjouC75sYBg`.
 Commencée le 06/10/2026. Je n'appelle jamais Supabase : le coordinateur pose, je lis les sorties brutes.
 
-## REPRISE (arrêt du 19/10/2026 14 h 45 Z — plus de lot construisible sans Twilio ni Teo)
+## REPRISE (arrêt du 19/10/2026 16 h 20 Z — plus de lot construisible sans Twilio, Teo ou un fournisseur UE)
 
-- **Arrêt** : lots 1 à 10 faits, verts, poussés ; posés et verts sur la recette jusqu'à c3_23 (c3_23a socle relu et posé par le coordinateur). Arbre propre, rien en cours.
-- **À faire par d'autres** : déployer les Edge reput-reponse, reput-astreinte, reput-appels (session bureau) ; compte Twilio de test (Teo) + secrets + cron x-reput-jeton ; point RGPD/HDS de la reconnaissance vocale Twilio (Teo).
+- **Arrêt** : lots 1 à 10 + c3_24 faits, verts, poussés ; posés et verts sur la recette jusqu'à c3_24. Arbre propre, rien en cours.
+- **À faire par d'autres** : redéployer reput-appels v2 (+ TWILIO_ACCOUNT_SID) et reput-reponse, déployer reput-astreinte (session bureau) ; 403 du premier appel : Auth Token PRINCIPAL et REPUT_APPELS_URL identique à la console (Teo) ; choisir le fournisseur de transcription UE ; point RGPD/HDS.
 - **Reprise** : preuve en vrai (mail + formulaire, puis astreinte et appels quand Twilio est ouvert) ; restent hors de portée sans accès tiers : connecteur agenda, réseaux sociaux, lecture des avis Google, logiciels métier.
 
 - **Fait et posé sur la recette, vert** : c3_01 → c3_08 (migrations + tests pgTAP, dernier lot c3_08 bb153a2 vert, socle 44/46/51 verts, worker-c3 fusionnée par le coordinateur) ; Edge `reput-reponse` déployée (Deno 12/12) ; écran `app/espace/reput` + `components/espace/reput` ; souche locale 264/264.
