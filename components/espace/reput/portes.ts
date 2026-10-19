@@ -152,3 +152,25 @@ export async function chargerSites(client: string): Promise<ReglageSite[]> {
 export const reglerSite = (client: string, entite: string, champs: Pick<ReglageSite, "signature" | "ton" | "formule_appel" | "formule_politesse">) =>
   rpc("reput_regler", { p_client: client, p_entite: entite, p_reglages: champs });
 export const suivreOrganisation = (client: string, entite: string) => rpc("reput_suivre_organisation", { p_client: client, p_entite: entite });
+
+/* L'export à date fixe (c3_19) : le programme, les fichiers fabriqués (sans leur contenu), puis un fichier à la demande. */
+export type ProgrammeExport = { id: string; entite_id: string | null; frequence: "hebdomadaire" | "mensuel"; jour: number; actif: boolean };
+export type ExportFait = { id: string; entite_id: string | null; periode_du: string; periode_au: string; lignes: number; nom_fichier: string; cree_le: string };
+export async function chargerExports(client: string): Promise<{ programmes: ProgrammeExport[]; exports: ExportFait[] }> {
+  const supabase = createClient();
+  const [p, e] = await Promise.all([
+    supabase.from("reput_exports_programmes").select("id, entite_id, frequence, jour, actif").eq("client_id", client),
+    supabase.from("reput_exports").select("id, entite_id, periode_du, periode_au, lignes, nom_fichier, cree_le").eq("client_id", client)
+      .order("cree_le", { ascending: false }).limit(24),
+  ]);
+  if (p.error) throw new ErreurPorte(message(p.error));
+  if (e.error) throw new ErreurPorte(message(e.error));
+  return { programmes: (p.data ?? []) as ProgrammeExport[], exports: (e.data ?? []) as ExportFait[] };
+}
+export async function contenuExport(id: string): Promise<string> {
+  const { data, error } = await createClient().from("reput_exports").select("contenu").eq("id", id).single();
+  if (error) throw new ErreurPorte(message(error));
+  return (data as { contenu: string }).contenu;
+}
+export const programmerExport = (client: string, frequence: ProgrammeExport["frequence"], jour: number, actif: boolean) =>
+  rpc("reput_programmer_export", { p_client: client, p_frequence: frequence, p_jour: jour, p_entite: null, p_destinataires: null, p_actif: actif });

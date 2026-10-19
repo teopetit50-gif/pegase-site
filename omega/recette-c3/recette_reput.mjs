@@ -89,6 +89,13 @@ for (const largeur of LARGEURS) {
     verifier(await s.evaluer(cliquer("Revenir à l'organisation")), `${largeur} : revenir à l'organisation`);
     await s.dormir(300);
     verifier(await s.evaluer(`document.body.innerText.includes("reprend les réglages de l'organisation")`), `${largeur} : le site reprend les réglages de l'organisation`);
+    // c3_19 : l'export à date fixe.
+    verifier(await s.evaluer(`!!document.querySelector('[data-export-programme]') && document.body.innerText.includes('Chaque lundi') && document.body.innerText.includes('37 demandes')`), `${largeur} : l'export programmé et ses fichiers`);
+    verifier(await s.evaluer(cliquer("Programmer l'export")), `${largeur} : programmer l'export`);
+    await s.dormir(300);
+    verifier(await s.evaluer(`document.body.innerText.includes('Export programmé : chaque lundi, les sept jours précédents')`), `${largeur} : l'export est programmé`);
+    d = await s.evaluer(DEBORDE);
+    verifier(!d.scroll && d.elements.length === 0, `${largeur} : aucun débordement (export) ${d.elements.join(' | ')}`);
     // c3_13 : l'envoi automatique se coupe et se rallume depuis « Sujets autorisés ».
     verifier(await s.evaluer(cliquer('Sujets autorisés', '[role=tab]')), `${largeur} : onglet Sujets autorisés (envoi automatique)`);
     await s.dormir(300);
