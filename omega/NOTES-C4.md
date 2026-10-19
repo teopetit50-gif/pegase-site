@@ -6,9 +6,9 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 
 ## REPRISE (19/10, 14 h 50 Z — reprise du 19/10, feu vert de Teo)
 
-- Fait : c4_01 à c4_17 verts sur la recette ; c4_18 et c4_19 en pose par le coordinateur ; écran c4_20 (envoi automatique, données, effacement) poussé.
+- Fait : c4_01 à c4_19 verts sur la recette (c4_18 après c676d17f) ; écran c4_20 poussé (rien à poser).
 - En cours : rien. Gmail attend l'accord de Teo dans cette session ; aucun import de données personnelles sans accord écrit de Teo.
-- Prochain pas : corriger ce que la recette de c4_18 et c4_19 signale ; la liste Guadeloupe reste hors git.
+- Prochain pas : aucun lot OFFLOAD ouvert sans décision de Teo (Gmail, import, réécriture par modèle) ; ligne 15 attend la messagerie A2. Liste Guadeloupe hors git.
 
 ### Reprise du 17/10
 
@@ -760,3 +760,4 @@ Partielles : 6, 11, 15, 38.
 - 19/10 — lot c4_19 (effacement des données d'une personne) : 44 tests, 422 ok en local.
 - 19/10, 14 h 50 Z — reprise ; écran c4_20 (envoi automatique, données, effacement) : build vert, cinq largeurs.
 - 19/10, 14 h 40 Z — recette c4_18 : 42501 au révoquer (le socle exige une personne gérante) ; le test éteint désormais en gérant. Local 422 ok.
+- 19/10, 14 h 36 Z — recette : c4_18 et c4_19 verts. La liste de Teo est couverte ; restent ses décisions.
