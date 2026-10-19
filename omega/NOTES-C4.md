@@ -4,11 +4,11 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 `components/espace/offload/`, `app/espace/offload/`, et ce fichier. Coordinateur : session
 `session_01BCGFdpRKBvXKjouC75sYBg`. Je n'appelle jamais Supabase : le coordinateur pose, je reçois les sorties brutes.
 
-## REPRISE (18/10, 22 h Z — modèle 2 : envoi automatique)
+## REPRISE (pause du 19/10, 00 h 25 Z — reprise samedi 25/10 après 02 h Z)
 
-- Fait : c4_01 à c4_17 verts sur la recette ; c4_18 (envoi automatique) remis au coordinateur ; c4_19 (effacement d'une personne) écrit, local 422 ok.
-- En cours : rien. La liste Guadeloupe reste hors git et hors recette ; scratchpad seulement.
-- Prochain pas : poser c4_18 puis c4_19 ; Teo doit trancher : règles appliquées par un modèle de langue ?, fichier des lignes « atteste », branche Gmail (compte tiers) ; côté socle (coordinateur) : offload/envoi.email sur activation_seul_autorisee, offload/offload.message_retenu sur actions_sans_accord.
+- Fait : c4_01 à c4_17 verts sur la recette ; c4_18 (envoi automatique) et c4_19 (effacement d'une personne) poussés, verts en local (422 ok), PAS encore posés.
+- En cours : rien. Gmail attend l'accord de Teo dans cette session ; règles par modèle de langue : non pour l'instant ; ligne « atteste » retirée.
+- Prochain pas : le coordinateur pose c4_18 puis c4_19 (hors 22 h–minuit Z) ; corriger ce que la recette signale. La liste Guadeloupe reste hors git.
 
 ### Reprise du 17/10
 
