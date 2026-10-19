@@ -3,7 +3,7 @@
 ## REPRISE (pause du 19/10, 00 h 25 Z — reprise samedi 25/10 après 02 h Z)
 
 - **Fait** : a4_01 → a4_49 posés et verts sur la recette ; a4_50 posé, son test (a4_38) pas encore joué. Écrits, testés en local (97/97), NON posés : a4_51 boîtes, a4_52 vue cabinet, a4_53 frais kilométriques (barème vérifié BOFiP 20/07/2023, revenus 2022), a4_54 historique par palier ; le (4) du chantier existait (a4_33).
-- **En cours** : a4_51 → a4_57 posés et verts (19/10). a4_58 écrit (octroi de mer et taxes hors TVA dans le total ; mention d'exonération → régime exonéré ; champs pour A1 : « taxes.autres » [{code, libelle, base, taux, montant}] ou « octroi_mer.montant », « mention.exoneration » ; test `a4_46_octroi_de_mer.sql` ; 101/101 en local), à poser. Pour A1 aussi : « contrat.* » (a4_56), « courrier.* » (a4_57).
+- **En cours** : a4_01 → a4_58 posés et verts sur la recette (101/101, 19/10 14 h 48 Z). En attente : rejeu des deux pièces NOBAT par le coordinateur quand A1 aura posé taxes.autres, mention.exoneration, tva.ventilation (catégorie E). Champs pour A1 aussi : « contrat.* » (a4_56), « courrier.* » (a4_57), `private.filed_categories_lecteur`.
 - **Prochain pas** : à la reprise, le coordinateur joue a4_38 (test d'a4_50), puis pose a4_51 → a4_54 dans l'ordre avec a4_39 → a4_42 ; corriger ce que la recette refuse (inserts de test dans expediteurs, entites). Ouverts : blocage au dépassement (Teo), barème kilométrique de l'année (opérateur), saisie téléphone (A2), invitation cabinet et bascule (A3).
 
 ## Banc, chantier 3 (18/10) — exemples de la norme lus par FILED (PAS de vraies factures)
