@@ -371,15 +371,15 @@ export function montantFr(n: number): string {
   return `${n < 0 ? "-" : ""}${ent.replace(/\B(?=(\d{3})+(?!\d))/g, " ")},${dec}`;
 }
 
-/** Les taxes hors TVA (octroi de mer…) : une seule valeur « taxes.hors_tva », vérifiée si chaque montant se retrouve sur sa page. */
+/** Les taxes hors TVA (octroi de mer…) : une seule valeur « taxes.autres », vérifiée si chaque montant se retrouve sur sa page. */
 export function valeurTaxes(brutes: LigneBrute[] | undefined, pages: PageLue[], source: "ia" | "tableur" = "ia"): ValeurLue | null {
   if (!Array.isArray(brutes) || brutes.length === 0) return null;
   const parNumero = new Map(pages.map((p) => [p.n, p]));
   let retrouvees = 0;
   const taxes = brutes.filter((l) => l && typeof l === "object").map((l) => {
     const n = nettoyerLigne(l, CHAMPS_TAXE);
-    const nature = String(n.nature ?? "").toUpperCase().replace(/[^A-Z]/g, "");
-    n.nature = nature === "OMR" || nature === "OMRI" ? nature : "autre";
+    const code = String(n.code ?? "").toUpperCase().replace(/[^A-Z]/g, "");
+    n.code = code === "OMR" || code === "OMRI" ? code : "autre";
     const page = Number.isInteger(l.page) ? parNumero.get(l.page as number) : undefined;
     if (page && typeof n.montant === "number" && retrouver(montantFr(n.montant), page.texte).trouve) retrouvees++;
     return n;
@@ -387,7 +387,7 @@ export function valeurTaxes(brutes: LigneBrute[] | undefined, pages: PageLue[], 
   if (taxes.length === 0) return null;
   const premierePage = brutes.find((l) => Number.isInteger(l?.page))?.page as number | undefined;
   return {
-    champ: "taxes.hors_tva",
+    champ: "taxes.autres",
     valeur: taxes,
     page: premierePage,
     source,
@@ -456,12 +456,12 @@ export function completerDepuisTexte(valeurs: ValeurLue[], pages: PageLue[], cha
     }
   }
 
-  if (absent("mention.exoneration_tva") && !valeurs.some((v) => v.champ === "mention.franchise_293b" && v.valeur === true)) {
+  if (absent("mention.exoneration") && !valeurs.some((v) => v.champ === "mention.franchise_293b" && v.valeur === true)) {
     const mentions = seulesLectures(pages, RE_EXONERATION, 0).filter((m) => !/293\s*B/i.test(m.texte));
     if (mentions.length > 0) {
       const m = mentions[0];
       ajouts.push({
-        champ: "mention.exoneration_tva",
+        champ: "mention.exoneration",
         valeur: m.texte.slice(0, 300),
         texte: m.texte.slice(0, 2000),
         page: m.page,
@@ -472,4 +472,25 @@ export function completerDepuisTexte(valeurs: ValeurLue[], pages: PageLue[], cha
     }
   }
   return ajouts;
+}
+
+/**
+ * Une pièce exonérée (mention.exoneration) sans ventilation rendue : la base hors taxes en catégorie E, taux 0.
+ * Sans elle, FILED déduirait la TVA de TTC − HT, octroi de mer compris (convenu avec A4, a4_58).
+ */
+export function ventilationExoneree(valeurs: ValeurLue[]): ValeurLue | null {
+  if (valeurs.some((v) => v.champ === "tva.ventilation")) return null;
+  const mention = valeurs.find((v) => v.champ === "mention.exoneration");
+  const ht = valeurs.find((v) => v.champ === "montant_ht");
+  const tva = valeurs.find((v) => v.champ === "montant_tva");
+  if (!mention || !ht || typeof ht.valeur !== "number") return null;
+  if (tva && typeof tva.valeur === "number" && tva.valeur !== 0) return null; // exonération partielle : au modèle de ventiler
+  return {
+    champ: "tva.ventilation",
+    valeur: [{ categorie: "E", taux: 0, base: ht.valeur, montant: 0, motif: String(mention.valeur).slice(0, 300) }],
+    page: ht.page,
+    source: "ia",
+    verifiee: ht.verifiee && mention.verifiee,
+    controle: "déduite de la mention d'exonération et du total HT (catégorie E)",
+  };
 }

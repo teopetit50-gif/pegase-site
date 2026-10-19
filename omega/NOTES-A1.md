@@ -1,11 +1,12 @@
 # NOTES-A1 — ouvrier LECTEUR (session worker A1)
 
 ## 19/10, lot unique (feu vert de Teo, 14 h 42 Z) : pièces des Antilles (NOBAT)
-- Le format de lecture FILED gagne `taxes_hors_tva`, rendu dans `taxes.hors_tva` (OMR, OMRI, autre) : on a HT + TVA + taxes = TTC.
-- Nouveau champ `mention.exoneration_tva`. Le SIREN est tiré du RCS (« RC <ville> B nnn nnn nnn »).
+- Le format de lecture FILED gagne `taxes_autres`, rendu dans `taxes.autres` (OMR, OMRI, autre) : on a HT + TVA + taxes = TTC.
+- Nouveau champ `mention.exoneration`. Le SIREN est tiré du RCS (« RC <ville> B nnn nnn nnn »).
 - Un IBAN partiellement masqué est gardé, à vérifier ; la clé modulo 97 est désormais contrôlée.
 - Quand le modèle les omet, ces valeurs sont relevées sur le texte (`completerDepuisTexte`).
-- 8 tests sur doublures, 161 au total. **La consigne et le schéma changent : la fonction Edge lecteur est à redéployer** (session bureau). Aucun SQL côté lecteur.
+- Les noms de champs sont ceux convenus avec A4 (a4_58) : `taxes.autres` (avec `code`) et `mention.exoneration`. Une pièce exonérée reçoit une `tva.ventilation` avec la base en catégorie E.
+- 9 tests sur doublures, 162 au total. **La consigne et le schéma changent : la fonction Edge lecteur est à redéployer** (session bureau). Aucun SQL côté lecteur.
 
 ## ARRÊT — pause du 18/10, 17 h 13 Z (Teo : priorité au grand groupe et à l'architecture)
 - **Fait** : socle 19as posé ; `pieces_citees` au format B4 (lecteur à redéployer) ; 5 DCE réels publics avec SOURCE et sha256 ; `CHIFFRAGE/lecteur.md` mis à jour (lectures du 18/10, arrêt sur crédit API épuisé).

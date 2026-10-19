@@ -123,7 +123,7 @@ Sur un **avoir**, les montants sont rendus avec le signe du document (souvent n�
 |---|---|---|
 | `mention.autoliquidation` | booléen | la pièce porte « autoliquidation » (TVA due par le preneur) |
 | `mention.franchise_293b` | booléen | la pièce porte « TVA non applicable, art. 293 B du CGI » |
-| `mention.exoneration_tva` | texte (≤ 300) | la mention d'exonération telle qu'imprimée (« Exonération de TVA conformément à l'article 295 du CGI », art. 262 ter I…), hors 293 B ; relevée sur le texte si le modèle l'omet |
+| `mention.exoneration` | texte (≤ 300) | la mention d'exonération telle qu'imprimée (« Exonération de TVA conformément à l'article 295 du CGI », art. 262 ter I…), hors 293 B ; relevée sur le texte si le modèle l'omet |
 
 Si le lecteur ne les rend pas, FILED les détecte lui-même par expression régulière dans le texte des pages.
 
@@ -170,9 +170,11 @@ Exemple : `[{"designation":"Pose de cloisons placo","quantite":12,"prix_unitaire
 
 Exemple : `[{"taux":20,"base":1234.4,"montant":246.88}]`
 
-**`taxes.hors_tva`** (19/10, Antilles) : une seule valeur par pièce, tableau d'objets `{nature, libelle, base, taux, montant}`, une entrée par taxe facturée en plus de la TVA. `nature` vaut `OMR` (octroi de mer), `OMRI` (octroi de mer régional) ou `autre`. `montant_tva` ne compte que la TVA ; on a donc `montant_ht + montant_tva + Σ taxes.hors_tva.montant = montant_ttc`. `verifiee` est vraie si chaque montant se retrouve sur sa page.
+Pièce exonérée : la base exonérée figure en catégorie `E`, taux 0, avec son `motif`. Si le modèle ne rend pas de ventilation alors que la pièce porte `mention.exoneration`, un `montant_ht` et une TVA nulle ou absente, le lecteur la pose lui-même : `[{"categorie":"E","taux":0,"base":<HT>,"montant":0,"motif":<mention>}]`. Sans cette ventilation, FILED déduirait la TVA de TTC − HT, octroi de mer compris.
 
-Exemple (devis Lafarge) : `[{"nature":"OMR","libelle":"OMR","taux":2,"montant":14.24},{"nature":"OMRI","libelle":"OMRI","taux":2.5,"montant":17.81}]`
+**`taxes.autres`** (19/10, Antilles) : une seule valeur par pièce, tableau d'objets `{code, libelle, base, taux, montant}` (noms convenus avec A4, a4_58), une entrée par taxe facturée en plus de la TVA. `code` vaut `OMR` (octroi de mer), `OMRI` (octroi de mer régional) ou `autre`. `montant_tva` ne compte que la TVA ; on a donc `montant_ht + montant_tva + Σ taxes.autres.montant = montant_ttc`. `verifiee` est vraie si chaque montant se retrouve sur sa page.
+
+Exemple (devis Lafarge) : `[{"code":"OMR","libelle":"OMR","taux":2,"montant":14.24},{"code":"OMRI","libelle":"OMRI","taux":2.5,"montant":17.81}]`
 
 ### Résultat du travail (`travaux.resultat`, pour les tableaux de bord)
 

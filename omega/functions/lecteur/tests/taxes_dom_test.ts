@@ -29,7 +29,7 @@ const DEVIS_LAFARGE = page([
   "Total TTC 747,71",
 ].join("\n"));
 
-Deno.test("octroi de mer : OMR et OMRI rangés dans taxes.hors_tva, montants retrouvés ; HT + TVA + taxes = TTC", () => {
+Deno.test("octroi de mer : OMR et OMRI rangés dans taxes.autres, montants retrouvés ; HT + TVA + taxes = TTC", () => {
   const b = assembler(
     ia({
       type_piece: "devis",
@@ -38,9 +38,9 @@ Deno.test("octroi de mer : OMR et OMRI rangés dans taxes.hors_tva, montants ret
         { champ: "montant_tva", valeur: 0.26, texte: "TVA 2,1 % 0,26", page: 1 },
         { champ: "montant_ttc", valeur: 747.71, texte: "Total TTC 747,71", page: 1 },
       ],
-      taxes_hors_tva: [
-        { nature: "OMR", libelle: "OMR", taux: 2, montant: 14.24, page: 1 },
-        { nature: "omri", libelle: "OMRI", taux: "2,5", montant: "17,81", page: 1 },
+      taxes_autres: [
+        { code: "OMR", libelle: "OMR", taux: 2, montant: 14.24, page: 1 },
+        { code: "omri", libelle: "OMRI", taux: "2,5", montant: "17,81", page: 1 },
       ],
     }),
     null,
@@ -48,27 +48,27 @@ Deno.test("octroi de mer : OMR et OMRI rangés dans taxes.hors_tva, montants ret
     "natif",
     0,
   );
-  const taxes = b.resultat.valeurs.find((v) => v.champ === "taxes.hors_tva")!;
+  const taxes = b.resultat.valeurs.find((v) => v.champ === "taxes.autres")!;
   assert(taxes.verifiee, taxes.controle);
   assertEquals(taxes.valeur, [
-    { nature: "OMR", libelle: "OMR", taux: 2, montant: 14.24 },
-    { nature: "OMRI", libelle: "OMRI", taux: 2.5, montant: 17.81 },
+    { code: "OMR", libelle: "OMR", taux: 2, montant: 14.24 },
+    { code: "OMRI", libelle: "OMRI", taux: 2.5, montant: 17.81 },
   ]);
   const v = (c: string) => b.resultat.valeurs.find((x) => x.champ === c)!.valeur as number;
   const octroi = (taxes.valeur as { montant: number }[]).reduce((s, t) => s + t.montant, 0);
   assertEquals(Math.round((v("montant_ht") + v("montant_tva") + octroi) * 100) / 100, v("montant_ttc"));
 });
 
-Deno.test("octroi de mer : une nature inconnue devient « autre » ; un montant introuvable laisse la valeur à vérifier", () => {
+Deno.test("octroi de mer : un code inconnu devient « autre » ; un montant introuvable laisse la valeur à vérifier", () => {
   const b = assembler(
-    ia({ taxes_hors_tva: [{ nature: "éco-contribution", montant: 3.5, page: 1 }] }),
+    ia({ taxes_autres: [{ code: "éco-contribution", montant: 3.5, page: 1 }] }),
     null,
     [DEVIS_LAFARGE],
     "natif",
     0,
   );
-  const taxes = b.resultat.valeurs.find((v) => v.champ === "taxes.hors_tva")!;
-  assertEquals((taxes.valeur as { nature: string }[])[0].nature, "autre");
+  const taxes = b.resultat.valeurs.find((v) => v.champ === "taxes.autres")!;
+  assertEquals((taxes.valeur as { code: string }[])[0].code, "autre");
   assert(!taxes.verifiee);
 });
 
@@ -83,15 +83,20 @@ const FACTURE_GEDIMAT = page([
 
 Deno.test("Gedimat : mention d'exonération, SIREN du RCS et IBAN masqué relevés quand le modèle les omet", () => {
   const b = assembler(
-    ia({ valeurs: [{ champ: "numero", valeur: "FA-77120", texte: "FA-77120", page: 1 }] }),
+    ia({
+      valeurs: [
+        { champ: "numero", valeur: "FA-77120", texte: "FA-77120", page: 1 },
+        { champ: "montant_ht", valeur: 1250, texte: "Total HT 1 250,00", page: 1 },
+      ],
+    }),
     null,
     [FACTURE_GEDIMAT],
     "natif",
     0,
   );
   const v = (c: string) => b.resultat.valeurs.find((x) => x.champ === c);
-  assertEquals(v("mention.exoneration_tva")?.valeur, "Exonération de TVA conformément à l'article 295 du CGI");
-  assert(v("mention.exoneration_tva")?.verifiee);
+  assertEquals(v("mention.exoneration")?.valeur, "Exonération de TVA conformément à l'article 295 du CGI");
+  assert(v("mention.exoneration")?.verifiee);
   assertEquals(v("fournisseur.siren")?.valeur, "303120638");
   assert(v("fournisseur.siren")?.verifiee, v("fournisseur.siren")?.controle);
   assertEquals(v("fournisseur.siren")?.texte, "RC Pointe-à-Pitre B 303 120 638");
@@ -100,6 +105,22 @@ Deno.test("Gedimat : mention d'exonération, SIREN du RCS et IBAN masqué relev�
   assert(!iban.verifiee);
   assert(String(iban.valeur).startsWith("FR763000"), String(iban.valeur));
   assert(iban.controle?.includes("masqué"), iban.controle);
+  const ventilation = v("tva.ventilation")!;
+  assertEquals(ventilation.valeur, [
+    { categorie: "E", taux: 0, base: 1250, montant: 0, motif: "Exonération de TVA conformément à l'article 295 du CGI" },
+  ]);
+  assert(ventilation.verifiee, ventilation.controle);
+});
+
+Deno.test("exonération : une ventilation rendue par le modèle, ou une TVA non nulle, n'est pas remplacée", async () => {
+  const { ventilationExoneree } = await import("../verifier.ts");
+  const base = [
+    { champ: "mention.exoneration", valeur: "art. 295 du CGI", source: "ia" as const, verifiee: true },
+    { champ: "montant_ht", valeur: 100, source: "ia" as const, verifiee: true },
+  ];
+  assertEquals(ventilationExoneree([...base, { champ: "montant_tva", valeur: 8.5, source: "ia" as const, verifiee: true }]), null);
+  assertEquals(ventilationExoneree([...base, { champ: "tva.ventilation", valeur: [], source: "ia" as const, verifiee: true }]), null);
+  assertEquals(ventilationExoneree([base[1]]), null);
 });
 
 Deno.test("Gedimat : ce que le modèle rend lui-même n'est pas doublé ; un IBAN masqué qu'il cite reste, à vérifier", () => {
@@ -113,7 +134,7 @@ Deno.test("Gedimat : ce que le modèle rend lui-même n'est pas doublé ; un IBA
   assert(iban.controle?.includes("partiellement masqué"), iban.controle);
   assert(verif.valeurs.find((x) => x.champ === "fournisseur.siren")!.verifiee);
   const ajouts = completerDepuisTexte(verif.valeurs, [FACTURE_GEDIMAT], CHAMPS_PAR_NOM);
-  assertEquals(ajouts.map((a) => a.champ), ["mention.exoneration_tva"]);
+  assertEquals(ajouts.map((a) => a.champ), ["mention.exoneration"]);
 });
 
 Deno.test("RCS : deux SIREN différents (émetteur et client) → on ne choisit pas ; celui de l'acheteur est écarté", () => {
@@ -145,9 +166,9 @@ Deno.test("IBAN : clé modulo 97, masques reconnus", () => {
   assert(v.controle?.includes("clé IBAN invalide"), v.controle);
 });
 
-Deno.test("format de lecture : taxes_hors_tva dans l'outil FILED et ses dérivés, absent des modules sans lignes", () => {
+Deno.test("format de lecture : taxes_autres dans l'outil FILED et ses dérivés, absent des modules sans lignes", () => {
   const props = (m: string) => (schemaOutilPour(m) as { properties: Record<string, unknown> }).properties;
-  assert("taxes_hors_tva" in props("filed"));
-  assert("taxes_hors_tva" in props("nobat"), "un module sans schéma propre lit comme FILED");
-  assert(!("taxes_hors_tva" in props("tamila")));
+  assert("taxes_autres" in props("filed"));
+  assert("taxes_autres" in props("nobat"), "un module sans schéma propre lit comme FILED");
+  assert(!("taxes_autres" in props("tamila")));
 });

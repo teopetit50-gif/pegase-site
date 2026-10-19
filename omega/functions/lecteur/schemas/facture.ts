@@ -35,7 +35,7 @@ export const CHAMPS_FACTURE: ChampFacture[] = [
     champ: "montant_tva",
     type: "nombre",
     cle: true,
-    description: "Total de TVA, et rien d'autre : l'octroi de mer (OMR, OMRI) et les autres taxes hors TVA vont dans taxes_hors_tva.",
+    description: "Total de TVA, et rien d'autre : l'octroi de mer (OMR, OMRI) et les autres taxes hors TVA vont dans taxes_autres.",
   },
   { champ: "montant_ttc", type: "nombre", cle: true, description: "Total toutes taxes comprises." },
   { champ: "net_a_payer", type: "nombre", description: "Net à payer s'il diffère du TTC (acompte déduit, retenue…)." },
@@ -83,7 +83,7 @@ export const CHAMPS_FACTURE: ChampFacture[] = [
   { champ: "mention.autoliquidation", type: "booleen", description: "true si la pièce porte la mention « autoliquidation » (TVA due par le preneur)." },
   { champ: "mention.franchise_293b", type: "booleen", description: "true si la pièce porte « TVA non applicable, art. 293 B du CGI »." },
   {
-    champ: "mention.exoneration_tva",
+    champ: "mention.exoneration",
     type: "texte",
     max: 300,
     description:
@@ -136,9 +136,9 @@ export const CHAMPS_LIGNE = [
 /** Les colonnes d'une ligne de ventilation de TVA (filed_factures_tva). */
 export const CHAMPS_VENTILATION = ["categorie", "taux", "base", "montant", "motif"] as const;
 
-/** Les colonnes d'une taxe hors TVA (octroi de mer…), valeur « taxes.hors_tva ». */
-export const CHAMPS_TAXE = ["nature", "libelle", "base", "taux", "montant"] as const;
-export const NATURES_TAXE = ["OMR", "OMRI", "autre"] as const;
+/** Les colonnes d'une taxe hors TVA (octroi de mer…), valeur « taxes.autres » (nom convenu avec A4, a4_58). */
+export const CHAMPS_TAXE = ["code", "libelle", "base", "taux", "montant"] as const;
+export const CODES_TAXE = ["OMR", "OMRI", "autre"] as const;
 
 /** Les natures de pièce que private.filed_nature_de reconnaît ; tout autre type devient « autre ». */
 export const TYPES_PIECE = [
@@ -257,7 +257,8 @@ export const SCHEMA_OUTIL_LECTURE: Record<string, unknown> = {
     },
     tva_ventilation: {
       type: "array",
-      description: "La ventilation de TVA par taux, si le document la donne.",
+      description:
+        "La ventilation de TVA par taux, dès que le document porte un montant de TVA ou une exonération : une entrée par taux ; la base exonérée en catégorie E, taux 0, avec son motif. Jamais l'octroi de mer, qui va dans taxes_autres.",
       items: {
         type: "object",
         required: ["taux", "page"],
@@ -271,15 +272,15 @@ export const SCHEMA_OUTIL_LECTURE: Record<string, unknown> = {
         },
       },
     },
-    taxes_hors_tva: {
+    taxes_autres: {
       type: "array",
       description:
-        "Les taxes et droits facturés EN PLUS de la TVA, une entrée par taxe imprimée : octroi de mer (OMR), octroi de mer régional (OMRI), autre taxe (éco-contribution, taxe spéciale…). Jamais la TVA elle-même.",
+        "Les taxes et droits facturés EN PLUS de la TVA, une entrée par taxe imprimée : octroi de mer (OMR), octroi de mer régional (OMRI), autre taxe (éco-contribution, taxe spéciale…). Jamais la TVA elle-même, qui va dans tva_ventilation.",
       items: {
         type: "object",
-        required: ["nature", "montant", "page"],
+        required: ["code", "montant", "page"],
         properties: {
-          nature: { type: "string", enum: [...NATURES_TAXE], description: "OMR = octroi de mer ; OMRI = octroi de mer régional ; autre = toute autre taxe hors TVA." },
+          code: { type: "string", enum: [...CODES_TAXE], description: "OMR = octroi de mer ; OMRI = octroi de mer régional ; autre = toute autre taxe hors TVA." },
           libelle: { type: ["string", "null"], description: "Le libellé imprimé (« OMR », « Octroi de mer régional »)." },
           base: nombreOuTexte,
           taux: { ...nombreOuTexte, description: "Le taux en pourcentage (2,5 pour « 2,5 % »)." },
