@@ -269,3 +269,12 @@ do $$ begin
       using (client_id in (select private.mes_clients()) and private.voit_entite(client_id, id));
   end if;
 end $$;
+
+-- ── Pour c3_23a (dépôt d'une réception) : la garde d'ouvrier et la résolution de boîte, imitées ──
+create or replace function private.exiger_ouvrier() returns void language plpgsql stable security definer set search_path to '' as $$
+begin
+  if not private.reput_est_serveur() then raise exception 'Réservé aux ouvriers d''Omega.' using errcode = '42501'; end if;
+end $$;
+create or replace function private.resoudre_boite(p_canal text, p_boite text) returns jsonb language sql stable security definer set search_path to '' as $$
+  select null::jsonb
+$$;
