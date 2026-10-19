@@ -139,3 +139,16 @@ export const separer = (demande: string) => rpc("reput_separer", { p_demande: de
 /* Le second sujet d'une demande (c3_16) : le second service est prévenu s'il en a un autre. */
 export const noterSujetSecondaire = (demande: string, sujet: string | null) =>
   rpc<{ prevenus?: number }>("reput_noter_sujet_secondaire", { p_demande: demande, p_sujet: sujet });
+
+/* Les réglages par site (c3_17) : la vue au périmètre, régler un site, le ramener à l'organisation. */
+export type ReglageSite = { entite_id: string; nom: string; type: string; principale: boolean; source: "organisation" | "propres";
+  signature: string; ton: "vouvoiement" | "tutoiement"; formule_appel: string; formule_politesse: string };
+export async function chargerSites(client: string): Promise<ReglageSite[]> {
+  const { data, error } = await createClient().from("reput_reglages_sites")
+    .select("entite_id, nom, type, principale, source, signature, ton, formule_appel, formule_politesse").eq("client_id", client).order("nom");
+  if (error) throw new ErreurPorte(message(error));
+  return (data ?? []) as ReglageSite[];
+}
+export const reglerSite = (client: string, entite: string, champs: Pick<ReglageSite, "signature" | "ton" | "formule_appel" | "formule_politesse">) =>
+  rpc("reput_regler", { p_client: client, p_entite: entite, p_reglages: champs });
+export const suivreOrganisation = (client: string, entite: string) => rpc("reput_suivre_organisation", { p_client: client, p_entite: entite });

@@ -17,6 +17,7 @@ import { Loader } from "@/components/ui/loader";
 import { dateCourte } from "../format";
 import { Avis as Bandeau, Pastille, Vide, type Teinte } from "../ui";
 import { avisRecu, programmerAvis, regler } from "./portes";
+import ReglagesSites from "./ReglagesSites";
 import type { Avis, Client, Monde, Reglages } from "./types";
 
 const STATUTS_AVIS: Record<Avis["statut"], { libelle: string; teinte: Teinte }> = {
@@ -144,6 +145,8 @@ export default function ReglagesAvis({ monde, source, client, role, relire, modi
           </div>
         )}
       </section>
+
+      <ReglagesSites key={source} source={source} client={client} dirige={dirige} />
 
       <section className="esp-carte" aria-label="Demandes d'avis">
         <div className="esp-carte-tete"><h2 className="esp-carte-titre">Demandes d&apos;avis</h2></div>

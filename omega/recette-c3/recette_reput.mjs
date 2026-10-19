@@ -75,6 +75,19 @@ for (const largeur of LARGEURS) {
       verifier(!d.scroll && d.elements.length === 0, `${largeur} : aucun débordement (${onglet}) ${d.elements.join(' | ')}`);
       await s.capturer(`${DOSSIER}/reput-${onglet.split(' ')[0].toLowerCase()}-${largeur}.jpg`, { pleine: true });
     }
+    // c3_17 : les réglages par site, sur l'onglet Réglages et avis (le dernier ouvert).
+    verifier(await s.evaluer(`!!document.querySelector('[data-reglages-sites]') && document.body.innerText.includes("Suit l'organisation") && document.body.innerText.includes('Réglages propres')`), `${largeur} : les sites, d'où viennent leurs réglages`);
+    verifier(await s.evaluer(cliquer('Régler ce site')), `${largeur} : « Régler ce site »`);
+    await s.dormir(300);
+    d = await s.evaluer(DEBORDE);
+    verifier(!d.scroll && d.elements.length === 0, `${largeur} : aucun débordement (réglage d'un site) ${d.elements.join(' | ')}`);
+    await s.capturer(`${DOSSIER}/reput-sites-${largeur}.jpg`);
+    verifier(await s.evaluer(cliquer('Enregistrer pour ce site')), `${largeur} : enregistrer pour ce site`);
+    await s.dormir(300);
+    verifier(await s.evaluer(`document.body.innerText.includes('a désormais ses propres réglages')`), `${largeur} : le site a ses propres réglages`);
+    verifier(await s.evaluer(cliquer("Revenir à l'organisation")), `${largeur} : revenir à l'organisation`);
+    await s.dormir(300);
+    verifier(await s.evaluer(`document.body.innerText.includes("reprend les réglages de l'organisation")`), `${largeur} : le site reprend les réglages de l'organisation`);
     // c3_13 : l'envoi automatique se coupe et se rallume depuis « Sujets autorisés ».
     verifier(await s.evaluer(cliquer('Sujets autorisés', '[role=tab]')), `${largeur} : onglet Sujets autorisés (envoi automatique)`);
     await s.dormir(300);
