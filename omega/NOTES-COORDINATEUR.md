@@ -1294,3 +1294,21 @@ NOBAT (6 vraies pièces, client banc) : le lecteur A1 8596e165 relève taxes.aut
 
 ### Arrêt (19/10, 14 h 55 Z) : versions d'arrêt
 A1 8596e165 · A4 89599be6 · C2 879dce0c · C3 a67a4e04 · C4 db647d2f. A2, A3, A5, les B et C1 n'ont pas été réveillés.
+
+## 19/10 14 h 55 Z → 17 h 50 Z : décisions du bureau (délégation de Teo), puis PAUSE (Teo) à 35 %
+
+Posés et verts sur la recette (niveau 1), en plus de la section précédente :
+- **FILED** : a4_60 (IBAN lu comme TVA), a4_61 (documents de chantier → Daliro ; filed_integrer_piece vérifiée par empreinte), a4_62 (banc de référence, 39 cas ; relevé 4 : contrôles 25/30, champs 16/18), a4_63 v2 (relevé d'heures ↔ facture d'intérim), a4_64 (sceau mensuel au gérant), a4_65 (quota sans blocage, alertes 80/100 %), a4_66 (devis ↔ facture proposé à une personne) ; filed_controler_facture vérifiée par empreinte (deux lignes ajoutées). ^test_a4_ 109/109.
+- **Daliro** : b6_37 (documents de chantier : réserves à lever, références du marché), test b6_33 vert. Écran « Documents du chantier » sur worker-b6 7a0ff42e, **non fusionné** (la prod n'a pas b6_37).
+- **OFFLOAD** : c4_21 (réécriture par règles, sans modèle de langue), c4_22 (Gmail en essai), verts.
+- **REPUT** : c3_22 astreinte, c3_23a socle (canal 'appel', vérifié par empreinte), c3_23 appels transcrits, c3_24 transcription commutable (Twilio / UE), verts.
+- Cas NOBAT du banc remplis à la main sur la recette (hors git).
+
+Attend Teo :
+- **Déployer l'Edge lecteur** depuis worker-a1 4a4ad9e1 (SIREN depuis SIRET, IBAN, octroi de mer, exonération, types chantier et relevé d'heures ; ajouter analyse/, media/, mesure/ et _partage/) : non fait. Puis relire R2026-000045, 47, 53 et les 6 pièces chantier, un job à la fois.
+- **Redéployer reput-appels v2** depuis worker-c3 4ab27cb0 (+ reput-astreinte/twilio.ts) ; le 403 vient de l'Auth Token : Twilio signe avec le jeton PRINCIPAL, et REPUT_APPELS_URL doit être exactement l'URL de la console.
+- **Import OFFLOAD des personnes morales** (script worker-c4 6f0a05b2) : la garde de C4 a refusé la vraie liste ; non joué, en attente d'une confirmation écrite de Teo.
+- Accord permanent du gérant pour l'envoi seul du sceau mensuel (envoi.email / filed_sceau) ; fournisseur de transcription UE ; écran des exports FILED.
+
+### REPRISE (19/10, 17 h 50 Z) : versions d'arrêt
+A1 4a4ad9e1 · A4 ca5e4aa0 · B6 7a0ff42e · C2 879dce0c · C3 4ab27cb0 · C4 6f0a05b2. Routine 3 h coupée. Reprise samedi 25/10 après 02 h Z ou au feu vert de Teo.
