@@ -1,5 +1,9 @@
 # NOTES-A1 — ouvrier LECTEUR (session worker A1)
 
+## 19/10, lot « relevé d'heures » (décision du bureau par délégation de Teo, sur be522355)
+- Le schéma FILED gagne `releve_heures` : `agence`, `interimaire`, `client`, `periode_du`, `periode_au`, `total_heures`, `signature_client`, et `lignes` [{date, heures, taux si écrit, page}]. La liste est vérifiée si chaque jour se retrouve sur sa page et si la somme égale le total écrit.
+- 5 tests, 178 au total. L'Edge lecteur est à redéployer.
+
 ## 19/10, lot unique (feu vert de Teo, 14 h 42 Z) : pièces des Antilles (NOBAT)
 - Le format de lecture FILED gagne `taxes_autres`, rendu dans `taxes.autres` (OMR, OMRI, autre) : on a HT + TVA + taxes = TTC.
 - Nouveau champ `mention.exoneration`. Le SIREN est tiré du RCS (« RC <ville> B nnn nnn nnn »).

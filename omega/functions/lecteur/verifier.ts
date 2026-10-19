@@ -625,3 +625,67 @@ export function valeurListeObjets(
     controle: `${retrouves}/${elements.length} éléments retrouvés sur leur page`,
   };
 }
+
+/** « 7h30 », « 7:30 », « 7,5 » → 7.5 ; null si ce n'est pas une durée. */
+export function heuresDepuisTexte(v: unknown): number | null {
+  if (typeof v === "number") return Number.isFinite(v) && v >= 0 && v <= 24 ? v : null;
+  const t = String(v ?? "").trim().toLowerCase();
+  const hm = t.match(/^(\d{1,2})\s*(?:h|:)\s*(\d{2})?$/);
+  const n = hm ? Number(hm[1]) + (hm[2] ? Number(hm[2]) / 60 : 0) : nombreDepuisTexte(t.replace(/\s*h(eures?)?$/, ""));
+  return n !== null && n >= 0 && n <= 24 ? Math.round(n * 100) / 100 : null;
+}
+
+/** Les formes imprimées d'une durée (7.5 → « 7,5 », « 7.5 », « 7h30 », « 7:30 »). */
+function formesHeures(h: number): string[] {
+  const ent = Math.floor(h);
+  const min = Math.round((h - ent) * 60);
+  const formes = [String(h).replace(".", ","), String(h), `${ent}h${String(min).padStart(2, "0")}`, `${ent}:${String(min).padStart(2, "0")}`];
+  if (min === 0) formes.push(`${ent}h`, `${ent},00`, `${ent}.00`);
+  return formes;
+}
+
+/** Les formes imprimées d'une date ISO (« 14/10/2026 », « 14/10/26 », « 14/10 », « 14.10.2026 »). */
+function formesDate(iso: string): string[] {
+  const [a, m, j] = iso.split("-");
+  return [`${j}/${m}/${a}`, `${j}/${m}/${a.slice(2)}`, `${j}.${m}.${a}`, `${j}-${m}-${a}`, `${j}/${m}`, iso];
+}
+
+/**
+ * Les heures d'un relevé d'intérimaire : une seule valeur « lignes » [{date, heures, taux?, page}]. Une ligne sans
+ * date lisible ou sans heures n'est pas rendue. Vérifiée si chaque date et ses heures se retrouvent sur leur page,
+ * et si la somme égale le total écrit (quand il l'est).
+ */
+export function valeurHeures(brutes: LigneBrute[] | undefined, pages: PageLue[], totalEcrit: number | null): ValeurLue | null {
+  if (!Array.isArray(brutes) || brutes.length === 0) return null;
+  const parNumero = new Map(pages.map((p) => [p.n, p]));
+  let retrouvees = 0;
+  const lignes: Record<string, unknown>[] = [];
+  for (const l of brutes.slice(0, MAX_LIGNES)) {
+    if (!l || typeof l !== "object") continue;
+    const date = dateIso(l.date);
+    const heures = heuresDepuisTexte(l.heures);
+    if (!date || heures === null) continue;
+    const e: Record<string, unknown> = { date, heures };
+    const taux = l.taux === undefined || l.taux === null || l.taux === "" ? null : nombreDepuisTexte(l.taux);
+    if (taux !== null) e.taux = taux;
+    const page = Number.isInteger(l.page) ? parNumero.get(l.page as number) : undefined;
+    if (page) {
+      e.page = page.n;
+      const ok = (formes: string[]) => formes.some((f) => retrouver(f, page.texte).trouve);
+      if (ok(formesDate(date)) && ok(formesHeures(heures))) retrouvees++;
+    }
+    lignes.push(e);
+  }
+  if (lignes.length === 0) return null;
+  const somme = Math.round(lignes.reduce((s, e) => s + (e.heures as number), 0) * 100) / 100;
+  const ecart = totalEcrit !== null && Math.abs(somme - totalEcrit) > 0.01;
+  return {
+    champ: "lignes",
+    valeur: lignes,
+    page: lignes.find((e) => typeof e.page === "number")?.page as number | undefined,
+    source: "ia",
+    verifiee: retrouvees === lignes.length && !ecart,
+    controle: `${retrouvees}/${lignes.length} jours retrouvés sur leur page ; somme ${somme} h` +
+      (totalEcrit === null ? "" : ecart ? ` ≠ total écrit ${totalEcrit} h` : " = total écrit"),
+  };
+}

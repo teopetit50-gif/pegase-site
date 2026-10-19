@@ -198,6 +198,20 @@ Les listes sont **une seule valeur** (tableau jsonb). Chaque élément porte sa 
 - `reserves` : `[{numero, localisation, lot, entreprise, description, echeance, delai, page}]`. `echeance` est une date AAAA-MM-JJ, gardée **seulement si elle est écrite** ; `delai` est repris tel qu'écrit. Une réserve sans description n'est pas rendue.
 - `dispositions` : `[{texte, reference, page}]`. `reference` est la norme ou l'article cité, s'il est écrit.
 
+## Relevé d'heures d'intérimaire lu par FILED (19/10, décision du bureau)
+
+`type_piece = releve_heures`, hors `TYPES_PIECE` : la nature FILED n'en tient pas compte, et Varelo et Daliro ne le lisent pas. Clés : `interimaire` et `lignes`.
+
+| Champ | Type | Sens |
+|---|---|---|
+| `agence` | texte (≤ 200) | l'agence d'intérim, telle qu'écrite |
+| `interimaire` | texte (≤ 200) | l'intérimaire, tel qu'écrit |
+| `client` | texte (≤ 200) | l'entreprise utilisatrice, telle qu'écrite |
+| `periode_du`, `periode_au` | date | la période, si elle est écrite |
+| `total_heures` | nombre | le total écrit (7h30 = 7.5), pas une somme refaite |
+| `signature_client` | booléen | true si la signature du client est visible, false si la case est visiblement vide, rien sinon |
+| **`lignes`** | tableau | `[{date, heures, taux, page}]` : une ligne par jour ; `taux` seulement s'il est écrit. Une ligne sans date lisible ou sans heures n'est pas rendue. La liste est vérifiée si chaque date et ses heures se retrouvent sur leur page, et si leur somme égale `total_heures` quand celui-ci est écrit. |
+
 ## Module Lorani — urbanisme (en service)
 
 Six types, plus `lorani_courrier_autre`, tels que `private.lorani_propositions` les attend (B5, `omega/modules/lorani/CHAMPS-LECTURE-LORANI.md`). Le lecteur choisit la table des types selon `pieces.module` (`omega/functions/lecteur/schemas/modules.ts`) ; une pièce Lorani d'un autre type (une facture, une photo) part en `a_classer`. `numero_dossier` est attendu sur tous les types. Les dates sont en `AAAA-MM-JJ`, les boîtes en fractions de page avec `y` depuis le haut.

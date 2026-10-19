@@ -28,6 +28,7 @@ export interface SortieOutil {
   tva_ventilation?: LigneBrute[];
   taxes_autres?: LigneBrute[];
   reserves?: LigneBrute[];
+  lignes_heures?: LigneBrute[];
   dispositions?: LigneBrute[];
   decoupage?: { pages: number[]; type_piece?: string; numero?: string | null }[];
 }
@@ -209,6 +210,7 @@ export function normaliserSortie(x: unknown): SortieOutil {
     tva_ventilation: tableau<LigneBrute>(o.tva_ventilation),
     taxes_autres: tableau<LigneBrute>(o.taxes_autres),
     reserves: tableau<LigneBrute>(o.reserves),
+    lignes_heures: tableau<LigneBrute>(o.lignes_heures),
     dispositions: tableau<LigneBrute>(o.dispositions),
     decoupage: tableau<{ pages: number[]; type_piece?: string; numero?: string | null }>(o.decoupage).filter((d) =>
       d && Array.isArray(d.pages) && d.pages.length > 0

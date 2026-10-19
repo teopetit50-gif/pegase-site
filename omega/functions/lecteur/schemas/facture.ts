@@ -157,6 +157,24 @@ export const CHAMPS_CHANTIER: ChampFacture[] = [
   { champ: "auteur", type: "texte", max: 200, description: "Plan ou note technique : l'auteur (architecte, bureau d'études), tel qu'écrit." },
 ];
 
+/** Le relevé d'heures d'un intérimaire (19/10, décision du bureau) : hors TYPES_PIECE, comme les documents de chantier. */
+export const CHAMPS_RELEVE_HEURES: ChampFacture[] = [
+  { champ: "agence", type: "texte", max: 200, description: "Relevé d'heures : l'agence d'intérim, telle qu'écrite." },
+  { champ: "interimaire", type: "texte", max: 200, description: "Relevé d'heures : l'intérimaire, tel qu'écrit." },
+  { champ: "client", type: "texte", max: 200, description: "Relevé d'heures : l'entreprise utilisatrice (le client de l'agence), telle qu'écrite." },
+  { champ: "periode_du", type: "date", description: "Relevé d'heures : début de la période, en AAAA-MM-JJ, s'il est écrit." },
+  { champ: "periode_au", type: "date", description: "Relevé d'heures : fin de la période, en AAAA-MM-JJ, s'il est écrit." },
+  { champ: "total_heures", type: "nombre", description: "Relevé d'heures : le total d'heures écrit sur le relevé (7h30 = 7.5), pas une somme refaite." },
+  {
+    champ: "signature_client",
+    type: "booleen",
+    description: "Relevé d'heures : true si la signature du client est visible ; false si la case de signature est visiblement vide ; rien si on ne peut pas le voir.",
+  },
+];
+
+/** Les colonnes d'une ligne d'heures (valeur « lignes » d'un relevé d'heures). */
+export const CHAMPS_LIGNE_HEURES = ["date", "heures", "taux"] as const;
+
 /** Les colonnes d'une réserve (valeur « reserves ») et d'une disposition (valeur « dispositions »). */
 export const CHAMPS_RESERVE = ["numero", "localisation", "lot", "entreprise", "description", "echeance", "delai"] as const;
 export const CHAMPS_DISPOSITION = ["texte", "reference"] as const;
@@ -205,9 +223,9 @@ export const SCHEMA_OUTIL_LECTURE: Record<string, unknown> = {
     motif: { type: "string", description: "Si lisible est false, ou si le type est incertain : pourquoi, en une phrase (≤ 300 caractères)." },
     type_piece: {
       type: "string",
-      enum: [...TYPES_PIECE, ...TYPES_CHANTIER],
+      enum: [...TYPES_PIECE, ...TYPES_CHANTIER, "releve_heures"],
       description:
-        "La nature du document. Documents de chantier : chantier_pv_reserves = PV de réserves (OPR, réception, levée) ; chantier_plan = plan ou cartouche de plan ; chantier_note_technique = note technique ou de calcul, dispositions constructives.",
+        "La nature du document. Documents de chantier : chantier_pv_reserves = PV de réserves (OPR, réception, levée) ; chantier_plan = plan ou cartouche de plan ; chantier_note_technique = note technique ou de calcul, dispositions constructives. releve_heures = relevé d'heures d'un intérimaire.",
     },
     confiance_type: { type: "number", minimum: 0, maximum: 1 },
     manuscrit: { type: "boolean", description: "true si l'essentiel du document est écrit à la main." },
@@ -234,7 +252,7 @@ export const SCHEMA_OUTIL_LECTURE: Record<string, unknown> = {
         required: ["champ", "valeur", "texte", "page"],
         additionalProperties: false,
         properties: {
-          champ: { type: "string", enum: [...CHAMPS_FACTURE, ...CHAMPS_CHANTIER].map((c) => c.champ) },
+          champ: { type: "string", enum: [...CHAMPS_FACTURE, ...CHAMPS_CHANTIER, ...CHAMPS_RELEVE_HEURES].map((c) => c.champ) },
           valeur: {
             type: ["string", "number", "boolean"],
             description: "Nombre pour les montants (point décimal), AAAA-MM-JJ pour les dates, booléen pour les mentions, texte sinon.",
@@ -298,6 +316,21 @@ export const SCHEMA_OUTIL_LECTURE: Record<string, unknown> = {
           base: nombreOuTexte,
           montant: nombreOuTexte,
           motif: { type: ["string", "null"], description: "Motif d'exonération imprimé, s'il y en a un." },
+          page: { type: "integer", minimum: 1 },
+        },
+      },
+    },
+    lignes_heures: {
+      type: "array",
+      description:
+        "Relevé d'heures seulement : une entrée par jour travaillé, telle qu'écrite. Rien de deviné : pas de date déduite d'un jour de semaine, un taux seulement s'il est écrit.",
+      items: {
+        type: "object",
+        required: ["date", "heures", "page"],
+        properties: {
+          date: { type: "string", description: "La date du jour, en AAAA-MM-JJ." },
+          heures: { ...nombreOuTexte, description: "Les heures du jour (7h30 = 7.5)." },
+          taux: { ...nombreOuTexte, description: "Le taux horaire, seulement s'il est écrit sur la ligne." },
           page: { type: "integer", minimum: 1 },
         },
       },

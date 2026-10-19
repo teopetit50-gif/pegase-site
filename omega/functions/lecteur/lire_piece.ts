@@ -20,7 +20,7 @@ import type { ClientClaude } from "@partage/claude.ts";
 import type { PortesAnalyse } from "./analyse/travail.ts";
 import { type BilanAvis, chiffrerLecture, type CoffreTamila, depotDechiffrant, poserAvisTamila } from "./coffre.ts";
 import { lireCsv, lireXlsx } from "./tableur.ts";
-import { completerDepuisTexte, reclasserIdentifiants, valeurListeObjets, valeurLignes, valeurTaxes, valeurVentilation, ventilationExoneree, verifierValeurs } from "./verifier.ts";
+import { completerDepuisTexte, reclasserIdentifiants, valeurHeures, valeurListeObjets, valeurLignes, valeurTaxes, valeurVentilation, ventilationExoneree, verifierValeurs } from "./verifier.ts";
 import { estXmlFacture, lireXmlFacture } from "./xml_facture.ts";
 import { type BilanDecoupage, creerPiecesFilles } from "./decoupage.ts";
 import { concorder } from "./concordance.ts";
@@ -560,6 +560,7 @@ export function reunir(sorties: SortieIa[]): SortieIa {
       tva_ventilation: sorties.find((s) => (s.brut.tva_ventilation ?? []).length > 0)?.brut.tva_ventilation,
       taxes_autres: sorties.find((s) => (s.brut.taxes_autres ?? []).length > 0)?.brut.taxes_autres,
       reserves: sorties.flatMap((s) => s.brut.reserves ?? []),
+      lignes_heures: sorties.flatMap((s) => s.brut.lignes_heures ?? []),
       dispositions: sorties.flatMap((s) => s.brut.dispositions ?? []),
     },
     usage: sorties.reduce((u, s) => ({ tokens_entree: u.tokens_entree + s.usage.tokens_entree, tokens_sortie: u.tokens_sortie + s.usage.tokens_sortie }), { tokens_entree: 0, tokens_sortie: 0 }),
@@ -617,7 +618,7 @@ export function assembler(
   const verif = verifierValeurs(brut.valeurs, pages, pagesPdf, "ia", champs, typeDeclare?.cles ?? []);
   const classees = reclasserIdentifiants(verif.valeurs, champs);
   const valeurs: ValeurLue[] = [...classees, ...completerDepuisTexte(classees, pages, champs)];
-  if (schema.lignes) {
+  if (schema.lignes && type_piece !== "releve_heures") {
     const lignes = valeurLignes(brut.lignes, pages, "ia", schema.colonnesLigne);
     if (lignes) valeurs.push(lignes);
     const ventilation = valeurVentilation(brut.tva_ventilation, pages);
@@ -631,6 +632,10 @@ export function assembler(
   if (type_piece === "chantier_pv_reserves") {
     const reserves = valeurListeObjets("reserves", brut.reserves, pages, CHAMPS_RESERVE, "description");
     if (reserves) valeurs.push(reserves);
+  } else if (type_piece === "releve_heures") {
+    const total = valeurs.find((v) => v.champ === "total_heures")?.valeur;
+    const heures = valeurHeures(brut.lignes_heures, pages, typeof total === "number" ? total : null);
+    if (heures) valeurs.push(heures);
   } else if (type_piece === "chantier_note_technique") {
     const dispositions = valeurListeObjets("dispositions", brut.dispositions, pages, CHAMPS_DISPOSITION, "texte");
     if (dispositions) valeurs.push(dispositions);
