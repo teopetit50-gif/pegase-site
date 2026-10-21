@@ -46,7 +46,7 @@ export const STATUTS: Record<StatutDemande, { libelle: string; teinte: Teinte }>
   envoyee: { libelle: "Répondue", teinte: "vert" },
   refusee: { libelle: "Réponse refusée", teinte: "gris" },
   bloquee: { libelle: "Envoi bloqué", teinte: "rouge" },
-  ignoree: { libelle: "Ignorée", teinte: "gris" },
+  ignoree: { libelle: "Écartée", teinte: "gris" },
 };
 
 const CANAUX: Record<string, string> = { email: "Courriel", whatsapp: "WhatsApp", sms: "SMS", formulaire: "Formulaire du site", appel: "Appel manqué (message transcrit)" };
@@ -201,7 +201,7 @@ export default function EcranReput() {
               ) : (
                 <ul className="esp-liste" aria-label="Demandes">
                   {visibles.map((d) => {
-                    const s = STATUTS[d.statut];
+                    const s = d.statut === "ignoree" && d.regroupee_avec ? { ...STATUTS.ignoree, libelle: "Regroupée" } : STATUTS[d.statut];
                     const sujet = monde.sujets.find((x) => x.code === d.sujet)?.libelle;
                     const rec = monde.receptions[d.reception_id];
                     return (
@@ -320,7 +320,7 @@ function DemandeVue({ demande, monde, decideur, traite, client, source, relire, 
     <div className="esp-carte">
       <div className="esp-carte-tete">
         <h2 className="esp-carte-titre">{demande.de_nom || demande.adresse_reponse || "Client"}</h2>
-        <Pastille teinte={STATUTS[demande.statut].teinte}>{STATUTS[demande.statut].libelle}</Pastille>
+        <Pastille teinte={STATUTS[demande.statut].teinte}>{demande.statut === "ignoree" && demande.regroupee_avec ? "Regroupée" : STATUTS[demande.statut].libelle}</Pastille>
       </div>
       <div className="esp-carte-corps">
         <div className="esp-section-titre">Le message reçu</div>
