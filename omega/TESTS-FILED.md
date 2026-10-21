@@ -228,6 +228,18 @@ seulement « proposé », jamais tenu pour bon (vérifié par le coordinateur). 
   pas partie.` Le refus arrive **avant** le contrôle de la date de fin. Le valideur du banc n'est pas « membre de l'organisation », alors
   qu'il peut décider une demande (V1b). C'est soit un trou dans le montage du banc, soit une incohérence du socle : Q16. Tant que le
   banc n'a pas un second membre, D1 à D3 ne sont **pas testables**.
+- **Q16 réglée** : mon insert omettait `client_id`, l'erreur venait de moi et pas du banc. Rejoué avec `client_id = 'dddddddd-…00f1'`
+  (gérant → valideur, entité `fba91a52-…`, module `filed`) :
+  - **D1**, sans date de fin, transaction annulée → `ERROR 23502: null value in column "fin" of relation "delegations" violates not-null
+    constraint`. **Juste** (`:71`) : pas de délégation sans fin. Observation : le message est brut, c'est une contrainte et non un texte
+    destiné au client. C'est sans conséquence si l'écran le traduit, ce que je ne vois pas.
+  - **D2**, fin (22/10) antérieure au début (29/10), transaction annulée → `ERROR 23514: … violates check constraint "delegations_periode"`.
+    **Juste**, avec la même observation sur le message.
+  - **D3**, du 22/10 au 29/10, motif « T-FILED D3 : absence fictive du gérant, banc », validée (`commit`) → `{debut: "2026-10-22
+    00:00:00+00", fin: "2026-10-29 00:00:00+00", motif: "…"}`. **Juste** pour la pose. **Observation** : les dates sont stockées en
+    minuit **UTC**. Pour un client en Guadeloupe (UTC−4), une délégation « jusqu'au 29/10 » s'éteint le 28/10 à 20 h, heure locale, et elle
+    commence le 21/10 à 20 h (`:177` « s'éteint à la date prévue »). L'extinction réelle et l'usage de la délégation, c'est-à-dire une
+    approbation par le délégataire, ne sont **pas testables** : il faudrait attendre la date et avoir une facture dans le circuit.
 - Pour info : A4 a livré TFILED-08 (a4_73), mais le correctif n'est **pas encore posé** sur la recette. À revérifier quand il le sera.
 
 ### Jeu d'essai série 1 (prêt, pas encore joué)
@@ -289,9 +301,9 @@ par les portes `public.filed_confirmer_fournisseur(uuid, text)` et `public.filed
 
 ## REPRISE
 
-**Arrêt 8 — 21/10/2026, 21 h 30** (remplace les arrêts précédents)
+**Arrêt 9 — 21/10/2026, 20 h 30 Z** (remplace les arrêts précédents)
 - Fait : séries 1, 1b et 2 (partielle), niveau 1. Juste : F1, F2b, F2c, F3 et F4b (après a4_71 et a4_72), F4a, F5, F8, F11 (contre la l. 31), F12, rejeu, exports Sage et Pennylane vides, V1b (rejet de l'IBAN et recontrôle). Écarts ouverts : TFILED-07 et TFILED-06 (remontés à Teo), TFILED-08 (à A4). Pas couvert : TFILED-05. Pas testable sans tiers : F0 « sans arrêt », circuit des factures (seuil, double approbation, `:74`), FEC (le banc n'a pas de SIREN).
-- En cours : délégation D1 à D3, bloquée par Q16 (le valideur n'est pas membre de l'organisation).
-- Prochain pas : rejouer D1 à D3 quand le coordinateur dit que la recette répond. Puis, si l'on veut tester le circuit des factures, il faut un SIREN que VIES reconnaît sur le banc ou une décision de la file à l'écran, ce qui est l'affaire du coordinateur ou du bureau.
-- Questions : **Q16** : le valideur `…02f1` n'est pas « membre de l'organisation » au sens des délégations, alors qu'il décide des demandes. Faut-il compléter le banc (en faire un membre), ou est-ce une incohérence du socle ? Reste l'observation pour Teo : « déposer » vaut-il « saisir » au sens de `:74` ? Et TFILED-08 est à revérifier une fois a4_73 posé.
+- En cours : rien. D1 à D3 sont joués.
+- Prochain pas : revérifier TFILED-08 une fois a4_73 posé. Puis, si l'on veut tester le circuit des factures, il faut un SIREN que VIES reconnaît sur le banc ou une décision de la file à l'écran, ce qui est l'affaire du coordinateur ou du bureau.
+- Questions : Q16 réglée (mon erreur : `client_id` manquant). Reste l'observation pour Teo : « déposer » vaut-il « saisir » au sens de `:74` ? Et TFILED-08 est à revérifier une fois a4_73 posé.
 - SHA d'arrêt : voir le commit « T-FILED série 2 : V1 qualifié, recette injoignable » sur `testeur-filed`.
