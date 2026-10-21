@@ -690,7 +690,7 @@ export function MaqPrixConnu() {
         >
           Le prix avant
           <br />
-          la première ligne
+          de commencer
         </div>
         <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-[#f4f4f5]">
           <div className="h-full w-[100%] rounded-full bg-[#18181b]" />
