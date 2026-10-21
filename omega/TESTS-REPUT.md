@@ -137,6 +137,7 @@ Chaque série = 16 dépôts, puis rejeu à l'identique (même id externe).
 | R12 (1342) | capacites/accueil.ts:21, :154 | injection | refus calme, rien divulgué | « Nous ne pouvons pas communiquer la liste de nos clients ni d'informations internes », aucune donnée, transfert | juste | 1 |
 | R13, accord | accueil.ts:430 (« vous décidez poste par poste ») | accord « horaires » en envoi seul | l'accord passe par une décision | décidé par le valideur (`approbations`, « approuve », 19 h 31 UTC) → validation `executee`, accord `active` ; avant cela, `reput_activer_accord_seul` refusé au gérant : « Un autre décideur existe… l'accord s'active par lui » ; `reput_donner_accord` → validation `politique.activer` `3fd95f5a…` `en_attente`. Résumé affiché : « Accord permanent : Accord permanent : … » (préfixe en double, à l'écran) | juste (quatre yeux) ; libellé en double à noter | 1 |
 | R13a (1350) | accueil.ts:430 | « À quelle heure fermez-vous le vendredi ? », sujet autorisé, accord actif | part seul, en essai, sans relecture | brouillon exact (« nous fermons donc à 16 h 30 », K1), `reput.repondre.horaires`. La validation s'exécute **sans décision humaine** et finit en `echec_execution` ; envoi `bloque` (aucun réglage d'envoi sur le banc : attendu, coordinateur) | juste (le départ seul est tenté, le socle retient) ; pas d'envoi d'essai visible sans réglage d'envoi | 1 |
+| Préfixe, rejeu c3_27 | accueil.ts:430 | nouvel accord « devis », donné par le gérant (19 h 46) | résumé sans préfixe en double | validation `1c341f7e…` : « Accord permanent : Réponses « Demande de devis » envoyées sans relecture » ✔ (les anciennes `3fd95f5a`, `189b1b52` gardent leur libellé, comme annoncé). Rejetée ensuite par le valideur → `rejetee`, accord `refusee` : rien d'actif ajouté sur le banc | juste (corrigé) | 1 |
 | R13b (1351) | accueil.ts:430 | « Combien coûte le diagnostic à domicile ? », sujet protégé | attend une personne | brouillon exact (75 €, K4), validation `reput.repondre.tarifs` `en_attente` | juste | 1 |
 | REJEU | CONTRAT-TESTEUR § 3 | les 12 à nouveau, mêmes identifiants | rien de nouveau | 12 × `nouvelle: false`, mêmes id ; compteurs inchangés : 11 demandes, 11 réponses, 11 validations, 12 envois | juste | 1 |
 | Base | accueil.ts:94 | fiches écrites par le gérant | — | `validee` dès l'écriture ; voulu côté produit, le gérant en est l'auteur (coordinateur) | observation | 1 |
@@ -222,7 +223,7 @@ Lecture : sous `set local role authenticated` + claims `sub = eeeeeeee-0000-4000
 ## REPRISE
 
 - **Fait** : séries 1 et 2 jouées. Écarts TREPUT-01 à 07 (05 = compteur envoyées seules ; 07 = « export » chez C3). L'accusé est requalifié « pas testable sans réglage ».
-- **En cours** : rien. Le correctif c3_25 (TREPUT-04) est en test chez le coordinateur.
+- **En cours** : rien. Préfixe en double rejoué après c3_27 : juste. 01, 03 et 04 attendent le redéploiement de `reput-reponse`.
 - **Prochain pas** : quand le bureau aura redéployé l'ouvrier `reput-reponse`, rejouer R11 (c3_25) et R8, puis R7a/R7b « hors base » (TREPUT-03), R10, R7b, le point du matin et l'export.
 - **Questions** : aucune bloquante.
 - **SHA d'arrêt** : voir le commit « T-REPUT : renumérotation (TREPUT-05), accusé pas testable sans réglage ».
