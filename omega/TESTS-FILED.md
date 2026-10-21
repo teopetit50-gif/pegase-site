@@ -231,7 +231,7 @@ ne peuvent pas être la même personne » ; carte « Des rôles et des délégat
   montre toujours « En attente d'approbation » (1 pièce, 846,30 €). Le coordinateur regarde si l'exécution est différée ou en panne.
   Verdict suspendu.
 
-**TFILED-15 · sceau mensuel · le gérant ne peut pas activer seul la politique, contre la décision de Teo du 21/10** (socle 19av)
+**~~TFILED-15~~ · RETIRÉ (pas un écart)** : la politique `bb14ca0d` est sur le banc principal (client `cccccccc…`), pas sur `banc-test-filed`. Mon gérant n'en est pas membre, donc **le refus était juste** (cloisonnement entre clients). Sur le bon client, le gérant seul l'a approuvée à 23 h 22 Z : approbation marquée « [seul décideur] », demande « executee », politique « active ». Point (1) **juste, constaté par le coordinateur** (pas par mes portes). Trace d'origine :
 - Contexte (relayé) : la politique `bb14ca0d` (filed/envoi.email) est « a_valider », avec sa demande `politique.activer`
   `1c907dd3-7dae-475e-9dce-b70900e9bec4`, « en_attente ». Le gérant en est aussi le demandeur.
 - En gérant `eeeeeeee-…01f1`, à 23 h 26 Z : `insert into public.approbations (demande_id, client_id, user_id, decision, commentaire)
@@ -405,6 +405,6 @@ par les portes `public.filed_confirmer_fournisseur(uuid, text)` et `public.filed
 
 **Arrêt 15 — 21/10/2026, 23 h 25 Z** (réveil court, rejeu demandé par le coordinateur)
 - Fait : TFILED-09 et 10 revérifiés et justes (socle 19ax). TFILED-12 clos par décision de Teo : la conformité vient de C1, le rejeu est impossible faute de demande ouverte.
-- (1) Joué à 23 h 26 Z : **refusé** (« Ce rôle ne peut pas décider de cette demande. ») → **TFILED-15**, écart.
-- Prochain pas : revérifier TFILED-15 au correctif. Ensuite, arrêt jusqu'au feu vert de Teo, ou samedi 25/10 après 02 h Z.
+- (1) Joué à 23 h 26 Z sur une demande d'un autre client, donc refus juste (cloisonnement). Sur le bon client, le coordinateur constate qu'il est juste. TFILED-15 est retiré.
+- Prochain pas : aucun. arrêt jusqu'au feu vert de Teo, ou samedi 25/10 après 02 h Z.
 - SHA d'arrêt : voir le commit « T-FILED : rejeu 19ax, TFILED-09 et 10 corrigés, TFILED-12 clos » sur `testeur-filed`.
