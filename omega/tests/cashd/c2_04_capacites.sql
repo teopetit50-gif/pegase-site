@@ -141,7 +141,10 @@ begin
   perform tests.redevenir_admin();
   update public.cashd_reglages set seuil_lre = 1000 where client_id = v_client;
   perform private.cashd_preparer_relances(v_client, j + 5, null);
+  -- un palier précédent est parti : la mise en demeure peut suivre (c2_24)
+  perform tests.c2_parti(x.id) from public.cashd_relances x where x.compte_id = (p ->> 'hotel')::uuid and x.statut <> 'coupee';
   perform private.cashd_preparer_relances(v_client, j + 10, null);
+  perform tests.c2_parti(x.id) from public.cashd_relances x where x.compte_id = (p ->> 'hotel')::uuid and x.statut <> 'coupee';
   perform private.cashd_preparer_relances(v_client, j + 15, null);
   select * into r from public.cashd_relances x where x.compte_id = (p ->> 'hotel')::uuid and x.palier = 'mise_en_demeure' and x.statut <> 'coupee' order by x.jour desc limit 1;
   return next is(r.canal || '/' || (select d.payload ->> 'canal' from public.demandes_validation d where d.id = r.demande_id), 'lre/lre',

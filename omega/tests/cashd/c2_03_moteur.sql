@@ -91,6 +91,7 @@ begin
   perform tests.redevenir_admin();
   return next ok(exists (select 1 from public.regles_validation x where x.client_id = v_client and x.module = 'cashd' and x.montant_min = 2000 and x.actif
                          and x.roles_autorises = array['gerant', 'admin']), 'Le seuil pose une règle de validation du socle pour CASHD');
+  perform tests.c2_parti(r.id);   -- la relance ferme est partie : la mise en demeure peut suivre (c2_24)
   v_b := private.cashd_preparer_relances(v_client, j + 10, null);
   select * into r from public.cashd_relances x where x.compte_id = (p ->> 'hotel')::uuid and x.jour = j + 10;
   select * into d from public.demandes_validation x where x.id = r.demande_id;

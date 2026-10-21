@@ -70,6 +70,7 @@ begin
   return next ok(rc.palier = 'relance' and rc.statut = 'a_valider'
                  and (select d.type_action = 'cashd.relance' and d.statut = 'en_attente' and d.politique_id is null from public.demandes_validation d where d.id = rc.demande_id),
                  'La relance ferme (palier 3) attend une personne, accord ou pas');
+  perform tests.c2_parti(rc.id);   -- la relance ferme est partie : la mise en demeure peut suivre (c2_24)
   perform private.cashd_preparer_relances(v_client, j + 10, null);
   select * into rc from public.cashd_relances x where x.compte_id = v_c and x.jour = j + 10;
   return next ok(rc.palier = 'mise_en_demeure' and rc.canal = 'lre' and rc.statut = 'a_valider'

@@ -50,9 +50,9 @@ begin
   perform private.cashd_preparer_relances(v_client, j + 10, null);
   select * into ra from public.cashd_relances x where x.compte_id = v_a and x.jour = j + 10;
   select * into rb from public.cashd_relances x where x.compte_id = v_b and x.jour = j + 10;
-  return next ok(ra.palier = 'mise_en_demeure' and tests.c2_plat(ra.corps) not like '%précédentes relances%'
-                 and tests.c2_plat(ra.corps) like '%Les sommes suivantes restent impayées%' and tests.c2_plat(ra.corps) like '%mettons en demeure%',
-                 'Mise en demeure sans envoi parti : elle ne cite aucune relance précédente, la mise en demeure reste entière');
+  -- (c2_24 : sans envoi parti, la mise en demeure n'est plus écrite du tout ; le texte sans renvoi reste en défaut de sûreté)
+  return next ok(ra.id is null or ra.palier <> 'mise_en_demeure',
+                 'Mise en demeure sans envoi parti : elle n''est pas écrite (c2_24), elle ne peut donc citer aucune relance précédente');
   return next ok(rb.palier = 'mise_en_demeure' and tests.c2_plat(rb.corps) like '%Malgré nos précédentes relances%',
                  'Après un envoi réellement parti, la mise en demeure cite les relances précédentes');
 end $f$;
