@@ -62,8 +62,11 @@ begin
   raise notice 'OK une levée ancienne ne débloque pas la facture';
 
   -- ── 4. La sortie reste la confirmation, par une autre personne que le déposant ──
+  -- a4_76 (décision de Teo, 21/10) : un gérant confirme seul, sauf au-delà du seuil réglé par l'organisation ;
+  -- ici l'organisation règle le seuil à 0 € : une seconde personne est toujours exigée.
   set local role authenticated;
   perform set_config('request.jwt.claims', json_build_object('sub', v_c, 'role', 'authenticated')::text, true);
+  perform public.filed_regler_seconde_personne(v_cl, 0::numeric);
   begin
     perform public.filed_confirmer_fournisseur(v_four, 'Je l''ai déposée.');
     raise exception 'le déposant a pu confirmer';
