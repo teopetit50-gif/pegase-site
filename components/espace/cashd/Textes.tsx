@@ -409,7 +409,7 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
         <div className="esp-form">
           <div className="esp-form-ligne">
             <label className="rv-libelle">Au-delà de ce montant, demander la date de règlement (€)
-              <input className="rv-champ" inputMode="decimal" value={r.seuil_ton} onChange={(e) => setR({ ...r, seuil_ton: e.target.value })} placeholder="10 000" />
+              <input className="rv-champ" inputMode="decimal" value={r.seuil_ton} onChange={(e) => setR({ ...r, seuil_ton: e.target.value })} placeholder="1 500 (par défaut)" />
             </label>
             <label className="rv-libelle">Proposer un échéancier au-delà de (€)
               <input className="rv-champ" inputMode="decimal" value={r.echelonnement_des} onChange={(e) => setR({ ...r, echelonnement_des: e.target.value })} placeholder="5 000" />

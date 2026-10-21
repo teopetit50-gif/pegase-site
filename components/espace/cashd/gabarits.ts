@@ -109,7 +109,8 @@ export function apercu(
     if (r.moyens_reglement) reglement += `Vous pouvez régler ${r.moyens_reglement.replace(/[.\s]+$/, "")}.\n`;
     if (r.echelonnement_des !== null && r.echelonnement_des !== undefined && total >= r.echelonnement_des) reglement += "Si un règlement en plusieurs fois vous aide, répondez-nous : nous pouvons convenir d'un échéancier.\n";
   }
-  const ton = (ech || cle === "rappel" || cle === "relance") && r.seuil_ton !== null && r.seuil_ton !== undefined && total >= r.seuil_ton
+  /* c2_33 : 1 500 € par défaut, tant que l'organisation n'a pas posé son seuil */
+  const ton = (ech || cle === "rappel" || cle === "relance") && total >= (r.seuil_ton ?? 1500)
     ? "Compte tenu du montant en jeu, merci de nous indiquer dès à présent la date de règlement prévue. " : "";
   const v: Record<string, string> = {
     bonjour: "Bonjour Mme Lefèvre,",
