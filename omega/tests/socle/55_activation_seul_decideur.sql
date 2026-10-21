@@ -65,6 +65,11 @@ begin
   select a.commentaire into com from public.approbations a where a.demande_id = dem and a.user_id = gerant;
   return next is(com, '[seul décideur] Activation de l''accord J-2', 'Le commentaire est marqué « [seul décideur] »');
 
+  -- Cas 2 à 4 : règle d'avant 19av (le gérant ne décidait seul que les accords de la liste blanche). Depuis 19av,
+  -- le gérant décide seul de toute demande (test 64) : ces cas ne s'appliquent plus.
+  if to_regprocedure('private.decide_seul(public.demandes_validation, uuid, uuid)') is not null then
+    return next pass('19av posé : le gérant décide seul de toute demande, cas 2 à 4 couverts par le test 64');
+  else
   -- ── 2. Même cas avec une DAF valideur active : refusé ──
   begin
     insert into auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data, is_sso_user, is_anonymous)
@@ -114,6 +119,8 @@ begin
   return next throws_ok(format('insert into public.approbations (demande_id, client_id, user_id, decision) values (%L, %L, %L, ''approuve'')', dem_libre, client, gerant),
                         '42501', 'Le demandeur ne décide pas de sa propre demande.', 'Type d''action autre que politique.activer : 42501');
   perform tests.redevenir_admin();
+
+  end if;
 
   -- ── 5. Décision au nom d'un autre (délégation) : jamais l'exception ──
   perform tests.endosser(gerant, 'a5-gerant-a@essai.invalid');
