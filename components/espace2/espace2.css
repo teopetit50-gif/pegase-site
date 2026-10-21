@@ -14,7 +14,9 @@
    dans supabase.com/dashboard, thèmes dark et light, recoupés avec une
    capture du tableau de bord de Teo. Page = barre latérale = barre du
    haut (background), cartes un cran plus claires (surface-100), filets
-   en blanc à 7,5 % (border). Seule différence voulue : l'accent reste
+   en blanc à 7,5 % (border). En sombre, les gris sont pris neutres sur
+   la capture de Teo (#141414, #1a1a1a, #f1f1f1…) : la pointe de vert des
+   jetons OKLCH se voyait. Seule différence voulue : l'accent reste
    bleu, à la saturation et à la clarté du vert Supabase (hsl 212 60 % 53 %).
    Finitions relevées sur sa capture le même jour : cartes, cadres et menus
    à 6 px, fenêtres à 8 px, aucune ombre portée (le filet seul), boutons
@@ -117,26 +119,26 @@ html.v2-actif .dlg-panneau {
 /* ——— thème sombre : le choix « sombre », ou « système » sur un poste sombre ——— */
 @media (prefers-color-scheme: dark) {
   html:not([data-v2-theme="light"]) :is(.v2, .v2-jetons, .dlg-panneau) {
-    /* les gris de Supabase (jetons de packages/ui résolus en sRGB le 21/10) : page et barre latérale #131413, carte #181a19, ligne active #1e1e1e, fenêtre #1b1d1c */
-    --v2-bg-100: #181a19;
-    --v2-bg-200: #131413;
-    --v2-bg-eleve: #1b1d1c;
+    /* les gris de Supabase, neutres, lus sur la capture de Teo (21/10) : page et barre latérale #141414, carte #1a1a1a, ligne active #1e1e1e, fenêtre #1c1c1c — la pointe de vert des jetons OKLCH (teinte 157,5) se voyait */
+    --v2-bg-100: #1a1a1a;
+    --v2-bg-200: #141414;
+    --v2-bg-eleve: #1c1c1c;
     --v2-gray-100: #1e1e1e;
-    --v2-gray-200: #1e201f;
-    --v2-gray-300: #262827;
-    --v2-gray-400: #303130;
-    --v2-gray-500: #383938;
-    --v2-gray-600: #989a99;
-    --v2-gray-700: #989a99;
-    --v2-gray-800: #989a99;
-    --v2-gray-900: #bcbdbc;
-    --v2-gray-1000: #edefee;
-    --v2-a-100: #edefee08;
-    --v2-a-200: #edefee0d;
-    --v2-a-300: #edefee11;
-    --v2-a-400: #edefee13;
-    --v2-a-500: #edefee22;
-    --v2-a-600: #edefee2c;
+    --v2-gray-200: #1f1f1f;
+    --v2-gray-300: #262626;
+    --v2-gray-400: #303030;
+    --v2-gray-500: #393939;
+    --v2-gray-600: #999999;
+    --v2-gray-700: #999999;
+    --v2-gray-800: #999999;
+    --v2-gray-900: #bfbfbf;
+    --v2-gray-1000: #f1f1f1;
+    --v2-a-100: #ffffff08;
+    --v2-a-200: #ffffff0d;
+    --v2-a-300: #ffffff11;
+    --v2-a-400: #ffffff13;
+    --v2-a-500: #ffffff22;
+    --v2-a-600: #ffffff2c;
     --v2-blue-100: #001329;
     --v2-blue-200: #001731;
     --v2-blue-400: #002e62;
@@ -162,37 +164,37 @@ html.v2-actif .dlg-panneau {
     --v2-green-900: #85e0ba;
     --v2-green-1000: #d3f8e4;
     --v2-primaire-survol: #5691d5;
-    --v2-bouton: #1e201f;
-    --v2-bouton-survol: #262827;
-    --v2-ombre-bord: 0 0 0 1px #edefee13;
-    --v2-ombre-petite: 0 0 0 1px #edefee13;
-    --v2-ombre-moyenne: 0 0 0 1px #edefee13, 0px 2px 2px #00000052, 0px 8px 8px -8px #00000029;
-    --v2-ombre-menu: 0 0 0 1px #edefee22, 0px 1px 1px #00000005, 0px 4px 8px -4px #0000000a, 0px 16px 24px -8px #0000000f;
-    --v2-ombre-modal: 0 0 0 1px #edefee22, 0px 1px 1px #00000005, 0px 8px 16px -4px #0000000a, 0px 24px 32px -8px #0000000f;
-    --v2-anneau: 0 0 0 1px var(--v2-a-600), 0px 0px 0px 4px #edefee1f;
+    --v2-bouton: #242424;
+    --v2-bouton-survol: #2a2a2a;
+    --v2-ombre-bord: 0 0 0 1px #ffffff13;
+    --v2-ombre-petite: 0 0 0 1px #ffffff13;
+    --v2-ombre-moyenne: 0 0 0 1px #ffffff13, 0px 2px 2px #00000052, 0px 8px 8px -8px #00000029;
+    --v2-ombre-menu: 0 0 0 1px #ffffff22, 0px 1px 1px #00000005, 0px 4px 8px -4px #0000000a, 0px 16px 24px -8px #0000000f;
+    --v2-ombre-modal: 0 0 0 1px #ffffff22, 0px 1px 1px #00000005, 0px 8px 16px -4px #0000000a, 0px 24px 32px -8px #0000000f;
+    --v2-anneau: 0 0 0 1px var(--v2-a-600), 0px 0px 0px 4px #ffffff1f;
     color-scheme: dark;
   }
 }
 html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
-  --v2-bg-100: #181a19;
-  --v2-bg-200: #131413;
-  --v2-bg-eleve: #1b1d1c;
+  --v2-bg-100: #1a1a1a;
+  --v2-bg-200: #141414;
+  --v2-bg-eleve: #1c1c1c;
   --v2-gray-100: #1e1e1e;
-  --v2-gray-200: #1e201f;
-  --v2-gray-300: #262827;
-  --v2-gray-400: #303130;
-  --v2-gray-500: #383938;
-  --v2-gray-600: #989a99;
-  --v2-gray-700: #989a99;
-  --v2-gray-800: #989a99;
-  --v2-gray-900: #bcbdbc;
-  --v2-gray-1000: #edefee;
-  --v2-a-100: #edefee08;
-  --v2-a-200: #edefee0d;
-  --v2-a-300: #edefee11;
-  --v2-a-400: #edefee13;
-  --v2-a-500: #edefee22;
-  --v2-a-600: #edefee2c;
+  --v2-gray-200: #1f1f1f;
+  --v2-gray-300: #262626;
+  --v2-gray-400: #303030;
+  --v2-gray-500: #393939;
+  --v2-gray-600: #999999;
+  --v2-gray-700: #999999;
+  --v2-gray-800: #999999;
+  --v2-gray-900: #bfbfbf;
+  --v2-gray-1000: #f1f1f1;
+  --v2-a-100: #ffffff08;
+  --v2-a-200: #ffffff0d;
+  --v2-a-300: #ffffff11;
+  --v2-a-400: #ffffff13;
+  --v2-a-500: #ffffff22;
+  --v2-a-600: #ffffff2c;
   --v2-blue-100: #001329;
   --v2-blue-200: #001731;
   --v2-blue-400: #002e62;
@@ -218,14 +220,14 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   --v2-green-900: #85e0ba;
   --v2-green-1000: #d3f8e4;
   --v2-primaire-survol: #5691d5;
-  --v2-bouton: #1e201f;
-  --v2-bouton-survol: #262827;
-  --v2-ombre-bord: 0 0 0 1px #edefee13;
-  --v2-ombre-petite: 0 0 0 1px #edefee13;
-  --v2-ombre-moyenne: 0 0 0 1px #edefee13, 0px 2px 2px #00000052, 0px 8px 8px -8px #00000029;
-  --v2-ombre-menu: 0 0 0 1px #edefee22, 0px 1px 1px #00000005, 0px 4px 8px -4px #0000000a, 0px 16px 24px -8px #0000000f;
-  --v2-ombre-modal: 0 0 0 1px #edefee22, 0px 1px 1px #00000005, 0px 8px 16px -4px #0000000a, 0px 24px 32px -8px #0000000f;
-  --v2-anneau: 0 0 0 1px var(--v2-a-600), 0px 0px 0px 4px #edefee1f;
+  --v2-bouton: #242424;
+  --v2-bouton-survol: #2a2a2a;
+  --v2-ombre-bord: 0 0 0 1px #ffffff13;
+  --v2-ombre-petite: 0 0 0 1px #ffffff13;
+  --v2-ombre-moyenne: 0 0 0 1px #ffffff13, 0px 2px 2px #00000052, 0px 8px 8px -8px #00000029;
+  --v2-ombre-menu: 0 0 0 1px #ffffff22, 0px 1px 1px #00000005, 0px 4px 8px -4px #0000000a, 0px 16px 24px -8px #0000000f;
+  --v2-ombre-modal: 0 0 0 1px #ffffff22, 0px 1px 1px #00000005, 0px 8px 16px -4px #0000000a, 0px 24px 32px -8px #0000000f;
+  --v2-anneau: 0 0 0 1px var(--v2-a-600), 0px 0px 0px 4px #ffffff1f;
   color-scheme: dark;
 }
 
