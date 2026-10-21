@@ -162,3 +162,7 @@ c.showPage(); c.save()
 
 for k, f in FOURN.items(): print(k, f["siren"], tva_intra(f["siren"]), f["iban"])
 print("BAR iban 2", IBAN_BAR_2, "| masque F12", masque)
+
+# Série 2 — F2c : 3ᵉ pièce Béton Archipel sur l'IBAN …0309 (seulement « proposé », jamais décidé)
+piece("F2c_iban_propose_non_valide.pdf", dict(base, f=B, numero="BAR-2026-0503", date="20/10/2026", echeance="19/11/2026",
+      lignes=[("Béton prêt à l'emploi C25/30 — m³", 6, 95.00, 8.5)], iban_txt=IBAN_BAR_2))

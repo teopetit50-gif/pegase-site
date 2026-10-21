@@ -161,6 +161,24 @@ Lecture par le coordinateur à l'écran ou en lecture seule, relayée brute ; li
 3. Redéposer F2b n'aurait servi à rien (mêmes octets, donc doublon de fichier). Le coordinateur a plutôt relancé le contrôle sur la facture F2b → `iban.nouveau` bloquant. TFILED-02 est requalifié juste, avec réserve (voir Écarts).
 4. Témoin F0 « sans arrêt » : **pas testable sans tiers**, le coordinateur est d'accord.
 
+### Série 2 — préparation (21/10, 21 h)
+
+Feu vert du coordinateur (Q13) : banc seulement, mode essai, aucun envoi réel possible. Les portes de la série 2 :
+`filed_regler_circuit` (en gérant) ; insertion dans `approbations` (sous le valideur) ; insertion dans `delegations` (sous le
+gérant) ; `filed_exporter_ecritures`, `filed_exporter_tableau`, `filed_exporter_fec`. Réserve 2 de TFILED-02 : l'IBAN `…0309` est
+seulement « proposé », jamais tenu pour bon (vérifié par le coordinateur). La réserve 1 devient **TFILED-08** (A4).
+
+- **F2c** (`pieces/F2c_iban_propose_non_valide.pdf`) : Béton Archipel, BAR-2026-0503 du 20/10/2026, 6 m³ × 95,00 = HT 570,00,
+  TVA 8,5 % 48,45, TTC 618,45, IBAN `…0309`. Attendu (`:57`) : `iban.nouveau` encore posé (l'IBAN n'a pas été décidé), pas de
+  doublon probable (montant différent). À déposer par le coordinateur.
+- **E1, essais d'export** (gérant, `filed_exporter_ecritures`) :
+  - `p_format 'csv'` → `ERROR 22023: Format inconnu : pennylane, sage, cegid ou quickbooks.`, refus lisible. Le brief parlait d'un
+    « export CSV » ; le site promet seulement « le format qu'elle utilise déjà » (`factures.ts:275`). Ce n'est donc pas un écart.
+  - `p_format 'sage'` et `'pennylane'`, avec `p_entite null` → `ERROR 22023: Société introuvable dans cette organisation.` Contrairement
+    au dépôt, `null` ne vaut pas ici « entité principale » (Q14).
+- Attendu de l'export, avant de le jouer : **aucune** des 15 pièces bloquées ni la pièce écartée ne doit y figurer (`factures.ts:283`,
+  « Rien n'entre en silence dans votre comptabilité »).
+
 ### Jeu d'essai série 1 (prêt, pas encore joué)
 
 - Générateur : `omega/testeur-filed/generer_pieces.py` → `omega/testeur-filed/pieces/*.pdf` (15 fichiers, même gabarit).
@@ -223,6 +241,6 @@ par les portes `public.filed_confirmer_fournisseur(uuid, text)` et `public.filed
 **Arrêt 7 — 21/10/2026, 20 h 50** (remplace les arrêts précédents)
 - Fait : séries 1 et 1b, au niveau 1. Juste : F1, F2b (en 1b), F4a, F5, F8, F11 (contre la l. 31), F12, rejeu. Écarts : TFILED-03 et 04 (envoyés à A4). TFILED-07 et TFILED-06 sont remontés à Teo. Pas couvert : TFILED-05 (à Teo). Pas testable sans tiers : F0 « sans arrêt ».
 - En cours : rien.
-- Prochain pas : la série 2, quand le coordinateur la lance. Circuit de validation (seuil de double approbation, délégation datée, saisie et approbation par deux personnes distinctes), puis la sortie comptable (CSV 401/44566/512, FEC). Y ajouter la 3ᵉ pièce Béton Archipel sur l'IBAN `…0309` (réserve 2 de TFILED-02) et l'avoir F6 une fois les arrêts levés.
-- Questions : Q13, pour la série 2. Quelles portes servent à régler le seuil, poser une délégation, approuver et exporter ? Et le valideur `…02f1` peut-il appeler les portes sous sa propre identité ?
+- Prochain pas : la série 2 (feu vert reçu ; F2c générée, à déposer par le coordinateur). Circuit de validation (seuil de double approbation, délégation datée, saisie et approbation par deux personnes distinctes), puis la sortie comptable (CSV 401/44566/512, FEC). Y ajouter la 3ᵉ pièce Béton Archipel sur l'IBAN `…0309` (réserve 2 de TFILED-02) et l'avoir F6 une fois les arrêts levés.
+- Questions : Q13 répondue. **Q14** : (a) l'uuid de l'entité principale du banc ; (b) le sens des 3 uuid de `filed_exporter_fec` ; (c) une porte qui liste les demandes d'approbation (`demande_id`) ; (d) les valeurs admises pour `p_roles`. Point bloquant : toutes les factures sont arrêtées par le registre. Si aucune demande d'approbation n'existe pour une facture bloquée, le circuit de validation n'est **pas testable sans tiers** (il faut un SIREN que VIES connaît, ou une décision de la file à l'écran).
 - SHA d'arrêt : voir le commit « T-FILED série 1b : TFILED-02 requalifié » sur `testeur-filed`.
