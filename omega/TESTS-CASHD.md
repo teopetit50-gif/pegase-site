@@ -68,7 +68,7 @@ Attendus notés **avant** de jouer. « R » = `lib/produits/relances.ts`, « C �
 |---|---|---|---|---|---|---|
 | C0 | R:211 (J+7 rappel), R:186, R:453 | aucune — FB-2026-0100, échue 13/10 (8 j) | rappel palier 1 préparé, en file de validation, rien d'envoyé | rappel préparé, `en_attente` de validation, `envoi_id` null, motif « envoi pas encore réglé » | juste | 1 |
 | C1 | C:52-53 (une séquence par facture) — *pas de ligne explicite sur le doublon* | n° FB-2026-0100 repris sur un autre compte | doublon signalé, pas deux créances sous un même n° relancées sans bruit | import : ligne écartée, motif « numéro déjà porté par la pièce du compte A-C00 », la pièce existante est gardée ; rejeu idem | juste (à l'import ; écran à voir) | 1 |
-| C2 | C:34, C:50 (montant repris) — *le site ne parle pas des lignes* | total TTC 1 185 ≠ lignes 1 085 | signalé, pas de relance sur un montant faux | import accepté sans motif ; **aucune relance préparée et aucun motif** (fiche : actif, ouverte, relançable 1 185) | écart (TCASHD-02, TCASHD-04) | 1 |
+| C2 | C:34, C:50 (montant repris) — *le site ne parle pas des lignes* | total TTC 1 185 ≠ lignes 1 085 | signalé, pas de relance sur un montant faux | import accepté sans motif ; **aucune relance préparée et aucun motif** (fiche : actif, ouverte, relançable 1 185) | écart (TCASHD-02 : retenue juste mais muette) | 1 |
 | C3 | R:210-211 — *pas de ligne explicite* | échéance 05/09 < émission 05/10 | signalée ou retenue, palier pas calculé sur une date absurde | import : ligne écartée, motif « échéance antérieure à l'émission » | juste | 1 |
 | C4 | *aucune ligne du site* ; banc ouvrier : « marquée sans adresse » | e-mail de facturation vide | relance suspendue « pas d'adresse », visible à l'écran | relance `sans_adresse`, motif « le compte n'a pas d'adresse de facturation : relancez-le vous-même ou complétez sa fiche » | juste (écran : en attente du compte) | 1 |
 | C5 | C:78-79, C:146 (virement sans référence ⇒ séquence suspendue) | 500 € reçus sans référence de facture | pas de relance tant que non lettré ; après lettrage J+1, reste dû 585,00 | avant lettrage : aucune relance, mais aucun motif visible (compte `actif`) ; après `cashd_lettrer` : reste 585, rappel 585,00 € préparé | juste (suspension muette, voir TCASHD-04) | 1 |
@@ -98,17 +98,26 @@ puis `select to_jsonb(e) from public.cashd_factures_etat e where client_id = '<c
 - **TCASHD-01** · R1 · rejouer `serie1_import.sql` tel quel · réponse `clients : creees 0, modifiees 14, inchangees 0`
   alors que rien n'a changé (factures et règlements, eux, répondent `inchangees`). Bruit : un rapport d'import qui annonce
   14 modifications fausses masque une vraie modification. Écran : non vu.
-- **TCASHD-02** · C2 · facture `FB-2026-0102`, `montant_ht` 1000, une ligne 1000 HT à 8,5 %, `montant_ttc` **1185** ·
-  réponse : créée sans motif, `reste_relancable` 1185. Le total faux n'est pas signalé (il ne l'est ni sur la ligne, ni
-  sur HT × TVA). Écran : non vu.
-- **TCASHD-03** · C6 · pièce `AV-2026-0006`, `montant_ttc` −200, `commande_ref` « avoir sur FB-2026-0999 » · réponse :
+- **TCASHD-02** · C2 · *(reformulé le 21/10 après vérification du coordinateur : la marque d'incohérence existe en base)*.
+  Ligne importée exacte (jeu `factures`, `serie1_import.sql`) :
+  `{"numero":"FB-2026-0102","compte_ref":"A-C02","date_emission":"2026-09-13","echeance":"2026-10-13","montant_ht":1000,"montant_ttc":1185,"reste_du":1185,"commande_ref":"Chantier : École de Dothémare","lignes":[{"article":"Fer à béton HA10 x200","quantite":1,"prix_ht":1000,"montant_ht":1000,"tva":8.5},{"article":"Octroi de mer et OMR","mention":"inclus dans les prix unitaires"}]}`
+  (pas de champ TVA total : HT 1000, TTC 1185, une ligne 1000 HT à 8,5 %).
+  **L'écart : la marque n'est visible par aucune porte du client.** Réponse brute de `cashd_importer` : `creees 14, ecartees`
+  = seulement C1 et C3, **rien sur FB-2026-0102**. `cashd_fiche_compte('5c06e06e-…')` : pièce `ouverte`, `statut_motif`
+  null, `reste_relancable` 1185, compte `actif`. `cashd_relances_du_jour(client,'2026-10-21')` : **aucune ligne** pour
+  A-C02 (ni préparée, ni bloquée, ni coupée). Le moteur retient bien la facture (pas de relance sur un montant faux :
+  ça, c'est juste), mais en silence : le client ne voit ni l'incohérence ni la retenue. Écran : en attente du compte.
+- **TCASHD-03** · C6 · ligne importée exacte (jeu `factures`) :
+  `{"numero":"AV-2026-0006","compte_ref":"A-C06","date_emission":"2026-10-10","montant_ht":-184.33,"montant_ttc":-200,"reste_du":-200,"commande_ref":"Chantier : Résidence Gosier — avoir sur FB-2026-0999","lignes":[{"article":"Retour marchandise","quantite":1,"prix_ht":-184.33,"montant_ht":-184.33,"tva":8.5},{"article":"Octroi de mer et OMR","mention":"inclus dans les prix unitaires"}]}`
+  (aucun champ `nature` : c'est le moteur qui l'a reconnue comme avoir ; pas d'échéance ; TVA implicite 15,67).
+  Réponse :
   reconnue `nature = avoir` mais rangée `ouverte`, `reste_du` **+200**, `reste_relancable` **200**, aucun signalement.
   Un avoir (somme due AU client) apparaît comme une créance relançable. Non imputé à FB-2026-0106 : ça, c'est juste.
   NB : l'import ne porte aucun champ « facture visée » ; la référence n'est que dans `commande_ref`.
   **Aggravé au passage du matin** : la relance du compte A-C06 réclame « FB-2026-0106 … 1 085,00 € TTC … : **885,00 €**
   restant dus ». Les 200 € de l'avoir orphelin sont déduits de FB-2026-0106 dans le montant réclamé, alors que la fiche
   dit `avoirs_imputes` 0 et `reste_relancable` 1 085. Imputation de fait, au hasard, et deux chiffres contradictoires.
-- **TCASHD-04** · C2 (et C5) · après le passage de J, `cashd_relances_du_jour(client,'2026-10-21')` ne contient aucune
+- **TCASHD-04** · C5 (C2 : voir TCASHD-02) · après le passage de J, `cashd_relances_du_jour(client,'2026-10-21')` ne contient aucune
   ligne pour A-C02 ni A-C05, et `cashd_fiche_compte` des deux comptes ne donne aucun motif (`statut actif`,
   `statut_motif` null, pièce `ouverte`). La retenue est peut-être voulue, mais le client ne peut pas savoir pourquoi la
   facture n'est pas relancée (C2 : total faux ? C5 : règlement à imputer ?). Écran : en attente du compte.

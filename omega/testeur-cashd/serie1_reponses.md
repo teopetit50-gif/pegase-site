@@ -34,6 +34,7 @@ reglements : creees 0, lignes 5, inchangees 5
 | FB-2026-0114 (C13) | facture | 1085 | 1085 | 1085 | ouverte | 35 | 0 |
 
 ## Passage du matin J (2026-10-21)
+- Réponse du coordinateur : `private.cashd_preparer_relances(client,'2026-10-21',null)` → `{preparees 7, bloquees 1, coupees 0, mode_envoi null}` (bloquée = A-C04).
 - Les relances de J portent `cree_le` 19:17:29, avant mon propre appel : le passage a été joué par le coordinateur.
   Mon `public.cashd_preparer_maintenant(client)` juste après → `{preparees 0, coupees 0, bloquees 0}` (rien en double).
 - `public.cashd_relances_du_jour(client, '2026-10-21')` → 8 relances, toutes palier `rappel`, `demande_statut en_attente`,
