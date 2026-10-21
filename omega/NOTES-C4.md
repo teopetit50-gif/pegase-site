@@ -4,11 +4,11 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 `components/espace/offload/`, `app/espace/offload/`, et ce fichier. Coordinateur : session
 `session_01BCGFdpRKBvXKjouC75sYBg`. Je n'appelle jamais Supabase : le coordinateur pose, je reçois les sorties brutes.
 
-## REPRISE (21/10, 23 h 15 Z — décision du bureau « un cycle par trimestre », TOFFLOAD-03)
+## REPRISE (arrêt du 21/10, 23 h 25 Z)
 
-- Fait : c4_01 à c4_29 posés ; c4_30 (date d'achat jugée à Paris) et tests c4_25, c4_27, c4_29 datés à Paris, poussés.
+- Fait : c4_01 à c4_30 posés et verts sur la recette ; T-OFFLOAD a rejoué juste O6 / TOFFLOAD-03.
 - En cours : rien. Import des personnes morales : script livré (6f0a05b2), non joué, attend Teo.
-- Prochain pas : poser c4_29 (et les tests c4_16, c4_18 mis à jour) ; l'écran n'a pas encore le bouton « forcer » (porte offload_forcer_reprise).
+- Prochain pas (noté par le coordinateur) : OFFLOAD raisonne à l'heure de Paris ; un client en Guadeloupe a son fuseau (America/Guadeloupe) : lire le fuseau de l'organisation au lieu de « Europe/Paris ».
 
 ### Reprise du 17/10
 
