@@ -23,7 +23,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, Banknote, Building2, CheckSquare, CircleHelp, Diamond, Home, Bell, Check, CheckCheck, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, LayoutGrid, LifeBuoy, LogOut, Menu as IconeMenu, Moon, Plus, Search, Settings, Sun, Terminal, X } from "lucide-react";
+import { Activity, Banknote, Building2, CheckSquare, CircleHelp, Home, Bell, Check, CheckCheck, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, LayoutGrid, LifeBuoy, LogOut, Menu as IconeMenu, Moon, Plus, Search, Settings, Sun, Terminal, User, X } from "lucide-react";
 import { Button, Dialog, DialogTrigger, Modal, ModalOverlay, Popover, RouterProvider } from "react-aria-components";
 import type { Utilisateur } from "@/lib/compte";
 import { createClient } from "@/lib/supabase/client";
@@ -44,11 +44,6 @@ import { A_PAYER, groupeDe } from "./filed/calculs";
 import { useAujourdhui } from "./horloge";
 import "./espace2.css";
 import "./client.css";
-
-function initiales(u: Utilisateur): string {
-  const i = `${(u.prenom ?? "").trim().charAt(0)}${(u.nom ?? "").trim().charAt(0)}`.toUpperCase();
-  return i || u.email.charAt(0).toUpperCase();
-}
 
 /* un lien vers /espace/… mène à /espace2/… ; « ?ancien=1 » le garde vers l'écran actuel */
 export const versV2 = (href: string) => (/^\/espace(\/|\?|$)/.test(href) && !href.includes("ancien=1") ? href.replace(/^\/espace/, RACINE) : null);
@@ -261,8 +256,9 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
             <button type="button" className="v2-btn v2-btn--petit v2-btn--icone v2-btn--fantome" aria-label="Assistant" onClick={() => setAssistant(true)}>
               <Terminal {...I} />
             </button>
-            {/* les raccourcis vers les moteurs : un menu, comme les icônes d'outils de Supabase */}
-            <MenuDeroulant etiquette="Moteurs : raccourcis vers chaque moteur" classe="v2-btn v2-btn--petit v2-btn--icone v2-btn--fantome v2-masque-mobile" placement="bottom end" largeur={260} declencheur={<Diamond {...I} />}>
+            {/* les raccourcis vers les moteurs : un menu, comme les icônes d'outils de Supabase ; 21/10, l'icône pilotage remplace le losange */}
+            {/* eslint-disable-next-line @next/next/no-img-element -- l'icône pilotage, déjà à sa taille */}
+            <MenuDeroulant etiquette="Moteurs : raccourcis vers chaque moteur" classe="v2-btn v2-btn--petit v2-btn--icone v2-btn--fantome v2-masque-mobile" placement="bottom end" largeur={260} declencheur={<img src="/omega-icone-pilotage.png" alt="" width={16} height={16} />}>
               <SectionMenu titre="Moteurs">
                 {MODULES.map((m) => (
                   <ItemMenu key={m.cle} id={m.cle} href={`${RACINE}/${m.cle}${m.cle === "filed" ? "/a-payer" : ""}`} textValue={m.nom} icone={<m.icone {...I} />}>
@@ -273,7 +269,7 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
             </MenuDeroulant>
             <Link href={`${RACINE}/reglages`} className="v2-haut-compte" aria-label="Compte et réglages">
               <span className="v2-pastille-ronde" aria-hidden="true">
-                {(utilisateur?.prenom ?? "?").charAt(0).toUpperCase()}
+                <User {...I} />
               </span>
             </Link>
           </div>
@@ -330,12 +326,10 @@ function MenuOrganisation({ utilisateur, classe }: { utilisateur: Utilisateur | 
       largeur={260}
       declencheur={
         <>
-          {/* 14/10 — demande de Teo : « mets juste le logo Omega là ». */}
+          {/* 14/10 — demande de Teo : « mets juste le logo Omega là ». 21/10 : l'icône pilotage, la tuile de l'onglet, lisible à 20 px. */}
           <span className="v2-marque-omega" aria-hidden="true">
-            {/* eslint-disable-next-line @next/next/no-img-element -- le logo Omega, déjà à sa taille */}
-            <img src="/logo-pegase-blanc.png" alt="" width={20} height={20} className="oc-logo-sombre" />
-            {/* eslint-disable-next-line @next/next/no-img-element -- la variante noire, pour le thème clair */}
-            <img src="/logo-pegase.png" alt="" width={20} height={20} className="oc-logo-clair" />
+            {/* eslint-disable-next-line @next/next/no-img-element -- l'icône pilotage, déjà à sa taille */}
+            <img src="/omega-icone-pilotage.png" alt="" width={20} height={20} />
           </span>
           <span className="v2-rail-libelle v2-portee-nom">{organisation}</span>
           <ChevronsUpDown width={14} height={14} aria-hidden="true" />
@@ -596,7 +590,7 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
                   declencheur={
                     <>
                       <span className="v2-avatar" aria-hidden="true" data-vide={utilisateur ? undefined : ""}>
-                        {utilisateur ? initiales(utilisateur) : "?"}
+                        <User width={12} height={12} strokeWidth={1.8} />
                       </span>
                       <span className="v2-rail-libelle">{nom ?? "Non connecté"}</span>
                     </>

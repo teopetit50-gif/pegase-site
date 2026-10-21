@@ -47,6 +47,7 @@ import {
   Search,
   Settings,
   Upload,
+  User,
   UserMinus,
   Zap,
   type LucideIcon,
@@ -130,14 +131,13 @@ function Courbe() {
   );
 }
 
-function Cockpit({ email }: Pick<Props, "email">) {
-  const initiale = (email.trim()[0] ?? "O").toUpperCase();
+function Cockpit() {
   return (
     <div className="bv-cockpit">
       <div className="bv-rail">
         <span className="bv-rail-item">
-          {/* eslint-disable-next-line @next/next/no-img-element -- le logo Omega, déjà à sa taille */}
-          <img src="/logo-pegase-blanc.png" alt="" width={20} height={20} />
+          {/* eslint-disable-next-line @next/next/no-img-element -- l'icône pilotage, déjà à sa taille */}
+          <img src="/omega-icone-pilotage.png" alt="" width={20} height={20} />
         </span>
         <div className="bv-rail-nav">
           {RAIL.map((groupe, i) => (
@@ -165,7 +165,9 @@ function Cockpit({ email }: Pick<Props, "email">) {
               <span className="bv-rail-point" />
             </span>
             <span className="bv-rail-item">
-              <span className="bv-avatar bv-rail-avatar">{initiale}</span>
+              <span className="bv-avatar bv-rail-avatar">
+                <User width={12} height={12} strokeWidth={1.8} />
+              </span>
             </span>
           </div>
         </div>
@@ -527,7 +529,7 @@ export function Apercu(p: Props) {
             transition={{ duration: 0.25 }}
             className="bv-fondu-cockpit absolute inset-0"
           >
-            <Cockpit email={p.email} />
+            <Cockpit />
           </motion.div>
         )}
       </AnimatePresence>
