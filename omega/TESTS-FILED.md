@@ -213,6 +213,11 @@ ne peuvent pas être la même personne » ; carte « Des rôles et des délégat
   `{decision: "approuve", user_id: "eeeeeeee-…01f1"}`.
 - Résultat (Q18, relayé) : la demande est **« approuvee »** (`decide_le 20:31:12Z`) sur la seule approbation du déposant
   (`au_nom_de null`, `delegation null`), sans refus ni message. La promesse n'est pas tenue.
+- **Faits relevés par le coordinateur** (20 h 52 Z) : la règle existe dans le socle (« Celui qui a saisi la pièce ne l'approuve pas : une
+  autre personne décide. »), et elle lit `payload.saisi_par` de la demande. Pour F1, venue par le dépôt par lot, on a `depose_par = null`
+  et la source « connecteur », et la demande `7b4464be` porte `saisi_par = []`. Le contrôle n'avait personne à exclure. Le contrôle
+  n'est donc pas en défaut : une pièce venue du dépôt **n'a pas de saisisseur**, et l'ouvreur du dépôt n'est pas tracé comme
+  déposant. **TFILED-12 reste un écart, à décision de Teo.**
 - Réserve, à trancher par Teo : « déposer » vaut-il « saisir » ? Pour une pièce lue par le moteur, le déposant est la seule personne
   qui l'a fait entrer. Si ce n'est pas lui que vise `:74`, alors `:74` ne vise personne dans FILED.
 
