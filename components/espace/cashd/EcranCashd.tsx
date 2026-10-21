@@ -730,7 +730,7 @@ export default function EcranCashd({ vue }: { vue?: Onglet } = {}) {
                           {r.motif ? <span className="c2-sous c2-motif">{r.motif}</span> : null}
                         </summary>
                         {r.corps ? <pre className="c2-corps">{r.corps}</pre> : <p className="c2-sous">Le texte est dans la file de validation.</p>}
-                        {r.etat === "validee" ? <EnvoiMain relance={r} noter={noterEnvoi} /> : null}
+                        {r.etat === "validee" || (r.etat === "non_reglee" && r.demande_statut === "approuvee") ? <EnvoiMain relance={r} noter={noterEnvoi} /> : null}
                       </details>
                     </li>
                   );
