@@ -140,6 +140,18 @@ Lecture par le coordinateur à l'écran ou en lecture seule, relayée brute ; li
 - Observation annexe : sur F4a, `identite.registre` est seulement en **attention** (« pas encore confirmé par VIES »), alors qu'il est
   **bloquant** sur les 15 autres pièces pour le même fournisseur. La gravité dépend du moment de la réponse VIES.
 
+### Série 1b — 21/10, 20 h 40 (portes d'écriture, en gérant `eeeeeeee-…01f1`, client banc seulement)
+
+1. `select public.filed_lever_anomalie('a46345d2-c631-4af3-b713-4bd52b70541e', 'identite.registre', 'T-FILED 1b : …')` (facture F0)
+   → refus : `ERROR 22023: Cette anomalie ne se lève pas d'un motif : elle se corrige, ou se décide par la file.` La transaction est
+   annulée, rien n'est écrit. Le refus est juste et dit pourquoi. Conséquence : le témoin F0 ne peut atteindre la validation « sans
+   arrêt » qu'avec un SIREN que VIES reconnaît, ou par une décision de la file, à l'écran, que je n'ai pas. Le cas F0 « sans
+   arrêt » reste **pas testable sans tiers** (écran ou SIREN réel, refusé en Q11).
+2. `filed_confirmer_fournisseur('dc84c929-…' /* Béton Archipel */, 'T-FILED 1b : …')` → `2`. Puis
+   `filed_confirmer_fournisseur('538937d9-…' /* MCD */, 'T-FILED 1b : …')` → `11`. Lecture de l'agrégat juste après :
+   `bloquees 14, 10813.55` (inchangé : le registre bloque encore toutes les pièces).
+3. Le coordinateur redépose F2b sous un nouveau nom, pour TFILED-02. Résultat à venir.
+
 ### Jeu d'essai série 1 (prêt, pas encore joué)
 
 - Générateur : `omega/testeur-filed/generer_pieces.py` → `omega/testeur-filed/pieces/*.pdf` (15 fichiers, même gabarit).
@@ -199,9 +211,9 @@ par les portes `public.filed_confirmer_fournisseur(uuid, text)` et `public.filed
 
 ## REPRISE
 
-**Arrêt 6 — 21/10/2026, 20 h 35** (remplace les arrêts précédents)
+**Arrêt 6 — 21/10/2026, 20 h 40** (remplace les arrêts précédents)
 - Fait : série 1 jouée deux fois, verdicts au niveau 1. Juste : F1, F4a, F5, F8, F11 (contre la l. 31), F12, rejeu. Écarts : TFILED-03 et 04 (confirmés, envoyés à A4), TFILED-07 (nouveau). Pas couvert : TFILED-05 (à Teo). Constat sur le site : TFILED-06 (à Teo). TFILED-02 attend la série 1b.
 - En cours : préparation de la série 1b (Q11 : pas de SIREN réel, on lève les arrêts par les portes du produit, en gérant).
 - Prochain pas : en gérant, `filed_confirmer_fournisseur` sur Béton Archipel, puis le coordinateur redépose F2b sous un nouveau nom. Ensuite, F0 : confirmer MCD, lever `identite.registre`, et vérifier que le témoin arrive à la validation sans autre arrêt. F6 : vérifier que l'avoir reste retenu (sinon, pas couvert).
-- Questions : Q12 (identifiants et sens des paramètres des deux portes d'écriture).
+- Questions : Q12 répondue. En attente : le résultat de F2b redéposée. TFILED-07 est remonté à Teo par le coordinateur, avec TFILED-06.
 - SHA d'arrêt : voir le commit « T-FILED : Q9–Q11 intégrées » sur `testeur-filed`.
