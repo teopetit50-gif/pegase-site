@@ -56,8 +56,10 @@ begin
   -- Une commande clôt le cycle sans rouvrir le droit avant le trimestre suivant.
   v_q := tests.c4_compte_courriel('TR3', 'Garage Trimestre', 'atelier@garage-trimestre.test', 70);
   perform private.offload_detecter(v_client, null);
-  perform private.offload_cycle(v_client, null);
   perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
+  -- Ouverte à la main : sur la recette, le plafond de la vague du jour peut être déjà pris par les comptes du banc.
+  perform public.offload_ouvrir_reprise(v_q);
+  return next ok((tests.c4_reprise(v_q)).id is not null, 'Le cycle du compte est ouvert');
   perform public.offload_saisir_achat(v_q, current_date, 300, 'F-TR3', 'Entretien', 'facture');
   return next is((tests.c4_reprise(v_q)).issue, 'commande', 'La commande clôt le cycle');
   return next throws_ok(format('select public.offload_ouvrir_reprise(%L::uuid)', v_q), '55000', null,

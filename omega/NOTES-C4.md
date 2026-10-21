@@ -865,3 +865,4 @@ Partielles : 6, 11, 15, 38.
 - 21/10 — lot c4_27 (TOFFLOAD-07, retenue annulée avec sa reprise) : 465 ok.
 - 21/10 — lot c4_28 (TOFFLOAD-08, réglages hors bornes en français) : 471 ok.
 - 21/10, 23 h 15 Z — lot c4_29 (décision « un cycle par trimestre », TOFFLOAD-03) : 481 ok.
+- 21/10, 23 h 20 Z — recette c4_29 : 8/10, le cycle n'avait pas ouvert la reprise de TR3 (plafond de la vague du banc, probable) ; le test l'ouvre à la main.
