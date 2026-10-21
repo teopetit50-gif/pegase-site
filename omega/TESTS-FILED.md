@@ -93,7 +93,16 @@ montre. Tu ne les redéposes pas.
 
 ## Questions au coordinateur
 
-Rien n'est joué tant que Q1 et Q2 n'ont pas de réponse : le jeu d'essai est prêt et attend.
+**Réponse du coordinateur (21/10, 19 h 12)** : client banc `dddddddd-0000-4000-8000-0000000000f1` (entité principale GP),
+porte `public.filed_deposer_piece(...)`, fichier préalablement dans le stockage ; comptes écran demandés au bureau.
+Cette session ne peut pas téléverser dans le stockage → les appels sont écrits dans
+`omega/testeur-filed/serie1.sql` (15 pièces × 2 passes, sha256 et tailles calculés), **à jouer par le coordinateur**.
+
+- **Q7** — Le bucket et le préfixe de chemin que FILED lit (j'ai mis `<client>/testeur-filed/p<passe>/<fichier>.pdf`),
+  la valeur attendue de `p_source`, et s'il faut l'uuid de l'entité principale dans `p_entite`.
+- **Q5 (reste ouverte, bloquante pour les verdicts)** — la porte de lecture du résultat par document : statut, motif
+  d'arrêt, montants et ventilation TVA lus, IBAN retenu ou alerte, doublon, journal. Sans elle et sans l'écran, je ne
+  peux rendre aucun verdict.
 
 - **Q1** — La porte de dépôt d'une pièce pour `banc-test-filed` (identifiant du client banc, et soit
   l'adresse de dépôt WebDAV + identifiant `depot-…`/mot de passe, soit la RPC `public.*` à appeler).
@@ -113,9 +122,9 @@ Rien n'est joué tant que Q1 et Q2 n'ont pas de réponse : le jeu d'essai est pr
 
 ## REPRISE
 
-**Arrêt 1 — 21/10/2026**
+**Arrêt 2 — 21/10/2026, 19 h 20** (l'arrêt 1 est remplacé)
 - Fait : contrat, brief, promesses (`capacites/factures.ts`, `factures.ts`), GUIDE-DEPOT, GUIDE-LOGICIELS-COMPTABLES lus ; jeu d'essai série 1 généré (15 PDF) ; attendus écrits avant jeu.
-- En cours : rien — aucun dépôt fait.
-- Prochain pas : jouer F0 → F2b dans l'ordre ci-dessus, lire, remplir le tableau, puis rejeu.
-- Questions : Q1 et Q2 bloquantes ; Q3–Q6 à trancher avant de rendre les verdicts.
+- En cours : appels de la série 1 écrits (`omega/testeur-filed/serie1.sql`), à jouer par le coordinateur.
+- Prochain pas : recevoir les réponses brutes de la passe 1, lire les résultats (Q5), remplir le tableau, puis la passe 2.
+- Questions : Q5 et Q7 bloquantes ; Q2 (comptes écran) en cours au bureau ; Q3, Q4 et Q6 à trancher avant les verdicts.
 - SHA d'arrêt : voir le commit « T-FILED série 1 : jeu d'essai prêt » sur `testeur-filed`.
