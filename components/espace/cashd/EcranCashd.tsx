@@ -468,6 +468,9 @@ export default function EcranCashd({ vue }: { vue?: Onglet } = {}) {
           (r.soldees_par_absence ? `, ${r.soldees_par_absence} soldée${r.soldees_par_absence > 1 ? "s" : ""} (absentes de l'export)` : "") +
           (r.lettrees ? `, ${r.lettrees} règlement${r.lettrees > 1 ? "s" : ""} lettré${r.lettrees > 1 ? "s" : ""}` : "") +
           (r.ecartees.length ? `. ${r.ecartees.length} écartée${r.ecartees.length > 1 ? "s" : ""} : ${r.ecartees.slice(0, 3).map((x) => `ligne ${x.ligne + 1} (${x.motif})`).join(", ")}${r.ecartees.length > 3 ? "…" : ""}` : "") +
+          (r.avoirs_non_imputes?.length
+            ? `. ${r.avoirs_non_imputes.length} avoir${r.avoirs_non_imputes.length > 1 ? "s" : ""} non imputé${r.avoirs_non_imputes.length > 1 ? "s" : ""}, facture visée inconnue : ${r.avoirs_non_imputes.slice(0, 3).map((x) => `${x.numero} sur ${x.vise}`).join(", ")}${r.avoirs_non_imputes.length > 3 ? "…" : ""}`
+            : "") +
           ".",
       );
       setDepot(false);

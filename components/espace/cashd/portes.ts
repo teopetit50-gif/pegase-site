@@ -68,7 +68,7 @@ export async function chargerPropositions(reglement: string): Promise<Propositio
 }
 
 export async function importer(o: { client: string; jeu: string; lignes: Record<string, string>[]; complet: boolean; fichier: string }) {
-  return rpc<{ lignes: number; creees: number; modifiees: number; inchangees: number; soldees_par_absence: number; lettrees: number; ecartees: { ligne: number; motif: string }[] }>(
+  return rpc<{ lignes: number; creees: number; modifiees: number; inchangees: number; soldees_par_absence: number; lettrees: number; ecartees: { ligne: number; motif: string }[]; avoirs_non_imputes?: { numero: string; vise: string; compte: string }[] }>(
     "cashd_importer",
     { p_client: o.client, p_jeu: o.jeu, p_lignes: o.lignes, p_complet: o.complet, p_entite: null, p_fichier: o.fichier },
   );
