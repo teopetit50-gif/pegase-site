@@ -108,6 +108,8 @@ Attendus notés **avant** de jouer. « R » = `lib/produits/relances.ts`, « C �
 | R04b-05b | rejeu c2_22b | fiches A-C15 (règlement à imputer), A-C16 et A-C11 (sous le seuil, sans relance), A-C02 (MED retenue, total incohérent) | raison sur la fiche ; relançable 0 ; dû gardé | A-C15 : relançable 0, dû 1 085, raison « règlement … à imputer » ; A-C16 : « reste dû 5,00 €, sous le seuil de relance de 10,00 € : il reste dans l'encours, à abandonner ou à réclamer », relançable 0, dû 5 ; A-C11 idem à 3,00 € ; A-C02 : relançable 0 sur ses deux factures | juste | 1 |
 | R10 | rejeu c2_26 (« cette / ces factures ») | A-C18 : deux factures échues le 13/10, rappel du 21/10 | « ces factures » | « Pour toute question sur **ces factures**, il vous suffit de répondre à ce courriel. » (TCASHD-11 « régler Virement » toujours là ; c2_27 « courriel/courrier » : il faut une MED neuve pour le lire) | juste (c2_26) | 1 |
 | R12b | reprise c2_24b (MED en file sans relance partie) | MED A-C00 et A-C12 (12/11), A-C06 (13/11), A-C14 (03/11) | coupées, retenue sur la fiche | A-C00, A-C12 (2 factures), A-C06 : MED `coupee`, demande `annulee`, motif « mise en demeure retenue : la relance qui la précède n'est pas réellement partie. Une mise en demeure ne vient qu'après une relance reçue : envoyez d'abord la relance, ou notez-la envoyée à la main. » ; fiches : même raison, relançable 0. A-C14 : MED déjà coupée par la garde c2_25 (mon approbation à commentaire vide), fiche sans raison, relançable 1 085 | juste ; nouveaux paliers : passage du 21/11 demandé | 1 |
+| R12c | c2_24b, nouveaux paliers (passage du 21/11, `{preparees 1}`) | A-C02 (ferme du 13/11 sans rappel parti), A-C17 (ferme du 20/11 sans rappel parti), A-C14 (rappel, ferme, MED tous coupés, rien parti) | fermes d'avant le lot coupées ; un **rappel** écrit pour chacun | A-C02 : ferme du 13/11 toujours `non_reglee` en file, aucun rappel ; A-C17 : ferme du 20/11 toujours en file, aucun rappel ; A-C14 : **rien** d'écrit, fiche « mise en demeure retenue … envoyez d'abord la relance, ou notez-la envoyée à la main » alors qu'aucune relance n'est en file | écart (TCASHD-14) | 1 |
+| R12d | « notez-la envoyée à la main » (`cashd_noter_envoi_main`, feu vert du coordinateur) | ferme A-C17 `0cf52b47-…` : approuvée en valideur (commentaire « Test du banc »), puis notée envoyée en gérant | envoi noté, MED possible | avant comme après l'approbation : `ERROR 55000 : Cette relance n'est pas à envoyer (non_reglee)`. Sans réglage d'envoi, une relance reste `non_reglee` même approuvée : le geste que la fiche conseille est impossible | écart (TCASHD-15) ; c2_27 non lisible | 1 |
 
 Notes de lecture (avant de jouer) :
 - « Un message par compte et par jour », « cinq jours d'écart au moins » (C13) et « suspendue pas d'adresse » (C4)
@@ -201,6 +203,16 @@ puis `select to_jsonb(e) from public.cashd_factures_etat e where client_id = '<c
   Contre C:47 « Une facture échue suit trois paliers : deux relances, puis la mise en demeure ». Atténuation : la MED exige
   une validation (mais voir TCASHD-07).
 - **TCASHD-13** (mineur) · R06 · la MED A-C14 du 03/11 ne reprend pas `moyens_reglement`, que la ferme du 27/10 porte.
+- **TCASHD-14** · c2_24b · passage du 21/11 (`private.cashd_preparer_relances(client,'2026-11-21',null)` → `{preparees 1}`) :
+  `cashd_relances_du_jour` 13/11 A-C02 `relance` `b860d136-…` toujours `non_reglee` ; 20/11 A-C17 `relance` `0cf52b47-…` toujours
+  `non_reglee` ; aucun rappel écrit le 21/11 pour A-C02, A-C17, A-C14. Fiche A-C14 FB-2026-0115 : « mise en demeure retenue : la
+  relance qui la précède n'est pas réellement partie … envoyez d'abord la relance » — aucune relance en file pour A-C14.
+  Attendu (annonce c2_24b) : les fermes écrites sans rappel parti coupées, et le premier palier non parti (le rappel) écrit.
+- **TCASHD-15** · en gérant, `cashd_noter_envoi_main('0cf52b47-…','email','2026-11-20 10:00+00','Test du banc …')` →
+  `ERROR 55000: Cette relance n'est pas à envoyer (non_reglee)`, avant et après approbation en valideur (approbation
+  `2f7cdf9b-…`, commentaire « Test du banc T-CASHD »). Un client sans réglage d'envoi (le cas de tout client qui copie le
+  texte et l'envoie lui-même, comme Omega pour son propre compte) ne peut donc jamais noter un envoi : la MED reste retenue
+  pour toujours, et le motif lui conseille un geste impossible.
 
 ## Questions au coordinateur
 
