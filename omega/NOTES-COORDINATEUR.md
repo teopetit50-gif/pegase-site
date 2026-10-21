@@ -1370,10 +1370,10 @@ Sessions actives arrêtées par message (A1, A4, C2, C3, C4, T-FILED, T-CASHD, T
 |---|---|
 | main | b4673c78 |
 | worker-a1 | fd2da4bd |
-| worker-a4 | c9b15f5c |
+| worker-a4 | f4df31b6 (notes ; a4_63 corrigé déjà posé et vert, 2/2) |
 | worker-c2 | 0ce7bbd8 |
 | worker-c3 | 192a033f |
-| worker-c4 | 2d05c1cd |
+| worker-c4 | f4f2e2ed (notes) |
 | testeur-filed | 0edc36d7 |
 | testeur-cashd | 064bbb52 |
 | testeur-reput | 9c54b74c |
