@@ -56,7 +56,7 @@ type Props = {
   email: string;
 };
 
-const ICONE = "size-4 shrink-0 text-[#8a8b91]";
+const ICONE = "size-4 shrink-0 text-[var(--bv-texte-3)]";
 
 function Os({ l, className = "" }: { l: number; className?: string }) {
   return <span className={`bv-os block ${className}`} style={{ width: l }} />;
@@ -77,22 +77,22 @@ const RAIL: { icone: LucideIcon; l: number; sous?: boolean }[] = [
 
 function Rail() {
   return (
-    <div className="absolute bottom-0 left-[22%] top-[150px] w-[48%] border-r border-[var(--bv-filet)] bg-[#0f1112]">
+    <div className="absolute bottom-0 left-[22%] top-[150px] w-[48%] border-r border-[var(--bv-filet)] bg-[var(--bv-fond)]">
       <div className="space-y-[22px] px-5 pt-[34px]">
         {RAIL.map(({ icone: I, l, sous }, i) => (
           <div key={i} className={`flex items-center gap-3 ${sous ? "pl-6" : ""}`}>
             <I className={ICONE} />
             <Os l={l} />
-            {i === 6 && <ChevronDown className="size-3.5 text-[#6b6c72]" />}
+            {i === 6 && <ChevronDown className="size-3.5 text-[var(--bv-texte-3)]" />}
           </div>
         ))}
         <div className="flex items-center gap-3">
-          <ChevronDown className="size-3.5 text-[#6b6c72]" />
+          <ChevronDown className="size-3.5 text-[var(--bv-texte-3)]" />
           <Os l={56} />
         </div>
         {[0, 1, 2].map((i) => (
           <div key={i} className="flex items-center gap-3">
-            <span className="size-4 rounded-[5px] bg-[#2a3a5c]" />
+            <span className="size-4 rounded-[5px] bg-[var(--bv-bleu-sourd)]" />
             <Os l={52 + i * 12} />
           </div>
         ))}
@@ -103,7 +103,7 @@ function Rail() {
 
 function Liste({ titre }: { titre: string }) {
   return (
-    <div className="absolute bottom-0 left-[70%] right-0 top-[150px] bg-[#0f1112]">
+    <div className="absolute bottom-0 left-[70%] right-0 top-[150px] bg-[var(--bv-fond)]">
       <div className="flex h-[60px] items-center gap-2 border-b border-[var(--bv-filet)] pl-4">
         <span className="grid size-5 place-items-center rounded-[5px] bg-[var(--bv-bleu)]">
           <Contact className="size-3 text-white" />
@@ -112,14 +112,14 @@ function Liste({ titre }: { titre: string }) {
       </div>
       <div className="flex h-[60px] items-center gap-2 border-b border-[var(--bv-filet)] pl-4">
         <span className="flex h-9 items-center gap-2 rounded-lg border border-[var(--bv-champ-filet)] px-2">
-          <span className="size-4 rounded-[4px] bg-[#1f9d55]" />
+          <span className="size-4 rounded-[4px] bg-[var(--bv-vert)]" />
           <Os l={60} />
-          <ChevronDown className="size-3.5 text-[#6b6c72]" />
+          <ChevronDown className="size-3.5 text-[var(--bv-texte-3)]" />
         </span>
       </div>
       <div className="flex h-[60px] items-center gap-2 border-b border-[var(--bv-filet)] pl-4">
         <span className="flex h-8 items-center gap-2 rounded-lg border border-dashed border-[var(--bv-champ-filet)] px-2">
-          <ArrowUpDown className="size-3.5 text-[#8a8b91]" />
+          <ArrowUpDown className="size-3.5 text-[var(--bv-texte-3)]" />
           <Os l={52} />
         </span>
       </div>
@@ -170,18 +170,18 @@ function Espace({ entreprise, logo }: Pick<Props, "entreprise" | "logo">) {
       </div>
       <div className="flex items-center gap-2 p-3">
         <span className="flex h-10 flex-1 items-center gap-2 rounded-lg border border-[var(--bv-champ-filet)] px-2">
-          <span className="grid size-5 place-items-center rounded-[5px] border border-[#8a8b91] text-[10px] text-[#8a8b91]">
+          <span className="grid size-5 place-items-center rounded-[5px] border border-[var(--bv-texte-3)] text-[10px] text-[var(--bv-texte-3)]">
             Ω
           </span>
           <Os l={110} />
           <span className="ml-auto flex gap-1">
-            <kbd className="grid size-6 place-items-center rounded-md border border-[var(--bv-champ-filet)] text-[11px] text-[#8a8b91]">⌘</kbd>
-            <kbd className="grid size-6 place-items-center rounded-md border border-[var(--bv-champ-filet)] text-[11px] text-[#8a8b91]">K</kbd>
+            <kbd className="grid size-6 place-items-center rounded-md border border-[var(--bv-champ-filet)] text-[11px] text-[var(--bv-texte-3)]">⌘</kbd>
+            <kbd className="grid size-6 place-items-center rounded-md border border-[var(--bv-champ-filet)] text-[11px] text-[var(--bv-texte-3)]">K</kbd>
           </span>
         </span>
         <span className="flex h-10 items-center gap-2 rounded-lg border border-[var(--bv-champ-filet)] px-2">
           <Search className="size-4 text-[var(--bv-texte-2)]" />
-          <kbd className="grid size-6 place-items-center rounded-md border border-[var(--bv-champ-filet)] text-[11px] text-[#8a8b91]">/</kbd>
+          <kbd className="grid size-6 place-items-center rounded-md border border-[var(--bv-champ-filet)] text-[11px] text-[var(--bv-texte-3)]">/</kbd>
         </span>
       </div>
     </Zoom>
@@ -200,7 +200,7 @@ function Listes({ metier, priorites }: Pick<Props, "metier" | "priorites">) {
     <Zoom className="left-[10%] top-[300px] w-[62%]">
       <div className="px-5 py-4">
         <div className="flex items-center gap-3 pb-2">
-          <ChevronDown className="size-3.5 text-[#8a8b91]" />
+          <ChevronDown className="size-3.5 text-[var(--bv-texte-3)]" />
           <Os l={56} />
         </div>
         <AnimatePresence initial={false} mode="popLayout">
@@ -255,13 +255,13 @@ function Sources() {
             initial={reduit ? { opacity: 0 } : { opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.08 * i, duration: 0.25 }}
-            className="flex h-[46px] items-center gap-2.5 rounded-[12px] border border-[var(--bv-filet)] bg-[#0f1112] px-4 text-[17px] shadow-[0_10px_30px_rgba(0,0,0,0.35)]"
+            className="flex h-[46px] items-center gap-2.5 rounded-[12px] border border-[var(--bv-filet)] bg-[var(--bv-fenetre)] px-4 text-[17px] shadow-[0_10px_30px_rgba(0,0,0,0.35)]"
           >
             <I className="size-[18px] text-[var(--bv-texte-2)]" />
             {texte}
           </motion.span>
         ))}
-        <span className="grid size-10 place-items-center rounded-[10px] border border-[var(--bv-filet)] bg-[#0f1112]">
+        <span className="grid size-10 place-items-center rounded-[10px] border border-[var(--bv-filet)] bg-[var(--bv-fenetre)]">
           <ArrowDown className="size-4 text-[var(--bv-texte-2)]" />
         </span>
       </div>
@@ -274,33 +274,33 @@ function Sources() {
           </g>
         ))}
       </svg>
-      <div className="bv-fondu absolute bottom-0 left-0 right-0 top-[440px] border-t border-[var(--bv-filet)] bg-[#0f1112]">
+      <div className="bv-fondu absolute bottom-0 left-0 right-0 top-[440px] border-t border-[var(--bv-filet)] bg-[var(--bv-fond)]">
         <div className="flex h-[62px] items-center gap-2 border-b border-[var(--bv-filet)] pl-5">
           <span className="text-[16px] font-medium">Clients</span>
         </div>
         <div className="flex h-[62px] items-center gap-3 border-b border-[var(--bv-filet)] pl-5">
           <span className="flex h-9 items-center gap-2 rounded-lg border border-[var(--bv-champ-filet)] px-2">
-            <span className="size-3 rounded-[3px] bg-[#1f9d55]" />
+            <span className="size-3 rounded-[3px] bg-[var(--bv-vert)]" />
             <Os l={70} />
-            <ChevronDown className="size-3.5 text-[#6b6c72]" />
+            <ChevronDown className="size-3.5 text-[var(--bv-texte-3)]" />
           </span>
           <span className="flex h-9 items-center gap-2 rounded-lg border border-[var(--bv-champ-filet)] px-2">
-            <Columns2 className="size-4 text-[#8a8b91]" />
+            <Columns2 className="size-4 text-[var(--bv-texte-3)]" />
             <Os l={80} />
-            <ChevronDown className="size-3.5 text-[#6b6c72]" />
+            <ChevronDown className="size-3.5 text-[var(--bv-texte-3)]" />
           </span>
         </div>
         <div className="flex h-[62px] items-center gap-3 border-b border-[var(--bv-filet)] pl-5">
           <span className="flex h-8 items-center gap-2 rounded-lg border border-dashed border-[var(--bv-champ-filet)] px-2">
-            <ArrowUpDown className="size-3.5 text-[#8a8b91]" />
+            <ArrowUpDown className="size-3.5 text-[var(--bv-texte-3)]" />
             <Os l={60} />
           </span>
           <span className="flex h-8 items-center gap-2 rounded-lg border border-dashed border-[var(--bv-champ-filet)] px-2">
-            <ListFilter className="size-3.5 text-[#8a8b91]" />
+            <ListFilter className="size-3.5 text-[var(--bv-texte-3)]" />
             <Os l={50} />
           </span>
         </div>
-        <div className="grid h-[50px] grid-cols-[1.2fr_1fr_0.6fr] items-center border-b border-[var(--bv-filet)] text-[#8a8b91]">
+        <div className="grid h-[50px] grid-cols-[1.2fr_1fr_0.6fr] items-center border-b border-[var(--bv-filet)] text-[var(--bv-texte-3)]">
           <span className="flex items-center justify-between px-3">
             <Os l={110} />
             <Plus className="size-4" />
@@ -339,10 +339,10 @@ function Equipe({ invitations, email }: Pick<Props, "invitations" | "email">) {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-      className="bv-fondu absolute bottom-0 left-0 right-[10%] top-[165px] rounded-tr-[14px] border-r border-t border-[var(--bv-filet)] bg-[#0f1112]"
+      className="bv-fondu absolute bottom-0 left-0 right-[10%] top-[165px] rounded-tr-[14px] border-r border-t border-[var(--bv-filet)] bg-[var(--bv-fond)]"
     >
       <div className="flex h-[68px] items-center justify-end gap-4 border-b border-[var(--bv-filet)] pr-4">
-        <span className="grid size-7 place-items-center rounded-full bg-[#1a9fbf] text-[13px] font-medium text-white">
+        <span className="bv-avatar grid size-7 place-items-center rounded-full text-[13px] font-medium text-white">
           {initiale}
         </span>
         <span className="h-5 w-px bg-[var(--bv-filet)]" />
@@ -362,7 +362,7 @@ function Equipe({ invitations, email }: Pick<Props, "invitations" | "email">) {
         </span>
       </div>
       <div className="h-[70px] border-b border-[var(--bv-filet)]" />
-      <div className="grid h-[58px] grid-cols-[0.6fr_1.4fr_1fr] border-b border-[var(--bv-filet)] text-[#8a8b91]">
+      <div className="grid h-[58px] grid-cols-[0.6fr_1.4fr_1fr] border-b border-[var(--bv-filet)] text-[var(--bv-texte-3)]">
         <span className="flex items-center justify-end pr-4">
           <Zap className="size-4" />
         </span>
@@ -389,7 +389,7 @@ function Equipe({ invitations, email }: Pick<Props, "invitations" | "email">) {
                     animate={{ opacity: 1 }}
                     className="flex min-w-0 items-center gap-2"
                   >
-                    <span className="grid size-6 shrink-0 place-items-center rounded-full bg-[#2a3a5c] text-[11px] text-white">
+                    <span className="grid size-6 shrink-0 place-items-center rounded-full bg-[var(--bv-bleu-sourd)] text-[11px] text-white">
                       {adresse[0].toUpperCase()}
                     </span>
                     <span className="truncate text-[14px] text-[var(--bv-texte)]">{adresse}</span>
