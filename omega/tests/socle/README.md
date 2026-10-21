@@ -26,7 +26,7 @@ la fin du test, y compris en cas d'échec. Aucune donnée d'essai ne reste.
 
 ## Fichiers groupés pour le coordinateur
 
-- `TOUT.sql` : `00_installation.sql` suivi des 64 tests (la règle « pas de
+- `TOUT.sql` : `00_installation.sql` suivi des 65 tests (la règle « pas de
   DELETE en clair » est levée depuis que les fichiers sont posés depuis le
   dépôt), terminé par un seul `runtests()` qui rend une ligne `ok` / `not ok`
   par test. Un seul appel.
@@ -35,7 +35,7 @@ la fin du test, y compris en cas d'échec. Aucune donnée d'essai ne reste.
   un seul appel est trop gros.
 - Ils sont générés depuis les fichiers numérotés ; pour les refaire après une
   modification d'un test, relancer le script de la section « Régénérer ».
-- Validés sur la maquette locale : `TOUT.sql` rend `1..64`, 64 `ok`.
+- Validés sur la maquette locale : `TOUT.sql` rend `1..65`, 65 `ok`.
 
 ## Ce que chaque test vérifie
 
@@ -77,6 +77,7 @@ la fin du test, y compris en cas d'échec. Aucune donnée d'essai ne reste.
 | 62 | Lot 19at : **sceau et export du journal opposable**. Réservés au gérant ou à un admin (un membre et le gérant d'un autre client reçoivent 42501), ou au service. Le sceau rend la dernière ligne, son empreinte et une chaîne intacte, et s'inscrit dans `private.journal_sceaux` (ajout seul). Le sceau se vérifie (« confirme »). L'export porte toutes les lignes, sa date et l'empreinte de son contenu. Une dernière ligne réécrite, déclencheurs coupés, est révélée par un sceau noté plus tôt (« reecrit »). 11/11 sur la maquette |
 | 63 | Lot 19au : **interface de programmation pour un tiers**. Seul le service authentifie une clé. Une porte n'est offerte que si elle existe, et elle est documentée avec sa signature. Seuls le gérant ou un admin créent une clé, et seulement pour leur organisation et des portes offertes. Le secret n'est montré qu'une fois : seule son empreinte est gardée, et la liste ne le montre jamais. La création est inscrite au journal. La clé ouvre sa porte pour sa seule organisation. Sont refusés : une porte hors des portées, une clé inconnue, le quota du jour dépassé (54000), une porte retirée du catalogue, une clé révoquée. 16/16 sur la maquette |
 | 64 | Lot 19av : **une seule personne suffit si elle est gérante**, ou d'un rôle que le gérant désigne (`regler_decision_seule`). Le gérant approuve sa propre demande et ce qu'il a saisi, et c'est marqué « [seul décideur] ». Un valideur ne le peut qu'une fois désigné, et seul le gérant le désigne (désignation au journal). Un membre ne décide jamais seul. Rouge avant 19av. Le test 55 saute ses cas 2 à 4 une fois 19av posé. Sans objet sur la maquette |
+| 65 | Lot 19aw : **une demande qui exige un commentaire ne s'approuve pas sans commentaire** (TCASHD-07). Sans commentaire, ou avec des espaces seulement : 23514, phrase en français, la demande reste en attente. Avec un commentaire, l'approbation passe. Le repère « [seul décideur] » ne compte pas comme commentaire. Rouge avant 19aw. Sans objet sur la maquette |
 
 ## Mécanique réelle du socle prise en compte (retours de la recette du 5 octobre)
 

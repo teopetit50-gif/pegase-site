@@ -5,7 +5,8 @@
 - Lot 1 — 19av, décision seule du gérant (ou d'un rôle désigné ; config decision_seule_roles) : À POSER, puis tests 64 et 55.
   preparer_approbation est réécrit par repères (ceux de 19af et de 19c). Le comportement a été vérifié dans une base d'essai
   avec le texte du 5/10 et 19af : rejouable, le gérant décide seul, la DAF seulement une fois désignée.
-- Lots 2 (exige_commentaire), 3 (délégations : messages en français, fuseau de l'organisation), 4 (crochet de réécriture à l'approbation) : à venir.
+- Lot 2 — 19aw, exige_commentaire (déclencheur approbations_zz_exiger_commentaire, 23514) : À POSER, puis test 65.
+- Lots 3 (délégations : messages en français, fuseau de l'organisation), 4 (crochet de réécriture à l'approbation) : à venir.
 
 ## ARRÊT — 19/10/2026, 00 h 25 Z (pause, forfait à 29 % ; reprise samedi 25/10 après 02 h Z)
 
