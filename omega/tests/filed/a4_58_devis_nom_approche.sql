@@ -54,7 +54,9 @@ begin
   values (v_cl, 'DUP1', 'Dupont Matériaux', 'dupont materiaux', 'FR', 'actif', 'saisie') returning id into v_dup1;
   insert into public.filed_fournisseurs (client_id, code, nom, nom_normalise, pays, statut, source)
   values (v_cl, 'DUP2', 'DUPONT MATERIAU SARL', 'dupont materiau sarl', 'FR', 'actif', 'saisie') returning id into v_dup2;
-  d2 := tests.a4_devis_nom(o, 'DV-DUP-1', 'DUPONT-MATERIAU', 90);
+  -- Le nom du devis est écrit d'un seul mot : aucun nom normalisé (avec ou sans forme sociale) ne lui est identique,
+  -- seule la clé approchée le relie, aux deux fournisseurs.
+  d2 := tests.a4_devis_nom(o, 'DV-DUP-1', 'DUPONTMATERIAU', 90);
   select * into x from public.filed_devis where document_id = d2;
   return next ok(x.fournisseur_id is null, 'Nom approché de deux fournisseurs : le devis n''est rattaché à aucun');
   f2 := tests.a4_facture_lignes(o, 'FAC-DUP-1', 90, array['Disques à tronçonner']);
