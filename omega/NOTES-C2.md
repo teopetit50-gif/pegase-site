@@ -13,6 +13,13 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
 - **Jeu NOBAT (21/10, Teo)** : `omega/banc/cashd_nobat.sql` — factures émises par le banc (négoce BTP Guadeloupe, fictif) : 1 juste + 5 erreurs (doublon de numéro, TTC faux, échéance avant émission, client sans adresse, règlement partiel non lettré) + relevé. Local : 3 attrapées / traitées, **2 écarts** (doublon : la ligne met à jour la pièce d'un autre client, sans alerte ; TTC ≠ HT + TVA relancé tel quel). Non corrigés (consigne).
 - **À poser (21/10)** : `c2_17_controles_import.sql` puis test `c2_17_controles_import` (13) — corrige les deux écarts NOBAT : numéro déjà porté par un autre compte → ligne écartée + alerte, pièce gardée ; TTC contrôlé (HT + TVA, ou lignes, ou HT seul ± 20 %) → pièce marquée `incoherence`, relance suspendue, alerte ; levée par un export corrigé ou cashd_lever_incoherence. Relevé NOBAT : 5/5 attrapées en local. Local 315/315. Écran : la marque n'est pas encore affichée sur la fiche.
 - **c2_17 v2 posé et vert (21/10)**. **À poser** : `c2_18_incoherence_file.sql` puis test `c2_18_incoherence_file` (4) — une relance déjà en file est coupée quand sa pièce devient incohérente (motif « total incohérent (…) ») et revient quand la marque est levée. Local 319/319.
+- **Recette T-CASHD (21/10, testeur-cashd, omega/TESTS-CASHD.md)** — un lot à la fois, rouge avant / vert après, à poser
+  dans l'ordre : `c2_19_texte_parti` (TCASHD-06, test 5) · `c2_20_avoir_vise` (TCASHD-03, test 6 ; colonne
+  cashd_factures.facture_visee) · `c2_21_incoherence_dite` (TCASHD-02, test 6 ; fiche : incoherence, relance_suspendue,
+  reste_relancable 0) · `c2_22_raison_exacte` (TCASHD-04/05, test 4) · `c2_23_clients_inchanges` (TCASHD-01, test 3).
+  Local 343/343. Jeu du testeur rejoué en local : scratchpad c2_19/repro.sql (serie1 sur le banc).
+- **En attente d'accord** : TCASHD-08/09/10 (ton, secteur et chantier, canal / délai / pluriel) — proposition envoyée au
+  coordinateur le 21/10, pas de code avant son accord. TCASHD-07 (MED approuvée sans commentaire) : socle ; garde CASHD proposée.
 - **Prochain pas** : charger les factures d'Omega (cashd_omega.sql) quand Teo envoie ses PDF ; G19 avec un premier client.
 
 - **Posés et verts (18/10)** : c2_11 envoi à la main (842f9c25) ; c2_12 v2 modèle 2 (5ee5fd10, ^test_c2_ 12/12) — rappels
