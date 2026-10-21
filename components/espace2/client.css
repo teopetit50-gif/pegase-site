@@ -25,16 +25,16 @@
 html[data-v2-theme="light"] .oc-logo-clair { display: block; }
 html[data-v2-theme="light"] .oc-logo-sombre { display: none; }
 
-/* — la navigation latérale : liens de 28 px, 6 px de rayon, en 400 comme
-   chez Supabase (21/10), gris au repos, blancs au survol et sur la page
-   ouverte ; l'anneau de focus ne reste pas après un clic (il reste au
-   clavier) — */
-.v2.oc .v2-lien { height: 28px; border-radius: 6px; font-weight: 400; letter-spacing: -0.02em; color: var(--v2-gray-900); }
+/* — la navigation latérale : le volet Supabase (21/10) — entrées de 26 px,
+   6 px de rayon, grises au repos, blanches au survol, blanches et en 600
+   sur la page ouverte (graisses dans espace2.css) ; l'anneau de focus ne
+   reste pas après un clic (il reste au clavier) — */
+.v2.oc .v2-lien { height: 26px; border-radius: 6px; letter-spacing: -0.02em; color: var(--v2-gray-900); }
 .v2.oc .v2-lien:hover { color: var(--v2-gray-1000); }
 .v2.oc .v2-lien[aria-current="page"], .v2.oc .v2-lien[data-dedans] { color: var(--v2-gray-1000); }
 .v2.oc .v2-lien svg { color: currentColor; opacity: 0.85; }
 .v2.oc .v2-lien:focus:not(:focus-visible) { box-shadow: none; }
-.v2.oc .v2-section-titre { font-size: 12px; font-weight: 500; letter-spacing: 0; color: var(--v2-gray-700); }
+.v2.oc .v2-laterale .v2-section-titre { font-size: 13px; font-weight: 400; letter-spacing: 0; color: var(--v2-gray-700); }
 
 /* — « Rechercher… » : 30 px, angles de 6 px comme les boutons — */
 .v2.oc .v2-trouver { height: 30px; border-radius: 6px; font-weight: 400; }

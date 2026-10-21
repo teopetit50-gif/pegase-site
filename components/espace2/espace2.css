@@ -343,12 +343,17 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 12px 12px 0;
+  padding: 0;
 }
+/* l'en-tête du volet Supabase : 48 px, le filet dessous, le contenu à 24 px du bord */
 .v2-laterale-haut {
   display: flex;
   align-items: center;
   gap: 4px;
+  flex: none;
+  min-height: 48px;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--v2-a-400);
 }
 .v2-equipe {
   flex: 1;
@@ -389,9 +394,9 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   display: flex;
   align-items: center;
   gap: 8px;
-  width: 100%;
+  width: auto;
   height: 30px;
-  margin: 8px 0 12px;
+  margin: 16px 12px 0;
   padding: 0 6px 0 10px;
   border: 0;
   border-radius: 6px;
@@ -418,8 +423,8 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   min-height: 0;
   overflow-y: auto;
   scrollbar-width: thin;
-  margin: 0 -12px;
-  padding: 0 12px 12px;
+  margin: 0;
+  padding: 0;
 }
 .v2-groupe {
   list-style: none;
@@ -428,51 +433,37 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   display: grid;
   gap: 1px;
 }
-/* 07/10/2026 — sections titrées et repliables ; un filet seulement
-   avant une section sans titre (le bas : Aide, Réglages) */
-.v2-section + .v2-section {
-  margin-top: 12px;
+/* 21/10/2026 — le volet de navigation de Supabase (ProductMenu) : les
+   groupes toujours ouverts (my-4 mx-3), séparés par un filet sur toute la
+   largeur, un intitulé en capitales à chasse fixe (text-sm uppercase
+   font-mono, foreground-lighter, mb-2), les entrées en pastilles de 26 px */
+.v2-section {
+  padding: 16px 12px;
 }
-.v2-section:last-child:not(:has(.v2-section-titre)) {
-  padding-top: 12px;
+.v2-section + .v2-section {
   border-top: 1px solid var(--v2-a-400);
 }
-.v2-section-titre {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  width: 100%;
-  height: 28px;
+.v2-laterale .v2-section-titre {
+  display: block;
+  margin: 0 0 8px;
   padding: 0 12px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--v2-gray-900);
-  font: inherit;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: color 0.15s, background 0.15s;
-}
-.v2-section-titre:hover {
-  color: var(--v2-gray-1000);
-  background: var(--v2-a-100);
-}
-.v2-section-titre svg {
-  transition: transform 0.15s;
-}
-.v2-section-titre[aria-expanded="false"] svg {
-  transform: rotate(-90deg);
+  color: var(--v2-gray-700);
+  font-family: var(--v2-mono);
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: uppercase;
 }
 .v2-lien {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
-  height: 32px;
-  padding: 0 8px;
+  height: 26px;
+  padding: 0 12px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 6px;
   background: transparent;
   color: var(--v2-gray-900);
   font: inherit;
@@ -486,9 +477,9 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   color: var(--v2-gray-1000);
 }
 .v2-lien[aria-current="page"] {
-  background: var(--v2-a-200);
+  background: var(--v2-gray-100);
   color: var(--v2-gray-1000);
-  font-weight: 400;
+  font-weight: 600;
 }
 .v2-lien[data-dedans] {
   color: var(--v2-gray-1000);
@@ -516,17 +507,20 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
 .v2-lien[aria-expanded="true"] .v2-lien-chevron {
   transform: rotate(90deg);
 }
+/* le compteur, comme le badge « NEW » du volet Supabase : pastille bordée, chasse fixe */
 .v2-lien-compteur {
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 7px;
   border-radius: 999px;
   display: inline-grid;
   place-items: center;
+  font-family: var(--v2-mono);
   font-size: 11px;
   font-weight: 500;
-  background: var(--v2-gray-200);
-  color: var(--v2-gray-1000);
+  background: var(--v2-a-100);
+  box-shadow: 0 0 0 1px var(--v2-a-500);
+  color: var(--v2-gray-900);
   font-variant-numeric: tabular-nums;
 }
 .v2-sous-menu {
@@ -547,14 +541,15 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   gap: 1px;
 }
 .v2-lien--sous {
-  padding-left: 34px;
+  padding-left: 24px;
 }
 .v2-laterale-bas {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 0 -12px;
+  margin: 0;
   padding: 12px;
+  border-top: 1px solid var(--v2-a-400);
   border-top: 1px solid var(--v2-a-400);
 }
 .v2-moi {
@@ -1123,7 +1118,7 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   padding: 12px 16px;
   border-top: 1px solid var(--v2-a-400);
   background: var(--v2-bg-200);
-  border-radius: 0 0 12px 12px;
+  border-radius: 0 0 6px 6px;
   color: var(--v2-gray-900);
   font-size: 13px;
 }
@@ -1347,7 +1342,7 @@ a.v2-jauge:hover {
   background: var(--v2-a-100);
 }
 .v2-liste-item:last-child {
-  border-radius: 0 0 12px 12px;
+  border-radius: 0 0 6px 6px;
 }
 .v2-liste-texte {
   min-width: 0;
@@ -1729,7 +1724,7 @@ a.v2-jauge:hover {
   padding: 16px 24px;
   background: var(--v2-bg-200);
   border-top: 1px solid var(--v2-a-400);
-  border-radius: 0 0 12px 12px;
+  border-radius: 0 0 6px 6px;
 }
 
 /* ══ La palette de commandes (⌘K) ══════════════════════════════════════ */
@@ -2945,10 +2940,9 @@ html.v2-calme .v2-vivant .v2-carte::before, html.v2-calme .v2-vivant .v2-dr-cart
    (#161819) plutôt que voilée. Vaut pour /espace2 et /omega.
    ══════════════════════════════════════════════════════════════════════ */
 .v2 .v2-haut { height: 48px; padding: 0 16px; }
-.v2 .v2-lien { height: 28px; gap: 8px; border-radius: 6px; }
+.v2 .v2-lien { height: 26px; gap: 8px; border-radius: 6px; }
 .v2 .v2-lien[aria-current="page"], .v2 .v2-lien[data-dedans] { background: var(--v2-gray-100); }
-.v2 .v2-section-titre { height: 24px; }
-.v2 .v2-trouver { height: 28px; }
+.v2 .v2-trouver { height: 30px; }
 .v2 .v2-equipe { height: 32px; }
 /* boutons : 26 px et texte de 13 px, comme ceux d'Attio (« Sorted by Date », « View settings », mesurés le 11/10) */
 .v2 .v2-portee, .v2 .v2-btn--petit, .v2 .v2-val-bouton { height: 26px; padding: 0 8px; gap: 6px; font-size: 13px; }

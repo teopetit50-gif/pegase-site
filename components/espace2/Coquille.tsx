@@ -22,7 +22,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, Banknote, Building2, CheckSquare, ChevronDown, NotebookPen, Phone, Users, Workflow, Gauge, Inbox, Bell, Check, CheckCheck, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, LayoutGrid, LifeBuoy, LogOut, Menu as IconeMenu, Moon, MoreHorizontal, Search, Settings, Sparkles, Sun, X } from "lucide-react";
+import { Activity, Banknote, Building2, CheckSquare, NotebookPen, Phone, Users, Workflow, Gauge, Inbox, Bell, Check, CheckCheck, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, LayoutGrid, LifeBuoy, LogOut, Menu as IconeMenu, Moon, MoreHorizontal, Search, Settings, Sparkles, Sun, X } from "lucide-react";
 import { Button, Dialog, DialogTrigger, Modal, ModalOverlay, Popover, RouterProvider } from "react-aria-components";
 import type { Utilisateur } from "@/lib/compte";
 import { createClient } from "@/lib/supabase/client";
@@ -33,7 +33,7 @@ import { ItemMenu, Kbd, MenuDeroulant, SectionMenu, SeparateurMenu } from "./ui"
 import Palette from "./Palette";
 import { IconeModule } from "./vivant";
 import Assistant from "./Assistant";
-import { ecrireStockage, useOuvertes, useStockage } from "./Collection";
+import { useOuvertes } from "./Collection";
 import { MODULES, MODULES_A_VENIR, MODULES_PRINCIPAUX, RACINE, moduleMetier, porteeDe, titreDe } from "./modules";
 import { useCompteurs } from "./compteurs";
 import { OrganisationContexte } from "./organisation";
@@ -273,7 +273,6 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
   const compteurs = useCompteurs();
   const tachesOuvertes = useOuvertes("taches");
   const metier = moduleMetier(utilisateur?.secteur, !!utilisateur);
-  const [ouvertes, basculer] = useSections();
   const organisation = utilisateur?.entreprise || (utilisateur ? "Mon organisation" : "CAMA");
   const nom = utilisateur ? [utilisateur.prenom, utilisateur.nom].filter(Boolean).join(" ") || utilisateur.email : null;
 
@@ -292,8 +291,9 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
   };
 
   /* 07/10/2026 — demande de Teo : des sections titrées, comme la barre
-     d'Attio (« Records ⌄ », « Lists ⌄ »), qui se replient d'un clic pour
-     que la liste ne devienne pas immense à faire défiler. */
+     d'Attio. 21/10 — elles prennent le dessin du volet de navigation de
+     Supabase : toujours ouvertes, intitulé en capitales à chasse fixe,
+     un filet entre les groupes, sans icône devant les entrées. */
   const groupes: { titre?: string; liens: Lien[] }[] = [
     {
       liens: [
@@ -426,29 +426,17 @@ function BarreLaterale({ utilisateur, chemin, ouvrirPalette, fermer }: { utilisa
       </button>
 
       <nav className="v2-laterale-nav" aria-label="Pages et modules">
-        {groupes.map((g, i) => {
-          /* fermée par défaut (Teo, 07/10) ; celle de la page courante
-             s'ouvre seule, tant qu'on ne l'a pas refermée à la main */
-          const ici = g.liens.some((l) => chemin === (l.racine ?? l.href) || chemin.startsWith(`${l.racine ?? l.href}/`));
-          const replie = !!g.titre && !(ouvertes[g.titre] ?? ici);
-          return (
-            <div key={i} className="v2-section">
-              {g.titre ? (
-                <button type="button" className="v2-section-titre" aria-expanded={!replie} onClick={() => basculer(g.titre!, replie)}>
-                  <span>{g.titre}</span>
-                  <ChevronDown width={14} height={14} aria-hidden="true" />
-                </button>
-              ) : null}
-              {replie ? null : (
-                <ul className="v2-groupe">
-                  {g.liens.map((l) => (
-                    <LienLateral key={l.href} lien={l} chemin={chemin} />
-                  ))}
-                </ul>
-              )}
-            </div>
-          );
-        })}
+        {groupes.map((g, i) => (
+          <div key={i} className="v2-section">
+            {/* l'intitulé n'est plus un bouton : tous les groupes restent ouverts (volet Supabase, 21/10) */}
+            {g.titre ? <div className="v2-section-titre">{g.titre}</div> : null}
+            <ul className="v2-groupe">
+              {g.liens.map((l) => (
+                <LienLateral key={l.href} lien={l} chemin={chemin} />
+              ))}
+            </ul>
+          </div>
+        ))}
       </nav>
 
       <div className="v2-laterale-bas">
@@ -573,17 +561,6 @@ function LogoClient({ chemin, nom, demo }: { chemin: string | null; nom: string;
   );
 }
 
-function useSections(): [Record<string, boolean>, (titre: string, ouvrir: boolean) => void] {
-  const brut = useStockage("espace2-sections");
-  let etat: Record<string, boolean> = {};
-  try {
-    const v = JSON.parse(brut || "{}");
-    if (v && typeof v === "object" && !Array.isArray(v)) etat = v;
-  } catch {}
-  const basculer = (titre: string, ouvrir: boolean) => ecrireStockage("espace2-sections", JSON.stringify({ ...etat, [titre]: ouvrir }));
-  return [etat, basculer];
-}
-
 /* CASHD : le tableau de bord, puis chaque vue de l'écran de travail —
    EcranCashd (C2) ouvre la vue que porte ?vue= */
 const SOUS_CASHD = [
@@ -598,12 +575,13 @@ function LienLateral({ lien, chemin }: { lien: Lien; chemin: string }) {
   const base = lien.racine ?? lien.href;
   const dedans = lien.exact ? chemin === lien.href : chemin === base || chemin.startsWith(`${base}/`);
   const [ouvert, setOuvert] = useState(dedans);
+  /* les icônes (lien.icone) ne sont plus rendues ici : le volet de Supabase
+     n'en a pas devant ses entrées (21/10) ; la palette les garde */
   /* un module annoncé : sa place, sans lien tant que son écran n'existe pas */
   if (lien.bientot) {
     return (
       <li>
         <span className="v2-lien v2-lien--bientot" aria-disabled="true">
-          {lien.icone}
           <span>{lien.libelle}</span>
           <span className="v2-badge">bientôt</span>
         </span>
@@ -615,7 +593,6 @@ function LienLateral({ lien, chemin }: { lien: Lien; chemin: string }) {
     return (
       <li>
         <button type="button" className="v2-lien" aria-expanded={ouvert} aria-controls={id} data-dedans={dedans ? "" : undefined} onClick={() => setOuvert((v) => !v)}>
-          {lien.icone}
           <span>{lien.libelle}</span>
           <ChevronRight width={14} height={14} aria-hidden="true" className="v2-lien-chevron" />
         </button>
@@ -636,7 +613,6 @@ function LienLateral({ lien, chemin }: { lien: Lien; chemin: string }) {
   return (
     <li>
       <Link href={lien.href} className="v2-lien" aria-current={dedans ? "page" : undefined}>
-        {lien.icone}
         <span>{lien.libelle}</span>
         {lien.compteur ? <span className="v2-lien-compteur">{lien.compteur}</span> : null}
       </Link>
