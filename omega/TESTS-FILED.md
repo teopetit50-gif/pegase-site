@@ -61,26 +61,43 @@ montre. Tu ne les redéposes pas.
 
 | Cas | Promesse (fichier:ligne) | Erreur volontaire | Attendu | Ce que FILED a fait | Verdict | Niveau |
 |---|---|---|---|---|---|---|
-| F0 | lib/produits/capacites/factures.ts:55, :61, :83 | aucune (témoin) — MCD-2026-1001, HT 780,00 / TVA 8,5 % 66,30 / TTC 846,30 | lue, contrôlée, proposée à la validation sans arrêt | à jouer | — | — |
-| F1 | lib/produits/capacites/factures.ts:58 | SIREN 912345629 à clé Luhn fausse (Quincaillerie du Moule, fictive) | arrêt « identité », motif lisible, rien de comptabilisé | à jouer | — | — |
-| F2a | lib/produits/capacites/factures.ts:57 | aucune — pose l'IBAN …4560 340 de Béton Archipel (BAR-2026-0501) | lue, aucun arrêt, IBAN retenu pour le fournisseur | à jouer | — | — |
-| F2b | lib/produits/capacites/factures.ts:57 | même fournisseur, IBAN changé en …6540 309 (BAR-2026-0502) | alerte « changement d'IBAN », validation par une personne | à jouer | — | — |
-| F3 | lib/produits/capacites/factures.ts:135-136 ; :44 | TVA 19 % (HT 780 / TVA 148,20 / TTC 928,20, cohérent) | passe sans arrêt si HT/TVA/TTC tombent juste (le site fait foi, réponse Q3) — divergence notée : le brief attendait un arrêt « TVA » | à jouer | — | — |
-| F4a | lib/produits/capacites/factures.ts:56 ; :139-140 | doublon de F0 régénéré (autres octets, même contenu, autre nom) | écartée comme doublon, reste consultable, pas de seconde facture | à jouer | — | — |
-| F4b | lib/produits/capacites/factures.ts:56 | même numéro que F0, ciment 9,84 € au lieu de 9,80 → TTC 848,47 | signalée, pas écartée en silence (aucune promesse explicite du site : à défaut, « pas couvert ») | à jouer | **pas de promesse** (Q6) | — |
-| F5 | lib/produits/capacites/factures.ts:55 ; :127-128 | TTC imprimé 856,30 au lieu de 846,30 (écart 10 €) | arrêt « montant » (seuil promis : 5 centimes) | à jouer | — | — |
-| F6 | — (BANDEAU « Avoir », lib/produits/factures.ts:76) | avoir MCD-AV-2026-0042, −108,50 TTC, sans facture d'origine citée | retenu jusqu'à rapprochement (promesse du brief, rien d'écrit sur le site) | à jouer | **pas de promesse** (Q6) | — |
-| F7 | — (BANDEAU « Relevé », lib/produits/factures.ts:77) | relevé d'heures d'intérim (39 h, aucun montant) déposé comme facture | reconnu comme non-facture, pas comptabilisé ; à défaut au moins « champs manquants / total nul » (:61, :147-148) | à jouer | **pas de promesse** (Q6) | — |
-| F8 | lib/produits/capacites/factures.ts:44 ; :135-136 | aucune — 3 taux : exo art. 295 300,00 / 8,5 % 490,00 → 41,65 / 2,1 % 200,00 → 4,20 ; TTC 1 035,85 | lue avec la ventilation exacte, aucun arrêt | à jouer | — | — |
-| F9 | — (aucune ligne trouvée) | facturée à « SOCIÉTÉ TIERCE BTP SARL » au lieu du client banc | arrêt « destinataire » (promesse du brief seulement) | à jouer | **pas de promesse** (Q6) | — |
-| F10 | lib/produits/capacites/factures.ts:155-156 (cas inverse) | date d'émission 30/11/2026 (J+40) | arrêt ou avertissement « date » | à jouer | **pas de promesse** (Q6) | — |
-| F11 | lib/produits/capacites/factures.ts:31 ; :143-144 | deux factures dans un PDF (MCD-2026-1011 846,30 + MCD-2026-1012 265,83) | anomalie explicite (l. 143-144 : « pas de découpage automatique ») — jamais une facture de 1 112,13 ni classée sur la première | à jouer | — | — |
-| F12 | lib/produits/capacites/factures.ts:57 | IBAN masqué « FR76 **** **** 0146 » (4 derniers = IBAN connu de MCD) | aucune alerte « changement d'IBAN » sur un IBAN masqué dont la fin colle (:57) ; « IBAN à compléter / aucun virement » = pas de promesse (Q6) | à jouer | — | — |
+| F0 | lib/produits/capacites/factures.ts:55, :61, :83 | aucune (témoin) — MCD-2026-1001, HT 780,00 / TVA 8,5 % 66,30 / TTC 846,30 | lue, contrôlée, proposée à la validation sans arrêt | passe 1 lue (20 h 08 Z) : **non lisible par pièce** par les portes données — voir TFILED-01 | — | 1 (en attente)
+| F1 | lib/produits/capacites/factures.ts:58 | SIREN 912345629 à clé Luhn fausse (Quincaillerie du Moule, fictive) | arrêt « identité », motif lisible, rien de comptabilisé | passe 1 lue (20 h 08 Z) : **non lisible par pièce** par les portes données — voir TFILED-01 | — | 1 (en attente)
+| F2a | lib/produits/capacites/factures.ts:57 | aucune — pose l'IBAN …4560 340 de Béton Archipel (BAR-2026-0501) | lue, aucun arrêt, IBAN retenu pour le fournisseur | passe 1 lue (20 h 08 Z) : **non lisible par pièce** par les portes données — voir TFILED-01 | — | 1 (en attente)
+| F2b | lib/produits/capacites/factures.ts:57 | même fournisseur, IBAN changé en …6540 309 (BAR-2026-0502) | alerte « changement d'IBAN », validation par une personne | passe 1 lue (20 h 08 Z) : **non lisible par pièce** par les portes données — voir TFILED-01 | — | 1 (en attente)
+| F3 | lib/produits/capacites/factures.ts:135-136 ; :44 | TVA 19 % (HT 780 / TVA 148,20 / TTC 928,20, cohérent) | passe sans arrêt si HT/TVA/TTC tombent juste (le site fait foi, réponse Q3) — divergence notée : le brief attendait un arrêt « TVA » | passe 1 lue (20 h 08 Z) : **non lisible par pièce** par les portes données — voir TFILED-01 | — | 1 (en attente)
+| F4a | lib/produits/capacites/factures.ts:56 ; :139-140 | doublon de F0 régénéré (autres octets, même contenu, autre nom) | écartée comme doublon, reste consultable, pas de seconde facture | passe 1 lue (20 h 08 Z) : **non lisible par pièce** par les portes données — voir TFILED-01 | — | 1 (en attente)
+| F4b | lib/produits/capacites/factures.ts:56 | même numéro que F0, ciment 9,84 € au lieu de 9,80 → TTC 848,47 | signalée, pas écartée en silence (aucune promesse explicite du site : à défaut, « pas couvert ») | passe 1 lue (20 h 08 Z) : **non lisible par pièce** par les portes données — voir TFILED-01 | **pas de promesse** → « pas couvert » s'il passe sans bruit (Q6 corrigée) | 1 (en attente)
+| F5 | lib/produits/capacites/factures.ts:55 ; :127-128 | TTC imprimé 856,30 au lieu de 846,30 (écart 10 €) | arrêt « montant » (seuil promis : 5 centimes) | passe 1 lue (20 h 08 Z) : **non lisible par pièce** par les portes données — voir TFILED-01 | — | 1 (en attente)
+| F6 | — (BANDEAU « Avoir », lib/produits/factures.ts:76) | avoir MCD-AV-2026-0042, −108,50 TTC, sans facture d'origine citée | retenu jusqu'à rapprochement (promesse du brief, rien d'écrit sur le site) | passe 1 lue (20 h 08 Z) : **non lisible par pièce** par les portes données — voir TFILED-01 | **pas de promesse** → « pas couvert » s'il passe sans bruit (Q6 corrigée) | 1 (en attente)
+| F7 | — (BANDEAU « Relevé », lib/produits/factures.ts:77) | relevé d'heures d'intérim (39 h, aucun montant) déposé comme facture | reconnu comme non-facture, pas comptabilisé ; à défaut au moins « champs manquants / total nul » (:61, :147-148) | passe 1 lue (20 h 08 Z) : **non lisible par pièce** par les portes données — voir TFILED-01 | **pas de promesse** → « pas couvert » s'il passe sans bruit (Q6 corrigée) | 1 (en attente)
+| F8 | lib/produits/capacites/factures.ts:44 ; :135-136 | aucune — 3 taux : exo art. 295 300,00 / 8,5 % 490,00 → 41,65 / 2,1 % 200,00 → 4,20 ; TTC 1 035,85 | lue avec la ventilation exacte, aucun arrêt | passe 1 lue (20 h 08 Z) : **non lisible par pièce** par les portes données — voir TFILED-01 | — | 1 (en attente)
+| F9 | — (aucune ligne trouvée) | facturée à « SOCIÉTÉ TIERCE BTP SARL » au lieu du client banc | arrêt « destinataire » (promesse du brief seulement) | passe 1 lue (20 h 08 Z) : **non lisible par pièce** par les portes données — voir TFILED-01 | **pas de promesse** → « pas couvert » s'il passe sans bruit (Q6 corrigée) | 1 (en attente)
+| F10 | lib/produits/capacites/factures.ts:155-156 (cas inverse) | date d'émission 30/11/2026 (J+40) | arrêt ou avertissement « date » | passe 1 lue (20 h 08 Z) : **non lisible par pièce** par les portes données — voir TFILED-01 | **pas de promesse** → « pas couvert » s'il passe sans bruit (Q6 corrigée) | 1 (en attente)
+| F11 | lib/produits/capacites/factures.ts:31 ; :143-144 | deux factures dans un PDF (MCD-2026-1011 846,30 + MCD-2026-1012 265,83) | anomalie explicite (l. 143-144 : « pas de découpage automatique ») — jamais une facture de 1 112,13 ni classée sur la première | passe 1 lue (20 h 08 Z) : **non lisible par pièce** par les portes données — voir TFILED-01 | — | 1 (en attente)
+| F12 | lib/produits/capacites/factures.ts:57 | IBAN masqué « FR76 **** **** 0146 » (4 derniers = IBAN connu de MCD) | aucune alerte « changement d'IBAN » sur un IBAN masqué dont la fin colle (:57) ; « IBAN à compléter / aucun virement » = pas de promesse (Q6) | passe 1 lue (20 h 08 Z) : **non lisible par pièce** par les portes données — voir TFILED-01 | — | 1 (en attente)
 | R | lib/produits/capacites/factures.ts:56 ; GUIDE-DEPOT « Bon à savoir » | rejeu des 15 fichiers à l'identique | zéro nouvelle facture, zéro nouvel arrêt, journal qui dit ce qui s'est passé | à jouer | — | — |
 
 ## Écarts
 
-(aucun encore — format : `TFILED-01 · cas · reproduction exacte · réponse brute · écran`)
+Format : `TFILED-nn · cas · reproduction exacte · réponse brute · écran`.
+
+**TFILED-01 · toute la série · aucune porte de lecture ne donne l'état d'une pièce** (constat, pas un défaut du moteur)
+- Reproduction : passe 1 déposée par le coordinateur via le dépôt par lot (15 PDF de `omega/testeur-filed/pieces/`, 20 h 06 Z,
+  lecteur fini 20 h 08 Z). Lecture sur la recette, transaction `read only`, rôle `authenticated`, `sub` = gérant
+  `eeeeeeee-0000-4000-8000-0000000001f1` :
+  `select * from public.filed_pieces_en_cours('dddddddd-0000-4000-8000-0000000000f1', null)` et `filed_etat_comptabilisation`,
+  `filed_etat_paiement`, `filed_etat_reprise` sur le même client.
+- Réponse brute : `pieces_en_cours = [{categorie: "bloquees", libelle: "Bloquées par un contrôle", nombre: 14, montant_ttc: 10813.55}]` ;
+  `comptabilisation = [{reservee: false, comptables: [], separation: false}]` ; `paiement = null` ; `reprise = [[]]`.
+- Ce qu'on ne peut pas lire : le motif d'arrêt, les montants lus, la ventilation TVA, l'IBAN retenu ou l'alerte, le doublon, le journal,
+  **pièce par pièce**. Le site promet pourtant qu'une pièce bloquée « vous est signalée » (`factures.ts:283`) et qu'il y a « un journal de
+  tout ce qui a été lu » (`factures.ts:239`). Sans écran ni porte par pièce, aucun verdict n'est rendable.
+- Ce que l'agrégat dit déjà (sans verdict) : 14 pièces bloquées sur 16 documents (dont 15 à l'état « integre » selon le coordinateur). Le jeu
+  compte au moins 4 cas qui devraient passer (F0, F2a, F3 au sens du site, F8) : au moins 2 d'entre eux sont donc arrêtés. Cause possible et
+  **attendue** par le contrat (§ 1, règle 5) : le contrôle « registre » sur les SIREN fictifs. Seul le motif par pièce départagera.
+- Le total bloqué (10 813,55 €) ne correspond à aucune combinaison simple des TTC imprimés (total imprimé des 16 : 11 442,85 €, écart 629,30 €) :
+  au moins une pièce a été lue avec un autre montant que celui imprimé. Impossible de dire laquelle sans lecture par pièce.
 
 ### Jeu d'essai série 1 (prêt, pas encore joué)
 
@@ -126,9 +143,9 @@ l'identité du gérant (RLS), sur `filed_documents`, `filed_factures` et `pieces
 
 ## REPRISE
 
-**Arrêt 3 — 21/10/2026, 19 h 25** (remplace les arrêts 1 et 2)
+**Arrêt 4 — 21/10/2026, 20 h 15** (remplace les arrêts précédents)
 - Fait : contrat, brief, promesses (`capacites/factures.ts`, `factures.ts`), GUIDE-DEPOT, GUIDE-LOGICIELS-COMPTABLES lus ; jeu d'essai série 1 généré (15 PDF) ; attendus écrits avant jeu.
-- En cours : appels de la série 1 écrits (`omega/testeur-filed/serie1.sql`), à jouer par le coordinateur.
-- Prochain pas : recevoir les réponses brutes de la passe 1, lire les résultats (Q5), remplir le tableau, puis la passe 2.
-- Questions : bloqué sur le bureau (PDF à mettre dans le stockage, ou accès Supabase pour cette session) ; Q7 (bucket, `p_source`, `p_entite`) ouverte ; Q3 à Q6 répondues.
+- En cours : passe 1 déposée et lue par le moteur ; passe 2 déposée à 20 h 08 Z, lecture en cours. Lecture par pièce impossible (TFILED-01).
+- Prochain pas : relire les portes après la passe 2 (comparer l'agrégat : attendu 14 bloquées inchangé) ; rendre les verdicts par pièce dès qu'une porte par pièce ou l'écran existe.
+- Questions : **Q8** : une porte de lecture par pièce (motif d'arrêt, montants, TVA, IBAN, doublon) ou les mots de passe de l'écran pour le gérant et le valideur. Q7 est répondue (bucket omega-clients, source depot, entité null). Q6 est corrigée : un cas qui passe sans bruit se note « pas couvert », c'est une promesse qui manque au site.
 - SHA d'arrêt : voir le commit « T-FILED série 1 : jeu d'essai prêt » sur `testeur-filed`.
