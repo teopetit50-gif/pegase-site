@@ -387,6 +387,6 @@ par les portes `public.filed_confirmer_fournisseur(uuid, text)` et `public.filed
 **Arrêt 13 — 21/10/2026, 20 h 45 Z**
 - Fait : séries 1, 1b et 2, au niveau 1. Corrigés et revérifiés : TFILED-03, 04, 08 et 11. Clos justes : TFILED-02 et 13. Écarts ouverts : **TFILED-12** (`:74`, réserve pour Teo) et **TFILED-14** (facture validée puis contredite). Remontés à Teo : TFILED-05, 06, 07, 09 et 10. Pas testable : F0 « sans arrêt », le FEC, le seuil de double approbation, l'usage réel d'une délégation, le paiement.
 - En cours : rien.
-- Prochain pas : la décision du coordinateur sur TFILED-14.
+- Prochain pas : TFILED-14 est vérifié par le coordinateur et part à A4 (une facture validée qui reçoit un bloquant revient en « bloquee », et sa validation devient caduque). À revérifier au correctif : F1 en « bloquee », comptée dans `pieces_en_cours`. Arrêt jusque-là.
 - Questions : à Teo, « déposer » vaut-il « saisir » (TFILED-12) ? Et que devient une facture validée quand un contrôle la contredit (TFILED-14) ?
 - SHA d'arrêt : voir le commit « T-FILED : TFILED-11 corrigé, TFILED-14 » sur `testeur-filed`.
