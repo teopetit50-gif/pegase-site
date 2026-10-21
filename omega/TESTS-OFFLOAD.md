@@ -79,6 +79,41 @@ P = `lib/produits/reprise.ts`, C = `lib/produits/capacites/reprise.ts`.
 | O12 | P:441 ; brief | O0 ; effacement par `offload_effacer_compte` | plus rien ne la mentionne ; journal présent sans ses données | sans motif : refusé (« Dites d'où vient la demande d'effacement … ») ; avec motif : fiche et tableau anonymisés (« Compte effacé (réf. O12) », email/contact `null`), journal `offload.compte_efface` présent. **Mais** `offload_restitution` contient encore nom, courriel et contact dans la ligne de journal `offload.compte_saisi` ; tâche d'appel restée `a_faire` ; rejeu : la saisie est acceptée en silence et réécrit les données au journal (`offload.compte_modifie`) | **écart** TOFFLOAD-04 | 1 |
 | R | P:196, P:397 | rejeu à l'identique des passes A et B, puis deux détections au 22/10 | aucun doublon, 1 signal/compte/jour, aucune seconde reprise | signaux : 13 (un par compte, 2ᵉ détection `entrees: 0`), reprises : 10, aucune seconde ; comptes 13, affaire 1, contrat 1. **Mais achats 172 → 342** (chaque facture recréée, même référence, même date, même montant) et contacts 1 → 2 ; d'où `ca_12m` d'O0 passé de 4 050 à 8 100 et `valeur_annuelle` de 5 567,8 à 11 135,59 | signaux et reprises : juste ; dépôt : **écart** TOFFLOAD-05 | 1 |
 
+
+### Contre-épreuve des correctifs (21/10, après c4_24, c4_25, c4_26 ; réglage d'envoi essai posé, `envoi_auto` false, accord « absent »)
+
+Rejouée sur des comptes neufs pour ne pas lire l'état pollué de la série 1. Aucun envoi ni demande approuvés.
+
+| Cas | Écart | Ce qui a été joué | Ce qu'OFFLOAD a fait | Verdict | Niveau |
+|---|---|---|---|---|---|
+| C-01 | TOFFLOAD-01 | O14 « Snack Fictif Reprise-Neuve SARL » (mensuel, muet depuis 20/07), `offload_ouvrir_reprise` par le gérant | reprise `a_valider`, envoi1 `"mode":"essai","statut":"a_valider"` ; `offload_tableau.a_valider` montre la demande `415069c1-…` avec destinataire, sujet et corps entier ; `retenus_en_attente: 1`. Le corps reprend date, réf. et montant de la dernière commande (P:237, C:56), aucun prix ni délai (C:102), propose « stop » | juste | 1 |
+| C-04 | TOFFLOAD-04 | O13 neuf (13 achats), `offload_effacer_compte` avec motif, puis ressaisie du compte et d'un achat | restitution : aucune trace du nom, du courriel ni du contact ; ressaisie refusée (« Ce compte a été effacé à la demande de la personne : il ne se ressaisit pas. ») ; achat refusé (« … aucun achat ne s'y rattache plus. »). O12 de la série 1 a aussi disparu de la restitution | juste | 1 |
+| C-05 | TOFFLOAD-05 | rejeu à l'identique du compte O0 et de ses 13 factures | `achats` 342 → 368 = +13 (O13) +13 (O14) : zéro doublon pour O0 | juste | 1 |
+| C-06 | TOFFLOAD-06 | O14 : achat F-9014 le 21/10 pendant la reprise | reprise `close`, `issue: commande`, motif « Une commande est arrivée depuis l'ouverture de la reprise. », envoi1 `annule`, plus rien à valider pour O14. **Mais** `offload_envoi_auto.retenus_en_attente` reste à 1 | juste ; compteur : TOFFLOAD-07 | 1 |
+| — | TOFFLOAD-06 (série 1) | reprises O7 et O11 ouvertes avant le correctif | toujours `appel`, `close_le: null` (pas de détection depuis) | à relire après la détection du 26/10 | — |
+
+**TOFFLOAD-07 · compteur des messages retenus.** Après C-06 (envoi `bf3163bd-…` annulé, `a_valider` vide pour O14 et vide en tout),
+`offload_envoi_auto('dddddddd-0000-4000-8000-0000000000c4')` rend encore `"retenus_en_attente": 1`. Mineur : le valideur croit qu'un
+message attend.
+
+**TOFFLOAD-08 · réglage refusé en langage machine.** `offload_regler(client, '{"vague_jour":9}')` sous le gérant rend
+`new row for relation "offload_reglages" violates check constraint "offload_reglages_vague_jour_check"` au lieu d'une phrase
+(les autres portes disent pourquoi en français). Mineur.
+
+## Série 2
+
+Réglage : `offload_regler(client, '{"vague_jour":2}')` (mardi, P:256 « Mardi 9 h ») par le gérant. Comptes neufs, mensuels, muets
+depuis le 20/07 : V1 Hôtellerie 600 €, V2 Restauration 300 €, V3 Hôtellerie 900 € (`5797c896-…`, `9ac17c98-…`, `a9130d92-…`).
+Détections demandées au coordinateur : lundi 26/10, mardi 27/10, mardi 27/10 encore.
+
+| Cas | Promesse | Attendu | Ce qu'OFFLOAD a fait | Verdict | Niveau |
+|---|---|---|---|---|---|
+| S2-1 | P:256 | lundi : signaux levés, aucune reprise ouverte | en attente | — | — |
+| S2-2 | P:256, P:451 | mardi : V1-V3 ouverts en demandes retenues « à valider », rien ne part | en attente | — | — |
+| S2-3 | P:381, P:397 | second appel du mardi : rien de plus | en attente | — | — |
+| S2-4 | C:113, C:115 ; brief | pilotage : valeur en jeu par segment sur 12 mois | lu une fois le 21/10 : valeur en jeu par vague et par entité ; taux par segment / canal / niveau ; **pas** de valeur en jeu par segment | à relire après la vague | — |
+| S2-5 | P:441 | restitution : tout revient, format lisible | `offload_restitution` : JSON, `resume` + `donnees` (achats, comptes, contacts, contrats, affaires, échéances, signaux, reprises, tâches, journal…) ; aucun export tableur | à compléter | — |
+
 ## Écarts
 
 **TOFFLOAD-01 · O0 (et tous les comptes ouverts) · « Vous validez ce qui part » (P:451) et essai.**
@@ -172,3 +207,7 @@ Questions : aucune nouvelle ; alerte envoyée sur le `mode: reel` (TOFFLOAD-01),
 fois (vague du 21/10 : `en_jeu` 51 910,2, taux par segment/canal/niveau, pas de valeur en jeu par segment), restitution (JSON, déjà
 lue) ; la vague de la semaine attend le correctif TOFFLOAD-01 (régler `vague_jour` déclencherait de nouveaux envois `reel`).
 Questions : porte des demandes de validation ; feu vert pour la vague après TOFFLOAD-01.
+
+**21/10, arrêt 5.** Fait : contre-épreuve 01/04/05/06 justes, TOFFLOAD-07 et 08 (mineurs) ; série 2 posée (vague mardi, V1-V3).
+En cours : attente des détections 26/10, 27/10, 27/10. Prochain pas : lire la vague, le pilotage par segment, O7/O11.
+Questions : aucune. Aucune approbation faite.
