@@ -142,7 +142,7 @@ Chaque série = 16 dépôts, puis rejeu à l'identique (même id externe).
 | Base | accueil.ts:94 | fiches écrites par le gérant | — | `validee` dès l'écriture ; voulu côté produit, le gérant en est l'auteur (coordinateur) | observation | 1 |
 
 Note : le 12ᵉ envoi est la notification interne de R11 au service Comptabilité (coordinateur).
-Écart **TREPUT-05** (numéro fixé par le coordinateur) : l'accord « horaires » affiche `envoyees_seules_mois: 1`, alors que R13a n'est jamais parti (`echec_execution`, envoi `bloque`). Observation sans verdict : (b) les envois du banc portent `destinataire_fuseau: Europe/Paris` pour une entreprise en Guadeloupe : à vérifier pour la règle « pas d'envoi le dimanche soir ».
+Écart **TREPUT-05** (numéro fixé par le coordinateur) : l'accord « horaires » affiche `envoyees_seules_mois: 1`, alors que R13a n'est jamais parti (`echec_execution`, envoi `bloque`). Observation sans verdict : (b) les envois du banc portent `destinataire_fuseau: Europe/Paris` : le banc est déclaré en Europe/Paris (entité sans territoire), donc c'est juste sur le banc (coordinateur). Le coordinateur signale à C3 que l'export écrit Europe/Paris en dur, sans lire le fuseau de l'entité.
 
 ### Série 2 (21/10, 19 h 35 UTC)
 
@@ -223,6 +223,6 @@ Lecture : sous `set local role authenticated` + claims `sub = eeeeeeee-0000-4000
 
 - **Fait** : séries 1 et 2 jouées. Écarts TREPUT-01 à 07 (05 = compteur envoyées seules ; 07 = « export » chez C3). L'accusé est requalifié « pas testable sans réglage ».
 - **En cours** : rien. Le correctif c3_25 (TREPUT-04) est en test chez le coordinateur.
-- **Prochain pas** : rejouer R11 quand le coordinateur le dira, puis les autres lots (R10, R8, R7b, point du matin, export).
+- **Prochain pas** : quand le bureau aura redéployé l'ouvrier `reput-reponse`, rejouer R11 (c3_25) et R8, puis R7a/R7b « hors base » (TREPUT-03), R10, R7b, le point du matin et l'export.
 - **Questions** : aucune bloquante.
 - **SHA d'arrêt** : voir le commit « T-REPUT : renumérotation (TREPUT-05), accusé pas testable sans réglage ».
