@@ -28,7 +28,7 @@ export const CATALOGUE: Catalogue = {
         { t: "Une adresse dédiée reçoit les pièces, et l'expéditeur est repris sur la ligne d'achat.", atteste: true },
         { t: "Les factures en PDF sont lues de la même façon, qu'elles soient natives ou scannées.", atteste: true },
         { t: "Un message sans pièce jointe lisible part en anomalie, il n'est jamais classé au jugé.", atteste: true },
-        { t: "Un fichier qui contient plusieurs factures est découpé pièce par pièce.", atteste: false },
+        { t: "Un fichier qui contient plusieurs factures est découpé pièce par pièce.", atteste: true },
         { t: "Les factures manuscrites et les tickets de caisse sont lus et rattachés.", atteste: false },
         { t: "Les formats structurés Factur-X, UBL et CII sont reçus et lus tels quels.", atteste: false },
         { t: "Un dépôt par lot arrive depuis un dossier partagé ou un transfert de fichiers.", atteste: false },
@@ -141,7 +141,7 @@ export const CAS_LIMITES: BlocCasLimites = {
     },
     {
       q: "Un même fichier contient plusieurs factures.",
-      r: "La pièce part en anomalie plutôt que d'être classée sur la première facture lue. Le découpage automatique n'existe pas encore, et l'annoncer coûterait plus cher que de le dire.",
+      r: "Chaque facture devient une pièce à part, avec sa propre lecture et ses propres contrôles. Le fichier d'origine reste attaché à chacune, pour qu'on sache d'où elle vient.",
     },
     {
       q: "Le total de la facture est à zéro.",
@@ -149,7 +149,7 @@ export const CAS_LIMITES: BlocCasLimites = {
     },
     {
       q: "Le fournisseur n'existe pas encore dans votre comptabilité.",
-      r: "La pièce est classée avec le nom lu sur la facture, et c'est votre comptabilité qui crée la fiche. Le système n'écrit rien dans votre plan comptable.",
+      r: "La pièce est lue, puis mise en attente avec le nom lu sur la facture : une personne confirme ce fournisseur une fois, et ses factures suivantes passent seules. Le système n'écrit rien dans votre plan comptable.",
     },
     {
       q: "La pièce arrive longtemps après sa date d'émission.",
