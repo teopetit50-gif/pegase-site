@@ -142,22 +142,22 @@ Chaque série = 16 dépôts, puis rejeu à l'identique (même id externe).
 | Base | accueil.ts:94 | fiches écrites par le gérant | — | `validee` dès l'écriture ; voulu côté produit, le gérant en est l'auteur (coordinateur) | observation | 1 |
 
 Note : le 12ᵉ envoi est la notification interne de R11 au service Comptabilité (coordinateur).
-Observations sans verdict : (a) l'accord « horaires » affiche `envoyees_seules_mois: 1`, alors que R13a n'est jamais parti (`echec_execution`, envoi `bloque`) : le compteur du pilotage compterait comme envoyé un message qui n'est pas parti ; (b) les envois du banc portent `destinataire_fuseau: Europe/Paris` pour une entreprise en Guadeloupe : à vérifier pour la règle « pas d'envoi le dimanche soir ».
+Écart **TREPUT-05** (numéro fixé par le coordinateur) : l'accord « horaires » affiche `envoyees_seules_mois: 1`, alors que R13a n'est jamais parti (`echec_execution`, envoi `bloque`). Observation sans verdict : (b) les envois du banc portent `destinataire_fuseau: Europe/Paris` pour une entreprise en Guadeloupe : à vérifier pour la règle « pas d'envoi le dimanche soir ».
 
 ### Série 2 (21/10, 19 h 35 UTC)
 
 | Cas | Promesse (fichier:ligne) | La demande | Attendu | Ce que REPUT a fait | Verdict | Niveau |
 |---|---|---|---|---|---|---|
 | A0, accord | accueil.ts:430 | accord « Accusés de réception » | décision du second décideur | `reput_donner_accord(c3,'accuse')` → `a_valider` (`189b1b52…`) ; décision du valideur → `active` | juste | 1 |
-| A1 (1354) | capacites/accueil.ts:32, :44, :150 | « pour le service comptabilité : je n'ai pas reçu ma facture d'août » (`sandra.moreau@exemple.test`) | accusé dans la minute, avec la phrase de transfert au service nommé ; demande routée vers Comptabilité | `sujet: facturation`, validation `reput.transferer.facturation` avec `equipe_id = 72756b97…` (Comptabilité) ✔ ; brouillon « Nous la transmettons au service Comptabilité… sous 5 jours ouvrés » (K12). **Aucun accusé préparé** : `accuse_le` et `accuse_envoi` restent null, aucun envoi d'accusé, même `bloque` | routage juste ; accusé : écart **TREPUT-05** | 1 |
-| A2 (1355) | capacites/accueil.ts:32, :55 | « combien de temps sont garanties les pièces ? » | accusé ; réponse depuis K9 | brouillon « Les pièces remplacées sont garanties un an. » (K9), `en_attente`. **Aucun accusé préparé** | réponse juste ; accusé : **TREPUT-05** | 1 |
+| A1 (1354) | capacites/accueil.ts:32, :44, :150 | « pour le service comptabilité : je n'ai pas reçu ma facture d'août » (`sandra.moreau@exemple.test`) | accusé dans la minute, avec la phrase de transfert au service nommé ; demande routée vers Comptabilité | `sujet: facturation`, validation `reput.transferer.facturation` avec `equipe_id = 72756b97…` (Comptabilité) ✔ ; brouillon « Nous la transmettons au service Comptabilité… sous 5 jours ouvrés » (K12). **Aucun accusé préparé** : `accuse_le` et `accuse_envoi` restent null, aucun envoi d'accusé, même `bloque` | routage juste ; accusé : pas testable sans réglage (voir note) | 1 |
+| A2 (1355) | capacites/accueil.ts:32, :55 | « combien de temps sont garanties les pièces ? » | accusé ; réponse depuis K9 | brouillon « Les pièces remplacées sont garanties un an. » (K9), `en_attente`. **Aucun accusé préparé** | réponse juste ; accusé : pas testable sans réglage | 1 |
 | Envoi de l'accusé | capacites/accueil.ts:32 | — | part sous votre signature | pas de réglage d'envoi sur le banc (décision du coordinateur, envoi réel réservé à Teo) | pas testable sans réglage | — |
 | Point du matin, lignes du 21/10 | brief, série 2 ; accueil.ts (PULSE « ce qui attend validation ») | `private.reput_point_matin_lignes(c3, '2026-10-21')`, joué par le coordinateur | reçues / en attente de validation / répondues, justes | 21 lignes. Entête « Hier : 0 demande reçue, 0 répondue. **En attente de votre validation : 0.** À traiter vous-même : 17. » Or, à cette heure, une quinzaine de validations REPUT du banc sont `en_attente` (R0, R5, R7a, R7b, R13b, A1, A2…, lues dans `demandes_validation`). 17 lignes « <Nom> — <Sujet> : réponse bloquée, à traiter », Marc Deglas préfixé « URGENT · » ✔ | écart **TREPUT-06** (compteur « en attente ») ; urgence en tête juste | 1 |
 | Point du matin, lignes du 22/10 | idem | même fonction, jour 22/10 | reçues hier = 17 | « Hier : 17 demandes reçues, 0 répondue… » ✔ (17 = 11 + R13a + R13b + R5 + R7b-c + A1 + A2) | juste (comptage des reçues) | 1 |
 | Point du matin, sujets hors base | capacites/accueil.ts:98 | — | sujets qui reviennent, signalés | « 3 questions hors de votre base cette semaine sur « Tarifs et prix » : ajoutez une fiche… ». Les 3 sont R2 (vraiment hors base) et R7a, R7b, qui sont **dans la base** (K5) mais retenus par le garde-fou « 280 » : le conseil « ajoutez une fiche » est faux pour ces deux-là (même cause que TREPUT-03) | observation, rattachée à TREPUT-03 | 1 |
 | Point du matin, dépôt | — | `private.reput_deposer_points` | — | non joué : il agit sur tous les clients de la recette (coordinateur) | non joué | — |
 | Export, programmation | capacites/accueil.ts:100 | `reput_programmer_export(c3,'mensuel',1)` en gérant | programme enregistré, destinataire interne | programme `704776f6…`, mensuel, jour 1, destinataires [gérant], entité null | juste | 1 |
-| Export, fichier | capacites/accueil.ts:100, :96 ; ECHELLE « export daté » | `reput_fabriquer_export(704776f6…, 01/10, 21/10)`, joué par le coordinateur | CSV des demandes de la période, colonnes exactes | `reput-demandes-2026-10-01-au-2026-10-21.csv`, 17 lignes, « ; », BOM, CRLF, entête « Reçue le;Canal;Client;Sujet;Langue;Urgente;Tirée de la base;Statut;Répondue le;Délai de réponse (min);Délai de traitement dépassé;Site » ✔. Mais **« Délai de réponse (min) » = 1 sur les 17 lignes, alors que « Répondue le » est vide** (rien n'a été répondu). R7a, reçue à 18 h 21 UTC et préparée à 19 h 22, affiche aussi 1. Heures en heure de Paris (R7a « 21/10/2026 20:21 » pour 18 h 21 UTC ; 14 h 21 en Guadeloupe) | fichier juste ; délai : écart **TREPUT-07** ; fuseau : voir l'observation (b) | 1 |
+| Export, fichier | capacites/accueil.ts:100, :96 ; ECHELLE « export daté » | `reput_fabriquer_export(704776f6…, 01/10, 21/10)`, joué par le coordinateur | CSV des demandes de la période, colonnes exactes | `reput-demandes-2026-10-01-au-2026-10-21.csv`, 17 lignes, « ; », BOM, CRLF, entête « Reçue le;Canal;Client;Sujet;Langue;Urgente;Tirée de la base;Statut;Répondue le;Délai de réponse (min);Délai de traitement dépassé;Site » ✔. Mais **« Délai de réponse (min) » = 1 sur les 17 lignes, alors que « Répondue le » est vide** (rien n'a été répondu). R7a, reçue à 18 h 21 UTC et préparée à 19 h 22, affiche aussi 1. Heures en heure de Paris (R7a « 21/10/2026 20:21 » pour 18 h 21 UTC ; 14 h 21 en Guadeloupe) | fichier juste ; délai : écart **TREPUT-07** (= l'écart « export » relevé par le coordinateur chez C3) ; fuseau : voir l'observation (b) | 1 |
 | Export, courriel | brief (« CSV reçu en interne, sans le fichier dans le courriel ») | — | courriel sans pièce jointe | la fabrication ne prépare aucun courriel (ligne dans `reput_exports` seulement) | pas testable sans réglage | — |
 
 
@@ -191,11 +191,9 @@ Lecture : sous `set local role authenticated` + claims `sub = eeeeeeee-0000-4000
   À la même heure, sous RLS gérant, `demandes_validation` du banc : validations `reput.*` `en_attente`, par exemple `f5fa4164…` (R0), `8e430013…` (R13b), `9c502306…` (R5), `d592ee77…` (R7a), `659c6f12…` (R7b), plus celles de A1 et A2. Le gérant qui lit le point croit n'avoir rien à valider.
 - **TREPUT-07 · export · délai de réponse = 1 min pour des demandes jamais répondues.**
   `private.reput_fabriquer_export('704776f6-6c62-4850-979e-ad8e7c25d175', '2026-10-01', '2026-10-21')` (coordinateur) → export `ec4d2f70-ad71-4cfd-9348-477328832df2`. Ligne brute : `21/10/2026 20:21;email;Nora Céleste;Tarifs et prix;fr;non;non;bloquee;;1;non;`. « Répondue le » est vide et « Délai de réponse (min) » vaut 1, alors que cette demande a été reçue à 18 h 21 UTC et préparée à 19 h 22 UTC. Même valeur 1 sur les 17 lignes. Promesse : « Le délai de première réponse est mesuré, demande par demande » (capacites:96).
-- **TREPUT-05 · A1/A2 · accord « accusés » actif, aucun accusé préparé.**
-  Accord : `reput_donner_accord(c3, 'accuse', null)` en gérant → validation `189b1b52-74d4-49c1-9fc7-7cfe8ae9e7b3`, approuvée par le valideur (`approbations`) → `reput_accords` : `accuse` `active`.
-  Dépôts, environ une minute plus tard : A1 `treput-a1` → 1354 → demande `2bab1e4b…` ; A2 `treput-a2` → 1355 → demande `e50eaec4…`.
-  Lecture à T+60 s et T+2 min : `accuse_le: null`, `accuse_envoi: null` sur les deux. Les envois créés pendant ces 3 minutes sont seulement les réponses (`Re : Facture août`, `Re : Garantie`) : aucun envoi d'accusé, même `bloque`/`CONFIG_ABSENTE`. Pourtant les réponses, elles, ont bien un envoi `bloque`.
-  Attendu (capacites:32) : un accusé préparé dans la minute, retenu par le socle faute de réglage, avec la phrase de transfert quand un service est nommé (A1).
+- **TREPUT-05 · accord « horaires » · le compteur des réponses « envoyées seules » compte un message qui n'est pas parti.**
+  Après R13a (1350, `treput-r13a-b`) : validation `d4a9ffb2…` `echec_execution`, envoi `0f4eb5fa…` `bloque` (`CONFIG_ABSENTE`), `envoyee_le: null`. Pourtant `reput_accords(c3)` → `horaires` `envoyees_seules_mois: 1`.
+- *Requalifié (coordinateur, 21/10) : l'accusé de A1/A2 n'est pas un écart.* L'accusé ne se prépare que pour une demande `a_valider`/`a_traiter`. Sur le banc sans réglage d'envoi, la réponse passe tout de suite `bloquee`, donc pas d'accusé. Accusé et accord des accusés : **pas testable sans réglage**.
 
 ## Questions au coordinateur
 
@@ -223,8 +221,8 @@ Lecture : sous `set local role authenticated` + claims `sub = eeeeeeee-0000-4000
 
 ## REPRISE
 
-- **Fait** : séries 1 et 2 jouées. Écarts TREPUT-01 à 07 ; 01, 03, 04 et le préfixe en double sont partis en lots ; 02, 04 requalifié, 05, 06 et 07 sont chez le coordinateur.
-- **En cours** : rien.
-- **Prochain pas** : rejouer les cas des lots livrés (R10, R8, R11, accord), puis R7b, A1/A2, le point du matin et l'export, quand le coordinateur le dira.
-- **Questions** : aucune bloquante. Hors de portée : envoi réel de l'accusé et de l'export (Teo), dépôt du point du matin (tous clients), astreinte, niveau 2.
-- **SHA d'arrêt** : voir le commit « T-REPUT : point du matin et export notés, TREPUT-06 et 07 ».
+- **Fait** : séries 1 et 2 jouées. Écarts TREPUT-01 à 07 (05 = compteur envoyées seules ; 07 = « export » chez C3). L'accusé est requalifié « pas testable sans réglage ».
+- **En cours** : rien. Le correctif c3_25 (TREPUT-04) est en test chez le coordinateur.
+- **Prochain pas** : rejouer R11 quand le coordinateur le dira, puis les autres lots (R10, R8, R7b, point du matin, export).
+- **Questions** : aucune bloquante.
+- **SHA d'arrêt** : voir le commit « T-REPUT : renumérotation (TREPUT-05), accusé pas testable sans réglage ».
