@@ -8,16 +8,24 @@
 -- Une facture contrôlée « à valider », approuvée par le valideur, la décision exécutée par la file : « validee ».
 create or replace function tests.a4_facture_approuvee(p_org jsonb, p_numero text) returns uuid
 language plpgsql as $$
-declare v_f uuid := tests.a4_facture_identifiants_lus(p_org, p_numero, '{"nom": "Quai des Matériaux d''exemple"}');
+declare v_f uuid := tests.a4_facture_identifiants_lus(p_org, p_numero, '{"nom": "Quai des Matériaux d''exemple"}'); v_approbateur uuid;
 begin
   if (select statut from public.filed_factures where id = v_f) <> 'a_valider' then
     raise exception 'doublure : % attendue « a_valider », trouvée %', p_numero, (select statut from public.filed_factures where id = v_f);
   end if;
-  perform set_config('request.jwt.claims', json_build_object('sub', p_org ->> 'valideur', 'role', 'authenticated')::text, true);
+  -- L'approbateur : un membre qui n'a pas saisi la pièce (règle du socle, lot 19c : payload.saisi_par).
+  select u into v_approbateur
+    from unnest(array[(p_org ->> 'valideur')::uuid, (p_org ->> 'gerant')::uuid]) u
+   where not (u = any (private.filed_saisisseurs(v_f)))
+   limit 1;
+  if v_approbateur is null then raise exception 'doublure : aucun approbateur distinct du saisisseur pour %', p_numero; end if;
+  perform set_config('request.jwt.claims', json_build_object('sub', v_approbateur, 'role', 'authenticated')::text, true);
   set local role authenticated;
   insert into public.approbations (demande_id, decision)
   select v.demande_id, 'approuve' from public.filed_validations v where v.facture_id = v_f and v.issue is null;
   reset role;
+  -- L'identité ne reste pas : la pièce suivante n'est pas « saisie » par l'approbateur.
+  perform set_config('request.jwt.claims', '', true);
   perform private.filed_traiter(10);
   if (select statut from public.filed_factures where id = v_f) <> 'validee' then
     raise exception 'doublure : % non validée par la file', p_numero;
