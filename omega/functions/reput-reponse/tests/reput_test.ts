@@ -263,3 +263,16 @@ Deno.test("TREPUT-01 : « Envoyé de mon iPhone » sans pièce = message sans te
   assertEquals(p.depots[0].resultat.cout_eur, 0);
   assertStringIncludes(consigne(dossier()), "Jamais de civilité");
 });
+
+Deno.test("TREPUT-02 : la même question rattachée par la base (« regroupee ») : le travail est clos sans appeler le modèle", async () => {
+  const p = new PortesFausses();
+  p.dossiers.set(42, { statut: "regroupee", demande: "dddddddd-0000-4000-8000-000000000028", motif: "même question que le message précédent" });
+  p.travaux.push(travail(1, 42));
+  const claude = new ClaudeFaux({ sujet: "autre", langue: "fr", urgence: false, couverte: false, sources: [], corps: "x" });
+  const c = capturerConsole();
+  let bilan;
+  try { bilan = await passage(contexte(p, claude)); } finally { c.rendre(); }
+  assertEquals(bilan.issues.ignore, 1);
+  assertEquals(claude.demandes.length, 0);
+  assertEquals(p.depots.length, 0);
+});

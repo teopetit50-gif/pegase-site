@@ -43,7 +43,8 @@ export interface Base {
 
 export interface Dossier {
   /** « preparee » (c3_20) : la base a déjà préparé la réponse (pièce sans texte) ; l'ouvrier n'appelle pas l'IA. */
-  statut: "a_preparer" | "ignore" | "deja" | "preparee";
+  /** « regroupee » (c3_28) : même question qu'une demande précédente du dossier ; pas de nouvel appel au modèle. */
+  statut: "a_preparer" | "ignore" | "deja" | "preparee" | "regroupee";
   motif?: string;
   demande?: string;
   client?: string;
