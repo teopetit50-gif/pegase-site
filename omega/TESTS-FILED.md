@@ -148,7 +148,18 @@ Lecture par le coordinateur à l'écran ou en lecture seule, relayée brute ; li
 - Observation annexe : sur F4a, `identite.registre` est seulement en **attention** (« pas encore confirmé par VIES »), alors qu'il est
   **bloquant** sur les 15 autres pièces pour le même fournisseur. La gravité dépend du moment de la réponse VIES.
 
-### Série 1b — 21/10, 20 h 40 (portes d'écriture, en gérant `eeeeeeee-…01f1`, client banc seulement)
+**TFILED-09 · D1, D2 · refus de délégation par un message brut de contrainte** (socle, table `delegations`, A5 ; remonté à Teo)
+- En gérant, `insert into public.delegations (client_id, delegant, delegataire, entite_id, module, debut, fin, motif)` avec
+  `fin null` → `ERROR 23502: null value in column "fin" … violates not-null constraint`. Avec `debut 2026-10-29` et `fin 2026-10-22`
+  → `ERROR 23514: … violates check constraint "delegations_periode"`.
+- Le refus est juste (`:71`), mais le motif n'est pas lisible par un client, alors que les autres portes répondent en français clair.
+
+**TFILED-10 · D3 · les dates de délégation sont en minuit UTC, pas à l'heure du client** (socle, A5 ; remonté à Teo)
+- Insertion validée, `debut 2026-10-22`, `fin 2026-10-29` → stocké `2026-10-22 00:00:00+00` / `2026-10-29 00:00:00+00`.
+- Pour un client en Guadeloupe (UTC−4), la délégation commence le 21/10 à 20 h et s'éteint le **28/10 à 20 h**, heure locale. Le
+  site dit qu'elle « s'éteint à la date prévue » (`capacites/factures.ts:177`).
+- Ligne de délégation de test laissée sur le banc (22/10 → 29/10, motif « T-FILED D3 … »).
+ — 21/10, 20 h 40 (portes d'écriture, en gérant `eeeeeeee-…01f1`, client banc seulement)
 
 1. `select public.filed_lever_anomalie('a46345d2-c631-4af3-b713-4bd52b70541e', 'identite.registre', 'T-FILED 1b : …')` (facture F0)
    → refus : `ERROR 22023: Cette anomalie ne se lève pas d'un motif : elle se corrige, ou se décide par la file.` La transaction est
@@ -232,14 +243,14 @@ seulement « proposé », jamais tenu pour bon (vérifié par le coordinateur). 
   (gérant → valideur, entité `fba91a52-…`, module `filed`) :
   - **D1**, sans date de fin, transaction annulée → `ERROR 23502: null value in column "fin" of relation "delegations" violates not-null
     constraint`. **Juste** (`:71`) : pas de délégation sans fin. Observation : le message est brut, c'est une contrainte et non un texte
-    destiné au client. C'est sans conséquence si l'écran le traduit, ce que je ne vois pas.
+    destiné au client → **TFILED-09**.
   - **D2**, fin (22/10) antérieure au début (29/10), transaction annulée → `ERROR 23514: … violates check constraint "delegations_periode"`.
     **Juste**, avec la même observation sur le message.
   - **D3**, du 22/10 au 29/10, motif « T-FILED D3 : absence fictive du gérant, banc », validée (`commit`) → `{debut: "2026-10-22
     00:00:00+00", fin: "2026-10-29 00:00:00+00", motif: "…"}`. **Juste** pour la pose. **Observation** : les dates sont stockées en
     minuit **UTC**. Pour un client en Guadeloupe (UTC−4), une délégation « jusqu'au 29/10 » s'éteint le 28/10 à 20 h, heure locale, et elle
     commence le 21/10 à 20 h (`:177` « s'éteint à la date prévue »). L'extinction réelle et l'usage de la délégation, c'est-à-dire une
-    approbation par le délégataire, ne sont **pas testables** : il faudrait attendre la date et avoir une facture dans le circuit.
+    approbation par le délégataire, ne sont **pas testables** (fuseau → **TFILED-10**) : il faudrait attendre la date et avoir une facture dans le circuit.
 - Pour info : A4 a livré TFILED-08 (a4_73), mais le correctif n'est **pas encore posé** sur la recette. À revérifier quand il le sera.
 
 ### Jeu d'essai série 1 (prêt, pas encore joué)
