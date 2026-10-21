@@ -18,7 +18,7 @@ export const JEUX: { cle: Jeu; libelle: string; aide: string; complet: boolean }
   { cle: "factures", libelle: "Factures non soldées", aide: "L'export des factures ouvertes (ou de la balance âgée détaillée) : numéro, client, date, échéance, montant TTC, reste dû.", complet: true },
   { cle: "reglements", libelle: "Règlements reçus", aide: "Le journal des encaissements, ou le relevé bancaire filtré sur les crédits : date, montant, référence, client ou facture.", complet: false },
   { cle: "devis", libelle: "Devis envoyés", aide: "Les devis en attente de réponse : numéro, client, date d'envoi, montant, statut.", complet: true },
-  { cle: "clients", libelle: "Fichier clients", aide: "Code client, raison sociale, courriel de facturation, plafond d'encours, délai de paiement.", complet: false },
+  { cle: "clients", libelle: "Fichier clients", aide: "Code client, raison sociale, courriel de facturation, plafond d'encours, délai de paiement, secteur.", complet: false },
 ];
 
 /* Les synonymes d'en-têtes : ceux du modèle cashd / tableur v1, à l'identique. */
@@ -73,6 +73,7 @@ const SYNONYMES: Record<Jeu, Record<string, string[]>> = {
     email_commercial: ["email_commercial", "E-mail commercial", "Email commercial", "Commercial"],
     delai_paiement: ["delai_paiement", "Délai de paiement", "Conditions de paiement (jours)", "Délai (jours)"],
     plafond: ["plafond", "Plafond d'encours", "Encours autorisé", "Plafond", "Credit limit"],
+    secteur: ["secteur", "Secteur", "Secteur d'activité", "Activité", "Industry"],
   },
 };
 
