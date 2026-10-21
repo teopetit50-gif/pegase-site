@@ -61,17 +61,17 @@ montre. Tu ne les redéposes pas.
 
 | Cas | Promesse (fichier:ligne) | Erreur volontaire | Attendu | Ce que FILED a fait | Verdict | Niveau |
 |---|---|---|---|---|---|---|
-| F0 | lib/produits/capacites/factures.ts:55, :61, :83 | aucune (témoin) — MCD-2026-1001, HT 780,00 / TVA 8,5 % 66,30 / TTC 846,30 | lue, contrôlée, proposée à la validation sans arrêt | lu 780,00/66,30/846,30 (exact) · bloquée · 1 bloquant/1 attention · {fournisseur.a_confirmer, identite.registre} | juste sur la lecture et les montants ; « sans arrêt » **pas testable** avec un SIREN fictif (arrêt registre attendu, contrat § 1 r. 5) — voir Q9, Q11 | 1
+| F0 | lib/produits/capacites/factures.ts:55, :61, :83 | aucune (témoin) — MCD-2026-1001, HT 780,00 / TVA 8,5 % 66,30 / TTC 846,30 | lue, contrôlée, proposée à la validation sans arrêt | lu 780,00/66,30/846,30 (exact) · bloquée · 1 bloquant/1 attention · {fournisseur.a_confirmer, identite.registre} | juste sur la lecture et les montants ; bloquée par `fournisseur.a_confirmer` **B** et `identite.registre` **B** (VIES) → « sans arrêt » non atteint, voir TFILED-07 ; à refaire en 1b après confirmation | 1
 | F1 | lib/produits/capacites/factures.ts:58 | SIREN 912345629 à clé Luhn fausse (Quincaillerie du Moule, fictive) | arrêt « identité », motif lisible, rien de comptabilisé | lu 780,00/66,30/846,30 · bloquée · 1/3 · {identite.siren, identite.tva_intracom, tva.numero, fournisseur.a_confirmer} | **juste** (arrêt identité, motifs lisibles, rien de comptabilisé) | 1
-| F2a | lib/produits/capacites/factures.ts:57 | aucune — pose l'IBAN …4560 340 de Béton Archipel (BAR-2026-0501) | lue, aucun arrêt, IBAN retenu pour le fournisseur | lu 780,00/66,30/846,30 · bloquée · 2/0 · IBAN lu · {fournisseur.a_confirmer, identite.registre} | juste sur la lecture et l'IBAN ; 2/0 contre 1/1 pour F0 dans la même situation (Q9) | 1
+| F2a | lib/produits/capacites/factures.ts:57 | aucune — pose l'IBAN …4560 340 de Béton Archipel (BAR-2026-0501) | lue, aucun arrêt, IBAN retenu pour le fournisseur | lu 780,00/66,30/846,30 · bloquée · 2/0 · IBAN lu · {fournisseur.a_confirmer, identite.registre} | juste sur la lecture et l'IBAN ; mêmes arrêts B que F0 (Q9 lève la différence 1/1 vs 2/0) | 1
 | F2b | lib/produits/capacites/factures.ts:57 | même fournisseur, IBAN changé en …6540 309 (BAR-2026-0502) | alerte « changement d'IBAN », validation par une personne | lu 780,00/66,30/846,30 · bloquée · 3/0 · IBAN lu · {doublon.probable, fournisseur.a_confirmer, identite.registre} — **aucune anomalie IBAN** | **écart** TFILED-02 | 1
-| F3 | lib/produits/capacites/factures.ts:135-136 ; :44 | TVA 19 % (HT 780 / TVA 148,20 / TTC 928,20, cohérent) | passe sans arrêt si HT/TVA/TTC tombent juste (le site fait foi, réponse Q3) — divergence notée : le brief attendait un arrêt « TVA » | lu 780,00/148,20/928,20 (exact) · bloquée · 2/1 · {fournisseur.a_confirmer, identite.registre, **tva.taux**} | **écart** TFILED-03 (au sens du site, qui fait foi ; conforme au brief) — sous réserve Q9 | 1
+| F3 | lib/produits/capacites/factures.ts:135-136 ; :44 | TVA 19 % (HT 780 / TVA 148,20 / TTC 928,20, cohérent) | passe sans arrêt si HT/TVA/TTC tombent juste (le site fait foi, réponse Q3) — divergence notée : le brief attendait un arrêt « TVA » | lu 780,00/148,20/928,20 (exact) · bloquée · 2/1 · {fournisseur.a_confirmer, identite.registre, **tva.taux**} | **écart** TFILED-03, confirmé : `tva.taux` est bloquant (« Taux de TVA qui n'existe pas en France : 19 % ») — envoyé à A4 | 1
 | F4a | lib/produits/capacites/factures.ts:56 ; :139-140 | doublon de F0 régénéré (autres octets, même contenu, autre nom) | écartée comme doublon, reste consultable, pas de seconde facture | lu identique à F0 · **écartée** · doublon oui · {doublon.exact, …} | **juste** (écartée, reste consultable, pas de seconde facture) | 1
-| F4b | lib/produits/capacites/factures.ts:56 | même numéro que F0, ciment 9,84 € au lieu de 9,80 → TTC 848,47 | signalée, pas écartée en silence (aucune promesse explicite du site : à défaut, « pas couvert ») | lu 782,00/66,47/848,47 (exact) · bloquée (pas écartée) · {**doublon.exact**, …} | signalée, pas écartée : conforme au brief ; **écart de motif** TFILED-04 | 1
+| F4b | lib/produits/capacites/factures.ts:56 | même numéro que F0, ciment 9,84 € au lieu de 9,80 → TTC 848,47 | signalée, pas écartée en silence (aucune promesse explicite du site : à défaut, « pas couvert ») | lu 782,00/66,47/848,47 (exact) · bloquée (pas écartée) · {**doublon.exact**, …} | signalée, pas écartée, message juste (« … 848,47 € au lieu de 846,30 € : un numéro ne sert qu'une fois ») ; **code de motif** `doublon.exact` faux : TFILED-04 confirmé, envoyé à A4 | 1
 | F5 | lib/produits/capacites/factures.ts:55 ; :127-128 | TTC imprimé 856,30 au lieu de 846,30 (écart 10 €) | arrêt « montant » (seuil promis : 5 centimes) | lu 780,00/66,30/856,30 (TTC imprimé) · bloquée · 2/1 · {montant.coherence, …} | **juste** (arrêt montant) | 1
-| F6 | — (BANDEAU « Avoir », lib/produits/factures.ts:76) | avoir MCD-AV-2026-0042, −108,50 TTC, sans facture d'origine citée | retenu jusqu'à rapprochement (promesse du brief, rien d'écrit sur le site) | nature **avoir** · lu 100,00/8,50/108,50 · bloquée · 1/2 · {avoir.origine, …} | pas de promesse — retenu avec motif lisible, conforme au brief (pas « pas couvert » : il ne passe pas sans bruit) | 1
+| F6 | — (BANDEAU « Avoir », lib/produits/factures.ts:76) | avoir MCD-AV-2026-0042, −108,50 TTC, sans facture d'origine citée | retenu jusqu'à rapprochement (promesse du brief, rien d'écrit sur le site) | nature **avoir** · lu 100,00/8,50/108,50 · bloquée · 1/2 · {avoir.origine, …} | pas de promesse. `avoir.origine` n'est qu'une **attention** (Q9) : l'avoir n'est retenu que par les arrêts fournisseur/registre. Sans eux, il passerait sans rapprochement → **pas couvert** probable, à vérifier en 1b | 1
 | F7 | — (BANDEAU « Relevé », lib/produits/factures.ts:77) | relevé d'heures d'intérim (39 h, aucun montant) déposé comme facture | reconnu comme non-facture, pas comptabilisé ; à défaut au moins « champs manquants / total nul » (:61, :147-148) | état **classe**, nature **autre** · aucun montant, aucune facture | pas de promesse — reconnu comme non-facture, conforme au brief | 1
-| F8 | lib/produits/capacites/factures.ts:44 ; :135-136 | aucune — 3 taux : exo art. 295 300,00 / 8,5 % 490,00 → 41,65 / 2,1 % 200,00 → 4,20 ; TTC 1 035,85 | lue avec la ventilation exacte, aucun arrêt | lu 990,00/45,85/1 035,85 (exact) · bloquée · 1/1 · {fournisseur.a_confirmer, identite.registre} — aucun arrêt TVA | **juste** sur les totaux et l'absence d'arrêt propre ; ventilation par taux **non lue** (pas relayée, Q10) | 1
+| F8 | lib/produits/capacites/factures.ts:44 ; :135-136 | aucune — 3 taux : exo art. 295 300,00 / 8,5 % 490,00 → 41,65 / 2,1 % 200,00 → 4,20 ; TTC 1 035,85 | lue avec la ventilation exacte, aucun arrêt | lu 990,00/45,85/1 035,85 (exact) · bloquée · 1/1 · {fournisseur.a_confirmer, identite.registre} — aucun arrêt TVA | **juste** : totaux exacts, ventilation lue exacte (exo 300 ; 8,5 % 490 ; 2,1 % 200 ; TVA 45,85), aucun arrêt TVA (Q10) | 1
 | F9 | — (aucune ligne trouvée) | facturée à « SOCIÉTÉ TIERCE BTP SARL » au lieu du client banc | arrêt « destinataire » (promesse du brief seulement) | lu 780,00/66,30/846,30 · bloquée · 2/1 · {doublon.probable, …} — **aucune anomalie destinataire** | **pas couvert** TFILED-05 (promesse manquante du site, à Teo) | 1
 | F10 | lib/produits/capacites/factures.ts:155-156 (cas inverse) | date d'émission 30/11/2026 (J+40) | arrêt ou avertissement « date » | lu 780,00/66,30/846,30 · bloquée · 2/1 · {**date.future**, …} | pas de promesse — arrêt « date », conforme au brief | 1
 | F11 | lib/produits/capacites/factures.ts:31 ; :143-144 | deux factures dans un PDF (MCD-2026-1011 846,30 + MCD-2026-1012 265,83) | anomalie explicite (l. 143-144 : « pas de découpage automatique ») — jamais une facture de 1 112,13 ni classée sur la première | **découpé en deux pièces** : MCD-2026-1011 780,00/66,30/846,30 et MCD-2026-1012 245,00/20,83/265,83 (exacts, document « F11_deux_factures-p2.pdf ») · chacune bloquée (registre ; 1ʳᵉ + doublon.probable) | **juste** contre `:31` ; le texte du site `:143-144` dit le contraire — constat TFILED-06 | 1
@@ -130,6 +130,16 @@ Lecture par le coordinateur à l'écran ou en lecture seule, relayée brute ; li
   découpage automatique n'existe pas encore » : le texte public est en retard sur le moteur. C'est à Teo d'en décider : les pages
   sont gelées (règle du 06/10).
 
+**TFILED-07 · F0 et toutes les pièces · une facture d'un fournisseur inconnu est bloquée, pas classée** (`capacites/factures.ts:151-152`)
+- Déposé : n'importe quelle pièce de la série, par exemple `F0_temoin.pdf` (Matériaux Caraïbes Distribution, fournisseur jamais vu par le client banc).
+- Réponse brute (Q9, relayée) : `F0 : fournisseur.a_confirmer B ; identite.registre B`. `fournisseur.a_confirmer` est **bloquant** sur les 16 pièces.
+- Le site promet : « Le fournisseur n'existe pas encore dans votre comptabilité. La pièce est classée avec le nom lu sur la facture,
+  et c'est votre comptabilité qui crée la fiche. » Le moteur arrête la pièce jusqu'à ce que le fournisseur soit confirmé. Ce
+  comportement peut être voulu, puisqu'il protège le contrôle IBAN, mais il contredit la ligne publique. C'est au coordinateur de
+  trancher entre lot correctif et correction du site.
+- Observation annexe : sur F4a, `identite.registre` est seulement en **attention** (« pas encore confirmé par VIES »), alors qu'il est
+  **bloquant** sur les 15 autres pièces pour le même fournisseur. La gravité dépend du moment de la réponse VIES.
+
 ### Jeu d'essai série 1 (prêt, pas encore joué)
 
 - Générateur : `omega/testeur-filed/generer_pieces.py` → `omega/testeur-filed/pieces/*.pdf` (15 fichiers, même gabarit).
@@ -152,6 +162,13 @@ au bureau (il les dépose depuis la branche, ou il donne l'accès Supabase à ce
 demandés au bureau. Q3, le site fait foi. Q4, raison sociale « banc-test-filed », territoire GP. Q5, lecture en SELECT seul, sous
 l'identité du gérant (RLS), sur `filed_documents`, `filed_factures` et `pieces_valeurs`. Q6, on note « pas de promesse », sans verdict.
 
+**Réponses du coordinateur (21/10, 20 h 12)** : Q9, la gravité par pièce est reportée dans le tableau et dans TFILED-07. Q10, la
+ventilation de F8 est exacte, l'avoir F6 est enregistré en positif. Q11, **non** au SIREN d'une société réelle ; on lève les arrêts
+par les portes `public.filed_confirmer_fournisseur(uuid, text)` et `public.filed_lever_anomalie(uuid, text, text)`, en gérant.
+
+- **Q12** — Pour la série 1b : l'uuid du fournisseur Béton Archipel et celui de Matériaux Caraïbes Distribution, l'uuid de la
+  pièce F0 (ou de sa facture), et le sens des paramètres `text` des deux portes (motif ? code d'anomalie ?). Aucune porte de
+  lecture qu'on m'a donnée ne rend ces uuid.
 - **Q9** — Pour chaque pièce, quelles anomalies sont **bloquantes** et lesquelles sont de simple « attention » ? Il faut le
   savoir pour TFILED-03 (est-ce `tva.taux` qui bloque ?) et pour la ligne `:151-152` (est-ce `fournisseur.a_confirmer` qui
   bloque ? Le site promet qu'une pièce d'un fournisseur inconnu est classée avec le nom lu). Il faut aussi l'expliquer : F0
@@ -182,9 +199,9 @@ l'identité du gérant (RLS), sur `filed_documents`, `filed_factures` et `pieces
 
 ## REPRISE
 
-**Arrêt 5 — 21/10/2026, 20 h 25** (remplace les arrêts précédents)
-- Fait : série 1, passes 1 et 2, jouée par dépôt par lot ; verdicts posés au niveau 1. Juste : F1, F4a, F5, F8 (totaux), F11 (contre la l. 31), F12, rejeu. Écarts : TFILED-02, 03, 04. Pas couvert : TFILED-05. Constat sur le site : TFILED-06.
-- En cours : rien.
-- Prochain pas : série 1b, si le coordinateur la valide. Un témoin et F2/F3 sur un fournisseur dont le SIREN est public et réel, montants inventés, pour lever l'arrêt registre et tester « sans arrêt » ; F2b rejoué après confirmation du fournisseur. Ensuite la série 2 (validation, export).
-- Questions : Q9 (quelles anomalies sont bloquantes, pièce par pièce), Q10 (ventilation TVA de F8 ; signe de l'avoir F6), Q11 (feu vert pour 1b et pour la confirmation d'un fournisseur).
-- SHA d'arrêt : voir le commit « T-FILED série 1 : verdicts » sur `testeur-filed`.
+**Arrêt 6 — 21/10/2026, 20 h 35** (remplace les arrêts précédents)
+- Fait : série 1 jouée deux fois, verdicts au niveau 1. Juste : F1, F4a, F5, F8, F11 (contre la l. 31), F12, rejeu. Écarts : TFILED-03 et 04 (confirmés, envoyés à A4), TFILED-07 (nouveau). Pas couvert : TFILED-05 (à Teo). Constat sur le site : TFILED-06 (à Teo). TFILED-02 attend la série 1b.
+- En cours : préparation de la série 1b (Q11 : pas de SIREN réel, on lève les arrêts par les portes du produit, en gérant).
+- Prochain pas : en gérant, `filed_confirmer_fournisseur` sur Béton Archipel, puis le coordinateur redépose F2b sous un nouveau nom. Ensuite, F0 : confirmer MCD, lever `identite.registre`, et vérifier que le témoin arrive à la validation sans autre arrêt. F6 : vérifier que l'avoir reste retenu (sinon, pas couvert).
+- Questions : Q12 (identifiants et sens des paramètres des deux portes d'écriture).
+- SHA d'arrêt : voir le commit « T-FILED : Q9–Q11 intégrées » sur `testeur-filed`.
