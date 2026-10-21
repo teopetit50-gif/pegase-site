@@ -87,7 +87,7 @@ const TRADUCTION = {
   'COH-FXC-003': { f: [fx({ ht: 1559.46, tva: 311.89, ttc: 1871.35, lignes: [1560.46], ventilation: [] })],
                    c: { 'montant.lignes': { resultat: 'anomalie' } }, note: 'TVA et TTC complétés par A4.' },
   'COH-FXC-004': { f: [fx({ ttc: 121 })], c: { 'montant.coherence': { resultat: 'anomalie' } } },
-  'COH-FXC-005': { f: [fx({ devise: 'USD', ht: 95, tva: 19, ttc: 114, prepaye: 14, net: 100, ventilation: [] })],
+  'COH-FXC-005': { f: [fx({ devise: 'USD', ht: 95, tva: 19, ttc: 114, prepaye: 14, arrondi: 0.01, net: 100, ventilation: [] })],
                    c: { 'montant.net_a_payer': { resultat: 'anomalie', gravites: ['attention', 'bloquant'] }, 'montant.devise': { resultat: 'present' } },
                    note: 'Net à payer 100 au lieu de 114 − 14 + 0,01 d’arrondi = 100,01 (BR-CO-16). HT et TVA complétés par A4.' },
   'COH-FXC-008': { f: [fx({ numero: null })], c: { 'lecture.complete': { resultat: 'anomalie' } } },
