@@ -43,7 +43,7 @@ FOURN = {
                 siren=siren("91234564"), iban=iban("00012345604")),
 }
 IBAN_BAR_2 = iban("00098765403")
-CLIENT = ("BANC TEST FILED SAS", "Zone d'essai, lot 0", "97122 Baie-Mahault")
+CLIENT = ("banc-test-filed", "Zone d'essai, lot 0", "97122 Baie-Mahault")
 TIERS = ("SOCIÉTÉ TIERCE BTP SARL", "3 impasse Ailleurs", "97200 Fort-de-France")
 CHANTIER = "Chantier : Résidence Les Flamboyants, Le Gosier"
 
