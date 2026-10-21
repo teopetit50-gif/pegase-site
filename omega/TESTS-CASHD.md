@@ -206,4 +206,4 @@ puis `select to_jsonb(e) from public.cashd_factures_etat e where client_id = '<c
 - Prochain pas : série 2 faite (S2-1 à S2-9, TCASHD-08 à 10). Restent : S2-8 (historique), C:95 (règles de communication : porte `cashd_regler_relances`, champs à connaître), écran (compte gérant sans mot de passe). Niveau 2 : pas avant le coordinateur.
 - Questions : 1, 2, 4 (litige) répondues le 21/10 ; restent 3 (passage du matin, joué par le coordinateur), 4 (seuil), 5 (porte de lecture des relances), 6 (compte gérant, au bureau).
 - Note : pour le format, j'ai lu les appels `cashd_importer` de `cashd_nobat.sql` (autorisé par le coordinateur) ; deux commentaires de ce fichier citent des issues attendues (avoir, échéance) — vu malgré moi, signalé.
-- SHA d'arrêt : voir le dernier commit de `testeur-cashd` (« … jour J, tableau »).
+- SHA d'arrêt : 8780859d (séries 1 et 2), branche testeur-cashd.
