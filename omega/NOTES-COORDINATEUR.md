@@ -1321,3 +1321,41 @@ A1 4a4ad9e1 · A4 ca5e4aa0 · B6 7a0ff42e · C2 879dce0c · C3 4ab27cb0 · C4 6f
 
 ### REPRISE (19/10, 18 h 50 Z) : versions d'arrêt
 A1 b7773e70 · A4 55c0cfa2 · B6 7a0ff42e · C2 879dce0c · C3 4ab27cb0 · C4 6f0a05b2. Routine 3 h coupée. Reprise samedi 25/10 après 02 h Z ou au feu vert de Teo. Ces notes sont sur la branche notes-coordinateur (les 2 pushes du jour sur main sont faits) : à fusionner dans main au prochain push.
+
+## 21/10, 18 h 42 → 21 h 15 Z : relance (plafond 70 %), quatre testeurs boîte noire, lots correctifs
+
+Décisions de Teo du 21/10 : import OFFLOAD des personnes morales (fait, 9 898 comptes « exclu ») ; accord permanent du sceau FILED (politique posée, non activable : le banc n'a qu'un gérant) ; jeu de factures CASHD à 5 erreurs (fait, 5/5 attrapées) ; testeurs lancés (contrat omega/CONTRAT-TESTEUR.md).
+
+### Testeurs (Opus 5.5, tag omega-testeur, parent = coordinateur)
+
+| Testeur | Session | Branche | Banc (client recette) |
+|---|---|---|---|
+| T-FILED | session_012s3D9VQdzHfQS5qxdZ8GP6 | testeur-filed | banc-test-filed dddddddd-0000-4000-8000-0000000000f1 |
+| T-CASHD | session_01ELKvAvjP6TZexVtPGJeGyb | testeur-cashd | banc-test-cashd …00c2 |
+| T-REPUT | session_01QdbMQ9uALEhFTxBB5LPFPX | testeur-reput | banc-test-reput …00c3 |
+| T-OFFLOAD | session_01Y9xBbG3KjuQM5tPeZAcmqV | testeur-offload | banc-test-offload …00c4 |
+
+Comptes du banc : gérant eeeeeeee-0000-4000-8000-0000000001xx, valideur …02xx (xx = f1, c2, c3, c4). Aucun réglage d'envoi, sauf OFFLOAD c4 (essai, adresse .invalid, envoi_auto false). Aucun secret transmis entre sessions. Deux dépôts par lot ouverts par moi sur f1 puis fermés (401 vérifié) ; leur mot de passe est passé une fois dans mes sorties d'outil, rien n'a été transmis.
+
+### Niveau 1 (recette), posé et vert, rejoué juste par le testeur
+
+- OFFLOAD c4_23 → c4_28 : TOFFLOAD-01, 04 à 08.
+- CASHD c2_17 → c2_37 : TCASHD-01 à 06, 07 (garde côté CASHD), 12, 14 à 17, plus les lots de ton 08/09/10 (défauts : 1 500 €, 15/45 j, 3 j ouvrés + 2 j de remise).
+- REPUT c3_25 → c3_32 : TREPUT-02, 04 (base), 05, 06, 07, 08. 01, 03 et le texte de 04 attendent le redéploiement de l'Edge reput-reponse (bureau).
+- FILED a4_71 → a4_75 : TFILED-02, 03, 04, 08, 11, 14.
+
+### Incident
+
+20 h 22 Z : la suite complète ^test_c2_ en un seul job a fait redémarrer la recette. Tests désormais par petits lots (≤ 4 fichiers).
+
+### Pas poussé en main
+
+Les écrans d'espace des branches worker-a4/c2/c3/c4 appellent des portes qui n'existent que sur la recette : ne pas les fusionner tant que les migrations ne sont pas en production (niveau 3, décision de Teo).
+
+### REPRISE
+
+- C2 : reste TCASHD-11 (« par »), puis les deux réglages de délai à l'écran (espace seulement).
+- A4, C3, C4 : en attente. T-FILED, T-CASHD, T-REPUT, T-OFFLOAD : à l'arrêt, séries closes.
+- À Teo : réveil d'A5 (TCASHD-07 refus à la saisie, délégations TFILED-09/10, crochet « réécrire à l'approbation » de 10b) ; envoi d'essai REPUT ; O6 (TOFFLOAD-03) ; sceau (un seul gérant) ; site ou moteur pour TFILED-06 et 07 ; TFILED-12 (l'ouvreur d'un dépôt vaut-il saisisseur ?) ; statut de cycle de vie 207/208 après un 205 (A4).
+- Au bureau : redéployer l'Edge reput-reponse (c3_25 à c3_28) et le lecteur A1 fd2da4bd.
+- Sécurité : pause à 01 h 00 Z (trig_01Y1g8hC8geoXnUd7GyYhhAB) si pas de PAUSE avant.
