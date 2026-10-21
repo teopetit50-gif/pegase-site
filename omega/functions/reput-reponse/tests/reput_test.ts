@@ -170,7 +170,7 @@ Deno.test("sans texte mais avec un objet parlant, un dossier en cours ou sans pi
   const avecPrecedent = dossier("", { precedents: [{ canal: "email", recu_le: "2026-10-06T19:40:00Z", sujet: null, corps: "Ma chaudière fuit.", statut: "a_valider" }] });
   avecPrecedent.reception = { ...avecPrecedent.reception!, sujet: null, pieces: 1 };
   assertEquals(sansTexte(avecPrecedent), null);
-  const sansPiece = dossier("", {});
+  const sansPiece = dossier("Une question sur vos horaires.", {});
   sansPiece.reception = { ...sansPiece.reception!, sujet: null, pieces: 0 };
   assertEquals(sansTexte(sansPiece), null);
   const photoSeule = dossier("📷", {});
@@ -247,4 +247,19 @@ Deno.test("TREPUT-03 : une heure à l'anglaise répond à l'heure de la fiche ; 
   const invente = controler(d, { sujet: "horaires", langue: "en", couverte: true, sources: [FICHE_HORAIRES.id], corps: "Yes, on Saturdays we are open until 6:30 pm." });
   assertEquals(invente.redaction.couverte, false);
   assert(invente.controles.includes("chiffre_non_source"));
+});
+
+Deno.test("TREPUT-01 : « Envoyé de mon iPhone » sans pièce = message sans texte, sans modèle ; et la consigne interdit la civilité inventée", async () => {
+  const p = new PortesFausses();
+  const d = dossier("\n\nEnvoyé de mon iPhone", {});
+  d.reception = { ...d.reception!, sujet: null, pieces: 0 };
+  p.dossiers.set(42, d);
+  p.travaux.push(travail(1, 42));
+  const claude = new ClaudeFaux({ sujet: "horaires", langue: "fr", urgence: false, couverte: true, sources: [], corps: "ne doit pas servir" });
+  const c = capturerConsole();
+  try { await passage(contexte(p, claude)); } finally { c.rendre(); }
+  assertEquals(claude.demandes.length, 0);
+  assertStringIncludes(p.depots[0].resultat.corps, "Il nous est parvenu sans texte");
+  assertEquals(p.depots[0].resultat.cout_eur, 0);
+  assertStringIncludes(consigne(dossier()), "Jamais de civilité");
 });

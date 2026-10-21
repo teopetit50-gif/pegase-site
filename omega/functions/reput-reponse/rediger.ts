@@ -72,6 +72,7 @@ export function consigne(d: Dossier): string {
     `7. Ton : ${tu ? "tutoiement" : "vouvoiement"}, sobre, chaleureux, sans formule creuse. Court : quelques phrases. Texte brut, sans mise en forme Markdown, sans lien inventé.`,
     "8. Pas de formule d'appel, pas de formule de politesse finale ni de signature dans le corps : l'entreprise les ajoute elle-même.",
     "9. Jamais de donnée de santé, jamais d'avis médical, juridique ou financier personnalisé : transmets (couverte = false).",
+    "10. Jamais de civilité (Madame, Monsieur, Mme, M., Mrs, Mr…) que le client n'a pas écrite lui-même : ne la déduis jamais d'un prénom ni d'un nom. Dans le doute, aucune.",
   ].join("\n");
 }
 
@@ -263,9 +264,14 @@ function parle(t: string | null | undefined): boolean {
 export const CORPS_PRECISION =
   "Merci pour votre message. Nous avons bien reçu votre pièce jointe, rattachée à votre demande, mais sans précision sur ce que vous souhaitez : pouvez-vous nous l'écrire en quelques mots ? Nous pourrons alors vous répondre.";
 
+export const CORPS_VIDE =
+  "Merci pour votre message. Il nous est parvenu sans texte : pouvez-vous nous écrire en quelques mots ce que vous souhaitez ? Nous pourrons alors vous répondre.";
+
 export function sansTexte(d: Dossier): SortieRedaction | null {
   const r = d.reception;
-  if (!r || !(r.pieces > 0) || parle(r.corps) || parle(r.sujet) || (d.precedents ?? []).length > 0) return null;
+  // c3_26 (TREPUT-01) : avec ou sans pièce — « Envoyé de mon iPhone » seul est un message sans texte.
+  if (!r || parle(r.corps) || parle(r.sujet) || (d.precedents ?? []).length > 0) return null;
+  const avecPieces = r.pieces > 0;
   return {
     redaction: {
       sujet: "autre",
@@ -273,8 +279,10 @@ export function sansTexte(d: Dossier): SortieRedaction | null {
       urgence: false,
       couverte: false,
       sources: [],
-      corps: CORPS_PRECISION,
-      raison: `Message sans texte (${r.pieces} pièce${r.pieces > 1 ? "s" : ""} jointe${r.pieces > 1 ? "s" : ""}) : précision demandée au client.`,
+      corps: avecPieces ? CORPS_PRECISION : CORPS_VIDE,
+      raison: avecPieces
+        ? `Message sans texte (${r.pieces} pièce${r.pieces > 1 ? "s" : ""} jointe${r.pieces > 1 ? "s" : ""}) : précision demandée au client.`
+        : "Message sans texte (rien qu'une signature d'appareil, ou vide) : précision demandée au client.",
     },
     controles: ["sans_texte"],
     usage: { tokens_entree: 0, tokens_sortie: 0 },

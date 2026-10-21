@@ -56,8 +56,8 @@ begin
   -- ── Ce qui suit le chemin habituel ──
   v_rec := tests.c3_20_reception(v_client, 'email', 'c3-20b@exemple.test', 'Devis', 'Voici le devis signé.', 1);
   return next is(public.reput_commencer(v_rec) ->> 'statut', 'a_preparer', 'Une pièce avec un texte qui parle : le modèle prépare');
-  v_rec := tests.c3_20_reception(v_client, 'email', 'c3-20c@exemple.test', null, null, 0);
-  return next is(public.reput_commencer(v_rec) ->> 'statut', 'a_preparer', 'Sans pièce : pas de demande de précision « pièce »');
+  v_rec := tests.c3_20_reception(v_client, 'email', 'c3-20c@exemple.test', null, 'Une question sur vos horaires de samedi.', 0);
+  return next is(public.reput_commencer(v_rec) ->> 'statut', 'a_preparer', 'Sans pièce, avec un texte qui parle : le modèle prépare');
   v_rec := tests.c3_20_reception(v_client, 'email', 'c3-20d@exemple.test', 'Ma porte', 'La porte d''entrée frotte, vous pouvez venir ?', 0);
   perform public.reput_commencer(v_rec);
   v_rec := tests.c3_20_reception(v_client, 'email', 'c3-20d@exemple.test', null, null, 1);
