@@ -32,16 +32,16 @@ begin
 
   -- Jour j + 5 : la relance ferme serait due ; rien n'est parti.
   perform private.cashd_preparer_relances(v_client, j + 5, null);
-  select * into r from public.cashd_relances x where x.compte_id = v_17 and x.jour = j + 5;
-  return next ok(r.palier = 'rappel' and r.gabarit = 'rappel', 'A-C17 : son rappel n''est jamais parti — pas de relance ferme, la séquence reprend au rappel');
-  return next ok((select x.statut = 'coupee' and x.motif like 'remplacée par la relance%' from public.cashd_relances x where x.compte_id = v_17 and x.jour = j),
-                 'Le nouveau rappel remplace celui qui attendait');
+  select * into r from public.cashd_relances x where x.compte_id = v_17 and x.jour = j;
+  return next ok(not exists (select 1 from public.cashd_relances x where x.compte_id = v_17 and x.jour = j + 5),
+                 'A-C17 : son rappel n''est jamais parti — pas de relance ferme');
+  return next ok(r.palier = 'rappel' and r.statut = 'a_valider', 'Le rappel attend dans la file : il n''est pas réécrit (c2_31)');
   return next ok((select x.palier from public.cashd_relances x where x.compte_id = v_02 and x.jour = j + 5) = 'rappel',
                  'A-C02 : après la suspension levée, la séquence reprend au premier palier non parti (le rappel)');
   -- Une fois le rappel parti, la relance ferme suit.
   perform tests.c2_parti(r.id);
   -- (A-C14 : son rappel aussi est tenu pour parti — pour reconstituer plus bas une mise en demeure d'avant c2_24)
-  perform tests.c2_parti(x.id) from public.cashd_relances x where x.compte_id = v_14 and x.jour = j + 5;
+  perform tests.c2_parti(x.id) from public.cashd_relances x where x.compte_id = v_14 and x.jour = j;
   perform private.cashd_preparer_relances(v_client, j + 10, null);
   return next ok((select x.palier from public.cashd_relances x where x.compte_id = v_17 and x.jour = j + 10) = 'relance',
                  'Le rappel parti, la relance ferme suit');

@@ -35,9 +35,10 @@ begin
 
   -- Jour j + 5 : la relance ferme remplace les rappels.
   perform private.cashd_preparer_relances(v_client, j + 5, null);
-  select * into ra from public.cashd_relances x where x.compte_id = v_a and x.jour = j + 5;
+  -- (c2_31 : le rappel jamais parti attend dans la file ; rien de plus n'est écrit à j + 5)
+  select * into ra from public.cashd_relances x where x.compte_id = v_a order by x.jour desc limit 1;
   select * into rb from public.cashd_relances x where x.compte_id = v_b and x.jour = j + 5;
-  select * into rc from public.cashd_relances x where x.compte_id = v_c and x.jour = j + 5;
+  select * into rc from public.cashd_relances x where x.compte_id = v_c order by x.jour desc limit 1;
   -- (c2_24b : sans rappel parti, pas de relance ferme — la séquence reprend au rappel, qui ne cite aucun envoi)
   return next ok(ra.palier = 'rappel' and tests.c2_plat(ra.corps) not like '%précédent rappel%' and tests.c2_plat(ra.corps) not like '%premier rappel%'
                  and ra.corps like '%F-2026-810%',
