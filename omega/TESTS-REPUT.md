@@ -109,6 +109,14 @@ Routage (R11) : `facturation` → service Comptabilité.
 
 Chaque série = 16 dépôts, puis rejeu à l'identique (même id externe).
 
+## Journal de jeu — série 1, passe 1 (21/10, ~19 h 20 UTC)
+
+- **Base** : 12 fiches posées en gérant (`eeeeeeee-…01c3`) par `reput_ecrire_connaissance(null, client, {sujet, genre, titre, contenu, source})`, plus le sujet `facturation` (`reput_ecrire_sujet`). Toutes reviennent `statut: validee`, version 1, dès l'écriture : aucun passage par `reput_valider_connaissance` (à noter, voir Q ci-dessous). K1 = `f1599c37-ccbe-4c9c-9cab-74f3ddfd9717`.
+- **Dépôts** (`deposer_reception`, boîte `banc-test-reput@recu.omegaai.fr`) : R0 → 1324, R1 → 1325, R10 → 1326, R12 → 1327, R2 → 1328, R3 → 1329, R6 → 1330, R7a → 1331 (reçue à T−1 h), R7b → 1332 (`formulaire`, T), R8 → 1333, R9 → 1334, R9b → 1337. Tous `{"nouvelle": true}`.
+- **Faute du testeur** : R9 (1334) est parti avec `p_corps = null`, pas le texte long. On le compte comme un cas « sans texte » de plus. Le vrai R9 est **R9b** (1337, 9 001 caractères, identifiant `treput-r9b`).
+- **Lecture** sous RLS gérant (`public.reput_demandes`, filtre sur le client) : **0 ligne** à T+30 s et à T+3 min. Question posée au coordinateur, jeu arrêté.
+- Pas encore joués : R5 (litige et accord), R11 (il manque une équipe), R13 (accord).
+
 ## Résultats
 
 | Cas | Promesse (fichier:ligne) | La demande | Attendu | Ce que REPUT a fait | Verdict | Niveau |
@@ -140,7 +148,10 @@ Chaque série = 16 dépôts, puis rejeu à l'identique (même id externe).
 - Un compte « gérant » du client banc pour l'écran et pour l'accord de R13.
 - (T-REPUT, 21/10) ~~client_id~~ → **répondu** : `dddddddd-0000-4000-8000-0000000000c3` ; dépôt par `public.deposer_reception` ; formulaires par la même porte (canal `formulaire`) ; compte gérant demandé au bureau. Adresse de litige R5 transmise : `contact.litige@exemple.test`.
 - (T-REPUT, 21/10) Portes reçues : `reput_ecrire_connaissance` + `reput_valider_connaissance`, `reput_donner_accord` + `reput_activer_accord_seul`, `reput_ecrire_sujet` + `reput_router_sujet`, lectures `reput_base`, `reput_accords`, `reput_pieces`. Fiches, accord et routage : **en attente du compte gérant** (la clé de service est refusée). R4 : pas de promesse, pas de test. Envoi attendu : « retenu » (aucun réglage d'envoi).
-- (T-REPUT, 21/10, **bloquant**) La porte de **lecture d'une demande** : catégorie, urgence, retenue et motif, brouillon et fiche citée, rapprochement, service prévenu, envoi.
+- (T-REPUT, 21/10) ~~Lecture d'une demande~~ → répondu : SELECT sous RLS gérant sur `reput_demandes`, `reput_reponses`, `demandes_validation`, `envois` (sans `corps`).
+- (T-REPUT, 21/10, **bloquant**) 12 réceptions déposées, **0 demande REPUT** visible après 3 min. Est-ce une tâche planifiée arrêtée, une boîte fictive non routée, ou la RLS ?
+- (T-REPUT, 21/10) R11 : l'uuid d'une équipe « Comptabilité » pour `reput_router_sujet`, ou la porte pour la créer.
+- (T-REPUT, 21/10) Une fiche écrite par le gérant est validée d'office. C'est voulu ? La page promet « tout ce que vous avez validé » (accueil.ts:94), donc ça peut l'être.
 - (T-REPUT) Les **portes** pour : (a) déposer une demande sans passer par Brevo (courriel simulé
   avec `message_id` fixe, et pièce jointe) ; (b) poser et valider les 12 fiches au nom du gérant ;
   (c) poser l'accord « horaires » en envoi seul et le routage `facturation` → Comptabilité ;
@@ -154,7 +165,7 @@ Chaque série = 16 dépôts, puis rejeu à l'identique (même id externe).
 ## REPRISE
 
 - **Fait** : promesses et guides lus ; jeu d'essai série 1 écrit (12 fiches, 16 dépôts, attendus adossés aux lignes).
-- **En cours** : rien de joué ; client_id et porte de dépôt reçus.
-- **Prochain pas** : dès la porte de lecture, jouer R1 R2 R3 R6 R9 R10 R12 (sans base) ; R0 R7 R8 R11 R13 après le compte gérant ; prévenir le coordinateur avant R5.
-- **Questions** : porte de lecture d'une demande (bloquant) ; compte gérant (bureau) pour fiches, accord, routage.
+- **En cours** : passe 1 déposée (12 réceptions), aucune demande produite ; aucun verdict encore.
+- **Prochain pas** : relire les demandes dès la réponse du coordinateur, remplir le tableau, rejouer la passe 1 ; puis accord « horaires » → R13 et R5 (prévenir avant) ; R11 après l'équipe.
+- **Questions** : 0 demande après les dépôts (bloquant) ; équipe Comptabilité ; validation d'office des fiches.
 - **SHA d'arrêt** : voir le commit « T-REPUT : jeu d'essai série 1 ».
