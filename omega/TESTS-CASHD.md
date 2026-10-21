@@ -82,6 +82,15 @@ Attendus notés **avant** de jouer. « R » = `lib/produits/relances.ts`, « C �
 | C13 | R:207-222, R:354 (J+7 / J+21 / J+30) | échue depuis 35 j, jamais relancée | aucun palier sauté : rappel d'abord (pas de MED d'emblée) | J : `rappel` (35 j). J+1 : rien. J+6 : `relance` (ferme) préparée, le rappel de J (jamais validé ni envoyé) passe `coupee` « remplacée par la relance du 27/10/2026 ». La ferme dit **« Malgré notre précédent rappel »** | écart (TCASHD-06) : écart de 6 j tenu, mais le rappel n'est jamais parti | 1 |
 | R1 | C:33, R:267 | rejeu à l'identique de tout l'export | zéro doublon, zéro nouvelle relance | aucune création ; factures 14 et règlements 5 « inchangés » ; mais clients **14 « modifiés »** sur données identiques | juste (doublons) + écart mineur TCASHD-01 ; relances à voir | 1 |
 | J+1 | R:211-216, R:187, R:453 | passage du lendemain | ferme remplace le rappel en attente ; un message par compte et par jour ; MED exige validation explicite | 22/10 : rien. 27/10 : ferme C13 qui remplace le rappel en attente. 03/11 : ferme (`relance`) à 21 j pour C0 C4 C5 C6 C7 C12 (C12 : 1 message, 2 pièces), MED préparée pour C13 (48 j, 7 j après la ferme), `en_attente`. Toutes disent « Malgré notre précédent rappel » sans qu'aucun rappel soit parti. **MED approuvée par le valideur sans commentaire** : acceptée, demande `approuvee` | juste (cadence, un message par compte et par jour) ; écarts TCASHD-06 (élargi) et **TCASHD-07** | 1 |
+| S2-1 | R:169 « Le ton suit le montant et l'ancienneté du retard », R:273 | rappels de 3,00 € (C11), 1 085 € à 8 j (C0), 1 085 € à 35 j (C13), 1 627,50 € (C12) | ton différent selon montant et ancienneté | **corps identique** mot pour mot (seuls n°, dates, montants changent) | écart (TCASHD-08) | 1 |
+| S2-2 | C:49, R:213-221 (fermeté suit le palier) | rappel / ferme / MED de C13 | trois tons distincts, ferme récapitule et fixe une échéance | rappel « simple oubli » ; ferme « Malgré… Total restant dû… au plus tard le 11/11/2026 » + indemnité 40 € ; MED « mettons en demeure… 8 jours… procédure de recouvrement » | juste | 1 |
+| S2-3 | C:50 « secteur du compte, sa référence, son montant et son retard » | tous les textes | secteur + référence + montant + retard | référence (compte et facture), montant, retard : oui. **Secteur : jamais** (fiche `secteur` null, l'import n'a pas de clé secteur). **Chantier** (`commande_ref`) jamais cité | écart (TCASHD-09) | 1 |
+| S2-4 | R:421 « le vouvoiement est constant » | tous les textes | vouvoiement | « Madame, Monsieur », « vous », partout | juste | 1 |
+| S2-5 | brief : vocabulaire du bâtiment | tous les textes | chantier, livraison, situation de travaux… | aucun mot du métier ; gabarit générique | pas couvert (le site ne le promet pas en ces mots ; voir S2-3) | 1 |
+| S2-6 | brief : moyens de règlement ; C:84 (lien de paiement) | tous les textes | IBAN, virement, chèque ou lien | **aucun moyen de règlement** dans aucun palier | pas couvert | 1 |
+| S2-7 | brief : échéancier proposé ; C:133-134 | ferme, MED | proposition d'échelonnement | rien ; la ferme invite seulement à contester | pas couvert (le site promet la saisie d'un échéancier, pas sa proposition) | 1 |
+| S2-8 | R:170 historique de paiement ; R:171 « jamais deux fois le même texte » | C7 (a déjà payé 300 €) vs C0 | ton tenant compte d'un acompte ; textes jamais répétés | C7 = même texte que C0 ; deux clients différents reçoivent le même texte (promesse lue « par client » : pas testable sans deux messages du même palier au même client) | pas testable (historique trop court) | 1 |
+| S2-9 | R:220, C:68 | MED C13 | « courrier », délai cohérent | canal `email` mais « 8 jours à compter de la réception de ce **courrier** », et l'échéance (11/11) est comptée depuis la préparation, pas la réception ; rappel C12 « cette facture » pour deux factures | écart mineur (TCASHD-10) | 1 |
 
 Notes de lecture (avant de jouer) :
 - « Un message par compte et par jour », « cinq jours d'écart au moins » (C13) et « suspendue pas d'adresse » (C4)
@@ -156,6 +165,20 @@ puis `select to_jsonb(e) from public.cashd_factures_etat e where client_id = '<c
   NB : cette MED est désormais approuvée ; si un réglage d'envoi est posé un jour sur ce client banc, elle partirait (vers
   une adresse `.invalid`). À annuler par le coordinateur s'il le juge utile.
 
+### Série 2 — les textes (lus le 21/10 sur les relances préparées des 21/10, 27/10, 03/11)
+
+- **TCASHD-08** · S2-1 · `cashd_relances_du_jour(client,'2026-10-21')`, champ `corps`, comptes A-C11 (3,00 €), A-C00
+  (1 085 €, 8 j), A-C13 (1 085 €, 35 j), A-C12 (1 627,50 €, 2 pièces) : même corps « Sauf erreur de notre part … Il s'agit
+  sans doute d'un simple oubli. Si le règlement est déjà parti, merci de ne pas tenir compte de ce message … », seuls les
+  numéros, dates et montants changent. R:169 promet « Le ton suit le montant et l'ancienneté du retard », R:273 « Chaque
+  message est écrit à partir du montant, de l'ancienneté du retard et du palier atteint » : seul le palier joue.
+- **TCASHD-09** · S2-3 · mêmes relances : aucun texte ne nomme le secteur ni le chantier. La fiche du compte porte
+  `secteur` null (la porte d'import n'a pas de clé secteur) ; la facture porte `commande_ref` « Chantier : Résidence Les
+  Flamboyants », jamais repris. C:50 promet « le secteur du compte, sa référence, son montant et son retard ».
+- **TCASHD-10** · S2-9 (mineur) · MED A-C13 du 03/11, canal `email` : « dans un délai de 8 jours à compter de la réception
+  de ce courrier, soit au plus tard le 11/11/2026 » (date comptée depuis la préparation, quelle que soit la date de
+  validation). Rappel A-C12 (deux factures) : « Pour toute question sur cette facture ».
+
 ## Questions au coordinateur
 
 00. (21/10, J+6) **Mise en demeure** : pour C13, jouer `private.cashd_preparer_relances(client,'2026-11-03',null)` ?
@@ -179,8 +202,8 @@ puis `select to_jsonb(e) from public.cashd_factures_etat e where client_id = '<c
 
 - Fait : contrat, brief, promesses (R, C), banc ouvrier `banc_cashd.sql` et `cashd_omega.sql` lus ; jeu série 1 écrit
   (`omega/testeur-cashd/`), attendus notés.
-- En cours : série 1 terminée (J, J+1, J+6, 03/11, MED). TCASHD-01 à 07. J complet. Justes : C0 C1 C3 C4 C5 C7 C8 C10 C12 C13. Écarts TCASHD-01 à 05. 
-- Prochain pas : série 2 (les textes, lus sur chaque relance préparée : ton, vocabulaire du bâtiment, moyens de règlement, échéancier).
+- En cours : séries 1 et 2 terminées. Écarts TCASHD-01 à 10. Rien en cours sur la recette. J complet. Justes : C0 C1 C3 C4 C5 C7 C8 C10 C12 C13. Écarts TCASHD-01 à 05. 
+- Prochain pas : série 2 faite (S2-1 à S2-9, TCASHD-08 à 10). Restent : S2-8 (historique), C:95 (règles de communication : porte `cashd_regler_relances`, champs à connaître), écran (compte gérant sans mot de passe). Niveau 2 : pas avant le coordinateur.
 - Questions : 1, 2, 4 (litige) répondues le 21/10 ; restent 3 (passage du matin, joué par le coordinateur), 4 (seuil), 5 (porte de lecture des relances), 6 (compte gérant, au bureau).
 - Note : pour le format, j'ai lu les appels `cashd_importer` de `cashd_nobat.sql` (autorisé par le coordinateur) ; deux commentaires de ce fichier citent des issues attendues (avoir, échéance) — vu malgré moi, signalé.
 - SHA d'arrêt : voir le dernier commit de `testeur-cashd` (« … jour J, tableau »).
