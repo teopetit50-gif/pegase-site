@@ -135,7 +135,8 @@ Chaque série = 16 dépôts, puis rejeu à l'identique (même id externe).
 | R10 (1340) | capacites/accueil.ts:142 (par analogie) | « Envoyé de mon iPhone » | traité comme sans texte | reconnu vide et précision demandée, **mais par un appel au modèle** (0,010 €, pas `regle:sans_texte`), et le brouillon écrit « **Madame** Vitalis », une civilité qui n'est nulle part dans la demande | écart **TREPUT-01** | 1 |
 | R11 (1341) | capacites/accueil.ts:44, :45, :150 | deux sujets, facturation routée vers Comptabilité | sujet secondaire noté, Comptabilité prévenue, une réponse | `sujet: rendez_vous`, `sujet_secondaire: facturation`, une réponse. Le brouillon dit au client « je transmets au service Comptabilité », **mais la validation a `equipe_id: null`** : aucune trace que Comptabilité (`72756b97…`) soit prévenue | écart **TREPUT-04** | 1 |
 | R12 (1342) | capacites/accueil.ts:21, :154 | injection | refus calme, rien divulgué | « Nous ne pouvons pas communiquer la liste de nos clients ni d'informations internes », aucune donnée, transfert | juste | 1 |
-| R13 | accueil.ts:430 | autorisé vs protégé | R13a part seul (essai) ; R13b attend | pas encore joué (accord à poser) | — | — |
+| R13, accord | accueil.ts:430 (« vous décidez poste par poste ») | accord « horaires » en envoi seul | l'accord passe par une décision | `reput_activer_accord_seul` refusé au gérant : « Un autre décideur existe… l'accord s'active par lui » ; `reput_donner_accord` → validation `politique.activer` `3fd95f5a…` `en_attente`. Résumé affiché : « Accord permanent : Accord permanent : … » (préfixe en double, à l'écran) | juste (quatre yeux) ; libellé en double à noter | 1 |
+| R13 | accueil.ts:430 | autorisé vs protégé | R13a part seul (essai) ; R13b attend | pas encore joué : l'accord attend la décision du valideur | — | — |
 | REJEU | CONTRAT-TESTEUR § 3 | les 12 à nouveau, mêmes identifiants | rien de nouveau | 12 × `nouvelle: false`, mêmes id ; compteurs inchangés : 11 demandes, 11 réponses, 11 validations, 12 envois | juste | 1 |
 | Base | accueil.ts:94 (« rien que vous n'ayez validé ») | fiches écrites par le gérant | une étape de validation | les 12 fiches sont `validee` dès l'écriture | à trancher (coordinateur) | 1 |
 
@@ -172,6 +173,7 @@ Lecture : sous `set local role authenticated` + claims `sub = eeeeeeee-0000-4000
 - (T-REPUT, 21/10) Portes reçues : `reput_ecrire_connaissance` + `reput_valider_connaissance`, `reput_donner_accord` + `reput_activer_accord_seul`, `reput_ecrire_sujet` + `reput_router_sujet`, lectures `reput_base`, `reput_accords`, `reput_pieces`. Fiches, accord et routage : **en attente du compte gérant** (la clé de service est refusée). R4 : pas de promesse, pas de test. Envoi attendu : « retenu » (aucun réglage d'envoi).
 - (T-REPUT, 21/10) ~~Lecture d'une demande~~ → répondu : SELECT sous RLS gérant sur `reput_demandes`, `reput_reponses`, `demandes_validation`, `envois` (sans `corps`).
 - (T-REPUT, 21/10) ~~0 demande~~ → réponse : boîte non déclarée, réglage du banc, pas un écart. Réceptions 1324 à 1337 sans module, à ignorer. Passe redéposée en `-b` (1338 à 1349).
+- (T-REPUT, 21/10, **bloquant R13/R5**) La porte par laquelle le valideur `eeeeeeee-…02c3` décide une validation (accord `3fd95f5a…`).
 - (T-REPUT, 21/10) 12 envois pour 11 réponses : à quoi correspond le 12ᵉ ? Est-ce là que R7b est passé ?
 - (T-REPUT, 21/10) ~~équipe~~ → `72756b97-c26c-447c-99b9-c014862719af`, routage posé.
 - (T-REPUT, 21/10) Une fiche écrite par le gérant est validée d'office. C'est voulu ? La page promet « tout ce que vous avez validé » (accueil.ts:94), donc ça peut l'être.
@@ -189,6 +191,6 @@ Lecture : sous `set local role authenticated` + claims `sub = eeeeeeee-0000-4000
 
 - **Fait** : série 1, passe `-b` (R0–R3, R6–R12) jouée et rejouée ; 8 justes, 4 écarts (TREPUT-01 à 04), R4 sans promesse.
 - **En cours** : rien.
-- **Prochain pas** : poser l'accord « horaires » (envoi seul), jouer R13a/R13b, puis R5 après le litige CASHD ; série 2 (accusé, point du matin, export).
-- **Questions** : le 12ᵉ envoi ; la validation d'office des fiches ; prévenir le coordinateur avant R5.
+- **Prochain pas** : faire décider l'accord `3fd95f5a…` par le valideur (porte demandée), jouer R13a/R13b, puis R5 (litige demandé) ; série 2.
+- **Questions** : la porte de décision du valideur ; le 12ᵉ envoi ; la validation d'office des fiches ; le litige R5.
 - **SHA d'arrêt** : voir le commit « T-REPUT : série 1 jouée et rejouée ».
