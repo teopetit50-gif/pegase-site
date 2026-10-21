@@ -84,3 +84,11 @@ reglements : creees 0, lignes 5, inchangees 5
 - Valideur, `insert into public.approbations (…, decision 'approuve', commentaire null)` → accepté, id `fe3fe337-d2da-4652-99d2-99dddb56c150`.
 - `public.demandes_validation` (lu en valideur) : `type_action cashd.mise_en_demeure`, `exige_commentaire true`,
   `exige_motif true`, `statut approuvee`, `decide_le 2026-10-21T19:24:42`. Relance : `non_reglee`, `envoi_id` null.
+
+## Rejeu TCASHD-06 et réglages (21/10, 19:41)
+- Import : client `A-C14` « Second Œuvre Rejeu (fictif) », facture `FB-2026-0115` (émise 27/08, échue 26/09, 1085 TTC) → créées.
+- Gérant : `cashd_regler_relances(client, {"metier":"btp","moyens_reglement":"Virement IBAN FR76 0000 … (fictif) ou chèque à l'ordre de banc-test-cashd","signature":"Service comptabilité — Négoce Banc Matériaux (fictif)","interdits":["simple oubli"]})`
+  et `cashd_regler_compte(A-C14, {"secteur":"second œuvre"})` → acceptés (réponse : `ecart_paliers_jours 5`, `delai_mise_en_demeure_jours 8`, scénario 0/7/21/30).
+- `cashd_preparer_maintenant` → `{bloquees 1}` ; relance A-C14 `rappel` `bloquee`, motif « le message contient un mot interdit
+  par vos règles : « simple oubli » » ; corps : « … sur votre compte A-C14, secteur second œuvre : … Il s'agit sans doute d'un
+  simple oubli. … Vous pouvez régler Virement IBAN … Service comptabilité — Négoce Banc Matériaux (fictif) ».

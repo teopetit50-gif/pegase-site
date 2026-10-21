@@ -91,6 +91,10 @@ Attendus notés **avant** de jouer. « R » = `lib/produits/relances.ts`, « C �
 | S2-7 | brief : échéancier proposé ; C:133-134 | ferme, MED | proposition d'échelonnement | rien ; la ferme invite seulement à contester | pas couvert (le site promet la saisie d'un échéancier, pas sa proposition) | 1 |
 | S2-8 | R:170 historique de paiement ; R:171 « jamais deux fois le même texte » | C7 (a déjà payé 300 €) vs C0 | ton tenant compte d'un acompte ; textes jamais répétés | C7 = même texte que C0 ; deux clients différents reçoivent le même texte (promesse lue « par client » : pas testable sans deux messages du même palier au même client) | pas testable (historique trop court) | 1 |
 | S2-9 | R:220, C:68 | MED C13 | « courrier », délai cohérent | canal `email` mais « 8 jours à compter de la réception de ce **courrier** », et l'échéance (11/11) est comptée depuis la préparation, pas la réception ; rappel C12 « cette facture » pour deux factures | écart mineur (TCASHD-10) | 1 |
+| S2-10 | C:95 « Vos règles de communication et vos interdits sont repris dans chaque message » | interdit « simple oubli » posé (`cashd_regler_relances` … `interdits`) ; rappel C14 qui contient ces mots | le mot ne part pas | rappel C14 `bloquee`, motif « le message contient un mot interdit par vos règles : « simple oubli » » | juste | 1 |
+| S2-11 | C:50 (secteur) — rejeu de TCASHD-09 avec réglage | `cashd_regler_compte(A-C14, {secteur:"second œuvre"})` | secteur cité | « compte A-C14, **secteur second œuvre** » ; signature réglée reprise ; chantier toujours absent ; `metier btp` : aucun mot du métier visible | juste pour le secteur (TCASHD-09 réduit au chantier et à l'import sans clé secteur) | 1 |
+| S2-12 | brief : moyens de règlement | `moyens_reglement` réglé | moyens cités | « Vous pouvez régler Virement IBAN … ou chèque … » (le texte libre est collé après « régler », sans « par » : tournure bancale selon la saisie) | juste (remarque de tournure) | 1 |
+| R06 | rejeu TCASHD-06 (lot c2_19) | C14 : FB-2026-0115 échue 26/09, jamais relancée ; rappel de J bloqué (jamais parti) | ferme et MED sans « précédent rappel » | en attente des passages 27/10 et 03/11 (coordinateur) | à jouer | 1 |
 
 Notes de lecture (avant de jouer) :
 - « Un message par compte et par jour », « cinq jours d'écart au moins » (C13) et « suspendue pas d'adresse » (C4)
@@ -201,7 +205,7 @@ puis `select to_jsonb(e) from public.cashd_factures_etat e where client_id = '<c
 ## REPRISE
 
 - Fait : série 1 (C0-C13, rejeu, 22/10, 27/10, 03/11, validation de la MED) et série 2 (textes). Justes : C0 C1 C3 C4 C5 C7 C8 C9 C10 C12, cadence J+21/J+30, un message par compte et par jour. Écarts : TCASHD-01 à 10 (les plus graves : 07 MED approuvée sans commentaire, 03 avoir orphelin déduit d'une autre facture, 06 « précédent rappel » jamais parti).
-- En cours : rien sur la recette. La MED A-C13 est `approuvee` (sans envoi) : au coordinateur de l'annuler s'il le juge utile.
+- En cours : rejeu TCASHD-06 sur C14 (A-C14, FB-2026-0115), en attente des passages 27/10 et 03/11. Réglages posés sur le client banc : `metier btp`, `moyens_reglement`, `signature`, `interdits ["simple oubli"]` (ce dernier bloque tout rappel neuf). La MED A-C13 est `approuvee` (sans envoi) : au coordinateur de l'annuler s'il le juge utile.
 - Prochain pas : S2-8 (historique de paiement), C:95 (règles de communication, champs de `cashd_regler_relances` à connaître), écran (en attente du compte gérant avec mot de passe). Niveau 2 : pas avant le coordinateur.
 - Questions : champs de `cashd_regler_relances` / `cashd_regler_compte` (secteur, règles de communication) ; accès écran. Toutes les autres sont répondues (21/10).
 - Note : pour le format, j'ai lu les appels `cashd_importer` de `cashd_nobat.sql` (autorisé par le coordinateur) ; deux commentaires de ce fichier citent des issues attendues (avoir, échéance) — vus malgré moi, signalé.
