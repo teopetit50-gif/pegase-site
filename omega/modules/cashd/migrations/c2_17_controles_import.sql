@@ -304,14 +304,14 @@ begin
       format('Import : %s ligne%s écartée%s, numéro déjà porté par la facture d''un autre client : %s. Vérifiez la numérotation du facturier.',
              cardinality(v_doublons), case when cardinality(v_doublons) > 1 then 's' else '' end, case when cardinality(v_doublons) > 1 then 's' else '' end,
              array_to_string(v_doublons[1:10], ', ')),
-      jsonb_build_object('numeros', to_jsonb(v_doublons[1:50]), 'origine', p_origine), 'import:doublon:' || md5(array_to_string(v_doublons, ',')), true, p_entite);
+      jsonb_build_object('numeros', to_jsonb(v_doublons[1:50]), 'origine', p_origine), 'import:doublon:' || md5(array_to_string(v_doublons, ',')), true, null);
   end if;
   if p_jeu = 'factures' and exists (select 1 from public.cashd_factures x where x.client_id = p_client and x.entite_id = p_entite and x.incoherence is not null
                                     and x.statut = 'ouverte' and (x.nature || ':' || x.numero) = any (v_vus)) then
     perform private.lever_alerte_module(p_client, 'cashd', 'attention',
       format('Import : %s facture%s au total incohérent, relance suspendue : %s.',
              count(*), case when count(*) > 1 then 's' else '' end, string_agg(x.numero || ' (' || x.incoherence || ')', ' ; ' order by x.numero)),
-      jsonb_build_object('factures', jsonb_agg(x.id)), 'import:incoherence:' || md5(string_agg(x.id::text, ',' order by x.id)), true, p_entite)
+      jsonb_build_object('factures', jsonb_agg(x.id)), 'import:incoherence:' || md5(string_agg(x.id::text, ',' order by x.id)), true, null)
     from public.cashd_factures x where x.client_id = p_client and x.entite_id = p_entite and x.incoherence is not null
       and x.statut = 'ouverte' and (x.nature || ':' || x.numero) = any (v_vus);
   end if;
