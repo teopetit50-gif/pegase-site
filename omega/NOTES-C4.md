@@ -6,7 +6,7 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 
 ## REPRISE (21/10, 19 h 30 Z — lot correctif du testeur T-OFFLOAD)
 
-- Fait : c4_01 à c4_22 verts sur la recette ; c4_23 (TOFFLOAD-01, 02), c4_24 (05), c4_25 (06), c4_26 (04) et c4_27 (07) poussés, local 465 ok.
+- Fait : c4_01 à c4_22 verts sur la recette ; c4_23 (TOFFLOAD-01, 02), c4_24 (05), c4_25 (06), c4_26 (04), c4_27 (07) et c4_28 (08) poussés, local 471 ok.
 - En cours : rien. Import des personnes morales : script livré (6f0a05b2), non joué, en attente de Teo.
 - Prochain pas : poser c4_23 à c4_26 ; TOFFLOAD-03 (O6) attend une décision ; O6 (contact récent, reprise ouverte à la main) : voulu depuis c4_05, à trancher si on le ferme aussi.
 
@@ -451,6 +451,12 @@ Banc local : 28 tests, 312 assertions vertes, migrations posées deux fois ; tsc
 l'échéance honorée après message est comptée au suivi). Le chiffre repris compte tous les achats des 90 jours,
 sans prétendre qu'ils sont dus au seul message.
 
+## Lot c4_28 — un réglage hors bornes se dit en français (TOFFLOAD-08, 21/10)
+
+offload_regler renvoyait le texte brut d'une contrainte (vague_jour 9). `private.offload_phrase_reglage` donne la phrase
+de chaque borne ; offload_regler la renvoie en 23514 ; une valeur non numérique ou trop grande répond 22023 en
+français. Test `c4_28_reglages_en_francais.sql` : 5 rouges sur 6 avant, 6 verts après. Banc local : 52 tests, 471 ok.
+
 ## Lot c4_27 — une retenue ne survit pas à sa reprise (TOFFLOAD-07, 21/10)
 
 O14 : reprise close « commande », message annulé, mais la demande « offload.message_retenu » restait en attente et
@@ -846,3 +852,4 @@ Partielles : 6, 11, 15, 38.
 - 21/10 — lot c4_25 (TOFFLOAD-06, clôture sur commande partout, message annulé) : 454 ok.
 - 21/10 — lot c4_26 (TOFFLOAD-04, effacement jusqu'au bout) : 461 ok.
 - 21/10 — lot c4_27 (TOFFLOAD-07, retenue annulée avec sa reprise) : 465 ok.
+- 21/10 — lot c4_28 (TOFFLOAD-08, réglages hors bornes en français) : 471 ok.
