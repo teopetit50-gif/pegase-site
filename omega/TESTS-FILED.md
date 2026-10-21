@@ -198,7 +198,7 @@ ne peuvent pas être la même personne » ; carte « Des rôles et des délégat
 - Réserve, à trancher par Teo : « déposer » vaut-il « saisir » ? Pour une pièce lue par le moteur, le déposant est la seule personne
   qui l'a fait entrer. Si ce n'est pas lui que vise `:74`, alors `:74` ne vise personne dans FILED.
 
-**TFILED-13 (en cours) · F1 · une décision approuvée n'est pas appliquée à la facture**
+**TFILED-13 · ✅ CLOS, juste · F1 · une décision approuvée n'est pas appliquée à la facture** : l'exécution est différée d'environ 1 minute. La demande passe « executee » à 20:32:00Z (`motif_echec null`), par la tâche de fond qui tourne chaque minute, et F1 devient **`validee`**. Ma lecture avait eu lieu juste avant ce passage. Constat d'origine :
 - Après TFILED-12 : `execute_le null`, `motif_echec null`, et la facture reste **`a_valider`**. La porte `filed_pieces_en_cours` la
   montre toujours « En attente d'approbation » (1 pièce, 846,30 €). Le coordinateur regarde si l'exécution est différée ou en panne.
   Verdict suspendu.
@@ -304,7 +304,7 @@ seulement « proposé », jamais tenu pour bon (vérifié par le coordinateur). 
   donc **avant** C0. Le nouveau seuil n'est pas reporté sur une demande ouverte. **Observation** (`:70`) : le site ne dit pas si un
   seuil s'applique aux demandes en cours. Le seuil de double approbation n'est **pas testable** sur le banc : il faudrait une demande
   neuve, et aucune facture n'entre dans le circuit à cause du registre.
-- **C1** (gérant = déposant) : approbation acceptée, demande approuvée → **TFILED-12** ; facture non mise à jour → **TFILED-13**.
+- **C1** (gérant = déposant) : approbation acceptée, demande approuvée → **TFILED-12** ; exécution différée d'environ 1 min, puis F1 `validee` à 20:32:00Z → TFILED-13 clos, juste.
 - **C2** (valideur) : impossible, puisque la demande est close après C1.
 
 ### Jeu d'essai série 1 (prêt, pas encore joué)
@@ -366,10 +366,9 @@ par les portes `public.filed_confirmer_fournisseur(uuid, text)` et `public.filed
 
 ## REPRISE
 
-**Arrêt 11 — 21/10/2026, 20 h 40 Z** (remplace les arrêts précédents)
-- Fait : séries 1, 1b et 2, au niveau 1. Corrigés et revérifiés : TFILED-03, 04 et 08. Écarts ouverts : **TFILED-11** (A4), **TFILED-12** (`:74`), TFILED-13 (en cours). Remontés à Teo : TFILED-05, 06, 07, 09 et 10. Pas testable : F0 « sans arrêt », le FEC, le seuil de double approbation (aucune demande neuve possible), l'usage réel d'une délégation.
-- Correction de ce fichier : les sections TFILED-08, 11, 12, 13 et « Circuit » manquaient dans les commits 215cdfeb à 7bf715dc. L'en-tête « Série 1b » avait été écrasé par l'ajout de TFILED-09 et 10, et les insertions suivantes ont échoué sans bruit. Elles sont rétablies dans ce commit.
-- En cours : TFILED-13, qui attend le constat du coordinateur sur `execute_le`.
-- Prochain pas : rendre le verdict de TFILED-13. Ensuite, plus rien n'est jouable sur le banc sans un SIREN connu de VIES ou sans l'écran.
-- Questions : à Teo, « déposer » vaut-il « saisir » au sens de `:74` (TFILED-12) ?
-- SHA d'arrêt : voir le commit « T-FILED : sections rétablies, TFILED-12 et 13 » sur `testeur-filed`.
+**Arrêt 12 — 21/10/2026, 20 h 45 Z** (fin de session sur instruction du coordinateur)
+- Fait : séries 1, 1b et 2, au niveau 1. Corrigés et revérifiés : TFILED-03, 04 et 08. Clos juste : TFILED-02 et 13. Écarts ouverts : **TFILED-11** (A4) et **TFILED-12** (`:74`, réserve pour Teo). Remontés à Teo : TFILED-05, 06, 07, 09 et 10. Pas testable : F0 « sans arrêt », le FEC, le seuil de double approbation, l'usage réel d'une délégation.
+- En cours : rien.
+- Prochain pas : revérifier TFILED-11 quand le coordinateur l'annonce corrigé. Attendu : F1 rebloquée pour son SIREN invalide.
+- Questions : à Teo, « déposer » vaut-il « saisir » au sens de `:74` ?
+- SHA d'arrêt : voir le commit « T-FILED : TFILED-13 clos, arrêt 12 » sur `testeur-filed`.
