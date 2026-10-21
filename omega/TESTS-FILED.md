@@ -192,6 +192,19 @@ seulement « proposé », jamais tenu pour bon (vérifié par le coordinateur). 
   en gérant). (2) Le valideur **rejette** `f363b16f` avec le commentaire « IBAN non confirmé par appel au fournisseur » ; attendu
   `:73`, le commentaire et le motif restent attachés, et l'IBAN `…0309` n'est pas tenu pour bon. Je préfère un rejet à une approbation,
   qui rendrait l'IBAN « valide » (avertissement du coordinateur).
+- **F2c** (déposée à 20 h 19 Z, ligne relayée) : `integre · facture · BAR-2026-0503 · TTC 618,45 · bloquee` ; `bloquant · iban.nouveau · « Nouvel
+  IBAN (FR76 •••• 0309) pour ce fournisseur : une personne le vérifie auprès de lui avant tout paiement. »` ; `doublon.probable · ok` ;
+  `identite.registre` bloquant (VIES). **Juste** (`:57`) : un IBAN seulement « proposé » n'est pas tenu pour connu. La réserve 2 de
+  TFILED-02 est levée. Niveau 1.
+- **V1a** (21/10, 21 h 20) : en **gérant** `…01f1`, `insert into public.approbations (demande_id, client_id, user_id, decision, commentaire)
+  values ('f363b16f-…', client, auth.uid(), 'approuve', 'T-FILED V1 : tentative du gérant (annulée)') returning …` → **accepté** :
+  `{decision: "approuve", user_id: "eeeeeeee-…01f1"}`. Transaction **annulée** (`rollback`), donc rien n'est décidé. Limite : un
+  contrôle différé au `commit` ne se voit pas ainsi. Verdict sur `:74` en attente (Q15). Si le gérant est celui qui a « saisi » la
+  demande (le dépôt est fait sous son identité), c'est un **écart** : le socle laisse la même personne saisir et approuver.
+- **V1b** (21/10, 21 h 21) : en **valideur** `…02f1`, même insert avec `decision 'rejete'` et le commentaire « T-FILED V1 : IBAN …0309 non
+  confirmé par appel au fournisseur (banc, données fictives) » → accepté et **validé (`commit`)** : `{decision: "rejete", user_id:
+  "eeeeeeee-…02f1", commentaire: "…"}`. Effets à relire (Q15) : statut de la demande, état de l'IBAN `…0309`, et si les anomalies
+  `iban.nouveau` de F2b et F2c restent ouvertes, le motif de refus attaché aux factures (`:73`).
 
 ### Jeu d'essai série 1 (prêt, pas encore joué)
 
@@ -256,5 +269,5 @@ par les portes `public.filed_confirmer_fournisseur(uuid, text)` et `public.filed
 - Fait : séries 1 et 1b, au niveau 1. Juste : F1, F2b (en 1b), F4a, F5, F8, F11 (contre la l. 31), F12, rejeu. Écarts : TFILED-03 et 04 (envoyés à A4). TFILED-07 et TFILED-06 sont remontés à Teo. Pas couvert : TFILED-05 (à Teo). Pas testable sans tiers : F0 « sans arrêt ».
 - En cours : rien.
 - Prochain pas : la série 2 (feu vert reçu ; F2c générée, à déposer par le coordinateur). Circuit de validation (seuil de double approbation, délégation datée, saisie et approbation par deux personnes distinctes), puis la sortie comptable (CSV 401/44566/512, FEC). Y ajouter la 3ᵉ pièce Béton Archipel sur l'IBAN `…0309` (réserve 2 de TFILED-02) et l'avoir F6 une fois les arrêts levés.
-- Questions : Q14 répondue (entité, FEC, file, rôles). Reste en attente : la ligne brute de F2c (déposée à 20 h 19 Z). F3 et F4b sont revérifiés : justes. Historique de Q14 : : (a) l'uuid de l'entité principale du banc ; (b) le sens des 3 uuid de `filed_exporter_fec` ; (c) une porte qui liste les demandes d'approbation (`demande_id`) ; (d) les valeurs admises pour `p_roles`. Point bloquant : toutes les factures sont arrêtées par le registre. Si aucune demande d'approbation n'existe pour une facture bloquée, le circuit de validation n'est **pas testable sans tiers** (il faut un SIREN que VIES connaît, ou une décision de la file à l'écran).
+- Questions : Q14 répondue (entité, FEC, file, rôles). F3 et F4b sont revérifiés : justes. F2c est lue : juste. **Q15** : (a) qui est le demandeur, ou « saisisseur », de la demande `f363b16f` ? Le socle a accepté l'approbation du gérant (V1a, annulée). (b) Après le rejet du valideur (V1b) : quel est le statut de la demande et l'état de l'IBAN `…0309` ? Les `iban.nouveau` de F2b et F2c restent-ils ouverts ? Le commentaire et le motif de refus sont-ils visibles sur les factures ? Historique de Q14 : : (a) l'uuid de l'entité principale du banc ; (b) le sens des 3 uuid de `filed_exporter_fec` ; (c) une porte qui liste les demandes d'approbation (`demande_id`) ; (d) les valeurs admises pour `p_roles`. Point bloquant : toutes les factures sont arrêtées par le registre. Si aucune demande d'approbation n'existe pour une facture bloquée, le circuit de validation n'est **pas testable sans tiers** (il faut un SIREN que VIES connaît, ou une décision de la file à l'écran).
 - SHA d'arrêt : voir le commit « T-FILED série 1b : TFILED-02 requalifié » sur `testeur-filed`.
