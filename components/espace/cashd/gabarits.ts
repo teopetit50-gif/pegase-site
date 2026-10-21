@@ -38,6 +38,7 @@ export const VARIABLES: Record<string, string> = {
   reglement: "vos moyens de règlement, et la proposition d'échelonnement au-delà du seuil réglé",
   devis_suite: "la fin d'une relance de devis, au vocabulaire de votre métier",
   cette_facture: "« cette facture » ou « ces factures », accordé au nombre de pièces",
+  ce_message: "« ce courriel » ou « ce courrier », selon le canal (courriel, ou lettre recommandée)",
 };
 
 const OBLIGATOIRES: Record<CleGabarit, string[]> = {
@@ -77,7 +78,7 @@ export const GABARITS_EXEMPLE: Gabarit[] = [
   D("relance", 2, "{emetteur} — {total} restent à régler",
     "{bonjour}\n\nNotre premier rappel est resté sans suite, et {dues} sur votre compte {compte} :\n{lignes}\nLe total dû s'élève à {total}. Merci de le régler au plus tard le {limite}.\n{ton_montant}{droits}Si une partie de ces montants vous paraît contestable, écrivez-nous : nous l'examinerons.\n{reglement}"),
   D("mise_en_demeure", 1, "{emetteur} — mise en demeure de payer {total}",
-    "{bonjour}\n\nMalgré nos précédentes relances, les sommes suivantes restent impayées (compte {compte}) :\n{lignes}\nPar la présente, nous vous mettons en demeure de régler la somme de {total} dans un délai de {delai} jours à compter de la réception de ce courrier, soit au plus tard le {limite}.\n{droits}À défaut de règlement dans ce délai, nous engagerons une procédure de recouvrement, sans autre avis.\n"),
+    "{bonjour}\n\nMalgré nos précédentes relances, les sommes suivantes restent impayées (compte {compte}) :\n{lignes}\nPar la présente, nous vous mettons en demeure de régler la somme de {total} dans un délai de {delai} jours à compter de la réception de {ce_message}, soit au plus tard le {limite}.\n{droits}À défaut de règlement dans ce délai, nous engagerons une procédure de recouvrement, sans autre avis.\n"),
   D("devis_rappel", 1, "{emetteur} — votre devis{objet}", "{bonjour}\n\nNous vous avons adressé {dues} (compte {compte}) :\n{lignes}{devis_suite}"),
   D("devis_rappel", 2, "{emetteur} — suite à notre devis{objet}",
     "{bonjour}\n\nNous nous permettons de revenir vers vous : nous vous avons adressé {dues} (compte {compte}), et nous n'avons pas encore eu votre retour.\n{lignes}{devis_suite}"),
@@ -113,6 +114,7 @@ export function apercu(
   const v: Record<string, string> = {
     bonjour: "Bonjour Mme Lefèvre,",
     cette_facture: "cette facture",
+    ce_message: "ce courriel",
     emetteur: r.emetteur ?? "Atelier Bertin",
     compte: "C-LEFEVRE, secteur Immobilier",
     lignes: devis
