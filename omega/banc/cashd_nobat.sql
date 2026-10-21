@@ -114,13 +114,18 @@ with attendu(rang, numero, compte_ref, erreur) as (values
   (7, 'NB-1007', 'NB-C7', 'règlement partiel non lettré'))
 select a.rang, a.numero, a.compte_ref, a.erreur,
        case when c.id is null then 'compte absent' when f.id is null then 'AUCUNE PIÈCE pour ce compte' else 'importée' end as import,
-       f.montant_ttc, e.reste_du, e.retard_jours,
+       f.montant_ttc, e.reste_du, e.retard_jours, f.incoherence,
        (select coalesce(sum(x.a_imputer), 0) from public.cashd_reglements_etat x where x.compte_id = c.id) as a_imputer_compte,
        s.etat_sequence, s.palier_suivant,
        r.palier as relance_palier, r.statut as relance_statut, r.montant as relance_montant, left(r.motif, 120) as relance_motif,
        case
          when c.id is not null and f.id is null and a.erreur = 'échéance avant émission' then 'attrapée : ligne écartée à l''import (échéance antérieure à l''émission)'
+         when c.id is not null and f.id is null and a.erreur = 'numéro en doublon'
+              and exists (select 1 from public.cashd_factures x join public.cashd_comptes y on y.id = x.compte_id
+                          where y.reference = 'NB-C2' and x.numero = 'NB-1002' and y.client_id = c.client_id)
+           then 'attrapée (c2_17) : ligne écartée à l''import, la pièce de NB-C2 est gardée, alerte levée'
          when c.id is not null and f.id is null then 'ÉCART : la pièce n''existe pas pour ce compte (le numéro a mis à jour une autre pièce)'
+         when f.incoherence is not null then 'attrapée (c2_17) : total incohérent, relance suspendue — ' || f.incoherence
          when f.id is not null and f.montant_ht is not null and abs(f.montant_ttc - 2343.76) > 0.005 and f.montant_ht = 2179.00 then 'ÉCART : TTC incohérent avec HT + TVA, relancé tel quel'
          when r.statut = 'sans_adresse' then 'attrapée : relance écrite, ne part pas (sans adresse)'
          when r.id is null and (select coalesce(sum(x.a_imputer), 0) from public.cashd_reglements_etat x where x.compte_id = c.id) > 0 then 'traitée : la relance attend le lettrage du règlement'
