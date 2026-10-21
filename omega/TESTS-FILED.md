@@ -167,7 +167,9 @@ Lecture par le coordinateur à l'écran ou en lecture seule, relayée brute ; li
   revérification après a4_73')` → `1`. Sans relance manuelle, F1 est recontrôlée à `2026-10-21 20:29:00.58Z`, avec
   `fournisseur.a_confirmer · ok · « Fournisseur connu. »`. Le déclencheur fonctionne.
 
-**TFILED-11 · F1 · une facture au SIREN à clé fausse arrive à la validation dès que le fournisseur est confirmé** (`capacites/factures.ts:58`) — envoyé à A4
+**TFILED-11 · ✅ CORRIGÉ par a4_74, revérifié le 21/10 à 20 h 40 Z (contrôle relancé par le coordinateur) · F1 · une facture au SIREN à clé fausse arrive à la validation dès que le fournisseur est confirmé** (`capacites/factures.ts:58`)
+- Après a4_74, les lignes brutes sont : `bloquant · identite.siren · « SIREN lu (912345629) : clé de contrôle fausse ; aucune entreprise ne peut porter ce numéro. Erreur de lecture ou fausse facture… »` ; `bloquant · identite.tva_intracom · « … bâti sur le SIREN 912345629, dont la clé de contrôle est fausse ; ce numéro ne peut pas exister… »` ; `bloquant · identite.registre · « Registre non interrogé : le SIREN lu (912345629) a une clé de contrôle fausse… une personne vérifie ce fournisseur avant tout paiement. »` ; `attention · tva.numero · ok · « Numéro de TVA présent sur la pièce (FR24912345629)… »`. Les trois défauts constatés sont corrigés (clé de Luhn, paradoxe du registre, message contradictoire). **Juste.** La suite est en TFILED-14.
+- Constat d'origine :
 - Déposé : `F1_siren_cle_fausse.pdf` (Quincaillerie du Moule, SIREN imprimé `912345629`, dont la clé de Luhn est fausse, ce que le
   coordinateur a vérifié ; TVA `FR24912345629` imprimée dans l'en-tête). Puis, en gérant,
   `filed_confirmer_fournisseur('e5ee6419-…', …)` → `1`.
@@ -185,6 +187,22 @@ Lecture par le coordinateur à l'écran ou en lecture seule, relayée brute ; li
 - Le verdict « juste » posé sur F1 en série 1 est **retiré** : l'arrêt ne tenait qu'à `fournisseur.a_confirmer`, et les contrôles
   `identite.*` n'étaient qu'en attention.
 - F1 sera **rebloquée** après le correctif : le circuit joué sur elle (ci-dessous) ne se rejoue pas tel quel.
+
+**TFILED-14 · F1 · une facture déjà validée garde son statut quand un nouveau contrôle y trouve trois bloquants** (`capacites/factures.ts:108`,
+« Aucune ne se règle en classant la pièce quand même » ; `:61` ; message du contrôle « une personne vérifie ce fournisseur avant tout paiement »)
+- État de départ : F1 est **`validee`** depuis C1 et TFILED-13 (exécution à 20:32:00Z). Le coordinateur relance le contrôle à 20:40:37Z,
+  après a4_74 : trois **bloquants** sont posés (`identite.siren`, `identite.tva_intracom`, `identite.registre`, cités en TFILED-11), et la
+  fonction rend **« validee »**.
+- Lecture par les portes (gérant, 20 h 42 Z, transaction annulée) : `filed_exporter_ecritures(…, 'sage')` → `lignes 0, ecritures 0` ;
+  `filed_pieces_en_cours` → `bloquees 14 / 10 585,70 €` seulement, sans F1 et sans catégorie « validées » ; `filed_etat_comptabilisation`
+  → `comptables []` ; `filed_etat_paiement` → `null`.
+- Ce qui est tenu : F1 n'entre pas dans l'export comptable (`:283`), et rien n'est payable, puisqu'aucun paiement n'est branché sur le banc.
+- Ce qui ne l'est pas : la facture reste « validee » avec trois bloquants. Elle **n'est comptée nulle part** parmi les pièces bloquées,
+  donc personne ne la voit. Le message promet « une personne vérifie… avant tout paiement », mais aucun état ne le porte : ni retour en
+  « bloquee », ni nouvelle demande. Sur un client dont le paiement est branché, rien de ce que je vois n'empêche le règlement.
+- Attendu (contrat § 3 : le site ne dit pas explicitement ce que devient une pièce validée puis contredite) : soit la facture repasse
+  « bloquee », soit elle est signalée, comptée et exclue du paiement. Je le classe **écart**, au niveau 1. Ce qu'il advient du paiement
+  reste **pas testable sans tiers**, faute d'un réglage d'envoi sur le banc.
 
 **TFILED-12 · F1 · le déposant approuve seul sa propre facture** (`capacites/factures.ts:74`, « Celui qui saisit et celui qui approuve
 ne peuvent pas être la même personne » ; carte « Des rôles et des délégations », `:177`)
@@ -366,9 +384,9 @@ par les portes `public.filed_confirmer_fournisseur(uuid, text)` et `public.filed
 
 ## REPRISE
 
-**Arrêt 12 — 21/10/2026, 20 h 45 Z** (fin de session sur instruction du coordinateur)
-- Fait : séries 1, 1b et 2, au niveau 1. Corrigés et revérifiés : TFILED-03, 04 et 08. Clos juste : TFILED-02 et 13. Écarts ouverts : **TFILED-11** (A4) et **TFILED-12** (`:74`, réserve pour Teo). Remontés à Teo : TFILED-05, 06, 07, 09 et 10. Pas testable : F0 « sans arrêt », le FEC, le seuil de double approbation, l'usage réel d'une délégation.
+**Arrêt 13 — 21/10/2026, 20 h 45 Z**
+- Fait : séries 1, 1b et 2, au niveau 1. Corrigés et revérifiés : TFILED-03, 04, 08 et 11. Clos justes : TFILED-02 et 13. Écarts ouverts : **TFILED-12** (`:74`, réserve pour Teo) et **TFILED-14** (facture validée puis contredite). Remontés à Teo : TFILED-05, 06, 07, 09 et 10. Pas testable : F0 « sans arrêt », le FEC, le seuil de double approbation, l'usage réel d'une délégation, le paiement.
 - En cours : rien.
-- Prochain pas : revérifier TFILED-11 quand le coordinateur l'annonce corrigé. Attendu : F1 rebloquée pour son SIREN invalide.
-- Questions : à Teo, « déposer » vaut-il « saisir » au sens de `:74` ?
-- SHA d'arrêt : voir le commit « T-FILED : TFILED-13 clos, arrêt 12 » sur `testeur-filed`.
+- Prochain pas : la décision du coordinateur sur TFILED-14.
+- Questions : à Teo, « déposer » vaut-il « saisir » (TFILED-12) ? Et que devient une facture validée quand un contrôle la contredit (TFILED-14) ?
+- SHA d'arrêt : voir le commit « T-FILED : TFILED-11 corrigé, TFILED-14 » sur `testeur-filed`.
