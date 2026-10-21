@@ -6,9 +6,9 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 
 ## REPRISE (21/10, 19 h 30 Z — lot correctif du testeur T-OFFLOAD)
 
-- Fait : c4_01 à c4_22 verts sur la recette ; c4_23 (TOFFLOAD-01, 02), c4_24 (05) et c4_25 (06) poussés, local 454 ok.
+- Fait : c4_01 à c4_22 verts sur la recette ; c4_23 (TOFFLOAD-01, 02), c4_24 (05), c4_25 (06) et c4_26 (04) poussés, local 461 ok.
 - En cours : rien. Import des personnes morales : script livré (6f0a05b2), non joué, en attente de Teo.
-- Prochain pas : poser c4_23 à c4_25 ; puis TOFFLOAD-03 (O6), 04 (effacement) et la question « a_valider » ; O6 (contact récent, reprise ouverte à la main) : voulu depuis c4_05, à trancher si on le ferme aussi.
+- Prochain pas : poser c4_23 à c4_26 ; TOFFLOAD-03 (O6) attend une décision ; O6 (contact récent, reprise ouverte à la main) : voulu depuis c4_05, à trancher si on le ferme aussi.
 
 ### Reprise du 17/10
 
@@ -451,6 +451,16 @@ Banc local : 28 tests, 312 assertions vertes, migrations posées deux fois ; tsc
 l'échéance honorée après message est comptée au suivi). Le chiffre repris compte tous les achats des 90 jours,
 sans prétendre qu'ils sont dus au seul message.
 
+## Lot c4_26 — l'effacement d'une personne, jusqu'au bout (TOFFLOAD-04, 21/10)
+
+Après effacement (O12) : la restitution montrait nom/courriel/contact recopiés au journal à la saisie ; reprise ouverte,
+tâche à faire ; ressaisie acceptée en silence. Le journal opposable est chaîné et ne se réécrit pas (preuve) ; les achats
+restent (pièces comptables du client, sans nom). Corrigé : saisir_compte journalise le NOM des champs, pas leurs valeurs ;
+la restitution masque les lignes de journal d'un compte effacé ; effacer clôt les reprises (« abandon », message annulé)
+et abandonne les tâches, y compris en rejouant l'effacement sur un compte déjà effacé ; ressaisie et nouvel achat
+refusés (55000). Le test c4_19 accepte le refus de ressaisie. Test `c4_26_effacement_complet.sql` : 5 rouges sur 7
+avant, 7 verts après. Banc local : 50 tests, 461 ok.
+
 ## Lot c4_25 — une commande pendant la reprise la clôt (TOFFLOAD-06, 21/10)
 
 La clôture « commande » ne vivait que dans l'étape 1 du cycle, après ses sorties anticipées (suspendu, essai sans
@@ -827,3 +837,4 @@ Partielles : 6, 11, 15, 38.
 - 21/10 — lot c4_23 (correctifs T-OFFLOAD : essai sans réglage, litige à l'ouverture manuelle) : rouge avant, vert après ; 441 ok.
 - 21/10 — lot c4_24 (TOFFLOAD-05, saisie idempotente, réparation des doublons) : 449 ok.
 - 21/10 — lot c4_25 (TOFFLOAD-06, clôture sur commande partout, message annulé) : 454 ok.
+- 21/10 — lot c4_26 (TOFFLOAD-04, effacement jusqu'au bout) : 461 ok.

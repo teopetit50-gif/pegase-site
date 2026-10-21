@@ -52,8 +52,13 @@ begin
 
   -- Une nouvelle saisie de la même référence ne réécrit rien.
   perform tests.endosser((banc ->> 'gerant')::uuid, 'gerant@banc-varelo.test');
-  perform public.offload_saisir_compte(v_client, null, 'EF1', 'Jean Durand EI',
-    jsonb_build_object('email', 'jean.durand@durand-ei.test', 'contact', 'Jean', 'telephone', '06 00 00 00 01'));
+  -- Depuis c4_26, la ressaisie est refusée (55000) ; avant, elle passait sans rien réécrire. Dans les deux cas, rien ne revient.
+  begin
+    perform public.offload_saisir_compte(v_client, null, 'EF1', 'Jean Durand EI',
+      jsonb_build_object('email', 'jean.durand@durand-ei.test', 'contact', 'Jean', 'telephone', '06 00 00 00 01'));
+  exception when sqlstate '55000' then
+    null;
+  end;
   r := public.offload_effacer_compte(v_x, 'Second courrier');
   perform tests.redevenir_admin();
   select * into c from public.offload_comptes where id = v_x;
