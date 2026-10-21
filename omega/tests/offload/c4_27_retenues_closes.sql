@@ -27,7 +27,7 @@ begin
 
   -- La commande arrive : la reprise se clôt, le message est annulé, la demande aussi.
   perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
-  perform public.offload_saisir_achat(v_x, current_date, 450, 'F-RC1', 'Pressing', 'facture');
+  perform public.offload_saisir_achat(v_x, (now() at time zone 'Europe/Paris')::date, 450, 'F-RC1', 'Pressing', 'facture');
   return next is((public.offload_envoi_auto(v_client) ->> 'retenus_en_attente')::integer, v_avant - 1,
                  'Le compteur ne compte plus la retenue d''une reprise close');
   perform tests.redevenir_admin();

@@ -60,7 +60,7 @@ begin
   -- Ouverte à la main : sur la recette, le plafond de la vague du jour peut être déjà pris par les comptes du banc.
   perform public.offload_ouvrir_reprise(v_q);
   return next ok((tests.c4_reprise(v_q)).id is not null, 'Le cycle du compte est ouvert');
-  perform public.offload_saisir_achat(v_q, current_date, 300, 'F-TR3', 'Entretien', 'facture');
+  perform public.offload_saisir_achat(v_q, (now() at time zone 'Europe/Paris')::date, 300, 'F-TR3', 'Entretien', 'facture');
   return next is((tests.c4_reprise(v_q)).issue, 'commande', 'La commande clôt le cycle');
   return next throws_ok(format('select public.offload_ouvrir_reprise(%L::uuid)', v_q), '55000', null,
                         'Le droit ne se rouvre pas avant le trimestre suivant');

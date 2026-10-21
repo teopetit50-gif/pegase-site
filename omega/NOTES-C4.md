@@ -6,7 +6,7 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 
 ## REPRISE (21/10, 23 h 15 Z — décision du bureau « un cycle par trimestre », TOFFLOAD-03)
 
-- Fait : c4_01 à c4_28 verts sur la recette ; c4_29 (un cycle par trimestre, un rappel, reprise forcée) poussé, local 481 ok.
+- Fait : c4_01 à c4_29 posés ; c4_30 (date d'achat jugée à Paris) et tests c4_25, c4_27, c4_29 datés à Paris, poussés.
 - En cours : rien. Import des personnes morales : script livré (6f0a05b2), non joué, attend Teo.
 - Prochain pas : poser c4_29 (et les tests c4_16, c4_18 mis à jour) ; l'écran n'a pas encore le bouton « forcer » (porte offload_forcer_reprise).
 
@@ -451,6 +451,15 @@ Banc local : 28 tests, 312 assertions vertes, migrations posées deux fois ; tsc
 l'échéance honorée après message est comptée au suivi). Le chiffre repris compte tous les achats des 90 jours,
 sans prétendre qu'ils sont dus au seul message.
 
+## Lot c4_30 — la date d'un achat se juge à l'heure de Paris (21/10, 23 h 20 Z)
+
+Recette, test c4_29 à 23 h Z : la reprise est datée à Paris (22/10), l'achat du test à current_date UTC (21/10) → pas
+« depuis l'ouverture ». Et offload_saisir_achat refusait comme future une date du jour à Paris entre 22 h et minuit UTC
+(défaut réel). Corrigé : la borne « pas dans le futur » se juge à la date de Paris ; les tests c4_25, c4_27, c4_29
+datent la commande à Paris. Avant (session UTC, 23 h 17 Z) : test c4_29 tombe (« La date d'un achat est connue et
+passée ») ; après : c4_24 à c4_30 verts en UTC. Restent les tests anciens (c4_03 à c4_09) qui comparent current_date UTC
+aux dates de Paris : faux rouges entre 22 h et minuit UTC, connus, à lancer hors de cette heure.
+
 ## Lot c4_29 — un cycle par compte et par trimestre, un rappel, la reprise forcée (21/10)
 
 Décision du bureau (délégation de Teo) : au plus un cycle par compte et par trimestre ; un seul rappel (deux messages) ;
@@ -866,3 +875,4 @@ Partielles : 6, 11, 15, 38.
 - 21/10 — lot c4_28 (TOFFLOAD-08, réglages hors bornes en français) : 471 ok.
 - 21/10, 23 h 15 Z — lot c4_29 (décision « un cycle par trimestre », TOFFLOAD-03) : 481 ok.
 - 21/10, 23 h 20 Z — recette c4_29 : 8/10, le cycle n'avait pas ouvert la reprise de TR3 (plafond de la vague du banc, probable) ; le test l'ouvre à la main.
+- 21/10, 23 h 20 Z — lot c4_30 (date d'achat à Paris) ; tests 25, 27, 29 datés à Paris.

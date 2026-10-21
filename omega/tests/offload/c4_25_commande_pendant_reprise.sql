@@ -21,7 +21,7 @@ begin
 
   -- A : la commande est saisie pendant la reprise ; la reprise se clôt aussitôt, le message attendu est annulé.
   perform tests.endosser((banc ->> 'gerant')::uuid, 'gerant@banc-varelo.test');
-  perform public.offload_saisir_achat(v_a, current_date, 450, 'F-9007', 'Entretien climatisation', 'facture');
+  perform public.offload_saisir_achat(v_a, (now() at time zone 'Europe/Paris')::date, 450, 'F-9007', 'Entretien climatisation', 'facture');
   perform tests.redevenir_admin();
   r := tests.c4_reprise(v_a);
   return next ok(r.statut = 'close' and r.issue = 'commande',
@@ -32,7 +32,7 @@ begin
   -- B : comme sur banc-test-offload, aucun réglage d'envoi en essai ; la commande arrive par la détection seule.
   update public.reglages_envois set mode = null where client_id = v_client and (module = 'offload' or module is null);
   insert into public.offload_achats (client_id, entite_id, compte_id, date_achat, montant_ht, reference, nature, source)
-  select v_client, k.entite_id, k.id, current_date, 1000, 'F-9011', 'facture', 'saisie' from public.offload_comptes k where k.id = v_b;
+  select v_client, k.entite_id, k.id, (now() at time zone 'Europe/Paris')::date, 1000, 'F-9011', 'facture', 'saisie' from public.offload_comptes k where k.id = v_b;
   perform private.offload_detecter(v_client, null);
   r := tests.c4_reprise(v_b);
   return next ok(r.statut = 'close' and r.issue = 'commande',
