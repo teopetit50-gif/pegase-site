@@ -32,3 +32,24 @@ reglements : creees 0, lignes 5, inchangees 5
 | FB-2026-0111 (C11) | facture | 1085 | 3 | 3 | ouverte | 8 | 1082 |
 | FB-2026-0112 / 0113 (C12) | facture | 1085 / 542,5 | idem | idem | ouverte | 8 | 0 |
 | FB-2026-0114 (C13) | facture | 1085 | 1085 | 1085 | ouverte | 35 | 0 |
+
+## Passage du matin J (2026-10-21)
+- Les relances de J portent `cree_le` 19:17:29, avant mon propre appel : le passage a été joué par le coordinateur.
+  Mon `public.cashd_preparer_maintenant(client)` juste après → `{preparees 0, coupees 0, bloquees 0}` (rien en double).
+- `public.cashd_relances_du_jour(client, '2026-10-21')` → 8 relances, toutes palier `rappel`, `demande_statut en_attente`,
+  `envoi_id null`, motif « l'envoi par courriel n'est pas encore réglé pour CASHD : la relance est écrite et validable » :
+  A-C00 1085 · A-C04 **sans_adresse** (« le compte n'a pas d'adresse de facturation : relancez-le vous-même ou complétez sa fiche »)
+  · A-C06 **885** (« Facture FB-2026-0106 … 1 085,00 € TTC … : 885,00 € restant dus ») · A-C07 785 · A-C08 1085 · A-C11 3
+  · A-C12 **un message, 2 pièces** (FB-0112 1085 + FB-0113 542,50, chacune son palier `rappel`) · A-C13 1085 (35 j, `rappel`).
+- **Absentes** : A-C02 (FB-0102, 1185, aucun motif nulle part), A-C05 (500 € à imputer), A-C10 (soldée), A-C09 (non échue).
+- `cashd_fiche_compte` A-C02 : compte `actif`, pièce `ouverte`, `reste_relancable` 1185, `statut_motif` null — rien n'explique l'absence.
+- `cashd_fiche_compte` A-C05 : règlement `a_imputer` 500, `facture_citee` null ; compte `actif`, aucun motif de suspension visible.
+
+## Gestes (en gérant eeeeeeee-…-0000000001c2)
+- `cashd_litige('8d43c4ff-…'(FB-0108), true, 'Le client conteste la quantité de gravier livrée (essai T-CASHD)')`
+  → `{statut litige, relances_coupees 1}` ; relance A-C08 → `coupee`, demande `annulee`, motif « facture FB-2026-0108 en litige : … ».
+- `cashd_regler_entite('f2e7e4fc-…', 10)` → `seuil_relance 10` ; préparation suivante → `coupees 1` ; relance A-C11 → `coupee`,
+  demande `annulee`, motif **« avant l'envoi : facture FB-2026-0111 réglée ou sortie de l'export »**.
+- `cashd_lettrer('48c35a5f-…'(VIR-C05-0001), 'c9b232eb-…'(FB-0105), 500)` → `{reste_du 585, a_imputer 0}` ;
+  préparation suivante → `preparees 1` ; relance A-C05 `rappel` 585,00 € en attente de validation.
+- Import d'un devis (`nature devis`, DV-2026-0009) par `cashd_importer` jeu `factures` → écarté, motif « un devis dans l'export des factures ».
