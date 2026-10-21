@@ -23,7 +23,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, Banknote, Building2, CheckSquare, Home, Bell, Check, CheckCheck, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, LayoutGrid, LifeBuoy, LogOut, Menu as IconeMenu, Moon, Search, Settings, Sparkles, Sun, X } from "lucide-react";
+import { Activity, Banknote, Building2, CheckSquare, CircleHelp, Diamond, Home, Bell, Check, CheckCheck, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, LayoutGrid, LifeBuoy, LogOut, Menu as IconeMenu, Moon, Plus, Search, Settings, Sun, Terminal, X } from "lucide-react";
 import { Button, Dialog, DialogTrigger, Modal, ModalOverlay, Popover, RouterProvider } from "react-aria-components";
 import type { Utilisateur } from "@/lib/compte";
 import { createClient } from "@/lib/supabase/client";
@@ -181,80 +181,107 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
         Aller au contenu
       </a>
       <div className="v2-app">
+        {/* la barre du haut court sur toute la largeur, comme celle de Supabase (21/10) : organisation, module, page ; à droite, Nouveau, Feedback, la recherche et les raccourcis vers les moteurs */}
+        <header className="v2-haut">
+          <div className="v2-haut-gauche">
+            <button type="button" className="v2-btn v2-btn--petit v2-btn--icone v2-btn--fantome v2-seul-mobile" aria-label="Ouvrir la navigation" onClick={() => setTiroir(true)}>
+              <IconeMenu {...I} />
+            </button>
+            <MenuOrganisation utilisateur={utilisateur} classe="v2-portee v2-haut-org v2-masque-mobile" />
+            <span className="v2-haut-sep v2-masque-mobile" aria-hidden="true">
+              /
+            </span>
+            <MenuDeroulant
+              etiquette={`Portée : ${portee ? portee.nom : "tous les modules"}. Changer de module`}
+              classe="v2-portee"
+              placement="bottom start"
+              largeur={300}
+              declencheur={
+                <>
+                  {portee ? <portee.icone {...I} /> : <LayoutGrid {...I} />}
+                  <span className="v2-portee-nom">{portee ? portee.nom : "Tous les modules"}</span>
+                  <ChevronsUpDown width={14} height={14} aria-hidden="true" />
+                </>
+              }
+            >
+              <ItemMenu id="tous" href={RACINE} textValue="Tous les modules" icone={<LayoutGrid {...I} />} suffixe={coche(!portee)}>
+                Tous les modules
+              </ItemMenu>
+              <SeparateurMenu />
+              <SectionMenu titre="Modules">
+                {MODULES.map((m) => (
+                  <ItemMenu key={m.cle} id={m.cle} href={`${RACINE}/${m.cle}${m.cle === "filed" ? "/a-payer" : ""}`} textValue={m.nom} icone={<m.icone {...I} />} suffixe={coche(m.cle === portee?.cle)}>
+                    {m.nom} <span className="v2-gris">· {m.libelle}</span>
+                  </ItemMenu>
+                ))}
+              </SectionMenu>
+            </MenuDeroulant>
+            <span className="v2-haut-sep v2-masque-mobile" aria-hidden="true">
+              /
+            </span>
+            {/* le titre visible ; chaque page porte son propre h1 (masqué), pour garder le titre exact de l'écran */}
+            <p className="v2-haut-titre">{titreDe(chemin)}</p>
+          </div>
+          <div className="v2-haut-droite">
+            <MenuDeroulant
+              etiquette="Nouveau"
+              classe="v2-btn v2-btn--petit"
+              largeur={260}
+              declencheur={
+                <>
+                  <Plus {...I} />
+                  <span className="v2-masque-mobile">Nouveau…</span>
+                </>
+              }
+            >
+              <ItemMenu id="paiement" href={`${RACINE}/filed/a-payer`} icone={<Banknote {...I} />}>
+                Noter un paiement
+              </ItemMenu>
+              <ItemMenu id="document" href={`${RACINE}/filed`} icone={<FileText {...I} />}>
+                Déposer un document
+              </ItemMenu>
+              <ItemMenu id="valider" href={`${RACINE}/validations`} icone={<CheckCheck {...I} />}>
+                Décider d&apos;une validation
+              </ItemMenu>
+            </MenuDeroulant>
+            <Link href="/contact" className="v2-haut-lien v2-masque-mobile">
+              Feedback
+            </Link>
+            {/* la palette (touche F, ou ⌘K comme sur Supabase) */}
+            <button type="button" className="v2-btn v2-btn--petit v2-recherche" onClick={() => setPalette(true)} aria-keyshortcuts="F Meta+K Control+K" aria-label="Rechercher">
+              <Search {...I} />
+              <span className="v2-masque-mobile">Rechercher…</span>
+              <span className="v2-masque-mobile">
+                <Kbd>⌘K</Kbd>
+              </span>
+            </button>
+            <Link href="/contact" className="v2-btn v2-btn--petit v2-btn--icone v2-btn--fantome v2-masque-mobile" aria-label="Aide">
+              <CircleHelp {...I} />
+            </Link>
+            <button type="button" className="v2-btn v2-btn--petit v2-btn--icone v2-btn--fantome" aria-label="Assistant" onClick={() => setAssistant(true)}>
+              <Terminal {...I} />
+            </button>
+            {/* les raccourcis vers les moteurs : un menu, comme les icônes d'outils de Supabase */}
+            <MenuDeroulant etiquette="Moteurs : raccourcis vers chaque moteur" classe="v2-btn v2-btn--petit v2-btn--icone v2-btn--fantome v2-masque-mobile" placement="bottom end" largeur={260} declencheur={<Diamond {...I} />}>
+              <SectionMenu titre="Moteurs">
+                {MODULES.map((m) => (
+                  <ItemMenu key={m.cle} id={m.cle} href={`${RACINE}/${m.cle}${m.cle === "filed" ? "/a-payer" : ""}`} textValue={m.nom} icone={<m.icone {...I} />}>
+                    {m.nom} <span className="v2-gris">· {m.libelle}</span>
+                  </ItemMenu>
+                ))}
+              </SectionMenu>
+            </MenuDeroulant>
+            <Link href={`${RACINE}/reglages`} className="v2-haut-compte" aria-label="Compte et réglages">
+              <span className="v2-pastille-ronde" aria-hidden="true">
+                {(utilisateur?.prenom ?? "?").charAt(0).toUpperCase()}
+              </span>
+            </Link>
+          </div>
+        </header>
         <aside className="v2-laterale v2-laterale--fixe" aria-label="Navigation de l'espace client">
           <BarreLaterale utilisateur={utilisateur} chemin={chemin} />
         </aside>
         <div className="v2-colonne-principale">
-          <header className="v2-haut">
-            <div className="v2-haut-gauche">
-              <button type="button" className="v2-btn v2-btn--petit v2-btn--icone v2-btn--fantome v2-seul-mobile" aria-label="Ouvrir la navigation" onClick={() => setTiroir(true)}>
-                <IconeMenu {...I} />
-              </button>
-              <MenuDeroulant
-                etiquette={`Portée : ${portee ? portee.nom : "tous les modules"}. Changer de module`}
-                classe="v2-portee"
-                placement="bottom start"
-                largeur={300}
-                declencheur={
-                  <>
-                    {portee ? <portee.icone {...I} /> : <LayoutGrid {...I} />}
-                    <span className="v2-portee-nom">{portee ? portee.nom : "Tous les modules"}</span>
-                    <ChevronsUpDown width={14} height={14} aria-hidden="true" />
-                  </>
-                }
-              >
-                <ItemMenu id="tous" href={RACINE} textValue="Tous les modules" icone={<LayoutGrid {...I} />} suffixe={coche(!portee)}>
-                  Tous les modules
-                </ItemMenu>
-                <SeparateurMenu />
-                <SectionMenu titre="Modules">
-                  {MODULES.map((m) => (
-                    <ItemMenu key={m.cle} id={m.cle} href={`${RACINE}/${m.cle}${m.cle === "filed" ? "/a-payer" : ""}`} textValue={m.nom} icone={<m.icone {...I} />} suffixe={coche(m.cle === portee?.cle)}>
-                      {m.nom} <span className="v2-gris">· {m.libelle}</span>
-                    </ItemMenu>
-                  ))}
-                </SectionMenu>
-              </MenuDeroulant>
-            </div>
-            {/* le titre visible ; chaque page porte son propre h1 (masqué), pour garder le titre exact de l'écran */}
-            <p className="v2-haut-titre">{titreDe(chemin)}</p>
-            <div className="v2-haut-droite">
-              {/* la palette (touche F) : un bouton de la barre du haut, comme la recherche ⌘K de Supabase (21/10) */}
-              <button type="button" className="v2-btn v2-btn--petit v2-recherche" onClick={() => setPalette(true)} aria-keyshortcuts="F Meta+K Control+K" aria-label="Rechercher">
-                <Search {...I} />
-                <span className="v2-masque-mobile">Rechercher…</span>
-                <span className="v2-masque-mobile">
-                  <Kbd>F</Kbd>
-                </span>
-              </button>
-              <MenuDeroulant
-                etiquette="Nouveau"
-                classe="v2-btn v2-btn--petit v2-btn--primaire"
-                largeur={260}
-                declencheur={
-                  <>
-                    <span aria-hidden="true" style={{ fontSize: 16, lineHeight: 1 }}>
-                      +
-                    </span>
-                    <span className="v2-masque-mobile">Nouveau…</span>
-                  </>
-                }
-              >
-                <ItemMenu id="paiement" href={`${RACINE}/filed/a-payer`} icone={<Banknote {...I} />}>
-                  Noter un paiement
-                </ItemMenu>
-                <ItemMenu id="document" href={`${RACINE}/filed`} icone={<FileText {...I} />}>
-                  Déposer un document
-                </ItemMenu>
-                <ItemMenu id="valider" href={`${RACINE}/validations`} icone={<CheckCheck {...I} />}>
-                  Décider d&apos;une validation
-                </ItemMenu>
-              </MenuDeroulant>
-              <button type="button" className="v2-btn v2-btn--petit v2-masque-mobile" onClick={() => setAssistant(true)}>
-                <Sparkles {...I} /> Assistant
-              </button>
-            </div>
-          </header>
           <main id="contenu" tabIndex={-1} style={{ outline: "none" }}>
             {children}
           </main>
@@ -283,23 +310,65 @@ type Section = { cle: string; titre: string; sousTitre?: string; icone: React.Re
 /* les icônes du rail : size-5 et trait 1,5, comme la Sidebar du studio Supabase */
 const R = { width: 20, height: 20, strokeWidth: 1.5, "aria-hidden": true } as const;
 
-function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisateur | null; chemin: string; fermer?: () => void }) {
-  const [theme, changerTheme] = useTheme();
-  useCalme();
-  const toast = useToast();
+/* l'organisation et les données affichées : un menu de la barre du haut, comme le sélecteur d'organisation de Supabase (21/10) ; dans le tiroir du mobile, il reste en tête de la navigation */
+function MenuOrganisation({ utilisateur, classe }: { utilisateur: Utilisateur | null; classe: string }) {
   const { source, changer, connecte } = useSource();
-  const { alertes, enAttente } = useAlertes();
-  const compteurs = useCompteurs();
-  const tachesOuvertes = useOuvertes("taches");
-  const metier = moduleMetier(utilisateur?.secteur, !!utilisateur);
+  const toast = useToast();
   const organisation = utilisateur?.entreprise || (utilisateur ? "Mon organisation" : "CAMA");
-  const nom = utilisateur ? [utilisateur.prenom, utilisateur.nom].filter(Boolean).join(" ") || utilisateur.email : null;
-
   const choisirSource = (s: "exemple" | "reelle") => {
     if (s === "reelle" && !connecte) return;
     changer(s);
     toast(s === "reelle" ? "Base réelle affichée" : "Données d'exemple affichées");
   };
+  return (
+    <MenuDeroulant
+      /* le nom accessible contient le texte visible (« RENAULT » en
+         démonstration) — WCAG 2.5.3 */
+      etiquette={`Organisation : ${utilisateur ? "" : "Renault, "}${organisation}. Changer d'organisation ou de données`}
+      classe={classe}
+      placement="bottom start"
+      largeur={260}
+      declencheur={
+        <>
+          {/* 14/10 — demande de Teo : « mets juste le logo Omega là ». */}
+          <span className="v2-marque-omega" aria-hidden="true">
+            {/* eslint-disable-next-line @next/next/no-img-element -- le logo Omega, déjà à sa taille */}
+            <img src="/logo-pegase-blanc.png" alt="" width={20} height={20} className="oc-logo-sombre" />
+            {/* eslint-disable-next-line @next/next/no-img-element -- la variante noire, pour le thème clair */}
+            <img src="/logo-pegase.png" alt="" width={20} height={20} className="oc-logo-clair" />
+          </span>
+          <span className="v2-rail-libelle v2-portee-nom">{organisation}</span>
+          <ChevronsUpDown width={14} height={14} aria-hidden="true" />
+        </>
+      }
+    >
+      <SectionMenu titre="Organisations">
+        <ItemMenu id="org" href={RACINE} textValue={organisation} icone={<span className="v2-pastille-ronde">{organisation.charAt(0).toUpperCase()}</span>} suffixe={coche(true)}>
+          {organisation}
+        </ItemMenu>
+      </SectionMenu>
+      <SeparateurMenu />
+      <SectionMenu titre="Données affichées">
+        <ItemMenu id="exemple" onAction={() => choisirSource("exemple")} icone={<Database {...I} />} suffixe={coche(source === "exemple")}>
+          Données d&apos;exemple
+        </ItemMenu>
+        <ItemMenu id="reelle" isDisabled={!connecte} onAction={() => choisirSource("reelle")} textValue="Base réelle" icone={<Database {...I} />} suffixe={connecte ? coche(source === "reelle") : <span>connexion requise</span>}>
+          Base réelle
+        </ItemMenu>
+      </SectionMenu>
+    </MenuDeroulant>
+  );
+}
+
+function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisateur | null; chemin: string; fermer?: () => void }) {
+  const [theme, changerTheme] = useTheme();
+  useCalme();
+  const { alertes, enAttente } = useAlertes();
+  const compteurs = useCompteurs();
+  const tachesOuvertes = useOuvertes("taches");
+  const metier = moduleMetier(utilisateur?.secteur, !!utilisateur);
+  const nom =utilisateur ? [utilisateur.prenom, utilisateur.nom].filter(Boolean).join(" ") || utilisateur.email : null;
+
   /* /auth/signout n'accepte qu'un POST (une déconnexion ne suit jamais un simple lien) */
   const deconnecter = () => {
     const f = document.createElement("form");
@@ -455,43 +524,8 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
       <div className="v2-rail-place" aria-hidden="true" />
       <div className="v2-rail">
         <div className="v2-rail-int">
-          <MenuDeroulant
-            /* le nom accessible contient le texte visible (« RENAULT » en
-               démonstration) — WCAG 2.5.3 */
-            etiquette={`Organisation : ${utilisateur ? "" : "Renault, "}${organisation}. Changer d'organisation ou de données`}
-            classe="v2-rail-item v2-rail-logo"
-            placement="bottom start"
-            largeur={260}
-            declencheur={
-              <>
-                {/* 14/10 — demande de Teo : « mets juste le logo Omega là ». Le
-                   logo tient lieu d'icône du rail ; le nom de l'organisation
-                   apparaît quand le rail s'ouvre. */}
-                <span className="v2-marque-omega" aria-hidden="true">
-                  {/* eslint-disable-next-line @next/next/no-img-element -- le logo Omega, déjà à sa taille */}
-                  <img src="/logo-pegase-blanc.png" alt="" width={20} height={20} className="oc-logo-sombre" />
-                  {/* eslint-disable-next-line @next/next/no-img-element -- la variante noire, pour le thème clair */}
-                  <img src="/logo-pegase.png" alt="" width={20} height={20} className="oc-logo-clair" />
-                </span>
-                <span className="v2-rail-libelle">{organisation}</span>
-              </>
-            }
-          >
-            <SectionMenu titre="Organisations">
-              <ItemMenu id="org" href={RACINE} textValue={organisation} icone={<span className="v2-pastille-ronde">{organisation.charAt(0).toUpperCase()}</span>} suffixe={coche(true)}>
-                {organisation}
-              </ItemMenu>
-            </SectionMenu>
-            <SeparateurMenu />
-            <SectionMenu titre="Données affichées">
-              <ItemMenu id="exemple" onAction={() => choisirSource("exemple")} icone={<Database {...I} />} suffixe={coche(source === "exemple")}>
-                Données d&apos;exemple
-              </ItemMenu>
-              <ItemMenu id="reelle" isDisabled={!connecte} onAction={() => choisirSource("reelle")} textValue="Base réelle" icone={<Database {...I} />} suffixe={connecte ? coche(source === "reelle") : <span>connexion requise</span>}>
-                Base réelle
-              </ItemMenu>
-            </SectionMenu>
-          </MenuDeroulant>
+          {/* sur ordinateur, ce menu est dans la barre du haut ; le tiroir du mobile le garde en tête */}
+          {fermer ? <MenuOrganisation utilisateur={utilisateur} classe="v2-rail-item v2-rail-logo" /> : null}
 
           <nav className="v2-rail-nav" aria-label="Sections">
             {rail.map((g, i) => (

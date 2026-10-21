@@ -335,8 +335,8 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   }
   .v2-laterale--fixe > .v2-laterale-int {
     position: sticky;
-    top: 0;
-    height: 100dvh;
+    top: 48px;
+    height: calc(100dvh - 48px);
   }
 }
 
@@ -739,31 +739,42 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
 }
 
 /* ══ La barre du haut (dans la colonne principale) ═════════════════════ */
+/* la barre du haut court sur toute la largeur, au-dessus du rail et du volet (21/10, comme Supabase) */
 .v2-haut {
+  grid-column: 1 / -1;
   position: sticky;
   top: 0;
   z-index: 40;
-  height: 64px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  height: 48px;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
-  padding: 0 24px;
+  padding: 0 16px;
   background: var(--v2-bg-200);
   box-shadow: inset 0 -1px 0 var(--v2-a-400);
 }
 .v2-haut-gauche {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   min-width: 0;
 }
+.v2-haut-sep {
+  flex: none;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--v2-gray-700);
+}
+.v2-haut .v2-portee {
+  flex: none;
+}
 .v2-haut-titre {
+  min-width: 0;
   margin: 0;
-  font-size: 16px;
-  line-height: 24px;
-  letter-spacing: -0.32px;
-  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -773,6 +784,34 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
+  flex: none;
+}
+.v2-haut-lien {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--v2-gray-900);
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+.v2-haut-lien:hover {
+  background: var(--v2-a-100);
+  color: var(--v2-gray-1000);
+}
+.v2-haut-compte {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  border-radius: 50%;
+}
+.v2-haut-compte .v2-pastille-ronde {
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
 }
 .v2-haut-droite .v2-btn[disabled] .v2-badge {
   background: var(--v2-gray-200);
