@@ -83,7 +83,8 @@ begin
   v_b := private.cashd_preparer_relances(v_client, j + 5, null);
   select * into r from public.cashd_relances x where x.compte_id = (p ->> 'hotel')::uuid and x.jour = j + 5;
   return next is(r.palier, 'relance', 'Cinq jours après : la relance ferme');
-  return next ok(tests.c2_plat(r.corps) like '%Total restant dû : 3 000,00 €%' and r.corps like '%au plus tard le ' || to_char(j + 5 + 8, 'DD/MM/YYYY') || '%'
+  return next ok(tests.c2_plat(r.corps) like '%Total restant dû : 3 000,00 €%' and r.corps like '%au plus tard le ' || to_char(private.cashd_jours_ouvres(j + 5, 3) + 8, 'DD/MM/YYYY') || '%'   -- c2_35 : 3 jours ouvrés de validation, puis le délai
+
                  and tests.c2_plat(r.corps) like '%indemnité forfaitaire pour frais de recouvrement de 40,00 €%' and r.corps like '%L441-10%',
                  'Elle récapitule le reste dû (avoir déduit), fixe une échéance, rappelle l''indemnité et les pénalités');
   return next is(r.indemnites, 40.00::numeric(14,2), 'L''indemnité de 40 € est comptée');

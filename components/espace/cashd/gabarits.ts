@@ -45,7 +45,7 @@ const OBLIGATOIRES: Record<CleGabarit, string[]> = {
   echeance: ["lignes"],
   rappel: ["lignes"],
   relance: ["lignes", "total"],
-  mise_en_demeure: ["lignes", "total", "limite"],
+  mise_en_demeure: ["lignes", "total"],
   devis_rappel: ["lignes"],
   devis_relance: ["lignes"],
 };
@@ -57,6 +57,8 @@ export function verifier(cle: CleGabarit, sujet: string, corps: string, variable
   if (inconnues.length) return `Variable inconnue : ${inconnues.map((v) => `{${v}}`).join(", ")}.`;
   const manque = OBLIGATOIRES[cle].filter((v) => !corps.includes(`{${v}}`));
   if (manque.length) return `Ce palier exige dans le corps : ${manque.map((v) => `{${v}}`).join(", ")}.`;
+  /* c2_35 : une mise en demeure porte son délai — {limite} ou {delai} */
+  if (cle === "mise_en_demeure" && !corps.includes("{limite}") && !corps.includes("{delai}")) return "Ce palier exige dans le corps : {limite} ou {delai}.";
   return null;
 }
 
@@ -78,7 +80,7 @@ export const GABARITS_EXEMPLE: Gabarit[] = [
   D("relance", 2, "{emetteur} — {total} restent à régler",
     "{bonjour}\n\nNotre premier rappel est resté sans suite, et {dues} sur votre compte {compte} :\n{lignes}\nLe total dû s'élève à {total}. Merci de le régler au plus tard le {limite}.\n{ton_montant}{droits}Si une partie de ces montants vous paraît contestable, écrivez-nous : nous l'examinerons.\n{reglement}"),
   D("mise_en_demeure", 1, "{emetteur} — mise en demeure de payer {total}",
-    "{bonjour}\n\nMalgré nos précédentes relances, les sommes suivantes restent impayées (compte {compte}) :\n{lignes}\nPar la présente, nous vous mettons en demeure de régler la somme de {total} dans un délai de {delai} jours à compter de la réception de {ce_message}, soit au plus tard le {limite}.\n{droits}À défaut de règlement dans ce délai, nous engagerons une procédure de recouvrement, sans autre avis.\n"),
+    "{bonjour}\n\nMalgré nos précédentes relances, les sommes suivantes restent impayées (compte {compte}) :\n{lignes}\nPar la présente, nous vous mettons en demeure de régler la somme de {total} dans un délai de {delai} jours à compter de la réception de {ce_message}.\n{droits}À défaut de règlement dans ce délai, nous engagerons une procédure de recouvrement, sans autre avis.\n"),
   D("devis_rappel", 1, "{emetteur} — votre devis{objet}", "{bonjour}\n\nNous vous avons adressé {dues} (compte {compte}) :\n{lignes}{devis_suite}"),
   D("devis_rappel", 2, "{emetteur} — suite à notre devis{objet}",
     "{bonjour}\n\nNous nous permettons de revenir vers vous : nous vous avons adressé {dues} (compte {compte}), et nous n'avons pas encore eu votre retour.\n{lignes}{devis_suite}"),
