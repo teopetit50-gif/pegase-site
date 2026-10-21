@@ -1512,3 +1512,125 @@ create or replace function private.filed_regime_territorial(p_client uuid, p_ent
   from public.entites e where e.client_id = p_client and (e.id = p_entite or (p_entite is null and e.principale))
   union all select 'metropole' limit 1
 $$;
+
+-- TFILED-08 (a4_73) : filed_proposer_iban et filed_resoudre_fournisseur tels qu'extraits du socle (SOCLE-EXTRAITS-COMMUN.sql, 5/10).
+CREATE OR REPLACE FUNCTION private.filed_proposer_iban(p_fournisseur uuid, p_iban text, p_source text, p_document uuid DEFAULT NULL::uuid, p_motif text DEFAULT NULL::text)
+ RETURNS filed_fournisseurs_ibans
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare
+  v_f public.filed_fournisseurs;
+  v_ib public.filed_fournisseurs_ibans;
+  v_iban text := upper(regexp_replace(coalesce(p_iban, ''), '\s', '', 'g'));
+begin
+  select * into v_f from public.filed_fournisseurs where id = p_fournisseur;
+  select * into v_ib from public.filed_fournisseurs_ibans
+  where client_id = v_f.client_id and fournisseur_id = v_f.id and iban = v_iban;
+  if found then
+    return v_ib;
+  end if;
+  insert into public.filed_fournisseurs_ibans (client_id, fournisseur_id, iban, iban_masque, empreinte, statut, source,
+                                               document_id, propose_par, decide_le, decide_par, motif)
+  values (v_f.client_id, v_f.id, v_iban, private.filed_masquer_iban(v_iban),
+          encode(sha256(convert_to(v_iban, 'UTF8')), 'hex'),
+          case when p_source = 'import' then 'valide' else 'propose' end, p_source, p_document, (select auth.uid()),
+          case when p_source = 'import' then now() end, case when p_source = 'import' then (select auth.uid()) end,
+          left(p_motif, 500))
+  returning * into v_ib;
+
+  if p_source <> 'import' and v_f.statut = 'actif' then
+    perform private.filed_deposer_demande(v_f.client_id, null, 'filed.valider_iban', 'filed_iban', v_ib.id::text,
+      format('Nouvel IBAN pour %s : %s', private.filed_libelle_fournisseur(v_f), v_ib.iban_masque), null,
+      jsonb_build_object('fournisseur', v_f.id, 'iban', v_ib.iban_masque, 'empreinte', v_ib.empreinte,
+                         'document', p_document, 'source', p_source),
+      'filed:iban:' || v_ib.id::text);
+    perform private.lever_alerte_module(v_f.client_id, 'filed', 'attention',
+      left(format('Nouvel IBAN pour %s : à vérifier auprès du fournisseur avant tout paiement', v_f.nom), 200),
+      jsonb_build_object('fournisseur', v_f.id, 'iban', v_ib.iban_masque, 'document', p_document),
+      'iban:' || v_ib.id::text, true, null);
+    perform private.filed_historiser(v_f.client_id, null, 'filed_fournisseur', v_f.id::text, 'iban_propose',
+      format('Nouvel IBAN proposé (%s) : une personne le vérifie avant tout paiement.', v_ib.iban_masque),
+      jsonb_build_object('iban', v_ib.iban_masque, 'document', p_document, 'source', p_source));
+  end if;
+  return v_ib;
+end $function$
+;
+CREATE OR REPLACE FUNCTION private.filed_resoudre_fournisseur(p_facture uuid)
+ RETURNS uuid
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare
+  v_f public.filed_factures;
+  v_id uuid;
+  v_methode text;
+  v_ident jsonb;
+  v_four public.filed_fournisseurs;
+  v_n integer;
+begin
+  select * into v_f from public.filed_factures where id = p_facture for update;
+  v_ident := v_f.fournisseur_lu;
+  if v_f.fournisseur_force is not null then
+    v_id := v_f.fournisseur_force;
+    v_methode := 'humain';
+  else
+    if v_ident ? 'siren' then
+      select f.id into v_id from public.filed_fournisseurs f
+      where f.client_id = v_f.client_id and f.siren = v_ident ->> 'siren';
+      v_methode := 'siren';
+    end if;
+    if v_id is null and v_ident ? 'tva' then
+      select f.id into v_id from public.filed_fournisseurs f
+      where f.client_id = v_f.client_id and f.tva = v_ident ->> 'tva';
+      v_methode := 'tva';
+    end if;
+    if v_id is null and v_ident ? 'id_etranger' then
+      select f.id into v_id from public.filed_fournisseurs f
+      where f.client_id = v_f.client_id and f.id_etranger = v_ident ->> 'id_etranger';
+      v_methode := 'id_etranger';
+    end if;
+    if v_id is null and coalesce(private.filed_normaliser_nom(v_ident ->> 'nom'), '') <> '' then
+      select count(*), min(f.id::text)::uuid into v_n, v_id from public.filed_fournisseurs f
+      where f.client_id = v_f.client_id and f.nom_normalise = private.filed_normaliser_nom(v_ident ->> 'nom')
+        and (f.siren is null or not (v_ident ? 'siren') or f.siren = v_ident ->> 'siren')
+        and (f.tva is null or not (v_ident ? 'tva') or f.tva = v_ident ->> 'tva');
+      if v_n <> 1 then
+        v_id := null;
+      end if;
+      v_methode := 'nom';
+    end if;
+    if v_id is null and (v_ident ?| array['siren', 'tva', 'id_etranger']
+                         or coalesce(private.filed_normaliser_nom(v_ident ->> 'nom'), '') <> '') then
+      -- Une seule création à la fois par organisation : deux factures du même
+      -- fournisseur nouveau n'en créent pas deux.
+      perform pg_advisory_xact_lock(hashtextextended('filed.fournisseur:' || v_f.client_id::text, 0));
+      select f.id into v_id from public.filed_fournisseurs f
+      where f.client_id = v_f.client_id
+        and ((v_ident ? 'siren' and f.siren = v_ident ->> 'siren')
+          or (v_ident ? 'tva' and f.tva = v_ident ->> 'tva')
+          or (v_ident ? 'id_etranger' and f.id_etranger = v_ident ->> 'id_etranger'))
+      limit 1;
+      if v_id is null then
+        v_four := private.filed_creer_fournisseur(v_f.client_id,
+                    v_ident || case when v_f.iban is not null then jsonb_build_object('iban', v_f.iban) else '{}'::jsonb end,
+                    'facture', v_f.document_id);
+        v_id := v_four.id;
+        v_methode := 'creation';
+      else
+        v_methode := case when v_ident ? 'siren' then 'siren' when v_ident ? 'tva' then 'tva' else 'id_etranger' end;
+      end if;
+    end if;
+  end if;
+
+  update public.filed_factures set fournisseur_id = v_id, fournisseur_identification = case when v_id is null then null else v_methode end
+  where id = p_facture;
+
+  if v_id is not null and v_f.iban is not null and private.filed_iban_valide(v_f.iban) then
+    perform private.filed_proposer_iban(v_id, v_f.iban, 'facture', v_f.document_id);
+  end if;
+  return v_id;
+end $function$
+;
