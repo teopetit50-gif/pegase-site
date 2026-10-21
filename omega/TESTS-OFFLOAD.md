@@ -91,6 +91,8 @@ Rejouée sur des comptes neufs pour ne pas lire l'état pollué de la série 1. 
 | C-05 | TOFFLOAD-05 | rejeu à l'identique du compte O0 et de ses 13 factures | `achats` 342 → 368 = +13 (O13) +13 (O14) : zéro doublon pour O0 | juste | 1 |
 | C-06 | TOFFLOAD-06 | O14 : achat F-9014 le 21/10 pendant la reprise | reprise `close`, `issue: commande`, motif « Une commande est arrivée depuis l'ouverture de la reprise. », envoi1 `annule`, plus rien à valider pour O14. **Mais** `offload_envoi_auto.retenus_en_attente` reste à 1 | juste ; compteur : TOFFLOAD-07 | 1 |
 | — | TOFFLOAD-06 (série 1) | reprises O7 et O11 ouvertes avant le correctif, puis détections 26/10 et 27/10 | `close`, `issue: commande` | juste | 1 |
+| C-07 | TOFFLOAD-07 (c4_27) | compteur lu, puis O15 neuf : reprise ouverte, puis achat F-9015 | `retenus_en_attente / a_valider` : 3 / 3 (V1-V3) → 4 / 4 après l'ouverture → 3 / 3 après la commande (reprise `close`, `commande`) ; la demande d'O14 n'est plus comptée | juste | 1 |
+| C-08 | TOFFLOAD-08 (c4_28) | `offload_regler(client, '{"vague_jour":9}')` sous le gérant | refusé : « Le jour de la vague va de 1 (lundi) à 7 (dimanche). » ; `vague_jour` reste 2 | juste | 1 |
 
 **TOFFLOAD-07 · compteur des messages retenus.** Après C-06 (envoi `bf3163bd-…` annulé, `a_valider` vide pour O14 et vide en tout),
 `offload_envoi_auto('dddddddd-0000-4000-8000-0000000000c4')` rend encore `"retenus_en_attente": 1`. Mineur : le valideur croit qu'un
@@ -222,3 +224,6 @@ sans doublon ; pilotage sans valeur par segment (pas couvert) ; restitution sans
 « du 27/10 », `offload_pilotage.vagues` range V1-V3 dans la vague `2026-10-21` (`comptes: 14`, `en_jeu: 73 103,75`) — la vague
 semble datée du jour réel et non du jour joué ; à revoir sur une vraie semaine. Reste : le cycle un autre jour que mardi (non joué),
 TOFFLOAD-03 (décision de Teo), TOFFLOAD-07 et 08 (mineurs). Questions : aucune. Les 3 envois `a_valider` ne sont pas approuvés.
+
+**21/10, arrêt 8.** Fait : TOFFLOAD-07 et 08 rejoués, justes. Reste ouvert : TOFFLOAD-03 (décision de Teo) ; cycle un autre jour que mardi
+(non joué, à la demande du coordinateur). Aucune approbation : 3 demandes `a_valider` (V1-V3) restent en attente.
