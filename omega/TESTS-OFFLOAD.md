@@ -32,11 +32,11 @@ interventions terminées. Douze comptes sur le même gabarit ; seul le cas chang
 | O4 | commande arrivée, non retirée depuis 10 jours (délai réglé 7) | affaire en plan, relance 1 préparée |
 | O5 | contact importé sans accord | aucun message préparé pour lui |
 | O6 | compte déjà relancé il y a 40 jours | pas de second message ce trimestre |
-| O7 | commande passée **pendant** une reprise en attente | reprise close « commande », message en attente annulé |
+| O7 | C:114 ; brief | O0 + achat F-9007 le 21/10 pendant la reprise | reprise close « commande », message annulé | après deux détections au 22/10 : niveau passé à `ralentit` (« Ses commandes s'espacent … »), mais reprise toujours `appel`, `issue: null`, `close_le: null`, tâche d'appel `a_faire`. Le pilotage, lui, compte la commande (`commandes_reprises: 2`, `chiffre_repris: 1450` sur la vague du 21/10) | **écart** TOFFLOAD-06 | 1 |
 | O8 | sortie d'un geste (exclure / suivre) sans motif | refusée ; avec motif : acceptée et journalisée | | sans motif (null, blanc, vide) : refusé par `offload_changer_statut` (« Un changement de suivi dit pourquoi. ») et `offload_exclure` (« Une exclusion nomme ce qu'elle écarte et dit pourquoi. ») ; avec motif : accepté, deux lignes `offload.compte_statut` (avant/après/motif) au journal lu par `offload_restitution` | juste | 1 |
 | O9 | compte joignable par courriel et par SMS | **un seul** canal par vague |
 | O10 | contrat à reconduction tacite, échéance dans 60 jours | échéance signalée à temps, pas après |
-| O11 | valeur en jeu : le compte commande 1 000 € après l'ouverture de la reprise | valeur **figée** à l'ouverture, pas recalculée |
+| O11 | C:113 ; brief | O0 + achat F-9011 1 000 € le 21/10 après l'ouverture | valeur figée à l'ouverture | après la détection du 22/10 : `valeur_en_jeu: 5567.8` inchangée (le signal, lui, passe à `valeur_annuelle: 9738.45`). Même défaut de clôture que O7 : reprise toujours `appel` | valeur : juste ; clôture : voir TOFFLOAD-06 | 1 |
 | O12 | effacement d'une personne (porte d'effacement, demandée au coordinateur) | plus rien ne la mentionne ; journal présent, sans ses données |
 
 Après la série : rejoue le relevé **à l'identique**. Attendu : un signal par compte et par
@@ -77,7 +77,7 @@ P = `lib/produits/reprise.ts`, C = `lib/produits/capacites/reprise.ts`.
 | O10 | C:73, C:75 | actif, CT-O10 tacite au 20/12 | échéance signalée à temps | contrat accepté (`reconduction`, `libelle`, `debut`) ; `offload_echeances_tableau` : `[]`, alors que `offload_restitution` compte `echeances: 1` | pas couvert (CYCLE, dit par le coordinateur) | 1 |
 | O11 | C:113 ; brief | O0 + achat F-9011 1 000 € le 21/10 après l'ouverture | valeur figée à l'ouverture | juste après l'achat : `valeur_en_jeu: 5567.8` inchangée | en attente de la détection du 22/10 | — |
 | O12 | P:441 ; brief | O0 ; effacement par `offload_effacer_compte` | plus rien ne la mentionne ; journal présent sans ses données | sans motif : refusé (« Dites d'où vient la demande d'effacement … ») ; avec motif : fiche et tableau anonymisés (« Compte effacé (réf. O12) », email/contact `null`), journal `offload.compte_efface` présent. **Mais** `offload_restitution` contient encore nom, courriel et contact dans la ligne de journal `offload.compte_saisi` ; tâche d'appel restée `a_faire` ; rejeu : la saisie est acceptée en silence et réécrit les données au journal (`offload.compte_modifie`) | **écart** TOFFLOAD-04 | 1 |
-| R | P:196, P:397 | rejeu à l'identique des passes A et B | aucun doublon, 1 signal/compte/jour, aucune seconde reprise | comptes 13 (pas de doublon), affaire 1, contrat 1 ; **achats 172 → 342** (chaque facture recréée, même référence, même date, même montant) ; contacts 1 → 2. Signaux et reprises : en attente des deux détections du 22/10 | dépôt : **écart** TOFFLOAD-05 | 1 |
+| R | P:196, P:397 | rejeu à l'identique des passes A et B, puis deux détections au 22/10 | aucun doublon, 1 signal/compte/jour, aucune seconde reprise | signaux : 13 (un par compte, 2ᵉ détection `entrees: 0`), reprises : 10, aucune seconde ; comptes 13, affaire 1, contrat 1. **Mais achats 172 → 342** (chaque facture recréée, même référence, même date, même montant) et contacts 1 → 2 ; d'où `ca_12m` d'O0 passé de 4 050 à 8 100 et `valeur_annuelle` de 5 567,8 à 11 135,59 | signaux et reprises : juste ; dépôt : **écart** TOFFLOAD-05 | 1 |
 
 ## Écarts
 
@@ -111,7 +111,17 @@ effacée mais écrit au journal `offload.compte_modifie` avec nom, courriel et c
 **TOFFLOAD-05 · R · rejeu à l'identique.** Le même lot `serie1_A_depot.sql` rejoué, plus la passe B : `offload_restitution(...)->'resume'`
 passe de `achats: 172` à `achats: 342` et de `contacts: 1` à `contacts: 2`. Ex. O0 : deux factures `F-1013` du 20/07/2026 à 450 €
 actives (`annule_le` null). Comptes, affaire et contrat ne sont pas doublés. Conséquence attendue sur la valeur en jeu et le
-CA 12 mois des comptes : à lire après la détection du 22/10.
+CA 12 mois des comptes, constatée après la détection du 22/10 : O0 `ca_12m` 4 050 → 8 100, `valeur_annuelle` 5 567,8 → 11 135,59 (le compte n'a rien acheté de plus).
+
+**TOFFLOAD-06 · O7 (et O11) · commande pendant une reprise (C:114 ; brief).** Reprise O7 `c015930d-296e-40c6-a1e2-bd63cf7d633a`
+ouverte le 21/10 par le gérant ; `offload_saisir_achat('a9fc8da0-1d4f-43fc-9237-d5c5c7a84fe7','2026-10-21',450,'F-9007','Entretien climatisation (fictif)')` ;
+détection au 22/10 (deux fois, par le coordinateur). `offload_tableau` : reprise O7 `"statut":"appel","issue":null,"close_le":null`, tâche
+d'appel toujours `a_faire` — le commercial est invité à appeler un client qui vient de commander. Même chose pour O11 (`d1f3cdab-…`).
+Pourtant `offload_pilotage(…, '2025-10-21')->'vagues'` compte `"commandes":2,"chiffre_repris":1450` : la commande est vue, la reprise n'est pas close.
+
+**TOFFLOAD-01, complément.** Le coordinateur indique que chaque envoi bloqué porte une demande de validation (`demande_id` non nul).
+Par les portes OFFLOAD, rien ne la montre : `offload_tableau(...)->'a_valider'` = `[]` et `compteurs.a_valider` = 0, avant et après les
+détections. Question posée : quelle porte (socle) montre ces demandes au valideur ?
 
 Notes, non classées en écart :
 - `offload_deposer_export` exige un fichier déjà en Storage (nom, sha256, chemin) : dépôt par fichier non testé.
@@ -156,3 +166,9 @@ affaires / échéances, puis O7, O11, O12, détection au 22/10, rejeu. Fichiers 
 En cours : O7, O11 et la moitié « signaux / reprises » du rejeu, qui attendent deux détections au 22/10 (demandées).
 Prochain pas : lire O7 (close « commande » ?), O11 (valeur figée ?), doublons de signaux et de reprises ; puis série 2.
 Questions : aucune nouvelle ; alerte envoyée sur le `mode: reel` (TOFFLOAD-01), ne pas poser de réglage d'envoi sur le banc.
+
+**21/10, arrêt 4 — fin de série 1.** Fait : les 14 lignes jouées ; justes O2, O3, O8, O9, O11 (valeur), R (signaux, reprises) ;
+écarts TOFFLOAD-01 à 06 ; pas couverts O4 (relance, chiffrage), O5, O10. En cours : rien. Prochain pas : série 2 — pilotage lu une
+fois (vague du 21/10 : `en_jeu` 51 910,2, taux par segment/canal/niveau, pas de valeur en jeu par segment), restitution (JSON, déjà
+lue) ; la vague de la semaine attend le correctif TOFFLOAD-01 (régler `vague_jour` déclencherait de nouveaux envois `reel`).
+Questions : porte des demandes de validation ; feu vert pour la vague après TOFFLOAD-01.
