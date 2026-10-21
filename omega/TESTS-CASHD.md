@@ -200,10 +200,9 @@ puis `select to_jsonb(e) from public.cashd_factures_etat e where client_id = '<c
 
 ## REPRISE
 
-- Fait : contrat, brief, promesses (R, C), banc ouvrier `banc_cashd.sql` et `cashd_omega.sql` lus ; jeu série 1 écrit
-  (`omega/testeur-cashd/`), attendus notés.
-- En cours : séries 1 et 2 terminées. Écarts TCASHD-01 à 10. Rien en cours sur la recette. J complet. Justes : C0 C1 C3 C4 C5 C7 C8 C10 C12 C13. Écarts TCASHD-01 à 05. 
-- Prochain pas : série 2 faite (S2-1 à S2-9, TCASHD-08 à 10). Restent : S2-8 (historique), C:95 (règles de communication : porte `cashd_regler_relances`, champs à connaître), écran (compte gérant sans mot de passe). Niveau 2 : pas avant le coordinateur.
-- Questions : 1, 2, 4 (litige) répondues le 21/10 ; restent 3 (passage du matin, joué par le coordinateur), 4 (seuil), 5 (porte de lecture des relances), 6 (compte gérant, au bureau).
-- Note : pour le format, j'ai lu les appels `cashd_importer` de `cashd_nobat.sql` (autorisé par le coordinateur) ; deux commentaires de ce fichier citent des issues attendues (avoir, échéance) — vu malgré moi, signalé.
-- SHA d'arrêt : 8780859d (séries 1 et 2), branche testeur-cashd.
+- Fait : série 1 (C0-C13, rejeu, 22/10, 27/10, 03/11, validation de la MED) et série 2 (textes). Justes : C0 C1 C3 C4 C5 C7 C8 C9 C10 C12, cadence J+21/J+30, un message par compte et par jour. Écarts : TCASHD-01 à 10 (les plus graves : 07 MED approuvée sans commentaire, 03 avoir orphelin déduit d'une autre facture, 06 « précédent rappel » jamais parti).
+- En cours : rien sur la recette. La MED A-C13 est `approuvee` (sans envoi) : au coordinateur de l'annuler s'il le juge utile.
+- Prochain pas : S2-8 (historique de paiement), C:95 (règles de communication, champs de `cashd_regler_relances` à connaître), écran (en attente du compte gérant avec mot de passe). Niveau 2 : pas avant le coordinateur.
+- Questions : champs de `cashd_regler_relances` / `cashd_regler_compte` (secteur, règles de communication) ; accès écran. Toutes les autres sont répondues (21/10).
+- Note : pour le format, j'ai lu les appels `cashd_importer` de `cashd_nobat.sql` (autorisé par le coordinateur) ; deux commentaires de ce fichier citent des issues attendues (avoir, échéance) — vus malgré moi, signalé.
+- SHA d'arrêt : voir le dernier commit de `testeur-cashd` (« REPRISE de fin des séries 1 et 2 »).
