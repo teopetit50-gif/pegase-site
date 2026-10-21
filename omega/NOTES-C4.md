@@ -4,11 +4,11 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 `components/espace/offload/`, `app/espace/offload/`, et ce fichier. Coordinateur : session
 `session_01BCGFdpRKBvXKjouC75sYBg`. Je n'appelle jamais Supabase : le coordinateur pose, je reçois les sorties brutes.
 
-## REPRISE (21/10, 19 h 30 Z — lot correctif du testeur T-OFFLOAD)
+## REPRISE (pause du 21/10, 22 h 45 Z — reprise au feu vert de Teo ou samedi 25/10 après 02 h Z)
 
-- Fait : c4_01 à c4_22 verts sur la recette ; c4_23 (TOFFLOAD-01, 02), c4_24 (05), c4_25 (06), c4_26 (04), c4_27 (07) et c4_28 (08) poussés, local 471 ok.
-- En cours : rien. Import des personnes morales : script livré (6f0a05b2), non joué, en attente de Teo.
-- Prochain pas : poser c4_23 à c4_26 ; TOFFLOAD-03 (O6) attend une décision ; O6 (contact récent, reprise ouverte à la main) : voulu depuis c4_05, à trancher si on le ferme aussi.
+- Fait : c4_01 à c4_28 posés et verts sur la recette (correctifs T-OFFLOAD 01, 02, 04 à 08) ; local 471 ok.
+- En cours : rien. Import des personnes morales : script livré (6f0a05b2), non joué, attend Teo.
+- Prochain pas : TOFFLOAD-03 (porte manuelle pendant la quarantaine d'un contact) sur décision de Teo ; sinon, ce que le testeur relèvera.
 
 ### Reprise du 17/10
 
