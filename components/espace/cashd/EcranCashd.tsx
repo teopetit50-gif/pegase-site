@@ -71,10 +71,15 @@ export default function EcranCashd({ vue }: { vue?: Onglet } = {}) {
   const [pilotageReel, setPilotageReel] = useState<{ reponses: portes.Reponse[]; arretes: portes.Arrete[] } | null>(null);
   const [onglet, setOngletEtat] = useState<Onglet>(vue ?? "debiteurs");
   useEffect(() => {
-    if (vue) return;
-    const v = new URLSearchParams(window.location.search).get("vue");
-    if (!estOnglet(v)) return;
-    const t = window.setTimeout(() => setOngletEtat(v), 0);
+    const p = new URLSearchParams(window.location.search);
+    const v = p.get("vue");
+    /* ?compte=<id> ouvre la fiche d'un compte (les pages de fonction de /espace2/cashd, 21/10) */
+    const c = p.get("compte");
+    if ((vue || !estOnglet(v)) && !c) return;
+    const t = window.setTimeout(() => {
+      if (!vue && estOnglet(v)) setOngletEtat(v);
+      if (c) setChoix(c);
+    }, 0);
     return () => window.clearTimeout(t);
   }, [vue]);
   /* la vue choisie reste dans l'adresse : un lien la rouvre */

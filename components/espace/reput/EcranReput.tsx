@@ -30,7 +30,7 @@ import { csvDemandes, telecharger } from "./export";
 import { chargerMonde, corriger, decider, monClient } from "./portes";
 import type { Client, Demande, Monde, Reponse, StatutDemande } from "./types";
 
-type Onglet = "demandes" | "base" | "sujets" | "reglages";
+export type Onglet = "demandes" | "base" | "sujets" | "reglages";
 type Famille = "a_valider" | "a_traiter" | "repondues" | "recues";
 
 export const STATUTS: Record<StatutDemande, { libelle: string; teinte: Teinte }> = {
@@ -70,9 +70,12 @@ function famille(d: Demande, depuis: number): Famille[] {
   return f;
 }
 
-export default function EcranReput() {
+/* `vue` : dans /espace2, chaque onglet est sa propre page du volet (21/10/2026) ;
+   l'écran s'y fige et ne montre plus la rangée d'onglets */
+export default function EcranReput({ vue }: { vue?: Onglet } = {}) {
   const { source } = useSource();
-  const [onglet, setOnglet] = useState<Onglet>("demandes");
+  const [ongletLibre, setOnglet] = useState<Onglet>("demandes");
+  const onglet = vue ?? ongletLibre;
   const [local, setLocal] = useState<Monde>(() => mondeExemple());
   const [reel, setReel] = useState<{ monde: Monde; client: Client } | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -160,11 +163,11 @@ export default function EcranReput() {
         </div>
       ) : null}
 
-      <div className="esp-onglets" role="tablist" aria-label="REPUT" style={{ marginBottom: 16 }}>
+      {vue ? null : <div className="esp-onglets" role="tablist" aria-label="REPUT" style={{ marginBottom: 16 }}>
         {([["demandes", "Demandes"], ["base", "Base de connaissances"], ["sujets", "Sujets autorisés"], ["reglages", "Réglages et avis"]] as [Onglet, string][]).map(([cle, libelle]) => (
           <button key={cle} type="button" role="tab" aria-selected={onglet === cle} className="esp-onglet" onClick={() => setOnglet(cle)}>{libelle}</button>
         ))}
-      </div>
+      </div>}
 
       {source === "reelle" && !reel && !erreur ? <Chargement texte="Lecture des demandes…" /> : null}
 
