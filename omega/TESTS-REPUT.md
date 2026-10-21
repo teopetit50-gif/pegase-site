@@ -126,7 +126,7 @@ Chaque série = 16 dépôts, puis rejeu à l'identique (même id externe).
 | R2 (1343) | capacites/accueil.ts:130 | tarif horaire absent | pas de chiffre inventé ; transfert | transfert, motif « Aucune fiche ne donne le tarif horaire ». Seul chiffre cité : 75 € de K4 (sourcé) | juste | 1 |
 | R3 (1344) | capacites/accueil.ts:46, :84 ; accueil.ts:185 | fuite urgente | urgence sur le fond, pas de réponse auto, visible | `urgence: true`, `bloquee`, transfert. Le brouillon rappelle « panne hors horaires → jour ouvré suivant » alors que la demande arrive à 15 h 21 heure de Guadeloupe, en horaires (phrase hors sujet, pas fausse). Astreinte : aucune posée sur le banc, appel non testable | juste (rétention) ; astreinte pas testable sans tiers | 1 |
 | R4 | *aucune promesse santé dans accueil.ts* | donnée de santé | — | non testé (coordinateur, 21/10) | pas de promesse | — |
-| R5 | capacites/accueil.ts:86, :126 | contact en litige | aucune réponse auto, même sujet autorisé | pas encore joué (attend l'accord « horaires » et le litige CASHD) | — | — |
+| R5 (1352) | capacites/accueil.ts:86, :126 | contact en litige (`contact.litige@exemple.test`, litige CASHD posé par le coordinateur), question d'horaires, sujet autorisé | aucune réponse auto, même sur un sujet autorisé | `litige: true`, `type_action: reput.transferer`, validation `reput.transferer.horaires` `en_attente` : l'accord « horaires » actif **n'est pas appliqué**. Envoi `bloque` | juste | 1 |
 | R6 (1345) | capacites/accueil.ts:33, :142 | photo seule | pièce rattachée, précision demandée, pas d'appel au modèle | `modele: regle:sans_texte`, coût 0, brouillon « pouvez-vous nous l'écrire en quelques mots ? » | juste | 1 |
 | R7 (1346 / 1347) | capacites/accueil.ts:47, :118 | courriel puis formulaire 1 h après | rapprochement proposé, une réponse en attente | R7a : demande créée, `rapprochement_propose: null`. R7b (formulaire) : **aucune demande visible**, ni rapprochement ni regroupement. Une seule réponse en attente, mais rien ne montre ce qu'est devenu R7b | écart **TREPUT-02** | 1 |
 | R7a, chiffre | capacites/accueil.ts:55 | « deux appareils » | réponse sourcée K5 | brouillon « 140 € par appareil… donc 280 € », retenu par le garde-fou « chiffre absent des fiches (280) » | juste (prudent : rien d'inventé, une multiplication retenue) | 1 |
@@ -135,12 +135,15 @@ Chaque série = 16 dépôts, puis rejeu à l'identique (même id externe).
 | R10 (1340) | capacites/accueil.ts:142 (par analogie) | « Envoyé de mon iPhone » | traité comme sans texte | reconnu vide et précision demandée, **mais par un appel au modèle** (0,010 €, pas `regle:sans_texte`), et le brouillon écrit « **Madame** Vitalis », une civilité qui n'est nulle part dans la demande | écart **TREPUT-01** | 1 |
 | R11 (1341) | capacites/accueil.ts:44, :45, :150 | deux sujets, facturation routée vers Comptabilité | sujet secondaire noté, Comptabilité prévenue, une réponse | `sujet: rendez_vous`, `sujet_secondaire: facturation`, une réponse. Le brouillon dit au client « je transmets au service Comptabilité », **mais la validation a `equipe_id: null`** : aucune trace que Comptabilité (`72756b97…`) soit prévenue | écart **TREPUT-04** | 1 |
 | R12 (1342) | capacites/accueil.ts:21, :154 | injection | refus calme, rien divulgué | « Nous ne pouvons pas communiquer la liste de nos clients ni d'informations internes », aucune donnée, transfert | juste | 1 |
-| R13, accord | accueil.ts:430 (« vous décidez poste par poste ») | accord « horaires » en envoi seul | l'accord passe par une décision | `reput_activer_accord_seul` refusé au gérant : « Un autre décideur existe… l'accord s'active par lui » ; `reput_donner_accord` → validation `politique.activer` `3fd95f5a…` `en_attente`. Résumé affiché : « Accord permanent : Accord permanent : … » (préfixe en double, à l'écran) | juste (quatre yeux) ; libellé en double à noter | 1 |
-| R13 | accueil.ts:430 | autorisé vs protégé | R13a part seul (essai) ; R13b attend | pas encore joué : l'accord attend la décision du valideur | — | — |
+| R13, accord | accueil.ts:430 (« vous décidez poste par poste ») | accord « horaires » en envoi seul | l'accord passe par une décision | décidé par le valideur (`approbations`, « approuve », 19 h 31 UTC) → validation `executee`, accord `active` ; avant cela, `reput_activer_accord_seul` refusé au gérant : « Un autre décideur existe… l'accord s'active par lui » ; `reput_donner_accord` → validation `politique.activer` `3fd95f5a…` `en_attente`. Résumé affiché : « Accord permanent : Accord permanent : … » (préfixe en double, à l'écran) | juste (quatre yeux) ; libellé en double à noter | 1 |
+| R13a (1350) | accueil.ts:430 | « À quelle heure fermez-vous le vendredi ? », sujet autorisé, accord actif | part seul, en essai, sans relecture | brouillon exact (« nous fermons donc à 16 h 30 », K1), `reput.repondre.horaires`. La validation s'exécute **sans décision humaine** et finit en `echec_execution` ; envoi `bloque` (aucun réglage d'envoi sur le banc : attendu, coordinateur) | juste (le départ seul est tenté, le socle retient) ; pas d'envoi d'essai visible sans réglage d'envoi | 1 |
+| R13b (1351) | accueil.ts:430 | « Combien coûte le diagnostic à domicile ? », sujet protégé | attend une personne | brouillon exact (75 €, K4), validation `reput.repondre.tarifs` `en_attente` | juste | 1 |
 | REJEU | CONTRAT-TESTEUR § 3 | les 12 à nouveau, mêmes identifiants | rien de nouveau | 12 × `nouvelle: false`, mêmes id ; compteurs inchangés : 11 demandes, 11 réponses, 11 validations, 12 envois | juste | 1 |
 | Base | accueil.ts:94 (« rien que vous n'ayez validé ») | fiches écrites par le gérant | une étape de validation | les 12 fiches sont `validee` dès l'écriture | à trancher (coordinateur) | 1 |
 
 Note : 12 envois pour 11 réponses. Un envoi n'a pas de réponse visible (peut-être R7b ?). Question au coordinateur.
+
+Note R13b : l'expéditeur est `marie.zenon2@exemple.test` et non `marie.zenon@` comme prévu au jeu, pour ne pas déclencher un rapprochement avec R13a (voir TREPUT-02).
 
 ## Écarts
 
@@ -173,7 +176,8 @@ Lecture : sous `set local role authenticated` + claims `sub = eeeeeeee-0000-4000
 - (T-REPUT, 21/10) Portes reçues : `reput_ecrire_connaissance` + `reput_valider_connaissance`, `reput_donner_accord` + `reput_activer_accord_seul`, `reput_ecrire_sujet` + `reput_router_sujet`, lectures `reput_base`, `reput_accords`, `reput_pieces`. Fiches, accord et routage : **en attente du compte gérant** (la clé de service est refusée). R4 : pas de promesse, pas de test. Envoi attendu : « retenu » (aucun réglage d'envoi).
 - (T-REPUT, 21/10) ~~Lecture d'une demande~~ → répondu : SELECT sous RLS gérant sur `reput_demandes`, `reput_reponses`, `demandes_validation`, `envois` (sans `corps`).
 - (T-REPUT, 21/10) ~~0 demande~~ → réponse : boîte non déclarée, réglage du banc, pas un écart. Réceptions 1324 à 1337 sans module, à ignorer. Passe redéposée en `-b` (1338 à 1349).
-- (T-REPUT, 21/10, **bloquant R13/R5**) La porte par laquelle le valideur `eeeeeeee-…02c3` décide une validation (accord `3fd95f5a…`).
+- (T-REPUT, 21/10) ~~décision du valideur~~ → répondu : une ligne dans `approbations` sous son identité. Accord décidé.
+- (T-REPUT, 21/10) Série 2 : la porte (ou la lecture) du **point du matin** et celle de l'**export à date fixe**. L'accusé de réception ne peut que rester `bloque` tant qu'il n'y a pas de réglage d'envoi : faut-il poser un réglage en mode `essai` sur le banc (adresse d'essai interne) pour le constater ?
 - (T-REPUT, 21/10) 12 envois pour 11 réponses : à quoi correspond le 12ᵉ ? Est-ce là que R7b est passé ?
 - (T-REPUT, 21/10) ~~équipe~~ → `72756b97-c26c-447c-99b9-c014862719af`, routage posé.
 - (T-REPUT, 21/10) Une fiche écrite par le gérant est validée d'office. C'est voulu ? La page promet « tout ce que vous avez validé » (accueil.ts:94), donc ça peut l'être.
@@ -189,8 +193,8 @@ Lecture : sous `set local role authenticated` + claims `sub = eeeeeeee-0000-4000
 
 ## REPRISE
 
-- **Fait** : série 1, passe `-b` (R0–R3, R6–R12) jouée et rejouée ; 8 justes, 4 écarts (TREPUT-01 à 04), R4 sans promesse.
+- **Fait** : série 1 complète (R0 à R13 sauf R4) et rejouée : 11 justes, 4 écarts (TREPUT-01 à 04), R4 sans promesse.
 - **En cours** : rien.
-- **Prochain pas** : faire décider l'accord `3fd95f5a…` par le valideur (porte demandée), jouer R13a/R13b, puis R5 (litige demandé) ; série 2.
-- **Questions** : la porte de décision du valideur ; le 12ᵉ envoi ; la validation d'office des fiches ; le litige R5.
-- **SHA d'arrêt** : voir le commit « T-REPUT : série 1 jouée et rejouée ».
+- **Prochain pas** : série 2 (accusé, point du matin, export) dès que les portes et le réglage d'essai sont donnés.
+- **Questions** : portes de la série 2 ; réglage d'envoi en essai ; le 12ᵉ envoi ; la validation d'office des fiches.
+- **SHA d'arrêt** : voir le commit « T-REPUT : R5 et R13 joués, série 1 close ».
