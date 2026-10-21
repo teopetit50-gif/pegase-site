@@ -6,9 +6,9 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 
 ## REPRISE (21/10, 19 h 30 Z — lot correctif du testeur T-OFFLOAD)
 
-- Fait : c4_01 à c4_22 verts sur la recette ; c4_23 (TOFFLOAD-01, 02) et c4_24 (TOFFLOAD-05 saisie idempotente) poussés, local 449 ok.
+- Fait : c4_01 à c4_22 verts sur la recette ; c4_23 (TOFFLOAD-01, 02), c4_24 (05) et c4_25 (06) poussés, local 454 ok.
 - En cours : rien. Import des personnes morales : script livré (6f0a05b2), non joué, en attente de Teo.
-- Prochain pas : poser c4_23, c4_24 ; puis TOFFLOAD-06 (commande pendant la reprise), 03, 04 ; O6 (contact récent, reprise ouverte à la main) : voulu depuis c4_05, à trancher si on le ferme aussi.
+- Prochain pas : poser c4_23 à c4_25 ; puis TOFFLOAD-03 (O6), 04 (effacement) et la question « a_valider » ; O6 (contact récent, reprise ouverte à la main) : voulu depuis c4_05, à trancher si on le ferme aussi.
 
 ### Reprise du 17/10
 
@@ -451,6 +451,14 @@ Banc local : 28 tests, 312 assertions vertes, migrations posées deux fois ; tsc
 l'échéance honorée après message est comptée au suivi). Le chiffre repris compte tous les achats des 90 jours,
 sans prétendre qu'ils sont dus au seul message.
 
+## Lot c4_25 — une commande pendant la reprise la clôt (TOFFLOAD-06, 21/10)
+
+La clôture « commande » ne vivait que dans l'étape 1 du cycle, après ses sorties anticipées (suspendu, essai sans
+réglage) : la détection seule, ou un client sans réglage d'envoi, ne la jouait jamais (O7, O11 : reprise « appel »,
+tâche « à faire »). `private.offload_clore_commandes(p_client, p_compte)` joue à la saisie d'un achat, à la fin de
+chaque détection et en tête du cycle (étape 00). `offload_clore` annule aussi le message pas encore parti.
+Test `c4_25_commande_pendant_reprise.sql` : 4 rouges sur 5 sans le lot, 5 verts avec. Banc local : 49 tests, 454 ok.
+
 ## Lot c4_24 — saisie idempotente (TOFFLOAD-05, 21/10)
 
 Rejouer offload_saisir_achat doublait l'achat (banc-test-offload : 170 doublons, CA 12 mois doublé) ; idem
@@ -818,3 +826,4 @@ Partielles : 6, 11, 15, 38.
 - 19/10 — point 7 : script d'import des personnes morales écrit, testé sur un fichier fictif ; non lancé sur la vraie liste (garde).
 - 21/10 — lot c4_23 (correctifs T-OFFLOAD : essai sans réglage, litige à l'ouverture manuelle) : rouge avant, vert après ; 441 ok.
 - 21/10 — lot c4_24 (TOFFLOAD-05, saisie idempotente, réparation des doublons) : 449 ok.
+- 21/10 — lot c4_25 (TOFFLOAD-06, clôture sur commande partout, message annulé) : 454 ok.
