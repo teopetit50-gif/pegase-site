@@ -4,11 +4,11 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 `components/espace/offload/`, `app/espace/offload/`, et ce fichier. Coordinateur : session
 `session_01BCGFdpRKBvXKjouC75sYBg`. Je n'appelle jamais Supabase : le coordinateur pose, je reçois les sorties brutes.
 
-## REPRISE (pause du 21/10, 22 h 45 Z — reprise au feu vert de Teo ou samedi 25/10 après 02 h Z)
+## REPRISE (21/10, 23 h 15 Z — décision du bureau « un cycle par trimestre », TOFFLOAD-03)
 
-- Fait : c4_01 à c4_28 posés et verts sur la recette (correctifs T-OFFLOAD 01, 02, 04 à 08) ; local 471 ok.
+- Fait : c4_01 à c4_28 verts sur la recette ; c4_29 (un cycle par trimestre, un rappel, reprise forcée) poussé, local 481 ok.
 - En cours : rien. Import des personnes morales : script livré (6f0a05b2), non joué, attend Teo.
-- Prochain pas : TOFFLOAD-03 (porte manuelle pendant la quarantaine d'un contact) sur décision de Teo ; sinon, ce que le testeur relèvera.
+- Prochain pas : poser c4_29 (et les tests c4_16, c4_18 mis à jour) ; l'écran n'a pas encore le bouton « forcer » (porte offload_forcer_reprise).
 
 ### Reprise du 17/10
 
@@ -451,6 +451,17 @@ Banc local : 28 tests, 312 assertions vertes, migrations posées deux fois ; tsc
 l'échéance honorée après message est comptée au suivi). Le chiffre repris compte tous les achats des 90 jours,
 sans prétendre qu'ils sont dus au seul message.
 
+## Lot c4_29 — un cycle par compte et par trimestre, un rappel, la reprise forcée (21/10)
+
+Décision du bureau (délégation de Teo) : au plus un cycle par compte et par trimestre ; un seul rappel (deux messages) ;
+commande ou réponse clôt le cycle sans rouvrir le droit ; le gérant force avec un motif, jamais sur un litige CASHD.
+Écarts corrigés : relance écrite allumée par défaut (et rallumée là où personne ne l'a éteinte au journal) ; la reprise
+manuelle suit les règles de la vague (offload_ecarte : trimestre, contact noté, exclusions, à vérifier, litige) ;
+`public.offload_forcer_reprise(p_compte, p_motif)` (gérant/admin, motif, journal « offload.reprise_forcee ») passe le
+trimestre et les écarts, jamais le litige, un compte retiré, OFFLOAD suspendu ou hors essai. Tests c4_16 et c4_18 rendus
+indépendants du défaut. Test `c4_29_un_cycle_par_trimestre.sql` (10 assertions ; tombe sans le lot). Local : 53 tests, 481 ok.
+Quarantaine : 90 jours glissants depuis la clôture du cycle (pas le trimestre civil).
+
 ## Lot c4_28 — un réglage hors bornes se dit en français (TOFFLOAD-08, 21/10)
 
 offload_regler renvoyait le texte brut d'une contrainte (vague_jour 9). `private.offload_phrase_reglage` donne la phrase
@@ -853,3 +864,4 @@ Partielles : 6, 11, 15, 38.
 - 21/10 — lot c4_26 (TOFFLOAD-04, effacement jusqu'au bout) : 461 ok.
 - 21/10 — lot c4_27 (TOFFLOAD-07, retenue annulée avec sa reprise) : 465 ok.
 - 21/10 — lot c4_28 (TOFFLOAD-08, réglages hors bornes en français) : 471 ok.
+- 21/10, 23 h 15 Z — lot c4_29 (décision « un cycle par trimestre », TOFFLOAD-03) : 481 ok.

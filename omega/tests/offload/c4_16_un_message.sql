@@ -10,8 +10,12 @@ declare
   r public.offload_reprises;
 begin
   perform tests.c4_reprises_pretes();
+  -- Depuis c4_29 (décision du bureau du 21/10), la relance est allumée par défaut ; ce test éprouve la relance ÉTEINTE.
+  perform tests.endosser((banc ->> 'gerant')::uuid, 'gerant@banc-varelo.test');
+  perform public.offload_regler(v_client, '{"relance_ecrite": false}');
+  perform tests.redevenir_admin();
   return next is((select g.relance_ecrite from public.offload_reglages g where g.client_id = v_client), false,
-                 'La relance écrite est éteinte par défaut');
+                 'La relance écrite s''éteint par un réglage');
   v := tests.c4_compte_courriel('UM16', 'Garage Lemaire', 'atelier@lemaire.test', 70);
   perform private.offload_detecter(v_client, null);
   perform private.offload_cycle(v_client, null);

@@ -110,7 +110,7 @@ begin
 
   -- La règle d'un message par trimestre et la quarantaine restent.
   select * into g from public.offload_reglages where client_id = v_client;
-  return next ok(not g.relance_ecrite and g.quarantaine_jours = 90, 'Un message par trimestre, quarantaine de 90 jours : inchangés');
+  return next ok(g.quarantaine_jours = 90, 'Un cycle par trimestre, quarantaine de 90 jours : inchangés');
   return next ok(not has_function_privilege('authenticated', 'private.offload_envoyer(uuid, text, uuid, text, text, jsonb, jsonb, text, uuid)', 'execute')
                  and not has_function_privilege('anon', 'public.offload_donner_accord_auto(uuid)', 'execute'),
                  'Les portes privées restent fermées');
