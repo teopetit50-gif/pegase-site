@@ -234,10 +234,19 @@ for (const largeur of LARGEURS) {
   await s.dormir(400);
   v = await lire();
   ok(/Texte par défaut/.test(v.pastille) && !/Petit mot/.test(v.apercu), 'rendu au texte par défaut');
-  await s.evaluer(saisir(`${T} input[placeholder="10 000"]`, '10000', 'HTMLInputElement'));
+  await s.evaluer(saisir(`${T} input[placeholder="1 500 (par défaut)"]`, '10000', 'HTMLInputElement'));
   await s.dormir(200);
   v = await lire();
   ok(/Compte tenu du montant en jeu/.test(v.apercu) && !/simple oubli/.test(v.apercu), 'au-delà de 10 000 €, la relance demande la date de règlement');
+  // c2_35 : la marge de validation et la remise du courrier se règlent ici ; hors bornes, l'enregistrement est retenu
+  const jours = await s.evaluer(`(() => { const t = document.querySelector('${T}'); return { marge: !!t.querySelector('input[placeholder="3 (par défaut)"]'), remise: !!t.querySelector('input[placeholder="2 (par défaut)"]') }; })()`);
+  ok(jours.marge && jours.remise, 'la marge de validation (3 jours ouvrés) et la remise du courrier (2 jours) se règlent, défauts affichés');
+  await s.evaluer(saisir(`${T} input[placeholder="3 (par défaut)"]`, '40', 'HTMLInputElement'));
+  await s.dormir(200);
+  const borne = await s.evaluer(`(() => { const t = document.querySelector('${T}'); return { bouton: [...t.querySelectorAll('button')].find(b => /Enregistrer ces réglages/.test(b.textContent))?.disabled, avis: t.innerText.includes('De 0 à 15 jours') }; })()`);
+  ok(borne.bouton === true && borne.avis, 'au-delà de 15 jours, les réglages ne s\'enregistrent pas, et l\'écran le dit');
+  await s.evaluer(saisir(`${T} input[placeholder="3 (par défaut)"]`, '', 'HTMLInputElement'));
+  await s.dormir(200);
   await s.evaluer(saisir(`${T} select`, 'devis_rappel', 'HTMLSelectElement'));
   await s.evaluer(saisir(`${T} select:has(option[value="btp"])`, 'btp', 'HTMLSelectElement'));
   await s.dormir(300);

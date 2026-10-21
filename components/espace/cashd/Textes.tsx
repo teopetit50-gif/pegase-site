@@ -36,7 +36,7 @@ const PALIERS_DEFAUT: PalierValidation[] = [
 ];
 
 type Source = "exemple" | "reelle";
-type Reglage = { metier: "general" | "btp"; seuil_ton: string; moyens_reglement: string; echelonnement_des: string; ton_retard_jours: string; ton_retard_important_jours: string };
+type Reglage = { metier: "general" | "btp"; seuil_ton: string; moyens_reglement: string; echelonnement_des: string; ton_retard_jours: string; ton_retard_important_jours: string; marge_validation_jours: string; remise_courrier_jours: string };
 
 function nombre(t: string): number | null {
   const s = t.replace(/[\s  €]/g, "").replace(",", ".");
@@ -73,6 +73,8 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
     echelonnement_des: reglages?.echelonnement_des != null ? String(reglages.echelonnement_des) : "",
     ton_retard_jours: reglages?.ton_retard_jours != null ? String(reglages.ton_retard_jours) : "",
     ton_retard_important_jours: reglages?.ton_retard_important_jours != null ? String(reglages.ton_retard_important_jours) : "",
+    marge_validation_jours: reglages?.marge_validation_jours != null ? String(reglages.marge_validation_jours) : "",
+    remise_courrier_jours: reglages?.remise_courrier_jours != null ? String(reglages.remise_courrier_jours) : "",
   });
 
   const charger = useCallback(async () => {
@@ -276,10 +278,14 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
   const valeursReglage = {
     seuil_ton: nombre(r.seuil_ton), echelonnement_des: nombre(r.echelonnement_des),
     ton_retard_jours: nombre(r.ton_retard_jours), ton_retard_important_jours: nombre(r.ton_retard_important_jours),
+    marge_validation_jours: nombre(r.marge_validation_jours), remise_courrier_jours: nombre(r.remise_courrier_jours),
   };
+  /* c2_35 : de 0 à 15 jours, entiers ; vide rend le défaut (3 jours ouvrés, 2 jours) */
+  const joursValides = [valeursReglage.marge_validation_jours, valeursReglage.remise_courrier_jours]
+    .every((x) => x === null || (Number.isInteger(x) && x >= 0 && x <= 15));
   const paliersTon = (valeursReglage.ton_retard_jours ?? 15) < (valeursReglage.ton_retard_important_jours ?? 45);
   const reglageValide = !Number.isNaN(valeursReglage.seuil_ton) && !Number.isNaN(valeursReglage.echelonnement_des) && r.moyens_reglement.length <= 400
-    && !Number.isNaN(valeursReglage.ton_retard_jours) && !Number.isNaN(valeursReglage.ton_retard_important_jours) && paliersTon;
+    && !Number.isNaN(valeursReglage.ton_retard_jours) && !Number.isNaN(valeursReglage.ton_retard_important_jours) && paliersTon && joursValides;
   const reglerTon = async () => {
     setEnvoi(true);
     setErreur(null);
@@ -290,6 +296,7 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
         await portes.reglerRelances(client, {
           metier: r.metier, seuil_ton: valeursReglage.seuil_ton, moyens_reglement: r.moyens_reglement.trim(), echelonnement_des: valeursReglage.echelonnement_des,
           ton_retard_jours: valeursReglage.ton_retard_jours, ton_retard_important_jours: valeursReglage.ton_retard_important_jours,
+          marge_validation_jours: valeursReglage.marge_validation_jours, remise_courrier_jours: valeursReglage.remise_courrier_jours,
         });
         await apresReglage?.();
       }
@@ -424,6 +431,15 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
             </label>
           </div>
           {!paliersTon ? <p className="c2-sous">Le premier palier vient avant le second.</p> : null}
+          <div className="esp-form-ligne">
+            <label className="rv-libelle">Date limite : temps laissé à la validation (jours ouvrés)
+              <input className="rv-champ" inputMode="numeric" value={r.marge_validation_jours} onChange={(e) => setR({ ...r, marge_validation_jours: e.target.value })} placeholder="3 (par défaut)" />
+            </label>
+            <label className="rv-libelle">Remise d&apos;un courrier ou d&apos;une lettre recommandée (jours)
+              <input className="rv-champ" inputMode="numeric" value={r.remise_courrier_jours} onChange={(e) => setR({ ...r, remise_courrier_jours: e.target.value })} placeholder="2 (par défaut)" />
+            </label>
+          </div>
+          {!joursValides ? <p className="c2-sous">De 0 à 15 jours, en nombre entier.</p> : null}
           <label className="rv-libelle">Vos moyens de règlement (« Moyens de règlement : … »)
             <input className="rv-champ" value={r.moyens_reglement} maxLength={400} onChange={(e) => setR({ ...r, moyens_reglement: e.target.value })} placeholder="Virement sur le compte FR76 …, chèque à l'ordre de …, ou au comptoir" />
           </label>

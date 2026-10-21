@@ -25,6 +25,9 @@ export type Reglages = {
   /* c2_30 : les paliers d'ancienneté du ton (null : 15 et 45 jours) */
   ton_retard_jours?: number | null;
   ton_retard_important_jours?: number | null;
+  /* c2_35 : la date limite — marge de validation (jours ouvrés, null : 3) et remise du courrier (jours, null : 2) */
+  marge_validation_jours?: number | null;
+  remise_courrier_jours?: number | null;
   moyens_reglement?: string | null;
   echelonnement_des?: number | null;
   metier?: "general" | "btp";
