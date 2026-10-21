@@ -188,6 +188,11 @@ Lecture par le coordinateur à l'écran ou en lecture seule, relayée brute ; li
   `identite.*` n'étaient qu'en attention.
 - F1 sera **rebloquée** après le correctif : le circuit joué sur elle (ci-dessous) ne se rejoue pas tel quel.
 
+**TFILED-14 · ✅ CORRIGÉ par a4_75, revérifié le 21/10 à 20 h 56 Z** — contrôle relancé à 20:55:43Z (relayé) : F1 « bloquee », validation
+caduque (« Bloquant(s) apparu(s) après la validation : identite.registre, identite.siren, identite.tva_intracom. »), alerte levée.
+Lecture par mes portes (gérant, transaction annulée) : `filed_pieces_en_cours` → **`bloquees 15 / 11 432,00 €`** (= 10 585,70 + 846,30 :
+F1 est de nouveau comptée) ; `filed_exporter_ecritures(…, 'sage')` → `0` écriture. **Juste.** Le cas d'une facture déjà réglée ou
+comptabilisée (alerte critique, pas défaite) n'est **pas testable** sur le banc, faute de paiement et d'écriture. Constat d'origine :
 **TFILED-14 · F1 · une facture déjà validée garde son statut quand un nouveau contrôle y trouve trois bloquants** (`capacites/factures.ts:108`,
 « Aucune ne se règle en classant la pièce quand même » ; `:61` ; message du contrôle « une personne vérifie ce fournisseur avant tout paiement »)
 - État de départ : F1 est **`validee`** depuis C1 et TFILED-13 (exécution à 20:32:00Z). Le coordinateur relance le contrôle à 20:40:37Z,
@@ -389,9 +394,9 @@ par les portes `public.filed_confirmer_fournisseur(uuid, text)` et `public.filed
 
 ## REPRISE
 
-**Arrêt 13 — 21/10/2026, 20 h 45 Z**
-- Fait : séries 1, 1b et 2, au niveau 1. Corrigés et revérifiés : TFILED-03, 04, 08 et 11. Clos justes : TFILED-02 et 13. Écarts ouverts : **TFILED-12** (`:74`, réserve pour Teo) et **TFILED-14** (facture validée puis contredite). Remontés à Teo : TFILED-05, 06, 07, 09 et 10. Pas testable : F0 « sans arrêt », le FEC, le seuil de double approbation, l'usage réel d'une délégation, le paiement.
+**Arrêt 14 — 21/10/2026, 20 h 57 Z**
+- Fait : séries 1, 1b et 2, au niveau 1. Corrigés et revérifiés : TFILED-03, 04, 08, 11 et 14. Clos justes : TFILED-02 et 13. Écart ouvert : **TFILED-12** (à décision de Teo : l'ouvreur du dépôt compte-t-il comme saisisseur ?). Remontés à Teo : TFILED-05, 06, 07, 09 et 10. Pas testable : F0 « sans arrêt », le FEC, le seuil de double approbation, l'usage réel d'une délégation, le paiement, une facture comptabilisée puis contredite.
 - En cours : rien.
-- Prochain pas : TFILED-14 est vérifié par le coordinateur et part à A4 (une facture validée qui reçoit un bloquant revient en « bloquee », et sa validation devient caduque). À revérifier au correctif : F1 en « bloquee », comptée dans `pieces_en_cours`. Arrêt jusque-là.
-- Questions : à Teo, « déposer » vaut-il « saisir » (TFILED-12) ? Et que devient une facture validée quand un contrôle la contredit (TFILED-14) ?
-- SHA d'arrêt : voir le commit « T-FILED : TFILED-11 corrigé, TFILED-14 » sur `testeur-filed`.
+- Prochain pas : aucun sur ce banc. Une nouvelle série demande un SIREN connu de VIES, l'écran, ou le niveau 2 (relecture des pièces NOBAT de l'ouvrier, sur instruction du coordinateur).
+- Questions : à Teo, TFILED-12 et TFILED-05, 06, 07, 09, 10 (via le coordinateur).
+- SHA d'arrêt : voir le commit « T-FILED : TFILED-14 corrigé, arrêt 14 » sur `testeur-filed`.
