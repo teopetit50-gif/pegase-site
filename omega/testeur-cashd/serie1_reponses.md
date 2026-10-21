@@ -54,3 +54,16 @@ reglements : creees 0, lignes 5, inchangees 5
 - `cashd_lettrer('48c35a5f-…'(VIR-C05-0001), 'c9b232eb-…'(FB-0105), 500)` → `{reste_du 585, a_imputer 0}` ;
   préparation suivante → `preparees 1` ; relance A-C05 `rappel` 585,00 € en attente de validation.
 - Import d'un devis (`nature devis`, DV-2026-0009) par `cashd_importer` jeu `factures` → écarté, motif « un devis dans l'export des factures ».
+
+## Passages J+1 et J+6 (joués par le coordinateur)
+- `private.cashd_preparer_relances(client,'2026-10-22',null)` → `{preparees 0, bloquees 0, coupees 0, mode_envoi null}` ;
+  `cashd_relances_du_jour(client,'2026-10-22')` → vide.
+- `private.cashd_preparer_relances(client,'2026-10-27',null)` → `{preparees 1}` ; `cashd_relances_du_jour(client,'2026-10-27')` →
+  une seule : A-C13, palier `relance`, `en_attente`, 1085, sujet « banc-test-cashd — relance : 1 085,00 € restent dus »,
+  corps « Malgré notre précédent rappel, la somme suivante reste impayée sur votre compte A-C13 : • Facture FB-2026-0114 du
+  17/08/2026, 1 085,00 € TTC, échue le 16/09/2026 (41 jours de retard) … Total restant dû : 1 085,00 €. Nous vous remercions
+  de procéder au règlement au plus tard le 04/11/2026. Nous vous rappelons que tout retard de paiement rend exigibles une
+  indemnité forfaitaire pour frais de recouvrement de 40,00 € par facture et des pénalités de retard (Code de commerce,
+  art. L441-10). Si vous contestez tout ou partie de ces montants, merci de nous l'écrire … »
+- Relances du 21/10 relues ensuite : A-C13 `coupee`, `annulee`, « remplacée par la relance du 27/10/2026 », `envoye_le` null ;
+  les autres inchangées (rappels `en_attente`, A-C08/A-C11 coupées, A-C04 sans adresse).

@@ -75,13 +75,13 @@ Attendus notés **avant** de jouer. « R » = `lib/produits/relances.ts`, « C �
 | C6 | C:82 | avoir −200 € visant FB-2026-0999 (inconnue) | avoir retenu, signalé, jamais imputé à FB-2026-0106 | pas imputé en fiche (`avoirs_imputes` 0) — mais la relance de FB-2026-0106 réclame **885,00 €** : les 200 € de l'avoir orphelin sont déduits ; l'avoir lui-même `ouverte`, relançable 200 | écart (TCASHD-03) | 1 |
 | C7 | C:77-79 | règlement VIR-C07-001 (300 €) deux fois dans l'export | un seul règlement, reste dû 785,00, aucun trop-perçu | 2ᵉ ligne « inchangée » ; réglé 300, reste 785 | juste | 1 |
 | C8 | C:62, C:65, R:188 (« coupe même ce qui est déjà prêt ») | compte mis en litige après préparation du rappel | rappel en attente ⇒ annulé ; aucune relance suivante | `cashd_litige` → `relances_coupees 1` ; rappel `coupee`, demande `annulee`, motif « en litige : … » ; rien de neuf aux préparations suivantes | juste (J+1 à confirmer) | 1 |
-| C9 | R:223 (devis J+3/J+7), C:166 | devis DV-2026-0009 (7 j) accepté et facturé FB-2026-0109 le 20/10 | relance de devis coupée ; facture non échue ⇒ rien | devis refusé par l'import (« un devis dans l'export des factures ») ; facture FB-0109 non échue, rien | pas couvert par la porte d'import — porte devis demandée | 1 |
+| C9 | R:223 (devis J+3/J+7), C:166 | devis DV-2026-0009 (7 j) accepté et facturé FB-2026-0109 le 20/10 | relance de devis coupée ; facture non échue ⇒ rien | devis refusé par l'import (« un devis dans l'export des factures ») | en attente de la porte (coordinateur, 21/10) | 1 |
 | C10 | R:267, C:36, C:125-126 | réglée la veille (1 085 €), toujours dans l'export de J+1 | coupée, aucune relance, ni à J ni à J+1 | soldée « réglée (lettrage) », aucune relance à J | juste (J+1 à faire) | 1 |
 | C11 | C:149-150 | reste dû 3,00 € | sort du cycle automatique, reste visible dans l'encours | seuil 10 € posé ⇒ rappel 3 € `coupee` — motif **« facture FB-2026-0111 réglée ou sortie de l'export »** | écart (TCASHD-05, motif faux) | 1 |
 | C12 | *aucune ligne du site* ; C:53 dit « chaque facture suit sa propre séquence » | deux factures du même compte échues le 13/10 | brief : **un** message portant les deux — à confronter à C:53 | **un** message, 2 pièces, chacune avec son palier ; montant 1 627,50 € | juste (site C:53 et brief tous deux tenus) | 1 |
-| C13 | R:207-222, R:354 (J+7 / J+21 / J+30) | échue depuis 35 j, jamais relancée | aucun palier sauté : rappel d'abord (pas de MED d'emblée) | palier `rappel` à 35 j de retard : aucun palier sauté | juste à J (écart de 5 j à vérifier J+1/J+6) | 1 |
+| C13 | R:207-222, R:354 (J+7 / J+21 / J+30) | échue depuis 35 j, jamais relancée | aucun palier sauté : rappel d'abord (pas de MED d'emblée) | J : `rappel` (35 j). J+1 : rien. J+6 : `relance` (ferme) préparée, le rappel de J (jamais validé ni envoyé) passe `coupee` « remplacée par la relance du 27/10/2026 ». La ferme dit **« Malgré notre précédent rappel »** | écart (TCASHD-06) : écart de 6 j tenu, mais le rappel n'est jamais parti | 1 |
 | R1 | C:33, R:267 | rejeu à l'identique de tout l'export | zéro doublon, zéro nouvelle relance | aucune création ; factures 14 et règlements 5 « inchangés » ; mais clients **14 « modifiés »** sur données identiques | juste (doublons) + écart mineur TCASHD-01 ; relances à voir | 1 |
-| J+1 | R:211-216, R:187, R:453 | passage du lendemain | ferme remplace le rappel en attente ; un message par compte et par jour ; MED exige validation explicite | — | à jouer | 1 |
+| J+1 | R:211-216, R:187, R:453 | passage du lendemain | ferme remplace le rappel en attente ; un message par compte et par jour ; MED exige validation explicite | 22/10 : `{preparees 0, bloquees 0, coupees 0}` — aucun doublon, aucune ferme à 1 j du rappel. 27/10 : `{preparees 1}` (ferme C13 qui remplace le rappel en attente) ; C0 C5 C6 C7 C12 (14 j de retard) restent au rappel du 21/10, en attente. Mise en demeure : pas encore atteinte | juste (un message par compte et par jour ; remplacement) ; MED à faire | 1 |
 
 Notes de lecture (avant de jouer) :
 - « Un message par compte et par jour », « cinq jours d'écart au moins » (C13) et « suspendue pas d'adresse » (C4)
@@ -117,17 +117,35 @@ puis `select to_jsonb(e) from public.cashd_factures_etat e where client_id = '<c
   **Aggravé au passage du matin** : la relance du compte A-C06 réclame « FB-2026-0106 … 1 085,00 € TTC … : **885,00 €**
   restant dus ». Les 200 € de l'avoir orphelin sont déduits de FB-2026-0106 dans le montant réclamé, alors que la fiche
   dit `avoirs_imputes` 0 et `reste_relancable` 1 085. Imputation de fait, au hasard, et deux chiffres contradictoires.
-- **TCASHD-04** · C5 (C2 : voir TCASHD-02) · après le passage de J, `cashd_relances_du_jour(client,'2026-10-21')` ne contient aucune
+- **TCASHD-04** · C5 (C2 : voir TCASHD-02) · lignes importées exactes : facture
+  `{"numero":"FB-2026-0105","compte_ref":"A-C05","date_emission":"2026-09-13","echeance":"2026-10-13","montant_ht":1000,"montant_ttc":1085,"reste_du":1085,"commande_ref":"Chantier : Villa Sainte-Anne","lignes":[…une ligne 1000 HT à 8,5 %…]}`
+  et règlement (jeu `reglements`) `{"date":"2026-10-18","montant":500,"mode":"VIR","compte_ref":"A-C05","reference":"VIR-C05-0001","libelle":"VIR SARL CARRELAGE PARTIEL"}`
+  (réponse import : `lettrees 3` sur 5, celui-ci non lettré ; fiche : `a_imputer 500`, `facture_citee` null). Après le passage de J, `cashd_relances_du_jour(client,'2026-10-21')` ne contient aucune
   ligne pour A-C02 ni A-C05, et `cashd_fiche_compte` des deux comptes ne donne aucun motif (`statut actif`,
   `statut_motif` null, pièce `ouverte`). La retenue est peut-être voulue, mais le client ne peut pas savoir pourquoi la
   facture n'est pas relancée (C2 : total faux ? C5 : règlement à imputer ?). Écran : en attente du compte.
-- **TCASHD-05** · C11 · `cashd_regler_entite('f2e7e4fc-0b0c-4b8f-8ea5-1800439408ca', 10)` puis `cashd_preparer_maintenant`
+- **TCASHD-05** · C11 · lignes importées : FB-2026-0111 (1085 TTC, échue 13/10) et règlement
+  `{"date":"2026-10-15","montant":1082,"mode":"CHQ","compte_ref":"A-C11","reference":"CHQ-0004521","libelle":"CHQ FB-2026-0111"}`
+  (lettré à l'import : reste 3,00). Rappel de 3,00 € préparé à J (`en_attente`). Puis, en gérant `eeeeeeee-…-0000000001c2` :
+  `cashd_regler_entite('f2e7e4fc-0b0c-4b8f-8ea5-1800439408ca', 10)` puis `cashd_preparer_maintenant`
   → rappel A-C11 (3,00 €) `coupee`, motif « avant l'envoi : facture FB-2026-0111 réglée ou sortie de l'export ».
   Faux : elle n'est ni réglée ni sortie, elle est sous le seuil. Le site (C:149-150) promet que ces soldes « restent
   visibles dans l'encours, et vous décidez de les abandonner ou de les réclamer » : un motif « réglée » pousse à l'oubli.
+- **TCASHD-06** · C13 · facture FB-2026-0114 (émise 17/08, échue 16/09, 1085 TTC, jamais relancée). Passage du 21/10
+  (coordinateur) → rappel préparé, `en_attente`, `envoye_le` null, **jamais validé ni envoyé**. Passage du 27/10
+  (`private.cashd_preparer_relances(client,'2026-10-27',null)` → `{preparees 1}`) → `cashd_relances_du_jour(client,'2026-10-27')` :
+  palier `relance`, sujet « relance : 1 085,00 € restent dus », corps « **Malgré notre précédent rappel**, la somme suivante
+  reste impayée … au plus tard le 04/11/2026 … indemnité forfaitaire … 40,00 € … (art. L441-10) ». Et le rappel du 21/10
+  passe `coupee`, demande `annulee`, motif « remplacée par la relance du 27/10/2026 ».
+  Conséquence : le premier message que le débiteur recevrait est la relance ferme, qui affirme un rappel qu'il n'a
+  jamais reçu. Le palier « rappel courtois » (R:211) est sauté de fait ; le texte est inexact. Attendu (brief C13, R:207-222) :
+  tant que le rappel n'est pas parti, la ferme ne le remplace pas — ou alors elle ne cite pas de « précédent rappel ».
 
 ## Questions au coordinateur
 
+00. (21/10, J+6) **Mise en demeure** : pour C13, jouer `private.cashd_preparer_relances(client,'2026-11-03',null)` ?
+   Et quelle porte pour **valider** une relance (en valideur `eeeeeeee-…-0000000002c2`), afin de vérifier que la MED exige
+   un commentaire (R:187, R:453) ?
 0. (21/10, après J) **Porte devis** : `cashd_importer` refuse `nature devis` ; par où entre un devis (C9, R:223) ?
    **Passages à jouer pour moi** : `private.cashd_preparer_relances(client, '2026-10-22', null)` puis `'2026-10-27'`
    (J+1 et J+6 : rejeu, cadence rappel → ferme, écart de 5 j sur C13, un message par compte et par jour).
@@ -146,7 +164,7 @@ puis `select to_jsonb(e) from public.cashd_factures_etat e where client_id = '<c
 
 - Fait : contrat, brief, promesses (R, C), banc ouvrier `banc_cashd.sql` et `cashd_omega.sql` lus ; jeu série 1 écrit
   (`omega/testeur-cashd/`), attendus notés.
-- En cours : J complet. Justes : C0 C1 C3 C4 C5 C7 C8 C10 C12 C13. Écarts TCASHD-01 à 05. C9 pas couvert (devis). Attente : passages J+1 et J+6.
+- En cours : J, J+1, J+6 lus (TCASHD-06). J complet. Justes : C0 C1 C3 C4 C5 C7 C8 C10 C12 C13. Écarts TCASHD-01 à 05. C9 pas couvert (devis). Attente : passages J+1 et J+6.
 - Prochain pas : rejouer l'export avant J+1 (C10 encore présente), lire J+1 et J+6, puis valider une mise en demeure (commentaire exigé), puis série 2 (textes).
 - Questions : 1, 2, 4 (litige) répondues le 21/10 ; restent 3 (passage du matin, joué par le coordinateur), 4 (seuil), 5 (porte de lecture des relances), 6 (compte gérant, au bureau).
 - Note : pour le format, j'ai lu les appels `cashd_importer` de `cashd_nobat.sql` (autorisé par le coordinateur) ; deux commentaires de ce fichier citent des issues attendues (avoir, échéance) — vu malgré moi, signalé.
