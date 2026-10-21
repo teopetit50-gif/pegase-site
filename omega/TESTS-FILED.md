@@ -64,7 +64,7 @@ montre. Tu ne les redéposes pas.
 | F0 | lib/produits/capacites/factures.ts:55, :61, :83 | aucune (témoin) — MCD-2026-1001, HT 780,00 / TVA 8,5 % 66,30 / TTC 846,30 | lue, contrôlée, proposée à la validation sans arrêt | lu 780,00/66,30/846,30 (exact) · bloquée · 1 bloquant/1 attention · {fournisseur.a_confirmer, identite.registre} | juste sur la lecture et les montants ; bloquée par `fournisseur.a_confirmer` **B** et `identite.registre` **B** (VIES) → « sans arrêt » non atteint, voir TFILED-07 ; à refaire en 1b après confirmation | 1
 | F1 | lib/produits/capacites/factures.ts:58 | SIREN 912345629 à clé Luhn fausse (Quincaillerie du Moule, fictive) | arrêt « identité », motif lisible, rien de comptabilisé | lu 780,00/66,30/846,30 · bloquée · 1/3 · {identite.siren, identite.tva_intracom, tva.numero, fournisseur.a_confirmer} | **juste** (arrêt identité, motifs lisibles, rien de comptabilisé) | 1
 | F2a | lib/produits/capacites/factures.ts:57 | aucune — pose l'IBAN …4560 340 de Béton Archipel (BAR-2026-0501) | lue, aucun arrêt, IBAN retenu pour le fournisseur | lu 780,00/66,30/846,30 · bloquée · 2/0 · IBAN lu · {fournisseur.a_confirmer, identite.registre} | juste sur la lecture et l'IBAN ; mêmes arrêts B que F0 (Q9 lève la différence 1/1 vs 2/0) | 1
-| F2b | lib/produits/capacites/factures.ts:57 | même fournisseur, IBAN changé en …6540 309 (BAR-2026-0502) | alerte « changement d'IBAN », validation par une personne | lu 780,00/66,30/846,30 · bloquée · 3/0 · IBAN lu · {doublon.probable, fournisseur.a_confirmer, identite.registre} — **aucune anomalie IBAN** | **écart** TFILED-02 | 1
+| F2b | lib/produits/capacites/factures.ts:57 | même fournisseur, IBAN changé en …6540 309 (BAR-2026-0502) | alerte « changement d'IBAN », validation par une personne | lu 780,00/66,30/846,30 · bloquée · 3/0 · IBAN lu · {doublon.probable, fournisseur.a_confirmer, identite.registre} — **aucune anomalie IBAN** ; **1b** (fournisseur confirmé, contrôle relancé par le coordinateur) : `B · iban.nouveau · « Nouvel IBAN (FR76 •••• 0309) pour ce fournisseur : une personne le vérifie auprès de lui avant tout paiement. »` | **juste** en 1b pour un fournisseur confirmé (`:57` « fournisseur connu ») ; TFILED-02 requalifié, avec réserve | 1
 | F3 | lib/produits/capacites/factures.ts:135-136 ; :44 | TVA 19 % (HT 780 / TVA 148,20 / TTC 928,20, cohérent) | passe sans arrêt si HT/TVA/TTC tombent juste (le site fait foi, réponse Q3) — divergence notée : le brief attendait un arrêt « TVA » | lu 780,00/148,20/928,20 (exact) · bloquée · 2/1 · {fournisseur.a_confirmer, identite.registre, **tva.taux**} | **écart** TFILED-03, confirmé : `tva.taux` est bloquant (« Taux de TVA qui n'existe pas en France : 19 % ») — envoyé à A4 | 1
 | F4a | lib/produits/capacites/factures.ts:56 ; :139-140 | doublon de F0 régénéré (autres octets, même contenu, autre nom) | écartée comme doublon, reste consultable, pas de seconde facture | lu identique à F0 · **écartée** · doublon oui · {doublon.exact, …} | **juste** (écartée, reste consultable, pas de seconde facture) | 1
 | F4b | lib/produits/capacites/factures.ts:56 | même numéro que F0, ciment 9,84 € au lieu de 9,80 → TTC 848,47 | signalée, pas écartée en silence (aucune promesse explicite du site : à défaut, « pas couvert ») | lu 782,00/66,47/848,47 (exact) · bloquée (pas écartée) · {**doublon.exact**, …} | signalée, pas écartée, message juste (« … 848,47 € au lieu de 846,30 € : un numéro ne sert qu'une fois ») ; **code de motif** `doublon.exact` faux : TFILED-04 confirmé, envoyé à A4 | 1
@@ -102,6 +102,14 @@ Lecture par le coordinateur à l'écran ou en lecture seule, relayée brute ; li
 - Attendu : alerte « changement de coordonnées bancaires ». Aucune anomalie `iban.*`. Réserve : le fournisseur est
   `a_confirmer`, et le site dit « chez un fournisseur **connu** ». Si « connu » veut dire « confirmé », il faut le refaire après
   confirmation de BAR (Q11). Sinon, l'écart tient.
+- **Requalifié en série 1b** (21/10, 20 h 45) : Béton Archipel est confirmé en gérant, puis le coordinateur relance le contrôle serveur
+  sur la facture F2b existante (`4fb3f16d-…`) → `bloquee`. Il pose `B · iban.nouveau · « Nouvel IBAN (FR76 •••• 0309) pour ce
+  fournisseur : une personne le vérifie auprès de lui avant tout paiement. »`, et `fournisseur.a_confirmer` disparaît. La promesse `:57`
+  est **tenue pour un fournisseur connu** : ce n'est plus un écart.
+- Réserves : (1) l'alerte n'a paru qu'après un contrôle relancé à la main par le coordinateur. À la réception, un fournisseur pas encore
+  confirmé ne reçoit aucune alerte IBAN, mais il est de toute façon bloqué par `a_confirmer` (voir TFILED-07). (2) **Observation** :
+  après ce contrôle, Béton Archipel a **2 IBAN connus**. Il faudra vérifier qu'une 3ᵉ pièce portant l'IBAN `…0309`, avant la vérification
+  humaine, déclenche encore l'alerte et ne passe pas comme un IBAN « connu ». Proposé pour la série 2.
 
 **TFILED-03 · F3 · un taux de 19 % cohérent est arrêté** (`capacites/factures.ts:135-136`, le site fait foi selon Q3)
 - Déposé : `F3_tva_19.pdf`, MCD-2026-1003, HT 780,00, TVA 19 % 148,20, TTC 928,20 (cohérent).
@@ -150,7 +158,8 @@ Lecture par le coordinateur à l'écran ou en lecture seule, relayée brute ; li
 2. `filed_confirmer_fournisseur('dc84c929-…' /* Béton Archipel */, 'T-FILED 1b : …')` → `2`. Puis
    `filed_confirmer_fournisseur('538937d9-…' /* MCD */, 'T-FILED 1b : …')` → `11`. Lecture de l'agrégat juste après :
    `bloquees 14, 10813.55` (inchangé : le registre bloque encore toutes les pièces).
-3. Le coordinateur redépose F2b sous un nouveau nom, pour TFILED-02. Résultat à venir.
+3. Redéposer F2b n'aurait servi à rien (mêmes octets, donc doublon de fichier). Le coordinateur a plutôt relancé le contrôle sur la facture F2b → `iban.nouveau` bloquant. TFILED-02 est requalifié juste, avec réserve (voir Écarts).
+4. Témoin F0 « sans arrêt » : **pas testable sans tiers**, le coordinateur est d'accord.
 
 ### Jeu d'essai série 1 (prêt, pas encore joué)
 
@@ -211,9 +220,9 @@ par les portes `public.filed_confirmer_fournisseur(uuid, text)` et `public.filed
 
 ## REPRISE
 
-**Arrêt 6 — 21/10/2026, 20 h 40** (remplace les arrêts précédents)
-- Fait : série 1 jouée deux fois, verdicts au niveau 1. Juste : F1, F4a, F5, F8, F11 (contre la l. 31), F12, rejeu. Écarts : TFILED-03 et 04 (confirmés, envoyés à A4), TFILED-07 (nouveau). Pas couvert : TFILED-05 (à Teo). Constat sur le site : TFILED-06 (à Teo). TFILED-02 attend la série 1b.
-- En cours : préparation de la série 1b (Q11 : pas de SIREN réel, on lève les arrêts par les portes du produit, en gérant).
-- Prochain pas : en gérant, `filed_confirmer_fournisseur` sur Béton Archipel, puis le coordinateur redépose F2b sous un nouveau nom. Ensuite, F0 : confirmer MCD, lever `identite.registre`, et vérifier que le témoin arrive à la validation sans autre arrêt. F6 : vérifier que l'avoir reste retenu (sinon, pas couvert).
-- Questions : Q12 répondue. En attente : le résultat de F2b redéposée. TFILED-07 est remonté à Teo par le coordinateur, avec TFILED-06.
-- SHA d'arrêt : voir le commit « T-FILED : Q9–Q11 intégrées » sur `testeur-filed`.
+**Arrêt 7 — 21/10/2026, 20 h 50** (remplace les arrêts précédents)
+- Fait : séries 1 et 1b, au niveau 1. Juste : F1, F2b (en 1b), F4a, F5, F8, F11 (contre la l. 31), F12, rejeu. Écarts : TFILED-03 et 04 (envoyés à A4). TFILED-07 et TFILED-06 sont remontés à Teo. Pas couvert : TFILED-05 (à Teo). Pas testable sans tiers : F0 « sans arrêt ».
+- En cours : rien.
+- Prochain pas : la série 2, quand le coordinateur la lance. Circuit de validation (seuil de double approbation, délégation datée, saisie et approbation par deux personnes distinctes), puis la sortie comptable (CSV 401/44566/512, FEC). Y ajouter la 3ᵉ pièce Béton Archipel sur l'IBAN `…0309` (réserve 2 de TFILED-02) et l'avoir F6 une fois les arrêts levés.
+- Questions : Q13, pour la série 2. Quelles portes servent à régler le seuil, poser une délégation, approuver et exporter ? Et le valideur `…02f1` peut-il appeler les portes sous sa propre identité ?
+- SHA d'arrêt : voir le commit « T-FILED série 1b : TFILED-02 requalifié » sur `testeur-filed`.
