@@ -73,3 +73,14 @@ reglements : creees 0, lignes 5, inchangees 5
   → `{creees 1}` ; `cashd_preparer_maintenant` → `{preparees 1}` ; relance `devis_rappel`, sujet « votre devis DV-2026-0009 », `en_attente`.
 - Même ligne avec `"statut":"accepte"` → `{modifiees 1, relances_coupees 1}` ; `cashd_preparer_maintenant` → `{preparees 0}` ;
   relance `coupee`, demande `annulee`, motif « avant l'envoi : facture DV-2026-0009 : devis accepte ».
+
+## Passage du 03/11 et validation de la MED
+- Coordinateur : `private.cashd_preparer_relances(client,'2026-11-03',null)` → `{preparees 6, bloquees 1, coupees 0}`.
+- `cashd_relances_du_jour(client,'2026-11-03')` : `relance` (ferme, 21 j) pour A-C00 1085, A-C04 1085 (`sans_adresse`),
+  A-C05 585, A-C06 885, A-C07 785, A-C12 1627,50 (2 pièces) ; `mise_en_demeure` A-C13 1085 (48 j), demande
+  `bdc51f0d-a8f8-46a7-9618-bf8170bcff53`. Toutes les fermes : « Malgré notre précédent rappel … au plus tard le 11/11/2026 ».
+  MED : « Malgré nos précédentes relances … nous vous mettons en demeure de régler la somme de 1 085,00 € dans un délai de
+  8 jours … au plus tard le 11/11/2026 … articles L441-10 et D441-5 … À défaut … procédure de recouvrement, sans autre avis. »
+- Valideur, `insert into public.approbations (…, decision 'approuve', commentaire null)` → accepté, id `fe3fe337-d2da-4652-99d2-99dddb56c150`.
+- `public.demandes_validation` (lu en valideur) : `type_action cashd.mise_en_demeure`, `exige_commentaire true`,
+  `exige_motif true`, `statut approuvee`, `decide_le 2026-10-21T19:24:42`. Relance : `non_reglee`, `envoi_id` null.

@@ -81,7 +81,7 @@ Attendus notés **avant** de jouer. « R » = `lib/produits/relances.ts`, « C �
 | C12 | *aucune ligne du site* ; C:53 dit « chaque facture suit sa propre séquence » | deux factures du même compte échues le 13/10 | brief : **un** message portant les deux — à confronter à C:53 | **un** message, 2 pièces, chacune avec son palier ; montant 1 627,50 € | juste (site C:53 et brief tous deux tenus) | 1 |
 | C13 | R:207-222, R:354 (J+7 / J+21 / J+30) | échue depuis 35 j, jamais relancée | aucun palier sauté : rappel d'abord (pas de MED d'emblée) | J : `rappel` (35 j). J+1 : rien. J+6 : `relance` (ferme) préparée, le rappel de J (jamais validé ni envoyé) passe `coupee` « remplacée par la relance du 27/10/2026 ». La ferme dit **« Malgré notre précédent rappel »** | écart (TCASHD-06) : écart de 6 j tenu, mais le rappel n'est jamais parti | 1 |
 | R1 | C:33, R:267 | rejeu à l'identique de tout l'export | zéro doublon, zéro nouvelle relance | aucune création ; factures 14 et règlements 5 « inchangés » ; mais clients **14 « modifiés »** sur données identiques | juste (doublons) + écart mineur TCASHD-01 ; relances à voir | 1 |
-| J+1 | R:211-216, R:187, R:453 | passage du lendemain | ferme remplace le rappel en attente ; un message par compte et par jour ; MED exige validation explicite | 22/10 : `{preparees 0, bloquees 0, coupees 0}` — aucun doublon, aucune ferme à 1 j du rappel. 27/10 : `{preparees 1}` (ferme C13 qui remplace le rappel en attente) ; C0 C5 C6 C7 C12 (14 j de retard) restent au rappel du 21/10, en attente. Mise en demeure : pas encore atteinte | juste (un message par compte et par jour ; remplacement) ; MED à faire | 1 |
+| J+1 | R:211-216, R:187, R:453 | passage du lendemain | ferme remplace le rappel en attente ; un message par compte et par jour ; MED exige validation explicite | 22/10 : rien. 27/10 : ferme C13 qui remplace le rappel en attente. 03/11 : ferme (`relance`) à 21 j pour C0 C4 C5 C6 C7 C12 (C12 : 1 message, 2 pièces), MED préparée pour C13 (48 j, 7 j après la ferme), `en_attente`. Toutes disent « Malgré notre précédent rappel » sans qu'aucun rappel soit parti. **MED approuvée par le valideur sans commentaire** : acceptée, demande `approuvee` | juste (cadence, un message par compte et par jour) ; écarts TCASHD-06 (élargi) et **TCASHD-07** | 1 |
 
 Notes de lecture (avant de jouer) :
 - « Un message par compte et par jour », « cinq jours d'écart au moins » (C13) et « suspendue pas d'adresse » (C4)
@@ -140,6 +140,21 @@ puis `select to_jsonb(e) from public.cashd_factures_etat e where client_id = '<c
   Conséquence : le premier message que le débiteur recevrait est la relance ferme, qui affirme un rappel qu'il n'a
   jamais reçu. Le palier « rappel courtois » (R:211) est sauté de fait ; le texte est inexact. Attendu (brief C13, R:207-222) :
   tant que le rappel n'est pas parti, la ferme ne le remplace pas — ou alors elle ne cite pas de « précédent rappel ».
+  **Élargi le 03/11** (`private.cashd_preparer_relances(client,'2026-11-03',null)` → `{preparees 6, bloquees 1}`) : les six
+  relances fermes (A-C00, A-C04, A-C05, A-C06, A-C07, A-C12) commencent toutes par « Malgré notre précédent rappel », alors
+  qu'aucun rappel n'a été envoyé (tous `envoye_le` null) — y compris A-C04, qui n'a pas d'adresse et n'a donc jamais pu rien
+  recevoir. La MED de A-C13 dit « Malgré nos précédentes relances ». Le texte affirme un historique que le journal dément.
+- **TCASHD-07** · mise en demeure · MED A-C13 du 03/11 (`cashd_relances_du_jour(client,'2026-11-03')`, palier
+  `mise_en_demeure`, `demande_id` `bdc51f0d-a8f8-46a7-9618-bf8170bcff53`). La demande porte `type_action`
+  `cashd.mise_en_demeure`, **`exige_commentaire true`**, `exige_motif true`. En valideur `eeeeeeee-…-0000000002c2` (claims +
+  `role authenticated`, geste de l'écran /espace2/validations, autorisé par le coordinateur) :
+  `insert into public.approbations (demande_id, client_id, user_id, decision, commentaire) values ('bdc51f0d-…', 'dddddddd-…-0000000000c2', auth.uid(), 'approuve', null) returning id, decision, commentaire;`
+  → **accepté** : `{id fe3fe337-d2da-4652-99d2-99dddb56c150, decision approuve, commentaire null}`. Ensuite la demande est
+  `approuvee`, `decide_le` 19:24:42 ; la relance reste `non_reglee` (rien envoyé : pas de réglage d'envoi), `envoi_id` null.
+  Promesse trahie : R:187 « La mise en demeure exige une validation explicite », R:453 « La mise en demeure exige en plus une
+  validation explicite, à chaque fois », C:68, C:197 — et le brief : « la mise en demeure exige un commentaire ».
+  NB : cette MED est désormais approuvée ; si un réglage d'envoi est posé un jour sur ce client banc, elle partirait (vers
+  une adresse `.invalid`). À annuler par le coordinateur s'il le juge utile.
 
 ## Questions au coordinateur
 
@@ -164,8 +179,8 @@ puis `select to_jsonb(e) from public.cashd_factures_etat e where client_id = '<c
 
 - Fait : contrat, brief, promesses (R, C), banc ouvrier `banc_cashd.sql` et `cashd_omega.sql` lus ; jeu série 1 écrit
   (`omega/testeur-cashd/`), attendus notés.
-- En cours : J, J+1, J+6 lus (TCASHD-06) ; C9 joué (juste). J complet. Justes : C0 C1 C3 C4 C5 C7 C8 C10 C12 C13. Écarts TCASHD-01 à 05. Attente : passage du 03/11 (MED) et porte de validation.
-- Prochain pas : rejouer l'export avant J+1 (C10 encore présente), lire J+1 et J+6, puis valider une mise en demeure (commentaire exigé), puis série 2 (textes).
+- En cours : série 1 terminée (J, J+1, J+6, 03/11, MED). TCASHD-01 à 07. J complet. Justes : C0 C1 C3 C4 C5 C7 C8 C10 C12 C13. Écarts TCASHD-01 à 05. 
+- Prochain pas : série 2 (les textes, lus sur chaque relance préparée : ton, vocabulaire du bâtiment, moyens de règlement, échéancier).
 - Questions : 1, 2, 4 (litige) répondues le 21/10 ; restent 3 (passage du matin, joué par le coordinateur), 4 (seuil), 5 (porte de lecture des relances), 6 (compte gérant, au bureau).
 - Note : pour le format, j'ai lu les appels `cashd_importer` de `cashd_nobat.sql` (autorisé par le coordinateur) ; deux commentaires de ce fichier citent des issues attendues (avoir, échéance) — vu malgré moi, signalé.
 - SHA d'arrêt : voir le dernier commit de `testeur-cashd` (« … jour J, tableau »).
