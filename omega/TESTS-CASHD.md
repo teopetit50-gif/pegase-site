@@ -117,6 +117,7 @@ Attendus notés **avant** de jouer. « R » = `lib/produits/relances.ts`, « C �
 | R16 | rejeu TCASHD-16 (lot c2_34) | rappel A-C19 du 21/10 noté envoyé à la main avant le lot | quitte `non_reglee`, ne repartira pas | `etat` **envoyee**, `envoye_le` 20:48:39, motif « envoyée à la main le 21/10/2026 (email) : elle ne repartira pas » (remarque : `statut` affiché `a_valider` à côté d'un `etat` `envoyee`) | juste (remarque mineure) | 1 |
 | R33 | c2_33 (ton au-dessus de 1 500 € ; mention du règlement partiel) | A-C21 : 2 170 € à 8 j ; A-C22 : 1 085 € à 8 j, règlement lettré 500 € du 16/10 | ton du montant ; reste après règlement | A-C21 : « Compte tenu du montant en jeu, merci de nous indiquer dès à présent la date de règlement prévue. » ; A-C22 : « 585,00 € restant dus (il reste 585,00 € après votre règlement du 16/10/2026) » et ton « simple oubli » (8 j, < 1 500 €) | juste | 1 |
 | R35 | c2_35 / c2_36 (date limite de la ferme avec marge de validation de 3 jours ouvrés ; MED avec moyens de règlement et délai « à compter de la réception de ce courriel ») | A-C19 : rappel noté parti le 21/10, passage du 26/10 (`{preparees 1}`) | ferme neuve, date limite = préparation + 8 j + 3 jours ouvrés | ferme du 26/10 (lundi) : « Malgré notre précédent rappel » (juste : le rappel est noté parti) … « au plus tard le **06/11/2026** » (26/10 + 3 j ouvrés = 29/10, + 8 j = 06/11 ; les fermes d'avant le lot donnaient préparation + 8 j) ; moyens de règlement repris. MED neuve : non testable sur le banc (couvert par le test de l'ouvrier) | juste pour la ferme | 1 |
+| R17 | rejeu TCASHD-17 (lot c2_37) | rappel A-C19 noté envoyé ; seconde note `cashd_noter_envoi_main('7451efc5-…')` | statut `envoyee` ; double note refusée | `statut` **envoyee**, `etat` envoyee, motif « envoyée à la main le 21/10/2026 (email) : elle ne repartira pas » ; seconde note → `ERROR 23505: Cet envoi est déjà noté.` | juste | 1 |
 
 Notes de lecture (avant de jouer) :
 - « Un message par compte et par jour », « cinq jours d'écart au moins » (C13) et « suspendue pas d'adresse » (C4)
@@ -246,7 +247,7 @@ puis `select to_jsonb(e) from public.cashd_factures_etat e where client_id = '<c
 ## REPRISE
 
 - Fait : séries 1 et 2 ; rejeux de TCASHD-01 à 08, 12, 14, 15 (justes), compléments c2_20b, c2_22b, c2_24b, c2_26, c2_30, c2_31, c2_32 (justes).
-- Ouverts côté C2 : TCASHD-09 (import sans clé secteur), 10 et 11 (tournures), 13 (MED sans moyens de règlement). TCASHD-16 et c2_33 rejoués justes. c2_27 couvert par le test de l'ouvrier.
+- Ouvert côté C2 (coordinateur, 21/10 21:10) : TCASHD-11 seul (« Vous pouvez régler » sans « par »). TCASHD-16, 17, c2_33, c2_35/36 rejoués justes ; MED neuve (c2_27, c2_36) couverte par les tests de l'ouvrier. c2_27 couvert par le test de l'ouvrier.
 - En cours : rien sur la recette. État du banc : réglages `metier btp`, `moyens_reglement`, `signature`, seuil 10 € ; aucun réglage d'envoi ; 0 ligne dans `public.envois` ; une ferme A-C17 et un rappel A-C19 approuvés (« Test du banc »), le rappel A-C19 noté envoyé à la main.
 - Prochain pas : rejouer TCASHD-16 et les lots de ton quand le coordinateur les annonce ; écran (compte gérant à mot de passe, au bureau).
 - SHA d'arrêt : dernier commit de `testeur-cashd`.
