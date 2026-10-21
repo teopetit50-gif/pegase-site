@@ -90,7 +90,7 @@ Rejouée sur des comptes neufs pour ne pas lire l'état pollué de la série 1. 
 | C-04 | TOFFLOAD-04 | O13 neuf (13 achats), `offload_effacer_compte` avec motif, puis ressaisie du compte et d'un achat | restitution : aucune trace du nom, du courriel ni du contact ; ressaisie refusée (« Ce compte a été effacé à la demande de la personne : il ne se ressaisit pas. ») ; achat refusé (« … aucun achat ne s'y rattache plus. »). O12 de la série 1 a aussi disparu de la restitution | juste | 1 |
 | C-05 | TOFFLOAD-05 | rejeu à l'identique du compte O0 et de ses 13 factures | `achats` 342 → 368 = +13 (O13) +13 (O14) : zéro doublon pour O0 | juste | 1 |
 | C-06 | TOFFLOAD-06 | O14 : achat F-9014 le 21/10 pendant la reprise | reprise `close`, `issue: commande`, motif « Une commande est arrivée depuis l'ouverture de la reprise. », envoi1 `annule`, plus rien à valider pour O14. **Mais** `offload_envoi_auto.retenus_en_attente` reste à 1 | juste ; compteur : TOFFLOAD-07 | 1 |
-| — | TOFFLOAD-06 (série 1) | reprises O7 et O11 ouvertes avant le correctif | toujours `appel`, `close_le: null` (pas de détection depuis) | à relire après la détection du 26/10 | — |
+| — | TOFFLOAD-06 (série 1) | reprises O7 et O11 ouvertes avant le correctif, puis détections 26/10 et 27/10 | `close`, `issue: commande` | juste | 1 |
 
 **TOFFLOAD-07 · compteur des messages retenus.** Après C-06 (envoi `bf3163bd-…` annulé, `a_valider` vide pour O14 et vide en tout),
 `offload_envoi_auto('dddddddd-0000-4000-8000-0000000000c4')` rend encore `"retenus_en_attente": 1`. Mineur : le valideur croit qu'un
@@ -108,11 +108,11 @@ Détections demandées au coordinateur : lundi 26/10, mardi 27/10, mardi 27/10 e
 
 | Cas | Promesse | Attendu | Ce qu'OFFLOAD a fait | Verdict | Niveau |
 |---|---|---|---|---|---|
-| S2-1 | P:256 | lundi : signaux levés, aucune reprise ouverte | en attente | — | — |
-| S2-2 | P:256, P:451 | mardi : V1-V3 ouverts en demandes retenues « à valider », rien ne part | en attente | — | — |
-| S2-3 | P:381, P:397 | second appel du mardi : rien de plus | en attente | — | — |
-| S2-4 | C:113, C:115 ; brief | pilotage : valeur en jeu par segment sur 12 mois | lu une fois le 21/10 : valeur en jeu par vague et par entité ; taux par segment / canal / niveau ; **pas** de valeur en jeu par segment | à relire après la vague | — |
-| S2-5 | P:441 | restitution : tout revient, format lisible | `offload_restitution` : JSON, `resume` + `donnees` (achats, comptes, contacts, contrats, affaires, échéances, signaux, reprises, tâches, journal…) ; aucun export tableur | à compléter | — |
+| S2-1 | P:256 | lundi : signaux levés, aucune reprise ouverte | 26/10 : `entrees: 5`, V1-V3 `eteint`, aucune reprise ouverte | juste | 1 |
+| S2-2 | P:256, P:451 | mardi : V1-V3 ouverts en demandes retenues « à valider », rien ne part | 27/10 : `entrees: 0`, V1-V3 `eteint`, `reprise: null`, `a_valider` 0 ; aucun envoi créé (constat du coordinateur) | rien ne part : juste ; vague : en attente de la réponse du coordinateur (autre tâche que la détection ?) | — |
+| S2-3 | P:381, P:397 | second appel du mardi : rien de plus | identique au premier (`entrees: 0`), aucun envoi | juste (mais rien n'avait été ouvert) | 1 |
+| S2-4 | C:113, C:115 ; brief | pilotage : valeur en jeu par segment sur 12 mois | `offload_pilotage(client, '2025-10-27')` : `vagues` (valeur en jeu, comptes, commandes, chiffre repris par vague : 21/10, en jeu 51 910,2, 3 commandes, 1 900 € repris), `suivi` mois par mois sur 12 mois, `entites` (consolidé, par entité ; `par_site` vide) ; `taux` par segment / canal / niveau. **Pas** de valeur en jeu par segment ; pas de taux par message (C:115) ; V1-V3 (secteurs renseignés) n'y figurent pas, faute de vague | valeur par segment : pas couvert ; par vague, par entité, 12 mois : juste | 1 |
+| S2-5 | P:441, C:118 ; brief | restitution : tout revient, format lisible | `offload_restitution` : un JSON, `resume` (compteurs) + `donnees` (achats, comptes, contacts, contrats, affaires, échéances, équipements, interventions, signaux, reprises, tâches, exclusions, règles, réglages, rapprochements, arrêtés, journal). Les messages préparés (sujet, corps, destinataire) n'y sont pas, ni les envois ; aucun export tableur (C:118) | données OFFLOAD : juste ; messages : à confirmer (relèvent du socle ?) ; tableur : pas couvert | 1 |
 
 ## Écarts
 
@@ -211,3 +211,7 @@ Questions : porte des demandes de validation ; feu vert pour la vague après TOF
 **21/10, arrêt 5.** Fait : contre-épreuve 01/04/05/06 justes, TOFFLOAD-07 et 08 (mineurs) ; série 2 posée (vague mardi, V1-V3).
 En cours : attente des détections 26/10, 27/10, 27/10. Prochain pas : lire la vague, le pilotage par segment, O7/O11.
 Questions : aucune. Aucune approbation faite.
+
+**21/10, arrêt 6.** Fait : série 2 lue (S2-1, S2-3 justes ; S2-4 sans valeur par segment ; S2-5 sans messages ni tableur) ;
+O7/O11 clos « commande ». En cours : S2-2 — la vague du mardi n'ouvre rien ; question posée au coordinateur (autre tâche ?).
+Prochain pas : selon sa réponse, rejouer la vague ou noter l'écart. Aucune approbation faite.
