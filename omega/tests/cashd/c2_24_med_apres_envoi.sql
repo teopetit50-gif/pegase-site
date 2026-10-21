@@ -29,25 +29,26 @@ begin
   v_fb := public.cashd_ecrire_facture(null, v_client, jsonb_build_object('compte_id', v_b, 'numero', 'FB-2026-0982', 'date_emission', j - 70, 'echeance', j - 40, 'montant_ttc', 900));
   perform tests.redevenir_admin();
 
-  -- A : rappel au jour j, relance ferme à j + 5, ni l'un ni l'autre validé.
+  -- A : rappel au jour j, parti ; relance ferme à j + 5, pas validée.
   perform private.cashd_preparer_relances(v_client, j, null);
+  perform tests.c2_parti(x.id) from public.cashd_relances x where x.compte_id = v_a and x.jour = j;
   perform private.cashd_preparer_relances(v_client, j + 5, null);
-  -- B : rappel et relance ferme bloqués par un mot interdit (cas A-C14) — posé après coup sur les textes déjà écrits.
+  -- B : ses messages bloqués par un mot interdit (cas A-C14) — posé après coup sur les textes déjà écrits ; rien ne part.
   update public.cashd_relances set statut = 'bloquee', motif = 'le message contient un mot interdit par vos règles : « contentieux »'
    where compte_id = v_b and statut = 'a_valider';
 
   perform private.cashd_preparer_relances(v_client, j + 10, null);
   return next ok(not exists (select 1 from public.cashd_relances x where x.compte_id in (v_a, v_b) and x.palier = 'mise_en_demeure'),
-                 'Rien n''est parti : aucune mise en demeure n''est écrite, ni pour A ni pour B');
+                 'La relance ferme de A n''est pas partie, rien n''est parti pour B : aucune mise en demeure n''est écrite');
   select * into r from public.cashd_relances x where x.compte_id = v_a and x.jour = j + 5;
   return next ok(r.palier = 'relance' and r.statut = 'a_valider', 'La relance ferme en attente de A n''est pas remplacée');
   perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
-  select x into v_p from jsonb_array_elements(public.cashd_fiche_compte(v_b) -> 'pieces') x where x ->> 'numero' = 'FB-2026-0982';
-  return next ok(tests.c2_plat(v_p ->> 'relance_suspendue') like 'mise en demeure retenue : aucun message précédent n''est réellement parti%',
+  select x into v_p from jsonb_array_elements(public.cashd_fiche_compte(v_a) -> 'pieces') x where x ->> 'numero' = 'FB-2026-0981';
+  return next ok(tests.c2_plat(v_p ->> 'relance_suspendue') like 'mise en demeure retenue : la relance qui la précède n''est pas réellement partie%',
                  'La fiche dit pourquoi la mise en demeure est retenue');
   perform tests.redevenir_admin();
   return next ok((select to_jsonb(f) ->> 'relance_retenue' is not null from public.cashd_factures f where f.id = v_fa),
-                 'La retenue est posée sur la facture de A aussi');
+                 'La retenue est posée sur la facture de A');
 
   -- A : la relance ferme est validée puis partie (envoi noté à la main ; posé directement, la date du test étant à venir) ;
   -- la mise en demeure suit au passage suivant.

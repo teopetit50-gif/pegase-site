@@ -65,6 +65,7 @@ begin
                  'Un rappel de 3 000 €, au-delà du plafond de 2 000 €, attend une personne');
 
   -- ── Relance ferme, mise en demeure et LRE : toujours retenues ──
+  perform tests.c2_parti(rc.id);   -- le rappel est parti : la relance ferme peut suivre (c2_24b)
   perform private.cashd_preparer_relances(v_client, j + 5, null);
   select * into rc from public.cashd_relances x where x.compte_id = v_c and x.jour = j + 5;
   return next ok(rc.palier = 'relance' and rc.statut = 'a_valider'

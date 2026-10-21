@@ -38,15 +38,17 @@ begin
   select * into ra from public.cashd_relances x where x.compte_id = v_a and x.jour = j + 5;
   select * into rb from public.cashd_relances x where x.compte_id = v_b and x.jour = j + 5;
   select * into rc from public.cashd_relances x where x.compte_id = v_c and x.jour = j + 5;
-  return next ok(ra.palier = 'relance' and tests.c2_plat(ra.corps) not like '%précédent rappel%' and tests.c2_plat(ra.corps) not like '%premier rappel%'
-                 and ra.corps like '%F-2026-810%' and tests.c2_plat(ra.corps) like '%Total restant dû%',
-                 'Relance ferme qui remplace un rappel jamais parti : le texte ne cite aucun rappel');
-  return next ok(rc.palier = 'relance' and tests.c2_plat(rc.corps) not like '%précédent rappel%' and tests.c2_plat(rc.corps) not like '%premier rappel%',
+  -- (c2_24b : sans rappel parti, pas de relance ferme — la séquence reprend au rappel, qui ne cite aucun envoi)
+  return next ok(ra.palier = 'rappel' and tests.c2_plat(ra.corps) not like '%précédent rappel%' and tests.c2_plat(ra.corps) not like '%premier rappel%'
+                 and ra.corps like '%F-2026-810%',
+                 'Rappel jamais parti : pas de relance ferme, le nouveau message ne cite aucun rappel');
+  return next ok(rc.palier = 'rappel' and tests.c2_plat(rc.corps) not like '%précédent rappel%' and tests.c2_plat(rc.corps) not like '%premier rappel%',
                  'Même chose pour un compte sans adresse');
   return next ok(rb.palier = 'relance' and tests.c2_plat(rb.corps) like '%Malgré notre précédent rappel%',
                  'Après un rappel réellement parti, la relance ferme le cite');
 
-  -- Jour j + 10 : la mise en demeure. A n'a rien reçu ; B a reçu son rappel.
+  -- Jour j + 10 : la mise en demeure. A n'a rien reçu ; B a reçu son rappel, puis sa relance ferme (c2_24b).
+  perform tests.c2_parti(rb.id);
   perform private.cashd_preparer_relances(v_client, j + 10, null);
   select * into ra from public.cashd_relances x where x.compte_id = v_a and x.jour = j + 10;
   select * into rb from public.cashd_relances x where x.compte_id = v_b and x.jour = j + 10;

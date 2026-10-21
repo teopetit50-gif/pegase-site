@@ -76,6 +76,8 @@ begin
   v_b := private.cashd_preparer_relances(v_client, j + 4, null);
   return next ok(not exists (select 1 from public.cashd_relances x where x.compte_id = (p ->> 'hotel')::uuid and x.jour = j + 4),
                  'Quatre jours après le rappel, rien : la fermeté ne monte pas avant cinq jours');
+  -- le rappel est parti : la relance ferme peut suivre (c2_24b)
+  perform tests.c2_parti(x.id) from public.cashd_relances x where x.compte_id = (p ->> 'hotel')::uuid and x.jour = j;
   v_b := private.cashd_preparer_relances(v_client, j + 5, null);
   select * into r from public.cashd_relances x where x.compte_id = (p ->> 'hotel')::uuid and x.jour = j + 5;
   return next is(r.palier, 'relance', 'Cinq jours après : la relance ferme');

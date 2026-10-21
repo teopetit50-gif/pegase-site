@@ -24,6 +24,7 @@ begin
   perform public.cashd_ecrire_facture(null, v_client, jsonb_build_object('compte_id', v_b, 'numero', 'FB-2026-0992', 'date_emission', j - 70, 'echeance', j - 40, 'montant_ttc', 900));
   perform tests.redevenir_admin();
   perform private.cashd_preparer_relances(v_client, j, null);
+  perform tests.c2_parti(x.id) from public.cashd_relances x where x.compte_id in (v_a, v_b) and x.jour = j;   -- rappel parti (c2_24b)
   perform private.cashd_preparer_relances(v_client, j + 5, null);
   perform tests.c2_parti(x.id) from public.cashd_relances x where x.compte_id in (v_a, v_b) and x.jour = j + 5;
   perform private.cashd_preparer_relances(v_client, j + 10, null);
