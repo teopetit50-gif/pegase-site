@@ -117,7 +117,7 @@ Chaque série = 16 dépôts, puis rejeu à l'identique (même id externe).
 | R1 | capacites/accueil.ts:56 ; accueil.ts:422 | plomberie | aucune hypothèse, transfert + fiche d'escalade | pas joué | — | — |
 | R2 | capacites/accueil.ts:130 | tarif horaire absent | pas de chiffre ; « sera vérifié » + transfert | pas joué | — | — |
 | R3 | capacites/accueil.ts:46, :84 ; accueil.ts:185 | fuite urgente | qualifiée urgence sur le fond, pas de réponse auto, visible à l'écran | pas joué | — | — |
-| R4 | *aucune promesse santé dans accueil.ts* (brief seulement) | donnée de santé | verrou santé visible, rien hors canal agréé | pas joué | — | — |
+| R4 | *aucune promesse santé dans accueil.ts* | donnée de santé | — | non testé (coordinateur, 21/10 : pas de promesse) | pas de promesse | — |
 | R5 | capacites/accueil.ts:86, :126 | contact en litige | aucune réponse auto, transfert au responsable avec historique | pas joué | — | — |
 | R6 | capacites/accueil.ts:33, :142 | photo seule | pièce rattachée, demande de précision, pas d'appel au modèle | pas joué | — | — |
 | R7 | capacites/accueil.ts:47, :118 | courriel puis formulaire | un seul dossier (rapprochement proposé), une réponse en attente | pas joué | — | — |
@@ -139,7 +139,8 @@ Chaque série = 16 dépôts, puis rejeu à l'identique (même id externe).
 - Comment poser un contact « en litige CASHD » pour R5 (c'est côté socle, pas à toi).
 - Un compte « gérant » du client banc pour l'écran et pour l'accord de R13.
 - (T-REPUT, 21/10) ~~client_id~~ → **répondu** : `dddddddd-0000-4000-8000-0000000000c3` ; dépôt par `public.deposer_reception` ; formulaires par la même porte (canal `formulaire`) ; compte gérant demandé au bureau. Adresse de litige R5 transmise : `contact.litige@exemple.test`.
-- (T-REPUT, 21/10, **bloquant**) Toujours sans réponse : la porte pour poser **et valider** les fiches, les portes de **lecture** du résultat, la porte du routage (R11) et celle de l'accord (R13).
+- (T-REPUT, 21/10) Portes reçues : `reput_ecrire_connaissance` + `reput_valider_connaissance`, `reput_donner_accord` + `reput_activer_accord_seul`, `reput_ecrire_sujet` + `reput_router_sujet`, lectures `reput_base`, `reput_accords`, `reput_pieces`. Fiches, accord et routage : **en attente du compte gérant** (la clé de service est refusée). R4 : pas de promesse, pas de test. Envoi attendu : « retenu » (aucun réglage d'envoi).
+- (T-REPUT, 21/10, **bloquant**) La porte de **lecture d'une demande** : catégorie, urgence, retenue et motif, brouillon et fiche citée, rapprochement, service prévenu, envoi.
 - (T-REPUT) Les **portes** pour : (a) déposer une demande sans passer par Brevo (courriel simulé
   avec `message_id` fixe, et pièce jointe) ; (b) poser et valider les 12 fiches au nom du gérant ;
   (c) poser l'accord « horaires » en envoi seul et le routage `facturation` → Comptabilité ;
@@ -154,6 +155,6 @@ Chaque série = 16 dépôts, puis rejeu à l'identique (même id externe).
 
 - **Fait** : promesses et guides lus ; jeu d'essai série 1 écrit (12 fiches, 16 dépôts, attendus adossés aux lignes).
 - **En cours** : rien de joué ; client_id et porte de dépôt reçus.
-- **Prochain pas** : poser la base, déposer les 16 demandes, lire par les portes, rejouer.
-- **Questions** : portes fiches/validation et lecture (bloquant), routage, accord R13, R4, adresse d'essai.
+- **Prochain pas** : dès la porte de lecture, jouer R1 R2 R3 R6 R9 R10 R12 (sans base) ; R0 R7 R8 R11 R13 après le compte gérant ; prévenir le coordinateur avant R5.
+- **Questions** : porte de lecture d'une demande (bloquant) ; compte gérant (bureau) pour fiches, accord, routage.
 - **SHA d'arrêt** : voir le commit « T-REPUT : jeu d'essai série 1 ».
