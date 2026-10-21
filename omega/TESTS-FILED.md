@@ -178,6 +178,20 @@ seulement « proposé », jamais tenu pour bon (vérifié par le coordinateur). 
     au dépôt, `null` ne vaut pas ici « entité principale » (Q14).
 - Attendu de l'export, avant de le jouer : **aucune** des 15 pièces bloquées ni la pièce écartée ne doit y figurer (`factures.ts:283`,
   « Rien n'entre en silence dans votre comptabilité »).
+- **E2** (21/10, 21 h 05, gérant, entité `fba91a52-9d22-445e-ba6b-0590b3c205be`) : `filed_exporter_ecritures(client, entité, 'sage')`
+  et `'pennylane'` → `{mode: "nouvelles", lignes: 0, ecritures: 0, fichiers: [], total_debit: 0, total_credit: 0, envoi: null}` pour
+  les deux formats. **Juste** (`factures.ts:283`) : aucune pièce bloquée ni écartée n'entre dans l'export. Niveau 1.
+- **E3** `filed_exporter_fec(client, entité)` → `ERROR 55000: La société n'a pas de SIREN : le fichier des écritures comptables est
+  nommé d'après lui.` Le refus est juste et lisible (le nom légal du FEC porte le SIREN). Le FEC n'est **pas testable** sur ce banc
+  sans SIREN, ni sans écriture à exporter.
+- **Circuit de validation des factures** (`capacites/factures.ts:69-74`) : **pas testable sans tiers**, confirmé par le
+  coordinateur (Q14 c). Aucune demande d'approbation de facture n'existe, puisque toutes les factures sont arrêtées avant le circuit
+  par le registre (VIES). Restent testables : la décision sur l'IBAN `…0309` (demande `f363b16f-…`, `filed.valider_iban`) et la
+  validation fournisseur (`7fb25997-…`). Je les joue **après** la lecture de F2c, pour ne pas fausser son contrôle IBAN.
+- Plan V1 (après F2c) : (1) le gérant tente d'approuver `f363b16f` ; attendu `:74`, refus si c'est lui qui a saisi (le dépôt est fait
+  en gérant). (2) Le valideur **rejette** `f363b16f` avec le commentaire « IBAN non confirmé par appel au fournisseur » ; attendu
+  `:73`, le commentaire et le motif restent attachés, et l'IBAN `…0309` n'est pas tenu pour bon. Je préfère un rejet à une approbation,
+  qui rendrait l'IBAN « valide » (avertissement du coordinateur).
 
 ### Jeu d'essai série 1 (prêt, pas encore joué)
 
@@ -242,5 +256,5 @@ par les portes `public.filed_confirmer_fournisseur(uuid, text)` et `public.filed
 - Fait : séries 1 et 1b, au niveau 1. Juste : F1, F2b (en 1b), F4a, F5, F8, F11 (contre la l. 31), F12, rejeu. Écarts : TFILED-03 et 04 (envoyés à A4). TFILED-07 et TFILED-06 sont remontés à Teo. Pas couvert : TFILED-05 (à Teo). Pas testable sans tiers : F0 « sans arrêt ».
 - En cours : rien.
 - Prochain pas : la série 2 (feu vert reçu ; F2c générée, à déposer par le coordinateur). Circuit de validation (seuil de double approbation, délégation datée, saisie et approbation par deux personnes distinctes), puis la sortie comptable (CSV 401/44566/512, FEC). Y ajouter la 3ᵉ pièce Béton Archipel sur l'IBAN `…0309` (réserve 2 de TFILED-02) et l'avoir F6 une fois les arrêts levés.
-- Questions : Q13 répondue. **Q14** : (a) l'uuid de l'entité principale du banc ; (b) le sens des 3 uuid de `filed_exporter_fec` ; (c) une porte qui liste les demandes d'approbation (`demande_id`) ; (d) les valeurs admises pour `p_roles`. Point bloquant : toutes les factures sont arrêtées par le registre. Si aucune demande d'approbation n'existe pour une facture bloquée, le circuit de validation n'est **pas testable sans tiers** (il faut un SIREN que VIES connaît, ou une décision de la file à l'écran).
+- Questions : Q14 répondue (entité, FEC, file, rôles). Restent en attente : la ligne brute de F2c (déposée à 20 h 19 Z), puis la relance du contrôle sur F3 et F4b. Historique de Q14 : : (a) l'uuid de l'entité principale du banc ; (b) le sens des 3 uuid de `filed_exporter_fec` ; (c) une porte qui liste les demandes d'approbation (`demande_id`) ; (d) les valeurs admises pour `p_roles`. Point bloquant : toutes les factures sont arrêtées par le registre. Si aucune demande d'approbation n'existe pour une facture bloquée, le circuit de validation n'est **pas testable sans tiers** (il faut un SIREN que VIES connaît, ou une décision de la file à l'écran).
 - SHA d'arrêt : voir le commit « T-FILED série 1b : TFILED-02 requalifié » sur `testeur-filed`.
