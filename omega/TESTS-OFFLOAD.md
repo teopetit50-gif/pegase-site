@@ -93,6 +93,7 @@ Rejouée sur des comptes neufs pour ne pas lire l'état pollué de la série 1. 
 | — | TOFFLOAD-06 (série 1) | reprises O7 et O11 ouvertes avant le correctif, puis détections 26/10 et 27/10 | `close`, `issue: commande` | juste | 1 |
 | C-07 | TOFFLOAD-07 (c4_27) | compteur lu, puis O15 neuf : reprise ouverte, puis achat F-9015 | `retenus_en_attente / a_valider` : 3 / 3 (V1-V3) → 4 / 4 après l'ouverture → 3 / 3 après la commande (reprise `close`, `commande`) ; la demande d'O14 n'est plus comptée | juste | 1 |
 | C-08 | TOFFLOAD-08 (c4_28) | `offload_regler(client, '{"vague_jour":9}')` sous le gérant | refusé : « Le jour de la vague va de 1 (lundi) à 7 (dimanche). » ; `vague_jour` reste 2 | juste | 1 |
+| C-03 | TOFFLOAD-03 (c4_29, c4_30 ; décision du bureau : un cycle par compte et par trimestre, forçage du gérant avec motif, jamais sur litige) | O16 neuf, contact courriel noté le 11/09 ; puis O1 (litige CASHD) ; puis O14 (cycle clos par commande le jour même) | O16 reprise manuelle refusée : « Déjà contacté le 11/09/2026 par relance (fictive) : écarté de la vague en cours. Le gérant peut forcer la reprise, avec un motif. » ; `offload_forcer_reprise` sans motif : « Forcer une reprise demande un motif. » ; avec motif : reprise `a_valider`, envoi `essai` `a_valider` (non approuvé) ; O1 forcé : refusé « compte en litige chez CASHD (…) : pas de reprise commerciale tant que CASHD suit ce compte. » ; O14 : « Ce compte a déjà eu une reprise il y a moins de 90 jours. » | juste | 1 |
 
 **TOFFLOAD-07 · compteur des messages retenus.** Après C-06 (envoi `bf3163bd-…` annulé, `a_valider` vide pour O14 et vide en tout),
 `offload_envoi_auto('dddddddd-0000-4000-8000-0000000000c4')` rend encore `"retenus_en_attente": 1`. Mineur : le valideur croit qu'un
@@ -227,3 +228,6 @@ TOFFLOAD-03 (décision de Teo), TOFFLOAD-07 et 08 (mineurs). Questions : aucune.
 
 **21/10, arrêt 8.** Fait : TOFFLOAD-07 et 08 rejoués, justes. Reste ouvert : TOFFLOAD-03 (décision de Teo) ; cycle un autre jour que mardi
 (non joué, à la demande du coordinateur). Aucune approbation : 3 demandes `a_valider` (V1-V3) restent en attente.
+
+**22/10, arrêt 9 (réveil court).** Fait : TOFFLOAD-03 rejoué (C-03), juste. Plus aucun écart ouvert. Non joué : cycle un autre jour que
+mardi. Une demande de plus en attente (O16, forcée), non approuvée. Pause jusqu'au feu vert de Teo ou samedi 25/10 après 02 h Z.
