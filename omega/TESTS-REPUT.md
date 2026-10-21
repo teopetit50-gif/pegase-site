@@ -230,7 +230,7 @@ Lecture : sous `set local role authenticated` + claims `sub = eeeeeeee-0000-4000
 ## REPRISE
 
 - **Fait** : séries 1 et 2 jouées ; rejeux justes : préfixe (c3_27), TREPUT-05 (c3_29), 06 (c3_31), 07 (c3_30), 08 (c3_32) ; R7 regroupé par c3_28 (conforme au site, rejeu sur une paire neuve à faire).
-- **En cours** : rien.
+- **En cours** : PAUSE (Teo, 21/10 22 h 45 Z). Reprise au feu vert de Teo ou samedi 25/10 après 02 h Z.
 - **Prochain pas** : après le redéploiement de `reput-reponse`, rejouer R10 (01), une paire R7 neuve (02), R8, R7a et R7b (03), R11 (04).
 - **Questions** : aucune bloquante.
 - **SHA d'arrêt** : voir le commit « T-REPUT : rejeux 06 et 07 justes, R7 regroupé ».
