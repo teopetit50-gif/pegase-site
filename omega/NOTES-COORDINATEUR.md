@@ -1398,3 +1398,7 @@ Redéployer l'Edge reput-reponse (c3_25 à c3_28) et le lecteur A1 fd2da4bd.
 ### Reprise
 
 Au feu vert de Teo ou samedi 25/10 après 02 h Z. Fusionner d'abord cette section dans main (les 2 pushes du 21/10 étaient pris). Les écrans d'espace des branches worker ne vont dans main qu'avec leurs migrations en production (niveau 3, Teo).
+
+## Preuve REPUT en vrai (21/10)
+
+BOÎTE OUVERTE : banc@recu.omegaai.fr à 23 h 06 Z (expediteurs a3630f13 → actif, vérifié encore à 23 h 50 Z). Bloc 0 vérifié : REPUT en essai avec adresse d essai, 3 fiches validées (Horaires d ouverture, Diagnostic à domicile, Comment prendre rendez-vous ?), 62 fiches métiers en brouillon, crons reput-synchro et omega-reput actifs, aucun accord actif (attendu : a_valider). Edge reput-reponse v28 (bureau, 23 h 07 Z). En attente des deux courriels de Teo.
