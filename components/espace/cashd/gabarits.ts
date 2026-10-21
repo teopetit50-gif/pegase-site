@@ -108,7 +108,7 @@ export function apercu(
   const total = 12000;
   let reglement = "";
   /* c2_36 : les moyens de règlement, mise en demeure comprise */
-  if ((ech || cle === "rappel" || cle === "relance" || cle === "mise_en_demeure") && r.moyens_reglement) reglement += `Vous pouvez régler ${r.moyens_reglement.replace(/[.\s]+$/, "")}.\n`;
+  if ((ech || cle === "rappel" || cle === "relance" || cle === "mise_en_demeure") && r.moyens_reglement) reglement += `Moyens de règlement : ${r.moyens_reglement.trim().replace(/[.\s]+$/, "")}.\n`;   /* c2_38 */
   if (ech || cle === "rappel" || cle === "relance") {
     if (r.echelonnement_des !== null && r.echelonnement_des !== undefined && total >= r.echelonnement_des) reglement += "Si un règlement en plusieurs fois vous aide, répondez-nous : nous pouvons convenir d'un échéancier.\n";
   }

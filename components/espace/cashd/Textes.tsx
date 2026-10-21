@@ -424,8 +424,8 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
             </label>
           </div>
           {!paliersTon ? <p className="c2-sous">Le premier palier vient avant le second.</p> : null}
-          <label className="rv-libelle">Vos moyens de règlement (« Vous pouvez régler … »)
-            <input className="rv-champ" value={r.moyens_reglement} maxLength={400} onChange={(e) => setR({ ...r, moyens_reglement: e.target.value })} placeholder="par virement sur le compte FR76 …, par chèque à l'ordre de …, ou au comptoir" />
+          <label className="rv-libelle">Vos moyens de règlement (« Moyens de règlement : … »)
+            <input className="rv-champ" value={r.moyens_reglement} maxLength={400} onChange={(e) => setR({ ...r, moyens_reglement: e.target.value })} placeholder="Virement sur le compte FR76 …, chèque à l'ordre de …, ou au comptoir" />
           </label>
           <label className="rv-libelle">Le vocabulaire des relances de devis
             <select className="rv-champ" value={r.metier} onChange={(e) => setR({ ...r, metier: e.target.value as Reglage["metier"] })}>

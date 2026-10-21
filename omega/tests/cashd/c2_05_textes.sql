@@ -118,7 +118,8 @@ begin
   perform private.cashd_preparer_relances(v_client, j + 4, null);
   select * into r3 from public.cashd_relances x where x.compte_id = (p ->> 'sci')::uuid and x.jour = j + 4 and x.nature = 'facture';
   return next ok(r3.corps like '%Compte tenu du montant en jeu%' and r3.corps not like '%simple oubli%'
-                 and r3.corps like '%Vous pouvez régler par virement sur le compte FR76%' and r3.corps like '%en plusieurs fois%',
+                 and r3.corps like '%Moyens de règlement : par virement sur le compte FR76%'   -- c2_38
+                 and r3.corps like '%en plusieurs fois%',
                  'Au-delà de 10 000 €, la relance demande la date de règlement ; elle donne les moyens de régler et propose un échéancier');
 
   -- ── Une autre langue : l'organisation écrit ses textes en allemand pour un compte allemand ──
