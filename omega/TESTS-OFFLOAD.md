@@ -33,7 +33,7 @@ interventions terminées. Douze comptes sur le même gabarit ; seul le cas chang
 | O5 | contact importé sans accord | aucun message préparé pour lui |
 | O6 | compte déjà relancé il y a 40 jours | pas de second message ce trimestre |
 | O7 | commande passée **pendant** une reprise en attente | reprise close « commande », message en attente annulé |
-| O8 | sortie d'un geste (exclure / suivre) sans motif | refusée ; avec motif : acceptée et journalisée |
+| O8 | sortie d'un geste (exclure / suivre) sans motif | refusée ; avec motif : acceptée et journalisée | | sans motif (null, blanc, vide) : refusé par `offload_changer_statut` (« Un changement de suivi dit pourquoi. ») et `offload_exclure` (« Une exclusion nomme ce qu'elle écarte et dit pourquoi. ») ; avec motif : accepté, deux lignes `offload.compte_statut` (avant/après/motif) au journal lu par `offload_restitution` | juste | 1 |
 | O9 | compte joignable par courriel et par SMS | **un seul** canal par vague |
 | O10 | contrat à reconduction tacite, échéance dans 60 jours | échéance signalée à temps, pas après |
 | O11 | valeur en jeu : le compte commande 1 000 € après l'ouverture de la reprise | valeur **figée** à l'ouverture, pas recalculée |
@@ -74,6 +74,14 @@ CRM / ERP / tableur : « pas testable sans tiers ».
 
 ## Écarts
 
+Candidats en cours de série (à confirmer après la détection) :
+- `offload_tableau` à l'installation : `envoi_auto: true` par défaut (avec `sujets_auto` affaire, échéance, reprise),
+  alors que la page promet « Vous validez ce qui part » (`lib/produits/reprise.ts:451`).
+- Pas de champ « accord du contact » dans `offload_saisir_compte` (champs reconnus : contact, email,
+  telephone, commercial, secteur, ville) : O5 sans moyen de déposer l'absence d'accord.
+- Pas de montant sur une affaire (`offload_saisir_affaire` ne reconnaît que libelle, type) :
+  « stock immobilisé chiffré » (`capacites/reprise.ts:88`, `:152`) ne peut pas l'être.
+
 (aucun encore — format : `TOFFLOAD-01 · cas · reproduction exacte · réponse brute · écran`)
 
 ## Questions au coordinateur
@@ -103,3 +111,8 @@ CRM / ERP / tableur : « pas testable sans tiers ».
 - Prochain pas : dès réponse, dépôt → détection → lecture → événements O7/O11/O8/O12 → rejeu.
 - Questions : section ci-dessus (identifiant du banc, portes de dépôt/lecture/geste/effacement, litige O1, compte gérant).
 - SHA : voir le commit « T-OFFLOAD : jeu d'essai série 1 ».
+
+**21/10, arrêt 2.** Fait : passe A (13 comptes, 170 achats) et passe B (affaire O4, contrat O10, contact
+O6 au 11/09) par `public.offload_saisir_*` ; O8 joué, juste. En cours : attente du litige O1 et de
+`private.offload_detecter(…, 2026-10-21)` demandés au coordinateur. Prochain pas : lire tableau / fiches /
+affaires / échéances, puis O7, O11, O12, détection au 22/10, rejeu. Fichiers : `omega/testeur-offload/serie1_A_depot.sql`.
