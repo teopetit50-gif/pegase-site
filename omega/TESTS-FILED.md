@@ -159,7 +159,51 @@ Lecture par le coordinateur à l'écran ou en lecture seule, relayée brute ; li
 - Pour un client en Guadeloupe (UTC−4), la délégation commence le 21/10 à 20 h et s'éteint le **28/10 à 20 h**, heure locale. Le
   site dit qu'elle « s'éteint à la date prévue » (`capacites/factures.ts:177`).
 - Ligne de délégation de test laissée sur le banc (22/10 → 29/10, motif « T-FILED D3 … »).
- — 21/10, 20 h 40 (portes d'écriture, en gérant `eeeeeeee-…01f1`, client banc seulement)
+
+**TFILED-08 · ✅ CORRIGÉ par a4_73, revérifié le 21/10 à 20 h 29 Z** · confirmer un fournisseur ne relançait pas le contrôle de ses factures
+- Constat d'origine (série 1b) : après `filed_confirmer_fournisseur` sur Béton Archipel, F2b gardait ses anciens contrôles. Il a fallu
+  une relance manuelle par le coordinateur pour voir `iban.nouveau`.
+- Revérification : en gérant, `select public.filed_confirmer_fournisseur('e5ee6419-edf8-4719-924a-cdaa6e31564f', 'T-FILED TFILED-08 :
+  revérification après a4_73')` → `1`. Sans relance manuelle, F1 est recontrôlée à `2026-10-21 20:29:00.58Z`, avec
+  `fournisseur.a_confirmer · ok · « Fournisseur connu. »`. Le déclencheur fonctionne.
+
+**TFILED-11 · F1 · une facture au SIREN à clé fausse arrive à la validation dès que le fournisseur est confirmé** (`capacites/factures.ts:58`) — envoyé à A4
+- Déposé : `F1_siren_cle_fausse.pdf` (Quincaillerie du Moule, SIREN imprimé `912345629`, dont la clé de Luhn est fausse, ce que le
+  coordinateur a vérifié ; TVA `FR24912345629` imprimée dans l'en-tête). Puis, en gérant,
+  `filed_confirmer_fournisseur('e5ee6419-…', …)` → `1`.
+- Réponse brute (relayée, contrôle du 20:29:00.58Z) : statut **`a_valider`** (il était `bloquee`) ;
+  `attention · identite.siren · « SIREN lu (912345629) mais non vérifié par le lecteur : à confirmer sur la pièce. »` ;
+  `attention · identite.tva_intracom · « Numéro de TVA lu (FR24912345629) mais non vérifié par le lecteur : à confirmer sur la pièce. »` ;
+  `attention · tva.numero · « Numéro de TVA du fournisseur absent de la facture : mention obligatoire… »`. Aucun bloquant.
+- Le site promet : « Le numéro de TVA intracommunautaire et le SIREN sont vérifiés avant classement. » En pratique :
+  1. **La clé de contrôle n'est pas vérifiée.** Aucun message ne dit que `912345629` est un SIREN impossible, ce que l'algorithme de
+     Luhn tranche sans aucun tiers.
+  2. **Effet paradoxal** : les SIREN fictifs *valides* (MCD, BAR) restent bloqués par `identite.registre` (VIES), alors que le SIREN
+     *invalide* n'est pas soumis au registre (Q9) et passe. Une fausse facture au SIREN mal formé franchit donc plus facilement les
+     contrôles qu'une facture au SIREN bien formé.
+  3. **Message contradictoire** : `tva.numero` dit « absent de la facture » alors que `identite.tva_intracom` cite le numéro lu sur la pièce.
+- Le verdict « juste » posé sur F1 en série 1 est **retiré** : l'arrêt ne tenait qu'à `fournisseur.a_confirmer`, et les contrôles
+  `identite.*` n'étaient qu'en attention.
+- F1 sera **rebloquée** après le correctif : le circuit joué sur elle (ci-dessous) ne se rejoue pas tel quel.
+
+**TFILED-12 · F1 · le déposant approuve seul sa propre facture** (`capacites/factures.ts:74`, « Celui qui saisit et celui qui approuve
+ne peuvent pas être la même personne » ; carte « Des rôles et des délégations », `:177`)
+- Pièce déposée par le dépôt du **gérant** `eeeeeeee-…01f1` (le coordinateur confirme que le déposant est le gérant). Après TFILED-11,
+  F1 est `a_valider`, avec la demande `7b4464be-1f83-4d6e-a3d5-eadce0d95126` (`filed.valider_facture`, 1 approbation requise).
+- En gérant, transaction validée (20 h 31 Z) : `insert into public.approbations (demande_id, client_id, user_id, decision, commentaire)
+  values ('7b4464be-…', 'dddddddd-0000-4000-8000-0000000000f1', auth.uid(), 'approuve', 'T-FILED C1 : …') returning …` → accepté,
+  `{decision: "approuve", user_id: "eeeeeeee-…01f1"}`.
+- Résultat (Q18, relayé) : la demande est **« approuvee »** (`decide_le 20:31:12Z`) sur la seule approbation du déposant
+  (`au_nom_de null`, `delegation null`), sans refus ni message. La promesse n'est pas tenue.
+- Réserve, à trancher par Teo : « déposer » vaut-il « saisir » ? Pour une pièce lue par le moteur, le déposant est la seule personne
+  qui l'a fait entrer. Si ce n'est pas lui que vise `:74`, alors `:74` ne vise personne dans FILED.
+
+**TFILED-13 (en cours) · F1 · une décision approuvée n'est pas appliquée à la facture**
+- Après TFILED-12 : `execute_le null`, `motif_echec null`, et la facture reste **`a_valider`**. La porte `filed_pieces_en_cours` la
+  montre toujours « En attente d'approbation » (1 pièce, 846,30 €). Le coordinateur regarde si l'exécution est différée ou en panne.
+  Verdict suspendu.
+
+### Série 1b — 21/10, 20 h 40 (portes d'écriture, en gérant `eeeeeeee-…01f1`, client banc seulement)
 
 1. `select public.filed_lever_anomalie('a46345d2-c631-4af3-b713-4bd52b70541e', 'identite.registre', 'T-FILED 1b : …')` (facture F0)
    → refus : `ERROR 22023: Cette anomalie ne se lève pas d'un motif : elle se corrige, ou se décide par la file.` La transaction est
@@ -253,6 +297,16 @@ seulement « proposé », jamais tenu pour bon (vérifié par le coordinateur). 
     approbation par le délégataire, ne sont **pas testables** (fuseau → **TFILED-10**) : il faudrait attendre la date et avoir une facture dans le circuit.
 - Pour info : A4 a livré TFILED-08 (a4_73), mais le correctif n'est **pas encore posé** sur la recette. À revérifier quand il le sera.
 
+### Circuit de validation sur F1 (Q17 : feu vert, banc seulement, rien n'est branché vers l'extérieur)
+- **C0** (20 h 31 Z, gérant) : `filed_regler_circuit('dddddddd-…00f1', 'fba91a52-…', null, 500, null, 2, '{gerant,valideur}')` →
+  `81295f9e-87fa-4e00-ab6d-ab60b41b380a`.
+- Demande de F1 (relayée) : `7b4464be-…`, `en_attente`, **`approbations_requises = 1`**, 846,30 €, `regle_id null`, créée à 20:29:00Z,
+  donc **avant** C0. Le nouveau seuil n'est pas reporté sur une demande ouverte. **Observation** (`:70`) : le site ne dit pas si un
+  seuil s'applique aux demandes en cours. Le seuil de double approbation n'est **pas testable** sur le banc : il faudrait une demande
+  neuve, et aucune facture n'entre dans le circuit à cause du registre.
+- **C1** (gérant = déposant) : approbation acceptée, demande approuvée → **TFILED-12** ; facture non mise à jour → **TFILED-13**.
+- **C2** (valideur) : impossible, puisque la demande est close après C1.
+
 ### Jeu d'essai série 1 (prêt, pas encore joué)
 
 - Générateur : `omega/testeur-filed/generer_pieces.py` → `omega/testeur-filed/pieces/*.pdf` (15 fichiers, même gabarit).
@@ -312,9 +366,10 @@ par les portes `public.filed_confirmer_fournisseur(uuid, text)` et `public.filed
 
 ## REPRISE
 
-**Arrêt 10 — 21/10/2026, 20 h 35 Z** (remplace les arrêts précédents)
-- Fait : séries 1, 1b et 2, au niveau 1. Corrigés et revérifiés : TFILED-03 (a4_71), 04 (a4_72), 08 (a4_73). Écart nouveau : **TFILED-11** (SIREN à clé fausse, facture à valider ; le verdict F1 « juste » est retiré). Remontés à Teo : TFILED-05, 06, 07, 09, 10. Pas testable sans tiers : F0 « sans arrêt » et le FEC.
-- En cours : rien.
-- Prochain pas : selon Q18, faire approuver F1 par le valideur (C2). Plan initial : utiliser F1 (`a_valider`, 846,30 €) pour le circuit. Régler en gérant un seuil à 500 € avec deux approbations, puis faire approuver F1 par le gérant, puis par le valideur, en observant `:70` (deux approbations distinctes) et `:74`. Sinon, attendre le correctif de TFILED-11.
-- Questions : Q17 répondue (feu vert). **Q18** : après C1, quels sont le statut de la demande `7b4464be`, le décompte des approbations et l'état de F1 ? Pourquoi F1 reste-t-elle « en attente » ? Toujours ouverte pour Teo : « déposer » vaut-il « saisir » au sens de `:74` ?
-- SHA d'arrêt : voir le commit « T-FILED : TFILED-08 corrigé, TFILED-11 » sur `testeur-filed`.
+**Arrêt 11 — 21/10/2026, 20 h 40 Z** (remplace les arrêts précédents)
+- Fait : séries 1, 1b et 2, au niveau 1. Corrigés et revérifiés : TFILED-03, 04 et 08. Écarts ouverts : **TFILED-11** (A4), **TFILED-12** (`:74`), TFILED-13 (en cours). Remontés à Teo : TFILED-05, 06, 07, 09 et 10. Pas testable : F0 « sans arrêt », le FEC, le seuil de double approbation (aucune demande neuve possible), l'usage réel d'une délégation.
+- Correction de ce fichier : les sections TFILED-08, 11, 12, 13 et « Circuit » manquaient dans les commits 215cdfeb à 7bf715dc. L'en-tête « Série 1b » avait été écrasé par l'ajout de TFILED-09 et 10, et les insertions suivantes ont échoué sans bruit. Elles sont rétablies dans ce commit.
+- En cours : TFILED-13, qui attend le constat du coordinateur sur `execute_le`.
+- Prochain pas : rendre le verdict de TFILED-13. Ensuite, plus rien n'est jouable sur le banc sans un SIREN connu de VIES ou sans l'écran.
+- Questions : à Teo, « déposer » vaut-il « saisir » au sens de `:74` (TFILED-12) ?
+- SHA d'arrêt : voir le commit « T-FILED : sections rétablies, TFILED-12 et 13 » sur `testeur-filed`.
