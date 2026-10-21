@@ -32,7 +32,7 @@ export const VARIABLES: Record<string, string> = {
   retard_max: "le plus long retard, en jours",
   objet: "l'objet court : « facture F-12 échue », « 3 factures échues »",
   dues: "« la somme suivante reste due », « les sommes suivantes restent dues »… (accordé au nombre)",
-  oubli: "« Il s'agit sans doute d'un simple oubli. » quand le client paie d'habitude à l'heure, sinon rien",
+  oubli: "au rappel, la phrase qui suit l'ancienneté du retard : « simple oubli » jusqu'à 15 jours (si le client paie d'habitude à l'heure), « ce retard dure depuis N jours » ensuite, « ce retard devient important » au-delà de 45 jours (paliers réglables)",
   ton_montant: "au-delà du seuil de ton, la demande de la date de règlement prévue, sinon rien",
   droits: "les pénalités et l'indemnité forfaitaire dues, quand il y en a",
   reglement: "vos moyens de règlement, et la proposition d'échelonnement au-delà du seuil réglé",
@@ -99,7 +99,7 @@ export function apercu(
   cle: CleGabarit,
   sujet: string,
   corps: string,
-  r: { metier?: string; seuil_ton?: number | null; moyens_reglement?: string | null; echelonnement_des?: number | null; emetteur?: string },
+  r: { metier?: string; seuil_ton?: number | null; moyens_reglement?: string | null; echelonnement_des?: number | null; emetteur?: string; ton_retard_jours?: number | null; ton_retard_important_jours?: number | null },
 ): { sujet: string; corps: string } {
   const devis = cle.startsWith("devis");
   const ech = cle === "echeance";
@@ -130,7 +130,11 @@ export function apercu(
     retard_max: ech ? "0" : "45",
     objet: devis ? " D-2026-033" : ech ? "facture F-2026-101" : "facture F-2026-101 échue",
     dues: ech ? "la facture suivante arrive à échéance" : cle === "rappel" ? "la somme suivante reste due" : cle === "relance" ? "la somme suivante reste impayée" : devis ? "le devis suivant" : "les sommes suivantes restent dues",
-    oubli: cle === "rappel" && !ton ? "Il s'agit sans doute d'un simple oubli. " : "",
+    /* c2_30 : le ton suit l'ancienneté du retard (l'exemple a 45 jours de retard) */
+    oubli: cle !== "rappel" ? ""
+      : 45 > (r.ton_retard_important_jours ?? 45) ? `Ce retard de 45 jours devient important${ton ? ". " : " : merci de nous indiquer dès à présent la date de règlement prévue. "}`
+      : 45 > (r.ton_retard_jours ?? 15) ? "Ce retard dure maintenant depuis 45 jours. "
+      : !ton ? "Il s'agit sans doute d'un simple oubli. " : "",
     ton_montant: ton,
     droits: cle === "relance"
       ? "Nous vous rappelons que tout retard de paiement rend exigibles une indemnité forfaitaire pour frais de recouvrement de 40,00 € par facture et des pénalités de retard (Code de commerce, art. L441-10).\n"

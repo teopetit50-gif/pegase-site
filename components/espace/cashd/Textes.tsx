@@ -36,7 +36,7 @@ const PALIERS_DEFAUT: PalierValidation[] = [
 ];
 
 type Source = "exemple" | "reelle";
-type Reglage = { metier: "general" | "btp"; seuil_ton: string; moyens_reglement: string; echelonnement_des: string };
+type Reglage = { metier: "general" | "btp"; seuil_ton: string; moyens_reglement: string; echelonnement_des: string; ton_retard_jours: string; ton_retard_important_jours: string };
 
 function nombre(t: string): number | null {
   const s = t.replace(/[\s  €]/g, "").replace(",", ".");
@@ -71,6 +71,8 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
     seuil_ton: reglages?.seuil_ton != null ? String(reglages.seuil_ton) : "",
     moyens_reglement: reglages?.moyens_reglement ?? "",
     echelonnement_des: reglages?.echelonnement_des != null ? String(reglages.echelonnement_des) : "",
+    ton_retard_jours: reglages?.ton_retard_jours != null ? String(reglages.ton_retard_jours) : "",
+    ton_retard_important_jours: reglages?.ton_retard_important_jours != null ? String(reglages.ton_retard_important_jours) : "",
   });
 
   const charger = useCallback(async () => {
@@ -152,6 +154,7 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
   const vu = apercu(cle, sujet, corps, {
     metier: r.metier, seuil_ton: nombre(r.seuil_ton), moyens_reglement: r.moyens_reglement.trim() || null,
     echelonnement_des: nombre(r.echelonnement_des), emetteur,
+    ton_retard_jours: nombre(r.ton_retard_jours), ton_retard_important_jours: nombre(r.ton_retard_important_jours),
   });
 
   const enregistrer = async (actif: boolean) => {
@@ -270,8 +273,13 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
     }
   };
 
-  const valeursReglage = { seuil_ton: nombre(r.seuil_ton), echelonnement_des: nombre(r.echelonnement_des) };
-  const reglageValide = !Number.isNaN(valeursReglage.seuil_ton) && !Number.isNaN(valeursReglage.echelonnement_des) && r.moyens_reglement.length <= 400;
+  const valeursReglage = {
+    seuil_ton: nombre(r.seuil_ton), echelonnement_des: nombre(r.echelonnement_des),
+    ton_retard_jours: nombre(r.ton_retard_jours), ton_retard_important_jours: nombre(r.ton_retard_important_jours),
+  };
+  const paliersTon = (valeursReglage.ton_retard_jours ?? 15) < (valeursReglage.ton_retard_important_jours ?? 45);
+  const reglageValide = !Number.isNaN(valeursReglage.seuil_ton) && !Number.isNaN(valeursReglage.echelonnement_des) && r.moyens_reglement.length <= 400
+    && !Number.isNaN(valeursReglage.ton_retard_jours) && !Number.isNaN(valeursReglage.ton_retard_important_jours) && paliersTon;
   const reglerTon = async () => {
     setEnvoi(true);
     setErreur(null);
@@ -281,6 +289,7 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
         if (!client) throw new Error("Aucun compte rattaché à cette session.");
         await portes.reglerRelances(client, {
           metier: r.metier, seuil_ton: valeursReglage.seuil_ton, moyens_reglement: r.moyens_reglement.trim(), echelonnement_des: valeursReglage.echelonnement_des,
+          ton_retard_jours: valeursReglage.ton_retard_jours, ton_retard_important_jours: valeursReglage.ton_retard_important_jours,
         });
         await apresReglage?.();
       }
@@ -406,6 +415,15 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
               <input className="rv-champ" inputMode="decimal" value={r.echelonnement_des} onChange={(e) => setR({ ...r, echelonnement_des: e.target.value })} placeholder="5 000" />
             </label>
           </div>
+          <div className="esp-form-ligne">
+            <label className="rv-libelle">Au rappel, dire la durée du retard au-delà de (jours)
+              <input className="rv-champ" inputMode="numeric" value={r.ton_retard_jours} onChange={(e) => setR({ ...r, ton_retard_jours: e.target.value })} placeholder="15 (par défaut)" />
+            </label>
+            <label className="rv-libelle">Dire que le retard devient important au-delà de (jours)
+              <input className="rv-champ" inputMode="numeric" value={r.ton_retard_important_jours} onChange={(e) => setR({ ...r, ton_retard_important_jours: e.target.value })} placeholder="45 (par défaut)" />
+            </label>
+          </div>
+          {!paliersTon ? <p className="c2-sous">Le premier palier vient avant le second.</p> : null}
           <label className="rv-libelle">Vos moyens de règlement (« Vous pouvez régler … »)
             <input className="rv-champ" value={r.moyens_reglement} maxLength={400} onChange={(e) => setR({ ...r, moyens_reglement: e.target.value })} placeholder="par virement sur le compte FR76 …, par chèque à l'ordre de …, ou au comptoir" />
           </label>

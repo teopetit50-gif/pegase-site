@@ -45,7 +45,9 @@ begin
                  and r.corps like '%C-LEFEVRE, secteur Immobilier%' and r.corps like '%Mme Lefèvre%' and r.corps like '%Bien cordialement,%Atelier Bertin — service comptable%',
                  'Le message reprend la facture, son montant, son retard, la référence et le secteur du compte, la formule et la signature');
   return next ok(r.corps not like '%F-2026-140%', 'La facture non échue n''y est pas');
-  return next ok(r.corps like '%simple oubli%', 'Un compte sans retard passé : le ton du rappel est le plus doux');
+  -- (c2_30 : le ton suit aussi l'ancienneté — à 45 jours de retard, le rappel dit la durée du retard plutôt que « simple oubli »)
+  return next ok(tests.c2_plat(r.corps) like '%Ce retard dure maintenant depuis 45 jours.%' and r.corps not like '%simple oubli%',
+                 'Un compte sans retard passé, 45 jours de retard : le rappel dit la durée du retard, sans parler d''oubli');
   select * into d from public.demandes_validation x where x.id = r.demande_id;
   return next is(d.module || '/' || d.type_action || '/' || d.objet_type || '/' || d.montant || '/' || d.statut, 'cashd/cashd.rappel/cashd_relances/12000.00/en_attente',  -- un rappel : type cashd.rappel depuis c2_12, sans accord il attend
                  'Une demande de validation du socle, avec son montant, attend une décision humaine');

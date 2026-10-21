@@ -22,6 +22,9 @@ export type Reglages = {
   heure_relances?: string;
   /* c2_04 : le ton, les moyens de règlement, le métier */
   seuil_ton?: number | null;
+  /* c2_30 : les paliers d'ancienneté du ton (null : 15 et 45 jours) */
+  ton_retard_jours?: number | null;
+  ton_retard_important_jours?: number | null;
   moyens_reglement?: string | null;
   echelonnement_des?: number | null;
   metier?: "general" | "btp";
