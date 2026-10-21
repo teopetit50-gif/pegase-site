@@ -10,6 +10,7 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
 - **Fait** : c2_10 → c2_15 posés ; liste de Teo complète (G2…G21, G14, G17).
 - **Posés et verts (19/10)** : c2_15 (11/11 seul), c2_16 (taux le plus récent).
 - **Écran (19/10)** : section « Taux de change » de la vue Trésorerie (TauxChange.tsx) — le taux retenu de chaque devise des factures et sa source (BCE / saisi), saisie d'un taux par cashd_poser_taux. Rien à poser en base.
+- **Jeu NOBAT (21/10, Teo)** : `omega/banc/cashd_nobat.sql` — factures émises par le banc (négoce BTP Guadeloupe, fictif) : 1 juste + 5 erreurs (doublon de numéro, TTC faux, échéance avant émission, client sans adresse, règlement partiel non lettré) + relevé. Local : 3 attrapées / traitées, **2 écarts** (doublon : la ligne met à jour la pièce d'un autre client, sans alerte ; TTC ≠ HT + TVA relancé tel quel). Non corrigés (consigne).
 - **Prochain pas** : charger les factures d'Omega (cashd_omega.sql) quand Teo envoie ses PDF ; G19 avec un premier client.
 
 - **Posés et verts (18/10)** : c2_11 envoi à la main (842f9c25) ; c2_12 v2 modèle 2 (5ee5fd10, ^test_c2_ 12/12) — rappels
