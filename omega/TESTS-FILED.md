@@ -205,6 +205,22 @@ seulement « proposé », jamais tenu pour bon (vérifié par le coordinateur). 
   confirmé par appel au fournisseur (banc, données fictives) » → accepté et **validé (`commit`)** : `{decision: "rejete", user_id:
   "eeeeeeee-…02f1", commentaire: "…"}`. Effets à relire (Q15) : statut de la demande, état de l'IBAN `…0309`, et si les anomalies
   `iban.nouveau` de F2b et F2c restent ouvertes, le motif de refus attaché aux factures (`:73`).
+- **Qualification de V1** (Q15, relayé par le coordinateur, 20 h 21 Z) :
+  - Demande `f363b16f` : `demandeur_type = systeme`, `demandeur_id null`, `roles_autorises = gerant, admin, valideur`,
+    `exige_commentaire = false`. L'IBAN a été proposé par le moteur, personne ne l'a saisi. **V1a : `:74` pas testable sur cette
+    demande** (pas de saisie humaine). **Observation** pour Teo : le gérant, déposant de F2c, peut approuver l'IBAN tiré de sa propre
+    pièce. Reste à trancher si « déposer » vaut « saisir » au sens de `:74`.
+  - **V1b : juste.** La demande est « rejetee » (20:20:40Z), avec une seule approbation, celle du valideur, commentaire compris. L'IBAN
+    `…0309` est « refuse », avec mon commentaire pour motif ; `…0340` reste « valide ». Les factures sont **recontrôlées d'elles-mêmes**
+    (20:21:00Z) : F2b et F2c passent de `iban.nouveau` à `iban.refuse` (« IBAN déjà refusé pour ce fournisseur (FR76 •••• 0309) : ne pas
+    payer, alerter. »), et F2a affiche `iban.nouveau ok` (« IBAN connu et validé »). Toutes restent bloquées. Le contraste avec
+    TFILED-08 est noté : la décision sur l'IBAN relance le contrôle, la confirmation du fournisseur ne le relance pas.
+  - **Observation `:73`** : le commentaire du valideur est attaché à l'IBAN, pas aux factures. Les factures ne montrent que le message
+    du contrôle. `:73` vise le circuit des factures, qui n'est pas testable ici : je le garde en observation, sans en faire un écart.
+- **D1 à D3, délégation datée** (`:71`), préparés : en gérant, insertion dans `delegations` (gérant → valideur, module `filed`, entité
+  principale). D1 sans date de fin et D2 avec une fin antérieure au début, tous deux attendus refusés, joués en transaction annulée.
+  D3, du 22/10 au 29/10 avec un motif, attendu accepté. **Non joués** : à 21 h 25, la recette rend deux fois `Connection terminated
+  due to connection timeout` (redémarrage ? cf. constat du 19/10). Je n'insiste pas.
 
 ### Jeu d'essai série 1 (prêt, pas encore joué)
 
@@ -265,9 +281,9 @@ par les portes `public.filed_confirmer_fournisseur(uuid, text)` et `public.filed
 
 ## REPRISE
 
-**Arrêt 7 — 21/10/2026, 20 h 50** (remplace les arrêts précédents)
-- Fait : séries 1 et 1b, au niveau 1. Juste : F1, F2b (en 1b), F4a, F5, F8, F11 (contre la l. 31), F12, rejeu. Écarts : TFILED-03 et 04 (envoyés à A4). TFILED-07 et TFILED-06 sont remontés à Teo. Pas couvert : TFILED-05 (à Teo). Pas testable sans tiers : F0 « sans arrêt ».
-- En cours : rien.
-- Prochain pas : la série 2 (feu vert reçu ; F2c générée, à déposer par le coordinateur). Circuit de validation (seuil de double approbation, délégation datée, saisie et approbation par deux personnes distinctes), puis la sortie comptable (CSV 401/44566/512, FEC). Y ajouter la 3ᵉ pièce Béton Archipel sur l'IBAN `…0309` (réserve 2 de TFILED-02) et l'avoir F6 une fois les arrêts levés.
-- Questions : Q14 répondue (entité, FEC, file, rôles). F3 et F4b sont revérifiés : justes. F2c est lue : juste. **Q15** : (a) qui est le demandeur, ou « saisisseur », de la demande `f363b16f` ? Le socle a accepté l'approbation du gérant (V1a, annulée). (b) Après le rejet du valideur (V1b) : quel est le statut de la demande et l'état de l'IBAN `…0309` ? Les `iban.nouveau` de F2b et F2c restent-ils ouverts ? Le commentaire et le motif de refus sont-ils visibles sur les factures ? Historique de Q14 : : (a) l'uuid de l'entité principale du banc ; (b) le sens des 3 uuid de `filed_exporter_fec` ; (c) une porte qui liste les demandes d'approbation (`demande_id`) ; (d) les valeurs admises pour `p_roles`. Point bloquant : toutes les factures sont arrêtées par le registre. Si aucune demande d'approbation n'existe pour une facture bloquée, le circuit de validation n'est **pas testable sans tiers** (il faut un SIREN que VIES connaît, ou une décision de la file à l'écran).
-- SHA d'arrêt : voir le commit « T-FILED série 1b : TFILED-02 requalifié » sur `testeur-filed`.
+**Arrêt 8 — 21/10/2026, 21 h 30** (remplace les arrêts précédents)
+- Fait : séries 1, 1b et 2 (partielle), niveau 1. Juste : F1, F2b, F2c, F3 et F4b (après a4_71 et a4_72), F4a, F5, F8, F11 (contre la l. 31), F12, rejeu, exports Sage et Pennylane vides, V1b (rejet de l'IBAN et recontrôle). Écarts ouverts : TFILED-07 et TFILED-06 (remontés à Teo), TFILED-08 (à A4). Pas couvert : TFILED-05. Pas testable sans tiers : F0 « sans arrêt », circuit des factures (seuil, double approbation, `:74`), FEC (le banc n'a pas de SIREN).
+- En cours : délégation D1 à D3, interrompue par l'indisponibilité de la recette.
+- Prochain pas : rejouer D1 à D3 quand le coordinateur dit que la recette répond. Puis, si l'on veut tester le circuit des factures, il faut un SIREN que VIES reconnaît sur le banc ou une décision de la file à l'écran, ce qui est l'affaire du coordinateur ou du bureau.
+- Questions : la recette est-elle disponible ? Et une observation pour Teo : « déposer » vaut-il « saisir » au sens de `:74` ?
+- SHA d'arrêt : voir le commit « T-FILED série 2 : V1 qualifié, recette injoignable » sur `testeur-filed`.
