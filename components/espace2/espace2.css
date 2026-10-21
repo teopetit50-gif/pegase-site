@@ -294,7 +294,7 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
 }
 @media (min-width: 768px) {
   .v2-app {
-    grid-template-columns: 255px minmax(0, 1fr);
+    grid-template-columns: 304px minmax(0, 1fr); /* rail 48 + volet 256 */
   }
 }
 .v2-colonne-principale {
@@ -339,84 +339,165 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
     height: 100dvh;
   }
 }
+
+/* ══ Le rail d'icônes et le volet (21/10/2026, comme Supabase) ═══════════
+   Relevé dans packages/ui sidebar.tsx et apps/studio Sidebar.tsx : rail de
+   3rem (48 px) qui s'ouvre à 13rem (208 px) au survol, par-dessus le volet,
+   en 100 ms linéaires ; entrées h-8 (32 px) rounded-md px-1.5 gap-2, icônes
+   size-5 (20 px, trait 1,5), libellé text-sm, foreground-lighter au repos,
+   foreground + font-medium + fond sidebar-accent sur la section ouverte,
+   survol sidebar-accent/50 ; groupes p-2 séparés par un filet ; volet de
+   256 px (w-64) avec un en-tête de 48 px (ProductMenuBar, px-6). */
 .v2-laterale-int {
+  position: relative;
+  display: flex;
+  height: 100%;
+}
+.v2-rail-place {
+  flex: none;
+  width: 48px;
+}
+.v2-rail {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 30;
+  width: 48px;
+  overflow: hidden;
+  background: var(--v2-bg-200);
+  border-right: 1px solid var(--v2-a-400);
+  transition: width 0.1s linear;
+}
+@media (hover: hover) {
+  .v2-rail:hover,
+  .v2-rail:focus-within {
+    width: 208px;
+  }
+}
+.v2-rail-int {
   display: flex;
   flex-direction: column;
+  gap: 8px;
   height: 100%;
-  padding: 0;
+  padding: 8px;
 }
-/* l'en-tête du volet Supabase : 48 px, le filet dessous, le contenu à 24 px du bord */
+.v2-rail-nav {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden auto;
+  scrollbar-width: none;
+}
+/* min-width 0 et minmax(0, 1fr) : les libellés (nowrap) ne doivent pas
+   élargir les entrées au-delà du rail replié ; chaque entrée rogne le sien */
+.v2-rail-groupe {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
+}
+.v2-rail-groupe + .v2-rail-groupe {
+  padding-top: 8px;
+  border-top: 1px solid var(--v2-a-400);
+}
+.v2-rail-bas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  margin-top: auto;
+}
+.v2-rail-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  height: 32px;
+  padding: 0 6px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--v2-gray-700);
+  font: inherit;
+  font-size: 14px;
+  white-space: nowrap;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.v2-rail-item:hover,
+.v2-rail-item[data-pressed] {
+  background: var(--v2-a-100);
+  color: var(--v2-gray-1000);
+}
+.v2-rail-item[data-actif] {
+  background: var(--v2-gray-100);
+  color: var(--v2-gray-1000);
+  font-weight: 500;
+}
+.v2-rail-item > svg,
+.v2-rail-item .v2-marque-omega,
+.v2-rail-item .v2-avatar {
+  flex: none;
+}
+.v2-rail-item .v2-marque-omega,
+.v2-rail-item .v2-marque-omega img {
+  width: 20px;
+  height: 20px;
+}
+.v2-rail-item .v2-avatar {
+  width: 20px;
+  height: 20px;
+  font-size: 9px;
+}
+.v2-rail-item .v2-rond-pastille {
+  top: 6px;
+  left: 18px;
+  right: auto;
+  box-shadow: 0 0 0 2px var(--v2-bg-200);
+}
+.v2-rail-libelle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2-volet {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+/* l'en-tête du volet Supabase : 48 px, le filet dessous, le titre à 24 px du bord */
 .v2-laterale-haut {
   display: flex;
   align-items: center;
   gap: 4px;
   flex: none;
   min-height: 48px;
-  padding: 0 18px;
+  padding: 0 16px 0 24px;
   border-bottom: 1px solid var(--v2-a-400);
 }
-.v2-equipe {
+.v2-volet-titre {
   flex: 1;
   min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 40px;
-  padding: 0 8px 0 6px;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--v2-gray-1000);
-  font: inherit;
+  margin: 0;
+  font-size: 14px;
   font-weight: 500;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.v2-equipe:hover,
-.v2-equipe[data-pressed] {
-  background: var(--v2-a-100);
-}
-.v2-equipe-nom {
-  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.v2-equipe-chevrons {
-  margin-left: auto;
-  flex: none;
-  color: var(--v2-gray-900);
-}
-.v2-equipe .v2-badge {
-  flex: none;
-}
-.v2-trouver {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: auto;
-  height: 30px;
-  margin: 16px 12px 0;
-  padding: 0 6px 0 10px;
-  border: 0;
-  border-radius: 6px;
-  background: var(--v2-bg-100);
-  box-shadow: 0 0 0 1px var(--v2-a-400);
-  color: var(--v2-gray-900);
-  font: inherit;
-  cursor: pointer;
-  transition: box-shadow 0.15s;
-}
-.v2-trouver:hover {
-  box-shadow: 0 0 0 1px var(--v2-a-500);
-}
-.v2-trouver > span:first-of-type {
-  flex: 1;
-  text-align: left;
-}
-.v2-trouver .v2-kbd {
-  border-radius: 999px;
-  min-width: 22px;
+/* la recherche, dans la barre du haut */
+.v2-recherche .v2-kbd {
+  margin-left: 2px;
 }
 .v2-laterale-nav {
   flex: 1;
@@ -543,35 +624,6 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
 .v2-lien--sous {
   padding-left: 24px;
 }
-.v2-laterale-bas {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-  padding: 12px;
-  border-top: 1px solid var(--v2-a-400);
-  border-top: 1px solid var(--v2-a-400);
-}
-.v2-moi {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 500;
-}
-.v2-moi .v2-avatar {
-  width: 24px;
-  height: 24px;
-  font-size: 10px;
-  cursor: default;
-}
-.v2-moi-nom {
-  min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 .v2-rond {
   position: relative;
   width: 32px;
@@ -659,7 +711,7 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   background: #00000066;
 }
 .v2-tiroir {
-  width: min(300px, 85vw);
+  width: min(304px, 88vw);
   height: 100dvh;
   outline: none;
   font-family: var(--v2-sans);
@@ -2762,7 +2814,6 @@ html.v2-calme *::after {
 }
 
 /* « Omega × l'entreprise » en tête de la barre (07/10/2026) */
-.v2-equipe { gap: 7px; }
 .v2-marque-omega { display: grid; place-items: center; width: 24px; height: 24px; flex: none; }
 .v2-marque-omega img { width: 22px; height: 22px; object-fit: contain; }
 .v2-marque-fois { flex: none; display: grid; place-items: center; width: 14px; height: 14px; color: var(--v2-gray-1000); margin: 0 1px; }
@@ -2942,8 +2993,6 @@ html.v2-calme .v2-vivant .v2-carte::before, html.v2-calme .v2-vivant .v2-dr-cart
 .v2 .v2-haut { height: 48px; padding: 0 16px; }
 .v2 .v2-lien { height: 26px; gap: 8px; border-radius: 6px; }
 .v2 .v2-lien[aria-current="page"], .v2 .v2-lien[data-dedans] { background: var(--v2-gray-100); }
-.v2 .v2-trouver { height: 30px; }
-.v2 .v2-equipe { height: 32px; }
 /* boutons : 26 px et texte de 13 px, comme ceux d'Attio (« Sorted by Date », « View settings », mesurés le 11/10) */
 .v2 .v2-portee, .v2 .v2-btn--petit, .v2 .v2-val-bouton { height: 26px; padding: 0 8px; gap: 6px; font-size: 13px; }
 .v2 .v2-btn--petit.v2-btn--icone { width: 26px; padding: 0; }

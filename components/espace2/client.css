@@ -36,9 +36,6 @@ html[data-v2-theme="light"] .oc-logo-sombre { display: none; }
 .v2.oc .v2-lien:focus:not(:focus-visible) { box-shadow: none; }
 .v2.oc .v2-laterale .v2-section-titre { font-size: 13px; font-weight: 400; letter-spacing: 0; color: var(--v2-gray-700); }
 
-/* — « Rechercher… » : 30 px, angles de 6 px comme les boutons — */
-.v2.oc .v2-trouver { height: 30px; border-radius: 6px; font-weight: 400; }
-.v2.oc .v2-trouver .v2-kbd { border-radius: 4px; height: 16px; min-width: 16px; padding: 0 3px; font-size: 10.5px; }
 
 /* — la barre du haut et les boutons — */
 .v2.oc .v2-haut-titre { font-weight: 500; letter-spacing: -0.02em; }
