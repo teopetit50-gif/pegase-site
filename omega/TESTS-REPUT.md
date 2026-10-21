@@ -138,7 +138,8 @@ Chaque série = 16 dépôts, puis rejeu à l'identique (même id externe).
 - La boîte de réception de `banc-test-reput` et l'outil de formulaire signé.
 - Comment poser un contact « en litige CASHD » pour R5 (c'est côté socle, pas à toi).
 - Un compte « gérant » du client banc pour l'écran et pour l'accord de R13.
-- (T-REPUT, 21/10) **Bloquant** : l'identifiant (`client_id`) de `banc-test-reput`. Je ne dépose rien avant.
+- (T-REPUT, 21/10) ~~client_id~~ → **répondu** : `dddddddd-0000-4000-8000-0000000000c3` ; dépôt par `public.deposer_reception` ; formulaires par la même porte (canal `formulaire`) ; compte gérant demandé au bureau. Adresse de litige R5 transmise : `contact.litige@exemple.test`.
+- (T-REPUT, 21/10, **bloquant**) Toujours sans réponse : la porte pour poser **et valider** les fiches, les portes de **lecture** du résultat, la porte du routage (R11) et celle de l'accord (R13).
 - (T-REPUT) Les **portes** pour : (a) déposer une demande sans passer par Brevo (courriel simulé
   avec `message_id` fixe, et pièce jointe) ; (b) poser et valider les 12 fiches au nom du gérant ;
   (c) poser l'accord « horaires » en envoi seul et le routage `facturation` → Comptabilité ;
@@ -152,7 +153,7 @@ Chaque série = 16 dépôts, puis rejeu à l'identique (même id externe).
 ## REPRISE
 
 - **Fait** : promesses et guides lus ; jeu d'essai série 1 écrit (12 fiches, 16 dépôts, attendus adossés aux lignes).
-- **En cours** : rien de joué.
+- **En cours** : rien de joué ; client_id et porte de dépôt reçus.
 - **Prochain pas** : poser la base, déposer les 16 demandes, lire par les portes, rejouer.
-- **Questions** : client_id du banc + portes (bloquant), R4, adresse d'essai — voir ci-dessus.
+- **Questions** : portes fiches/validation et lecture (bloquant), routage, accord R13, R4, adresse d'essai.
 - **SHA d'arrêt** : voir le commit « T-REPUT : jeu d'essai série 1 ».
