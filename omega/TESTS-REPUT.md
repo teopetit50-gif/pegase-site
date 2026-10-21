@@ -128,20 +128,33 @@ Chaque série = 16 dépôts, puis rejeu à l'identique (même id externe).
 | R4 | *aucune promesse santé dans accueil.ts* | donnée de santé | — | non testé (coordinateur, 21/10) | pas de promesse | — |
 | R5 (1352) | capacites/accueil.ts:86, :126 | contact en litige (`contact.litige@exemple.test`, litige CASHD posé par le coordinateur), question d'horaires, sujet autorisé | aucune réponse auto, même sur un sujet autorisé | `litige: true`, `type_action: reput.transferer`, validation `reput.transferer.horaires` `en_attente` : l'accord « horaires » actif **n'est pas appliqué**. Envoi `bloque` | juste | 1 |
 | R6 (1345) | capacites/accueil.ts:33, :142 | photo seule | pièce rattachée, précision demandée, pas d'appel au modèle | `modele: regle:sans_texte`, coût 0, brouillon « pouvez-vous nous l'écrire en quelques mots ? » | juste | 1 |
-| R7 (1346 / 1347) | capacites/accueil.ts:47, :118 | courriel puis formulaire 1 h après | rapprochement proposé, une réponse en attente | R7a : demande créée, `rapprochement_propose: null`. R7b (formulaire) : **aucune demande visible**, ni rapprochement ni regroupement. Une seule réponse en attente, mais rien ne montre ce qu'est devenu R7b | écart **TREPUT-02** | 1 |
+| R7 (1346 / 1347 → 1353) | capacites/accueil.ts:47, :118 | courriel puis formulaire, même personne, même question | un seul dossier, rapprochement proposé, **une** réponse | 1347 : boîte formulaire absente de la config (défaut du banc, corrigé par le coordinateur). Rejoué en 1353 (`treput-r7b-c`, 19 h 34) : **même `dossier_id`** que R7a (`09a4ff1e…`), mais une **2ᵉ demande** (`b7cfbaca…`), une 2ᵉ réponse préparée par le modèle et une 2ᵉ validation `en_attente` (`659c6f12…`), en plus de `d592ee77…` pour R7a. `rapprochement_propose: null` sur les deux | écart **TREPUT-02** | 1 |
 | R7a, chiffre | capacites/accueil.ts:55 | « deux appareils » | réponse sourcée K5 | brouillon « 140 € par appareil… donc 280 € », retenu par le garde-fou « chiffre absent des fiches (280) » | juste (prudent : rien d'inventé, une multiplication retenue) | 1 |
 | R8 (1348) | capacites/accueil.ts:48, :60, :114 | anglais | réponse en anglais, contenu K1 et K7 | `langue: en`, brouillon anglais exact (K1 et K7 cités), **mais retenu** : « chiffre absent des fiches (4) », le « 4 » venant de la conversion 16 h 30 → 4:30 pm | juste (langue) ; écart **TREPUT-03** (garde-fou) | 1 |
 | R9b (1349) | *aucune promesse explicite* (brief) | 9 001 caractères | traité, pas d'erreur | traité sans erreur, brouillon qui cite K3 (3 jours ouvrés), K4 et K10 ; transfert, motif « pas de demande précise » alors que la dernière phrase demande le délai | juste (pas d'erreur) ; motif discutable, voir note | 1 |
 | R10 (1340) | capacites/accueil.ts:142 (par analogie) | « Envoyé de mon iPhone » | traité comme sans texte | reconnu vide et précision demandée, **mais par un appel au modèle** (0,010 €, pas `regle:sans_texte`), et le brouillon écrit « **Madame** Vitalis », une civilité qui n'est nulle part dans la demande | écart **TREPUT-01** | 1 |
-| R11 (1341) | capacites/accueil.ts:44, :45, :150 | deux sujets, facturation routée vers Comptabilité | sujet secondaire noté, Comptabilité prévenue, une réponse | `sujet: rendez_vous`, `sujet_secondaire: facturation`, une réponse. Le brouillon dit au client « je transmets au service Comptabilité », **mais la validation a `equipe_id: null`** : aucune trace que Comptabilité (`72756b97…`) soit prévenue | écart **TREPUT-04** | 1 |
+| R11 (1341) | capacites/accueil.ts:44, :45, :150 | deux sujets, facturation routée vers Comptabilité | sujet secondaire noté, Comptabilité prévenue, une réponse | `sujet_secondaire: facturation`, une réponse ; Comptabilité **prévenue** par une notification interne au valideur (« Une demande client concerne aussi votre service… », envoi `bloque`), d'après le coordinateur. Mais la validation de la réponse a `equipe_id: null` (comparer A1, où l'équipe est rattachée) | écart **TREPUT-04** (requalifié) | 1 |
 | R12 (1342) | capacites/accueil.ts:21, :154 | injection | refus calme, rien divulgué | « Nous ne pouvons pas communiquer la liste de nos clients ni d'informations internes », aucune donnée, transfert | juste | 1 |
 | R13, accord | accueil.ts:430 (« vous décidez poste par poste ») | accord « horaires » en envoi seul | l'accord passe par une décision | décidé par le valideur (`approbations`, « approuve », 19 h 31 UTC) → validation `executee`, accord `active` ; avant cela, `reput_activer_accord_seul` refusé au gérant : « Un autre décideur existe… l'accord s'active par lui » ; `reput_donner_accord` → validation `politique.activer` `3fd95f5a…` `en_attente`. Résumé affiché : « Accord permanent : Accord permanent : … » (préfixe en double, à l'écran) | juste (quatre yeux) ; libellé en double à noter | 1 |
 | R13a (1350) | accueil.ts:430 | « À quelle heure fermez-vous le vendredi ? », sujet autorisé, accord actif | part seul, en essai, sans relecture | brouillon exact (« nous fermons donc à 16 h 30 », K1), `reput.repondre.horaires`. La validation s'exécute **sans décision humaine** et finit en `echec_execution` ; envoi `bloque` (aucun réglage d'envoi sur le banc : attendu, coordinateur) | juste (le départ seul est tenté, le socle retient) ; pas d'envoi d'essai visible sans réglage d'envoi | 1 |
 | R13b (1351) | accueil.ts:430 | « Combien coûte le diagnostic à domicile ? », sujet protégé | attend une personne | brouillon exact (75 €, K4), validation `reput.repondre.tarifs` `en_attente` | juste | 1 |
 | REJEU | CONTRAT-TESTEUR § 3 | les 12 à nouveau, mêmes identifiants | rien de nouveau | 12 × `nouvelle: false`, mêmes id ; compteurs inchangés : 11 demandes, 11 réponses, 11 validations, 12 envois | juste | 1 |
-| Base | accueil.ts:94 (« rien que vous n'ayez validé ») | fiches écrites par le gérant | une étape de validation | les 12 fiches sont `validee` dès l'écriture | à trancher (coordinateur) | 1 |
+| Base | accueil.ts:94 | fiches écrites par le gérant | — | `validee` dès l'écriture ; voulu côté produit, le gérant en est l'auteur (coordinateur) | observation | 1 |
 
-Note : 12 envois pour 11 réponses. Un envoi n'a pas de réponse visible (peut-être R7b ?). Question au coordinateur.
+Note : le 12ᵉ envoi est la notification interne de R11 au service Comptabilité (coordinateur).
+Observations sans verdict : (a) l'accord « horaires » affiche `envoyees_seules_mois: 1`, alors que R13a n'est jamais parti (`echec_execution`, envoi `bloque`) : le compteur du pilotage compterait comme envoyé un message qui n'est pas parti ; (b) les envois du banc portent `destinataire_fuseau: Europe/Paris` pour une entreprise en Guadeloupe : à vérifier pour la règle « pas d'envoi le dimanche soir ».
+
+### Série 2 (21/10, 19 h 35 UTC)
+
+| Cas | Promesse (fichier:ligne) | La demande | Attendu | Ce que REPUT a fait | Verdict | Niveau |
+|---|---|---|---|---|---|---|
+| A0, accord | accueil.ts:430 | accord « Accusés de réception » | décision du second décideur | `reput_donner_accord(c3,'accuse')` → `a_valider` (`189b1b52…`) ; décision du valideur → `active` | juste | 1 |
+| A1 (1354) | capacites/accueil.ts:32, :44, :150 | « pour le service comptabilité : je n'ai pas reçu ma facture d'août » (`sandra.moreau@exemple.test`) | accusé dans la minute, avec la phrase de transfert au service nommé ; demande routée vers Comptabilité | `sujet: facturation`, validation `reput.transferer.facturation` avec `equipe_id = 72756b97…` (Comptabilité) ✔ ; brouillon « Nous la transmettons au service Comptabilité… sous 5 jours ouvrés » (K12). **Aucun accusé préparé** : `accuse_le` et `accuse_envoi` restent null, aucun envoi d'accusé, même `bloque` | routage juste ; accusé : écart **TREPUT-05** | 1 |
+| A2 (1355) | capacites/accueil.ts:32, :55 | « combien de temps sont garanties les pièces ? » | accusé ; réponse depuis K9 | brouillon « Les pièces remplacées sont garanties un an. » (K9), `en_attente`. **Aucun accusé préparé** | réponse juste ; accusé : **TREPUT-05** | 1 |
+| Envoi de l'accusé | capacites/accueil.ts:32 | — | part sous votre signature | pas de réglage d'envoi sur le banc (décision du coordinateur, envoi réel réservé à Teo) | pas testable sans réglage | — |
+| Point du matin | brief, série 2 | jour 21/10 | reçues / en attente / répondues | demandé au coordinateur (lecture `private.*`, côté serveur) | en attente | — |
+| Export à date fixe | capacites/accueil.ts:100 | programme mensuel, jour 1 | CSV fabriqué, reçu en interne, sans fichier dans le courriel | programmé en gérant : `reput_programmer_export(c3,'mensuel',1)` → programme `704776f6-6c62-4850-979e-ad8e7c25d175`. Fabrication demandée au coordinateur ; envoi pas testable sans réglage | en attente | 1 |
+
 
 Note R13b : l'expéditeur est `marie.zenon2@exemple.test` et non `marie.zenon@` comme prévu au jeu, pour ne pas déclencher un rapprochement avec R13a (voir TREPUT-02).
 
@@ -159,13 +172,20 @@ Lecture : sous `set local role authenticated` + claims `sub = eeeeeeee-0000-4000
   R7a : canal `email`, id `treput-r7a-b`, de `nora.celeste@exemple.test`, reçu à T−1 h → 1346 → demande `09a4ff1e-…`, `rapprochement_propose: null`, `regroupee_avec: null`.
   R7b : canal `formulaire`, id `treput-r7b-b`, même adresse et même texte, reçu à T → 1347 (`nouvelle: true`) → **aucune ligne** dans `reput_demandes` après 3 min.
   Attendu (capacites:47, :118) : R7b reconnu comme le même dossier, rapprochement proposé et visible, une seule réponse. Constaté : une seule réponse, mais le rapprochement ne se voit nulle part.
+  **Mise à jour 19 h 35** : 1347 venait d'un défaut du banc (pas de `boite_formulaire`). Rejoué : `deposer_reception(c3,'formulaire','banc-test-reput@recu.omegaai.fr','treput-r7b-c','nora.celeste@exemple.test','Nora Céleste',null,'Combien coûte le contrat d''entretien pour deux appareils ?',null,'[]','{}',now())` → 1353 → demande `b7cfbaca-6f2f-4c2c-89f7-ab7049bcabe2`, `dossier_id = 09a4ff1e…` (celui de R7a), `rapprochement_propose: null`, réponse `reput.transferer` préparée par le modèle, validation `659c6f12-d382-44a9-bfc7-cb9258ba8609` `en_attente`, envoi `bloque` vers la même adresse. La validation `d592ee77…` de R7a reste aussi `en_attente`. **Deux réponses attendent pour la même question** : si le valideur approuve les deux, le client en reçoit deux.
 - **TREPUT-03 · R8 · un horaire traduit est pris pour un chiffre inventé.**
   Dépôt : `email`, id `treput-r8-b`, `j.miller@exemple.test`, « Hello, do you service Daikin units and what are your opening hours? » → 1348 → demande `06bf9480-…`, `langue: en`, `statut: bloquee`, motif « Chiffre absent des fiches citées (4) : à vérifier. ». Le brouillon traduit fidèlement K1 (« 7:30 am to 4:30 pm »).
   Conséquence : toute réponse en anglais qui donne les horaires sera retenue, même sur un sujet autorisé à partir seul (à confirmer avec R13).
 - **TREPUT-04 · R11 · le client lit « je transmets au service Comptabilité », mais rien n'est transmis.**
   Routage posé en gérant : `reput_router_sujet(client, 'facturation', '72756b97-c26c-447c-99b9-c014862719af')` → `{"sujet":"facturation","equipe":"72756b97…"}`.
   Dépôt : `email`, id `treput-r11-b`, `yves.lacour@exemple.test`, « Je voudrais un rendez-vous pour l'entretien, et ma facture de septembre me semble fausse (deux fois le déplacement). » → 1341 → demande `abfd14cd-…`, `sujet: rendez_vous`, `sujet_secondaire: facturation`.
-  Validation `106fb00d-…` : `equipe_id: null`, résumé « Réponse à Yves Lacour — Rendez-vous (hors base : à compléter) ». Aucune autre trace (lue par mes portes) que l'équipe Comptabilité soit prévenue.
+  Validation `106fb00d-…` : `equipe_id: null`, résumé « Réponse à Yves Lacour — Rendez-vous (hors base : à compléter) ».
+  **Requalifié 19 h 35** : la Comptabilité est bien prévenue, par une notification interne au valideur (le 12ᵉ envoi, `bloque`). Reste l'écart : la validation de la réponse n'est rattachée à aucune équipe, alors qu'en A1 (facturation en sujet principal) elle l'est (`equipe_id = 72756b97…`). Le libellé « je transmets votre remarque au service Comptabilité » est donc tenu par la notification, pas par la validation.
+- **TREPUT-05 · A1/A2 · accord « accusés » actif, aucun accusé préparé.**
+  Accord : `reput_donner_accord(c3, 'accuse', null)` en gérant → validation `189b1b52-74d4-49c1-9fc7-7cfe8ae9e7b3`, approuvée par le valideur (`approbations`) → `reput_accords` : `accuse` `active`.
+  Dépôts, environ une minute plus tard : A1 `treput-a1` → 1354 → demande `2bab1e4b…` ; A2 `treput-a2` → 1355 → demande `e50eaec4…`.
+  Lecture à T+60 s et T+2 min : `accuse_le: null`, `accuse_envoi: null` sur les deux. Les envois créés pendant ces 3 minutes sont seulement les réponses (`Re : Facture août`, `Re : Garantie`) : aucun envoi d'accusé, même `bloque`/`CONFIG_ABSENTE`. Pourtant les réponses, elles, ont bien un envoi `bloque`.
+  Attendu (capacites:32) : un accusé préparé dans la minute, retenu par le socle faute de réglage, avec la phrase de transfert quand un service est nommé (A1).
 
 ## Questions au coordinateur
 
@@ -177,10 +197,10 @@ Lecture : sous `set local role authenticated` + claims `sub = eeeeeeee-0000-4000
 - (T-REPUT, 21/10) ~~Lecture d'une demande~~ → répondu : SELECT sous RLS gérant sur `reput_demandes`, `reput_reponses`, `demandes_validation`, `envois` (sans `corps`).
 - (T-REPUT, 21/10) ~~0 demande~~ → réponse : boîte non déclarée, réglage du banc, pas un écart. Réceptions 1324 à 1337 sans module, à ignorer. Passe redéposée en `-b` (1338 à 1349).
 - (T-REPUT, 21/10) ~~décision du valideur~~ → répondu : une ligne dans `approbations` sous son identité. Accord décidé.
-- (T-REPUT, 21/10) Série 2 : la porte (ou la lecture) du **point du matin** et celle de l'**export à date fixe**. L'accusé de réception ne peut que rester `bloque` tant qu'il n'y a pas de réglage d'envoi : faut-il poser un réglage en mode `essai` sur le banc (adresse d'essai interne) pour le constater ?
-- (T-REPUT, 21/10) 12 envois pour 11 réponses : à quoi correspond le 12ᵉ ? Est-ce là que R7b est passé ?
+- (T-REPUT, 21/10) Série 2 : ~~portes~~ → reçues ; réglage d'essai refusé (envoi réel = Teo). **En attente** : sorties brutes du point du matin du 21/10 et de `reput_fabriquer_export(704776f6…, 01/10, 21/10)`, demandées au coordinateur. Ancienne question : la porte (ou la lecture) du **point du matin** et celle de l'**export à date fixe**. L'accusé de réception ne peut que rester `bloque` tant qu'il n'y a pas de réglage d'envoi : faut-il poser un réglage en mode `essai` sur le banc (adresse d'essai interne) pour le constater ?
+- (T-REPUT, 21/10) ~~12ᵉ envoi~~ → notification de R11 au service.
 - (T-REPUT, 21/10) ~~équipe~~ → `72756b97-c26c-447c-99b9-c014862719af`, routage posé.
-- (T-REPUT, 21/10) Une fiche écrite par le gérant est validée d'office. C'est voulu ? La page promet « tout ce que vous avez validé » (accueil.ts:94), donc ça peut l'être.
+- (T-REPUT, 21/10) ~~Fiches validées d'office~~ → voulu (le gérant est l'auteur) ; noté en observation.
 - (T-REPUT) Les **portes** pour : (a) déposer une demande sans passer par Brevo (courriel simulé
   avec `message_id` fixe, et pièce jointe) ; (b) poser et valider les 12 fiches au nom du gérant ;
   (c) poser l'accord « horaires » en envoi seul et le routage `facturation` → Comptabilité ;
@@ -193,8 +213,8 @@ Lecture : sous `set local role authenticated` + claims `sub = eeeeeeee-0000-4000
 
 ## REPRISE
 
-- **Fait** : série 1 complète (R0 à R13 sauf R4) et rejouée : 11 justes, 4 écarts (TREPUT-01 à 04), R4 sans promesse.
-- **En cours** : rien.
-- **Prochain pas** : série 2 (accusé, point du matin, export) dès que les portes et le réglage d'essai sont donnés.
-- **Questions** : portes de la série 2 ; réglage d'envoi en essai ; le 12ᵉ envoi ; la validation d'office des fiches.
-- **SHA d'arrêt** : voir le commit « T-REPUT : R5 et R13 joués, série 1 close ».
+- **Fait** : série 1 complète et rejouée (11 justes, écarts TREPUT-01 à 04) ; série 2 : accord des accusés, A1/A2 joués (routage juste, TREPUT-05 : aucun accusé préparé), export programmé.
+- **En cours** : point du matin et fabrication de l'export, que joue le coordinateur (`private.*`).
+- **Prochain pas** : noter leurs sorties brutes ; rejouer TREPUT-01, 03, 04 et le préfixe en double quand les lots seront livrés.
+- **Questions** : sorties du point du matin et de l'export ; TREPUT-05.
+- **SHA d'arrêt** : voir le commit « T-REPUT : série 2 (accusés, export programmé), TREPUT-02 confirmé, TREPUT-05 ».
