@@ -106,7 +106,9 @@ begin
   assert v_r.fournisseur_lu->>'siren' is null and v_r.fournisseur_lu->>'tva' is null, 'rien de non vérifié n''est repris';
   assert v_r.fournisseur_lu->'non_verifie'->>'siren' = '842115763', 'le SIREN lu non vérifié est gardé à part';
   assert (select siren from public.filed_fournisseurs where id = v_four) is null, 'le fournisseur ne reçoit pas un SIREN non vérifié';
-  assert (select message from public.filed_controles where facture_id = v_f and code = 'identite.siren') like 'SIREN lu (842115763) mais non vérifié%', 'le contrôle dit « lu, non vérifié » : ' || (select message from public.filed_controles where facture_id = v_f and code = 'identite.siren');
+  -- a4_74 (TFILED-11) : 842115763 a une clé de Luhn fausse (a4_08) ; lu sans être vérifié, sa clé est jugée : bloquant.
+  assert (select message from public.filed_controles where facture_id = v_f and code = 'identite.siren' and gravite = 'bloquant' and resultat = 'anomalie')
+         like 'SIREN lu (842115763) : clé de contrôle fausse%', 'le contrôle dit le SIREN lu et sa clé fausse : ' || (select message from public.filed_controles where facture_id = v_f and code = 'identite.siren');
   raise notice 'OK une valeur lue mais non vérifiée n''est pas reprise, et le contrôle le dit';
 
   -- ── Un « indisponible » ne vaut que deux heures ──
