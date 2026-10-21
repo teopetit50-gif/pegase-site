@@ -315,6 +315,6 @@ par les portes `public.filed_confirmer_fournisseur(uuid, text)` et `public.filed
 **Arrêt 10 — 21/10/2026, 20 h 35 Z** (remplace les arrêts précédents)
 - Fait : séries 1, 1b et 2, au niveau 1. Corrigés et revérifiés : TFILED-03 (a4_71), 04 (a4_72), 08 (a4_73). Écart nouveau : **TFILED-11** (SIREN à clé fausse, facture à valider ; le verdict F1 « juste » est retiré). Remontés à Teo : TFILED-05, 06, 07, 09, 10. Pas testable sans tiers : F0 « sans arrêt » et le FEC.
 - En cours : rien.
-- Prochain pas : si le coordinateur l'accepte (Q17), utiliser F1 (`a_valider`, 846,30 €) pour le circuit. Régler en gérant un seuil à 500 € avec deux approbations, puis faire approuver F1 par le gérant, puis par le valideur, en observant `:70` (deux approbations distinctes) et `:74`. Sinon, attendre le correctif de TFILED-11.
-- Questions : **Q17** : peut-on dérouler le circuit sur F1, sachant qu'elle porte un SIREN invalide, ou faut-il attendre TFILED-11 ? Toujours ouverte pour Teo : « déposer » vaut-il « saisir » au sens de `:74` ?
+- Prochain pas : selon Q18, faire approuver F1 par le valideur (C2). Plan initial : utiliser F1 (`a_valider`, 846,30 €) pour le circuit. Régler en gérant un seuil à 500 € avec deux approbations, puis faire approuver F1 par le gérant, puis par le valideur, en observant `:70` (deux approbations distinctes) et `:74`. Sinon, attendre le correctif de TFILED-11.
+- Questions : Q17 répondue (feu vert). **Q18** : après C1, quels sont le statut de la demande `7b4464be`, le décompte des approbations et l'état de F1 ? Pourquoi F1 reste-t-elle « en attente » ? Toujours ouverte pour Teo : « déposer » vaut-il « saisir » au sens de `:74` ?
 - SHA d'arrêt : voir le commit « T-FILED : TFILED-08 corrigé, TFILED-11 » sur `testeur-filed`.
