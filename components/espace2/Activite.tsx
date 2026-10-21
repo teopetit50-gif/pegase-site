@@ -26,6 +26,7 @@ import { ItemMenu, MenuDeroulant, Note, Squelette, teinte, type Teinte } from ".
 import { ecrireStockage, useStockage } from "./Collection";
 import { useDonnees, type Donnees } from "./donnees";
 import { STATUTS_DEMANDE } from "./evenements";
+import { useMaintenant } from "./horloge";
 import { MODULES, RACINE } from "./modules";
 
 const I = { width: 16, height: 16, strokeWidth: 1.6, "aria-hidden": true } as const;
@@ -131,7 +132,8 @@ function cartes(donnees: Donnees): Carte[] {
 export default function Activite() {
   const { donnees, erreur } = useDonnees();
   const { source } = useSource();
-  const [maintenant] = useState(() => Date.now());
+  /* 21/10 — l'horloge du navigateur (horloge.ts) : « Il y a 2 h », « Hier » ne se rendent qu'une fois la page montée ; avant, les squelettes */
+  const maintenant = useMaintenant();
   const [tri, setTri] = useState<Tri>("recent");
   const [periode, setPeriode] = useState<Periode>("7j");
   const [module, setModule] = useState<string | null>(null);
@@ -144,6 +146,7 @@ export default function Activite() {
   const modules = useMemo(() => Array.from(new Set(toutes.map((c) => c.module))).sort((a, b) => libelleModule(a).localeCompare(libelleModule(b), "fr")), [toutes]);
 
   const visibles = useMemo(() => {
+    if (maintenant === null) return [];
     const duree = PERIODES.find((p) => p.cle === periode)?.duree ?? Infinity;
     const q = sansAccents(recherche.trim());
     const l = toutes.filter(
@@ -158,6 +161,7 @@ export default function Activite() {
     });
   }, [toutes, module, periode, recherche, tri, maintenant]);
 
+  const pret = !!donnees && maintenant !== null;
   const parColonne = (cle: Cle) => visibles.filter((c) => c.colonne === cle);
   const filtre = !!recherche.trim() || !!module;
   const libellePeriode = PERIODES.find((p) => p.cle === periode)?.libelle ?? "";
@@ -274,10 +278,10 @@ export default function Activite() {
                   <Icone {...I} />
                   <h2 id={`ac-${col.cle}`}>{col.titre}</h2>
                   {col.cle === "a_valider" && liste.length ? <span className="ac-led" title="En attente d'une décision" /> : null}
-                  {donnees ? <span className="no-compte">{liste.length}</span> : null}
+                  {pret ? <span className="no-compte">{liste.length}</span> : null}
                 </header>
 
-                {!donnees ? (
+                {!donnees || maintenant === null ? (
                   <ul className="ac-cartes" aria-busy="true">
                     {[0, 1, 2].map((i) => (
                       <li key={i} className="ac-carte ac-carte--squelette">
@@ -297,7 +301,7 @@ export default function Activite() {
                   <p className="ac-vide">{filtre ? "Aucun résultat avec ces filtres" : `${col.vide} sur cette période`}</p>
                 )}
 
-                {donnees ? (
+                {pret ? (
                   <div className="ac-colonne-pied">
                     {/* le nom accessible commence par le texte visible (WCAG 2.5.3) ;
                        un aria-label, pas un .v2-sr : en colonnes qui défilent,
@@ -317,7 +321,7 @@ export default function Activite() {
             );
           })}
         </div>
-      ) : !donnees ? (
+      ) : !donnees || maintenant === null ? (
         <div className="ac-liste" aria-busy="true">
           {[0, 1, 2, 3, 4].map((i) => (
             <div key={i} className="ac-ligne ac-ligne--squelette">

@@ -17,7 +17,8 @@ import { libelleModule, montant } from "@/components/espace/format";
 import { CarteSuivi, ChoixPeriode, DetailBarres, PERIODES, type LigneSuivi, type Periode } from "./Suivi";
 import { Note, Squelette } from "./ui";
 import { useDonnees } from "./donnees";
-import { A_PAYER, du, minuit } from "./filed/calculs";
+import { A_PAYER, du } from "./filed/calculs";
+import { useAujourdhui } from "./horloge";
 
 const JOUR = 86_400_000;
 const nombre = (n: number) => new Intl.NumberFormat("fr-FR").format(n);
@@ -35,12 +36,13 @@ const STATUTS: Record<string, string> = { en_attente: "En attente", approuvee: "
 export default function Utilisation() {
   const { donnees, erreur } = useDonnees();
   const [periode, setPeriode] = useState<Periode>(PERIODES[1]);
-  const [aujourdhui] = useState(minuit);
-  const depuis = aujourdhui - periode.jours * JOUR + JOUR;
-  const dans = (iso: string | null | undefined) => !!iso && new Date(iso).getTime() >= depuis;
+  /* 21/10 — l'horloge du navigateur (horloge.ts) : null au rendu serveur, les squelettes en attendant */
+  const aujourdhui = useAujourdhui();
+  const depuis = aujourdhui === null ? null : aujourdhui - periode.jours * JOUR + JOUR;
+  const dans = (iso: string | null | undefined) => depuis !== null && !!iso && new Date(iso).getTime() >= depuis;
 
   const cartes = useMemo(() => {
-    if (!donnees) return null;
+    if (!donnees || depuis === null) return null;
     const nomFournisseur = (id: string | null) => donnees.vue.fournisseurs.find((f) => f.id === id)?.nom ?? "Fournisseur inconnu";
     const docs = donnees.docs.filter((d) => dans(d.recu_le));
     const emises = donnees.vue.factures.filter((f) => f.nature !== "avoir" && dans(f.date_emission));

@@ -13,13 +13,18 @@
    échéances sans colonne « État » (une date dépassée passe au rouge) ; plus
    de bandeau de l'assistant, le bouton « Assistant » est en haut.
    17/10/2026 — décision de Teo : plus de salutation ni de rangée de quatre
-   chiffres, comme la vue d'ensemble du pilotage. */
+   chiffres, comme la vue d'ensemble du pilotage.
+   21/10/2026 — l'horloge est celle du navigateur (horloge.ts) : les cartes
+   se rendent après le montage, en squelette avant. Le serveur, en UTC,
+   n'écrit plus une heure ni un « Hier » que le visiteur en Guadeloupe
+   recalculerait autrement (erreur d'hydratation #418 vue en production). */
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import { dateCourte, montant, relatif } from "@/components/espace/format";
-import { A_PAYER, aPayer, groupeDe, minuit, totaux } from "./filed/calculs";
+import { A_PAYER, aPayer, groupeDe, jourDe, totaux } from "./filed/calculs";
+import { useAujourdhui } from "./horloge";
 import { Squelette } from "./ui";
 import { RACINE } from "./modules";
 import { useDonnees } from "./donnees";
@@ -30,12 +35,12 @@ import "./habillage.css";
 const CLE_TACHES = "espace2-collection-taches";
 
 export default function Accueil() {
-  const [aujourdhui] = useState(minuit);
+  const aujourdhui = useAujourdhui();
   const { donnees, erreur } = useDonnees();
   const [periode, setPeriode] = useState(30);
 
   const c = useMemo(() => {
-    if (!donnees) return null;
+    if (!donnees || aujourdhui === null) return null;
     const etats = donnees.etats;
     const aRegler = donnees.vue.factures.filter((f) => A_PAYER.has(f.statut) && f.nature !== "avoir" && etats[f.id]?.etat !== "payee");
     const retard = aRegler.filter((f) => groupeDe(f, aujourdhui) === "retard");
@@ -162,7 +167,7 @@ export default function Accueil() {
                   <span className="v2-va-texte">
                     <span>{t.titre}</span>
                   </span>
-                  {t.echeance ? <span className="oc-meta" data-retard={new Date(t.echeance).getTime() < aujourdhui ? "" : undefined}>{dateCourte(t.echeance)}</span> : null}
+                  {t.echeance ? <span className="oc-meta" data-retard={aujourdhui !== null && jourDe(t.echeance) < aujourdhui ? "" : undefined}>{dateCourte(t.echeance)}</span> : null}
                   <Link href={`${RACINE}/taches`} aria-label="Ouvrir les tâches"><ChevronRight width={16} height={16} /></Link>
                 </li>
               ))}

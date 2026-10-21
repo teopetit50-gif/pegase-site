@@ -47,6 +47,7 @@ import DetailDemande from "@/components/espace/validations/DetailDemande";
 import DecisionLot, { eligibilite } from "@/components/espace/validations/DecisionLot";
 import MesDelegations from "@/components/espace/validations/MesDelegations";
 import { Note } from "./ui";
+import { useMonte } from "./horloge";
 import { EnDirect, Initiales } from "./vivant";
 import { useToast } from "./Toasts";
 import "@/components/espace/espace.css";
@@ -92,7 +93,10 @@ export default function Validations({ utilisateur }: { utilisateur: Utilisateur 
   /* le panneau de droite : le détail complet, ou la gestion des délégations */
   const [panneau, setPanneau] = useState<"detail" | "delegations" | null>(null);
 
-  const etat = source === "exemple" ? local : reel;
+  /* 21/10 — l'horloge du navigateur (horloge.ts) : « Hier », « Dans 3 jours » et les dates de décision
+     ne se rendent qu'une fois la page montée ; avant, la file dit « Lecture… » */
+  const monte = useMonte();
+  const etat = !monte ? null : source === "exemple" ? local : reel;
 
   /* ——— chargement de la base réelle (comme FileValidations) ——— */
   const charger = useCallback(async () => {
