@@ -9,6 +9,18 @@
    fenêtre 0,3 s, courbe « swift » cubic-bezier(.175,.885,.32,1.1),
    départ à l'échelle 0,96). La marque reste Omega.
 
+   Les couleurs, depuis le 21/10/2026, sont celles du tableau de bord
+   Supabase : jetons de packages/ui (supabase/supabase) résolus en sRGB
+   dans supabase.com/dashboard, thèmes dark et light, recoupés avec une
+   capture du tableau de bord de Teo. Page = barre latérale = barre du
+   haut (background), cartes un cran plus claires (surface-100), filets
+   en blanc à 7,5 % (border). Seule différence voulue : l'accent reste
+   bleu, à la saturation et à la clarté du vert Supabase (hsl 212 60 % 53 %).
+   Finitions relevées sur sa capture le même jour : cartes, cadres et menus
+   à 6 px, fenêtres à 8 px, aucune ombre portée (le filet seul), boutons
+   secondaires sur --v2-bouton (surface-300) avec filet --v2-a-500, bouton
+   principal plein bleu, champs à 34 px, petits boutons d'outils à 26 px.
+
    Tout est préfixé `v2-` et rangé sous `.v2` : rien ne fuit vers le site
    ni vers l'ancien espace (components/espace/espace.css).
    ══════════════════════════════════════════════════════════════════════ */
@@ -24,58 +36,59 @@ html:has(.v2) {
 .v2,
 .v2-jetons,
 html.v2-actif .dlg-panneau {
-  /* ——— jetons Geist, thème clair ——— */
+  /* ——— jetons : la grille Geist, les couleurs de Supabase (21/10/2026, voir en tête) ; thème clair ——— */
   --v2-bg-100: #fff;
-  --v2-bg-200: #fafafa;
+  --v2-bg-200: #fdfdfd;
   --v2-bg-eleve: #fff;
-  --v2-gray-100: #f2f2f2;
-  --v2-gray-200: #ebebeb;
-  --v2-gray-300: #e6e6e6;
-  --v2-gray-400: #eaeaea;
-  --v2-gray-500: #c9c9c9;
-  --v2-gray-600: #a8a8a8;
-  --v2-gray-700: #8f8f8f;
-  --v2-gray-800: #7d7d7d;
-  --v2-gray-900: #4d4d4d;
-  --v2-gray-1000: #171717;
-  --v2-a-100: #0000000d;
-  --v2-a-200: #00000014;
-  --v2-a-300: #0000001a;
-  --v2-a-400: #00000014;
-  --v2-a-500: #00000036;
-  --v2-a-600: #00000057;
-  --v2-blue-100: #f0f7ff;
-  --v2-blue-200: #eaf4ff;
-  --v2-blue-400: #cce7ff;
-  --v2-blue-700: #0070f7;
-  --v2-blue-900: #0064e2;
-  --v2-blue-1000: #002453;
-  --v2-red-100: #ffeef0;
-  --v2-red-200: #ffe9ea;
-  --v2-red-400: #ffd8d7;
-  --v2-red-700: #fc0035;
-  --v2-red-900: #d60020;
-  --v2-red-1000: #46000c;
-  --v2-amber-100: #fff6e1;
-  --v2-amber-200: #fff4d4;
-  --v2-amber-400: #ffdd84;
-  --v2-amber-700: #ffb200;
-  --v2-amber-900: #a64f00;
-  --v2-amber-1000: #541c00;
-  --v2-green-100: #ecfdec;
-  --v2-green-200: #e5fce7;
-  --v2-green-400: #b9f5bc;
-  --v2-green-700: #28a948;
-  --v2-green-900: #107d32;
-  --v2-green-1000: #00370d;
-  --v2-primaire-survol: #383838;
-
-  --v2-ombre-bord: 0 0 0 1px #00000014;
-  --v2-ombre-petite: 0 0 0 1px #00000014, 0px 2px 2px #0000000a;
-  --v2-ombre-moyenne: 0 0 0 1px #00000014, 0px 2px 2px #0000000a, 0px 8px 8px -8px #0000000a;
-  --v2-ombre-menu: 0 0 0 1px #00000014, 0px 1px 1px #00000005, 0px 4px 8px -4px #0000000a, 0px 16px 24px -8px #0000000f;
-  --v2-ombre-modal: 0 0 0 1px #00000014, 0px 1px 1px #00000005, 0px 8px 16px -4px #0000000a, 0px 24px 32px -8px #0000000f;
-  --v2-anneau: 0 0 0 1px var(--v2-a-600), 0px 0px 0px 4px #00000029;
+  --v2-gray-100: #f6f6f6;
+  --v2-gray-200: #f3f3f3;
+  --v2-gray-300: #efefef;
+  --v2-gray-400: #e8e8e8;
+  --v2-gray-500: #d8d8d8;
+  --v2-gray-600: #696969;
+  --v2-gray-700: #696969;
+  --v2-gray-800: #696969;
+  --v2-gray-900: #464646;
+  --v2-gray-1000: #030303;
+  --v2-a-100: #03030307;
+  --v2-a-200: #0303030a;
+  --v2-a-300: #0303030e;
+  --v2-a-400: #03030315;
+  --v2-a-500: #03030325;
+  --v2-a-600: #03030330;
+  --v2-blue-100: #d3e4f8;
+  --v2-blue-200: #a9cbf1;
+  --v2-blue-400: #72a7e3;
+  --v2-blue-700: #3f82cf;
+  --v2-blue-900: #093f7c;
+  --v2-blue-1000: #002652;
+  --v2-red-100: #fffcfc;
+  --v2-red-200: #fff0ee;
+  --v2-red-400: #fdd8d3;
+  --v2-red-700: #e54d2e;
+  --v2-red-900: #ca3214;
+  --v2-red-1000: #541c15;
+  --v2-amber-100: #fefbf5;
+  --v2-amber-200: #fff4d5;
+  --v2-amber-400: #ffe3a2;
+  --v2-amber-700: #dc7b18;
+  --v2-amber-900: #ac5800;
+  --v2-amber-1000: #693f05;
+  --v2-green-100: #d3f8e4;
+  --v2-green-200: #a9f1ca;
+  --v2-green-400: #72e3ad;
+  --v2-green-700: #3fcf8e;
+  --v2-green-900: #097c4f;
+  --v2-green-1000: #00311d;
+  --v2-primaire-survol: #3772b6;
+  --v2-bouton: #fff;
+  --v2-bouton-survol: #f3f3f3;
+  --v2-ombre-bord: 0 0 0 1px #03030315;
+  --v2-ombre-petite: 0 0 0 1px #03030315;
+  --v2-ombre-moyenne: 0 0 0 1px #03030315, 0px 2px 2px #0000000a, 0px 8px 8px -8px #0000000a;
+  --v2-ombre-menu: 0 0 0 1px #03030325, 0px 1px 1px #00000005, 0px 4px 8px -4px #0000000a, 0px 16px 24px -8px #0000000f;
+  --v2-ombre-modal: 0 0 0 1px #03030325, 0px 1px 1px #00000005, 0px 8px 16px -4px #0000000a, 0px 24px 32px -8px #0000000f;
+  --v2-anneau: 0 0 0 1px var(--v2-a-600), 0px 0px 0px 4px #03030314;
   --v2-voile: #000000b3;
 
   /* ——— le mouvement ——— */
@@ -104,111 +117,115 @@ html.v2-actif .dlg-panneau {
 /* ——— thème sombre : le choix « sombre », ou « système » sur un poste sombre ——— */
 @media (prefers-color-scheme: dark) {
   html:not([data-v2-theme="light"]) :is(.v2, .v2-jetons, .dlg-panneau) {
-    /* les gris d'Attio (relevés sur ses captures, 10/10) : page #0f1112, barre latérale #0c0b0e, ligne active #161819, fenêtre #17191a */
-    --v2-bg-100: #0f1112;
-    --v2-bg-200: #0c0b0e;
-    --v2-bg-eleve: #17191a;
-    --v2-gray-100: #161819;
-    --v2-gray-200: #1f2123;
-    --v2-gray-300: #292929;
-    --v2-gray-400: #2e2e2e;
-    --v2-gray-500: #454545;
-    --v2-gray-600: #878787;
-    --v2-gray-700: #8f8f8f;
-    --v2-gray-800: #7d7d7d;
-    --v2-gray-900: #a0a0a0;
-    --v2-gray-1000: #ededed;
-    --v2-a-100: #ffffff0f;
-    --v2-a-200: #ffffff17;
-    --v2-a-300: #ffffff21;
-    --v2-a-400: #ffffff24;
-    --v2-a-500: #ffffff3d;
-    --v2-a-600: #ffffff82;
-    --v2-blue-100: #06193a;
-    --v2-blue-200: #022248;
-    --v2-blue-400: #003771;
-    --v2-blue-700: #0071f6;
-    --v2-blue-900: #50a8ff;
-    --v2-blue-1000: #ebf6ff;
-    --v2-red-100: #330a11;
-    --v2-red-200: #440d13;
-    --v2-red-400: #6f101b;
-    --v2-red-700: #f13242;
-    --v2-red-900: #ff5e63;
-    --v2-red-1000: #ffeaed;
-    --v2-amber-100: #291800;
-    --v2-amber-200: #331b00;
-    --v2-amber-400: #573200;
-    --v2-amber-700: #ffb200;
-    --v2-amber-900: #f90;
-    --v2-amber-1000: #fff3d9;
-    --v2-green-100: #00250a;
-    --v2-green-200: #003110;
-    --v2-green-400: #004616;
-    --v2-green-700: #00ab3e;
-    --v2-green-900: #00ca52;
-    --v2-green-1000: #daffe5;
-    --v2-primaire-survol: #cccccc;
-    --v2-ombre-bord: 0 0 0 1px #ffffff25;
-    --v2-ombre-petite: 0 0 0 1px #ffffff25, 0px 1px 2px #00000029;
-    --v2-ombre-moyenne: 0 0 0 1px #ffffff25, 0px 2px 2px #00000052, 0px 8px 8px -8px #00000029;
-    --v2-ombre-menu: 0 0 0 1px #ffffff25, 0px 1px 1px #00000005, 0px 4px 8px -4px #0000000a, 0px 16px 24px -8px #0000000f;
-    --v2-ombre-modal: 0 0 0 1px #ffffff25, 0px 1px 1px #00000005, 0px 8px 16px -4px #0000000a, 0px 24px 32px -8px #0000000f;
-    --v2-anneau: 0 0 0 1px var(--v2-a-600), 0px 0px 0px 4px #ffffff3d;
+    /* les gris de Supabase (jetons de packages/ui résolus en sRGB le 21/10) : page et barre latérale #131413, carte #181a19, ligne active #1e1e1e, fenêtre #1b1d1c */
+    --v2-bg-100: #181a19;
+    --v2-bg-200: #131413;
+    --v2-bg-eleve: #1b1d1c;
+    --v2-gray-100: #1e1e1e;
+    --v2-gray-200: #1e201f;
+    --v2-gray-300: #262827;
+    --v2-gray-400: #303130;
+    --v2-gray-500: #383938;
+    --v2-gray-600: #989a99;
+    --v2-gray-700: #989a99;
+    --v2-gray-800: #989a99;
+    --v2-gray-900: #bcbdbc;
+    --v2-gray-1000: #edefee;
+    --v2-a-100: #edefee08;
+    --v2-a-200: #edefee0d;
+    --v2-a-300: #edefee11;
+    --v2-a-400: #edefee13;
+    --v2-a-500: #edefee22;
+    --v2-a-600: #edefee2c;
+    --v2-blue-100: #001329;
+    --v2-blue-200: #001731;
+    --v2-blue-400: #002e62;
+    --v2-blue-700: #3f82cf;
+    --v2-blue-900: #85afe0;
+    --v2-blue-1000: #e1effe;
+    --v2-red-100: #1d1412;
+    --v2-red-200: #3b1813;
+    --v2-red-400: #7f2315;
+    --v2-red-700: #e54d2e;
+    --v2-red-900: #f16a50;
+    --v2-red-1000: #fde3dc;
+    --v2-amber-100: #291900;
+    --v2-amber-200: #341c00;
+    --v2-amber-400: #693f05;
+    --v2-amber-700: #db8e00;
+    --v2-amber-900: #f2af48;
+    --v2-amber-1000: #fff0d6;
+    --v2-green-100: #002918;
+    --v2-green-200: #00311d;
+    --v2-green-400: #006239;
+    --v2-green-700: #3ecf8e;
+    --v2-green-900: #85e0ba;
+    --v2-green-1000: #d3f8e4;
+    --v2-primaire-survol: #5691d5;
+    --v2-bouton: #1e201f;
+    --v2-bouton-survol: #262827;
+    --v2-ombre-bord: 0 0 0 1px #edefee13;
+    --v2-ombre-petite: 0 0 0 1px #edefee13;
+    --v2-ombre-moyenne: 0 0 0 1px #edefee13, 0px 2px 2px #00000052, 0px 8px 8px -8px #00000029;
+    --v2-ombre-menu: 0 0 0 1px #edefee22, 0px 1px 1px #00000005, 0px 4px 8px -4px #0000000a, 0px 16px 24px -8px #0000000f;
+    --v2-ombre-modal: 0 0 0 1px #edefee22, 0px 1px 1px #00000005, 0px 8px 16px -4px #0000000a, 0px 24px 32px -8px #0000000f;
+    --v2-anneau: 0 0 0 1px var(--v2-a-600), 0px 0px 0px 4px #edefee1f;
     color-scheme: dark;
   }
 }
 html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
-  --v2-bg-100: #0f1112;
-  --v2-bg-200: #0c0b0e;
-  --v2-bg-eleve: #17191a;
-  --v2-gray-100: #161819;
-  --v2-gray-200: #1f2123;
-  --v2-gray-300: #292929;
-  --v2-gray-400: #2e2e2e;
-  --v2-gray-500: #454545;
-  --v2-gray-600: #878787;
-  --v2-gray-700: #8f8f8f;
-  --v2-gray-800: #7d7d7d;
-  --v2-gray-900: #a0a0a0;
-  --v2-gray-1000: #ededed;
-  --v2-a-100: #ffffff0f;
-  --v2-a-200: #ffffff17;
-  --v2-a-300: #ffffff21;
-  --v2-a-400: #ffffff24;
-  --v2-a-500: #ffffff3d;
-  --v2-a-600: #ffffff82;
-  --v2-blue-100: #06193a;
-  --v2-blue-200: #022248;
-  --v2-blue-400: #003771;
-  --v2-blue-700: #0071f6;
-  --v2-blue-900: #50a8ff;
-  --v2-blue-1000: #ebf6ff;
-  --v2-red-100: #330a11;
-  --v2-red-200: #440d13;
-  --v2-red-400: #6f101b;
-  --v2-red-700: #f13242;
-  --v2-red-900: #ff5e63;
-  --v2-red-1000: #ffeaed;
-  --v2-amber-100: #291800;
-  --v2-amber-200: #331b00;
-  --v2-amber-400: #573200;
-  --v2-amber-700: #ffb200;
-  --v2-amber-900: #f90;
-  --v2-amber-1000: #fff3d9;
-  --v2-green-100: #00250a;
-  --v2-green-200: #003110;
-  --v2-green-400: #004616;
-  --v2-green-700: #00ab3e;
-  --v2-green-900: #00ca52;
-  --v2-green-1000: #daffe5;
-  --v2-primaire-survol: #cccccc;
-  --v2-ombre-bord: 0 0 0 1px #ffffff25;
-  --v2-ombre-petite: 0 0 0 1px #ffffff25, 0px 1px 2px #00000029;
-  --v2-ombre-moyenne: 0 0 0 1px #ffffff25, 0px 2px 2px #00000052, 0px 8px 8px -8px #00000029;
-  --v2-ombre-menu: 0 0 0 1px #ffffff25, 0px 1px 1px #00000005, 0px 4px 8px -4px #0000000a, 0px 16px 24px -8px #0000000f;
-  --v2-ombre-modal: 0 0 0 1px #ffffff25, 0px 1px 1px #00000005, 0px 8px 16px -4px #0000000a, 0px 24px 32px -8px #0000000f;
-  --v2-anneau: 0 0 0 1px var(--v2-a-600), 0px 0px 0px 4px #ffffff3d;
+  --v2-bg-100: #181a19;
+  --v2-bg-200: #131413;
+  --v2-bg-eleve: #1b1d1c;
+  --v2-gray-100: #1e1e1e;
+  --v2-gray-200: #1e201f;
+  --v2-gray-300: #262827;
+  --v2-gray-400: #303130;
+  --v2-gray-500: #383938;
+  --v2-gray-600: #989a99;
+  --v2-gray-700: #989a99;
+  --v2-gray-800: #989a99;
+  --v2-gray-900: #bcbdbc;
+  --v2-gray-1000: #edefee;
+  --v2-a-100: #edefee08;
+  --v2-a-200: #edefee0d;
+  --v2-a-300: #edefee11;
+  --v2-a-400: #edefee13;
+  --v2-a-500: #edefee22;
+  --v2-a-600: #edefee2c;
+  --v2-blue-100: #001329;
+  --v2-blue-200: #001731;
+  --v2-blue-400: #002e62;
+  --v2-blue-700: #3f82cf;
+  --v2-blue-900: #85afe0;
+  --v2-blue-1000: #e1effe;
+  --v2-red-100: #1d1412;
+  --v2-red-200: #3b1813;
+  --v2-red-400: #7f2315;
+  --v2-red-700: #e54d2e;
+  --v2-red-900: #f16a50;
+  --v2-red-1000: #fde3dc;
+  --v2-amber-100: #291900;
+  --v2-amber-200: #341c00;
+  --v2-amber-400: #693f05;
+  --v2-amber-700: #db8e00;
+  --v2-amber-900: #f2af48;
+  --v2-amber-1000: #fff0d6;
+  --v2-green-100: #002918;
+  --v2-green-200: #00311d;
+  --v2-green-400: #006239;
+  --v2-green-700: #3ecf8e;
+  --v2-green-900: #85e0ba;
+  --v2-green-1000: #d3f8e4;
+  --v2-primaire-survol: #5691d5;
+  --v2-bouton: #1e201f;
+  --v2-bouton-survol: #262827;
+  --v2-ombre-bord: 0 0 0 1px #edefee13;
+  --v2-ombre-petite: 0 0 0 1px #edefee13;
+  --v2-ombre-moyenne: 0 0 0 1px #edefee13, 0px 2px 2px #00000052, 0px 8px 8px -8px #00000029;
+  --v2-ombre-menu: 0 0 0 1px #edefee22, 0px 1px 1px #00000005, 0px 4px 8px -4px #0000000a, 0px 16px 24px -8px #0000000f;
+  --v2-ombre-modal: 0 0 0 1px #edefee22, 0px 1px 1px #00000005, 0px 8px 16px -4px #0000000a, 0px 24px 32px -8px #0000000f;
+  --v2-anneau: 0 0 0 1px var(--v2-a-600), 0px 0px 0px 4px #edefee1f;
   color-scheme: dark;
 }
 
@@ -280,7 +297,7 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
 }
 .v2-colonne-principale {
   min-width: 0;
-  background: var(--v2-bg-100);
+  background: var(--v2-bg-200);
   /* les tableaux se règlent sur la largeur de la colonne, pas de l'écran */
   container-type: inline-size;
   container-name: principale;
@@ -371,11 +388,11 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   align-items: center;
   gap: 8px;
   width: 100%;
-  height: 32px;
+  height: 30px;
   margin: 8px 0 12px;
   padding: 0 6px 0 10px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 6px;
   background: var(--v2-bg-100);
   box-shadow: 0 0 0 1px var(--v2-a-400);
   color: var(--v2-gray-900);
@@ -469,7 +486,7 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
 .v2-lien[aria-current="page"] {
   background: var(--v2-a-200);
   color: var(--v2-gray-1000);
-  font-weight: 500;
+  font-weight: 400;
 }
 .v2-lien[data-dedans] {
   color: var(--v2-gray-1000);
@@ -679,7 +696,7 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   align-items: center;
   gap: 12px;
   padding: 0 24px;
-  background: var(--v2-bg-100);
+  background: var(--v2-bg-200);
   box-shadow: inset 0 -1px 0 var(--v2-a-400);
 }
 .v2-haut-gauche {
@@ -809,7 +826,7 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 40px;
+  height: 30px;
   padding: 0 12px;
   border: 0;
   border-radius: 6px;
@@ -820,13 +837,14 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   white-space: nowrap;
   cursor: pointer;
   user-select: none;
-  background: var(--v2-bg-100);
+  background: var(--v2-bouton);
   color: var(--v2-gray-1000);
-  box-shadow: var(--v2-ombre-petite);
+  box-shadow: 0 0 0 1px var(--v2-a-500);
   transition: background 0.15s, box-shadow 0.15s, color 0.15s, transform 0.1s;
 }
 .v2-btn:hover {
-  background: var(--v2-gray-100);
+  background: var(--v2-bouton-survol);
+  box-shadow: 0 0 0 1px var(--v2-a-600);
 }
 .v2-btn:active {
   transform: scale(0.98);
@@ -838,8 +856,8 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
 .v2-btn--primaire,
 .v2 a.v2-btn--primaire {
   /* « .v2 a » (couleur héritée) l'emporterait sur un lien-bouton */
-  background: var(--v2-gray-1000);
-  color: var(--v2-bg-100);
+  background: var(--v2-blue-700);
+  color: #fff;
   box-shadow: none;
 }
 .v2-btn--primaire:hover {
@@ -905,7 +923,7 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 40px;
+  height: 34px;
   padding: 0 12px;
   border-radius: 6px;
   background: var(--v2-bg-100);
@@ -1081,7 +1099,7 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
 /* ══ Cartes ════════════════════════════════════════════════════════════ */
 .v2-carte {
   background: var(--v2-bg-100);
-  border-radius: 12px;
+  border-radius: 6px;
   box-shadow: var(--v2-ombre-petite);
   min-width: 0;
 }
@@ -1121,7 +1139,7 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   display: grid;
   gap: 16px;
   padding: 16px;
-  border-radius: 12px;
+  border-radius: 6px;
   background: var(--v2-bg-100);
   box-shadow: var(--v2-ombre-petite);
   transition: box-shadow 0.2s;
@@ -1153,7 +1171,7 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   content: "";
   position: absolute;
   inset: 0;
-  border-radius: 12px;
+  border-radius: 6px;
 }
 .v2-projet-lien:focus-visible {
   box-shadow: none;
@@ -1234,7 +1252,7 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
 }
 .v2-projets[data-vue="liste"] {
   gap: 0;
-  border-radius: 12px;
+  border-radius: 6px;
   background: var(--v2-bg-100);
   box-shadow: var(--v2-ombre-petite);
 }
@@ -1348,7 +1366,7 @@ a.v2-jauge:hover {
 /* ══ Tableaux ══════════════════════════════════════════════════════════ */
 .v2-tableau-cadre {
   overflow-x: auto;
-  border-radius: 12px;
+  border-radius: 6px;
 }
 .v2-tableau {
   width: 100%;
@@ -1363,15 +1381,15 @@ a.v2-jauge:hover {
   font-size: 12px;
   font-weight: 500;
   color: var(--v2-gray-900);
-  background: var(--v2-bg-200);
+  background: var(--v2-bg-100);
   border-bottom: 1px solid var(--v2-a-400);
   white-space: nowrap;
 }
 .v2-tableau th:first-child {
-  border-top-left-radius: 12px;
+  border-top-left-radius: 6px;
 }
 .v2-tableau th:last-child {
-  border-top-right-radius: 12px;
+  border-top-right-radius: 6px;
 }
 .v2-tableau td {
   padding: 12px 16px;
@@ -1504,7 +1522,7 @@ a.v2-jauge:hover {
   text-align: center;
   gap: 12px;
   padding: 48px 24px;
-  border-radius: 12px;
+  border-radius: 6px;
   border: 1px dashed var(--v2-a-500);
   background: var(--v2-bg-100);
 }
@@ -1550,7 +1568,7 @@ a.v2-jauge:hover {
 .v2-popover {
   min-width: 200px;
   max-width: min(320px, calc(100vw - 32px));
-  border-radius: 12px;
+  border-radius: 6px;
   background: var(--v2-bg-eleve, var(--v2-bg-100));
   color: var(--v2-gray-1000);
   box-shadow: var(--v2-ombre-menu);
@@ -1665,7 +1683,7 @@ a.v2-jauge:hover {
   max-width: 540px;
   max-height: calc(100dvh - 32px);
   overflow: auto;
-  border-radius: 12px;
+  border-radius: 8px;
   background: var(--v2-bg-eleve, var(--v2-bg-100));
   color: var(--v2-gray-1000);
   box-shadow: var(--v2-ombre-modal);
@@ -1793,7 +1811,7 @@ a.v2-jauge:hover {
   gap: 10px;
   min-height: 52px;
   padding: 14px 16px;
-  border-radius: 12px;
+  border-radius: 8px;
   background: var(--v2-bg-100);
   color: var(--v2-gray-1000);
   box-shadow: var(--v2-ombre-menu);
@@ -1893,7 +1911,7 @@ a.v2-jauge:hover {
   text-align: left;
   padding: 16px;
   border: 0;
-  border-radius: 12px;
+  border-radius: 6px;
   background: var(--v2-bg-100);
   color: var(--v2-gray-1000);
   box-shadow: var(--v2-ombre-petite);
@@ -2349,8 +2367,8 @@ html.v2-calme *::after {
    icône · libellé · chevron ; c'est le modèle des boutons de l'espace */
 .v2-val-filtres { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .v2-val-droite { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-.v2-val-bouton { position: relative; display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 10px; border-radius: 6px; background: var(--v2-bg-100); box-shadow: 0 0 0 1px var(--v2-a-400); color: var(--v2-gray-1000); font: inherit; font-size: 13px; font-weight: 500; white-space: nowrap; cursor: pointer; border: 0; transition: background 0.15s, box-shadow 0.15s; }
-.v2-val-bouton:hover { background: var(--v2-a-200); box-shadow: 0 0 0 1px var(--v2-a-500, var(--v2-a-400)); }
+.v2-val-bouton { position: relative; display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 10px; border-radius: 6px; background: var(--v2-bouton); box-shadow: 0 0 0 1px var(--v2-a-500); color: var(--v2-gray-1000); font: inherit; font-size: 13px; font-weight: 500; white-space: nowrap; cursor: pointer; border: 0; transition: background 0.15s, box-shadow 0.15s; }
+.v2-val-bouton:hover { background: var(--v2-bouton-survol); box-shadow: 0 0 0 1px var(--v2-a-600); }
 .v2-val-bouton > svg { color: var(--v2-gray-900); flex-shrink: 0; }
 .v2-val-bouton[data-actif] { box-shadow: 0 0 0 1px var(--v2-blue-700); }
 .v2-val-bouton[data-actif] > svg:first-child { color: var(--v2-blue-700); }
@@ -2384,7 +2402,7 @@ html.v2-calme *::after {
 .v2-val-case { display: grid; place-items: center; width: 52px; flex-shrink: 0; }
 .v2-val-case input { appearance: none; -webkit-appearance: none; display: grid; place-items: center; width: 16px; height: 16px; margin: 0; border: 1.5px solid var(--v2-gray-900); border-radius: 4px; background: transparent; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
 .v2-val-case input:hover:not(:disabled) { border-color: var(--v2-gray-1000); }
-.v2-val-case input:checked { background: var(--v2-gray-1000); border-color: var(--v2-gray-1000); }
+.v2-val-case input:checked { background: var(--v2-blue-700); border-color: var(--v2-blue-700); }
 .v2-val-case input:checked::after { content: ""; width: 4px; height: 8px; margin-top: -2px; border: solid var(--v2-bg-100); border-width: 0 2px 2px 0; transform: rotate(45deg); }
 .v2-val-case input:focus-visible { box-shadow: var(--v2-anneau); }
 .v2-val-case input:disabled { cursor: not-allowed; opacity: 0.4; }
@@ -2704,8 +2722,8 @@ html.v2-calme *::after {
 .v2-dr-raccourcis { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 28px; margin-top: 16px; }
 .v2-dr-raccourcis > a, .v2-dr-raccourcis > button { display: inline-flex; align-items: center; gap: 8px; padding: 6px 0; border: 0; background: none; color: var(--v2-gray-900); font: inherit; font-size: 13px; cursor: pointer; transition: color 0.15s; }
 .v2-dr-raccourcis > a:hover, .v2-dr-raccourcis > button:hover { color: var(--v2-gray-1000); }
-.v2 .v2-dr-raccourcis .v2-dr-principal { margin-left: auto; height: 32px; padding: 0 14px; border-radius: 6px; background: var(--v2-gray-1000); color: var(--v2-bg-100); font-weight: 500; }
-.v2 .v2-dr-raccourcis .v2-dr-principal:hover { color: var(--v2-bg-100); opacity: 0.9; }
+.v2 .v2-dr-raccourcis .v2-dr-principal { margin-left: auto; height: 32px; padding: 0 14px; border-radius: 6px; background: var(--v2-blue-700); color: #fff; font-weight: 500; }
+.v2 .v2-dr-raccourcis .v2-dr-principal:hover { color: #fff; opacity: 0.9; }
 
 /* les boîtes et les canaux */
 .v2-dr-carte--liste { padding: 0; }
@@ -2730,7 +2748,7 @@ html.v2-calme *::after {
    porte les raccourcis, deux cartes à vues (flèches au bord) */
 .v2-page:has(> .v2-dr) { max-width: none; padding: 16px 16px 48px; }
 .v2-dr-titre-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.v2 .v2-dr-titre-actions .v2-dr-principal { display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px; border-radius: 6px; background: var(--v2-gray-1000); color: var(--v2-bg-100); font-size: 13px; font-weight: 500; white-space: nowrap; }
+.v2 .v2-dr-titre-actions .v2-dr-principal { display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px; border-radius: 6px; background: var(--v2-blue-700); color: #fff; font-size: 13px; font-weight: 500; white-space: nowrap; }
 .v2-dr-principale { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(320px, 1fr); gap: 16px; align-items: stretch; }
 .v2-dr-carrousel { display: flex; flex-direction: column; }
 .v2-dr-carrousel-tete { display: flex; align-items: center; gap: 12px; }
@@ -2778,7 +2796,7 @@ html.v2-calme *::after {
 .v2-ia-saisie textarea::placeholder { color: var(--v2-gray-900); }
 .v2-ia-saisie-pied { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .v2-ia-saisie-pied > span { font-size: 11px; color: var(--v2-gray-900); }
-.v2-ia-envoyer { display: grid; place-items: center; width: 30px; height: 30px; border: 0; border-radius: 6px; background: var(--v2-gray-1000); color: var(--v2-bg-100); cursor: pointer; transition: opacity 0.15s; }
+.v2-ia-envoyer { display: grid; place-items: center; width: 30px; height: 30px; border: 0; border-radius: 6px; background: var(--v2-blue-700); color: #fff; cursor: pointer; transition: opacity 0.15s; }
 .v2-ia-envoyer:disabled { opacity: 0.35; cursor: default; }
 
 /* la conversation */

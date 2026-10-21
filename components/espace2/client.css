@@ -25,18 +25,19 @@
 html[data-v2-theme="light"] .oc-logo-clair { display: block; }
 html[data-v2-theme="light"] .oc-logo-sombre { display: none; }
 
-/* — la navigation latérale : liens de 28 px, 6 px de rayon, gris au repos,
-   blancs au survol et sur la page ouverte ; l'anneau de focus ne reste
-   pas après un clic (il reste au clavier) — */
-.v2.oc .v2-lien { height: 28px; border-radius: 6px; font-weight: 500; letter-spacing: -0.02em; color: var(--v2-gray-900); }
+/* — la navigation latérale : liens de 28 px, 6 px de rayon, en 400 comme
+   chez Supabase (21/10), gris au repos, blancs au survol et sur la page
+   ouverte ; l'anneau de focus ne reste pas après un clic (il reste au
+   clavier) — */
+.v2.oc .v2-lien { height: 28px; border-radius: 6px; font-weight: 400; letter-spacing: -0.02em; color: var(--v2-gray-900); }
 .v2.oc .v2-lien:hover { color: var(--v2-gray-1000); }
 .v2.oc .v2-lien[aria-current="page"], .v2.oc .v2-lien[data-dedans] { color: var(--v2-gray-1000); }
 .v2.oc .v2-lien svg { color: currentColor; opacity: 0.85; }
 .v2.oc .v2-lien:focus:not(:focus-visible) { box-shadow: none; }
 .v2.oc .v2-section-titre { font-size: 12px; font-weight: 500; letter-spacing: 0; color: var(--v2-gray-700); }
 
-/* — « Rechercher… » : 28 px, angles de 6 px comme les boutons — */
-.v2.oc .v2-trouver { height: 28px; border-radius: 6px; font-weight: 400; }
+/* — « Rechercher… » : 30 px, angles de 6 px comme les boutons — */
+.v2.oc .v2-trouver { height: 30px; border-radius: 6px; font-weight: 400; }
 .v2.oc .v2-trouver .v2-kbd { border-radius: 4px; height: 16px; min-width: 16px; padding: 0 3px; font-size: 10.5px; }
 
 /* — la barre du haut et les boutons — */
@@ -60,11 +61,11 @@ html[data-v2-theme="light"] .oc-logo-sombre { display: none; }
 .v2.oc .v2-va-kpi:hover .v2-va-kpi-libelle { color: var(--v2-gray-1000); }
 .v2.oc .v2-va-kpi:hover strong { color: var(--v2-blue-900); }
 
-/* — les cartes : 12 px de rayon, filet + ombre de 2 px, sans le liseré
+/* — les cartes : 6 px de rayon et le filet seul, sans ombre portée, comme
+   les cadres du tableau de bord Supabase (relevé du 21/10) ; sans le liseré
    lumineux qui tourne ni le fond animé de la vue d'ensemble — */
-.v2.oc .v2-carte, .v2.oc .v2-dr-carte, .v2.oc .v2-va-kpis { border-radius: 12px; box-shadow: 0 0 0 1px var(--v2-a-400), 0 2px 2px rgba(0, 0, 0, 0.04); }
-html[data-v2-theme="dark"] .v2.oc :is(.v2-carte, .v2-dr-carte, .v2-va-kpis) { box-shadow: 0 0 0 1px var(--v2-a-400), 0 2px 2px rgba(0, 0, 0, 0.32); }
-.v2.oc .v2-carte > .v2-tableau-cadre { border-radius: 8px; }
+.v2.oc .v2-carte, .v2.oc .v2-dr-carte, .v2.oc .v2-va-kpis { border-radius: 6px; box-shadow: 0 0 0 1px var(--v2-a-400); }
+.v2.oc .v2-carte > .v2-tableau-cadre { border-radius: 6px; }
 .v2.oc .v2-carte::before,
 .v2.oc .v2-dr-carte::before,
 .v2.oc .v2-va-kpis::before { content: none; animation: none; }
@@ -75,8 +76,8 @@ html[data-v2-theme="dark"] .v2.oc :is(.v2-carte, .v2-dr-carte, .v2-va-kpis) { bo
 .v2.oc .v2-tableau th { height: 36px; font-size: 13px; background: none; }
 .v2.oc .v2-tableau td { border-bottom-color: var(--v2-a-200, var(--v2-a-300)); }
 
-/* — les menus flottants : 12 px de rayon, lignes de 6 px — */
-html.oc-actif .v2-popover { border-radius: 12px; }
+/* — les menus flottants : 6 px de rayon comme chez Supabase, lignes de 6 px — */
+html.oc-actif .v2-popover { border-radius: 6px; }
 html.oc-actif .v2-menu-item { border-radius: 6px; font-weight: 400; }
 
 /* — contrastes (WCAG AA, 4,5:1), relevés par axe au clonage ; écarts au
@@ -134,7 +135,7 @@ html[data-v2-theme="light"] .v2.oc :is(.v2-section-titre, .v2-cote-groupe) { col
    comme Tâches et Appels du pilotage : une barre fine, puis une ligne par
    fiche (titre, détail gris, date à droite), la corbeille au survol — */
 .v2.oc .oc-barre { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
-.v2.oc .oc-barre-recherche { flex: 1; min-width: 0; height: 32px; }
+.v2.oc .oc-barre-recherche { flex: 1; min-width: 0; height: 30px; }
 .v2.oc .oc-barre-recherche svg { flex: none; color: var(--v2-gray-900); }
 .v2.oc .oc-barre-recherche input { min-width: 0; }
 .v2.oc .oc-barre > .v2-btn { flex: none; }
