@@ -1359,3 +1359,42 @@ Les écrans d'espace des branches worker-a4/c2/c3/c4 appellent des portes qui n'
 - À Teo : réveil d'A5 (TCASHD-07 refus à la saisie, délégations TFILED-09/10, crochet « réécrire à l'approbation » de 10b) ; envoi d'essai REPUT ; O6 (TOFFLOAD-03) ; sceau (un seul gérant) ; site ou moteur pour TFILED-06 et 07 ; TFILED-12 (l'ouvreur d'un dépôt vaut-il saisisseur ?) ; statut de cycle de vie 207/208 après un 205 (A4).
 - Au bureau : redéployer l'Edge reput-reponse (c3_25 à c3_28) et le lecteur A1 fd2da4bd.
 - Sécurité : pause à 01 h 00 Z (trig_01Y1g8hC8geoXnUd7GyYhhAB) si pas de PAUSE avant.
+
+## PAUSE (Teo, par le bureau) — 21/10, 22 h 45 Z, forfait 60 %
+
+Sessions actives arrêtées par message (A1, A4, C2, C3, C4, T-FILED, T-CASHD, T-REPUT, T-OFFLOAD). Routine 3 h coupée par le bureau ; sécurité trig_01Y1g8hC8geoXnUd7GyYhhAB désarmée. Aucun job de test en cours sur la recette.
+
+### SHA d'arrêt
+
+| Branche | SHA |
+|---|---|
+| main | b4673c78 |
+| worker-a1 | fd2da4bd |
+| worker-a4 | c9b15f5c |
+| worker-c2 | 0ce7bbd8 |
+| worker-c3 | 192a033f |
+| worker-c4 | 2d05c1cd |
+| testeur-filed | 0edc36d7 |
+| testeur-cashd | 064bbb52 |
+| testeur-reput | 9c54b74c |
+| testeur-offload | 847710dd |
+
+Dernière pose sur la recette : c2_38 (TCASHD-11), vert. Aucun écart CASHD, OFFLOAD ou FILED ouvert sur les bancs hors décisions de Teo ; REPUT 01/02/03/04-texte attendent l'Edge reput-reponse.
+
+### À TEO (telle quelle)
+
+- Réveil d'A5 : TCASHD-07 (refus à la saisie d'une approbation sans commentaire), TFILED-09/10 (délégations : messages bruts, minuit UTC), crochet « réécrire à l'approbation » pour 10b.
+- Envoi d'essai REPUT.
+- O6 / TOFFLOAD-03.
+- Sceau à un seul gérant.
+- Site ou moteur pour TFILED-06 (découpage d'un PDF à deux factures) et TFILED-07 (fournisseur inconnu bloqué avant paiement).
+- TFILED-12 : l'ouvreur d'un dépôt par lot vaut-il saisisseur ?
+- Statut de cycle de vie 207/208 après un 205 déjà transmis (A4).
+
+### Au bureau
+
+Redéployer l'Edge reput-reponse (c3_25 à c3_28) et le lecteur A1 fd2da4bd.
+
+### Reprise
+
+Au feu vert de Teo ou samedi 25/10 après 02 h Z. Fusionner d'abord cette section dans main (les 2 pushes du 21/10 étaient pris). Les écrans d'espace des branches worker ne vont dans main qu'avec leurs migrations en production (niveau 3, Teo).
