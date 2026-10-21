@@ -92,3 +92,8 @@ reglements : creees 0, lignes 5, inchangees 5
 - `cashd_preparer_maintenant` → `{bloquees 1}` ; relance A-C14 `rappel` `bloquee`, motif « le message contient un mot interdit
   par vos règles : « simple oubli » » ; corps : « … sur votre compte A-C14, secteur second œuvre : … Il s'agit sans doute d'un
   simple oubli. … Vous pouvez régler Virement IBAN … Service comptabilité — Négoce Banc Matériaux (fictif) ».
+- Coordinateur : `private.cashd_preparer_relances(client,'2026-10-27',null)` → `{preparees 1}` ; `'2026-11-03'` → `{preparees 1}` ; aucune ligne dans `public.envois`.
+- `cashd_relances_du_jour` A-C14 : 21/10 `rappel` `coupee` « remplacée par la relance du 27/10/2026 » ; 27/10 `relance`
+  « Sauf erreur de notre part, la somme suivante reste impayée … au plus tard le 04/11/2026 … Vous pouvez régler … », `coupee`
+  « remplacée par la relance du 03/11/2026 » ; 03/11 `mise_en_demeure` « Les sommes suivantes restent impayées (compte A-C14,
+  secteur second œuvre) … mettons en demeure … au plus tard le 11/11/2026 … », `non_reglee` (pas de moyens de règlement).
