@@ -125,7 +125,7 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
   const refusLigne = (nature: "facture" | "devis", m: string) =>
     !m.trim() ? null
       : !m.includes("{numero}") || (nature === "facture" && !m.includes("{reste}")) ? `La ligne d'${nature === "facture" ? "une facture porte {numero} et {reste}" : "un devis porte {numero}"}.`
-      : [...m.matchAll(/\{([a-z_]+)\}/g)].some((x) => !(nature === "facture" ? ["numero", "date", "montant", "echeance", "retard", "reste"] : ["numero", "date", "montant"]).includes(x[1])) ? "Variable inconnue pour cette ligne."
+      : [...m.matchAll(/\{([a-z_]+)\}/g)].some((x) => !(nature === "facture" ? ["numero", "date", "montant", "echeance", "retard", "reste", "commande"] : ["numero", "date", "montant"]).includes(x[1])) ? "Variable inconnue pour cette ligne."
       : null;
   const enregistrerLigne = async (nature: "facture" | "devis") => {
     const m = (ligneSaisie[nature] || ligneDe(nature)).trim();
@@ -363,7 +363,7 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
                 const refusL = refusLigne(nature, valeur);
                 return (
                   <div key={nature} className="esp-form-ligne">
-                    <label className="rv-libelle">{nature === "facture" ? "Ligne d'une facture ({numero} {date} {montant} {echeance} {retard} {reste})" : "Ligne d'un devis ({numero} {date} {montant})"}
+                    <label className="rv-libelle">{nature === "facture" ? "Ligne d'une facture ({numero} {date} {montant} {echeance} {retard} {reste} {commande})" : "Ligne d'un devis ({numero} {date} {montant})"}
                       <input className="rv-champ" value={valeur} maxLength={300} placeholder={nature === "facture" ? "Rechnung {numero} vom {date}, fällig am {echeance}: {reste} offen" : "Angebot {numero} vom {date}: {montant}"}
                         onChange={(e) => setLigneSaisie({ ...ligneSaisie, [nature]: e.target.value })} />
                     </label>
