@@ -1505,3 +1505,10 @@ begin
   returning id into v;
   return v;
 end $function$;
+
+-- Lot 60 : doublure du régime territorial, d'après le territoire de l'entité (GP, MQ, RE : DOM ; GF, YT : sans TVA).
+create or replace function private.filed_regime_territorial(p_client uuid, p_entite uuid) returns text language sql stable set search_path to '' as $$
+  select case when e.territoire in ('GP', 'MQ', 'RE') then 'dom' when e.territoire in ('GF', 'YT') then 'sans_tva' else 'metropole' end
+  from public.entites e where e.client_id = p_client and (e.id = p_entite or (p_entite is null and e.principale))
+  union all select 'metropole' limit 1
+$$;

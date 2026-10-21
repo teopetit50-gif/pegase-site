@@ -145,3 +145,9 @@ create table if not exists public.envois (id uuid primary key default gen_random
   objet_type text, objet_id text, canal text not null, destinataire_adresse text, destinataire_membre uuid, sujet text, corps text not null,
   pieces uuid[] not null default '{}', transactionnel boolean not null default false, statut text not null default 'a_valider', verrou text, motif text,
   cle_idempotence text, cree_le timestamptz not null default now(), unique (client_id, cle_idempotence));
+
+-- Lot 60 (facture mixte DOM) : doublure des taux des départements d'outre-mer (CGI, art. 296 : 8,5 % normal, 2,1 % réduit
+-- en Guadeloupe, Martinique, La Réunion). La recette porte sa propre table : ceci ne sert qu'en local.
+insert into public.filed_taux_tva (regime, taux, libelle)
+select x.r, x.t, x.l from (values ('dom', 8.5, 'normal (DOM)'), ('dom', 2.1, 'réduit (DOM)')) x(r, t, l)
+where not exists (select 1 from public.filed_taux_tva t where t.regime = x.r and t.taux = x.t);
