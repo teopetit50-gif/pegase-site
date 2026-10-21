@@ -4,11 +4,11 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 `components/espace/offload/`, `app/espace/offload/`, et ce fichier. Coordinateur : session
 `session_01BCGFdpRKBvXKjouC75sYBg`. Je n'appelle jamais Supabase : le coordinateur pose, je reçois les sorties brutes.
 
-## REPRISE (19/10, 14 h 50 Z — reprise du 19/10, feu vert de Teo)
+## REPRISE (21/10, 19 h 30 Z — lot correctif du testeur T-OFFLOAD)
 
-- Fait : c4_01 à c4_19 verts sur la recette ; écran c4_20 ; c4_21 (réécriture par règles écrites) et c4_22 (branche Gmail) poussés, local 435 ok.
-- En cours : rien. Gmail attend l'accord de Teo dans cette session ; aucun import de données personnelles sans accord écrit de Teo.
-- Prochain pas : le coordinateur joue le script d'import des personnes morales sur la recette (ma garde a refusé que je le lance sur la vraie liste : données personnelles). Rien d'autre.
+- Fait : c4_01 à c4_22 verts sur la recette ; c4_23 (TOFFLOAD-01 essai, TOFFLOAD-02 litige à l'ouverture manuelle) poussé, local 441 ok.
+- En cours : rien. Import des personnes morales : script livré (6f0a05b2), non joué, en attente de Teo.
+- Prochain pas : poser c4_23 ; O6 (contact récent, reprise ouverte à la main) : voulu depuis c4_05, à trancher si on le ferme aussi.
 
 ### Reprise du 17/10
 
@@ -451,6 +451,17 @@ Banc local : 28 tests, 312 assertions vertes, migrations posées deux fois ; tsc
 l'échéance honorée après message est comptée au suivi). Le chiffre repris compte tous les achats des 90 jours,
 sans prétendre qu'ils sont dus au seul message.
 
+## Lot c4_23 — correctifs du testeur T-OFFLOAD (21/10)
+
+TOFFLOAD-01 : OFFLOAD en essai sans réglage d'envoi du module → le socle faisait naître les envois en « reel »
+(bloqués CONFIG_ABSENTE). `offload_essai_contre_reel` est désormais vrai dès que le réglage effectif n'est pas « essai »
+(absent compris) : aucune porte ne prépare rien ; `offload_envoyer` le revérifie en dernier ; les phrases disent « ne
+sont pas réglés en essai ». TOFFLOAD-02 : `offload_ouvrir` refuse un compte que CASHD suit (`offload_impaye`), même à la
+main. Test `c4_23_correctifs_testeur.sql` : 6 rouges sans le lot, 6 verts avec. Souche locale : un envoi sans réglage
+naît désormais en « reel », comme le vrai socle. Banc local : 47 tests, 441 ok.
+O6 (contact noté il y a moins de 90 jours, reprise ouverte à la main) : voulu depuis c4_05 — la quarantaine du contact
+écarte du CYCLE automatique ; la porte manuelle est la décision d'une personne. Fermable sur décision.
+
 ## Point 7 du bureau — script d'import des comptes d'Omega, personnes morales seulement (19/10)
 
 `omega/modules/offload/outils/offload_omega_personnes_morales.py` : AUCUNE donnée dans le fichier. Il lit
@@ -796,3 +807,4 @@ Partielles : 6, 11, 15, 38.
 - 19/10, 16 h 30 Z — reprise (bureau) : lot c4_21 (réécriture par règles écrites) : 45 tests, 430 ok en local.
 - 19/10 — lot c4_22 (branche Gmail, brouillons déposés) : 46 tests, 435 ok en local.
 - 19/10 — point 7 : script d'import des personnes morales écrit, testé sur un fichier fictif ; non lancé sur la vraie liste (garde).
+- 21/10 — lot c4_23 (correctifs T-OFFLOAD : essai sans réglage, litige à l'ouverture manuelle) : rouge avant, vert après ; 441 ok.
