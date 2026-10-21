@@ -80,7 +80,7 @@ export const GABARITS_EXEMPLE: Gabarit[] = [
   D("relance", 2, "{emetteur} — {total} restent à régler",
     "{bonjour}\n\nNotre premier rappel est resté sans suite, et {dues} sur votre compte {compte} :\n{lignes}\nLe total dû s'élève à {total}. Merci de le régler au plus tard le {limite}.\n{ton_montant}{droits}Si une partie de ces montants vous paraît contestable, écrivez-nous : nous l'examinerons.\n{reglement}"),
   D("mise_en_demeure", 1, "{emetteur} — mise en demeure de payer {total}",
-    "{bonjour}\n\nMalgré nos précédentes relances, les sommes suivantes restent impayées (compte {compte}) :\n{lignes}\nPar la présente, nous vous mettons en demeure de régler la somme de {total} dans un délai de {delai} jours à compter de la réception de {ce_message}.\n{droits}À défaut de règlement dans ce délai, nous engagerons une procédure de recouvrement, sans autre avis.\n"),
+    "{bonjour}\n\nMalgré nos précédentes relances, les sommes suivantes restent impayées (compte {compte}) :\n{lignes}\nPar la présente, nous vous mettons en demeure de régler la somme de {total} dans un délai de {delai} jours à compter de la réception de {ce_message}.\n{reglement}{droits}À défaut de règlement dans ce délai, nous engagerons une procédure de recouvrement, sans autre avis.\n"),
   D("devis_rappel", 1, "{emetteur} — votre devis{objet}", "{bonjour}\n\nNous vous avons adressé {dues} (compte {compte}) :\n{lignes}{devis_suite}"),
   D("devis_rappel", 2, "{emetteur} — suite à notre devis{objet}",
     "{bonjour}\n\nNous nous permettons de revenir vers vous : nous vous avons adressé {dues} (compte {compte}), et nous n'avons pas encore eu votre retour.\n{lignes}{devis_suite}"),
@@ -107,8 +107,9 @@ export function apercu(
   const ech = cle === "echeance";
   const total = 12000;
   let reglement = "";
+  /* c2_36 : les moyens de règlement, mise en demeure comprise */
+  if ((ech || cle === "rappel" || cle === "relance" || cle === "mise_en_demeure") && r.moyens_reglement) reglement += `Vous pouvez régler ${r.moyens_reglement.replace(/[.\s]+$/, "")}.\n`;
   if (ech || cle === "rappel" || cle === "relance") {
-    if (r.moyens_reglement) reglement += `Vous pouvez régler ${r.moyens_reglement.replace(/[.\s]+$/, "")}.\n`;
     if (r.echelonnement_des !== null && r.echelonnement_des !== undefined && total >= r.echelonnement_des) reglement += "Si un règlement en plusieurs fois vous aide, répondez-nous : nous pouvons convenir d'un échéancier.\n";
   }
   /* c2_33 : 1 500 € par défaut, tant que l'organisation n'a pas posé son seuil */
