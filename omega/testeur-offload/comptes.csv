@@ -1,0 +1,14 @@
+compte_ref,raison_sociale,contact,courriel,sms,accord_contact
+O0,Résidence Fictive Anse-Témoin SARL,Contact fictif O0,contact@o0.example.invalid,,oui
+O1,Hôtel Fictif Litige-Karukera SAS,Contact fictif O1,contact@o1.example.invalid,,oui
+O2,Clinique Fictive Rythme-Annuel SA,Contact fictif O2,contact@o2.example.invalid,,oui
+O3,Boulangerie Fictive Sans-Courriel SARL,Contact fictif O3,,,oui
+O4,Garage Fictif Pièce-En-Plan EURL,Contact fictif O4,contact@o4.example.invalid,,oui
+O5,Pharmacie Fictive Sans-Accord SELARL,Contact fictif O5,contact@o5.example.invalid,,non
+O6,Supérette Fictive Déjà-Relancée SAS,Contact fictif O6,contact@o6.example.invalid,,oui
+O7,Restaurant Fictif Commande-Pendant SARL,Contact fictif O7,contact@o7.example.invalid,,oui
+O8,Bureau Fictif Geste-Motif SAS,Contact fictif O8,contact@o8.example.invalid,,oui
+O9,École Fictive Deux-Canaux SAS,Contact fictif O9,contact@o9.example.invalid,+33 6 39 98 00 09,oui
+O10,Gîte Fictif Reconduction SARL,Contact fictif O10,contact@o10.example.invalid,,oui
+O11,Atelier Fictif Valeur-Figée SAS,Contact fictif O11,contact@o11.example.invalid,,oui
+O12,Cabinet Fictif Effacement SCP,Contact fictif O12,contact@o12.example.invalid,,oui

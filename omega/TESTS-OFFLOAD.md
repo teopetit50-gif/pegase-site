@@ -57,7 +57,20 @@ CRM / ERP / tableur : « pas testable sans tiers ».
 
 | Cas | Promesse (fichier:ligne) | Le compte | Attendu | Ce qu'OFFLOAD a fait | Verdict | Niveau |
 |---|---|---|---|---|---|---|
-| | | | | | | |
+| O0 | lib/produits/reprise.ts:166, lib/produits/reprise.ts:451, lib/produits/capacites/reprise.ts:44 | mensuel, muet depuis 20/07 | signal levé, reprise à valider, rien d'envoyé | pas encore joué (portes attendues) | — | — |
+| O1 | lib/produits/reprise.ts:195, lib/produits/capacites/reprise.ts:156 | O0 + litige CASHD | exclu de la vague, motif dit | pas encore joué (portes attendues) | — | — |
+| O2 | lib/produits/capacites/reprise.ts:44, lib/produits/reprise.ts:320 | annuel, muet depuis 20/07 | aucun signal (silence normal) | pas encore joué (portes attendues) | — | — |
+| O3 | aucune promesse « appel » trouvée sur le site (brief seulement) | O0 sans courriel | reprise par appel, aucun message | pas encore joué (portes attendues) | — | — |
+| O4 | lib/produits/capacites/reprise.ts:86-87, lib/produits/capacites/reprise.ts:152 | actif, CMD-O4-01 arrivée 11/10, délai 7 j | affaire en plan, relance 1 préparée | pas encore joué (portes attendues) | — | — |
+| O5 | aucune promesse « accord » trouvée sur le site (brief seulement) | O0, contact sans accord | aucun message préparé | pas encore joué (portes attendues) | — | — |
+| O6 | lib/produits/reprise.ts:193, lib/produits/reprise.ts:381 | O0, relancé le 11/09 | pas de second message ce trimestre | pas encore joué (portes attendues) | — | — |
+| O7 | lib/produits/capacites/reprise.ts:114 ; « close commande » : brief | O0 + commande pendant la reprise | reprise close « commande », message annulé | pas encore joué (portes attendues) | — | — |
+| O8 | lib/produits/capacites/reprise.ts:101, lib/produits/capacites/reprise.ts:176 ; motif : brief | actif | sans motif refusé ; avec motif accepté et journalisé | pas encore joué (portes attendues) | — | — |
+| O9 | lib/produits/reprise.ts:381 | O0, courriel + SMS | un seul canal par vague | pas encore joué (portes attendues) | — | — |
+| O10 | lib/produits/capacites/reprise.ts:75, lib/produits/capacites/reprise.ts:73 | actif, CT-O10 tacite au 20/12 | échéance signalée à temps (avant J-7) | pas encore joué (portes attendues) | — | — |
+| O11 | lib/produits/capacites/reprise.ts:113 ; « figée » : brief | O0 + 1 000 € après ouverture | valeur figée à l'ouverture | pas encore joué (portes attendues) | — | — |
+| O12 | lib/produits/reprise.ts:441 ; porte : brief | personne de O12 | plus rien ne la mentionne ; journal sans ses données | pas encore joué (portes attendues) | — | — |
+| R | lib/produits/reprise.ts:196, lib/produits/reprise.ts:397 | rejeu à l'identique | 1 signal/compte/jour, aucune seconde reprise | pas encore joué (portes attendues) | — | — |
 
 ## Écarts
 
@@ -69,7 +82,24 @@ CRM / ERP / tableur : « pas testable sans tiers ».
   et interventions.
 - Comment poser un compte « en litige CASHD » pour O1, et déclencher la détection à la demande.
 - Un compte « gérant » du client banc pour l'écran et les gestes.
+- (21/10) L'identifiant (uuid) de `banc-test-offload`, et la confirmation qu'OFFLOAD y est installé en `essai`.
+- (21/10) Les portes de lecture : signaux / reprises d'un compte, affaires en plan, échéances, journal des envois préparés.
+- (21/10) La porte d'effacement d'une personne (O12) et la porte de geste exclure / suivre avec motif (O8).
+- (21/10) Le format attendu du relevé : mon jeu est en CSV (`omega/testeur-offload/releve.csv`,
+  compte, date, référence, libellé, montant HT). Faut-il le passer par le dépôt de fichier
+  (`GUIDE-DEPOT.md`) ou par une RPC ?
+- (21/10) Constat de lecture, pour info : O3 (appel), O5 (accord), O8 (motif), O11 (valeur figée)
+  et O12 (effacement) ne correspondent à aucune promesse écrite sur la page ni au catalogue ; je
+  les teste contre le brief. Par ailleurs toutes les lignes « Échéances » et « Affaires en plan »
+  du catalogue portent le commentaire « moteur CYCLE pas construit » (`capacites/reprise.ts:20-25`) :
+  O4 et O10 risquent d'être « pas couvert ».
 
 ## REPRISE
 
-(à remplir à chaque arrêt : fait / en cours / prochain pas / questions / SHA)
+**21/10, arrêt 1.**
+- Fait : contrat, brief, promesses (page + catalogue) et banc de l'ouvrier lus ; jeu d'essai série 1 prêt
+  (`omega/testeur-offload/` : `comptes.csv`, `releve.csv`, `jeu-serie1.md`) ; attendus notés dans le tableau.
+- En cours : rien joué — aucune porte de dépôt connue (le banc de l'ouvrier ne montre que `offload_installer`).
+- Prochain pas : dès réponse, dépôt → détection → lecture → événements O7/O11/O8/O12 → rejeu.
+- Questions : section ci-dessus (identifiant du banc, portes de dépôt/lecture/geste/effacement, litige O1, compte gérant).
+- SHA : voir le commit « T-OFFLOAD : jeu d'essai série 1 ».
