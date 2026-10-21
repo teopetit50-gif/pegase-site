@@ -18,8 +18,18 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
   cashd_factures.facture_visee) · `c2_21_incoherence_dite` (TCASHD-02, test 6 ; fiche : incoherence, relance_suspendue,
   reste_relancable 0) · `c2_22_raison_exacte` (TCASHD-04/05, test 4) · `c2_23_clients_inchanges` (TCASHD-01, test 3).
   Local 343/343. Jeu du testeur rejoué en local : scratchpad c2_19/repro.sql (serie1 sur le banc).
-- **En attente d'accord** : TCASHD-08/09/10 (ton, secteur et chantier, canal / délai / pluriel) — proposition envoyée au
-  coordinateur le 21/10, pas de code avant son accord. TCASHD-07 (MED approuvée sans commentaire) : socle ; garde CASHD proposée.
+- **Suite de la recette T-CASHD (21/10, soir)** — poussés dans l'ordre : c2_20b (reprise des avoirs mal imputés), c2_22b
+  (fiche : relançable 0 pendant toute suspension, « sous le seuil » dit d'emblée), c2_24 / c2_24b / c2_31 (aucun palier sans
+  que le précédent soit réellement parti ; la séquence reprend au premier palier non parti ; MED retenue tant que la ferme
+  n'est pas partie ; reprises), c2_25 (MED approuvée sans commentaire coupée, déclencheur après le socle), c2_26 / c2_27 /
+  c2_28 / c2_29 / c2_30 / c2_33 / c2_35 / c2_36 / c2_38 (textes : pluriel, canal, chantier, secteur, ton selon ancienneté
+  et montant — défauts 15/45 j et 1 500 € —, date limite avec 3 j ouvrés de validation + 2 j de remise, moyens de
+  règlement dans la MED, « Moyens de règlement : … »), c2_32 / c2_34 / c2_37 (envoi à la main d'une relance non_reglee ;
+  elle ne repart jamais ; statut « envoyee », contrainte élargie), puis l'écran des deux réglages de date limite.
+  Local 429/429. Banc local : stub public.approbations (scratchpad/approbations_stub.sql, non commité).
+- **Limites dites au coordinateur** : le socle fige le texte d'un envoi adossé (pas de réécriture à l'approbation, piste
+  (c) pour Teo) ; une relance bloquée par un interdit n'est pas réécrite quand l'interdit est retiré (choix de produit).
+
 - **Prochain pas** : charger les factures d'Omega (cashd_omega.sql) quand Teo envoie ses PDF ; G19 avec un premier client.
 
 - **Posés et verts (18/10)** : c2_11 envoi à la main (842f9c25) ; c2_12 v2 modèle 2 (5ee5fd10, ^test_c2_ 12/12) — rappels
