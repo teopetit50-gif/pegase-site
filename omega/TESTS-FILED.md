@@ -221,6 +221,14 @@ seulement « proposé », jamais tenu pour bon (vérifié par le coordinateur). 
   principale). D1 sans date de fin et D2 avec une fin antérieure au début, tous deux attendus refusés, joués en transaction annulée.
   D3, du 22/10 au 29/10 avec un motif, attendu accepté. **Non joués** : à 21 h 25, la recette rend deux fois `Connection terminated
   due to connection timeout` (redémarrage ? cf. constat du 19/10). Je n'insiste pas.
+  Cause, selon le coordinateur : il avait lancé la suite CASHD complète, qui a fait redémarrer la recette à 20 h 22 Z. Elle répond de
+  nouveau depuis 20 h 23 Z.
+- **D1 rejoué** (21/10, 20 h 24 Z, gérant, transaction annulée) : `insert into public.delegations (…) values (auth.uid(), 'eeeeeeee-…02f1',
+  'fba91a52-…', 'filed', '2026-10-22', null, '…')` → `ERROR 42501: On ne délègue qu'à un membre de l'organisation : cette personne n'en fait
+  pas partie.` Le refus arrive **avant** le contrôle de la date de fin. Le valideur du banc n'est pas « membre de l'organisation », alors
+  qu'il peut décider une demande (V1b). C'est soit un trou dans le montage du banc, soit une incohérence du socle : Q16. Tant que le
+  banc n'a pas un second membre, D1 à D3 ne sont **pas testables**.
+- Pour info : A4 a livré TFILED-08 (a4_73), mais le correctif n'est **pas encore posé** sur la recette. À revérifier quand il le sera.
 
 ### Jeu d'essai série 1 (prêt, pas encore joué)
 
@@ -283,7 +291,7 @@ par les portes `public.filed_confirmer_fournisseur(uuid, text)` et `public.filed
 
 **Arrêt 8 — 21/10/2026, 21 h 30** (remplace les arrêts précédents)
 - Fait : séries 1, 1b et 2 (partielle), niveau 1. Juste : F1, F2b, F2c, F3 et F4b (après a4_71 et a4_72), F4a, F5, F8, F11 (contre la l. 31), F12, rejeu, exports Sage et Pennylane vides, V1b (rejet de l'IBAN et recontrôle). Écarts ouverts : TFILED-07 et TFILED-06 (remontés à Teo), TFILED-08 (à A4). Pas couvert : TFILED-05. Pas testable sans tiers : F0 « sans arrêt », circuit des factures (seuil, double approbation, `:74`), FEC (le banc n'a pas de SIREN).
-- En cours : délégation D1 à D3, interrompue par l'indisponibilité de la recette.
+- En cours : délégation D1 à D3, bloquée par Q16 (le valideur n'est pas membre de l'organisation).
 - Prochain pas : rejouer D1 à D3 quand le coordinateur dit que la recette répond. Puis, si l'on veut tester le circuit des factures, il faut un SIREN que VIES reconnaît sur le banc ou une décision de la file à l'écran, ce qui est l'affaire du coordinateur ou du bureau.
-- Questions : la recette est-elle disponible ? Et une observation pour Teo : « déposer » vaut-il « saisir » au sens de `:74` ?
+- Questions : **Q16** : le valideur `…02f1` n'est pas « membre de l'organisation » au sens des délégations, alors qu'il décide des demandes. Faut-il compléter le banc (en faire un membre), ou est-ce une incohérence du socle ? Reste l'observation pour Teo : « déposer » vaut-il « saisir » au sens de `:74` ? Et TFILED-08 est à revérifier une fois a4_73 posé.
 - SHA d'arrêt : voir le commit « T-FILED série 2 : V1 qualifié, recette injoignable » sur `testeur-filed`.
