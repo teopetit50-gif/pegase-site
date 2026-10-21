@@ -369,9 +369,13 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   border-right: 1px solid var(--v2-a-400);
   transition: width 0.1s linear;
 }
+/* le rail s'ouvre au survol, et au clavier dès qu'une de ses entrées a le
+   focus visible. `:focus-within` le laissait ouvert après un clic à la
+   souris (le lien cliqué garde le focus) : c'est le « des fois ça reste
+   déplié » de Teo, 21/10. `:has(:focus-visible)` n'ouvre qu'au clavier. */
 @media (hover: hover) {
   .v2-rail:hover,
-  .v2-rail:focus-within {
+  .v2-rail:has(:focus-visible) {
     width: 208px;
   }
 }
@@ -2745,7 +2749,8 @@ html.v2-calme *::after {
 .v2-dr-chaleur-grille i, .v2-dr-echelle i { display: block; aspect-ratio: 1; max-height: 16px; border-radius: 3px; background: var(--v2-a-200); }
 .v2-dr-chaleur-grille i[data-n="-1"] { background: transparent; }
 .v2-dr-chaleur-grille i[data-n="1"], .v2-dr-echelle i[data-n="1"] { background: var(--v2-a-400); }
-.v2-dr-chaleur-grille i[data-n="2"], .v2-dr-echelle i[data-n="2"] { background: var(--v2-gray-700); }
+/* le gris 2 est un cran plus noir que le gris 700 (21/10, demande de Teo) */
+.v2-dr-chaleur-grille i[data-n="2"], .v2-dr-echelle i[data-n="2"] { background: color-mix(in srgb, var(--v2-gray-700) 90%, #000); }
 .v2-dr-chaleur-grille i[data-n="3"], .v2-dr-echelle i[data-n="3"] { background: var(--v2-gray-900); }
 .v2-dr-chaleur-grille i[data-n="4"], .v2-dr-echelle i[data-n="4"] { background: var(--v2-gray-1000); }
 .v2-dr-echelle { display: flex; align-items: center; gap: 4px; margin: 20px 0 0; font-size: 13px; color: var(--v2-gray-1000); }

@@ -438,8 +438,13 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
     sections[0];
   /* les groupes du rail, séparés par un filet : l'accueil ; travail et fiches ; les modules ; le suivi */
   const rail: Section[][] = [[sections[0]], sections.slice(1, 3), sections.slice(3, 3 + modules.length), sections.slice(3 + modules.length)].filter((g) => g.length);
+  /* 21/10 (soir), capture de Teo : la bulle « title » du navigateur restait
+     dessinée par-dessus le rail ouvert (« Travail » collée sur « Accueil »),
+     et parfois après le survol — le navigateur la pose et l'enlève à sa
+     guise, rien ne la commande. Le rail s'ouvre au survol et montre le
+     libellé lui-même : pas de title, donc ni doublon ni bulle figée. */
   const iconeRail = (s: Section) => (
-    <Link href={s.href} className="v2-rail-item" title={s.titre} data-actif={s.cle === courante.cle ? "" : undefined} aria-current={s.cle === courante.cle ? "true" : undefined}>
+    <Link href={s.href} className="v2-rail-item" data-actif={s.cle === courante.cle ? "" : undefined} aria-current={s.cle === courante.cle ? "true" : undefined}>
       {s.icone}
       <span className="v2-rail-libelle">{s.titre}</span>
     </Link>
@@ -501,7 +506,7 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
           <div className="v2-rail-bas">
             <ul className="v2-rail-groupe">
               <li>
-                <Link href="/contact" className="v2-rail-item" title="Aide">
+                <Link href="/contact" className="v2-rail-item">
                   <LifeBuoy {...R} />
                   <span className="v2-rail-libelle">Aide</span>
                 </Link>
