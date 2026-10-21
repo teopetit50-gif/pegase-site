@@ -148,13 +148,13 @@ Lecture par le coordinateur à l'écran ou en lecture seule, relayée brute ; li
 - Observation annexe : sur F4a, `identite.registre` est seulement en **attention** (« pas encore confirmé par VIES »), alors qu'il est
   **bloquant** sur les 15 autres pièces pour le même fournisseur. La gravité dépend du moment de la réponse VIES.
 
-**TFILED-09 · D1, D2 · refus de délégation par un message brut de contrainte** (socle, table `delegations`, A5 ; remonté à Teo)
+**TFILED-09 · ✅ CORRIGÉ par socle 19ax, revérifié le 21/10 à 23 h 22 Z** — D1 rejoué (annulé) → `ERROR 23502: Une délégation a toujours une fin : indiquez jusqu'à quel jour elle vaut.` ; D2 (début 29/10, fin 22/10, annulé) → `ERROR 23514: La fin de la délégation doit venir après son début (du 29/10/2026 00:00 au 23/10/2026 00:00).` **Juste.** Petite observation : la fin saisie au 22/10 est affichée « 23/10/2026 00:00 », c'est-à-dire en borne exclusive, ce qui peut dérouter la personne qui a tapé 22/10. Constat d'origine : **refus de délégation par un message brut de contrainte** (socle, table `delegations`, A5 ; remonté à Teo)
 - En gérant, `insert into public.delegations (client_id, delegant, delegataire, entite_id, module, debut, fin, motif)` avec
   `fin null` → `ERROR 23502: null value in column "fin" … violates not-null constraint`. Avec `debut 2026-10-29` et `fin 2026-10-22`
   → `ERROR 23514: … violates check constraint "delegations_periode"`.
 - Le refus est juste (`:71`), mais le motif n'est pas lisible par un client, alors que les autres portes répondent en français clair.
 
-**TFILED-10 · D3 · les dates de délégation sont en minuit UTC, pas à l'heure du client** (socle, A5 ; remonté à Teo)
+**TFILED-10 · ✅ CORRIGÉ par socle 19ax, revérifié le 21/10 à 23 h 22 Z** — D3 rejoué (23/10 → 29/10, annulé) → stocké `debut 2026-10-23T04:00Z`, `fin 2026-10-30T04:00Z`, soit à l'heure de Guadeloupe du **23/10 00:00 au 30/10 00:00** : le 29/10 est couvert en entier. **Juste.** Constat d'origine : **les dates de délégation sont en minuit UTC, pas à l'heure du client** (socle, A5 ; remonté à Teo)
 - Insertion validée, `debut 2026-10-22`, `fin 2026-10-29` → stocké `2026-10-22 00:00:00+00` / `2026-10-29 00:00:00+00`.
 - Pour un client en Guadeloupe (UTC−4), la délégation commence le 21/10 à 20 h et s'éteint le **28/10 à 20 h**, heure locale. Le
   site dit qu'elle « s'éteint à la date prévue » (`capacites/factures.ts:177`).
@@ -209,7 +209,7 @@ comptabilisée (alerte critique, pas défaite) n'est **pas testable** sur le ban
   « bloquee », soit elle est signalée, comptée et exclue du paiement. Je le classe **écart**, au niveau 1. Ce qu'il advient du paiement
   reste **pas testable sans tiers**, faute d'un réglage d'envoi sur le banc.
 
-**TFILED-12 · F1 · le déposant approuve seul sa propre facture** (`capacites/factures.ts:74`, « Celui qui saisit et celui qui approuve
+**TFILED-12 · CLOS PAR DÉCISION DE TEO (21/10, soir)** : un gérant décide seul ; une organisation qui veut deux personnes pose un seuil (`filed_regler_seconde_personne`, nul par défaut). Ce comportement est observé en C1 (approbation seule du gérant acceptée), donc **conforme à la décision**. Le rejeu demandé à 23 h 22 Z n'a pas pu se faire : la seule demande restante, `7fb25997`, est « annulee » (`ERROR 23514: Cette demande n'est plus en attente (annulee).`), et aucune autre demande n'est ouverte sur le banc. Constat d'origine : **le déposant approuve seul sa propre facture** (`capacites/factures.ts:74`, « Celui qui saisit et celui qui approuve
 ne peuvent pas être la même personne » ; carte « Des rôles et des délégations », `:177`)
 - Pièce déposée par le dépôt du **gérant** `eeeeeeee-…01f1` (le coordinateur confirme que le déposant est le gérant). Après TFILED-11,
   F1 est `a_valider`, avec la demande `7b4464be-1f83-4d6e-a3d5-eadce0d95126` (`filed.valider_facture`, 1 approbation requise).
@@ -394,9 +394,8 @@ par les portes `public.filed_confirmer_fournisseur(uuid, text)` et `public.filed
 
 ## REPRISE
 
-**Arrêt 14 — 21/10/2026, 20 h 57 Z**
-- Fait : séries 1, 1b et 2, au niveau 1. Corrigés et revérifiés : TFILED-03, 04, 08, 11 et 14. Clos justes : TFILED-02 et 13. Écart ouvert : **TFILED-12** (à décision de Teo : l'ouvreur du dépôt compte-t-il comme saisisseur ?). Remontés à Teo : TFILED-05, 06, 07, 09 et 10. Pas testable : F0 « sans arrêt », le FEC, le seuil de double approbation, l'usage réel d'une délégation, le paiement, une facture comptabilisée puis contredite.
-- En cours : rien.
-- Prochain pas : aucun sur ce banc. Une nouvelle série demande un SIREN connu de VIES, l'écran, ou le niveau 2 (relecture des pièces NOBAT de l'ouvrier, sur instruction du coordinateur).
-- Questions : à Teo, TFILED-12 et TFILED-05, 06, 07, 09, 10 (via le coordinateur).
-- SHA d'arrêt : voir le commit « T-FILED : TFILED-14 corrigé, arrêt 14 » sur `testeur-filed`.
+**Arrêt 15 — 21/10/2026, 23 h 25 Z** (réveil court, rejeu demandé par le coordinateur)
+- Fait : TFILED-09 et 10 revérifiés et justes (socle 19ax). TFILED-12 clos par décision de Teo : la conformité vient de C1, le rejeu est impossible faute de demande ouverte.
+- Pas fait : (1) l'activation du sceau mensuel par le gérant seul (politique `bb14ca0d`, filed/envoi.email). On ne m'a donné aucune porte d'activation de politique, et je ne vais pas la chercher dans le code (contrat § 2).
+- Prochain pas : (1) dès que la porte me sera donnée, avec ses paramètres. Ensuite, arrêt jusqu'au feu vert de Teo, ou samedi 25/10 après 02 h Z.
+- SHA d'arrêt : voir le commit « T-FILED : rejeu 19ax, TFILED-09 et 10 corrigés, TFILED-12 clos » sur `testeur-filed`.
