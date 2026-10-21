@@ -15,7 +15,9 @@
    /espace2 (components/espace2/espace2.css, bloc sombre), qui porte
    depuis le commit 474652a0 celles du tableau de bord Supabase — l'aperçu
    dessiné ici doit ressembler au vrai tableau de bord. Les mesures
-   (tailles, rayons, disposition) restent celles du relevé Attio.
+   (tailles, rayons, disposition) restent celles du relevé Attio. Le soir
+   même, les gris sont pris NEUTRES comme dans /espace2 (Teo : la pointe
+   de vert des jetons OKLCH se voyait) ; les filets passent en blanc pur.
 
    Écarts assumés :
    · le SOMBRE quel que soit le thème choisi dans /espace2 : Teo a demandé
@@ -42,39 +44,39 @@ html:has(.bv) body > header {
 }
 html:has(.bv),
 html:has(.bv) body {
-  background: #131413;
+  background: #141414;
 }
 
 .bv {
   /* 21/10 — les jetons sombres de /espace2 (espace2.css), c'est-à-dire
-     Supabase : page = barre latérale (bg-200), carte un cran plus claire
-     (bg-100), fenêtre posée dessus (bg-eleve), relief d'un avatar vide
-     (gray-200), filets en blanc à 7,5 % (a-400) et à 13 % au survol
-     (a-500), textes gray-1000 / 900 / 700, accent bleu désaturé
-     (blue-700), vert green-700, rouge red-900. Le 07/10, tout était en
-     #0f1112, relevé sur les captures Attio. */
-  --bv-fond: #131413;
-  --bv-carte: #181a19;
-  --bv-fenetre: #1b1d1c;
-  --bv-relief: #1e201f;
-  --bv-filet: #edefee13;
-  --bv-panneau-haut: #1e201f;
-  --bv-panneau-bas: #303130;
-  --bv-texte: #edefee;
-  --bv-texte-2: #bcbdbc;
-  --bv-texte-3: #989a99;
-  --bv-champ: #181a19;
-  --bv-champ-filet: #edefee13;
-  --bv-champ-filet-survol: #edefee22;
-  --bv-pastille: #181a19;
+     Supabase en gris neutres : page = barre latérale (bg-200), carte un
+     cran plus claire (bg-100), fenêtre posée dessus (bg-eleve), relief
+     d'un avatar vide (gray-200), filets en blanc pur à 7,5 % (a-400) et à
+     13 % au survol (a-500), textes gray-1000 / 900 / 700, accent bleu
+     désaturé (blue-700), vert green-700, rouge red-900. Le 07/10, tout
+     était en #0f1112, relevé sur les captures Attio. */
+  --bv-fond: #141414;
+  --bv-carte: #1a1a1a;
+  --bv-fenetre: #1c1c1c;
+  --bv-relief: #1f1f1f;
+  --bv-filet: #ffffff13;
+  --bv-panneau-haut: #1f1f1f;
+  --bv-panneau-bas: #303030;
+  --bv-texte: #f1f1f1;
+  --bv-texte-2: #bfbfbf;
+  --bv-texte-3: #999999;
+  --bv-champ: #1a1a1a;
+  --bv-champ-filet: #ffffff13;
+  --bv-champ-filet-survol: #ffffff22;
+  --bv-pastille: #1a1a1a;
   --bv-bleu: #3f82cf;
   --bv-bleu-survol: #3975ba; /* blue-700 assombri de 10 %, l'écart qu'Attio tenait entre repos et survol */
   --bv-bleu-anneau: rgba(63, 130, 207, 0.35);
-  --bv-bleu-sourd: #263e59; /* blue-700 à 35 % sur la carte : les carrés et avatars en os */
+  --bv-bleu-sourd: #273e59; /* blue-700 à 35 % sur la carte : les carrés et avatars en os */
   --bv-vert: #3ecf8e;
   --bv-rouge: #f16a50;
-  --bv-os: #262827;
-  --bv-os-clair: #383938;
+  --bv-os: #262626;
+  --bv-os-clair: #393939;
 
   min-height: 100dvh;
   background: var(--bv-fond);
