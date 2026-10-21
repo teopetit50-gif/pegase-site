@@ -100,7 +100,7 @@ create or replace function private.souche_deposer_activation() returns trigger l
 declare v uuid;
 begin
   insert into public.demandes_validation (client_id, entite_id, module, type_action, objet_type, objet_id, resume, cle_idempotence)
-  values (new.client_id, new.entite_id, new.module, 'politique.activer', 'politique', new.id::text, left('Activer : ' || new.libelle, 500), 'politique:' || new.id)
+  values (new.client_id, new.entite_id, new.module, 'politique.activer', 'politique', new.id::text, left('Accord permanent : ' || new.libelle, 500), 'politique:' || new.id)
   returning id into v;
   update public.politiques set demande_id = v where id = new.id;
   return null;
