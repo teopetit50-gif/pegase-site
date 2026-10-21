@@ -109,7 +109,7 @@ export function Bienvenue({ suite, email, depart }: Props) {
   }
 
   const alerte = erreur && (
-    <p role="alert" className="mt-4 text-[13.5px] leading-5 text-[#f08a7e]">
+    <p role="alert" className="mt-4 text-[13.5px] leading-5 text-[var(--bv-rouge)]">
       {erreur}
     </p>
   );
@@ -165,7 +165,7 @@ export function Bienvenue({ suite, email, depart }: Props) {
                         <button
                           type="button"
                           onClick={() => fichier.current?.click()}
-                          className="bv-lien relative grid size-[58px] shrink-0 place-items-center overflow-hidden rounded-[12px] border border-[var(--bv-champ-filet)] bg-[#17191a] text-[26px] text-[var(--bv-texte-2)] transition-colors hover:border-[#3a3b41]"
+                          className="bv-lien relative grid size-[58px] shrink-0 place-items-center overflow-hidden rounded-[12px] border border-[var(--bv-champ-filet)] bg-[var(--bv-relief)] text-[26px] text-[var(--bv-texte-2)] transition-colors hover:border-[var(--bv-champ-filet-survol)]"
                           aria-label="Choisir le logo de l'entreprise"
                         >
                           {logo ? (
@@ -187,7 +187,7 @@ export function Bienvenue({ suite, email, depart }: Props) {
                             <br />
                             Taille conseillée&nbsp;: 400×400&nbsp;px.
                           </p>
-                          {logoErreur && <p className="mt-1 text-[13px] text-[#f08a7e]">{logoErreur}</p>}
+                          {logoErreur && <p className="mt-1 text-[13px] text-[var(--bv-rouge)]">{logoErreur}</p>}
                         </div>
                         <input
                           ref={fichier}
@@ -220,7 +220,7 @@ export function Bienvenue({ suite, email, depart }: Props) {
                               value={siren}
                               onChange={(e) => setSiren(e.target.value.replace(/[^\d ]/g, "").slice(0, 11))}
                               inputMode="numeric"
-                              className="h-full flex-1 bg-transparent text-[15px] text-[var(--bv-texte)] outline-none placeholder:text-[#6b6c72]"
+                              className="h-full flex-1 bg-transparent text-[15px] text-[var(--bv-texte)] outline-none placeholder:text-[var(--bv-texte-3)]"
                               placeholder="facultatif"
                             />
                           </span>
@@ -415,7 +415,7 @@ export function Bienvenue({ suite, email, depart }: Props) {
 
                       <div className="mt-12 text-center">
                         <p className="text-[14px] text-[var(--bv-texte-3)]">Pensé pour six métiers</p>
-                        <ul className="mx-auto mt-4 grid max-w-[420px] grid-cols-3 gap-x-4 gap-y-3 text-[15px] font-semibold tracking-[-0.01em] text-[#6f7076]">
+                        <ul className="mx-auto mt-4 grid max-w-[420px] grid-cols-3 gap-x-4 gap-y-3 text-[15px] font-semibold tracking-[-0.01em] text-[var(--bv-texte-3)]">
                           {["BTP", "Dentaire", "Avocats", "Architectes", "Location auto", "Groupes"].map((m) => (
                             <li key={m}>{m}</li>
                           ))}
@@ -465,7 +465,7 @@ export function Bienvenue({ suite, email, depart }: Props) {
                               }
                               placeholder="exemple@entreprise.fr"
                               aria-label={`Adresse de la personne ${i + 1}`}
-                              className="h-full min-w-0 flex-1 bg-transparent text-[15px] text-[var(--bv-texte)] outline-none placeholder:text-[#6b6c72]"
+                              className="h-full min-w-0 flex-1 bg-transparent text-[15px] text-[var(--bv-texte)] outline-none placeholder:text-[var(--bv-texte-3)]"
                             />
                             <span className="relative">
                               <select

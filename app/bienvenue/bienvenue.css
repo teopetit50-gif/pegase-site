@@ -11,6 +11,12 @@
    champ), et sont rangées ici en jetons — une ligne à changer si une
    mesure vient les corriger.
 
+   21/10/2026 : les COULEURS ne viennent plus des captures Attio mais de
+   /espace2 (components/espace2/espace2.css, bloc sombre), qui porte
+   depuis le commit 474652a0 celles du tableau de bord Supabase — l'aperçu
+   dessiné ici doit ressembler au vrai tableau de bord. Les mesures
+   (tailles, rayons, disposition) restent celles du relevé Attio.
+
    Écarts assumés :
    · le SOMBRE quel que soit le thème choisi dans /espace2 : Teo a demandé
      « exactement le même design ». Tout est scopé sous .bv et n'emprunte
@@ -36,30 +42,39 @@ html:has(.bv) body > header {
 }
 html:has(.bv),
 html:has(.bv) body {
-  background: #0f1112;
+  background: #131413;
 }
 
 .bv {
-  /* 07/10 — relevé au pixel sur les captures (Teo : « les couleurs ne
-     sont pas aussi foncées que sur le modèle ») : fond de page, carte et
-     intérieur des champs sont UNE seule teinte, #0f1112 ; les filets sont
-     à peine plus clairs. */
-  --bv-fond: #0f1112;
-  --bv-carte: #0f1112;
-  --bv-filet: #1a1c1e;
-  --bv-panneau-haut: #17191a;
-  --bv-panneau-bas: #232428;
-  --bv-texte: #f9fbfc;
-  --bv-texte-2: #a3a5a6;
-  --bv-texte-3: #808283;
-  --bv-champ: #0f1112;
-  --bv-champ-filet: #1e2022;
-  --bv-pastille: #0f1112;
-  --bv-bleu: #2a6ef2;
-  --bv-bleu-survol: #2160db;
-  --bv-bleu-anneau: rgba(42, 110, 242, 0.35);
-  --bv-os: #232527;
-  --bv-os-clair: #34353a;
+  /* 21/10 — les jetons sombres de /espace2 (espace2.css), c'est-à-dire
+     Supabase : page = barre latérale (bg-200), carte un cran plus claire
+     (bg-100), fenêtre posée dessus (bg-eleve), relief d'un avatar vide
+     (gray-200), filets en blanc à 7,5 % (a-400) et à 13 % au survol
+     (a-500), textes gray-1000 / 900 / 700, accent bleu désaturé
+     (blue-700), vert green-700, rouge red-900. Le 07/10, tout était en
+     #0f1112, relevé sur les captures Attio. */
+  --bv-fond: #131413;
+  --bv-carte: #181a19;
+  --bv-fenetre: #1b1d1c;
+  --bv-relief: #1e201f;
+  --bv-filet: #edefee13;
+  --bv-panneau-haut: #1e201f;
+  --bv-panneau-bas: #303130;
+  --bv-texte: #edefee;
+  --bv-texte-2: #bcbdbc;
+  --bv-texte-3: #989a99;
+  --bv-champ: #181a19;
+  --bv-champ-filet: #edefee13;
+  --bv-champ-filet-survol: #edefee22;
+  --bv-pastille: #181a19;
+  --bv-bleu: #3f82cf;
+  --bv-bleu-survol: #3975ba; /* blue-700 assombri de 10 %, l'écart qu'Attio tenait entre repos et survol */
+  --bv-bleu-anneau: rgba(63, 130, 207, 0.35);
+  --bv-bleu-sourd: #263e59; /* blue-700 à 35 % sur la carte : les carrés et avatars en os */
+  --bv-vert: #3ecf8e;
+  --bv-rouge: #f16a50;
+  --bv-os: #262827;
+  --bv-os-clair: #383938;
 
   min-height: 100dvh;
   background: var(--bv-fond);
@@ -97,7 +112,7 @@ html:has(.bv) body {
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 .bv-champ::placeholder {
-  color: #6b6c72;
+  color: var(--bv-texte-3);
 }
 .bv-champ:focus,
 .bv-champ:focus-within {
@@ -116,11 +131,11 @@ html:has(.bv) body {
   transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
 }
 .bv-pastille:hover {
-  border-color: #2c2e31;
+  border-color: var(--bv-champ-filet-survol);
 }
 .bv-pastille[aria-pressed="true"] {
   border-color: var(--bv-bleu);
-  background: #0f1625;
+  background: color-mix(in srgb, var(--bv-bleu) 12%, var(--bv-carte));
   box-shadow: 0 0 0 3px var(--bv-bleu-anneau);
 }
 .bv-pastille:focus-visible,
@@ -161,12 +176,16 @@ html:has(.bv) body {
 .bv-zoom {
   border-radius: 18px;
   padding: 8px;
-  background: rgba(42, 110, 242, 0.28);
+  background: rgba(63, 130, 207, 0.28);
 }
 .bv-zoom > div {
   border-radius: 12px;
   border: 1.5px solid var(--bv-bleu);
-  background: #0f1112;
+  background: var(--bv-fenetre);
+}
+/* l'avatar de la personne : le dégradé de /espace2 (.v2-avatar) */
+.bv-avatar {
+  background: linear-gradient(135deg, #7c3aed 0%, #2563eb 50%, #06b6d4 100%);
 }
 /* le fondu bas de l'aperçu, comme sur la référence */
 .bv-fondu {
