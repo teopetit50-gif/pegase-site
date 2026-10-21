@@ -7,10 +7,11 @@
   avec le texte du 5/10 et 19af : rejouable, le gérant décide seul, la DAF seulement une fois désignée.
 - Lot 2 — 19aw, exige_commentaire (déclencheur approbations_zz_exiger_commentaire, 23514) : POSÉ, test 65 vert.
 - Lot 3 — 19ax, délégations (refus en français ; une borne à minuit UTC pile est lue comme un jour dans le fuseau de
-  l'entité, et la fin vaut la fin de ce jour) : À POSER, puis test 66.
+  l'entité, et la fin vaut la fin de ce jour) : POSÉ, test 66 vert (délégations jugées justes par le testeur).
 - Lot 4 — 19ay, crochet de réécriture à l'approbation (private.crochets_approbation_envoi, inscrire_crochet_approbation_envoi,
-  envoi_crochet_approbation ; envois_suivre_demande réécrit par repère) : À POSER, puis test 67. C2 inscrit son crochet
+  envoi_crochet_approbation ; envois_suivre_demande réécrit par repère) : POSÉ, test 67 vert. C2 inscrit son crochet
   cashd (fonction (public.envois) → jsonb {sujet, corps, variables}) pour recalculer {limite} à la validation.
+- ARRÊT 21/10 23 h 25 Z : lots 1 à 4 posés et verts. Reste pour la reprise : l'inscription du crochet cashd par C2, la passerelle HTTP de 19au, et runner.temp dans omega-sauvegarde.yml.
 - Les lots 1 à 4 ont été vérifiés dans une base d'essai locale (essai_19av), avec les textes extraits les 5 et 6/10 : réécritures rejouables, comportement attendu.
 
 ## ARRÊT — 19/10/2026, 00 h 25 Z (pause, forfait à 29 % ; reprise samedi 25/10 après 02 h Z)
