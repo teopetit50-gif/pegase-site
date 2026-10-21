@@ -117,9 +117,57 @@ export function contenuDemande(d: Dossier): string {
 // ─── Contrôles par règle ───────────────────────────────────────────────
 
 /** Les nombres d'un texte, normalisés (8h30 → 8, 30 ; 1 234,50 → 1234,50 ; 89€ → 89). */
+// Les heures sont lues comme des heures, à la française (16 h 30, 16h, 16 heures) comme à l'anglaise (4:30 pm, 9 am,
+// 16:30) : chacune devient un seul jeton « HH:MM » (24 h), pour que « 4:30 pm » réponde à « 16 h 30 » d'une fiche
+// (correctif TREPUT-03, série 1). Le reste du texte garde la lecture des nombres.
+const HEURE_AMPM = /\b(\d{1,2})(?:[:.h](\d{2}))?\s?([ap])\.?\s?m\b\.?/gi;
+const HEURE_DEUX_POINTS = /\b([01]?\d|2[0-3])[:h](\d{2})\b/gi;
+const HEURE_FR = /\b(\d{1,2})\s?(?:h|heures?)(?:\s?(\d{2}))?(?![\p{L}\d])/giu;
+
+function jeton(h: number, m: number): string {
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+export function heuresEtReste(t: string): { heures: string[]; reste: string } {
+  const heures: string[] = [];
+  let reste = t.replace(HEURE_AMPM, (tout, h, m, ap) => {
+    const hh = Number(h), mm = Number(m ?? "0");
+    if (hh < 1 || hh > 12 || mm > 59) return tout;
+    heures.push(jeton((hh % 12) + (ap.toLowerCase() === "p" ? 12 : 0), mm));
+    return " ";
+  });
+  reste = reste.replace(HEURE_DEUX_POINTS, (tout, h, m) => {
+    if (Number(m) > 59) return tout;
+    heures.push(jeton(Number(h), Number(m)));
+    return " ";
+  });
+  reste = reste.replace(HEURE_FR, (tout, h, m) => {
+    const hh = Number(h), mm = Number(m ?? "0");
+    if (hh > 23 || mm > 59) return tout;   // « 48 h » est un délai : il reste un nombre
+    heures.push(jeton(hh, mm));
+    return " ";
+  });
+  return { heures, reste };
+}
+
 export function nombres(t: string): string[] {
-  const compact = t.replace(/(\d)[\s  ](?=\d{3}\b)/g, "$1");
-  return (compact.match(/\d+(?:[.,]\d+)?/g) ?? []).map((n) => n.replace(".", ","));
+  const { heures, reste } = heuresEtReste(t);
+  const compact = reste.replace(/(\d)[\s  ](?=\d{3}\b)/g, "$1");
+  return [...heures, ...(compact.match(/\d+(?:[.,]\d+)?/g) ?? []).map((n) => n.replace(".", ","))];
+}
+
+/** Un jeton de la réponse est-il permis ? Une heure sans am/pm peut être lue sur 12 h (« until 4:30 » = 16 h 30) ;
+ *  une heure ronde répond au nombre de la fiche (« 9 h » ↔ « 9 am ») et réciproquement. */
+export function permis(n: string, ensemble: Set<string>): boolean {
+  if (ensemble.has(n)) return true;
+  const h = /^(\d{2}):(\d{2})$/.exec(n);
+  if (h) {
+    const hh = Number(h[1]), mm = h[2];
+    if (hh < 12 && ensemble.has(jeton(hh + 12, Number(mm)))) return true;
+    if (mm === "00" && ensemble.has(String(hh))) return true;
+    return false;
+  }
+  return /^\d{1,2}$/.test(n) && ensemble.has(jeton(Number(n), 0));
 }
 
 function chaineOu(v: unknown, d = ""): string {
@@ -163,14 +211,14 @@ export function controler(d: Dossier, brut: unknown): { redaction: Redaction; co
   }
   if (couverte) {
     // Chaque nombre de la réponse doit se lire dans une fiche citée, ou dans la demande.
-    const permis = new Set<string>();
+    const autorises = new Set<string>();
     for (const s of sources) {
       const f = parId.get(s)!;
-      for (const n of nombres(`${f.titre} ${f.contenu}`)) permis.add(n);
+      for (const n of nombres(`${f.titre} ${f.contenu}`)) autorises.add(n);
     }
-    for (const n of nombres(`${d.reception?.sujet ?? ""} ${d.reception?.corps ?? ""}`)) permis.add(n);
-    for (const m of d.precedents ?? []) for (const n of nombres(`${m.sujet ?? ""} ${m.corps ?? ""}`)) permis.add(n);
-    const inventes = nombres(corps).filter((n) => !permis.has(n));
+    for (const n of nombres(`${d.reception?.sujet ?? ""} ${d.reception?.corps ?? ""}`)) autorises.add(n);
+    for (const m of d.precedents ?? []) for (const n of nombres(`${m.sujet ?? ""} ${m.corps ?? ""}`)) autorises.add(n);
+    const inventes = nombres(corps).filter((n) => !permis(n, autorises));
     if (inventes.length) {
       couverte = false;
       controles.push("chiffre_non_source");

@@ -1,6 +1,6 @@
 import { assert, assertEquals, assertStringIncludes } from "@std/assert";
 import { passage } from "../passage.ts";
-import { consigne, contenuDemande, controler, CORPS_PRECISION, nombres, sansTexte } from "../rediger.ts";
+import { consigne, contenuDemande, controler, CORPS_PRECISION, nombres, permis, sansTexte } from "../rediger.ts";
 import { ClaudeFaux, contexte, dossier, FICHE_HORAIRES, FICHE_TARIF, panne, PortesFausses, travail } from "./doubles.ts";
 
 function capturerConsole(): { lignes: string[]; rendre: () => void } {
@@ -80,7 +80,7 @@ Deno.test("un sujet inconnu devient « autre », une langue invalide le françai
 });
 
 Deno.test("les nombres sont lus comme un lecteur : 8 h 30, 1 234,50 €, 89€", () => {
-  assertEquals(nombres("de 8 h 30 à 18 h"), ["8", "30", "18"]);
+  assertEquals(nombres("de 8 h 30 à 18 h"), ["08:30", "18:00"]);
   assertEquals(nombres("1 234,50 € puis 89€ et 2.5"), ["1234,50", "89", "2,5"]);
 });
 
@@ -230,4 +230,21 @@ Deno.test("un appel transcrit : le modèle sait que c'est un message vocal, peut
   const q = contenuDemande(d);
   assertStringIncludes(q, "message vocal laissé quand personne n'a décroché, transcrit automatiquement");
   assertStringIncludes(q, "la réponse part par SMS");
+});
+
+Deno.test("TREPUT-03 : une heure à l'anglaise répond à l'heure de la fiche ; une heure inventée reste attrapée (aller-retour)", () => {
+  assertEquals(nombres("open until 4:30 pm, from 9 am; 12 pm; 16:30; 16h30; 16 heures"), ["16:30", "09:00", "12:00", "16:30", "16:30", "16:00"]);
+  assertEquals(nombres("sous 48 h"), ["48"]);
+  const fiche = new Set(nombres("Le samedi de 9 h à 16 h 30."));
+  assert(permis("16:30", fiche) && permis("09:00", fiche), "4:30 pm et 9 am sont dans la fiche");
+  assert(permis("04:30", fiche), "« until 4:30 » se lit sur 12 h");
+  assert(!permis("17:30", fiche) && !permis("10:00", fiche), "5:30 pm ou 10 am ne sont pas dans la fiche");
+  const d = dossier("Are you open on Saturday afternoon?", {});
+  d.base!.fiches = [{ ...FICHE_HORAIRES, contenu: "Le samedi de 9 h à 16 h 30." }];
+  const juste = controler(d, { sujet: "horaires", langue: "en", couverte: true, sources: [FICHE_HORAIRES.id], corps: "Yes, on Saturdays we are open from 9 am until 4:30 pm." });
+  assertEquals(juste.redaction.couverte, true);
+  assertEquals(juste.controles.includes("chiffre_non_source"), false);
+  const invente = controler(d, { sujet: "horaires", langue: "en", couverte: true, sources: [FICHE_HORAIRES.id], corps: "Yes, on Saturdays we are open until 6:30 pm." });
+  assertEquals(invente.redaction.couverte, false);
+  assert(invente.controles.includes("chiffre_non_source"));
 });
