@@ -44,7 +44,9 @@ const KPIS: { cle: Exclude<Filtre, "tous">; libelle: string; sous: string; teint
   { cle: "appels", libelle: "Appels à passer", sous: "tâches des commerciaux", teinte: "bleu" },
 ];
 
-export default function EcranOffload() {
+/* `sections` : faux dans /espace2, où garde-fous, échéances, affaires,
+   groupes et pilotage ont chacun leur page (21/10/2026) */
+export default function EcranOffload({ sections = true }: { sections?: boolean } = {}) {
   const { source } = useSource();
   const [exemple, setExemple] = useState(() => exempleOffload());
   const [reel, setReel] = useState<{ tableau: Tableau | null; fiches: Record<string, Fiche> } | null>(null);
@@ -53,6 +55,17 @@ export default function EcranOffload() {
   const [choix, setChoix] = useState<string | null>(null);
   const [chargeFiche, setChargeFiche] = useState(false);
   const [recalcul, setRecalcul] = useState(false);
+
+  /* ?compte=<id> ouvre la fiche d'un compte (les pages de fonction de /espace2/offload, 21/10) */
+  useEffect(() => {
+    const c = new URLSearchParams(window.location.search).get("compte");
+    if (!c) return;
+    const t = window.setTimeout(() => {
+      setFiltre("tous");
+      setChoix(c);
+    }, 0);
+    return () => window.clearTimeout(t);
+  }, []);
 
   const charger = useCallback(async () => {
     await Promise.resolve();
@@ -323,6 +336,7 @@ export default function EcranOffload() {
               </div>
             )}
           </section>
+          {sections ? <>
           <GardeFous source={source} client={tableau?.client ?? null} />
           <Echeances source={source} onChoisir={(id) => {
             setFiltre("tous");
@@ -340,6 +354,7 @@ export default function EcranOffload() {
             if (window.innerWidth < 1024) document.getElementById("esp-dossier")?.scrollIntoView({ behavior: "smooth", block: "start" });
           }} />
           <Pilotage source={source} />
+          </> : null}
 
           {(tableau?.rapprochements ?? []).length ? (
             <section className="esp-carte" aria-label="Doublons proposés">

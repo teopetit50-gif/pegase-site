@@ -327,8 +327,19 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
         { libelle: "Comptabilité", href: `${RACINE}/filed/comptabilite` },
       ];
     if (cle === "cashd") return SOUS_CASHD.map((s, i) => ({ ...s, exact: i === 0 }));
+    if (cle === "reput")
+      return [
+        { libelle: "Demandes", href: `${RACINE}/reput`, exact: true },
+        { libelle: "Base de connaissances", href: `${RACINE}/reput/base` },
+        { libelle: "Sujets autorisés", href: `${RACINE}/reput/sujets` },
+        { libelle: "Réglages et avis", href: `${RACINE}/reput/reglages` },
+      ];
+    if (cle === "offload") return [{ libelle: "Comptes à risque", href: `${RACINE}/offload`, exact: true }];
     return [{ libelle: "Tableau de bord", href: `${RACINE}/${cle}`, exact: true }];
   };
+  /* 21/10/2026 — demande de Teo : sous les écrans de travail, une page par
+     groupe de fonctions vendues sur la page produit du module */
+  const fonctionsDe = (cle: string): Lien[] => FONCTIONS[cle] ?? [];
   const modules = MODULES.filter((m) => MODULES_PRINCIPAUX.includes(m.cle) || m.cle === metier)
     /* les quatre communs dans leur ordre, puis le module du métier */
     .sort((a, b) => Number(a.cle === metier) - Number(b.cle === metier));
@@ -392,7 +403,10 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
       /* FILED ouvre sur « À payer », son écran de travail */
       href: `${RACINE}/${m.cle}${m.cle === "filed" ? "/a-payer" : ""}`,
       racines: [`${RACINE}/${m.cle}`],
-      groupes: [{ titre: "Pages", liens: pagesDe(m.cle).map((l, i) => (i === 0 ? { ...l, compteur: compteurs[m.cle] } : l)) }],
+      groupes: [
+        { titre: "Pages", liens: pagesDe(m.cle).map((l, i) => (i === 0 ? { ...l, compteur: compteurs[m.cle] } : l)) },
+        ...(fonctionsDe(m.cle).length ? [{ titre: "Fonctions", liens: fonctionsDe(m.cle) }] : []),
+      ],
     })),
     {
       cle: "suivi",
@@ -678,6 +692,25 @@ const SOUS_CASHD = [
   { libelle: "Envois", href: `${RACINE}/cashd/suivi?vue=envois` },
   { libelle: "Trésorerie", href: `${RACINE}/cashd/suivi?vue=tresorerie` },
 ];
+
+/* les pages de fonction de chaque module (21/10/2026) */
+const FONCTIONS: Record<string, Lien[]> = {
+  cashd: [
+    { libelle: "Balance âgée", href: `${RACINE}/cashd/balance` },
+    { libelle: "Litiges et pauses", href: `${RACINE}/cashd/litiges` },
+    { libelle: "Risque client", href: `${RACINE}/cashd/risque` },
+    { libelle: "Devis sans réponse", href: `${RACINE}/cashd/devis` },
+    { libelle: "Encaissements", href: `${RACINE}/cashd/encaissements` },
+  ],
+  reput: [{ libelle: "Urgences et escalade", href: `${RACINE}/reput/urgences` }],
+  offload: [
+    { libelle: "Échéances", href: `${RACINE}/offload/echeances` },
+    { libelle: "Affaires en plan", href: `${RACINE}/offload/affaires` },
+    { libelle: "Groupes clients", href: `${RACINE}/offload/groupes` },
+    { libelle: "Garde-fous", href: `${RACINE}/offload/garde-fous` },
+    { libelle: "Pilotage", href: `${RACINE}/offload/pilotage` },
+  ],
+};
 
 function LienLateral({ lien, chemin }: { lien: Lien; chemin: string }) {
   const base = lien.racine ?? lien.href;
