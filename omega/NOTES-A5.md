@@ -2,10 +2,10 @@
 
 ## REPRISE — 21/10/2026, 23 h Z (réveil par Teo ; lots 1 à 4 dans l'ordre, un à la fois)
 
-- Lot 1 — 19av, décision seule du gérant (ou d'un rôle désigné ; config decision_seule_roles) : À POSER, puis tests 64 et 55.
+- Lot 1 — 19av, décision seule du gérant (ou d'un rôle désigné ; config decision_seule_roles) : POSÉ, tests 64 et 55 verts.
   preparer_approbation est réécrit par repères (ceux de 19af et de 19c). Le comportement a été vérifié dans une base d'essai
   avec le texte du 5/10 et 19af : rejouable, le gérant décide seul, la DAF seulement une fois désignée.
-- Lot 2 — 19aw, exige_commentaire (déclencheur approbations_zz_exiger_commentaire, 23514) : À POSER, puis test 65.
+- Lot 2 — 19aw, exige_commentaire (déclencheur approbations_zz_exiger_commentaire, 23514) : POSÉ, test 65 vert.
 - Lot 3 — 19ax, délégations (refus en français ; une borne à minuit UTC pile est lue comme un jour dans le fuseau de
   l'entité, et la fin vaut la fin de ce jour) : À POSER, puis test 66.
 - Lot 4 — 19ay, crochet de réécriture à l'approbation (private.crochets_approbation_envoi, inscrire_crochet_approbation_envoi,
