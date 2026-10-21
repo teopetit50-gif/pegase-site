@@ -109,8 +109,9 @@ Détections demandées au coordinateur : lundi 26/10, mardi 27/10, mardi 27/10 e
 | Cas | Promesse | Attendu | Ce qu'OFFLOAD a fait | Verdict | Niveau |
 |---|---|---|---|---|---|
 | S2-1 | P:256 | lundi : signaux levés, aucune reprise ouverte | 26/10 : `entrees: 5`, V1-V3 `eteint`, aucune reprise ouverte | juste | 1 |
-| S2-2 | P:256, P:451 | mardi : V1-V3 ouverts en demandes retenues « à valider », rien ne part | 27/10 : `entrees: 0`, V1-V3 `eteint`, `reprise: null`, `a_valider` 0 ; aucun envoi créé (constat du coordinateur) | rien ne part : juste ; vague : en attente de la réponse du coordinateur (autre tâche que la détection ?) | — |
-| S2-3 | P:381, P:397 | second appel du mardi : rien de plus | identique au premier (`entrees: 0`), aucun envoi | juste (mais rien n'avait été ouvert) | 1 |
+| S2-2 | P:256, P:451 | mardi : V1-V3 ouverts en demandes retenues « à valider », rien ne part | la vague est `private.offload_cycle` (pas la détection, précision du coordinateur). Cycle au 27/10 : `{"ouvertes": 3, …}` ; V1-V3 `a_valider`, `ouverte_par: detection`, segments Hôtellerie / Restauration, valeur en jeu 7 064,52 / 3 532,26 / 10 596,77 ; trois envois `essai` `a_valider` vers les adresses `.example.invalid`, corps ancrés sur la dernière facture. Rien d'approuvé, rien de parti | juste | 1 |
+| S2-3 | P:381, P:397 | second passage du mardi : rien de plus | détection 27/10 bis : `entrees: 0` ; cycle 27/10 bis : `{"ouvertes": 0, …}` | juste | 1 |
+| S2-1b | P:256 | cycle un autre jour que mardi : rien n'ouvre | non joué (le cycle n'a été lancé que le mardi) | non testé | — |
 | S2-4 | C:113, C:115 ; brief | pilotage : valeur en jeu par segment sur 12 mois | `offload_pilotage(client, '2025-10-27')` : `vagues` (valeur en jeu, comptes, commandes, chiffre repris par vague : 21/10, en jeu 51 910,2, 3 commandes, 1 900 € repris), `suivi` mois par mois sur 12 mois, `entites` (consolidé, par entité ; `par_site` vide) ; `taux` par segment / canal / niveau. **Pas** de valeur en jeu par segment ; pas de taux par message (C:115) ; V1-V3 (secteurs renseignés) n'y figurent pas, faute de vague | valeur par segment : pas couvert ; par vague, par entité, 12 mois : juste | 1 |
 | S2-5 | P:441, C:118 ; brief | restitution : tout revient, format lisible | `offload_restitution` : un JSON, `resume` (compteurs) + `donnees` (achats, comptes, contacts, contrats, affaires, échéances, équipements, interventions, signaux, reprises, tâches, exclusions, règles, réglages, rapprochements, arrêtés, journal). Les messages préparés (sujet, corps, destinataire) n'y sont pas, ni les envois ; aucun export tableur (C:118) | données OFFLOAD : juste ; messages : à confirmer (relèvent du socle ?) ; tableur : pas couvert | 1 |
 
@@ -215,3 +216,9 @@ Questions : aucune. Aucune approbation faite.
 **21/10, arrêt 6.** Fait : série 2 lue (S2-1, S2-3 justes ; S2-4 sans valeur par segment ; S2-5 sans messages ni tableur) ;
 O7/O11 clos « commande ». En cours : S2-2 — la vague du mardi n'ouvre rien ; question posée au coordinateur (autre tâche ?).
 Prochain pas : selon sa réponse, rejouer la vague ou noter l'écart. Aucune approbation faite.
+
+**21/10, arrêt 7 — fin de série 2.** Fait : vague du mardi juste (3 demandes retenues, essai, rien approuvé), second passage
+sans doublon ; pilotage sans valeur par segment (pas couvert) ; restitution sans messages ni tableur. Observation : après le cycle
+« du 27/10 », `offload_pilotage.vagues` range V1-V3 dans la vague `2026-10-21` (`comptes: 14`, `en_jeu: 73 103,75`) — la vague
+semble datée du jour réel et non du jour joué ; à revoir sur une vraie semaine. Reste : le cycle un autre jour que mardi (non joué),
+TOFFLOAD-03 (décision de Teo), TOFFLOAD-07 et 08 (mineurs). Questions : aucune. Les 3 envois `a_valider` ne sont pas approuvés.
