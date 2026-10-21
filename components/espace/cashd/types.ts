@@ -162,6 +162,10 @@ export type Piece = {
   attente_commande_email?: string | null;
   attente_commande_nom?: string | null;
   attente_commande_motif?: string | null;
+  /* c2_21 : la retenue du moteur, dite sur la pièce */
+  incoherence?: string | null;
+  relance_suspendue?: string | null;
+  facture_visee?: string | null;
 };
 
 /* La séquence d'une pièce (vue cashd_suivi) */

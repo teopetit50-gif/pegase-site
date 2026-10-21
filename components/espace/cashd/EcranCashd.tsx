@@ -471,6 +471,9 @@ export default function EcranCashd({ vue }: { vue?: Onglet } = {}) {
           (r.avoirs_non_imputes?.length
             ? `. ${r.avoirs_non_imputes.length} avoir${r.avoirs_non_imputes.length > 1 ? "s" : ""} non imputé${r.avoirs_non_imputes.length > 1 ? "s" : ""}, facture visée inconnue : ${r.avoirs_non_imputes.slice(0, 3).map((x) => `${x.numero} sur ${x.vise}`).join(", ")}${r.avoirs_non_imputes.length > 3 ? "…" : ""}`
             : "") +
+          (r.incoherentes?.length
+            ? `. ${r.incoherentes.length} facture${r.incoherentes.length > 1 ? "s" : ""} au total incohérent, relance suspendue : ${r.incoherentes.slice(0, 3).map((x) => `${x.numero} (${x.motif})`).join(", ")}${r.incoherentes.length > 3 ? "…" : ""}`
+            : "") +
           ".",
       );
       setDepot(false);
