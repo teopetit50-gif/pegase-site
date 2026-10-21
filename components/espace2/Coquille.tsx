@@ -40,7 +40,8 @@ import { OrganisationContexte } from "./organisation";
 import { useTheme } from "./theme";
 import { useCalme } from "./mouvement";
 import { useDonnees } from "./donnees";
-import { A_PAYER, groupeDe, minuit } from "./filed/calculs";
+import { A_PAYER, groupeDe } from "./filed/calculs";
+import { useAujourdhui } from "./horloge";
 import "./espace2.css";
 import "./client.css";
 
@@ -118,16 +119,19 @@ export default function Coquille({ utilisateur, police, children }: { utilisateu
 /* les alertes de la cloche : ce qui est en retard, tiré des mêmes données que la vue d'ensemble */
 function useAlertes() {
   const { donnees } = useDonnees();
-  const [aujourdhui] = useState(minuit);
+  /* 21/10 — l'horloge du navigateur (horloge.ts) : un retard ne se juge qu'une fois la page montée */
+  const aujourdhui = useAujourdhui();
   if (!donnees) return { alertes: [], enAttente: 0 };
   const enAttente = donnees.demandes.filter((d) => d.statut === "en_attente");
   const alertes: { id: string; texte: string; quand: string | null; lien: string }[] = [];
-  for (const f of donnees.vue.factures) {
-    if (!A_PAYER.has(f.statut) || f.nature === "avoir" || donnees.etats[f.id]?.etat === "payee") continue;
-    if (groupeDe(f, aujourdhui) === "retard") alertes.push({ id: `f-${f.id}`, texte: `Facture ${f.reference ?? ""} en retard de paiement`, quand: f.echeance_lue, lien: `${RACINE}/filed/a-payer` });
-  }
-  for (const d of enAttente) {
-    if (d.echeance && new Date(d.echeance).getTime() < aujourdhui) alertes.push({ id: `d-${d.id}`, texte: `Décision en retard : ${d.resume}`, quand: d.echeance, lien: `${RACINE}/validations` });
+  if (aujourdhui !== null) {
+    for (const f of donnees.vue.factures) {
+      if (!A_PAYER.has(f.statut) || f.nature === "avoir" || donnees.etats[f.id]?.etat === "payee") continue;
+      if (groupeDe(f, aujourdhui) === "retard") alertes.push({ id: `f-${f.id}`, texte: `Facture ${f.reference ?? ""} en retard de paiement`, quand: f.echeance_lue, lien: `${RACINE}/filed/a-payer` });
+    }
+    for (const d of enAttente) {
+      if (d.echeance && new Date(d.echeance).getTime() < aujourdhui) alertes.push({ id: `d-${d.id}`, texte: `Décision en retard : ${d.resume}`, quand: d.echeance, lien: `${RACINE}/validations` });
+    }
   }
   return { alertes, enAttente: enAttente.length };
 }

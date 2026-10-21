@@ -24,6 +24,7 @@ import { MOYENS_PAIEMENT, chargerVueFournisseurs, etatPaiement, noterPaiement, t
 import { A_PAYER, GROUPES, JOUR, aPayer, du, etatsExemple, groupeDe, jourDe, minuit, totaux, type Etats, type Groupe } from "./calculs";
 import { Badge, Etat, ItemMenu, MenuDeroulant, Note, SeparateurMenu, Squelette, Vide, teinte } from "../ui";
 import { useToast } from "../Toasts";
+import { useAujourdhui } from "../horloge";
 
 const LIBELLES_MOYEN: Record<MoyenPaiement, string> = { virement: "Virement", prelevement: "Prélèvement", cheque: "Chèque", carte: "Carte", especes: "Espèces", compensation: "Compensation", autre: "Autre" };
 const aujourdhuiIso = () => {
@@ -35,9 +36,10 @@ const sansAccents = (s: string) => s.normalize("NFD").replace(/\p{M}/gu, "").toL
 export default function APayer() {
   const { source } = useSource();
   const toast = useToast();
-  const [aujourdhui] = useState(minuit);
+  /* 21/10 — l'horloge du navigateur (horloge.ts) : null au rendu serveur, les squelettes en attendant */
+  const aujourdhui = useAujourdhui();
   const exemple = useMemo(() => vueExemple(), []);
-  const [etatsEx, setEtatsEx] = useState<Etats>(() => etatsExemple(exemple.factures, aujourdhui));
+  const [etatsEx, setEtatsEx] = useState<Etats>(() => etatsExemple(exemple.factures, minuit()));
   const [reel, setReel] = useState<VueFournisseurs | null>(null);
   const [etatsReels, setEtatsReels] = useState<Etats>({});
   const [erreur, setErreur] = useState<string | null>(null);
@@ -94,7 +96,7 @@ export default function APayer() {
   );
   const parGroupe = useMemo(() => {
     const g: Record<Groupe, FactureDuFournisseur[]> = { retard: [], semaine: [], mois: [], plus_tard: [], sans: [] };
-    for (const l of lignes) g[groupeDe(l, aujourdhui)].push(l);
+    if (aujourdhui !== null) for (const l of lignes) g[groupeDe(l, aujourdhui)].push(l);
     return g;
   }, [lignes, aujourdhui]);
   const q = sansAccents(recherche.trim());
@@ -154,7 +156,7 @@ export default function APayer() {
       () => toast("Impossible de copier. Réessayez.", "rouge"),
     );
 
-  const chargement = source === "reelle" && !reel;
+  const chargement = (source === "reelle" && !reel) || aujourdhui === null;
 
   return (
     <div className="v2-page v2-arrivee">
@@ -309,7 +311,7 @@ export default function APayer() {
                           const ib = ibanValide(l.fournisseur_id);
                           const st = statutFacture(l.statut);
                           const ep = etats[l.id];
-                          const jours = l.echeance_lue ? Math.round((jourDe(l.echeance_lue) - aujourdhui) / JOUR) : null;
+                          const jours = l.echeance_lue && aujourdhui !== null ? Math.round((jourDe(l.echeance_lue) - aujourdhui) / JOUR) : null;
                           const peutPayer = l.nature !== "avoir" && ep?.etat !== "payee";
                           const lien = `/espace2/filed?objet=facture:${encodeURIComponent(l.id)}`;
                           return (

@@ -12,6 +12,7 @@ import { useMemo, useState, useSyncExternalStore, type FormEvent } from "react";
 import { Plus, Search, Trash2 } from "lucide-react";
 import { Note } from "./ui";
 import { useToast } from "./Toasts";
+import { jourDe } from "./filed/calculs";
 
 export type Champ = {
   cle: string;
@@ -83,9 +84,10 @@ export function useOuvertes(cle: string): number {
   return fiches ? fiches.filter((f) => !f.fait).length : 0;
 }
 
+/* 21/10 — une date calendaire (« 2026-10-21 », le champ date) se lit en UTC : le même jour partout, et non la veille au soir en Guadeloupe */
 const dateFr = (iso: string) => {
   const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
+  return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric", timeZone: /^\d{4}-\d{2}-\d{2}$/.test(iso) ? "UTC" : undefined });
 };
 
 export default function Collection({ config }: { config: ConfigCollection }) {
@@ -198,7 +200,7 @@ export default function Collection({ config }: { config: ConfigCollection }) {
               </span>
               {(() => {
                 const v = date ? String(f[date.cle] ?? "") : "";
-                const passee = !!v && config.coche && !f.fait && new Date(v).getTime() < aujourdhui;
+                const passee = !!v && config.coche && !f.fait && jourDe(v) < aujourdhui;
                 return (
                   <span className="oc-meta" data-retard={passee ? "" : undefined}>
                     {v ? dateFr(v) : dateFr(f.cree)}

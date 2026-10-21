@@ -20,18 +20,25 @@ export function pourcent(v: number | null | undefined): string {
   return `${nombre.format(v)} %`;
 }
 
+/* 21/10/2026 — une date calendaire sans heure (« 2026-10-16 ») se lit en
+   UTC : le même jour partout, et non la veille au soir pour un navigateur
+   à l'ouest de Greenwich (Guadeloupe, UTC−4). Un horodatage complet se lit
+   dans le fuseau du visiteur. Le serveur, en UTC, et le navigateur écrivent
+   ainsi la même chose — voir components/espace2/horloge.ts. */
+const fuseauDe = (iso: string) => (/^\d{4}-\d{2}-\d{2}$/.test(iso) ? "UTC" : undefined);
+
 export function dateCourte(iso: string | null | undefined): string {
   if (!iso) return "—";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "—";
-  return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }).format(d);
+  return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: fuseauDe(iso) }).format(d);
 }
 
 export function dateLongue(iso: string | null | undefined): string {
   if (!iso) return "—";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "—";
-  return new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(d);
+  return new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: fuseauDe(iso) }).format(d);
 }
 
 export function dateHeure(iso: string | null | undefined): string {
@@ -44,6 +51,7 @@ export function dateHeure(iso: string | null | undefined): string {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: fuseauDe(iso),
   }).format(d);
 }
 

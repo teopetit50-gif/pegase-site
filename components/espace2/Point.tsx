@@ -37,6 +37,7 @@ import { libelleModule } from "@/components/espace/format";
 import type { LignePoint, PointDuJour } from "@/components/espace/types";
 import { apercuPoint, lirePoint, listerPoints, monCompte } from "@/components/espace/point/portes";
 import { Note } from "./ui";
+import { useMonte } from "./horloge";
 import { Chiffre, EnDirect, Initiales } from "./vivant";
 import { RACINE } from "./modules";
 
@@ -89,6 +90,8 @@ export default function Point() {
   const [erreur, setErreur] = useState<string | null>(null);
   const [chargeApercu, setChargeApercu] = useState(false);
   const jour = aujourdHui(decalage);
+  /* 21/10 — l'horloge du navigateur (horloge.ts) : le nom du jour s'écrit une fois la page montée */
+  const monte = useMonte();
 
   /* ——— base réelle : comme PointDuMatin ——— */
   useEffect(() => {
@@ -200,10 +203,10 @@ export default function Point() {
       <div className="v2-val-filtres">
         <label className="v2-val-bouton">
           <CalendarDays width={16} height={16} aria-hidden="true" />
-          <span>{decalage === 0 ? `Aujourd'hui, ${nomJour(0).split(" ").slice(1).join(" ")}` : nomJour(decalage)}</span>
+          <span>{!monte ? "Aujourd'hui" : decalage === 0 ? `Aujourd'hui, ${nomJour(0).split(" ").slice(1).join(" ")}` : nomJour(decalage)}</span>
           <ChevronDown width={14} height={14} aria-hidden="true" className="v2-val-bouton-chevron" />
           <select value={decalage} onChange={(e) => setDecalage(Number(e.target.value))} aria-label="Édition">
-            {jours.map((d) => (
+            {(monte ? jours : [0]).map((d) => (
               <option key={d} value={d}>
                 {d === 0 ? "Aujourd'hui" : nomJour(d)}
               </option>
