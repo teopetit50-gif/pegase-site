@@ -37,6 +37,7 @@ export const VARIABLES: Record<string, string> = {
   droits: "les pénalités et l'indemnité forfaitaire dues, quand il y en a",
   reglement: "vos moyens de règlement, et la proposition d'échelonnement au-delà du seuil réglé",
   devis_suite: "la fin d'une relance de devis, au vocabulaire de votre métier",
+  cette_facture: "« cette facture » ou « ces factures », accordé au nombre de pièces",
 };
 
 const OBLIGATOIRES: Record<CleGabarit, string[]> = {
@@ -64,11 +65,11 @@ const D = (cle: CleGabarit, variante: number, sujet: string, corps: string): Gab
 });
 export const GABARITS_EXEMPLE: Gabarit[] = [
   D("echeance", 1, "{emetteur} — {objet} : échéance du jour",
-    "{bonjour}\n\nPetit rappel : {dues} aujourd'hui sur votre compte {compte} :\n{lignes}\n{ton_montant}Si le règlement est déjà parti, merci de ne pas tenir compte de ce message. Pour toute question sur cette facture, il vous suffit de répondre à ce courriel.\n{reglement}"),
+    "{bonjour}\n\nPetit rappel : {dues} aujourd'hui sur votre compte {compte} :\n{lignes}\n{ton_montant}Si le règlement est déjà parti, merci de ne pas tenir compte de ce message. Pour toute question sur {cette_facture}, il vous suffit de répondre à ce courriel.\n{reglement}"),
   D("echeance", 2, "{emetteur} — {objet}, à régler aujourd'hui",
     "{bonjour}\n\nNous nous permettons de vous signaler que {dues} ce jour (compte {compte}) :\n{lignes}\n{ton_montant}Si vous avez déjà procédé au règlement, nos messages se sont simplement croisés. Une question ? Répondez simplement à ce courriel.\n{reglement}"),
   D("rappel", 1, "{emetteur} — rappel : {objet}",
-    "{bonjour}\n\nSauf erreur de notre part, {dues} sur votre compte {compte} :\n{lignes}\n{ton_montant}{oubli}Si le règlement est déjà parti, merci de ne pas tenir compte de ce message. Pour toute question sur cette facture, il vous suffit de répondre à ce courriel.\n{reglement}"),
+    "{bonjour}\n\nSauf erreur de notre part, {dues} sur votre compte {compte} :\n{lignes}\n{ton_montant}{oubli}Si le règlement est déjà parti, merci de ne pas tenir compte de ce message. Pour toute question sur {cette_facture}, il vous suffit de répondre à ce courriel.\n{reglement}"),
   D("rappel", 2, "{emetteur} — {objet}, pour rappel",
     "{bonjour}\n\nNous revenons vers vous au sujet de votre compte {compte}. À ce jour, {dues} :\n{lignes}\n{ton_montant}{oubli}Si vous avez déjà réglé, nos messages se sont simplement croisés et vous pouvez ignorer celui-ci. Une question ? Répondez simplement à ce courriel.\n{reglement}"),
   D("relance", 1, "{emetteur} — relance : {total} restent dus",
@@ -111,6 +112,7 @@ export function apercu(
     ? "Compte tenu du montant en jeu, merci de nous indiquer dès à présent la date de règlement prévue. " : "";
   const v: Record<string, string> = {
     bonjour: "Bonjour Mme Lefèvre,",
+    cette_facture: "cette facture",
     emetteur: r.emetteur ?? "Atelier Bertin",
     compte: "C-LEFEVRE, secteur Immobilier",
     lignes: devis
