@@ -170,6 +170,8 @@ Exemple : `[{"designation":"Pose de cloisons placo","quantite":12,"prix_unitaire
 
 Exemple : `[{"taux":20,"base":1234.4,"montant":246.88}]`
 
+Si le modèle ne rend pas de ventilation alors que la page porte un tableau « TOTAL NET HT | TAUX TVA | TOTAL TVA » (une rangée par code : base | code | taux | montant, ou base | code | Exo), le lecteur la relève sur ce tableau. Une rangée « Exo » va en catégorie `E`, taux 0. Une rangée sans base (code de taux non utilisé) n'est pas rendue, la rangée des totaux non plus. La ventilation est vérifiée si la somme des bases égale `montant_ht` et celle des montants égale `montant_tva`.
+
 Pièce exonérée : la base exonérée figure en catégorie `E`, taux 0, avec son `motif`. Si le modèle ne rend pas de ventilation alors que la pièce porte `mention.exoneration`, un `montant_ht` et une TVA nulle ou absente, le lecteur la pose lui-même : `[{"categorie":"E","taux":0,"base":<HT>,"montant":0,"motif":<mention>}]`. Sans cette ventilation, FILED déduirait la TVA de TTC − HT, octroi de mer compris.
 
 **`taxes.autres`** (19/10, Antilles) : une seule valeur par pièce, tableau d'objets `{code, libelle, base, taux, montant}` (noms convenus avec A4, a4_58), une entrée par taxe facturée en plus de la TVA. `code` vaut `OMR` (octroi de mer), `OMRI` (octroi de mer régional) ou `autre`. `montant_tva` ne compte que la TVA ; on a donc `montant_ht + montant_tva + Σ taxes.autres.montant = montant_ttc`. `verifiee` est vraie si chaque montant se retrouve sur sa page.

@@ -258,3 +258,56 @@ Deno.test("IBAN : un FR entier garde sa clé contrôlée ; un FR trop long est m
   assert(v(IBAN_DOUBLURE).verifiee);
   assert(v(IBAN_DOUBLURE + "1").controle?.includes("IBAN mal formé"));
 });
+
+// Facture à trois codes de TVA (forme LEADER MAT, 21/10) : doublure, montants et IBAN d'exemple.
+const FACTURE_TROIS_TAUX = page([
+  "MATERIAUX ESSAI — FACTURE 900001",
+  "Ciment 35 kg | 25,90 | 2",
+  "Fer à béton | 53,55 | 1",
+  "Visserie | 0,88 | 2",
+  "TOTAL NET HT | CODE | TAUX TVA | TOTAL TVA",
+  "53,55 | 1 | Exo",
+  "26,78 | 2 | 8,50 | 2,28",
+  "| 3 | 2,10",
+  "80,33 | | 2,28 | 82,61 €",
+  "FR 76 3000 6000 0112 3456 7890 189",
+].join("\n"));
+
+Deno.test("trois taux : tva.ventilation relevée sur le tableau (Exo en E, code sans base écarté), sommes = HT et TVA", () => {
+  const b = assembler(
+    ia({
+      valeurs: [
+        { champ: "montant_ht", valeur: 80.33, texte: "80,33", page: 1 },
+        { champ: "montant_tva", valeur: 2.28, texte: "2,28", page: 1 },
+        { champ: "montant_ttc", valeur: 82.61, texte: "82,61 €", page: 1 },
+      ],
+    }),
+    null,
+    [FACTURE_TROIS_TAUX],
+    "natif",
+    0,
+  );
+  const v = b.resultat.valeurs.find((x) => x.champ === "tva.ventilation")!;
+  assertEquals(v.valeur, [
+    { categorie: "E", taux: 0, base: 53.55, montant: 0, motif: "Exo" },
+    { taux: 8.5, base: 26.78, montant: 2.28 },
+  ]);
+  assert(v.verifiee, v.controle);
+  assertEquals(b.resultat.valeurs.filter((x) => x.champ === "tva.ventilation").length, 1, "pas de seconde ventilation « exonérée »");
+});
+
+Deno.test("trois taux : IBAN sans étiquette, groupes séparés dès « FR » → fournisseur.iban", () => {
+  const ajout = completerDepuisTexte([], [FACTURE_TROIS_TAUX], CHAMPS_PAR_NOM).find((a) => a.champ === "fournisseur.iban")!;
+  assertEquals(ajout.valeur, "FR7630006000011234567890189");
+  assert(ajout.verifiee, ajout.controle);
+  const faux = completerDepuisTexte([], [page("FR 76 3000 6000 0112 3456 7890 188")], CHAMPS_PAR_NOM).find((a) => a.champ === "fournisseur.iban")!;
+  assert(!faux.verifiee && faux.controle?.includes("clé IBAN invalide"), faux.controle);
+});
+
+Deno.test("tableau de TVA : bases ≠ HT → à vérifier ; ventilation rendue par le modèle prioritaire", async () => {
+  const { ventilationDepuisTableau } = await import("../verifier.ts");
+  const ht = { champ: "montant_ht", valeur: 99, source: "ia" as const, verifiee: true };
+  const v = ventilationDepuisTableau([ht], [FACTURE_TROIS_TAUX])!;
+  assert(!v.verifiee && v.controle?.includes("≠ HT 99"), v.controle);
+  assertEquals(ventilationDepuisTableau([{ champ: "tva.ventilation", valeur: [], source: "ia" as const, verifiee: true }], [FACTURE_TROIS_TAUX]), null);
+});

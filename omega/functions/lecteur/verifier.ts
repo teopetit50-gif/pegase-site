@@ -422,9 +422,10 @@ const RE_RCS = /\bR\.?\s?C\.?\s?S?\.?\s+([A-ZÀ-Ÿa-zà-ÿ' -]{2,40}?)\s+(?:[AB]
 const MASQUE_IBAN = String.raw`(?:\s?(?:…|\.{3}|\[[^\]]{0,30}\]|[•*·]{2,}|X{3,}))`;
 const RE_IBAN = new RegExp(String.raw`\bI\.?B\.?A\.?N\.?\b\s*[:.]?\s*([A-Z]{2}\s?\d{2}(?:[\s\-]?[A-Z0-9•*…·]{1,4}){2,9}${MASQUE_IBAN}?)`, "gi");
 // Sans étiquette : un IBAN FR coupé ou masqué (FR + 2 chiffres + au moins 12 caractères, puis une marque de masque).
-const RE_IBAN_FR_MASQUE = new RegExp(String.raw`\bFR\d{2}(?:\s?[0-9A-Z]{4}){3,5}(?:\s?[0-9A-Z]{1,3})?${MASQUE_IBAN}`, "g");
+const RE_IBAN_FR_MASQUE = new RegExp(String.raw`\bFR\s?\d{2}(?:\s?[0-9A-Z]{4}){3,5}(?:\s?[0-9A-Z]{1,3})?${MASQUE_IBAN}`, "g");
 const RE_SIREN_SIRET = /\bSIRE[NT]\b\s*(?:n[°o]\s*)?[:.]?\s*(\d{3}\s?\d{3}\s?\d{3}(?:\s?\d{5})?)(?!\s?\d)/gi;
-const RE_IBAN_FR_NU = /\bFR\d{2}(?:\s?[0-9A-Z]{4}){5}\s?[0-9A-Z]{3}\b/g;
+// « FR76 3000 … », « FR 76 3000 … » : les groupes peuvent être séparés dès « FR ».
+const RE_IBAN_FR_NU = /\bFR\s?\d{2}(?:\s?[0-9A-Z]{4}){5}\s?[0-9A-Z]{3}\b/g;
 const RE_EXONERATION = /[^\n]*(?:exon[ée]r[ée]?(?:ation)?s?\b[^\n]*\bTVA\b|\bTVA\b[^\n]*exon[ée]r|art(?:icle|\.)?\s*(?:295|262\s*ter|261|275)\b[^\n]*\bCGI\b)[^\n]*/gi;
 
 function seulesLectures(pages: PageLue[], re: RegExp, groupe: number): { valeur: string; texte: string; page: number }[] {
@@ -715,4 +716,59 @@ export function valeurHeures(brutes: LigneBrute[] | undefined, pages: PageLue[],
     controle: `${retrouvees}/${lignes.length} jours retrouvés sur leur page ; somme ${somme} h` +
       (totalEcrit === null ? "" : ecart ? ` ≠ total écrit ${totalEcrit} h` : " = total écrit"),
   };
+}
+
+/** Une cellule de montant ou de taux imprimée (« 26,78 », « 8,50 % », « 82,61 € ») ; null sinon. */
+function nombreCellule(c: string): number | null {
+  const t = c.replace(/[€%\s]/g, "");
+  return /^-?\d+(?:[.,]\d+)?$/.test(t) ? nombreDepuisTexte(t) : null;
+}
+
+/**
+ * La ventilation de TVA relevée sur le tableau « TOTAL NET HT | TAUX TVA | TOTAL TVA » quand le modèle ne l'a pas
+ * rendue (factures à plusieurs taux, LEADER MAT 21/10). Une rangée = base | code | (Exo) ou (taux | montant) ; une
+ * rangée sans base n'est pas rendue (un code de taux sans achat) ; la rangée des totaux (code vide) non plus.
+ * Vérifiée si la somme des bases égale le HT lu et celle des montants la TVA lue, quand ils le sont.
+ */
+export function ventilationDepuisTableau(valeurs: ValeurLue[], pages: PageLue[]): ValeurLue | null {
+  if (valeurs.some((v) => v.champ === "tva.ventilation")) return null;
+  for (const p of pages) {
+    const lignes = p.texte.split("\n");
+    const debut = lignes.findIndex((l) => /taux\s*(de\s*)?t\.?v\.?a/i.test(l) && /h\.?t/i.test(l) && l.includes("|"));
+    if (debut < 0) continue;
+    const rangees: Record<string, unknown>[] = [];
+    for (const l of lignes.slice(debut + 1, debut + 20)) {
+      if (!l.includes("|")) break;
+      const c = l.split("|").map((x) => x.trim());
+      const base = nombreCellule(c[0] ?? "");
+      const code = (c[1] ?? "").match(/^\d{1,2}$/) ? c[1] : null;
+      if (base === null || code === null) continue; // sans base (code non utilisé) ou rangée des totaux
+      const reste = c.slice(2).filter((x) => x !== "");
+      if (reste.length > 0 && /^exo/i.test(reste[0])) {
+        rangees.push({ categorie: "E", taux: 0, base, montant: 0, motif: reste[0].slice(0, 300) });
+        continue;
+      }
+      const taux = nombreCellule(reste[0] ?? "");
+      const montant = nombreCellule(reste[1] ?? "");
+      if (taux === null || montant === null) continue;
+      rangees.push({ taux, base, montant });
+    }
+    if (rangees.length === 0) continue;
+    const somme = (k: string) => Math.round(rangees.reduce((s, r) => s + (r[k] as number), 0) * 100) / 100;
+    const ht = valeurs.find((v) => v.champ === "montant_ht")?.valeur;
+    const tva = valeurs.find((v) => v.champ === "montant_tva")?.valeur;
+    const okHt = typeof ht !== "number" || Math.abs(somme("base") - ht) <= 0.01;
+    const okTva = typeof tva !== "number" || Math.abs(somme("montant") - tva) <= 0.01;
+    return {
+      champ: "tva.ventilation",
+      valeur: rangees,
+      page: p.n,
+      source: "ia",
+      verifiee: okHt && okTva && (typeof ht === "number" || typeof tva === "number"),
+      controle: `relevée sur le tableau de TVA page ${p.n} ; bases ${somme("base")}` +
+        (typeof ht === "number" ? (okHt ? " = HT" : ` ≠ HT ${ht}`) : "") + ` ; TVA ${somme("montant")}` +
+        (typeof tva === "number" ? (okTva ? " = TVA" : ` ≠ TVA ${tva}`) : ""),
+    };
+  }
+  return null;
 }

@@ -1,5 +1,10 @@
 # NOTES-A1 — ouvrier LECTEUR (session worker A1)
 
+## 21/10, lot « facture à trois taux » (feu vert de Teo, sur b7773e70)
+- La `tva.ventilation` est relevée sur le tableau « TOTAL NET HT | TAUX TVA | TOTAL TVA » quand le modèle ne la rend pas : « Exo » va en E, une rangée sans base est écartée, et la liste est vérifiée si Σ bases = HT et Σ TVA = TVA.
+- Le relevé de secours prend un IBAN dont les groupes sont séparés dès « FR » (« FR 76 … »).
+- 3 tests, 185 au total.
+
 ## 19/10, 18 h 30 Z, lot « IBAN masqué » (feu vert de Teo, sur 4a4ad9e1)
 - Un IBAN en partie couvert sort toujours en `fournisseur.iban`, avec `verifiee = false` et « partiellement masqué : à compléter », qu'il soit coupé avec ou sans marque, `[masqué]`, `...`, mis par erreur en TVA, ou omis par le modèle.
 - **Côté FILED (A4)** : `filed_integrer_facture` met `v_iban` à null s'il n'est pas complet, et le contrôle dit alors « Aucun IBAN ». Il faut un repère « IBAN partiellement masqué » au lieu de `iban.absent` quand la pièce porte un `fournisseur.iban` incomplet.

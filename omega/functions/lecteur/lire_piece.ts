@@ -20,7 +20,7 @@ import type { ClientClaude } from "@partage/claude.ts";
 import type { PortesAnalyse } from "./analyse/travail.ts";
 import { type BilanAvis, chiffrerLecture, type CoffreTamila, depotDechiffrant, poserAvisTamila } from "./coffre.ts";
 import { lireCsv, lireXlsx } from "./tableur.ts";
-import { completerDepuisTexte, reclasserIdentifiants, valeurHeures, valeurListeObjets, valeurLignes, valeurTaxes, valeurVentilation, ventilationExoneree, verifierValeurs } from "./verifier.ts";
+import { completerDepuisTexte, reclasserIdentifiants, valeurHeures, ventilationDepuisTableau, valeurListeObjets, valeurLignes, valeurTaxes, valeurVentilation, ventilationExoneree, verifierValeurs } from "./verifier.ts";
 import { estXmlFacture, lireXmlFacture } from "./xml_facture.ts";
 import { type BilanDecoupage, creerPiecesFilles } from "./decoupage.ts";
 import { concorder } from "./concordance.ts";
@@ -625,6 +625,8 @@ export function assembler(
     if (ventilation) valeurs.push(ventilation);
     const taxes = valeurTaxes(brut.taxes_autres, pages);
     if (taxes) valeurs.push(taxes);
+    const tableau = ventilationDepuisTableau(valeurs, pages);
+    if (tableau) valeurs.push(tableau);
     const exoneree = ventilationExoneree(valeurs);
     if (exoneree) valeurs.push(exoneree);
   }
