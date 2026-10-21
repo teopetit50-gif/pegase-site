@@ -67,3 +67,9 @@ reglements : creees 0, lignes 5, inchangees 5
   art. L441-10). Si vous contestez tout ou partie de ces montants, merci de nous l'écrire … »
 - Relances du 21/10 relues ensuite : A-C13 `coupee`, `annulee`, « remplacée par la relance du 27/10/2026 », `envoye_le` null ;
   les autres inchangées (rappels `en_attente`, A-C08/A-C11 coupées, A-C04 sans adresse).
+
+## C9 — devis (porte donnée par le coordinateur le 21/10)
+- `cashd_importer(client,'devis','[{"numero":"DV-2026-0009","compte_ref":"A-C09","compte_nom":"Menuiserie Devis Accepté (fictif)","date_emission":"2026-10-14","montant_ht":1000,"montant_ttc":1085,"statut":"en_attente"}]',false,null,…)`
+  → `{creees 1}` ; `cashd_preparer_maintenant` → `{preparees 1}` ; relance `devis_rappel`, sujet « votre devis DV-2026-0009 », `en_attente`.
+- Même ligne avec `"statut":"accepte"` → `{modifiees 1, relances_coupees 1}` ; `cashd_preparer_maintenant` → `{preparees 0}` ;
+  relance `coupee`, demande `annulee`, motif « avant l'envoi : facture DV-2026-0009 : devis accepte ».
