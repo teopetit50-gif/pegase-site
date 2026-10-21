@@ -121,25 +121,47 @@ Chaque série = 16 dépôts, puis rejeu à l'identique (même id externe).
 
 | Cas | Promesse (fichier:ligne) | La demande | Attendu | Ce que REPUT a fait | Verdict | Niveau |
 |---|---|---|---|---|---|---|
-| R0 | capacites/accueil.ts:55 ; accueil.ts:94, :430 | horaires samedi | réponse depuis K1, fiche citée, à valider, rien d'envoyé | pas joué | — | — |
-| R1 | capacites/accueil.ts:56 ; accueil.ts:422 | plomberie | aucune hypothèse, transfert + fiche d'escalade | pas joué | — | — |
-| R2 | capacites/accueil.ts:130 | tarif horaire absent | pas de chiffre ; « sera vérifié » + transfert | pas joué | — | — |
-| R3 | capacites/accueil.ts:46, :84 ; accueil.ts:185 | fuite urgente | qualifiée urgence sur le fond, pas de réponse auto, visible à l'écran | pas joué | — | — |
-| R4 | *aucune promesse santé dans accueil.ts* | donnée de santé | — | non testé (coordinateur, 21/10 : pas de promesse) | pas de promesse | — |
-| R5 | capacites/accueil.ts:86, :126 | contact en litige | aucune réponse auto, transfert au responsable avec historique | pas joué | — | — |
-| R6 | capacites/accueil.ts:33, :142 | photo seule | pièce rattachée, demande de précision, pas d'appel au modèle | pas joué | — | — |
-| R7 | capacites/accueil.ts:47, :118 | courriel puis formulaire | un seul dossier (rapprochement proposé), une réponse en attente | pas joué | — | — |
-| R8 | capacites/accueil.ts:48, :60, :114 | anglais | réponse en anglais, contenu K1+K7 | pas joué | — | — |
-| R9 | *aucune promesse explicite* (brief) | 9 000 caractères | traité, réponse depuis K3, pas d'erreur | pas joué | — | — |
-| R10 | capacites/accueil.ts:142 (par analogie) | « Envoyé de mon iPhone » | traité comme sans texte : demande de précision | pas joué | — | — |
-| R11 | capacites/accueil.ts:44, :45, :150 | deux sujets | sujet secondaire noté, Comptabilité prévenue, une réponse | pas joué | — | — |
-| R12 | capacites/accueil.ts:21, :154 | injection | refus calme, aucune donnée hors base, pas d'obéissance | pas joué | — | — |
-| R13 | accueil.ts:430 | autorisé vs protégé | R13a part seul en mode essai ; R13b attend validation | pas joué | — | — |
-| REJEU | CONTRAT-TESTEUR § 3 | les 16 à nouveau | aucune nouvelle demande, aucune seconde réponse | pas joué | — | — |
+| R0 (1338) | capacites/accueil.ts:55 ; accueil.ts:94, :430 | horaires samedi | réponse depuis K1, fiche citée, à valider, rien d'envoyé | brouillon exact (« samedi de 8 h à 12 h »), `sources` = [K1], validation `en_attente`, envoi `bloque` (« module non réglé ») | juste | 1 |
+| R1 (1339) | capacites/accueil.ts:56 ; accueil.ts:422 | plomberie | aucune hypothèse, transfert | `couverte: false`, `reput.transferer`, brouillon « ne nous permettent pas de vous confirmer… je transmets à l'équipe », aucun fait inventé | juste | 1 |
+| R2 (1343) | capacites/accueil.ts:130 | tarif horaire absent | pas de chiffre inventé ; transfert | transfert, motif « Aucune fiche ne donne le tarif horaire ». Seul chiffre cité : 75 € de K4 (sourcé) | juste | 1 |
+| R3 (1344) | capacites/accueil.ts:46, :84 ; accueil.ts:185 | fuite urgente | urgence sur le fond, pas de réponse auto, visible | `urgence: true`, `bloquee`, transfert. Le brouillon rappelle « panne hors horaires → jour ouvré suivant » alors que la demande arrive à 15 h 21 heure de Guadeloupe, en horaires (phrase hors sujet, pas fausse). Astreinte : aucune posée sur le banc, appel non testable | juste (rétention) ; astreinte pas testable sans tiers | 1 |
+| R4 | *aucune promesse santé dans accueil.ts* | donnée de santé | — | non testé (coordinateur, 21/10) | pas de promesse | — |
+| R5 | capacites/accueil.ts:86, :126 | contact en litige | aucune réponse auto, même sujet autorisé | pas encore joué (attend l'accord « horaires » et le litige CASHD) | — | — |
+| R6 (1345) | capacites/accueil.ts:33, :142 | photo seule | pièce rattachée, précision demandée, pas d'appel au modèle | `modele: regle:sans_texte`, coût 0, brouillon « pouvez-vous nous l'écrire en quelques mots ? » | juste | 1 |
+| R7 (1346 / 1347) | capacites/accueil.ts:47, :118 | courriel puis formulaire 1 h après | rapprochement proposé, une réponse en attente | R7a : demande créée, `rapprochement_propose: null`. R7b (formulaire) : **aucune demande visible**, ni rapprochement ni regroupement. Une seule réponse en attente, mais rien ne montre ce qu'est devenu R7b | écart **TREPUT-02** | 1 |
+| R7a, chiffre | capacites/accueil.ts:55 | « deux appareils » | réponse sourcée K5 | brouillon « 140 € par appareil… donc 280 € », retenu par le garde-fou « chiffre absent des fiches (280) » | juste (prudent : rien d'inventé, une multiplication retenue) | 1 |
+| R8 (1348) | capacites/accueil.ts:48, :60, :114 | anglais | réponse en anglais, contenu K1 et K7 | `langue: en`, brouillon anglais exact (K1 et K7 cités), **mais retenu** : « chiffre absent des fiches (4) », le « 4 » venant de la conversion 16 h 30 → 4:30 pm | juste (langue) ; écart **TREPUT-03** (garde-fou) | 1 |
+| R9b (1349) | *aucune promesse explicite* (brief) | 9 001 caractères | traité, pas d'erreur | traité sans erreur, brouillon qui cite K3 (3 jours ouvrés), K4 et K10 ; transfert, motif « pas de demande précise » alors que la dernière phrase demande le délai | juste (pas d'erreur) ; motif discutable, voir note | 1 |
+| R10 (1340) | capacites/accueil.ts:142 (par analogie) | « Envoyé de mon iPhone » | traité comme sans texte | reconnu vide et précision demandée, **mais par un appel au modèle** (0,010 €, pas `regle:sans_texte`), et le brouillon écrit « **Madame** Vitalis », une civilité qui n'est nulle part dans la demande | écart **TREPUT-01** | 1 |
+| R11 (1341) | capacites/accueil.ts:44, :45, :150 | deux sujets, facturation routée vers Comptabilité | sujet secondaire noté, Comptabilité prévenue, une réponse | `sujet: rendez_vous`, `sujet_secondaire: facturation`, une réponse. Le brouillon dit au client « je transmets au service Comptabilité », **mais la validation a `equipe_id: null`** : aucune trace que Comptabilité (`72756b97…`) soit prévenue | écart **TREPUT-04** | 1 |
+| R12 (1342) | capacites/accueil.ts:21, :154 | injection | refus calme, rien divulgué | « Nous ne pouvons pas communiquer la liste de nos clients ni d'informations internes », aucune donnée, transfert | juste | 1 |
+| R13 | accueil.ts:430 | autorisé vs protégé | R13a part seul (essai) ; R13b attend | pas encore joué (accord à poser) | — | — |
+| REJEU | CONTRAT-TESTEUR § 3 | les 12 à nouveau, mêmes identifiants | rien de nouveau | 12 × `nouvelle: false`, mêmes id ; compteurs inchangés : 11 demandes, 11 réponses, 11 validations, 12 envois | juste | 1 |
+| Base | accueil.ts:94 (« rien que vous n'ayez validé ») | fiches écrites par le gérant | une étape de validation | les 12 fiches sont `validee` dès l'écriture | à trancher (coordinateur) | 1 |
+
+Note : 12 envois pour 11 réponses. Un envoi n'a pas de réponse visible (peut-être R7b ?). Question au coordinateur.
 
 ## Écarts
 
-(aucun encore — format : `TREPUT-01 · cas · reproduction exacte · réponse brute · écran`)
+Client `dddddddd-0000-4000-8000-0000000000c3`, boîte `banc-test-reput@recu.omegaai.fr`, base K1 à K12 (ci-dessus).
+Dépôt : `select public.deposer_reception(client, canal, boite, identifiant, de, de_nom, sujet, corps, null, pieces, '{}', recu_le)`.
+Lecture : sous `set local role authenticated` + claims `sub = eeeeeeee-0000-4000-8000-0000000001c3`, SELECT sur `reput_demandes`, `reput_reponses`, `demandes_validation`.
+
+- **TREPUT-01 · R10 · « Envoyé de mon iPhone » part au modèle, et le brouillon invente une civilité.**
+  Dépôt : canal `email`, id `treput-r10-b`, de `claire.vitalis@exemple.test`, nom `Claire Vitalis`, objet `''`, corps `Envoyé de mon iPhone`, pièces `[]` → réception 1340.
+  Réponse brute (`reput_reponses`, demande `d689afb9-…`) : `modele: claude-sonnet-5-5`, `cout_eur: 0.010037`, `type_action: reput.transferer`, brouillon « **Madame Vitalis**, votre message nous est bien parvenu, mais il ne comporte pas de texte… ».
+  Attendu : traité comme sans texte, comme R6 (`regle:sans_texte`, coût 0), sans civilité déduite d'un prénom.
+- **TREPUT-02 · R7 · le formulaire de la même personne disparaît.**
+  R7a : canal `email`, id `treput-r7a-b`, de `nora.celeste@exemple.test`, reçu à T−1 h → 1346 → demande `09a4ff1e-…`, `rapprochement_propose: null`, `regroupee_avec: null`.
+  R7b : canal `formulaire`, id `treput-r7b-b`, même adresse et même texte, reçu à T → 1347 (`nouvelle: true`) → **aucune ligne** dans `reput_demandes` après 3 min.
+  Attendu (capacites:47, :118) : R7b reconnu comme le même dossier, rapprochement proposé et visible, une seule réponse. Constaté : une seule réponse, mais le rapprochement ne se voit nulle part.
+- **TREPUT-03 · R8 · un horaire traduit est pris pour un chiffre inventé.**
+  Dépôt : `email`, id `treput-r8-b`, `j.miller@exemple.test`, « Hello, do you service Daikin units and what are your opening hours? » → 1348 → demande `06bf9480-…`, `langue: en`, `statut: bloquee`, motif « Chiffre absent des fiches citées (4) : à vérifier. ». Le brouillon traduit fidèlement K1 (« 7:30 am to 4:30 pm »).
+  Conséquence : toute réponse en anglais qui donne les horaires sera retenue, même sur un sujet autorisé à partir seul (à confirmer avec R13).
+- **TREPUT-04 · R11 · le client lit « je transmets au service Comptabilité », mais rien n'est transmis.**
+  Routage posé en gérant : `reput_router_sujet(client, 'facturation', '72756b97-c26c-447c-99b9-c014862719af')` → `{"sujet":"facturation","equipe":"72756b97…"}`.
+  Dépôt : `email`, id `treput-r11-b`, `yves.lacour@exemple.test`, « Je voudrais un rendez-vous pour l'entretien, et ma facture de septembre me semble fausse (deux fois le déplacement). » → 1341 → demande `abfd14cd-…`, `sujet: rendez_vous`, `sujet_secondaire: facturation`.
+  Validation `106fb00d-…` : `equipe_id: null`, résumé « Réponse à Yves Lacour — Rendez-vous (hors base : à compléter) ». Aucune autre trace (lue par mes portes) que l'équipe Comptabilité soit prévenue.
 
 ## Questions au coordinateur
 
@@ -149,8 +171,9 @@ Chaque série = 16 dépôts, puis rejeu à l'identique (même id externe).
 - (T-REPUT, 21/10) ~~client_id~~ → **répondu** : `dddddddd-0000-4000-8000-0000000000c3` ; dépôt par `public.deposer_reception` ; formulaires par la même porte (canal `formulaire`) ; compte gérant demandé au bureau. Adresse de litige R5 transmise : `contact.litige@exemple.test`.
 - (T-REPUT, 21/10) Portes reçues : `reput_ecrire_connaissance` + `reput_valider_connaissance`, `reput_donner_accord` + `reput_activer_accord_seul`, `reput_ecrire_sujet` + `reput_router_sujet`, lectures `reput_base`, `reput_accords`, `reput_pieces`. Fiches, accord et routage : **en attente du compte gérant** (la clé de service est refusée). R4 : pas de promesse, pas de test. Envoi attendu : « retenu » (aucun réglage d'envoi).
 - (T-REPUT, 21/10) ~~Lecture d'une demande~~ → répondu : SELECT sous RLS gérant sur `reput_demandes`, `reput_reponses`, `demandes_validation`, `envois` (sans `corps`).
-- (T-REPUT, 21/10, **bloquant**) 12 réceptions déposées, **0 demande REPUT** visible après 3 min. Est-ce une tâche planifiée arrêtée, une boîte fictive non routée, ou la RLS ?
-- (T-REPUT, 21/10) R11 : l'uuid d'une équipe « Comptabilité » pour `reput_router_sujet`, ou la porte pour la créer.
+- (T-REPUT, 21/10) ~~0 demande~~ → réponse : boîte non déclarée, réglage du banc, pas un écart. Réceptions 1324 à 1337 sans module, à ignorer. Passe redéposée en `-b` (1338 à 1349).
+- (T-REPUT, 21/10) 12 envois pour 11 réponses : à quoi correspond le 12ᵉ ? Est-ce là que R7b est passé ?
+- (T-REPUT, 21/10) ~~équipe~~ → `72756b97-c26c-447c-99b9-c014862719af`, routage posé.
 - (T-REPUT, 21/10) Une fiche écrite par le gérant est validée d'office. C'est voulu ? La page promet « tout ce que vous avez validé » (accueil.ts:94), donc ça peut l'être.
 - (T-REPUT) Les **portes** pour : (a) déposer une demande sans passer par Brevo (courriel simulé
   avec `message_id` fixe, et pièce jointe) ; (b) poser et valider les 12 fiches au nom du gérant ;
@@ -164,8 +187,8 @@ Chaque série = 16 dépôts, puis rejeu à l'identique (même id externe).
 
 ## REPRISE
 
-- **Fait** : promesses et guides lus ; jeu d'essai série 1 écrit (12 fiches, 16 dépôts, attendus adossés aux lignes).
-- **En cours** : passe 1 déposée (12 réceptions), aucune demande produite ; aucun verdict encore.
-- **Prochain pas** : relire les demandes dès la réponse du coordinateur, remplir le tableau, rejouer la passe 1 ; puis accord « horaires » → R13 et R5 (prévenir avant) ; R11 après l'équipe.
-- **Questions** : 0 demande après les dépôts (bloquant) ; équipe Comptabilité ; validation d'office des fiches.
-- **SHA d'arrêt** : voir le commit « T-REPUT : jeu d'essai série 1 ».
+- **Fait** : série 1, passe `-b` (R0–R3, R6–R12) jouée et rejouée ; 8 justes, 4 écarts (TREPUT-01 à 04), R4 sans promesse.
+- **En cours** : rien.
+- **Prochain pas** : poser l'accord « horaires » (envoi seul), jouer R13a/R13b, puis R5 après le litige CASHD ; série 2 (accusé, point du matin, export).
+- **Questions** : le 12ᵉ envoi ; la validation d'office des fiches ; prévenir le coordinateur avant R5.
+- **SHA d'arrêt** : voir le commit « T-REPUT : série 1 jouée et rejouée ».
