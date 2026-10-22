@@ -1495,7 +1495,9 @@ supabase functions deploy lecteur --project-ref ygwbgpowzlbdaajlsqkn --import-ma
 
 ### Pour le bureau — redéploiements (mise à jour 19 h 25 Z), remplace la commande ci-dessus
 
-1. **`lecteur`** : depuis worker-a1 **bda7a5ed04b3583ed3879d66e532e89844f9ceba** (plans : titre ou numéro ; 069 : ventilation TVA, IBAN). Le paquet sort de `deno run -A omega/functions/lecteur/outils/preparer_deploiement.ts` (réparé par A1 : il suit les imports, 41 fichiers). Puis relances une à une : 069, puis 067, 068, 072, 074, 075, 077.
+1. **`lecteur`** : depuis worker-a1 **d46bc4d3cb0bac3702e7f96944487a3c37e28fcd** (remplace bda7a5ed ; plans : titre ou numéro ; 069 : ventilation TVA, IBAN, SIREN déduit, TVA intracom de secours). Le paquet sort de `deno run -A omega/functions/lecteur/outils/preparer_deploiement.ts` (réparé par A1 : il suit les imports, 41 fichiers). Puis relances une à une : 069, puis 067, 068, 072, 074, 075, 077.
 2. **`reput-reponse`** : depuis worker-c3 **1296dc256f81b2e2898d35849a6bdcc4c6c84409** (consigne SMS courte, durées écrites dans le résultat ; va avec c3_34, déjà posé).
 
 Posés et verts depuis 19 h 06 Z : c4_31 (fuseau par organisation), c4_32 (TOFFLOAD-09/10). Posés, tests en cours : c3_33 à c3_35. Réglages du banc : SIREN fictif 912345659 (banc-test-filed), fuseau America/Guadeloupe (banc-test-offload), reglages_envois reput en essai pour le banc c3 (il manquait : CONFIG_ABSENTE).
+
+19 h 35 Z : a4_78 (TFILED-16, identite.registre levable) posé, vert 3/3. A5 : étape 1 faite (worker-a5 f4878dac, 397 fichiers, P1-P6) ; empreinte recette 22/10 19:32 Z sur export-prod 1190e8d2. **À TEO** : relevé du schéma de production (`PROD_DB_URL=… bash omega/prod/base/relever-base.sh`, lecture seule, ~2 min, gratuit), puis lancement de la répétition (Actions → « Répétition du SQL (Postgres jetable) » sur worker-a5).
