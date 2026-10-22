@@ -36,6 +36,8 @@ export interface TypeDeclare {
   champs: string[];
   /** Les champs qui doivent être vérifiés pour que la pièce soit « lue » ; vide = une valeur vérifiée suffit. */
   cles: string[];
+  /** En plus des clés : au moins un de ces champs doit être vérifié (un plan : son titre ou son numéro). */
+  clesUneDe?: string[];
   /** Sans clé : la pièce est « lue » même sans aucune valeur (une pièce que le module range sans en rien tirer). */
   lueSansValeur?: boolean;
 }
@@ -106,7 +108,9 @@ SCHEMA_FILED.types.push(
     libelle: "plan",
     description: "un plan ou un cartouche de plan (architecte, structure, réseaux)",
     champs: ["titre", "numero_plan", "indice", "date", "echelle", "phase", "maitre_ouvrage", "auteur"],
-    cles: ["titre"],
+    // NOBAT 22/10 : un plan de détail n'a souvent que « Plan 101 » dans son cartouche ; titre OU numéro suffit.
+    cles: [],
+    clesUneDe: ["titre", "numero_plan"],
   },
   {
     type: "chantier_note_technique",

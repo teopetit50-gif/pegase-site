@@ -120,3 +120,19 @@ Deno.test("format de lecture : les trois types dans FILED (et un module sans sch
   assert(!("reserves" in props("daliro")) && !("reserves" in props("varelo")));
   assert(consignePour("filed", "").includes("chantier_pv_reserves"));
 });
+
+Deno.test("plan de détail sans titre (NOBAT 068) : le numéro « Plan 101 » suffit ; ni titre ni numéro → à vérifier", () => {
+  const texte = "M1: 60 x 60 h.: 80 / M1 : à replier après la pose du treillis / Plan 101";
+  const avecNumero = lire({ type_piece: "chantier_plan", valeurs: [{ champ: "numero_plan", valeur: "101", texte: "Plan 101", page: 1 }] }, [page(1, texte)]);
+  assertEquals(avecNumero.statut, "lue", avecNumero.motif);
+  const rien = lire({ type_piece: "chantier_plan", valeurs: [] }, [page(1, texte)]);
+  assertEquals(rien.statut, "a_verifier");
+  assertEquals(rien.motif, "À vérifier : titre ou numero_plan.");
+});
+
+Deno.test("plan de détail (NOBAT 067) : le premier intitulé écrit tient lieu de titre", () => {
+  const r = lire({ type_piece: "chantier_plan", valeurs: [{ champ: "titre", valeur: "Détail sur scellement n° 1", texte: "Détail sur scellement n° 1", page: 1 }] }, [
+    page(1, "Détail sur scellement n° 1 / Détail joint de retrait / DÉSIGNATION DES MASSIFS"),
+  ]);
+  assertEquals(r.statut, "lue", r.motif);
+});

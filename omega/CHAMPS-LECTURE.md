@@ -193,7 +193,7 @@ Ils arrivent par FILED, dont le schéma les reconnaît. Leurs types sont hors `T
 | `type_piece` | Champs | Clé (statut « lue ») |
 |---|---|---|
 | `chantier_pv_reserves` | `date_pv` (date), `maitre_ouvrage`, `operation`, `redacteur`, **`reserves`** | `reserves` |
-| `chantier_plan` | `titre`, `numero_plan`, `indice`, `date`, `echelle`, `phase`, `maitre_ouvrage`, `auteur` | `titre` |
+| `chantier_plan` | `titre` (à défaut, le premier intitulé écrit du dessin), `numero_plan` (« Plan 101 » → `101`), `indice`, `date`, `echelle`, `phase`, `maitre_ouvrage`, `auteur` | `titre` **ou** `numero_plan` (NOBAT 22/10 : un plan de détail n'a souvent que son numéro) |
 | `chantier_note_technique` | `titre`, `date`, `auteur`, `maitre_ouvrage`, **`dispositions`** | `titre` |
 
 Les listes sont **une seule valeur** (tableau jsonb). Chaque élément porte sa `page`, et la liste est vérifiée si chaque texte principal (description, texte) se retrouve sur sa page.

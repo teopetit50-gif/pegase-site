@@ -149,8 +149,14 @@ export const CHAMPS_CHANTIER: ChampFacture[] = [
   { champ: "maitre_ouvrage", type: "texte", max: 200, description: "Document de chantier : le maître d'ouvrage, tel qu'écrit." },
   { champ: "operation", type: "texte", max: 200, description: "PV de réserves : l'opération ou le bâtiment, tel qu'écrit." },
   { champ: "redacteur", type: "texte", max: 200, description: "PV de réserves : le rédacteur (maître d'œuvre), tel qu'écrit." },
-  { champ: "titre", type: "texte", max: 300, description: "Plan ou note technique : le titre, tel qu'écrit (cartouche ou en-tête)." },
-  { champ: "numero_plan", type: "texte", max: 60, description: "Plan : le numéro du plan, tel qu'écrit dans le cartouche." },
+  {
+    champ: "titre",
+    type: "texte",
+    max: 300,
+    description:
+      "Plan ou note technique : le titre, tel qu'écrit (cartouche ou en-tête) ; à défaut, le premier intitulé écrit qui désigne le dessin (« Détail sur scellement n° 1 », « Plan de fondations »), jamais un intitulé inventé.",
+  },
+  { champ: "numero_plan", type: "texte", max: 60, description: "Plan : le numéro du plan, tel qu'écrit (« Plan 101 » → « 101 », « N° S-101 » → « S-101 »)." },
   { champ: "indice", type: "texte", max: 20, description: "Plan : l'indice de révision (A, B, 02…)." },
   { champ: "echelle", type: "texte", max: 30, description: "Plan : l'échelle, telle qu'écrite (« 1/50 »)." },
   { champ: "phase", type: "texte", max: 30, description: "Plan : la phase (ESQ, APS, APD, PRO, DCE, EXE…), telle qu'écrite." },

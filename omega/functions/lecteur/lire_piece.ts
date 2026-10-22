@@ -651,9 +651,12 @@ export function assembler(
       (!typeDeclare
         ? `Type de pièce non reconnu pour le module ${schema.module} : une personne le tranche.`
         : `Type « ${type_piece} » incertain (${Math.round(brut.confiance_type * 100)} %) : une personne le tranche.`);
-  } else if (typeDeclare.cles.length > 0) {
+  } else if (typeDeclare.cles.length > 0 || (typeDeclare.clesUneDe ?? []).length > 0) {
     // Les clés comptent toutes les valeurs, listes comprises (« reserves » d'un PV).
-    const douteuses = typeDeclare.cles.filter((c) => !valeurs.some((v) => v.champ === c && v.verifiee));
+    const verifie = (c: string) => valeurs.some((v) => v.champ === c && v.verifiee);
+    const douteuses = typeDeclare.cles.filter((c) => !verifie(c));
+    const uneDe = typeDeclare.clesUneDe ?? [];
+    if (uneDe.length > 0 && !uneDe.some(verifie)) douteuses.push(uneDe.join(" ou "));
     if (douteuses.length === 0) statut = "lue";
     else {
       statut = "a_verifier";

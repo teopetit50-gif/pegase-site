@@ -1,5 +1,10 @@
 # NOTES-A1 — ouvrier LECTEUR (session worker A1)
 
+## 22/10, relance NOBAT 065→077 (Teo, 19 h 06 Z)
+- `outils/preparer_deploiement.ts` suit les imports (41 fichiers, `analyse/` et `media/` compris) ; les contrôles sont dans `omega/banc/nobat_065_077_controle.sql`.
+- 069 (LEADER MAT) : la ventilation et l'IBAN sont corrigés par fd2da4bd, à relancer seule après le redéploiement.
+- Plans 067, 068, 072, 074, 075 et 077 (« À vérifier : titre ») : un plan est désormais « lu » si son titre **ou** son numéro est vérifié. La consigne prend le premier intitulé écrit comme titre, et « Plan 101 » donne `numero_plan` 101.
+
 ## 21/10, lot « facture à trois taux » (feu vert de Teo, sur b7773e70)
 - La `tva.ventilation` est relevée sur le tableau « TOTAL NET HT | TAUX TVA | TOTAL TVA » quand le modèle ne la rend pas : « Exo » va en E, une rangée sans base est écartée, et la liste est vérifiée si Σ bases = HT et Σ TVA = TVA.
 - Le relevé de secours prend un IBAN dont les groupes sont séparés dès « FR » (« FR 76 … »).
