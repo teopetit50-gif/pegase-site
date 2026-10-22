@@ -76,6 +76,14 @@ export function consigne(d: Dossier): string {
   ].join("\n");
 }
 
+/** c3_33 : la réponse part par SMS ou WhatsApp (un appel manqué d'un mobile, par exemple) : elle tient en peu de mots. */
+export const CONSIGNE_COURTE =
+  "RÉPONSE COURTE (elle part par SMS) : deux phrases au plus, 300 caractères au plus, sans salutation ni excuse de ne pas avoir décroché : l'entreprise ajoute elle-même l'ouverture et la signature.";
+
+export function court(d: Dossier): boolean {
+  return d.canal_reponse === "sms" || d.canal_reponse === "whatsapp" || d.reception?.canal === "appel";
+}
+
 /** Le contenu de la question posée au modèle : la base, puis la demande entre balises. */
 export function contenuDemande(d: Dossier): string {
   const b = d.base!;
@@ -106,6 +114,7 @@ export function contenuDemande(d: Dossier): string {
     ...(precedents.length
       ? ["MESSAGES PRÉCÉDENTS DU MÊME CLIENT (même dossier, encore sans réponse envoyée ou déjà traités) : une seule réponse doit couvrir tout le dossier.", ...precedents, ""]
       : []),
+    ...(court(d) ? [CONSIGNE_COURTE, ""] : []),
     `MESSAGE REÇU par ${r.canal === "appel" ? "téléphone (message vocal laissé quand personne n'a décroché, transcrit automatiquement : des mots peuvent être mal reconnus ; la réponse part par SMS, courte)" : r.canal}${r.pieces ? `, avec ${r.pieces} pièce(s) jointe(s) que tu ne vois pas` : ""}${r.en_reponse_a ? ", en réponse à un message de l'entreprise" : ""} :`,
     "<message>",
     r.de_nom ? `De : ${r.de_nom}` : "",
