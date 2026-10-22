@@ -307,8 +307,8 @@ Lecture : sous `set local role authenticated` + claims `sub = eeeeeeee-0000-4000
 
 ## REPRISE
 
-- **Fait** : rejeux après v29 : délai de 60 s, TREPUT-01, 02 (en séquence), 03 et 04 justes. Astreinte de bout en bout : appel par l'Edge, échec, rang 2, épuisée, état en clair (TREPUT-15 corrigé). Nouveaux : TREPUT-16 (astreinte épuisée sans alerte) et TREPUT-17 (arrivées simultanées non regroupées).
+- **Fait** : tous les écarts TREPUT-01 à 17 sont rejoués justes, ou requalifiés en réglage du banc (09). Restent deux observations de libellé : « rappelez-le » dans l'alerte d'astreinte, et le titre d'alerte « Hors de la base » pour une réponse tirée en partie de la base.
 - **En cours** : rien.
-- **Prochain pas** : rejouer 12, 16 et 17 au signal ; pause au plus tard à 23 h 30 Z.
-- **Questions** : aucune bloquante. Hors de portée : la sonnerie réelle (Twilio de test, numéros fictifs).
-- **SHA d'arrêt** : voir le commit « T-REPUT : rejeux v29 (01 à 04, délai) justes, astreinte de bout en bout, TREPUT-16 et 17 ».
+- **Prochain pas** : au signal du coordinateur ; pause au plus tard à 23 h 30 Z. Hors de portée : la sonnerie réelle (Twilio de test), la poussée « interne urgent » (en préparation).
+- **Questions** : aucune.
+- **SHA d'arrêt** : voir le commit « T-REPUT : TREPUT-12, 16 et 17 rejoués après c3_40, justes ».
