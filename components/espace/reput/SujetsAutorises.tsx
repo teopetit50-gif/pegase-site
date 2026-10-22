@@ -17,6 +17,7 @@ import { useState } from "react";
 import { Loader } from "@/components/ui/loader";
 import { dateCourte } from "../format";
 import { Avis, Pastille, type Teinte } from "../ui";
+import { SbBandeau, SbGroupe, SbRegle } from "@/components/espace2/sb/Sb";
 import { activerAccordSeul, donnerAccord, fixerDelai, revoquerAccord, routerSujet } from "./portes";
 import type { AccordSujet, Client, Monde } from "./types";
 
@@ -29,9 +30,11 @@ const ETATS: Record<AccordSujet["statut"], { libelle: string; teinte: Teinte }> 
   expire: { libelle: "Accord expiré", teinte: "ambre" },
 };
 
-export default function SujetsAutorises({ monde, source, client, role, relire, modifierLocal }: {
+export default function SujetsAutorises({ monde, source, client, role, relire, modifierLocal, gabarit }: {
   monde: Monde; source: "exemple" | "reelle"; client: Client | null; role: string;
   relire: () => Promise<void>; modifierLocal: (f: (m: Monde) => Monde) => void;
+  /** « sb » : /espace2 rend la page Policies de Supabase (22/10) ; /espace garde sa carte */
+  gabarit?: "sb";
 }) {
   const [envoi, setEnvoi] = useState<string | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -101,6 +104,11 @@ export default function SujetsAutorises({ monde, source, client, role, relire, m
     }
   };
 
+  /* 22/10 — la page Database › Policies de Supabase (espace2/sb) : le
+     bandeau qui dit la règle, puis une carte « table » où chaque sujet est
+     une règle : son état en pilule, le service qui décide, ses gestes. */
+  const actifs = monde.accords.sujets.filter((a) => a.actif);
+  if (gabarit !== "sb") {
   return (
     <section className="esp-carte" aria-label="Sujets autorisés">
       <div className="esp-carte-tete">
@@ -173,5 +181,90 @@ export default function SujetsAutorises({ monde, source, client, role, relire, m
         </ul>
       </div>
     </section>
+  );
+  }
+  return (
+    <div className="sb-pile">
+      <SbBandeau
+        titre="Par défaut, rien ne part sans votre validation"
+        texte="Sur un sujet que vous autorisez, une réponse entièrement tirée de votre base part seule, dans la minute ; une réponse hors base ou corrigée est toujours relue. L'accord dure un an et se révoque à tout moment."
+      />
+      {fait ? <Avis teinte="vert" role="status">{fait}</Avis> : null}
+      {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+      <SbGroupe
+        nom="sujets"
+        badges={
+          <span className="sb-badge" data-teinte={actifs.some((a) => a.statut === "active") ? "vert" : undefined}>
+            {actifs.filter((a) => a.statut === "active").length} part{actifs.filter((a) => a.statut === "active").length > 1 ? "ent" : ""} seul{actifs.filter((a) => a.statut === "active").length > 1 ? "s" : ""}
+          </span>
+        }
+      >
+        {actifs.map((a) => {
+          const e = ETATS[a.statut];
+          const sujet = a.genre === "message" ? undefined : monde.sujets.find((x) => x.code === a.sujet);
+          const equipes = monde.equipes ?? [];
+          const delai = sujet?.delai_heures ?? null;
+          return (
+            <SbRegle
+              key={a.sujet}
+              nom={a.libelle}
+              sous={
+                <>
+                  {delai ? (
+                    <>
+                      Délai de traitement : {delai} h
+                      {dirige ? (
+                        <>
+                          {" "}
+                          · <button type="button" className="esp-lien-bouton" disabled={envoi !== null} onClick={() => void changerDelai(a.sujet, delai)}>changer</button>
+                        </>
+                      ) : null}
+                    </>
+                  ) : null}
+                  {a.statut === "active" ? ` · jusqu'au ${dateCourte(a.fin)}${a.donne_par_libelle ? `, donné par ${a.donne_par_libelle}` : ""} · ${a.envoyees_seules_mois} partie${a.envoyees_seules_mois > 1 ? "s" : ""} seule${a.envoyees_seules_mois > 1 ? "s" : ""} ce mois-ci` : null}
+                </>
+              }
+              commande={a.autorisable ? <span className="sb-badge" data-teinte={e.teinte === "vert" ? "vert" : e.teinte === "ambre" ? "ambre" : undefined}>{e.libelle}</span> : <span className="sb-commande">toujours relu</span>}
+              cible={
+                sujet && equipes.length ? (
+                  <span className="v2-champ" style={{ height: 26, width: "fit-content", maxWidth: "100%" }}>
+                    <select aria-label={`Service qui décide : ${a.libelle}`} disabled={!dirige || envoi !== null} value={sujet.equipe_id ?? ""} onChange={(ev) => void router(sujet.code, ev.target.value || null)}>
+                      <option value="">Tous les décideurs</option>
+                      {equipes.map((q) => (
+                        <option key={q.id} value={q.id}>
+                          {q.nom}
+                        </option>
+                      ))}
+                    </select>
+                  </span>
+                ) : (
+                  <span className="sb-gris">tous les décideurs</span>
+                )
+              }
+              fin={
+                dirige && a.autorisable ? (
+                  <span style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "flex-end" }}>
+                    {a.statut === "active" || a.statut === "a_valider" ? (
+                      <button type="button" className="v2-btn" disabled={envoi !== null} onClick={() => agir(a, "revoquer")}>
+                        {envoi === a.sujet ? <Loader variant="spin" /> : null} Révoquer
+                      </button>
+                    ) : (
+                      <button type="button" className="v2-btn v2-btn--primaire" disabled={envoi !== null} onClick={() => agir(a, "donner")}>
+                        {envoi === a.sujet ? <Loader variant="spin" /> : null} Autoriser l&apos;envoi seul
+                      </button>
+                    )}
+                    {a.statut === "a_valider" && monde.accords.seul_decideur ? (
+                      <button type="button" className="v2-btn v2-btn--primaire" disabled={envoi !== null} onClick={() => agir(a, "activer")}>
+                        Activer moi-même
+                      </button>
+                    ) : null}
+                  </span>
+                ) : null
+              }
+            />
+          );
+        })}
+      </SbGroupe>
+    </div>
   );
 }

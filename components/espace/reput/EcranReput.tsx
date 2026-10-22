@@ -142,7 +142,7 @@ export default function EcranReput({ vue }: { vue?: Onglet } = {}) {
     <>
       <div className="esp-tete" data-arrivee="">
         <div>
-          <h1 className="esp-titre">Demandes clients</h1>
+          <h1 className="esp-titre">{vue === "base" ? "Base de connaissances" : vue === "sujets" ? "Sujets autorisés" : vue === "reglages" ? "Réglages et avis" : "Demandes clients"}</h1>
           <p className="esp-sous">
             Chaque message reçu par courriel, WhatsApp ou le formulaire de votre site reçoit dans la minute une réponse préparée à partir de votre base de connaissances. Rien ne part sans que vous l&apos;ayez vu, sauf sur les sujets que vous avez autorisés d&apos;avance.
           </p>
@@ -245,7 +245,7 @@ export default function EcranReput({ vue }: { vue?: Onglet } = {}) {
         <ReglagesAvis key={`${source}:${monde.reglages?.id ?? ""}`} monde={monde} source={source} client={client} role={role} relire={charger} modifierLocal={modifierLocal} />
       ) : null}
       {monde && onglet === "sujets" ? (
-        <SujetsAutorises monde={monde} source={source} client={client} role={role} relire={charger} modifierLocal={modifierLocal} />
+        <SujetsAutorises monde={monde} source={source} client={client} role={role} relire={charger} modifierLocal={modifierLocal} gabarit={vue ? "sb" : undefined} />
       ) : null}
     </>
   );
