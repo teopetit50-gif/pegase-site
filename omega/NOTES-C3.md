@@ -3,7 +3,17 @@
 Branche `worker-c3`. Coordinateur : `session_01BCGFdpRKBvXKjouC75sYBg`.
 Commencée le 06/10/2026. Je n'appelle jamais Supabase : le coordinateur pose, je lis les sorties brutes.
 
-## REPRISE (pause de Teo, 22/10/2026 00 h 11 Z — reprise sur son go ou samedi 25/10 après 02 h Z)
+## REPRISE (relance de Teo, 22/10/2026 19 h 06 Z — pause au plus tard 23 h 30 Z)
+
+- **22/10 soir — relance, trois points faits, verts, poussés** (souche 577/577, Deno reput-reponse 22/22). Lots à poser dans l'ordre :
+  - `c3_33_gabarit_appel.sql` + test (9) : réponse à un appel manqué ouverte par « Bonjour, excusez-nous de ne pas avoir décroché. » (`reput_reglages.ouverture_appel`, porte `reput_regler_ouverture_appel`) ; par SMS ou WhatsApp, forme courte (ouverture, corps, première ligne de la signature, mention) ; plus de 480 caractères → relecture. Test c3_32 rendu indépendant de la date (règle des 48 h).
+  - `c3_34_reveil_ouvrier.sql` + test (7) — **TREPUT-05** : un travail reput.preparer réveille aussitôt reput-reponse (pg_net, au commit, `?nombre=1`) ; le cron omega-reput reste le filet. **À poser une fois sur la recette** : `private.reglages` clé `reput_reponse_url` = URL de la fonction (en-tête du fichier). L'ouvrier écrit `durees_ms` (commencer, modèle, dépôt) dans le résultat du travail ; mesure : `omega/recette-c3/mesure_treput05.sql` (lecture seule). Analyse : 0 à 60 s d'attente du cron + le modèle.
+  - `c3_35_accuses_clos.sql` + test (6) — **TREPUT-07** : l'accusé en attente est annulé dès que la demande est validée, envoyée, refusée ou regroupée (déclencheur) ; rattrapage des accusés déjà restés (3745fcb2, 60eaee37).
+  - `c3_36_whatsapp_appels.sql` + test (18) : appel manqué d'un mobile → WhatsApp si `reponse_appels = 'whatsapp'` ET gabarit du socle `reput.appel_whatsapp` validé (modele_externe = nom Meta, texte avec {{message}}, {{organisation}}) ; sinon SMS. Porte `reput_regler_reponse_appels(client, canal, modele, corps)` dépose le gabarit en brouillon ; **Teo** : compte Meta, soumission et approbation du modèle, puis validation du gabarit par le serveur (`valider_gabarit`). Réponse, réponse corrigée et accusé passent par `private.reput_preparer_envoi`. Le socle exige le consentement WhatsApp du destinataire : sans lui, l'envoi est bloqué (« bloquee »).
+  - **À redéployer** : Edge `reput-reponse` (consigne courte SMS/WhatsApp, durées).
+  - Pas d'écran pour ces réglages (comme la transcription c3_24) : portes SQL seulement.
+
+## Pause précédente (Teo, 22/10/2026 00 h 11 Z)
 
 - **22/10 — preuve REPUT niveau 2 NON FAITE** : banc prêt (boîte banc@recu.omegaai.fr réactivée, envoi en essai, 3 fiches validées seulement, crons verts, aucun accord actif), mais les 2 courriels de Teo vers banc@recu.omegaai.fr ont été rejetés par Brevo « 550 5.1.2 adresse introuvable » (MX OK). **Inbound Brevo à rétablir** (Teo : compte Brevo → Inbound parsing → domaine recu.omegaai.fr ; puis brevo-inbound-installer). Ensuite rejouer PREUVE-VRAIE.md étape 1 (heure T0 dans les blocs 1 à 4).
 - **Arrêt** : lots 1 à 10 + c3_24 faits, verts, poussés ; posés et verts sur la recette jusqu'à c3_24. Arbre propre, rien en cours.
