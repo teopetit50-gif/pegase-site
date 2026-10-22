@@ -375,3 +375,4 @@
 .v2 .sb-liens-liste .sb-liens-texte strong { font-size: 13px; line-height: 19.5px; font-weight: 450; color: var(--v2-gray-1000); }
 .v2 .sb-liens-liste .sb-liens-texte span { font-size: 13px; line-height: 19.5px; color: var(--v2-gray-900); }
 .v2 .sb-liens-liste .sb-liens-fin { flex: none; display: inline-flex; align-items: center; gap: 8px; color: var(--v2-gray-600); }
+@container principale (min-width: 1000px) { .v2 .sb-volet-detail--large { width: min(600px, 55%); } }
