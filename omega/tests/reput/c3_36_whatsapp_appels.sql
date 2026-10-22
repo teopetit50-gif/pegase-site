@@ -92,6 +92,10 @@ begin
   v_dem := (public.reput_commencer(v_rec) ->> 'demande')::uuid;
   return next is((select canal_reponse from public.reput_demandes where id = v_dem), null::text,
                  'Un fixe : aucune réponse écrite, à rappeler');
+  v_j := public.reput_deposer_reponse(v_dem, jsonb_build_object('sujet', 'autre', 'langue', 'fr', 'couverte', false,
+           'corps', 'Le client demande à être rappelé.'));
+  return next is((select corps from public.reput_reponses where id = (v_j ->> 'reponse')::uuid), 'Le client demande à être rappelé.',
+                 'TREPUT-12 : un fixe, la note de rappel seule (ni excuse, ni signature, ni SMS)');
   return next ok(not has_function_privilege('authenticated', 'private.reput_preparer_envoi(public.reput_demandes, text, text, text, text, uuid)', 'execute'),
                  'L''envoi reste au serveur');
 end $f$;
