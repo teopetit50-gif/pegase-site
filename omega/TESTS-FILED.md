@@ -423,6 +423,14 @@ seulement « proposé », jamais tenu pour bon (vérifié par le coordinateur). 
   - **Sage** (`.pnm`, Windows-1252, à positions fixes, validé) : les mêmes 7 lignes, équilibrées, les libellés tronqués à la largeur du
     format. Un **second export validé** juste après → `lignes 0, ecritures 0, envoi null`. **Juste** : le mode « nouvelles » n'exporte
     pas deux fois la même écriture.
+  - **F8, trois taux** (22/10 à 19 h 38-41 Z) : registre levé → `a_valider` ; imputée sur 3 lignes en 601000 / CH-FLAMB (300 + 490 + 200,
+    total contrôlé) ; demande `ed6f2c97-…` (1 approbation) approuvée par le **gérant seul** à 19:39:07Z ; une comptabilisation tentée
+    avant l'exécution → `ERROR 55000: Seule une facture validée se comptabilise (ici : a_valider).` (refus juste et clair) ; après environ
+    1 minute, comptabilisation acceptée. **FEC** (annulé) : 3 écritures, `equilibre true`, total au débit 2 728,45. Écriture 3 : 601000 D
+    300,00 / 490,00 / 200,00, 44566 D **45,85**, 401 C **1 035,85**, auxiliaire `F00001`, le même que pour F0 (fournisseur reconnu).
+    **Juste** : HT, TVA et TTC conformes à la pièce. Observation : la TVA des taux 8,5 % et 2,1 % tient sur **une seule ligne 44566**, et la
+    base exonérée (art. 295) n'est pas distinguée. C'est conforme au FEC, mais la déclaration de TVA en Guadeloupe ventile ces taux :
+    le comptable devra les retrouver ailleurs.
 - **(3) Niveau 2, pièces NOBAT R2026-000065 → 000077** : en attente du signal du coordinateur (lecteur).
 
 ### Niveau 2 — relecture des pièces NOBAT (client du banc principal, lecture seule ; contenu relayé par le coordinateur)
