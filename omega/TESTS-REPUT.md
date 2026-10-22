@@ -178,11 +178,20 @@ Personnes de garde fictives : le gérant (`eeeeeeee-…01c3`, `+33199000011`) au
 
 | Cas | Promesse (fichier:ligne) | La demande | Attendu | Ce que REPUT a fait | Verdict | Niveau |
 |---|---|---|---|---|---|---|
-| C0 (1459) | capacites/accueil.ts:31 | appel transcrit « êtes-vous ouverts le samedi matin ? », `+33199000001` | demande écrite, traitée comme un courriel | réception `nouvelle`, **aucune demande REPUT** à T+70 s | écart **TREPUT-09** | 1 |
+| C0 (1459, avant correction du banc) | capacites/accueil.ts:31 | appel transcrit « êtes-vous ouverts le samedi matin ? », `+33199000001` | demande écrite, traitée comme un courriel | réception `nouvelle`, **aucune demande REPUT** à T+70 s | écart **TREPUT-09** | 1 |
 | C1 (1460) | capacites/accueil.ts:31, :142 | appel de 3 s, transcription vide | traité comme sans texte | aucune demande | TREPUT-09 | 1 |
 | C2 (1461) | capacites/accueil.ts:31, :46 | appel « de l'eau coule sur les prises, c'est urgent » | urgence | aucune demande | TREPUT-09 | 1 |
 | C3 (1462) | capacites/accueil.ts:31 | numéro masqué (`p_de = null`) | demande, réponse impossible, donc transfert | aucune demande | TREPUT-09 | 1 |
 | C4 (1463) | capacites/accueil.ts:31, :56 | transcription bruitée « [inaudible] tarif du [inaudible] » | précision demandée, aucun chiffre | aucune demande | TREPUT-09 | 1 |
+| C0-b (1491) | capacites/accueil.ts:31 | appel rejoué sur la ligne `+33199000099` (déclarée par le coordinateur), mobile fictif `+33639980001`, « ouverts le samedi matin ? » | demande écrite ; réponse par SMS | demande `canal: appel`, `canal_reponse: sms`, brouillon exact (K1). Sujet autorisé : la réponse part seule, SMS **en essai**, `differe` (`HORS_HEURES`, 21 h 24 à Paris) | juste | 1 |
+| C1-b (1492) | capacites/accueil.ts:31, :142 | appel de 3 s, transcription vide | traité comme sans texte, sans le modèle | `regle:sans_texte`, accusé à 19 h 25 m 00 s (moins d'une minute), SMS de précision `a_valider` en essai | juste | 1 |
+| C2-b (1493) | capacites/accueil.ts:31, :46, :84 | fixe `+33199000003`, « de l'eau coule sur les prises, c'est urgent » | urgence ; astreinte ; pas de SMS vers un fixe | `urgence: true`, `a_traiter`, `canal_reponse: null` (pas de SMS vers un fixe ✔). **Aucun appel d'astreinte** (TREPUT-11). Le brouillon dit « une panne signalée en dehors de nos horaires est traitée le jour ouvré suivant » à quelqu'un qui signale de l'eau sur des prises | urgence juste ; astreinte : TREPUT-11 | 1 |
+| C3-b (1494) | capacites/accueil.ts:31 | numéro masqué | aucune réponse possible, à traiter par une personne | `a_traiter`, motif « Aucune adresse de réponse : à traiter par une personne. » ; aucun envoi | juste | 1 |
+| C4-b (1495) | capacites/accueil.ts:31, :56 | fixe `+33199000005`, « [inaudible] tarif du [inaudible] » | aucun chiffre ; précision ; transfert | aucun chiffre, `a_traiter`, motif « en partie inaudible ». Le brouillon demande à ce **fixe** de « répondre par SMS » | juste sur le fond ; écart léger **TREPUT-12** | 1 |
+| U1, après 5 min | capacites/accueil.ts:84 | personne ne prend U1 | rang 2 appelé, puis astreinte épuisée | à 19 h 24 (U1 déposée à 19 h 16 m 40 s) : `astreinte_epuisee_le: null`, `escaladee_le: null`, aucun envoi d'astreinte. (U1 a été déposée avant le réglage d'envoi.) | TREPUT-11 | 1 |
+| U3 (1483), en essai | capacites/accueil.ts:84 ; accueil.ts:185 | urgence déposée après le réglage d'essai, à 19 h 20 m 20 s ; personne ne prend | appel rang 1, puis rang 2 après 5 min | `urgence: true`, `a_valider`, accusé à 19 h 21 m 00 s ✔. À 19 h 26 m 10 s : aucun envoi vers `+33199000011` ni `+33199000012`, `escaladee_le` et `astreinte_epuisee_le` null | TREPUT-11 confirmé en essai | 1 |
+| E1 (1481) | accueil.ts:430 | horaires (sujet autorisé), en essai | part seul, en essai | envoi `mode: essai`, `differe`, verrou `HORS_HEURES` (21 h 20 heure de Paris) : il partira aux heures ouvrées | juste | 1 |
+| E2 (1482) | capacites/accueil.ts:32 ; accueil.ts:430 | tarifs (protégé), en essai | accusé dans la minute ; réponse à valider ; valideurs prévenus | accusé `968d2fcc…` à 19 h 21 m 00 s (40 s après le dépôt) ✔ ; réponse `a_valider` ✔ ; courriels « Réponses clients à valider » au gérant et au valideur ✔ ; tous en essai, différés hors heures | juste | 1 |
 | A-réglage | capacites/accueil.ts:84 | `reput_regler_astreinte(c3, true, 1)` | refus lisible si la durée est hors bornes | refusé par une **erreur brute** : `violates check constraint "reput_reglages_astreinte_minutes_check"`. À 5 minutes : `{"minutes":5,"astreinte":true}` | refus juste ; message : écart **TREPUT-10** | 1 |
 | G1, G2 | capacites/accueil.ts:84 (« selon le tour de garde ») | gardes rang 1 (gérant) et rang 2 (valideur), de maintenant −1 h à +1 jour | gardes posées | `27f38757…`, `e7848f57…` | juste | 1 |
 | G3 | idem | garde dont le début est après la fin | refus lisible | refus brut `reput_gardes_periode_check` | TREPUT-10 | 1 |
@@ -193,7 +202,7 @@ Personnes de garde fictives : le gérant (`eeeeeeee-…01c3`, `+33199000011`) au
 | U2 (1466) | capacites/accueil.ts:84 | « fumée, odeur de brûlé » ; prise par le valideur | prise enregistrée | `reput_prendre_urgence` (valideur) → `{"prise":true}` ; `urgence_prise_le` 19 h 17 m 43 s, `urgence_prise_par = …02c3` ✔ | juste | 1 |
 | U2 bis | idem | le gérant reprend U2, déjà prise | pas de seconde prise, preneur indiqué | `{"prise":false,"deja_par":"…02c3"}`, preneur inchangé | juste | 1 |
 | U0 bis | idem | prendre U0, non urgente | refus | « Cette demande n'est pas une urgence. » | juste | 1 |
-| Mode d'envoi | — | — | « REPUT est en mode essai sur le banc » (coordinateur, 19 h 15) | les 3 envois U0, U1 et U2 portent `mode: reel`, `statut: bloque`, `verrou: CONFIG_ABSENTE` : il n'y a toujours **aucun réglage d'envoi**, donc pas de mode essai | à éclaircir (coordinateur) | 1 |
+| Mode d'envoi | — | — | « REPUT est en mode essai sur le banc » | à 19 h 17, les envois étaient `reel` / `CONFIG_ABSENTE` ; le coordinateur a reconnu l'erreur et posé un réglage d'essai (`banc-reput@banc.invalid`) à 19 h 20. Les envois suivants sont `mode: essai` | réglage du banc, pas un écart | 1 |
 
 ## Écarts
 
@@ -227,11 +236,14 @@ Lecture : sous `set local role authenticated` + claims `sub = eeeeeeee-0000-4000
   Après R13a (1350, `treput-r13a-b`) : validation `d4a9ffb2…` `echec_execution`, envoi `0f4eb5fa…` `bloque` (`CONFIG_ABSENTE`), `envoyee_le: null`. Pourtant `reput_accords(c3)` → `horaires` `envoyees_seules_mois: 1`.
 - *Requalifié (coordinateur, 21/10) : l'accusé de A1/A2 n'est pas un écart.* L'accusé ne se prépare que pour une demande `a_valider`/`a_traiter`. Sur le banc sans réglage d'envoi, la réponse passe tout de suite `bloquee`, donc pas d'accusé. Accusé et accord des accusés : **pas testable sans réglage**.
 
-- **TREPUT-09 · appel transcrit : aucune demande** (numéro du coordinateur).
+- **TREPUT-09 · appel transcrit : aucune demande** (numéro du coordinateur). **Requalifié** : configuration du banc (aucune ligne d'appel), corrigée par le coordinateur ; rejoué en C0-b à C4-b, les appels deviennent des demandes. Ce n'est pas un défaut du moteur.
   `deposer_reception(c3, 'appel', 'banc-test-reput@recu.omegaai.fr', 'treput-c0', '+33199000001', null, null, 'Bonjour, c''est pour savoir si vous êtes ouverts le samedi matin. Merci de me rappeler.', null, '[]', '{"duree_s":14,"transcrit":true}', now())` → 1459 `nouvelle:true`. Même chose pour c1 à c4 (1460 à 1463). Aucune ligne dans `reput_demandes` à T+70 s ; les réceptions restent `nouvelle` (constat du coordinateur). Boîte « appel » à déclarer, ou trou du moteur : la question est chez C3.
 - **TREPUT-10 · astreinte : des refus en erreur brute de la base.**
   En gérant : `reput_regler_astreinte(c3, true, 1)` → `new row for relation "reput_reglages" violates check constraint "reput_reglages_astreinte_minutes_check"` (avec le détail de toute la ligne de réglages). `reput_poser_garde(c3, null, '…02c3', '+33199000013', now()+1 day, now(), 3)` → `reput_gardes_periode_check`. Téléphone `abc` → `reput_gardes_telephone_check`. Membre inconnu `eeeeeeee-0000-4000-8000-0000000009c3` → « Le membre de garde traite les demandes de ce site. ». Un gérant à l'écran ne sait ni quelle durée est permise, ni ce qui ne va pas.
+- **TREPUT-12 · appel depuis un fixe : le brouillon demande de « répondre par SMS ».**
+  `deposer_reception(c3, 'appel', '+33199000099', 'treput-c4-b', '+33199000005', null, null, 'euh bonjour [inaudible] c''est pour le tarif du [inaudible] voilà merci', null, '[]', '{"duree_s":8,"transcrit":true}', now())` → 1495 → `canal_reponse: null`, `a_traiter`. Brouillon : « …Pouvez-vous nous répondre par SMS en précisant le service concerné ? ». Le numéro est un fixe : il ne peut pas envoyer de SMS, et le moteur l'a lui-même jugé non joignable par SMS.
 - **TREPUT-11 · urgence qualifiée, astreinte posée et active, aucun appel d'astreinte.**
+  **Confirmé en essai (19 h 26)** : U3 (1483, `treput-u3`, déposée à 19 h 20 m 20 s après le réglage d'essai) et C2-b (1493, appel) sont `urgence: true` ; aucun envoi vers les gardes, aucun `escaladee_le` ni `astreinte_epuisee_le` après 6 minutes.
   Astreinte `{"astreinte":true,"minutes":5}`, gardes rang 1 `27f38757…` (gérant, `+33199000011`) et rang 2 `e7848f57…` (valideur, `+33199000012`), de maintenant −1 h à +1 jour. Dépôt U1 : `email`, `treput-u1`, `anne.rosier@exemple.test`, « De l'eau coule du climatiseur directement sur le tableau électrique, ça grésille, venez tout de suite. » → 1465 → demande `6afeba17-e91c-4e70-99eb-4c76d340651b`, `urgence: true`. Envois du banc créés dans les 4 minutes : seulement les 3 réponses aux clients (`email`, `bloque`) ; aucun envoi vers les numéros de garde, aucun `rang`. Promesse : « Quand elle est urgente, le téléphone de l'astreinte sonne » (accueil.ts:185) ; « Une urgence déclenche l'appel de l'astreinte, selon le tour de garde en cours » (capacites:84).
 
 ## Questions au coordinateur
@@ -260,8 +272,8 @@ Lecture : sous `set local role authenticated` + claims `sub = eeeeeeee-0000-4000
 
 ## REPRISE
 
-- **Fait** : série 3 en cours. Appels transcrits : TREPUT-09. Astreinte : gardes posées, prise et refus justes, TREPUT-10 (refus bruts) et TREPUT-11 (aucun appel d'astreinte).
-- **En cours** : attente de 5 minutes sur U1 (passage au rang 2, astreinte épuisée).
-- **Prochain pas** : relire U1 ; redéposer les appels quand C3 aura donné le geste ; rejouer le délai de 60 s au signal du coordinateur ; pause au plus tard à 23 h 30 Z.
-- **Questions** : la boîte « appel » ; le mode essai annoncé alors que les envois sont `reel`/`CONFIG_ABSENTE`.
-- **SHA d'arrêt** : voir le commit « T-REPUT : série 3 (appels, astreinte), TREPUT-09 à 11 ».
+- **Fait** : série 3. Appels transcrits rejoués après correction du banc : 4 justes, TREPUT-12 (fixe invité à répondre par SMS). Astreinte : gardes, prise et refus justes ; TREPUT-10 (refus bruts) ; TREPUT-11 (aucun appel d'astreinte, confirmé en essai). Mode essai : accusés dans la minute, réponse autorisée en essai différée hors heures, valideurs prévenus.
+- **En cours** : rien.
+- **Prochain pas** : rejouer le délai de 60 s et les écarts 01 à 04 après le redéploiement de `reput-reponse` ; les doublures WhatsApp (c3_36) si le coordinateur le demande ; pause au plus tard à 23 h 30 Z.
+- **Questions** : aucune bloquante.
+- **SHA d'arrêt** : voir le commit « T-REPUT : appels rejoués, mode essai, TREPUT-11 confirmé, TREPUT-12 ».
