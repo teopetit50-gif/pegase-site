@@ -122,7 +122,10 @@ Détections demandées au coordinateur : lundi 26/10, mardi 27/10, mardi 27/10 e
 ### Relecture des signaux du banc (22/10, `offload_tableau` sous le gérant, dernier jour détecté 27/10)
 
 Niveau 2 sur les 9 898 sociétés importées (client « Omega ») : **en attente** — vraies données, seule identité celle de Teo,
-détection jamais jouée ; le coordinateur remonte la question au bureau. Observation transmise : ce client est en essai avec
+détection jamais jouée ; le coordinateur remonte la question au bureau.
+**Tranché par le bureau (22/10)** : détection jouée côté serveur par le coordinateur, sans identité prêtée, en essai, `envoi_auto`
+coupé. Résultat au 22/10 : 9 898 comptes, tous `sans_achat`, 0 signal, 0 reprise — prospects sans historique d'achat, donc ni rythme
+ni silence à juger. **Rien à relire au niveau 2** ; aucune liste de sociétés consignée ici. Observation transmise : ce client est en essai avec
 `envoi_auto` activé.
 
 | Cas | Promesse | Lecture | Verdict | Niveau |
