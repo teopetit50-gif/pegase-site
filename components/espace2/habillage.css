@@ -925,3 +925,16 @@ html.v2-actif .dlg-sortie:hover:not(:disabled) {
 /* les champs : 34 px, rayon 8, filet, fond de champ */
 .v2 .resa.esp .rv-champ { min-height: 34px; padding: 0 12px; border-radius: 8px; font-size: 13px; background: var(--sb-champ, transparent); box-shadow: 0 0 0 1px var(--v2-a-500); }
 .v2 .resa.esp textarea.rv-champ { padding: 8px 12px; }
+
+/* les formulaires dans les cartes : la ligne de Settings › General de
+   Supabase — libellé à gauche, commande à droite, à moitié chacun, un
+   filet entre les lignes (les fenêtres gardent leur formulaire empilé) */
+.v2 .resa.esp .esp-carte .esp-form { display: flex; flex-direction: column; gap: 0; }
+.v2 .resa.esp .esp-carte .esp-form-ligne { display: contents; }
+.v2 .resa.esp .esp-carte .esp-form .rv-libelle { padding: 12px 0; border-bottom: 1px solid var(--v2-a-400); font-size: 13px; line-height: 19.5px; font-weight: 450; color: var(--v2-gray-1000); }
+@container principale (min-width: 640px) {
+  .v2 .resa.esp .esp-carte .esp-form .rv-libelle:not([style]) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-auto-flow: dense; align-items: start; gap: 4px 24px; }
+  .v2 .resa.esp .esp-carte .esp-form .rv-libelle:not([style]) > .esp-obligatoire { grid-column: 1; font-size: 12px; }
+  .v2 .resa.esp .esp-carte .esp-form .rv-libelle:not([style]) > :is(input, select, textarea) { grid-column: 2; grid-row: 1 / span 2; width: 100%; }
+}
+.v2 .resa.esp .esp-carte .esp-form > :last-child { border-bottom: 0; }
