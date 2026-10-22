@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function PageDemandes() {
   return (
-    <Habille avant={<TableauDemandes />}>
+    <Habille avant={<TableauDemandes />} ancien>
       <EcranBoite portee="toutes" />
     </Habille>
   );
