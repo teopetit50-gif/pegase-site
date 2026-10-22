@@ -35,15 +35,26 @@ begin
   r_hors := private.verrous_envoi(interne_urgent, true, v_hors);
   return next ok(coalesce(r_hors ->> 'code', '') <> 'HORS_HEURES' and (r_hors ->> 'code') is not distinct from (r_dans ->> 'code'),
                  'Interne urgent : à 3 h, les mêmes verrous qu''à 10 h, sans HORS_HEURES' || coalesce(' [à 10 h : ' || (r_dans ->> 'code') || ']', ''));
-  r_dans := private.verrous_envoi(interne, true, v_dans);
-  return next is(case when r_dans is null then private.verrous_envoi(interne, true, v_hors) ->> 'code' else 'HORS_HEURES' end, 'HORS_HEURES',
-                 'Interne NON urgent : différé HORS_HEURES' || coalesce(' [à 10 h déjà : ' || (r_dans ->> 'code') || ']', ''));
+  -- Le verrou rendu dépend de l'ordre des contrôles du socle (un verrou contrôlé AVANT les heures sort à toute heure ; un
+  -- verrou contrôlé APRÈS n'apparaît qu'en journée) : on compare donc à la même heure (3 h), avec et sans urgence.
+  r_hors := private.verrous_envoi(interne, true, v_hors);
+  return next ok(coalesce(r_hors ->> 'code', '') = 'HORS_HEURES'
+                 or (r_hors ->> 'code') is not distinct from (private.verrous_envoi(interne_urgent, true, v_hors) ->> 'code'),
+                 'Interne NON urgent : différé HORS_HEURES (ou retenu plus tôt, comme l''urgent)'
+                 || format(' [3 h : %s ; urgent à 3 h : %s ; 10 h : %s]', coalesce(r_hors ->> 'code', 'aucun'),
+                           coalesce(private.verrous_envoi(interne_urgent, true, v_hors) ->> 'code', 'aucun'),
+                           coalesce(private.verrous_envoi(interne, true, v_dans) ->> 'code', 'aucun')));
+  r_hors := private.verrous_envoi(tiers, true, v_hors);
   r_dans := private.verrous_envoi(tiers, true, v_dans);
-  return next is(case when r_dans is null then private.verrous_envoi(tiers, true, v_hors) ->> 'code' else 'HORS_HEURES' end, 'HORS_HEURES',
-                 'Envoi à un TIERS, même marqué urgent : différé HORS_HEURES' || coalesce(' [à 10 h déjà : ' || (r_dans ->> 'code') || ']', ''));
+  return next ok(r_hors is not null and (coalesce(r_hors ->> 'code', '') = 'HORS_HEURES' or r_hors = r_dans),
+                 'Envoi à un TIERS, même marqué urgent : retenu à 3 h (HORS_HEURES, ou un verrou contrôlé avant)'
+                 || format(' [3 h : %s ; 10 h : %s]', coalesce(r_hors ->> 'code', 'aucun'), coalesce(r_dans ->> 'code', 'aucun')));
   perform set_config('omega.envoi_interne_urgent', 'on', true);
-  return next ok(coalesce(private.verrous_envoi(tiers, true, v_hors) ->> 'code', '') is not distinct from coalesce(r_dans ->> 'code', 'HORS_HEURES'),
-                 'Le drapeau de transaction ne libère jamais un envoi à un tiers');
+  r_dans := private.verrous_envoi(tiers, true, v_hors);   -- le même envoi au tiers, à 3 h, drapeau posé
+  return next ok(r_dans is not distinct from r_hors,
+                 'Le drapeau de transaction ne libère jamais un envoi à un tiers (même verrou, drapeau posé ou non)'
+                 || format(' [sans drapeau : %s ; avec : %s ; envoi_interne_urgent(tiers) = %s]', coalesce(r_hors::text, 'aucun'),
+                           coalesce(r_dans::text, 'aucun'), private.envoi_interne_urgent(tiers)));
   return next ok(private.envoi_interne_urgent(interne), 'Le drapeau marque un envoi interne');
   perform set_config('omega.envoi_interne_urgent', 'off', true);
   return next ok(not private.envoi_interne_urgent(interne) and not private.envoi_interne_urgent(tiers), 'Sans drapeau ni colonne : rien d''urgent ; un tiers jamais');
