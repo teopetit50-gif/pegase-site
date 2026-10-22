@@ -1,0 +1,15 @@
+# empreinte.sql (worker-a5 f4878dac), niveau resume, recette ygwbgpowzlbdaajlsqkn, 22/10/2026 19:32 Z — relayé par le coordinateur.
+# Cible MOUVANTE : la relance du 22/10 pose encore des lots (c4_31, c4_32, c3_33 à c3_35, a4_78 depuis 19:06 Z). À rejouer au gel.
+# categorie | nombre | md5
+contrainte | 3759 | 088c3251b23e5c0645aad408ab21d53b
+cron | 91 | bb587fee8cadaf26318f3fb2747a356c
+declencheur | 458 | 4b56ea233cf3430e3772f42120188a26
+droit | 3085 | 8c41b6521a3d7fd18e8d2706c8d337f5
+droit_defaut | 12 | cfd33994f38ea7e5ab6925a5c415caea
+extension | 8 | e7be864d527095592f77e2acd5ce7229
+fonction | 2594 | 8f2c313abe1ebf38915eb6bc7c8bb289
+index | 1279 | bfccebed6153e31aa6b8b70da2c33222
+politique | 530 | 2fc86b15c677595748e3043b07a9e597
+publication | 46 | d1bac857a1a80fd21499f456c7893f92
+table | 422 | fce15103bf6b00b54a50d485d6a5a07a
+vue | 42 | 2759d8638cab15461382907ce67ad1fd
