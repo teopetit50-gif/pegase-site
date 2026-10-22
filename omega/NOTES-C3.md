@@ -3,7 +3,13 @@
 Branche `worker-c3`. Coordinateur : `session_01BCGFdpRKBvXKjouC75sYBg`.
 Commencée le 06/10/2026. Je n'appelle jamais Supabase : le coordinateur pose, je lis les sorties brutes.
 
-## REPRISE (relance de Teo, 22/10/2026 19 h 06 Z — pause au plus tard 23 h 30 Z)
+## REPRISE (pause de Teo, 22/10/2026 22 h 04 Z — reprise sur son feu vert ou samedi 25/10 après 02 h Z)
+
+- **À faire à la reprise** : l'accusé de nuit (arbitrage de Teo, 21 h 49 Z : « l'accusé part dans la minute même la nuit, honnête sur les horaires ; la vraie réponse attend l'ouverture ») — c3_42a (socle : envois.accuse, l'accusé REPUT « reput:accuse:… » préparé sous le drapeau omega.envoi_accuse saute le SEUL HORS_HEURES, verrous_envoi modifié à l'ancre de c3_41a) + c3_42 (reput_accuser : « Nos horaires : … traitée en premier à l'ouverture ») + test (accusé de nuit libre, réponse de fond retenue). **Bloqué par le contrôle de permissions de la session : il faut l'autorisation de Teo DANS cette session** (rien n'est écrit).
+- **Posé et vert sur la recette** : c3_33 à c3_41a (dont le lot socle c3_41a, autorisé par Teo) ; Edge reput-reponse v30 et reput-astreinte v3 déployées par le bureau. Attend Teo : compte et modèle Meta WhatsApp.
+- **Arbre propre**, rien en cours ; détail des lots du 22/10 ci-dessous.
+
+## Relance de Teo, 22/10/2026 19 h 06 Z
 
 - **22/10 soir — relance, trois points faits, verts, poussés** (souche 577/577, Deno reput-reponse 22/22). Lots à poser dans l'ordre :
   - `c3_33_gabarit_appel.sql` + test (9) : réponse à un appel manqué ouverte par « Bonjour, excusez-nous de ne pas avoir décroché. » (`reput_reglages.ouverture_appel`, porte `reput_regler_ouverture_appel`) ; par SMS ou WhatsApp, forme courte (ouverture, corps, première ligne de la signature, mention) ; plus de 480 caractères → relecture. Test c3_32 rendu indépendant de la date (règle des 48 h).
