@@ -6,9 +6,9 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 
 ## REPRISE (22/10, 19 h 15 Z — relance de Teo : fuseau par organisation, puis arrêt)
 
-- Fait : c4_01 à c4_30 posés et verts ; c4_31 (fuseau de l'organisation) poussé, local 490 ok.
+- Fait : c4_01 à c4_30 posés et verts ; c4_31 (fuseau) et c4_32 (TOFFLOAD-09, 10) poussés, local 496 ok.
 - En cours : rien. Import des personnes morales : script livré (6f0a05b2), non joué, attend Teo.
-- Prochain pas : poser c4_31 ; offload_deposer_points reste à l'heure de Paris (point du matin commun, 5 h).
+- Prochain pas : poser c4_31 puis c4_32 ; offload_deposer_points reste à l'heure de Paris (point du matin commun, 5 h).
 
 ### Reprise du 17/10
 
@@ -451,6 +451,14 @@ Banc local : 28 tests, 312 assertions vertes, migrations posées deux fois ; tsc
 l'échéance honorée après message est comptée au suivi). Le chiffre repris compte tous les achats des 90 jours,
 sans prétendre qu'ils sont dus au seul message.
 
+## Lot c4_32 — les reprises d'avant les règles suivent les règles (TOFFLOAD-09, 10 ; 22/10)
+
+O1 (litige CASHD) et O12 (effacé avant c4_26) gardaient une reprise « appel » et une tâche ; O12, O13 restaient listés.
+`private.offload_clore_interdites(p_client)` clôt « abandon » toute reprise ouverte d'un compte suivi par CASHD, effacé
+ou retiré, et abandonne les tâches d'un compte effacé ; elle joue à chaque détection et en tête du cycle ; la pose la
+joue une fois pour toutes les organisations. offload_tableau ne liste plus un compte effacé. Test
+`c4_32_reprises_d_avant.sql` : 5 rouges sur 6 avant, 6 verts après. Local : 55 tests, 496 ok.
+
 ## Lot c4_31 — le fuseau de l'organisation (22/10)
 
 OFFLOAD lit le fuseau de l'entité principale de l'organisation (public.entites.fuseau, défaut Europe/Paris), comme le
@@ -886,3 +894,4 @@ Partielles : 6, 11, 15, 38.
 - 21/10, 23 h 20 Z — recette c4_29 : 8/10, le cycle n'avait pas ouvert la reprise de TR3 (plafond de la vague du banc, probable) ; le test l'ouvre à la main.
 - 21/10, 23 h 20 Z — lot c4_30 (date d'achat à Paris) ; tests 25, 27, 29 datés à Paris.
 - 22/10, 19 h 15 Z — lot c4_31 (fuseau de l'organisation) : 490 ok.
+- 22/10 — lot c4_32 (TOFFLOAD-09, 10 : reprises d'avant les règles, comptes effacés hors liste) : 496 ok.
