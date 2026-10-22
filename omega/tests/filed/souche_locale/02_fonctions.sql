@@ -108,7 +108,14 @@ create or replace function private.filed_regime_territorial(p_client uuid, p_ent
 create or replace function private.filed_pays_ue(p text) returns boolean language sql immutable as $$ select p in ('AT','BE','BG','CY','CZ','DE','DK','EE','EL','ES','FI','HR','HU','IE','IT','LT','LU','LV','MT','NL','PL','PT','RO','SE','SI','SK') $$;
 create or replace function private.filed_iban_valide(p text) returns boolean language sql immutable as $$ select p ~ '^[A-Z]{2}[0-9]{2}[A-Z0-9]{10,30}$' $$;
 create or replace function private.filed_masquer_iban(p text) returns text language sql immutable as $$ select left(p, 4) || '…' || right(p, 4) $$;
-create or replace function private.filed_levable(p_code text) returns boolean language sql immutable as $$ select p_code not like 'lecture.%' $$;
+-- La liste fermée de la recette (relevée par le coordinateur le 22/10, 19 h 20 Z) ; a4_78 l'étend sans la réécrire.
+create or replace function private.filed_levable(p_code text) returns boolean language sql immutable as $$
+  select p_code in ('montant.coherence', 'montant.signe', 'doublon.exact', 'doublon.probable', 'iban.partage', 'fournisseur.siren',
+                    'tva.numero_siren', 'tva.taux', 'tva.autoliquidation_attendue', 'destinataire.societe', 'date.future',
+                    'rapprochement.commande', 'rapprochement.commande_inconnue', 'rapprochement.commande_fermee', 'rapprochement.prix',
+                    'rapprochement.quantite', 'rapprochement.deja_facture', 'rapprochement.reception', 'rapprochement.lignes',
+                    'rapprochement.montant', 'avoir.origine', 'avoir.montant', 'avoir.quantite')
+$$;
 create or replace function private.filed_libelle_fournisseur(p public.filed_fournisseurs) returns text language sql immutable as $$ select p.nom $$;
 create or replace function private.filed_montant_texte(p numeric) returns text language sql immutable as $$ select replace(to_char(coalesce(p, 0), 'FM999G999G990D00'), '.', ',') || ' €' $$;
 create or replace function private.filed_quantite_texte(p numeric) returns text language sql immutable as $$ select trim(trailing '.' from trim(trailing '0' from coalesce(p, 0)::text)) $$;
