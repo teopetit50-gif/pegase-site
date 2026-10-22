@@ -139,6 +139,7 @@ ni silence à juger. **Rien à relire au niveau 2** ; aucune liste de sociétés
 | C-09 | TOFFLOAD-09 (c4_32) | O1 : reprise `close`, `issue: abandon`, motif « compte en litige chez CASHD (…) La reprise ne se poursuit pas. », tâche `abandonnee`. Reste au tableau avec `eteint` et priorité 3 340,68 (remarque : un compte en litige classé parmi les comptes à relancer) | juste ; remarque au coordinateur | 1 |
 | C-10 | TOFFLOAD-10 (c4_32) | O12 : reprise `close`, `abandon`, « Données de la personne effacées à sa demande. … », tâche `abandonnee` ; O12 et O13 ne figurent plus dans `offload_tableau` | juste | 1 |
 | F-1 | c4_31 (fuseau de l'entité `America/Guadeloupe`) | 22/10 22 h 07 Z (Paris 23/10, Guadeloupe 22/10) sur O8 : achat daté 23/10 refusé (« La date d'un achat est connue et passée. ») ; achat daté 22/10 (F-FUS-22) accepté ; contact daté 23/10 refusé. Prouve que le jour n'est pas celui de Paris. Limite : à cette heure l'UTC est aussi le 22/10, donc Guadeloupe et UTC ne se distinguent qu'entre 00 h et 04 h Z (hors de la fenêtre de travail) | juste (Paris exclu) ; UTC/Guadeloupe non départagés | 1 |
+| F-2 | c4_31 | détection du coordinateur à 22 h 07 Z au jour de Guadeloupe (`jour 2026-10-22`, 2 entrées, ok 4 / ralentit 4 / éteint 12) : les 18 comptes lisibles portent `jour: 2026-10-22` (O12, O13 effacés absents) ; O8 : dernier achat 22/10 (celui de F-1), silence 0 j, `ok` ; O0 : 94 j de silence (20/07 → 22/10), clôture 31/10 | juste | 1 |
 
 ## Écarts
 
@@ -270,3 +271,6 @@ détection lancée par le coordinateur au jour de Guadeloupe. Sonde (annulée, r
 
 **22/10 22 h 08 Z, arrêt 12.** Fait : F-1 (fuseau) joué. En attente : la détection du coordinateur au jour de Guadeloupe (22/10) ;
 note : le signal d'O8 porte encore `jour: 2026-10-27` (détections simulées plus tôt), à relire après. Arrêt avant 23 h 30 Z.
+
+**22/10 22 h 10 Z, arrêt 13.** Fait : F-1 et F-2 (fuseau) justes ; plus aucun écart ouvert (TOFFLOAD-01 à 10 corrigés et rejoués).
+Reste non joué : le cycle un autre jour que mardi ; UTC contre Guadeloupe (fenêtre 00 h-04 h Z). Aucune approbation (demandes V1-V3, O16 en attente).
