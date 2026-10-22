@@ -3,7 +3,7 @@
 
 import { rpc, type ConfigSupabase } from "@partage/portes.ts";
 import { journal, messageDe } from "@partage/journal.ts";
-import { appeler, type ConfigTwilio, issueDuStatut, signatureValide, twimlMerci } from "./twilio.ts";
+import { appeler, type ConfigTwilio, issueDuStatut, numeroRefuse, signatureValide, twimlMerci } from "./twilio.ts";
 
 export interface AppelAPasser {
   appel: string;
@@ -33,7 +33,7 @@ export interface ContexteAstreinte {
   fetchTwilio: typeof fetch;
 }
 
-/** Un passage : sans Twilio, rien n'est pris (les appels attendent ; la base escalade au délai). */
+/** Un passage : sans Twilio, rien n'est pris (les appels attendent ; au délai la base les dit « non passés » et alerte). */
 export async function passer(ctx: ContexteAstreinte, nombre = 10): Promise<{ appeles: number; echecs: number; branche: boolean }> {
   if (!ctx.twilio) {
     journal("alerte", "Twilio non branché : les appels d'astreinte attendent (TWILIO_NON_BRANCHE).");
@@ -48,8 +48,14 @@ export async function passer(ctx: ContexteAstreinte, nombre = 10): Promise<{ app
       appeles++;
     } catch (e) {
       echecs++;
-      journal("erreur", "appel d'astreinte impossible", { appel: a.appel, rang: a.rang, erreur: messageDe(e, 200) });
-      await ctx.portes.issue(a.appel, "echec", null);
+      if (numeroRefuse(e)) {
+        journal("erreur", "appel d'astreinte refusé (numéro)", { appel: a.appel, rang: a.rang, erreur: messageDe(e, 200) });
+        await ctx.portes.issue(a.appel, "echec", null);
+      } else {
+        // c3_39 (TREPUT-15) : une panne n'est pas un échec de la garde ; rien n'est noté, la base le dit « non passé »
+        // au délai, alerte le gérant, et l'appel est repris au passage suivant.
+        journal("erreur", "appel d'astreinte non passé (panne)", { appel: a.appel, rang: a.rang, erreur: messageDe(e, 200) });
+      }
     }
   }
   journal("info", "astreinte : passage", { appeles, echecs });
