@@ -17,91 +17,91 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
+import { useState } from "react";
 import { Download, ListChecks } from "lucide-react";
 import { dateCourte, montant } from "@/components/espace/format";
 import { jourParis } from "@/components/espace/cashd/calcul";
 import { STATUTS_COMPTE } from "@/components/espace/cashd/etats";
 import { exporterBalance } from "@/components/espace/cashd/tableur";
 import type { Balance, Tableau } from "@/components/espace/cashd/types";
-import { Badge, Note, Squelette, Vide, teinte } from "../ui";
+import { Badge, Note, Squelette, teinte } from "../ui";
+import { SbBandeau, SbLigneVide, SbListe, SbOutils, SbRecherche, SbTableau } from "../sb/Sb";
 import { lienCompte, useTableauCashd } from "./donnees";
 
 type Stat = { libelle: string; valeur: string; sous: string; teinte?: "vert" | "ambre" | "rouge" | "bleu" | "gris" };
 
-function Cadre({ titre, intro, stats, actions, children }: { titre: string; intro: string; stats: (t: Tableau) => Stat[]; actions?: (t: Tableau) => React.ReactNode; children: (t: Tableau) => React.ReactNode }) {
+/* 22/10 — le gabarit « Database › Tables » de Supabase (../sb) : titre et
+   description, un bandeau qui résume les chiffres, la barre d'outils
+   (recherche à gauche, actions à droite), puis le tableau en carte avec sa
+   ligne de pied. La recherche filtre les comptes, les devis et les
+   règlements ; les chiffres du bandeau restent ceux de tout le tableau. */
+const sansAccents = (x: string) => x.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+function filtrer(t: Tableau, q: string): Tableau {
+  const r = sansAccents(q.trim());
+  if (!r) return t;
+  const ok = (...xs: (string | null | undefined)[]) => xs.some((x) => x && sansAccents(x).includes(r));
+  return {
+    ...t,
+    comptes: t.comptes.filter((b) => ok(b.nom, b.reference)),
+    devis_en_attente: t.devis_en_attente.filter((d) => ok(d.compte, d.numero)),
+    a_imputer: t.a_imputer.filter((x) => ok(x.compte, x.reference, x.libelle)),
+  };
+}
+
+function Cadre({ titre, intro, stats, actions, recherche = "Rechercher un compte", children }: { titre: string; intro: string; stats: (t: Tableau) => Stat[]; actions?: (t: Tableau) => React.ReactNode; recherche?: string; children: (t: Tableau) => React.ReactNode }) {
   const { tableau, erreur } = useTableauCashd();
+  const [q, setQ] = useState("");
   const s = tableau ? stats(tableau) : null;
+  const alerte = s?.find((x) => x.teinte === "rouge") ?? s?.find((x) => x.teinte === "ambre");
   return (
-    <div className="v2-page v2-arrivee">
-      <h1 className="v2-sr">{titre}</h1>
-      <div className="v2-tete" style={{ marginBottom: 24 }}>
-        <div>
-          <p>{intro}</p>
-        </div>
-        <div className="v2-actions">
-          {tableau && actions ? actions(tableau) : null}
-          <Link href="/espace2/cashd/suivi?vue=debiteurs" className="v2-btn">
-            <ListChecks width={16} height={16} aria-hidden="true" /> Débiteurs et relances
-          </Link>
-        </div>
-      </div>
+    <SbListe titre={titre} description={intro}>
       {erreur ? (
-        <div style={{ marginBottom: 24 }}>
-          <Note teinte="rouge" role="alert">
-            <strong>La base réelle n&apos;a pas répondu.</strong> {erreur}
-          </Note>
-        </div>
+        <Note teinte="rouge" role="alert">
+          <strong>La base réelle n&apos;a pas répondu.</strong> {erreur}
+        </Note>
       ) : null}
-      <div className="v2-stats" style={{ "--nb": s?.length ?? 4 } as React.CSSProperties}>
-        {(s ?? [0, 1, 2, 3].map(() => null)).map((x, i) => (
-          <div key={x?.libelle ?? i} className="v2-stat" style={{ cursor: "default" }}>
-            <span className="v2-stat-etiquette">
-              <span className="v2-point" data-teinte={x?.teinte ?? "gris"} aria-hidden="true" />
-              {x ? x.libelle : <Squelette largeur="60%" hauteur={14} />}
-            </span>
-            <span className="v2-stat-valeur">{x ? x.valeur : <Squelette largeur={64} hauteur={28} />}</span>
-            <span className="v2-stat-sous">{x ? x.sous : <Squelette largeur="70%" hauteur={14} />}</span>
-          </div>
-        ))}
-      </div>
+      {s ? (
+        <SbBandeau
+          teinte={alerte?.teinte === "rouge" || alerte?.teinte === "ambre" ? alerte.teinte : undefined}
+          titre={`${s[0].libelle} : ${s[0].valeur}`}
+          texte={s
+            .slice(1)
+            .map((x) => `${x.libelle} : ${x.valeur}`)
+            .join(" · ")}
+        />
+      ) : (
+        <Squelette hauteur={80} />
+      )}
+      <SbOutils
+        gauche={<SbRecherche valeur={q} changer={setQ} placeholder={recherche} />}
+        droite={
+          <>
+            {tableau && actions ? actions(tableau) : null}
+            <Link href="/espace2/cashd/suivi?vue=debiteurs" className="v2-btn">
+              <ListChecks width={14} height={14} aria-hidden="true" /> Débiteurs et relances
+            </Link>
+          </>
+        }
+      />
       {tableau ? (
-        children(tableau)
+        children(filtrer(tableau, q))
       ) : erreur ? null : (
-        <div className="v2-carte" aria-busy="true" style={{ padding: 16, display: "grid", gap: 16 }}>
+        <div className="sb-carte-tableau" aria-busy="true" style={{ padding: 16, display: "grid", gap: 16 }}>
           {[0, 1, 2, 3].map((i) => (
             <Squelette key={i} hauteur={20} />
           ))}
         </div>
       )}
-    </div>
+    </SbListe>
   );
 }
 
-function Tableau({ colonnes, children, largeurs }: { colonnes: { libelle: string; num?: boolean }[]; children: React.ReactNode; largeurs?: string[] }) {
+function Tableau({ colonnes, children, largeurs, pied, vide }: { colonnes: { libelle: string; num?: boolean }[]; children: React.ReactNode; largeurs?: string[]; pied: string; vide: { titre: string; texte: string } | null }) {
   return (
-    <div className="v2-carte">
-      <div className="v2-tableau-cadre">
-        <table className="v2-tableau v2-tableau--empile">
-          {largeurs ? (
-            <colgroup>
-              {largeurs.map((l, i) => (
-                <col key={i} style={{ width: l }} />
-              ))}
-            </colgroup>
-          ) : null}
-          <thead>
-            <tr>
-              {colonnes.map((c) => (
-                <th key={c.libelle} scope="col" className={c.num ? "v2-num" : undefined}>
-                  {c.libelle}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>{children}</tbody>
-        </table>
-      </div>
-    </div>
+    <SbTableau colonnes={colonnes} largeurs={largeurs} pied={pied}>
+      {vide ? <SbLigneVide colonnes={colonnes.length} titre={vide.titre} texte={vide.texte} /> : children}
+    </SbTableau>
   );
 }
 
@@ -144,9 +144,8 @@ export function BalanceAgee() {
     >
       {(t) => {
         const comptes = t.comptes.filter((b) => b.encours !== 0 || b.credits !== 0).sort((a, b) => b.echu - a.echu || b.encours - a.encours);
-        if (!comptes.length) return <Vide icone={<ListChecks width={20} height={20} />} titre="Aucun encours">Le facturier ne contient aucune facture ouverte.</Vide>;
         return (
-          <Tableau colonnes={[{ libelle: "Compte" }, ...TRANCHES.map((x) => ({ libelle: x.libelle, num: true })), { libelle: "Encours", num: true }, { libelle: "Retard max", num: true }]}>
+          <Tableau pied={pluriel(comptes.length, "compte")} vide={comptes.length ? null : { titre: "Aucun encours", texte: "Le facturier ne contient aucune facture ouverte." }} colonnes={[{ libelle: "Compte" }, ...TRANCHES.map((x) => ({ libelle: x.libelle, num: true })), { libelle: "Encours", num: true }, { libelle: "Retard max", num: true }]}>
             {comptes.map((b) => (
               <tr key={b.compte_id}>
                 <td data-etiquette="Compte" data-plein="">
@@ -194,9 +193,8 @@ export function Litiges() {
         const comptes = t.comptes
           .filter((b) => (HORS_CYCLE as readonly string[]).includes(b.statut) || b.en_litige > 0)
           .sort((a, b) => b.en_litige - a.en_litige || b.encours - a.encours);
-        if (!comptes.length) return <Vide icone={<ListChecks width={20} height={20} />} titre="Aucun compte hors cycle">Toutes les factures ouvertes suivent leur séquence de relance.</Vide>;
         return (
-          <Tableau colonnes={[{ libelle: "Compte" }, { libelle: "Situation" }, { libelle: "En litige", num: true }, { libelle: "Encours", num: true }, { libelle: "Plus ancienne échéance" }]}>
+          <Tableau pied={pluriel(comptes.length, "compte")} vide={comptes.length ? null : { titre: "Aucun compte hors cycle", texte: "Toutes les factures ouvertes suivent leur séquence de relance." }} colonnes={[{ libelle: "Compte" }, { libelle: "Situation" }, { libelle: "En litige", num: true }, { libelle: "Encours", num: true }, { libelle: "Plus ancienne échéance" }]}>
             {comptes.map((b) => {
               const st = STATUTS_COMPTE[b.statut];
               return (
@@ -248,9 +246,8 @@ export function Risque() {
         const comptes = t.comptes
           .filter((b) => b.encours > 0 || b.plafond_encours !== null)
           .sort((a, b) => Number(!!b.depasse_plafond) - Number(!!a.depasse_plafond) || (utilisation(b) ?? -1) - (utilisation(a) ?? -1) || b.retard_max_jours - a.retard_max_jours);
-        if (!comptes.length) return <Vide icone={<ListChecks width={20} height={20} />} titre="Aucun compte à suivre">Aucun encours ni plafond pour l&apos;instant.</Vide>;
         return (
-          <Tableau colonnes={[{ libelle: "Compte" }, { libelle: "Encours", num: true }, { libelle: "Plafond", num: true }, { libelle: "Utilisé", num: true }, { libelle: "Retard max", num: true }, { libelle: "État" }]}>
+          <Tableau pied={pluriel(comptes.length, "compte")} vide={comptes.length ? null : { titre: "Aucun compte à suivre", texte: "Aucun encours ni plafond pour l'instant." }} colonnes={[{ libelle: "Compte" }, { libelle: "Encours", num: true }, { libelle: "Plafond", num: true }, { libelle: "Utilisé", num: true }, { libelle: "Retard max", num: true }, { libelle: "État" }]}>
             {comptes.map((b) => {
               const u = utilisation(b);
               return (
@@ -313,9 +310,8 @@ export function Devis() {
     >
       {(t) => {
         const devis = [...t.devis_en_attente].sort((a, b) => b.jours_ecoules - a.jours_ecoules);
-        if (!devis.length) return <Vide icone={<ListChecks width={20} height={20} />} titre="Aucun devis en attente">Tous les devis envoyés ont reçu une réponse.</Vide>;
         return (
-          <Tableau colonnes={[{ libelle: "Devis" }, { libelle: "Compte" }, { libelle: "Montant", num: true }, { libelle: "Envoyé le" }, { libelle: "Attente", num: true }, { libelle: "Étape" }]}>
+          <Tableau pied={`${devis.length} devis`} vide={devis.length ? null : { titre: "Aucun devis en attente", texte: "Tous les devis envoyés ont reçu une réponse." }} colonnes={[{ libelle: "Devis" }, { libelle: "Compte" }, { libelle: "Montant", num: true }, { libelle: "Envoyé le" }, { libelle: "Attente", num: true }, { libelle: "Étape" }]}>
             {devis.map((d) => (
               <tr key={d.id}>
                 <td data-etiquette="Devis">
@@ -369,9 +365,8 @@ export function Encaissements() {
     >
       {(t) => {
         const r = [...t.a_imputer].sort((a, b) => b.recu_le.localeCompare(a.recu_le));
-        if (!r.length) return <Vide icone={<ListChecks width={20} height={20} />} titre="Tout est imputé">Chaque règlement reçu solde la facture qu&apos;il vise.</Vide>;
         return (
-          <Tableau colonnes={[{ libelle: "Reçu le" }, { libelle: "Payeur" }, { libelle: "Référence" }, { libelle: "Montant", num: true }, { libelle: "Imputé", num: true }, { libelle: "À imputer", num: true }]}>
+          <Tableau pied={pluriel(r.length, "règlement")} vide={r.length ? null : { titre: "Tout est imputé", texte: "Chaque règlement reçu solde la facture qu'il vise." }} colonnes={[{ libelle: "Reçu le" }, { libelle: "Payeur" }, { libelle: "Référence" }, { libelle: "Montant", num: true }, { libelle: "Imputé", num: true }, { libelle: "À imputer", num: true }]}>
             {r.map((x) => (
               <tr key={x.id}>
                 <td data-etiquette="Reçu le">{dateCourte(x.recu_le)}</td>

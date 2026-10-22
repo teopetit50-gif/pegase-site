@@ -9,10 +9,12 @@
      <SbCompteurs> / <SbCompteur>   la grille « Usage Summary » et ses jauges
      <SbMesure>    la barre et les lignes de quota d'une mesure
      <SbGraphique> la carte graphique, avec son état « No data in period »
+     <SbListe>     le gabarit « Database › Tables » : en-tête, bandeau,
+                   barre d'outils (<SbOutils>, <SbRecherche>), tableau en carte
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
-import { BarChart3, ChevronRight, ExternalLink } from "lucide-react";
+import { BarChart3, ChevronRight, ExternalLink, Info, Search, X } from "lucide-react";
 import "./sb.css";
 
 export function SbPage({ titre, description, actions, filtres, children }: { titre: string; description?: React.ReactNode; actions?: React.ReactNode; filtres?: { gauche?: React.ReactNode; droite?: React.ReactNode }; children: React.ReactNode }) {
@@ -181,5 +183,111 @@ export function SbGraphique({ titre, texte, barres, format, vide = "Aucune donn�
         )}
       </div>
     </div>
+  );
+}
+
+/* ══ Le gabarit « liste » (Database › Tables) ══ */
+
+export function SbListe({ titre, description, actions, children }: { titre: string; description?: React.ReactNode; actions?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <div className="sb-liste v2-arrivee">
+      <div className="sb-liste-tete">
+        <div>
+          <h1 className="sb-titre">{titre}</h1>
+          {description ? <p className="sb-description">{description}</p> : null}
+        </div>
+        {actions ? <div className="sb-actions">{actions}</div> : null}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+export function SbBandeau({ titre, texte, action, teinte, icone, fermer }: { titre: string; texte?: React.ReactNode; action?: React.ReactNode; teinte?: "ambre" | "rouge"; icone?: React.ReactNode; fermer?: () => void }) {
+  return (
+    <div className="sb-bandeau" data-teinte={teinte} role={teinte ? "status" : undefined}>
+      <span className="sb-bandeau-icone" aria-hidden="true">
+        {icone ?? <Info width={14} height={14} strokeWidth={2} />}
+      </span>
+      <div className="sb-bandeau-texte">
+        <strong>{titre}</strong>
+        {texte ? <span>{texte}</span> : null}
+      </div>
+      {action}
+      {fermer ? (
+        <button type="button" className="v2-btn v2-btn--petit v2-btn--fantome v2-btn--icone" onClick={fermer} aria-label="Masquer">
+          <X width={14} height={14} aria-hidden="true" />
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+export function SbOutils({ gauche, droite }: { gauche?: React.ReactNode; droite?: React.ReactNode }) {
+  return (
+    <div className="sb-outils">
+      <div>{gauche}</div>
+      <div>{droite}</div>
+    </div>
+  );
+}
+
+export function SbRecherche({ valeur, changer, placeholder, etiquette }: { valeur: string; changer: (v: string) => void; placeholder: string; etiquette?: string }) {
+  return (
+    <label className="sb-recherche">
+      <Search width={16} height={16} strokeWidth={1.5} aria-hidden="true" />
+      <span className="v2-sr">{etiquette ?? placeholder}</span>
+      <input type="search" value={valeur} onChange={(e) => changer(e.target.value)} placeholder={placeholder} />
+    </label>
+  );
+}
+
+/* le tableau en carte ; `pied` : la dernière ligne, « 5 tables », en discret */
+export function SbTableau({ colonnes, pied, children, largeurs }: { colonnes: { libelle: string; num?: boolean }[]; pied?: React.ReactNode; children: React.ReactNode; largeurs?: string[] }) {
+  return (
+    <div className="sb-carte-tableau">
+      <div className="v2-tableau-cadre">
+        <table className="v2-tableau v2-tableau--empile">
+          {largeurs ? (
+            <colgroup>
+              {largeurs.map((l, i) => (
+                <col key={i} style={{ width: l }} />
+              ))}
+            </colgroup>
+          ) : null}
+          <thead>
+            <tr>
+              {colonnes.map((c) => (
+                <th key={c.libelle} scope="col" className={c.num ? "v2-num" : undefined}>
+                  {c.libelle}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {children}
+            {pied ? (
+              <tr className="sb-pied">
+                <td colSpan={colonnes.length} data-plein="">
+                  {pied}
+                </td>
+              </tr>
+            ) : null}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/* la ligne vide du tableau : « No tables created yet » */
+export function SbLigneVide({ colonnes, titre, texte }: { colonnes: number; titre: string; texte?: string }) {
+  return (
+    <tr>
+      <td colSpan={colonnes} data-plein="">
+        <span className="sb-vide-titre">{titre}</span>
+        {texte ? <span className="sb-vide-texte">{texte}</span> : null}
+      </td>
+    </tr>
   );
 }
