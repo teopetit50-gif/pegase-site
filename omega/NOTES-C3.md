@@ -12,6 +12,8 @@ Commencée le 06/10/2026. Je n'appelle jamais Supabase : le coordinateur pose, j
   - `c3_36_whatsapp_appels.sql` + test (18) : appel manqué d'un mobile → WhatsApp si `reponse_appels = 'whatsapp'` ET gabarit du socle `reput.appel_whatsapp` validé (modele_externe = nom Meta, texte avec {{message}}, {{organisation}}) ; sinon SMS. Porte `reput_regler_reponse_appels(client, canal, modele, corps)` dépose le gabarit en brouillon ; **Teo** : compte Meta, soumission et approbation du modèle, puis validation du gabarit par le serveur (`valider_gabarit`). Réponse, réponse corrigée et accusé passent par `private.reput_preparer_envoi`. Le socle exige le consentement WhatsApp du destinataire : sans lui, l'envoi est bloqué (« bloquee »).
   - **À redéployer** : Edge `reput-reponse` (consigne courte SMS/WhatsApp, durées).
   - Pas d'écran pour ces réglages (comme la transcription c3_24) : portes SQL seulement.
+  - **TREPUT-09** (appels déposés sans demande) : configuration, pas de lot — la boîte d'un appel est un NUMÉRO déclaré dans `expediteurs` (canal 'appel', module 'reput') ; sinon `receptions.module` reste nul et `reput_commencer` ignore. Geste envoyé au coordinateur.
+  - `c3_37_astreinte_clair.sql` + test (8) — **TREPUT-10** : refus de l'astreinte et de la garde en clair (22023) ; **TREPUT-11** : une demande devenue urgente crée aussitôt l'appel de rang 1 (déclencheur) ; l'astreinte crée des `reput_appels`, pas des envois ; l'urgence vient de la préparation (le détail de la réception n'est pas lu). Test c3_22 aligné. Souche 585/585.
 
 ## Pause précédente (Teo, 22/10/2026 00 h 11 Z)
 
