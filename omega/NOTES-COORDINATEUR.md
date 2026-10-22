@@ -1475,3 +1475,20 @@ Inbound Brevo rétabli par le bureau à 00 h 41 Z : `recu.omegaai.fr` n'existait
 - **TREPUT-05** : préparation de (a) en 106 s > 60 s promis (cadence du cron omega-reput + temps du modèle).
 - **TREPUT-06** : règle « regroupée avec le message suivant » à confirmer quand deux questions arrivent à 3 min d'écart (ici, une seule réponse complète : bon résultat).
 - **TREPUT-07** : deux accusés de réception (3745fcb2, 60eaee37) restent `a_valider` après l'envoi de la réponse ; à clore ou annuler avec elle.
+
+## RELANCE (Teo, par le bureau) — 22/10, 19 h 06 Z, plafond 85 %, sécurité 23 h 30 Z
+
+Réveillés (Opus 5.5 ; l'effort « medium » ne se règle pas sur une session existante, aucun outil ne le permet) : A5 (étape 1 MISE-EN-PRODUCTION), A1 + A4 (NOBAT 065→077, COH-FXC-002/005/016, écran exports), C2 (crochet 19ay + délais, puis stop), C3 (gabarit appel, TREPUT-05/07, WhatsApp en doublures), C4 (fuseau par organisation, puis stop), T-FILED, T-CASHD, T-OFFLOAD, T-REPUT. Pas B1, B5, C5. Sécurité trig_01X9QTaRUic1w1JRoUotiHXn à 23 h 30 Z.
+
+**Pour le bureau — Edge `lecteur` (recette) depuis worker-a1 fd2da4bd : non redéployé par le coordinateur.** Le paquet fait ~340 Ko (31 fichiers lecteur + 12 de `_partage`) ; le passer à la main dans l'outil MCP coûterait ~100 k jetons, et `outils/preparer_deploiement.ts` est périmé (il oublie `analyse/`, `media/`, `mesure/`). Commande à jouer par le bureau (CLI Supabase connectée) :
+
+```sh
+git worktree add /tmp/lecteur fd2da4bd && cd /tmp/lecteur/omega
+mkdir -p supabase/functions && cp -r functions/lecteur functions/_partage supabase/functions/
+sed -i 's#"@partage/": "../_partage/"#"@partage/": "../_partage/"#' supabase/functions/lecteur/deno.json
+supabase functions deploy lecteur --project-ref ygwbgpowzlbdaajlsqkn --import-map supabase/functions/lecteur/deno.json
+```
+
+(`verify_jwt` : garder le réglage de la version en place.) Ensuite prévenir A1/A4 : les 13 pièces NOBAT attendent ce lecteur.
+
+**T-OFFLOAD — à trancher (bureau/Teo).** Les 9 898 sociétés sont sur le client interne « Omega » 633470bc (vrais prospects Guadeloupe, tous `exclu`), seul compte = celui, réel, de Teo ; détection jamais jouée (0 signal) ; OFFLOAD en essai, `envoi_auto` vrai, adresse d'essai = boîte de Teo. Le contrat testeur interdit vraies données et identité hors banc : je n'ai ni prêté l'identité de Teo ni lancé la détection. T-OFFLOAD continue sur son banc (dddddddd-…-c4). Pour lever : accord écrit de Teo pour (1) jouer la détection sur 633470bc, (2) laisser un testeur lire sous son identité (ou créer un membre lecteur dédié).
