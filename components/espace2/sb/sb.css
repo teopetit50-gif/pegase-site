@@ -255,3 +255,19 @@
 .v2 .sb-carte-form-pied > span { margin-right: auto; }
 .v2 .sb-carte-form .v2-note { margin: 0 16px 16px; }
 .v2 .sb-avatar { flex: none; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 999px; background: var(--v2-gray-300); box-shadow: inset 0 0 0 1px var(--v2-a-400); font-size: 11px; font-weight: 500; color: var(--v2-gray-1000); }
+
+/* ══ Le gabarit « données » : Authentication › Users (relevé le 22/10) ══
+   pleine largeur : en-tête de 48 px, barre d'outils de 50 px teintée
+   (« py-3 px-6 »), grille aux en-têtes Inter 13 px de 36 px séparés par un
+   filet vertical, pied de 36 px collé en bas (« Total: N users », 12 px). */
+.v2 .sb-donnees-outils { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 24px; background: var(--v2-a-300); border-bottom: 1px solid var(--v2-a-400); }
+.v2 .sb-donnees-outils > div { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.v2 .sb-donnees-outils .sb-recherche { width: 245px; }
+.v2 .sb-grille-donnees.sb-grille-colonnes th { font-family: var(--v2-sans); font-size: 13px; line-height: 19.5px; font-weight: 450; background: var(--v2-bg-200); border-right: 1px solid var(--v2-a-400); }
+.v2 .sb-grille-donnees.sb-grille-colonnes td { border-right: 1px solid var(--v2-a-400); max-width: 360px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2 .sb-grille-donnees.sb-grille-colonnes th:last-child, .v2 .sb-grille-donnees.sb-grille-colonnes td:last-child { border-right: 0; }
+.v2 .sb-donnees-pied { position: sticky; bottom: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 36px; padding: 0 24px; border-top: 1px solid var(--v2-a-400); background: var(--v2-bg-200); font-size: 12px; line-height: 16px; color: var(--v2-gray-900); }
+.v2 .sb-volet-detail form { display: flex; flex-direction: column; gap: 16px; }
+.v2 .sb-volet-detail label { display: flex; flex-direction: column; gap: 8px; font-size: 13px; line-height: 19.5px; color: var(--v2-gray-1000); }
+.v2 .sb-volet-detail .v2-champ textarea { flex: 1; min-height: 96px; padding: 8px 0; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; resize: vertical; }
+.v2 .sb-volet-detail-pied { display: flex; justify-content: flex-end; gap: 8px; padding: 16px 24px; border-top: 1px solid var(--v2-a-400); margin-top: auto; }

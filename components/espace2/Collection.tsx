@@ -9,10 +9,11 @@
    passent en base, seul `lire`/`ecrire` change. */
 
 import { useMemo, useState, useSyncExternalStore, type FormEvent } from "react";
-import { Plus, Search, Trash2 } from "lucide-react";
-import { Note } from "./ui";
+import { Plus, Trash2 } from "lucide-react";
 import { useToast } from "./Toasts";
 import { jourDe } from "./filed/calculs";
+import { SbRecherche } from "./sb/Sb";
+import { SbDonnees } from "./sb/Donnees";
 
 export type Champ = {
   cle: string;
@@ -118,115 +119,157 @@ export default function Collection({ config }: { config: ConfigCollection }) {
     return config.coche ? [...liste].sort((a, b) => Number(!!a.fait) - Number(!!b.fait)) : liste;
   }, [fiches, filtre, champs, config.coche]);
 
-  const [principal, ...autres] = champs;
-  /* 15/10 — une ligne par fiche, comme Tâches et Appels du pilotage /omega :
-     le titre, un détail court en gris, une seule date à droite (rouge si
-     elle est passée pour une tâche ouverte) ; les textes longs passent en
-     infobulle */
-  const detail = autres.find((c) => !c.type || c.type === "tel" || c.type === "email");
-  const date = autres.find((c) => c.type === "date");
-  const longs = autres.filter((c) => c.type === "long");
+  const [principal] = champs;
+  const date = champs.find((c) => c.type === "date");
+  const courts = champs.filter((c) => c.type !== "long" && c.type !== "date");
   const aujourdhui = new Date().setHours(0, 0, 0, 0);
+  const [choisie, setChoisie] = useState<string | null>(null);
+  const fiche = visibles.find((f) => f.id === choisie) ?? null;
+  const idForm = `ajout-${cle}`;
 
+  /* 22/10 — le gabarit « Users » de Supabase (./sb/Donnees) : la barre
+     d'outils (recherche, ajout), la grille des fiches, le volet de droite
+     pour ajouter ou lire une fiche, le total collé en bas. */
   return (
-    <div className="v2-page v2-page--etroite v2-arrivee">
-      <h1 className="v2-sr">{config.titre}</h1>
-      {/* 15/10 — une barre fine (la recherche, l'ajout) puis une seule liste
-         encadrée, comme Activité et le pilotage /omega */}
-      <div className="oc-barre">
-        <label className="v2-champ oc-barre-recherche">
-          <Search width={16} height={16} aria-hidden="true" />
-          <input placeholder="Rechercher…" value={filtre} onChange={(e) => setFiltre(e.target.value)} aria-label={`Rechercher : ${config.titre}`} />
-        </label>
-        <button type="button" className="v2-btn v2-btn--petit v2-btn--primaire" onClick={() => setOuvert((v) => !v)} aria-expanded={ouvert}>
-          <Plus width={16} height={16} aria-hidden="true" /> Ajouter {config.une}
-        </button>
-      </div>
-
-      {ouvert ? (
-        <form className="v2-carte" onSubmit={ajouter} style={{ marginBottom: 24 }}>
-          <div className="v2-carte-corps" style={{ display: "grid", gap: 12 }}>
-            {champs.map((c) => (
-              <label key={c.cle} style={{ display: "grid", gap: 6, fontSize: 13 }}>
-                <span className="v2-gris">{c.libelle}</span>
-                {c.type === "long" ? (
-                  <span className="v2-champ" style={{ height: "auto", padding: 12 }}>
-                    <textarea name={c.cle} rows={4} required={c.requis} style={{ flex: 1, border: 0, outline: 0, background: "transparent", color: "inherit", font: "inherit", resize: "vertical" }} />
-                  </span>
-                ) : (
-                  <span className="v2-champ">
-                    <input name={c.cle} required={c.requis} type={c.type === "date" ? "date" : c.type === "email" ? "email" : c.type === "tel" ? "tel" : "text"} />
-                  </span>
-                )}
-              </label>
-            ))}
-          </div>
-          <div className="v2-carte-pied">
-            <span>Enregistré sur cet appareil.</span>
-            <span style={{ display: "flex", gap: 8 }}>
-              <button type="button" className="v2-btn v2-btn--petit" onClick={() => setOuvert(false)}>
-                Annuler
-              </button>
-              <button type="submit" className="v2-btn v2-btn--petit v2-btn--primaire">
-                Enregistrer
-              </button>
-            </span>
-          </div>
-        </form>
-      ) : null}
-
-      {fiches === null ? null : visibles.length === 0 ? (
-        <div className="v2-carte v2-carte-corps">
-          <p className="v2-gris" style={{ margin: 0 }}>{filtre ? "Rien ne correspond à cette recherche." : `${config.vide} ${config.intro}`}</p>
-        </div>
-      ) : (
-        <ul className="v2-carte v2-liste oc-collection">
-          {visibles.map((f) => (
-            <li key={f.id} className="v2-liste-item">
-              {config.coche ? (
-                <input
-                  type="checkbox"
-                  checked={!!f.fait}
-                  aria-label={`Marquer « ${String(f[principal.cle])} » comme faite`}
-                  onChange={() => maj((fiches ?? []).map((x) => (x.id === f.id ? { ...x, fait: !x.fait } : x)))}
-                  style={{ width: 16, height: 16, flexShrink: 0 }}
-                />
-              ) : null}
-              <span className="v2-liste-texte" title={longs.map((c) => String(f[c.cle] ?? "")).filter(Boolean).join("\n") || undefined}>
-                <span style={f.fait ? { textDecoration: "line-through", color: "var(--v2-gray-900)" } : undefined}>
-                  {String(f[principal.cle] || "—")}
-                  {detail && f[detail.cle] ? <span className="oc-collection-detail"> {String(f[detail.cle])}</span> : null}
-                </span>
-              </span>
-              {(() => {
-                const v = date ? String(f[date.cle] ?? "") : "";
-                const passee = !!v && config.coche && !f.fait && jourDe(v) < aujourdhui;
-                return (
-                  <span className="oc-meta" data-retard={passee ? "" : undefined}>
+    <SbDonnees
+      titre={config.titre}
+      outils={{
+        gauche: <SbRecherche valeur={filtre} changer={setFiltre} placeholder="Rechercher…" etiquette={`Rechercher : ${config.titre}`} />,
+        droite: (
+          <button
+            type="button"
+            className="v2-btn v2-btn--primaire"
+            onClick={() => {
+              setChoisie(null);
+              setOuvert((v) => !v);
+            }}
+            aria-expanded={ouvert}
+          >
+            <Plus width={14} height={14} aria-hidden="true" /> Ajouter {config.une}
+          </button>
+        ),
+      }}
+      colonnes={[...(config.coche ? ["Fait"] : []), ...courts.map((c) => c.libelle), date ? date.libelle : "Créée le", ""]}
+      lignes={
+        fiches === null
+          ? null
+          : visibles.map((f) => {
+              const v = date ? String(f[date.cle] ?? "") : "";
+              const passee = !!v && config.coche && !f.fait && jourDe(v) < aujourdhui;
+              return {
+                cle: f.id,
+                choisie: f.id === choisie,
+                ouvrir: () => {
+                  setOuvert(false);
+                  setChoisie(f.id === choisie ? null : f.id);
+                },
+                cellules: [
+                  ...(config.coche
+                    ? [
+                        <input
+                          key="fait"
+                          type="checkbox"
+                          checked={!!f.fait}
+                          aria-label={`Marquer « ${String(f[principal.cle])} » comme faite`}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={() => maj((fiches ?? []).map((x) => (x.id === f.id ? { ...x, fait: !x.fait } : x)))}
+                          style={{ width: 16, height: 16 }}
+                        />,
+                      ]
+                    : []),
+                  ...courts.map((c, i) =>
+                    i === 0 ? (
+                      <span key={c.cle} style={f.fait ? { textDecoration: "line-through", color: "var(--v2-gray-900)" } : undefined}>
+                        {String(f[c.cle] || "—")}
+                      </span>
+                    ) : (
+                      <span key={c.cle} className={c.type === "email" || c.type === "tel" ? "sb-mono" : "sb-gris"}>
+                        {String(f[c.cle] || "—")}
+                      </span>
+                    ),
+                  ),
+                  <span key="date" className="sb-gris" style={passee ? { color: "var(--v2-red-900)" } : undefined}>
                     {v ? dateFr(v) : dateFr(f.cree)}
                     {passee ? <span className="v2-sr"> (en retard)</span> : null}
-                  </span>
-                );
-              })()}
-              <button
-                type="button"
-                className="v2-btn v2-btn--petit v2-btn--icone v2-btn--fantome"
-                aria-label={`Supprimer « ${String(f[principal.cle] || "")} »`}
-                onClick={() => {
-                  maj((fiches ?? []).filter((x) => x.id !== f.id));
-                  toast("Supprimé");
-                }}
-              >
-                <Trash2 width={16} height={16} aria-hidden="true" />
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <div style={{ marginTop: 24 }}>
-        <Note>Ces fiches sont gardées dans le navigateur de cet appareil : vos collègues ne les voient pas encore depuis le leur.</Note>
-      </div>
-    </div>
+                  </span>,
+                  <button
+                    key="suppr"
+                    type="button"
+                    className="v2-btn v2-btn--petit v2-btn--icone v2-btn--fantome"
+                    aria-label={`Supprimer « ${String(f[principal.cle] || "")} »`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      maj((fiches ?? []).filter((x) => x.id !== f.id));
+                      if (choisie === f.id) setChoisie(null);
+                      toast("Supprimé");
+                    }}
+                  >
+                    <Trash2 width={14} height={14} aria-hidden="true" />
+                  </button>,
+                ],
+              };
+            })
+      }
+      vide={filtre ? { titre: "Rien ne correspond", texte: "Aucune fiche ne correspond à cette recherche." } : { titre: config.vide, texte: config.intro }}
+      total={`Total : ${visibles.length} ${visibles.length > 1 ? "fiches" : "fiche"} · gardées sur cet appareil, vos collègues ne les voient pas encore`}
+      volet={
+        ouvert
+          ? {
+              titre: `Ajouter ${config.une}`,
+              fermer: () => setOuvert(false),
+              contenu: (
+                <form id={idForm} onSubmit={ajouter}>
+                  {champs.map((c) => (
+                    <label key={c.cle}>
+                      {c.libelle}
+                      {c.type === "long" ? (
+                        <span className="v2-champ" style={{ height: "auto" }}>
+                          <textarea name={c.cle} rows={4} required={c.requis} />
+                        </span>
+                      ) : (
+                        <span className="v2-champ">
+                          <input name={c.cle} required={c.requis} type={c.type === "date" ? "date" : c.type === "email" ? "email" : c.type === "tel" ? "tel" : "text"} />
+                        </span>
+                      )}
+                    </label>
+                  ))}
+                  <p className="sb-texte">Enregistré sur cet appareil.</p>
+                </form>
+              ),
+              pied: (
+                <>
+                  <button type="button" className="v2-btn" onClick={() => setOuvert(false)}>
+                    Annuler
+                  </button>
+                  <button type="submit" form={idForm} className="v2-btn v2-btn--primaire">
+                    Enregistrer
+                  </button>
+                </>
+              ),
+            }
+          : fiche
+            ? {
+                titre: String(fiche[principal.cle] || config.titre),
+                fermer: () => setChoisie(null),
+                contenu: (
+                  <>
+                    {champs.map((c) => (
+                      <div key={c.cle} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                        <h3>{c.libelle}</h3>
+                        <p className="sb-texte--fort" style={{ whiteSpace: "pre-line" }}>
+                          {c.type === "date" && fiche[c.cle] ? dateFr(String(fiche[c.cle])) : String(fiche[c.cle] || "—")}
+                        </p>
+                      </div>
+                    ))}
+                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                      <h3>Créée le</h3>
+                      <p>{dateFr(fiche.cree)}</p>
+                    </div>
+                  </>
+                ),
+              }
+            : null
+      }
+    />
   );
 }
