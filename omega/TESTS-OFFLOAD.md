@@ -118,6 +118,22 @@ Détections demandées au coordinateur : lundi 26/10, mardi 27/10, mardi 27/10 e
 | S2-4 | C:113, C:115 ; brief | pilotage : valeur en jeu par segment sur 12 mois | `offload_pilotage(client, '2025-10-27')` : `vagues` (valeur en jeu, comptes, commandes, chiffre repris par vague : 21/10, en jeu 51 910,2, 3 commandes, 1 900 € repris), `suivi` mois par mois sur 12 mois, `entites` (consolidé, par entité ; `par_site` vide) ; `taux` par segment / canal / niveau. **Pas** de valeur en jeu par segment ; pas de taux par message (C:115) ; V1-V3 (secteurs renseignés) n'y figurent pas, faute de vague | valeur par segment : pas couvert ; par vague, par entité, 12 mois : juste | 1 |
 | S2-5 | P:441, C:118 ; brief | restitution : tout revient, format lisible | `offload_restitution` : un JSON, `resume` (compteurs) + `donnees` (achats, comptes, contacts, contrats, affaires, échéances, équipements, interventions, signaux, reprises, tâches, exclusions, règles, réglages, rapprochements, arrêtés, journal). Les messages préparés (sujet, corps, destinataire) n'y sont pas, ni les envois ; aucun export tableur (C:118) | données OFFLOAD : juste ; messages : à confirmer (relèvent du socle ?) ; tableur : pas couvert | 1 |
 
+
+### Relecture des signaux du banc (22/10, `offload_tableau` sous le gérant, dernier jour détecté 27/10)
+
+Niveau 2 sur les 9 898 sociétés importées (client « Omega ») : **en attente** — vraies données, seule identité celle de Teo,
+détection jamais jouée ; le coordinateur remonte la question au bureau. Observation transmise : ce client est en essai avec
+`envoi_auto` activé.
+
+| Cas | Promesse | Lecture | Verdict | Niveau |
+|---|---|---|---|---|
+| L-1 | C:44 | rythmes lus justes : mensuels 29,5 à 34 j, annuel 365 j (O2 `ok` malgré 99 j de silence) | juste | 1 |
+| L-2 | C:45 | tri par priorité = valeur : V3 (10 596,77) > V1 (7 064,52) > comptes à 5 567,80 > V2 (3 532,26) ; `ok` en bas | juste | 1 |
+| L-3 | TOFFLOAD-05 | `ca_12m` d'O0 revenu à 4 050 (doublons retirés par c4_24) | juste | 1 |
+| L-4 | P:195 | O1 en litige : la reprise ouverte en série 1 (avant c4_29/30) est toujours `appel`, tâche « Appeler Hôtel Fictif Litige-Karukera SAS » `a_faire` (échéance 24/10) | **écart** TOFFLOAD-09 | 1 |
+| L-5 | P:441 | O12 effacé (`arrete`) : reprise `appel` ouverte, tâche « Tâche d'un compte effacé » `a_faire` (24/10) ; O12 et O13 effacés gardent un signal `eteint` et une priorité (3 340,68 / 3 179,03) au milieu du tableau | **écart** TOFFLOAD-10 | 1 |
+| L-6 | P:166 | O7, O11, O14 : commande reçue 6 jours plus tôt → `ralentit` (« Ses commandes s'espacent… ») et non `ok` | à confirmer (lecture défendable) | 1 |
+
 ## Écarts
 
 **TOFFLOAD-01 · O0 (et tous les comptes ouverts) · « Vous validez ce qui part » (P:451) et essai.**
@@ -161,6 +177,14 @@ Pourtant `offload_pilotage(…, '2025-10-21')->'vagues'` compte `"commandes":2,"
 **TOFFLOAD-01, complément.** Le coordinateur indique que chaque envoi bloqué porte une demande de validation (`demande_id` non nul).
 Par les portes OFFLOAD, rien ne la montre : `offload_tableau(...)->'a_valider'` = `[]` et `compteurs.a_valider` = 0, avant et après les
 détections. Question posée : quelle porte (socle) montre ces demandes au valideur ?
+
+**TOFFLOAD-09 · O1 · reprise ouverte avant le correctif sur un compte en litige.** `offload_fiche('c988d725-79b0-4241-babf-6aac82a66148')` :
+reprise `0b20b320-…` `statut: appel`, tâche « Appeler Hôtel Fictif Litige-Karukera SAS » `a_faire`, échéance 2026-10-24. Le correctif
+refuse les nouvelles reprises (C-03) mais ne ferme pas celles qui existaient : le commercial reste invité à appeler un client en litige.
+
+**TOFFLOAD-10 · O12 (et O13) · compte effacé encore actif dans la liste.** `offload_fiche('1ec7702c-938b-40d8-a27c-c11d77022795')` :
+compte `arrete`, reprise `c503a160-…` `appel`, tâche « Tâche d'un compte effacé » `a_faire` (24/10). `offload_tableau` : O12 et O13
+(`243738d3-…`) gardent `niveau: eteint` et une priorité (3 340,68, 3 179,03) parmi les comptes à relancer.
 
 Notes, non classées en écart :
 - `offload_deposer_export` exige un fichier déjà en Storage (nom, sha256, chemin) : dépôt par fichier non testé.
@@ -231,3 +255,6 @@ TOFFLOAD-03 (décision de Teo), TOFFLOAD-07 et 08 (mineurs). Questions : aucune.
 
 **22/10, arrêt 9 (réveil court).** Fait : TOFFLOAD-03 rejoué (C-03), juste. Plus aucun écart ouvert. Non joué : cycle un autre jour que
 mardi. Une demande de plus en attente (O16, forcée), non approuvée. Pause jusqu'au feu vert de Teo ou samedi 25/10 après 02 h Z.
+
+**22/10, arrêt 10.** Fait : relecture des signaux du banc ; TOFFLOAD-09, 10. En attente : niveau 2 sur « Omega » (bureau) ; rejeu
+après le fuseau par organisation de C4 (le coordinateur prévient). Aucune approbation.
