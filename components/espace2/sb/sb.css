@@ -355,3 +355,23 @@
 .v2 .sb-mini-liste .sb-meta { font-family: var(--v2-code); font-size: 12px; color: var(--v2-gray-900); white-space: nowrap; }
 .v2 .sb-mini-liste .sb-meta[data-retard] { color: var(--v2-red-900); }
 .v2 .sb-mini-vide { margin: 0; font-size: 13px; line-height: 19.5px; color: var(--v2-gray-900); }
+
+/* ══ Edge Functions (et Auth › Emails) : carte en trois colonnes et liste
+   de lignes à chevron (relevé le 22/10) ══════════════════════════════════ */
+.v2 .sb-trois { overflow: hidden; border-radius: 10.6667px; background: var(--v2-bg-100); box-shadow: var(--v2-ombre-petite); }
+.v2 .sb-trois > p { margin: 0; padding: 12px 16px; border-bottom: 1px solid var(--v2-a-400); }
+.v2 .sb-trois-grille { display: grid; grid-template-columns: minmax(0, 1fr); }
+@container principale (min-width: 768px) { .v2 .sb-trois-grille { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.v2 .sb-trois-grille > div { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 16px; border-bottom: 1px solid var(--v2-a-400); }
+@container principale (min-width: 768px) { .v2 .sb-trois-grille > div { border-bottom: 0; border-right: 1px solid var(--v2-a-400); } .v2 .sb-trois-grille > div:last-child { border-right: 0; } }
+.v2 .sb-trois-grille strong { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; line-height: 19.5px; font-weight: 450; color: var(--v2-gray-1000); }
+.v2 .sb-trois-grille span { font-size: 13px; line-height: 19.5px; color: var(--v2-gray-900); }
+.v2 .sb-liens-liste { overflow: hidden; border-radius: 10.6667px; background: var(--v2-bg-100); box-shadow: var(--v2-ombre-petite); margin: 0; padding: 0; list-style: none; }
+.v2 .sb-liens-liste li + li { border-top: 1px solid var(--v2-a-400); }
+.v2 .sb-liens-liste a, .v2 .sb-liens-liste button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 16px; border: 0; background: none; color: inherit; font: inherit; text-align: left; text-decoration: none; cursor: pointer; transition: background 0.15s; }
+.v2 .sb-liens-liste a:hover, .v2 .sb-liens-liste button:hover { background: var(--v2-a-100); }
+.v2 .sb-liens-liste .sb-liens-icone { flex: none; color: var(--v2-gray-900); }
+.v2 .sb-liens-liste .sb-liens-texte { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.v2 .sb-liens-liste .sb-liens-texte strong { font-size: 13px; line-height: 19.5px; font-weight: 450; color: var(--v2-gray-1000); }
+.v2 .sb-liens-liste .sb-liens-texte span { font-size: 13px; line-height: 19.5px; color: var(--v2-gray-900); }
+.v2 .sb-liens-liste .sb-liens-fin { flex: none; display: inline-flex; align-items: center; gap: 8px; color: var(--v2-gray-600); }
