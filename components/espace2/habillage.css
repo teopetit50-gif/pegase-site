@@ -938,3 +938,17 @@ html.v2-actif .dlg-sortie:hover:not(:disabled) {
   .v2 .resa.esp .esp-carte .esp-form .rv-libelle:not([style]) > :is(input, select, textarea) { grid-column: 2; grid-row: 1 / span 2; width: 100%; }
 }
 .v2 .resa.esp .esp-carte .esp-form > :last-child { border-bottom: 0; }
+
+/* les écrans « liste | fiche » : la grille de Users et le volet d'Advisors.
+   Les tuiles s'espacent de 8 px comme celles d'Observability ; la liste
+   devient une grille de lignes (13 px, marge 16, filet), la ligne choisie
+   prend le fond plein de Supabase, sans liseré ; la fiche de droite se
+   pose comme le volet de détail, filet à gauche. */
+.v2 .resa.esp .esp-kpis { gap: 8px; margin-bottom: 16px; }
+.v2 .resa.esp .esp-grille { gap: 16px; }
+.v2 .resa.esp .esp-liste .esp-item { padding: 10px 16px; border-top-color: var(--v2-a-400); font-size: 13px; line-height: 19.5px; }
+.v2 .resa.esp .esp-item[aria-selected="true"], .v2 .resa.esp .esp-item[aria-current="true"] { background: var(--v2-a-300); box-shadow: none; }
+.v2 .resa.esp .esp-item-titre { font-size: 13px; line-height: 19.5px; font-weight: 450; }
+.v2 .resa.esp .esp-item-bas, .v2 .resa.esp .esp-item-haut { font-size: 12px; line-height: 16px; }
+.v2 .resa.esp .esp-item-montant { font-family: var(--v2-code); font-size: 12px; }
+.v2 .resa.esp .esp-detail-mobile > .esp-carte, .v2 .resa.esp .esp-colle > .esp-carte { box-shadow: var(--v2-ombre-petite), -1px 0 0 var(--v2-a-400); }
