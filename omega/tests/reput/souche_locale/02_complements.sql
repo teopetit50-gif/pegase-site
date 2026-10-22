@@ -59,6 +59,8 @@ begin
     if g.id is null then raise exception 'Aucun gabarit validé « % » pour le module %.', p_gabarit, p_module using errcode = 'P0002'; end if;
     if g.canal <> p_canal then raise exception 'Le gabarit % est écrit pour le canal %, pas pour %.', p_gabarit, g.canal, p_canal using errcode = '22023'; end if;
     p_corps := g.corps;
+    -- organisation et entite sont fournies par la base (socle), jamais passées.
+    p_corps := replace(p_corps, '{{organisation}}', coalesce((select c.nom from public.clients c where c.id = p_client), ''));
     for k, v in select * from jsonb_each_text(coalesce(p_variables, '{}')) loop p_corps := replace(p_corps, '{{' || k || '}}', v); end loop;
   elsif p_variables is not null and p_variables <> '{}'::jsonb then
     raise exception 'Des variables sans gabarit : rien à remplir.' using errcode = '22023';
@@ -296,3 +298,15 @@ end $$;
 create or replace function private.resoudre_boite(p_canal text, p_boite text) returns jsonb language sql stable security definer set search_path to '' as $$
   select null::jsonb
 $$;
+
+-- private.preparer_gabarit (socle) imité pour la règle que REPUT touche : organisation et entite ne se déclarent pas.
+create or replace function private.souche_preparer_gabarit() returns trigger language plpgsql set search_path to '' as $$
+begin
+  if new.variables ?| array['organisation', 'entite'] then
+    raise exception 'Nom de variable refusé : « % » (organisation et entite sont fournies par la base)',
+      (select k from jsonb_object_keys(new.variables) k where k in ('organisation', 'entite') limit 1) using errcode = '22023';
+  end if;
+  return new;
+end $$;
+drop trigger if exists gabarits_messages_preparer on public.gabarits_messages;
+create trigger gabarits_messages_preparer before insert or update on public.gabarits_messages for each row execute function private.souche_preparer_gabarit();
