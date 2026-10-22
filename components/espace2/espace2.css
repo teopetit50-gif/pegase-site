@@ -127,15 +127,15 @@ html.v2-actif .dlg-panneau {
 /* ——— thème sombre : le choix « sombre », ou « système » sur un poste sombre ——— */
 @media (prefers-color-scheme: dark) {
   html:not([data-v2-theme="light"]) :is(.v2, .v2-jetons, .dlg-panneau) {
-    /* 22/10 — assombris d'un cran à la demande de Teo (« trop gris, pas assez sombre ») : page #0d0d0d, carte #141414. Avant : les gris de Supabase lus sur sa capture (21/10) : page et barre latérale #141414, carte #1a1a1a, ligne active #1e1e1e, fenêtre #1c1c1c — la pointe de vert des jetons OKLCH (teinte 157,5) se voyait */
-    --v2-bg-100: #141414;
-    --v2-bg-200: #0d0d0d;
-    --v2-bg-eleve: #181818;
-    --v2-gray-100: #181818;
-    --v2-gray-200: #1a1a1a;
-    --v2-gray-300: #202020;
-    --v2-gray-400: #292929;
-    --v2-gray-500: #323232;
+    /* 22/10 — la page garde #141414 ; seules les cartes passent de #1a1a1a à #171717, un peu plus sombres sans se fondre dans la page (« les cartes étaient trop grises »). Avant : les gris de Supabase lus sur sa capture (21/10) : page et barre latérale #141414, carte #1a1a1a, ligne active #1e1e1e, fenêtre #1c1c1c — la pointe de vert des jetons OKLCH (teinte 157,5) se voyait */
+    --v2-bg-100: #171717;
+    --v2-bg-200: #141414;
+    --v2-bg-eleve: #1c1c1c;
+    --v2-gray-100: #1e1e1e;
+    --v2-gray-200: #1f1f1f;
+    --v2-gray-300: #262626;
+    --v2-gray-400: #303030;
+    --v2-gray-500: #393939;
     --v2-gray-600: #999999;
     --v2-gray-700: #999999;
     --v2-gray-800: #999999;
@@ -187,14 +187,14 @@ html.v2-actif .dlg-panneau {
   }
 }
 html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
-  --v2-bg-100: #141414;
-  --v2-bg-200: #0d0d0d;
-  --v2-bg-eleve: #181818;
-  --v2-gray-100: #181818;
-  --v2-gray-200: #1a1a1a;
-  --v2-gray-300: #202020;
-  --v2-gray-400: #292929;
-  --v2-gray-500: #323232;
+  --v2-bg-100: #171717;
+  --v2-bg-200: #141414;
+  --v2-bg-eleve: #1c1c1c;
+  --v2-gray-100: #1e1e1e;
+  --v2-gray-200: #1f1f1f;
+  --v2-gray-300: #262626;
+  --v2-gray-400: #303030;
+  --v2-gray-500: #393939;
   --v2-gray-600: #999999;
   --v2-gray-700: #999999;
   --v2-gray-800: #999999;
