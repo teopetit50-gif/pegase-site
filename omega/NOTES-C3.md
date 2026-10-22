@@ -18,6 +18,7 @@ Commencée le 06/10/2026. Je n'appelle jamais Supabase : le coordinateur pose, j
   - Test c3_36 (cas 13, accusé) : un appel neuf « à traiter » — sur la recette la réponse WhatsApp est bloquée faute de consentement, la demande « bloquee » n'a plus d'accusé (voulu).
   - `c3_38_astreinte_suivi.sql` + test (6) — **TREPUT-13** : vue `reput_astreinte_suivi` (security_invoker, sans numéro ni contenu) pour le gérant ; **TREPUT-14** : « La fin de la garde (…) est avant son début (…). » Test c3_37 aligné. Souche 592/592.
   - `c3_39_astreinte_non_passe.sql` + test (9) — **TREPUT-15** : un appel jamais sonné (ni pris par l'ouvrier, ou pris sans « sonne ») devient « non_passe » au délai : ni escalade ni épuisement, alerte critique au gérant, repris par l'ouvrier. Test c3_22 aligné ; écran Astreinte : libellé « appel non passé ». Souche 601/601, recette 5 largeurs verte.
+  - Bureau : reput-reponse v29 et reput-astreinte v1 déployées depuis 83830b47 (cron 660 omega-reput-astreinte + job SQL 545). c3_39 reprise : la tâche SQL ne change un appel que s'il est encore dans l'état lu (pas d'écrasement avec l'Edge). Edge reput-astreinte : panne Twilio (réseau, 5xx, 401/403, 429) → rien noté (non passé au délai), numéro refusé (autre 4xx) → echec. **À redéployer** : reput-astreinte (37405a91) ; **à reposer** : c3_39.
 
 ## Pause précédente (Teo, 22/10/2026 00 h 11 Z)
 
