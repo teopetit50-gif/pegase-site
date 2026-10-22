@@ -645,6 +645,30 @@ export function reclasserIdentifiants(valeurs: ValeurLue[], champs: { has(champ:
 }
 
 /**
+ * Un texte retrouvé sur la page, entier (espaces et retours près), ou par morceaux : un élément « titre : contenu »
+ * ou « section, sous-titre : contenu » formé de lignes réelles qui se suivent (NOBAT 066, T-FILED). Chaque morceau
+ * doit se retrouver, et dans l'ordre ; un morceau d'un seul caractère ne prouve rien.
+ */
+export function retrouveParMorceaux(texte: string, page: string): boolean {
+  if (retrouver(texte, page).trouve) return true;
+  const morceaux = texte.split(/\s*[:;]\s+|,\s+/).map((m) => m.trim()).filter((m) => m !== "");
+  if (morceaux.length < 2 || morceaux.some((m) => m.length < 2)) return false;
+  const compact = (t: string) => t.replace(/\s+/g, "").toLowerCase();
+  const p = compact(page);
+  let depuis = 0;
+  for (const m of morceaux) {
+    const i = p.indexOf(compact(m), depuis);
+    if (i < 0) {
+      // un titre de section rattaché à plusieurs lits peut précéder : on le cherche aussi depuis le début
+      if (!retrouver(m, page).trouve) return false;
+      continue;
+    }
+    depuis = i + compact(m).length;
+  }
+  return true;
+}
+
+/**
  * Une liste d'objets lus (les réserves d'un PV, les dispositions d'une note) : une seule valeur, chaque élément
  * avec sa page. Un élément sans son texte principal n'est pas rendu ; une échéance n'est gardée que si c'est une
  * date écrite. La liste est vérifiée si chaque texte principal se retrouve sur sa page.
@@ -676,7 +700,7 @@ export function valeurListeObjets(
     if (typeof e[principal] !== "string") continue;
     const page = Number.isInteger(l.page) ? parNumero.get(l.page as number) : undefined;
     if (page) e.page = page.n;
-    if (page && retrouver(e[principal] as string, page.texte).trouve) retrouves++;
+    if (page && retrouveParMorceaux(e[principal] as string, page.texte)) retrouves++;
     elements.push(e);
   }
   if (elements.length === 0) return null;

@@ -166,3 +166,27 @@ Deno.test("T-FILED 23 : plan sans cartouche — une cote n'est pas un titre ; «
   assertEquals(valeur(r, "numero_plan")?.texte, "Plan 101");
   assertEquals(r.statut, "lue", r.motif);
 });
+
+Deno.test("NOBAT 066 : une disposition « titre : contenu » faite de lignes réelles qui se suivent est vérifiée", () => {
+  const texte = [
+    "DISPOSITIONS CONSTRUCTIVES PARASISMIQUES", "POTEAUX", "1er cadre à 5 cm les suivants e=10", "POUTRES / LONGRINES D'ANGLES",
+    "Prévoir dans chaque angle", "1 equerre HA 10 * 150 sur les aciers", "inferieurs/ de peau/ superieurs",
+    "DETAIL D'ANGLE - VUE EN PLAN", "RENFORTS DE CHAINAGE AU DROIT", "DES PLANCHERS", "Pour chaque lit", "2x2 HA 12 x 120",
+    "Pour chaque lit", "2 HA 12 x 150",
+  ].join("\n");
+  const r = lire({
+    type_piece: "chantier_note_technique",
+    valeurs: [{ champ: "titre", valeur: "Dispositions constructives parasismiques", texte: "DISPOSITIONS CONSTRUCTIVES PARASISMIQUES", page: 1 }],
+    dispositions: [
+      { texte: "POTEAUX : 1er cadre à 5 cm les suivants e=10", page: 1 },
+      { texte: "POUTRES / LONGRINES D'ANGLES : Prévoir dans chaque angle 1 equerre HA 10 * 150 sur les aciers inferieurs/ de peau/ superieurs", page: 1 },
+      { texte: "DETAIL D'ANGLE - VUE EN PLAN, RENFORTS DE CHAINAGE AU DROIT DES PLANCHERS : Pour chaque lit 2x2 HA 12 x 120", page: 1 },
+      { texte: "DETAIL D'ANGLE - VUE EN PLAN, RENFORTS DE CHAINAGE AU DROIT DES PLANCHERS : Pour chaque lit 2 HA 12 x 150", page: 1 },
+    ],
+  }, [page(1, texte)]);
+  const d = valeur(r, "dispositions")!;
+  assert(d.verifiee, d.controle);
+  // un morceau inventé reste introuvable
+  const faux = lire({ type_piece: "chantier_note_technique", dispositions: [{ texte: "POTEAUX : cadre tous les 30 cm", page: 1 }] }, [page(1, texte)]);
+  assert(!valeur(faux, "dispositions")!.verifiee);
+});
