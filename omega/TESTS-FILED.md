@@ -428,7 +428,7 @@ seulement « proposé », jamais tenu pour bon (vérifié par le coordinateur). 
 ### Niveau 2 — relecture des pièces NOBAT (client du banc principal, lecture seule ; contenu relayé par le coordinateur)
 Règle (Q23 c) : seulement le numéro de pièce, le code du contrôle et le verdict. **Aucun nom, montant ni IBAN réel** dans ce fichier.
 Méthode : le coordinateur me donne le texte reçu par le lecteur (OCR) et la ligne brute de FILED après la relecture de 19:26 Z.
-Je compare champ par champ. Niveau 2 : vraie pièce, lue sur la recette.
+Je compare champ par champ. Niveau 2 : vraie pièce, lue sur la recette. Les noms réels du cartouche (maître d'ouvrage, bureau d'études) sont volontairement omis.
 
 | Pièce | Champ ou contrôle | Ce que la pièce montre | Ce que FILED a fait | Verdict |
 |---|---|---|---|---|
@@ -444,6 +444,31 @@ Je compare champ par champ. Niveau 2 : vraie pièce, lue sur la recette.
 | R2026-000069 | `date.ancienne` | facture de janvier 2024 | attention | juste |
 | R2026-000069 | `identite.tva_intracom` | pas de n° TVA du fournisseur | attention « absent » | juste |
 | R2026-000069 | `mentions.indemnite`, `mentions.penalites`, `mentions.escompte` | non relayé | anomalies (attention ou info) | non jugeable (texte des mentions non relayé) |
+| R2026-000065 | nature | plan de chantier avec cartouche | `chantier_plan`, classe, aucun contrôle en anomalie | juste |
+| R2026-000065 | titre, n° de plan, échelle, phase, maître d'ouvrage | imprimés au cartouche | lus à l'identique, vérifiés | juste |
+| R2026-000065 | date | « Septembre 2023 » imprimée au cartouche | **non relevée** (070, même cartouche, la relève) | **écart** TFILED-22 |
+| R2026-000066 | nature | note technique (dispositions parasismiques) | `chantier_note_technique`, classe | juste |
+| R2026-000066 | titre, dispositions | imprimés | titre vérifié ; dispositions relevées à l'identique mais marquées non vérifiées | juste (observation : non vérifié) |
+| R2026-000070 | nature, titre, n°, échelle, phase, maître d'ouvrage, auteur | même cartouche que 065, plus des repères d'armature | lus à l'identique, vérifiés | juste |
+| R2026-000070 | date | « Septembre 2023 » | relevée, mais marquée non vérifiée | juste (observation) |
+| R2026-000071 | nature | plan **sans cartouche** (armatures, massif, pied de page « Plan 101 - Pag… ») | `chantier_plan`, classe | juste |
+| R2026-000071 | titre | pas de titre : la première ligne est une **cote de massif** | titre = cette cote, marqué **vérifié** | **écart** TFILED-23 |
+| R2026-000071 | n° de plan | « Plan 101 » en pied de page | `numero_plan` = « Plan 101 » (le mot « Plan » est gardé, alors que 065 et 070 donnent « 101 ») | **écart** TFILED-23 |
+| R2026-000073 | nature, titre, n°, indice, échelle, phase, maître d'ouvrage | imprimés au cartouche | lus à l'identique, vérifiés | juste |
+| R2026-000073 | date | « Septembre 2023 » au cartouche et indice A du 10/11/2023 | date = celle de l'indice | juste (défendable : la date de la révision en cours ; observation) |
+| R2026-000076 | tous les champs | même cartouche que 073, texte relayé coupé | comme 073, tout vérifié | juste |
+| R2026-000065 / 000070 | doublon | même dossier, même plan n° 101, même titre | aucun signal de doublon | pas de promesse (observation : deux versions ou deux pages du même plan, sans rapprochement) |
+
+**TFILED-22 · R2026-000065 · la date du cartouche n'est pas relevée**
+- Le cartouche imprime « DATE: Septembre 2023 ». FILED ne relève aucune date. Sur 070, au cartouche identique, la date est relevée
+  (non vérifiée). La lecture est irrégulière sur un champ pourtant présent.
+
+**TFILED-23 · R2026-000071 · sur un plan sans cartouche, une cote est prise pour le titre et marquée vérifiée ; le n° garde le mot « Plan »**
+- Le plan n'a pas de cartouche ; sa première ligne est une cote de massif (dimensions et hauteur). FILED en fait le `titre`, marqué
+  **vérifié**. Attendu : titre absent, ou « non lu ».
+- `numero_plan` = « Plan 101 », alors que 065 et 070 rendent « 101 » pour le même plan. Le format n'est pas homogène, donc deux
+  versions du même plan ne se rapprochent pas.
+
 
 **TFILED-20 · R2026-000069 · le lecteur fabrique un SIRET en complétant un SIREN par des zéros, puis le bloque pour clé fausse**
 - La pièce imprime 9 chiffres sous l'étiquette « SIRET » : c'est un SIREN. FILED lit `fournisseur.siret` = les 9 chiffres suivis de
