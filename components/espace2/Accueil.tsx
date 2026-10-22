@@ -21,16 +21,16 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ChevronRight, Info } from "lucide-react";
+import { ArrowRight, ChevronRight } from "lucide-react";
 import { dateCourte, montant, relatif } from "@/components/espace/format";
-import { A_PAYER, aPayer, groupeDe, totaux } from "./filed/calculs";
+import { A_PAYER, aPayer, groupeDe, jourDe, totaux } from "./filed/calculs";
 import { useAujourdhui } from "./horloge";
 import { Squelette } from "./ui";
 import { RACINE } from "./modules";
 import { useDonnees } from "./donnees";
 import { evenements } from "./evenements";
 import { ecrireStockage, useStockage } from "./Collection";
-import "./sb/sb.css";
+import "./habillage.css";
 
 const CLE_TACHES = "espace2-collection-taches";
 
@@ -59,12 +59,6 @@ export default function Accueil() {
       if (i >= 0 && i < parJour.length) parJour[i] += d.montant ?? 0;
     }
     const courbe = Array.from({ length: periode }, (_, i) => parJour.slice(i, i + 7).reduce((a, b) => a + b, 0));
-    /* 22/10 — l'histogramme de « Service Health » : les documents reçus, jour par jour */
-    const recusParJour = Array.from({ length: periode }, () => 0);
-    for (const d of donnees.docs) {
-      const i = Math.floor((new Date(d.recu_le).setHours(0, 0, 0, 0) - debut) / 86_400_000);
-      if (i >= 0 && i < periode) recusParJour[i] += 1;
-    }
     /* aujourd'hui : ce qui demande une action — échéances proches, accords */
     const actions = [
       ...aRegler
@@ -79,8 +73,6 @@ export default function Accueil() {
       retard,
       priorite,
       courbe,
-      recusParJour,
-      recus: recusParJour.reduce((a, b) => a + b, 0),
       debut,
       actions,
       totalARegler: totaux(aRegler, etats),
@@ -105,170 +97,116 @@ export default function Accueil() {
   const cocher = (id: string) => ecrireStockage(CLE_TACHES, JSON.stringify(taches.map((t) => (t.id === id ? { ...t, fait: true } : t))));
 
 
-  const tuiles = c
-    ? [
-        { cle: "apayer", libelle: "À payer", valeur: c.totalARegler, aide: `${c.aRegler.length} facture${c.aRegler.length > 1 ? "s" : ""} validée${c.aRegler.length > 1 ? "s" : ""}`, lien: `${RACINE}/filed/a-payer` },
-        { cle: "retard", libelle: "En retard", valeur: c.totalRetard, aide: `${c.retard.length} échéance${c.retard.length > 1 ? "s" : ""} passée${c.retard.length > 1 ? "s" : ""}`, lien: `${RACINE}/filed/a-payer`, teinte: c.retard.length ? "rouge" : undefined },
-        { cle: "valider", libelle: "À valider", valeur: String(c.aValider), aide: "demandes en attente", lien: `${RACINE}/validations`, teinte: c.aValider ? "ambre" : undefined },
-        { cle: "traiter", libelle: "Documents à traiter", valeur: String(c.aTraiter), aide: "en lecture ou à classer", lien: `${RACINE}/filed` },
-        { cle: "actions", libelle: "Actions du jour", valeur: String(c.actions.length + duJour.length), aide: "échéances, accords et tâches", lien: `${RACINE}/taches` },
-        { cle: "recus", libelle: "Documents reçus", valeur: String(c.recus), aide: `sur ${periode} jours`, lien: `${RACINE}/filed/boite` },
-      ]
-    : null;
-  const maxRecus = c ? Math.max(1, ...c.recusParJour) : 1;
-
-  /* 22/10 — la page Observability › Overview de Supabase, au 1:1 : le titre
-     et ses actions, une rangée de tuiles (étiquette en capitales, valeur),
-     puis « la santé » en une carte de cellules — les documents reçus en
-     histogramme sur toute la largeur, puis ce qui est à payer, à faire
-     aujourd'hui, et l'activité récente. Gabarit : ./sb/sb.css. */
   return (
-    <div className="sb-obs v2-arrivee">
-      <div className="sb-tete-ligne">
-        <h1 className="sb-titre">Vue d&apos;ensemble</h1>
-        <div className="sb-actions">
-          <Link href={`${RACINE}/activite`} className="v2-btn">
-            Activité
-          </Link>
-          <span className="v2-champ" style={{ height: 26, padding: "0 8px" }}>
-            <select value={periode} onChange={(e) => setPeriode(Number(e.target.value))} aria-label="Période de la courbe" style={{ fontSize: 12 }}>
-              <option value={7}>7 derniers jours</option>
-              <option value={30}>30 derniers jours</option>
-              <option value={90}>90 derniers jours</option>
-            </select>
-          </span>
-        </div>
-      </div>
-      {erreur ? <p className="sb-texte">La base n&apos;a pas répondu : {erreur}</p> : null}
+    <div className="v2-page v2-arrivee v2-va v2-vivant oc-va-simple">
+      <h1 className="v2-sr">Vue d&apos;ensemble</h1>
+      {erreur ? <p className="v2-gris">La base n&apos;a pas répondu : {erreur}</p> : null}
 
-      <section className="sb-obs-section" aria-labelledby="va-chiffres">
-        <h2 id="va-chiffres">Aujourd&apos;hui</h2>
-        <div className="sb-tuiles">
-          {(tuiles ?? [0, 1, 2, 3, 4, 5].map(() => null)).map((t, i) =>
-            t ? (
-              <Link key={t.cle} href={t.lien} className="sb-tuile" title={t.aide}>
-                <span className="sb-tuile-etiquette">
-                  {t.libelle}
-                  <Info width={14} height={14} strokeWidth={1.5} aria-hidden="true" />
-                </span>
-                <span className="sb-tuile-valeur" data-teinte={t.teinte}>
-                  {t.valeur}
-                </span>
-                <span className="v2-sr">{t.aide}</span>
-              </Link>
-            ) : (
-              <div key={i} className="sb-tuile">
-                <Squelette largeur="50%" hauteur={14} />
-                <Squelette largeur={64} hauteur={22} />
-              </div>
-            ),
-          )}
-        </div>
-      </section>
+      <div className="v2-va-grille">
+        <div className="v2-va-col">
+        <section className="v2-carte v2-carte-corps">
+          <div className="v2-va-titre" style={{ marginBottom: 16 }}>
+            <h2 className="v2-h2">Factures reçues</h2>
+            <span className="v2-champ v2-va-periode">
+              <select value={periode} onChange={(e) => setPeriode(Number(e.target.value))} aria-label="Période">
+                <option value={7}>7 derniers jours</option>
+                <option value={30}>30 derniers jours</option>
+                <option value={90}>90 derniers jours</option>
+              </select>
+            </span>
+          </div>
+          {c ? <Courbe valeurs={c.courbe} debut={c.debut} /> : <Squelette largeur="100%" hauteur={220} />}
+        </section>
 
-      <section className="sb-obs-section" aria-labelledby="va-sante">
-        <h2 id="va-sante">L&apos;état de vos modules</h2>
-        <div className="sb-sante">
-          <div className="sb-sante-grille">
-            <div className="sb-cellule sb-cellule--large">
-              <div className="sb-cellule-tete">
-                <Link href={`${RACINE}/filed/boite`}>Factures reçues</Link>
-                <span className="sb-cellule-compte">{c ? `${c.recus} document${c.recus > 1 ? "s" : ""} · ${periode} jours` : <Squelette largeur={80} hauteur={14} />}</span>
-              </div>
-              <div className="sb-mini-histo" role="img" aria-label={c ? `${c.recus} documents reçus sur ${periode} jours` : "Chargement"}>
-                {(c?.recusParJour ?? Array.from({ length: periode }, () => 0)).map((n, i) => (
-                  <span key={i} data-vide={n ? undefined : ""} style={{ height: n ? `${Math.max(8, (n / maxRecus) * 100)}%` : "2px" }} />
-                ))}
-              </div>
-            </div>
-
-            <div className="sb-cellule">
-              <div className="sb-cellule-tete">
-                <Link href={`${RACINE}/filed/a-payer`}>À payer en priorité</Link>
-                <span className="sb-cellule-compte">{c ? c.totalARegler : ""}</span>
-              </div>
-              {!c ? (
-                <Squelette hauteur={80} />
-              ) : !c.priorite.length ? (
-                <p className="sb-mini-vide">Aucune facture à payer.</p>
-              ) : (
-                <ul className="sb-mini-liste">
+        <section className="v2-carte v2-carte-corps">
+          <div className="v2-va-titre">
+            <h2 className="v2-h2">À payer en priorité</h2>
+            <Link href={`${RACINE}/filed/a-payer`} className="v2-va-lien">Voir tout <ArrowRight width={14} height={14} /></Link>
+          </div>
+          {!c ? <Squelette largeur="100%" hauteur={200} /> : c.priorite.length === 0 ? (
+            <p className="v2-gris" style={{ margin: 0 }}>Aucune facture à payer.</p>
+          ) : (
+            <div className="v2-tableau-cadre">
+              <table className="v2-va-table">
+                <thead>
+                  <tr><th>Fournisseur</th><th>Échéance</th><th style={{ textAlign: "right" }}>Reste à payer</th></tr>
+                </thead>
+                <tbody>
                   {c.priorite.map(({ f, nom, groupe, reste }) => (
-                    <li key={f.id}>
-                      <Link href={`${RACINE}/filed/a-payer`}>{nom}</Link>
-                      <span className="sb-meta">{montant(reste, f.devise)}</span>
-                      <span className="sb-meta" data-retard={groupe === "retard" ? "" : undefined}>
+                    <tr key={f.id}>
+                      <td><Link href={`${RACINE}/filed/a-payer`}>{nom}</Link></td>
+                      <td className="v2-gris" data-retard={groupe === "retard" ? "" : undefined}>
                         {f.echeance_lue ? dateCourte(f.echeance_lue) : "—"}
                         {groupe === "retard" ? <span className="v2-sr"> (en retard)</span> : null}
-                      </span>
-                    </li>
+                      </td>
+                      <td style={{ textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{montant(reste, f.devise)}</td>
+                    </tr>
                   ))}
-                </ul>
-              )}
+                </tbody>
+              </table>
             </div>
+          )}
+        </section>
 
-            <div className="sb-cellule">
-              <div className="sb-cellule-tete">
-                <Link href={`${RACINE}/taches`}>Aujourd&apos;hui</Link>
-                <span className="sb-cellule-compte">{c ? `${c.actions.length + duJour.length} à faire` : ""}</span>
-              </div>
-              {!c ? (
-                <Squelette hauteur={80} />
-              ) : !c.actions.length && !duJour.length ? (
-                <p className="sb-mini-vide">
-                  Rien d&apos;urgent aujourd&apos;hui. <Link href={`${RACINE}/taches`}>Ajouter une tâche</Link>
-                </p>
-              ) : (
-                <ul className="sb-mini-liste">
-                  {duJour.map((t) => (
-                    <li key={t.id}>
-                      <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <input type="checkbox" aria-label={`Marquer « ${t.titre} » comme faite`} onChange={() => cocher(t.id)} />
-                        {t.titre}
-                      </span>
-                      {t.echeance ? <span className="sb-meta">{dateCourte(t.echeance)}</span> : null}
-                    </li>
-                  ))}
-                  {c.actions.slice(0, 6).map((x) => (
-                    <li key={x.id}>
-                      <Link href={x.lien}>{x.titre}</Link>
-                      {x.quand ? (
-                        <span className="sb-meta" data-retard={x.retard ? "" : undefined}>
-                          {x.quand}
-                          {x.retard ? <span className="v2-sr"> (en retard)</span> : null}
-                        </span>
-                      ) : null}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
-            <div className="sb-cellule sb-cellule--large">
-              <div className="sb-cellule-tete">
-                <Link href={`${RACINE}/activite`}>Activité récente</Link>
-                <ChevronRight width={14} height={14} aria-hidden="true" />
-              </div>
-              {!c ? (
-                <Squelette hauteur={80} />
-              ) : !c.activite.length ? (
-                <p className="sb-mini-vide">Rien pour l&apos;instant.</p>
-              ) : (
-                <ul className="sb-mini-liste">
-                  {c.activite.map((e) => (
-                    <li key={e.id}>
-                      {e.lien ? <Link href={e.lien}>{e.quoi} : {e.detail}</Link> : <span>{e.quoi} : {e.detail}</span>}
-                      <span className="sb-meta" title={relatif(e.quand)}>
-                        {heureCourte(e.quand)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
         </div>
-      </section>
+        <div className="v2-va-col">
+        <section className="v2-carte v2-carte-corps">
+          <div className="v2-va-titre">
+            <h2 className="v2-h2">Aujourd&apos;hui</h2>
+            <span className="v2-gris">{(c?.actions.length ?? 0) + duJour.length} à faire</span>
+          </div>
+          {!c ? <Squelette largeur="100%" hauteur={200} /> : c.actions.length + duJour.length === 0 ? (
+            <p className="v2-gris" style={{ margin: 0 }}>
+              Rien d&apos;urgent aujourd&apos;hui. <Link href={`${RACINE}/taches`} className="v2-va-lien">Ajouter une tâche</Link>
+            </p>
+          ) : (
+            <ul className="v2-va-liste">
+              {duJour.map((t) => (
+                <li key={t.id}>
+                  <input type="checkbox" aria-label={`Marquer « ${t.titre} » comme faite`} onChange={() => cocher(t.id)} />
+                  <span className="v2-va-texte">
+                    <span>{t.titre}</span>
+                  </span>
+                  {t.echeance ? <span className="oc-meta" data-retard={aujourdhui !== null && jourDe(t.echeance) < aujourdhui ? "" : undefined}>{dateCourte(t.echeance)}</span> : null}
+                  <Link href={`${RACINE}/taches`} aria-label="Ouvrir les tâches"><ChevronRight width={16} height={16} /></Link>
+                </li>
+              ))}
+              {c.actions.slice(0, Math.max(0, 5 - duJour.length)).map((x) => (
+                <li key={x.id}>
+                  <span className="v2-va-texte">
+                    <span>{x.titre}</span>
+                  </span>
+                  {x.quand ? <span className="oc-meta" data-retard={x.retard ? "" : undefined}>{x.quand}{x.retard ? <span className="v2-sr"> (en retard)</span> : null}</span> : null}
+                  <Link href={x.lien} aria-label={`Ouvrir : ${x.titre}`}><ChevronRight width={16} height={16} /></Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        <section className="v2-carte v2-carte-corps">
+          <div className="v2-va-titre">
+            <h2 className="v2-h2">Activité récente</h2>
+            <Link href={`${RACINE}/activite`} className="v2-va-lien">Voir tout</Link>
+          </div>
+          {!c ? <Squelette largeur="100%" hauteur={200} /> : c.activite.length === 0 ? (
+            <p className="v2-gris" style={{ margin: 0 }}>Rien pour l&apos;instant.</p>
+          ) : (
+            <ul className="v2-va-liste">
+              {c.activite.map((e) => (
+                <li key={e.id}>
+                  <span className="v2-va-texte">
+                    <span>{e.quoi} : {e.detail}</span>
+                  </span>
+                  <span className="oc-meta" title={relatif(e.quand)}>{heureCourte(e.quand)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+        </div>
+      </div>
+
     </div>
   );
 }
@@ -282,4 +220,49 @@ function heureCourte(iso: string): string {
   j.setDate(j.getDate() - 1);
   if (d.toDateString() === j.toDateString()) return `Hier ${h}`;
   return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+}
+
+const kEuros = (v: number) => (v >= 1000 ? `${Math.round(v / 100) / 10} k€` : `${Math.round(v)} €`);
+
+/* la courbe en aire, dessinée en SVG (lissée, axe des montants à gauche) */
+function Courbe({ valeurs, debut }: { valeurs: number[]; debut: number }) {
+  const L = 600, H = 200, n = valeurs.length;
+  const brut = Math.max(1, ...valeurs);
+  const pas = Math.pow(10, Math.floor(Math.log10(brut)));
+  const max = Math.ceil(brut / pas) * pas;
+  const pts = valeurs.map((v, i) => [(i / Math.max(1, n - 1)) * L, H - (v / max) * H] as const);
+  /* Catmull-Rom → Bézier : une courbe douce qui passe par chaque point */
+  let ligne = `M${pts[0][0]},${pts[0][1]}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] ?? pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] ?? p2;
+    const c1y = Math.min(H, p1[1] + (p2[1] - p0[1]) / 6), c2y = Math.min(H, p2[1] - (p3[1] - p1[1]) / 6);
+    ligne += ` C${p1[0] + (p2[0] - p0[0]) / 6},${c1y} ${p2[0] - (p3[0] - p1[0]) / 6},${c2y} ${p2[0]},${p2[1]}`;
+  }
+  const reperes = [0, 0.25, 0.5, 0.75, 1].map((p) => {
+    const i = Math.round(p * (n - 1));
+    return { x: p * 100, texte: new Date(debut + i * 86_400_000).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) };
+  });
+  return (
+    <figure className="v2-va-courbe">
+      <div className="v2-va-axe-y" aria-hidden="true">
+        {[1, 0.75, 0.5, 0.25, 0].map((p) => <span key={p}>{kEuros(max * p)}</span>)}
+      </div>
+      <div style={{ minWidth: 0 }}>
+        <svg viewBox={`0 0 ${L} ${H}`} preserveAspectRatio="none" style={{ width: "100%", height: 200, display: "block", overflow: "visible" }} role="img" aria-label={`Montant reçu sur 7 jours glissants, dernier point : ${montant(valeurs[n - 1] ?? 0)}`}>
+          <defs>
+            <linearGradient id="v2-va-degrade" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="var(--v2-blue-700)" stopOpacity="0.4" />
+              <stop offset="1" stopColor="var(--v2-blue-700)" stopOpacity="0.02" />
+            </linearGradient>
+          </defs>
+          {[0, 0.25, 0.5, 0.75, 1].map((p) => <line key={p} x1="0" x2={L} y1={H * p} y2={H * p} stroke="var(--v2-a-300, var(--v2-a-400))" strokeWidth="1" vectorEffect="non-scaling-stroke" />)}
+          <path d={`${ligne} L${L},${H} L0,${H} Z`} fill="url(#v2-va-degrade)" />
+          <path d={ligne} pathLength={1} className="v2-trace" fill="none" stroke="var(--v2-blue-700)" strokeWidth="2" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+        </svg>
+        <div className="v2-va-axe">
+          {reperes.map((r) => <span key={r.x} style={{ left: `${r.x}%` }}>{r.texte}</span>)}
+        </div>
+      </div>
+    </figure>
+  );
 }

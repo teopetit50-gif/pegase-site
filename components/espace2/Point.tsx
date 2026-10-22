@@ -37,7 +37,6 @@ import { libelleModule } from "@/components/espace/format";
 import type { LignePoint, PointDuJour } from "@/components/espace/types";
 import { apercuPoint, lirePoint, listerPoints, monCompte } from "@/components/espace/point/portes";
 import { Note } from "./ui";
-import "./sb/sb.css";
 import { useMonte } from "./horloge";
 import { Chiffre, EnDirect, Initiales } from "./vivant";
 import { RACINE } from "./modules";
@@ -196,13 +195,12 @@ export default function Point() {
   const vide = !enCours && !(contenu?.lignes ?? []).length;
 
   return (
-    /* 22/10 — la page Observability › Overview de Supabase, au 1:1 : le titre
-       et ses actions (l'édition, « en direct »), puis les cartes du point en
-       cellules d'une seule carte, comme « Service Health ». */
-    <div className="sb-obs v2-arrivee v2-pm oc-pm-simple">
-      <div className="sb-tete-ligne">
-        <h1 className="sb-titre">Point du matin</h1>
-      <div className="v2-val-filtres" style={{ margin: 0 }}>
+    <div className="v2-page v2-arrivee v2-pm v2-vivant oc-pm-simple">
+      <h1 className="v2-sr">Point du matin</h1>
+
+      {/* ——— la barre : la date seule (15/10, comme le pilotage /omega ; l'heure
+         et le canal de remise sont dans « Prochaine édition ») ——— */}
+      <div className="v2-val-filtres">
         <label className="v2-val-bouton">
           <CalendarDays width={16} height={16} aria-hidden="true" />
           <span>{!monte ? "Aujourd'hui" : decalage === 0 ? `Aujourd'hui, ${nomJour(0).split(" ").slice(1).join(" ")}` : nomJour(decalage)}</span>
@@ -218,7 +216,6 @@ export default function Point() {
         <span className="v2-val-droite">
           <EnDirect />
         </span>
-      </div>
       </div>
 
       {erreur ? <Note teinte="rouge" role="alert">La base réelle n&apos;a pas répondu : {erreur}</Note> : null}
@@ -241,10 +238,7 @@ export default function Point() {
               )}
         </div>
       ) : (
-        <section className="sb-obs-section" aria-label="Le point du jour">
-        <h2>{monte && decalage !== 0 ? nomJour(decalage) : "Ce matin"}</h2>
-        <div className="sb-sante">
-        <div className="sb-sante-grille">
+        <div className="v2-pm-grille">
           {/* ——— À regarder en premier ——— */}
           <Carte titre="À regarder en premier" classe="v2-pm-large" lien={`${RACINE}/activite`}>
             {cartes.premier.length ? (
@@ -461,8 +455,6 @@ export default function Point() {
             </ul>
           </Carte>
         </div>
-        </div>
-        </section>
       )}
     </div>
   );
@@ -485,18 +477,20 @@ function Carte({
 }) {
   const cible = lien ?? pied?.href;
   return (
-    /* 22/10 — une cellule de « Service Health » (Supabase) : l'étiquette en
-       capitales mène à la page ; « v2-pm-large » prend toute la largeur */
-    <section className={`sb-cellule${classe?.includes("v2-pm-large") ? " sb-cellule--large" : ""}`} aria-label={titre}>
-      <div className="sb-cellule-tete">
-        {cible ? (
-          <Link href={cible}>
-            {titre} <ChevronRight width={14} height={14} aria-hidden="true" />
-          </Link>
-        ) : (
-          <span>{titre}</span>
-        )}
-        {badge ? <span className="sb-badge" data-teinte={badge === "Complète" ? "vert" : "ambre"}>{badge}</span> : null}
+    /* 15/10 — comme le pilotage /omega : le titre de la carte mène à la page
+       (plus de « ⋮ » ni de lien en pied) */
+    <section className={`v2-carte v2-pm-carte${classe ? ` ${classe}` : ""}`} aria-label={titre}>
+      <div className="v2-pm-tete">
+        <h2>
+          {cible ? (
+            <Link href={cible} className="oc-pm-titre">
+              {titre} <ChevronRight width={14} height={14} aria-hidden="true" />
+            </Link>
+          ) : (
+            titre
+          )}
+        </h2>
+        {badge ? <span className="v2-pm-badge">{badge}</span> : null}
       </div>
       <div className="v2-pm-corps">{children}</div>
     </section>

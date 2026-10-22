@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function PageReput() {
   return (
-    <Habille>
+    <Habille ancien>
       <EcranReput vue="demandes" />
     </Habille>
   );

@@ -22,6 +22,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
+  ChevronRight,
   ChevronDown,
   CircleCheck,
   CircleDashed,
@@ -29,6 +30,7 @@ import {
   FileText,
   Inbox,
   LayoutGrid,
+  Search,
   X,
 } from "lucide-react";
 import { Dialog, Modal, ModalOverlay } from "react-aria-components";
@@ -45,8 +47,6 @@ import DetailDemande from "@/components/espace/validations/DetailDemande";
 import DecisionLot, { eligibilite } from "@/components/espace/validations/DecisionLot";
 import MesDelegations from "@/components/espace/validations/MesDelegations";
 import { Note } from "./ui";
-import { SbRecherche } from "./sb/Sb";
-import "./sb/sb.css";
 import { useMonte } from "./horloge";
 import { EnDirect, Initiales } from "./vivant";
 import { useToast } from "./Toasts";
@@ -88,8 +88,6 @@ export default function Validations({ utilisateur }: { utilisateur: Utilisateur 
   const [module, setModule] = useState("");
   const [recherche, setRecherche] = useState<string | null>(null);
   const [choix, setChoix] = useState<string | null>(null);
-  /* 22/10 — l'onglet d'échéance ouvert (gabarit Advisors) */
-  const [groupeActif, setGroupeActif] = useState<string | null>(null);
   const [coches, setCoches] = useState<string[]>([]);
   const [decisionLot, setDecisionLot] = useState<{ decision: "approuve" | "rejete"; demandes: Demande[]; cle: number } | null>(null);
   /* le panneau de droite : le détail complet, ou la gestion des délégations */
@@ -245,155 +243,116 @@ export default function Validations({ utilisateur }: { utilisateur: Utilisateur 
   }, [etat, moi.id]);
 
 
-  /* 22/10 — la page Advisors de Supabase, au 1:1 : l'en-tête de 48 px, les
-     groupes d'échéance en onglets à compteur (comme Errors / Warnings /
-     Info), la barre d'outils teintée (vue, module, recherche, lot), la
-     grille des demandes et, à droite, le volet : circuit d'approbation et
-     délégations de la demande choisie. Gabarit : ./sb/sb.css. */
-  const ongletsGroupes = [...GROUPES, { cle: "decidees" as const, libelle: "Décidées" }].filter((g) => (groupes.get(g.cle)?.length ?? 0) > 0);
-  const groupeOuvert = ongletsGroupes.some((g) => g.cle === groupeActif) ? groupeActif : (ongletsGroupes[0]?.cle ?? null);
-  const lignes = groupeOuvert ? (groupes.get(groupeOuvert) ?? []) : [];
-  const TEINTES: Record<string, string> = { retard: "rouge", aujourdhui: "ambre", semaine: "bleu", plus_tard: "gris", sans: "gris", decidees: "vert" };
-
   return (
-    <div className="sb-conseil v2-arrivee v2-val oc-val-simple">
-      <div className="sb-conseil-tete">
-        <h1 className="sb-conseil-titre">À valider</h1>
-        <EnDirect />
-      </div>
-      <div className="sb-onglets" role="tablist" aria-label="Échéances">
-        {ongletsGroupes.length ? (
-          ongletsGroupes.map((g) => {
-            const n = groupes.get(g.cle)?.length ?? 0;
-            return (
-              <button key={g.cle} type="button" role="tab" aria-selected={g.cle === groupeOuvert} className="sb-onglet" onClick={() => setGroupeActif(g.cle)}>
-                <span className="sb-onglet-nom">
-                  <span className="sb-onglet-carre" data-teinte={TEINTES[g.cle]} aria-hidden="true" />
-                  {g.libelle}
-                </span>
-                <span className="sb-onglet-compte">
-                  {n} demande{n > 1 ? "s" : ""}
-                </span>
+    <div className="v2-page v2-arrivee v2-val v2-vivant oc-val-simple">
+      <h1 className="v2-sr">À valider</h1>
+
+      {/* ——— la vue et le module, en menus ; la recherche à droite.
+         15/10 — allégée comme le pilotage /omega : plus de filtres catégorie
+         et échéance (la file est déjà rangée par échéance) ——— */}
+      <div className="v2-val-filtres">
+        <Selecteur icone={Inbox} valeur={filtre} changer={(v) => setFiltre(v as Filtre)} options={ONGLETS.map((o) => ({ cle: o.cle, libelle: o.libelle }))} />
+        <Selecteur icone={LayoutGrid} valeur={module} changer={setModule} tous="Tous les modules" options={modules.map((m) => ({ cle: m, libelle: libelleModule(m) }))} />
+        <span className="v2-val-droite">
+          <EnDirect />
+          {recherche !== null ? (
+            <span className="v2-val-recherche">
+              <Search width={16} height={16} aria-hidden="true" />
+              <input autoFocus value={recherche} onChange={(e) => setRecherche(e.target.value)} placeholder="Rechercher une demande…" aria-label="Rechercher une demande" />
+              <button type="button" className="v2-val-icone" aria-label="Fermer la recherche" onClick={() => setRecherche(null)}>
+                <X width={14} height={14} />
               </button>
-            );
-          })
-        ) : (
-          <span className="sb-onglet" aria-selected="true" role="tab">
-            <span className="sb-onglet-nom">File vide</span>
-            <span className="sb-onglet-compte">0 demande</span>
-          </span>
-        )}
-      </div>
-      <div className="sb-conseil-outils">
-        <div>
-          <Selecteur icone={Inbox} valeur={filtre} changer={(v) => setFiltre(v as Filtre)} options={ONGLETS.map((o) => ({ cle: o.cle, libelle: o.libelle }))} />
-          <Selecteur icone={LayoutGrid} valeur={module} changer={setModule} tous="Tous les modules" options={modules.map((m) => ({ cle: m, libelle: libelleModule(m) }))} />
-          <SbRecherche valeur={recherche ?? ""} changer={(v) => setRecherche(v)} placeholder="Rechercher une demande…" />
-        </div>
-        <div>
-          {cochees.length ? (
-            <>
-              <span className="sb-onglet-compte">
-                {cochees.length} cochée{cochees.length > 1 ? "s" : ""}
-              </span>
-              <button type="button" className="v2-btn v2-btn--fantome" onClick={() => setCoches([])}>
-                Annuler
-              </button>
-              <button type="button" className="v2-btn" onClick={() => setDecisionLot({ decision: "rejete", demandes: cochees, cle: Date.now() })}>
-                Refuser ({cochees.length})
-              </button>
-              <button type="button" className="v2-btn v2-btn--primaire" onClick={() => setDecisionLot({ decision: "approuve", demandes: cochees, cle: Date.now() })}>
-                Approuver ({cochees.length})
-              </button>
-            </>
+            </span>
           ) : (
-            <button type="button" className="v2-btn" onClick={() => setPanneau("delegations")}>
-              Délégations
+            <button type="button" className="v2-val-bouton v2-val-bouton--icone" aria-label="Rechercher" onClick={() => setRecherche("")}>
+              <Search width={16} height={16} />
             </button>
           )}
-        </div>
+        </span>
       </div>
 
       {erreur ? (
-        <div style={{ padding: "16px 24px 0" }}>
-          <Note teinte="rouge" role="alert">
-            La base réelle n&apos;a pas répondu : {erreur}
-          </Note>
+        <Note teinte="rouge" role="alert">
+          La base réelle n&apos;a pas répondu : {erreur}
+        </Note>
+      ) : null}
+
+      {/* ——— la barre du lot, quand des cases sont cochées ——— */}
+      {cochees.length ? (
+        <div className="v2-val-lot" role="group" aria-label="Décision en lot">
+          <span>
+            {cochees.length} demande{cochees.length > 1 ? "s" : ""} cochée{cochees.length > 1 ? "s" : ""}
+          </span>
+          <span className="v2-val-actions">
+            <button type="button" className="v2-btn v2-btn--petit v2-btn--fantome" onClick={() => setCoches([])}>
+              Annuler
+            </button>
+            <button type="button" className="v2-btn v2-btn--petit" onClick={() => setDecisionLot({ decision: "rejete", demandes: cochees, cle: Date.now() })}>
+              Refuser ({cochees.length})
+            </button>
+            <button type="button" className="v2-btn v2-btn--petit v2-btn--primaire" onClick={() => setDecisionLot({ decision: "approuve", demandes: cochees, cle: Date.now() })}>
+              Approuver ({cochees.length})
+            </button>
+          </span>
         </div>
       ) : null}
 
-      <div className="sb-conseil-corps">
-        <div className="sb-grille-donnees">
-          <table>
-            <thead>
-              <tr>
-                <th scope="col">
-                  <span className="v2-sr">Cocher</span>
-                </th>
-                <th scope="col">Demande</th>
-                <th scope="col">Module</th>
-                <th scope="col">Montant</th>
-                <th scope="col">{groupeOuvert === "decidees" ? "Décision" : "Échéance"}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {lignes.map((d) => {
-                const decidable = decidables.some((x) => x.id === d.id);
-                const quand = d.statut !== "en_attente" ? (d.decide_le ? jourRelatif(d.decide_le) : "") : d.echeance ? jourRelatif(d.echeance) : "—";
-                return (
-                  <tr
-                    key={d.id}
-                    aria-selected={choisie === d.id}
-                    tabIndex={0}
-                    onClick={() => setChoix(d.id)}
-                    onKeyDown={(e) => {
-                      if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) {
-                        e.preventDefault();
-                        setChoix(d.id);
-                      }
-                    }}
-                  >
-                    <td style={{ width: 32 }}>
-                      <input
-                        type="checkbox"
-                        checked={coches.includes(d.id)}
-                        disabled={!decidable}
-                        title={decidable ? undefined : "Cette demande ne peut pas être décidée par vous en lot"}
-                        aria-label={`Cocher : ${d.resume}`}
-                        onClick={(e) => e.stopPropagation()}
-                        onChange={(e) => cocher(d.id, e.target.checked)}
-                      />
-                    </td>
-                    <td>{d.resume}</td>
-                    <td className="sb-gris">{libelleModule(d.module)}</td>
-                    <td className="sb-mono">{d.montant !== null ? montant(d.montant, d.devise) : "—"}</td>
-                    <td className="sb-gris" style={d.statut === "en_attente" && groupeDe(d) === "retard" ? { color: "var(--v2-red-900)" } : undefined}>
-                      {d.statut !== "en_attente" ? `${STATUTS[d.statut].libelle} · ${quand}` : quand}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+      <div className="v2-val-grille">
+        {/* ——— la file, une carte par échéance ——— */}
+        <div className="v2-val-col">
           {!etat ? (
-            <div className="sb-conseil-vide">
-              <span>Lecture de la file…</span>
+            <div className="v2-carte v2-val-vide">Lecture de la file…</div>
+          ) : visibles.length === 0 ? (
+            <div className="v2-carte v2-val-vide">
+              {filtre === "a_decider" ? "Aucune demande n'attend votre décision pour l'instant." : "Aucune demande ne correspond à ces filtres."}
             </div>
-          ) : !lignes.length ? (
-            <div className="sb-conseil-vide">
-              <CircleCheck width={18} height={18} strokeWidth={1.5} aria-hidden="true" />
-              <p style={{ margin: 0 }}>{filtre === "a_decider" ? "Rien n'attend votre décision" : "Aucune demande"}</p>
-              <span>{filtre === "a_decider" ? "Aucune demande n'attend votre décision pour l'instant." : "Aucune demande ne correspond à ces filtres."}</span>
-            </div>
-          ) : null}
+          ) : (
+            [...GROUPES, { cle: "decidees" as const, libelle: "Décidées" }].map((g) => {
+              const liste = groupes.get(g.cle);
+              if (!liste?.length) return null;
+              return (
+                <section key={g.cle} className="v2-carte" aria-label={g.libelle}>
+                  <h2 className="v2-val-groupe">{g.libelle}</h2>
+                  <ul className="v2-val-liste">
+                    {liste.map((d) => {
+                      const decidable = decidables.some((x) => x.id === d.id);
+                      const quand = d.statut !== "en_attente" ? (d.decide_le ? jourRelatif(d.decide_le) : "") : d.echeance ? jourRelatif(d.echeance) : "";
+                      return (
+                        <li key={d.id} className="v2-val-ligne" aria-current={choisie === d.id ? "true" : undefined}>
+                          <span className="v2-val-case">
+                            <input
+                              type="checkbox"
+                              checked={coches.includes(d.id)}
+                              disabled={!decidable}
+                              title={decidable ? undefined : "Cette demande ne peut pas être décidée par vous en lot"}
+                              aria-label={`Cocher : ${d.resume}`}
+                              onChange={(e) => cocher(d.id, e.target.checked)}
+                            />
+                          </span>
+                          <button type="button" className="v2-val-corps" onClick={() => setChoix(d.id)}>
+                            {/* 15/10 — une ligne : le résumé, puis le montant et le délai à droite */}
+                            <span className="v2-val-texte">
+                              <span>{d.resume}</span>
+                            </span>
+                            <span className="oc-meta" data-retard={d.statut === "en_attente" && groupeDe(d) === "retard" ? "" : undefined}>
+                              {[d.montant !== null ? montant(d.montant, d.devise) : null, d.statut !== "en_attente" ? STATUTS[d.statut].libelle : quand].filter(Boolean).join(" · ")}
+                            </span>
+                            <ChevronRight width={16} height={16} aria-hidden="true" className="v2-val-chevron" />
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </section>
+              );
+            })
+          )}
         </div>
 
-        <aside className="sb-volet-detail" aria-label="Circuit et délégations">
-          <div className="sb-volet-detail-tete">
-            <span>Circuit d&apos;approbation</span>
-          </div>
-          <div className="sb-volet-detail-corps v2-val-cote">
-          <section aria-label="Circuit d'approbation">
+        {/* ——— à droite : le circuit, puis les délégations ——— */}
+        <div className="v2-val-col v2-val-cote">
+          <section className="v2-carte" aria-label="Circuit d'approbation">
+            <h2 className="v2-val-groupe">Circuit d&apos;approbation</h2>
             {demande && circuit ? (
               <div className="v2-val-circuit">
                 <div>
@@ -460,7 +419,7 @@ export default function Validations({ utilisateur }: { utilisateur: Utilisateur 
             )}
           </section>
 
-          <section aria-label="Délégations">
+          <section className="v2-carte" aria-label="Délégations">
             <h2 className="v2-val-groupe">Délégations</h2>
             {delegationsEnCours.length ? (
               <ul className="v2-val-delegations">
@@ -494,8 +453,7 @@ export default function Validations({ utilisateur }: { utilisateur: Utilisateur 
               <p className="v2-val-gris v2-val-pad">Aucune délégation en cours. Pour en donner une, ouvrez une demande puis « Déléguer ».</p>
             )}
           </section>
-          </div>
-        </aside>
+        </div>
       </div>
 
       {/* ——— la décision en lot (inchangée) ——— */}

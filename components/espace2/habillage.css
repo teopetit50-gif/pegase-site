@@ -944,14 +944,14 @@ html.v2-actif .dlg-sortie:hover:not(:disabled) {
    devient une grille de lignes (13 px, marge 16, filet), la ligne choisie
    prend le fond plein de Supabase, sans liseré ; la fiche de droite se
    pose comme le volet de détail, filet à gauche. */
-.v2 .resa.esp .esp-kpis { gap: 8px; margin-bottom: 16px; }
-.v2 .resa.esp .esp-grille { gap: 16px; }
-.v2 .resa.esp .esp-liste .esp-item { padding: 10px 16px; border-top-color: var(--v2-a-400); font-size: 13px; line-height: 19.5px; }
-.v2 .resa.esp .esp-item[aria-selected="true"], .v2 .resa.esp .esp-item[aria-current="true"] { background: var(--v2-a-300); box-shadow: none; }
-.v2 .resa.esp .esp-item-titre { font-size: 13px; line-height: 19.5px; font-weight: 450; }
-.v2 .resa.esp .esp-item-bas, .v2 .resa.esp .esp-item-haut { font-size: 12px; line-height: 16px; }
-.v2 .resa.esp .esp-item-montant { font-family: var(--v2-code); font-size: 12px; }
-.v2 .resa.esp .esp-detail-mobile > .esp-carte, .v2 .resa.esp .esp-colle > .esp-carte { box-shadow: var(--v2-ombre-petite), -1px 0 0 var(--v2-a-400); }
+.v2 .resa.esp:not(.esp-ancien) .esp-kpis { gap: 8px; margin-bottom: 16px; }
+.v2 .resa.esp:not(.esp-ancien) .esp-grille { gap: 16px; }
+.v2 .resa.esp:not(.esp-ancien) .esp-liste .esp-item { padding: 10px 16px; border-top-color: var(--v2-a-400); font-size: 13px; line-height: 19.5px; }
+.v2 .resa.esp:not(.esp-ancien) .esp-item[aria-selected="true"], .v2 .resa.esp:not(.esp-ancien) .esp-item[aria-current="true"] { background: var(--v2-a-300); box-shadow: none; }
+.v2 .resa.esp:not(.esp-ancien) .esp-item-titre { font-size: 13px; line-height: 19.5px; font-weight: 450; }
+.v2 .resa.esp:not(.esp-ancien) .esp-item-bas, .v2 .resa.esp:not(.esp-ancien) .esp-item-haut { font-size: 12px; line-height: 16px; }
+.v2 .resa.esp:not(.esp-ancien) .esp-item-montant { font-family: var(--v2-code); font-size: 12px; }
+.v2 .resa.esp:not(.esp-ancien) .esp-detail-mobile > .esp-carte, .v2 .resa.esp:not(.esp-ancien) .esp-colle > .esp-carte { box-shadow: var(--v2-ombre-petite), -1px 0 0 var(--v2-a-400); }
 
 /* dans le volet de détail d'une page Supabase, les fiches reprises s'empilent sur une colonne */
 .v2 .resa.esp .sb-volet-detail .esp-def, .v2 .resa.esp .sb-volet-detail .esp-def--trois { grid-template-columns: minmax(0, 1fr); }
