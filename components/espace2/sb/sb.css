@@ -120,7 +120,7 @@
 .v2 .sb-liste { width: 100%; max-width: 1600px; margin: 0 auto; padding: 48px 16px 64px; display: flex; flex-direction: column; gap: 16px; }
 @container principale (min-width: 512px) { .v2 .sb-liste { padding-left: 24px; padding-right: 24px; } }
 @container principale (min-width: 576px) { .v2 .sb-liste { padding-left: 40px; padding-right: 40px; } }
-.v2 .sb-liste-tete { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.v2 .sb-liste-tete { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .v2 .sb-liste-tete > div { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 
 /* le bandeau (Admonition) : fond à peine teinté, filet, icône dans un carré de 23 px */
@@ -376,3 +376,11 @@
 .v2 .sb-liens-liste .sb-liens-texte span { font-size: 13px; line-height: 19.5px; color: var(--v2-gray-900); }
 .v2 .sb-liens-liste .sb-liens-fin { flex: none; display: inline-flex; align-items: center; gap: 8px; color: var(--v2-gray-600); }
 @container principale (min-width: 1000px) { .v2 .sb-volet-detail--large { width: min(600px, 55%); } }
+/* Vos textes — la page Emails de Supabase : liste des modèles, éditeur à deux colonnes */
+.v2 .sb-textes .sb-reglages-section .esp-section-titre { display: none; }
+.v2 .sb-modeles button { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 12px 16px; border: 0; background: transparent; color: var(--v2-gray-1000); font: inherit; font-size: 13px; line-height: 19.5px; text-align: left; cursor: pointer; }
+.v2 .sb-modeles button:hover, .v2 .sb-modeles button[aria-current] { background: var(--v2-a-200); }
+.v2 .sb-modele-corps { display: grid; grid-template-columns: minmax(0, 1fr); }
+@container principale (min-width: 1000px) { .v2 .sb-modele-corps { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .v2 .sb-modele-apercu { border-left: 1px solid var(--v2-a-400); } }
+.v2 .sb-modele-apercu .esp-section-titre { display: block; }
+.v2 .sb-reglages.sb-textes { max-width: 1200px; padding-left: 0; padding-right: 0; }

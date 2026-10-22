@@ -699,6 +699,7 @@ export default function EcranCashd({ vue, gabarit }: { vue?: Onglet; gabarit?: "
         client={reel?.client?.client_id ?? null}
         reglages={tableau?.reglages ?? null}
         apresReglage={relire}
+        gabarit={gabarit}
       />
       </>
       ) : null}
