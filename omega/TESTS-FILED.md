@@ -425,6 +425,38 @@ seulement « proposé », jamais tenu pour bon (vérifié par le coordinateur). 
     pas deux fois la même écriture.
 - **(3) Niveau 2, pièces NOBAT R2026-000065 → 000077** : en attente du signal du coordinateur (lecteur).
 
+### Niveau 2 — relecture des pièces NOBAT (client du banc principal, lecture seule ; contenu relayé par le coordinateur)
+Règle (Q23 c) : seulement le numéro de pièce, le code du contrôle et le verdict. **Aucun nom, montant ni IBAN réel** dans ce fichier.
+Méthode : le coordinateur me donne le texte reçu par le lecteur (OCR) et la ligne brute de FILED après la relecture de 19:26 Z.
+Je compare champ par champ. Niveau 2 : vraie pièce, lue sur la recette.
+
+| Pièce | Champ ou contrôle | Ce que la pièce montre | Ce que FILED a fait | Verdict |
+|---|---|---|---|---|
+| R2026-000069 | nature | facture | facture, document integre, facture bloquee | juste |
+| R2026-000069 | numéro, date, échéance, réf. commande, acheteur, réf. client | imprimés | lus à l'identique, vérifiés | juste |
+| R2026-000069 | HT / TVA / TTC | imprimés au pied | lus à l'identique, vérifiés ; `montant.coherence ok` | juste |
+| R2026-000069 | ventilation TVA | 3 colonnes : Exo, 8,5 % et 2,1 % (cette dernière à vide) | 2 lignes, Exo et 8,5 %, bases et montant justes ; rien pour le 2,1 % vide ; `tva.ventilation ok` | juste |
+| R2026-000069 | lignes | 3 lignes | 3/3, `montant.lignes ok` | juste |
+| R2026-000069 | IBAN | imprimé sans étiquette | lu, « relevé sur le texte de la page 1 », vérifié ; `iban.nouveau` bloquant (premier IBAN, fournisseur à confirmer) | juste |
+| R2026-000069 | SIREN | 9 chiffres imprimés sous l'étiquette « SIRET » | SIREN lu juste, mais marqué **non vérifié** (« déduit des 9 premiers chiffres du SIRET ») ; pourtant `identite.siren ok` | **écart** TFILED-21 |
+| R2026-000069 | SIRET | aucun SIRET à 14 chiffres sur la pièce | **SIRET fabriqué** : les 9 chiffres complétés par 5 zéros, puis `identite.siret` **bloquant** « clé de contrôle fausse » | **écart** TFILED-20 |
+| R2026-000069 | `tva.taux` | 8,5 %, taux légal en Guadeloupe ; acheteur à Baie-Mahault | attention « Taux légal ailleurs en France, pas dans le territoire de la société : 8,5 % » | observation : écart de banc connu (le territoire de la société du banc), selon le coordinateur |
+| R2026-000069 | `date.ancienne` | facture de janvier 2024 | attention | juste |
+| R2026-000069 | `identite.tva_intracom` | pas de n° TVA du fournisseur | attention « absent » | juste |
+| R2026-000069 | `mentions.indemnite`, `mentions.penalites`, `mentions.escompte` | non relayé | anomalies (attention ou info) | non jugeable (texte des mentions non relayé) |
+
+**TFILED-20 · R2026-000069 · le lecteur fabrique un SIRET en complétant un SIREN par des zéros, puis le bloque pour clé fausse**
+- La pièce imprime 9 chiffres sous l'étiquette « SIRET » : c'est un SIREN. FILED lit `fournisseur.siret` = les 9 chiffres suivis de
+  `00000`, avec la mention « citation retrouvée page 1 ; SIRET invalide », puis pose `identite.siret` **bloquant** « clé de contrôle
+  fausse… ». La valeur n'existe pas sur la pièce : c'est une **invention de lecture**, et elle produit un arrêt **faux**. La facture est
+  bloquée pour un défaut que la pièce n'a pas. Attendu : SIRET absent (ou « non lu »), sans bloquant. Le coordinateur l'a déjà transmis
+  à A1.
+
+**TFILED-21 · R2026-000069 · `identite.siren` est « ok » alors que la valeur du SIREN n'est pas vérifiée**
+- `fournisseur.siren` est lu juste, mais marqué NON vérifié (« déduit des 9 premiers chiffres du SIRET »). Le contrôle `identite.siren`
+  rend pourtant `ok`. Un contrôle d'identité ne devrait pas se dire « ok » sur une valeur que le lecteur ne garantit pas. Attendu :
+  attention « SIREN déduit, à confirmer », comme pour F1 avant a4_74.
+
 ### Jeu d'essai série 1 (prêt, pas encore joué)
 
 - Générateur : `omega/testeur-filed/generer_pieces.py` → `omega/testeur-filed/pieces/*.pdf` (15 fichiers, même gabarit).
