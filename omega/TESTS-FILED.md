@@ -354,6 +354,20 @@ seulement « proposé », jamais tenu pour bon (vérifié par le coordinateur). 
   - `filed_exporter_ecritures(…, 'cegid')` et `'quickbooks'` → 0 écriture, comme Sage et Pennylane la veille. Juste : aucune pièce bloquée ne sort.
   - Le « CSV » du brief n'existe pas comme format (« Format inconnu : pennylane, sage, cegid ou quickbooks »). Le site promet seulement
     « le format qu'elle utilise déjà » (`factures.ts:275`) : ce n'est pas un écart.
+- **(1)(a) Circuit C0, 2 approbations**, F0, demande `47b977f5-50e4-4c14-874e-040b7cdea47f` (relayé : `approbations_requises 2`,
+  `payload.circuit 81295f9e`, `exige_motif true`) :
+  - gérant `approuve` (validé) → accepté, **sans** la mention « [seul décideur] ». C'est normal puisque C0 exige deux personnes (coordinateur).
+  - le gérant approuve une 2ᵉ fois (annulée) → `ERROR 23505: duplicate key value violates unique constraint "approbations_une_par_personne"`.
+    Le refus est **juste** (`:70`, deux approbations *distinctes*), mais le message est brut → **TFILED-17**.
+  - valideur `approuve` (validé) → accepté. Relayé : la demande est « approuvee » à 19:24:01 avec 2 approbations, mais `execute_le` est
+    encore nul et F0 encore `a_valider` à 19 h 26. Le coordinateur recontrôle.
+- **(1)(b) Circuit ramené à 1 approbation** : `filed_regler_circuit(…, 500, null, 1, '{gerant,valideur}')` → **même id** `81295f9e`. Le
+  circuit est modifié sur place. L'historique du seuil (`:183`, « son historique reste lisible ») n'est pas lisible par mes portes.
+  Registre levé sur F2a → demande `39ad3915-…`, `approbations_requises 1` (relayé). Le gérant seul `approuve` → accepté, sans mention
+  « [seul décideur] » non plus. À 19 h 25 Z, `pieces_en_cours` donne `attente 1 / 846,30 €` : une des deux factures a quitté l'attente.
+- **(2) Comptabilisation** : en gérant, `filed_designer_comptable(client, gérant, true)` et `filed_regler_comptabilisation(client, false,
+  false)` → `etat_comptabilisation.comptables = [gérant]`. Puis `filed_comptabiliser_facture(F0, motif)` → `ERROR 55000: Aucune imputation
+  validée : le compte et le centre de coût se posent avant.` Le refus est lisible. Il me faut la porte d'imputation (Q21).
 - **(3) Niveau 2, pièces NOBAT R2026-000065 → 000077** : en attente du signal du coordinateur (lecteur).
 
 ### Jeu d'essai série 1 (prêt, pas encore joué)
