@@ -263,7 +263,14 @@ ne peuvent pas être la même personne » ; carte « Des rôles et des délégat
   `v_compte := coalesce((v_l->>'compte')::uuid, (select c.id from public.filed_plan_comptable …))`.
 - Un client (ou un écran) qui envoie un numéro de compte dans « compte », ce qui est le sens courant du mot, reçoit une erreur technique
   qui montre le code interne. Attendu : accepter le numéro, ou répondre en français (« compte : numéro attendu dans `numero` »).
- (portes d'écriture, en gérant `eeeeeeee-…01f1`, client banc seulement)
+**TFILED-19 · plan comptable · la nature d'un compte refusée par une contrainte brute, sans les valeurs admises** (`filed_poser_compte`)
+- En gérant, transaction annulée : `select public.filed_poser_compte('dddddddd-…00f1', 'fba91a52-…', '401000', 'Fournisseurs',
+  'fournisseur', false)` → `ERROR 23514: new row for relation "filed_plan_comptable" violates check constraint
+  "filed_plan_comptable_nature_check"`, avec DETAIL (la ligne entière) et CONTEXT (la requête interne `insert … on conflict …`).
+- Un client ne peut pas savoir quelles natures sont admises, et la réponse expose le code. Attendu : un refus en français qui liste
+  les natures possibles.
+
+### Série 1b — 21/10, 20 h 40 (portes d'écriture, en gérant `eeeeeeee-…01f1`, client banc seulement)
 
 1. `select public.filed_lever_anomalie('a46345d2-c631-4af3-b713-4bd52b70541e', 'identite.registre', 'T-FILED 1b : …')` (facture F0)
    → refus : `ERROR 22023: Cette anomalie ne se lève pas d'un motif : elle se corrige, ou se décide par la file.` La transaction est
@@ -398,6 +405,24 @@ seulement « proposé », jamais tenu pour bon (vérifié par le coordinateur). 
     syntax for type uuid: "601000"`, avec un **extrait du code interne dans le contexte** → **TFILED-18**. Avec `"numero":"601000"` →
     `ERROR 22023: Ligne 1 : compte inconnu ou retiré.` Le refus est lisible, mais **le plan comptable du banc est vide** et aucune porte
     connue ne le remplit (Q22).
+  - Q22 (relayé) : la porte est `filed_poser_compte(client, entité, numero, libelle, nature default 'charge', tva_deductible default true)`.
+    `filed_poser_compte(…, '601000', 'Achats stockés - matières premières')` → `96558531-…`. Avec `'401000', 'Fournisseurs', 'fournisseur'`
+    (annulé), le refus est une contrainte brute qui montre le code et ne donne pas les valeurs admises → **TFILED-19**. Le compte 401 n'est
+    finalement pas nécessaire : il est fourni par le système (voir le FEC).
+  - **I1** (annulé) : imputation de F0 sur 601000 / CH-FLAMB à **700,00** HT → `ERROR 22023: Les lignes font 700.00 HT, la facture 780.00.`
+    **Juste.**
+  - **I2/I3** (validés) : F0 sur deux lignes, 490 + 290 → `2` ; F2a sur une ligne, 780 → `1`. Puis `filed_comptabiliser_facture(F0)` et
+    `(F2a)` → `null`, sans erreur.
+  - **FEC** (`912345659FEC20261231.txt`, annulé) : 7 lignes, 2 écritures, `equilibre true`, débit = crédit = 1 692,60. Écriture 1, F0 :
+    601000 D 490,00 et 290,00 ; **44566** D 66,30 ; **401** C 846,30 avec l'auxiliaire `F00001` « MATÉRIAUX CARAÏBES DISTRIBUTION SARL » ;
+    PieceRef `MCD-2026-1001`, PieceDate `20261014`, EcritureDate et ValidDate `20261022`, décimales à la virgule. Écriture 2, F2a : même
+    schéma, auxiliaire `F00002`. **Juste** : montants, TVA 8,5 % et sens conformes aux pièces, journal HA, numérotation continue.
+    Observations : (a) les longueurs de compte sont mêlées (`601000` sur 6 chiffres, `401` et `44566` plus courts), ce que certains
+    logiciels refusent à l'import ; (b) EcritureDate est la date de comptabilisation, pas celle de la facture (choix défendable). Le compte
+    **512** du brief ne figure pas, ce qui est normal : aucun règlement n'est passé.
+  - **Sage** (`.pnm`, Windows-1252, à positions fixes, validé) : les mêmes 7 lignes, équilibrées, les libellés tronqués à la largeur du
+    format. Un **second export validé** juste après → `lignes 0, ecritures 0, envoi null`. **Juste** : le mode « nouvelles » n'exporte
+    pas deux fois la même écriture.
 - **(3) Niveau 2, pièces NOBAT R2026-000065 → 000077** : en attente du signal du coordinateur (lecteur).
 
 ### Jeu d'essai série 1 (prêt, pas encore joué)
@@ -459,9 +484,13 @@ par les portes `public.filed_confirmer_fournisseur(uuid, text)` et `public.filed
 
 ## REPRISE
 
-**Arrêt 16 — 22/10/2026, 19 h 20 Z**
-- Fait : série 3 (2), forme du FEC juste et exports vides justes. Nouvel écart **TFILED-16** : l'arrêt registre est sans issue, ce qui bloque (1) et le contenu de (2).
+**Arrêt 17 — 22/10/2026, 19 h 35 Z**
+- Fait (série 3) : TFILED-16 corrigé ; circuit à 2 approbations distinctes (juste) puis à 1 approbation par le gérant seul (juste) ;
+  exécution environ 1 minute après la décision (normal) ; imputation avec contrôle du total HT (juste) ; comptabilisation de F0 et F2a ;
+  FEC réel et export Sage justes et idempotents. Écarts nouveaux : **TFILED-17** (double approbation, message brut), **TFILED-18**
+  (« compte » attend un uuid, code exposé), **TFILED-19** (nature du compte, contrainte brute).
+- Correction de ce fichier : l'en-tête « Série 1b » avait encore été écrasé (insertion de TFILED-18). Il est rétabli, et les
+  insertions passent maintenant par un contrôle qui le préserve.
 - En cours : rien.
-- Prochain pas : le correctif de TFILED-16, puis F0 au circuit, la décision seule du gérant, et l'export avec écritures (comptes 401 / 44566 / 6xx, équilibre). Ensuite (3) au signal.
-- Questions : aucune nouvelle.
-- SHA d'arrêt : voir le commit « T-FILED série 3 : TFILED-16, forme du FEC » sur `testeur-filed`.
+- Prochain pas : (3) niveau 2, relecture des pièces NOBAT R2026-000065 → 000077, au signal du coordinateur.
+- SHA d'arrêt : voir le commit « T-FILED série 3 : FEC réel, TFILED-19, arrêt 17 » sur `testeur-filed`.
