@@ -2,6 +2,11 @@
 
 ## REPRISE (pause du 19/10, 17 h 50 Z — reprise samedi 25/10 après 02 h Z)
 
+**ARRÊT du 22/10, ~21 h 45 Z (coordinateur, après TFILED-17).**
+1. Fait et poussé le 22/10 : a4_78 → a4_83 (TFILED-16, 18, 19, 21, 24, 17 ; « premier IBAN » 069), tests a4_66 → a4_71 ; 133/133 en local ; a4_77 retiré (doublon de filed_lever_anomalie).
+2. Rien en cours ; a4_82 et a4_83 restent à poser par le coordinateur.
+3. Ouvert : 207/208 (Teo) ; NOBAT 069 sans SIREN acheteur (écart de banc) ; SIRET à 9 chiffres (A1, TFILED-20).
+
 **PAUSE du 21/10, 22 h 45 Z (Teo) — reprise au feu vert de Teo ou samedi 25/10 après 02 h Z.**
 1. Fait et poussé : a4_71 → a4_75 (TFILED-03, 04, 08, 11, 14), tests a4_59 → a4_63 ; 125/125 en local ; a4_71 → a4_75 posés sur la recette par le coordinateur ; seul le test a4_63 corrigé (c9b15f5c, approbateur ≠ saisisseur) reste à y reposer.
 2. Rien en cours : arbre propre, aucun geste à moitié fait.
@@ -12,6 +17,7 @@
 - 069 : acheteur_lu sans SIREN → reste dans Sogexal (FR), écart de banc noté par le coordinateur (pas de réglage changé). a4_80 (TFILED-18/19) : nature de compte hors liste dite en clair ; imputation « compte » = identifiant OU numéro (601000), « centre » = identifiant OU code, montant illisible dit en clair ; test `a4_68_messages_clairs.sql`, 130/130.
 - a4_81 (TFILED-21) : identite.siren dit sa source (pièce vérifiée, fiche du fournisseur, SIRET) ; si le SIREN jugé vient de la fiche et que la pièce en porte un AUTRE (non vérifié) : bloquant ; test `a4_69_siren_source.sql`, 131/131.
 - a4_82 (TFILED-24) : identite.tva_intracom (Union) nomme sa source (pièce / fiche) ; un autre numéro lu non vérifié bloque ; tva.numero signale « mention obligatoire absente » même quand la fiche porte un numéro ; test `a4_70_tva_source.sql`, 132/132.
+- a4_83 (TFILED-17) : un second avis de la même personne sur une demande FILED → 22023 clair (déclencheur approbations_zz_filed_avis_unique, après approbations_preparer du socle, limité au module filed) ; test `a4_71_avis_deja_donne.sql`, 133/133.
 
 - **Fait** : a4_01 → a4_66 posés et verts sur la recette (^test_a4_ 109/109) : a4_61 documents de chantier → Daliro, a4_62 banc de référence (39 cas), a4_63 v2 relevés d'heures (noms d'A1), a4_64 sceau mensuel, a4_65 quota sans blocage, a4_66 rapprochement.devis proposé / confirmé par une personne.
 - **Reprise 19/10 18 h 30 Z (un lot)** : a4_67 écrit, à poser — SIREN ou TVA lus pour un fournisseur connu à son seul nom : proposés (filed_fournisseurs_completions), confirmés ou écartés par une personne ; le lot 7 ne complète plus seul qu'un fournisseur « à confirmer » né de la pièce ; plus de « faute de SIREN » quand la pièce en porte un. Complément (A1, b7773e70) : `iban.masque` (attention) remplace `iban.absent` quand la pièce porte un IBAN incomplet, jamais repris ; pas de virement noté tant qu'il est ouvert. Test `a4_55_completer_fournisseur.sql`, 111/111.
