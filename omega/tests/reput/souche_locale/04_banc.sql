@@ -10,3 +10,12 @@ insert into public.comptes (user_id, client_id, role) values
   ('cccccccc-0000-4000-8000-0000000000c3', 'cccccccc-0000-4000-8000-00000000000c', 'valideur'),
   ('cccccccc-0000-4000-8000-0000000000c4', 'cccccccc-0000-4000-8000-00000000000c', 'valideur')
 on conflict do nothing;
+
+-- pgTAP imité (complément) : throws_like(requête, motif LIKE du message, description), comme le vrai pgTAP.
+create or replace function public.throws_like(q text, motif text, d text default '') returns text language plpgsql as $$
+begin
+  begin execute q; exception when others then
+    return public.ok(sqlerrm like motif, d) || case when sqlerrm not like motif then format(' [eu %s : %s]', sqlstate, sqlerrm) else '' end;
+  end;
+  return public.ok(false, d) || ' [aucune erreur]';
+end $$;
