@@ -527,6 +527,11 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
 .v2-recherche .v2-kbd {
   margin-left: 2px;
 }
+/* 22/10 — en clair, le ⌘K de la recherche n'a plus de carte : le texte seul */
+html[data-v2-theme="light"] .v2-recherche .v2-kbd {
+  background: none;
+  box-shadow: none;
+}
 .v2-laterale-nav {
   flex: 1;
   min-height: 0;

@@ -11,15 +11,16 @@ import { useEffect } from "react";
 import { CLE_THEME } from "./amorce";
 import { ecrireStockage, useStockage } from "./Collection";
 
-export type Theme = "sombre" | "clair" | "doux";
+export type Theme = "sombre" | "clair";
 
 export function useTheme(): [Theme, (t: Theme) => void] {
+  /* « doux » est le nom de l'ancienne option : elle reste lue comme « clair » */
   const choisi = useStockage(CLE_THEME);
-  const theme: Theme = choisi === "clair" || choisi === "doux" ? choisi : "sombre";
+  const theme: Theme = choisi === "clair" || choisi === "doux" ? "clair" : "sombre";
   useEffect(() => {
     const html = document.documentElement;
     html.dataset.v2Theme = theme === "sombre" ? "dark" : "light";
-    if (theme === "doux") html.dataset.v2Fond = "doux";
+    if (theme === "clair") html.dataset.v2Fond = "doux";
     else delete html.dataset.v2Fond;
   }, [theme]);
   /* en quittant l'espace, le site retrouve son <html> */

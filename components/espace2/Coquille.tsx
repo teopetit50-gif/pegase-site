@@ -23,7 +23,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, Banknote, Building2, CheckSquare, CircleHelp, Home, Bell, Check, CheckCheck, ChevronRight, ChevronsUpDown, Cloud, Database, ExternalLink, FileText, LayoutGrid, LifeBuoy, LogOut, Menu as IconeMenu, Moon, Plus, Search, Settings, Sun, Terminal, User, X } from "lucide-react";
+import { Activity, Banknote, Building2, CheckSquare, CircleHelp, Home, Bell, Check, CheckCheck, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, LayoutGrid, LifeBuoy, LogOut, Menu as IconeMenu, Moon, Plus, Search, Settings, Sun, Terminal, User, X } from "lucide-react";
 import { Button, Dialog, DialogTrigger, Modal, ModalOverlay, Popover, RouterProvider } from "react-aria-components";
 import type { Utilisateur } from "@/lib/compte";
 import { createClient } from "@/lib/supabase/client";
@@ -329,7 +329,9 @@ function MenuOrganisation({ utilisateur, classe }: { utilisateur: Utilisateur | 
           {/* 14/10 — demande de Teo : « mets juste le logo Omega là ». 21/10 : l'icône pilotage, la tuile de l'onglet, lisible à 20 px. */}
           <span className="v2-marque-omega" aria-hidden="true">
             {/* eslint-disable-next-line @next/next/no-img-element -- l'icône pilotage, déjà à sa taille */}
-            <img src="/omega-icone-pilotage.png" alt="" width={20} height={20} />
+            <img className="oc-logo-sombre" src="/omega-icone-pilotage.png" alt="" width={20} height={20} />
+            {/* eslint-disable-next-line @next/next/no-img-element -- la marque noire, sans tuile, pour le thème clair */}
+            <img className="oc-logo-clair" src="/logo-pegase.png" alt="" width={20} height={20} />
           </span>
           <span className="v2-rail-libelle v2-portee-nom">{organisation}</span>
           <ChevronsUpDown width={14} height={14} aria-hidden="true" />
@@ -616,9 +618,6 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
                     </ItemMenu>
                     <ItemMenu id="clair" textValue="Thème clair" onAction={() => changerTheme("clair")} icone={<Sun {...I} />} suffixe={coche(theme === "clair")}>
                       Clair
-                    </ItemMenu>
-                    <ItemMenu id="doux" textValue="Thème clair doux" onAction={() => changerTheme("doux")} icone={<Cloud {...I} />} suffixe={coche(theme === "doux")}>
-                      Clair doux
                     </ItemMenu>
                   </SectionMenu>
                   <SeparateurMenu />
