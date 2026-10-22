@@ -46,7 +46,8 @@ const GROUPES = [
 ];
 const RUBRIQUES = GROUPES.flatMap((g) => g.rubriques);
 
-const TITRE_CARTE = { fontSize: 20, lineHeight: "26px", letterSpacing: "-0.4px" } as const;
+/* 22/10 — le titre de section de Supabase (« General settings ») : Manrope 18/25,2 px, sans resserrement */
+const TITRE_CARTE = { fontSize: 18, lineHeight: "25.2px", letterSpacing: "normal" } as const;
 
 export default function Reglages() {
   const toast = useToast();

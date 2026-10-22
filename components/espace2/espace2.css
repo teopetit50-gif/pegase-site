@@ -86,7 +86,10 @@ html.v2-actif .dlg-panneau {
   --v2-bouton: #fff;
   --v2-bouton-survol: #f3f3f3;
   --v2-ombre-bord: 0 0 0 1px #03030315;
-  --v2-ombre-petite: 0 0 0 1px #03030315;
+  --v2-ombre-petite: 0 0 0 1px #03030315, 0 1px 2px #0000000d;
+  /* 22/10 — les boutons de Supabase : quatre filets intérieurs et une ombre portée (mesurés) */
+  --v2-ombre-bouton: 0 1px 3px #0000000a, inset 0 1px 0 #00000007, inset 0 0 0 1px #0000000a, inset 0 -1px 0 #0000000a, inset 0 0 0 1px #00000011;
+  --v2-ombre-primaire: 0 1px 3px #0000000a, inset 0 1px 0 #00000007, inset 0 0 0 1px #0000000a, inset 0 0 0 1px #00000011;
   --v2-ombre-moyenne: 0 0 0 1px #03030315, 0px 2px 2px #0000000a, 0px 8px 8px -8px #0000000a;
   --v2-ombre-menu: 0 0 0 1px #03030325, 0px 1px 1px #00000005, 0px 4px 8px -4px #0000000a, 0px 16px 24px -8px #0000000f;
   --v2-ombre-modal: 0 0 0 1px #03030325, 0px 1px 1px #00000005, 0px 8px 16px -4px #0000000a, 0px 24px 32px -8px #0000000f;
@@ -100,8 +103,12 @@ html.v2-actif .dlg-panneau {
   --v2-popover: 0.2s;
   --v2-overlay: 0.3s;
 
-  --v2-sans: var(--font-geist), "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  /* 22/10 — Inter, Manrope et Source Code Pro, comme le tableau de bord Supabase (app/espace2/layout.tsx) ;
+     sans elles (/omega, /bienvenue), on retombe sur Geist */
+  --v2-sans: var(--font-v2-inter, var(--font-geist)), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --v2-titre: var(--font-v2-manrope, var(--font-geist)), "Manrope", var(--v2-sans);
   --v2-mono: var(--font-omega-mono), "Geist Mono", Menlo, Monaco, "Liberation Mono", monospace;
+  --v2-code: var(--font-v2-code, var(--font-omega-mono)), "Source Code Pro", Menlo, monospace;
 
   color-scheme: light;
 }
@@ -167,7 +174,9 @@ html.v2-actif .dlg-panneau {
     --v2-bouton: #242424;
     --v2-bouton-survol: #2a2a2a;
     --v2-ombre-bord: 0 0 0 1px #ffffff13;
-    --v2-ombre-petite: 0 0 0 1px #ffffff13;
+    --v2-ombre-petite: 0 0 0 1px #ffffff13, 0 1px 2px #0000000d;
+    --v2-ombre-bouton: 0 1px 3px #00000033, inset 0 1px 0 #ffffff0a, inset 0 0 0 1px #0000000f, inset 0 -1px 0 #0000000f, inset 0 0 0 1px #ffffff1a;
+    --v2-ombre-primaire: 0 1px 3px #00000033, inset 0 1px 0 #ffffff0a, inset 0 0 0 1px #ffffff0f, inset 0 0 0 1px #ffffff1a;
     --v2-ombre-moyenne: 0 0 0 1px #ffffff13, 0px 2px 2px #00000052, 0px 8px 8px -8px #00000029;
     --v2-ombre-menu: 0 0 0 1px #ffffff22, 0px 1px 1px #00000005, 0px 4px 8px -4px #0000000a, 0px 16px 24px -8px #0000000f;
     --v2-ombre-modal: 0 0 0 1px #ffffff22, 0px 1px 1px #00000005, 0px 8px 16px -4px #0000000a, 0px 24px 32px -8px #0000000f;
@@ -223,7 +232,9 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   --v2-bouton: #242424;
   --v2-bouton-survol: #2a2a2a;
   --v2-ombre-bord: 0 0 0 1px #ffffff13;
-  --v2-ombre-petite: 0 0 0 1px #ffffff13;
+  --v2-ombre-petite: 0 0 0 1px #ffffff13, 0 1px 2px #0000000d;
+  --v2-ombre-bouton: 0 1px 3px #00000033, inset 0 1px 0 #ffffff0a, inset 0 0 0 1px #0000000f, inset 0 -1px 0 #0000000f, inset 0 0 0 1px #ffffff1a;
+  --v2-ombre-primaire: 0 1px 3px #00000033, inset 0 1px 0 #ffffff0a, inset 0 0 0 1px #ffffff0f, inset 0 0 0 1px #ffffff1a;
   --v2-ombre-moyenne: 0 0 0 1px #ffffff13, 0px 2px 2px #00000052, 0px 8px 8px -8px #00000029;
   --v2-ombre-menu: 0 0 0 1px #ffffff22, 0px 1px 1px #00000005, 0px 4px 8px -4px #0000000a, 0px 16px 24px -8px #0000000f;
   --v2-ombre-modal: 0 0 0 1px #ffffff22, 0px 1px 1px #00000005, 0px 8px 16px -4px #0000000a, 0px 24px 32px -8px #0000000f;
@@ -3042,3 +3053,4 @@ html.v2-calme .v2-vivant .v2-carte::before, html.v2-calme .v2-vivant .v2-dr-cart
 .v2 .v2-btn--petit.v2-btn--icone { width: 26px; padding: 0; }
 .v2 .v2-btn--petit svg, .v2 .v2-val-bouton svg, .v2 .v2-portee svg { width: 14px; height: 14px; }
 .v2 .v2-val-recherche { height: 28px; }
+

@@ -57,8 +57,8 @@ export default function Coquille({ utilisateur, police, children }: { utilisateu
      variable de la police Geist doit vivre sur <html> pendant la visite */
   useEffect(() => {
     const html = document.documentElement;
-    html.classList.add(police, "v2-actif", "oc-actif");
-    return () => html.classList.remove(police, "v2-actif", "oc-actif");
+    html.classList.add(...police.split(" "), "v2-actif", "oc-actif");
+    return () => html.classList.remove(...police.split(" "), "v2-actif", "oc-actif");
   }, [police]);
 
   /* Les écrans repris de /espace écrivent leurs liens en dur vers /espace/… :
