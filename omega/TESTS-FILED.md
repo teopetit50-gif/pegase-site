@@ -250,7 +250,7 @@ ne peuvent pas être la même personne » ; carte « Des rôles et des délégat
 - Revérification après a4_78 : le même appel → `"a_valider"`, et `pieces_en_cours` montre `attente 1 / 846,30 €`. Même chose sur F2a
   (`722b2757-…`) → `"a_valider"`. **Juste.**
 
-**TFILED-17 · F0 · une seconde approbation par la même personne est refusée par un message brut** (socle, comme TFILED-09)
+**TFILED-17 · ✅ CORRIGÉ par a4_83, revérifié le 22/10 à 21 h 37 Z** — sur F3 (`830baec5-…`, registre levé → `a_valider`), demande `76c22335-…` (C0 remis à 2 approbations) : la 1ʳᵉ approbation du gérant est validée ; la 2ᵉ par le même gérant (annulée) → `ERROR 22023: Vous avez déjà donné votre avis sur cette demande (approuvée le 22/10/2026 à 23:37) : il compte déjà.` **Juste** (voir TFILED-27 pour l'heure). Constat d'origine : **TFILED-17 · F0 · une seconde approbation par la même personne est refusée par un message brut** (socle, comme TFILED-09)
 - Gérant `…01f1`, demande `47b977f5-50e4-4c14-874e-040b7cdea47f` (circuit C0, 2 approbations requises), qu'il a déjà approuvée.
   Transaction annulée : `insert into public.approbations (demande_id, client_id, user_id, decision, commentaire) values ('47b977f5-…',
   'dddddddd-…00f1', auth.uid(), 'approuve', '…')` → `ERROR 23505: duplicate key value violates unique constraint
@@ -287,6 +287,11 @@ ne peuvent pas être la même personne » ; carte « Des rôles et des délégat
   désignation des massifs). FILED prend le premier intitulé comme `titre` et le marque **vérifié**. Sur 074 et 077, au même genre de
   planche, FILED rend au contraire « à vérifier : titre ou numero_plan ». C'est la même famille que TFILED-23 : sans cartouche, il n'y a
   pas de titre certain. Attendu : « à vérifier », ou un titre marqué non vérifié, comme sur 074 et 077.
+
+**TFILED-27 · F3 · le message d'avis déjà donné donne l'heure de Paris, pas celle du client** (socle ; même famille que TFILED-10)
+- Approbation faite à 21:37 UTC (vérifié par `now()` côté recette). Le refus de la 2ᵉ approbation dit « approuvée le 22/10/2026 à
+  **23:37** », soit l'heure de Paris (UTC+2). Pour un client en Guadeloupe (UTC−4), il était 17 h 37. Le socle 19ax a mis les délégations
+  à l'heure de l'entité ; ce message ne suit pas. Attendu : l'heure de l'entité, ou une heure suivie de son fuseau.
 
 ### Série 1b — 21/10, 20 h 40 (portes d'écriture, en gérant `eeeeeeee-…01f1`, client banc seulement)
 
@@ -595,9 +600,9 @@ par les portes `public.filed_confirmer_fournisseur(uuid, text)` et `public.filed
 - Fait : niveau 1 complet (séries 1 à 3, F8 à trois taux, F13 et F14) ; niveau 2 sur les 13 pièces NOBAT R2026-000065 → 077.
   - Corrigés et revérifiés : TFILED-03, 04, 08, 09, 10, 11, 14, 16, 18, 19, 20, 21, 22, 24 et 25.
   - Clos : TFILED-02 et 13 (justes), TFILED-12 (par décision de Teo), TFILED-15 (retiré).
-  - Encore ouverts : **TFILED-17** (double approbation, message brut, chez A4) ; **TFILED-23**, résidu (le n° de plan de 071 n'est plus
+  - Encore ouverts : **TFILED-27** (heure de Paris dans un message, nouveau) ; **TFILED-23**, résidu (le n° de plan de 071 n'est plus
     lu, chez A1) ; **TFILED-26** (titre « vérifié » sur une planche sans cartouche, corrigé dans 57284506, pas encore déployé).
   - Remontés à Teo : TFILED-05, 06 et 07.
 - En cours : rien.
-- Prochain pas : rejouer TFILED-26 après le déploiement de 57284506, ainsi que le résidu de TFILED-23 et TFILED-17 à leurs correctifs.
+- Prochain pas : rejouer TFILED-26 après le déploiement de 57284506, ainsi que le résidu de TFILED-23 et TFILED-27 à leurs correctifs. Note : la demande `76c22335` (F3) reste en attente d'une 2ᵉ approbation, celle du valideur. Je la laisse ainsi.
 - SHA d'arrêt : voir le commit « T-FILED : arrêt 19 » sur `testeur-filed`.
