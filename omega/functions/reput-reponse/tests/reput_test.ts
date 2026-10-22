@@ -1,6 +1,6 @@
 import { assert, assertEquals, assertStringIncludes } from "@std/assert";
 import { passage } from "../passage.ts";
-import { consigne, contenuDemande, controler, CORPS_PRECISION, nombres, permis, sansTexte } from "../rediger.ts";
+import { consigne, CONSIGNE_COURTE, contenuDemande, controler, CORPS_PRECISION, nombres, permis, sansTexte } from "../rediger.ts";
 import { ClaudeFaux, contexte, dossier, FICHE_HORAIRES, FICHE_TARIF, panne, PortesFausses, travail } from "./doubles.ts";
 
 function capturerConsole(): { lignes: string[]; rendre: () => void } {
@@ -230,6 +230,10 @@ Deno.test("un appel transcrit : le modèle sait que c'est un message vocal, peut
   const q = contenuDemande(d);
   assertStringIncludes(q, "message vocal laissé quand personne n'a décroché, transcrit automatiquement");
   assertStringIncludes(q, "la réponse part par SMS");
+  assertStringIncludes(q, CONSIGNE_COURTE);
+  d.reception = { ...d.reception!, canal: "email" };
+  d.canal_reponse = "email";
+  assert(!contenuDemande(d).includes(CONSIGNE_COURTE), "un courriel garde sa longueur");
 });
 
 Deno.test("TREPUT-03 : une heure à l'anglaise répond à l'heure de la fiche ; une heure inventée reste attrapée (aller-retour)", () => {
