@@ -21,7 +21,7 @@ import GardeFous from "@/components/espace/offload/GardeFous";
 import Groupes from "@/components/espace/offload/Groupes";
 import Pilotage from "@/components/espace/offload/Pilotage";
 import { chargerTableau } from "@/components/espace/offload/portes";
-import Habille from "../Habille";
+import Habille, { HabilleSb } from "../Habille";
 
 function Tete({ titre, sous }: { titre: string; sous: string }) {
   const { source } = useSource();
@@ -103,9 +103,8 @@ export function PageGardeFous() {
 export function PagePilotage() {
   const { source } = useSource();
   return (
-    <Habille>
-      <Tete titre="Pilotage" sous="Le chiffre remis en jeu vague par vague, les taux de réponse comparés, le suivi mois par mois et les résultats par entité. Chaque tableau s'exporte vers un tableur." />
-      <Pilotage source={source} />
-    </Habille>
+    <HabilleSb>
+      <Pilotage source={source} gabarit="sb" />
+    </HabilleSb>
   );
 }

@@ -412,3 +412,4 @@
 .v2 .sb-sauvegarde-icone { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 28px; height: 28px; border-radius: 6px; background: var(--v2-a-200); color: var(--v2-gray-900); }
 .v2 .sb-sauvegarde-texte { flex: 1; min-width: 0; display: flex; flex-direction: column; font-size: 13px; line-height: 19.5px; color: var(--v2-gray-900); }
 .v2 .sb-sauvegarde-texte strong { font-weight: 450; color: var(--v2-gray-1000); }
+.v2 .sb-pilotage { display: grid; gap: 10px; min-width: 0; }
