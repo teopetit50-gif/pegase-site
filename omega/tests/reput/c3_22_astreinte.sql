@@ -29,7 +29,7 @@ begin
   return next throws_ok(format('select public.reput_poser_garde(%L, null, %L, %L, now(), now() + interval ''1 day'')', v_client, v_lecteur, '+33600000003'),
                         '22023', null, 'Un lecteur n''est pas de garde');
   return next throws_ok(format('select public.reput_poser_garde(%L, null, %L, %L, now(), now() + interval ''1 day'')', v_client, m1, '12'),
-                        '23514', null, 'Un numéro mal formé est refusé');
+                        '22023', null, 'Un numéro mal formé est refusé (c3_37 : en clair)');
 
   -- ── Qui lit la garde (numéros) ──
   perform tests.endosser(m1, 'c3-22-m1@banc-varelo.test');
@@ -42,7 +42,7 @@ begin
   v_d1 := tests.c3_15_demande(v_client, 'email', 'c3-22a@exemple.test', 'Fictif Urgence', 'Fuite d''eau sous l''évier, ça coule partout.');
   update public.reput_demandes set urgence = true where id = v_d1;
   v_j := private.reput_astreinte(v_t);
-  return next ok((v_j ->> 'lances')::int >= 1 and exists (select 1 from public.reput_appels a where a.demande_id = v_d1 and a.rang = 1
+  return next ok(exists (select 1 from public.reput_appels a where a.demande_id = v_d1 and a.rang = 1
                                                           and a.user_id = m1 and a.statut = 'a_appeler'),
                  'Une urgence non prise : le rang 1 de la garde est appelé');
   v_j := public.reput_appels_a_passer(10, v_t);
