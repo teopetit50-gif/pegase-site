@@ -22,7 +22,7 @@ begin
   return next throws_like(format('select public.reput_poser_garde(%L, null, %L, %L, now(), now() + interval ''1 day'')', v_client, m1, 'abc'),
                           '%Numéro de garde illisible%', 'Téléphone « abc » : le refus le dit');
   return next throws_like(format('select public.reput_poser_garde(%L, null, %L, %L, now() + interval ''1 day'', now())', v_client, m1, '0600000037'),
-                          '%finit après son début%', 'Début après la fin : le refus le dit');
+                          '%fin de la garde%est avant son début%', 'Début après la fin : le refus le dit (c3_38 : le constat)');
   return next throws_like(format('select public.reput_poser_garde(%L, null, %L, %L, now(), now() + interval ''1 day'')', v_client,
                                  '00000000-0000-4000-8000-0000000c3037', '0600000037'),
                           '%n''appartient pas à l''organisation%invitez-le%', 'Membre inconnu : ce qui manque est dit');
