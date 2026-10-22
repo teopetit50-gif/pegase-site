@@ -1417,7 +1417,7 @@ Sessions actives arrêtées par message (A4, A5, C3, C4, T-FILED, T-CASHD, T-OFF
 | worker-a4 | 2ee67ed7 |
 | worker-a5 | 3cf96646 |
 | worker-c2 | 0ce7bbd8 |
-| worker-c3 | 192a033f (+ note inbound à venir) |
+| worker-c3 | b2efa7d2 (note inbound Brevo dans NOTES-C3) |
 | worker-c4 | 27c89ecf |
 | testeur-filed | cb6c7fec |
 | testeur-cashd | 858f0395 |
