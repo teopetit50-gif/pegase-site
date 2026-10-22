@@ -17,7 +17,9 @@
 --     variable {message} (le texte sur une ligne : Meta refuse les retours à la ligne ; {{organisation}} est fourni par le socle, qui refuse qu'un gabarit la déclare) ; sinon le texte
 --     libre de toujours. Repris par reput_deposer_reponse (de c3_33), reput_redeposer (de c3_07) et reput_accuser
 --     (de c3_18, qui prend aussi la forme courte par SMS ou WhatsApp, comme la réponse en c3_33) ;
---   · private.reput_gabarit (reprise de c3_33) : appel + WhatsApp → pas d'ouverture (le modèle Meta porte la sienne).
+--   · private.reput_gabarit (reprise de c3_33) : appel + WhatsApp → pas d'ouverture (le modèle Meta porte la sienne) ;
+--     TREPUT-12 : appel d'un fixe ou d'un numéro masqué (aucun écrit possible) → la note de rappel seule.
+--   · Correctif recette : le gabarit ne déclare que {{message}} ; {{organisation}} est fournie par le socle.
 -- Testé en doublures (souche : gabarit et préparation d'envoi imités) ; aucun compte ouvert, rien n'est envoyé.
 -- Le socle exige pour WhatsApp le consentement du destinataire (« consentement_toujours ») : sans lui, l'envoi est
 -- bloqué et la demande le dit (« bloquee »), comme tout envoi refusé.
@@ -174,7 +176,7 @@ end $function$;
 revoke execute on function private.reput_preparer_envoi(public.reput_demandes, text, text, text, text, uuid) from public, anon, authenticated;
 grant execute on function private.reput_preparer_envoi(public.reput_demandes, text, text, text, text, uuid) to service_role;
 
--- La forme du texte (reprise de c3_33) : appel + WhatsApp, sans ouverture.
+-- La forme du texte (reprise de c3_33) : appel + WhatsApp, sans ouverture ; appel sans écrit possible, la note seule.
 create or replace function private.reput_gabarit(p_client uuid, p_entite uuid, p_canal text, p_canal_reponse text,
                                                  p_reglages jsonb, p_langue text, p_resultat jsonb)
  returns text
@@ -187,6 +189,11 @@ declare
   v_appel text;
   v_mention text := nullif(btrim(p_reglages ->> 'mention_automatisee'), '');
 begin
+  -- TREPUT-12 : un appel d'un fixe ou d'un numéro masqué ne reçoit aucun écrit ; le texte est la note de la personne
+  -- qui rappelle : ni ouverture, ni signature.
+  if p_canal = 'appel' and p_canal_reponse is null then
+    return btrim(p_resultat ->> 'corps');
+  end if;
   if p_canal = 'appel' and p_langue = 'fr' then
     select nullif(btrim(r.ouverture_appel), '') into v_ouverture
     from public.reput_reglages r
