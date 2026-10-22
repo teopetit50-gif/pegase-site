@@ -74,12 +74,16 @@ export async function traiter(ctx: Contexte, t: Travail, version: string): Promi
       await ctx.portes.finirTravail(t.id, { ignore: `réception du module ${t.charge.module}` });
       return "ignore";
     }
+    // c3_34 (TREPUT-05) : les durées de chaque étape vont au résultat du travail ; l'attente du cron s'en déduit.
+    let top = Date.now();
     const dossier = await ctx.portes.commencer(reception);
+    const commencer_ms = Date.now() - top;
     if (dossier.statut !== "a_preparer" || !dossier.demande || !dossier.client) {
       await ctx.portes.finirTravail(t.id, { ignore: dossier.motif ?? dossier.statut, demande: dossier.demande ?? null });
       return "ignore";
     }
     demande = dossier.demande;
+    top = Date.now();
     let sortie = sansTexte(dossier);
     if (!sortie) {
       if (!ctx.claude) {
@@ -88,6 +92,8 @@ export async function traiter(ctx: Contexte, t: Travail, version: string): Promi
       await plafond(ctx, dossier.client, estimer(ctx.claude, dossier));
       sortie = await rediger(ctx.claude, dossier);
     }
+    const modele_ms = Date.now() - top;
+    top = Date.now();
     const depot = await ctx.portes.deposerReponse(demande, {
       ...sortie.redaction,
       modele: sortie.modele,
@@ -95,6 +101,7 @@ export async function traiter(ctx: Contexte, t: Travail, version: string): Promi
       tokens_sortie: sortie.usage.tokens_sortie,
       cout_eur: sortie.cout_eur,
     }, version);
+    const depot_ms = Date.now() - top;
     // c3_16 : le second sujet, noté après la réponse ; un échec ici ne défait pas la réponse déposée.
     let prevenus: number | null = null;
     if (sortie.redaction.sujet_secondaire) {
@@ -121,9 +128,11 @@ export async function traiter(ctx: Contexte, t: Travail, version: string): Promi
       tokens_entree: sortie.usage.tokens_entree,
       tokens_sortie: sortie.usage.tokens_sortie,
       cout_eur: sortie.cout_eur,
+      durees_ms: { commencer: commencer_ms, modele: modele_ms, depot: depot_ms },
     });
     journal("info", "réponse préparée", {
       travail: t.id, demande, statut: depot.statut, sujet: depot.sujet, couverte: depot.couverte, cout_eur: sortie.cout_eur,
+      durees_ms: { commencer: commencer_ms, modele: modele_ms, depot: depot_ms },
     });
     return "preparee";
   } catch (e) {
