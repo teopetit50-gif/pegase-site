@@ -1,32 +1,57 @@
-// Assemble le paquet à déployer : les fichiers du lecteur, le socle partagé
-// copié sous ./_partage, et un deno.json dont l'alias @partage/ pointe dedans.
-// Sortie : un JSON { files: [{name, content}] } pour l'outil de déploiement,
-// écrit dans le dossier passé en argument (par défaut ./outils/paquet.json).
+// Assemble le paquet à déployer : tous les fichiers que le lecteur importe, depuis index.ts, en suivant
+// les imports (relatifs et @partage/) ; le socle partagé est copié sous ./_partage, et le deno.json fait
+// pointer l'alias @partage/ dedans. Rien n'est listé à la main : un nouveau dossier (analyse/, media/,
+// mesure/…) entre dans le paquet dès qu'un fichier déployé l'importe.
+// Sortie : un JSON { entrypoint_path, import_map_path, files: [{name, content}] } pour l'outil de
+// déploiement, écrit dans le chemin passé en argument (par défaut ./outils/paquet.json).
 
 const ici = new URL(".", import.meta.url);
 const racine = new URL("../", ici);
 const partage = new URL("../../_partage/", ici);
 
-async function lister(dossier: URL, prefixe: string, filtre: (n: string) => boolean): Promise<{ name: string; content: string }[]> {
-  const sortie: { name: string; content: string }[] = [];
-  for await (const e of Deno.readDir(dossier)) {
-    if (e.isFile && filtre(e.name)) sortie.push({ name: prefixe + e.name, content: await Deno.readTextFile(new URL(e.name, dossier)) });
-  }
-  return sortie.sort((a, b) => a.name.localeCompare(b.name));
+/** Les spécificateurs importés par un fichier : import … from "x", export … from "x", import("x"), import "x". */
+export function importsDe(source: string): string[] {
+  const vus = new Set<string>();
+  const re = /(?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s+)["']([^"']+)["']/g;
+  for (const m of source.matchAll(re)) vus.add(m[1]);
+  return [...vus];
 }
 
-const ts = (n: string) => n.endsWith(".ts") && !n.endsWith("_test.ts");
-const fichiers = [
-  ...(await lister(racine, "", ts)),
-  ...(await lister(new URL("schemas/", racine), "schemas/", ts)),
-  ...(await lister(partage, "_partage/", ts)),
-];
-const denoJson = JSON.parse(await Deno.readTextFile(new URL("deno.json", racine)));
-denoJson.imports["@partage/"] = "./_partage/";
-delete denoJson.tasks;
-fichiers.push({ name: "deno.json", content: JSON.stringify(denoJson, null, 2) + "\n" });
+/** Le nom d'un fichier dans le paquet : relatif au lecteur, ou « _partage/… » pour le socle partagé. */
+function nomDansPaquet(url: URL): string | null {
+  if (url.href.startsWith(racine.href)) return url.href.slice(racine.href.length);
+  if (url.href.startsWith(partage.href)) return "_partage/" + url.href.slice(partage.href.length);
+  return null;
+}
 
-const cible = Deno.args[0] ?? new URL("paquet.json", ici).pathname;
-await Deno.writeTextFile(cible, JSON.stringify({ entrypoint_path: "index.ts", import_map_path: "deno.json", files: fichiers }, null, 2));
-console.log(`${fichiers.length} fichiers → ${cible}`);
-for (const f of fichiers) console.log(`  ${f.name} (${f.content.length})`);
+export async function assembler(entree = "index.ts"): Promise<{ name: string; content: string }[]> {
+  const fichiers = new Map<string, string>();
+  const aVoir: URL[] = [new URL(entree, racine)];
+  while (aVoir.length > 0) {
+    const url = aVoir.pop()!;
+    const nom = nomDansPaquet(url);
+    if (!nom) throw new Error(`Import hors du lecteur et du socle partagé : ${url.href}`);
+    if (fichiers.has(nom)) continue;
+    const source = await Deno.readTextFile(url);
+    fichiers.set(nom, source);
+    for (const spec of importsDe(source)) {
+      if (spec.startsWith("@partage/")) aVoir.push(new URL(spec.slice("@partage/".length), partage));
+      else if (spec.startsWith("./") || spec.startsWith("../")) aVoir.push(new URL(spec, url));
+      // les autres (jsr:, npm:, @std/…) passent par l'import map
+    }
+  }
+  return [...fichiers.entries()].map(([name, content]) => ({ name, content })).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+if (import.meta.main) {
+  const fichiers = await assembler();
+  const denoJson = JSON.parse(await Deno.readTextFile(new URL("deno.json", racine)));
+  denoJson.imports["@partage/"] = "./_partage/";
+  delete denoJson.tasks;
+  fichiers.push({ name: "deno.json", content: JSON.stringify(denoJson, null, 2) + "\n" });
+
+  const cible = Deno.args[0] ?? new URL("paquet.json", ici).pathname;
+  await Deno.writeTextFile(cible, JSON.stringify({ entrypoint_path: "index.ts", import_map_path: "deno.json", files: fichiers }, null, 2));
+  console.log(`${fichiers.length} fichiers → ${cible}`);
+  for (const f of fichiers) console.log(`  ${f.name} (${f.content.length})`);
+}
