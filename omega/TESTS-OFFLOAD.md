@@ -138,6 +138,7 @@ ni silence à juger. **Rien à relire au niveau 2** ; aucune liste de sociétés
 | L-6 | P:166 | O7, O11, O14 : commande reçue 6 jours plus tôt → `ralentit` (« Ses commandes s'espacent… ») et non `ok` | à confirmer (lecture défendable) | 1 |
 | C-09 | TOFFLOAD-09 (c4_32) | O1 : reprise `close`, `issue: abandon`, motif « compte en litige chez CASHD (…) La reprise ne se poursuit pas. », tâche `abandonnee`. Reste au tableau avec `eteint` et priorité 3 340,68 (remarque : un compte en litige classé parmi les comptes à relancer) | juste ; remarque au coordinateur | 1 |
 | C-10 | TOFFLOAD-10 (c4_32) | O12 : reprise `close`, `abandon`, « Données de la personne effacées à sa demande. … », tâche `abandonnee` ; O12 et O13 ne figurent plus dans `offload_tableau` | juste | 1 |
+| F-1 | c4_31 (fuseau de l'entité `America/Guadeloupe`) | 22/10 22 h 07 Z (Paris 23/10, Guadeloupe 22/10) sur O8 : achat daté 23/10 refusé (« La date d'un achat est connue et passée. ») ; achat daté 22/10 (F-FUS-22) accepté ; contact daté 23/10 refusé. Prouve que le jour n'est pas celui de Paris. Limite : à cette heure l'UTC est aussi le 22/10, donc Guadeloupe et UTC ne se distinguent qu'entre 00 h et 04 h Z (hors de la fenêtre de travail) | juste (Paris exclu) ; UTC/Guadeloupe non départagés | 1 |
 
 ## Écarts
 
@@ -266,3 +267,6 @@ après le fuseau par organisation de C4 (le coordinateur prévient). Aucune appr
 
 **22/10, arrêt 11.** Fait : TOFFLOAD-09 et 10 rejoués, justes. En attente : test du fuseau (entité en America/Guadeloupe) à 22 h 05 Z,
 détection lancée par le coordinateur au jour de Guadeloupe. Sonde (annulée, rien d'écrit) : un achat ou un contact daté du futur est refusé.
+
+**22/10 22 h 08 Z, arrêt 12.** Fait : F-1 (fuseau) joué. En attente : la détection du coordinateur au jour de Guadeloupe (22/10) ;
+note : le signal d'O8 porte encore `jour: 2026-10-27` (détections simulées plus tôt), à relire après. Arrêt avant 23 h 30 Z.
