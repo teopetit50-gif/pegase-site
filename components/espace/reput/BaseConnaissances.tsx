@@ -11,12 +11,13 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useState } from "react";
-import { BookOpen, Plus } from "lucide-react";
+import { BookOpen, ChevronRight, Plus } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { dateCourte } from "../format";
 import { Avis, Pastille, Vide } from "../ui";
 import { ecrireFiche, retirerFiche, validerFiche } from "./portes";
+import { SbBandeau, SbOutils } from "@/components/espace2/sb/Sb";
 import type { Client, Fiche, GenreFiche, Monde } from "./types";
 
 const GENRES: Record<GenreFiche, string> = {
@@ -27,9 +28,11 @@ type Brouillon = { id: string | null; sujet: string; genre: GenreFiche; titre: s
 
 const VIDE: Brouillon = { id: null, sujet: "information", genre: "question", titre: "", contenu: "", source: "", valide_du: "", valide_au: "" };
 
-export default function BaseConnaissances({ monde, source, client, role, relire, modifierLocal }: {
+export default function BaseConnaissances({ monde, source, client, role, relire, modifierLocal, gabarit }: {
   monde: Monde; source: "exemple" | "reelle"; client: Client | null; role: string;
   relire: () => Promise<void>; modifierLocal: (f: (m: Monde) => Monde) => void;
+  /** « sb » : /espace2 rend la page Auth › Emails de Supabase (22/10) ; /espace garde sa carte */
+  gabarit?: "sb";
 }) {
   const [b, setB] = useState<Brouillon | null>(null);
   const [envoi, setEnvoi] = useState(false);
@@ -80,6 +83,133 @@ export default function BaseConnaissances({ monde, source, client, role, relire,
   };
 
   const pret = b && b.titre.trim() && b.contenu.trim() && b.source.trim() && (!b.valide_au || !b.valide_du || b.valide_au >= b.valide_du);
+
+  const ouvrir = (f: Fiche) => {
+    setErreur(null);
+    setB({ id: f.id, sujet: f.sujet, genre: f.genre, titre: f.titre, contenu: f.contenu, source: f.source, valide_du: f.valide_du, valide_au: f.valide_au ?? "" });
+  };
+  const ouverte = b?.id ? monde.fiches.find((x) => x.id === b.id) ?? null : null;
+  const fenetre = (
+      <Dialog open={b !== null} onOpenChange={(o) => !o && setB(null)}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogIcone><BookOpen width={18} height={18} aria-hidden="true" /></DialogIcone>
+          <DialogTitle>{b?.id ? "Corriger la fiche" : "Nouvelle fiche"}</DialogTitle>
+          <DialogDescription>Écrivez ce que vous répondriez vous-même, avec ses chiffres exacts. La réponse ne dira rien de plus.</DialogDescription>
+        </DialogHeader>
+        {b ? (
+          <DialogBody>
+            <div className="esp-form">
+              <div className="esp-form-ligne">
+                <label className="rv-libelle">Sujet
+                  <select className="rv-champ" value={b.sujet} onChange={(e) => setB({ ...b, sujet: e.target.value })}>
+                    {monde.sujets.filter((s) => s.actif).map((s) => <option key={s.code} value={s.code}>{s.libelle}</option>)}
+                  </select>
+                </label>
+                <label className="rv-libelle">Genre
+                  <select className="rv-champ" value={b.genre} onChange={(e) => setB({ ...b, genre: e.target.value as GenreFiche })}>
+                    {(Object.keys(GENRES) as GenreFiche[]).map((g) => <option key={g} value={g}>{GENRES[g]}</option>)}
+                  </select>
+                </label>
+              </div>
+              <label className="rv-libelle">Question ou titre <span className="esp-obligatoire">(obligatoire)</span>
+                <input className="rv-champ" value={b.titre} onChange={(e) => setB({ ...b, titre: e.target.value })} placeholder="Êtes-vous ouverts le samedi ?" />
+              </label>
+              <label className="rv-libelle">Réponse ou contenu <span className="esp-obligatoire">(obligatoire)</span>
+                <textarea className="rv-champ" rows={5} value={b.contenu} onChange={(e) => setB({ ...b, contenu: e.target.value })} placeholder="Le samedi de 9 h à 12 h." />
+              </label>
+              <label className="rv-libelle">Source <span className="esp-obligatoire">(obligatoire)</span>
+                <input className="rv-champ" value={b.source} onChange={(e) => setB({ ...b, source: e.target.value })} placeholder="Grille tarifaire 2026, page 2" />
+              </label>
+              <div className="esp-form-ligne">
+                <label className="rv-libelle">En vigueur à partir du
+                  <input className="rv-champ" type="date" value={b.valide_du} onChange={(e) => setB({ ...b, valide_du: e.target.value })} />
+                </label>
+                <label className="rv-libelle">Jusqu&apos;au (facultatif)
+                  <input className="rv-champ" type="date" value={b.valide_au} onChange={(e) => setB({ ...b, valide_au: e.target.value })} />
+                </label>
+              </div>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+        ) : null}
+        <DialogFooter>
+          {gabarit === "sb" && ouverte && decide ? (
+            <button
+              type="button"
+              className="r-btn"
+              disabled={envoi}
+              onClick={() => {
+                const motif = window.prompt("Pourquoi retirer cette fiche ?");
+                if (motif && motif.trim()) void action(() => retirerFiche(ouverte.id, motif.trim()), (m) => ({ ...m, fiches: m.fiches.filter((x) => x.id !== ouverte.id) }), "La fiche est retirée : les réponses ne la citent plus.");
+              }}
+            >
+              Retirer
+            </button>
+          ) : null}
+          {gabarit === "sb" && ouverte && decide && ouverte.statut === "brouillon" ? (
+            <button type="button" className="r-btn" disabled={envoi} onClick={() => void action(() => validerFiche(ouverte.id), (m) => ({ ...m, fiches: m.fiches.map((x) => (x.id === ouverte.id ? { ...x, statut: "validee", valide_le: new Date().toISOString() } : x)) }), "La fiche est validée et en vigueur.")}>
+              Valider tel quel
+            </button>
+          ) : null}
+          <button type="button" className="r-btn r-btn--noir" disabled={!pret || envoi} onClick={enregistrer}>{envoi ? <Loader variant="spin" /> : null} {decide ? "Mettre en vigueur" : "Enregistrer le brouillon"}</button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+
+  /* 22/10 — la page Auth › Emails de Supabase (espace2/sb) : l'intertitre de
+     chaque sujet, puis ses fiches en lignes à chevron ; un clic ouvre la
+     fiche à corriger, avec ses gestes. /espace garde sa carte. */
+  if (gabarit === "sb") {
+    return (
+      <div className="sb-pile">
+        <SbOutils
+          gauche={<p className="sb-texte" style={{ maxWidth: 640 }}>Les réponses ne disent que ce qui est écrit ici. Chaque fiche porte sa source et sa période de validité ; une correction crée une nouvelle version, appliquée dès la réponse suivante.</p>}
+          droite={
+            ecrit ? (
+              <button type="button" className="v2-btn v2-btn--primaire" onClick={() => { setErreur(null); setB({ ...VIDE }); }}>
+                <Plus width={14} height={14} aria-hidden="true" /> Nouvelle fiche
+              </button>
+            ) : null
+          }
+        />
+        {fait ? <Avis teinte="vert" role="status">{fait}</Avis> : null}
+        {erreur && !b ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+        {parSujet.length === 0 ? (
+          <SbBandeau titre="La base est vide" texte="Sans fiche, chaque demande est transmise à votre équipe avec un accusé de réception." />
+        ) : (
+          parSujet.map(({ s: sujet, fiches }) => (
+            <section key={sujet.code} style={{ display: "flex", flexDirection: "column", gap: 16, marginTop: 8 }}>
+              <h2 className="v2-h2">{sujet.libelle}</h2>
+              <ul className="sb-liens-liste">
+                {fiches.map((f) => (
+                  <li key={f.id}>
+                    <button type="button" onClick={() => (ecrit ? ouvrir(f) : undefined)} aria-label={`Ouvrir la fiche : ${f.titre}`}>
+                      <span className="sb-liens-texte">
+                        <strong>{f.titre}</strong>
+                        <span>
+                          {f.contenu.length > 140 ? `${f.contenu.slice(0, 139)}…` : f.contenu} · Source : {f.source} · en vigueur du {dateCourte(f.valide_du)}
+                          {f.valide_au ? ` au ${dateCourte(f.valide_au)}` : ", sans fin"}
+                        </span>
+                      </span>
+                      <span className="sb-liens-fin">
+                        <span className="sb-commande">{GENRES[f.genre]}</span>
+                        {f.statut === "brouillon" ? <span className="sb-badge" data-teinte="ambre">brouillon</span> : null}
+                        {f.version > 1 ? <span className="sb-badge">v{f.version}</span> : null}
+                        <ChevronRight width={16} height={16} aria-hidden="true" />
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))
+        )}
+        {fenetre}
+      </div>
+    );
+  }
 
   return (
     <section className="esp-carte" aria-label="Base de connaissances">
@@ -138,54 +268,7 @@ export default function BaseConnaissances({ monde, source, client, role, relire,
         </div>
       ))}
 
-      <Dialog open={b !== null} onOpenChange={(o) => !o && setB(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogIcone><BookOpen width={18} height={18} aria-hidden="true" /></DialogIcone>
-            <DialogTitle>{b?.id ? "Corriger la fiche" : "Nouvelle fiche"}</DialogTitle>
-            <DialogDescription>Écrivez ce que vous répondriez vous-même, avec ses chiffres exacts. La réponse ne dira rien de plus.</DialogDescription>
-          </DialogHeader>
-          {b ? (
-            <DialogBody>
-              <div className="esp-form">
-                <div className="esp-form-ligne">
-                  <label className="rv-libelle">Sujet
-                    <select className="rv-champ" value={b.sujet} onChange={(e) => setB({ ...b, sujet: e.target.value })}>
-                      {monde.sujets.filter((s) => s.actif).map((s) => <option key={s.code} value={s.code}>{s.libelle}</option>)}
-                    </select>
-                  </label>
-                  <label className="rv-libelle">Genre
-                    <select className="rv-champ" value={b.genre} onChange={(e) => setB({ ...b, genre: e.target.value as GenreFiche })}>
-                      {(Object.keys(GENRES) as GenreFiche[]).map((g) => <option key={g} value={g}>{GENRES[g]}</option>)}
-                    </select>
-                  </label>
-                </div>
-                <label className="rv-libelle">Question ou titre <span className="esp-obligatoire">(obligatoire)</span>
-                  <input className="rv-champ" value={b.titre} onChange={(e) => setB({ ...b, titre: e.target.value })} placeholder="Êtes-vous ouverts le samedi ?" />
-                </label>
-                <label className="rv-libelle">Réponse ou contenu <span className="esp-obligatoire">(obligatoire)</span>
-                  <textarea className="rv-champ" rows={5} value={b.contenu} onChange={(e) => setB({ ...b, contenu: e.target.value })} placeholder="Le samedi de 9 h à 12 h." />
-                </label>
-                <label className="rv-libelle">Source <span className="esp-obligatoire">(obligatoire)</span>
-                  <input className="rv-champ" value={b.source} onChange={(e) => setB({ ...b, source: e.target.value })} placeholder="Grille tarifaire 2026, page 2" />
-                </label>
-                <div className="esp-form-ligne">
-                  <label className="rv-libelle">En vigueur à partir du
-                    <input className="rv-champ" type="date" value={b.valide_du} onChange={(e) => setB({ ...b, valide_du: e.target.value })} />
-                  </label>
-                  <label className="rv-libelle">Jusqu&apos;au (facultatif)
-                    <input className="rv-champ" type="date" value={b.valide_au} onChange={(e) => setB({ ...b, valide_au: e.target.value })} />
-                  </label>
-                </div>
-                {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
-              </div>
-            </DialogBody>
-          ) : null}
-          <DialogFooter>
-            <button type="button" className="r-btn r-btn--noir" disabled={!pret || envoi} onClick={enregistrer}>{envoi ? <Loader variant="spin" /> : null} {decide ? "Mettre en vigueur" : "Enregistrer le brouillon"}</button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {fenetre}
     </section>
   );
 }

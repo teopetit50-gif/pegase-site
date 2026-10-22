@@ -45,12 +45,13 @@ function nombre(t: string): number | null {
   return Number.isFinite(n) && n >= 0 ? n : NaN;
 }
 
-export default function Textes({ source, client, reglages, emetteur, apresReglage }: {
+export default function Textes({ source, client, reglages, emetteur, apresReglage, gabarit }: {
   source: Source;
   client: string | null;
   reglages: Reglages | null;
   emetteur?: string;
   apresReglage?: () => Promise<void> | void;
+  gabarit?: "sb";
 }) {
   const [liste, setListe] = useState<Gabarit[] | null>(source === "exemple" ? GABARITS_EXEMPLE : null);
   const [variables, setVariables] = useState<Record<string, string>>(VARIABLES);
@@ -310,214 +311,274 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
 
   if (!liste) return <div className="esp-carte"><Chargement texte="Lecture de vos textes…" /></div>;
 
+  const edition = (
+    <>
+    <div className="esp-form">
+      <div className="esp-form-ligne">
+        <label className="rv-libelle">Palier
+          <select className="rv-champ" value={cle} onChange={(e) => choisir(e.target.value as CleGabarit, langue, 1)}>
+            {PALIERS_GABARIT.map((p) => <option key={p.cle} value={p.cle}>{p.libelle}</option>)}
+          </select>
+        </label>
+        <label className="rv-libelle">Langue
+          <select className="rv-champ" value={langue} onChange={(e) => choisir(cle, e.target.value, 1)}>
+            {langues.map((l) => <option key={l} value={l}>{l.toUpperCase()}</option>)}
+          </select>
+        </label>
+        <label className="rv-libelle">Variante
+          <select className="rv-champ" value={variante} onChange={(e) => choisir(cle, langue, Number(e.target.value))}>
+            {Array.from({ length: palier.variantes }, (_, i) => i + 1).map((v) => {
+              const g = dansPalier.find((x) => x.variante === v);
+              return <option key={v} value={v}>{`${v}${g ? (g.personnalise ? " — la vôtre" : " — par défaut") : " — à écrire"}`}</option>;
+            })}
+          </select>
+        </label>
+      </div>
+      <div className="c2-tete-droite">
+        {actuel?.personnalise ? <Pastille teinte="vert">Votre texte</Pastille> : actuel ? <Pastille teinte="gris">Texte par défaut</Pastille> : <Pastille teinte="ambre">Pas encore écrit</Pastille>}
+        {cle === "mise_en_demeure" ? <span className="c2-sous">Une seule variante : la forme de la mise en demeure est juridique.</span> : null}
+      </div>
+      <label className="rv-libelle">Objet
+        <input className="rv-champ" value={sujet} maxLength={200} onChange={(e) => setSujet(e.target.value)} />
+      </label>
+      <label className="rv-libelle">Corps (la formule de politesse et la signature réglées s&apos;ajoutent à la fin)
+        <textarea className="rv-champ c2-gabarit" rows={9} value={corps} maxLength={8000} onChange={(e) => setCorps(e.target.value)} />
+      </label>
+      {refus ? <Avis teinte="ambre">{refus}</Avis> : null}
+      <div className="esp-actions">
+        <button type="button" className="r-btn r-btn--noir" disabled={!!refus || envoi} onClick={() => void enregistrer(true)}>
+          {envoi ? <Loader variant="spin" /> : null} Enregistrer ce texte
+        </button>
+        {actuel?.personnalise ? (
+          <button type="button" className="r-btn" disabled={envoi} onClick={() => void enregistrer(false)}>Revenir au texte par défaut</button>
+        ) : null}
+        <span className="c2-ajout-langue">
+          <input className="rv-champ" aria-label="Nouvelle langue (deux lettres)" placeholder="de, es, it…" maxLength={2} value={nouvelleLangue}
+            onChange={(e) => setNouvelleLangue(e.target.value.toLowerCase().replace(/[^a-z]/g, ""))} />
+          <button type="button" className="esp-lien-bouton" disabled={nouvelleLangue.length !== 2 || langues.includes(nouvelleLangue)}
+            onClick={() => {
+              const l = nouvelleLangue;
+              setAjoutees((prev) => [...prev, l]);
+              setNouvelleLangue("");
+              choisir(cle, l, 1);
+              setFait(`Écrivez ce palier en ${l.toUpperCase()}, en partant du texte français : les comptes de cette langue le recevront. Le détail des pièces reste en anglais.`);
+            }}>
+            Écrire dans une autre langue
+          </button>
+        </span>
+      </div>
+      {etrangere ? (
+        <div className="c2-lignes-langue">
+          <p className="c2-sous">Le détail des pièces en {langue.toUpperCase()} — sans ligne propre, il part en anglais.</p>
+          {(["facture", "devis"] as const).map((nature) => {
+            const valeur = ligneSaisie[nature] || ligneDe(nature);
+            const refusL = refusLigne(nature, valeur);
+            return (
+              <div key={nature} className="esp-form-ligne">
+                <label className="rv-libelle">{nature === "facture" ? "Ligne d'une facture ({numero} {date} {montant} {echeance} {retard} {reste} {commande})" : "Ligne d'un devis ({numero} {date} {montant})"}
+                  <input className="rv-champ" value={valeur} maxLength={300} placeholder={nature === "facture" ? "Rechnung {numero} vom {date}, fällig am {echeance}: {reste} offen" : "Angebot {numero} vom {date}: {montant}"}
+                    onChange={(e) => setLigneSaisie({ ...ligneSaisie, [nature]: e.target.value })} />
+                </label>
+                <span className="c2-gestes">
+                  <button type="button" className="r-btn" disabled={!valeur.trim() || !!refusL || envoi} onClick={() => void enregistrerLigne(nature)}>Enregistrer la ligne</button>
+                  {refusL ? <span className="c2-sous c2-motif">{refusL}</span> : null}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      ) : null}
+      {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+      {fait ? <Avis teinte="vert" role="status">{fait}</Avis> : null}
+    </div>
+    </>
+  );
+  const exemple = (
+    <>
+    <h3 className="esp-section-titre">Aperçu sur un exemple</h3>
+    <p className="c2-sous">{cle === "echeance" ? <>La SCI Lefèvre, une facture de {montant(12000)} à régler ce jour.</> : <>La SCI Lefèvre, une facture de {montant(12000)} en retard de 45 jours.</>}</p>
+    <pre className="c2-corps"><strong>{vu.sujet}</strong>{"\n\n"}{vu.corps}</pre>
+    <details className="c2-variables">
+      <summary>Les variables</summary>
+      <dl className="c2-legende">
+        {Object.entries(variables).map(([k, v]) => (
+          <div key={k}><dt><code>{`{${k}}`}</code></dt><dd>{v}</dd></div>
+        ))}
+      </dl>
+    </details>
+    </>
+  );
+  const ton = (
+    <>
+    <h3 className="esp-section-titre">Le ton, les moyens de règlement, le métier</h3>
+    <div className="esp-form">
+      <div className="esp-form-ligne">
+        <label className="rv-libelle">Au-delà de ce montant, demander la date de règlement (€)
+          <input className="rv-champ" inputMode="decimal" value={r.seuil_ton} onChange={(e) => setR({ ...r, seuil_ton: e.target.value })} placeholder="1 500 (par défaut)" />
+        </label>
+        <label className="rv-libelle">Proposer un échéancier au-delà de (€)
+          <input className="rv-champ" inputMode="decimal" value={r.echelonnement_des} onChange={(e) => setR({ ...r, echelonnement_des: e.target.value })} placeholder="5 000" />
+        </label>
+      </div>
+      <div className="esp-form-ligne">
+        <label className="rv-libelle">Au rappel, dire la durée du retard au-delà de (jours)
+          <input className="rv-champ" inputMode="numeric" value={r.ton_retard_jours} onChange={(e) => setR({ ...r, ton_retard_jours: e.target.value })} placeholder="15 (par défaut)" />
+        </label>
+        <label className="rv-libelle">Dire que le retard devient important au-delà de (jours)
+          <input className="rv-champ" inputMode="numeric" value={r.ton_retard_important_jours} onChange={(e) => setR({ ...r, ton_retard_important_jours: e.target.value })} placeholder="45 (par défaut)" />
+        </label>
+      </div>
+      {!paliersTon ? <p className="c2-sous">Le premier palier vient avant le second.</p> : null}
+      <div className="esp-form-ligne">
+        <label className="rv-libelle">Date limite : temps laissé à la validation (jours ouvrés)
+          <input className="rv-champ" inputMode="numeric" value={r.marge_validation_jours} onChange={(e) => setR({ ...r, marge_validation_jours: e.target.value })} placeholder="3 (par défaut)" />
+        </label>
+        <label className="rv-libelle">Remise d&apos;un courrier ou d&apos;une lettre recommandée (jours)
+          <input className="rv-champ" inputMode="numeric" value={r.remise_courrier_jours} onChange={(e) => setR({ ...r, remise_courrier_jours: e.target.value })} placeholder="2 (par défaut)" />
+        </label>
+      </div>
+      {!joursValides ? <p className="c2-sous">De 0 à 15 jours, en nombre entier.</p> : null}
+      <label className="rv-libelle">Vos moyens de règlement (« Moyens de règlement : … »)
+        <input className="rv-champ" value={r.moyens_reglement} maxLength={400} onChange={(e) => setR({ ...r, moyens_reglement: e.target.value })} placeholder="Virement sur le compte FR76 …, chèque à l'ordre de …, ou au comptoir" />
+      </label>
+      <label className="rv-libelle">Le vocabulaire des relances de devis
+        <select className="rv-champ" value={r.metier} onChange={(e) => setR({ ...r, metier: e.target.value as Reglage["metier"] })}>
+          <option value="general">Général</option>
+          <option value="btp">Bâtiment : chantier, visite, date d&apos;intervention</option>
+        </select>
+      </label>
+      <div className="esp-actions">
+        <button type="button" className="r-btn" disabled={!reglageValide || envoi} onClick={() => void reglerTon()}>Enregistrer ces réglages</button>
+      </div>
+    </div>
+    </>
+  );
+  const valide = (
+    <>
+    <h3 className="esp-section-titre">Qui valide les relances, selon le montant</h3>
+    <p className="c2-sous">Le gérant règle jusqu&apos;à trois paliers. Une relance attend la validation d&apos;une personne d&apos;un des rôles de son palier.</p>
+    <div className="esp-form">
+      {paliers.map((x, i) => (
+        <fieldset key={i} className="c2-palier">
+          <legend>{i === 0 ? "Dès 0 €" : `Palier ${i + 1}`}</legend>
+          {i > 0 ? (
+            <label className="rv-libelle">À partir de (€)
+              <input className="rv-champ" inputMode="decimal" value={x.montant} onChange={(e) => setPaliers(paliers.map((y, k) => (k === i ? { ...y, montant: e.target.value } : y)))} />
+            </label>
+          ) : null}
+          <span className="c2-roles">
+            {ROLES.map((r) => (
+              <label key={r.cle} className="c2-coche">
+                <input type="checkbox" checked={x.roles.includes(r.cle)}
+                  onChange={(e) => setPaliers(paliers.map((y, k) => (k === i ? { ...y, roles: e.target.checked ? [...y.roles, r.cle] : y.roles.filter((z) => z !== r.cle) } : y)))} />
+                <span>{r.libelle}</span>
+              </label>
+            ))}
+          </span>
+        </fieldset>
+      ))}
+      <div className="esp-actions">
+        {paliers.length < 3 ? <button type="button" className="esp-lien-bouton" onClick={() => setPaliers([...paliers, { montant: "", roles: ["gerant"] }])}>Ajouter un palier</button> : null}
+        {paliers.length > 1 ? <button type="button" className="esp-lien-bouton" onClick={() => setPaliers(paliers.slice(0, -1))}>Retirer le dernier palier</button> : null}
+      </div>
+      {!paliersValides ? <Avis teinte="ambre">Chaque palier a au moins un rôle, et ses montants croissent.</Avis> : null}
+      <div className="esp-actions">
+        <button type="button" className="r-btn" disabled={!paliersValides || envoi} onClick={() => void reglerPaliers(false)}>Enregistrer les paliers</button>
+        {reglages?.paliers_validation ? <button type="button" className="r-btn" disabled={envoi} onClick={() => void reglerPaliers(true)}>Revenir aux rôles par défaut</button> : null}
+      </div>
+      <label className="c2-coche">
+        <input type="checkbox" checked={portefeuille} disabled={envoi} onChange={(e) => void reglerPortefeuille(e.target.checked)} />
+        <span>Chaque chargé de recouvrement ne voit que son portefeuille (les comptes dont il est le chargé) ; la direction, l&apos;administration et les valideurs lisent le consolidé.</span>
+      </label>
+      <div className="c2-auto" role="group" aria-labelledby="c2-auto-titre">
+        <p id="c2-auto-titre" className="c2-auto-titre">Rappels envoyés sans validation</p>
+        <p className="c2-sous">
+          Le rappel du jour de l&apos;échéance et le rappel J+7 peuvent partir seuls, jusqu&apos;à un plafond par rappel. La relance ferme, la mise en demeure et la lettre recommandée attendent toujours une personne. L&apos;accord dure un an ; une seconde personne l&apos;active dans la file de validation.
+        </p>
+        <p className="c2-auto-etat">
+          {auto.actif && auto.accord
+            ? <><Pastille teinte="vert">Actif</Pastille> jusqu&apos;à {montant(auto.accord.plafond)} par rappel, jusqu&apos;au {dateCourte(auto.accord.fin)}</>
+            : auto.accord?.statut === "a_valider"
+              ? <><Pastille teinte="ambre">Proposé</Pastille> en attente d&apos;activation, plafond {montant(auto.accord.plafond)}</>
+              : <><Pastille teinte="gris">Coupé</Pastille> chaque rappel attend une validation</>}
+        </p>
+        <div className="esp-actions">
+          {auto.accord ? (
+            <button type="button" className="r-btn" disabled={envoi} onClick={() => void reglerAuto(false)}>Couper l&apos;envoi automatique</button>
+          ) : (
+            <>
+              <label className="rv-libelle c2-auto-plafond">Plafond par rappel (€)
+                <input className="rv-champ" inputMode="decimal" value={plafondAuto} onChange={(e) => setPlafondAuto(e.target.value)} />
+              </label>
+              <button type="button" className="r-btn" disabled={envoi} onClick={() => void reglerAuto(true)}>Proposer l&apos;envoi automatique</button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+    </>
+  );
+
+  if (gabarit === "sb") {
+    /* 22/10 — la page Emails de Supabase : la liste des modèles, puis l'éditeur
+       du modèle choisi (objet, corps, aperçu à côté), puis les réglages en sections */
+    return (
+      <div className="sb-reglages sb-textes">
+        <h1 className="sb-titre">Vos textes</h1>
+        <section className="sb-reglages-section" aria-label="Modèles">
+          <header>
+            <h2>Modèles</h2>
+            <p>Un compte reçoit à chaque palier la variante suivante : jamais deux fois le même message.</p>
+          </header>
+          <ul className="sb-liens-liste sb-modeles">
+            {PALIERS_GABARIT.map((p) => {
+              const propre = (liste ?? []).some((g) => g.cle === p.cle && g.langue === langue && g.personnalise);
+              return (
+                <li key={p.cle}>
+                  <button type="button" aria-current={p.cle === cle ? "true" : undefined} onClick={() => choisir(p.cle, langue, 1)}>
+                    <span>{p.libelle}</span>
+                    {propre ? <Pastille teinte="vert">Votre texte</Pastille> : <Pastille teinte="gris">Par défaut</Pastille>}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+          <div className="esp-carte sb-modele">
+            <div className="esp-carte-tete"><h3 className="esp-carte-titre">{palier.libelle}</h3></div>
+            <div className="sb-modele-corps">
+              <div className="esp-carte-corps">{edition}</div>
+              <div className="esp-carte-corps sb-modele-apercu">{exemple}</div>
+            </div>
+          </div>
+        </section>
+        <section className="sb-reglages-section" aria-label="Le ton">
+          <header>
+            <h2>Le ton, les moyens de règlement, le métier</h2>
+            <p>Ce qui change dans chaque relance selon le montant et votre métier.</p>
+          </header>
+          <div className="esp-carte"><div className="esp-carte-corps">{ton}</div></div>
+        </section>
+        <section className="sb-reglages-section" aria-label="Qui valide">
+          <header>
+            <h2>Qui valide les relances</h2>
+            <p>Selon le montant, la personne qui laisse partir une relance.</p>
+          </header>
+          <div className="esp-carte"><div className="esp-carte-corps">{valide}</div></div>
+        </section>
+      </div>
+    );
+  }
+
   return (
     <section className="esp-carte c2-section" aria-label="Vos textes">
       <div className="esp-carte-tete">
         <h2 className="esp-carte-titre">Vos textes</h2>
         <span className="esp-kpi-sous">un compte reçoit à chaque palier la variante suivante : jamais deux fois le même message</span>
       </div>
-      <div className="esp-carte-corps">
-        <div className="esp-form">
-          <div className="esp-form-ligne">
-            <label className="rv-libelle">Palier
-              <select className="rv-champ" value={cle} onChange={(e) => choisir(e.target.value as CleGabarit, langue, 1)}>
-                {PALIERS_GABARIT.map((p) => <option key={p.cle} value={p.cle}>{p.libelle}</option>)}
-              </select>
-            </label>
-            <label className="rv-libelle">Langue
-              <select className="rv-champ" value={langue} onChange={(e) => choisir(cle, e.target.value, 1)}>
-                {langues.map((l) => <option key={l} value={l}>{l.toUpperCase()}</option>)}
-              </select>
-            </label>
-            <label className="rv-libelle">Variante
-              <select className="rv-champ" value={variante} onChange={(e) => choisir(cle, langue, Number(e.target.value))}>
-                {Array.from({ length: palier.variantes }, (_, i) => i + 1).map((v) => {
-                  const g = dansPalier.find((x) => x.variante === v);
-                  return <option key={v} value={v}>{`${v}${g ? (g.personnalise ? " — la vôtre" : " — par défaut") : " — à écrire"}`}</option>;
-                })}
-              </select>
-            </label>
-          </div>
-          <div className="c2-tete-droite">
-            {actuel?.personnalise ? <Pastille teinte="vert">Votre texte</Pastille> : actuel ? <Pastille teinte="gris">Texte par défaut</Pastille> : <Pastille teinte="ambre">Pas encore écrit</Pastille>}
-            {cle === "mise_en_demeure" ? <span className="c2-sous">Une seule variante : la forme de la mise en demeure est juridique.</span> : null}
-          </div>
-          <label className="rv-libelle">Objet
-            <input className="rv-champ" value={sujet} maxLength={200} onChange={(e) => setSujet(e.target.value)} />
-          </label>
-          <label className="rv-libelle">Corps (la formule de politesse et la signature réglées s&apos;ajoutent à la fin)
-            <textarea className="rv-champ c2-gabarit" rows={9} value={corps} maxLength={8000} onChange={(e) => setCorps(e.target.value)} />
-          </label>
-          {refus ? <Avis teinte="ambre">{refus}</Avis> : null}
-          <div className="esp-actions">
-            <button type="button" className="r-btn r-btn--noir" disabled={!!refus || envoi} onClick={() => void enregistrer(true)}>
-              {envoi ? <Loader variant="spin" /> : null} Enregistrer ce texte
-            </button>
-            {actuel?.personnalise ? (
-              <button type="button" className="r-btn" disabled={envoi} onClick={() => void enregistrer(false)}>Revenir au texte par défaut</button>
-            ) : null}
-            <span className="c2-ajout-langue">
-              <input className="rv-champ" aria-label="Nouvelle langue (deux lettres)" placeholder="de, es, it…" maxLength={2} value={nouvelleLangue}
-                onChange={(e) => setNouvelleLangue(e.target.value.toLowerCase().replace(/[^a-z]/g, ""))} />
-              <button type="button" className="esp-lien-bouton" disabled={nouvelleLangue.length !== 2 || langues.includes(nouvelleLangue)}
-                onClick={() => {
-                  const l = nouvelleLangue;
-                  setAjoutees((prev) => [...prev, l]);
-                  setNouvelleLangue("");
-                  choisir(cle, l, 1);
-                  setFait(`Écrivez ce palier en ${l.toUpperCase()}, en partant du texte français : les comptes de cette langue le recevront. Le détail des pièces reste en anglais.`);
-                }}>
-                Écrire dans une autre langue
-              </button>
-            </span>
-          </div>
-          {etrangere ? (
-            <div className="c2-lignes-langue">
-              <p className="c2-sous">Le détail des pièces en {langue.toUpperCase()} — sans ligne propre, il part en anglais.</p>
-              {(["facture", "devis"] as const).map((nature) => {
-                const valeur = ligneSaisie[nature] || ligneDe(nature);
-                const refusL = refusLigne(nature, valeur);
-                return (
-                  <div key={nature} className="esp-form-ligne">
-                    <label className="rv-libelle">{nature === "facture" ? "Ligne d'une facture ({numero} {date} {montant} {echeance} {retard} {reste} {commande})" : "Ligne d'un devis ({numero} {date} {montant})"}
-                      <input className="rv-champ" value={valeur} maxLength={300} placeholder={nature === "facture" ? "Rechnung {numero} vom {date}, fällig am {echeance}: {reste} offen" : "Angebot {numero} vom {date}: {montant}"}
-                        onChange={(e) => setLigneSaisie({ ...ligneSaisie, [nature]: e.target.value })} />
-                    </label>
-                    <span className="c2-gestes">
-                      <button type="button" className="r-btn" disabled={!valeur.trim() || !!refusL || envoi} onClick={() => void enregistrerLigne(nature)}>Enregistrer la ligne</button>
-                      {refusL ? <span className="c2-sous c2-motif">{refusL}</span> : null}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          ) : null}
-          {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
-          {fait ? <Avis teinte="vert" role="status">{fait}</Avis> : null}
-        </div>
-      </div>
-
-      <div className="esp-carte-corps">
-        <h3 className="esp-section-titre">Aperçu sur un exemple</h3>
-        <p className="c2-sous">{cle === "echeance" ? <>La SCI Lefèvre, une facture de {montant(12000)} à régler ce jour.</> : <>La SCI Lefèvre, une facture de {montant(12000)} en retard de 45 jours.</>}</p>
-        <pre className="c2-corps"><strong>{vu.sujet}</strong>{"\n\n"}{vu.corps}</pre>
-        <details className="c2-variables">
-          <summary>Les variables</summary>
-          <dl className="c2-legende">
-            {Object.entries(variables).map(([k, v]) => (
-              <div key={k}><dt><code>{`{${k}}`}</code></dt><dd>{v}</dd></div>
-            ))}
-          </dl>
-        </details>
-      </div>
-
-      <div className="esp-carte-corps">
-        <h3 className="esp-section-titre">Le ton, les moyens de règlement, le métier</h3>
-        <div className="esp-form">
-          <div className="esp-form-ligne">
-            <label className="rv-libelle">Au-delà de ce montant, demander la date de règlement (€)
-              <input className="rv-champ" inputMode="decimal" value={r.seuil_ton} onChange={(e) => setR({ ...r, seuil_ton: e.target.value })} placeholder="1 500 (par défaut)" />
-            </label>
-            <label className="rv-libelle">Proposer un échéancier au-delà de (€)
-              <input className="rv-champ" inputMode="decimal" value={r.echelonnement_des} onChange={(e) => setR({ ...r, echelonnement_des: e.target.value })} placeholder="5 000" />
-            </label>
-          </div>
-          <div className="esp-form-ligne">
-            <label className="rv-libelle">Au rappel, dire la durée du retard au-delà de (jours)
-              <input className="rv-champ" inputMode="numeric" value={r.ton_retard_jours} onChange={(e) => setR({ ...r, ton_retard_jours: e.target.value })} placeholder="15 (par défaut)" />
-            </label>
-            <label className="rv-libelle">Dire que le retard devient important au-delà de (jours)
-              <input className="rv-champ" inputMode="numeric" value={r.ton_retard_important_jours} onChange={(e) => setR({ ...r, ton_retard_important_jours: e.target.value })} placeholder="45 (par défaut)" />
-            </label>
-          </div>
-          {!paliersTon ? <p className="c2-sous">Le premier palier vient avant le second.</p> : null}
-          <div className="esp-form-ligne">
-            <label className="rv-libelle">Date limite : temps laissé à la validation (jours ouvrés)
-              <input className="rv-champ" inputMode="numeric" value={r.marge_validation_jours} onChange={(e) => setR({ ...r, marge_validation_jours: e.target.value })} placeholder="3 (par défaut)" />
-            </label>
-            <label className="rv-libelle">Remise d&apos;un courrier ou d&apos;une lettre recommandée (jours)
-              <input className="rv-champ" inputMode="numeric" value={r.remise_courrier_jours} onChange={(e) => setR({ ...r, remise_courrier_jours: e.target.value })} placeholder="2 (par défaut)" />
-            </label>
-          </div>
-          {!joursValides ? <p className="c2-sous">De 0 à 15 jours, en nombre entier.</p> : null}
-          <label className="rv-libelle">Vos moyens de règlement (« Moyens de règlement : … »)
-            <input className="rv-champ" value={r.moyens_reglement} maxLength={400} onChange={(e) => setR({ ...r, moyens_reglement: e.target.value })} placeholder="Virement sur le compte FR76 …, chèque à l'ordre de …, ou au comptoir" />
-          </label>
-          <label className="rv-libelle">Le vocabulaire des relances de devis
-            <select className="rv-champ" value={r.metier} onChange={(e) => setR({ ...r, metier: e.target.value as Reglage["metier"] })}>
-              <option value="general">Général</option>
-              <option value="btp">Bâtiment : chantier, visite, date d&apos;intervention</option>
-            </select>
-          </label>
-          <div className="esp-actions">
-            <button type="button" className="r-btn" disabled={!reglageValide || envoi} onClick={() => void reglerTon()}>Enregistrer ces réglages</button>
-          </div>
-        </div>
-      </div>
-
-      <div className="esp-carte-corps" role="region" aria-label="Qui valide">
-        <h3 className="esp-section-titre">Qui valide les relances, selon le montant</h3>
-        <p className="c2-sous">Le gérant règle jusqu&apos;à trois paliers. Une relance attend la validation d&apos;une personne d&apos;un des rôles de son palier.</p>
-        <div className="esp-form">
-          {paliers.map((x, i) => (
-            <fieldset key={i} className="c2-palier">
-              <legend>{i === 0 ? "Dès 0 €" : `Palier ${i + 1}`}</legend>
-              {i > 0 ? (
-                <label className="rv-libelle">À partir de (€)
-                  <input className="rv-champ" inputMode="decimal" value={x.montant} onChange={(e) => setPaliers(paliers.map((y, k) => (k === i ? { ...y, montant: e.target.value } : y)))} />
-                </label>
-              ) : null}
-              <span className="c2-roles">
-                {ROLES.map((r) => (
-                  <label key={r.cle} className="c2-coche">
-                    <input type="checkbox" checked={x.roles.includes(r.cle)}
-                      onChange={(e) => setPaliers(paliers.map((y, k) => (k === i ? { ...y, roles: e.target.checked ? [...y.roles, r.cle] : y.roles.filter((z) => z !== r.cle) } : y)))} />
-                    <span>{r.libelle}</span>
-                  </label>
-                ))}
-              </span>
-            </fieldset>
-          ))}
-          <div className="esp-actions">
-            {paliers.length < 3 ? <button type="button" className="esp-lien-bouton" onClick={() => setPaliers([...paliers, { montant: "", roles: ["gerant"] }])}>Ajouter un palier</button> : null}
-            {paliers.length > 1 ? <button type="button" className="esp-lien-bouton" onClick={() => setPaliers(paliers.slice(0, -1))}>Retirer le dernier palier</button> : null}
-          </div>
-          {!paliersValides ? <Avis teinte="ambre">Chaque palier a au moins un rôle, et ses montants croissent.</Avis> : null}
-          <div className="esp-actions">
-            <button type="button" className="r-btn" disabled={!paliersValides || envoi} onClick={() => void reglerPaliers(false)}>Enregistrer les paliers</button>
-            {reglages?.paliers_validation ? <button type="button" className="r-btn" disabled={envoi} onClick={() => void reglerPaliers(true)}>Revenir aux rôles par défaut</button> : null}
-          </div>
-          <label className="c2-coche">
-            <input type="checkbox" checked={portefeuille} disabled={envoi} onChange={(e) => void reglerPortefeuille(e.target.checked)} />
-            <span>Chaque chargé de recouvrement ne voit que son portefeuille (les comptes dont il est le chargé) ; la direction, l&apos;administration et les valideurs lisent le consolidé.</span>
-          </label>
-          <div className="c2-auto" role="group" aria-labelledby="c2-auto-titre">
-            <p id="c2-auto-titre" className="c2-auto-titre">Rappels envoyés sans validation</p>
-            <p className="c2-sous">
-              Le rappel du jour de l&apos;échéance et le rappel J+7 peuvent partir seuls, jusqu&apos;à un plafond par rappel. La relance ferme, la mise en demeure et la lettre recommandée attendent toujours une personne. L&apos;accord dure un an ; une seconde personne l&apos;active dans la file de validation.
-            </p>
-            <p className="c2-auto-etat">
-              {auto.actif && auto.accord
-                ? <><Pastille teinte="vert">Actif</Pastille> jusqu&apos;à {montant(auto.accord.plafond)} par rappel, jusqu&apos;au {dateCourte(auto.accord.fin)}</>
-                : auto.accord?.statut === "a_valider"
-                  ? <><Pastille teinte="ambre">Proposé</Pastille> en attente d&apos;activation, plafond {montant(auto.accord.plafond)}</>
-                  : <><Pastille teinte="gris">Coupé</Pastille> chaque rappel attend une validation</>}
-            </p>
-            <div className="esp-actions">
-              {auto.accord ? (
-                <button type="button" className="r-btn" disabled={envoi} onClick={() => void reglerAuto(false)}>Couper l&apos;envoi automatique</button>
-              ) : (
-                <>
-                  <label className="rv-libelle c2-auto-plafond">Plafond par rappel (€)
-                    <input className="rv-champ" inputMode="decimal" value={plafondAuto} onChange={(e) => setPlafondAuto(e.target.value)} />
-                  </label>
-                  <button type="button" className="r-btn" disabled={envoi} onClick={() => void reglerAuto(true)}>Proposer l&apos;envoi automatique</button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+      <div className="esp-carte-corps">{edition}</div>
+      <div className="esp-carte-corps">{exemple}</div>
+      <div className="esp-carte-corps">{ton}</div>
+      <div className="esp-carte-corps" role="region" aria-label="Qui valide">{valide}</div>
     </section>
   );
 }

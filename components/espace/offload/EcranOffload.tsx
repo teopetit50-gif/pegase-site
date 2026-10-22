@@ -26,6 +26,7 @@ import { Avis, Chargement, Pastille, Ruban, Vide } from "../ui";
 import { dateCourte, montant } from "../format";
 import { A_RISQUE, NIVEAUX, STATUTS_REPRISE } from "./etats";
 import { exempleOffload } from "./exemples";
+import { SbBandeau } from "@/components/espace2/sb/Sb";
 import FicheCompte, { type Geste } from "./FicheCompte";
 import Affaires from "./Affaires";
 import GardeFous from "./GardeFous";
@@ -44,7 +45,9 @@ const KPIS: { cle: Exclude<Filtre, "tous">; libelle: string; sous: string; teint
   { cle: "appels", libelle: "Appels à passer", sous: "tâches des commerciaux", teinte: "bleu" },
 ];
 
-export default function EcranOffload() {
+/* `sections` : faux dans /espace2, où garde-fous, échéances, affaires,
+   groupes et pilotage ont chacun leur page (21/10/2026) */
+export default function EcranOffload({ sections = true, gabarit }: { sections?: boolean; gabarit?: "sb" } = {}) {
   const { source } = useSource();
   const [exemple, setExemple] = useState(() => exempleOffload());
   const [reel, setReel] = useState<{ tableau: Tableau | null; fiches: Record<string, Fiche> } | null>(null);
@@ -53,6 +56,17 @@ export default function EcranOffload() {
   const [choix, setChoix] = useState<string | null>(null);
   const [chargeFiche, setChargeFiche] = useState(false);
   const [recalcul, setRecalcul] = useState(false);
+
+  /* ?compte=<id> ouvre la fiche d'un compte (les pages de fonction de /espace2/offload, 21/10) */
+  useEffect(() => {
+    const c = new URLSearchParams(window.location.search).get("compte");
+    if (!c) return;
+    const t = window.setTimeout(() => {
+      setFiltre("tous");
+      setChoix(c);
+    }, 0);
+    return () => window.clearTimeout(t);
+  }, []);
 
   const charger = useCallback(async () => {
     await Promise.resolve();
@@ -210,6 +224,127 @@ export default function EcranOffload() {
 
   const reglages = tableau?.reglages;
 
+  const doublons = (
+    <>
+    {(tableau?.rapprochements ?? []).length ? (
+      <section className="esp-carte" aria-label="Doublons proposés">
+        <div className="esp-carte-tete">
+          <h2 className="esp-carte-titre">Doublons proposés</h2>
+          <span className="esp-kpi-sous">la fusion n&apos;a lieu qu&apos;après votre accord</span>
+        </div>
+        <div className="esp-carte-corps" style={{ display: "grid", gap: 8 }}>
+          {(tableau?.rapprochements ?? []).map((x) => (
+            <div key={x.id} style={{ border: "1px solid var(--r-filet)", borderRadius: 12, padding: "10px 12px" }}>
+              <strong>{x.a_nom}</strong> <span className="esp-mono">{x.a_ref}</span> et <strong>{x.b_nom}</strong> <span className="esp-mono">{x.b_ref}</span>
+              <ul style={{ margin: "6px 0", paddingLeft: 18 }}>{x.raisons.map((r) => <li key={r} className="esp-kpi-sous">{r}</li>)}</ul>
+              {source === "reelle" ? (
+                <div className="esp-actions">
+                  <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={() => void trancher(x.id, true)}>Fusionner dans {x.a_nom}</button>
+                  <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => void trancher(x.id, false)}>Ce sont deux clients</button>
+                </div>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      </section>
+    ) : null}
+    </>
+  );
+
+  if (gabarit === "sb") {
+    /* 22/10 — la page Users de Supabase : les comptes en tableau, la fiche dans le volet de droite */
+    const attente = (tableau?.a_valider ?? []).length;
+    return (
+      <div className="sb-conseil v2-arrivee">
+        <div className="sb-conseil-tete">
+          <h1 className="sb-conseil-titre">Clients qui décrochent</h1>
+        </div>
+        <div className="sb-donnees-outils">
+          <div>
+            <span className="v2-champ" style={{ height: 26, padding: "0 8px" }}>
+              <select aria-label="Filtrer les comptes" value={filtre} onChange={(e) => setFiltre(e.target.value as Filtre)} style={{ fontSize: 12 }}>
+                {KPIS.map((k) => <option key={k.cle} value={k.cle}>{`${k.libelle} (${valeurKpi(k.cle)})`}</option>)}
+                <option value="tous">{`Tous les comptes (${compteurs?.comptes ?? 0})`}</option>
+              </select>
+            </span>
+            {reglages ? <span className="sb-badge" data-teinte={reglages.mode === "essai" ? "ambre" : undefined}>{reglages.mode === "essai" ? "mode essai" : "mode réel"}</span> : null}
+          </div>
+          <div>
+            {source === "reelle" ? (
+              <button type="button" className="v2-btn" onClick={lancerRecalcul} disabled={recalcul || !tableau?.client}>
+                {recalcul ? <Loader variant="spin" /> : <RefreshCw width={14} height={14} aria-hidden="true" />} Recalculer
+              </button>
+            ) : null}
+          </div>
+        </div>
+        {erreur || attente || (source === "reelle" && reel && !reel.tableau?.reglages) ? (
+          <div style={{ padding: "12px 24px 0", display: "grid", gap: 8 }}>
+            {erreur ? <Avis teinte="rouge" role="alert"><strong>La base réelle n&apos;a pas répondu.</strong> {erreur}</Avis> : null}
+            {source === "reelle" && reel && !reel.tableau?.reglages && !erreur ? <Avis teinte="bleu">OFFLOAD n&apos;est pas encore installé pour votre organisation : Omega l&apos;installe en mode essai, puis vos exports de ventes alimentent l&apos;historique.</Avis> : null}
+            {attente ? (
+              <SbBandeau teinte="ambre" titre={`${attente} message${attente > 1 ? "s" : ""} de reprise à valider`} texte="Rien ne part sans vous."
+                action={<Link className="v2-btn v2-btn--petit" href="/espace2/validations">Ouvrir « À valider »</Link>} />
+            ) : null}
+          </div>
+        ) : null}
+        <div className="sb-conseil-corps">
+          <div className="sb-grille-donnees sb-grille-colonnes">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Client</th>
+                  <th scope="col">Niveau</th>
+                  <th scope="col">Raison</th>
+                  <th scope="col">Priorité</th>
+                  <th scope="col">Dernier achat</th>
+                  <th scope="col">Suivi par</th>
+                </tr>
+              </thead>
+              <tbody>
+                {visibles.map((c) => {
+                  const n = c.signal ? NIVEAUX[c.signal.niveau] : null;
+                  const r = c.reprise;
+                  const raison = c.signal?.raisons.find((x) => x.code !== "avant_cloture") ?? c.signal?.raisons[0];
+                  return (
+                    <tr key={c.id} aria-selected={choisi === c.id} tabIndex={0} onClick={() => setChoix(c.id)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setChoix(c.id); } }}>
+                      <td>{c.nom}</td>
+                      <td>
+                        {n ? <Pastille teinte={n.teinte}>{n.libelle}</Pastille> : "—"}
+                        {c.signal?.avant_cloture ? <> <Pastille teinte="rouge" contour>Avant la clôture</Pastille></> : null}
+                        {r && r.statut !== "close" ? <> <Pastille teinte={STATUTS_REPRISE[r.statut].teinte} contour>{STATUTS_REPRISE[r.statut].libelle}</Pastille></> : null}
+                      </td>
+                      <td>{raison?.phrase ?? "—"}</td>
+                      <td className="sb-mono">{c.signal?.priorite ? montant(c.signal.priorite) : "—"}</td>
+                      <td className="sb-mono">{c.signal?.dernier_achat ? dateCourte(c.signal.dernier_achat) : "—"}</td>
+                      <td>{c.commercial ?? "—"}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            {source === "reelle" && !reel ? (
+              <Chargement texte="Lecture des comptes…" />
+            ) : !visibles.length ? (
+              <div className="sb-conseil-vide">
+                <p style={{ margin: 0 }}>{filtre === "risque" ? "Aucun client à risque" : "Rien ici"}</p>
+                <span>{comptes.length === 0 ? "L'historique est vide : importez l'export de votre logiciel de ventes (code client, date, montant HT)." : "Aucun compte dans ce filtre."}</span>
+              </div>
+            ) : null}
+            {doublons}
+          </div>
+          {fiche || chargeFiche ? (
+            <aside className="sb-volet-detail sb-volet-detail--large" aria-label="Fiche du compte">
+              <div className="sb-volet-detail-corps">
+                {fiche ? <FicheCompte key={fiche.compte.id} fiche={fiche} onAgir={agir} source={source} /> : <Chargement texte="Lecture de la fiche…" />}
+              </div>
+            </aside>
+          ) : null}
+        </div>
+        <div className="sb-donnees-pied">{visibles.length} compte{visibles.length > 1 ? "s" : ""}</div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="esp-tete" data-arrivee="">
@@ -323,6 +458,7 @@ export default function EcranOffload() {
               </div>
             )}
           </section>
+          {sections ? <>
           <GardeFous source={source} client={tableau?.client ?? null} />
           <Echeances source={source} onChoisir={(id) => {
             setFiltre("tous");
@@ -340,29 +476,9 @@ export default function EcranOffload() {
             if (window.innerWidth < 1024) document.getElementById("esp-dossier")?.scrollIntoView({ behavior: "smooth", block: "start" });
           }} />
           <Pilotage source={source} />
+          </> : null}
 
-          {(tableau?.rapprochements ?? []).length ? (
-            <section className="esp-carte" aria-label="Doublons proposés">
-              <div className="esp-carte-tete">
-                <h2 className="esp-carte-titre">Doublons proposés</h2>
-                <span className="esp-kpi-sous">la fusion n&apos;a lieu qu&apos;après votre accord</span>
-              </div>
-              <div className="esp-carte-corps" style={{ display: "grid", gap: 8 }}>
-                {(tableau?.rapprochements ?? []).map((x) => (
-                  <div key={x.id} style={{ border: "1px solid var(--r-filet)", borderRadius: 12, padding: "10px 12px" }}>
-                    <strong>{x.a_nom}</strong> <span className="esp-mono">{x.a_ref}</span> et <strong>{x.b_nom}</strong> <span className="esp-mono">{x.b_ref}</span>
-                    <ul style={{ margin: "6px 0", paddingLeft: 18 }}>{x.raisons.map((r) => <li key={r} className="esp-kpi-sous">{r}</li>)}</ul>
-                    {source === "reelle" ? (
-                      <div className="esp-actions">
-                        <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={() => void trancher(x.id, true)}>Fusionner dans {x.a_nom}</button>
-                        <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => void trancher(x.id, false)}>Ce sont deux clients</button>
-                      </div>
-                    ) : null}
-                  </div>
-                ))}
-              </div>
-            </section>
-          ) : null}
+          {doublons}
         </div>
 
         <section id="esp-dossier" className="esp-detail-mobile" aria-label="Fiche du compte">

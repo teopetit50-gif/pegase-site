@@ -86,7 +86,11 @@ html.v2-actif .dlg-panneau {
   --v2-bouton: #fff;
   --v2-bouton-survol: #f3f3f3;
   --v2-ombre-bord: 0 0 0 1px #03030315;
-  --v2-ombre-petite: 0 0 0 1px #03030315;
+  --v2-ombre-petite: 0 0 0 1px #03030315, 0 1px 2px #0000000d;
+  /* 22/10 — les boutons de Supabase : quatre filets intérieurs et une ombre portée (mesurés) */
+  --v2-ombre-bouton: 0 1px 3px #0000000a, inset 0 1px 0 #00000007, inset 0 0 0 1px #0000000a, inset 0 -1px 0 #0000000a, inset 0 0 0 1px #00000011;
+  --sb-champ: #00000004;
+  --v2-ombre-primaire: 0 1px 3px #0000000a, inset 0 1px 0 #00000007, inset 0 0 0 1px #0000000a, inset 0 0 0 1px #00000011;
   --v2-ombre-moyenne: 0 0 0 1px #03030315, 0px 2px 2px #0000000a, 0px 8px 8px -8px #0000000a;
   --v2-ombre-menu: 0 0 0 1px #03030325, 0px 1px 1px #00000005, 0px 4px 8px -4px #0000000a, 0px 16px 24px -8px #0000000f;
   --v2-ombre-modal: 0 0 0 1px #03030325, 0px 1px 1px #00000005, 0px 8px 16px -4px #0000000a, 0px 24px 32px -8px #0000000f;
@@ -100,8 +104,12 @@ html.v2-actif .dlg-panneau {
   --v2-popover: 0.2s;
   --v2-overlay: 0.3s;
 
-  --v2-sans: var(--font-geist), "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  /* 22/10 — Inter, Manrope et Source Code Pro, comme le tableau de bord Supabase (app/espace2/layout.tsx) ;
+     sans elles (/omega, /bienvenue), on retombe sur Geist */
+  --v2-sans: var(--font-v2-inter, var(--font-geist)), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --v2-titre: var(--font-v2-manrope, var(--font-geist)), "Manrope", var(--v2-sans);
   --v2-mono: var(--font-omega-mono), "Geist Mono", Menlo, Monaco, "Liberation Mono", monospace;
+  --v2-code: var(--font-v2-code, var(--font-omega-mono)), "Source Code Pro", Menlo, monospace;
 
   color-scheme: light;
 }
@@ -167,7 +175,10 @@ html.v2-actif .dlg-panneau {
     --v2-bouton: #242424;
     --v2-bouton-survol: #2a2a2a;
     --v2-ombre-bord: 0 0 0 1px #ffffff13;
-    --v2-ombre-petite: 0 0 0 1px #ffffff13;
+    --v2-ombre-petite: 0 0 0 1px #ffffff13, 0 1px 2px #0000000d;
+    --v2-ombre-bouton: 0 1px 3px #00000033, inset 0 1px 0 #ffffff0a, inset 0 0 0 1px #0000000f, inset 0 -1px 0 #0000000f, inset 0 0 0 1px #ffffff1a;
+    --sb-champ: #0000001f;
+    --v2-ombre-primaire: 0 1px 3px #00000033, inset 0 1px 0 #ffffff0a, inset 0 0 0 1px #ffffff0f, inset 0 0 0 1px #ffffff1a;
     --v2-ombre-moyenne: 0 0 0 1px #ffffff13, 0px 2px 2px #00000052, 0px 8px 8px -8px #00000029;
     --v2-ombre-menu: 0 0 0 1px #ffffff22, 0px 1px 1px #00000005, 0px 4px 8px -4px #0000000a, 0px 16px 24px -8px #0000000f;
     --v2-ombre-modal: 0 0 0 1px #ffffff22, 0px 1px 1px #00000005, 0px 8px 16px -4px #0000000a, 0px 24px 32px -8px #0000000f;
@@ -223,7 +234,10 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   --v2-bouton: #242424;
   --v2-bouton-survol: #2a2a2a;
   --v2-ombre-bord: 0 0 0 1px #ffffff13;
-  --v2-ombre-petite: 0 0 0 1px #ffffff13;
+  --v2-ombre-petite: 0 0 0 1px #ffffff13, 0 1px 2px #0000000d;
+  --v2-ombre-bouton: 0 1px 3px #00000033, inset 0 1px 0 #ffffff0a, inset 0 0 0 1px #0000000f, inset 0 -1px 0 #0000000f, inset 0 0 0 1px #ffffff1a;
+  --sb-champ: #0000001f;
+  --v2-ombre-primaire: 0 1px 3px #00000033, inset 0 1px 0 #ffffff0a, inset 0 0 0 1px #ffffff0f, inset 0 0 0 1px #ffffff1a;
   --v2-ombre-moyenne: 0 0 0 1px #ffffff13, 0px 2px 2px #00000052, 0px 8px 8px -8px #00000029;
   --v2-ombre-menu: 0 0 0 1px #ffffff22, 0px 1px 1px #00000005, 0px 4px 8px -4px #0000000a, 0px 16px 24px -8px #0000000f;
   --v2-ombre-modal: 0 0 0 1px #ffffff22, 0px 1px 1px #00000005, 0px 8px 16px -4px #0000000a, 0px 24px 32px -8px #0000000f;
@@ -335,8 +349,8 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   }
   .v2-laterale--fixe > .v2-laterale-int {
     position: sticky;
-    top: 0;
-    height: 100dvh;
+    top: 48px;
+    height: calc(100dvh - 48px);
   }
 }
 
@@ -369,9 +383,13 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   border-right: 1px solid var(--v2-a-400);
   transition: width 0.1s linear;
 }
+/* le rail s'ouvre au survol, et au clavier dès qu'une de ses entrées a le
+   focus visible. `:focus-within` le laissait ouvert après un clic à la
+   souris (le lien cliqué garde le focus) : c'est le « des fois ça reste
+   déplié » de Teo, 21/10. `:has(:focus-visible)` n'ouvre qu'au clavier. */
 @media (hover: hover) {
   .v2-rail:hover,
-  .v2-rail:focus-within {
+  .v2-rail:has(:focus-visible) {
     width: 208px;
   }
 }
@@ -735,31 +753,42 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
 }
 
 /* ══ La barre du haut (dans la colonne principale) ═════════════════════ */
+/* la barre du haut court sur toute la largeur, au-dessus du rail et du volet (21/10, comme Supabase) */
 .v2-haut {
+  grid-column: 1 / -1;
   position: sticky;
   top: 0;
   z-index: 40;
-  height: 64px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  height: 48px;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
-  padding: 0 24px;
+  padding: 0 16px;
   background: var(--v2-bg-200);
   box-shadow: inset 0 -1px 0 var(--v2-a-400);
 }
 .v2-haut-gauche {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   min-width: 0;
 }
+.v2-haut-sep {
+  flex: none;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--v2-gray-700);
+}
+.v2-haut .v2-portee {
+  flex: none;
+}
 .v2-haut-titre {
+  min-width: 0;
   margin: 0;
-  font-size: 16px;
-  line-height: 24px;
-  letter-spacing: -0.32px;
-  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -769,6 +798,34 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
+  flex: none;
+}
+.v2-haut-lien {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--v2-gray-900);
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+.v2-haut-lien:hover {
+  background: var(--v2-a-100);
+  color: var(--v2-gray-1000);
+}
+.v2-haut-compte {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  border-radius: 50%;
+}
+.v2-haut-compte .v2-pastille-ronde {
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
 }
 .v2-haut-droite .v2-btn[disabled] .v2-badge {
   background: var(--v2-gray-200);
@@ -2745,7 +2802,8 @@ html.v2-calme *::after {
 .v2-dr-chaleur-grille i, .v2-dr-echelle i { display: block; aspect-ratio: 1; max-height: 16px; border-radius: 3px; background: var(--v2-a-200); }
 .v2-dr-chaleur-grille i[data-n="-1"] { background: transparent; }
 .v2-dr-chaleur-grille i[data-n="1"], .v2-dr-echelle i[data-n="1"] { background: var(--v2-a-400); }
-.v2-dr-chaleur-grille i[data-n="2"], .v2-dr-echelle i[data-n="2"] { background: var(--v2-gray-700); }
+/* le gris 2 est un cran plus noir que le gris 700 (21/10, demande de Teo) */
+.v2-dr-chaleur-grille i[data-n="2"], .v2-dr-echelle i[data-n="2"] { background: color-mix(in srgb, var(--v2-gray-700) 90%, #000); }
 .v2-dr-chaleur-grille i[data-n="3"], .v2-dr-echelle i[data-n="3"] { background: var(--v2-gray-900); }
 .v2-dr-chaleur-grille i[data-n="4"], .v2-dr-echelle i[data-n="4"] { background: var(--v2-gray-1000); }
 .v2-dr-echelle { display: flex; align-items: center; gap: 4px; margin: 20px 0 0; font-size: 13px; color: var(--v2-gray-1000); }
@@ -2998,3 +3056,4 @@ html.v2-calme .v2-vivant .v2-carte::before, html.v2-calme .v2-vivant .v2-dr-cart
 .v2 .v2-btn--petit.v2-btn--icone { width: 26px; padding: 0; }
 .v2 .v2-btn--petit svg, .v2 .v2-val-bouton svg, .v2 .v2-portee svg { width: 14px; height: 14px; }
 .v2 .v2-val-recherche { height: 28px; }
+

@@ -57,7 +57,8 @@ type Reel = { client: portes.MonClient | null; tableau: Tableau | null; relances
 const estOnglet = (v: string | null | undefined): v is Onglet => !!v && ONGLETS.some((o) => o.cle === v);
 
 /* `vue` (ou `?vue=` dans l'adresse) ouvre une des quatre vues : debiteurs, relances, envois, tresorerie. */
-export default function EcranCashd({ vue }: { vue?: Onglet } = {}) {
+/* `gabarit="sb"` : /espace2 rend chaque vue en page Supabase (22/10/2026) */
+export default function EcranCashd({ vue, gabarit }: { vue?: Onglet; gabarit?: "sb" } = {}) {
   const { source } = useSource();
   const [fiches, setFiches] = useState<Fiche[]>(FICHES_EXEMPLE);
   const [sansCompte, setSansCompte] = useState<ReglementEtat[]>(SANS_COMPTE_EXEMPLE);
@@ -65,6 +66,8 @@ export default function EcranCashd({ vue }: { vue?: Onglet } = {}) {
   const [reel, setReel] = useState<Reel | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
   const [filtre, setFiltre] = useState<Filtre>(null);
+  /* le canal choisi dans les filtres de la page Envois (gabarit sb) */
+  const [canalChoisi, setCanalChoisi] = useState<string | null>(null);
   const [choix, setChoix] = useState<string | null>(null);
   const [chargeFiche, setChargeFiche] = useState(false);
   const [fait, setFait] = useState<string | null>(null);
@@ -72,10 +75,21 @@ export default function EcranCashd({ vue }: { vue?: Onglet } = {}) {
   const [pilotageReel, setPilotageReel] = useState<{ reponses: portes.Reponse[]; arretes: portes.Arrete[] } | null>(null);
   const [onglet, setOngletEtat] = useState<Onglet>(vue ?? "debiteurs");
   useEffect(() => {
-    if (vue) return;
-    const v = new URLSearchParams(window.location.search).get("vue");
-    if (!estOnglet(v)) return;
-    const t = window.setTimeout(() => setOngletEtat(v), 0);
+    const p = new URLSearchParams(window.location.search);
+    const v = p.get("vue");
+    /* ?compte=<id> ouvre la fiche d'un compte (les pages de fonction de /espace2/cashd, 21/10) */
+    const c = p.get("compte");
+    if ((vue || !estOnglet(v)) && !c) return;
+    const t = window.setTimeout(() => {
+      if (!vue && estOnglet(v)) setOngletEtat(v);
+      if (c) setChoix(c);
+    }, 0);
+    return () => window.clearTimeout(t);
+  }, [vue]);
+  /* 22/10 — la page lit ?vue= côté serveur : un lien du volet change la vue sans remonter l'écran */
+  useEffect(() => {
+    if (!vue) return;
+    const t = window.setTimeout(() => setOngletEtat(vue), 0);
     return () => window.clearTimeout(t);
   }, [vue]);
   /* la vue choisie reste dans l'adresse : un lien la rouvre */
@@ -530,6 +544,586 @@ export default function EcranCashd({ vue }: { vue?: Onglet } = {}) {
   const essai = tableau?.reglages?.mode !== "reel";
   const total = t ? Math.max(t.encours, 0.01) : 1;
 
+  /* la vue courante et la fenêtre de dépôt : communes aux deux dessins */
+  const vueCourante = (
+    <div id="c2-vue" role="tabpanel" aria-labelledby={`c2-onglet-${onglet}`}>
+      {onglet === "tresorerie" && t && t.encours > 0 ? (
+        <section className="esp-carte c2-balance" aria-label="Balance âgée">
+          <div className="esp-carte-tete">
+            <h2 className="esp-carte-titre">Balance âgée</h2>
+            <span className="esp-kpi-sous">
+              {tableau?.dernier_import ? `Facturier relu le ${dateHeure(tableau.dernier_import)}` : "Aucun export lu pour l'instant"}
+              {t.credits > 0 ? ` · ${montant(t.credits)} de crédits à déduire` : ""}
+            </span>
+          </div>
+          <div className="esp-carte-corps">
+            <div className="c2-barre" role="img" aria-label={TRANCHES.map((x) => `${x.libelle} : ${montant(t[x.cle])}`).join(", ")}>
+              {TRANCHES.map((x) => (t[x.cle] > 0 ? <span key={x.cle} className={`c2-segment ${x.teinte}`} style={{ width: `${(t[x.cle] / total) * 100}%` }} /> : null))}
+            </div>
+            {prevision ? (
+              <p className="c2-prevision">
+                Encaissements attendus : <strong>{montant(prevision.a_30_jours)}</strong> à 30 jours, <strong>{montant(prevision.a_60_jours)}</strong> à 60 jours
+                {prevision.tenu_a_part > 0 ? ` ; ${montant(prevision.tenu_a_part)} tenus à part (litiges, recouvrement)` : ""}.
+              </p>
+            ) : null}
+            <dl className="c2-legende">
+              {TRANCHES.map((x) => (
+                <div key={x.cle}>
+                  <dt><span className={`c2-puce ${x.teinte}`} aria-hidden="true" />{x.libelle}</dt>
+                  <dd>{montant(t[x.cle])}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </section>
+      ) : null}
+  
+      {(onglet === "debiteurs" || onglet === "relances") && (source === "exemple" || (reel?.tableau?.reglages && essai)) ? (
+        <div style={{ marginBottom: 14 }}>
+          <Avis teinte="bleu">
+            <strong>Mode essai.</strong> Les relances validées partent vers l&apos;adresse d&apos;essai d&apos;Omega, jamais chez vos clients, tant que le gérant n&apos;a pas basculé en réel.
+          </Avis>
+        </div>
+      ) : null}
+  
+      {onglet === "debiteurs" ? (
+      <div className="esp-grille">
+        <section className="esp-carte" aria-label="Débiteurs">
+          <div className="esp-carte-tete">
+            <h2 className="esp-carte-titre">{filtre === "echu" ? "Comptes en retard" : filtre === "plus_90" ? "Retards de plus de 90 jours" : filtre === "pause" ? "Comptes hors cycle" : "Débiteurs"}</h2>
+            <span className="c2-tete-droite">
+              <span className="esp-kpi-sous">{comptes.length} compte{comptes.length > 1 ? "s" : ""}</span>
+              <button type="button" className="esp-lien-bouton" onClick={() => exporterBalance(tableau?.comptes ?? [], jourParis())}>
+                <Download width={14} height={14} aria-hidden="true" /> Tableur
+              </button>
+            </span>
+          </div>
+          {comptes.length === 0 ? (
+            <Vide titre="Personne ne vous doit rien ici">{filtre ? "Rien dans ce filtre." : "Déposez l'export des factures non soldées de votre facturier pour commencer."}</Vide>
+          ) : (
+            <ul className="esp-liste" aria-label="Débiteurs">
+              {comptes.map((b) => {
+                const s = STATUTS_COMPTE[b.statut];
+                return (
+                  <li key={b.compte_id}>
+                    <button
+                      type="button"
+                      className="esp-item"
+                      aria-current={choisi === b.compte_id ? "true" : undefined}
+                      onClick={() => {
+                        setChoix(b.compte_id);
+                        if (window.innerWidth < 1024) document.getElementById("c2-fiche")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }}
+                    >
+                      <span className="esp-item-haut">
+                        <span style={{ fontWeight: 600 }}>{b.nom}</span>
+                        {b.statut !== "actif" ? <Pastille teinte={s.teinte}>{s.libelle}</Pastille> : b.retard_max_jours > 60 ? <Pastille teinte="rouge">{b.retard_max_jours} j</Pastille> : b.retard_max_jours > 0 ? <Pastille teinte="ambre">{b.retard_max_jours} j</Pastille> : <Pastille teinte="vert">À échoir</Pastille>}
+                        {b.depasse_plafond ? <Pastille teinte="rouge" contour>Plafond dépassé</Pastille> : null}
+                      </span>
+                      <span className="esp-item-montant">{montant(b.echu > 0 ? b.echu : b.encours)}</span>
+                      <span className="esp-item-titre">{b.reference}{b.groupe ? ` · ${b.groupe}` : ""}</span>
+                      <span className="esp-item-bas">
+                        <span>{b.echu > 0 ? `${montant(b.echu)} échus sur ${montant(b.encours)}` : `${montant(b.encours)} à échoir`}</span>
+                        <span>{b.factures_echues} facture{b.factures_echues > 1 ? "s" : ""} échue{b.factures_echues > 1 ? "s" : ""}</span>
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+  
+        <section id="c2-fiche" className="esp-detail-mobile" aria-label="Fiche du compte">
+          {fiche && actions ? (
+            <FicheCompte key={`${source}:${fiche.compte.id}`} fiche={fiche} actions={actions} />
+          ) : chargeFiche || (source === "reelle" && choisi) ? (
+            <div className="esp-carte"><Chargement texte="Lecture du compte…" /></div>
+          ) : (
+            <div className="esp-carte"><Vide titre="Choisissez un compte">Ses factures, la relance de chacune et ses règlements s&apos;affichent ici.</Vide></div>
+          )}
+        </section>
+      </div>
+      ) : null}
+  
+      {onglet === "relances" ? (
+      <>
+      <section id="c2-relances" className="esp-carte c2-section" aria-label="Relances">
+        <div className="esp-carte-tete">
+          <h2 className="esp-carte-titre">Relances écrites</h2>
+          <span className="c2-tete-droite">
+            <button type="button" className="esp-lien-bouton" onClick={() => exporterRelances(relances, jourParis())}>
+              <Download width={14} height={14} aria-hidden="true" /> Tableur
+            </button>
+            <Link className="esp-lien-bouton" href="/espace2/validations">Ouvrir la file de validation</Link>
+          </span>
+        </div>
+        {recentes.length === 0 ? (
+          <Vide titre="Aucune relance">Les relances s&apos;écrivent chaque matin à 7 h pour les comptes qui ont atteint un palier.</Vide>
+        ) : (
+          <ul className="c2-relances">
+            {recentes.map((r) => {
+              const e = ETATS_RELANCE[r.etat] ?? ETATS_RELANCE.preparee;
+              return (
+                <li key={r.id}>
+                  <details>
+                    <summary>
+                      <span className="esp-item-haut">
+                        <strong>{r.compte}</strong>
+                        <Pastille teinte={r.palier === "mise_en_demeure" ? "rouge" : "gris"} contour>{libellePalier(r.palier)}</Pastille>
+                        <Pastille teinte={e.teinte}>{e.libelle}</Pastille>
+                      </span>
+                      <span className="c2-relance-ligne">
+                        <span>{r.sujet ?? "—"}</span>
+                        <span className="esp-num">{montant(r.montant)}</span>
+                      </span>
+                      <span className="c2-sous">
+                        Écrite le {dateCourte(r.jour)}{r.destinataire_adresse ? ` pour ${r.destinataire_adresse}` : ""}
+                        {r.envoye_le ? ` · partie le ${dateHeure(r.envoye_le)}` : ""}
+                        {r.indemnites > 0 ? ` · indemnité ${montant(r.indemnites)}` : ""}
+                        {r.penalites > 0 ? ` · pénalités ${montant(r.penalites)}` : ""}
+                      </span>
+                      {r.motif ? <span className="c2-sous c2-motif">{r.motif}</span> : null}
+                    </summary>
+                    {r.corps ? <pre className="c2-corps">{r.corps}</pre> : <p className="c2-sous">Le texte est dans la file de validation.</p>}
+                    {r.etat === "validee" || (r.etat === "non_reglee" && r.demande_statut === "approuvee") ? <EnvoiMain relance={r} noter={noterEnvoi} /> : null}
+                  </details>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
+  
+      {commandes.length ? (
+        <section className="esp-carte c2-section" aria-label="Bons de commande attendus">
+          <div className="esp-carte-tete">
+            <h2 className="esp-carte-titre">Bons de commande attendus</h2>
+            <span className="esp-kpi-sous">la relance va au service qui émet le bon, pas à la comptabilité</span>
+          </div>
+          <ul className="c2-relances">
+            {commandes.map((x) => (
+              <li key={x.id}>
+                <span className="esp-item-haut">
+                  <strong>{x.destinataire_nom ?? x.destinataire_adresse}</strong>
+                  <Pastille teinte={ETATS_COMMANDE[x.statut].teinte}>{ETATS_COMMANDE[x.statut].libelle}</Pastille>
+                </span>
+                <span className="c2-relance-ligne"><span>{x.sujet ?? "—"}</span></span>
+                <span className="c2-sous">Écrite le {dateCourte(x.jour)} pour {x.destinataire_adresse}{x.motif ? ` · ${x.motif}` : ""}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+  
+      <Textes
+        key={`${source}:${reel?.client?.client_id ?? ""}`}
+        source={source}
+        client={reel?.client?.client_id ?? null}
+        reglages={tableau?.reglages ?? null}
+        apresReglage={relire}
+        gabarit={gabarit}
+      />
+      </>
+      ) : null}
+  
+      {onglet === "envois" ? (
+        <section className="esp-carte c2-section" aria-label="Envois">
+          <div className="esp-carte-tete">
+            <h2 className="esp-carte-titre">Envois</h2>
+            <span className="c2-tete-droite">
+              <span className="esp-kpi-sous">chaque relance partie, datée, avec son destinataire, son objet et son canal</span>
+              <button type="button" className="esp-lien-bouton" onClick={() => exporterRelances(parties, jourParis())}>
+                <Download width={14} height={14} aria-hidden="true" /> Tableur
+              </button>
+            </span>
+          </div>
+          {parties.length === 0 ? (
+            <Vide titre="Rien n'est encore parti">Une relance part une fois validée dans la file ; elle s&apos;inscrit ici avec son heure, son destinataire et son canal.</Vide>
+          ) : (
+            <div className="esp-tableau-cadre">
+              <table className="esp-tableau c2-envois">
+                <thead>
+                  <tr>
+                    <th scope="col">Partie le</th>
+                    <th scope="col">Destinataire</th>
+                    <th scope="col">Objet</th>
+                    <th scope="col">Canal</th>
+                    <th scope="col">État</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {parties.map((r) => {
+                    const e = ETATS_RELANCE[r.etat] ?? ETATS_RELANCE.preparee;
+                    return (
+                      <tr key={r.id}>
+                        <td>{r.envoye_le ? dateHeure(r.envoye_le) : dateCourte(r.jour)}</td>
+                        <td><strong>{r.compte}</strong><span className="c2-sous">{r.destinataire_adresse ?? "—"}</span></td>
+                        <td>{r.sujet ?? "—"}<span className="c2-sous">{libellePalier(r.palier)} · {montant(r.montant)}</span></td>
+                        <td>{r.envoi_main ? `${CANAUX_MAIN[r.envoi_main.canal] ?? r.envoi_main.canal}, à la main` : r.canal === "lre" ? "Recommandé électronique" : r.canal === "whatsapp" ? "WhatsApp" : "Courriel"}</td>
+                        <td><Pastille teinte={e.teinte}>{e.libelle}</Pastille></td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      ) : null}
+  
+      {onglet === "tresorerie" && pilotage && (pilotage.reponses.length || pilotage.arretes.length) ? (
+        <section className="esp-carte c2-section" aria-label="Pilotage">
+          <div className="esp-carte-tete">
+            <h2 className="esp-carte-titre">Pilotage</h2>
+            <span className="esp-kpi-sous">une relance est « suivie » d&apos;un règlement ou d&apos;une réponse dans les quinze jours</span>
+          </div>
+          <div className="esp-carte-corps c2-pilotage">
+            <div>
+              <h3 className="esp-section-titre">Taux de réponse par palier</h3>
+              {pilotage.reponses.length ? (
+                <ul className="c2-reglements">
+                  {pilotage.reponses.map((x) => (
+                    <li key={x.palier}>
+                      <span>{libellePalier(x.palier)}</span>
+                      <span className="esp-num">{x.taux_pct === null ? "—" : `${String(x.taux_pct).replace(".", ",")} %`}</span>
+                      <span className="c2-sous">{x.suivies} sur {x.envoyees} parties</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : <p className="c2-sous">Aucune relance partie pour l&apos;instant.</p>}
+            </div>
+            <div>
+              <h3 className="esp-section-titre">Arrêtés de la balance</h3>
+              {pilotage.arretes.length ? (
+                <ul className="c2-reglements">
+                  {pilotage.arretes.map((a) => (
+                    <li key={a.jour}>
+                      <span>Au {dateCourte(a.jour)}</span>
+                      <span className="esp-num">{montant(a.totaux.echu)} échus</span>
+                      <button type="button" className="esp-lien-bouton" onClick={() => exporterBalance(a.balance, a.jour)}>
+                        <Download width={14} height={14} aria-hidden="true" /> Tableur
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : <p className="c2-sous">Le premier arrêté se prend au jour du mois réglé.</p>}
+            </div>
+          </div>
+        </section>
+      ) : null}
+  
+      {onglet === "tresorerie" ? (
+        <TauxChange key={`${source}:${reel?.client?.client_id ?? ""}`} source={source} client={reel?.client?.client_id ?? null} />
+      ) : null}
+
+      {onglet === "tresorerie" && (tableau?.a_imputer ?? []).length ? (
+        <section className="esp-carte c2-section" aria-label="Règlements à rapprocher">
+          <div className="esp-carte-tete">
+            <h2 className="esp-carte-titre">Règlements à rapprocher</h2>
+            <span className="esp-kpi-sous">la relance du compte concerné attend</span>
+          </div>
+          <ul className="c2-relances">
+            {(tableau?.a_imputer ?? []).map((r) => (
+              <li key={r.id} className="c2-rapprocher">
+                <span className="c2-relance-ligne">
+                  <span><strong>{montant(r.a_imputer)}</strong> reçus le {dateCourte(r.recu_le)} · {r.libelle ?? r.reference ?? "sans référence"}{r.compte ? ` · ${r.compte}` : ""}</span>
+                  <button type="button" className="esp-lien-bouton" onClick={() => void proposer(r)}>Factures probables</button>
+                </span>
+                {propositions[r.id] ? (
+                  propositions[r.id].length === 0 ? (
+                    <span className="c2-sous">Aucune facture ouverte de ce montant : rapprochez-le depuis la fiche du compte.</span>
+                  ) : (
+                    <span className="c2-propositions">
+                      {propositions[r.id].map((p, i) => (
+                        <span key={i}>
+                          {p.factures.map((x) => `${x.numero}${x.compte ? ` (${x.compte})` : ""} — ${montant(x.reste_du)}`).join(" + ")}
+                          {p.factures.length === 1 ? (
+                            <button type="button" className="r-btn" onClick={() => void lettrer(r, p.factures[0].id)}>Lettrer</button>
+                          ) : null}
+                        </span>
+                      ))}
+                    </span>
+                  )
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+      {onglet === "tresorerie" && !(t && t.encours > 0) ? (
+        <div className="esp-carte"><Vide titre="Aucun encours">La balance âgée, la prévision d&apos;encaissement et les arrêtés s&apos;affichent dès le premier export lu.</Vide></div>
+      ) : null}
+      </div>
+  );
+  const fenetreDepot = (
+    <Dialog open={depot} onOpenChange={(o) => !o && setDepot(false)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><FileUp width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Déposer un export du facturier</DialogTitle>
+            <DialogDescription>Un fichier CSV tel que votre logiciel l&apos;exporte : les colonnes sont reconnues par leur en-tête. Rien n&apos;est envoyé avant que vous ayez vu le compte des lignes.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Ce que contient le fichier
+                <select className="rv-champ" value={jeu} onChange={(e) => setJeu(e.target.value as Jeu)}>
+                  {JEUX.map((x) => <option key={x.cle} value={x.cle}>{x.libelle}</option>)}
+                </select>
+              </label>
+              <p className="c2-sous">{JEUX.find((x) => x.cle === jeu)?.aide}</p>
+              <label className="rv-libelle">Fichier CSV
+                <input className="rv-champ" type="file" accept=".csv,.txt,.tsv,text/csv" onChange={(e) => void lireFichier(e.target.files?.[0])} />
+              </label>
+              <label className="rv-libelle">Ou collez les lignes (en-têtes compris)
+                <textarea className="rv-champ" rows={4} value={texte} onChange={(e) => { setTexte(e.target.value); setNomFichier(""); }} placeholder="N° facture;Client;Date de facture;Échéance;Montant TTC;Reste dû" />
+              </label>
+              {JEUX.find((x) => x.cle === jeu)?.complet ? (
+                <label className="c2-coche">
+                  <input type="checkbox" checked={complet} onChange={(e) => setComplet(e.target.checked)} />
+                  <span>Ce fichier liste toutes les pièces encore ouvertes : celles qui n&apos;y sont plus sont soldées.</span>
+                </label>
+              ) : null}
+              {lecture ? (
+                lecture.manque.length || lecture.sansClient ? (
+                  <Avis teinte="ambre">
+                    Colonnes introuvables : {[...lecture.manque.map((k) => LIBELLES_CHAMPS[k] ?? k), ...(lecture.sansClient ? ["client (code ou nom)"] : [])].join(", ")}. Vérifiez la première ligne du fichier.
+                  </Avis>
+                ) : (
+                  <Avis teinte="vert" role="status">
+                    {lecture.lignes.length} ligne{lecture.lignes.length > 1 ? "s" : ""} lue{lecture.lignes.length > 1 ? "s" : ""} ; colonnes reconnues : {lecture.reconnues.map((x) => x.entete).join(", ")}.
+                    {lecture.ignorees.length ? ` Ignorées : ${lecture.ignorees.join(", ")}.` : ""}
+                  </Avis>
+                )
+              ) : null}
+              {erreurDepot ? <Avis teinte="rouge" role="alert">{erreurDepot}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!lecture || !!lecture.manque.length || lecture.sansClient || !lecture.lignes.length || envoiDepot} onClick={deposer}>
+              {envoiDepot ? <Loader variant="spin" /> : null} Déposer {lecture?.lignes.length ? `${lecture.lignes.length} ligne${lecture.lignes.length > 1 ? "s" : ""}` : ""}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+  );
+
+  /* 22/10 — /espace2 : chaque vue est une page Supabase (le volet de
+     navigation porte Débiteurs, Relances, Envois, Trésorerie) : Débiteurs
+     au gabarit Users (grille et fiche dans le volet), Envois au gabarit
+     Logs (filtres, table dense), Relances et Trésorerie au gabarit Tables
+     (titre, actions, contenu). /espace garde son écran à onglets. */
+  if (gabarit === "sb") {
+    const actionsHaut = (
+      <>
+        <button type="button" className="v2-btn" onClick={() => exporterBalance(tableau?.comptes ?? [], jourParis())}>
+          <Download width={14} height={14} aria-hidden="true" /> Tableur
+        </button>
+        {source === "reelle" && reel?.client ? (
+          <button type="button" className="v2-btn" disabled={prepare} onClick={preparer}>
+            {prepare ? <Loader variant="spin" /> : <PenLine width={14} height={14} aria-hidden="true" />} Écrire les relances du jour
+          </button>
+        ) : null}
+        <button type="button" className="v2-btn v2-btn--primaire" onClick={ouvrirDepot}>
+          <FileUp width={14} height={14} aria-hidden="true" /> Déposer un export
+        </button>
+      </>
+    );
+    const messages = (
+      <>
+        {fait ? <Avis teinte="vert" role="status"><strong>C&apos;est fait.</strong> {fait}</Avis> : null}
+        {erreur ? <Avis teinte="rouge" role="alert"><strong>La base réelle a répondu autrement.</strong> {erreur}</Avis> : null}
+        {source === "reelle" && reel && !reel.tableau?.reglages && !erreur ? <Avis teinte="bleu">CASHD n&apos;est pas encore installé pour votre organisation : Omega l&apos;installe en mode essai, puis vous déposez le premier export de votre facturier.</Avis> : null}
+      </>
+    );
+    const TITRES: Record<Onglet, string> = { debiteurs: "Débiteurs", relances: "Relances", envois: "Envois", tresorerie: "Trésorerie" };
+    const chargement = source === "reelle" && !reel;
+
+    if (onglet === "debiteurs") {
+      return (
+        <>
+          <div className="sb-conseil v2-arrivee">
+            <div className="sb-conseil-tete">
+              <h1 className="sb-conseil-titre">Débiteurs</h1>
+            </div>
+            <div className="sb-donnees-outils">
+              <div>
+                <span className="v2-champ" style={{ height: 26, padding: "0 8px" }}>
+                  <select aria-label="Filtrer les débiteurs" value={filtre ?? ""} onChange={(e) => setFiltre((e.target.value || null) as Filtre)} style={{ fontSize: 12 }}>
+                    <option value="">Tous les débiteurs</option>
+                    <option value="echu">Comptes en retard</option>
+                    <option value="plus_90">Retards de plus de 90 jours</option>
+                    <option value="pause">Comptes hors cycle</option>
+                  </select>
+                </span>
+                {source === "exemple" || (reel?.tableau?.reglages && essai) ? <span className="sb-badge" data-teinte="ambre">mode essai</span> : null}
+              </div>
+              <div>{actionsHaut}</div>
+            </div>
+            {fait || erreur ? <div style={{ padding: "12px 24px 0", display: "grid", gap: 8 }}>{messages}</div> : null}
+            <div className="sb-conseil-corps">
+              <div className="sb-grille-donnees sb-grille-colonnes">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Compte</th>
+                      <th scope="col">Référence</th>
+                      <th scope="col">Échu</th>
+                      <th scope="col">Encours</th>
+                      <th scope="col">Retard</th>
+                      <th scope="col">Statut</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {comptes.map((b) => {
+                      const st = STATUTS_COMPTE[b.statut];
+                      return (
+                        <tr key={b.compte_id} aria-selected={choisi === b.compte_id} tabIndex={0} onClick={() => setChoix(b.compte_id)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setChoix(b.compte_id); } }}>
+                          <td>{b.nom}</td>
+                          <td className="sb-mono">{b.reference}{b.groupe ? ` · ${b.groupe}` : ""}</td>
+                          <td className="sb-mono">{b.echu > 0 ? montant(b.echu) : "—"}</td>
+                          <td className="sb-mono">{montant(b.encours)}</td>
+                          <td className="sb-mono">{b.retard_max_jours > 0 ? `${b.retard_max_jours} j` : "—"}</td>
+                          <td>
+                            {b.statut !== "actif" ? <Pastille teinte={st.teinte}>{st.libelle}</Pastille> : b.depasse_plafond ? <Pastille teinte="rouge">Plafond dépassé</Pastille> : b.echu > 0 ? <Pastille teinte="ambre">En retard</Pastille> : <Pastille teinte="vert">À échoir</Pastille>}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+                {chargement ? (
+                  <Chargement texte="Lecture de l'encours…" />
+                ) : !comptes.length ? (
+                  <div className="sb-conseil-vide">
+                    <p style={{ margin: 0 }}>Personne ne vous doit rien ici</p>
+                    <span>{filtre ? "Rien dans ce filtre." : "Déposez l'export des factures non soldées de votre facturier pour commencer."}</span>
+                  </div>
+                ) : null}
+              </div>
+              {fiche && actions ? (
+                <aside className="sb-volet-detail sb-volet-detail--large" aria-label="Fiche du compte">
+                  <div className="sb-volet-detail-corps">
+                    <FicheCompte key={`${source}:${fiche.compte.id}`} fiche={fiche} actions={actions} />
+                  </div>
+                </aside>
+              ) : chargeFiche || (source === "reelle" && choisi) ? (
+                <aside className="sb-volet-detail sb-volet-detail--large"><Chargement texte="Lecture du compte…" /></aside>
+              ) : null}
+            </div>
+            <div className="sb-donnees-pied">
+              <span>Total : {comptes.length} compte{comptes.length > 1 ? "s" : ""} · {montant(t?.echu ?? 0)} échus sur {montant(t?.encours ?? 0)}</span>
+            </div>
+          </div>
+          {fenetreDepot}
+        </>
+      );
+    }
+
+    if (onglet === "envois") {
+      const canal = (r: Relance) => (r.envoi_main ? `${CANAUX_MAIN[r.envoi_main.canal] ?? r.envoi_main.canal}, à la main` : r.canal === "lre" ? "Recommandé électronique" : r.canal === "whatsapp" ? "WhatsApp" : "Courriel");
+      const canaux = Array.from(new Set(parties.map(canal)));
+      const vus = parties.filter((r) => !canalChoisi || canal(r) === canalChoisi);
+      return (
+        <div className="sb-journal v2-arrivee">
+          <h1 className="v2-sr">Envois</h1>
+          <aside className="sb-journal-filtres" aria-label="Filtres">
+            <div className="sb-journal-groupe">
+              <p>Canal</p>
+              <label className="sb-journal-option">
+                <input type="radio" name="canal" checked={!canalChoisi} onChange={() => setCanalChoisi(null)} />
+                <span>Tous les canaux</span>
+                <span>{parties.length}</span>
+              </label>
+              {canaux.map((c) => (
+                <label key={c} className="sb-journal-option">
+                  <input type="radio" name="canal" checked={canalChoisi === c} onChange={() => setCanalChoisi(c)} />
+                  <span>{c}</span>
+                  <span>{parties.filter((r) => canal(r) === c).length}</span>
+                </label>
+              ))}
+            </div>
+            <div className="sb-journal-groupe">
+              <p>Export</p>
+              <button type="button" className="v2-btn v2-btn--petit" onClick={() => exporterRelances(vus, jourParis())}>
+                <Download width={12} height={12} aria-hidden="true" /> Tableur
+              </button>
+            </div>
+          </aside>
+          <div className="sb-journal-principal">
+            <div className="sb-journal-barre">
+              <span>Chaque relance partie, datée, avec son destinataire, son objet et son canal</span>
+            </div>
+            <div className="sb-conseil-corps">
+              <div className="sb-journal-table">
+                {chargement ? (
+                  <Chargement texte="Lecture des envois…" />
+                ) : (
+                  <table>
+                    <thead>
+                      <tr>
+                        <th scope="col">Partie le</th>
+                        <th scope="col">Compte</th>
+                        <th scope="col">Destinataire</th>
+                        <th scope="col">Objet</th>
+                        <th scope="col">Palier</th>
+                        <th scope="col">Montant</th>
+                        <th scope="col">Canal</th>
+                        <th scope="col">État</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {vus.map((r) => {
+                        const e = ETATS_RELANCE[r.etat] ?? ETATS_RELANCE.preparee;
+                        return (
+                          <tr key={r.id}>
+                            <td className="sb-mono">{r.envoye_le ? dateHeure(r.envoye_le) : dateCourte(r.jour)}</td>
+                            <td>{r.compte}</td>
+                            <td className="sb-mono">{r.destinataire_adresse ?? "—"}</td>
+                            <td>{r.sujet ?? "—"}</td>
+                            <td>{libellePalier(r.palier)}</td>
+                            <td className="sb-mono">{montant(r.montant)}</td>
+                            <td>{canal(r)}</td>
+                            <td><Pastille teinte={e.teinte}>{e.libelle}</Pastille></td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                )}
+                {!chargement && !vus.length ? (
+                  <div className="sb-conseil-vide">
+                    <p style={{ margin: 0 }}>Rien n&apos;est encore parti</p>
+                    <span>Une relance part une fois validée dans la file ; elle s&apos;inscrit ici avec son heure, son destinataire et son canal.</span>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <div className="sb-liste v2-arrivee">
+          <div className="sb-liste-tete">
+            <div>
+              <h1 className="sb-titre">{TITRES[onglet]}</h1>
+              <p className="sb-description">
+                {onglet === "relances" ? "Les relances écrites chaque matin à 7 h, les bons de commande attendus et vos textes ; aucune ne part sans votre validation." : "La balance âgée, la prévision d'encaissement, le pilotage et les règlements à rapprocher."}
+              </p>
+            </div>
+            <div className="sb-actions">{actionsHaut}</div>
+          </div>
+          {messages}
+          {chargement ? <Chargement texte="Lecture de l'encours…" /> : vueCourante}
+        </div>
+        {fenetreDepot}
+      </>
+    );
+  }
+
   return (
     <>
       <div className="esp-tete" data-arrivee="">
@@ -590,366 +1184,11 @@ export default function EcranCashd({ vue }: { vue?: Onglet } = {}) {
             ))}
           </div>
 
-          <div id="c2-vue" role="tabpanel" aria-labelledby={`c2-onglet-${onglet}`}>
-          {onglet === "tresorerie" && t && t.encours > 0 ? (
-            <section className="esp-carte c2-balance" aria-label="Balance âgée">
-              <div className="esp-carte-tete">
-                <h2 className="esp-carte-titre">Balance âgée</h2>
-                <span className="esp-kpi-sous">
-                  {tableau?.dernier_import ? `Facturier relu le ${dateHeure(tableau.dernier_import)}` : "Aucun export lu pour l'instant"}
-                  {t.credits > 0 ? ` · ${montant(t.credits)} de crédits à déduire` : ""}
-                </span>
-              </div>
-              <div className="esp-carte-corps">
-                <div className="c2-barre" role="img" aria-label={TRANCHES.map((x) => `${x.libelle} : ${montant(t[x.cle])}`).join(", ")}>
-                  {TRANCHES.map((x) => (t[x.cle] > 0 ? <span key={x.cle} className={`c2-segment ${x.teinte}`} style={{ width: `${(t[x.cle] / total) * 100}%` }} /> : null))}
-                </div>
-                {prevision ? (
-                  <p className="c2-prevision">
-                    Encaissements attendus : <strong>{montant(prevision.a_30_jours)}</strong> à 30 jours, <strong>{montant(prevision.a_60_jours)}</strong> à 60 jours
-                    {prevision.tenu_a_part > 0 ? ` ; ${montant(prevision.tenu_a_part)} tenus à part (litiges, recouvrement)` : ""}.
-                  </p>
-                ) : null}
-                <dl className="c2-legende">
-                  {TRANCHES.map((x) => (
-                    <div key={x.cle}>
-                      <dt><span className={`c2-puce ${x.teinte}`} aria-hidden="true" />{x.libelle}</dt>
-                      <dd>{montant(t[x.cle])}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </div>
-            </section>
-          ) : null}
-
-          {(onglet === "debiteurs" || onglet === "relances") && (source === "exemple" || (reel?.tableau?.reglages && essai)) ? (
-            <div style={{ marginBottom: 14 }}>
-              <Avis teinte="bleu">
-                <strong>Mode essai.</strong> Les relances validées partent vers l&apos;adresse d&apos;essai d&apos;Omega, jamais chez vos clients, tant que le gérant n&apos;a pas basculé en réel.
-              </Avis>
-            </div>
-          ) : null}
-
-          {onglet === "debiteurs" ? (
-          <div className="esp-grille">
-            <section className="esp-carte" aria-label="Débiteurs">
-              <div className="esp-carte-tete">
-                <h2 className="esp-carte-titre">{filtre === "echu" ? "Comptes en retard" : filtre === "plus_90" ? "Retards de plus de 90 jours" : filtre === "pause" ? "Comptes hors cycle" : "Débiteurs"}</h2>
-                <span className="c2-tete-droite">
-                  <span className="esp-kpi-sous">{comptes.length} compte{comptes.length > 1 ? "s" : ""}</span>
-                  <button type="button" className="esp-lien-bouton" onClick={() => exporterBalance(tableau?.comptes ?? [], jourParis())}>
-                    <Download width={14} height={14} aria-hidden="true" /> Tableur
-                  </button>
-                </span>
-              </div>
-              {comptes.length === 0 ? (
-                <Vide titre="Personne ne vous doit rien ici">{filtre ? "Rien dans ce filtre." : "Déposez l'export des factures non soldées de votre facturier pour commencer."}</Vide>
-              ) : (
-                <ul className="esp-liste" aria-label="Débiteurs">
-                  {comptes.map((b) => {
-                    const s = STATUTS_COMPTE[b.statut];
-                    return (
-                      <li key={b.compte_id}>
-                        <button
-                          type="button"
-                          className="esp-item"
-                          aria-current={choisi === b.compte_id ? "true" : undefined}
-                          onClick={() => {
-                            setChoix(b.compte_id);
-                            if (window.innerWidth < 1024) document.getElementById("c2-fiche")?.scrollIntoView({ behavior: "smooth", block: "start" });
-                          }}
-                        >
-                          <span className="esp-item-haut">
-                            <span style={{ fontWeight: 600 }}>{b.nom}</span>
-                            {b.statut !== "actif" ? <Pastille teinte={s.teinte}>{s.libelle}</Pastille> : b.retard_max_jours > 60 ? <Pastille teinte="rouge">{b.retard_max_jours} j</Pastille> : b.retard_max_jours > 0 ? <Pastille teinte="ambre">{b.retard_max_jours} j</Pastille> : <Pastille teinte="vert">À échoir</Pastille>}
-                            {b.depasse_plafond ? <Pastille teinte="rouge" contour>Plafond dépassé</Pastille> : null}
-                          </span>
-                          <span className="esp-item-montant">{montant(b.echu > 0 ? b.echu : b.encours)}</span>
-                          <span className="esp-item-titre">{b.reference}{b.groupe ? ` · ${b.groupe}` : ""}</span>
-                          <span className="esp-item-bas">
-                            <span>{b.echu > 0 ? `${montant(b.echu)} échus sur ${montant(b.encours)}` : `${montant(b.encours)} à échoir`}</span>
-                            <span>{b.factures_echues} facture{b.factures_echues > 1 ? "s" : ""} échue{b.factures_echues > 1 ? "s" : ""}</span>
-                          </span>
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </section>
-
-            <section id="c2-fiche" className="esp-detail-mobile" aria-label="Fiche du compte">
-              {fiche && actions ? (
-                <FicheCompte key={`${source}:${fiche.compte.id}`} fiche={fiche} actions={actions} />
-              ) : chargeFiche || (source === "reelle" && choisi) ? (
-                <div className="esp-carte"><Chargement texte="Lecture du compte…" /></div>
-              ) : (
-                <div className="esp-carte"><Vide titre="Choisissez un compte">Ses factures, la relance de chacune et ses règlements s&apos;affichent ici.</Vide></div>
-              )}
-            </section>
-          </div>
-          ) : null}
-
-          {onglet === "relances" ? (
-          <>
-          <section id="c2-relances" className="esp-carte c2-section" aria-label="Relances">
-            <div className="esp-carte-tete">
-              <h2 className="esp-carte-titre">Relances écrites</h2>
-              <span className="c2-tete-droite">
-                <button type="button" className="esp-lien-bouton" onClick={() => exporterRelances(relances, jourParis())}>
-                  <Download width={14} height={14} aria-hidden="true" /> Tableur
-                </button>
-                <Link className="esp-lien-bouton" href="/espace2/validations">Ouvrir la file de validation</Link>
-              </span>
-            </div>
-            {recentes.length === 0 ? (
-              <Vide titre="Aucune relance">Les relances s&apos;écrivent chaque matin à 7 h pour les comptes qui ont atteint un palier.</Vide>
-            ) : (
-              <ul className="c2-relances">
-                {recentes.map((r) => {
-                  const e = ETATS_RELANCE[r.etat] ?? ETATS_RELANCE.preparee;
-                  return (
-                    <li key={r.id}>
-                      <details>
-                        <summary>
-                          <span className="esp-item-haut">
-                            <strong>{r.compte}</strong>
-                            <Pastille teinte={r.palier === "mise_en_demeure" ? "rouge" : "gris"} contour>{libellePalier(r.palier)}</Pastille>
-                            <Pastille teinte={e.teinte}>{e.libelle}</Pastille>
-                          </span>
-                          <span className="c2-relance-ligne">
-                            <span>{r.sujet ?? "—"}</span>
-                            <span className="esp-num">{montant(r.montant)}</span>
-                          </span>
-                          <span className="c2-sous">
-                            Écrite le {dateCourte(r.jour)}{r.destinataire_adresse ? ` pour ${r.destinataire_adresse}` : ""}
-                            {r.envoye_le ? ` · partie le ${dateHeure(r.envoye_le)}` : ""}
-                            {r.indemnites > 0 ? ` · indemnité ${montant(r.indemnites)}` : ""}
-                            {r.penalites > 0 ? ` · pénalités ${montant(r.penalites)}` : ""}
-                          </span>
-                          {r.motif ? <span className="c2-sous c2-motif">{r.motif}</span> : null}
-                        </summary>
-                        {r.corps ? <pre className="c2-corps">{r.corps}</pre> : <p className="c2-sous">Le texte est dans la file de validation.</p>}
-                        {r.etat === "validee" || (r.etat === "non_reglee" && r.demande_statut === "approuvee") ? <EnvoiMain relance={r} noter={noterEnvoi} /> : null}
-                      </details>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </section>
-
-          {commandes.length ? (
-            <section className="esp-carte c2-section" aria-label="Bons de commande attendus">
-              <div className="esp-carte-tete">
-                <h2 className="esp-carte-titre">Bons de commande attendus</h2>
-                <span className="esp-kpi-sous">la relance va au service qui émet le bon, pas à la comptabilité</span>
-              </div>
-              <ul className="c2-relances">
-                {commandes.map((x) => (
-                  <li key={x.id}>
-                    <span className="esp-item-haut">
-                      <strong>{x.destinataire_nom ?? x.destinataire_adresse}</strong>
-                      <Pastille teinte={ETATS_COMMANDE[x.statut].teinte}>{ETATS_COMMANDE[x.statut].libelle}</Pastille>
-                    </span>
-                    <span className="c2-relance-ligne"><span>{x.sujet ?? "—"}</span></span>
-                    <span className="c2-sous">Écrite le {dateCourte(x.jour)} pour {x.destinataire_adresse}{x.motif ? ` · ${x.motif}` : ""}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-
-          <Textes
-            key={`${source}:${reel?.client?.client_id ?? ""}`}
-            source={source}
-            client={reel?.client?.client_id ?? null}
-            reglages={tableau?.reglages ?? null}
-            apresReglage={relire}
-          />
-          </>
-          ) : null}
-
-          {onglet === "envois" ? (
-            <section className="esp-carte c2-section" aria-label="Envois">
-              <div className="esp-carte-tete">
-                <h2 className="esp-carte-titre">Envois</h2>
-                <span className="c2-tete-droite">
-                  <span className="esp-kpi-sous">chaque relance partie, datée, avec son destinataire, son objet et son canal</span>
-                  <button type="button" className="esp-lien-bouton" onClick={() => exporterRelances(parties, jourParis())}>
-                    <Download width={14} height={14} aria-hidden="true" /> Tableur
-                  </button>
-                </span>
-              </div>
-              {parties.length === 0 ? (
-                <Vide titre="Rien n'est encore parti">Une relance part une fois validée dans la file ; elle s&apos;inscrit ici avec son heure, son destinataire et son canal.</Vide>
-              ) : (
-                <div className="esp-tableau-cadre">
-                  <table className="esp-tableau c2-envois">
-                    <thead>
-                      <tr>
-                        <th scope="col">Partie le</th>
-                        <th scope="col">Destinataire</th>
-                        <th scope="col">Objet</th>
-                        <th scope="col">Canal</th>
-                        <th scope="col">État</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {parties.map((r) => {
-                        const e = ETATS_RELANCE[r.etat] ?? ETATS_RELANCE.preparee;
-                        return (
-                          <tr key={r.id}>
-                            <td>{r.envoye_le ? dateHeure(r.envoye_le) : dateCourte(r.jour)}</td>
-                            <td><strong>{r.compte}</strong><span className="c2-sous">{r.destinataire_adresse ?? "—"}</span></td>
-                            <td>{r.sujet ?? "—"}<span className="c2-sous">{libellePalier(r.palier)} · {montant(r.montant)}</span></td>
-                            <td>{r.envoi_main ? `${CANAUX_MAIN[r.envoi_main.canal] ?? r.envoi_main.canal}, à la main` : r.canal === "lre" ? "Recommandé électronique" : r.canal === "whatsapp" ? "WhatsApp" : "Courriel"}</td>
-                            <td><Pastille teinte={e.teinte}>{e.libelle}</Pastille></td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </section>
-          ) : null}
-
-          {onglet === "tresorerie" && pilotage && (pilotage.reponses.length || pilotage.arretes.length) ? (
-            <section className="esp-carte c2-section" aria-label="Pilotage">
-              <div className="esp-carte-tete">
-                <h2 className="esp-carte-titre">Pilotage</h2>
-                <span className="esp-kpi-sous">une relance est « suivie » d&apos;un règlement ou d&apos;une réponse dans les quinze jours</span>
-              </div>
-              <div className="esp-carte-corps c2-pilotage">
-                <div>
-                  <h3 className="esp-section-titre">Taux de réponse par palier</h3>
-                  {pilotage.reponses.length ? (
-                    <ul className="c2-reglements">
-                      {pilotage.reponses.map((x) => (
-                        <li key={x.palier}>
-                          <span>{libellePalier(x.palier)}</span>
-                          <span className="esp-num">{x.taux_pct === null ? "—" : `${String(x.taux_pct).replace(".", ",")} %`}</span>
-                          <span className="c2-sous">{x.suivies} sur {x.envoyees} parties</span>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : <p className="c2-sous">Aucune relance partie pour l&apos;instant.</p>}
-                </div>
-                <div>
-                  <h3 className="esp-section-titre">Arrêtés de la balance</h3>
-                  {pilotage.arretes.length ? (
-                    <ul className="c2-reglements">
-                      {pilotage.arretes.map((a) => (
-                        <li key={a.jour}>
-                          <span>Au {dateCourte(a.jour)}</span>
-                          <span className="esp-num">{montant(a.totaux.echu)} échus</span>
-                          <button type="button" className="esp-lien-bouton" onClick={() => exporterBalance(a.balance, a.jour)}>
-                            <Download width={14} height={14} aria-hidden="true" /> Tableur
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : <p className="c2-sous">Le premier arrêté se prend au jour du mois réglé.</p>}
-                </div>
-              </div>
-            </section>
-          ) : null}
-
-          {onglet === "tresorerie" ? (
-            <TauxChange key={`${source}:${reel?.client?.client_id ?? ""}`} source={source} client={reel?.client?.client_id ?? null} />
-          ) : null}
-
-          {onglet === "tresorerie" && (tableau?.a_imputer ?? []).length ? (
-            <section className="esp-carte c2-section" aria-label="Règlements à rapprocher">
-              <div className="esp-carte-tete">
-                <h2 className="esp-carte-titre">Règlements à rapprocher</h2>
-                <span className="esp-kpi-sous">la relance du compte concerné attend</span>
-              </div>
-              <ul className="c2-relances">
-                {(tableau?.a_imputer ?? []).map((r) => (
-                  <li key={r.id} className="c2-rapprocher">
-                    <span className="c2-relance-ligne">
-                      <span><strong>{montant(r.a_imputer)}</strong> reçus le {dateCourte(r.recu_le)} · {r.libelle ?? r.reference ?? "sans référence"}{r.compte ? ` · ${r.compte}` : ""}</span>
-                      <button type="button" className="esp-lien-bouton" onClick={() => void proposer(r)}>Factures probables</button>
-                    </span>
-                    {propositions[r.id] ? (
-                      propositions[r.id].length === 0 ? (
-                        <span className="c2-sous">Aucune facture ouverte de ce montant : rapprochez-le depuis la fiche du compte.</span>
-                      ) : (
-                        <span className="c2-propositions">
-                          {propositions[r.id].map((p, i) => (
-                            <span key={i}>
-                              {p.factures.map((x) => `${x.numero}${x.compte ? ` (${x.compte})` : ""} — ${montant(x.reste_du)}`).join(" + ")}
-                              {p.factures.length === 1 ? (
-                                <button type="button" className="r-btn" onClick={() => void lettrer(r, p.factures[0].id)}>Lettrer</button>
-                              ) : null}
-                            </span>
-                          ))}
-                        </span>
-                      )
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-          {onglet === "tresorerie" && !(t && t.encours > 0) ? (
-            <div className="esp-carte"><Vide titre="Aucun encours">La balance âgée, la prévision d&apos;encaissement et les arrêtés s&apos;affichent dès le premier export lu.</Vide></div>
-          ) : null}
-          </div>
+          {vueCourante}
         </>
       )}
 
-      <Dialog open={depot} onOpenChange={(o) => !o && setDepot(false)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogIcone><FileUp width={18} height={18} aria-hidden="true" /></DialogIcone>
-            <DialogTitle>Déposer un export du facturier</DialogTitle>
-            <DialogDescription>Un fichier CSV tel que votre logiciel l&apos;exporte : les colonnes sont reconnues par leur en-tête. Rien n&apos;est envoyé avant que vous ayez vu le compte des lignes.</DialogDescription>
-          </DialogHeader>
-          <DialogBody>
-            <div className="esp-form">
-              <label className="rv-libelle">Ce que contient le fichier
-                <select className="rv-champ" value={jeu} onChange={(e) => setJeu(e.target.value as Jeu)}>
-                  {JEUX.map((x) => <option key={x.cle} value={x.cle}>{x.libelle}</option>)}
-                </select>
-              </label>
-              <p className="c2-sous">{JEUX.find((x) => x.cle === jeu)?.aide}</p>
-              <label className="rv-libelle">Fichier CSV
-                <input className="rv-champ" type="file" accept=".csv,.txt,.tsv,text/csv" onChange={(e) => void lireFichier(e.target.files?.[0])} />
-              </label>
-              <label className="rv-libelle">Ou collez les lignes (en-têtes compris)
-                <textarea className="rv-champ" rows={4} value={texte} onChange={(e) => { setTexte(e.target.value); setNomFichier(""); }} placeholder="N° facture;Client;Date de facture;Échéance;Montant TTC;Reste dû" />
-              </label>
-              {JEUX.find((x) => x.cle === jeu)?.complet ? (
-                <label className="c2-coche">
-                  <input type="checkbox" checked={complet} onChange={(e) => setComplet(e.target.checked)} />
-                  <span>Ce fichier liste toutes les pièces encore ouvertes : celles qui n&apos;y sont plus sont soldées.</span>
-                </label>
-              ) : null}
-              {lecture ? (
-                lecture.manque.length || lecture.sansClient ? (
-                  <Avis teinte="ambre">
-                    Colonnes introuvables : {[...lecture.manque.map((k) => LIBELLES_CHAMPS[k] ?? k), ...(lecture.sansClient ? ["client (code ou nom)"] : [])].join(", ")}. Vérifiez la première ligne du fichier.
-                  </Avis>
-                ) : (
-                  <Avis teinte="vert" role="status">
-                    {lecture.lignes.length} ligne{lecture.lignes.length > 1 ? "s" : ""} lue{lecture.lignes.length > 1 ? "s" : ""} ; colonnes reconnues : {lecture.reconnues.map((x) => x.entete).join(", ")}.
-                    {lecture.ignorees.length ? ` Ignorées : ${lecture.ignorees.join(", ")}.` : ""}
-                  </Avis>
-                )
-              ) : null}
-              {erreurDepot ? <Avis teinte="rouge" role="alert">{erreurDepot}</Avis> : null}
-            </div>
-          </DialogBody>
-          <DialogFooter>
-            <button type="button" className="r-btn r-btn--noir" disabled={!lecture || !!lecture.manque.length || lecture.sansClient || !lecture.lignes.length || envoiDepot} onClick={deposer}>
-              {envoiDepot ? <Loader variant="spin" /> : null} Déposer {lecture?.lignes.length ? `${lecture.lignes.length} ligne${lecture.lignes.length > 1 ? "s" : ""}` : ""}
-            </button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {fenetreDepot}
     </>
   );
 }
@@ -987,4 +1226,3 @@ function EnvoiMain({ relance, noter }: { relance: Relance; noter: (r: Relance, c
     </div>
   );
 }
-
