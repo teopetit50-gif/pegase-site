@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import EcranOffload from "@/components/espace/offload/EcranOffload";
-import Habille from "@/components/espace2/Habille";
+import { HabilleSb } from "@/components/espace2/Habille";
 
 /* /espace2/offload — l'écran de /espace/offload, repris dans le nouvel espace.
    21/10/2026 : les cinq cartes empilées sous la liste (garde-fous,
@@ -13,8 +13,8 @@ export const metadata: Metadata = {
 
 export default function PageOffload() {
   return (
-    <Habille>
-      <EcranOffload sections={false} />
-    </Habille>
+    <HabilleSb>
+      <EcranOffload sections={false} gabarit="sb" />
+    </HabilleSb>
   );
 }
