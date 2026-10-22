@@ -4,11 +4,11 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 `components/espace/offload/`, `app/espace/offload/`, et ce fichier. Coordinateur : session
 `session_01BCGFdpRKBvXKjouC75sYBg`. Je n'appelle jamais Supabase : le coordinateur pose, je reçois les sorties brutes.
 
-## REPRISE (arrêt du 21/10, 23 h 25 Z)
+## REPRISE (22/10, 19 h 15 Z — relance de Teo : fuseau par organisation, puis arrêt)
 
-- Fait : c4_01 à c4_30 posés et verts sur la recette ; T-OFFLOAD a rejoué juste O6 / TOFFLOAD-03.
+- Fait : c4_01 à c4_30 posés et verts ; c4_31 (fuseau de l'organisation) poussé, local 490 ok.
 - En cours : rien. Import des personnes morales : script livré (6f0a05b2), non joué, attend Teo.
-- Prochain pas (noté par le coordinateur) : OFFLOAD raisonne à l'heure de Paris ; un client en Guadeloupe a son fuseau (America/Guadeloupe) : lire le fuseau de l'organisation au lieu de « Europe/Paris ».
+- Prochain pas : poser c4_31 ; offload_deposer_points reste à l'heure de Paris (point du matin commun, 5 h).
 
 ### Reprise du 17/10
 
@@ -451,6 +451,15 @@ Banc local : 28 tests, 312 assertions vertes, migrations posées deux fois ; tsc
 l'échéance honorée après message est comptée au suivi). Le chiffre repris compte tous les achats des 90 jours,
 sans prétendre qu'ils sont dus au seul message.
 
+## Lot c4_31 — le fuseau de l'organisation (22/10)
+
+OFFLOAD lit le fuseau de l'entité principale de l'organisation (public.entites.fuseau, défaut Europe/Paris), comme le
+socle : `private.offload_fuseau(p_client)`, `private.offload_fuseau_compte(p_compte)`. 22 fonctions redéfinies (jour de
+détection, cycle, vague, arrêté ; « pas dans le futur » d'un achat, d'un contact, d'une intervention ; clôture sur
+commande ; quarantaine d'un contact ; échéance des tâches ; pilotage ; fiche ; phrases datées). Reste à Paris :
+offload_deposer_points (point du matin commun). Test `c4_31_fuseau_organisation.sql` : deux fuseaux lointains
+(Kiritimati, Pago Pago), indépendant de l'heure ; 8 assertions ; tombe sans le lot. Local : 54 tests, 490 ok.
+
 ## Lot c4_30 — la date d'un achat se juge à l'heure de Paris (21/10, 23 h 20 Z)
 
 Recette, test c4_29 à 23 h Z : la reprise est datée à Paris (22/10), l'achat du test à current_date UTC (21/10) → pas
@@ -876,3 +885,4 @@ Partielles : 6, 11, 15, 38.
 - 21/10, 23 h 15 Z — lot c4_29 (décision « un cycle par trimestre », TOFFLOAD-03) : 481 ok.
 - 21/10, 23 h 20 Z — recette c4_29 : 8/10, le cycle n'avait pas ouvert la reprise de TR3 (plafond de la vague du banc, probable) ; le test l'ouvre à la main.
 - 21/10, 23 h 20 Z — lot c4_30 (date d'achat à Paris) ; tests 25, 27, 29 datés à Paris.
+- 22/10, 19 h 15 Z — lot c4_31 (fuseau de l'organisation) : 490 ok.
