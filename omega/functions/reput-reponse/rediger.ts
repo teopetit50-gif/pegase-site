@@ -81,7 +81,16 @@ export const CONSIGNE_COURTE =
   "RÉPONSE COURTE (elle part par SMS) : deux phrases au plus, 300 caractères au plus, sans salutation ni excuse de ne pas avoir décroché : l'entreprise ajoute elle-même l'ouverture et la signature.";
 
 export function court(d: Dossier): boolean {
-  return d.canal_reponse === "sms" || d.canal_reponse === "whatsapp" || d.reception?.canal === "appel";
+  return d.canal_reponse === "sms" || d.canal_reponse === "whatsapp";
+}
+
+/** c3_38 (TREPUT-12) : ce que devient la réponse à un appel, selon le canal que la base a retenu. Un fixe ou un numéro
+ *  masqué ne reçoit aucun écrit : le texte est la note de la personne qui rappelle, sans renvoi à un SMS. */
+export function suiteAppel(d: Dossier): string {
+  if (d.canal_reponse === "sms") return "la réponse part par SMS, courte";
+  if (d.canal_reponse === "whatsapp") return "la réponse part par WhatsApp, courte";
+  return "appel d'un numéro fixe ou masqué : AUCUN message écrit ne peut lui parvenir, une personne de l'entreprise le rappellera ; " +
+    "écris en une ou deux phrases ce que le client demande, pour cette personne, sans jamais proposer de répondre par SMS, courriel ou WhatsApp";
 }
 
 /** Le contenu de la question posée au modèle : la base, puis la demande entre balises. */
@@ -115,7 +124,7 @@ export function contenuDemande(d: Dossier): string {
       ? ["MESSAGES PRÉCÉDENTS DU MÊME CLIENT (même dossier, encore sans réponse envoyée ou déjà traités) : une seule réponse doit couvrir tout le dossier.", ...precedents, ""]
       : []),
     ...(court(d) ? [CONSIGNE_COURTE, ""] : []),
-    `MESSAGE REÇU par ${r.canal === "appel" ? "téléphone (message vocal laissé quand personne n'a décroché, transcrit automatiquement : des mots peuvent être mal reconnus ; la réponse part par SMS, courte)" : r.canal}${r.pieces ? `, avec ${r.pieces} pièce(s) jointe(s) que tu ne vois pas` : ""}${r.en_reponse_a ? ", en réponse à un message de l'entreprise" : ""} :`,
+    `MESSAGE REÇU par ${r.canal === "appel" ? `téléphone (message vocal laissé quand personne n'a décroché, transcrit automatiquement : des mots peuvent être mal reconnus ; ${suiteAppel(d)})` : r.canal}${r.pieces ? `, avec ${r.pieces} pièce(s) jointe(s) que tu ne vois pas` : ""}${r.en_reponse_a ? ", en réponse à un message de l'entreprise" : ""} :`,
     "<message>",
     r.de_nom ? `De : ${r.de_nom}` : "",
     r.sujet ? `Objet : ${r.sujet}` : "",
@@ -276,8 +285,32 @@ export const CORPS_PRECISION =
 export const CORPS_VIDE =
   "Merci pour votre message. Il nous est parvenu sans texte : pouvez-vous nous écrire en quelques mots ce que vous souhaitez ? Nous pourrons alors vous répondre.";
 
+/** Les textes que reput-appels dépose quand l'appel n'a pas de message compréhensible (mêmes textes, test commun). */
+export const APPEL_SANS_MESSAGE = ["Appel manqué, sans message laissé.", "Message vocal reçu ; la transcription n'a pas pu être faite. Rappelez ce numéro."];
+
+export const CORPS_APPEL_RAPPEL = "Appel manqué sans message compréhensible : rappeler ce numéro.";
+export const CORPS_APPEL_ECRIRE =
+  "Nous avons manqué votre appel et votre message ne nous est pas parvenu clairement : pouvez-vous nous écrire votre demande en réponse à ce message ?";
+
 export function sansTexte(d: Dossier): SortieRedaction | null {
   const r = d.reception;
+  // c3_38 (TREPUT-12) : un appel sans message, ou inaudible — ni le modèle ni une réponse inventée ; à un mobile, on
+  // demande d'écrire ; à un fixe, la note de rappel seule.
+  if (r && r.canal === "appel" && APPEL_SANS_MESSAGE.includes((r.corps ?? "").trim()) && (d.precedents ?? []).length === 0) {
+    const ecrit = d.canal_reponse === "sms" || d.canal_reponse === "whatsapp";
+    return {
+      redaction: {
+        sujet: "autre", langue: "fr", urgence: false, couverte: false, sources: [],
+        corps: ecrit ? CORPS_APPEL_ECRIRE : CORPS_APPEL_RAPPEL,
+        raison: ecrit ? "Appel manqué sans message compréhensible : le client est invité à écrire sa demande."
+                      : "Appel manqué sans message compréhensible, d'un fixe ou d'un numéro masqué : à rappeler.",
+      },
+      controles: ["sans_texte", "appel_sans_message"],
+      usage: { tokens_entree: 0, tokens_sortie: 0 },
+      modele: "regle:appel_sans_message",
+      cout_eur: 0,
+    };
+  }
   // c3_26 (TREPUT-01) : avec ou sans pièce — « Envoyé de mon iPhone » seul est un message sans texte.
   if (!r || parle(r.corps) || parle(r.sujet) || (d.precedents ?? []).length > 0) return null;
   const avecPieces = r.pieces > 0;
