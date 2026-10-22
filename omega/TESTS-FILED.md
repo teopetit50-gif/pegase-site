@@ -257,7 +257,13 @@ ne peuvent pas être la même personne » ; carte « Des rôles et des délégat
   "approbations_une_par_personne"`. Le refus est **juste** (`:70`, deux approbations distinctes), mais le message n'est pas lisible par
   un client.
 
-### Série 1b — 21/10, 20 h 40 (portes d'écriture, en gérant `eeeeeeee-…01f1`, client banc seulement)
+**TFILED-18 · imputation · le champ « compte » attend un identifiant interne, et l'erreur expose le code** (`filed_imputer_facture`)
+- En gérant, transaction annulée : `select public.filed_imputer_facture('a46345d2-…', '[{"compte":"601000","centre":"CH-FLAMB",
+  "montant_ht":700.00,"libelle":"…"}]', '…')` → `ERROR 22P02: invalid input syntax for type uuid: "601000"`, avec en CONTEXT l'extrait
+  `v_compte := coalesce((v_l->>'compte')::uuid, (select c.id from public.filed_plan_comptable …))`.
+- Un client (ou un écran) qui envoie un numéro de compte dans « compte », ce qui est le sens courant du mot, reçoit une erreur technique
+  qui montre le code interne. Attendu : accepter le numéro, ou répondre en français (« compte : numéro attendu dans `numero` »).
+ (portes d'écriture, en gérant `eeeeeeee-…01f1`, client banc seulement)
 
 1. `select public.filed_lever_anomalie('a46345d2-c631-4af3-b713-4bd52b70541e', 'identite.registre', 'T-FILED 1b : …')` (facture F0)
    → refus : `ERROR 22023: Cette anomalie ne se lève pas d'un motif : elle se corrige, ou se décide par la file.` La transaction est
@@ -385,6 +391,13 @@ seulement « proposé », jamais tenu pour bon (vérifié par le coordinateur). 
 - **(2) Comptabilisation** : en gérant, `filed_designer_comptable(client, gérant, true)` et `filed_regler_comptabilisation(client, false,
   false)` → `etat_comptabilisation.comptables = [gérant]`. Puis `filed_comptabiliser_facture(F0, motif)` → `ERROR 55000: Aucune imputation
   validée : le compte et le centre de coût se posent avant.` Le refus est lisible. Il me faut la porte d'imputation (Q21).
+  - Q21 (relayé) : F0 est `validee` (exécutée à 19:25:00Z) et F2a aussi (19:26:00Z), environ 1 minute après la décision, soit au
+    passage de la tâche de fond. C'est normal, pas un écart. Portes d'imputation : `filed_poser_centre`, puis `filed_imputer_facture`.
+  - `filed_poser_centre(client, entité, 'CH-FLAMB', 'Chantier Résidence Les Flamboyants (fictif)')` → `2990cc26-…`.
+  - I1 (annulé) : `filed_imputer_facture(F0, '[{"compte":"601000","centre":"CH-FLAMB","montant_ht":700,…}]')` → `ERROR 22P02: invalid input
+    syntax for type uuid: "601000"`, avec un **extrait du code interne dans le contexte** → **TFILED-18**. Avec `"numero":"601000"` →
+    `ERROR 22023: Ligne 1 : compte inconnu ou retiré.` Le refus est lisible, mais **le plan comptable du banc est vide** et aucune porte
+    connue ne le remplit (Q22).
 - **(3) Niveau 2, pièces NOBAT R2026-000065 → 000077** : en attente du signal du coordinateur (lecteur).
 
 ### Jeu d'essai série 1 (prêt, pas encore joué)
