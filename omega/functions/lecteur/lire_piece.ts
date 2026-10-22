@@ -15,6 +15,7 @@ import type { Ocr } from "./ocr.ts";
 import { analyserPdf, type PagePdf, pageSansTexte } from "./pdf.ts";
 import { controlerPlafond } from "@partage/plafond.ts";
 import { champsPour, schemaPour } from "./schemas/modules.ts";
+import { SHA_PAQUET } from "./version_paquet.ts";
 import { CHAMPS_DISPOSITION, CHAMPS_RESERVE } from "./schemas/facture.ts";
 import type { ClientClaude } from "@partage/claude.ts";
 import type { PortesAnalyse } from "./analyse/travail.ts";
@@ -63,10 +64,15 @@ export type Issue = "lue" | "a_verifier" | "a_classer" | "rejetee" | "echec" | "
 export const SEUIL_TYPE_SUR = 0.6;
 const MAX_TEXTE_PAGE = 200_000;
 
-export function versionLecteur(maintenant: Date, modele: string | null): string {
+/**
+ * « lecteur/2026-10-22/claude-sonnet-5-5 » dans le dépôt ; « lecteur/10-22.ea1f941/claude-sonnet-5-5 » une fois
+ * déployé : le SHA court du paquet distingue deux déploiements du même jour (dédoublonnage de piece_lue, A4).
+ */
+export function versionLecteur(maintenant: Date, modele: string | null, sha: string | null = SHA_PAQUET): string {
   const jour = maintenant.toISOString().slice(0, 10);
   const court = (modele ?? "sans-ia").replace(/^(eu|us|global)\./, "").replace(/^anthropic\./, "").replace(/-\d{8}-v\d+:\d+$/, "");
-  return `lecteur/${jour}/${court}`.slice(0, 40);
+  const quand = sha ? `${jour.slice(5)}.${sha.slice(0, 7)}` : jour;
+  return `lecteur/${quand}/${court}`.slice(0, 40);
 }
 
 /** Ce que les appels d'IA préalables (transcriptions par morceaux) ont déjà coûté. */

@@ -793,11 +793,15 @@ function nombreCellule(c: string): number | null {
 export function ventilationDepuisTableau(valeurs: ValeurLue[], pages: PageLue[]): ValeurLue | null {
   if (valeurs.some((v) => v.champ === "tva.ventilation")) return null;
   for (const p of pages) {
-    const lignes = p.texte.split("\n");
-    const debut = lignes.findIndex((l) => /taux\s*(de\s*)?t\.?v\.?a/i.test(l) && /h\.?t/i.test(l) && l.includes("|"));
+    // Les rangées après l'en-tête, qu'elles soient sur des lignes à part (lignes vides comprises) ou à la suite
+    // de l'en-tête séparées par « / » (TFILED-25 : la transcription change d'une lecture à l'autre).
+    const lignes = p.texte.split("\n").flatMap((l) => l.split(/\s+\/\s+(?=[\d|])/));
+    const debut = lignes.findIndex((l) => /taux\s*(de\s*)?t\.?v\.?a/i.test(l) && /\bh\.?t\b/i.test(l) && l.includes("|"));
     if (debut < 0) continue;
     const rangees: Record<string, unknown>[] = [];
-    for (const l of lignes.slice(debut + 1, debut + 20)) {
+    for (const brute of lignes.slice(debut + 1, debut + 30)) {
+      const l = brute.trim();
+      if (l === "") continue;
       if (!l.includes("|")) break;
       const c = l.split("|").map((x) => x.trim());
       const base = nombreCellule(c[0] ?? "");

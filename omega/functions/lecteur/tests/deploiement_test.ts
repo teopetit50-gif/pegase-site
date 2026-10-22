@@ -19,3 +19,13 @@ Deno.test("déploiement : le paquet contient tout ce qu'importe index.ts, rien d
   }
   assert(!noms.some((n) => n.startsWith("tests/") || n.startsWith("outils/") || n.endsWith("_test.ts")), noms.join(", "));
 });
+
+Deno.test("déploiement : la version du lecteur porte le SHA court du paquet, et tient en 40 caractères", async () => {
+  const { versionLecteur } = await import("../lire_piece.ts");
+  const v = versionLecteur(new Date("2026-10-22T20:00:00Z"), "claude-sonnet-5-5", "ea1f941ce018dcc2");
+  assertEquals(v, "lecteur/10-22.ea1f941/claude-sonnet-5-5");
+  assert(v.length <= 40);
+  assertEquals(versionLecteur(new Date("2026-10-22T20:00:00Z"), "claude-sonnet-5-5", null), "lecteur/2026-10-22/claude-sonnet-5-5");
+  const noms = (await assembler()).map((f) => f.name);
+  assert(noms.includes("version_paquet.ts"));
+});

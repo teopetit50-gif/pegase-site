@@ -45,6 +45,14 @@ export async function assembler(entree = "index.ts"): Promise<{ name: string; co
 
 if (import.meta.main) {
   const fichiers = await assembler();
+  // Le SHA court du commit déployé, inscrit dans la version du lecteur ; un avertissement si l'arbre n'est pas propre.
+  const git = (args: string[]) => new TextDecoder().decode(new Deno.Command("git", { args, cwd: racine.pathname }).outputSync().stdout).trim();
+  const sha = git(["rev-parse", "--short=7", "HEAD"]);
+  const sale = git(["status", "--porcelain", "--", "."]) !== "";
+  const version = fichiers.find((f) => f.name === "version_paquet.ts");
+  if (!version || !/^[0-9a-f]{7}$/.test(sha)) throw new Error("version_paquet.ts absent du paquet, ou SHA illisible");
+  if (sale) console.warn("ATTENTION : le lecteur a des modifications non commitées ; le paquet ne correspond pas au SHA " + sha);
+  version.content = `// Écrit par outils/preparer_deploiement.ts.\nexport const SHA_PAQUET: string | null = ${JSON.stringify(sha)};\n`;
   const denoJson = JSON.parse(await Deno.readTextFile(new URL("deno.json", racine)));
   denoJson.imports["@partage/"] = "./_partage/";
   delete denoJson.tasks;

@@ -349,3 +349,48 @@ Deno.test("NOBAT 069 : « SIRET 552 100 554 - APE 4673 A » rendu « 55210055400
   ], [p], null);
   assertEquals(reclasserIdentifiants(avecSiren.valeurs, CHAMPS_PAR_NOM).map((v) => v.champ), ["fournisseur.siren"]);
 });
+
+// TFILED-25 : le tableau exact de 069, tel que la page le porte (rejoué sans les autres valeurs de la pièce).
+const TABLEAU_069 = [
+  "TOTAL NET HT | C | TAUX TVA | TOTAL TVA | TOTAL TTC A PAYER",
+  "53,55 | 1 | Exo | |",
+  "26,78 | 2 | 8,50 | 2,28 |",
+  "| 3 | 2,10 | |",
+  "80,33 | | | 2,28 | 82,61 €",
+];
+const ATTENDU_069 = [
+  { categorie: "E", taux: 0, base: 53.55, montant: 0, motif: "Exo" },
+  { taux: 8.5, base: 26.78, montant: 2.28 },
+];
+
+Deno.test("TFILED-25 : le tableau exact de 069, sur des lignes, avec ou sans lignes vides, ou à la suite séparé par « / »", async () => {
+  const { ventilationDepuisTableau } = await import("../verifier.ts");
+  const tete = [
+    { champ: "montant_ht", valeur: 80.33, source: "ia" as const, verifiee: true },
+    { champ: "montant_tva", valeur: 2.28, source: "ia" as const, verifiee: true },
+  ];
+  for (const texte of [TABLEAU_069.join("\n"), TABLEAU_069.join("\n\n"), TABLEAU_069.join(" / "), `LEADER ESSAI\n${TABLEAU_069.join("\n")}\nMerci de votre confiance`]) {
+    const v = ventilationDepuisTableau(tete, [page(texte)]);
+    assert(v, JSON.stringify(texte));
+    assertEquals(v.valeur, ATTENDU_069, JSON.stringify(texte));
+    assert(v.verifiee, v.controle);
+  }
+});
+
+Deno.test("TFILED-25 : de bout en bout (assembler), la ventilation de 069 sort quand le modèle ne la rend pas", () => {
+  const b = assembler(
+    ia({
+      valeurs: [
+        { champ: "montant_ht", valeur: 80.33, texte: "80,33", page: 1 },
+        { champ: "montant_tva", valeur: 2.28, texte: "2,28", page: 1 },
+        { champ: "montant_ttc", valeur: 82.61, texte: "82,61 €", page: 1 },
+        { champ: "fournisseur.siret", valeur: "55210055400000", texte: "SIRET 552 100 554 - APE 4673 A", page: 1 },
+      ],
+    }),
+    null,
+    [page(`SIRET 552 100 554 - APE 4673 A\n${TABLEAU_069.join("\n\n")}`)],
+    "natif",
+    0,
+  );
+  assertEquals(b.resultat.valeurs.find((x) => x.champ === "tva.ventilation")?.valeur, ATTENDU_069);
+});
