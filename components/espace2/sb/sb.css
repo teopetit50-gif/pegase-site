@@ -368,8 +368,8 @@
 .v2 .sb-trois-grille span { font-size: 13px; line-height: 19.5px; color: var(--v2-gray-900); }
 .v2 .sb-liens-liste { overflow: hidden; border-radius: 10.6667px; background: var(--v2-bg-100); box-shadow: var(--v2-ombre-petite); margin: 0; padding: 0; list-style: none; }
 .v2 .sb-liens-liste li + li { border-top: 1px solid var(--v2-a-400); }
-.v2 .sb-liens-liste a, .v2 .sb-liens-liste button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 16px; border: 0; background: none; color: inherit; font: inherit; text-align: left; text-decoration: none; cursor: pointer; transition: background 0.15s; }
-.v2 .sb-liens-liste a:hover, .v2 .sb-liens-liste button:hover { background: var(--v2-a-100); }
+.v2 .sb-liens-liste a, .v2 .sb-liens-liste button:not(.v2-btn) { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 16px; border: 0; background: none; color: inherit; font: inherit; text-align: left; text-decoration: none; cursor: pointer; transition: background 0.15s; }
+.v2 .sb-liens-liste a:hover, .v2 .sb-liens-liste button:not(.v2-btn):hover { background: var(--v2-a-100); }
 .v2 .sb-liens-liste .sb-liens-icone { flex: none; color: var(--v2-gray-900); }
 .v2 .sb-liens-liste .sb-liens-texte { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .v2 .sb-liens-liste .sb-liens-texte strong { font-size: 13px; line-height: 19.5px; font-weight: 450; color: var(--v2-gray-1000); }
@@ -407,3 +407,8 @@
 .v2 .sb-stockage-point[data-teinte="rouge"] { background: var(--v2-red-900); }
 .v2 .sb-stockage-apercu { min-width: 0; padding: 16px 24px; background: var(--v2-bg-100); overflow-y: auto; }
 .v2 .sb-stockage-apercu > .esp-carte { background: transparent; box-shadow: none; border: 0; }
+/* Comptabilité — la page Backups de Supabase : une ligne par compte, l'action à droite */
+.v2 .sb-sauvegardes li > div { display: flex; align-items: center; gap: 12px; padding: 12px 16px; }
+.v2 .sb-sauvegarde-icone { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 28px; height: 28px; border-radius: 6px; background: var(--v2-a-200); color: var(--v2-gray-900); }
+.v2 .sb-sauvegarde-texte { flex: 1; min-width: 0; display: flex; flex-direction: column; font-size: 13px; line-height: 19.5px; color: var(--v2-gray-900); }
+.v2 .sb-sauvegarde-texte strong { font-weight: 450; color: var(--v2-gray-1000); }
