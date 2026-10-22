@@ -133,6 +133,8 @@ détection jamais jouée ; le coordinateur remonte la question au bureau. Observ
 | L-4 | P:195 | O1 en litige : la reprise ouverte en série 1 (avant c4_29/30) est toujours `appel`, tâche « Appeler Hôtel Fictif Litige-Karukera SAS » `a_faire` (échéance 24/10) | **écart** TOFFLOAD-09 | 1 |
 | L-5 | P:441 | O12 effacé (`arrete`) : reprise `appel` ouverte, tâche « Tâche d'un compte effacé » `a_faire` (24/10) ; O12 et O13 effacés gardent un signal `eteint` et une priorité (3 340,68 / 3 179,03) au milieu du tableau | **écart** TOFFLOAD-10 | 1 |
 | L-6 | P:166 | O7, O11, O14 : commande reçue 6 jours plus tôt → `ralentit` (« Ses commandes s'espacent… ») et non `ok` | à confirmer (lecture défendable) | 1 |
+| C-09 | TOFFLOAD-09 (c4_32) | O1 : reprise `close`, `issue: abandon`, motif « compte en litige chez CASHD (…) La reprise ne se poursuit pas. », tâche `abandonnee`. Reste au tableau avec `eteint` et priorité 3 340,68 (remarque : un compte en litige classé parmi les comptes à relancer) | juste ; remarque au coordinateur | 1 |
+| C-10 | TOFFLOAD-10 (c4_32) | O12 : reprise `close`, `abandon`, « Données de la personne effacées à sa demande. … », tâche `abandonnee` ; O12 et O13 ne figurent plus dans `offload_tableau` | juste | 1 |
 
 ## Écarts
 
@@ -258,3 +260,6 @@ mardi. Une demande de plus en attente (O16, forcée), non approuvée. Pause jusq
 
 **22/10, arrêt 10.** Fait : relecture des signaux du banc ; TOFFLOAD-09, 10. En attente : niveau 2 sur « Omega » (bureau) ; rejeu
 après le fuseau par organisation de C4 (le coordinateur prévient). Aucune approbation.
+
+**22/10, arrêt 11.** Fait : TOFFLOAD-09 et 10 rejoués, justes. En attente : test du fuseau (entité en America/Guadeloupe) à 22 h 05 Z,
+détection lancée par le coordinateur au jour de Guadeloupe. Sonde (annulée, rien d'écrit) : un achat ou un contact daté du futur est refusé.
