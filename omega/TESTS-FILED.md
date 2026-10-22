@@ -270,6 +270,13 @@ ne peuvent pas être la même personne » ; carte « Des rôles et des délégat
 - Un client ne peut pas savoir quelles natures sont admises, et la réponse expose le code. Attendu : un refus en français qui liste
   les natures possibles.
 
+**TFILED-24 · F13 (R2026-000034) · `identite.tva_intracom` dit « ok » sur un numéro que la pièce ne porte pas, sans en nommer la source**
+- F13 n'imprime aucun numéro de TVA intracommunautaire (seulement « SIRET 912345618 »). FILED rend `identite.tva_intracom` bloquant **ok**
+  « Numéro de TVA FR : Format et clé corrects pour FR. », puis `identite.coherence` ok, puis `identite.registre` en anomalie sur
+  `FR88912345618`. Le numéro vient vraisemblablement de la fiche fournisseur (MCD est confirmé), mais le message ne le dit pas.
+- C'est le même défaut que TFILED-21 avant a4_81 : un contrôle d'identité « ok » sur une valeur dont la source n'est pas nommée. Attendu :
+  « Numéro de TVA repris de la fiche fournisseur (absent de la pièce) », et une attention sur l'absence de la mention obligatoire.
+
 ### Série 1b — 21/10, 20 h 40 (portes d'écriture, en gérant `eeeeeeee-…01f1`, client banc seulement)
 
 1. `select public.filed_lever_anomalie('a46345d2-c631-4af3-b713-4bd52b70541e', 'identite.registre', 'T-FILED 1b : …')` (facture F0)
@@ -485,12 +492,17 @@ Je compare champ par champ. Niveau 2 : vraie pièce, lue sur la recette. Les nom
   bloquée pour un défaut que la pièce n'a pas. Attendu : SIRET absent (ou « non lu »), sans bloquant. Le coordinateur l'a déjà transmis
   à A1.
 
-**TFILED-21 · R2026-000069 · `identite.siren` est « ok » alors que la valeur du SIREN n'est pas vérifiée**
+**TFILED-21 · ✅ CORRIGÉ par a4_81, revérifié le 22/10 à 19 h 44 Z sur F13** · R2026-000069 · `identite.siren` est « ok » alors que la valeur du SIREN n'est pas vérifiée**
 - *Rejeu après a4_81 (posé, vert)* : le cas ne se reproduit pas sur le banc, où mes pièces impriment « SIREN ». J'ai généré une pièce
   fictive qui le reproduit, **F13** (`pieces/F13_siret_9_chiffres.pdf`) : MCD (fournisseur déjà confirmé), MCD-2026-1014, 100 agglos ×
   1,35 = HT 135,00, TVA 8,5 % 11,48, TTC 146,48, et l'en-tête « SIRET 912345618 » (9 chiffres, rien d'autre). Attendus : aucun SIRET à
   14 chiffres inventé (TFILED-20) ; SIREN déduit avec sa source nommée, et `identite.siren` pas « ok » muet (TFILED-21). À déposer par le
   coordinateur.
+- *F13 lue* (R2026-000034, lecteur v63, relayé) : `fournisseur.siren` « 912345618 » **vérifié**, avec la source « citation retrouvée
+  page 1 ; 9 chiffres sous « SIRET » : rangé en SIREN » ; **aucun** `fournisseur.siret` ; `identite.siren` ok « SIREN 912345618, lu sur la
+  pièce : clé correcte. » → **TFILED-21 corrigé, juste.** TFILED-20 est juste **sur cette lecture**, mais le coordinateur note que le
+  modèle varie d'une lecture à l'autre (069 avait comblé par des zéros). TFILED-20 reste ouvert jusqu'à la relecture de 069 après le
+  redéploiement du lecteur (verrou A1). Nouvel écart : **TFILED-24**.
 - `fournisseur.siren` est lu juste, mais marqué NON vérifié (« déduit des 9 premiers chiffres du SIRET »). Le contrôle `identite.siren`
   rend pourtant `ok`. Un contrôle d'identité ne devrait pas se dire « ok » sur une valeur que le lecteur ne garantit pas. Attendu :
   attention « SIREN déduit, à confirmer », comme pour F1 avant a4_74.
