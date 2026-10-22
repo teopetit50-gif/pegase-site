@@ -69,6 +69,9 @@ export const MODULES: ModuleV2[] = [
       { libelle: "À payer", href: `${RACINE}/filed/a-payer` },
       { libelle: "Fournisseurs", href: `${RACINE}/filed/fournisseurs` },
       { libelle: "Comptabilité", href: `${RACINE}/filed/comptabilite` },
+      /* 21/10/2026 — les pages de fonction */
+      { libelle: "Contrôles et fraude", href: `${RACINE}/filed/controles` },
+      { libelle: "Circuit de validation", href: `${RACINE}/filed/circuit` },
     ],
     true,
   ),

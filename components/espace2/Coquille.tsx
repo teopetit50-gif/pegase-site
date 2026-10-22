@@ -723,6 +723,10 @@ const SOUS_CASHD = [
 
 /* les pages de fonction de chaque module (21/10/2026) */
 const FONCTIONS: Record<string, Lien[]> = {
+  filed: [
+    { libelle: "Contrôles et fraude", href: `${RACINE}/filed/controles` },
+    { libelle: "Circuit de validation", href: `${RACINE}/filed/circuit` },
+  ],
   cashd: [
     { libelle: "Balance âgée", href: `${RACINE}/cashd/balance` },
     { libelle: "Litiges et pauses", href: `${RACINE}/cashd/litiges` },
