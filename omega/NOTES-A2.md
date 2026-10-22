@@ -965,3 +965,16 @@ convient pas.
 
 `worker-a2` poussé sur GitHub le 05/10/2026 (cinq commits, pas de 403). Pas de PR :
 le coordinateur intègre.
+
+## Inbound Brevo rétabli (22/10, 00 h 41 Z — bureau, noté par le coordinateur)
+
+Le 21/10, deux vrais courriels vers `banc@recu.omegaai.fr` ont été rejetés par Brevo :
+« 550 5.1.2 Recipient … adresse introuvable », MX pourtant corrects. Cause : le domaine
+`recu.omegaai.fr` n'existait pas dans le compte Brevo (seul `omegaai.fr`), et le webhook
+inbound 2225428 (06/10) portait `omegaai.fr`. Correctif du bureau : domaine ajouté par
+l'API (`POST /v3/senders/domains`), DNS posés par Teo chez OVH (TXT `recu` = `brevo-code…`,
+CNAME `brevo1/brevo2._domainkey.recu`), domaine vérifié et authentifié (`PUT …/authenticate`),
+webhook 2225428 basculé sur `recu.omegaai.fr` (PUT, 204). Outil : brevo-inbound-installer
+v28, remis en stub 410 (v29). Vérifié par deux réceptions réelles (1436, 1437) le 22/10.
+**Règle** : un domaine de réception doit être déclaré ET authentifié chez Brevo avant le
+webhook (GUIDE-INBOUND corrigé dans main).
