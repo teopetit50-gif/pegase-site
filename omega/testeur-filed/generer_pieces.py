@@ -181,3 +181,11 @@ def _draw(x, y, t, *a, **k):
     return _orig(x, y, t, *a, **k)
 c.drawString = _draw
 page13(c); c.save()
+
+# F14 : comme F13, mais au-dessus du seuil de la facture simplifiée (150 € TTC) — tranche tva.numero (TFILED-24)
+c = canvas.Canvas(os.path.join(SORTIE, "F14_siret_9_chiffres_plus_150.pdf"), pagesize=A4)
+_o14 = c.drawString
+c.drawString = lambda x, y, t, *a, **k: _o14(x, y, ("SIRET " + M13["siren"]) if isinstance(t, str) and t.startswith("SIREN ") else t, *a, **k)
+page(c, f=M13, titre="FACTURE", numero="MCD-2026-1015", date="15/10/2026", echeance="14/11/2026",
+     lignes=[("Agglos creux 20x20x50", 200, 1.35, 8.5)])
+c.save()
