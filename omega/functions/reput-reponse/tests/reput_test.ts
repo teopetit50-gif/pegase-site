@@ -32,6 +32,7 @@ Deno.test("une demande couverte : réponse sourcée déposée, coût et jetons c
   assertStringIncludes(p.depots[0].version, "reput-reponse/2026-10-06/claude-essai");
   const fini = JSON.stringify(p.finis[0].resultat);
   assertStringIncludes(fini, "\"cout_eur\":0.004");
+  assertStringIncludes(fini, "\"durees_ms\":{\"commencer\":", "les durées des étapes vont au résultat (TREPUT-05)");
   assert(!fini.includes("samedi"), "le résultat du travail ne porte pas le texte");
   assert(!c.lignes.join("\n").includes("samedi"), "le journal ne porte ni la demande ni la réponse");
   assertEquals(p.battements, 1);
