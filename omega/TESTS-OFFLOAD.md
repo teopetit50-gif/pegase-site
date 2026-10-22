@@ -274,3 +274,8 @@ note : le signal d'O8 porte encore `jour: 2026-10-27` (détections simulées plu
 
 **22/10 22 h 10 Z, arrêt 13.** Fait : F-1 et F-2 (fuseau) justes ; plus aucun écart ouvert (TOFFLOAD-01 à 10 corrigés et rejoués).
 Reste non joué : le cycle un autre jour que mardi ; UTC contre Guadeloupe (fenêtre 00 h-04 h Z). Aucune approbation (demandes V1-V3, O16 en attente).
+
+**PAUSE (Teo, 22/10 22 h 04 Z) — REPRISE en 3 lignes.**
+- Fait : séries 1 et 2, contre-épreuves ; TOFFLOAD-01 à 10 corrigés et rejoués justes ; fuseau Guadeloupe juste (F-1, F-2 ; détection brute : jour 2026-10-22, entrées 2, ok 4 / ralentit 4 / éteint 12, 12 avant clôture) ; niveau 2 Omega : rien à relire.
+- Reste : cycle un autre jour que mardi ; UTC contre Guadeloupe (00 h-04 h Z) ; aucune demande approuvée (V1-V3, O16 en attente).
+- Reprise : au feu vert de Teo ou samedi 25/10 après 02 h Z.
