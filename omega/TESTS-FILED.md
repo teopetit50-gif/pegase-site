@@ -344,6 +344,18 @@ seulement « proposé », jamais tenu pour bon (vérifié par le coordinateur). 
 - **C1** (gérant = déposant) : approbation acceptée, demande approuvée → **TFILED-12** ; exécution différée d'environ 1 min, puis F1 `validee` à 20:32:00Z → TFILED-13 clos, juste.
 - **C2** (valideur) : impossible, puisque la demande est close après C1.
 
+### Série 3 — 22/10, 19 h 10 Z (relance de Teo)
+- **(1) Circuit à une seule personne** : non jouable, voir **TFILED-16**. Aucune facture n'atteint `a_valider`.
+- **(2) Sortie comptable**, SIREN fictif `912345659` posé par le coordinateur sur l'entité (clé de Luhn vérifiée), gérant, transaction annulée :
+  - `filed_exporter_fec(client, entité)` → `nom_fichier "912345659FEC20261231.txt"`, `separateur "tabulation"`, `encodage "UTF-8"`,
+    période du 01/01 au 31/12/2026, `equilibre true`, `ecritures 0`, une empreinte SHA-256, et l'en-tête des **18 colonnes réglementaires dans
+    l'ordre** (JournalCode … Idevise), terminé par CRLF. **Juste** pour la forme (nom `SIREN FEC AAAAMMJJ`, colonnes, séparateur).
+    Le contenu reste **non testable** : il n'y a aucune écriture (TFILED-16).
+  - `filed_exporter_ecritures(…, 'cegid')` et `'quickbooks'` → 0 écriture, comme Sage et Pennylane la veille. Juste : aucune pièce bloquée ne sort.
+  - Le « CSV » du brief n'existe pas comme format (« Format inconnu : pennylane, sage, cegid ou quickbooks »). Le site promet seulement
+    « le format qu'elle utilise déjà » (`factures.ts:275`) : ce n'est pas un écart.
+- **(3) Niveau 2, pièces NOBAT R2026-000065 → 000077** : en attente du signal du coordinateur (lecteur).
+
 ### Jeu d'essai série 1 (prêt, pas encore joué)
 
 - Générateur : `omega/testeur-filed/generer_pieces.py` → `omega/testeur-filed/pieces/*.pdf` (15 fichiers, même gabarit).
@@ -403,8 +415,9 @@ par les portes `public.filed_confirmer_fournisseur(uuid, text)` et `public.filed
 
 ## REPRISE
 
-**Arrêt 15 — 21/10/2026, 23 h 25 Z** (réveil court, rejeu demandé par le coordinateur)
-- Fait : TFILED-09 et 10 revérifiés et justes (socle 19ax). TFILED-12 clos par décision de Teo : la conformité vient de C1, le rejeu est impossible faute de demande ouverte.
-- (1) Joué à 23 h 26 Z sur une demande d'un autre client, donc refus juste (cloisonnement). Sur le bon client, le coordinateur constate qu'il est juste. TFILED-15 est retiré.
-- Prochain pas : aucun. arrêt jusqu'au feu vert de Teo, ou samedi 25/10 après 02 h Z.
-- SHA d'arrêt : voir le commit « T-FILED : rejeu 19ax, TFILED-09 et 10 corrigés, TFILED-12 clos » sur `testeur-filed`.
+**Arrêt 16 — 22/10/2026, 19 h 20 Z**
+- Fait : série 3 (2), forme du FEC juste et exports vides justes. Nouvel écart **TFILED-16** : l'arrêt registre est sans issue, ce qui bloque (1) et le contenu de (2).
+- En cours : rien.
+- Prochain pas : le correctif de TFILED-16, puis F0 au circuit, la décision seule du gérant, et l'export avec écritures (comptes 401 / 44566 / 6xx, équilibre). Ensuite (3) au signal.
+- Questions : aucune nouvelle.
+- SHA d'arrêt : voir le commit « T-FILED série 3 : TFILED-16, forme du FEC » sur `testeur-filed`.
