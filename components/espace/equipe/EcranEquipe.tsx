@@ -18,6 +18,8 @@ import { Loader } from "@/components/ui/loader";
 import { CLAIRE, ENTITES, EXEMPLE_CLIENT_ID, MARC, PERSONNES, SIEGE, SOFIA, YANIS } from "../exemples/socle";
 import { useSource } from "../source";
 import { Avis, Chargement, Pastille, Ruban, Vide } from "../ui";
+import { Note, Squelette } from "@/components/espace2/ui";
+import { SbGroupe, SbLigneVide, SbListe, SbOutils, SbRecherche, SbRegle, SbTableau } from "@/components/espace2/sb/Sb";
 import { ROLES, ajouterMembre, changerRole, chargerEquipe, libelleRole, reglerPerimetre, retirerMembre, type Membre, type Role, type VueEquipe } from "./portes";
 
 const ADRESSES: Record<string, string> = {
@@ -36,7 +38,10 @@ function vueExemple(): VueEquipe {
 
 type Form = { type: "ajouter" } | { type: "perimetre"; membre: Membre } | { type: "retirer"; membre: Membre } | null;
 
-export default function EcranEquipe() {
+/* `gabarit="sb"` : /espace2 rend la page Team de Supabase (22/10/2026) ;
+   /espace garde son écran. Les fenêtres (ajouter, sociétés, retirer) sont
+   communes aux deux. */
+export default function EcranEquipe({ gabarit }: { gabarit?: "sb" } = {}) {
   const { source } = useSource();
   const [exemple, setExemple] = useState<VueEquipe>(vueExemple);
   const [reel, setReel] = useState<VueEquipe | null | undefined>(undefined);
@@ -105,9 +110,92 @@ export default function EcranEquipe() {
   };
 
   const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const [filtre, setFiltre] = useState("");
+
+  const membresVus = (vue?.membres ?? []).filter((m) => !filtre.trim() || [m.nom, m.email, libelleRole(m.role)].some((x) => x && x.toLowerCase().includes(filtre.trim().toLowerCase())));
+  const pageSb = gabarit === "sb" ? (
+    <SbListe titre="Équipe" description="Qui a accès à votre organisation, avec quel rôle, et sur quelles sociétés. Chaque changement est inscrit au journal.">
+      {erreur ? <Note teinte="rouge" role="alert"><strong>La base réelle n&apos;a pas répondu.</strong> {erreur}</Note> : null}
+      {fait ? <Note teinte="vert" role="status"><strong>C&apos;est fait.</strong> {fait}</Note> : null}
+      {erreurAction && !form ? <Note teinte="rouge" role="alert"><strong>Refusé par la base.</strong> {erreurAction}</Note> : null}
+      <SbOutils
+        gauche={<SbRecherche valeur={filtre} changer={setFiltre} placeholder="Filtrer les membres" />}
+        droite={
+          <>
+            <Link href="/espace2/reglages" className="v2-btn"><Settings width={14} height={14} aria-hidden="true" /> Réglages</Link>
+            {gere ? <button type="button" className="v2-btn v2-btn--primaire" onClick={() => ouvrir({ type: "ajouter" })}><UserPlus width={14} height={14} aria-hidden="true" /> Inviter un membre</button> : null}
+          </>
+        }
+      />
+      {source === "reelle" && reel === undefined ? (
+        <Squelette hauteur={120} />
+      ) : (
+        <SbTableau colonnes={[{ libelle: "Membre" }, { libelle: "Rôle" }, { libelle: "Sociétés" }, { libelle: "Gestes" }]} pied={vue ? `${membresVus.length} membre${membresVus.length > 1 ? "s" : ""}` : undefined}>
+          {!vue ? (
+            <SbLigneVide colonnes={4} titre="Aucune organisation" texte="Connectez-vous avec un compte rattaché à une organisation pour voir son équipe." />
+          ) : !membresVus.length ? (
+            <SbLigneVide colonnes={4} titre="Aucun membre trouvé" texte="Aucun membre ne correspond à ce filtre." />
+          ) : (
+            membresVus.map((m) => (
+              <tr key={m.user_id}>
+                <td data-etiquette="Membre" data-plein="">
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                    <span className="sb-avatar" aria-hidden="true">{m.nom.charAt(0).toUpperCase()}</span>
+                    <span>
+                      <span style={{ fontWeight: 500 }}>{m.email ?? m.nom}</span>
+                      {m.user_id === vue.moi ? <> <span className="sb-badge">vous</span></> : null}
+                      <small>{m.nom}</small>
+                    </span>
+                  </span>
+                </td>
+                <td data-etiquette="Rôle">
+                  {touche(m) && m.user_id !== vue.moi ? (
+                    <span className="v2-champ" style={{ height: 26, width: "fit-content" }}>
+                      <select
+                        aria-label={`Rôle de ${m.nom}`}
+                        value={m.role}
+                        disabled={envoi === m.user_id}
+                        onChange={(e) => {
+                          const r = e.target.value as Role;
+                          void agir(m.user_id, () => changerRole(vue.client, m.user_id, r), (v) => ({ ...v, membres: v.membres.map((x) => (x.user_id === m.user_id ? { ...x, role: r } : x)) }), `${m.nom} est maintenant ${libelleRole(r).toLowerCase()}.`);
+                        }}
+                      >
+                        {rolesPermis.map((r) => <option key={r.cle} value={r.cle}>{r.libelle}</option>)}
+                      </select>
+                    </span>
+                  ) : (
+                    libelleRole(m.role)
+                  )}
+                </td>
+                <td data-etiquette="Sociétés">
+                  {m.perimetre_total ? "Toutes" : m.entites.length ? m.entites.map(nomSociete).join(", ") : <span className="sb-badge" data-teinte="ambre">aucune</span>}
+                  {touche(m) && vue.societes.length > 1 ? (
+                    <> <button type="button" className="v2-btn v2-btn--petit v2-btn--fantome" aria-label={`Modifier les sociétés visibles par ${m.nom}`} onClick={() => ouvrir({ type: "perimetre", membre: m })}>Modifier</button></>
+                  ) : null}
+                </td>
+                <td data-etiquette="Gestes" className="v2-num">
+                  {touche(m) && m.user_id !== vue.moi ? (
+                    <button type="button" className="v2-btn v2-btn--petit" aria-label={`Retirer ${m.nom}`} onClick={() => ouvrir({ type: "retirer", membre: m })}><UserMinus width={13} height={13} aria-hidden="true" /> Retirer</button>
+                  ) : null}
+                </td>
+              </tr>
+            ))
+          )}
+        </SbTableau>
+      )}
+      {vue && !gere ? <p className="sb-texte">Seuls les gérants et administrateurs changent l&apos;équipe. Votre rôle : {libelleRole(vue.monRole ?? "")}.</p> : null}
+      <p className="sb-pile-titre">Ce que chaque rôle permet</p>
+      <SbGroupe nom="rôles">
+        {ROLES.map((r) => (
+          <SbRegle key={r.cle} nom={r.libelle} commande={<span className="sb-commande">{r.cle}</span>} cible={<span className="sb-gris">{r.peut}</span>} />
+        ))}
+      </SbGroupe>
+    </SbListe>
+  ) : null;
 
   return (
     <>
+      {pageSb ?? <>
       <div className="esp-tete" data-arrivee="">
         <div>
           <h1 className="esp-titre">Équipe</h1>
@@ -194,6 +282,7 @@ export default function EcranEquipe() {
           </div>
         </section>
       </div>
+      </>}
 
       <Dialog open={form?.type === "ajouter"} onOpenChange={(o) => !o && setForm(null)}>
         <DialogContent>

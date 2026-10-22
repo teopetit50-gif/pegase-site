@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import EcranEquipe from "@/components/espace/equipe/EcranEquipe";
-import Habille from "@/components/espace2/Habille";
+import "@/components/espace/espace.css";
+import "@/components/espace2/habillage.css";
 
-/* /espace2/equipe — l'écran de /espace/equipe (A3, 15/10/2026), repris tel quel dans le nouvel espace. */
+/* /espace2/equipe — l'écran de /espace/equipe (A3, 15/10/2026), au gabarit Team de Supabase
+   depuis le 22/10 ; le monde .resa .esp reste autour pour ses fenêtres. */
 
 export const metadata: Metadata = {
   title: "Équipe",
@@ -11,8 +13,8 @@ export const metadata: Metadata = {
 
 export default function PageEquipe() {
   return (
-    <Habille>
-      <EcranEquipe />
-    </Habille>
+    <div className="resa esp">
+      <EcranEquipe gabarit="sb" />
+    </div>
   );
 }
