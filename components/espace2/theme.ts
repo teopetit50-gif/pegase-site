@@ -11,14 +11,24 @@ import { useEffect } from "react";
 import { CLE_THEME } from "./amorce";
 import { ecrireStockage, useStockage } from "./Collection";
 
-export type Theme = "sombre" | "clair";
+export type Theme = "sombre" | "clair" | "doux";
 
 export function useTheme(): [Theme, (t: Theme) => void] {
-  const theme: Theme = useStockage(CLE_THEME) === "clair" ? "clair" : "sombre";
+  const choisi = useStockage(CLE_THEME);
+  const theme: Theme = choisi === "clair" || choisi === "doux" ? choisi : "sombre";
   useEffect(() => {
-    document.documentElement.dataset.v2Theme = theme === "clair" ? "light" : "dark";
+    const html = document.documentElement;
+    html.dataset.v2Theme = theme === "sombre" ? "dark" : "light";
+    if (theme === "doux") html.dataset.v2Fond = "doux";
+    else delete html.dataset.v2Fond;
   }, [theme]);
   /* en quittant l'espace, le site retrouve son <html> */
-  useEffect(() => () => void delete document.documentElement.dataset.v2Theme, []);
+  useEffect(
+    () => () => {
+      delete document.documentElement.dataset.v2Theme;
+      delete document.documentElement.dataset.v2Fond;
+    },
+    [],
+  );
   return [theme, (t) => ecrireStockage(CLE_THEME, t)];
 }

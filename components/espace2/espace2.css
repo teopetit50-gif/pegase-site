@@ -124,6 +124,16 @@ html.v2-actif .dlg-panneau {
   font-feature-settings: "liga" 1, "calt" 1;
 }
 
+/* 22/10/2026 — le clair « doux » : le même clair, posé sur un gris (#f5f5f5,
+   relevé sur la page d'inscription de Qonto) au lieu du blanc pur. Les cartes
+   et les menus restent blancs et se détachent ; filets et textes ne bougent
+   pas. Posé par data-v2-fond="doux" sur <html> (theme.ts, amorce.ts). */
+html[data-v2-fond="doux"] :is(.v2, .v2-jetons, .dlg-panneau) {
+  --v2-bg-200: #f5f5f5;
+  --v2-gray-100: #ececec;
+  --v2-bouton-survol: #ececec;
+}
+
 /* ——— thème sombre : le choix « sombre », ou « système » sur un poste sombre ——— */
 @media (prefers-color-scheme: dark) {
   html:not([data-v2-theme="light"]) :is(.v2, .v2-jetons, .dlg-panneau) {
