@@ -93,10 +93,9 @@ export function PageGardeFous() {
     };
   }, [source]);
   return (
-    <Habille>
-      <Tete titre="Garde-fous" sous="Ce que le système ne fait jamais sans vous : il s'arrête de lui-même au premier doute, applique vos règles écrites en français et retient tout message qui en enfreint une." />
-      <GardeFous source={source} client={source === "reelle" ? client : null} />
-    </Habille>
+    <HabilleSb>
+      <GardeFous source={source} client={source === "reelle" ? client : null} gabarit="sb" />
+    </HabilleSb>
   );
 }
 
