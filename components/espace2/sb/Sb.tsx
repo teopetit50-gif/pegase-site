@@ -66,7 +66,7 @@ export function SbSection({ id, titre, textes = [], liens = [], children }: { id
                     {liens.map((l) => (
                       <Link key={l.href} href={l.href} target={l.externe ? "_blank" : undefined} rel={l.externe ? "noreferrer" : undefined}>
                         {l.libelle}
-                        <ExternalLink width={14} height={14} aria-hidden="true" />
+                        {l.externe ? <ExternalLink width={14} height={14} aria-hidden="true" /> : <ChevronRight width={14} height={14} aria-hidden="true" />}
                       </Link>
                     ))}
                   </div>
