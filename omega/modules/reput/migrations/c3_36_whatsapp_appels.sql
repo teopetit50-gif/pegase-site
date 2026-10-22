@@ -14,7 +14,7 @@
 --   · private.reput_canal_reponse (reprise de c3_23, désormais stable) : appel d'un mobile → « whatsapp » si ce
 --     gabarit existe, sinon « sms » comme avant ;
 --   · private.reput_preparer_envoi(demande, …) : l'envoi d'une réponse ou d'un accusé ; appel + WhatsApp → le gabarit,
---     variables {message (le texte sur une ligne : Meta refuse les retours à la ligne), organisation} ; sinon le texte
+--     variable {message} (le texte sur une ligne : Meta refuse les retours à la ligne ; {{organisation}} est fourni par le socle, qui refuse qu'un gabarit la déclare) ; sinon le texte
 --     libre de toujours. Repris par reput_deposer_reponse (de c3_33), reput_redeposer (de c3_07) et reput_accuser
 --     (de c3_18, qui prend aussi la forme courte par SMS ou WhatsApp, comme la réponse en c3_33) ;
 --   · private.reput_gabarit (reprise de c3_33) : appel + WhatsApp → pas d'ouverture (le modèle Meta porte la sienne).
@@ -136,7 +136,7 @@ begin
       insert into public.gabarits_messages (client_id, module, code, langue, version, canal, libelle, corps, variables,
                                             transactionnel, donnees_sante, espacement, modele_externe, statut)
       values (p_client, 'reput', 'reput.appel_whatsapp', 'fr', v_version, 'whatsapp', 'Réponse à un appel manqué (WhatsApp)',
-              v_corps, '{"message": "texte", "organisation": "texte"}'::jsonb, true, false, false, v_modele, 'brouillon')
+              v_corps, '{"message": "texte"}'::jsonb, true, false, false, v_modele, 'brouillon')
       on conflict do nothing
       returning * into g;
     end if;
@@ -163,8 +163,7 @@ begin
     return private.preparer_envoi(d.client_id, 'reput', 'reput_demandes', d.id::text, 'whatsapp',
       jsonb_build_object('adresse', d.adresse_reponse, 'nom', d.de_nom, 'langue', 'fr', 'professionnel', false),
       'reput.appel_whatsapp',
-      jsonb_build_object('message', coalesce(private.reput_ligne(p_corps), '-'),
-                         'organisation', coalesce((select c.nom from public.clients c where c.id = d.client_id), '')),
+      jsonb_build_object('message', coalesce(private.reput_ligne(p_corps), '-')),   -- {{organisation}} : fourni par le socle
       null, null, null::uuid[], p_cle, d.entite_id, true, false, null::timestamptz, jsonb_build_object('demande', p_dv));
   end if;
   return private.preparer_envoi(d.client_id, 'reput', 'reput_demandes', d.id::text, d.canal_reponse,
