@@ -240,7 +240,24 @@ ne peuvent pas être la même personne » ; carte « Des rôles et des délégat
   `preparer_approbation`). Rien n'est écrit.
 - Attendu (décision de Teo, socle 19av) : accepté, marqué « [seul décideur] », puis la politique devient active. Obtenu : un refus
   pour cause de rôle. Il faut sans doute vérifier les `roles_autorises` de cette demande : le gérant n'y figure peut-être pas.
- — 21/10, 20 h 40 (portes d'écriture, en gérant `eeeeeeee-…01f1`, client banc seulement)
+
+**TFILED-16 · ✅ CORRIGÉ par a4_78, revérifié le 22/10 à 19 h 24 Z · F0 · l'arrêt « registre » renvoyait à « la file », mais aucune demande n'y existait : impasse** (`capacites/factures.ts:61`, `:108`)
+- Constat d'origine, le 22/10 à 19 h 17 Z, en gérant : `select public.filed_lever_anomalie('a46345d2-c631-4af3-b713-4bd52b70541e',
+  'identite.registre', 'T-FILED série 3 : …')` → `ERROR 22023: Cette anomalie ne se lève pas d'un motif : elle se corrige, ou se décide
+  par la file.` Le coordinateur constate qu'aucune demande n'est ouverte dans la file pour cette anomalie, et que `private.filed_levable`
+  est une liste fermée sans `identite.registre`. Une facture d'un fournisseur réel que VIES ne connaît pas (par exemple un artisan en
+  franchise de TVA, sans numéro intracommunautaire) restait bloquée sans issue.
+- Revérification après a4_78 : le même appel → `"a_valider"`, et `pieces_en_cours` montre `attente 1 / 846,30 €`. Même chose sur F2a
+  (`722b2757-…`) → `"a_valider"`. **Juste.**
+
+**TFILED-17 · F0 · une seconde approbation par la même personne est refusée par un message brut** (socle, comme TFILED-09)
+- Gérant `…01f1`, demande `47b977f5-50e4-4c14-874e-040b7cdea47f` (circuit C0, 2 approbations requises), qu'il a déjà approuvée.
+  Transaction annulée : `insert into public.approbations (demande_id, client_id, user_id, decision, commentaire) values ('47b977f5-…',
+  'dddddddd-…00f1', auth.uid(), 'approuve', '…')` → `ERROR 23505: duplicate key value violates unique constraint
+  "approbations_une_par_personne"`. Le refus est **juste** (`:70`, deux approbations distinctes), mais le message n'est pas lisible par
+  un client.
+
+### Série 1b — 21/10, 20 h 40 (portes d'écriture, en gérant `eeeeeeee-…01f1`, client banc seulement)
 
 1. `select public.filed_lever_anomalie('a46345d2-c631-4af3-b713-4bd52b70541e', 'identite.registre', 'T-FILED 1b : …')` (facture F0)
    → refus : `ERROR 22023: Cette anomalie ne se lève pas d'un motif : elle se corrige, ou se décide par la file.` La transaction est
