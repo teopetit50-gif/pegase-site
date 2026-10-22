@@ -586,15 +586,23 @@ export function reclasserIdentifiants(valeurs: ValeurLue[], champs: { has(champ:
   for (const partie of ["fournisseur", "acheteur"]) {
     const siret = trouver(`${partie}.siret`);
     if (siret && champs.has(`${partie}.siren`)) {
-      const chiffres = String(siret.valeur).replace(/\D/g, "");
-      if (chiffres.length === 9 && !trouver(`${partie}.siren`)) {
+      let chiffres = String(siret.valeur).replace(/\D/g, "");
+      // NOBAT 069 : « SIRET 413 130 972 » imprimé, « 41313097200000 » rendu. Des chiffres absents de la citation
+      // (des zéros ajoutés) ne sont jamais gardés : on reprend les 9 chiffres réellement cités.
+      const cite = (siret.texte ?? "").replace(/(\d)\s+(?=\d)/g, "$1");
+      const comble = chiffres.length === 14 && !cite.includes(chiffres) &&
+        new RegExp(`(^|\\D)${chiffres.slice(0, 9)}(\\D|$)`).test(cite);
+      if (comble) chiffres = chiffres.slice(0, 9);
+      if (chiffres.length === 9 && trouver(`${partie}.siren`)) {
+        sortie.splice(sortie.indexOf(siret), 1); // le SIREN est déjà là : ce « SIRET » à 9 chiffres n'en est pas un
+      } else if (chiffres.length === 9) {
         const valide = sirenValide(chiffres);
         sortie[sortie.indexOf(siret)] = {
           ...siret,
           champ: `${partie}.siren`,
           valeur: chiffres,
           verifiee: citationRetrouvee(siret) && valide,
-          controle: `${siret.controle?.split(" ; ")[0] ?? ""} ; 9 chiffres sous « SIRET » : rangé en SIREN${valide ? "" : " ; clé SIREN invalide"}`.slice(0, 300),
+          controle: `${siret.controle?.split(" ; ")[0] ?? ""} ; 9 chiffres sous « SIRET » : rangé en SIREN${comble ? " (zéros ajoutés écartés)" : ""}${valide ? "" : " ; clé SIREN invalide"}`.slice(0, 300),
         };
       } else if (chiffres.length === 14 && !trouver(`${partie}.siren`)) {
         const siren = chiffres.slice(0, 9);

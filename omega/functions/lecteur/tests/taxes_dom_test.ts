@@ -333,3 +333,19 @@ Deno.test("TVA intracommunautaire omise par le modèle : relevée après son ét
   const acheteur = [{ champ: "acheteur.tva", valeur: "FR96552100554", source: "ia" as const, verifiee: true }];
   assertEquals(completerDepuisTexte(acheteur, [page("N° TVA : FR96552100554")], CHAMPS_PAR_NOM).find((a) => a.champ === "fournisseur.tva"), undefined);
 });
+
+Deno.test("NOBAT 069 : « SIRET 552 100 554 - APE 4673 A » rendu « 55210055400000 » → SIREN vérifié, aucun SIRET, aucun zéro ajouté", () => {
+  const imprime = "SIRET 552 100 554 - APE 4673 A";
+  const p = page(`${imprime}\nSIRET Client :`);
+  const verif = verifierValeurs([{ champ: "fournisseur.siret", valeur: "55210055400000", texte: imprime, page: 1 }], [p], null);
+  const r = reclasserIdentifiants(verif.valeurs, CHAMPS_PAR_NOM);
+  assertEquals(r.map((v) => [v.champ, v.valeur]), [["fournisseur.siren", "552100554"]]);
+  assert(r[0].verifiee, r[0].controle);
+  assert(r[0].controle?.includes("zéros ajoutés écartés"), r[0].controle);
+  // le SIREN déjà rendu par le modèle : le faux SIRET disparaît simplement
+  const avecSiren = verifierValeurs([
+    { champ: "fournisseur.siret", valeur: "55210055400000", texte: imprime, page: 1 },
+    { champ: "fournisseur.siren", valeur: "552100554", texte: imprime, page: 1 },
+  ], [p], null);
+  assertEquals(reclasserIdentifiants(avecSiren.valeurs, CHAMPS_PAR_NOM).map((v) => v.champ), ["fournisseur.siren"]);
+});
