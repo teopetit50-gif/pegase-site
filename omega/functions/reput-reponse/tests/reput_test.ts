@@ -1,6 +1,7 @@
+import { SANS_MESSAGE, SANS_TRANSCRIPTION } from "../../reput-appels/appels.ts";
 import { assert, assertEquals, assertStringIncludes } from "@std/assert";
 import { passage } from "../passage.ts";
-import { consigne, CONSIGNE_COURTE, contenuDemande, controler, CORPS_PRECISION, nombres, permis, sansTexte } from "../rediger.ts";
+import { APPEL_SANS_MESSAGE, consigne, CONSIGNE_COURTE, CORPS_APPEL_ECRIRE, CORPS_APPEL_RAPPEL, contenuDemande, controler, CORPS_PRECISION, nombres, permis, sansTexte } from "../rediger.ts";
 import { ClaudeFaux, contexte, dossier, FICHE_HORAIRES, FICHE_TARIF, panne, PortesFausses, travail } from "./doubles.ts";
 
 function capturerConsole(): { lignes: string[]; rendre: () => void } {
@@ -228,6 +229,7 @@ Deno.test("« Envoyé de mon iPhone » ne parle pas : une photo ainsi signée re
 Deno.test("un appel transcrit : le modèle sait que c'est un message vocal, peut-être mal reconnu, et que la réponse part par SMS", () => {
   const d = dossier("Bonjour je voudrais un rendez-vous pour le diagnostic", {});
   d.reception = { ...d.reception!, canal: "appel" };
+  d.canal_reponse = "sms";
   const q = contenuDemande(d);
   assertStringIncludes(q, "message vocal laissé quand personne n'a décroché, transcrit automatiquement");
   assertStringIncludes(q, "la réponse part par SMS");
@@ -280,4 +282,23 @@ Deno.test("TREPUT-02 : la même question rattachée par la base (« regroupee »
   assertEquals(bilan.issues.ignore, 1);
   assertEquals(claude.demandes.length, 0);
   assertEquals(p.depots.length, 0);
+});
+
+Deno.test("TREPUT-12 : un appel d'un fixe ne parle jamais de SMS ; un appel sans message ou inaudible n'appelle pas le modèle", () => {
+  const d = dossier("Bonjour, rappelez-moi pour la chaudière", {});
+  d.reception = { ...d.reception!, canal: "appel" };
+  d.canal_reponse = null;
+  const q = contenuDemande(d);
+  assert(!q.includes("la réponse part par SMS"), "un fixe ne reçoit pas de SMS");
+  assertStringIncludes(q, "AUCUN message écrit ne peut lui parvenir");
+  assert(!q.includes(CONSIGNE_COURTE));
+  assertEquals(APPEL_SANS_MESSAGE, [SANS_MESSAGE, SANS_TRANSCRIPTION]);
+  for (const corps of APPEL_SANS_MESSAGE) {
+    d.reception = { ...d.reception!, corps };
+    d.canal_reponse = null;
+    assertEquals(sansTexte(d)?.redaction.corps, CORPS_APPEL_RAPPEL);
+    d.canal_reponse = "sms";
+    assertEquals(sansTexte(d)?.redaction.corps, CORPS_APPEL_ECRIRE);
+    assertEquals(sansTexte(d)?.modele, "regle:appel_sans_message");
+  }
 });
