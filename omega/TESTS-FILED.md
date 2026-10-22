@@ -541,13 +541,15 @@ par les portes `public.filed_confirmer_fournisseur(uuid, text)` et `public.filed
 
 ## REPRISE
 
-**Arrêt 17 — 22/10/2026, 19 h 35 Z**
-- Fait (série 3) : TFILED-16 corrigé ; circuit à 2 approbations distinctes (juste) puis à 1 approbation par le gérant seul (juste) ;
-  exécution environ 1 minute après la décision (normal) ; imputation avec contrôle du total HT (juste) ; comptabilisation de F0 et F2a ;
-  FEC réel et export Sage justes et idempotents. Écarts nouveaux : **TFILED-17** (double approbation, message brut), **TFILED-18**
-  (« compte » attend un uuid, code exposé), **TFILED-19** (nature du compte, contrainte brute).
-- Correction de ce fichier : l'en-tête « Série 1b » avait encore été écrasé (insertion de TFILED-18). Il est rétabli, et les
-  insertions passent maintenant par un contrôle qui le préserve.
+**Arrêt 18 — 22/10/2026, 19 h 40 Z**
+- Fait : séries 1, 1b, 2 et 3 (niveau 1), puis niveau 2 sur R2026-000065, 066, 069, 070, 071, 073 et 076.
+  - Corrigés et revérifiés : TFILED-03, 04, 08, 09, 10, 11, 14 et 16.
+  - Clos : TFILED-02 et 13 (justes), TFILED-12 (par décision de Teo), TFILED-15 (retiré).
+  - Écarts ouverts : TFILED-17, 18 et 19 (A4, messages bruts et format de l'imputation) ; TFILED-20, 21, 22 et 23 (A1, lecture des
+    pièces NOBAT).
+  - Remontés à Teo : TFILED-05, 06 et 07.
 - En cours : rien.
-- Prochain pas : (3) niveau 2, relecture des pièces NOBAT R2026-000065 → 000077, au signal du coordinateur.
-- SHA d'arrêt : voir le commit « T-FILED série 3 : FEC réel, TFILED-19, arrêt 17 » sur `testeur-filed`.
+- Prochain pas : le niveau 2 sur 067, 068, 072, 074, 075 et 077, quand le bureau aura redéployé le lecteur ; rejouer chaque écart après
+  son correctif.
+- Questions : aucune.
+- SHA d'arrêt : voir le commit « T-FILED : arrêt 18 » sur `testeur-filed`.
