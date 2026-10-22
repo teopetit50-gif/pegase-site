@@ -75,6 +75,11 @@ function famille(d: Demande, depuis: number): Famille[] {
   return f;
 }
 
+/* c3_40 (TREPUT-16) : une urgence dont l'astreinte est épuisée et que personne n'a prise passe avant tout. */
+function gardeInjoignable(d: Demande): boolean {
+  return Boolean(d.urgence && d.astreinte_epuisee_le && !d.urgence_prise_le);
+}
+
 export default function EcranReput() {
   const { source } = useSource();
   const [onglet, setOnglet] = useState<Onglet>("demandes");
@@ -131,7 +136,8 @@ export default function EcranReput() {
     const ordre: Partial<Record<StatutDemande, number>> = { a_traiter: 0, bloquee: 0, a_valider: 1, a_preparer: 2, validee: 3 };
     return [...(monde?.demandes ?? [])]
       .filter((d) => !filtre || famille(d, depuis).includes(filtre))
-      .sort((a, b) => Number(b.urgence) - Number(a.urgence) || (ordre[a.statut] ?? 9) - (ordre[b.statut] ?? 9) || b.recu_le.localeCompare(a.recu_le));
+      .sort((a, b) => Number(gardeInjoignable(b)) - Number(gardeInjoignable(a)) || Number(b.urgence) - Number(a.urgence)
+        || (ordre[a.statut] ?? 9) - (ordre[b.statut] ?? 9) || b.recu_le.localeCompare(a.recu_le));
   }, [monde, filtre, depuis]);
 
   const choisi = choix && visibles.some((d) => d.id === choix) ? choix : (visibles[0]?.id ?? null);
@@ -215,6 +221,7 @@ export default function EcranReput() {
                             <span style={{ fontWeight: 600 }}>{d.de_nom || d.adresse_reponse || "Client"}</span>
                             <Pastille teinte={s.teinte}>{s.libelle}</Pastille>
                             {d.urgence ? <Pastille teinte="rouge">Urgent</Pastille> : null}
+                            {gardeInjoignable(d) ? <Pastille teinte="rouge">Garde injoignable</Pastille> : null}
                           </span>
                           <span className="esp-item-titre">{(d.canal !== "formulaire" && rec?.sujet) || extrait(rec?.corps) || rec?.sujet || "Message sans texte"}</span>
                           <span className="esp-item-bas">
