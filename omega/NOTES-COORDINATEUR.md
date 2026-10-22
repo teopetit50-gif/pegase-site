@@ -1435,7 +1435,6 @@ Sessions actives arrêtées par message (A4, A5, C3, C4, T-FILED, T-CASHD, T-OFF
 
 ### À TEO
 
-- Inbound Brevo à rétablir (compte Brevo → Inbound parsing → recu.omegaai.fr), puis refaire la preuve REPUT.
 - Statut de cycle de vie 207/208 après un 205 déjà transmis (A4).
 - Passage en production des lots de cette nuit (niveau 3).
 
@@ -1452,8 +1451,27 @@ C2 inscrit le crochet cashd de 19ay (10b). C4 : fuseau par organisation dans OFF
 3. Fait (niv. 1) : CASHD c2_17→c2_38 (avoirs, mises en demeure, envoi manuel).
 4. Fait (niv. 1) : OFFLOAD c4_23→c4_30 (un cycle par trimestre, forçage avec motif, heure de Paris).
 5. Fait (niv. 1) : REPUT c3_25→c3_32 ; boîte du banc ouverte.
-6. Non fait (niv. 2) : preuve REPUT en vrai — Brevo refuse le courrier entrant (550).
+6. Fait (niv. 2) : preuve REPUT en vrai — 2 vrais courriels, réponses préparées en 106 s et 59 s, regroupées en une seule, validée puis partie 33 s après (voir section 22/10 00 h 50 Z).
 7. Quatre testeurs : séries closes, aucun écart ouvert hors vos décisions.
-8. Reste à vous : inbound Brevo, statut 207/208.
+8. Reste à vous : statut 207/208 ; envoi au vrai expéditeur (mode réel) si vous le voulez.
 9. Reste (niv. 3) : migrations de production, puis écrans d'espace dans main.
 10. Reprise : à votre feu vert ou samedi 25/10 après 02 h Z.
+
+## Preuve REPUT niveau 2 — 22/10, 00 h 50 → 00 h 58 Z (consigne du bureau)
+
+Inbound Brevo rétabli par le bureau à 00 h 41 Z : `recu.omegaai.fr` n'existait pas chez Brevo (seul `omegaai.fr`), le webhook 2225428 portait `omegaai.fr`. Domaine ajouté et authentifié par l'API, DNS posés par Teo chez OVH, webhook basculé ; brevo-inbound-installer remis en stub 410. GUIDE-INBOUND corrigé ; NOTES-A2 complété.
+
+| Étape | Résultat |
+|---|---|
+| 1 (Teo) | (a) « Diagnostic à domicile » → réception 1436, 00:41:19 Z ; (b) « Chaudière à granulés » → réception 1437, 00:44:08 Z. Réception 1435 (00:37:04 Z) sans demande REPUT : essai du bureau. |
+| 2 (formulaire signé) | **Non jouée** : FORMULAIRE_SECRET n'est ni dans mon environnement ni dans le coffre de la recette (secret de l'Edge seulement). |
+| 3 | (a) demande 763a0b50 : couverte, fiches « Horaires d'ouverture » + « Diagnostic à domicile », **106 s** (> 60 s promis), puis `ignoree` « Regroupée avec le message suivant ». (b) demande bd3c193c : couverte faux, `reput.transferer`, raison écrite, **59 s**, `a_valider`. Modèle claude-sonnet-5-5 ; 0,009 € et 0,010 €. Travaux `reput.preparer` : 3 faits, 0 erreur. Rien parti avant validation. |
+| 4 | Validée au nom du gérant du banc (approbation 1dc19a6f, 00:54:30 Z, commentaire écrit). |
+| 5 | Envoi b65bc08a `envoye` à 00:55:02 Z (33 s après la validation), mode essai, référence Brevo reçue, événement fournisseur à 00:55:04 Z. Journal dans l'ordre : demande_recue → reponse_preparee → accuse_prepare → demande_regroupee → approbation → reponse_approuvee → envoi → reponse_envoyee (00:56:00 Z). Quatre avis « Réponses clients à valider » partis au gérant (essai) à 00:44:19 Z. |
+
+À vérifier à l'œil par Teo : le courriel arrivé à l'adresse d'essai du banc (signature et mention de réponse automatisée) ; je n'ai pas accès à cette boîte.
+
+Écarts ouverts pour C3 (pas corrigés ce soir) :
+- **TREPUT-05** : préparation de (a) en 106 s > 60 s promis (cadence du cron omega-reput + temps du modèle).
+- **TREPUT-06** : règle « regroupée avec le message suivant » à confirmer quand deux questions arrivent à 3 min d'écart (ici, une seule réponse complète : bon résultat).
+- **TREPUT-07** : deux accusés de réception (3745fcb2, 60eaee37) restent `a_valider` après l'envoi de la réponse ; à clore ou annuler avec elle.
