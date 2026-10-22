@@ -69,6 +69,20 @@ const REMPLACEMENTS = {
   'omega/modules/tamila/migrations/b4_05_tamila_coffre.sql': { sha: 'dc24eec', raison: 'B4 a corrigé les grants (outils du coffre)' },
 };
 
+// Notes de pose qui ne désignent pas une migration du dépôt (relevé A5 du 22/10 sur l'export du coordinateur) : un fichier
+// hors de migrations/, ou une exclusion motivée (réglage ou donnée propres à la recette, simple rappel).
+const MANUELS = {
+  tamila_b4_06_note: { exclure: 'rappel : b4_06 déjà enregistré à sa propre version' },
+  recette_pa_bac_a_sable: { exclure: 'propre à la recette (bac à sable de la plateforme agréée, cron d\'échange de recette)' },
+  messagerie_gmail_branche: { exclure: 'réglage de recette (fournisseur Gmail branché avec les secrets de la recette) : décision de production à part' },
+  meta_whatsapp_branche: { exclure: 'réglage de recette seulement (secrets Meta de la recette)' },
+  offload_omega_personnes_morales: { exclure: 'données : import OFFLOAD d\'Omega sur la recette' },
+  a4_accord_sceau_banc: { exclure: 'données du banc (accord du sceau proposé par le gérant du banc)' },
+  cashd_nobat_banc: { exclure: 'données du banc (essai NOBAT de CASHD)' },
+  cashd_nobat_v2: { exclure: 'données du banc (essai NOBAT de CASHD, rejoué)' },
+  daliro_taux_penalites_2026s2: { fichiers: [{ sha: '66f5ec6', chemin: 'omega/modules/daliro/reglages/taux_penalites_2026s2.sql' }] },
+};
+
 const arbres = new Map();
 function arbre(sha) {
   if (!arbres.has(sha)) arbres.set(sha, git('ls-tree', '-r', '--name-only', sha, 'omega').split('\n').filter(Boolean));
@@ -86,17 +100,21 @@ function estCommit(sha) {
 // Reconnaît : un chemin complet « omega/…/x.sql », un nom de fichier « b3_08_heures_locales.sql », un nom de lot
 // « b5_06 », « a4_13 », une plage « b6_01..b6_04 », et le cas du socle « 19ab » quand le chemin est donné.
 // Rend { fichiers, avertissements } ; un fichier de omega/tests/ est rendu avec test = true (exclu par l'appelant).
-function lireNote(texte) {
+function lireNote(texte, nom = '') {
   const avertissements = [];
   const jetons = [];
-  const re = /(omega\/[^\s'",;()]+\.sql)|([A-Za-z0-9_]+\.sql)|\b([ab]\d)_(\d{2})\s*(?:\.\.|…|à|-)\s*(?:[ab]\d_)?(\d{2})\b|\b([ab]\d_\d{2})(?:_v\d+)?\b|\b(worker-[a-z0-9]+|main)\b|\b([0-9a-f]{7,40})\b/g;
+  const re = /(omega\/[^\s'",;()]+\.sql)|([A-Za-z0-9_]+\.sql)|\b([abc]\d)_(\d{2})\s*(?:\.\.|…|à|-)\s*(?:[abc]\d_)?(\d{2})\b|\b([abc]\d_\d{2}[a-z]?|19[a-z]{1,2})(?:_v\d+)?\b|\b(worker-[a-z0-9]+|main)\b|\b([0-9a-f]{7,40})\b/g;
   for (const m of texte.matchAll(re)) {
     if (m[1]) jetons.push({ type: 'chemin', val: m[1], pos: m.index });
     else if (m[2]) jetons.push({ type: 'fichier', val: m[2], pos: m.index });
     else if (m[3]) { for (let i = Number(m[4]); i <= Number(m[5]); i++) jetons.push({ type: 'lot', val: `${m[3]}_${String(i).padStart(2, '0')}`, pos: m.index }); }
     else if (m[6]) {
       // « test a4_08 vert », « tests b5_* » : le nom désigne un test, pas une migration à emporter.
-      if (/\btests?\b[\s:]*$/i.test(texte.slice(Math.max(0, m.index - 12), m.index))) avertissements.push(`${m[6]} cité comme test : ignoré`);
+      const avantTok = texte.slice(Math.max(0, m.index - 60), m.index);
+      const apresTok = texte.slice(m.index + m[0].length).split('\n')[0];
+      // « test a4_08 », « tests c4_25, c4_27 » : des tests ; « a4_73 tests verts », « 19ax test 66 vert » : un état.
+      if (/\btests?\b[\s:]*(?:[a-z]\d_\d{2}[a-z]?\s*(?:,|\+|et)\s*)*$/i.test(avantTok)) avertissements.push(`${m[6]} cité comme test : ignoré`);
+      else if (/^[\s/a-z0-9_]*?\btests?\b[^\n]*?\b(verts?|rouges?)\b/i.test(apresTok) || /^\s*:\s*test_/i.test(apresTok)) avertissements.push(`${m[6]} cité pour un état de test : ignoré`);
       else jetons.push({ type: 'lot', val: m[6], pos: m.index });
     }
     else if (m[7]) jetons.push({ type: 'branche', val: m[7], pos: m.index });
@@ -109,10 +127,22 @@ function lireNote(texte) {
   const nomsExplicites = jetons.filter((x) => x.type === 'chemin' || x.type === 'fichier').map((x) => x.val.split('/').pop());
   const utiles = jetons.filter((x) => ['chemin', 'fichier'].includes(x.type)
     || (x.type === 'lot' && !nomsExplicites.some((n) => n.startsWith(x.val + '_') || n === x.val + '.sql')));
+  // 22/10 : « posé depuis le dépôt : <sha> » sans fichier ni lot cité : le nom de la version est celui du fichier
+  // (suffixe _v2, _v3 retiré : la version corrigée du même fichier, au SHA de la note).
+  if (utiles.length === 0 && nom && shas.length) {
+    utiles.push({ type: 'nom', val: nom.replace(/_v\d+$/, ''), pos: shas[shas.length - 1].pos - 1 });
+  }
   for (const j of utiles) {
     const avant = shas.filter((x) => x.pos < j.pos).pop();
     const apres = shas.find((x) => x.pos > j.pos);
-    let sha = (avant || apres || {}).val;
+    const suite = texte.slice(j.pos).match(/^[^\s(]*\s*\([^)]*?\b([0-9a-f]{7,40})\b/);
+    const entre = suite && estCommit(suite[1]) ? suite[1] : null;
+    const candidats = [entre, avant && avant.val, apres && apres.val].filter(Boolean);
+    let sha = candidats[0];
+    if (candidats.length > 1 && j.type !== 'chemin') {
+      const trouve = candidats.find((c) => arbre(c).some((x) => x.includes('/migrations/') && (x.split('/').pop().startsWith(j.val + '_') || x.split('/').pop() === j.val + '.sql' || x.endsWith('/' + j.val))));
+      if (trouve) sha = trouve;
+    }
     let branche = (branches.filter((x) => x.pos < j.pos).pop() || branches[0] || {}).val || null;
     if (!sha && branche) { sha = `origin/${branche}`; avertissements.push(`${j.val} : aucun SHA, pointe de ${branche} prise`); }
     if (!sha) { avertissements.push(`${j.val} : ni SHA ni branche`); continue; }
@@ -120,6 +150,14 @@ function lireNote(texte) {
     let chemins;
     if (j.type === 'chemin') chemins = tous.includes(j.val) ? [j.val] : [];
     else if (j.type === 'fichier') chemins = tous.filter((c) => c.endsWith('/' + j.val));
+    else if (j.type === 'nom') {
+      chemins = tous.filter((c) => c.includes('/migrations/') && c.split('/').pop() === j.val + '.sql');
+      if (chemins.length === 0) {
+        const lot = (j.val.match(/^(19[a-z]{1,2}|a5_\d{2}|[a-z]\d_\d{2}[a-z]?)(?=_|$)/) || [])[1];
+        if (lot) chemins = tous.filter((c) => c.includes('/migrations/') && (c.split('/').pop().startsWith(lot + '_') || c.split('/').pop() === lot + '.sql'));
+        if (chemins.length) avertissements.push(`${j.val} : fichier trouvé par le lot ${lot}`);
+      }
+    }
     else chemins = tous.filter((c) => c.includes('/migrations/') && (c.split('/').pop().startsWith(j.val + '_') || c.split('/').pop() === j.val + '.sql'));
     if (j.type !== 'chemin' && chemins.length > 1) chemins = chemins.filter((c) => c.includes('/migrations/'));
     if (chemins.length !== 1) { avertissements.push(`${j.val} @ ${sha} : ${chemins.length} fichier(s) trouvé(s)`); continue; }
@@ -282,8 +320,16 @@ function principal() {
         texte = propre;
         origine = `requête retrouvée dans le fil de la session coordinateur : omega/prod/recupere/${recupere.split('/').pop()}`;
         notesLigne.push(...retirees.map((r) => 'retiré : ' + r));
+      } else if (MANUELS[l.name] && MANUELS[l.name].exclure) {
+        manifeste.push({ version, name: l.name, decision: 'exclure: ' + MANUELS[l.name].exclure, source: l.source, fichier: '—', notes: [] });
+        continue;
+      } else if (MANUELS[l.name]) {
+        const fs = MANUELS[l.name].fichiers;
+        texte = fs.map((f) => `-- ═══ ${f.chemin} @ ${f.sha}\n${lireAuSha(f.sha, f.chemin)}`).join('\n\n');
+        origine = 'dépôt (relevé A5) : ' + fs.map((f) => `${f.sha} ${f.chemin}`).join(' ; ');
+        notesLigne.push('fichiers : ' + fs.map((f) => `${f.chemin.split('/').pop()} @ ${f.sha}`).join(', '));
       } else if (l.source === 'note' || l.source === 'depot') {
-        const { fichiers, avertissements } = lireNote(l.provenance || '');
+        const { fichiers, avertissements } = lireNote(l.provenance || '', l.name || '');
         notesLigne.push(...avertissements);
         // 19ah_recette_seulement (environnement = recette) ne part jamais en production, même cité dans une note.
         const recetteSeule = fichiers.filter((f) => /recette_seulement/i.test(f.chemin));

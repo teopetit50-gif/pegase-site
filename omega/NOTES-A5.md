@@ -1,5 +1,18 @@
 # NOTES — session A5 (garde-fous)
 
+## ÉTAPE 1 DE LA MISE EN PRODUCTION — 22/10/2026, 19 h Z (relance de Teo)
+
+- Export de la recette fait par le coordinateur (exporter.sql, lecture seule) : branche export-prod, commit 968d3020,
+  omega/prod/sortie/page-1.json (435 lignes). Je ne l'ai pas recopié sur worker-a5 : l'assemblage s'y rejoue.
+- assembler.mjs complété : une note « posé depuis le dépôt : <sha> » sans fichier prend le nom de sa version, avec le
+  suffixe _vN retiré ; les lots c*, a*_NNb et 19xx sont reconnus ; « lot (sha) » prend le SHA entre parenthèses ;
+  « tests verts » et « test_… » désignent un état, pas une migration ; une table MANUELS couvre 9 notes sans migration
+  (6 exclusions de réglages ou données de recette, 3 données du banc) et le réglage daliro taux_penalites_2026s2.
+- Résultat : omega/prod/migrations/, 397 fichiers, 31 exclus, rien à reconstruire, aucune erreur. MANIFESTE.md et
+  PALIERS.md (P1 9, P2 23, P3 33, P4 27, P5 303, P6 2). Aucun secret : recherche de JWT, clés et mots de passe faite.
+  Aucune référence à la recette dans les fichiers ; les URL sont réécrites vers la production.
+- Rien n'est posé. Prochain pas : la répétition (voie C) sur ces fichiers, puis le gel.
+
 ## REPRISE — 21/10/2026, 23 h Z (réveil par Teo ; lots 1 à 4 dans l'ordre, un à la fois)
 
 - Lot 1 — 19av, décision seule du gérant (ou d'un rôle désigné ; config decision_seule_roles) : POSÉ, tests 64 et 55 verts.
