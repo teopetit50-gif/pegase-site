@@ -22,6 +22,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { SbConseiller, type SbGravite, type SbProbleme } from "../sb/Conseiller";
+import { SbBandeau, SbGroupe, SbLigneVide, SbListe, SbOutils, SbRecherche, SbRegle, SbTableau } from "../sb/Sb";
 import { CheckCheck, FileText, Users } from "lucide-react";
 import { useSource } from "@/components/espace/source";
 import { dateCourte, montant } from "@/components/espace/format";
@@ -35,30 +36,11 @@ import { chargerFile } from "@/components/espace/validations/portes";
 import { STATUTS, compteApprobations } from "@/components/espace/validations/regles";
 import type { Approbation, Delegation, Demande, DocumentFiled, Facture, Fournisseur, Regle, Role } from "@/components/espace/types";
 import { createClient } from "@/lib/supabase/client";
-import { Badge, Note, Squelette, Vide } from "../ui";
+import { Badge, Note, Squelette } from "../ui";
 import { useMaintenant } from "../horloge";
 
 const JOUR = 86_400_000;
 const pluriel = (n: number, mot: string) => `${n} ${mot}${n > 1 ? "s" : ""}`;
-
-type Stat = { libelle: string; valeur: string; sous: string; teinte?: "vert" | "ambre" | "rouge" | "bleu" | "gris" };
-
-function Stats({ stats }: { stats: Stat[] | null }) {
-  return (
-    <div className="v2-stats" style={{ "--nb": stats?.length ?? 4 } as React.CSSProperties}>
-      {(stats ?? [0, 1, 2, 3].map(() => null)).map((x, i) => (
-        <div key={x?.libelle ?? i} className="v2-stat" style={{ cursor: "default" }}>
-          <span className="v2-stat-etiquette">
-            <span className="v2-point" data-teinte={x?.teinte ?? "gris"} aria-hidden="true" />
-            {x ? x.libelle : <Squelette largeur="60%" hauteur={14} />}
-          </span>
-          <span className="v2-stat-valeur">{x ? x.valeur : <Squelette largeur={48} hauteur={28} />}</span>
-          <span className="v2-stat-sous">{x ? x.sous : <Squelette largeur="70%" hauteur={14} />}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
 
 function Attente({ erreur }: { erreur: string | null }) {
   if (erreur) return null;
@@ -67,56 +49,6 @@ function Attente({ erreur }: { erreur: string | null }) {
       {[0, 1, 2].map((i) => (
         <Squelette key={i} hauteur={20} />
       ))}
-    </div>
-  );
-}
-
-function Erreur({ erreur }: { erreur: string | null }) {
-  if (!erreur) return null;
-  return (
-    <div style={{ marginBottom: 24 }}>
-      <Note teinte="rouge" role="alert">
-        <strong>La base réelle n&apos;a pas répondu.</strong> {erreur}
-      </Note>
-    </div>
-  );
-}
-
-function Section({ id, titre, sous, children }: { id: string; titre: string; sous?: string; children: React.ReactNode }) {
-  return (
-    <section aria-labelledby={id}>
-      <div className="v2-section-titre">
-        <h2 className="v2-h2" id={id}>
-          {titre}
-        </h2>
-        {sous ? (
-          <span className="v2-gris v2-tabulaire" style={{ fontSize: 13 }}>
-            {sous}
-          </span>
-        ) : null}
-      </div>
-      {children}
-    </section>
-  );
-}
-
-function Tableau({ colonnes, children }: { colonnes: { libelle: string; num?: boolean }[]; children: React.ReactNode }) {
-  return (
-    <div className="v2-carte">
-      <div className="v2-tableau-cadre">
-        <table className="v2-tableau v2-tableau--empile">
-          <thead>
-            <tr>
-              {colonnes.map((c) => (
-                <th key={c.libelle} scope="col" className={c.num ? "v2-num" : undefined}>
-                  {c.libelle}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>{children}</tbody>
-        </table>
-      </div>
     </div>
   );
 }
@@ -372,70 +304,87 @@ export function Circuit() {
     return { attente, decidees, delegations, regles };
   }, [donnees, maintenant]);
 
-  const stats: Stat[] | null = calc
-    ? [
-        { libelle: "En attente d'approbation", valeur: String(calc.attente.length), sous: montant(calc.attente.reduce((s, d) => s + (d.montant ?? 0), 0)), teinte: calc.attente.length ? "ambre" : "vert" },
-        { libelle: "Double approbation", valeur: String(calc.attente.filter((d) => d.approbations_requises > 1).length), sous: "deux personnes distinctes", teinte: calc.attente.some((d) => d.approbations_requises > 1) ? "ambre" : "gris" },
-        { libelle: "Délégations en cours", valeur: String(calc.delegations.length), sous: "avec leur date de fin" },
-        { libelle: "Décidées sur 30 jours", valeur: String(calc.decidees.length), sous: pluriel(calc.decidees.filter((d) => d.statut === "rejetee").length, "refus") },
-      ]
-    : null;
+  const [q, setQ] = useState("");
+  const r = q.trim().toLowerCase();
+  const garde = (...xs: (string | null | undefined)[]) => !r || xs.some((x) => x && x.toLowerCase().includes(r));
+  const parModule = calc ? [calc.regles.filter((x) => x.module === "filed"), calc.regles.filter((x) => x.module === "*")] : null;
 
+  /* 22/10 — le gabarit « Database › Policies » de Supabase (../sb) : titre et
+     description, bandeau, barre d'outils, puis une carte par « table » de
+     règles (FILED, règles communes) et, dessous, les tableaux du circuit. */
   return (
-    <div className="v2-page v2-arrivee">
-      <h1 className="v2-sr">Circuit de validation</h1>
-      <div className="v2-tete" style={{ marginBottom: 24 }}>
-        <div>
-          <p>
-            Qui approuve quoi : l&apos;approbation suit le montant et l&apos;action ; au-delà d&apos;un seuil, deux personnes distinctes signent, et celle qui a saisi ne peut pas approuver. Le commentaire, la pièce et le motif d&apos;un refus restent attachés à la facture.
-          </p>
-        </div>
-        <div className="v2-actions">
-          <Link href="/espace2/validations" className="v2-btn">
-            <CheckCheck width={16} height={16} aria-hidden="true" /> À valider
-          </Link>
-        </div>
-      </div>
-      <Erreur erreur={erreur} />
-      <Stats stats={stats} />
-
-      {!calc ? (
+    <SbListe
+      titre="Circuit de validation"
+      description="Qui approuve quoi : l'approbation suit le montant et l'action, celle qui a saisi ne peut pas approuver, et le motif d'un refus reste attaché à la facture."
+      actions={
+        <Link href="/espace2/validations" className="v2-btn">
+          <CheckCheck width={14} height={14} aria-hidden="true" /> À valider
+        </Link>
+      }
+    >
+      {erreur ? (
+        <Note teinte="rouge" role="alert">
+          <strong>La base réelle n&apos;a pas répondu.</strong> {erreur}
+        </Note>
+      ) : null}
+      {calc ? (
+        <SbBandeau
+          teinte={calc.attente.length ? "ambre" : undefined}
+          titre={`${calc.attente.length} demande${calc.attente.length > 1 ? "s" : ""} en attente d'approbation · ${montant(calc.attente.reduce((s, d) => s + (d.montant ?? 0), 0))}`}
+          texte={`${calc.attente.filter((d) => d.approbations_requises > 1).length} en double approbation · ${calc.delegations.length} délégation${calc.delegations.length > 1 ? "s" : ""} en cours · ${calc.decidees.length} décision${calc.decidees.length > 1 ? "s" : ""} sur 30 jours`}
+        />
+      ) : (
+        <Squelette hauteur={80} />
+      )}
+      <SbOutils gauche={<SbRecherche valeur={q} changer={setQ} placeholder="Filtrer les règles et les demandes" />} />
+      {!calc || !parModule ? (
         <Attente erreur={erreur} />
       ) : (
-        <div style={{ display: "grid", gap: 24 }}>
-          <Section id="cv-regles" titre="Les règles du circuit" sous={pluriel(calc.regles.length, "règle")}>
-            {calc.regles.length ? (
-              <Tableau colonnes={[{ libelle: "Action" }, { libelle: "Montant" }, { libelle: "Approbations", num: true }, { libelle: "Qui peut approuver" }, { libelle: "Exigé" }]}>
-                {calc.regles.map((r) => (
-                  <tr key={r.id}>
-                    <td data-etiquette="Action" data-plein="">
-                      <span style={{ fontWeight: 500 }}>{action(r.type_action)}</span>
-                      <small>{r.module === "*" ? "règle commune à tous les modules" : "FILED"}</small>
-                    </td>
-                    <td data-etiquette="Montant">{tranche(r)}</td>
-                    <td data-etiquette="Approbations" className="v2-num">
-                      {r.approbations_requises}
-                    </td>
-                    <td data-etiquette="Qui peut approuver">{r.roles_autorises.map((x) => ROLES[x] ?? x).join(", ")}</td>
-                    <td data-etiquette="Exigé">
-                      <span style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-                        {r.exige_commentaire ? <Badge>Commentaire</Badge> : null}
-                        {r.exige_piece ? <Badge>Pièce jointe</Badge> : null}
-                        {r.exige_motif !== false ? <Badge>Motif si refus</Badge> : null}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </Tableau>
-            ) : (
-              <Vide icone={<CheckCheck width={20} height={20} />} titre="Aucune règle posée">Les règles d&apos;approbation se posent à l&apos;installation, avec vous.</Vide>
-            )}
-          </Section>
+        <div className="sb-pile">
+          {[
+            { nom: "filed", lignes: parModule[0], aide: "Les règles propres à FILED" },
+            { nom: "toutes les actions", lignes: parModule[1], aide: "La règle commune à tous les modules" },
+          ].map((m) => {
+            const lignes = m.lignes.filter((x) => garde(action(x.type_action), x.roles_autorises.join(" ")));
+            return (
+              <SbGroupe
+                key={m.nom}
+                nom={m.nom}
+                badges={
+                  <span className="sb-badge" data-teinte={lignes.length ? "vert" : undefined}>
+                    {lignes.length ? `${lignes.length} règle${lignes.length > 1 ? "s" : ""}` : "aucune règle"}
+                  </span>
+                }
+                vide={`${m.aide} : aucune pour l'instant. Les règles se posent à l'installation, avec vous.`}
+              >
+                {lignes.length
+                  ? lignes.map((x) => (
+                      <SbRegle
+                        key={x.id}
+                        nom={action(x.type_action)}
+                        sous={tranche(x)}
+                        commande={<span className="sb-commande">{x.approbations_requises} approbation{x.approbations_requises > 1 ? "s" : ""}</span>}
+                        cible={<span className="sb-gris">{x.roles_autorises.map((y) => ROLES[y] ?? y).join(", ")}</span>}
+                        fin={
+                          <span style={{ display: "flex", flexWrap: "wrap", gap: 4, justifyContent: "flex-end" }}>
+                            {x.exige_commentaire ? <span className="sb-commande">commentaire</span> : null}
+                            {x.exige_piece ? <span className="sb-commande">pièce</span> : null}
+                            {x.exige_motif !== false ? <span className="sb-commande">motif</span> : null}
+                          </span>
+                        }
+                      />
+                    ))
+                  : null}
+              </SbGroupe>
+            );
+          })}
 
-          <Section id="cv-attente" titre="En attente d'approbation" sous={pluriel(calc.attente.length, "demande")}>
-            {calc.attente.length ? (
-              <Tableau colonnes={[{ libelle: "Demande" }, { libelle: "Montant", num: true }, { libelle: "Approbations" }, { libelle: "Échéance" }]}>
-                {calc.attente.map((d) => {
+          <p className="sb-pile-titre">En attente d&apos;approbation</p>
+          <SbTableau colonnes={[{ libelle: "Demande" }, { libelle: "Montant", num: true }, { libelle: "Approbations" }, { libelle: "Échéance" }]} pied={pluriel(calc.attente.filter((d) => garde(d.resume, d.type_action)).length, "demande")}>
+            {calc.attente.filter((d) => garde(d.resume, d.type_action)).length ? (
+              calc.attente
+                .filter((d) => garde(d.resume, d.type_action))
+                .map((d) => {
                   const c = compteApprobations(d, donnees!.approbations);
                   return (
                     <tr key={d.id}>
@@ -456,59 +405,56 @@ export function Circuit() {
                       <td data-etiquette="Échéance">{d.echeance ? dateCourte(d.echeance) : "—"}</td>
                     </tr>
                   );
-                })}
-              </Tableau>
+                })
             ) : (
-              <Vide icone={<CheckCheck width={20} height={20} />} titre="Rien en attente">Aucune facture n&apos;attend d&apos;approbation.</Vide>
+              <SbLigneVide colonnes={4} titre="Rien en attente" texte="Aucune facture n'attend d'approbation." />
             )}
-          </Section>
+          </SbTableau>
 
-          <Section id="cv-delegations" titre="Délégations en cours" sous={pluriel(calc.delegations.length, "délégation")}>
+          <p className="sb-pile-titre">Délégations en cours</p>
+          <SbTableau colonnes={[{ libelle: "De" }, { libelle: "À" }, { libelle: "Jusqu'au" }, { libelle: "Motif" }]} pied={pluriel(calc.delegations.length, "délégation")}>
             {calc.delegations.length ? (
-              <Tableau colonnes={[{ libelle: "De" }, { libelle: "À" }, { libelle: "Jusqu'au" }, { libelle: "Motif" }]}>
-                {calc.delegations.map((g) => (
-                  <tr key={g.id}>
-                    <td data-etiquette="De">{nomDe(g.delegant, g.delegant_nom)}</td>
-                    <td data-etiquette="À">{nomDe(g.delegataire, g.delegataire_nom)}</td>
-                    <td data-etiquette="Jusqu'au">{dateCourte(g.fin)}</td>
-                    <td data-etiquette="Motif" data-plein="">
-                      {g.motif ?? "—"}
-                    </td>
-                  </tr>
-                ))}
-              </Tableau>
+              calc.delegations.map((g) => (
+                <tr key={g.id}>
+                  <td data-etiquette="De">{nomDe(g.delegant, g.delegant_nom)}</td>
+                  <td data-etiquette="À">{nomDe(g.delegataire, g.delegataire_nom)}</td>
+                  <td data-etiquette="Jusqu'au">{dateCourte(g.fin)}</td>
+                  <td data-etiquette="Motif" data-plein="">
+                    {g.motif ?? "—"}
+                  </td>
+                </tr>
+              ))
             ) : (
-              <Vide icone={<Users width={20} height={20} />} titre="Aucune délégation">Une absence se couvre par une délégation datée, depuis « À valider ».</Vide>
+              <SbLigneVide colonnes={4} titre="Aucune délégation" texte="Une absence se couvre par une délégation datée, depuis « À valider »." />
             )}
-          </Section>
+          </SbTableau>
 
-          <Section id="cv-decisions" titre="Décisions des 30 derniers jours" sous={pluriel(calc.decidees.length, "décision")}>
+          <p className="sb-pile-titre">Décisions des 30 derniers jours</p>
+          <SbTableau colonnes={[{ libelle: "Demande" }, { libelle: "Décision" }, { libelle: "Le" }, { libelle: "Commentaire ou motif" }]} pied={pluriel(calc.decidees.length, "décision")}>
             {calc.decidees.length ? (
-              <Tableau colonnes={[{ libelle: "Demande" }, { libelle: "Décision" }, { libelle: "Le" }, { libelle: "Commentaire ou motif" }]}>
-                {calc.decidees.map((d) => {
-                  const st = STATUTS[d.statut];
-                  const mot = donnees!.approbations.filter((a) => a.demande_id === d.id && a.commentaire).map((a) => a.commentaire)[0];
-                  return (
-                    <tr key={d.id}>
-                      <td data-etiquette="Demande" data-plein="">
-                        <span style={{ fontWeight: 500 }}>{action(d.type_action)}</span>
-                        <small>{d.resume}</small>
-                      </td>
-                      <td data-etiquette="Décision">
-                        <Badge teinte={st.teinte}>{st.libelle}</Badge>
-                      </td>
-                      <td data-etiquette="Le">{d.decide_le ? dateCourte(d.decide_le) : "—"}</td>
-                      <td data-etiquette="Commentaire ou motif">{mot ?? <span className="v2-gris">—</span>}</td>
-                    </tr>
-                  );
-                })}
-              </Tableau>
+              calc.decidees.map((d) => {
+                const st = STATUTS[d.statut];
+                const mot = donnees!.approbations.filter((a) => a.demande_id === d.id && a.commentaire).map((a) => a.commentaire)[0];
+                return (
+                  <tr key={d.id}>
+                    <td data-etiquette="Demande" data-plein="">
+                      <span style={{ fontWeight: 500 }}>{action(d.type_action)}</span>
+                      <small>{d.resume}</small>
+                    </td>
+                    <td data-etiquette="Décision">
+                      <Badge teinte={st.teinte}>{st.libelle}</Badge>
+                    </td>
+                    <td data-etiquette="Le">{d.decide_le ? dateCourte(d.decide_le) : "—"}</td>
+                    <td data-etiquette="Commentaire ou motif">{mot ?? <span className="v2-gris">—</span>}</td>
+                  </tr>
+                );
+              })
             ) : (
-              <Vide icone={<CheckCheck width={20} height={20} />} titre="Aucune décision récente">Les décisions prises sur FILED apparaîtront ici.</Vide>
+              <SbLigneVide colonnes={4} titre="Aucune décision récente" texte="Les décisions prises sur FILED apparaîtront ici." />
             )}
-          </Section>
+          </SbTableau>
         </div>
       )}
-    </div>
+    </SbListe>
   );
 }

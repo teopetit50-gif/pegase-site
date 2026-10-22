@@ -291,3 +291,35 @@ export function SbLigneVide({ colonnes, titre, texte }: { colonnes: number; titr
     </tr>
   );
 }
+
+/* la carte d'une table dans Database › Policies : en-tête (nom en chasse
+   fixe, badges, actions), puis une ligne par règle */
+export function SbGroupe({ nom, badges, actions, vide, children }: { nom: string; badges?: React.ReactNode; actions?: React.ReactNode; vide?: string; children?: React.ReactNode }) {
+  return (
+    <div className="sb-groupe">
+      <div className="sb-groupe-tete">
+        <div>
+          <span className="sb-groupe-nom">{nom}</span>
+          {badges}
+        </div>
+        {actions ? <div>{actions}</div> : null}
+      </div>
+      {children}
+      {!children && vide ? <p className="sb-groupe-vide">{vide}</p> : null}
+    </div>
+  );
+}
+
+export function SbRegle({ nom, sous, commande, cible, fin }: { nom: React.ReactNode; sous?: React.ReactNode; commande?: React.ReactNode; cible?: React.ReactNode; fin?: React.ReactNode }) {
+  return (
+    <div className="sb-groupe-ligne">
+      <div>
+        {nom}
+        {sous ? <small>{sous}</small> : null}
+      </div>
+      <div>{commande}</div>
+      <div>{cible}</div>
+      <div>{fin}</div>
+    </div>
+  );
+}
