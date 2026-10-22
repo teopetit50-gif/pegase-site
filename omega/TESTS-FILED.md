@@ -430,7 +430,7 @@ seulement « proposé », jamais tenu pour bon (vérifié par le coordinateur). 
     300,00 / 490,00 / 200,00, 44566 D **45,85**, 401 C **1 035,85**, auxiliaire `F00001`, le même que pour F0 (fournisseur reconnu).
     **Juste** : HT, TVA et TTC conformes à la pièce. Observation : la TVA des taux 8,5 % et 2,1 % tient sur **une seule ligne 44566**, et la
     base exonérée (art. 295) n'est pas distinguée. C'est conforme au FEC, mais la déclaration de TVA en Guadeloupe ventile ces taux :
-    le comptable devra les retrouver ailleurs.
+    le comptable devra les retrouver ailleurs. *(Le coordinateur la classe en piste pour la déclaration de TVA dans les DOM, pas en écart.)*
 - **(3) Niveau 2, pièces NOBAT R2026-000065 → 000077** : en attente du signal du coordinateur (lecteur).
 
 ### Niveau 2 — relecture des pièces NOBAT (client du banc principal, lecture seule ; contenu relayé par le coordinateur)
@@ -486,6 +486,11 @@ Je compare champ par champ. Niveau 2 : vraie pièce, lue sur la recette. Les nom
   à A1.
 
 **TFILED-21 · R2026-000069 · `identite.siren` est « ok » alors que la valeur du SIREN n'est pas vérifiée**
+- *Rejeu après a4_81 (posé, vert)* : le cas ne se reproduit pas sur le banc, où mes pièces impriment « SIREN ». J'ai généré une pièce
+  fictive qui le reproduit, **F13** (`pieces/F13_siret_9_chiffres.pdf`) : MCD (fournisseur déjà confirmé), MCD-2026-1014, 100 agglos ×
+  1,35 = HT 135,00, TVA 8,5 % 11,48, TTC 146,48, et l'en-tête « SIRET 912345618 » (9 chiffres, rien d'autre). Attendus : aucun SIRET à
+  14 chiffres inventé (TFILED-20) ; SIREN déduit avec sa source nommée, et `identite.siren` pas « ok » muet (TFILED-21). À déposer par le
+  coordinateur.
 - `fournisseur.siren` est lu juste, mais marqué NON vérifié (« déduit des 9 premiers chiffres du SIRET »). Le contrôle `identite.siren`
   rend pourtant `ok`. Un contrôle d'identité ne devrait pas se dire « ok » sur une valeur que le lecteur ne garantit pas. Attendu :
   attention « SIREN déduit, à confirmer », comme pour F1 avant a4_74.

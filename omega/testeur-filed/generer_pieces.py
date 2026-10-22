@@ -166,3 +166,18 @@ print("BAR iban 2", IBAN_BAR_2, "| masque F12", masque)
 # Série 2 — F2c : 3ᵉ pièce Béton Archipel sur l'IBAN …0309 (seulement « proposé », jamais décidé)
 piece("F2c_iban_propose_non_valide.pdf", dict(base, f=B, numero="BAR-2026-0503", date="20/10/2026", echeance="19/11/2026",
       lignes=[("Béton prêt à l'emploi C25/30 — m³", 6, 95.00, 8.5)], iban_txt=IBAN_BAR_2))
+
+# Rejeu TFILED-20/21 — F13 : le fournisseur imprime 9 chiffres sous l'étiquette « SIRET » (comme R2026-000069), rien d'autre
+import copy
+M13 = dict(FOURN["MCD"])
+def page13(c):
+    page(c, f=M13, titre="FACTURE", numero="MCD-2026-1014", date="15/10/2026", echeance="14/11/2026",
+         lignes=[("Agglos creux 20x20x50", 100, 1.35, 8.5)])
+c = canvas.Canvas(os.path.join(SORTIE, "F13_siret_9_chiffres.pdf"), pagesize=A4)
+_orig = c.drawString
+def _draw(x, y, t, *a, **k):
+    if isinstance(t, str) and t.startswith("SIREN "):
+        t = "SIRET " + M13["siren"]
+    return _orig(x, y, t, *a, **k)
+c.drawString = _draw
+page13(c); c.save()
