@@ -3,8 +3,9 @@
 Branche `worker-c3`. Coordinateur : `session_01BCGFdpRKBvXKjouC75sYBg`.
 Commencée le 06/10/2026. Je n'appelle jamais Supabase : le coordinateur pose, je lis les sorties brutes.
 
-## REPRISE (arrêt du 19/10/2026 16 h 20 Z — plus de lot construisible sans Twilio, Teo ou un fournisseur UE)
+## REPRISE (pause de Teo, 22/10/2026 00 h 11 Z — reprise sur son go ou samedi 25/10 après 02 h Z)
 
+- **22/10 — preuve REPUT niveau 2 NON FAITE** : banc prêt (boîte banc@recu.omegaai.fr réactivée, envoi en essai, 3 fiches validées seulement, crons verts, aucun accord actif), mais les 2 courriels de Teo vers banc@recu.omegaai.fr ont été rejetés par Brevo « 550 5.1.2 adresse introuvable » (MX OK). **Inbound Brevo à rétablir** (Teo : compte Brevo → Inbound parsing → domaine recu.omegaai.fr ; puis brevo-inbound-installer). Ensuite rejouer PREUVE-VRAIE.md étape 1 (heure T0 dans les blocs 1 à 4).
 - **Arrêt** : lots 1 à 10 + c3_24 faits, verts, poussés ; posés et verts sur la recette jusqu'à c3_24. Arbre propre, rien en cours.
 - **À faire par d'autres** : redéployer reput-appels v2 (+ TWILIO_ACCOUNT_SID) et reput-reponse, déployer reput-astreinte (session bureau) ; 403 du premier appel : Auth Token PRINCIPAL et REPUT_APPELS_URL identique à la console (Teo) ; choisir le fournisseur de transcription UE ; point RGPD/HDS.
 - **Reprise** : preuve en vrai (mail + formulaire, puis astreinte et appels quand Twilio est ouvert) ; restent hors de portée sans accès tiers : connecteur agenda, réseaux sociaux, lecture des avis Google, logiciels métier.
