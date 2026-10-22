@@ -57,6 +57,9 @@ begin
   -- ── Sans prise au délai : le rang 2 ──
   v_j := private.reput_astreinte(v_t + interval '5 minutes');
   return next ok(not exists (select 1 from public.reput_appels a where a.demande_id = v_d1 and a.rang = 2), 'Avant le délai, on attend');
+  -- c3_39 : le téléphone a sonné (Twilio l'a dit) ; un appel jamais passé n'escalade plus (voir c3_39).
+  perform public.reput_appel_issue((select a.id from public.reput_appels a where a.demande_id = v_d1 and a.rang = 1), 'sonne');
+  update public.reput_appels set essai_le = v_t where demande_id = v_d1 and rang = 1;
   v_j := private.reput_astreinte(v_t + interval '11 minutes');
   return next ok((select a.statut from public.reput_appels a where a.demande_id = v_d1 and a.rang = 1) = 'sans_reponse'
                  and exists (select 1 from public.reput_appels a where a.demande_id = v_d1 and a.rang = 2 and a.user_id = m2),
@@ -80,6 +83,8 @@ begin
   perform private.reput_astreinte(v_t + interval '1 minute');
   return next ok(exists (select 1 from public.reput_appels a where a.demande_id = v_d2 and a.rang = 2),
                  'Un appel qui n''aboutit pas passe aussitôt au rang suivant');
+  perform public.reput_appel_issue((select a.id from public.reput_appels a where a.demande_id = v_d2 and a.rang = 2), 'sonne');
+  update public.reput_appels set essai_le = v_t + interval '1 minute' where demande_id = v_d2 and rang = 2;
   perform private.reput_astreinte(v_t + interval '12 minutes');
   return next ok((select astreinte_epuisee_le is not null from public.reput_demandes where id = v_d2)
                  and tests.c3_journal(v_client, 'reput.astreinte_epuisee', v_d2::text) is not null,
