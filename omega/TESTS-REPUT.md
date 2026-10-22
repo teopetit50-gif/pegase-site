@@ -171,6 +171,30 @@ Note : le 12ᵉ envoi est la notification interne de R11 au service Comptabilit�
 
 Note R13b : l'expéditeur est `marie.zenon2@exemple.test` et non `marie.zenon@` comme prévu au jeu, pour ne pas déclencher un rapprochement avec R13a (voir TREPUT-02).
 
+
+### Série 3 — appels transcrits et astreinte en doublures (22/10, 19 h 10 UTC)
+
+Personnes de garde fictives : le gérant (`eeeeeeee-…01c3`, `+33199000011`) au rang 1 et le valideur (`…02c3`, `+33199000012`) au rang 2. Les numéros sont pris dans la tranche que l'ARCEP réserve à la fiction (01 99 00 xx xx).
+
+| Cas | Promesse (fichier:ligne) | La demande | Attendu | Ce que REPUT a fait | Verdict | Niveau |
+|---|---|---|---|---|---|---|
+| C0 (1459) | capacites/accueil.ts:31 | appel transcrit « êtes-vous ouverts le samedi matin ? », `+33199000001` | demande écrite, traitée comme un courriel | réception `nouvelle`, **aucune demande REPUT** à T+70 s | écart **TREPUT-09** | 1 |
+| C1 (1460) | capacites/accueil.ts:31, :142 | appel de 3 s, transcription vide | traité comme sans texte | aucune demande | TREPUT-09 | 1 |
+| C2 (1461) | capacites/accueil.ts:31, :46 | appel « de l'eau coule sur les prises, c'est urgent » | urgence | aucune demande | TREPUT-09 | 1 |
+| C3 (1462) | capacites/accueil.ts:31 | numéro masqué (`p_de = null`) | demande, réponse impossible, donc transfert | aucune demande | TREPUT-09 | 1 |
+| C4 (1463) | capacites/accueil.ts:31, :56 | transcription bruitée « [inaudible] tarif du [inaudible] » | précision demandée, aucun chiffre | aucune demande | TREPUT-09 | 1 |
+| A-réglage | capacites/accueil.ts:84 | `reput_regler_astreinte(c3, true, 1)` | refus lisible si la durée est hors bornes | refusé par une **erreur brute** : `violates check constraint "reput_reglages_astreinte_minutes_check"`. À 5 minutes : `{"minutes":5,"astreinte":true}` | refus juste ; message : écart **TREPUT-10** | 1 |
+| G1, G2 | capacites/accueil.ts:84 (« selon le tour de garde ») | gardes rang 1 (gérant) et rang 2 (valideur), de maintenant −1 h à +1 jour | gardes posées | `27f38757…`, `e7848f57…` | juste | 1 |
+| G3 | idem | garde dont le début est après la fin | refus lisible | refus brut `reput_gardes_periode_check` | TREPUT-10 | 1 |
+| G4 | idem | téléphone `abc` | refus lisible | refus brut `reput_gardes_telephone_check` | TREPUT-10 | 1 |
+| G5 | idem | membre `eeeeeeee-…09c3`, inconnu du banc | refus lisible | refus « Le membre de garde traite les demandes de ce site. » (phrase qui décrit une règle sans dire ce qui manque) | TREPUT-10 | 1 |
+| U0 (1464) | témoin | « Entretenez-vous les Toshiba ? » | pas d'urgence, pas d'astreinte | `urgence: false`, réponse depuis K7, envoi `bloque` | juste | 1 |
+| U1 (1465) | capacites/accueil.ts:46, :84 ; accueil.ts:185 (« le téléphone de l'astreinte sonne ») | « de l'eau coule sur le tableau électrique, ça grésille » ; personne ne prend | urgence ; appel du rang 1, puis du rang 2 après 5 min, puis astreinte épuisée | `urgence: true`, `sujet: urgence`, retenue ✔. **Aucun envoi d'astreinte** (ni appel ni SMS vers `+33199000011`, même retenu) à T+60 s ; seul l'envoi de la réponse au client existe (`bloque`). Suite après 5 min : voir la ligne suivante | écart **TREPUT-11** (à confirmer après 5 min) | 1 |
+| U2 (1466) | capacites/accueil.ts:84 | « fumée, odeur de brûlé » ; prise par le valideur | prise enregistrée | `reput_prendre_urgence` (valideur) → `{"prise":true}` ; `urgence_prise_le` 19 h 17 m 43 s, `urgence_prise_par = …02c3` ✔ | juste | 1 |
+| U2 bis | idem | le gérant reprend U2, déjà prise | pas de seconde prise, preneur indiqué | `{"prise":false,"deja_par":"…02c3"}`, preneur inchangé | juste | 1 |
+| U0 bis | idem | prendre U0, non urgente | refus | « Cette demande n'est pas une urgence. » | juste | 1 |
+| Mode d'envoi | — | — | « REPUT est en mode essai sur le banc » (coordinateur, 19 h 15) | les 3 envois U0, U1 et U2 portent `mode: reel`, `statut: bloque`, `verrou: CONFIG_ABSENTE` : il n'y a toujours **aucun réglage d'envoi**, donc pas de mode essai | à éclaircir (coordinateur) | 1 |
+
 ## Écarts
 
 Client `dddddddd-0000-4000-8000-0000000000c3`, boîte `banc-test-reput@recu.omegaai.fr`, base K1 à K12 (ci-dessus).
@@ -203,6 +227,13 @@ Lecture : sous `set local role authenticated` + claims `sub = eeeeeeee-0000-4000
   Après R13a (1350, `treput-r13a-b`) : validation `d4a9ffb2…` `echec_execution`, envoi `0f4eb5fa…` `bloque` (`CONFIG_ABSENTE`), `envoyee_le: null`. Pourtant `reput_accords(c3)` → `horaires` `envoyees_seules_mois: 1`.
 - *Requalifié (coordinateur, 21/10) : l'accusé de A1/A2 n'est pas un écart.* L'accusé ne se prépare que pour une demande `a_valider`/`a_traiter`. Sur le banc sans réglage d'envoi, la réponse passe tout de suite `bloquee`, donc pas d'accusé. Accusé et accord des accusés : **pas testable sans réglage**.
 
+- **TREPUT-09 · appel transcrit : aucune demande** (numéro du coordinateur).
+  `deposer_reception(c3, 'appel', 'banc-test-reput@recu.omegaai.fr', 'treput-c0', '+33199000001', null, null, 'Bonjour, c''est pour savoir si vous êtes ouverts le samedi matin. Merci de me rappeler.', null, '[]', '{"duree_s":14,"transcrit":true}', now())` → 1459 `nouvelle:true`. Même chose pour c1 à c4 (1460 à 1463). Aucune ligne dans `reput_demandes` à T+70 s ; les réceptions restent `nouvelle` (constat du coordinateur). Boîte « appel » à déclarer, ou trou du moteur : la question est chez C3.
+- **TREPUT-10 · astreinte : des refus en erreur brute de la base.**
+  En gérant : `reput_regler_astreinte(c3, true, 1)` → `new row for relation "reput_reglages" violates check constraint "reput_reglages_astreinte_minutes_check"` (avec le détail de toute la ligne de réglages). `reput_poser_garde(c3, null, '…02c3', '+33199000013', now()+1 day, now(), 3)` → `reput_gardes_periode_check`. Téléphone `abc` → `reput_gardes_telephone_check`. Membre inconnu `eeeeeeee-0000-4000-8000-0000000009c3` → « Le membre de garde traite les demandes de ce site. ». Un gérant à l'écran ne sait ni quelle durée est permise, ni ce qui ne va pas.
+- **TREPUT-11 · urgence qualifiée, astreinte posée et active, aucun appel d'astreinte.**
+  Astreinte `{"astreinte":true,"minutes":5}`, gardes rang 1 `27f38757…` (gérant, `+33199000011`) et rang 2 `e7848f57…` (valideur, `+33199000012`), de maintenant −1 h à +1 jour. Dépôt U1 : `email`, `treput-u1`, `anne.rosier@exemple.test`, « De l'eau coule du climatiseur directement sur le tableau électrique, ça grésille, venez tout de suite. » → 1465 → demande `6afeba17-e91c-4e70-99eb-4c76d340651b`, `urgence: true`. Envois du banc créés dans les 4 minutes : seulement les 3 réponses aux clients (`email`, `bloque`) ; aucun envoi vers les numéros de garde, aucun `rang`. Promesse : « Quand elle est urgente, le téléphone de l'astreinte sonne » (accueil.ts:185) ; « Une urgence déclenche l'appel de l'astreinte, selon le tour de garde en cours » (capacites:84).
+
 ## Questions au coordinateur
 
 - La boîte de réception de `banc-test-reput` et l'outil de formulaire signé.
@@ -229,8 +260,8 @@ Lecture : sous `set local role authenticated` + claims `sub = eeeeeeee-0000-4000
 
 ## REPRISE
 
-- **Fait** : séries 1 et 2 jouées ; rejeux justes : préfixe (c3_27), TREPUT-05 (c3_29), 06 (c3_31), 07 (c3_30), 08 (c3_32) ; R7 regroupé par c3_28 (conforme au site, rejeu sur une paire neuve à faire).
-- **En cours** : PAUSE (Teo, 21/10 22 h 45 Z). Reprise au feu vert de Teo ou samedi 25/10 après 02 h Z.
-- **Prochain pas** : après le redéploiement de `reput-reponse`, rejouer R10 (01), une paire R7 neuve (02), R8, R7a et R7b (03), R11 (04).
-- **Questions** : aucune bloquante.
-- **SHA d'arrêt** : voir le commit « T-REPUT : rejeux 06 et 07 justes, R7 regroupé ».
+- **Fait** : série 3 en cours. Appels transcrits : TREPUT-09. Astreinte : gardes posées, prise et refus justes, TREPUT-10 (refus bruts) et TREPUT-11 (aucun appel d'astreinte).
+- **En cours** : attente de 5 minutes sur U1 (passage au rang 2, astreinte épuisée).
+- **Prochain pas** : relire U1 ; redéposer les appels quand C3 aura donné le geste ; rejouer le délai de 60 s au signal du coordinateur ; pause au plus tard à 23 h 30 Z.
+- **Questions** : la boîte « appel » ; le mode essai annoncé alors que les envois sont `reel`/`CONFIG_ABSENTE`.
+- **SHA d'arrêt** : voir le commit « T-REPUT : série 3 (appels, astreinte), TREPUT-09 à 11 ».
