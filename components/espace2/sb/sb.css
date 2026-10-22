@@ -1,0 +1,115 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Les gabarits de page du tableau de bord Supabase, au 1:1 (22/10/2026)
+
+   Demande de Teo : remplacer nos pages par les pages de Supabase, recopiées
+   exactement. Chaque valeur est lue au style calculé sur
+   supabase.com/dashboard (classes Tailwind relevées dans le DOM) :
+     · conteneur   max 1200 px, marges 16 → 24 → 40 px (« px-4 @lg:px-6 @xl:px-10 »)
+     · en-tête     « flex-col gap-3 py-6 pt-8 » : 32 px au-dessus, 24 dessous,
+                   titre Manrope 22/29,33 px 600, interlettrage −0,55 px
+     · filtres     barre collante, filet dessous, 16 px de marge (59 px de haut)
+     · section     « py-8 md:py-16 gap-10 », grille de 12 colonnes à 24 px,
+                   5 à gauche (collée à 128 px du haut de la zone qui défile, 176 px chez nous), 7 à droite ; filet dessous
+     · texte       titre de section 15/22,5 px, paragraphe 13/18,57 px clair,
+                   « MORE INFORMATION » Source Code Pro 12 px en capitales, discret
+     · jauge       cercle de 32 px, rayon 12, trait de 4
+     · lignes      quota en 12 px, 4 px de marge, filet entre elles
+     · graphique   carte à 8 px de rayon, filet + ombre « shadow-xs »
+   Les couleurs sont nos jetons : premier plan --v2-gray-1000, « light »
+   --v2-gray-900, « muted » --v2-gray-600 (mêmes valeurs que Supabase,
+   sans sa pointe de vert).
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .sb-page { min-height: 100%; }
+.v2 .sb-conteneur { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+@container principale (min-width: 512px) { .v2 .sb-conteneur { padding: 0 24px; } }
+@container principale (min-width: 576px) { .v2 .sb-conteneur { padding: 0 40px; } }
+
+/* — l'en-tête de page — */
+.v2 .sb-tete { display: flex; flex-direction: column; gap: 12px; padding: 32px 0 24px; }
+.v2 .sb-tete-ligne { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.v2 .sb-titre { margin: 0; font-family: var(--v2-titre); font-size: 22px; line-height: 29.3333px; font-weight: 600; letter-spacing: -0.55px; color: var(--v2-gray-1000); }
+.v2 .sb-description { margin: 0; font-size: 13px; line-height: 18.5714px; color: var(--v2-gray-900); }
+.v2 .sb-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+/* — la barre de filtres, collée en haut — */
+/* notre barre du haut (48 px) colle déjà : les filtres collent dessous ; chez Supabase la zone qui défile commence sous elle */
+.v2 .sb-filtres { position: sticky; top: 48px; z-index: 1; border-bottom: 1px solid var(--v2-a-400); background: var(--v2-bg-200); }
+.v2 .sb-filtres-ligne { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 0; }
+.v2 .sb-filtres .v2-btn--petit { height: 26px; padding: 0 10px; }
+.v2 .sb-filtres-gauche, .v2 .sb-filtres-droite { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.v2 .sb-filtres-droite { gap: 16px; font-size: 13px; line-height: 18.5714px; color: var(--v2-gray-900); }
+.v2 .sb-marque { color: var(--v2-blue-700); }
+
+/* — les sections — */
+.v2 .sb-bloc { border-bottom: 1px solid var(--v2-a-400); scroll-margin-top: 107px; }
+.v2 .sb-bloc:last-child { border-bottom: 0; }
+.v2 .sb-section { display: flex; flex-direction: column; gap: 40px; padding: 32px 0; }
+@container principale (min-width: 768px) { .v2 .sb-section { padding: 64px 0; } }
+.v2 .sb-grille { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 24px; }
+.v2 .sb-gauche, .v2 .sb-droite { grid-column: span 12; min-width: 0; }
+.v2 .sb-droite { display: flex; flex-direction: column; gap: 24px; }
+@container principale (min-width: 900px) {
+  .v2 .sb-gauche { grid-column: span 5; }
+  .v2 .sb-droite { grid-column: span 7; }
+  .v2 .sb-colle { position: sticky; top: 176px; }
+}
+.v2 .sb-colle { display: flex; flex-direction: column; gap: 24px; }
+.v2 .sb-resume { display: flex; flex-direction: column; gap: 4px; }
+.v2 .sb-resume-titre { margin: 0; font-family: var(--v2-sans); font-size: 15px; line-height: 22.5px; font-weight: 450; color: var(--v2-gray-1000); }
+.v2 .sb-resume p { margin: 0; font-size: 13px; line-height: 18.5714px; color: var(--v2-gray-900); }
+.v2 .sb-resume p + p { margin-top: 8px; }
+.v2 .sb-etiquette { margin: 0; font-family: var(--v2-code); font-size: 12px; line-height: 16px; font-weight: 450; text-transform: uppercase; color: var(--v2-gray-600); }
+.v2 .sb-liens { display: flex; flex-direction: column; gap: 8px; }
+.v2 .sb-liens a { display: inline-flex; align-items: center; gap: 6px; width: fit-content; font-size: 13px; line-height: 18.5714px; color: var(--v2-gray-900); text-decoration: none; transition: color 0.15s; }
+.v2 .sb-liens a:hover { color: var(--v2-gray-1000); }
+.v2 .sb-texte { margin: 0; font-size: 13px; line-height: 18.5714px; color: var(--v2-gray-900); }
+.v2 .sb-texte--fort { color: var(--v2-gray-1000); }
+
+/* — la grille de compteurs (« Usage Summary ») — */
+.v2 .sb-compteurs { display: grid; grid-template-columns: minmax(0, 1fr); }
+@container principale (min-width: 640px) { .v2 .sb-compteurs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.v2 .sb-compteur { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 16px 16px 0; border-bottom: 1px solid var(--v2-a-400); min-width: 0; }
+@container principale (min-width: 640px) {
+  .v2 .sb-compteur:nth-child(2n) { padding-left: 16px; }
+}
+.v2 .sb-compteur-texte { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.v2 .sb-compteur-lien { display: inline-flex; align-items: center; gap: 4px; width: fit-content; color: var(--v2-gray-900); text-decoration: none; font-size: 13px; line-height: 16px; transition: color 0.15s; }
+.v2 .sb-compteur-lien svg { color: var(--v2-gray-600); transition: transform 0.15s; }
+.v2 .sb-compteur-lien:hover { color: var(--v2-gray-1000); }
+.v2 .sb-compteur-lien:hover svg { transform: translateX(2px); }
+.v2 .sb-compteur-valeur { font-size: 13px; line-height: 16px; color: var(--v2-gray-1000); font-variant-numeric: tabular-nums; }
+.v2 .sb-jauge { flex: none; width: 32px; height: 32px; transform: rotate(-90deg); }
+.v2 .sb-jauge-fond { stroke: var(--v2-gray-400); }
+.v2 .sb-jauge-trait { stroke: var(--v2-gray-600); transition: stroke-dashoffset 0.4s var(--v2-doux); }
+.v2 .sb-jauge[data-teinte="ambre"] .sb-jauge-trait { stroke: var(--v2-amber-700); }
+.v2 .sb-jauge[data-teinte="rouge"] .sb-jauge-trait { stroke: var(--v2-red-700); }
+
+/* — le badge (« UPCOMING », « BETA ») : 9 px en capitales, bordé, en pilule — */
+.v2 .sb-badge { display: inline-flex; align-items: center; height: 17px; padding: 0 5.5px; border-radius: 999px; border: 1px solid var(--v2-a-500); font-size: 9px; line-height: 1; font-weight: 500; letter-spacing: 0.63px; text-transform: uppercase; color: var(--v2-gray-900); white-space: nowrap; }
+.v2 .sb-badge[data-teinte="ambre"] { border-color: var(--v2-amber-1000); background: color-mix(in srgb, var(--v2-amber-700) 10%, transparent); color: var(--v2-amber-700); }
+.v2 .sb-badge[data-teinte="vert"] { border-color: var(--v2-green-1000); background: color-mix(in srgb, var(--v2-green-700) 10%, transparent); color: var(--v2-green-700); }
+.v2 .sb-badge[data-teinte="rouge"] { border-color: var(--v2-red-1000); background: color-mix(in srgb, var(--v2-red-700) 10%, transparent); color: var(--v2-red-700); }
+.v2 .sb-badge[data-teinte="bleu"] { border-color: var(--v2-blue-1000); background: color-mix(in srgb, var(--v2-blue-700) 10%, transparent); color: var(--v2-blue-700); }
+
+/* — le détail d'une mesure : barre, lignes de quota, graphique — */
+.v2 .sb-mesure { display: flex; flex-direction: column; gap: 8px; }
+.v2 .sb-mesure-tete { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 13px; line-height: 18.5714px; color: var(--v2-gray-1000); }
+.v2 .sb-barre { height: 4px; border-radius: 999px; background: var(--v2-gray-400); overflow: hidden; }
+.v2 .sb-barre > span { display: block; height: 100%; border-radius: inherit; background: var(--v2-gray-1000); }
+.v2 .sb-lignes { display: flex; flex-direction: column; }
+.v2 .sb-ligne { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px 0; border-bottom: 1px solid var(--v2-a-400); font-size: 12px; line-height: 16px; color: var(--v2-gray-900); }
+.v2 .sb-ligne:last-child { border-bottom: 0; }
+.v2 .sb-ligne strong { font-weight: 450; color: var(--v2-gray-1000); font-variant-numeric: tabular-nums; }
+.v2 .sb-sous-titre { display: flex; flex-direction: column; gap: 0; }
+.v2 .sb-sous-titre p:first-child { margin: 0; font-size: 13px; line-height: 18.5714px; color: var(--v2-gray-1000); }
+.v2 .sb-sous-titre p + p { margin: 0; font-size: 13px; line-height: 18.5714px; color: var(--v2-gray-900); }
+.v2 .sb-graphique { border-radius: 8px; background: var(--v2-bg-100); box-shadow: var(--v2-ombre-petite); overflow: hidden; }
+.v2 .sb-graphique-vide { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; height: 103px; text-align: center; font-size: 13px; line-height: 18.5714px; }
+.v2 .sb-graphique-vide svg { margin-bottom: 6px; color: var(--v2-gray-1000); }
+.v2 .sb-graphique-vide span { color: var(--v2-gray-900); }
+.v2 .sb-histo { display: flex; align-items: flex-end; gap: 2px; height: 160px; padding: 16px 16px 0; }
+.v2 .sb-histo-barre { flex: 1; min-width: 2px; border-radius: 2px 2px 0 0; background: var(--v2-gray-1000); opacity: 0.85; transition: opacity 0.15s; }
+.v2 .sb-histo-barre[data-vide] { background: var(--v2-gray-400); opacity: 1; }
+.v2 .sb-histo-barre:hover { opacity: 1; }
+.v2 .sb-histo-axe { display: flex; justify-content: space-between; padding: 8px 16px 12px; font-family: var(--v2-code); font-size: 11px; line-height: 16px; color: var(--v2-gray-600); }
