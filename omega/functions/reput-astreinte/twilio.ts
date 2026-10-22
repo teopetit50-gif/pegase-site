@@ -38,6 +38,19 @@ export function twimlMerci(pris: boolean): string {
   return `<?xml version="1.0" encoding="UTF-8"?><Response><Say language="fr-FR">${t}</Say></Response>`;
 }
 
+/** Un refus de l'API Twilio, avec son statut HTTP (c3_39 : distinguer un numéro refusé d'une panne). */
+export class ErreurTwilio extends Error {
+  constructor(readonly statut: number, message: string) {
+    super(message);
+  }
+}
+
+/** Le refus porte sur le NUMÉRO appelé (4xx hors identifiants et débit) : la garde suivante a sa chance. Sinon (réseau,
+ *  5xx, 401/403, 429) c'est une panne : aucun téléphone n'a sonné. */
+export function numeroRefuse(e: unknown): boolean {
+  return e instanceof ErreurTwilio && e.statut >= 400 && e.statut < 500 && ![401, 403, 429].includes(e.statut);
+}
+
 /** Lance l'appel ; rend le SID de l'appel. */
 export async function appeler(cfg: ConfigTwilio, fetchFn: typeof fetch, telephone: string, appel: string, organisation: string): Promise<string> {
   const corps = new URLSearchParams({
@@ -54,7 +67,7 @@ export async function appeler(cfg: ConfigTwilio, fetchFn: typeof fetch, telephon
     body: corps,
   });
   const texte = await rep.text();
-  if (!rep.ok) throw new Error(`Twilio : HTTP ${rep.status} ${texte.slice(0, 200)}`);
+  if (!rep.ok) throw new ErreurTwilio(rep.status, `Twilio : HTTP ${rep.status} ${texte.slice(0, 200)}`);
   const sid = (JSON.parse(texte) as { sid?: string }).sid;
   if (!sid) throw new Error("Twilio : réponse sans sid");
   return sid;
