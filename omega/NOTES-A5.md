@@ -12,6 +12,9 @@
   PALIERS.md (P1 9, P2 23, P3 33, P4 27, P5 303, P6 2). Aucun secret : recherche de JWT, clés et mots de passe faite.
   Aucune référence à la recette dans les fichiers ; les URL sont réécrites vers la production.
 - Rien n'est posé. Prochain pas : la répétition (voie C) sur ces fichiers, puis le gel.
+- Voie C prête (gratuite, workflow omega-repetition-ci). Attend : relevé du schéma de prod par Teo (relever-base.sh,
+  liste À TEO) et alignement de l'image supabase/postgres sur sa version. Empreinte de la recette du 22/10 19:32 Z sur
+  export-prod 1190e8d2 (à rejouer au gel). ARRÊT 22/10 19 h 25 Z.
 
 ## REPRISE — 21/10/2026, 23 h Z (réveil par Teo ; lots 1 à 4 dans l'ordre, un à la fois)
 
