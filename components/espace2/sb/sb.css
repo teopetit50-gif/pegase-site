@@ -295,7 +295,7 @@
 .v2 .sb-journal-histo { display: flex; align-items: flex-end; gap: 2px; height: 60px; padding: 8px 8px 4px; border-bottom: 1px solid var(--v2-a-400); }
 .v2 .sb-journal-histo span { flex: 1; min-height: 1px; border-radius: 1px; background: var(--v2-gray-600); opacity: 0.8; }
 .v2 .sb-journal-histo span[data-vide] { background: var(--v2-a-400); opacity: 1; }
-.v2 .sb-journal-table { flex: 1; overflow: auto; }
+.v2 .sb-journal-table { flex: 1; min-width: 0; overflow: auto; }
 .v2 .sb-journal-table table { width: 100%; border-collapse: collapse; }
 .v2 .sb-journal-table th { position: sticky; top: 0; height: 36px; padding: 0 8px; text-align: left; background: var(--v2-bg-200); border-bottom: 1px solid var(--v2-a-400); font-family: var(--v2-code); font-size: 12px; line-height: 16px; font-weight: 450; text-transform: uppercase; color: var(--v2-gray-600); white-space: nowrap; }
 .v2 .sb-journal-table th:first-child, .v2 .sb-journal-table td:first-child { padding-left: 12px; }

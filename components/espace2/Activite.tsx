@@ -213,7 +213,7 @@ export default function Activite() {
             <span key={i} data-vide={n ? undefined : ""} style={{ height: n ? `${Math.max(8, (n / max) * 100)}%` : "1px" }} />
           ))}
         </div>
-        <div style={{ flex: 1, display: "flex", minHeight: 0 }}>
+        <div className="sb-conseil-corps">
           <div className="sb-journal-table">
             {!dansPeriode ? (
               <div style={{ padding: 16, display: "grid", gap: 12 }}>

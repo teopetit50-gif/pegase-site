@@ -952,3 +952,9 @@ html.v2-actif .dlg-sortie:hover:not(:disabled) {
 .v2 .resa.esp .esp-item-bas, .v2 .resa.esp .esp-item-haut { font-size: 12px; line-height: 16px; }
 .v2 .resa.esp .esp-item-montant { font-family: var(--v2-code); font-size: 12px; }
 .v2 .resa.esp .esp-detail-mobile > .esp-carte, .v2 .resa.esp .esp-colle > .esp-carte { box-shadow: var(--v2-ombre-petite), -1px 0 0 var(--v2-a-400); }
+
+/* dans le volet de détail d'une page Supabase, les fiches reprises s'empilent sur une colonne */
+.v2 .resa.esp .sb-volet-detail .esp-def, .v2 .resa.esp .sb-volet-detail .esp-def--trois { grid-template-columns: minmax(0, 1fr); }
+.v2 .resa.esp .sb-volet-detail .esp-carte { box-shadow: none; border-radius: 0; background: transparent; }
+.v2 .resa.esp .sb-volet-detail .esp-carte-tete { background: transparent; padding-left: 0; padding-right: 0; }
+.v2 .resa.esp .sb-volet-detail .esp-carte-corps { padding-left: 0; padding-right: 0; }

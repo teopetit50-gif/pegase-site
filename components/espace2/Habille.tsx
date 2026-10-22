@@ -22,3 +22,14 @@ export default function Habille({ children, avant }: { children: React.ReactNode
     </div>
   );
 }
+
+/* 22/10/2026 — un écran repris dont le dessin est une page Supabase
+   (gabarit="sb") : il porte lui-même ses marges, pleine largeur ; seul le
+   monde `.resa .esp` reste autour, pour ses fenêtres et ses pastilles. */
+export function HabilleSb({ children }: { children: React.ReactNode }) {
+  return (
+    <div id="ecran" className="resa esp sb-ecran">
+      {children}
+    </div>
+  );
+}
