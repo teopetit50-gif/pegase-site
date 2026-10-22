@@ -277,6 +277,11 @@ ne peuvent pas être la même personne » ; carte « Des rôles et des délégat
 - C'est le même défaut que TFILED-21 avant a4_81 : un contrôle d'identité « ok » sur une valeur dont la source n'est pas nommée. Attendu :
   « Numéro de TVA repris de la fiche fournisseur (absent de la pièce) », et une attention sur l'absence de la mention obligatoire.
 
+**TFILED-25 (en cours) · R2026-000069 · régression du lecteur v64 : la ventilation de TVA est perdue**
+- Sur v63, 069 avait une `tva.ventilation` juste (Exo et 8,5 %). Relue sur v64 (relayé par le coordinateur), elle n'a **plus de
+  ventilation**, et un contrôle calcule alors un « taux moyen 2,84 % » (TVA rapportée au HT total, sur une pièce mêlant exonéré et
+  8,5 %). La correction de TFILED-20 s'est faite au prix d'une régression. Une relecture sur v66 est en cours : verdict suspendu.
+
 ### Série 1b — 21/10, 20 h 40 (portes d'écriture, en gérant `eeeeeeee-…01f1`, client banc seulement)
 
 1. `select public.filed_lever_anomalie('a46345d2-c631-4af3-b713-4bd52b70541e', 'identite.registre', 'T-FILED 1b : …')` (facture F0)
@@ -485,7 +490,7 @@ Je compare champ par champ. Niveau 2 : vraie pièce, lue sur la recette. Les nom
   versions du même plan ne se rapprochent pas.
 
 
-**TFILED-20 · R2026-000069 · le lecteur fabrique un SIRET en complétant un SIREN par des zéros, puis le bloque pour clé fausse**
+**TFILED-20 · ✅ juste sur le lecteur v64 (relu par le coordinateur, 22/10, 20 h 40 Z)** : SIREN vérifié « 9 chiffres sous SIRET : rangé en SIREN », plus de `fournisseur.siret`, `identite.siret` a disparu. Constat d'origine · R2026-000069 · le lecteur fabrique un SIRET en complétant un SIREN par des zéros, puis le bloque pour clé fausse**
 - La pièce imprime 9 chiffres sous l'étiquette « SIRET » : c'est un SIREN. FILED lit `fournisseur.siret` = les 9 chiffres suivis de
   `00000`, avec la mention « citation retrouvée page 1 ; SIRET invalide », puis pose `identite.siret` **bloquant** « clé de contrôle
   fausse… ». La valeur n'existe pas sur la pièce : c'est une **invention de lecture**, et elle produit un arrêt **faux**. La facture est
@@ -498,6 +503,8 @@ Je compare champ par champ. Niveau 2 : vraie pièce, lue sur la recette. Les nom
   1,35 = HT 135,00, TVA 8,5 % 11,48, TTC 146,48, et l'en-tête « SIRET 912345618 » (9 chiffres, rien d'autre). Attendus : aucun SIRET à
   14 chiffres inventé (TFILED-20) ; SIREN déduit avec sa source nommée, et `identite.siren` pas « ok » muet (TFILED-21). À déposer par le
   coordinateur.
+- *Rejeu TFILED-24* (22/10 à 20:40:54Z, gérant) : `filed_lever_anomalie('775e98e4-1178-48a6-b7c5-d2e390656198', 'identite.registre', …)`
+  → `"a_valider"`. Lignes `identite.tva_intracom` et `tva.numero` attendues du coordinateur.
 - *F13 lue* (R2026-000034, lecteur v63, relayé) : `fournisseur.siren` « 912345618 » **vérifié**, avec la source « citation retrouvée
   page 1 ; 9 chiffres sous « SIRET » : rangé en SIREN » ; **aucun** `fournisseur.siret` ; `identite.siren` ok « SIREN 912345618, lu sur la
   pièce : clé correcte. » → **TFILED-21 corrigé, juste.** TFILED-20 est juste **sur cette lecture**, mais le coordinateur note que le
