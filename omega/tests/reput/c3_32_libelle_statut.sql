@@ -17,9 +17,11 @@ begin
   select v_client, 'reput', 'essai', 'essais@omegaai.fr', array['email']
   where not exists (select 1 from public.reglages_envois r where r.client_id = v_client and r.module = 'reput');
   perform public.reput_installer(v_client);
-  v_a := tests.c3_15_demande(v_client, 'email', 'c3-32-nora@exemple.test', 'Fictive Céleste', q, '2026-10-20 14:05:00 Europe/Paris'::timestamptz);
+  v_a := tests.c3_15_demande(v_client, 'email', 'c3-32-nora@exemple.test', 'Fictive Céleste', q, now() - interval '25 minutes');
   perform public.reput_deposer_reponse(v_a, jsonb_build_object('sujet', 'rendez_vous', 'langue', 'fr', 'couverte', false, 'corps', 'Nous regardons.'));
   v_b := (public.reput_commencer(tests.c3_reception(v_client, 'formulaire', 'c3-32-nora@exemple.test', 'Fictive Céleste', 'Formulaire du site', q)) ->> 'demande')::uuid;
+  -- Les heures sont fixées APRÈS le regroupement (la règle des 48 h se lit à l'arrivée), pour un libellé constant.
+  update public.reput_demandes set recu_le = '2026-10-20 14:05:00 Europe/Paris'::timestamptz where id = v_a;
   update public.reput_demandes set recu_le = '2026-10-20 14:30:00 Europe/Paris'::timestamptz where id = v_b;
 
   return next is(private.reput_libelle_statut(v_b), 'Regroupée avec la demande du 20/10/2026 14:05 (courriel, Fictive Céleste)',
