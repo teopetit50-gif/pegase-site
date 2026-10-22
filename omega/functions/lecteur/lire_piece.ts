@@ -20,7 +20,7 @@ import type { ClientClaude } from "@partage/claude.ts";
 import type { PortesAnalyse } from "./analyse/travail.ts";
 import { type BilanAvis, chiffrerLecture, type CoffreTamila, depotDechiffrant, poserAvisTamila } from "./coffre.ts";
 import { lireCsv, lireXlsx } from "./tableur.ts";
-import { completerDepuisTexte, reclasserIdentifiants, valeurHeures, ventilationDepuisTableau, valeurListeObjets, valeurLignes, valeurTaxes, valeurVentilation, ventilationExoneree, verifierValeurs } from "./verifier.ts";
+import { completerDepuisTexte, dateChantierDepuisTexte, nettoyerPlan, reclasserIdentifiants, valeurHeures, ventilationDepuisTableau, valeurListeObjets, valeurLignes, valeurTaxes, valeurVentilation, ventilationExoneree, verifierValeurs } from "./verifier.ts";
 import { estXmlFacture, lireXmlFacture } from "./xml_facture.ts";
 import { type BilanDecoupage, creerPiecesFilles } from "./decoupage.ts";
 import { concorder } from "./concordance.ts";
@@ -615,9 +615,18 @@ export function assembler(
   const typeDeclare = schema.types.find((t) => t.type === brut.type_piece);
   const type_piece = typeDeclare ? typeDeclare.type : "autre";
   const champs = champsPour(module, type_piece);
-  const verif = verifierValeurs(brut.valeurs, pages, pagesPdf, "ia", champs, typeDeclare?.cles ?? []);
-  const classees = reclasserIdentifiants(verif.valeurs, champs);
+  // Un document de chantier peut n'être daté que du mois (« Septembre 2023 ») : sa « date » l'accepte, pas celle d'une facture.
+  const champsLus = type_piece.startsWith("chantier_") && champs.has("date")
+    ? new Map([...champs, ["date", { ...champs.get("date")!, type: "date_ou_mois" as const }]])
+    : champs;
+  const verif = verifierValeurs(brut.valeurs, pages, pagesPdf, "ia", champsLus, typeDeclare?.cles ?? []);
+  const lus = type_piece === "chantier_plan" ? nettoyerPlan(verif.valeurs) : verif.valeurs;
+  const classees = reclasserIdentifiants(lus, champs);
   const valeurs: ValeurLue[] = [...classees, ...completerDepuisTexte(classees, pages, champs)];
+  if (type_piece === "chantier_plan" || type_piece === "chantier_note_technique") {
+    const date = dateChantierDepuisTexte(valeurs, pages);
+    if (date) valeurs.push(date);
+  }
   if (schema.lignes && type_piece !== "releve_heures") {
     const lignes = valeurLignes(brut.lignes, pages, "ia", schema.colonnesLigne);
     if (lignes) valeurs.push(lignes);

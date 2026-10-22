@@ -11,7 +11,7 @@ import { SCHEMA_TAMILA } from "./tamila.ts";
 import { CHAMPS_VARELO, TYPE_BON_LIVRAISON_VARELO } from "./varelo.ts";
 import { SCHEMA_DALIRO } from "./daliro.ts";
 
-export type TypeChampDeclare = "texte" | "nombre" | "entier" | "date" | "dateheure" | "mois" | "booleen" | "choix" | "liste";
+export type TypeChampDeclare = "texte" | "nombre" | "entier" | "date" | "date_ou_mois" | "dateheure" | "mois" | "booleen" | "choix" | "liste";
 
 export interface ChampDeclare {
   champ: string;
@@ -106,7 +106,8 @@ SCHEMA_FILED.types.push(
   {
     type: "chantier_plan",
     libelle: "plan",
-    description: "un plan ou un cartouche de plan (architecte, structure, réseaux)",
+    description:
+      "un plan ou un cartouche de plan (architecte, structure, réseaux) ; date en AAAA-MM si seul le mois est écrit (« Septembre 2023 » → 2023-09) ; jamais une cote, une désignation de massif ni une note comme titre",
     champs: ["titre", "numero_plan", "indice", "date", "echelle", "phase", "maitre_ouvrage", "auteur"],
     // NOBAT 22/10 : un plan de détail n'a souvent que « Plan 101 » dans son cartouche ; titre OU numéro suffit.
     cles: [],

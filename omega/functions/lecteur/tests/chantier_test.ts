@@ -136,3 +136,33 @@ Deno.test("plan de détail (NOBAT 067) : le premier intitulé écrit tient lieu 
   ]);
   assertEquals(r.statut, "lue", r.motif);
 });
+
+Deno.test("T-FILED 22 : plan daté « Septembre 2023 » → date 2023-09 vérifiée (rendue par le modèle, ou relevée s'il l'omet)", () => {
+  const texte = "PLAN DE FONDATIONS — DATE: Septembre 2023 — Plan 101";
+  const rendue = lire({
+    type_piece: "chantier_plan",
+    valeurs: [{ champ: "date", valeur: "Septembre 2023", texte: "DATE: Septembre 2023", page: 1 }, { champ: "numero_plan", valeur: "101", texte: "Plan 101", page: 1 }],
+  }, [page(1, texte)]);
+  assertEquals(valeur(rendue, "date")?.valeur, "2023-09");
+  assert(valeur(rendue, "date")?.verifiee, valeur(rendue, "date")?.controle);
+  const omise = lire({ type_piece: "chantier_plan", valeurs: [{ champ: "numero_plan", valeur: "101", texte: "Plan 101", page: 1 }] }, [page(1, texte)]);
+  assertEquals(valeur(omise, "date")?.valeur, "2023-09");
+  // une facture n'accepte toujours pas une date au mois
+  const facture = lire({ type_piece: "facture", valeurs: [{ champ: "date", valeur: "Septembre 2023", texte: "Septembre 2023", page: 1 }] }, [page(1, "Septembre 2023")]);
+  assertEquals(valeur(facture, "date")?.verifiee, false);
+});
+
+Deno.test("T-FILED 23 : plan sans cartouche — une cote n'est pas un titre ; « Plan 101 » → numero_plan 101", () => {
+  const texte = "M1: 60 x 60 h.: 80 … M6: 220 x 220 h.: 100 / Plan 101";
+  const r = lire({
+    type_piece: "chantier_plan",
+    valeurs: [
+      { champ: "titre", valeur: "M6: 220 x 220 h.: 100", texte: "M6: 220 x 220 h.: 100", page: 1 },
+      { champ: "numero_plan", valeur: "Plan 101", texte: "Plan 101", page: 1 },
+    ],
+  }, [page(1, texte)]);
+  assertEquals(valeur(r, "titre"), undefined);
+  assertEquals(valeur(r, "numero_plan")?.valeur, "101");
+  assertEquals(valeur(r, "numero_plan")?.texte, "Plan 101");
+  assertEquals(r.statut, "lue", r.motif);
+});

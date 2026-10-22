@@ -144,6 +144,11 @@ export function typerValeur(
       const d = dateIso(valeur);
       return d === null ? { valeur, ok: false, detail: "date illisible" } : { valeur: d, ok: true };
     }
+    case "date_ou_mois": {
+      // Un document de chantier daté « Septembre 2023 » : le mois, jamais un jour inventé.
+      const d = dateIso(valeur) ?? moisIso(valeur);
+      return d === null ? { valeur, ok: false, detail: "date illisible" } : { valeur: d, ok: true };
+    }
     case "mois": {
       const m = moisIso(valeur);
       return m === null ? { valeur, ok: false, detail: "mois illisible (AAAA-MM)" } : { valeur: m, ok: true };
@@ -802,4 +807,46 @@ export function ventilationDepuisTableau(valeurs: ValeurLue[], pages: PageLue[])
     };
   }
   return null;
+}
+
+/** Une cote ou une désignation chiffrée (« M6: 220 x 220 h.: 100 », « 5 Cad HA 8 x 220 e=18 ») : pas un titre de plan. */
+export function ressembleACote(t: string): boolean {
+  const lettres = (t.match(/[A-Za-zÀ-ÿ]/g) ?? []).length;
+  const chiffres = (t.match(/\d/g) ?? []).length;
+  return /\d\s*[x×]\s*\d/.test(t) || /\bh\.?\s*:/i.test(t) || /\be\s*=\s*\d/.test(t) || chiffres > lettres;
+}
+
+/**
+ * Les champs d'un plan après lecture (T-FILED 23, NOBAT 071) : un « titre » qui n'est qu'une cote est écarté ;
+ * « Plan 101 » ou « N° S-101 » en numero_plan devient « 101 » / « S-101 » (la citation garde la forme imprimée).
+ */
+export function nettoyerPlan(valeurs: ValeurLue[]): ValeurLue[] {
+  return valeurs.flatMap((v) => {
+    if (v.champ === "titre" && typeof v.valeur === "string" && ressembleACote(v.valeur)) return [];
+    if (v.champ === "numero_plan" && typeof v.valeur === "string") {
+      const n = v.valeur.replace(/^\s*(?:plan|pl\.?|n°|no\.?|num(?:é|e)ro)\s*(?:n°\s*)?[:.]?\s*/i, "").trim();
+      if (n !== "" && n !== v.valeur) return [{ ...v, valeur: n }];
+    }
+    return [v];
+  });
+}
+
+/** La date d'un document de chantier quand le modèle l'omet : « DATE : Septembre 2023 », « Date : 12/03/2024 » (T-FILED 22). */
+export function dateChantierDepuisTexte(valeurs: ValeurLue[], pages: PageLue[]): ValeurLue | null {
+  if (valeurs.some((v) => v.champ === "date")) return null;
+  const re = /\bDATE\s*[:.]?\s*(\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4}|[A-Za-zÀ-ÿ]{3,9}\.?\s+\d{4})/gi;
+  const lues = seulesLectures(pages, re, 1)
+    .map((r) => ({ ...r, iso: dateIso(r.valeur) ?? moisIso(r.valeur) }))
+    .filter((r) => r.iso !== null);
+  const distinctes = [...new Set(lues.map((r) => r.iso))];
+  if (distinctes.length !== 1) return null;
+  return {
+    champ: "date",
+    valeur: distinctes[0],
+    texte: lues[0].texte,
+    page: lues[0].page,
+    source: "ia",
+    verifiee: true,
+    controle: `relevée sur le texte de la page ${lues[0].page}`,
+  };
 }
