@@ -23,13 +23,14 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { MessageSquareText, PhoneOff } from "lucide-react";
+import { MessageSquareText } from "lucide-react";
 import { dateHeure } from "@/components/espace/format";
 import { useSource } from "@/components/espace/source";
 import { mondeExemple } from "@/components/espace/reput/exemples";
 import { chargerMonde, monClient } from "@/components/espace/reput/portes";
 import type { Demande, Monde } from "@/components/espace/reput/types";
-import { Badge, Note, Squelette, Vide } from "../ui";
+import { Badge, Note } from "../ui";
+import { SbConseiller, type SbProbleme } from "../sb/Conseiller";
 import { useMaintenant } from "../horloge";
 
 const HEURE = 3_600_000;
@@ -97,123 +98,80 @@ export default function Urgences() {
       .sort((a, b) => Number(b.motif?.teinte === "rouge") - Number(a.motif?.teinte === "rouge") || Number(b.depasse) - Number(a.depasse) || b.ecoule - a.ecoule);
   }, [monde, maintenant]);
 
-  const stats = lignes
-    ? [
-        { libelle: "Urgences ouvertes", n: lignes.filter((l) => l.motif?.libelle === "Urgence").length, sous: "passent en tête de liste", teinte: "rouge" as const },
-        { libelle: "Délai dépassé", n: lignes.filter((l) => l.depasse).length, sous: "au-delà du délai de leur sujet", teinte: "rouge" as const },
-        { libelle: "Réclamations et litiges", n: lignes.filter((l) => l.motif?.libelle === "Réclamation" || l.motif?.libelle === "Client en litige").length, sous: "aucune réponse automatique", teinte: "ambre" as const },
-        { libelle: "À traiter vous-même", n: lignes.filter((l) => l.motif?.libelle === "À traiter vous-même" || l.motif?.libelle === "Veut parler à une personne").length, sous: "une personne reprend la main", teinte: "ambre" as const },
-      ]
-    : null;
+  /* 22/10 — le gabarit « Advisors » de Supabase (../sb/Conseiller) : les
+     urgences en « erreurs », réclamations et litiges en « avertissements »,
+     ce qui revient à une personne en « information ». */
+  const problemes = useMemo<SbProbleme[] | null>(
+    () =>
+      lignes?.map(({ d, motif, ecoule, delai, depasse, sujet }) => ({
+        cle: d.id,
+        gravite: motif?.teinte === "rouge" ? "urgent" : motif?.teinte === "ambre" ? "attention" : "reprendre",
+        type: motif?.libelle ?? "Demande",
+        element: <span className="sb-mono">{d.de_nom ?? d.adresse_reponse ?? "Expéditeur inconnu"}</span>,
+        description: `${d.objet ?? sujet} · reçue il y a ${duree(ecoule)}${delai !== null ? (depasse ? ` · délai de ${delai} h dépassé` : ` · dans les ${delai} h`) : ""}`,
+        detail: (
+          <>
+            <h3>Demande</h3>
+            <p className="sb-texte--fort">{d.de_nom ?? d.adresse_reponse ?? "Expéditeur inconnu"}</p>
+            <p>
+              {d.objet ?? sujet}
+              {d.motif ? ` · ${d.motif}` : ""}
+            </p>
+            <h3>Reçue</h3>
+            <p>
+              {dateHeure(d.recu_le)} · il y a {duree(ecoule)}
+            </p>
+            <h3>Délai du sujet</h3>
+            <p>{delai === null ? "Aucun délai fixé pour ce sujet." : depasse ? `Dépassé : le sujet demande une réponse sous ${delai} h.` : `Dans le délai : réponse attendue sous ${delai} h.`}</p>
+            <Badge teinte={depasse ? "rouge" : "vert"}>{depasse ? "Délai dépassé" : "Dans le délai"}</Badge>
+            <Link href={`/espace2/reput?demande=${encodeURIComponent(d.id)}`} className="v2-btn" style={{ width: "fit-content" }}>
+              Ouvrir la demande
+            </Link>
+          </>
+        ),
+      })) ?? null,
+    [lignes],
+  );
 
   return (
-    <div className="v2-page v2-arrivee">
-      <h1 className="v2-sr">Urgences et escalade</h1>
-      <div className="v2-tete" style={{ marginBottom: 24 }}>
-        <div>
-          <p>
-            Les demandes qui ne passent pas par la file ordinaire : une urgence, une réclamation, un client en litige, quelqu&apos;un qui veut parler à une personne. Chacune porte le délai que vous avez fixé pour son sujet.
-          </p>
-        </div>
-        <div className="v2-actions">
-          <Link href="/espace2/reput" className="v2-btn">
-            <MessageSquareText width={16} height={16} aria-hidden="true" /> Toutes les demandes
-          </Link>
-        </div>
-      </div>
-
+    <>
       {erreur ? (
-        <div style={{ marginBottom: 24 }}>
+        <div style={{ padding: "16px 24px 0" }}>
           <Note teinte="rouge" role="alert">
             <strong>La base réelle n&apos;a pas répondu.</strong> {erreur}
           </Note>
         </div>
       ) : null}
-
-      <div className="v2-stats" style={{ "--nb": 4 } as React.CSSProperties}>
-        {(stats ?? [0, 1, 2, 3].map(() => null)).map((s, i) => (
-          <div key={s?.libelle ?? i} className="v2-stat" style={{ cursor: "default" }}>
-            <span className="v2-stat-etiquette">
-              <span className="v2-point" data-teinte={s && s.n ? s.teinte : "gris"} aria-hidden="true" />
-              {s ? s.libelle : <Squelette largeur="60%" hauteur={14} />}
-            </span>
-            <span className="v2-stat-valeur">{s ? s.n : <Squelette largeur={32} hauteur={28} />}</span>
-            <span className="v2-stat-sous">{s ? s.sous : <Squelette largeur="70%" hauteur={14} />}</span>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ display: "grid", gap: 24 }}>
-        <section className="v2-carte" aria-labelledby="astreinte-titre">
-          <div className="v2-carte-tete">
-            <h2 className="v2-h2" id="astreinte-titre">
-              Hors de vos horaires
-            </h2>
-            <Badge>Par défaut : jamais hors horaires</Badge>
-          </div>
-          <div className="v2-carte-corps" style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-            <PhoneOff width={18} height={18} aria-hidden="true" style={{ flex: "none", marginTop: 2 }} />
-            <p style={{ margin: 0 }}>
-              Personne n&apos;est réveillé sans l&apos;avoir choisi. Une urgence reçue hors horaires obtient tout de suite une réponse honnête, avec les horaires que vous avez écrits : elle est notée, et vous rappelez en premier. À l&apos;ouverture, elle passe en tête de cette liste. Un conseil d&apos;attente n&apos;est donné que s&apos;il figure dans votre base validée.
-            </p>
-          </div>
-        </section>
-
-        {!lignes ? (
-          erreur ? null : (
-            <div className="v2-carte" aria-busy="true" style={{ padding: 16, display: "grid", gap: 16 }}>
-              {[0, 1, 2].map((i) => (
-                <Squelette key={i} hauteur={20} />
-              ))}
-            </div>
-          )
-        ) : !lignes.length ? (
-          <Vide icone={<MessageSquareText width={20} height={20} />} titre="Rien d'urgent">
-            Aucune urgence, réclamation ou demande à reprendre en main pour l&apos;instant.
-          </Vide>
-        ) : (
-          <div className="v2-carte">
-            <div className="v2-tableau-cadre">
-              <table className="v2-tableau v2-tableau--empile">
-                <thead>
-                  <tr>
-                    <th scope="col">Demande</th>
-                    <th scope="col">Motif</th>
-                    <th scope="col">Reçue</th>
-                    <th scope="col" className="v2-num">
-                      Écoulé
-                    </th>
-                    <th scope="col">Délai</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {lignes.map(({ d, motif, ecoule, delai, depasse, sujet }) => (
-                    <tr key={d.id}>
-                      <td data-etiquette="Demande" data-plein="">
-                        <Link href={`/espace2/reput?demande=${encodeURIComponent(d.id)}`} style={{ fontWeight: 500 }}>
-                          {d.de_nom ?? d.adresse_reponse ?? "Expéditeur inconnu"}
-                        </Link>
-                        <small>
-                          {d.objet ?? sujet}
-                          {d.motif ? ` · ${d.motif}` : ""}
-                        </small>
-                      </td>
-                      <td data-etiquette="Motif">{motif ? <Badge teinte={motif.teinte}>{motif.libelle}</Badge> : null}</td>
-                      <td data-etiquette="Reçue">{dateHeure(d.recu_le)}</td>
-                      <td data-etiquette="Écoulé" className="v2-num">
-                        {duree(ecoule)}
-                      </td>
-                      <td data-etiquette="Délai">
-                        {delai === null ? <span className="v2-gris">—</span> : depasse ? <Badge teinte="rouge">Dépassé ({delai} h)</Badge> : <Badge teinte="vert">Dans les {delai} h</Badge>}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+      <SbConseiller
+        titre="Urgences et escalade"
+        gravites={[
+          { cle: "urgent", libelle: "Urgences", teinte: "rouge", unite: ["urgence", "urgences"] },
+          { cle: "attention", libelle: "Réclamations", teinte: "ambre", unite: ["réclamation", "réclamations"] },
+          { cle: "reprendre", libelle: "À reprendre", teinte: "bleu", unite: ["demande", "demandes"] },
+        ]}
+        problemes={problemes}
+        colonnes={["Motif", "De", "Demande"]}
+        vide={(g) =>
+          g.cle === "urgent"
+            ? { titre: "Aucune urgence", texte: "Aucune urgence ni client en litige n'attend de réponse." }
+            : g.cle === "attention"
+              ? { titre: "Aucune réclamation", texte: "Aucune réclamation ni demande de parler à une personne." }
+              : { titre: "Rien à reprendre", texte: "Le système a traité seul toutes les autres demandes." }
+        }
+        actions={
+          <Link href="/espace2/reput" className="v2-btn">
+            <MessageSquareText width={14} height={14} aria-hidden="true" /> Toutes les demandes
+          </Link>
+        }
+        pied={[
+          {
+            titre: "Hors de vos horaires",
+            texte: "Par défaut, jamais hors horaires : personne n'est réveillé sans l'avoir choisi. Le client reçoit tout de suite une réponse honnête avec vos horaires, et son urgence passe en tête à l'ouverture.",
+          },
+          { titre: "Le délai de chaque sujet", texte: "Chaque sujet porte le délai que vous avez fixé : une heure pour une urgence, quatre pour une réclamation." },
+          { titre: "Un client en litige", texte: "Il ne reçoit aucune réponse automatique : la demande revient toujours à une personne." },
+        ]}
+      />
+    </>
   );
 }

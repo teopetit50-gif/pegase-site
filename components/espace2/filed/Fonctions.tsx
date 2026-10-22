@@ -21,7 +21,8 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { CheckCheck, FileText, ShieldCheck, Users } from "lucide-react";
+import { SbConseiller, type SbGravite, type SbProbleme } from "../sb/Conseiller";
+import { CheckCheck, FileText, Users } from "lucide-react";
 import { useSource } from "@/components/espace/source";
 import { dateCourte, montant } from "@/components/espace/format";
 import { DOSSIERS_EXEMPLE } from "@/components/espace/exemples/filed";
@@ -154,151 +155,162 @@ function useControles() {
 const familleDe = (code: string) => FAMILLES_CONTROLE[code.split(".")[0]] ?? code.split(".")[0];
 const lienPiece = (p: Piece) => (p.facture ? `/espace2/filed?objet=facture:${encodeURIComponent(p.facture.id)}` : "/espace2/filed");
 
+/* 22/10 — le gabarit « Advisors » de Supabase (../sb/Conseiller) : chaque
+   point de contrôle devient un problème, rangé par gravité comme
+   Errors / Warnings / Info ; un clic ouvre son détail à droite. */
+const GRAVITES_CONTROLE: SbGravite[] = [
+  { cle: "bloquant", libelle: "Bloquants", teinte: "rouge", unite: ["point bloquant", "points bloquants"] },
+  { cle: "verifier", libelle: "À vérifier", teinte: "ambre", unite: ["point à vérifier", "points à vérifier"] },
+  { cle: "info", libelle: "Pour information", teinte: "vert", unite: ["information", "informations"] },
+];
+
 export function Controles() {
   const { donnees, erreur } = useControles();
 
-  const calc = useMemo(() => {
+  const problemes = useMemo<SbProbleme[] | null>(() => {
     if (!donnees) return null;
     const { pieces, vue } = donnees;
-    const enAnomalie = pieces
-      .filter((p) => p.facture && (p.facture.anomalies.length > 0 || p.facture.nb_bloquants > 0 || p.facture.nb_attention > 0) && !["validee", "comptabilisee", "refusee"].includes(p.facture.statut))
-      .sort((a, b) => (b.facture?.nb_bloquants ?? 0) - (a.facture?.nb_bloquants ?? 0) || b.document.recu_le.localeCompare(a.document.recu_le));
     const nom = (id: string) => vue.fournisseurs.find((f) => f.id === id)?.nom ?? "Fournisseur inconnu";
+    const liste: SbProbleme[] = [];
     /* un IBAN proposé chez un fournisseur qui en a déjà un validé : un changement de coordonnées */
-    const ibans = vue.ibans
-      .filter((i) => i.statut === "propose")
-      .map((i) => ({ ...i, nom: nom(i.fournisseur_id), change: vue.ibans.some((x) => x.fournisseur_id === i.fournisseur_id && x.id !== i.id && (x.statut === "valide" || x.statut === "revoque")) }))
-      .sort((a, b) => Number(b.change) - Number(a.change) || b.propose_le.localeCompare(a.propose_le));
-    const surveiller = vue.fournisseurs.filter((f) => f.statut === "a_confirmer" || f.statut === "bloque" || f.identite_verdict?.resultat === "invalide");
-    const doublons = pieces.filter((p) => p.document.etat === "doublon");
-    return { enAnomalie, ibans, surveiller, doublons, bloquees: enAnomalie.filter((p) => (p.facture?.nb_bloquants ?? 0) > 0).length };
+    for (const i of vue.ibans.filter((x) => x.statut === "propose")) {
+      const change = vue.ibans.some((x) => x.fournisseur_id === i.fournisseur_id && x.id !== i.id && (x.statut === "valide" || x.statut === "revoque"));
+      liste.push({
+        cle: `iban-${i.id}`,
+        gravite: change ? "bloquant" : "verifier",
+        type: change ? "Changement de RIB" : "Premier IBAN",
+        element: <span className="sb-mono">{nom(i.fournisseur_id)}</span>,
+        description: change ? `Un nouvel IBAN (${i.iban_masque}) remplace un IBAN validé : à confirmer avant tout paiement.` : `IBAN reçu le ${dateCourte(i.propose_le)}, à confirmer une fois.`,
+        detail: (
+          <>
+            <h3>Fournisseur</h3>
+            <p className="sb-texte--fort">{nom(i.fournisseur_id)}</p>
+            <h3>IBAN proposé</h3>
+            <p className="v2-mono">{i.iban_masque}</p>
+            <h3>Pourquoi</h3>
+            <p>{change ? "Un changement de coordonnées bancaires chez un fournisseur connu est la première porte d'entrée de la fraude au virement. Aucun paiement ne part vers ce nouvel IBAN tant qu'une personne ne l'a pas confirmé, idéalement par un appel au numéro habituel du fournisseur." : "Un fournisseur payé pour la première fois : son IBAN est confirmé une fois, puis il sert pour les paiements suivants."}</p>
+            <Link href="/espace2/filed/fournisseurs" className="v2-btn" style={{ width: "fit-content" }}>
+              Ouvrir Fournisseurs
+            </Link>
+          </>
+        ),
+      });
+    }
+    for (const p of pieces) {
+      const f = p.facture;
+      if (!f || ["validee", "comptabilisee", "refusee"].includes(f.statut)) continue;
+      if (!(f.anomalies.length > 0 || f.nb_bloquants > 0 || f.nb_attention > 0)) continue;
+      const familles = Array.from(new Set(f.anomalies.map(familleDe)));
+      const bloquant = f.nb_bloquants > 0 || f.anomalies.some((c) => c.startsWith("fournisseur.iban") || c.startsWith("doublon"));
+      liste.push({
+        cle: `piece-${p.document.id}`,
+        gravite: bloquant ? "bloquant" : "verifier",
+        type: familles[0] ? `Contrôle « ${familles[0]} »` : "Pièce en anomalie",
+        element: <span className="sb-mono">{p.document.reference}</span>,
+        description: `${p.fournisseur?.nom ?? "Fournisseur inconnu"} · ${montant(f.montant_ttc, f.devise)}${familles.length > 1 ? ` · ${familles.length} contrôles en défaut` : ""}`,
+        detail: (
+          <>
+            <h3>Pièce</h3>
+            <p className="sb-texte--fort">
+              {p.document.reference} · reçue le {dateCourte(p.document.recu_le)}
+            </p>
+            <h3>Fournisseur et montant</h3>
+            <p>
+              {p.fournisseur?.nom ?? "Fournisseur inconnu"} · {montant(f.montant_ttc, f.devise)}
+            </p>
+            <h3>Contrôles en défaut</h3>
+            <p>{familles.length ? familles.join(", ") : "Voir la pièce"}</p>
+            <p>{bloquant ? "La pièce n'est ni classée ni payée tant qu'une personne n'a pas levé le point, avec son motif." : "La pièce peut avancer ; le point est à vérifier avant le paiement."}</p>
+            <Link href={lienPiece(p)} className="v2-btn" style={{ width: "fit-content" }}>
+              Ouvrir la pièce
+            </Link>
+          </>
+        ),
+      });
+    }
+    for (const f of vue.fournisseurs.filter((x) => x.statut === "a_confirmer" || x.statut === "bloque" || x.identite_verdict?.resultat === "invalide")) {
+      const grave = f.statut === "bloque" || f.identite_verdict?.resultat === "invalide";
+      liste.push({
+        cle: `four-${f.id}`,
+        gravite: grave ? "bloquant" : "verifier",
+        type: f.statut === "bloque" ? "Fournisseur bloqué" : f.identite_verdict?.resultat === "invalide" ? "Introuvable au registre" : "Fournisseur à confirmer",
+        element: <span className="sb-mono">{f.nom}</span>,
+        description: f.statut === "bloque" ? "Ne pas payer : le fournisseur est bloqué." : f.identite_verdict?.resultat === "invalide" ? `Le SIREN ${f.siren ?? "lu"} n'est pas trouvé au registre public.` : "Jamais vu : une personne le confirme une fois.",
+        detail: (
+          <>
+            <h3>Fournisseur</h3>
+            <p className="sb-texte--fort">{f.nom}</p>
+            <h3>SIREN</h3>
+            <p className="v2-mono">{f.siren ?? "—"}</p>
+            <h3>Identité</h3>
+            <p>{f.identite_verifiee_le ? `Vérifiée le ${dateCourte(f.identite_verifiee_le)}` : "Pas encore vérifiée"}</p>
+            <Link href="/espace2/filed/fournisseurs" className="v2-btn" style={{ width: "fit-content" }}>
+              Ouvrir Fournisseurs
+            </Link>
+          </>
+        ),
+      });
+    }
+    for (const p of pieces.filter((x) => x.document.etat === "doublon")) {
+      liste.push({
+        cle: `doublon-${p.document.id}`,
+        gravite: "info",
+        type: "Doublon écarté",
+        element: <span className="sb-mono">{p.document.reference}</span>,
+        description: `${p.fournisseur?.nom ?? "Fournisseur inconnu"} · reconnu même renommé ou rescanné, il n'est ni classé ni payé deux fois.`,
+        detail: (
+          <>
+            <h3>Pièce</h3>
+            <p className="sb-texte--fort">{p.document.reference}</p>
+            <p>FILED a reconnu une pièce déjà reçue : elle reste visible, marquée doublon, et ne compte pas dans les montants.</p>
+            <Link href={lienPiece(p)} className="v2-btn" style={{ width: "fit-content" }}>
+              Ouvrir la pièce
+            </Link>
+          </>
+        ),
+      });
+    }
+    return liste;
   }, [donnees]);
 
-  const stats: Stat[] | null = calc
-    ? [
-        { libelle: "Pièces bloquées", valeur: String(calc.bloquees), sous: "aucune n'est classée au jugé", teinte: calc.bloquees ? "rouge" : "vert" },
-        { libelle: "Changements de RIB", valeur: String(calc.ibans.filter((i) => i.change).length), sous: "à confirmer avant tout paiement", teinte: calc.ibans.some((i) => i.change) ? "rouge" : "vert" },
-        { libelle: "Fournisseurs à surveiller", valeur: String(calc.surveiller.length), sous: "à confirmer, bloqués ou non vérifiés", teinte: calc.surveiller.length ? "ambre" : "gris" },
-        { libelle: "Doublons écartés", valeur: String(calc.doublons.length), sous: "même renommés ou rescannés" },
-      ]
-    : null;
-
   return (
-    <div className="v2-page v2-arrivee">
-      <h1 className="v2-sr">Contrôles et fraude</h1>
-      <div className="v2-tete" style={{ marginBottom: 24 }}>
-        <div>
-          <p>
-            Ce que FILED vérifie avant de classer une pièce : les totaux, la TVA, les doublons, l&apos;identité du fournisseur et ses coordonnées bancaires. Une pièce en anomalie attend une personne ; un changement de RIB n&apos;est jamais pris en compte sans confirmation.
-          </p>
+    <>
+      {erreur ? (
+        <div style={{ padding: "16px 24px 0" }}>
+          <Note teinte="rouge" role="alert">
+            <strong>La base réelle n&apos;a pas répondu.</strong> {erreur}
+          </Note>
         </div>
-        <div className="v2-actions">
-          <Link href="/espace2/filed/fournisseurs" className="v2-btn">
-            <Users width={16} height={16} aria-hidden="true" /> Fournisseurs
-          </Link>
-          <Link href="/espace2/filed" className="v2-btn">
-            <FileText width={16} height={16} aria-hidden="true" /> Documents reçus
-          </Link>
-        </div>
-      </div>
-      <Erreur erreur={erreur} />
-      <Stats stats={stats} />
-
-      {!calc ? (
-        <Attente erreur={erreur} />
-      ) : (
-        <div style={{ display: "grid", gap: 24 }}>
-          <Section id="ctl-rib" titre="Coordonnées bancaires proposées" sous={pluriel(calc.ibans.length, "IBAN")}>
-            {calc.ibans.length ? (
-              <Tableau colonnes={[{ libelle: "Fournisseur" }, { libelle: "IBAN proposé" }, { libelle: "Reçu le" }, { libelle: "Signal" }]}>
-                {calc.ibans.map((i) => (
-                  <tr key={i.id}>
-                    <td data-etiquette="Fournisseur" data-plein="">
-                      <Link href="/espace2/filed/fournisseurs" style={{ fontWeight: 500 }}>
-                        {i.nom}
-                      </Link>
-                    </td>
-                    <td data-etiquette="IBAN proposé">
-                      <span className="v2-mono">{i.iban_masque}</span>
-                    </td>
-                    <td data-etiquette="Reçu le">{dateCourte(i.propose_le)}</td>
-                    <td data-etiquette="Signal">{i.change ? <Badge teinte="rouge">Remplace un IBAN validé</Badge> : <Badge teinte="ambre">Premier IBAN, à confirmer</Badge>}</td>
-                  </tr>
-                ))}
-              </Tableau>
-            ) : (
-              <Vide icone={<ShieldCheck width={20} height={20} />} titre="Aucun IBAN en attente">Chaque facture à payer porte un IBAN déjà confirmé.</Vide>
-            )}
-          </Section>
-
-          <Section id="ctl-pieces" titre="Pièces en anomalie" sous={pluriel(calc.enAnomalie.length, "pièce")}>
-            {calc.enAnomalie.length ? (
-              <Tableau colonnes={[{ libelle: "Pièce" }, { libelle: "Fournisseur" }, { libelle: "Contrôles en défaut" }, { libelle: "Montant", num: true }, { libelle: "Gravité" }]}>
-                {calc.enAnomalie.map((p) => {
-                  const f = p.facture!;
-                  const familles = Array.from(new Set(f.anomalies.map(familleDe)));
-                  return (
-                    <tr key={p.document.id}>
-                      <td data-etiquette="Pièce">
-                        <Link href={lienPiece(p)} className="v2-mono">
-                          {p.document.reference}
-                        </Link>
-                        <small>reçue le {dateCourte(p.document.recu_le)}</small>
-                      </td>
-                      <td data-etiquette="Fournisseur">{p.fournisseur?.nom ?? "Fournisseur inconnu"}</td>
-                      <td data-etiquette="Contrôles en défaut" data-plein="">
-                        <span style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-                          {familles.length ? familles.map((x) => <Badge key={x}>{x}</Badge>) : <span className="v2-gris">voir la pièce</span>}
-                        </span>
-                      </td>
-                      <td data-etiquette="Montant" className="v2-num">
-                        {montant(f.montant_ttc, f.devise)}
-                      </td>
-                      <td data-etiquette="Gravité">
-                        {f.nb_bloquants > 0 || f.anomalies.some((c) => c.startsWith("fournisseur.iban") || c.startsWith("doublon")) ? <Badge teinte="rouge">Bloquante</Badge> : <Badge teinte="ambre">À vérifier</Badge>}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </Tableau>
-            ) : (
-              <Vide icone={<ShieldCheck width={20} height={20} />} titre="Aucune pièce en anomalie">Toutes les pièces en cours ont passé leurs contrôles.</Vide>
-            )}
-          </Section>
-
-          <Section id="ctl-fournisseurs" titre="Fournisseurs à surveiller" sous={pluriel(calc.surveiller.length, "fournisseur")}>
-            {calc.surveiller.length ? (
-              <Tableau colonnes={[{ libelle: "Fournisseur" }, { libelle: "SIREN" }, { libelle: "Identité" }, { libelle: "Statut" }]}>
-                {calc.surveiller.map((f) => (
-                  <tr key={f.id}>
-                    <td data-etiquette="Fournisseur" data-plein="">
-                      <Link href="/espace2/filed/fournisseurs" style={{ fontWeight: 500 }}>
-                        {f.nom}
-                      </Link>
-                    </td>
-                    <td data-etiquette="SIREN">
-                      <span className="v2-mono">{f.siren ?? "—"}</span>
-                    </td>
-                    <td data-etiquette="Identité">
-                      {f.identite_verdict?.resultat === "invalide" ? (
-                        <Badge teinte="rouge">Introuvable au registre</Badge>
-                      ) : f.identite_verifiee_le ? (
-                        <Badge teinte="vert">Vérifiée le {dateCourte(f.identite_verifiee_le)}</Badge>
-                      ) : (
-                        <Badge>Non vérifiée</Badge>
-                      )}
-                    </td>
-                    <td data-etiquette="Statut">{f.statut === "bloque" ? <Badge teinte="rouge">Bloqué : ne pas payer</Badge> : f.statut === "a_confirmer" ? <Badge teinte="ambre">Jamais vu, à confirmer</Badge> : <Badge>Actif</Badge>}</td>
-                  </tr>
-                ))}
-              </Tableau>
-            ) : (
-              <Vide icone={<Users width={20} height={20} />} titre="Aucun fournisseur à surveiller">Chaque fournisseur est confirmé et son identité vérifiée.</Vide>
-            )}
-          </Section>
-        </div>
-      )}
-    </div>
+      ) : null}
+      <SbConseiller
+        titre="Contrôles et fraude"
+        gravites={GRAVITES_CONTROLE}
+        problemes={problemes}
+        colonnes={["Point", "Élément", "Description"]}
+        vide={(g) =>
+          g.cle === "bloquant"
+            ? { titre: "Aucun point bloquant", texte: "Aucune pièce, aucun IBAN ni aucun fournisseur n'empêche un paiement." }
+            : g.cle === "verifier"
+              ? { titre: "Rien à vérifier", texte: "Toutes les pièces en cours ont passé leurs contrôles." }
+              : { titre: "Rien à signaler", texte: "Aucun doublon écarté pour l'instant." }
+        }
+        actions={
+          <>
+            <Link href="/espace2/filed/fournisseurs" className="v2-btn">
+              <Users width={14} height={14} aria-hidden="true" /> Fournisseurs
+            </Link>
+            <Link href="/espace2/filed" className="v2-btn">
+              <FileText width={14} height={14} aria-hidden="true" /> Documents reçus
+            </Link>
+          </>
+        }
+        pied={[
+          { titre: "Ce qui est contrôlé", texte: "Les totaux et la TVA, les doublons même renommés, l'identité du fournisseur au registre public et ses coordonnées bancaires." },
+          { titre: "Lever un point", texte: "Un point se lève depuis la pièce, avec son motif ; au-delà de la règle, il passe par « À valider »." },
+          { titre: "Un changement de RIB", texte: "Il n'est jamais pris en compte sans confirmation : appelez le fournisseur au numéro que vous connaissez déjà." },
+        ]}
+      />
+    </>
   );
 }
 
