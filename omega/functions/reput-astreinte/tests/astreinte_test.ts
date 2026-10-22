@@ -53,7 +53,7 @@ Deno.test("un passage : chaque appel part chez Twilio, la référence est notée
   assertEquals(p.issues, [{ appel: "a1", issue: "sonne", reference: "CA123" }, { appel: "a2", issue: "echec", reference: null }]);
 });
 
-Deno.test("sans Twilio : aucun appel n'est pris (la base escalade au délai)", async () => {
+Deno.test("sans Twilio : aucun appel n'est pris (au délai, la base les dit non passés)", async () => {
   const p = new PortesFausses();
   p.a = [{ appel: "a1", telephone: "+33600000001", rang: 1, organisation: "Banc" }];
   const b = await silence(() => passer({ portes: p, twilio: null, fetchTwilio: fetch }));
@@ -89,4 +89,16 @@ Deno.test("une autre touche ne prend rien ; les statuts : sans réponse, échec,
   assertEquals(p.issues.map((x) => x.issue), ["sans_reponse", "echec"]);
   assertEquals(issueDuStatut("ringing"), null);
   assert(await signatureValide("k", "u", new URLSearchParams(), null) === false);
+});
+
+Deno.test("TREPUT-15 : une panne de Twilio (5xx, réseau, identifiants) ne note rien ; un numéro refusé (400) note l'échec", async () => {
+  for (const [reponse, attendu] of [[503, []], [401, []], ["reseau", []], [400, ["echec"]]] as const) {
+    const p = new PortesFausses();
+    p.a = [{ appel: "a1", telephone: "+33600000001", rang: 1, organisation: "Banc" }];
+    const fetchTwilio = (() => reponse === "reseau" ? Promise.reject(new TypeError("réseau coupé"))
+      : Promise.resolve(new Response('{"message":"x"}', { status: reponse }))) as typeof fetch;
+    const b = await silence(() => passer({ portes: p, twilio: TWILIO, fetchTwilio }));
+    assertEquals(b.echecs, 1);
+    assertEquals(p.issues.map((i) => i.issue), [...attendu], `réponse ${reponse}`);
+  }
 });
