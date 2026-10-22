@@ -310,3 +310,22 @@ begin
 end $$;
 drop trigger if exists gabarits_messages_preparer on public.gabarits_messages;
 create trigger gabarits_messages_preparer before insert or update on public.gabarits_messages for each row execute function private.souche_preparer_gabarit();
+
+-- private.verrous_envoi (socle 17) imité pour ce que c3_41a touche : la plage d'envoi (8 h – 20 h, Paris, tous les jours)
+-- et le verrou HORS_HEURES, écrits avec la MÊME ligne que le socle (l'ancre que c3_41a modifie).
+create or replace function private.verrous_envoi(p_e public.envois, p_complet boolean, p_instant timestamp with time zone default now())
+ returns jsonb language plpgsql stable security definer set search_path to '' as $function$
+declare
+  v_t2 timestamptz;
+  v_h numeric := extract(hour from p_instant at time zone 'Europe/Paris');
+begin
+  if p_complet then
+    v_t2 := case when v_h >= 8 and v_h < 20 then p_instant
+                 else date_trunc('day', (p_instant at time zone 'Europe/Paris') + case when v_h >= 20 then interval '1 day' else interval '0' end)
+                      at time zone 'Europe/Paris' + interval '8 hours' end;
+    if v_t2 is null or v_t2 > p_instant then
+      return jsonb_build_object('code', 'HORS_HEURES', 'motif', 'Hors des heures d''envoi du destinataire.', 'definitif', false, 'reprise_le', v_t2);
+    end if;
+  end if;
+  return null;
+end $function$;
