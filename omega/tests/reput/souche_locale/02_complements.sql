@@ -36,15 +36,33 @@ create table if not exists public.envois (
   cle_idempotence text not null, envoye_le timestamptz, cree_le timestamptz not null default now(), unique (client_id, cle_idempotence));
 create table if not exists private.souche_verrous (adresse text primary key, code text not null, motif text);
 
+create table if not exists public.gabarits_messages (
+  id uuid primary key default gen_random_uuid(), client_id uuid, module text not null, code text not null, langue text not null,
+  version integer not null, canal text not null, libelle text, sujet text, corps text not null, variables jsonb not null default '{}',
+  transactionnel boolean not null default true, donnees_sante boolean not null default false, espacement boolean not null default false,
+  statut text not null default 'brouillon', note text, unique nulls not distinct (client_id, code, langue, version));
 create or replace function private.preparer_envoi(p_client uuid, p_module text, p_objet_type text, p_objet_id text, p_canal text, p_destinataire jsonb,
   p_gabarit text default null, p_variables jsonb default '{}', p_sujet text default null, p_corps text default null, p_pieces uuid[] default null,
   p_cle_idempotence text default null, p_entite uuid default null, p_transactionnel boolean default false, p_donnees_sante boolean default false,
   p_echeance timestamptz default null, p_options jsonb default '{}') returns uuid
 language plpgsql security definer set search_path to '' as $$
-declare v_id uuid; v_d public.demandes_validation; v_v private.souche_verrous;
+declare v_id uuid; v_d public.demandes_validation; v_v private.souche_verrous; g public.gabarits_messages; k text; v text;
 begin
   select e.id into v_id from public.envois e where e.client_id = p_client and e.cle_idempotence = p_cle_idempotence;
   if v_id is not null then return v_id; end if;
+  -- Gabarit (socle 17) imité : un gabarit validé de l'organisation (ou commun), même canal ; {{variable}} remplacées.
+  if p_gabarit is not null then
+    if p_sujet is not null or p_corps is not null then raise exception 'Un gabarit ou un texte (sujet, corps), pas les deux.' using errcode = '22023'; end if;
+    select * into g from public.gabarits_messages x where x.code = p_gabarit and x.module = p_module and x.statut = 'valide'
+      and (x.client_id = p_client or x.client_id is null) and x.langue = coalesce(p_destinataire ->> 'langue', 'fr')
+    order by x.client_id nulls last, x.version desc limit 1;
+    if g.id is null then raise exception 'Aucun gabarit validé « % » pour le module %.', p_gabarit, p_module using errcode = 'P0002'; end if;
+    if g.canal <> p_canal then raise exception 'Le gabarit % est écrit pour le canal %, pas pour %.', p_gabarit, g.canal, p_canal using errcode = '22023'; end if;
+    p_corps := g.corps;
+    for k, v in select * from jsonb_each_text(coalesce(p_variables, '{}')) loop p_corps := replace(p_corps, '{{' || k || '}}', v); end loop;
+  elsif p_variables is not null and p_variables <> '{}'::jsonb then
+    raise exception 'Des variables sans gabarit : rien à remplir.' using errcode = '22023';
+  end if;
   if p_canal = 'email' and p_sujet is null then raise exception 'Un envoi par courriel porte un sujet.' using errcode = '22023'; end if;
   if p_canal <> 'email' and p_sujet is not null then raise exception 'Un envoi par % n''a pas de sujet.', p_canal using errcode = '22023'; end if;
   if p_canal = 'sms' and char_length(p_corps) > 640 then raise exception 'Message trop long pour le canal SMS.' using errcode = '22023'; end if;
@@ -53,9 +71,10 @@ begin
     raise exception 'Cette décision ne porte pas sur cet envoi : même module, même objet.' using errcode = '22023';
   end if;
   insert into public.envois (client_id, entite_id, module, objet_type, objet_id, canal, destinataire_adresse, destinataire_nom, destinataire_langue,
-    sujet, corps, transactionnel, donnees_sante, demande_id, adossee, cle_idempotence)
+    sujet, corps, transactionnel, donnees_sante, demande_id, adossee, cle_idempotence, gabarit_id, variables)
   values (p_client, p_entite, p_module, p_objet_type, p_objet_id, p_canal, p_destinataire ->> 'adresse', p_destinataire ->> 'nom',
-    coalesce(p_destinataire ->> 'langue', 'fr'), p_sujet, p_corps, p_transactionnel, p_donnees_sante, v_d.id, true, p_cle_idempotence)
+    coalesce(p_destinataire ->> 'langue', 'fr'), p_sujet, p_corps, p_transactionnel, p_donnees_sante, v_d.id, true, p_cle_idempotence,
+    g.id, coalesce(p_variables, '{}'))
   returning id into v_id;
   select * into v_v from private.souche_verrous s where s.adresse = p_destinataire ->> 'adresse';
   if v_v.code is not null then
@@ -208,12 +227,11 @@ alter table public.equipes_membres add column if not exists client_id uuid;
 alter table public.equipes add column if not exists cle text;
 
 -- ── Gabarits et envoi interne (socle 19as, A1), imités : un membre, un gabarit validé fermé, sans validation ──
-create table if not exists public.gabarits_messages (
-  id uuid primary key default gen_random_uuid(), client_id uuid, module text not null, code text not null, langue text not null,
-  version integer not null, canal text not null, libelle text, sujet text, corps text not null, variables jsonb not null default '{}',
-  transactionnel boolean not null default true, donnees_sante boolean not null default false, espacement boolean not null default false,
-  statut text not null default 'brouillon', note text, unique nulls not distinct (client_id, code, langue, version));
+
 alter table public.envois add column if not exists destinataire_membre uuid;
+alter table public.envois add column if not exists gabarit_id uuid;
+alter table public.envois add column if not exists variables jsonb not null default '{}';
+alter table public.gabarits_messages add column if not exists modele_externe text;
 alter table public.envois add column if not exists direct boolean not null default false;
 create or replace function public.valider_gabarit(p_gabarit uuid, p_note text) returns void
 language plpgsql security definer set search_path to '' as $$
