@@ -282,6 +282,12 @@ ne peuvent pas être la même personne » ; carte « Des rôles et des délégat
   ventilation**, et un contrôle calcule alors un « taux moyen 2,84 % » (TVA rapportée au HT total, sur une pièce mêlant exonéré et
   8,5 %). La correction de TFILED-20 s'est faite au prix d'une régression.
 
+**TFILED-26 · R2026-000067, 000075 · sur une planche de détails sans cartouche, le premier intitulé devient le titre « vérifié »**
+- 067 et 075 n'ont pas de cartouche ; la page aligne plusieurs détails (scellement n° 1, sur 075 aussi n° 2, joint de retrait, coupes,
+  désignation des massifs). FILED prend le premier intitulé comme `titre` et le marque **vérifié**. Sur 074 et 077, au même genre de
+  planche, FILED rend au contraire « à vérifier : titre ou numero_plan ». C'est la même famille que TFILED-23 : sans cartouche, il n'y a
+  pas de titre certain. Attendu : « à vérifier », ou un titre marqué non vérifié, comme sur 074 et 077.
+
 ### Série 1b — 21/10, 20 h 40 (portes d'écriture, en gérant `eeeeeeee-…01f1`, client banc seulement)
 
 1. `select public.filed_lever_anomalie('a46345d2-c631-4af3-b713-4bd52b70541e', 'identite.registre', 'T-FILED 1b : …')` (facture F0)
@@ -477,6 +483,14 @@ Je compare champ par champ. Niveau 2 : vraie pièce, lue sur la recette. Les nom
 | R2026-000073 | nature, titre, n°, indice, échelle, phase, maître d'ouvrage | imprimés au cartouche | lus à l'identique, vérifiés | juste |
 | R2026-000073 | date | « Septembre 2023 » au cartouche et indice A du 10/11/2023 | date = celle de l'indice | juste (défendable : la date de la révision en cours ; observation) |
 | R2026-000076 | tous les champs | même cartouche que 073, texte relayé coupé | comme 073, tout vérifié | juste |
+| R2026-000069 | ventilation TVA (lecteur 37583a8) | Exo et 8,5 % | ventilation revenue et vérifiée | juste (TFILED-25 corrigé) |
+| R2026-000067 | titre | planche de détails **sans cartouche** ; première ligne « Détail sur scellement n° 1 », puis joint de retrait, massifs, coupes | titre = « Détail sur scellement n° 1 », **vérifié** | **écart** TFILED-26 |
+| R2026-000075 | titre | planche **sans cartouche** portant deux intitulés « Détail sur scellement n° 1 » et « n° 2 », plus d'autres détails | titre = le premier intitulé, **vérifié** | **écart** TFILED-26 |
+| R2026-000067 / 000075 | n° de plan | aucun | aucun | juste |
+| R2026-000068 | n° de plan | « Plan 101 » en fin de page, sans cartouche | `numero_plan` « 101 », vérifié (le format est maintenant homogène avec 065 et 070) | juste |
+| R2026-000072 | n° de plan | mêmes armatures que 068 ; le texte relayé est coupé avant la fin | « 101 », vérifié | non jugeable sur le texte relayé (vraisemblablement juste, comme 068) |
+| R2026-000074 / 000077 | titre, n° de plan | cotes et repères seulement, sans cartouche, ni titre ni numéro | « à vérifier : titre ou numero_plan » | juste |
+| R2026-000066 | dispositions (lecteur 37583a8) | 5 dispositions | 3 sur 5 non vérifiées (deux titres réécrits, des lits fusionnés) ; le « non vérifié » est maintenu | juste (le lecteur avoue son doute) |
 | R2026-000065 / 000070 | doublon | même dossier, même plan n° 101, même titre | aucun signal de doublon | pas de promesse (observation : deux versions ou deux pages du même plan, sans rapprochement) |
 
 **TFILED-22 · R2026-000065 · la date du cartouche n'est pas relevée**
