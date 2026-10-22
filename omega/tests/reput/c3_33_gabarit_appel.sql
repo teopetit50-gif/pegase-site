@@ -41,10 +41,9 @@ begin
                    '{"corps": "Oui, de 9 h à 12 h."}'::jsonb),
                  E'Bonjour, désolés de vous avoir manqué.\nOui, de 9 h à 12 h.\nL''équipe C3-33', 'La phrase réglée est reprise');
 
-  -- ── Appel d'un fixe (pas de SMS) : la forme longue, l'excuse en tête ──
+  -- ── Appel d'un fixe (aucun écrit possible) : la note de rappel seule (c3_36, TREPUT-12) ──
   return next is(private.reput_gabarit(v_client, null, 'appel', null, private.reput_base(v_client) -> 'reglages', 'fr', '{"corps": "Nous vous rappelons."}'::jsonb),
-                 E'Bonjour, désolés de vous avoir manqué.\n\nNous vous rappelons.\n\nBien cordialement,\nL''équipe C3-33\n12 rue Fictive, 75000 Paris\n01 00 00 00 00',
-                 'Sans SMS : l''assemblage de toujours, l''excuse tenant lieu de formule d''appel');
+                 'Nous vous rappelons.', 'Sans SMS ni WhatsApp : la note de rappel seule, ni excuse ni signature');
 
   -- ── Ce qui ne change pas : un courriel ──
   return next is(private.reput_gabarit(v_client, null, 'email', 'email', private.reput_base(v_client) -> 'reglages', 'fr', '{"corps": "Oui."}'::jsonb),
