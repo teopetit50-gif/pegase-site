@@ -282,7 +282,7 @@ ne peuvent pas être la même personne » ; carte « Des rôles et des délégat
   ventilation**, et un contrôle calcule alors un « taux moyen 2,84 % » (TVA rapportée au HT total, sur une pièce mêlant exonéré et
   8,5 %). La correction de TFILED-20 s'est faite au prix d'une régression.
 
-**TFILED-26 · R2026-000067, 000075 · sur une planche de détails sans cartouche, le premier intitulé devient le titre « vérifié »**
+**TFILED-26 · corrigé par A1 dans le lot 57284506, pas encore déployé : en attente du rejeu** · R2026-000067, 000075 · sur une planche de détails sans cartouche, le premier intitulé devient le titre « vérifié »**
 - 067 et 075 n'ont pas de cartouche ; la page aligne plusieurs détails (scellement n° 1, sur 075 aussi n° 2, joint de retrait, coupes,
   désignation des massifs). FILED prend le premier intitulé comme `titre` et le marque **vérifié**. Sur 074 et 077, au même genre de
   planche, FILED rend au contraire « à vérifier : titre ou numero_plan ». C'est la même famille que TFILED-23 : sans cartouche, il n'y a
@@ -493,11 +493,11 @@ Je compare champ par champ. Niveau 2 : vraie pièce, lue sur la recette. Les nom
 | R2026-000066 | dispositions (lecteur 37583a8) | 5 dispositions | 3 sur 5 non vérifiées (deux titres réécrits, des lits fusionnés) ; le « non vérifié » est maintenu | juste (le lecteur avoue son doute) |
 | R2026-000065 / 000070 | doublon | même dossier, même plan n° 101, même titre | aucun signal de doublon | pas de promesse (observation : deux versions ou deux pages du même plan, sans rapprochement) |
 
-**TFILED-22 · R2026-000065 · la date du cartouche n'est pas relevée**
+**TFILED-22 · ✅ CORRIGÉ (lecteur 37583a8, relu le 22/10 à 21 h 33 Z)** : date « 2023-09 », vérifiée ; titre, n° « 101 », échelle, phase, maître d'ouvrage et auteur vérifiés. **Juste.** Constat d'origine · R2026-000065 · la date du cartouche n'est pas relevée**
 - Le cartouche imprime « DATE: Septembre 2023 ». FILED ne relève aucune date. Sur 070, au cartouche identique, la date est relevée
   (non vérifiée). La lecture est irrégulière sur un champ pourtant présent.
 
-**TFILED-23 · R2026-000071 · sur un plan sans cartouche, une cote est prise pour le titre et marquée vérifiée ; le n° garde le mot « Plan »**
+**TFILED-23 · à moitié corrigé (lecteur 37583a8, 21 h 33 Z) : le titre est juste, le n° est perdu** — 071 rend « à vérifier : titre ou numero_plan », sans aucune valeur : la cote n'est plus prise pour un titre (**juste**). Mais la page se termine toujours par « Plan 101 - Pag… », et `numero_plan` n'est **plus relevé du tout**, alors que 068 (même pied de page) donne « 101 » vérifié. Le résidu reste **ouvert** : le n° est présent sur la pièce et n'est pas lu. Constat d'origine · R2026-000071 · sur un plan sans cartouche, une cote est prise pour le titre et marquée vérifiée ; le n° garde le mot « Plan »**
 - Le plan n'a pas de cartouche ; sa première ligne est une cote de massif (dimensions et hauteur). FILED en fait le `titre`, marqué
   **vérifié**. Attendu : titre absent, ou « non lu ».
 - `numero_plan` = « Plan 101 », alors que 065 et 070 rendent « 101 » pour le même plan. Le format n'est pas homogène, donc deux
@@ -591,15 +591,13 @@ par les portes `public.filed_confirmer_fournisseur(uuid, text)` et `public.filed
 
 ## REPRISE
 
-**Arrêt 18 — 22/10/2026, 19 h 40 Z**
-- Fait : séries 1, 1b, 2 et 3 (niveau 1), puis niveau 2 sur R2026-000065, 066, 069, 070, 071, 073 et 076.
-  - Corrigés et revérifiés : TFILED-03, 04, 08, 09, 10, 11, 14 et 16.
+**Arrêt 19 — 22/10/2026, 21 h 35 Z**
+- Fait : niveau 1 complet (séries 1 à 3, F8 à trois taux, F13 et F14) ; niveau 2 sur les 13 pièces NOBAT R2026-000065 → 077.
+  - Corrigés et revérifiés : TFILED-03, 04, 08, 09, 10, 11, 14, 16, 18, 19, 20, 21, 22, 24 et 25.
   - Clos : TFILED-02 et 13 (justes), TFILED-12 (par décision de Teo), TFILED-15 (retiré).
-  - Écarts ouverts : TFILED-17, 18 et 19 (A4, messages bruts et format de l'imputation) ; TFILED-20, 21, 22 et 23 (A1, lecture des
-    pièces NOBAT).
+  - Encore ouverts : **TFILED-17** (double approbation, message brut, chez A4) ; **TFILED-23**, résidu (le n° de plan de 071 n'est plus
+    lu, chez A1) ; **TFILED-26** (titre « vérifié » sur une planche sans cartouche, corrigé dans 57284506, pas encore déployé).
   - Remontés à Teo : TFILED-05, 06 et 07.
 - En cours : rien.
-- Prochain pas : le niveau 2 sur 067, 068, 072, 074, 075 et 077, quand le bureau aura redéployé le lecteur ; rejouer chaque écart après
-  son correctif.
-- Questions : aucune.
-- SHA d'arrêt : voir le commit « T-FILED : arrêt 18 » sur `testeur-filed`.
+- Prochain pas : rejouer TFILED-26 après le déploiement de 57284506, ainsi que le résidu de TFILED-23 et TFILED-17 à leurs correctifs.
+- SHA d'arrêt : voir le commit « T-FILED : arrêt 19 » sur `testeur-filed`.
