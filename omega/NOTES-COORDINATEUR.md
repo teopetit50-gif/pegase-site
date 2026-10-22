@@ -1535,13 +1535,13 @@ Sessions actives arrêtées par message (T-OFFLOAD, C3 ; les autres déjà arrê
 | worker-a4 | d0b9e9e7 |
 | worker-a5 | 90f386cb |
 | worker-c2 | bab78415 |
-| worker-c3 | 57f5b247 |
+| worker-c3 | fd0d302b |
 | worker-c4 | 2f027b48 |
 | export-prod | 1190e8d2 |
 | testeur-filed | d5ce390b |
 | testeur-cashd | 09d9c5e6 |
 | testeur-reput | 5043e740 |
-| testeur-offload | 2a3189d1 (avant son dernier commit) |
+| testeur-offload | 39bf6c09 (fuseau juste, plus aucun écart ouvert) |
 
 ### NOBAT 065 → 077 (recette ; lecteur déployé 5728450)
 
