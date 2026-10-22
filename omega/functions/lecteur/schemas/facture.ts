@@ -154,7 +154,7 @@ export const CHAMPS_CHANTIER: ChampFacture[] = [
     type: "texte",
     max: 300,
     description:
-      "Plan ou note technique : le titre, tel qu'écrit (cartouche ou en-tête) ; à défaut, le premier intitulé écrit qui désigne le dessin (« Détail sur scellement n° 1 », « Plan de fondations »), jamais un intitulé inventé.",
+      "Plan ou note technique : le titre de la planche, tel qu'écrit (cartouche ou en-tête, « Plan de fondations ») ; jamais l'intitulé d'un détail de la planche (« Détail sur scellement n° 1 »), jamais une cote, jamais un intitulé inventé. Sans titre écrit, ne rends pas de titre.",
   },
   { champ: "numero_plan", type: "texte", max: 60, description: "Plan : le numéro du plan, tel qu'écrit (« Plan 101 » → « 101 », « N° S-101 » → « S-101 »)." },
   { champ: "indice", type: "texte", max: 20, description: "Plan : l'indice de révision (A, B, 02…)." },
@@ -362,7 +362,8 @@ export const SCHEMA_OUTIL_LECTURE: Record<string, unknown> = {
     },
     dispositions: {
       type: "array",
-      description: "Note technique seulement : chaque disposition constructive prescrite, dans l'ordre, avec la norme ou l'article cité s'il est écrit.",
+      description:
+        "Note technique seulement : chaque disposition constructive prescrite, dans l'ordre, avec la norme ou l'article cité s'il est écrit. Le texte tel qu'écrit, casse comprise, sans abréger ni réécrire ; une entrée par ligne ou par lit, jamais deux fusionnées.",
       items: {
         type: "object",
         required: ["texte", "page"],

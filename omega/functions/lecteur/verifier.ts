@@ -837,6 +837,11 @@ export function ventilationDepuisTableau(valeurs: ValeurLue[], pages: PageLue[])
   return null;
 }
 
+/** L'intitulé d'un détail (« Détail sur scellement n° 1 », « DETAIL 2 », « Coupe A-A ») : pas le titre d'une planche. */
+export function intituleDeDetail(t: string): boolean {
+  return /^\s*(d[ée]tail|coupe|vue)\b.*(\bn[°o]?\s*\d+|\b\d+\s*$|\b[A-Z]-[A-Z]\b)/i.test(t);
+}
+
 /** Une cote ou une désignation chiffrée (« M6: 220 x 220 h.: 100 », « 5 Cad HA 8 x 220 e=18 ») : pas un titre de plan. */
 export function ressembleACote(t: string): boolean {
   const lettres = (t.match(/[A-Za-zÀ-ÿ]/g) ?? []).length;
@@ -851,6 +856,10 @@ export function ressembleACote(t: string): boolean {
 export function nettoyerPlan(valeurs: ValeurLue[]): ValeurLue[] {
   return valeurs.flatMap((v) => {
     if (v.champ === "titre" && typeof v.valeur === "string" && ressembleACote(v.valeur)) return [];
+    // T-FILED 26 : « Détail sur scellement n° 1 » désigne un détail de la planche, pas la planche : à vérifier.
+    if (v.champ === "titre" && typeof v.valeur === "string" && intituleDeDetail(v.valeur)) {
+      return [{ ...v, verifiee: false, controle: `${v.controle ?? ""} ; intitulé d'un détail, pas le titre de la planche : à vérifier`.slice(0, 300) }];
+    }
     if (v.champ === "numero_plan" && typeof v.valeur === "string") {
       const n = v.valeur.replace(/^\s*(?:plan|pl\.?|n°|no\.?|num(?:é|e)ro)\s*(?:n°\s*)?[:.]?\s*/i, "").trim();
       if (n !== "" && n !== v.valeur) return [{ ...v, valeur: n }];

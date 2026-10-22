@@ -130,11 +130,17 @@ Deno.test("plan de détail sans titre (NOBAT 068) : le numéro « Plan 101 » su
   assertEquals(rien.motif, "À vérifier : titre ou numero_plan.");
 });
 
-Deno.test("plan de détail (NOBAT 067) : le premier intitulé écrit tient lieu de titre", () => {
+Deno.test("T-FILED 26 (NOBAT 067, 075) : l'intitulé d'un détail n'est pas le titre de la planche → à vérifier, comme 074 et 077", () => {
+  const texte = "Détail sur scellement n° 1 / Détail joint de retrait / Détail sur scellement n° 2 / DÉSIGNATION DES MASSIFS";
   const r = lire({ type_piece: "chantier_plan", valeurs: [{ champ: "titre", valeur: "Détail sur scellement n° 1", texte: "Détail sur scellement n° 1", page: 1 }] }, [
-    page(1, "Détail sur scellement n° 1 / Détail joint de retrait / DÉSIGNATION DES MASSIFS"),
+    page(1, texte),
   ]);
-  assertEquals(r.statut, "lue", r.motif);
+  const titre = valeur(r, "titre")!;
+  assert(!titre.verifiee && titre.controle?.includes("pas le titre de la planche"), titre.controle);
+  assertEquals(r.statut, "a_verifier");
+  // un vrai titre de planche reste vérifié
+  const vrai = lire({ type_piece: "chantier_plan", valeurs: [{ champ: "titre", valeur: "Plan de fondations", texte: "PLAN DE FONDATIONS", page: 1 }] }, [page(1, "PLAN DE FONDATIONS")]);
+  assertEquals(vrai.statut, "lue", vrai.motif);
 });
 
 Deno.test("T-FILED 22 : plan daté « Septembre 2023 » → date 2023-09 vérifiée (rendue par le modèle, ou relevée s'il l'omet)", () => {
