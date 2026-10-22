@@ -227,3 +227,30 @@
 }
 .v2 .sb-pile { display: flex; flex-direction: column; gap: 16px; }
 .v2 .sb-pile-titre { margin: 8px 0 0; font-size: 13px; line-height: 19.5px; font-weight: 500; color: var(--v2-gray-1000); }
+
+/* ══ Le gabarit « réglages » : Settings › General (relevé le 22/10) ══════
+   « flex flex-col gap-4 pt-12 », conteneur « max-w-[768px] px-6 xl:px-10 »,
+   sections « pt-12 last:pb-12 gap-6 » : titre Manrope 18/25,2 px et
+   description, puis la carte ; dans la carte, chaque ligne met le libellé
+   et son aide à gauche, la commande à droite, à moitié chacun ; le pied
+   aligne ses boutons à droite (« py-4 px-(--card-padding-x) justify-end »). */
+.v2 .sb-reglages { width: 100%; max-width: 768px; margin: 0 auto; padding: 48px 24px 48px; display: flex; flex-direction: column; }
+@container principale (min-width: 1280px) { .v2 .sb-reglages { padding-left: 40px; padding-right: 40px; } }
+.v2 .sb-reglages-section { display: flex; flex-direction: column; gap: 24px; padding-top: 48px; scroll-margin-top: 64px; }
+.v2 .sb-reglages-section > header { display: flex; flex-direction: column; gap: 4px; }
+.v2 .sb-reglages-section h2 { margin: 0; font-family: var(--v2-titre); font-size: 18px; line-height: 25.2px; font-weight: 600; color: var(--v2-gray-1000); }
+.v2 .sb-reglages-section > header p { margin: 0; font-size: 13px; line-height: 18.5714px; color: var(--v2-gray-900); }
+.v2 .sb-carte-form { overflow: hidden; border-radius: 10.6667px; background: var(--v2-bg-100); box-shadow: var(--v2-ombre-petite); }
+.v2 .sb-champ-ligne { display: flex; flex-direction: column; gap: 8px; padding: 16px; border-bottom: 1px solid var(--v2-a-400); }
+.v2 .sb-champ-ligne:last-child { border-bottom: 0; }
+@container principale (min-width: 640px) {
+  .v2 .sb-champ-ligne { flex-direction: row; justify-content: space-between; align-items: flex-start; gap: 24px; }
+  .v2 .sb-champ-ligne > div { width: 50%; }
+}
+.v2 .sb-champ-libelle { display: flex; flex-direction: column; gap: 0; }
+.v2 .sb-champ-libelle label, .v2 .sb-champ-libelle strong { font-size: 13px; line-height: 19.5px; font-weight: 450; color: var(--v2-gray-1000); }
+.v2 .sb-champ-libelle span { font-size: 13px; line-height: 19.5px; color: var(--v2-gray-900); }
+.v2 .sb-champ-commande { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
+.v2 .sb-carte-form-pied { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 16px; border-top: 1px solid var(--v2-a-400); font-size: 13px; line-height: 19.5px; color: var(--v2-gray-900); }
+.v2 .sb-carte-form-pied > span { margin-right: auto; }
+.v2 .sb-carte-form .v2-note { margin: 0 16px 16px; }

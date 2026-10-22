@@ -1,179 +1,147 @@
 "use client";
 
-/* Les réglages : la page « avec barre latérale » de la référence. À
-   gauche, les rubriques ; à droite, une carte par réglage, avec son pied
-   gris et son bouton. Les données affichées sont à nous ; la
-   rubrique « Données » porte aussi l'écran Réglages de /espace (A3 :
-   journal, export complet, préparer l'effacement), repris tel quel — son
-   h1 « Réglages » est celui de la page. */
+/* Les réglages — la page Settings › General de Supabase, au 1:1 (22/10/2026).
 
-import { Fragment, useState } from "react";
+   06–07/10 : page « avec barre latérale », rubriques à la Attio.
+   22/10 : demande de Teo, recopier exactement les réglages de Supabase :
+   conteneur de 768 px, titre et description, une section par sujet (titre
+   Manrope 18 px, description, carte), dans la carte des lignes « libellé
+   et aide à gauche, commande à droite », le pied aligné à droite. Les
+   rubriques ne sont plus dans la page : le volet de navigation les porte
+   déjà (Général, Accessibilité, Données, Équipe). La section « Export et
+   effacement » garde l'écran Réglages de /espace (A3 : journal, export
+   complet, préparer l'effacement), repris tel quel. Gabarit : ./sb. */
+
 import Link from "next/link";
 import { useSource } from "@/components/espace/source";
 import EcranReglages from "@/components/espace/reglages/EcranReglages";
 import "@/components/espace/espace.css";
 import "./habillage.css";
+import "./sb/sb.css";
 import { Interrupteur, Note } from "./ui";
 import { changerCalme, useCalme } from "./mouvement";
 import { useToast } from "./Toasts";
 
-/* 07/10/2026 — demande de Teo, d'après les Settings d'Attio : les
-   rubriques rangées sous des intertitres (Personnel, Espace, Données,
-   Aide), dans la colonne de la page et non dans la barre de gauche, qui
-   n'a qu'une entrée « Réglages ». */
-const GROUPES = [
-  {
-    titre: "Personnel",
-    rubriques: [
-      { id: "accessibilite", libelle: "Accessibilité" },
-    ],
-  },
-  {
-    titre: "Espace",
-    rubriques: [
-      { id: "compte", libelle: "Membres et équipe" },
-      { id: "utilisation", libelle: "Utilisation" },
-    ],
-  },
-  {
-    titre: "Données",
-    rubriques: [
-      { id: "donnees", libelle: "Données affichées" },
-      { id: "donnees-export", libelle: "Export et effacement" },
-    ],
-  },
-  { titre: "Aide", rubriques: [{ id: "support", libelle: "Support" }] },
-];
-const RUBRIQUES = GROUPES.flatMap((g) => g.rubriques);
+function Section({ id, titre, description, children }: { id: string; titre: string; description?: string; children: React.ReactNode }) {
+  return (
+    <section id={id} className="sb-reglages-section" aria-labelledby={`t-${id}`}>
+      <header>
+        <h2 id={`t-${id}`}>{titre}</h2>
+        {description ? <p>{description}</p> : null}
+      </header>
+      {children}
+    </section>
+  );
+}
 
-/* 22/10 — le titre de section de Supabase (« General settings ») : Manrope 18/25,2 px, sans resserrement */
-const TITRE_CARTE = { fontSize: 18, lineHeight: "25.2px", letterSpacing: "normal" } as const;
+function Ligne({ libelle, aide, children }: { libelle: string; aide?: string; children: React.ReactNode }) {
+  return (
+    <div className="sb-champ-ligne">
+      <div className="sb-champ-libelle">
+        <strong>{libelle}</strong>
+        {aide ? <span>{aide}</span> : null}
+      </div>
+      <div className="sb-champ-commande">{children}</div>
+    </div>
+  );
+}
 
 export default function Reglages() {
   const toast = useToast();
   const { source, changer, connecte } = useSource();
-  const [rubrique, setRubrique] = useState(RUBRIQUES[0].id);
   const calme = useCalme();
 
   return (
-    <div className="v2-page v2-arrivee">
-      <div className="v2-avec-cote">
-        <nav className="v2-cote" aria-label="Rubriques des réglages">
-          {GROUPES.map((g) => (
-            <Fragment key={g.titre}>
-              <p className="v2-cote-groupe">{g.titre}</p>
-              {g.rubriques.map((r) => (
-                <a key={r.id} href={`#${r.id}`} aria-current={rubrique === r.id ? "location" : undefined} onClick={() => setRubrique(r.id)}>
-                  {r.libelle}
-                </a>
-              ))}
-            </Fragment>
-          ))}
-        </nav>
-        <div style={{ display: "grid", gap: 24 }}>
-          <section id="accessibilite" className="v2-carte" aria-labelledby="t-accessibilite">
-            <div className="v2-carte-corps" style={{ display: "grid", gap: 16 }}>
-              <h2 className="v2-h2" id="t-accessibilite" style={TITRE_CARTE}>
-                Accessibilité
-              </h2>
-              <p className="v2-gris" style={{ margin: 0 }}>
-                Coupe les animations et les transitions de l&apos;espace : les écrans changent d&apos;un coup, sans mouvement.
-              </p>
-              <Interrupteur
-                actif={calme}
-                onChange={(v) => {
-                  changerCalme(v);
-                  toast(v ? "Animations réduites" : "Animations rétablies", "vert");
-                }}
-              >
-                Réduire les animations
-              </Interrupteur>
-            </div>
-            <div className="v2-carte-pied">
-              <span>Enregistré sur cet appareil.</span>
-            </div>
-          </section>
-
-          <section id="donnees" className="v2-carte" aria-labelledby="t-donnees">
-            <div className="v2-carte-corps" style={{ display: "grid", gap: 16 }}>
-              <h2 className="v2-h2" id="t-donnees" style={TITRE_CARTE}>
-                Données affichées
-              </h2>
-              <p className="v2-gris" style={{ margin: 0 }}>
-                Les écrans montrent soit l&apos;entreprise d&apos;exemple (Atelier Bertin), soit vos propres données, lues dans la base sous vos droits.
-              </p>
-              <Interrupteur
-                actif={source === "reelle"}
-                desactive={!connecte}
-                onChange={(v) => {
-                  changer(v ? "reelle" : "exemple");
-                  toast(v ? "Base réelle affichée" : "Données d'exemple affichées");
-                }}
-              >
-                Afficher la base réelle
-              </Interrupteur>
-              {!connecte ? <Note teinte="bleu">Vous n&apos;êtes pas connecté : seul l&apos;exemple est visible. Connectez-vous depuis le cockpit pour voir vos données.</Note> : null}
-            </div>
-          </section>
-
-          <div id="donnees-export" className="resa esp">
-            <EcranReglages />
-          </div>
-
-          <section id="compte" className="v2-carte" aria-labelledby="t-compte">
-            <div className="v2-carte-corps" style={{ display: "grid", gap: 16 }}>
-              <h2 className="v2-h2" id="t-compte" style={TITRE_CARTE}>
-                Membres et équipe
-              </h2>
-              <p className="v2-gris" style={{ margin: 0 }}>
-                Chaque personne a son propre accès, avec son adresse e-mail : on ne partage pas un mot de passe. Les délégations et les règles de validation se règlent depuis la file « À valider » ; pour ouvrir un accès à un collègue, écrivez à Omega.
-              </p>
-            </div>
-            <div className="v2-carte-pied">
-              <Link href="/contact" className="v2-btn v2-btn--petit">
-                Demander un accès
-              </Link>
-              <Link href="/espace2/validations" className="v2-btn v2-btn--petit">
-                Ouvrir « À valider »
-              </Link>
-            </div>
-          </section>
-
-          <section id="utilisation" className="v2-carte" aria-labelledby="t-utilisation">
-            <div className="v2-carte-corps" style={{ display: "grid", gap: 16 }}>
-              <h2 className="v2-h2" id="t-utilisation" style={TITRE_CARTE}>
-                Utilisation
-              </h2>
-              <p className="v2-gris" style={{ margin: 0 }}>
-                Le volume traité par vos modules, module par module.
-              </p>
-            </div>
-            <div className="v2-carte-pied">
-              <span>Utilisation</span>
-              <Link href="/espace2/utilisation" className="v2-btn v2-btn--petit">
-                Ouvrir
-              </Link>
-            </div>
-          </section>
-
-          <section id="support" className="v2-carte" aria-labelledby="t-support">
-            <div className="v2-carte-corps" style={{ display: "grid", gap: 16 }}>
-              <h2 className="v2-h2" id="t-support" style={TITRE_CARTE}>
-                Support
-              </h2>
-              <p className="v2-gris" style={{ margin: 0 }}>
-                Une question, un module qui ne fait pas ce qu&apos;il devrait, une demande sur mesure : écrivez à Omega.
-              </p>
-            </div>
-            <div className="v2-carte-pied">
-              <span>Contact</span>
-              <Link href="/contact" className="v2-btn v2-btn--petit">
-                Écrire à Omega
-              </Link>
-            </div>
-          </section>
+    <div className="sb-reglages v2-arrivee">
+      <div className="sb-liste-tete" style={{ alignItems: "flex-start" }}>
+        <div>
+          <h1 className="sb-titre">Réglages</h1>
+          <p className="sb-description">L&apos;affichage de l&apos;espace, vos données, les accès de l&apos;équipe et l&apos;assistance.</p>
         </div>
       </div>
+
+      <Section id="accessibilite" titre="Accessibilité" description="Le confort de lecture, pour cet appareil.">
+        <div className="sb-carte-form">
+          <Ligne libelle="Réduire les animations" aide="Coupe les animations et les transitions de l'espace : les écrans changent d'un coup, sans mouvement.">
+            <Interrupteur
+              actif={calme}
+              onChange={(v) => {
+                changerCalme(v);
+                toast(v ? "Animations réduites" : "Animations rétablies", "vert");
+              }}
+            >
+              <span className="v2-sr">Réduire les animations</span>
+            </Interrupteur>
+          </Ligne>
+          <div className="sb-carte-form-pied">
+            <span>Enregistré sur cet appareil.</span>
+          </div>
+        </div>
+      </Section>
+
+      <Section id="donnees" titre="Données affichées" description="L'entreprise d'exemple, ou vos propres données lues dans la base sous vos droits.">
+        <div className="sb-carte-form">
+          <Ligne libelle="Afficher la base réelle" aide="Les écrans montrent soit l'entreprise d'exemple (Atelier Bertin), soit vos propres données.">
+            <Interrupteur
+              actif={source === "reelle"}
+              desactive={!connecte}
+              onChange={(v) => {
+                changer(v ? "reelle" : "exemple");
+                toast(v ? "Base réelle affichée" : "Données d'exemple affichées");
+              }}
+            >
+              <span className="v2-sr">Afficher la base réelle</span>
+            </Interrupteur>
+          </Ligne>
+          {!connecte ? <Note teinte="bleu">Vous n&apos;êtes pas connecté : seul l&apos;exemple est visible. Connectez-vous depuis le cockpit pour voir vos données.</Note> : null}
+        </div>
+      </Section>
+
+      <Section id="donnees-export" titre="Export et effacement" description="Le journal de tout ce qui a été fait, l'export complet en un clic, et la sortie.">
+        <div className="resa esp">
+          <EcranReglages />
+        </div>
+      </Section>
+
+      <Section id="compte" titre="Membres et équipe" description="Chaque personne a son propre accès, avec son adresse e-mail : on ne partage pas un mot de passe.">
+        <div className="sb-carte-form">
+          <Ligne libelle="Ouvrir un accès" aide="Pour ouvrir un accès à un collègue, écrivez à Omega.">
+            <Link href="/contact" className="v2-btn">
+              Demander un accès
+            </Link>
+          </Ligne>
+          <Ligne libelle="Délégations et règles de validation" aide="Elles se règlent depuis la file « À valider ».">
+            <Link href="/espace2/validations" className="v2-btn">
+              Ouvrir « À valider »
+            </Link>
+          </Ligne>
+          <Ligne libelle="L'équipe" aide="Qui a accès à l'espace, et avec quel rôle.">
+            <Link href="/espace2/equipe" className="v2-btn">
+              Voir l&apos;équipe
+            </Link>
+          </Ligne>
+        </div>
+      </Section>
+
+      <Section id="utilisation" titre="Utilisation" description="Le volume traité par vos modules, module par module.">
+        <div className="sb-carte-form">
+          <Ligne libelle="Utilisation de l'espace" aide="Documents, montants, demandes et décisions sur la période.">
+            <Link href="/espace2/utilisation" className="v2-btn">
+              Ouvrir
+            </Link>
+          </Ligne>
+        </div>
+      </Section>
+
+      <Section id="support" titre="Support" description="Une question, un module qui ne fait pas ce qu'il devrait, une demande sur mesure.">
+        <div className="sb-carte-form">
+          <Ligne libelle="Écrire à Omega" aide="Une personne de l'équipe vous répond.">
+            <Link href="/contact" className="v2-btn">
+              Écrire à Omega
+            </Link>
+          </Ligne>
+        </div>
+      </Section>
     </div>
   );
 }
