@@ -257,13 +257,13 @@ ne peuvent pas être la même personne » ; carte « Des rôles et des délégat
   "approbations_une_par_personne"`. Le refus est **juste** (`:70`, deux approbations distinctes), mais le message n'est pas lisible par
   un client.
 
-**TFILED-18 · imputation · le champ « compte » attend un identifiant interne, et l'erreur expose le code** (`filed_imputer_facture`)
+**TFILED-18 · ✅ CORRIGÉ par a4_80, revérifié le 22/10 à 19 h 38 Z** — sur F8 (`3d0f6b3f-…`, registre levé → `a_valider`), `filed_imputer_facture(F8, '[{"compte":"601000",…,"montant_ht":990}]')` (annulé) → `1`. Le numéro de compte est accepté dans « compte ». Sur F0 déjà comptabilisée, le refus passe d'abord par le statut : « Une facture s'impute quand elle est à valider ou validée (ici : comptabilisee). » C'est clair. **Juste.** Constat d'origine : **TFILED-18 · imputation · le champ « compte » attend un identifiant interne, et l'erreur expose le code** (`filed_imputer_facture`)
 - En gérant, transaction annulée : `select public.filed_imputer_facture('a46345d2-…', '[{"compte":"601000","centre":"CH-FLAMB",
   "montant_ht":700.00,"libelle":"…"}]', '…')` → `ERROR 22P02: invalid input syntax for type uuid: "601000"`, avec en CONTEXT l'extrait
   `v_compte := coalesce((v_l->>'compte')::uuid, (select c.id from public.filed_plan_comptable …))`.
 - Un client (ou un écran) qui envoie un numéro de compte dans « compte », ce qui est le sens courant du mot, reçoit une erreur technique
   qui montre le code interne. Attendu : accepter le numéro, ou répondre en français (« compte : numéro attendu dans `numero` »).
-**TFILED-19 · plan comptable · la nature d'un compte refusée par une contrainte brute, sans les valeurs admises** (`filed_poser_compte`)
+**TFILED-19 · ✅ CORRIGÉ par a4_80, revérifié le 22/10 à 19 h 38 Z** — même appel (annulé) → `ERROR 22023: Nature de compte inconnue (fournisseur) : charge, immobilisation, stock, tiers ou autre.` **Juste.** Constat d'origine : **TFILED-19 · plan comptable · la nature d'un compte refusée par une contrainte brute, sans les valeurs admises** (`filed_poser_compte`)
 - En gérant, transaction annulée : `select public.filed_poser_compte('dddddddd-…00f1', 'fba91a52-…', '401000', 'Fournisseurs',
   'fournisseur', false)` → `ERROR 23514: new row for relation "filed_plan_comptable" violates check constraint
   "filed_plan_comptable_nature_check"`, avec DETAIL (la ligne entière) et CONTEXT (la requête interne `insert … on conflict …`).
