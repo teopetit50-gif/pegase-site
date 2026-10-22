@@ -270,7 +270,7 @@ ne peuvent pas être la même personne » ; carte « Des rôles et des délégat
 - Un client ne peut pas savoir quelles natures sont admises, et la réponse expose le code. Attendu : un refus en français qui liste
   les natures possibles.
 
-**TFILED-24 · corrigé par a4_82 : source nommée (juste) ; mention absente juste sous réserve, F14 en cours** · F13 (R2026-000034) · `identite.tva_intracom` dit « ok » sur un numéro que la pièce ne porte pas, sans en nommer la source**
+**TFILED-24 · ✅ CORRIGÉ par a4_82, revérifié le 22/10 à 20 h 45 Z** — F14 (R2026-000035, TTC 292,95) : `tva.numero` attention « Mention obligatoire absente : numéro de TVA intracommunautaire du vendeur non imprimé sur la facture (CGI, art. 242 nonies A) ; la TVA déductible en dépend. La fiche du fournisseur en porte un (FR88912345618), qui ne remplace pas la mention. » ; `identite.tva_intracom` ok avec la source nommée. Sous 150 € (F13), pas d'attention, ce qui est cohérent avec la facture simplifiée. **Juste.** Constat d'origine : · F13 (R2026-000034) · `identite.tva_intracom` dit « ok » sur un numéro que la pièce ne porte pas, sans en nommer la source**
 - F13 n'imprime aucun numéro de TVA intracommunautaire (seulement « SIRET 912345618 »). FILED rend `identite.tva_intracom` bloquant **ok**
   « Numéro de TVA FR : Format et clé corrects pour FR. », puis `identite.coherence` ok, puis `identite.registre` en anomalie sur
   `FR88912345618`. Le numéro vient vraisemblablement de la fiche fournisseur (MCD est confirmé), mais le message ne le dit pas.
