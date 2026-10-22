@@ -68,10 +68,16 @@ begin
   perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
   perform public.reput_regler(v_client, null, jsonb_build_object('accuse', true));
   perform tests.redevenir_admin();
+  -- Une demande qui attend (sur la recette, la réponse WhatsApp ci-dessus peut être bloquée faute de consentement : la
+  -- demande est alors « bloquee » et ne reçoit plus d'accusé — c'est voulu) : un appel neuf, « à traiter ».
+  execute format(function_appel, v_client, 'CA-c3-36-3b', '06 00 00 00 40', 'Le chauffe-eau ne chauffe plus du tout.') into v_rec;
+  v_dem := (public.reput_commencer(v_rec) ->> 'demande')::uuid;
+  update public.reput_demandes set statut = 'a_traiter' where id = v_dem;
   v_j := private.reput_accuser(v_dem);
   select * into e from public.envois x where x.id = (v_j ->> 'envoi')::uuid;
-  return next ok(e.canal = 'whatsapp' and e.gabarit_id = v_g and position(E'\n' in e.variables ->> 'message') = 0,
-                 'L''accusé de réception part dans le même modèle');
+  return next ok(coalesce(e.canal = 'whatsapp' and e.gabarit_id = v_g and position(E'\n' in e.variables ->> 'message') = 0, false),
+                 'L''accusé de réception part dans le même modèle'
+                 || case when e.id is null then ' [accuser : ' || coalesce(v_j::text, 'null') || ']' else '' end);
 
   -- ── Un autre nom de modèle : nouvelle version en brouillon, retour au SMS jusqu'à sa validation ──
   perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
