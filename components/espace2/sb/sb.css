@@ -271,3 +271,41 @@
 .v2 .sb-volet-detail label { display: flex; flex-direction: column; gap: 8px; font-size: 13px; line-height: 19.5px; color: var(--v2-gray-1000); }
 .v2 .sb-volet-detail .v2-champ textarea { flex: 1; min-height: 96px; padding: 8px 0; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; resize: vertical; }
 .v2 .sb-volet-detail-pied { display: flex; justify-content: flex-end; gap: 8px; padding: 16px 24px; border-top: 1px solid var(--v2-a-400); margin-top: auto; }
+
+/* ══ Le gabarit « journal » : Logs, journaux unifiés (relevé le 22/10) ═══
+   à gauche, la colonne de filtres (groupes repliables, options en 12 px
+   avec leur compte) ; à droite, la barre de filtre de 43 px (champ de
+   24 px), l'histogramme de 60 px, la table dense : en-têtes Source Code
+   Pro 12 px en capitales discrètes (36 px), lignes de 30 px, date en
+   chasse fixe ; le volet de détail s'ouvre au clic. */
+.v2 .sb-journal { display: flex; min-height: calc(100dvh - 48px); }
+.v2 .sb-journal-filtres { flex: none; width: 240px; border-right: 1px solid var(--v2-a-400); padding: 8px 0 24px; overflow-y: auto; }
+.v2 .sb-journal-groupe { padding: 8px 16px; border-bottom: 1px solid var(--v2-a-400); }
+.v2 .sb-journal-groupe:last-child { border-bottom: 0; }
+.v2 .sb-journal-groupe > p { margin: 0 0 8px; font-size: 13px; line-height: 19.5px; font-weight: 500; color: var(--v2-gray-1000); }
+.v2 .sb-journal-option { display: flex; align-items: center; gap: 8px; min-height: 24px; font-size: 12px; line-height: 16px; color: var(--v2-gray-900); cursor: pointer; }
+.v2 .sb-journal-option input { width: 14px; height: 14px; margin: 0; accent-color: var(--v2-gray-1000); }
+.v2 .sb-journal-option span:nth-child(2) { flex: 1; min-width: 0; }
+.v2 .sb-journal-option span:last-child { font-family: var(--v2-code); font-size: 11px; color: var(--v2-gray-600); }
+.v2 .sb-journal-principal { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.v2 .sb-journal-barre { display: flex; align-items: center; gap: 8px; height: 43px; padding: 0 8px; border-bottom: 1px solid var(--v2-a-400); color: var(--v2-gray-600); }
+.v2 .sb-journal-barre input { flex: 1; min-width: 0; height: 24px; border: 0; outline: 0; background: transparent; font: inherit; font-size: 12px; color: var(--v2-gray-1000); }
+.v2 .sb-journal-barre input::placeholder { color: var(--v2-gray-600); }
+.v2 .sb-journal-barre input:focus-visible { box-shadow: none; }
+.v2 .sb-journal-histo { display: flex; align-items: flex-end; gap: 2px; height: 60px; padding: 8px 8px 4px; border-bottom: 1px solid var(--v2-a-400); }
+.v2 .sb-journal-histo span { flex: 1; min-height: 1px; border-radius: 1px; background: var(--v2-gray-600); opacity: 0.8; }
+.v2 .sb-journal-histo span[data-vide] { background: var(--v2-a-400); opacity: 1; }
+.v2 .sb-journal-table { flex: 1; overflow: auto; }
+.v2 .sb-journal-table table { width: 100%; border-collapse: collapse; }
+.v2 .sb-journal-table th { position: sticky; top: 0; height: 36px; padding: 0 8px; text-align: left; background: var(--v2-bg-200); border-bottom: 1px solid var(--v2-a-400); font-family: var(--v2-code); font-size: 12px; line-height: 16px; font-weight: 450; text-transform: uppercase; color: var(--v2-gray-600); white-space: nowrap; }
+.v2 .sb-journal-table th:first-child, .v2 .sb-journal-table td:first-child { padding-left: 12px; }
+.v2 .sb-journal-table td { height: 30px; padding: 0 8px; border-bottom: 1px solid var(--v2-a-300); font-size: 12px; line-height: 16px; color: var(--v2-gray-1000); white-space: nowrap; max-width: 420px; overflow: hidden; text-overflow: ellipsis; }
+.v2 .sb-journal-table td.sb-mono { font-family: var(--v2-code); }
+.v2 .sb-journal-table tbody tr { cursor: pointer; transition: background 0.15s; }
+.v2 .sb-journal-table tbody tr:hover { background: var(--v2-a-100); }
+.v2 .sb-journal-table tbody tr[aria-selected="true"] { background: var(--v2-a-300); }
+@container principale (max-width: 899px) {
+  .v2 .sb-journal { flex-direction: column; }
+  .v2 .sb-journal-filtres { width: auto; border-right: 0; border-bottom: 1px solid var(--v2-a-400); display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .v2 .sb-journal-groupe { border-bottom: 0; }
+}
