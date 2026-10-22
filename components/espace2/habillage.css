@@ -870,3 +870,58 @@ html.v2-actif .dlg-sortie:hover:not(:disabled) {
     content: "Commande";
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   Les écrans repris de /espace, aux mesures de Supabase (22/10/2026)
+
+   Demande de Teo : toutes les pages de /espace2 au 1:1 du tableau de bord
+   Supabase. Les écrans métier repris tels quels (débiteurs, fournisseurs,
+   boîte de réception, base de connaissances, réglages et avis…) gardent
+   leurs gestes ; leur habit prend les mesures relevées sur
+   supabase.com/dashboard, celles du gabarit ./sb : page « Database ›
+   Tables » (1 600 px, 48 px au-dessus, titre Manrope 22 px visible),
+   cartes à 10,667 px avec filet et ombre « shadow-xs », en-têtes de
+   tableau Source Code Pro 12 px en capitales, tuiles d'Observability,
+   boutons de 26 px à 8 px de rayon et à quatre filets, champs de 34 px.
+   Portée « .v2 .resa.esp » : elle passe devant le reste de l'habit, quel
+   que soit l'ordre de chargement des feuilles.
+   ══════════════════════════════════════════════════════════════════════ */
+.v2 .v2-page:has(> #ecran.resa) { max-width: 1600px; padding: 48px 16px 64px; }
+@container principale (min-width: 512px) { .v2 .v2-page:has(> #ecran.resa) { padding-left: 24px; padding-right: 24px; } }
+@container principale (min-width: 576px) { .v2 .v2-page:has(> #ecran.resa) { padding-left: 40px; padding-right: 40px; } }
+.v2 .resa.esp { font-size: 13px; line-height: 19.5px; font-weight: 450; }
+
+/* le titre de l'écran redevient visible, comme le titre d'une page Supabase */
+.v2 .resa.esp .esp-tete { margin: 0 0 16px; gap: 12px 16px; align-items: center; }
+.v2 .resa.esp .esp-titre { position: static; width: auto; height: auto; overflow: visible; clip-path: none; margin: 0; font-family: var(--v2-titre); font-size: 22px; line-height: 29.3333px; font-weight: 600; letter-spacing: -0.55px; color: var(--v2-gray-1000); white-space: normal; }
+.v2 .resa.esp .esp-sous { margin: 4px 0 0; font-size: 13px; line-height: 18.5714px; color: var(--v2-gray-900); }
+.v2 .resa.esp .esp-section-titre, .v2 .resa.esp .esp-groupe-titre { font-family: var(--v2-titre); font-size: 18px; line-height: 25.2px; letter-spacing: normal; font-weight: 600; }
+
+/* les cartes */
+.v2 .resa.esp .esp-carte { border-radius: 10.6667px; background: var(--v2-bg-100); box-shadow: var(--v2-ombre-petite); overflow: hidden; }
+.v2 .resa.esp .esp-carte-tete { min-height: 48px; padding: 10px 16px; background: var(--v2-a-100); border-bottom: 1px solid var(--v2-a-400); }
+.v2 .resa.esp .esp-carte-titre { font-family: var(--v2-sans); font-size: 13px; line-height: 19.5px; font-weight: 500; letter-spacing: normal; color: var(--v2-gray-1000); }
+
+/* les tableaux */
+.v2 .resa.esp .esp-tableau th { height: 40px; padding: 0 16px; font-family: var(--v2-code); font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: 0.6px; text-transform: uppercase; color: var(--v2-gray-600); }
+.v2 .resa.esp .esp-tableau td { padding: 12px 16px; font-size: 13px; line-height: 19.5px; font-weight: 450; }
+
+/* les tuiles de chiffres, comme celles d'Observability */
+.v2 .resa.esp .esp-kpi { min-height: 75px; padding: 16px 17px; border-radius: 10.6667px; background: var(--v2-bg-100); box-shadow: var(--v2-ombre-petite); }
+.v2 .resa.esp .esp-kpi-etiquette { font-family: var(--v2-code); font-size: 12px; line-height: 16px; font-weight: 600; text-transform: uppercase; color: var(--v2-gray-900); }
+.v2 .resa.esp .esp-kpi-valeur { font-family: var(--v2-sans); font-size: 18px; line-height: 25.2px; font-weight: 450; letter-spacing: normal; }
+.v2 .resa.esp .esp-kpi-sous { font-size: 12px; line-height: 16px; }
+
+/* les onglets : 13 px, la ligne active d'un pixel */
+.v2 .resa.esp .esp-onglet { height: 40px; padding: 0 12px; font-size: 13px; line-height: 19.5px; }
+
+/* les boutons : 26 px, rayon 8, 12 px graisse 500, quatre filets */
+.v2 .resa.esp .r-btn { height: 26px; padding: 0 10px; gap: 6px; border-radius: 8px; font-family: var(--v2-sans); font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: normal; box-shadow: var(--v2-ombre-bouton); }
+.v2 .resa.esp .r-btn:hover { box-shadow: var(--v2-ombre-bouton); }
+.v2 .resa.esp .r-btn--petit { height: 24px; padding: 0 8px; }
+.v2 .resa.esp .r-btn--noir, .v2 .resa.esp .r-btn--noir:hover, .v2 .resa.esp .r-btn--rouge, .v2 .resa.esp .r-btn--vert { box-shadow: var(--v2-ombre-primaire); }
+.v2 .resa.esp .r-btn svg { width: 14px; height: 14px; }
+
+/* les champs : 34 px, rayon 8, filet, fond de champ */
+.v2 .resa.esp .rv-champ { min-height: 34px; padding: 0 12px; border-radius: 8px; font-size: 13px; background: var(--sb-champ, transparent); box-shadow: 0 0 0 1px var(--v2-a-500); }
+.v2 .resa.esp textarea.rv-champ { padding: 8px 12px; }
