@@ -1359,3 +1359,101 @@ Les écrans d'espace des branches worker-a4/c2/c3/c4 appellent des portes qui n'
 - À Teo : réveil d'A5 (TCASHD-07 refus à la saisie, délégations TFILED-09/10, crochet « réécrire à l'approbation » de 10b) ; envoi d'essai REPUT ; O6 (TOFFLOAD-03) ; sceau (un seul gérant) ; site ou moteur pour TFILED-06 et 07 ; TFILED-12 (l'ouvreur d'un dépôt vaut-il saisisseur ?) ; statut de cycle de vie 207/208 après un 205 (A4).
 - Au bureau : redéployer l'Edge reput-reponse (c3_25 à c3_28) et le lecteur A1 fd2da4bd.
 - Sécurité : pause à 01 h 00 Z (trig_01Y1g8hC8geoXnUd7GyYhhAB) si pas de PAUSE avant.
+
+## PAUSE (Teo, par le bureau) — 21/10, 22 h 45 Z, forfait 60 %
+
+Sessions actives arrêtées par message (A1, A4, C2, C3, C4, T-FILED, T-CASHD, T-REPUT, T-OFFLOAD). Routine 3 h coupée par le bureau ; sécurité trig_01Y1g8hC8geoXnUd7GyYhhAB désarmée. Aucun job de test en cours sur la recette.
+
+### SHA d'arrêt
+
+| Branche | SHA |
+|---|---|
+| main | b4673c78 |
+| worker-a1 | fd2da4bd |
+| worker-a4 | f4df31b6 (notes ; a4_63 corrigé déjà posé et vert, 2/2) |
+| worker-c2 | 0ce7bbd8 |
+| worker-c3 | 192a033f |
+| worker-c4 | f4f2e2ed (notes) |
+| testeur-filed | 0edc36d7 |
+| testeur-cashd | 064bbb52 |
+| testeur-reput | 9c54b74c |
+| testeur-offload | 847710dd |
+
+Dernière pose sur la recette : c2_38 (TCASHD-11), vert. Aucun écart CASHD, OFFLOAD ou FILED ouvert sur les bancs hors décisions de Teo ; REPUT 01/02/03/04-texte attendent l'Edge reput-reponse.
+
+### À TEO (telle quelle)
+
+- Réveil d'A5 : TCASHD-07 (refus à la saisie d'une approbation sans commentaire), TFILED-09/10 (délégations : messages bruts, minuit UTC), crochet « réécrire à l'approbation » pour 10b.
+- Envoi d'essai REPUT.
+- O6 / TOFFLOAD-03.
+- Sceau à un seul gérant.
+- Site ou moteur pour TFILED-06 (découpage d'un PDF à deux factures) et TFILED-07 (fournisseur inconnu bloqué avant paiement).
+- TFILED-12 : l'ouvreur d'un dépôt par lot vaut-il saisisseur ?
+- Statut de cycle de vie 207/208 après un 205 déjà transmis (A4).
+
+### Au bureau
+
+Redéployer l'Edge reput-reponse (c3_25 à c3_28) et le lecteur A1 fd2da4bd.
+
+### Reprise
+
+Au feu vert de Teo ou samedi 25/10 après 02 h Z. Fusionner d'abord cette section dans main (les 2 pushes du 21/10 étaient pris). Les écrans d'espace des branches worker ne vont dans main qu'avec leurs migrations en production (niveau 3, Teo).
+
+## Preuve REPUT en vrai (21/10)
+
+BOÎTE OUVERTE : banc@recu.omegaai.fr à 23 h 06 Z (expediteurs a3630f13 → actif, vérifié encore à 23 h 50 Z). Bloc 0 vérifié : REPUT en essai avec adresse d essai, 3 fiches validées (Horaires d ouverture, Diagnostic à domicile, Comment prendre rendez-vous ?), 62 fiches métiers en brouillon, crons reput-synchro et omega-reput actifs, aucun accord actif (attendu : a_valider). Edge reput-reponse v28 (bureau, 23 h 07 Z). En attente des deux courriels de Teo.
+
+Résultat (bureau, 22/10 00 h 07 Z) : les deux courriels de Teo (23 h 57 Z et 00 h 00 Z) vers banc@recu.omegaai.fr sont rejetés par Brevo, « 550 5.1.2 adresse introuvable ». MX corrects (inbound1/2.sendinblue.com) : c'est Brevo qui refuse le destinataire (domaine non déclaré en inbound parsing ou webhook absent). **Preuve REPUT niveau 2 : NON FAITE.** Inbound Brevo à rétablir (Teo : compte Brevo → Inbound parsing → domaine recu.omegaai.fr ; puis brevo-inbound-installer).
+
+## PAUSE (Teo, par le bureau) — 22/10, 00 h 11 Z
+
+Sessions actives arrêtées par message (A4, A5, C3, C4, T-FILED, T-CASHD, T-OFFLOAD, T-REPUT ; C3 note « inbound Brevo à rétablir » dans NOTES-C3). Sécurité trig_013vYXQg14DBt13FqcfGH1kt désarmée. Aucun job de test en cours sur la recette. Toutes les sessions réveillées le sont en Opus 5.5, effort medium.
+
+### SHA d'arrêt (git ls-remote, 00 h 12 Z)
+
+| Branche | SHA |
+|---|---|
+| main | 63d6173a |
+| worker-a4 | 2ee67ed7 |
+| worker-a5 | 3cf96646 |
+| worker-c2 | 0ce7bbd8 |
+| worker-c3 | 192a033f (+ note inbound à venir) |
+| worker-c4 | 27c89ecf |
+| testeur-filed | cb6c7fec |
+| testeur-cashd | 858f0395 |
+| testeur-reput | 1d641ac8 |
+| testeur-offload | 97fe6938 |
+
+### Testeurs
+
+| Testeur | Banc | État |
+|---|---|---|
+| T-FILED | FILED | série close ; TFILED-06/07/12 tranchés par Teo ; TFILED-14 cosmétique (date de fin D2 affichée 23/10) |
+| T-CASHD | CASHD | série close, aucun écart ouvert |
+| T-OFFLOAD | OFFLOAD | série close (un cycle par trimestre, forçage avec motif, dates en heure de Paris) |
+| T-REPUT | REPUT | série close au niveau 1 ; preuve en vrai bloquée par l'inbound Brevo |
+
+### À TEO
+
+- Inbound Brevo à rétablir (compte Brevo → Inbound parsing → recu.omegaai.fr), puis refaire la preuve REPUT.
+- Statut de cycle de vie 207/208 après un 205 déjà transmis (A4).
+- Passage en production des lots de cette nuit (niveau 3).
+
+Tranché ce soir, retiré : règle des deux personnes (gérant seul), O6/TOFFLOAD-03, TFILED-06/07 (le site gagne), TFILED-12, sceau à un seul gérant, réveil d'A5.
+
+### Pour la reprise
+
+C2 inscrit le crochet cashd de 19ay (10b). C4 : fuseau par organisation dans OFFLOAD. Un seul job de test à la fois, 4 fichiers au plus.
+
+### BILAN pour Teo
+
+1. Fait (niv. 1) : gérant décide seul, approbation sans commentaire refusée à la saisie, délégations en français et à l'heure locale (A5).
+2. Fait (niv. 1) : FILED a4_71→a4_76, découpage et fournisseur inconnu côté moteur.
+3. Fait (niv. 1) : CASHD c2_17→c2_38 (avoirs, mises en demeure, envoi manuel).
+4. Fait (niv. 1) : OFFLOAD c4_23→c4_30 (un cycle par trimestre, forçage avec motif, heure de Paris).
+5. Fait (niv. 1) : REPUT c3_25→c3_32 ; boîte du banc ouverte.
+6. Non fait (niv. 2) : preuve REPUT en vrai — Brevo refuse le courrier entrant (550).
+7. Quatre testeurs : séries closes, aucun écart ouvert hors vos décisions.
+8. Reste à vous : inbound Brevo, statut 207/208.
+9. Reste (niv. 3) : migrations de production, puis écrans d'espace dans main.
+10. Reprise : à votre feu vert ou samedi 25/10 après 02 h Z.
