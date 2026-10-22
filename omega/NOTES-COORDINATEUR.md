@@ -1505,3 +1505,9 @@ Posés et verts depuis 19 h 06 Z : c4_31 (fuseau par organisation), c4_32 (TOFFL
 19 h 50 Z — **Pour le bureau** : lecteur v63 (fd2da4bd) reçu, 069 relue (ventilation et IBAN justes). Redéployer maintenant le lecteur depuis worker-a1 **ea1f941ce018dcc29186445c743908e7f3aa4e9c** (SHA final d'A1) ; reput-reponse depuis worker-c3 **fccce2de0f725a051848769ea7507a2db619b2a7** (ou plus récent) ; et déployer l'Edge **reput-astreinte** avec son cron (appels de garde, c3_37). Posés et verts depuis 19 h 35 : c2_39, c3_33 à c3_37, c3_36 v2, a4_78, a4_79. Réglages du banc : ligne d'appel +33199000099 (banc c3), envoi_auto coupé sur le client Omega (détection jouée : 9 898 « sans_achat », 0 signal).
 
 19 h 55 Z — Lecteur : **SHA final d'A1 = ea1f941ce018dcc29186445c743908e7f3aa4e9c** (inclut 2348ab88 et f7b19a91 : SIRET à 9 chiffres, date au mois, titre ≠ cote, dispositions vérifiées par morceaux). Relances après déploiement : 069, 066, puis 067, 068, 072, 074, 075, 077, une à une. Posés et verts : a4_80 ; a4_81 en test. Ouvert chez C3 : TREPUT-15 (appel jamais passé compté « sans réponse »).
+
+### RÈGLE (bureau, 22/10 20 h 37 Z) — déploiements Edge
+
+**Ne jamais appeler `mcp__Supabase__deploy_edge_function`.** Dans le cloud, cet outil ouvre une fenêtre d'autorisation que personne ne peut valider : la session du coordinateur est restée figée dessus de 19 h 58 à 20 h 37 Z, chantier à l'arrêt. Seul le bureau déploie : le coordinateur écrit la demande ici (fonction + SHA), le bureau la joue dans les 10 minutes.
+
+20 h 40 Z — déployé par le bureau : lecteur v66 (worker-a1 ea1f941c), reput-astreinte v3 (worker-c3 0ea5e540), reput-reponse v30 ; cron 660 omega-reput-astreinte à 200. Posés et verts : a4_82, c3_39 v2 (37405a91). 069 relue sur v64 : plus de faux SIRET, mais tva.ventilation perdue (variance du modèle) → relance sur v66 en cours. Ouverts chez C3 : TREPUT-16 (astreinte épuisée sans alerte), TREPUT-17 (dépôts simultanés non regroupés).
