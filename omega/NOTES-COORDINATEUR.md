@@ -1492,3 +1492,10 @@ supabase functions deploy lecteur --project-ref ygwbgpowzlbdaajlsqkn --import-ma
 (`verify_jwt` : garder le réglage de la version en place.) Ensuite prévenir A1/A4 : les 13 pièces NOBAT attendent ce lecteur.
 
 **T-OFFLOAD — à trancher (bureau/Teo).** Les 9 898 sociétés sont sur le client interne « Omega » 633470bc (vrais prospects Guadeloupe, tous `exclu`), seul compte = celui, réel, de Teo ; détection jamais jouée (0 signal) ; OFFLOAD en essai, `envoi_auto` vrai, adresse d'essai = boîte de Teo. Le contrat testeur interdit vraies données et identité hors banc : je n'ai ni prêté l'identité de Teo ni lancé la détection. T-OFFLOAD continue sur son banc (dddddddd-…-c4). Pour lever : accord écrit de Teo pour (1) jouer la détection sur 633470bc, (2) laisser un testeur lire sous son identité (ou créer un membre lecteur dédié).
+
+### Pour le bureau — redéploiements (mise à jour 19 h 25 Z), remplace la commande ci-dessus
+
+1. **`lecteur`** : depuis worker-a1 **bda7a5ed04b3583ed3879d66e532e89844f9ceba** (plans : titre ou numéro ; 069 : ventilation TVA, IBAN). Le paquet sort de `deno run -A omega/functions/lecteur/outils/preparer_deploiement.ts` (réparé par A1 : il suit les imports, 41 fichiers). Puis relances une à une : 069, puis 067, 068, 072, 074, 075, 077.
+2. **`reput-reponse`** : depuis worker-c3 **1296dc256f81b2e2898d35849a6bdcc4c6c84409** (consigne SMS courte, durées écrites dans le résultat ; va avec c3_34, déjà posé).
+
+Posés et verts depuis 19 h 06 Z : c4_31 (fuseau par organisation), c4_32 (TOFFLOAD-09/10). Posés, tests en cours : c3_33 à c3_35. Réglages du banc : SIREN fictif 912345659 (banc-test-filed), fuseau America/Guadeloupe (banc-test-offload), reglages_envois reput en essai pour le banc c3 (il manquait : CONFIG_ABSENTE).
