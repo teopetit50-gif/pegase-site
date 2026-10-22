@@ -258,7 +258,7 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
             </button>
             {/* les raccourcis vers les moteurs : un menu, comme les icônes d'outils de Supabase ; 21/10, l'icône pilotage remplace le losange */}
             {/* eslint-disable-next-line @next/next/no-img-element -- l'icône pilotage, déjà à sa taille */}
-            <MenuDeroulant etiquette="Moteurs : raccourcis vers chaque moteur" classe="v2-btn v2-btn--petit v2-btn--icone v2-btn--fantome v2-masque-mobile" placement="bottom end" largeur={260} declencheur={<img src="/omega-icone-pilotage.png" alt="" width={16} height={16} />}>
+            <MenuDeroulant etiquette="Moteurs : raccourcis vers chaque moteur" classe="v2-btn v2-btn--petit v2-btn--icone v2-btn--fantome v2-masque-mobile" placement="bottom end" largeur={260} declencheur={<><img className="oc-logo-sombre" src="/omega-icone-pilotage.png" alt="" width={16} height={16} /><img className="oc-logo-clair" src="/logo-pegase.png" alt="" width={16} height={16} /></>}>
               <SectionMenu titre="Moteurs">
                 {MODULES.map((m) => (
                   <ItemMenu key={m.cle} id={m.cle} href={`${RACINE}/${m.cle}${m.cle === "filed" ? "/a-payer" : ""}`} textValue={m.nom} icone={<m.icone {...I} />}>
