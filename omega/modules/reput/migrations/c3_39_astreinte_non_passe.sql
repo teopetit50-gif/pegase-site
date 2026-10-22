@@ -10,6 +10,9 @@
 --     (« L'appel d'astreinte n'a pas pu partir… appelez la garde vous-même », une fois par demande), PAS d'escalade ni
 --     d'épuisement. Seuls « sonne » sans prise, « echec » et « sans_reponse » rapportés escaladent, comme avant ;
 --   · public.reput_appels_a_passer : reprend aussi les « non_passe » (l'ouvrier revenu, l'appel part) ;
+--   · la tâche SQL (job reput-astreinte) et l'ouvrier Edge (omega-reput-astreinte) ne s'écrasent pas : la tâche ne
+--     change un appel que s'il est encore dans l'état lu (même essai) ; l'ouvrier prend les appels « for update skip
+--     locked » ;
 --   · reput_prendre_urgence, reput_appel_issue : un « non_passe » se clôt avec les autres quand l'urgence est prise ;
 --   · vue reput_astreinte_suivi (reprise de c3_38) : « Appel non passé (aucun téléphone n'a sonné) : gérant alerté… ».
 --
@@ -74,7 +77,10 @@ begin
     -- pas (le rang suivant ne sonnerait pas davantage). L'ouvrier le reprend à son prochain passage.
     if a.statut in ('a_appeler', 'en_cours', 'non_passe') then
       if a.statut <> 'non_passe' then
-        update public.reput_appels y set statut = 'non_passe', issue_le = p_maintenant where y.id = a.id;
+        -- Seulement si l'ouvrier n'a pas pris l'appel entre-temps (même état, même essai) : jamais d'écrasement.
+        update public.reput_appels y set statut = 'non_passe', issue_le = p_maintenant
+        where y.id = a.id and y.statut = a.statut and y.essai_le is not distinct from a.essai_le;
+        continue when not found;
         perform private.journaliser_module(d.client_id, 'reput', 'reput.astreinte_non_passee', 'reput_demandes', d.id::text,
           jsonb_build_object('rang', a.rang, 'pris_par_ouvrier', a.essai_le is not null), d.entite_id);
         perform private.lever_alerte_module(d.client_id, 'reput', 'critique',
@@ -85,8 +91,9 @@ begin
       end if;
       continue;
     end if;
-    if a.statut in ('a_appeler', 'en_cours', 'sonne') then
-      update public.reput_appels y set statut = 'sans_reponse', issue_le = p_maintenant where y.id = a.id;
+    if a.statut = 'sonne' then
+      update public.reput_appels y set statut = 'sans_reponse', issue_le = p_maintenant where y.id = a.id and y.statut = 'sonne';
+      continue when not found;   -- une issue est arrivée entre-temps (pris, par exemple) : la minute suivante la lit
     end if;
     g := private.reput_garde_suivante(d.client_id, d.entite_id, a.rang, p_maintenant);
     if g.id is null then
