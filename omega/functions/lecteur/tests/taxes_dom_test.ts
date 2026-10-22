@@ -311,3 +311,25 @@ Deno.test("tableau de TVA : bases ≠ HT → à vérifier ; ventilation rendue p
   assert(!v.verifiee && v.controle?.includes("≠ HT 99"), v.controle);
   assertEquals(ventilationDepuisTableau([{ champ: "tva.ventilation", valeur: [], source: "ia" as const, verifiee: true }], [FACTURE_TROIS_TAUX]), null);
 });
+
+Deno.test("SIRET au NIC mal lu (« …00000 ») : fournisseur.siret non vérifié, SIREN déduit vérifié par sa propre clé", () => {
+  const imprime = "SIRET 552 100 554 00000";
+  const verif = verifierValeurs([{ champ: "fournisseur.siret", valeur: "55210055400000", texte: imprime, page: 1 }], [page(imprime)], null);
+  const r = reclasserIdentifiants(verif.valeurs, CHAMPS_PAR_NOM);
+  const siret = r.find((v) => v.champ === "fournisseur.siret")!;
+  const siren = r.find((v) => v.champ === "fournisseur.siren")!;
+  assert(!siret.verifiee && siret.controle?.includes("SIRET invalide"), siret.controle);
+  assertEquals(siren.valeur, "552100554");
+  assert(siren.verifiee, siren.controle);
+  assert(siren.controle?.includes("ne tient pas sa clé"), siren.controle);
+});
+
+Deno.test("TVA intracommunautaire omise par le modèle : relevée après son étiquette si sa clé est juste ; jamais un IBAN", () => {
+  const ajout = (t: string) => completerDepuisTexte([], [page(t)], CHAMPS_PAR_NOM).find((a) => a.champ === "fournisseur.tva");
+  assertEquals(ajout("N° TVA intracom. : FR 96 552 100 554")?.valeur, "FR96552100554");
+  assertEquals(ajout("TVA FR96552100554 — RCS Paris")?.valeur, "FR96552100554");
+  assertEquals(ajout("N° TVA : FR 40 552 100 554"), undefined, "clé fausse : pas de relevé");
+  assertEquals(ajout(`TVA 8,50 %\nIBAN ${IBAN_DOUBLURE}`), undefined);
+  const acheteur = [{ champ: "acheteur.tva", valeur: "FR96552100554", source: "ia" as const, verifiee: true }];
+  assertEquals(completerDepuisTexte(acheteur, [page("N° TVA : FR96552100554")], CHAMPS_PAR_NOM).find((a) => a.champ === "fournisseur.tva"), undefined);
+});

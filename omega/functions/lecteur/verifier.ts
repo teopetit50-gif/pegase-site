@@ -425,6 +425,8 @@ const RE_IBAN = new RegExp(String.raw`\bI\.?B\.?A\.?N\.?\b\s*[:.]?\s*([A-Z]{2}\s
 const RE_IBAN_FR_MASQUE = new RegExp(String.raw`\bFR\s?\d{2}(?:\s?[0-9A-Z]{4}){3,5}(?:\s?[0-9A-Z]{1,3})?${MASQUE_IBAN}`, "g");
 const RE_SIREN_SIRET = /\bSIRE[NT]\b\s*(?:n[°o]\s*)?[:.]?\s*(\d{3}\s?\d{3}\s?\d{3}(?:\s?\d{5})?)(?!\s?\d)/gi;
 // « FR76 3000 … », « FR 76 3000 … » : les groupes peuvent être séparés dès « FR ».
+// Le numéro de TVA FR imprimé après son étiquette (« TVA », « N° TVA intracom. », « Id. TVA ») ; jamais un IBAN (13 caractères).
+const RE_TVA_FR = /\b(?:TVA|T\.V\.A\.?)\b[^\n\d]{0,30}?(FR\s?[0-9A-Z]{2}\s?\d{3}\s?\d{3}\s?\d{3})(?![\s]?\d)/gi;
 const RE_IBAN_FR_NU = /\bFR\s?\d{2}(?:\s?[0-9A-Z]{4}){5}\s?[0-9A-Z]{3}\b/g;
 const RE_EXONERATION = /[^\n]*(?:exon[ée]r[ée]?(?:ation)?s?\b[^\n]*\bTVA\b|\bTVA\b[^\n]*exon[ée]r|art(?:icle|\.)?\s*(?:295|262\s*ter|261|275)\b[^\n]*\bCGI\b)[^\n]*/gi;
 
@@ -506,6 +508,26 @@ export function completerDepuisTexte(valeurs: ValeurLue[], pages: PageLue[], cha
     }
   }
 
+  if (absent("fournisseur.tva")) {
+    // « N° TVA intracom. : FR 12 345678901 », « TVA FR12345678901 » : FR + 2 caractères + 9 chiffres, clé tenue.
+    const acheteur = valeurs.find((v) => v.champ === "acheteur.tva")?.valeur;
+    const lues = seulesLectures(pages, RE_TVA_FR, 1)
+      .map((r) => ({ ...r, valeur: r.valeur.replace(/[\s.\-]/g, "").toUpperCase() }))
+      .filter((r) => r.valeur !== acheteur && tvaFrValide(r.valeur));
+    const distinctes = [...new Set(lues.map((r) => r.valeur))];
+    if (distinctes.length === 1) {
+      ajouts.push({
+        champ: "fournisseur.tva",
+        valeur: distinctes[0],
+        texte: lues[0].texte,
+        page: lues[0].page,
+        source: "ia",
+        verifiee: true,
+        controle: `relevé sur le texte de la page ${lues[0].page} (clé de TVA juste)`,
+      });
+    }
+  }
+
   if (absent("mention.exoneration") && !valeurs.some((v) => v.champ === "mention.franchise_293b" && v.valeur === true)) {
     const mentions = seulesLectures(pages, RE_EXONERATION, 0).filter((m) => !/293\s*B/i.test(m.texte));
     if (mentions.length > 0) {
@@ -582,8 +604,9 @@ export function reclasserIdentifiants(valeurs: ValeurLue[], champs: { has(champ:
           texte: siret.texte,
           page: siret.page,
           source: siret.source,
-          verifiee: siret.verifiee && sirenValide(siren),
-          controle: "déduit des 9 premiers chiffres du SIRET",
+          // Le SIREN a sa propre clé : un NIC mal lu (« 00000 ») n'empêche pas les 9 premiers chiffres d'être justes.
+          verifiee: citationRetrouvee(siret) && sirenValide(siren),
+          controle: `déduit des 9 premiers chiffres du SIRET${siret.verifiee ? "" : " (le SIRET lui-même ne tient pas sa clé)"}${sirenValide(siren) ? "" : " ; clé SIREN invalide"}`,
         });
       }
     }
