@@ -239,7 +239,7 @@ export default function EcranReput({ vue }: { vue?: Onglet } = {}) {
       ) : null}
 
       {monde && onglet === "base" ? (
-        <BaseConnaissances monde={monde} source={source} client={client} role={role} relire={charger} modifierLocal={modifierLocal} />
+        <BaseConnaissances monde={monde} source={source} client={client} role={role} relire={charger} modifierLocal={modifierLocal} gabarit={vue ? "sb" : undefined} />
       ) : null}
       {monde && onglet === "reglages" ? (
         <ReglagesAvis key={`${source}:${monde.reglages?.id ?? ""}`} monde={monde} source={source} client={client} role={role} relire={charger} modifierLocal={modifierLocal} />
