@@ -19,6 +19,7 @@ import type { Demande } from "./types";
 const ISSUES: Record<string, string> = {
   a_appeler: "appel en préparation", en_cours: "appel en cours", sonne: "a sonné, attend la touche 1", pris: "pris",
   sans_reponse: "sans réponse", echec: "appel impossible", clos: "clos", sans_garde: "aucune garde en cours",
+  non_passe: "appel non passé, aucun téléphone n’a sonné : appelez la garde vous-même",
 };
 
 export default function Astreinte({ demande, traite, source }: { demande: Demande; traite: boolean; source: "exemple" | "reelle" }) {
