@@ -277,7 +277,7 @@ ne peuvent pas être la même personne » ; carte « Des rôles et des délégat
 - C'est le même défaut que TFILED-21 avant a4_81 : un contrôle d'identité « ok » sur une valeur dont la source n'est pas nommée. Attendu :
   « Numéro de TVA repris de la fiche fournisseur (absent de la pièce) », et une attention sur l'absence de la mention obligatoire.
 
-**TFILED-25 · CONFIRMÉ sur v66 (relu à 20:41 Z, relayé ; transmis à A1) · R2026-000069 · régression du lecteur v64 : la ventilation de TVA est perdue** — sur v66, toujours pas de `tva.ventilation`, et `tva.taux` reste « Taux moyen de 2,84 % ». Le reste est juste : SIREN vérifié, pas de SIRET, IBAN, `identite.siren` « lu sur la pièce ».
+**TFILED-25 · ✅ CORRIGÉ sur le lecteur 37583a8 (relu par le coordinateur, 22/10, 21 h 29 Z)** : la ventilation est revenue et vérifiée, `tva.taux` ne porte plus que l'écart territorial connu, pas de SIRET, SIREN vérifié. **Juste.** Historique : CONFIRMÉ sur v66 (relu à 20:41 Z, relayé ; transmis à A1) · R2026-000069 · régression du lecteur v64 : la ventilation de TVA est perdue** — sur v66, toujours pas de `tva.ventilation`, et `tva.taux` reste « Taux moyen de 2,84 % ». Le reste est juste : SIREN vérifié, pas de SIRET, IBAN, `identite.siren` « lu sur la pièce ».
 - Sur v63, 069 avait une `tva.ventilation` juste (Exo et 8,5 %). Relue sur v64 (relayé par le coordinateur), elle n'a **plus de
   ventilation**, et un contrôle calcule alors un « taux moyen 2,84 % » (TVA rapportée au HT total, sur une pièce mêlant exonéré et
   8,5 %). La correction de TFILED-20 s'est faite au prix d'une régression.
