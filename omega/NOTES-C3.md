@@ -15,6 +15,8 @@ Commencée le 06/10/2026. Je n'appelle jamais Supabase : le coordinateur pose, j
   - **TREPUT-09** (appels déposés sans demande) : configuration, pas de lot — la boîte d'un appel est un NUMÉRO déclaré dans `expediteurs` (canal 'appel', module 'reput') ; sinon `receptions.module` reste nul et `reput_commencer` ignore. Geste envoyé au coordinateur.
   - `c3_37_astreinte_clair.sql` + test (8) — **TREPUT-10** : refus de l'astreinte et de la garde en clair (22023) ; **TREPUT-11** : une demande devenue urgente crée aussitôt l'appel de rang 1 (déclencheur) ; l'astreinte crée des `reput_appels`, pas des envois ; l'urgence vient de la préparation (le détail de la réception n'est pas lu). Test c3_22 aligné. Souche 585/585.
   - **c3_36 corrigé** (recette : le socle refuse qu'un gabarit déclare « organisation ») : le gabarit ne déclare que {{message}} ; souche alignée sur ce refus. **TREPUT-12** (appel d'un fixe, brouillon « répondez par SMS ») : c3_36 → note de rappel seule pour un fixe ou un numéro masqué ; Edge reput-reponse : l'annonce de l'appel suit `canal_reponse`, appel sans message ou inaudible traité par règle (sans modèle). Tests c3_33 et c3_36 alignés. Souche 586/586, Deno 23/23. **À reposer** c3_36 ; **à redéployer** reput-reponse (fccce2de).
+  - Test c3_36 (cas 13, accusé) : un appel neuf « à traiter » — sur la recette la réponse WhatsApp est bloquée faute de consentement, la demande « bloquee » n'a plus d'accusé (voulu).
+  - `c3_38_astreinte_suivi.sql` + test (6) — **TREPUT-13** : vue `reput_astreinte_suivi` (security_invoker, sans numéro ni contenu) pour le gérant ; **TREPUT-14** : « La fin de la garde (…) est avant son début (…). » Test c3_37 aligné. Souche 592/592.
 
 ## Pause précédente (Teo, 22/10/2026 00 h 11 Z)
 
