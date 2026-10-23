@@ -1581,3 +1581,5 @@ Sessions actives arrêtées par message (T-OFFLOAD, C3 ; les autres déjà arrê
 ## RELANCE (Teo, 23/10 00 h 05 Z) — sécurité trig_0141qUHeNDs5m9Xs1RcJ1TnB à 03 h 00 Z
 
 **DEMANDE DE DÉPLOIEMENT (bureau) — 00 h 13 Z** : `lecteur` depuis worker-a1 **2f21e987b5281dbc10fde3efa69faabc0fae1395** (inclut 57284506 ; relevé de secours « Plan NNN », 071). Paquet par `omega/functions/lecteur/outils/preparer_deploiement.ts` (SHA_PAQUET = "2f21e98"). Ensuite : 066 puis 071.
+
+**POUR TEO (00 h 13 Z)** : le lot « accusé de nuit » est bloqué dans la session C3 (session_01Fb8QHDbEZep6P1zq77gN3n) par le contrôle de permissions ; aucune fenêtre ne s'ouvre et une autorisation relayée ne compte pas. Teo doit écrire lui-même dans la session C3, par exemple « j'autorise c3_42a et c3_42 » (c'est ainsi que c3_41a est passé). 066 relue sur 5728450 : juste (6/6 dispositions vérifiées).
