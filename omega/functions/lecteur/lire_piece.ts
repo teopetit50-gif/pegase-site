@@ -21,7 +21,7 @@ import type { ClientClaude } from "@partage/claude.ts";
 import type { PortesAnalyse } from "./analyse/travail.ts";
 import { type BilanAvis, chiffrerLecture, type CoffreTamila, depotDechiffrant, poserAvisTamila } from "./coffre.ts";
 import { lireCsv, lireXlsx } from "./tableur.ts";
-import { completerDepuisTexte, dateChantierDepuisTexte, nettoyerPlan, reclasserIdentifiants, valeurHeures, ventilationDepuisTableau, valeurListeObjets, valeurLignes, valeurTaxes, valeurVentilation, ventilationExoneree, verifierValeurs } from "./verifier.ts";
+import { completerDepuisTexte, dateChantierDepuisTexte, nettoyerPlan, numeroPlanDepuisTexte, reclasserIdentifiants, valeurHeures, ventilationDepuisTableau, valeurListeObjets, valeurLignes, valeurTaxes, valeurVentilation, ventilationExoneree, verifierValeurs } from "./verifier.ts";
 import { estXmlFacture, lireXmlFacture } from "./xml_facture.ts";
 import { type BilanDecoupage, creerPiecesFilles } from "./decoupage.ts";
 import { concorder } from "./concordance.ts";
@@ -632,6 +632,10 @@ export function assembler(
   if (type_piece === "chantier_plan" || type_piece === "chantier_note_technique") {
     const date = dateChantierDepuisTexte(valeurs, pages);
     if (date) valeurs.push(date);
+  }
+  if (type_piece === "chantier_plan") {
+    const numero = numeroPlanDepuisTexte(valeurs, pages);
+    if (numero) valeurs.push(numero);
   }
   if (schema.lignes && type_piece !== "releve_heures") {
     const lignes = valeurLignes(brut.lignes, pages, "ia", schema.colonnesLigne);

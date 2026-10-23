@@ -887,3 +887,21 @@ export function dateChantierDepuisTexte(valeurs: ValeurLue[], pages: PageLue[]):
     controle: `relevée sur le texte de la page ${lues[0].page}`,
   };
 }
+
+/** Le numéro d'un plan quand le modèle l'omet : « Plan 101 », « Plan n° S-101 » (NOBAT 071 : « Sarl S / Plan 101 - Pag »). */
+export function numeroPlanDepuisTexte(valeurs: ValeurLue[], pages: PageLue[]): ValeurLue | null {
+  if (valeurs.some((v) => v.champ === "numero_plan")) return null;
+  const re = /\bPlan\s*(?:n[°o]\.?\s*)?([A-Z]{0,3}-?\d{1,4}[A-Z]?)(?![\w\/,.]\d)/g;
+  const lus = seulesLectures(pages, re, 1);
+  const distincts = [...new Set(lus.map((r) => r.valeur))];
+  if (distincts.length !== 1) return null;
+  return {
+    champ: "numero_plan",
+    valeur: distincts[0],
+    texte: lus[0].texte,
+    page: lus[0].page,
+    source: "ia",
+    verifiee: true,
+    controle: `relevé sur le texte de la page ${lus[0].page}`,
+  };
+}

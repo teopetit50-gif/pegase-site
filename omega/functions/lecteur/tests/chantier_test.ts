@@ -125,7 +125,7 @@ Deno.test("plan de détail sans titre (NOBAT 068) : le numéro « Plan 101 » su
   const texte = "M1: 60 x 60 h.: 80 / M1 : à replier après la pose du treillis / Plan 101";
   const avecNumero = lire({ type_piece: "chantier_plan", valeurs: [{ champ: "numero_plan", valeur: "101", texte: "Plan 101", page: 1 }] }, [page(1, texte)]);
   assertEquals(avecNumero.statut, "lue", avecNumero.motif);
-  const rien = lire({ type_piece: "chantier_plan", valeurs: [] }, [page(1, texte)]);
+  const rien = lire({ type_piece: "chantier_plan", valeurs: [] }, [page(1, "M1: 60 x 60 h.: 80 / M1 : à replier après la pose du treillis")]);
   assertEquals(rien.statut, "a_verifier");
   assertEquals(rien.motif, "À vérifier : titre ou numero_plan.");
 });
@@ -195,4 +195,18 @@ Deno.test("NOBAT 066 : une disposition « titre : contenu » faite de lignes ré
   // un morceau inventé reste introuvable
   const faux = lire({ type_piece: "chantier_note_technique", dispositions: [{ texte: "POTEAUX : cadre tous les 30 cm", page: 1 }] }, [page(1, texte)]);
   assert(!valeur(faux, "dispositions")!.verifiee);
+});
+
+Deno.test("NOBAT 071 : « Plan 101 » omis par le modèle → numero_plan 101 relevé sur le texte, la planche est lue", () => {
+  const texte = "M1: 60 x 60 h.: 80 … M6: 220 x 220 h.: 100\nSarl S / Plan 101 - Pag";
+  const r = lire({ type_piece: "chantier_plan", valeurs: [{ champ: "titre", valeur: "M6: 220 x 220 h.: 100", texte: "M6: 220 x 220 h.: 100", page: 1 }] }, [page(1, texte)]);
+  assertEquals(valeur(r, "numero_plan")?.valeur, "101");
+  assert(valeur(r, "numero_plan")?.verifiee);
+  assertEquals(valeur(r, "titre"), undefined);
+  assertEquals(r.statut, "lue", r.motif);
+  // deux numéros différents : on ne choisit pas ; « Plan de fondations » n'est pas un numéro
+  const deux = lire({ type_piece: "chantier_plan", valeurs: [] }, [page(1, "Plan 101 / Plan 102 / Plan de fondations")]);
+  assertEquals(valeur(deux, "numero_plan"), undefined);
+  const nom = lire({ type_piece: "chantier_plan", valeurs: [] }, [page(1, "Plan de fondations — Plan n° S-12")]);
+  assertEquals(valeur(nom, "numero_plan")?.valeur, "S-12");
 });
