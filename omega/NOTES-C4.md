@@ -4,11 +4,11 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 `components/espace/offload/`, `app/espace/offload/`, et ce fichier. Coordinateur : session
 `session_01BCGFdpRKBvXKjouC75sYBg`. Je n'appelle jamais Supabase : le coordinateur pose, je reçois les sorties brutes.
 
-## REPRISE (22/10, 19 h 15 Z — relance de Teo : fuseau par organisation, puis arrêt)
+## REPRISE (23/10, 00 h 30 Z — relance de Teo : promesse C:86-88 et C:152, puis arrêt)
 
-- Fait : c4_01 à c4_30 posés et verts ; c4_31 (fuseau) et c4_32 (TOFFLOAD-09, 10) poussés, local 496 ok.
+- Fait : c4_01 à c4_30 posés ; c4_31 (fuseau), c4_32 (TOFFLOAD-09, 10), c4_33 (affaires : relance et chiffrage) poussés, local 502 ok.
 - En cours : rien. Import des personnes morales : script livré (6f0a05b2), non joué, attend Teo.
-- Prochain pas : poser c4_31 puis c4_32 ; offload_deposer_points reste à l'heure de Paris (point du matin commun, 5 h).
+- Prochain pas : poser c4_31, c4_32, c4_33 ; offload_deposer_points reste à l'heure de Paris.
 
 ### Reprise du 17/10
 
@@ -450,6 +450,15 @@ Banc local : 28 tests, 312 assertions vertes, migrations posées deux fois ; tsc
 **Limites** : le taux par message ne compte pas les messages d'échéance (pas de réponse rattachée à une échéance ;
 l'échéance honorée après message est comptée au suivi). Le chiffre repris compte tous les achats des 90 jours,
 sans prétendre qu'ils sont dus au seul message.
+
+## Lot c4_33 — affaires en plan : relance et chiffrage tenus même sans message (23/10)
+
+Promesses C:86-88 et C:152 (O4 du testeur : listée, mais ni relance ni tâche, valeur inconnue). Le cycle des affaires
+ne s'arrête plus quand OFFLOAD ne peut préparer aucun message (essai sans réglage, suspendu) : chaque étape passe par
+une tâche d'appel, avec la raison ; seconde relance puis décision manuelle « montant immobilisé en regard » aux mêmes
+délais ; aucun envoi hors essai. `private.offload_chiffrer_affaires` : une affaire sans valeur prend le montant HT de la
+pièce du même compte et de même référence ; la saisie accepte « montant » / « montant_ht ». Test
+`c4_33_affaires_relance_et_chiffrage.sql` : tombe sans le lot, 6 verts avec. Local : 56 tests, 502 ok.
 
 ## Lot c4_32 — les reprises d'avant les règles suivent les règles (TOFFLOAD-09, 10 ; 22/10)
 
@@ -895,3 +904,4 @@ Partielles : 6, 11, 15, 38.
 - 21/10, 23 h 20 Z — lot c4_30 (date d'achat à Paris) ; tests 25, 27, 29 datés à Paris.
 - 22/10, 19 h 15 Z — lot c4_31 (fuseau de l'organisation) : 490 ok.
 - 22/10 — lot c4_32 (TOFFLOAD-09, 10 : reprises d'avant les règles, comptes effacés hors liste) : 496 ok.
+- 23/10, 00 h 30 Z — lot c4_33 (affaires en plan : relance par une personne sans message, chiffrage) : 502 ok.
