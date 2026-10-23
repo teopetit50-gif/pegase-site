@@ -140,6 +140,8 @@ ni silence à juger. **Rien à relire au niveau 2** ; aucune liste de sociétés
 | C-10 | TOFFLOAD-10 (c4_32) | O12 : reprise `close`, `abandon`, « Données de la personne effacées à sa demande. … », tâche `abandonnee` ; O12 et O13 ne figurent plus dans `offload_tableau` | juste | 1 |
 | F-1 | c4_31 (fuseau de l'entité `America/Guadeloupe`) | 22/10 22 h 07 Z (Paris 23/10, Guadeloupe 22/10) sur O8 : achat daté 23/10 refusé (« La date d'un achat est connue et passée. ») ; achat daté 22/10 (F-FUS-22) accepté ; contact daté 23/10 refusé. Prouve que le jour n'est pas celui de Paris. Limite : à cette heure l'UTC est aussi le 22/10, donc Guadeloupe et UTC ne se distinguent qu'entre 00 h et 04 h Z (hors de la fenêtre de travail) | juste (Paris exclu) ; UTC/Guadeloupe non départagés | 1 |
 | F-2 | c4_31 | détection du coordinateur à 22 h 07 Z au jour de Guadeloupe (`jour 2026-10-22`, 2 entrées, ok 4 / ralentit 4 / éteint 12) : les 18 comptes lisibles portent `jour: 2026-10-22` (O12, O13 effacés absents) ; O8 : dernier achat 22/10 (celui de F-1), silence 0 j, `ok` ; O0 : 94 j de silence (20/07 → 22/10), clôture 31/10 | juste | 1 |
+| F-3 | c4_31 | 23/10 00 h 18 Z (UTC 23/10, Guadeloupe 22/10), sans rien écrire (transaction annulée) : achat O8 daté 23/10 refusé | juste : la date est celle de Guadeloupe, ni Paris ni UTC | 1 |
+| A-1 | C:86-88, C:152 ; c4_33 | O4, CMD-O4-01 disponible le 11/10 ; pièce de même référence déposée (`offload_saisir_achat`, 11/10, 1 240 €, réf. CMD-O4-01) ; `private.offload_affaires_cycle` joué par le coordinateur au 22/10 (`relances_1: 1`), 29/10 (`relances_2: 1`), 05/11 (`decisions: 1`) | `offload_affaires_compte` : `valeur_ht: 1240`, `statut: decision`, motif « Relancé deux fois sans réponse : à décider (1 240 € immobilisés depuis le 11/10/2026). », `envoi1_id` 76b53cb4-…, `envoi2_id` 7c0ae563-… ; liste : `a_decider: 1`, `valeur_ht: 1240` ; aucune tâche d'appel (un message était possible) | chiffrage et décision : juste ; envois : **écart** TOFFLOAD-11 | 1 |
 
 ## Écarts
 
@@ -192,6 +194,12 @@ refuse les nouvelles reprises (C-03) mais ne ferme pas celles qui existaient : l
 **TOFFLOAD-10 · O12 (et O13) · compte effacé encore actif dans la liste.** `offload_fiche('1ec7702c-938b-40d8-a27c-c11d77022795')` :
 compte `arrete`, reprise `c503a160-…` `appel`, tâche « Tâche d'un compte effacé » `a_faire` (24/10). `offload_tableau` : O12 et O13
 (`243738d3-…`) gardent `niveau: eteint` et une priorité (3 340,68, 3 179,03) parmi les comptes à relancer.
+
+**TOFFLOAD-11 · O4 · relances d'affaire invisibles au valideur.** Après les trois passes d'`offload_affaires_cycle`, l'affaire
+`a79e5363-…` porte `envoi1_id: 76b53cb4-5dec-47cc-9bd5-bf41cc50e12f` et `envoi2_id: 7c0ae563-1461-4bb3-881b-4a8dd08466a6`, et son motif dit
+« Relancé deux fois sans réponse ». Mais `offload_tableau(...)->'a_valider'` ne contient que V1, V2, V3 et O16 : aucun des deux envois d'O4.
+Aucune porte ne donne leur statut. Soit ils sont partis sans approbation, soit ils sont retenus hors de la vue du valideur et l'affaire
+compte deux relances que personne n'a validées ni envoyées. Statut demandé au coordinateur.
 
 Notes, non classées en écart :
 - `offload_deposer_export` exige un fichier déjà en Storage (nom, sha256, chemin) : dépôt par fichier non testé.
@@ -279,3 +287,6 @@ Reste non joué : le cycle un autre jour que mardi ; UTC contre Guadeloupe (fen�
 - Fait : séries 1 et 2, contre-épreuves ; TOFFLOAD-01 à 10 corrigés et rejoués justes ; fuseau Guadeloupe juste (F-1, F-2 ; détection brute : jour 2026-10-22, entrées 2, ok 4 / ralentit 4 / éteint 12, 12 avant clôture) ; niveau 2 Omega : rien à relire.
 - Reste : cycle un autre jour que mardi ; UTC contre Guadeloupe (00 h-04 h Z) ; aucune demande approuvée (V1-V3, O16 en attente).
 - Reprise : au feu vert de Teo ou samedi 25/10 après 02 h Z.
+
+**23/10 00 h 25 Z, arrêt 14.** Fait : F-3 (fuseau Guadeloupe contre UTC) juste ; A-1 (cycle d'affaires O4) : chiffrage et décision justes,
+TOFFLOAD-11 ouvert (envois de relance invisibles). En attente : statut des deux envois. Aucune approbation.
