@@ -288,7 +288,7 @@ ne peuvent pas être la même personne » ; carte « Des rôles et des délégat
   planche, FILED rend au contraire « à vérifier : titre ou numero_plan ». C'est la même famille que TFILED-23 : sans cartouche, il n'y a
   pas de titre certain. Attendu : « à vérifier », ou un titre marqué non vérifié, comme sur 074 et 077.
 
-**TFILED-27 · F3 · le message d'avis déjà donné donne l'heure de Paris, pas celle du client** (socle ; même famille que TFILED-10)
+**TFILED-27 · ✅ CORRIGÉ par a4_84, revérifié le 23/10 à 00 h 15 Z** — même 2ᵉ approbation (annulée) → « … (approuvée le 22/10/2026 à **17:37**) : il compte déjà. », soit l'heure de Guadeloupe. **Juste.** Constat d'origine · F3 · le message d'avis déjà donné donne l'heure de Paris, pas celle du client** (socle ; même famille que TFILED-10)
 - Approbation faite à 21:37 UTC (vérifié par `now()` côté recette). Le refus de la 2ᵉ approbation dit « approuvée le 22/10/2026 à
   **23:37** », soit l'heure de Paris (UTC+2). Pour un client en Guadeloupe (UTC−4), il était 17 h 37. Le socle 19ax a mis les délégations
   à l'heure de l'entité ; ce message ne suit pas. Attendu : l'heure de l'entité, ou une heure suivie de son fuseau.
@@ -495,6 +495,8 @@ Je compare champ par champ. Niveau 2 : vraie pièce, lue sur la recette. Les nom
 | R2026-000068 | n° de plan | « Plan 101 » en fin de page, sans cartouche | `numero_plan` « 101 », vérifié (le format est maintenant homogène avec 065 et 070) | juste |
 | R2026-000072 | n° de plan | mêmes armatures que 068 ; le texte relayé est coupé avant la fin | « 101 », vérifié | non jugeable sur le texte relayé (vraisemblablement juste, comme 068) |
 | R2026-000074 / 000077 | titre, n° de plan | cotes et repères seulement, sans cartouche, ni titre ni numéro | « à vérifier : titre ou numero_plan » | juste |
+| R2026-000066 | dispositions (lecteur 5728450, relayé le 23/10) | 5 à 6 dispositions | **6/6 vérifiées** | juste |
+| R2026-000069 | `tva.taux` (pièce rangée sous l'entité « NOBAT (banc) », en Guadeloupe, relayé le 23/10) | 8,5 %, taux de Guadeloupe | `tva.taux` **ok** | juste : l'écart de banc est clos |
 | R2026-000066 | dispositions (lecteur 37583a8) | 5 dispositions | 3 sur 5 non vérifiées (deux titres réécrits, des lits fusionnés) ; le « non vérifié » est maintenu | juste (le lecteur avoue son doute) |
 | R2026-000065 / 000070 | doublon | même dossier, même plan n° 101, même titre | aucun signal de doublon | pas de promesse (observation : deux versions ou deux pages du même plan, sans rapprochement) |
 
@@ -596,13 +598,13 @@ par les portes `public.filed_confirmer_fournisseur(uuid, text)` et `public.filed
 
 ## REPRISE
 
-**Arrêt 19 — 22/10/2026, 21 h 35 Z**
+**Arrêt 20 — 23/10/2026, 00 h 15 Z**
 - Fait : niveau 1 complet (séries 1 à 3, F8 à trois taux, F13 et F14) ; niveau 2 sur les 13 pièces NOBAT R2026-000065 → 077.
   - Corrigés et revérifiés : TFILED-03, 04, 08, 09, 10, 11, 14, 16, 18, 19, 20, 21, 22, 24 et 25.
   - Clos : TFILED-02 et 13 (justes), TFILED-12 (par décision de Teo), TFILED-15 (retiré).
-  - Encore ouverts : **TFILED-27** (heure de Paris dans un message, nouveau) ; **TFILED-23**, résidu (le n° de plan de 071 n'est plus
+  - Encore ouverts : **TFILED-23**, résidu (le n° de plan de 071 n'est plus
     lu, chez A1) ; **TFILED-26** (titre « vérifié » sur une planche sans cartouche, corrigé dans 57284506, pas encore déployé).
   - Remontés à Teo : TFILED-05, 06 et 07.
 - En cours : rien.
-- Prochain pas : rejouer TFILED-26 après le déploiement de 57284506, ainsi que le résidu de TFILED-23 et TFILED-27 à leurs correctifs. Note : la demande `76c22335` (F3) reste en attente d'une 2ᵉ approbation, celle du valideur. Je la laisse ainsi.
+- Prochain pas : rejouer TFILED-26 après le déploiement de 57284506, ainsi que le résidu de TFILED-23 (lecteur 2f21e987, pour 071). Note : la demande `76c22335` (F3) reste en attente d'une 2ᵉ approbation, celle du valideur. Je la laisse ainsi.
 - SHA d'arrêt : voir le commit « T-FILED : arrêt 19 » sur `testeur-filed`.
