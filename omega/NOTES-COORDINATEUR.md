@@ -1620,3 +1620,20 @@ a4_84 (TFILED-27) ; c4_33 (affaires en plan : relance et chiffrage) ; **c3_42a +
 8. Production (niv. 3) : rien ; A5 attend votre relevé de la base de production.
 9. Notes fusionnées dans main (2 pushes ce jour).
 10. Reprise à votre feu vert ou samedi 25/10 après 02 h Z.
+
+## DÉCISION DE TEO (23/10, 15 h 05 Z, par le bureau) — reprise après refus par le moteur
+
+Teo a demandé, après avoir vu la nouvelle carte de décision de /espace2/validations : « quand une demande est refusée avec un commentaire, le moteur relit la pièce avec cette remarque comme consigne et repropose une demande corrigée, liée à la demande refusée ». Aujourd'hui un refus n'écrit que le motif, le commentaire et la pièce jointe dans `approbations` ; aucun moteur ne les relit. Nouveau lot, périmètre fermé, à répartir par le coordinateur à la reprise : socle d'abord (déclencheur et lien), puis un lot par moteur, FILED en premier (la facture est le cas de Teo).
+
+### Ce que fait le lot
+
+1. **Déclencheur (socle)** : une ligne `approbations` avec `decision = 'rejete'` sur une demande qui passe `rejetee`. Le motif (liste de six : « Montant ou bénéficiaire à vérifier », « Pièce manquante ou illisible », « Hors budget ou hors période », « Doublon », « Fournisseur non référencé », « Désaccord (préciser) ») et le commentaire libre forment la consigne. Sans commentaire, le motif seul fait consigne.
+2. **Reprise par le moteur de la demande** (module de la demande) : il rejoue sa préparation avec la consigne (FILED relit la pièce ; CASHD refait la relance ou le virement ; OFFLOAD refait la proposition ; REPUT reprépare la réponse) et crée une **nouvelle demande `en_attente`, liée à la refusée** (`reprise_de` = id de la demande refusée, colonne ou clé du payload, au choix du socle), résumé préfixé « Reprise après refus », avec dans le payload la liste `corrections` (champ, avant, après) pour que le valideur voie ce qui a changé.
+3. **Délai** : la reprise est proposée dans la minute, par la mécanique de cron des moteurs ; rien ne part et rien ne s'exécute sans une nouvelle validation humaine.
+4. **Garde-fous** : une seule reprise automatique par demande refusée (pas de boucle : le refus d'une reprise ne relance rien, il revient au demandeur) ; si le moteur ne peut pas corriger (consigne hors de sa portée, ou même résultat qu'avant), pas de nouvelle demande, mais une note « reprise impossible : … » dans le journal de la demande refusée et un avis au demandeur ; la demande de reprise est saisie au nom du moteur, jamais au nom du valideur (séparation saisie / approbation respectée) ; le circuit (nombre d'approbations, rôles) est celui de la demande d'origine.
+5. **Écran** (site, bureau, quand le socle est posé) : dans /espace2/validations, la carte d'une reprise affiche « Reprise après refus de … » avec le lien vers la demande refusée et la liste des corrections ; la demande refusée montre « reprise proposée » ou « reprise impossible ».
+6. **Tests niveau 1 (testeurs)** : refus avec commentaire → nouvelle demande liée dans la minute, corrections listées et justes ; refus avec motif seul → reprise sur le motif ; cas impossible → note et avis, aucune demande ; refus de la reprise → aucune troisième demande ; jamais d'exécution sans validation.
+
+### À la reprise (ajout)
+
+- Ce lot s'ajoute à la liste « À la reprise » du 23/10 01 h 37 Z ; par défaut après TOFFLOAD-11 et avant les promesses non faites, sauf ordre contraire de Teo à la relance.
