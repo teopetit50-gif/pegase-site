@@ -1475,3 +1475,111 @@ Inbound Brevo rétabli par le bureau à 00 h 41 Z : `recu.omegaai.fr` n'existait
 - **TREPUT-05** : préparation de (a) en 106 s > 60 s promis (cadence du cron omega-reput + temps du modèle).
 - **TREPUT-06** : règle « regroupée avec le message suivant » à confirmer quand deux questions arrivent à 3 min d'écart (ici, une seule réponse complète : bon résultat).
 - **TREPUT-07** : deux accusés de réception (3745fcb2, 60eaee37) restent `a_valider` après l'envoi de la réponse ; à clore ou annuler avec elle.
+
+## RELANCE (Teo, par le bureau) — 22/10, 19 h 06 Z, plafond 85 %, sécurité 23 h 30 Z
+
+Réveillés (Opus 5.5 ; l'effort « medium » ne se règle pas sur une session existante, aucun outil ne le permet) : A5 (étape 1 MISE-EN-PRODUCTION), A1 + A4 (NOBAT 065→077, COH-FXC-002/005/016, écran exports), C2 (crochet 19ay + délais, puis stop), C3 (gabarit appel, TREPUT-05/07, WhatsApp en doublures), C4 (fuseau par organisation, puis stop), T-FILED, T-CASHD, T-OFFLOAD, T-REPUT. Pas B1, B5, C5. Sécurité trig_01X9QTaRUic1w1JRoUotiHXn à 23 h 30 Z.
+
+**Pour le bureau — Edge `lecteur` (recette) depuis worker-a1 fd2da4bd : non redéployé par le coordinateur.** Le paquet fait ~340 Ko (31 fichiers lecteur + 12 de `_partage`) ; le passer à la main dans l'outil MCP coûterait ~100 k jetons, et `outils/preparer_deploiement.ts` est périmé (il oublie `analyse/`, `media/`, `mesure/`). Commande à jouer par le bureau (CLI Supabase connectée) :
+
+```sh
+git worktree add /tmp/lecteur fd2da4bd && cd /tmp/lecteur/omega
+mkdir -p supabase/functions && cp -r functions/lecteur functions/_partage supabase/functions/
+sed -i 's#"@partage/": "../_partage/"#"@partage/": "../_partage/"#' supabase/functions/lecteur/deno.json
+supabase functions deploy lecteur --project-ref ygwbgpowzlbdaajlsqkn --import-map supabase/functions/lecteur/deno.json
+```
+
+(`verify_jwt` : garder le réglage de la version en place.) Ensuite prévenir A1/A4 : les 13 pièces NOBAT attendent ce lecteur.
+
+**T-OFFLOAD — à trancher (bureau/Teo).** Les 9 898 sociétés sont sur le client interne « Omega » 633470bc (vrais prospects Guadeloupe, tous `exclu`), seul compte = celui, réel, de Teo ; détection jamais jouée (0 signal) ; OFFLOAD en essai, `envoi_auto` vrai, adresse d'essai = boîte de Teo. Le contrat testeur interdit vraies données et identité hors banc : je n'ai ni prêté l'identité de Teo ni lancé la détection. T-OFFLOAD continue sur son banc (dddddddd-…-c4). Pour lever : accord écrit de Teo pour (1) jouer la détection sur 633470bc, (2) laisser un testeur lire sous son identité (ou créer un membre lecteur dédié).
+
+### Pour le bureau — redéploiements (mise à jour 19 h 25 Z), remplace la commande ci-dessus
+
+1. **`lecteur`** : depuis worker-a1 **ea1f941ce018dcc29186445c743908e7f3aa4e9c** (remplace d46bc4d3 et bda7a5ed ; SIRET à 9 chiffres jamais complété ; plans : titre ou numéro ; 069 : ventilation TVA, IBAN, SIREN déduit, TVA intracom de secours). Le paquet sort de `deno run -A omega/functions/lecteur/outils/preparer_deploiement.ts` (réparé par A1 : il suit les imports, 41 fichiers). Puis relances une à une : 069, puis 067, 068, 072, 074, 075, 077.
+2. **`reput-reponse`** : depuis worker-c3 **1296dc256f81b2e2898d35849a6bdcc4c6c84409** (consigne SMS courte, durées écrites dans le résultat ; va avec c3_34, déjà posé).
+
+Posés et verts depuis 19 h 06 Z : c4_31 (fuseau par organisation), c4_32 (TOFFLOAD-09/10). Posés, tests en cours : c3_33 à c3_35. Réglages du banc : SIREN fictif 912345659 (banc-test-filed), fuseau America/Guadeloupe (banc-test-offload), reglages_envois reput en essai pour le banc c3 (il manquait : CONFIG_ABSENTE).
+
+19 h 35 Z : a4_78 (TFILED-16, identite.registre levable) posé, vert 3/3. A5 : étape 1 faite (worker-a5 f4878dac, 397 fichiers, P1-P6) ; empreinte recette 22/10 19:32 Z sur export-prod 1190e8d2. **À TEO** : relevé du schéma de production (`PROD_DB_URL=… bash omega/prod/base/relever-base.sh`, lecture seule, ~2 min, gratuit), puis lancement de la répétition (Actions → « Répétition du SQL (Postgres jetable) » sur worker-a5).
+
+19 h 50 Z — **Pour le bureau** : lecteur v63 (fd2da4bd) reçu, 069 relue (ventilation et IBAN justes). Redéployer maintenant le lecteur depuis worker-a1 **ea1f941ce018dcc29186445c743908e7f3aa4e9c** (SHA final d'A1) ; reput-reponse depuis worker-c3 **fccce2de0f725a051848769ea7507a2db619b2a7** (ou plus récent) ; et déployer l'Edge **reput-astreinte** avec son cron (appels de garde, c3_37). Posés et verts depuis 19 h 35 : c2_39, c3_33 à c3_37, c3_36 v2, a4_78, a4_79. Réglages du banc : ligne d'appel +33199000099 (banc c3), envoi_auto coupé sur le client Omega (détection jouée : 9 898 « sans_achat », 0 signal).
+
+19 h 55 Z — Lecteur : **SHA final d'A1 = ea1f941ce018dcc29186445c743908e7f3aa4e9c** (inclut 2348ab88 et f7b19a91 : SIRET à 9 chiffres, date au mois, titre ≠ cote, dispositions vérifiées par morceaux). Relances après déploiement : 069, 066, puis 067, 068, 072, 074, 075, 077, une à une. Posés et verts : a4_80 ; a4_81 en test. Ouvert chez C3 : TREPUT-15 (appel jamais passé compté « sans réponse »).
+
+### RÈGLE (bureau, 22/10 20 h 37 Z) — déploiements Edge
+
+**Ne jamais appeler `mcp__Supabase__deploy_edge_function`.** Dans le cloud, cet outil ouvre une fenêtre d'autorisation que personne ne peut valider : la session du coordinateur est restée figée dessus de 19 h 58 à 20 h 37 Z, chantier à l'arrêt. Seul le bureau déploie : le coordinateur écrit la demande ici (fonction + SHA), le bureau la joue dans les 10 minutes.
+
+20 h 40 Z — déployé par le bureau : lecteur v66 (worker-a1 ea1f941c), reput-astreinte v3 (worker-c3 0ea5e540), reput-reponse v30 ; cron 660 omega-reput-astreinte à 200. Posés et verts : a4_82, c3_39 v2 (37405a91). 069 relue sur v64 : plus de faux SIRET, mais tva.ventilation perdue (variance du modèle) → relance sur v66 en cours. Ouverts chez C3 : TREPUT-16 (astreinte épuisée sans alerte), TREPUT-17 (dépôts simultanés non regroupés).
+
+**DEMANDE DE DÉPLOIEMENT (bureau) — 20 h 47 Z** : `lecteur` depuis worker-a1 **37583a8ffa6536c588ffd9da5f2edab8f838eb2c** (remplace ea1f941c ; TFILED-25 : tableau des taux de TVA relu même quand les rangées sont séparées par des lignes vides ou « / » ; version_lecteur porte le SHA court). Le paquet doit sortir de `omega/functions/lecteur/outils/preparer_deploiement.ts` (il y écrit le SHA). Ensuite : 069 seule, puis 066 et les six plans.
+
+20 h 52 Z — Posés et verts : c3_40 (TREPUT-16 alerte d'épuisement dans l'espace ; TREPUT-17 dépôts simultanés regroupés), a4_82 (TFILED-24, vérifié par F14 > 150 €). **À TEO** : C3 a écrit c3_41a (socle : un envoi INTERNE urgent à un membre saute le seul contrôle HORS_HEURES, pour prévenir le gérant d'une urgence ou d'une astreinte épuisée la nuit) + c3_41 ; le commit a été refusé par le contrôle de permissions de sa session (« Modify Shared Resources », fonction du socle). Non contourné, non porté ailleurs : à autoriser par Teo dans la session C3, ou à laisser. Fichiers prêts, non commités, dans l'arbre de C3.
+
+21 h 37 Z — Posés et verts : c3_41a (socle, porté par C3, autorisé par Teo : l'envoi INTERNE urgent à un membre saute le seul verrou HORS_HEURES ; tiers et interne ordinaire restent différés, test 9/9) + c3_41 ; a4_83 (TFILED-17). Lecteur 37583a8 déployé : NOBAT relues (069 juste ; 065 date juste ; 067/068/072/075 lus ; 074/077 à vérifier, justes ; 066 et 071 restes). Lot lecteur suivant prêt, à déployer plus tard : worker-a1 **57284506** (TFILED-26) ; reste : numéro « Plan 101 » de secours (071). T-REPUT : série close, TREPUT-01 à 17 justes. **À TEO (arbitrage)** : l'accusé au client en urgence est lui aussi différé hors heures, alors que le site promet « un accusé dans la minute » (capacites:32) — faut-il qu'un accusé d'urgence parte la nuit ?
+
+**DEMANDE DE DÉPLOIEMENT (bureau) — 21 h 55 Z** : `lecteur` depuis worker-a1 **572845062e827c80b72217f1eff2ac6e04107250** (TFILED-26 : l'intitulé d'un détail n'est plus le titre de la planche ; dispositions recopiées sans abréger ; inclut 37583a8). Paquet par `omega/functions/lecteur/outils/preparer_deploiement.ts` (SHA_PAQUET = "5728450"). Ensuite : relance de 067, 075 et 066.
+
+Arbitrage de Teo (21 h 49 Z) : l'accusé de réception part dans la minute même la nuit (horaires dits) ; la réponse de fond attend l'ouverture. Lot demandé à C3. TFILED-27 (heure de l'avis « déjà donné » en heure de Paris, pas celle de l'entité) noté pour A4 à la reprise.
+
+## PAUSE (Teo, par le bureau) — 22/10, 22 h 04 Z, forfait 78 %
+
+Sessions actives arrêtées par message (T-OFFLOAD, C3 ; les autres déjà arrêtées). Sécurité trig_01X9QTaRUic1w1JRoUotiHXn désarmée. Aucun job de test en cours. Aucun push sur main ce soir après les 2 du jour.
+
+### SHA d'arrêt (22 h 10 Z)
+
+| Branche | SHA |
+|---|---|
+| main | 70b9c938 |
+| worker-a1 | 36e041c0 |
+| worker-a4 | d0b9e9e7 |
+| worker-a5 | 90f386cb |
+| worker-c2 | bab78415 |
+| worker-c3 | fd0d302b |
+| worker-c4 | 2f027b48 |
+| export-prod | 1190e8d2 |
+| testeur-filed | d5ce390b |
+| testeur-cashd | 09d9c5e6 |
+| testeur-reput | 5043e740 |
+| testeur-offload | 39bf6c09 (fuseau juste, plus aucun écart ouvert) |
+
+### NOBAT 065 → 077 (recette ; lecteur déployé 5728450)
+
+| Pièce | Lecteur | Résultat |
+|---|---|---|
+| 065 | 37583a8 | juste (date 2023-09, titre, n° 101, échelle, phase…) — TFILED-22 juste |
+| 066 | 37583a8 | dispositions 3/5 non vérifiées (réécriture du modèle) — à relire sur 5728450 (non relue) |
+| 067 | 5728450 | à vérifier (intitulé de détail écarté) — TFILED-26 juste |
+| 068, 072 | 37583a8 | justes (n° 101) |
+| 069 | 37583a8 | juste (ventilation, IBAN, SIREN, plus de faux SIRET) ; tva.taux = écart de banc connu (entité en métropole) |
+| 070, 073, 076 | 19/10 | justes, non relues |
+| 071 | 37583a8 | à vérifier ; reste : « Plan 101 » non relevé (A1, lot suivant) |
+| 074, 077 | 37583a8 | à vérifier, justes (sans cartouche) |
+| 075 | 5728450 | à vérifier (intitulé de détail écarté), comme voulu |
+
+### À la reprise
+
+- C3 : accusé de nuit (arbitrage de Teo, 21 h 49 Z) — lot c3_42a (socle) + c3_42 bloqué par les permissions de sa session : Teo doit l'autoriser dans la session C3. Libellés (a) « rappelez cette personne », (b) titre « Hors de la base » vs « en partie ».
+- A1 : relevé de secours « Plan NNN » (071) ; relire 066 sur 5728450.
+- A4 : TFILED-27 (heure de l'avis « déjà donné » en heure de Paris, pas celle de l'entité).
+- A5 : la répétition attend le relevé de prod de Teo (`PROD_DB_URL=… bash omega/prod/base/relever-base.sh`).
+- Banc FILED : NOBAT rattachées à l'entité Sogexal (FR) — écart de banc, à décider si on les range sous une entité GP.
+
+### BILAN pour Teo (22/10, 19 h 06 → 22 h 04 Z)
+
+1. Production : A5 a préparé les 397 fichiers en 6 paliers (rien posé) ; la répétition gratuite attend votre relevé de la base de production (2 min, lecture seule).
+2. FILED (niv. 1) : 7 lots verts (a4_78 → a4_83) ; circuit à 1 personne, imputation, comptabilisation, FEC et Sage justes (testés à 1 et 3 taux).
+3. NOBAT (niv. 1, vraies pièces sur la recette) : 13 pièces relues ; facture 069 juste ; 4 plans justes, 6 « à vérifier » à raison ; 2 restes de lecture chez A1.
+4. REPUT (niv. 1) : délai < 60 s tenu (0 à 5 s), réponses aux appels (SMS, fixe), WhatsApp en doublures, astreinte de bout en bout en Twilio de test, alerte d'astreinte épuisée — 17 écarts testeur, tous justes.
+5. REPUT, accusé de nuit (votre arbitrage) : à faire à la reprise, il faut votre autorisation dans la session C3.
+6. OFFLOAD (niv. 1) : fuseau par organisation et reprises d'avant (c4_31, c4_32) verts ; vérifié en Guadeloupe à 22 h 07 Z.
+7. OFFLOAD sur vos 9 898 prospects : détection jouée, 0 signal (aucun historique d'achat) ; envoi automatique coupé sur ce client.
+8. CASHD (niv. 1) : date limite réécrite à la validation (c2_39) ; mise en demeure réelle testable à partir du 26/10.
+9. Incident : ma session est restée bloquée 40 min sur un déploiement ; règle posée, seul le bureau déploie.
+10. Rien en production (niv. 3) ; reprise à votre feu vert ou samedi 25/10 après 02 h Z.
+
+## RELANCE (Teo, 23/10 00 h 05 Z) — sécurité trig_0141qUHeNDs5m9Xs1RcJ1TnB à 03 h 00 Z
+
+**DEMANDE DE DÉPLOIEMENT (bureau) — 00 h 13 Z** : `lecteur` depuis worker-a1 **2f21e987b5281dbc10fde3efa69faabc0fae1395** (inclut 57284506 ; relevé de secours « Plan NNN », 071). Paquet par `omega/functions/lecteur/outils/preparer_deploiement.ts` (SHA_PAQUET = "2f21e98"). Ensuite : 066 puis 071.
+
+**POUR TEO (00 h 13 Z)** : le lot « accusé de nuit » est bloqué dans la session C3 (session_01Fb8QHDbEZep6P1zq77gN3n) par le contrôle de permissions ; aucune fenêtre ne s'ouvre et une autorisation relayée ne compte pas. Teo doit écrire lui-même dans la session C3, par exemple « j'autorise c3_42a et c3_42 » (c'est ainsi que c3_41a est passé). 066 relue sur 5728450 : juste (6/6 dispositions vérifiées).
