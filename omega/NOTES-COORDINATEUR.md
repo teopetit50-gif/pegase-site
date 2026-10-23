@@ -1577,3 +1577,7 @@ Sessions actives arrêtées par message (T-OFFLOAD, C3 ; les autres déjà arrê
 8. CASHD (niv. 1) : date limite réécrite à la validation (c2_39) ; mise en demeure réelle testable à partir du 26/10.
 9. Incident : ma session est restée bloquée 40 min sur un déploiement ; règle posée, seul le bureau déploie.
 10. Rien en production (niv. 3) ; reprise à votre feu vert ou samedi 25/10 après 02 h Z.
+
+## RELANCE (Teo, 23/10 00 h 05 Z) — sécurité trig_0141qUHeNDs5m9Xs1RcJ1TnB à 03 h 00 Z
+
+**DEMANDE DE DÉPLOIEMENT (bureau) — 00 h 13 Z** : `lecteur` depuis worker-a1 **2f21e987b5281dbc10fde3efa69faabc0fae1395** (inclut 57284506 ; relevé de secours « Plan NNN », 071). Paquet par `omega/functions/lecteur/outils/preparer_deploiement.ts` (SHA_PAQUET = "2f21e98"). Ensuite : 066 puis 071.
