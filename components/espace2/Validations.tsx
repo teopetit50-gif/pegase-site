@@ -43,7 +43,7 @@ import { dateCourte, libelleModule, montant, phrase } from "@/components/espace/
 import type { Approbation, Delegation, Demande, Entite, Role } from "@/components/espace/types";
 import { GROUPES, STATUTS, compteApprobations, groupeDe, trier, verdict, type Decideur } from "@/components/espace/validations/regles";
 import { chargerContexte, chargerFile, type ContexteSocle } from "@/components/espace/validations/portes";
-import DetailDemande from "@/components/espace/validations/DetailDemande";
+import DetailDemande from "./DetailDemande";
 import DecisionLot, { eligibilite } from "@/components/espace/validations/DecisionLot";
 import MesDelegations from "@/components/espace/validations/MesDelegations";
 import { Note } from "./ui";
@@ -190,6 +190,17 @@ export default function Validations({ utilisateur }: { utilisateur: Utilisateur 
 
   const choisie = choix && visibles.some((d) => d.id === choix) ? choix : (visibles[0]?.id ?? null);
   const demande = useMemo(() => etat?.demandes.find((d) => d.id === choisie) ?? null, [etat, choisie]);
+  /* la carte : passer à la demande précédente ou suivante de la file (dans l'ordre affiché) */
+  const naviguer = useMemo(() => {
+    const i = visibles.findIndex((d) => d.id === choisie);
+    if (i < 0) return undefined;
+    return {
+      precedente: i > 0 ? () => setChoix(visibles[i - 1].id) : null,
+      suivante: i < visibles.length - 1 ? () => setChoix(visibles[i + 1].id) : null,
+      position: i + 1,
+      total: visibles.length,
+    };
+  }, [visibles, choisie]);
 
   /* ——— le lot : une case par demande décidable ——— */
   const decidables = useMemo(
@@ -486,19 +497,13 @@ export default function Validations({ utilisateur }: { utilisateur: Utilisateur 
         </div>
       ) : null}
 
-      {/* ——— le panneau : détail complet et actions, ou délégations ——— */}
-      <ModalOverlay isOpen={panneau !== null} onOpenChange={(o) => !o && setPanneau(null)} isDismissable className="v2-jetons v2-voile v2-voile--assistant">
-        <Modal className="v2-assistant v2-val-panneau">
-          <Dialog className="v2-modale-dialogue v2-assistant-corps" aria-label={panneau === "delegations" ? "Délégations" : "Détail de la demande"}>
-            <div className="v2-assistant-tete">
-              <strong style={{ fontWeight: 500 }}>{panneau === "delegations" ? "Délégations" : "Détail de la demande"}</strong>
-              <button type="button" className="v2-btn v2-btn--petit v2-btn--icone v2-btn--fantome" aria-label="Fermer" onClick={() => setPanneau(null)} style={{ marginLeft: "auto" }}>
-                <X width={16} height={16} />
-              </button>
-            </div>
-            <div className="v2 v2-val-panneau-corps"><div className="resa esp">
-              {panneau === "detail" && etat && demande ? (
-                <DetailDemande
+      {/* ——— la carte de décision, au milieu de l'écran (23/10) ——— */}
+      <ModalOverlay isOpen={panneau === "detail"} onOpenChange={(o) => !o && setPanneau(null)} isDismissable className="v2-jetons v2-voile v2-voile--carte">
+        <Modal className="v2-modale v2-val-carte">
+          <Dialog className="v2-modale-dialogue" aria-label="Détail de la demande">
+            {etat && demande ? (
+              <DetailDemande
+                key={demande.id}
                   demande={demande}
                   approbations={etat.approbations}
                   delegations={etat.delegations}
@@ -519,12 +524,29 @@ export default function Validations({ utilisateur }: { utilisateur: Utilisateur 
                   onFait={(t) => {
                     if (t) toast(t, "vert");
                   }}
-                />
-              ) : null}
-              {panneau === "delegations" && etat ? (
+                fermer={() => setPanneau(null)}
+                naviguer={naviguer}
+              />
+            ) : null}
+          </Dialog>
+        </Modal>
+      </ModalOverlay>
+
+      {/* ——— le panneau latéral : les délégations ——— */}
+      <ModalOverlay isOpen={panneau === "delegations"} onOpenChange={(o) => !o && setPanneau(null)} isDismissable className="v2-jetons v2-voile v2-voile--assistant">
+        <Modal className="v2-assistant v2-val-panneau">
+          <Dialog className="v2-modale-dialogue v2-assistant-corps" aria-label="Délégations">
+            <div className="v2-assistant-tete">
+              <strong style={{ fontWeight: 500 }}>Délégations</strong>
+              <button type="button" className="v2-btn v2-btn--petit v2-btn--icone v2-btn--fantome" aria-label="Fermer" onClick={() => setPanneau(null)} style={{ marginLeft: "auto" }}>
+                <X width={16} height={16} />
+              </button>
+            </div>
+            <div className="v2 v2-val-panneau-corps">
+              {etat ? (<div className="resa esp">
                 <MesDelegations delegations={etat.delegations} moi={moi.id} source={source} nommer={nommer} onRevocationLocale={revoquerLocal} recharger={charger} />
-              ) : null}
-            </div></div>
+              </div>) : null}
+            </div>
           </Dialog>
         </Modal>
       </ModalOverlay>
