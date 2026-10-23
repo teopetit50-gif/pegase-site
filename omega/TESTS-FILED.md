@@ -504,7 +504,7 @@ Je compare champ par champ. Niveau 2 : vraie pièce, lue sur la recette. Les nom
 - Le cartouche imprime « DATE: Septembre 2023 ». FILED ne relève aucune date. Sur 070, au cartouche identique, la date est relevée
   (non vérifiée). La lecture est irrégulière sur un champ pourtant présent.
 
-**TFILED-23 · à moitié corrigé (lecteur 37583a8, 21 h 33 Z) : le titre est juste, le n° est perdu** — 071 rend « à vérifier : titre ou numero_plan », sans aucune valeur : la cote n'est plus prise pour un titre (**juste**). Mais la page se termine toujours par « Plan 101 - Pag… », et `numero_plan` n'est **plus relevé du tout**, alors que 068 (même pied de page) donne « 101 » vérifié. Le résidu reste **ouvert** : le n° est présent sur la pièce et n'est pas lu. Constat d'origine · R2026-000071 · sur un plan sans cartouche, une cote est prise pour le titre et marquée vérifiée ; le n° garde le mot « Plan »**
+**TFILED-23 · ✅ CORRIGÉ (lecteur 2f21e98, relayé le 23/10 à 00 h 20 Z)** : 071 est « lue », `numero_plan` « 101 » est vérifié (citation retrouvée page 1), sans titre. **Juste.** Historique : à moitié corrigé (lecteur 37583a8, 21 h 33 Z), le titre juste mais le n° perdu — 071 rend « à vérifier : titre ou numero_plan », sans aucune valeur : la cote n'est plus prise pour un titre (**juste**). Mais la page se termine toujours par « Plan 101 - Pag… », et `numero_plan` n'est **plus relevé du tout**, alors que 068 (même pied de page) donne « 101 » vérifié. Le résidu reste **ouvert** : le n° est présent sur la pièce et n'est pas lu. Constat d'origine · R2026-000071 · sur un plan sans cartouche, une cote est prise pour le titre et marquée vérifiée ; le n° garde le mot « Plan »**
 - Le plan n'a pas de cartouche ; sa première ligne est une cote de massif (dimensions et hauteur). FILED en fait le `titre`, marqué
   **vérifié**. Attendu : titre absent, ou « non lu ».
 - `numero_plan` = « Plan 101 », alors que 065 et 070 rendent « 101 » pour le même plan. Le format n'est pas homogène, donc deux
@@ -598,13 +598,13 @@ par les portes `public.filed_confirmer_fournisseur(uuid, text)` et `public.filed
 
 ## REPRISE
 
-**Arrêt 20 — 23/10/2026, 00 h 15 Z**
+**Arrêt 21 — 23/10/2026, 00 h 21 Z**
 - Fait : niveau 1 complet (séries 1 à 3, F8 à trois taux, F13 et F14) ; niveau 2 sur les 13 pièces NOBAT R2026-000065 → 077.
-  - Corrigés et revérifiés : TFILED-03, 04, 08, 09, 10, 11, 14, 16, 18, 19, 20, 21, 22, 24 et 25.
+  - Corrigés et revérifiés : TFILED-03, 04, 08, 09, 10, 11, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 et 27.
   - Clos : TFILED-02 et 13 (justes), TFILED-12 (par décision de Teo), TFILED-15 (retiré).
-  - Encore ouverts : **TFILED-23**, résidu (le n° de plan de 071 n'est plus
-    lu, chez A1) ; **TFILED-26** (titre « vérifié » sur une planche sans cartouche, corrigé dans 57284506, pas encore déployé).
-  - Remontés à Teo : TFILED-05, 06 et 07.
-- En cours : rien.
-- Prochain pas : rejouer le seul écart ouvert, le résidu de TFILED-23 (lecteur 2f21e987, pour 071). Note : la demande `76c22335` (F3) reste en attente d'une 2ᵉ approbation, celle du valideur. Je la laisse ainsi.
-- SHA d'arrêt : voir le commit « T-FILED : arrêt 19 » sur `testeur-filed`.
+  - **Aucun écart ouvert chez les ouvriers.** Remontés à Teo : TFILED-05, 06 et 07 (promesses et textes du site).
+  - Observations sans écart : TVA DOM sur une seule ligne 44566 (piste), longueurs de compte mêlées dans le FEC, EcritureDate = date
+    de comptabilisation, historique du seuil de circuit non lisible par mes portes.
+- En cours : rien. La demande `76c22335` (F3) reste en attente du valideur.
+- Prochain pas : selon le coordinateur ou Teo, une nouvelle série, ou le rejeu de TFILED-05, 06 et 07 s'ils sont tranchés.
+- SHA d'arrêt : voir le commit « T-FILED : TFILED-23 corrigé, arrêt 21 » sur `testeur-filed`.
