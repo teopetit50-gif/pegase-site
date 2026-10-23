@@ -1583,3 +1583,40 @@ Sessions actives arrêtées par message (T-OFFLOAD, C3 ; les autres déjà arrê
 **DEMANDE DE DÉPLOIEMENT (bureau) — 00 h 13 Z** : `lecteur` depuis worker-a1 **2f21e987b5281dbc10fde3efa69faabc0fae1395** (inclut 57284506 ; relevé de secours « Plan NNN », 071). Paquet par `omega/functions/lecteur/outils/preparer_deploiement.ts` (SHA_PAQUET = "2f21e98"). Ensuite : 066 puis 071.
 
 **POUR TEO (00 h 13 Z)** : le lot « accusé de nuit » est bloqué dans la session C3 (session_01Fb8QHDbEZep6P1zq77gN3n) par le contrôle de permissions ; aucune fenêtre ne s'ouvre et une autorisation relayée ne compte pas. Teo doit écrire lui-même dans la session C3, par exemple « j'autorise c3_42a et c3_42 » (c'est ainsi que c3_41a est passé). 066 relue sur 5728450 : juste (6/6 dispositions vérifiées).
+
+## PAUSE (Teo, par le bureau) — 23/10, 01 h 37 Z, forfait 81 %
+
+Sessions actives arrêtées (T-REPUT en dernière passe courte ; C3, C4, A1, A4, T-FILED, T-OFFLOAD déjà arrêtés). Sécurité trig_0141qUHeNDs5m9Xs1RcJ1TnB désarmée. Aucun job de test en cours.
+
+### SHA d'arrêt (01 h 42 Z)
+
+main da414cfb (avant ce commit) · worker-a1 2f21e987 · worker-a4 ddaea652 · worker-a5 90f386cb · worker-c2 bab78415 · worker-c3 42d01c3c · worker-c4 0fc5a614 · testeur-filed 87b82cd0 · testeur-cashd 09d9c5e6 · testeur-offload 3e3b6a00 · testeur-reput 5043e740 (avant sa passe accusé de nuit).
+
+### Posés et verts depuis la relance de 00 h 05 Z (recette, niveau 1)
+
+a4_84 (TFILED-27) ; c4_33 (affaires en plan : relance et chiffrage) ; **c3_42a + c3_42 (accusé de nuit, autorisé par Teo dans la session C3 ; tests c3_41 + c3_42 verts)**. Banc : entité « NOBAT (banc) » GP (9118458d), 33 pièces NOBAT déplacées avec historique. Lecteur déployé : 2f21e98.
+
+### NOBAT 065 → 077 (lecteur 2f21e98 et précédents)
+
+065 juste (37583a8) · 066 juste, 6/6 dispositions (5728450) · 067 à vérifier, juste (5728450) · 068, 072 justes (37583a8) · 069 juste, tva.taux ok depuis l'entité GP · 070, 073, 076 justes, lus le 19/10 non relus · 071 juste, n° 101 vérifié (2f21e98) · 074, 077 à vérifier, justes · 075 à vérifier, juste (5728450). Écarts TFILED-20 → 27 tous justes.
+
+### À la reprise
+
+- C4 : **TOFFLOAD-11** (relances d'affaire c4_33 : absentes de offload_tableau.a_valider ; « relancé deux fois » alors que rien n'est parti ; relance 2 et décision sans attendre la relance 1) ; puis c4_34 (échéances à reconduction, 2/3, non poussé, cause notée dans NOTES-C4).
+- Promesses non faites : valeur en jeu par segment + export tableur (OFFLOAD), lien de paiement dans la relance (CASHD, C:84), facture adressée à une autre société → arrêt « destinataire » (FILED, TFILED-05).
+- T-REPUT : rejeu de l'accusé de nuit s'il n'a pas pu le finir.
+- A5 : répétition, attend le relevé de prod de Teo.
+- Rien à déployer : lecteur 2f21e98, reput-reponse v30, reput-astreinte v3 sont à jour.
+
+### BILAN pour Teo (23/10, 00 h 05 → 01 h 37 Z)
+
+1. Accusé de nuit (votre arbitrage) : fait et vert (niv. 1) grâce à votre autorisation dans la session C3 ; l'accusé part la nuit, la réponse attend l'ouverture.
+2. NOBAT : les 13 pièces sont justes ou « à vérifier » à raison ; tous les écarts de lecture sont clos (niv. 1, vraies pièces sur la recette).
+3. FILED : NOBAT rangées sous une entité Guadeloupe, TVA 8,5 % acceptée ; heure des messages à l'heure de l'entité.
+4. OFFLOAD : relance et chiffrage des affaires en plan posés (niv. 1), mais un écart trouvé (TOFFLOAD-11) à corriger.
+5. OFFLOAD : échéances des contrats commencées, pas finies.
+6. Non commencées : valeur par segment (OFFLOAD), lien de paiement (CASHD), facture adressée à une autre société (FILED).
+7. REPUT : libellés corrigés (« rappelez cette personne », « en partie dans la base »).
+8. Production (niv. 3) : rien ; A5 attend votre relevé de la base de production.
+9. Notes fusionnées dans main (2 pushes ce jour).
+10. Reprise à votre feu vert ou samedi 25/10 après 02 h Z.
