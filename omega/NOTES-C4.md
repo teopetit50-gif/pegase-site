@@ -4,11 +4,11 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 `components/espace/offload/`, `app/espace/offload/`, et ce fichier. Coordinateur : session
 `session_01BCGFdpRKBvXKjouC75sYBg`. Je n'appelle jamais Supabase : le coordinateur pose, je reçois les sorties brutes.
 
-## REPRISE (23/10, 00 h 30 Z — relance de Teo : promesse C:86-88 et C:152, puis arrêt)
+## REPRISE (arrêt du 23/10, 00 h 45 Z — forfait au plafond)
 
-- Fait : c4_01 à c4_30 posés ; c4_31 (fuseau), c4_32 (TOFFLOAD-09, 10), c4_33 (affaires : relance et chiffrage) poussés, local 502 ok.
-- En cours : rien. Import des personnes morales : script livré (6f0a05b2), non joué, attend Teo.
-- Prochain pas : poser c4_31, c4_32, c4_33 ; offload_deposer_points reste à l'heure de Paris.
+- Fait : c4_01 à c4_33 posés et verts. Import des personnes morales : script livré (6f0a05b2), non joué, attend Teo.
+- En cours, NON poussé : c4_34 (promesse (b), C:73/C:75), qui fait apparaître au tableau des échéances les contrats à reconduction tacite à 60 jours. Écrit, 2 verts sur 3.
+- Reste rouge : le test met CT-EXP et CT-O10 sur le même compte ; le contrat tacite plus tardif « couvre » alors l'expresse (règle c4_07). Il faut deux comptes dans le test, puis reposer le lot (offload_echeances_tableau, phrase par contrat, fuseau de l'organisation).
 
 ### Reprise du 17/10
 
