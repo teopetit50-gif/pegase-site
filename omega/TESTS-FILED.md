@@ -282,7 +282,7 @@ ne peuvent pas être la même personne » ; carte « Des rôles et des délégat
   ventilation**, et un contrôle calcule alors un « taux moyen 2,84 % » (TVA rapportée au HT total, sur une pièce mêlant exonéré et
   8,5 %). La correction de TFILED-20 s'est faite au prix d'une régression.
 
-**TFILED-26 · corrigé par A1 dans le lot 57284506, pas encore déployé : en attente du rejeu** · R2026-000067, 000075 · sur une planche de détails sans cartouche, le premier intitulé devient le titre « vérifié »**
+**TFILED-26 · ✅ CORRIGÉ (lecteur 5728450, relayé le 23/10 à 00 h 14 Z)** : 067 et 075 passent « à vérifier », et l'intitulé du détail est écarté, comme pour 074 et 077. **Juste.** · R2026-000067, 000075 · sur une planche de détails sans cartouche, le premier intitulé devient le titre « vérifié »**
 - 067 et 075 n'ont pas de cartouche ; la page aligne plusieurs détails (scellement n° 1, sur 075 aussi n° 2, joint de retrait, coupes,
   désignation des massifs). FILED prend le premier intitulé comme `titre` et le marque **vérifié**. Sur 074 et 077, au même genre de
   planche, FILED rend au contraire « à vérifier : titre ou numero_plan ». C'est la même famille que TFILED-23 : sans cartouche, il n'y a
@@ -606,5 +606,5 @@ par les portes `public.filed_confirmer_fournisseur(uuid, text)` et `public.filed
     lu, chez A1) ; **TFILED-26** (titre « vérifié » sur une planche sans cartouche, corrigé dans 57284506, pas encore déployé).
   - Remontés à Teo : TFILED-05, 06 et 07.
 - En cours : rien.
-- Prochain pas : rejouer TFILED-26 après le déploiement de 57284506, ainsi que le résidu de TFILED-23 (lecteur 2f21e987, pour 071). Note : la demande `76c22335` (F3) reste en attente d'une 2ᵉ approbation, celle du valideur. Je la laisse ainsi.
+- Prochain pas : rejouer le seul écart ouvert, le résidu de TFILED-23 (lecteur 2f21e987, pour 071). Note : la demande `76c22335` (F3) reste en attente d'une 2ᵉ approbation, celle du valideur. Je la laisse ainsi.
 - SHA d'arrêt : voir le commit « T-FILED : arrêt 19 » sur `testeur-filed`.
