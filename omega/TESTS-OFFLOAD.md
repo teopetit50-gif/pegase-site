@@ -198,8 +198,12 @@ compte `arrete`, reprise `c503a160-…` `appel`, tâche « Tâche d'un compte ef
 **TOFFLOAD-11 · O4 · relances d'affaire invisibles au valideur.** Après les trois passes d'`offload_affaires_cycle`, l'affaire
 `a79e5363-…` porte `envoi1_id: 76b53cb4-5dec-47cc-9bd5-bf41cc50e12f` et `envoi2_id: 7c0ae563-1461-4bb3-881b-4a8dd08466a6`, et son motif dit
 « Relancé deux fois sans réponse ». Mais `offload_tableau(...)->'a_valider'` ne contient que V1, V2, V3 et O16 : aucun des deux envois d'O4.
-Aucune porte ne donne leur statut. Soit ils sont partis sans approbation, soit ils sont retenus hors de la vue du valideur et l'affaire
-compte deux relances que personne n'a validées ni envoyées. Statut demandé au coordinateur.
+Statut lu par le coordinateur : **aucun n'est parti** — `76b53cb4` et `7c0ae563` sont `a_valider`, mode `essai`, sans verrou, `envoye_le`
+nul, demandes `ec817b37` et `4e1a0a31` `en_attente` (créés à 00:18:52 Z, à 0,1 s d'écart : les trois passes simulées tournaient dans la
+même seconde réelle). Trois points :
+(a) les deux envois n'apparaissent pas dans `offload_tableau.a_valider` : le valideur ne les voit pas ;
+(b) l'affaire dit « Relancé deux fois sans réponse » alors que rien n'est parti ni n'a été validé ;
+(c) la relance 2 et la décision avancent sans attendre que la relance 1 soit partie.
 
 Notes, non classées en écart :
 - `offload_deposer_export` exige un fichier déjà en Storage (nom, sha256, chemin) : dépôt par fichier non testé.
@@ -290,3 +294,5 @@ Reste non joué : le cycle un autre jour que mardi ; UTC contre Guadeloupe (fen�
 
 **23/10 00 h 25 Z, arrêt 14.** Fait : F-3 (fuseau Guadeloupe contre UTC) juste ; A-1 (cycle d'affaires O4) : chiffrage et décision justes,
 TOFFLOAD-11 ouvert (envois de relance invisibles). En attente : statut des deux envois. Aucune approbation.
+
+**23/10 00 h 22 Z, arrêt 15.** TOFFLOAD-11 précisé (a, b, c), transmis par le coordinateur à C4 à sa reprise. Aucune approbation. Arrêt.
