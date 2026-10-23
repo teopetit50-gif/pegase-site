@@ -45,7 +45,7 @@ jobs:
     services:
       base:
         # Version de Postgres de Supabase ; à aligner sur celle de la production au gel (select version()).
-        image: supabase/postgres:15.8.1.060
+        image: supabase/postgres:17.6.1.155
         env:
           POSTGRES_PASSWORD: repetition
         ports:
