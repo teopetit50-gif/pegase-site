@@ -19,7 +19,7 @@
 
 import { useEffect, useId, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Ban, Check, ChevronLeft, ChevronRight, Clock, FileSearch, FileText, Pencil, Users, X } from "lucide-react";
+import { ArrowLeft, Ban, Check, ChevronLeft, ChevronRight, CircleCheck, CircleDashed, CircleX, Clock, FileSearch, FileText, OctagonAlert, Pencil, TriangleAlert, Users, X, type LucideIcon } from "lucide-react";
 import { Loader } from "@/components/ui/loader";
 import { createClient } from "@/lib/supabase/client";
 import type { Source } from "@/components/espace/source";
@@ -32,7 +32,8 @@ import { statutFacture } from "@/components/espace/filed/etats";
 import { lienDossierFiled } from "@/components/espace/filed/lien";
 import { lienPiece } from "@/components/espace/filed/receptions";
 import PagePdf, { nombreDePages } from "@/components/espace/filed/PagePdf";
-import { Etat, Note, teinte } from "./ui";
+import { Note } from "./ui";
+import { Initiales } from "./vivant";
 import "./detail-demande.css";
 
 type Props = {
@@ -123,10 +124,28 @@ function valeurLisible(cle: string, val: unknown): string {
   return texte;
 }
 
-function initiales(nom: string): string {
-  const mots = nom.trim().split(/\s+/).filter(Boolean);
-  const lettres = ((mots[0]?.[0] ?? "") + (mots[1]?.[0] ?? "")).toUpperCase();
-  return lettres || "?";
+/* Les états se lisent en texte et en icône monochrome, comme le circuit
+   d'approbation de la page : aucune pastille de couleur. */
+const ICONES_STATUT: Record<Demande["statut"], LucideIcon> = {
+  en_attente: CircleDashed,
+  approuvee: CircleCheck,
+  executee: CircleCheck,
+  rejetee: CircleX,
+  annulee: Ban,
+  expiree: Clock,
+  echec_execution: TriangleAlert,
+};
+const ICONES_TEINTE: Record<string, LucideIcon> = { rouge: OctagonAlert, ambre: TriangleAlert, vert: CircleCheck, bleu: CircleDashed, gris: CircleDashed };
+const RANGS = ["Première", "Seconde", "Troisième", "Quatrième", "Cinquième"];
+
+function IconeStatut({ statut }: { statut: Demande["statut"] }) {
+  const Icone = ICONES_STATUT[statut] ?? CircleDashed;
+  return <Icone width={14} height={14} aria-hidden="true" />;
+}
+
+function IconeTeinte({ teinte }: { teinte: string }) {
+  const Icone = ICONES_TEINTE[teinte] ?? CircleDashed;
+  return <Icone width={14} height={14} aria-hidden="true" />;
 }
 
 function uuidLocal(): string {
@@ -204,12 +223,19 @@ function FeuilleExemple({ fournisseur, numero, ttc }: { fournisseur: string | nu
         <div className="v2-det-feuille-titre">FACTURE</div>
         <div className="v2-det-feuille-sous">{numero ? `N° ${numero}` : ""}</div>
       </div>
-      <div className="v2-det-feuille-nom">{fournisseur ?? "—"}</div>
-      <div className="v2-det-feuille-trait" />
-      <div className="v2-det-feuille-trait" data-court="" />
-      <div className="v2-det-feuille-trait" />
-      <div className="v2-det-feuille-trait" data-court="" />
-      <div className="v2-det-feuille-trait" />
+      <div className="v2-det-feuille-fournisseur">
+        <div className="v2-det-feuille-nom">{fournisseur ?? "—"}</div>
+        <div className="v2-det-feuille-trait" data-court="" />
+        <div className="v2-det-feuille-trait" data-court="" />
+      </div>
+      <div className="v2-det-feuille-lignes">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="v2-det-feuille-ligne">
+            <div className="v2-det-feuille-trait" data-court={i % 2 ? "" : undefined} />
+            <div className="v2-det-feuille-trait" />
+          </div>
+        ))}
+      </div>
       <div className="v2-det-feuille-total">
         <span>Total TTC</span>
         <span>{ttc ?? ""}</span>
@@ -265,38 +291,43 @@ function Document({ demande: d, source }: { demande: Demande; source: Source }) 
   return (
     <aside className="v2-det-document" aria-label="Le document">
       <div className="v2-det-document-pages">
-        {url && mime === "application/pdf" && fichier ? (
-          Array.from({ length: fichier.pages }).map((_, i) => (
-            <div key={i} className="v2-det-page">
-              <PagePdf url={url} page={i + 1} />
+        <div className="v2-det-liasse">
+          {url && mime === "application/pdf" && fichier ? (
+            Array.from({ length: fichier.pages }).map((_, i) => (
+              <div key={i} className="v2-det-page">
+                <PagePdf url={url} page={i + 1} />
+              </div>
+            ))
+          ) : url && mime.startsWith("image/") ? (
+            <div className="v2-det-page">
+              {/* eslint-disable-next-line @next/next/no-img-element -- fichier signé du seau, pas une image du site */}
+              <img src={url} alt="" />
             </div>
-          ))
-        ) : url && mime.startsWith("image/") ? (
-          <div className="v2-det-page">
-            {/* eslint-disable-next-line @next/next/no-img-element -- fichier signé du seau, pas une image du site */}
-            <img src={url} alt="" />
-          </div>
-        ) : r ? (
-          <FeuilleExemple fournisseur={r.fournisseur} numero={r.numero} ttc={ttcTexte} />
-        ) : chemin ? (
-          <div className="v2-det-document-vide">Lecture du document…</div>
-        ) : (
-          <div className="v2-det-document-vide">
-            <FileText width={22} height={22} aria-hidden="true" />
-            {lien ? "Le document se lit dans le dossier." : "Cette demande ne porte pas de document."}
-          </div>
-        )}
+          ) : r ? (
+            <FeuilleExemple fournisseur={r.fournisseur} numero={r.numero} ttc={ttcTexte} />
+          ) : chemin ? (
+            <div className="v2-det-document-vide">Lecture du document…</div>
+          ) : (
+            <div className="v2-det-document-vide">
+              <FileText width={22} height={22} aria-hidden="true" />
+              {lien ? "Le document se lit dans le dossier." : "Cette demande ne porte pas de document."}
+            </div>
+          )}
+        </div>
       </div>
       {r && s ? (
         <footer className="v2-det-document-pied">
           <div className="v2-det-document-ligne">
             {r.reference ? <span className="v2-det-mono">{r.reference}</span> : null}
-            <Etat teinte={teinte(s.teinte)}>{s.libelle}</Etat>
             <span className="v2-det-controles">
-              {r.bloquants ? <span><span className="v2-point" data-teinte="rouge" aria-hidden="true" />{r.bloquants} bloquant{r.bloquants > 1 ? "s" : ""}</span> : null}
-              {r.attention ? <span><span className="v2-point" data-teinte="ambre" aria-hidden="true" />{r.attention} à vérifier</span> : null}
-              {r.levees ? <span><span className="v2-point" data-teinte="bleu" aria-hidden="true" />{r.levees} levé{r.levees > 1 ? "s" : ""}</span> : null}
-              {!r.bloquants && !r.attention ? <span><span className="v2-point" data-teinte="vert" aria-hidden="true" />contrôles passés</span> : null}
+              <IconeTeinte teinte={s.teinte} />
+              {[
+                s.libelle,
+                r.bloquants ? `${r.bloquants} contrôle${r.bloquants > 1 ? "s" : ""} bloquant${r.bloquants > 1 ? "s" : ""}` : null,
+                r.attention ? `${r.attention} à vérifier` : null,
+                r.levees ? `${r.levees} levé${r.levees > 1 ? "s" : ""}` : null,
+                !r.bloquants && !r.attention ? "contrôles passés" : null,
+              ].filter(Boolean).join(" · ")}
             </span>
           </div>
           <div className="v2-det-document-ligne">
@@ -336,6 +367,7 @@ export default function DetailDemande(p: Props) {
   const ex = useMemo(() => exigences(d), [d]);
   const v = useMemo(() => verdict(d, moi, approbations, delegations, new Date(), equipes), [d, moi, approbations, delegations, equipes]);
   const compte = useMemo(() => compteApprobations(d, approbations), [d, approbations]);
+  const restantes = d.statut === "en_attente" ? Math.max(0, compte.requises - compte.faites) : 0;
   const delegs = useMemo(() => delegationsUtilisables(d, moi, delegations), [d, moi, delegations]);
   const grp = groupeDe(d);
 
@@ -518,9 +550,12 @@ export default function DetailDemande(p: Props) {
     <div className="v2-det" data-form={form ?? undefined}>
       {/* ——— l'en-tête de la carte : où on est, où aller, fermer ——— */}
       <header className="v2-det-carte-tete">
-        <div className="v2-det-badges">
+        <div className="v2-det-ou">
           <span className="v2-det-sur">{libelleModule(d.module)} · {phrase(d.type_action)}</span>
-          <Etat teinte={teinte(statut.teinte)}>{statut.libelle}</Etat>
+          <span className="v2-det-statut">
+            <IconeStatut statut={d.statut} />
+            {statut.libelle}
+          </span>
         </div>
         <div className="v2-det-carte-outils">
           {nav ? (
@@ -605,45 +640,57 @@ export default function DetailDemande(p: Props) {
                       {compte.refus ? ` · ${compte.refus} refus` : ""}
                     </small>
                   </h3>
-                  <div className="v2-det-jauge" aria-hidden="true">
-                    {Array.from({ length: compte.requises }).map((_, i) => (
-                      <span key={i} data-fait={compte.refus && i === compte.faites ? "refus" : i < compte.faites ? "true" : "false"} />
-                    ))}
+                  <div className="v2-det-jauge" role="progressbar" aria-label="Approbations obtenues" aria-valuemin={0} aria-valuemax={compte.requises} aria-valuenow={compte.faites}>
+                    <span style={{ width: `${Math.min(100, (compte.faites / Math.max(1, compte.requises)) * 100)}%` }} />
                   </div>
-                  {compte.liste.length ? (
-                    <ul className="v2-det-fil">
+                  {compte.liste.length || restantes ? (
+                    <ol className="v2-det-fil">
                       {compte.liste.map((a) => (
                         <li key={a.id}>
-                          <span className="v2-pastille-ronde" aria-hidden="true">{initiales(p.nommer(a.user_id))}</span>
+                          <span className="v2-det-fil-avatar" aria-hidden="true">
+                            <Initiales nom={p.nommer(a.user_id)} taille={22} />
+                            <i>{a.decision === "rejete" ? <CircleX width={11} height={11} /> : <CircleCheck width={11} height={11} />}</i>
+                          </span>
                           <div>
                             <div className="v2-det-fil-texte">
-                              <strong>{p.nommer(a.user_id)}</strong> {a.decision === "approuve" ? "a approuvé" : "a refusé"}
-                              {a.au_nom_de ? <> au nom de <strong>{p.nommer(a.au_nom_de)}</strong></> : null}
+                              <strong>{p.nommer(a.user_id)}</strong>
+                              <span>
+                                {a.decision === "approuve" ? "a approuvé" : "a refusé"}
+                                {a.au_nom_de ? ` au nom de ${p.nommer(a.au_nom_de)}` : ""} · <time dateTime={a.decide_le}>{dateHeure(a.decide_le)}</time>
+                              </span>
                             </div>
                             {a.commentaire ? <p className="v2-det-fil-commentaire">{a.commentaire}</p> : null}
-                            <div className="v2-det-fil-meta">
-                              <span data-decision={a.decision}>{a.decision === "approuve" ? "Approuvé" : "Refusé"}</span>
-                              <span aria-hidden="true">·</span>
-                              <time dateTime={a.decide_le}>{dateHeure(a.decide_le)}</time>
-                            </div>
                           </div>
                         </li>
                       ))}
-                    </ul>
+                      {Array.from({ length: restantes }, (_, i) => (
+                        <li key={`attente-${i}`} data-attente="">
+                          <span className="v2-det-fil-avatar" aria-hidden="true">
+                            <CircleDashed width={18} height={18} />
+                          </span>
+                          <div className="v2-det-fil-texte">
+                            <strong>{RANGS[compte.faites + i] ?? `${compte.faites + i + 1}e`} approbation</strong>
+                            <span>En attente</span>
+                          </div>
+                        </li>
+                      ))}
+                    </ol>
                   ) : (
                     <p className="v2-det-vide">Aucune décision prise pour l&apos;instant.</p>
                   )}
                 </div>
+              </div>
+              <div className="v2-det-fondu" aria-hidden="true" />
 
-                <div className="v2-det-notes">
-                  {(ex.commentaire || ex.piece_jointe || ex.motif_refus) && enAttente ? (
-                    <Note teinte="bleu">
-                      <strong>La règle exige</strong>{" "}
-                      {[ex.commentaire && "un commentaire pour approuver", ex.piece_jointe && "une pièce jointe", ex.motif_refus && "un motif en cas de refus"].filter(Boolean).join(", ")}.
-                    </Note>
-                  ) : null}
-                  {notesEtat}
-                </div>
+              {/* ——— ce qui conditionne l'action, contre les boutons : jamais dessous ——— */}
+              <div className="v2-det-notes">
+                {(ex.commentaire || ex.piece_jointe || ex.motif_refus) && enAttente ? (
+                  <Note teinte="bleu">
+                    <strong>La règle exige</strong>{" "}
+                    {[ex.commentaire && "un commentaire pour approuver", ex.piece_jointe && "une pièce jointe", ex.motif_refus && "un motif en cas de refus"].filter(Boolean).join(", ")}.
+                  </Note>
+                ) : null}
+                {notesEtat}
               </div>
 
               {enAttente ? (
@@ -823,6 +870,7 @@ function Formulaire({ quel, titre, retour, envoi, erreur, pied, children }: { qu
         {children}
         {erreur ? <Note teinte="rouge" role="alert"><strong>Refusé par la base.</strong> {erreur}</Note> : null}
       </div>
+      <div className="v2-det-fondu" aria-hidden="true" />
       <div className="v2-det-actions">{pied}</div>
     </div>
   );
