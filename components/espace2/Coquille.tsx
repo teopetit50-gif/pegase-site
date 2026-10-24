@@ -33,6 +33,7 @@ import { FournisseurToasts, useToast } from "./Toasts";
 import { ItemMenu, Kbd, MenuDeroulant, SectionMenu, SeparateurMenu } from "./ui";
 import Palette from "./Palette";
 import Assistant from "./Assistant";
+import { PanneauAide, PanneauRetour, type TypeRetour } from "./Retours";
 import { useOuvertes } from "./Collection";
 import { MODULES, MODULES_PRINCIPAUX, RACINE, moduleMetier, porteeDe, titreDe } from "./modules";
 import { useCompteurs } from "./compteurs";
@@ -136,11 +137,25 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
   const [palette, setPalette] = useState(false);
   const [tiroir, setTiroir] = useState(false);
   const [assistant, setAssistant] = useState(false);
-  /* la Vue d'ensemble ouvre l'assistant par un événement */
+  /* 24/10 — le Feedback et l'Aide ouvrent un panneau, plus la page /contact du site */
+  const [retour, setRetour] = useState(false);
+  const [typeRetour, setTypeRetour] = useState<TypeRetour>("idee");
+  const [aide, setAide] = useState(false);
+  const ecrire = (t: TypeRetour) => {
+    setTypeRetour(t);
+    setAide(false);
+    setRetour(true);
+  };
+  /* la Vue d'ensemble ouvre l'assistant, le rail ouvre l'aide, par un événement */
   useEffect(() => {
     const ouvrir = () => setAssistant(true);
+    const ouvrirAide = () => setAide(true);
     window.addEventListener("espace2-assistant", ouvrir);
-    return () => window.removeEventListener("espace2-assistant", ouvrir);
+    window.addEventListener("espace2-aide", ouvrirAide);
+    return () => {
+      window.removeEventListener("espace2-assistant", ouvrir);
+      window.removeEventListener("espace2-aide", ouvrirAide);
+    };
   }, []);
   const portee = porteeDe(chemin);
 
@@ -239,9 +254,9 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
                 Décider d&apos;une validation
               </ItemMenu>
             </MenuDeroulant>
-            <Link href="/contact" className="v2-haut-lien v2-masque-mobile">
+            <button type="button" className="v2-haut-lien v2-masque-mobile" onClick={() => ecrire("idee")}>
               Feedback
-            </Link>
+            </button>
             {/* la palette (touche F, ou ⌘K comme sur Supabase) */}
             <button type="button" className="v2-btn v2-btn--petit v2-recherche" onClick={() => setPalette(true)} aria-keyshortcuts="F Meta+K Control+K" aria-label="Rechercher">
               <Search {...I} />
@@ -250,9 +265,9 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
                 <Kbd>⌘K</Kbd>
               </span>
             </button>
-            <Link href="/contact" className="v2-btn v2-btn--petit v2-btn--icone v2-btn--fantome v2-masque-mobile" aria-label="Aide">
+            <button type="button" className="v2-btn v2-btn--petit v2-btn--icone v2-btn--fantome v2-masque-mobile" aria-label="Aide" onClick={() => setAide(true)}>
               <CircleHelp {...I} />
-            </Link>
+            </button>
             <button type="button" className="v2-btn v2-btn--petit v2-btn--icone v2-btn--fantome" aria-label="Assistant" onClick={() => setAssistant(true)}>
               <Terminal {...I} />
             </button>
@@ -285,6 +300,16 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
       </div>
 
       <Assistant ouvert={assistant} changer={setAssistant} connecte={!!utilisateur} prenom={utilisateur?.prenom ?? null} />
+      <PanneauRetour ouvert={retour} changer={setRetour} utilisateur={utilisateur} type={typeRetour} changerType={setTypeRetour} />
+      <PanneauAide
+        ouvert={aide}
+        changer={setAide}
+        ecrire={ecrire}
+        ouvrirAssistant={() => {
+          setAide(false);
+          setAssistant(true);
+        }}
+      />
       <ModalOverlay isOpen={tiroir} onOpenChange={setTiroir} isDismissable className="v2-jetons v2-voile v2-voile--tiroir">
         <Modal className="v2-tiroir">
           <Dialog className="v2-modale-dialogue v2-laterale" aria-label="Navigation de l'espace client">
@@ -550,10 +575,17 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
           <div className="v2-rail-bas">
             <ul className="v2-rail-groupe">
               <li>
-                <Link href="/contact" className="v2-rail-item">
+                <button
+                  type="button"
+                  className="v2-rail-item"
+                  onClick={() => {
+                    fermer?.();
+                    window.dispatchEvent(new Event("espace2-aide"));
+                  }}
+                >
                   <LifeBuoy {...R} />
                   <span className="v2-rail-libelle">Aide</span>
-                </Link>
+                </button>
               </li>
               <li>{iconeRail(reglages)}</li>
             </ul>
