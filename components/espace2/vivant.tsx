@@ -26,16 +26,20 @@ export function Chiffre({ valeur, duree = 900 }: { valeur: string; duree?: numbe
   const decimales = m && m[0].includes(",") ? m[0].split(",")[1].length : 0;
   const [v, setV] = useState<number | null>(null);
   const deja = useRef<string | null>(null);
+  /* 24/10/2026 — un chiffre qui change repart de sa valeur d'avant, pas de zéro */
+  const avant = useRef(0);
 
   useEffect(() => {
     if (Number.isNaN(cible) || deja.current === valeur || calme()) return;
     deja.current = valeur;
+    const depart = avant.current;
+    avant.current = cible;
     let raf = 0;
     const debut = performance.now();
     const pas = (t: number) => {
       const p = Math.min(1, (t - debut) / duree);
       const e = 1 - Math.pow(1 - p, 3);
-      setV(cible * e);
+      setV(depart + (cible - depart) * e);
       if (p < 1) raf = requestAnimationFrame(pas);
       else setV(null);
     };
