@@ -3079,3 +3079,30 @@ html.v2-calme .v2-vivant .v2-carte::before, html.v2-calme .v2-vivant .v2-dr-cart
 .v2 .v2-dr-chaleur-grille i[data-n="2"], .v2 .v2-dr-echelle i[data-n="2"] { background: color-mix(in srgb, var(--v2-blue-700) 45%, var(--v2-bg-100)); }
 .v2 .v2-dr-chaleur-grille i[data-n="3"], .v2 .v2-dr-echelle i[data-n="3"] { background: color-mix(in srgb, var(--v2-blue-700) 70%, var(--v2-bg-100)); }
 .v2 .v2-dr-chaleur-grille i[data-n="4"], .v2 .v2-dr-echelle i[data-n="4"] { background: var(--v2-blue-700); }
+
+/* ══ Le vivant, en léger (24/10/2026, Teo : « des trucs légers », partout) ══
+   · une ligne de liste ou de tableau se cliquera en entier et le montre au survol ;
+   · la flèche glisse d'un cran vers là où elle mène ;
+   · la tâche cochée se barre et s'efface avant de quitter la liste ;
+   · la courbe des factures dit le jour et le montant sous la souris.
+   Tout s'arrête avec « Réduire les animations » (règle v2-calme plus haut). */
+.v2-va-liste li { position: relative; margin-inline: -8px; padding-inline: 8px; border-radius: 6px; transition: background 0.15s, opacity 0.3s, transform 0.3s cubic-bezier(0.23, 1, 0.32, 1); }
+.v2-va-liste li > a:last-child::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+.v2-va-liste li > input { position: relative; z-index: 1; }
+.v2-va-liste a svg, .v2 .v2-va-lien svg { transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1); }
+.v2-va-table tbody tr { position: relative; }
+.v2-va-table tbody td:first-child a::after { content: ""; position: absolute; inset: 0; }
+.v2-va-table tbody td { transition: background 0.15s; }
+@media (hover: hover) and (pointer: fine) {
+  .v2-va-liste li:has(> a:last-child):hover { background: var(--v2-a-200); }
+  .v2-va-liste li:hover a:last-child svg, .v2 .v2-va-lien:hover svg { transform: translateX(2px); }
+  .v2-va-table tbody tr:hover td { background: var(--v2-a-200); }
+}
+.v2-va-liste li[data-partante] { opacity: 0; transform: translateX(8px); transition-delay: 0.12s; }
+.v2-va-liste li[data-partante] .v2-va-texte > span { text-decoration: line-through; color: var(--v2-gray-900); }
+.v2-va-survol { position: absolute; top: 0; bottom: 26px; width: 0; pointer-events: none; z-index: 1; }
+.v2-va-survol::before { content: ""; position: absolute; top: 0; height: 200px; left: -0.5px; width: 1px; background: var(--v2-a-500, var(--v2-gray-700)); }
+.v2-va-survol i { position: absolute; left: -4px; width: 8px; height: 8px; margin-top: -4px; border-radius: 999px; background: var(--v2-blue-700); box-shadow: 0 0 0 3px var(--v2-bg-100); }
+.v2-va-survol span { position: absolute; top: 0; left: 10px; display: grid; gap: 1px; padding: 6px 8px; border-radius: 6px; background: var(--v2-bg-eleve, var(--v2-bg-100)); box-shadow: var(--v2-ombre-petite, 0 0 0 1px var(--v2-a-400)); font-size: 13px; font-weight: 500; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.v2-va-survol span small { font-size: 11px; font-weight: 400; color: var(--v2-gray-900); }
+.v2-va-survol[data-cote="gauche"] span { left: auto; right: 10px; }

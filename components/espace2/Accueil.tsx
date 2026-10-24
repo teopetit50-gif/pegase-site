@@ -19,13 +19,14 @@
    n'écrit plus une heure ni un « Hier » que le visiteur en Guadeloupe
    recalculerait autrement (erreur d'hydratation #418 vue en production). */
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type PointerEvent } from "react";
 import Link from "next/link";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import { dateCourte, montant, relatif } from "@/components/espace/format";
 import { A_PAYER, aPayer, groupeDe, jourDe, totaux } from "./filed/calculs";
 import { useAujourdhui } from "./horloge";
 import { Squelette } from "./ui";
+import { Chiffre } from "./vivant";
 import { RACINE } from "./modules";
 import { useDonnees } from "./donnees";
 import { evenements } from "./evenements";
@@ -94,7 +95,15 @@ export default function Accueil() {
     }
   }, [brut]);
   const duJour = taches.filter((t) => !t.fait).slice(0, 4);
-  const cocher = (id: string) => ecrireStockage(CLE_TACHES, JSON.stringify(taches.map((t) => (t.id === id ? { ...t, fait: true } : t))));
+  /* 24/10/2026 — cocher se voit : la ligne se barre et s'efface, puis quitte la liste */
+  const [partantes, setPartantes] = useState<string[]>([]);
+  const cocher = (id: string) => {
+    setPartantes((l) => [...l, id]);
+    window.setTimeout(() => {
+      ecrireStockage(CLE_TACHES, JSON.stringify(taches.map((t) => (t.id === id ? { ...t, fait: true } : t))));
+      setPartantes((l) => l.filter((x) => x !== id));
+    }, 420);
+  };
 
 
   return (
@@ -139,7 +148,7 @@ export default function Accueil() {
                         {f.echeance_lue ? dateCourte(f.echeance_lue) : "—"}
                         {groupe === "retard" ? <span className="v2-sr"> (en retard)</span> : null}
                       </td>
-                      <td style={{ textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{montant(reste, f.devise)}</td>
+                      <td style={{ textAlign: "right", fontVariantNumeric: "tabular-nums" }}><Chiffre valeur={montant(reste, f.devise)} /></td>
                     </tr>
                   ))}
                 </tbody>
@@ -153,7 +162,7 @@ export default function Accueil() {
         <section className="v2-carte v2-carte-corps">
           <div className="v2-va-titre">
             <h2 className="v2-h2">Aujourd&apos;hui</h2>
-            <span className="v2-gris">{(c?.actions.length ?? 0) + duJour.length} à faire</span>
+            <span className="v2-gris"><Chiffre valeur={`${(c?.actions.length ?? 0) + duJour.length - partantes.length} à faire`} duree={600} /></span>
           </div>
           {!c ? <Squelette largeur="100%" hauteur={200} /> : c.actions.length + duJour.length === 0 ? (
             <p className="v2-gris" style={{ margin: 0 }}>
@@ -162,8 +171,8 @@ export default function Accueil() {
           ) : (
             <ul className="v2-va-liste">
               {duJour.map((t) => (
-                <li key={t.id}>
-                  <input type="checkbox" aria-label={`Marquer « ${t.titre} » comme faite`} onChange={() => cocher(t.id)} />
+                <li key={t.id} data-partante={partantes.includes(t.id) ? "" : undefined}>
+                  <input type="checkbox" aria-label={`Marquer « ${t.titre} » comme faite`} checked={partantes.includes(t.id)} disabled={partantes.includes(t.id)} onChange={() => cocher(t.id)} />
                   <span className="v2-va-texte">
                     <span>{t.titre}</span>
                   </span>
@@ -238,6 +247,12 @@ function Courbe({ valeurs, debut }: { valeurs: number[]; debut: number }) {
     const c1y = Math.min(H, p1[1] + (p2[1] - p0[1]) / 6), c2y = Math.min(H, p2[1] - (p3[1] - p1[1]) / 6);
     ligne += ` C${p1[0] + (p2[0] - p0[0]) / 6},${c1y} ${p2[0] - (p3[0] - p1[0]) / 6},${c2y} ${p2[0]},${p2[1]}`;
   }
+  /* 24/10/2026 — au survol, un repère suit la souris et dit le jour et le montant */
+  const [survol, setSurvol] = useState<number | null>(null);
+  const suivre = (e: PointerEvent<HTMLDivElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    setSurvol(Math.max(0, Math.min(n - 1, Math.round(((e.clientX - r.left) / r.width) * (n - 1)))));
+  };
   const reperes = [0, 0.25, 0.5, 0.75, 1].map((p) => {
     const i = Math.round(p * (n - 1));
     return { x: p * 100, texte: new Date(debut + i * 86_400_000).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) };
@@ -247,7 +262,16 @@ function Courbe({ valeurs, debut }: { valeurs: number[]; debut: number }) {
       <div className="v2-va-axe-y" aria-hidden="true">
         {[1, 0.75, 0.5, 0.25, 0].map((p) => <span key={p}>{kEuros(max * p)}</span>)}
       </div>
-      <div style={{ minWidth: 0 }}>
+      <div style={{ minWidth: 0, position: "relative" }} onPointerMove={suivre} onPointerLeave={() => setSurvol(null)}>
+        {survol !== null ? (
+          <div className="v2-va-survol" style={{ left: `${(survol / Math.max(1, n - 1)) * 100}%` }} data-cote={survol > n / 2 ? "gauche" : undefined} aria-hidden="true">
+            <i style={{ top: pts[survol][1] }} />
+            <span>
+              <small>{new Date(debut + survol * 86_400_000).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}</small>
+              {montant(valeurs[survol])}
+            </span>
+          </div>
+        ) : null}
         <svg viewBox={`0 0 ${L} ${H}`} preserveAspectRatio="none" style={{ width: "100%", height: 200, display: "block", overflow: "visible" }} role="img" aria-label={`Montant reçu sur 7 jours glissants, dernier point : ${montant(valeurs[n - 1] ?? 0)}`}>
           <defs>
             <linearGradient id="v2-va-degrade" x1="0" y1="0" x2="0" y2="1">

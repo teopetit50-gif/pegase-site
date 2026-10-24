@@ -244,9 +244,9 @@ function FeuilleExemple({ fournisseur, numero, ttc }: { fournisseur: string | nu
   );
 }
 
-/* La colonne de gauche : les pages du document, puis le résumé du dossier. */
-function Document({ demande: d, source }: { demande: Demande; source: Source }) {
-  const lien = lienDossierFiled(d.objet_type, d.objet_id, d.payload);
+/* Le dossier FILED de la demande, lu une fois pour les deux colonnes : la
+   pièce à gauche, et à droite ce qui bloque (24/10/2026). */
+function useDossier(d: Demande, source: Source): ResumeDossier | null {
   const facture = d.objet_type === "filed_facture" && d.objet_id ? d.objet_id : null;
   const [reel, setReel] = useState<{ pour: string; resume: ResumeDossier | null } | null>(null);
 
@@ -261,7 +261,19 @@ function Document({ demande: d, source }: { demande: Demande; source: Source }) 
     };
   }, [source, facture]);
 
-  const r = !facture ? null : source === "exemple" ? lireDossierExemple(facture) : reel?.pour === facture ? reel.resume : null;
+  return !facture ? null : source === "exemple" ? lireDossierExemple(facture) : reel?.pour === facture ? reel.resume : null;
+}
+
+/* « gérant, administrateur, valideur » → « gérant, administrateur ou valideur » */
+const ouListe = (l: string[]) => (l.length > 1 ? `${l.slice(0, -1).join(", ")} ou ${l[l.length - 1]}` : (l[0] ?? ""));
+
+/* le résumé saisi finit souvent par le montant, déjà écrit en grand juste dessous */
+const sansMontantFinal = (t: string) => t.replace(/[\s,·—–-]+-?\d[\d\s  ]*(?:,\d+)?\s*(?:€|EUR)\s*$/u, "").trim() || t;
+
+/* La colonne de gauche : les pages du document, puis le résumé du dossier. */
+function Document({ demande: d, source, r }: { demande: Demande; source: Source; r: ResumeDossier | null }) {
+  const lien = lienDossierFiled(d.objet_type, d.objet_id, d.payload);
+  const facture = d.objet_type === "filed_facture" && d.objet_id ? d.objet_id : null;
   const chemin = source === "reelle" ? (r?.piece?.chemin ?? null) : null;
   const mime = r?.piece?.mime ?? "";
 
@@ -370,6 +382,8 @@ export default function DetailDemande(p: Props) {
   const restantes = d.statut === "en_attente" ? Math.max(0, compte.requises - compte.faites) : 0;
   const delegs = useMemo(() => delegationsUtilisables(d, moi, delegations), [d, moi, delegations]);
   const grp = groupeDe(d);
+  const dossier = useDossier(d, source);
+  const bloquee = !!dossier?.bloquants && d.statut === "en_attente";
 
   /* ——— champs des formulaires ——— */
   const [commentaire, setCommentaire] = useState("");
@@ -578,14 +592,14 @@ export default function DetailDemande(p: Props) {
       </header>
 
       <div className="v2-det-carte-corps">
-        <Document demande={d} source={source} />
+        <Document demande={d} source={source} r={dossier} />
 
         {/* ——— la colonne de droite : la décision, ou le formulaire en cours ——— */}
         <section className="v2-det-decision" aria-label="La décision">
           {form === null ? (
             <>
               <div className="v2-det-decision-corps">
-                <h2 className="v2-det-titre">{d.resume}</h2>
+                <h2 className="v2-det-titre">{d.montant !== null ? sansMontantFinal(d.resume) : d.resume}</h2>
                 <div className="v2-det-chiffre">
                   {d.montant !== null ? <span className="v2-det-montant">{montant(d.montant, d.devise)}</span> : null}
                   <span className="v2-det-echeance" data-urgence={grp === "retard" ? "retard" : grp === "aujourdhui" ? "aujourdhui" : undefined}>
@@ -593,6 +607,35 @@ export default function DetailDemande(p: Props) {
                     {d.echeance ? `Échéance ${relatif(d.echeance)} · ${dateHeure(d.echeance)}` : "Sans échéance"}
                   </span>
                 </div>
+
+                {/* 24/10/2026 — Teo : « plus clair et facile à comprendre ». La
+                   situation en une phrase, avant le détail. */}
+                {enAttente ? (
+                  <p className="v2-det-phrase">
+                    {d.demandeur_type === "systeme" ? "Omega" : p.nommer(d.demandeur_id)} demande{" "}
+                    {compte.requises} accord{compte.requises > 1 ? "s" : ""}
+                    {compte.faites ? `, ${compte.faites} déjà donné${compte.faites > 1 ? "s" : ""}` : ""}.{" "}
+                    {v.peut ? (restantes === 1 ? "Votre accord suffit pour valider." : `Il en manque ${restantes}, dont le vôtre.`) : `Il en manque ${restantes}.`}
+                  </p>
+                ) : null}
+
+                {bloquee ? (
+                  <div className="v2-det-blocage" role="status">
+                    <OctagonAlert width={16} height={16} aria-hidden="true" />
+                    <div>
+                      <strong>
+                        Facture bloquée : {dossier!.bloquants} contrôle{dossier!.bloquants > 1 ? "s" : ""} en échec
+                        {dossier!.attention ? `, ${dossier!.attention} point${dossier!.attention > 1 ? "s" : ""} à vérifier` : ""}.
+                      </strong>
+                      <span>Regardez le dossier avant d&apos;approuver ce paiement.</span>
+                    </div>
+                    {lienDossierFiled(d.objet_type, d.objet_id, d.payload) ? (
+                      <Link href={lienDossierFiled(d.objet_type, d.objet_id, d.payload)!} className="v2-det-blocage-lien">
+                        Voir le dossier
+                      </Link>
+                    ) : null}
+                  </div>
+                ) : null}
 
                 <dl className="v2-det-fiche">
                   <dt>Entité</dt>
@@ -605,22 +648,30 @@ export default function DetailDemande(p: Props) {
                     <>
                       <dt>Objet</dt>
                       <dd>
-                        {NATURE_OBJET[d.objet_type] ?? phrase(d.objet_type)} {d.objet_id ? <span className="v2-det-mono">{d.objet_id}</span> : null}
+                        {dossier?.numero ? (
+                          <>Facture <span className="v2-det-mono">{dossier.numero}</span></>
+                        ) : (
+                          <>{NATURE_OBJET[d.objet_type] ?? phrase(d.objet_type)} {d.objet_id ? <span className="v2-det-mono">{d.objet_id}</span> : null}</>
+                        )}
                       </dd>
                     </>
                   ) : null}
-                  <dt>Règle</dt>
+                  <dt>Qui décide</dt>
                   <dd>
-                    {d.approbations_requises} approbation{d.approbations_requises > 1 ? "s" : ""} <span className="v2-det-sous">· {d.roles_autorises.map(libelleRole).join(", ")}</span>
+                    {d.approbations_requises} accord{d.approbations_requises > 1 ? "s" : ""} <span className="v2-det-sous">· {ouListe(d.roles_autorises.map(libelleRole))}</span>
                     {d.equipe_id ? <span className="v2-det-sous"> · équipe {equipes.noms[d.equipe_id] ?? "réservée"}</span> : null}
                   </dd>
-                  <dt>Politique</dt>
-                  <dd>{d.politique_id ? "Approuvée d'office par un accord permanent" : "Décidée par des personnes"}</dd>
+                  {d.politique_id ? (
+                    <>
+                      <dt>Accord permanent</dt>
+                      <dd>Approuvée d&apos;office</dd>
+                    </>
+                  ) : null}
                 </dl>
 
                 {payloadVisible.length ? (
                   <div className="v2-det-bloc">
-                    <h3 className="v2-det-section-titre">Ce que porte la demande</h3>
+                    <h3 className="v2-det-section-titre">Détails</h3>
                     <dl className="v2-det-fiche">
                       {payloadVisible.map(([k, val]) => (
                         <div key={k} style={{ display: "contents" }}>
@@ -684,18 +735,27 @@ export default function DetailDemande(p: Props) {
 
               {/* ——— ce qui conditionne l'action, contre les boutons : jamais dessous ——— */}
               <div className="v2-det-notes">
-                {(ex.commentaire || ex.piece_jointe || ex.motif_refus) && enAttente ? (
-                  <Note teinte="bleu">
-                    <strong>La règle exige</strong>{" "}
-                    {[ex.commentaire && "un commentaire pour approuver", ex.piece_jointe && "une pièce jointe", ex.motif_refus && "un motif en cas de refus"].filter(Boolean).join(", ")}.
-                  </Note>
-                ) : null}
                 {notesEtat}
+                {/* ce que la règle exige : une ligne discrète au-dessus des boutons, plus un encadré */}
+                {(ex.commentaire || ex.piece_jointe || ex.motif_refus) && enAttente && v.peut ? (
+                  <p className="v2-det-exige">
+                    {phrase(
+                      [
+                        ex.commentaire || ex.piece_jointe ? `pour approuver : ${[ex.commentaire && "un commentaire", ex.piece_jointe && "une pièce jointe"].filter(Boolean).join(" et ")}` : null,
+                        ex.motif_refus ? "pour refuser : un motif" : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" · "),
+                    )}
+                    .
+                  </p>
+                ) : null}
               </div>
 
               {enAttente ? (
                 <div className="v2-det-actions">
-                  <button type="button" className="v2-btn v2-btn--primaire" disabled={!v.peut} onClick={() => ouvrir("approuver")}>
+                  {/* facture bloquée : « Approuver » perd le bleu, l'encadré rouge dit pourquoi */}
+                  <button type="button" className={bloquee ? "v2-btn" : "v2-btn v2-btn--primaire"} disabled={!v.peut} onClick={() => ouvrir("approuver")}>
                     <Check width={16} height={16} aria-hidden="true" /> Approuver
                   </button>
                   <button type="button" className="v2-btn v2-det-btn-danger" disabled={!v.peut} onClick={() => ouvrir("refuser")}>

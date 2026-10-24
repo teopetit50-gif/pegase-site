@@ -23,6 +23,7 @@ import { vueExemple } from "@/components/espace/filed/EcranFournisseurs";
 import { MOYENS_PAIEMENT, chargerVueFournisseurs, etatPaiement, noterPaiement, type EtatPaiement, type FactureDuFournisseur, type MoyenPaiement, type VueFournisseurs } from "@/components/espace/filed/portes";
 import { A_PAYER, GROUPES, JOUR, aPayer, du, etatsExemple, groupeDe, jourDe, minuit, totaux, type Etats, type Groupe } from "./calculs";
 import { Badge, Etat, ItemMenu, MenuDeroulant, Note, SeparateurMenu, Squelette, Vide, teinte } from "../ui";
+import { Chiffre } from "../vivant";
 import { useToast } from "../Toasts";
 import { useAujourdhui } from "../horloge";
 
@@ -184,7 +185,7 @@ export default function APayer() {
                 <span className="v2-point" data-teinte={n && g.cle !== "plus_tard" && g.cle !== "sans" ? g.teinte : "gris"} aria-hidden="true" />
                 {g.libelle}
               </span>
-              <span className="v2-stat-valeur">{chargement ? <Squelette largeur={32} hauteur={28} /> : n}</span>
+              <span className="v2-stat-valeur">{chargement ? <Squelette largeur={32} hauteur={28} /> : <Chiffre valeur={String(n)} duree={600} />}</span>
               <span className="v2-stat-sous">{chargement ? <Squelette largeur="70%" hauteur={14} /> : n ? totaux(parGroupe[g.cle], etats) : g.sous}</span>
             </button>
           );
