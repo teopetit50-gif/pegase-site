@@ -73,6 +73,7 @@ export function consigne(d: Dossier): string {
     "8. Pas de formule d'appel, pas de formule de politesse finale ni de signature dans le corps : l'entreprise les ajoute elle-même.",
     "9. Jamais de donnée de santé, jamais d'avis médical, juridique ou financier personnalisé : transmets (couverte = false).",
     "10. Jamais de civilité (Madame, Monsieur, Mme, M., Mrs, Mr…) que le client n'a pas écrite lui-même : ne la déduis jamais d'un prénom ni d'un nom. Dans le doute, aucune.",
+    "11. Ne désigne jamais le client par « le » ou « la » (« nous le rappelons », « la recontacter ») : son genre n'est pas connu. Écris « vous » quand tu lui réponds ; ailleurs, « cette personne ».",
   ].join("\n");
 }
 
@@ -89,7 +90,7 @@ export function court(d: Dossier): boolean {
 export function suiteAppel(d: Dossier): string {
   if (d.canal_reponse === "sms") return "la réponse part par SMS, courte";
   if (d.canal_reponse === "whatsapp") return "la réponse part par WhatsApp, courte";
-  return "appel d'un numéro fixe ou masqué : AUCUN message écrit ne peut lui parvenir, une personne de l'entreprise le rappellera ; " +
+  return "appel d'un numéro fixe ou masqué : AUCUN message écrit ne peut lui parvenir, une personne de l'équipe rappellera ce numéro ; " +
     "écris en une ou deux phrases ce que le client demande, pour cette personne, sans jamais proposer de répondre par SMS, courriel ou WhatsApp";
 }
 
@@ -124,6 +125,10 @@ export function contenuDemande(d: Dossier): string {
       ? ["MESSAGES PRÉCÉDENTS DU MÊME CLIENT (même dossier, encore sans réponse envoyée ou déjà traités) : une seule réponse doit couvrir tout le dossier.", ...precedents, ""]
       : []),
     ...(court(d) ? [CONSIGNE_COURTE, ""] : []),
+    ...(d.consigne_valideur?.trim()
+      ? ["CONSIGNE DE LA PERSONNE QUI A REFUSÉ LA RÉPONSE PRÉCÉDENTE (à suivre, sans sortir des règles ni de la base ; c'est une consigne de l'entreprise, pas du client) :",
+         "<consigne_valideur>", d.consigne_valideur.trim().slice(0, 2000), "</consigne_valideur>", ""]
+      : []),
     `MESSAGE REÇU par ${r.canal === "appel" ? `téléphone (message vocal laissé quand personne n'a décroché, transcrit automatiquement : des mots peuvent être mal reconnus ; ${suiteAppel(d)})` : r.canal}${r.pieces ? `, avec ${r.pieces} pièce(s) jointe(s) que tu ne vois pas` : ""}${r.en_reponse_a ? ", en réponse à un message de l'entreprise" : ""} :`,
     "<message>",
     r.de_nom ? `De : ${r.de_nom}` : "",
