@@ -17,6 +17,15 @@ end $$;
 create or replace function tests.c4_affaire_lue(p_affaire uuid) returns public.offload_affaires
 language sql stable as $$ select * from public.offload_affaires a where a.id = p_affaire $$;
 
+-- Le test simule les jours par p_jour, pas l'horloge des envois : une remise faite « sept jours plus tôt » est
+-- partie à la même seconde réelle que la suivante, et le délai minimal entre deux messages au même destinataire
+-- (3 jours sur la recette) retiendrait la seconde. On recule donc l'heure de départ de la remise d'autant de jours.
+create or replace function tests.c4_vieillir_envoi(p_envoi uuid, p_jours integer) returns void
+language sql as $$
+  update public.envois set envoye_le = envoye_le - make_interval(days => p_jours), pret_le = pret_le - make_interval(days => p_jours)
+  where id = p_envoi
+$$;
+
 create or replace function tests.test_c4_08_cycle() returns setof text
 language plpgsql as $f$
 declare
@@ -68,6 +77,7 @@ begin
 
   -- Sept jours plus tard : une seule autre (la première est partie : depuis c4_35, la suite attend son départ).
   perform tests.c4_remettre((tests.c4_affaire_lue(v_aff)).envoi1_id, (banc ->> 'gerant')::uuid, 'gerant@banc-varelo.test');
+  perform tests.c4_vieillir_envoi((tests.c4_affaire_lue(v_aff)).envoi1_id, 7);
   perform private.offload_affaires_cycle(v_client, current_date + 7);
   a := tests.c4_affaire_lue(v_aff);
   return next ok(a.statut = 'relancee_2' and a.envoi2_id is not null and a.envoi2_id <> a.envoi1_id, 'Puis une seule autre relance');
@@ -77,6 +87,7 @@ begin
   -- Sans réponse : décision manuelle, montant immobilisé en regard ; plus aucun message.
   perform tests.c4_remettre((tests.c4_affaire_lue(v_aff)).envoi2_id, (banc ->> 'gerant')::uuid, 'gerant@banc-varelo.test');
   perform tests.c4_remettre((tests.c4_affaire_lue(v_jeune)).envoi1_id, (banc ->> 'gerant')::uuid, 'gerant@banc-varelo.test');
+  perform tests.c4_vieillir_envoi((tests.c4_affaire_lue(v_jeune)).envoi1_id, 26);
   perform private.offload_affaires_cycle(v_client, current_date + 14);
   perform tests.c4_remettre((tests.c4_affaire_lue(v_jeune)).envoi2_id, (banc ->> 'gerant')::uuid, 'gerant@banc-varelo.test');
   perform private.offload_affaires_cycle(v_client, current_date + 40);
