@@ -5,6 +5,11 @@ Dernière mise à jour : 05/10/2026, 23 h.
 
 ## REPRISE (pause demandée par Teo, 06/10/2026 à 21 h Z)
 
+**25/10, 01 h 23 Z — PAUSE (Teo). Arrêt propre, tout est poussé sur worker-b5.**
+- Fait pendant la relance : l'écran Lorani choisit toujours la même organisation (`?organisation=<id>` si le compte en est membre, sinon une organisation d'architectes, sinon le plus ancien compte) et filtre ses 26 lectures sur `client_id` (portes.ts). La recette passe à 110/110.
+- Accessibilité : 10 écarts « color-contrast » sur les réserves levées (`div[data-statut="levee"]`). Ils sont présents aussi sans ce changement, donc venus avec la fusion de main : à corriger dans lorani.css (lot suivant).
+- Le reste attend toujours le crédit IA, voir la reprise du 18/10 ci-dessous.
+
 **18/10, 20 h 00 Z — PAUSE DE SÉCURITÉ (coordinateur). Rien en cours, tout est poussé sur worker-b5.**
 - Démo Guadeloupe pour le lundi 27/10, prête et répétée (omega/banc/demo-aau/PLAN.md). Client aa01 posé, PCMI de Baie-Mahault, PLU, servitudes et risques relevés en vrai, courriers d'essai prêts ; ne pas utiliser le compte de Teo (rattaché par erreur à aa01) ; il faut un compte propre à aa01, ou un lot écran qui choisit l'organisation.
 - Crédit IA de la recette épuisé : rien n'est à déposer avant sa recharge. À la recharge, dans l'ordre : le CCTP de Luzarches à relire, les courriers d'essai du PCMI, puis les DCE de l'Hôtel de police (branche bureau-dce-gpe ; relamping 16 p., vidéosurveillance 32 p. ; LORANI_CLIENT, LORANI_EMAIL et LORANI_MOT_DE_PASSE en local), et le chronométrage du dépôt en direct.

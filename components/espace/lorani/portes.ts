@@ -50,14 +50,26 @@ function message(e: unknown): string {
 
 type Compte = { user_id: string; client_id: string; role: string };
 
+/* L'organisation de l'écran. Un compte peut appartenir à plusieurs organisations (comptes) : la RLS laisse alors lire les
+   lignes de toutes. On en retient une, toujours la même : celle que l'adresse désigne (?organisation=<id>) si le compte en
+   est membre, sinon une organisation d'architectes (clients.secteur = 'archi'), sinon le plus ancien compte. Chaque
+   lecture de chargerDossier est ensuite filtrée sur elle, et les écritures partent sous elle. */
 export async function monCompte(): Promise<Compte | null> {
   const supabase = createClient();
   const { data: auth, error } = await supabase.auth.getUser();
   if (error) throw new ErreurPorte(message(error));
   if (!auth.user) return null;
-  const { data } = await supabase.from("comptes").select("client_id, role").eq("user_id", auth.user.id).limit(1);
-  const c = (data ?? [])[0] as { client_id: string; role: string } | undefined;
-  return c ? { user_id: auth.user.id, client_id: c.client_id, role: c.role } : null;
+  const { data } = await supabase.from("comptes").select("client_id, role, cree_le").eq("user_id", auth.user.id).order("cree_le").limit(50);
+  const comptes = (data ?? []) as { client_id: string; role: string }[];
+  if (!comptes.length) return null;
+  let c = comptes[0];
+  if (comptes.length > 1) {
+    const voulue = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("organisation") : null;
+    const { data: orgs } = await supabase.from("clients").select("id, secteur").in("id", comptes.map((x) => x.client_id));
+    const archi = new Set(((orgs ?? []) as { id: string; secteur: string | null }[]).filter((o) => o.secteur === "archi").map((o) => o.id));
+    c = comptes.find((x) => x.client_id === voulue) ?? comptes.find((x) => archi.has(x.client_id)) ?? comptes[0];
+  }
+  return { user_id: auth.user.id, client_id: c.client_id, role: c.role };
 }
 
 export async function chargerDossier(): Promise<Dossier> {
@@ -65,45 +77,45 @@ export async function chargerDossier(): Promise<Dossier> {
   const moi = await monCompte();
   if (!moi) throw new ErreurPorte("Aucune session ouverte : connectez-vous depuis le cockpit.");
   const [projets, permis, dates, echeances, recours, lots, intervenants, membres, cas, pieces, annuaire, honoraires, temps, marches, situations, visas, controles, controlePieces, constats, plu, attestations, ordresService, reserves, comptesRendus, points, doe, consultations, offres] = await Promise.all([
-    supabase.from("lorani_projets").select("*").order("maj_le", { ascending: false }).limit(300),
-    supabase.from("lorani_permis").select("*").order("cree_le", { ascending: false }).limit(600),
-    supabase.from("lorani_permis_dates_lues").select("*").order("cree_le", { ascending: false }).limit(600),
-    supabase.from("lorani_echeances_permis").select("*").limit(2000),
-    supabase.from("lorani_permis_recours").select("*").order("date_recours").limit(600),
-    supabase.from("lorani_lots").select("id, projet_id, numero, intitule, activites_requises").order("numero").limit(2000),
-    supabase.from("lorani_intervenants").select("*").order("organisme").limit(2000),
-    supabase.from("lorani_membres_projet").select("id, projet_id, user_id, role_projet").limit(2000),
+    supabase.from("lorani_projets").select("*").eq("client_id", moi.client_id).order("maj_le", { ascending: false }).limit(300),
+    supabase.from("lorani_permis").select("*").eq("client_id", moi.client_id).order("cree_le", { ascending: false }).limit(600),
+    supabase.from("lorani_permis_dates_lues").select("*").eq("client_id", moi.client_id).order("cree_le", { ascending: false }).limit(600),
+    supabase.from("lorani_echeances_permis").select("*").eq("client_id", moi.client_id).limit(2000),
+    supabase.from("lorani_permis_recours").select("*").eq("client_id", moi.client_id).order("date_recours").limit(600),
+    supabase.from("lorani_lots").select("id, projet_id, numero, intitule, activites_requises").eq("client_id", moi.client_id).order("numero").limit(2000),
+    supabase.from("lorani_intervenants").select("*").eq("client_id", moi.client_id).order("organisme").limit(2000),
+    supabase.from("lorani_membres_projet").select("id, projet_id, user_id, role_projet").eq("client_id", moi.client_id).limit(2000),
     supabase.from("lorani_cas_rejet").select("code, article, libelle, source_url").order("code"),
     /* public.pieces date la réception (recue_le) ; l'écran la montre comme date de dépôt */
-    supabase.from("pieces").select("id, objet_id, nom_fichier, mime, statut, type_piece, motif, source, chemin, recue_le").eq("module", "lorani").eq("objet_type", "lorani_projet").order("recue_le", { ascending: false }).limit(600),
+    supabase.from("pieces").select("id, objet_id, nom_fichier, mime, statut, type_piece, motif, source, chemin, recue_le").eq("client_id", moi.client_id).eq("module", "lorani").eq("objet_type", "lorani_projet").order("recue_le", { ascending: false }).limit(600),
     supabase.rpc("annuaire", { p_client: moi.client_id }),
     /* b5_12 : absentes tant que la migration n'est pas posée ; l'écran montre alors des honoraires vides */
-    supabase.from("lorani_honoraires").select("id, projet_id, element, intitule, montant_ht, heures_prevues, statut, achevee_le, facturee_le").limit(3000),
-    supabase.from("lorani_temps").select("id, projet_id, honoraire_id, membre, jour, heures, note").order("jour", { ascending: false }).limit(5000),
+    supabase.from("lorani_honoraires").select("id, projet_id, element, intitule, montant_ht, heures_prevues, statut, achevee_le, facturee_le").eq("client_id", moi.client_id).limit(3000),
+    supabase.from("lorani_temps").select("id, projet_id, honoraire_id, membre, jour, heures, note").eq("client_id", moi.client_id).order("jour", { ascending: false }).limit(5000),
     /* b5_13 : absentes tant que la migration n'est pas posée ; le chantier est alors vide */
-    supabase.from("lorani_marches").select("*").limit(2000),
-    supabase.from("lorani_situations").select("id, projet_id, marche_id, numero, mois, cumul_ht, recue_le, a_viser_avant, statut, cumul_admis_ht, observation, visee_le, avancement_declare, avancement_constate, avancement_cr, retenue_deduite_ht, avance_remboursee_ht, penalites_ht, montants").order("numero").limit(5000),
-    supabase.from("lorani_visas").select("id, projet_id, lot_id, document, indice, recu_le, commande_le, delai_visa_jours, a_viser_avant, avis, observation, vise_le").order("recu_le", { ascending: false }).limit(5000),
+    supabase.from("lorani_marches").select("*").eq("client_id", moi.client_id).limit(2000),
+    supabase.from("lorani_situations").select("id, projet_id, marche_id, numero, mois, cumul_ht, recue_le, a_viser_avant, statut, cumul_admis_ht, observation, visee_le, avancement_declare, avancement_constate, avancement_cr, retenue_deduite_ht, avance_remboursee_ht, penalites_ht, montants").eq("client_id", moi.client_id).order("numero").limit(5000),
+    supabase.from("lorani_visas").select("id, projet_id, lot_id, document, indice, recu_le, commande_le, delai_visa_jours, a_viser_avant, avis, observation, vise_le").eq("client_id", moi.client_id).order("recu_le", { ascending: false }).limit(5000),
     /* b5_16 : absentes tant que la migration n'est pas posée ; le contrôle du dossier est alors vide */
     /* « * » : la colonne changements (b5_28) quand elle existe */
-    supabase.from("lorani_controles").select("*").order("cree_le", { ascending: false }).limit(1000),
-    supabase.from("lorani_controle_pieces").select("id, controle_id, piece_id, role, reference").limit(10000),
-    supabase.from("lorani_constats").select("id, controle_id, nature, gravite, grandeur, objet, titre, correction, article, valeurs, statut, motif, precedent_id, corrige_au_controle, decide_par, decide_le").limit(10000),
+    supabase.from("lorani_controles").select("*").eq("client_id", moi.client_id).order("cree_le", { ascending: false }).limit(1000),
+    supabase.from("lorani_controle_pieces").select("id, controle_id, piece_id, role, reference").eq("client_id", moi.client_id).limit(10000),
+    supabase.from("lorani_constats").select("id, controle_id, nature, gravite, grandeur, objet, titre, correction, article, valeurs, statut, motif, precedent_id, corrige_au_controle, decide_par, decide_le").eq("client_id", moi.client_id).limit(10000),
     /* b5_17 : absente tant que la migration n'est pas posée ; le PLU est alors « non cherché » */
-    supabase.from("lorani_plu").select("*").limit(1000),
+    supabase.from("lorani_plu").select("*").eq("client_id", moi.client_id).limit(1000),
     /* b5_18 : absente tant que la migration n'est pas posée ; les assurances sont alors vides */
-    supabase.from("lorani_attestations").select("id, projet_id, intervenant_id, lot_id, piece_id, assureur, numero_police, assure, siren, activites, debut, fin, plafond_eur, statut, constats, verifie_le").limit(5000),
+    supabase.from("lorani_attestations").select("id, projet_id, intervenant_id, lot_id, piece_id, assureur, numero_police, assure, siren, activites, debut, fin, plafond_eur, statut, constats, verifie_le").eq("client_id", moi.client_id).limit(5000),
     /* b5_19 : absentes tant que la migration n'est pas posée */
-    supabase.from("lorani_ordres_service").select("id, projet_id, marche_id, numero, nature, objet, emis_le, notifie_le, montant_ht, delai_jours, statut, reserves_entreprise, reserves_jusquau").order("numero").limit(5000),
-    supabase.from("lorani_reserves").select("id, projet_id, lot_id, marche_id, numero, intitule, localisation, origine, constatee_le, lever_avant, statut, levee_le, motif").order("numero").limit(10000),
+    supabase.from("lorani_ordres_service").select("id, projet_id, marche_id, numero, nature, objet, emis_le, notifie_le, montant_ht, delai_jours, statut, reserves_entreprise, reserves_jusquau").eq("client_id", moi.client_id).order("numero").limit(5000),
+    supabase.from("lorani_reserves").select("id, projet_id, lot_id, marche_id, numero, intitule, localisation, origine, constatee_le, lever_avant, statut, levee_le, motif").eq("client_id", moi.client_id).order("numero").limit(10000),
     /* b5_20 : absentes tant que la migration n'est pas posée */
-    supabase.from("lorani_comptes_rendus").select("id, projet_id, numero, visite_le, presents, notes, avancement, avancement_lots, prochaine_visite, statut, diffuse_le, contenu").order("numero").limit(5000),
-    supabase.from("lorani_points").select("id, projet_id, lot_id, intervenant_id, nature, texte, echeance, statut, reponse, repondu_le, ouvert_au_cr, clos_au_cr, cree_le, maj_le").order("cree_le").limit(20000),
+    supabase.from("lorani_comptes_rendus").select("id, projet_id, numero, visite_le, presents, notes, avancement, avancement_lots, prochaine_visite, statut, diffuse_le, contenu").eq("client_id", moi.client_id).order("numero").limit(5000),
+    supabase.from("lorani_points").select("id, projet_id, lot_id, intervenant_id, nature, texte, echeance, statut, reponse, repondu_le, ouvert_au_cr, clos_au_cr, cree_le, maj_le").eq("client_id", moi.client_id).order("cree_le").limit(20000),
     /* b5_21 : absente tant que la migration n'est pas posée */
-    supabase.from("lorani_doe").select("id, projet_id, lot_id, nature, intitule, statut, piece_id, recu_le, motif").limit(20000),
+    supabase.from("lorani_doe").select("id, projet_id, lot_id, nature, intitule, statut, piece_id, recu_le, motif").eq("client_id", moi.client_id).limit(20000),
     /* b5_26 : absentes tant que la migration n'est pas posée ; l'analyse des offres est alors vide */
-    supabase.from("lorani_consultations").select("id, projet_id, lot_id, intitule, dpgf_piece_id, estimation_ht, seuil_ecart_pct, date_limite, statut, offre_retenue, tableau, analysee_le, cree_le").order("cree_le", { ascending: false }).limit(2000),
-    supabase.from("lorani_offres").select("id, projet_id, consultation_id, piece_id, intervenant_id, entreprise, siren, montant_ht, montant_calcule_ht, montant_comparable_ht, rang, ecart_estimation_pct, reserves, constats, statut, motif, recue_le").limit(10000),
+    supabase.from("lorani_consultations").select("id, projet_id, lot_id, intitule, dpgf_piece_id, estimation_ht, seuil_ecart_pct, date_limite, statut, offre_retenue, tableau, analysee_le, cree_le").eq("client_id", moi.client_id).order("cree_le", { ascending: false }).limit(2000),
+    supabase.from("lorani_offres").select("id, projet_id, consultation_id, piece_id, intervenant_id, entreprise, siren, montant_ht, montant_calcule_ht, montant_comparable_ht, rang, ecart_estimation_pct, reserves, constats, statut, motif, recue_le").eq("client_id", moi.client_id).limit(10000),
   ]);
   /* le premier refus de la base est dit tel quel ; les lectures secondaires manquantes ne cachent pas les permis */
   for (const r of [projets, permis, dates]) if (r.error) throw new ErreurPorte(message(r.error));
