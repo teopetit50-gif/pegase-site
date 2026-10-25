@@ -4,11 +4,11 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 `components/espace/offload/`, `app/espace/offload/`, et ce fichier. Coordinateur : session
 `session_01BCGFdpRKBvXKjouC75sYBg`. Je n'appelle jamais Supabase : le coordinateur pose, je reçois les sorties brutes.
 
-## REPRISE (25/10, 01 h 20 Z — sprint de Teo jusqu'à 01 h 52 Z)
+## REPRISE (25/10, 01 h 25 Z — fin du sprint de Teo)
 
-- Fait : c4_01 à c4_33 posés ; c4_34 (contrats à reconduction) et c4_35 (TOFFLOAD-11) poussés, local 509 ok.
-- En cours : rien.
-- Puis : valeur en jeu par segment et export tableur de la restitution. Import des personnes morales : attend Teo.
+- Fait : c4_01 à c4_33 posés ; c4_34 (contrats à reconduction), c4_35 (TOFFLOAD-11), c4_36 (valeur par segment, restitution en tableur) poussés, local 513 ok.
+- En cours : rien. Import des personnes morales : script livré (6f0a05b2), non joué, attend Teo.
+- Prochain pas : poser c4_34 à c4_36 ; l'écran n'a pas encore la carte « par segment » ni le bouton « tableur » (portes prêtes).
 
 ### Reprise du 17/10
 
@@ -450,6 +450,14 @@ Banc local : 28 tests, 312 assertions vertes, migrations posées deux fois ; tsc
 **Limites** : le taux par message ne compte pas les messages d'échéance (pas de réponse rattachée à une échéance ;
 l'échéance honorée après message est comptée au suivi). Le chiffre repris compte tous les achats des 90 jours,
 sans prétendre qu'ils sont dus au seul message.
+
+## Lot c4_36 — valeur en jeu par segment, restitution en tableur (25/10)
+
+`public.offload_valeur_par_segment(p_client)` (gérant/admin) : par secteur (« Sans segment » à défaut), comptes suivis,
+à risque, valeur annuelle en jeu, reprises en cours ; comptes effacés, retirés, fusionnés exclus.
+`public.offload_restitution_tableur(p_client)` (gérant/admin) : la restitution c4_17 en CSV, un fichier par famille
+(« ; », guillemets doublés, en-tête), au journal. Test `c4_36_segments_et_tableur.sql` : tombe sans le lot, 4 verts
+avec. Local : 59 tests, 513 ok.
 
 ## Lot c4_35 — les relances d'affaire se valident, la suite attend leur départ (TOFFLOAD-11, 25/10)
 
@@ -922,3 +930,4 @@ Partielles : 6, 11, 15, 38.
 - 23/10, 00 h 30 Z — lot c4_33 (affaires en plan : relance par une personne sans message, chiffrage) : 502 ok.
 - 25/10, 01 h 20 Z — lot c4_34 (contrats à reconduction au tableau des échéances) : 505 ok.
 - 25/10, 01 h 20 Z — lot c4_35 (TOFFLOAD-11) : 509 ok.
+- 25/10, 01 h 25 Z — lot c4_36 (valeur par segment, restitution en tableur) : 513 ok.
