@@ -4,6 +4,8 @@
 // Six courriers, lorani_courrier_autre, la situation de travaux (b5_14) et les quatre pièces du contrôle du
 // dossier (b5_16 : planche, CCTP, DPGF, règlement du PLU, champs à nom composé) ; dates en AAAA-MM-JJ.
 // Les clés suivent les champs « obligatoires » de la fiche de B5 ; les autres champs sont facultatifs.
+// Les pièces de chantier (b5_51, 25/10) : ordre de service, avenant, procès-verbal de réception ; la base en tire une
+// lecture « à confirmer » (lorani_lectures_chantier), rien n'entre au marché sans le geste d'un membre.
 
 import type { FamilleChamps, SchemaModule } from "./modules.ts";
 
@@ -143,11 +145,15 @@ export const ACTIVITES_BTP = [
 
 export const DECISIONS_ARRETE = ["accorde", "refuse", "non_opposition", "opposition", "sursis"] as const;
 export const TYPES_AUTORISATION = ["pc", "pcmi", "pa", "pd", "dp"] as const;
+/** La nature d'un ordre de service (b5_19, b5_51). */
+export const NATURES_OS = ["demarrage", "travaux_modificatifs", "travaux_supplementaires", "arret", "reprise", "autre"] as const;
+/** Les colonnes d'une réserve d'un PV de réception (b5_51 lit intitule, lot, localisation, lever_avant). */
+export const CHAMPS_RESERVE_LORANI = ["intitule", "lot", "localisation", "lever_avant"] as const;
 
 export const SCHEMA_LORANI: SchemaModule = {
   module: "lorani",
   presentation:
-    "le module d'urbanisme d'une plateforme pour PME françaises : il lit les courriers et actes reçus de la mairie, de la préfecture ou d'un commissaire de justice (huissier) à propos d'une demande d'autorisation d'urbanisme (permis de construire, permis d'aménager, déclaration préalable, permis de démolir)",
+    "le module d'urbanisme et de suivi de chantier d'une plateforme pour PME françaises : il lit les courriers et actes reçus de la mairie, de la préfecture ou d'un commissaire de justice (huissier) à propos d'une demande d'autorisation d'urbanisme (permis de construire, permis d'aménager, déclaration préalable, permis de démolir), les pièces du dossier, et, pendant le chantier, les pièces des marchés de travaux (situations, ordres de service, avenants, procès-verbaux de réception)",
   types: [
     {
       type: "lorani_recepisse_depot",
@@ -299,8 +305,44 @@ export const SCHEMA_LORANI: SchemaModule = {
       champs: ["zone"],
       cles: [],
     },
+    {
+      type: "lorani_ordre_service",
+      libelle: "ordre de service",
+      description:
+        "un ordre de service (OS) de la maîtrise d'œuvre ou du maître d'ouvrage à une entreprise de travaux : démarrage, travaux modificatifs ou supplémentaires, arrêt ou reprise du chantier ; son numéro, sa date d'émission, sa date de notification, son incidence sur le montant HT (négative pour une moins-value) et sur le délai en jours (négative pour une réduction), le titulaire et le lot",
+      champs: ["objet", "date_emission", "numero_os", "nature", "date_notification", "montant_ht", "delai_jours", "titulaire", "lot"],
+      cles: ["objet", "date_emission"],
+    },
+    {
+      type: "lorani_avenant",
+      libelle: "avenant au marché",
+      description:
+        "un avenant au marché d'une entreprise de travaux : son objet, son montant HT (positif pour une plus-value, négatif pour une moins-value), son numéro, sa date de signature (seulement si l'avenant est signé et daté), le nouveau montant HT du marché s'il est écrit, le titulaire et le lot",
+      champs: ["objet", "montant_ht", "numero_avenant", "date_signature", "montant_marche_ht", "titulaire", "lot"],
+      cles: ["objet", "montant_ht"],
+    },
+    {
+      type: "lorani_pv_reception",
+      libelle: "procès-verbal de réception",
+      description:
+        "un procès-verbal de réception des travaux (ou des opérations préalables à la réception, OPR), avec ou sans réserves : la date de réception, s'il s'agit d'OPR, la mention « avec » ou « sans » réserves, le délai de levée en jours, et chaque réserve dans « reserves », dans l'ordre du PV",
+      champs: ["date_reception", "origine", "avec_reserves", "delai_levee_jours", "reserves"],
+      cles: ["date_reception"],
+    },
   ],
   familles: FAMILLES_CONTROLE,
+  reserves: {
+    colonnes: [...CHAMPS_RESERVE_LORANI],
+    principal: "intitule",
+    description:
+      "PV de réception seulement : chaque réserve, dans l'ordre du PV, telle qu'écrite. Rien de deviné : un lot ou une localisation seulement s'ils sont écrits, une date de levée seulement si elle est écrite.",
+    proprietes: {
+      intitule: { type: "string", description: "La réserve, telle qu'écrite." },
+      lot: { type: ["string", "null"], description: "Le lot, tel qu'écrit (« 02 », « Menuiseries »)." },
+      localisation: { type: ["string", "null"], description: "Le logement, la pièce ou l'ouvrage concerné." },
+      lever_avant: { type: ["string", "null"], description: "La date avant laquelle la lever, en AAAA-MM-JJ, seulement si elle est écrite." },
+    },
+  },
   champs: [
     {
       champ: "numero_dossier",
@@ -349,15 +391,15 @@ export const SCHEMA_LORANI: SchemaModule = {
       description: "le délai laissé pour fournir les pièces, en mois (souvent 3), s'il est écrit",
     },
     { champ: "prescriptions", type: "texte", max: 1000, description: "les prescriptions dont l'arrêté assortit la décision, résumées fidèlement" },
-    { champ: "date_notification", type: "date", description: "la date de notification de l'arrêté, si elle est écrite" },
+    { champ: "date_notification", type: "date", description: "la date de notification de l'arrêté ou de l'ordre de service, si elle est écrite" },
     { champ: "date_certificat", type: "date", description: "la date du certificat de décision tacite" },
     { champ: "commissaire", type: "texte", max: 200, description: "le nom du commissaire de justice (huissier) ou de son étude" },
     { champ: "cumul_ht", type: "nombre", description: "situation : le montant HT cumulé des travaux exécutés à ce jour depuis le début du marché" },
     { champ: "numero_situation", type: "entier", min: 1, maximum: 999, description: "situation : son numéro (« Situation n° 3 »)" },
     { champ: "mois", type: "mois", description: "situation : le mois des travaux, en AAAA-MM" },
-    { champ: "titulaire", type: "texte", max: 200, description: "situation : la raison sociale de l'entreprise titulaire, telle qu'écrite" },
+    { champ: "titulaire", type: "texte", max: 200, description: "situation, ordre de service, avenant : la raison sociale de l'entreprise titulaire, telle qu'écrite" },
     { champ: "lot", type: "texte", max: 20, description: "le numéro du lot, tel qu'écrit (« 02 », « 08.1 »)" },
-    { champ: "montant_marche_ht", type: "nombre", description: "situation : le montant HT du marché" },
+    { champ: "montant_marche_ht", type: "nombre", description: "situation : le montant HT du marché ; avenant : le nouveau montant HT du marché, s'il est écrit" },
     { champ: "cumul_precedent_ht", type: "nombre", description: "situation : le cumul HT de la situation précédente" },
     { champ: "montant_periode_ht", type: "nombre", description: "situation : le montant HT des travaux du mois" },
     { champ: "reference", type: "texte", max: 40, description: "planche : sa référence (« PC2 », « A-102 »)" },
@@ -383,6 +425,39 @@ export const SCHEMA_LORANI: SchemaModule = {
       type: "nombre",
       description: "attestation décennale : le plafond de garantie par sinistre pour les ouvrages non soumis à l'obligation d'assurance, en euros, nombre sans unité",
     },
+    { champ: "objet", type: "texte", max: 300, description: "ordre de service, avenant : son objet, tel qu'écrit" },
+    { champ: "date_emission", type: "date", description: "ordre de service : sa date d'émission (la date de l'OS)" },
+    { champ: "numero_os", type: "entier", min: 1, maximum: 999, description: "ordre de service : son numéro (« OS n° 6 » → 6)" },
+    {
+      champ: "nature",
+      type: "choix",
+      choix: [...NATURES_OS],
+      description:
+        "ordre de service : demarrage (ordre de commencer), travaux_modificatifs, travaux_supplementaires, arret (arrêt ou suspension), reprise, autre",
+    },
+    {
+      champ: "montant_ht",
+      type: "nombre",
+      description: "ordre de service, avenant : le montant HT en euros, nombre sans unité, NÉGATIF pour une moins-value (« moins-value de 1 500 € » → -1500)",
+    },
+    {
+      champ: "delai_jours",
+      type: "entier",
+      min: -3650,
+      maximum: 3650,
+      description: "ordre de service : l'incidence sur le délai, en jours (une prolongation est positive, une réduction négative) ; en semaines, ×7",
+    },
+    { champ: "numero_avenant", type: "entier", min: 1, maximum: 999, description: "avenant : son numéro (« Avenant n° 2 » → 2)" },
+    { champ: "date_signature", type: "date", description: "avenant : la date de signature, seulement si l'avenant est signé et daté" },
+    { champ: "date_reception", type: "date", description: "PV de réception : la date de la réception (ou des opérations préalables)" },
+    {
+      champ: "origine",
+      type: "choix",
+      choix: ["reception", "opr"],
+      description: "PV de réception : reception (PV de réception), opr (PV des opérations préalables à la réception)",
+    },
+    { champ: "avec_reserves", type: "choix", choix: ["oui", "non"], description: "PV de réception : oui si la réception est prononcée avec réserves, non si sans réserve" },
+    { champ: "delai_levee_jours", type: "entier", min: 1, maximum: 3650, description: "PV de réception : le délai de levée des réserves, en jours, s'il est écrit" },
   ],
   lignes: false,
 };

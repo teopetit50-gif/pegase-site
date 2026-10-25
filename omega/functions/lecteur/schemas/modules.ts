@@ -69,6 +69,8 @@ export interface SchemaModule {
   familles?: FamilleChamps[];
   /** Les colonnes gardées pour une ligne de détail (CHAMPS_LIGNE des factures par défaut). */
   colonnesLigne?: string[];
+  /** La liste « reserves » propre au module (Lorani : PV de réception), une seule valeur, un tableau d'objets. */
+  reserves?: { colonnes: string[]; principal: string; description: string; proprietes: Record<string, unknown> };
 }
 
 /** FILED, construit depuis schemas/facture.ts pour ne rien dupliquer. */
@@ -207,7 +209,13 @@ export function schemaOutilPour(module: string | null | undefined): Record<strin
       (s.champs.some((c) => c.type === "dateheure") ? ", AAAA-MM-JJTHH:MM (heure locale, sans fuseau) pour une date et heure, AAAA-MM-JJ seul si l'heure n'est pas imprimée" : "") +
       ", nombre entier pour les durées, rangs et numéros de passage, l'une des valeurs admises pour un choix, tableau de textes pour une liste, texte sinon.",
   };
-  delete props.reserves; // les documents de chantier ne se lisent que par le schéma FILED
+  if (s.reserves) {
+    props.reserves = {
+      type: "array",
+      description: s.reserves.description,
+      items: { type: "object", required: [s.reserves.principal, "page"], properties: { ...s.reserves.proprietes, page: { type: "integer", minimum: 1 } } },
+    };
+  } else delete props.reserves; // les documents de chantier ne se lisent que par le schéma FILED
   delete props.dispositions;
   delete props.lignes_heures;
   if (!s.lignes) {
@@ -216,8 +224,13 @@ export function schemaOutilPour(module: string | null | undefined): Record<strin
     delete props.taxes_autres;
   } else if (s.colonnesLigne?.includes("lot")) {
     const l = props.lignes as { description?: string; items: { properties: Record<string, unknown> } };
-    l.description = "TOUTES les lignes chiffrées du document, dans l'ordre ; pour chacune, le lot ou la section dont elle relève.";
+    l.description = s.colonnesLigne.includes("reference")
+      ? "TOUTES les lignes du document, dans l'ordre : pour un devis, les lignes chiffrées avec le lot ou la section dont elles relèvent ; pour un bon de livraison, chaque article livré avec sa référence, sa quantité livrée (nombre) et son unité telle qu'écrite."
+      : "TOUTES les lignes chiffrées du document, dans l'ordre ; pour chacune, le lot ou la section dont elle relève.";
     l.items.properties.lot = { type: ["string", "null"], description: "le lot ou le titre de section (« Lot 02 Gros œuvre », « Menuiseries »)" };
+    if (s.colonnesLigne.includes("reference")) {
+      l.items.properties.reference = { type: ["string", "null"], description: "la référence de l'article, telle qu'écrite (« F12 »)" };
+    }
   }
   const decoupage = props.decoupage as Record<string, unknown>;
   const dItems = decoupage.items as Record<string, unknown>;

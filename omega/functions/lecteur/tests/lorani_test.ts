@@ -208,6 +208,9 @@ Deno.test("table des types par module : schémas d'outil et consignes", () => {
     "lorani_plan_bet",
     "lorani_notice",
     "lorani_plu_reglement",
+    "lorani_ordre_service",
+    "lorani_avenant",
+    "lorani_pv_reception",
     "autre",
   ]);
   const outil = schemaOutilPour("lorani") as { properties: Record<string, { enum?: string[]; items?: { properties: Record<string, { enum?: string[] }> } }> };

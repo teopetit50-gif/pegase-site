@@ -690,7 +690,7 @@ export function valeurListeObjets(
     for (const c of colonnes) {
       const v = l[c];
       if (v === undefined || v === null || String(v).trim() === "") continue;
-      if (c === "echeance") {
+      if (c === "echeance" || c === "lever_avant") {
         const d = dateIso(v);
         if (d) e[c] = d;
       } else {
