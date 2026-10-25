@@ -29,6 +29,7 @@ import { controlerZone, indicationObjets, indicationPlu, objetsPourPiece, type S
 import { type BilanReception, type PortesVarelo, poserReception } from "./reception_varelo.ts";
 import type { Transcripteur } from "./media/transcription.ts";
 import type { LectureMedia } from "./media/lire_media.ts";
+import { consignesDansPiece, type Relecture, relectureDeCharge } from "./relecture.ts";
 
 export interface Environnement {
   get(nom: string): string | undefined;
@@ -67,12 +68,17 @@ const MAX_TEXTE_PAGE = 200_000;
 /**
  * « lecteur/2026-10-22/claude-sonnet-5-5 » dans le dépôt ; « lecteur/10-22.ea1f941/claude-sonnet-5-5 » une fois
  * déployé : le SHA court du paquet distingue deux déploiements du même jour (dédoublonnage de piece_lue, A4).
+ * Une relecture avec consigne (essai n) finit par « +c<n> », toujours gardé dans les 40 caractères :
+ * « lecteur/10-25.4069fdf/sonnet-5-5+c1 ».
  */
-export function versionLecteur(maintenant: Date, modele: string | null, sha: string | null = SHA_PAQUET): string {
+export function versionLecteur(maintenant: Date, modele: string | null, sha: string | null = SHA_PAQUET, essai: number | null = null): string {
   const jour = maintenant.toISOString().slice(0, 10);
-  const court = (modele ?? "sans-ia").replace(/^(eu|us|global)\./, "").replace(/^anthropic\./, "").replace(/-\d{8}-v\d+:\d+$/, "");
+  let court = (modele ?? "sans-ia").replace(/^(eu|us|global)\./, "").replace(/^anthropic\./, "").replace(/-\d{8}-v\d+:\d+$/, "");
   const quand = sha ? `${jour.slice(5)}.${sha.slice(0, 7)}` : jour;
-  return `lecteur/${quand}/${court}`.slice(0, 40);
+  if (essai === null) return `lecteur/${quand}/${court}`.slice(0, 40);
+  const fin = `+c${essai}`;
+  court = court.replace(/^claude-/, "");
+  return `lecteur/${quand}/${court}`.slice(0, 40 - fin.length) + fin;
 }
 
 /** Ce que les appels d'IA préalables (transcriptions par morceaux) ont déjà coûté. */
@@ -85,7 +91,7 @@ export interface Prealable {
 
 const SANS_PREALABLE: Prealable = { cout_eur: 0, tokens_entree: 0, tokens_sortie: 0, appels_ia: 0 };
 
-interface Bilan {
+export interface Bilan {
   resultat: ResultatLecture;
   ia: SortieIa | null;
   cout_ocr: number;
@@ -95,7 +101,8 @@ interface Bilan {
 
 export async function lirePiece(ctx: Contexte, travail: Travail): Promise<Issue> {
   const pieceId = typeof travail.charge?.piece === "string" ? travail.charge.piece : null;
-  const trace = { travail: travail.id, piece: pieceId, client: travail.client_id };
+  const relecture = relectureDeCharge(travail.charge);
+  const trace = { travail: travail.id, piece: pieceId, client: travail.client_id, ...(relecture ? { essai: relecture.essai } : {}) };
   try {
     if (!pieceId) {
       await ctx.portes.finirTravail(travail.id, { ignore: "charge sans pièce" });
@@ -131,7 +138,7 @@ export async function lirePiece(ctx: Contexte, travail: Travail): Promise<Issue>
         journal("info", "pièce déjà lue ou détachée, travail ignoré", { ...trace, statut: piece.statut });
         return "ignore";
       }
-      return await lireEtRendre(ctxLecture, travail, piece, trace, cle);
+      return await lireEtRendre(ctxLecture, travail, piece, trace, cle, relecture);
     } finally {
       // La clé ne survit pas au travail, même si le fichier n'a jamais été téléchargé.
       cle?.fill(0);
@@ -142,12 +149,19 @@ export async function lirePiece(ctx: Contexte, travail: Travail): Promise<Issue>
 }
 
 /** La lecture proprement dite, une fois la pièce à soi (et son dépôt déchiffrant pour une pièce chiffrée). */
-async function lireEtRendre(ctx: Contexte, travail: Travail, piece: Piece, trace: Record<string, unknown>, cle: Uint8Array | null): Promise<Issue> {
+async function lireEtRendre(
+  ctx: Contexte,
+  travail: Travail,
+  piece: Piece,
+  trace: Record<string, unknown>,
+  cle: Uint8Array | null,
+  relecture: Relecture | null,
+): Promise<Issue> {
   const pieceId = piece.id;
   const dechiffree = cle !== null;
-  const bilan = await lire(ctx, piece);
+  const bilan = await lire(ctx, piece, relecture);
   const modele = bilan.ia?.modele ?? null;
-  const version = versionLecteur(ctx.maintenant(), modele);
+  const version = versionLecteur(ctx.maintenant(), modele, SHA_PAQUET, relecture?.essai ?? null);
   // Une pièce chiffrée se rend chiffrée : rien de son contenu n'entre en clair en base.
   const aEnregistrer = cle ? await chiffrerLecture(bilan.resultat, cle) : bilan.resultat;
   const enregistre = await ctx.portes.enregistrerLecture(pieceId, aEnregistrer, version);
@@ -203,6 +217,7 @@ async function lireEtRendre(ctx: Contexte, travail: Travail, piece: Piece, trace
       ? { decoupage: bilan.decoupage.map((d) => (dechiffree ? { pages: d.pages, type_piece: d.type_piece } : d)) }
       : {}),
     ...(dechiffree ? { dechiffree: true } : {}),
+    ...(relecture ? { relecture: { essai: relecture.essai, consigne: true }, version } : {}),
     ...(avis ? { avis_rpva: avis } : {}),
     ...(reception ? { reception_varelo: reception } : {}),
     ...(filles ? { filles: filles.filles, ...("raison" in filles ? { filles_raison: filles.raison } : {}), ...("erreur" in filles ? { filles_erreur: filles.erreur } : {}) } : {}),
@@ -239,7 +254,7 @@ export function sembleXml(piece: Pick<Piece, "mime" | "nom_fichier">): boolean {
   return /xml/i.test(piece.mime) || /\.xml$/i.test(piece.nom_fichier);
 }
 
-async function lire(ctx: Contexte, piece: Piece): Promise<Bilan> {
+async function lire(ctx: Contexte, piece: Piece, relecture: Relecture | null = null): Promise<Bilan> {
   // Lorani : la zone du terrain, quand la base la connaît, guide la lecture d'un règlement de PLUi.
   const zones = await zonesPourPiece(ctx.sourcePlu, piece);
   // … et les objets déjà nommés par les autres pièces du contrôle, pour que le croisement retrouve les mêmes.
@@ -250,9 +265,27 @@ async function lire(ctx: Contexte, piece: Piece): Promise<Bilan> {
     mime: piece.mime,
     module: piece.module,
     indication: indications.length > 0 ? indications.join("\n") : null,
+    consigne_valideur: relecture?.consigne ?? null,
   };
-  const bilan = await lireFichier(ctx, piece, contexte);
+  const bilan = gardeConsignes(await lireFichier(ctx, piece, contexte));
   return zones ? { ...bilan, resultat: controlerZone(bilan.resultat, zones) } : bilan;
+}
+
+/**
+ * Une pièce qui s'adresse au lecteur (« ignore les instructions précédentes… ») n'est jamais « lue » d'office : le
+ * modèle a pour règle de ne pas suivre ces phrases, et le code la remet « à vérifier », passages cités, pour qu'une
+ * personne regarde ce que la pièce cherchait à obtenir.
+ */
+export function gardeConsignes(bilan: Bilan): Bilan {
+  const r = bilan.resultat;
+  if (!["lue", "a_verifier", "a_classer"].includes(r.statut)) return bilan;
+  const suspects = consignesDansPiece(r.pages);
+  if (suspects.length === 0) return bilan;
+  const dit = `Consignes adressées au lecteur dans la pièce, non suivies (${suspects.map((x) => `p. ${x.page} : « ${x.extrait} »`).join(" ; ")}).`;
+  return {
+    ...bilan,
+    resultat: { ...r, statut: r.statut === "lue" ? "a_verifier" : r.statut, motif: [dit, r.motif ?? ""].filter((m) => m !== "").join(" ").slice(0, 500) },
+  };
 }
 
 async function lireFichier(ctx: Contexte, piece: Piece, contexte: ContextePiece): Promise<Bilan> {
@@ -660,6 +693,10 @@ export function assembler(
   } else if (type_piece === "chantier_note_technique") {
     const dispositions = valeurListeObjets("dispositions", brut.dispositions, pages, CHAMPS_DISPOSITION, "texte");
     if (dispositions) valeurs.push(dispositions);
+  } else if (schema.reserves && typeDeclare?.champs.includes("reserves")) {
+    // Lorani : les réserves d'un PV de réception, une seule valeur (b5_51).
+    const reserves = valeurListeObjets("reserves", brut.reserves, pages, schema.reserves.colonnes, schema.reserves.principal);
+    if (reserves) valeurs.push(reserves);
   }
 
   let statut: StatutLecture;
