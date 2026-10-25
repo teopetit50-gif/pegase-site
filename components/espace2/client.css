@@ -191,16 +191,16 @@ html[data-v2-theme="light"] .v2.oc :is(.v2-section-titre, .v2-cote-groupe) { col
 .v2.oc .v2-champ--erreur { box-shadow: 0 0 0 1px var(--v2-red-700); }
 
 /* — cartes — */
-.v2.oc .v2-carte, .v2.oc .v2-va .v2-carte, .v2.oc .v2-val .v2-carte, .v2.oc .v2-pm .v2-carte, .v2.oc .v2-dr-carte, .v2.oc .v2-va-kpis, .v2.oc .v2-stat, .v2.oc .v2-bascule { border-radius: 10.6667px; box-shadow: var(--v2-ombre-petite); }
-.v2.oc .v2-carte-pied { border-radius: 0 0 10.6667px 10.6667px; }
+.v2.oc .v2-carte, .v2.oc .v2-va .v2-carte, .v2.oc .v2-val .v2-carte, .v2.oc .v2-pm .v2-carte, .v2.oc .v2-dr-carte, .v2.oc .v2-va-kpis, .v2.oc .v2-stat, .v2.oc .v2-bascule { border-radius: 8px; box-shadow: var(--v2-ombre-petite); }
+.v2.oc .v2-carte-pied { border-radius: 0 0 8px 8px; }
 .v2.oc .v2-vivant .v2-carte, .v2.oc .v2-vivant .v2-dr-carte, .v2.oc .v2-vivant .v2-va-kpis { box-shadow: var(--v2-ombre-petite); }
 
 /* — tableaux — */
-.v2.oc .v2-tableau-cadre, .v2.oc .v2-carte > .v2-tableau-cadre { border-radius: 10.6667px; }
+.v2.oc .v2-tableau-cadre, .v2.oc .v2-carte > .v2-tableau-cadre { border-radius: 8px; }
 .v2.oc .v2-tableau { font-size: 13px; line-height: 19.5px; }
 .v2.oc .v2-tableau th { height: 40px; padding: 0 16px; font-family: var(--v2-code); font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: 0.6px; text-transform: uppercase; color: var(--v2-gray-600); }
-.v2.oc .v2-tableau th:first-child { border-top-left-radius: 10.6667px; }
-.v2.oc .v2-tableau th:last-child { border-top-right-radius: 10.6667px; }
+.v2.oc .v2-tableau th:first-child { border-top-left-radius: 8px; }
+.v2.oc .v2-tableau th:last-child { border-top-right-radius: 8px; }
 .v2.oc .v2-tableau td { padding: 16px; font-weight: 450; border-bottom-color: var(--v2-a-400); }
 .v2.oc .v2-tableau td small, .v2.oc .v2-sous { font-size: 12px; line-height: 16px; }
 /* les étiquettes des tuiles de chiffres : Source Code Pro en capitales, comme « SLOW QUERIES » */

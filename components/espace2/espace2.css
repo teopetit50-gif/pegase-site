@@ -124,11 +124,21 @@ html.v2-actif .dlg-panneau {
   font-feature-settings: "liga" 1, "calt" 1;
 }
 
+/* 22/10/2026 — le clair « doux » : le même clair, posé sur un gris (#f5f5f5,
+   relevé sur la page d'inscription de Qonto) au lieu du blanc pur. Les cartes
+   et les menus restent blancs et se détachent ; filets et textes ne bougent
+   pas. Posé par data-v2-fond="doux" sur <html> (theme.ts, amorce.ts). */
+html[data-v2-fond="doux"] :is(.v2, .v2-jetons, .dlg-panneau) {
+  --v2-bg-200: #efefef;
+  --v2-gray-100: #e5e5e5;
+  --v2-bouton-survol: #e5e5e5;
+}
+
 /* ——— thème sombre : le choix « sombre », ou « système » sur un poste sombre ——— */
 @media (prefers-color-scheme: dark) {
   html:not([data-v2-theme="light"]) :is(.v2, .v2-jetons, .dlg-panneau) {
-    /* les gris de Supabase, neutres, lus sur la capture de Teo (21/10) : page et barre latérale #141414, carte #1a1a1a, ligne active #1e1e1e, fenêtre #1c1c1c — la pointe de vert des jetons OKLCH (teinte 157,5) se voyait */
-    --v2-bg-100: #1a1a1a;
+    /* 22/10 — la page garde #141414 ; seules les cartes passent de #1a1a1a à #171717, un peu plus sombres sans se fondre dans la page (« les cartes étaient trop grises »). Avant : les gris de Supabase lus sur sa capture (21/10) : page et barre latérale #141414, carte #1a1a1a, ligne active #1e1e1e, fenêtre #1c1c1c — la pointe de vert des jetons OKLCH (teinte 157,5) se voyait */
+    --v2-bg-100: #171717;
     --v2-bg-200: #141414;
     --v2-bg-eleve: #1c1c1c;
     --v2-gray-100: #1e1e1e;
@@ -187,7 +197,7 @@ html.v2-actif .dlg-panneau {
   }
 }
 html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
-  --v2-bg-100: #1a1a1a;
+  --v2-bg-100: #171717;
   --v2-bg-200: #141414;
   --v2-bg-eleve: #1c1c1c;
   --v2-gray-100: #1e1e1e;
@@ -517,6 +527,11 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
 .v2-recherche .v2-kbd {
   margin-left: 2px;
 }
+/* 22/10 — en clair, le ⌘K de la recherche n'a plus de carte : le texte seul */
+html[data-v2-theme="light"] .v2-recherche .v2-kbd {
+  background: none;
+  box-shadow: none;
+}
 .v2-laterale-nav {
   flex: 1;
   min-height: 0;
@@ -810,6 +825,10 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   font-weight: 500;
   color: var(--v2-gray-900);
   text-decoration: none;
+  border: 0;
+  background: none;
+  font-family: inherit;
+  cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
 .v2-haut-lien:hover {
@@ -2344,6 +2363,7 @@ html.v2-calme *::after {
   height: 100dvh;
   outline: none;
   background: var(--v2-bg-100);
+  color: var(--v2-gray-1000); /* 23/10 : le panneau est porté par <body>, dont le texte est clair ; il prend sa propre couleur */
   font-family: var(--v2-sans);
   font-size: 14px;
   line-height: 20px;
@@ -3057,3 +3077,43 @@ html.v2-calme .v2-vivant .v2-carte::before, html.v2-calme .v2-vivant .v2-dr-cart
 .v2 .v2-btn--petit svg, .v2 .v2-val-bouton svg, .v2 .v2-portee svg { width: 14px; height: 14px; }
 .v2 .v2-val-recherche { height: 28px; }
 
+
+/* 22/10 — l'activité de Demandes reçues tout en bleu : plus de carrés gris entre « Moins » et « Plus » */
+.v2 .v2-dr-chaleur-grille i[data-n="1"], .v2 .v2-dr-echelle i[data-n="1"] { background: color-mix(in srgb, var(--v2-blue-700) 25%, var(--v2-bg-100)); }
+.v2 .v2-dr-chaleur-grille i[data-n="2"], .v2 .v2-dr-echelle i[data-n="2"] { background: color-mix(in srgb, var(--v2-blue-700) 45%, var(--v2-bg-100)); }
+.v2 .v2-dr-chaleur-grille i[data-n="3"], .v2 .v2-dr-echelle i[data-n="3"] { background: color-mix(in srgb, var(--v2-blue-700) 70%, var(--v2-bg-100)); }
+.v2 .v2-dr-chaleur-grille i[data-n="4"], .v2 .v2-dr-echelle i[data-n="4"] { background: var(--v2-blue-700); }
+
+/* ══ Le Feedback et l'Aide : le panneau de l'assistant (24/10/2026) ═════ */
+.v2-ret-titre { margin: 0; font-size: 14px; font-weight: 500; color: var(--v2-gray-1000); }
+.v2-ret-corps { flex: 1; display: grid; align-content: start; gap: 14px; padding: 4px 16px 20px; }
+.v2-ret-defile { overflow-y: auto; gap: 24px; }
+.v2-ret-intro { margin: 0; font-size: 14px; line-height: 21px; color: var(--v2-gray-900); }
+.v2-ret-centre { text-align: center; }
+.v2-ret-types { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.v2-ret-type { display: flex; align-items: center; justify-content: center; gap: 8px; height: 36px; border: 0; border-radius: 6px; background: var(--v2-bouton); box-shadow: 0 0 0 1px var(--v2-a-500); color: var(--v2-gray-900); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s, box-shadow 0.15s, color 0.15s; }
+.v2-ret-type:hover { background: var(--v2-bouton-survol); color: var(--v2-gray-1000); }
+.v2-ret-type[aria-checked="true"] { background: var(--v2-a-200); box-shadow: 0 0 0 1px var(--v2-gray-1000); color: var(--v2-gray-1000); }
+.v2-ret-type:focus-visible { outline: 0; box-shadow: var(--v2-anneau); }
+.v2-ret-erreur { margin: 0; font-size: 13px; color: var(--v2-red-900, #e5484d); }
+.v2-ret-section { margin: 0 0 8px; font-size: 12px; font-weight: 500; color: var(--v2-gray-900); }
+.v2-ret-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.v2-ret-liste button { width: 100%; display: flex; align-items: center; gap: 12px; padding: 10px; border: 0; border-radius: 8px; background: none; color: var(--v2-gray-1000); font: inherit; font-size: 14px; text-align: left; cursor: pointer; transition: background 0.15s; }
+.v2-ret-liste button:hover { background: var(--v2-a-100); }
+.v2-ret-liste button:focus-visible { outline: 0; box-shadow: var(--v2-anneau); }
+.v2-ret-liste button > svg { color: var(--v2-gray-900); flex-shrink: 0; }
+.v2-ret-liste button > span { flex: 1; display: grid; gap: 2px; }
+.v2-ret-liste small { font-size: 12px; color: var(--v2-gray-900); }
+.v2-ret-raccourcis { margin: 0; display: grid; gap: 2px; }
+.v2-ret-raccourcis > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 10px; }
+.v2-ret-raccourcis dt { font-size: 14px; color: var(--v2-gray-1000); }
+.v2-ret-raccourcis dd { margin: 0; display: flex; gap: 4px; }
+.v2-ret-faq { display: grid; gap: 2px; }
+.v2-ret-faq details { border-radius: 8px; transition: background 0.15s; }
+.v2-ret-faq details[open] { background: var(--v2-a-100); }
+.v2-ret-faq summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px; list-style: none; font-size: 14px; color: var(--v2-gray-1000); cursor: pointer; border-radius: 8px; }
+.v2-ret-faq summary::-webkit-details-marker { display: none; }
+.v2-ret-faq summary:hover { background: var(--v2-a-100); }
+.v2-ret-faq summary svg { color: var(--v2-gray-900); flex-shrink: 0; transition: transform 0.2s; }
+.v2-ret-faq details[open] summary svg { transform: rotate(90deg); }
+.v2-ret-faq details p { margin: 0; padding: 0 10px 12px; font-size: 13px; line-height: 20px; color: var(--v2-gray-900); }
