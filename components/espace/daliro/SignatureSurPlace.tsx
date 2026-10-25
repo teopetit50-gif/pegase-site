@@ -30,6 +30,8 @@ type Document = {
   regime_tva: string;
   lignes: Ligne[];
   total_ht: number;
+  /* b6_38 : les photos jointes, datées ; elles entrent dans l'empreinte du document signé */
+  photos?: { rang: number; nom: string; date: string; nature_date: "prise_de_vue" | "reception"; date_libelle: string; empreinte: string }[];
 };
 type ALire = { document: Document; empreinte: string; expire_le: string };
 type Signe = { signee: boolean; message: string; signee_le?: string; preuve?: string };
@@ -44,6 +46,12 @@ const EXEMPLE: ALire = {
       { designation: "Dépose du garde-corps provisoire", unite: "ml", quantite: 12, prix_unitaire_ht: 15, montant_ht: 180 },
     ],
     total_ht: 1884,
+    photos: [
+      { rang: 1, nom: "balcon-r3-1.jpg", date: "2026-10-23T08:14:00Z", nature_date: "reception", date_libelle: "Reçue le 23/10/2026 à 10:14", empreinte: "exemple-1" },
+      { rang: 2, nom: "balcon-r3-2.jpg", date: "2026-10-23T08:14:00Z", nature_date: "reception", date_libelle: "Reçue le 23/10/2026 à 10:14", empreinte: "exemple-2" },
+      { rang: 3, nom: "balcon-r3-3.jpg", date: "2026-10-23T08:15:00Z", nature_date: "reception", date_libelle: "Reçue le 23/10/2026 à 10:15", empreinte: "exemple-3" },
+      { rang: 4, nom: "garde-corps-provisoire.jpg", date: "2026-10-22T14:02:00Z", nature_date: "prise_de_vue", date_libelle: "Prise le 22/10/2026 à 16:02", empreinte: "exemple-4" },
+    ],
   },
   empreinte: "exemple",
   expire_le: new Date(Date.now() + 72 * 3600 * 1000).toISOString(),
@@ -198,6 +206,14 @@ export default function SignatureSurPlace({ jeton }: { jeton: string }) {
           <strong>Total HT</strong><strong className="esp-num">{montant(d.total_ht)}</strong>
         </li>
       </ul>
+      {d.photos?.length ? (
+        <div style={{ margin: "12px 0" }}>
+          <strong>Photos jointes ({d.photos.length})</strong>
+          <ul aria-label="Photos jointes à l'avenant" style={{ margin: "4px 0 0", paddingLeft: 18 }}>
+            {d.photos.map((p) => <li key={p.rang} className="esp-kpi-sous">{p.nom} — {p.date_libelle}</li>)}
+          </ul>
+        </div>
+      ) : null}
       <p className="esp-kpi-sous">
         {d.regime_tva === "autoliquidation" ? "TVA autoliquidée par le preneur (CGI, art. 283-2 nonies)." : d.regime_tva === "normal" ? "TVA en sus au taux applicable aux travaux." : "Sans TVA."}
         {" "}Lien valable jusqu&apos;au {new Date(a.expire_le).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}, une seule fois.

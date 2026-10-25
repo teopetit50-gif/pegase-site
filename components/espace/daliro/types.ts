@@ -242,6 +242,18 @@ export type Avenant = {
   nb_lignes: number;
   montant_ht: number | null;
   lignes: LigneAvenant[];
+  /* b6_38 : les photos du fil jointes à l'avenant, datées (prise de vue si le canal la donne, sinon réception) */
+  photos?: PhotoAvenant[];
+};
+
+export type PhotoAvenant = {
+  id: string;
+  avenant_id: string;
+  message_id: string | null;
+  rang: number;
+  nom: string;
+  date_photo: string;
+  date_nature: "prise_de_vue" | "reception";
 };
 
 export type FactureChantier = {

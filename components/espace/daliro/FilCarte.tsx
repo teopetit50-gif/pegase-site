@@ -15,7 +15,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useState } from "react";
-import { FileSignature, Mic } from "lucide-react";
+import { FileSignature, Images, Mic } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { ilYa } from "../exemples/socle";
@@ -23,8 +23,8 @@ import type { Source } from "../source";
 import { dateHeure } from "../format";
 import { Avis, Pastille } from "../ui";
 import { urlSigneeMedia } from "@/app/espace/daliro/actions";
-import { avenantDepuisMessage, chargerFil, ecarterMessage } from "./portes";
-import type { MessageChantier, PieceMessage, Tableau } from "./types";
+import { avenantDepuisMessage, chargerFil, ecarterMessage, joindrePhotos } from "./portes";
+import type { Avenant, MessageChantier, PieceMessage, Tableau } from "./types";
 
 const RANGEMENTS: Record<NonNullable<MessageChantier["rangement"]>, string> = {
   nom: "chantier nommé dans le message",
@@ -85,15 +85,21 @@ function Media({ piece, source, auteur, recu }: { piece: PieceMessage; source: S
   return <a href={url} target="_blank" rel="noreferrer">{piece.nom}</a>;
 }
 
-type Props = { tableau: Tableau; source: Source; relire: () => Promise<void> };
+type Props = { tableau: Tableau; source: Source; relire: () => Promise<void>; onLocal?: (t: Tableau) => void };
 
-export default function FilCarte({ tableau, source, relire }: Props) {
+/* b6_38 : les photos d'un message (pas les vocaux), celles qu'on joint à un avenant */
+const photosDe = (m: MessageChantier) => m.pieces.filter((p) => !p.vocal && (p.mime ?? "").startsWith("image/"));
+const lesPhotos = (n: number) => (n === 1 ? "la photo" : `les ${n} photos`);
+
+export default function FilCarte({ tableau, source, relire, onLocal }: Props) {
   const c = tableau.chantier;
   const [reel, setReel] = useState<MessageChantier[] | null>(null);
   const [local, setLocal] = useState<MessageChantier[]>(() => exemple(tableau));
   const [chargement, setChargement] = useState(source === "reelle");
   const [avenant, setAvenant] = useState<MessageChantier | null>(null);
   const [objet, setObjet] = useState("");
+  const [joindre, setJoindre] = useState<MessageChantier | null>(null);
+  const [cible, setCible] = useState("");
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [fait, setFait] = useState<string | null>(null);
@@ -123,6 +129,7 @@ export default function FilCarte({ tableau, source, relire }: Props) {
       if (source === "reelle") { await reelle(); await lire(); await relire(); } else { locale(); }
       setFait(message);
       setAvenant(null);
+      setJoindre(null);
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base a refusé l'action.");
     } finally {
@@ -139,6 +146,21 @@ export default function FilCarte({ tableau, source, relire }: Props) {
     `Avenant ouvert en brouillon depuis le message de ${m.de_nom ?? "l'expéditeur"} : chiffrez-le, puis soumettez-le à la signature.`,
   );
 
+  /* « Joindre les photos » : à un avenant encore en préparation du chantier (la base refuse les autres) */
+  const enPreparation = tableau.avenants.filter((a) => a.statut === "brouillon");
+  const faireJoindre = (m: MessageChantier) => agir(
+    () => joindrePhotos(cible, m.id),
+    () => {
+      const a = tableau.avenants.find((x) => x.id === cible);
+      if (!a || a.statut !== "brouillon") throw new Error("Les photos se joignent à un avenant en préparation.");
+      const deja = new Set((a.photos ?? []).map((p) => p.nom));
+      const neuves = photosDe(m).filter((p) => !deja.has(p.nom)).map((p, k) => ({ id: `${m.id}-${p.chemin}`, avenant_id: a.id, message_id: m.id, rang: (a.photos?.length ?? 0) + k + 1, nom: p.nom, date_photo: m.recu_le, date_nature: "reception" as const }));
+      const a2: Avenant = { ...a, photos: [...(a.photos ?? []), ...neuves] };
+      onLocal?.({ ...tableau, avenants: tableau.avenants.map((x) => (x.id === a.id ? a2 : x)) });
+    },
+    `Photos jointes à l'avenant n° ${tableau.avenants.find((x) => x.id === cible)?.numero ?? ""}, datées : elles figurent sur le document que le client signe.`,
+  );
+
   const ecarter = (m: MessageChantier) => agir(
     () => ecarterMessage(m.id, null),
     () => setLocal((l) => l.map((x) => (x.id === m.id ? { ...x, statut: "ecarte" } : x))),
@@ -149,7 +171,7 @@ export default function FilCarte({ tableau, source, relire }: Props) {
     <section className="esp-carte" aria-label="Fil du chantier">
       <div className="esp-section-titre">Fil du chantier — photos, vocaux et messages du terrain{messages.length ? ` (${messages.length})` : ""}</div>
       {fait ? <div style={{ marginBottom: 10 }}><Avis teinte="vert" role="status">{fait}</Avis></div> : null}
-      {erreur && !avenant ? <div style={{ marginBottom: 10 }}><Avis teinte="rouge" role="alert">{erreur}</Avis></div> : null}
+      {erreur && !avenant && !joindre ? <div style={{ marginBottom: 10 }}><Avis teinte="rouge" role="alert">{erreur}</Avis></div> : null}
       {chargement ? <Loader variant="spin" /> : messages.length ? (
         <ul className="esp-fil">
           {messages.map((m) => {
@@ -197,6 +219,7 @@ export default function FilCarte({ tableau, source, relire }: Props) {
                   </div>
                   <div className="esp-actions" style={{ marginTop: 4 }}>
                     {!m.avenant_id ? <button type="button" className="esp-lien-bouton" disabled={envoi} onClick={() => { setErreur(null); setObjet(m.texte ?? ""); setAvenant(m); }}>Ouvrir un avenant</button> : null}
+                    {photosDe(m).length && enPreparation.some((a) => a.id !== m.avenant_id) ? <button type="button" className="esp-lien-bouton" disabled={envoi} onClick={() => { setErreur(null); setCible(enPreparation.find((a) => a.id !== m.avenant_id)?.id ?? ""); setJoindre(m); }}>Joindre {lesPhotos(photosDe(m).length)} à un avenant</button> : null}
                     <button type="button" className="esp-lien-bouton" disabled={envoi} onClick={() => void ecarter(m)}>Écarter</button>
                   </div>
                 </div>
@@ -205,6 +228,31 @@ export default function FilCarte({ tableau, source, relire }: Props) {
           })}
         </ul>
       ) : <p className="esp-kpi-sous">Rien encore : les photos, vocaux et messages que le chef d&apos;équipe envoie au numéro WhatsApp de l&apos;entreprise s&apos;affichent ici, rangés à leur chantier.</p>}
+
+      <Dialog open={!!joindre} onOpenChange={(o) => !o && setJoindre(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><Images width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Joindre les photos à un avenant</DialogTitle>
+            <DialogDescription>{joindre && photosDe(joindre).length === 1
+              ? `La photo du message de ${joindre.de_nom ?? "l'expéditeur"} rejoint l'avenant avec sa date et figure sur le document que le client signe.`
+              : `Les ${joindre ? photosDe(joindre).length : 0} photos du message de ${joindre?.de_nom ?? "l'expéditeur"} rejoignent l'avenant avec leur date et figurent sur le document que le client signe.`}</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Avenant en préparation
+                <select className="rv-champ" value={cible} onChange={(e) => setCible(e.target.value)}>
+                  {enPreparation.filter((a) => a.id !== joindre?.avenant_id).map((a) => <option key={a.id} value={a.id}>Avenant n° {a.numero} — {a.objet}</option>)}
+                </select>
+              </label>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={envoi || !cible} onClick={() => joindre && void faireJoindre(joindre)}>{envoi ? <Loader variant="spin" /> : null} Joindre les photos</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!avenant} onOpenChange={(o) => !o && setAvenant(null)}>
         <DialogContent>

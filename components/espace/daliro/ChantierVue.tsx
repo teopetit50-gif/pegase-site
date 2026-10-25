@@ -20,7 +20,7 @@
 import ChiffrageLu from "./ChiffrageLu";
 import { ouverte } from "./fonctions";
 import { useMemo, useState } from "react";
-import { BookOpen, CheckCircle2, ClipboardCheck, FileSignature, FileText, FileUp, Link2, MessageSquare, PenLine, Plus, RotateCcw, Unlock, Users } from "lucide-react";
+import { BookOpen, CheckCircle2, ClipboardCheck, FileSignature, FileText, FileUp, Images, Link2, Mail, MessageSquare, PenLine, Plus, RotateCcw, Unlock, Users } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
@@ -42,7 +42,7 @@ import { aujourdHui } from "../exemples/socle";
 import DocumentsCarte from "./DocumentsCarte";
 import QuestionsCarte from "./QuestionsCarte";
 import ReleveDialog from "./ReleveDialog";
-import { abandonnerAvenant, accepterEcart, changerStatutChantier, chargerFacturesCandidates, chiffrerLigneAvenant, confirmerDependance, detacherFacture, ecrireLigne, ecrireMarche, ouvrirAvenant, poserPrix, proposerDependances, proposerRemplacants, rattacherFacture, repondreConfirmation, retirerLigneAvenant, rouvrirMarche, signerAvenant, soumettreAvenant, validerPrix, verifierMarche } from "./portes";
+import { abandonnerAvenant, accepterEcart, changerStatutChantier, chargerFacturesCandidates, chiffrerLigneAvenant, confirmerDependance, detacherFacture, ecrireAuClient, ecrireLigne, ecrireMarche, ouvrirAvenant, poserPrix, proposerDependances, proposerRemplacants, rattacherFacture, repondreConfirmation, retirerLigneAvenant, rouvrirMarche, signerAvenant, soumettreAvenant, validerPrix, verifierMarche } from "./portes";
 import type { Avenant, FactureCandidate, LigneAvenant, LigneMarche, Marche, Passage, Prix, Remplacant, Tableau } from "./types";
 
 type Props = { tableau: Tableau; source: Source; onLocal: (t: Tableau) => void; relire: () => Promise<void> };
@@ -67,6 +67,7 @@ type Form =
   | { type: "soumettre"; avenant: Avenant }
   | { type: "signer"; avenant: Avenant }
   | { type: "abandonner"; avenant: Avenant }
+  | { type: "ecrire" }
   | { type: "facture" }
   | { type: "detacher"; facture_id: string }
   | { type: "prix" }
@@ -284,6 +285,15 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
     () => avecAvenant({ ...a, statut: "abandonne", motif: ch("motif").trim() }),
     "L'avenant est abandonné avec son motif.",
   );
+  /* b6_38 : le courriel au client du chantier part par la validation, jamais directement */
+  const faireEcrire = () => agir(
+    () => ecrireAuClient(c.id, ch("sujet"), ch("corps")),
+    () => {
+      if (!c.maitre_ouvrage_nom) throw new Error("Le chantier n'a pas de client dans l'annuaire.");
+      return tableau;
+    },
+    `Le courriel à ${c.maitre_ouvrage_nom ?? "votre client"} est préparé : il attend votre accord dans « À valider ». Rien ne part avant.`,
+  );
   const faireRattacher = () => {
     const f = candidates?.find((x) => x.id === ch("facture_id"));
     return agir(
@@ -350,6 +360,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
           {c.statut === "suspendu" ? <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={() => ouvrir({ type: "statut", statut: "ouvert" })}>Reprendre</button> : null}
           <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "avenant" })} disabled={c.statut !== "ouvert" && c.statut !== "suspendu"} title={c.statut !== "ouvert" && c.statut !== "suspendu" ? "Un avenant se prépare sur un chantier ouvert" : undefined}><FileSignature width={14} height={14} aria-hidden="true" /> Ouvrir un avenant</button>
           <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "facture" })}><Link2 width={14} height={14} aria-hidden="true" /> Rattacher une facture</button>
+          {voit_prix ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "ecrire" })} disabled={!c.maitre_ouvrage_nom} title={!c.maitre_ouvrage_nom ? "Désignez d'abord le client du chantier dans l'annuaire" : undefined}><Mail width={14} height={14} aria-hidden="true" /> Écrire au client</button> : null}
         </div>
       </section>
 
@@ -537,6 +548,14 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
               </div>
               <div className="esp-controle-message">{a.objet}</div>
               {a.origine?.texte || a.origine?.canal ? <div className="esp-kpi-sous">Origine : {a.origine.canal === "vocal" ? "vocal" : a.origine.canal === "photo" ? "photo" : a.origine.canal === "visite" ? "visite" : a.origine.canal ?? "—"}{a.origine.auteur ? ` de ${a.origine.auteur}` : ""}{a.origine.date ? ` le ${dateCourte(String(a.origine.date))}` : ""}{a.origine.texte ? ` — « ${a.origine.texte} »` : ""}</div> : null}
+              {a.photos?.length ? (
+                <div style={{ marginTop: 6 }}>
+                  <div className="esp-kpi-sous"><Images width={14} height={14} aria-hidden="true" style={{ display: "inline", verticalAlign: "-2px" }} /> {a.photos.length === 1 ? "1 photo jointe, signée avec l'avenant :" : `${a.photos.length} photos jointes, signées avec l'avenant :`}</div>
+                  <ul style={{ margin: "2px 0 0", paddingLeft: 18 }}>
+                    {a.photos.map((p) => <li key={p.id} className="esp-kpi-sous">{p.nom} — {p.date_nature === "prise_de_vue" ? "prise" : "reçue"} le {dateHeure(p.date_photo)}</li>)}
+                  </ul>
+                </div>
+              ) : null}
               <ChiffrageLu chiffrage={a.origine?.chiffrage} chiffree={a.lignes.some((l) => l.origine_prix === "bibliotheque")} voitPrix={!!voit_prix} />
               {a.lignes.length ? (
                 <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Lignes de l'avenant (tableau qui défile)" style={{ marginTop: 6 }}>
@@ -580,7 +599,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
       </section>
 
       {/* ——— fil du chantier : photos, vocaux, messages (b6_24) ——— */}
-      <FilCarte key={`fil-${c.id}`} tableau={tableau} source={source} relire={relire} />
+      <FilCarte key={`fil-${c.id}`} tableau={tableau} source={source} relire={relire} onLocal={onLocal} />
 
       {/* ——— situations de travaux (b6_12) ——— */}
       <SituationsCarte tableau={tableau} source={source} onLocal={onLocal} relire={relire} />
@@ -792,6 +811,17 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
               <DialogHeader><DialogTitle>Abandonner l&apos;avenant n° {form.avenant.numero}</DialogTitle><DialogDescription>Le motif reste au journal ; une demande de validation encore en attente est annulée.</DialogDescription></DialogHeader>
               <DialogBody><div className="esp-form"><label className="rv-libelle">Motif <span className="esp-obligatoire">(obligatoire)</span><textarea className="rv-champ" rows={2} value={ch("motif")} onChange={(e) => pose("motif", e.target.value)} /></label>{erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}</div></DialogBody>
               <DialogFooter><button type="button" className="r-btn r-btn--rouge" disabled={ch("motif").trim().length < 3 || envoi} onClick={() => faireAbandonner(form.avenant)}>{envoi ? <Loader variant="spin" /> : null} Abandonner</button></DialogFooter>
+            </>
+          ) : null}
+          {form?.type === "ecrire" ? (
+            <>
+              <DialogHeader><DialogIcone><Mail width={18} height={18} aria-hidden="true" /></DialogIcone><DialogTitle>Écrire au client</DialogTitle><DialogDescription>Un courriel à {c.maitre_ouvrage_nom ?? "votre client"}, à l&apos;adresse de l&apos;annuaire. Il attend votre accord dans « À valider » : rien ne part avant.</DialogDescription></DialogHeader>
+              <DialogBody><div className="esp-form">
+                <label className="rv-libelle">Sujet <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" maxLength={200} value={ch("sujet")} onChange={(e) => pose("sujet", e.target.value)} placeholder="Avenant n° 3 : la prise du garage" /></label>
+                <label className="rv-libelle">Message <span className="esp-obligatoire">(obligatoire)</span><textarea className="rv-champ" rows={6} maxLength={5000} value={ch("corps")} onChange={(e) => pose("corps", e.target.value)} /></label>
+                {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+              </div></DialogBody>
+              <DialogFooter><button type="button" className="r-btn r-btn--noir" disabled={!ch("sujet").trim() || !ch("corps").trim() || envoi} onClick={faireEcrire}>{envoi ? <Loader variant="spin" /> : null} Préparer le courriel</button></DialogFooter>
             </>
           ) : null}
           {form?.type === "facture" ? (

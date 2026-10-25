@@ -136,6 +136,13 @@ const AVENANTS_TIL: Avenant[] = [
     lignes: [
       { id: id("311"), avenant_id: AV1, lot_id: LOT2, prix_id: PRIX_GC, ordre: 1, designation: "Garde-corps acier laqué, hauteur 1,00 m", unite: "ml", quantite: 12, sens: 1, nature: "ouvrage", origine_prix: "bibliotheque", prix_unitaire_ht: 142, montant_ht: 1704 },
       { id: id("312"), avenant_id: AV1, lot_id: LOT2, prix_id: null, ordre: 2, designation: "Dépose du garde-corps provisoire", unite: "ml", quantite: 12, sens: 1, nature: "ouvrage", origine_prix: "saisie", prix_unitaire_ht: 15, montant_ht: 180 },
+    ],
+    /* b6_38 : les photos du fil jointes à l'avenant, datées (« reçue » : WhatsApp efface la date de prise de vue) */
+    photos: [
+      { id: id("331"), avenant_id: AV1, message_id: null, rang: 1, nom: "balcon-r3-1.jpg", date_photo: ilYa(2, 14), date_nature: "reception" },
+      { id: id("332"), avenant_id: AV1, message_id: null, rang: 2, nom: "balcon-r3-2.jpg", date_photo: ilYa(2, 14), date_nature: "reception" },
+      { id: id("333"), avenant_id: AV1, message_id: null, rang: 3, nom: "balcon-r3-3.jpg", date_photo: ilYa(2, 14), date_nature: "reception" },
+      { id: id("334"), avenant_id: AV1, message_id: null, rang: 4, nom: "garde-corps-provisoire.jpg", date_photo: ilYa(3, 10), date_nature: "prise_de_vue" },
     ] },
   { id: AV2, chantier_id: TILLEULS, marche_id: M1, numero: 2, objet: "Remplacement de deux fenêtres par des portes-fenêtres (logements 7 et 8)",
     origine: { canal: "photo", auteur: "Conducteur de travaux", date: aujourdHui(-1), texte: "Photo du mardi : les allèges des logements 7 et 8 sont déjà démolies." },

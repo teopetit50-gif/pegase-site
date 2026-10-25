@@ -32,13 +32,14 @@
      btp_deposer_devis, btp_devis_lu (lecture, b6_33) ; btp_ordre_meteo (lecture), btp_echanger_passages (b6_35) ;
      btp_poser_question, btp_questions_du_chantier (lecture, b6_36) ;
      btp_documents_chantier (lecture), btp_rattacher_document, btp_lever_reserve_lue (b6_37) ; btp_documents à rattacher lus sous RLS.
+     btp_joindre_photos, btp_ecrire_au_client (b6_38 ; les photos jointes se lisent sous RLS dans btp_avenants_photos).
    Les tables sans porte (chantiers, lots, tiers, dépendances, acceptations)
    s'écrivent en direct, comme le socle le prévoit (politiques du bureau).
    Si la base répond autrement, l'écran montre son message tel quel.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { AccordJ2, Appro, AvancementPhotos, Disponibilite, PointMensuel, Chantier, FactureCandidate, HeuresChantier, MessageChantier, MeteoChantier, QuestionChantier, DocumentsChantier, DocumentARattacher, Recalage, Remplacant, RetourPointage, Tableau } from "./types";
+import type { AccordJ2, Appro, AvancementPhotos, Avenant, Disponibilite, PointMensuel, Chantier, FactureCandidate, HeuresChantier, MessageChantier, MeteoChantier, PhotoAvenant, QuestionChantier, DocumentsChantier, DocumentARattacher, Recalage, Remplacant, RetourPointage, Tableau } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -61,7 +62,19 @@ export async function chargerListe(): Promise<Chantier[]> {
 
 export async function chargerTableau(chantier: string): Promise<Tableau | null> {
   const t = await rpc<Tableau | null>("btp_tableau_chantier", { p_chantier: chantier });
-  return t && typeof t === "object" ? t : null;
+  if (!t || typeof t !== "object") return null;
+  return { ...t, avenants: await avecPhotos(t.avenants ?? []) };
+}
+
+/* b6_38 : les photos jointes aux avenants, lues sous RLS. Une base sans b6_38 répond une erreur : l'écran continue sans photos. */
+async function avecPhotos(avenants: Avenant[]): Promise<Avenant[]> {
+  if (!avenants.length) return avenants;
+  const { data, error } = await createClient().from("btp_avenants_photos")
+    .select("id, avenant_id, message_id, rang, nom, date_photo, date_nature")
+    .in("avenant_id", avenants.map((a) => a.id)).order("rang");
+  if (error || !Array.isArray(data)) return avenants;
+  const photos = data as PhotoAvenant[];
+  return avenants.map((a) => ({ ...a, photos: photos.filter((p) => p.avenant_id === a.id) }));
 }
 
 export async function monClient(): Promise<{ user_id: string; client_id: string; email: string | null; role: string } | null> {
@@ -318,6 +331,15 @@ export async function ecarterMessage(message: string, motif: string | null): Pro
 
 export async function avenantDepuisMessage(message: string, objet: string): Promise<string> {
   return rpc<string>("btp_avenant_depuis_message", { p_message: message, p_objet: objet });
+}
+
+/* b6_38 : joindre les photos d'un message du chantier à un avenant en préparation ; écrire au client du chantier */
+export async function joindrePhotos(avenant: string, message: string): Promise<{ avenant: string; ajoutees: number; photos: number }> {
+  return rpc("btp_joindre_photos", { p_avenant: avenant, p_message: message });
+}
+
+export async function ecrireAuClient(chantier: string, sujet: string, corps: string): Promise<{ envoi: string; statut: string; destinataire: string }> {
+  return rpc("btp_ecrire_au_client", { p_chantier: chantier, p_sujet: sujet, p_corps: corps });
 }
 
 /* b6_30 : le point mensuel (bureau qui voit les prix, formules Chantiers et Entreprise). */
