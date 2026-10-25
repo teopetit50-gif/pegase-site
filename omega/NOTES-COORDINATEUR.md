@@ -1643,3 +1643,9 @@ Teo a demandé, après avoir vu la nouvelle carte de décision de /espace2/valid
 01 h 16 Z : le connecteur Supabase de cette session répond « You do not have permission to perform this action » sur la recette ygwbgpowzlbdaajlsqkn (même `select 1`). `list_projects` ne montre plus que deux projets d'une AUTRE organisation (compte teo.karczewski@omegaai.fr, créés le 23/10) : « omega-metiers-recette » (hstcfemeldpfzfslytek) et un projet sans nom (ohwolvyjtceisvtkiftb). Je ne bascule PAS sur ces projets sans consigne écrite de Teo/du bureau : la recette de référence, ses tests et tout l'historique sont sur ygwbgpowzlbdaajlsqkn. **À TEO / BUREAU** : rendre l'accès du connecteur à ygwbgpowzlbdaajlsqkn, ou dire explicitement si la recette a été déplacée. En attendant : les ouvriers écrivent et poussent leurs lots verts (testés en local) ; aucune pose ni rejeu testeur possible de mon côté.
 
 Sessions réveillées 01 h 13 Z : C4 (TOFFLOAD-11, c4_34, segments), A5 (socle reprise après refus), A4 (TFILED-05 puis reprise FILED), C2 (lien de paiement C:84 puis reprise CASHD), C3 (reprise REPUT, libellé « rappellera »), B1, B5, T-FILED/T-CASHD/T-OFFLOAD en attente. A1 : rien d'indépendant. Message à T-REPUT refusé par le contrôle de permissions (non essentiel).
+
+### File de pose (recette inaccessible, 01 h 18 Z) — à poser dès l'accès rendu, dans l'ordre
+
+1. worker-c4 **b9bc84718a571e0c6af8b75d8e93efe740418146** : omega/modules/offload/migrations/c4_34_contrats_a_reconduction.sql, puis omega/tests/offload/c4_34_contrats_a_reconduction.sql (3/3 en local).
+2. worker-c3 **8c882b8e3534dd21ddea35dc6f491af7c171e614** : omega/modules/reput/migrations/c3_43_tournures_neutres.sql + omega/tests/reput/c3_43_tournures_neutres.sql.
+**DEMANDE DE DÉPLOIEMENT (bureau)** : `reput-reponse` depuis worker-c3 **8c882b8e3534dd21ddea35dc6f491af7c171e614** (« une personne de l'équipe rappellera ce numéro », règle 11, entrée consigne_valideur prête pour la reprise après refus).
