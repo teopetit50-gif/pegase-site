@@ -358,6 +358,20 @@ export const ERREURS: Record<string, string> = {
    reserver_audit_serveur le 28/09) ; les nouvelles clés prennent le profil
    « generique ». MIROIR : pegase-dashboard/lib/espace/profil.ts porte les
    mêmes clés (le cockpit affiche le libellé) — modifier les deux. */
+/* Le métier noté au clic sur « Réserver un audit » depuis une page /secteurs,
+   lu puis effacé par le formulaire d'audit. */
+export const CLE_SECTEUR_AUDIT = "omega-secteur-audit";
+
+/* Chaque page /secteurs/<page> et la valeur du menu qu'elle précoche. */
+export const SECTEUR_DES_PAGES: Record<string, string> = {
+  architectes: "archi",
+  avocats: "avocats",
+  btp: "btp",
+  dentaire: "dentaire",
+  groupes: "groupe",
+  "location-automobile": "location",
+};
+
 export const SECTEURS: { valeur: string; libelle: string }[] = [
   { valeur: "btp", libelle: "Bâtiment & travaux publics" },
   { valeur: "archi", libelle: "Architecture & maîtrise d’œuvre" },

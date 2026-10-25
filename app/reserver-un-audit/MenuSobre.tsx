@@ -32,15 +32,17 @@ type Props = {
   pleine?: boolean;
   /* prévenu à chaque choix : le formulaire s'en sert pour afficher la suite */
   onChoix?: (valeur: string) => void;
+  /* valeur cochée à l'ouverture (le métier venu d'une page /secteurs) */
+  initiale?: string;
 };
 
-export default function MenuSobre({ nom, libelle, options, erreur, pleine, onChoix }: Props) {
+export default function MenuSobre({ nom, libelle, options, erreur, pleine, onChoix, initiale = "" }: Props) {
   const id = useId();
   const racine = useRef<HTMLDivElement>(null);
   const bouton = useRef<HTMLButtonElement>(null);
   const liste = useRef<HTMLUListElement>(null);
   const [ouvert, setOuvert] = useState(false);
-  const [valeur, setValeur] = useState("");
+  const [valeur, setValeur] = useState(initiale);
   const [actif, setActif] = useState(0);
 
   const choisi = options.find((o) => o.valeur === valeur);

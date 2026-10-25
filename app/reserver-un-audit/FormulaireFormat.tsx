@@ -6,6 +6,7 @@ import MenuSobre from "@/app/reserver-un-audit/MenuSobre";
 import {
   DUREES_RDV,
   ERREURS,
+  CLE_SECTEUR_AUDIT,
   SECTEURS,
   aujourdhuiGp,
   chargerAgenda,
@@ -69,6 +70,19 @@ export default function FormulaireFormat({ retard = 0 }: { retard?: number }) {
   const [envoi, setEnvoi] = useState<"repos" | "envoi" | "ok" | "erreur">("repos");
   const [confirmation, setConfirmation] = useState<{ email: string; quand: string } | null>(null);
   const [motif, setMotif] = useState("");
+
+  /* le métier de la page /secteurs d'où l'on vient (?secteur=… ou noté au clic
+     par app/secteurs/MetierAudit) : il coche la case, qui reste modifiable */
+  const [secteurDepart, setSecteurDepart] = useState("");
+  useEffect(() => {
+    let v = new URLSearchParams(window.location.search).get("secteur") ?? "";
+    try {
+      v ||= sessionStorage.getItem(CLE_SECTEUR_AUDIT) ?? "";
+      sessionStorage.removeItem(CLE_SECTEUR_AUDIT);
+    } catch {}
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- lecture de l'URL après l'hydratation
+    if (SECTEURS.some((s) => s.valeur === v)) setSecteurDepart(v);
+  }, []);
 
   /* la durée du format choisi : null pour un format sur devis, sans horaire */
   const dureeMin = formatChoisi ? (DUREES_RDV[formatChoisi] ?? null) : null;
@@ -210,6 +224,8 @@ export default function FormulaireFormat({ retard = 0 }: { retard?: number }) {
           options={PAYS.map((p) => ({ valeur: p, libelle: p }))}
         />
         <MenuSobre
+          key={secteurDepart}
+          initiale={secteurDepart}
           nom="secteur"
           libelle="Quelle description correspond à votre entreprise ?"
           pleine
