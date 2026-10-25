@@ -14,7 +14,7 @@
 
 import { EXEMPLE_CLIENT_ID, EXEMPLE_MOI, YANIS, aujourdHui, ilYa } from "../exemples/socle";
 import { ouvrirLocale, recalculer } from "./situations";
-import type { Avenant, Chantier, Controle, Lot, Marche, Passage, Prix, Tableau, Tiers } from "./types";
+import type { Avenant, Chantier, Commande, Controle, Lot, Marche, Passage, Prix, Tableau, Tiers } from "./types";
 
 const id = (n: string) => `00000000-0000-4000-8000-00000000d${n.padStart(3, "0")}`;
 
@@ -265,3 +265,53 @@ export const FACTURES_CANDIDATES_EXEMPLE = [
   { id: FACT_MRA, numero: "F-45812", date_emission: aujourdHui(-3), montant_ht: 14260, fournisseur_nom: "Menuiseries Rhône-Alpes", fournisseur_siren: "775665011", statut: "a_valider" },
   { id: id("103"), numero: "2026-0917", date_emission: aujourdHui(-6), montant_ht: 2310, fournisseur_nom: "Loca-Nacelles Lyon", fournisseur_siren: "401234565", statut: "a_completer" },
 ];
+
+/* L'approvisionnement des Tilleuls (b6_22, b6_60 à b6_63) : ce que btp_appro_chantier rendrait. Les fenêtres sont
+   promises trois jours avant la pose (« trop tôt »), les appuis ont une réponse ambiguë à lire, les tôles attendent
+   dans « À valider », le fournisseur des platines a accepté le décalage ; deux bons lus sur photo, l'un à confirmer,
+   l'autre à vérifier. Rolland, en préparation, n'a encore rien commandé. */
+const sansSuite = { ligne_marche_id: null, besoin_le: null, livree_le: null, note: null, motif: null, a_retourner: false, retour_prevu: null, retourne_le: null,
+                    livraisons: [], demandes_preparees: [], demandes_livraison: [], bons_lus: [], client_id: EXEMPLE_CLIENT_ID, chantier_id: TILLEULS };
+export const APPRO_EXEMPLE: Record<string, Omit<Commande, "echeances">[]> = {
+  [TILLEULS]: [
+    { ...sansSuite, id: id("701"), lot_id: LOT1, lot_code: "01", passage_id: P1, passage_tache: "Pose des fenêtres", fournisseur_id: MRA, fournisseur_nom: "Menuiseries Rhône-Alpes",
+      objet: "Fenêtres PVC sur mesure", quantite: 14, unite: "u", quantite_texte: "14 u", reference: "CDE-45812", delai_jours: 15,
+      statut: "commandee", commandee_le: aujourdHui(-12), livraison_prevue: aujourdHui(1) },
+    { ...sansSuite, id: id("702"), lot_id: LOT1, lot_code: "01", passage_id: P1, passage_tache: "Pose des fenêtres", fournisseur_id: MRA, fournisseur_nom: "Menuiseries Rhône-Alpes",
+      objet: "Appuis de fenêtre aluminium", quantite: 14, unite: "u", quantite_texte: "14 u", reference: "CDE-45820", delai_jours: 5,
+      statut: "commandee", commandee_le: aujourdHui(-8), livraison_prevue: aujourdHui(2),
+      demandes_livraison: [{ id: id("721"), motif: "calage", statut: "en_attente", canal: "email", ancienne_date: aujourdHui(2), date_demandee: aujourdHui(4),
+                             reponse: "Je vois avec le dépôt et je vous redis", repondu_le: null, lu: null, envoi_statut: "envoye", envoi_mode: "reel",
+                             envoye_le: ilYa(1, 16), reponse_a_lire: true, cree_le: ilYa(1, 16) }] },
+    { ...sansSuite, id: id("703"), lot_id: LOT1, lot_code: "01", passage_id: P5, passage_tache: "Réglages et finitions", fournisseur_id: MRA, fournisseur_nom: "Menuiseries Rhône-Alpes",
+      objet: "Tôles d'habillage aluminium", quantite: 18, unite: "ml", quantite_texte: "18 ml", reference: "CDE-45833", delai_jours: 10,
+      statut: "commandee", commandee_le: aujourdHui(-2), livraison_prevue: aujourdHui(26),
+      demandes_livraison: [{ id: id("722"), motif: "calage", statut: "en_attente", canal: "email", ancienne_date: aujourdHui(26), date_demandee: aujourdHui(30),
+                             reponse: null, repondu_le: null, lu: null, envoi_statut: "a_valider", envoi_mode: "reel", envoye_le: null, reponse_a_lire: false, cree_le: ilYa(0, 8) }] },
+    { ...sansSuite, id: id("704"), lot_id: LOT2, lot_code: "02", passage_id: P7, passage_tache: "Pose des platines", fournisseur_id: DUMONT, fournisseur_nom: "Serrurerie Dumont",
+      objet: "Platines d'ancrage inox", quantite: 24, unite: "u", quantite_texte: "24 u", reference: "SD-2207", delai_jours: 3,
+      statut: "commandee", commandee_le: aujourdHui(-5), livraison_prevue: aujourdHui(1),
+      demandes_livraison: [{ id: id("723"), motif: "recalage", statut: "acceptee", canal: "email", ancienne_date: aujourdHui(0), date_demandee: aujourdHui(1),
+                             reponse: "Oui, c'est bon pour nous", repondu_le: ilYa(1, 15), lu: "automatique", envoi_statut: "envoye", envoi_mode: "reel",
+                             envoye_le: ilYa(1, 11), reponse_a_lire: false, cree_le: ilYa(1, 11) }] },
+    { ...sansSuite, id: id("705"), lot_id: LOT1, lot_code: "01", passage_id: null, passage_tache: null, besoin_le: aujourdHui(0), fournisseur_id: MRA, fournisseur_nom: "Menuiseries Rhône-Alpes",
+      objet: "Précadres bois", quantite: 14, unite: "u", quantite_texte: "14 u", reference: "CDE-45799", delai_jours: 5,
+      statut: "commandee", commandee_le: aujourdHui(-9), livraison_prevue: aujourdHui(0),
+      bons_lus: [{ id: id("741"), statut: "a_confirmer", piece_id: id("751"), numero_bon: "BL-5531", date_livraison: aujourdHui(0), quantite_lue: 10, unite_lue: "u",
+                   designation_lue: "Précadre bois 1250 × 1450", rapprochement: "manquant", ecart: -4, motifs: [], cree_le: ilYa(0, 8), nom_fichier: "BL-precadres.jpg" }] },
+    { ...sansSuite, id: id("706"), lot_id: LOT1, lot_code: "01", passage_id: P1, passage_tache: "Pose des fenêtres", fournisseur_id: null, fournisseur_nom: "Négoce Bâti Lyon",
+      objet: "Joint mousse imprégnée 15 mm", quantite: 120, unite: "ml", quantite_texte: "120 ml", reference: null, delai_jours: 2,
+      statut: "commandee", commandee_le: aujourdHui(-4), livraison_prevue: aujourdHui(-1),
+      bons_lus: [{ id: id("742"), statut: "a_verifier", piece_id: id("752"), numero_bon: "N-88412", date_livraison: aujourdHui(-1), quantite_lue: 12, unite_lue: "rouleau",
+                   designation_lue: "Joint mousse imprégnée 15 mm, rouleau de 8 m", rapprochement: null, ecart: null,
+                   motifs: ["unité du bon (rouleau) différente de la commande (ml)"], cree_le: ilYa(0, 7), nom_fichier: "bon-joints.jpg" }] },
+    { ...sansSuite, id: id("707"), lot_id: LOT2, lot_code: "02", passage_id: P2, passage_tache: "Pose des garde-corps", fournisseur_id: DUMONT, fournisseur_nom: "Serrurerie Dumont",
+      objet: "Garde-corps acier, balcons R+3", quantite: 12, unite: "ml", quantite_texte: "12 ml", reference: null, delai_jours: 8,
+      statut: "a_commander", commandee_le: null, livraison_prevue: null },
+    { ...sansSuite, id: id("708"), lot_id: null, lot_code: null, passage_id: null, passage_tache: null, besoin_le: aujourdHui(-3), fournisseur_id: null, fournisseur_nom: "Loca-Nacelles Lyon",
+      objet: "Nacelle 12 m, 2 jours", quantite: null, unite: null, quantite_texte: null, reference: null, delai_jours: 1,
+      statut: "livree", commandee_le: aujourdHui(-6), livraison_prevue: aujourdHui(-3), livree_le: aujourdHui(-3), a_retourner: true, retour_prevu: aujourdHui(-1),
+      livraisons: [{ id: id("761"), livree_le: aujourdHui(-3), quantite: null, bon_reference: "LN-2291", piece_id: null, note: null }] },
+  ],
+  [ROLLAND]: [],
+};

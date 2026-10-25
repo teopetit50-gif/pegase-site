@@ -589,13 +589,57 @@ export type Commande = {
   retour_prevu?: string | null;
   retourne_le?: string | null;
   livraisons?: LivraisonCommande[];
+  /* b6_61 à b6_63 : l'organisation (chemin du bon déposé), la demande au fournisseur, les bons lus sur photo */
+  client_id?: string;
+  demandes_preparees?: DemandePreparee[];
+  demandes_livraison?: DemandeLivraison[];
+  bons_lus?: BonLu[];
   echeances: {
     besoin_le: string | null; livrer_avant: string | null; livrer_le?: string | null; commander_avant: string | null; etat: EtatCommande;
     quantite_commandee?: number | null; quantite_livree?: number | null; ecart?: number | null;
     retour_prevu?: string | null; retour?: "sur_chantier" | "a_rendre" | "rendu" | null;
+    /* b6_60 : promise le jour de la pose ; promise avant, les jours de stockage sur site */
+    livraison_calee?: boolean | null; stockage_jours?: number | null;
   };
 };
 export type LivraisonCommande = { id: string; livree_le: string; quantite: number | null; bon_reference: string | null; piece_id: string | null; note: string | null };
+/* b6_63 : la demande déposée, pas encore prise par l'ouvrier daliro-appro (dans la minute) */
+export type DemandePreparee = { travail: number; date_demandee: string; ancienne_date: string | null; motif: "recalage" | "calage"; etat: "a_faire" | "en_cours"; cree_le: string };
+/* b6_61 : la demande faite au fournisseur de livrer le jour de la pose, et sa réponse (b6_63 : mode et date de l'envoi, réponse à lire) */
+export type DemandeLivraison = {
+  id: string;
+  motif: "recalage" | "calage";
+  statut: "en_attente" | "acceptee" | "refusee" | "caduque" | "sans_canal";
+  canal: "email" | "whatsapp" | "sms" | null;
+  ancienne_date: string | null;
+  date_demandee: string;
+  reponse: string | null;
+  repondu_le: string | null;
+  lu: "automatique" | "humain" | null;
+  envoi_statut: string | null;
+  envoi_mode?: "essai" | "reel" | null;
+  envoye_le?: string | null;
+  reponse_a_lire?: boolean;
+  cree_le: string;
+};
+/* b6_62 : le bon de livraison déposé en photo, lu, comparé à la commande (b6_63 : fichier, motif de l'écart) */
+export type BonLu = {
+  id: string;
+  statut: "en_lecture" | "a_confirmer" | "a_verifier" | "confirme" | "ecarte";
+  piece_id: string;
+  numero_bon: string | null;
+  date_livraison: string | null;
+  quantite_lue: number | null;
+  unite_lue: string | null;
+  designation_lue: string | null;
+  rapprochement: "manquant" | "conforme" | "excedent" | "sans_quantite" | null;
+  ecart: number | null;
+  motifs: string[];
+  cree_le: string;
+  motif?: string | null;
+  decide_le?: string | null;
+  nom_fichier?: string | null;
+};
 export type Appro = { commandes: Commande[]; fournisseurs: { id: string; nom: string }[]; devis_verifie?: boolean };
 
 /* b6_24 : le fil du chantier — messages, photos, vocaux du terrain */

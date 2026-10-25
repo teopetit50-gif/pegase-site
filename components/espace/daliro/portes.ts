@@ -26,6 +26,7 @@
      btp_meteo_chantier (lecture, b6_21) ;
      btp_appro_chantier (lecture), btp_ecrire_commande, btp_noter_commande, btp_noter_livraison, btp_annuler_commande (b6_22) ;
      btp_preparer_liste, btp_recevoir, btp_noter_retour (b6_23) ;
+     btp_demander_livraison, btp_noter_reponse_fournisseur (b6_61) ; btp_deposer_bon, btp_confirmer_bon, btp_ecarter_bon (b6_62) ;
      btp_fil_chantier, btp_messages_a_ranger (lecture), btp_ranger_message, btp_ecarter_message, btp_avenant_depuis_message (b6_24) ;
      btp_avancement_photos (lecture, b6_25) ; btp_importer_lignes (b6_28) ; btp_point_mensuel (lecture, b6_30) ;
      btp_disponibilites (lecture), btp_noter_indisponibilite, btp_annuler_indisponibilite (b6_31) ; btp_avenant_depuis_reserve (b6_32) ;
@@ -308,6 +309,44 @@ export async function recevoir(commande: string, livreeLe: string, quantite: num
 
 export async function noterRetour(commande: string, renduLe: string | null, retourPrevu: string | null): Promise<unknown> {
   return rpc("btp_noter_retour", { p_commande: commande, p_rendu_le: renduLe, p_retour_prevu: retourPrevu });
+}
+
+/* b6_61 : la livraison demandée au fournisseur (le jour de la pose par défaut) ; le message part par la porte d'envoi
+   du socle, « À valider » sans accord permanent. Sa réponse reçue autrement (téléphone, comptoir) se note ici. */
+export async function demanderLivraison(commande: string, date: string | null): Promise<{ travail: number; date_demandee: string }> {
+  return rpc("btp_demander_livraison", { p_commande: commande, p_date: date });
+}
+
+export async function noterReponseFournisseur(demande: string, acceptee: boolean, note: string | null): Promise<unknown> {
+  return rpc("btp_noter_reponse_fournisseur", { p_demande: demande, p_acceptee: acceptee, p_note: note });
+}
+
+/* b6_62 : la photo (ou le PDF) du bon, déposée sur la commande, puis lue par le lecteur d'A1 et comparée à la commande.
+   Rien n'est noté reçu sans une personne : confirmer (avec la quantité au besoin) ou écarter. */
+export const MIMES_BON = ["image/jpeg", "image/png", "image/heic", "image/webp", "application/pdf"];
+export function mimeBon(fichier: File): string {
+  if (fichier.type) return fichier.type;
+  return /\.heic$/i.test(fichier.name) ? "image/heic" : /\.pdf$/i.test(fichier.name) ? "application/pdf" : "";
+}
+export async function deposerBon(client: string, commande: string, fichier: File): Promise<string> {
+  const supabase = createClient();
+  const mime = mimeBon(fichier);
+  const nom = fichier.name.normalize("NFKD").replace(/[^\w.-]+/g, "-").replace(/-+/g, "-").slice(0, 120) || "bon";
+  const chemin = `${client}/btp_commande/${commande}/${Date.now()}-${nom}`;
+  const envoi = await supabase.storage.from("omega-clients").upload(chemin, fichier, { contentType: mime, upsert: false });
+  if (envoi.error) throw new ErreurPorte(message(envoi.error));
+  const h = await crypto.subtle.digest("SHA-256", await fichier.arrayBuffer());
+  const sha = Array.from(new Uint8Array(h)).map((b) => b.toString(16).padStart(2, "0")).join("");
+  return rpc<string>("btp_deposer_bon", { p_commande: commande, p_nom_fichier: fichier.name.slice(0, 200), p_mime: mime,
+                                          p_octets: fichier.size, p_sha256: sha, p_chemin: chemin });
+}
+
+export async function confirmerBon(bon: string, quantite: number | null, livreeLe: string | null): Promise<unknown> {
+  return rpc("btp_confirmer_bon", { p_bon: bon, p_quantite: quantite, p_livree_le: livreeLe });
+}
+
+export async function ecarterBon(bon: string, motif: string): Promise<unknown> {
+  return rpc("btp_ecarter_bon", { p_bon: bon, p_motif: motif });
 }
 
 /* b6_24 : le fil du chantier */
