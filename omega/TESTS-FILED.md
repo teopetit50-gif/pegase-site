@@ -547,7 +547,7 @@ Je compare champ par champ. Niveau 2 : vraie pièce, lue sur la recette. Les nom
   - **F16** (`pieces/F16_destinataire_variante_nom.pdf`), le **témoin** : MCD-2026-1017, TTC 156,24, facturée à « BANC TEST FILED » (casse et
     tirets différents de la raison sociale « banc-test-filed », même adresse). Attendu : **aucun** arrêt `destinataire`.
   - F9 existante (R2026-0000xx) : à recontrôler après le lot. Attendu : `destinataire` posé.
-- En attente du signal du coordinateur (pose du lot A4).
+- **Non jouée** : PAUSE de Teo à 01 h 23 Z. Aucun lot n'a été posé, l'accès à la recette étant perdu. F15 et F16 attendent.
 
 ### Jeu d'essai série 1 (prêt, pas encore joué)
 
@@ -618,3 +618,10 @@ par les portes `public.filed_confirmer_fournisseur(uuid, text)` et `public.filed
 - En cours : rien. La demande `76c22335` (F3) reste en attente du valideur.
 - Prochain pas : selon le coordinateur ou Teo, une nouvelle série, ou le rejeu de TFILED-05, 06 et 07 s'ils sont tranchés.
 - SHA d'arrêt : voir le commit « T-FILED : TFILED-23 corrigé, arrêt 21 » sur `testeur-filed`.
+
+**Arrêt 22 — 25/10/2026, 01 h 25 Z** (PAUSE de Teo)
+- Fait : la série 4 est préparée (F15, F16, attendus écrits). **Rien n'est joué** : aucun lot n'a été posé, l'accès à la recette est perdu.
+- En cours : rien.
+- Prochain pas : à la reprise, une fois le lot A4 TFILED-05 posé, déposer F15 et F16, recontrôler F9, puis rejouer la reprise après refus
+  (ce que le lot promet est à demander au coordinateur).
+- SHA d'arrêt : voir le commit « T-FILED : arrêt 22 (pause) » sur `testeur-filed`.
