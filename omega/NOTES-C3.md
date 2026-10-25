@@ -2,11 +2,59 @@
 
 Branche `worker-c3`. Coordinateur : `session_01BCGFdpRKBvXKjouC75sYBg`.
 Commencée le 06/10/2026. Je n'appelle jamais Supabase : le coordinateur pose, je lis les sorties brutes.
+(Depuis le 25/10 au soir, la session de reprise pose elle-même sur `omega-recette`, méthode « depuis le dépôt ».)
 
-## REPRISE (sprint du 25/10, 01 h 10 → 01 h 52 Z — reprise sur le feu vert de Teo)
+## REPRISE (25/10, 18 h → 19 h Z — session de reprise lancée par « Omega moteurs et build »)
 
-- **Fait le 25/10** : tournure neutre — `c3_43_tournures_neutres.sql` + test (2) (« rappelez cette personne vous-même » ; le test balaie toutes les fonctions reput_*) ; Edge reput-reponse 8c882b8e (« une personne de l'équipe rappellera ce numéro », règle 11 : jamais « le »/« la » pour le client ; entrée `consigne_valideur` jointe à la question du modèle). **À poser** c3_43 ; **à redéployer** reput-reponse (8c882b8e).
-- **À faire dès que le socle d'A5 est posé : reprise après refus côté REPUT** (décision de Teo, NOTES-COORDINATEUR branche notes-coordinateur, « DÉCISION DE TEO (23/10, 15 h 05 Z) »). Plan : porte serveur `private.reput_reprendre(dv refusée)` appelée par le mécanisme du socle — consigne = motif + commentaire du refus ; une seule reprise (pas de reprise d'une reprise) ; la demande REPUT repasse « à préparer » avec la consigne ; l'ouvrier reprépare (consigne_valideur, déjà dans l'Edge) ; dépôt d'une version 2 de la réponse, nouvelle demande de validation « Reprise après refus » liée (reprise_de, selon le socle) avec `corrections` (corps avant / après) ; saisie au nom du moteur ; même circuit ; si même texte ou consigne hors de portée → « reprise impossible » au journal + avis au demandeur. Il faut d'A5 : le nom du lien (colonne ou clé), le déclencheur ou le travail qui appelle les moteurs.
+- **Edge `reput-reponse` redéployée, version 31** (18 h 42 Z), **en coquille** au SHA `08b9fe2c00b042ab2c8347a71d4a546b25b02c02`
+  de worker-c3 (contient 8c882b8e : « une personne de l'équipe rappellera ce numéro », règle 11, entrée `consigne_valideur` ;
+  plus `sansTexte` qui s'efface devant une consigne). Deux fichiers : `index.ts` importe
+  `raw.githubusercontent.com/teopetit50-gif/pegase-site/<sha>/omega/functions/reput-reponse/index.ts`, `deno.json` mappe
+  `@partage/` sur `…/<sha>/omega/functions/_partage/`. Même configuration que la v30 : `verify_jwt` true, import map ;
+  secrets du projet inchangés (non listables par l'outil ; preuve qu'ils sont lus : `ia_branchee` true). **Preuve** : journal
+  de la v31 à 18 h 44 min 02 Z, « passage terminé », pris 0, `version reput-reponse/2026-10-25/claude-sonnet-5-5`,
+  `ia_branchee` true, battement REPUT du banc à la même seconde. Aucun message envoyé (rien à préparer). Deno 26/26 en local.
+  Pour livrer une autre version : changer le SHA dans les deux fichiers et redéployer.
+- **c3_44 — reprise après refus (socle 19az), posée et verte** : `omega/modules/reput/migrations/c3_44_reprise_apres_refus.sql`
+  + test `omega/tests/reput/c3_44_reprise_apres_refus.sql`, posés depuis le dépôt (worker-c3 08b9fe2c, `depot_demander` puis
+  `depot_executer`), inscrits dans `schema_migrations` (`c3_44_reprise_apres_refus`). `^test_c3_44` **19/19** ; `^test_c3_`
+  **43/43 fichiers verts** (joués par morceaux de 2 à 7). Cron `reput-reprises` chaque minute.
+  - Au refus, le socle dépose la consigne ; `private.reput_traiter_reprises()` → `reput_reprendre_refus` : décision recopiée
+    (`reput_synchroniser`), puis **reprise impossible** si : pas une réponse rédigée (accusé…), motif « Doublon », refus sans
+    consigne, version déjà corrigée par une personne (`reput_corriger` refuse l'ancienne : le socle y voit un refus),
+    demande qui n'attend plus, pas d'adresse ; sinon la demande repasse `a_preparer` et un travail `reput.preparer`
+    (clé `reprise:<refusée>`) part à l'ouvrier.
+  - `reput_commencer` (reprise de c3_40) rend `consigne_valideur` (« Motif du refus : … / Commentaire : … » puis la réponse
+    refusée, 1 200 caractères) et `reprise_de` ; pas de regroupement ni de réponse fixe pour une reprise.
+  - `reput_deposer_reponse` (reprise de c3_42) : version suivante ; même corps et même objet (aux espaces près) → reprise
+    impossible, la demande revient `refusee` ; sinon `private.proposer_reprise` (liée, même type, en attente, demandeur
+    « système ») avec `corrections` {corps, objet, sujet}, l'envoi adossé à la nouvelle demande. Une reprise sans nouvelle
+    rédaction dans l'heure est close et la demande revient `refusee`. Une reprise refusée ne relance rien (socle).
+  - **Point pour A5/Teo** : la correction par une personne (`reput_corriger`) passe par un refus de l'ancienne demande ; le
+    socle l'enfile comme une reprise, REPUT la clôt « impossible » (« une version corrigée par une personne la remplace
+    déjà ») et le socle lève alors un avis « Reprise impossible : … » au client. Bruit léger, à filtrer côté socle si gênant.
+- **Écrans REPUT de worker-c3 absents de main** (liste seulement, rien fusionné). `main` sert `/espace2/reput` (+ base, sujets,
+  reglages, urgences) en réutilisant `components/espace/reput/EcranReput` **dans sa version du 18/10** ; les écrans du
+  19 au 22/10 ne sont que sur worker-c3. Toutes leurs portes et vues existent sur la recette, avec les droits
+  d'`authenticated` (vérifié le 25/10).
+  | Écran (worker-c3) | Composant | Porte(s) | Prêt | Manque |
+  |---|---|---|---|---|
+  | Pièces jointes ouvertes depuis la demande (lot 1) | `PiecesJointes.tsx` | `reput_pieces`, `reput_ouvrir_piece` | code + recette 5 largeurs (19/10), base posée | fusion |
+  | Rapprochement de canaux (un dossier, pas la même personne, sortir) (lot 2) | `Rapprochement.tsx` | `reput_rapprocher`, `reput_ecarter_rapprochement`, `reput_separer` | idem | fusion |
+  | « Concerne aussi », second sujet (lot 3) | `SujetSecondaire.tsx` | `reput_noter_sujet_secondaire` | idem | fusion |
+  | Réglages par site (suivre l'organisation, propres, revenir) (lot 4) | `ReglagesSites.tsx` | vue `reput_reglages_sites`, `reput_regler`, `reput_suivre_organisation` | idem | fusion ; à placer dans `/espace2/reput/reglages` |
+  | Phrase de transfert de l'accusé (lot 5) | `ReglagesAvis.tsx` (+11 lignes) | `reput_regler` | idem | **conflit** : main a réécrit ReglagesAvis (gabarit sb) |
+  | Export programmé (programmer, suspendre, télécharger) (lot 6) | `ExportProgramme.tsx`, `export.ts` | `reput_programmer_export`, tables `reput_exports(_programmes)` | idem | fusion |
+  | Rendez-vous sur la demande (type, créneaux, poser) (lot 8) | `RendezVous.tsx` | `reput_rdv_types`, `reput_creneaux_libres`, `reput_poser_rdv`, `reput_rdv` | idem | fusion |
+  | Astreinte d'une urgence, « Je prends l'urgence », « appel non passé », « Garde injoignable » en tête (lots 9, TREPUT-16) | `Astreinte.tsx` | `reput_prendre_urgence`, `reput_appels` | idem | fusion ; main a sa page `/espace2/reput/urgences` (`components/espace2/reput/Urgences.tsx`) sans « Je prends l'urgence » : à réunir |
+  | Canal « appel manqué », statut en clair (« Regroupée avec… »), envoi automatique (lots 10, TREPUT-08, modèle 2) | `EcranReput.tsx`, `SujetsAutorises.tsx`, `types.ts`, `exemples.ts` | — | idem | **conflit** : main a changé EcranReput (prop `vue`, pages du volet), SujetsAutorises et BaseConnaissances (gabarit sb) |
+  Ce qui manque pour tous : la fusion dans `main` en reprenant les gabarits `components/espace2/sb` (rayons 8 px, Inter/Manrope),
+  puis la recette aux cinq largeurs sur `/espace2/reput`. Rien n'a été fusionné.
+
+## REPRISE précédente (sprint du 25/10, 01 h 10 → 01 h 52 Z — reprise sur le feu vert de Teo)
+
+- **Fait le 25/10** : tournure neutre — `c3_43_tournures_neutres.sql` + test (2) (« rappelez cette personne vous-même » ; le test balaie toutes les fonctions reput_*) ; Edge reput-reponse 8c882b8e (« une personne de l'équipe rappellera ce numéro », règle 11 : jamais « le »/« la » pour le client ; entrée `consigne_valideur` jointe à la question du modèle). c3_43 posé par Teo ; reput-reponse redéployée le 25/10 au soir (v31, voir plus haut).
+- **Fait le 25/10 au soir (c3_44, voir plus haut) : reprise après refus côté REPUT** (décision de Teo, NOTES-COORDINATEUR branche notes-coordinateur, « DÉCISION DE TEO (23/10, 15 h 05 Z) »). Plan : porte serveur `private.reput_reprendre(dv refusée)` appelée par le mécanisme du socle — consigne = motif + commentaire du refus ; une seule reprise (pas de reprise d'une reprise) ; la demande REPUT repasse « à préparer » avec la consigne ; l'ouvrier reprépare (consigne_valideur, déjà dans l'Edge) ; dépôt d'une version 2 de la réponse, nouvelle demande de validation « Reprise après refus » liée (reprise_de, selon le socle) avec `corrections` (corps avant / après) ; saisie au nom du moteur ; même circuit ; si même texte ou consigne hors de portée → « reprise impossible » au journal + avis au demandeur. Il faut d'A5 : le nom du lien (colonne ou clé), le déclencheur ou le travail qui appelle les moteurs.
 - **Posé et vert sur la recette** : c3_33 à c3_42 (dont socle c3_41a et c3_42a, autorisés par Teo). Attend Teo : compte et modèle Meta WhatsApp. Arbre propre.
 
 ## Pause précédente (Teo, 22/10/2026 22 h 04 Z)
