@@ -1,5 +1,16 @@
 # NOTES-A1 — ouvrier LECTEUR (session worker A1)
 
+## REPRISE — prochain lot validé (coordinateur et A4, 25/10, 01 h 20 Z), à écrire au prochain feu vert
+- **Relecture avec consigne du valideur** :
+  - `lecteur.lire` accepte `charge.consigne` (500 caractères au plus), ajoutée à la consigne du modèle en « Indication du valideur : … ». Ce n'est jamais une valeur : les citations restent vérifiées sur la page.
+  - `charge.essai` = n donne `version_lecteur` « …/<sha>+c<n> », pour que la clé `piece_lue:<piece>:<version>` change.
+  - Côté socle ou A4 : une porte remet la pièce « recue » et dépose `lecteur.lire` {piece, consigne, essai}, avec la clé « relire:<piece>:<n> ».
+  - Environ 0,5 j côté lecteur, avec des tests.
+- Restent hors de mon ressort :
+  - la lecture des 5 DCE et la mesure ;
+  - les 5 dossiers Tamila (B4) ;
+  - le repère `iban.masque` (A4).
+
 ## 22/10, relance NOBAT 065→077 (Teo, 19 h 06 Z)
 - `outils/preparer_deploiement.ts` suit les imports (41 fichiers, `analyse/` et `media/` compris) ; les contrôles sont dans `omega/banc/nobat_065_077_controle.sql`.
 - 069 (LEADER MAT) : la ventilation et l'IBAN sont corrigés par fd2da4bd, à relancer seule après le redéploiement.
