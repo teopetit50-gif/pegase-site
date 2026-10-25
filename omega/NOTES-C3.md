@@ -3,7 +3,13 @@
 Branche `worker-c3`. Coordinateur : `session_01BCGFdpRKBvXKjouC75sYBg`.
 Commencée le 06/10/2026. Je n'appelle jamais Supabase : le coordinateur pose, je lis les sorties brutes.
 
-## REPRISE (pause de Teo, 22/10/2026 22 h 04 Z — reprise sur son feu vert ou samedi 25/10 après 02 h Z)
+## REPRISE (sprint du 25/10, 01 h 10 → 01 h 52 Z — reprise sur le feu vert de Teo)
+
+- **Fait le 25/10** : tournure neutre — `c3_43_tournures_neutres.sql` + test (2) (« rappelez cette personne vous-même » ; le test balaie toutes les fonctions reput_*) ; Edge reput-reponse 8c882b8e (« une personne de l'équipe rappellera ce numéro », règle 11 : jamais « le »/« la » pour le client ; entrée `consigne_valideur` jointe à la question du modèle). **À poser** c3_43 ; **à redéployer** reput-reponse (8c882b8e).
+- **À faire dès que le socle d'A5 est posé : reprise après refus côté REPUT** (décision de Teo, NOTES-COORDINATEUR branche notes-coordinateur, « DÉCISION DE TEO (23/10, 15 h 05 Z) »). Plan : porte serveur `private.reput_reprendre(dv refusée)` appelée par le mécanisme du socle — consigne = motif + commentaire du refus ; une seule reprise (pas de reprise d'une reprise) ; la demande REPUT repasse « à préparer » avec la consigne ; l'ouvrier reprépare (consigne_valideur, déjà dans l'Edge) ; dépôt d'une version 2 de la réponse, nouvelle demande de validation « Reprise après refus » liée (reprise_de, selon le socle) avec `corrections` (corps avant / après) ; saisie au nom du moteur ; même circuit ; si même texte ou consigne hors de portée → « reprise impossible » au journal + avis au demandeur. Il faut d'A5 : le nom du lien (colonne ou clé), le déclencheur ou le travail qui appelle les moteurs.
+- **Posé et vert sur la recette** : c3_33 à c3_42 (dont socle c3_41a et c3_42a, autorisés par Teo). Attend Teo : compte et modèle Meta WhatsApp. Arbre propre.
+
+## Pause précédente (Teo, 22/10/2026 22 h 04 Z)
 
 - **23/10 (relance de Teo, 00 h 05 Z) — fait, autorisé par Teo dans cette session** : `c3_42a_socle_accuse_nuit.sql` (socle porté par C3 : `envois.accuse` ; l'accusé REPUT « reput:accuse:… » préparé sous le drapeau omega.envoi_accuse saute le SEUL HORS_HEURES ; verrous_envoi modifié en place à l'ancre de c3_41a, rejouable) puis `c3_42_accuse_nuit.sql` (reput_accuser : « Nos horaires : … Si nous sommes fermés en ce moment, votre demande sera traitée en premier à l'ouverture » ; libellés : appel d'un fixe → « rappelez cette personne » / alerte « Appel à rappeler », fiches citées sans tout couvrir → alerte « En partie dans la base, à relire ») + test (8). Souche 624/624. **Ordre de pose : c3_42a puis c3_42.**
 - **Posé et vert sur la recette** : c3_33 à c3_41a (dont le lot socle c3_41a, autorisé par Teo) ; Edge reput-reponse v30 et reput-astreinte v3 déployées par le bureau. Attend Teo : compte et modèle Meta WhatsApp.
