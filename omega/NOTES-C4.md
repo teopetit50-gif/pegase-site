@@ -4,11 +4,11 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 `components/espace/offload/`, `app/espace/offload/`, et ce fichier. Coordinateur : session
 `session_01BCGFdpRKBvXKjouC75sYBg`. Je n'appelle jamais Supabase : le coordinateur pose, je reçois les sorties brutes.
 
-## REPRISE (arrêt du 23/10, 00 h 45 Z — forfait au plafond)
+## REPRISE (25/10, 01 h 20 Z — sprint de Teo jusqu'à 01 h 52 Z)
 
-- Fait : c4_01 à c4_33 posés et verts. Import des personnes morales : script livré (6f0a05b2), non joué, attend Teo.
-- En cours, NON poussé : c4_34 (promesse (b), C:73/C:75), qui fait apparaître au tableau des échéances les contrats à reconduction tacite à 60 jours. Écrit, 2 verts sur 3.
-- Reste rouge : le test met CT-EXP et CT-O10 sur le même compte ; le contrat tacite plus tardif « couvre » alors l'expresse (règle c4_07). Il faut deux comptes dans le test, puis reposer le lot (offload_echeances_tableau, phrase par contrat, fuseau de l'organisation).
+- Fait : c4_01 à c4_33 posés ; c4_34 (contrats à reconduction, C:73/C:75) poussé, local 505 ok.
+- En cours : TOFFLOAD-11 (relances d'affaire visibles dans a_valider, compteur = parti, relance 2 après départ de la 1).
+- Puis : valeur en jeu par segment et export tableur de la restitution. Import des personnes morales : attend Teo.
 
 ### Reprise du 17/10
 
@@ -450,6 +450,13 @@ Banc local : 28 tests, 312 assertions vertes, migrations posées deux fois ; tsc
 **Limites** : le taux par message ne compte pas les messages d'échéance (pas de réponse rattachée à une échéance ;
 l'échéance honorée après message est comptée au suivi). Le chiffre repris compte tous les achats des 90 jours,
 sans prétendre qu'ils sont dus au seul message.
+
+## Lot c4_34 — les échéances des contrats à reconduction (C:73, C:75 ; 25/10)
+
+`offload_echeances_tableau` montre l'échéance de tout contrat actif à 60 jours, avec une phrase (tacite : « se reconduit
+tacitement le … : rien à faire, sauf si le client veut l'arrêter » ; expresse/aucune : le signal « s'éteint ») ; jour au
+fuseau de l'organisation. Test `c4_34_contrats_a_reconduction.sql` (deux comptes : un contrat plus tardif du même compte
+couvre l'autre, c4_07) : 1 rouge sur 3 avant, 3 verts après. Local : 57 tests, 505 ok.
 
 ## Lot c4_33 — affaires en plan : relance et chiffrage tenus même sans message (23/10)
 
@@ -905,3 +912,4 @@ Partielles : 6, 11, 15, 38.
 - 22/10, 19 h 15 Z — lot c4_31 (fuseau de l'organisation) : 490 ok.
 - 22/10 — lot c4_32 (TOFFLOAD-09, 10 : reprises d'avant les règles, comptes effacés hors liste) : 496 ok.
 - 23/10, 00 h 30 Z — lot c4_33 (affaires en plan : relance par une personne sans message, chiffrage) : 502 ok.
+- 25/10, 01 h 20 Z — lot c4_34 (contrats à reconduction au tableau des échéances) : 505 ok.
