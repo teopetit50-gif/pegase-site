@@ -1683,3 +1683,27 @@ main 76eeb68c (avant ce commit) · worker-a1 4069fdf4 · worker-a4 6470f895 · w
 8. Lecteur : la relecture avec la consigne du valideur est conçue (format validé), à coder à la reprise.
 9. Varelo (B1) : bloqué, relevé du point de 7 h impossible sans accès.
 10. Rien en production (niv. 3) ; reprise à votre feu vert, après rétablissement de l'accès à la recette.
+
+## POSE de la file (session de Teo, 25/10, 15 h 13 → 15 h 18 Z) — recette rendue
+
+**Accès.** La recette `ygwbgpowzlbdaajlsqkn` est de nouveau visible par le connecteur Supabase de la session de Teo (organisation d'Omega). Le connecteur ne se branche que sur une organisation à la fois : il reste sur celle d'Omega ; `omega-metiers-recette` passe par une connexion directe (mot de passe tapé par Teo).
+
+**Les 9 lots de la file sont posés, dans l'ordre**, par `private.depot_demander` / `depot_executer` aux SHA de la file, chacun inscrit dans `schema_migrations` avec sa provenance :
+
+| # | Lot | SHA | Recette |
+|---|---|---|---|
+| 1 | c4_34 contrats à reconduction | b9bc8471 | `^test_c4_34` 3/3 |
+| 2 | c3_43 tournures neutres | 8c882b8e | `^test_c3_43` 2/2 ; `^test_c3_4[0-3]` 4/4 |
+| 3 | socle 19az reprise après refus | f5f8ff0c | `^test_68_` 9/9 |
+| 4 | a4_85 destinataire (TFILED-05) | 4c8d9fbe | `^test_a4_85` 5/5 |
+| 5 | c4_35 relances d'affaire visibles (TOFFLOAD-11) | fe4ddfaf | `^test_c4_35` 4/4 ; **`test_c4_08_cycle` 22/25** (voir plus bas) |
+| 6 | c4_36 segments et tableur | 58b850b6 | `^test_c4_3[4-6]` 3/3 |
+| 7 | a4_86 reprise après refus FILED | 6470f895 | `^test_a4_8[56]` 3/3 (13 assertions) |
+| 8 | c2_40 lien de paiement | 2b616610 | `^test_c2_40` 3/3 |
+| 9 | c2_41 reprise après refus CASHD | b996c405 | `^test_c2_4[01]` 2/2 |
+
+**Non-régression vérifiée** sur ce que les lots touchent : `^test_6[4-7]_` 4/4 (décision seule, commentaire, délégations, crochet d'approbation), `^test_c2_(05|07|39)_` 3/3, `^test_a4_(07|18)` 7/7. Une suite complète d'un module en un seul appel dépasse la minute de l'outil : elle reste à jouer par morceaux.
+
+**C4 — `test_c4_08_cycle` rouge sur la recette (12, 14, 21), cause de test et non de produit.** Diagnostic (bloc annulé en fin de transaction, rien laissé en base) : les remises du test donnent `envoye`, puis `differe / DELAI_MINIMAL`, `envoye`, `differe / DELAI_MINIMAL`. La seconde relance est remise à la même seconde réelle que la première (le test simule les jours par `p_jour`, pas l'horloge des envois), et la recette applique le délai minimal entre deux messages au même destinataire ; c4_35 attendant désormais le départ de la seconde, la décision ne vient pas. Le test doit vieillir la première remise ou régler le délai du client du banc. À reprendre par C4.
+
+**Reste de la file de reprise** (inchangé) : déploiement de `reput-reponse` depuis worker-c3 8c882b8e (bureau) ; reprises REPUT et OFFLOAD à écrire (le socle 19az est posé) ; A1, relecture avec consigne (~0,5 j) ; testeurs à rejouer (T-FILED F15/F16 pour TFILED-05, T-OFFLOAD c4_34/35/36, T-CASHD c2_40/41, T-REPUT c3_43) ; B1, relevé du point de 7 h. Les sessions restent en pause : rien ne repart sans le feu vert de Teo.
