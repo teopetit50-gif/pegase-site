@@ -28,7 +28,7 @@ export function SchemaTrajet({ className }: P) {
     { a: -18, l: ["Le système", "lit le champ"] },
     { a: 54, l: ["Le modèle", "rédige"] },
     { a: 126, l: ["Vous", "validez"] },
-    { a: 198, l: ["La base", "à Francfort"] },
+    { a: 198, l: ["La base", "dans l'UE"] },
   ];
   const cx = 300;
   const cy = 210;
@@ -334,7 +334,7 @@ export function MaquetteBase() {
   };
 
   return (
-    <Fenetre titre="base · eu-central-1" cle="base">
+    <Fenetre titre="base · Union européenne" cle="base">
       {/* en-tête de colonnes */}
       {cols.map((c) => (
         <text

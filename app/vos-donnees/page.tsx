@@ -119,7 +119,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/vos-donnees" },
   title: "Où vont vos données | Omega.AI",
   description:
-    "Hébergement dans l'Union européenne, à Francfort, ou sur vos propres serveurs. Sous-traitants, chiffrement, journalisation et réversibilité.",
+    "Stockées dans l'Union européenne, lues en Europe, ou sur vos propres serveurs. Sous-traitants, chiffrement, journalisation et réversibilité.",
 };
 
 
@@ -129,7 +129,7 @@ const GARANTIES = [
     icone: IconeLieu,
     titre: "Hébergement européen",
     texte:
-      "Notre base de données est hébergée dans la région eu-central-1, à Francfort, en Allemagne. Aucune réplication n'est effectuée hors de l'Union européenne.",
+      "Vos données sont stockées dans l'Union européenne et lues en Europe. Aucune réplication n'est effectuée hors de l'Union européenne.",
   },
   {
     icone: IconeBarriere,
@@ -168,8 +168,8 @@ const CHIFFRES = [
   {
     icone: IconeServeur,
     etiquette: "HÉBERGEMENT",
-    valeur: "eu-central-1",
-    texte: "Francfort, Allemagne : aucune réplication hors de l'Union européenne",
+    valeur: "UE",
+    texte: "Stockées dans l'Union européenne : aucune réplication ailleurs",
   },
   {
     icone: IconeZero,
@@ -179,9 +179,9 @@ const CHIFFRES = [
   },
   {
     icone: IconeSablier,
-    etiquette: "RÉTENTION MODÈLE",
-    valeur: "30 j",
-    texte: "Durée maximale de rétention chez notre fournisseur, puis effacement",
+    etiquette: "LECTURE",
+    valeur: "Europe",
+    texte: "Le modèle lit en Europe le strict nécessaire à la tâche, jamais un fichier entier",
   },
 ];
 
@@ -194,7 +194,7 @@ const RECOIT: { point: string; nom: string; role: string; jetons: string[] }[] =
     point: "#7c6cf0",
     nom: "Notre base de données",
     role: "hébergeur européen",
-    jetons: ["Francfort · eu-central-1", "Fiches clients", "Journal d'exécution", "Chiffré au repos"],
+    jetons: ["Union européenne", "Fiches clients", "Journal d'exécution", "Chiffré au repos"],
   },
   {
     point: "#5b8def",
@@ -206,7 +206,7 @@ const RECOIT: { point: string; nom: string; role: string; jetons: string[] }[] =
     point: "#d97757",
     nom: "Notre fournisseur de modèles",
     role: "intelligence artificielle",
-    jetons: ["Le texte à traiter", "Aucun entraînement", "Rétention 30 jours max"],
+    jetons: ["Le texte à traiter", "Aucun entraînement", "Lu en Europe"],
   },
   {
     point: "#2fb6a8",
@@ -232,10 +232,10 @@ const RECOIT: { point: string; nom: string; role: string; jetons: string[] }[] =
 const OPTIONS: Option[] = [
   {
     cle: "francfort",
-    onglet: "Hébergement Omega.AI · Francfort",
-    titre: "Votre base hébergée à Francfort",
+    onglet: "Hébergement Omega.AI · Union européenne",
+    titre: "Votre base hébergée dans l'Union européenne",
     resume:
-      "Vous n'administrez aucune machine. Notre base est opérée dans la région eu-central-1 et nos automatisations exécutent les systèmes, tandis que vos équipes conservent la validation de ce qui est produit.",
+      "Vous n'administrez aucune machine. Notre base est opérée dans l'Union européenne et nos automatisations exécutent les systèmes, tandis que vos équipes conservent la validation de ce qui est produit.",
     image: "/photos/donnees-francfort-datacenter.jpg",
     alt: "Allée d'une salle de serveurs, baies métalliques alignées",
     chiffres: [
@@ -246,7 +246,7 @@ const OPTIONS: Option[] = [
     principe:
       "Votre environnement existant reste en place. Le système s'y connecte, lit les champs dont il a besoin, écrit son résultat dans la base, puis vous le soumet pour validation.",
     obtenez: [
-      "Une base de données à Francfort, chiffrée au repos",
+      "Une base de données dans l'Union européenne, chiffrée au repos",
       "Les sauvegardes et la supervision comprises",
       "Un export complet en un clic, à tout moment",
       "L'effacement de la base et des sauvegardes sur demande",
@@ -344,7 +344,7 @@ export default function VosDonnees() {
                   vos données
                 </h1>
                 <p className="vd-lead max-w-[42rem]">
-                  Vos données sont hébergées dans l&apos;Union européenne, à Francfort, ou sur une machine installée dans vos locaux lorsque votre politique interne l&apos;exige. Cette page décrit les deux dispositifs, les sous-traitants concernés et les engagements repris au contrat.
+                  Vos données sont stockées dans l&apos;Union européenne et lues en Europe, ou sur une machine installée dans vos locaux lorsque votre politique interne l&apos;exige. Cette page décrit les deux dispositifs, les sous-traitants concernés et les engagements repris au contrat.
                 </p>
                 <Link href="/commencer" className="vd-cta w-fit">
                   Commencer
@@ -363,7 +363,7 @@ export default function VosDonnees() {
                   référence pour cette section-là. Les autres sont centrées. */}
               <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2 lg:gap-20">
                 <h2 className="vd-h2">
-                  Vos données sont hébergées à Francfort, sans réplication ailleurs
+                  Vos données sont stockées dans l&apos;Union européenne, sans réplication ailleurs
                 </h2>
                 <p className="vd-body lg:pt-3">
                   Un système ne duplique ni votre messagerie ni vos fichiers. Il lit les champs nécessaires à la tâche en cours, écrit son résultat, puis laisse le reste à sa place. Le schéma ci-dessous suit une donnée d&apos;un bout à l&apos;autre du traitement.
@@ -379,7 +379,7 @@ export default function VosDonnees() {
                     Cinq étapes, dont une seule conserve une donnée
                   </h3>
                   <p className="mt-4 text-[15px] leading-[1.6] tracking-[-0.01em] text-white/85">
-                    Le système lit la donnée, le modèle rédige une proposition, puis vos équipes valident avant tout envoi. Seule la dernière étape écrit durablement, et elle se situe en Allemagne.
+                    Le système lit la donnée, le modèle rédige une proposition, puis vos équipes valident avant tout envoi. Seule la dernière étape écrit durablement, et elle se situe dans l&apos;Union européenne.
                   </p>
                 </div>
                 <SchemaTrajet className="h-auto w-full text-white/85" />
@@ -393,7 +393,7 @@ export default function VosDonnees() {
               <div className="mx-auto max-w-[46rem] text-center">
                 <h2 className="vd-h2">Les trois environnements par lesquels passent vos données</h2>
                 <p className="vd-lead mt-5">
-                  Vos données transitent par votre outil existant, par le système qui exécute la tâche, puis par notre base à Francfort. Aucun quatrième environnement n&apos;intervient et aucune copie de travail n&apos;est conservée ailleurs.
+                  Vos données transitent par votre outil existant, par le système qui exécute la tâche, puis par notre base dans l&apos;Union européenne. Aucun quatrième environnement n&apos;intervient et aucune copie de travail n&apos;est conservée ailleurs.
                 </p>
               </div>
 
@@ -532,8 +532,7 @@ export default function VosDonnees() {
                     Le cloud désigne ici des centres de données identifiés
                   </h2>
                   <p className="vd-body mt-4">
-                    Notre hébergeur les regroupe par région, et la vôtre se situe à Francfort, en Allemagne. Elle figure au contrat sous son identifiant exact&nbsp;:
-                    <span className="whitespace-nowrap"> eu-central-1</span>.
+                    Notre hébergeur les regroupe par région, et la vôtre se situe dans l&apos;Union européenne. Elle figure au contrat sous son identifiant exact.
                   </p>
                 </div>
               </div>

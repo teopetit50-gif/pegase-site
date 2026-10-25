@@ -76,7 +76,7 @@ const LIEUX = [
   {
     maquette: MaquetteBase,
     titre: "La base",
-    soustitre: "Francfort, région eu-central-1",
+    soustitre: "Union européenne",
   },
 ];
 
