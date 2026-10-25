@@ -302,3 +302,22 @@ Deno.test("TREPUT-12 : un appel d'un fixe ne parle jamais de SMS ; un appel sans
     assertEquals(sansTexte(d)?.modele, "regle:appel_sans_message");
   }
 });
+
+Deno.test("tournure neutre (relance du 25/10) : jamais « le rappellera » ; la consigne interdit « le »/« la » pour le client", () => {
+  const d = dossier("Rappelez-moi", {});
+  d.reception = { ...d.reception!, canal: "appel" };
+  d.canal_reponse = null;
+  const q = contenuDemande(d);
+  assert(!/\b(le|la) rappellera\b/.test(q), "consigne d'appel neutre");
+  assertStringIncludes(q, "une personne de l'équipe rappellera ce numéro");
+  assertStringIncludes(consigne(d), "Ne désigne jamais le client par « le » ou « la »");
+});
+
+Deno.test("reprise après refus : la consigne du valideur est jointe, entre balises, comme consigne de l'entreprise", () => {
+  const d = dossier("Quel est le prix ?", {});
+  assert(!contenuDemande(d).includes("<consigne_valideur>"), "sans refus : rien");
+  d.consigne_valideur = "Montant ou bénéficiaire à vérifier : citez le tarif 2026, pas 2025.";
+  const q = contenuDemande(d);
+  assertStringIncludes(q, "<consigne_valideur>\nMontant ou bénéficiaire à vérifier : citez le tarif 2026, pas 2025.\n</consigne_valideur>");
+  assert(q.indexOf("<consigne_valideur>") < q.indexOf("<message>"), "avant le message du client");
+});
