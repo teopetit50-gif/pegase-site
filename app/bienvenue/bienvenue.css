@@ -11,6 +11,14 @@
    champ), et sont rangées ici en jetons — une ligne à changer si une
    mesure vient les corriger.
 
+   21/10/2026 : les COULEURS ne viennent plus des captures Attio mais de
+   /espace2 (components/espace2/espace2.css, bloc sombre), qui porte
+   depuis le commit 474652a0 celles du tableau de bord Supabase — l'aperçu
+   dessiné ici doit ressembler au vrai tableau de bord. Les mesures
+   (tailles, rayons, disposition) restent celles du relevé Attio. Le soir
+   même, les gris sont pris NEUTRES comme dans /espace2 (Teo : la pointe
+   de vert des jetons OKLCH se voyait) ; les filets passent en blanc pur.
+
    Écarts assumés :
    · le SOMBRE quel que soit le thème choisi dans /espace2 : Teo a demandé
      « exactement le même design ». Tout est scopé sous .bv et n'emprunte
@@ -36,30 +44,47 @@ html:has(.bv) body > header {
 }
 html:has(.bv),
 html:has(.bv) body {
-  background: #0f1112;
+  background: #141414;
 }
 
 .bv {
-  /* 07/10 — relevé au pixel sur les captures (Teo : « les couleurs ne
-     sont pas aussi foncées que sur le modèle ») : fond de page, carte et
-     intérieur des champs sont UNE seule teinte, #0f1112 ; les filets sont
-     à peine plus clairs. */
-  --bv-fond: #0f1112;
-  --bv-carte: #0f1112;
-  --bv-filet: #1a1c1e;
-  --bv-panneau-haut: #17191a;
-  --bv-panneau-bas: #232428;
-  --bv-texte: #f9fbfc;
-  --bv-texte-2: #a3a5a6;
-  --bv-texte-3: #808283;
-  --bv-champ: #0f1112;
-  --bv-champ-filet: #1e2022;
-  --bv-pastille: #0f1112;
-  --bv-bleu: #2a6ef2;
-  --bv-bleu-survol: #2160db;
-  --bv-bleu-anneau: rgba(42, 110, 242, 0.35);
-  --bv-os: #232527;
-  --bv-os-clair: #34353a;
+  /* 21/10 — les jetons sombres de /espace2 (espace2.css), c'est-à-dire
+     Supabase en gris neutres : page = barre latérale (bg-200), carte un
+     cran plus claire (bg-100), fenêtre posée dessus (bg-eleve), relief
+     d'un avatar vide (gray-200), filets en blanc pur à 7,5 % (a-400) et à
+     13 % au survol (a-500), textes gray-1000 / 900 / 700, accent bleu
+     désaturé (blue-700), vert green-700, rouge red-900. Le 07/10, tout
+     était en #0f1112, relevé sur les captures Attio. */
+  --bv-fond: #141414;
+  --bv-carte: #1a1a1a;
+  --bv-fenetre: #1c1c1c;
+  --bv-relief: #1f1f1f;
+  --bv-filet: #ffffff13;
+  --bv-panneau-haut: #1f1f1f;
+  --bv-panneau-bas: #303030;
+  --bv-texte: #f1f1f1;
+  --bv-texte-2: #bfbfbf;
+  --bv-texte-3: #999999;
+  --bv-champ: #1a1a1a;
+  --bv-champ-filet: #ffffff13;
+  --bv-champ-filet-survol: #ffffff22;
+  --bv-pastille: #1a1a1a;
+  --bv-bleu: #3f82cf;
+  --bv-bleu-survol: #3975ba; /* blue-700 assombri de 10 %, l'écart qu'Attio tenait entre repos et survol */
+  --bv-bleu-anneau: rgba(63, 130, 207, 0.35);
+  --bv-bleu-sourd: #273e59; /* blue-700 à 35 % sur la carte : les carrés et avatars en os */
+  --bv-vert: #3ecf8e;
+  --bv-rouge: #f16a50;
+  --bv-os: #262626;
+  --bv-os-clair: #393939;
+  /* 21/10 au soir — le cockpit de l'aperçu reprend le rail et le volet de
+     /espace2 (voir en bas de ce fichier) : la section ouverte (gray-100),
+     les boutons secondaires (surface-300), le voile a-100 du compteur, et
+     la chasse fixe des intitulés (celle de /espace2, chargée par la racine) */
+  --bv-actif: #1e1e1e;
+  --bv-bouton: #242424;
+  --bv-voile: #ffffff08;
+  --bv-mono: var(--font-omega-mono), "Geist Mono", Menlo, Monaco, monospace;
 
   min-height: 100dvh;
   background: var(--bv-fond);
@@ -97,7 +122,7 @@ html:has(.bv) body {
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 .bv-champ::placeholder {
-  color: #6b6c72;
+  color: var(--bv-texte-3);
 }
 .bv-champ:focus,
 .bv-champ:focus-within {
@@ -116,11 +141,11 @@ html:has(.bv) body {
   transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
 }
 .bv-pastille:hover {
-  border-color: #2c2e31;
+  border-color: var(--bv-champ-filet-survol);
 }
 .bv-pastille[aria-pressed="true"] {
   border-color: var(--bv-bleu);
-  background: #0f1625;
+  background: color-mix(in srgb, var(--bv-bleu) 12%, var(--bv-carte));
   box-shadow: 0 0 0 3px var(--bv-bleu-anneau);
 }
 .bv-pastille:focus-visible,
@@ -161,15 +186,301 @@ html:has(.bv) body {
 .bv-zoom {
   border-radius: 18px;
   padding: 8px;
-  background: rgba(42, 110, 242, 0.28);
+  background: rgba(63, 130, 207, 0.28);
 }
 .bv-zoom > div {
   border-radius: 12px;
   border: 1.5px solid var(--bv-bleu);
-  background: #0f1112;
+  background: var(--bv-fenetre);
+}
+/* l'avatar de la personne : le dégradé de /espace2 (.v2-avatar) */
+.bv-avatar {
+  background: linear-gradient(135deg, #7c3aed 0%, #2563eb 50%, #06b6d4 100%);
 }
 /* le fondu bas de l'aperçu, comme sur la référence */
 .bv-fondu {
   -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent 100%);
   mask-image: linear-gradient(180deg, #000 60%, transparent 100%);
+}
+
+/* ══ Le cockpit des étapes 1 et 2 : /espace2 tel qu'il est (21/10/2026) ══
+   Depuis le commit 8edffeab, la navigation de /espace2 est en deux temps,
+   comme chez Supabase. Relevé dans components/espace2/espace2.css (blocs
+   « rail », « volet », « barre du haut », boutons, finition Attio) et dans
+   components/espace2/Coquille.tsx :
+   · un rail d'icônes de 48 px (bg-200, filet droit a-400, marge 8) :
+     entrées de 32 px à 6 px de rayon, icônes de 20 px au trait 1,5 en
+     gray-700, la section ouverte en gray-1000 sur gray-100 ; groupes à
+     2 px, séparés d'un filet et de 8 px ;
+   · un volet de 256 px : en-tête de 48 px (titre 14 px / 500, à 24 px du
+     bord, filet dessous) ; groupe à 16 px 12 px, intitulé en capitales à
+     chasse fixe 13 px gray-700, pages en pastilles de 26 px (14 px,
+     gray-900 ; la page ouverte en gray-1000 / 600 sur gray-100), compteur
+     en pastille bordée de 18 px à chasse fixe ;
+   · la barre du haut de 48 px (filet dessous, marge 16) : le sélecteur de
+     module (26 px, 13 px / 500), puis à droite les boutons de 26 px
+     « Rechercher… F » (surface-300, filet a-500) et « + Nouveau… » (plein
+     blue-700) ;
+   · la Vue d'ensemble : grille à 12 px sous 16 px de marge, cartes bg-100
+     à 6 px cerclées d'a-400, corps 20 / 24.
+   L'aperçu est RÉDUIT, par un transform : les pixels ci-dessous sont ceux
+   de espace2.css, seuls les rapports comptent. L'échelle suit la largeur
+   du panneau (une container query sur l'enveloppe du cockpit) : 80 % à
+   600 px et plus (1440 : 600 px de panneau = 750 px de cockpit), puis 75,
+   70 et 65 % sur les panneaux plus étroits (à 1024, le panneau fait 488 px),
+   pour que la largeur naturelle reste autour de 750 px et que rien ne soit
+   rogné à droite. La colonne principale (446 px) n'a pas la place du titre
+   centré ni du bouton « Assistant », qu'on ne dessine pas.
+   Le cockpit remplit le panneau depuis son bord haut (l'encart de l'étape,
+   posé à 118 px, laisse voir la barre du haut, l'en-tête du volet et la
+   page ouverte) et s'estompe sous 70 % de la hauteur ; il déborde en bas,
+   et le bas du rail est remonté dans la partie encore lisible. */
+.bv-fondu-cockpit {
+  container-type: inline-size;
+  -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
+}
+.bv-cockpit {
+  --bv-echelle: 0.8;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(100cqw / var(--bv-echelle));
+  height: 1100px;
+  transform: scale(var(--bv-echelle));
+  transform-origin: top left;
+  display: grid;
+  grid-template-columns: 48px 256px minmax(0, 1fr);
+  background: var(--bv-fond);
+  color: var(--bv-texte);
+  font-size: 14px;
+  line-height: 20px;
+}
+@container (max-width: 599px) {
+  .bv-cockpit {
+    --bv-echelle: 0.75;
+  }
+}
+@container (max-width: 559px) {
+  .bv-cockpit {
+    --bv-echelle: 0.7;
+  }
+}
+@container (max-width: 519px) {
+  .bv-cockpit {
+    --bv-echelle: 0.65;
+  }
+}
+.bv-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  border-right: 1px solid var(--bv-filet);
+}
+.bv-rail-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bv-rail-groupe {
+  display: grid;
+  gap: 2px;
+}
+.bv-rail-groupe + .bv-rail-groupe {
+  padding-top: 8px;
+  border-top: 1px solid var(--bv-filet);
+}
+.bv-rail-bas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+  margin-bottom: 392px; /* le bas du rail s'arrête à 700 px (560 à l'écran à 80 %), avant le fondu */
+}
+.bv-rail-item {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 32px;
+  border-radius: 6px;
+  color: var(--bv-texte-3);
+}
+.bv-rail-item[data-actif] {
+  background: var(--bv-actif);
+  color: var(--bv-texte);
+}
+.bv-rail-item img {
+  width: 20px;
+  height: 20px;
+}
+/* la pastille de la cloche : 7 px de bleu, cerclés du fond */
+.bv-rail-point {
+  position: absolute;
+  top: 6px;
+  left: 18px;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--bv-bleu);
+  box-shadow: 0 0 0 2px var(--bv-fond);
+}
+.bv-rail-avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 600;
+  color: #fff;
+}
+.bv-volet {
+  min-width: 0;
+}
+.bv-volet-haut {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  padding: 0 16px 0 24px;
+  border-bottom: 1px solid var(--bv-filet);
+  font-weight: 500;
+}
+.bv-section {
+  padding: 16px 12px;
+}
+.bv-section-titre {
+  margin: 0 0 8px;
+  padding: 0 12px;
+  color: var(--bv-texte-3);
+  font-family: var(--bv-mono);
+  font-size: 13px;
+  line-height: 20px;
+  text-transform: uppercase;
+}
+.bv-groupe {
+  display: grid;
+  gap: 1px;
+}
+.bv-lien {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 26px;
+  padding: 0 12px;
+  border-radius: 6px;
+  color: var(--bv-texte-2);
+  white-space: nowrap;
+}
+.bv-lien > span:first-child {
+  flex: 1;
+}
+.bv-lien[data-actif] {
+  background: var(--bv-actif);
+  color: var(--bv-texte);
+  font-weight: 600;
+}
+.bv-compteur {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--bv-voile);
+  box-shadow: 0 0 0 1px var(--bv-champ-filet-survol);
+  color: var(--bv-texte-2);
+  font-family: var(--bv-mono);
+  font-size: 11px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.bv-principale {
+  min-width: 0;
+}
+.bv-haut {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 48px;
+  padding: 0 16px;
+  box-shadow: inset 0 -1px 0 var(--bv-filet);
+}
+.bv-portee {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.bv-portee svg {
+  color: var(--bv-texte-2);
+}
+.bv-haut-droite {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.bv-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: var(--bv-bouton);
+  box-shadow: 0 0 0 1px var(--bv-champ-filet-survol);
+  color: var(--bv-texte);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 20px;
+  white-space: nowrap;
+}
+.bv-btn--primaire {
+  background: var(--bv-bleu);
+  box-shadow: none;
+  color: #fff;
+}
+.bv-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  margin-left: 2px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: var(--bv-actif);
+  box-shadow: 0 0 0 1px var(--bv-filet);
+  color: var(--bv-texte-2);
+  font-size: 12px;
+  line-height: 1;
+}
+.bv-page {
+  display: grid;
+  gap: 12px;
+  padding: 16px 16px 48px;
+}
+.bv-carte-app {
+  min-width: 0;
+  padding: 20px 24px;
+  border-radius: 6px;
+  background: var(--bv-carte);
+  box-shadow: 0 0 0 1px var(--bv-filet);
+}
+.bv-carte-titre {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.32px;
 }

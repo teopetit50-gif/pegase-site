@@ -30,7 +30,7 @@ import { csvDemandes, telecharger } from "./export";
 import { chargerMonde, corriger, decider, monClient } from "./portes";
 import type { Client, Demande, Monde, Reponse, StatutDemande } from "./types";
 
-type Onglet = "demandes" | "base" | "sujets" | "reglages";
+export type Onglet = "demandes" | "base" | "sujets" | "reglages";
 type Famille = "a_valider" | "a_traiter" | "repondues" | "recues";
 
 export const STATUTS: Record<StatutDemande, { libelle: string; teinte: Teinte }> = {
@@ -70,9 +70,12 @@ function famille(d: Demande, depuis: number): Famille[] {
   return f;
 }
 
-export default function EcranReput() {
+/* `vue` : dans /espace2, chaque onglet est sa propre page du volet (21/10/2026) ;
+   l'écran s'y fige et ne montre plus la rangée d'onglets */
+export default function EcranReput({ vue }: { vue?: Onglet } = {}) {
   const { source } = useSource();
-  const [onglet, setOnglet] = useState<Onglet>("demandes");
+  const [ongletLibre, setOnglet] = useState<Onglet>("demandes");
+  const onglet = vue ?? ongletLibre;
   const [local, setLocal] = useState<Monde>(() => mondeExemple());
   const [reel, setReel] = useState<{ monde: Monde; client: Client } | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -137,9 +140,11 @@ export default function EcranReput() {
 
   return (
     <>
+      {/* /espace2/reput/reglages : la page Settings porte son propre titre */}
+      {vue === "reglages" ? null : (
       <div className="esp-tete" data-arrivee="">
         <div>
-          <h1 className="esp-titre">Demandes clients</h1>
+          <h1 className="esp-titre">{vue === "base" ? "Base de connaissances" : vue === "sujets" ? "Sujets autorisés" : "Demandes clients"}</h1>
           <p className="esp-sous">
             Chaque message reçu par courriel, WhatsApp ou le formulaire de votre site reçoit dans la minute une réponse préparée à partir de votre base de connaissances. Rien ne part sans que vous l&apos;ayez vu, sauf sur les sujets que vous avez autorisés d&apos;avance.
           </p>
@@ -153,6 +158,7 @@ export default function EcranReput() {
           <Ruban source={source} />
         </div>
       </div>
+      )}
 
       {erreur ? (
         <div style={{ marginBottom: 14 }}>
@@ -160,11 +166,11 @@ export default function EcranReput() {
         </div>
       ) : null}
 
-      <div className="esp-onglets" role="tablist" aria-label="REPUT" style={{ marginBottom: 16 }}>
+      {vue ? null : <div className="esp-onglets" role="tablist" aria-label="REPUT" style={{ marginBottom: 16 }}>
         {([["demandes", "Demandes"], ["base", "Base de connaissances"], ["sujets", "Sujets autorisés"], ["reglages", "Réglages et avis"]] as [Onglet, string][]).map(([cle, libelle]) => (
           <button key={cle} type="button" role="tab" aria-selected={onglet === cle} className="esp-onglet" onClick={() => setOnglet(cle)}>{libelle}</button>
         ))}
-      </div>
+      </div>}
 
       {source === "reelle" && !reel && !erreur ? <Chargement texte="Lecture des demandes…" /> : null}
 
@@ -236,13 +242,13 @@ export default function EcranReput() {
       ) : null}
 
       {monde && onglet === "base" ? (
-        <BaseConnaissances monde={monde} source={source} client={client} role={role} relire={charger} modifierLocal={modifierLocal} />
+        <BaseConnaissances monde={monde} source={source} client={client} role={role} relire={charger} modifierLocal={modifierLocal} gabarit={vue ? "sb" : undefined} />
       ) : null}
       {monde && onglet === "reglages" ? (
-        <ReglagesAvis key={`${source}:${monde.reglages?.id ?? ""}`} monde={monde} source={source} client={client} role={role} relire={charger} modifierLocal={modifierLocal} />
+        <ReglagesAvis key={`${source}:${monde.reglages?.id ?? ""}`} monde={monde} source={source} client={client} role={role} relire={charger} modifierLocal={modifierLocal} gabarit={vue ? "sb" : undefined} />
       ) : null}
       {monde && onglet === "sujets" ? (
-        <SujetsAutorises monde={monde} source={source} client={client} role={role} relire={charger} modifierLocal={modifierLocal} />
+        <SujetsAutorises monde={monde} source={source} client={client} role={role} relire={charger} modifierLocal={modifierLocal} gabarit={vue ? "sb" : undefined} />
       ) : null}
     </>
   );

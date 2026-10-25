@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
+import { MotsReveles } from "@/components/ui/hero-section";
 import {
   EstimationRetenue,
   ModeleRetenu,
@@ -72,27 +73,28 @@ const NOMS_POSTES: Record<string, string> = Object.fromEntries(
   POSTES.map((p) => [p.id, `${p.system} · ${p.nom}`]),
 );
 
-/* Les logos de la carte sont ceux d'Omega : les quatre systèmes, puis les six
-   logiciels métiers (Teo, 18/10 au soir : « remplace les logos d'outils par les
-   logos Omega »). Les signes carrés de public/logos/<produit>-mark.png, en masque
-   à 36 px, le nom en mono dessous ; 4 puis 3 et 3, comme la référence. Aucune
-   marque tierce : un logo d'outil se lit comme un partenariat, et le site ne
-   nomme pas ses éditeurs d'IA. */
+/* Les outils de la carte : la liste des onze de ce matin, moins les quatre
+   que Teo a retirés le 18/10 au soir (« enlève Google Meet, Stripe, Supabase,
+   Vercel »). Restent Claude, Anthropic, Next.js, Resend, Tailwind CSS, React
+   et GSAP. Logos officiels : Anthropic (pied de page d'anthropic.com), Next.js
+   (nextjs.org), Resend (resend.com), Tailwind (logotype de tailwindcss.com) ;
+   Claude, React et GSAP viennent du paquet simple-icons déjà installé.
+   `largeur` garde les proportions de chaque fichier, à hauteur égale de 36 px.
+   Autorisés par Teo : ils disent quels outils Omega utilise, pas une
+   collaboration. Trois rangées (3, 2, 2) pour que le logotype Tailwind, le
+   plus large, ne casse pas la ligne dans la carte. */
 const RANGEE_UN = [
-  { nom: "CASHD", fichier: "/logos/cashd-mark.png", largeur: 36 },
-  { nom: "OFFLOAD", fichier: "/logos/offload-mark.png", largeur: 36 },
-  { nom: "REPUT", fichier: "/logos/reput-mark.png", largeur: 36 },
-  { nom: "FILED", fichier: "/logos/filed-mark.png", largeur: 36 },
+  { nom: "Claude", fichier: "/logos/outils/claude.svg", largeur: 36 },
+  { nom: "Anthropic", fichier: "/logos/outils/anthropic.svg", largeur: 52 },
+  { nom: "Next.js", fichier: "/logos/outils/nextjs.svg", largeur: 179 },
 ];
 const RANGEE_DEUX = [
-  { nom: "Varelo", fichier: "/logos/varelo-mark.png", largeur: 36 },
-  { nom: "Tavaro", fichier: "/logos/tavaro-mark.png", largeur: 36 },
-  { nom: "Lorani", fichier: "/logos/lorani-mark.png", largeur: 36 },
+  { nom: "Resend", fichier: "/logos/outils/resend.svg", largeur: 170 },
+  { nom: "Tailwind CSS", fichier: "/logos/outils/tailwind.svg", largeur: 286 },
 ];
 const RANGEE_TROIS = [
-  { nom: "Tiroma", fichier: "/logos/tiroma-mark.png", largeur: 36 },
-  { nom: "Tamila", fichier: "/logos/tamila-mark.png", largeur: 36 },
-  { nom: "Daliro", fichier: "/logos/daliro-mark.png", largeur: 36 },
+  { nom: "React", fichier: "/logos/outils/react.svg", largeur: 36 },
+  { nom: "GSAP", fichier: "/logos/outils/gsap.svg", largeur: 36 },
 ];
 const RANGEES = [RANGEE_UN, RANGEE_DEUX, RANGEE_TROIS];
 
@@ -111,6 +113,19 @@ function Marque({ nom, fichier, largeur }: { nom: string; fichier: string; large
   );
 }
 
+/* ─── L'entrée au chargement : la cadence du hero de l'accueil ───
+   Le titre se peint mot à mot (.o-mot, hero-section.css), départ 220 ms et
+   pas de 70 ms, comme app/page.tsx. Le chapô part 140 ms après le dernier mot
+   du titre, comme les sections de l'accueil (components/accueil/Apparition.tsx).
+   La colonne de droite part avec lui ; les rappels et le formulaire, 160 ms
+   plus tard. Tout est en CSS : sans JavaScript ou en mouvement réduit, le
+   texte est là sans attendre. */
+const TITRE = "Un audit à la mesure de votre organisation";
+const DEPART_TITRE = 220;
+const PAS_MOT = 70;
+const DELAI_CHAPO = DEPART_TITRE + PAS_MOT * (TITRE.split(/\s+/).length - 1) + 140;
+const DELAI_SUITE = DELAI_CHAPO + 160;
+
 export default function ReserverUnAuditPage() {
   return (
     <PageShell>
@@ -124,24 +139,35 @@ export default function ReserverUnAuditPage() {
             <div className="rdv-hero-grille">
               <div className="rdv-hero-gauche">
                 <div className="rdv-entete">
-                  <h1 className="rdv-h1">Un audit à la mesure de votre organisation</h1>
-                  <p className="rdv-lead">
+                  <h1 className="rdv-h1">
+                    <MotsReveles lignes={TITRE} depart={DEPART_TITRE} pas={PAS_MOT} />
+                  </h1>
+                  <p
+                    className="rdv-lead o-bloc-apparait"
+                    style={{ "--o-mot-d": `${DELAI_CHAPO}ms` } as React.CSSProperties}
+                  >
                     Plusieurs services, plusieurs validateurs&nbsp;: nous mesurons
                     d&apos;abord, et le devis est établi à partir de vos volumes. Trois
                     formats, du cadrage de 45 minutes à la journée dans vos locaux.
                   </p>
                 </div>
 
-                <div className="rdv-notes">
+                <div
+                  className="rdv-notes o-bloc-apparait"
+                  style={{ "--o-mot-d": `${DELAI_SUITE}ms` } as React.CSSProperties}
+                >
                   <ModeleRetenu noms={NOMS_MODELES} />
                   <SiteRetenu />
                   <EstimationRetenue noms={NOMS_POSTES} />
                 </div>
 
-                <FormulaireFormat />
+                <FormulaireFormat retard={DELAI_SUITE} />
               </div>
 
-              <div className="rdv-carte">
+              <div
+                className="rdv-carte o-bloc-apparait"
+                style={{ "--o-mot-d": `${DELAI_CHAPO}ms` } as React.CSSProperties}
+              >
                 <blockquote className="rdv-citation">
                   <p>
                     Un système ne se justifie que si la difficulté qu&apos;il traite coûte
@@ -157,7 +183,7 @@ export default function ReserverUnAuditPage() {
                 <hr className="rdv-filet" />
 
                 <div className="rdv-logos-bloc">
-                  <p className="rdv-mono rdv-centre">Nos systèmes et nos logiciels métiers</p>
+                  <p className="rdv-mono rdv-centre">Nous travaillons avec</p>
                   {RANGEES.map((rangee, n) => (
                     <ul key={n} className="rdv-logos">
                       {rangee.map((m) => (

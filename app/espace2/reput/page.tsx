@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import EcranReput from "@/components/espace/reput/EcranReput";
 import Habille from "@/components/espace2/Habille";
 
-/* /espace2/reput — l'écran de /espace/reput, repris tel quel dans le nouvel espace. */
+/* /espace2/reput — l'écran de /espace/reput, repris dans le nouvel espace.
+   21/10/2026 : ses onglets sont devenus des pages du volet (base, sujets,
+   réglages) ; celle-ci garde les demandes. */
 
 export const metadata: Metadata = {
   title: "Demandes clients",
@@ -12,7 +14,7 @@ export const metadata: Metadata = {
 export default function PageReput() {
   return (
     <Habille>
-      <EcranReput />
+      <EcranReput vue="demandes" />
     </Habille>
   );
 }

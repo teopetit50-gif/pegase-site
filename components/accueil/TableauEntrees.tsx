@@ -124,7 +124,7 @@ const COLONNES: {
 }[] = [
   {
     nom: "Les systèmes prêts",
-    resume: "Quatre postes déjà outillés",
+    resume: "Quatre tâches prêtes à l'emploi",
     lien: { label: "Voir les quatre", href: "/offres" },
   },
   {
@@ -135,30 +135,30 @@ const COLONNES: {
   },
   {
     nom: "Votre site",
-    resume: "Une vitrine qui tient debout",
+    resume: "Un site qui présente bien votre entreprise",
     lien: { label: "Voir les modèles", href: "/modeles" },
   },
 ];
 
 const LIGNES: { label: string; cellules: [Cellule, Cellule, Cellule] }[] = [
   {
-    label: "Ce qui est déjà écrit",
+    label: "Ce qui existe déjà",
     cellules: [
-      "Les quatre systèmes",
+      "Les quatre tâches",
       "Rien : tout part de vos règles",
       `${MODELES.length} modèles, tous visitables`,
     ],
   },
   {
-    label: "Ce qu'on écrit avec vous",
+    label: "Ce qu'on prépare avec vous",
     cellules: [
-      "Cadence, plafonds, verrous",
-      "Le besoin, cadré et chiffré",
-      "Le contenu, à votre métier",
+      "Le rythme, les limites, les interdits",
+      "Votre besoin, défini et chiffré",
+      "Les textes, écrits pour votre métier",
     ],
   },
   {
-    label: "Un cadrage avant de commencer",
+    label: "Une étude avant de commencer",
     cellules: ["Facultatif", true, false],
   },
   {

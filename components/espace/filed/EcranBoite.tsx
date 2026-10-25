@@ -15,7 +15,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { BookOpen, Check, Copy, FileText, Inbox, Paperclip, RotateCcw, Wallet, X } from "lucide-react";
+import { BookOpen, Check, Copy, FileText, Inbox, Paperclip, RotateCcw, Search, Wallet, X } from "lucide-react";
+import { useMaintenant } from "@/components/espace2/horloge";
 import { DOSSIERS_EXEMPLE } from "../exemples/filed";
 import { ilYa } from "../exemples/socle";
 import { useSource } from "../source";
@@ -107,7 +108,9 @@ const FAMILLES: { cle: Famille; libelle: string; sous: string; teinte: "bleu" | 
 const SOUS_TOUTES: Record<Famille, string> = { nouvelle: "pas encore ouvertes", lue: "ouvertes, sans suite encore", traitee: "réponse faite ou classée", ecartee: "ignorées ou indésirables" };
 const familleDe = (s: StatutReception): Famille => (s === "ignoree" || s === "indesirable" ? "ecartee" : s);
 
-export default function EcranBoite({ portee = "filed" }: { portee?: Portee }) {
+/* `gabarit="sb"` : /espace2 rend la page Logs de Supabase (22/10/2026) */
+export default function EcranBoite({ portee = "filed", gabarit }: { portee?: Portee; gabarit?: "sb" }) {
+  const maintenant = useMaintenant();
   const toutes = portee === "toutes";
   const { source } = useSource();
   const [exemple, setExemple] = useState<VueBoite>(() => vueExemple(portee));
@@ -195,6 +198,225 @@ export default function EcranBoite({ portee = "filed" }: { portee?: Portee }) {
       setErreurPiece(e instanceof Error ? e.message : "Lien indisponible.");
     }
   };
+
+  /* le corps de la fiche d'un courriel : commun aux deux dessins */
+  const corpsDetail = r ? (
+    <div className="esp-carte-corps" style={{ display: "grid", gap: 16 }}>
+      <dl className="esp-def esp-def--trois">
+        <Def etiquette="De">{r.de_nom ? <>{r.de_nom} · </> : null}<span className="esp-mono">{r.de_adresse ?? "—"}</span></Def>
+        <Def etiquette="À"><span className="esp-mono">{r.boite}</span></Def>
+        <Def etiquette="Reçu le">{dateHeure(r.recu_le)}</Def>
+        {toutes ? <Def etiquette="Canal">{CANAUX[r.canal] ?? r.canal}{r.module ? ` · ${libelleModule(r.module)}` : ""}</Def> : null}
+      </dl>
+      {r.statut === "traitee" || r.statut === "indesirable" ? null : (
+        <div className="esp-actions">
+          {r.statut === "nouvelle" ? (
+            <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={marquage === r.id} onClick={() => void marquer(r.id, "lue")}><Check width={13} height={13} aria-hidden="true" /> Marquer comme lu</button>
+          ) : null}
+          {r.statut !== "ignoree" ? (
+            <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={marquage === r.id} onClick={() => void marquer(r.id, "ecartee")}><X width={13} height={13} aria-hidden="true" /> Écarter</button>
+          ) : null}
+          {r.statut !== "nouvelle" ? (
+            <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={marquage === r.id} onClick={() => void marquer(r.id, "nouvelle")}><RotateCcw width={13} height={13} aria-hidden="true" /> Remettre en nouveau</button>
+          ) : null}
+        </div>
+      )}
+      {erreurMarque ? <Avis teinte="rouge" role="alert"><strong>Refusé par la base.</strong> {erreurMarque}</Avis> : null}
+      {champsDe(r).length ? (
+        <div>
+          <div className="esp-section-titre">{r.canal === "formulaire" ? "Champs du formulaire" : "Informations jointes"}</div>
+          <dl className="esp-def">
+            {champsDe(r).map(([k, v]) => <Def key={k} etiquette={k}>{v}</Def>)}
+          </dl>
+        </div>
+      ) : null}
+
+      <div>
+        <div className="esp-section-titre">Pièces jointes</div>
+        {r.pieces.length ? (
+          <ul className="esp-fil">
+            {r.pieces.map((p, i) => {
+              const d = documentDe(r, p, vue?.documents ?? []);
+              return (
+                <li key={`${p.nom}-${i}`}>
+                  <span className="esp-fil-point" data-teinte={d ? "vert" : "bleu"} />
+                  <div>
+                    <div className="esp-fil-texte esp-item-haut">
+                      <button type="button" className="esp-lien-bouton" onClick={() => void ouvrirPiece(p.chemin)} aria-label={`Ouvrir la pièce ${p.nom}`}>{p.nom}</button>
+                      {p.taille ? <span className="esp-kpi-sous">{taille(p.taille)}</span> : null}
+                    </div>
+                    <div className="esp-fil-meta">
+                      {r.module !== "filed" ? null : d ? (
+                        <>Devenue le document <Link href={`/espace/filed?objet=document:${encodeURIComponent(d.id)}`} className="esp-mono">{d.reference ?? "FILED"}</Link></>
+                      ) : r.statut === "nouvelle" ? "En attente de lecture par FILED" : "Pas de document FILED retrouvé pour cette pièce"}
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <p className="esp-kpi-sous" style={{ margin: 0 }}>{toutes ? "Aucune pièce jointe." : "Aucune pièce jointe : rien à lire pour FILED."}</p>
+        )}
+        {piecesIgnorees(r).map((p) => (
+          <div key={p.nom} style={{ marginTop: 8 }}>
+            <Avis teinte="ambre"><strong>{p.nom}</strong> n&apos;a pas été gardée{p.raison ? ` : ${p.raison}` : ""}. Demandez à l&apos;expéditeur de la renvoyer en PDF.</Avis>
+          </div>
+        ))}
+        {erreurPiece ? <div style={{ marginTop: 8 }}><Avis teinte="rouge" role="alert">{erreurPiece}</Avis></div> : null}
+      </div>
+
+      <div>
+        <div className="esp-section-titre">Message</div>
+        {r.corps?.trim() ? (
+          <div className="esp-courriel-texte" tabIndex={0} role="region" aria-label="Texte du message">{r.corps.trim()}</div>
+        ) : (
+          <p className="esp-kpi-sous" style={{ margin: 0 }}>Message sans texte.</p>
+        )}
+      </div>
+    </div>
+  ) : null;
+
+  /* 22/10 — /espace2 : la page Logs (journaux unifiés) de Supabase, au 1:1
+     (espace2/sb) — à gauche les filtres (statut, boîte), à droite la barre
+     de recherche, l'histogramme des arrivées, la table dense, et la fiche
+     du courriel dans le volet de droite. /espace garde son écran. */
+  if (gabarit === "sb") {
+    const jours = 30;
+    const debut = maintenant === null ? 0 : maintenant - (jours - 1) * 86_400_000;
+    const parJour = Array.from({ length: jours }, () => 0);
+    if (maintenant !== null) for (const x of visibles) {
+      const k = Math.floor((new Date(x.recu_le).getTime() - debut) / 86_400_000);
+      if (k >= 0 && k < jours) parJour[k] += 1;
+    }
+    const max = Math.max(1, ...parJour);
+    return (
+      <div className="sb-journal v2-arrivee">
+        <h1 className="v2-sr">{toutes ? "Demandes reçues" : "Boîte de réception"}</h1>
+        <aside className="sb-journal-filtres" aria-label="Filtres">
+          <div className="sb-journal-groupe">
+            <p>Statut</p>
+            {FAMILLES.map((x) => (
+              <label key={x.cle} className="sb-journal-option">
+                <input type="radio" name="statut-boite" checked={filtre === x.cle} onChange={() => setFiltre(x.cle)} />
+                <span>{x.libelle}</span>
+                <span>{compteurs[x.cle]}</span>
+              </label>
+            ))}
+            <label className="sb-journal-option">
+              <input type="radio" name="statut-boite" checked={filtre === null} onChange={() => setFiltre(null)} />
+              <span>Tous</span>
+              <span>{Object.values(compteurs).reduce((a, b) => a + b, 0)}</span>
+            </label>
+          </div>
+          {vue && vue.boites.length > 1 ? (
+            <div className="sb-journal-groupe">
+              <p>Boîte</p>
+              <label className="sb-journal-option">
+                <input type="radio" name="boite" checked={!boiteChoisie} onChange={() => { setBoiteChoisie(""); setChoix(null); }} />
+                <span>Toutes les boîtes</span>
+                <span>{vue.boites.length}</span>
+              </label>
+              {vue.boites.map((b) => (
+                <label key={b} className="sb-journal-option">
+                  <input type="radio" name="boite" checked={boiteChoisie === b.toLowerCase()} onChange={() => { setBoiteChoisie(b.toLowerCase()); setChoix(null); }} />
+                  <span>{b.startsWith("site:") ? `Site ${b.slice(5)}` : b}</span>
+                  <span />
+                </label>
+              ))}
+            </div>
+          ) : null}
+          {!toutes && boite ? (
+            <div className="sb-journal-groupe">
+              <p>Adresse de la boîte</p>
+              <span className="sb-journal-option" style={{ wordBreak: "break-all" }}>{boite}</span>
+              <button type="button" className="v2-btn v2-btn--petit" onClick={() => void copier()} style={{ marginTop: 8 }}>
+                <Copy width={12} height={12} aria-hidden="true" /> {copie ? "Adresse copiée" : "Copier l'adresse"}
+              </button>
+            </div>
+          ) : null}
+          <div className="sb-journal-groupe">
+            <p>{direct === "en_direct" ? "En direct" : "Source"}</p>
+            <span className="sb-journal-option">{source === "exemple" ? "Données d'exemple" : direct === "coupe" ? "Relue toutes les 30 s" : "Base réelle"}</span>
+          </div>
+        </aside>
+        <div className="sb-journal-principal">
+          <label className="sb-journal-barre">
+            <Search width={16} height={16} strokeWidth={1.5} aria-hidden="true" />
+            <span className="v2-sr">{toutes ? "Chercher une demande" : "Chercher un courriel"}</span>
+            <input value={recherche} onChange={(e) => setRecherche(e.target.value)} placeholder="Chercher un expéditeur, un objet, une pièce…" />
+          </label>
+          {erreur ? (
+            <div style={{ padding: 16 }}>
+              <Avis teinte="rouge" role="alert"><strong>La base réelle n&apos;a pas répondu.</strong> {erreur}</Avis>
+            </div>
+          ) : null}
+          <div className="sb-journal-histo" role="img" aria-label={`${visibles.length} ${toutes ? "demandes" : "courriels"} sur 30 jours`}>
+            {parJour.map((n, k) => (
+              <span key={k} data-vide={n ? undefined : ""} style={{ height: n ? `${Math.max(8, (n / max) * 100)}%` : "1px" }} />
+            ))}
+          </div>
+          <div className="sb-conseil-corps">
+            <div className="sb-journal-table">
+              {source === "reelle" && !reel ? (
+                <Chargement texte="Lecture de la boîte…" />
+              ) : (
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Reçu le</th>
+                      <th scope="col">Statut</th>
+                      {toutes ? <th scope="col">Canal</th> : null}
+                      <th scope="col">De</th>
+                      <th scope="col">Objet</th>
+                      <th scope="col">Pièces</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {visibles.map((x) => {
+                      const st = STATUTS_RECEPTION[x.statut] ?? STATUTS_RECEPTION.lue;
+                      return (
+                        <tr
+                          key={x.id}
+                          aria-selected={choisi === x.id}
+                          tabIndex={0}
+                          onClick={() => { setChoix(x.id); setErreurPiece(null); setErreurMarque(null); }}
+                          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setChoix(x.id); } }}
+                        >
+                          <td className="sb-mono">{dateHeure(x.recu_le)}</td>
+                          <td><Pastille teinte={st.teinte}>{st.libelle}</Pastille></td>
+                          {toutes ? <td>{CANAUX[x.canal] ?? x.canal}</td> : null}
+                          <td>{x.de_nom || x.de_adresse || "Expéditeur inconnu"}</td>
+                          <td>{x.sujet || (x.corps ? x.corps.slice(0, 80) : "(sans objet)")}</td>
+                          <td className="sb-mono">{x.pieces.length || "—"}{piecesIgnorees(x).length ? " · 1 écartée" : ""}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+              {vue && !visibles.length ? (
+                <div className="sb-conseil-vide">
+                  <Inbox width={18} height={18} strokeWidth={1.5} aria-hidden="true" />
+                  <p style={{ margin: 0 }}>{toutes ? "Aucune demande" : "Aucun courriel"}</p>
+                  <span>{filtre || recherche ? "Rien ne correspond." : toutes ? "Les demandes reçues apparaissent ici dès leur arrivée." : "Les courriels envoyés à la boîte de FILED apparaissent ici dès leur arrivée."}</span>
+                </div>
+              ) : null}
+            </div>
+            {r ? (
+              <aside className="sb-volet-detail" aria-label={toutes ? "La demande" : "Le courriel"}>
+                <div className="sb-volet-detail-tete">
+                  <span>{r.sujet || (toutes ? `Message ${CANAUX[r.canal] ?? r.canal}` : "(sans objet)")}</span>
+                  <Pastille teinte={(STATUTS_RECEPTION[r.statut] ?? STATUTS_RECEPTION.lue).teinte}>{(STATUTS_RECEPTION[r.statut] ?? STATUTS_RECEPTION.lue).libelle}</Pastille>
+                </div>
+                <div className="sb-volet-detail-corps">{corpsDetail}</div>
+              </aside>
+            ) : null}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -328,80 +550,7 @@ export default function EcranBoite({ portee = "filed" }: { portee?: Portee }) {
                 <h2 className="esp-carte-titre">{r.sujet || (toutes ? `Message ${CANAUX[r.canal] ?? r.canal}` : "(sans objet)")}</h2>
                 <Pastille teinte={(STATUTS_RECEPTION[r.statut] ?? STATUTS_RECEPTION.lue).teinte}>{(STATUTS_RECEPTION[r.statut] ?? STATUTS_RECEPTION.lue).libelle}</Pastille>
               </div>
-              <div className="esp-carte-corps" style={{ display: "grid", gap: 16 }}>
-                <dl className="esp-def esp-def--trois">
-                  <Def etiquette="De">{r.de_nom ? <>{r.de_nom} · </> : null}<span className="esp-mono">{r.de_adresse ?? "—"}</span></Def>
-                  <Def etiquette="À"><span className="esp-mono">{r.boite}</span></Def>
-                  <Def etiquette="Reçu le">{dateHeure(r.recu_le)}</Def>
-                  {toutes ? <Def etiquette="Canal">{CANAUX[r.canal] ?? r.canal}{r.module ? ` · ${libelleModule(r.module)}` : ""}</Def> : null}
-                </dl>
-                {r.statut === "traitee" || r.statut === "indesirable" ? null : (
-                  <div className="esp-actions">
-                    {r.statut === "nouvelle" ? (
-                      <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={marquage === r.id} onClick={() => void marquer(r.id, "lue")}><Check width={13} height={13} aria-hidden="true" /> Marquer comme lu</button>
-                    ) : null}
-                    {r.statut !== "ignoree" ? (
-                      <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={marquage === r.id} onClick={() => void marquer(r.id, "ecartee")}><X width={13} height={13} aria-hidden="true" /> Écarter</button>
-                    ) : null}
-                    {r.statut !== "nouvelle" ? (
-                      <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={marquage === r.id} onClick={() => void marquer(r.id, "nouvelle")}><RotateCcw width={13} height={13} aria-hidden="true" /> Remettre en nouveau</button>
-                    ) : null}
-                  </div>
-                )}
-                {erreurMarque ? <Avis teinte="rouge" role="alert"><strong>Refusé par la base.</strong> {erreurMarque}</Avis> : null}
-                {champsDe(r).length ? (
-                  <div>
-                    <div className="esp-section-titre">{r.canal === "formulaire" ? "Champs du formulaire" : "Informations jointes"}</div>
-                    <dl className="esp-def">
-                      {champsDe(r).map(([k, v]) => <Def key={k} etiquette={k}>{v}</Def>)}
-                    </dl>
-                  </div>
-                ) : null}
-
-                <div>
-                  <div className="esp-section-titre">Pièces jointes</div>
-                  {r.pieces.length ? (
-                    <ul className="esp-fil">
-                      {r.pieces.map((p, i) => {
-                        const d = documentDe(r, p, vue?.documents ?? []);
-                        return (
-                          <li key={`${p.nom}-${i}`}>
-                            <span className="esp-fil-point" data-teinte={d ? "vert" : "bleu"} />
-                            <div>
-                              <div className="esp-fil-texte esp-item-haut">
-                                <button type="button" className="esp-lien-bouton" onClick={() => void ouvrirPiece(p.chemin)} aria-label={`Ouvrir la pièce ${p.nom}`}>{p.nom}</button>
-                                {p.taille ? <span className="esp-kpi-sous">{taille(p.taille)}</span> : null}
-                              </div>
-                              <div className="esp-fil-meta">
-                                {r.module !== "filed" ? null : d ? (
-                                  <>Devenue le document <Link href={`/espace/filed?objet=document:${encodeURIComponent(d.id)}`} className="esp-mono">{d.reference ?? "FILED"}</Link></>
-                                ) : r.statut === "nouvelle" ? "En attente de lecture par FILED" : "Pas de document FILED retrouvé pour cette pièce"}
-                              </div>
-                            </div>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  ) : (
-                    <p className="esp-kpi-sous" style={{ margin: 0 }}>{toutes ? "Aucune pièce jointe." : "Aucune pièce jointe : rien à lire pour FILED."}</p>
-                  )}
-                  {piecesIgnorees(r).map((p) => (
-                    <div key={p.nom} style={{ marginTop: 8 }}>
-                      <Avis teinte="ambre"><strong>{p.nom}</strong> n&apos;a pas été gardée{p.raison ? ` : ${p.raison}` : ""}. Demandez à l&apos;expéditeur de la renvoyer en PDF.</Avis>
-                    </div>
-                  ))}
-                  {erreurPiece ? <div style={{ marginTop: 8 }}><Avis teinte="rouge" role="alert">{erreurPiece}</Avis></div> : null}
-                </div>
-
-                <div>
-                  <div className="esp-section-titre">Message</div>
-                  {r.corps?.trim() ? (
-                    <div className="esp-courriel-texte" tabIndex={0} role="region" aria-label="Texte du message">{r.corps.trim()}</div>
-                  ) : (
-                    <p className="esp-kpi-sous" style={{ margin: 0 }}>Message sans texte.</p>
-                  )}
-                </div>
-              </div>
+              {corpsDetail}
             </div>
           ) : source === "reelle" && !reel ? (
             <div className="esp-carte"><Chargement texte="Lecture…" /></div>

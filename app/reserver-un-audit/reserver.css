@@ -532,14 +532,68 @@
    Teo, 18/10 : « c'est blanc en bas alors que ça doit être noir ». Le pied est
    partagé (components/Footer.tsx, blanc partout) et suit .rdv dans <main> :
    le sélecteur frère le noircit sur cette page seulement, rien ne change
-   ailleurs. Référence : pied noir, mentions en gris, blanc au survol. */
+   ailleurs. Référence : pied noir, mentions en gris, blanc au survol ;
+   aucun filet entre la bande et le pied. */
 .rdv ~ footer {
   background: #000;
-  border-top-color: rgba(255, 255, 255, 0.12);
+  border-top-color: #000; /* Teo, 18/10 : pas de filet entre la bande et le pied */
 }
 .rdv ~ footer .text-neutral-500 {
   color: rgba(255, 255, 255, 0.6);
 }
 .rdv ~ footer a:hover {
   color: #fff;
+}
+
+/* ─── Le bouton noir du formulaire ───
+   Teo, 18/10 au soir : « une fois qu'il a mis l'horaire et le jour, je veux
+   qu'il y ait juste le bouton noir qu'il y avait avant, pas "Continuer" ».
+   Les règles ci-dessous sont celles de la refonte du matin (09cf7aac) ;
+   af709068 les avait retirées avec le CSS des sections supprimées alors que
+   le <button type="submit" className="rdv-bouton"> de FormulaireFormat.tsx
+   les utilise toujours. Ne pas les retirer tant que ce bouton existe.
+   Référence : bouton noir 40 px, rayon 6, icône blanche dans un carré. */
+.rdv-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  height: 40px;
+  padding: 0 4px 0 16px;
+  border: 0;
+  border-radius: 6px;
+  background: #000;
+  color: #fff;
+  font: 400 16px/24px var(--font-omega), ui-sans-serif, system-ui, sans-serif;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+.rdv-bouton:hover {
+  opacity: 0.85;
+}
+.rdv-bouton:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.rdv-bouton-icone {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: #fff;
+  color: #000;
+}
+
+/* ─── L'entrée au chargement (cascade du hero, hero-section.css) ───
+   Ces classes finissent sur transform et filter. Avec « forwards », ces
+   deux propriétés resteraient après la fin de la cascade et feraient du
+   formulaire et de la carte un contexte d'empilement permanent, sans raison.
+   « backwards » ne tient que pendant le délai et l'animation ; l'opacité de
+   base revient à 1 pour que le texte reste là une fois la cascade finie. */
+.rdv .o-mot,
+.rdv .o-bloc-apparait {
+  opacity: 1;
+  animation-fill-mode: backwards;
 }

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import EcranFournisseurs from "@/components/espace/filed/EcranFournisseurs";
-import Habille from "@/components/espace2/Habille";
+import { HabilleSb } from "@/components/espace2/Habille";
 
 /* /espace2/filed/fournisseurs — l'écran de /espace/filed/fournisseurs, repris tel quel dans le nouvel espace. */
 
@@ -11,8 +11,8 @@ export const metadata: Metadata = {
 
 export default function PageFiledFournisseurs() {
   return (
-    <Habille>
-      <EcranFournisseurs />
-    </Habille>
+    <HabilleSb>
+      <EcranFournisseurs gabarit="sb" />
+    </HabilleSb>
   );
 }

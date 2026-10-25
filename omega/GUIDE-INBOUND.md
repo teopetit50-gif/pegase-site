@@ -41,8 +41,14 @@ Dans la zone DNS de `omegaai.fr`, ajoutez **deux** enregistrements :
 - Le nom `sendinblue` est normal : c'est l'ancien nom de Brevo, toujours utilisé pour
   ces serveurs.
 
-Le domaine `omegaai.fr` est déjà authentifié chez Brevo (envois d'essai du 5/10). C'est
-la condition que Brevo pose avant tout inbound : rien d'autre à faire de ce côté.
+**Avant le webhook, le domaine de réception doit être déclaré ET authentifié chez Brevo.**
+Que `omegaai.fr` le soit ne suffit pas : `recu.omegaai.fr` doit l'être aussi, sinon Brevo
+rejette chaque courriel par « 550 5.1.2 Recipient … adresse introuvable », MX corrects ou
+non (vécu le 21/10). Geste (bureau, 22/10) : ajouter le domaine par l'API
+(`POST /v3/senders/domains`), poser chez OVH les enregistrements que Brevo rend (TXT
+`recu` = `brevo-code…`, CNAME `brevo1._domainkey.recu` et `brevo2._domainkey.recu`), puis
+le faire authentifier (`PUT /v3/senders/domains/recu.omegaai.fr/authenticate`). Ensuite
+seulement, le webhook de l'étape 2 doit porter `recu.omegaai.fr` (et non `omegaai.fr`).
 
 ## Étape 2 — Le webhook « inbound » chez Brevo
 

@@ -27,9 +27,10 @@ const STATUTS_AVIS: Record<Avis["statut"], { libelle: string; teinte: Teinte }> 
   ecarte: { libelle: "Écartée (moins de six mois)", teinte: "gris" },
 };
 
-export default function ReglagesAvis({ monde, source, client, role, relire, modifierLocal }: {
+export default function ReglagesAvis({ monde, source, client, role, relire, modifierLocal, gabarit }: {
   monde: Monde; source: "exemple" | "reelle"; client: Client | null; role: string;
   relire: () => Promise<void>; modifierLocal: (f: (m: Monde) => Monde) => void;
+  gabarit?: "sb";
 }) {
   const dirige = source === "exemple" || role === "gerant" || role === "admin";
   const membre = role !== "lecteur";
@@ -77,6 +78,158 @@ export default function ReglagesAvis({ monde, source, client, role, relire, modi
                motif: null, prochain_le: null, envois: [], cree_le: new Date().toISOString() }, ...m.avis],
     }), "Demande d'avis programmée : elle part trois jours après le règlement, relancée deux fois au plus.");
 
+  const reponses = (
+    <>
+  {!r ? (
+    <div className="esp-carte-corps"><Vide titre="REPUT n'est pas encore installé">Il s&apos;installe à la première demande reçue.</Vide></div>
+  ) : (
+    <div className="esp-carte-corps">
+      <div className="esp-form">
+        <label className="rv-libelle">Signature
+          <textarea className="rv-champ" rows={2} disabled={!dirige} value={r.signature} onChange={(e) => setR({ ...r, signature: e.target.value })} />
+        </label>
+        <div className="esp-form-ligne">
+          <label className="rv-libelle">Formule d&apos;appel
+            <input className="rv-champ" disabled={!dirige} value={r.formule_appel} onChange={(e) => setR({ ...r, formule_appel: e.target.value })} />
+          </label>
+          <label className="rv-libelle">Formule de politesse
+            <input className="rv-champ" disabled={!dirige} value={r.formule_politesse} onChange={(e) => setR({ ...r, formule_politesse: e.target.value })} />
+          </label>
+        </div>
+        <div className="esp-form-ligne">
+          <label className="rv-libelle">Ton
+            <select className="rv-champ" disabled={!dirige} value={r.ton} onChange={(e) => setR({ ...r, ton: e.target.value as Reglages["ton"] })}>
+              <option value="vouvoiement">Vouvoiement</option>
+              <option value="tutoiement">Tutoiement</option>
+            </select>
+          </label>
+          <label className="rv-libelle">Langues de réponse (codes, séparés par des virgules)
+            <input className="rv-champ" disabled={!dirige} value={r.langues.join(", ")}
+              onChange={(e) => setR({ ...r, langues: e.target.value.split(",").map((x) => x.trim().toLowerCase()).filter(Boolean) })} />
+          </label>
+        </div>
+        <label className="rv-libelle">Mention de la réponse automatisée, dans vos termes
+          <input className="rv-champ" disabled={!dirige} value={r.mention_automatisee ?? ""} onChange={(e) => setR({ ...r, mention_automatisee: e.target.value })}
+            placeholder="Réponse préparée par notre assistant, relue par notre équipe." />
+        </label>
+        <label className="rv-libelle" style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <input type="checkbox" disabled={!dirige} checked={r.accuse} onChange={(e) => setR({ ...r, accuse: e.target.checked })} />
+          Accusé de réception dans la minute quand la réponse attend votre validation
+        </label>
+        <label className="rv-libelle">Texte de l&apos;accusé
+          <textarea className="rv-champ" rows={2} disabled={!dirige || !r.accuse} value={r.texte_accuse} onChange={(e) => setR({ ...r, texte_accuse: e.target.value })} />
+        </label>
+        <label className="rv-libelle">Lien de votre page d&apos;avis (https)
+          <input className="rv-champ" disabled={!dirige} value={r.lien_avis ?? ""} onChange={(e) => setR({ ...r, lien_avis: e.target.value })} placeholder="https://g.page/r/…/review" />
+        </label>
+        <label className="rv-libelle" style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <input type="checkbox" disabled={!dirige} checked={!!r.avis_auto_reglement} onChange={(e) => setR({ ...r, avis_auto_reglement: e.target.checked })} />
+          Demander un avis automatiquement après chaque facture réglée (relances d&apos;impayés CASHD)
+        </label>
+        <label className="rv-libelle">Texte de la demande d&apos;avis
+          <textarea className="rv-champ" rows={2} disabled={!dirige} value={r.texte_avis} onChange={(e) => setR({ ...r, texte_avis: e.target.value })} />
+        </label>
+        {dirige ? (
+          <div className="esp-actions">
+            <button type="button" className="r-btn r-btn--noir" disabled={envoi !== null || !r.signature.trim()} onClick={enregistrer}>
+              {envoi === "reglages" ? <Loader variant="spin" /> : null} Enregistrer
+            </button>
+          </div>
+        ) : <p className="esp-kpi-sous">Le gérant ou un administrateur change ces réglages.</p>}
+      </div>
+    </div>
+  )}
+    </>
+  );
+  const nouvelAvis = (
+    <>
+  {membre ? (
+    <div className="esp-carte-corps">
+      <div className="esp-form">
+        <div className="esp-form-ligne">
+          <label className="rv-libelle">Canal
+            <select className="rv-champ" value={nouvel.canal} onChange={(e) => setNouvel({ ...nouvel, canal: e.target.value })}>
+              <option value="email">Courriel</option>
+              <option value="whatsapp">WhatsApp</option>
+              <option value="sms">SMS</option>
+            </select>
+          </label>
+          <label className="rv-libelle">{nouvel.canal === "email" ? "Adresse" : "Numéro"} <span className="esp-obligatoire">(obligatoire)</span>
+            <input className="rv-champ" value={nouvel.adresse} onChange={(e) => setNouvel({ ...nouvel, adresse: e.target.value })} />
+          </label>
+        </div>
+        <div className="esp-form-ligne">
+          <label className="rv-libelle">Nom du client
+            <input className="rv-champ" value={nouvel.nom} onChange={(e) => setNouvel({ ...nouvel, nom: e.target.value })} />
+          </label>
+          <label className="rv-libelle">Facture ou intervention
+            <input className="rv-champ" value={nouvel.reference} onChange={(e) => setNouvel({ ...nouvel, reference: e.target.value })} placeholder="F-2026-118" />
+          </label>
+        </div>
+        <label className="rv-libelle">Réglée le
+          <input className="rv-champ" type="date" value={nouvel.regle_le} onChange={(e) => setNouvel({ ...nouvel, regle_le: e.target.value })} />
+        </label>
+        <div className="esp-actions">
+          <button type="button" className="r-btn r-btn--noir" disabled={envoi !== null || nouvel.adresse.trim().length < 3} onClick={programmer}>
+            {envoi === "avis" ? <Loader variant="spin" /> : null} Programmer la demande d&apos;avis
+          </button>
+        </div>
+      </div>
+    </div>
+  ) : null}
+    </>
+  );
+
+  if (gabarit === "sb") {
+    /* 22/10 — la page Settings de Supabase : vos réponses, puis les demandes d'avis, chacune en ligne */
+    return (
+      <div className="sb-reglages v2-arrivee">
+        <h1 className="sb-titre">Réglages et avis</h1>
+        {fait ? <Bandeau teinte="vert" role="status">{fait}</Bandeau> : null}
+        {erreur ? <Bandeau teinte="rouge" role="alert">{erreur}</Bandeau> : null}
+        <section className="sb-reglages-section" aria-label="Vos réponses">
+          <header>
+            <h2>Vos réponses</h2>
+            <p>La signature, les formules, le ton et les langues de chaque réponse préparée.</p>
+          </header>
+          <div className="esp-carte">{reponses}</div>
+        </section>
+        <section className="sb-reglages-section" aria-label="Demandes d'avis">
+          <header>
+            <h2>Demandes d&apos;avis</h2>
+            <p>La demande part trois jours après le règlement, puis elle est relancée deux fois au plus. La même personne n&apos;est plus sollicitée avant six mois.</p>
+          </header>
+          {membre ? <div className="esp-carte">{nouvelAvis}</div> : null}
+          {monde.avis.length === 0 ? (
+            <div className="sb-conseil-vide"><p style={{ margin: 0 }}>Aucune demande d&apos;avis</p><span>Elles s&apos;affichent ici dès qu&apos;un règlement est déclaré.</span></div>
+          ) : (
+            <ul className="sb-liens-liste sb-sauvegardes" aria-label="Demandes d'avis">
+              {monde.avis.map((a) => (
+                <li key={a.id}>
+                  <div>
+                    <span className="sb-sauvegarde-texte">
+                      <strong>{a.nom || a.adresse}</strong>
+                      <span style={{ overflowWrap: "anywhere" }}>
+                        Réglé le {dateCourte(a.regle_le)}{a.reference ? ` · ${a.reference}` : ""} · {a.envois.length} envoi{a.envois.length > 1 ? "s" : ""}
+                        {a.prochain_le && (a.statut === "programme" || a.statut === "sollicite") ? ` · prochain le ${dateCourte(a.prochain_le)}` : ""}
+                      </span>
+                    </span>
+                    <Pastille teinte={STATUTS_AVIS[a.statut].teinte}>{STATUTS_AVIS[a.statut].libelle}</Pastille>
+                    {membre && (a.statut === "programme" || a.statut === "sollicite") ? (
+                      <button type="button" className="v2-btn" disabled={envoi !== null}
+                        onClick={() => void agir(a.id, () => avisRecu(a.id), (m) => ({ ...m, avis: m.avis.map((x) => (x.id === a.id ? { ...x, statut: "avis_recu", prochain_le: null } : x)) }),
+                          "Avis noté reçu : plus aucune relance.")}>Avis reçu</button>
+                    ) : null}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div style={{ display: "grid", gap: 16 }}>
       {fait ? <Bandeau teinte="vert" role="status">{fait}</Bandeau> : null}
@@ -84,65 +237,8 @@ export default function ReglagesAvis({ monde, source, client, role, relire, modi
 
       <section className="esp-carte" aria-label="Réglages des réponses">
         <div className="esp-carte-tete"><h2 className="esp-carte-titre">Vos réponses</h2></div>
-        {!r ? (
-          <div className="esp-carte-corps"><Vide titre="REPUT n'est pas encore installé">Il s&apos;installe à la première demande reçue.</Vide></div>
-        ) : (
-          <div className="esp-carte-corps">
-            <div className="esp-form">
-              <label className="rv-libelle">Signature
-                <textarea className="rv-champ" rows={2} disabled={!dirige} value={r.signature} onChange={(e) => setR({ ...r, signature: e.target.value })} />
-              </label>
-              <div className="esp-form-ligne">
-                <label className="rv-libelle">Formule d&apos;appel
-                  <input className="rv-champ" disabled={!dirige} value={r.formule_appel} onChange={(e) => setR({ ...r, formule_appel: e.target.value })} />
-                </label>
-                <label className="rv-libelle">Formule de politesse
-                  <input className="rv-champ" disabled={!dirige} value={r.formule_politesse} onChange={(e) => setR({ ...r, formule_politesse: e.target.value })} />
-                </label>
-              </div>
-              <div className="esp-form-ligne">
-                <label className="rv-libelle">Ton
-                  <select className="rv-champ" disabled={!dirige} value={r.ton} onChange={(e) => setR({ ...r, ton: e.target.value as Reglages["ton"] })}>
-                    <option value="vouvoiement">Vouvoiement</option>
-                    <option value="tutoiement">Tutoiement</option>
-                  </select>
-                </label>
-                <label className="rv-libelle">Langues de réponse (codes, séparés par des virgules)
-                  <input className="rv-champ" disabled={!dirige} value={r.langues.join(", ")}
-                    onChange={(e) => setR({ ...r, langues: e.target.value.split(",").map((x) => x.trim().toLowerCase()).filter(Boolean) })} />
-                </label>
-              </div>
-              <label className="rv-libelle">Mention de la réponse automatisée, dans vos termes
-                <input className="rv-champ" disabled={!dirige} value={r.mention_automatisee ?? ""} onChange={(e) => setR({ ...r, mention_automatisee: e.target.value })}
-                  placeholder="Réponse préparée par notre assistant, relue par notre équipe." />
-              </label>
-              <label className="rv-libelle" style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <input type="checkbox" disabled={!dirige} checked={r.accuse} onChange={(e) => setR({ ...r, accuse: e.target.checked })} />
-                Accusé de réception dans la minute quand la réponse attend votre validation
-              </label>
-              <label className="rv-libelle">Texte de l&apos;accusé
-                <textarea className="rv-champ" rows={2} disabled={!dirige || !r.accuse} value={r.texte_accuse} onChange={(e) => setR({ ...r, texte_accuse: e.target.value })} />
-              </label>
-              <label className="rv-libelle">Lien de votre page d&apos;avis (https)
-                <input className="rv-champ" disabled={!dirige} value={r.lien_avis ?? ""} onChange={(e) => setR({ ...r, lien_avis: e.target.value })} placeholder="https://g.page/r/…/review" />
-              </label>
-              <label className="rv-libelle" style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <input type="checkbox" disabled={!dirige} checked={!!r.avis_auto_reglement} onChange={(e) => setR({ ...r, avis_auto_reglement: e.target.checked })} />
-                Demander un avis automatiquement après chaque facture réglée (relances d&apos;impayés CASHD)
-              </label>
-              <label className="rv-libelle">Texte de la demande d&apos;avis
-                <textarea className="rv-champ" rows={2} disabled={!dirige} value={r.texte_avis} onChange={(e) => setR({ ...r, texte_avis: e.target.value })} />
-              </label>
-              {dirige ? (
-                <div className="esp-actions">
-                  <button type="button" className="r-btn r-btn--noir" disabled={envoi !== null || !r.signature.trim()} onClick={enregistrer}>
-                    {envoi === "reglages" ? <Loader variant="spin" /> : null} Enregistrer
-                  </button>
-                </div>
-              ) : <p className="esp-kpi-sous">Le gérant ou un administrateur change ces réglages.</p>}
-            </div>
-          </div>
-        )}
+        {reponses}
+
       </section>
 
       <section className="esp-carte" aria-label="Demandes d'avis">
@@ -152,40 +248,7 @@ export default function ReglagesAvis({ monde, source, client, role, relire, modi
             La demande part trois jours après le règlement, puis elle est relancée deux fois au plus. La même personne n&apos;est plus sollicitée avant six mois.
           </p>
         </div>
-        {membre ? (
-          <div className="esp-carte-corps">
-            <div className="esp-form">
-              <div className="esp-form-ligne">
-                <label className="rv-libelle">Canal
-                  <select className="rv-champ" value={nouvel.canal} onChange={(e) => setNouvel({ ...nouvel, canal: e.target.value })}>
-                    <option value="email">Courriel</option>
-                    <option value="whatsapp">WhatsApp</option>
-                    <option value="sms">SMS</option>
-                  </select>
-                </label>
-                <label className="rv-libelle">{nouvel.canal === "email" ? "Adresse" : "Numéro"} <span className="esp-obligatoire">(obligatoire)</span>
-                  <input className="rv-champ" value={nouvel.adresse} onChange={(e) => setNouvel({ ...nouvel, adresse: e.target.value })} />
-                </label>
-              </div>
-              <div className="esp-form-ligne">
-                <label className="rv-libelle">Nom du client
-                  <input className="rv-champ" value={nouvel.nom} onChange={(e) => setNouvel({ ...nouvel, nom: e.target.value })} />
-                </label>
-                <label className="rv-libelle">Facture ou intervention
-                  <input className="rv-champ" value={nouvel.reference} onChange={(e) => setNouvel({ ...nouvel, reference: e.target.value })} placeholder="F-2026-118" />
-                </label>
-              </div>
-              <label className="rv-libelle">Réglée le
-                <input className="rv-champ" type="date" value={nouvel.regle_le} onChange={(e) => setNouvel({ ...nouvel, regle_le: e.target.value })} />
-              </label>
-              <div className="esp-actions">
-                <button type="button" className="r-btn r-btn--noir" disabled={envoi !== null || nouvel.adresse.trim().length < 3} onClick={programmer}>
-                  {envoi === "avis" ? <Loader variant="spin" /> : null} Programmer la demande d&apos;avis
-                </button>
-              </div>
-            </div>
-          </div>
-        ) : null}
+        {nouvelAvis}
         <div className="esp-carte-corps">
           {monde.avis.length === 0 ? <Vide titre="Aucune demande d'avis">Elles s&apos;affichent ici dès qu&apos;un règlement est déclaré.</Vide> : (
             <ul style={{ display: "grid", gap: 10 }}>

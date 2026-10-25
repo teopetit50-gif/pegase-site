@@ -12,10 +12,6 @@ export const metadata: Metadata = {
 };
 
 export default function PageCashd() {
-  return (
-    <div className="v2-page v2-arrivee v2-cd-page">
-      <h1 className="v2-sr">Relances</h1>
-      <TableauCashd />
-    </div>
-  );
+  /* 22/10 — le tableau de bord porte lui-même son titre et sa marge (gabarit Observability de Supabase) */
+  return <TableauCashd />;
 }

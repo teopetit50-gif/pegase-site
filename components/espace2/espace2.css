@@ -9,6 +9,20 @@
    fenêtre 0,3 s, courbe « swift » cubic-bezier(.175,.885,.32,1.1),
    départ à l'échelle 0,96). La marque reste Omega.
 
+   Les couleurs, depuis le 21/10/2026, sont celles du tableau de bord
+   Supabase : jetons de packages/ui (supabase/supabase) résolus en sRGB
+   dans supabase.com/dashboard, thèmes dark et light, recoupés avec une
+   capture du tableau de bord de Teo. Page = barre latérale = barre du
+   haut (background), cartes un cran plus claires (surface-100), filets
+   en blanc à 7,5 % (border). En sombre, les gris sont pris neutres sur
+   la capture de Teo (#141414, #1a1a1a, #f1f1f1…) : la pointe de vert des
+   jetons OKLCH se voyait. Seule différence voulue : l'accent reste
+   bleu, à la saturation et à la clarté du vert Supabase (hsl 212 60 % 53 %).
+   Finitions relevées sur sa capture le même jour : cartes, cadres et menus
+   à 6 px, fenêtres à 8 px, aucune ombre portée (le filet seul), boutons
+   secondaires sur --v2-bouton (surface-300) avec filet --v2-a-500, bouton
+   principal plein bleu, champs à 34 px, petits boutons d'outils à 26 px.
+
    Tout est préfixé `v2-` et rangé sous `.v2` : rien ne fuit vers le site
    ni vers l'ancien espace (components/espace/espace.css).
    ══════════════════════════════════════════════════════════════════════ */
@@ -24,58 +38,63 @@ html:has(.v2) {
 .v2,
 .v2-jetons,
 html.v2-actif .dlg-panneau {
-  /* ——— jetons Geist, thème clair ——— */
+  /* ——— jetons : la grille Geist, les couleurs de Supabase (21/10/2026, voir en tête) ; thème clair ——— */
   --v2-bg-100: #fff;
-  --v2-bg-200: #fafafa;
+  --v2-bg-200: #fdfdfd;
   --v2-bg-eleve: #fff;
-  --v2-gray-100: #f2f2f2;
-  --v2-gray-200: #ebebeb;
-  --v2-gray-300: #e6e6e6;
-  --v2-gray-400: #eaeaea;
-  --v2-gray-500: #c9c9c9;
-  --v2-gray-600: #a8a8a8;
-  --v2-gray-700: #8f8f8f;
-  --v2-gray-800: #7d7d7d;
-  --v2-gray-900: #4d4d4d;
-  --v2-gray-1000: #171717;
-  --v2-a-100: #0000000d;
-  --v2-a-200: #00000014;
-  --v2-a-300: #0000001a;
-  --v2-a-400: #00000014;
-  --v2-a-500: #00000036;
-  --v2-a-600: #00000057;
-  --v2-blue-100: #f0f7ff;
-  --v2-blue-200: #eaf4ff;
-  --v2-blue-400: #cce7ff;
-  --v2-blue-700: #0070f7;
-  --v2-blue-900: #0064e2;
-  --v2-blue-1000: #002453;
-  --v2-red-100: #ffeef0;
-  --v2-red-200: #ffe9ea;
-  --v2-red-400: #ffd8d7;
-  --v2-red-700: #fc0035;
-  --v2-red-900: #d60020;
-  --v2-red-1000: #46000c;
-  --v2-amber-100: #fff6e1;
-  --v2-amber-200: #fff4d4;
-  --v2-amber-400: #ffdd84;
-  --v2-amber-700: #ffb200;
-  --v2-amber-900: #a64f00;
-  --v2-amber-1000: #541c00;
-  --v2-green-100: #ecfdec;
-  --v2-green-200: #e5fce7;
-  --v2-green-400: #b9f5bc;
-  --v2-green-700: #28a948;
-  --v2-green-900: #107d32;
-  --v2-green-1000: #00370d;
-  --v2-primaire-survol: #383838;
-
-  --v2-ombre-bord: 0 0 0 1px #00000014;
-  --v2-ombre-petite: 0 0 0 1px #00000014, 0px 2px 2px #0000000a;
-  --v2-ombre-moyenne: 0 0 0 1px #00000014, 0px 2px 2px #0000000a, 0px 8px 8px -8px #0000000a;
-  --v2-ombre-menu: 0 0 0 1px #00000014, 0px 1px 1px #00000005, 0px 4px 8px -4px #0000000a, 0px 16px 24px -8px #0000000f;
-  --v2-ombre-modal: 0 0 0 1px #00000014, 0px 1px 1px #00000005, 0px 8px 16px -4px #0000000a, 0px 24px 32px -8px #0000000f;
-  --v2-anneau: 0 0 0 1px var(--v2-a-600), 0px 0px 0px 4px #00000029;
+  --v2-gray-100: #f6f6f6;
+  --v2-gray-200: #f3f3f3;
+  --v2-gray-300: #efefef;
+  --v2-gray-400: #e8e8e8;
+  --v2-gray-500: #d8d8d8;
+  --v2-gray-600: #696969;
+  --v2-gray-700: #696969;
+  --v2-gray-800: #696969;
+  --v2-gray-900: #464646;
+  --v2-gray-1000: #030303;
+  --v2-a-100: #03030307;
+  --v2-a-200: #0303030a;
+  --v2-a-300: #0303030e;
+  --v2-a-400: #03030315;
+  --v2-a-500: #03030325;
+  --v2-a-600: #03030330;
+  --v2-blue-100: #d3e4f8;
+  --v2-blue-200: #a9cbf1;
+  --v2-blue-400: #72a7e3;
+  --v2-blue-700: #3f82cf;
+  --v2-blue-900: #093f7c;
+  --v2-blue-1000: #002652;
+  --v2-red-100: #fffcfc;
+  --v2-red-200: #fff0ee;
+  --v2-red-400: #fdd8d3;
+  --v2-red-700: #e54d2e;
+  --v2-red-900: #ca3214;
+  --v2-red-1000: #541c15;
+  --v2-amber-100: #fefbf5;
+  --v2-amber-200: #fff4d5;
+  --v2-amber-400: #ffe3a2;
+  --v2-amber-700: #dc7b18;
+  --v2-amber-900: #ac5800;
+  --v2-amber-1000: #693f05;
+  --v2-green-100: #d3f8e4;
+  --v2-green-200: #a9f1ca;
+  --v2-green-400: #72e3ad;
+  --v2-green-700: #3fcf8e;
+  --v2-green-900: #097c4f;
+  --v2-green-1000: #00311d;
+  --v2-primaire-survol: #3772b6;
+  --v2-bouton: #fff;
+  --v2-bouton-survol: #f3f3f3;
+  --v2-ombre-bord: 0 0 0 1px #03030315;
+  --v2-ombre-petite: 0 0 0 1px #03030315, 0 1px 2px #0000000d;
+  /* 22/10 — les boutons de Supabase : quatre filets intérieurs et une ombre portée (mesurés) */
+  --v2-ombre-bouton: 0 1px 3px #0000000a, inset 0 1px 0 #00000007, inset 0 0 0 1px #0000000a, inset 0 -1px 0 #0000000a, inset 0 0 0 1px #00000011;
+  --sb-champ: #00000004;
+  --v2-ombre-primaire: 0 1px 3px #0000000a, inset 0 1px 0 #00000007, inset 0 0 0 1px #0000000a, inset 0 0 0 1px #00000011;
+  --v2-ombre-moyenne: 0 0 0 1px #03030315, 0px 2px 2px #0000000a, 0px 8px 8px -8px #0000000a;
+  --v2-ombre-menu: 0 0 0 1px #03030325, 0px 1px 1px #00000005, 0px 4px 8px -4px #0000000a, 0px 16px 24px -8px #0000000f;
+  --v2-ombre-modal: 0 0 0 1px #03030325, 0px 1px 1px #00000005, 0px 8px 16px -4px #0000000a, 0px 24px 32px -8px #0000000f;
+  --v2-anneau: 0 0 0 1px var(--v2-a-600), 0px 0px 0px 4px #03030314;
   --v2-voile: #000000b3;
 
   /* ——— le mouvement ——— */
@@ -85,8 +104,12 @@ html.v2-actif .dlg-panneau {
   --v2-popover: 0.2s;
   --v2-overlay: 0.3s;
 
-  --v2-sans: var(--font-geist), "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  /* 22/10 — Inter, Manrope et Source Code Pro, comme le tableau de bord Supabase (app/espace2/layout.tsx) ;
+     sans elles (/omega, /bienvenue), on retombe sur Geist */
+  --v2-sans: var(--font-v2-inter, var(--font-geist)), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --v2-titre: var(--font-v2-manrope, var(--font-geist)), "Manrope", var(--v2-sans);
   --v2-mono: var(--font-omega-mono), "Geist Mono", Menlo, Monaco, "Liberation Mono", monospace;
+  --v2-code: var(--font-v2-code, var(--font-omega-mono)), "Source Code Pro", Menlo, monospace;
 
   color-scheme: light;
 }
@@ -101,114 +124,134 @@ html.v2-actif .dlg-panneau {
   font-feature-settings: "liga" 1, "calt" 1;
 }
 
+/* 22/10/2026 — le clair « doux » : le même clair, posé sur un gris (#f5f5f5,
+   relevé sur la page d'inscription de Qonto) au lieu du blanc pur. Les cartes
+   et les menus restent blancs et se détachent ; filets et textes ne bougent
+   pas. Posé par data-v2-fond="doux" sur <html> (theme.ts, amorce.ts). */
+html[data-v2-fond="doux"] :is(.v2, .v2-jetons, .dlg-panneau) {
+  --v2-bg-200: #efefef;
+  --v2-gray-100: #e5e5e5;
+  --v2-bouton-survol: #e5e5e5;
+}
+
 /* ——— thème sombre : le choix « sombre », ou « système » sur un poste sombre ——— */
 @media (prefers-color-scheme: dark) {
   html:not([data-v2-theme="light"]) :is(.v2, .v2-jetons, .dlg-panneau) {
-    /* les gris d'Attio (relevés sur ses captures, 10/10) : page #0f1112, barre latérale #0c0b0e, ligne active #161819, fenêtre #17191a */
-    --v2-bg-100: #0f1112;
-    --v2-bg-200: #0c0b0e;
-    --v2-bg-eleve: #17191a;
-    --v2-gray-100: #161819;
-    --v2-gray-200: #1f2123;
-    --v2-gray-300: #292929;
-    --v2-gray-400: #2e2e2e;
-    --v2-gray-500: #454545;
-    --v2-gray-600: #878787;
-    --v2-gray-700: #8f8f8f;
-    --v2-gray-800: #7d7d7d;
-    --v2-gray-900: #a0a0a0;
-    --v2-gray-1000: #ededed;
-    --v2-a-100: #ffffff0f;
-    --v2-a-200: #ffffff17;
-    --v2-a-300: #ffffff21;
-    --v2-a-400: #ffffff24;
-    --v2-a-500: #ffffff3d;
-    --v2-a-600: #ffffff82;
-    --v2-blue-100: #06193a;
-    --v2-blue-200: #022248;
-    --v2-blue-400: #003771;
-    --v2-blue-700: #0071f6;
-    --v2-blue-900: #50a8ff;
-    --v2-blue-1000: #ebf6ff;
-    --v2-red-100: #330a11;
-    --v2-red-200: #440d13;
-    --v2-red-400: #6f101b;
-    --v2-red-700: #f13242;
-    --v2-red-900: #ff5e63;
-    --v2-red-1000: #ffeaed;
-    --v2-amber-100: #291800;
-    --v2-amber-200: #331b00;
-    --v2-amber-400: #573200;
-    --v2-amber-700: #ffb200;
-    --v2-amber-900: #f90;
-    --v2-amber-1000: #fff3d9;
-    --v2-green-100: #00250a;
-    --v2-green-200: #003110;
-    --v2-green-400: #004616;
-    --v2-green-700: #00ab3e;
-    --v2-green-900: #00ca52;
-    --v2-green-1000: #daffe5;
-    --v2-primaire-survol: #cccccc;
-    --v2-ombre-bord: 0 0 0 1px #ffffff25;
-    --v2-ombre-petite: 0 0 0 1px #ffffff25, 0px 1px 2px #00000029;
-    --v2-ombre-moyenne: 0 0 0 1px #ffffff25, 0px 2px 2px #00000052, 0px 8px 8px -8px #00000029;
-    --v2-ombre-menu: 0 0 0 1px #ffffff25, 0px 1px 1px #00000005, 0px 4px 8px -4px #0000000a, 0px 16px 24px -8px #0000000f;
-    --v2-ombre-modal: 0 0 0 1px #ffffff25, 0px 1px 1px #00000005, 0px 8px 16px -4px #0000000a, 0px 24px 32px -8px #0000000f;
-    --v2-anneau: 0 0 0 1px var(--v2-a-600), 0px 0px 0px 4px #ffffff3d;
+    /* 22/10 — la page garde #141414 ; seules les cartes passent de #1a1a1a à #171717, un peu plus sombres sans se fondre dans la page (« les cartes étaient trop grises »). Avant : les gris de Supabase lus sur sa capture (21/10) : page et barre latérale #141414, carte #1a1a1a, ligne active #1e1e1e, fenêtre #1c1c1c — la pointe de vert des jetons OKLCH (teinte 157,5) se voyait */
+    --v2-bg-100: #171717;
+    --v2-bg-200: #141414;
+    --v2-bg-eleve: #1c1c1c;
+    --v2-gray-100: #1e1e1e;
+    --v2-gray-200: #1f1f1f;
+    --v2-gray-300: #262626;
+    --v2-gray-400: #303030;
+    --v2-gray-500: #393939;
+    --v2-gray-600: #999999;
+    --v2-gray-700: #999999;
+    --v2-gray-800: #999999;
+    --v2-gray-900: #bfbfbf;
+    --v2-gray-1000: #f1f1f1;
+    --v2-a-100: #ffffff08;
+    --v2-a-200: #ffffff0d;
+    --v2-a-300: #ffffff11;
+    --v2-a-400: #ffffff13;
+    --v2-a-500: #ffffff22;
+    --v2-a-600: #ffffff2c;
+    --v2-blue-100: #001329;
+    --v2-blue-200: #001731;
+    --v2-blue-400: #002e62;
+    --v2-blue-700: #3f82cf;
+    --v2-blue-900: #85afe0;
+    --v2-blue-1000: #e1effe;
+    --v2-red-100: #1d1412;
+    --v2-red-200: #3b1813;
+    --v2-red-400: #7f2315;
+    --v2-red-700: #e54d2e;
+    --v2-red-900: #f16a50;
+    --v2-red-1000: #fde3dc;
+    --v2-amber-100: #291900;
+    --v2-amber-200: #341c00;
+    --v2-amber-400: #693f05;
+    --v2-amber-700: #db8e00;
+    --v2-amber-900: #f2af48;
+    --v2-amber-1000: #fff0d6;
+    --v2-green-100: #002918;
+    --v2-green-200: #00311d;
+    --v2-green-400: #006239;
+    --v2-green-700: #3ecf8e;
+    --v2-green-900: #85e0ba;
+    --v2-green-1000: #d3f8e4;
+    --v2-primaire-survol: #5691d5;
+    --v2-bouton: #242424;
+    --v2-bouton-survol: #2a2a2a;
+    --v2-ombre-bord: 0 0 0 1px #ffffff13;
+    --v2-ombre-petite: 0 0 0 1px #ffffff13, 0 1px 2px #0000000d;
+    --v2-ombre-bouton: 0 1px 3px #00000033, inset 0 1px 0 #ffffff0a, inset 0 0 0 1px #0000000f, inset 0 -1px 0 #0000000f, inset 0 0 0 1px #ffffff1a;
+    --sb-champ: #0000001f;
+    --v2-ombre-primaire: 0 1px 3px #00000033, inset 0 1px 0 #ffffff0a, inset 0 0 0 1px #ffffff0f, inset 0 0 0 1px #ffffff1a;
+    --v2-ombre-moyenne: 0 0 0 1px #ffffff13, 0px 2px 2px #00000052, 0px 8px 8px -8px #00000029;
+    --v2-ombre-menu: 0 0 0 1px #ffffff22, 0px 1px 1px #00000005, 0px 4px 8px -4px #0000000a, 0px 16px 24px -8px #0000000f;
+    --v2-ombre-modal: 0 0 0 1px #ffffff22, 0px 1px 1px #00000005, 0px 8px 16px -4px #0000000a, 0px 24px 32px -8px #0000000f;
+    --v2-anneau: 0 0 0 1px var(--v2-a-600), 0px 0px 0px 4px #ffffff1f;
     color-scheme: dark;
   }
 }
 html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
-  --v2-bg-100: #0f1112;
-  --v2-bg-200: #0c0b0e;
-  --v2-bg-eleve: #17191a;
-  --v2-gray-100: #161819;
-  --v2-gray-200: #1f2123;
-  --v2-gray-300: #292929;
-  --v2-gray-400: #2e2e2e;
-  --v2-gray-500: #454545;
-  --v2-gray-600: #878787;
-  --v2-gray-700: #8f8f8f;
-  --v2-gray-800: #7d7d7d;
-  --v2-gray-900: #a0a0a0;
-  --v2-gray-1000: #ededed;
-  --v2-a-100: #ffffff0f;
-  --v2-a-200: #ffffff17;
-  --v2-a-300: #ffffff21;
-  --v2-a-400: #ffffff24;
-  --v2-a-500: #ffffff3d;
-  --v2-a-600: #ffffff82;
-  --v2-blue-100: #06193a;
-  --v2-blue-200: #022248;
-  --v2-blue-400: #003771;
-  --v2-blue-700: #0071f6;
-  --v2-blue-900: #50a8ff;
-  --v2-blue-1000: #ebf6ff;
-  --v2-red-100: #330a11;
-  --v2-red-200: #440d13;
-  --v2-red-400: #6f101b;
-  --v2-red-700: #f13242;
-  --v2-red-900: #ff5e63;
-  --v2-red-1000: #ffeaed;
-  --v2-amber-100: #291800;
-  --v2-amber-200: #331b00;
-  --v2-amber-400: #573200;
-  --v2-amber-700: #ffb200;
-  --v2-amber-900: #f90;
-  --v2-amber-1000: #fff3d9;
-  --v2-green-100: #00250a;
-  --v2-green-200: #003110;
-  --v2-green-400: #004616;
-  --v2-green-700: #00ab3e;
-  --v2-green-900: #00ca52;
-  --v2-green-1000: #daffe5;
-  --v2-primaire-survol: #cccccc;
-  --v2-ombre-bord: 0 0 0 1px #ffffff25;
-  --v2-ombre-petite: 0 0 0 1px #ffffff25, 0px 1px 2px #00000029;
-  --v2-ombre-moyenne: 0 0 0 1px #ffffff25, 0px 2px 2px #00000052, 0px 8px 8px -8px #00000029;
-  --v2-ombre-menu: 0 0 0 1px #ffffff25, 0px 1px 1px #00000005, 0px 4px 8px -4px #0000000a, 0px 16px 24px -8px #0000000f;
-  --v2-ombre-modal: 0 0 0 1px #ffffff25, 0px 1px 1px #00000005, 0px 8px 16px -4px #0000000a, 0px 24px 32px -8px #0000000f;
-  --v2-anneau: 0 0 0 1px var(--v2-a-600), 0px 0px 0px 4px #ffffff3d;
+  --v2-bg-100: #171717;
+  --v2-bg-200: #141414;
+  --v2-bg-eleve: #1c1c1c;
+  --v2-gray-100: #1e1e1e;
+  --v2-gray-200: #1f1f1f;
+  --v2-gray-300: #262626;
+  --v2-gray-400: #303030;
+  --v2-gray-500: #393939;
+  --v2-gray-600: #999999;
+  --v2-gray-700: #999999;
+  --v2-gray-800: #999999;
+  --v2-gray-900: #bfbfbf;
+  --v2-gray-1000: #f1f1f1;
+  --v2-a-100: #ffffff08;
+  --v2-a-200: #ffffff0d;
+  --v2-a-300: #ffffff11;
+  --v2-a-400: #ffffff13;
+  --v2-a-500: #ffffff22;
+  --v2-a-600: #ffffff2c;
+  --v2-blue-100: #001329;
+  --v2-blue-200: #001731;
+  --v2-blue-400: #002e62;
+  --v2-blue-700: #3f82cf;
+  --v2-blue-900: #85afe0;
+  --v2-blue-1000: #e1effe;
+  --v2-red-100: #1d1412;
+  --v2-red-200: #3b1813;
+  --v2-red-400: #7f2315;
+  --v2-red-700: #e54d2e;
+  --v2-red-900: #f16a50;
+  --v2-red-1000: #fde3dc;
+  --v2-amber-100: #291900;
+  --v2-amber-200: #341c00;
+  --v2-amber-400: #693f05;
+  --v2-amber-700: #db8e00;
+  --v2-amber-900: #f2af48;
+  --v2-amber-1000: #fff0d6;
+  --v2-green-100: #002918;
+  --v2-green-200: #00311d;
+  --v2-green-400: #006239;
+  --v2-green-700: #3ecf8e;
+  --v2-green-900: #85e0ba;
+  --v2-green-1000: #d3f8e4;
+  --v2-primaire-survol: #5691d5;
+  --v2-bouton: #242424;
+  --v2-bouton-survol: #2a2a2a;
+  --v2-ombre-bord: 0 0 0 1px #ffffff13;
+  --v2-ombre-petite: 0 0 0 1px #ffffff13, 0 1px 2px #0000000d;
+  --v2-ombre-bouton: 0 1px 3px #00000033, inset 0 1px 0 #ffffff0a, inset 0 0 0 1px #0000000f, inset 0 -1px 0 #0000000f, inset 0 0 0 1px #ffffff1a;
+  --sb-champ: #0000001f;
+  --v2-ombre-primaire: 0 1px 3px #00000033, inset 0 1px 0 #ffffff0a, inset 0 0 0 1px #ffffff0f, inset 0 0 0 1px #ffffff1a;
+  --v2-ombre-moyenne: 0 0 0 1px #ffffff13, 0px 2px 2px #00000052, 0px 8px 8px -8px #00000029;
+  --v2-ombre-menu: 0 0 0 1px #ffffff22, 0px 1px 1px #00000005, 0px 4px 8px -4px #0000000a, 0px 16px 24px -8px #0000000f;
+  --v2-ombre-modal: 0 0 0 1px #ffffff22, 0px 1px 1px #00000005, 0px 8px 16px -4px #0000000a, 0px 24px 32px -8px #0000000f;
+  --v2-anneau: 0 0 0 1px var(--v2-a-600), 0px 0px 0px 4px #ffffff1f;
   color-scheme: dark;
 }
 
@@ -275,12 +318,12 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
 }
 @media (min-width: 768px) {
   .v2-app {
-    grid-template-columns: 255px minmax(0, 1fr);
+    grid-template-columns: 304px minmax(0, 1fr); /* rail 48 + volet 256 */
   }
 }
 .v2-colonne-principale {
   min-width: 0;
-  background: var(--v2-bg-100);
+  background: var(--v2-bg-200);
   /* les tableaux se règlent sur la largeur de la colonne, pas de l'écran */
   container-type: inline-size;
   container-name: principale;
@@ -316,91 +359,186 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   }
   .v2-laterale--fixe > .v2-laterale-int {
     position: sticky;
-    top: 0;
-    height: 100dvh;
+    top: 48px;
+    height: calc(100dvh - 48px);
   }
 }
+
+/* ══ Le rail d'icônes et le volet (21/10/2026, comme Supabase) ═══════════
+   Relevé dans packages/ui sidebar.tsx et apps/studio Sidebar.tsx : rail de
+   3rem (48 px) qui s'ouvre à 13rem (208 px) au survol, par-dessus le volet,
+   en 100 ms linéaires ; entrées h-8 (32 px) rounded-md px-1.5 gap-2, icônes
+   size-5 (20 px, trait 1,5), libellé text-sm, foreground-lighter au repos,
+   foreground + font-medium + fond sidebar-accent sur la section ouverte,
+   survol sidebar-accent/50 ; groupes p-2 séparés par un filet ; volet de
+   256 px (w-64) avec un en-tête de 48 px (ProductMenuBar, px-6). */
 .v2-laterale-int {
+  position: relative;
+  display: flex;
+  height: 100%;
+}
+.v2-rail-place {
+  flex: none;
+  width: 48px;
+}
+.v2-rail {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 30;
+  width: 48px;
+  overflow: hidden;
+  background: var(--v2-bg-200);
+  border-right: 1px solid var(--v2-a-400);
+  transition: width 0.1s linear;
+}
+/* le rail s'ouvre au survol, et au clavier dès qu'une de ses entrées a le
+   focus visible. `:focus-within` le laissait ouvert après un clic à la
+   souris (le lien cliqué garde le focus) : c'est le « des fois ça reste
+   déplié » de Teo, 21/10. `:has(:focus-visible)` n'ouvre qu'au clavier. */
+@media (hover: hover) {
+  .v2-rail:hover,
+  .v2-rail:has(:focus-visible) {
+    width: 208px;
+  }
+}
+.v2-rail-int {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  padding: 12px 12px 0;
-}
-.v2-laterale-haut {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.v2-equipe {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
   gap: 8px;
-  height: 40px;
-  padding: 0 8px 0 6px;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--v2-gray-1000);
-  font: inherit;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.15s;
+  height: 100%;
+  padding: 8px;
 }
-.v2-equipe:hover,
-.v2-equipe[data-pressed] {
-  background: var(--v2-a-100);
-}
-.v2-equipe-nom {
+.v2-rail-nav {
+  flex: 1;
+  min-height: 0;
   min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden auto;
+  scrollbar-width: none;
 }
-.v2-equipe-chevrons {
-  margin-left: auto;
-  flex: none;
-  color: var(--v2-gray-900);
+/* min-width 0 et minmax(0, 1fr) : les libellés (nowrap) ne doivent pas
+   élargir les entrées au-delà du rail replié ; chaque entrée rogne le sien */
+.v2-rail-groupe {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
 }
-.v2-equipe .v2-badge {
-  flex: none;
+.v2-rail-groupe + .v2-rail-groupe {
+  padding-top: 8px;
+  border-top: 1px solid var(--v2-a-400);
 }
-.v2-trouver {
+.v2-rail-bas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  margin-top: auto;
+}
+.v2-rail-item {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
   width: 100%;
+  min-width: 0;
   height: 32px;
-  margin: 8px 0 12px;
-  padding: 0 6px 0 10px;
+  padding: 0 6px;
+  overflow: hidden;
   border: 0;
-  border-radius: 999px;
-  background: var(--v2-bg-100);
-  box-shadow: 0 0 0 1px var(--v2-a-400);
-  color: var(--v2-gray-900);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--v2-gray-700);
   font: inherit;
-  cursor: pointer;
-  transition: box-shadow 0.15s;
-}
-.v2-trouver:hover {
-  box-shadow: 0 0 0 1px var(--v2-a-500);
-}
-.v2-trouver > span:first-of-type {
-  flex: 1;
+  font-size: 14px;
+  white-space: nowrap;
   text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
 }
-.v2-trouver .v2-kbd {
-  border-radius: 999px;
-  min-width: 22px;
+.v2-rail-item:hover,
+.v2-rail-item[data-pressed] {
+  background: var(--v2-a-100);
+  color: var(--v2-gray-1000);
+}
+.v2-rail-item[data-actif] {
+  background: var(--v2-gray-100);
+  color: var(--v2-gray-1000);
+  font-weight: 500;
+}
+.v2-rail-item > svg,
+.v2-rail-item .v2-marque-omega,
+.v2-rail-item .v2-avatar {
+  flex: none;
+}
+.v2-rail-item .v2-marque-omega,
+.v2-rail-item .v2-marque-omega img {
+  width: 20px;
+  height: 20px;
+}
+.v2-rail-item .v2-avatar {
+  width: 20px;
+  height: 20px;
+  font-size: 9px;
+}
+.v2-rail-item .v2-rond-pastille {
+  top: 6px;
+  left: 18px;
+  right: auto;
+  box-shadow: 0 0 0 2px var(--v2-bg-200);
+}
+.v2-rail-libelle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2-volet {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+/* l'en-tête du volet Supabase : 48 px, le filet dessous, le titre à 24 px du bord */
+.v2-laterale-haut {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+  min-height: 48px;
+  padding: 0 16px 0 24px;
+  border-bottom: 1px solid var(--v2-a-400);
+}
+.v2-volet-titre {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* la recherche, dans la barre du haut */
+.v2-recherche .v2-kbd {
+  margin-left: 2px;
+}
+/* 22/10 — en clair, le ⌘K de la recherche n'a plus de carte : le texte seul */
+html[data-v2-theme="light"] .v2-recherche .v2-kbd {
+  background: none;
+  box-shadow: none;
 }
 .v2-laterale-nav {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   scrollbar-width: thin;
-  margin: 0 -12px;
-  padding: 0 12px 12px;
+  margin: 0;
+  padding: 0;
 }
 .v2-groupe {
   list-style: none;
@@ -409,51 +547,37 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   display: grid;
   gap: 1px;
 }
-/* 07/10/2026 — sections titrées et repliables ; un filet seulement
-   avant une section sans titre (le bas : Aide, Réglages) */
-.v2-section + .v2-section {
-  margin-top: 12px;
+/* 21/10/2026 — le volet de navigation de Supabase (ProductMenu) : les
+   groupes toujours ouverts (my-4 mx-3), séparés par un filet sur toute la
+   largeur, un intitulé en capitales à chasse fixe (text-sm uppercase
+   font-mono, foreground-lighter, mb-2), les entrées en pastilles de 26 px */
+.v2-section {
+  padding: 16px 12px;
 }
-.v2-section:last-child:not(:has(.v2-section-titre)) {
-  padding-top: 12px;
+.v2-section + .v2-section {
   border-top: 1px solid var(--v2-a-400);
 }
-.v2-section-titre {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  width: 100%;
-  height: 28px;
+.v2-laterale .v2-section-titre {
+  display: block;
+  margin: 0 0 8px;
   padding: 0 12px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--v2-gray-900);
-  font: inherit;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: color 0.15s, background 0.15s;
-}
-.v2-section-titre:hover {
-  color: var(--v2-gray-1000);
-  background: var(--v2-a-100);
-}
-.v2-section-titre svg {
-  transition: transform 0.15s;
-}
-.v2-section-titre[aria-expanded="false"] svg {
-  transform: rotate(-90deg);
+  color: var(--v2-gray-700);
+  font-family: var(--v2-mono);
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: uppercase;
 }
 .v2-lien {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
-  height: 32px;
-  padding: 0 8px;
+  height: 26px;
+  padding: 0 12px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 6px;
   background: transparent;
   color: var(--v2-gray-900);
   font: inherit;
@@ -467,9 +591,9 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   color: var(--v2-gray-1000);
 }
 .v2-lien[aria-current="page"] {
-  background: var(--v2-a-200);
+  background: var(--v2-gray-100);
   color: var(--v2-gray-1000);
-  font-weight: 500;
+  font-weight: 600;
 }
 .v2-lien[data-dedans] {
   color: var(--v2-gray-1000);
@@ -497,17 +621,20 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
 .v2-lien[aria-expanded="true"] .v2-lien-chevron {
   transform: rotate(90deg);
 }
+/* le compteur, comme le badge « NEW » du volet Supabase : pastille bordée, chasse fixe */
 .v2-lien-compteur {
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 7px;
   border-radius: 999px;
   display: inline-grid;
   place-items: center;
+  font-family: var(--v2-mono);
   font-size: 11px;
   font-weight: 500;
-  background: var(--v2-gray-200);
-  color: var(--v2-gray-1000);
+  background: var(--v2-a-100);
+  box-shadow: 0 0 0 1px var(--v2-a-500);
+  color: var(--v2-gray-900);
   font-variant-numeric: tabular-nums;
 }
 .v2-sous-menu {
@@ -528,35 +655,7 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   gap: 1px;
 }
 .v2-lien--sous {
-  padding-left: 34px;
-}
-.v2-laterale-bas {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 -12px;
-  padding: 12px;
-  border-top: 1px solid var(--v2-a-400);
-}
-.v2-moi {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 500;
-}
-.v2-moi .v2-avatar {
-  width: 24px;
-  height: 24px;
-  font-size: 10px;
-  cursor: default;
-}
-.v2-moi-nom {
-  min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  padding-left: 24px;
 }
 .v2-rond {
   position: relative;
@@ -645,7 +744,7 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   background: #00000066;
 }
 .v2-tiroir {
-  width: min(300px, 85vw);
+  width: min(304px, 88vw);
   height: 100dvh;
   outline: none;
   font-family: var(--v2-sans);
@@ -669,31 +768,42 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
 }
 
 /* ══ La barre du haut (dans la colonne principale) ═════════════════════ */
+/* la barre du haut court sur toute la largeur, au-dessus du rail et du volet (21/10, comme Supabase) */
 .v2-haut {
+  grid-column: 1 / -1;
   position: sticky;
   top: 0;
   z-index: 40;
-  height: 64px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  height: 48px;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
-  padding: 0 24px;
-  background: var(--v2-bg-100);
+  padding: 0 16px;
+  background: var(--v2-bg-200);
   box-shadow: inset 0 -1px 0 var(--v2-a-400);
 }
 .v2-haut-gauche {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   min-width: 0;
 }
+.v2-haut-sep {
+  flex: none;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--v2-gray-700);
+}
+.v2-haut .v2-portee {
+  flex: none;
+}
 .v2-haut-titre {
+  min-width: 0;
   margin: 0;
-  font-size: 16px;
-  line-height: 24px;
-  letter-spacing: -0.32px;
-  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -703,6 +813,38 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
+  flex: none;
+}
+.v2-haut-lien {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--v2-gray-900);
+  text-decoration: none;
+  border: 0;
+  background: none;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.v2-haut-lien:hover {
+  background: var(--v2-a-100);
+  color: var(--v2-gray-1000);
+}
+.v2-haut-compte {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  border-radius: 50%;
+}
+.v2-haut-compte .v2-pastille-ronde {
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
 }
 .v2-haut-droite .v2-btn[disabled] .v2-badge {
   background: var(--v2-gray-200);
@@ -809,7 +951,7 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 40px;
+  height: 30px;
   padding: 0 12px;
   border: 0;
   border-radius: 6px;
@@ -820,13 +962,14 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   white-space: nowrap;
   cursor: pointer;
   user-select: none;
-  background: var(--v2-bg-100);
+  background: var(--v2-bouton);
   color: var(--v2-gray-1000);
-  box-shadow: var(--v2-ombre-petite);
+  box-shadow: 0 0 0 1px var(--v2-a-500);
   transition: background 0.15s, box-shadow 0.15s, color 0.15s, transform 0.1s;
 }
 .v2-btn:hover {
-  background: var(--v2-gray-100);
+  background: var(--v2-bouton-survol);
+  box-shadow: 0 0 0 1px var(--v2-a-600);
 }
 .v2-btn:active {
   transform: scale(0.98);
@@ -838,8 +981,8 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
 .v2-btn--primaire,
 .v2 a.v2-btn--primaire {
   /* « .v2 a » (couleur héritée) l'emporterait sur un lien-bouton */
-  background: var(--v2-gray-1000);
-  color: var(--v2-bg-100);
+  background: var(--v2-blue-700);
+  color: #fff;
   box-shadow: none;
 }
 .v2-btn--primaire:hover {
@@ -905,7 +1048,7 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 40px;
+  height: 34px;
   padding: 0 12px;
   border-radius: 6px;
   background: var(--v2-bg-100);
@@ -1081,7 +1224,7 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
 /* ══ Cartes ════════════════════════════════════════════════════════════ */
 .v2-carte {
   background: var(--v2-bg-100);
-  border-radius: 12px;
+  border-radius: 6px;
   box-shadow: var(--v2-ombre-petite);
   min-width: 0;
 }
@@ -1103,7 +1246,7 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   padding: 12px 16px;
   border-top: 1px solid var(--v2-a-400);
   background: var(--v2-bg-200);
-  border-radius: 0 0 12px 12px;
+  border-radius: 0 0 6px 6px;
   color: var(--v2-gray-900);
   font-size: 13px;
 }
@@ -1121,7 +1264,7 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   display: grid;
   gap: 16px;
   padding: 16px;
-  border-radius: 12px;
+  border-radius: 6px;
   background: var(--v2-bg-100);
   box-shadow: var(--v2-ombre-petite);
   transition: box-shadow 0.2s;
@@ -1153,7 +1296,7 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   content: "";
   position: absolute;
   inset: 0;
-  border-radius: 12px;
+  border-radius: 6px;
 }
 .v2-projet-lien:focus-visible {
   box-shadow: none;
@@ -1234,7 +1377,7 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
 }
 .v2-projets[data-vue="liste"] {
   gap: 0;
-  border-radius: 12px;
+  border-radius: 6px;
   background: var(--v2-bg-100);
   box-shadow: var(--v2-ombre-petite);
 }
@@ -1327,7 +1470,7 @@ a.v2-jauge:hover {
   background: var(--v2-a-100);
 }
 .v2-liste-item:last-child {
-  border-radius: 0 0 12px 12px;
+  border-radius: 0 0 6px 6px;
 }
 .v2-liste-texte {
   min-width: 0;
@@ -1348,7 +1491,7 @@ a.v2-jauge:hover {
 /* ══ Tableaux ══════════════════════════════════════════════════════════ */
 .v2-tableau-cadre {
   overflow-x: auto;
-  border-radius: 12px;
+  border-radius: 6px;
 }
 .v2-tableau {
   width: 100%;
@@ -1363,15 +1506,15 @@ a.v2-jauge:hover {
   font-size: 12px;
   font-weight: 500;
   color: var(--v2-gray-900);
-  background: var(--v2-bg-200);
+  background: var(--v2-bg-100);
   border-bottom: 1px solid var(--v2-a-400);
   white-space: nowrap;
 }
 .v2-tableau th:first-child {
-  border-top-left-radius: 12px;
+  border-top-left-radius: 6px;
 }
 .v2-tableau th:last-child {
-  border-top-right-radius: 12px;
+  border-top-right-radius: 6px;
 }
 .v2-tableau td {
   padding: 12px 16px;
@@ -1504,7 +1647,7 @@ a.v2-jauge:hover {
   text-align: center;
   gap: 12px;
   padding: 48px 24px;
-  border-radius: 12px;
+  border-radius: 6px;
   border: 1px dashed var(--v2-a-500);
   background: var(--v2-bg-100);
 }
@@ -1550,7 +1693,7 @@ a.v2-jauge:hover {
 .v2-popover {
   min-width: 200px;
   max-width: min(320px, calc(100vw - 32px));
-  border-radius: 12px;
+  border-radius: 6px;
   background: var(--v2-bg-eleve, var(--v2-bg-100));
   color: var(--v2-gray-1000);
   box-shadow: var(--v2-ombre-menu);
@@ -1665,7 +1808,7 @@ a.v2-jauge:hover {
   max-width: 540px;
   max-height: calc(100dvh - 32px);
   overflow: auto;
-  border-radius: 12px;
+  border-radius: 8px;
   background: var(--v2-bg-eleve, var(--v2-bg-100));
   color: var(--v2-gray-1000);
   box-shadow: var(--v2-ombre-modal);
@@ -1709,7 +1852,7 @@ a.v2-jauge:hover {
   padding: 16px 24px;
   background: var(--v2-bg-200);
   border-top: 1px solid var(--v2-a-400);
-  border-radius: 0 0 12px 12px;
+  border-radius: 0 0 6px 6px;
 }
 
 /* ══ La palette de commandes (⌘K) ══════════════════════════════════════ */
@@ -1793,7 +1936,7 @@ a.v2-jauge:hover {
   gap: 10px;
   min-height: 52px;
   padding: 14px 16px;
-  border-radius: 12px;
+  border-radius: 8px;
   background: var(--v2-bg-100);
   color: var(--v2-gray-1000);
   box-shadow: var(--v2-ombre-menu);
@@ -1893,7 +2036,7 @@ a.v2-jauge:hover {
   text-align: left;
   padding: 16px;
   border: 0;
-  border-radius: 12px;
+  border-radius: 6px;
   background: var(--v2-bg-100);
   color: var(--v2-gray-1000);
   box-shadow: var(--v2-ombre-petite);
@@ -2220,6 +2363,7 @@ html.v2-calme *::after {
   height: 100dvh;
   outline: none;
   background: var(--v2-bg-100);
+  color: var(--v2-gray-1000); /* 23/10 : le panneau est porté par <body>, dont le texte est clair ; il prend sa propre couleur */
   font-family: var(--v2-sans);
   font-size: 14px;
   line-height: 20px;
@@ -2349,8 +2493,8 @@ html.v2-calme *::after {
    icône · libellé · chevron ; c'est le modèle des boutons de l'espace */
 .v2-val-filtres { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .v2-val-droite { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-.v2-val-bouton { position: relative; display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 10px; border-radius: 6px; background: var(--v2-bg-100); box-shadow: 0 0 0 1px var(--v2-a-400); color: var(--v2-gray-1000); font: inherit; font-size: 13px; font-weight: 500; white-space: nowrap; cursor: pointer; border: 0; transition: background 0.15s, box-shadow 0.15s; }
-.v2-val-bouton:hover { background: var(--v2-a-200); box-shadow: 0 0 0 1px var(--v2-a-500, var(--v2-a-400)); }
+.v2-val-bouton { position: relative; display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 10px; border-radius: 6px; background: var(--v2-bouton); box-shadow: 0 0 0 1px var(--v2-a-500); color: var(--v2-gray-1000); font: inherit; font-size: 13px; font-weight: 500; white-space: nowrap; cursor: pointer; border: 0; transition: background 0.15s, box-shadow 0.15s; }
+.v2-val-bouton:hover { background: var(--v2-bouton-survol); box-shadow: 0 0 0 1px var(--v2-a-600); }
 .v2-val-bouton > svg { color: var(--v2-gray-900); flex-shrink: 0; }
 .v2-val-bouton[data-actif] { box-shadow: 0 0 0 1px var(--v2-blue-700); }
 .v2-val-bouton[data-actif] > svg:first-child { color: var(--v2-blue-700); }
@@ -2384,7 +2528,7 @@ html.v2-calme *::after {
 .v2-val-case { display: grid; place-items: center; width: 52px; flex-shrink: 0; }
 .v2-val-case input { appearance: none; -webkit-appearance: none; display: grid; place-items: center; width: 16px; height: 16px; margin: 0; border: 1.5px solid var(--v2-gray-900); border-radius: 4px; background: transparent; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
 .v2-val-case input:hover:not(:disabled) { border-color: var(--v2-gray-1000); }
-.v2-val-case input:checked { background: var(--v2-gray-1000); border-color: var(--v2-gray-1000); }
+.v2-val-case input:checked { background: var(--v2-blue-700); border-color: var(--v2-blue-700); }
 .v2-val-case input:checked::after { content: ""; width: 4px; height: 8px; margin-top: -2px; border: solid var(--v2-bg-100); border-width: 0 2px 2px 0; transform: rotate(45deg); }
 .v2-val-case input:focus-visible { box-shadow: var(--v2-anneau); }
 .v2-val-case input:disabled { cursor: not-allowed; opacity: 0.4; }
@@ -2678,7 +2822,8 @@ html.v2-calme *::after {
 .v2-dr-chaleur-grille i, .v2-dr-echelle i { display: block; aspect-ratio: 1; max-height: 16px; border-radius: 3px; background: var(--v2-a-200); }
 .v2-dr-chaleur-grille i[data-n="-1"] { background: transparent; }
 .v2-dr-chaleur-grille i[data-n="1"], .v2-dr-echelle i[data-n="1"] { background: var(--v2-a-400); }
-.v2-dr-chaleur-grille i[data-n="2"], .v2-dr-echelle i[data-n="2"] { background: var(--v2-gray-700); }
+/* le gris 2 est un cran plus noir que le gris 700 (21/10, demande de Teo) */
+.v2-dr-chaleur-grille i[data-n="2"], .v2-dr-echelle i[data-n="2"] { background: color-mix(in srgb, var(--v2-gray-700) 90%, #000); }
 .v2-dr-chaleur-grille i[data-n="3"], .v2-dr-echelle i[data-n="3"] { background: var(--v2-gray-900); }
 .v2-dr-chaleur-grille i[data-n="4"], .v2-dr-echelle i[data-n="4"] { background: var(--v2-gray-1000); }
 .v2-dr-echelle { display: flex; align-items: center; gap: 4px; margin: 20px 0 0; font-size: 13px; color: var(--v2-gray-1000); }
@@ -2704,8 +2849,8 @@ html.v2-calme *::after {
 .v2-dr-raccourcis { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 28px; margin-top: 16px; }
 .v2-dr-raccourcis > a, .v2-dr-raccourcis > button { display: inline-flex; align-items: center; gap: 8px; padding: 6px 0; border: 0; background: none; color: var(--v2-gray-900); font: inherit; font-size: 13px; cursor: pointer; transition: color 0.15s; }
 .v2-dr-raccourcis > a:hover, .v2-dr-raccourcis > button:hover { color: var(--v2-gray-1000); }
-.v2 .v2-dr-raccourcis .v2-dr-principal { margin-left: auto; height: 32px; padding: 0 14px; border-radius: 6px; background: var(--v2-gray-1000); color: var(--v2-bg-100); font-weight: 500; }
-.v2 .v2-dr-raccourcis .v2-dr-principal:hover { color: var(--v2-bg-100); opacity: 0.9; }
+.v2 .v2-dr-raccourcis .v2-dr-principal { margin-left: auto; height: 32px; padding: 0 14px; border-radius: 6px; background: var(--v2-blue-700); color: #fff; font-weight: 500; }
+.v2 .v2-dr-raccourcis .v2-dr-principal:hover { color: #fff; opacity: 0.9; }
 
 /* les boîtes et les canaux */
 .v2-dr-carte--liste { padding: 0; }
@@ -2730,7 +2875,7 @@ html.v2-calme *::after {
    porte les raccourcis, deux cartes à vues (flèches au bord) */
 .v2-page:has(> .v2-dr) { max-width: none; padding: 16px 16px 48px; }
 .v2-dr-titre-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.v2 .v2-dr-titre-actions .v2-dr-principal { display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px; border-radius: 6px; background: var(--v2-gray-1000); color: var(--v2-bg-100); font-size: 13px; font-weight: 500; white-space: nowrap; }
+.v2 .v2-dr-titre-actions .v2-dr-principal { display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px; border-radius: 6px; background: var(--v2-blue-700); color: #fff; font-size: 13px; font-weight: 500; white-space: nowrap; }
 .v2-dr-principale { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(320px, 1fr); gap: 16px; align-items: stretch; }
 .v2-dr-carrousel { display: flex; flex-direction: column; }
 .v2-dr-carrousel-tete { display: flex; align-items: center; gap: 12px; }
@@ -2747,7 +2892,6 @@ html.v2-calme *::after {
 }
 
 /* « Omega × l'entreprise » en tête de la barre (07/10/2026) */
-.v2-equipe { gap: 7px; }
 .v2-marque-omega { display: grid; place-items: center; width: 24px; height: 24px; flex: none; }
 .v2-marque-omega img { width: 22px; height: 22px; object-fit: contain; }
 .v2-marque-fois { flex: none; display: grid; place-items: center; width: 14px; height: 14px; color: var(--v2-gray-1000); margin: 0 1px; }
@@ -2778,7 +2922,7 @@ html.v2-calme *::after {
 .v2-ia-saisie textarea::placeholder { color: var(--v2-gray-900); }
 .v2-ia-saisie-pied { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .v2-ia-saisie-pied > span { font-size: 11px; color: var(--v2-gray-900); }
-.v2-ia-envoyer { display: grid; place-items: center; width: 30px; height: 30px; border: 0; border-radius: 6px; background: var(--v2-gray-1000); color: var(--v2-bg-100); cursor: pointer; transition: opacity 0.15s; }
+.v2-ia-envoyer { display: grid; place-items: center; width: 30px; height: 30px; border: 0; border-radius: 6px; background: var(--v2-blue-700); color: #fff; cursor: pointer; transition: opacity 0.15s; }
 .v2-ia-envoyer:disabled { opacity: 0.35; cursor: default; }
 
 /* la conversation */
@@ -2925,13 +3069,51 @@ html.v2-calme .v2-vivant .v2-carte::before, html.v2-calme .v2-vivant .v2-dr-cart
    (#161819) plutôt que voilée. Vaut pour /espace2 et /omega.
    ══════════════════════════════════════════════════════════════════════ */
 .v2 .v2-haut { height: 48px; padding: 0 16px; }
-.v2 .v2-lien { height: 28px; gap: 8px; border-radius: 6px; }
+.v2 .v2-lien { height: 26px; gap: 8px; border-radius: 6px; }
 .v2 .v2-lien[aria-current="page"], .v2 .v2-lien[data-dedans] { background: var(--v2-gray-100); }
-.v2 .v2-section-titre { height: 24px; }
-.v2 .v2-trouver { height: 28px; }
-.v2 .v2-equipe { height: 32px; }
 /* boutons : 26 px et texte de 13 px, comme ceux d'Attio (« Sorted by Date », « View settings », mesurés le 11/10) */
 .v2 .v2-portee, .v2 .v2-btn--petit, .v2 .v2-val-bouton { height: 26px; padding: 0 8px; gap: 6px; font-size: 13px; }
 .v2 .v2-btn--petit.v2-btn--icone { width: 26px; padding: 0; }
 .v2 .v2-btn--petit svg, .v2 .v2-val-bouton svg, .v2 .v2-portee svg { width: 14px; height: 14px; }
 .v2 .v2-val-recherche { height: 28px; }
+
+
+/* 22/10 — l'activité de Demandes reçues tout en bleu : plus de carrés gris entre « Moins » et « Plus » */
+.v2 .v2-dr-chaleur-grille i[data-n="1"], .v2 .v2-dr-echelle i[data-n="1"] { background: color-mix(in srgb, var(--v2-blue-700) 25%, var(--v2-bg-100)); }
+.v2 .v2-dr-chaleur-grille i[data-n="2"], .v2 .v2-dr-echelle i[data-n="2"] { background: color-mix(in srgb, var(--v2-blue-700) 45%, var(--v2-bg-100)); }
+.v2 .v2-dr-chaleur-grille i[data-n="3"], .v2 .v2-dr-echelle i[data-n="3"] { background: color-mix(in srgb, var(--v2-blue-700) 70%, var(--v2-bg-100)); }
+.v2 .v2-dr-chaleur-grille i[data-n="4"], .v2 .v2-dr-echelle i[data-n="4"] { background: var(--v2-blue-700); }
+
+/* ══ Le Feedback et l'Aide : le panneau de l'assistant (24/10/2026) ═════ */
+.v2-ret-titre { margin: 0; font-size: 14px; font-weight: 500; color: var(--v2-gray-1000); }
+.v2-ret-corps { flex: 1; display: grid; align-content: start; gap: 14px; padding: 4px 16px 20px; }
+.v2-ret-defile { overflow-y: auto; gap: 24px; }
+.v2-ret-intro { margin: 0; font-size: 14px; line-height: 21px; color: var(--v2-gray-900); }
+.v2-ret-centre { text-align: center; }
+.v2-ret-types { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.v2-ret-type { display: flex; align-items: center; justify-content: center; gap: 8px; height: 36px; border: 0; border-radius: 6px; background: var(--v2-bouton); box-shadow: 0 0 0 1px var(--v2-a-500); color: var(--v2-gray-900); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s, box-shadow 0.15s, color 0.15s; }
+.v2-ret-type:hover { background: var(--v2-bouton-survol); color: var(--v2-gray-1000); }
+.v2-ret-type[aria-checked="true"] { background: var(--v2-a-200); box-shadow: 0 0 0 1px var(--v2-gray-1000); color: var(--v2-gray-1000); }
+.v2-ret-type:focus-visible { outline: 0; box-shadow: var(--v2-anneau); }
+.v2-ret-erreur { margin: 0; font-size: 13px; color: var(--v2-red-900, #e5484d); }
+.v2-ret-section { margin: 0 0 8px; font-size: 12px; font-weight: 500; color: var(--v2-gray-900); }
+.v2-ret-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.v2-ret-liste button { width: 100%; display: flex; align-items: center; gap: 12px; padding: 10px; border: 0; border-radius: 8px; background: none; color: var(--v2-gray-1000); font: inherit; font-size: 14px; text-align: left; cursor: pointer; transition: background 0.15s; }
+.v2-ret-liste button:hover { background: var(--v2-a-100); }
+.v2-ret-liste button:focus-visible { outline: 0; box-shadow: var(--v2-anneau); }
+.v2-ret-liste button > svg { color: var(--v2-gray-900); flex-shrink: 0; }
+.v2-ret-liste button > span { flex: 1; display: grid; gap: 2px; }
+.v2-ret-liste small { font-size: 12px; color: var(--v2-gray-900); }
+.v2-ret-raccourcis { margin: 0; display: grid; gap: 2px; }
+.v2-ret-raccourcis > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 10px; }
+.v2-ret-raccourcis dt { font-size: 14px; color: var(--v2-gray-1000); }
+.v2-ret-raccourcis dd { margin: 0; display: flex; gap: 4px; }
+.v2-ret-faq { display: grid; gap: 2px; }
+.v2-ret-faq details { border-radius: 8px; transition: background 0.15s; }
+.v2-ret-faq details[open] { background: var(--v2-a-100); }
+.v2-ret-faq summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px; list-style: none; font-size: 14px; color: var(--v2-gray-1000); cursor: pointer; border-radius: 8px; }
+.v2-ret-faq summary::-webkit-details-marker { display: none; }
+.v2-ret-faq summary:hover { background: var(--v2-a-100); }
+.v2-ret-faq summary svg { color: var(--v2-gray-900); flex-shrink: 0; transition: transform 0.2s; }
+.v2-ret-faq details[open] summary svg { transform: rotate(90deg); }
+.v2-ret-faq details p { margin: 0; padding: 0 10px 12px; font-size: 13px; line-height: 20px; color: var(--v2-gray-900); }

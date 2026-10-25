@@ -69,21 +69,43 @@ export const MODULES: ModuleV2[] = [
       { libelle: "À payer", href: `${RACINE}/filed/a-payer` },
       { libelle: "Fournisseurs", href: `${RACINE}/filed/fournisseurs` },
       { libelle: "Comptabilité", href: `${RACINE}/filed/comptabilite` },
+      /* 21/10/2026 — les pages de fonction */
+      { libelle: "Contrôles et fraude", href: `${RACINE}/filed/controles` },
+      { libelle: "Circuit de validation", href: `${RACINE}/filed/circuit` },
     ],
     true,
   ),
   m("cashd", "CASHD", "Relances", "Qui vous doit, depuis quand, où en est chaque relance", HandCoins, [
     { libelle: "Tableau de bord", href: `${RACINE}/cashd`, exact: true },
     { libelle: "Débiteurs et relances", href: `${RACINE}/cashd/suivi` },
+    /* 21/10/2026 — les pages de fonction (le titre de la barre du haut) */
+    { libelle: "Balance âgée", href: `${RACINE}/cashd/balance` },
+    { libelle: "Litiges et pauses", href: `${RACINE}/cashd/litiges` },
+    { libelle: "Risque client", href: `${RACINE}/cashd/risque` },
+    { libelle: "Devis sans réponse", href: `${RACINE}/cashd/devis` },
+    { libelle: "Encaissements", href: `${RACINE}/cashd/encaissements` },
   ]),
-  m("reput", "REPUT", "Demandes clients", "Demandes reçues et réponses préparées", MessageSquareText),
+  m("reput", "REPUT", "Demandes clients", "Demandes reçues et réponses préparées", MessageSquareText, [
+    { libelle: "Demandes", href: `${RACINE}/reput`, exact: true },
+    { libelle: "Base de connaissances", href: `${RACINE}/reput/base` },
+    { libelle: "Sujets autorisés", href: `${RACINE}/reput/sujets` },
+    { libelle: "Réglages et avis", href: `${RACINE}/reput/reglages` },
+    { libelle: "Urgences et escalade", href: `${RACINE}/reput/urgences` },
+  ]),
   m("varelo", "VARELO", "Référentiel du groupe", "Sociétés, lots et objets du groupe", Building),
   m("tavaro", "TAVARO", "Location", "Contrats, retours et barèmes", CarFront),
   m("lorani", "LORANI", "Permis", "Demandes de permis et délais d'instruction", Stamp),
   m("tiroma", "TIROMA", "Cabinet dentaire", "Créneaux, fauteuils et liste d'attente", Smile),
   m("tamila", "TAMILA", "Dossiers du cabinet", "Dossiers chiffrés et pièces", FolderLock),
   m("daliro", "DALIRO", "Chantiers", "Chantiers, envois et accords", HardHat),
-  m("offload", "OFFLOAD", "Clients qui décrochent", "Rythme d'achat, décrochages et reprises de contact", UserMinus),
+  m("offload", "OFFLOAD", "Clients qui décrochent", "Rythme d'achat, décrochages et reprises de contact", UserMinus, [
+    { libelle: "Comptes à risque", href: `${RACINE}/offload`, exact: true },
+    { libelle: "Échéances et renouvellements", href: `${RACINE}/offload/echeances` },
+    { libelle: "Affaires restées en plan", href: `${RACINE}/offload/affaires` },
+    { libelle: "Groupes clients", href: `${RACINE}/offload/groupes` },
+    { libelle: "Garde-fous", href: `${RACINE}/offload/garde-fous` },
+    { libelle: "Pilotage", href: `${RACINE}/offload/pilotage` },
+  ]),
 ];
 
 /* 07/10/2026 — demande de Teo : la barre ne montre que les quatre
