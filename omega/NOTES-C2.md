@@ -27,6 +27,14 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
   règlement dans la MED, « Moyens de règlement : … »), c2_32 / c2_34 / c2_37 (envoi à la main d'une relance non_reglee ;
   elle ne repart jamais ; statut « envoyee », contrainte élargie), puis l'écran des deux réglages de date limite.
   Local 429/429. Banc local : stub public.approbations (scratchpad/approbations_stub.sql, non commité).
+- **22/10** : c2_39 (crochet d'approbation du socle 19ay : texte réécrit au jour de la validation ; à poser après 19ay) ;
+  écrans CASHD reportés à la main dans la refonte Espace 2 de main (fusion d073dd22). La recette c2 vise l'ancien écran à
+  onglets (/espace redirige vers /espace2) : 43 ✓ / 48 ✗, identique sur main seul — à réécrire pour les pages Espace 2.
+- **25/10 (sprint 01 h 10 – 01 h 52 Z)** : c2_40 (C:84, adresse de paiement de l'organisation dans la relance, {numero}
+  et {montant} ; champ dans « Vos textes ») ; c2_41 (reprise après refus, côté CASHD, sur le socle 19az : cron
+  cashd-reprises chaque minute ; à poser après 19az). Local 445/445 (banc : 19az chargé, colonne devise ajoutée à la
+  souche locale de demandes_validation, non commité).
+- **Prochain pas** : la recette c2 sur les pages Espace 2 ; le reste de la liste au feu vert du coordinateur.
 - **Limites dites au coordinateur** : le socle fige le texte d'un envoi adossé (pas de réécriture à l'approbation, piste
   (c) pour Teo) ; une relance bloquée par un interdit n'est pas réécrite quand l'interdit est retiré (choix de produit).
 
