@@ -296,3 +296,8 @@ Reste non joué : le cycle un autre jour que mardi ; UTC contre Guadeloupe (fen�
 TOFFLOAD-11 ouvert (envois de relance invisibles). En attente : statut des deux envois. Aucune approbation.
 
 **23/10 00 h 22 Z, arrêt 15.** TOFFLOAD-11 précisé (a, b, c), transmis par le coordinateur à C4 à sa reprise. Aucune approbation. Arrêt.
+
+**PAUSE (Teo, 25/10 01 h 23 Z) — REPRISE.**
+- Fait depuis l'arrêt 15 : rien ; aucun lot posé (accès à la recette perdu côté coordinateur).
+- À rejouer à la reprise : correctif TOFFLOAD-11 (a, b, c), c4_34, valeur en jeu par segment au pilotage.
+- Reprise au signal du coordinateur. Aucune approbation (demandes V1-V3, O16, O4 ×2 en attente).
