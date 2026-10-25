@@ -1,4 +1,4 @@
--- 20261021231947 environnement_production
+-- 20261025180657 environnement_production
 -- Source : assembler.mjs --cloture (A5). Pose environnement = 'production' dans private.reglages.
 
 do $$

@@ -139,6 +139,8 @@ function lireNote(texte, nom = '') {
     const entre = suite && estCommit(suite[1]) ? suite[1] : null;
     const candidats = [entre, avant && avant.val, apres && apres.val].filter(Boolean);
     let sha = candidats[0];
+    // 25/10 : « c3_36….sql @ <sha1> (reposé) ; omega/…/a4_79….sql @ <sha2> » : un chemin prend le premier SHA qui le porte.
+    if (candidats.length > 1 && j.type === 'chemin') sha = candidats.find((c) => arbre(c).includes(j.val)) || sha;
     if (candidats.length > 1 && j.type !== 'chemin') {
       const trouve = candidats.find((c) => arbre(c).some((x) => x.includes('/migrations/') && (x.split('/').pop().startsWith(j.val + '_') || x.split('/').pop() === j.val + '.sql' || x.endsWith('/' + j.val))));
       if (trouve) sha = trouve;
