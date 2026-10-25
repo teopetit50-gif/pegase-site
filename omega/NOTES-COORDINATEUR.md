@@ -1658,3 +1658,28 @@ Reprise après refus, lecteur (A1) : format validé — charge.consigne (≤ 500
 7. worker-a4 **6470f895b11da3219501f4f3e5cbbe47181139d7** : omega/migrations/a4_86_filed_lot78_reprise_apres_refus.sql + omega/tests/filed/a4_74_reprise_apres_refus.sql (^test_a4_86_) — reprise après refus FILED, version réduite (correction humaine, 24 h max ; doublon / hors budget → impossible). À poser APRÈS 19az (point 3). A4 arrêté.
 8. worker-c2 **2b61661005bb3020cd5fbf9c40bfbc93e60317fd** : omega/modules/cashd/migrations/c2_40_lien_paiement.sql + omega/tests/cashd/c2_40_lien_paiement.sql (C:84, lien de paiement réglé par le client ; 3/3).
 9. worker-c2 **b996c405a5343f7b98fc6c61716e830da7684e43** : omega/modules/cashd/migrations/c2_41_reprise_apres_refus.sql + omega/tests/cashd/c2_41_reprise_apres_refus.sql (reprise CASHD ; APRÈS 19az ; à vérifier sur la recette : le nouvel envoi adossé à la reprise). C2 arrêté (c6dfbe88).
+
+## PAUSE (Teo, par le bureau) — 25/10, 01 h 23 Z, forfait weekly 95 %
+
+Sessions réveillées à 01 h 13 Z arrêtées (C4, A5, A4, C2, C3, A1, B1 arrêtés d'eux-mêmes ; B5, T-FILED, T-CASHD, T-OFFLOAD prévenus). Pause d'office de 01 h 52 Z désarmée. Rien ne repart.
+
+### SHA d'arrêt (01 h 25 Z)
+
+main 76eeb68c (avant ce commit) · worker-a1 4069fdf4 · worker-a4 6470f895 · worker-a5 f5f8ff0c · worker-b1 061ea633 · worker-b5 528b933f · worker-c2 c6dfbe88 · worker-c3 c1acfb25 · worker-c4 58b850b6 · testeur-filed badbfd71 · testeur-cashd 9b1dcd9c · testeur-offload 3e3b6a00 · testeur-reput eaaf0140.
+
+### Reprise — d'abord l'accès
+
+**Recette inaccessible depuis 01 h 16 Z** (connecteur Supabase : « permission » sur ygwbgpowzlbdaajlsqkn ; il ne voit plus que 2 projets d'une autre organisation, dont « omega-metiers-recette »). Teo : rendre l'accès, ou dire si la recette a changé. Puis poser la file ci-dessus dans l'ordre (points 1 à 9), un job de test à la fois, et faire rejouer les testeurs (T-FILED a F15/F16 prêtes pour TFILED-05 ; T-OFFLOAD : c4_34/35/36 ; T-CASHD : c2_40/41 ; T-REPUT : c3_43). Bureau : reput-reponse depuis worker-c3 8c882b8e. A1 : relecture avec consigne (~0,5 j, format validé). B1 : relevé du point de 7 h à faire dès l'accès rendu.
+
+### BILAN pour Teo (25/10, 01 h 10 → 01 h 23 Z)
+
+1. Bloquant : l'accès à la base de test (recette) a été coupé à 01 h 16 Z ; rien n'a pu être posé ni testé par les testeurs ce soir.
+2. Écrit et testé en local (niveau 0, pas encore niv. 1) : 9 lots dans la file, prêts à poser.
+3. OFFLOAD : contrats à reconduction (c4_34), correction TOFFLOAD-11 (c4_35), valeur par segment + export tableur (c4_36).
+4. Socle : reprise après refus (19az, A5) — déclencheur, lien, une seule reprise.
+5. FILED : facture adressée à une autre société bloquée (a4_85, TFILED-05) ; reprise après refus en version réduite (a4_86).
+6. CASHD : lien de paiement dans la relance (c2_40, sans prestataire) ; reprise après refus (c2_41).
+7. REPUT : tournures neutres (c3_43) ; la reprise REPUT attend le socle posé.
+8. Lecteur : la relecture avec la consigne du valideur est conçue (format validé), à coder à la reprise.
+9. Varelo (B1) : bloqué, relevé du point de 7 h impossible sans accès.
+10. Rien en production (niv. 3) ; reprise à votre feu vert, après rétablissement de l'accès à la recette.
