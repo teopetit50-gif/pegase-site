@@ -129,7 +129,7 @@ const GARANTIES = [
     icone: IconeLieu,
     titre: "Hébergement européen",
     texte:
-      "Vos données sont stockées dans l'Union européenne et lues en Europe. Aucune réplication n'est effectuée hors de l'Union européenne.",
+      "Vos données sont stockées dans l'Union européenne, lues en Europe, sans conservation chez le modèle. Aucune réplication n'est effectuée hors de l'Union européenne.",
   },
   {
     icone: IconeBarriere,
@@ -181,7 +181,7 @@ const CHIFFRES = [
     icone: IconeSablier,
     etiquette: "LECTURE",
     valeur: "Europe",
-    texte: "Le modèle lit en Europe le strict nécessaire à la tâche, jamais un fichier entier",
+    texte: "Le modèle lit en Europe le strict nécessaire à la tâche, sans le conserver",
   },
 ];
 
@@ -206,7 +206,7 @@ const RECOIT: { point: string; nom: string; role: string; jetons: string[] }[] =
     point: "#d97757",
     nom: "Notre fournisseur de modèles",
     role: "intelligence artificielle",
-    jetons: ["Le texte à traiter", "Aucun entraînement", "Lu en Europe"],
+    jetons: ["Le texte à traiter", "Aucun entraînement", "Lu en Europe, rien de conservé"],
   },
   {
     point: "#2fb6a8",
@@ -344,7 +344,7 @@ export default function VosDonnees() {
                   vos données
                 </h1>
                 <p className="vd-lead max-w-[42rem]">
-                  Vos données sont stockées dans l&apos;Union européenne et lues en Europe, ou sur une machine installée dans vos locaux lorsque votre politique interne l&apos;exige. Cette page décrit les deux dispositifs, les sous-traitants concernés et les engagements repris au contrat.
+                  Vos données sont stockées dans l&apos;Union européenne, lues en Europe, sans conservation chez le modèle, ou sur une machine installée dans vos locaux lorsque votre politique interne l&apos;exige. Cette page décrit les deux dispositifs, les sous-traitants concernés et les engagements repris au contrat.
                 </p>
                 <Link href="/commencer" className="vd-cta w-fit">
                   Commencer
