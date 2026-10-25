@@ -321,3 +321,19 @@ Deno.test("reprise après refus : la consigne du valideur est jointe, entre bali
   assertStringIncludes(q, "<consigne_valideur>\nMontant ou bénéficiaire à vérifier : citez le tarif 2026, pas 2025.\n</consigne_valideur>");
   assert(q.indexOf("<consigne_valideur>") < q.indexOf("<message>"), "avant le message du client");
 });
+
+Deno.test("reprise après refus (c3_44) : une réponse fixe refusée avec une consigne repasse par le modèle", () => {
+  const photo = dossier("📷", {});
+  photo.reception = { ...photo.reception!, sujet: "Photo", pieces: 1 };
+  assert(sansTexte(photo) !== null, "sans consigne : la précision fixe");
+  photo.consigne_valideur = "Demandez aussi l'adresse du chantier.";
+  assertEquals(sansTexte(photo), null);
+  const appel = dossier(APPEL_SANS_MESSAGE[0], {});
+  appel.reception = { ...appel.reception!, canal: "appel" };
+  appel.canal_reponse = "sms";
+  assertEquals(sansTexte(appel)?.redaction.corps, CORPS_APPEL_ECRIRE);
+  appel.consigne_valideur = "   ";
+  assert(sansTexte(appel) !== null, "une consigne vide ne compte pas");
+  appel.consigne_valideur = "Proposez plutôt de nous écrire par WhatsApp.";
+  assertEquals(sansTexte(appel), null);
+});

@@ -299,6 +299,9 @@ export const CORPS_APPEL_ECRIRE =
 
 export function sansTexte(d: Dossier): SortieRedaction | null {
   const r = d.reception;
+  // c3_44 (reprise après refus) : la réponse fixe a été refusée avec une consigne ; la redire ne servirait à rien,
+  // le modèle reprend la main pour suivre la consigne.
+  if (d.consigne_valideur?.trim()) return null;
   // c3_38 (TREPUT-12) : un appel sans message, ou inaudible — ni le modèle ni une réponse inventée ; à un mobile, on
   // demande d'écrire ; à un fixe, la note de rappel seule.
   if (r && r.canal === "appel" && APPEL_SANS_MESSAGE.includes((r.corps ?? "").trim()) && (d.precedents ?? []).length === 0) {
