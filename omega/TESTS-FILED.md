@@ -539,6 +539,16 @@ Je compare champ par champ. Niveau 2 : vraie pièce, lue sur la recette. Les nom
   rend pourtant `ok`. Un contrôle d'identité ne devrait pas se dire « ok » sur une valeur que le lecteur ne garantit pas. Attendu :
   attention « SIREN déduit, à confirmer », comme pour F1 avant a4_74.
 
+### Série 4 — 25/10, 01 h 15 Z (relance de Teo) : rejeu de TFILED-05 et de la reprise après refus
+- Pièces préparées, attendus écrits avant de jouer :
+  - **F15** (`pieces/F15_destinataire_tiers.pdf`) : MCD (fournisseur confirmé), MCD-2026-1016, HT 128,00, TVA 10,88, TTC 138,88, facturée à
+    « SOCIÉTÉ TIERCE BTP SARL, 97200 Fort-de-France ». Le montant est unique, donc pas de doublon probable. Attendu : un arrêt
+    `destinataire`, motif lisible (nom lu et nom du client).
+  - **F16** (`pieces/F16_destinataire_variante_nom.pdf`), le **témoin** : MCD-2026-1017, TTC 156,24, facturée à « BANC TEST FILED » (casse et
+    tirets différents de la raison sociale « banc-test-filed », même adresse). Attendu : **aucun** arrêt `destinataire`.
+  - F9 existante (R2026-0000xx) : à recontrôler après le lot. Attendu : `destinataire` posé.
+- En attente du signal du coordinateur (pose du lot A4).
+
 ### Jeu d'essai série 1 (prêt, pas encore joué)
 
 - Générateur : `omega/testeur-filed/generer_pieces.py` → `omega/testeur-filed/pieces/*.pdf` (15 fichiers, même gabarit).

@@ -189,3 +189,12 @@ c.drawString = lambda x, y, t, *a, **k: _o14(x, y, ("SIRET " + M13["siren"]) if 
 page(c, f=M13, titre="FACTURE", numero="MCD-2026-1015", date="15/10/2026", echeance="14/11/2026",
      lignes=[("Agglos creux 20x20x50", 200, 1.35, 8.5)])
 c.save()
+
+# Rejeu TFILED-05 (contrôle « destinataire »)
+# F15 : adressée à un tiers, montant unique (pas de doublon probable), fournisseur confirmé (MCD)
+piece("F15_destinataire_tiers.pdf", dict(base, numero="MCD-2026-1016", date="16/10/2026", echeance="15/11/2026", client=TIERS,
+      lignes=[("Parpaings pleins 15x20x50", 80, 1.60, 8.5)]))
+# F16 : témoin — adressée au client banc, mais nom écrit autrement (casse, tirets) : ne doit PAS déclencher « destinataire »
+piece("F16_destinataire_variante_nom.pdf", dict(base, numero="MCD-2026-1017", date="16/10/2026", echeance="15/11/2026",
+      client=("BANC TEST FILED", "Zone d'essai, lot 0", "97122 Baie-Mahault"),
+      lignes=[("Sable 0/4 lavé — tonne", 3, 48.00, 8.5)]))
