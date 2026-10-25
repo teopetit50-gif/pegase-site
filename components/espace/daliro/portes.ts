@@ -22,7 +22,8 @@
      btp_heures_chantier (lecture), btp_pointer, btp_pointer_equipe, btp_poser_cout_horaire (b6_17) ;
      btp_proposer_recalage (lecture), btp_recaler, btp_terminer_passage (b6_19) ;
      btp_preparer_signature, btp_preuve_signature (b6_20 ; la page /signer/<jeton> appelle btp_lire_a_signer et
-     btp_signer_sur_place sans compte) ;
+     btp_signer_sur_place sans compte) ; btp_preparer_signature_un_geste (b6_51 ; la page appelle alors
+     btp_signer_un_geste, sans compte) ;
      btp_meteo_chantier (lecture, b6_21) ;
      btp_appro_chantier (lecture), btp_ecrire_commande, btp_noter_commande, btp_noter_livraison, btp_annuler_commande (b6_22) ;
      btp_preparer_liste, btp_recevoir, btp_noter_retour (b6_23) ;
@@ -254,15 +255,26 @@ export async function terminerPassage(passage: string, finReelle: string): Promi
   return rpc("btp_terminer_passage", { p_passage: passage, p_fin_reelle: finReelle });
 }
 
-/* b6_20 : la signature sur place */
-export async function preparerSignature(avenant: string, heures: number): Promise<{ signature_id: string; jeton: string; lien: string; expire_le: string; empreinte: string }> {
+/* b6_20 : la signature sur place ; b6_51 : en un geste, le lien préparé au nom du signataire */
+export type LienSignature = {
+  signature_id: string; jeton: string; lien: string; expire_le: string; empreinte: string;
+  mode?: "trace" | "un_geste"; signataire?: { nom: string; qualite: string | null } | null;
+};
+
+export async function preparerSignature(avenant: string, heures: number): Promise<LienSignature> {
   return rpc("btp_preparer_signature", { p_avenant: avenant, p_heures: heures });
+}
+
+export async function preparerSignatureUnGeste(avenant: string, nom: string, qualite: string | null, heures: number): Promise<LienSignature> {
+  return rpc("btp_preparer_signature_un_geste", { p_avenant: avenant, p_nom: nom, p_qualite: qualite, p_heures: heures });
 }
 
 export type PreuveSignature = {
   signature_id: string; statut: "ouverte" | "signee" | "annulee"; empreinte: string; expire_le: string; prepare_le: string;
   signataire_nom: string | null; signataire_qualite: string | null; trace: string | null; trace_empreinte: string | null;
   appareil: string | null; signee_le: string | null; preuve_empreinte: string | null; annulee_motif: string | null;
+  /* b6_51 : « un_geste » = signé d'un appui, au nom préparé par le bureau, sans tracé ; absent avant b6_51 */
+  mode?: "trace" | "un_geste";
 };
 
 export async function preuveSignature(avenant: string): Promise<PreuveSignature | null> {

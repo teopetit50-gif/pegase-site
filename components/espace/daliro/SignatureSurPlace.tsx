@@ -11,6 +11,12 @@
    horodate, calcule les empreintes et passe l'avenant « signé »
    (public.btp_signer_sur_place). Le jeton « exemple » montre la page sans
    rien écrire.
+
+   En un geste (25/10/2026, DAL-17, b6_51, promesse « 1 clic · Pour signer
+   un avenant ») : quand le bureau a préparé le lien au nom du signataire,
+   la page montre l'avenant et ce nom, et un seul bouton « Signer »
+   (public.btp_signer_un_geste). La base garde le nom, l'heure, l'empreinte
+   du document et celle du jeton à usage unique. L'exemple est en un geste.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -33,7 +39,9 @@ type Document = {
   /* b6_38 : les photos jointes, datées ; elles entrent dans l'empreinte du document signé */
   photos?: { rang: number; nom: string; date: string; nature_date: "prise_de_vue" | "reception"; date_libelle: string; empreinte: string }[];
 };
-type ALire = { document: Document; empreinte: string; expire_le: string };
+type Signataire = { nom: string; qualite: string | null };
+/* mode et signataire : b6_51 ; absents d'une base sans b6_51, la page reste alors « avec tracé » */
+type ALire = { document: Document; empreinte: string; expire_le: string; mode?: "trace" | "un_geste"; signataire?: Signataire | null };
 type Signe = { signee: boolean; message: string; signee_le?: string; preuve?: string };
 
 const EXEMPLE: ALire = {
@@ -55,6 +63,8 @@ const EXEMPLE: ALire = {
   },
   empreinte: "exemple",
   expire_le: new Date(Date.now() + 72 * 3600 * 1000).toISOString(),
+  mode: "un_geste",
+  signataire: { nom: "Hélène Lefèvre", qualite: "Gérante de la SCI Lefèvre Patrimoine" },
 };
 
 const UNITES: Record<string, string> = { u: "u", ens: "ens.", forfait: "forfait", ml: "m", m2: "m²", m3: "m³", kg: "kg", t: "t", l: "l", h: "h", j: "j", sem: "sem.", mois: "mois" };
@@ -143,6 +153,28 @@ export default function SignatureSurPlace({ jeton }: { jeton: string }) {
     setTrace(true);
   };
 
+  /* En un geste : le lien porte le nom ; l'appui sur « Signer » est l'accord. */
+  const signerUnGeste = async () => {
+    setEnvoi(true);
+    setErreur(null);
+    try {
+      if (exemple) {
+        const quand = new Date().toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }).replace(" ", " à ");
+        setSigne({ signee: true, message: `Avenant n° ${EXEMPLE.document.numero} signé le ${quand} par ${EXEMPLE.signataire?.nom} (exemple : rien n'est enregistré).`, signee_le: new Date().toISOString() });
+        return;
+      }
+      const { data, error } = await createClient().rpc("btp_signer_un_geste", { p_jeton: jeton, p_appareil: navigator.userAgent.slice(0, 300) });
+      if (error) throw new Error(error.message);
+      const r = data as Signe;
+      if (!r.signee) throw new Error(r.message);
+      setSigne(r);
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : "La signature n'a pas été enregistrée.");
+    } finally {
+      setEnvoi(false);
+    }
+  };
+
   const signer = async () => {
     setEnvoi(true);
     setErreur(null);
@@ -183,6 +215,7 @@ export default function SignatureSurPlace({ jeton }: { jeton: string }) {
   }
 
   const d = a.document;
+  const unGeste = a.mode === "un_geste" && !!a.signataire;
   return (
     <section className="esp-carte" aria-label="Signature de l'avenant" style={{ maxWidth: 760, margin: "0 auto" }}>
       <h1 className="esp-section-titre">Avenant n° {d.numero} — {d.chantier.nom}</h1>
@@ -223,6 +256,23 @@ export default function SignatureSurPlace({ jeton }: { jeton: string }) {
         <Avis teinte="vert" role="status">
           {signe.message}{signe.preuve ? <> Empreinte de preuve : <span className="esp-mono">{signe.preuve.slice(0, 16)}…</span></> : null} Vous pouvez rendre le téléphone.
         </Avis>
+      ) : unGeste && a.signataire ? (
+        <div className="esp-form" style={{ marginTop: 14 }}>
+          <div style={{ border: "1px solid #e4e4e4", borderRadius: 10, padding: "12px 14px" }}>
+            <div className="esp-kpi-sous" style={{ margin: 0 }}>Signataire</div>
+            <div style={{ fontSize: 18 }}><strong>{a.signataire.nom}</strong>{a.signataire.qualite ? <>, {a.signataire.qualite}</> : null}</div>
+          </div>
+          <p style={{ margin: 0 }}>En appuyant sur « Signer », vous acceptez ces travaux supplémentaires pour {montant(d.total_ht)} HT.</p>
+          {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+          <button type="button" className="r-btn r-btn--noir" style={{ width: "100%", justifyContent: "center", minHeight: 52, fontSize: 17 }}
+                  onClick={() => void signerUnGeste()} disabled={envoi}>{envoi ? <Loader variant="spin" /> : null} Signer</button>
+          <p className="esp-kpi-sous" style={{ margin: 0 }}>
+            Ce n&apos;est pas vous ? Ne signez pas : {d.entreprise ?? "l'entreprise"} prépare un nouveau lien à votre nom.
+          </p>
+          <p className="esp-kpi-sous" style={{ margin: 0 }}>
+            Signature électronique simple (règlement eIDAS ; Code civil, art. 1366 et 1367). Sont conservés comme preuve de votre accord, par {d.entreprise ?? "l'entreprise"} : votre nom et votre qualité, l&apos;heure du serveur, le navigateur utilisé, l&apos;empreinte du document signé et ce lien, qui ne sert qu&apos;une fois.
+          </p>
+        </div>
       ) : (
         <div className="esp-form" style={{ marginTop: 14 }}>
           <div className="esp-form-ligne">

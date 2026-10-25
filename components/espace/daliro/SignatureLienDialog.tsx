@@ -2,13 +2,16 @@
 
 /* ══════════════════════════════════════════════════════════════════════
    Faire signer un avenant sur place, ou en voir la preuve
-   (06/10/2026, session B6, b6_20)
+   (06/10/2026, session B6, b6_20 ; en un geste : 25/10/2026, DAL-17, b6_51)
 
    « Faire signer sur place » : le bureau prépare un lien à usage unique
    (24 h, 72 h ou 7 jours), le copie et l'envoie au chef d'équipe ; le
-   client signe sur son téléphone (/signer/<jeton>). « Preuve » : le
-   signataire, l'heure, le tracé et les empreintes, tels que la base les
-   garde (public.btp_preuve_signature).
+   client signe sur son téléphone (/signer/<jeton>). Avec le nom du
+   signataire (et sa qualité), le lien les porte : le client lit l'avenant
+   et appuie sur « Signer » (btp_preparer_signature_un_geste). Sans nom,
+   il saisit son nom et trace sa signature (btp_preparer_signature).
+   « Preuve » : le signataire, l'heure, le tracé s'il y en a un et les
+   empreintes, tels que la base les garde (public.btp_preuve_signature).
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useState } from "react";
@@ -18,14 +21,17 @@ import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
 import { dateHeure, montant } from "../format";
 import { Avis, Def } from "../ui";
-import { preparerSignature, preuveSignature, type PreuveSignature } from "./portes";
+import { preparerSignature, preparerSignatureUnGeste, preuveSignature, type PreuveSignature } from "./portes";
 import type { Avenant } from "./types";
 
-type Props = { mode: "preparer" | "preuve"; avenant: Avenant; source: Source };
+/* signataire : le nom proposé d'office (le maître d'ouvrage s'il est un particulier), modifiable */
+type Props = { mode: "preparer" | "preuve"; avenant: Avenant; source: Source; signataire?: string | null };
 
-export default function SignatureLienDialog({ mode, avenant, source }: Props) {
+export default function SignatureLienDialog({ mode, avenant, source, signataire }: Props) {
   const [heures, setHeures] = useState("72");
-  const [lien, setLien] = useState<{ url: string; expire_le: string; empreinte: string } | null>(null);
+  const [nom, setNom] = useState(signataire ?? "");
+  const [qualite, setQualite] = useState("");
+  const [lien, setLien] = useState<{ url: string; expire_le: string; empreinte: string; signataire: string | null } | null>(null);
   const [preuve, setPreuve] = useState<PreuveSignature | null>(null);
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -49,11 +55,16 @@ export default function SignatureLienDialog({ mode, avenant, source }: Props) {
     setEnvoi(true);
     setErreur(null);
     try {
+      const n = nom.trim();
+      if (n.length === 1) throw new Error("Le nom du signataire compte au moins deux lettres.");
+      if (!n && qualite.trim()) throw new Error("Indiquez le nom du signataire avec sa qualité.");
+      const libelle = n ? `${n}${qualite.trim() ? `, ${qualite.trim()}` : ""}` : null;
       if (source === "reelle") {
-        const r = await preparerSignature(avenant.id, Number(heures));
-        setLien({ url: `${window.location.origin}${r.lien}`, expire_le: r.expire_le, empreinte: r.empreinte });
+        const r = n ? await preparerSignatureUnGeste(avenant.id, n, qualite.trim() || null, Number(heures))
+                    : await preparerSignature(avenant.id, Number(heures));
+        setLien({ url: `${window.location.origin}${r.lien}`, expire_le: r.expire_le, empreinte: r.empreinte, signataire: libelle });
       } else {
-        setLien({ url: `${window.location.origin}/signer/exemple`, expire_le: new Date(Date.now() + Number(heures) * 3600 * 1000).toISOString(), empreinte: "exemple" });
+        setLien({ url: `${window.location.origin}/signer/exemple`, expire_le: new Date(Date.now() + Number(heures) * 3600 * 1000).toISOString(), empreinte: "exemple", signataire: libelle });
       }
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base a refusé l'action.");
@@ -88,9 +99,10 @@ export default function SignatureLienDialog({ mode, avenant, source }: Props) {
               <div>
                 <Def etiquette="Signataire">{preuve.signataire_nom ?? "—"}{preuve.signataire_qualite ? `, ${preuve.signataire_qualite}` : ""}</Def>
                 <Def etiquette="Signé le">{dateHeure(preuve.signee_le)}</Def>
+                <Def etiquette="Geste">{preuve.mode === "un_geste" ? "Un appui sur « Signer », au nom préparé par le bureau" : "Nom saisi, « lu et approuvé », signature tracée"}</Def>
                 <Def etiquette="Appareil">{preuve.appareil ?? "—"}</Def>
                 <Def etiquette="Empreinte du document"><span className="esp-mono" style={{ wordBreak: "break-all" }}>{preuve.empreinte}</span></Def>
-                <Def etiquette="Empreinte du tracé"><span className="esp-mono" style={{ wordBreak: "break-all" }}>{preuve.trace_empreinte ?? "—"}</span></Def>
+                {preuve.mode === "un_geste" ? null : <Def etiquette="Empreinte du tracé"><span className="esp-mono" style={{ wordBreak: "break-all" }}>{preuve.trace_empreinte ?? "—"}</span></Def>}
                 <Def etiquette="Empreinte de preuve"><span className="esp-mono" style={{ wordBreak: "break-all" }}>{preuve.preuve_empreinte ?? "—"}</span></Def>
                 {preuve.trace ? (
                   // eslint-disable-next-line @next/next/no-img-element -- image en data: URL gardée en base
@@ -109,26 +121,39 @@ export default function SignatureLienDialog({ mode, avenant, source }: Props) {
         <DialogIcone><FileSignature width={18} height={18} aria-hidden="true" /></DialogIcone>
         <DialogTitle>Faire signer l&apos;avenant n° {avenant.numero} sur place</DialogTitle>
         <DialogDescription>
-          Un lien à usage unique, à ouvrir sur le téléphone du chef d&apos;équipe et à tendre au client sur le chantier ({montant(avenant.montant_ht)} HT). Il signe du doigt ; l&apos;avenant passe « signé » avec son nom, l&apos;heure et l&apos;empreinte du document.
+          Un lien à usage unique, à ouvrir sur le téléphone du chef d&apos;équipe et à tendre au client sur le chantier ({montant(avenant.montant_ht)} HT). Avec le nom du signataire, le client lit l&apos;avenant et appuie sur « Signer » ; l&apos;avenant passe « signé » avec ce nom, l&apos;heure et l&apos;empreinte du document.
         </DialogDescription>
       </DialogHeader>
       <DialogBody>
         <div className="esp-form" style={{ gridTemplateColumns: "minmax(0, 1fr)" }}>
           {!lien ? (
-            <label className="rv-libelle">Valable
-              <select className="rv-champ" value={heures} onChange={(e) => setHeures(e.target.value)}>
-                <option value="24">24 heures</option>
-                <option value="72">72 heures</option>
-                <option value="168">7 jours</option>
-              </select>
-            </label>
+            <>
+              <label className="rv-libelle">Signataire (nom et prénom)
+                <input className="rv-champ" maxLength={120} value={nom} onChange={(e) => setNom(e.target.value)} placeholder="Hélène Lefèvre" />
+              </label>
+              <label className="rv-libelle">Qualité
+                <input className="rv-champ" maxLength={120} value={qualite} onChange={(e) => setQualite(e.target.value)} placeholder="Gérante de la SCI, propriétaire…" />
+              </label>
+              <p className="esp-kpi-sous" style={{ margin: 0 }}>
+                {nom.trim().length >= 2
+                  ? <>Le client signe d&apos;un appui sur « Signer », au nom de <strong>{nom.trim()}</strong>. Si une autre personne signe, préparez un nouveau lien.</>
+                  : <>Sans nom, le client saisit le sien, coche « lu et approuvé » et trace sa signature.</>}
+              </p>
+              <label className="rv-libelle">Valable
+                <select className="rv-champ" value={heures} onChange={(e) => setHeures(e.target.value)}>
+                  <option value="24">24 heures</option>
+                  <option value="72">72 heures</option>
+                  <option value="168">7 jours</option>
+                </select>
+              </label>
+            </>
           ) : (
             <>
               <label className="rv-libelle">Lien de signature
                 <input className="rv-champ esp-mono" readOnly value={lien.url} onFocus={(e) => e.currentTarget.select()} />
               </label>
               <Avis teinte="vert" role="status">
-                Lien prêt, valable jusqu&apos;au {dateHeure(lien.expire_le)}. Envoyez-le au chef d&apos;équipe ; il ne sert qu&apos;une fois, et un nouveau lien annule celui-ci.
+                Lien prêt{lien.signataire ? <>, au nom de {lien.signataire}</> : null}, valable jusqu&apos;au {dateHeure(lien.expire_le)}. Envoyez-le au chef d&apos;équipe ; il ne sert qu&apos;une fois, et un nouveau lien annule celui-ci.
                 {copie ? " Copié." : ""}
               </Avis>
               {source !== "reelle" ? <Avis teinte="bleu">Exemple : le lien ouvre la page de démonstration, rien n&apos;y est enregistré.</Avis> : null}

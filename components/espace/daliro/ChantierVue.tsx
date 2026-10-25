@@ -736,7 +736,8 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
             </>
           ) : null}
           {form?.type === "sur_place" || form?.type === "preuve" ? (
-            <SignatureLienDialog key={`${form.type}-${form.avenant.id}`} mode={form.type === "sur_place" ? "preparer" : "preuve"} avenant={form.avenant} source={source} />
+            <SignatureLienDialog key={`${form.type}-${form.avenant.id}`} mode={form.type === "sur_place" ? "preparer" : "preuve"} avenant={form.avenant} source={source}
+                                 signataire={c.maitre_ouvrage_type === "particulier" ? c.maitre_ouvrage_nom ?? null : null} />
           ) : null}
           {form?.type === "releve" ? <ReleveDialog tableau={tableau} /> : null}
           {form?.type === "import" ? (
