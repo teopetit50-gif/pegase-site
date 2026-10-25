@@ -1,5 +1,15 @@
 # NOTES — session A5 (garde-fous)
 
+## REPRISE — 25/10/2026, 01 h 20 Z (sprint de Teo jusqu'à 01 h 52 Z)
+
+- Lot 19az, reprise après refus (décision de Teo du 23/10, NOTES-COORDINATEUR) : À POSER, puis test 68.
+  Il pose la file private.reprises (déclencheur approbations_zz_reprise sur les refus), le lien payload.reprise_de avec
+  un index unique (une seule reprise), et les portes moteur reprises_a_faire, proposer_reprise (corrections
+  {champ, avant, apres}, au moins une qui change) et reprise_impossible (journal + avis). Vérifié dans la base d'essai
+  locale : rejouable, même résultat refusé, seconde reprise refusée, pas de boucle.
+- Prochain pas, chez les moteurs : un lot par moteur, FILED en premier. Leur cron lit reprises_a_faire(module) et
+  appelle proposer_reprise ou reprise_impossible. L'écran (/espace2/validations) lit payload.reprise_de et corrections.
+
 ## ÉTAPE 1 DE LA MISE EN PRODUCTION — 22/10/2026, 19 h Z (relance de Teo)
 
 - Export de la recette fait par le coordinateur (exporter.sql, lecture seule) : branche export-prod, commit 968d3020,

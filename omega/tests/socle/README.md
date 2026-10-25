@@ -26,7 +26,7 @@ la fin du test, y compris en cas d'échec. Aucune donnée d'essai ne reste.
 
 ## Fichiers groupés pour le coordinateur
 
-- `TOUT.sql` : `00_installation.sql` suivi des 67 tests (la règle « pas de
+- `TOUT.sql` : `00_installation.sql` suivi des 68 tests (la règle « pas de
   DELETE en clair » est levée depuis que les fichiers sont posés depuis le
   dépôt), terminé par un seul `runtests()` qui rend une ligne `ok` / `not ok`
   par test. Un seul appel.
@@ -35,7 +35,7 @@ la fin du test, y compris en cas d'échec. Aucune donnée d'essai ne reste.
   un seul appel est trop gros.
 - Ils sont générés depuis les fichiers numérotés ; pour les refaire après une
   modification d'un test, relancer le script de la section « Régénérer ».
-- Validés sur la maquette locale : `TOUT.sql` rend `1..67`, 67 `ok`.
+- Validés sur la maquette locale : `TOUT.sql` rend `1..68`, 68 `ok`.
 
 ## Ce que chaque test vérifie
 
@@ -80,6 +80,7 @@ la fin du test, y compris en cas d'échec. Aucune donnée d'essai ne reste.
 | 65 | Lot 19aw : **une demande qui exige un commentaire ne s'approuve pas sans commentaire** (TCASHD-07). Sans commentaire, ou avec des espaces seulement : 23514, phrase en français, la demande reste en attente. Avec un commentaire, l'approbation passe. Le repère « [seul décideur] » ne compte pas comme commentaire. Rouge avant 19aw. Sans objet sur la maquette |
 | 66 | Lot 19ax : **délégations**. Les refus sont des phrases en français : sans fin, et fin avant début (TFILED-09). Une délégation « du 20/10 au 29/10 » vaut, en Guadeloupe, du 20/10 à 0 h jusqu'à la fin du 29/10, heure locale ; elle ne s'éteint plus le 28/10 à 20 h (TFILED-10). Une borne à l'heure précise n'est pas touchée. Rouge avant 19ax. Sans objet sur la maquette |
 | 67 | Lot 19ay : **crochet de réécriture à l'approbation**, par module. `envois_suivre_demande` appelle le crochet avant `envoi_valide`. Le crochet réécrit le corps ; l'empreinte suit, et destinataire, canal et échéance ne bougent pas. La réécriture est inscrite au journal. Un envoi décidé ne se réécrit plus. Un crochet qui touche autre chose que sujet, corps ou variables est refusé (22023), de même qu'une fonction qui ne reçoit pas un envoi. Rouge avant 19ay. Sans objet sur la maquette |
+| 68 | Lot 19az : **reprise après refus**. Le refus dépose sa consigne dans `private.reprises`. Une correction qui ne change rien est refusée (22023). La reprise est une demande en attente, liée à la refusée (`payload.reprise_de`), avec ses corrections, au nom du moteur. Une seule reprise par demande (23505). Le refus d'une reprise ne relance rien. Une reprise impossible ne crée pas de demande ; elle laisse une note au journal et un avis au client. Rouge avant 19az. Sans objet sur la maquette |
 
 ## Mécanique réelle du socle prise en compte (retours de la recette du 5 octobre)
 
