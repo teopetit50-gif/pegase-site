@@ -1653,3 +1653,5 @@ Sessions réveillées 01 h 13 Z : C4 (TOFFLOAD-11, c4_34, segments), A5 (socle r
 Arrêts : C3 c1acfb25 ; B1 061ea633 (relevé 7 h non fait, faute d'accès).
 4. worker-a4 **4c8d9fbea11412ee5d1b30291287ca647c00f2ba** : omega/migrations/a4_85_filed_lot77_destinataire.sql + omega/tests/filed/a4_73_destinataire.sql (TFILED-05 ; T-FILED a les pièces F15/F16 prêtes, recontrôler F9).
 5. worker-c4 **fe4ddfafef0985e22e033daff389eb113a380270** : omega/modules/offload/migrations/c4_35_relances_affaire_visibles.sql, puis tests c4_35_relances_affaire_visibles.sql et c4_08_affaires.sql (mis à jour) — TOFFLOAD-11 (4/4 en local). À poser APRÈS c4_33 (déjà posé) et c4_34 (point 1).
+6. worker-c4 **58b850b612685a0a78aee9e85834245d4c37ee7a** : omega/modules/offload/migrations/c4_36_segments_et_tableur.sql + omega/tests/offload/c4_36_segments_et_tableur.sql (valeur en jeu par segment, restitution CSV ; 4/4 en local). C4 arrêté.
+Reprise après refus, lecteur (A1) : format validé — charge.consigne (≤ 500 car., « Indication du valideur », jamais une valeur), charge.essai → version « …+c<n> », porte relire:<piece>:<n> ; ~0,5 j à la reprise. FILED ce soir : version réduite (A4).
