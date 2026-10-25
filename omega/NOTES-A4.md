@@ -2,6 +2,11 @@
 
 ## REPRISE (pause du 19/10, 17 h 50 Z — reprise samedi 25/10 après 02 h Z)
 
+**PAUSE du 25/10, 01 h 52 Z (sprint de Teo).**
+1. Fait : a4_85 (TFILED-05, destinataire par SIREN normalisé, TVA ou nom), test a4_73, 135/135 ; a4_84 et précédents posés par le coordinateur.
+2. À faire ensuite : le module FILED de la « reprise après refus », dès que le socle 19az d'A5 est posé (worker-a5 f5f8ff0c, « À POSER »). Le plan est envoyé au coordinateur : reprises_a_faire('filed') → instantané → relecture avec consigne (porte d'A1, à connaître) → différence → proposer_reprise ou reprise_impossible ; Doublon et Hors budget donnent impossible tout de suite.
+3. Ouvert : la réponse d'A1 sur la relecture avec consigne (sinon, version réduite : reprendre seulement les corrections humaines) ; 207/208 (Teo).
+
 **ARRÊT du 22/10, ~21 h 45 Z (coordinateur, après TFILED-17).**
 1. Fait et poussé le 22/10 : a4_78 → a4_83 (TFILED-16, 18, 19, 21, 24, 17 ; « premier IBAN » 069), tests a4_66 → a4_71 ; 133/133 en local ; a4_77 retiré (doublon de filed_lever_anomalie).
 2. Rien en cours ; a4_82 et a4_83 restent à poser par le coordinateur.
