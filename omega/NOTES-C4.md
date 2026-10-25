@@ -6,8 +6,8 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 
 ## REPRISE (25/10, 01 h 20 Z — sprint de Teo jusqu'à 01 h 52 Z)
 
-- Fait : c4_01 à c4_33 posés ; c4_34 (contrats à reconduction, C:73/C:75) poussé, local 505 ok.
-- En cours : TOFFLOAD-11 (relances d'affaire visibles dans a_valider, compteur = parti, relance 2 après départ de la 1).
+- Fait : c4_01 à c4_33 posés ; c4_34 (contrats à reconduction) et c4_35 (TOFFLOAD-11) poussés, local 509 ok.
+- En cours : rien.
 - Puis : valeur en jeu par segment et export tableur de la restitution. Import des personnes morales : attend Teo.
 
 ### Reprise du 17/10
@@ -450,6 +450,14 @@ Banc local : 28 tests, 312 assertions vertes, migrations posées deux fois ; tsc
 **Limites** : le taux par message ne compte pas les messages d'échéance (pas de réponse rattachée à une échéance ;
 l'échéance honorée après message est comptée au suivi). Le chiffre repris compte tous les achats des 90 jours,
 sans prétendre qu'ils sont dus au seul message.
+
+## Lot c4_35 — les relances d'affaire se valident, la suite attend leur départ (TOFFLOAD-11, 25/10)
+
+offload_tableau.a_valider liste aussi les relances de retrait à valider (« affaire », rang), le compteur a_valider les
+compte ; le cycle des affaires compte à part les relances qui attendent une validation (« a_valider ») : relances_1/2
+ne comptent que ce qui est parti ; la seconde relance attend le départ de la première (envoyé, brouillon déposé, ou
+relance par une personne), la décision attend celui de la seconde. Le test c4_08 fait partir les relances (c4_remettre)
+avant d'attendre la suite. Test `c4_35_relances_affaire_visibles.sql` : 3 rouges sur 4 avant, 4 verts après. Local : 58 tests, 509 ok.
 
 ## Lot c4_34 — les échéances des contrats à reconduction (C:73, C:75 ; 25/10)
 
@@ -913,3 +921,4 @@ Partielles : 6, 11, 15, 38.
 - 22/10 — lot c4_32 (TOFFLOAD-09, 10 : reprises d'avant les règles, comptes effacés hors liste) : 496 ok.
 - 23/10, 00 h 30 Z — lot c4_33 (affaires en plan : relance par une personne sans message, chiffrage) : 502 ok.
 - 25/10, 01 h 20 Z — lot c4_34 (contrats à reconduction au tableau des échéances) : 505 ok.
+- 25/10, 01 h 20 Z — lot c4_35 (TOFFLOAD-11) : 509 ok.

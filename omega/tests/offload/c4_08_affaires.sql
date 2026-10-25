@@ -66,7 +66,8 @@ begin
   return next is((select count(*)::integer from public.envois x where x.objet_type = 'offload_affaires' and x.objet_id = v_aff::text), 1,
                  'Une seule relance tant que le délai de relance n''est pas passé');
 
-  -- Sept jours plus tard : une seule autre.
+  -- Sept jours plus tard : une seule autre (la première est partie : depuis c4_35, la suite attend son départ).
+  perform tests.c4_remettre((tests.c4_affaire_lue(v_aff)).envoi1_id, (banc ->> 'gerant')::uuid, 'gerant@banc-varelo.test');
   perform private.offload_affaires_cycle(v_client, current_date + 7);
   a := tests.c4_affaire_lue(v_aff);
   return next ok(a.statut = 'relancee_2' and a.envoi2_id is not null and a.envoi2_id <> a.envoi1_id, 'Puis une seule autre relance');
@@ -74,7 +75,10 @@ begin
                  'La seconde dit qu''il s''agit d''un rappel');
 
   -- Sans réponse : décision manuelle, montant immobilisé en regard ; plus aucun message.
+  perform tests.c4_remettre((tests.c4_affaire_lue(v_aff)).envoi2_id, (banc ->> 'gerant')::uuid, 'gerant@banc-varelo.test');
+  perform tests.c4_remettre((tests.c4_affaire_lue(v_jeune)).envoi1_id, (banc ->> 'gerant')::uuid, 'gerant@banc-varelo.test');
   perform private.offload_affaires_cycle(v_client, current_date + 14);
+  perform tests.c4_remettre((tests.c4_affaire_lue(v_jeune)).envoi2_id, (banc ->> 'gerant')::uuid, 'gerant@banc-varelo.test');
   perform private.offload_affaires_cycle(v_client, current_date + 40);
   a := tests.c4_affaire_lue(v_aff);
   return next ok(a.statut = 'decision' and a.motif like 'Relancé deux fois sans réponse : à décider (480 € immobilisés depuis le %',
@@ -179,6 +183,7 @@ begin
                  'La réponse du client arrête les relances de retrait : ' || coalesce(a.statut, ''));
   return next ok(exists (select 1 from public.offload_taches t where t.compte_id = v_r and t.type = 'repondre' and t.titre like '%retrait CMD-77%'),
                  'La conversation revient au magasin');
+  perform tests.c4_remettre((tests.c4_affaire_lue(v_ai)).envoi1_id, (banc ->> 'gerant')::uuid, 'gerant@banc-varelo.test');
   perform private.offload_affaires_cycle(v_client, current_date + 8);
   return next is((select count(*)::integer from public.envois x where x.objet_type = 'offload_affaires' and x.objet_id = v_ar::text), 1,
                  'Après une réponse, aucune relance de retrait');
