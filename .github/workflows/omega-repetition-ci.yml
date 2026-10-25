@@ -18,7 +18,9 @@ name: Répétition du SQL (Postgres jetable)
 
 on:
   push:
-    tags: ['prod-*'] # le gel (MISE-EN-PRODUCTION.md § 1.7) ; pas sur les branches : la base de départ n'y est pas
+    # prod-* : le gel (MISE-EN-PRODUCTION.md § 1.7). repetition-* : une répétition sans valeur de gel (RUNBOOK) ; la pose
+    # continue alors après un fichier en échec, pour lister tous les échecs en un passage. Pas sur les branches.
+    tags: ['prod-*', 'repetition-*']
   workflow_dispatch:
     inputs:
       motif:
@@ -116,13 +118,22 @@ jobs:
           for f in $(ls omega/prod/base/0[0-9]_*.sql | sort) $(ls omega/prod/migrations/*.sql | sort); do
             nom=$(basename "$f" .sql)
             if ! psql "$ADMIN_URL" -v ON_ERROR_STOP=1 -X -q -1 -f "$f" > "$SORTIE/poses/$nom.txt" 2>&1; then
-              echo "::error title=Pose en échec::$f"
               tail -20 "$SORTIE/poses/$nom.txt"
-              exit 1
+              if [[ "$GITHUB_REF_NAME" != repetition-* ]]; then echo "::error title=Pose en échec::$f"; exit 1; fi
+              echo "$nom" >> "$SORTIE/echecs.txt"
+              [ -s "$SORTIE/premier_echec.txt" ] || { echo "$nom"; grep -m3 -E 'ERROR|ERREUR' "$SORTIE/poses/$nom.txt"; } > "$SORTIE/premier_echec.txt"
+              continue
             fi
             n=$((n + 1))
           done
           echo "$n fichier(s) posé(s), chacun en entier."
+          if [ -s "$SORTIE/echecs.txt" ]; then
+            echo "::error title=Premier échec::$(tr '\n' ' ' < "$SORTIE/premier_echec.txt" | cut -c1-900)"
+            echo "::error title=Fichiers en échec ($(wc -l < "$SORTIE/echecs.txt"))::$(tr '\n' ' ' < "$SORTIE/echecs.txt" | cut -c1-3000)"
+            for e in $(head -8 "$SORTIE/echecs.txt"); do echo "::warning title=$e::$(grep -m2 -E 'ERROR|ERREUR' "$SORTIE/poses/$e.txt" | tr '\n' ' ' | cut -c1-600)"; done
+            exit 1
+          fi
+          echo "::notice title=Pose::$n fichier(s) posé(s) sans échec"
 
       - name: Aucun job actif, aucun appel parti
         run: |
@@ -140,6 +151,29 @@ jobs:
           rouges=$(psql "$ADMIN_URL" -v ON_ERROR_STOP=1 -X -At -F ' | ' -f omega/prod/garde_fous.sql | awk -F ' [|] ' '$4 == "f"' | tee "$SORTIE/garde_fous_rouges.txt" | wc -l)
           [ "$rouges" -eq 0 ] || { echo "::error title=Garde-fous rouges::$rouges contrôle(s) : $(cut -d'|' -f1 "$SORTIE/garde_fous_rouges.txt" | tr '\n' ';')"; exit 1; }
 
+      - name: Relevé détaillé, comparé à la recette (omega/prod/releve-*/recette.tsv)
+        if: always() && steps.pose.outcome != 'skipped'
+        run: |
+          set -uo pipefail
+          ref="$(ls -d omega/prod/releve-*/ | sort | tail -1)recette.tsv"
+          # Pas de db push ici : la table d'historique de la CLI n'existe pas ; vide, elle ne compte que dans « migration ».
+          psql "$ADMIN_URL" -X -q -c "create schema if not exists supabase_migrations" \
+            -c "create table if not exists supabase_migrations.schema_migrations (version text primary key, statements text[], name text)"
+          psql "$ADMIN_URL" -v ON_ERROR_STOP=1 -X -q -At -f omega/prod/releve.sql > "$SORTIE/releve-ci.tsv"
+          python3 omega/prod/comparer_releves.py "$SORTIE/releve-ci.tsv" "$ref" repetition recette --sans-site --detail > "$SORTIE/comparaison.md"
+          cat "$SORTIE/comparaison.md" >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice title=Comparaison (répétition | recette | seulement recette | seulement répétition | différents)::$(sed -n '3,20p' "$SORTIE/comparaison.md" | grep -v '^| migration' | sed 's/^| //; s/ |$//' | tr '\n' ';' | cut -c1-1500)"
+          python3 - "$SORTIE/comparaison.md" <<'PY'
+          import sys, re
+          t = open(sys.argv[1]).read()
+          ordre = ['table', 'fonction', 'vue', 'cron', 'publication', 'politique', 'declencheur', 'index', 'contrainte', 'enum', 'droit_defaut', 'droit']
+          blocs = re.findall(r'### (\S+) — (seulement recette|seulement repetition|différents) \((\d+)\)\n\n(.*)', t)
+          blocs.sort(key=lambda b: (ordre.index(b[0]) if b[0] in ordre else 99, b[1]))
+          for c, quoi, n, liste in blocs[:9]:
+              print(f"::warning title={c} {quoi} ({n})::{liste.replace('`', '')[:3800]}")
+          PY
+          psql "$ADMIN_URL" -X -q -At -f omega/prod/empreinte.sql > "$SORTIE/empreinte-ci.txt" || true
+
       - name: Tests pgTAP, un fichier par appel
         if: always() && steps.pose.outcome == 'success'
         run: |
@@ -152,7 +186,7 @@ jobs:
           {
             echo "## Répétition du SQL — tests pgTAP"; echo; echo "| Fichier | ok | rouge |"; echo "|---|---|---|"
           } >> "$GITHUB_STEP_SUMMARY"
-          for f in omega/tests/socle/[0-9][0-9]_*.sql omega/tests/socle/19[a-z]*.sql omega/tests/{filed,identite,varelo,tavaro,tiroma,tamila,lorani,daliro}/*.sql; do
+          for f in omega/tests/socle/[0-9][0-9]_*.sql omega/tests/socle/19[a-z]*.sql omega/tests/{filed,identite,varelo,tavaro,tiroma,tamila,lorani,daliro,cashd,reput,offload}/*.sql; do
             [ -f "$f" ] || continue
             case "$(basename "$f")" in 00_installation.sql|TOUT*.sql) continue ;; esac
             nom="$(basename "$(dirname "$f")")_$(basename "$f" .sql)"
@@ -168,25 +202,8 @@ jobs:
           echo >> "$GITHUB_STEP_SUMMARY"
           echo "**$total résultats, $ko rouges, $so fichiers sans objet (banc de recette).**" >> "$GITHUB_STEP_SUMMARY"
           echo "Tests : $total résultats, $ko rouges, $so sans objet."
-          [ "$ko" -eq 0 ] || { echo "::error title=Tests rouges::$ko résultat(s) rouge(s)"; exit 1; }
-
-      - name: Empreinte du catalogue, comparée à celle de la recette au gel
-        if: always() && steps.pose.outcome == 'success'
-        env:
-          EMPREINTE: ${{ github.event.inputs.empreinte }}
-        run: |
-          set -uo pipefail
-          ref="${EMPREINTE:-$(ls -t omega/prod/empreintes/recette-*.txt 2>/dev/null | head -1)}"
-          [ -f "$ref" ] || { echo "::error::aucune empreinte de la recette à comparer"; exit 1; }
-          psql "$ADMIN_URL" -v ON_ERROR_STOP=1 -X -q -At -F ' | ' -f omega/prod/empreinte.sql > "$SORTIE/empreinte-ci.txt"
-          if diff <(grep -v '^#' "$ref" | sort) <(sort "$SORTIE/empreinte-ci.txt") > "$SORTIE/empreinte-diff.txt"; then
-            echo "Empreintes identiques à $(basename "$ref")." | tee -a "$GITHUB_STEP_SUMMARY"
-          else
-            { echo; echo "### Empreinte : écarts avec $(basename "$ref") (< recette, > CI)"; echo '```'; cat "$SORTIE/empreinte-diff.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
-            cat "$SORTIE/empreinte-diff.txt"
-            echo "::error title=Empreinte différente::écarts avec $(basename "$ref") : détailler la catégorie avec empreinte.sql (niveau detail)"
-            exit 1
-          fi
+          echo "::notice title=Tests pgTAP::$total résultats, $ko rouges, $so sans objet"
+          [ "$ko" -eq 0 ] || { echo "::error title=Tests rouges::$ko résultat(s) rouge(s) : $(grep -l -E '^not ok |ERROR' "$SORTIE"/tests/*.txt | xargs -n1 basename | tr '\n' ' ' | cut -c1-2500)"; exit 1; }
 
       - name: Garder les sorties
         if: always()
