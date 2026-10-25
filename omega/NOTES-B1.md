@@ -1,5 +1,12 @@
 # Session B1 — VARELO, le référentiel du groupe (sociétés, pôles, rapprochement)
 
+## REPRISE (25/10/2026, 01 h 20 Z — relance de Teo, sprint arrêté)
+
+Le relevé du point de 7 h n'est toujours pas fait. L'accès du coordinateur à la recette (ygwbgpowzlbdaajlsqkn)
+est refusé depuis 01 h 15 Z, et c'est remonté au bureau. Rien d'autre n'a changé. Prochain pas, inchangé :
+le relevé de `points_du_jour` et de `points_sections` pour un jour ouvré (requêtes en fin de
+`omega/banc/varelo_presidence_7h.sql`, avec la date à changer), puis la ligne 11 de `varelo-chaine.md`.
+
 ## REPRISE (18/10/2026, 20 h 00 Z — pause de sécurité)
 
 Arbre propre, tout est poussé sur worker-b1. Posé et vert sur la recette : les 3 groupes publics (737bd0b), b1_20
