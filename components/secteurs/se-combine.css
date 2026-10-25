@@ -147,3 +147,12 @@
 .scb .scb-tout:hover {
   text-decoration-color: currentColor;
 }
+
+/* La mention « données d'exemple », sous le lien « Toutes les offres » */
+.scb .scb-exemple {
+  margin: 32px 0 0;
+  max-width: 40rem;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #71717a;
+}

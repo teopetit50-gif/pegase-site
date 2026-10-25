@@ -63,6 +63,13 @@ export default function SeCombine({ slug }: { slug: string }) {
           Toutes les offres
           <ArrowRight aria-hidden size={15} strokeWidth={1.75} />
         </Link>
+
+        {/* Les maquettes des pages métier portent des noms et des chiffres
+            inventés : la mention vaut pour les six pages (24/10/2026). */}
+        <p className="scb-exemple">
+          Les écrans, les noms et les chiffres montrés sur cette page sont des
+          exemples&nbsp;: aucun ne vient d&apos;un client réel.
+        </p>
       </div>
     </section>
   );
