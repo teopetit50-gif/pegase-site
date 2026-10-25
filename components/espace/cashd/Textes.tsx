@@ -36,7 +36,7 @@ const PALIERS_DEFAUT: PalierValidation[] = [
 ];
 
 type Source = "exemple" | "reelle";
-type Reglage = { metier: "general" | "btp"; seuil_ton: string; moyens_reglement: string; echelonnement_des: string; ton_retard_jours: string; ton_retard_important_jours: string; marge_validation_jours: string; remise_courrier_jours: string };
+type Reglage = { metier: "general" | "btp"; seuil_ton: string; moyens_reglement: string; echelonnement_des: string; ton_retard_jours: string; ton_retard_important_jours: string; marge_validation_jours: string; remise_courrier_jours: string; lien_paiement: string };
 
 function nombre(t: string): number | null {
   const s = t.replace(/[\s  €]/g, "").replace(",", ".");
@@ -76,6 +76,7 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
     ton_retard_important_jours: reglages?.ton_retard_important_jours != null ? String(reglages.ton_retard_important_jours) : "",
     marge_validation_jours: reglages?.marge_validation_jours != null ? String(reglages.marge_validation_jours) : "",
     remise_courrier_jours: reglages?.remise_courrier_jours != null ? String(reglages.remise_courrier_jours) : "",
+    lien_paiement: reglages?.lien_paiement ?? "",
   });
 
   const charger = useCallback(async () => {
@@ -284,9 +285,11 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
   /* c2_35 : de 0 à 15 jours, entiers ; vide rend le défaut (3 jours ouvrés, 2 jours) */
   const joursValides = [valeursReglage.marge_validation_jours, valeursReglage.remise_courrier_jours]
     .every((x) => x === null || (Number.isInteger(x) && x >= 0 && x <= 15));
+  /* c2_40 : une adresse https, sans espace */
+  const lienValide = !r.lien_paiement.trim() || (/^https:\/\/\S+$/.test(r.lien_paiement.trim()) && r.lien_paiement.trim().length <= 500);
   const paliersTon = (valeursReglage.ton_retard_jours ?? 15) < (valeursReglage.ton_retard_important_jours ?? 45);
   const reglageValide = !Number.isNaN(valeursReglage.seuil_ton) && !Number.isNaN(valeursReglage.echelonnement_des) && r.moyens_reglement.length <= 400
-    && !Number.isNaN(valeursReglage.ton_retard_jours) && !Number.isNaN(valeursReglage.ton_retard_important_jours) && paliersTon && joursValides;
+    && !Number.isNaN(valeursReglage.ton_retard_jours) && !Number.isNaN(valeursReglage.ton_retard_important_jours) && paliersTon && joursValides && lienValide;
   const reglerTon = async () => {
     setEnvoi(true);
     setErreur(null);
@@ -298,6 +301,7 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
           metier: r.metier, seuil_ton: valeursReglage.seuil_ton, moyens_reglement: r.moyens_reglement.trim(), echelonnement_des: valeursReglage.echelonnement_des,
           ton_retard_jours: valeursReglage.ton_retard_jours, ton_retard_important_jours: valeursReglage.ton_retard_important_jours,
           marge_validation_jours: valeursReglage.marge_validation_jours, remise_courrier_jours: valeursReglage.remise_courrier_jours,
+          lien_paiement: r.lien_paiement.trim() || null,
         });
         await apresReglage?.();
       }
@@ -441,6 +445,10 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
       <label className="rv-libelle">Vos moyens de règlement (« Moyens de règlement : … »)
         <input className="rv-champ" value={r.moyens_reglement} maxLength={400} onChange={(e) => setR({ ...r, moyens_reglement: e.target.value })} placeholder="Virement sur le compte FR76 …, chèque à l'ordre de …, ou au comptoir" />
       </label>
+      <label className="rv-libelle">Votre adresse de paiement en ligne, reprise sous chaque facture ({"{numero}"} et {"{montant}"} y sont remplacés)
+        <input className="rv-champ" value={r.lien_paiement} maxLength={500} onChange={(e) => setR({ ...r, lien_paiement: e.target.value })} placeholder="https://… ?facture={numero}&montant={montant}" />
+      </label>
+      {!lienValide ? <p className="c2-sous">L&apos;adresse commence par https:// et ne contient pas d&apos;espace.</p> : null}
       <label className="rv-libelle">Le vocabulaire des relances de devis
         <select className="rv-champ" value={r.metier} onChange={(e) => setR({ ...r, metier: e.target.value as Reglage["metier"] })}>
           <option value="general">Général</option>

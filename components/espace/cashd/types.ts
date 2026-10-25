@@ -28,6 +28,8 @@ export type Reglages = {
   /* c2_35 : la date limite — marge de validation (jours ouvrés, null : 3) et remise du courrier (jours, null : 2) */
   marge_validation_jours?: number | null;
   remise_courrier_jours?: number | null;
+  /* c2_40 : l'adresse de paiement de l'organisation ({numero}, {montant}) */
+  lien_paiement?: string | null;
   moyens_reglement?: string | null;
   echelonnement_des?: number | null;
   metier?: "general" | "btp";
