@@ -130,7 +130,7 @@ jobs:
           if [ -s "$SORTIE/echecs.txt" ]; then
             echo "::error title=Premier échec::$(tr '\n' ' ' < "$SORTIE/premier_echec.txt" | cut -c1-900)"
             echo "::error title=Fichiers en échec ($(wc -l < "$SORTIE/echecs.txt"))::$(tr '\n' ' ' < "$SORTIE/echecs.txt" | cut -c1-3000)"
-            for e in $(head -8 "$SORTIE/echecs.txt"); do echo "::warning title=$e::$(grep -m2 -E 'ERROR|ERREUR' "$SORTIE/poses/$e.txt" | tr '\n' ' ' | cut -c1-600)"; done
+            echo "::error title=Erreur de chaque fichier::$(for e in $(cat "$SORTIE/echecs.txt"); do printf '%s → %s ‖ ' "${e:0:14}" "$(grep -m1 -E 'ERROR|ERREUR' "$SORTIE/poses/$e.txt" | sed 's/^psql:[^ ]* //' | cut -c1-160)"; done | cut -c1-9000)"
             exit 1
           fi
           echo "::notice title=Pose::$n fichier(s) posé(s) sans échec"

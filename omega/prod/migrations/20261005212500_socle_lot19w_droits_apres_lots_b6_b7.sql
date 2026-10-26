@@ -1,6 +1,6 @@
 -- 20261005212500 socle_lot19w_droits_apres_lots_b6_b7
 -- Source : requête retrouvée dans le fil de la session coordinateur : omega/prod/recupere/20261005212500_socle_lot19w_droits_apres_lots_b6_b7.sql.
--- Assemblé par omega/prod/assembler.mjs pour la production (noepmkkplxshjbmqqxft). Transformations : retiré : ligne de schema_migrations (db push écrit la sienne) : insert into supabase_migrations.schema_migrations (version, name, statements) select '2026.
+-- Assemblé par omega/prod/assembler.mjs pour la production (noepmkkplxshjbmqqxft). Transformations : retiré : ligne de schema_migrations (db push écrit la sienne) : insert into supabase_migrations.schema_migrations (version, name, statements) select '2026 ; retiré : appel de tests pgTAP (pgTAP ne va pas en production) : select * from runtests('tests'::name, '^test_b6_02_');.
 -- recupere 20261005212500 socle_lot19w_droits_apres_lots_b6_b7
 -- Source : fil de la session coordinateur session_01B4JNQXyT69GytdvE9SjAnE, paramètre « query » tel que posé (lecture autorisée par le coordinateur le 6/10).
 -- Note : Généré (table temporaire).
@@ -28,4 +28,3 @@ begin
   end loop;
 end $$;
 select (select string_agg(stmt, ' ; ') from lot19w) as grants;
-select * from runtests('tests'::name, '^test_b6_02_');

@@ -222,6 +222,16 @@ const A_RETIRER = [
   [/banc-varelo\.test/i, 'comptes de recette du banc'],
 ];
 
+// 25/10 (répétition du 25/10 sur le relevé de la production) : retirés de TOUTES les sources, instruction de tête seulement
+// (jamais un corps de fonction) : un appel de tests (pgTAP n'est pas en production) et la vérification de 18d, réservée au
+// rôle serveur, qui échoue sous postgres.
+const A_RETIRER_PARTOUT = [
+  [/^\s*select\b[^;]*\bruntests\s*\(/i, 'appel de tests pgTAP (pgTAP ne va pas en production)'],
+  [/^\s*select\s+public\.resoudre_boite\s*\(/i, 'contrôle de pose réservé au rôle serveur'],
+];
+// Fonctions que la production a déjà, identiques (empreinte du 25/10) : « create » deviendrait une erreur.
+const DEJA_EN_PRODUCTION = /^([ \t]*)create\s+function\s+(private\.tamila_(?:ouvrir|fermer)_porte)\b/gim;
+
 function nettoyer(sql) {
   const retirees = [];
   const gardees = [];
@@ -252,6 +262,19 @@ function transformer(texte) {
   if (nUrl > 0) {
     texte = texte.split(RECETTE).join(PRODUCTION);
     notes.push(`URL de la recette réécrite en production (${nUrl} fois)`);
+  }
+  const partout = [];
+  texte = decouper(texte).filter((m) => {
+    const tete = m.replace(/^(\s*--[^\n]*\n|\s*\/\*[\s\S]*?\*\/)*/g, '');
+    const regle = A_RETIRER_PARTOUT.find(([re]) => re.test(tete));
+    if (regle) partout.push(`retiré : ${regle[1]} : ${tete.trim().replace(/\s+/g, ' ').slice(0, 90)}`);
+    return !regle;
+  }).join('');
+  notes.push(...partout);
+  const nDeja = (texte.match(DEJA_EN_PRODUCTION) || []).length;
+  if (nDeja) {
+    texte = texte.replace(DEJA_EN_PRODUCTION, '$1create or replace function $2');
+    notes.push(`create → create or replace (${nDeja}) : fonction déjà en production, identique`);
   }
   const avant = texte;
   texte = texte.replace(/^[ \t]*create\s+extension\s+(if\s+not\s+exists\s+)?pgtap\b[^;]*;[ \t]*$/gim,

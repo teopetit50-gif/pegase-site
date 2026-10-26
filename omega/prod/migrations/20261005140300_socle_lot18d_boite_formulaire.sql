@@ -1,6 +1,6 @@
 -- 20261005140300 socle_lot18d_boite_formulaire
 -- Source : requête retrouvée dans le fil de la session coordinateur : omega/prod/recupere/20261005140300_socle_lot18d_boite_formulaire.sql.
--- Assemblé par omega/prod/assembler.mjs pour la production (noepmkkplxshjbmqqxft). Transformations : retiré : donnée du client du banc : update public.clients set config = config || '{"boite_formulaire": "site:omegaai.fr"}'::js ; retiré : ligne de schema_migrations (db push écrit la sienne) : insert into supabase_migrations.schema_migrations (version, name, statements) values ('202 ; URL de la recette réécrite en production (1 fois).
+-- Assemblé par omega/prod/assembler.mjs pour la production (noepmkkplxshjbmqqxft). Transformations : retiré : donnée du client du banc : update public.clients set config = config || '{"boite_formulaire": "site:omegaai.fr"}'::js ; retiré : ligne de schema_migrations (db push écrit la sienne) : insert into supabase_migrations.schema_migrations (version, name, statements) values ('202 ; URL de la recette réécrite en production (1 fois) ; retiré : contrôle de pose réservé au rôle serveur : select public.resoudre_boite('formulaire', 'site:omegaai.fr') as boite_site, (select count.
 -- recupere 20261005140300 socle_lot18d_boite_formulaire
 -- Source : fil de la session coordinateur session_01B4JNQXyT69GytdvE9SjAnE, paramètre « query » tel que posé (lecture autorisée par le coordinateur le 6/10).
 -- Note : Contient aussi : la ligne config.boite_formulaire du client du banc (donnée de recette) et le cron omega-expediteur (URL de la recette).
@@ -36,4 +36,3 @@ select cron.schedule('omega-expediteur', '* * * * *', $cron$
     timeout_milliseconds := 50000)
   from vault.decrypted_secrets s where s.name = 'cle_service'
 $cron$);
-select public.resoudre_boite('formulaire', 'site:omegaai.fr') as boite_site, (select count(*) from cron.job where jobname = 'omega-expediteur') as cron_pose;

@@ -1,8 +1,8 @@
 -- 20260929033851 tamila_m10b_porte_etroite
 -- Source : statements de la recette.
--- Assemblé par omega/prod/assembler.mjs pour la production (noepmkkplxshjbmqqxft). Transformations : aucune.
+-- Assemblé par omega/prod/assembler.mjs pour la production (noepmkkplxshjbmqqxft). Transformations : create → create or replace (2) : fonction déjà en production, identique.
 -- Tamila, M10b (recette seulement) : la porte des délais se referme après chaque appel à B5.
-create function private.tamila_ouvrir_porte() returns text
+create or replace function private.tamila_ouvrir_porte() returns text
 language plpgsql volatile set search_path = '' as $$
 declare
   v_avant text := current_setting('omega.delai_module', true);
@@ -11,7 +11,7 @@ begin
   return v_avant;
 end $$;
 
-create function private.tamila_fermer_porte(p_avant text) returns void
+create or replace function private.tamila_fermer_porte(p_avant text) returns void
 language plpgsql volatile set search_path = '' as $$
 begin
   perform set_config('omega.delai_module', coalesce(p_avant, ''), true);
