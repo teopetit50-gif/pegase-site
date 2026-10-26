@@ -32,6 +32,29 @@ relever est listé au § 8.
 
 ---
 
+## Pose du 26/10/2026 : où on en est (session prod-prep)
+
+Feu vert de Teo relayé par la session coordinatrice : « Fait la production des 4 modules ». Teo ne change pas le mot
+de passe de la base et ne pose pas la clé IA pour l'instant.
+
+| Étape | État |
+|---|---|
+| 0. Sauvegarde | **faite** le 26/10 à 20 h 14 Z par la CLI (`db dump --linked`) : `~/omega-pose/sauvegarde-prod-20261026T2014Z/` sur le Mac de Teo, hors dépôt (schéma 2,2 Mo, données 17,6 Mo — auth, public, private, storage, veille —, rôles ; `SHA256SUMS`) |
+| 1. Gel | **fait** : export du 26/10 à 20 h 20 Z, **470 fichiers** (c4_39, a4_93, a4_94, c2_46, c4_40, c3_46 ajoutés ; neuf lignes qui reprenaient à tort la migration d'un test cité, corrigées), lot d'alignement de l'arbitrage. Répétition `repetition-20261026l` : **474 fichiers posés sans échec**, garde-fous verts |
+| 2. Paliers P1 à P6 | **non commencé** : l'écriture en production est refusée par le garde-fou de permissions de la session (un essai annulé — création puis rollback — a été refusé). Rien n'a été écrit en production. |
+| 3 à 6. Edge, crons, réglages, fusion des écrans, vérifications | **non commencés** (ils suivent la base) |
+
+**Pour reprendre** — Teo, au choix :
+- lancer lui-même, depuis le dépôt sur `worker-a5`, palier par palier :
+  `bash omega/prod/poser-palier-cli.sh P1 --essai` puis `bash omega/prod/poser-palier-cli.sh P1` (… jusqu'à P6) ; puis
+  `bash omega/prod/deployer-coquilles.sh $(grep -v '^#' omega/prod/coquilles/QUATRE-MODULES.txt)` ; puis, dans
+  l'éditeur SQL de la production, `omega/prod/crons-edge-production.sql` et `omega/prod/reglages-production.sql` ;
+- ou autoriser la session à le faire : dans les permissions de Claude Code, une règle Bash qui permet
+  `npx --yes supabase@2.122.0 db query --linked --project-ref noepmkkplxshjbmqqxft` et
+  `npx --yes supabase@2.122.0 functions deploy`, puis relancer la session.
+
+---
+
 ## 0. Trois constats avant tout
 
 1. **Une bonne moitié de ce qui est posé sur la recette n'existe pas en fichier.**
