@@ -148,6 +148,8 @@ function lireNote(texte, nom = '') {
       // « test a4_08 », « tests c4_25, c4_27 » : des tests ; « a4_73 tests verts », « 19ax test 66 vert » : un état.
       if (/\btests?\b[\s:]*(?:[a-z]\d_\d{2}[a-z]?\s*(?:,|\+|et)\s*)*$/i.test(avantTok)) avertissements.push(`${m[6]} cité comme test : ignoré`);
       else if (/^[\s/a-z0-9_]*?\btests?\b[^\n]*?\b(verts?|rouges?)\b/i.test(apresTok) || /^\s*:\s*test_/i.test(apresTok)) avertissements.push(`${m[6]} cité pour un état de test : ignoré`);
+      // 26/10 : « c4_08 test @ da761bb4 » : le test du lot, pas sa migration.
+      else if (/^\s*tests?\b/i.test(apresTok)) avertissements.push(`${m[6]} cité comme test : ignoré`);
       else jetons.push({ type: 'lot', val: m[6], pos: m.index });
     }
     else if (m[7]) jetons.push({ type: 'branche', val: m[7], pos: m.index });
