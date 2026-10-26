@@ -293,6 +293,20 @@ ne peuvent pas être la même personne » ; carte « Des rôles et des délégat
   **23:37** », soit l'heure de Paris (UTC+2). Pour un client en Guadeloupe (UTC−4), il était 17 h 37. Le socle 19ax a mis les délégations
   à l'heure de l'entité ; ce message ne suit pas. Attendu : l'heure de l'entité, ou une heure suivie de son fuseau.
 
+**TFILED-28 · F3 · la reprise après refus attend une correction, mais une facture refusée ne se corrige pas : impasse** (a4_86)
+- Circuit annoncé par le lot (relayé) : refus avec consigne → reprise `a_faire` → correction de la facture (moins de 24 h) → recontrôle
+  par le cron → `proposer_reprise` → la facture repasse `a_valider`, avec une nouvelle demande.
+- Joué : R1 (refus commenté, accepté), puis R2 : `filed_corriger_facture(F3, …, motif)` en gérant → `ERROR 55000: Cette facture est
+  décidée (refusee) : elle ne se corrige plus.`
+- La seule action que la reprise attend est refusée sur la facture même qui l'a déclenchée. Toute reprise après refus finit donc en
+  `reprise_impossible`. Attendu : une facture refusée avec une reprise `a_faire` doit pouvoir se corriger (au moins sur les champs
+  visés par la consigne).
+
+**TFILED-29 · pièces en cours · une facture refusée reste comptée comme « Imputation proposée », et F13 compte deux fois**
+- Après R1, `filed_pieces_en_cours` (gérant) rend `imputation 2 / 1 074,68` = F3 (refusée, 928,20) + F13 (146,48), alors que F13 est
+  aussi dans `attente 1 / 146,48`. Attendu : F3 hors des pièces à valider (dans une catégorie « refusée » ou « à reprendre ») ; chaque
+  pièce comptée une seule fois. Les totaux du pilotage (`:97`, pièces bloquées ou en attente « comptées en continu ») sont faussés.
+
 ### Série 1b — 21/10, 20 h 40 (portes d'écriture, en gérant `eeeeeeee-…01f1`, client banc seulement)
 
 1. `select public.filed_lever_anomalie('a46345d2-c631-4af3-b713-4bd52b70541e', 'identite.registre', 'T-FILED 1b : …')` (facture F0)
@@ -548,6 +562,16 @@ Je compare champ par champ. Niveau 2 : vraie pièce, lue sur la recette. Les nom
     tirets différents de la raison sociale « banc-test-filed », même adresse). Attendu : **aucun** arrêt `destinataire`.
   - F9 existante (R2026-0000xx) : à recontrôler après le lot. Attendu : `destinataire` posé.
 - **Non jouée** : PAUSE de Teo à 01 h 23 Z. Aucun lot n'a été posé, l'accès à la recette étant perdu. F15 et F16 attendent.
+- **Reprise le 26/10** (a4_85, TFILED-05, et a4_86, la reprise après refus, sont posés) :
+  - **R1** (00:52:59Z, valideur) : rejet de F3 sur la demande `76c22335` avec le commentaire « TVA à 19 % non justifiée, demander une
+    facture rectificative à 8,5 % » → accepté. Relayé : F3 `refusee`, demande `rejetee`, une reprise `a_faire` avec la consigne = mon
+    commentaire. `filed_etat_reprise` ne sert pas à cela (il concerne la reprise d'un fichier comptable), d'où `[[]]`.
+  - `pieces_en_cours` à 00:54Z : `bloquees 12 / 8 068,30`, `attente 1 / 146,48` (F13) et une catégorie nouvelle, `imputation « Imputation
+    proposée, à valider » 2 / 1 074,68` = F3 (928,20) + F13 (146,48) → **TFILED-29**.
+  - **R2** (00:56Z, gérant) : `filed_corriger_facture('830baec5-…', '{"montant_tva":66.30,"montant_ttc":846.30,"net_a_payer":846.30,
+    "tva.ventilation":[…8,5 %…]}', 'T-FILED R2 : facture rectificative reçue, TVA à 8,5 %')` → `ERROR 55000: Cette facture est décidée
+    (refusee) : elle ne se corrige plus.` → **TFILED-28**.
+  - F9 (`6de272f6-…`) : registre levé en gérant (00:56:47Z) → `"bloquee"`. Lignes attendues du coordinateur (`destinataire` ?).
 
 ### Jeu d'essai série 1 (prêt, pas encore joué)
 
