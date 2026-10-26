@@ -20,7 +20,7 @@ la page du matin de la présidence à 7 h sur les 3 groupes publics.
 | 8 | « Une règle s'écrit une fois pour le groupe et s'applique dans chaque filiale (réserve, préavis, seuil d'encours). » | B | b1_16, tests b1_19. |
 | 9 | « Chaque matin, la présidence lit le groupe sur une page… » | N1 / M | Les chiffres sont prouvés (N1, 18/10). La section de la présidence ne disait que « à redéposer » sur des comptes publiés : corrigé par **b1_20** (total, une ligne par société, écart, résultat, « non publiée ») : posé, test b1_23 et 44 verts sur la recette le 18/10. Remise à 7 h : ligne 11. |
 | 10 | « …et chaque direction reçoit ses décisions avec le calcul et la pièce qui les justifient. » | B | b1_15, tests b1_18. |
-| 11 | « Chaque matin à 7 h, chaque direction reçoit : » | M | Posé le 18/10 (a371689) : chaque gérant est dans `presidence`, et le point est réglé à 7 h, heure de Paris, en semaine. `points_manquants` donne `prevu_le` = 19/10 05:00 Z pour les 3 gérants. Aucune remise n'est encore observée : relevé le 19/10 à 05 h 10 Z. |
+| 11 | « Chaque matin à 7 h, chaque direction reçoit : » | N1 partiel / M | **Assemblage à 7 h observé sur des données réelles.** Relevé du coordinateur du 23/10 : pour les 3 groupes publics, le point est prévu à 05:00 Z (7 h à Paris) et assemblé à 05:00:00,78 Z. Il contient « Le groupe ce matin » : 4 lignes pour EDH et Normaxis, 5 pour Ankama. **Remise non observée** : le statut finit en « perime », car aucun envoi n'est réglé pour ces clients et les adresses sont en .test. **Défaut relevé** : le gérant, aussi membre de `presidence`, reçoit deux fois la même section (2 sections, 8 ou 10 items). La section de `direction_financiere` est déposée, mais personne n'est dans cette équipe. |
 | 12 | « Le groupe sur une page » (ventes, trésorerie et écarts de chaque société) | N1 partiel | Ventes, résultat et écart N-1 réels. La trésorerie n'est pas publiée par le jeu ouvert : l'écran dit « non publiée » (en attente de fusion sur main). |
 | 13 | « Les contrats à dénoncer » | B | b1_05, tests b1_08 ; décision proposée d'office (b1_15). Aucun contrat n'est publié pour les 3 groupes. |
 | 14 | « Les réserves à émettre » (colis, photos, trois jours) | B | b1_11 et b1_12, tests b1_14 et b1_15 ; délai légal de 3 jours (C. com. L133-3). |
@@ -43,4 +43,4 @@ la page du matin de la présidence à 7 h sur les 3 groupes publics.
 
 1. Fait : b1_20 et test b1_23, la section de la présidence parle de chiffres.
 2. Fait : chaque gérant rejoint l'équipe `presidence`, et le point est réglé à 7 h (heure de Paris).
-3. Le 19/10 après 05 h Z : relevé de `points_du_jour` et `points_sections` pour les 3 groupes.
+3. Fait le 23/10 : assemblage à 7 h observé, remise et dédoublonnage restent à faire (ligne 11).

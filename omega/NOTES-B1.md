@@ -1,5 +1,13 @@
 # Session B1 — VARELO, le référentiel du groupe (sociétés, pôles, rapprochement)
 
+## REPRISE (26/10/2026, 01 h 05 Z — relevé du point de 7 h lu)
+
+Relevé du 23/10, rendu par le coordinateur : le point des 3 groupes publics est assemblé à 05:00 Z, à l'heure
+prévue, puis passe en « perime » (aucun envoi réglé). La ligne 11 de `varelo-chaine.md` est à jour. Défaut :
+le gérant, aussi membre de `presidence`, reçoit « Le groupe ce matin » en double. À décider : soit le socle
+(A3, assemblage) fusionne les sections de même titre, soit le gérant sort de `presidence` sur le banc.
+Prochain pas : ce choix, puis une remise réelle (un envoi réglé vers une adresse lue), qui dépend de Teo.
+
 ## REPRISE (25/10/2026, 01 h 20 Z — relance de Teo, sprint arrêté)
 
 Le relevé du point de 7 h n'est toujours pas fait. L'accès du coordinateur à la recette (ygwbgpowzlbdaajlsqkn)
