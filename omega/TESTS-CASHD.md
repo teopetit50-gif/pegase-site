@@ -262,8 +262,8 @@ puis `select to_jsonb(e) from public.cashd_factures_etat e where client_id = '<c
 
 ## REPRISE
 
-- Fait : séries 1 et 2 ; rejeux de TCASHD-01 à 08, 12, 14, 15 (justes), compléments c2_20b, c2_22b, c2_24b, c2_26, c2_30, c2_31, c2_32 (justes).
-- Ouvert côté C2 : **aucun** (TCASHD-11 rejoué juste le 21/10 21:23). TCASHD-16, 17, c2_33, c2_35/36 rejoués justes ; MED neuve (c2_27, c2_36) couverte par les tests de l'ouvrier. c2_27 couvert par le test de l'ouvrier.
-- En cours : rien sur la recette. PAUSE du 25/10 01:23 Z (Teo) : aucun lot posé, accès à la recette perdu côté coordinateur ; le lien de paiement (P1, C:84) et la reprise après refus restent à jouer au prochain signal. État du banc : réglages `metier btp`, `moyens_reglement`, `signature`, seuil 10 € ; aucun réglage d'envoi ; 0 ligne dans `public.envois` ; une ferme A-C17 et un rappel A-C19 approuvés (« Test du banc »), le rappel A-C19 noté envoyé à la main.
-- Prochain pas : MED avec commentaire, chemin positif (M1) — reporté : au 26/10 réel, approuver puis noter envoyée la ferme A-C19 (jour 26/10), puis à +7 j (≥ 02/11 réel) lire la MED neuve, l'approuver sans puis avec commentaire. D'ici là couvert par les tests de l'ouvrier c2_25 et 19aw (coordinateur, 22/10). Écran : compte gérant à mot de passe, au bureau.
-- SHA d'arrêt : dernier commit de `testeur-cashd` (22/10, après la série de relance : lendemain réel et historique justes).
+- Fait (au 26/10 01:00 Z) : séries 1 et 2 ; rejeux justes de TCASHD-01 à 08, 11, 12, 14 à 17 ; lendemain réel et historique de paiement justes ; c2_40 (lien de paiement, avec variables `{numero}`, `{montant}`) juste.
+- Ouverts côté C2 : **TCASHD-18** (aucune reprise après refus + règlement partiel, A-C27) et **TCASHD-19** (relance en attente non revue après règlement partiel, A-C26 à 1 085 € pour 585 dus). C2 n'est pas relancé ce soir (plafond 15 %).
+- En cours : rien sur la recette. État du banc : réglages `metier btp`, `moyens_reglement`, `signature`, `lien_paiement` (avec variables), seuil 10 € ; aucun réglage d'envoi ; envois notés à la main : rappel A-C19 (21/10).
+- Prochain pas : rejouer TCASHD-18 et 19 au signal ; vérifier alors l'envoi adossé à la reprise. MED avec commentaire (M1) : la ferme A-C19 (jour 26/10) est désormais notable (date réelle atteinte) → l'approuver, la noter envoyée, puis MED à partir du 02/11 réel. Écran : compte gérant à mot de passe, au bureau.
+- SHA d'arrêt : dernier commit de `testeur-cashd` (« REPRISE du 26/10 »).
