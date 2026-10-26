@@ -34,6 +34,27 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
   et {montant} ; champ dans « Vos textes ») ; c2_41 (reprise après refus, côté CASHD, sur le socle 19az : cron
   cashd-reprises chaque minute ; à poser après 19az). Local 445/445 (banc : 19az chargé, colonne devise ajoutée à la
   souche locale de demandes_validation, non commité).
+- **26/10 (reprise après le plantage du Mac)** — TCASHD-18 et TCASHD-19, posés sur omega-recette depuis le dépôt,
+  rouge avant / vert après :
+  - `c2_42_montant_revu` (861c19b2, TCASHD-19) : un règlement (ou avoir) lettré qui baisse le reste d'une facture
+    REVOIT SUR PLACE toute relance qui l'attend encore (pièces et texte du jour, demande en attente annulée, nouvelle
+    demande au reste dû, clé `cashd:relance:<id>:revue:<ancienne>`, `revue_de` dans le contenu ; envoi adossé refait).
+    Déclencheur `cashd_imputations_zz_revoir`. Seule la baisse est revue. Test 5/5.
+    **Décision prudente prise seul (Teo injoignable)** : pas de seconde relance le même jour (la contrainte
+    `cashd_relances_une_par_jour` l'interdit et on ne fait pas de DROP) ; c'est la même relance, revue, qui repasse par la
+    validation. Un premier essai (6fc56cae : couper puis réécrire) a été exécuté à 16 h 50 Z puis remplacé : la
+    préparation a repris sa forme c2_31 (md5 vérifié) et A-C26 a été rendue et revue (585 €, en attente).
+  - `c2_43_refus_puis_reglement` (9c094c73, test a8a92381, TCASHD-18) : une relance refusée dont la reprise est
+    impossible le dit (« refusée dans la file de validation : <commentaire> — reprise impossible : … », plus
+    « l'envoi viendra ») ; si un règlement baisse ensuite le reste, elle est revue avec une nouvelle demande
+    « Après refus — … » qui porte la consigne (`apres_refus`). Le socle n'admet qu'une reprise par refus : CASHD ne la
+    redemande pas. Une refusée sans changement n'est pas réécrite. A-C27 revue à la pose (585 €, en attente). 5/5.
+  - Inscrits dans schema_migrations (20261026165644, 20261026165645). `^test_c2_4[0-3]` 4/4.
+  - Suite `^test_c2_` rejouée par morceaux : tout vert sauf **test_c2_01 (4) et test_c2_08 (5)**, qui comptent tous les
+    comptes du client du banc : les 7 comptes NOBAT (NB-C1…C7, jeu du 21/10) en ajoutent. Sans lien avec c2_42/43 ;
+    à trancher par le coordinateur (retirer le jeu NOBAT du banc ou borner ces tests à leurs comptes). test_c2_25 adapté
+    au socle 19aw (l'approbation d'une mise en demeure sans commentaire est refusée dès la saisie), vert (b2ac1d5e).
+  - T-CASHD peut rejouer R41 et P1 (c).
 - **Prochain pas** : la recette c2 sur les pages Espace 2 ; le reste de la liste au feu vert du coordinateur.
 - **Limites dites au coordinateur** : le socle fige le texte d'un envoi adossé (pas de réécriture à l'approbation, piste
   (c) pour Teo) ; une relance bloquée par un interdit n'est pas réécrite quand l'interdit est retiré (choix de produit).
