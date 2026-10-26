@@ -24,6 +24,7 @@ create or replace function tests.test_a4_87_01_sans_reprise_ouverte() returns se
 language plpgsql as $f$
 declare o jsonb := tests.a4_organisation(); d1 uuid; d2 uuid; f1 uuid; f2 uuid; v_rep uuid; v text;
 begin
+  -- Une organisation par cas : deux factures de 1 200 € du même fournisseur se verraient en doublon probable.
   -- Reprise déclarée impossible (aucune correction dans le délai) : la facture refusée ne se corrige plus.
   d1 := tests.a4_facture_refusee(o, 'COR-001', 'Vérifiez le fournisseur.');
   select objet_id::uuid into f1 from public.demandes_validation where id = d1;
@@ -34,6 +35,7 @@ begin
                  and (select montant_ttc from public.filed_factures where id = f1) = 1200,
                  'Reprise impossible : la correction est refusée, rien n''est changé');
   -- La reprise a eu lieu, et sa nouvelle demande est refusée à son tour : plus de reprise ouverte, plus de correction.
+  o := tests.a4_organisation();
   d2 := tests.a4_facture_refusee(o, 'COR-002', 'Le montant TTC est faux.');
   select objet_id::uuid into f2 from public.demandes_validation where id = d2;
   v := tests.a4_corriger_comme((o ->> 'gerant')::uuid, f2);
