@@ -2,6 +2,20 @@
 
 ## REPRISE (pause du 19/10, 17 h 50 Z — reprise samedi 25/10 après 02 h Z)
 
+**RELANCE du 26/10, 13 h 50 → 14 h 40 Z (session du Mac, Teo absent) : TFILED-28 et TFILED-29.**
+1. **Fait, posé sur la recette par la méthode du dépôt, inscrit dans `schema_migrations`** :
+   - **a4_87** (TFILED-28, 20261026142129, worker-a4 6a13e13f) : `filed_corriger_facture` passe par `private.filed_exiger_facture_corrigeable`. Une facture « refusee » se corrige si, et seulement si : une reprise FILED de son refus est « a_faire » (`private.filed_reprise_ouverte`) ; c'est une personne (auth.uid, rôles de la correction ordinaire, périmètre) ; le motif n'est ni « Doublon » ni « Hors budget ou hors période » ; le refus date de 24 h au plus. Sinon : le refus d'avant (55000 « elle ne se corrige plus »), ou la raison en clair (doublon, hors budget, délai passé, 42501 sans personne). La facture reste « refusee » ; le cron (a4_86) recontrôle et propose la reprise. `filed_integrer_facture` n'accepte la facture refusée que pour cette correction (réglage local `omega.filed_correction_reprise`, posé par la porte puis effacé) ; la relecture avec consigne d'A1 (a1_02) est inchangée.
+   - **a4_89** (20261026143146, 29fea5f2) : correctif d'a4_87, trouvé par la non-régression (`test_a1_02_02` rouge) — un réglage jamais posé dans la session rend NULL et la garde « déjà décidée » ne tenait plus ; coalesce à ''.
+   - **a4_88** (TFILED-29, 20261026142748, 98d5a93b) : `filed_pieces_en_cours` ne compte plus une facture refusée ou écartée en « Imputation proposée », et chaque facture une seule fois, dans la première catégorie (bloquée, litige, attente, à compléter, imputation). Sur le banc T-FILED, relu en service_role à 14 h 35 Z : « bloquées 14 / 8 363,42, attente 1 / 146,48 », plus de ligne imputation.
+   - Tests : `a4_74` (reprise par la vraie porte, approuvée, exécutée : facture **validée**), `a4_75` (sans reprise ouverte ×2, doublon, hors budget, > 24 h, sans personne, lecture du moteur), `a4_76` (F3 / F13). Rouges sans leur migration (joués à blanc, transaction annulée), verts après.
+   - Non-régression : `^test_a4_` **141/141** par morceaux après a4_89, plus `^test_(a1_0[12]_|68_)` verts ; scripts `a4_01` et `a4_02` verts chacun seul (enchaînés dans une même transaction, a4_02 échoue sur le rôle laissé par a4_01 : effet d'ordre, pas de ces lots).
+2. **Décisions prudentes (Teo absent)** :
+   - Mêmes rôles que la correction ordinaire (gérant, admin, valideur, collaborateur) ; pas de liste de champs limitée par la consigne : la nouvelle validation humaine reste le garde-fou.
+   - L'imputation proposée d'une facture refusée et sa demande `filed.imputer` restent écrites (rien n'est annulé : la reprise la retrouve). Elles ne comptent plus dans le pilotage, mais la demande reste dans la file d'approbation : **à trancher** (Teo / A3) s'il faut l'écarter au refus.
+   - Une facture bloquée et en litige ne compte plus qu'en « bloquées » (le litige ne double plus le compte).
+   - `a4_75` donne une organisation à chaque cas : deux factures de 1 200 € du même fournisseur se voyaient en `doublon.probable` selon l'ordre aléatoire des numéros de réception (rouge 1 fois sur 3 avant 90cd94e2).
+3. **Ouvert** : T-FILED peut rejouer R2 (corriger F3, MCD-2026-1003) **avant le 27/10, 00 h 52 Z** (reprise 76c22335 encore « a_faire »), puis la reprise proposée ; après, elle passera « impossible ». 207/208 (Teo) inchangé.
+
 **PAUSE du 25/10, 01 h 52 Z (sprint de Teo).**
 1. Fait : a4_85 (TFILED-05, destinataire par SIREN normalisé, TVA ou nom), test a4_73, 135/135 ; a4_84 et précédents posés par le coordinateur.
 2. Fait aussi : a4_86, le module FILED de la reprise après refus, contre le socle 19az d'A5 (worker-a5 f5f8ff0c, chargé en local seulement, non posé sur la recette) : instantané au refus, cron filed_traiter → filed_traiter_reprises (correction → recontrôle → proposer_reprise et facture « à valider » liée ; bloquant, Doublon, Hors budget, ou rien en 24 h → reprise_impossible) ; test `a4_74_reprise_apres_refus.sql`, 137/137. À poser APRÈS 19az. Relecture avec la consigne : porte d'A1 à brancher dans filed_traiter_reprises.
