@@ -96,12 +96,16 @@ const SUITES: Record<string, string> = {
   "btp:devis_relance": "\nVotre accord nous permettrait de réserver une date d'intervention dans notre planning de chantiers. Si le projet a changé, un mot suffit pour nous le dire.\n",
 };
 
+/* comme private.cashd_url_composant (c2_40) : lettres, chiffres, - _ . ~ gardés, le reste en %XX de l'UTF-8 */
+const composantUrl = (t: string) =>
+  [...new TextEncoder().encode(t)].map((b) => (/[A-Za-z0-9._~-]/.test(String.fromCharCode(b)) ? String.fromCharCode(b) : `%${b.toString(16).toUpperCase().padStart(2, "0")}`)).join("");
+
 /* Un aperçu rempli sur un exemple (la SCI Lefèvre, une facture de 12 000 € en retard de 45 jours). */
 export function apercu(
   cle: CleGabarit,
   sujet: string,
   corps: string,
-  r: { metier?: string; seuil_ton?: number | null; moyens_reglement?: string | null; echelonnement_des?: number | null; emetteur?: string; ton_retard_jours?: number | null; ton_retard_important_jours?: number | null },
+  r: { metier?: string; seuil_ton?: number | null; moyens_reglement?: string | null; echelonnement_des?: number | null; emetteur?: string; ton_retard_jours?: number | null; ton_retard_important_jours?: number | null; lien_paiement?: string | null },
 ): { sujet: string; corps: string } {
   const devis = cle.startsWith("devis");
   const ech = cle === "echeance";
@@ -115,6 +119,10 @@ export function apercu(
   /* c2_33 : 1 500 € par défaut, tant que l'organisation n'a pas posé son seuil */
   const ton = (ech || cle === "rappel" || cle === "relance") && total >= (r.seuil_ton ?? 1500)
     ? "Compte tenu du montant en jeu, merci de nous indiquer dès à présent la date de règlement prévue. " : "";
+  /* c2_40 : sous chaque facture, l'adresse de paiement de l'organisation ({numero} encodé, {montant} au point) */
+  const enLigne = !devis && r.lien_paiement
+    ? `    Régler en ligne : ${r.lien_paiement.replaceAll("{numero}", composantUrl("F-2026-101")).replaceAll("{montant}", total.toFixed(2))}\n`
+    : "";
   const v: Record<string, string> = {
     bonjour: "Bonjour Mme Lefèvre,",
     cette_facture: "cette facture",
@@ -124,8 +132,8 @@ export function apercu(
     lignes: devis
       ? "  • Devis D-2026-033 du 01/10/2026 : 4 800,00 €\n"
       : ech
-        ? "  • Facture F-2026-101 du 27/07/2026, 12 000,00 € TTC, à régler le 26/08/2026 : 12 000,00 €\n"
-        : "  • Facture F-2026-101 du 27/07/2026, 12 000,00 € TTC, échue le 26/08/2026 (45 jours de retard) : 12 000,00 € restant dus\n",
+        ? "  • Facture F-2026-101 du 27/07/2026, 12 000,00 € TTC, à régler le 26/08/2026 : 12 000,00 €\n" + enLigne
+        : "  • Facture F-2026-101 du 27/07/2026, 12 000,00 € TTC, échue le 26/08/2026 (45 jours de retard) : 12 000,00 € restant dus\n" + enLigne,
     total: devis ? "4 800,00 €" : "12 000,00 €",
     limite: "19 octobre 2026",
     delai: "8",

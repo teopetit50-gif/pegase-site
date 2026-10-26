@@ -159,6 +159,7 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
     metier: r.metier, seuil_ton: nombre(r.seuil_ton), moyens_reglement: r.moyens_reglement.trim() || null,
     echelonnement_des: nombre(r.echelonnement_des), emetteur,
     ton_retard_jours: nombre(r.ton_retard_jours), ton_retard_important_jours: nombre(r.ton_retard_important_jours),
+    lien_paiement: /^https:\/\/\S+$/.test(r.lien_paiement.trim()) ? r.lien_paiement.trim() : null,
   });
 
   const enregistrer = async (actif: boolean) => {
