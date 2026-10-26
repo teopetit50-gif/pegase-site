@@ -4,7 +4,39 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 `components/espace/offload/`, `app/espace/offload/`, et ce fichier. Coordinateur : session
 `session_01BCGFdpRKBvXKjouC75sYBg`. Je n'appelle jamais Supabase : le coordinateur pose, je reçois les sorties brutes.
 
-## REPRISE (26/10, nuit — contre-recette du testeur des modules, TMOD-14)
+## REPRISE (27/10 — « Un message par trimestre au plus » redevient vrai par défaut)
+
+- Décision de Teo, relayée par le coordinateur : la phrase du site fait foi. Elle porte sur l'audit des promesses
+  (`omega/CHIFFRAGE/offload.md` sur main, « 5 manques » n° 4 ; lignes 17, 40, N5, N7). Le fichier du chiffrage est
+  sur main : je ne l'ai pas modifié ; sa ligne mise à jour est ci-dessous.
+- Fait : c4_40 (80dc0335) posé sur la recette depuis le dépôt et inscrit (`c4_40_un_message_par_trimestre`).
+  - La relance écrite revient éteinte par défaut, comme le 17/10 (c4_16). Elle est éteinte partout où personne ne l'a
+    choisie (aucun `offload_regler` portant `relance_ecrite` au journal). Sur la recette, c'était le cas des trois
+    clients : les trois sont passés à « éteinte ». Un client ne la rallume qu'en la choisissant dans ses réglages.
+  - Trouvé en route : la quarantaine entre deux reprises se réglait jusqu'à 30 jours. Comptée depuis la clôture du
+    cycle, elle laissait partir un second message dans le même trimestre. Elle va désormais de 90 à 730 jours :
+    une contrainte est ajoutée, l'ancienne est gardée (pas de DROP), et la phrase française est mise à jour.
+  - Vérifié sans changement : une reprise n'écrit qu'au rang 1 sans relance ; un message refusé puis repris (c4_37)
+    n'est jamais parti ; un message non parti passe par l'appel ; la reprise ouverte à la main suit les mêmes règles.
+  - Tests : c4_40 (nouveau) ; c4_28 (phrase « 90 à 730 jours ») et c4_29 (le cycle à deux messages, quand le client a
+    choisi la relance) gravaient l'ancienne décision du 21/10 et sont mis à jour. Rouges avant la pose (5 assertions),
+    verts après (22 assertions). Suite `^test_c4_` par morceaux : 62 fonctions sur 63, 542 assertions, aucune rouge.
+    `test_c4_09_arretes` dépasse toujours la minute de l'outil.
+- Ligne de l'audit, à reporter dans `offload.md` par qui tient main :
+  - 17, 40, N5, N7 « Un message par trimestre au plus » : **B**, preuve c4_40 ✔. Par défaut, une reprise envoie un seul
+    message et la quarantaine compte au moins 90 jours depuis la clôture (test_c4_40, test_c4_16). Deux messages
+    seulement si le client choisit la relance écrite (test_c4_29). Ce qui manque : rien. N8 n'est pas vérifié ici.
+  - Manque n° 4 : levé.
+- Décisions prises seul, au plus prudent :
+  - La reprise forcée par le gérant (c4_29, motif obligatoire, au journal) passe toujours le trimestre. C'est un choix
+    explicite d'une personne, comme la relance choisie. À retirer si Teo veut la phrase sans aucune exception.
+  - Les rappels de retrait (affaires) et d'échéance (contrats) ne comptent pas comme messages de reprise : la phrase
+    vise les clients inactifs.
+  - L'écran n'a pas d'interrupteur « relance écrite » : le choix passe par `offload_regler`. Un interrupteur dans les
+    réglages de l'écran OFFLOAD reste à faire, si Teo le veut.
+- Reste : T-OFFLOAD peut rejouer O-2 de TOFFLOAD-03 et la promesse 17. Import des personnes morales : attend Teo.
+
+### Reprise du 26/10, nuit — contre-recette du testeur des modules, TMOD-14)
 
 - Contre-recette (testeur-modules cc61ebf4) : TMOD-06 et TMOD-07 confirmés corrigés.
 - Fait : c4_39 (e8592257) posé sur la recette depuis le dépôt et inscrit (`c4_39_tableur_pleine_chasse`). TMOD-14 :
