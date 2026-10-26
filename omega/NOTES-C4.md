@@ -4,7 +4,40 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 `components/espace/offload/`, `app/espace/offload/`, et ce fichier. Coordinateur : session
 `session_01BCGFdpRKBvXKjouC75sYBg`. Je n'appelle jamais Supabase : le coordinateur pose, je reçois les sorties brutes.
 
-## REPRISE (26/10, fin de matinée — session « offload-c4 » du bureau)
+## REPRISE (26/10, soir — correctifs de la recette du testeur des modules)
+
+- Fait : c4_38 (5eacae5f, test 1ae23b65) posé sur la recette depuis le dépôt et inscrit (`c4_38_refus_immediat_et_tableur_neutre`).
+  Rapport : `omega/RECETTE-TESTEUR-MODULES-2026-10-26.md` (testeur-modules 157b506f).
+  - TMOD-06 : le message refusé ne reste plus « à valider ». Le déclencheur `demandes_validation_zz_offload_refus` agit
+    dès qu'une demande d'OFFLOAD passe `rejetee`, sans attendre l'événement de l'envoi (asynchrone) :
+    - la reprise de contact se clôt `refusee`, avec la consigne dans le motif ;
+    - la relance de retrait renvoie l'affaire « à décider » ;
+    - le refus d'une reprise la clôt pour de bon (« Reprise refusée à son tour »).
+    Seule une reprise proposée (c4_37) remet un message à valider, et c'est un nouveau message. Une reprise impossible
+    réécrit le motif définitif.
+  - TMOD-07 : le résumé de la demande de reprise cite le contact en vigueur, et l'ancien s'il a changé :
+    « Courriel à Mme Durand (au lieu de Martin) : … ».
+  - Trouvé en route : sur une affaire, c4_37 refusait la reprise dès qu'une décision (même « relancer », antérieure)
+    était datée. Seule une décision prise après le refus l'empêche désormais.
+  - Tableur : la restitution CSV neutralise par une apostrophe un texte qui commence par = + - @, une tabulation ou un
+    retour chariot.
+  - Preuve : le test posé avant la migration était rouge (6 assertions sur 9, et le test du tableur mourait) ; après la
+    migration, `^test_c4_3[7-8]_` passe 3/3 (33 assertions). Suite `^test_c4_` par morceaux : 60 fonctions sur 61,
+    534 assertions, aucune rouge. `test_c4_09_arretes` dépasse toujours la minute de l'outil (client de charge de
+    9 898 comptes).
+- Décisions prises seul, au plus prudent :
+  - Les nombres de la restitution ne sont pas préfixés. Un nombre JSON ne porte pas de formule, et un avoir négatif
+    doit rester calculable dans le tableur. Seuls les textes sont neutralisés, comme le fait l'export du navigateur
+    (`tableur.ts`).
+  - Le refus est appliqué par un déclencheur sur `demandes_validation`, comme le font déjà FILED et CASHD, plutôt que
+    par l'événement de l'envoi, qui reste en place (il devient sans effet).
+  - Test c4_38 : la décision « relancer » est datée deux jours avant le refus, parce que `now()` est fixe dans la
+    transaction du test.
+  - En partage sur la recette : les suites CASHD et REPUT d'autres sessions tiennent parfois le verrou du journal du
+    client de test. Jouer de petits morceaux, et réessayer.
+- Reste : T-OFFLOAD doit rejouer O-5 et O-6 (TMOD-06) et O-1 (TMOD-07). Import des personnes morales : attend Teo.
+
+### Reprise du 26/10, fin de matinée — session « offload-c4 » du bureau)
 
 - Fait :
   - test c4_08 vert sur la recette (25/25 ; 77bb0f21, puis da761bb4 du coordinateur).
