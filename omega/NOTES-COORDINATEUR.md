@@ -1790,3 +1790,26 @@ Le niveau 1 (recette) est acquis sur ce qui suit, et RIEN n'est en production.
   - Décision de Teo sur le doublon du point de 7 h (B1).
   - Relevé de production d'A5 (Teo).
   - Niveau 2 (preuve réelle) et niveau 3 (production) : rien de neuf.
+
+## REPRISE PAR LA SESSION DE TEO — 25/10 au soir et 26/10 (sessions locales du Mac, pas celles de l'iPhone)
+
+Pour le coordinateur et les sessions de l'iPhone : ce qui a été fait **en dehors de la relance de 00 h 51 Z**, et ce qui est à jour. Ne refaites rien de cette liste.
+
+### Fait et posé sur la recette (niveau 1)
+
+| Module | Branche, tête | Fait |
+|---|---|---|
+| FILED | worker-a4 `82ac55bd` | TFILED-28 corrigé (a4_87, a4_89 : une facture refusée se corrige pour sa reprise, pas sans reprise ouverte) ; TFILED-29 corrigé (a4_88 : ni facture refusée ni double compte dans « Imputation proposée ») ; `^test_a4_` 141/141. T-FILED doit rejouer R2 sur F3 avant le 27/10 00 h 52 Z. |
+| CASHD | worker-c2 `f22a0d3c` | TCASHD-18 et 19 corrigés (c2_42, c2_43, tests rouge puis vert) ; recette des écrans de l'espace 2 réécrite, 298/298 en données d'exemple ; passe navigateur en base réelle à faire (compte du banc). |
+| OFFLOAD | worker-c4 `69dce296` | c4_37 (reprise après refus, écrit le 25/10, posé par C4 cette nuit) 20/20 ; écran : carte « par segment » et bouton « tableur » ; les CSV de la base ne neutralisent pas encore les formules (à faire). |
+| REPUT | worker-c3 `a7d96c26` | reput-reponse v31 en coquille sur 08b9fe2c (contient 8c882b8e) ; c3_44 (reprise après refus) 19/19, les 43 fichiers `^test_c3_` verts ; liste des écrans de worker-c3 absents de main dans NOTES-C3. |
+| Lecteur | worker-a1 `2888f1ee` | relecture avec consigne (a1_01, a1_02, faite par A1 cette nuit) prouvée en vrai ; familles `daliro_bon_livraison`, `lorani_ordre_service`, `lorani_avenant`, `lorani_pv_reception` ; **lecteur v71 déployé sur la recette** (paquet f8c811e, la demande « bureau » de 01 h 02 Z est donc faite) ; lectures réelles de pièces publiques : OS et avenant justes, bon de 1832 resté « à classer », aucun PV rempli trouvé ; coût 0,23 €. |
+| Mise en production | worker-a5 `00d52f38` | **rien d'écrit en production.** Relevé de la production et de la recette par le connecteur (lecture seule), export refait (445 fichiers, 6 paliers), répétitions jusqu'à 0 échec avec garde-fous verts, runbook pas à pas (`omega/prod/RUNBOOK-*.md`). À arbitrer par Teo avant le gel : 22 fonctions, 1 politique, 5 contraintes, 194 droits qui diffèrent entre recette et production. |
+
+### Reste, dans l'ordre
+1. Testeurs : rejouer TFILED-28/29 (F3, R2 avant le 27/10 00 h 52 Z), TCASHD-18/19, c4_37, c3_44, la relecture avec consigne.
+2. CASHD : passe navigateur en base réelle ; OFFLOAD : neutraliser les formules dans les CSV.
+3. Teo : arbitrer les écarts recette/production listés par A5, poser les secrets de production, puis feu vert pour le runbook.
+4. B1 : décision de Teo sur le doublon du point de 7 h (toujours ouverte).
+
+Sessions de l'iPhone : en pause depuis 01 h 08 Z, ne les relancez pas en même temps que les sessions locales de Teo sans le lui dire (doublon constaté le 26/10 sur la relecture avec consigne).
