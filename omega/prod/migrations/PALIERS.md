@@ -4,7 +4,7 @@ Export refait le 25/10/2026 à 18 h 10 Z sur la recette (`omega/prod/sortie/page
 `node omega/prod/assembler.mjs --cloture` le 26/10. Ordre et numéros de version : ceux de la recette ; les lots
 rattrapés (posés sur la recette sans ligne `schema_migrations`) prennent l'heure UTC de leur dernier commit.
 Pose : `omega/prod/poser-palier.sh Pn` (RUNBOOK-20261026.md § 4). Bornes reprises dans ce script.
-Répétition verte (450 fichiers, relevé de la production compris) : tag `repetition-20261026a`.
+Répétition : les 445 fichiers passent en rôle postgres sur le relevé de la production, garde-fous verts (tag `repetition-20261026h`).
 
 | Palier | Contenu | Fichiers | Première version | Dernière version |
 |---|---|---|---|---|
