@@ -23,13 +23,16 @@ case "$PALIER" in
   P2) DE=20260929034414; A=20261005182000 ;;
   P3) DE=20261005182001; A=20261005215301 ;;
   P4) DE=20261005215302; A=20261006003701 ;;
-  P5) DE=20261006003702; A=20261025151751 ;;
-  P6) DE=20261025151752; A=99999999999999 ;;
+  P5) DE=20261006003702; A=99999999999999 ;;   # tout le reste, sauf la clôture (P6)
+  P6) DE=00000000000000; A=99999999999999 ;;   # la clôture seule : a5_01 et environnement_production
   *) echo "Usage : bash omega/prod/poser-palier.sh P1..P6 [--essai]"; exit 2 ;;
 esac
 FICHIERS=()
 for f in $(ls "$ICI"/migrations/*.sql | sort); do
   v=$(basename "$f" | cut -c1-14)
+  cloture=0; case "$f" in *_a5_01_cloture.sql|*_environnement_production.sql) cloture=1 ;; esac
+  [ "$PALIER" = P6 ] && [ $cloture = 0 ] && continue
+  [ "$PALIER" = P5 ] && [ $cloture = 1 ] && continue
   [[ "$v" > "$DE" || "$v" == "$DE" ]] && [[ "$v" < "$A" || "$v" == "$A" ]] && FICHIERS+=("$f")
 done
 echo "Palier $PALIER : ${#FICHIERS[@]} fichier(s), $(basename "${FICHIERS[0]}") → $(basename "${FICHIERS[${#FICHIERS[@]}-1]}")"

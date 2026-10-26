@@ -444,6 +444,19 @@ function principal() {
   }
 
   if (cloture) {
+    // 26/10 : le lot d'alignement de l'arbitrage (omega/prod/ARBITRAGE-2026-10-26.md), s'il existe, passe juste avant la
+    // clôture : les définitions de la recette retenues par l'arbitrage, que la séquence ne ramène pas d'elle-même.
+    const ALIGNEMENT = join(ICI, 'arbitrage', 'alignement.sql');
+    if (existsSync(ALIGNEMENT)) {
+      derniere = String(BigInt(derniere) + 1n);
+      const nomA = `${derniere}_alignement_arbitrage.sql`;
+      const contenuA = `-- ${derniere} alignement_arbitrage\n-- Source : omega/prod/arbitrage/alignement.sql (arbitrage du 26/10, avant la clôture).\n\n` + readFileSync(ALIGNEMENT, 'utf8');
+      const refusA = controler(contenuA);
+      if (refusA.length && !forcer) { console.error(`alignement refusé : ${refusA.join(', ')}`); process.exit(1); }
+      writeFileSync(join(SORTIE, nomA), contenuA);
+      manifeste.push({ version: derniere, name: 'alignement_arbitrage', decision: 'emporter', source: 'arbitrage', fichier: nomA,
+                       sha256: createHash('sha256').update(contenuA).digest('hex').slice(0, 16), notes: ['ARBITRAGE-2026-10-26.md'] });
+    }
     // Étape C : a5_01 rejouée en dernier, une seconde après la dernière version de la recette.
     const v = String(BigInt(derniere) + 1n);
     const texte = git('show', 'origin/worker-a5:omega/migrations/a5_01_private_execute.sql');

@@ -1,7 +1,7 @@
 # Manifeste des migrations de production (assemblé, non posé)
 
 Assemblé par `omega/prod/assembler.mjs` depuis 1 page(s) de `omega/prod/exporter.sql` (recette ygwbgpowzlbdaajlsqkn).
-Fichiers écrits : 463 ; exclus : 34 ; à reconstruire : 0 ; erreurs : 0.
+Fichiers écrits : 464 ; exclus : 34 ; à reconstruire : 0 ; erreurs : 0.
 
 | Version | Nom | Décision | Source | Fichier | sha256 (16) | Notes |
 |---|---|---|---|---|---|---|
@@ -500,5 +500,6 @@ Fichiers écrits : 463 ; exclus : 34 ; à reconstruire : 0 ; erreurs : 0.
 | 20261026183850 | `a4_90_filed_lot82_refus_ferme_liees` | emporter | note | `20261026183850_a4_90_filed_lot82_refus_ferme_liees.sql` | 7454bac07c31429b | fichiers : a4_90_filed_lot82_refus_ferme_liees.sql @ 6c0413ccbafc8e7a05be7a18e39a96f8467c13b9 ; fichiers de tests ignorés : omega/tests/filed/a4_77_refus_ferme_liees.sql |
 | 20261026183913 | `a4_91_filed_lot83_correcteur_n_approuve_pas` | emporter | note | `20261026183913_a4_91_filed_lot83_correcteur_n_approuve_pas.sql` | 2550b68aee755c1c | fichiers : a4_91_filed_lot83_correcteur_n_approuve_pas.sql @ 6c0413ccbafc8e7a05be7a18e39a96f8467c13b9 ; fichiers de tests ignorés : omega/tests/filed/a4_78_correcteur_n_approuve_pas.sql |
 | 20261026183916 | `a4_92_filed_lot84_refusees_visibles` | emporter | note | `20261026183916_a4_92_filed_lot84_refusees_visibles.sql` | 3eaf12f5e6965ed3 | fichiers : a4_92_filed_lot84_refusees_visibles.sql @ 6c0413ccbafc8e7a05be7a18e39a96f8467c13b9 ; fichiers de tests ignorés : omega/tests/filed/a4_79_refusees_visibles.sql, omega/tests/filed/a4_76_pieces_en_cours.sql |
-| 20261026183917 | `a5_01_cloture` | emporter | depot | `20261026183917_a5_01_cloture.sql` | 534d8898e4327c68 | étape C |
-| 20261026183918 | `environnement_production` | emporter | assembleur | `20261026183918_environnement_production.sql` | e16df9b647240e59 | étape C, après a5_01 |
+| 20261026183917 | `alignement_arbitrage` | emporter | arbitrage | `20261026183917_alignement_arbitrage.sql` | ef2e50c0c91d3cee | ARBITRAGE-2026-10-26.md |
+| 20261026183918 | `a5_01_cloture` | emporter | depot | `20261026183918_a5_01_cloture.sql` | 725fc299450db852 | étape C |
+| 20261026183919 | `environnement_production` | emporter | assembleur | `20261026183919_environnement_production.sql` | cce1140053e779a6 | étape C, après a5_01 |
