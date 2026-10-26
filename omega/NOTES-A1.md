@@ -1,6 +1,9 @@
 # NOTES-A1 — ouvrier LECTEUR (session worker A1)
 
-## REPRISE — prochain lot validé (coordinateur et A4, 25/10, 01 h 20 Z), à écrire au prochain feu vert
+## Relecture avec consigne du valideur — FAITE le 25/10 (commits dae039e, cd97140, 9cfaecd, session de Teo), vérifiée le 26/10 : 211 tests verts
+- À poser : `omega/modules/socle/migrations/a1_01_relecture_consigne.sql` (porte `private.lecteur_relire`, clé « relire:<piece>:<n> »), puis `omega/migrations/a1_02_filed_relecture_reprise.sql` ; tests `^test_a1_01_` et `^test_a1_02_`. Lecteur à redéployer depuis 9cfaecd.
+
+### Le format validé (25/10)
 - **Relecture avec consigne du valideur** :
   - `lecteur.lire` accepte `charge.consigne` (500 caractères au plus), ajoutée à la consigne du modèle en « Indication du valideur : … ». Ce n'est jamais une valeur : les citations restent vérifiées sur la page.
   - `charge.essai` = n donne `version_lecteur` « …/<sha>+c<n> », pour que la clé `piece_lue:<piece>:<version>` change.
