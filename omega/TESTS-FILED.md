@@ -124,7 +124,10 @@ Lecture par le coordinateur à l'écran ou en lecture seule, relayée brute ; li
 - Le comportement est bon : signalée, pas écartée, montants lus exacts. Le motif dit « exact » alors que les montants diffèrent
   de 2,17 € TTC. Un comptable qui lit « doublon exact » écarte la pièce, et elle se perd. Écart de motif (contrat § 3).
 
-**TFILED-05 · F9 · facture adressée à une autre société : rien ne le relève** (pas couvert)
+**TFILED-05 · ✅ CORRIGÉ par a4_85, revérifié le 26/10 à 00 h 57 Z** — F9 recontrôlée (registre levé) : `destinataire.societe`
+**bloquant** « Facture adressée à « SOCIÉTÉ TIERCE BTP SARL », qui n'est ni cette société ni une autre société de l'organisation : à
+vérifier ». F15 (tiers, montant unique) : le même bloquant, motif lisible. **Témoin F16** (« BANC TEST FILED », même adresse) : **aucune**
+anomalie destinataire, la variante de nom est acceptée. **Juste.** Constat d'origine : **TFILED-05 · F9 · facture adressée à une autre société : rien ne le relève** (pas couvert)
 - Déposé : `F9_autre_destinataire.pdf`, facturée à « SOCIÉTÉ TIERCE BTP SARL, 97200 Fort-de-France » au lieu de « banc-test-filed ».
 - Réponse brute : `F9 · integre · facture · MCD-2026-1009 · 780.00/66.30/846.30 · bloquee · 2/1 · non · oui · {doublon.probable, fournisseur.a_confirmer, identite.registre}`.
 - Aucune anomalie `destinataire`. Les arrêts présents viennent d'ailleurs (registre, doublon probable). Avec un fournisseur
@@ -571,7 +574,9 @@ Je compare champ par champ. Niveau 2 : vraie pièce, lue sur la recette. Les nom
   - **R2** (00:56Z, gérant) : `filed_corriger_facture('830baec5-…', '{"montant_tva":66.30,"montant_ttc":846.30,"net_a_payer":846.30,
     "tva.ventilation":[…8,5 %…]}', 'T-FILED R2 : facture rectificative reçue, TVA à 8,5 %')` → `ERROR 55000: Cette facture est décidée
     (refusee) : elle ne se corrige plus.` → **TFILED-28**.
-  - F9 (`6de272f6-…`) : registre levé en gérant (00:56:47Z) → `"bloquee"`. Lignes attendues du coordinateur (`destinataire` ?).
+  - F9 (`6de272f6-…`) : registre levé en gérant (00:56:47Z) → `"bloquee"`, par `destinataire.societe` (et `doublon.probable`).
+  - F15 (`7902d546-…`) : `destinataire.societe` bloquant, attendu → **juste**. F16 (`91dc5a76-…`), le témoin : aucun `destinataire`,
+    bloquée seulement par le registre (VIES), attendu → **juste**. TFILED-05 est corrigé.
 
 ### Jeu d'essai série 1 (prêt, pas encore joué)
 
@@ -643,9 +648,12 @@ par les portes `public.filed_confirmer_fournisseur(uuid, text)` et `public.filed
 - Prochain pas : selon le coordinateur ou Teo, une nouvelle série, ou le rejeu de TFILED-05, 06 et 07 s'ils sont tranchés.
 - SHA d'arrêt : voir le commit « T-FILED : TFILED-23 corrigé, arrêt 21 » sur `testeur-filed`.
 
-**Arrêt 22 — 25/10/2026, 01 h 25 Z** (PAUSE de Teo)
-- Fait : la série 4 est préparée (F15, F16, attendus écrits). **Rien n'est joué** : aucun lot n'a été posé, l'accès à la recette est perdu.
-- En cours : rien.
-- Prochain pas : à la reprise, une fois le lot A4 TFILED-05 posé, déposer F15 et F16, recontrôler F9, puis rejouer la reprise après refus
-  (ce que le lot promet est à demander au coordinateur).
-- SHA d'arrêt : voir le commit « T-FILED : arrêt 22 (pause) » sur `testeur-filed`.
+**Arrêt 23 — 26/10/2026, 01 h 00 Z** (fin de la relance, plafond 15 %)
+- Fait : série 4. **TFILED-05 corrigé** (a4_85 : F9 et F15 arrêtées pour « destinataire », le témoin F16 accepté). La reprise après refus
+  (a4_86) est jouée jusqu'à la correction : **TFILED-28** (une facture refusée ne se corrige pas, la reprise est une impasse) et **TFILED-29**
+  (une pièce refusée reste comptée en « Imputation proposée », F13 compte deux fois), tous deux notés pour A4, non relancés ce soir.
+- Écarts ouverts : TFILED-28 et 29 (A4). Remontés à Teo : TFILED-06 et 07. Tous les autres sont corrigés ou clos.
+- En cours : rien. F3 est `refusee` avec une reprise `a_faire`. Le cron la passera sans doute en `reprise_impossible` sous 24 h :
+  le relever au prochain passage.
+- Prochain pas : rejouer R2 (corriger F3), puis la reprise proposée, après le correctif de TFILED-28 ; relire `pieces_en_cours` pour TFILED-29.
+- SHA d'arrêt : voir le commit « T-FILED : arrêt 23, TFILED-05 corrigé » sur `testeur-filed`.
