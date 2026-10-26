@@ -1620,3 +1620,108 @@ a4_84 (TFILED-27) ; c4_33 (affaires en plan : relance et chiffrage) ; **c3_42a +
 8. Production (niv. 3) : rien ; A5 attend votre relevé de la base de production.
 9. Notes fusionnées dans main (2 pushes ce jour).
 10. Reprise à votre feu vert ou samedi 25/10 après 02 h Z.
+
+## DÉCISION DE TEO (23/10, 15 h 05 Z, par le bureau) — reprise après refus par le moteur
+
+Teo a demandé, après avoir vu la nouvelle carte de décision de /espace2/validations : « quand une demande est refusée avec un commentaire, le moteur relit la pièce avec cette remarque comme consigne et repropose une demande corrigée, liée à la demande refusée ». Aujourd'hui un refus n'écrit que le motif, le commentaire et la pièce jointe dans `approbations` ; aucun moteur ne les relit. Nouveau lot, périmètre fermé, à répartir par le coordinateur à la reprise : socle d'abord (déclencheur et lien), puis un lot par moteur, FILED en premier (la facture est le cas de Teo).
+
+### Ce que fait le lot
+
+1. **Déclencheur (socle)** : une ligne `approbations` avec `decision = 'rejete'` sur une demande qui passe `rejetee`. Le motif (liste de six : « Montant ou bénéficiaire à vérifier », « Pièce manquante ou illisible », « Hors budget ou hors période », « Doublon », « Fournisseur non référencé », « Désaccord (préciser) ») et le commentaire libre forment la consigne. Sans commentaire, le motif seul fait consigne.
+2. **Reprise par le moteur de la demande** (module de la demande) : il rejoue sa préparation avec la consigne (FILED relit la pièce ; CASHD refait la relance ou le virement ; OFFLOAD refait la proposition ; REPUT reprépare la réponse) et crée une **nouvelle demande `en_attente`, liée à la refusée** (`reprise_de` = id de la demande refusée, colonne ou clé du payload, au choix du socle), résumé préfixé « Reprise après refus », avec dans le payload la liste `corrections` (champ, avant, après) pour que le valideur voie ce qui a changé.
+3. **Délai** : la reprise est proposée dans la minute, par la mécanique de cron des moteurs ; rien ne part et rien ne s'exécute sans une nouvelle validation humaine.
+4. **Garde-fous** : une seule reprise automatique par demande refusée (pas de boucle : le refus d'une reprise ne relance rien, il revient au demandeur) ; si le moteur ne peut pas corriger (consigne hors de sa portée, ou même résultat qu'avant), pas de nouvelle demande, mais une note « reprise impossible : … » dans le journal de la demande refusée et un avis au demandeur ; la demande de reprise est saisie au nom du moteur, jamais au nom du valideur (séparation saisie / approbation respectée) ; le circuit (nombre d'approbations, rôles) est celui de la demande d'origine.
+5. **Écran** (site, bureau, quand le socle est posé) : dans /espace2/validations, la carte d'une reprise affiche « Reprise après refus de … » avec le lien vers la demande refusée et la liste des corrections ; la demande refusée montre « reprise proposée » ou « reprise impossible ».
+6. **Tests niveau 1 (testeurs)** : refus avec commentaire → nouvelle demande liée dans la minute, corrections listées et justes ; refus avec motif seul → reprise sur le motif ; cas impossible → note et avis, aucune demande ; refus de la reprise → aucune troisième demande ; jamais d'exécution sans validation.
+
+### À la reprise (ajout)
+
+- Ce lot s'ajoute à la liste « À la reprise » du 23/10 01 h 37 Z ; par défaut après TOFFLOAD-11 et avant les promesses non faites, sauf ordre contraire de Teo à la relance.
+
+## RELANCE (Teo, 25/10 01 h 10 Z) — **BLOCAGE : accès à la recette perdu**
+
+01 h 16 Z : le connecteur Supabase de cette session répond « You do not have permission to perform this action » sur la recette ygwbgpowzlbdaajlsqkn (même `select 1`). `list_projects` ne montre plus que deux projets d'une AUTRE organisation (compte teo.karczewski@omegaai.fr, créés le 23/10) : « omega-metiers-recette » (hstcfemeldpfzfslytek) et un projet sans nom (ohwolvyjtceisvtkiftb). Je ne bascule PAS sur ces projets sans consigne écrite de Teo/du bureau : la recette de référence, ses tests et tout l'historique sont sur ygwbgpowzlbdaajlsqkn. **À TEO / BUREAU** : rendre l'accès du connecteur à ygwbgpowzlbdaajlsqkn, ou dire explicitement si la recette a été déplacée. En attendant : les ouvriers écrivent et poussent leurs lots verts (testés en local) ; aucune pose ni rejeu testeur possible de mon côté.
+
+Sessions réveillées 01 h 13 Z : C4 (TOFFLOAD-11, c4_34, segments), A5 (socle reprise après refus), A4 (TFILED-05 puis reprise FILED), C2 (lien de paiement C:84 puis reprise CASHD), C3 (reprise REPUT, libellé « rappellera »), B1, B5, T-FILED/T-CASHD/T-OFFLOAD en attente. A1 : rien d'indépendant. Message à T-REPUT refusé par le contrôle de permissions (non essentiel).
+
+### File de pose (recette inaccessible, 01 h 18 Z) — à poser dès l'accès rendu, dans l'ordre
+
+1. worker-c4 **b9bc84718a571e0c6af8b75d8e93efe740418146** : omega/modules/offload/migrations/c4_34_contrats_a_reconduction.sql, puis omega/tests/offload/c4_34_contrats_a_reconduction.sql (3/3 en local).
+2. worker-c3 **8c882b8e3534dd21ddea35dc6f491af7c171e614** : omega/modules/reput/migrations/c3_43_tournures_neutres.sql + omega/tests/reput/c3_43_tournures_neutres.sql.
+**DEMANDE DE DÉPLOIEMENT (bureau)** : `reput-reponse` depuis worker-c3 **8c882b8e3534dd21ddea35dc6f491af7c171e614** (« une personne de l'équipe rappellera ce numéro », règle 11, entrée consigne_valideur prête pour la reprise après refus).
+3. worker-a5 **f5f8ff0ca1fa35fbe3274f260e9d5eb7bcc414f3** (tête actuelle ; le lot est à f5f8ff0c) : omega/modules/socle/migrations/19az_reprise_apres_refus.sql, puis omega/tests/socle/68_reprise_apres_refus.sql (^test_68_) — socle de la reprise après refus (déclencheur approbations_zz_reprise, payload.reprise_de unique, portes reprises_a_faire / proposer_reprise / reprise_impossible).
+Arrêts : C3 c1acfb25 ; B1 061ea633 (relevé 7 h non fait, faute d'accès).
+4. worker-a4 **4c8d9fbea11412ee5d1b30291287ca647c00f2ba** : omega/migrations/a4_85_filed_lot77_destinataire.sql + omega/tests/filed/a4_73_destinataire.sql (TFILED-05 ; T-FILED a les pièces F15/F16 prêtes, recontrôler F9).
+5. worker-c4 **fe4ddfafef0985e22e033daff389eb113a380270** : omega/modules/offload/migrations/c4_35_relances_affaire_visibles.sql, puis tests c4_35_relances_affaire_visibles.sql et c4_08_affaires.sql (mis à jour) — TOFFLOAD-11 (4/4 en local). À poser APRÈS c4_33 (déjà posé) et c4_34 (point 1).
+6. worker-c4 **58b850b612685a0a78aee9e85834245d4c37ee7a** : omega/modules/offload/migrations/c4_36_segments_et_tableur.sql + omega/tests/offload/c4_36_segments_et_tableur.sql (valeur en jeu par segment, restitution CSV ; 4/4 en local). C4 arrêté.
+Reprise après refus, lecteur (A1) : format validé — charge.consigne (≤ 500 car., « Indication du valideur », jamais une valeur), charge.essai → version « …+c<n> », porte relire:<piece>:<n> ; ~0,5 j à la reprise. FILED ce soir : version réduite (A4).
+7. worker-a4 **6470f895b11da3219501f4f3e5cbbe47181139d7** : omega/migrations/a4_86_filed_lot78_reprise_apres_refus.sql + omega/tests/filed/a4_74_reprise_apres_refus.sql (^test_a4_86_) — reprise après refus FILED, version réduite (correction humaine, 24 h max ; doublon / hors budget → impossible). À poser APRÈS 19az (point 3). A4 arrêté.
+8. worker-c2 **2b61661005bb3020cd5fbf9c40bfbc93e60317fd** : omega/modules/cashd/migrations/c2_40_lien_paiement.sql + omega/tests/cashd/c2_40_lien_paiement.sql (C:84, lien de paiement réglé par le client ; 3/3).
+9. worker-c2 **b996c405a5343f7b98fc6c61716e830da7684e43** : omega/modules/cashd/migrations/c2_41_reprise_apres_refus.sql + omega/tests/cashd/c2_41_reprise_apres_refus.sql (reprise CASHD ; APRÈS 19az ; à vérifier sur la recette : le nouvel envoi adossé à la reprise). C2 arrêté (c6dfbe88).
+
+## PAUSE (Teo, par le bureau) — 25/10, 01 h 23 Z, forfait weekly 95 %
+
+Sessions réveillées à 01 h 13 Z arrêtées (C4, A5, A4, C2, C3, A1, B1 arrêtés d'eux-mêmes ; B5, T-FILED, T-CASHD, T-OFFLOAD prévenus). Pause d'office de 01 h 52 Z désarmée. Rien ne repart.
+
+### SHA d'arrêt (01 h 25 Z)
+
+main 76eeb68c (avant ce commit) · worker-a1 4069fdf4 · worker-a4 6470f895 · worker-a5 f5f8ff0c · worker-b1 061ea633 · worker-b5 528b933f · worker-c2 c6dfbe88 · worker-c3 c1acfb25 · worker-c4 58b850b6 · testeur-filed badbfd71 · testeur-cashd 9b1dcd9c · testeur-offload 3e3b6a00 · testeur-reput eaaf0140.
+
+### Reprise — d'abord l'accès
+
+**Recette inaccessible depuis 01 h 16 Z** (connecteur Supabase : « permission » sur ygwbgpowzlbdaajlsqkn ; il ne voit plus que 2 projets d'une autre organisation, dont « omega-metiers-recette »). Teo : rendre l'accès, ou dire si la recette a changé. Puis poser la file ci-dessus dans l'ordre (points 1 à 9), un job de test à la fois, et faire rejouer les testeurs (T-FILED a F15/F16 prêtes pour TFILED-05 ; T-OFFLOAD : c4_34/35/36 ; T-CASHD : c2_40/41 ; T-REPUT : c3_43). Bureau : reput-reponse depuis worker-c3 8c882b8e. A1 : relecture avec consigne (~0,5 j, format validé). B1 : relevé du point de 7 h à faire dès l'accès rendu.
+
+### BILAN pour Teo (25/10, 01 h 10 → 01 h 23 Z)
+
+1. Bloquant : l'accès à la base de test (recette) a été coupé à 01 h 16 Z ; rien n'a pu être posé ni testé par les testeurs ce soir.
+2. Écrit et testé en local (niveau 0, pas encore niv. 1) : 9 lots dans la file, prêts à poser.
+3. OFFLOAD : contrats à reconduction (c4_34), correction TOFFLOAD-11 (c4_35), valeur par segment + export tableur (c4_36).
+4. Socle : reprise après refus (19az, A5) — déclencheur, lien, une seule reprise.
+5. FILED : facture adressée à une autre société bloquée (a4_85, TFILED-05) ; reprise après refus en version réduite (a4_86).
+6. CASHD : lien de paiement dans la relance (c2_40, sans prestataire) ; reprise après refus (c2_41).
+7. REPUT : tournures neutres (c3_43) ; la reprise REPUT attend le socle posé.
+8. Lecteur : la relecture avec la consigne du valideur est conçue (format validé), à coder à la reprise.
+9. Varelo (B1) : bloqué, relevé du point de 7 h impossible sans accès.
+10. Rien en production (niv. 3) ; reprise à votre feu vert, après rétablissement de l'accès à la recette.
+
+## POSE de la file (session de Teo, 25/10, 15 h 13 → 15 h 18 Z) — recette rendue
+
+**Accès.** La recette `ygwbgpowzlbdaajlsqkn` est de nouveau visible par le connecteur Supabase de la session de Teo (organisation d'Omega). Le connecteur ne se branche que sur une organisation à la fois : il reste sur celle d'Omega ; `omega-metiers-recette` passe par une connexion directe (mot de passe tapé par Teo).
+
+**Les 9 lots de la file sont posés, dans l'ordre**, par `private.depot_demander` / `depot_executer` aux SHA de la file, chacun inscrit dans `schema_migrations` avec sa provenance :
+
+| # | Lot | SHA | Recette |
+|---|---|---|---|
+| 1 | c4_34 contrats à reconduction | b9bc8471 | `^test_c4_34` 3/3 |
+| 2 | c3_43 tournures neutres | 8c882b8e | `^test_c3_43` 2/2 ; `^test_c3_4[0-3]` 4/4 |
+| 3 | socle 19az reprise après refus | f5f8ff0c | `^test_68_` 9/9 |
+| 4 | a4_85 destinataire (TFILED-05) | 4c8d9fbe | `^test_a4_85` 5/5 |
+| 5 | c4_35 relances d'affaire visibles (TOFFLOAD-11) | fe4ddfaf | `^test_c4_35` 4/4 ; **`test_c4_08_cycle` 22/25** (voir plus bas) |
+| 6 | c4_36 segments et tableur | 58b850b6 | `^test_c4_3[4-6]` 3/3 |
+| 7 | a4_86 reprise après refus FILED | 6470f895 | `^test_a4_8[56]` 3/3 (13 assertions) |
+| 8 | c2_40 lien de paiement | 2b616610 | `^test_c2_40` 3/3 |
+| 9 | c2_41 reprise après refus CASHD | b996c405 | `^test_c2_4[01]` 2/2 |
+
+**Non-régression vérifiée** sur ce que les lots touchent : `^test_6[4-7]_` 4/4 (décision seule, commentaire, délégations, crochet d'approbation), `^test_c2_(05|07|39)_` 3/3, `^test_a4_(07|18)` 7/7. Une suite complète d'un module en un seul appel dépasse la minute de l'outil : elle reste à jouer par morceaux.
+
+**C4 — `test_c4_08_cycle` rouge sur la recette (12, 14, 21), cause de test et non de produit.** Diagnostic (bloc annulé en fin de transaction, rien laissé en base) : les remises du test donnent `envoye`, puis `differe / DELAI_MINIMAL`, `envoye`, `differe / DELAI_MINIMAL`. La seconde relance est remise à la même seconde réelle que la première (le test simule les jours par `p_jour`, pas l'horloge des envois), et la recette applique le délai minimal entre deux messages au même destinataire ; c4_35 attendant désormais le départ de la seconde, la décision ne vient pas. Le test doit vieillir la première remise ou régler le délai du client du banc. À reprendre par C4.
+
+**Reste de la file de reprise** (inchangé) : déploiement de `reput-reponse` depuis worker-c3 8c882b8e (bureau) ; reprises REPUT et OFFLOAD à écrire (le socle 19az est posé) ; A1, relecture avec consigne (~0,5 j) ; testeurs à rejouer (T-FILED F15/F16 pour TFILED-05, T-OFFLOAD c4_34/35/36, T-CASHD c2_40/41, T-REPUT c3_43) ; B1, relevé du point de 7 h. Les sessions restent en pause : rien ne repart sans le feu vert de Teo.
+
+## RELANCE du 26/10, 00 h 51 Z — plafond 15 % du forfait (Teo)
+
+### DEMANDE DE DÉPLOIEMENT (bureau) — 26/10, 00 h 56 Z
+
+- Fonction : `reput-reponse`
+- Source : branche `worker-c3`, SHA `8c882b8e3534dd21ddea35dc6f491af7c171e614`
+- Cible : recette `ygwbgpowzlbdaajlsqkn` uniquement.
+- Une fois que c'est fait, prévenir le coordinateur : T-REPUT rejoue alors le texte de réponse c3_43.
+
+### Relancés à 00 h 55 Z
+
+- T-FILED, T-OFFLOAD, T-CASHD, T-REPUT : ils rejouent les lots posés le 25/10.
+- C4 : correction de `test_c4_08_cycle`, puis la reprise après refus OFFLOAD.
+- C3 : la reprise après refus REPUT.
+- A1 : la relecture avec consigne.
+- B1 : le relevé du point de 7 h (23/10) est transmis brut.
+- Pause d'office à 01 h 40 Z au plus tard, ou plus tôt si Teo envoie PAUSE à 15 %.
