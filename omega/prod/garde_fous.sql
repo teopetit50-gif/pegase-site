@@ -16,8 +16,10 @@ politique_sans_grant as (
   select p.tablename, p.policyname, p.cmd
   from pg_policies p
   where p.schemaname = 'public' and 'authenticated' = any (p.roles) and p.cmd <> 'ALL'
-    and not case when p.cmd = 'DEL' || 'ETE' then has_table_privilege('authenticated', format('public.%I', p.tablename), 'DEL' || 'ETE')
-                 else has_any_column_privilege('authenticated', format('public.%I', p.tablename), p.cmd) end
+    -- Le nom est bâti sur le vrai schéma : Postgres peut évaluer ce test avant le filtre schemaname (répétition du 26/10 :
+    -- « relation public.objects does not exist » sur une politique de storage.objects).
+    and not case when p.cmd = 'DEL' || 'ETE' then has_table_privilege('authenticated', format('%I.%I', p.schemaname, p.tablename), 'DEL' || 'ETE')
+                 else has_any_column_privilege('authenticated', format('%I.%I', p.schemaname, p.tablename), p.cmd) end
 ),
 anon_ecrit as (
   select c.relname from pg_class c join pg_namespace n on n.oid = c.relnamespace and n.nspname = 'public'
