@@ -4,6 +4,38 @@ Branche `worker-c3`. Coordinateur : `session_01BCGFdpRKBvXKjouC75sYBg`.
 Commencée le 06/10/2026. Je n'appelle jamais Supabase : le coordinateur pose, je lis les sorties brutes.
 (Depuis le 25/10 au soir, la session de reprise pose elle-même sur `omega-recette`, méthode « depuis le dépôt ».)
 
+## ÉCARTS DU TESTEUR (26/10, ~18 h 40 Z) — TMOD-08 à 10, rapport `omega/RECETTE-TESTEUR-MODULES-2026-10-26.md` (testeur-modules 157b506f)
+
+- **c3_45 posée et verte** : `omega/modules/reput/migrations/c3_45_reprise_ecarts_testeur.sql`, depuis le dépôt (worker-c3
+  af472f50), inscrite dans `schema_migrations` (20261026183759). Test `omega/tests/reput/c3_45_reprise_ecarts_testeur.sql`
+  poussé **avant** la correction (65813422) : **rouge 7/8** sur la recette, puis **vert 8/8** après c3_45. `^test_c3_44` 19/19
+  (test réaligné, voir plus bas) ; `^test_c3_` **44/44 fichiers verts**, joués par morceaux.
+  - **TMOD-08 (important)** : une demande n'est plus jamais en suspens après un refus sans reprise possible. Elle passe
+    `a_traiter` avec une alerte « Demande à traiter vous-même : <nom> » (clé `demande:<id>:a_traiter`), via
+    `private.reput_rendre_a_traiter`. Cas couverts : tous les motifs de « reprise impossible » (doublon, sans consigne,
+    même texte, délai dépassé…) et le **refus de la reprise elle-même** (motif « Reprise refusée : écrivez la réponse
+    vous-même. Consigne du refus : … »). `reput_traiter_reprises` recopie d'abord les décisions (`reput_synchroniser`),
+    puis balaie les demandes `refusee` dont la dernière réponse est refusée sans reprise à venir. **Changement voulu** :
+    les cas B (même texte) et F (délai) du test c3_44 finissent `a_traiter`, et non plus `refusee`. Sur les vraies
+    données de la recette, le balayage n'a rien trouvé (aucune demande `refusee`).
+  - **TMOD-09 (mineur)** : « consigne suivie » seulement si toute la consigne l'est. Sinon : « Reprise après refus (consigne
+    suivie en partie ; non suivi : … ) ». Ce qui n'est pas suivi vient de deux sources : ce que le modèle déclare dans le
+    nouveau champ `consigne_non_suivie`, et ce que la consigne demande hors du corps
+    (`private.reput_consigne_hors_corps` : formule d'appel et civilité, politesse et signature, qui viennent des réglages
+    REPUT). La demande de validation porte `consigne_suivie` (booléen) et `consigne_non_suivie` (liste).
+  - **TMOD-10 (mineur)** : le motif d'un refus sans consigne ne propose plus de « refuser de nouveau » (une réponse refusée ne
+    se refuse ni ne se corrige plus). Nouveau texte : « REPUT ne sait pas quoi corriger. Répondez au client vous-même ; au
+    prochain refus, un commentaire suffit pour que REPUT propose une réponse corrigée ». La demande va `a_traiter`.
+- **Edge `reput-reponse` redéployée sur la recette seulement, version 32**, en coquille au SHA
+  `af472f50f747dc56af0bcb43e7dd271991031ffe` (`verify_jwt` true). Ajout du champ `consigne_non_suivie` à l'outil du modèle :
+  pris en compte seulement s'il y a une consigne du valideur, et demandé dans le bloc de la consigne. Deno **27/27** (le
+  nouveau test était rouge avant la modification). Déployée par l'outil Supabase (même coquille que la v31), pas par la CLI :
+  rien en production.
+- **Décisions prises seul (consigne : la plus prudente)** :
+  - un refus comme doublon va aussi `a_traiter`, avec son alerte ; mieux vaut une alerte de trop qu'une demande oubliée ;
+  - la détection « hors du corps » est volontairement large (« bonjour », « madame », « signature »…) : elle peut dire
+    « en partie » à tort, jamais « suivie » à tort.
+
 ## REPRISE (25/10, 18 h → 19 h Z — session de reprise lancée par « Omega moteurs et build »)
 
 - **Edge `reput-reponse` redéployée, version 31** (18 h 42 Z), **en coquille** au SHA `08b9fe2c00b042ab2c8347a71d4a546b25b02c02`
