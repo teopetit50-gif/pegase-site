@@ -77,28 +77,28 @@ objets as (
   union all
   -- Droits sur les relations (tables, vues, séquences) et les fonctions, par rôle
   select 'droit', format('%I.%I', n.nspname, c.relname),
-         md5(coalesce((select string_agg(format('%s:%s%s', coalesce(r.rolname, 'PUBLIC'), a.privilege_type, case when a.is_grantable then '*' else '' end), ',' order by 1)
+         md5(coalesce((select string_agg(format('%s:%s%s', coalesce(r.rolname, 'PUBLIC'), a.privilege_type, case when a.is_grantable then '*' else '' end), ',' order by coalesce(r.rolname, 'PUBLIC'), a.privilege_type)
                        from aclexplode(c.relacl) a left join pg_roles r on r.oid = a.grantee
                        where a.grantee <> c.relowner), 'défaut'))
   from pg_class c join pg_namespace n on n.oid = c.relnamespace
   where n.nspname in (select nspname from schemas) and c.relkind in ('r', 'p', 'v', 'm', 'S')
   union all
   select 'droit', p.oid::regprocedure::text,
-         md5(coalesce((select string_agg(format('%s:%s', coalesce(r.rolname, 'PUBLIC'), a.privilege_type), ',' order by 1)
+         md5(coalesce((select string_agg(format('%s:%s', coalesce(r.rolname, 'PUBLIC'), a.privilege_type), ',' order by coalesce(r.rolname, 'PUBLIC'), a.privilege_type)
                        from aclexplode(p.proacl) a left join pg_roles r on r.oid = a.grantee
                        where a.grantee <> p.proowner), 'défaut'))
   from pg_proc p join pg_namespace n on n.oid = p.pronamespace
   where n.nspname in (select nspname from schemas) and p.prokind in ('f', 'p')
   union all
   select 'droit', 'schema ' || n.nspname,
-         md5(coalesce((select string_agg(format('%s:%s', coalesce(r.rolname, 'PUBLIC'), a.privilege_type), ',' order by 1)
+         md5(coalesce((select string_agg(format('%s:%s', coalesce(r.rolname, 'PUBLIC'), a.privilege_type), ',' order by coalesce(r.rolname, 'PUBLIC'), a.privilege_type)
                        from aclexplode(n.nspacl) a left join pg_roles r on r.oid = a.grantee
                        where a.grantee <> n.nspowner), 'défaut'))
   from pg_namespace n
   where n.nspname in (select nspname from schemas)
   union all
   select 'droit_defaut', format('%s %s %s', coalesce(r.rolname, '?'), coalesce(n.nspname, '(global)'), d.defaclobjtype::text),
-         md5(coalesce((select string_agg(format('%s:%s', coalesce(g.rolname, 'PUBLIC'), a.privilege_type), ',' order by 1)
+         md5(coalesce((select string_agg(format('%s:%s', coalesce(g.rolname, 'PUBLIC'), a.privilege_type), ',' order by coalesce(g.rolname, 'PUBLIC'), a.privilege_type)
                        from aclexplode(d.defaclacl) a left join pg_roles g on g.oid = a.grantee), ''))
   from pg_default_acl d left join pg_roles r on r.oid = d.defaclrole left join pg_namespace n on n.oid = d.defaclnamespace
   where n.nspname is null or n.nspname in ('public', 'private', 'extensions')

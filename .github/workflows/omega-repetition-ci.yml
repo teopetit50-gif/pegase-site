@@ -121,6 +121,8 @@ jobs:
             # Tout se pose en postgres, comme en production où il possède public, private et leurs objets (relevé du
             # 26/10) sans être superutilisateur ; seuls 00 (Auth, Storage simulés) et 01 (extensions) en supabase_admin.
             url="$BASE_URL"; case "$f" in omega/prod/base/00_*|omega/prod/base/01_*) url="$ADMIN_URL" ;; esac
+            # Arbitrage : l'état de la production (relevé posé), juste avant la première migration.
+            case "$f" in omega/prod/migrations/*) [ -f "$SORTIE/avant.json" ] || python3 omega/prod/arbitrage/relever.py "$BASE_URL" > "$SORTIE/avant.json" || echo "::warning::relevé « avant » impossible" ;; esac
             # Dans le relevé, les droits par défaut DU rôle supabase_admin ne se posent qu'en supabase_admin.
             if [ "$nom" = 02_schema ]; then
               grep 'FOR ROLE supabase_admin' "$f" > "$SORTIE/02_admin.sql"; grep -v 'FOR ROLE supabase_admin' "$f" > "$SORTIE/02_postgres.sql"
@@ -187,6 +189,11 @@ jobs:
               print(f"::warning title={c} {quoi} ({n})::{liste.replace('`', '')[:3800]}")
           PY
           psql "$ADMIN_URL" -X -q -At -f omega/prod/empreinte.sql > "$SORTIE/empreinte-ci.txt" || true
+          # Arbitrage à trois voies (production avant, répétition après, recette) : omega/prod/arbitrage/.
+          if [ -f "$SORTIE/avant.json" ] && python3 omega/prod/arbitrage/relever.py "$BASE_URL" > "$SORTIE/apres.json"; then
+            python3 omega/prod/arbitrage/comparer.py "$SORTIE/avant.json" "$SORTIE/apres.json" --annotations > "$SORTIE/arbitrage.md"
+            cat "$SORTIE/arbitrage.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Tests pgTAP, un fichier par appel
         if: always() && steps.pose.outcome == 'success'
