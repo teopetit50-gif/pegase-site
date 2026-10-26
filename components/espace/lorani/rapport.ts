@@ -33,7 +33,7 @@ export type DonneesRapport = {
 };
 
 const GRAVITE: Record<Constat["gravite"], string> = { bloquant: "Bloquant", majeur: "Majeur", mineur: "Mineur" };
-const NATURE: Record<Constat["nature"], string> = { incoherence: "Entre les pièces", plu: "Contre le PLU", cctp_dpgf: "CCTP et DPGF", metre_dpgf: "Métré et DPGF", re2020: "RE2020", accessibilite: "Accessibilité", securite_incendie: "Sécurité incendie" };
+const NATURE: Record<Constat["nature"], string> = { incoherence: "Entre les pièces", plu: "Contre le PLU", cctp_dpgf: "CCTP et DPGF", metre_dpgf: "Métré et DPGF", re2020: "RE2020", accessibilite: "Accessibilité", securite_incendie: "Sécurité incendie", dtu: "DTU en vigueur", charte: "Charte graphique (lecture en essai)", agence: "Listes de l’agence" };
 const STATUT: Record<Constat["statut"], string> = { ouvert: "Ouvert", corrige: "Corrigé", accepte: "Accepté", ecarte: "Écarté" };
 const RANG: Record<Constat["gravite"], number> = { bloquant: 0, majeur: 1, mineur: 2 };
 

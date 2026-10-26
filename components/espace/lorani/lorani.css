@@ -376,6 +376,60 @@
   margin-top: 12px;
 }
 
+/* ——— marché, avenants et révision BT (b5_34, b5_50) ; les pièces de chantier lues (b5_51) ——— */
+.esp .lor-marche-montants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  margin: 0;
+}
+.esp .lor-marche-montants div {
+  display: grid;
+  gap: 2px;
+}
+.esp .lor-marche-montants dt {
+  font-size: 12px;
+  color: var(--r-doux);
+}
+.esp .lor-marche-montants dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+.esp .lor-formule {
+  display: grid;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--r-filet);
+}
+.esp .lor-formule-tete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+}
+.esp .lor-formule-calcul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.esp .lor-revision td,
+.esp .lor-revision th {
+  font-variant-numeric: tabular-nums;
+}
+.esp .lor-lu-citations {
+  font-size: 12.5px;
+}
+.esp .lor-lu-citations summary {
+  cursor: pointer;
+  color: var(--r-doux);
+}
+.esp .lor-lecture q {
+  overflow-wrap: anywhere;
+}
+
 /* ——— le contrôle du dossier (b5_16) ; le choix des pièces vit dans un dialogue, hors de .esp ——— */
 .esp .lor-controles {
   margin-bottom: 10px;

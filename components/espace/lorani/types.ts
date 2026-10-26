@@ -307,6 +307,59 @@ export type Marche = {
   /* b5_33 : l'avance (% du montant initial) et la pénalité de retard par jour prévue au marché */
   avance_pct?: number;
   penalite_jour_ht?: number | null;
+  /* b5_34 : la formule de révision, C = a + (1 − a) × In / I0 (série INSEE, mois zéro, partie fixe a) */
+  revision_idbank?: string | null;
+  revision_mois_zero?: string | null;
+  revision_partie_fixe?: number;
+};
+/* b5_34 : la révision calculée par la base sur chaque situation (vide si le marché n'est pas révisable) */
+export type Revision = {
+  index?: string;
+  idbank?: string;
+  partie_fixe?: number;
+  mois_zero?: string;
+  i0?: number | null;
+  mois?: string;
+  mois_index?: string;
+  in?: number;
+  provisoire?: boolean;
+  coefficient?: number;
+  montant_periode?: number;
+  revision_ht?: number;
+  manque?: string;
+};
+/* b5_34 : les séries d'index suivies (BT01, TP01…) et leurs valeurs mensuelles relevées à l'INSEE */
+export type IndexSerie = { idbank: string; code: string; libelle: string | null; releve_le: string | null; erreur: string | null };
+export type IndexValeur = { idbank: string; mois: string; valeur: number; qualite: string | null };
+/* b5_50 : les avenants d'un marché, un par un ; signé, l'avenant entre dans le marché */
+export type Avenant = {
+  id: string;
+  projet_id: string;
+  marche_id: string;
+  numero: number;
+  objet: string;
+  montant_ht: number;
+  statut: "a_signer" | "signe" | "abandonne";
+  signe_le: string | null;
+  integre_le: string | null;
+  piece_id: string | null;
+  motif: string | null;
+};
+/* b5_51 : une pièce de chantier lue (OS, avenant, PV de réception), à confirmer avant d'entrer au chantier */
+export type ConstatLecture = { code: string; gravite: "bloquant" | "attention" | "info"; texte: string };
+export type LectureChantier = {
+  id: string;
+  projet_id: string;
+  piece_id: string;
+  nature: "ordre_service" | "avenant" | "pv_reception";
+  marche_id: string | null;
+  valeurs: Record<string, unknown>;
+  citations: Record<string, { texte: string | null; page: number | null; verifiee: boolean }>;
+  constats: ConstatLecture[];
+  statut: "a_confirmer" | "a_ranger" | "posee" | "ecartee";
+  poses: Record<string, unknown>;
+  motif: string | null;
+  cree_le: string;
 };
 export type Situation = {
   id: string;
@@ -330,6 +383,8 @@ export type Situation = {
   avance_remboursee_ht?: number | null;
   penalites_ht?: number | null;
   montants?: Record<string, unknown>;
+  /* b5_34 */
+  revision?: Revision;
 };
 export type Visa = {
   id: string;
@@ -404,7 +459,7 @@ export type ValeurCitee = {
 export type Constat = {
   id: string;
   controle_id: string;
-  nature: "incoherence" | "plu" | "cctp_dpgf" | "metre_dpgf" | "re2020" | "accessibilite" | "securite_incendie";
+  nature: "incoherence" | "plu" | "cctp_dpgf" | "metre_dpgf" | "re2020" | "accessibilite" | "securite_incendie" | "agence" | "dtu" | "charte";
   gravite: "bloquant" | "majeur" | "mineur";
   grandeur: string | null;
   objet: string | null;
@@ -419,6 +474,36 @@ export type Constat = {
   decide_par: string | null;
   decide_le: string | null;
 };
+
+/* les listes de contrôle de l'agence (b5_60) : des points mesurés, de présence ou à vérifier à la main, ajoutés aux
+   contrôles réglementaires ; chaque enregistrement fait une version figée, citée par les constats */
+export type GenrePointListe = "mesure" | "presence" | "manuel";
+export type PointListe = {
+  /* absent pour un point nouveau : la base le tire, puis il le garde d'une version à l'autre */
+  id?: string;
+  libelle: string;
+  genre: GenrePointListe;
+  gravite: Constat["gravite"];
+  reference?: string;
+  grandeur?: string;
+  borne?: "min" | "max";
+  seuil?: number;
+  objet?: string;
+  role?: RolePieceControle;
+  champ?: string;
+};
+export type ListeAgence = {
+  id: string;
+  nom: string;
+  description: string | null;
+  natures: NatureProjet[];
+  phases: PhaseProjet[];
+  actif: boolean;
+  version: number;
+  points_nb: number;
+  maj_le: string;
+};
+export type VersionListe = { id: string; liste_id: string; version: number; points: PointListe[]; enregistre_par: string | null; enregistre_le: string };
 
 /* le PLU du projet trouvé depuis son adresse (b5_17), Géoportail de l'urbanisme */
 export type ZonePlu = { libelle: string | null; libelong: string | null; typezone: string | null; partition: string | null; idurba: string | null; nomfic: string | null; urlfic: string | null; datvalid: string | null };
@@ -642,6 +727,14 @@ export type Dossier = {
   doe: PieceDoe[];
   consultations: Consultation[];
   offres: Offre[];
+  /* b5_60 : les listes de contrôle de l'agence et leurs versions */
+  listes: ListeAgence[];
+  listeVersions: VersionListe[];
+  /* b5_34, b5_50, b5_51 : absents tant que les migrations ne sont pas posées */
+  avenants: Avenant[];
+  lecturesChantier: LectureChantier[];
+  indexSeries: IndexSerie[];
+  indexValeurs: IndexValeur[];
   /* user_id → nom (annuaire) */
   noms: Record<string, string>;
   /* le compte de la personne connectée (base réelle) */

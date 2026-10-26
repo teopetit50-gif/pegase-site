@@ -16,8 +16,9 @@
    l'urbanisme que le socle applique.
    ══════════════════════════════════════════════════════════════════════ */
 
+import { revisionSituation } from "./revision";
 import { EXEMPLE_CLIENT_ID, EXEMPLE_MOI, CLAIRE, SIEGE, SOFIA, YANIS, aujourdHui, ilYa } from "../exemples/socle";
-import type { Attestation, CompteRendu, Consultation, Offre, OrdreService, PieceDoe, Point, Reserve, CasRejet, Constat, Controle, Plu, ControlePiece, DateLue, Dossier, Echeance, Etape, Honoraire, Intervenant, Lot, Marche, MembreProjet, Permis, PieceProjet, Projet, Recours, Situation, Temps, Visa } from "./types";
+import type { ListeAgence, VersionListe, Attestation, CompteRendu, Consultation, Offre, OrdreService, PieceDoe, Point, Reserve, CasRejet, Constat, Controle, Plu, ControlePiece, DateLue, Dossier, Echeance, Etape, Honoraire, Intervenant, Lot, Marche, MembreProjet, Permis, PieceProjet, Projet, Recours, Situation, Temps, Visa, Avenant, IndexSerie, IndexValeur, LectureChantier } from "./types";
 
 const C = EXEMPLE_CLIENT_ID;
 const j = (n: number) => aujourdHui(n);
@@ -306,6 +307,8 @@ const PIECE_LETTRE = id("d", 3);
 const PIECE_RECEPISSE_DP = id("d", 4);
 const PIECE_ARRETE = id("d", 5);
 const PIECE_CONSTAT = id("d", 6);
+const PIECE_OS = id("d", 7);
+const PIECE_AVENANT = id("d", 8);
 
 export const PIECES_EXEMPLE: PieceProjet[] = [
   { id: PIECE_RECEPISSE, objet_id: P_LEMOINE, nom_fichier: "recepisse-depot-PC04410926A0042.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_recepisse_depot", cree_le: ilYa(93) },
@@ -314,6 +317,8 @@ export const PIECES_EXEMPLE: PieceProjet[] = [
   { id: PIECE_RECEPISSE_DP, objet_id: P_MARTIN, nom_fichier: "ARE_DP06938326N0107.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_recepisse_depot", source: "courriel", cree_le: ilYa(44) },
   { id: PIECE_ARRETE, objet_id: P_MERCIERE, nom_fichier: "arrete-PC06938225V0344.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_arrete", cree_le: ilYa(218) },
   { id: PIECE_CONSTAT, objet_id: P_MERCIERE, nom_fichier: "constat-affichage-huissier.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_constat_affichage", cree_le: ilYa(209) },
+  { id: PIECE_OS, objet_id: P_MERCIERE, nom_fichier: "OS-06-pierres-de-bourgogne.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_ordre_service", cree_le: ilYa(0, 3) },
+  { id: PIECE_AVENANT, objet_id: P_MERCIERE, nom_fichier: "avenant-01-echafaudages-rhone.pdf", mime: "application/pdf", statut: "a_verifier", type_piece: "lorani_avenant", cree_le: ilYa(1) },
 ];
 
 const dateLue = (d: Partial<DateLue> & Pick<DateLue, "id" | "projet_id" | "permis_id" | "piece_id" | "type_piece" | "nature" | "proposition" | "citations">): DateLue => ({
@@ -495,9 +500,16 @@ export const TEMPS_EXEMPLE: Temps[] = [
 ];
 
 /* ——— le chantier (b5_13) : la façade rue Mercière, en travaux ——— */
+/* le premier jour du mois, k mois avant celui-ci */
+function moisAvant(k: number) {
+  const x = new Date(`${j(0).slice(0, 7)}-15T12:00:00`);
+  x.setMonth(x.getMonth() - k);
+  return `${x.toISOString().slice(0, 7)}-01`;
+}
 const M = (n: number) => id("m", n);
 export const MARCHES_EXEMPLE: Marche[] = [
-  { id: M(1), projet_id: P_MERCIERE, lot_id: id("1", 8), titulaire: "Pierres de Bourgogne SARL", montant_ht: 186000, avenants_ht: 7400, retenue_pct: 5, delai_verification_jours: 15, actif: true, delai_execution_jours: 180, demarrage_le: j(-100) },
+  { id: M(1), projet_id: P_MERCIERE, lot_id: id("1", 8), titulaire: "Pierres de Bourgogne SARL", montant_ht: 186000, avenants_ht: 7400, retenue_pct: 5, delai_verification_jours: 15, actif: true, delai_execution_jours: 180, demarrage_le: j(-100),
+    revision_idbank: "001710986", revision_mois_zero: moisAvant(6), revision_partie_fixe: 0.15 },
   { id: M(2), projet_id: P_MERCIERE, lot_id: id("1", 9), titulaire: "Échafaudages Rhône", montant_ht: 24000, avenants_ht: 0, retenue_pct: 5, delai_verification_jours: 15, actif: true, delai_execution_jours: 210, demarrage_le: j(-102) },
 ];
 const mois = (n: number) => `${j(n).slice(0, 7)}-01`;
@@ -507,6 +519,47 @@ export const SITUATIONS_EXEMPLE: Situation[] = [
   { id: id("5", 3), projet_id: P_MERCIERE, marche_id: M(1), numero: 3, mois: mois(-35), cumul_ht: 201500, recue_le: j(-4), a_viser_avant: j(11), statut: "a_viser", cumul_admis_ht: null, observation: null, visee_le: null },
   { id: id("5", 4), projet_id: P_MERCIERE, marche_id: M(2), numero: 1, mois: mois(-65), cumul_ht: 12000, recue_le: j(-36), a_viser_avant: j(-21), statut: "visee", cumul_admis_ht: 12000, observation: null, visee_le: j(-33) },
   { id: id("5", 5), projet_id: P_MERCIERE, marche_id: M(2), numero: 2, mois: mois(-35), cumul_ht: 11000, recue_le: j(-9), a_viser_avant: j(6), statut: "a_viser", cumul_admis_ht: null, observation: null, visee_le: null, retenue_deduite_ht: 0 },
+];
+/* b5_34 : le BT01 relevé à l'INSEE (valeurs d'exemple, du même ordre que les vraies de 2026) ; le dernier mois publié
+   l'est deux mois après, et pas encore en définitif */
+export const INDEX_SERIES_EXEMPLE: IndexSerie[] = [
+  { idbank: "001710986", code: "BT01", libelle: "Index du bâtiment - BT01 - Tous corps d'état - Base 2010", releve_le: ilYa(0, 2), erreur: null },
+  { idbank: "001711007", code: "TP01", libelle: "Index Travaux Publics - TP01 - Index général tous travaux - Base 2010", releve_le: ilYa(0, 2), erreur: null },
+];
+export const INDEX_VALEURS_EXEMPLE: IndexValeur[] = [133.9, 134.4, 134.7, 135.6, 136.8, 138.3, 138.9].map((valeur, i) => (
+  { idbank: "001710986", mois: moisAvant(8 - i), valeur, qualite: i === 6 ? "P" : "DEF" }
+));
+/* b5_50 : les avenants de la pierre (les 7 400 € du marché), et un troisième à signer */
+const avenant = (a: Partial<Avenant> & Pick<Avenant, "id" | "marche_id" | "numero" | "objet" | "montant_ht">): Avenant => ({
+  projet_id: P_MERCIERE, statut: "signe", signe_le: null, integre_le: null, piece_id: null, motif: null, ...a,
+});
+export const AVENANTS_EXEMPLE: Avenant[] = [
+  avenant({ id: id("v", 1), marche_id: M(1), numero: 1, objet: "Appuis de fenêtre en pierre de Comblanchien au lieu du béton", montant_ht: 5200, signe_le: j(-70), integre_le: ilYa(70) }),
+  avenant({ id: id("v", 2), marche_id: M(1), numero: 2, objet: "Hydrofuge sur la façade cour", montant_ht: 2200, signe_le: j(-20), integre_le: ilYa(20) }),
+  avenant({ id: id("v", 3), marche_id: M(1), numero: 3, objet: "Reprise de la corniche d’angle", montant_ht: 3800, statut: "a_signer" }),
+];
+/* b5_51 : deux pièces de chantier lues, l'une à confirmer, l'autre à ranger */
+export const LECTURES_CHANTIER_EXEMPLE: LectureChantier[] = [
+  { id: id("l", 1), projet_id: P_MERCIERE, piece_id: PIECE_OS, nature: "ordre_service", marche_id: M(1), statut: "a_confirmer", poses: {}, motif: null, cree_le: ilYa(0, 3),
+    valeurs: { numero: 6, nature: "travaux_modificatifs", objet: "Remplacement des descentes d’eaux pluviales en zinc", emis_le: j(-1), notifie_le: j(-1), montant_ht: 2900, delai_jours: 0, titulaire: "Pierres de Bourgogne", lot: "01", illisibles: [] },
+    citations: {
+      numero_os: { texte: "ORDRE DE SERVICE N° 6", page: 1, verifiee: true },
+      objet: { texte: "Remplacement des descentes d’eaux pluviales en zinc", page: 1, verifiee: true },
+      montant_ht: { texte: "Montant : 2 900,00 € HT", page: 1, verifiee: true },
+      date_emission: { texte: `Fait à Lyon le ${fr(-1)}`, page: 1, verifiee: true },
+    },
+    constats: [{ code: "reserves_entreprise", gravite: "info", texte: `l’entreprise a jusqu’au ${fr(14)} pour émettre ses réserves (CCAG-Travaux 2021, art. 3.8.2)` }] },
+  { id: id("l", 2), projet_id: P_MERCIERE, piece_id: PIECE_AVENANT, nature: "avenant", marche_id: M(2), statut: "a_ranger", poses: {}, motif: null, cree_le: ilYa(1),
+    valeurs: { numero: 1, objet: "Location de l’échafaudage prolongée de quatre semaines", signe_le: j(-2), titulaire: "Échafaudages Rhône", illisibles: ["montant_ht"] },
+    citations: {
+      numero_avenant: { texte: "AVENANT N° 1", page: 1, verifiee: true },
+      objet: { texte: "Location de l’échafaudage prolongée de quatre semaines", page: 1, verifiee: true },
+      montant_ht: { texte: "Plus-value : voir le détail joint", page: 1, verifiee: false },
+    },
+    constats: [
+      { code: "montant", gravite: "bloquant", texte: "le montant écrit n’est pas lisible : à saisir" },
+      { code: "citation", gravite: "attention", texte: "citation non retrouvée sur la pièce pour : le montant : à relire sur la pièce" },
+    ] },
 ];
 export const VISAS_EXEMPLE: Visa[] = [
   { id: id("6", 1), projet_id: P_MERCIERE, lot_id: id("1", 8), document: "Calepinage des pierres — façade sud", indice: "B", recu_le: j(-2), commande_le: j(3), delai_visa_jours: 15, a_viser_avant: j(2), avis: "a_viser", observation: null, vise_le: null },
@@ -528,7 +581,7 @@ export const PIECES_CONTROLE_EXEMPLE: PieceProjet[] = [
 const CA = id("8", 1);
 const CB = id("8", 2);
 export const CONTROLES_EXEMPLE: Controle[] = [
-  { id: CB, projet_id: P_DUBOIS, intitule: "Dossier de permis", indice: "B", precedent_id: CA, statut: "controle", lance_le: ilYa(2), constats_nb: 3, cree_le: ilYa(2), decideur: EXEMPLE_MOI,
+  { id: CB, projet_id: P_DUBOIS, intitule: "Dossier de permis", indice: "B", precedent_id: CA, statut: "controle", lance_le: ilYa(2), constats_nb: 6, cree_le: ilYa(2), decideur: EXEMPLE_MOI,
     changements: [
       { reference: "PC3", grandeur: "largeur_m", objet: "tremie_r1", libelle: "la largeur de « tremie r1 »", unite: "m", avant: 1.2, apres: 1.8, page_avant: 1, page_apres: 1, texte_avant: "trémie 120", texte_apres: "trémie 180", releve: false },
       { reference: "PC2", grandeur: "recul_limite_m", objet: "projet", libelle: "le recul sur limite séparative", unite: "m", avant: 3.4, apres: 3.2, page_avant: 1, page_apres: 1, texte_avant: "3,40 m", texte_apres: "3,20 m", releve: true },
@@ -595,6 +648,44 @@ export const CONSTATS_EXEMPLE: Constat[] = [
   constat({ id: id("9", 8), controle_id: CB, ...POSTE_27, precedent_id: id("9", 5), decide_le: ilYa(15) }),
   constat({ id: id("9", 10), controle_id: CA, ...METRE_22 }),
   constat({ id: id("9", 11), controle_id: CB, ...METRE_22, precedent_id: id("9", 10) }),
+  /* b5_62 : un DTU cité dans une version qui n'est plus en vigueur */
+  constat({
+    id: id("9", 42), controle_id: CB, nature: "dtu", gravite: "majeur", objet: "20_1", article: "Liste datée des NF DTU, relevé du 25/10/2026",
+    titre: "CCTP 02 (p. 1) cite le DTU 20.1 d'octobre 2008, qui n'est plus en vigueur : la version en vigueur est celle de juillet 2020 (NF DTU 20.1 P1-1 (P10-202)).",
+    correction: "Citer le NF DTU 20.1 P1-1 (P10-202), version juillet 2020 (« Maçonnerie de petits éléments, parois et murs »).",
+    valeurs: [
+      { piece: PD(5), reference: "CCTP 02", page: 1, valeur: "d'octobre 2008", texte: "NF DTU 20.1 d'octobre 2008." },
+      { reference: "Liste datée des NF DTU (relevé du 25/10/2026)", texte: "NF DTU 20.1 P1-1 (P10-202) : en vigueur depuis juillet 2020 ; remplace octobre 2008, avril 1994" },
+    ],
+  }),
+  /* b5_60 : les points de la liste de l'agence, ajoutés aux contrôles réglementaires */
+  constat({
+    id: id("9", 40), controle_id: CB, nature: "agence", gravite: "mineur", article: "Liste de l'agence « Avant chaque dépôt », v2, point 2",
+    titre: "Aucune pièce « notice » au contrôle : la liste « Avant chaque dépôt », v2, point 2 la demande (« La notice de sécurité incendie est jointe »).",
+    correction: "Ajouter au contrôle la pièce demandée (notice), ou écarter le point avec un motif.",
+    valeurs: [{ reference: "liste « Avant chaque dépôt », v2, point 2", texte: "La notice de sécurité incendie est jointe" }],
+  }),
+  constat({
+    id: id("9", 41), controle_id: CB, nature: "agence", gravite: "mineur", grandeur: "point_manuel", article: "Liste de l'agence « Avant chaque dépôt », v2, point 3",
+    titre: "À vérifier (liste « Avant chaque dépôt », v2, point 3) : Les légendes des façades reprennent les matériaux de la notice",
+    correction: "Vérifier ce point sur les pièces, puis le marquer vérifié, ou l'écarter avec un motif.",
+    valeurs: [{ reference: "liste « Avant chaque dépôt », v2, point 3", texte: "Les légendes des façades reprennent les matériaux de la notice" }],
+  }),
+];
+
+/* ——— les listes de contrôle de l'agence (b5_60) ——— */
+const L_DEPOT = id("4", 1);
+export const LISTES_EXEMPLE: ListeAgence[] = [
+  { id: L_DEPOT, nom: "Avant chaque dépôt", description: "Ce que l'agence vérifie sur tout dossier de permis.", natures: [], phases: [], actif: true, version: 2, points_nb: 3, maj_le: ilYa(9) },
+];
+const POINTS_DEPOT = [
+  { id: id("4", 11), libelle: "Portes de hall : passage utile de 0,90 m au moins", genre: "mesure" as const, gravite: "majeur" as const, grandeur: "largeur_porte_m", borne: "min" as const, seuil: 0.9, reference: "Charte de l'agence, § 4" },
+  { id: id("4", 12), libelle: "La notice de sécurité incendie est jointe", genre: "presence" as const, gravite: "mineur" as const, role: "notice" as const },
+  { id: id("4", 13), libelle: "Les légendes des façades reprennent les matériaux de la notice", genre: "manuel" as const, gravite: "mineur" as const },
+];
+export const LISTE_VERSIONS_EXEMPLE: VersionListe[] = [
+  { id: id("4", 22), liste_id: L_DEPOT, version: 2, points: POINTS_DEPOT, enregistre_par: EXEMPLE_MOI, enregistre_le: ilYa(9) },
+  { id: id("4", 21), liste_id: L_DEPOT, version: 1, points: POINTS_DEPOT.slice(0, 2), enregistre_par: EXEMPLE_MOI, enregistre_le: ilYa(30) },
 ];
 
 /* ——— le PLU trouvé depuis l'adresse (b5_17) : réponses du Géoportail de l'urbanisme, telles qu'au 06/10/2026 ——— */
@@ -804,8 +895,17 @@ export function dossierExemple(): Dossier {
     honoraires: HONORAIRES_EXEMPLE,
     temps: TEMPS_EXEMPLE,
     marches: MARCHES_EXEMPLE,
-    situations: SITUATIONS_EXEMPLE,
+    situations: SITUATIONS_EXEMPLE.map((x) => {
+      const m = MARCHES_EXEMPLE.find((y) => y.id === x.marche_id)!;
+      return { ...x, revision: revisionSituation(x, m, SITUATIONS_EXEMPLE, INDEX_VALEURS_EXEMPLE, INDEX_SERIES_EXEMPLE.find((z) => z.idbank === m.revision_idbank)?.code) };
+    }),
+    avenants: AVENANTS_EXEMPLE,
+    lecturesChantier: LECTURES_CHANTIER_EXEMPLE,
+    indexSeries: INDEX_SERIES_EXEMPLE,
+    indexValeurs: INDEX_VALEURS_EXEMPLE,
     visas: VISAS_EXEMPLE,
+    listes: LISTES_EXEMPLE,
+    listeVersions: LISTE_VERSIONS_EXEMPLE,
     noms: {},
     moi: { user_id: EXEMPLE_MOI, client_id: C, role: "valideur" },
   };

@@ -12,16 +12,19 @@
    Qui décide (b5_30) : le gérant, un admin ou le chef de projet nomme, par contrôle, la personne qui tranche les
    constats ; elle seule (avec le gérant et les admins) les marque corrigés, acceptés ou écartés.
    Régler les contrôles (b5_31) : par projet, l'écart toléré de chaque grandeur et entre métré et DPGF, et les familles
-   de constats coupées ; les réglages valent au prochain passage. */
+   de constats coupées ; les réglages valent au prochain passage.
+   Listes de l'agence (b5_60) : les règles internes de l'agence s'ajoutent aux contrôles réglementaires (famille
+   « agence ») ; un point à vérifier à la main se marque « vérifié » et se revérifie à chaque indice. */
 
 import { useMemo, useState } from "react";
-import { FileDown, MessageSquareText, PauseCircle, ScanSearch, ShieldCheck, SlidersHorizontal, UserCheck } from "lucide-react";
+import { FileDown, ListChecks, MessageSquareText, PauseCircle, ScanSearch, ShieldCheck, SlidersHorizontal, UserCheck } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { Avis, Pastille } from "../ui";
 import { dateCourte } from "../format";
 import { ajouterPoints, choisirDecideur, deciderConstat, lancerControle, octetsPiece, preparerControle, reglerControles, reprendreControle, suspendreControle } from "./portes";
 import { ROLES_PROJET } from "./etats";
+import ListesAgence from "./ListesAgence";
 import { excelControle, pdfControle, telecharger, type DonneesRapport } from "./rapport";
 import type { Constat, Controle as ControleT, ControlePiece, Dossier, PieceProjet, Point, Projet, RolePieceControle } from "./types";
 
@@ -32,7 +35,7 @@ const GRAVITES: Record<Constat["gravite"], { libelle: string; teinte: "rouge" | 
   majeur: { libelle: "Majeur", teinte: "ambre", rang: 1 },
   mineur: { libelle: "Mineur", teinte: "gris", rang: 2 },
 };
-const NATURES: Record<Constat["nature"], string> = { incoherence: "Entre les pièces", plu: "Contre le PLU", cctp_dpgf: "CCTP et DPGF", metre_dpgf: "Métré et DPGF", re2020: "RE2020", accessibilite: "Accessibilité", securite_incendie: "Sécurité incendie" };
+const NATURES: Record<Constat["nature"], string> = { incoherence: "Entre les pièces", plu: "Contre le PLU", cctp_dpgf: "CCTP et DPGF", metre_dpgf: "Métré et DPGF", re2020: "RE2020", accessibilite: "Accessibilité", securite_incendie: "Sécurité incendie", dtu: "DTU en vigueur", charte: "Charte graphique (lecture en essai)", agence: "Listes de l’agence" };
 const DECISIONS: Record<Exclude<Constat["statut"], "ouvert">, { libelle: string; verbe: string; teinte: "vert" | "bleu" | "gris" }> = {
   corrige: { libelle: "Corrigé", verbe: "Marquer corrigé", teinte: "vert" },
   accepte: { libelle: "Accepté", verbe: "Accepter", teinte: "bleu" },
@@ -49,7 +52,7 @@ const lue = (p: PieceProjet | undefined) => !!p && !EN_LECTURE.includes(p.statut
 const jour = (d: string | null) => (d ? dateCourte(d.length === 10 ? `${d}T12:00:00` : d) : "—");
 const indiceSuivant = (i: string) => (/^[A-Y]$/.test(i) ? String.fromCharCode(i.charCodeAt(0) + 1) : /^\d+$/.test(i) ? String(Number(i) + 1) : "");
 /* l'unité d'une grandeur du contrat de lecture, d'après son suffixe (hauteur_faitage_m, emprise_sol_m2, espaces_verts_pct…) */
-const unite = (g: string | null) => (!g ? "" : g.endsWith("_m2") ? " m²" : g === "cote_altimetrique_m" ? " m NGF" : g.endsWith("_m") ? " m" : g.endsWith("_pct") ? " %" : "");
+const unite = (g: string | null) => (!g ? "" : g.endsWith("_mj_m2") ? " MJ/m²" : g.endsWith("_m2") ? " m²" : g === "cote_altimetrique_m" ? " m NGF" : g.endsWith("_m") ? " m" : g.endsWith("_pct") ? " %" : "");
 /* une valeur d'un indice : « 1,8 m », ou « absente » */
 const valeurIndice = (v: number | null, u: string | null) => (v === null ? "absente" : `${String(v).replace(".", ",")}${u ? ` ${u}` : ""}`);
 const pluriel = (n: number, s: string) => `${n} ${s}${n > 1 ? "s" : ""}`;
@@ -102,6 +105,7 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
   const pieceDe = (id: string | undefined) => dossier.pieces.find((p) => p.id === id);
 
   const [form, setForm] = useState<Form>(null);
+  const [listesOuvert, setListesOuvert] = useState(false);
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [nc, setNc] = useState({ intitule: "", indice: "A" });
@@ -189,9 +193,11 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
     );
   };
 
+  /* un point d'une liste de l'agence à vérifier à la main (b5_60) : « vérifié » = accepté, motif prérempli */
+  const manuel = (k: Constat) => k.nature === "agence" && k.grandeur === "point_manuel";
   const ouvrirDecision = (k: Constat, statut: Exclude<Constat["statut"], "ouvert">) => {
     setErreur(null);
-    setMotif("");
+    setMotif(manuel(k) && statut === "accepte" ? "Vérifié" : "");
     setForm({ type: "decider", constat: k, statut });
   };
   const soumettreDecision = () => {
@@ -319,6 +325,7 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
           {c ? <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => ouvrirNouveau(c)}>Revérifier à l’indice suivant</button> : null}
           <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi || piecesProjet.length < 2} onClick={() => ouvrirNouveau(null)}>Nouveau contrôle</button>
           <button type="button" className="esp-lien-bouton" disabled={!peutChoisir || envoi} onClick={ouvrirReglages}>Régler les contrôles</button>
+          <button type="button" className="esp-lien-bouton" onClick={() => setListesOuvert(true)}><ListChecks width={14} height={14} aria-hidden="true" /> Listes de l’agence</button>
         </span>
       </div>
       {reglesPropres || famillesCoupees.length ? (
@@ -406,8 +413,14 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
                 </ul>
               ) : null}
               <div className="esp-actions">
-                <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={!peutDecider || envoi} onClick={() => ouvrirDecision(k, "corrige")}>Corrigé</button>
-                <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutDecider || envoi} onClick={() => ouvrirDecision(k, "accepte")}>Accepter</button>
+                {manuel(k) ? (
+                  <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={!peutDecider || envoi} onClick={() => ouvrirDecision(k, "accepte")}>Vérifié</button>
+                ) : (
+                  <>
+                    <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={!peutDecider || envoi} onClick={() => ouvrirDecision(k, "corrige")}>Corrigé</button>
+                    <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutDecider || envoi} onClick={() => ouvrirDecision(k, "accepte")}>Accepter</button>
+                  </>
+                )}
                 <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutDecider || envoi} onClick={() => ouvrirDecision(k, "ecarte")}>Écarter</button>
                 <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => ouvrirQuestion(k)}>En faire une question</button>
               </div>
@@ -441,7 +454,7 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
               <summary>Décidés ({decides.length})</summary>
               <ul className="lor-liste">
                 {decides.map((k) => {
-                  const d = DECISIONS[k.statut as Exclude<Constat["statut"], "ouvert">];
+                  const d = manuel(k) && k.statut === "accepte" ? { libelle: "Vérifié", teinte: "vert" as const } : DECISIONS[k.statut as Exclude<Constat["statut"], "ouvert">];
                   return (
                     <li key={k.id}>
                       <Pastille teinte={d.teinte}>{d.libelle}</Pastille> {k.titre}
@@ -455,6 +468,8 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
           ) : null}
         </>
       )}
+
+      <ListesAgence dossier={dossier} ouvert={listesOuvert} fermer={() => setListesOuvert(false)} agir={agir} />
 
       {/* ——— nouveau contrôle, ou revérification à l'indice suivant ——— */}
       <Dialog open={form?.type === "nouveau"} onOpenChange={(o) => !o && setForm(null)}>
@@ -637,10 +652,11 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
         <DialogContent>
           <DialogHeader>
             <DialogIcone><ShieldCheck width={18} height={18} aria-hidden="true" /></DialogIcone>
-            <DialogTitle>{form?.type === "decider" ? DECISIONS[form.statut].verbe : ""}</DialogTitle>
+            <DialogTitle>{form?.type === "decider" ? (manuel(form.constat) && form.statut === "accepte" ? "Marquer vérifié" : DECISIONS[form.statut].verbe) : ""}</DialogTitle>
             <DialogDescription>
               {form?.type === "decider" ? form.constat.titre : ""}{" "}
-              {form?.type === "decider" && form.statut !== "corrige" ? "Le motif est obligatoire ; il suit le constat aux indices suivants." : "Le prochain indice le confirmera : un constat qui se retrouve rouvre."}
+              {form?.type === "decider" && manuel(form.constat) ? "Le motif est obligatoire ; ce point se revérifie à l’indice suivant."
+                : form?.type === "decider" && form.statut !== "corrige" ? "Le motif est obligatoire ; il suit le constat aux indices suivants." : "Le prochain indice le confirmera : un constat qui se retrouve rouvre."}
             </DialogDescription>
           </DialogHeader>
           <DialogBody>
@@ -652,7 +668,7 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
             </div>
           </DialogBody>
           <DialogFooter>
-            <button type="button" className="r-btn r-btn--noir" disabled={!decisionOk || envoi} onClick={soumettreDecision}>{envoi ? <Loader variant="spin" /> : null} {form?.type === "decider" ? DECISIONS[form.statut].verbe : ""}</button>
+            <button type="button" className="r-btn r-btn--noir" disabled={!decisionOk || envoi} onClick={soumettreDecision}>{envoi ? <Loader variant="spin" /> : null} {form?.type === "decider" ? (manuel(form.constat) && form.statut === "accepte" ? "Marquer vérifié" : DECISIONS[form.statut].verbe) : ""}</button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
