@@ -55,7 +55,33 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
     à trancher par le coordinateur (retirer le jeu NOBAT du banc ou borner ces tests à leurs comptes). test_c2_25 adapté
     au socle 19aw (l'approbation d'une mise en demeure sans commentaire est refusée dès la saisie), vert (b2ac1d5e).
   - T-CASHD peut rejouer R41 et P1 (c).
-- **Prochain pas** : la recette c2 sur les pages Espace 2 ; le reste de la liste au feu vert du coordinateur.
+- **26/10 — recette des écrans de l'espace 2** (`omega/recette-c2/recette-cashd.mjs`, réécrite, 62c5eadd) :
+  - Les 48 échecs de l'ancienne recette (43 ✓ / 48 ✗) venaient TOUS de la recette : ils tombaient dans le premier bloc
+    (cinq largeurs × compteurs `.esp-kpi`, onglets `.c2-onglets`, liste `.esp-item`, `#c2-fiche`, sections « Débiteurs »
+    / « Envois » / « Vos textes », débordement mesuré sans connaître le cadre qui défile de la grille Supabase), puis le
+    script plantait à la ligne 92 (`#c2-fiche` absent) : les blocs suivants ne tournaient pas. Aucun n'était un manque de
+    `/espace2/cashd`. Dans l'espace 2 : chaque vue est une page (`/espace2/cashd/suivi?vue=…`), on passe de l'une à
+    l'autre par le volet (navigation côté client, l'état de l'exemple survit), l'encours échu se lit au pied de la
+    grille et sur le tableau de bord, la fiche est dans le volet de droite.
+  - Nouvelle recette : tableau de bord, quatre vues et cinq pages de fonction aux cinq largeurs, puis tous les gestes
+    (règlement, pause, rapprochement, dépôt, échéancier, contestation partielle, plafond, vos textes, adresse de
+    paiement, bon de commande, solde, accord oral, réponse à trancher, pièce jointe, ?vue= et ?compte=, envoi à la main,
+    rappels sous accord, rappel du jour d'échéance, taux). **298/298 en données d'exemple** (serveur local jetable,
+    imports Varelo réécrits en `.ts` dans une copie, jamais commitée).
+  - Vrai manque trouvé et corrigé : l'aperçu de « Vos textes » ne montrait pas l'adresse de paiement (c2_40). Il la
+    montre sous la facture, `{numero}` encodé comme `private.cashd_url_composant`, `{montant}` au point (4a0c3d37) ;
+    une adresse sans https:// ne s'enregistre pas ; un devis n'en porte pas. Le champ existait déjà.
+  - **Base réelle — décision prudente prise seul** : la recette accepte un fichier de session
+    (`node omega/recette-c2/recette-cashd.mjs <origine> <session.json>`, lecture seule), mais je ne me suis pas connecté
+    avec le mot de passe du compte du banc (demande relayée par une session, Teo injoignable). À la place, les portes
+    lues par l'écran ont été rejouées en SQL sous RLS comme `gerant@banc-varelo.test` (transaction annulée) : tableau
+    (5 comptes, 11 818,80 € échus), relances du jour (4), fiche, suivi, prévision, textes (22), taux, pilotage,
+    commandes, `lien_paiement` dans les réglages — aucun refus. La passe navigateur en base réelle reste à faire par Teo
+    ou sur son feu vert.
+  - Non fait : `npm run build` (Mac à 8 Go, branche worker, pas de push sur main) ; tsc ne remonte que la casse Varelo
+    propre à ce Mac ; eslint propre.
+- **Prochain pas** : la passe en base réelle de la recette (session du banc) ; le reste de la liste au feu vert du
+  coordinateur (voir `omega/CHIFFRAGE/cashd.md`, « Ce qui reste vraiment », 26/10).
 - **Limites dites au coordinateur** : le socle fige le texte d'un envoi adossé (pas de réécriture à l'approbation, piste
   (c) pour Teo) ; une relance bloquée par un interdit n'est pas réécrite quand l'interdit est retiré (choix de produit).
 
