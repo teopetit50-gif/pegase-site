@@ -2,6 +2,47 @@
 
 C2, 06/10/2026, 18 h 31 Z (heure du conteneur). Demande de Teo, relayée par le coordinateur : « estime ce qui reste à construire pour avoir vraiment un truc livrable, et vérifie toutes les petites promesses ». Lu sur main c0494b4 (vitrine), **aucun fichier du site public modifié**.
 
+## Ce qui reste vraiment — liste à jour du 26/10/2026 (c2_01 → c2_43 posés)
+
+Relu contre les migrations c2_01 → c2_43 (toutes posées sur omega-recette) et la recette T-CASHD. Liste seulement :
+rien n'est construit ici, G1 et G19 attendent un client.
+
+**Fait depuis le chiffrage du 06/10** (la colonne « Ce qui manque » plus bas est donc périmée pour ces lignes) :
+G2 textes propres (c2_04/05), G3 variantes et ton selon montant et ancienneté (c2_05, c2_30, c2_33), G5 lecture des
+réponses par règles (c2_06), G6 mécanisme des autres langues (c2_09), G7 bon de commande, G8 accord oral, G9 petits
+soldes (c2_05), G10 portefeuille (c2_08), G11 trois paliers de validation (c2_07), G14 les quatre vues (écran, reporté
+dans /espace2/cashd/suivi le 22/10), G17 taux BCE quotidiens (c2_15/16), G20 pièces du dossier (c2_06), G21 moyens de
+règlement et échelonnement (c2_05, c2_36, c2_38) ; C34 en partie : l'adresse de paiement de l'organisation dans chaque
+relance (c2_40) ; reprise après refus (c2_41) ; montants revus après un règlement partiel, refus compris (c2_42/43).
+Les écarts de texte P21 (devis J+3 puis J+7) et M8 (rappel à l'échéance) sont résorbés : scénarios par défaut
+`[échéance J0, rappel J+7, relance J+21, mise en demeure J+30]` et devis `[J+3, J+7]`.
+
+**Reste côté CASHD, construisible sans client** :
+1. La recette des écrans de l'espace 2 (`omega/recette-c2/recette-cashd.mjs`) et ses manques d'écran (en cours, 26/10).
+2. G6, le contenu : seuls le français et l'anglais ont des textes par défaut ; une autre langue s'écrit par
+   l'organisation (mécanisme fait) ou se traduit et se relit par langue (~150–300 € par langue, tiers).
+
+**Attend un client** (ne pas construire avant) :
+3. G1 — l'arrivée quotidienne du facturier (connecteur A1) ; d'ici là, CASHD relit le dernier export déposé.
+4. G19 — raccorder le logiciel de commandes à `cashd_verifier_commande`.
+
+**Attend un tiers ou une autre équipe** :
+5. G15 — le lien de paiement PAR FACTURE qui s'éteint au règlement : contrat posé (`cashd_poser_lien`,
+   `cashd_lien_paye`), il manque le prestataire de chaque organisation (Stripe, GoCardless…) et l'ouvrier serveur qui
+   crée le lien et reçoit le webhook. L'adresse de paiement fixe (c2_40), elle, marche sans tiers.
+6. G16 — la lettre recommandée électronique : contrat AR24, branchement A2 (CASHD prépare déjà la LRE).
+7. G4 — l'envoi depuis la boîte de l'entreprise (Gmail / Microsoft 365, A2, vérification d'application).
+8. G13 — WhatsApp (A2, compte Meta vérifié).
+9. G12 — une interface de programmation offerte à un tiers (socle).
+10. G18 — un journal qui ne se modifie pas, même par nous (socle) — ou reformuler la promesse.
+11. G22 — région d'hébergement, CGV, DPA, assistance (Teo).
+
+**Vitrine (pas CASHD, propriétaire de la page)** : les aperçus de la section « Écrans » (P26) sont des maquettes,
+présentées « telles quelles » ; à refaire depuis /espace2/cashd/suivi ou à reformuler. P38 « transmet à un modèle » :
+aucun modèle n'est appelé. P27 « vos données restent chez vous ».
+
+**Passage à A** : inchangé — pilote chez un premier client, ~13 j de travail sur 30 à 45 jours de calendrier.
+
 ## Mise à jour du 11/10/2026 (reprise, c2_04 + écran)
 
 Construit et testé (recette locale ; à poser sur le banc) — les lacunes côté CASHD de la synthèse :
