@@ -4,11 +4,11 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 `components/espace/offload/`, `app/espace/offload/`, et ce fichier. Coordinateur : session
 `session_01BCGFdpRKBvXKjouC75sYBg`. Je n'appelle jamais Supabase : le coordinateur pose, je reçois les sorties brutes.
 
-## REPRISE (25/10, 01 h 25 Z — fin du sprint de Teo)
+## REPRISE (26/10, 01 h 00 Z)
 
-- Fait : c4_01 à c4_33 posés ; c4_34 (contrats à reconduction), c4_35 (TOFFLOAD-11), c4_36 (valeur par segment, restitution en tableur) poussés, local 513 ok.
-- En cours : rien. Import des personnes morales : script livré (6f0a05b2), non joué, attend Teo.
-- Prochain pas : poser c4_34 à c4_36 ; l'écran n'a pas encore la carte « par segment » ni le bouton « tableur » (portes prêtes).
+- Fait : c4_01 à c4_36 posés ; test c4_08 vert sur la recette (77bb0f21 + da761bb4). c4_37 (reprise après refus, socle 19az) écrit par une autre session le 25/10 (679f0db3), à poser et à rejouer.
+- En cours : rien. Le conteneur a été recyclé le 26/10 : banc local et souche du socle perdus (hors git) ; à reconstruire avant tout nouveau lot.
+- Prochain pas : poser c4_37 ; écran (carte « par segment », bouton « tableur », bouton « forcer ») ; import des personnes morales en attente de Teo.
 
 ### Reprise du 17/10
 
