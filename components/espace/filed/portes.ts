@@ -238,7 +238,27 @@ async function rpc<T = unknown>(nom: string, args: Record<string, unknown>): Pro
   return data as T;
 }
 
-export const corrigerFacture = (p_facture: string, p_valeurs: Record<string, unknown>, p_motif: string) => rpc<string>("filed_corriger_facture", { p_facture, p_valeurs, p_motif });
+/* 26/10/2026 (a4_92, a4_94) : les factures refusées, leur motif et le geste qui reste ; le classement sans suite
+   (gérant, admin, valideur, motif de 5 caractères au moins ; la facture reste refusée, rien n'est effacé). */
+export type Refusee = {
+  facture_id: string;
+  reference: string | null;
+  numero: string | null;
+  fournisseur: string | null;
+  montant_ttc: number | null;
+  refusee_le: string | null;
+  motif: string;
+  reprise: "a_faire" | "proposee" | "impossible" | "aucune";
+  reprise_motif: string | null;
+  corriger_avant: string | null;
+  classee_le: string | null;
+  classee_motif: string | null;
+  geste: string;
+};
+export const chargerRefusees = (p_client: string, p_avec_classees: boolean) => rpc<Refusee[]>("filed_factures_refusees", { p_client, p_entite: null, p_avec_classees });
+export const classerRefusee = (p_facture: string, p_motif: string) => rpc<string>("filed_classer_refusee", { p_facture, p_motif });
+
+export const corrigerFacture =(p_facture: string, p_valeurs: Record<string, unknown>, p_motif: string) => rpc<string>("filed_corriger_facture", { p_facture, p_valeurs, p_motif });
 export const confirmerValeurs = (p_facture: string, p_champs: string[]) => rpc<string>("filed_confirmer_valeurs", { p_facture, p_champs });
 export const leverAnomalie = (p_facture: string, p_code: string, p_motif: string) => rpc<string>("filed_lever_anomalie", { p_facture, p_code, p_motif });
 export const classerDocument = (p_document: string, p_nature: NatureDocument, p_motif: string) => rpc<string>("filed_classer_document", { p_document, p_nature, p_motif });
