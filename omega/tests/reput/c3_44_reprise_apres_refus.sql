@@ -137,8 +137,8 @@ begin
                  and (select x.statut = 'impossible' and x.motif like 'même texte qu''avant%Trop sec.%' from private.reprises x where x.demande_id = v_b)
                  and not exists (select 1 from public.demandes_validation x where x.payload ->> 'reprise_de' = v_b::text)
                  and (select count(*) from public.reput_reponses p where p.demande_id = dem.id) = 1
-                 and (select x.statut from public.reput_demandes x where x.id = dem.id) = 'refusee',
-                 'B : même texte qu''avant (aux espaces près) : reprise impossible, aucune nouvelle demande, la demande revient « refusée »');
+                 and (select x.statut from public.reput_demandes x where x.id = dem.id) = 'a_traiter',
+                 'B : même texte qu''avant (aux espaces près) : reprise impossible, aucune nouvelle demande, la demande va « à traiter » (c3_45)');
   return next ok(exists (select 1 from public.alertes a where a.client_id = v_client and a.titre like 'Reprise impossible : même texte qu''avant%'),
                  'Le client est averti que la reprise est impossible');
 
@@ -146,8 +146,8 @@ begin
   update private.reput_reprises set cree_le = now() - interval '2 hours' where refusee = v_f;
   perform private.reput_traiter_reprises();
   return next ok((select x.statut = 'impossible' and x.motif like 'la nouvelle rédaction n''a pas abouti%' from private.reprises x where x.demande_id = v_f)
-                 and (select d.statut from public.reput_demandes d join public.reput_reponses p on p.demande_id = d.id where p.demande_validation_id = v_f) = 'refusee',
-                 'F : sans nouvelle rédaction dans l''heure, la reprise est close et la demande revient « refusée »');
+                 and (select d.statut from public.reput_demandes d join public.reput_reponses p on p.demande_id = d.id where p.demande_validation_id = v_f) = 'a_traiter',
+                 'F : sans nouvelle rédaction dans l''heure, la reprise est close et la demande va « à traiter » (c3_45)');
 
   -- Rien d'envoyé pour de vrai.
   return next ok(not exists (select 1 from public.envois e where e.client_id = v_client and e.module = 'reput'
