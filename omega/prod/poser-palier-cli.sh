@@ -68,7 +68,15 @@ for f in "${FICHIERS[@]}"; do
     echo "insert into supabase_migrations.schema_migrations (version, name, statements) values ('$v', '$nom', array['posé par poser-palier-cli.sh : omega/prod/migrations/$base.sql sha256 $empreinte']);";
     echo "commit;"; } > "$t"
   t0=$(date +%s)
-  if ! requete -f "$t" > "$TRAVAIL/$base.out" 2>&1; then
+  # Erreur de connexion (réseau, IPv6, API) : la requête n'est pas partie, on la renvoie (3 fois au plus). Erreur SQL
+  # (« Failed to run sql query ») : la transaction est annulée, on s'arrête.
+  essais=0
+  until requete -f "$t" > "$TRAVAIL/$base.out" 2>&1; do
+    grep -q 'Failed to run sql query' "$TRAVAIL/$base.out" && break
+    essais=$((essais + 1)); [ $essais -ge 3 ] && break
+    echo "  connexion perdue sur $base ($(grep -o '"code":"[A-Za-z0-9]*"' "$TRAVAIL/$base.out" | head -1)) : nouvel envoi dans 15 s" | tee -a "$JOURNAL"; sleep 15
+  done
+  if ! grep -q '"rows"\|boundary' "$TRAVAIL/$base.out"; then
     echo "ÉCHEC à $base (rien de ce fichier n'est posé ; les $n précédents le sont) : $(grep -o 'ERROR:[^"]*' "$TRAVAIL/$base.out" | head -2)" | tee -a "$JOURNAL"
     exit 1
   fi

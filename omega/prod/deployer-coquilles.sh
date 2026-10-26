@@ -19,7 +19,7 @@ for f in "${choix[@]}"; do
   jwt=$(awk -v f="$f" '$1 == f { print $2 }' "$ICI/coquilles/LISTE.txt")
   [ -n "$jwt" ] || { echo "inconnue : $f"; exit 2; }
   cp -R "$ICI/coquilles/$f" "supabase/functions/$f"
-  options=(--project-ref "$PROJET" --import-map "supabase/functions/$f/deno.json")
+  options=(--project-ref "$PROJET" --import-map "supabase/functions/$f/deno.json" --use-api)
   [ "$jwt" = false ] && options+=(--no-verify-jwt)
   echo "→ $f (verify_jwt $jwt) : $(grep -o 'pegase-site/[0-9a-f]\{8\}' "supabase/functions/$f/index.ts")"
   npx --yes supabase@2.122.0 functions deploy "$f" "${options[@]}"
