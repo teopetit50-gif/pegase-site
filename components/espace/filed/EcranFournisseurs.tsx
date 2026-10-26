@@ -64,7 +64,7 @@ export function vueExemple(): VueFournisseurs {
 
 const maintenant = () => new Date().toISOString();
 
-export default function EcranFournisseurs() {
+export default function EcranFournisseurs({ gabarit }: { gabarit?: "sb" } = {}) {
   const { source } = useSource();
   const [local, setLocal] = useState<VueFournisseurs>(vueExemple);
   const [reel, setReel] = useState<VueFournisseurs | null>(null);
@@ -213,6 +213,269 @@ export default function EcranFournisseurs() {
       f.statut === "actif" ? "L'IBAN est proposé ; sa validation part dans la file « À valider »." : "L'IBAN est proposé ; il sera validé avec le fournisseur.",
     );
 
+  const fiche = (
+    <>
+      {f ? (
+        <div className="esp-carte">
+          <div className="esp-carte-tete">
+            <h2 className="esp-carte-titre">{f.nom}</h2>
+            {f.code ? <span className="esp-mono esp-kpi-sous">{f.code}</span> : null}
+          </div>
+          <div className="esp-carte-corps" style={{ display: "grid", gap: 16 }}>
+            <FicheFournisseur
+              fournisseur={f}
+              deposantOrigine={deposantOrigine}
+              registre={registre?.nom ?? null}
+              envoi={envoi && !form}
+              onConfirmer={() => ouvrir({ type: "confirmer" })}
+              onAttester={() => ouvrir({ type: "attester" })}
+              onReverifier={() => { setFait(null); reverifier(); }}
+            />
+            <div className="esp-actions">
+              {f.statut !== "refuse" ? (
+                <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "iban" })}><Landmark width={13} height={13} aria-hidden="true" /> Proposer un IBAN</button>
+              ) : null}
+              {f.statut === "actif" || f.statut === "bloque" ? (
+                <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "bloquer", bloquer: f.statut !== "bloque" })}>
+                  {f.statut === "bloque" ? <Unlock width={13} height={13} aria-hidden="true" /> : <Ban width={13} height={13} aria-hidden="true" />} {f.statut === "bloque" ? "Débloquer" : "Bloquer"}
+                </button>
+              ) : null}
+            </div>
+
+            {fait ? <Avis teinte="vert" role="status"><strong>C&apos;est fait.</strong> {fait}</Avis> : null}
+            {erreurAction && !form ? <Avis teinte="rouge" role="alert"><strong>Refusé par la base.</strong> {erreurAction}</Avis> : null}
+
+            <div>
+              <div className="esp-section-titre">IBAN</div>
+              {ibansDe(f.id).length ? (
+                <ul className="esp-fil">
+                  {ibansDe(f.id).map((i) => (
+                    <li key={i.id}>
+                      <span className="esp-fil-point" data-teinte={i.statut === "valide" ? "vert" : i.statut === "propose" ? "bleu" : i.statut === "refuse" ? "rouge" : undefined} />
+                      <div>
+                        <div className="esp-fil-texte esp-item-haut">
+                          <span className="esp-mono">{i.iban_masque}</span>
+                          <Pastille teinte={i.statut === "valide" ? "vert" : i.statut === "propose" ? "ambre" : "gris"}>{i.statut === "valide" ? "Validé" : i.statut === "propose" ? "Proposé" : i.statut === "refuse" ? "Refusé" : "Révoqué"}</Pastille>
+                        </div>
+                        <div className="esp-fil-meta">
+                          Proposé le {dateCourte(i.propose_le)}
+                          {i.statut === "propose" ? (f.statut === "a_confirmer" ? " · validé avec le fournisseur à sa confirmation" : <> · à valider dans la file <Link href="/espace/validations">« À valider »</Link></>) : ""}
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="esp-kpi-sous">Aucun IBAN connu : le paiement passera par un autre moyen, ou proposez-en un.</p>
+              )}
+            </div>
+
+            <div>
+              <div className="esp-section-titre">Factures</div>
+              {facturesDe(f.id).length ? (
+                <ul className="esp-fil">
+                  {facturesDe(f.id).map((x) => {
+                    const s = statutFacture(x.statut);
+                    return (
+                      <li key={x.id}>
+                        <span className="esp-fil-point" data-teinte={s.teinte === "rouge" ? "rouge" : s.teinte === "vert" ? "vert" : "bleu"} />
+                        <div>
+                          <div className="esp-fil-texte esp-item-haut">
+                            <Link href={`/espace/filed?objet=facture:${encodeURIComponent(x.id)}`} className="esp-mono">{x.reference ?? x.numero ?? "Facture"}</Link>
+                            <Pastille teinte={s.teinte}>{s.libelle}</Pastille>
+                            {x.montant_ttc !== null ? <span>{montant(x.montant_ttc, x.devise)} TTC</span> : null}
+                          </div>
+                          <div className="esp-fil-meta">{x.numero ? `n° ${x.numero}` : ""}{x.date_emission ? ` · du ${dateCourte(x.date_emission)}` : ""}</div>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <p className="esp-kpi-sous">Aucune facture rattachée.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : source === "reelle" && !reel ? (
+        <div className="esp-carte"><Chargement texte="Lecture…" /></div>
+      ) : (
+        <div className="esp-carte"><Vide titre="Choisissez un fournisseur">Sa fiche, ses IBAN et ses factures s&apos;affichent ici.</Vide></div>
+      )}
+    </>
+  );
+  const dialogues = (
+    <>
+    {/* ——— dialogues ——— */}
+    <Dialog open={form?.type === "confirmer"} onOpenChange={(o) => !o && setForm(null)}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogIcone><UserCheck width={18} height={18} aria-hidden="true" /></DialogIcone>
+          <DialogTitle>Confirmer le fournisseur</DialogTitle>
+          <DialogDescription>Vous confirmez que {f?.nom} est bien un fournisseur de l&apos;entreprise. Il devient actif, l&apos;IBAN proposé avec sa première facture est validé, et ses factures bloquées sont recontrôlées.</DialogDescription>
+        </DialogHeader>
+        <DialogBody>
+          <div className="esp-form">
+            <Avis teinte="ambre">La personne qui a déposé la pièce d&apos;origine ne confirme pas ce fournisseur : une autre personne décide. La confirmation est réservée au gérant, à l&apos;administrateur et au valideur ; elle est conservée avec votre nom et l&apos;heure.</Avis>
+            <label className="rv-libelle">
+              Motif <span className="esp-kpi-sous">(facultatif)</span>
+              <textarea className="rv-champ" value={motif} onChange={(e) => setMotif(e.target.value)} maxLength={500} placeholder="Ce que vous avez vérifié : bon de commande, appel au numéro connu, contrat…" />
+            </label>
+            {erreurAction ? <Avis teinte="rouge" role="alert">{erreurAction}</Avis> : null}
+          </div>
+        </DialogBody>
+        <DialogFooter>
+          <button type="button" className="r-btn r-btn--noir" disabled={envoi || deposantOrigine} onClick={() => void confirmer()}>{envoi ? <Loader variant="spin" /> : null} Confirmer le fournisseur</button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    <Dialog open={form?.type === "attester"} onOpenChange={(o) => !o && setForm(null)}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogIcone><BadgeCheck width={18} height={18} aria-hidden="true" /></DialogIcone>
+          <DialogTitle>Attester l&apos;identité</DialogTitle>
+          <DialogDescription>Quand le registre ne répond pas, ou pour un fournisseur étranger hors registre, vous attestez que {f?.nom} est bien l&apos;entreprise qu&apos;il dit être.</DialogDescription>
+        </DialogHeader>
+        <DialogBody>
+          <div className="esp-form">
+            <Motif motif={motif} onChange={setMotif} aide="Sur quoi l'attestation se fonde : extrait Kbis reçu, registre étranger consulté, contrat signé…" />
+            {erreurAction ? <Avis teinte="rouge" role="alert">{erreurAction}</Avis> : null}
+          </div>
+        </DialogBody>
+        <DialogFooter>
+          <button type="button" className="r-btn r-btn--noir" disabled={!motifOk || envoi} onClick={() => void attester()}>{envoi ? <Loader variant="spin" /> : null} Attester</button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    <Dialog open={form?.type === "bloquer"} onOpenChange={(o) => !o && setForm(null)}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogIcone>{form?.type === "bloquer" && !form.bloquer ? <Unlock width={18} height={18} aria-hidden="true" /> : <Ban width={18} height={18} aria-hidden="true" />}</DialogIcone>
+          <DialogTitle>{form?.type === "bloquer" && !form.bloquer ? "Débloquer le fournisseur" : "Bloquer le fournisseur"}</DialogTitle>
+          <DialogDescription>{form?.type === "bloquer" && !form.bloquer ? `${f?.nom} pourra de nouveau être payé.` : `Plus aucune facture de ${f?.nom} ne sera payée tant que le blocage tient.`}</DialogDescription>
+        </DialogHeader>
+        <DialogBody>
+          <div className="esp-form">
+            <Motif motif={motif} onChange={setMotif} />
+            {erreurAction ? <Avis teinte="rouge" role="alert">{erreurAction}</Avis> : null}
+          </div>
+        </DialogBody>
+        <DialogFooter>
+          <button type="button" className={`r-btn ${form?.type === "bloquer" && !form.bloquer ? "r-btn--noir" : "r-btn--rouge"}`} disabled={!motifOk || envoi} onClick={() => form?.type === "bloquer" && void bloquer(form.bloquer)}>{envoi ? <Loader variant="spin" /> : null} {form?.type === "bloquer" && !form.bloquer ? "Débloquer" : "Bloquer"}</button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    <Dialog open={form?.type === "iban"} onOpenChange={(o) => !o && setForm(null)}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogIcone><Landmark width={18} height={18} aria-hidden="true" /></DialogIcone>
+          <DialogTitle>Proposer un IBAN</DialogTitle>
+          <DialogDescription>Pour {f?.nom}. L&apos;IBAN proposé devra être validé par une personne habilitée avant tout paiement.</DialogDescription>
+        </DialogHeader>
+        <DialogBody>
+          <div className="esp-form">
+            <label className="rv-libelle">IBAN <span className="esp-obligatoire">(obligatoire)</span>
+              <input className="rv-champ esp-mono" value={iban} onChange={(e) => setIban(e.target.value)} placeholder="FR76 …" autoComplete="off" />
+            </label>
+            {iban && !ibanOk ? <Avis teinte="ambre">Format attendu : deux lettres, deux chiffres, puis 10 à 30 caractères.</Avis> : null}
+            <Motif motif={motif} onChange={setMotif} aide="D'où vient cet IBAN et comment il a été vérifié (appel au numéro connu, courrier signé…)." />
+            {erreurAction ? <Avis teinte="rouge" role="alert">{erreurAction}</Avis> : null}
+          </div>
+        </DialogBody>
+        <DialogFooter>
+          <button type="button" className="r-btn r-btn--noir" disabled={!motifOk || !ibanOk || envoi} onClick={() => void soumettreIban()}>{envoi ? <Loader variant="spin" /> : null} Proposer</button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
+  );
+
+  if (gabarit === "sb") {
+    /* 22/10 — la page Users de Supabase : la liste en tableau, la fiche dans le volet de droite */
+    const chargement = source === "reelle" && !reel;
+    return (
+      <>
+        <div className="sb-conseil v2-arrivee">
+          <div className="sb-conseil-tete">
+            <h1 className="sb-conseil-titre">Fournisseurs</h1>
+          </div>
+          <div className="sb-donnees-outils">
+            <div>
+              <span className="v2-champ" style={{ height: 26, padding: "0 8px", minWidth: 220 }}>
+                <input type="search" placeholder="Chercher un nom, un SIREN, une TVA…" value={recherche} onChange={(e) => setRecherche(e.target.value)} aria-label="Chercher un fournisseur" style={{ fontSize: 12 }} />
+              </span>
+              <span className="v2-champ" style={{ height: 26, padding: "0 8px" }}>
+                <select aria-label="Filtrer les fournisseurs" value={filtre ?? ""} onChange={(e) => setFiltre((e.target.value || null) as Famille | null)} style={{ fontSize: 12 }}>
+                  <option value="">Tous les fournisseurs</option>
+                  {FAMILLES.map((x) => <option key={x.cle} value={x.cle}>{`${x.libelle} (${compteurs[x.cle]})`}</option>)}
+                </select>
+              </span>
+            </div>
+            <div>
+              <Link href="/espace2/filed" className="v2-btn"><FileText width={14} height={14} aria-hidden="true" /> Documents reçus</Link>
+              <Link href="/espace2/filed/a-payer" className="v2-btn"><Wallet width={14} height={14} aria-hidden="true" /> À payer</Link>
+            </div>
+          </div>
+          {erreur ? <div style={{ padding: "12px 24px 0" }}><Avis teinte="rouge" role="alert"><strong>La base réelle n&apos;a pas répondu.</strong> {erreur}</Avis></div> : null}
+          <div className="sb-conseil-corps">
+            <div className="sb-grille-donnees sb-grille-colonnes">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Nom</th>
+                    <th scope="col">Identifiant</th>
+                    <th scope="col">Identité</th>
+                    <th scope="col">Factures</th>
+                    <th scope="col">Statut</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibles.map((x) => {
+                    const st = STATUTS_FOURNISSEUR[x.statut] ?? STATUTS_FOURNISSEUR.actif;
+                    const id = identiteDe(x);
+                    const proposes = ibansDe(x.id).filter((i) => i.statut === "propose").length;
+                    const enCours = facturesDe(x.id).filter((y) => y.statut === "bloquee" || y.statut === "a_valider" || y.statut === "a_completer").length;
+                    const ouvrir = () => { setChoix(x.id); setFait(null); };
+                    return (
+                      <tr key={x.id} aria-selected={choisi === x.id} tabIndex={0} onClick={ouvrir} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); ouvrir(); } }}>
+                        <td>{x.nom}</td>
+                        <td className="sb-mono">{x.siren ? `SIREN ${x.siren}` : x.tva ? `TVA ${x.tva}` : "—"}</td>
+                        <td><Pastille teinte={id.teinte}>{id.teinte === "vert" ? "Vérifiée" : id.teinte === "rouge" ? "Invalide" : id.teinte === "ambre" ? "Registre en attente" : "Non vérifiée"}</Pastille></td>
+                        <td className="sb-mono">{enCours ? `${enCours} en cours` : facturesDe(x.id).length}</td>
+                        <td>
+                          <Pastille teinte={st.teinte}>{st.libelle}</Pastille>
+                          {proposes ? <> <Pastille teinte="ambre">{proposes} IBAN à valider</Pastille></> : null}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              {chargement ? (
+                <Chargement texte="Lecture des fournisseurs…" />
+              ) : !visibles.length ? (
+                <div className="sb-conseil-vide">
+                  <p style={{ margin: 0 }}>Aucun fournisseur</p>
+                  <span>{filtre || recherche ? "Rien ne correspond." : "Les fournisseurs naissent de la première facture lue."}</span>
+                </div>
+              ) : null}
+            </div>
+            {f ? (
+              <aside className="sb-volet-detail sb-volet-detail--large" aria-label="Fiche du fournisseur">
+                <div className="sb-volet-detail-corps">{fiche}</div>
+              </aside>
+            ) : null}
+          </div>
+          <div className="sb-donnees-pied">{visibles.length} fournisseur{visibles.length > 1 ? "s" : ""}</div>
+        </div>
+        {dialogues}
+      </>
+    );
+  }
+
   return (
     <>
       <div className="esp-tete" data-arrivee="">
@@ -302,180 +565,11 @@ export default function EcranFournisseurs() {
         </section>
 
         <section id="esp-fournisseur" className="esp-detail-mobile" aria-label="Fiche du fournisseur">
-          {f ? (
-            <div className="esp-carte">
-              <div className="esp-carte-tete">
-                <h2 className="esp-carte-titre">{f.nom}</h2>
-                {f.code ? <span className="esp-mono esp-kpi-sous">{f.code}</span> : null}
-              </div>
-              <div className="esp-carte-corps" style={{ display: "grid", gap: 16 }}>
-                <FicheFournisseur
-                  fournisseur={f}
-                  deposantOrigine={deposantOrigine}
-                  registre={registre?.nom ?? null}
-                  envoi={envoi && !form}
-                  onConfirmer={() => ouvrir({ type: "confirmer" })}
-                  onAttester={() => ouvrir({ type: "attester" })}
-                  onReverifier={() => { setFait(null); reverifier(); }}
-                />
-                <div className="esp-actions">
-                  {f.statut !== "refuse" ? (
-                    <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "iban" })}><Landmark width={13} height={13} aria-hidden="true" /> Proposer un IBAN</button>
-                  ) : null}
-                  {f.statut === "actif" || f.statut === "bloque" ? (
-                    <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "bloquer", bloquer: f.statut !== "bloque" })}>
-                      {f.statut === "bloque" ? <Unlock width={13} height={13} aria-hidden="true" /> : <Ban width={13} height={13} aria-hidden="true" />} {f.statut === "bloque" ? "Débloquer" : "Bloquer"}
-                    </button>
-                  ) : null}
-                </div>
-
-                {fait ? <Avis teinte="vert" role="status"><strong>C&apos;est fait.</strong> {fait}</Avis> : null}
-                {erreurAction && !form ? <Avis teinte="rouge" role="alert"><strong>Refusé par la base.</strong> {erreurAction}</Avis> : null}
-
-                <div>
-                  <div className="esp-section-titre">IBAN</div>
-                  {ibansDe(f.id).length ? (
-                    <ul className="esp-fil">
-                      {ibansDe(f.id).map((i) => (
-                        <li key={i.id}>
-                          <span className="esp-fil-point" data-teinte={i.statut === "valide" ? "vert" : i.statut === "propose" ? "bleu" : i.statut === "refuse" ? "rouge" : undefined} />
-                          <div>
-                            <div className="esp-fil-texte esp-item-haut">
-                              <span className="esp-mono">{i.iban_masque}</span>
-                              <Pastille teinte={i.statut === "valide" ? "vert" : i.statut === "propose" ? "ambre" : "gris"}>{i.statut === "valide" ? "Validé" : i.statut === "propose" ? "Proposé" : i.statut === "refuse" ? "Refusé" : "Révoqué"}</Pastille>
-                            </div>
-                            <div className="esp-fil-meta">
-                              Proposé le {dateCourte(i.propose_le)}
-                              {i.statut === "propose" ? (f.statut === "a_confirmer" ? " · validé avec le fournisseur à sa confirmation" : <> · à valider dans la file <Link href="/espace/validations">« À valider »</Link></>) : ""}
-                            </div>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="esp-kpi-sous">Aucun IBAN connu : le paiement passera par un autre moyen, ou proposez-en un.</p>
-                  )}
-                </div>
-
-                <div>
-                  <div className="esp-section-titre">Factures</div>
-                  {facturesDe(f.id).length ? (
-                    <ul className="esp-fil">
-                      {facturesDe(f.id).map((x) => {
-                        const s = statutFacture(x.statut);
-                        return (
-                          <li key={x.id}>
-                            <span className="esp-fil-point" data-teinte={s.teinte === "rouge" ? "rouge" : s.teinte === "vert" ? "vert" : "bleu"} />
-                            <div>
-                              <div className="esp-fil-texte esp-item-haut">
-                                <Link href={`/espace/filed?objet=facture:${encodeURIComponent(x.id)}`} className="esp-mono">{x.reference ?? x.numero ?? "Facture"}</Link>
-                                <Pastille teinte={s.teinte}>{s.libelle}</Pastille>
-                                {x.montant_ttc !== null ? <span>{montant(x.montant_ttc, x.devise)} TTC</span> : null}
-                              </div>
-                              <div className="esp-fil-meta">{x.numero ? `n° ${x.numero}` : ""}{x.date_emission ? ` · du ${dateCourte(x.date_emission)}` : ""}</div>
-                            </div>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  ) : (
-                    <p className="esp-kpi-sous">Aucune facture rattachée.</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          ) : source === "reelle" && !reel ? (
-            <div className="esp-carte"><Chargement texte="Lecture…" /></div>
-          ) : (
-            <div className="esp-carte"><Vide titre="Choisissez un fournisseur">Sa fiche, ses IBAN et ses factures s&apos;affichent ici.</Vide></div>
-          )}
+          {fiche}
         </section>
       </div>
 
-      {/* ——— dialogues ——— */}
-      <Dialog open={form?.type === "confirmer"} onOpenChange={(o) => !o && setForm(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogIcone><UserCheck width={18} height={18} aria-hidden="true" /></DialogIcone>
-            <DialogTitle>Confirmer le fournisseur</DialogTitle>
-            <DialogDescription>Vous confirmez que {f?.nom} est bien un fournisseur de l&apos;entreprise. Il devient actif, l&apos;IBAN proposé avec sa première facture est validé, et ses factures bloquées sont recontrôlées.</DialogDescription>
-          </DialogHeader>
-          <DialogBody>
-            <div className="esp-form">
-              <Avis teinte="ambre">La personne qui a déposé la pièce d&apos;origine ne confirme pas ce fournisseur : une autre personne décide. La confirmation est réservée au gérant, à l&apos;administrateur et au valideur ; elle est conservée avec votre nom et l&apos;heure.</Avis>
-              <label className="rv-libelle">
-                Motif <span className="esp-kpi-sous">(facultatif)</span>
-                <textarea className="rv-champ" value={motif} onChange={(e) => setMotif(e.target.value)} maxLength={500} placeholder="Ce que vous avez vérifié : bon de commande, appel au numéro connu, contrat…" />
-              </label>
-              {erreurAction ? <Avis teinte="rouge" role="alert">{erreurAction}</Avis> : null}
-            </div>
-          </DialogBody>
-          <DialogFooter>
-            <button type="button" className="r-btn r-btn--noir" disabled={envoi || deposantOrigine} onClick={() => void confirmer()}>{envoi ? <Loader variant="spin" /> : null} Confirmer le fournisseur</button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={form?.type === "attester"} onOpenChange={(o) => !o && setForm(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogIcone><BadgeCheck width={18} height={18} aria-hidden="true" /></DialogIcone>
-            <DialogTitle>Attester l&apos;identité</DialogTitle>
-            <DialogDescription>Quand le registre ne répond pas, ou pour un fournisseur étranger hors registre, vous attestez que {f?.nom} est bien l&apos;entreprise qu&apos;il dit être.</DialogDescription>
-          </DialogHeader>
-          <DialogBody>
-            <div className="esp-form">
-              <Motif motif={motif} onChange={setMotif} aide="Sur quoi l'attestation se fonde : extrait Kbis reçu, registre étranger consulté, contrat signé…" />
-              {erreurAction ? <Avis teinte="rouge" role="alert">{erreurAction}</Avis> : null}
-            </div>
-          </DialogBody>
-          <DialogFooter>
-            <button type="button" className="r-btn r-btn--noir" disabled={!motifOk || envoi} onClick={() => void attester()}>{envoi ? <Loader variant="spin" /> : null} Attester</button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={form?.type === "bloquer"} onOpenChange={(o) => !o && setForm(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogIcone>{form?.type === "bloquer" && !form.bloquer ? <Unlock width={18} height={18} aria-hidden="true" /> : <Ban width={18} height={18} aria-hidden="true" />}</DialogIcone>
-            <DialogTitle>{form?.type === "bloquer" && !form.bloquer ? "Débloquer le fournisseur" : "Bloquer le fournisseur"}</DialogTitle>
-            <DialogDescription>{form?.type === "bloquer" && !form.bloquer ? `${f?.nom} pourra de nouveau être payé.` : `Plus aucune facture de ${f?.nom} ne sera payée tant que le blocage tient.`}</DialogDescription>
-          </DialogHeader>
-          <DialogBody>
-            <div className="esp-form">
-              <Motif motif={motif} onChange={setMotif} />
-              {erreurAction ? <Avis teinte="rouge" role="alert">{erreurAction}</Avis> : null}
-            </div>
-          </DialogBody>
-          <DialogFooter>
-            <button type="button" className={`r-btn ${form?.type === "bloquer" && !form.bloquer ? "r-btn--noir" : "r-btn--rouge"}`} disabled={!motifOk || envoi} onClick={() => form?.type === "bloquer" && void bloquer(form.bloquer)}>{envoi ? <Loader variant="spin" /> : null} {form?.type === "bloquer" && !form.bloquer ? "Débloquer" : "Bloquer"}</button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={form?.type === "iban"} onOpenChange={(o) => !o && setForm(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogIcone><Landmark width={18} height={18} aria-hidden="true" /></DialogIcone>
-            <DialogTitle>Proposer un IBAN</DialogTitle>
-            <DialogDescription>Pour {f?.nom}. L&apos;IBAN proposé devra être validé par une personne habilitée avant tout paiement.</DialogDescription>
-          </DialogHeader>
-          <DialogBody>
-            <div className="esp-form">
-              <label className="rv-libelle">IBAN <span className="esp-obligatoire">(obligatoire)</span>
-                <input className="rv-champ esp-mono" value={iban} onChange={(e) => setIban(e.target.value)} placeholder="FR76 …" autoComplete="off" />
-              </label>
-              {iban && !ibanOk ? <Avis teinte="ambre">Format attendu : deux lettres, deux chiffres, puis 10 à 30 caractères.</Avis> : null}
-              <Motif motif={motif} onChange={setMotif} aide="D'où vient cet IBAN et comment il a été vérifié (appel au numéro connu, courrier signé…)." />
-              {erreurAction ? <Avis teinte="rouge" role="alert">{erreurAction}</Avis> : null}
-            </div>
-          </DialogBody>
-          <DialogFooter>
-            <button type="button" className="r-btn r-btn--noir" disabled={!motifOk || !ibanOk || envoi} onClick={() => void soumettreIban()}>{envoi ? <Loader variant="spin" /> : null} Proposer</button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {dialogues}
     </>
   );
 }

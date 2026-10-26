@@ -21,6 +21,7 @@ import { useSource } from "@/components/espace/source";
 import { vueExemple } from "@/components/espace/filed/EcranBoite";
 import { CANAUX, chargerBoite, type Canal, type VueBoite } from "@/components/espace/filed/receptions";
 import { RACINE } from "./modules";
+import { useAujourdhui } from "./horloge";
 import { Chiffre, EnDirect } from "./vivant";
 
 const JOUR = 86_400_000;
@@ -44,7 +45,8 @@ export default function TableauDemandes() {
   const [reel, setReel] = useState<VueBoite | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
   const [periode, setPeriode] = useState<number>(91);
-  const [aujourdhui] = useState(() => minuit(Date.now()));
+  /* 21/10 — l'horloge du navigateur (horloge.ts) : null au rendu serveur, la vue dit « Lecture… » */
+  const aujourdhui = useAujourdhui();
 
   useEffect(() => {
     if (source !== "reelle") return;
@@ -69,7 +71,7 @@ export default function TableauDemandes() {
   const vue = source === "exemple" ? exemple : reel;
 
   const c = useMemo(() => {
-    if (!vue) return null;
+    if (!vue || aujourdhui === null) return null;
     const debut = aujourdhui - (periode - 1) * JOUR;
     const toutes = vue.receptions;
     const dans = toutes.filter((r) => new Date(r.recu_le).getTime() >= debut);
@@ -107,7 +109,7 @@ export default function TableauDemandes() {
       .map((b) => ({ boite: b, canal: toutes.find((r) => r.boite === b)?.canal ?? ("email" as Canal), n: dans.filter((r) => r.boite === b).length, nouvelles: dans.filter((r) => r.boite === b && r.statut === "nouvelle").length }))
       .sort((a, b) => b.n - a.n);
     const derniere = toutes.slice().sort((a, b) => b.recu_le.localeCompare(a.recu_le))[0] ?? null;
-    return { debut, dans, nouvelles, traitees, ecartees, parCanal, actifs, parJour, pic, seaux, parMois, parBoite, derniere };
+    return { debut, fin: aujourdhui, dans, nouvelles, traitees, ecartees, parCanal, actifs, parJour, pic, seaux, parMois, parBoite, derniere };
   }, [vue, periode, aujourdhui]);
 
   if (erreur) return <div className="v2-dr-carte v2-dr-vide">La base réelle n&apos;a pas répondu : {erreur}</div>;
@@ -189,7 +191,7 @@ export default function TableauDemandes() {
           <span>Pic :</span> {c.pic ? `${c.pic.n} demande${c.pic.n > 1 ? "s" : ""} (${jourCourt(c.pic.t)})` : "aucune demande sur la période"}{" "}
           <Info width={14} height={14} aria-label="Le jour qui a reçu le plus de demandes sur la période" />
         </p>
-        <Chaleur debut={c.debut} fin={aujourdhui} parJour={c.parJour} />
+        <Chaleur debut={c.debut} fin={c.fin} parJour={c.parJour} />
                 </>
               ),
             },

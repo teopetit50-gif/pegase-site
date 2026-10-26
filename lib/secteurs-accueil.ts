@@ -29,7 +29,7 @@ export type CarteSecteur = {
 
 const ACCUEIL: Record<string, { probleme: string; photo: string; cadrage?: string }> = {
   btp: {
-    probleme: "Les travaux supplémentaires se perdent entre le chantier et la facture.",
+    probleme: "Les travaux en plus faits sur le chantier n'arrivent pas toujours sur la facture.",
     photo: "/accueil-secteurs/btp.jpg",
     cadrage: "50% 38%",
   },
@@ -38,17 +38,17 @@ const ACCUEIL: Record<string, { probleme: string; photo: string; cadrage?: strin
     photo: "/photos/avocats-palais-facade.jpg",
   },
   architectes: {
-    probleme: "Une incohérence entre deux pièces du dossier se découvre sur le chantier.",
+    probleme: "Deux documents du dossier qui se contredisent, on le découvre sur le chantier.",
     photo: "/secteurs-architectes/photos/tertiaire.jpg",
   },
   "location-automobile": {
-    probleme: "Un dommage constaté au retour se conteste s'il n'a pas sa preuve.",
+    probleme: "Sans preuve, un dégât constaté au retour du véhicule se conteste.",
     /* la plaque du véhicule est tout en haut de la photo : le cadrage 3:2
        centré la laisse hors champ */
     photo: "/accueil-secteurs/location-automobile.jpg",
   },
   dentaire: {
-    probleme: "Un créneau annulé la veille se perd, faute de patient prévenu à temps.",
+    probleme: "Un rendez-vous annulé la veille reste vide si aucun patient n'est prévenu à temps.",
     photo: "/secteurs-dentaire/photos/praticien-au-fauteuil.jpg",
   },
   groupes: {

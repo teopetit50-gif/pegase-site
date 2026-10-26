@@ -1277,3 +1277,516 @@ Pas sur main : l'écran REPUT de l'envoi automatique (worker-c3 e06d6ca7), car o
 
 ### REPRISE (19/10, 00 h 25 Z) : têtes de branche à l'arrêt
 A1 5d6856c2 · A2 ef88f351 · A3 96965cbf · A4 422f40d0 · A5 30b9fc7a · B1 41924b93 · B2 cff734cb · B3 bcd02f62 · B4 9aba87ef · B5 528b933f · B6 0ba479ad · B7 9388a1b6 · C2 2278f180 · C3 d98c272b · C4 a879098a. Routine 3 h désactivée.
+
+## 19/10 14 h 22 Z → 14 h 55 Z : relance de Teo (plafond 40 %), quatre moteurs au bout de ce qui se construit seul
+
+Bissection : chaque lot passe seul (^test_c3_1[234] 3/3, ^test_c2_15 11/11, ^test_a4_ 92/92). C'est le groupement des tests qui fait redémarrer la recette : **un job de tests à la fois**.
+
+Posés et verts sur la recette (niveau 1) :
+- **OFFLOAD** : c4_18 (envoi automatique ; test corrigé c676d17f, le gérant éteint), avec (offload, envoi.email) dans activation_seul_autorisee et (offload, offload.message_retenu) dans actions_sans_accord ; c4_19 (effacement). c4_20 : écran seul.
+- **CASHD** : c2_16 (le taux le plus récent l'emporte). Écran « Taux de change » : 879dce0c.
+- **REPUT** : c3_15 → c3_21 (7/7), c3_22 astreinte (tâche cron reput-astreinte), c3_23a socle (canal 'appel' dans receptions_canal_check et private.deposer_reception ; relu : identique à la liste des canaux près), c3_23 appels transcrits.
+- **FILED** : a4_51 → a4_59 (test a4_39 corrigé 596c34cf ; contrats, courriers, tickets, octroi de mer, exonération art. 295) ; ^test_a4_ 102/102.
+
+NOBAT (6 vraies pièces, client banc) : le lecteur A1 8596e165 relève taxes.autres (OMR/OMRI), mention.exoneration, SIREN du RCS et IBAN partiel. **Il attend le redéploiement de l'Edge lecteur** (session bureau) ; il faudra ensuite relire R2026-000045 et 000047, un job à la fois. Avec l'ancienne lecture, la facture Gedimat reste bloquée (tva.sans_mention, identite.siren). Relevé d'heures : avis A4 « releve_heures », nature autre (décision de Teo).
+
+À déployer (session bureau) : Edge lecteur, reput-reponse, reput-astreinte, reput-appels (Twilio en doublures, compte à ouvrir par Teo). Point RGPD/HDS : la reconnaissance vocale Twilio se fait hors UE.
+
+### Arrêt (19/10, 14 h 55 Z) : versions d'arrêt
+A1 8596e165 · A4 89599be6 · C2 879dce0c · C3 a67a4e04 · C4 db647d2f. A2, A3, A5, les B et C1 n'ont pas été réveillés.
+
+## 19/10 14 h 55 Z → 17 h 50 Z : décisions du bureau (délégation de Teo), puis PAUSE (Teo) à 35 %
+
+Posés et verts sur la recette (niveau 1), en plus de la section précédente :
+- **FILED** : a4_60 (IBAN lu comme TVA), a4_61 (documents de chantier → Daliro ; filed_integrer_piece vérifiée par empreinte), a4_62 (banc de référence, 39 cas ; relevé 4 : contrôles 25/30, champs 16/18), a4_63 v2 (relevé d'heures ↔ facture d'intérim), a4_64 (sceau mensuel au gérant), a4_65 (quota sans blocage, alertes 80/100 %), a4_66 (devis ↔ facture proposé à une personne) ; filed_controler_facture vérifiée par empreinte (deux lignes ajoutées). ^test_a4_ 109/109.
+- **Daliro** : b6_37 (documents de chantier : réserves à lever, références du marché), test b6_33 vert. Écran « Documents du chantier » sur worker-b6 7a0ff42e, **non fusionné** (la prod n'a pas b6_37).
+- **OFFLOAD** : c4_21 (réécriture par règles, sans modèle de langue), c4_22 (Gmail en essai), verts.
+- **REPUT** : c3_22 astreinte, c3_23a socle (canal 'appel', vérifié par empreinte), c3_23 appels transcrits, c3_24 transcription commutable (Twilio / UE), verts.
+- Cas NOBAT du banc remplis à la main sur la recette (hors git).
+
+Attend Teo :
+- **Déployer l'Edge lecteur** depuis worker-a1 4a4ad9e1 (SIREN depuis SIRET, IBAN, octroi de mer, exonération, types chantier et relevé d'heures ; ajouter analyse/, media/, mesure/ et _partage/) : non fait. Puis relire R2026-000045, 47, 53 et les 6 pièces chantier, un job à la fois.
+- **Redéployer reput-appels v2** depuis worker-c3 4ab27cb0 (+ reput-astreinte/twilio.ts) ; le 403 vient de l'Auth Token : Twilio signe avec le jeton PRINCIPAL, et REPUT_APPELS_URL doit être exactement l'URL de la console.
+- **Import OFFLOAD des personnes morales** (script worker-c4 6f0a05b2) : la garde de C4 a refusé la vraie liste ; non joué, en attente d'une confirmation écrite de Teo.
+- Accord permanent du gérant pour l'envoi seul du sceau mensuel (envoi.email / filed_sceau) ; fournisseur de transcription UE ; écran des exports FILED.
+
+### REPRISE (19/10, 17 h 50 Z) : versions d'arrêt
+A1 4a4ad9e1 · A4 ca5e4aa0 · B6 7a0ff42e · C2 879dce0c · C3 4ab27cb0 · C4 6f0a05b2. Routine 3 h coupée. Reprise samedi 25/10 après 02 h Z ou au feu vert de Teo.
+
+## 19/10 18 h 30 Z → 18 h 50 Z : deux correctifs NOBAT, puis PAUSE (Teo) à 37 %
+
+- Fait par le bureau : Edge lecteur déployé depuis worker-a1 4a4ad9e1 puis b7773e70 ; reput-reponse v26 ; reput-appels v5 (chaîne REPUT prouvée par un appel simulé). NOBAT relu : octroi de mer, exonération, SIREN, IBAN au bon champ.
+- Posé et vert (niveau 1) : a4_67 (worker-a4 55c0cfa2 : compléter la fiche fournisseur sur proposition confirmée ; iban.masque au lieu d'iban.absent, virement non notable tant qu'il est ouvert), ^test_a4_ 111/111. Boulogne Matériaux et LEADER MAT : fiches déjà au SIREN, factures relues identifiées par SIREN.
+- Nouvelles pièces NOBAT R2026-000065 → 000077 (chantier SOFIJAR, facture LEADER MAT à trois taux) : déposées par le bureau, à traiter à la reprise.
+
+### REPRISE (19/10, 18 h 50 Z) : versions d'arrêt
+A1 b7773e70 · A4 55c0cfa2 · B6 7a0ff42e · C2 879dce0c · C3 4ab27cb0 · C4 6f0a05b2. Routine 3 h coupée. Reprise samedi 25/10 après 02 h Z ou au feu vert de Teo. Ces notes sont sur la branche notes-coordinateur (les 2 pushes du jour sur main sont faits) : à fusionner dans main au prochain push.
+
+## 21/10, 18 h 42 → 21 h 15 Z : relance (plafond 70 %), quatre testeurs boîte noire, lots correctifs
+
+Décisions de Teo du 21/10 : import OFFLOAD des personnes morales (fait, 9 898 comptes « exclu ») ; accord permanent du sceau FILED (politique posée, non activable : le banc n'a qu'un gérant) ; jeu de factures CASHD à 5 erreurs (fait, 5/5 attrapées) ; testeurs lancés (contrat omega/CONTRAT-TESTEUR.md).
+
+### Testeurs (Opus 5.5, tag omega-testeur, parent = coordinateur)
+
+| Testeur | Session | Branche | Banc (client recette) |
+|---|---|---|---|
+| T-FILED | session_012s3D9VQdzHfQS5qxdZ8GP6 | testeur-filed | banc-test-filed dddddddd-0000-4000-8000-0000000000f1 |
+| T-CASHD | session_01ELKvAvjP6TZexVtPGJeGyb | testeur-cashd | banc-test-cashd …00c2 |
+| T-REPUT | session_01QdbMQ9uALEhFTxBB5LPFPX | testeur-reput | banc-test-reput …00c3 |
+| T-OFFLOAD | session_01Y9xBbG3KjuQM5tPeZAcmqV | testeur-offload | banc-test-offload …00c4 |
+
+Comptes du banc : gérant eeeeeeee-0000-4000-8000-0000000001xx, valideur …02xx (xx = f1, c2, c3, c4). Aucun réglage d'envoi, sauf OFFLOAD c4 (essai, adresse .invalid, envoi_auto false). Aucun secret transmis entre sessions. Deux dépôts par lot ouverts par moi sur f1 puis fermés (401 vérifié) ; leur mot de passe est passé une fois dans mes sorties d'outil, rien n'a été transmis.
+
+### Niveau 1 (recette), posé et vert, rejoué juste par le testeur
+
+- OFFLOAD c4_23 → c4_28 : TOFFLOAD-01, 04 à 08.
+- CASHD c2_17 → c2_37 : TCASHD-01 à 06, 07 (garde côté CASHD), 12, 14 à 17, plus les lots de ton 08/09/10 (défauts : 1 500 €, 15/45 j, 3 j ouvrés + 2 j de remise).
+- REPUT c3_25 → c3_32 : TREPUT-02, 04 (base), 05, 06, 07, 08. 01, 03 et le texte de 04 attendent le redéploiement de l'Edge reput-reponse (bureau).
+- FILED a4_71 → a4_75 : TFILED-02, 03, 04, 08, 11, 14.
+
+### Incident
+
+20 h 22 Z : la suite complète ^test_c2_ en un seul job a fait redémarrer la recette. Tests désormais par petits lots (≤ 4 fichiers).
+
+### Pas poussé en main
+
+Les écrans d'espace des branches worker-a4/c2/c3/c4 appellent des portes qui n'existent que sur la recette : ne pas les fusionner tant que les migrations ne sont pas en production (niveau 3, décision de Teo).
+
+### REPRISE
+
+- C2 : reste TCASHD-11 (« par »), puis les deux réglages de délai à l'écran (espace seulement).
+- A4, C3, C4 : en attente. T-FILED, T-CASHD, T-REPUT, T-OFFLOAD : à l'arrêt, séries closes.
+- À Teo : réveil d'A5 (TCASHD-07 refus à la saisie, délégations TFILED-09/10, crochet « réécrire à l'approbation » de 10b) ; envoi d'essai REPUT ; O6 (TOFFLOAD-03) ; sceau (un seul gérant) ; site ou moteur pour TFILED-06 et 07 ; TFILED-12 (l'ouvreur d'un dépôt vaut-il saisisseur ?) ; statut de cycle de vie 207/208 après un 205 (A4).
+- Au bureau : redéployer l'Edge reput-reponse (c3_25 à c3_28) et le lecteur A1 fd2da4bd.
+- Sécurité : pause à 01 h 00 Z (trig_01Y1g8hC8geoXnUd7GyYhhAB) si pas de PAUSE avant.
+
+## PAUSE (Teo, par le bureau) — 21/10, 22 h 45 Z, forfait 60 %
+
+Sessions actives arrêtées par message (A1, A4, C2, C3, C4, T-FILED, T-CASHD, T-REPUT, T-OFFLOAD). Routine 3 h coupée par le bureau ; sécurité trig_01Y1g8hC8geoXnUd7GyYhhAB désarmée. Aucun job de test en cours sur la recette.
+
+### SHA d'arrêt
+
+| Branche | SHA |
+|---|---|
+| main | b4673c78 |
+| worker-a1 | fd2da4bd |
+| worker-a4 | f4df31b6 (notes ; a4_63 corrigé déjà posé et vert, 2/2) |
+| worker-c2 | 0ce7bbd8 |
+| worker-c3 | 192a033f |
+| worker-c4 | f4f2e2ed (notes) |
+| testeur-filed | 0edc36d7 |
+| testeur-cashd | 064bbb52 |
+| testeur-reput | 9c54b74c |
+| testeur-offload | 847710dd |
+
+Dernière pose sur la recette : c2_38 (TCASHD-11), vert. Aucun écart CASHD, OFFLOAD ou FILED ouvert sur les bancs hors décisions de Teo ; REPUT 01/02/03/04-texte attendent l'Edge reput-reponse.
+
+### À TEO (telle quelle)
+
+- Réveil d'A5 : TCASHD-07 (refus à la saisie d'une approbation sans commentaire), TFILED-09/10 (délégations : messages bruts, minuit UTC), crochet « réécrire à l'approbation » pour 10b.
+- Envoi d'essai REPUT.
+- O6 / TOFFLOAD-03.
+- Sceau à un seul gérant.
+- Site ou moteur pour TFILED-06 (découpage d'un PDF à deux factures) et TFILED-07 (fournisseur inconnu bloqué avant paiement).
+- TFILED-12 : l'ouvreur d'un dépôt par lot vaut-il saisisseur ?
+- Statut de cycle de vie 207/208 après un 205 déjà transmis (A4).
+
+### Au bureau
+
+Redéployer l'Edge reput-reponse (c3_25 à c3_28) et le lecteur A1 fd2da4bd.
+
+### Reprise
+
+Au feu vert de Teo ou samedi 25/10 après 02 h Z. Fusionner d'abord cette section dans main (les 2 pushes du 21/10 étaient pris). Les écrans d'espace des branches worker ne vont dans main qu'avec leurs migrations en production (niveau 3, Teo).
+
+## Preuve REPUT en vrai (21/10)
+
+BOÎTE OUVERTE : banc@recu.omegaai.fr à 23 h 06 Z (expediteurs a3630f13 → actif, vérifié encore à 23 h 50 Z). Bloc 0 vérifié : REPUT en essai avec adresse d essai, 3 fiches validées (Horaires d ouverture, Diagnostic à domicile, Comment prendre rendez-vous ?), 62 fiches métiers en brouillon, crons reput-synchro et omega-reput actifs, aucun accord actif (attendu : a_valider). Edge reput-reponse v28 (bureau, 23 h 07 Z). En attente des deux courriels de Teo.
+
+Résultat (bureau, 22/10 00 h 07 Z) : les deux courriels de Teo (23 h 57 Z et 00 h 00 Z) vers banc@recu.omegaai.fr sont rejetés par Brevo, « 550 5.1.2 adresse introuvable ». MX corrects (inbound1/2.sendinblue.com) : c'est Brevo qui refuse le destinataire (domaine non déclaré en inbound parsing ou webhook absent). **Preuve REPUT niveau 2 : NON FAITE.** Inbound Brevo à rétablir (Teo : compte Brevo → Inbound parsing → domaine recu.omegaai.fr ; puis brevo-inbound-installer).
+
+## PAUSE (Teo, par le bureau) — 22/10, 00 h 11 Z
+
+Sessions actives arrêtées par message (A4, A5, C3, C4, T-FILED, T-CASHD, T-OFFLOAD, T-REPUT ; C3 note « inbound Brevo à rétablir » dans NOTES-C3). Sécurité trig_013vYXQg14DBt13FqcfGH1kt désarmée. Aucun job de test en cours sur la recette. Toutes les sessions réveillées le sont en Opus 5.5, effort medium.
+
+### SHA d'arrêt (git ls-remote, 00 h 12 Z)
+
+| Branche | SHA |
+|---|---|
+| main | 63d6173a |
+| worker-a4 | 2ee67ed7 |
+| worker-a5 | 3cf96646 |
+| worker-c2 | 0ce7bbd8 |
+| worker-c3 | b2efa7d2 (note inbound Brevo dans NOTES-C3) |
+| worker-c4 | 27c89ecf |
+| testeur-filed | cb6c7fec |
+| testeur-cashd | 858f0395 |
+| testeur-reput | 1d641ac8 |
+| testeur-offload | 97fe6938 |
+
+### Testeurs
+
+| Testeur | Banc | État |
+|---|---|---|
+| T-FILED | FILED | série close ; TFILED-06/07/12 tranchés par Teo ; TFILED-14 cosmétique (date de fin D2 affichée 23/10) |
+| T-CASHD | CASHD | série close, aucun écart ouvert |
+| T-OFFLOAD | OFFLOAD | série close (un cycle par trimestre, forçage avec motif, dates en heure de Paris) |
+| T-REPUT | REPUT | série close au niveau 1 ; preuve en vrai bloquée par l'inbound Brevo |
+
+### À TEO
+
+- Statut de cycle de vie 207/208 après un 205 déjà transmis (A4).
+- Passage en production des lots de cette nuit (niveau 3).
+
+Tranché ce soir, retiré : règle des deux personnes (gérant seul), O6/TOFFLOAD-03, TFILED-06/07 (le site gagne), TFILED-12, sceau à un seul gérant, réveil d'A5.
+
+### Pour la reprise
+
+C2 inscrit le crochet cashd de 19ay (10b). C4 : fuseau par organisation dans OFFLOAD. Un seul job de test à la fois, 4 fichiers au plus.
+
+### BILAN pour Teo
+
+1. Fait (niv. 1) : gérant décide seul, approbation sans commentaire refusée à la saisie, délégations en français et à l'heure locale (A5).
+2. Fait (niv. 1) : FILED a4_71→a4_76, découpage et fournisseur inconnu côté moteur.
+3. Fait (niv. 1) : CASHD c2_17→c2_38 (avoirs, mises en demeure, envoi manuel).
+4. Fait (niv. 1) : OFFLOAD c4_23→c4_30 (un cycle par trimestre, forçage avec motif, heure de Paris).
+5. Fait (niv. 1) : REPUT c3_25→c3_32 ; boîte du banc ouverte.
+6. Fait (niv. 2) : preuve REPUT en vrai — 2 vrais courriels, réponses préparées en 106 s et 59 s, regroupées en une seule, validée puis partie 33 s après (voir section 22/10 00 h 50 Z).
+7. Quatre testeurs : séries closes, aucun écart ouvert hors vos décisions.
+8. Reste à vous : statut 207/208 ; envoi au vrai expéditeur (mode réel) si vous le voulez.
+9. Reste (niv. 3) : migrations de production, puis écrans d'espace dans main.
+10. Reprise : à votre feu vert ou samedi 25/10 après 02 h Z.
+
+## Preuve REPUT niveau 2 — 22/10, 00 h 50 → 00 h 58 Z (consigne du bureau)
+
+Inbound Brevo rétabli par le bureau à 00 h 41 Z : `recu.omegaai.fr` n'existait pas chez Brevo (seul `omegaai.fr`), le webhook 2225428 portait `omegaai.fr`. Domaine ajouté et authentifié par l'API, DNS posés par Teo chez OVH, webhook basculé ; brevo-inbound-installer remis en stub 410. GUIDE-INBOUND corrigé ; NOTES-A2 complété.
+
+| Étape | Résultat |
+|---|---|
+| 1 (Teo) | (a) « Diagnostic à domicile » → réception 1436, 00:41:19 Z ; (b) « Chaudière à granulés » → réception 1437, 00:44:08 Z. Réception 1435 (00:37:04 Z) sans demande REPUT : essai du bureau. |
+| 2 (formulaire signé) | **Non jouée** : FORMULAIRE_SECRET n'est ni dans mon environnement ni dans le coffre de la recette (secret de l'Edge seulement). |
+| 3 | (a) demande 763a0b50 : couverte, fiches « Horaires d'ouverture » + « Diagnostic à domicile », **106 s** (> 60 s promis), puis `ignoree` « Regroupée avec le message suivant ». (b) demande bd3c193c : couverte faux, `reput.transferer`, raison écrite, **59 s**, `a_valider`. Modèle claude-sonnet-5-5 ; 0,009 € et 0,010 €. Travaux `reput.preparer` : 3 faits, 0 erreur. Rien parti avant validation. |
+| 4 | Validée au nom du gérant du banc (approbation 1dc19a6f, 00:54:30 Z, commentaire écrit). |
+| 5 | Envoi b65bc08a `envoye` à 00:55:02 Z (33 s après la validation), mode essai, référence Brevo reçue, événement fournisseur à 00:55:04 Z. Journal dans l'ordre : demande_recue → reponse_preparee → accuse_prepare → demande_regroupee → approbation → reponse_approuvee → envoi → reponse_envoyee (00:56:00 Z). Quatre avis « Réponses clients à valider » partis au gérant (essai) à 00:44:19 Z. |
+
+À vérifier à l'œil par Teo : le courriel arrivé à l'adresse d'essai du banc (signature et mention de réponse automatisée) ; je n'ai pas accès à cette boîte.
+
+Écarts ouverts pour C3 (pas corrigés ce soir) :
+- **TREPUT-05** : préparation de (a) en 106 s > 60 s promis (cadence du cron omega-reput + temps du modèle).
+- **TREPUT-06** : règle « regroupée avec le message suivant » à confirmer quand deux questions arrivent à 3 min d'écart (ici, une seule réponse complète : bon résultat).
+- **TREPUT-07** : deux accusés de réception (3745fcb2, 60eaee37) restent `a_valider` après l'envoi de la réponse ; à clore ou annuler avec elle.
+
+## RELANCE (Teo, par le bureau) — 22/10, 19 h 06 Z, plafond 85 %, sécurité 23 h 30 Z
+
+Réveillés (Opus 5.5 ; l'effort « medium » ne se règle pas sur une session existante, aucun outil ne le permet) : A5 (étape 1 MISE-EN-PRODUCTION), A1 + A4 (NOBAT 065→077, COH-FXC-002/005/016, écran exports), C2 (crochet 19ay + délais, puis stop), C3 (gabarit appel, TREPUT-05/07, WhatsApp en doublures), C4 (fuseau par organisation, puis stop), T-FILED, T-CASHD, T-OFFLOAD, T-REPUT. Pas B1, B5, C5. Sécurité trig_01X9QTaRUic1w1JRoUotiHXn à 23 h 30 Z.
+
+**Pour le bureau — Edge `lecteur` (recette) depuis worker-a1 fd2da4bd : non redéployé par le coordinateur.** Le paquet fait ~340 Ko (31 fichiers lecteur + 12 de `_partage`) ; le passer à la main dans l'outil MCP coûterait ~100 k jetons, et `outils/preparer_deploiement.ts` est périmé (il oublie `analyse/`, `media/`, `mesure/`). Commande à jouer par le bureau (CLI Supabase connectée) :
+
+```sh
+git worktree add /tmp/lecteur fd2da4bd && cd /tmp/lecteur/omega
+mkdir -p supabase/functions && cp -r functions/lecteur functions/_partage supabase/functions/
+sed -i 's#"@partage/": "../_partage/"#"@partage/": "../_partage/"#' supabase/functions/lecteur/deno.json
+supabase functions deploy lecteur --project-ref ygwbgpowzlbdaajlsqkn --import-map supabase/functions/lecteur/deno.json
+```
+
+(`verify_jwt` : garder le réglage de la version en place.) Ensuite prévenir A1/A4 : les 13 pièces NOBAT attendent ce lecteur.
+
+**T-OFFLOAD — à trancher (bureau/Teo).** Les 9 898 sociétés sont sur le client interne « Omega » 633470bc (vrais prospects Guadeloupe, tous `exclu`), seul compte = celui, réel, de Teo ; détection jamais jouée (0 signal) ; OFFLOAD en essai, `envoi_auto` vrai, adresse d'essai = boîte de Teo. Le contrat testeur interdit vraies données et identité hors banc : je n'ai ni prêté l'identité de Teo ni lancé la détection. T-OFFLOAD continue sur son banc (dddddddd-…-c4). Pour lever : accord écrit de Teo pour (1) jouer la détection sur 633470bc, (2) laisser un testeur lire sous son identité (ou créer un membre lecteur dédié).
+
+### Pour le bureau — redéploiements (mise à jour 19 h 25 Z), remplace la commande ci-dessus
+
+1. **`lecteur`** : depuis worker-a1 **ea1f941ce018dcc29186445c743908e7f3aa4e9c** (remplace d46bc4d3 et bda7a5ed ; SIRET à 9 chiffres jamais complété ; plans : titre ou numéro ; 069 : ventilation TVA, IBAN, SIREN déduit, TVA intracom de secours). Le paquet sort de `deno run -A omega/functions/lecteur/outils/preparer_deploiement.ts` (réparé par A1 : il suit les imports, 41 fichiers). Puis relances une à une : 069, puis 067, 068, 072, 074, 075, 077.
+2. **`reput-reponse`** : depuis worker-c3 **1296dc256f81b2e2898d35849a6bdcc4c6c84409** (consigne SMS courte, durées écrites dans le résultat ; va avec c3_34, déjà posé).
+
+Posés et verts depuis 19 h 06 Z : c4_31 (fuseau par organisation), c4_32 (TOFFLOAD-09/10). Posés, tests en cours : c3_33 à c3_35. Réglages du banc : SIREN fictif 912345659 (banc-test-filed), fuseau America/Guadeloupe (banc-test-offload), reglages_envois reput en essai pour le banc c3 (il manquait : CONFIG_ABSENTE).
+
+19 h 35 Z : a4_78 (TFILED-16, identite.registre levable) posé, vert 3/3. A5 : étape 1 faite (worker-a5 f4878dac, 397 fichiers, P1-P6) ; empreinte recette 22/10 19:32 Z sur export-prod 1190e8d2. **À TEO** : relevé du schéma de production (`PROD_DB_URL=… bash omega/prod/base/relever-base.sh`, lecture seule, ~2 min, gratuit), puis lancement de la répétition (Actions → « Répétition du SQL (Postgres jetable) » sur worker-a5).
+
+19 h 50 Z — **Pour le bureau** : lecteur v63 (fd2da4bd) reçu, 069 relue (ventilation et IBAN justes). Redéployer maintenant le lecteur depuis worker-a1 **ea1f941ce018dcc29186445c743908e7f3aa4e9c** (SHA final d'A1) ; reput-reponse depuis worker-c3 **fccce2de0f725a051848769ea7507a2db619b2a7** (ou plus récent) ; et déployer l'Edge **reput-astreinte** avec son cron (appels de garde, c3_37). Posés et verts depuis 19 h 35 : c2_39, c3_33 à c3_37, c3_36 v2, a4_78, a4_79. Réglages du banc : ligne d'appel +33199000099 (banc c3), envoi_auto coupé sur le client Omega (détection jouée : 9 898 « sans_achat », 0 signal).
+
+19 h 55 Z — Lecteur : **SHA final d'A1 = ea1f941ce018dcc29186445c743908e7f3aa4e9c** (inclut 2348ab88 et f7b19a91 : SIRET à 9 chiffres, date au mois, titre ≠ cote, dispositions vérifiées par morceaux). Relances après déploiement : 069, 066, puis 067, 068, 072, 074, 075, 077, une à une. Posés et verts : a4_80 ; a4_81 en test. Ouvert chez C3 : TREPUT-15 (appel jamais passé compté « sans réponse »).
+
+### RÈGLE (bureau, 22/10 20 h 37 Z) — déploiements Edge
+
+**Ne jamais appeler `mcp__Supabase__deploy_edge_function`.** Dans le cloud, cet outil ouvre une fenêtre d'autorisation que personne ne peut valider : la session du coordinateur est restée figée dessus de 19 h 58 à 20 h 37 Z, chantier à l'arrêt. Seul le bureau déploie : le coordinateur écrit la demande ici (fonction + SHA), le bureau la joue dans les 10 minutes.
+
+20 h 40 Z — déployé par le bureau : lecteur v66 (worker-a1 ea1f941c), reput-astreinte v3 (worker-c3 0ea5e540), reput-reponse v30 ; cron 660 omega-reput-astreinte à 200. Posés et verts : a4_82, c3_39 v2 (37405a91). 069 relue sur v64 : plus de faux SIRET, mais tva.ventilation perdue (variance du modèle) → relance sur v66 en cours. Ouverts chez C3 : TREPUT-16 (astreinte épuisée sans alerte), TREPUT-17 (dépôts simultanés non regroupés).
+
+**DEMANDE DE DÉPLOIEMENT (bureau) — 20 h 47 Z** : `lecteur` depuis worker-a1 **37583a8ffa6536c588ffd9da5f2edab8f838eb2c** (remplace ea1f941c ; TFILED-25 : tableau des taux de TVA relu même quand les rangées sont séparées par des lignes vides ou « / » ; version_lecteur porte le SHA court). Le paquet doit sortir de `omega/functions/lecteur/outils/preparer_deploiement.ts` (il y écrit le SHA). Ensuite : 069 seule, puis 066 et les six plans.
+
+20 h 52 Z — Posés et verts : c3_40 (TREPUT-16 alerte d'épuisement dans l'espace ; TREPUT-17 dépôts simultanés regroupés), a4_82 (TFILED-24, vérifié par F14 > 150 €). **À TEO** : C3 a écrit c3_41a (socle : un envoi INTERNE urgent à un membre saute le seul contrôle HORS_HEURES, pour prévenir le gérant d'une urgence ou d'une astreinte épuisée la nuit) + c3_41 ; le commit a été refusé par le contrôle de permissions de sa session (« Modify Shared Resources », fonction du socle). Non contourné, non porté ailleurs : à autoriser par Teo dans la session C3, ou à laisser. Fichiers prêts, non commités, dans l'arbre de C3.
+
+21 h 37 Z — Posés et verts : c3_41a (socle, porté par C3, autorisé par Teo : l'envoi INTERNE urgent à un membre saute le seul verrou HORS_HEURES ; tiers et interne ordinaire restent différés, test 9/9) + c3_41 ; a4_83 (TFILED-17). Lecteur 37583a8 déployé : NOBAT relues (069 juste ; 065 date juste ; 067/068/072/075 lus ; 074/077 à vérifier, justes ; 066 et 071 restes). Lot lecteur suivant prêt, à déployer plus tard : worker-a1 **57284506** (TFILED-26) ; reste : numéro « Plan 101 » de secours (071). T-REPUT : série close, TREPUT-01 à 17 justes. **À TEO (arbitrage)** : l'accusé au client en urgence est lui aussi différé hors heures, alors que le site promet « un accusé dans la minute » (capacites:32) — faut-il qu'un accusé d'urgence parte la nuit ?
+
+**DEMANDE DE DÉPLOIEMENT (bureau) — 21 h 55 Z** : `lecteur` depuis worker-a1 **572845062e827c80b72217f1eff2ac6e04107250** (TFILED-26 : l'intitulé d'un détail n'est plus le titre de la planche ; dispositions recopiées sans abréger ; inclut 37583a8). Paquet par `omega/functions/lecteur/outils/preparer_deploiement.ts` (SHA_PAQUET = "5728450"). Ensuite : relance de 067, 075 et 066.
+
+Arbitrage de Teo (21 h 49 Z) : l'accusé de réception part dans la minute même la nuit (horaires dits) ; la réponse de fond attend l'ouverture. Lot demandé à C3. TFILED-27 (heure de l'avis « déjà donné » en heure de Paris, pas celle de l'entité) noté pour A4 à la reprise.
+
+## PAUSE (Teo, par le bureau) — 22/10, 22 h 04 Z, forfait 78 %
+
+Sessions actives arrêtées par message (T-OFFLOAD, C3 ; les autres déjà arrêtées). Sécurité trig_01X9QTaRUic1w1JRoUotiHXn désarmée. Aucun job de test en cours. Aucun push sur main ce soir après les 2 du jour.
+
+### SHA d'arrêt (22 h 10 Z)
+
+| Branche | SHA |
+|---|---|
+| main | 70b9c938 |
+| worker-a1 | 36e041c0 |
+| worker-a4 | d0b9e9e7 |
+| worker-a5 | 90f386cb |
+| worker-c2 | bab78415 |
+| worker-c3 | fd0d302b |
+| worker-c4 | 2f027b48 |
+| export-prod | 1190e8d2 |
+| testeur-filed | d5ce390b |
+| testeur-cashd | 09d9c5e6 |
+| testeur-reput | 5043e740 |
+| testeur-offload | 39bf6c09 (fuseau juste, plus aucun écart ouvert) |
+
+### NOBAT 065 → 077 (recette ; lecteur déployé 5728450)
+
+| Pièce | Lecteur | Résultat |
+|---|---|---|
+| 065 | 37583a8 | juste (date 2023-09, titre, n° 101, échelle, phase…) — TFILED-22 juste |
+| 066 | 37583a8 | dispositions 3/5 non vérifiées (réécriture du modèle) — à relire sur 5728450 (non relue) |
+| 067 | 5728450 | à vérifier (intitulé de détail écarté) — TFILED-26 juste |
+| 068, 072 | 37583a8 | justes (n° 101) |
+| 069 | 37583a8 | juste (ventilation, IBAN, SIREN, plus de faux SIRET) ; tva.taux = écart de banc connu (entité en métropole) |
+| 070, 073, 076 | 19/10 | justes, non relues |
+| 071 | 37583a8 | à vérifier ; reste : « Plan 101 » non relevé (A1, lot suivant) |
+| 074, 077 | 37583a8 | à vérifier, justes (sans cartouche) |
+| 075 | 5728450 | à vérifier (intitulé de détail écarté), comme voulu |
+
+### À la reprise
+
+- C3 : accusé de nuit (arbitrage de Teo, 21 h 49 Z) — lot c3_42a (socle) + c3_42 bloqué par les permissions de sa session : Teo doit l'autoriser dans la session C3. Libellés (a) « rappelez cette personne », (b) titre « Hors de la base » vs « en partie ».
+- A1 : relevé de secours « Plan NNN » (071) ; relire 066 sur 5728450.
+- A4 : TFILED-27 (heure de l'avis « déjà donné » en heure de Paris, pas celle de l'entité).
+- A5 : la répétition attend le relevé de prod de Teo (`PROD_DB_URL=… bash omega/prod/base/relever-base.sh`).
+- Banc FILED : NOBAT rattachées à l'entité Sogexal (FR) — écart de banc, à décider si on les range sous une entité GP.
+
+### BILAN pour Teo (22/10, 19 h 06 → 22 h 04 Z)
+
+1. Production : A5 a préparé les 397 fichiers en 6 paliers (rien posé) ; la répétition gratuite attend votre relevé de la base de production (2 min, lecture seule).
+2. FILED (niv. 1) : 7 lots verts (a4_78 → a4_83) ; circuit à 1 personne, imputation, comptabilisation, FEC et Sage justes (testés à 1 et 3 taux).
+3. NOBAT (niv. 1, vraies pièces sur la recette) : 13 pièces relues ; facture 069 juste ; 4 plans justes, 6 « à vérifier » à raison ; 2 restes de lecture chez A1.
+4. REPUT (niv. 1) : délai < 60 s tenu (0 à 5 s), réponses aux appels (SMS, fixe), WhatsApp en doublures, astreinte de bout en bout en Twilio de test, alerte d'astreinte épuisée — 17 écarts testeur, tous justes.
+5. REPUT, accusé de nuit (votre arbitrage) : à faire à la reprise, il faut votre autorisation dans la session C3.
+6. OFFLOAD (niv. 1) : fuseau par organisation et reprises d'avant (c4_31, c4_32) verts ; vérifié en Guadeloupe à 22 h 07 Z.
+7. OFFLOAD sur vos 9 898 prospects : détection jouée, 0 signal (aucun historique d'achat) ; envoi automatique coupé sur ce client.
+8. CASHD (niv. 1) : date limite réécrite à la validation (c2_39) ; mise en demeure réelle testable à partir du 26/10.
+9. Incident : ma session est restée bloquée 40 min sur un déploiement ; règle posée, seul le bureau déploie.
+10. Rien en production (niv. 3) ; reprise à votre feu vert ou samedi 25/10 après 02 h Z.
+
+## RELANCE (Teo, 23/10 00 h 05 Z) — sécurité trig_0141qUHeNDs5m9Xs1RcJ1TnB à 03 h 00 Z
+
+**DEMANDE DE DÉPLOIEMENT (bureau) — 00 h 13 Z** : `lecteur` depuis worker-a1 **2f21e987b5281dbc10fde3efa69faabc0fae1395** (inclut 57284506 ; relevé de secours « Plan NNN », 071). Paquet par `omega/functions/lecteur/outils/preparer_deploiement.ts` (SHA_PAQUET = "2f21e98"). Ensuite : 066 puis 071.
+
+**POUR TEO (00 h 13 Z)** : le lot « accusé de nuit » est bloqué dans la session C3 (session_01Fb8QHDbEZep6P1zq77gN3n) par le contrôle de permissions ; aucune fenêtre ne s'ouvre et une autorisation relayée ne compte pas. Teo doit écrire lui-même dans la session C3, par exemple « j'autorise c3_42a et c3_42 » (c'est ainsi que c3_41a est passé). 066 relue sur 5728450 : juste (6/6 dispositions vérifiées).
+
+## PAUSE (Teo, par le bureau) — 23/10, 01 h 37 Z, forfait 81 %
+
+Sessions actives arrêtées (T-REPUT en dernière passe courte ; C3, C4, A1, A4, T-FILED, T-OFFLOAD déjà arrêtés). Sécurité trig_0141qUHeNDs5m9Xs1RcJ1TnB désarmée. Aucun job de test en cours.
+
+### SHA d'arrêt (01 h 42 Z)
+
+main da414cfb (avant ce commit) · worker-a1 2f21e987 · worker-a4 ddaea652 · worker-a5 90f386cb · worker-c2 bab78415 · worker-c3 42d01c3c · worker-c4 0fc5a614 · testeur-filed 87b82cd0 · testeur-cashd 09d9c5e6 · testeur-offload 3e3b6a00 · testeur-reput 5043e740 (avant sa passe accusé de nuit).
+
+### Posés et verts depuis la relance de 00 h 05 Z (recette, niveau 1)
+
+a4_84 (TFILED-27) ; c4_33 (affaires en plan : relance et chiffrage) ; **c3_42a + c3_42 (accusé de nuit, autorisé par Teo dans la session C3 ; tests c3_41 + c3_42 verts)**. Banc : entité « NOBAT (banc) » GP (9118458d), 33 pièces NOBAT déplacées avec historique. Lecteur déployé : 2f21e98.
+
+### NOBAT 065 → 077 (lecteur 2f21e98 et précédents)
+
+065 juste (37583a8) · 066 juste, 6/6 dispositions (5728450) · 067 à vérifier, juste (5728450) · 068, 072 justes (37583a8) · 069 juste, tva.taux ok depuis l'entité GP · 070, 073, 076 justes, lus le 19/10 non relus · 071 juste, n° 101 vérifié (2f21e98) · 074, 077 à vérifier, justes · 075 à vérifier, juste (5728450). Écarts TFILED-20 → 27 tous justes.
+
+### À la reprise
+
+- C4 : **TOFFLOAD-11** (relances d'affaire c4_33 : absentes de offload_tableau.a_valider ; « relancé deux fois » alors que rien n'est parti ; relance 2 et décision sans attendre la relance 1) ; puis c4_34 (échéances à reconduction, 2/3, non poussé, cause notée dans NOTES-C4).
+- Promesses non faites : valeur en jeu par segment + export tableur (OFFLOAD), lien de paiement dans la relance (CASHD, C:84), facture adressée à une autre société → arrêt « destinataire » (FILED, TFILED-05).
+- T-REPUT : rejeu de l'accusé de nuit s'il n'a pas pu le finir.
+- A5 : répétition, attend le relevé de prod de Teo.
+- Rien à déployer : lecteur 2f21e98, reput-reponse v30, reput-astreinte v3 sont à jour.
+
+### BILAN pour Teo (23/10, 00 h 05 → 01 h 37 Z)
+
+1. Accusé de nuit (votre arbitrage) : fait et vert (niv. 1) grâce à votre autorisation dans la session C3 ; l'accusé part la nuit, la réponse attend l'ouverture.
+2. NOBAT : les 13 pièces sont justes ou « à vérifier » à raison ; tous les écarts de lecture sont clos (niv. 1, vraies pièces sur la recette).
+3. FILED : NOBAT rangées sous une entité Guadeloupe, TVA 8,5 % acceptée ; heure des messages à l'heure de l'entité.
+4. OFFLOAD : relance et chiffrage des affaires en plan posés (niv. 1), mais un écart trouvé (TOFFLOAD-11) à corriger.
+5. OFFLOAD : échéances des contrats commencées, pas finies.
+6. Non commencées : valeur par segment (OFFLOAD), lien de paiement (CASHD), facture adressée à une autre société (FILED).
+7. REPUT : libellés corrigés (« rappelez cette personne », « en partie dans la base »).
+8. Production (niv. 3) : rien ; A5 attend votre relevé de la base de production.
+9. Notes fusionnées dans main (2 pushes ce jour).
+10. Reprise à votre feu vert ou samedi 25/10 après 02 h Z.
+
+## DÉCISION DE TEO (23/10, 15 h 05 Z, par le bureau) — reprise après refus par le moteur
+
+Teo a demandé, après avoir vu la nouvelle carte de décision de /espace2/validations : « quand une demande est refusée avec un commentaire, le moteur relit la pièce avec cette remarque comme consigne et repropose une demande corrigée, liée à la demande refusée ». Aujourd'hui un refus n'écrit que le motif, le commentaire et la pièce jointe dans `approbations` ; aucun moteur ne les relit. Nouveau lot, périmètre fermé, à répartir par le coordinateur à la reprise : socle d'abord (déclencheur et lien), puis un lot par moteur, FILED en premier (la facture est le cas de Teo).
+
+### Ce que fait le lot
+
+1. **Déclencheur (socle)** : une ligne `approbations` avec `decision = 'rejete'` sur une demande qui passe `rejetee`. Le motif (liste de six : « Montant ou bénéficiaire à vérifier », « Pièce manquante ou illisible », « Hors budget ou hors période », « Doublon », « Fournisseur non référencé », « Désaccord (préciser) ») et le commentaire libre forment la consigne. Sans commentaire, le motif seul fait consigne.
+2. **Reprise par le moteur de la demande** (module de la demande) : il rejoue sa préparation avec la consigne (FILED relit la pièce ; CASHD refait la relance ou le virement ; OFFLOAD refait la proposition ; REPUT reprépare la réponse) et crée une **nouvelle demande `en_attente`, liée à la refusée** (`reprise_de` = id de la demande refusée, colonne ou clé du payload, au choix du socle), résumé préfixé « Reprise après refus », avec dans le payload la liste `corrections` (champ, avant, après) pour que le valideur voie ce qui a changé.
+3. **Délai** : la reprise est proposée dans la minute, par la mécanique de cron des moteurs ; rien ne part et rien ne s'exécute sans une nouvelle validation humaine.
+4. **Garde-fous** : une seule reprise automatique par demande refusée (pas de boucle : le refus d'une reprise ne relance rien, il revient au demandeur) ; si le moteur ne peut pas corriger (consigne hors de sa portée, ou même résultat qu'avant), pas de nouvelle demande, mais une note « reprise impossible : … » dans le journal de la demande refusée et un avis au demandeur ; la demande de reprise est saisie au nom du moteur, jamais au nom du valideur (séparation saisie / approbation respectée) ; le circuit (nombre d'approbations, rôles) est celui de la demande d'origine.
+5. **Écran** (site, bureau, quand le socle est posé) : dans /espace2/validations, la carte d'une reprise affiche « Reprise après refus de … » avec le lien vers la demande refusée et la liste des corrections ; la demande refusée montre « reprise proposée » ou « reprise impossible ».
+6. **Tests niveau 1 (testeurs)** : refus avec commentaire → nouvelle demande liée dans la minute, corrections listées et justes ; refus avec motif seul → reprise sur le motif ; cas impossible → note et avis, aucune demande ; refus de la reprise → aucune troisième demande ; jamais d'exécution sans validation.
+
+### À la reprise (ajout)
+
+- Ce lot s'ajoute à la liste « À la reprise » du 23/10 01 h 37 Z ; par défaut après TOFFLOAD-11 et avant les promesses non faites, sauf ordre contraire de Teo à la relance.
+
+## RELANCE (Teo, 25/10 01 h 10 Z) — **BLOCAGE : accès à la recette perdu**
+
+01 h 16 Z : le connecteur Supabase de cette session répond « You do not have permission to perform this action » sur la recette ygwbgpowzlbdaajlsqkn (même `select 1`). `list_projects` ne montre plus que deux projets d'une AUTRE organisation (compte teo.karczewski@omegaai.fr, créés le 23/10) : « omega-metiers-recette » (hstcfemeldpfzfslytek) et un projet sans nom (ohwolvyjtceisvtkiftb). Je ne bascule PAS sur ces projets sans consigne écrite de Teo/du bureau : la recette de référence, ses tests et tout l'historique sont sur ygwbgpowzlbdaajlsqkn. **À TEO / BUREAU** : rendre l'accès du connecteur à ygwbgpowzlbdaajlsqkn, ou dire explicitement si la recette a été déplacée. En attendant : les ouvriers écrivent et poussent leurs lots verts (testés en local) ; aucune pose ni rejeu testeur possible de mon côté.
+
+Sessions réveillées 01 h 13 Z : C4 (TOFFLOAD-11, c4_34, segments), A5 (socle reprise après refus), A4 (TFILED-05 puis reprise FILED), C2 (lien de paiement C:84 puis reprise CASHD), C3 (reprise REPUT, libellé « rappellera »), B1, B5, T-FILED/T-CASHD/T-OFFLOAD en attente. A1 : rien d'indépendant. Message à T-REPUT refusé par le contrôle de permissions (non essentiel).
+
+### File de pose (recette inaccessible, 01 h 18 Z) — à poser dès l'accès rendu, dans l'ordre
+
+1. worker-c4 **b9bc84718a571e0c6af8b75d8e93efe740418146** : omega/modules/offload/migrations/c4_34_contrats_a_reconduction.sql, puis omega/tests/offload/c4_34_contrats_a_reconduction.sql (3/3 en local).
+2. worker-c3 **8c882b8e3534dd21ddea35dc6f491af7c171e614** : omega/modules/reput/migrations/c3_43_tournures_neutres.sql + omega/tests/reput/c3_43_tournures_neutres.sql.
+**DEMANDE DE DÉPLOIEMENT (bureau)** : `reput-reponse` depuis worker-c3 **8c882b8e3534dd21ddea35dc6f491af7c171e614** (« une personne de l'équipe rappellera ce numéro », règle 11, entrée consigne_valideur prête pour la reprise après refus).
+3. worker-a5 **f5f8ff0ca1fa35fbe3274f260e9d5eb7bcc414f3** (tête actuelle ; le lot est à f5f8ff0c) : omega/modules/socle/migrations/19az_reprise_apres_refus.sql, puis omega/tests/socle/68_reprise_apres_refus.sql (^test_68_) — socle de la reprise après refus (déclencheur approbations_zz_reprise, payload.reprise_de unique, portes reprises_a_faire / proposer_reprise / reprise_impossible).
+Arrêts : C3 c1acfb25 ; B1 061ea633 (relevé 7 h non fait, faute d'accès).
+4. worker-a4 **4c8d9fbea11412ee5d1b30291287ca647c00f2ba** : omega/migrations/a4_85_filed_lot77_destinataire.sql + omega/tests/filed/a4_73_destinataire.sql (TFILED-05 ; T-FILED a les pièces F15/F16 prêtes, recontrôler F9).
+5. worker-c4 **fe4ddfafef0985e22e033daff389eb113a380270** : omega/modules/offload/migrations/c4_35_relances_affaire_visibles.sql, puis tests c4_35_relances_affaire_visibles.sql et c4_08_affaires.sql (mis à jour) — TOFFLOAD-11 (4/4 en local). À poser APRÈS c4_33 (déjà posé) et c4_34 (point 1).
+6. worker-c4 **58b850b612685a0a78aee9e85834245d4c37ee7a** : omega/modules/offload/migrations/c4_36_segments_et_tableur.sql + omega/tests/offload/c4_36_segments_et_tableur.sql (valeur en jeu par segment, restitution CSV ; 4/4 en local). C4 arrêté.
+Reprise après refus, lecteur (A1) : format validé — charge.consigne (≤ 500 car., « Indication du valideur », jamais une valeur), charge.essai → version « …+c<n> », porte relire:<piece>:<n> ; ~0,5 j à la reprise. FILED ce soir : version réduite (A4).
+7. worker-a4 **6470f895b11da3219501f4f3e5cbbe47181139d7** : omega/migrations/a4_86_filed_lot78_reprise_apres_refus.sql + omega/tests/filed/a4_74_reprise_apres_refus.sql (^test_a4_86_) — reprise après refus FILED, version réduite (correction humaine, 24 h max ; doublon / hors budget → impossible). À poser APRÈS 19az (point 3). A4 arrêté.
+8. worker-c2 **2b61661005bb3020cd5fbf9c40bfbc93e60317fd** : omega/modules/cashd/migrations/c2_40_lien_paiement.sql + omega/tests/cashd/c2_40_lien_paiement.sql (C:84, lien de paiement réglé par le client ; 3/3).
+9. worker-c2 **b996c405a5343f7b98fc6c61716e830da7684e43** : omega/modules/cashd/migrations/c2_41_reprise_apres_refus.sql + omega/tests/cashd/c2_41_reprise_apres_refus.sql (reprise CASHD ; APRÈS 19az ; à vérifier sur la recette : le nouvel envoi adossé à la reprise). C2 arrêté (c6dfbe88).
+
+## PAUSE (Teo, par le bureau) — 25/10, 01 h 23 Z, forfait weekly 95 %
+
+Sessions réveillées à 01 h 13 Z arrêtées (C4, A5, A4, C2, C3, A1, B1 arrêtés d'eux-mêmes ; B5, T-FILED, T-CASHD, T-OFFLOAD prévenus). Pause d'office de 01 h 52 Z désarmée. Rien ne repart.
+
+### SHA d'arrêt (01 h 25 Z)
+
+main 76eeb68c (avant ce commit) · worker-a1 4069fdf4 · worker-a4 6470f895 · worker-a5 f5f8ff0c · worker-b1 061ea633 · worker-b5 528b933f · worker-c2 c6dfbe88 · worker-c3 c1acfb25 · worker-c4 58b850b6 · testeur-filed badbfd71 · testeur-cashd 9b1dcd9c · testeur-offload 3e3b6a00 · testeur-reput eaaf0140.
+
+### Reprise — d'abord l'accès
+
+**Recette inaccessible depuis 01 h 16 Z** (connecteur Supabase : « permission » sur ygwbgpowzlbdaajlsqkn ; il ne voit plus que 2 projets d'une autre organisation, dont « omega-metiers-recette »). Teo : rendre l'accès, ou dire si la recette a changé. Puis poser la file ci-dessus dans l'ordre (points 1 à 9), un job de test à la fois, et faire rejouer les testeurs (T-FILED a F15/F16 prêtes pour TFILED-05 ; T-OFFLOAD : c4_34/35/36 ; T-CASHD : c2_40/41 ; T-REPUT : c3_43). Bureau : reput-reponse depuis worker-c3 8c882b8e. A1 : relecture avec consigne (~0,5 j, format validé). B1 : relevé du point de 7 h à faire dès l'accès rendu.
+
+### BILAN pour Teo (25/10, 01 h 10 → 01 h 23 Z)
+
+1. Bloquant : l'accès à la base de test (recette) a été coupé à 01 h 16 Z ; rien n'a pu être posé ni testé par les testeurs ce soir.
+2. Écrit et testé en local (niveau 0, pas encore niv. 1) : 9 lots dans la file, prêts à poser.
+3. OFFLOAD : contrats à reconduction (c4_34), correction TOFFLOAD-11 (c4_35), valeur par segment + export tableur (c4_36).
+4. Socle : reprise après refus (19az, A5) — déclencheur, lien, une seule reprise.
+5. FILED : facture adressée à une autre société bloquée (a4_85, TFILED-05) ; reprise après refus en version réduite (a4_86).
+6. CASHD : lien de paiement dans la relance (c2_40, sans prestataire) ; reprise après refus (c2_41).
+7. REPUT : tournures neutres (c3_43) ; la reprise REPUT attend le socle posé.
+8. Lecteur : la relecture avec la consigne du valideur est conçue (format validé), à coder à la reprise.
+9. Varelo (B1) : bloqué, relevé du point de 7 h impossible sans accès.
+10. Rien en production (niv. 3) ; reprise à votre feu vert, après rétablissement de l'accès à la recette.
+
+## POSE de la file (session de Teo, 25/10, 15 h 13 → 15 h 18 Z) — recette rendue
+
+**Accès.** La recette `ygwbgpowzlbdaajlsqkn` est de nouveau visible par le connecteur Supabase de la session de Teo (organisation d'Omega). Le connecteur ne se branche que sur une organisation à la fois : il reste sur celle d'Omega ; `omega-metiers-recette` passe par une connexion directe (mot de passe tapé par Teo).
+
+**Les 9 lots de la file sont posés, dans l'ordre**, par `private.depot_demander` / `depot_executer` aux SHA de la file, chacun inscrit dans `schema_migrations` avec sa provenance :
+
+| # | Lot | SHA | Recette |
+|---|---|---|---|
+| 1 | c4_34 contrats à reconduction | b9bc8471 | `^test_c4_34` 3/3 |
+| 2 | c3_43 tournures neutres | 8c882b8e | `^test_c3_43` 2/2 ; `^test_c3_4[0-3]` 4/4 |
+| 3 | socle 19az reprise après refus | f5f8ff0c | `^test_68_` 9/9 |
+| 4 | a4_85 destinataire (TFILED-05) | 4c8d9fbe | `^test_a4_85` 5/5 |
+| 5 | c4_35 relances d'affaire visibles (TOFFLOAD-11) | fe4ddfaf | `^test_c4_35` 4/4 ; **`test_c4_08_cycle` 22/25** (voir plus bas) |
+| 6 | c4_36 segments et tableur | 58b850b6 | `^test_c4_3[4-6]` 3/3 |
+| 7 | a4_86 reprise après refus FILED | 6470f895 | `^test_a4_8[56]` 3/3 (13 assertions) |
+| 8 | c2_40 lien de paiement | 2b616610 | `^test_c2_40` 3/3 |
+| 9 | c2_41 reprise après refus CASHD | b996c405 | `^test_c2_4[01]` 2/2 |
+
+**Non-régression vérifiée** sur ce que les lots touchent : `^test_6[4-7]_` 4/4 (décision seule, commentaire, délégations, crochet d'approbation), `^test_c2_(05|07|39)_` 3/3, `^test_a4_(07|18)` 7/7. Une suite complète d'un module en un seul appel dépasse la minute de l'outil : elle reste à jouer par morceaux.
+
+**C4 — `test_c4_08_cycle` rouge sur la recette (12, 14, 21), cause de test et non de produit.** Diagnostic (bloc annulé en fin de transaction, rien laissé en base) : les remises du test donnent `envoye`, puis `differe / DELAI_MINIMAL`, `envoye`, `differe / DELAI_MINIMAL`. La seconde relance est remise à la même seconde réelle que la première (le test simule les jours par `p_jour`, pas l'horloge des envois), et la recette applique le délai minimal entre deux messages au même destinataire ; c4_35 attendant désormais le départ de la seconde, la décision ne vient pas. Le test doit vieillir la première remise ou régler le délai du client du banc. À reprendre par C4.
+
+**Reste de la file de reprise** (inchangé) : déploiement de `reput-reponse` depuis worker-c3 8c882b8e (bureau) ; reprises REPUT et OFFLOAD à écrire (le socle 19az est posé) ; A1, relecture avec consigne (~0,5 j) ; testeurs à rejouer (T-FILED F15/F16 pour TFILED-05, T-OFFLOAD c4_34/35/36, T-CASHD c2_40/41, T-REPUT c3_43) ; B1, relevé du point de 7 h. Les sessions restent en pause : rien ne repart sans le feu vert de Teo.
+
+## RELANCE du 26/10, 00 h 51 Z — plafond 15 % du forfait (Teo)
+
+### DEMANDE DE DÉPLOIEMENT (bureau) — 26/10, 00 h 56 Z
+
+- Fonction : `reput-reponse`
+- Source : branche `worker-c3`, SHA `8c882b8e3534dd21ddea35dc6f491af7c171e614`
+- Cible : recette `ygwbgpowzlbdaajlsqkn` uniquement.
+- Une fois que c'est fait, prévenir le coordinateur : T-REPUT rejoue alors le texte de réponse c3_43.
+
+### Relancés à 00 h 55 Z
+
+- T-FILED, T-OFFLOAD, T-CASHD, T-REPUT : ils rejouent les lots posés le 25/10.
+- C4 : correction de `test_c4_08_cycle`, puis la reprise après refus OFFLOAD.
+- C3 : la reprise après refus REPUT.
+- A1 : la relecture avec consigne.
+- B1 : le relevé du point de 7 h (23/10) est transmis brut.
+- Pause d'office à 01 h 40 Z au plus tard, ou plus tôt si Teo envoie PAUSE à 15 %.
+
+### ANNULÉE — demande reput-reponse 8c882b8e (01 h 02 Z)
+
+reput-reponse v31 est déjà déployée au SHA 08b9fe2c00b042ab2c8347a71d4a546b25b02c02, qui contient 8c882b8e (le fichier de la fonction est identique). Il n'y a rien à redéployer. La reprise après refus REPUT (c3_44) était déjà posée et verte le 25/10 : ^test_c3_44 19/19.
+
+### DEMANDE DE DÉPLOIEMENT (bureau) — 26/10, 01 h 02 Z
+
+- Fonction : `lecteur`
+- Source : branche `worker-a1`, SHA `971aec0c58e7713f0cf5d7087cef696c7cf069a3`, paquet produit par outils/preparer_deploiement.ts.
+- Cible : recette `ygwbgpowzlbdaajlsqkn`.
+- Côté SQL, a1_01 et a1_02 et leurs tests sont posés depuis ce SHA ; ^test_a1_0[12]_ passe 4/4.
+
+### Écarts relevés pendant la relance (26/10)
+
+- TFILED-28 (A4, a4_86) : filed_corriger_facture refuse une facture « refusee » (« elle ne se corrige plus »). La reprise après refus attend une correction qui ne peut pas venir : c'est une impasse, et toute reprise FILED finira en reprise_impossible au bout de 24 h.
+- TFILED-29 (FILED) : dans « Imputation proposée, à valider », 2 lignes pour 1 074,68 €. F3, pourtant refusée, y reste comptée, et F13 y est comptée deux fois.
+- TFILED-05 : rejoué. F15 (tiers) donne destinataire.societe bloquant, ce qui est juste. F16 (variante de nom) ne donne pas d'anomalie destinataire, ce qui est juste. F9 reste bloquée par destinataire et doublon.
+- TCASHD-18 (C2, c2_41) : un rappel refusé, puis un règlement partiel lettré, puis la préparation donne 0 préparée et aucune reprise.
+- TCASHD-19 (C2) : la relance en attente reste à 1 085 € après un règlement de 500 €, alors que le reste dû est de 585 €.
+- B1, point de 7 h : l'assemblage est observé (05:00:00,78 Z, 3 groupes), mais la remise n'est pas observée (statut perime). Le gérant, aussi membre de presidence, reçoit la section deux fois. À décider par Teo : soit A3 fusionne les sections de même titre, soit on sort le gérant de presidence sur le banc.
+- T-REPUT, c3_43 : juste. Observation : « un client » (masculin générique) dans le titre de l'alerte et dans le résumé.
+- T-OFFLOAD :
+  - c4_34 juste ;
+  - c4_36 juste (O12 et O13 absents) ;
+  - c4_35 : la passe du 26/10 met la relance 1 d'O8 à valider. Les passes du 02/11 et du 09/11 renvoient 0 partout, ce qui est l'attendu.
+  - O4 n'est pas repris (observation).
+
+### c4_37 posé (01 h 05 Z)
+
+- c4_37, la reprise après refus OFFLOAD, est posé avec son test depuis 679f0db39af3c073f4e20cea60c64ec912653c51. Il a été écrit le 25/10 par une autre session. Il crée le cron « offload-reprises » (chaque minute).
+- ^test_c4_(37|08)_ passe 4/4, 0 not ok. Cela inclut test_c4_08_cycle, réparé par da761bb4 (redondant avec 77bb0f21, mais sans danger).
+
+## PAUSE du 26/10, 01 h 08 Z — avancée sur la pause d'office de 01 h 40 Z : toute la liste de relance est faite
+
+### SHA d'arrêt
+
+| Session | Branche | SHA |
+|---|---|---|
+| T-FILED | testeur-filed | 319694ce |
+| T-OFFLOAD | testeur-offload | 337e299 |
+| T-CASHD | testeur-cashd | 5470547b |
+| T-REPUT | testeur-reput | baa76a0e |
+| C4 | worker-c4 | 0e5f2da9 |
+| C3 | worker-c3 | a7d96c26 (rien de neuf) |
+| A1 | worker-a1 | 68e8c5b |
+| B1 | worker-b1 | 6447e810 |
+
+### BILAN pour Teo
+
+Le niveau 1 (recette) est acquis sur ce qui suit, et RIEN n'est en production.
+
+- Fait et juste, au niveau 1 :
+  - FILED : destinataire tiers bloqué, variante de nom acceptée (TFILED-05).
+  - OFFLOAD : préavis tacite et exprès (c4_34) ; la relance 1 attend le valideur (c4_35) ; valeur par segment (c4_36) ; reprise après refus (c4_37, tests verts).
+  - CASHD : lien de paiement (c2_40).
+  - REPUT : appel sur ligne fixe (c3_43) ; reprise après refus (c3_44, faite le 25/10).
+  - Lecteur : relecture avec consigne (a1_01 et a1_02, tests verts).
+- Reste :
+  - TFILED-28 (bloquant, A4) : une facture refusée ne se corrige plus, donc la reprise FILED n'aboutit jamais.
+  - TFILED-29 : double compte dans « Imputation proposée ».
+  - TCASHD-18 et 19 (C2) : pas de reprise après un règlement partiel, et un montant de relance qui n'est pas mis à jour.
+  - Déploiement du lecteur 971aec0c par le bureau.
+  - Décision de Teo sur le doublon du point de 7 h (B1).
+  - Relevé de production d'A5 (Teo).
+  - Niveau 2 (preuve réelle) et niveau 3 (production) : rien de neuf.
