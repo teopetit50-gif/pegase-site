@@ -1,7 +1,7 @@
 # Manifeste des migrations de production (assemblé, non posé)
 
 Assemblé par `omega/prod/assembler.mjs` depuis 1 page(s) de `omega/prod/exporter.sql` (recette ygwbgpowzlbdaajlsqkn).
-Fichiers écrits : 426 ; exclus : 32 ; à reconstruire : 0 ; erreurs : 0.
+Fichiers écrits : 445 ; exclus : 33 ; à reconstruire : 0 ; erreurs : 0.
 
 | Version | Nom | Décision | Source | Fichier | sha256 (16) | Notes |
 |---|---|---|---|---|---|---|
@@ -12,7 +12,7 @@ Fichiers écrits : 426 ; exclus : 32 ; à reconstruire : 0 ; erreurs : 0.
 | 20260929023244 | `daliro_m0c_planning` | emporter | sql | `20260929023244_daliro_m0c_planning.sql` | e0ff47a0d1d11553 |  |
 | 20260929024032 | `tamila_m10_delais_correctifs` | emporter | sql | `20260929024032_tamila_m10_delais_correctifs.sql` | 03c6abf9b50ff070 |  |
 | 20260929033045 | `varelo_referentiel_perf` | emporter | sql | `20260929033045_varelo_referentiel_perf.sql` | 8aea809681f9fd2c |  |
-| 20260929033851 | `tamila_m10b_porte_etroite` | emporter | sql | `20260929033851_tamila_m10b_porte_etroite.sql` | 75a2b5427e81e860 | create → create or replace (2) : fonction déjà en production, identique |
+| 20260929033851 | `tamila_m10b_porte_etroite` | exclure: déjà en production, à l'identique (relevé du 25/10) | sql | — | — |  |
 | 20260929034413 | `tiroma_releve` | emporter | sql | `20260929034413_tiroma_releve.sql` | 9a3b17712db10b66 |  |
 | 20261004220932 | `socle_lot17_portes_ouvrier` | emporter | sql | `20261004220932_socle_lot17_portes_ouvrier.sql` | 2a61e1a0a953456c |  |
 | 20261005140000 | `socle_lot18a_receptions_table` | emporter | note | `20261005140000_socle_lot18a_receptions_table.sql` | 3742d4a5dd11ad35 | retiré : ligne de schema_migrations (db push écrit la sienne) : insert into supabase_migrations.schema_migrations (version, name, statements) values ('202 |
@@ -133,15 +133,30 @@ Fichiers écrits : 426 ; exclus : 32 ; à reconstruire : 0 ; erreurs : 0.
 | 20261006144947 | `daliro_b6_12_situations` | emporter | note | `20261006144947_daliro_b6_12_situations.sql` | 1b363b8bfaaf83a5 | fichiers : b6_12_situations.sql @ 9566496 ; fichiers de tests ignorés : omega/tests/daliro/b6_07_situations.sql |
 | 20261006144948 | `lorani_b5_11_courriels_guichet` | emporter | note | `20261006144948_lorani_b5_11_courriels_guichet.sql` | 3cf75b6401e7210d | fichiers : b5_11_courriels_guichet.sql @ 218a777 ; fichiers de tests ignorés : omega/tests/lorani/b5_02_courriels_guichet.sql |
 | 20261006144949 | `tamila_b4_06_note` | exclure: rappel : b4_06 déjà enregistré à sa propre version | note | — | — |  |
+| 20261006145007 | `b1_04_encours_groupe_rattrape` | emporter | rattrape | `20261006145007_b1_04_encours_groupe_rattrape.sql` | f8b71813f9c7af8e | rattrapé : b1_04_encours_groupe.sql @ 786017e83c (posé sur la recette sans ligne schema_migrations) ; URL de la recette réécrite en production (1 fois) |
+| 20261006145030 | `b2_03_avis_contravention_rattrape` | emporter | rattrape | `20261006145030_b2_03_avis_contravention_rattrape.sql` | ea22ffb12ee40a96 | rattrapé : b2_03_avis_contravention.sql @ 7e97d91a90 (posé sur la recette sans ligne schema_migrations) |
+| 20261006145031 | `b2_04_designation_conservation_rattrape` | emporter | rattrape | `20261006145031_b2_04_designation_conservation_rattrape.sql` | 9aa1dbc4f13b5c01 | rattrapé : b2_04_designation_conservation.sql @ 7e97d91a90 (posé sur la recette sans ligne schema_migrations) |
+| 20261006145403 | `b4_07_tamila_conflits_rattrape` | emporter | rattrape | `20261006145403_b4_07_tamila_conflits_rattrape.sql` | f9481fd38e4fe168 | rattrapé : b4_07_tamila_conflits.sql @ 875e83f883 (posé sur la recette sans ligne schema_migrations) |
+| 20261006145514 | `a4_16b_filed_lot9_droits_meme_valeur_rattrape` | emporter | rattrape | `20261006145514_a4_16b_filed_lot9_droits_meme_valeur_rattrape.sql` | 319f5cf5aa4c2547 | rattrapé : a4_16b_filed_lot9_droits_meme_valeur.sql @ 00eeeeb12f (posé sur la recette sans ligne schema_migrations) |
+| 20261006145515 | `a4_17_filed_lot10_ecritures_fec_rattrape` | emporter | rattrape | `20261006145515_a4_17_filed_lot10_ecritures_fec_rattrape.sql` | 0ac54aba940ef181 | rattrapé : a4_17_filed_lot10_ecritures_fec.sql @ 00eeeeb12f (posé sur la recette sans ligne schema_migrations) |
+| 20261006145904 | `b3_12c_droits_appelant_rattrape` | emporter | rattrape | `20261006145904_b3_12c_droits_appelant_rattrape.sql` | 18c94ab11a32ba04 | rattrapé : b3_12c_droits_appelant.sql @ 453e33283f (posé sur la recette sans ligne schema_migrations) |
+| 20261006151003 | `b6_13_reception_rattrape` | emporter | rattrape | `20261006151003_b6_13_reception_rattrape.sql` | 3eff7a9dead41a50 | rattrapé : b6_13_reception.sql @ ed60ed2b78 (posé sur la recette sans ligne schema_migrations) |
+| 20261006151004 | `b6_14_tableau_correctif_rattrape` | emporter | rattrape | `20261006151004_b6_14_tableau_correctif_rattrape.sql` | 9fad03d2f9fb8457 | rattrapé : b6_14_tableau_correctif.sql @ ed60ed2b78 (posé sur la recette sans ligne schema_migrations) |
+| 20261006151304 | `b3_13_pilotage_rattrape` | emporter | rattrape | `20261006151304_b3_13_pilotage_rattrape.sql` | 435570988d69e4c7 | rattrapé : b3_13_pilotage.sql @ 80465b04dd (posé sur la recette sans ligne schema_migrations) |
+| 20261006151642 | `b6_15_point_matin_rattrape` | emporter | rattrape | `20261006151642_b6_15_point_matin_rattrape.sql` | 1c2b00352d5153e4 | rattrapé : b6_15_point_matin.sql @ 81a7b0461d (posé sur la recette sans ligne schema_migrations) |
+| 20261006151812 | `b1_05_contrats_groupe_rattrape` | emporter | rattrape | `20261006151812_b1_05_contrats_groupe_rattrape.sql` | d78a941539e19501 | rattrapé : b1_05_contrats_groupe.sql @ d36967609b (posé sur la recette sans ligne schema_migrations) ; URL de la recette réécrite en production (1 fois) |
+| 20261006152118 | `b2_05_etats_des_lieux_rattrape` | emporter | rattrape | `20261006152118_b2_05_etats_des_lieux_rattrape.sql` | 9303b4eae417bbe1 | rattrapé : b2_05_etats_des_lieux.sql @ 36bd54f81e (posé sur la recette sans ligne schema_migrations) |
 | 20261006152132 | `recette_pa_bac_a_sable` | exclure: propre à la recette (bac à sable de la plateforme agréée, cron d'échange de recette) | note | — | — |  |
 | 20261006152713 | `b2_05b_revoquer_chiffrer_agence` | emporter | note | `20261006152713_b2_05b_revoquer_chiffrer_agence.sql` | 62475adac2491f4f | fichiers : b2_05b_revoquer_chiffrer_agence.sql @ 36bd54f |
 | 20261006153755 | `b5_13_situations_visas` | emporter | note | `20261006153755_b5_13_situations_visas.sql` | 227ca795ff305fd3 | fichiers : b5_13_situations_visas.sql @ 53bc500 |
 | 20261006153756 | `b6_16_encaissement` | emporter | note | `20261006153756_b6_16_encaissement.sql` | 8cd99978162330cb | fichiers : b6_16_encaissement.sql @ 187e1c1 |
 | 20261006153757 | `19ah_essai_donnees_fictives` | emporter | note | `20261006153757_19ah_essai_donnees_fictives.sql` | 70206f4b7a539345 | fichiers : 19ah_essai_donnees_fictives.sql @ dcb2542 |
 | 20261006153758 | `b3_14_rappels_patients` | emporter | note | `20261006153758_b3_14_rappels_patients.sql` | 09b7c12fde752d16 | fichiers : b3_14_rappels_patients.sql @ d64d4c1 |
+| 20261006154255 | `b5_12_honoraires_phases_rattrape` | emporter | rattrape | `20261006154255_b5_12_honoraires_phases_rattrape.sql` | 1edac6e8ebb4e597 | rattrapé : b5_12_honoraires_phases.sql @ 7515fbdd78 (posé sur la recette sans ligne schema_migrations) |
 | 20261006154508 | `b4_08_tamila_avis_lecteur` | emporter | note | `20261006154508_b4_08_tamila_avis_lecteur.sql` | 01e27c65a722ab80 | fichiers : b4_08_tamila_avis_lecteur.sql @ 2556214 |
 | 20261006154509 | `b1_06_reciproques` | emporter | note | `20261006154509_b1_06_reciproques.sql` | a2ec78e313ac59c1 | fichiers : b1_06_reciproques.sql @ ccc8f8f ; URL de la recette réécrite en production (1 fois) |
 | 20261006154510 | `b5_13b_privileges` | emporter | note | `20261006154510_b5_13b_privileges.sql` | a4eb1b756716718a | fichiers : b5_13b_privileges.sql @ 7515fbd |
+| 20261006154622 | `a4_18_filed_lot11_echange_pa_rattrape` | emporter | rattrape | `20261006154622_a4_18_filed_lot11_echange_pa_rattrape.sql` | bc25d5845b23a5de | rattrapé : a4_18_filed_lot11_echange_pa.sql @ 52100b4999 (posé sur la recette sans ligne schema_migrations) |
 | 20261006155141 | `daliro_taux_penalites_2026s2` | emporter | note | `20261006155141_daliro_taux_penalites_2026s2.sql` | cd68b44d5ca673cd | fichiers : taux_penalites_2026s2.sql @ 66f5ec6 |
 | 20261006155142 | `a4_19_filed_lot11b_pa_fournisseur_etranger` | emporter | note | `20261006155142_a4_19_filed_lot11b_pa_fournisseur_etranger.sql` | 2bc77e20d8aebd61 | fichiers : a4_19_filed_lot11b_pa_fournisseur_etranger.sql @ 52100b4 |
 | 20261006155143 | `19ah_essai_donnees_fictives_v2` | emporter | note | `20261006155143_19ah_essai_donnees_fictives_v2.sql` | b2366594c5b40928 | fichiers : 19ah_essai_donnees_fictives.sql @ 77cecd9 |
@@ -290,6 +305,7 @@ Fichiers écrits : 426 ; exclus : 32 ; à reconstruire : 0 ; erreurs : 0.
 | 20261011145239 | `b1_17_caisses` | emporter | note | `20261011145239_b1_17_caisses.sql` | 09a2cf4b9e3af8a1 | fichiers : b1_17_caisses.sql @ c78b91c ; b1_20 cité comme test : ignoré ; b1_13 cité comme test : ignoré |
 | 20261011150420 | `b5_27_liens_espace2` | emporter | note | `20261011150420_b5_27_liens_espace2.sql` | 25444595cb66877c | fichiers : b5_27_liens_espace2.sql @ eada47c ; b5_01 cité comme test : ignoré |
 | 20261011150757 | `b1_18_contexte` | emporter | note | `20261011150757_b1_18_contexte.sql` | 42ee6fa54acc2fee | fichiers : b1_18_contexte.sql @ origin/worker-b1 ; b1_21 cité comme test : ignoré ; b1_18 : aucun SHA, pointe de worker-b1 prise |
+| 20261011150902 | `c2_07_liens_rattrape` | emporter | rattrape | `20261011150902_c2_07_liens_rattrape.sql` | e81c67dd644d2d52 | rattrapé : c2_07_liens.sql @ 5526abb348 (posé sur la recette sans ligne schema_migrations) |
 | 20261011151103 | `b6_30_b1_18` | emporter | note | `20261011151103_b6_30_b1_18.sql` | 208a21df5bf7cdcc | fichiers : b6_30_point_mensuel.sql @ cb55002, b1_18_contexte.sql @ 357fcb2 ; b6_26 cité comme test : ignoré ; b1_21 cité comme test : ignoré |
 | 20261011151249 | `c2_06_c2_07_liens` | emporter | note | `20261011151249_c2_06_c2_07_liens.sql` | c8214d4bbc37e4a9 | fichiers : c2_06_validation.sql @ d01be6e ; c2_07 cité comme test : ignoré |
 | 20261011152712 | `c2_08_portefeuille` | emporter | note | `20261011152712_c2_08_portefeuille.sql` | 190c8deacf4fa407 | fichiers : c2_08_portefeuille.sql @ 0615c80 |
@@ -298,6 +314,7 @@ Fichiers écrits : 426 ; exclus : 32 ; à reconstruire : 0 ; erreurs : 0.
 | 20261015122131 | `a4_36_note_frais_devise` | emporter | note | `20261015122131_a4_36_note_frais_devise.sql` | e13fbe23aaa90212 | fichiers : a4_36_filed_lot28_note_frais_devise.sql @ 586bcba ; a4_28 cité comme test : ignoré |
 | 20261015122225 | `c4_11_impayes` | emporter | note | `20261015122225_c4_11_impayes.sql` | 303b07afe12392c9 | fichiers : c4_11_impayes.sql @ 77756c1 ; c4_10 cité comme test : ignoré ; c4_11 cité comme test : ignoré |
 | 20261015122255 | `b2_17_responsable_remise` | emporter | note | `20261015122255_b2_17_responsable_remise.sql` | 7d84046b3fe8cfd1 | fichiers : b2_17_responsable_remise.sql @ b883669 |
+| 20261015122308 | `b3t_05_couts_plan_de_flotte_rattrape` | emporter | rattrape | `20261015122308_b3t_05_couts_plan_de_flotte_rattrape.sql` | 09b4a5b2e594ec96 | rattrapé : b3t_05_couts_plan_de_flotte.sql @ eb5b4cd267 (posé sur la recette sans ligne schema_migrations) |
 | 20261015122350 | `a4_37_c3_09_b3t_05` | emporter | note | `20261015122350_a4_37_c3_09_b3t_05.sql` | 6386161f962e5efc | fichiers : a4_37_filed_lot29_note_frais_envois.sql @ 9166695, a4_28_filed_lot20_envoi_api_comptable.sql @ 9166695, c3_09_service_nomme.sql @ 8699ed0 |
 | 20261015122505 | `c4_12_canal_et_vague` | emporter | note | `20261015122505_c4_12_canal_et_vague.sql` | 1f7b1958bee36e10 | fichiers : c4_12_canal_et_vague.sql @ 18a2ff7 ; c4_03 cité comme test : ignoré ; c4_04 cité comme test : ignoré ; c4_12 cité comme test : ignoré |
 | 20261015122556 | `b5_29_suspendre_controle` | emporter | note | `20261015122556_b5_29_suspendre_controle.sql` | 71793357689e6987 | fichiers : b5_29_suspendre_controle.sql @ 84824d6 ; b5_18 cité comme test : ignoré |
@@ -308,6 +325,7 @@ Fichiers écrits : 426 ; exclus : 32 ; à reconstruire : 0 ; erreurs : 0.
 | 20261015124240 | `b2_19_audit_retours` | emporter | note | `20261015124240_b2_19_audit_retours.sql` | 812e0a3b912bfe10 | fichiers : b2_19_audit_retours.sql @ 8838677 |
 | 20261015124627 | `b5_31_regler_controles` | emporter | note | `20261015124627_b5_31_regler_controles.sql` | 21e69dd8284fb5ee | fichiers : b5_31_regler_controles.sql @ 839f669, b6_33_devis_pdf.sql @ 6033be8 ; b5_20 cité comme test : ignoré |
 | 20261015130726 | `b5_32_b5_33` | emporter | note | `20261015130726_b5_32_b5_33.sql` | 69c462fdf5aabf9a | fichiers : b5_32_avancement_constate.sql @ 8d42f1c ; b5_19 cité comme test : ignoré ; b5_32 cité comme test : ignoré ; b5_21 cité comme test : ignoré ; b5_33 cité comme test : ignoré ; b5_22 cité comme test : ignoré ; b5_32_b5_33 : fichier trouvé par le lot b5_32 |
+| 20261015131728 | `b5_33_retenue_avance_penalites_rattrape` | emporter | rattrape | `20261015131728_b5_33_retenue_avance_penalites_rattrape.sql` | 22116ce14d33f744 | rattrapé : b5_33_retenue_avance_penalites.sql @ b340e3ed5a (posé sur la recette sans ligne schema_migrations) |
 | 20261015133816 | `b6_34_decalage_prevenu` | emporter | note | `20261015133816_b6_34_decalage_prevenu.sql` | 5712236d505949e3 | fichiers : b6_34_decalage_prevenu.sql @ 8bd8c09 ; b6_30 cité comme test : ignoré |
 | 20261015135154 | `b6_35_ordre_meteo` | emporter | note | `20261015135154_b6_35_ordre_meteo.sql` | 5034ae72398f5994 | fichiers : b6_35_ordre_meteo.sql @ b8081b3 ; b6_31 cité comme test : ignoré |
 | 20261017151124 | `c4_16_un_message` | emporter | note | `20261017151124_c4_16_un_message.sql` | a279c681308ad00e | fichiers : c4_16_un_message.sql @ 1b37c0a9 |
@@ -341,7 +359,9 @@ Fichiers écrits : 426 ; exclus : 32 ; à reconstruire : 0 ; erreurs : 0.
 | 20261018172619 | `banc_demo_aau_dfa8f1ba` | exclure: donnée du banc | note | — | — |  |
 | 20261018212014 | `a4_44_filed_lot36_tva_etrangere_libelle` | emporter | note | `20261018212014_a4_44_filed_lot36_tva_etrangere_libelle.sql` | 72411d41dc3fa71d | fichiers : a4_44_filed_lot36_tva_etrangere_libelle.sql @ 9b46d4f, a4_32_filed_lot24_reprise_des_pieces.sql @ 9b46d4f |
 | 20261018212113 | `c4_17_restitution` | emporter | note | `20261018212113_c4_17_restitution.sql` | 5987b65647304af6 | fichiers : c4_17_restitution.sql @ cba4ae41 |
+| 20261018212801 | `c3_12_indicateurs_services_rattrape` | emporter | rattrape | `20261018212801_c3_12_indicateurs_services_rattrape.sql` | 2622dbdc89c86550 | rattrapé : c3_12_indicateurs_services.sql @ c13ea951b9 (posé sur la recette sans ligne schema_migrations) |
 | 20261018212901 | `c2_11_envoi_main_c3_12_services` | emporter | note | `20261018212901_c2_11_envoi_main_c3_12_services.sql` | 859d031ac62eadc1 | fichiers : c2_11_envoi_main.sql @ 842f9c25 ; c2_11_envoi_main_c3_12_services : fichier trouvé par le lot c2_11 |
+| 20261018213105 | `c3_13_envoi_automatique_rattrape` | emporter | rattrape | `20261018213105_c3_13_envoi_automatique_rattrape.sql` | 73d04850f5b26cb8 | rattrapé : c3_13_envoi_automatique.sql @ 70b2e5039e (posé sur la recette sans ligne schema_migrations) |
 | 20261018213459 | `c4_17_bis_c3_13_envoi_auto` | emporter | note | `20261018213459_c4_17_bis_c3_13_envoi_auto.sql` | 82768fc6201bbb64 | fichiers : c4_17_restitution.sql @ 946acf9a ; c4_17_bis_c3_13_envoi_auto : fichier trouvé par le lot c4_17 |
 | 20261018214034 | `a4_32_test_5988307` | exclure: pose de tests, pas une migration | note | — | — |  |
 | 20261018214058 | `c2_12_envoi_auto` | emporter | note | `20261018214058_c2_12_envoi_auto.sql` | 42cc9fc2a59c63ff | fichiers : c2_12_envoi_auto.sql @ b314574e ; c2_12 cité comme test : ignoré ; c2_03 cité comme test : ignoré |
@@ -461,5 +481,5 @@ Fichiers écrits : 426 ; exclus : 32 ; à reconstruire : 0 ; erreurs : 0.
 | 20261025151724 | `c2_40_lien_paiement` | emporter | note | `20261025151724_c2_40_lien_paiement.sql` | fd447affb0e0b9d4 | fichiers : c2_40_lien_paiement.sql @ 2b61661005bb3020cd5fbf9c40bfbc93e60317fd ; fichiers de tests ignorés : omega/tests/cashd/c2_40_lien_paiement.sql |
 | 20261025151751 | `c2_41_reprise_apres_refus` | emporter | note | `20261025151751_c2_41_reprise_apres_refus.sql` | 905a31a176093189 | fichiers : c2_41_reprise_apres_refus.sql @ b996c405a5343f7b98fc6c61716e830da7684e43 ; fichiers de tests ignorés : omega/tests/cashd/c2_41_reprise_apres_refus.sql |
 | 20261025180655 | `c4_08_test_delai_minimal` | exclure: pose de tests, pas une migration | note | — | — |  |
-| 20261025180656 | `a5_01_cloture` | emporter | depot | `20261025180656_a5_01_cloture.sql` | dba1733746bf2570 | étape C |
+| 20261025180656 | `a5_01_cloture` | emporter | depot | `20261025180656_a5_01_cloture.sql` | cb80840e588a9dc8 | étape C |
 | 20261025180657 | `environnement_production` | emporter | assembleur | `20261025180657_environnement_production.sql` | 7116a2425e3b2657 | étape C, après a5_01 |

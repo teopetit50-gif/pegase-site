@@ -80,8 +80,37 @@ const MANUELS = {
   a4_accord_sceau_banc: { exclure: 'données du banc (accord du sceau proposé par le gérant du banc)' },
   cashd_nobat_banc: { exclure: 'données du banc (essai NOBAT de CASHD)' },
   cashd_nobat_v2: { exclure: 'données du banc (essai NOBAT de CASHD, rejoué)' },
+  // 25/10 : la production a déjà tamila_m10 et m10b, à l'identique (empreintes du 25/10) ; m10b supprime une fonction
+  // (tamila_porte_delais) qu'elle n'a jamais eue : le rejouer échoue.
+  tamila_m10b_porte_etroite: { exclure: 'déjà en production, à l\'identique (relevé du 25/10)' },
   daliro_taux_penalites_2026s2: { fichiers: [{ sha: '66f5ec6', chemin: 'omega/modules/daliro/reglages/taux_penalites_2026s2.sql' }] },
 };
+
+// 25/10 : lots POSÉS sur la recette SANS ligne dans schema_migrations (ses objets y sont, l'export ne les voyait pas ; la
+// répétition du 25/10 échouait sur leurs tables). Fichier du dépôt au SHA de son dernier commit, version = l'heure UTC de
+// ce commit (avant les lots qui en dépendent). Repérés en croisant les fichiers des branches et le relevé de la recette.
+const RATTRAPES = [
+  { version: '20261006145007', nom: 'b1_04_encours_groupe', sha: '786017e83c', chemin: 'omega/modules/varelo/migrations/b1_04_encours_groupe.sql' },
+  { version: '20261006145030', nom: 'b2_03_avis_contravention', sha: '7e97d91a90', chemin: 'omega/modules/tavaro/migrations/b2_03_avis_contravention.sql' },
+  { version: '20261006145031', nom: 'b2_04_designation_conservation', sha: '7e97d91a90', chemin: 'omega/modules/tavaro/migrations/b2_04_designation_conservation.sql' },
+  { version: '20261006145403', nom: 'b4_07_tamila_conflits', sha: '875e83f883', chemin: 'omega/modules/tamila/migrations/b4_07_tamila_conflits.sql' },
+  { version: '20261006145514', nom: 'a4_16b_filed_lot9_droits_meme_valeur', sha: '00eeeeb12f', chemin: 'omega/migrations/a4_16b_filed_lot9_droits_meme_valeur.sql' },
+  { version: '20261006145515', nom: 'a4_17_filed_lot10_ecritures_fec', sha: '00eeeeb12f', chemin: 'omega/migrations/a4_17_filed_lot10_ecritures_fec.sql' },
+  { version: '20261006145904', nom: 'b3_12c_droits_appelant', sha: '453e33283f', chemin: 'omega/modules/tiroma/migrations/b3_12c_droits_appelant.sql' },
+  { version: '20261006151003', nom: 'b6_13_reception', sha: 'ed60ed2b78', chemin: 'omega/modules/daliro/migrations/b6_13_reception.sql' },
+  { version: '20261006151004', nom: 'b6_14_tableau_correctif', sha: 'ed60ed2b78', chemin: 'omega/modules/daliro/migrations/b6_14_tableau_correctif.sql' },
+  { version: '20261006151304', nom: 'b3_13_pilotage', sha: '80465b04dd', chemin: 'omega/modules/tiroma/migrations/b3_13_pilotage.sql' },
+  { version: '20261006151642', nom: 'b6_15_point_matin', sha: '81a7b0461d', chemin: 'omega/modules/daliro/migrations/b6_15_point_matin.sql' },
+  { version: '20261006151812', nom: 'b1_05_contrats_groupe', sha: 'd36967609b', chemin: 'omega/modules/varelo/migrations/b1_05_contrats_groupe.sql' },
+  { version: '20261006152118', nom: 'b2_05_etats_des_lieux', sha: '36bd54f81e', chemin: 'omega/modules/tavaro/migrations/b2_05_etats_des_lieux.sql' },
+  { version: '20261006154255', nom: 'b5_12_honoraires_phases', sha: '7515fbdd78', chemin: 'omega/modules/lorani/migrations/b5_12_honoraires_phases.sql' },
+  { version: '20261006154622', nom: 'a4_18_filed_lot11_echange_pa', sha: '52100b4999', chemin: 'omega/migrations/a4_18_filed_lot11_echange_pa.sql' },
+  { version: '20261011150902', nom: 'c2_07_liens', sha: '5526abb348', chemin: 'omega/modules/cashd/migrations/c2_07_liens.sql' },
+  { version: '20261015122308', nom: 'b3t_05_couts_plan_de_flotte', sha: 'eb5b4cd267', chemin: 'omega/modules/tavaro/migrations/b3t_05_couts_plan_de_flotte.sql' },
+  { version: '20261015131728', nom: 'b5_33_retenue_avance_penalites', sha: 'b340e3ed5a', chemin: 'omega/modules/lorani/migrations/b5_33_retenue_avance_penalites.sql' },
+  { version: '20261018212801', nom: 'c3_12_indicateurs_services', sha: 'c13ea951b9', chemin: 'omega/modules/reput/migrations/c3_12_indicateurs_services.sql' },
+  { version: '20261018213105', nom: 'c3_13_envoi_automatique', sha: '70b2e5039e', chemin: 'omega/modules/reput/migrations/c3_13_envoi_automatique.sql' },
+];
 
 const arbres = new Map();
 function arbre(sha) {
@@ -229,8 +258,6 @@ const A_RETIRER_PARTOUT = [
   [/^\s*select\b[^;]*\bruntests\s*\(/i, 'appel de tests pgTAP (pgTAP ne va pas en production)'],
   [/^\s*select\s+public\.resoudre_boite\s*\(/i, 'contrôle de pose réservé au rôle serveur'],
 ];
-// Fonctions que la production a déjà, identiques (empreinte du 25/10) : « create » deviendrait une erreur.
-const DEJA_EN_PRODUCTION = /^([ \t]*)create\s+function\s+(private\.tamila_(?:ouvrir|fermer)_porte)\b/gim;
 
 function nettoyer(sql) {
   const retirees = [];
@@ -271,11 +298,6 @@ function transformer(texte) {
     return !regle;
   }).join('');
   notes.push(...partout);
-  const nDeja = (texte.match(DEJA_EN_PRODUCTION) || []).length;
-  if (nDeja) {
-    texte = texte.replace(DEJA_EN_PRODUCTION, '$1create or replace function $2');
-    notes.push(`create → create or replace (${nDeja}) : fonction déjà en production, identique`);
-  }
   const avant = texte;
   texte = texte.replace(/^[ \t]*create\s+extension\s+(if\s+not\s+exists\s+)?pgtap\b[^;]*;[ \t]*$/gim,
     '-- (assembler.mjs) extension pgtap retirée : pgTAP ne va pas en production.');
@@ -322,6 +344,8 @@ function principal() {
     process.exit(2);
   }
   const lignes = lirePages(pages);
+  for (const r of RATTRAPES) lignes.push({ version: r.version, name: r.nom + '_rattrape', decision: 'emporter', source: 'rattrape', rattrape: r });
+  lignes.sort((a, b) => String(a.version).localeCompare(String(b.version)));
   mkdirSync(SORTIE, { recursive: true });
   const manifeste = [];
   const erreurs = [];
@@ -345,6 +369,11 @@ function principal() {
         texte = propre;
         origine = `requête retrouvée dans le fil de la session coordinateur : omega/prod/recupere/${recupere.split('/').pop()}`;
         notesLigne.push(...retirees.map((r) => 'retiré : ' + r));
+      } else if (l.rattrape) {
+        const r = l.rattrape;
+        texte = `-- ═══ ${r.chemin} @ ${r.sha}\n${lireAuSha(r.sha, r.chemin)}`;
+        origine = `dépôt, lot posé sur la recette sans ligne schema_migrations (rattrapé le 25/10) : ${r.sha} ${r.chemin}`;
+        notesLigne.push(`rattrapé : ${r.chemin.split('/').pop()} @ ${r.sha} (posé sur la recette sans ligne schema_migrations)`);
       } else if (MANUELS[l.name] && MANUELS[l.name].exclure) {
         manifeste.push({ version, name: l.name, decision: 'exclure: ' + MANUELS[l.name].exclure, source: l.source, fichier: '—', notes: [] });
         continue;

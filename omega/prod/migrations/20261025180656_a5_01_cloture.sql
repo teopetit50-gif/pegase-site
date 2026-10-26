@@ -1,5 +1,5 @@
 -- 20261025180656 a5_01_cloture
--- Source : dépôt worker-a5 bae89915 omega/migrations/a5_01_private_execute.sql (étape C du dossier).
+-- Source : dépôt worker-a5 7d6dd3d9 omega/migrations/a5_01_private_execute.sql (étape C du dossier).
 
 -- a5_01_private_execute — reprendre l'EXECUTE accordé par défaut à PUBLIC sur les fonctions du schéma private.
 --

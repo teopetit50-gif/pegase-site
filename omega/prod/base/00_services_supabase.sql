@@ -1,11 +1,42 @@
 -- omega/prod/base/00_services_supabase.sql — RÉPÉTITION SEULEMENT. Ne se pose jamais en production.
 --
 -- L'image supabase/postgres seule n'a pas ce que les services Storage et Auth de Supabase créent dans une vraie base :
--- le schéma storage (buckets, objects, foldername…) et les colonnes récentes de auth.users (deleted_at, is_anonymous…).
+-- le schéma storage (buckets, objects, foldername…) et toutes les colonnes de auth.users de la production (banned_until, deleted_at, is_anonymous…).
 -- Forme relevée dans le catalogue de la production le 25/10/2026 (information_schema, pg_proc ; aucune donnée).
 -- Sans ce fichier, la répétition du 25/10 échouait sur 19b, 19m, 19n, b5_01 (storage.objects) et 19af (deleted_at).
 -- Idempotent : sur une base qui a déjà ces objets, il ne change rien.
 
+alter table auth.users add column if not exists instance_id uuid;
+alter table auth.users add column if not exists aud character varying;
+alter table auth.users add column if not exists role character varying;
+alter table auth.users add column if not exists email character varying;
+alter table auth.users add column if not exists encrypted_password character varying;
+alter table auth.users add column if not exists email_confirmed_at timestamptz;
+alter table auth.users add column if not exists invited_at timestamptz;
+alter table auth.users add column if not exists confirmation_token character varying;
+alter table auth.users add column if not exists confirmation_sent_at timestamptz;
+alter table auth.users add column if not exists recovery_token character varying;
+alter table auth.users add column if not exists recovery_sent_at timestamptz;
+alter table auth.users add column if not exists email_change_token_new character varying;
+alter table auth.users add column if not exists email_change character varying;
+alter table auth.users add column if not exists email_change_sent_at timestamptz;
+alter table auth.users add column if not exists last_sign_in_at timestamptz;
+alter table auth.users add column if not exists raw_app_meta_data jsonb;
+alter table auth.users add column if not exists raw_user_meta_data jsonb;
+alter table auth.users add column if not exists is_super_admin boolean;
+alter table auth.users add column if not exists created_at timestamptz;
+alter table auth.users add column if not exists updated_at timestamptz;
+alter table auth.users add column if not exists phone text;
+alter table auth.users add column if not exists phone_confirmed_at timestamptz;
+alter table auth.users add column if not exists phone_change text;
+alter table auth.users add column if not exists phone_change_token character varying;
+alter table auth.users add column if not exists phone_change_sent_at timestamptz;
+alter table auth.users add column if not exists confirmed_at timestamptz;
+alter table auth.users add column if not exists email_change_token_current character varying;
+alter table auth.users add column if not exists email_change_confirm_status smallint;
+alter table auth.users add column if not exists banned_until timestamptz;
+alter table auth.users add column if not exists reauthentication_token character varying;
+alter table auth.users add column if not exists reauthentication_sent_at timestamptz;
 alter table auth.users add column if not exists is_sso_user boolean not null default false;
 alter table auth.users add column if not exists deleted_at timestamptz;
 alter table auth.users add column if not exists is_anonymous boolean not null default false;
