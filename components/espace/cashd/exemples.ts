@@ -188,4 +188,13 @@ export const RELANCES_EXEMPLE: Relance[] = [
     corps: null, montant: 960, penalites: 0, indemnites: 40, statut: "coupee", etat: "coupee", motif: "compte pause : Le gérant a appelé : paiement promis vendredi", demande_id: id(205), envoi_id: null, envoye_le: null,
     pieces: [{ facture_id: id(51), numero: "F-2026-120", palier: "rappel", reste_du: 960, retard_jours: 7, penalites: 0, indemnite: 40 }],
   },
+  {
+    // Validée ce matin, à envoyer soi-même (envoi du module coupé) : le geste « Noter l'envoi à la main » (c2_11).
+    id: id(106), compte_id: giraud.id, compte: giraud.nom, jour: decale(0), nature: "facture", palier: "relance", langue: "fr",
+    destinataire_adresse: giraud.contact_facturation_email, destinataire_nom: "M. Giraud",
+    sujet: "Atelier Bertin — relance : 1 850,00 € restent dus",
+    corps: `Bonjour M. Giraud,\n\nMalgré notre précédent rappel, la somme suivante reste impayée sur votre compte C-GIRAUD, secteur Bâtiment :\n  • Facture F-2026-088 du ${decale(-55).split("-").reverse().join("/")}, 1 850,00 € TTC, échue le ${decale(-25).split("-").reverse().join("/")} (25 jours de retard) : 1 850,00 € restant dus\n\nTotal restant dû : 1 850,00 €. Nous vous remercions de procéder au règlement au plus tard le ${decale(8).split("-").reverse().join("/")}.\nNous vous rappelons que tout retard de paiement rend exigibles une indemnité forfaitaire pour frais de recouvrement de 40,00 € par facture et des pénalités de retard (Code de commerce, art. L441-10).\nSi vous contestez tout ou partie de ces montants, merci de nous l'écrire pour que nous l'examinions.${signature}`,
+    montant: 1850, penalites: 0, indemnites: 40, statut: "a_valider", etat: "validee", motif: null, demande_id: id(206), envoi_id: null, envoye_le: null,
+    pieces: [{ facture_id: id(41), numero: "F-2026-088", palier: "relance", reste_du: 1850, retard_jours: 25, penalites: 0, indemnite: 40 }],
+  },
 ];

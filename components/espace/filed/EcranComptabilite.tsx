@@ -13,6 +13,9 @@
    Les comptes : les cinq rôles, le numéro et le libellé en place (ou la
    valeur par défaut du plan comptable), modifiables par le gérant ou
    l'administrateur (filed_regler_compte_systeme).
+   Les exports (21/10, A4) : ce que le balayage a produit, dont le sceau
+   mensuel de l'historique ; ?export=<id> (le lien du courriel du sceau)
+   met sa ligne en avant (ExportsFiled).
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -27,6 +30,7 @@ import { Avis, Chargement, Pastille, Ruban } from "../ui";
 import { montant } from "../format";
 import { COMPTES_SYSTEME, SOUS_TITRE_FEC, exporterFec, quand, reglerCompte, telecharger, type ExportFec, type RoleCompte } from "./factureElectronique";
 import { monClient } from "./portes";
+import ExportsFiled from "./ExportsFiled";
 
 type Exercice = { id: string; libelle: string; debut: string; fin: string; statut: string; entite_id: string | null };
 type Compte = { role: RoleCompte; numero: string; libelle: string; regle: boolean };
@@ -319,6 +323,8 @@ export default function EcranComptabilite({ gabarit }: { gabarit?: "sb" } = {}) 
               {exportFec}
             </div>
           </section>
+
+          <ExportsFiled source={source === "reelle" ? "reelle" : "exemple"} client={ctx.client} />
 
           <section className="esp-carte" aria-labelledby="titre-comptes">
             <div className="esp-carte-tete">

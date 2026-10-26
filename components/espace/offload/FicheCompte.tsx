@@ -19,6 +19,7 @@ import { dateCourte, montant, nombreFr } from "../format";
 import { Avis, Def, Pastille, Vide } from "../ui";
 import Courbe from "./Courbe";
 import AffairesCompte from "./AffairesCompte";
+import { Effacement } from "./EnvoiAuto";
 import { Verification } from "./GardeFous";
 import ParcCompte from "./ParcCompte";
 import type { Source } from "../source";
@@ -212,6 +213,9 @@ export default function FicheCompte({ fiche, onAgir, source = "exemple" }: { fic
           <ParcCompte key={compte.id} compte={compte.id} source={source} />
         </>
       ) : null}
+
+      <div className="esp-section-titre">Données de la personne</div>
+      <Effacement key={`effacement-${compte.id}`} compte={compte} source={source} />
 
       <div className="esp-section-titre">Tâches</div>
       {fiche.taches.length === 0 ? <p className="esp-kpi-sous">Aucune tâche sur ce compte.</p> : null}

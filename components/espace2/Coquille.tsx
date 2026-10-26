@@ -760,6 +760,7 @@ const FONCTIONS: Record<string, Lien[]> = {
   filed: [
     { libelle: "Contrôles et fraude", href: `${RACINE}/filed/controles` },
     { libelle: "Circuit de validation", href: `${RACINE}/filed/circuit` },
+    { libelle: "Refusées", href: `${RACINE}/filed/refusees` },
   ],
   cashd: [
     { libelle: "Balance âgée", href: `${RACINE}/cashd/balance` },

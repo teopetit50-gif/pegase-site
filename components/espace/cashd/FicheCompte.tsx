@@ -321,7 +321,7 @@ export default function FicheCompte({ fiche, actions }: { fiche: Fiche; actions:
                     <tr key={p.id} data-solde={p.reste_du <= 0 && p.nature !== "devis" ? "" : undefined}>
                       <td>
                         <strong>{p.numero}</strong>
-                        <span className="c2-sous">{p.nature === "devis" ? `Devis du ${dateCourte(p.date_emission)} · ${p.jours_ecoules} j sans réponse` : p.nature === "avoir" ? `Avoir du ${dateCourte(p.date_emission)}` : `Du ${dateCourte(p.date_emission)} · ${montant(p.montant_ttc)} TTC`}</span>
+                        <span className="c2-sous">{p.nature === "devis" ? `Devis du ${dateCourte(p.date_emission)} · ${p.jours_ecoules} j sans réponse` : p.nature === "avoir" ? `Avoir du ${dateCourte(p.date_emission)}${p.facture_visee ? ` · sur ${p.facture_visee}` : ""}` : `Du ${dateCourte(p.date_emission)} · ${montant(p.montant_ttc)} TTC`}</span>
                       </td>
                       <td>
                         {p.echeance ? dateCourte(p.echeance) : "—"}
@@ -334,7 +334,12 @@ export default function FicheCompte({ fiche, actions }: { fiche: Fiche; actions:
                         {p.devise && p.devise !== "EUR" && p.reste_du_eur !== null && p.reste_du_eur !== undefined ? <span className="c2-sous">soit {montant(p.reste_du_eur)}</span> : null}
                       </td>
                       <td>
-                        {p.attente_commande_le ? (
+                        {p.relance_suspendue ? (
+                          <>
+                            <Pastille teinte="ambre">Relance suspendue</Pastille>
+                            <span className="c2-sous">{p.relance_suspendue}</span>
+                          </>
+                        ) : p.attente_commande_le ? (
                           <>
                             <Pastille teinte="ambre">Attend un bon de commande</Pastille>
                             <span className="c2-sous">depuis le {dateCourte(p.attente_commande_le)} · relance à {p.attente_commande_nom ?? p.attente_commande_email}</span>

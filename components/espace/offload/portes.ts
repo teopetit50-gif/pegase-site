@@ -16,13 +16,16 @@
      lectures offload_affaires_liste, offload_affaires_compte ;
      lectures offload_pilotage, offload_arretes_liste (c4_09) ;
      offload_ecrire_regle, offload_retirer_regle, offload_suspendre, offload_reprendre,
-     offload_lever_verification, offload_rattacher_groupe (c4_10) ; lectures offload_garde_fous, offload_groupes.
+     offload_lever_verification, offload_rattacher_groupe (c4_10) ; lectures offload_garde_fous, offload_groupes ;
+     lecture offload_restitution (c4_17) ; offload_regler (envoi_auto, sujets_auto), offload_donner_accord_auto,
+     offload_revoquer_accord_auto, lecture offload_envoi_auto (c4_18) ; offload_effacer_compte (c4_19) ;
+     lectures offload_valeur_par_segment, offload_restitution_tableur (c4_36, gérant et administrateur).
    La décision sur un message (valider, refuser) se prend dans « À valider »,
    l'écran commun des demandes de validation du socle.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { AffaireCompte, AffairesListe, Arrete, EcheanceLigne, Fiche, GardeFous, Groupes, ParcCompte, Pilotage, Tableau } from "./types";
+import type { AffaireCompte, AffairesListe, Arrete, EcheanceLigne, EnvoiAuto, Fiche, GardeFous, Groupes, ParcCompte, Pilotage, RestitutionTableur, Segment, SujetAuto, Tableau } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -170,4 +173,39 @@ export async function chargerGroupes(): Promise<Groupes> {
 
 export function rattacherGroupe(comptes: string[], groupe: string | null) {
   return rpc<number>("offload_rattacher_groupe", { p_comptes: comptes, p_groupe: groupe });
+}
+
+export function chargerEnvoiAuto(client: string) {
+  return rpc<EnvoiAuto>("offload_envoi_auto", { p_client: client });
+}
+
+export function reglerEnvoiAuto(client: string, reglages: { envoi_auto?: boolean; sujets_auto?: SujetAuto[] }) {
+  return rpc<unknown>("offload_regler", { p_client: client, p_reglages: reglages });
+}
+
+export function donnerAccordAuto(client: string) {
+  return rpc<EnvoiAuto>("offload_donner_accord_auto", { p_client: client });
+}
+
+export function revoquerAccordAuto(client: string, motif: string | null) {
+  return rpc<EnvoiAuto>("offload_revoquer_accord_auto", { p_client: client, p_motif: motif });
+}
+
+export function restituer(client: string) {
+  return rpc<Record<string, unknown>>("offload_restitution", { p_client: client });
+}
+
+export function effacerCompte(compte: string, motif: string) {
+  return rpc<{ compte: string; efface_le: string; deja: boolean }>("offload_effacer_compte", { p_compte: compte, p_motif: motif });
+}
+
+/* c4_36 — la valeur en jeu par segment ; la restitution complète en fichiers CSV, un par famille */
+export async function chargerSegments(client: string): Promise<Segment[]> {
+  const l = await rpc<Segment[] | null>("offload_valeur_par_segment", { p_client: client });
+  return Array.isArray(l) ? l : [];
+}
+
+export async function restituerTableur(client: string): Promise<RestitutionTableur> {
+  const r = await rpc<RestitutionTableur | null>("offload_restitution_tableur", { p_client: client });
+  return r && typeof r === "object" && r.fichiers && typeof r.fichiers === "object" ? r : { format: "csv", fichiers: {} };
 }

@@ -23,6 +23,11 @@ import { useTempsReel } from "../tempsReel";
 import { Avis, Chargement, Pastille, Ruban, Vide, type Teinte } from "../ui";
 import { dateHeure, relatif } from "../format";
 import BaseConnaissances from "./BaseConnaissances";
+import Astreinte from "./Astreinte";
+import PiecesJointes from "./PiecesJointes";
+import Rapprochement from "./Rapprochement";
+import RendezVous from "./RendezVous";
+import SujetSecondaire from "./SujetSecondaire";
 import ReglagesAvis from "./ReglagesAvis";
 import SujetsAutorises from "./SujetsAutorises";
 import { mondeExemple } from "./exemples";
@@ -41,10 +46,10 @@ export const STATUTS: Record<StatutDemande, { libelle: string; teinte: Teinte }>
   envoyee: { libelle: "Répondue", teinte: "vert" },
   refusee: { libelle: "Réponse refusée", teinte: "gris" },
   bloquee: { libelle: "Envoi bloqué", teinte: "rouge" },
-  ignoree: { libelle: "Ignorée", teinte: "gris" },
+  ignoree: { libelle: "Écartée", teinte: "gris" },
 };
 
-const CANAUX: Record<string, string> = { email: "Courriel", whatsapp: "WhatsApp", sms: "SMS", formulaire: "Formulaire du site" };
+const CANAUX: Record<string, string> = { email: "Courriel", whatsapp: "WhatsApp", sms: "SMS", formulaire: "Formulaire du site", appel: "Appel manqué (message transcrit)" };
 
 const FAMILLES: { cle: Famille; libelle: string; sous: string; teinte: Teinte }[] = [
   { cle: "a_valider", libelle: "À valider", sous: "réponses prêtes", teinte: "ambre" },
@@ -68,6 +73,11 @@ function famille(d: Demande, depuis: number): Famille[] {
     if (d.statut === "envoyee") f.push("repondues");
   }
   return f;
+}
+
+/* c3_40 (TREPUT-16) : une urgence dont l'astreinte est épuisée et que personne n'a prise passe avant tout. */
+function gardeInjoignable(d: Demande): boolean {
+  return Boolean(d.urgence && d.astreinte_epuisee_le && !d.urgence_prise_le);
 }
 
 /* `vue` : dans /espace2, chaque onglet est sa propre page du volet (21/10/2026) ;
@@ -129,7 +139,8 @@ export default function EcranReput({ vue }: { vue?: Onglet } = {}) {
     const ordre: Partial<Record<StatutDemande, number>> = { a_traiter: 0, bloquee: 0, a_valider: 1, a_preparer: 2, validee: 3 };
     return [...(monde?.demandes ?? [])]
       .filter((d) => !filtre || famille(d, depuis).includes(filtre))
-      .sort((a, b) => Number(b.urgence) - Number(a.urgence) || (ordre[a.statut] ?? 9) - (ordre[b.statut] ?? 9) || b.recu_le.localeCompare(a.recu_le));
+      .sort((a, b) => Number(gardeInjoignable(b)) - Number(gardeInjoignable(a)) || Number(b.urgence) - Number(a.urgence)
+        || (ordre[a.statut] ?? 9) - (ordre[b.statut] ?? 9) || b.recu_le.localeCompare(a.recu_le));
   }, [monde, filtre, depuis]);
 
   const choisi = choix && visibles.some((d) => d.id === choix) ? choix : (visibles[0]?.id ?? null);
@@ -202,7 +213,7 @@ export default function EcranReput({ vue }: { vue?: Onglet } = {}) {
               ) : (
                 <ul className="esp-liste" aria-label="Demandes">
                   {visibles.map((d) => {
-                    const s = STATUTS[d.statut];
+                    const s = d.statut === "ignoree" && d.regroupee_avec ? { ...STATUTS.ignoree, libelle: "Regroupée" } : STATUTS[d.statut];
                     const sujet = monde.sujets.find((x) => x.code === d.sujet)?.libelle;
                     const rec = monde.receptions[d.reception_id];
                     return (
@@ -216,6 +227,7 @@ export default function EcranReput({ vue }: { vue?: Onglet } = {}) {
                             <span style={{ fontWeight: 600 }}>{d.de_nom || d.adresse_reponse || "Client"}</span>
                             <Pastille teinte={s.teinte}>{s.libelle}</Pastille>
                             {d.urgence ? <Pastille teinte="rouge">Urgent</Pastille> : null}
+                            {gardeInjoignable(d) ? <Pastille teinte="rouge">Garde injoignable</Pastille> : null}
                           </span>
                           <span className="esp-item-titre">{(d.canal !== "formulaire" && rec?.sujet) || extrait(rec?.corps) || rec?.sujet || "Message sans texte"}</span>
                           <span className="esp-item-bas">
@@ -231,7 +243,7 @@ export default function EcranReput({ vue }: { vue?: Onglet } = {}) {
             </section>
             <section id="esp-dossier" className="esp-detail-mobile" aria-label="La demande">
               {demande ? (
-                <DemandeVue key={demande.id} demande={demande} monde={monde} decideur={decideur} source={source}
+                <DemandeVue key={demande.id} demande={demande} monde={monde} decideur={decideur} traite={role !== "lecteur"} client={client} source={source}
                   relire={charger} modifierLocal={modifierLocal} />
               ) : (
                 <div className="esp-carte"><Vide titre="Choisissez une demande">Le message reçu et la réponse préparée s&apos;affichent ici.</Vide></div>
@@ -254,8 +266,19 @@ export default function EcranReput({ vue }: { vue?: Onglet } = {}) {
   );
 }
 
-function DemandeVue({ demande, monde, decideur, source, relire, modifierLocal }: {
-  demande: Demande; monde: Monde; decideur: boolean; source: "exemple" | "reelle";
+/* Modèle 2 (c3_13) : pourquoi une réponse attend une personne au lieu de partir seule. */
+function raisonRetenue(rep: Reponse, demande: Demande, monde: Monde): string | null {
+  if (rep.statut !== "a_valider") return null;
+  if (demande.urgence) return "message urgent : une personne le relit toujours.";
+  if (!rep.couverte) return "l'IA doute — la réponse n'est pas entièrement tirée de votre base.";
+  const accord = monde.accords.sujets.find((a) => a.sujet === demande.sujet);
+  if (accord && !accord.autorisable) return "sujet toujours relu (réclamation, urgence, parler à quelqu'un, hors sujet).";
+  if (!accord || accord.statut !== "active") return "sujet pas encore autorisé d'avance : activez l'envoi automatique dans « Sujets autorisés ».";
+  return null;
+}
+
+function DemandeVue({ demande, monde, decideur, traite, client, source, relire, modifierLocal }: {
+  demande: Demande; monde: Monde; decideur: boolean; traite: boolean; client: Client | null; source: "exemple" | "reelle";
   relire: () => Promise<void>; modifierLocal: (f: (m: Monde) => Monde) => void;
 }) {
   const rec = monde.receptions[demande.reception_id];
@@ -310,7 +333,7 @@ function DemandeVue({ demande, monde, decideur, source, relire, modifierLocal }:
     <div className="esp-carte">
       <div className="esp-carte-tete">
         <h2 className="esp-carte-titre">{demande.de_nom || demande.adresse_reponse || "Client"}</h2>
-        <Pastille teinte={STATUTS[demande.statut].teinte}>{STATUTS[demande.statut].libelle}</Pastille>
+        <Pastille teinte={STATUTS[demande.statut].teinte}>{demande.statut === "ignoree" && demande.regroupee_avec ? "Regroupée" : STATUTS[demande.statut].libelle}</Pastille>
       </div>
       <div className="esp-carte-corps">
         <div className="esp-section-titre">Le message reçu</div>
@@ -331,14 +354,15 @@ function DemandeVue({ demande, monde, decideur, source, relire, modifierLocal }:
             </p>
           ) : null;
         })()}
+        <Astreinte key={`astreinte:${demande.id}`} demande={demande} traite={traite} source={source} />
+        <SujetSecondaire demande={demande} monde={monde} traite={traite} source={source} relire={relire} modifierLocal={modifierLocal} />
+        <Rapprochement demande={demande} monde={monde} traite={traite} source={source} relire={relire} modifierLocal={modifierLocal} />
         {rec?.sujet ? <p style={{ fontWeight: 600, marginBottom: 6 }}>{rec.sujet}</p> : null}
         <p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{rec?.corps || "(message sans texte)"}</p>
-        {Array.isArray(rec?.pieces) && rec.pieces.length ? (
-          <p className="esp-kpi-sous" style={{ marginTop: 8, overflowWrap: "anywhere" }}>
-            Pièces jointes conservées : {(rec.pieces as { nom?: string }[]).map((x) => x?.nom ?? "pièce").join(", ")}
-          </p>
-        ) : null}
+        <PiecesJointes key={demande.id} demande={demande.id} pieces={rec?.pieces ?? null} source={source} />
       </div>
+
+      <RendezVous key={`rdv:${demande.id}`} demande={demande} client={client} traite={traite} source={source} />
 
       <div className="esp-carte-corps">
         <div className="esp-section-titre">{rep ? `La réponse préparée${rep.version > 1 ? ` (version ${rep.version})` : ""}` : "La réponse"}</div>
@@ -356,6 +380,10 @@ function DemandeVue({ demande, monde, decideur, source, relire, modifierLocal }:
               {rep.redigee_par ? <Pastille contour>Corrigée par une personne</Pastille> : null}
             </p>
             {rep.raison && !rep.couverte ? <p className="esp-kpi-sous" style={{ marginBottom: 8 }}>{rep.raison}</p> : null}
+            {(() => {
+              const r = raisonRetenue(rep, demande, monde);
+              return r ? <p className="esp-kpi-sous" style={{ marginBottom: 8 }}><strong>Retenue :</strong> {r}</p> : null;
+            })()}
             {rep.objet ? <p style={{ fontWeight: 600, marginBottom: 6 }}>Objet : {rep.objet}</p> : null}
             {mode === "corriger" ? (
               <label className="rv-libelle">Votre version

@@ -72,6 +72,8 @@ export const MODULES: ModuleV2[] = [
       /* 21/10/2026 — les pages de fonction */
       { libelle: "Contrôles et fraude", href: `${RACINE}/filed/controles` },
       { libelle: "Circuit de validation", href: `${RACINE}/filed/circuit` },
+      /* 26/10/2026 — les factures refusées, à reprendre ou à classer */
+      { libelle: "Refusées", href: `${RACINE}/filed/refusees` },
     ],
     true,
   ),

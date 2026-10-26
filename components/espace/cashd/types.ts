@@ -22,6 +22,14 @@ export type Reglages = {
   heure_relances?: string;
   /* c2_04 : le ton, les moyens de règlement, le métier */
   seuil_ton?: number | null;
+  /* c2_30 : les paliers d'ancienneté du ton (null : 15 et 45 jours) */
+  ton_retard_jours?: number | null;
+  ton_retard_important_jours?: number | null;
+  /* c2_35 : la date limite — marge de validation (jours ouvrés, null : 3) et remise du courrier (jours, null : 2) */
+  marge_validation_jours?: number | null;
+  remise_courrier_jours?: number | null;
+  /* c2_40 : l'adresse de paiement de l'organisation ({numero}, {montant}) */
+  lien_paiement?: string | null;
   moyens_reglement?: string | null;
   echelonnement_des?: number | null;
   metier?: "general" | "btp";
@@ -162,6 +170,10 @@ export type Piece = {
   attente_commande_email?: string | null;
   attente_commande_nom?: string | null;
   attente_commande_motif?: string | null;
+  /* c2_21 : la retenue du moteur, dite sur la pièce */
+  incoherence?: string | null;
+  relance_suspendue?: string | null;
+  facture_visee?: string | null;
 };
 
 /* La séquence d'une pièce (vue cashd_suivi) */
@@ -223,6 +235,9 @@ export type Relance = {
   envoi_id: string | null;
   envoye_le: string | null;
   canal?: string | null;
+  envoi_main?: { canal: string; envoye_le: string; note: string | null } | null;
+  /* c2_32 : la décision de la file (une relance « non_reglee » validée se note envoyée à la main) */
+  demande_statut?: string | null;
   gabarit?: string | null;
   variante?: number | null;
   pieces: { facture_id: string; numero: string; palier: string; reste_du: number; retard_jours: number; penalites: number; indemnite: number }[];
@@ -234,7 +249,7 @@ export type Proposition = {
 };
 
 /* c2_04 — les textes de l'organisation (porte cashd_gabarits) */
-export type CleGabarit = "rappel" | "relance" | "mise_en_demeure" | "devis_rappel" | "devis_relance";
+export type CleGabarit = "echeance" | "rappel" | "relance" | "mise_en_demeure" | "devis_rappel" | "devis_relance";
 export type Gabarit = {
   cle: CleGabarit;
   langue: string;

@@ -4,7 +4,7 @@
 
 export type StatutDemande = "a_preparer" | "a_valider" | "a_traiter" | "validee" | "envoyee" | "refusee" | "bloquee" | "ignoree";
 export type StatutReponse = "a_valider" | "approuvee" | "envoyee" | "refusee" | "bloquee" | "remplacee" | "sans_envoi";
-export type Canal = "email" | "whatsapp" | "sms" | "formulaire";
+export type Canal = "email" | "whatsapp" | "sms" | "formulaire" | "appel";
 
 export type Reception = {
   id: number;
@@ -56,6 +56,10 @@ export type Demande = {
   escaladee_le?: string | null;
   dossier_id?: string | null;
   regroupee_avec?: string | null;
+  rapprochement_propose?: string | null;
+  sujet_secondaire?: string | null;
+  urgence_prise_le?: string | null;
+  astreinte_epuisee_le?: string | null;
   motif: string | null;
   recu_le: string;
   preparee_le: string | null;
@@ -120,9 +124,13 @@ export type Reglages = {
   actif: boolean;
   accuse: boolean;
   texte_accuse: string;
+  /** c3_18 : la phrase de l'accusé quand le sujet va à un service ({service} = son nom) ; nulle = aucune. */
+  phrase_transfert?: string | null;
   lien_avis: string | null;
   texte_avis: string;
   avis_auto_reglement?: boolean;
+  /** Modèle 2 (c3_13) : l'organisation veut l'envoi automatique (vrai par défaut). */
+  envoi_auto?: boolean;
 };
 
 export type Avis = {

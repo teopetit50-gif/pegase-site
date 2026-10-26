@@ -12,6 +12,8 @@
    nuit, chacun téléchargeable en tableur.
    Lecture : public.offload_pilotage(), public.offload_arretes_liste()
    (gérant, admin, valideur). L'exemple vit ici.
+   25/10 (c4_36) : la valeur en jeu par segment et la restitution en
+   tableur, réservées au gérant et à l'administrateur (Segments.tsx).
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useState } from "react";
@@ -19,16 +21,22 @@ import { dateCourte, montant, nombreFr } from "../format";
 import type { Source } from "../source";
 import { Chargement, Vide } from "../ui";
 import { SbGraphique, SbPage, SbSection } from "@/components/espace2/sb/Sb";
-import { chargerArretes, chargerPilotage } from "./portes";
+import { chargerArretes, chargerPilotage, chargerSegments, chargerTableau } from "./portes";
+import { RestitutionEnTableur, segmentsExemple, ValeurParSegment } from "./Segments";
 import { exporterArrete, exporterTableau, type TableauPilotage } from "./tableur";
-import type { Arrete, LigneTaux, Pilotage as Donnees } from "./types";
+import type { Arrete, LigneTaux, Pilotage as Donnees, Segment } from "./types";
 
-const ONGLETS: { cle: TableauPilotage | "arretes"; libelle: string }[] = [
+type Onglet = TableauPilotage | "arretes" | "segments" | "restitution";
+const EXPORTABLES: Onglet[] = ["vagues", "taux", "suivi", "entites"];
+
+const ONGLETS: { cle: Onglet; libelle: string }[] = [
   { cle: "vagues", libelle: "Vagues" },
   { cle: "taux", libelle: "Taux de réponse" },
   { cle: "suivi", libelle: "Suivi" },
   { cle: "entites", libelle: "Entités et sites" },
   { cle: "arretes", libelle: "Arrêtés" },
+  { cle: "segments", libelle: "Par segment" },
+  { cle: "restitution", libelle: "Restitution" },
 ];
 
 const AXES: { cle: keyof Donnees["taux"]; libelle: string }[] = [
@@ -115,11 +123,14 @@ function Cadre({ etiquette, children }: { etiquette: string; children: React.Rea
 }
 
 export default function Pilotage({ source, gabarit }: { source: Source; gabarit?: "sb" }) {
-  const [onglet, setOnglet] = useState<TableauPilotage | "arretes">("vagues");
+  const [onglet, setOnglet] = useState<Onglet>("vagues");
   const [reel, setReel] = useState<Donnees | null>(null);
   const [arretes, setArretes] = useState<Arrete[]>([]);
   const [erreur, setErreur] = useState<string | null>(null);
   const [charge, setCharge] = useState(false);
+  const [client, setClient] = useState<string | null>(null);
+  const [segments, setSegments] = useState<Segment[] | null>(null);
+  const [erreurSegments, setErreurSegments] = useState<string | null>(null);
 
   useEffect(() => {
     if (source !== "reelle") return;
@@ -137,12 +148,32 @@ export default function Pilotage({ source, gabarit }: { source: Source; gabarit?
     return () => { actif = false; window.clearTimeout(t); };
   }, [source]);
 
+  /* c4_36 : par segment et restitution, lus avec le client que donne offload_tableau ; gérant ou administrateur */
+  useEffect(() => {
+    if (source !== "reelle") return;
+    let actif = true;
+    (async () => {
+      try {
+        const c = (await chargerTableau())?.client ?? null;
+        if (!actif) return;
+        setClient(c);
+        if (!c) { setErreurSegments("OFFLOAD n'est pas installé pour cette organisation."); return; }
+        const l = await chargerSegments(c);
+        if (actif) setSegments(l);
+      } catch (e) {
+        if (actif) setErreurSegments(e instanceof Error ? e.message : "La base n'a pas répondu.");
+      }
+    })();
+    return () => { actif = false; };
+  }, [source]);
+
   const p = source === "exemple" ? pilotageExemple() : reel;
   const listeArretes: Arrete[] = source === "exemple" && p ? [{ jour: jour(-5), pilotage: p, cree_le: jour(-5) }] : arretes;
   const aujourdhui = new Date().toISOString().slice(0, 10);
+  const lesSegments = source === "exemple" ? segmentsExemple() : segments;
 
   /* un tableau du pilotage : l'onglet de /espace, une section de la page Usage de /espace2 */
-  const contenu = (o: TableauPilotage | "arretes", p: Donnees) => (
+  const contenu = (o: Onglet, p: Donnees) => (
     <>
       {o === "vagues" ? (
         p.vagues.length === 0 ? <p className="esp-kpi-sous">Aucune vague sur la période.</p> : (
@@ -237,17 +268,22 @@ export default function Pilotage({ source, gabarit }: { source: Source; gabarit?
           </ul>
         )
       ) : null}
+
+      {o === "segments" ? <ValeurParSegment segments={lesSegments} erreur={source === "exemple" ? null : erreurSegments} /> : null}
+      {o === "restitution" ? <RestitutionEnTableur source={source} client={client} /> : null}
     </>
   );
 
   if (gabarit === "sb") {
     /* 22/10 — la page Usage de Supabase : une section par tableau, le texte à gauche, le tableau à droite */
-    const TEXTES: Record<TableauPilotage | "arretes", string> = {
+    const TEXTES: Record<Onglet, string> = {
       vagues: "Une vague est le passage d'un jour. En jeu : la valeur annuelle attendue des comptes sollicités ; repris : leurs achats dans les 90 jours.",
       taux: "Les taux de réponse comparés par segment, canal, message et niveau du signal.",
       suivi: "Mois par mois : échéances honorées, commandes reprises, affaires retirées.",
       entites: "Les résultats par entité, par site et en consolidé.",
       arretes: "Posés la nuit à date fixe, chacun téléchargeable en tableur.",
+      segments: "La valeur annuelle en jeu chez les comptes à risque, segment par segment. Réservé au gérant et à l'administrateur.",
+      restitution: "Un fichier CSV par famille, prêt pour un tableur.",
     };
     return (
       <SbPage titre="Pilotage" description={p ? `Douze derniers mois, depuis le ${dateCourte(p.depuis)}. Chaque tableau s'exporte vers un tableur.` : "Vue consolidée, réservée à la direction."}>
@@ -255,14 +291,17 @@ export default function Pilotage({ source, gabarit }: { source: Source; gabarit?
           <Vide titre="Pilotage indisponible">{erreur ?? "Le pilotage consolidé se lit par le gérant, l'administrateur ou le valideur."}</Vide>
         ) : (
           <>
+            <SbSection titre="Valeur en jeu par segment" textes={[TEXTES.segments]}>
+              <div className="sb-pilotage">{contenu("segments", p)}</div>
+            </SbSection>
             <SbSection titre="Chiffre repris" textes={["Le chiffre repris hors taxes, vague par vague, sur la période."]}>
               <SbGraphique titre="Chiffre repris HT" barres={p.vagues.map((v) => ({ cle: v.vague, libelle: dateCourte(v.vague), valeur: v.chiffre_repris }))} format={(n) => montant(n)} vide="Aucune vague sur la période" />
             </SbSection>
-            {ONGLETS.map((o) => (
+            {ONGLETS.filter((o) => o.cle !== "segments").map((o) => (
               <SbSection key={o.cle} titre={o.libelle} textes={[TEXTES[o.cle]]}>
                 <div className="sb-pilotage">
                   {contenu(o.cle, p)}
-                  {o.cle !== "arretes" ? <div><Exporter onClick={() => exporterTableau(p, o.cle as TableauPilotage, aujourdhui)} /></div> : null}
+                  {EXPORTABLES.includes(o.cle) ? <div><Exporter onClick={() => exporterTableau(p, o.cle as TableauPilotage, aujourdhui)} /></div> : null}
                 </div>
               </SbSection>
             ))}
@@ -292,7 +331,7 @@ export default function Pilotage({ source, gabarit }: { source: Source; gabarit?
           </div>
 
           {contenu(onglet, p)}
-          {onglet !== "arretes" ? <div><Exporter onClick={() => exporterTableau(p, onglet, aujourdhui)} /></div> : null}
+          {EXPORTABLES.includes(onglet) ? <div><Exporter onClick={() => exporterTableau(p, onglet as TableauPilotage, aujourdhui)} /></div> : null}
         </div>
       )}
     </section>

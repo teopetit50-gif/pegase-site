@@ -68,7 +68,7 @@ export async function chargerPropositions(reglement: string): Promise<Propositio
 }
 
 export async function importer(o: { client: string; jeu: string; lignes: Record<string, string>[]; complet: boolean; fichier: string }) {
-  return rpc<{ lignes: number; creees: number; modifiees: number; inchangees: number; soldees_par_absence: number; lettrees: number; ecartees: { ligne: number; motif: string }[] }>(
+  return rpc<{ lignes: number; creees: number; modifiees: number; inchangees: number; soldees_par_absence: number; lettrees: number; ecartees: { ligne: number; motif: string }[]; avoirs_non_imputes?: { numero: string; vise: string; compte: string }[]; incoherentes?: { numero: string; compte: string; motif: string }[] }>(
     "cashd_importer",
     { p_client: o.client, p_jeu: o.jeu, p_lignes: o.lignes, p_complet: o.complet, p_entite: null, p_fichier: o.fichier },
   );
@@ -218,3 +218,27 @@ export async function reglerPortefeuille(client: string, actif: boolean) {
 export async function ecrireLigne(client: string, langue: string, nature: "facture" | "devis", modele: string | null, actif: boolean) {
   return rpc<{ id: string }>("cashd_ecrire_ligne", { p_client: client, p_langue: langue, p_nature: nature, p_modele: modele, p_actif: actif });
 }
+
+/* ——— c2_11 : la relance validée, envoyée à la main ——— */
+export async function noterEnvoiMain(relance: string, canal: string, note: string | null) {
+  return rpc<{ id: string; canal: string; envoye_le: string }>("cashd_noter_envoi_main", { p_relance: relance, p_canal: canal, p_le: null, p_note: note });
+}
+
+/* ——— c2_12 : les rappels des paliers 1 et 2 envoyés sans validation, sous accord permanent ——— */
+export type EnvoiAuto = { actif: boolean; accord: { id: string; statut: "active" | "a_valider"; plafond: number; debut: string; fin: string; demande_id: string | null } | null };
+export async function chargerEnvoiAuto(client: string) {
+  return rpc<EnvoiAuto>("cashd_envoi_auto", { p_client: client });
+}
+export async function reglerEnvoiAuto(client: string, actif: boolean, plafond: number | null) {
+  return rpc<EnvoiAuto & { propose: string | null; revoques: number }>("cashd_regler_envoi_auto", { p_client: client, p_actif: actif, p_plafond: plafond ?? 5000 });
+}
+
+/* ——— c2_15 / c2_16 : les taux de change (BCE chaque jour ouvré, ou saisis par l'organisation) ——— */
+export type TauxConnu = { devise: string; jour: string | null; taux: number | null; source: "bce" | "saisie" | null };
+export async function chargerTaux(client: string) {
+  return rpc<TauxConnu[]>("cashd_taux_connus", { p_client: client });
+}
+export async function poserTaux(client: string, devise: string, jour: string, taux: number) {
+  return rpc<{ devise: string; jour: string; taux: number; source: string }>("cashd_poser_taux", { p_devise: devise, p_jour: jour, p_taux: taux, p_client: client });
+}
+

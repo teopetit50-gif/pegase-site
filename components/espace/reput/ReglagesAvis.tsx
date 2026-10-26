@@ -17,6 +17,8 @@ import { Loader } from "@/components/ui/loader";
 import { dateCourte } from "../format";
 import { Avis as Bandeau, Pastille, Vide, type Teinte } from "../ui";
 import { avisRecu, programmerAvis, regler } from "./portes";
+import ExportProgramme from "./ExportProgramme";
+import ReglagesSites from "./ReglagesSites";
 import type { Avis, Client, Monde, Reglages } from "./types";
 
 const STATUTS_AVIS: Record<Avis["statut"], { libelle: string; teinte: Teinte }> = {
@@ -63,6 +65,7 @@ export default function ReglagesAvis({ monde, source, client, role, relire, modi
       mention_automatisee: r.mention_automatisee, langues: r.langues, accuse: r.accuse, texte_accuse: r.texte_accuse,
       lien_avis: r.lien_avis, texte_avis: r.texte_avis,
       ...(r.avis_auto_reglement !== undefined ? { avis_auto_reglement: r.avis_auto_reglement } : {}),
+      ...(r.phrase_transfert !== undefined ? { phrase_transfert: r.phrase_transfert } : {}),
     };
     void agir("reglages", () => regler(client!.client_id, champs), (m) => ({ ...m, reglages: r }), "Réglages enregistrés : ils valent dès la prochaine réponse.");
   };
@@ -118,6 +121,10 @@ export default function ReglagesAvis({ monde, source, client, role, relire, modi
         </label>
         <label className="rv-libelle">Texte de l&apos;accusé
           <textarea className="rv-champ" rows={2} disabled={!dirige || !r.accuse} value={r.texte_accuse} onChange={(e) => setR({ ...r, texte_accuse: e.target.value })} />
+        </label>
+        <label className="rv-libelle">Phrase ajoutée quand la demande va à un service (écrire {"{service}"} à la place de son nom ; vide : aucune)
+          <input className="rv-champ" disabled={!dirige || !r.accuse} value={r.phrase_transfert ?? ""} onChange={(e) => setR({ ...r, phrase_transfert: e.target.value })}
+                 placeholder="Votre demande est transmise au service {service}, qui revient vers vous." data-phrase-transfert />
         </label>
         <label className="rv-libelle">Lien de votre page d&apos;avis (https)
           <input className="rv-champ" disabled={!dirige} value={r.lien_avis ?? ""} onChange={(e) => setR({ ...r, lien_avis: e.target.value })} placeholder="https://g.page/r/…/review" />
@@ -240,6 +247,10 @@ export default function ReglagesAvis({ monde, source, client, role, relire, modi
         {reponses}
 
       </section>
+
+      <ReglagesSites key={source} source={source} client={client} dirige={dirige} />
+
+      <ExportProgramme key={`export:${source}`} source={source} client={client} dirige={dirige} />
 
       <section className="esp-carte" aria-label="Demandes d'avis">
         <div className="esp-carte-tete"><h2 className="esp-carte-titre">Demandes d&apos;avis</h2></div>

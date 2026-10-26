@@ -18,7 +18,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Loader } from "@/components/ui/loader";
 import { Avis, Chargement, Pastille } from "../ui";
-import { montant } from "../format";
+import { dateCourte, montant } from "../format";
 import * as portes from "./portes";
 import { apercu, GABARITS_EXEMPLE, PALIERS_GABARIT, VARIABLES, verifier } from "./gabarits";
 import type { CleGabarit, Gabarit, LigneGabarit, PalierValidation, Reglages, RoleValidation } from "./types";
@@ -36,7 +36,7 @@ const PALIERS_DEFAUT: PalierValidation[] = [
 ];
 
 type Source = "exemple" | "reelle";
-type Reglage = { metier: "general" | "btp"; seuil_ton: string; moyens_reglement: string; echelonnement_des: string };
+type Reglage = { metier: "general" | "btp"; seuil_ton: string; moyens_reglement: string; echelonnement_des: string; ton_retard_jours: string; ton_retard_important_jours: string; marge_validation_jours: string; remise_courrier_jours: string; lien_paiement: string };
 
 function nombre(t: string): number | null {
   const s = t.replace(/[\s  €]/g, "").replace(",", ".");
@@ -72,6 +72,11 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
     seuil_ton: reglages?.seuil_ton != null ? String(reglages.seuil_ton) : "",
     moyens_reglement: reglages?.moyens_reglement ?? "",
     echelonnement_des: reglages?.echelonnement_des != null ? String(reglages.echelonnement_des) : "",
+    ton_retard_jours: reglages?.ton_retard_jours != null ? String(reglages.ton_retard_jours) : "",
+    ton_retard_important_jours: reglages?.ton_retard_important_jours != null ? String(reglages.ton_retard_important_jours) : "",
+    marge_validation_jours: reglages?.marge_validation_jours != null ? String(reglages.marge_validation_jours) : "",
+    remise_courrier_jours: reglages?.remise_courrier_jours != null ? String(reglages.remise_courrier_jours) : "",
+    lien_paiement: reglages?.lien_paiement ?? "",
   });
 
   const charger = useCallback(async () => {
@@ -126,7 +131,7 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
   const refusLigne = (nature: "facture" | "devis", m: string) =>
     !m.trim() ? null
       : !m.includes("{numero}") || (nature === "facture" && !m.includes("{reste}")) ? `La ligne d'${nature === "facture" ? "une facture porte {numero} et {reste}" : "un devis porte {numero}"}.`
-      : [...m.matchAll(/\{([a-z_]+)\}/g)].some((x) => !(nature === "facture" ? ["numero", "date", "montant", "echeance", "retard", "reste"] : ["numero", "date", "montant"]).includes(x[1])) ? "Variable inconnue pour cette ligne."
+      : [...m.matchAll(/\{([a-z_]+)\}/g)].some((x) => !(nature === "facture" ? ["numero", "date", "montant", "echeance", "retard", "reste", "commande"] : ["numero", "date", "montant"]).includes(x[1])) ? "Variable inconnue pour cette ligne."
       : null;
   const enregistrerLigne = async (nature: "facture" | "devis") => {
     const m = (ligneSaisie[nature] || ligneDe(nature)).trim();
@@ -153,6 +158,8 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
   const vu = apercu(cle, sujet, corps, {
     metier: r.metier, seuil_ton: nombre(r.seuil_ton), moyens_reglement: r.moyens_reglement.trim() || null,
     echelonnement_des: nombre(r.echelonnement_des), emetteur,
+    ton_retard_jours: nombre(r.ton_retard_jours), ton_retard_important_jours: nombre(r.ton_retard_important_jours),
+    lien_paiement: /^https:\/\/\S+$/.test(r.lien_paiement.trim()) ? r.lien_paiement.trim() : null,
   });
 
   const enregistrer = async (actif: boolean) => {
@@ -237,8 +244,53 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
     }
   };
 
-  const valeursReglage = { seuil_ton: nombre(r.seuil_ton), echelonnement_des: nombre(r.echelonnement_des) };
-  const reglageValide = !Number.isNaN(valeursReglage.seuil_ton) && !Number.isNaN(valeursReglage.echelonnement_des) && r.moyens_reglement.length <= 400;
+  /* les rappels des paliers 1 et 2 envoyés sans validation, sous accord permanent (c2_12) */
+  const [auto, setAuto] = useState<portes.EnvoiAuto>({ actif: false, accord: null });
+  const [plafondAuto, setPlafondAuto] = useState("5000");
+  useEffect(() => {
+    if (source !== "reelle" || !client) return;
+    let actif = true;
+    void portes.chargerEnvoiAuto(client).then((x) => { if (actif) setAuto(x); }, () => undefined);
+    return () => { actif = false; };
+  }, [source, client]);
+  const reglerAuto = async (actif: boolean) => {
+    setEnvoi(true);
+    setErreur(null);
+    setFait(null);
+    try {
+      const plafond = nombre(plafondAuto);
+      if (actif && (Number.isNaN(plafond) || !plafond || plafond <= 0)) throw new Error("Le plafond d'un rappel envoyé seul est un montant positif.");
+      if (source === "reelle") {
+        if (!client) throw new Error("Aucun compte rattaché à cette session.");
+        setAuto(await portes.reglerEnvoiAuto(client, actif, plafond));
+      } else {
+        setAuto(actif
+          ? { actif: false, accord: { id: "exemple", statut: "a_valider", plafond: plafond as number, debut: new Date().toISOString(), fin: new Date(Date.now() + 365 * 86400000).toISOString(), demande_id: null } }
+          : { actif: false, accord: null });
+      }
+      setFait(actif
+        ? `Accord proposé${source === "exemple" ? " (exemple)" : ""} : une seconde personne l'active dans la file de validation ; ensuite, les rappels jusqu'à ${montant(plafond as number)} partent seuls.`
+        : `Envoi automatique coupé${source === "exemple" ? " (exemple)" : ""} : chaque rappel attend de nouveau une validation.`);
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : "La base a refusé ce réglage.");
+    } finally {
+      setEnvoi(false);
+    }
+  };
+
+  const valeursReglage = {
+    seuil_ton: nombre(r.seuil_ton), echelonnement_des: nombre(r.echelonnement_des),
+    ton_retard_jours: nombre(r.ton_retard_jours), ton_retard_important_jours: nombre(r.ton_retard_important_jours),
+    marge_validation_jours: nombre(r.marge_validation_jours), remise_courrier_jours: nombre(r.remise_courrier_jours),
+  };
+  /* c2_35 : de 0 à 15 jours, entiers ; vide rend le défaut (3 jours ouvrés, 2 jours) */
+  const joursValides = [valeursReglage.marge_validation_jours, valeursReglage.remise_courrier_jours]
+    .every((x) => x === null || (Number.isInteger(x) && x >= 0 && x <= 15));
+  /* c2_40 : une adresse https, sans espace */
+  const lienValide = !r.lien_paiement.trim() || (/^https:\/\/\S+$/.test(r.lien_paiement.trim()) && r.lien_paiement.trim().length <= 500);
+  const paliersTon = (valeursReglage.ton_retard_jours ?? 15) < (valeursReglage.ton_retard_important_jours ?? 45);
+  const reglageValide = !Number.isNaN(valeursReglage.seuil_ton) && !Number.isNaN(valeursReglage.echelonnement_des) && r.moyens_reglement.length <= 400
+    && !Number.isNaN(valeursReglage.ton_retard_jours) && !Number.isNaN(valeursReglage.ton_retard_important_jours) && paliersTon && joursValides && lienValide;
   const reglerTon = async () => {
     setEnvoi(true);
     setErreur(null);
@@ -248,6 +300,9 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
         if (!client) throw new Error("Aucun compte rattaché à cette session.");
         await portes.reglerRelances(client, {
           metier: r.metier, seuil_ton: valeursReglage.seuil_ton, moyens_reglement: r.moyens_reglement.trim(), echelonnement_des: valeursReglage.echelonnement_des,
+          ton_retard_jours: valeursReglage.ton_retard_jours, ton_retard_important_jours: valeursReglage.ton_retard_important_jours,
+          marge_validation_jours: valeursReglage.marge_validation_jours, remise_courrier_jours: valeursReglage.remise_courrier_jours,
+          lien_paiement: r.lien_paiement.trim() || null,
         });
         await apresReglage?.();
       }
@@ -325,7 +380,7 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
             const refusL = refusLigne(nature, valeur);
             return (
               <div key={nature} className="esp-form-ligne">
-                <label className="rv-libelle">{nature === "facture" ? "Ligne d'une facture ({numero} {date} {montant} {echeance} {retard} {reste})" : "Ligne d'un devis ({numero} {date} {montant})"}
+                <label className="rv-libelle">{nature === "facture" ? "Ligne d'une facture ({numero} {date} {montant} {echeance} {retard} {reste} {commande})" : "Ligne d'un devis ({numero} {date} {montant})"}
                   <input className="rv-champ" value={valeur} maxLength={300} placeholder={nature === "facture" ? "Rechnung {numero} vom {date}, fällig am {echeance}: {reste} offen" : "Angebot {numero} vom {date}: {montant}"}
                     onChange={(e) => setLigneSaisie({ ...ligneSaisie, [nature]: e.target.value })} />
                 </label>
@@ -346,7 +401,7 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
   const exemple = (
     <>
     <h3 className="esp-section-titre">Aperçu sur un exemple</h3>
-    <p className="c2-sous">La SCI Lefèvre, une facture de {montant(12000)} en retard de 45 jours.</p>
+    <p className="c2-sous">{cle === "echeance" ? <>La SCI Lefèvre, une facture de {montant(12000)} à régler ce jour.</> : <>La SCI Lefèvre, une facture de {montant(12000)} en retard de 45 jours.</>}</p>
     <pre className="c2-corps"><strong>{vu.sujet}</strong>{"\n\n"}{vu.corps}</pre>
     <details className="c2-variables">
       <summary>Les variables</summary>
@@ -364,15 +419,37 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
     <div className="esp-form">
       <div className="esp-form-ligne">
         <label className="rv-libelle">Au-delà de ce montant, demander la date de règlement (€)
-          <input className="rv-champ" inputMode="decimal" value={r.seuil_ton} onChange={(e) => setR({ ...r, seuil_ton: e.target.value })} placeholder="10 000" />
+          <input className="rv-champ" inputMode="decimal" value={r.seuil_ton} onChange={(e) => setR({ ...r, seuil_ton: e.target.value })} placeholder="1 500 (par défaut)" />
         </label>
         <label className="rv-libelle">Proposer un échéancier au-delà de (€)
           <input className="rv-champ" inputMode="decimal" value={r.echelonnement_des} onChange={(e) => setR({ ...r, echelonnement_des: e.target.value })} placeholder="5 000" />
         </label>
       </div>
-      <label className="rv-libelle">Vos moyens de règlement (« Vous pouvez régler … »)
-        <input className="rv-champ" value={r.moyens_reglement} maxLength={400} onChange={(e) => setR({ ...r, moyens_reglement: e.target.value })} placeholder="par virement sur le compte FR76 …, par chèque à l'ordre de …, ou au comptoir" />
+      <div className="esp-form-ligne">
+        <label className="rv-libelle">Au rappel, dire la durée du retard au-delà de (jours)
+          <input className="rv-champ" inputMode="numeric" value={r.ton_retard_jours} onChange={(e) => setR({ ...r, ton_retard_jours: e.target.value })} placeholder="15 (par défaut)" />
+        </label>
+        <label className="rv-libelle">Dire que le retard devient important au-delà de (jours)
+          <input className="rv-champ" inputMode="numeric" value={r.ton_retard_important_jours} onChange={(e) => setR({ ...r, ton_retard_important_jours: e.target.value })} placeholder="45 (par défaut)" />
+        </label>
+      </div>
+      {!paliersTon ? <p className="c2-sous">Le premier palier vient avant le second.</p> : null}
+      <div className="esp-form-ligne">
+        <label className="rv-libelle">Date limite : temps laissé à la validation (jours ouvrés)
+          <input className="rv-champ" inputMode="numeric" value={r.marge_validation_jours} onChange={(e) => setR({ ...r, marge_validation_jours: e.target.value })} placeholder="3 (par défaut)" />
+        </label>
+        <label className="rv-libelle">Remise d&apos;un courrier ou d&apos;une lettre recommandée (jours)
+          <input className="rv-champ" inputMode="numeric" value={r.remise_courrier_jours} onChange={(e) => setR({ ...r, remise_courrier_jours: e.target.value })} placeholder="2 (par défaut)" />
+        </label>
+      </div>
+      {!joursValides ? <p className="c2-sous">De 0 à 15 jours, en nombre entier.</p> : null}
+      <label className="rv-libelle">Vos moyens de règlement (« Moyens de règlement : … »)
+        <input className="rv-champ" value={r.moyens_reglement} maxLength={400} onChange={(e) => setR({ ...r, moyens_reglement: e.target.value })} placeholder="Virement sur le compte FR76 …, chèque à l'ordre de …, ou au comptoir" />
       </label>
+      <label className="rv-libelle">Votre adresse de paiement en ligne, reprise sous chaque facture ({"{numero}"} et {"{montant}"} y sont remplacés)
+        <input className="rv-champ" value={r.lien_paiement} maxLength={500} onChange={(e) => setR({ ...r, lien_paiement: e.target.value })} placeholder="https://… ?facture={numero}&montant={montant}" />
+      </label>
+      {!lienValide ? <p className="c2-sous">L&apos;adresse commence par https:// et ne contient pas d&apos;espace.</p> : null}
       <label className="rv-libelle">Le vocabulaire des relances de devis
         <select className="rv-champ" value={r.metier} onChange={(e) => setR({ ...r, metier: e.target.value as Reglage["metier"] })}>
           <option value="general">Général</option>
@@ -422,6 +499,31 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
         <input type="checkbox" checked={portefeuille} disabled={envoi} onChange={(e) => void reglerPortefeuille(e.target.checked)} />
         <span>Chaque chargé de recouvrement ne voit que son portefeuille (les comptes dont il est le chargé) ; la direction, l&apos;administration et les valideurs lisent le consolidé.</span>
       </label>
+      <div className="c2-auto" role="group" aria-labelledby="c2-auto-titre">
+        <p id="c2-auto-titre" className="c2-auto-titre">Rappels envoyés sans validation</p>
+        <p className="c2-sous">
+          Le rappel du jour de l&apos;échéance et le rappel J+7 peuvent partir seuls, jusqu&apos;à un plafond par rappel. La relance ferme, la mise en demeure et la lettre recommandée attendent toujours une personne. L&apos;accord dure un an ; une seconde personne l&apos;active dans la file de validation.
+        </p>
+        <p className="c2-auto-etat">
+          {auto.actif && auto.accord
+            ? <><Pastille teinte="vert">Actif</Pastille> jusqu&apos;à {montant(auto.accord.plafond)} par rappel, jusqu&apos;au {dateCourte(auto.accord.fin)}</>
+            : auto.accord?.statut === "a_valider"
+              ? <><Pastille teinte="ambre">Proposé</Pastille> en attente d&apos;activation, plafond {montant(auto.accord.plafond)}</>
+              : <><Pastille teinte="gris">Coupé</Pastille> chaque rappel attend une validation</>}
+        </p>
+        <div className="esp-actions">
+          {auto.accord ? (
+            <button type="button" className="r-btn" disabled={envoi} onClick={() => void reglerAuto(false)}>Couper l&apos;envoi automatique</button>
+          ) : (
+            <>
+              <label className="rv-libelle c2-auto-plafond">Plafond par rappel (€)
+                <input className="rv-champ" inputMode="decimal" value={plafondAuto} onChange={(e) => setPlafondAuto(e.target.value)} />
+              </label>
+              <button type="button" className="r-btn" disabled={envoi} onClick={() => void reglerAuto(true)}>Proposer l&apos;envoi automatique</button>
+            </>
+          )}
+        </div>
+      </div>
     </div>
     </>
   );

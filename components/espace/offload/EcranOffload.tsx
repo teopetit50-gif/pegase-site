@@ -29,6 +29,7 @@ import { exempleOffload } from "./exemples";
 import { SbBandeau } from "@/components/espace2/sb/Sb";
 import FicheCompte, { type Geste } from "./FicheCompte";
 import Affaires from "./Affaires";
+import EnvoiAuto from "./EnvoiAuto";
 import GardeFous from "./GardeFous";
 import Groupes from "./Groupes";
 import Pilotage from "./Pilotage";
@@ -460,6 +461,7 @@ export default function EcranOffload({ sections = true, gabarit }: { sections?: 
           </section>
           {sections ? <>
           <GardeFous source={source} client={tableau?.client ?? null} />
+          <EnvoiAuto source={source} client={tableau?.client ?? null} />
           <Echeances source={source} onChoisir={(id) => {
             setFiltre("tous");
             setChoix(id);

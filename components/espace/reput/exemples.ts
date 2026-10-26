@@ -34,7 +34,9 @@ export const SUJETS_EXEMPLE: Sujet[] = [
   ["avis", "Avis et retours", true], ["reclamation", "Réclamation", false], ["urgence", "Urgence", false],
   ["humain", "Parler à une personne", false], ["autre", "Autre", false],
 ].map(([code, libelle, autorisable], i) => ({ code: code as string, libelle: libelle as string, description: null, autorisable: autorisable as boolean, actif: true, ordre: (i + 1) * 10,
-               delai_heures: code === "urgence" ? 1 : code === "reclamation" || code === "humain" ? 4 : 24 }));
+               delai_heures: code === "urgence" ? 1 : code === "reclamation" || code === "humain" ? 4 : 24,
+               /* c3_16 : les rendez-vous vont à l'équipe Pose et SAV (le second service prévenu dans l'exemple) */
+               equipe_id: code === "rendez_vous" ? "00000000-0000-4000-8000-00000000c3c2" : null }));
 
 function demande(n: number, canal: Demande["canal"], nom: string, adresse: string | null, recu: string, extra: Partial<Demande>): Demande {
   return {
@@ -57,11 +59,17 @@ function reponse(n: number, d: Demande, corps: string, extra: Partial<Reponse>):
 export function mondeExemple(): Monde {
   const d1 = demande(1, "email", "Marie Durand", "marie.durand@exemple.fr", ilYa(1, 21), { objet: "Ouverts samedi ?", sujet: "horaires" });
   const d2 = demande(2, "whatsapp", "Karim B.", "+33 6 12 34 56 78", ilYa(1, 19), { sujet: "tarifs", statut: "envoyee", decidee_le: ilYa(1, 19), envoyee_le: ilYa(1, 19) });
-  const d3 = demande(3, "formulaire", "Luc Martin", "luc.martin@exemple.fr", ilYa(0, 7), { objet: "Formulaire du site", sujet: "devis", couverte: false });
+  const d3 = demande(3, "formulaire", "Luc Martin", "luc.martin@exemple.fr", ilYa(0, 7), { objet: "Formulaire du site", sujet: "devis", couverte: false, sujet_secondaire: "rendez_vous" });
   const d4 = demande(4, "email", "Hélène Roux", "h.roux@exemple.fr", ilYa(0, 8), { objet: "Pose non terminée", sujet: "reclamation", urgence: false,
                                                                                   de_empreinte: "exemple-roux", litige: true, escaladee_le: ilYa(0, 12) });
   const d5 = demande(5, "formulaire", "Bernard", null, ilYa(0, 6), { objet: "Formulaire du site", sujet: "rendez_vous", statut: "a_traiter", couverte: false,
                                                                      motif: "Aucune adresse de réponse : à traiter par une personne." });
+  /* c3_15 : même nom, autre canal, sans clé commune → le rapprochement est proposé, une personne décide */
+  const d6 = demande(6, "whatsapp", "Martin Luc", "+33 6 00 00 00 06", ilYa(0, 5), { sujet: "devis", statut: "a_preparer", couverte: null, preparee_le: null,
+                                                                                    rapprochement_propose: d3.id });
+  /* c3_22 : une urgence non prise, l'astreinte appelée (rang 2 après un rang 1 sans réponse) */
+  const d7 = demande(7, "whatsapp", "Sophie Garnier", "+33 6 00 00 00 07", ilYa(0, 1), { sujet: "urgence", statut: "a_traiter", urgence: true, couverte: false,
+                                                                                         motif: "Urgence : jamais de réponse automatique, l'astreinte est appelée." });
   const receptions: Record<number, Reception> = {
     9001: { id: 9001, canal: "email", de_nom: "Marie Durand", de_adresse: "marie.durand@exemple.fr", sujet: "Ouverts samedi ?", recu_le: d1.recu_le, pieces: [],
             corps: "Bonjour,\nJe voudrais passer voir les échantillons de plans de travail. Êtes-vous ouverts samedi matin ?\nMerci,\nMarie" },
@@ -74,6 +82,10 @@ export function mondeExemple(): Monde {
             pieces: [{ nom: "photo-dressing.jpg" }] },
     9005: { id: 9005, canal: "formulaire", de_nom: "Bernard", de_adresse: null, sujet: "Formulaire du site", recu_le: d5.recu_le, pieces: [],
             corps: "Rappelez-moi pour un rendez-vous, au 06 00 00 00 00." },
+    9007: { id: 9007, canal: "whatsapp", de_nom: "Sophie Garnier", de_adresse: "+33 6 00 00 00 07", sujet: null, recu_le: d7.recu_le, pieces: [],
+            corps: "Le volet roulant est tombé, la fenêtre ne ferme plus et il pleut dans la chambre." },
+    9006: { id: 9006, canal: "whatsapp", de_nom: "Martin Luc", de_adresse: "+33 6 00 00 00 06", sujet: null, recu_le: d6.recu_le, pieces: [],
+            corps: "Pour la cuisine, j'ai pris les mesures : 4,20 m exactement." },
   };
   const reponses: Reponse[] = [
     reponse(1, d1, "Oui, l'atelier vous accueille le samedi de 9 h à 12 h ; les échantillons de plans de travail sont exposés au showroom.",
@@ -104,9 +116,11 @@ export function mondeExemple(): Monde {
       id: "00000000-0000-4000-8000-00000000c3a1", signature: "L'équipe de l'Atelier Bertin", formule_appel: "Bonjour,", formule_politesse: "Bien cordialement,",
       ton: "vouvoiement", mention_automatisee: MENTION, langues: ["fr", "en"], actif: true, accuse: true,
       texte_accuse: "Nous avons bien reçu votre message. Notre équipe vous répond au plus vite.",
+      phrase_transfert: "Votre demande est transmise au service {service}, qui revient vers vous.",
       lien_avis: "https://g.page/r/atelier-bertin/review",
       texte_avis: "Merci de nous avoir fait confiance. Votre avis aide d'autres clients à nous choisir : il prend une minute.",
       avis_auto_reglement: true,
+      envoi_auto: true,
     },
     avis: [
       { id: "00000000-0000-4000-8000-00000000c3b1", canal: "email", adresse: "m.lefevre@exemple.fr", nom: "M. Lefèvre", reference: "F-2026-118",
@@ -117,7 +131,7 @@ export function mondeExemple(): Monde {
         regle_le: ilYa(40).slice(0, 10), statut: "avis_recu", motif: null, prochain_le: null, envois: ["y", "z"], cree_le: ilYa(40) },
     ],
     indicateurs: { recues: 41, repondues: 33, parties_seules: 14, hors_base: 6, delai_median_minutes: 47 },
-    demandes: [d1, d2, d3, d4, d5],
+    demandes: [d1, d2, d3, d4, d5, d6, d7],
     receptions,
     reponses,
     fiches,
