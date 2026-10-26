@@ -1,6 +1,6 @@
 {
   "imports": {
-    "@partage/": "https://raw.githubusercontent.com/teopetit50-gif/pegase-site/2f21e987b5281dbc10fde3efa69faabc0fae1395/omega/functions/_partage/",
+    "@partage/": "https://raw.githubusercontent.com/teopetit50-gif/pegase-site/f8c811e1e3e8dc87354a42f0649fc3e94bab5dd9/omega/functions/_partage/",
     "unpdf": "npm:unpdf@1.3.2",
     "fast-xml-parser": "npm:fast-xml-parser@5.2.5",
     "xlsx": "npm:xlsx@0.18.5",
