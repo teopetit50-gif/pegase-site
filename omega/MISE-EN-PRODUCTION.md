@@ -16,12 +16,12 @@ relever est listé au § 8.
 >   `omega/prod/releve-20261025/`. Elle n'a rien reçu depuis le 09/10 (144 migrations,
 >   27 crons, une seule fonction Edge, `routes-site`), et porte le site d'avant
 >   (63 tables, 33 fonctions) qu'aucun fichier de l'export ne touche.
-> - **L'export est refait** (25/10, 18 h 10 Z) : 445 fichiers en 6 paliers
+> - **L'export est refait** (25/10, 18 h 10 Z) : 464 fichiers en 6 paliers (export du 26/10)
 >   (`omega/prod/migrations/PALIERS.md`), dont **21 lots posés sur la recette sans ligne
 >   `schema_migrations`**, rattrapés (RUNBOOK § 3.4) ; `tamila_m10` et `m10b` sortent (déjà en production).
 > - **La répétition tourne** : GitHub Actions, tag `repetition-*`, base remise comme la
->   production par le relevé du 23/10, migrations en rôle `postgres`. Les 445 fichiers passent, garde-fous
->   verts ; restent à arbitrer 22 fonctions, 1 politique, 5 contraintes et 194 droits (RUNBOOK § 3.5).
+>   production par le relevé du 23/10, migrations en rôle `postgres`. Les 464 fichiers passent, garde-fous
+>   verts. **Arbitrage fait le 26/10** : `omega/prod/ARBITRAGE-2026-10-26.md` (7 fonctions alignées sur la recette).
 > - **§ 1.7 (poser par `db push`) est abandonné** : les deux historiques n'ont aucune version
 >   en commun ; la pose se fait par `omega/prod/poser-palier.sh`, palier par palier, avec un
 >   essai annulé avant chaque palier.
