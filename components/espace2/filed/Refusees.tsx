@@ -205,8 +205,12 @@ export function Refusees() {
       {lignes && maintenant !== null ? (
         <SbBandeau
           teinte={aCorriger ? "ambre" : undefined}
-          titre={`${pluriel(ouvertes.length, "facture refusée")} à reprendre ou à classer · ${montant(ouvertes.reduce((s, x) => s + (x.montant_ttc ?? 0), 0))}`}
-          texte={aCorriger ? `${aCorriger} se corrige${aCorriger > 1 ? "nt" : ""} encore pour sa reprise ; passé l'heure limite, la reprise devient impossible.` : "Aucune n'attend de correction : elles se classent sans suite, ou se remplacent par la rectificative."}
+          titre={`${ouvertes.length} facture${ouvertes.length > 1 ? "s refusées" : " refusée"} à reprendre ou à classer · ${montant(ouvertes.reduce((s, x) => s + (x.montant_ttc ?? 0), 0))}`}
+          texte={
+            aCorriger
+              ? `${aCorriger > 1 ? `${aCorriger} se corrigent` : "Une se corrige"} encore pour sa reprise ; passé l'heure limite, la reprise devient impossible.`
+              : "Aucune n'attend de correction : elles se classent sans suite, ou se remplacent par la rectificative."
+          }
         />
       ) : (
         <Squelette hauteur={80} />
@@ -253,11 +257,11 @@ export function Refusees() {
                 <td data-etiquette="Reprise">
                   <EtatReprise r={x} />
                 </td>
-                <td data-etiquette="Geste">
+                <td data-etiquette="Geste" data-plein="">
                   {x.classee_le ? (
                     <span className="v2-gris">—</span>
                   ) : (
-                    <button type="button" className="v2-btn v2-btn--petit" onClick={() => ouvrir(x)} title={x.geste}>
+                    <button type="button" className="v2-btn v2-btn--petit" onClick={() => ouvrir(x)}>
                       <Archive width={14} height={14} aria-hidden="true" /> Classer sans suite
                     </button>
                   )}
