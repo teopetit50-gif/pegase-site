@@ -34,7 +34,7 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
     vise les clients inactifs.
   - L'écran n'a pas d'interrupteur « relance écrite » : le choix passe par `offload_regler`. Un interrupteur dans les
     réglages de l'écran OFFLOAD reste à faire, si Teo le veut.
-- Reste : T-OFFLOAD peut rejouer O-2 de TOFFLOAD-03 et la promesse 17. Import des personnes morales : attend Teo.
+- Reste : T-OFFLOAD peut rejouer la promesse 17 (un compte sans réponse ne reçoit qu'un message dans le trimestre). Import des personnes morales : attend Teo.
 
 ### Reprise du 26/10, nuit — contre-recette du testeur des modules, TMOD-14)
 
