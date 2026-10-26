@@ -280,3 +280,7 @@ export type EnvoiAuto = {
   politiques: { id: string; statut: string; nombre_mensuel: number | null; debut: string; fin: string; donne_par: string | null; demande: string | null }[];
   retenus_en_attente: number;
 };
+
+/* c4_36 — la valeur en jeu par segment ; la restitution en tableur (gérant, administrateur) */
+export type Segment = { segment: string; comptes: number; a_risque: number; valeur_en_jeu: number; reprises_en_cours: number };
+export type RestitutionTableur = { format: string; fichiers: Record<string, string> };

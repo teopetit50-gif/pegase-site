@@ -8,7 +8,7 @@
    mensuel posé la nuit s'exporte de la même façon.
    ══════════════════════════════════════════════════════════════════════ */
 
-import type { Pilotage } from "./types";
+import type { Pilotage, Segment } from "./types";
 
 type Cellule = string | number | null | undefined;
 
@@ -20,7 +20,11 @@ function cellule(v: Cellule): string {
 }
 
 function telecharger(nom: string, lignes: Cellule[][]) {
-  const texte = "﻿" + lignes.map((l) => l.map(cellule).join(";")).join("\r\n");
+  telechargerTexte(nom, lignes.map((l) => l.map(cellule).join(";")).join("\r\n"));
+}
+
+function telechargerTexte(nom: string, csv: string) {
+  const texte = "﻿" + csv;
   const url = URL.createObjectURL(new Blob([texte], { type: "text/csv;charset=utf-8" }));
   const a = document.createElement("a");
   a.href = url;
@@ -83,4 +87,17 @@ export function exporterArrete(p: Pilotage, jour: string) {
   const l: Cellule[][] = [[`OFFLOAD — arrêté du ${jour}`], [`Période depuis le ${p.depuis}`]];
   for (const cle of Object.keys(TABLEAUX) as TableauPilotage[]) l.push([], [TABLEAUX[cle].titre], ...TABLEAUX[cle].fn(p));
   telecharger(`offload-arrete-${jour}.csv`, l);
+}
+
+/* c4_36 — la valeur en jeu par segment, et les fichiers de la restitution préparés par la base */
+export function exporterSegments(segments: Segment[], jour: string) {
+  telecharger(`offload-segments-${jour}.csv`, [
+    ["Segment", "Comptes suivis", "Comptes à risque", "Valeur en jeu HT", "Reprises en cours"],
+    ...segments.map((s) => [s.segment, n(s.comptes), n(s.a_risque), n(s.valeur_en_jeu), n(s.reprises_en_cours)]),
+  ]);
+}
+
+/** Un fichier de la restitution (offload_restitution_tableur) : déjà au format CSV, il reçoit le BOM pour Excel. */
+export function telechargerFichier(nom: string, csv: string) {
+  telechargerTexte(nom, csv.replace(/\r?\n/g, "\r\n"));
 }
