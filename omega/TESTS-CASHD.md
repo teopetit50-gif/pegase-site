@@ -123,7 +123,8 @@ Attendus notés **avant** de jouer. « R » = `lib/produits/relances.ts`, « C �
 | L1 | passage du lendemain réel (22/10) ; R:171, « un message par compte et par jour » | `cashd_preparer_maintenant` le 22/10 (date réelle), rappels du 21/10 encore en file | rien de réécrit, aucun doublon | `{jour 2026-10-22, preparees 0, coupees 0, bloquees 0}` ; `cashd_relances_du_jour(…,'2026-10-22')` vide | juste | 1 |
 | S2-8b | R:170 « L'historique de paiement du client pèse aussi » | A-C24 : ancienne facture FB-2026-0040 réglée 50 j après échéance + FB-2026-0127 à 9 j ; A-C25 : même facture à 9 j, sans historique | ton différent | A-C24 : la phrase « Il s'agit sans doute d'un simple oubli. » **disparaît** ; A-C25 la garde ; reste du texte identique | juste | 1 |
 | M1 | MED avec commentaire (R:187, R:453) — chemin positif | il faut une ferme réellement partie : A-C19 a sa ferme datée du 26/10 (jour simulé), `cashd_noter_envoi_main` refuse une date future | MED préparée, approuvée avec commentaire | non joué : pas avant le 26/10 réel (noter la ferme), puis +7 j pour la MED. Le refus sans commentaire (c2_25, R07) est juste ; le refus à la saisie (19aw) n'a pas de demande à tester | pas testable ce soir sur le banc | 1 |
-| P1 | C:84 « Un lien de paiement accompagne la relance et s'éteint dès le règlement. » | (a) relance neuve d'une facture échue ; (b) même facture réglée et lettrée ensuite ; (c) règlement partiel | (a) lien présent dans le texte ; (b) lien éteint, relance coupée ; (c) lien au reste dû | attendus notés le 25/10 01:15 ; à jouer au signal du coordinateur (lot C2) | à jouer | 1 |
+| P1 | C:84 « Un lien de paiement accompagne la relance et s'éteint dès le règlement. » | (a) relance neuve d'une facture échue ; (b) même facture réglée et lettrée ensuite ; (c) règlement partiel | (a) lien présent dans le texte ; (b) lien éteint, relance coupée ; (c) lien au reste dû | (a) réglage `lien_paiement` fixe → « Régler en ligne : https://paiement.banc-cashd.invalid/regler » sous la facture (A-C26, A-C27) ; avec variables `{numero}` `{montant}` → « …?facture=FB-2026-0131&montant=1085.00 » (A-C28). (b) A-C28 réglée en entier → relance `coupee`, « facture FB-2026-0131 réglée ». (c) A-C26 réglée de 500 € → la relance en attente garde **1 085 €** et son lien, rien n'est revu (voir TCASHD-19) | (a)(b) juste (la page de paiement elle-même : pas testable sans tiers) ; (c) écart TCASHD-19 | 1 |
+| R41 | c2_41 reprise après refus | A-C27 : rappel 1 085 € refusé en valideur (`rejete`, commentaire « Test du banc … attendre »), puis règlement 500 € lettré (VIR-C27-0001), puis `cashd_preparer_maintenant` | reprise proposée à 585 € | demande `rejetee` ; la relance reste `non_reglee`, 1 085 €, motif « l'envoi viendra une fois le réglage posé » ; préparation → `{preparees 0}` ; fiche : reste 585, relançable 585, aucune suspension. **Aucune reprise.** Envoi adossé à la reprise : non vérifiable (pas de reprise) | écart TCASHD-18 | 1 |
 
 Notes de lecture (avant de jouer) :
 - « Un message par compte et par jour », « cinq jours d'écart au moins » (C13) et « suspendue pas d'adresse » (C4)
@@ -230,6 +231,15 @@ puis `select to_jsonb(e) from public.cashd_factures_etat e where client_id = '<c
 - **TCASHD-16** (numéroté par le coordinateur) · R15 · rappel A-C19 du 21/10 approuvé puis noté envoyé à la main
   (`cashd_noter_envoi_main` → `5d7cba3f-…`) : la relance porte `envoye_le` mais reste `non_reglee`, motif « l'envoi viendra
   une fois le réglage posé ». Un réglage d'envoi posé plus tard pourrait la faire repartir une seconde fois.
+- **TCASHD-18** · c2_41 · compte A-C27, FB-2026-0130 (1 085 €, échue 16/10). 26/10 : rappel `6faf6b59-…` préparé ; en valideur
+  `insert into public.approbations (demande_id, …, decision, commentaire) values ('db3ecf24-…', …, 'rejete', 'Test du banc T-CASHD : le client annonce un virement partiel, attendre')`
+  → accepté (`4b1f2dd4-…`), demande `rejetee`. Puis `cashd_importer(…,'reglements',[{date 2026-10-25, montant 500, compte_ref A-C27, reference VIR-C27-0001, libelle "VIR FB-2026-0130"}])`
+  → `lettrees 1`. Puis `cashd_preparer_maintenant(client)` → `{preparees 0}`. `cashd_relances_du_jour(client,'2026-10-26')` : seule la relance
+  refusée, toujours `non_reglee`, 1 085 €, motif « … la relance est écrite et validable, l'envoi viendra une fois le réglage posé »
+  (motif faux pour une relance refusée). Fiche : reste 585, relançable 585, `relance_suspendue` null. Attendu (annonce c2_41) : reprise au nouveau montant.
+- **TCASHD-19** · C:77-78 · compte A-C26, FB-2026-0129 (1 085 €) : rappel `6874a940-…` en attente de validation ; règlement 500 € lettré
+  (VIR-C26-0001) ; `cashd_preparer_maintenant` → `{preparees 0, coupees 0}` ; la relance reste `en_attente`, **1 085,00 € restant dus**, lien
+  inchangé. Un valideur peut approuver une relance qui réclame 500 € de trop (comparer : un avoir mal imputé coupait la relance « montant revu »).
 
 ## Questions au coordinateur
 
