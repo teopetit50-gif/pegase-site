@@ -83,6 +83,8 @@ const MANUELS = {
   // 25/10 : la production a déjà tamila_m10 et m10b, à l'identique (empreintes du 25/10) ; m10b supprime une fonction
   // (tamila_porte_delais) qu'elle n'a jamais eue : le rejouer échoue.
   tamila_m10b_porte_etroite: { exclure: 'déjà en production, à l\'identique (relevé du 25/10)' },
+  // 26/10 : idem pour m10 ; rejoué, il ramenait six fonctions Tamila de la production à une version plus ancienne.
+  tamila_m10_delais_correctifs: { exclure: 'déjà en production, à l\'identique (relevé du 25/10)' },
   daliro_taux_penalites_2026s2: { fichiers: [{ sha: '66f5ec6', chemin: 'omega/modules/daliro/reglages/taux_penalites_2026s2.sql' }] },
 };
 

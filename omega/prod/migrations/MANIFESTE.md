@@ -1,7 +1,7 @@
 # Manifeste des migrations de production (assemblé, non posé)
 
 Assemblé par `omega/prod/assembler.mjs` depuis 1 page(s) de `omega/prod/exporter.sql` (recette ygwbgpowzlbdaajlsqkn).
-Fichiers écrits : 446 ; exclus : 33 ; à reconstruire : 0 ; erreurs : 0.
+Fichiers écrits : 445 ; exclus : 34 ; à reconstruire : 0 ; erreurs : 0.
 
 | Version | Nom | Décision | Source | Fichier | sha256 (16) | Notes |
 |---|---|---|---|---|---|---|
@@ -10,7 +10,7 @@ Fichiers écrits : 446 ; exclus : 33 ; à reconstruire : 0 ; erreurs : 0.
 | 20260928222752 | `daliro_m0b_marches` | emporter | sql | `20260928222752_daliro_m0b_marches.sql` | eae4aba94c22bbf2 |  |
 | 20260928223335 | `varelo_referentiel_index` | emporter | sql | `20260928223335_varelo_referentiel_index.sql` | ca2d1a0aa50d2532 |  |
 | 20260929023244 | `daliro_m0c_planning` | emporter | sql | `20260929023244_daliro_m0c_planning.sql` | e0ff47a0d1d11553 |  |
-| 20260929024032 | `tamila_m10_delais_correctifs` | emporter | sql | `20260929024032_tamila_m10_delais_correctifs.sql` | 03c6abf9b50ff070 |  |
+| 20260929024032 | `tamila_m10_delais_correctifs` | exclure: déjà en production, à l'identique (relevé du 25/10) | sql | — | — |  |
 | 20260929033045 | `varelo_referentiel_perf` | emporter | sql | `20260929033045_varelo_referentiel_perf.sql` | 8aea809681f9fd2c |  |
 | 20260929033851 | `tamila_m10b_porte_etroite` | exclure: déjà en production, à l'identique (relevé du 25/10) | sql | — | — |  |
 | 20260929034413 | `tiroma_releve` | emporter | sql | `20260929034413_tiroma_releve.sql` | 9a3b17712db10b66 |  |
@@ -482,5 +482,5 @@ Fichiers écrits : 446 ; exclus : 33 ; à reconstruire : 0 ; erreurs : 0.
 | 20261025151724 | `c2_40_lien_paiement` | emporter | note | `20261025151724_c2_40_lien_paiement.sql` | fd447affb0e0b9d4 | fichiers : c2_40_lien_paiement.sql @ 2b61661005bb3020cd5fbf9c40bfbc93e60317fd ; fichiers de tests ignorés : omega/tests/cashd/c2_40_lien_paiement.sql |
 | 20261025151751 | `c2_41_reprise_apres_refus` | emporter | note | `20261025151751_c2_41_reprise_apres_refus.sql` | 905a31a176093189 | fichiers : c2_41_reprise_apres_refus.sql @ b996c405a5343f7b98fc6c61716e830da7684e43 ; fichiers de tests ignorés : omega/tests/cashd/c2_41_reprise_apres_refus.sql |
 | 20261025180655 | `c4_08_test_delai_minimal` | exclure: pose de tests, pas une migration | note | — | — |  |
-| 20261025180656 | `a5_01_cloture` | emporter | depot | `20261025180656_a5_01_cloture.sql` | 711556eb5d8da743 | étape C |
+| 20261025180656 | `a5_01_cloture` | emporter | depot | `20261025180656_a5_01_cloture.sql` | 39dee467616941a3 | étape C |
 | 20261025180657 | `environnement_production` | emporter | assembleur | `20261025180657_environnement_production.sql` | 7116a2425e3b2657 | étape C, après a5_01 |
