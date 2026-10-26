@@ -4,6 +4,38 @@ Branche `worker-c3`. Coordinateur : `session_01BCGFdpRKBvXKjouC75sYBg`.
 Commencée le 06/10/2026. Je n'appelle jamais Supabase : le coordinateur pose, je lis les sorties brutes.
 (Depuis le 25/10 au soir, la session de reprise pose elle-même sur `omega-recette`, méthode « depuis le dépôt ».)
 
+## RÉPONSE DE NUIT SOUS ACCORD (26/10, ~19 h 50 Z) — c3_46, audit omega/CHIFFRAGE/reput.md, « 5 manques » n° 1
+
+- **Décision** (transmise par « Omega moteurs et build », Teo absent ; règle d'or : la phrase du site fait foi, et le patron
+  garde la main) : la nuit, une réponse de fond PART si et seulement si son sujet est couvert par un **accord permanent**
+  du client, toutes les autres vérifications d'envoi restant les mêmes. Sans accord, rien ne change : l'accusé part, la
+  réponse attend l'ouverture et la validation.
+- **c3_46 posée et verte** : `omega/modules/reput/migrations/c3_46_reponse_nuit_accord.sql`, depuis le dépôt (worker-c3
+  57972159), inscrite dans `schema_migrations` (20261026194847). Test `omega/tests/reput/c3_46_reponse_nuit_accord.sql`
+  poussé **avant** la migration (9eb0d3f0) : **rouge** (de nuit, la réponse sous accord est bloquée HORS_HEURES, et la marque
+  n'existe pas), puis **10/10** après. `^test_c3_` **45/45 fichiers verts**, joués par morceaux.
+  - Marque `envois.reponse_accord`, posée à la création par le déclencheur `envois_reponse_accord_marquer`.
+  - `private.reput_reponse_sous_accord(envoi)`, relue à chaque vérification. Les conditions :
+    - un envoi REPUT de réponse (clé `reput:envoi:`), transactionnel, ni direct ni interne ;
+    - vers l'adresse de réponse de la demande (jamais un tiers), sans urgence ni litige ;
+    - dont la demande de validation `reput.repondre.<sujet>` a été approuvée par une politique **active**, de ce client,
+      de ce module et de ce type.
+  - `private.envoi_hors_heures_permis` (reprise de c3_42a) = interne urgent, OU accusé marqué, OU réponse marquée **et**
+    toujours sous accord. `verrous_envoi` n'est pas modifié.
+  - Ce que le test vérifie, de nuit (3 h, Paris) et de jour (10 h), avec des heures d'ouverture réalistes dans la scène
+    (le banc envoie à toute heure) :
+    - avec accord, la réponse passe la nuit, et ses autres verrous sont les mêmes que le jour ;
+    - sans accord, HORS_HEURES ;
+    - de jour, aucune des deux n'est retenue ;
+    - une marque posée à tort, sans accord : HORS_HEURES ;
+    - vers un tiers : HORS_HEURES ;
+    - un autre module (tiroma) de nuit : HORS_HEURES ;
+    - un accord révoqué : la même réponse marquée retombe en HORS_HEURES.
+  - La fonction Edge `reput-reponse` n'est pas touchée (v32 inchangée).
+- **Pour le site** : la phrase « Une demande reçue à 21 h obtient sa réponse à 21 h » est tenue pour les sujets que le client
+  a autorisés d'avance (accord permanent, posé par « Envoi automatique ») ; les autres reçoivent l'accusé dans la minute et
+  la réponse à l'ouverture. Le mode des envois reste en essai sur la recette : rien n'est parti pour de vrai.
+
 ## ÉCARTS DU TESTEUR (26/10, ~18 h 40 Z) — TMOD-08 à 10, rapport `omega/RECETTE-TESTEUR-MODULES-2026-10-26.md` (testeur-modules 157b506f)
 
 - **c3_45 posée et verte** : `omega/modules/reput/migrations/c3_45_reprise_ecarts_testeur.sql`, depuis le dépôt (worker-c3
