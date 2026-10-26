@@ -6,7 +6,7 @@ create or replace function tests.test_c2_01_donnees() returns setof text
 language plpgsql as $f$
 declare
   banc jsonb; v_client uuid; v_gerant uuid; v_daf uuid; v_collab uuid; p jsonb; j date := tests.c2_jour();
-  v_r jsonb; v_reg uuid; v_imp uuid; v_t jsonb; v_b record; v_e record; v_autre jsonb;
+  v_r jsonb; v_reg uuid; v_imp uuid; v_t jsonb; v_b record; v_e record; v_autre jsonb; v_n0 integer; v_t0 jsonb;
 begin
   banc := tests.c2_banc();
   v_client := (banc ->> 'client')::uuid; v_gerant := (banc ->> 'gerant')::uuid; v_daf := (banc ->> 'daf')::uuid;
@@ -32,8 +32,11 @@ begin
   perform public.cashd_regler(v_client, '{"taux_penalites": 0.1215}');
 
   -- ── Le portefeuille ──
+  -- 27/10 (C2) : le banc porte déjà le jeu NOBAT (omega/banc/cashd_nobat.sql, 21/10) ; ce qui y est avant le test est compté à part
+  v_n0 := (select count(*)::int from public.cashd_comptes c where c.client_id = v_client);
+  v_t0 := public.cashd_tableau(v_client);
   p := tests.c2_portefeuille();
-  return next is((select count(*)::int from public.cashd_comptes c where c.client_id = v_client), 3, 'Trois comptes clients saisis');
+  return next is((select count(*)::int from public.cashd_comptes c where c.client_id = v_client), 3 + v_n0, 'Trois comptes clients saisis');
   return next is((select f.echeance from public.cashd_factures f where f.id = (p ->> 'f4')::uuid), j - 1 + 30,
                  'Sans échéance donnée : émission + 30 jours (délai du compte)');
   return next throws_ok(format('select public.cashd_ecrire_facture(null, %L, %L)', v_client,
@@ -53,7 +56,8 @@ begin
   return next is(v_e.jours_ecoules || '/' || v_e.statut || '/' || coalesce(v_e.tranche, 'aucune'), '5/en_attente/aucune',
                  'Le devis porte ses 5 jours écoulés depuis l''envoi, hors encours');
   v_t := public.cashd_tableau(v_client);
-  return next is((v_t #>> '{totaux,echu}')::numeric || '/' || (v_t #>> '{totaux,encours}')::numeric || '/' || (v_t #>> '{totaux,comptes_en_retard}'),
+  return next is(((v_t #>> '{totaux,echu}')::numeric - (v_t0 #>> '{totaux,echu}')::numeric) || '/' || ((v_t #>> '{totaux,encours}')::numeric - (v_t0 #>> '{totaux,encours}')::numeric)
+                 || '/' || ((v_t #>> '{totaux,comptes_en_retard}')::int - (v_t0 #>> '{totaux,comptes_en_retard}')::int),
                  '15600.00/24000.00/2', 'Le tableau : 15 600 € échus au total, 24 000 € d''encours, deux comptes en retard');
 
   -- ── Les règlements et le lettrage ──
@@ -77,7 +81,7 @@ begin
   v_reg := (v_r ->> 'reglement')::uuid;
   return next is((v_r ->> 'imputations')::int || '/' || (v_r ->> 'a_imputer')::numeric, '0/2400.00', 'Un virement sans référence ni compte reste à imputer');
   return next is((public.cashd_propositions(v_reg) #>> '{0,factures,0,numero}'), 'F-2026-150', 'La facture probable est proposée (montant exact)');
-  return next is(jsonb_array_length(public.cashd_tableau(v_client) -> 'a_imputer'), 1, 'Le tableau le montre « à imputer »');
+  return next is(jsonb_array_length(public.cashd_tableau(v_client) -> 'a_imputer'), 1 + jsonb_array_length(v_t0 -> 'a_imputer'), 'Le tableau le montre « à imputer »');
   v_r := public.cashd_lettrer(v_reg, (p ->> 'f4')::uuid);
   return next is((v_r ->> 'reste_du')::numeric || '/' || (v_r ->> 'a_imputer')::numeric, '0.00/0.00', 'Lettré à la main : la facture de la mairie est soldée');
   return next throws_ok(format('select public.cashd_lettrer(%L, %L, 1)', v_reg, p ->> 'f2'), '23514', null,
@@ -109,7 +113,7 @@ begin
   -- ── Les droits ──
   perform tests.endosser(v_collab, 'c2-collab@banc-varelo.test');
   return next throws_ok(format('select public.cashd_noter_reglement(%L, null, 10)', v_client), '42501', null, 'Un collaborateur sans droit ne note pas de règlement');
-  return next is((select count(*)::int from public.cashd_comptes c where c.client_id = v_client), 3, 'Le collaborateur lit les comptes de son périmètre');
+  return next is((select count(*)::int from public.cashd_comptes c where c.client_id = v_client), 3 + v_n0, 'Le collaborateur lit les comptes de son périmètre');
   perform tests.redevenir_admin();
   insert into public.droits (client_id, droit, user_id) values (v_client, 'cashd.gerer', v_collab);
   perform tests.endosser(v_collab, 'c2-collab@banc-varelo.test');
