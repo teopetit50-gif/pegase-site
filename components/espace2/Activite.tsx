@@ -1,7 +1,16 @@
 "use client";
 
 /* ══════════════════════════════════════════════════════════════════════
-   Activité — en colonnes, à la manière d'Attio (11/10/2026)
+   Activité — le journal unifié (Logs) de Supabase, au 1:1 (22/10/2026)
+
+   22/10 : demande de Teo, recopier les pages de Supabase. Activité prend
+   la page Logs : à gauche la colonne de filtres (période, type, module,
+   chacun avec son compte), à droite la barre de recherche, l'histogramme
+   des événements sur la période, la table dense (date en chasse fixe,
+   type, module, événement, montant, état) ; un clic ouvre le détail dans
+   le volet de droite. Gabarit et mesures : ./sb/sb.css.
+
+   Avant (11/10) : en colonnes, à la manière d'Attio.
 
    Demande de Teo, maquette à l'appui : trois colonnes — Documents reçus,
    À valider, Décisions — chacune avec son compte, ses cartes (titre,
@@ -13,28 +22,21 @@
    Mêmes sources qu'avant (./donnees) : l'exemple, ou la base réelle.
    ══════════════════════════════════════════════════════════════════════ */
 
-import "./notes.css";
-import "./activite.css";
-import { createElement, useMemo, useState } from "react";
+import "./sb/sb.css";
+import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowUpDown, CalendarDays, Check, ChevronDown, ChevronRight, CircleCheck, Clock3, Columns3, FileText, LayoutGrid, List, Search, X, type LucideIcon } from "lucide-react";
+import { CircleCheck, Clock3, FileText, Search, X, type LucideIcon } from "lucide-react";
 import { dateHeure, libelleModule, montant } from "@/components/espace/format";
 import { etatDocument } from "@/components/espace/filed/etats";
 import { nomPersonne } from "@/components/espace/exemples/socle";
 import { useSource } from "@/components/espace/source";
-import { ItemMenu, MenuDeroulant, Note, Squelette, teinte, type Teinte } from "./ui";
-import { ecrireStockage, useStockage } from "./Collection";
+import { Badge, Note, Squelette, teinte, type Teinte } from "./ui";
 import { useDonnees, type Donnees } from "./donnees";
 import { STATUTS_DEMANDE } from "./evenements";
-import { MODULES, RACINE } from "./modules";
+import { useMaintenant } from "./horloge";
+import { RACINE } from "./modules";
 
-const I = { width: 16, height: 16, strokeWidth: 1.6, "aria-hidden": true } as const;
-const CLE_VUE = "espace2-activite-vue";
-const MINUTE = 60_000;
-const HEURE = 3_600_000;
 const JOUR = 86_400_000;
-/* au-delà, la colonne se replie : « N de plus » la déplie */
-const LIMITE = 5;
 
 type Cle = "recus" | "a_valider" | "decisions";
 type Carte = {
@@ -57,15 +59,7 @@ const COLONNES: { cle: Cle; titre: string; icone: LucideIcon; tout: string; libe
   { cle: "a_valider", titre: "À valider", icone: Clock3, tout: `${RACINE}/validations`, libelleTout: "Voir toutes les demandes à valider", vide: "Rien à valider" },
   { cle: "decisions", titre: "Décisions", icone: CircleCheck, tout: `${RACINE}/validations`, libelleTout: "Voir toutes les décisions", vide: "Aucune décision" },
 ];
-const ICONES = Object.fromEntries(COLONNES.map((c) => [c.cle, c.icone])) as Record<Cle, LucideIcon>;
 const TYPE: Record<Cle, string> = { recus: "Document reçu", a_valider: "À valider", decisions: "Décision" };
-
-type Tri = "recent" | "ancien" | "montant";
-const TRIS: { cle: Tri; libelle: string }[] = [
-  { cle: "recent", libelle: "Plus récent en premier" },
-  { cle: "ancien", libelle: "Plus ancien en premier" },
-  { cle: "montant", libelle: "Montant le plus élevé" },
-];
 
 type Periode = "jour" | "7j" | "30j" | "tout";
 const PERIODES: { cle: Periode; libelle: string; duree: number }[] = [
@@ -78,22 +72,6 @@ const PERIODES: { cle: Periode; libelle: string; duree: number }[] = [
 /* « Payer la facture R2026-000014 — Papeterie Durand, 486,20 € » : la carte garde l'action, le reste va dans l'info-bulle */
 const court = (resume: string) => resume.split(" — ")[0].trim() || resume;
 const sansAccents = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
-const iconeModule = (cle: string): LucideIcon => MODULES.find((m) => m.cle === cle)?.icone ?? LayoutGrid;
-
-/* le moment, au plus court : « À l'instant », « Il y a 12 min », « Il y a 2 h », « Hier », « 3 oct. » */
-function moment(iso: string, maintenant: number): string {
-  const t = new Date(iso).getTime();
-  if (Number.isNaN(t)) return "—";
-  const ecart = maintenant - t;
-  if (ecart < MINUTE) return "À l'instant";
-  if (ecart < HEURE) return `Il y a ${Math.floor(ecart / MINUTE)} min`;
-  const jour = new Date(maintenant);
-  jour.setHours(0, 0, 0, 0);
-  if (t >= jour.getTime()) return `Il y a ${Math.floor(ecart / HEURE)} h`;
-  if (t >= jour.getTime() - JOUR) return "Hier";
-  const d = new Date(t);
-  return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: d.getFullYear() === jour.getFullYear() ? undefined : "numeric" });
-}
 
 function cartes(donnees: Donnees): Carte[] {
   const l: Carte[] = [];
@@ -131,279 +109,204 @@ function cartes(donnees: Donnees): Carte[] {
 export default function Activite() {
   const { donnees, erreur } = useDonnees();
   const { source } = useSource();
-  const [maintenant] = useState(() => Date.now());
-  const [tri, setTri] = useState<Tri>("recent");
-  const [periode, setPeriode] = useState<Periode>("7j");
-  const [module, setModule] = useState<string | null>(null);
+  const maintenant = useMaintenant();
+  const [periode, setPeriode] = useState<Periode>("30j");
+  const [types, setTypes] = useState<Cle[]>(["recus", "a_valider", "decisions"]);
+  const [modules, setModules] = useState<string[] | null>(null);
   const [recherche, setRecherche] = useState("");
-  const [deplies, setDeplies] = useState<Record<Cle, boolean>>({ recus: false, a_valider: false, decisions: false });
-  const vue = useStockage(CLE_VUE) === "liste" ? "liste" : "colonnes";
-  const choisirVue = (v: "colonnes" | "liste") => ecrireStockage(CLE_VUE, v);
+  const [choisie, setChoisie] = useState<string | null>(null);
 
-  const toutes = useMemo(() => (donnees ? cartes(donnees) : []), [donnees]);
-  const modules = useMemo(() => Array.from(new Set(toutes.map((c) => c.module))).sort((a, b) => libelleModule(a).localeCompare(libelleModule(b), "fr")), [toutes]);
+  const toutes = useMemo(() => (donnees ? cartes(donnees) : null), [donnees]);
+  const duree = PERIODES.find((p) => p.cle === periode)?.duree ?? Infinity;
+  const dansPeriode = useMemo(() => (toutes && maintenant !== null ? toutes.filter((c) => duree === Infinity || maintenant - new Date(c.quand).getTime() <= duree) : null), [toutes, maintenant, duree]);
+  const lesModules = useMemo(() => Array.from(new Set((dansPeriode ?? []).map((c) => c.module))), [dansPeriode]);
+  const q = sansAccents(recherche.trim());
+  const visibles = useMemo(
+    () =>
+      (dansPeriode ?? [])
+        .filter((c) => types.includes(c.colonne) && (!modules || modules.includes(c.module)) && (!q || sansAccents(c.texte).includes(q)))
+        .sort((a, b) => b.quand.localeCompare(a.quand)),
+    [dansPeriode, types, modules, q],
+  );
+  const carte = visibles.find((c) => c.id === choisie) ?? null;
+  const compte = (f: (c: Carte) => boolean) => (dansPeriode ?? []).filter(f).length;
 
-  const visibles = useMemo(() => {
-    const duree = PERIODES.find((p) => p.cle === periode)?.duree ?? Infinity;
-    const q = sansAccents(recherche.trim());
-    const l = toutes.filter(
-      (c) =>
-        (!module || c.module === module) &&
-        maintenant - new Date(c.quand).getTime() <= duree &&
-        (!q || sansAccents(`${c.texte} ${libelleModule(c.module)}`).includes(q)),
-    );
-    return l.sort((a, b) => {
-      if (tri === "montant") return (b.somme ?? -Infinity) - (a.somme ?? -Infinity) || b.quand.localeCompare(a.quand);
-      return tri === "ancien" ? a.quand.localeCompare(b.quand) : b.quand.localeCompare(a.quand);
-    });
-  }, [toutes, module, periode, recherche, tri, maintenant]);
-
-  const parColonne = (cle: Cle) => visibles.filter((c) => c.colonne === cle);
-  const filtre = !!recherche.trim() || !!module;
-  const libellePeriode = PERIODES.find((p) => p.cle === periode)?.libelle ?? "";
-  const coche = (actif: boolean) => (actif ? <Check width={16} height={16} aria-label="choisi" /> : null);
+  /* l'histogramme : 40 tranches sur la période (ou sur l'étendue des événements) */
+  const barres = useMemo(() => {
+    if (!visibles.length || maintenant === null) return [];
+    const debut = duree === Infinity ? Math.min(...visibles.map((c) => new Date(c.quand).getTime())) : maintenant - duree;
+    const pas = Math.max(1, (maintenant - debut) / 40);
+    const b = Array.from({ length: 40 }, () => 0);
+    for (const c of visibles) {
+      const k = Math.min(39, Math.max(0, Math.floor((new Date(c.quand).getTime() - debut) / pas)));
+      b[k] += 1;
+    }
+    return b;
+  }, [visibles, maintenant, duree]);
+  const max = Math.max(1, ...barres);
+  const dateLog = (iso: string) => {
+    const d = new Date(iso);
+    return Number.isNaN(d.getTime()) ? "—" : `${d.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "2-digit" })} ${d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}`;
+  };
 
   return (
-    <div className="no-page ac-page v2-arrivee">
+    <div className="sb-journal v2-arrivee">
       <h1 className="v2-sr">Activité</h1>
-
-      <div className="no-barre">
-        <div className="ac-barre-gauche">
-          <MenuDeroulant
-            etiquette={`Trier : ${TRIS.find((t) => t.cle === tri)?.libelle ?? ""}`}
-            classe="no-bouton"
-            placement="bottom start"
-            largeur={240}
-            declencheur={
-              <>
-                <ArrowUpDown {...I} />
-                {TRIS.find((t) => t.cle === tri)?.libelle}
-                <ChevronDown {...I} />
-              </>
-            }
-          >
-            {TRIS.map((t) => (
-              <ItemMenu key={t.cle} id={t.cle} onAction={() => setTri(t.cle)} suffixe={coche(tri === t.cle)}>
-                {t.libelle}
-              </ItemMenu>
-            ))}
-          </MenuDeroulant>
-          <MenuDeroulant
-            etiquette={`Filtrer par module : ${module ? libelleModule(module) : "Tous les modules"}`}
-            classe="no-bouton"
-            placement="bottom start"
-            largeur={220}
-            declencheur={
-              <>
-                <LayoutGrid {...I} />
-                {module ? libelleModule(module) : "Tous les modules"}
-                <ChevronDown {...I} />
-              </>
-            }
-          >
-            <ItemMenu id="tous" onAction={() => setModule(null)} suffixe={coche(!module)}>
-              Tous les modules
-            </ItemMenu>
-            {modules.map((m) => (
-              <ItemMenu key={m} id={m} textValue={libelleModule(m)} onAction={() => setModule(m)} suffixe={coche(module === m)}>
-                {libelleModule(m)}
-              </ItemMenu>
-            ))}
-          </MenuDeroulant>
-          <MenuDeroulant
-            etiquette={`Période : ${libellePeriode}`}
-            classe="no-bouton"
-            placement="bottom start"
-            largeur={220}
-            declencheur={
-              <>
-                <CalendarDays {...I} />
-                {libellePeriode}
-                <ChevronDown {...I} />
-              </>
-            }
-          >
-            {PERIODES.map((p) => (
-              <ItemMenu key={p.cle} id={p.cle} onAction={() => setPeriode(p.cle)} suffixe={coche(periode === p.cle)}>
-                {p.libelle}
-              </ItemMenu>
-            ))}
-          </MenuDeroulant>
-        </div>
-
-        <div className="no-barre-droite">
-          <label className="ac-recherche">
-            <Search {...I} width={14} height={14} />
-            <span className="v2-sr">Rechercher dans l&apos;activité</span>
-            <input type="search" value={recherche} placeholder="Rechercher" autoComplete="off" spellCheck={false} onChange={(e) => setRecherche(e.target.value)} onKeyDown={(e) => e.key === "Escape" && setRecherche("")} />
-            {recherche ? (
-              <button type="button" className="ac-effacer" aria-label="Effacer la recherche" onClick={() => setRecherche("")}>
-                <X width={12} height={12} strokeWidth={2} aria-hidden="true" />
-              </button>
-            ) : null}
-          </label>
-          <div className="no-bascule" role="group" aria-label="Affichage">
-            <button type="button" aria-pressed={vue === "colonnes"} aria-label="Vue en colonnes" title="Vue en colonnes" onClick={() => choisirVue("colonnes")}>
-              <Columns3 {...I} width={14} height={14} />
-            </button>
-            <button type="button" aria-pressed={vue === "liste"} aria-label="Vue en liste" title="Vue en liste" onClick={() => choisirVue("liste")}>
-              <List {...I} width={14} height={14} />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {erreur ? (
-        <div className="ac-alerte">
-          <Note teinte="rouge" role="alert">
-            <strong>La base réelle n&apos;a pas répondu.</strong> {erreur}
-          </Note>
-        </div>
-      ) : null}
-
-      {vue === "colonnes" ? (
-        <div className="ac-tableau">
-          {COLONNES.map((col) => {
-            const liste = parColonne(col.cle);
-            const montrees = deplies[col.cle] ? liste : liste.slice(0, LIMITE);
-            const reste = liste.length - montrees.length;
-            const Icone = col.icone;
-            return (
-              <section key={col.cle} className="ac-colonne" aria-labelledby={`ac-${col.cle}`} data-colonne={col.cle}>
-                <header className="ac-colonne-tete">
-                  <Icone {...I} />
-                  <h2 id={`ac-${col.cle}`}>{col.titre}</h2>
-                  {col.cle === "a_valider" && liste.length ? <span className="ac-led" title="En attente d'une décision" /> : null}
-                  {donnees ? <span className="no-compte">{liste.length}</span> : null}
-                </header>
-
-                {!donnees ? (
-                  <ul className="ac-cartes" aria-busy="true">
-                    {[0, 1, 2].map((i) => (
-                      <li key={i} className="ac-carte ac-carte--squelette">
-                        <Squelette largeur="70%" hauteur={14} />
-                        <Squelette largeur="45%" hauteur={12} />
-                        <Squelette largeur="100%" hauteur={12} />
-                      </li>
-                    ))}
-                  </ul>
-                ) : liste.length ? (
-                  <ul className="ac-cartes">
-                    {montrees.map((c) => (
-                      <CarteActivite key={c.id} c={c} maintenant={maintenant} />
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="ac-vide">{filtre ? "Aucun résultat avec ces filtres" : `${col.vide} sur cette période`}</p>
-                )}
-
-                {donnees ? (
-                  <div className="ac-colonne-pied">
-                    {/* le nom accessible commence par le texte visible (WCAG 2.5.3) ;
-                       un aria-label, pas un .v2-sr : en colonnes qui défilent,
-                       le texte masqué sortait du défilement et élargissait la page */}
-                    <Link href={col.tout} className="ac-voir" aria-label={`Voir tout : ${col.libelleTout.replace(/^Voir /, "")}`}>
-                      Voir tout
-                    </Link>
-                    {reste > 0 || deplies[col.cle] ? (
-                      <button type="button" className="ac-voir" aria-expanded={deplies[col.cle]} onClick={() => setDeplies((d) => ({ ...d, [col.cle]: !d[col.cle] }))}>
-                        {deplies[col.cle] ? "Réduire" : `${reste} de plus`}
-                        <ChevronDown {...I} width={14} height={14} className="ac-voir-chevron" />
-                      </button>
-                    ) : null}
-                  </div>
-                ) : null}
-              </section>
-            );
-          })}
-        </div>
-      ) : !donnees ? (
-        <div className="ac-liste" aria-busy="true">
-          {[0, 1, 2, 3, 4].map((i) => (
-            <div key={i} className="ac-ligne ac-ligne--squelette">
-              <Squelette largeur="40%" hauteur={14} />
-            </div>
+      <aside className="sb-journal-filtres" aria-label="Filtres">
+        <div className="sb-journal-groupe">
+          <p>Période</p>
+          {PERIODES.map((p) => (
+            <label key={p.cle} className="sb-journal-option">
+              <input type="radio" name="periode" checked={periode === p.cle} onChange={() => setPeriode(p.cle)} />
+              <span>{p.libelle}</span>
+              <span />
+            </label>
           ))}
         </div>
-      ) : visibles.length ? (
-        <ul className="ac-liste">
-          {visibles.map((c) => {
-            return (
-              <li key={c.id} className="ac-ligne" data-colonne={c.colonne}>
-                <Link href={c.lien} title={c.complet}>
-                  <span className="ac-type" aria-hidden="true">
-                    {createElement(ICONES[c.colonne], { ...I, width: 14, height: 14 })}
-                  </span>
-                  <span className="ac-ligne-titre">
-                    <strong>{c.titre}</strong>
-                    <Meta c={c} />
-                  </span>
-                  <span className="ac-ligne-type">{TYPE[c.colonne]}</span>
-                  <Module cle={c.module} />
-                  <time dateTime={c.quand} title={dateHeure(c.quand)}>
-                    {moment(c.quand, maintenant)}
-                  </time>
-                  <ChevronRight {...I} width={14} height={14} className="ac-chevron" />
+        <div className="sb-journal-groupe">
+          <p>Type</p>
+          {COLONNES.map((c) => (
+            <label key={c.cle} className="sb-journal-option">
+              <input type="checkbox" checked={types.includes(c.cle)} onChange={(e) => setTypes((t) => (e.target.checked ? [...t, c.cle] : t.filter((x) => x !== c.cle)))} />
+              <span>{TYPE[c.cle]}</span>
+              <span>{dansPeriode ? compte((x) => x.colonne === c.cle) : ""}</span>
+            </label>
+          ))}
+        </div>
+        <div className="sb-journal-groupe">
+          <p>Module</p>
+          {lesModules.map((m) => (
+            <label key={m} className="sb-journal-option">
+              <input type="checkbox" checked={!modules || modules.includes(m)} onChange={(e) => setModules((t) => { const base = t ?? lesModules; return e.target.checked ? [...base, m] : base.filter((x) => x !== m); })} />
+              <span>{libelleModule(m)}</span>
+              <span>{compte((x) => x.module === m)}</span>
+            </label>
+          ))}
+          {!lesModules.length ? <span className="sb-journal-option">—</span> : null}
+        </div>
+        <div className="sb-journal-groupe">
+          <p>Source</p>
+          <span className="sb-journal-option">{source === "exemple" ? "Données d'exemple" : "Base réelle"}</span>
+        </div>
+      </aside>
+
+      <div className="sb-journal-principal">
+        <label className="sb-journal-barre">
+          <Search width={16} height={16} strokeWidth={1.5} aria-hidden="true" />
+          <span className="v2-sr">Filtrer les événements</span>
+          <input value={recherche} onChange={(e) => setRecherche(e.target.value)} placeholder="Filtrer par fournisseur, référence, demande, état…" />
+          {recherche ? (
+            <button type="button" className="v2-btn v2-btn--petit v2-btn--fantome v2-btn--icone" onClick={() => setRecherche("")} aria-label="Effacer le filtre">
+              <X width={14} height={14} aria-hidden="true" />
+            </button>
+          ) : null}
+        </label>
+        {erreur ? (
+          <div style={{ padding: 16 }}>
+            <Note teinte="rouge" role="alert">
+              <strong>La base réelle n&apos;a pas répondu.</strong> {erreur}
+            </Note>
+          </div>
+        ) : null}
+        <div className="sb-journal-histo" role="img" aria-label={`${visibles.length} événements sur la période`}>
+          {barres.map((n, i) => (
+            <span key={i} data-vide={n ? undefined : ""} style={{ height: n ? `${Math.max(8, (n / max) * 100)}%` : "1px" }} />
+          ))}
+        </div>
+        <div className="sb-conseil-corps">
+          <div className="sb-journal-table">
+            {!dansPeriode ? (
+              <div style={{ padding: 16, display: "grid", gap: 12 }}>
+                {[0, 1, 2, 3].map((k) => (
+                  <Squelette key={k} hauteur={16} />
+                ))}
+              </div>
+            ) : (
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Module</th>
+                    <th scope="col">Événement</th>
+                    <th scope="col">Montant</th>
+                    <th scope="col">État</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibles.map((c) => (
+                    <tr
+                      key={c.id}
+                      aria-selected={c.id === choisie}
+                      tabIndex={0}
+                      onClick={() => setChoisie(c.id === choisie ? null : c.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setChoisie(c.id === choisie ? null : c.id);
+                        }
+                      }}
+                    >
+                      <td className="sb-mono">{dateLog(c.quand)}</td>
+                      <td>{TYPE[c.colonne]}</td>
+                      <td>{libelleModule(c.module)}</td>
+                      <td title={c.complet}>{c.titre}</td>
+                      <td className="sb-mono">{c.somme !== null ? montant(c.somme, c.devise) : "—"}</td>
+                      <td>{c.etat ? <Badge teinte={c.etat.teinte}>{c.etat.libelle}</Badge> : c.colonne === "a_valider" ? <Badge teinte="ambre">En attente</Badge> : null}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            {dansPeriode && !visibles.length ? (
+              <div className="sb-conseil-vide">
+                <Search width={18} height={18} strokeWidth={1.5} aria-hidden="true" />
+                <p style={{ margin: 0 }}>Aucun événement</p>
+                <span>Rien ne correspond à ces filtres sur la période.</span>
+              </div>
+            ) : null}
+          </div>
+          {carte ? (
+            <aside className="sb-volet-detail" aria-label="Détail de l'événement">
+              <div className="sb-volet-detail-tete">
+                <span>{TYPE[carte.colonne]}</span>
+                <button type="button" className="v2-btn v2-btn--petit v2-btn--fantome v2-btn--icone" onClick={() => setChoisie(null)} aria-label="Fermer le détail">
+                  <X width={14} height={14} aria-hidden="true" />
+                </button>
+              </div>
+              <div className="sb-volet-detail-corps">
+                <h3>Événement</h3>
+                <p className="sb-texte--fort">{carte.complet}</p>
+                <h3>Date</h3>
+                <p className="v2-mono">{dateHeure(carte.quand)}</p>
+                <h3>Module</h3>
+                <p>{libelleModule(carte.module)}</p>
+                {carte.somme !== null ? (
+                  <>
+                    <h3>Montant</h3>
+                    <p>{montant(carte.somme, carte.devise)}</p>
+                  </>
+                ) : null}
+                {carte.par ? (
+                  <>
+                    <h3>Demandé par</h3>
+                    <p>{carte.par}</p>
+                  </>
+                ) : null}
+                {carte.etat ? (
+                  <>
+                    <h3>État</h3>
+                    <Badge teinte={carte.etat.teinte}>{carte.etat.libelle}</Badge>
+                  </>
+                ) : null}
+                <Link href={carte.lien} className="v2-btn" style={{ width: "fit-content" }}>
+                  Ouvrir
                 </Link>
-              </li>
-            );
-          })}
-        </ul>
-      ) : (
-        <p className="ac-vide ac-vide--liste">{filtre ? "Aucun résultat avec ces filtres" : "Rien ne s'est passé sur cette période"}</p>
-      )}
-
-      {source === "exemple" ? <p className="no-gris ac-mention">Données de démonstration</p> : null}
+              </div>
+            </aside>
+          ) : null}
+        </div>
+      </div>
     </div>
-  );
-}
-
-function Module({ cle }: { cle: string }) {
-  return (
-    <span className="ac-module">
-      {createElement(iconeModule(cle), { ...I, width: 14, height: 14 })}
-      {libelleModule(cle)}
-    </span>
-  );
-}
-
-function Meta({ c }: { c: Carte }) {
-  return (
-    <span className="ac-meta">
-      {c.colonne === "decisions" && c.etat ? (
-        <span className="ac-etat">
-          <span className="v2-point" data-teinte={c.etat.teinte} aria-hidden="true" />
-          {c.etat.libelle}
-        </span>
-      ) : null}
-      {c.somme !== null ? <span className="ac-somme">{montant(c.somme, c.devise)}</span> : null}
-      {c.colonne === "recus" && c.etat ? (
-        <span className="ac-etat">
-          <span className="v2-point" data-teinte={c.etat.teinte} aria-hidden="true" />
-          {c.etat.libelle}
-        </span>
-      ) : null}
-      {c.par ? <span>Demandée par {c.par}</span> : null}
-    </span>
-  );
-}
-
-function CarteActivite({ c, maintenant }: { c: Carte; maintenant: number }) {
-  return (
-    <li className="ac-carte" data-colonne={c.colonne}>
-      <Link href={c.lien} className="ac-carte-lien" title={c.complet}>
-        <span className="ac-carte-haut">
-          <strong className="ac-carte-titre">{c.titre}</strong>
-          <ChevronRight {...I} width={14} height={14} className="ac-chevron" />
-        </span>
-        <Meta c={c} />
-        <span className="ac-carte-pied">
-          <Module cle={c.module} />
-          <time dateTime={c.quand} title={dateHeure(c.quand)}>
-            {moment(c.quand, maintenant)}
-          </time>
-        </span>
-      </Link>
-    </li>
   );
 }

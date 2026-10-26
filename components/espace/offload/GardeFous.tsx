@@ -45,7 +45,7 @@ const EXEMPLE: Etat = {
   ],
 };
 
-export default function GardeFous({ source, client }: { source: Source; client: string | null }) {
+export default function GardeFous({ source, client, gabarit }: { source: Source; client: string | null; gabarit?: "sb" }) {
   const [reel, setReel] = useState<Etat | null>(null);
   const [texte, setTexte] = useState("");
   const [motif, setMotif] = useState("");
@@ -90,6 +90,104 @@ export default function GardeFous({ source, client }: { source: Source; client: 
 
   if (!etat) return source === "reelle" && !erreur ? <Chargement texte="Lecture des garde-fous…" /> : null;
 
+  const arret = (
+    <>
+    {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+    {etat.suspendu_le ? (
+      <Avis teinte="rouge" role="alert">
+        <strong>OFFLOAD est arrêté depuis le {dateHeure(etat.suspendu_le)}.</strong> {etat.suspendu_motif} Aucun message n&apos;est préparé ;
+        ceux qui attendaient ont été annulés.
+      </Avis>
+    ) : (
+      <p className="esp-kpi-sous" style={{ margin: 0 }}>
+        OFFLOAD surveille ses envois : au-delà de {etat.seuil_non_remis_pct} % de messages non remis sur 7 jours, ou si deux messages visent la même
+        adresse, il s&apos;arrête de lui-même et vous le signale.{etat.a_verifier ? ` ${etat.a_verifier} compte${etat.a_verifier > 1 ? "s" : ""} à vérifier.` : ""}
+      </p>
+    )}
+    {ouvert ? (
+      <div className="esp-form">
+        <label className="rv-libelle">{etat.suspendu_le ? "Ce qui a été vérifié" : "Pourquoi suspendre"} <span className="esp-obligatoire">(obligatoire)</span>
+          <input className="rv-champ" value={motif} onChange={(e) => setMotif(e.target.value)}
+            placeholder={etat.suspendu_le ? "Adresses corrigées avec le commercial." : "Salon cette semaine."} />
+        </label>
+        <div className="esp-actions">
+          <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={envoi || !motif.trim()}
+            onClick={() => void agir(() => (etat.suspendu_le ? reprendre(client ?? "", motif.trim()) : suspendre(client ?? "", motif.trim())),
+              () => { setOuvert(false); setMotif(""); })}>
+            {etat.suspendu_le ? "Relancer OFFLOAD" : "Suspendre OFFLOAD"}
+          </button>
+          <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => setOuvert(false)}>Annuler</button>
+        </div>
+      </div>
+    ) : (
+      <div className="esp-actions">
+        <button type="button" className={`r-btn r-btn--petit ${etat.suspendu_le ? "r-btn--noir" : "r-btn--fil"}`} onClick={() => setOuvert(true)}>
+          {etat.suspendu_le ? "Relancer OFFLOAD (gérant)" : "Suspendre OFFLOAD"}
+        </button>
+      </div>
+    )}
+    </>
+  );
+  const formRegle = (
+    <>
+    <div className="esp-form">
+      <label className="rv-libelle">Une phrase suffit
+        <input className="rv-champ" value={texte} onChange={(e) => setTexte(e.target.value)}
+          placeholder="Ne propose aucune remise aux anciens clients." />
+      </label>
+      <div className="esp-actions">
+        <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={envoi || texte.trim().length < 3}
+          onClick={() => void agir(() => ecrireRegle(client ?? "", texte.trim()), (r) => {
+            setReponse((r as { reponse?: string } | null)?.reponse ?? null);
+            setTexte("");
+          })}>
+          Ajouter la règle
+        </button>
+      </div>
+      {reponse ? <Avis teinte="vert" role="status">{reponse}</Avis> : null}
+    </div>
+    </>
+  );
+
+  if (gabarit === "sb") {
+    /* 22/10 — la page Settings de Supabase : l'arrêt, puis vos règles, chacune en ligne */
+    return (
+      <div className="sb-reglages v2-arrivee">
+        <h1 className="sb-titre">Garde-fous</h1>
+        <section className="sb-reglages-section" aria-label="Arrêt automatique">
+          <header>
+            <h2>Arrêt automatique</h2>
+            <p>OFFLOAD s&apos;arrête de lui-même au premier doute ; vous pouvez aussi le suspendre.</p>
+          </header>
+          <div className="esp-carte"><div className="esp-carte-corps" style={{ display: "grid", gap: 10 }}>{arret}</div></div>
+        </section>
+        <section className="sb-reglages-section" aria-label="Vos règles">
+          <header>
+            <h2>Vos règles, en français</h2>
+            <p>Tout message qui enfreint une règle est retenu. Sans règle, les messages suivent le gabarit, sans prix ni délai, toujours au vouvoiement.</p>
+          </header>
+          <div className="esp-carte"><div className="esp-carte-corps">{formRegle}</div></div>
+          {etat.regles.length ? (
+            <ul className="sb-liens-liste sb-sauvegardes" aria-label="Vos règles">
+              {etat.regles.map((r) => (
+                <li key={r.id}>
+                  <div>
+                    <span className="sb-sauvegarde-texte">
+                      <strong>« {r.texte} »</strong>
+                      <span>{r.reponse}</span>
+                    </span>
+                    <Pastille teinte={STATUTS[r.statut].teinte}>{STATUTS[r.statut].libelle}</Pastille>
+                    {source === "reelle" ? <button type="button" className="v2-btn" onClick={() => void agir(() => retirerRegle(r.id))}>Retirer</button> : null}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </section>
+      </div>
+    );
+  }
+
   return (
     <section className="esp-carte" aria-label="Garde-fous et règles des messages">
       <div className="esp-carte-tete">
@@ -97,58 +195,10 @@ export default function GardeFous({ source, client }: { source: Source; client: 
         <span className="esp-kpi-sous">s&apos;arrête au premier doute ; vos règles s&apos;écrivent en français</span>
       </div>
       <div className="esp-carte-corps" style={{ display: "grid", gap: 10 }}>
-        {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
-        {etat.suspendu_le ? (
-          <Avis teinte="rouge" role="alert">
-            <strong>OFFLOAD est arrêté depuis le {dateHeure(etat.suspendu_le)}.</strong> {etat.suspendu_motif} Aucun message n&apos;est préparé ;
-            ceux qui attendaient ont été annulés.
-          </Avis>
-        ) : (
-          <p className="esp-kpi-sous" style={{ margin: 0 }}>
-            OFFLOAD surveille ses envois : au-delà de {etat.seuil_non_remis_pct} % de messages non remis sur 7 jours, ou si deux messages visent la même
-            adresse, il s&apos;arrête de lui-même et vous le signale.{etat.a_verifier ? ` ${etat.a_verifier} compte${etat.a_verifier > 1 ? "s" : ""} à vérifier.` : ""}
-          </p>
-        )}
-        {ouvert ? (
-          <div className="esp-form">
-            <label className="rv-libelle">{etat.suspendu_le ? "Ce qui a été vérifié" : "Pourquoi suspendre"} <span className="esp-obligatoire">(obligatoire)</span>
-              <input className="rv-champ" value={motif} onChange={(e) => setMotif(e.target.value)}
-                placeholder={etat.suspendu_le ? "Adresses corrigées avec le commercial." : "Salon cette semaine."} />
-            </label>
-            <div className="esp-actions">
-              <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={envoi || !motif.trim()}
-                onClick={() => void agir(() => (etat.suspendu_le ? reprendre(client ?? "", motif.trim()) : suspendre(client ?? "", motif.trim())),
-                  () => { setOuvert(false); setMotif(""); })}>
-                {etat.suspendu_le ? "Relancer OFFLOAD" : "Suspendre OFFLOAD"}
-              </button>
-              <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => setOuvert(false)}>Annuler</button>
-            </div>
-          </div>
-        ) : (
-          <div className="esp-actions">
-            <button type="button" className={`r-btn r-btn--petit ${etat.suspendu_le ? "r-btn--noir" : "r-btn--fil"}`} onClick={() => setOuvert(true)}>
-              {etat.suspendu_le ? "Relancer OFFLOAD (gérant)" : "Suspendre OFFLOAD"}
-            </button>
-          </div>
-        )}
+        {arret}
 
         <div className="esp-section-titre" style={{ marginTop: 4 }}>Vos règles, en français</div>
-        <div className="esp-form">
-          <label className="rv-libelle">Une phrase suffit
-            <input className="rv-champ" value={texte} onChange={(e) => setTexte(e.target.value)}
-              placeholder="Ne propose aucune remise aux anciens clients." />
-          </label>
-          <div className="esp-actions">
-            <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={envoi || texte.trim().length < 3}
-              onClick={() => void agir(() => ecrireRegle(client ?? "", texte.trim()), (r) => {
-                setReponse((r as { reponse?: string } | null)?.reponse ?? null);
-                setTexte("");
-              })}>
-              Ajouter la règle
-            </button>
-          </div>
-          {reponse ? <Avis teinte="vert" role="status">{reponse}</Avis> : null}
-        </div>
+        {formRegle}
         {etat.regles.length === 0 ? <p className="esp-kpi-sous" style={{ margin: 0 }}>Aucune règle : les messages suivent le gabarit, sans prix ni délai, toujours au vouvoiement.</p> : (
           <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 6 }}>
             {etat.regles.map((r) => (

@@ -34,6 +34,10 @@ export const runtime = "nodejs";
 const API_ENVOI = "https://api.resend.com/emails";
 const EXPEDITEUR_PAR_DEFAUT = "Omega <bonjour@auth.omegaai.fr>";
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+/* 24/10/2026 — demande de Teo : le Feedback et l'Aide de l'espace client
+   (components/espace2/Retours.tsx) lui arrivent directement. L'adresse est
+   fixée ici : le navigateur ne choisit jamais le destinataire. */
+const COURRIEL_FEEDBACK = "teo.karczewski@omegaai.fr";
 
 const SUJETS: Record<string, string> = {
   installation: "Mon installation ou ma réunion",
@@ -42,6 +46,7 @@ const SUJETS: Record<string, string> = {
   application: "L'application",
   site: "Mon site",
   autre: "Autre chose",
+  feedback: "Feedback de l'espace client",
 };
 
 function texte(v: unknown, max: number): string {
@@ -152,6 +157,7 @@ export async function POST(req: Request) {
   }
 
   const qui =`${prenom} ${nom}${entreprise ? ` (${entreprise})` : ""}`;
+  const provenance = sujetCle === "feedback" ? "le panneau Feedback de l'espace client, omegaai.fr/espace2" : "le formulaire du service client, omegaai.fr/contact";
   const lignes = [
     `De : ${qui}`,
     `E-mail : ${email}`,
@@ -160,7 +166,7 @@ export async function POST(req: Request) {
     "",
     message,
     "",
-    "— Envoyé depuis le formulaire du service client, omegaai.fr/contact. Répondre à ce message répond au client.",
+    `— Envoyé depuis ${provenance}. Répondre à ce message répond au client.`,
   ].filter((l): l is string => l !== null);
 
   const html =
@@ -169,7 +175,7 @@ export async function POST(req: Request) {
     (telephone ? `<br><strong>Téléphone / WhatsApp :</strong> ${echapper(telephone)}` : "") +
     `<br><strong>Demande :</strong> ${echapper(sujet)}</p>` +
     `<p style="white-space:pre-wrap;border-left:3px solid #e9cd91;padding-left:12px">${echapper(message)}</p>` +
-    `<p style="color:#616161;font-size:13px">Envoyé depuis le formulaire du service client, omegaai.fr/contact. Répondre à ce message répond au client.</p></div>`;
+    `<p style="color:#616161;font-size:13px">Envoyé depuis ${echapper(provenance)}. Répondre à ce message répond au client.</p></div>`;
 
   try {
     const r = await fetch(API_ENVOI, {
@@ -177,7 +183,7 @@ export async function POST(req: Request) {
       headers: { Authorization: `Bearer ${cle}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         from: process.env.MAIL_EXPEDITEUR?.trim() || EXPEDITEUR_PAR_DEFAUT,
-        to: [COURRIEL],
+        to: [sujetCle === "feedback" ? COURRIEL_FEEDBACK : COURRIEL],
         reply_to: email,
         subject: `Service client — ${sujet} — ${qui}`,
         text: lignes.join("\n"),

@@ -1,0 +1,734 @@
+/* ══════════════════════════════════════════════════════════════════════
+   La carte de décision d'une demande de validation (Espace 2, 23/10/2026).
+   Tout vient des jetons v2 : jamais une couleur en dur.
+
+   Une carte centrée, deux colonnes : le document à gauche sur un fond
+   doux, la décision à droite sur le blanc. Un seul rythme : 20 px de
+   marge, des lignes étiquette / valeur alignées sur une colonne de
+   120 px, les nombres en chiffres tabulaires. Pas de carte dans la carte.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ——— la carte elle-même (la modale de react-aria, redimensionnée) ——— */
+.v2-modale.v2-val-carte {
+  max-width: 920px;
+  height: auto;
+  max-height: min(780px, calc(100dvh - 64px));
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.v2-val-carte .v2-modale-dialogue,
+.v2-val-carte .v2-det {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.v2-det {
+  font-family: var(--v2-sans);
+  color: var(--v2-gray-1000);
+}
+
+/* ——— l'en-tête : où on est, où aller, fermer ——— */
+.v2-det-carte-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 52px;
+  padding: 0 12px 0 20px;
+  border-bottom: 1px solid var(--v2-a-400);
+  flex: none;
+}
+.v2-det-ou {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.v2-det-statut {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 10px;
+  border-left: 1px solid var(--v2-a-400);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--v2-gray-900);
+  white-space: nowrap;
+}
+.v2-det-statut svg {
+  flex: none;
+  color: var(--v2-gray-1000);
+}
+.v2-det-sur {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--v2-gray-900);
+  white-space: nowrap;
+}
+.v2-det-carte-outils {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.v2-det-position {
+  font-size: 12px;
+  color: var(--v2-gray-900);
+  margin-right: 6px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.v2-det-carte-outils .v2-btn[disabled] {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* ——— les deux colonnes ——— */
+.v2-det-carte-corps {
+  display: grid;
+  grid-template-columns: minmax(0, 10fr) minmax(380px, 11fr);
+  flex: 1;
+  min-height: 0;
+}
+
+/* ——— à gauche, le document ——— */
+.v2-det-document {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--v2-gray-200);
+  border-right: 1px solid var(--v2-a-400);
+}
+.v2-det-document-pages {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+}
+/* la liasse se centre quand elle tient dans la colonne ; dès qu'elle
+   dépasse, les marges automatiques tombent à zéro et elle part du haut */
+.v2-det-liasse {
+  width: 100%;
+  margin: auto 0;
+  display: grid;
+  gap: 16px;
+  justify-items: center;
+}
+.v2-det-page {
+  width: 100%;
+  max-width: 520px;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px #0000000d, 0 8px 24px -12px #00000026, 0 0 0 1px var(--v2-a-300);
+  overflow: hidden;
+}
+.v2-det-page canvas,
+.v2-det-page img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.v2-det-page .esp-page-attente {
+  padding: 24px;
+  font-size: 13px;
+  color: var(--v2-gray-900);
+  text-align: center;
+}
+.v2-det-document-vide {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  align-content: center;
+  min-height: 240px;
+  font-size: 13px;
+  color: var(--v2-gray-900);
+  text-align: center;
+}
+/* la feuille de l'exemple : un document dessiné avec les vraies valeurs de la pièce */
+.v2-det-feuille {
+  /* la feuille est un papier blanc quel que soit le thème : ses encres
+     sont fixes, pas celles de l'interface */
+  --feuille-encre: #171717;
+  --feuille-gris: #737373;
+  --feuille-trait: #e5e5e5;
+  --feuille-ligne: #d4d4d4;
+  aspect-ratio: 1 / 1.3;
+  padding: 36px 36px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--feuille-gris);
+}
+.v2-det-feuille-tete {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+.v2-det-feuille-titre {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--feuille-encre);
+}
+.v2-det-feuille-sous {
+  font-family: var(--v2-mono);
+  font-size: 12px;
+}
+.v2-det-feuille-nom {
+  font-weight: 500;
+  color: var(--feuille-encre);
+}
+.v2-det-feuille-fournisseur {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+}
+.v2-det-feuille-fournisseur .v2-det-feuille-trait[data-court] {
+  width: 38%;
+}
+/* les lignes de la facture occupent le corps de la feuille, comme un
+   tableau : un libellé, un montant à droite, un filet entre deux */
+.v2-det-feuille-lignes {
+  flex: 1;
+  display: grid;
+  grid-auto-rows: 1fr;
+  border-top: 1px solid var(--feuille-ligne);
+}
+.v2-det-feuille-ligne {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 64px;
+  column-gap: 32px;
+  align-items: center;
+  border-bottom: 1px solid var(--feuille-trait);
+}
+.v2-det-feuille-ligne:last-child {
+  border-bottom: 0;
+}
+.v2-det-feuille-trait {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--feuille-trait);
+}
+.v2-det-feuille-trait[data-court] {
+  width: 62%;
+}
+.v2-det-feuille-total {
+  margin-top: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--feuille-ligne);
+  font-weight: 600;
+  color: var(--feuille-encre);
+  font-variant-numeric: tabular-nums;
+}
+.v2-det-document-pied {
+  flex: none;
+  display: grid;
+  gap: 8px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--v2-a-400);
+  background: var(--v2-bg-100);
+  font-size: 13px;
+  line-height: 20px;
+}
+.v2-det-document-ligne {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  min-height: 24px;
+}
+.v2-det-document-ligne .v2-det-mono {
+  font-weight: 500;
+}
+.v2-det-document-ouvrir {
+  margin-left: auto;
+}
+.v2-det-controles {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--v2-gray-900);
+}
+.v2-det-controles svg {
+  flex: none;
+  color: var(--v2-gray-1000);
+}
+
+/* ——— à droite, la décision ——— */
+.v2-det-decision {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--v2-bg-100);
+}
+.v2-det-decision-corps {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 20px 24px 28px;
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+.v2-det-titre {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 22px;
+  letter-spacing: -0.005em;
+  text-wrap: balance;
+}
+.v2-det-chiffre {
+  display: grid;
+  gap: 4px;
+  margin-top: -8px;
+}
+.v2-det-montant {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 34px;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.v2-det-echeance {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--v2-gray-900);
+  font-variant-numeric: tabular-nums;
+}
+.v2-det-echeance[data-urgence="retard"] {
+  color: var(--v2-red-900);
+}
+.v2-det-echeance[data-urgence="aujourdhui"] {
+  color: var(--v2-amber-900);
+}
+.v2-det-bloc {
+  display: grid;
+  gap: 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--v2-a-400);
+}
+
+/* ——— les lignes étiquette / valeur ——— */
+.v2-det-fiche {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  column-gap: 16px;
+  row-gap: 8px;
+  font-size: 13px;
+  line-height: 20px;
+}
+.v2-det-fiche dt {
+  color: var(--v2-gray-900);
+}
+.v2-det-fiche dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.v2-det-mono {
+  font-family: var(--v2-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+}
+.v2-det-sous {
+  color: var(--v2-gray-900);
+}
+
+/* ——— le titre d'une section et son complément à droite ——— */
+.v2-det-section-titre {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 20px;
+}
+.v2-det-section-titre small {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--v2-gray-900);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ——— les approbations : la jauge par segments, puis le fil ——— */
+.v2-det-jauge {
+  height: 4px;
+  margin: 0 0 12px;
+  border-radius: 999px;
+  background: var(--v2-a-300);
+  overflow: hidden;
+}
+.v2-det-jauge span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--v2-gray-1000);
+  transition: width 0.3s;
+}
+/* le fil reprend le circuit d'approbation de la page : avatar et petite
+   coche, trait vertical entre les étapes, texte gris, aucune couleur */
+.v2-det-fil {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+.v2-det-fil li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  column-gap: 12px;
+  align-items: start;
+  padding: 4px 0 14px;
+}
+.v2-det-fil li:last-child {
+  padding-bottom: 0;
+}
+.v2-det-fil li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 11px;
+  top: 30px;
+  bottom: 2px;
+  width: 1px;
+  background: var(--v2-a-400);
+}
+.v2-det-fil-avatar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  color: var(--v2-gray-1000);
+}
+.v2-det-fil-avatar > i {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  display: grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--v2-bg-100);
+  color: var(--v2-gray-1000);
+}
+.v2-det-fil li[data-attente] .v2-det-fil-avatar {
+  color: var(--v2-gray-900);
+}
+.v2-det-fil-texte {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 5px;
+  min-height: 22px;
+  font-size: 13px;
+  line-height: 20px;
+}
+.v2-det-fil-texte strong {
+  font-weight: 500;
+}
+.v2-det-fil-texte span {
+  color: var(--v2-gray-900);
+  font-variant-numeric: tabular-nums;
+}
+.v2-det-fil-commentaire {
+  margin: 2px 0 0;
+  font-size: 13px;
+  line-height: 19px;
+  color: var(--v2-gray-900);
+}
+.v2-det-vide {
+  margin: 0;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--v2-gray-900);
+}
+
+/* ——— les notes (la règle, la délégation, le résultat) ——— */
+.v2-det-notes {
+  flex: none;
+  display: grid;
+  gap: 8px;
+  padding: 0 24px 12px;
+}
+.v2-det-notes:empty {
+  display: none;
+}
+.v2-det .v2-note {
+  font-size: 13px;
+  line-height: 19px;
+}
+.v2-det .v2-note[data-teinte="bleu"] {
+  background: var(--v2-blue-100);
+  color: var(--v2-blue-1000);
+  box-shadow: inset 0 0 0 1px var(--v2-blue-200);
+}
+.v2-det .v2-note[data-teinte="ambre"] {
+  background: var(--v2-amber-200);
+  color: var(--v2-amber-1000);
+  box-shadow: inset 0 0 0 1px var(--v2-amber-400);
+}
+.v2-det .v2-note[data-teinte="vert"] {
+  background: var(--v2-green-100);
+  color: var(--v2-green-1000);
+  box-shadow: inset 0 0 0 1px var(--v2-green-200);
+}
+.v2-det .v2-note[data-teinte="rouge"] {
+  background: var(--v2-red-200);
+  color: var(--v2-red-1000);
+  box-shadow: inset 0 0 0 1px var(--v2-red-400);
+}
+.v2-det .v2-note svg {
+  flex: none;
+  margin-top: 1px;
+}
+
+/* ——— les actions, en bas de la colonne, toujours visibles ——— */
+.v2-det-actions {
+  position: relative;
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 20px;
+  background: var(--v2-bg-100);
+  border-top: 1px solid var(--v2-a-400);
+}
+.v2-det-actions .v2-btn {
+  padding: 0 10px;
+}
+/* la zone qui défile s'efface dans le fond juste avant ce qui la suit
+   (notes, boutons) : une ligne coupée se lit « il y a la suite », pas
+   comme un défaut. L'élément est vide et sans hauteur ; son dégradé
+   remonte sur les 28 derniers pixels du contenu. */
+.v2-det-fondu {
+  position: relative;
+  flex: none;
+  height: 0;
+  z-index: 1;
+}
+.v2-det-fondu::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 28px;
+  background: linear-gradient(to bottom, transparent, var(--v2-bg-100));
+  pointer-events: none;
+}
+.v2-det-actions .v2-btn--fantome {
+  color: var(--v2-gray-900);
+}
+.v2-det-actions .v2-btn--fantome:hover {
+  background: var(--v2-a-200);
+  color: var(--v2-gray-1000);
+}
+.v2-det-btn-danger {
+  color: var(--v2-red-900);
+}
+.v2-det-btn-danger:hover:not([disabled]) {
+  background: var(--v2-red-200);
+}
+.v2-det-btn-danger--plein {
+  background: var(--v2-red-700);
+  color: #fff;
+  box-shadow: none;
+}
+.v2-det-btn-danger--plein:hover:not([disabled]) {
+  background: var(--v2-red-900);
+  color: #fff;
+}
+.v2-det-actions .v2-btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.v2-det-actions .v2-btn--primaire:hover:not([disabled]) {
+  background: var(--v2-primaire-survol);
+}
+.v2-det .v2-btn:focus-visible,
+.v2-det a:focus-visible,
+.v2-det .v2-det-champ:focus-visible {
+  outline: none;
+  box-shadow: var(--v2-anneau);
+}
+
+/* ——— un formulaire à la place de la décision ——— */
+.v2-det-form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.v2-det-form-tete {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--v2-a-400);
+}
+.v2-det-form-titre {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+}
+.v2-det-form-corps {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 20px 24px 28px;
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+.v2-det-form-sous {
+  margin: 0;
+  font-size: 13px;
+  line-height: 19px;
+  color: var(--v2-gray-900);
+}
+.v2-det-form-ligne {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.v2-det .v2-libelle {
+  color: var(--v2-gray-1000);
+}
+.v2-det-obligatoire,
+.v2-det-facultatif {
+  font-style: normal;
+  font-size: 12px;
+  color: var(--v2-gray-900);
+}
+.v2-det-obligatoire {
+  color: var(--v2-amber-900);
+}
+.v2-det-champ {
+  width: 100%;
+  height: 34px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--v2-bg-100);
+  box-shadow: 0 0 0 1px var(--v2-a-400);
+  color: var(--v2-gray-1000);
+  font: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  transition: box-shadow 0.15s;
+}
+.v2-det-champ::placeholder {
+  color: var(--v2-gray-600);
+}
+.v2-det-champ--multi {
+  height: auto;
+  min-height: 96px;
+  padding: 8px 10px;
+  resize: vertical;
+}
+select.v2-det-champ {
+  appearance: none;
+  padding-right: 32px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23696969' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+.v2-det-fichier {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+.v2-det-fichier-natif {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.v2-det-fichier-natif:focus-visible + label {
+  box-shadow: var(--v2-anneau);
+}
+.v2-det-fichier label {
+  cursor: pointer;
+}
+
+/* ——— la sélection et la barre de défilement, dans la palette ——— */
+.v2-det ::selection {
+  background: var(--v2-blue-200);
+  color: var(--v2-blue-1000);
+}
+.v2-det-document-pages,
+.v2-det-decision-corps,
+.v2-det-form-corps {
+  scrollbar-width: thin;
+  scrollbar-color: var(--v2-a-500) transparent;
+}
+
+/* ——— étroit : le document au-dessus, la décision dessous ——— */
+@media (max-width: 900px) {
+  .v2-modale.v2-val-carte {
+    height: calc(100dvh - 32px);
+    max-height: none;
+  }
+  .v2-det-carte-corps {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 2fr) minmax(0, 3fr);
+  }
+  .v2-det-document {
+    border-right: 0;
+    border-bottom: 1px solid var(--v2-a-400);
+  }
+  .v2-det-document-pages {
+    padding: 16px;
+  }
+  .v2-det-decision-corps,
+  .v2-det-form-corps,
+  .v2-det-notes,
+  .v2-det-actions {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .v2-det-fiche {
+    grid-template-columns: 104px minmax(0, 1fr);
+  }
+  .v2-det-montant {
+    font-size: 24px;
+    line-height: 30px;
+  }
+  .v2-det-position {
+    display: none;
+  }
+}

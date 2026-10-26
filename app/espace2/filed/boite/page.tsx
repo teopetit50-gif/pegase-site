@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import EcranBoite from "@/components/espace/filed/EcranBoite";
-import Habille from "@/components/espace2/Habille";
+import { HabilleSb } from "@/components/espace2/Habille";
 
-/* /espace2/filed/boite — l'écran de /espace/filed/boite, repris tel quel dans le nouvel espace. */
+/* /espace2/filed/boite — l'écran de /espace/filed/boite, au dessin de la page Logs de Supabase (22/10). */
 
 export const metadata: Metadata = {
   title: "Boîte de réception",
@@ -11,8 +11,8 @@ export const metadata: Metadata = {
 
 export default function PageFiledBoite() {
   return (
-    <Habille>
-      <EcranBoite />
-    </Habille>
+    <HabilleSb>
+      <EcranBoite gabarit="sb" />
+    </HabilleSb>
   );
 }

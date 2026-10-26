@@ -15,7 +15,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { BookOpen, Building2, Inbox, Upload, Wallet } from "lucide-react";
+import { BookOpen, Building2, FileText, Folder, Inbox, Upload, Wallet } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { COMMANDES_EXEMPLE, DOSSIERS_EXEMPLE, FOURNISSEURS_EXEMPLE, LIGNES_COMMANDE_EXEMPLE, MOTIFS_EXEMPLE } from "../exemples/filed";
@@ -32,7 +32,7 @@ import { lireCible, trouverCible, type Cible } from "./lien";
 
 type Reel = { apercus: Apercu[]; motifs: MotifRefus[]; fournisseurs: Fournisseur[]; commandes: Commande[]; lignesCommande: LigneCommande[]; dossiers: Record<string, DossierFiled>; moi: string | null };
 
-export default function EcranFiled() {
+export default function EcranFiled({ gabarit }: { gabarit?: "sb" } = {}) {
   const { source } = useSource();
   const [local, setLocal] = useState<DossierFiled[]>(DOSSIERS_EXEMPLE);
   const [reel, setReel] = useState<Reel | null>(null);
@@ -238,6 +238,141 @@ export default function EcranFiled() {
     setReel((prev) => (prev ? { ...prev, apercus: liste.apercus, motifs: liste.motifs, dossiers: { ...prev.dossiers, [d.document.id]: d } } : prev));
   }, []);
 
+  const vueDossier = (
+    <>
+      {dossier ? (
+        <DossierVue
+          key={dossier.document.id}
+          dossier={dossier}
+          source={source}
+          motifs={motifs}
+          fournisseurs={fournisseurs}
+          commandes={commandes}
+          lignesCommande={lignesCommande}
+          onLocal={remplacerLocal}
+          relire={() => (apercu ? relireReel(apercu) : Promise.resolve())}
+          moi={source === "exemple" ? EXEMPLE_MOI : (reel?.moi ?? null)}
+        />
+      ) : chargeDossier || (source === "reelle" && apercu) ? (
+        <div className="esp-carte"><Chargement texte="Lecture du dossier…" /></div>
+      ) : (
+        <div className="esp-carte"><Vide titre="Choisissez un document">Le dossier, les contrôles et la pièce s&apos;affichent ici.</Vide></div>
+      )}
+    </>
+  );
+  const fenetreDepot = (
+    <>
+    <Dialog open={depot} onOpenChange={(o) => !o && setDepot(false)}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogIcone><Upload width={18} height={18} aria-hidden="true" /></DialogIcone>
+          <DialogTitle>Déposer un document</DialogTitle>
+          <DialogDescription>Le fichier reçoit un numéro, est lu par le lecteur, puis contrôlé comme tout document reçu.</DialogDescription>
+        </DialogHeader>
+        <DialogBody>
+          <div className="esp-form">
+            <div>
+              <span className="rv-libelle">Fichier <span className="esp-obligatoire">(obligatoire)</span></span>
+              <div className="esp-fichier">
+                <input id="esp-depot-fichier" type="file" className="esp-fichier-natif" accept=".pdf,.png,.jpg,.jpeg,.xml,.csv,.xlsx" onChange={(e) => setFichier(e.target.files?.[0] ?? null)} />
+                <label htmlFor="esp-depot-fichier" className="r-btn r-btn--fil r-btn--petit" style={{ cursor: "pointer" }}>{fichier ? "Changer de fichier" : "Choisir un fichier"}</label>
+                <span className="esp-kpi-sous">{fichier ? `${fichier.name} · ${Math.round(fichier.size / 1024)} Ko` : "PDF, image, Factur-X (XML), CSV ou tableur."}</span>
+              </div>
+            </div>
+            {entitesDepot.length > 1 ? (
+              <label className="rv-libelle">Entité
+                <select className="rv-champ" value={entiteDepot} onChange={(e) => setEntiteDepot(e.target.value)}>
+                  {entitesDepot.map((en) => <option key={en.id} value={en.id}>{en.nom}</option>)}
+                </select>
+              </label>
+            ) : null}
+            {erreurDepot ? <Avis teinte="rouge" role="alert">{erreurDepot}</Avis> : null}
+          </div>
+        </DialogBody>
+        <DialogFooter>
+          <button type="button" className="r-btn r-btn--noir" disabled={!fichier || envoiDepot} onClick={soumettreDepot}>{envoiDepot ? <Loader variant="spin" /> : null} Déposer</button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
+  );
+
+  if (gabarit === "sb") {
+    /* 22/10 — la page Storage de Supabase : les familles comme des buckets à gauche,
+       les documents en colonne, l'aperçu du dossier à droite */
+    return (
+      <>
+        <div className="sb-stockage v2-arrivee">
+          <div className="sb-stockage-tete">
+            <nav className="sb-stockage-fil" aria-label="Emplacement">
+              <span>Documents reçus</span>
+              <span aria-hidden="true">/</span>
+              <strong>{filtre ? FAMILLES.find((f) => f.cle === filtre)?.libelle : "Tous les documents"}</strong>
+            </nav>
+            <div className="sb-actions">
+              <Link href="/espace2/filed/boite" className="v2-btn"><Inbox width={14} height={14} aria-hidden="true" /> Boîte de réception</Link>
+              <button type="button" className="v2-btn v2-btn--primaire" onClick={ouvrirDepot}><Upload width={14} height={14} aria-hidden="true" /> Déposer un document</button>
+            </div>
+          </div>
+          {faitDepot || cibleIntrouvable || erreur ? (
+            <div style={{ padding: "12px 24px 0", display: "grid", gap: 8 }}>
+              {faitDepot ? <Avis teinte="vert" role="status"><strong>C&apos;est fait.</strong> {faitDepot}</Avis> : null}
+              {cibleIntrouvable ? <Avis teinte="ambre" role="status"><strong>Document introuvable.</strong> Le document que désigne la demande n&apos;est pas dans cette liste{source === "exemple" ? " (vous regardez les données d'exemple)" : ""}.</Avis> : null}
+              {erreur ? <Avis teinte="rouge" role="alert"><strong>La base réelle n&apos;a pas répondu.</strong> {erreur}</Avis> : null}
+            </div>
+          ) : null}
+          <div className="sb-stockage-corps">
+            <ul className="sb-stockage-colonne sb-stockage-familles" aria-label="Familles">
+              <li>
+                <button type="button" aria-current={!filtre ? "true" : undefined} onClick={() => setFiltre(null)}>
+                  <Folder width={14} height={14} aria-hidden="true" /> <span>Tous les documents</span>
+                </button>
+              </li>
+              {FAMILLES.map((f) => (
+                <li key={f.cle}>
+                  <button type="button" aria-current={filtre === f.cle ? "true" : undefined} onClick={() => setFiltre(f.cle)}>
+                    <Folder width={14} height={14} aria-hidden="true" /> <span>{f.libelle}</span>
+                    <span className="sb-stockage-compte" data-teinte={compteurs[f.cle] ? f.teinte : undefined}>{compteurs[f.cle]}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <div className="sb-stockage-colonne">
+              {source === "reelle" && !reel ? (
+                <Chargement texte="Lecture des documents…" />
+              ) : visibles.length === 0 ? (
+                <div className="sb-conseil-vide">
+                  <p style={{ margin: 0 }}>Aucun document</p>
+                  <span>{filtre ? "Rien dans cette famille." : "Aucun document reçu pour l'instant."}</span>
+                </div>
+              ) : (
+                <ul aria-label="Documents reçus">
+                  {visibles.map((a) => {
+                    const fam = famille(a.document, a.facture);
+                    return (
+                      <li key={a.document.id}>
+                        <button type="button" aria-current={choisi === a.document.id ? "true" : undefined} onClick={() => setChoix(a.document.id)}>
+                          <FileText width={14} height={14} aria-hidden="true" />
+                          <span className="sb-stockage-nom">
+                            {a.document.reference}
+                            <small>{a.fournisseur ? a.fournisseur.nom : (a.document.expediteur ?? a.document.nom_fichier)}</small>
+                          </span>
+                          {fam === "litige" || a.facture?.nb_bloquants ? <span className="sb-stockage-point" data-teinte={a.facture?.nb_bloquants ? "rouge" : "ambre"} aria-label={a.facture?.nb_bloquants ? "Bloquant" : "Litige"} /> : null}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+            <aside className="sb-stockage-apercu" aria-label="Dossier du document">{vueDossier}</aside>
+          </div>
+        </div>
+        {fenetreDepot}
+      </>
+    );
+  }
+
   return (
     <>
       <div className="esp-tete" data-arrivee="">
@@ -334,59 +469,11 @@ export default function EcranFiled() {
         </section>
 
         <section id="esp-dossier" className="esp-detail-mobile" aria-label="Dossier du document">
-          {dossier ? (
-            <DossierVue
-              key={dossier.document.id}
-              dossier={dossier}
-              source={source}
-              motifs={motifs}
-              fournisseurs={fournisseurs}
-              commandes={commandes}
-              lignesCommande={lignesCommande}
-              onLocal={remplacerLocal}
-              relire={() => (apercu ? relireReel(apercu) : Promise.resolve())}
-              moi={source === "exemple" ? EXEMPLE_MOI : (reel?.moi ?? null)}
-            />
-          ) : chargeDossier || (source === "reelle" && apercu) ? (
-            <div className="esp-carte"><Chargement texte="Lecture du dossier…" /></div>
-          ) : (
-            <div className="esp-carte"><Vide titre="Choisissez un document">Le dossier, les contrôles et la pièce s&apos;affichent ici.</Vide></div>
-          )}
+          {vueDossier}
         </section>
       </div>
 
-      <Dialog open={depot} onOpenChange={(o) => !o && setDepot(false)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogIcone><Upload width={18} height={18} aria-hidden="true" /></DialogIcone>
-            <DialogTitle>Déposer un document</DialogTitle>
-            <DialogDescription>Le fichier reçoit un numéro, est lu par le lecteur, puis contrôlé comme tout document reçu.</DialogDescription>
-          </DialogHeader>
-          <DialogBody>
-            <div className="esp-form">
-              <div>
-                <span className="rv-libelle">Fichier <span className="esp-obligatoire">(obligatoire)</span></span>
-                <div className="esp-fichier">
-                  <input id="esp-depot-fichier" type="file" className="esp-fichier-natif" accept=".pdf,.png,.jpg,.jpeg,.xml,.csv,.xlsx" onChange={(e) => setFichier(e.target.files?.[0] ?? null)} />
-                  <label htmlFor="esp-depot-fichier" className="r-btn r-btn--fil r-btn--petit" style={{ cursor: "pointer" }}>{fichier ? "Changer de fichier" : "Choisir un fichier"}</label>
-                  <span className="esp-kpi-sous">{fichier ? `${fichier.name} · ${Math.round(fichier.size / 1024)} Ko` : "PDF, image, Factur-X (XML), CSV ou tableur."}</span>
-                </div>
-              </div>
-              {entitesDepot.length > 1 ? (
-                <label className="rv-libelle">Entité
-                  <select className="rv-champ" value={entiteDepot} onChange={(e) => setEntiteDepot(e.target.value)}>
-                    {entitesDepot.map((en) => <option key={en.id} value={en.id}>{en.nom}</option>)}
-                  </select>
-                </label>
-              ) : null}
-              {erreurDepot ? <Avis teinte="rouge" role="alert">{erreurDepot}</Avis> : null}
-            </div>
-          </DialogBody>
-          <DialogFooter>
-            <button type="button" className="r-btn r-btn--noir" disabled={!fichier || envoiDepot} onClick={soumettreDepot}>{envoiDepot ? <Loader variant="spin" /> : null} Déposer</button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {fenetreDepot}
     </>
   );
 }

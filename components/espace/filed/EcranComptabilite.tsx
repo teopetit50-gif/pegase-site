@@ -20,7 +20,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Download, FileText, Pencil, Wallet } from "lucide-react";
+import { BookOpen, Download, FileText, Pencil, Wallet } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { createClient } from "@/lib/supabase/client";
@@ -54,7 +54,7 @@ function fecExemple(du: string, au: string): ExportFec {
   return { nom_fichier: `123456789FEC${d(au)}.txt`, encodage: "UTF-8", separateur: "tabulation", contenu, lignes: lignes.length, ecritures: 1, total_debit: 2208, total_credit: 2208, equilibre: true, ecritures_desequilibrees: 0, du, au, empreinte: "exemple" };
 }
 
-export default function EcranComptabilite() {
+export default function EcranComptabilite({ gabarit }: { gabarit?: "sb" } = {}) {
   const { source } = useSource();
   const [reel, setReel] = useState<Contexte | null>(null);
   const [comptesExemple, setComptesExemple] = useState<Compte[]>(comptesDefaut);
@@ -155,6 +155,145 @@ export default function EcranComptabilite() {
     }
   }
 
+  const exportFec = (
+    <>
+    {peutExporter ? (
+      <>
+        <div className="esp-form">
+          <div className="esp-form-ligne">
+            <label className="rv-libelle">Société
+              <select className="rv-champ" value={entiteChoisie} onChange={(e) => setEntite(e.target.value)}>
+                {ctx.entites.map((e) => <option key={e.id} value={e.id}>{e.nom}</option>)}
+              </select>
+            </label>
+            <label className="rv-libelle">Période
+              <select className="rv-champ" value={mode} onChange={(e) => setMode(e.target.value as "exercice" | "periode")}>
+                <option value="periode">Des dates</option>
+                <option value="exercice" disabled={!ctx.exercices.length}>Un exercice{ctx.exercices.length ? "" : " (aucun ouvert)"}</option>
+              </select>
+            </label>
+          </div>
+          {mode === "exercice" ? (
+            <label className="rv-libelle">Exercice
+              <select className="rv-champ" value={exercice} onChange={(e) => setExercice(e.target.value)}>
+                <option value="">Choisir…</option>
+                {ctx.exercices.map((x) => <option key={x.id} value={x.id}>{x.libelle}{x.statut === "cloture" ? " (clôturé)" : ""}</option>)}
+              </select>
+            </label>
+          ) : (
+            <div className="esp-form-ligne">
+              <label className="rv-libelle">Du<input className="rv-champ" type="date" value={du} onChange={(e) => setDu(e.target.value)} /></label>
+              <label className="rv-libelle">Au<input className="rv-champ" type="date" value={au} onChange={(e) => setAu(e.target.value)} /></label>
+            </div>
+          )}
+        </div>
+        <div className="esp-actions">
+          <button type="button" className="r-btn r-btn--noir" disabled={envoi || !entiteChoisie || (mode === "exercice" ? !exercice : !du || !au || du > au)} onClick={() => void exporter()}>
+            {envoi ? <Loader variant="spin" /> : <Download width={15} height={15} aria-hidden="true" />} Exporter le FEC
+          </button>
+        </div>
+      </>
+    ) : (
+      <Avis teinte="gris">L&apos;export du FEC est réservé au gérant, à l&apos;administrateur et au valideur.</Avis>
+    )}
+    {resultat ? (
+      <div role="status" style={{ display: "grid", gap: 8 }}>
+        <Avis teinte={resultat.equilibre ? "vert" : "rouge"}>
+          <strong>{resultat.nom_fichier}</strong> téléchargé : {resultat.lignes} ligne{resultat.lignes > 1 ? "s" : ""}, {resultat.ecritures} écriture{resultat.ecritures > 1 ? "s" : ""}, débit {montant(resultat.total_debit)} = crédit {montant(resultat.total_credit)}.
+          {!resultat.equilibre ? ` Attention : ${resultat.ecritures_desequilibrees} écriture(s) déséquilibrée(s). Ne transmettez pas ce fichier ; signalez-le.` : ""}
+        </Avis>
+        <span className="esp-kpi-sous">Export enregistré au journal le {quand(resultat.le)}{resultat.empreinte && resultat.empreinte !== "exemple" ? ` · empreinte ${resultat.empreinte.slice(0, 12)}…` : ""}.</span>
+      </div>
+    ) : null}
+    {erreurExport ? (
+      <Avis teinte="rouge" role="alert">
+        <strong>Refusé par la base.</strong> {erreurExport.message}
+        {/SIREN/.test(erreurExport.message) ? " Le SIREN se renseigne sur la fiche de la société, dans les réglages de l'organisation." : ""}
+      </Avis>
+    ) : null}
+    </>
+  );
+  const fenetreCompte = (
+    <>
+    <Dialog open={!!edition} onOpenChange={(o) => !o && !envoi && setEdition(null)}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogIcone><Pencil width={18} height={18} aria-hidden="true" /></DialogIcone>
+          <DialogTitle>Modifier le compte</DialogTitle>
+          <DialogDescription>{edition ? COMPTES_SYSTEME.find((x) => x.role === edition.role)?.libelle : ""} — employé dans les écritures que FILED passera à partir de maintenant ; les écritures passées ne changent pas.</DialogDescription>
+        </DialogHeader>
+        <DialogBody>
+          <div className="esp-form">
+            <label className="rv-libelle">Numéro de compte
+              <input className="rv-champ esp-mono" inputMode="numeric" value={numero} onChange={(e) => setNumero(e.target.value)} />
+            </label>
+            {numero && !numeroOk ? <Avis teinte="ambre">Numéro de compte : de 3 à 12 chiffres.</Avis> : null}
+            <label className="rv-libelle">Libellé
+              <input className="rv-champ" value={libelle} onChange={(e) => setLibelle(e.target.value)} maxLength={200} />
+            </label>
+            {erreurCompte ? <Avis teinte="rouge" role="alert">{erreurCompte}</Avis> : null}
+          </div>
+        </DialogBody>
+        <DialogFooter>
+          <button type="button" className="r-btn r-btn--noir" disabled={!numeroOk || !libelle.trim() || envoi} onClick={() => void enregistrerCompte()}>{envoi ? <Loader variant="spin" /> : null} Enregistrer</button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
+  );
+
+  if (gabarit === "sb") {
+    /* 22/10 — la page Backups de Supabase : l'export en carte, puis la liste des comptes,
+       une ligne par compte avec son action à droite */
+    return (
+      <>
+        <div className="sb-reglages v2-arrivee">
+          <h1 className="sb-titre">Comptabilité</h1>
+          {erreurLecture ? <Avis teinte="rouge" role="alert"><strong>La base réelle n&apos;a pas répondu.</strong> {erreurLecture}</Avis> : null}
+          {!ctx ? (
+            <Chargement texte="Lecture…" />
+          ) : (
+            <>
+              <section className="sb-reglages-section" aria-labelledby="titre-fec">
+                <header>
+                  <h2 id="titre-fec">Fichier des écritures comptables (FEC)</h2>
+                  <p>{SOUS_TITRE_FEC}</p>
+                </header>
+                <div className="esp-carte"><div className="esp-carte-corps" style={{ display: "grid", gap: 12 }}>{exportFec}</div></div>
+              </section>
+              <section className="sb-reglages-section" aria-labelledby="titre-comptes">
+                <header>
+                  <h2 id="titre-comptes">Les comptes de FILED</h2>
+                  <p>Hors plan de charges. {peutRegler ? "Un changement vaut pour les écritures à venir ; les écritures passées ne changent pas." : "Les comptes se règlent par le gérant ou l'administrateur."}</p>
+                </header>
+                {faitCompte ? <Avis teinte="vert" role="status"><strong>C&apos;est fait.</strong> {faitCompte}</Avis> : null}
+                <ul className="sb-liens-liste sb-sauvegardes" aria-label="Les comptes de FILED">
+                  {ctx.comptes.map((c) => (
+                    <li key={c.role}>
+                      <div>
+                        <span className="sb-sauvegarde-icone" aria-hidden="true"><BookOpen width={14} height={14} /></span>
+                        <span className="sb-sauvegarde-texte">
+                          <strong>{COMPTES_SYSTEME.find((x) => x.role === c.role)?.libelle}</strong>
+                          <span><span className="sb-mono">{c.numero}</span> · {c.libelle}{c.regle ? "" : " · par défaut"}</span>
+                        </span>
+                        {peutRegler ? (
+                          <button type="button" className="v2-btn" aria-label={`Modifier le compte : ${COMPTES_SYSTEME.find((x) => x.role === c.role)?.libelle}`} onClick={() => { setEdition(c); setNumero(c.numero); setLibelle(c.libelle); setErreurCompte(null); setFaitCompte(null); }}>
+                            Modifier
+                          </button>
+                        ) : null}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </>
+          )}
+        </div>
+        {fenetreCompte}
+      </>
+    );
+  }
+
   return (
     <>
       <div className="esp-tete" data-arrivee="">
@@ -181,60 +320,7 @@ export default function EcranComptabilite() {
             </div>
             <div className="esp-carte-corps" style={{ display: "grid", gap: 12 }}>
               <p className="esp-sous" style={{ margin: 0 }}>{SOUS_TITRE_FEC}</p>
-              {peutExporter ? (
-                <>
-                  <div className="esp-form">
-                    <div className="esp-form-ligne">
-                      <label className="rv-libelle">Société
-                        <select className="rv-champ" value={entiteChoisie} onChange={(e) => setEntite(e.target.value)}>
-                          {ctx.entites.map((e) => <option key={e.id} value={e.id}>{e.nom}</option>)}
-                        </select>
-                      </label>
-                      <label className="rv-libelle">Période
-                        <select className="rv-champ" value={mode} onChange={(e) => setMode(e.target.value as "exercice" | "periode")}>
-                          <option value="periode">Des dates</option>
-                          <option value="exercice" disabled={!ctx.exercices.length}>Un exercice{ctx.exercices.length ? "" : " (aucun ouvert)"}</option>
-                        </select>
-                      </label>
-                    </div>
-                    {mode === "exercice" ? (
-                      <label className="rv-libelle">Exercice
-                        <select className="rv-champ" value={exercice} onChange={(e) => setExercice(e.target.value)}>
-                          <option value="">Choisir…</option>
-                          {ctx.exercices.map((x) => <option key={x.id} value={x.id}>{x.libelle}{x.statut === "cloture" ? " (clôturé)" : ""}</option>)}
-                        </select>
-                      </label>
-                    ) : (
-                      <div className="esp-form-ligne">
-                        <label className="rv-libelle">Du<input className="rv-champ" type="date" value={du} onChange={(e) => setDu(e.target.value)} /></label>
-                        <label className="rv-libelle">Au<input className="rv-champ" type="date" value={au} onChange={(e) => setAu(e.target.value)} /></label>
-                      </div>
-                    )}
-                  </div>
-                  <div className="esp-actions">
-                    <button type="button" className="r-btn r-btn--noir" disabled={envoi || !entiteChoisie || (mode === "exercice" ? !exercice : !du || !au || du > au)} onClick={() => void exporter()}>
-                      {envoi ? <Loader variant="spin" /> : <Download width={15} height={15} aria-hidden="true" />} Exporter le FEC
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <Avis teinte="gris">L&apos;export du FEC est réservé au gérant, à l&apos;administrateur et au valideur.</Avis>
-              )}
-              {resultat ? (
-                <div role="status" style={{ display: "grid", gap: 8 }}>
-                  <Avis teinte={resultat.equilibre ? "vert" : "rouge"}>
-                    <strong>{resultat.nom_fichier}</strong> téléchargé : {resultat.lignes} ligne{resultat.lignes > 1 ? "s" : ""}, {resultat.ecritures} écriture{resultat.ecritures > 1 ? "s" : ""}, débit {montant(resultat.total_debit)} = crédit {montant(resultat.total_credit)}.
-                    {!resultat.equilibre ? ` Attention : ${resultat.ecritures_desequilibrees} écriture(s) déséquilibrée(s). Ne transmettez pas ce fichier ; signalez-le.` : ""}
-                  </Avis>
-                  <span className="esp-kpi-sous">Export enregistré au journal le {quand(resultat.le)}{resultat.empreinte && resultat.empreinte !== "exemple" ? ` · empreinte ${resultat.empreinte.slice(0, 12)}…` : ""}.</span>
-                </div>
-              ) : null}
-              {erreurExport ? (
-                <Avis teinte="rouge" role="alert">
-                  <strong>Refusé par la base.</strong> {erreurExport.message}
-                  {/SIREN/.test(erreurExport.message) ? " Le SIREN se renseigne sur la fiche de la société, dans les réglages de l'organisation." : ""}
-                </Avis>
-              ) : null}
+              {exportFec}
             </div>
           </section>
 
@@ -274,30 +360,7 @@ export default function EcranComptabilite() {
         </div>
       )}
 
-      <Dialog open={!!edition} onOpenChange={(o) => !o && !envoi && setEdition(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogIcone><Pencil width={18} height={18} aria-hidden="true" /></DialogIcone>
-            <DialogTitle>Modifier le compte</DialogTitle>
-            <DialogDescription>{edition ? COMPTES_SYSTEME.find((x) => x.role === edition.role)?.libelle : ""} — employé dans les écritures que FILED passera à partir de maintenant ; les écritures passées ne changent pas.</DialogDescription>
-          </DialogHeader>
-          <DialogBody>
-            <div className="esp-form">
-              <label className="rv-libelle">Numéro de compte
-                <input className="rv-champ esp-mono" inputMode="numeric" value={numero} onChange={(e) => setNumero(e.target.value)} />
-              </label>
-              {numero && !numeroOk ? <Avis teinte="ambre">Numéro de compte : de 3 à 12 chiffres.</Avis> : null}
-              <label className="rv-libelle">Libellé
-                <input className="rv-champ" value={libelle} onChange={(e) => setLibelle(e.target.value)} maxLength={200} />
-              </label>
-              {erreurCompte ? <Avis teinte="rouge" role="alert">{erreurCompte}</Avis> : null}
-            </div>
-          </DialogBody>
-          <DialogFooter>
-            <button type="button" className="r-btn r-btn--noir" disabled={!numeroOk || !libelle.trim() || envoi} onClick={() => void enregistrerCompte()}>{envoi ? <Loader variant="spin" /> : null} Enregistrer</button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {fenetreCompte}
     </>
   );
 }
