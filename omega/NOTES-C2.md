@@ -80,6 +80,25 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
     ou sur son feu vert.
   - Non fait : `npm run build` (Mac à 8 Go, branche worker, pas de push sur main) ; tsc ne remonte que la casse Varelo
     propre à ce Mac ; eslint propre.
+- **26/10, soir — testeur indépendant** (`omega/RECETTE-TESTEUR-MODULES-2026-10-26.md`, origin/testeur-modules 157b506f) :
+  TCASHD-18 et 19 jugés justes (C-1 à C-7). Deux écarts corrigés, posés depuis le dépôt, rouge avant / vert après :
+  - `c2_44_revue_controlee` (28e284a8, test 4ee1fa4c, **TMOD-04**) : la relance revue (c2_42, c2_43) repasse, une fois son
+    texte réécrit et AVANT toute demande, les contrôles d'une relance neuve : compte hors cycle ou réciproque, pièce en
+    litige / sortie / réglée / solde abandonné / bon de commande / total incohérent / sous le seuil → coupée « avant
+    l'envoi : … » ; sans adresse → « sans adresse » ; mot interdit → « bloquée » (avec le mot) ; puis l'accord permanent
+    (seuls les rappels 1 et 2). Bloquée, la demande en attente est retirée et aucune nouvelle n'entre dans la file.
+    Test 6/6 (dont : refusée puis hors périmètre, plus rien de reproposé).
+    **Décisions prudentes prises seul** : les fenêtres d'envoi, fériés et oppositions restent contrôlés par le socle à
+    l'envoi (preparer_envoi), comme pour une relance neuve ; un règlement encore à lettrer ne bloque pas la revue (elle
+    naît d'un lettrage en cours, plusieurs imputations peuvent se suivre) ; une relance bloquée par un interdit n'est plus
+    revue par un règlement suivant (elle attend une décision, comme à la préparation).
+  - `c2_45_reglement_nul` (28e284a8, **TMOD-05**) : « Un règlement de 0 € ou moins ne se note pas : le montant reçu doit
+    être supérieur à 0 €. » (22023). Fonction c2_01 recopiée telle quelle (md5 vérifié avant). Test 3/3. Les autres
+    « … est positif » (avoir imputé, lettrage, plafond, litige partiel) n'ont pas été touchés : hors du constat.
+  - Inscrits (20261026183016, 20261026183017). `^test_c2_4[0-5]` 6/6 ; suite `^test_c2_` par morceaux : inchangée, seuls
+    test_c2_01 (4) et test_c2_08 (5) restent rouges, à cause du jeu NOBAT du banc (voir plus haut). A-C26 et A-C27 restent
+    à 585 €, en attente. Remarque du testeur non traitée : le sujet d'une relance revue reste « rappel : facture … échue »
+    (le corps dit le reste dû) — c'est le sujet du palier, juste.
 - **Prochain pas** : la passe en base réelle de la recette (session du banc) ; le reste de la liste au feu vert du
   coordinateur (voir `omega/CHIFFRAGE/cashd.md`, « Ce qui reste vraiment », 26/10).
 - **Limites dites au coordinateur** : le socle fige le texte d'un envoi adossé (pas de réécriture à l'approbation, piste
