@@ -37,6 +37,8 @@ begin
   perform tests.endosser((banc ->> 'gerant')::uuid, 'gerant@banc-varelo.test');
   perform public.offload_decider_affaire(v_aff, 'relancer', 'Le client a promis de passer.');
   perform tests.redevenir_admin();
+  -- Le test tient dans une transaction (now() fixe) : la décision est datée de deux jours avant le refus, comme en vrai.
+  update public.offload_affaires set decide_le = now() - interval '2 days' where id = v_aff;
   perform private.offload_affaires_cycle(v_client, null);
   af := tests.c4_affaire_lue(v_aff);
   v_da := tests.c4_demande_de(ra.envoi1_id);
