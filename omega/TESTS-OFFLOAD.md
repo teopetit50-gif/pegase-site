@@ -142,6 +142,9 @@ ni silence à juger. **Rien à relire au niveau 2** ; aucune liste de sociétés
 | F-2 | c4_31 | détection du coordinateur à 22 h 07 Z au jour de Guadeloupe (`jour 2026-10-22`, 2 entrées, ok 4 / ralentit 4 / éteint 12) : les 18 comptes lisibles portent `jour: 2026-10-22` (O12, O13 effacés absents) ; O8 : dernier achat 22/10 (celui de F-1), silence 0 j, `ok` ; O0 : 94 j de silence (20/07 → 22/10), clôture 31/10 | juste | 1 |
 | F-3 | c4_31 | 23/10 00 h 18 Z (UTC 23/10, Guadeloupe 22/10), sans rien écrire (transaction annulée) : achat O8 daté 23/10 refusé | juste : la date est celle de Guadeloupe, ni Paris ni UTC | 1 |
 | A-1 | C:86-88, C:152 ; c4_33 | O4, CMD-O4-01 disponible le 11/10 ; pièce de même référence déposée (`offload_saisir_achat`, 11/10, 1 240 €, réf. CMD-O4-01) ; `private.offload_affaires_cycle` joué par le coordinateur au 22/10 (`relances_1: 1`), 29/10 (`relances_2: 1`), 05/11 (`decisions: 1`) | `offload_affaires_compte` : `valeur_ht: 1240`, `statut: decision`, motif « Relancé deux fois sans réponse : à décider (1 240 € immobilisés depuis le 11/10/2026). », `envoi1_id` 76b53cb4-…, `envoi2_id` 7c0ae563-… ; liste : `a_decider: 1`, `valeur_ht: 1240` ; aucune tâche d'appel (un message était possible) | chiffrage et décision : juste ; envois : **écart** TOFFLOAD-11 | 1 |
+| E-1 | C:73, C:75 ; c4_34 | O10 : CT-O10 (tacite, 20/12) et CT-O10B neuf (`reconduction: expresse`, 20/12) ; `offload_echeances_tableau` | CT-O10 : « se reconduit tacitement le 20/12/2026 : rien à faire, sauf si le client veut l'arrêter. », `s_eteint: false` ; CT-O10B : « s'éteint le 20/12/2026 sans reconduction tacite : il faut le renouveler. », `s_eteint: true` ; tous deux `a_venir`, nature commerciale | juste | 1 |
+| P-1 | brief (valeur par segment), C:118 ; c4_36 | `offload_valeur_par_segment` ; `offload_restitution_tableur` | segments : Hôtellerie 2 comptes, 17 661,29 € ; Restauration 1, 3 532,26 € ; Sans segment 15, 59 385,48 € (comptes effacés exclus) ; tableur : CSV « ; » UTF-8, 11 fichiers (achats, comptes, contacts, contrats, affaires, échéances, signaux, reprises, tâches, réglages, journal), aucune trace d'O12/O13. Remarques : colonnes techniques (uuid, `cle`, `jeu_id`) peu lisibles pour un client ; messages préparés absents ; pas d'équipements ni d'interventions (vides sur le banc) | juste ; remarques | 1 |
+| C-11 | TOFFLOAD-11 ; c4_35 | affaire NEUVE O8, CMD-O8-01 disponible 12/10, pièce 800 € même réf. ; `offload_affaires_cycle` au 26/10, 02/11, 09/11 (coordinateur) | 26/10 `{"a_valider":1,…}` : relance 1 visible dans `offload_tableau.a_valider` (sujet « votre commande est arrivée », réf., date, aucune mention de paiement — C:92), affaire `relancee_1`, `valeur_ht: 800`, motif nul ; 02/11 et 09/11 : tout à 0 — ni relance 2 ni décision tant que la relance 1 n'est pas partie. Observation : l'ancienne affaire O4 garde son historique (« relancé deux fois », envois hors liste) : c4_35 vaut pour les nouvelles affaires (dit par le coordinateur) | juste (a, b, c) ; O4 : observation | 1 |
 
 ## Écarts
 
@@ -301,3 +304,8 @@ TOFFLOAD-11 ouvert (envois de relance invisibles). En attente : statut des deux 
 - Fait depuis l'arrêt 15 : rien ; aucun lot posé (accès à la recette perdu côté coordinateur).
 - À rejouer à la reprise : correctif TOFFLOAD-11 (a, b, c), c4_34, valeur en jeu par segment au pilotage.
 - Reprise au signal du coordinateur. Aucune approbation (demandes V1-V3, O16, O4 ×2 en attente).
+
+**26/10 01 h 00 Z, arrêt 16 — REPRISE.**
+- Fait : c4_34 (E-1), c4_35 (C-11, TOFFLOAD-11 corrigé), c4_36 (P-1) justes ; plus aucun écart ouvert.
+- Reste : cycle de vague un autre jour que mardi ; O4 en observation ; aucune approbation (demandes V1-V3, O16, O8, O4 ×2 en attente).
+- Reprise : au signal du coordinateur.
