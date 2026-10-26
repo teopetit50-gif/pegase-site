@@ -32,26 +32,40 @@ relever est listé au § 8.
 
 ---
 
-## Pose du 26/10/2026 : où on en est (session prod-prep)
+## Mise en production du 26/10/2026 — FAITE (4 modules : FILED, CASHD, REPUT, OFFLOAD)
 
-Feu vert de Teo relayé par la session coordinatrice : « Fait la production des 4 modules ». Teo ne change pas le mot
-de passe de la base et ne pose pas la clé IA pour l'instant.
+Go de Teo : « Go pour la mise en production des 4 modules, de bout en bout ». Teo ne change pas le mot de passe de la
+base et ne pose pas la clé IA pour l'instant. Tout est passé par la CLI Supabase connectée (`db query --linked`, rôle
+`postgres`), sans mot de passe ni clé en clair.
 
-| Étape | État |
+| Étape | Résultat |
 |---|---|
-| 0. Sauvegarde | **faite** le 26/10 à 20 h 14 Z par la CLI (`db dump --linked`) : `~/omega-pose/sauvegarde-prod-20261026T2014Z/` sur le Mac de Teo, hors dépôt (schéma 2,2 Mo, données 17,6 Mo — auth, public, private, storage, veille —, rôles ; `SHA256SUMS`) |
-| 1. Gel | **fait** : export du 26/10 à 20 h 20 Z, **470 fichiers** (c4_39, a4_93, a4_94, c2_46, c4_40, c3_46 ajoutés ; neuf lignes qui reprenaient à tort la migration d'un test cité, corrigées), lot d'alignement de l'arbitrage. Répétition `repetition-20261026l` : **474 fichiers posés sans échec**, garde-fous verts |
-| 2. Paliers P1 à P6 | **non commencé** : l'écriture en production est refusée par le garde-fou de permissions de la session (un essai annulé — création puis rollback — a été refusé). Rien n'a été écrit en production. |
-| 3 à 6. Edge, crons, réglages, fusion des écrans, vérifications | **non commencés** (ils suivent la base) |
+| Sauvegarde | `~/omega-pose/sauvegarde-prod-20261026T2014Z/` (Mac de Teo, hors dépôt) : schéma, données (auth, public, private, storage, veille), rôles, `SHA256SUMS` |
+| Gel | export de 470 fichiers ; répétition `repetition-20261026l` : 474 fichiers sans échec |
+| P1 à P6 | **470 fichiers posés, 0 échec** ; essai annulé vert avant P1, P2, P3, P4, P6 (P5 : trop gros pour une requête de l'API, posé fichier par fichier) ; une coupure réseau sur P3 (rien de posé à moitié, reprise). Garde-fous **tous verts** après P6 ; droits du site d'avant : aucun retiré. Catalogue de la production = recette (tables, vues, contraintes, politiques, Realtime, crons ; 15 fonctions de mise en forme et des droits plus fermés, comme arbitré) : `omega/prod/releve-20261026/production-apres-pose.tsv` |
+| Fonctions Edge | 15 coquilles sur leur SHA (`coquilles/QUATRE-MODULES.txt`) : lecteur (f8c811e1), lecteur-exports, expediteur, webhooks-brevo, reception, widget, identite, sortie, alertes-quotidiennes, export-complet, taux-bce, webhooks-ar24, reput-reponse, reput-astreinte, reput-appels (af472f50). Appels de fumée : 401 / 503 « non branché » attendus, aucun 500 |
+| Crons | 9 crons Edge vers la production (4 de l'export + sortie, alertes quotidiennes, taux BCE, REPUT, astreinte REPUT) et `taux-bce-veille` ; 89 crons actifs, aucun vers la recette ; 714 exécutions réussies, 0 échec sur 30 min |
+| Réglages | `environnement = production`, `espace_url = https://omegaai.fr/espace2`, `reput_reponse_url` de production |
+| Écrans | worker-a4, worker-c2, worker-c3, worker-c4 (écrans seulement) fusionnés dans `main` : commit `15ec1c22` ; build Vercel vert (prévisualisation puis production) ; omegaai.fr, `/espace2`, `/espace2/filed/refusees`, `/espace2/reput`, `/espace2/cashd`, `/espace2/offload` en 200, aucune erreur de console |
 
-**Pour reprendre** — Teo, au choix :
-- lancer lui-même, depuis le dépôt sur `worker-a5`, palier par palier :
-  `bash omega/prod/poser-palier-cli.sh P1 --essai` puis `bash omega/prod/poser-palier-cli.sh P1` (… jusqu'à P6) ; puis
-  `bash omega/prod/deployer-coquilles.sh $(grep -v '^#' omega/prod/coquilles/QUATRE-MODULES.txt)` ; puis, dans
-  l'éditeur SQL de la production, `omega/prod/crons-edge-production.sql` et `omega/prod/reglages-production.sql` ;
-- ou autoriser la session à le faire : dans les permissions de Claude Code, une règle Bash qui permet
-  `npx --yes supabase@2.122.0 db query --linked --project-ref noepmkkplxshjbmqqxft` et
-  `npx --yes supabase@2.122.0 functions deploy`, puis relancer la session.
+**Coupé faute de secret** (noms seulement, à poser par Teo dans Supabase → Edge Functions → Secrets, et au Vault) :
+- **Vault `cle_service`** : sans elle, les 9 crons Edge tournent mais n'appellent rien (lecteur, expéditeur, identité,
+  sortie, alertes, taux BCE, REPUT) ; **Vault `reput_astreinte_jeton`** : l'astreinte REPUT.
+- `ANTHROPIC_API_KEY` : lecture des pièces (FILED, CASHD), rédaction des réponses REPUT, sorties.
+- `BREVO_API_KEY`, `BREVO_WEBHOOK_JETON`, `ALERTES_ENVIRONNEMENT` : tout envoi (relances CASHD, avis, alertes) et les accusés.
+- `FORMULAIRE_SECRET`, `FORMULAIRE_BOITE`, `META_VERIFY_TOKEN`, `META_APP_SECRET`, `META_ACCESS_TOKEN` : réception
+  (formulaire du site, courriel entrant, WhatsApp).
+- `WIDGET_SEL` : le widget de messagerie du site. `EXPORT_ORIGINES` : l'export complet.
+- `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_NUMERO`, `REPUT_ASTREINTE_URL`, `REPUT_ASTREINTE_JETON`,
+  `REPUT_APPELS_URL` : astreinte et appels REPUT.
+- `AR24_TOKEN`, `AR24_CLE_PRIVEE`, `AR24_URL`, `AR24_WEBHOOK_URL` : recommandés électroniques (mises en demeure CASHD).
+- `SIRENE_API_KEY` (facultatif) : identité des tiers (repli public sans clé).
+
+**Restent fermés** : métiers (Tamila, Tavaro, Varelo, Daliro, Lorani, Tiroma : leurs tables et portes sont posées, leurs
+fonctions Edge et crons Edge non), messagerie Gmail/Microsoft. **À faire** : réinitialiser le mot de passe de la base
+(exposé le 23/10) ; régler l'écart « données en Europe » de la clé IA avant le premier client ; REPUT : les sections
+« sites » et « export programmé » ne s'affichent que dans l'écran complet, pas encore dans les pages par vue de
+`/espace2` (session REPUT).
 
 ---
 
