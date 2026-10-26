@@ -2871,6 +2871,7 @@ contrainte	public.offload_reglages.offload_reglages_montant_check	0edef9b93809
 contrainte	public.offload_reglages.offload_reglages_pkey	bd36dc36b566
 contrainte	public.offload_reglages.offload_reglages_plafond_check	3748d9156997
 contrainte	public.offload_reglages.offload_reglages_quarantaine_check	16675f414566
+contrainte	public.offload_reglages.offload_reglages_quarantaine_trimestre_check	d176ada1c4a0
 contrainte	public.offload_reglages.offload_reglages_relance_check	d98143b6aade
 contrainte	public.offload_reglages.offload_reglages_retrait_check	47921d928a66
 contrainte	public.offload_reglages.offload_reglages_seuil_non_remis_check	78a39cb62fc3
@@ -3926,6 +3927,7 @@ declencheur	public.btp_tiers.btp_tiers_preparer	9e35fc013f94
 declencheur	public.btp_tiers.btp_tiers_telephone	54709a433536
 declencheur	public.btp_tiers.btp_tiers_tracer	4888c1c3e08e
 declencheur	public.cashd_imputations.cashd_imputations_zz_revoir	ff8dcdb75b6f
+declencheur	public.cashd_reglages.cashd_reglages_zz_interdits	802039b9b6e5
 declencheur	public.cashd_relances.cashd_relances_garder_envoi_main	f9232918bfb5
 declencheur	public.clients.clients_a_tracer	64b374719da5
 declencheur	public.clients.clients_entite_principale	627b48e02214
@@ -3961,6 +3963,7 @@ declencheur	public.entites.entites_sans_cycle	ce4374aca066
 declencheur	public.entites.entites_tracer	e9241e29e4fc
 declencheur	public.envois.envois_accuse_marquer	2b94761c77c4
 declencheur	public.envois.envois_garder	b84fb65408b8
+declencheur	public.envois.envois_reponse_accord_marquer	8e9cb05a1adc
 declencheur	public.envois.envois_tracer	06d618cfee31
 declencheur	public.envois.envois_urgent_marquer	4c1750d034ed
 declencheur	public.envois_evenements.envois_evenements_garder	93495a296c50
@@ -5146,6 +5149,7 @@ droit	private.cashd_piece_partie(uuid)	892b8ae782c1
 droit	private.cashd_piece_partie_avant(uuid,uuid)	892b8ae782c1
 droit	private.cashd_point_lignes(uuid,date)	892b8ae782c1
 droit	private.cashd_preparer_relances(uuid,date,uuid)	892b8ae782c1
+droit	private.cashd_reglages_revoir_bloquees()	892b8ae782c1
 droit	private.cashd_relancer_commandes(uuid,date)	892b8ae782c1
 droit	private.cashd_relettrer(uuid)	892b8ae782c1
 droit	private.cashd_rendre(text,jsonb)	892b8ae782c1
@@ -5389,6 +5393,7 @@ droit	private.filed_cycle_vie_litige()	892b8ae782c1
 droit	private.filed_cycle_vie_reglement()	892b8ae782c1
 droit	private.filed_cycle_vie_travail()	892b8ae782c1
 droit	private.filed_date(jsonb)	892b8ae782c1
+droit	private.filed_date_du_refus(uuid)	892b8ae782c1
 droit	private.filed_date_enregistrement(date,date)	892b8ae782c1
 droit	private.filed_date_lue(text)	892b8ae782c1
 droit	private.filed_decaissement(uuid,date,uuid,integer)	892b8ae782c1
@@ -6181,6 +6186,7 @@ droit	private.lorani_voit_projet_pour(uuid,uuid,uuid,uuid)	892b8ae782c1
 droit	private.manifestes_effacement	dec6fff71afd
 droit	private.marquer_envoi_accuse()	892b8ae782c1
 droit	private.marquer_envoi_manuel(uuid,text,text)	e24b146746f9
+droit	private.marquer_envoi_reponse_accord()	892b8ae782c1
 droit	private.marquer_envoi_urgent()	892b8ae782c1
 droit	private.mes_clients()	e24b146746f9
 droit	private.messagerie_a_reconnecter(uuid,text)	892b8ae782c1
@@ -6498,6 +6504,7 @@ droit	private.reput_reglages_naissance()	892b8ae782c1
 droit	private.reput_reglages_propager()	892b8ae782c1
 droit	private.reput_regrouper()	892b8ae782c1
 droit	private.reput_rendre_a_traiter(uuid,text)	892b8ae782c1
+droit	private.reput_reponse_sous_accord(envois)	892b8ae782c1
 droit	private.reput_reprendre_refus(uuid,jsonb)	892b8ae782c1
 droit	private.reput_reprise_impossible(uuid,text,boolean)	892b8ae782c1
 droit	private.reput_reprises	55272346abac
@@ -8334,6 +8341,7 @@ fonction	private.cashd_piece_partie(uuid)	e5db5069d7d6
 fonction	private.cashd_piece_partie_avant(uuid,uuid)	4b7a650d2506
 fonction	private.cashd_point_lignes(uuid,date)	d9e1aa848d12
 fonction	private.cashd_preparer_relances(uuid,date,uuid)	7d3e4cf648d7
+fonction	private.cashd_reglages_revoir_bloquees()	f161fe1e2275
 fonction	private.cashd_relancer_commandes(uuid,date)	03bd6784d9c5
 fonction	private.cashd_relettrer(uuid)	d17392eab4b8
 fonction	private.cashd_rendre(text,jsonb)	b37324c62af5
@@ -8342,8 +8350,8 @@ fonction	private.cashd_reprendre_paliers(uuid)	102b1f4410b4
 fonction	private.cashd_reprendre_refus(uuid,jsonb)	c956f92f26ea
 fonction	private.cashd_reste(uuid)	ca300668a3eb
 fonction	private.cashd_retenir_med_sans_envoi(uuid)	931778d0b52a
-fonction	private.cashd_reviser_relance(uuid,text,jsonb)	77af89d80e92
-fonction	private.cashd_revoir_montants(uuid)	c7da92d5ef55
+fonction	private.cashd_reviser_relance(uuid,text,jsonb)	c69d8bebf984
+fonction	private.cashd_revoir_montants(uuid)	df21735d3d99
 fonction	private.cashd_role_session()	f9a50d5016f4
 fonction	private.cashd_seuil_relance(uuid,numeric)	1fcfea6d4a79
 fonction	private.cashd_statut_devis(text)	81b1563f6202
@@ -8439,7 +8447,7 @@ fonction	private.enregistrer_lecture(uuid,jsonb,text)	c06108846598
 fonction	private.enregistrer_mesure(uuid,text,integer,text,date,numeric,numeric,text,numeric,uuid,text,text,text,date)	f0f3d7530365
 fonction	private.entites_sans_cycle()	383a8ec3a55c
 fonction	private.envoi_crochet_approbation(uuid)	da4311ecf0e2
-fonction	private.envoi_hors_heures_permis(envois)	57769d9462e6
+fonction	private.envoi_hors_heures_permis(envois)	652a8394eacd
 fonction	private.envoi_interne_urgent(envois)	5a699316547a
 fonction	private.envoi_valide(uuid,timestamp with time zone)	192757559613
 fonction	private.envois_suivre_demande()	b7156185189b
@@ -8555,7 +8563,7 @@ fonction	private.filed_controler_facture(uuid)	b9c18d601a3b
 fonction	private.filed_controles_comptables(uuid)	e1be95c36029
 fonction	private.filed_controles_identite(uuid)	df8a503de4e5
 fonction	private.filed_controles_mentions(filed_factures)	d6186961f72a
-fonction	private.filed_correcteur_n_approuve_pas()	87164820a956
+fonction	private.filed_correcteur_n_approuve_pas()	fbc62f690629
 fonction	private.filed_correcteurs(uuid,timestamp with time zone)	3e86f864311b
 fonction	private.filed_corriger_facture(uuid,jsonb,text)	e64f3c74269d
 fonction	private.filed_courriers_a_traiter(uuid)	81f63b2be8c1
@@ -8568,6 +8576,7 @@ fonction	private.filed_cycle_vie_litige()	492a97b3cf6d
 fonction	private.filed_cycle_vie_reglement()	f330a764a8de
 fonction	private.filed_cycle_vie_travail()	d602db51e3f0
 fonction	private.filed_date(jsonb)	97ee175c1e31
+fonction	private.filed_date_du_refus(uuid)	005cedcb6f78
 fonction	private.filed_date_enregistrement(date,date)	da305a28d75a
 fonction	private.filed_date_lue(text)	f20201e7686a
 fonction	private.filed_decaissement(uuid,date,uuid,integer)	5941cd1ee26f
@@ -8639,7 +8648,7 @@ fonction	private.filed_exporter_fec(uuid,uuid,uuid,date,date)	c7ab4a38cb62
 fonction	private.filed_exporter_tableau(uuid,text,date,date,uuid)	226ae894385b
 fonction	private.filed_extourner_facture(uuid,text)	ee7286ba52d0
 fonction	private.filed_facture_refusee_fermer()	1ebd27520dc9
-fonction	private.filed_factures_refusees(uuid,uuid,boolean)	3e8be80e6382
+fonction	private.filed_factures_refusees(uuid,uuid,boolean)	67ca2a6e4b8b
 fonction	private.filed_factures_visibles(uuid,uuid)	b232169636d2
 fonction	private.filed_fec_date(date)	a4ec38d1bff9
 fonction	private.filed_fec_lire_date(text)	a9b8f9625da7
@@ -8809,7 +8818,7 @@ fonction	private.filed_reprendre_ibans_sans_demande(uuid)	7379a26106d1
 fonction	private.filed_reprise_instantane()	0313bff20837
 fonction	private.filed_reprise_ouverte(uuid)	36f884a9cda2
 fonction	private.filed_reprise_reimputer(uuid)	b4746aac1c78
-fonction	private.filed_reprise_separation(demandes_validation,uuid,timestamp with time zone)	448d2b34ef66
+fonction	private.filed_reprise_separation(demandes_validation,uuid,timestamp with time zone)	0c59d55998fb
 fonction	private.filed_reproposer_iban(uuid,text)	313723133c44
 fonction	private.filed_resilier_contrat(uuid,date)	3fd76fd1c1fe
 fonction	private.filed_resoudre_fournisseur(uuid)	4cbbca53c2af
@@ -9351,6 +9360,7 @@ fonction	private.lorani_voit_projet(uuid,uuid,uuid)	8553b768f4d6
 fonction	private.lorani_voit_projet_pour(uuid,uuid,uuid,uuid)	7661840719a8
 fonction	private.marquer_envoi_accuse()	f2fd9a40ed6f
 fonction	private.marquer_envoi_manuel(uuid,text,text)	e0c0d78dbbfe
+fonction	private.marquer_envoi_reponse_accord()	d30d682c19a2
 fonction	private.marquer_envoi_urgent()	2989c2998604
 fonction	private.mes_clients()	4027c54df720
 fonction	private.messagerie_a_reconnecter(uuid,text)	1db7d178b63e
@@ -9408,7 +9418,7 @@ fonction	private.offload_clore_interdites(uuid)	4683a4689f1a
 fonction	private.offload_cloture(date,smallint)	e2e0b95925e4
 fonction	private.offload_compte_de_envoi(uuid)	f2994540a794
 fonction	private.offload_csv_cellule(text)	5165bb9d698c
-fonction	private.offload_csv_neutre(text)	ec90eba367d6
+fonction	private.offload_csv_neutre(text)	84a8d7904edc
 fonction	private.offload_cycle(uuid,date)	d7df2ca87b65
 fonction	private.offload_date_longue(date)	12e44c6aa4b1
 fonction	private.offload_decider_affaire(uuid,text,text)	dea7536d8c90
@@ -9462,7 +9472,7 @@ fonction	private.offload_noter_intervention(uuid,date,text,boolean,text)	8d0ddca
 fonction	private.offload_noter_tache(uuid,text,text)	2e3fd211c778
 fonction	private.offload_ouvrir(uuid,text,date)	5e588815bae3
 fonction	private.offload_ouvrir_reprise(uuid)	731c2d9ea1f6
-fonction	private.offload_phrase_reglage(text)	2f79e3ccbf53
+fonction	private.offload_phrase_reglage(text)	3378fb37e087
 fonction	private.offload_pilotage(uuid,date)	afb84eaf4aa5
 fonction	private.offload_pilotage_calcul(uuid,date)	e3baa4ea04be
 fonction	private.offload_plat(text)	c15717dc1e84
@@ -9661,6 +9671,7 @@ fonction	private.reput_reglages_naissance()	dbde774eff64
 fonction	private.reput_reglages_propager()	37fb1e5e3b44
 fonction	private.reput_regrouper()	13e18d8acde3
 fonction	private.reput_rendre_a_traiter(uuid,text)	175d3b74d0dd
+fonction	private.reput_reponse_sous_accord(envois)	73349ba2842a
 fonction	private.reput_reprendre_refus(uuid,jsonb)	89aef4bde1d4
 fonction	private.reput_reprise_impossible(uuid,text,boolean)	f87cc7b92bd9
 fonction	private.reput_reveil(travaux)	1a16535cb878
@@ -12048,6 +12059,12 @@ migration	20261026183759 c3_45_reprise_ecarts_testeur	5a9805285910
 migration	20261026183850 a4_90_filed_lot82_refus_ferme_liees	e4fb605d31b0
 migration	20261026183913 a4_91_filed_lot83_correcteur_n_approuve_pas	e2e6e0fbb044
 migration	20261026183916 a4_92_filed_lot84_refusees_visibles	d98a498a0594
+migration	20261026191626 c4_39_tableur_pleine_chasse	ca1910c67030
+migration	20261026191906 a4_93_filed_lot85_correcteur_seul_decideur	b83258619c58
+migration	20261026191909 a4_94_filed_lot86_date_du_refus	1ac37d0c5a56
+migration	20261026192111 c2_46_bloquee_suit	a54151227df8
+migration	20261026192545 c4_40_un_message_par_trimestre	48b46eaae429
+migration	20261026194847 c3_46_reponse_nuit_accord	333665c0ec6e
 politique	public.abonnements_modules."client lit ses modules"	00b339e1725c
 politique	public.acces_objets."on voit les acces qui nous concernent"	66d55b2fe6d0
 politique	public.acces_objets."qui ecrit change le niveau"	f7c9cfa747f1
@@ -12743,7 +12760,7 @@ table	public.droits	0fb04d9963c8
 table	public.effacements	a35161ad6767
 table	public.effacements_objets	28a1ea903d7b
 table	public.entites	f299bf99d266
-table	public.envois	d0a90f7ff633
+table	public.envois	eea17cf80626
 table	public.envois_evenements	a3b6867b3cde
 table	public.equipes	3634b6dc8c97
 table	public.equipes_membres	d48060098886
@@ -12953,7 +12970,7 @@ table	public.offload_equipements	388866178b61
 table	public.offload_exclusions	5f2c8b1a199c
 table	public.offload_interventions	e20fbc47a63e
 table	public.offload_rapprochements	e2073dd3e828
-table	public.offload_reglages	c717bc08aea9
+table	public.offload_reglages	02586556544a
 table	public.offload_regles	404bb7636bb0
 table	public.offload_reprises	a93864187401
 table	public.offload_signaux	47ed935e194e

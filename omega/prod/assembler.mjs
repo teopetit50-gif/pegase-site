@@ -140,13 +140,19 @@ function lireNote(texte, nom = '') {
   for (const m of texte.matchAll(re)) {
     if (m[1]) jetons.push({ type: 'chemin', val: m[1], pos: m.index });
     else if (m[2]) jetons.push({ type: 'fichier', val: m[2], pos: m.index });
-    else if (m[3]) { for (let i = Number(m[4]); i <= Number(m[5]); i++) jetons.push({ type: 'lot', val: `${m[3]}_${String(i).padStart(2, '0')}`, pos: m.index }); }
+    else if (m[3]) {
+      // 26/10 : « + tests a4_39..a4_43 » : une plage de tests, pas de migrations.
+      if (/\btests?\b[\s:]*$/i.test(texte.slice(Math.max(0, m.index - 20), m.index))) { avertissements.push(`${m[0]} cités comme tests : ignorés`); continue; }
+      for (let i = Number(m[4]); i <= Number(m[5]); i++) jetons.push({ type: 'lot', val: `${m[3]}_${String(i).padStart(2, '0')}`, pos: m.index });
+    }
     else if (m[6]) {
       // « test a4_08 vert », « tests b5_* » : le nom désigne un test, pas une migration à emporter.
       const avantTok = texte.slice(Math.max(0, m.index - 60), m.index);
       const apresTok = texte.slice(m.index + m[0].length).split('\n')[0];
       // « test a4_08 », « tests c4_25, c4_27 » : des tests ; « a4_73 tests verts », « 19ax test 66 vert » : un état.
-      if (/\btests?\b[\s:]*(?:[a-z]\d_\d{2}[a-z]?\s*(?:,|\+|et)\s*)*$/i.test(avantTok)) avertissements.push(`${m[6]} cité comme test : ignoré`);
+      // 26/10 : aussi « tests/filed/a4_32 » (chemin de test) et « tests c2_44 (82ac2358), c2_01 et c2_08 » (SHA entre parenthèses).
+      if (/\btests?\b[\s:]*(?:[a-z]\d_\d{2}[a-z]?\s*(?:\([0-9a-f]{7,40}\))?\s*(?:,|\+|et)\s*)*$/i.test(avantTok)
+          || /\btests\/[a-z_]+\/$/i.test(avantTok)) avertissements.push(`${m[6]} cité comme test : ignoré`);
       else if (/^[\s/a-z0-9_]*?\btests?\b[^\n]*?\b(verts?|rouges?)\b/i.test(apresTok) || /^\s*:\s*test_/i.test(apresTok)) avertissements.push(`${m[6]} cité pour un état de test : ignoré`);
       // 26/10 : « c4_08 test @ da761bb4 » : le test du lot, pas sa migration.
       else if (/^\s*tests?\b/i.test(apresTok)) avertissements.push(`${m[6]} cité comme test : ignoré`);

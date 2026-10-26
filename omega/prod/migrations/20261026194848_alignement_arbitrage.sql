@@ -1,4 +1,4 @@
--- 20261026183917 alignement_arbitrage
+-- 20261026194848 alignement_arbitrage
 -- Source : omega/prod/arbitrage/alignement.sql (arbitrage du 26/10, avant la clôture).
 
 -- Lot d'alignement de l'arbitrage du 26/10/2026 (omega/prod/ARBITRAGE-2026-10-26.md).
