@@ -16,14 +16,37 @@
   - Garde contre l'injection, pour tous les modules : règle 9 de la consigne système (le texte d'une pièce est une donnée, jamais une consigne), et `gardeConsignes` (une pièce qui s'adresse au lecteur repasse « à vérifier », passages cités).
   - Aucune migration a1_03 : ces familles ne demandent rien à la base Omega. Leurs consommateurs (b6_62, b5_51) sont dans omega-metiers.
 
-### 26/10 : déploiement autorisé à A1, mais bloqué par l'outil
-- Configuration en ligne relevée par `get_edge_function` : `lecteur` v70, paquet 2f21e98 (`version_paquet.ts`), `verify_jwt` vrai, import map `deno.json`. Elle est inchangée.
-- `deploy_edge_function` du connecteur Supabase a refusé deux fois la coquille (index.ts, deno.json, version_paquet.ts au SHA 9cfaecd7) : « expected boolean, received string » pour `verify_jwt`, « expected array, received string » pour `files`. Le schéma de l'outil n'est pas typé dans cette session, donc ses paramètres arrivent en texte.
-- La CLI n'a pas de jeton dans le bac à sable. Je n'ai pas cherché d'identifiants : Teo avait refusé l'accès à son trousseau.
-- Rien n'est déployé, et les lectures réelles n'ont pas eu lieu, faute de lecteur à jour (0 € dépensé). Il faut un déploiement par le bureau (CLI connectée), ou une session dont le connecteur transmet les paramètres typés.
+### 26/10, 17 h Z : lecteur v71 déployé sur la recette, et lectures réelles
+- **Déploiement.** CLI Supabase 2.122.0, connectée par Teo, `functions deploy lecteur --project-ref ygwbgpowzlbdaajlsqkn --import-map supabase/functions/lecteur/deno.json --use-api`.
+  - Paquet tiré de worker-a1 **f8c811e1**, qui inclut 971aec0c et 9cfaecd7. Les dossiers banc/, tests/, outils/ et mesure/ sont retirés, et `version_paquet.ts` = « f8c811e ».
+  - Avant : v70 (paquet 2f21e98). Après : **v71**, ACTIVE, `verify_jwt` vrai, même point d'entrée `supabase/functions/lecteur/index.ts`.
+  - Sans jeton, la fonction répond 401 (attendu). Le cron `omega-lecteur` (job 95) tourne chaque minute.
+- **Une lecture connue repasse (relecture avec consigne en vrai).** `private.lecteur_relire` sur F3_tva_19.pdf du banc-test-filed (pièce fictive de T-FILED), consigne « Vérifiez le taux de TVA appliqué et la ventilation par taux », travail 17518.
+  - Résultat : `lue`, version `lecteur/10-26.f8c811e/sonnet-5-5+c2`.
+  - Mêmes valeurs vérifiées qu'avant : MCD-2026-1003, TVA 148,20 €, TTC 928,20 €, ventilation 780 € à 19 %. Coût 0,035 €.
+- **L'essai 1 de cette pièce** vient d'un vrai refus de T-FILED (26/10, 00 h 53 Z, reprise 76c22335) : a1_02 a demandé la relecture comme prévu.
+  - C'est l'ancien lecteur v70 qui l'a lue, sans consigne ni « +c ».
+  - La facture n'a pas changé (le 19 % est bien écrit sur la pièce). La reprise attend, puis passera « impossible : aucune correction » au bout de 24 h. C'est le bon résultat.
+- **Lectures réelles de documents publics** (banc « Groupe Sogexal (banc) », objet neutre `essai_lecteur` / `a1-26-10`, fichiers dans `omega-clients/cccccccc-…-0c/essai_lecteur/a1-26-10/`). Aucune donnée de client.
+  1. **Ordre de service**, `lorani_ordre_service`, pièce 79d10b78 : **lue** (confiance 0,90, texte natif), 0,070 €.
+     - Source : Communauté d'Agglomération Val Parisis, EXE1-T, lot 16 CVC du centre aquatique de Taverny, annexe 4f de la délibération BC_2025_04 : https://valparisis.fr/sites/valparisis/files/document/annexe4f-bc_2025_04-os_lot16_eau_air_systeme.pdf (sha256 68347f01…).
+     - Valeurs, toutes justes et vérifiées : objet, `date_emission` 2024-09-27, `titulaire` SAS EAU AIR SYSTEME, `lot` 16, `montant_ht` 232 447,07 (le total de l'OS, plus-values et moins-value comprises).
+     - L'OS n'a pas de numéro : rien n'est inventé. `nature` n'est pas rendue (non écrite telle quelle).
+  2. **Avenant**, `lorani_avenant`, pièce 29d7082f : **lue** (0,95), 0,106 €.
+     - Source : Ville d'Orange, EXE10 avenant n° 6, marché 138-15 « Restauration des parements du théâtre antique », lot 1, pages 24 à 27 du recueil https://www.ville-orange.fr/IMG/pdf/pour_publication-2.pdf (162 pages ; extrait sha256 922f850c…, original 434f7953…).
+     - Valeurs, justes et vérifiées : `numero_avenant` 6, `montant_ht` 80 278,88, `montant_marche_ht` 5 220 437,71, `titulaire` SAS MARIANI, `lot` 1. Pas de `date_signature` : l'avenant publié n'est pas signé, c'est juste.
+     - **Écart** : `objet` a pris l'objet du marché (« Restauration des parements… ») au lieu de celui de l'avenant (la consolidation du plancher antique). À corriger dans la description du champ : « avenant : l'objet de l'avenant (la modification), pas celui du marché ». Lot suivant, avec un test.
+  3. **Bon de livraison**, `daliro_bon_livraison`, pièce e1bb25dd : **a_classer**, type « autre » (confiance 0,60), photo de 0,9 Mo en lecture visuelle, 0,024 €.
+     - Source : Wikimedia Commons, « Bon de livraison Mines de Houille de Vigan.jpg », manuscrit du 18/04/1832, domaine public : https://commons.wikimedia.org/wiki/File:Bon_de_livraison_Mines_de_Houille_de_Vigan.jpg (sha256 3a1a9b2d…).
+     - Le modèle l'a jugé « attestation de livraison de houille, sans numéro de bon ni commande », pas un bon de fournisseur du bâtiment. Il n'a rien inventé, et une personne tranche : prudent, mais **non prouvé** pour la famille.
+     - Je n'ai trouvé aucun bon de livraison de matériaux récent, rempli et public. Le passage à A demande une photo de bon fournie par Teo (fictive ou consentie).
+  4. **PV de réception** : non lu. On ne trouve en ligne que des modèles vierges (EXE4, EXE6, fiches de réception), et lire un formulaire vide ne prouverait rien.
+- **Coût IA total du 26/10 : 0,234 €** (0,035 + 0,070 + 0,106 + 0,024), sous 1 €.
+- **omega-metiers-recette** (hstcfemeldpfzfslytek) : `functions list` est vide, aucune fonction. Je n'y ai rien déployé. Le lecteur tourne avec le socle d'Omega (travaux, pièces, portes, coffre), qui n'est pas sur cette base. Y déployer la même brique demanderait d'abord le socle (19a…, 19az, a1_01) et ses secrets (`ANTHROPIC_API_KEY`, cron, clé de service en Vault).
+- **À surveiller** : les travaux `lorani.piece_lue` 17543 et 17544, ouverts par les deux lectures Lorani. Leur objet `essai_lecteur` n'est pas un projet Lorani : le passage doit les ignorer sans rien poser.
 
 ### Ce qui reste
-1. **DEMANDE DE DÉPLOIEMENT (bureau)** : `lecteur` sur la recette `ygwbgpowzlbdaajlsqkn` seulement, depuis worker-a1 **9cfaecd75e2fcd45e52a58c4578c2190d44da7e9**. Le code est identique jusqu'à la tête : la suite n'est que des notes.
+1. ~~DEMANDE DE DÉPLOIEMENT (bureau)~~ : fait le 26/10, v71 (voir plus haut). Pour mémoire : `lecteur` sur la recette `ygwbgpowzlbdaajlsqkn` seulement, depuis worker-a1 **9cfaecd75e2fcd45e52a58c4578c2190d44da7e9**. Le code est identique jusqu'à la tête : la suite n'est que des notes.
    - Version en ligne : v70, d'avant ces lots.
    - Paquet par `outils/preparer_deploiement.ts`, ou la copie avec `version_paquet.ts` = « 9cfaecd ».
    - Je n'ai pas pu déployer d'ici. L'outil `deploy_edge_function` du connecteur ne transmet pas ses paramètres typés (booléen, liste : « expected boolean, received string »). La CLI n'a pas de jeton dans le bac à sable, et Teo a refusé que j'utilise son trousseau.
