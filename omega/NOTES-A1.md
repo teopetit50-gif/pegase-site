@@ -1,5 +1,14 @@
 # NOTES-A1 — ouvrier LECTEUR (session worker A1)
 
+## REPRISE — arrêt du 26/10, 01 h Z (plafond à 15 %)
+- **Fait** :
+  - a1_01 et a1_02 sont posés sur la recette, et `^test_a1_0[12]_` passe 4/4 ;
+  - le lecteur à 971aec0c est demandé au bureau pour déploiement.
+- **En cours** : rien, l'arbre est propre.
+- **Prochain pas** : après le déploiement, A4 branche la reprise FILED sur `lecteur_relire`.
+  - Tenir compte de TFILED-28 (T-FILED) : une facture refusée ne peut plus être corrigée, donc la reprise ne voit jamais de correction.
+  - La relecture avec consigne doit le prendre en compte. Il faut voir avec A4 si `filed_integrer_facture` laisse entrer la relecture et la correction qu'elle porte (a1_02), ou s'il faut une autre porte.
+
 ## Relecture avec consigne du valideur — FAITE le 25/10 (commits dae039e, cd97140, 9cfaecd, session de Teo), vérifiée le 26/10 : 211 tests verts
 - À poser : `omega/modules/socle/migrations/a1_01_relecture_consigne.sql` (porte `private.lecteur_relire`, clé « relire:<piece>:<n> »), puis `omega/migrations/a1_02_filed_relecture_reprise.sql` ; tests `^test_a1_01_` et `^test_a1_02_`. Lecteur à redéployer depuis 9cfaecd.
 
