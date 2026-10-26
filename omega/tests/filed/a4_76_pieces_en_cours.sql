@@ -38,8 +38,11 @@ begin
                  'Plus de ligne « Imputation proposée » : F3 est refusée, F13 est déjà « En attente d''approbation »');
   return next ok((select nombre = 1 and montant_ttc = 146.48 from public.filed_pieces_en_cours(v_cl) where categorie = 'attente'),
                  'F13 en attente d''approbation : 1 pour 146,48 €');
-  return next is((select sum(nombre) from public.filed_pieces_en_cours(v_cl)), 1::numeric,
-                 'Chaque pièce comptée une fois : une seule pièce en cours (F13)');
+  -- a4_92 (TMOD-01) : F3 refusée reste visible, dans sa catégorie ; chaque pièce comptée une fois.
+  return next ok((select nombre = 1 and montant_ttc = 928.20 from public.filed_pieces_en_cours(v_cl) where categorie = 'refusees'),
+                 'F3 refusée : 1 pour 928,20 € en « Refusées, à reprendre ou à classer »');
+  return next is((select sum(nombre) from public.filed_pieces_en_cours(v_cl)), 2::numeric,
+                 'Chaque pièce comptée une fois : deux pièces en cours (F3 refusée, F13 en attente)');
   reset role;
   perform set_config('request.jwt.claims', '', true);
   -- Une facture validée dont l'imputation reste proposée : seule l'imputation reste à valider, elle est comptée.
