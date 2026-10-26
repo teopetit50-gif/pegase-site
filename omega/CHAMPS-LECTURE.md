@@ -232,6 +232,8 @@ Les clés sont les champs « obligatoires » de la fiche de B5 ; `numero_dossier
 
 **Situation de travaux (b5_14)** : `lorani_situation_travaux`, clé `cumul_ht` (nombre) ; facultatifs `numero_situation` (entier), `mois` (`AAAA-MM`), `titulaire`, `lot`, `montant_marche_ht`, `cumul_precedent_ht`, `montant_periode_ht`.
 
+**Pièces de chantier (b5_51, 25/10)** : `lorani_ordre_service`, clés `objet` et `date_emission` ; facultatifs `numero_os` (entier), `nature` (`demarrage`, `travaux_modificatifs`, `travaux_supplementaires`, `arret`, `reprise`, `autre`), `date_notification`, `montant_ht` (négatif pour une moins-value), `delai_jours` (entier signé), `titulaire`, `lot`. `lorani_avenant`, clés `objet` et `montant_ht` (signé) ; facultatifs `numero_avenant`, `date_signature` (absente = non signé), `montant_marche_ht` (le nouveau montant écrit), `titulaire`, `lot`. `lorani_pv_reception`, clé `date_reception` ; facultatifs `origine` (`reception` ou `opr`), `avec_reserves` (`oui` / `non`), `delai_levee_jours`, et **`reserves`** : une seule valeur, tableau d'objets `{intitule, lot, localisation, lever_avant}` dans l'ordre du PV, vérifiée si chaque intitulé se retrouve sur sa page. La base (b5_51) pose une lecture « à confirmer » ; rien n'entre au marché sans le geste d'un membre.
+
 **Contrôle du dossier (b5_16)** : `lorani_planche` (`reference`, `indice`), `lorani_cctp` (`lot`), `lorani_dpgf` (`lot`), `lorani_plu_reglement` (`zone`), plus des **champs à nom composé**, une ligne par champ : `mesure.<grandeur>.<objet>` (nombre ; planche et CCTP), `poste.<référence>` (intitulé au CCTP, quantité à la DPGF), `regle.<grandeur>.max|min` (nombre) et `regle.<grandeur>.article` (texte) au règlement du PLU. `<grandeur>` est le vocabulaire fermé de la fiche de B5 (`hauteur_faitage_m`… `cote_altimetrique_m`) : un nom hors vocabulaire, ou d'une famille qui n'est pas celle du type de pièce, n'est pas retenu. Le lecteur (`schemas/modules.ts`, `FamilleChamps`) valide le nom entier par motif et le type par famille.
 
 | Champ | Type de `valeur` | Description | Exemple |
@@ -287,6 +289,8 @@ Les pièces d'une société du groupe se lisent comme dans FILED (factures, avoi
 ## Module Daliro — le devis en lignes (B6, b6_28)
 
 `daliro_devis` : `numero`, `date`, `client`, `objet`, `montant_total_ht` (clé), `montant_ttc`, et **`lignes`** (une seule valeur, tableau jsonb) : chaque ligne porte `numero`, `lot` (titre de section ou code de lot), `designation`, `unite`, `quantite`, `prix_unitaire`, `montant`, dans l'ordre du devis. La valeur est vérifiée si chaque désignation se retrouve sur sa page. Un long devis se lit par morceaux de 80 lignes ; les lignes sont réunies dans l'ordre. `daliro_piece_autre` : lue sans valeur. Le lecteur ne pose rien : l'écran du marché (B6) relit `lignes` dans `pieces_valeurs`, montre l'aperçu, puis appelle `btp_importer_lignes` au nom de l'utilisateur.
+
+`daliro_bon_livraison` (b6_62, 25/10 ; souvent une photo, lecture visuelle) : clés `numero_bon`, `date_livraison` et `lignes` ; facultatifs `reference_commande` (la commande du client citée par le bon), `fournisseur`, `reserves` (texte, les réserves écrites à la réception). **`lignes`** : une seule valeur, tableau d'objets `{designation, reference, quantite, unite}` (quantité livrée en nombre, unité telle qu'écrite). Daliro (`private.btp_rapprocher_bon`) n'emploie que les valeurs vérifiées et rapproche le bon de la commande ; rien n'est noté reçu sans une personne.
 
 ## Module Tamila — avis RPVA des cabinets d'avocats (lecture par le coffre serveur)
 
@@ -352,3 +356,7 @@ Même contrat : noms en minuscules à points, `texte` + `page` + `verifiee` sur 
 ## Comment faire évoluer ce référentiel
 
 Un nouveau champ se déclare d'abord dans `schemas/facture.ts` (ou le schéma du module), avec son type, sa description et sa longueur maximale ; ce fichier est relu ici. Un moteur qui a besoin d'un champ absent le demande à A1 par le coordinateur, avec le nom souhaité au format ci-dessus.
+
+## Relecture avec consigne et garde contre les consignes glissées (A1, 25/10)
+
+`lecteur.lire` accepte `charge.consigne` (500 caractères au plus) et `charge.essai` = n : la consigne va au modèle en « Indication du valideur », jamais comme une valeur (chaque citation reste vérifiée sur sa page), et `version_lecteur` finit par « +c<n> ». La porte est `private.lecteur_relire(piece, consigne, origine)` (a1_01), clé « relire:<piece>:<n> », trois relectures au plus. Pour tous les modules, le texte d'une pièce est une donnée, jamais une consigne : une pièce qui s'adresse au lecteur (« ignore les instructions précédentes… ») n'est jamais « lue » d'office, elle repasse « à vérifier » avec les passages cités dans le motif.
