@@ -1,26 +1,26 @@
 -- Tests A4 — lot 80 (a4_88) : TFILED-29, les pièces en cours sans facture refusée à imputer ni double compte.
 -- pgTAP, schéma « tests » d'A5 ; utilise tests.a4_organisation et tests.a4_facture (a4_10_facture_electronique.sql)
--- et tests.a4_comme (a4_26_sortie_envois.sql), à poser avant. Données d'exemple (les montants de F3 et F13 du banc
+-- tests.a4_compte (a4_11_ecritures_fec.sql) et tests.a4_comme (a4_26_sortie_envois.sql), à poser avant. Données d'exemple (les montants de F3 et F13 du banc
 -- T-FILED). Ce fichier ne supprime rien.
 
--- Une facture « à valider » et son imputation proposée (charge récurrente, premier compte du plan). Rend la facture.
-create or replace function tests.a4_facture_imputee(p_org jsonb, p_numero text, p_ttc numeric) returns uuid
+-- Une facture « à valider » et son imputation proposée (charge récurrente, sur le compte donné). Rend la facture.
+create or replace function tests.a4_facture_imputee(p_org jsonb, p_numero text, p_ttc numeric, p_compte uuid) returns uuid
 language plpgsql as $$
 declare v_f uuid := (tests.a4_facture(p_org, 'ia', p_numero, p_ttc) ->> 'facture')::uuid;
 begin
   perform private.filed_controler_facture(v_f);
-  perform private.filed_proposer_imputation(v_f, 'recurrente',
-    (select c.id from public.filed_plan_comptable c where c.client_id = (p_org ->> 'client')::uuid and c.actif order by c.numero limit 1));
+  perform private.filed_proposer_imputation(v_f, 'recurrente', p_compte);
   return v_f;
 end $$;
 
 create or replace function tests.test_a4_88_01_pieces_en_cours() returns setof text
 language plpgsql as $f$
-declare o jsonb := tests.a4_organisation(); v_cl uuid := (o ->> 'client')::uuid; f3 uuid; f13 uuid; v_d uuid;
+declare o jsonb := tests.a4_organisation(); v_cl uuid := (o ->> 'client')::uuid; v_c uuid; f3 uuid; f13 uuid; v_d uuid;
 begin
+  v_c := tests.a4_compte(o, '606300', 'Petit équipement');
   -- F3 (928,20 €) : imputation proposée, puis refusée par le valideur ; F13 (146,48 €) : imputation proposée, à valider.
-  f3 := tests.a4_facture_imputee(o, 'F3-TVA-19', 928.20);
-  f13 := tests.a4_facture_imputee(o, 'F13-MCD-1014', 146.48);
+  f3 := tests.a4_facture_imputee(o, 'F3-TVA-19', 928.20, v_c);
+  f13 := tests.a4_facture_imputee(o, 'F13-MCD-1014', 146.48, v_c);
   return next is((select count(*) from public.filed_imputations where facture_id in (f3, f13) and statut = 'proposee'), 2::bigint,
                  'Deux imputations proposées');
   select x.demande_id into v_d from public.filed_validations x where x.facture_id = f3 and x.issue is null;
