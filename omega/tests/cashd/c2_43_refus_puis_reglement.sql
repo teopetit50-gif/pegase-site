@@ -41,16 +41,22 @@ begin
   perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
   perform public.cashd_noter_reglement(v_client, v_a, 500, j, 'VIR FB-2026-2801', 'virement');
   perform tests.redevenir_admin();
-  return next ok((select x.statut = 'coupee' and tests.c2_plat(x.motif) like 'refusée, puis montant revu : FB-2026-2801 ne doit plus que 585,00 €%'
-                  from public.cashd_relances x where x.id = ra.id),
-                 'Le règlement partiel rend la relance refusée : « refusée, puis montant revu »');
+  select * into r1 from public.cashd_relances x where x.id = ra.id;
+  return next ok(r1.statut in ('a_valider', 'non_reglee') and r1.montant = 585 and tests.c2_plat(r1.corps) like '%585,00 €%'
+                 and tests.c2_plat(r1.motif) like 'refusée, puis montant revu : FB-2026-2801 ne doit plus que 585,00 €%',
+                 'Le règlement partiel revoit la relance refusée : 585 €, « refusée, puis montant revu »');
+  return next ok(r1.demande_id <> ra.demande_id
+                 and (select d.statut = 'en_attente' and d.montant = 585 and d.resume like '%Après refus — %'
+                             and (d.payload ->> 'revue_de')::uuid = ra.demande_id
+                             and d.payload #>> '{apres_refus,commentaire}' = 'Le client annonce un virement partiel, attendre'
+                      from public.demandes_validation d where d.id = r1.demande_id)
+                 and (select d.statut = 'rejetee' from public.demandes_validation d where d.id = ra.demande_id),
+                 'Une nouvelle demande au reste dû, « Après refus », qui porte la consigne ; la refusée reste refusée');
 
-  -- Le passage écrit une nouvelle relance au reste dû, à valider ; le compte B, refusé sans changement, n'en reçoit pas.
+  -- Le passage du jour n'écrit rien de plus ; le compte B, refusé sans changement, garde sa demande refusée.
   perform private.cashd_preparer_relances(v_client, j, null);
-  select * into r1 from public.cashd_relances x where x.compte_id = v_a and x.jour = j and x.id <> ra.id;
-  return next ok(r1.id is not null and r1.montant = 585 and tests.c2_plat(r1.corps) like '%585,00 €%'
-                 and (select d.statut = 'en_attente' and d.montant = 585 from public.demandes_validation d where d.id = r1.demande_id),
-                 'Une nouvelle relance au reste dû (585 €), à valider : rien ne part sans validation');
-  return next ok(not exists (select 1 from public.cashd_relances x where x.compte_id = v_b and x.jour = j and x.id <> rb.id),
+  return next ok((select count(*) from public.cashd_relances x where x.compte_id = v_a and x.jour = j) = 1
+                 and (select x.demande_id = rb.demande_id and x.montant = 1085 from public.cashd_relances x where x.id = rb.id)
+                 and not exists (select 1 from public.demandes_validation d where d.payload ->> 'revue_de' = rb.demande_id::text),
                  'Une relance refusée sans changement n''est pas réécrite');
 end $f$;
