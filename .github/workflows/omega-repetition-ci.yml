@@ -172,7 +172,8 @@ jobs:
           # Pas de db push ici : la table d'historique de la CLI n'existe pas ; vide, elle ne compte que dans « migration ».
           psql "$ADMIN_URL" -X -q -c "create schema if not exists supabase_migrations" \
             -c "create table if not exists supabase_migrations.schema_migrations (version text primary key, statements text[], name text)"
-          psql "$ADMIN_URL" -v ON_ERROR_STOP=1 -X -q -At -f omega/prod/releve.sql > "$SORTIE/releve-ci.tsv"
+          # search_path de la recette et de la production (postgres) : sinon supabase_admin écrit uid() pour auth.uid().
+          PGOPTIONS='-c search_path="$user",public,extensions' psql "$BASE_URL" -v ON_ERROR_STOP=1 -X -q -At -f omega/prod/releve.sql > "$SORTIE/releve-ci.tsv"
           python3 omega/prod/comparer_releves.py "$SORTIE/releve-ci.tsv" "$ref" repetition recette --sans-site --detail > "$SORTIE/comparaison.md"
           cat "$SORTIE/comparaison.md" >> "$GITHUB_STEP_SUMMARY"
           echo "::notice title=Comparaison (répétition | recette | seulement recette | seulement répétition | différents)::$(sed -n '3,20p' "$SORTIE/comparaison.md" | grep -v '^| migration' | sed 's/^| //; s/ |$//' | tr '\n' ';' | cut -c1-1500)"
