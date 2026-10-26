@@ -310,7 +310,7 @@ Lecture : sous `set local role authenticated` + claims `sub = eeeeeeee-0000-4000
 ## REPRISE
 
 - **Fait** : tous les écarts TREPUT-01 à 17 sont rejoués justes, ou requalifiés en réglage du banc (09). Restent deux observations de libellé : « rappelez-le » dans l'alerte d'astreinte, et le titre d'alerte « Hors de la base » pour une réponse tirée en partie de la base.
-- **En cours** : rien. Passe de nuit (23/10 01 h 42 Z) jouée après la relance : accusé parti en 47 s, avec les horaires et « traitée en premier à l'ouverture » ✔, réponse de fond non partie ✔, libellés « Appel à rappeler » et « En partie dans la base, à relire » ✔. TREPUT-18 requalifié (récapitulatif urgent). Observation pour C3 : « le rappellera » au masculin. Arrêt.
+- **En cours** : rien. Passe de nuit (23/10 01 h 42 Z) jouée après la relance : accusé parti en 47 s, avec les horaires et « traitée en premier à l'ouverture » ✔, réponse de fond non partie ✔, libellés « Appel à rappeler » et « En partie dans la base, à relire » ✔. TREPUT-18 requalifié (récapitulatif urgent). Observation pour C3 : « le rappellera » au masculin → corrigé (c3_43, rejoué le 26/10 : « cette personne… la rappellera »). Reste « un client » dans le titre d'alerte et le résumé. Arrêt.
 - **Prochain pas** : dernière passe (21 h 31 Z) faite : TREPUT-16 juste hors heures, témoin juste. Arrêt. À la reprise : les libellés (a) et (b), et l'arbitrage « accusé dans la minute » contre « heures d'envoi » pour une urgence (Teo). Hors de portée : la sonnerie réelle (Twilio de test), la poussée « interne urgent » (en préparation).
 - **Questions** : aucune.
 - **SHA d'arrêt** : voir le commit « T-REPUT : TREPUT-12, 16 et 17 rejoués après c3_40, justes ».
