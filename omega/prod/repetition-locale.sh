@@ -20,6 +20,7 @@ IMAGE="${IMAGE:-supabase/postgres:17.6.1.155}"
 NOM=omega-repetition
 PORT=54329
 ADMIN_URL="postgresql://supabase_admin:repetition@localhost:$PORT/postgres"
+BASE_URL="postgresql://postgres:repetition@localhost:$PORT/postgres"   # le rôle de la pose en production
 
 rm -rf "$SORTIE" && mkdir -p "$SORTIE/poses" "$SORTIE/tests"
 docker rm -f "$NOM" >/dev/null 2>&1 || true
@@ -57,7 +58,8 @@ n=0; debut=$(date +%s); echec=""
 for f in $(ls "$ICI"/base/0[0-9]_*.sql | sort) $(ls "$ICI"/migrations/*.sql | sort); do
   nom=$(basename "$f" .sql)
   t0=$(date +%s)
-  if ! psql "$ADMIN_URL" -v ON_ERROR_STOP=1 -X -q -1 -f "$f" > "$SORTIE/poses/$nom.txt" 2>&1; then
+  url="$BASE_URL"; case "$f" in "$ICI"/base/*) url="$ADMIN_URL" ;; esac
+  if ! psql "$url" -v ON_ERROR_STOP=1 -X -q -1 -f "$f" > "$SORTIE/poses/$nom.txt" 2>&1; then
     echec="$nom"; break
   fi
   echo "$nom $(( $(date +%s) - t0 ))s" >> "$SORTIE/durees.txt"

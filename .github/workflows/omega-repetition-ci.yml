@@ -117,7 +117,10 @@ jobs:
           n=0
           for f in $(ls omega/prod/base/0[0-9]_*.sql | sort) $(ls omega/prod/migrations/*.sql | sort); do
             nom=$(basename "$f" .sql)
-            if ! psql "$ADMIN_URL" -v ON_ERROR_STOP=1 -X -q -1 -f "$f" > "$SORTIE/poses/$nom.txt" 2>&1; then
+            # Le relevé (base/) se pose en supabase_admin ; les migrations en postgres, le rôle que Teo prendra en
+            # production (poser-palier.sh) : un droit qui manquerait à postgres casse ici, pas le jour de la pose.
+            url="$BASE_URL"; case "$f" in omega/prod/base/*) url="$ADMIN_URL" ;; esac
+            if ! psql "$url" -v ON_ERROR_STOP=1 -X -q -1 -f "$f" > "$SORTIE/poses/$nom.txt" 2>&1; then
               tail -20 "$SORTIE/poses/$nom.txt"
               if [[ "$GITHUB_REF_NAME" != repetition-* ]]; then echo "::error title=Pose en échec::$f"; exit 1; fi
               echo "$nom" >> "$SORTIE/echecs.txt"
@@ -149,6 +152,8 @@ jobs:
           set -euo pipefail
           psql "$ADMIN_URL" -v ON_ERROR_STOP=1 -X -f omega/prod/garde_fous.sql | tee "$SORTIE/garde_fous.txt"
           rouges=$(psql "$ADMIN_URL" -v ON_ERROR_STOP=1 -X -At -F ' | ' -f omega/prod/garde_fous.sql | awk -F ' [|] ' '$4 == "f"' | tee "$SORTIE/garde_fous_rouges.txt" | wc -l)
+          echo "::notice title=anon écrit dans (table : droits)::$(psql "$ADMIN_URL" -XAt -c "select string_agg(c.relname || ':' || concat_ws('/', case when has_table_privilege('anon', c.oid, 'INSERT') then 'I' end, case when has_table_privilege('anon', c.oid, 'UPDATE') then 'U' end, case when has_table_privilege('anon', c.oid, 'DELETE') then 'D' end, case when has_table_privilege('anon', c.oid, 'TRUNCATE') then 'T' end), ', ') from pg_class c join pg_namespace n on n.oid = c.relnamespace and n.nspname = 'public' where c.relkind in ('r','p','v') and (has_table_privilege('anon', c.oid, 'INSERT') or has_table_privilege('anon', c.oid, 'UPDATE') or has_table_privilege('anon', c.oid, 'DELETE') or has_table_privilege('anon', c.oid, 'TRUNCATE'))" | cut -c1-3000)"
+          echo "::notice title=Exemples (politique, contrainte, droit)::$(psql "$ADMIN_URL" -XAt -c "select concat_ws(' ## ', (select string_agg(policyname || ' [' || cmd || ' ' || array_to_string(roles, ',') || '] ' || coalesce(qual, '') || ' | ' || coalesce(with_check, ''), ' ;; ') from pg_policies where tablename = 'acces_objets'), (select pg_get_constraintdef(oid) from pg_constraint where conname = 'approbations_user_id_fkey'), (select relacl::text from pg_class where oid = 'public.approbations'::regclass), (select proacl::text from pg_proc where oid = 'private.envoyer_alertes()'::regprocedure), (select pg_get_userbyid(relowner) from pg_class where oid = 'public.approbations'::regclass))" | cut -c1-4000)"
           [ "$rouges" -eq 0 ] || { echo "::error title=Garde-fous rouges::$rouges contrôle(s) : $(cut -d'|' -f1 "$SORTIE/garde_fous_rouges.txt" | tr '\n' ';')"; exit 1; }
 
       - name: Relevé détaillé, comparé à la recette (omega/prod/releve-*/recette.tsv)
@@ -203,6 +208,7 @@ jobs:
           echo "**$total résultats, $ko rouges, $so fichiers sans objet (banc de recette).**" >> "$GITHUB_STEP_SUMMARY"
           echo "Tests : $total résultats, $ko rouges, $so sans objet."
           echo "::notice title=Tests pgTAP::$total résultats, $ko rouges, $so sans objet"
+          echo "::notice title=Première ligne rouge des tests::$(for t in $(grep -l -E '^not ok |ERROR' "$SORTIE"/tests/*.txt | head -40); do printf '%s → %s ‖ ' "$(basename "$t" .txt)" "$(grep -m1 -E -A1 '^not ok |ERROR' "$t" | tr '\n' ' ' | cut -c1-170)"; done | cut -c1-9000)"
           [ "$ko" -eq 0 ] || { echo "::error title=Tests rouges::$ko résultat(s) rouge(s) : $(grep -l -E '^not ok |ERROR' "$SORTIE"/tests/*.txt | xargs -n1 basename | tr '\n' ' ' | cut -c1-2500)"; exit 1; }
 
       - name: Garder les sorties
