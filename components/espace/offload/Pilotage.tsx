@@ -283,7 +283,7 @@ export default function Pilotage({ source, gabarit }: { source: Source; gabarit?
       entites: "Les résultats par entité, par site et en consolidé.",
       arretes: "Posés la nuit à date fixe, chacun téléchargeable en tableur.",
       segments: "La valeur annuelle en jeu chez les comptes à risque, segment par segment. Réservé au gérant et à l'administrateur.",
-      restitution: "Toutes vos données OFFLOAD, prêtes pour un tableur : un fichier par famille.",
+      restitution: "Un fichier CSV par famille, prêt pour un tableur.",
     };
     return (
       <SbPage titre="Pilotage" description={p ? `Douze derniers mois, depuis le ${dateCourte(p.depuis)}. Chaque tableau s'exporte vers un tableur.` : "Vue consolidée, réservée à la direction."}>

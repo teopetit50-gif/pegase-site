@@ -4,11 +4,37 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 `components/espace/offload/`, `app/espace/offload/`, et ce fichier. Coordinateur : session
 `session_01BCGFdpRKBvXKjouC75sYBg`. Je n'appelle jamais Supabase : le coordinateur pose, je reçois les sorties brutes.
 
-## REPRISE (26/10, 01 h 00 Z)
+## REPRISE (26/10, fin de matinée — session « offload-c4 » du bureau)
 
-- Fait : c4_01 à c4_36 posés ; test c4_08 vert sur la recette (77bb0f21 + da761bb4). c4_37 (reprise après refus, socle 19az) écrit par une autre session le 25/10 (679f0db3), à poser et à rejouer.
-- En cours : rien. Le conteneur a été recyclé le 26/10 : banc local et souche du socle perdus (hors git) ; à reconstruire avant tout nouveau lot.
-- Prochain pas : poser c4_37 ; écran (carte « par segment », bouton « tableur », bouton « forcer ») ; import des personnes morales en attente de Teo.
+- Fait :
+  - test c4_08 vert sur la recette (25/25 ; 77bb0f21, puis da761bb4 du coordinateur).
+  - c4_37, la reprise après refus (679f0db3), posé sur la recette : `^test_c4_37_` 20/20, cron `offload-reprises`.
+  - Suite `^test_c4_` jouée par morceaux le 25/10 : 58 fonctions sur 59 vertes, 521 assertions, aucune rouge.
+    `test_c4_09_arretes` dépasse la minute de l'outil : `offload_detecter_tout` rapproche les 9 898 comptes du
+    client de charge créé le 21/10 (633470bc-…). Ce n'est pas une régression : le jouer hors de l'outil ou
+    écarter ce client.
+  - Écran (c4_36), fait le 26/10 : dans le pilotage, la section « Valeur en jeu par segment » (la valeur en
+    deuxième colonne pour rester lisible sur téléphone, total, export CSV) et la section « Restitution » (fichiers
+    CSV de la base, un par famille, téléchargés avec BOM). Ajoutés aux deux gabarits : `/espace2/offload/pilotage`
+    (sections) et `/espace/offload` (onglets). Fichiers : `Segments.tsx` (nouveau), `Pilotage.tsx`, `portes.ts`,
+    `tableur.ts`, `types.ts`. main fusionné dans worker-c4 (748b25ad) pour partir de l'écran actuel.
+    Contrôles : tsc sans erreur hors Varelo (la casse de Mac, connue), eslint propre. Recette locale en données
+    d'exemple sur `next dev --webpack` aux largeurs 375, 768, 1440 et 1700 : pas de défilement horizontal,
+    aucune erreur. Les imports Varelo et Lorani ont été réécrits dans une copie jetable, jamais commitée.
+- Décisions prises seul (Teo absent), au plus prudent :
+  - La base réelle n'a pas été ouverte en local : pas de connexion au compte du banc depuis ce poste. Les deux
+    portes (`offload_valeur_par_segment`, `offload_restitution_tableur`) sont prouvées par le test c4_36 sur la
+    recette. Pour la valeur par segment et la restitution, l'écran lit le client donné par `offload_tableau`.
+    Si la base refuse (valideur, collaborateur), il affiche son message : réservé au gérant et à l'administrateur.
+  - Les fichiers de la restitution sont proposés un par un, avec un bouton « Télécharger » chacun, et pas en
+    rafale : un navigateur bloque souvent les téléchargements multiples.
+- Reste / à surveiller :
+  - Les CSV de `offload_restitution_tableur` ne neutralisent pas une cellule de texte qui commence par
+    `= + - @` (injection de formule dans un tableur), alors que l'export du navigateur (`tableur.ts`) le fait.
+    Correctif proposé en c4_38 : préfixer d'une apostrophe les seules valeurs de type texte. Pas écrit ici, parce que
+    ce passage ne portait que sur l'écran.
+  - T-OFFLOAD : rejouer c4_37 (reprise après refus) et l'écran du pilotage.
+  - Import des personnes morales : toujours en attente de Teo.
 
 ### Reprise du 17/10
 

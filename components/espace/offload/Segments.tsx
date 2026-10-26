@@ -55,7 +55,7 @@ export function ValeurParSegment({ segments, erreur }: { segments: Segment[] | n
       <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Valeur en jeu par segment (tableau qui défile)">
         <table className="esp-tableau">
           <thead>
-            <tr><th>Segment</th><th className="esp-num">Comptes suivis</th><th className="esp-num">À risque</th><th className="esp-num">Valeur en jeu HT</th><th className="esp-num">Reprises en cours</th></tr>
+            <tr><th>Segment</th><th className="esp-num">Valeur en jeu HT</th><th className="esp-num">À risque</th><th className="esp-num">Comptes suivis</th><th className="esp-num">Reprises en cours</th></tr>
           </thead>
           <tbody>
             {segments.map((s) => {
@@ -63,8 +63,6 @@ export function ValeurParSegment({ segments, erreur }: { segments: Segment[] | n
               return (
                 <tr key={s.segment}>
                   <td>{s.segment}</td>
-                  <td className="esp-num">{nombreFr(s.comptes)}</td>
-                  <td className="esp-num">{nombreFr(s.a_risque)}</td>
                   <td className="esp-num">
                     <span style={{ display: "inline-flex", alignItems: "center", gap: 8, justifyContent: "flex-end", width: "100%" }}>
                       <span aria-hidden="true" style={{ width: 64, height: 6, borderRadius: 3, background: "var(--r-filet)", overflow: "hidden", flex: "none" }}>
@@ -73,15 +71,17 @@ export function ValeurParSegment({ segments, erreur }: { segments: Segment[] | n
                       <span style={{ minWidth: 88, textAlign: "right" }}>{montant(s.valeur_en_jeu)}</span>
                     </span>
                   </td>
+                  <td className="esp-num">{nombreFr(s.a_risque)}</td>
+                  <td className="esp-num">{nombreFr(s.comptes)}</td>
                   <td className="esp-num">{nombreFr(s.reprises_en_cours)}</td>
                 </tr>
               );
             })}
             <tr style={{ fontWeight: 600 }}>
               <td>Total</td>
-              <td className="esp-num">{nombreFr(segments.reduce((t, s) => t + Number(s.comptes || 0), 0))}</td>
-              <td className="esp-num">{nombreFr(segments.reduce((t, s) => t + Number(s.a_risque || 0), 0))}</td>
               <td className="esp-num">{montant(total)}</td>
+              <td className="esp-num">{nombreFr(segments.reduce((t, s) => t + Number(s.a_risque || 0), 0))}</td>
+              <td className="esp-num">{nombreFr(segments.reduce((t, s) => t + Number(s.comptes || 0), 0))}</td>
               <td className="esp-num">{nombreFr(segments.reduce((t, s) => t + Number(s.reprises_en_cours || 0), 0))}</td>
             </tr>
           </tbody>
