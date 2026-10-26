@@ -99,10 +99,32 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
     test_c2_01 (4) et test_c2_08 (5) restent rouges, à cause du jeu NOBAT du banc (voir plus haut). A-C26 et A-C27 restent
     à 585 €, en attente. Remarque du testeur non traitée : le sujet d'une relance revue reste « rappel : facture … échue »
     (le corps dit le reste dû) — c'est le sujet du palier, juste.
+- **27/10 — contre-recette du testeur** (origin/testeur-modules cc61ebf4 : TMOD-04 et 05 confirmés corrigés) :
+  - `c2_46_bloquee_suit` (8f368793, test 9f60d964, **TMOD-13**) : une relance bloquée dont la demande a été retirée (ou
+    qui n'en a jamais eu) suit le reste dû comme une relance en attente, puis repasse les contrôles de c2_44 ; quand
+    l'organisation change ses interdits (déclencheur `cashd_reglages_zz_interdits`), chaque relance bloquée par un mot
+    interdit, jamais partie et la plus récente de son compte, est revue : contrôles passés, elle entre dans la file (sa
+    première demande si elle a été bloquée dès la préparation, clé `cashd:relance:<id>`), envoi adossé quand l'envoi est
+    réglé ; sinon elle reste retenue. Statut selon le réglage d'envoi, comme à la préparation. Une demande impossible à
+    déposer met la relance en échec avec une alerte, sans faire échouer le règlement. Test 7/7. Remplace la limite
+    « une relance bloquée par un interdit n'est pas réécrite quand l'interdit est retiré » (liste des limites, plus haut).
+    **Décisions prudentes prises seul** : pas de reprise des anciennes relances bloquées à la pose (elles suivront au
+    prochain règlement ou au prochain changement d'interdits, et la préparation du lendemain écrit déjà celles qui sont
+    périmées) ; seule la plus récente relance d'un compte revient dans la file ; ajouter un interdit ne retire pas une
+    relance déjà en attente (comme avant).
+  - test_c2_44 (82ac2358) : son dernier cas vérifiait l'ancien comportement que TMOD-13 change ; aligné.
+  - **test_c2_01 et test_c2_08 rouges : ce n'était PAS un banc abîmé.** Les 7 comptes en trop sont le jeu NOBAT
+    (`omega/banc/cashd_nobat.sql`, NB-C1…C7, « Démo … », client « Groupe Sogexal (banc) »), chargé volontairement le
+    21/10 sur décision de Teo, et intact : 5 factures, 1 règlement (VIR-DEMO-0001, 1 000 €), 4 relances, tout daté du
+    21/10, rien écrit depuis, aucune imputation. Les deux tests supposaient le client du banc vide de CASHD. Décision
+    prudente : **aucune ligne du banc n'a été modifiée ni effacée** ; les deux tests comptent à part ce que le banc
+    portait avant eux (comptes, totaux du tableau, règlements à imputer, comptes sans chargé), commentés (9f60d964). Verts.
+  - Inscrit (20261026192111). Suite `^test_c2_` rejouée par morceaux (un morceau à la fois, délai de la recette) :
+    **tout vert**, c2_01 et c2_08 compris. Aucun serveur de dev lancé.
 - **Prochain pas** : la passe en base réelle de la recette (session du banc) ; le reste de la liste au feu vert du
   coordinateur (voir `omega/CHIFFRAGE/cashd.md`, « Ce qui reste vraiment », 26/10).
 - **Limites dites au coordinateur** : le socle fige le texte d'un envoi adossé (pas de réécriture à l'approbation, piste
-  (c) pour Teo) ; une relance bloquée par un interdit n'est pas réécrite quand l'interdit est retiré (choix de produit).
+  (c) pour Teo) ; ~~une relance bloquée par un interdit n'est pas réécrite quand l'interdit est retiré~~ (levée par c2_46, 27/10).
 
 - **Prochain pas** : charger les factures d'Omega (cashd_omega.sql) quand Teo envoie ses PDF ; G19 avec un premier client.
 
