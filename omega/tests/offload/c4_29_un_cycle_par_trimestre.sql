@@ -13,10 +13,15 @@ declare
   v_id uuid;
 begin
   perform tests.c4_reprises_pretes();
+  -- Depuis c4_40 (27/10, la phrase du site fait foi), la relance écrite est éteinte par défaut ; ce test éprouve le cycle
+  -- quand le client l'a choisie dans ses réglages.
+  perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
+  perform public.offload_regler(v_client, '{"relance_ecrite": true}');
+  perform tests.redevenir_admin();
   return next ok((select g.relance_ecrite from public.offload_reglages g where g.client_id = v_client)
                  and (select c.column_default from information_schema.columns c where c.table_schema = 'public'
-                        and c.table_name = 'offload_reglages' and c.column_name = 'relance_ecrite') = 'true',
-                 'Un rappel par cycle : la relance écrite est allumée par défaut');
+                        and c.table_name = 'offload_reglages' and c.column_name = 'relance_ecrite') = 'false',
+                 'Un rappel par cycle seulement si le client l''a choisi : la relance écrite est éteinte par défaut');
 
   -- Deux messages en tout dans un cycle : le premier, puis un seul rappel.
   v_r := tests.c4_compte_courriel('TR1', 'Garage Rappel', 'atelier@garage-rappel.test', 70);

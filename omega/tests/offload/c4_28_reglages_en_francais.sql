@@ -12,7 +12,7 @@ begin
   return next throws_ok(format('select public.offload_regler(%L::uuid, %L)', v_client, '{"vague_jour": 9}'), '23514',
                         'Le jour de la vague va de 1 (lundi) à 7 (dimanche).', 'Le jour de la vague hors bornes se dit en français');
   return next throws_ok(format('select public.offload_regler(%L::uuid, %L)', v_client, '{"quarantaine_jours": 10}'), '23514',
-                        'La quarantaine entre deux reprises va de 30 à 730 jours.', 'La quarantaine aussi');
+                        'La quarantaine entre deux reprises va de 90 à 730 jours.', 'La quarantaine aussi (90 à 730 jours depuis c4_40)');
   return next throws_ok(format('select public.offload_regler(%L::uuid, %L)', v_client, '{"seuil_non_remis_pct": 95}'), '23514',
                         'Le seuil de messages non remis va de 5 à 80 %.', 'Le seuil de non-remise aussi');
   return next throws_ok(format('select public.offload_regler(%L::uuid, %L)', v_client, '{"arrete_jour": 31}'), '23514',
