@@ -191,9 +191,19 @@ jobs:
           psql "$ADMIN_URL" -X -q -At -f omega/prod/empreinte.sql > "$SORTIE/empreinte-ci.txt" || true
           # Arbitrage à trois voies (production avant, répétition après, recette) : omega/prod/arbitrage/.
           if [ -f "$SORTIE/avant.json" ] && python3 omega/prod/arbitrage/relever.py "$BASE_URL" > "$SORTIE/apres.json"; then
-            python3 omega/prod/arbitrage/comparer.py "$SORTIE/avant.json" "$SORTIE/apres.json" --annotations > "$SORTIE/arbitrage.md"
+            python3 omega/prod/arbitrage/comparer.py "$SORTIE/avant.json" "$SORTIE/apres.json" --annotations > "$SORTIE/arbitrage.md" 2> "$SORTIE/arbitrage-annotations.txt"
             cat "$SORTIE/arbitrage.md" >> "$GITHUB_STEP_SUMMARY"
           fi
+
+      - name: Arbitrage (annotations 1 à 10)
+        if: always()
+        run: sed -n '1,10p' /tmp/repetition/arbitrage-annotations.txt 2>/dev/null || true
+      - name: Arbitrage (annotations 11 à 20)
+        if: always()
+        run: sed -n '11,20p' /tmp/repetition/arbitrage-annotations.txt 2>/dev/null || true
+      - name: Arbitrage (annotations 21 à 30)
+        if: always()
+        run: sed -n '21,30p' /tmp/repetition/arbitrage-annotations.txt 2>/dev/null || true
 
       - name: Tests pgTAP, un fichier par appel
         if: always() && steps.pose.outcome == 'success'

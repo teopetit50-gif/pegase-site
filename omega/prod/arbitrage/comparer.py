@@ -65,7 +65,34 @@ for cle, objets in sorted(familles.items(), key=lambda x: -len(x[1])):
 
 texte = '\n'.join(sortie)
 print(texte)
+
+# Annotations courtes (GitHub les coupe vers 4 000 caractères) : un résumé, puis un écart réel par annotation.
+import re
+def sans_bruit(t):
+    # Sans commentaires « -- » (hors chaînes, approximation suffisante ici) ni différences d'espaces.
+    t = re.sub(r"--[^\n]*", "", t or "")
+    return re.sub(r"\s+", " ", t).strip()
+def esc(m):
+    return m.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
 if '--annotations' in sys.argv:
-    morceaux = [texte[i:i + 60000] for i in range(0, len(texte), 60000)][:9]
-    for n, m in enumerate(morceaux, 1):
-        print(f'::notice title=Arbitrage {n}/{len(morceaux)}::' + m.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A'), file=sys.stderr)
+    etats, reels = [], []
+    for k in sorted(recette_defs):
+        r, a, v = recette_defs[k], apres['definitions'].get(k), avant['definitions'].get(k)
+        if a == r:
+            continue
+        if sans_bruit(a) == sans_bruit(r):
+            etats.append(f'{k} : commentaires/espaces seulement')
+            continue
+        etats.append(f'{k} : DIFFÉRENT' + (' (production = répétition)' if v is not None and sans_bruit(v) == sans_bruit(a) else ''))
+        ta, tr = sans_bruit(a).split(' '), sans_bruit(r).split(' ')
+        morceaux = []
+        for op, i1, i2, j1, j2 in difflib.SequenceMatcher(None, ta, tr, autojunk=False).get_opcodes():
+            if op != 'equal':
+                morceaux.append(f"[{op}] répétition « {' '.join(ta[max(0, i1 - 6):i2 + 3])} » → recette « {' '.join(tr[max(0, j1 - 6):j2 + 3])} »")
+        reels.append((k, ' ‖ '.join(morceaux)))
+    print('::notice title=Arbitrage : définitions::' + esc(' ; '.join(etats))[:3900], file=sys.stderr)
+    for k, d in reels[:20]:
+        print(f'::notice title=Écart {k[:80]}::' + esc(d)[:3900], file=sys.stderr)
+    lignes = [f'{c[0]} {c[1]} | manque {c[2] or "—"} | trop {c[3] or "—"} | {c[4]} | {len(o)} : {", ".join(o[:4])}' for c, o in sorted(familles.items(), key=lambda x: -len(x[1]))]
+    for n in range(0, len(lignes), 8):
+        print(f'::notice title=Arbitrage : droits {n // 8 + 1}::' + esc('\n'.join(lignes[n:n + 8]))[:3900], file=sys.stderr)
