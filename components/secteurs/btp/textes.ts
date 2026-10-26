@@ -15,6 +15,9 @@
      Daliro »). Consigne de Teo du 24/09 : tous les boutons d'action mènent
      à /reserver-un-audit. La démonstration se fait pendant l'audit, sur
      les chantiers du visiteur : le libellé « Voir la démo » reste juste.
+     26/10/2026 (promesse n° 3 du plan Daliro) : « Voir la démo » mène à
+     l'espace client Daliro, /espace2/daliro, qui s'ouvre sans session sur
+     les données d'exemple ; seule la destination change, pas le libellé.
    · `CONTACT.connexion` et tout le bloc `NAV` sont partis avec l'entête du
      site source : c'est l'entête d'Omega qui sert.
    · Dans `LU`, `var(--font-tiempos)` (Newsreader, la serif des titres du
@@ -28,7 +31,7 @@
 export const MARQUE = "Daliro";
 export const CONTACT = {
   audit: "/reserver-un-audit",
-  demo: "/reserver-un-audit",
+  demo: "/espace2/daliro",
 };
 
 export const HERO = {

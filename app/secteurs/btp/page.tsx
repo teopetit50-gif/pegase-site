@@ -49,7 +49,8 @@ import SeCombine from "@/components/secteurs/SeCombine";
       `data-monde="clair"` pour l'entête du site.
    5. Les polices sont celles du site : aucune `next/font` ici.
    6. Appels à l'action : tout mène à /reserver-un-audit (héros, bouton
-      des fonctionnalités, trois formules, appel final). `/sign-up` et
+      des fonctionnalités, trois formules, appel final) ; « Voir la démo »
+      mène à /espace2/daliro (26/10, données d'exemple). `/sign-up` et
       `/pricing`, routes mortes du gabarit, sont réaiguillés ; « Connexion »
       et la recherche partent avec l'entête de la source.
 

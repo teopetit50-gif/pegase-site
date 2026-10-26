@@ -11,7 +11,7 @@
      text-[#737373] · bg-muted → bg-[#f5f5f5] · border-border, ring-border, bg-border → #e6e6e6 ·
      border-foreground/N, ring-foreground/N → #171717/N · border-card → #ffffff.
    Les 14 utilitaires `dark:` sont retirés (règle 4, monde clair figé).
-   Liens (règle 6) : « Réserver un audit » et « Voir la démo » mènent à /reserver-un-audit (voir textes.ts),
+   Liens (règle 6) : « Réserver un audit » mène à /reserver-un-audit, « Voir la démo » à /espace2/daliro (voir textes.ts),
    en <Lien> pour une navigation sans rechargement ; « Conçu par Omega » visait https://omegaai.fr dans un
    nouvel onglet — on y est déjà : il mène à l'accueil, dans le même onglet.
    « J-2 » du chapô : insécable (insecable.tsx).
