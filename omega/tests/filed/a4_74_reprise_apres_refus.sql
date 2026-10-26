@@ -3,11 +3,17 @@
 -- tests.a4_comme (a4_26_sortie_envois.sql), à poser avant. Ce fichier ne supprime rien.
 
 -- Une facture « à valider », refusée par le valideur avec un commentaire ; la file exécute la décision. Rend la demande.
+-- a4_87 : la pièce est lue en entier (date, HT, TVA, SIREN), pour que la correction d'une personne, qui réintègre la
+-- facture depuis ses valeurs, ne perde rien de ce qui n'est pas corrigé.
 create or replace function tests.a4_facture_refusee(p_org jsonb, p_numero text, p_commentaire text) returns uuid
 language plpgsql as $$
-declare fa jsonb := tests.a4_facture(p_org, 'ia', p_numero, 1200); v_d uuid;
+declare fa jsonb := tests.a4_facture(p_org, 'ia', p_numero, 1200); v_cl uuid := (p_org ->> 'client')::uuid; v_d uuid;
 begin
-  perform private.filed_controler_facture((fa ->> 'facture')::uuid);
+  insert into public.pieces_valeurs (client_id, piece_id, champ, valeur, texte, source, confiance, verifiee)
+  select v_cl, (fa ->> 'piece')::uuid, x.champ, x.valeur, x.valeur #>> '{}', 'ia', 1, true
+    from (values ('date', to_jsonb('2026-09-28'::text)), ('montant_ht', to_jsonb(1000)), ('montant_tva', to_jsonb(200)),
+                 ('fournisseur.siren', to_jsonb('123456782'::text))) x(champ, valeur);
+  perform private.filed_integrer_facture((fa ->> 'document')::uuid);
   select x.demande_id into v_d from public.filed_validations x where x.facture_id = (fa ->> 'facture')::uuid and x.issue is null;
   perform set_config('request.jwt.claims', json_build_object('sub', p_org ->> 'valideur', 'role', 'authenticated')::text, true);
   set local role authenticated;
@@ -32,8 +38,13 @@ begin
   -- Rien n'a changé : la reprise attend ; au-delà du délai, impossible.
   perform private.filed_traiter_reprises();
   return next is((select statut from private.reprises where demande_id = d1), 'a_faire', 'Sans correction : elle attend');
-  -- Une personne corrige le montant (comme la porte de correction : nouvelle version).
-  update public.filed_factures set montant_ttc = 1260, montant_ht = 1050, montant_tva = 210, version = version + 1 where id = f;
+  -- Le gérant corrige les montants par la vraie porte (a4_87, TFILED-28) : la facture refusée se corrige, reste refusée.
+  perform tests.a4_comme((o ->> 'gerant')::uuid);
+  perform public.filed_corriger_facture(f, '{"montant_ht": 1050, "montant_tva": 210, "montant_ttc": 1260}', 'Facture rectificative reçue.');
+  reset role;
+  perform set_config('request.jwt.claims', '', true);
+  return next ok((select statut = 'refusee' and montant_ttc = 1260 from public.filed_factures where id = f),
+                 'La porte de correction accepte la facture refusée dont la reprise est à faire');
   perform private.filed_traiter_reprises();
   select * into v_rep from public.demandes_validation where payload ->> 'reprise_de' = d1::text;
   return next ok(v_rep.id is not null and v_rep.statut = 'en_attente' and v_rep.resume like 'Reprise après refus — facture REP-001, corrigée%',
@@ -45,6 +56,15 @@ begin
                  and exists (select 1 from public.filed_validations where demande_id = v_rep.id and facture_id = f),
                  'la facture repasse « à valider », liée à la nouvelle demande');
   return next is((v_rep.payload ->> 'version')::integer, (select version from public.filed_factures where id = f), 'à sa version corrigée');
+  -- La reprise aboutit : le valideur approuve la nouvelle demande, la file l'exécute, la facture est validée.
+  perform tests.a4_comme((o ->> 'valideur')::uuid);
+  insert into public.approbations (demande_id, decision) values (v_rep.id, 'approuve');
+  reset role;
+  perform set_config('request.jwt.claims', '', true);
+  perform private.filed_traiter(10);
+  return next ok((select statut from public.demandes_validation where id = v_rep.id) = 'executee'
+                 and (select statut from public.filed_factures where id = f) = 'validee',
+                 'Reprise approuvée et exécutée : la facture corrigée est validée');
 
   -- « Doublon » : impossible tout de suite.
   d2 := tests.a4_facture_refusee(o, 'REP-002', 'Déjà reçue.');
