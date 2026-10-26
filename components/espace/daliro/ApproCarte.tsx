@@ -472,7 +472,7 @@ export default function ApproCarte({ tableau, source }: { tableau: Tableau; sour
                     {suivi ? (
                       <tr>
                         <td colSpan={7} style={{ paddingTop: 0 }}>
-                          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px 24px" }}>
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px 24px", position: "sticky", left: 0, maxWidth: "calc(100vw - 64px)" }}>
                             {preparee || (d && sd) ? (
                               <div style={{ flex: "1 1 320px", minWidth: 0 }}>
                                 <div className="esp-kpi-sous" style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}><Truck width={14} height={14} aria-hidden="true" /> Fournisseur{" "}
@@ -572,7 +572,7 @@ export default function ApproCarte({ tableau, source }: { tableau: Tableau; sour
               {form?.type === "demander" ? <>
                 <div className="esp-form-ligne">
                   <label className="rv-libelle">Livraison demandée le <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" type="date" min={auj} value={ch("date")} onChange={(e) => pose("date", e.target.value)} /></label>
-                  <div className="rv-libelle">Promise aujourd&apos;hui<div className="esp-kpi-sous" style={{ marginTop: 6 }}>{dateCourte(form.k.livraison_prevue)}{form.k.echeances.livrer_le ? ` · pose le ${dateCourte(form.k.echeances.livrer_le)}` : ""}</div></div>
+                  <div className="rv-libelle">Promise à ce jour<div className="esp-kpi-sous" style={{ marginTop: 6 }}>{dateCourte(form.k.livraison_prevue)}{form.k.echeances.livrer_le ? ` · pose le ${dateCourte(form.k.echeances.livrer_le)}` : ""}</div></div>
                 </div>
                 {derniereDemande(form.k)?.statut === "refusee" ? <Avis teinte="ambre">Le fournisseur a refusé le {dateCourte(derniereDemande(form.k)?.date_demandee)} : demandez une autre date.</Avis> : null}
               </> : null}
