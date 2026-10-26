@@ -4,7 +4,24 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 `components/espace/offload/`, `app/espace/offload/`, et ce fichier. Coordinateur : session
 `session_01BCGFdpRKBvXKjouC75sYBg`. Je n'appelle jamais Supabase : le coordinateur pose, je reçois les sorties brutes.
 
-## REPRISE (26/10, soir — correctifs de la recette du testeur des modules)
+## REPRISE (26/10, nuit — contre-recette du testeur des modules, TMOD-14)
+
+- Contre-recette (testeur-modules cc61ebf4) : TMOD-06 et TMOD-07 confirmés corrigés.
+- Fait : c4_39 (e8592257) posé sur la recette depuis le dépôt et inscrit (`c4_39_tableur_pleine_chasse`). TMOD-14 :
+  la restitution en tableur neutralise aussi les signes de formule en pleine chasse ＝ ＋ － ＠ (U+FF1D, U+FF0B,
+  U+FF0D, U+FF20), comme = + - @. La tabulation et le retour chariot en tête l'étaient déjà depuis c4_38 ; le test
+  le revérifie.
+  - Preuve : le test, posé avant la migration, était rouge (assertions 1 et 2 en échec ; la 3, non-régression de c4_38,
+    passait). Après la migration, `^test_c4_3[6-9]_` passe 5/5 (40 assertions). Suite `^test_c4_` par morceaux :
+    61 fonctions sur 62, 537 assertions, aucune rouge. `test_c4_09_arretes` dépasse toujours la minute de l'outil.
+  - L'export du navigateur (`tableur.ts`, ada459bb) suit la même règle. eslint propre ; tsc sans erreur hors Varelo.
+    Pas de serveur de dev lancé (consigne).
+- Décision prise seul : seuls les quatre signes en pleine chasse nommés par le testeur sont ajoutés. D'autres
+  variantes (moins U+2212, petit tiret U+FE63) ne sont pas traitées : aucun tableur connu ne les lit comme une formule.
+  À rouvrir si un testeur montre le contraire.
+- Reste : T-OFFLOAD peut rejouer TMOD-14. Import des personnes morales : attend Teo.
+
+### Reprise du 26/10, soir — correctifs de la recette du testeur des modules)
 
 - Fait : c4_38 (5eacae5f, test 1ae23b65) posé sur la recette depuis le dépôt et inscrit (`c4_38_refus_immediat_et_tableur_neutre`).
   Rapport : `omega/RECETTE-TESTEUR-MODULES-2026-10-26.md` (testeur-modules 157b506f).
