@@ -1,0 +1,53 @@
+-- Tests A4 — lot 80 (a4_88) : TFILED-29, les pièces en cours sans facture refusée à imputer ni double compte.
+-- pgTAP, schéma « tests » d'A5 ; utilise tests.a4_organisation et tests.a4_facture (a4_10_facture_electronique.sql)
+-- et tests.a4_comme (a4_26_sortie_envois.sql), à poser avant. Données d'exemple (les montants de F3 et F13 du banc
+-- T-FILED). Ce fichier ne supprime rien.
+
+-- Une facture « à valider » et son imputation proposée (charge récurrente, premier compte du plan). Rend la facture.
+create or replace function tests.a4_facture_imputee(p_org jsonb, p_numero text, p_ttc numeric) returns uuid
+language plpgsql as $$
+declare v_f uuid := (tests.a4_facture(p_org, 'ia', p_numero, p_ttc) ->> 'facture')::uuid;
+begin
+  perform private.filed_controler_facture(v_f);
+  perform private.filed_proposer_imputation(v_f, 'recurrente',
+    (select c.id from public.filed_plan_comptable c where c.client_id = (p_org ->> 'client')::uuid and c.actif order by c.numero limit 1));
+  return v_f;
+end $$;
+
+create or replace function tests.test_a4_88_01_pieces_en_cours() returns setof text
+language plpgsql as $f$
+declare o jsonb := tests.a4_organisation(); v_cl uuid := (o ->> 'client')::uuid; f3 uuid; f13 uuid; v_d uuid;
+begin
+  -- F3 (928,20 €) : imputation proposée, puis refusée par le valideur ; F13 (146,48 €) : imputation proposée, à valider.
+  f3 := tests.a4_facture_imputee(o, 'F3-TVA-19', 928.20);
+  f13 := tests.a4_facture_imputee(o, 'F13-MCD-1014', 146.48);
+  return next is((select count(*) from public.filed_imputations where facture_id in (f3, f13) and statut = 'proposee'), 2::bigint,
+                 'Deux imputations proposées');
+  select x.demande_id into v_d from public.filed_validations x where x.facture_id = f3 and x.issue is null;
+  perform tests.a4_comme((o ->> 'valideur')::uuid);
+  insert into public.approbations (demande_id, decision, commentaire)
+  values (v_d, 'rejete', 'TVA à 19 % non justifiée, demander une facture rectificative à 8,5 %');
+  reset role;
+  perform set_config('request.jwt.claims', '', true);
+  perform private.filed_traiter(10);
+  return next ok((select statut from public.filed_factures where id = f3) = 'refusee'
+                 and (select statut from public.filed_factures where id = f13) = 'a_valider', 'F3 refusée, F13 à valider');
+  -- Le relevé du gérant.
+  perform tests.a4_comme((o ->> 'gerant')::uuid);
+  return next is((select count(*) from public.filed_pieces_en_cours(v_cl) where categorie = 'imputation'), 0::bigint,
+                 'Plus de ligne « Imputation proposée » : F3 est refusée, F13 est déjà « En attente d''approbation »');
+  return next ok((select nombre = 1 and montant_ttc = 146.48 from public.filed_pieces_en_cours(v_cl) where categorie = 'attente'),
+                 'F13 en attente d''approbation : 1 pour 146,48 €');
+  return next is((select sum(nombre) from public.filed_pieces_en_cours(v_cl)), 1::numeric,
+                 'Chaque pièce comptée une fois : une seule pièce en cours (F13)');
+  reset role;
+  perform set_config('request.jwt.claims', '', true);
+  -- Une facture validée dont l'imputation reste proposée : seule l'imputation reste à valider, elle est comptée.
+  update public.filed_factures set statut = 'validee' where id = f13;
+  perform tests.a4_comme((o ->> 'gerant')::uuid);
+  return next ok((select nombre = 1 and montant_ttc = 146.48 from public.filed_pieces_en_cours(v_cl) where categorie = 'imputation')
+                 and not exists (select 1 from public.filed_pieces_en_cours(v_cl) where categorie = 'attente'),
+                 'Facture validée, imputation à valider : comptée une fois, en « Imputation proposée »');
+  reset role;
+  perform set_config('request.jwt.claims', '', true);
+end $f$;
