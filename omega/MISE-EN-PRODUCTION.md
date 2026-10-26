@@ -9,6 +9,26 @@ Recette de référence : `ygwbgpowzlbdaajlsqkn`. Ordre, crons et fonctions recal
 6/10 sur les sorties brutes relayées par le coordinateur (§ 8) ; ce qui reste à
 relever est listé au § 8.
 
+> **Mise à jour du 26/10/2026 — ce dossier est remplacé, pour la pose, par
+> [`omega/prod/RUNBOOK-20261026.md`](prod/RUNBOOK-20261026.md).** Les §§ ci-dessous
+> restent l'historique et la justification. Ce qui a changé depuis le 6/10 :
+> - **La production a été relevée** (25/10, lecture seule du catalogue, aucune donnée) :
+>   `omega/prod/releve-20261025/`. Elle n'a rien reçu depuis le 09/10 (144 migrations,
+>   27 crons, une seule fonction Edge, `routes-site`), et porte le site d'avant
+>   (63 tables, 33 fonctions) qu'aucun fichier de l'export ne touche.
+> - **L'export est refait** (25/10, 18 h 10 Z) : 446 fichiers en 6 paliers
+>   (`omega/prod/migrations/PALIERS.md`), dont **21 lots posés sur la recette sans ligne
+>   `schema_migrations`**, rattrapés (RUNBOOK § 3.4) ; `tamila_m10b` sort (déjà en production).
+> - **La répétition tourne** : GitHub Actions, tag `repetition-*`, base remise comme la
+>   production par le relevé du 23/10, migrations en rôle `postgres`. Les 446 fichiers passent.
+> - **§ 1.7 (poser par `db push`) est abandonné** : les deux historiques n'ont aucune version
+>   en commun ; la pose se fait par `omega/prod/poser-palier.sh`, palier par palier, avec un
+>   essai annulé avant chaque palier.
+> - **§ 2 (fonctions Edge)** : 23 fonctions et 15 crons Edge (4 dans l'export, 11 à poser à part) ; SHA relevés le 25/10
+>   (`releve-20261025/README.md` § 2), coquilles prêtes dans `omega/prod/coquilles/`.
+> - **§ 6.4 (Bedrock)** : décision de Teo du 25/10, API Anthropic directe pour l'instant ;
+>   écart à la promesse « données en Europe », à régler avant le premier client (RUNBOOK § 5.4).
+
 ---
 
 ## 0. Trois constats avant tout
