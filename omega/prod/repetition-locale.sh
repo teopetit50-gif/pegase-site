@@ -60,6 +60,10 @@ for f in $(ls "$ICI"/base/0[0-9]_*.sql | sort) $(ls "$ICI"/migrations/*.sql | so
   nom=$(basename "$f" .sql)
   t0=$(date +%s)
   url="$BASE_URL"; case "$f" in "$ICI"/base/00_*|"$ICI"/base/01_*) url="$ADMIN_URL" ;; esac
+  if [ "$nom" = 02_schema ]; then
+    grep 'FOR ROLE supabase_admin' "$f" | psql "$ADMIN_URL" -v ON_ERROR_STOP=1 -X -q -1 -f - > "$SORTIE/poses/02_admin.txt" 2>&1 || { echo "02 (supabase_admin) en échec"; exit 1; }
+    grep -v 'FOR ROLE supabase_admin' "$f" > "$SORTIE/02_postgres.sql"; f="$SORTIE/02_postgres.sql"
+  fi
   if ! psql "$url" -v ON_ERROR_STOP=1 -X -q -1 -f "$f" > "$SORTIE/poses/$nom.txt" 2>&1; then
     echec="$nom"; break
   fi

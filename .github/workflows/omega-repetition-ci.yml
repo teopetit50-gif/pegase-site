@@ -121,6 +121,12 @@ jobs:
             # Tout se pose en postgres, comme en production où il possède public, private et leurs objets (relevé du
             # 26/10) sans être superutilisateur ; seuls 00 (Auth, Storage simulés) et 01 (extensions) en supabase_admin.
             url="$BASE_URL"; case "$f" in omega/prod/base/00_*|omega/prod/base/01_*) url="$ADMIN_URL" ;; esac
+            # Dans le relevé, les droits par défaut DU rôle supabase_admin ne se posent qu'en supabase_admin.
+            if [ "$nom" = 02_schema ]; then
+              grep 'FOR ROLE supabase_admin' "$f" > "$SORTIE/02_admin.sql"; grep -v 'FOR ROLE supabase_admin' "$f" > "$SORTIE/02_postgres.sql"
+              psql "$ADMIN_URL" -v ON_ERROR_STOP=1 -X -q -1 -f "$SORTIE/02_admin.sql" > "$SORTIE/poses/02_admin.txt" 2>&1 || { echo "::error::02 (supabase_admin)"; exit 1; }
+              f="$SORTIE/02_postgres.sql"
+            fi
             if ! psql "$url" -v ON_ERROR_STOP=1 -X -q -1 -f "$f" > "$SORTIE/poses/$nom.txt" 2>&1; then
               tail -20 "$SORTIE/poses/$nom.txt"
               if [[ "$GITHUB_REF_NAME" != repetition-* ]]; then echo "::error title=Pose en échec::$f"; exit 1; fi

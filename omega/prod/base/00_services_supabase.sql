@@ -106,3 +106,20 @@ begin
   select _parts[array_length(_parts, 1)] into _filename;
   return reverse(split_part(reverse(_filename), '.', 1));
 end $$;
+
+-- Droits par défaut de postgres : l'image en pose (anon, authenticated…) que la production n'a pas ; on les retire tous,
+-- 02_schema.sql pose ensuite exactement ceux de la production (postgres et service_role seulement dans public).
+do $$
+declare d record; g record; genre text;
+begin
+  for d in select a.oid, a.defaclobjtype, n.nspname from pg_default_acl a left join pg_namespace n on n.oid = a.defaclnamespace
+           where a.defaclrole = 'postgres'::regrole loop
+    genre := case d.defaclobjtype when 'r' then 'tables' when 'S' then 'sequences' when 'f' then 'functions' when 'T' then 'types' when 'n' then 'schemas' end;
+    for g in select distinct coalesce(r.rolname, 'public') as role from pg_default_acl a, aclexplode(a.defaclacl) x
+             left join pg_roles r on r.oid = x.grantee where a.oid = d.oid loop
+      execute format('alter default privileges for role postgres %s revoke all on %s from %s',
+                     case when d.nspname is null then '' else 'in schema ' || quote_ident(d.nspname) end, genre,
+                     case when g.role = 'public' then 'public' else quote_ident(g.role) end);
+    end loop;
+  end loop;
+end $$;
