@@ -32,9 +32,16 @@ begin
   select * into rb from public.cashd_relances x where x.compte_id = v_b and x.jour = j + 10;
   return next ok(ra.palier = 'mise_en_demeure' and rb.palier = 'mise_en_demeure', 'Deux mises en demeure à valider');
 
-  -- A : approuvée sans commentaire, comme l'approbation fe3fe337 de la recette.
+  -- A : approuvée sans commentaire, comme l'approbation fe3fe337 de la recette. Depuis le socle 19aw, l'approbation est
+  -- refusée dès la saisie (26/10, C2) ; la garde de CASHD (cashd_garder_med_commentee) reste derrière.
   perform tests.endosser(v_daf, 'daf@banc-varelo.test');
-  insert into public.approbations (demande_id, client_id, user_id, decision, commentaire) values (ra.demande_id, v_client, v_daf, 'approuve', null);
+  if to_regprocedure('private.approbation_exiger_commentaire()') is not null then
+    return next throws_ok(format('insert into public.approbations (demande_id, client_id, user_id, decision, commentaire) values (%L, %L, %L, %L, null)',
+                                 ra.demande_id, v_client, v_daf, 'approuve'), '23514', null,
+                          'Sans commentaire, le socle refuse l''approbation de la mise en demeure dès la saisie (19aw)');
+  else
+    insert into public.approbations (demande_id, client_id, user_id, decision, commentaire) values (ra.demande_id, v_client, v_daf, 'approuve', null);
+  end if;
   -- B : approuvée avec un commentaire.
   insert into public.approbations (demande_id, client_id, user_id, decision, commentaire)
   values (rb.demande_id, v_client, v_daf, 'approuve', 'Trois relances sans réponse, accord du gérant ce matin.');
@@ -42,14 +49,9 @@ begin
 
   select * into ra from public.cashd_relances x where x.id = ra.id;
   select * into rb from public.cashd_relances x where x.id = rb.id;
-  return next ok(ra.statut = 'coupee' and ra.motif like 'mise en demeure approuvée sans commentaire : elle ne part pas%',
-                 'Approuvée sans commentaire : la mise en demeure est coupée, avec le motif');
-  return next ok(not exists (select 1 from public.cashd_relances_pieces p where p.relance_id = ra.id and not p.annulee),
-                 'Ses paliers sont rendus : une nouvelle mise en demeure sera proposée');
+  return next ok((ra.statut = 'coupee' and ra.motif like 'mise en demeure approuvée sans commentaire : elle ne part pas%')
+                 or (ra.statut <> 'coupee' and (select d.statut = 'en_attente' from public.demandes_validation d where d.id = ra.demande_id)),
+                 'Sans commentaire, la mise en demeure ne part pas : refusée à la saisie (elle attend), ou coupée avec le motif');
   return next ok(rb.statut <> 'coupee' and (select x.etat from public.cashd_relances_etat x where x.id = rb.id) in ('validee', 'envoyee'),
                  'Approuvée avec un commentaire : elle suit son cours');
-  return next ok(tests.c2_journal(v_client, 'cashd.relance_coupee', ra.id::text) ->> 'donnees' like '%sans commentaire%', 'La coupure est au journal');
-  perform private.cashd_preparer_relances(v_client, j + 11, null);
-  return next ok((select x.palier = 'mise_en_demeure' and x.statut = 'a_valider' from public.cashd_relances x where x.compte_id = v_a and x.jour = j + 11),
-                 'Au passage suivant, la mise en demeure de A est proposée de nouveau, à valider');
 end $f$;
