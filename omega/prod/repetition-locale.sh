@@ -108,6 +108,7 @@ echo "Tests : $total résultats, $ko rouges, $so fichiers sans objet." | tee -a 
 # 6. Relevé détaillé du catalogue (même requête que pour la production et la recette), après retrait des tests.
 psql "$ADMIN_URL" -X -q -c "drop schema if exists tests cascade" -c "drop extension if exists pgtap" \
   -c "create schema if not exists supabase_migrations" \
-  -c "create table if not exists supabase_migrations.schema_migrations (version text primary key, statements text[], name text)" >/dev/null 2>&1
+  -c "create table if not exists supabase_migrations.schema_migrations (version text primary key, statements text[], name text)" \
+  -c "grant usage on schema supabase_migrations to postgres" -c "grant select on supabase_migrations.schema_migrations to postgres" >/dev/null 2>&1
 PGOPTIONS='-c search_path="$user",public,extensions' psql "$BASE_URL" -X -At -f "$ICI/releve.sql" > "$SORTIE/releve-repetition.tsv" 2>&1
 echo "Relevé : $(wc -l < "$SORTIE/releve-repetition.tsv" | tr -d ' ') objets → $SORTIE/releve-repetition.tsv" | tee -a "$SORTIE/RESUME.txt"
