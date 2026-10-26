@@ -1751,3 +1751,42 @@ reput-reponse v31 est déjà déployée au SHA 08b9fe2c00b042ab2c8347a71d4a546b2
   - c4_36 juste (O12 et O13 absents) ;
   - c4_35 : la passe du 26/10 met la relance 1 d'O8 à valider. Les passes du 02/11 et du 09/11 renvoient 0 partout, ce qui est l'attendu.
   - O4 n'est pas repris (observation).
+
+### c4_37 posé (01 h 05 Z)
+
+- c4_37, la reprise après refus OFFLOAD, est posé avec son test depuis 679f0db39af3c073f4e20cea60c64ec912653c51. Il a été écrit le 25/10 par une autre session. Il crée le cron « offload-reprises » (chaque minute).
+- ^test_c4_(37|08)_ passe 4/4, 0 not ok. Cela inclut test_c4_08_cycle, réparé par da761bb4 (redondant avec 77bb0f21, mais sans danger).
+
+## PAUSE du 26/10, 01 h 08 Z — avancée sur la pause d'office de 01 h 40 Z : toute la liste de relance est faite
+
+### SHA d'arrêt
+
+| Session | Branche | SHA |
+|---|---|---|
+| T-FILED | testeur-filed | 319694ce |
+| T-OFFLOAD | testeur-offload | 337e299 |
+| T-CASHD | testeur-cashd | 5470547b |
+| T-REPUT | testeur-reput | baa76a0e |
+| C4 | worker-c4 | 0e5f2da9 |
+| C3 | worker-c3 | a7d96c26 (rien de neuf) |
+| A1 | worker-a1 | 68e8c5b |
+| B1 | worker-b1 | 6447e810 |
+
+### BILAN pour Teo
+
+Le niveau 1 (recette) est acquis sur ce qui suit, et RIEN n'est en production.
+
+- Fait et juste, au niveau 1 :
+  - FILED : destinataire tiers bloqué, variante de nom acceptée (TFILED-05).
+  - OFFLOAD : préavis tacite et exprès (c4_34) ; la relance 1 attend le valideur (c4_35) ; valeur par segment (c4_36) ; reprise après refus (c4_37, tests verts).
+  - CASHD : lien de paiement (c2_40).
+  - REPUT : appel sur ligne fixe (c3_43) ; reprise après refus (c3_44, faite le 25/10).
+  - Lecteur : relecture avec consigne (a1_01 et a1_02, tests verts).
+- Reste :
+  - TFILED-28 (bloquant, A4) : une facture refusée ne se corrige plus, donc la reprise FILED n'aboutit jamais.
+  - TFILED-29 : double compte dans « Imputation proposée ».
+  - TCASHD-18 et 19 (C2) : pas de reprise après un règlement partiel, et un montant de relance qui n'est pas mis à jour.
+  - Déploiement du lecteur 971aec0c par le bureau.
+  - Décision de Teo sur le doublon du point de 7 h (B1).
+  - Relevé de production d'A5 (Teo).
+  - Niveau 2 (preuve réelle) et niveau 3 (production) : rien de neuf.
