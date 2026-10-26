@@ -1,7 +1,7 @@
 import { SANS_MESSAGE, SANS_TRANSCRIPTION } from "../../reput-appels/appels.ts";
 import { assert, assertEquals, assertStringIncludes } from "@std/assert";
 import { passage } from "../passage.ts";
-import { APPEL_SANS_MESSAGE, consigne, CONSIGNE_COURTE, CORPS_APPEL_ECRIRE, CORPS_APPEL_RAPPEL, contenuDemande, controler, CORPS_PRECISION, nombres, permis, sansTexte } from "../rediger.ts";
+import { APPEL_SANS_MESSAGE, consigne, CONSIGNE_COURTE, CORPS_APPEL_ECRIRE, CORPS_APPEL_RAPPEL, contenuDemande, controler, CORPS_PRECISION, nombres, permis, sansTexte, SCHEMA_OUTIL } from "../rediger.ts";
 import { ClaudeFaux, contexte, dossier, FICHE_HORAIRES, FICHE_TARIF, panne, PortesFausses, travail } from "./doubles.ts";
 
 function capturerConsole(): { lignes: string[]; rendre: () => void } {
@@ -336,4 +336,17 @@ Deno.test("reprise après refus (c3_44) : une réponse fixe refusée avec une co
   assert(sansTexte(appel) !== null, "une consigne vide ne compte pas");
   appel.consigne_valideur = "Proposez plutôt de nous écrire par WhatsApp.";
   assertEquals(sansTexte(appel), null);
+});
+
+Deno.test("TMOD-09 (c3_45) : avec une consigne du valideur, le modèle dit ce qu'il n'a pas pu suivre ; sans consigne, rien", () => {
+  const props = (SCHEMA_OUTIL.properties ?? {}) as Record<string, unknown>;
+  assert("consigne_non_suivie" in props, "le champ est offert au modèle");
+  const brut = { sujet: "autre", langue: "fr", urgence: false, couverte: false, sources: [], corps: "Notre équipe vous rappelle.",
+                 consigne_non_suivie: "  le prix du ramonage n'est pas dans la base  " };
+  const sans = dossier("Combien coûte un ramonage ?", {});
+  assertEquals(controler(sans, brut).redaction.consigne_non_suivie, undefined);
+  const avec = dossier("Combien coûte un ramonage ?", {});
+  avec.consigne_valideur = "Commentaire : Donnez le prix du ramonage.";
+  assertEquals(controler(avec, brut).redaction.consigne_non_suivie, "le prix du ramonage n'est pas dans la base");
+  assertStringIncludes(contenuDemande(avec), "consigne_non_suivie");
 });

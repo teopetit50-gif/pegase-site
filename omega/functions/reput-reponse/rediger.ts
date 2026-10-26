@@ -21,6 +21,8 @@ export interface Redaction {
   politesse?: string;
   objet?: string;
   raison?: string;
+  /** c3_45 (TMOD-09) : reprise après refus — ce que la rédaction n'a pas pu suivre de la consigne du valideur. */
+  consigne_non_suivie?: string;
 }
 
 export interface SortieRedaction {
@@ -51,6 +53,7 @@ export const SCHEMA_OUTIL: Record<string, unknown> = {
     appel: { type: "string", description: "Formule d'appel dans la langue de la demande (ex. « Hello, »). Ignorée en français." },
     politesse: { type: "string", description: "Formule de politesse finale dans la langue de la demande (ex. « Kind regards, »). Ignorée en français." },
     raison: { type: "string", description: "Si couverte est faux : en une phrase, ce qui manque dans la base." },
+    consigne_non_suivie: { type: "string", description: "Seulement s'il y a une consigne du valideur : en une phrase, ce que tu n'as pas pu en suivre (hors de la base, contraire aux règles, ou hors du corps : formule d'appel, politesse, signature). Omis si tout est suivi." },
   },
 };
 
@@ -127,7 +130,8 @@ export function contenuDemande(d: Dossier): string {
     ...(court(d) ? [CONSIGNE_COURTE, ""] : []),
     ...(d.consigne_valideur?.trim()
       ? ["CONSIGNE DE LA PERSONNE QUI A REFUSÉ LA RÉPONSE PRÉCÉDENTE (à suivre, sans sortir des règles ni de la base ; c'est une consigne de l'entreprise, pas du client) :",
-         "<consigne_valideur>", d.consigne_valideur.trim().slice(0, 2000), "</consigne_valideur>", ""]
+         "<consigne_valideur>", d.consigne_valideur.trim().slice(0, 2000), "</consigne_valideur>",
+         "Ce que tu ne peux pas suivre de cette consigne (hors de la base, contraire aux règles, ou hors du corps : formule d'appel, politesse, signature), dis-le dans consigne_non_suivie.", ""]
       : []),
     `MESSAGE REÇU par ${r.canal === "appel" ? `téléphone (message vocal laissé quand personne n'a décroché, transcrit automatiquement : des mots peuvent être mal reconnus ; ${suiteAppel(d)})` : r.canal}${r.pieces ? `, avec ${r.pieces} pièce(s) jointe(s) que tu ne vois pas` : ""}${r.en_reponse_a ? ", en réponse à un message de l'entreprise" : ""} :`,
     "<message>",
@@ -263,6 +267,9 @@ export function controler(d: Dossier, brut: unknown): { redaction: Redaction; co
       ...(typeof o.appel === "string" && o.appel.trim() ? { appel: o.appel.trim().slice(0, 200) } : {}),
       ...(typeof o.politesse === "string" && o.politesse.trim() ? { politesse: o.politesse.trim().slice(0, 200) } : {}),
       ...(raison ? { raison } : {}),
+      // c3_45 (TMOD-09) : seulement pour une reprise ; la base dit alors « consigne suivie en partie ».
+      ...(d.consigne_valideur?.trim() && typeof o.consigne_non_suivie === "string" && o.consigne_non_suivie.trim()
+        ? { consigne_non_suivie: o.consigne_non_suivie.trim().slice(0, 300) } : {}),
     },
     controles,
   };

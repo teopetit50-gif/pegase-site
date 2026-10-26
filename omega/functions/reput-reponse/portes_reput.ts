@@ -82,6 +82,8 @@ export interface ResultatReponse {
   politesse?: string;
   objet?: string;
   raison?: string;
+  /** c3_45 (TMOD-09) : ce que la reprise n'a pas pu suivre de la consigne du valideur. */
+  consigne_non_suivie?: string;
   modele: string;
   tokens_entree: number;
   tokens_sortie: number;
