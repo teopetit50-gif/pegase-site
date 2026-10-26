@@ -1,207 +1,283 @@
-# CASHD — chiffrage de ce qui reste à construire, promesse par promesse
+# CASHD — audit des promesses du site, ligne par ligne (26/10/2026)
 
-C2, 06/10/2026, 18 h 31 Z (heure du conteneur). Demande de Teo, relayée par le coordinateur : « estime ce qui reste à construire pour avoir vraiment un truc livrable, et vérifie toutes les petites promesses ». Lu sur main c0494b4 (vitrine), **aucun fichier du site public modifié**.
+Audit refait le 26/10/2026, entre 18 h 40 et 19 h 10 Z, en lecture seule : aucun code produit touché, aucun fichier du
+site modifié. Il remplace le chiffrage du 06/10 (C2, `d7391be1`, toujours lisible dans l'historique git) ; la colonne
+« 06/10 » en garde l'état.
 
-## Synthèse
+Sources lues :
+- textes du site sur `origin/main` `de17d8c9` : `lib/produits/relances.ts` et `lib/produits/capacites/relances.ts`
+  (inchangés depuis le 15/09, donc les numéros de ligne du 06/10 tiennent), `app/page.tsx` (réécrit le 21/10 :
+  M1, M2, M3 reprennent les nouvelles phrases), `app/offres/page.tsx` et `lib/content.ts` (inchangés depuis le
+  06/10) ;
+- construction : `origin/worker-c2` `f31c0c7b` (migrations et tests c2_01 → c2_45), `omega/NOTES-C2.md` de cette
+  branche, et sa liste « Ce qui reste vraiment » du 26/10 (`2b7a6c7d`, pas encore sur main) ; fin de
+  `omega/NOTES-COORDINATEUR.md` ; rapport du testeur des modules du 26/10 (TMOD-04, TMOD-05) ;
+- recette `omega-recette` (`ygwbgpowzlbdaajlsqkn`), en lecture : `supabase_migrations.schema_migrations`,
+  fonctions `tests.test_c2_*`, crons, tables `envois`, `messageries`, `expediteurs` et `cashd_taux_change`.
 
-1. **Par état** (117 promesses) : A 0 · B 71 · C 38 · D 1 · T 7. Rien n'est prouvé EN VRAI : aucun client réel, aucun envoi réel (le banc est en essai et ses envois sont gardés).
-2. **Jours → B** : 38 j, dont 18,5 j dans CASHD et 19,5 j chez d'autres (A1 connecteur du facturier, A2 boîte d'envoi / WhatsApp / AR24, serveur, socle). 22 lacunes, détaillées plus bas, chacune comptée une seule fois même quand plusieurs promesses en dépendent.
-3. **Jours B → A** : 13 j de travail (6 j de pilote chez un premier client + 7 j pour provoquer les cas rares avec lui), et **au moins 30 à 45 jours de calendrier** : la mise en demeure n'arrive qu'à J+30, on ne la prouve pas plus vite.
-4. **Tiers / achats de Teo** : AR24 (LRE, prix par envoi sur devis) ; prestataire de paiement de chaque client (Stripe ~1,5 % + 0,25 €) ; vérification d'application Google et Microsoft pour l'envoi depuis la boîte du client (gratuit, plusieurs semaines) ; WhatsApp Business (Meta, ~0,05–0,10 € par conversation) ; région d'hébergement, CGV, DPA à confirmer. Taux BCE : gratuits.
-5. **Pour UN premier client réel** : (a) son facturier chaque jour — connecteur G1 (3 j) ou, à défaut, un dépôt quotidien fait par lui et la page reformulée ; (b) un envoi réel de courriel — au minimum par l'expéditeur du socle avec un domaine authentifié, idéalement depuis sa boîte (G4, 4,5 j chez A2 + vérification Google/Microsoft) ; (c) ses textes : formule, signature, interdits (0,5 j) ou de vrais gabarits rédigés avec lui (G2, 3 j) ; (d) l'écran dans /espace2 (C1, en cours) ; (e) contrat et CGV (Teo). Soit **6,5 j au minimum** (pilote + réglage des textes, dépôt manuel assumé) et **~16,5 j pour tenir la page telle qu'elle est écrite** sur ces points, plus un mois de calendrier.
-6. **Avis honnête** : le cœur promis (relire, écrire, faire valider, couper au règlement, escalader jusqu'à la mise en demeure, lettrer, compter) est construit et testé (B) ; il n'a jamais tourné sur une vraie créance. La page en dit plus que le produit sur trois points : le facturier « relu chaque matin » suppose un connecteur qui n'existe pas, les textes ne sont ni rédigés avec le client ni variés, et les quatre captures montrées sont celles d'une maquette. À corriger soit en construisant (G1, G2, G3, G14 : ~10,5 j), soit en reformulant la page (une demi-journée de texte, à faire par le propriétaire de la vitrine).
+## En tête
 
-Légende — **A** prouvé EN VRAI · **B** construit et testé sur la recette · **C** partiel · **D** pas construit · **T** tiers, compte ou achat de Teo. Tests : t1 = `test_c2_01_donnees`, t2 = `test_c2_02_export`, t3 = `test_c2_03_moteur`, t4 = `test_c2_04_capacites` (les quatre verts sur la recette le 06/10 : t2 et t3 à 17 h 25 Z, t1 et t4 à 19 h 05 Z, heures du coordinateur). « Jours » : actuel → B est porté par la lacune (colonne « Ce qui manque ») et compté une fois dans le tableau des lacunes ; B → A est propre à la ligne (cas rare à provoquer chez le client pilote), le pilote lui-même étant compté à part.
+### Décompte
 
-## Promesses
+| | A | B | C | D | T | Total |
+|---|---|---|---|---|---|---|
+| 06/10 (synthèse C2) | 0 | 71 | 38 | 1 | 7 | 117 |
+| **26/10** | **0** | **87** | **25** | **0** | **7** | **119** |
 
+Deux lignes ont été ajoutées parce qu'elles manquaient au relevé du 06/10 (M9, M10). Quinze lignes passent de C
+ou D à B, toutes sur un test rejoué vert le 26/10 : P10, P21, P33, C18, C42, L4, L7, L11, L12, E3, M4 à M8.
 
-### Page /offres/relances-impayes
+Une ligne descend de B à C : C10. Depuis c2_10, le devis est relancé à J+7 après l'envoi, et non plus sept jours
+après le rappel.
 
-| # | Promesse (texte exact) | Où | État | Preuve | Ce qui manque | Jours → B / B → A | Coût externe / tiers |
+E1 reste en C : elle est construite, mais son seul test est rouge ce jour. Aucune ligne n'est en A.
+
+### Les 5 manques les plus importants pour vendre CASHD
+
+1. **Rien n'a jamais tourné en vrai.** Sur la recette, CASHD n'a que des organisations de banc. Ses envois sont
+   2 « à valider » et 1 « annulé », tous en essai, et aucun n'est jamais parti (`envois.envoye_le` vide). On ne peut
+   citer ni client ni envoi réel. Il faut un pilote chez un premier client : ~13 j de travail sur 30 à 45 jours de
+   calendrier, puisque la mise en demeure n'arrive qu'à J+30.
+2. **« CASHD relit votre facturier chaque matin » (G1).** CASHD relit le **dernier export déposé**. Aucun connecteur
+   ne va chercher le facturier chaque jour. Seize lignes en dépendent, dont l'accroche de l'accueil. Il faut 3 j
+   (connecteur du lecteur A1) et un vrai client, ou bien un dépôt quotidien fait par lui, assumé sur la page.
+3. **« Les relances partent … depuis la boîte de votre entreprise » (G4).** Le socle sait déposer dans une boîte
+   Gmail : une boîte de test est branchée sur le banc (portées `gmail.compose` et `gmail.readonly`) et OFFLOAD
+   l'utilise (c4_22). CASHD, lui, ne s'y abonne pas (aucune migration c2 ne lit `envoi.brouillon_depose`), et
+   Microsoft 365 n'existe pas. Il faut 1 j côté CASHD et 2 j côté A2, plus la vérification d'application de Google
+   et de Microsoft (gratuite, plusieurs semaines).
+4. **Les captures de la page sont celles d'une maquette, montrées « telles quelles » (P26).** L'écran réel a
+   maintenant ses quatre vues dans `/espace2/cashd/suivi` (recette 298/298 du 26/10). Il reste à refaire les captures
+   depuis cet écran : 0,5 j de vitrine.
+5. **Le lien de paiement qui s'éteint au règlement (C34) et la LRE (C26) attendent un tiers.** Une adresse de
+   paiement fixe est glissée dans chaque relance (c2_40, ✔). Le lien PAR FACTURE demande en plus le compte du
+   prestataire de chaque client (Stripe, GoCardless) et l'ouvrier serveur (2,5 j). La LRE demande le contrat AR24
+   et son branchement (2 j).
+
+### Reste à construire (→ B) au 26/10
+
+Environ **14 j**, chaque lacune comptée une fois (détail plus bas) :
+- côté CASHD : ≈ 4,75 j (G4 1, G13 0,5, P12 1, C17 0,5, G19 1,5, E1 0,25) ;
+- chez les autres équipes : ≈ 9 j (A1 3, A2 3, socle 3) ;
+- vitrine : 0,5 j.
+
+Les tiers T restent à part (AR24, prestataire de paiement, Meta, région d'hébergement et contrats). Le 06/10, ce
+total était de 38 j.
+
+### Hypothèses prises seul (Teo non consulté, comme demandé)
+
+- **Recette rejouée.** Les tests marqués ✔ ont été rejoués par moi le 26/10 entre 18 h 52 et 19 h 02 Z
+  (`runtests`, chaque test annulé en fin de transaction : rien n'est resté écrit). Ils sont tous verts : c2_02 à
+  c2_07, c2_09 à c2_45. Deux sont rouges :
+  - **`test_c2_01_donnees`** : 35 assertions vertes et 4 rouges, à savoir 6 « trois comptes saisis » (10 trouvés),
+    13 « le tableau : 15 600 € échus » (totaux du client entier), 23 « à imputer » (2 au lieu de 1) et 36 « le
+    collaborateur lit les comptes de son périmètre » (10 au lieu de 3) ;
+  - **`test_c2_08_portefeuille`** : 5 décomptes rouges.
+
+  Les neuf assertions rouges comptent **tous** les comptes du client du banc, et les 7 comptes NOBAT ajoutés le 21/10
+  les faussent ; C2 l'avait déjà écrit. J'ai donc gardé en B les lignes dont l'assertion de fond reste verte
+  (C31 : « la facture probable est proposée », assertion 79, verte), et descendu en C celle dont le seul test est
+  rouge (E1).
+- **Lots posés sans inscription.** Une partie des lots est posée sur la recette sans figurer sous son nom dans
+  `schema_migrations` : c2_16, c2_19 à c2_22, c2_27 à c2_29, c2_33 et c2_37. c2_37 est inscrit sous
+  « c2_36 verts+c2_37 », et c2_07 sous « c2_06_c2_07_liens ». J'ai jugé posé un lot dont le test existe sur la
+  recette et y passe vert. Tous les tests `test_c2_01` à `test_c2_45` existent dans le schéma `tests`.
+- **Taux BCE.** « Taux BCE quotidiens » (C35, G17) : les crons `cashd-taux-bce` et `-lire` tournent chaque jour
+  ouvré, mais `cashd_taux_change` et `cashd_taux_demandes` sont **vides**. Aucune facture en devise n'existe sur la
+  recette, donc aucune demande n'est partie. Le mécanisme est B (c2_15 et c2_16 ✔) ; il n'a jamais appelé la BCE
+  en vrai.
+- **Accord permanent.** Le modèle 2 (c2_12 : rappels 1 et 2 sous accord permanent) est lu comme « votre accord »
+  dans P14, P39 et M5 : l'accord permanent est donné par une personne de l'organisation.
+- **Variantes de texte.** « Un client ne reçoit jamais deux fois le même texte » (P12) est en C. Les variantes
+  alternent : deux par palier, trois au plus, et une seule pour la mise en demeure. Le même gabarit revient donc au
+  troisième rappel d'un même palier. C2 la comptait B le 11/10.
+- **Comptes export (C17).** Ils sont en C. Le mécanisme des langues existe (c2_09 ✔), mais sans texte écrit par
+  l'organisation, un compte allemand reçoit l'anglais.
+
+Légende : **A** prouvé en vrai (vraie donnée ou vrai envoi, daté) · **B** construit et testé sur la recette, test vert
+cité · **C** partiel · **D** pas construit · **T** attend un tiers. Tests : t1 = `test_c2_01_donnees`, t2 =
+`test_c2_02_export`, t3 = `test_c2_03_moteur`, t4 = `test_c2_04_capacites`, `cNN` = `test_c2_NN_*`. ✔ = rejoué vert
+le 26/10 (18 h 52 – 19 h 02 Z) ; ✗ = rejoué rouge le 26/10. « j → B » : jours pour passer en B, portés par la lacune
+et comptés une fois dans le tableau final.
+
+## Page /offres/relances-impayes (`lib/produits/relances.ts`)
+
+| # | Promesse (texte exact) | Où | 06/10 | 26/10 | Preuve (26/10) | Ce qui manque | j → B |
 |---|---|---|---|---|---|---|---|
-| P1 | Vos factures attendent d'être payées | `lib/produits/relances.ts:78` | B | constat, pas une capacité | — | 0 / 0 | — |
-| P2 | Des devis attendent une réponse et des factures ont dépassé leur échéance. Chaque matin, une relance est déjà rédigée pour chaque compte, et vos équipes décident si elle part. | `lib/produits/relances.ts:85-86` | C | cron cashd-matin, cashd_preparer_relances, file de validation (t3) ; « chaque matin » suppose un facturier frais | G1 | 3 / 0,2 | selon la source (OAuth Google / Microsoft : vérification d'application) |
-| P3 | Vous ne changez aucun de vos outils — Google Sheets, Excel, Gmail, Outlook, WhatsApp | `lib/produits/relances.ts:110-111` | C | Excel et CSV : import et dépôt d'export (t1, t2) ; Google Sheets : par export seulement ; Gmail / Outlook : non branchés ; WhatsApp : absent | G1, G4, G13 | 3+4,5+4 / 0,5 | selon la source (OAuth Google / Microsoft : vérification d'application); vérification d'application Google (portée gmail.send) et Microsoft (éditeur vérifié) : gratuit, plusieurs semaines; WhatsApp Business : compte Meta vérifié + coût par conversation (~0,05–0,10 € en France) |
-| P4 | À 7 h, vos relances sont déjà écrites. | `lib/produits/relances.ts:137` | B | heure_relances, passage toutes les 10 min (t3) | — | 0 / 0 | — |
-| P5 | CASHD relit votre facturier chaque matin, avant d'écrire quoi que ce soit. | `lib/produits/relances.ts:144` | C | relit le dernier relevé intégré avant d'écrire (t2, t3) | G1 | 3 / 0 | selon la source (OAuth Google / Microsoft : vérification d'application) |
-| P6 | Chaque devis porte ses jours sans réponse | `lib/produits/relances.ts:153` | B | jours_ecoules (t1) ; écran | — | 0 / 0 | — |
-| P7 | Chaque facture porte son retard et son montant | `lib/produits/relances.ts:154` | B | cashd_factures_etat (t1) | — | 0 / 0 | — |
-| P8 | Un règlement encaissé la veille sort de la liste | `lib/produits/relances.ts:155` | C | vrai si le règlement est dans l'export ou saisi (t2, t3) | G1 | 3 / 0 | selon la source (OAuth Google / Microsoft : vérification d'application) |
-| P9 | Le message est déjà rédigé quand vous ouvrez votre espace, et il ne reste qu'à le relire. | `lib/produits/relances.ts:161` | B | relances a_valider avec texte (t3) ; écran | — | 0 / 0 | — |
-| P10 | Le ton suit le montant et l'ancienneté du retard | `lib/produits/relances.ts:169` | C | le ton suit le palier (donc l'ancienneté) ; le montant ne change que la validation (seuil direction) | G3 | 2 / 0 | — |
-| P11 | L'historique de paiement du client pèse aussi | `lib/produits/relances.ts:170` | B | cashd_payeur_en_retard retire « simple oubli » (t3) — effet mince | G3 | 2 / 0 | — |
-| P12 | Un client ne reçoit jamais deux fois le même texte | `lib/produits/relances.ts:171` | C | textes différents par palier ; deux rappels à des mois d'écart sont identiques | G3 | 2 / 0 | — |
-| P13 | Tout ce qui doit partir passe par une file de validation, qui reste la seule porte de sortie du système. | `lib/produits/relances.ts:178` | B | preparer_envoi adossé à demandes_validation (t3) ; gardes du socle | — | 0 / 0,2 | — |
-| P14 | Aucun message ne part sans votre accord | `lib/produits/relances.ts:186` | B | t3 | — | 0 / 0 | — |
-| P15 | La mise en demeure exige une validation explicite | `lib/produits/relances.ts:187` | B | commentaire exigé, jamais de politique couvrante (t3) | — | 0 / 0 | — |
-| P16 | Une suspension coupe même ce qui est déjà prêt | `lib/produits/relances.ts:188` | B | cashd_couper sur pause (t3) | — | 0 / 0 | — |
-| P17 | J 0 · Facture émise · le suivi s'ouvre automatiquement | `lib/produits/relances.ts:210` | C | à l'intégration de l'export (t2) | G1 | 3 / 0 | selon la source (OAuth Google / Microsoft : vérification d'application) |
-| P18 | J+7 · Rappel courtois · le ton se cale sur l'historique de paiement | `lib/produits/relances.ts:211` | B | t3 (P11) | — | 0 / 0 | — |
-| P19 | J+21 · Relance ferme · elle récapitule les sommes dues et fixe une échéance | `lib/produits/relances.ts:213-215` | B | texte « Total restant dû … au plus tard le » (t3) | — | 0 / 0 | — |
-| P20 | J+30 · Mise en demeure préparée · elle attend votre signature et ne part jamais seule | `lib/produits/relances.ts:218-220` | B | t3 | — | 0 / 0,2 | — |
-| P21 | Les devis suivent une cadence plus resserrée, J+3 puis J+7 | `lib/produits/relances.ts:223` | C | scénario devis par défaut 3 / 10, réglable (t3) — la page dit « J+7 », le moteur relance 7 jours APRÈS le rappel (J+10) ; le catalogue (ligne 10) dit bien « sept jours après ce rappel » | écart de texte : régler le défaut à 3/7 (0 j, une valeur) ou corriger la page | 0 / 0 | — |
-| P22 | Chaque ligne porte le client, le montant dû et les jours de retard, et elle se met à jour à chaque relecture. | `lib/produits/relances.ts:261` | B | t1, t2 | — | 0 / 0 | — |
-| P23 | Le facturier est relu avant chaque envoi, donc un règlement encaissé la veille coupe la séquence avant qu'elle reparte. Un client qui a payé n'est jamais relancé. | `lib/produits/relances.ts:267` | C | coupure au règlement intégré (t3) ; « jamais » dépend de la fraîcheur de l'export | G1 | 3 / 0 | selon la source (OAuth Google / Microsoft : vérification d'application) |
-| P24 | Chaque message est écrit à partir du montant, de l'ancienneté du retard et du palier atteint. | `lib/produits/relances.ts:273` | B | montant et retard dans le texte, palier → ton (t3) | — | 0 / 0 | — |
-| P25 | Le système date et archive chaque message, si bien que le jour où un client affirme n'avoir rien reçu, la preuve est disponible. | `lib/produits/relances.ts:278` | B | envois + journal_opposable + dossier (t4) ; preuve de REMISE réelle seulement après un vrai envoi | — | 0 / 0,2 | — |
-| P26 | Votre espace tient en quatre écrans — Débiteurs, Relances, Envois, Trésorerie ; les captures ci-dessous sont celles de l'espace, montrées telles quelles. | `lib/produits/relances.ts:295-325` | C | l'écran réel /espace/cashd tient en une page (encours, relances, fiche, pilotage) ; les captures viennent de l'ancienne maquette | G14 | 2,5 / 0 | — |
-| P27 | Aucun outil à remplacer · Rien ne part sans vous · Vos données restent chez vous | `lib/produits/relances.ts:328` | C | 1 : voir P3 ; 2 : B ; 3 : données dans la base Omega, pas « chez vous » au sens strict | G22 (formulation) | 0 / 0 | aucun si la région est déjà UE |
-| P28 | Conçu et développé en France ; rien n'est sous-traité ailleurs. | `lib/produits/relances.ts:373-375` | T | déclaration d'entreprise | G22 | 0 / 0 | aucun si la région est déjà UE |
-| P29 | Vos données sont hébergées dans l'Union européenne. Espace chiffré et distinct. Le système n'en extrait que le nécessaire, jamais votre facturier entier. | `lib/produits/relances.ts:378-380` | T | RLS par organisation (t1) ; CASHD n'envoie AUCUNE donnée à un modèle (textes déterministes) ; région d'hébergement à confirmer | G22 | 0 / 0 | aucun si la région est déjà UE |
-| P30 | L'assistance se fait en français, par les personnes qui ont installé le système chez vous. | `lib/produits/relances.ts:383-385` | T | organisation d'Omega | G22 | 0 / 0 | aucun si la région est déjà UE |
-| P31 | Facturation en euros, droit français | `lib/produits/relances.ts:388-390` | T | CGV / contrat | G22 | 0 / 0 | aucun si la région est déjà UE |
-| P32 | Et si un client paie entre deux relances ? … Un règlement enregistré interrompt la séquence sur-le-champ. | `lib/produits/relances.ts:412-413` | B | t3 (coupure à l'intégration) | — | 0 / 0 | — |
-| P33 | Les gabarits sont rédigés avec vous à l'installation, puis adaptés par le système à chaque situation. Le ton reste le vôtre. | `lib/produits/relances.ts:416-417` | C | formule, signature, interdits réglables ; corps des textes fixes | G2 | 3 / 0 | — |
-| P34 | Le ton reste le vôtre, le vouvoiement est constant, et vous lisez chaque message avant qu'il parte. | `lib/produits/relances.ts:421` | B | textes au vouvoiement ; validation (t3) | — | 0 / 0 | — |
-| P35 | Une liste blanche est établie à l'installation et modifiable à tout moment … et seul vous pouvez les y remettre. | `lib/produits/relances.ts:430-431` | B | cashd_statut_compte hors_perimetre, retour par décision motivée (t3) | — | 0 / 0 | — |
-| P36 | Le système lit le tableur ou l'outil où vit déjà votre facturation, avec vos colonnes et vos habitudes. Aucun compte à ouvrir ni aucune donnée à migrer. | `lib/produits/relances.ts:434-435` | C | modèle cashd/tableur à synonymes d'en-têtes (t2) ; « l'outil » : pas de connecteur logiciel | G1 | 3 / 0 | selon la source (OAuth Google / Microsoft : vérification d'application) |
-| P37 | Le système ne remplace personne. Il prépare les relances, puis cette personne les relit et décide de ce qui part. | `lib/produits/relances.ts:438-439` | B | t3 ; écran | — | 0 / 0 | — |
-| P38 | Pour rédiger un message, le système transmet à un modèle le strict nécessaire … jamais votre facturier entier. | `lib/produits/relances.ts:448-449` | B | plus strict que promis : aucun modèle n'est appelé, rien ne sort | à reformuler si G5 n'est pas fait | 0 / 0 | — |
-| P39 | Un message peut-il partir sans moi ? Non. … vous approuvez, vous corrigez ou vous suspendez. | `lib/produits/relances.ts:452-453` | B | file de validation ; corriger = cashd_regler_relances / texte modifiable avant envoi (t3) | — | 0 / 0 | — |
-| P40 | Le tarif dépend de votre encours et du nombre de comptes à suivre … nous chiffrons votre cas sur vos volumes réels. | `lib/produits/relances.ts:456-457` | T | commercial | grille de prix de Teo | 0 / 0 | — |
-| P41 | Vous connectez le tableur que vous tenez déjà, puis vos équipes relisent chaque relance avant qu'elle parte : le système ne demande rien d'autre. | `lib/produits/relances.ts:473-475` | C | dépôt d'export (t2) ; « connecter » suppose un lien permanent | G1 | 3 / 0 | selon la source (OAuth Google / Microsoft : vérification d'application) |
+| P1 | Vos factures attendent d'être payées | `lib/produits/relances.ts:78` | B | B | constat, pas une capacité | — | 0 |
+| P2 | Des devis attendent une réponse et des factures ont dépassé leur échéance. Chaque matin, une relance est déjà rédigée pour chaque compte, et vos équipes décident si elle part. | `:85-86` | C | C | cron `cashd-matin` (toutes les 10 min, actif), t3 ✔, c2_10 ✔ | G1 : le facturier n'arrive pas seul chaque matin, CASHD relit le dernier export déposé | 3 (G1) |
+| P3 | Vous ne changez aucun de vos outils — Google Sheets, Excel, Gmail, Outlook, WhatsApp | `:110-111` | C | C | Excel et CSV : dépôt d'export (t2 ✔) ; Sheets par export seulement | Gmail : CASHD non abonné à la boîte déjà branchée au socle (G4) ; Outlook absent ; WhatsApp : canal prévu dans `cashd_relances`, jamais branché (G13) | G1 + G4 + G13 |
+| P4 | À 7 h, vos relances sont déjà écrites. | `:137` | B | B | `heure_relances`, passage toutes les 10 min (t3 ✔) | — | 0 |
+| P5 | CASHD relit votre facturier chaque matin, avant d'écrire quoi que ce soit. | `:144` | C | C | relit le dernier relevé intégré (t2 ✔, t3 ✔) | G1 | (G1) |
+| P6 | Chaque devis porte ses jours sans réponse | `:153` | B | B | `jours_ecoules` (t1 : assertion verte ; t1 ✗ sur 4 décomptes faussés par le jeu NOBAT) | — | 0 |
+| P7 | Chaque facture porte son retard et son montant | `:154` | B | B | `cashd_factures_etat` (t3 ✔, c2_42 ✔) | — | 0 |
+| P8 | Un règlement encaissé la veille sort de la liste | `:155` | C | C | vrai si le règlement est dans l'export ou saisi (t2 ✔, c2_42 ✔) | G1 | (G1) |
+| P9 | Le message est déjà rédigé quand vous ouvrez votre espace, et il ne reste qu'à le relire. | `:161` | B | B | relances `a_valider` avec texte (t3 ✔) ; écran /espace2/cashd (recette 298/298 du 26/10, C2) | — | 0 |
+| P10 | Le ton suit le montant et l'ancienneté du retard | `:169` | C | **B** | c2_30 ✔ (ton selon l'ancienneté, 15/45 j), c2_33 ✔ (ton selon le montant, 1 500 € par défaut) | — | 0 |
+| P11 | L'historique de paiement du client pèse aussi | `:170` | B | B | `cashd_payeur_en_retard` (t3 ✔) ; variantes (c2_05 ✔) | — | 0 |
+| P12 | Un client ne reçoit jamais deux fois le même texte | `:171` | C | C | deux variantes par palier, trois au plus, alternées par compte (c2_05 ✔) | le gabarit revient au 3ᵉ rappel d'un même palier ; la mise en demeure n'a qu'un texte. Retenir les textes déjà reçus par compte et refuser une répétition mot pour mot, ou dire « varie d'un rappel à l'autre » | 1 |
+| P13 | Tout ce qui doit partir passe par une file de validation, qui reste la seule porte de sortie du système. | `:178` | B | B | `preparer_envoi` adossé à `demandes_validation` (t3 ✔) ; c2_39 ✔ ; c2_44 ✔ (la relance revue repasse les contrôles) | — | 0 |
+| P14 | Aucun message ne part sans votre accord | `:186` | B | B | t3 ✔ ; c2_12 ✔ (accord permanent donné par une personne) | — | 0 |
+| P15 | La mise en demeure exige une validation explicite | `:187` | B | B | c2_25 ✔ (approuvée sans commentaire : coupée) | — | 0 |
+| P16 | Une suspension coupe même ce qui est déjà prêt | `:188` | B | B | `cashd_couper` (t3 ✔) ; c2_22b ✔ | — | 0 |
+| P17 | J 0 · Facture émise · le suivi s'ouvre automatiquement | `:210` | C | C | à l'intégration de l'export (t2 ✔) | G1 | (G1) |
+| P18 | J+7 · Rappel courtois · le ton se cale sur l'historique de paiement | `:211` | B | B | t3 ✔ ; c2_10 ✔ (scénario par défaut J0 / J+7 / J+21 / J+30) | — | 0 |
+| P19 | J+21 · Relance ferme · elle récapitule les sommes dues et fixe une échéance | `:213-215` | B | B | t3 ✔ ; c2_35 ✔ (date limite : 3 j ouvrés de validation + 2 j de remise) | — | 0 |
+| P20 | J+30 · Mise en demeure préparée · elle attend votre signature et ne part jamais seule | `:218-220` | B | B | c2_24 ✔ (jamais avant que la ferme soit partie), c2_25 ✔ | — | 0 |
+| P21 | Les devis suivent une cadence plus resserrée, J+3 puis J+7 | `:223` | C | **B** | c2_10 ✔ : le scénario des devis par défaut est `[J+3, J+7]`, l'écart de texte du 06/10 est résorbé | — | 0 |
+| P22 | Chaque ligne porte le client, le montant dû et les jours de retard, et elle se met à jour à chaque relecture. | `:261` | B | B | t2 ✔ ; c2_23 ✔ (clients inchangés) | — | 0 |
+| P23 | Le facturier est relu avant chaque envoi, donc un règlement encaissé la veille coupe la séquence avant qu'elle reparte. Un client qui a payé n'est jamais relancé. | `:267` | C | C | coupure au règlement intégré (t3 ✔, c2_36 ✔, c2_42 ✔) | G1 : « jamais » dépend de la fraîcheur de l'export | (G1) |
+| P24 | Chaque message est écrit à partir du montant, de l'ancienneté du retard et du palier atteint. | `:273` | B | B | t3 ✔, c2_30 ✔, c2_33 ✔ | — | 0 |
+| P25 | Le système date et archive chaque message, si bien que le jour où un client affirme n'avoir rien reçu, la preuve est disponible. | `:278` | B | B | envois + journal opposable + dossier (t4 ✔) ; preuve de REMISE réelle : seulement après un vrai envoi (A) | — | 0 |
+| P26 | Votre espace tient en quatre écrans — Débiteurs, Relances, Envois, Trésorerie ; les captures ci-dessous sont celles de l'espace, montrées telles quelles. | `:295-325` | C | C | l'écran a ses quatre vues (`/espace2/cashd/suivi?vue=…`, recette 298/298 du 26/10, C2) ; les captures de la page viennent toujours de l'ancienne maquette | refaire les quatre captures depuis l'écran réel (vitrine) | 0,5 |
+| P27 | Aucun outil à remplacer · Rien ne part sans vous · Vos données restent chez vous | `:328` | C | C | 2ᵉ point : B ; 1ᵉʳ : voir P3 ; 3ᵉ : les données sont dans la base d'Omega, isolées par organisation | reformuler « restent chez vous » (G22) | 0 |
+| P28 | Conçu et développé en France ; rien n'est sous-traité ailleurs. | `:373-375` | T | T | déclaration d'entreprise | G22 (Teo) | — |
+| P29 | Vos données sont hébergées dans l'Union européenne. Espace chiffré et distinct. Le système n'en extrait que le nécessaire, jamais votre facturier entier. | `:378-380` | T | T | RLS par organisation (t1, assertions vertes) ; aucun modèle appelé ; région d'hébergement non vérifiée ici | G22 (Teo) | — |
+| P30 | L'assistance se fait en français, par les personnes qui ont installé le système chez vous. | `:383-385` | T | T | organisation d'Omega | G22 (Teo) | — |
+| P31 | Facturation en euros, droit français | `:388-390` | T | T | CGV / contrat | G22 (Teo) | — |
+| P32 | Et si un client paie entre deux relances ? … Un règlement enregistré interrompt la séquence sur-le-champ. | `:412-413` | B | B | t3 ✔ ; c2_42 ✔ (règlement partiel : la relance en attente est revue au reste dû) ; c2_43 ✔ | — | 0 |
+| P33 | Les gabarits sont rédigés avec vous à l'installation, puis adaptés par le système à chaque situation. Le ton reste le vôtre. | `:416-417` | C | **B** | textes de l'organisation par palier, langue et variante, écran « Vos textes » (c2_05 ✔) | — | 0 |
+| P34 | Le ton reste le vôtre, le vouvoiement est constant, et vous lisez chaque message avant qu'il parte. | `:421` | B | B | t3 ✔, c2_05 ✔ | — | 0 |
+| P35 | Une liste blanche est établie à l'installation et modifiable à tout moment … et seul vous pouvez les y remettre. | `:430-431` | B | B | `hors_perimetre`, retour par décision motivée (t3 ✔) | — | 0 |
+| P36 | Le système lit le tableur ou l'outil où vit déjà votre facturation, avec vos colonnes et vos habitudes. Aucun compte à ouvrir ni aucune donnée à migrer. | `:434-435` | C | C | tableur à synonymes d'en-têtes (t2 ✔), contrôles d'import (c2_17 ✔), secteur lu (c2_29 ✔) | G1 : « l'outil » suppose un connecteur | (G1) |
+| P37 | Le système ne remplace personne. Il prépare les relances, puis cette personne les relit et décide de ce qui part. | `:438-439` | B | B | t3 ✔ | — | 0 |
+| P38 | Pour rédiger un message, le système transmet à un modèle le strict nécessaire … jamais votre facturier entier. | `:448-449` | B | B | plus strict que promis : aucun modèle n'est appelé, rien ne sort | écart de texte : la phrase décrit un mécanisme absent | 0 |
+| P39 | Un message peut-il partir sans moi ? Non. … vous approuvez, vous corrigez ou vous suspendez. | `:452-453` | B | B | file de validation (t3 ✔) ; reprise après refus (c2_41 ✔) | — | 0 |
+| P40 | Le tarif dépend de votre encours et du nombre de comptes à suivre … nous chiffrons votre cas sur vos volumes réels. | `:456-457` | T | T | commercial (prix fixés à l'audit) | Teo | — |
+| P41 | Vous connectez le tableur que vous tenez déjà, puis vos équipes relisent chaque relance avant qu'elle parte : le système ne demande rien d'autre. | `:473-475` | C | C | dépôt d'export (t2 ✔) | G1 : « connecter » suppose un lien permanent | (G1) |
 
-### Catalogue (lib/produits/capacites/relances.ts, 50 lignes)
+## Catalogue (`lib/produits/capacites/relances.ts`, 50 lignes)
 
-| # | Promesse (texte exact) | Où | État | Preuve | Ce qui manque | Jours → B / B → A | Coût externe / tiers |
+| # | Promesse (texte exact) | Où | 06/10 | 26/10 | Preuve (26/10) | Ce qui manque | j → B |
 |---|---|---|---|---|---|---|---|
-| C1 | Le système relit votre facturier chaque matin, avant d'écrire la moindre relance. | `lib/produits/capacites/relances.ts:33` | C | relit le dernier relevé (t2, t3) | G1 | 3 / 0 | selon la source (OAuth Google / Microsoft : vérification d'application) |
-| C2 | Chaque devis porte le nombre de jours écoulés depuis son envoi. | `lib/produits/capacites/relances.ts:34` | B | t1 ; écran | — | 0 / 0 | — |
-| C3 | Chaque facture porte son montant dû, son retard et le compte concerné. | `lib/produits/capacites/relances.ts:35` | B | t1 | — | 0 / 0 | — |
-| C4 | Un règlement encaissé la veille sort de la liste du jour. | `lib/produits/capacites/relances.ts:36` | C | t2 (dépend de l'export) | G1 | 3 / 0 | selon la source (OAuth Google / Microsoft : vérification d'application) |
-| C5 | La balance âgée range l'encours par tranche d'ancienneté, compte par compte. | `lib/produits/capacites/relances.ts:37` | B | cashd_balance_agee (t1, t4) ; écran | — | 0 / 0 | — |
-| C6 | Chaque ligne indique l'état de la relance et le palier suivant. | `lib/produits/capacites/relances.ts:38` | B | cashd_suivi (t3) ; écran | — | 0 / 0 | — |
-| C7 | Un échéancier négocié remplace l'échéance d'origine, et le suivi épouse ses termes. | `lib/produits/capacites/relances.ts:39` | B | cashd_poser_echeancier (t4) | — | 0 / 0,5 | — |
-| C8 | Les devis sans réponse sont suivis au même titre que les factures échues. | `lib/produits/capacites/relances.ts:40` | B | t3 | — | 0 / 0 | — |
-| C9 | Une facture échue suit trois paliers : deux relances, puis la mise en demeure. | `lib/produits/capacites/relances.ts:47` | B | t3 | — | 0 / 0 | — |
-| C10 | Un devis sans réponse est relancé au troisième jour, puis sept jours après ce rappel. | `lib/produits/capacites/relances.ts:48` | B | t3 | — | 0 / 0 | — |
-| C11 | La fermeté du message suit le palier atteint, du rappel à la mise en demeure. | `lib/produits/capacites/relances.ts:49` | B | t3 (trois textes) | — | 0 / 0 | — |
-| C12 | Chaque message reprend le secteur du compte, sa référence, son montant et son retard. | `lib/produits/capacites/relances.ts:50` | B | t3 | — | 0 / 0 | — |
-| C13 | Les relances partent par courriel, depuis la boîte de votre entreprise. | `lib/produits/capacites/relances.ts:51` | C | courriel par l'expéditeur du socle ; pas depuis la boîte de l'entreprise | G4 | 4,5 / 0 | vérification d'application Google (portée gmail.send) et Microsoft (éditeur vérifié) : gratuit, plusieurs semaines |
-| C14 | Au-delà d'un montant que vous fixez, la relance remonte à la direction avant l'envoi. | `lib/produits/capacites/relances.ts:52` | B | seuil_direction → regles_validation (t3) | — | 0 / 0 | — |
-| C15 | Chaque facture suit sa propre séquence, avec son palier et son échéance. | `lib/produits/capacites/relances.ts:53` | B | cashd_relances_pieces (t3) | — | 0 / 0 | — |
-| C16 | Les envois respectent les jours ouvrés, les jours fériés locaux et vos fenêtres horaires. | `lib/produits/capacites/relances.ts:54` | B | calendrier du socle (t4 « un samedi ») ; fenêtres : reglages_envois | — | 0 / 0 | — |
-| C17 | Les comptes export reçoivent leur relance dans leur langue de facturation. | `lib/produits/capacites/relances.ts:55` | C | français et anglais (t3) | G6 | 1 / 0 | traduction relue ~150–300 € par langue |
-| C18 | Une contestation écrite bascule la facture en litige et la sort du cycle. | `lib/produits/capacites/relances.ts:62` | C | bascule par geste humain (t3) ; la réponse reçue est signalée, pas lue | G5 | 2,5 / 0 | appel de modèle de langue : quelques centimes par réponse lue |
-| C19 | Le commercial en charge du compte est notifié dès l'ouverture du litige. | `lib/produits/capacites/relances.ts:63` | B | cashd_alerter_commercial (t4) | — | 0 / 0 | — |
-| C20 | Une facture contestée sur une seule ligne laisse le reste en relance. | `lib/produits/capacites/relances.ts:64` | B | cashd_litige_partiel (t4) | — | 0 / 0,5 | — |
-| C21 | La reprise des relances demande une décision, jamais un simple délai écoulé. | `lib/produits/capacites/relances.ts:65` | B | motif obligatoire (t3) | — | 0 / 0 | — |
-| C22 | Le contact de facturation reçoit les relances, le contact commercial reçoit les alertes. | `lib/produits/capacites/relances.ts:66` | B | t4 | — | 0 / 0 | — |
-| C23 | Un compte se met en pause ou sort du périmètre à tout moment. | `lib/produits/capacites/relances.ts:67` | B | t3 ; écran | — | 0 / 0 | — |
-| C24 | La mise en demeure est préparée, puis elle attend une validation explicite. | `lib/produits/capacites/relances.ts:68` | B | t3 | — | 0 / 0 | — |
-| C25 | Le dossier de litige réunit les pièces, les envois et les accusés de réception. | `lib/produits/capacites/relances.ts:69` | B | cashd_dossier (t4) — accusés réels : après G16 | — | 0 / 0,5 | — |
-| C26 | Le courrier recommandé électronique est préparé quand la créance l'exige. | `lib/produits/capacites/relances.ts:70` | T | préparé en canal lre au-delà de seuil_lre (t4) ; ne part pas sans AR24 | G16 | 2 / 0 | contrat AR24 (prix par envoi sur devis, de l'ordre de quelques euros) |
-| C27 | Un règlement enregistré interrompt la séquence avant le prochain envoi. | `lib/produits/capacites/relances.ts:77` | B | t3 ; écran | — | 0 / 0 | — |
-| C28 | Les règlements partiels sont imputés, et le solde dû continue d'être suivi. | `lib/produits/capacites/relances.ts:78` | B | t1 | — | 0 / 0 | — |
-| C29 | Le lettrage rapproche chaque encaissement de la facture qu'il solde. | `lib/produits/capacites/relances.ts:79` | B | t1, t2 | — | 0 / 0 | — |
-| C30 | Les écritures bancaires sont rapprochées de l'encours, jour après jour. | `lib/produits/capacites/relances.ts:80` | C | par export du relevé (t2) ; « jour après jour » suppose un dépôt quotidien | G1 | 3 / 0 | selon la source (OAuth Google / Microsoft : vérification d'application) |
-| C31 | Un virement sans référence est proposé au rapprochement avec les factures probables. | `lib/produits/capacites/relances.ts:81` | B | cashd_propositions (t1) | — | 0 / 0,5 | — |
-| C32 | Les avoirs et les acomptes sont déduits avant tout calcul du solde dû. | `lib/produits/capacites/relances.ts:82` | B | t1, t3 | — | 0 / 0 | — |
-| C33 | Les pénalités de retard et l'indemnité forfaitaire de recouvrement sont calculées. | `lib/produits/capacites/relances.ts:83` | B | cashd_penalites (t3) | — | 0 / 0 | — |
-| C34 | Un lien de paiement accompagne la relance et s'éteint dès le règlement. | `lib/produits/capacites/relances.ts:84` | T | contrat d'interface (t4) ; aucun prestataire branché | G15 | 2,5 / 0 | compte du prestataire de chaque client (Stripe : ~1,5 % + 0,25 € par carte UE ; SEPA ~0,35 €) |
-| C35 | Les factures en devise étrangère sont suivies dans leur devise et en euros. | `lib/produits/capacites/relances.ts:85` | B | cashd_taux_change (t4) ; taux saisis à la main | G17 | 0,5 / 0,5 | aucun (taux publics) |
-| C36 | Un plafond d'encours se fixe par compte, à partir de son historique. | `lib/produits/capacites/relances.ts:92` | B | cashd_proposer_plafond (t4) | — | 0 / 0,5 | — |
-| C37 | Le dépassement du plafond déclenche une alerte avant toute nouvelle commande. | `lib/produits/capacites/relances.ts:93` | B | cashd_alerter_plafonds (t4) | — | 0 / 0 | — |
-| C38 | Une commande au-delà du plafond est bloquée jusqu'à la décision d'un responsable. | `lib/produits/capacites/relances.ts:94` | C | porte cashd_verifier_commande (t4) ; aucun logiciel de commandes ne l'appelle | G19 | 1,5 / 0,5 | selon le logiciel de commandes |
-| C39 | Vos règles de communication et vos interdits sont repris dans chaque message. | `lib/produits/capacites/relances.ts:95` | B | t3 | — | 0 / 0 | — |
-| C40 | Un compte qui se dégrade est signalé avant que le retard s'installe. | `lib/produits/capacites/relances.ts:96` | B | t4 (assertion stricte) | — | 0 / 0 | — |
-| C41 | Un compte se met en pause, et il n'y revient que sur votre décision. | `lib/produits/capacites/relances.ts:97` | B | t3 | — | 0 / 0 | — |
-| C42 | Le dossier destiné à l'assurance-crédit est constitué avec les pièces exigées. | `lib/produits/capacites/relances.ts:98` | C | dossier (t4) sans les PDF | G20 | 1 / 0 | — |
-| C43 | Le dossier de recouvrement judiciaire est remis complet à qui vous désignez. | `lib/produits/capacites/relances.ts:99` | B | cashd_remettre_dossier (t4) | — | 0 / 0,5 | — |
-| C44 | Le délai moyen de règlement se mesure compte par compte. | `lib/produits/capacites/relances.ts:106` | B | t4 | — | 0 / 0 | — |
-| C45 | La prévision d'encaissement est établie à trente et à soixante jours. | `lib/produits/capacites/relances.ts:107` | B | t4 | — | 0 / 0 | — |
-| C46 | Chaque relance partie est datée et consignée, avec son objet et son destinataire. | `lib/produits/capacites/relances.ts:108` | B | envois + journal ; écran | — | 0 / 0 | — |
-| C47 | Le taux de réponse aux relances se suit palier par palier. | `lib/produits/capacites/relances.ts:109` | B | vue cashd_reponses ; écran — aucune réponse réelle encore | — | 0 / 0 | — |
-| C48 | Les créances en litige, en pause et en recouvrement sont comptées en continu. | `lib/produits/capacites/relances.ts:110` | B | t4 | — | 0 / 0 | — |
-| C49 | Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe. | `lib/produits/capacites/relances.ts:111` | B | boutons Tableur ; arrêté mensuel (t4) | — | 0 / 0 | — |
-| C50 | Les seuils et les cadences se modifient, et chaque changement reste daté. | `lib/produits/capacites/relances.ts:112` | B | cashd_historique_reglages (t4) | — | 0 / 0 | — |
+| C1 | Le système relit votre facturier chaque matin, avant d'écrire la moindre relance. | `:33` | C | C | dernier relevé (t2 ✔, t3 ✔) | G1 | (G1) |
+| C2 | Chaque devis porte le nombre de jours écoulés depuis son envoi. | `:34` | B | B | t1 (assertion verte) ; écran | — | 0 |
+| C3 | Chaque facture porte son montant dû, son retard et le compte concerné. | `:35` | B | B | t3 ✔, c2_21 ✔ | — | 0 |
+| C4 | Un règlement encaissé la veille sort de la liste du jour. | `:36` | C | C | t2 ✔ (dépend de l'export) | G1 | (G1) |
+| C5 | La balance âgée range l'encours par tranche d'ancienneté, compte par compte. | `:37` | B | B | `cashd_balance_agee` (t4 ✔, t2 ✔) | — | 0 |
+| C6 | Chaque ligne indique l'état de la relance et le palier suivant. | `:38` | B | B | `cashd_suivi` (t3 ✔), c2_24b ✔ | — | 0 |
+| C7 | Un échéancier négocié remplace l'échéance d'origine, et le suivi épouse ses termes. | `:39` | B | B | `cashd_poser_echeancier` (t4 ✔) | — | 0 |
+| C8 | Les devis sans réponse sont suivis au même titre que les factures échues. | `:40` | B | B | t3 ✔ | — | 0 |
+| C9 | Une facture échue suit trois paliers : deux relances, puis la mise en demeure. | `:47` | B | B | t3 ✔, c2_31 ✔ | — | 0 |
+| C10 | Un devis sans réponse est relancé au troisième jour, puis sept jours après ce rappel. | `:48` | B | **C** | c2_10 ✔ : depuis le 17/10 (décision de Teo), le défaut est « J+3 puis J+7 **après l'envoi** », soit quatre jours après le rappel ; la phrase décrit l'ancien défaut (J+10) | écart de texte : corriger le catalogue (« puis au septième jour ») ou régler le défaut à 3/10 | 0 |
+| C11 | La fermeté du message suit le palier atteint, du rappel à la mise en demeure. | `:49` | B | B | t3 ✔, c2_05 ✔ | — | 0 |
+| C12 | Chaque message reprend le secteur du compte, sa référence, son montant et son retard. | `:50` | B | B | t3 ✔, c2_29 ✔ (secteur lu à l'import) | — | 0 |
+| C13 | Les relances partent par courriel, depuis la boîte de votre entreprise. | `:51` | C | C | courriel par l'expéditeur du socle (essai) ; une boîte Gmail de test est branchée au socle sur le banc, mais CASHD ne s'y abonne pas | G4 : abonner CASHD au dépôt dans la boîte (comme OFFLOAD c4_22), Microsoft 365 côté A2, vérification Google / Microsoft (T) | 1 + 2 (G4) |
+| C14 | Au-delà d'un montant que vous fixez, la relance remonte à la direction avant l'envoi. | `:52` | B | B | trois paliers de validation (c2_07 ✔) | — | 0 |
+| C15 | Chaque facture suit sa propre séquence, avec son palier et son échéance. | `:53` | B | B | `cashd_relances_pieces` (t3 ✔), c2_26 ✔ | — | 0 |
+| C16 | Les envois respectent les jours ouvrés, les jours fériés locaux et vos fenêtres horaires. | `:54` | B | B | calendrier du socle (t4 ✔) | — | 0 |
+| C17 | Les comptes export reçoivent leur relance dans leur langue de facturation. | `:55` | C | C | textes et lignes de pièces dans toute langue écrite par l'organisation (c2_09 ✔) | aucun texte par défaut hors français et anglais : un compte allemand reçoit l'anglais tant que l'organisation n'a pas écrit les siens ; textes relus par langue (~150–300 €, tiers) | 0,5 / langue |
+| C18 | Une contestation écrite bascule la facture en litige et la sort du cycle. | `:62` | C | **B** | réponse lue par règles (sans modèle), proposition « litige » acceptée par une personne (c2_06 ✔) | — | 0 |
+| C19 | Le commercial en charge du compte est notifié dès l'ouverture du litige. | `:63` | B | B | `cashd_alerter_commercial` (t4 ✔) | — | 0 |
+| C20 | Une facture contestée sur une seule ligne laisse le reste en relance. | `:64` | B | B | `cashd_litige_partiel` (t4 ✔) | — | 0 |
+| C21 | La reprise des relances demande une décision, jamais un simple délai écoulé. | `:65` | B | B | motif obligatoire (t3 ✔) | — | 0 |
+| C22 | Le contact de facturation reçoit les relances, le contact commercial reçoit les alertes. | `:66` | B | B | t4 ✔ | — | 0 |
+| C23 | Un compte se met en pause ou sort du périmètre à tout moment. | `:67` | B | B | t3 ✔ ; écran | — | 0 |
+| C24 | La mise en demeure est préparée, puis elle attend une validation explicite. | `:68` | B | B | t3 ✔, c2_25 ✔ | — | 0 |
+| C25 | Le dossier de litige réunit les pièces, les envois et les accusés de réception. | `:69` | B | B | `cashd_dossier` (t4 ✔), pièces déposées (c2_06 ✔) ; accusés réels : après G16 | — | 0 |
+| C26 | Le courrier recommandé électronique est préparé quand la créance l'exige. | `:70` | T | T | préparé en canal `lre` au-delà de `seuil_lre` (t4 ✔), ne part pas sans AR24 | G16 : contrat AR24 et branchement A2 | 2 (A2) |
+| C27 | Un règlement enregistré interrompt la séquence avant le prochain envoi. | `:77` | B | B | t3 ✔, c2_42 ✔ | — | 0 |
+| C28 | Les règlements partiels sont imputés, et le solde dû continue d'être suivi. | `:78` | B | B | c2_42 ✔ (reste dû revu), c2_45 ✔ (règlement de 0 € refusé) | — | 0 |
+| C29 | Le lettrage rapproche chaque encaissement de la facture qu'il solde. | `:79` | B | B | t2 ✔ ; t1 (assertions de lettrage vertes) | — | 0 |
+| C30 | Les écritures bancaires sont rapprochées de l'encours, jour après jour. | `:80` | C | C | par export du relevé (t2 ✔) | G1 : « jour après jour » suppose un dépôt quotidien | (G1) |
+| C31 | Un virement sans référence est proposé au rapprochement avec les factures probables. | `:81` | B | B | `cashd_propositions` : t1, assertion 79 verte ; l'assertion 80 du même test, rouge, compte tout le client | — | 0 |
+| C32 | Les avoirs et les acomptes sont déduits avant tout calcul du solde dû. | `:82` | B | B | c2_20 ✔, c2_20b ✔ | — | 0 |
+| C33 | Les pénalités de retard et l'indemnité forfaitaire de recouvrement sont calculées. | `:83` | B | B | `cashd_penalites` (t3 ✔) | — | 0 |
+| C34 | Un lien de paiement accompagne la relance et s'éteint dès le règlement. | `:84` | T | T | une adresse de paiement fixe de l'organisation dans chaque relance (c2_40 ✔) ; le lien par facture (`cashd_poser_lien`, `cashd_lien_paye`) attend un prestataire | G15 : prestataire de chaque client + ouvrier serveur et webhook | 2,5 (serveur) |
+| C35 | Les factures en devise étrangère sont suivies dans leur devise et en euros. | `:85` | B | B | c2_15 ✔, c2_16 ✔ ; crons BCE actifs, mais aucune facture en devise sur la recette, donc aucun taux BCE réel rangé (`cashd_taux_change` vide) | — (le premier appel réel à la BCE se fera avec la première facture en devise) | 0 |
+| C36 | Un plafond d'encours se fixe par compte, à partir de son historique. | `:92` | B | B | `cashd_proposer_plafond` (t4 ✔) | — | 0 |
+| C37 | Le dépassement du plafond déclenche une alerte avant toute nouvelle commande. | `:93` | B | B | `cashd_alerter_plafonds` (t4 ✔) | — | 0 |
+| C38 | Une commande au-delà du plafond est bloquée jusqu'à la décision d'un responsable. | `:94` | C | C | porte `cashd_verifier_commande` (t4 ✔) ; aucun logiciel de commandes ne l'appelle | G19 : raccorder le logiciel de commandes d'un premier client | 1,5 |
+| C39 | Vos règles de communication et vos interdits sont repris dans chaque message. | `:95` | B | B | t3 ✔, c2_44 ✔ (la relance revue repasse les interdits) | — | 0 |
+| C40 | Un compte qui se dégrade est signalé avant que le retard s'installe. | `:96` | B | B | t4 ✔ | — | 0 |
+| C41 | Un compte se met en pause, et il n'y revient que sur votre décision. | `:97` | B | B | t3 ✔ | — | 0 |
+| C42 | Le dossier destiné à l'assurance-crédit est constitué avec les pièces exigées. | `:98` | C | **B** | PDF de facture, bon de livraison, bon de commande, contrat rattachés ; le dossier nomme les factures sans PDF (c2_06 ✔) | — | 0 |
+| C43 | Le dossier de recouvrement judiciaire est remis complet à qui vous désignez. | `:99` | B | B | `cashd_remettre_dossier` (t4 ✔) | — | 0 |
+| C44 | Le délai moyen de règlement se mesure compte par compte. | `:106` | B | B | t4 ✔ | — | 0 |
+| C45 | La prévision d'encaissement est établie à trente et à soixante jours. | `:107` | B | B | t4 ✔ | — | 0 |
+| C46 | Chaque relance partie est datée et consignée, avec son objet et son destinataire. | `:108` | B | B | envois + journal (t4 ✔) ; c2_37 ✔ (statut « envoyée ») | — | 0 |
+| C47 | Le taux de réponse aux relances se suit palier par palier. | `:109` | B | B | vue `cashd_reponses` (t4 ✔) ; aucune réponse réelle encore | — | 0 |
+| C48 | Les créances en litige, en pause et en recouvrement sont comptées en continu. | `:110` | B | B | t4 ✔ | — | 0 |
+| C49 | Chaque tableau s'exporte vers un tableur, à la demande ou à date fixe. | `:111` | B | B | arrêté mensuel (t4 ✔) ; boutons Tableur (recette écran du 26/10) | — | 0 |
+| C50 | Les seuils et les cadences se modifient, et chaque changement reste daté. | `:112` | B | B | `cashd_historique_reglages` (t4 ✔), c2_10 ✔ | — | 0 |
 
-### Les douze cas tordus
+## Les douze cas tordus (`lib/produits/capacites/relances.ts`)
 
-| # | Promesse (texte exact) | Où | État | Preuve | Ce qui manque | Jours → B / B → A | Coût externe / tiers |
+| # | Promesse (texte exact) | Où | 06/10 | 26/10 | Preuve (26/10) | Ce qui manque | j → B |
 |---|---|---|---|---|---|---|---|
-| L1 | Le client a payé hier soir, et la relance était prête. | `lib/produits/capacites/relances.ts:125` | C | coupure au règlement intégré (t3) | G1 | 3 / 0 | selon la source (OAuth Google / Microsoft : vérification d'application) |
-| L2 | Le client conteste une seule ligne de la facture. | `lib/produits/capacites/relances.ts:129` | B | t4 | — | 0 / 0,5 | — |
-| L3 | Le client demande à régler en plusieurs fois. | `lib/produits/capacites/relances.ts:133` | B | t4 (échéance manquée → relance de l'échéance) | — | 0 / 0,5 | — |
-| L4 | Votre interlocuteur a quitté l'entreprise du client. Le rejet du message ou la réponse d'absence définitive signale l'adresse. | `lib/produits/capacites/relances.ts:137` | C | rebond → attente_contact (cashd_suivre_envoi) ; l'assertion (t4) a une branche de repli quand aucun envoi n'est réglé, ce qui est le cas tant que les envois sont gardés ; l'absence définitive n'est pas lue | G5 | 2,5 / 0,5 | appel de modèle de langue : quelques centimes par réponse lue |
-| L5 | Deux filiales du même groupe client doivent être relancées séparément. | `lib/produits/capacites/relances.ts:141` | B | un compte par entité, tableau par entité et consolidé (t1) | — | 0 / 0 | — |
-| L6 | Un virement arrive sans aucune référence … Tant que l'imputation n'est pas tranchée, la séquence du compte est suspendue. | `lib/produits/capacites/relances.ts:145` | B | t1, t3 | — | 0 / 0 | — |
-| L7 | Le montant restant dû est de quelques euros. Un seuil de relance se fixe par entité … | `lib/produits/capacites/relances.ts:149` | C | seuil_relance par organisation (t1) | G9 | 0,5 / 0 | — |
-| L8 | Le client est aussi l'un de vos fournisseurs. Le compte est signalé comme réciproque et sort du cycle automatique. | `lib/produits/capacites/relances.ts:153` | B | cashd_comptes.reciproque exclu de la préparation | — | 0 / 0 | — |
-| L9 | Le dossier est passé entre les mains d'un avocat … toute relance commerciale cesse, y compris celle qui était déjà rédigée. | `lib/produits/capacites/relances.ts:157` | B | cashd_remettre_dossier (t4) | — | 0 / 0 | — |
-| L10 | Le client demande expressément l'arrêt des relances … le journal garde la trace des deux décisions. | `lib/produits/capacites/relances.ts:161` | B | hors_perimetre + journal (t3) | — | 0 / 0 | — |
-| L11 | Le devis a été accepté de vive voix … Vous consignez l'accord oral, ce qui arrête la relance et ouvre le suivi de la facturation à venir. | `lib/produits/capacites/relances.ts:165` | C | statut « accepte » arrête la relance ; rien n'ouvre le suivi de la facture à venir | G8 | 0,5 / 0 | — |
-| L12 | La facture attend un bon de commande chez le client … la relance vise le service qui doit émettre ce bon. | `lib/produits/capacites/relances.ts:169` | D | colonne commande_ref lue, rien d'autre | G7 | 1 / 0 | — |
+| L1 | Le client a payé hier soir, et la relance était prête. | `:125` | C | C | coupure au règlement intégré (t3 ✔, c2_42 ✔) | G1 | (G1) |
+| L2 | Le client conteste une seule ligne de la facture. | `:129` | B | B | t4 ✔ | — | 0 |
+| L3 | Le client demande à régler en plusieurs fois. | `:133` | B | B | t4 ✔ ; échelonnement proposé (c2_05 ✔) | — | 0 |
+| L4 | Votre interlocuteur a quitté l'entreprise du client. Le rejet du message ou la réponse d'absence définitive signale l'adresse. | `:137` | C | **B** | la réponse « a quitté l'entreprise » est lue et proposée en « attente de contact » (c2_06 ✔) ; le rejet par rebond (`cashd_suivre_envoi`) ne se prouve qu'après un vrai envoi (→ A) | — | 0 |
+| L5 | Deux filiales du même groupe client doivent être relancées séparément. | `:141` | B | B | un compte par entité (t1, assertions vertes) ; tableau par entité (t4 ✔) | — | 0 |
+| L6 | Un virement arrive sans aucune référence … Tant que l'imputation n'est pas tranchée, la séquence du compte est suspendue. | `:145` | B | B | t3 ✔ ; c2_22 ✔ (raison dite) | — | 0 |
+| L7 | Le montant restant dû est de quelques euros. Un seuil de relance se fixe par entité … | `:149` | C | **B** | seuil par entité ; solde abandonné ou réclamé, motivé (c2_05 ✔) | — | 0 |
+| L8 | Le client est aussi l'un de vos fournisseurs. Le compte est signalé comme réciproque et sort du cycle automatique. | `:153` | B | B | `reciproque` exclu (t3 ✔), c2_44 ✔ | — | 0 |
+| L9 | Le dossier est passé entre les mains d'un avocat … toute relance commerciale cesse, y compris celle qui était déjà rédigée. | `:157` | B | B | `cashd_remettre_dossier` (t4 ✔) | — | 0 |
+| L10 | Le client demande expressément l'arrêt des relances … le journal garde la trace des deux décisions. | `:161` | B | B | `hors_perimetre` + journal (t3 ✔) | — | 0 |
+| L11 | Le devis a été accepté de vive voix … Vous consignez l'accord oral, ce qui arrête la relance et ouvre le suivi de la facturation à venir. | `:165` | C | **B** | accord oral : cadence arrêtée, point du matin si rien n'est facturé (c2_05 ✔) | — | 0 |
+| L12 | La facture attend un bon de commande chez le client … la relance vise le service qui doit émettre ce bon. | `:169` | D | **B** | relance au service émetteur tous les 7 jours, par la file (c2_05 ✔) | — | 0 |
 
-### À l'échelle d'un groupe
+## À l'échelle d'un groupe (`lib/produits/capacites/relances.ts`)
 
-| # | Promesse (texte exact) | Où | État | Preuve | Ce qui manque | Jours → B / B → A | Coût externe / tiers |
+| # | Promesse (texte exact) | Où | 06/10 | 26/10 | Preuve (26/10) | Ce qui manque | j → B |
 |---|---|---|---|---|---|---|---|
-| E1 | Chaque société, filiale ou site a son encours … un chargé de recouvrement ne voit que son portefeuille. | `lib/produits/capacites/relances.ts:185` | C | périmètre par entité (RLS, t1) ; pas par chargé | G10 | 1,5 / 0 | — |
-| E2 | Suivi, validation des relances, gestion des litiges et administration sont quatre rôles distincts. Une délégation se pose pour une absence et s'éteint à la date prévue. | `lib/produits/capacites/relances.ts:191` | B | rôles et délégations du socle ; CASHD exige gestion / validation (t1, t3) | — | 0 / 0 | — |
-| E3 | Le montant et le palier décident de qui valide : le chargé de compte, le responsable crédit, la direction financière. | `lib/produits/capacites/relances.ts:197` | C | un seul seuil direction (t3) | G11 | 1 / 0 | — |
-| E4 | … un journal qui ne se modifie pas, y compris par nous. | `lib/produits/capacites/relances.ts:203` | C | journal_opposable du socle | G18 | 1 / 0 | horodatage qualifié éventuel |
-| E5 | Le système lit votre facturation et vos encaissements là où ils vivent déjà, tableur compris. Là où un connecteur manque, l'échange passe par dépôt de fichiers ou par interface de programmation. | `lib/produits/capacites/relances.ts:209` | C | dépôt de fichiers (t2) ; API non offerte | G1, G12 | 3+2 / 0 | selon la source (OAuth Google / Microsoft : vérification d'application) |
-| E6 | Encours, balance âgée, délai moyen de règlement et prévision d'encaissement se lisent par société et en consolidé, avec un export daté. | `lib/produits/capacites/relances.ts:215` | B | cashd_tableau(p_client, p_entite), arrêtés (t4) | — | 0 / 0 | — |
+| E1 | Chaque société, filiale ou site a son encours … un chargé de recouvrement ne voit que son portefeuille. | `:185` | C | C | portefeuille par chargé construit (c2_08 : politiques RLS restrictives sur 7 tables) ; **c2_08 ✗** : 5 décomptes rouges, faussés par les 7 comptes NOBAT du banc | borner le test aux comptes qu'il crée (ou retirer le jeu NOBAT du banc), puis le rejouer vert | 0,25 |
+| E2 | Suivi, validation des relances, gestion des litiges et administration sont quatre rôles distincts. Une délégation se pose pour une absence et s'éteint à la date prévue. | `:191` | B | B | rôles du socle ; CASHD exige gestion / validation (t3 ✔, c2_07 ✔) | — | 0 |
+| E3 | Le montant et le palier décident de qui valide : le chargé de compte, le responsable crédit, la direction financière. | `:197` | C | **B** | trois paliers {montant, rôles} écrits en règles de validation du socle (c2_07 ✔) | — | 0 |
+| E4 | … un journal qui ne se modifie pas, y compris par nous. | `:203` | C | C | journal opposable du socle, protégé contre l'écriture | G18 : un administrateur de la base peut encore le modifier ; chaînage + export horodaté, ou reformuler | 1 (socle) |
+| E5 | Le système lit votre facturation et vos encaissements là où ils vivent déjà, tableur compris. Là où un connecteur manque, l'échange passe par dépôt de fichiers ou par interface de programmation. | `:209` | C | C | dépôt de fichiers (t2 ✔) | G1 ; G12 : interface de programmation offerte à un tiers | 2 (socle) + (G1) |
+| E6 | Encours, balance âgée, délai moyen de règlement et prévision d'encaissement se lisent par société et en consolidé, avec un export daté. | `:215` | B | B | `cashd_tableau(p_client, p_entite)`, arrêtés (t4 ✔) | — | 0 |
 
-### Accueil, /offres, articles (lib/content.ts)
+## Accueil, /offres, articles
 
-| # | Promesse (texte exact) | Où | État | Preuve | Ce qui manque | Jours → B / B → A | Coût externe / tiers |
+| # | Promesse (texte exact) | Où | 06/10 | 26/10 | Preuve (26/10) | Ce qui manque | j → B |
 |---|---|---|---|---|---|---|---|
-| M1 | À 7 h, vos relances sont déjà écrites. — Relit le facturier chaque matin. Vous décidez ce qui part. | `app/page.tsx:687-689` | C | voir P4, P5 | G1 | 3 / 0 | selon la source (OAuth Google / Microsoft : vérification d'application) |
-| M2 | Les relances partent au bon moment et s'arrêtent au règlement. | `app/page.tsx:288` | C | voir P23 | G1 | 3 / 0 | selon la source (OAuth Google / Microsoft : vérification d'application) |
-| M3 | Relances, demandes entrantes, réactivation, factures fournisseurs : automatisés … sur vos outils actuels. | `app/page.tsx:192` | C | voir P3 | G1, G4 | 3+4,5 / 0 | selon la source (OAuth Google / Microsoft : vérification d'application); vérification d'application Google (portée gmail.send) et Microsoft (éditeur vérifié) : gratuit, plusieurs semaines |
-| M4 | CASHD — Relance des devis · Relance des factures échues · Gradation par montant · Validation avant envoi | `app/offres/page.tsx:381-384` | C | devis, factures, validation : B ; « gradation par montant » : le montant change le valideur, pas le texte | G3 | 2 / 0 | — |
-| M5 | relance graduée, rédigée au cas par cas selon le montant en jeu, l'ancienneté du retard et l'historique du compte. — Relance à J+3, J+7, J+21, aucun envoi sans votre validation. | `lib/content.ts:112-113` | C | voir P10–P12, P21 | G3 | 2 / 0 | — |
-| M6 | CASHD relance aux bonnes dates avec des messages que le dirigeant valide, en proposant le règlement au comptoir, par virement ou en plusieurs fois. Chaque matin, le point du jour … | `lib/content.ts:260` | C | dates, validation, point du matin : B ; moyens de règlement non proposés dans le texte | G21 | 0,5 / 0 | — |
-| M7 | … un message de suivi part, formulation cordiale, jamais le mot « relance », en proposant de passer voir le chantier ou de caler une date … vocabulaire du métier … le dirigeant valide le ton une fois pour toutes. | `lib/content.ts:287` | C | devis : deux messages cordiaux sans « relance » (t3) ; pas de vocabulaire métier ni de proposition de visite ; ton réglé par formule et interdits seulement | G2, G3 | 3+2 / 0 | — |
-| M8 | rappel à l'échéance, relances progressives, proposition d'échelonnement pour les gros montants, et mise en demeure uniquement sur validation expresse du dirigeant. | `lib/content.ts:291` | C | premier rappel à J+7 et non à l'échéance ; pas de proposition d'échelonnement ; le reste B | G21 | 0,5 / 0 | — |
+| M1 | À 7 h, vos relances sont déjà écrites. — Il vérifie vos factures chaque matin. Vous choisissez les relances à envoyer. | `app/page.tsx:696-698` (réécrit le 21/10) | C | C | voir P4, P5 | G1 | (G1) |
+| M2 | Les relances partent au bon moment et s'arrêtent dès que le client paie. | `app/page.tsx:297` (réécrit le 21/10) | C | C | voir P23 | G1 : « dès que le client paie » = dès que le règlement est connu de CASHD | (G1) |
+| M3 | Pour les PME et les groupes : on relance les impayés, on répond aux demandes, on fait revenir les anciens clients et on classe vos documents. Sur les outils que vous avez déjà. | `app/page.tsx:201` (réécrit le 21/10) | C | C | voir P3 | G1, G4 | (G1, G4) |
+| M4 | CASHD — Relance des devis · Relance des factures échues · Gradation par montant · Validation avant envoi | `app/offres/page.tsx:381-384` | C | **B** | gradation par montant : c2_33 ✔ ; le reste t3 ✔ | — | 0 |
+| M5 | relance graduée, rédigée au cas par cas selon le montant en jeu, l'ancienneté du retard et l'historique du compte. — Relance à J+3, J+7, J+21, aucun envoi sans votre validation. | `lib/content.ts:112-113` | C | **B** | c2_30 ✔, c2_33 ✔, c2_10 ✔ (J+3 devis, J+7 et J+21 factures), t3 ✔ | — | 0 |
+| M6 | CASHD relance aux bonnes dates avec des messages que le dirigeant valide, en proposant le règlement au comptoir, par virement ou en plusieurs fois. Chaque matin, le point du jour … | `lib/content.ts:260` | C | **B** | moyens de règlement dans le texte (c2_38 ✔), échelonnement (c2_05 ✔), point du matin (c2_13, posé ; t3 ✔) | — | 0 |
+| M7 | … un message de suivi part, formulation cordiale, jamais le mot « relance », en proposant de passer voir le chantier ou de caler une date … vocabulaire du métier … le dirigeant valide le ton une fois pour toutes. | `lib/content.ts:287` | C | **B** | textes « btp » des devis (« passions voir les lieux », « caler une date d'intervention », c2_04) ; c2_05 ✔, c2_28 ✔ | — | 0 |
+| M8 | rappel à l'échéance, relances progressives, proposition d'échelonnement pour les gros montants, et mise en demeure uniquement sur validation expresse du dirigeant. | `lib/content.ts:291` | C | **B** | texte du jour d'échéance (c2_14 ✔), échelonnement au-delà d'`echelonnement_des` (c2_05 ✔), mise en demeure (c2_25 ✔) | — | 0 |
+| M9 | *(ajoutée)* L'espace client Omega : qui doit de l'argent, où en est la relance, et l'encours échu au total. | `app/page.tsx:1003` (texte de l'image) | — | B | tableau de bord /espace2/cashd : débiteurs, état des relances, encours échu au pied de la grille (recette `recette-cashd.mjs` 298/298 du 26/10, C2, données d'exemple ; portes rejouées sous RLS sur le banc) | — | 0 |
+| M10 | *(ajoutée)* Un système comme CASHD ne se fatigue pas et n'oublie rien : devis relancé à J+3 puis J+7, facture échue relancée à J+7 puis J+21, mise en demeure préparée au-delà, chaque message adapté à l'ancienneté du retard, chaque envoi soumis à votre validation. | `lib/content.ts:428` | — | B | c2_10 ✔, c2_30 ✔, c2_24 ✔, t3 ✔ | — | 0 |
 
-## Lacunes (chacune comptée une fois)
+## Lacunes encore ouvertes au 26/10 (chacune comptée une fois)
 
-| Lacune | Ce qu'il faut construire | Jours → B | Qui | Coût externe | Promesses concernées |
+Fermées depuis le 06/10 (test vert le 26/10) : G2, G3 (sauf la répétition, P12), G5, G7, G8, G9, G11, G14 (l'écran ;
+les captures restent à la vitrine), G17, G20, G21. G10 est construit mais son test est rouge (E1).
+
+| Lacune | Ce qui manque, en une phrase | j → B | Qui | Tiers | Promesses |
 |---|---|---|---|---|---|
-| G1 | Arrivée automatique et quotidienne du facturier (connecteur du lecteur d'A1 : tableur en ligne, dossier partagé ou logiciel) ; aujourd'hui CASHD relit le DERNIER export déposé | 3 | A1 | selon la source (OAuth Google / Microsoft : vérification d'application) | P2, P3, P5, P8, P17, P23, P36, P41, C1, C4, C30, L1, E5, M1, M2, M3 |
-| G2 | Gabarits de relance propres à chaque organisation, rédigés avec elle et modifiables à l'écran (aujourd'hui : textes fixes par palier, seules formule, signature et interdits se règlent) | 3 | C2 | — | P33, M7 |
-| G3 | Variation des textes : jamais deux fois le même message au même client, ton qui suit aussi le MONTANT, vocabulaire du métier (chantier, intervention, acompte, situation) | 2 | C2 | — | P10, P11, P12, M4, M5, M7 |
-| G4 | Envoi depuis la boîte de l'entreprise (Gmail / Microsoft 365 en OAuth) : branchement d'A2, CASHD n'a qu'à choisir l'expéditeur | 4,5 | A2 (+0,5 C2) | vérification d'application Google (portée gmail.send) et Microsoft (éditeur vérifié) : gratuit, plusieurs semaines | P3, C13, M3 |
-| G5 | Lecture automatique des réponses reçues : contestation, absence définitive, promesse de paiement → proposition de bascule (litige, attente de contact), toujours validée par une personne | 2,5 | C2 | appel de modèle de langue : quelques centimes par réponse lue | C18, L4 |
-| G6 | Langues de facturation au-delà du français et de l'anglais (par langue : textes des 6 paliers, relus par un natif) | 1 | C2 | traduction relue ~150–300 € par langue | C17 |
-| G7 | Bon de commande attendu : motif de blocage consigné, relance adressée au service émetteur du bon (destinataire propre), décompte qui continue | 1 | C2 | — | L12 |
-| G8 | Accord oral sur un devis : geste « accord consigné » qui arrête la cadence ET ouvre le suivi de la facture à venir (rappel si rien n'est facturé) | 0,5 | C2 | — | L11 |
-| G9 | Seuil de relance des petits soldes réglé PAR ENTITÉ (il est aujourd'hui par organisation), et geste « abandonner / réclamer » le solde | 0,5 | C2 | — | L7 |
-| G10 | Portefeuille par chargé de recouvrement (lecture limitée à ses comptes, en plus du périmètre par entité) | 1,5 | C2 | — | E1 |
-| G11 | Paliers de validation par montant à trois niveaux (chargé, responsable crédit, direction) posés par CASHD dans regles_validation (aujourd'hui : un seul seuil « direction ») | 1 | C2 | — | E3 |
-| G12 | Interface de programmation documentée pour un client (clés, documentation des portes cashd_*, quotas) — aujourd'hui les portes existent mais ne sont pas offertes à un tiers | 2 | socle | — | E5 |
-| G13 | Canal WhatsApp pour les relances (modèles approuvés par Meta, opt-in du destinataire) | 4 | A2 (+1 C2) | WhatsApp Business : compte Meta vérifié + coût par conversation (~0,05–0,10 € en France) | P3 |
-| G14 | Écrans montrés sur la page : les quatre captures (Débiteurs, Relances, Envois, Trésorerie) viennent de l'ancienne maquette du site CASHD, pas de l'écran réel ; il faut soit découper l'écran réel en quatre vues (dont un journal des envois avec canal et statut), soit refaire les captures et le texte | 2,5 | C2 (+C1 pour /espace2) | — | P26 |
-| G15 | Lien de paiement : ouvrier qui crée le lien chez le prestataire de l'organisation et reçoit son webhook (contrat d'interface CASHD déjà posé) | 2,5 | serveur | compte du prestataire de chaque client (Stripe : ~1,5 % + 0,25 € par carte UE ; SEPA ~0,35 €) | C34 |
-| G16 | Lettre recommandée électronique : branchement AR24 par A2 (CASHD prépare déjà la LRE au-delà du seuil) | 2 | A2 | contrat AR24 (prix par envoi sur devis, de l'ordre de quelques euros) | C26 |
-| G17 | Chargement quotidien des taux BCE (aujourd'hui saisis à la main) | 0,5 | serveur | aucun (taux publics) | C35 |
-| G18 | Journal « qui ne se modifie pas, y compris par nous » : chaînage par empreintes + export horodaté, ou reformuler (aujourd'hui protégé contre l'écriture, mais un administrateur de la base pourrait le modifier) | 1 | socle | horodatage qualifié éventuel | E4 |
-| G19 | Raccord du logiciel de commandes à cashd_verifier_commande (blocage effectif d'une commande au-delà du plafond) | 1,5 | C2 + connecteur | selon le logiciel de commandes | C38 |
-| G20 | Pièces de l'assurance-crédit : les PDF des factures et bons de livraison restent dans le facturier ; il faut les rattacher (dépôt ou lecture par FILED) | 1 | C2 | — | C42 |
-| G21 | Proposition d'échelonnement et des moyens de règlement (comptoir, virement, plusieurs fois) dans le texte des relances | 0,5 | C2 | — | M6, M8 |
-| G22 | Hébergement dans l'UE, espace chiffré distinct, assistance en français, facturation en euros sous droit français : à confirmer côté Teo (région du projet Supabase, contrat, CGV, DPA) — rien à construire dans CASHD | 0 | Teo | aucun si la région est déjà UE | P27, P28, P29, P30, P31 |
-| **Total** | | **38** | CASHD 18,5 · autres 19,5 | | |
+| G1 | Faire arriver le facturier chaque jour : aujourd'hui, CASHD relit le dernier export déposé. | 3 | A1 | OAuth Google / Microsoft selon la source ; un premier client | P2, P3, P5, P8, P17, P23, P36, P41, C1, C4, C30, L1, E5, M1, M2, M3 |
+| G4 | Abonner CASHD au dépôt dans la boîte de l'entreprise (Gmail déjà branché au socle) et brancher Microsoft 365. | 1 + 2 | C2 + A2 | vérification d'application Google et Microsoft (plusieurs semaines) | P3, C13, M3 |
+| G13 | Brancher le canal WhatsApp de CASHD (canal prévu dans `cashd_relances`, expéditeur Meta déjà présent au socle sur le banc) et faire approuver les modèles. | 0,5 + 1 | C2 + A2 | compte Meta vérifié, ~0,05–0,10 € par conversation | P3 |
+| P12 | Garder la trace des textes reçus par compte et ne jamais répéter un texte mot pour mot. | 1 | C2 | — | P12 |
+| G6 | Écrire et faire relire des textes par défaut dans chaque langue de facturation au-delà du français et de l'anglais. | 0,5 / langue | C2 | traduction relue ~150–300 € par langue | C17 |
+| G14 | Refaire les quatre captures de la page depuis l'écran réel. | 0,5 | vitrine | — | P26 |
+| G19 | Raccorder le logiciel de commandes d'un premier client à `cashd_verifier_commande`. | 1,5 | C2 + connecteur | un premier client | C38 |
+| G10 | Rendre `test_c2_08_portefeuille` vert, en le bornant à ses comptes ou en retirant le jeu NOBAT. | 0,25 | C2 / coordinateur | — | E1 |
+| G18 | Rendre le journal infalsifiable même par nous (chaînage + export horodaté), ou reformuler. | 1 | socle | horodatage qualifié éventuel | E4 |
+| G12 | Offrir à un tiers une interface de programmation documentée (clés, quotas). | 2 | socle | — | E5 |
+| G15 | Créer le lien de paiement par facture chez le prestataire du client et recevoir son webhook. | 2,5 | serveur | Stripe ~1,5 % + 0,25 € par carte UE ; SEPA ~0,35 € | C34 (T) |
+| G16 | Brancher AR24 pour la lettre recommandée électronique (CASHD la prépare déjà). | 2 | A2 | contrat AR24, prix par envoi | C26 (T) |
+| G22 | Confirmer la région d'hébergement et écrire les CGV, le DPA et l'engagement d'assistance. | 0 | Teo | — | P27, P28–P31 |
+| **Total → B** | (hors G15, G16, G22, qui portent des lignes T) | **≈ 14** | CASHD ≈ 4,75 · autres ≈ 9 · vitrine 0,5 | | |
 
-## Passage à A : le pilote chez un premier client (compté une fois)
+## Passage à A (inchangé)
 
-| Étape | Jours |
-|---|---|
-| Installer CASHD chez un premier client réel, mode essai puis réel | 0,5 |
-| Lire SON export réel (format, colonnes, dates, montants) et corriger le lecteur | 1,5 |
-| Régler avec lui formule, signature, interdits, seuils, cadences ; relire les six textes | 0,5 |
-| Basculer reglages_envois en réel, premier envoi validé, suivi des remises et rebonds | 1 |
-| Accompagner un cycle complet (J+7 → J+30) et corriger ce qu'il révèle | 2,5 |
-| Cas rares à provoquer avec lui (litige partiel, échéancier, devise, plafond, dossier…) : somme de la colonne B → A | 7 |
-| **Total** | **13** j de travail, sur **30 à 45 jours** de calendrier |
+Pilote chez un premier client : installation, lecture de SON export, réglage des textes, premier envoi validé, un
+cycle complet J+7 → J+30, puis les cas rares provoqués avec lui. ≈ 13 j de travail sur 30 à 45 jours de calendrier
+(détail dans la version du 06/10, `d7391be1`).
 
-## Écarts de texte à trancher (sans rien construire)
+## Écarts de texte encore ouverts (rien à construire)
 
-- **Cadence des devis** : la page dit « J+3 puis J+7 » (`lib/produits/relances.ts:223`), le catalogue « au troisième jour, puis sept jours après ce rappel » (ligne 48) — le moteur suit le catalogue (J+3, J+10). Une des deux phrases est fausse.
-- **Premier rappel** : l'article BTP dit « rappel à l'échéance » (`lib/content.ts:291`), la page et le moteur J+7.
-- **« Transmet à un modèle »** (`lib/produits/relances.ts:449`) : aucun modèle n'est appelé ; la promesse de minimisation est tenue a fortiori, mais la phrase décrit un mécanisme qui n'existe pas.
-- **Les quatre captures** de la section Écrans sont présentées « telles quelles » alors qu'elles viennent de la maquette du site CASHD.
-- **« Vos données restent chez vous »** (`lib/produits/relances.ts:328`) : elles sont dans la base d'Omega, isolées par organisation.
+- **P26** : les captures sont présentées « telles quelles », mais elles viennent de la maquette.
+- **P38** : « transmet à un modèle », alors qu'aucun modèle n'est appelé.
+- **P27** : « Vos données restent chez vous », alors qu'elles sont dans la base d'Omega, isolées par organisation.
+- **C10 et P21** : le moteur relance le devis à J+7 après l'envoi. La page dit « J+3 puis J+7 », ce qui est juste.
+  Le catalogue dit « sept jours après ce rappel », soit J+10, ce qui est faux depuis c2_10. C'est l'inverse de
+  l'écart du 06/10.
+- **Résorbé** : « rappel à l'échéance » (M8), grâce à c2_14.
