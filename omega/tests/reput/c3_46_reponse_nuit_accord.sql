@@ -45,7 +45,7 @@ begin
                  and (select x.politique_id is not null from public.demandes_validation x where x.id = cou.demande_id)
                  and (select x.politique_id is null from public.demandes_validation x where x.id = sans.demande_id),
                  'Deux réponses : l''une couverte par un accord permanent, l''autre non');
-  return next ok(coalesce(cou.reponse_accord, false) and not coalesce(sans.reponse_accord, false) and not coalesce(cou.accuse, false),
+  return next ok(coalesce((to_jsonb(cou) ->> 'reponse_accord')::boolean, false) and not coalesce((to_jsonb(sans) ->> 'reponse_accord')::boolean, false) and not coalesce(cou.accuse, false),
                  'Marquage : seule la réponse couverte par l''accord est marquée (et pas comme un accusé)');
 
   r_cou_nuit := private.verrous_envoi(cou, true, v_nuit);
