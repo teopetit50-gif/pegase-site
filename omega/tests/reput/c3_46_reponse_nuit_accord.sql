@@ -18,6 +18,10 @@ begin
   insert into public.reglages_envois (client_id, module, mode, essai_adresse, canaux)
   select v_client, 'reput', 'essai', 'essais@omegaai.fr', array['email']
   where not exists (select 1 from public.reglages_envois r where r.client_id = v_client and r.module = 'reput');
+  -- Le banc envoie à toute heure ; la scène a de vraies heures d'ouverture (lundi-vendredi, 8 h-18 h), pour REPUT et pour
+  -- le module témoin.
+  update public.reglages_envois set plages = '[{"debut": "08:00", "fin": "18:00", "jours": [1, 2, 3, 4, 5]}]'::jsonb
+   where client_id = v_client and module in ('reput', 'tiroma');
   perform public.reput_installer(v_client);
   perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
   v_h := (public.reput_ecrire_connaissance(null, v_client, jsonb_build_object('sujet', 'horaires', 'genre', 'horaires',
