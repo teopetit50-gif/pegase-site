@@ -1707,3 +1707,21 @@ main 76eeb68c (avant ce commit) · worker-a1 4069fdf4 · worker-a4 6470f895 · w
 **C4 — `test_c4_08_cycle` rouge sur la recette (12, 14, 21), cause de test et non de produit.** Diagnostic (bloc annulé en fin de transaction, rien laissé en base) : les remises du test donnent `envoye`, puis `differe / DELAI_MINIMAL`, `envoye`, `differe / DELAI_MINIMAL`. La seconde relance est remise à la même seconde réelle que la première (le test simule les jours par `p_jour`, pas l'horloge des envois), et la recette applique le délai minimal entre deux messages au même destinataire ; c4_35 attendant désormais le départ de la seconde, la décision ne vient pas. Le test doit vieillir la première remise ou régler le délai du client du banc. À reprendre par C4.
 
 **Reste de la file de reprise** (inchangé) : déploiement de `reput-reponse` depuis worker-c3 8c882b8e (bureau) ; reprises REPUT et OFFLOAD à écrire (le socle 19az est posé) ; A1, relecture avec consigne (~0,5 j) ; testeurs à rejouer (T-FILED F15/F16 pour TFILED-05, T-OFFLOAD c4_34/35/36, T-CASHD c2_40/41, T-REPUT c3_43) ; B1, relevé du point de 7 h. Les sessions restent en pause : rien ne repart sans le feu vert de Teo.
+
+## RELANCE du 26/10, 00 h 51 Z — plafond 15 % du forfait (Teo)
+
+### DEMANDE DE DÉPLOIEMENT (bureau) — 26/10, 00 h 56 Z
+
+- Fonction : `reput-reponse`
+- Source : branche `worker-c3`, SHA `8c882b8e3534dd21ddea35dc6f491af7c171e614`
+- Cible : recette `ygwbgpowzlbdaajlsqkn` uniquement.
+- Une fois que c'est fait, prévenir le coordinateur : T-REPUT rejoue alors le texte de réponse c3_43.
+
+### Relancés à 00 h 55 Z
+
+- T-FILED, T-OFFLOAD, T-CASHD, T-REPUT : ils rejouent les lots posés le 25/10.
+- C4 : correction de `test_c4_08_cycle`, puis la reprise après refus OFFLOAD.
+- C3 : la reprise après refus REPUT.
+- A1 : la relecture avec consigne.
+- B1 : le relevé du point de 7 h (23/10) est transmis brut.
+- Pause d'office à 01 h 40 Z au plus tard, ou plus tôt si Teo envoie PAUSE à 15 %.
