@@ -19,22 +19,22 @@ begin
   return next ok(r0.montant = 1085 and (select d.statut = 'en_attente' from public.demandes_validation d where d.id = r0.demande_id),
                  'La relance attend sa validation, à 1 085 €');
 
-  -- Un règlement de 500 € est lettré sur la facture.
+  -- Un règlement de 500 € est lettré sur la facture : la même relance est revue sur place.
   perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
   perform public.cashd_noter_reglement(v_client, v_c, 500, j, 'VIR FB-2026-2701', 'virement');
   perform tests.redevenir_admin();
-  return next ok((select x.statut = 'coupee' and tests.c2_plat(x.motif) like 'montant revu : FB-2026-2701 ne doit plus que 585,00 €%' from public.cashd_relances x where x.id = r0.id)
-                 and (select d.statut = 'annulee' from public.demandes_validation d where d.id = r0.demande_id),
-                 'Le règlement partiel coupe la relance en attente (« montant revu ») et la retire de la file');
-
-  -- Le passage suivant la réécrit le jour même, au reste dû.
+  select * into r1 from public.cashd_relances x where x.id = r0.id;
+  return next ok(r1.statut in ('a_valider', 'non_reglee') and r1.montant = 585 and tests.c2_plat(r1.corps) like '%585,00 €%'
+                 and tests.c2_plat(r1.motif) like 'montant revu : FB-2026-2701 ne doit plus que 585,00 €%',
+                 'Le règlement partiel revoit la relance en attente : 585 €, motif « montant revu »');
+  return next ok((select d.statut = 'annulee' from public.demandes_validation d where d.id = r0.demande_id)
+                 and r1.demande_id <> r0.demande_id
+                 and (select d.statut = 'en_attente' and d.montant = 585 and (d.payload ->> 'revue_de')::uuid = r0.demande_id
+                             and tests.c2_plat(d.payload ->> 'corps') like '%585,00 €%' from public.demandes_validation d where d.id = r1.demande_id),
+                 'L''ancienne demande est retirée de la file ; une nouvelle, à 585 €, attend la validation');
   perform private.cashd_preparer_relances(v_client, j, null);
-  select * into r1 from public.cashd_relances x where x.compte_id = v_c and x.jour = j and x.statut <> 'coupee';
-  return next ok(r1.id is not null and r1.montant = 585 and tests.c2_plat(r1.corps) like '%585,00 €%'
-                 and (select d.statut = 'en_attente' and d.montant = 585 from public.demandes_validation d where d.id = r1.demande_id),
-                 'Réécrite le jour même au reste dû (585 €), à valider de nouveau');
-  perform private.cashd_preparer_relances(v_client, j, null);
-  return next ok((select count(*) from public.cashd_relances x where x.compte_id = v_c and x.jour = j and x.statut <> 'coupee') = 1,
+  return next ok((select count(*) from public.cashd_relances x where x.compte_id = v_c and x.jour = j) = 1
+                 and (select x.demande_id = r1.demande_id from public.cashd_relances x where x.id = r0.id),
                  'Un seul message par compte et par jour : le passage suivant n''écrit rien de plus');
 
   -- Le solde réglé coupe comme avant (« réglée »), sans « montant revu ».

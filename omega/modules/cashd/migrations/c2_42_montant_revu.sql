@@ -4,29 +4,108 @@
 -- Recette T-CASHD (TCASHD-19) : un rappel de 1 085 € attend sa validation ; un règlement de 500 € est lettré ; la relance
 -- reste à 1 085 € (et son lien de paiement aussi) : un valideur pouvait approuver un message qui réclame 500 € de trop.
 -- Seul le règlement TOTAL coupait la relance (« facture réglée »).
--- Désormais, dès qu'une imputation (règlement ou avoir) est lettrée sur une facture qui reste due :
---   · toute relance qui attend encore (à valider, à envoyer, sans adresse, bloquée ; demande en attente ou sans demande)
---     et qui réclame pour cette facture plus que son reste relançable est coupée, motif « montant revu : <facture> ne
---     doit plus que <reste> (règlement ou avoir lettré) » ; sa demande est retirée de la file (annulée) et son palier est rendu ;
---   · le passage suivant (toutes les dix minutes, ou « Écrire les relances du jour ») la réécrit le jour même au reste
---     dû : une relance coupée pour « montant revu » ne compte pas dans « un message par compte et par jour », puisqu'elle
---     n'est jamais partie. La nouvelle relance repasse par la validation.
--- Un règlement qui solde la facture continue de couper « réglée » (c2_03). Une relance déjà partie n'est pas touchée.
--- Seule la baisse est revue : une relance qui réclame MOINS que le reste (une échéance devenue due) n'est pas coupée.
--- À la pose : les relances en attente déjà trop hautes sont revues une fois (recette : A-C26 de T-CASHD).
+-- Désormais, dès qu'une imputation (règlement ou avoir) est lettrée sur une facture qui reste due, toute relance qui
+-- attend encore (à valider, à envoyer, sans adresse, bloquée ; demande en attente ou sans demande) et qui réclame pour
+-- cette facture plus que son reste relançable est REVUE SUR PLACE, comme une reprise (c2_41) :
+--   · les restes dus de ses pièces et son texte sont réécrits sur les données du jour ;
+--   · sa demande en attente est annulée et une nouvelle demande, au nouveau montant, la remplace dans la file (clé
+--     « cashd:relance:<relance>:revue:<ancienne demande> », « revue_de » dans le contenu) ; un envoi adossé suit, si
+--     la relance en avait un ; la relance porte le motif « montant revu : <facture> ne doit plus que <reste> ».
+-- Pas de seconde relance le même jour (contrainte cashd_relances_une_par_jour) : c'est la même relance, revue. Rien ne
+-- part sans la nouvelle validation. Une relance déjà partie n'est pas touchée ; un règlement qui solde la facture
+-- continue de couper « réglée » (c2_03). Seule la baisse est revue : une relance qui réclame MOINS que le reste (une
+-- échéance devenue due) n'est pas touchée.
+-- Le premier essai de c2_42 (6fc56cae, posé le 26/10 à 16 h 50 Z sur la recette, jamais inscrit) coupait la relance
+-- pour la réécrire le jour même : la contrainte l'interdit. À la pose : la préparation reprend sa forme de c2_31, et la
+-- relance coupée par cet essai (A-C26 de T-CASHD) est rendue et revue sur place.
 --
 -- Règles de pose : rejouable ; jamais de DROP ni de DELETE ; revoke execute de public.
 
--- Revoir les relances en attente d'une facture : rend le nombre de relances coupées.
+-- Revoir une relance sur place : pièces et texte du jour, nouvelle demande à la place de l'ancienne (en attente ou
+-- refusée), envoi adossé. p_apres_refus : la consigne du refus, reprise dans le contenu de la nouvelle demande (c2_43).
+create or replace function private.cashd_reviser_relance(p_relance uuid, p_motif text, p_apres_refus jsonb default null)
+ returns uuid language plpgsql security definer set search_path to ''
+as $function$
+declare
+  r public.cashd_relances;
+  c public.cashd_comptes;
+  g public.cashd_reglages;
+  d public.demandes_validation;
+  v_t jsonb;
+  v_nouvelle uuid;
+  v_dstatut text;
+  v_dpolitique uuid;
+  v_envoi uuid;
+  v_statut text;
+  v_motif text := left(p_motif, 500);
+begin
+  select * into r from public.cashd_relances where id = p_relance for update;
+  select * into c from public.cashd_comptes where id = r.compte_id;
+  select * into g from public.cashd_reglages where client_id = r.client_id;
+  update public.cashd_relances_pieces p set reste_du = case when f.nature = 'devis' then f.montant_ttc else e.reste_relancable end
+    from public.cashd_factures f join public.cashd_factures_etat e on e.id = f.id
+   where p.relance_id = r.id and not p.annulee and f.id = p.facture_id;
+  v_t := private.cashd_ecrire_texte(r.id);
+  update public.cashd_relances set sujet = v_t ->> 'sujet', corps = v_t ->> 'corps', montant = (v_t ->> 'montant')::numeric,
+         gabarit = v_t ->> 'gabarit', variante = (v_t ->> 'variante')::smallint,
+         penalites = (v_t ->> 'penalites')::numeric, indemnites = (v_t ->> 'indemnites')::numeric, motif = v_motif, maj_le = now()
+   where id = r.id;
+  if r.demande_id is null then
+    -- sans adresse, bloquée par un interdit : pas de demande, le texte suffit
+    perform private.journaliser_module(r.client_id, 'cashd', 'cashd.relance_revue', 'cashd_relances', r.id::text,
+      jsonb_build_object('motif', v_motif, 'montant', (v_t ->> 'montant')::numeric), r.entite_id);
+    return null;
+  end if;
+  select * into d from public.demandes_validation where id = r.demande_id;
+  if d.statut = 'en_attente' then
+    update public.demandes_validation set statut = 'annulee' where id = d.id and statut = 'en_attente';
+  end if;
+  insert into public.demandes_validation (client_id, entite_id, module, type_action, objet_type, objet_id, resume, montant, payload, echeance, cle_idempotence)
+  values (d.client_id, d.entite_id, d.module, d.type_action, d.objet_type, d.objet_id,
+          left(case when g.mode = 'essai' then 'Essai — ' else '' end || case when p_apres_refus is not null then 'Après refus — ' else '' end
+               || case d.type_action when 'cashd.mise_en_demeure' then 'Mise en demeure' when 'cashd.devis' then 'Relance de devis' when 'cashd.rappel' then 'Rappel' else 'Relance' end
+               || ' : ' || c.nom || ', ' || private.cashd_eur((v_t ->> 'montant')::numeric), 500),
+          case when r.nature = 'devis' then null else (v_t ->> 'montant')::numeric end,
+          d.payload || jsonb_build_object('sujet', v_t ->> 'sujet', 'corps', v_t ->> 'corps',
+                                          'penalites', (v_t ->> 'penalites')::numeric, 'indemnites', (v_t ->> 'indemnites')::numeric,
+                                          'destinataire', jsonb_build_object('nom', coalesce(c.contact_facturation_nom, c.nom), 'adresse', c.contact_facturation_email),
+                                          'revue_de', d.id, 'motif_revue', v_motif)
+                    || case when p_apres_refus is not null then jsonb_build_object('apres_refus', p_apres_refus) else '{}'::jsonb end,
+          d.echeance, left('cashd:relance:' || r.id::text || ':revue:' || d.id::text, 200))
+  returning id, statut, politique_id into v_nouvelle, v_dstatut, v_dpolitique;
+  v_statut := case when r.statut = 'non_reglee' then 'non_reglee' else 'a_valider' end;
+  -- comme à la préparation : un accord permanent ne couvre que les rappels des paliers 1 et 2 (c2_12)
+  if v_dstatut = 'approuvee' and v_dpolitique is not null and d.type_action <> 'cashd.rappel' then
+    v_statut := 'bloquee';
+    v_motif := left(v_motif || ' — un accord permanent l''a approuvée d''office : seuls les rappels des paliers 1 et 2 partent sans validation, elle n''est pas préparée', 500);
+  end if;
+  update public.cashd_relances set demande_id = v_nouvelle, statut = v_statut, motif = v_motif, maj_le = now() where id = r.id;
+  if v_statut <> 'bloquee' and r.envoi_id is not null
+     and to_regprocedure('private.preparer_envoi(uuid,text,text,text,text,jsonb,uuid,jsonb,text,text,uuid[],text,uuid,boolean,boolean,timestamptz,jsonb)') is not null then
+    v_envoi := private.preparer_envoi(r.client_id, 'cashd', 'cashd_relances', r.id::text, r.canal,
+      jsonb_build_object('adresse', c.contact_facturation_email, 'nom', coalesce(c.contact_facturation_nom, c.nom), 'ref', c.reference,
+                         'professionnel', not c.particulier, 'langue', c.langue),
+      null, '{}'::jsonb, v_t ->> 'sujet', v_t ->> 'corps', null::uuid[], left('cashd:relance:' || r.id::text || ':revue:' || d.id::text, 200), r.entite_id, true, false,
+      null::timestamptz, jsonb_build_object('demande', v_nouvelle));
+    update public.cashd_relances set envoi_id = v_envoi where id = r.id;
+  end if;
+  perform private.journaliser_module(r.client_id, 'cashd', 'cashd.relance_revue', 'cashd_relances', r.id::text,
+    jsonb_build_object('motif', v_motif, 'avant', d.id, 'demande', v_nouvelle, 'montant_avant', d.montant, 'montant', (v_t ->> 'montant')::numeric), r.entite_id);
+  return v_nouvelle;
+end $function$;
+
+-- Revoir les relances en attente d'une facture : rend le nombre de relances revues.
 create or replace function private.cashd_revoir_montants(p_facture uuid)
  returns integer language plpgsql security definer set search_path to ''
 as $function$
 declare
   f record;
   g public.cashd_reglages;
+  x record;
+  n integer := 0;
 begin
-  select x.id, x.client_id, x.entite_id, x.numero, x.nature, x.statut, e.reste_relancable into f
-  from public.cashd_factures x join public.cashd_factures_etat e on e.id = x.id where x.id = p_facture;
+  select y.id, y.client_id, y.entite_id, y.numero, y.nature, y.statut, e.reste_relancable into f
+  from public.cashd_factures y join public.cashd_factures_etat e on e.id = y.id where y.id = p_facture;
   if f.id is null or f.nature not in ('facture', 'acompte') or f.statut <> 'ouverte' then
     return 0;
   end if;
@@ -35,19 +114,22 @@ begin
   if coalesce(f.reste_relancable, 0) <= greatest(private.cashd_seuil_relance(f.entite_id, g.seuil_relance), 0.005) then
     return 0;
   end if;
-  if not exists (select 1 from public.cashd_relances_pieces p join public.cashd_relances r on r.id = p.relance_id
-                 left join public.demandes_validation d on d.id = r.demande_id
-                 where p.facture_id = f.id and not p.annulee and p.reste_du > f.reste_relancable + 0.005
-                   and r.statut in ('a_valider', 'non_reglee', 'sans_adresse', 'bloquee', 'preparee')
-                   and coalesce(d.statut, 'en_attente') = 'en_attente') then
-    return 0;
-  end if;
-  return private.cashd_couper(f.client_id, null, f.id,
-    'montant revu : ' || f.numero || ' ne doit plus que ' || private.cashd_eur(f.reste_relancable, 'fr')
-    || ' (règlement ou avoir lettré) ; la relance est réécrite au prochain passage, à valider de nouveau');
+  for x in
+    select distinct r.id from public.cashd_relances_pieces p join public.cashd_relances r on r.id = p.relance_id
+    left join public.demandes_validation d on d.id = r.demande_id
+    where p.facture_id = f.id and not p.annulee and p.reste_du > f.reste_relancable + 0.005
+      and r.statut in ('a_valider', 'non_reglee', 'sans_adresse', 'bloquee', 'preparee')
+      and coalesce(d.statut, 'en_attente') = 'en_attente'
+  loop
+    perform private.cashd_reviser_relance(x.id,
+      'montant revu : ' || f.numero || ' ne doit plus que ' || private.cashd_eur(f.reste_relancable, 'fr')
+      || ' (règlement ou avoir lettré) ; la relance est revue au nouveau montant, à valider de nouveau');
+    n := n + 1;
+  end loop;
+  return n;
 end $function$;
 
--- Le déclencheur : chaque imputation lettrée (ou annulée) fait revoir les relances en attente de sa facture.
+-- Le déclencheur : chaque imputation lettrée fait revoir les relances en attente de sa facture.
 create or replace function private.cashd_imputation_revoir()
  returns trigger language plpgsql security definer set search_path to ''
 as $function$
@@ -64,7 +146,7 @@ begin
   end if;
 end $t$;
 
--- Préparer les relances (c2_31), et réécrire le jour même une relance coupée pour « montant revu » (c2_42).
+-- La préparation, telle que c2_31 l'a posée (le premier essai de c2_42 l'avait changée).
 create or replace function private.cashd_preparer_relances(p_client uuid, p_jour date, p_par uuid default null)
  returns jsonb language plpgsql security definer set search_path to ''
 as $function$
@@ -108,9 +190,7 @@ begin
     for c in
       select x.* from public.cashd_comptes x
       where x.client_id = p_client and x.statut = 'actif' and not x.reciproque
-        and not exists (select 1 from public.cashd_relances r where r.compte_id = x.id and r.jour = p_jour and r.nature = v_nature
-                        -- c2_42 : une relance coupée pour « montant revu » n'est jamais partie : elle est réécrite le jour même
-                        and not (r.statut = 'coupee' and r.motif like '%montant revu :%'))
+        and not exists (select 1 from public.cashd_relances r where r.compte_id = x.id and r.jour = p_jour and r.nature = v_nature)
         -- un règlement du compte reste à lettrer : la séquence attend l'imputation
         and not (v_nature = 'facture' and exists (select 1 from public.cashd_reglements_etat e where e.compte_id = x.id and e.a_imputer > 0))
       order by x.nom
@@ -328,14 +408,36 @@ begin
   return jsonb_build_object('jour', p_jour, 'preparees', v_n_prep, 'bloquees', v_n_bloq, 'coupees', v_n_coupees, 'mode_envoi', v_mode_envoi);
 end $function$;
 
+revoke execute on function private.cashd_reviser_relance(uuid, text, jsonb) from public, anon, authenticated;
 revoke execute on function private.cashd_revoir_montants(uuid) from public, anon, authenticated;
 revoke execute on function private.cashd_imputation_revoir() from public, anon, authenticated;
 revoke execute on function private.cashd_preparer_relances(uuid, date, uuid) from public, anon, authenticated;
 
--- À la pose, une fois : les relances en attente déjà trop hautes sont revues.
+-- À la pose, une fois : la relance coupée par le premier essai est rendue, puis les relances trop hautes sont revues.
 do $revue$
-declare v_f uuid;
+declare x record; v_f uuid; v_mode text;
 begin
+  for x in
+    select r.id, r.client_id from public.cashd_relances r
+    where r.statut = 'coupee' and r.motif like 'montant revu : % (règlement ou avoir lettré) ; la relance est réécrite au prochain passage%'
+  loop
+    begin
+      v_mode := private.reglages_envois_effectifs(x.client_id, 'cashd') ->> 'mode';
+    exception when others then
+      v_mode := null;
+    end;
+    update public.cashd_relances_pieces set annulee = false where relance_id = x.id;
+    update public.cashd_relances set statut = case when v_mode is null then 'non_reglee' else 'a_valider' end where id = x.id;
+  end loop;
+  for x in
+    select r.id, r.demande_id from public.cashd_relances r
+    where r.statut in ('non_reglee', 'a_valider') and r.motif like 'montant revu : % (règlement ou avoir lettré) ; la relance est réécrite au prochain passage%'
+  loop
+    perform private.cashd_reviser_relance(x.id, (select 'montant revu : ' || f.numero || ' ne doit plus que ' || private.cashd_eur(e.reste_relancable, 'fr')
+      || ' (règlement ou avoir lettré) ; la relance est revue au nouveau montant, à valider de nouveau'
+      from public.cashd_relances_pieces p join public.cashd_factures f on f.id = p.facture_id join public.cashd_factures_etat e on e.id = f.id
+      where p.relance_id = x.id and not p.annulee order by f.echeance limit 1));
+  end loop;
   for v_f in
     select distinct p.facture_id from public.cashd_relances_pieces p join public.cashd_relances r on r.id = p.relance_id
     join public.cashd_factures_etat e on e.id = p.facture_id
