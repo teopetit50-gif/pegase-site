@@ -1,0 +1,10 @@
+{
+  "imports": {
+    "@partage/": "https://raw.githubusercontent.com/teopetit50-gif/pegase-site/d963121419b014081fc5155c8e01151b8fd76deb/omega/functions/_partage/",
+    "xlsx": "npm:xlsx@0.18.5",
+    "@std/assert": "jsr:@std/assert@^1.0.14"
+  },
+  "compilerOptions": {
+    "strict": true
+  }
+}

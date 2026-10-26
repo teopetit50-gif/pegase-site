@@ -1,7 +1,7 @@
 # Manifeste des migrations de production (assemblé, non posé)
 
 Assemblé par `omega/prod/assembler.mjs` depuis 1 page(s) de `omega/prod/exporter.sql` (recette ygwbgpowzlbdaajlsqkn).
-Fichiers écrits : 445 ; exclus : 33 ; à reconstruire : 0 ; erreurs : 0.
+Fichiers écrits : 446 ; exclus : 33 ; à reconstruire : 0 ; erreurs : 0.
 
 | Version | Nom | Décision | Source | Fichier | sha256 (16) | Notes |
 |---|---|---|---|---|---|---|
@@ -133,6 +133,7 @@ Fichiers écrits : 445 ; exclus : 33 ; à reconstruire : 0 ; erreurs : 0.
 | 20261006144947 | `daliro_b6_12_situations` | emporter | note | `20261006144947_daliro_b6_12_situations.sql` | 1b363b8bfaaf83a5 | fichiers : b6_12_situations.sql @ 9566496 ; fichiers de tests ignorés : omega/tests/daliro/b6_07_situations.sql |
 | 20261006144948 | `lorani_b5_11_courriels_guichet` | emporter | note | `20261006144948_lorani_b5_11_courriels_guichet.sql` | 3cf75b6401e7210d | fichiers : b5_11_courriels_guichet.sql @ 218a777 ; fichiers de tests ignorés : omega/tests/lorani/b5_02_courriels_guichet.sql |
 | 20261006144949 | `tamila_b4_06_note` | exclure: rappel : b4_06 déjà enregistré à sa propre version | note | — | — |  |
+| 20261006145002 | `b3_12_registre_appels_v2_rattrape` | emporter | rattrape | `20261006145002_b3_12_registre_appels_v2_rattrape.sql` | d1831d5ee16bab9b | rattrapé : b3_12_registre_appels.sql @ cef1ef4a (posé sur la recette sans ligne schema_migrations) |
 | 20261006145007 | `b1_04_encours_groupe_rattrape` | emporter | rattrape | `20261006145007_b1_04_encours_groupe_rattrape.sql` | f8b71813f9c7af8e | rattrapé : b1_04_encours_groupe.sql @ 786017e83c (posé sur la recette sans ligne schema_migrations) ; URL de la recette réécrite en production (1 fois) |
 | 20261006145030 | `b2_03_avis_contravention_rattrape` | emporter | rattrape | `20261006145030_b2_03_avis_contravention_rattrape.sql` | ea22ffb12ee40a96 | rattrapé : b2_03_avis_contravention.sql @ 7e97d91a90 (posé sur la recette sans ligne schema_migrations) |
 | 20261006145031 | `b2_04_designation_conservation_rattrape` | emporter | rattrape | `20261006145031_b2_04_designation_conservation_rattrape.sql` | 9aa1dbc4f13b5c01 | rattrapé : b2_04_designation_conservation.sql @ 7e97d91a90 (posé sur la recette sans ligne schema_migrations) |
@@ -481,5 +482,5 @@ Fichiers écrits : 445 ; exclus : 33 ; à reconstruire : 0 ; erreurs : 0.
 | 20261025151724 | `c2_40_lien_paiement` | emporter | note | `20261025151724_c2_40_lien_paiement.sql` | fd447affb0e0b9d4 | fichiers : c2_40_lien_paiement.sql @ 2b61661005bb3020cd5fbf9c40bfbc93e60317fd ; fichiers de tests ignorés : omega/tests/cashd/c2_40_lien_paiement.sql |
 | 20261025151751 | `c2_41_reprise_apres_refus` | emporter | note | `20261025151751_c2_41_reprise_apres_refus.sql` | 905a31a176093189 | fichiers : c2_41_reprise_apres_refus.sql @ b996c405a5343f7b98fc6c61716e830da7684e43 ; fichiers de tests ignorés : omega/tests/cashd/c2_41_reprise_apres_refus.sql |
 | 20261025180655 | `c4_08_test_delai_minimal` | exclure: pose de tests, pas une migration | note | — | — |  |
-| 20261025180656 | `a5_01_cloture` | emporter | depot | `20261025180656_a5_01_cloture.sql` | cb80840e588a9dc8 | étape C |
+| 20261025180656 | `a5_01_cloture` | emporter | depot | `20261025180656_a5_01_cloture.sql` | 711556eb5d8da743 | étape C |
 | 20261025180657 | `environnement_production` | emporter | assembleur | `20261025180657_environnement_production.sql` | 7116a2425e3b2657 | étape C, après a5_01 |

@@ -90,6 +90,8 @@ const MANUELS = {
 // répétition du 25/10 échouait sur leurs tables). Fichier du dépôt au SHA de son dernier commit, version = l'heure UTC de
 // ce commit (avant les lots qui en dépendent). Repérés en croisant les fichiers des branches et le relevé de la recette.
 const RATTRAPES = [
+  // b3_12 v2 (clés étrangères, private.tiroma_appelant) reposé par-dessus la v1 inscrite (20261006144946), sans ligne.
+  { version: '20261006145002', nom: 'b3_12_registre_appels_v2', sha: 'cef1ef4a', chemin: 'omega/modules/tiroma/migrations/b3_12_registre_appels.sql' },
   { version: '20261006145007', nom: 'b1_04_encours_groupe', sha: '786017e83c', chemin: 'omega/modules/varelo/migrations/b1_04_encours_groupe.sql' },
   { version: '20261006145030', nom: 'b2_03_avis_contravention', sha: '7e97d91a90', chemin: 'omega/modules/tavaro/migrations/b2_03_avis_contravention.sql' },
   { version: '20261006145031', nom: 'b2_04_designation_conservation', sha: '7e97d91a90', chemin: 'omega/modules/tavaro/migrations/b2_04_designation_conservation.sql' },
