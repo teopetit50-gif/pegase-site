@@ -1725,3 +1725,29 @@ main 76eeb68c (avant ce commit) · worker-a1 4069fdf4 · worker-a4 6470f895 · w
 - A1 : la relecture avec consigne.
 - B1 : le relevé du point de 7 h (23/10) est transmis brut.
 - Pause d'office à 01 h 40 Z au plus tard, ou plus tôt si Teo envoie PAUSE à 15 %.
+
+### ANNULÉE — demande reput-reponse 8c882b8e (01 h 02 Z)
+
+reput-reponse v31 est déjà déployée au SHA 08b9fe2c00b042ab2c8347a71d4a546b25b02c02, qui contient 8c882b8e (le fichier de la fonction est identique). Il n'y a rien à redéployer. La reprise après refus REPUT (c3_44) était déjà posée et verte le 25/10 : ^test_c3_44 19/19.
+
+### DEMANDE DE DÉPLOIEMENT (bureau) — 26/10, 01 h 02 Z
+
+- Fonction : `lecteur`
+- Source : branche `worker-a1`, SHA `971aec0c58e7713f0cf5d7087cef696c7cf069a3`, paquet produit par outils/preparer_deploiement.ts.
+- Cible : recette `ygwbgpowzlbdaajlsqkn`.
+- Côté SQL, a1_01 et a1_02 et leurs tests sont posés depuis ce SHA ; ^test_a1_0[12]_ passe 4/4.
+
+### Écarts relevés pendant la relance (26/10)
+
+- TFILED-28 (A4, a4_86) : filed_corriger_facture refuse une facture « refusee » (« elle ne se corrige plus »). La reprise après refus attend une correction qui ne peut pas venir : c'est une impasse, et toute reprise FILED finira en reprise_impossible au bout de 24 h.
+- TFILED-29 (FILED) : dans « Imputation proposée, à valider », 2 lignes pour 1 074,68 €. F3, pourtant refusée, y reste comptée, et F13 y est comptée deux fois.
+- TFILED-05 : rejoué. F15 (tiers) donne destinataire.societe bloquant, ce qui est juste. F16 (variante de nom) ne donne pas d'anomalie destinataire, ce qui est juste. F9 reste bloquée par destinataire et doublon.
+- TCASHD-18 (C2, c2_41) : un rappel refusé, puis un règlement partiel lettré, puis la préparation donne 0 préparée et aucune reprise.
+- TCASHD-19 (C2) : la relance en attente reste à 1 085 € après un règlement de 500 €, alors que le reste dû est de 585 €.
+- B1, point de 7 h : l'assemblage est observé (05:00:00,78 Z, 3 groupes), mais la remise n'est pas observée (statut perime). Le gérant, aussi membre de presidence, reçoit la section deux fois. À décider par Teo : soit A3 fusionne les sections de même titre, soit on sort le gérant de presidence sur le banc.
+- T-REPUT, c3_43 : juste. Observation : « un client » (masculin générique) dans le titre de l'alerte et dans le résumé.
+- T-OFFLOAD :
+  - c4_34 juste ;
+  - c4_36 juste (O12 et O13 absents) ;
+  - c4_35 : la passe du 26/10 met la relance 1 d'O8 à valider. Les passes du 02/11 et du 09/11 renvoient 0 partout, ce qui est l'attendu.
+  - O4 n'est pas repris (observation).
