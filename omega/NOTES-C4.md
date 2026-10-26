@@ -931,3 +931,4 @@ Partielles : 6, 11, 15, 38.
 - 25/10, 01 h 20 Z — lot c4_34 (contrats à reconduction au tableau des échéances) : 505 ok.
 - 25/10, 01 h 20 Z — lot c4_35 (TOFFLOAD-11) : 509 ok.
 - 25/10, 01 h 25 Z — lot c4_36 (valeur par segment, restitution en tableur) : 513 ok.
+- 26/10, 01 h 05 Z — test c4_08 : délai minimal du banc réglé à zéro dans le test (DELAI_MINIMAL de la recette, remises à la même seconde). Le conteneur a été recyclé : banc local et souche perdus, test non rejoué en local.

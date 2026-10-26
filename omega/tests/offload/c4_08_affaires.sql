@@ -38,6 +38,9 @@ declare
   n integer;
 begin
   perform tests.c4_reprises_pretes();
+  -- Le test simule les jours (p_jour), pas l'horloge des envois : les deux relances partent à la même seconde réelle.
+  -- Le délai minimal entre deux messages au même destinataire (socle, DELAI_MINIMAL) est donc réglé à zéro pour le banc.
+  update public.reglages_envois set delai_min = interval '0' where client_id = (tests.c4_banc() ->> 'client')::uuid and module = 'offload';
   v_a := tests.c4_compte_courriel('AF1', 'Transports Lebrun SARL', 'atelier@lebrun.test', 10);
   v_b := tests.c4_compte_courriel('AF2', 'Boulangerie Morel', 'contact@morel.test', 10);
   v_aff := tests.c4_affaire(v_a, 'CMD-4471', 10, '{"libelle": "4 pneus hiver 315/70", "valeur_ht": 480}');
