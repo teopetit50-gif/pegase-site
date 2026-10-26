@@ -312,3 +312,123 @@ consigne en entrée, mais son résultat n'a pas la marque `relecture` (lecteur d
 
 Aucun autre état n'a été modifié. Aucune donnée réelle n'a été utilisée : clients, contacts et pièces sont fictifs, et les adresses
 sont en `.invalid` ou `exemple.test`.
+
+---
+
+## Contre-recette du 26/10 (18 h 44 à 18 h 56 Z)
+
+**Lots rejoués**, posés sur la recette :
+
+| Module | Lots | Branche, tête |
+|---|---|---|
+| FILED | a4_90 à a4_92 | worker-a4 `114f6fac` |
+| CASHD | c2_44, c2_45 | worker-c2 `f31c0c7b` |
+| OFFLOAD | c4_38 | worker-c4 `e8490963` |
+| REPUT | c3_45 et reput-reponse v32 | worker-c3 `711f83f0` |
+
+**Méthode** : les étapes d'origine de chaque écart, plus un ou deux cas de bord, avec les mêmes rôles et le même montage qu'à la
+première passe. Tout s'est fait en transaction annulée, sauf un refus REPUT réel (voir l'état laissé, plus bas).
+
+### État des écarts
+
+| TMOD | Étapes d'origine | Cas de bord | État |
+|---|---|---|---|
+| 01 | `filed_pieces_en_cours` → `bloquees 14 / 8 363,42`, plus une catégorie **`refusees` « Refusées, à reprendre ou à classer » 2 / 992,78** (F3 et F13). Nouvelle porte `filed_factures_refusees` : F3 « À classer sans suite, ou à redéposer en facture rectificative. » ; F13 « À corriger pour sa reprise avant l'heure limite, sinon à classer sans suite. », avec `corriger_avant` 27/10 17 h 56 Z. `filed_classer_refusee(F3, motif)` → `classee_sans_suite` | sans motif → « Un classement sans suite se motive (5 caractères au moins). » ; deuxième classement → « déjà classée sans suite » ; F13 classée pendant sa reprise → reprise `impossible` « Classée sans suite par une personne. », correction refusée ensuite ; F0 comptabilisée → « Seule une facture refusée se classe sans suite » ; valideur → accepté ; membre inconnu → « Votre rôle ne permet pas ce geste » ; classées hors de la liste par défaut, visibles avec `p_avec_classees` | **corrigé** (détail : TMOD-12) |
+| 02 | le valideur corrige F13 pendant sa reprise → demande de reprise `saisi_par = [valideur]` ; son approbation **et** son refus → « Celui qui a saisi la pièce ne l'approuve pas : une autre personne décide. » ; le gérant approuve → `approuvee` | le gérant corrige → c'est lui qui est exclu : « Vous avez corrigé cette facture pour sa reprise : une autre personne l'approuve. » | **corrigé** (conséquence : TMOD-11) |
+| 03 | les demandes `filed.imputer` de F3 (`60251551`) et de F13 (`ff6b0e60`) sont `annulee` ; l'approbation → « Cette demande n'est plus en attente (annulee). » | reprise de F13 proposée → une nouvelle demande `filed.imputer` `en_attente` | **corrigé** |
+| 04 | interdit « simple oubli », 85 € réglés sur A-C26 et A-C27 → relances `bloquee` 500 €, « montant revu à 500,00 €, mais le message contient un mot interdit par vos règles : « simple oubli » », aucune demande en attente | interdit retiré, puis 15 € de plus → la relance reste `bloquee` à 500 € (voir TMOD-13) | **corrigé** |
+| 05 | 0 € → « Un règlement de 0 € ou moins ne se note pas : le montant reçu doit être supérieur à 0 €. » | −10 € → même phrase | **corrigé** |
+| 06 | O-6 : juste après le refus, V1 n'est plus dans `a_valider`, compteur 4 ; reprise de compte `close` « Message refusé en validation (consigne : …) : OFFLOAD le repropose si la fiche ou les réglages … ». O-5 : second refus par le gérant → hors de `a_valider`, compteur 4, reprise `close`, `issue: refusee`, « Reprise refusée à son tour (consigne : …) : OFFLOAD n'en propose pas d'autre. » | O-1 rejoué en entier : correction du contact, puis reprise proposée | **corrigé** |
+| 07 | O-1 : résumé « Reprise après refus — Essai — Courriel à Mme Fictive Nouvelle (au lieu de Contact fictif V1) : … » | — | **corrigé** |
+| 08 | second refus de `40a3169f` → `reput_demandes` `d336c126` **`a_traiter`**, motif « Reprise refusée : écrivez la réponse vous-même. Consigne du refus : T-MOD : second refus, toujours sans le nom » | — | **corrigé** |
+| 09 | rejoué **pour de bon** sur une autre réponse du banc (`bac63f11`, Marie Quenette, client fictif), consigne « commencez par « Bonjour Madame Quenette » et terminez en l'invitant à répondre à ce courriel … ». Reprise `proposee` en 43 s, demande `462c724e`, envoi `essai` `a_valider`. Raison : « consigne suivie en partie ; non suivi : La formule d'appel « Bonjour Madame Quenette » ne peut pas figurer dans le corps (elle est ajoutée par l'entreprise) et la civilité « Madame » n'a pas été écrite par la cliente ; l'invitation à répondre à ce courriel est suivie. … » ; le texte finit par « Vous pouvez répondre à ce courriel pour toute autre question. » | refus de la cliente, civilité non écrite : non appliquée, et c'est dit | **corrigé** (observation : raison longue, l'explication est donnée deux fois) |
+| 10 | refus sans commentaire de `ffd90841` → « REPUT ne sait pas quoi corriger. Répondez au client vous-même ; au prochain refus, un commentaire suffit pour que REPUT propose une réponse corrigée » ; demande `a_traiter` | — | **corrigé** |
+
+### CSV d'OFFLOAD : neutralisation des formules (c4_38)
+
+Joué en transaction annulée. Des comptes et un achat sont saisis avec des valeurs piégées, puis lus par
+`offload_restitution_tableur` (gérant).
+
+| Valeur saisie | Champ | Dans le CSV | Verdict |
+|---|---|---|---|
+| `=HYPERLINK("http://x.invalid","clic")` | nom | `"'=HYPERLINK(""…"")"` | juste |
+| `+33 1 99 00 00 00` | contact | `'+33 1 99 00 00 00` | juste |
+| `-2+3` | secteur | `'-2+3` | juste |
+| `@SUM(A1:A2)` | nom | `'@SUM(A1:A2)` | juste |
+| tab puis `=1+1`, espace puis `=1+1` | nom, contact | `'=1+1` (l'espace de tête est retiré à la saisie) | juste |
+| `=REF-1`, `@libellé` | référence et libellé d'achat | `'=REF-1`, `'@libellé` | juste |
+| `＠SUM(1)`, `＝1+1`, `＋1`, `－1` (pleine chasse) | contact, nom, secteur | **inchangés** | **écart TMOD-14** |
+| `-` seul | secteur | `'-` | juste, prudent (la donnée garde une apostrophe) |
+
+### Tests rouges test_c2_01 et test_c2_08 : ce n'est pas l'effet de mes écritures
+
+Joués un par un, en transaction annulée, avec `no_plan()` :
+
+- **test_c2_01_donnees**, 4 échecs : « Trois comptes clients saisis » 10 au lieu de 3 ; tableau 27 418,80 / 35 818,80 / 7 au lieu
+  de 15 600 / 24 000 / 2 ; « à imputer » 2 au lieu de 1 ; collaborateur 10 au lieu de 3.
+- **test_c2_08_portefeuille**, 5 échecs : 10 au lieu de 3 (trois fois), 9 au lieu de 2, 8 au lieu de 3.
+
+**La cause.** Il y a **7 comptes CASHD** de plus sur le client du banc principal `cccccccc-…000c`, « Groupe Sogexal (banc) », tous
+importés le **21/10 à 19 h 05 m 27 s Z**. Le test ajoute ses 3 comptes à ce même client, d'où 10.
+
+**Pourquoi ce ne sont pas mes écritures.** Celles du 26/10 n'ont créé aucun compte CASHD et ne touchent pas ce client :
+
+- F3 et F13 sont sur le client `…00f1` ;
+- les réponses REPUT sont sur le client `…00c3` ;
+- tous mes cas CASHD étaient en transaction annulée.
+
+C2 parle du « jeu NOBAT ». Les comptes en cause portent l'entité « Groupe Sogexal (banc) » et datent du 21/10 : c'est un défaut des
+deux tests, qui supposent ce client vide de CASHD. Ce n'est pas un défaut du produit.
+
+### Nouveaux écarts
+
+**TMOD-11 · FILED · important (à trancher par Teo) · le gérant qui corrige une facture pour sa reprise ne peut plus l'approuver**
+
+- **Reproduction**, transaction annulée :
+  1. F13 refusée, reprise `a_faire` reculée de 10 min.
+  2. En gérant `…01f1` : `filed_corriger_facture(F13, '{"montant_ht":121.50,"montant_tva":10.33,"montant_ttc":131.83,"net_a_payer":131.83}', …)`.
+  3. `private.filed_traiter_reprises()` → demande de reprise `saisi_par = [gérant]`.
+  4. En gérant : `insert into approbations (…, 'approuve', …)` → `Vous avez corrigé cette facture pour sa reprise : une autre
+     personne l'approuve.`
+- **Pourquoi c'est un écart.** Le lot respecte `capacites/factures.ts:74`. Mais la décision de Teo sur TFILED-12 dit « un gérant
+  décide seul ; une organisation qui veut deux personnes pose un seuil ». Chez un client à un seul décideur (l'artisan seul), une
+  facture corrigée pour sa reprise ne peut plus être approuvée par personne : elle attendra sans fin.
+- **À trancher** : le gérant seul décideur approuve sa correction (comme pour un dépôt), ou bien la reprise le dit et propose une
+  délégation.
+
+**TMOD-12 · FILED · mineur · `filed_factures_refusees.refusee_le` donne l'heure de pose du lot, pas l'heure du refus**
+
+- **Reproduction** : en gérant, `filed_factures_refusees('dddddddd-…00f1', null, false)`.
+  - F3 : `refusee_le` 26/10 à 18 h 38 m 48 s Z. Le refus date de 00 h 53 Z (piste : « Refusée par une personne », 00 h 53 m 00 s).
+  - F13 : `refusee_le` 18 h 38 m 48 s Z, pour un refus à 17 h 57 m 00 s Z.
+- **Hypothèse** : le rattrapage de a4_90 a daté les factures déjà refusées de sa pose. Les refus à venir sont peut-être justes.
+  Je n'ai pas pu le vérifier sans refuser une nouvelle facture, faute de demande en attente sur le banc.
+
+**TMOD-13 · CASHD · mineur · une relance bloquée par un interdit ne suit plus le reste dû, même après la levée de l'interdit**
+
+- **Reproduction**, transaction annulée, en gérant :
+  1. Interdit « simple oubli », puis 85 € réglés sur A-C26 → relance `bloquee` à 500 € (juste).
+  2. `cashd_regler_relances(client, '{"interdits":[]}')`, puis 15 € de plus réglés (`VIR-C26-0003`).
+  3. `cashd_preparer_maintenant`, puis `private.cashd_preparer_relances(client, '2026-10-27', null)` → `preparees 0`.
+  4. La relance reste `bloquee` à **500 €** pour 485 € dus, avec le motif de l'interdit levé.
+- **Attendu** : la relance bloquée suit le reste dû comme une relance en attente (c2_43), ou se refait une fois l'interdit retiré.
+
+**TMOD-14 · OFFLOAD · mineur · les signes de formule en pleine chasse ne sont pas neutralisés dans les CSV**
+
+- **Reproduction**, transaction annulée :
+  1. `offload_saisir_compte(client, entité, 'TMOD-F3', '＝1+1', {"contact":"＋1","secteur":"－1",…})` et
+     `offload_saisir_compte(…, 'TMOD-F2', …, {"contact":"＠SUM(1)",…})`.
+  2. `offload_restitution_tableur(client)->'fichiers'->>'offload-comptes.csv'` : les quatre valeurs sortent sans apostrophe.
+- **Pourquoi c'est un écart.** Certaines versions d'Excel, avec des réglages de saisie asiatiques, convertissent les signes en pleine
+  chasse. C'est le cas demandé par le coordinateur (`＠`).
+- **Attendu** : traiter `＝ ＋ － ＠` comme `= + - @`.
+
+### État laissé sur la recette après la contre-recette
+
+| Pièce | État | Ce qu'il faut savoir |
+|---|---|---|
+| REPUT `bac63f11` (Marie Quenette, demande `702de13f`), réel | réponse refusée par T-MOD TMOD-09 à 18 h 54 Z ; nouvelle réponse `a_valider`, demande `462c724e`, envoi `essai` `a_valider` | rien n'est parti |
+| FILED F3, F13 | inchangés par moi : F3 `refusee`, reprise `impossible` ; F13 `refusee`, reprise `a_faire` jusqu'au 27/10 17 h 56 Z | a4_91 a annulé leurs demandes d'imputation ; les deux sont dans « Refusées, à reprendre ou à classer » ; aucune n'a été classée pour de bon |
+| CASHD, OFFLOAD | rien | tous les cas sont annulés |
+
+Aucun envoi réel. Aucune donnée réelle.
