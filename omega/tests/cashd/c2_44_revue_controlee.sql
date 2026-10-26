@@ -68,10 +68,13 @@ begin
   return next ok(x.statut = 'coupee' and not exists (select 1 from public.demandes_validation d where d.payload ->> 'revue_de' = rc.demande_id::text),
                  'Compte en litige : la relance reste coupée, rien n''est reproposé');
 
-  -- Le cas ordinaire est inchangé : sans interdit ni suspension, la relance revue entre dans la file (c2_42).
+  -- L'interdit a été levé plus haut : depuis c2_46 (TMOD-13), la relance bloquée de A est revenue dans la file, et un
+  -- règlement suivant la revoit comme une relance en attente (c2_42).
   perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
   perform public.cashd_noter_reglement(v_client, v_a, 85, j, 'VIR FB-2026-2901 bis', 'virement');
   perform tests.redevenir_admin();
-  return next ok((select r.statut = 'bloquee' from public.cashd_relances r where r.id = ra.id),
-                 'Une relance bloquée par un interdit n''est pas revue par un règlement suivant : elle attend une décision');
+  return next ok((select r.statut in ('a_valider', 'non_reglee') and r.montant = 500
+                         and (select d.statut = 'en_attente' and d.montant = 500 from public.demandes_validation d where d.id = r.demande_id)
+                  from public.cashd_relances r where r.id = ra.id),
+                 'L''interdit levé, la relance de A est revenue dans la file et suit le reste dû (500 €) (c2_46)');
 end $f$;
