@@ -3,7 +3,8 @@
 
    CSV au point-virgule, montants à la française, BOM UTF-8 : il s'ouvre
    tel quel dans Excel ou LibreOffice. Une cellule qui commencerait par
-   = + - @ est protégée (apostrophe) contre l'injection de formule. Rien ne
+   = + - @ (ou ＝ ＋ － ＠ en pleine chasse, une tabulation, un retour
+   chariot) est protégée (apostrophe) contre l'injection de formule. Rien ne
    sort du navigateur. À la demande depuis l'écran ; à date fixe, l'arrêté
    mensuel posé la nuit s'exporte de la même façon.
    ══════════════════════════════════════════════════════════════════════ */
@@ -15,7 +16,7 @@ type Cellule = string | number | null | undefined;
 function cellule(v: Cellule): string {
   if (v === null || v === undefined) return "";
   let t = typeof v === "number" ? (Number.isInteger(v) ? String(v) : v.toFixed(2).replace(".", ",")) : String(v);
-  if (/^[=+\-@\t\r]/.test(t)) t = `'${t}`;
+  if (/^[=+\-@\t\r＝＋－＠]/.test(t)) t = `'${t}`;
   return /[;"\n\r]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t;
 }
 
