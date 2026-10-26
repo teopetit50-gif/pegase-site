@@ -43,6 +43,7 @@ psql "$ADMIN_URL" -v ON_ERROR_STOP=1 -X -q <<'SQL' || exit 1
     if not exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
       create publication supabase_realtime;
     end if;
+    alter publication supabase_realtime owner to postgres;
   end $$;
   update cron.job set active = false where active;
   do $$ declare r record; begin
@@ -58,7 +59,7 @@ n=0; debut=$(date +%s); echec=""
 for f in $(ls "$ICI"/base/0[0-9]_*.sql | sort) $(ls "$ICI"/migrations/*.sql | sort); do
   nom=$(basename "$f" .sql)
   t0=$(date +%s)
-  url="$BASE_URL"; case "$f" in "$ICI"/base/*) url="$ADMIN_URL" ;; esac
+  url="$BASE_URL"; case "$f" in "$ICI"/base/00_*|"$ICI"/base/01_*) url="$ADMIN_URL" ;; esac
   if ! psql "$url" -v ON_ERROR_STOP=1 -X -q -1 -f "$f" > "$SORTIE/poses/$nom.txt" 2>&1; then
     echec="$nom"; break
   fi
