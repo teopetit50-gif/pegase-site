@@ -34,7 +34,7 @@ begin
   -- À l'import, une ligne n'est pas perdue pour un numéro illisible : il est écarté, et l'organisation est prévenue.
   v_imp := private.cashd_ecrire_compte(null, v_client, jsonb_build_object('reference', 'A-TEL-IMP', 'nom', 'Import Numéro', 'contact_facturation_telephone', 'n/a', 'langue', 'de-AT'), 'import');
   return next ok((select x.contact_facturation_telephone is null and x.langue = 'de' from public.cashd_comptes x where x.id = v_imp)
-                 and exists (select 1 from public.alertes a where a.client_id = v_client and a.titre like '%numéro de facturation illisible%Import Numéro%'),
+                 and exists (select 1 from public.alertes a where a.client_id = v_client and a.titre like '%Import Numéro%numéro de facturation illisible%'),
                  'À l''import, le numéro illisible est écarté et signalé ; la langue régionale est ramenée');
 
   -- La langue réelle du texte : un compte portugais, sans texte écrit par l'organisation, reçoit l'anglais et le dit.
