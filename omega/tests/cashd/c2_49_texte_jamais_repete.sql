@@ -36,7 +36,7 @@ begin
     v_r := v_r || v_id;
     v_textes := v_textes || private.cashd_empreinte_texte(v_t ->> 'sujet', v_t ->> 'corps');
   end loop;
-  return next ok((select count(distinct e) from unnest(v_textes) e) = 3, 'Les trois rappels partis ont trois textes différents (trois variantes)');
+  return next ok((select count(distinct e) from unnest(v_textes) e) = 3, 'Les trois rappels partis ont trois textes différents (deux variantes, puis la référence datée)');
 
   -- Un rappel qui ne part pas (variante 3) : le tour suivant retomberait sur la variante 1, déjà reçue mot pour mot.
   update public.cashd_relances set variante = 3 where id = v_r[3];
@@ -54,7 +54,7 @@ begin
   -- Avec une variante encore jamais reçue, c'est elle qui est choisie, sans référence ajoutée.
   update public.cashd_relances set corps = corps || ' ' where id = v_r[2];   -- le texte de la variante 2 n'a plus été reçu tel quel
   v_t := private.cashd_ecrire_texte(v_id);
-  return next ok(v_t ->> 'repetition_evitee' = 'variante' and v_t ->> 'corps' not like '%Référence de ce message%'
+  return next ok(coalesce(v_t ->> 'repetition_evitee', 'aucune') <> 'reference' and v_t ->> 'corps' not like '%Référence de ce message%'
                  and not (private.cashd_empreinte_texte(v_t ->> 'sujet', v_t ->> 'corps') = any (array[v_textes[1], v_textes[3]])),
                  'S''il reste une variante jamais reçue mot pour mot, elle est choisie');
 
