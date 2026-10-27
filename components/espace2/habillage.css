@@ -422,7 +422,8 @@ html.v2-actif .dlg-panneau .esp-pastille--contour {
   background: transparent;
   box-shadow: inset 0 0 0 1px var(--v2-a-400);
 }
-.v2 .esp .esp-ruban {
+.v2 .esp .esp-ruban,
+.v2 .v2-ruban-source .esp-ruban {
   height: 24px;
   padding: 0 10px;
   border: 0;
@@ -434,6 +435,13 @@ html.v2-actif .dlg-panneau .esp-pastille--contour {
   letter-spacing: 0;
   text-transform: none;
 }
+/* 27/10 — « Données d'exemple » une seule fois, dans la barre du haut, sur
+   toutes les pages (TPROD-04) : le ruban de REPUT, sorti du monde `.esp` ;
+   celui que certains écrans posent eux-mêmes ferait doublon */
+.v2 .v2-ruban-source { display: inline-flex; flex: none; margin-left: 8px; }
+.v2 .v2-ruban-source .esp-ruban { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+.v2 .v2-ruban-source .esp-ruban-point { width: 7px; height: 7px; border-radius: 9999px; background: currentColor; }
+.v2 .esp .esp-ruban[data-source="exemple"] { display: none; }
 
 /* ——— avis (la « note ») ——— */
 .v2 .esp .esp-avis,

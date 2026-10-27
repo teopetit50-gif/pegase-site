@@ -28,6 +28,7 @@ import { Button, Dialog, DialogTrigger, Modal, ModalOverlay, Popover, RouterProv
 import type { Utilisateur } from "@/lib/compte";
 import { createClient } from "@/lib/supabase/client";
 import { SourceFournisseur, useSource } from "@/components/espace/source";
+import { Ruban } from "@/components/espace/ui";
 import { relatif } from "@/components/espace/format";
 import { FournisseurToasts, useToast } from "./Toasts";
 import { ItemMenu, Kbd, MenuDeroulant, SectionMenu, SeparateurMenu } from "./ui";
@@ -231,6 +232,7 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
             </span>
             {/* le titre visible ; chaque page porte son propre h1 (masqué), pour garder le titre exact de l'écran */}
             <p className="v2-haut-titre">{titreDe(chemin)}</p>
+            <RubanSource />
           </div>
           <div className="v2-haut-droite">
             <MenuDeroulant
@@ -330,6 +332,13 @@ type Section = { cle: string; titre: string; sousTitre?: string; icone: React.Re
 
 /* les icônes du rail : size-5 et trait 1,5, comme la Sidebar du studio Supabase */
 const R = { width: 20, height: 20, strokeWidth: 1.5, "aria-hidden": true } as const;
+
+/* 27/10 — sans session, l'espace montre des données d'exemple : chaque page
+   le dit, avec le ruban de REPUT (TPROD-04) */
+function RubanSource() {
+  const { source } = useSource();
+  return source === "exemple" ? <span className="v2-ruban-source"><Ruban source="exemple" /></span> : null;
+}
 
 /* l'organisation et les données affichées : un menu de la barre du haut, comme le sélecteur d'organisation de Supabase (21/10) ; dans le tiroir du mobile, il reste en tête de la navigation */
 function MenuOrganisation({ utilisateur, classe }: { utilisateur: Utilisateur | null; classe: string }) {

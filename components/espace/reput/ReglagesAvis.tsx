@@ -204,9 +204,9 @@ export default function ReglagesAvis({ monde, source, client, role, relire, modi
           <ReglagesSites key={source} source={source} client={client} dirige={dirige} />
         </section>
         {dirige ? (
-          <section className="sb-reglages-section" aria-label="Export à date fixe">
+          <div className="sb-reglages-section">
             <ExportProgramme key={`export:${source}`} source={source} client={client} dirige={dirige} />
-          </section>
+          </div>
         ) : null}
         <section className="sb-reglages-section" aria-label="Demandes d'avis">
           <header>
