@@ -42,10 +42,12 @@ begin
   -- Immobilier, conseil : leurs mots.
   perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
   perform public.offload_regler_secteur(v_client, 'immobilier');
-  m := private.offload_message(v, 1, null, null);
-  perform public.offload_regler_secteur(v_client, 'conseil');
-  m2 := private.offload_message(v, 1, null, null);
   perform tests.redevenir_admin();
+  m := private.offload_message(v, 1, null, null);
+  perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
+  perform public.offload_regler_secteur(v_client, 'conseil');
+  perform tests.redevenir_admin();
+  m2 := private.offload_message(v, 1, null, null);
   return next ok((m ->> 'corps') like '%notre dernier dossier ensemble date du %' and (m ->> 'corps') like '%nouveau projet immobilier, achat, vente ou location%'
                  and (m2 ->> 'corps') like '%notre dernière mission pour vous date du %' and (m2 ->> 'corps') like '%un nouveau sujet sur lequel%',
                  'Immobilier et conseil ont chacun leurs mots');
