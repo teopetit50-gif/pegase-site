@@ -1264,3 +1264,6 @@ En attente de Teo :
 - Rouges du socle restés sur la recette, antérieurs à la convergence (aucun des lots posés n'y touche) : 11, 12, 30,
   32, 34 (journal), 18, 24 (`envois_evenements`, `suivis_evenements`), 36, 37 (envois), 44, 51. OFFLOAD
   `test_c4_09_arretes` dépasse 95 s. Détail : `JOURNAL.md` d'omega-metiers, 27/10.
+- **Socle 19bd** (même branche) : l'effacement d'une organisation emporte ses lignes de `private` (`mesures_pieces`,
+  `journal_sceaux`, `filed_lot4_passages`, `filed_banc_releves`) ; posé sur omega-recette (socle_19bd_effacement_private),
+  TMET-26 fermé. TMET-25 (archives FILED qui bloquent l'effacement) : avis à Teo dans le journal d'omega-metiers, non corrigé.
