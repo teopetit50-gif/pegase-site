@@ -20,6 +20,7 @@ import { Loader } from "@/components/ui/loader";
 import { Avis, Chargement, Pastille } from "../ui";
 import { dateCourte, montant } from "../format";
 import * as portes from "./portes";
+import { ReglageWhatsapp } from "@/components/espace2/cashd/Raccords";
 import { apercu, GABARITS_EXEMPLE, PALIERS_GABARIT, VARIABLES, verifier } from "./gabarits";
 import type { CleGabarit, Gabarit, LigneGabarit, PalierValidation, Reglages, RoleValidation } from "./types";
 
@@ -566,6 +567,13 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
             <p>Ce qui change dans chaque relance selon le montant et votre métier.</p>
           </header>
           <div className="esp-carte"><div className="esp-carte-corps">{ton}</div></div>
+        </section>
+        <section className="sb-reglages-section" aria-label="WhatsApp">
+          <header>
+            <h2>WhatsApp</h2>
+            <p>Pour les comptes qui préfèrent WhatsApp au courriel : le modèle que Meta a approuvé.</p>
+          </header>
+          <div className="esp-carte"><div className="esp-carte-corps"><ReglageWhatsapp modeleInitial={reglages?.whatsapp_modele ?? null} /></div></div>
         </section>
         <section className="sb-reglages-section" aria-label="Qui valide">
           <header>

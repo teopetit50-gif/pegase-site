@@ -26,6 +26,7 @@ import { dateCourte, montant } from "../format";
 import { libellePalier, libelleSequence, STATUTS_COMPTE } from "./etats";
 import { etatPiece, jourParis } from "./calcul";
 import type { Fiche, NaturePiece, Piece, ReponseLue, StatutCompte } from "./types";
+import { CanalCompte } from "@/components/espace2/cashd/Raccords";
 
 type Geste =
   | { type: "reglement"; facture: Piece | null }
@@ -247,6 +248,8 @@ export default function FicheCompte({ fiche, actions }: { fiche: Fiche; actions:
           <Def etiquette="Encours">{montant(b?.encours ?? 0)}{b?.depasse_plafond || (c.plafond_encours !== null && (b?.encours ?? 0) > c.plafond_encours) ? " — au-dessus du plafond" : ""}</Def>
           <Def etiquette="Crédits à déduire">{montant(b?.credits ?? 0)}</Def>
         </dl>
+        {/* c2_51 : courriel ou WhatsApp pour ses rappels et relances */}
+        <CanalCompte key={c.id} compte={c.id} canal={c.canal_relance ?? "email"} telephone={c.contact_facturation_telephone} />
         <div className="esp-actions" style={{ marginTop: 12 }}>
           <button type="button" className="r-btn r-btn--noir" onClick={() => ouvrir({ type: "reglement", facture: null })}>
             <Banknote width={15} height={15} aria-hidden="true" /> Noter un règlement

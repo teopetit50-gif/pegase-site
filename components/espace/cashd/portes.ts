@@ -242,3 +242,34 @@ export async function poserTaux(client: string, devise: string, jour: string, ta
   return rpc<{ devise: string; jour: string; taux: number; source: string }>("cashd_poser_taux", { p_devise: devise, p_jour: jour, p_taux: taux, p_client: client });
 }
 
+
+/* ——— c2_48 : par où partent les relances (boîte de l'entreprise connectée au socle, ou expéditeur partagé) ——— */
+export type Messagerie = {
+  mode: "essai" | "reel" | null;
+  boites: { adresse: string; fournisseur: string; etat: string; releve_le: string | null; depot: "brouillon" | "envoi" }[];
+  phrase: string;
+};
+export async function chargerMessagerie(client: string) {
+  return rpc<Messagerie>("cashd_messagerie", { p_client: client });
+}
+
+/* ——— c2_51 : WhatsApp — le modèle approuvé par Meta, et le canal de chaque compte ——— */
+export type ReglageWhatsapp = { modele: string | null; gabarit?: string | null; gabarit_statut?: string | null; actif: boolean; phrase?: string };
+export async function reglerWhatsapp(client: string, modele: string | null, corps: string | null) {
+  return rpc<ReglageWhatsapp>("cashd_regler_whatsapp", { p_client: client, p_modele: modele, p_corps: corps });
+}
+export async function canalCompte(compte: string, canal: "email" | "whatsapp") {
+  return rpc<{ compte: string; canal: string; whatsapp_possible: boolean; phrase: string }>("cashd_canal_compte", { p_compte: compte, p_canal: canal });
+}
+
+/* ——— c2_50 : les clés de raccord d'un logiciel de commandes ——— */
+export type CleCommandes = { id: string; libelle: string; prefixe: string; cree_le: string; revoquee_le: string | null; derniere_utilisation_le: string | null };
+export async function chargerClesCommandes(client: string) {
+  return rpc<CleCommandes[]>("cashd_cles_commandes_liste", { p_client: client });
+}
+export async function creerCleCommandes(client: string, libelle: string) {
+  return rpc<{ id: string; cle: string; prefixe: string; phrase: string }>("cashd_creer_cle_commandes", { p_client: client, p_libelle: libelle });
+}
+export async function revoquerCleCommandes(id: string) {
+  return rpc<{ id: string; revoquee: boolean }>("cashd_revoquer_cle_commandes", { p_cle_id: id });
+}

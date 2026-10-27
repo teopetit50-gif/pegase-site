@@ -27,6 +27,7 @@ import type { Balance, Tableau } from "@/components/espace/cashd/types";
 import { Badge, Note, Squelette, teinte } from "../ui";
 import { SbBandeau, SbLigneVide, SbListe, SbOutils, SbRecherche, SbTableau } from "../sb/Sb";
 import { lienCompte, useTableauCashd } from "./donnees";
+import { RaccordCommandes } from "./Raccords";
 
 type Stat = { libelle: string; valeur: string; sous: string; teinte?: "vert" | "ambre" | "rouge" | "bleu" | "gris" };
 
@@ -49,7 +50,7 @@ function filtrer(t: Tableau, q: string): Tableau {
   };
 }
 
-function Cadre({ titre, intro, stats, actions, recherche = "Rechercher un compte", children }: { titre: string; intro: string; stats: (t: Tableau) => Stat[]; actions?: (t: Tableau) => React.ReactNode; recherche?: string; children: (t: Tableau) => React.ReactNode }) {
+function Cadre({ titre, intro, stats, actions, recherche = "Rechercher un compte", children, apres }: { titre: string; intro: string; stats: (t: Tableau) => Stat[]; actions?: (t: Tableau) => React.ReactNode; recherche?: string; children: (t: Tableau) => React.ReactNode; apres?: React.ReactNode }) {
   const { tableau, erreur } = useTableauCashd();
   const [q, setQ] = useState("");
   const s = tableau ? stats(tableau) : null;
@@ -93,6 +94,7 @@ function Cadre({ titre, intro, stats, actions, recherche = "Rechercher un compte
           ))}
         </div>
       )}
+      {apres}
     </SbListe>
   );
 }
@@ -229,6 +231,7 @@ export function Risque() {
   return (
     <Cadre
       titre="Risque client"
+      apres={<RaccordCommandes />}
       intro="Le plafond d'encours de chaque compte, ce qu'il en consomme, et les comptes dont le retard s'allonge. Le plafond se fixe dans la fiche du compte, à partir de son historique ; un dépassement vous est signalé avant toute nouvelle commande."
       stats={(t) => {
         const avec = t.comptes.filter((b) => b.plafond_encours !== null);

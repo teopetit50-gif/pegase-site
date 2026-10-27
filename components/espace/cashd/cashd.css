@@ -355,3 +355,12 @@
 .esp .c2-taux li { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 8px 0; border-bottom: 1px solid var(--r-filet); }
 .esp .c2-taux-form { margin-top: 8px; }
 
+
+/* c2_48 · c2_50 · c2_51 — les raccords */
+.c2-messagerie { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--v2-bord, rgba(127,127,127,.25)); border-radius: 8px; margin: 0 0 14px; font-size: 13px; line-height: 1.5; }
+.c2-messagerie svg { flex: none; margin-top: 2px; }
+.c2-messagerie .v2-badge { margin-left: 6px; }
+.c2-canal { display: grid; gap: 4px; margin-top: 12px; max-width: 360px; }
+.c2-cle { display: block; margin: 6px 0; padding: 6px 8px; border-radius: 6px; background: rgba(127,127,127,.12); font-size: 12px; overflow-wrap: anywhere; word-break: break-all; }
+.c2-raccord { margin-top: 24px; }
+.c2-raccord code { overflow-wrap: anywhere; }

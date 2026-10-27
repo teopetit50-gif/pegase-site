@@ -32,6 +32,7 @@ import * as portes from "./portes";
 import FicheCompte, { type Actions } from "./FicheCompte";
 import Textes from "./Textes";
 import TauxChange from "./TauxChange";
+import { MessagerieCashd } from "@/components/espace2/cashd/Raccords";
 import type { Fiche, Proposition, Relance, RelanceCommande, ReglementEtat, Tableau } from "./types";
 import "./cashd.css";
 
@@ -1054,6 +1055,7 @@ export default function EcranCashd({ vue, gabarit }: { vue?: Onglet; gabarit?: "
             <div className="sb-journal-barre">
               <span>Chaque relance partie, datée, avec son destinataire, son objet et son canal</span>
             </div>
+            <MessagerieCashd />
             <div className="sb-conseil-corps">
               <div className="sb-journal-table">
                 {chargement ? (
@@ -1117,6 +1119,8 @@ export default function EcranCashd({ vue, gabarit }: { vue?: Onglet; gabarit?: "
             <div className="sb-actions">{actionsHaut}</div>
           </div>
           {messages}
+          {/* c2_48 : par où partent les relances (boîte de l'entreprise, ou expéditeur d'Omega) */}
+          {onglet === "relances" ? <MessagerieCashd /> : null}
           {chargement ? <Chargement texte="Lecture de l'encours…" /> : vueCourante}
         </div>
         {fenetreDepot}

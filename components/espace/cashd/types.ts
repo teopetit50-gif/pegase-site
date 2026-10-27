@@ -30,6 +30,9 @@ export type Reglages = {
   remise_courrier_jours?: number | null;
   /* c2_40 : l'adresse de paiement de l'organisation ({numero}, {montant}) */
   lien_paiement?: string | null;
+  /* c2_51 : le modèle WhatsApp approuvé par Meta */
+  whatsapp_modele?: string | null;
+  whatsapp_corps?: string | null;
   moyens_reglement?: string | null;
   echelonnement_des?: number | null;
   metier?: "general" | "btp";
@@ -131,6 +134,9 @@ export type Compte = {
   langue: string;
   contact_facturation_nom: string | null;
   contact_facturation_email: string | null;
+  /* c2_51 : le numéro de facturation et le canal des relances (courriel ou WhatsApp) */
+  contact_facturation_telephone?: string | null;
+  canal_relance?: "email" | "whatsapp";
   contact_commercial_email: string | null;
   plafond_encours: number | null;
   reciproque: boolean;
