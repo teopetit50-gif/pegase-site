@@ -1,11 +1,14 @@
--- tprod_05 — TPROD-05 : anon n'exécute que les quatre portes publiques voulues, et elles marchent encore.
+-- tprod_05 — TPROD-05 : anon n'exécute que les portes publiques voulues (quatre, et btp_signer_un_geste depuis b6_51), et elles marchent encore.
 -- Exécutable tel quel par execute_sql sur la RECETTE, après omega/prod/correctifs/tprod_05_portes_anon.sql.
 -- runtests() annule tout. Le parcours complet de signature par anon est dans daliro/b6_14.
 
 create or replace function tests.test_tprod_05_portes_anon() returns setof text
 language plpgsql as $f$
 declare
-  v_admises text[] := array['agenda_public', 'demande_pour_confirmation', 'btp_lire_a_signer', 'btp_signer_sur_place'];
+  -- 27/10/2026 : btp_signer_un_geste (Daliro b6_51, signature par lien en un geste, posée sur la recette après TPROD-05)
+  -- est une porte voulue pour anon, gardée par son jeton comme btp_signer_sur_place.
+  v_admises text[] := array['agenda_public', 'demande_pour_confirmation', 'btp_lire_a_signer', 'btp_signer_sur_place',
+                            'btp_signer_un_geste'];
   v_autres text[];
   v_etat text;
   v_role text;
@@ -18,7 +21,7 @@ begin
     and n.nspname not in ('pg_catalog', 'information_schema', 'extensions', 'graphql', 'graphql_public', 'pgbouncer',
                           'realtime', 'storage', 'vault', 'net', 'cron', 'supabase_functions', 'auth', 'pgsodium', 'tests')
     and not (n.nspname = 'public' and p.proname = any (v_admises));
-  return next is(v_autres, '{}'::text[], 'anon n''exécute aucune fonction SECURITY DEFINER hors des quatre portes publiques');
+  return next is(v_autres, '{}'::text[], 'anon n''exécute aucune fonction SECURITY DEFINER hors des portes publiques');
 
   -- ── 2. Les portes présentes : nommées, jamais par PUBLIC ──
   return next is((select count(*)::int
