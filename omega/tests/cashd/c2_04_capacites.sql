@@ -5,7 +5,7 @@ create or replace function tests.test_c2_04_capacites() returns setof text
 language plpgsql as $f$
 declare
   banc jsonb; v_client uuid; v_gerant uuid; v_daf uuid; v_collab uuid; p jsonb; j date := tests.c2_jour();
-  v_r jsonb; v_x uuid; v_f uuid; v_e record; r public.cashd_relances; v_d jsonb; v_dem uuid; v_samedi date; v_n integer; v_arrete date;
+  v_r jsonb; v_x uuid; v_f uuid; v_e record; r public.cashd_relances; v_d jsonb; v_dem uuid; v_samedi date; v_n integer; v_avant bigint; v_arrete date;
 begin
   banc := tests.c2_banc();
   v_client := (banc ->> 'client')::uuid; v_gerant := (banc ->> 'gerant')::uuid; v_daf := (banc ->> 'daf')::uuid;
@@ -141,7 +141,10 @@ begin
   perform tests.redevenir_admin();
   update public.cashd_reglages set seuil_lre = 1000 where client_id = v_client;
   perform private.cashd_preparer_relances(v_client, j + 5, null);
+  -- un palier précédent est parti : la mise en demeure peut suivre (c2_24)
+  perform tests.c2_parti(x.id) from public.cashd_relances x where x.compte_id = (p ->> 'hotel')::uuid and x.statut <> 'coupee';
   perform private.cashd_preparer_relances(v_client, j + 10, null);
+  perform tests.c2_parti(x.id) from public.cashd_relances x where x.compte_id = (p ->> 'hotel')::uuid and x.statut <> 'coupee';
   perform private.cashd_preparer_relances(v_client, j + 15, null);
   select * into r from public.cashd_relances x where x.compte_id = (p ->> 'hotel')::uuid and x.palier = 'mise_en_demeure' and x.statut <> 'coupee' order by x.jour desc limit 1;
   return next is(r.canal || '/' || (select d.payload ->> 'canal' from public.demandes_validation d where d.id = r.demande_id), 'lre/lre',
@@ -163,9 +166,11 @@ begin
   -- ── Jours ouvrés ──
   v_samedi := j + (6 - extract(isodow from j)::int + 7) % 7;
   if v_samedi = j then v_samedi := j + 7; end if;
+  -- (les étapes précédentes préparent à j + 5, qui tombe un samedi quand on est lundi : on compte ce que le passage ajoute)
+  v_avant := (select count(*) from public.cashd_relances x where x.client_id = v_client and x.jour = v_samedi);
   v_n := private.cashd_passage((v_samedi::timestamp + time '07:05') at time zone 'Europe/Paris');
   return next ok((select (x.bilan ->> 'jour_non_ouvre')::boolean from public.cashd_passages x where x.client_id = v_client and x.jour = v_samedi)
-                 and not exists (select 1 from public.cashd_relances x where x.client_id = v_client and x.jour = v_samedi),
+                 and (select count(*) from public.cashd_relances x where x.client_id = v_client and x.jour = v_samedi) = v_avant,
                  'Un samedi, le passage n''écrit aucune relance');
 
   -- ── L'arrêté de la balance à date fixe ──

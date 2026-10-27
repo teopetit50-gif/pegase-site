@@ -5,22 +5,184 @@ Commande : `omega/AUDIT-PROMESSES.md` § 1 (CASHD absent) ; promesses : `app/pag
 sont déjà écrites », capture « qui doit de l'argent, où en est la relance, et l'encours échu au total »),
 `app/offres/relances-impayes/page.tsx`, `lib/produits/relances.ts`, `lib/produits/capacites/relances.ts` (50 lignes).
 
-## REPRISE (pause demandée par Teo, 06/10/2026 au soir)
+## REPRISE (19/10, 14 h 18 Z, feu vert de Teo)
 
-- **Fait, posé, fusionné** : migrations c2_01 → c2_03 posées sur la recette ; tests ^test_c2_ verts (t1, t4 reposés depuis
-  a693a81 : verts ; t2, t3 verts depuis 8b8fbb4) ; worker-c2 fusionnée dans main (efd478e) ; banc_cashd.sql joué (CASHD
-  installé en essai sur le banc) ; écran /espace/cashd en ligne.
-- **Sur la branche, pas encore fusionné** : d7391be — `omega/CHIFFRAGE/cashd.md` (117 promesses, A 0 · B 71 · C 38 · D 1 ·
-  T 7 ; 38 j → B dont 18,5 CASHD ; 13 j + un mois de calendrier → A) et cette section. Documents seulement : rien à poser.
-- **Attend le coordinateur** : fusionner d7391be (ou le SHA de cette note) ; C1 a reçu de quoi reprendre l'écran dans
-  /espace2 (page prête + entrée de modules.ts) — rien n'est fait de mon côté dans /espace2.
-- **Attend Teo** : trancher construire ou reformuler (relecture quotidienne du facturier, gabarits, captures ;
-  `omega/CHIFFRAGE/cashd.md` § Synthèse et § Écarts de texte) ; tiers : AR24, prestataire de paiement, vérification
-  Google / Microsoft, WhatsApp Business ; région d'hébergement, CGV, DPA.
-- **Prochaine étape exacte** (au réveil) : selon la décision de Teo, soit G1 + G2 + G3 + G14 du chiffrage (~10,5 j,
-  dans l'ordre G2 → G3 → G14, G1 étant chez A1), soit le pilote chez un premier client (6,5 j minimum). Ligne 47 : preuve
-  stricte dès qu'un envoi réel existe. Banc local de test : Postgres 16 dans /tmp/pgc2 (à recréer, le conteneur est
-  éphémère).
+- **Fait** : c2_10 → c2_15 posés ; liste de Teo complète (G2…G21, G14, G17).
+- **Posés et verts (19/10)** : c2_15 (11/11 seul), c2_16 (taux le plus récent).
+- **Écran (19/10)** : section « Taux de change » de la vue Trésorerie (TauxChange.tsx) — le taux retenu de chaque devise des factures et sa source (BCE / saisi), saisie d'un taux par cashd_poser_taux. Rien à poser en base.
+- **Jeu NOBAT (21/10, Teo)** : `omega/banc/cashd_nobat.sql` — factures émises par le banc (négoce BTP Guadeloupe, fictif) : 1 juste + 5 erreurs (doublon de numéro, TTC faux, échéance avant émission, client sans adresse, règlement partiel non lettré) + relevé. Local : 3 attrapées / traitées, **2 écarts** (doublon : la ligne met à jour la pièce d'un autre client, sans alerte ; TTC ≠ HT + TVA relancé tel quel). Non corrigés (consigne).
+- **À poser (21/10)** : `c2_17_controles_import.sql` puis test `c2_17_controles_import` (13) — corrige les deux écarts NOBAT : numéro déjà porté par un autre compte → ligne écartée + alerte, pièce gardée ; TTC contrôlé (HT + TVA, ou lignes, ou HT seul ± 20 %) → pièce marquée `incoherence`, relance suspendue, alerte ; levée par un export corrigé ou cashd_lever_incoherence. Relevé NOBAT : 5/5 attrapées en local. Local 315/315. Écran : la marque n'est pas encore affichée sur la fiche.
+- **c2_17 v2 posé et vert (21/10)**. **À poser** : `c2_18_incoherence_file.sql` puis test `c2_18_incoherence_file` (4) — une relance déjà en file est coupée quand sa pièce devient incohérente (motif « total incohérent (…) ») et revient quand la marque est levée. Local 319/319.
+- **Recette T-CASHD (21/10, testeur-cashd, omega/TESTS-CASHD.md)** — un lot à la fois, rouge avant / vert après, à poser
+  dans l'ordre : `c2_19_texte_parti` (TCASHD-06, test 5) · `c2_20_avoir_vise` (TCASHD-03, test 6 ; colonne
+  cashd_factures.facture_visee) · `c2_21_incoherence_dite` (TCASHD-02, test 6 ; fiche : incoherence, relance_suspendue,
+  reste_relancable 0) · `c2_22_raison_exacte` (TCASHD-04/05, test 4) · `c2_23_clients_inchanges` (TCASHD-01, test 3).
+  Local 343/343. Jeu du testeur rejoué en local : scratchpad c2_19/repro.sql (serie1 sur le banc).
+- **Suite de la recette T-CASHD (21/10, soir)** — poussés dans l'ordre : c2_20b (reprise des avoirs mal imputés), c2_22b
+  (fiche : relançable 0 pendant toute suspension, « sous le seuil » dit d'emblée), c2_24 / c2_24b / c2_31 (aucun palier sans
+  que le précédent soit réellement parti ; la séquence reprend au premier palier non parti ; MED retenue tant que la ferme
+  n'est pas partie ; reprises), c2_25 (MED approuvée sans commentaire coupée, déclencheur après le socle), c2_26 / c2_27 /
+  c2_28 / c2_29 / c2_30 / c2_33 / c2_35 / c2_36 / c2_38 (textes : pluriel, canal, chantier, secteur, ton selon ancienneté
+  et montant — défauts 15/45 j et 1 500 € —, date limite avec 3 j ouvrés de validation + 2 j de remise, moyens de
+  règlement dans la MED, « Moyens de règlement : … »), c2_32 / c2_34 / c2_37 (envoi à la main d'une relance non_reglee ;
+  elle ne repart jamais ; statut « envoyee », contrainte élargie), puis l'écran des deux réglages de date limite.
+  Local 429/429. Banc local : stub public.approbations (scratchpad/approbations_stub.sql, non commité).
+- **22/10** : c2_39 (crochet d'approbation du socle 19ay : texte réécrit au jour de la validation ; à poser après 19ay) ;
+  écrans CASHD reportés à la main dans la refonte Espace 2 de main (fusion d073dd22). La recette c2 vise l'ancien écran à
+  onglets (/espace redirige vers /espace2) : 43 ✓ / 48 ✗, identique sur main seul — à réécrire pour les pages Espace 2.
+- **25/10 (sprint 01 h 10 – 01 h 52 Z)** : c2_40 (C:84, adresse de paiement de l'organisation dans la relance, {numero}
+  et {montant} ; champ dans « Vos textes ») ; c2_41 (reprise après refus, côté CASHD, sur le socle 19az : cron
+  cashd-reprises chaque minute ; à poser après 19az). Local 445/445 (banc : 19az chargé, colonne devise ajoutée à la
+  souche locale de demandes_validation, non commité).
+- **26/10 (reprise après le plantage du Mac)** — TCASHD-18 et TCASHD-19, posés sur omega-recette depuis le dépôt,
+  rouge avant / vert après :
+  - `c2_42_montant_revu` (861c19b2, TCASHD-19) : un règlement (ou avoir) lettré qui baisse le reste d'une facture
+    REVOIT SUR PLACE toute relance qui l'attend encore (pièces et texte du jour, demande en attente annulée, nouvelle
+    demande au reste dû, clé `cashd:relance:<id>:revue:<ancienne>`, `revue_de` dans le contenu ; envoi adossé refait).
+    Déclencheur `cashd_imputations_zz_revoir`. Seule la baisse est revue. Test 5/5.
+    **Décision prudente prise seul (Teo injoignable)** : pas de seconde relance le même jour (la contrainte
+    `cashd_relances_une_par_jour` l'interdit et on ne fait pas de DROP) ; c'est la même relance, revue, qui repasse par la
+    validation. Un premier essai (6fc56cae : couper puis réécrire) a été exécuté à 16 h 50 Z puis remplacé : la
+    préparation a repris sa forme c2_31 (md5 vérifié) et A-C26 a été rendue et revue (585 €, en attente).
+  - `c2_43_refus_puis_reglement` (9c094c73, test a8a92381, TCASHD-18) : une relance refusée dont la reprise est
+    impossible le dit (« refusée dans la file de validation : <commentaire> — reprise impossible : … », plus
+    « l'envoi viendra ») ; si un règlement baisse ensuite le reste, elle est revue avec une nouvelle demande
+    « Après refus — … » qui porte la consigne (`apres_refus`). Le socle n'admet qu'une reprise par refus : CASHD ne la
+    redemande pas. Une refusée sans changement n'est pas réécrite. A-C27 revue à la pose (585 €, en attente). 5/5.
+  - Inscrits dans schema_migrations (20261026165644, 20261026165645). `^test_c2_4[0-3]` 4/4.
+  - Suite `^test_c2_` rejouée par morceaux : tout vert sauf **test_c2_01 (4) et test_c2_08 (5)**, qui comptent tous les
+    comptes du client du banc : les 7 comptes NOBAT (NB-C1…C7, jeu du 21/10) en ajoutent. Sans lien avec c2_42/43 ;
+    à trancher par le coordinateur (retirer le jeu NOBAT du banc ou borner ces tests à leurs comptes). test_c2_25 adapté
+    au socle 19aw (l'approbation d'une mise en demeure sans commentaire est refusée dès la saisie), vert (b2ac1d5e).
+  - T-CASHD peut rejouer R41 et P1 (c).
+- **26/10 — recette des écrans de l'espace 2** (`omega/recette-c2/recette-cashd.mjs`, réécrite, 62c5eadd) :
+  - Les 48 échecs de l'ancienne recette (43 ✓ / 48 ✗) venaient TOUS de la recette : ils tombaient dans le premier bloc
+    (cinq largeurs × compteurs `.esp-kpi`, onglets `.c2-onglets`, liste `.esp-item`, `#c2-fiche`, sections « Débiteurs »
+    / « Envois » / « Vos textes », débordement mesuré sans connaître le cadre qui défile de la grille Supabase), puis le
+    script plantait à la ligne 92 (`#c2-fiche` absent) : les blocs suivants ne tournaient pas. Aucun n'était un manque de
+    `/espace2/cashd`. Dans l'espace 2 : chaque vue est une page (`/espace2/cashd/suivi?vue=…`), on passe de l'une à
+    l'autre par le volet (navigation côté client, l'état de l'exemple survit), l'encours échu se lit au pied de la
+    grille et sur le tableau de bord, la fiche est dans le volet de droite.
+  - Nouvelle recette : tableau de bord, quatre vues et cinq pages de fonction aux cinq largeurs, puis tous les gestes
+    (règlement, pause, rapprochement, dépôt, échéancier, contestation partielle, plafond, vos textes, adresse de
+    paiement, bon de commande, solde, accord oral, réponse à trancher, pièce jointe, ?vue= et ?compte=, envoi à la main,
+    rappels sous accord, rappel du jour d'échéance, taux). **298/298 en données d'exemple** (serveur local jetable,
+    imports Varelo réécrits en `.ts` dans une copie, jamais commitée).
+  - Vrai manque trouvé et corrigé : l'aperçu de « Vos textes » ne montrait pas l'adresse de paiement (c2_40). Il la
+    montre sous la facture, `{numero}` encodé comme `private.cashd_url_composant`, `{montant}` au point (4a0c3d37) ;
+    une adresse sans https:// ne s'enregistre pas ; un devis n'en porte pas. Le champ existait déjà.
+  - **Base réelle — décision prudente prise seul** : la recette accepte un fichier de session
+    (`node omega/recette-c2/recette-cashd.mjs <origine> <session.json>`, lecture seule), mais je ne me suis pas connecté
+    avec le mot de passe du compte du banc (demande relayée par une session, Teo injoignable). À la place, les portes
+    lues par l'écran ont été rejouées en SQL sous RLS comme `gerant@banc-varelo.test` (transaction annulée) : tableau
+    (5 comptes, 11 818,80 € échus), relances du jour (4), fiche, suivi, prévision, textes (22), taux, pilotage,
+    commandes, `lien_paiement` dans les réglages — aucun refus. La passe navigateur en base réelle reste à faire par Teo
+    ou sur son feu vert.
+  - Non fait : `npm run build` (Mac à 8 Go, branche worker, pas de push sur main) ; tsc ne remonte que la casse Varelo
+    propre à ce Mac ; eslint propre.
+- **26/10, soir — testeur indépendant** (`omega/RECETTE-TESTEUR-MODULES-2026-10-26.md`, origin/testeur-modules 157b506f) :
+  TCASHD-18 et 19 jugés justes (C-1 à C-7). Deux écarts corrigés, posés depuis le dépôt, rouge avant / vert après :
+  - `c2_44_revue_controlee` (28e284a8, test 4ee1fa4c, **TMOD-04**) : la relance revue (c2_42, c2_43) repasse, une fois son
+    texte réécrit et AVANT toute demande, les contrôles d'une relance neuve : compte hors cycle ou réciproque, pièce en
+    litige / sortie / réglée / solde abandonné / bon de commande / total incohérent / sous le seuil → coupée « avant
+    l'envoi : … » ; sans adresse → « sans adresse » ; mot interdit → « bloquée » (avec le mot) ; puis l'accord permanent
+    (seuls les rappels 1 et 2). Bloquée, la demande en attente est retirée et aucune nouvelle n'entre dans la file.
+    Test 6/6 (dont : refusée puis hors périmètre, plus rien de reproposé).
+    **Décisions prudentes prises seul** : les fenêtres d'envoi, fériés et oppositions restent contrôlés par le socle à
+    l'envoi (preparer_envoi), comme pour une relance neuve ; un règlement encore à lettrer ne bloque pas la revue (elle
+    naît d'un lettrage en cours, plusieurs imputations peuvent se suivre) ; une relance bloquée par un interdit n'est plus
+    revue par un règlement suivant (elle attend une décision, comme à la préparation).
+  - `c2_45_reglement_nul` (28e284a8, **TMOD-05**) : « Un règlement de 0 € ou moins ne se note pas : le montant reçu doit
+    être supérieur à 0 €. » (22023). Fonction c2_01 recopiée telle quelle (md5 vérifié avant). Test 3/3. Les autres
+    « … est positif » (avoir imputé, lettrage, plafond, litige partiel) n'ont pas été touchés : hors du constat.
+  - Inscrits (20261026183016, 20261026183017). `^test_c2_4[0-5]` 6/6 ; suite `^test_c2_` par morceaux : inchangée, seuls
+    test_c2_01 (4) et test_c2_08 (5) restent rouges, à cause du jeu NOBAT du banc (voir plus haut). A-C26 et A-C27 restent
+    à 585 €, en attente. Remarque du testeur non traitée : le sujet d'une relance revue reste « rappel : facture … échue »
+    (le corps dit le reste dû) — c'est le sujet du palier, juste.
+- **27/10 — contre-recette du testeur** (origin/testeur-modules cc61ebf4 : TMOD-04 et 05 confirmés corrigés) :
+  - `c2_46_bloquee_suit` (8f368793, test 9f60d964, **TMOD-13**) : une relance bloquée dont la demande a été retirée (ou
+    qui n'en a jamais eu) suit le reste dû comme une relance en attente, puis repasse les contrôles de c2_44 ; quand
+    l'organisation change ses interdits (déclencheur `cashd_reglages_zz_interdits`), chaque relance bloquée par un mot
+    interdit, jamais partie et la plus récente de son compte, est revue : contrôles passés, elle entre dans la file (sa
+    première demande si elle a été bloquée dès la préparation, clé `cashd:relance:<id>`), envoi adossé quand l'envoi est
+    réglé ; sinon elle reste retenue. Statut selon le réglage d'envoi, comme à la préparation. Une demande impossible à
+    déposer met la relance en échec avec une alerte, sans faire échouer le règlement. Test 7/7. Remplace la limite
+    « une relance bloquée par un interdit n'est pas réécrite quand l'interdit est retiré » (liste des limites, plus haut).
+    **Décisions prudentes prises seul** : pas de reprise des anciennes relances bloquées à la pose (elles suivront au
+    prochain règlement ou au prochain changement d'interdits, et la préparation du lendemain écrit déjà celles qui sont
+    périmées) ; seule la plus récente relance d'un compte revient dans la file ; ajouter un interdit ne retire pas une
+    relance déjà en attente (comme avant).
+  - test_c2_44 (82ac2358) : son dernier cas vérifiait l'ancien comportement que TMOD-13 change ; aligné.
+  - **test_c2_01 et test_c2_08 rouges : ce n'était PAS un banc abîmé.** Les 7 comptes en trop sont le jeu NOBAT
+    (`omega/banc/cashd_nobat.sql`, NB-C1…C7, « Démo … », client « Groupe Sogexal (banc) »), chargé volontairement le
+    21/10 sur décision de Teo, et intact : 5 factures, 1 règlement (VIR-DEMO-0001, 1 000 €), 4 relances, tout daté du
+    21/10, rien écrit depuis, aucune imputation. Les deux tests supposaient le client du banc vide de CASHD. Décision
+    prudente : **aucune ligne du banc n'a été modifiée ni effacée** ; les deux tests comptent à part ce que le banc
+    portait avant eux (comptes, totaux du tableau, règlements à imputer, comptes sans chargé), commentés (9f60d964). Verts.
+  - Inscrit (20261026192111). Suite `^test_c2_` rejouée par morceaux (un morceau à la fois, délai de la recette) :
+    **tout vert**, c2_01 et c2_08 compris. Aucun serveur de dev lancé.
+- **Prochain pas** : la passe en base réelle de la recette (session du banc) ; le reste de la liste au feu vert du
+  coordinateur (voir `omega/CHIFFRAGE/cashd.md`, « Ce qui reste vraiment », 26/10).
+- **Limites dites au coordinateur** : le socle fige le texte d'un envoi adossé (pas de réécriture à l'approbation, piste
+  (c) pour Teo) ; ~~une relance bloquée par un interdit n'est pas réécrite quand l'interdit est retiré~~ (levée par c2_46, 27/10).
+
+- **Prochain pas** : charger les factures d'Omega (cashd_omega.sql) quand Teo envoie ses PDF ; G19 avec un premier client.
+
+- **Posés et verts (18/10)** : c2_11 envoi à la main (842f9c25) ; c2_12 v2 modèle 2 (5ee5fd10, ^test_c2_ 12/12) — rappels
+  des paliers 1 et 2 sous accord permanent du socle, relance ferme / devis / mise en demeure (seule à pouvoir partir en
+  LRE) dans actions_sans_accord. Aucun accord créé ; Omega reste « coupe ».
+- **Posé (18/10)** : c2_13 point du matin des rappels sous accord (6a98ff42).
+- **Posé (18/10)** : c2_14 texte du jour d'échéance (05e9bf82, ^test_c2_ 14/14).
+- **Liste de Teo (18/10, 23 h 41 Z)** : G2, G3, G7, G8, G9, G10, G11, G20, G21, G14 déjà construits et posés (c2_04 → c2_09,
+  écran) ; restait G17.
+- **À poser** : `c2_15_taux_bce.sql` puis tests `c2_15_taux_bce` (11), `c2_07_validation` et `c2_12_envoi_auto` (ajustés) —
+  G17 : taux BCE demandés chaque jour ouvré (pg_net, API publique data-api.ecb.europa.eu, sans compte), rangés en source
+  « bce » ; le taux saisi par une organisation garde la priorité. Crons cashd-taux-bce (15 h 35 UTC) et -lire. Local 296/296.
+  À savoir : cashd_factures_etat (c2_03) préfère le taux saisi par l'organisation, même ancien, au taux BCE récent.
+- **Omega client CASHD (18/10, recette)** : `omega/banc/cashd_omega.sql` — installe CASHD (essai), coupe l'envoi du
+  module cashd (relances rédigées et validables, envoyées à la main), charge les factures d'un bloc VALUES que le
+  coordinateur remplit à partir des PDF de Teo (copie locale non commitée : vraies données). CASHD ne lit pas les PDF.
+  Essayé en local (2 passages, sans doublon ; relance a_valider, mode_envoi coupe).
+- **Captures** : omega/captures/cashd/ — Débiteurs et Relances à 1440 et 390 (script captures.mjs), faites le 17/10.
+- **Prochain pas** : CASHD ne garde qu'une lacune construisible seule, G19 (raccord d'un logiciel de commandes réel à
+  cashd_verifier_commande) — elle attend un premier client ; puis le pilote (omega/CHIFFRAGE/cashd.md § Passage à A).
+  Banc local : scratchpad/pg.sh (Postgres /tmp/pgc2, port 5499, base c2b).
+
+### Historique de la reprise du 11/10
+
+- **Fait, posé, fusionné (avant la pause)** : c2_01 → c2_03, tests ^test_c2_01 → 04 verts sur la recette, banc_cashd.sql joué,
+  worker-c2 fusionnée (efd478e), chiffrage d7391be.
+- **Fait le 11/10, sur worker-c2, À POSER** : migration `c2_04_textes.sql` (gabarits de l'organisation, variantes tournantes,
+  ton au-delà d'un montant, moyens de règlement et échéancier proposé, vocabulaire du bâtiment, seuil par entité, solde
+  abandonné / réclamé, accord oral sur un devis, bon de commande attendu avec relance au service émetteur ; redéfinit
+  ecrire_texte, preparer_relances, verifier_relances, point_lignes, passage, regler_relances, fiche_compte) et le test
+  `test_c2_05_textes` (30). Local : 184/184 (c2_01 → c2_05), aussi avec CASHD installé sur le banc. Rejouable (deux fois).
+- **Écran** (`components/espace/cashd/`) : quatre vues (Débiteurs, Relances, Envois, Trésorerie), « Vos textes », trois
+  gestes de la fiche (bon de commande, solde, accord oral). Recette 130/130 aux cinq largeurs sur
+  `/espace/cashd?ancien=1`. ⚠ Depuis le 07/10, Teo a réduit `/espace2/cashd` à son tableau de bord (TableauCashd, C1) :
+  C1 loge l'écran tel quel à `/espace2/cashd/suivi` (branche tableau-de-bord-v2, ec24902) ; chaque vue s'ouvre par
+  `?vue=debiteurs|relances|envois|tresorerie` ou la prop `vue` d'EcranCashd (recette 133/133).
+- **Fait le 11/10 après-midi, À POSER** : `c2_05_reponses.sql` (réponses lues → propositions tranchées ; pièces jointes ; dossier
+  et fiche enrichis) et `test_c2_06_reponses` (15). Local : 199/199 (c2_01 → c2_06), aussi avec CASHD installé sur le banc.
+  Écran : « Réponses à trancher », « Pièces du dossier » (dépôt dans omega-clients/<client>/cashd/…), bouton Assurance-crédit ;
+  recette 143/143.
+- **Fait le 11/10 (fin d'après-midi), À POSER** : `c2_06_validation.sql` (trois paliers de validation par montant → règles
+  du socle) et `test_c2_07_validation` (10). Local : 209/209 (c2_01 → c2_07), aussi avec CASHD installé. Écran : « Qui valide »
+  dans Vos textes ; recette 146/146.
+- **À POSER aussi** : `c2_07_liens.sql` (le point du matin mène à /espace2/cashd/suivi, plus jamais à l'ancien dessin ;
+  seule private.cashd_point_lignes est redéfinie), assertion ajoutée à `test_c2_07_validation` (11). Écran : lien de la file
+  vers /espace2/validations ; la recette tourne désormais sur /espace2/cashd/suivi (147/147, aucun lien vers /espace ni
+  ?ancien=) ; débordement de 5 px à 390 corrigé (libellé masqué du tableau des pièces).
+- **À POSER** : `c2_08_portefeuille.sql` (le chargé ne voit que son portefeuille : politiques restrictives « portefeuille du
+  charge » sur 7 tables, porte cashd_regler_portefeuille) et `test_c2_08_portefeuille` (14). Local : 224/224 (c2_01 → c2_08).
+  Écran : case dans « Qui valide » ; recette 148/148 sur /espace2/cashd/suivi.
+- **Attend le coordinateur** : poser c2_04 puis c2_05 (dans cet ordre, après c2_03), fusionner ; décider avec C1 où vivent
+  « Vos textes », les Envois et les gestes de la fiche dans /espace2.
+- **Attend Teo** : tiers inchangés (AR24, paiement, Google / Microsoft, WhatsApp) ; à la vitrine : refaire les quatre
+  captures depuis l'écran, trancher « J+3 puis J+7 » et « rappel à l'échéance » (omega/CHIFFRAGE/cashd.md, mise à jour).
+- **Prochaine étape** : G6 (détail des pièces dans d'autres langues), G19 (raccord du logiciel de commandes, avec un premier
+  client) ; puis le pilote (chiffrage § Passage à A). Banc local : /tmp/pgc2 (port 5499, base c2b) ; le constructeur de c2_04
+  est dans le scratchpad (copies patchées des dernières définitions).
 
 ## Les deux jauges
 
@@ -173,7 +335,7 @@ t3 = test_c2_03_moteur, t4 = test_c2_04_capacites ; R = recette de l'écran (ome
 ### Litiges et exceptions
 | # | Ligne | État | Preuve |
 |---|---|---|---|
-| 18 | Une contestation écrite bascule la facture en litige et la sort du cycle. | **moitié** | la sortie du cycle : `cashd_litige` (t3) ; la réponse reçue est signalée (`cashd_suivre_reception`) mais la bascule reste une décision humaine (lecture de la contestation non automatisée) |
+| 18 | Une contestation écrite bascule la facture en litige et la sort du cycle. | tenue (c2_05) — la réponse est lue et proposée, une personne tranche ; avant : **moitié** | la sortie du cycle : `cashd_litige` (t3) ; la réponse reçue est signalée (`cashd_suivre_reception`) mais la bascule reste une décision humaine (lecture de la contestation non automatisée) |
 | 19 | Le commercial en charge du compte est notifié dès l'ouverture du litige. | tenue | alerte nominative au commercial (t4) |
 | 20 | Une facture contestée sur une seule ligne laisse le reste en relance. | tenue | `cashd_litige_partiel` (t4 : 1 000 € contestés, le reste relancé et dit) ; R |
 | 21 | La reprise des relances demande une décision, jamais un simple délai écoulé. | tenue | motif obligatoire (t3) |
@@ -205,7 +367,7 @@ t3 = test_c2_03_moteur, t4 = test_c2_04_capacites ; R = recette de l'écran (ome
 | 39 | Vos règles de communication et vos interdits sont repris dans chaque message. | tenue | formule, signature, interdits (t3) |
 | 40 | Un compte qui se dégrade est signalé avant que le retard s'installe. | tenue | vue `cashd_delais_reglement.se_degrade` ; alerte au commercial et point du matin (c2_03) ; assertion `test_c2_04` (30 j de retard contre 5 d'habitude) |
 | 41 | Un compte se met en pause, et il n'y revient que sur votre décision. | tenue | t3 |
-| 42 | Le dossier destiné à l'assurance-crédit est constitué avec les pièces exigées. | tenue (avec les pièces que CASHD détient) | `cashd_dossier(…, 'assurance_credit')` (t4) ; les PDF des factures restent dans le facturier |
+| 42 | Le dossier destiné à l'assurance-crédit est constitué avec les pièces exigées. | tenue (c2_05 : pièces jointes, PDF manquants nommés) | `cashd_dossier(…, 'assurance_credit')` (t4) ; les PDF des factures restent dans le facturier |
 | 43 | Le dossier de recouvrement judiciaire est remis complet à qui vous désignez. | tenue | `cashd_remettre_dossier` : compte en recouvrement, relances coupées, envoi du récapitulatif par la file (t4) |
 
 ### Pilotage

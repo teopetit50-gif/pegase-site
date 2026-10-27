@@ -45,9 +45,11 @@ begin
                  and r.corps like '%C-LEFEVRE, secteur Immobilier%' and r.corps like '%Mme Lefèvre%' and r.corps like '%Bien cordialement,%Atelier Bertin — service comptable%',
                  'Le message reprend la facture, son montant, son retard, la référence et le secteur du compte, la formule et la signature');
   return next ok(r.corps not like '%F-2026-140%', 'La facture non échue n''y est pas');
-  return next ok(r.corps like '%simple oubli%', 'Un compte sans retard passé : le ton du rappel est le plus doux');
+  -- (c2_30 : le ton suit aussi l'ancienneté — à 45 jours de retard, le rappel dit la durée du retard plutôt que « simple oubli »)
+  return next ok(tests.c2_plat(r.corps) like '%Ce retard dure maintenant depuis 45 jours.%' and r.corps not like '%simple oubli%',
+                 'Un compte sans retard passé, 45 jours de retard : le rappel dit la durée du retard, sans parler d''oubli');
   select * into d from public.demandes_validation x where x.id = r.demande_id;
-  return next is(d.module || '/' || d.type_action || '/' || d.objet_type || '/' || d.montant || '/' || d.statut, 'cashd/cashd.relance/cashd_relances/12000.00/en_attente',
+  return next is(d.module || '/' || d.type_action || '/' || d.objet_type || '/' || d.montant || '/' || d.statut, 'cashd/cashd.rappel/cashd_relances/12000.00/en_attente',  -- un rappel : type cashd.rappel depuis c2_12, sans accord il attend
                  'Une demande de validation du socle, avec son montant, attend une décision humaine');
   return next ok(d.payload ->> 'corps' = r.corps and d.payload #>> '{destinataire,adresse}' = 'compta@lefevre-patrimoine.test',
                  'La file montre le texte exact et son destinataire');
@@ -76,10 +78,13 @@ begin
   v_b := private.cashd_preparer_relances(v_client, j + 4, null);
   return next ok(not exists (select 1 from public.cashd_relances x where x.compte_id = (p ->> 'hotel')::uuid and x.jour = j + 4),
                  'Quatre jours après le rappel, rien : la fermeté ne monte pas avant cinq jours');
+  -- le rappel est parti : la relance ferme peut suivre (c2_24b)
+  perform tests.c2_parti(x.id) from public.cashd_relances x where x.compte_id = (p ->> 'hotel')::uuid and x.jour = j;
   v_b := private.cashd_preparer_relances(v_client, j + 5, null);
   select * into r from public.cashd_relances x where x.compte_id = (p ->> 'hotel')::uuid and x.jour = j + 5;
   return next is(r.palier, 'relance', 'Cinq jours après : la relance ferme');
-  return next ok(tests.c2_plat(r.corps) like '%Total restant dû : 3 000,00 €%' and r.corps like '%au plus tard le ' || to_char(j + 5 + 8, 'DD/MM/YYYY') || '%'
+  return next ok(tests.c2_plat(r.corps) like '%Total restant dû : 3 000,00 €%' and r.corps like '%au plus tard le ' || to_char(private.cashd_jours_ouvres(j + 5, 3) + 8, 'DD/MM/YYYY') || '%'   -- c2_35 : 3 jours ouvrés de validation, puis le délai
+
                  and tests.c2_plat(r.corps) like '%indemnité forfaitaire pour frais de recouvrement de 40,00 €%' and r.corps like '%L441-10%',
                  'Elle récapitule le reste dû (avoir déduit), fixe une échéance, rappelle l''indemnité et les pénalités');
   return next is(r.indemnites, 40.00::numeric(14,2), 'L''indemnité de 40 € est comptée');
@@ -91,6 +96,7 @@ begin
   perform tests.redevenir_admin();
   return next ok(exists (select 1 from public.regles_validation x where x.client_id = v_client and x.module = 'cashd' and x.montant_min = 2000 and x.actif
                          and x.roles_autorises = array['gerant', 'admin']), 'Le seuil pose une règle de validation du socle pour CASHD');
+  perform tests.c2_parti(r.id);   -- la relance ferme est partie : la mise en demeure peut suivre (c2_24)
   v_b := private.cashd_preparer_relances(v_client, j + 10, null);
   select * into r from public.cashd_relances x where x.compte_id = (p ->> 'hotel')::uuid and x.jour = j + 10;
   select * into d from public.demandes_validation x where x.id = r.demande_id;
@@ -149,6 +155,8 @@ begin
   return next is((select x.statut from public.cashd_relances x where x.id = r.id), 'coupee', 'Le devis accepté : sa relance est coupée avant l''envoi');
 
   -- ── Le point du matin ──
+  -- (c2_10) F-2026-140 reçoit son rappel courtois le jour de son échéance, et l'attend dans la file.
+  perform private.cashd_preparer_relances(v_client, j + 20, null);
   v_items := private.cashd_point_lignes(v_client, j);
   return next ok(exists (select 1 from jsonb_array_elements(v_items) x where tests.c2_plat(x ->> 'texte') like 'Hôtel des Brotteaux doit 3 000,00 € échus%'),
                  'Le point du matin dit qui doit quoi');
