@@ -19,9 +19,11 @@ begin
   v_k := public.cashd_creer_cle_commandes(v_client, 'Logiciel de commandes du banc');
   v_cle := v_k ->> 'cle';
   return next ok(v_cle ~ '^cashd_cmd_[0-9a-f]{48}$' and v_k ->> 'prefixe' = left(v_cle, 12), 'La clé de raccord est créée et rendue une fois');
+  perform tests.redevenir_admin();
   return next ok(not exists (select 1 from public.cashd_cles_commandes x where x.empreinte = v_cle or x.prefixe = v_cle)
                  and exists (select 1 from public.cashd_cles_commandes x where x.empreinte = encode(extensions.digest(convert_to(v_cle, 'UTF8'), 'sha256'), 'hex')),
                  'Seule son empreinte SHA-256 est gardée');
+  perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');
   return next ok(public.cashd_cles_commandes_liste(v_client)::text !~ '[0-9a-f]{64}' and jsonb_array_length(public.cashd_cles_commandes_liste(v_client)) = 1,
                  'La liste des clés ne montre ni la clé ni son empreinte');
   perform tests.endosser(v_daf, 'daf@banc-varelo.test');
