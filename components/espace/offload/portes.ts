@@ -20,7 +20,7 @@
      lecture offload_restitution (c4_17) ; offload_regler (envoi_auto, sujets_auto), offload_donner_accord_auto,
      offload_revoquer_accord_auto, lecture offload_envoi_auto (c4_18) ; offload_effacer_compte (c4_19) ;
      lectures offload_valeur_par_segment, offload_restitution_tableur (c4_36, gérant et administrateur) ;
-     offload_sortie (c4_42) ; offload_regler_secteur, lecture offload_vocabulaire (c4_43) ;
+     offload_sortie (c4_42, c4_45), offload_effacer_module (c4_45) ; offload_regler_secteur, lecture offload_vocabulaire (c4_43) ;
      offload_regler_prospects (c4_44).
    La décision sur un message (valider, refuser) se prend dans « À valider »,
    l'écran commun des demandes de validation du socle.
@@ -215,6 +215,11 @@ export async function restituerTableur(client: string): Promise<RestitutionTable
 /* c4_42 — la sortie : l'arrêt, rien en suspens, la restitution ; l'effacement passe par le socle */
 export async function sortir(client: string, motif: string): Promise<Sortie> {
   return rpc<Sortie>("offload_sortie", { p_client: client, p_motif: motif });
+}
+
+/* c4_45 — l'effacement du seul OFFLOAD, après la sortie, confirmé par le nom exact de l'organisation */
+export function effacerModule(client: string, confirmation: string) {
+  return rpc<{ objets: number; lignes: Record<string, number>; garde: string }>("offload_effacer_module", { p_client: client, p_confirmation: confirmation });
 }
 
 /* c4_43 — le vocabulaire du secteur */

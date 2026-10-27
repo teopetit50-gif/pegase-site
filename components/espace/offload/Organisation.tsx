@@ -8,17 +8,19 @@
       secteur ; réglé, ou déduit de l'organisation ;
    2. les prospects qui n'ont pas abouti (c4_44) : OFFLOAD les reprend à la
       cadence de la vague, toujours relus, jamais sans leur accord ;
-   3. la sortie (c4_42) : OFFLOAD s'arrête, rien ne reste en suspens, tout
-      est restitué en fichiers pour un tableur ; l'effacement se fait
-      ensuite par Omega, confirmé par le nom de l'organisation.
+   3. la sortie (c4_42, c4_45) : OFFLOAD s'arrête, rien ne reste en suspens
+      et la saisie s'arrête ; tout est restitué en fichiers pour un tableur ;
+      puis le gérant efface OFFLOAD, et OFFLOAD seulement, en confirmant le
+      nom de l'organisation : ses autres modules continuent.
    Écritures : offload_regler_secteur, offload_regler_prospects,
-   offload_sortie (gérant, administrateur), en base réelle seulement.
+   offload_sortie (gérant, administrateur), offload_effacer_module (gérant),
+   en base réelle seulement.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useState } from "react";
 import type { Source } from "../source";
 import { Avis } from "../ui";
-import { chargerVocabulaire, reglerProspects, reglerSecteur, sortir } from "./portes";
+import { chargerVocabulaire, effacerModule, reglerProspects, reglerSecteur, sortir } from "./portes";
 import { telechargerFichier } from "./tableur";
 import type { Reglages, Secteur, Sortie, Vocabulaire } from "./types";
 
@@ -52,10 +54,12 @@ export default function Organisation({ source, client, reglages }: { source: Sou
   const reel = source === "reelle";
   const [vocab, setVocab] = useState<Vocabulaire | null>(null);
   const [choix, setChoix] = useState<Secteur | "">("");
-  const [prospects, setProspects] = useState<boolean>(true);
+  const [prospects, setProspects] = useState<boolean>(false);
   const [motif, setMotif] = useState("");
   const [compris, setCompris] = useState(false);
   const [sortie, setSortie] = useState<Sortie | null>(null);
+  const [nomConfirme, setNomConfirme] = useState("");
+  const [efface, setEfface] = useState(false);
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [fait, setFait] = useState<string | null>(null);
@@ -77,7 +81,7 @@ export default function Organisation({ source, client, reglages }: { source: Sou
 
   useEffect(() => {
     if (reglages?.prospects_actifs === undefined) return;
-    const t = window.setTimeout(() => setProspects(reglages.prospects_actifs !== false), 0);
+    const t = window.setTimeout(() => setProspects(reglages.prospects_actifs === true), 0);
     return () => window.clearTimeout(t);
   }, [reglages]);
 
@@ -127,7 +131,7 @@ export default function Organisation({ source, client, reglages }: { source: Sou
       <Section titre="Les prospects qui n'ont pas abouti"
         texte="Les contacts sans achat dont le dernier échange est ancien sont repris un par un, à la cadence de votre vague et dans votre plafond quotidien. Le message reprend la date et la nature de l'échange, jamais vos notes. Une personne le relit toujours, et sans accord enregistré pour son adresse, c'est un appel qui est proposé.">
         <p className="esp-kpi-sous" style={{ margin: 0 }}>
-          {prospects ? "Allumée : OFFLOAD reprend vos prospects chaque matin de vague." : "Éteinte : vos prospects restent présentés à part, sans message."}
+          {prospects ? "Allumée : OFFLOAD reprend vos prospects chaque matin de vague." : "Éteinte (par défaut) : vos prospects restent présentés à part, sans message. Vous l'allumez quand vous le décidez."}
         </p>
         {reel ? (
           <div>
@@ -143,11 +147,11 @@ export default function Organisation({ source, client, reglages }: { source: Sou
       </Section>
 
       <Section titre="Arrêter OFFLOAD et récupérer vos données"
-        texte="OFFLOAD s'arrête : plus aucune vague, plus aucun message ; ce qui attendait une validation est annulé. Toutes vos données vous sont restituées en fichiers pour un tableur, avec l'empreinte de l'export. L'effacement se fait ensuite par notre équipe, sur confirmation du nom exact de votre organisation, et vous en recevez la preuve.">
+        texte="OFFLOAD s'arrête : plus aucune vague, plus aucun message, plus aucune saisie ; ce qui attendait une validation, les tâches et les affaires en cours sont fermés, avec une trace. Toutes vos données OFFLOAD vous sont restituées en fichiers pour un tableur, avec l'empreinte de l'export. Ensuite seulement, vous effacez OFFLOAD en confirmant le nom de votre organisation : vos autres modules continuent, intacts.">
         {sortie ? (
           <>
             <Avis teinte="vert" role="status">
-              OFFLOAD est arrêté : {sortie.reprises_closes} reprise{sortie.reprises_closes > 1 ? "s" : ""} close{sortie.reprises_closes > 1 ? "s" : ""}, {sortie.envois_annules} message{sortie.envois_annules > 1 ? "s" : ""} annulé{sortie.envois_annules > 1 ? "s" : ""}. Empreinte de l&apos;export : <code style={{ overflowWrap: "anywhere" }}>{sortie.empreinte_sha256}</code>
+              OFFLOAD est arrêté : {sortie.reprises_closes} reprise(s) close(s), {sortie.envois_annules} message(s) annulé(s), {sortie.taches_abandonnees ?? 0} tâche(s) et {sortie.affaires_closes ?? 0} affaire(s) fermée(s). Empreinte de l&apos;export : <code style={{ overflowWrap: "anywhere" }}>{sortie.empreinte_sha256}</code>
             </Avis>
             <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 6 }}>
               {Object.entries(sortie.tableur.fichiers).sort(([a], [b]) => a.localeCompare(b)).map(([nom, csv]) => (
@@ -157,7 +161,21 @@ export default function Organisation({ source, client, reglages }: { source: Sou
                 </li>
               ))}
             </ul>
-            <p className="esp-kpi-sous" style={{ margin: 0 }}>{sortie.effacement.phrase} Nom à confirmer : « {sortie.effacement.confirmation} ».</p>
+            <p className="esp-kpi-sous" style={{ margin: 0 }}>{sortie.effacement.phrase}</p>
+            {efface ? (
+              <Avis teinte="vert" role="status">OFFLOAD est effacé. Vos autres modules continuent ; le journal garde la trace des actes, sans les données de vos comptes.</Avis>
+            ) : (
+              <>
+                <label className="esp-kpi-sous" htmlFor="offload-effacer-nom">Pour effacer OFFLOAD, saisissez le nom exact de votre organisation : « {sortie.effacement.confirmation} »</label>
+                <input id="offload-effacer-nom" className="rv-champ" value={nomConfirme} onChange={(e) => setNomConfirme(e.target.value)} disabled={enCours} autoComplete="off" />
+                <div>
+                  <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={!client || enCours || nomConfirme !== sortie.effacement.confirmation}
+                    onClick={() => client && void agir(async () => { await effacerModule(client, nomConfirme); setEfface(true); }, "OFFLOAD est effacé, et seulement OFFLOAD.")}>
+                    Effacer OFFLOAD
+                  </button>
+                </div>
+              </>
+            )}
           </>
         ) : (
           <>

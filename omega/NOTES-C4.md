@@ -4,7 +4,25 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 `components/espace/offload/`, `app/espace/offload/`, et ce fichier. Coordinateur : session
 `session_01BCGFdpRKBvXKjouC75sYBg`. Je n'appelle jamais Supabase : le coordinateur pose, je reçois les sorties brutes.
 
-## REPRISE (27/10, matin — quatre lacunes de l'audit, branche `offload-lacunes`)
+## REPRISE (27/10, suite — contre-recette de nuit TNUIT-02 à 04, branche `offload-lacunes`)
+
+- Rapport : omega/TESTEUR/CONTRE-RECETTE-NUIT-2026-10-27.md (testeur-modules 4b2ad9a5).
+- c4_45 (0027ccbb), posé depuis le dépôt et inscrit dans `schema_migrations` :
+  - TNUIT-02 : la sortie n'efface plus l'organisation. `offload_effacer_module(organisation, nom exact)` est réservé au
+    gérant (ou au serveur, avec une signature) et ne vient qu'après la sortie. Les envois et les demandes passent par
+    `effacer_objet` du socle, puis toutes les tables offload_*. CASHD et l'organisation restent intacts.
+  - TNUIT-03 : la sortie ferme tâches, affaires, échéances, reprises et validations, avec la trace « Sortie
+    d'OFFLOAD : … ». Une garde refuse ensuite toute saisie (55000), sauf pendant un effacement du socle. La détection
+    de nuit saute l'organisation.
+  - TNUIT-04 : prospects éteints par défaut, et éteints chez les trois clients de la recette.
+- Preuve : test c4_45 rouge avant la pose (la porte n'existait pas), vert après (17/17). c4_42 est mis à jour : sa
+  garde bloquait l'effacement du socle (clé « on delete set null »), corrigé. Suite `^test_c4_` : 67 fonctions sur 68,
+  598 assertions, aucune rouge (c4_09_arretes : trop long pour l'outil).
+- Écran : la section Organisation dit que seul OFFLOAD s'arrête, puis propose l'effacement d'OFFLOAD, confirmé par
+  le nom. Prospects « éteinte (par défaut) ». tsc et eslint propres.
+- Audit : 58 en B ; N9 retombe en C, parce que le défaut prime. Décompte : B 113, C 12.
+
+### Reprise du 27/10, matin — quatre lacunes de l'audit, branche `offload-lacunes`)
 
 - Branche partie de `origin/main` à jour, dans laquelle `worker-c4` est fusionné : le code OFFLOAD c4_10 à c4_40, déjà
   posé sur la recette, n'est pas encore dans main. Rien n'est fusionné dans main.

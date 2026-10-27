@@ -297,6 +297,9 @@ export type Sortie = {
   reprises_closes: number;
   envois_annules: number;
   demandes_annulees: number;
+  taches_abandonnees?: number;
+  affaires_closes?: number;
+  echeances_closes?: number;
   empreinte_sha256: string;
   tableur: RestitutionTableur;
   effacement: { porte: string; confirmation: string; phrase: string };

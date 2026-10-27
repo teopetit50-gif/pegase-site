@@ -30,8 +30,11 @@ morceaux le 27/10 entre 06 h 05 et 06 h 30 Z, donne 66 fonctions vertes sur 67 (
   OFFLOAD (c4_42 ✔, sur une organisation créée pour le test).
 - **Vocabulaire par secteur** (ligne 55, **B**) : six secteurs plus le texte général, réglés ou déduits de
   l'organisation (c4_43 ✔).
-- **Prospects qui n'ont pas abouti** (ligne N9, **B**) : reprise des contacts sans achat, à partir du dernier échange,
-  à la cadence de la vague, toujours relue, jamais sans accord enregistré (c4_44 ✔).
+- **Prospects qui n'ont pas abouti** (ligne N9, **C**) : reprise des contacts sans achat, à partir du dernier échange,
+  à la cadence de la vague, toujours relue, jamais sans accord enregistré (c4_44 ✔). Éteinte par défaut depuis la
+  contre-recette de nuit (TNUIT-04, c4_45 ✔) : le défaut prime, la ligne reste en C tant que le gérant ne l'allume pas.
+- **Contre-recette de nuit** (TNUIT-02, TNUIT-03, c4_45 ✔) : la sortie n'efface qu'OFFLOAD, ses autres modules
+  continuent ; plus rien en suspens, et la saisie est refusée après la sortie.
 - **« Un message par trimestre »** (17, 40, N5, N7, **B**) : c4_40 ✔ du 27/10 a éteint la relance écrite par défaut.
   Par conséquence, le catalogue K10 et K12 (« un second message », « deux messages en tout ») passe en **C**.
 
@@ -43,7 +46,7 @@ morceaux le 27/10 entre 06 h 05 et 06 h 30 Z, donne 66 fonctions vertes sur 67 (
 |---|---|---|---|---|---|---|---|
 | 06/10 (recompté ligne à ligne dans le fichier du 06/10) | 0 | 85 | 23 | 10 | 3 | 121 | 4 (3, 27, 44, 54) |
 | 26/10 | 0 | 109 | 16 | 1 | 3 | 129 | 5 (+ 52) |
-| **27/10** | **0** | **114** | **11** | **1** | **3** | **129** | 5 (+ 52) |
+| **27/10** | **0** | **113** | **12** | **1** | **3** | **129** | 5 (+ 52) |
 
 **Écart avec les chiffres transmis.** La consigne citait « B 79, C 17, T 3 » pour le 06/10. Ces chiffres ne se
 retrouvent ni dans le fichier du 06/10 ni dans `SYNTHESE.md`, qui donne 0 / 41 / 4 / 0 pour le seul catalogue de
@@ -197,7 +200,7 @@ jours pour passer en B.
 | 55 | « Les relances sont rédigées en français, dans le vocabulaire de votre secteur, et vos équipes les relisent avant qu'elles partent. » | R:430 | C | **B** | six secteurs (négoce, après-vente, maintenance, bâtiment, conseil, immobilier) et le texte général, réglés par le gérant ou déduits de l'organisation (c4_43 ✔) ; relecture (c4_18 ✔) | renseigner le secteur à l'installation (sinon, texte général) | 0 |
 | 56 | « Vos données sont hébergées dans l'Union européenne et ne sont jamais revendues. » | R:441 | T | T | — | vérifier les régions Supabase et Vercel ; engagement au contrat (Teo) | — |
 | 57 | « La liste des prestataires est annexée au contrat » | R:441 | T | T | — | annexe (Supabase, Vercel, expéditeur, Google) | — |
-| 58 | « si vous arrêtez, tout vous est restitué puis effacé » | R:441 | D | **B** | `offload_sortie` : arrêt, rien en suspens, restitution JSON et CSV avec empreinte ; puis effacement de l'organisation par la porte du socle, confirmé par son nom : aucune ligne OFFLOAD ne reste (c4_42 ✔) ; effacement d'une personne (c4_19 ✔, c4_26 ✔) | l'effacement final est exécuté par l'équipe Omega (pas d'écran en libre-service) | 0 |
+| 58 | « si vous arrêtez, tout vous est restitué puis effacé » | R:441 | D | **B** | `offload_sortie` : arrêt, plus rien en suspens (tâches, affaires, échéances, validations fermées avec trace), saisie refusée, restitution JSON et CSV avec empreinte (c4_42 ✔, c4_45 ✔) ; puis `offload_effacer_module`, confirmé par le nom : plus aucune ligne OFFLOAD, ni message ni demande du module, les autres modules intacts (c4_45 ✔) ; effacement d'une personne (c4_19 ✔, c4_26 ✔) | — | 0 |
 | 59 | « OFFLOAD relit votre base chaque matin, repère les comptes restés silencieux et rédige pour chacun un message ancré sur son dernier passage. Vous validez ce qui part, et vos équipes gardent la main sur chaque échange. » | R:451 | B | B | c4_02 ✔, c4_03 ✔, c4_05_reprise_en_main ✔ | — | 0 |
 
 ## Périmètre : mention, cas tordus, échelle groupe
@@ -288,7 +291,7 @@ jours pour passer en B.
 | N6 | Les clients inactifs sont identifiés dans votre historique de ventes, classés par valeur et par récence, puis recontactés un par un avec un message ancré dans ce qu'ils ont réellement acheté. Les entretiens qui redeviennent dus et les commandes que personne n'est venu reprendre entrent dans la même liste. | `lib/content.ts:119` | — | B | c4_02 ✔, c4_03_message ✔, c4_07 ✔, c4_08 ✔ | — | 0 |
 | N7 | Les clients inactifs classés par valeur, un message par compte et par trimestre. | `lib/content.ts:120` | — | **B** | voir 17 (c4_40 ✔) | — | 0 |
 | N8 | Le système OFFLOAD lit le fichier et repère les clients dont le dernier passage approche de l'année. Chacun reçoit un message personnel (le véhicule, la prestation réalisée, une proposition de faire un point avant le prochain contrôle), jamais une campagne de masse, jamais deux fois, et celui qui répond STOP ne sera plus jamais contacté. | `lib/content.ts:252` (article garage) | — | C | message ancré sur la dernière prestation (c4_03_message ✔) et l'échéance de l'équipement (c4_15 ✔) ; STOP = retrait définitif (c4_03_reponse ✔) | « jamais deux fois » : par défaut, un rappel suit le premier message (c4_29) ; « le véhicule » = équipement du parc, à condition que l'export du garage le porte | 0 (voir 17) |
-| N9 | Chaque agence possède un fichier de contacts qui n'ont pas abouti, et qui n'ont jamais été recontactés. Le système OFFLOAD reprend cette base à cadence maîtrisée : un message personnel, adapté à l'historique du contact, jamais une campagne de masse. Celui qui répond sort du circuit automatique et revient à l'agent ; celui qui demande à ne plus être contacté ne l'est plus jamais. | `lib/content.ts:330` (article agence) | — | **B** | contacts sans achat repris à partir du dernier échange (date, nature, jamais la note), jour de la vague et plafond quotidien, une fois par échange, toujours relus (c4_44 ✔) ; réponse → retour à l'agent, « stop » → retrait définitif (c4_03_reponse ✔) | un courriel exige l'accord enregistré du contact ; sans accord, une tâche d'appel | 0 |
+| N9 | Chaque agence possède un fichier de contacts qui n'ont pas abouti, et qui n'ont jamais été recontactés. Le système OFFLOAD reprend cette base à cadence maîtrisée : un message personnel, adapté à l'historique du contact, jamais une campagne de masse. Celui qui répond sort du circuit automatique et revient à l'agent ; celui qui demande à ne plus être contacté ne l'est plus jamais. | `lib/content.ts:330` (article agence) | — | C | construit et testé (c4_44 ✔) : contacts sans achat repris à partir du dernier échange, cadence de la vague, plafond, toujours relus, jamais sans accord ; réponse et « stop » (c4_03_reponse ✔). Mais la reprise est **éteinte par défaut** (décision du 27/10, TNUIT-04, c4_45 ✔) : le gérant l'allume | le défaut prime : allumer à l'installation avec l'accord du gérant, ou écrire « … peut reprendre cette base, si vous le décidez » | 0 (texte) |
 
 ## Ce qui reste à construire (→ B), regroupé
 
