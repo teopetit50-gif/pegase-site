@@ -342,29 +342,36 @@ language plpgsql as $f$
 declare
   banc jsonb := tests.c4_banc();
   v_client uuid := (banc ->> 'client')::uuid;
-  v_matin timestamptz := ((current_date + time '08:00') at time zone 'Europe/Paris');
-  v_nuit timestamptz := ((current_date + time '03:00') at time zone 'Europe/Paris');
+  -- Depuis c4_41, le jour et l'heure du point sont ceux de l'organisation (c4_31), plus ceux de Paris.
+  v_fuseau text := private.offload_fuseau((banc ->> 'client')::uuid);
+  v_jour date := (now() at time zone private.offload_fuseau((banc ->> 'client')::uuid))::date;
+  v_matin timestamptz;
+  v_nuit timestamptz;
   v_section uuid;
   n integer;
 begin
+  v_matin := (v_jour + time '08:00') at time zone v_fuseau;
+  v_nuit := (v_jour + time '03:00') at time zone v_fuseau;
   perform tests.c4_reprises_pretes();
   perform tests.c4_compte_courriel('PM1', 'Point du Matin', 'achats@matin.test', 70);
   perform private.offload_detecter(v_client, null);
   perform private.offload_cycle(v_client, null);
-  return next is(private.offload_deposer_points(v_nuit), 0, 'Avant 5 h (Paris), rien n''est déposé');
+  perform private.offload_deposer_points(v_nuit);
+  return next ok(not exists (select 1 from public.points_sections s where s.client_id = v_client and s.module = 'offload' and s.donnees_du = v_nuit),
+                 'Avant 5 h, à l''heure de l''organisation, rien n''est déposé pour elle');
   perform private.offload_deposer_points(v_matin);
   select s.id into v_section from public.points_sections s
-  where s.client_id = v_client and s.module = 'offload' and s.role = 'gerant' and s.jour = current_date and s.titre = 'Clients qui décrochent';
+  where s.client_id = v_client and s.module = 'offload' and s.role = 'gerant' and s.jour = v_jour and s.titre = 'Clients qui décrochent';
   return next ok(v_section is not null, 'Le gérant reçoit la section « Clients qui décrochent »');
   return next ok(exists (select 1 from public.points_sections s where s.client_id = v_client and s.module = 'offload' and s.role = 'collaborateur'
-                         and s.jour = current_date), 'Les commerciaux (collaborateurs) la reçoivent aussi');
+                         and s.jour = v_jour), 'Les commerciaux (collaborateurs) la reçoivent aussi');
   return next ok(exists (select 1 from public.points_items i where i.section_id = v_section and i.texte like 'Point du Matin : %Il achetait en moyenne tous les 30 jours%'),
                  'Ligne : le compte qui décroche, avec sa raison en clair');
   return next ok(exists (select 1 from public.points_items i where i.section_id = v_section and i.texte like '% de reprise à passer aujourd''hui ou en retard.')
-                 or exists (select 1 from public.points_items i where i.section_id = v_section and i.lien = '/espace/validations'),
+                 or exists (select 1 from public.points_items i where i.section_id = v_section and i.lien = '/espace2/validations'),
                  'Ligne : les appels du jour ou les messages qui attendent une validation');
-  return next ok((select bool_and(i.lien in ('/espace/offload', '/espace/validations')) from public.points_items i where i.section_id = v_section),
-                 'Chaque ligne mène à l''écran OFFLOAD ou aux validations');
+  return next ok((select bool_and(i.lien in ('/espace2/offload', '/espace2/validations')) from public.points_items i where i.section_id = v_section),
+                 'Chaque ligne mène à l''écran OFFLOAD ou aux validations de /espace2');
   select count(*) into n from public.points_items i where i.section_id = v_section;
   perform private.offload_deposer_points(v_matin);
   return next is((select count(*)::integer from public.points_items i where i.section_id = v_section), n, 'Redéposer ne double rien');
