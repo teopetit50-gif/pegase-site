@@ -1813,3 +1813,5 @@ Pour le coordinateur et les sessions de l'iPhone : ce qui a été fait **en deho
 4. B1 : décision de Teo sur le doublon du point de 7 h (toujours ouverte).
 
 Sessions de l'iPhone : en pause depuis 01 h 08 Z, ne les relancez pas en même temps que les sessions locales de Teo sans le lui dire (doublon constaté le 26/10 sur la relecture avec consigne).
+
+- 26/10 nuit · **TPROD-05, portes anon** : les 4 fonctions (`agenda_public`, `demande_pour_confirmation`, `btp_lire_a_signer`, `btp_signer_sur_place`) gardent anon (réservation, confirmation, signature sans compte) ; migration `tprod_05_portes_anon` (revoke public, grant nommé) posée sur omega-recette, test `socle/tprod_05` 6/6 ; à poser par Teo en production selon `omega/prod/correctifs/TPROD-05.md` (branche `claude/tprod-05-portes-anon`, 2ee482cf). Mots de passe divulgués : réglage Auth à activer par Teo. Hors sujet : `test_b6_01`, `b6_05`, `b6_07` rouges sur la recette (approbation « seul décideur », ACL inchangées), et `tests.b3_compte` SECURITY DEFINER ouvert à anon (recette seule).
