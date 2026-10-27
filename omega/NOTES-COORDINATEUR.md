@@ -1248,3 +1248,19 @@ En attente de Teo :
 - tamila-coffre a7a0f9d avec le secret TAMILA_BANC_CLIENT ;
 - reput-reponse 15a01a67 + c3_09 ;
 - sur main, l'écran Varelo « non publiée » (worker-b1 737bd0b, components/espace/varelo).
+
+## 27/10/2026 — Convergence des bases (session de Teo, dépôt omega-metiers) : branches à reprendre
+
+- **`claude/convergence-modules`** (depuis `worker-a5`) : lots du socle **19ba** (reprise après refus pour FILED, CASHD,
+  REPUT, OFFLOAD seulement, décision D3), **19bb** (anon n'écrit dans aucune table ni vue de `public`, ne lit que
+  `catalogue_site`, comme la production), **19bc** (62 tables à `client_id` des modules inscrites dans
+  `private.tables_locataires` ; exemptées : `filed_conservation*`, dépôt légal a4_40, et le coffre Tamila, à trancher
+  avec TAM-01) ; tests `02` (exemptions nommées), `64` (module « essai » ; le cas Daliro suit DAL-19), `69`, `70`.
+  Tous **posés et verts sur omega-recette** avec leur ligne `schema_migrations` (socle_19ba_reprise_modules,
+  socle_19bb_anon_sans_ecriture, socle_19bc_tables_locataires_modules). Ils sont à reporter dans la prochaine pose de
+  production (export de la recette).
+- **`claude/tprod-05-portes-anon`** (167fad5a) : `btp_signer_un_geste` (Daliro b6_51, signature par lien) rejoint les
+  portes admises pour anon ; test vert sur la recette (6/6).
+- Rouges du socle restés sur la recette, antérieurs à la convergence (aucun des lots posés n'y touche) : 11, 12, 30,
+  32, 34 (journal), 18, 24 (`envois_evenements`, `suivis_evenements`), 36, 37 (envois), 44, 51. OFFLOAD
+  `test_c4_09_arretes` dépasse 95 s. Détail : `JOURNAL.md` d'omega-metiers, 27/10.

@@ -500,6 +500,10 @@ begin
     join information_schema.tables t on t.table_schema = c.table_schema and t.table_name = c.table_name
     where c.table_schema = 'public' and c.column_name = 'client_id' and t.table_type = 'BASE TABLE'
       and c.table_name not in (select regexp_replace(nom, '^public\.', '') from private.tables_locataires)
+      -- exemptions (socle 19bc, 27/10/2026) : le dépôt légal de FILED survit à l'effacement (a4_40) ; le coffre Tamila
+      -- et la trace des remises de clés attendent la décision de TAM-01.
+      and c.table_name not in ('filed_conservation', 'filed_conservation_clients', 'filed_conservation_purges',
+                               'tamila_coffres', 'tamila_coffre_journal')
     order by 1
   $q$, 'Aucune table publique à client_id n''échappe à private.tables_locataires (sinon l''effacement prouvé la rate)');
 end $f$;
