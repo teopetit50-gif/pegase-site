@@ -41,6 +41,10 @@ create or replace function private.offload_garder_sortie() returns trigger
 as $function$
 declare v_sortie timestamptz;
 begin
+  -- Un effacement du socle (organisation entière, ou objet) passe : ses clés « on delete set null » mettent à jour.
+  if private.effacement_en_cours(new.client_id) then
+    return new;
+  end if;
   if tg_table_name = 'offload_reglages' then
     v_sortie := old.sortie_le;
   else
