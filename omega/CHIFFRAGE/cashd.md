@@ -15,6 +15,31 @@ Sources lues :
 - recette `omega-recette` (`ygwbgpowzlbdaajlsqkn`), en lecture : `supabase_migrations.schema_migrations`,
   fonctions `tests.test_c2_*`, crons, tables `envois`, `messageries`, `expediteurs` et `cashd_taux_change`.
 
+## Mise à jour du 27/10/2026 (session C2, branche `cashd-lacunes`)
+
+Construites, posées sur omega-recette depuis le dépôt avec leur ligne `schema_migrations`, chacune avec un test vu rouge
+avant la migration et vert après ; puis toute la suite `^test_c2_` (01 → 52) rejouée verte par morceaux :
+
+| Lacune | Migration | Test | Effet sur l'audit |
+|---|---|---|---|
+| E1 / G10 | (test borné, 26/10) | `test_c2_08` ✔ 14/14 | E1 C → **B** |
+| G4, part CASHD | `c2_48_boite_entreprise` | `test_c2_48` ✔ 7/7 | C13 reste C (Microsoft 365, vérification Google/Microsoft, A2/T) |
+| P12 | `c2_49_texte_jamais_repete` | `test_c2_49` ✔ 4/4 | P12 C → **B** |
+| G19 | `c2_50_raccord_commandes` + `API-COMMANDES.md` | `test_c2_50` ✔ 14/14 | C38 C → **B** |
+| G13, part CASHD | `c2_51_whatsapp` | `test_c2_51` ✔ 9/9 | P3 reste C (G1, Outlook, Meta) |
+| C17 / G6 (espagnol) | `c2_52_espagnol` | `test_c2_52` ✔ 7/7 | C17 reste C (relecture native, autres langues) |
+
+En chemin, un défaut corrigé (`c2_47_envoi_readosse`, `test_c2_47` ✔ 3/3) : depuis c2_41, une relance reprise après
+refus ou revue au nouveau montant gardait le message adossé à son ANCIENNE demande (signature de `preparer_envoi` mal
+écrite dans le test de présence) ; approuvée, elle ne serait jamais partie. Les relances en attente concernées ont reçu
+leur message à la pose.
+
+Décompte au 27/10 : **A 0 · B 90 · C 22 · D 0 · T 7** (119). Restent côté CASHD : la relecture native de l'espagnol et
+d'autres langues (G6, avec un traducteur). Le reste attend A1 (G1), A2 (Microsoft 365, expéditeur WhatsApp, AR24), le
+socle (G12, G18), la vitrine (G14) ou un tiers. Écrans ajoutés (vérifiés par tsc et eslint, **à ouvrir dans un
+navigateur**) : Relances et Envois (boîte d'envoi), Vos textes (section WhatsApp), fiche du compte (canal des relances),
+Risque client (raccord d'un logiciel de commandes).
+
 ## En tête
 
 ### Décompte
@@ -106,7 +131,7 @@ et comptés une fois dans le tableau final.
 |---|---|---|---|---|---|---|---|
 | P1 | Vos factures attendent d'être payées | `lib/produits/relances.ts:78` | B | B | constat, pas une capacité | — | 0 |
 | P2 | Des devis attendent une réponse et des factures ont dépassé leur échéance. Chaque matin, une relance est déjà rédigée pour chaque compte, et vos équipes décident si elle part. | `:85-86` | C | C | cron `cashd-matin` (toutes les 10 min, actif), t3 ✔, c2_10 ✔ | G1 : le facturier n'arrive pas seul chaque matin, CASHD relit le dernier export déposé | 3 (G1) |
-| P3 | Vous ne changez aucun de vos outils — Google Sheets, Excel, Gmail, Outlook, WhatsApp | `:110-111` | C | C | Excel et CSV : dépôt d'export (t2 ✔) ; Sheets par export seulement | Gmail : CASHD non abonné à la boîte déjà branchée au socle (G4) ; Outlook absent ; WhatsApp : canal prévu dans `cashd_relances`, jamais branché (G13) | G1 + G4 + G13 |
+| P3 | Vous ne changez aucun de vos outils — Google Sheets, Excel, Gmail, Outlook, WhatsApp | `:110-111` | C | C | Excel et CSV : dépôt d'export (t2 ✔) ; Sheets par export seulement ; **27/10** : Gmail, CASHD abonné au dépôt en brouillon (c2_48 ✔ 7/7) ; WhatsApp, rappels et relances sur le modèle Meta, canal par compte (c2_51 ✔ 9/9) | Outlook (Microsoft 365) absent (A2) ; vérification d'application Google et Microsoft (T) ; modèle WhatsApp à faire approuver par Meta (A2, T) ; facturier quotidien (G1) | G1 + 2 (A2) |
 | P4 | À 7 h, vos relances sont déjà écrites. | `:137` | B | B | `heure_relances`, passage toutes les 10 min (t3 ✔) | — | 0 |
 | P5 | CASHD relit votre facturier chaque matin, avant d'écrire quoi que ce soit. | `:144` | C | C | relit le dernier relevé intégré (t2 ✔, t3 ✔) | G1 | (G1) |
 | P6 | Chaque devis porte ses jours sans réponse | `:153` | B | B | `jours_ecoules` (t1 : assertion verte ; t1 ✗ sur 4 décomptes faussés par le jeu NOBAT) | — | 0 |
@@ -115,7 +140,7 @@ et comptés une fois dans le tableau final.
 | P9 | Le message est déjà rédigé quand vous ouvrez votre espace, et il ne reste qu'à le relire. | `:161` | B | B | relances `a_valider` avec texte (t3 ✔) ; écran /espace2/cashd (recette 298/298 du 26/10, C2) | — | 0 |
 | P10 | Le ton suit le montant et l'ancienneté du retard | `:169` | C | **B** | c2_30 ✔ (ton selon l'ancienneté, 15/45 j), c2_33 ✔ (ton selon le montant, 1 500 € par défaut) | — | 0 |
 | P11 | L'historique de paiement du client pèse aussi | `:170` | B | B | `cashd_payeur_en_retard` (t3 ✔) ; variantes (c2_05 ✔) | — | 0 |
-| P12 | Un client ne reçoit jamais deux fois le même texte | `:171` | C | C | deux variantes par palier, trois au plus, alternées par compte (c2_05 ✔) | le gabarit revient au 3ᵉ rappel d'un même palier ; la mise en demeure n'a qu'un texte. Retenir les textes déjà reçus par compte et refuser une répétition mot pour mot, ou dire « varie d'un rappel à l'autre » | 1 |
+| P12 | Un client ne reçoit jamais deux fois le même texte | `:171` | C | **B (27/10)** | variantes alternées par compte (c2_05 ✔) ; **c2_49 ✔ 4/4** : les textes reçus par chaque compte sont retenus (empreinte), une variante déjà reçue mot pour mot est écartée, et si toutes l'ont été la référence datée rend le message unique | le même *gabarit* peut revenir (deux ou trois variantes par palier) : la garantie porte sur le texte reçu, mot pour mot | 0 |
 | P13 | Tout ce qui doit partir passe par une file de validation, qui reste la seule porte de sortie du système. | `:178` | B | B | `preparer_envoi` adossé à `demandes_validation` (t3 ✔) ; c2_39 ✔ ; c2_44 ✔ (la relance revue repasse les contrôles) | — | 0 |
 | P14 | Aucun message ne part sans votre accord | `:186` | B | B | t3 ✔ ; c2_12 ✔ (accord permanent donné par une personne) | — | 0 |
 | P15 | La mise en demeure exige une validation explicite | `:187` | B | B | c2_25 ✔ (approuvée sans commentaire : coupée) | — | 0 |
@@ -162,11 +187,11 @@ et comptés une fois dans le tableau final.
 | C10 | Un devis sans réponse est relancé au troisième jour, puis sept jours après ce rappel. | `:48` | B | **C** | c2_10 ✔ : depuis le 17/10 (décision de Teo), le défaut est « J+3 puis J+7 **après l'envoi** », soit quatre jours après le rappel ; la phrase décrit l'ancien défaut (J+10) | écart de texte : corriger le catalogue (« puis au septième jour ») ou régler le défaut à 3/10 | 0 |
 | C11 | La fermeté du message suit le palier atteint, du rappel à la mise en demeure. | `:49` | B | B | t3 ✔, c2_05 ✔ | — | 0 |
 | C12 | Chaque message reprend le secteur du compte, sa référence, son montant et son retard. | `:50` | B | B | t3 ✔, c2_29 ✔ (secteur lu à l'import) | — | 0 |
-| C13 | Les relances partent par courriel, depuis la boîte de votre entreprise. | `:51` | C | C | courriel par l'expéditeur du socle (essai) ; une boîte Gmail de test est branchée au socle sur le banc, mais CASHD ne s'y abonne pas | G4 : abonner CASHD au dépôt dans la boîte (comme OFFLOAD c4_22), Microsoft 365 côté A2, vérification Google / Microsoft (T) | 1 + 2 (G4) |
+| C13 | Les relances partent par courriel, depuis la boîte de votre entreprise. | `:51` | C | C | **27/10, c2_48 ✔ 7/7** : CASHD abonné au dépôt en brouillon dans la boîte Gmail branchée au socle ; la relance dit « déposée en brouillon dans … : envoyez-la depuis votre messagerie », journal `cashd.brouillon_depose`, palier compté parti ; l'écran dit par quelle boîte partent les relances (`cashd_messagerie`) | Microsoft 365 (A2) ; envoi direct (portée `gmail.send`) et vérification d'application Google / Microsoft (T) ; aucun dépôt réel encore | 2 (A2) |
 | C14 | Au-delà d'un montant que vous fixez, la relance remonte à la direction avant l'envoi. | `:52` | B | B | trois paliers de validation (c2_07 ✔) | — | 0 |
 | C15 | Chaque facture suit sa propre séquence, avec son palier et son échéance. | `:53` | B | B | `cashd_relances_pieces` (t3 ✔), c2_26 ✔ | — | 0 |
 | C16 | Les envois respectent les jours ouvrés, les jours fériés locaux et vos fenêtres horaires. | `:54` | B | B | calendrier du socle (t4 ✔) | — | 0 |
-| C17 | Les comptes export reçoivent leur relance dans leur langue de facturation. | `:55` | C | C | textes et lignes de pièces dans toute langue écrite par l'organisation (c2_09 ✔) | aucun texte par défaut hors français et anglais : un compte allemand reçoit l'anglais tant que l'organisation n'a pas écrit les siens ; textes relus par langue (~150–300 €, tiers) | 0,5 / langue |
+| C17 | Les comptes export reçoivent leur relance dans leur langue de facturation. | `:55` | C | C | textes et lignes de pièces dans toute langue écrite par l'organisation (c2_09 ✔) ; **27/10, c2_52 ✔ 7/7** : l'espagnol est la troisième langue par défaut (six paliers, lignes, phrases, montants) | textes espagnols à faire relire par un natif (tiers, ~150–300 €) ; hors fr / en / es, un compte reçoit l'anglais tant que l'organisation n'a pas écrit ses textes | 0,5 / langue |
 | C18 | Une contestation écrite bascule la facture en litige et la sort du cycle. | `:62` | C | **B** | réponse lue par règles (sans modèle), proposition « litige » acceptée par une personne (c2_06 ✔) | — | 0 |
 | C19 | Le commercial en charge du compte est notifié dès l'ouverture du litige. | `:63` | B | B | `cashd_alerter_commercial` (t4 ✔) | — | 0 |
 | C20 | Une facture contestée sur une seule ligne laisse le reste en relance. | `:64` | B | B | `cashd_litige_partiel` (t4 ✔) | — | 0 |
@@ -187,7 +212,7 @@ et comptés une fois dans le tableau final.
 | C35 | Les factures en devise étrangère sont suivies dans leur devise et en euros. | `:85` | B | B | c2_15 ✔, c2_16 ✔ ; crons BCE actifs, mais aucune facture en devise sur la recette, donc aucun taux BCE réel rangé (`cashd_taux_change` vide) | — (le premier appel réel à la BCE se fera avec la première facture en devise) | 0 |
 | C36 | Un plafond d'encours se fixe par compte, à partir de son historique. | `:92` | B | B | `cashd_proposer_plafond` (t4 ✔) | — | 0 |
 | C37 | Le dépassement du plafond déclenche une alerte avant toute nouvelle commande. | `:93` | B | B | `cashd_alerter_plafonds` (t4 ✔) | — | 0 |
-| C38 | Une commande au-delà du plafond est bloquée jusqu'à la décision d'un responsable. | `:94` | C | C | porte `cashd_verifier_commande` (t4 ✔) ; aucun logiciel de commandes ne l'appelle | G19 : raccorder le logiciel de commandes d'un premier client | 1,5 |
+| C38 | Une commande au-delà du plafond est bloquée jusqu'à la décision d'un responsable. | `:94` | C | **B (27/10)** | porte `cashd_verifier_commande` (t4 ✔) ; **c2_50 ✔ 14/14** : raccord générique d'un logiciel de commandes — clé par logiciel (empreinte SHA-256, révocable), `cashd_commande` sans session rend autorisée / en attente, demande de validation et alerte au commercial, `cashd_commande_etat` rend débloquée / refusée / expirée ; contrat `omega/modules/cashd/API-COMMANDES.md` ; écran Risque client | A : le logiciel de commandes d'un premier client branché sur le raccord | 0 |
 | C39 | Vos règles de communication et vos interdits sont repris dans chaque message. | `:95` | B | B | t3 ✔, c2_44 ✔ (la relance revue repasse les interdits) | — | 0 |
 | C40 | Un compte qui se dégrade est signalé avant que le retard s'installe. | `:96` | B | B | t4 ✔ | — | 0 |
 | C41 | Un compte se met en pause, et il n'y revient que sur votre décision. | `:97` | B | B | t3 ✔ | — | 0 |
@@ -222,7 +247,7 @@ et comptés une fois dans le tableau final.
 
 | # | Promesse (texte exact) | Où | 06/10 | 26/10 | Preuve (26/10) | Ce qui manque | j → B |
 |---|---|---|---|---|---|---|---|
-| E1 | Chaque société, filiale ou site a son encours … un chargé de recouvrement ne voit que son portefeuille. | `:185` | C | C | portefeuille par chargé construit (c2_08 : politiques RLS restrictives sur 7 tables) ; **c2_08 ✗** : 5 décomptes rouges, faussés par les 7 comptes NOBAT du banc | borner le test aux comptes qu'il crée (ou retirer le jeu NOBAT du banc), puis le rejouer vert | 0,25 |
+| E1 | Chaque société, filiale ou site a son encours … un chargé de recouvrement ne voit que son portefeuille. | `:185` | C | **B (27/10)** | portefeuille par chargé (c2_08 : politiques RLS restrictives sur 7 tables) ; **c2_08 ✔ 14/14** depuis le 26/10 (9f60d964 : le jeu NOBAT du banc compté à part, aucune ligne du banc touchée), rejoué vert le 27/10 | — | 0 |
 | E2 | Suivi, validation des relances, gestion des litiges et administration sont quatre rôles distincts. Une délégation se pose pour une absence et s'éteint à la date prévue. | `:191` | B | B | rôles du socle ; CASHD exige gestion / validation (t3 ✔, c2_07 ✔) | — | 0 |
 | E3 | Le montant et le palier décident de qui valide : le chargé de compte, le responsable crédit, la direction financière. | `:197` | C | **B** | trois paliers {montant, rôles} écrits en règles de validation du socle (c2_07 ✔) | — | 0 |
 | E4 | … un journal qui ne se modifie pas, y compris par nous. | `:203` | C | C | journal opposable du socle, protégé contre l'écriture | G18 : un administrateur de la base peut encore le modifier ; chaînage + export horodaté, ou reformuler | 1 (socle) |
@@ -247,18 +272,19 @@ et comptés une fois dans le tableau final.
 ## Lacunes encore ouvertes au 26/10 (chacune comptée une fois)
 
 Fermées depuis le 06/10 (test vert le 26/10) : G2, G3 (sauf la répétition, P12), G5, G7, G8, G9, G11, G14 (l'écran ;
-les captures restent à la vitrine), G17, G20, G21. G10 est construit mais son test est rouge (E1).
+les captures restent à la vitrine), G17, G20, G21. **Le 27/10** : G10 (E1), P12, G19 (côté CASHD), et la part CASHD de G4 et G13 ;
+l'espagnol pour G6.
 
 | Lacune | Ce qui manque, en une phrase | j → B | Qui | Tiers | Promesses |
 |---|---|---|---|---|---|
 | G1 | Faire arriver le facturier chaque jour : aujourd'hui, CASHD relit le dernier export déposé. | 3 | A1 | OAuth Google / Microsoft selon la source ; un premier client | P2, P3, P5, P8, P17, P23, P36, P41, C1, C4, C30, L1, E5, M1, M2, M3 |
-| G4 | Abonner CASHD au dépôt dans la boîte de l'entreprise (Gmail déjà branché au socle) et brancher Microsoft 365. | 1 + 2 | C2 + A2 | vérification d'application Google et Microsoft (plusieurs semaines) | P3, C13, M3 |
-| G13 | Brancher le canal WhatsApp de CASHD (canal prévu dans `cashd_relances`, expéditeur Meta déjà présent au socle sur le banc) et faire approuver les modèles. | 0,5 + 1 | C2 + A2 | compte Meta vérifié, ~0,05–0,10 € par conversation | P3 |
-| P12 | Garder la trace des textes reçus par compte et ne jamais répéter un texte mot pour mot. | 1 | C2 | — | P12 |
-| G6 | Écrire et faire relire des textes par défaut dans chaque langue de facturation au-delà du français et de l'anglais. | 0,5 / langue | C2 | traduction relue ~150–300 € par langue | C17 |
+| G4 | ~~Abonner CASHD au dépôt dans la boîte de l'entreprise~~ (fait 27/10, c2_48 ✔) ; brancher Microsoft 365. | 2 | A2 | vérification d'application Google et Microsoft (plusieurs semaines) | P3, C13, M3 |
+| G13 | ~~Brancher le canal WhatsApp de CASHD~~ (fait 27/10, c2_51 ✔) ; expéditeur WhatsApp du module CASHD et approbation du modèle chez Meta. | 1 | A2 | compte Meta vérifié, ~0,05–0,10 € par conversation | P3 |
+| P12 | ~~Garder la trace des textes reçus par compte et ne jamais répéter un texte mot pour mot.~~ Fait 27/10 (c2_49 ✔). | 0 | — | — | P12 |
+| G6 | Espagnol écrit le 27/10 (c2_52 ✔) ; le faire relire, puis les autres langues de facturation. | 0,5 / langue | C2 + traducteur | traduction relue ~150–300 € par langue | C17 |
 | G14 | Refaire les quatre captures de la page depuis l'écran réel. | 0,5 | vitrine | — | P26 |
-| G19 | Raccorder le logiciel de commandes d'un premier client à `cashd_verifier_commande`. | 1,5 | C2 + connecteur | un premier client | C38 |
-| G10 | Rendre `test_c2_08_portefeuille` vert, en le bornant à ses comptes ou en retirant le jeu NOBAT. | 0,25 | C2 / coordinateur | — | E1 |
+| G19 | ~~Raccord du logiciel de commandes~~ : raccord générique fait le 27/10 (c2_50 ✔) ; brancher le logiciel d'un premier client dessus (A). | 0 | client | un premier client | C38 |
+| G10 | ~~Rendre `test_c2_08_portefeuille` vert~~ : vert depuis le 26/10 (borné, jeu NOBAT gardé). | 0 | — | — | E1 |
 | G18 | Rendre le journal infalsifiable même par nous (chaînage + export horodaté), ou reformuler. | 1 | socle | horodatage qualifié éventuel | E4 |
 | G12 | Offrir à un tiers une interface de programmation documentée (clés, quotas). | 2 | socle | — | E5 |
 | G15 | Créer le lien de paiement par facture chez le prestataire du client et recevoir son webhook. | 2,5 | serveur | Stripe ~1,5 % + 0,25 € par carte UE ; SEPA ~0,35 € | C34 (T) |
