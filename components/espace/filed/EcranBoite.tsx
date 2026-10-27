@@ -142,7 +142,10 @@ export default function EcranBoite({ portee = "filed", gabarit }: { portee?: Por
   }, [source, charger]);
   const direct = useTempsReel(["receptions", "filed_documents"], source === "reelle", charger);
 
-  const vue = source === "exemple" ? exemple : reel;
+  /* 27/10 — le monde d'exemple est daté à l'heure du visiteur (ilYa / dans) :
+     rien avant le montage, sinon le serveur (UTC) et le navigateur écrivent
+     d'autres heures et React jette l'arbre (#418) — voir espace2/horloge.ts */
+  const vue = source === "exemple" ? (maintenant === null ? null : exemple) : reel;
   const compteurs = useMemo(() => {
     const c: Record<Famille, number> = { nouvelle: 0, lue: 0, traitee: 0, ecartee: 0 };
     for (const r of vue?.receptions ?? []) if (!boiteChoisie || r.boite.toLowerCase() === boiteChoisie) c[familleDe(r.statut)]++;

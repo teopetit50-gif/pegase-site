@@ -21,6 +21,7 @@ import { Loader } from "@/components/ui/loader";
 import { COMMANDES_EXEMPLE, DOSSIERS_EXEMPLE, FOURNISSEURS_EXEMPLE, LIGNES_COMMANDE_EXEMPLE, MOTIFS_EXEMPLE } from "../exemples/filed";
 import { ENTITES, EXEMPLE_CLIENT_ID, EXEMPLE_MOI, SIEGE, nomEntite } from "../exemples/socle";
 import { useSource } from "../source";
+import { useMonte } from "@/components/espace2/horloge";
 import { useTempsReel } from "../tempsReel";
 import { Avis, Chargement, Pastille, Ruban, Vide } from "../ui";
 import { dateCourte, montant } from "../format";
@@ -34,6 +35,7 @@ type Reel = { apercus: Apercu[]; motifs: MotifRefus[]; fournisseurs: Fournisseur
 
 export default function EcranFiled({ gabarit }: { gabarit?: "sb" } = {}) {
   const { source } = useSource();
+  const monte = useMonte();
   const [local, setLocal] = useState<DossierFiled[]>(DOSSIERS_EXEMPLE);
   const [reel, setReel] = useState<Reel | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -86,9 +88,11 @@ export default function EcranFiled({ gabarit }: { gabarit?: "sb" } = {}) {
 
   /* ——— la liste, sous une forme commune aux deux sources ——— */
   const apercus: Apercu[] = useMemo(() => {
-    if (source === "exemple") return local.map((d) => ({ document: d.document, facture: d.facture, fournisseur: d.fournisseur }));
+    /* 27/10 — les dossiers d'exemple sont datés à l'heure du visiteur : rien
+       avant le montage (serveur UTC ≠ navigateur, #418) — voir espace2/horloge.ts */
+    if (source === "exemple") return monte ? local.map((d) => ({ document: d.document, facture: d.facture, fournisseur: d.fournisseur })) : [];
     return reel?.apercus ?? [];
-  }, [source, local, reel]);
+  }, [source, local, reel, monte]);
 
   const rang: Record<Famille, number> = { bloquee: 0, litige: 1, attente: 2, reste: 3 };
   const visibles = useMemo(() => {
@@ -131,9 +135,9 @@ export default function EcranFiled({ gabarit }: { gabarit?: "sb" } = {}) {
   /* ——— le dossier ouvert ——— */
   const dossier: DossierFiled | null = useMemo(() => {
     if (!choisi) return null;
-    if (source === "exemple") return local.find((d) => d.document.id === choisi) ?? null;
+    if (source === "exemple") return monte ? (local.find((d) => d.document.id === choisi) ?? null) : null;
     return reel?.dossiers[choisi] ?? null;
-  }, [source, local, reel, choisi]);
+  }, [source, local, reel, choisi, monte]);
 
   useEffect(() => {
     if (source !== "reelle" || !apercu || !reel || reel.dossiers[apercu.document.id]) return;
@@ -303,6 +307,8 @@ export default function EcranFiled({ gabarit }: { gabarit?: "sb" } = {}) {
     return (
       <>
         <div className="sb-stockage v2-arrivee">
+          {/* 27/10 — le titre de la page, lu par les lecteurs d'écran ; le fil le montre (TPROD-07) */}
+          <h1 className="v2-sr">Documents reçus</h1>
           <div className="sb-stockage-tete">
             <nav className="sb-stockage-fil" aria-label="Emplacement">
               <span>Documents reçus</span>

@@ -19,6 +19,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Loader } from "@/components/ui/loader";
 import { useSource } from "../source";
+import { useMonte } from "@/components/espace2/horloge";
 import { useTempsReel } from "../tempsReel";
 import { Avis, Chargement, Pastille, Ruban, Vide, type Teinte } from "../ui";
 import { dateHeure, relatif } from "../format";
@@ -124,7 +125,11 @@ export default function EcranReput({ vue }: { vue?: Onglet } = {}) {
     return () => window.clearTimeout(t);
   }, []);
 
-  const monde: Monde | null = source === "exemple" ? local : (reel?.monde ?? null);
+  /* 27/10 — le monde d'exemple est daté à l'heure du visiteur (ilYa / dans) :
+     rien avant le montage, sinon le serveur (UTC) et le navigateur écrivent
+     d'autres heures et React jette l'arbre (#418) — voir espace2/horloge.ts */
+  const monte = useMonte();
+  const monde: Monde | null = source === "exemple" ? (monte ? local : null) : (reel?.monde ?? null);
   const client = source === "reelle" ? (reel?.client ?? null) : null;
   const role = source === "exemple" ? "valideur" : (client?.role ?? "lecteur");
   const decideur = role === "gerant" || role === "admin" || role === "valideur";

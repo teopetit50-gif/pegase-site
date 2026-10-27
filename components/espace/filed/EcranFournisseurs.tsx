@@ -22,6 +22,7 @@ import { Loader } from "@/components/ui/loader";
 import { DOSSIERS_EXEMPLE } from "../exemples/filed";
 import { EXEMPLE_MOI } from "../exemples/socle";
 import { useSource } from "../source";
+import { useMonte } from "@/components/espace2/horloge";
 import { useTempsReel } from "../tempsReel";
 import { Avis, Chargement, Pastille, Ruban, Vide } from "../ui";
 import { dateCourte, masquerIban, montant } from "../format";
@@ -111,7 +112,11 @@ export default function EcranFournisseurs({ gabarit }: { gabarit?: "sb" } = {}) 
     relectures.current = [60, 120, 240].map((sec) => window.setTimeout(() => void charger(), sec * 1000));
   };
 
-  const vue = source === "exemple" ? local : reel;
+  /* 27/10 — le monde d'exemple est daté à l'heure du visiteur (ilYa / dans) :
+     rien avant le montage, sinon le serveur (UTC) et le navigateur écrivent
+     d'autres heures et React jette l'arbre (#418) — voir espace2/horloge.ts */
+  const monte = useMonte();
+  const vue = source === "exemple" ? (monte ? local : null) : reel;
   const moi = source === "exemple" ? EXEMPLE_MOI : (moiReel?.user_id ?? null);
 
   const compteurs = useMemo(() => {
