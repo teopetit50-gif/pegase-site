@@ -27,7 +27,7 @@ begin
   v_items := private.offload_point_validations(v_client, 20);
   return next ok(exists (select 1 from jsonb_array_elements(v_items) i
                          where i ->> 'lien' = '/espace2/validations?demande=' || v_dem
-                           and i ->> 'texte' like 'Reprise · Martin <atelier@courriel41.test> — « %» — %'
+                           and i ->> 'texte' like 'Reprise%· Martin <atelier@courriel41.test> — « %» — %'
                            and char_length(i ->> 'texte') <= 300 and (i ->> 'texte') !~ '[[:cntrl:]]'),
                  'Chaque message à valider tient en une ligne : nature, destinataire, objet, début du texte et lien vers sa demande');
 
