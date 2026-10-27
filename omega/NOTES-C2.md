@@ -121,6 +121,24 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
     portait avant eux (comptes, totaux du tableau, règlements à imputer, comptes sans chargé), commentés (9f60d964). Verts.
   - Inscrit (20261026192111). Suite `^test_c2_` rejouée par morceaux (un morceau à la fois, délai de la recette) :
     **tout vert**, c2_01 et c2_08 compris. Aucun serveur de dev lancé.
+- **27/10 — lacunes de l'audit (branche `cashd-lacunes`, partie d'origin/main + fusion de worker-c2)** : chaque lot posé sur
+  omega-recette depuis le dépôt, ligne `schema_migrations`, test vu rouge puis vert ; `^test_c2_` 01 → 52 toute verte.
+  - `c2_47_envoi_readosse` (88bd425e) — **défaut trouvé en lisant le socle** : `preparer_envoi` prend un text en 7ᵉ
+    argument ; c2_41 → c2_46 testaient sa présence avec un uuid, donc une relance reprise ou revue gardait le message de
+    l'ancienne demande et ne serait jamais partie. Corrigé, relances en attente réadossées à la pose. 3/3.
+  - `c2_48_boite_entreprise` (G4, côté CASHD) : abonnement `envoi.brouillon_depose.cashd`, la relance dit « déposée en
+    brouillon dans … », `cashd_messagerie` pour l'écran. 7/7. Microsoft 365 et vérifications : A2 / tiers.
+  - `c2_49_texte_jamais_repete` (P12) : textes reçus retenus par empreinte, autre variante, sinon référence datée. 4/4.
+  - `c2_50_raccord_commandes` (G19) : clés de raccord (empreinte SHA-256), `cashd_commande` / `cashd_commande_etat` sans
+    session, contrat `omega/modules/cashd/API-COMMANDES.md`. 14/14. **Décision prise seul** : raccord générique (pas de
+    connecteur d'éditeur) ; une référence rejouée rend la même décision ; 5 clés actives au plus.
+  - `c2_51_whatsapp` (G13, côté CASHD) : modèle Meta réglé par l'organisation (gabarit du socle en brouillon jusqu'à
+    validation), canal par compte, rappels et relances seulement, **jamais la mise en demeure**, français seulement. 9/9.
+  - `c2_52_espagnol` (C17) : espagnol, troisième langue par défaut. 7/7. **Décision** : l'espagnol d'abord (export
+    caribéen) ; à faire relire par un natif avant un client hispanophone ; C17 reste C dans l'audit.
+  - Écrans (tsc, eslint propres ; aucun serveur de dev) : boîte d'envoi sur Relances et Envois, section WhatsApp dans
+    Vos textes, canal du compte dans la fiche, raccord sur Risque client. **À ouvrir dans un navigateur.**
+  - Audit `omega/CHIFFRAGE/cashd.md` : E1, P12, C38 en B ; C13, P3, C17 restent C. B 90, C 22.
 - **Prochain pas** : la passe en base réelle de la recette (session du banc) ; le reste de la liste au feu vert du
   coordinateur (voir `omega/CHIFFRAGE/cashd.md`, « Ce qui reste vraiment », 26/10).
 - **Limites dites au coordinateur** : le socle fige le texte d'un envoi adossé (pas de réécriture à l'approbation, piste
