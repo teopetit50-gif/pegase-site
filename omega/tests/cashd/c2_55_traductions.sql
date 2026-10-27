@@ -24,9 +24,11 @@ begin
   select tests.c2_plat(x.corps) into v_t from public.cashd_relances x where x.compte_id = v_a and x.jour = j;
   return next ok(v_t like '%Atentamente,%' and v_t not like '%Bien cordialement%' and v_t not like '%Service comptabilité%',
                  'Sans traduction, la formule et la signature françaises ne passent pas dans le texte espagnol');
-  return next ok(v_t like '%Formas de pago: Virement IBAN FR76%'
-                 and exists (select 1 from public.alertes a where a.client_id = v_client and a.titre like '%espagnol%moyens de règlement%qu''en français%'),
-                 'Les moyens de règlement restent (l''IBAN compte) et l''organisation est prévenue qu''ils n''existent qu''en français');
+  -- depuis c2_57, les moyens usuels sont rendus par CASHD ; la formule et la signature, non traduites, sont signalées
+  return next ok(v_t like '%Formas de pago: transferencia bancaria (IBAN FR76 3000 4000 0500 0012 3456 789) o cheque a nombre de l''Atelier.%'
+                 and exists (select 1 from public.alertes a where a.client_id = v_client and a.titre like '%espagnol%votre formule, votre signature%qu''en français%'
+                               and a.titre not like '%moyens%'),
+                 'Les moyens usuels sont rendus en espagnol ; l''organisation est prévenue que sa formule et sa signature n''existent qu''en français');
 
   -- Traduits par l'organisation : plus un mot de français.
   perform tests.endosser(v_gerant, 'gerant@banc-varelo.test');

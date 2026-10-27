@@ -773,8 +773,9 @@ begin
     if new.langue_texte <> 'fr' then
       select * into g from public.cashd_reglages where client_id = new.client_id;
       v_manque := array_remove(array[
-        case when nullif(btrim(g.moyens_reglement), '') is not null and g.traductions #> array[new.langue, 'moyens_reglement'] is null
-                  and g.traductions #> array[new.langue_texte, 'moyens_reglement'] is null then 'vos moyens de règlement' end,
+        -- c2_57 : seulement s'ils restent en français dans le texte (CASHD rend les moyens usuels)
+        case when nullif(btrim(g.moyens_reglement), '') is not null and position(rtrim(btrim(g.moyens_reglement), '. ') in coalesce(new.corps, '')) > 0
+                  then 'vos moyens de règlement' end,
         case when nullif(btrim(g.formule), '') is not null and g.traductions #> array[new.langue, 'formule'] is null
                   and g.traductions #> array[new.langue_texte, 'formule'] is null then 'votre formule' end,
         case when nullif(btrim(g.signature), '') is not null and g.traductions #> array[new.langue, 'signature'] is null
