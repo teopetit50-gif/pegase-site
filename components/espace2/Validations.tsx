@@ -98,6 +98,31 @@ export default function Validations({ utilisateur }: { utilisateur: Utilisateur 
   const monte = useMonte();
   const etat = !monte ? null : source === "exemple" ? local : reel;
 
+  /* 27/10 — le lien d'un courriel du matin (« /espace2/validations?demande=<id> ») ouvre cette demande-là :
+     la décision se prend ici, connecté, jamais depuis le seul courriel */
+  const [lien, setLien] = useState<string | null>(null);
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get("demande");
+    if (!id || !/^[0-9a-f-]{36}$/i.test(id)) return;
+    const t = window.setTimeout(() => setLien(id), 0);
+    return () => window.clearTimeout(t);
+  }, []);
+  useEffect(() => {
+    if (!lien || !etat) return;
+    const d = etat.demandes.find((x) => x.id === lien);
+    const t = window.setTimeout(() => {
+      setLien(null);
+      if (!d) {
+        toast("Cette demande est introuvable : déjà décidée, ou hors de votre ressort.");
+        return;
+      }
+      setFiltre(d.statut === "en_attente" ? "en_attente" : "decidees");
+      setChoix(d.id);
+      setPanneau("detail");
+    }, 0);
+    return () => window.clearTimeout(t);
+  }, [lien, etat, toast]);
+
   /* ——— chargement de la base réelle (comme FileValidations) ——— */
   const charger = useCallback(async () => {
     await Promise.resolve();
