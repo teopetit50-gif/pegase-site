@@ -80,8 +80,9 @@ begin
   end loop;
   return next is(v_reste, 0::bigint, 'Après l''effacement, aucune ligne OFFLOAD ne reste, dans aucune des tables du module');
   return next ok(not exists (select 1 from public.clients c where c.id = v_org)
-                 and exists (select 1 from public.effacements x where x.client_efface = v_org and (x.lignes ->> 'offload_comptes')::int = 1),
-                 'L''organisation est effacée, et l''effacement est noté (dont les comptes OFFLOAD)');
+                 and exists (select 1 from public.effacements x where x.client_efface = v_org and x.lignes ? 'offload_comptes'
+                               and x.lignes ? 'offload_reprises' and (x.lignes ->> 'offload_reglages')::int = 1),
+                 'L''organisation est effacée, et l''effacement noté couvre les tables OFFLOAD (les comptes partent avec leur entité)');
 end $f$;
 
 select * from runtests('tests'::name, '^test_c4_42_');
