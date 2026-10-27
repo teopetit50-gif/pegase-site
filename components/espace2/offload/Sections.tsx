@@ -19,8 +19,10 @@ import Affaires from "@/components/espace/offload/Affaires";
 import Echeances from "@/components/espace/offload/Echeances";
 import GardeFous from "@/components/espace/offload/GardeFous";
 import Groupes from "@/components/espace/offload/Groupes";
+import Organisation from "@/components/espace/offload/Organisation";
 import Pilotage from "@/components/espace/offload/Pilotage";
 import { chargerTableau } from "@/components/espace/offload/portes";
+import type { Reglages } from "@/components/espace/offload/types";
 import Habille, { HabilleSb } from "../Habille";
 
 function Tete({ titre, sous }: { titre: string; sous: string }) {
@@ -78,14 +80,18 @@ export function PageGroupes() {
 
 export function PageGardeFous() {
   const { source } = useSource();
-  /* les garde-fous de la base réelle ont besoin du client : offload_tableau le donne */
+  /* les garde-fous de la base réelle ont besoin du client : offload_tableau le donne, avec les réglages (27/10 :
+     secteur, prospects, sortie — Organisation.tsx) */
   const [client, setClient] = useState<string | null>(null);
+  const [reglages, setReglages] = useState<Reglages | null>(null);
   useEffect(() => {
     if (source !== "reelle") return;
     let actif = true;
     chargerTableau()
       .then((t) => {
-        if (actif) setClient(t?.client ?? null);
+        if (!actif) return;
+        setClient(t?.client ?? null);
+        setReglages(t?.reglages ?? null);
       })
       .catch(() => {});
     return () => {
@@ -95,6 +101,7 @@ export function PageGardeFous() {
   return (
     <HabilleSb>
       <GardeFous source={source} client={source === "reelle" ? client : null} gabarit="sb" />
+      <Organisation source={source} client={source === "reelle" ? client : null} reglages={source === "reelle" ? reglages : null} />
     </HabilleSb>
   );
 }

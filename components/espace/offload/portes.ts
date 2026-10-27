@@ -19,13 +19,15 @@
      offload_lever_verification, offload_rattacher_groupe (c4_10) ; lectures offload_garde_fous, offload_groupes ;
      lecture offload_restitution (c4_17) ; offload_regler (envoi_auto, sujets_auto), offload_donner_accord_auto,
      offload_revoquer_accord_auto, lecture offload_envoi_auto (c4_18) ; offload_effacer_compte (c4_19) ;
-     lectures offload_valeur_par_segment, offload_restitution_tableur (c4_36, gérant et administrateur).
+     lectures offload_valeur_par_segment, offload_restitution_tableur (c4_36, gérant et administrateur) ;
+     offload_sortie (c4_42) ; offload_regler_secteur, lecture offload_vocabulaire (c4_43) ;
+     offload_regler_prospects (c4_44).
    La décision sur un message (valider, refuser) se prend dans « À valider »,
    l'écran commun des demandes de validation du socle.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { AffaireCompte, AffairesListe, Arrete, EcheanceLigne, EnvoiAuto, Fiche, GardeFous, Groupes, ParcCompte, Pilotage, RestitutionTableur, Segment, SujetAuto, Tableau } from "./types";
+import type { AffaireCompte, AffairesListe, Arrete, EcheanceLigne, EnvoiAuto, Fiche, GardeFous, Groupes, ParcCompte, Pilotage, RestitutionTableur, Secteur, Segment, Sortie, SujetAuto, Tableau, Vocabulaire } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -208,4 +210,24 @@ export async function chargerSegments(client: string): Promise<Segment[]> {
 export async function restituerTableur(client: string): Promise<RestitutionTableur> {
   const r = await rpc<RestitutionTableur | null>("offload_restitution_tableur", { p_client: client });
   return r && typeof r === "object" && r.fichiers && typeof r.fichiers === "object" ? r : { format: "csv", fichiers: {} };
+}
+
+/* c4_42 — la sortie : l'arrêt, rien en suspens, la restitution ; l'effacement passe par le socle */
+export async function sortir(client: string, motif: string): Promise<Sortie> {
+  return rpc<Sortie>("offload_sortie", { p_client: client, p_motif: motif });
+}
+
+/* c4_43 — le vocabulaire du secteur */
+export async function chargerVocabulaire(client: string): Promise<Vocabulaire | null> {
+  const v = await rpc<Vocabulaire | null>("offload_vocabulaire", { p_client: client });
+  return v && typeof v === "object" ? v : null;
+}
+
+export function reglerSecteur(client: string, secteur: Secteur | null) {
+  return rpc<Vocabulaire>("offload_regler_secteur", { p_client: client, p_secteur: secteur });
+}
+
+/* c4_44 — la reprise des prospects qui n'ont pas abouti */
+export function reglerProspects(client: string, actifs: boolean) {
+  return rpc<{ prospects_actifs: boolean }>("offload_regler_prospects", { p_client: client, p_actifs: actifs });
 }

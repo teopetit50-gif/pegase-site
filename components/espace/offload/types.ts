@@ -108,6 +108,9 @@ export type Reglages = {
   delai_relance_jours: number;
   quarantaine_jours: number;
   plafond_reprises_jour: number;
+  /* c4_43, c4_44 */
+  secteur?: Secteur | null;
+  prospects_actifs?: boolean;
 };
 
 export type Compteurs = Record<
@@ -284,3 +287,17 @@ export type EnvoiAuto = {
 /* c4_36 — la valeur en jeu par segment ; la restitution en tableur (gérant, administrateur) */
 export type Segment = { segment: string; comptes: number; a_risque: number; valeur_en_jeu: number; reprises_en_cours: number };
 export type RestitutionTableur = { format: string; fichiers: Record<string, string> };
+
+/* c4_43 — le vocabulaire du secteur ; c4_42 — la sortie de l'organisation */
+export type Secteur = "general" | "negoce" | "apres_vente" | "maintenance" | "batiment" | "conseil" | "immobilier";
+export type Vocabulaire = { secteur: Secteur; dernier: string; sujet: string; question: string; projet: string; retour: string; regle: boolean };
+export type Sortie = {
+  organisation: string;
+  arrete: boolean;
+  reprises_closes: number;
+  envois_annules: number;
+  demandes_annulees: number;
+  empreinte_sha256: string;
+  tableur: RestitutionTableur;
+  effacement: { porte: string; confirmation: string; phrase: string };
+};
