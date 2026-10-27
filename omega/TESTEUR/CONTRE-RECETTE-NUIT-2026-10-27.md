@@ -171,3 +171,62 @@
 - **Écrans en base réelle** (boîte d'envoi, modèle WhatsApp, canal par compte dans la fiche). Ils ne s'affichent qu'avec une
   session, et je n'avais pas les identifiants du compte vitrine. Hypothèse : ces sections sont masquées en données d'exemple,
   par construction.
+
+---
+
+## Rejeu (27/10, après c2_53 à c2_55 et c4_45)
+
+> **Branches** : `cashd-lacunes` (d4beed8c), `offload-lacunes` (cdcbb4dd).
+>
+> **Méthode** : la preuve d'origine de chaque écart, puis une seule variante proche, chacune dans une transaction annulée.
+>
+> **Écran de sortie d'OFFLOAD** : un seul serveur `next dev --webpack`, sur une copie jetable de `offload-lacunes` (supprimée,
+> jamais poussée). Le serveur est coupé.
+
+| TNUIT | Preuve d'origine rejouée | Variante | Verdict |
+|---|---|---|---|
+| 01 | plafond 1 000 €, encours 585 €, quatre commandes de 300 € : CUM-1 `autorisee`, puis CUM-2 à 4 **`en_attente`**, réponse `engage: 300.00` | commande FAC-1 de 300 € autorisée, puis **facturée** (facture FAC-1, 300 €) ; une commande de 100 € → `en_attente`, `encours: 885`, `engage: 300` : la commande facturée est comptée deux fois (885 + 300 + 100 = 1 285 au lieu de 985). Aucun champ ne relie une facture à sa commande (`reference_commande` → « Champ de facture inconnu ») | **en partie** : le contournement est fermé, mais il apparaît un double comptage (blocage à tort) jusqu'à ce que l'engagé s'éteigne. Voir TNUIT-09 |
+| 02 | `offload_sortie`, puis `offload_effacer_module(c4, 'banc-test-offload')` → 0 ligne OFFLOAD restante, `cashd_comptes` du client = **1** (inchangé), client présent. Phrase : « Il n'efface qu'OFFLOAD : vos autres modules continuent. » | effacement **sans sortie préalable** → « Arrêtez d'abord OFFLOAD et enregistrez vos fichiers (sortie) : la restitution précède l'effacement. » ; mauvais nom → refusé ; valideur → refusé | **fermé** (coquille : « le droit de effacer ») |
+| 03 | après la sortie : 0 tâche `a_faire`, affaires `close_sans_suite` = 2 ; saisie de compte → « OFFLOAD est arrêté pour cette organisation depuis le 27/10/2026 (sortie) : plus aucune saisie n'est reçue. » | saisie d'un **achat** après la sortie → même refus | **fermé** |
+| 04 | `offload_reglages.prospects_actifs` : défaut `false` ; banc c4 : `false` | installation neuve (`offload_installer` sur une organisation fictive) → `false` ; l'écran dit « Éteinte (par défaut) : vos prospects restent présentés à part, sans message » | **fermé** |
+| 05 | `es-ES` → accepté, rangé en `es` ; compte `pt` → texte anglais, `langue_texte = en` (nouvelle colonne), `langue = pt` (celle du compte) | `pt-BR` → accepté, rangé en `pt`, texte anglais | **fermé** |
+| 06 | compte `es` : corps espagnol, signature « banc-test-cashd » (plus de « Service comptabilité ») ; mais « Formas de pago: **Virement IBAN … ou chèque à l'ordre de** banc-test-cashd » reste en français, car `cashd_reglages.traductions = {}` sur le banc | compte `pt` (texte anglais) : « Payment methods: Virement IBAN … ou chèque à l'ordre de … », même mélange ; aucun mot du motif ne prévient l'organisation | **en partie** : l'organisation peut traduire (`traductions`, c2_55), mais rien ne lui dit que ses moyens de règlement partent en français dans un texte étranger |
+| 07 | téléphone « abc » → « Numéro de facturation invalide : « abc ». Un numéro compte au moins 9 chiffres, par exemple +590 690 12 34 56. » | « 06 90 12 » → même refus | **fermé** |
+| 08 | REJ-1 vérifiée à 5 000 €, revient à 10 € → « La commande REJ-1 a déjà été vérifiée pour 5 000,00 € ; elle revient pour 10,00 € : une commande modifiée se vérifie sous une nouvelle référence (par exemple REJ-1-2). » | REJ-1 revient au même montant → même décision, `deja_verifiee: true` (idempotent) | **fermé** |
+
+**TNUIT-09 · CASHD (c2_54) · mineur · une commande autorisée puis facturée est comptée deux fois dans le cumul**
+
+- **Reproduction**, transaction annulée :
+  1. Plafond 1 000 € sur A-C26 (encours 585 €).
+  2. En `anon` : `cashd_commande(clé, 'A-C26', 300, 'FAC-1')` → `autorisee`.
+  3. En gérant : `cashd_ecrire_facture(…, {compte A-C26, numero 'FAC-1', montant_ttc 300, …})`.
+  4. En `anon` : `cashd_commande(clé, 'A-C26', 100, 'FAC-2')` → `en_attente`, `encours 885`, `engage 300`.
+- **L'écart** : l'exposition réelle est de 985 €, sous le plafond. La commande est bloquée à tort, et un responsable doit la
+  débloquer à la main.
+- **Attendu** : éteindre l'engagé d'une commande quand sa facture arrive (par la référence, ou par une durée de vie annoncée
+  dans `API-COMMANDES.md`).
+
+**Écran de sortie d'OFFLOAD** (`/espace2/offload/garde-fous`, section « Arrêter OFFLOAD et récupérer vos données »)
+
+- **Texte** : « OFFLOAD s'arrête : plus aucune vague, plus aucun message, plus aucune saisie ; ce qui attendait une
+  validation, les tâches et les affaires en cours sont fermés, avec une trace. Toutes vos données OFFLOAD vous sont
+  restituées en fichiers pour un tableur, avec l'empreinte de l'export. Ensuite seulement, vous effacez OFFLOAD en
+  confirmant le nom de votre organisation : vos autres modules continuent, intacts. » C'est conforme à ce que fait la base.
+- **Formulaire** : motif (« Fin de contrat au 31 octobre. »), case « J'ai compris : OFFLOAD s'arrête dès maintenant et plus
+  aucun message ne part. », bouton « Arrêter OFFLOAD et préparer mes données ». En données d'exemple, les trois sont
+  désactivés (« rien ne s'arrête ici »).
+- **Vérifié** : à 375 px (planche mobile) et 1 440 px (planche bureau), aucun débordement horizontal. Seules erreurs de
+  console : celles du rechargement à chaud du serveur de dev (WebSocket `/_next/hmr`), rien de la page.
+- **Hors lot, observé à 375 px** : dans l'en-tête de l'espace, le badge « Données d'exemple » est recouvert par les boutons
+  « + » et « Rechercher » (« Donn… ple »).
+- **Non vu** : le parcours réel. Les boutons actifs, la restitution, puis l'étape d'effacement demandent une session, et je
+  n'ai pas d'identifiants de compte vitrine.
+
+**Résumé du rejeu (six lignes)**
+
+1. **Fermés** : TNUIT-02, 03, 04, 05, 07 et 08. Les preuves d'origine et leurs variantes donnent le comportement attendu.
+2. **TNUIT-01, en partie** : découper une commande ne contourne plus le plafond. Mais une commande autorisée puis facturée compte deux fois (TNUIT-09, mineur), ce qui bloque à tort.
+3. **TNUIT-06, en partie** : l'organisation peut traduire ses textes. Sans traduction, « Virement IBAN … ou chèque à l'ordre de » part en français dans un texte espagnol ou anglais, sans avertissement.
+4. **Écran de sortie** : texte conforme à la base, sans débordement à 375 et 1 440 px. Le parcours réel n'a pas été vu (pas de compte vitrine).
+5. **Hors lot** : en-tête mobile de l'espace, où « Données d'exemple » est recouvert.
+6. Tout s'est fait dans des transactions annulées. Rien n'est resté en base, le serveur est coupé, rien n'est fusionné sur `main`.
