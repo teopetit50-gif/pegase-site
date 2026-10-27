@@ -22,6 +22,8 @@ begin
                          and x.corps not like '%Vous pouvez régler%'
                   from public.cashd_relances x where x.compte_id = v_fr and x.jour = j),
                  'En français : « Moyens de règlement : … », le texte saisi repris tel quel');
-  return next ok((select x.corps like '%Payment methods: Virement IBAN FR76%' and x.corps not like '%You can pay%' from public.cashd_relances x where x.compte_id = v_en and x.jour = j),
-                 'En anglais : « Payment methods: … »');
+  -- depuis c2_57, les moyens usuels sont rendus dans la langue du texte
+  return next ok((select tests.c2_plat(x.corps) like '%Payment methods: bank transfer (IBAN FR76 3000 4000 0500 0012 3456 789), cheque payable to Négoce Banc.%'
+                         and x.corps not like '%You can pay%' and x.corps not like '%Virement%' from public.cashd_relances x where x.compte_id = v_en and x.jour = j),
+                 'En anglais : « Payment methods: … », dans la langue du texte');
 end $f$;
