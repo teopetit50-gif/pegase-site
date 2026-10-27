@@ -66,10 +66,10 @@ begin
                  'Et en fichiers pour un tableur, avec l''empreinte de l''export');
   return next ok(exists (select 1 from public.journal_opposable j where j.client_id = v_org and j.action = 'offload.sortie'
                            and j.donnees ->> 'empreinte_sha256' = s ->> 'empreinte_sha256')
-                 and s #>> '{effacement,porte}' = 'public.effacer_donnees_client' and s #>> '{effacement,confirmation}' = v_nom,
-                 'La sortie est au journal, et la réponse dit comment effacer');
+                 and s #>> '{effacement,porte}' = 'public.offload_effacer_module' and s #>> '{effacement,confirmation}' = v_nom,
+                 'La sortie est au journal, et la réponse renvoie à l''effacement du seul OFFLOAD (c4_45)');
 
-  -- L'effacement, par la porte du socle : confirmé par le nom, il ne laisse rien d'OFFLOAD.
+  -- Si l'organisation quitte Omega tout entière : l'effacement du socle, confirmé par le nom, ne laisse rien d'OFFLOAD.
   return next throws_ok(format('select private.effacer_client(%L::uuid, %L, %L)', v_org, 'un autre nom', 'test c4_42'), '22023', null,
                         'L''effacement exige le nom exact de l''organisation');
   v_effacement := private.effacer_client(v_org, v_nom, 'test c4_42');
