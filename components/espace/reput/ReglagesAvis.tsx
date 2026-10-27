@@ -200,7 +200,14 @@ export default function ReglagesAvis({ monde, source, client, role, relire, modi
             <p>La signature, les formules, le ton et les langues de chaque réponse préparée.</p>
           </header>
           <div className="esp-carte">{reponses}</div>
+          {/* 26/10 — les réglages par site et l'export à date fixe, comme dans l'écran complet */}
+          <ReglagesSites key={source} source={source} client={client} dirige={dirige} />
         </section>
+        {dirige ? (
+          <section className="sb-reglages-section" aria-label="Export à date fixe">
+            <ExportProgramme key={`export:${source}`} source={source} client={client} dirige={dirige} />
+          </section>
+        ) : null}
         <section className="sb-reglages-section" aria-label="Demandes d'avis">
           <header>
             <h2>Demandes d&apos;avis</h2>
