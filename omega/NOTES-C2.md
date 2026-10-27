@@ -153,6 +153,16 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
   - **TNUIT-06** — `c2_55_traductions` : `cashd_regler_traduction` (moyens de règlement, formule, signature par langue) ;
     sans traduction, formule de la langue et signature = nom de l'émetteur ; les moyens restent (l'IBAN) et une alerte le
     dit, une fois par langue. Textes espagnols relus en entier (rappel, relance, mise en demeure rendus et lus).
+- **27/10 — rejeu de la contre-recette** (origin/testeur-modules 2df8ed9a) : tests vus rouges, corrigés, posés, inscrits ;
+  `^test_c2_` 01 → 57 verte.
+  - **TNUIT-09** — `c2_56_commande_facturee` : une commande est facturée dès qu'une facture ou un acompte du même compte
+    porte sa référence (`commande_ref` ou numéro) ; elle sort de l'engagé. Chaque engagement compte une fois. 5/5.
+  - **Fin de TNUIT-06** — `c2_57_moyens_langues` : les moyens usuels (virement + IBAN/BIC gardés, chèque à l'ordre de +
+    nom gardé, espèces, carte, prélèvement SEPA, comptoir, en ligne ; liés par ou / et / virgule) sont rendus en anglais
+    et en espagnol, seulement s'ils sont reconnus en entier. Sinon (ou dans une langue sans textes par défaut), la demande
+    de validation porte « À relire — » et l'avertissement, la relance aussi (`avertissements`, motif « à relire avant
+    l'envoi »). L'alerte ne cite plus les moyens s'ils sont rendus. Tests c2_55 et c2_38 alignés (ils attendaient le
+    français). 7/7.
 - **Prochain pas** : la passe en base réelle de la recette (session du banc) ; le reste de la liste au feu vert du
   coordinateur (voir `omega/CHIFFRAGE/cashd.md`, « Ce qui reste vraiment », 26/10).
 - **Limites dites au coordinateur** : le socle fige le texte d'un envoi adossé (pas de réécriture à l'approbation, piste

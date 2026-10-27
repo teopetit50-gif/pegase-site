@@ -33,6 +33,11 @@ Le plafond porte sur le **cumul** (c2_54) : l'encours du compte, plus les comman
 ce compte dans la fenêtre réglée par l'organisation (30 jours par défaut), plus la commande. Découper une commande ne
 contourne donc pas le plafond.
 
+Une commande sort de l'engagé dès qu'elle est **facturée** (c2_56) : une facture (ou un acompte) du même compte porte sa
+référence, dans la colonne « commande » de l'export du facturier ou comme numéro de pièce. Chaque engagement compte donc
+une seule fois : la commande, ou sa facture. Une commande que rien ne cite reste engagée jusqu'à la fin de la fenêtre :
+pour ne pas bloquer à tort, faites porter la référence de la commande sur la facture.
+
 Réponse :
 
 ```json
