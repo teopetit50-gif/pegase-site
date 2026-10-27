@@ -31,6 +31,8 @@ begin
     update public.cashd_relances set sujet = v_t ->> 'sujet', corps = v_t ->> 'corps', gabarit = v_t ->> 'gabarit', variante = (v_t ->> 'variante')::smallint
      where id = v_id;
     perform tests.c2_parti(v_id);
+    -- la pièce est rendue (une facture n'a qu'une pièce active par palier) : le texte reçu, lui, reste
+    update public.cashd_relances_pieces set annulee = true where relance_id = v_id;
     v_r := v_r || v_id;
     v_textes := v_textes || private.cashd_empreinte_texte(v_t ->> 'sujet', v_t ->> 'corps');
   end loop;
