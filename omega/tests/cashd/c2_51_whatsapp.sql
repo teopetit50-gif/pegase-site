@@ -34,7 +34,7 @@ begin
 
   -- Meta approuve le modèle (A2).
   perform tests.redevenir_admin();
-  update public.gabarits_messages set statut = 'valide' where client_id = v_client and code = 'cashd.relance_whatsapp' and modele_externe = 'cashd_relance_v1';
+  update public.gabarits_messages set statut = 'valide', valide_par = v_gerant, valide_le = now() where client_id = v_client and code = 'cashd.relance_whatsapp' and modele_externe = 'cashd_relance_v1';
   perform private.cashd_preparer_relances(v_client, j, null);
   select * into ra from public.cashd_relances r where r.compte_id = v_a and r.jour = j;
   select * into rb from public.cashd_relances r where r.compte_id = v_b and r.jour = j;
