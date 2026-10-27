@@ -41,7 +41,7 @@ begin
   select * into e from public.envois where id = ra.envoi_id;
   return next ok(ra.canal = 'whatsapp' and e.canal = 'whatsapp' and e.destinataire_adresse like '%690%'
                  and e.gabarit_id = (private.cashd_gabarit_whatsapp(v_client)).id
-                 and e.variables ->> 'message' like 'la facture FB-2026-3501 (1 085,00 €)%restant à régler.%',
+                 and tests.c2_plat(e.variables ->> 'message') like 'la facture FB-2026-3501 (1 085,00 €)%restant à régler.%',
                  'Le rappel part par WhatsApp, au numéro de facturation, sur le modèle validé, avec un message court');
   return next ok((select d.statut = 'en_attente' and d.payload ->> 'canal' = 'whatsapp' from public.demandes_validation d where d.id = ra.demande_id)
                  and e.demande_id = ra.demande_id,
@@ -54,7 +54,7 @@ begin
   perform tests.redevenir_admin();
   select * into ra from public.cashd_relances r where r.id = ra.id;
   select * into e from public.envois where id = ra.envoi_id;
-  return next ok(e.canal = 'whatsapp' and e.demande_id = ra.demande_id and e.variables ->> 'message' like '%585,00 €%',
+  return next ok(e.canal = 'whatsapp' and e.demande_id = ra.demande_id and tests.c2_plat(e.variables ->> 'message') like '%585,00 €%',
                  'Revue au reste dû, la relance garde WhatsApp, au nouveau montant');
 
   -- La mise en demeure ne part jamais par WhatsApp (séquence courte, chaque palier réellement parti, comme c2_25).
