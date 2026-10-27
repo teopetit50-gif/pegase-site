@@ -139,6 +139,20 @@ sont déjà écrites », capture « qui doit de l'argent, où en est la relance,
   - Écrans (tsc, eslint propres ; aucun serveur de dev) : boîte d'envoi sur Relances et Envois, section WhatsApp dans
     Vos textes, canal du compte dans la fiche, raccord sur Risque client. **À ouvrir dans un navigateur.**
   - Audit `omega/CHIFFRAGE/cashd.md` : E1, P12, C38 en B ; C13, P3, C17 restent C. B 90, C 22.
+- **27/10 — contre-recette de nuit** (origin/testeur-modules 4b2ad9a5, TNUIT) : chaque écart reproduit par un test vu rouge,
+  corrigé, posé depuis le dépôt (7cf9c808), inscrit ; `^test_c2_` 01 → 55 verte.
+  - **TNUIT-01** (important) — `c2_54_commandes_cumul` : plafond sur le cumul (encours + commandes autorisées ou
+    débloquées du compte dans `commandes_fenetre_jours`, 30 j par défaut, réglable 1 → 180) ; réponse avec `engage`,
+    `fenetre_jours`. **Décision prudente** : une commande déjà facturée dans la fenêtre compte deux fois (pas de lien
+    commande → facture dans les exports) : le plafond bloque plus tôt, jamais plus tard.
+  - **TNUIT-08** — même lot : référence rejouée avec un autre montant refusée (23505), message avec les deux montants.
+  - **TNUIT-05, TNUIT-07** — `c2_53_controles_compte` : déclencheur sur cashd_comptes (langue ramenée à sa langue
+    principale, code illisible refusé avec un exemple ; numéro de 9 à 15 chiffres, refusé à la saisie, écarté et signalé
+    à l'import pour ne pas perdre la ligne) ; `cashd_relances.langue_texte` (et dans la vue) dit la langue réelle du texte.
+    La porte publique `cashd_ecrire_compte` marque la saisie (réglage de session `omega.cashd_saisie`).
+  - **TNUIT-06** — `c2_55_traductions` : `cashd_regler_traduction` (moyens de règlement, formule, signature par langue) ;
+    sans traduction, formule de la langue et signature = nom de l'émetteur ; les moyens restent (l'IBAN) et une alerte le
+    dit, une fois par langue. Textes espagnols relus en entier (rappel, relance, mise en demeure rendus et lus).
 - **Prochain pas** : la passe en base réelle de la recette (session du banc) ; le reste de la liste au feu vert du
   coordinateur (voir `omega/CHIFFRAGE/cashd.md`, « Ce qui reste vraiment », 26/10).
 - **Limites dites au coordinateur** : le socle fige le texte d'un envoi adossé (pas de réécriture à l'approbation, piste

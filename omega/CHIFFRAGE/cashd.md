@@ -34,6 +34,12 @@ refus ou revue au nouveau montant gardait le message adossé à son ANCIENNE dem
 écrite dans le test de présence) ; approuvée, elle ne serait jamais partie. Les relances en attente concernées ont reçu
 leur message à la pose.
 
+Contre-recette de nuit (TNUIT, 27/10) corrigée le même jour : c2_53 (codes de langue, numéro de facturation, langue du
+texte ; `test_c2_53` ✔ 7/7), c2_54 (le plafond porte sur le **cumul** encours + commandes autorisées dans la fenêtre ;
+référence rejouée avec un autre montant refusée ; `test_c2_54` ✔ 8/8 — c'est ce test qui fonde C38 en B, le cas des
+commandes découpées étant joué), c2_55 (traductions de l'organisation, plus de français dans un texte espagnol sans le
+dire ; `test_c2_55` ✔ 6/6). `^test_c2_` 01 → 55 verte.
+
 Décompte au 27/10 : **A 0 · B 90 · C 22 · D 0 · T 7** (119). Restent côté CASHD : la relecture native de l'espagnol et
 d'autres langues (G6, avec un traducteur). Le reste attend A1 (G1), A2 (Microsoft 365, expéditeur WhatsApp, AR24), le
 socle (G12, G18), la vitrine (G14) ou un tiers. Écrans ajoutés (vérifiés par tsc et eslint, **à ouvrir dans un

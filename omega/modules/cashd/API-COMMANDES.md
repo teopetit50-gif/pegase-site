@@ -25,14 +25,20 @@ Le gérant (ou l'administrateur) crée une clé de raccord par logiciel, depuis 
 
 - `p_compte` : la référence du compte client, telle qu'elle figure dans le facturier (casse indifférente).
 - `p_montant` : le montant TTC de la commande, supérieur à 0.
-- `p_reference` : le numéro de la commande chez vous. Recommandé : une commande rejouée avec la même référence rend la
-  même décision, sans en créer une seconde (90 jours).
+- `p_reference` : le numéro de la commande chez vous. Recommandé : une commande rejouée avec la même référence ET le
+  même montant rend la même décision, sans en créer une seconde (90 jours). Rejouée avec un autre montant, elle est
+  refusée (`23505`) : une commande modifiée se vérifie sous une nouvelle référence (c2_54).
+
+Le plafond porte sur le **cumul** (c2_54) : l'encours du compte, plus les commandes déjà autorisées (ou débloquées) pour
+ce compte dans la fenêtre réglée par l'organisation (30 jours par défaut), plus la commande. Découper une commande ne
+contourne donc pas le plafond.
 
 Réponse :
 
 ```json
-{ "commande": "uuid", "reference": "BC-2026-0412", "montant": 900.00, "encours": 1000.00, "plafond": 1500.00,
-  "decision": "en_attente", "livrable": false, "decide_le": null, "deja_verifiee": false }
+{ "commande": "uuid", "reference": "BC-2026-0412", "montant": 900.00, "encours": 1000.00, "engage": 300.00,
+  "fenetre_jours": 30, "plafond": 1500.00, "decision": "en_attente", "livrable": false, "decide_le": null,
+  "deja_verifiee": false }
 ```
 
 `decision` vaut :
@@ -57,6 +63,7 @@ réponse. Interroger toutes les 15 minutes au plus ; la décision tombe dans la 
 | `28000` | clé absente, mal formée, inconnue ou révoquée |
 | `P0002` | compte inconnu de CASHD, ou commande inconnue pour cette clé |
 | `21000` | plusieurs comptes portent cette référence |
+| `23505` | référence de commande déjà vérifiée pour un autre montant |
 | `22023` | montant nul ou négatif, référence de compte vide |
 
 ## 5. Ce que CASHD fait de son côté
