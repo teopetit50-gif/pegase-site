@@ -31,7 +31,7 @@ begin
 
   -- Les six paliers ont leur texte espagnol, toutes variantes ; la mise en demeure cite le délai et le recouvrement.
   foreach k in array array['echeance', 'rappel', 'relance', 'relance_premier', 'mise_en_demeure', 'mise_en_demeure_premier', 'devis_rappel', 'devis_relance'] loop
-    if private.cashd_gabarit_defaut(k, 'es', 1) is null or (private.cashd_gabarit_defaut(k, 'es', 1) ->> 'corps') = (private.cashd_gabarit_defaut(k, 'en', 1) ->> 'corps') then
+    if private.cashd_gabarit_defaut(k, 'es', 1) is null or (private.cashd_gabarit_defaut(k, 'es', 1) ->> 'corps') in ((private.cashd_gabarit_defaut(k, 'en', 1) ->> 'corps'), (private.cashd_gabarit_defaut(k, 'fr', 1) ->> 'corps')) then
       return next ok(false, 'Texte espagnol manquant : ' || k);
     end if;
   end loop;
