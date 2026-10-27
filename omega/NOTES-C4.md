@@ -4,7 +4,37 @@ Branche `worker-c4`. Périmètre : `omega/modules/offload/migrations/c4_NN_*.sql
 `components/espace/offload/`, `app/espace/offload/`, et ce fichier. Coordinateur : session
 `session_01BCGFdpRKBvXKjouC75sYBg`. Je n'appelle jamais Supabase : le coordinateur pose, je reçois les sorties brutes.
 
-## REPRISE (27/10 — « Un message par trimestre au plus » redevient vrai par défaut)
+## REPRISE (27/10, matin — quatre lacunes de l'audit, branche `offload-lacunes`)
+
+- Branche partie de `origin/main` à jour, dans laquelle `worker-c4` est fusionné : le code OFFLOAD c4_10 à c4_40, déjà
+  posé sur la recette, n'est pas encore dans main. Rien n'est fusionné dans main.
+- Poses par `apply_migration` (inscrites dans `schema_migrations`), tests posés depuis le dépôt ; chacun rouge avant,
+  vert après :
+  - c4_41 : le point du matin porte chaque message à valider (section « Messages à valider », gérant et valideur), et
+    le courriel part par la porte d'envoi, en essai. Liens du point vers /espace2, jour au fuseau de l'organisation.
+    « À valider » ouvre `?demande=<id>`. Test c4_41 vert (6/6) ; c4_03_point_matin mis à jour (fuseau, liens).
+  - c4_42 : `offload_sortie` (arrêt, rien en suspens, restitution JSON et CSV, empreinte, journal), puis effacement par
+    le socle sur une organisation de test : aucune ligne OFFLOAD ne reste. Test c4_42 vert (11/11).
+  - c4_43 : le vocabulaire du secteur (6 secteurs + général, réglé ou déduit de clients.secteur). Test c4_43 vert (11/11).
+  - c4_44 : la reprise des prospects (sans achat, dernier échange, vague, plafond, une fois par échange, toujours relue,
+    jamais sans accord). Cron `offload-prospects` à 05 h 20 UTC. Test c4_44 vert (11/11).
+  - Suite `^test_c4_` : 66 fonctions sur 67, 581 assertions, aucune rouge (c4_09_arretes : trop long pour l'outil).
+- Écrans : page Garde-fous de /espace2/offload, section « Organisation » (secteur, prospects, arrêt et restitution) ;
+  « À valider » s'ouvre sur la demande du lien. tsc sans erreur hors Varelo, eslint propre. Aucun serveur de dev lancé.
+  À ouvrir dans un navigateur : /espace2/offload/garde-fous (exemple, puis réel en gérant) et
+  /espace2/validations?demande=<id> (réel).
+- Décisions prises seul, au plus prudent :
+  - Validations par courriel : la décision reste dans l'espace, connecté ; pas de lien qui décide sans connexion, pas de
+    réponse par courriel (elle toucherait la réception du socle et demande une signature). La ligne 39 reste donc en C.
+  - Prospects : jamais en envoi automatique ; sans consentement enregistré, appel (pas d'intérêt légitime inventé pour
+    un contact sans achat, même professionnel) ; la note interne du commercial n'entre jamais dans un message.
+  - Sortie : OFFLOAD n'efface jamais seul ; l'effacement de l'organisation passe par la porte du socle, confirmé par le
+    nom, exécuté par l'équipe Omega (pas d'écran en libre-service).
+  - Secteur : sans réglage ni secteur connu, le texte général, inchangé.
+- Audit mis à jour (`omega/CHIFFRAGE/offload.md` sur la branche) : B 114, C 11, D 1, T 3. 55, 58, N9, 17, 40, N5 et N7
+  passent en B ; 39 reste en C ; K10 et K12 passent en C (un message par défaut depuis c4_40).
+
+### Reprise du 27/10 — « Un message par trimestre au plus » redevient vrai par défaut)
 
 - Décision de Teo, relayée par le coordinateur : la phrase du site fait foi. Elle porte sur l'audit des promesses
   (`omega/CHIFFRAGE/offload.md` sur main, « 5 manques » n° 4 ; lignes 17, 40, N5, N7). Le fichier du chiffrage est

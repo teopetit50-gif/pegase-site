@@ -14,6 +14,27 @@ Sources lues :
 - recette `omega-recette` (`ygwbgpowzlbdaajlsqkn`), en lecture : `supabase_migrations.schema_migrations`,
   fonctions `tests.test_c4_*`, crons, et les tables `envois`, `messageries`, `expediteurs`, `offload_comptes`.
 
+## Mise à jour du 27/10/2026 (C4, branche `offload-lacunes`)
+
+Quatre lacunes construites, posées sur la recette par `apply_migration` (lignes `c4_41` à `c4_44` dans
+`schema_migrations`) et prouvées par leur test, rouge avant la pose et vert après. La suite `^test_c4_`, rejouée par
+morceaux le 27/10 entre 06 h 05 et 06 h 30 Z, donne 66 fonctions vertes sur 67 (581 assertions), aucune rouge.
+`test_c4_09_arretes` dépasse toujours la minute de l'outil.
+- **Point du matin et validations par courriel** (ligne 39, reste **C**) : chaque message à valider arrive dans le
+  courriel du matin, avec son destinataire, son objet, le début de son texte et le lien qui ouvre sa demande
+  (c4_41 ✔ : envoi parti au gérant en mode essai). La décision, elle, se prend dans l'espace, connecté : un lien qui
+  déciderait sans connexion ouvrirait la porte à quiconque lit la boîte. « Vous ne changez pas d'outil » reste donc
+  vrai à moitié.
+- **Sortie de l'organisation** (ligne 58, **B**) : `offload_sortie` arrête OFFLOAD, annule ce qui attendait, restitue
+  tout en JSON et en CSV avec l'empreinte de l'export ; l'effacement par la porte du socle ne laisse aucune ligne
+  OFFLOAD (c4_42 ✔, sur une organisation créée pour le test).
+- **Vocabulaire par secteur** (ligne 55, **B**) : six secteurs plus le texte général, réglés ou déduits de
+  l'organisation (c4_43 ✔).
+- **Prospects qui n'ont pas abouti** (ligne N9, **B**) : reprise des contacts sans achat, à partir du dernier échange,
+  à la cadence de la vague, toujours relue, jamais sans accord enregistré (c4_44 ✔).
+- **« Un message par trimestre »** (17, 40, N5, N7, **B**) : c4_40 ✔ du 27/10 a éteint la relance écrite par défaut.
+  Par conséquence, le catalogue K10 et K12 (« un second message », « deux messages en tout ») passe en **C**.
+
 ## En tête
 
 ### Décompte
@@ -21,7 +42,8 @@ Sources lues :
 | | A | B | C | D | T | Total | Hors décompte |
 |---|---|---|---|---|---|---|---|
 | 06/10 (recompté ligne à ligne dans le fichier du 06/10) | 0 | 85 | 23 | 10 | 3 | 121 | 4 (3, 27, 44, 54) |
-| **26/10** | **0** | **109** | **16** | **1** | **3** | **129** | 5 (+ 52) |
+| 26/10 | 0 | 109 | 16 | 1 | 3 | 129 | 5 (+ 52) |
+| **27/10** | **0** | **114** | **11** | **1** | **3** | **129** | 5 (+ 52) |
 
 **Écart avec les chiffres transmis.** La consigne citait « B 79, C 17, T 3 » pour le 06/10. Ces chiffres ne se
 retrouvent ni dans le fichier du 06/10 ni dans `SYNTHESE.md`, qui donne 0 / 41 / 4 / 0 pour le seul catalogue de
@@ -119,7 +141,7 @@ jours pour passer en B.
 | 14 | « Sans commande depuis douze mois » | R:189 | B | B | délai réglable (c4_02 ✔) | — | 0 |
 | 15 | « Au moins 300 € d'achats cumulés » | R:190 | B | B | `montant_min` (c4_02 ✔) | — | 0 |
 | 16 | « Entretien annuel redevenu dû » / « Pièce arrivée, jamais reprise » | R:191-192 | B | B | c4_07 ✔ ; c4_08 ✔ | — | 0 |
-| 17 | « Un message par trimestre au plus » | R:193 | C | C | un cycle par compte et par trimestre (c4_29 ✔) ; mais la relance écrite est **allumée par défaut** depuis c4_29 : deux messages par cycle (c4_03_cycle ✔) ; un seul si `relance_ecrite` est éteinte (c4_16 ✔) | trancher : éteindre la relance par défaut, ou écrire « une séquence par trimestre » | 0 |
+| 17 | « Un message par trimestre au plus » | R:193 | C | **B** | par défaut, une reprise envoie un seul message ; quarantaine de 90 jours au moins depuis la clôture (c4_40 ✔, c4_16 ✔) ; deux messages seulement si le client choisit la relance écrite (c4_29 ✔) | — | 0 |
 | 18 | « Par courriel, depuis votre adresse » | R:194 | C | C | Gmail : dépôt dans la boîte du client, brouillon ou envoi selon les portées (c4_22 ✔) ; rien n'est parti en vrai | Microsoft 365 (A2) ; vérification d'application Google et Microsoft (T) | 2 (A2) + T |
 | 19 | « Jamais un compte en litige » | R:195 | D | **B** | `offload_impaye` lit CASHD : litige, recouvrement ou facture échue → écarté (c4_11 ✔) ; reprises d'avant closes (c4_32 ✔) ; refus même à la main (c4_23 ✔) | — | 0 |
 | 20 | « Jamais deux fois le même compte » | R:196 | B | B | une reprise ouverte par compte, quarantaine (c4_05 ✔, c4_29 ✔) | — | 0 |
@@ -151,8 +173,8 @@ jours pour passer en B.
 |---|---|---|---|---|---|---|---|
 | 37 | « OFFLOAD lit votre base clients tous les matins, et il en sort trois listes » | R:377 | B | B | écran : liste, échéances, affaires (c4_04 ✔) | — | 0 |
 | 38 | « Pour chacun, il rédige un message ancré sur son dernier passage, et ce message part de votre adresse. » | R:377 | C | C | message ancré : B (c4_03_message ✔) ; « part de votre adresse » : voir 18 | voir 18 | (18) |
-| 39 | « Vous ne changez pas d'outil, puisque tout vous arrive dans votre messagerie. » | R:377 | C | C | validations et point du matin dans l'espace Omega, pas dans la messagerie | envoyer le point du matin et les demandes de validation par courriel (socle), ou écrire « dans votre espace » | 1 |
-| 40 | « un message par compte et par trimestre » | R:381 | C | C | voir 17 | voir 17 | (17) |
+| 39 | « Vous ne changez pas d'outil, puisque tout vous arrive dans votre messagerie. » | R:377 | C | C | le point du matin part par courriel, avec chaque message à valider (nature, destinataire, objet, début du texte, lien vers la demande) : c4_41 ✔ | la décision se prend dans l'espace, connecté (choix de sécurité) : construire une décision par réponse au courriel, signée et vérifiée, ou écrire « tout vous arrive dans votre messagerie, et vous décidez d'un clic » | 1,5 (réponse signée) ou 0 (texte) |
+| 40 | « un message par compte et par trimestre » | R:381 | C | **B** | voir 17 (c4_40 ✔) | — | 0 |
 | 41 | « un seul canal à la fois, jamais les deux » | R:381 | C | **B** | la tâche d'appel n'est posée que si le message ne part pas (c4_12_canal_unique ✔) | — | 0 |
 | 42 | « Dès qu'une réponse arrive, même négative, la séquence s'arrête et la conversation revient à votre commercial. » | R:381 | B | B | c4_03_reponse ✔ ; une absence ne compte plus comme une réponse (c4_10_reponses_automatiques ✔) | — | 0 |
 | 43 | « Un compte qui ne répond jamais sort du cycle au lieu d'y tourner en boucle » | R:381 | B | B | c4_03_cycle ✔ | — | 0 |
@@ -172,10 +194,10 @@ jours pour passer en B.
 |---|---|---|---|---|---|---|---|
 | 53 | « Omega.AI en est l'éditeur et en assure la maintenance. Le contrat précise où vont vos données et ce que nous en faisons. » | R:418 | T | T | — | contrat et annexe (Teo) | — |
 | 54 | « une personne de l'équipe vous répond » | R:424 | — | — | organisationnel | — | — |
-| 55 | « Les relances sont rédigées en français, dans le vocabulaire de votre secteur, et vos équipes les relisent avant qu'elles partent. » | R:430 | C | C | français, relecture (c4_18 ✔) ; phrases propres aux chantiers et missions (c4_14 ✔) | « vocabulaire de votre secteur » : les gabarits restent génériques hors chantiers, missions et entretiens ; écrire des gabarits par secteur | 1,5 |
+| 55 | « Les relances sont rédigées en français, dans le vocabulaire de votre secteur, et vos équipes les relisent avant qu'elles partent. » | R:430 | C | **B** | six secteurs (négoce, après-vente, maintenance, bâtiment, conseil, immobilier) et le texte général, réglés par le gérant ou déduits de l'organisation (c4_43 ✔) ; relecture (c4_18 ✔) | renseigner le secteur à l'installation (sinon, texte général) | 0 |
 | 56 | « Vos données sont hébergées dans l'Union européenne et ne sont jamais revendues. » | R:441 | T | T | — | vérifier les régions Supabase et Vercel ; engagement au contrat (Teo) | — |
 | 57 | « La liste des prestataires est annexée au contrat » | R:441 | T | T | — | annexe (Supabase, Vercel, expéditeur, Google) | — |
-| 58 | « si vous arrêtez, tout vous est restitué puis effacé » | R:441 | D | C | restitution en JSON (c4_17 ✔) et en CSV neutralisé (c4_36 ✔, c4_38 ✔) ; effacement d'une personne (c4_19 ✔, c4_26 ✔) ; tables `offload_*` en `on delete cascade` | aucune procédure de sortie d'une ORGANISATION n'est écrite ni testée (socle) | 0,5 |
+| 58 | « si vous arrêtez, tout vous est restitué puis effacé » | R:441 | D | **B** | `offload_sortie` : arrêt, rien en suspens, restitution JSON et CSV avec empreinte ; puis effacement de l'organisation par la porte du socle, confirmé par son nom : aucune ligne OFFLOAD ne reste (c4_42 ✔) ; effacement d'une personne (c4_19 ✔, c4_26 ✔) | l'effacement final est exécuté par l'équipe Omega (pas d'écran en libre-service) | 0 |
 | 59 | « OFFLOAD relit votre base chaque matin, repère les comptes restés silencieux et rédige pour chacun un message ancré sur son dernier passage. Vous validez ce qui part, et vos équipes gardent la main sur chaque échange. » | R:451 | B | B | c4_02 ✔, c4_03 ✔, c4_05_reprise_en_main ✔ | — | 0 |
 
 ## Périmètre : mention, cas tordus, échelle groupe
@@ -217,9 +239,9 @@ jours pour passer en B.
 | K7 | Un tableur sans colonne de date est exploité à partir des dates de facture. | K:48 | B | B | c4_01 ✔ | — | 0 |
 | K8 | Les contrats et les équipements installés sont suivis jusqu'à leur échéance. | K:49 | B | B | c4_07 ✔, c4_34 ✔ | — | 0 |
 | K9 | Chaque message reprend la dernière prestation du compte et le temps écoulé depuis. | K:56 | B | B | c4_03_message ✔ | — | 0 |
-| K10 | Un compte sans réponse reçoit un second message, puis il sort du cycle. | K:57 | B | B | c4_03_cycle ✔ (relance écrite allumée par défaut, c4_29 ✔) | — | 0 |
+| K10 | Un compte sans réponse reçoit un second message, puis il sort du cycle. | K:57 | B | **C** | depuis c4_40 (décision du 27/10), la relance écrite est éteinte par défaut : un seul message, puis la sortie du cycle (c4_40 ✔) ; le second message seulement si le client le choisit (c4_29 ✔) | reformuler : « … reçoit au plus un rappel, si vous le choisissez » | 0 (texte) |
 | K11 | Les règles de ton et de contenu s'écrivent en français, sans case à cocher. | K:58 | C | **B** | c4_10_lecture_des_regles ✔, c4_21 ✔ | — | 0 |
-| K12 | Un compte reçoit deux messages en tout, espacés d'au moins trois jours. | K:59 | B | B | c4_03_cycle ✔, c4_29 ✔ | contredit 17, 40, N5, N7 (texte) | 0 |
+| K12 | Un compte reçoit deux messages en tout, espacés d'au moins trois jours. | K:59 | B | **C** | voir K10 : un message par défaut (c4_40 ✔) | reformuler (contredit 17, 40, N5, N7, qui font foi) | 0 (texte) |
 | K13 | Une réponse, même négative, arrête la séquence et vous rend la conversation. | K:60 | B | B | c4_03_reponse ✔ | — | 0 |
 | K14 | Les comptes déjà contactés par un commercial sont écartés de la vague en cours. | K:61 | B | B | c4_05_exclusions ✔, c4_13 ✔ | — | 0 |
 | K15 | Les messages partent par courriel, depuis la boîte de votre entreprise. | K:62 | C | C | voir 18 (`atteste: true` à tort) | voir 18 | (18) |
@@ -262,24 +284,21 @@ jours pour passer en B.
 | N2 | Chaque nuit, il repère les clients qui ne donnent plus de nouvelles. | `app/page.tsx:703` | — | B | cron `offload-detection` 04 h 41 UTC (actif), c4_02 ✔ | — | 0 |
 | N3 | OFFLOAD — Clients inactifs | `app/offres/page.tsx:390` | — | B | c4_02 ✔ | — | 0 |
 | N4 | OFFLOAD — Classement par valeur | `app/offres/page.tsx:390` | — | B | c4_02 ✔, c4_04 ✔ | — | 0 |
-| N5 | OFFLOAD — Un message par trimestre | `app/offres/page.tsx:390` | — | C | voir 17 : deux messages par cycle par défaut (c4_29) | voir 17 | (17) |
+| N5 | OFFLOAD — Un message par trimestre | `app/offres/page.tsx:390` | — | **B** | voir 17 (c4_40 ✔) | — | 0 |
 | N6 | Les clients inactifs sont identifiés dans votre historique de ventes, classés par valeur et par récence, puis recontactés un par un avec un message ancré dans ce qu'ils ont réellement acheté. Les entretiens qui redeviennent dus et les commandes que personne n'est venu reprendre entrent dans la même liste. | `lib/content.ts:119` | — | B | c4_02 ✔, c4_03_message ✔, c4_07 ✔, c4_08 ✔ | — | 0 |
-| N7 | Les clients inactifs classés par valeur, un message par compte et par trimestre. | `lib/content.ts:120` | — | C | voir 17 | voir 17 | (17) |
+| N7 | Les clients inactifs classés par valeur, un message par compte et par trimestre. | `lib/content.ts:120` | — | **B** | voir 17 (c4_40 ✔) | — | 0 |
 | N8 | Le système OFFLOAD lit le fichier et repère les clients dont le dernier passage approche de l'année. Chacun reçoit un message personnel (le véhicule, la prestation réalisée, une proposition de faire un point avant le prochain contrôle), jamais une campagne de masse, jamais deux fois, et celui qui répond STOP ne sera plus jamais contacté. | `lib/content.ts:252` (article garage) | — | C | message ancré sur la dernière prestation (c4_03_message ✔) et l'échéance de l'équipement (c4_15 ✔) ; STOP = retrait définitif (c4_03_reponse ✔) | « jamais deux fois » : par défaut, un rappel suit le premier message (c4_29) ; « le véhicule » = équipement du parc, à condition que l'export du garage le porte | 0 (voir 17) |
-| N9 | Chaque agence possède un fichier de contacts qui n'ont pas abouti, et qui n'ont jamais été recontactés. Le système OFFLOAD reprend cette base à cadence maîtrisée : un message personnel, adapté à l'historique du contact, jamais une campagne de masse. Celui qui répond sort du circuit automatique et revient à l'agent ; celui qui demande à ne plus être contacté ne l'est plus jamais. | `lib/content.ts:330` (article agence) | — | C | réponse → retour à une personne (c4_03_reponse ✔) ; retrait définitif (c4_03_reponse ✔) | OFFLOAD part des ACHATS : un contact qui n'a jamais abouti (sans achat) est présenté à part, pas relancé (c4_02 `sans_achat`). Il faut un mode « prospects non aboutis » (date du dernier échange, message propre) | 1,5 |
+| N9 | Chaque agence possède un fichier de contacts qui n'ont pas abouti, et qui n'ont jamais été recontactés. Le système OFFLOAD reprend cette base à cadence maîtrisée : un message personnel, adapté à l'historique du contact, jamais une campagne de masse. Celui qui répond sort du circuit automatique et revient à l'agent ; celui qui demande à ne plus être contacté ne l'est plus jamais. | `lib/content.ts:330` (article agence) | — | **B** | contacts sans achat repris à partir du dernier échange (date, nature, jamais la note), jour de la vague et plafond quotidien, une fois par échange, toujours relus (c4_44 ✔) ; réponse → retour à l'agent, « stop » → retrait définitif (c4_03_reponse ✔) | un courriel exige l'accord enregistré du contact ; sans accord, une tâche d'appel | 0 |
 
 ## Ce qui reste à construire (→ B), regroupé
 
 | Chantier | Ce qui manque, en une phrase | Lignes | j |
 |---|---|---|---|
-| Défaut « un message par trimestre » | Éteindre la relance écrite par défaut ou écrire « une séquence par trimestre » (décision, pas de construction). | 17, 40, N5, N7, N8 | 0 |
 | Boîte Microsoft 365 | Brancher Microsoft 365 comme Gmail (dépôt, envoi, relève) ; vérification d'application Google et Microsoft (T). | 8, 18, 38, K15 | 2 (A2) |
 | Règles en phrase libre | Appliquer une phrase hors des familles comprises : rédaction sous règles par un modèle de langue et contrôle du message produit. | 22 | 3 |
-| Tout dans la messagerie | Envoyer le point du matin et les demandes de validation par courriel, ou écrire « dans votre espace ». | 39 | 1 |
-| Vocabulaire du secteur | Écrire des gabarits par secteur au-delà des chantiers, missions et entretiens. | 55 | 1,5 |
-| Sortie d'une organisation | Écrire et tester la procédure qui restitue puis efface toute une organisation (socle). | 58 | 0,5 |
-| Prospects non aboutis | Relancer des contacts sans achat à partir de leur dernier échange. | N9 | 1,5 |
-| **Sous-total** | | | **9,5** |
+| Décider depuis la messagerie | Le point et les validations arrivent par courriel (c4_41) ; décider par réponse signée, ou reformuler. | 39 | 1,5 ou 0 |
+| Catalogue K10, K12 | Reformuler « un second message », « deux messages en tout » (un message par défaut depuis c4_40). | K10, K12 | 0 |
+| **Sous-total** | | | **6,5** |
 | Connecteurs directs | Lire un CRM, un ERP, un DMS ou Sheets en direct, sinon reformuler « lit » en « lit leurs exports ». | 7, 29 | 5 par connecteur (T) |
 | Réécriture dans le CRM | Retirer la phrase (recommandé) ou écrire dans chaque CRM. | 79 | 0 ou 10 par CRM (T) |
 
