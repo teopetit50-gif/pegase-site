@@ -232,8 +232,8 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
             </span>
             {/* le titre visible ; chaque page porte son propre h1 (masqué), pour garder le titre exact de l'écran */}
             <p className="v2-haut-titre">{titreDe(chemin)}</p>
-            <RubanSource />
           </div>
+          <RubanSource />
           <div className="v2-haut-droite">
             <MenuDeroulant
               etiquette="Nouveau"
@@ -242,7 +242,7 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
               declencheur={
                 <>
                   <Plus {...I} />
-                  <span className="v2-masque-mobile">Nouveau…</span>
+                  <span className="v2-masque-mobile v2-masque-etroit">Nouveau…</span>
                 </>
               }
             >
@@ -256,14 +256,14 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
                 Décider d&apos;une validation
               </ItemMenu>
             </MenuDeroulant>
-            <button type="button" className="v2-haut-lien v2-masque-mobile" onClick={() => ecrire("idee")}>
+            <button type="button" className="v2-haut-lien v2-masque-mobile v2-masque-etroit" onClick={() => ecrire("idee")}>
               Feedback
             </button>
             {/* la palette (touche F, ou ⌘K comme sur Supabase) */}
             <button type="button" className="v2-btn v2-btn--petit v2-recherche" onClick={() => setPalette(true)} aria-keyshortcuts="F Meta+K Control+K" aria-label="Rechercher">
               <Search {...I} />
-              <span className="v2-masque-mobile">Rechercher…</span>
-              <span className="v2-masque-mobile">
+              <span className="v2-masque-mobile v2-masque-etroit">Rechercher…</span>
+              <span className="v2-masque-mobile v2-masque-etroit">
                 <Kbd>⌘K</Kbd>
               </span>
             </button>

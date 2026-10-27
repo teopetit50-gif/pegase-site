@@ -894,6 +894,14 @@ html[data-v2-theme="light"] .v2-recherche .v2-kbd {
     max-width: 90px;
   }
 }
+/* 27/10 — de 768 à 1023 px, la barre du haut n'a pas la place des libellés
+   de droite : « Nouveau… », « Feedback », « Rechercher… ⌘K » gardent leur
+   icône (et leur nom accessible), comme sur mobile */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .v2-haut .v2-masque-etroit {
+    display: none;
+  }
+}
 
 /* ══ Le contenu ════════════════════════════════════════════════════════ */
 .v2-page {

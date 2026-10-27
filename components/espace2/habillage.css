@@ -441,6 +441,15 @@ html.v2-actif .dlg-panneau .esp-pastille--contour {
 .v2 .v2-ruban-source { display: inline-flex; flex: none; margin-left: 8px; }
 .v2 .v2-ruban-source .esp-ruban { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
 .v2 .v2-ruban-source .esp-ruban-point { width: 7px; height: 7px; border-radius: 9999px; background: currentColor; }
+/* il suit le titre ; sous 768 px, il prend sa propre ligne sous la barre : à
+   375 px, il glissait sous « + » et « Rechercher » (27/10) */
+.v2 .v2-haut-droite { margin-left: auto; }
+@media (max-width: 767px) {
+  .v2 .v2-haut:has(> .v2-ruban-source) { flex-wrap: wrap; height: auto; row-gap: 0; }
+  .v2 .v2-haut:has(> .v2-ruban-source) > .v2-haut-gauche { flex: 1 1 0; min-height: 48px; }
+  .v2 .v2-haut:has(> .v2-ruban-source) > .v2-haut-droite { min-height: 48px; }
+  .v2 .v2-haut > .v2-ruban-source { order: 3; flex-basis: 100%; margin: 0 0 10px; }
+}
 .v2 .esp .esp-ruban[data-source="exemple"] { display: none; }
 
 /* ——— avis (la « note ») ——— */
