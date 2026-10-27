@@ -55,7 +55,7 @@ begin
   update public.cashd_relances set corps = corps || ' ' where id = v_r[2];   -- le texte de la variante 2 n'a plus été reçu tel quel
   v_t := private.cashd_ecrire_texte(v_id);
   return next ok(v_t ->> 'repetition_evitee' = 'variante' and v_t ->> 'corps' not like '%Référence de ce message%'
-                 and not (private.cashd_empreinte_texte(v_t ->> 'sujet', v_t ->> 'corps') = any (v_textes)),
+                 and not (private.cashd_empreinte_texte(v_t ->> 'sujet', v_t ->> 'corps') = any (array[v_textes[1], v_textes[3]])),
                  'S''il reste une variante jamais reçue mot pour mot, elle est choisie');
 
 end $f$;
