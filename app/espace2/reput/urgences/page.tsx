@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
-import Urgences from "@/components/espace2/reput/Urgences";
+import { Suspense } from "react";
+import ReglesUrgences from "@/components/espace2/reput/ReglesUrgences";
 
-/* /espace2/reput/urgences — REPUT, urgences et escalade (page de fonction, 21/10/2026). */
+/* /espace2/reput/urgences — REPUT, urgences et escalade sur la liste des
+   workflows de Plain (28/10/2026) : une règle d'escalade par ligne, les
+   gravités en onglets, les demandes de chaque règle dans la carte au milieu.
+   Mêmes données que la page d'avant (components/espace2/reput/Urgences.tsx). */
 
 export const metadata: Metadata = {
   title: "Urgences et escalade",
@@ -9,5 +13,9 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <Urgences />;
+  return (
+    <Suspense>
+      <ReglesUrgences />
+    </Suspense>
+  );
 }

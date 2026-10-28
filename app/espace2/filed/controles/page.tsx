@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
-import { Controles } from "@/components/espace2/filed/Fonctions";
+import { Suspense } from "react";
+import ReglesControles from "@/components/espace2/filed/ReglesControles";
 
-/* /espace2/filed/controles — FILED, les contrôles avant classement (page de fonction, 21/10/2026). */
+/* /espace2/filed/controles — FILED, les contrôles avant classement sur la liste
+   des workflows de Plain (28/10/2026) : un contrôle par ligne, les gravités en
+   onglets, le détail et ses points dans la carte au milieu. Mêmes données et
+   mêmes gestes que la page d'avant (components/espace2/filed/Fonctions.tsx). */
 
 export const metadata: Metadata = {
   title: "Contrôles et fraude",
@@ -9,5 +13,9 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <Controles />;
+  return (
+    <Suspense>
+      <ReglesControles />
+    </Suspense>
+  );
 }

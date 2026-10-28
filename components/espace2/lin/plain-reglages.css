@@ -1,0 +1,755 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Le modèle « réglages » (28/10/2026) : la page Settings de Plain, au 1:1
+   — la vue d'ensemble (titre, sous-titre, sections de cartes icône · titre ·
+   description sur deux colonnes) et l'intérieur d'une carte (lien retour,
+   titre, sous-titre, champs, boutons, listes encadrées, état vide).
+   Relevé au getComputedStyle sur app.plain.com (settings/, general/,
+   members/, tiers/, workspace-notifications/), fenêtre 1600, thème sombre :
+   scratchpad/releve-plain-reglages.md. Couleurs : les jetons --lin-* de
+   lin.css (clair et sombre) ; tout le reste (dimensions, polices, graisses,
+   rayons, écarts) = Plain, au pixel.
+
+   Repères (px) :
+     page       856 de large, centrée, padding 32 32 98 ; tête 56 (h1 24/32 en 400, sous-titre 14/20 gris
+                à 4), 32 dessous ; sections à 48 d'écart, trait 1 au-dessus + 24 à partir de la 2e ;
+                titre de section 16/24 en 600, description 14/20 grise à 4, grille à 24
+     grille     2 colonnes de 420, 16 d'écart ; carte 74 (trait 1, rayon 10, padding 16) : icône 18
+                dans un carré de 24 (rayon 6, bleu à 12 %), texte à 16 : titre 14/20 en 600,
+                description 12/16 grise à 4 ; survol : trait plus clair + ombre 0 1 1
+     sous-page  même tête ; champ : libellé 14/20 en 600, aide 12/16 grise, contrôle 40 à 8 (padding 9 12,
+                rayon 6, trait 1), 24 sous chaque champ ; focus : anneau de 2 ; bouton 40 (padding 10 16,
+                rayon 6, 14/20) plein ou cerclé ; bouton de 34 (padding 8 12 8 8) avec icône 18 à 4 ;
+                carte 1/10 ; état vide padding 32, icône 48, titre 14/600 à 16, texte à 8, bouton à 16 ;
+                liste encadrée (trait 1, rayon 10) : lignes de 72 (padding 16), avatar 40 rayon 8, nom 14,
+                second 14 gris ; segmenté 32 (padding 2, pilules 28 en 12/600, rayon 6) ;
+                compteurs : cellules padding 12, nombre 20/600, libellé 14 gris
+
+   Jetons pris au plus proche (pas d'équivalent exact chez --lin-*) :
+     fond du panneau 26,25,27 → --lin-fond ; texte 238,238,240 → --lin-titre ; gris 181,178,188 et
+     152,151,159 → --lin-second ; gris d'icône de bouton 114,112,123 → --lin-second ; trait de carte
+     43,41,45 → --lin-detail-trait (clair : --lin-trait) ; trait de champ 50,48,53 et survol de carte
+     73,71,78 → --lin-menu-bord ; entrée active 43,41,45 → --lin-pastille-active ; segmenté 35,34,37 →
+     --lin-survol ; bleu d'icône 86,150,255 et anneau de focus 81,89,229 → --lin-graph-bleu ;
+     bouton plein 238,238,240 / 18,17,19 → --lin-titre / --lin-fond (clair : --lin-titre / --lin-carte) ;
+     lecture seule 18,17,19 → --lin-menu-fond. Titres (Whyte chez Plain) → --v2-titre.
+   Scopé .v2 .lin ; supprimer ce fichier supprime le modèle, sans effet ailleurs.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lin.pr {
+  --pr-carte: var(--lin-fond);
+  --pr-trait: var(--lin-detail-trait);
+  --pr-trait-survol: var(--lin-maj-trait);
+  --pr-champ-trait: var(--lin-menu-bord);
+  --pr-plein-fond: var(--lin-titre);
+  --pr-plein-texte: var(--lin-fond);
+  --pr-ombre-carte: 0 1px 1px lch(13 2 272 / 0.1);
+  --pr-ombre-bouton:
+    0 1px 0 lch(13 2 272 / 0.08), 0 2px 5px lch(13 2 272 / 0.08), inset 1px 1px 2px lch(100 0 0 / 0.02), inset 0 0 1px lch(100 0 0 / 0.1), inset 0 0 0 1px lch(10 3 272 / 0.08), inset 0 0 1px 1px lch(100 0 0 / 0.12),
+    inset 0 -1px 1px lch(0 0 0 / 0.12);
+  --pr-ombre-plein: 0 1px 0 lch(13 2 272 / 0.08), 0 2px 5px lch(13 2 272 / 0.08), inset 1px 1px 2px lch(100 0 0 / 0.02), inset 0 0 1px lch(100 0 0 / 0.1), inset 0 0 0 1px lch(100 0 0 / 0.1);
+  --pr-bleu: var(--lin-graph-bleu);
+  --pr-lecture: var(--lin-menu-fond);
+  flex-direction: column;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lin-titre);
+}
+html[data-v2-theme="light"] .v2 .lin.pr {
+  --pr-carte: var(--lin-carte);
+  --pr-trait: var(--lin-trait);
+  --pr-trait-survol: var(--lin-menu-bord);
+  --pr-plein-texte: var(--lin-carte);
+  --pr-ombre-bouton: var(--lin-anneau), var(--v2-ombre-petite, 0 1px 2px lch(0 0 0 / 0.06));
+  --pr-ombre-plein: var(--v2-ombre-petite, 0 1px 2px lch(0 0 0 / 0.06));
+  --pr-lecture: var(--lin-survol);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lin.pr {
+    --pr-carte: var(--lin-carte);
+    --pr-trait: var(--lin-trait);
+    --pr-trait-survol: var(--lin-menu-bord);
+    --pr-plein-texte: var(--lin-carte);
+    --pr-ombre-bouton: var(--lin-anneau), var(--v2-ombre-petite, 0 1px 2px lch(0 0 0 / 0.06));
+    --pr-ombre-plein: var(--v2-ombre-petite, 0 1px 2px lch(0 0 0 / 0.06));
+    --pr-lecture: var(--lin-survol);
+  }
+}
+
+/* ——— la page : 856 de large, centrée ——— */
+.v2 .lin .pr-page {
+  width: 100%;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 32px 32px 98px;
+}
+
+/* ——— la tête : titre 24/32, sous-titre à 4, 32 dessous ——— */
+.v2 .lin .pr-tete {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 32px;
+}
+.v2 .lin .pr-tete > div {
+  min-width: 0;
+}
+.v2 .lin .pr-h1 {
+  margin: 0;
+  font-family: var(--v2-titre);
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 400;
+  color: var(--lin-titre);
+}
+.v2 .lin .pr-sous {
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  color: var(--lin-second);
+}
+.v2 .lin .pr-tete-droite {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* le lien retour (sous-page), 32 de haut, au-dessus du titre */
+.v2 .lin .pr-retour {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  margin: -8px 0 8px -8px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+.v2 .lin .pr-retour svg {
+  width: 18px;
+  height: 18px;
+}
+.v2 .lin .pr-retour:hover {
+  background: var(--lin-survol);
+  color: var(--lin-titre);
+}
+
+/* ——— la vue d'ensemble : sections à 48, trait entre deux ——— */
+.v2 .lin .pr-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+.v2 .lin .pr-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.v2 .lin .pr-section + .pr-section {
+  padding-top: 24px;
+  border-top: 1px solid var(--pr-trait);
+}
+.v2 .lin .pr-section-tete {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.v2 .lin .pr-section-tete h2 {
+  margin: 0;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--lin-titre);
+}
+.v2 .lin .pr-section-tete p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lin-second);
+}
+.v2 .lin .pr-grille {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* la carte : 74 de haut, padding 16, icône 24 + texte à 16 */
+.v2 .lin .pr-carte {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  min-width: 0;
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px solid var(--pr-trait);
+  background: var(--pr-carte);
+  color: var(--lin-titre);
+  text-decoration: none;
+  transition:
+    border-color 0.12s ease,
+    box-shadow 0.12s ease;
+}
+.v2 .lin .pr-carte:hover {
+  border-color: var(--pr-trait-survol);
+  box-shadow: var(--pr-ombre-carte);
+}
+.v2 .lin .pr-carte:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--pr-bleu);
+}
+.v2 .lin .pr-carte-icone {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--pr-bleu) 12%, transparent);
+  color: var(--pr-bleu);
+}
+.v2 .lin .pr-carte-icone svg {
+  width: 18px;
+  height: 18px;
+}
+.v2 .lin .pr-carte-texte {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.v2 .lin .pr-carte-titre {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--lin-titre);
+}
+.v2 .lin .pr-carte-desc {
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--lin-second);
+}
+
+/* ——— une sous-page : titre de bloc avec icône, 12 au-dessus de son contenu ——— */
+.v2 .lin .pr-bloc + .pr-bloc {
+  margin-top: 40px;
+}
+.v2 .lin .pr-bloc-titre {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+.v2 .lin .pr-bloc-titre > svg {
+  width: 18px;
+  height: 18px;
+  color: var(--lin-titre);
+}
+.v2 .lin .pr-bloc-titre h3 {
+  margin: 0;
+  font-family: var(--v2-titre);
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 400;
+  color: var(--lin-titre);
+}
+.v2 .lin .pr-bloc-desc {
+  margin: -4px 0 12px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lin-second);
+}
+
+/* ——— les champs : libellé 14/600, aide 12 grise, contrôle 40 à 8, 24 dessous ——— */
+.v2 .lin .pr-champ {
+  display: block;
+  margin: 0 0 24px;
+}
+.v2 .lin .pr-libelle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--lin-titre);
+}
+.v2 .lin .pr-aide {
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--lin-second);
+}
+.v2 .lin .pr-controle {
+  position: relative;
+  display: block;
+  margin-top: 8px;
+}
+.v2 .lin .pr-input,
+.v2 .lin .pr-textarea,
+.v2 .lin .pr-select {
+  display: block;
+  width: 100%;
+  height: 40px;
+  padding: 9px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--pr-champ-trait);
+  background: var(--pr-carte);
+  font: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lin-titre);
+  outline: none;
+  box-shadow: none;
+  transition: box-shadow 0.12s ease;
+}
+.v2 .lin .pr-textarea {
+  height: auto;
+  min-height: 80px;
+  resize: vertical;
+}
+.v2 .lin .pr-select {
+  padding-right: 36px;
+  appearance: none;
+  cursor: pointer;
+}
+.v2 .lin .pr-select-chevron {
+  position: absolute;
+  right: 12px;
+  top: 11px;
+  width: 18px;
+  height: 18px;
+  color: var(--lin-second);
+  pointer-events: none;
+}
+.v2 .lin .pr-input::placeholder,
+.v2 .lin .pr-textarea::placeholder {
+  color: var(--lin-second);
+}
+.v2 .lin .pr-input:focus,
+.v2 .lin .pr-textarea:focus,
+.v2 .lin .pr-select:focus {
+  box-shadow: 0 0 0 2px var(--pr-bleu);
+}
+.v2 .lin .pr-input:disabled,
+.v2 .lin .pr-textarea:disabled,
+.v2 .lin .pr-select:disabled {
+  color: var(--lin-second);
+  background: var(--lin-menu-fond);
+  cursor: not-allowed;
+}
+.v2 .lin input[type="date"].pr-input {
+  color-scheme: dark;
+}
+html[data-v2-theme="light"] .v2 .lin input[type="date"].pr-input {
+  color-scheme: light;
+}
+
+/* la case à cocher : une rangée libellé + aide, la case de 16 à gauche */
+.v2 .lin .pr-case {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0 0 24px;
+  cursor: pointer;
+}
+.v2 .lin .pr-case input {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin: 2px 0 0;
+  border-radius: 4px;
+  border: 1px solid var(--pr-champ-trait);
+  background: var(--pr-carte);
+  appearance: none;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.v2 .lin .pr-case input:checked {
+  background: var(--pr-bleu);
+  border-color: var(--pr-bleu);
+}
+.v2 .lin .pr-case input:checked::after {
+  content: "";
+  width: 9px;
+  height: 5px;
+  margin-top: -2px;
+  border: 2px solid #fff;
+  border-top: 0;
+  border-right: 0;
+  transform: rotate(-45deg);
+}
+.v2 .lin .pr-case input:focus-visible {
+  box-shadow: 0 0 0 2px var(--pr-bleu);
+}
+.v2 .lin .pr-case input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.v2 .lin .pr-case > span {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+
+/* ——— les boutons ——— */
+.v2 .lin .pr-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 40px;
+  padding: 10px 16px;
+  border-radius: 6px;
+  background: var(--pr-carte);
+  font: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  color: var(--lin-titre);
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: var(--pr-ombre-bouton);
+}
+.v2 .lin .pr-btn > svg {
+  width: 18px;
+  height: 18px;
+  margin-left: -4px;
+  color: var(--lin-second);
+}
+.v2 .lin .pr-btn:hover {
+  background: var(--lin-survol);
+}
+.v2 .lin .pr-btn--plein {
+  background: var(--pr-plein-fond);
+  color: var(--pr-plein-texte);
+  box-shadow: var(--pr-ombre-plein);
+}
+.v2 .lin .pr-btn--plein > svg {
+  color: inherit;
+}
+.v2 .lin .pr-btn--plein:hover {
+  background: var(--pr-plein-fond);
+  opacity: 0.92;
+}
+.v2 .lin .pr-btn--34 {
+  height: 34px;
+  padding: 8px 12px 8px 8px;
+}
+.v2 .lin .pr-btn--34 > svg {
+  margin-left: 0;
+}
+.v2 .lin .pr-btn--34.pr-btn--sans-icone {
+  padding: 8px 12px;
+}
+.v2 .lin .pr-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.v2 .lin .pr-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--pr-bleu);
+}
+.v2 .lin .pr-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.v2 .lin .pr-note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--lin-second);
+}
+.v2 .lin .pr-chargement,
+.v2 .lin .pr-erreur {
+  margin: 0 0 24px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lin-second);
+}
+.v2 .lin .pr-erreur {
+  color: var(--lin-rouge);
+}
+
+/* ——— une carte encadrée (contenu libre) et l'état vide ——— */
+.v2 .lin .pr-cadre {
+  border-radius: 10px;
+  border: 1px solid var(--pr-trait);
+  background: var(--pr-carte);
+}
+.v2 .lin .pr-vide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 32px;
+  text-align: center;
+}
+.v2 .lin .pr-vide-icone {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  color: var(--lin-second);
+}
+.v2 .lin .pr-vide-icone svg {
+  width: 48px;
+  height: 48px;
+}
+.v2 .lin .pr-vide-texte {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.v2 .lin .pr-vide-texte strong {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--lin-titre);
+}
+.v2 .lin .pr-vide-texte p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lin-second);
+}
+
+/* ——— la liste encadrée : lignes de 72 (padding 16, contenu 40) ——— */
+.v2 .lin .pr-boite {
+  border-radius: 10px;
+  border: 1px solid var(--pr-champ-trait);
+}
+.v2 .lin .pr-ligne {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 72px;
+  padding: 16px;
+}
+.v2 .lin .pr-ligne + .pr-ligne,
+.v2 .lin .pr-ligne + .pr-ligne-suite,
+.v2 .lin .pr-ligne-suite + .pr-ligne {
+  border-top: 1px solid var(--pr-champ-trait);
+}
+.v2 .lin .pr-avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--lin-pastille-active);
+  color: var(--lin-titre);
+  font-size: 14px;
+  font-weight: 600;
+}
+.v2 .lin .pr-avatar svg {
+  width: 18px;
+  height: 18px;
+  color: var(--lin-second);
+}
+.v2 .lin .pr-ligne-texte {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+.v2 .lin .pr-ligne-nom {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lin-titre);
+  overflow-wrap: anywhere;
+}
+.v2 .lin .pr-ligne-nom b {
+  font-weight: 600;
+}
+.v2 .lin .pr-ligne-second {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lin-second);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.v2 .lin .pr-ligne-droite {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+.v2 .lin .pr-ligne-suite {
+  padding: 8px 16px 16px;
+}
+.v2 .lin .pr-rond {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 5px;
+  border-radius: 6px;
+  color: var(--lin-second);
+  cursor: pointer;
+}
+.v2 .lin .pr-rond svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .lin .pr-rond:hover {
+  background: var(--lin-survol);
+  color: var(--lin-titre);
+}
+
+/* l'étiquette d'état (programmée, demandée, avis reçu…) */
+.v2 .lin .pr-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 4px;
+  background: var(--lin-pastille-active);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--lin-texte-groupe);
+  white-space: nowrap;
+}
+.v2 .lin .pr-badge[data-teinte="vert"] {
+  color: var(--lin-vert);
+}
+.v2 .lin .pr-badge[data-teinte="bleu"] {
+  color: var(--pr-bleu);
+}
+.v2 .lin .pr-badge[data-teinte="ambre"] {
+  color: var(--lin-jaune);
+}
+.v2 .lin .pr-badge[data-teinte="gris"] {
+  color: var(--lin-second);
+}
+.v2 .lin .pr-badge--contour {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--pr-champ-trait);
+}
+
+/* ——— le segmenté (Active · Other · Invited) ——— */
+.v2 .lin .pr-segmente {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 32px;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--lin-survol);
+}
+.v2 .lin .pr-segmente button {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 6px;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  color: var(--lin-titre);
+  cursor: pointer;
+}
+.v2 .lin .pr-segmente button[aria-pressed="true"] {
+  background: var(--pr-carte);
+  font-weight: 600;
+}
+
+/* ——— la bande de compteurs ——— */
+.v2 .lin .pr-compteurs {
+  display: flex;
+  margin: 0 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--pr-champ-trait);
+}
+.v2 .lin .pr-compteur {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px;
+  font: inherit;
+  color: var(--lin-titre);
+  cursor: default;
+}
+.v2 .lin .pr-compteur + .pr-compteur {
+  border-left: 1px solid var(--pr-champ-trait);
+}
+.v2 .lin .pr-compteur b {
+  font-size: 20px;
+  line-height: 20px;
+  font-weight: 600;
+}
+.v2 .lin .pr-compteur span {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lin-second);
+}
+
+/* ——— lecture seule (Workspace ID) ——— */
+.v2 .lin .pr-lecture {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 4px;
+  background: var(--pr-lecture);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lin-titre);
+  overflow-wrap: anywhere;
+}
+
+/* ——— étroit ——— */
+@container principale (max-width: 959px) {
+  .v2 .lin .pr-grille {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@container principale (max-width: 639px) {
+  .v2 .lin .pr-page {
+    padding: 24px 16px 64px;
+  }
+  .v2 .lin .pr-tete {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .v2 .lin .pr-ligne {
+    flex-wrap: wrap;
+  }
+  .v2 .lin .pr-ligne-droite {
+    width: 100%;
+    margin-left: 0;
+    justify-content: flex-end;
+  }
+  .v2 .lin .pr-compteurs {
+    flex-direction: column;
+  }
+  .v2 .lin .pr-compteur + .pr-compteur {
+    border-left: 0;
+    border-top: 1px solid var(--pr-champ-trait);
+  }
+}

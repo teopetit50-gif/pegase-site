@@ -29,7 +29,7 @@ export function segmentsExemple(): Segment[] {
   ];
 }
 
-function restitutionExemple(): RestitutionTableur {
+export function restitutionExemple(): RestitutionTableur {
   return {
     format: "csv ; séparateur « ; » ; UTF-8",
     fichiers: {

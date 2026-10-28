@@ -120,7 +120,11 @@ export function Controles() {
             <h3>IBAN proposé</h3>
             <p className="v2-mono">{i.iban_masque}</p>
             <h3>Pourquoi</h3>
-            <p>{change ? "Un changement de coordonnées bancaires chez un fournisseur connu est la première porte d'entrée de la fraude au virement. Aucun paiement ne part vers ce nouvel IBAN tant qu'une personne ne l'a pas confirmé, idéalement par un appel au numéro habituel du fournisseur." : "Un fournisseur payé pour la première fois : son IBAN est confirmé une fois, puis il sert pour les paiements suivants."}</p>
+            <p>
+              {change
+                ? "Un changement de coordonnées bancaires chez un fournisseur connu est la première porte d'entrée de la fraude au virement. Aucun paiement ne part vers ce nouvel IBAN tant qu'une personne ne l'a pas confirmé, idéalement par un appel au numéro habituel du fournisseur."
+                : "Un fournisseur payé pour la première fois : son IBAN est confirmé une fois, puis il sert pour les paiements suivants."}
+            </p>
             <Link href="/espace2/filed/fournisseurs" className="v2-btn" style={{ width: "fit-content" }}>
               Ouvrir Fournisseurs
             </Link>
@@ -167,7 +171,12 @@ export function Controles() {
         gravite: grave ? "bloquant" : "verifier",
         type: f.statut === "bloque" ? "Fournisseur bloqué" : f.identite_verdict?.resultat === "invalide" ? "Introuvable au registre" : "Fournisseur à confirmer",
         element: <span className="sb-mono">{f.nom}</span>,
-        description: f.statut === "bloque" ? "Ne pas payer : le fournisseur est bloqué." : f.identite_verdict?.resultat === "invalide" ? `Le SIREN ${f.siren ?? "lu"} n'est pas trouvé au registre public.` : "Jamais vu : une personne le confirme une fois.",
+        description:
+          f.statut === "bloque"
+            ? "Ne pas payer : le fournisseur est bloqué."
+            : f.identite_verdict?.resultat === "invalide"
+              ? `Le SIREN ${f.siren ?? "lu"} n'est pas trouvé au registre public.`
+              : "Jamais vu : une personne le confirme une fois.",
         detail: (
           <>
             <h3>Fournisseur</h3>
@@ -248,14 +257,14 @@ export function Controles() {
 
 /* ══ Circuit de validation ════════════════════════════════════════════ */
 
-type DonneesCircuit = { demandes: Demande[]; approbations: Approbation[]; delegations: Delegation[]; regles: Regle[] };
+export type DonneesCircuit = { demandes: Demande[]; approbations: Approbation[]; delegations: Delegation[]; regles: Regle[] };
 
-const ROLES: Record<Role, string> = { gerant: "gérant", admin: "administrateur", valideur: "valideur", collaborateur: "collaborateur", lecteur: "lecteur" };
+export const ROLES: Record<Role, string> = { gerant: "gérant", admin: "administrateur", valideur: "valideur", collaborateur: "collaborateur", lecteur: "lecteur" };
 const ACTIONS: Record<string, string> = { payer_facture: "Payer une facture", valider_facture: "Valider une facture", lever_anomalie: "Lever une anomalie", valider_iban: "Confirmer un IBAN" };
-const action = (t: string | null) => (t ? (ACTIONS[t] ?? t.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase())) : "Toute action");
-const nomDe = (id: string, nom?: string) => nom ?? PERSONNES[id]?.nom ?? "Une personne de l'équipe";
+export const action = (t: string | null) => (t ? (ACTIONS[t] ?? t.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase())) : "Toute action");
+export const nomDe = (id: string, nom?: string) => nom ?? PERSONNES[id]?.nom ?? "Une personne de l'équipe";
 
-function useCircuit() {
+export function useCircuit() {
   const { source } = useSource();
   const [reel, setReel] = useState<DonneesCircuit | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -288,7 +297,7 @@ function useCircuit() {
   return { donnees: source === "exemple" ? exemple : reel, erreur: source === "exemple" ? null : erreur };
 }
 
-const tranche = (r: Regle) => (r.montant_max === null ? (r.montant_min > 0 ? `à partir de ${montant(r.montant_min)}` : "tout montant") : `de ${montant(r.montant_min)} à ${montant(r.montant_max)}`);
+export const tranche = (r: Regle) => (r.montant_max === null ? (r.montant_min > 0 ? `à partir de ${montant(r.montant_min)}` : "tout montant") : `de ${montant(r.montant_min)} à ${montant(r.montant_max)}`);
 
 export function Circuit() {
   const { donnees, erreur } = useCircuit();
@@ -363,7 +372,11 @@ export function Circuit() {
                         key={x.id}
                         nom={action(x.type_action)}
                         sous={tranche(x)}
-                        commande={<span className="sb-commande">{x.approbations_requises} approbation{x.approbations_requises > 1 ? "s" : ""}</span>}
+                        commande={
+                          <span className="sb-commande">
+                            {x.approbations_requises} approbation{x.approbations_requises > 1 ? "s" : ""}
+                          </span>
+                        }
                         cible={<span className="sb-gris">{x.roles_autorises.map((y) => ROLES[y] ?? y).join(", ")}</span>}
                         fin={
                           <span style={{ display: "flex", flexWrap: "wrap", gap: 4, justifyContent: "flex-end" }}>
@@ -380,7 +393,10 @@ export function Circuit() {
           })}
 
           <p className="sb-pile-titre">En attente d&apos;approbation</p>
-          <SbTableau colonnes={[{ libelle: "Demande" }, { libelle: "Montant", num: true }, { libelle: "Approbations" }, { libelle: "Échéance" }]} pied={pluriel(calc.attente.filter((d) => garde(d.resume, d.type_action)).length, "demande")}>
+          <SbTableau
+            colonnes={[{ libelle: "Demande" }, { libelle: "Montant", num: true }, { libelle: "Approbations" }, { libelle: "Échéance" }]}
+            pied={pluriel(calc.attente.filter((d) => garde(d.resume, d.type_action)).length, "demande")}
+          >
             {calc.attente.filter((d) => garde(d.resume, d.type_action)).length ? (
               calc.attente
                 .filter((d) => garde(d.resume, d.type_action))

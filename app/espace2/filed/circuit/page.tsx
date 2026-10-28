@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
-import { Circuit } from "@/components/espace2/filed/Fonctions";
+import { Suspense } from "react";
+import CircuitEditeur from "@/components/espace2/filed/CircuitEditeur";
 
-/* /espace2/filed/circuit — FILED, le circuit de validation (page de fonction, 21/10/2026). */
+/* /espace2/filed/circuit — FILED, le circuit de validation sur l'éditeur de
+   workflow de Plain (28/10/2026) : le canevas dessine les règles (qui
+   approuve quoi, à partir de quel montant), les approbations et les
+   délégations ; le panneau liste les étapes et les validations. Mêmes
+   données et mêmes gestes que la page de fonction d'avant
+   (components/espace2/filed/Fonctions.tsx › Circuit). */
 
 export const metadata: Metadata = {
   title: "Circuit de validation",
@@ -9,5 +15,9 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <Circuit />;
+  return (
+    <Suspense>
+      <CircuitEditeur />
+    </Suspense>
+  );
 }

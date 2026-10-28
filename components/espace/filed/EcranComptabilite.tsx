@@ -32,16 +32,16 @@ import { COMPTES_SYSTEME, SOUS_TITRE_FEC, exporterFec, quand, reglerCompte, tele
 import { monClient } from "./portes";
 import ExportsFiled from "./ExportsFiled";
 
-type Exercice = { id: string; libelle: string; debut: string; fin: string; statut: string; entite_id: string | null };
-type Compte = { role: RoleCompte; numero: string; libelle: string; regle: boolean };
-type Contexte = { client: string; role: string | null; entites: { id: string; nom: string; siren?: string | null }[]; exercices: Exercice[]; comptes: Compte[] };
+export type Exercice = { id: string; libelle: string; debut: string; fin: string; statut: string; entite_id: string | null };
+export type Compte = { role: RoleCompte; numero: string; libelle: string; regle: boolean };
+export type Contexte = { client: string; role: string | null; entites: { id: string; nom: string; siren?: string | null }[]; exercices: Exercice[]; comptes: Compte[] };
 
 const annee = new Date().getFullYear();
-const EXERCICES_EXEMPLE: Exercice[] = [{ id: "ex-2026", libelle: `Exercice ${annee}`, debut: `${annee}-01-01`, fin: `${annee}-12-31`, statut: "ouvert", entite_id: null }];
+export const EXERCICES_EXEMPLE: Exercice[] = [{ id: "ex-2026", libelle: `Exercice ${annee}`, debut: `${annee}-01-01`, fin: `${annee}-12-31`, statut: "ouvert", entite_id: null }];
 const comptesDefaut = (): Compte[] => COMPTES_SYSTEME.map((c) => ({ role: c.role, numero: c.numero, libelle: c.defaut, regle: false }));
 
 /* l'exemple : un FEC fabriqué à partir des écritures d'exemple, au format exact (tabulations, CRLF) */
-function fecExemple(du: string, au: string): ExportFec {
+export function fecExemple(du: string, au: string): ExportFec {
   const entete = ["JournalCode", "JournalLib", "EcritureNum", "EcritureDate", "CompteNum", "CompteLib", "CompAuxNum", "CompAuxLib", "PieceRef", "PieceDate", "EcritureLib", "Debit", "Credit", "EcritureLet", "DateLet", "ValidDate", "Montantdevise", "Idevise"];
   const d = (iso: string) => iso.replace(/-/g, "");
   const m = (n: number) => n.toFixed(2).replace(".", ",");

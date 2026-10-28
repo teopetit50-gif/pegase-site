@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
-import { PageGardeFous } from "@/components/espace2/offload/Sections";
+import { Suspense } from "react";
+import ReglesGardeFous from "@/components/espace2/offload/ReglesGardeFous";
 
-/* /espace2/offload/garde-fous — OFFLOAD, les garde-fous (page de fonction, 21/10/2026). */
+/* /espace2/offload/garde-fous — OFFLOAD, les garde-fous sur la liste des
+   workflows de Plain (28/10/2026) : une règle par ligne, l'arrêt automatique en
+   tête, les statuts en onglets, la carte au milieu pour écrire, retirer,
+   suspendre ou relancer. Mêmes portes que l'écran d'avant
+   (components/espace/offload/GardeFous.tsx). */
 
 export const metadata: Metadata = {
   title: "Garde-fous",
@@ -9,5 +14,9 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <PageGardeFous />;
+  return (
+    <Suspense>
+      <ReglesGardeFous />
+    </Suspense>
+  );
 }

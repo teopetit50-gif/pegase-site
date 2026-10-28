@@ -16,7 +16,7 @@ import { dateCourte } from "../format";
 import * as portes from "./portes";
 import { jourParis } from "./calcul";
 
-const EXEMPLE: portes.TauxConnu[] = [
+export const TAUX_EXEMPLE: portes.TauxConnu[] = [
   { devise: "CHF", jour: null, taux: 1.0638, source: "bce" },
   { devise: "USD", jour: null, taux: 0.9195, source: "saisie" },
 ];
@@ -28,7 +28,7 @@ function nombre(t: string): number {
 }
 
 export default function TauxChange({ source, client }: { source: "exemple" | "reelle"; client: string | null }) {
-  const [liste, setListe] = useState<portes.TauxConnu[]>(source === "exemple" ? EXEMPLE.map((x) => ({ ...x, jour: jourParis() })) : []);
+  const [liste, setListe] = useState<portes.TauxConnu[]>(source === "exemple" ? TAUX_EXEMPLE.map((x) => ({ ...x, jour: jourParis() })) : []);
   const [f, setF] = useState({ devise: "", jour: jourParis(), taux: "" });
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);

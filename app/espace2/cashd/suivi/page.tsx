@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import EcranCashd from "@/components/espace/cashd/EcranCashd";
 import BoiteDebiteurs from "@/components/espace2/cashd/BoiteDebiteurs";
 import TableauEnvois from "@/components/espace2/cashd/TableauEnvois";
-import { HabilleSb } from "@/components/espace2/Habille";
+import Tresorerie from "@/components/espace2/cashd/Tresorerie";
 
 /* /espace2/cashd/suivi — « Débiteurs et relances », la seconde page de
    CASHD, sur la boîte de réception (« Inbox ») de Linear (28/10/2026,
@@ -16,8 +15,9 @@ import { HabilleSb } from "@/components/espace2/Habille";
      · ?vue=envois : les relances en tableau, une colonne par état d'envoi
        (à valider, à envoyer, parties, réponse reçue, arrêtées), sur la vue
        « Board » de Linear (TableauEnvois, ?id=<relance> ouvre sa fiche).
-   Trésorerie reste l'écran de travail d'avant (EcranCashd, C2, au gabarit
-   Supabase du 22/10). */
+   Trésorerie (?vue=tresorerie) est la page « Reporting » de Plain (28/10,
+   Tresorerie.tsx) : balance âgée, prévision, pilotage, taux de change et
+   règlements à rapprocher, avec les mêmes gestes que l'écran de travail. */
 
 export const metadata: Metadata = {
   title: "Débiteurs et relances",
@@ -38,9 +38,9 @@ export default async function PageCashdSuivi({ searchParams }: { searchParams: P
     );
   if (v === "tresorerie")
     return (
-      <HabilleSb>
-        <EcranCashd vue={v} gabarit="sb" />
-      </HabilleSb>
+      <Suspense>
+        <Tresorerie />
+      </Suspense>
     );
   return (
     <Suspense>
