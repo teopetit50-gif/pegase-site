@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
-import EcranReput from "@/components/espace/reput/EcranReput";
-import Habille from "@/components/espace2/Habille";
+import { Suspense } from "react";
+import BoiteBase from "@/components/espace2/reput/BoiteBase";
 
-/* /espace2/reput/base — l'onglet « Base de connaissances » de l'écran REPUT, en page du volet (21/10/2026). */
+/* /espace2/reput/base — la base de connaissances de REPUT, sur la boîte de
+   réception de Linear (28/10/2026) : la liste des fiches à gauche, la fiche
+   choisie (?fiche=<id>) à droite, avec ses gestes (écrire, corriger, valider,
+   retirer). Elle remplace l'écran repris de /espace (EcranReput, vue
+   « base ») : mêmes données, mêmes portes. */
 
 export const metadata: Metadata = {
   title: "Base de connaissances",
@@ -11,8 +15,8 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <Habille>
-      <EcranReput vue="base" />
-    </Habille>
+    <Suspense>
+      <BoiteBase />
+    </Suspense>
   );
 }

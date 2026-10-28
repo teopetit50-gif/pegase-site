@@ -1,0 +1,81 @@
+/* ══════════════════════════════════════════════════════════════════════
+   REPUT, la base de connaissances en boîte de réception (28/10/2026) : les
+   quelques briques que ../lin/lin.css et ./reput.css n'ont pas — la rangée
+   des filtres posés sous la tête de la liste, et le formulaire d'une fiche
+   écrite ou corrigée sur place (titre en 24/600, champs à étiquette grise).
+   Uniquement des variables --lin-*, pour les deux thèmes.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lin .lin-base-filtres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 16px 0;
+}
+.v2 .lin .lin-base-filtres .lin-filtre-actif {
+  gap: 6px;
+}
+.v2 .lin .lin-base-filtres .lin-filtre-actif svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .lin .lin-base-vide-retour {
+  max-width: 360px;
+  text-align: center;
+}
+
+/* le formulaire : le titre de la page devient un champ, puis les champs de la fiche */
+.v2 .lin .lin-base-titre {
+  display: block;
+  width: 100%;
+  margin: 12px 0 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+  color: var(--lin-titre);
+  outline: none;
+}
+.v2 .lin .lin-base-titre:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.v2 .lin .lin-base-titre::placeholder {
+  color: var(--lin-second);
+}
+.v2 .lin .lin-base-champ {
+  display: block;
+  margin-top: 20px;
+}
+.v2 .lin .lin-base-champ > span {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-second);
+}
+.v2 .lin .lin-base-champ .lin-reput-champ {
+  margin-top: 6px;
+}
+.v2 .lin .lin-base-deux {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.v2 .lin .lin-base-aide {
+  margin: 16px 0 0;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+}
+.v2 .lin .lin-base-motif {
+  margin-top: 20px;
+}
+
+@container principale (max-width: 640px) {
+  .v2 .lin .lin-base-deux {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -1,0 +1,111 @@
+/* ══════════════════════════════════════════════════════════════════════
+   FILED « À payer » sur la boîte de réception de Linear (28/10/2026) : les
+   quelques réglages propres à ./BoiteAPayer.tsx, sous .v2 .lin comme le
+   gabarit (../lin/lin.css), qui reste intact.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* les filtres posés, sous la tête de la liste : une rangée de pastilles qui passe à la ligne */
+.v2 .lin .apayer-outils {
+  flex-wrap: wrap;
+  height: auto;
+  min-height: 28px;
+  gap: 6px;
+}
+
+/* le menu « Filtrer » : le champ de recherche, puis une section par dimension */
+.v2 .lin .apayer-menu {
+  max-height: min(520px, calc(100dvh - 140px));
+  overflow-y: auto;
+}
+.v2 .lin .apayer-menu-titre {
+  margin: 0;
+  padding: 8px 16px 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--lin-second);
+}
+.v2 .lin .apayer-menu .lin-menu-option svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.v2 .lin .apayer-menu .lin-option-coche {
+  width: 14px;
+  height: 14px;
+}
+.v2 .lin .apayer-bascule {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-texte);
+}
+
+/* rien de choisi : le chiffre à traiter, puis les groupes d'échéance (les compteurs de l'écran d'avant) */
+.v2 .lin .apayer-vide {
+  padding: 48px 24px;
+  text-align: center;
+}
+.v2 .lin .apayer-vide-titre {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--lin-texte);
+}
+.v2 .lin .apayer-vide-sous {
+  max-width: 440px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--lin-second);
+}
+.v2 .lin .apayer-vide-sous strong {
+  font-weight: 500;
+  color: var(--lin-texte);
+}
+.v2 .lin .apayer-compteurs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.v2 .lin .lin-boite-vide .apayer-compteurs svg {
+  width: 16px;
+  height: 16px;
+  opacity: 1;
+}
+.v2 .lin .apayer-compteurs .lin-meta {
+  margin-left: 2px;
+}
+.v2 .lin .apayer-alerte {
+  color: var(--lin-orange);
+}
+.v2 .lin .apayer-rouge {
+  color: var(--lin-rouge);
+}
+
+/* le pied de « Règlements » : un bouton peut y remplacer un lien */
+.v2 .lin button.lin-maj-pied-btn,
+.v2 .lin button.lin-maj-pied-rond {
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+}
+.v2 .lin .lin-maj-pied-btn--texte {
+  display: inline-flex;
+  align-items: center;
+  width: auto;
+  gap: 6px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* la phrase « C'est fait » après un paiement noté */
+.v2 .lin .apayer-fait strong {
+  font-weight: 600;
+}

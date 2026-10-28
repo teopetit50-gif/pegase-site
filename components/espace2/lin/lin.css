@@ -554,3 +554,43 @@ html[data-v2-theme="light"] .v2 .lin :is(.lin-carte-droite, .lin-maj, .lin-detai
 .v2 .lin { --lin-maj-pied: #1d1c1c; }
 html[data-v2-theme="light"] .v2 .lin { --lin-maj-pied: var(--v2-a-200); }
 
+
+/* ——— la boîte de réception (Inbox de Linear) : les secondes pages de chaque SaaS ———
+   Relevé du 28/10/2026 sur linear.app/omegaaii/inbox, fenêtre de 1710 px :
+     colonne de liste   400 de large, trait à droite ; tête de 44 (titre 13/500, boutons ronds de 28 à droite)
+     ligne              55 de haut ; avatar rond de 32 (fond de sa couleur à 13 %, icône 20) à x 17 ;
+                        texte à x 61 : ligne 1 en 13 (point bleu de 8 si non lu, référence 450, titre 500),
+                        ligne 2 en 12/450 grise ; à droite l'icône de statut (14) et l'heure (12/450) calées à 16 du bord ;
+                        lu : tout en gris ; survol et sélection : fond en retrait de 8, rayon 8
+     détail             le reste de la largeur : tête de 44, puis la page de l'élément (titre 24/600, propriétés à droite) */
+.v2 .lin-boite { display: flex; align-items: stretch; flex: 1; min-height: 0; }
+.v2 .lin-boite-liste { display: flex; flex-direction: column; width: 400px; flex-shrink: 0; border-right: 0.5px solid var(--lin-trait); min-height: calc(100dvh - 48px); }
+.v2 .lin-boite-liste > .lin-tete { position: sticky; top: 0; }
+.v2 .lin-boite-titre { margin-left: 4px; font-size: 13px; font-weight: 500; color: var(--lin-texte); }
+.v2 .lin-boite-lignes { margin: 0; padding: 8px 0; list-style: none; }
+.v2 .lin-boite-ligne { position: relative; display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; column-gap: 12px; align-items: center; height: 55px; padding: 0 16px 0 17px; color: var(--lin-second); }
+.v2 .lin-boite-ligne::before { content: ""; position: absolute; inset: 0 8px; border-radius: 8px; background: transparent; }
+.v2 .lin-boite-ligne:hover::before, .v2 .lin-boite-ligne[data-actif]::before { background: var(--lin-survol); }
+.v2 .lin-boite-ligne > * { position: relative; min-width: 0; }
+.v2 .lin-boite-ligne:focus-visible { outline: 2px solid var(--lin-fait); outline-offset: -2px; border-radius: 8px; }
+.v2 .lin-boite-avatar { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: color-mix(in srgb, currentColor 13%, transparent); color: var(--lin-avatar-teinte, #6879e1); }
+.v2 .lin-boite-avatar svg { width: 20px; height: 20px; }
+.v2 .lin-boite-texte { display: grid; row-gap: 4px; }
+.v2 .lin-boite-l1 { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 13px; font-weight: 500; color: var(--lin-second); white-space: nowrap; }
+.v2 .lin-boite-l1 b { font-weight: 450; }
+.v2 .lin-boite-l1 span:last-child { overflow: hidden; text-overflow: ellipsis; }
+.v2 .lin-boite-ligne[data-non-lu] .lin-boite-l1 { color: var(--lin-texte); }
+.v2 .lin-boite-ligne[data-non-lu] .lin-boite-l1 b { font-weight: 500; }
+.v2 .lin-boite-point { width: 8px; height: 8px; border-radius: 50%; background: var(--lin-graph-bleu); flex-shrink: 0; }
+.v2 .lin-boite-l2 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 450; color: var(--lin-second); }
+.v2 .lin-boite-droite { display: grid; justify-items: end; row-gap: 4px; }
+.v2 .lin-boite-droite .lin-ic, .v2 .lin-boite-droite svg { width: 14px; height: 14px; }
+.v2 .lin-boite-heure { font-size: 12px; font-weight: 450; color: var(--lin-second); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.v2 .lin-boite-detail { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.v2 .lin-boite-vide { flex: 1; display: grid; place-content: center; justify-items: center; gap: 14px; color: var(--lin-second); font-size: 13px; }
+.v2 .lin-boite-vide svg { width: 64px; height: 64px; color: var(--lin-second); opacity: 0.8; }
+
+@container principale (max-width: 1100px) {
+  .v2 .lin-boite { flex-direction: column; }
+  .v2 .lin-boite-liste { width: auto; min-height: 0; border-right: 0; border-bottom: 0.5px solid var(--lin-trait); }
+}

@@ -1,0 +1,77 @@
+/* ══════════════════════════════════════════════════════════════════════
+   CASHD — la boîte « Débiteurs et relances » (28/10/2026) : les quelques
+   réglages propres à ./BoiteDebiteurs.tsx, sous .v2 .lin comme le gabarit
+   (../lin/lin.css), qui reste intact.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* le texte d'une relance, tel qu'il partira : ses retours à la ligne gardés */
+.v2 .lin .c2b-corps {
+  margin: 20px 0 0;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 450;
+  line-height: 22px;
+  color: var(--lin-texte);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* une ligne de liste trop longue (une facture et son état) : coupée, lisible au survol */
+.v2 .lin .c2b-ligne-texte {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* le fil d'Ariane du détail : « Débiteurs » referme l'élément ouvert */
+.v2 .lin button.lin-fil-equipe,
+.v2 .lin button.lin-maj-pied-btn,
+.v2 .lin button.lin-maj-pied-rond {
+  cursor: pointer;
+}
+
+/* le pied d'une carte : des boutons à texte à droite des boutons ronds */
+.v2 .lin .c2b-pied-droite {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* les sections d'un menu de filtre */
+.v2 .lin .c2b-menu-titre {
+  padding: 8px 16px 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-second);
+}
+.v2 .lin .c2b-menu-titre:not(:first-child) {
+  margin-top: 4px;
+  border-top: 0.5px solid var(--lin-menu-trait);
+}
+.v2 .lin .lin-menu-option[aria-checked="true"] {
+  color: var(--lin-titre);
+}
+
+/* un message sous la tête de la liste (chargement, base non installée, erreur) */
+.v2 .lin .c2b-message {
+  margin: 0;
+  padding: 12px 24px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--lin-second);
+}
+
+/* l'état vide du détail : le total sous le compte des éléments à traiter */
+.v2 .lin .c2b-vide-sous {
+  font-size: 12px;
+  color: var(--lin-second);
+}
+
+/* « Vos textes » : l'écran des gabarits de toujours, dans le monde .resa .esp qu'il attend */
+.v2 .lin .c2b-textes {
+  flex: 1;
+  min-width: 0;
+  padding: 16px 24px 32px;
+}

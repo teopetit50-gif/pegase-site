@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
-import APayer from "@/components/espace2/filed/APayer";
+import { Suspense } from "react";
+import BoiteAPayer from "@/components/espace2/filed/BoiteAPayer";
 
-/* /espace2/filed/a-payer — « À payer » dans le nouveau design (06/10/2026). */
+/* /espace2/filed/a-payer — « À payer » sur la boîte de réception de Linear
+   (28/10/2026, demande de Teo : la seconde page de chaque SaaS sur l'Inbox
+   de Linear). La liste des factures validées à gauche, la facture choisie
+   (?id=) à droite ; mêmes données, mêmes règles et même « Noter un
+   paiement » que l'écran d'avant (APayer, 06/10/2026). */
 
 export const metadata: Metadata = {
   title: "À payer",
@@ -9,5 +14,9 @@ export const metadata: Metadata = {
 };
 
 export default function PageAPayer() {
-  return <APayer />;
+  return (
+    <Suspense>
+      <BoiteAPayer />
+    </Suspense>
+  );
 }
