@@ -79,8 +79,8 @@ import Textes from "@/components/espace/cashd/Textes";
 import type { Balance, Fiche, NaturePiece, Piece, ReglementEtat, Relance, RelanceCommande, ReponseLue, StatutCompte, Suivi, Tableau } from "@/components/espace/cashd/types";
 import { HabilleSb } from "../Habille";
 import { useToast } from "../Toasts";
-import { Choix, IconePriorite, Menu, MenuActions, MenuOptions, type Option } from "../lin/Lin";
-import { IconeCalendrier, IconeDocument, IconeEnveloppe, IconeGroupe, IconeStatutProjet, type EtatProjet } from "../lin/icones";
+import { Choix, IconePriorite, Menu, MenuActions, MenuOptions, Surlignage, type Option } from "../lin/Lin";
+import { IconeCalendrier, IconeDocument, IconeEnveloppe, IconeGroupe, IconeSante as IconeSanteLin, IconeStatutProjet, type EtatProjet, type Sante as SanteLin } from "../lin/icones";
 import { RACINE } from "../modules";
 /* les fenêtres de geste et « Vos textes » portent les classes de l'écran d'avant (c2-sous, c2-coche…) */
 import "@/components/espace/cashd/cashd.css";
@@ -199,6 +199,9 @@ function IconeLigne({ nature, taille = 20 }: { nature: NatureLigne; taille?: num
   const Icone = nature === "commande" ? ClipboardList : nature === "devis" ? FileText : Mail;
   return <Icone width={taille} height={taille} strokeWidth={1.6} aria-hidden="true" />;
 }
+/* l'icône de gauche des listes : la santé de Linear (en retard = à risque, en litige = hors délai) */
+const SANTE_LIGNE: Record<"retard" | "litige" | "pause" | "a_jour", SanteLin> = { retard: "risque", litige: "hors", pause: "neutre", a_jour: "bien" };
+const SANTE_RELANCE: Record<GroupeRelance, SanteLin> = { repondue: "risque", a_valider: "risque", a_envoyer: "risque", partie: "bien", arretee: "neutre" };
 function IconeGroupeRelance({ g }: { g: GroupeRelance }) {
   return <IconeStatutProjet etat={GROUPES_RELANCE[g].etat} titre={GROUPES_RELANCE[g].libelle} />;
 }
@@ -1088,8 +1091,8 @@ export default function BoiteDebiteurs({ vue }: { vue: VueBoite }) {
               scroll={false}
               onClick={(e) => suivreLien(e, { compte: b.compte_id })}
             >
-              <span className="lin-boite-avatar" style={{ "--lin-avatar-teinte": couleurDe(b.compte_id) } as React.CSSProperties}>
-                <Building2 aria-hidden="true" />
+              <span className="lin-boite-sante">
+                <IconeSanteLin etat={SANTE_LIGNE[santeDe(b)]} />
               </span>
               <span className="lin-boite-texte">
                 <span className="lin-boite-l1">
@@ -1110,6 +1113,7 @@ export default function BoiteDebiteurs({ vue }: { vue: VueBoite }) {
             </Link>
           </li>
         ))}
+        <Surlignage />
       </ul>
     ) : (
       <ul className="lin-boite-lignes" aria-label="Relances">
@@ -1130,8 +1134,8 @@ export default function BoiteDebiteurs({ vue }: { vue: VueBoite }) {
                 scroll={false}
                 onClick={(e) => suivreLien(e, { relance: l.cle, textes: null })}
               >
-                <span className="lin-boite-avatar" style={{ "--lin-avatar-teinte": couleurDe(l.compte_id) } as React.CSSProperties}>
-                  <IconeLigne nature={l.nature} />
+                <span className="lin-boite-sante">
+                  <IconeSanteLin etat={SANTE_RELANCE[l.groupe]} />
                 </span>
                 <span className="lin-boite-texte">
                   <span className="lin-boite-l1">
@@ -1153,6 +1157,7 @@ export default function BoiteDebiteurs({ vue }: { vue: VueBoite }) {
             </li>
           );
         })}
+        <Surlignage />
       </ul>
     );
   const nVus = vue === "debiteurs" ? debiteursVus.length : lignesVues.length;

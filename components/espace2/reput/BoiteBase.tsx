@@ -59,8 +59,8 @@ import { mondeExemple } from "@/components/espace/reput/exemples";
 import { csvDemandes, telecharger } from "@/components/espace/reput/export";
 import { chargerMonde, ecrireFiche, monClient, retirerFiche, validerFiche } from "@/components/espace/reput/portes";
 import type { Client, Demande, Fiche, GenreFiche, Monde, Reponse, StatutDemande, StatutReponse } from "@/components/espace/reput/types";
-import { Choix, Menu, MenuOptions, type Option } from "../lin/Lin";
-import { IconeCalendrier, IconeDiese, IconeDocument, IconeStatutProjet, type EtatProjet } from "../lin/icones";
+import { Choix, Menu, MenuOptions, Surlignage, type Option } from "../lin/Lin";
+import { IconeCalendrier, IconeDiese, IconeDocument, IconeSante, IconeStatutProjet, type EtatProjet, type Sante } from "../lin/icones";
 import { useMaintenant } from "../horloge";
 import { RACINE } from "../modules";
 import "./reput.css";
@@ -82,6 +82,8 @@ const ETATS: Record<Etat, { libelle: string; court: string; teinte: Teinte; hexa
   a_venir: { libelle: "Validée, en vigueur plus tard", court: "En vigueur plus tard", teinte: "gris", hexa: "planifie" },
   en_vigueur: { libelle: "En vigueur", court: "En vigueur", teinte: "vert", hexa: "fait" },
 };
+/* l'icône de gauche de la liste : la santé de Linear */
+const SANTE_ETAT: Record<Etat, Sante> = { brouillon: "risque", a_revoir: "hors", a_venir: "neutre", en_vigueur: "bien" };
 const ORDRE_ETATS: Etat[] = ["brouillon", "a_revoir", "a_venir", "en_vigueur"];
 /* les genres de l'ancien écran (BaseConnaissances) */
 const GENRES: Record<GenreFiche, string> = { question: "Question-réponse", horaires: "Horaires", tarif: "Tarif", document: "Document", information: "Information" };
@@ -607,8 +609,8 @@ function Boite({
                     if (window.innerWidth < 1024) window.setTimeout(() => document.getElementById("lin-base-fiche")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
                   }}
                 >
-                  <span className="lin-boite-avatar" style={{ "--lin-avatar-teinte": couleurDe(f.sujet) } as React.CSSProperties} title={sujetDe(m, f.sujet)}>
-                    <IconeGenre genre={f.genre} taille={20} />
+                  <span className="lin-boite-sante" title={ETATS[e].libelle}>
+                    <IconeSante etat={SANTE_ETAT[e]} />
                   </span>
                   <span className="lin-boite-texte">
                     <span className="lin-boite-l1">
@@ -629,6 +631,7 @@ function Boite({
               </li>
             );
           })}
+          <Surlignage />
         </ul>
       )}
     </section>

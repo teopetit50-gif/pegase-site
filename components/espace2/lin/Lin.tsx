@@ -325,3 +325,62 @@ export function GraphiqueProgres({ etiquettes, series, libelle, hauteur = 160 }:
     </figure>
   );
 }
+
+/* le surlignage qui glisse d'une ligne à l'autre dans la liste d'une boîte (style « vivant » choisi
+   par Teo le 28/10/2026) : posé en dernier enfant d'un ul.lin-boite-lignes, il suit le pointeur,
+   revient sur la ligne ouverte quand le pointeur sort, et disparaît s'il n'y en a pas. Le fond de
+   survol propre à chaque ligne est coupé tant qu'il est là (data-glisse sur la liste). */
+export function Surlignage() {
+  const ref = useRef<HTMLLIElement>(null);
+  useEffect(() => {
+    const bloc = ref.current;
+    const liste = bloc?.parentElement;
+    if (!bloc || !liste) return;
+    liste.setAttribute("data-glisse", "");
+    let survolee: HTMLElement | null = null;
+    const poser = (ligne: HTMLElement | null) => {
+      if (!ligne) {
+        bloc.style.opacity = "0";
+        return;
+      }
+      /* offsetTop plutôt que la position à l'écran : les lignes glissent encore pendant leur entrée */
+      const premiere = bloc.style.opacity !== "1";
+      if (premiere) bloc.style.transition = "none";
+      let haut = 0;
+      for (let n: HTMLElement | null = ligne; n && n !== liste; n = n.offsetParent as HTMLElement | null) haut += n.offsetTop;
+      bloc.style.transform = `translateY(${haut}px)`;
+      bloc.style.height = `${ligne.offsetHeight}px`;
+      bloc.style.opacity = "1";
+      if (premiere) {
+        void bloc.offsetHeight;
+        bloc.style.transition = "";
+      }
+    };
+    const ouverte = () => liste.querySelector<HTMLElement>(".lin-boite-ligne[data-actif]");
+    const dessus = (e: PointerEvent) => {
+      const l = (e.target as HTMLElement).closest<HTMLElement>(".lin-boite-ligne");
+      if (l && l !== survolee) {
+        survolee = l;
+        poser(l);
+      }
+    };
+    const sortie = () => {
+      survolee = null;
+      poser(ouverte());
+    };
+    const suivi = new MutationObserver(() => {
+      if (!survolee) poser(ouverte());
+    });
+    liste.addEventListener("pointerover", dessus);
+    liste.addEventListener("pointerleave", sortie);
+    suivi.observe(liste, { subtree: true, childList: true, attributes: true, attributeFilter: ["data-actif"] });
+    poser(ouverte());
+    return () => {
+      liste.removeAttribute("data-glisse");
+      liste.removeEventListener("pointerover", dessus);
+      liste.removeEventListener("pointerleave", sortie);
+      suivi.disconnect();
+    };
+  }, []);
+  return <li ref={ref} className="lin-boite-surlignage" aria-hidden="true" />;
+}

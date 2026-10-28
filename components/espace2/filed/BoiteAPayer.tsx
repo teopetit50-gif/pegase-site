@@ -36,7 +36,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Banknote, Check, ChevronDown, ChevronUp, Copy, ExternalLink, FileMinus, FileText, ListFilter, SlidersHorizontal, X } from "lucide-react";
+import { Banknote, Check, ChevronDown, ChevronUp, Copy, ExternalLink, FileText, ListFilter, SlidersHorizontal, X } from "lucide-react";
 import { Button, Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
 import { useSource } from "@/components/espace/source";
 import { useTempsReel } from "@/components/espace/tempsReel";
@@ -46,8 +46,8 @@ import { vueExemple } from "@/components/espace/filed/EcranFournisseurs";
 import { MOYENS_PAIEMENT, chargerVueFournisseurs, etatPaiement, noterPaiement, type EtatPaiement, type FactureDuFournisseur, type MoyenPaiement, type VueFournisseurs } from "@/components/espace/filed/portes";
 import type { Fournisseur } from "@/components/espace/types";
 import { A_PAYER, GROUPES, JOUR, aPayer, du, etatsExemple, groupeDe, jourDe, minuit, totaux, type Etats, type Groupe } from "./calculs";
-import { Choix, IconePriorite, Menu, MenuActions, MenuOptions, type Option } from "../lin/Lin";
-import { IconeCalendrier, IconeDiese, IconeDocument, IconeGroupe, IconeJauge, IconeStatutProjet, type EtatProjet } from "../lin/icones";
+import { Choix, IconePriorite, Menu, MenuActions, MenuOptions, Surlignage, type Option } from "../lin/Lin";
+import { IconeCalendrier, IconeDiese, IconeDocument, IconeGroupe, IconeJauge, IconeSante, IconeStatutProjet, type EtatProjet } from "../lin/icones";
 import { Note } from "../ui";
 import { useToast } from "../Toasts";
 import { useAujourdhui } from "../horloge";
@@ -586,8 +586,8 @@ export default function BoiteAPayer() {
           {visibles.map((l) => (
             <li key={l.id}>
               <Link href={lienId(l.id)} className="lin-boite-ligne" data-actif={l.id === id ? "" : undefined} data-non-lu={l.aTraiter ? "" : undefined} aria-current={l.id === id ? "true" : undefined} scroll={false}>
-                <span className="lin-boite-avatar" style={{ "--lin-avatar-teinte": l.couleur } as React.CSSProperties} aria-hidden="true">
-                  {l.paiement === "avoir" ? <FileMinus /> : <FileText />}
+                <span className="lin-boite-sante" aria-hidden="true">
+                  <IconeSante etat={l.paiement === "payee" || l.paiement === "avoir" ? "bien" : l.groupe === "retard" ? "hors" : l.groupe === "semaine" ? "risque" : "bien"} />
                 </span>
                 <span className="lin-boite-texte">
                   <span className="lin-boite-l1">
@@ -610,6 +610,7 @@ export default function BoiteAPayer() {
               </Link>
             </li>
           ))}
+          <Surlignage />
         </ul>
       )}
     </section>

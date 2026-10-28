@@ -667,3 +667,36 @@ html[data-v2-theme="light"] .v2 .lin-ticket-composeur { box-shadow: var(--v2-omb
   .v2 .lin-ticket-corps { width: 100%; padding-top: 32px; max-width: none; }
   .v2 .lin-ticket-cote { width: auto; padding-top: 0; }
 }
+
+/* ——— la liste « vivante » (style A choisi par Teo le 28/10/2026) ———
+   un surlignage qui glisse d'une ligne à l'autre, le point des non-lus qui bat doucement, les
+   lignes qui arrivent en cascade ; l'icône de gauche devient la santé de Linear (16 px), sans rond
+   coloré autour. Tout s'arrête si l'appareil ou l'espace demande moins de mouvement. */
+.v2 .lin-boite-lignes { position: relative; isolation: isolate; }
+.v2 .lin-boite-surlignage { position: absolute; z-index: -1; top: 0; left: 8px; right: 8px; height: 55px; border-radius: 8px; background: var(--lin-survol); opacity: 0; pointer-events: none; transition: transform 0.24s cubic-bezier(0.2, 0.8, 0.2, 1), height 0.24s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.16s ease; }
+.v2 .lin-boite-lignes[data-glisse] .lin-boite-ligne:hover::before, .v2 .lin-boite-lignes[data-glisse] .lin-boite-ligne[data-actif]::before { background: transparent; }
+.v2 .lin-boite-lignes > li:not(.lin-boite-surlignage) { animation: lin-entree 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.v2 .lin-boite-lignes > li:nth-child(2) { animation-delay: 30ms; }
+.v2 .lin-boite-lignes > li:nth-child(3) { animation-delay: 60ms; }
+.v2 .lin-boite-lignes > li:nth-child(4) { animation-delay: 90ms; }
+.v2 .lin-boite-lignes > li:nth-child(5) { animation-delay: 120ms; }
+.v2 .lin-boite-lignes > li:nth-child(6) { animation-delay: 150ms; }
+.v2 .lin-boite-lignes > li:nth-child(7) { animation-delay: 180ms; }
+.v2 .lin-boite-lignes > li:nth-child(8) { animation-delay: 210ms; }
+.v2 .lin-boite-lignes > li:nth-child(n + 9) { animation-delay: 240ms; }
+@keyframes lin-entree { from { opacity: 0; transform: translateY(6px); } }
+.v2 .lin-boite-point { position: relative; }
+.v2 .lin-boite-point::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: inherit; animation: lin-pouls 2.4s cubic-bezier(0.2, 0.8, 0.2, 1) infinite; }
+@keyframes lin-pouls { 0% { transform: scale(1); opacity: 0.55; } 70%, 100% { transform: scale(2.6); opacity: 0; } }
+.v2 .lin-boite-sante { display: grid; place-items: center; width: 32px; height: 32px; }
+.v2 .lin-boite-sante .lin-ic { width: 16px; height: 16px; }
+.v2 .lin-ic-sante--risque { color: var(--lin-jaune); }
+.v2 .lin-ic-sante--hors { color: var(--lin-rouge); }
+.v2 .lin-ic-sante--bien { color: var(--lin-vert); }
+.v2 .lin-ic-sante--neutre { color: var(--lin-second); }
+@media (prefers-reduced-motion: reduce) {
+  .v2 .lin-boite-lignes > li, .v2 .lin-boite-point::after { animation: none; }
+  .v2 .lin-boite-surlignage { transition: none; }
+}
+html.v2-calme .v2 .lin-boite-lignes > li, html.v2-calme .v2 .lin-boite-point::after { animation: none; }
+html.v2-calme .v2 .lin-boite-surlignage { transition: none; }

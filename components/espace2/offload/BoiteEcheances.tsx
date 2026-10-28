@@ -52,8 +52,8 @@ import { STATUTS_ECHEANCE, echeancesExemple } from "@/components/espace/offload/
 import { exempleOffload } from "@/components/espace/offload/exemples";
 import * as portes from "@/components/espace/offload/portes";
 import type { Compte, EcheanceLigne, ParcCompte } from "@/components/espace/offload/types";
-import { Choix, Menu, MenuOptions, type Option } from "../lin/Lin";
-import { IconeCalendrier, IconeEnveloppe, IconeStatutProjet, type EtatProjet } from "../lin/icones";
+import { Choix, Menu, MenuOptions, Surlignage, type Option } from "../lin/Lin";
+import { IconeCalendrier, IconeEnveloppe, IconeSante, IconeStatutProjet, type EtatProjet, type Sante } from "../lin/icones";
 import { RACINE } from "../modules";
 import "./offload.css";
 import "./BoiteEcheances.css";
@@ -70,6 +70,15 @@ const ICI = `${RACINE}/offload/echeances`;
 const ORDRE: Statut[] = ["depassee", "appel", "a_valider", "a_venir", "prevenue", "honoree", "honoree_ailleurs", "close"];
 const A_GESTE: Statut[] = ["depassee", "appel", "a_valider"];
 const FINIES: Statut[] = ["honoree", "honoree_ailleurs", "close"];
+/* l'icône de gauche de la liste : la santé de Linear (tombée = hors délai, un geste à faire = à risque) */
+const santeDe = (e: EcheanceLigne): Sante =>
+  e.statut === "depassee"
+    ? "hors"
+    : e.statut === "appel" || e.statut === "a_valider" || (e.s_eteint && !FINIES.includes(e.statut)) || (e.statut === "a_venir" && ecart(e.due_le) <= 7)
+      ? "risque"
+      : e.statut === "a_venir"
+        ? "neutre"
+        : "bien";
 /* le statut d'une échéance en hexagone de projet : à venir (contour), en cours (moitié), faite (pleine), tombée (croix) */
 const ETAT_PROJET: Record<Statut, EtatProjet> = {
   a_venir: "planifie",
@@ -530,8 +539,8 @@ export default function BoiteEcheances() {
             return (
               <li key={e.id}>
                 <Link href={adresse(actifs, e.id)} scroll={false} className="lin-boite-ligne" data-actif={actif ? "" : undefined} data-non-lu={aTraiter(e) ? "" : undefined} aria-current={actif ? "true" : undefined}>
-                  <span className="lin-boite-avatar" style={{ "--lin-avatar-teinte": couleurDe(e.compte_id) } as React.CSSProperties}>
-                    <IconeType e={e} taille={20} />
+                  <span className="lin-boite-sante">
+                    <IconeSante etat={santeDe(e)} />
                   </span>
                   <span className="lin-boite-texte">
                     <span className="lin-boite-l1">
@@ -553,6 +562,7 @@ export default function BoiteEcheances() {
               </li>
             );
           })}
+          <Surlignage />
         </ul>
       )}
     </section>
