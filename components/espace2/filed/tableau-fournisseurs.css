@@ -5,7 +5,7 @@
    qui reste intact.
    ══════════════════════════════════════════════════════════════════════ */
 
-/* large : la page tient dans la fenêtre comme chez Linear — les colonnes défilent chacune, la fiche aussi */
+/* large : la page tient dans la fenêtre comme chez Linear — les colonnes défilent chacune */
 @container principale (min-width: 901px) {
   .v2 .lin.fou {
     height: calc(100dvh - 48px);
@@ -22,25 +22,6 @@
     overflow-y: auto;
     scrollbar-width: thin;
   }
-  .v2 .lin.fou .lin-tableau-page > .lin-boite-detail {
-    overflow-y: auto;
-  }
-}
-
-/* la fiche ouverte n'a que 560 de large : la page du ticket sur une seule colonne, les propriétés dessous */
-.v2 .lin.fou .lin-tableau-page > .lin-boite-detail .lin-ticket {
-  flex-direction: column;
-  gap: 24px;
-  padding: 0 24px 48px;
-}
-.v2 .lin.fou .lin-tableau-page > .lin-boite-detail .lin-ticket-corps {
-  width: 100%;
-  max-width: none;
-  padding-top: 32px;
-}
-.v2 .lin.fou .lin-tableau-page > .lin-boite-detail .lin-ticket-cote {
-  width: auto;
-  padding-top: 0;
 }
 
 /* la carte : « .lin-carte-titre » sert aussi au titre des cartes de droite de la page d'un projet ;
@@ -128,63 +109,6 @@
   align-items: center;
 }
 
-/* la fiche : les deux listes (IBAN, factures) annoncées par une ligne grise, comme la ligne d'appel des sous-tickets */
-.v2 .lin.fou .fou-sous-titre {
-  display: flex;
-  align-items: center;
-  height: 24px;
-  margin: 20px 0 0;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--lin-second);
-}
-.v2 .lin.fou .fou-sous-titre + .lin-ticket-sous {
-  margin-top: 4px;
-}
-.v2 .lin.fou .fou-sous-vide {
-  height: auto;
-  font-weight: 450;
-}
-.v2 .lin.fou .lin-ticket-sous-ligne .fou-ic,
-.v2 .lin.fou .lin-ticket-fil > li > svg:first-child {
-  width: 14px;
-  height: 14px;
-  flex-shrink: 0;
-  color: var(--lin-second);
-}
-.v2 .lin.fou .lin-ticket-sous-nom a {
-  color: var(--lin-texte);
-  text-decoration: underline;
-  text-decoration-color: var(--lin-trait);
-  text-underline-offset: 2px;
-}
-.v2 .lin.fou .fou-mono {
-  font-family: var(--font-geist-mono, ui-monospace), ui-monospace, monospace;
-  font-size: 12px;
-}
-.v2 .lin.fou .fou-fait strong {
-  font-weight: 600;
-}
-.v2 .lin.fou .fou-rouge {
-  color: var(--lin-orange);
-}
-
-/* les pilules de la fiche : un bouton (copier le SIREN) s'habille comme une pilule ; la pilule d'alerte en orange */
-.v2 .lin.fou button.lin-ticket-pilule {
-  border: 0;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-}
-.v2 .lin.fou .lin-ticket-pilule[data-alerte] {
-  color: var(--lin-orange);
-}
-.v2 .lin.fou .lin-ticket-icone:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
 /* les fenêtres des gestes : l'icône du geste devant le titre, comme l'écran d'avant */
 .v2-modale .fou-modale-titre {
   display: flex;
@@ -193,4 +117,24 @@
 }
 .v2-modale .fou-mono {
   font-family: var(--font-geist-mono, ui-monospace), ui-monospace, monospace;
+}
+
+/* la carte du milieu (../lin/CarteCentrale) est rendue hors de la page : le « ··· » de « Plus d'actions »
+   est posé dans un petit « .v2 .lin » pour retrouver les jetons du gabarit ; on lui retire la hauteur
+   et le fond de page, et son menu s'ouvre vers le haut, au-dessus des boutons */
+.v2.fou-plus {
+  display: inline-flex;
+  align-items: center;
+  min-height: 0;
+  margin-left: auto;
+  background: transparent;
+}
+.v2.fou-plus > .lin {
+  display: inline-flex;
+  min-height: 0;
+  background: transparent;
+}
+.v2.fou-plus .lin-menu {
+  top: auto;
+  bottom: calc(100% + 6px);
 }

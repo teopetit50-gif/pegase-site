@@ -1,0 +1,32 @@
+/* La feuille de la carte au milieu (CarteCentrale) : la feuille de « À valider », avec des
+   valeurs écrites au lieu des traits de remplissage. */
+.lin-feuille .lin-feuille-petit {
+  font-size: 12px;
+  color: var(--feuille-gris);
+}
+.lin-feuille .lin-feuille-lignes {
+  grid-auto-rows: minmax(34px, auto);
+  align-content: start;
+}
+.lin-feuille .lin-feuille-ligne {
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 16px;
+  padding: 8px 0;
+  font-size: 12px;
+}
+.lin-feuille .lin-feuille-ligne > span:first-child {
+  color: var(--feuille-gris);
+}
+.lin-feuille .lin-feuille-ligne > span:last-child {
+  color: var(--feuille-encre);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.lin-feuille .lin-feuille-texte {
+  flex: 1;
+  overflow: hidden;
+  white-space: pre-line;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--feuille-encre);
+}

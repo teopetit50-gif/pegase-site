@@ -71,35 +71,35 @@
   box-shadow: inset 0 0 0 0.5px var(--lin-trait);
 }
 
-/* la fiche à droite : 560 de large au plus, le ticket en une colonne (le corps, puis les propriétés) */
-.v2 .lin.sujets .lin-tableau-page > .lin-boite-detail {
-  min-width: 0;
+/* « Plus d'actions », dans le pied de la carte du milieu : la carte est rendue hors de la page (portail),
+   donc le menu du gabarit y est ré-enveloppé dans .v2 .lin ; l'enveloppe ne prend ni fond ni hauteur,
+   et le menu s'ouvre vers le haut, calé à droite */
+.v2.sujets-plus {
+  display: inline-flex;
+  align-self: center;
+  height: auto;
+  min-height: 0;
+  background: none;
+  margin-left: auto;
 }
-.v2 .lin.sujets .lin-boite-detail .lin-ticket {
-  flex-direction: column;
-  align-items: stretch;
-  gap: 24px;
-  padding: 0 32px 48px;
+.v2.sujets-plus .lin {
+  display: inline-flex;
+  flex-direction: row;
+  height: auto;
+  min-height: 0;
+  background: none;
 }
-.v2 .lin.sujets .lin-boite-detail .lin-ticket-corps {
-  width: 100%;
-  max-width: none;
-  margin: 0;
-  padding-top: 32px;
+.v2.sujets-plus .lin-rond {
+  width: 36px;
+  height: 36px;
 }
-.v2 .lin.sujets .lin-boite-detail .lin-ticket-cote {
-  width: auto;
-  padding-top: 0;
+.v2.sujets-plus .lin-menu--options {
+  top: auto;
+  bottom: calc(100% + 6px);
+  text-align: left;
 }
-.v2 .lin.sujets .lin-ticket-icone:disabled {
-  opacity: 0.5;
-}
-
 @container principale (max-width: 900px) {
   .v2 .lin.sujets .lin-tableau-page {
     min-height: 0;
-  }
-  .v2 .lin.sujets .lin-boite-detail .lin-ticket {
-    padding: 0 16px 48px;
   }
 }

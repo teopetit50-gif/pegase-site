@@ -168,7 +168,9 @@ export function MenuOptions({
   }, [raccourci]);
   const touche = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
+      /* Échap ferme le menu, pas la carte au milieu qui le contient */
       e.preventDefault();
+      e.stopPropagation();
       fermer();
     } else if (e.key === "ArrowDown") {
       e.preventDefault();

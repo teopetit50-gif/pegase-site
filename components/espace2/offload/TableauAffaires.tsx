@@ -41,16 +41,17 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowDown, ArrowUp, Banknote, Bell, Building2, Check, ChevronDown, Clock, Copy, Eye, EyeOff, ExternalLink, ListFilter, Package, PackageCheck, Scale, SlidersHorizontal, Star, Wrench, X } from "lucide-react";
+import { ArrowDown, Banknote, Building2, Check, ChevronDown, Copy, Eye, EyeOff, ListFilter, MoreHorizontal, Package, PackageCheck, Scale, SlidersHorizontal, Star, Wrench, X } from "lucide-react";
 import { Button, Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
 import { useSource } from "@/components/espace/source";
 import { montant } from "@/components/espace/format";
 import { DECISIONS, STATUTS_AFFAIRE, affairesExemple } from "@/components/espace/offload/Affaires";
 import { chargerAffaires, deciderAffaire, retirerAffaire, type DecisionAffaire } from "@/components/espace/offload/portes";
 import type { AffaireLigne, AffairesListe, StatutAffaire } from "@/components/espace/offload/types";
-import { Choix, Menu, MenuActions, MenuOptions, useEpingles, type Option } from "../lin/Lin";
-import { IconeBoiteX, IconeCalendrier, IconeNonLus, IconeStatutProjet, type EtatProjet } from "../lin/icones";
-import { Note } from "../ui";
+import { Choix, Menu, MenuActions, useEpingles, type Option } from "../lin/Lin";
+import { CarteCentrale, Feuille } from "../lin/CarteCentrale";
+import { IconeCalendrier, IconeNonLus, IconeStatutProjet, type EtatProjet } from "../lin/icones";
+import { ItemMenu, MenuDeroulant, Note, SectionMenu, SeparateurMenu } from "../ui";
 import { useToast } from "../Toasts";
 import { RACINE } from "../modules";
 import "./offload.css";
@@ -304,6 +305,32 @@ export default function TableauAffaires() {
   useEffect(() => {
     if (id) document.querySelector(".v2 .lin .lin-carte-tableau[data-actif]")?.scrollIntoView({ block: "nearest", inline: "nearest" });
   }, [id]);
+  /* à la fermeture de la carte du milieu, le focus revient sur sa carte du tableau, une fois le voile parti
+     (avant, react-aria garde le focus dans la fenêtre qui s'en va) */
+  const derniere = useRef<string | null>(null);
+  useEffect(() => {
+    if (id) {
+      derniere.current = id;
+      return;
+    }
+    const x = derniere.current;
+    derniere.current = null;
+    if (!x) return;
+    let essais = 0;
+    const t = window.setInterval(() => {
+      essais += 1;
+      if (document.querySelector(".v2-val-carte") && essais < 15) return;
+      window.clearInterval(t);
+      document.querySelector<HTMLElement>(`.v2 .lin [data-carte="${CSS.escape(x)}"]`)?.focus();
+    }, 80);
+    return () => window.clearInterval(t);
+  }, [id]);
+  /* une carte ouverte qui n'est plus au tableau (retirée, close sans suite par un geste, ou une adresse ancienne) : la carte se
+     referme et l'adresse perd son ?id= ; le geste a déjà dit ce qu'il a fait */
+  const chargement = source === "reelle" && reel === null && !erreur;
+  useEffect(() => {
+    if (id && !choisie && !chargement) routeur.replace(adresse(actifs, null), { scroll: false });
+  });
 
   /* ——— les gestes : les portes de l'ancien écran ; l'exemple est modifié en mémoire ——— */
   const ouvrirDecision = (a: AffaireLigne, d: DecisionAffaire = "garder") => {
@@ -440,7 +467,6 @@ export default function TableauAffaires() {
         ]
       : []),
   ];
-  const chargement = source === "reelle" && reel === null && !erreur;
 
   const tete = (
     <header className="lin-tete">
@@ -692,253 +718,229 @@ export default function TableauAffaires() {
     </section>
   );
 
-  /* ——— la fiche de la carte ouverte : la page d'un ticket ——— */
-  const fiche = (a: AffaireLigne) => {
+  /* ——— la carte ouverte (?id=) : au milieu de l'écran, la carte de décision d'« À valider » (CarteCentrale) ———
+     Teo, 28/10 : « plutôt que d'ouvrir un truc sur la droite, ça ouvre une card au milieu ». */
+  const ordreTableau = colonnes.flatMap((s) => parColonne.get(s) ?? []);
+  /* passer à une autre carte depuis la carte ouverte (‹ ›, ← →, les autres affaires du compte) : le clavier du tableau dort */
+  const ouvrir = (sel: string) => routeur.replace(adresse(actifs, sel), { scroll: false });
+  const fermer = () => aller(null);
+  const carteOuverte = (a: AffaireLigne) => {
     const epinglee = epingles.has(a.id);
-    const col = parColonne.get(a.statut as Statut) ?? [];
-    const rang = col.findIndex((x) => x.id === a.id);
-    const precedente = rang > 0 ? col[rang - 1].id : null;
-    const suivante = rang >= 0 && rang < col.length - 1 ? col[rang + 1].id : null;
+    const rang = ordreTableau.findIndex((x) => x.id === a.id);
+    const precedente = rang > 0 ? ordreTableau[rang - 1].id : null;
+    const suivante = rang >= 0 && rang < ordreTableau.length - 1 ? ordreTableau[rang + 1].id : null;
     const decidable = a.statut === "decision";
     const memeCompte = lignes.filter((x) => x.compte_id === a.compte_id && x.id !== a.id);
-    const optionsGestes: Option[] = decidable
-      ? [
-          { cle: "decider", libelle: "Décider…", icone: <Scale width={16} height={16} aria-hidden="true" />, action: () => ouvrirDecision(a) },
-          { cle: "retiree", libelle: "Le client l'a retirée", icone: <PackageCheck width={16} height={16} aria-hidden="true" />, action: () => void retirer(a) },
-        ]
-      : [];
-    const optionCompte = optionFiltre("compte", a.compte_id, { libelle: actifs.compte === a.compte_id ? "Toutes les affaires" : "Les affaires de ce compte" });
-    const optionFiche: Option = { cle: "fiche", libelle: "Ouvrir la fiche du compte", icone: <ExternalLink width={16} height={16} aria-hidden="true" />, href: lienFiche(a) };
-    const optionsDetail: Option[] = [
-      ...(precedente ? [{ cle: "precedente", libelle: "Affaire précédente", meta: "↑", icone: <ArrowUp width={16} height={16} aria-hidden="true" />, action: () => aller(precedente) }] : []),
-      ...(suivante ? [{ cle: "suivante", libelle: "Affaire suivante", meta: "↓", icone: <ArrowDown width={16} height={16} aria-hidden="true" />, action: () => aller(suivante) }] : []),
-      ...optionsGestes,
-      { cle: "copier", libelle: "Copier la référence", meta: a.reference, icone: <Copy width={16} height={16} aria-hidden="true" />, action: () => void copier(a) },
-      { ...optionCompte, meta: undefined },
-      optionFiche,
-    ];
-    const optionsAttente = optionsDe("attente").map((o) => ({ ...o, coche: o.cle === `attente-${attenteDe(a)}` }));
-    const optionsEtat: Option[] = [...optionsGestes, ...optionsDe("etat").map((o) => ({ ...o, coche: o.cle === `etat-${a.statut}` }))];
-    const optionsType = optionsDe("type").map((o) => ({ ...o, coche: o.cle === `type-${a.type}` }));
     const valeur = a.valeur_ht !== null ? montant(a.valeur_ht) : null;
-    const desc = `${TYPES[a.type]} ${a.reference} de ${a.compte_nom}, ${a.type === "intervention" ? "terminée" : "arrivée"} le ${dateMoyenne(a.disponible_le)} et pas encore retirée${valeur ? ` : ${valeur} HT immobilisés` : ""}.`;
+    const ic = { width: 16, height: 16, "aria-hidden": true } as const;
 
-    /* le fil : la mise à disposition, puis l'état (une phrase d'OFFLOAD, ou la décision qui attend) */
-    const phrase: Record<Statut, React.ReactNode> = {
-      en_attente: (
-        <>
-          <b>OFFLOAD</b> relancera le client après le délai fixé, puis une seule autre fois · le message de retrait ne parle jamais de paiement
-        </>
-      ),
-      relancee_1: (
-        <>
-          <b>OFFLOAD</b> a relancé le client une fois · sans réponse, une seconde relance suivra
-        </>
-      ),
-      relancee_2: (
-        <>
-          <b>OFFLOAD</b> a relancé le client deux fois · sans réponse, l&apos;affaire passe en décision
-        </>
-      ),
-      decision: <span className="lin-ticket-fil-texte">{a.motif ?? "Relancée deux fois sans réponse : à décider."}</span>,
-      repondue: (
-        <>
-          <b>Le client a répondu</b> · la conversation revient au magasin
-        </>
-      ),
+    /* le fil : la mise à disposition, le signal d'export, puis l'état (une phrase d'OFFLOAD, ou la décision qui attend) */
+    const phrase: Record<Statut, string> = {
+      en_attente: "relancera le client après le délai fixé, puis une seule autre fois. Le message de retrait ne parle jamais de paiement.",
+      relancee_1: "a relancé le client une fois. Sans réponse, une seconde relance suivra.",
+      relancee_2: "a relancé le client deux fois. Sans réponse, l'affaire passe en décision.",
+      decision: "Relancée deux fois sans réponse : à décider.",
+      repondue: "La conversation revient au magasin.",
     };
-    const etat =
-      a.motif && a.statut !== "decision" ? (
-        <>
-          {a.statut === "repondue" ? (
-            a.motif
-          ) : (
-            <>
-              <b>OFFLOAD</b> · {a.motif}
-            </>
-          )}
-        </>
-      ) : (
-        phrase[a.statut as Statut]
-      );
+    const fil: { cle: string; icone: React.ReactNode; qui: string; quoi: string; quand?: string; commentaire?: string | null }[] = [
+      { cle: "dispo", icone: <IconeType t={a.type} taille={14} />, qui: a.type === "intervention" ? "Intervention terminée" : "Commande arrivée", quoi: "disponible au magasin", quand: dateCourte(a.disponible_le) },
+      ...(a.plus_vue ? [{ cle: "export", icone: <IconeCalendrier />, qui: "Absente du dernier export", quoi: "à vérifier au magasin" }] : []),
+      a.statut === "decision"
+        ? { cle: "etat", icone: <IconeStatut s={a.statut} />, qui: "À décider", quoi: `${jours(a.jours)} d'attente`, commentaire: a.motif ?? phrase.decision }
+        : a.statut === "repondue"
+          ? { cle: "etat", icone: <IconeStatut s={a.statut} />, qui: "Le client a répondu", quoi: phrase.repondue, commentaire: a.motif }
+          : { cle: "etat", icone: <IconeStatut s={a.statut} />, qui: "OFFLOAD", quoi: phrase[a.statut as Statut], commentaire: a.motif },
+    ];
+
+    /* « Plus d'actions » : ce qui n'a pas de bouton à soi — épingler, copier, les filtres en place des anciennes pilules */
+    const lienCompte = lienFiche(a);
+    const plus = (
+      <MenuDeroulant etiquette="Plus d'actions" classe="v2-btn v2-btn--fantome v2-btn--icone" placement="top end" largeur={280} declencheur={<MoreHorizontal width={16} height={16} aria-hidden="true" />}>
+        <SectionMenu>
+          <ItemMenu icone={<Star {...ic} fill={epinglee ? "currentColor" : "none"} />} onAction={() => basculerEpingle(a.id)}>
+            {epinglee ? "Désépingler" : "Épingler en haut de la colonne"}
+          </ItemMenu>
+          <ItemMenu icone={<Copy {...ic} />} suffixe={a.reference} onAction={() => void copier(a)}>
+            Copier la référence
+          </ItemMenu>
+          {decidable ? (
+            <ItemMenu icone={<Building2 {...ic} />} onAction={() => routeur.push(lienCompte)}>
+              Ouvrir la fiche du compte
+            </ItemMenu>
+          ) : null}
+        </SectionMenu>
+        <SeparateurMenu />
+        <SectionMenu titre="Montrer dans le tableau">
+          <ItemMenu
+            icone={<Building2 {...ic} style={{ color: couleurDe(a.compte_id) }} />}
+            suffixe={actifs.compte === a.compte_id ? "✓" : undefined}
+            onAction={() => routeur.replace(adresse(avec("compte", a.compte_id)), { scroll: false })}
+          >
+            {actifs.compte === a.compte_id ? "Toutes les affaires" : "Les affaires de ce compte"}
+          </ItemMenu>
+          <ItemMenu icone={<IconeStatut s={a.statut} />} suffixe={actifs.etat === a.statut ? "✓" : undefined} onAction={() => routeur.replace(adresse(avec("etat", a.statut)), { scroll: false })}>
+            {actifs.etat === a.statut ? "Toutes les colonnes" : `Seulement « ${STATUTS_AFFAIRE[a.statut].libelle} »`}
+          </ItemMenu>
+          <ItemMenu
+            icone={<IconeCalendrier passe={attenteDe(a) === "plus"} />}
+            suffixe={actifs.attente === attenteDe(a) ? "✓" : undefined}
+            onAction={() => routeur.replace(adresse(avec("attente", attenteDe(a))), { scroll: false })}
+          >
+            {`Attente : ${ATTENTES[attenteDe(a)].toLowerCase()}`}
+          </ItemMenu>
+          <ItemMenu icone={<IconeType t={a.type} taille={16} />} suffixe={actifs.type === a.type ? "✓" : undefined} onAction={() => routeur.replace(adresse(avec("type", a.type)), { scroll: false })}>
+            {`Type : ${TYPES[a.type].toLowerCase()}`}
+          </ItemMenu>
+        </SectionMenu>
+      </MenuDeroulant>
+    );
 
     return (
-      <section className="lin-boite-detail" aria-label={`Affaire ${a.reference}`}>
-        <header className="lin-tete">
-          <span className="lin-tete-ref">{a.reference}</span>
-          <span className="lin-tete-nom">{titreDe(a)}</span>
-          <button
-            type="button"
-            className="lin-rond"
-            aria-pressed={epinglee}
-            aria-label={epinglee ? "Désépingler" : "Épingler en haut de la colonne"}
-            title={epinglee ? "Désépingler" : "Épingler en haut de la colonne"}
-            onClick={() => basculerEpingle(a.id)}
-          >
-            <Star fill={epinglee ? "currentColor" : "none"} aria-hidden="true" />
-          </button>
-          <MenuActions rond aGauche titre="Actions" options={optionsDetail} />
-          <div className="lin-tete-ronds">
-            <button type="button" className="lin-rond" aria-label="Voir l'activité" title="Voir l'activité" onClick={() => document.getElementById("aff-activite")?.scrollIntoView({ behavior: "smooth", block: "start" })}>
-              <Bell aria-hidden="true" />
-            </button>
-            <MenuOptions rond aDroite libelle="Dates" titre="Attente…" declencheur={<Clock aria-hidden="true" />} options={optionsAttente} largeur={280} />
-            <button type="button" className="lin-rond" aria-label="Fermer (Échap)" title="Fermer (Échap)" onClick={() => aller(null)}>
-              <IconeBoiteX />
-            </button>
-          </div>
-        </header>
-
-        <div className="lin-ticket">
-          <article className="lin-ticket-corps">
-            <h2 className="lin-ticket-titre">{titreDe(a)}</h2>
-            <p className="lin-ticket-desc">{desc}</p>
-            <div className="lin-ticket-icones">
-              {decidable ? (
-                <>
-                  <button type="button" className="lin-ticket-icone" aria-label="Décider" title="Décider" onClick={() => ouvrirDecision(a)}>
-                    <Scale aria-hidden="true" />
-                  </button>
-                  <button type="button" className="lin-ticket-icone" aria-label="Le client l'a retirée" title="Le client l'a retirée" disabled={envoi} onClick={() => void retirer(a)}>
-                    <PackageCheck aria-hidden="true" />
-                  </button>
-                </>
-              ) : null}
-              <button type="button" className="lin-ticket-icone" aria-label="Copier la référence" title={copie === a.id ? "Copié" : `Copier la référence · ${a.reference}`} onClick={() => void copier(a)}>
-                {copie === a.id ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
-              </button>
-              <Link href={lienFiche(a)} className="lin-ticket-icone" aria-label="Ouvrir la fiche du compte" title="Ouvrir la fiche du compte">
-                <Building2 aria-hidden="true" />
+      <CarteCentrale
+        ouverte
+        fermer={fermer}
+        libelle={`Affaire ${a.reference}`}
+        sur={`OFFLOAD · ${TYPES[a.type]}`}
+        statut={
+          <>
+            <IconeStatut s={a.statut} />
+            {STATUTS_AFFAIRE[a.statut].libelle}
+          </>
+        }
+        nav={{
+          position: rang + 1,
+          total: ordreTableau.length,
+          precedente: precedente ? () => ouvrir(precedente) : undefined,
+          suivante: suivante ? () => ouvrir(suivante) : undefined,
+        }}
+        gauche={
+          <Feuille
+            titre={TYPES[a.type]}
+            sous={a.reference}
+            nom={a.compte_nom}
+            sousNom={[`Disponible depuis le ${dateMoyenne(a.disponible_le)}`]}
+            lignes={[[titreDe(a), valeur ?? "—"]]}
+            total={valeur ? ["Immobilisé (HT)", valeur] : null}
+          />
+        }
+        piedGauche={
+          <>
+            <div className="v2-det-document-ligne">
+              <span className="v2-det-mono">{a.reference}</span>
+              <span className="v2-det-sous">
+                {TYPES[a.type]} · {STATUTS_AFFAIRE[a.statut].libelle.toLowerCase()}
+              </span>
+            </div>
+            <div className="v2-det-document-ligne">
+              <span className="v2-det-sous">{a.compte_nom}</span>
+              <Link href={lienCompte} className="v2-btn v2-btn--petit v2-btn--fantome v2-det-document-ouvrir">
+                Ouvrir le compte
               </Link>
             </div>
+          </>
+        }
+        titre={titreDe(a)}
+        chiffre={valeur}
+        echeance={{ texte: `Disponible depuis le ${dateCourte(a.disponible_le)} · ${jours(a.jours)} d'attente`, urgence: decidable ? "retard" : undefined }}
+        notes={
+          decidable ? (
+            <Note teinte="bleu">
+              <strong>Une décision dit pourquoi.</strong> Le motif est obligatoire et noté au journal ; « Relancer encore » prépare un nouveau message de retrait, en validation.
+            </Note>
+          ) : null
+        }
+        actions={
+          decidable ? (
+            <>
+              <button type="button" className="v2-btn v2-btn--primaire" onClick={() => ouvrirDecision(a)}>
+                <Scale {...ic} /> Décider…
+              </button>
+              <button type="button" className="v2-btn v2-btn--fantome" disabled={envoi} onClick={() => void retirer(a)}>
+                <PackageCheck {...ic} /> Le client l&apos;a retirée
+              </button>
+              {plus}
+            </>
+          ) : (
+            <>
+              <Link href={lienCompte} className="v2-btn v2-btn--primaire">
+                <Building2 {...ic} /> Ouvrir la fiche du compte
+              </Link>
+              <button type="button" className="v2-btn v2-btn--fantome" onClick={() => void copier(a)}>
+                {copie === a.id ? <Check {...ic} /> : <Copy {...ic} />} {copie === a.id ? "Copiée" : "Copier la référence"}
+              </button>
+              {plus}
+            </>
+          )
+        }
+      >
+        <dl className="v2-det-fiche lin-aff-carte">
+          <dt>Compte</dt>
+          <dd>
+            {a.compte_nom}
+            {a.compte_niveau === "eteint" ? <span className="v2-det-sous"> · compte inactif</span> : null}
+          </dd>
+          <dt>Référence</dt>
+          <dd>
+            <span className="v2-det-mono">{a.reference}</span> <span className="v2-det-sous">· {TYPES[a.type].toLowerCase()}</span>
+          </dd>
+          <dt>Disponible le</dt>
+          <dd>
+            {dateMoyenne(a.disponible_le)} <span className="v2-det-sous">· {ATTENTES[attenteDe(a)].toLowerCase()}</span>
+          </dd>
+          <dt>Valeur</dt>
+          <dd>{valeur ? `${valeur} HT immobilisés` : "Inconnue"}</dd>
+          {a.plus_vue ? (
+            <>
+              <dt>Signal</dt>
+              <dd>Absente du dernier export</dd>
+            </>
+          ) : null}
+        </dl>
 
-            {memeCompte.length ? (
-              <ul className="lin-ticket-sous" aria-label="Les autres affaires du compte">
-                {memeCompte.slice(0, 5).map((x) => (
-                  <li key={x.id}>
-                    <Link href={adresse(actifs, x.id)} className="lin-ticket-sous-ligne" scroll={false}>
-                      <IconeStatut s={x.statut} />
-                      <span className="lin-ticket-sous-ref">{x.reference}</span>
-                      <span className="lin-ticket-sous-nom">{titreDe(x)}</span>
-                      <span className="lin-ticket-sous-meta">{jours(x.jours)}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-
-            <hr className="lin-ticket-trait" />
-            <div className="lin-ticket-activite-tete" id="aff-activite">
-              <h3>Activité</h3>
-            </div>
-            <ul className="lin-ticket-fil">
-              <li>
-                <IconeType t={a.type} />
-                <span>
-                  <b>{a.type === "intervention" ? "Intervention terminée" : "Commande arrivée"}</b> · disponible au magasin · {dateCourte(a.disponible_le)}
+        <div className="v2-det-bloc">
+          <h3 className="v2-det-section-titre">Activité</h3>
+          <ol className="v2-det-fil">
+            {fil.map((x) => (
+              <li key={x.cle}>
+                <span className="v2-det-fil-avatar lin-aff-fil-icone" aria-hidden="true">
+                  {x.icone}
                 </span>
-              </li>
-              {a.plus_vue ? (
-                <li>
-                  <IconeCalendrier />
-                  <span>
-                    <b>Absente du dernier export</b> · à vérifier au magasin
-                  </span>
-                </li>
-              ) : null}
-              <li>
-                <IconeStatut s={a.statut} />
-                <span>
-                  {etat}
-                  {decidable ? (
-                    <span className="lin-ticket-fil-actions">
-                      <button type="button" className="v2-btn v2-btn--petit" data-actif="" onClick={() => ouvrirDecision(a)}>
-                        <Scale width={14} height={14} aria-hidden="true" />
-                        <span>Décider</span>
-                      </button>
-                      <button type="button" className="v2-btn v2-btn--petit" disabled={envoi} onClick={() => void retirer(a)}>
-                        <PackageCheck width={14} height={14} aria-hidden="true" />
-                        <span>Le client l&apos;a retirée</span>
-                      </button>
+                <div>
+                  <div className="v2-det-fil-texte">
+                    <strong>{x.qui}</strong>
+                    <span>
+                      {x.quoi}
+                      {x.quand ? ` · ${x.quand}` : ""}
                     </span>
-                  ) : null}
-                </span>
+                  </div>
+                  {x.commentaire ? <p className="v2-det-fil-commentaire">{x.commentaire}</p> : null}
+                </div>
               </li>
-            </ul>
-          </article>
-
-          <aside className="lin-ticket-cote" aria-label="Propriétés de l'affaire">
-            <section className="lin-ticket-section">
-              <h3>Propriétés</h3>
-              <div className="lin-ticket-pilules">
-                <MenuOptions
-                  raccourci="s"
-                  titre="État de l'affaire…"
-                  declencheur={
-                    <>
-                      <IconeStatut s={a.statut} />
-                      {STATUTS_AFFAIRE[a.statut].libelle}
-                    </>
-                  }
-                  options={optionsEtat}
-                  largeur={300}
-                />
-                <MenuOptions
-                  raccourci="d"
-                  titre="Attente…"
-                  declencheur={
-                    <>
-                      <IconeCalendrier passe={a.statut === "decision"} />
-                      {`Depuis le ${dateCourte(a.disponible_le)} · ${jours(a.jours)}`}
-                    </>
-                  }
-                  options={optionsAttente}
-                  largeur={280}
-                />
-                <span className="lin-ticket-pilule" title="Valeur immobilisée (HT)" data-vide={valeur ? undefined : ""}>
-                  <Banknote aria-hidden="true" />
-                  {valeur ? `${valeur} immobilisés` : "Valeur inconnue"}
-                </span>
-              </div>
-            </section>
-            <section className="lin-ticket-section">
-              <h3>Étiquettes</h3>
-              <div className="lin-ticket-pilules">
-                <MenuOptions
-                  titre="Type…"
-                  declencheur={
-                    <>
-                      <IconeType t={a.type} taille={16} />
-                      {TYPES[a.type]}
-                    </>
-                  }
-                  options={optionsType}
-                  largeur={280}
-                />
-                {a.compte_niveau === "eteint" ? <span className="lin-ticket-pilule">Compte inactif</span> : null}
-                {a.plus_vue ? <span className="lin-ticket-pilule">Absente du dernier export</span> : null}
-              </div>
-            </section>
-            <section className="lin-ticket-section">
-              <h3>Compte</h3>
-              <div className="lin-ticket-pilules">
-                <MenuOptions
-                  raccourci="c"
-                  titre="Compte…"
-                  declencheur={
-                    <>
-                      <Building2 width={16} height={16} strokeWidth={1.8} style={{ color: couleurDe(a.compte_id) }} aria-hidden="true" />
-                      {a.compte_nom}
-                    </>
-                  }
-                  options={[optionCompte, optionFiche]}
-                  largeur={320}
-                />
-              </div>
-            </section>
-          </aside>
+            ))}
+          </ol>
         </div>
-      </section>
+
+        {memeCompte.length ? (
+          <div className="v2-det-bloc">
+            <h3 className="v2-det-section-titre">
+              Les autres affaires du compte
+              <small>{memeCompte.length}</small>
+            </h3>
+            <ul className="lin-aff-autres">
+              {memeCompte.slice(0, 5).map((x) => (
+                <li key={x.id}>
+                  <button type="button" className="lin-aff-autre" onClick={() => ouvrir(x.id)}>
+                    <IconeStatut s={x.statut} />
+                    <span className="v2-det-mono">{x.reference}</span>
+                    <span className="lin-aff-autre-nom">{titreDe(x)}</span>
+                    <span className="v2-det-sous">{jours(x.jours)}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </CarteCentrale>
     );
   };
 
@@ -1009,7 +1011,6 @@ export default function TableauAffaires() {
     </ModalOverlay>
   );
 
-  const perdue = id && !choisie && !chargement;
   return (
     <div className="lin">
       <h1 className="v2-sr">Affaires restées en plan</h1>
@@ -1042,22 +1043,9 @@ export default function TableauAffaires() {
             {colonnes.map(colonne)}
             {masqueesBloc}
           </div>
-          {choisie ? (
-            fiche(choisie)
-          ) : perdue ? (
-            <section className="lin-boite-detail" aria-label="Affaire introuvable">
-              <header className="lin-tete">
-                <div className="lin-tete-ronds">
-                  <button type="button" className="lin-rond" aria-label="Fermer (Échap)" title="Fermer (Échap)" onClick={() => aller(null)}>
-                    <IconeBoiteX />
-                  </button>
-                </div>
-              </header>
-              <p className="lin-vide">Cette affaire n&apos;est plus dans le tableau : retirée, ou close sans suite.</p>
-            </section>
-          ) : null}
         </div>
       )}
+      {choisie ? carteOuverte(choisie) : null}
       {fenetreDecision}
     </div>
   );

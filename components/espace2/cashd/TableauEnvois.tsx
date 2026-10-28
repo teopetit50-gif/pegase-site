@@ -21,7 +21,9 @@
    La carte ouverte est dans l'adresse (?id=), comme les filtres (?filtre=
    canal:…,palier:…,nature:…,debiteur:…), « à traiter » (?traiter=1) et le
    tri (?tri=), posés en place. ↑/↓ dans une colonne, ←/→ d'une colonne à
-   l'autre, Entrée ouvre, Échap ferme. Glisser une carte « À envoyer » sur
+   l'autre, Entrée ouvre la carte AU MILIEU de l'écran (CarteCentrale, la
+   même que la carte de décision d'« À valider », demande de Teo du 28/10) ;
+   dedans, ← → passent d'une carte à l'autre, Échap la ferme. Glisser une carte « À envoyer » sur
    « Parties » ouvre le geste qui existe déjà : noter l'envoi à la main
    (le canal est demandé) ; aucun autre passage n'a de geste, donc rien
    d'autre ne se glisse.
@@ -34,29 +36,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  ArrowDown,
-  ArrowUp,
-  Bell,
-  Building2,
-  CheckCheck,
-  ClipboardList,
-  Clock,
-  Copy,
-  Download,
-  FileText,
-  HandCoins,
-  Inbox,
-  ListFilter,
-  Mail,
-  MessageSquare,
-  PenLine,
-  Plus,
-  Send,
-  SlidersHorizontal,
-  Star,
-  X,
-} from "lucide-react";
+import { Building2, CheckCheck, ClipboardList, Copy, Download, FileText, HandCoins, ListFilter, Mail, MessageSquare, PenLine, Plus, Send, SlidersHorizontal, Star, X } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { useSource } from "@/components/espace/source";
@@ -69,8 +49,10 @@ import { ETATS_RELANCE, STATUTS_COMPTE, libellePalier } from "@/components/espac
 import * as portes from "@/components/espace/cashd/portes";
 import type { Balance, Fiche, Relance, RelanceCommande, ReponseLue, Suivi, Tableau } from "@/components/espace/cashd/types";
 import { useToast } from "../Toasts";
-import { Choix, Menu, MenuActions, MenuOptions, useEpingles, type Option } from "../lin/Lin";
-import { IconeBoiteX, IconeDocument, IconeEnveloppe, IconeNonLus, IconeStatutProjet, type EtatProjet } from "../lin/icones";
+import { Choix, Menu, MenuActions, useEpingles, type Option } from "../lin/Lin";
+import { CarteCentrale, Feuille, type NavCarte } from "../lin/CarteCentrale";
+import { Note } from "../ui";
+import { IconeEnveloppe, IconeNonLus, IconeStatutProjet, type EtatProjet } from "../lin/icones";
 import { RACINE } from "../modules";
 import { lienCompte } from "./donnees";
 /* la fenêtre du dépôt reprend les champs de l'écran d'avant (rv-libelle, rv-champ) */
@@ -272,7 +254,6 @@ export default function TableauEnvois() {
     else f[k] = v;
     aller({ filtre: ecrireFiltres(f) }, true);
   };
-  const filtrer = (k: string, v: string) => aller({ filtre: ecrireFiltres({ ...filtres, [k]: v }) }, true);
   const [epingles, epingler] = useEpingles("cashd-envois");
 
   /* ——— les gestes : la porte en base réelle, la mémoire en exemple ——— */
@@ -396,7 +377,7 @@ export default function TableauEnvois() {
   const grille = COLONNES.map((c) => parColonne[c.cle].map((k) => k.cle));
   const ouverte = choix ? (cartes.find((k) => k.cle === choix) ?? null) : null;
 
-  /* ——— le clavier : ↑/↓ dans une colonne, ←/→ d'une colonne à l'autre, Entrée ouvre (le lien), Échap ferme ——— */
+  /* ——— le clavier : ↑/↓ dans une colonne, ←/→ d'une colonne à l'autre, Entrée ouvre (le lien) ; la carte ouverte a le sien ——— */
   const choixRef = useRef(choix);
   const grilleRef = useRef(grille);
   useEffect(() => {
@@ -410,23 +391,13 @@ export default function TableauEnvois() {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       if (cible && (cible.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(cible.tagName))) return;
       if (document.querySelector(".lin-menu, .dlg-panneau")) return;
-      const ouvert = choixRef.current;
+      /* la carte ouverte au milieu a son propre clavier (← → , Échap) : le tableau se tait */
+      if (choixRef.current) return;
       const grille = grilleRef.current;
-      if (e.key === "Escape") {
-        if (!ouvert) return;
-        e.preventDefault();
-        const u = new URLSearchParams(window.location.search);
-        u.delete("id");
-        window.history.pushState(null, "", `${window.location.pathname}?${u.toString()}`);
-        window.setTimeout(() => carteDom(ouvert)?.focus(), 0);
-        return;
-      }
       if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) return;
-      /* hors du tableau (dans la fiche ouverte), les flèches restent aux boutons et au défilement, sauf si une carte est ouverte */
       const surCarte = cible?.closest?.<HTMLElement>(".lin-carte-tableau[data-carte]")?.dataset.carte ?? null;
-      const depart = surCarte ?? ouvert;
+      const depart = surCarte;
       if (!depart && !grille.some((c) => c.length)) return;
-      if (!surCarte && cible?.closest?.(".lin-boite-detail") && (e.key === "ArrowLeft" || e.key === "ArrowRight")) return;
       e.preventDefault();
       let col = depart ? grille.findIndex((c) => c.includes(depart)) : -1;
       let rang = col >= 0 && depart ? grille[col].indexOf(depart) : -1;
@@ -448,12 +419,6 @@ export default function TableauEnvois() {
       const el = carteDom(id);
       el?.focus({ preventScroll: true });
       el?.scrollIntoView({ block: "nearest", inline: "nearest" });
-      /* une carte ouverte suit le curseur, comme dans la boîte */
-      if (ouvert && id !== ouvert) {
-        const u = new URLSearchParams(window.location.search);
-        u.set("id", id);
-        window.history.replaceState(null, "", `${window.location.pathname}?${u.toString()}`);
-      }
     };
     window.addEventListener("keydown", touche);
     return () => window.removeEventListener("keydown", touche);
@@ -718,50 +683,61 @@ export default function TableauEnvois() {
     );
   });
 
-  /* ——— la fiche de la carte ouverte ——— */
-  const fermer = () => aller({ id: null });
-  let detail: React.ReactNode = null;
-  if (choix) {
-    if (!ouverte) {
-      detail = (
-        <section className="lin-boite-detail c2e-detail" aria-label="Relance">
-          <TeteDetail reference="Envois" nom="Relance" fermer={fermer} />
-          <p className="lin-vide">{chargement ? "Lecture des relances…" : "Cette relance n'est plus dans le tableau."}</p>
-        </section>
-      );
-    } else {
-      const colonne = parColonne[ouverte.groupe];
-      const rang = colonne.findIndex((k) => k.cle === ouverte.cle);
-      const voisins: Option[] =
-        rang < 0
-          ? []
-          : [
-              ...(rang > 0 ? [{ cle: "precedent", libelle: "Précédente", meta: "↑", icone: <ArrowUp width={16} height={16} aria-hidden="true" />, action: () => aller({ id: colonne[rang - 1].cle }, true) }] : []),
-              ...(rang < colonne.length - 1
-                ? [{ cle: "suivant", libelle: "Suivante", meta: "↓", icone: <ArrowDown width={16} height={16} aria-hidden="true" />, action: () => aller({ id: colonne[rang + 1].cle }, true) }]
-                : []),
-            ];
-      const fiche = ficheDe(ouverte.compte_id);
-      const b = tous.find((x) => x.compte_id === ouverte.compte_id) ?? null;
-      detail = (
-        <FicheEnvoi
-          key={`${source}:${ouverte.cle}`}
-          k={ouverte}
-          b={b}
-          autres={relances.filter((x) => x.compte_id === ouverte.compte_id && x.id !== ouverte.cle).sort((x, y) => (y.envoye_le ?? y.jour).localeCompare(x.envoye_le ?? x.jour))}
-          suivant={prochainPalier(fiche?.suivi ?? [])}
-          epingle={epingles.has(ouverte.cle)}
-          epingler={() => epingler(ouverte.cle)}
-          voisins={voisins}
-          noter={ouvrirEnvoi}
-          trancher={(x, accepter) => trancher(x, ouverte.compte_id, accepter)}
-          aller={aller}
-          fermer={fermer}
-          filtrer={filtrer}
-        />
-      );
-    }
-  }
+  /* ——— la carte ouverte, au milieu de l'écran (CarteCentrale, comme celle d'« À valider ») ——— */
+  /* fermer retire ?id= (remplacement, même route) et rend le focus à la carte du tableau */
+  const fermer = () => {
+    const id = choix;
+    aller({ id: null }, true);
+    if (id) window.setTimeout(() => document.querySelector<HTMLElement>(`.lin-carte-tableau[data-carte="${CSS.escape(id)}"]`)?.focus({ preventScroll: true }), 80);
+  };
+  /* l'ordre du tableau, colonne par colonne, de haut en bas */
+  const ordre = grille.flat();
+  const rangOuverte = ouverte ? ordre.indexOf(ouverte.cle) : -1;
+  const nav =
+    rangOuverte < 0
+      ? null
+      : {
+          position: rangOuverte + 1,
+          total: ordre.length,
+          precedente: rangOuverte > 0 ? () => aller({ id: ordre[rangOuverte - 1] }, true) : undefined,
+          suivante: rangOuverte < ordre.length - 1 ? () => aller({ id: ordre[rangOuverte + 1] }, true) : undefined,
+        };
+  const carteOuverte = ouverte ? (
+    <CarteEnvoi
+      key={`${source}:${ouverte.cle}`}
+      k={ouverte}
+      b={tous.find((x) => x.compte_id === ouverte.compte_id) ?? null}
+      autres={relances.filter((x) => x.compte_id === ouverte.compte_id && x.id !== ouverte.cle).sort((x, y) => (y.envoye_le ?? y.jour).localeCompare(x.envoye_le ?? x.jour))}
+      suivant={prochainPalier(ficheDe(ouverte.compte_id)?.suivi ?? [])}
+      nav={nav}
+      epingle={epingles.has(ouverte.cle)}
+      epingler={() => epingler(ouverte.cle)}
+      noter={noterEnvoi}
+      trancher={(x, accepter) => trancher(x, ouverte.compte_id, accepter)}
+      aller={aller}
+      fermer={fermer}
+      filtrer={(d, v) => aller({ filtre: ecrireFiltres({ ...filtres, [d]: v }), id: null }, true)}
+    />
+  ) : (
+    <CarteCentrale
+      ouverte={!!choix && !chargement}
+      fermer={fermer}
+      libelle="Relance introuvable"
+      sur="CASHD · Envoi"
+      gauche={
+        <div className="v2-det-document-vide">
+          <FileText width={22} height={22} aria-hidden="true" />
+          Aucune pièce.
+        </div>
+      }
+      titre="Cette relance n'est plus dans le tableau."
+      actions={
+        <button type="button" className="v2-btn v2-btn--fantome" onClick={fermer}>
+          Fermer
+        </button>
+      }
+    />
+  );
 
   const fenetreEnvoi = (
     <Dialog open={!!envoi} onOpenChange={(o) => !o && !envoiEnCours && setEnvoi(null)}>
@@ -861,8 +837,8 @@ export default function TableauEnvois() {
       {message ? <p className="c2e-message">{message}</p> : null}
       <div className="lin-tableau-page c2e-page">
         <div className="lin-tableau">{colonnes}</div>
-        {detail}
       </div>
+      {carteOuverte}
       {fenetreEnvoi}
     </div>
   );
@@ -871,107 +847,29 @@ export default function TableauEnvois() {
 /* le prochain palier prévu par le suivi des factures */
 const prochainPalier = (suivi: Suivi[]) => suivi.filter((s) => s.palier_suivant && s.palier_suivant_le).sort((a, b) => (a.palier_suivant_le ?? "").localeCompare(b.palier_suivant_le ?? ""))[0] ?? null;
 
-/* ——— la tête de la carte ouverte : celle du détail de l'Inbox (référence, nom, étoile, ···, cloche, horloge, bac-croix) ——— */
-function TeteDetail({
-  reference,
-  nom,
-  epingle,
-  epingler,
-  actions = [],
-  dates,
-  activite,
-  fermer,
-}: {
-  reference: string;
-  nom: string;
-  epingle?: boolean;
-  epingler?: () => void;
-  actions?: Option[];
-  dates?: { titre: string; options: Option[] };
-  activite?: boolean;
-  fermer: () => void;
-}) {
-  return (
-    <header className="lin-tete">
-      <span className="lin-tete-ref">{reference}</span>
-      <span className="lin-tete-nom" title={nom}>
-        {nom}
-      </span>
-      {epingler ? (
-        <button
-          type="button"
-          className="lin-rond"
-          aria-pressed={!!epingle}
-          data-actif={epingle ? "" : undefined}
-          aria-label={epingle ? "Désépingler" : "Épingler en haut de sa colonne"}
-          title={epingle ? "Désépingler" : "Épingler en haut de sa colonne"}
-          onClick={epingler}
-        >
-          <Star aria-hidden="true" fill={epingle ? "currentColor" : "none"} />
-        </button>
-      ) : null}
-      {actions.length ? <MenuActions rond aGauche titre="Actions" options={actions} /> : null}
-      <div className="lin-tete-ronds">
-        {activite ? (
-          <button type="button" className="lin-rond" aria-label="Voir l'activité" title="Voir l'activité" onClick={() => document.getElementById("c2e-activite")?.scrollIntoView({ behavior: "smooth", block: "start" })}>
-            <Bell aria-hidden="true" />
-          </button>
-        ) : null}
-        {dates?.options.length ? (
-          <span className="c2e-bulle" title="Dates">
-            <MenuOptions rond aDroite libelle="Dates" titre={dates.titre} declencheur={<Clock aria-hidden="true" />} options={dates.options} largeur={280} />
-          </span>
-        ) : null}
-        <button type="button" className="lin-rond" aria-label="Fermer" title="Fermer (Échap)" onClick={fermer}>
-          <IconeBoiteX />
-        </button>
-      </div>
-    </header>
-  );
-}
-
-/* ——— le fil d'activité de la relance (le modèle « page d'un ticket ») ——— */
-type Entree = { cle: string; le: string | null; icone: React.ReactNode; contenu: React.ReactNode; texte?: React.ReactNode; actions?: React.ReactNode; attente?: boolean };
-function Fil({ entrees, vide }: { entrees: Entree[]; vide: string }) {
-  return (
-    <ul className="lin-ticket-fil">
-      {entrees.length ? (
-        entrees.map((e) => (
-          <li key={e.cle} data-attente={e.attente ? "" : undefined}>
-            {e.icone}
-            <div className="c2e-fil-corps">
-              <span>
-                {e.contenu}
-                {e.le ? ` · ${jour(e.le)}` : ""}
-              </span>
-              {e.texte ? <span className="lin-ticket-fil-texte">{e.texte}</span> : null}
-              {e.actions ? <div className="lin-ticket-fil-actions">{e.actions}</div> : null}
-            </div>
-          </li>
-        ))
-      ) : (
-        <li>
-          <Inbox width={14} height={14} aria-hidden="true" />
-          <span>{vide}</span>
-        </li>
-      )}
-    </ul>
-  );
-}
-
 /* ══════════════════════════════════════════════════════════════════════
-   La fiche d'une carte, à droite : la page d'une relance (comme dans la
-   boîte) — son texte, ses factures, son fil, ses propriétés ; l'envoi à
-   la main d'une relance à envoyer, la réponse reçue à trancher.
+   La carte d'une relance, au milieu de l'écran : la même enveloppe que la
+   carte de décision d'« À valider » (CarteCentrale).
+     gauche  la lettre telle qu'elle part (ou les factures relancées, si le
+             texte n'est plus conservé), puis sa référence et « Ouvrir le
+             débiteur » ;
+     droite  l'objet, le montant, la date de l'étape ; la fiche (ce
+             qu'étaient les pilules), les factures, l'activité, ses autres
+             relances ; la règle qui conditionne le geste contre les boutons ;
+             les gestes, le principal en bleu, le reste dans « Plus
+             d'actions ».
+   « Noter l'envoi à la main » se règle dans la carte (le canal), comme
+   les gestes de la carte d'« À valider » : une fenêtre par-dessus serait
+   prise pour un clic hors de la carte, qui la refermerait.
    ══════════════════════════════════════════════════════════════════════ */
-function FicheEnvoi({
+function CarteEnvoi({
   k,
   b,
   autres,
   suivant,
+  nav,
   epingle,
   epingler,
-  voisins,
   noter,
   trancher,
   aller,
@@ -982,18 +880,19 @@ function FicheEnvoi({
   b: Balance | null;
   autres: Relance[];
   suivant: Suivi | null;
+  nav: NavCarte | null;
   epingle: boolean;
   epingler: () => void;
-  voisins: Option[];
-  noter: (r: Relance) => void;
+  noter: (r: Relance, canal: string) => Promise<void>;
   trancher: (x: ReponseLue, accepter: boolean) => Promise<void>;
   aller: Aller;
   fermer: () => void;
-  filtrer: (k: string, v: string) => void;
+  filtrer: (d: string, v: string) => void;
 }) {
   const toast = useToast();
-  const [tranche, setTranche] = useState(false);
-  const [toutesFactures, setToutesFactures] = useState(false);
+  const [envoiOuvert, setEnvoiOuvert] = useState(false);
+  const [canal, setCanal] = useState("email");
+  const [enCours, setEnCours] = useState(false);
   const r = k.r;
   const cmd = k.c;
   const reponse = k.reponse ?? null;
@@ -1003,363 +902,330 @@ function FicheEnvoi({
   const nomDest = r?.destinataire_nom ?? cmd?.destinataire_nom ?? null;
   const motif = r?.motif ?? cmd?.motif ?? null;
   const libelleEtat = etatTexte(k);
-  const texteComplet = `${sujet}\n\n${corps ?? ""}`;
+  const factures = r?.pieces ?? [];
   const copierTexte = () => {
-    copier(texteComplet);
+    copier(`${sujet}\n\n${corps ?? ""}`);
     toast("Texte copié : sujet et corps de la relance.", "vert");
   };
-  const decider = async (accepter: boolean) => {
-    if (!reponse) return;
-    setTranche(true);
-    await trancher(reponse, accepter).finally(() => setTranche(false));
+  const executer = async (f: () => Promise<void>) => {
+    setEnCours(true);
+    try {
+      await f();
+    } finally {
+      setEnCours(false);
+    }
   };
-  const autresOptions: Option[] = autres.map((x) => ({
-    cle: x.id,
-    libelle: libellePalier(x.palier),
-    meta: `${(ETATS_RELANCE[x.etat] ?? ETATS_RELANCE.preparee).libelle.toLowerCase()} · ${jour(x.envoye_le ?? x.jour)}`,
-    icone: <Losange atteint={x.etat !== "a_valider"} />,
-    action: () => aller({ id: x.id }),
-  }));
-  /* le « ··· » de la tête : précédente / suivante dans la colonne, puis les gestes de la relance */
-  const optionsTete: Option[] = [
-    ...voisins,
-    ...(r && k.groupe === "a_envoyer" ? [{ cle: "noter", libelle: "Noter l'envoi à la main", icone: <Send width={16} height={16} aria-hidden="true" />, action: () => noter(r) }] : []),
-    ...(corps ? [{ cle: "copier", libelle: "Copier le texte", icone: <Copy width={16} height={16} aria-hidden="true" />, action: copierTexte }] : []),
-    ...(k.groupe === "a_valider" ? [{ cle: "validations", libelle: "Ouvrir la file de validation", icone: <CheckCheck width={16} height={16} aria-hidden="true" />, href: `${RACINE}/validations` }] : []),
-    { cle: "debiteur", libelle: "Ouvrir le débiteur", meta: b ? STATUTS_COMPTE[b.statut].libelle : undefined, icone: <Building2 width={16} height={16} aria-hidden="true" />, href: lienCompte(k.compte_id) },
-  ];
-  const optionsDebiteur: Option[] = [
-    { cle: "ouvrir", libelle: "Ouvrir le débiteur", meta: b ? STATUTS_COMPTE[b.statut].libelle : undefined, icone: <Building2 width={16} height={16} />, href: lienCompte(k.compte_id) },
-    { cle: "filtrer", libelle: "Toutes ses relances", icone: <MessageSquare width={16} height={16} />, action: () => filtrer("debiteur", k.compte_id) },
-    ...autresOptions,
-  ];
-  const optionsDest: Option[] = adresseDest
-    ? [
-        { cle: "ecrire", libelle: "Écrire un e-mail", icone: <IconeEnveloppe />, action: () => window.open(`mailto:${adresseDest}`) },
-        { cle: "copier", libelle: "Copier l'adresse", meta: nomDest ? adresseDest : undefined, icone: <Copy width={16} height={16} />, action: () => copier(adresseDest) },
-      ]
-    : [];
-  /* l'horloge : la relance ne porte pas d'autre date que la sienne, donc « Ses autres relances », chacune à sa date */
-  const optionsDates: Option[] = [...autresOptions, { cle: "toutes", libelle: "Toutes ses relances", icone: <MessageSquare width={16} height={16} aria-hidden="true" />, action: () => filtrer("debiteur", k.compte_id) }];
-  const etape: { libelle: string; vide?: boolean } = suivant
-    ? { libelle: `${libellePalier(suivant.palier_suivant)} le ${jour(suivant.palier_suivant_le)}` }
+  const etape: { libelle: string; passe?: boolean; vide?: boolean } = suivant
+    ? { libelle: `${libellePalier(suivant.palier_suivant)} le ${jour(suivant.palier_suivant_le)}`, passe: !!suivant.palier_suivant_le && suivant.palier_suivant_le < jourParis() }
     : b && b.statut !== "actif"
       ? { libelle: `Aucune relance : ${STATUTS_COMPTE[b.statut].libelle.toLowerCase()}`, vide: true }
       : { libelle: "Aucune étape prévue", vide: true };
-  const factures = r?.pieces ?? [];
-  const facturesVues = toutesFactures ? factures : factures.slice(0, 5);
+  /* la date qui compte : celle de l'étape où en est la relance */
+  const echeance =
+    k.groupe === "partie" && r?.envoye_le
+      ? { texte: `Partie le ${dateHeure(r.envoye_le)}` }
+      : k.groupe === "repondue" && reponse
+        ? { texte: `Réponse reçue le ${dateHeure(reponse.cree_le)}` }
+        : { texte: `Écrite le ${jour(r?.jour ?? k.jour)}` };
 
   /* le fil : écrite, validée, partie ou arrêtée, et la réponse reçue */
-  const entrees: Entree[] = [];
+  type Pas = { cle: string; icone: React.ReactNode; qui: string; quoi: string; le?: string | null; commentaire?: string | null; attente?: boolean };
+  const fil: Pas[] = [];
   if (r) {
-    entrees.push({
-      cle: "ecrite",
-      le: r.jour,
-      icone: <PenLine width={14} height={14} aria-hidden="true" />,
-      contenu: (
-        <>
-          <b>CASHD</b> a écrit la relance
-        </>
-      ),
-    });
     const g = groupeDe(r, false);
-    if (g === "a_valider")
-      entrees.push({
-        cle: "valider",
-        le: null,
-        icone: <CheckCheck width={14} height={14} aria-hidden="true" />,
-        contenu: (
-          <>
-            <b>À valider</b> dans la file de validation
-          </>
-        ),
-      });
+    fil.push({ cle: "ecrite", icone: <PenLine width={12} height={12} />, qui: "CASHD", quoi: "a écrit la relance", le: r.jour });
+    if (g === "a_valider") fil.push({ cle: "valider", icone: <CheckCheck width={12} height={12} />, qui: "À valider", quoi: "dans la file de validation", attente: true });
     else if (g === "a_envoyer" || r.etat === "envoyee")
-      entrees.push({
-        cle: "validee",
-        le: null,
-        icone: <CheckCheck width={14} height={14} aria-hidden="true" />,
-        contenu: (
-          <>
-            <b>Validée</b> dans la file{g === "a_envoyer" ? " : à envoyer, puis noter l'envoi" : ""}
-          </>
-        ),
-        attente: g === "a_envoyer",
-        actions:
-          g === "a_envoyer" ? (
-            <button type="button" className="v2-btn v2-btn--petit" onClick={() => noter(r)}>
-              <Send width={14} height={14} aria-hidden="true" />
-              <span>Noter l&apos;envoi à la main</span>
-            </button>
-          ) : undefined,
-      });
+      fil.push({ cle: "validee", icone: <CheckCheck width={12} height={12} />, qui: "Validée", quoi: g === "a_envoyer" ? "dans la file : à envoyer, puis noter l'envoi" : "dans la file", attente: g === "a_envoyer" });
     if (r.envoye_le)
-      entrees.push({
-        cle: "partie",
-        le: r.envoye_le,
-        icone: <Send width={14} height={14} aria-hidden="true" />,
-        contenu: r.envoi_main ? (
-          <>
-            <b>Envoyée à la main</b> ({CANAUX_MAIN[r.envoi_main.canal] ?? r.envoi_main.canal}), le {dateHeure(r.envoye_le)}
-          </>
-        ) : (
-          <>
-            <b>CASHD</b> l&apos;a envoyée ({canalDe(r)}), le {dateHeure(r.envoye_le)}
-          </>
-        ),
-      });
-    else if (g === "arretee")
-      entrees.push({
-        cle: "arret",
-        le: null,
-        icone: <X width={14} height={14} aria-hidden="true" />,
-        contenu: (
-          <>
-            <b>{libelleEtat}</b>
-            {motif ? ` : ${motif}` : ""}
-          </>
-        ),
-      });
+      fil.push(
+        r.envoi_main
+          ? { cle: "partie", icone: <Send width={12} height={12} />, qui: "Envoyée à la main", quoi: `(${CANAUX_MAIN[r.envoi_main.canal] ?? r.envoi_main.canal})`, le: r.envoye_le, commentaire: r.envoi_main.note }
+          : { cle: "partie", icone: <Send width={12} height={12} />, qui: "CASHD", quoi: `l'a envoyée (${canalDe(r)})`, le: r.envoye_le },
+      );
+    else if (g === "arretee") fil.push({ cle: "arret", icone: <X width={12} height={12} />, qui: libelleEtat, quoi: motif ?? "" });
   } else if (cmd) {
-    entrees.push({
-      cle: "ecrite",
-      le: cmd.jour,
-      icone: <PenLine width={14} height={14} aria-hidden="true" />,
-      contenu: (
-        <>
-          <b>CASHD</b> a écrit la relance du bon de commande, pour le service qui l&apos;émet (pas la comptabilité)
-        </>
-      ),
-    });
-    entrees.push({
-      cle: "etat",
-      le: null,
-      icone: <ClipboardList width={14} height={14} aria-hidden="true" />,
-      contenu: (
-        <>
-          <b>{libelleEtat}</b>
-          {motif ? ` : ${motif}` : ""}
-        </>
-      ),
-    });
+    fil.push({ cle: "ecrite", icone: <PenLine width={12} height={12} />, qui: "CASHD", quoi: "a écrit la relance du bon de commande, pour le service qui l'émet (pas la comptabilité)", le: cmd.jour });
+    fil.push({ cle: "etat", icone: <ClipboardList width={12} height={12} />, qui: libelleEtat, quoi: motif ?? "" });
   }
   if (reponse)
-    entrees.push({
+    fil.push({
       cle: reponse.id,
+      icone: <MessageSquare width={12} height={12} />,
+      qui: "Réponse reçue",
+      quoi: reponse.lecture !== "autre" ? LECTURES[reponse.lecture].toLowerCase() : "",
       le: reponse.cree_le,
+      commentaire: reponse.indice ? `« ${reponse.indice} »` : null,
       attente: true,
-      icone: <MessageSquare width={14} height={14} aria-hidden="true" />,
-      contenu: (
-        <>
-          <b>Réponse reçue</b>
-          {reponse.lecture !== "autre" ? ` : ${LECTURES[reponse.lecture].toLowerCase()}` : ""}
-        </>
-      ),
-      texte: (
-        <>
-          {reponse.indice ? `« ${reponse.indice} » — ` : ""}Proposé : {PROPOSITIONS[reponse.proposition]}.
-        </>
-      ),
-      actions: (
-        <>
-          {reponse.proposition !== "aucune" ? (
-            <button type="button" className="v2-btn v2-btn--petit" disabled={tranche} onClick={() => void decider(true)}>
-              {tranche ? <Loader variant="spin" /> : <CheckCheck width={14} height={14} aria-hidden="true" />}
-              <span>Accepter</span>
-            </button>
-          ) : null}
-          <button type="button" className="v2-btn v2-btn--petit" disabled={tranche} onClick={() => void decider(false)}>
-            <span>{reponse.proposition === "aucune" ? "Lue" : "Écarter"}</span>
-          </button>
-        </>
-      ),
     });
 
+  /* « Plus d'actions » : les gestes qui n'ont pas de place dans le pied */
+  const plus: Option[] = [
+    { cle: "epingle", libelle: epingle ? "Désépingler" : "Épingler en haut de sa colonne", icone: <Star width={16} height={16} fill={epingle ? "currentColor" : "none"} aria-hidden="true" />, action: epingler },
+    ...(corps && k.groupe === "repondue" ? [{ cle: "copier", libelle: "Copier le texte", icone: <Copy width={16} height={16} aria-hidden="true" />, action: copierTexte }] : []),
+    { cle: "debiteur", libelle: "Ouvrir le débiteur", meta: b ? STATUTS_COMPTE[b.statut].libelle : undefined, icone: <Building2 width={16} height={16} aria-hidden="true" />, href: lienCompte(k.compte_id) },
+    { cle: "toutes", libelle: "Toutes ses relances", icone: <MessageSquare width={16} height={16} aria-hidden="true" />, action: () => filtrer("debiteur", k.compte_id) },
+    ...(r ? [{ cle: "palier", libelle: `Relances au palier « ${libellePalier(r.palier)} »`, icone: <Losange atteint />, action: () => filtrer("palier", r.palier) }] : []),
+    ...(k.canal ? [{ cle: "canal", libelle: `Relances par « ${k.canal} »`, icone: <Send width={16} height={16} aria-hidden="true" />, action: () => filtrer("canal", k.canal as string) }] : []),
+    ...(adresseDest
+      ? [
+          { cle: "ecrire", libelle: "Écrire un e-mail au destinataire", icone: <IconeEnveloppe />, action: () => window.open(`mailto:${adresseDest}`) },
+          { cle: "adresse", libelle: "Copier l'adresse", meta: adresseDest, icone: <Copy width={16} height={16} aria-hidden="true" />, action: () => copier(adresseDest) },
+        ]
+      : []),
+  ];
+  const menuPlus = (
+    <span className="v2 c2e-plus">
+      <span className="lin c2e-plus">
+        <MenuActions rond titre="Plus d'actions" options={plus} />
+      </span>
+    </span>
+  );
+
+  /* les boutons du pied : le geste principal en bleu */
+  let actions: React.ReactNode;
+  if (envoiOuvert && r) {
+    actions = (
+      <>
+        <button type="button" className="v2-btn v2-btn--primaire" disabled={enCours} onClick={() => void executer(() => noter(r, canal)).then(() => setEnvoiOuvert(false))}>
+          {enCours ? <Loader variant="spin" /> : <Send width={16} height={16} aria-hidden="true" />} Confirmer l&apos;envoi
+        </button>
+        <button type="button" className="v2-btn v2-btn--fantome" disabled={enCours} onClick={() => setEnvoiOuvert(false)}>
+          Retour
+        </button>
+      </>
+    );
+  } else if (k.groupe === "a_envoyer" && r) {
+    actions = (
+      <>
+        <button type="button" className="v2-btn v2-btn--primaire" onClick={() => setEnvoiOuvert(true)}>
+          <Send width={16} height={16} aria-hidden="true" /> Noter l&apos;envoi à la main
+        </button>
+        {corps ? (
+          <button type="button" className="v2-btn v2-btn--fantome" onClick={copierTexte}>
+            <Copy width={15} height={15} aria-hidden="true" /> Copier le texte
+          </button>
+        ) : null}
+        {menuPlus}
+      </>
+    );
+  } else if (k.groupe === "repondue" && reponse) {
+    actions = (
+      <>
+        {reponse.proposition !== "aucune" ? (
+          <button type="button" className="v2-btn v2-btn--primaire" disabled={enCours} onClick={() => void executer(() => trancher(reponse, true))}>
+            {enCours ? <Loader variant="spin" /> : <CheckCheck width={16} height={16} aria-hidden="true" />} Accepter
+          </button>
+        ) : null}
+        <button type="button" className={reponse.proposition === "aucune" ? "v2-btn v2-btn--primaire" : "v2-btn v2-det-btn-danger"} disabled={enCours} onClick={() => void executer(() => trancher(reponse, false))}>
+          {reponse.proposition === "aucune" ? <CheckCheck width={16} height={16} aria-hidden="true" /> : <X width={16} height={16} aria-hidden="true" />}
+          {reponse.proposition === "aucune" ? " Lue" : " Écarter"}
+        </button>
+        {menuPlus}
+      </>
+    );
+  } else if (k.groupe === "a_valider") {
+    actions = (
+      <>
+        <Link href={`${RACINE}/validations`} className="v2-btn v2-btn--primaire">
+          <CheckCheck width={16} height={16} aria-hidden="true" /> Ouvrir la file de validation
+        </Link>
+        {corps ? (
+          <button type="button" className="v2-btn v2-btn--fantome" onClick={copierTexte}>
+            <Copy width={15} height={15} aria-hidden="true" /> Copier le texte
+          </button>
+        ) : null}
+        {menuPlus}
+      </>
+    );
+  } else {
+    actions = (
+      <>
+        {corps ? (
+          <button type="button" className="v2-btn v2-btn--fantome" onClick={copierTexte}>
+            <Copy width={15} height={15} aria-hidden="true" /> Copier le texte
+          </button>
+        ) : null}
+        <button type="button" className="v2-btn v2-btn--fantome" onClick={() => filtrer("debiteur", k.compte_id)}>
+          <MessageSquare width={15} height={15} aria-hidden="true" /> Toutes ses relances
+        </button>
+        {menuPlus}
+      </>
+    );
+  }
+
+  /* contre les boutons : la règle qui conditionne le geste */
+  const notes = envoiOuvert ? (
+    <Note teinte="bleu">
+      <label className="v2-libelle c2e-canal">
+        Envoyée par
+        <select className="v2-det-champ" value={canal} onChange={(e) => setCanal(e.target.value)} autoFocus>
+          {Object.entries(CANAUX_MAIN).map(([v, l]) => (
+            <option key={v} value={v}>
+              {l}
+            </option>
+          ))}
+        </select>
+      </label>
+      La relance comptera comme partie, à cette date.
+    </Note>
+  ) : k.groupe === "a_valider" ? (
+    <Note teinte="bleu">Une relance ne part qu&apos;une fois validée dans la file de validation : rien n&apos;est parti.</Note>
+  ) : k.groupe === "a_envoyer" ? (
+    <Note teinte="bleu">Validée, mais l&apos;envoi du module est coupé : envoyez-la vous-même, puis notez l&apos;envoi. Elle comptera comme partie, à cette date.</Note>
+  ) : k.groupe === "repondue" && reponse ? (
+    <Note teinte="ambre">
+      <strong>{LECTURES[reponse.lecture]}.</strong> Proposé : {PROPOSITIONS[reponse.proposition]}.
+    </Note>
+  ) : !adresseDest ? (
+    <Note teinte="ambre">La relance ne peut pas partir sans adresse.</Note>
+  ) : null;
+
   return (
-    <section className="lin-boite-detail c2e-detail" aria-label={`Relance : ${sujet}`}>
-      <TeteDetail
-        reference={k.compte}
-        nom={r ? libellePalier(r.palier) : NATURES.commande}
-        epingle={epingle}
-        epingler={epingler}
-        actions={optionsTete}
-        dates={{ titre: "Ses autres relances…", options: optionsDates }}
-        activite
-        fermer={fermer}
-      />
-      <div className="lin-ticket">
-        <article className="lin-ticket-corps">
-          <h2 className="lin-ticket-titre">{sujet}</h2>
-          {corps ? (
-            <p className="lin-ticket-desc c2e-corps">{corps}</p>
-          ) : (
-            <p className="lin-ticket-desc" data-vide="">
-              {k.groupe === "a_valider" ? "Le texte est dans la file de validation." : "Le texte n'est plus conservé ici."}
-            </p>
-          )}
-          <div className="lin-ticket-icones">
-            {corps ? (
-              <button type="button" className="lin-ticket-icone" aria-label="Copier le texte" title="Copier le texte" onClick={copierTexte}>
-                <Copy aria-hidden="true" />
-              </button>
-            ) : null}
-            {r && k.groupe === "a_envoyer" ? (
-              <button type="button" className="lin-ticket-icone" aria-label="Noter l'envoi à la main" title="Noter l'envoi à la main" onClick={() => noter(r)}>
-                <Send aria-hidden="true" />
-              </button>
-            ) : null}
-            {k.groupe === "a_valider" ? (
-              <Link href={`${RACINE}/validations`} className="lin-ticket-icone" aria-label="Ouvrir la file de validation" title="Ouvrir la file de validation">
-                <CheckCheck aria-hidden="true" />
-              </Link>
-            ) : null}
-            <Link href={lienCompte(k.compte_id)} className="lin-ticket-icone" aria-label="Ouvrir le débiteur" title="Ouvrir le débiteur">
-              <Building2 aria-hidden="true" />
+    <CarteCentrale
+      ouverte
+      fermer={fermer}
+      libelle={`Relance : ${sujet}`}
+      sur={`CASHD · ${NATURES[k.nature]}`}
+      statut={
+        <>
+          <IconeColonne g={k.groupe} />
+          {LIBELLE[k.groupe]}
+          {r?.etat === "non_reglee" || (cmd && k.groupe !== "arretee") || k.groupe === "arretee" ? <span className="v2-det-sous"> · {libelleEtat.toLowerCase()}</span> : null}
+        </>
+      }
+      nav={nav}
+      gauche={
+        <Feuille
+          titre={r ? libellePalier(r.palier).toUpperCase() : "BON DE COMMANDE"}
+          sous={`Écrite le ${jour(r?.jour ?? k.jour)}`}
+          nom={nomDest ?? k.compte}
+          sousNom={[adresseDest ?? "Aucune adresse", ...(nomDest && nomDest !== k.compte ? [k.compte] : [])]}
+          texte={corps ? `Objet : ${sujet}\n\n${corps}` : null}
+          lignes={corps ? undefined : factures.map((p): [string, string] => [`${p.numero}${p.retard_jours > 0 ? ` · ${p.retard_jours} j de retard` : ""}`, montant(p.reste_du)])}
+          total={!corps && r ? ["Total relancé", montant(r.montant)] : null}
+        />
+      }
+      piedGauche={
+        <>
+          <div className="v2-det-document-ligne">
+            {factures.length ? <span className="v2-det-mono">{factures.map((p) => p.numero).join(", ")}</span> : null}
+            <span className="v2-det-sous">{[libelleEtat, k.canal].filter(Boolean).join(" · ")}</span>
+          </div>
+          <div className="v2-det-document-ligne">
+            <span className="v2-det-sous">
+              {k.compte}
+              {b ? ` · ${STATUTS_COMPTE[b.statut].libelle.toLowerCase()}` : ""}
+            </span>
+            <Link href={lienCompte(k.compte_id)} className="v2-btn v2-btn--petit v2-btn--fantome v2-det-document-ouvrir">
+              <Building2 width={14} height={14} aria-hidden="true" /> Ouvrir le débiteur
             </Link>
           </div>
+        </>
+      }
+      titre={sujet}
+      chiffre={r ? montant(r.montant) : null}
+      echeance={echeance}
+      notes={notes}
+      actions={actions}
+    >
+      <dl className="v2-det-fiche">
+        <dt>Débiteur</dt>
+        <dd>
+          {k.compte}
+          {b ? <span className="v2-det-sous"> · {STATUTS_COMPTE[b.statut].libelle}</span> : null}
+        </dd>
+        <dt>{r ? "Palier" : "Nature"}</dt>
+        <dd>{r ? libellePalier(r.palier) : NATURES[k.nature]}</dd>
+        <dt>Destinataire</dt>
+        <dd>
+          {adresseDest ? (
+            <>
+              {nomDest ?? adresseDest}
+              {nomDest ? <span className="v2-det-sous"> · {adresseDest}</span> : null}
+            </>
+          ) : (
+            <span className="v2-det-sous">Aucune adresse</span>
+          )}
+        </dd>
+        {k.canal ? (
+          <>
+            <dt>Canal</dt>
+            <dd>{k.canal}</dd>
+          </>
+        ) : null}
+        <dt>État</dt>
+        <dd>
+          {libelleEtat}
+          {motif ? <span className="v2-det-sous"> · {motif}</span> : null}
+        </dd>
+        <dt>Prochaine étape</dt>
+        <dd className={etape.passe ? "c2e-passe" : etape.vide ? "v2-det-sous" : undefined}>{etape.libelle}</dd>
+      </dl>
 
-          {factures.length ? (
-            <ul className="lin-ticket-sous" aria-label={r?.nature === "devis" ? "Devis relancé" : "Factures relancées"}>
-              {facturesVues.map((p) => (
-                <li key={p.facture_id}>
-                  <Link href={lienCompte(k.compte_id)} className="lin-ticket-sous-ligne" title={`${p.numero} : ouvrir le débiteur`}>
-                    <IconeDocument />
-                    <span className="lin-ticket-sous-ref">{p.numero}</span>
-                    <span className="lin-ticket-sous-nom">{p.retard_jours > 0 ? `${p.retard_jours} j de retard` : "à échoir"}</span>
-                    {factures.length > 1 ? <span className="lin-ticket-sous-meta">{montant(p.reste_du)}</span> : null}
-                  </Link>
-                </li>
-              ))}
-              {factures.length > 5 ? (
-                <li>
-                  <button type="button" className="lin-ticket-sous-appel" aria-expanded={toutesFactures} onClick={() => setToutesFactures((v) => !v)}>
-                    {toutesFactures ? "Voir moins" : `Voir les ${factures.length} factures`}
-                  </button>
-                </li>
-              ) : null}
-            </ul>
-          ) : null}
+      {factures.length && corps ? (
+        <div className="v2-det-bloc">
+          <h3 className="v2-det-section-titre">
+            {r?.nature === "devis" ? "Devis relancé" : "Factures relancées"}
+            <small>{factures.length}</small>
+          </h3>
+          <dl className="v2-det-fiche">
+            {factures.map((p) => (
+              <div key={p.facture_id} style={{ display: "contents" }}>
+                <dt className="v2-det-mono">{p.numero}</dt>
+                <dd>
+                  {montant(p.reste_du)}
+                  <span className="v2-det-sous"> · {p.retard_jours > 0 ? `${p.retard_jours} j de retard` : "à échoir"}</span>
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      ) : null}
 
-          <hr className="lin-ticket-trait" />
-          <div className="lin-ticket-activite-tete" id="c2e-activite">
-            <h3>Activité</h3>
-            <button type="button" className="lin-ticket-lien" onClick={() => filtrer("debiteur", k.compte_id)}>
-              Ses autres relances
-            </button>
-          </div>
-          <Fil entrees={entrees} vide="Rien n'est encore arrivé à cette relance." />
-        </article>
-
-        <aside className="lin-ticket-cote" aria-label="Propriétés de la relance">
-          <section className="lin-ticket-section">
-            <h3>Propriétés</h3>
-            <div className="lin-ticket-pilules">
-              <span className="lin-ticket-pilule" title={`Colonne « ${LIBELLE[k.groupe]} »`}>
-                <IconeColonne g={k.groupe} />
-                {LIBELLE[k.groupe]}
-                {/* l'état précis seulement quand il dit autre chose que la colonne (« écrite — envoi à régler », un bon de commande) */}
-                {r?.etat === "non_reglee" || (cmd && k.groupe !== "arretee") ? <span className="c2e-gris">{libelleEtat.toLowerCase()}</span> : null}
+      <div className="v2-det-bloc">
+        <h3 className="v2-det-section-titre">Activité</h3>
+        <ol className="v2-det-fil">
+          {fil.map((x) => (
+            <li key={x.cle} data-attente={x.attente ? "" : undefined}>
+              <span className="v2-det-fil-avatar" aria-hidden="true">
+                {x.icone}
               </span>
-              {k.groupe === "arretee" ? (
-                <span className="lin-ticket-pilule" data-bloquant={bloquante(k) ? "" : undefined} title={motif ?? undefined}>
-                  <X aria-hidden="true" />
-                  {libelleEtat}
-                </span>
-              ) : null}
-              {r ? (
-                <MenuOptions
-                  titre="Relances à ce palier…"
-                  declencheur={
-                    <>
-                      <Losange atteint={r.etat !== "a_valider"} />
-                      {libellePalier(r.palier)}
-                    </>
-                  }
-                  options={[{ cle: "palier", libelle: `Relances au palier « ${libellePalier(r.palier)} »`, icone: <Losange atteint />, action: () => filtrer("palier", r.palier) }]}
-                  largeur={300}
-                />
-              ) : (
-                <span className="lin-ticket-pilule">
-                  <IconeNature nature={k.nature} />
-                  {NATURES[k.nature]}
-                </span>
-              )}
-              {r ? (
-                <span className="lin-ticket-pilule" title="Montant relancé">
-                  <HandCoins aria-hidden="true" />
-                  {montant(r.montant)}
-                </span>
-              ) : null}
-            </div>
-          </section>
-          <section className="lin-ticket-section">
-            <h3>Envoi</h3>
-            <div className="lin-ticket-pilules">
-              {adresseDest ? (
-                <MenuOptions
-                  titre="Destinataire…"
-                  declencheur={
-                    <>
-                      <IconeEnveloppe />
-                      {nomDest ?? adresseDest}
-                    </>
-                  }
-                  options={optionsDest}
-                />
-              ) : (
-                <span className="lin-ticket-pilule" data-vide="" title="La relance ne peut pas partir sans adresse">
-                  <IconeEnveloppe />
-                  Aucune adresse
-                </span>
-              )}
-              {k.canal ? (
-                <MenuOptions
-                  titre="Canal…"
-                  declencheur={
-                    <>
-                      <Send aria-hidden="true" />
-                      {k.canal}
-                    </>
-                  }
-                  options={[{ cle: "canal", libelle: `Relances par « ${k.canal} »`, icone: <Send width={16} height={16} aria-hidden="true" />, action: () => filtrer("canal", k.canal as string) }]}
-                  largeur={280}
-                />
-              ) : null}
-              {r?.envoye_le ? (
-                <span className="lin-ticket-pilule" title={`Partie le ${dateHeure(r.envoye_le)}`}>
-                  <Clock aria-hidden="true" />
-                  Partie le {jour(r.envoye_le)}
-                </span>
-              ) : (
-                <span className="lin-ticket-pilule" data-vide="" title={`Écrite le ${jour(r?.jour ?? k.jour)}`}>
-                  <Clock aria-hidden="true" />
-                  Écrite le {jour(r?.jour ?? k.jour)}
-                </span>
-              )}
-            </div>
-          </section>
-          <section className="lin-ticket-section">
-            <h3>Débiteur</h3>
-            <div className="lin-ticket-pilules">
-              <MenuOptions
-                titre="Débiteur…"
-                declencheur={
-                  <>
-                    <Building2 aria-hidden="true" />
-                    {k.compte}
-                  </>
-                }
-                options={optionsDebiteur}
-                largeur={320}
-              />
-              <span className="lin-ticket-pilule lin-ticket-sous-pilule" data-vide={etape.vide ? "" : undefined}>
-                {etape.vide ? null : <Losange atteint={false} />}
-                {etape.libelle}
-              </span>
-            </div>
-          </section>
-        </aside>
+              <div>
+                <div className="v2-det-fil-texte">
+                  <strong>{x.qui}</strong>
+                  <span>
+                    {x.quoi}
+                    {x.le ? ` · ${jour(x.le)}` : ""}
+                  </span>
+                </div>
+                {x.commentaire ? <p className="v2-det-fil-commentaire">{x.commentaire}</p> : null}
+              </div>
+            </li>
+          ))}
+        </ol>
       </div>
-    </section>
+
+      {autres.length ? (
+        <div className="v2-det-bloc">
+          <h3 className="v2-det-section-titre">
+            Ses autres relances
+            <small>{autres.length}</small>
+          </h3>
+          <ul className="c2e-autres">
+            {autres.map((x) => (
+              <li key={x.id}>
+                <button type="button" className="c2e-autre" onClick={() => aller({ id: x.id }, true)}>
+                  <span>{libellePalier(x.palier)}</span>
+                  <span className="v2-det-sous">
+                    {(ETATS_RELANCE[x.etat] ?? ETATS_RELANCE.preparee).libelle.toLowerCase()} · {jour(x.envoye_le ?? x.jour)}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </CarteCentrale>
   );
 }

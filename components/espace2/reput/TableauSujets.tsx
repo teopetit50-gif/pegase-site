@@ -41,7 +41,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Bell, Check, ChevronDown, ChevronUp, Clock, Download, ListFilter, Lock, Mail, MessageSquare, Power, Send, ShieldCheck, ShieldOff, SlidersHorizontal, Star, Zap } from "lucide-react";
+import { Bell, Check, Clock, Download, ListFilter, Lock, Mail, MessageSquare, Power, Send, ShieldCheck, ShieldOff, SlidersHorizontal, Star, Zap } from "lucide-react";
 import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
 import { useSource } from "@/components/espace/source";
 import { useTempsReel } from "@/components/espace/tempsReel";
@@ -49,8 +49,10 @@ import { mondeExemple } from "@/components/espace/reput/exemples";
 import { csvDemandes, telecharger } from "@/components/espace/reput/export";
 import { activerAccordSeul, chargerMonde, donnerAccord, envoiAutomatique, fixerDelai, monClient, revoquerAccord, routerSujet } from "@/components/espace/reput/portes";
 import type { AccordSujet, Client, Demande, Monde, StatutDemande } from "@/components/espace/reput/types";
-import { Choix, Menu, MenuActions, MenuOptions, useEpingles, type Option } from "../lin/Lin";
-import { IconeBoiteX, IconeCalendrier, IconeDiese, IconeGroupe, IconeNonLus, IconeStatutProjet, type EtatProjet } from "../lin/icones";
+import { Choix, Menu, MenuActions, useEpingles, type Option } from "../lin/Lin";
+import { CarteCentrale, Feuille } from "../lin/CarteCentrale";
+import { Note } from "../ui";
+import { IconeCalendrier, IconeDiese, IconeGroupe, IconeNonLus, IconeStatutProjet, type EtatProjet } from "../lin/icones";
 import { useToast } from "../Toasts";
 import { useMaintenant } from "../horloge";
 import { RACINE } from "../modules";
@@ -104,6 +106,7 @@ const pluriel = (n: number, mot: string, pl = `${mot}s`) => `${n} ${n > 1 ? pl :
 const dateLongue = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" }) : "—");
 const dateCourte = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) : "—");
 const nomDe = (d: Demande) => d.de_nom || d.adresse_reponse || "Client";
+const carteDuTableau = (code: string) => document.querySelector<HTMLElement>(`.lin-carte-tableau[data-carte="${CSS.escape(code)}"]`);
 
 /* l'icône d'état d'une carte : l'hexagone de Linear ; un cadenas pour ce qui ne s'autorise jamais */
 function IconeEtat({ a }: { a: AccordSujet }) {
@@ -416,29 +419,20 @@ function Tableau({
     else if (p) void agir(a, p);
   };
 
-  /* ——— le clavier : ↑/↓ dans une colonne, ←/→ d'une colonne à l'autre, Entrée ouvre, Échap ferme ——— */
+  /* ——— le clavier : ↑/↓ dans une colonne, ←/→ d'une colonne à l'autre, Entrée ouvre (le lien de la carte) ———
+     ignoré tant que la carte du milieu est ouverte : elle a ses propres touches (← →, Échap) */
   const grille = colonnes.map((c) => c.cartes.map((a) => a.sujet)).filter((c) => c.length);
   const cleGrille = grille.map((c) => c.join(",")).join("|");
   useEffect(() => {
     const g = cleGrille ? cleGrille.split("|").map((c) => c.split(",")) : [];
-    const carte = (code: string) => document.querySelector<HTMLElement>(`.lin-carte-tableau[data-carte="${CSS.escape(code)}"]`);
     const touche = (e: KeyboardEvent) => {
-      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || saisie) return;
+      if (idOuvert || saisie || e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
       const c = e.target as HTMLElement | null;
       if (c && (c.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(c.tagName))) return;
       if (document.querySelector(".lin .lin-menu, .v2-voile")) return;
-      if (e.key === "Escape") {
-        if (idOuvert) {
-          e.preventDefault();
-          aller(lienSujet(null));
-          window.setTimeout(() => carte(idOuvert)?.focus({ preventScroll: true }), 0);
-        }
-        return;
-      }
       if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key) || !g.length) return;
       e.preventDefault();
-      const focalise = (document.activeElement as HTMLElement | null)?.dataset?.carte ?? null;
-      const actuel = idOuvert && g.some((col) => col.includes(idOuvert)) ? idOuvert : focalise;
+      const actuel = (document.activeElement as HTMLElement | null)?.dataset?.carte ?? null;
       let ci = actuel ? g.findIndex((col) => col.includes(actuel)) : -1;
       let ri = ci >= 0 ? g[ci].indexOf(actuel!) : -1;
       if (ci < 0) {
@@ -450,15 +444,26 @@ function Tableau({
         ci = e.key === "ArrowRight" ? Math.min(g.length - 1, ci + 1) : Math.max(0, ci - 1);
         ri = Math.min(g[ci].length - 1, ri);
       }
-      const cible = g[ci][ri];
-      if (idOuvert && cible !== idOuvert) aller(lienSujet(cible));
-      const el = carte(cible);
+      const el = carteDuTableau(g[ci][ri]);
       el?.focus({ preventScroll: true });
       el?.scrollIntoView({ block: "nearest", inline: "nearest" });
     };
     window.addEventListener("keydown", touche);
     return () => window.removeEventListener("keydown", touche);
-  }, [cleGrille, idOuvert, saisie, aller, lienSujet]);
+  }, [cleGrille, idOuvert, saisie]);
+  /* fermer la carte du milieu (×, Échap, le voile) : le paramètre part, le focus revient sur la carte du tableau */
+  const fermerCarte = () => {
+    const code = idOuvert;
+    aller(lienSujet(null));
+    if (!code) return;
+    /* après la sortie de la carte (react-aria rend alors le focus à ce qui l'avait avant) */
+    let essais = 0;
+    const rendre = () => {
+      if (document.querySelector(".v2-voile--carte") && essais++ < 20) window.setTimeout(rendre, 50);
+      else carteDuTableau(code)?.focus({ preventScroll: true });
+    };
+    window.setTimeout(rendre, 50);
+  };
 
   /* ——— la tête de la page ——— */
   const premier = colonnes.flatMap((c) => c.cartes).find(aTraiter) ?? null;
@@ -783,49 +788,40 @@ function Tableau({
           ) : null}
         </div>
       ) : null}
-      <div className="lin-tableau-page">
-        {tableau}
-        {ouvert ? (
-          <Fiche
-            key={ouvert.sujet}
-            a={ouvert}
-            m={m}
-            colonne={colonnes.find((c) => c.cartes.some((x) => x.sujet === ouvert.sujet)) ?? null}
-            dirige={dirige}
-            envoi={envoi}
-            gestes={gestesDe(ouvert)}
-            epinglee={epingles.has(ouvert.sujet)}
-            basculerEpingle={() => basculerEpingle(ouvert.sujet)}
-            aller={aller}
-            lienSujet={lienSujet}
-            basculeFiltre={basculeFiltre}
-            filtres={filtres}
-            router={(eq) => void router(ouvert, eq)}
-            ouvrirDelai={() => ouvrirDelai(ouvert)}
-          />
-        ) : idOuvert ? (
-          <section className="lin-boite-detail" aria-label="Sujet introuvable">
-            <header className="lin-tete">
-              <div className="lin-tete-ronds">
-                <button type="button" className="lin-rond" aria-label="Fermer (Échap)" title="Fermer (Échap)" onClick={() => aller(lienSujet(null))}>
-                  <IconeBoiteX />
-                </button>
-              </div>
-            </header>
-            <p className="lin-vide">Ce sujet n&apos;existe pas, ou n&apos;est plus actif{source === "exemple" ? " (vous regardez les données d'exemple)" : ""}.</p>
-          </section>
-        ) : null}
-      </div>
+      <div className="lin-tableau-page">{tableau}</div>
+      <CarteSujet
+        idOuvert={idOuvert}
+        a={ouvert}
+        m={m}
+        source={source}
+        ordre={colonnes.flatMap((c) => c.cartes)}
+        dirige={dirige}
+        envoi={envoi}
+        gestes={ouvert ? gestesDe(ouvert) : []}
+        epinglee={!!ouvert && epingles.has(ouvert.sujet)}
+        basculerEpingle={() => ouvert && basculerEpingle(ouvert.sujet)}
+        aller={aller}
+        lienSujet={lienSujet}
+        basculeFiltre={basculeFiltre}
+        filtres={filtres}
+        router={(eq) => ouvert && void router(ouvert, eq)}
+        ouvrirDelai={() => ouvert && ouvrirDelai(ouvert)}
+        fermer={fermerCarte}
+      />
       <Fenetre saisie={saisie} setSaisie={setSaisie} envoi={envoi !== null} agir={agir} basculerAuto={basculerAuto} changerDelai={changerDelai} />
     </div>
   );
 }
 
-/* ——— la carte ouverte : la page d'un ticket de Linear ——— */
-function Fiche({
+/* ——— la carte ouverte, au milieu de l'écran : la carte de décision d'« À valider » (../lin/CarteCentrale) ———
+   gauche : la feuille des règles de l'accord (ses vraies valeurs) ; droite : le titre, la date qui compte, la
+   fiche des propriétés, les demandes du sujet et l'activité ; en pied : les gestes de l'ancien écran. */
+function CarteSujet({
+  idOuvert,
   a,
   m,
-  colonne,
+  source,
+  ordre,
   dirige,
   envoi,
   gestes,
@@ -837,10 +833,13 @@ function Fiche({
   filtres,
   router,
   ouvrirDelai,
+  fermer,
 }: {
-  a: AccordSujet;
+  idOuvert: string | null;
+  a: AccordSujet | null;
   m: Monde;
-  colonne: { cle: Colonne; nom: string; cartes: AccordSujet[] } | null;
+  source: "exemple" | "reelle";
+  ordre: AccordSujet[];
   dirige: boolean;
   envoi: string | null;
   gestes: Option[];
@@ -852,43 +851,78 @@ function Fiche({
   filtres: Filtres;
   router: (equipe: string | null) => void;
   ouvrirDelai: () => void;
+  fermer: () => void;
 }) {
+  if (!a)
+    return (
+      <CarteCentrale
+        ouverte={!!idOuvert}
+        fermer={fermer}
+        libelle="Sujet introuvable"
+        sur="REPUT · Sujet"
+        gauche={<Feuille titre="SUJET" sous={idOuvert} texte={`Aucun sujet actif ne porte ce code${source === "exemple" ? " dans les données d'exemple" : ""}.`} />}
+        titre="Sujet introuvable"
+      >
+        <p className="v2-det-vide">Ce sujet n&apos;existe pas, ou n&apos;est plus actif.</p>
+      </CarteCentrale>
+    );
+
   const sujet = a.genre === "message" ? undefined : m.sujets.find((x) => x.code === a.sujet);
   const equipes = m.equipes ?? [];
   const service = sujet?.equipe_id ? (equipes.find((e) => e.id === sujet.equipe_id) ?? null) : null;
   const c = colonneDe(a);
   const demandes = a.genre === "message" ? [] : m.demandes.filter((d) => d.sujet === a.sujet).sort((x, y) => y.recu_le.localeCompare(x.recu_le));
-  const cartes = colonne?.cartes ?? [];
-  const rang = cartes.findIndex((x) => x.sujet === a.sujet);
-  const precedente = rang > 0 ? cartes[rang - 1] : null;
-  const suivante = rang >= 0 && rang < cartes.length - 1 ? cartes[rang + 1] : null;
+  const fiches = a.genre === "message" ? [] : m.fiches.filter((f) => f.sujet === a.sujet);
+  const rang = ordre.findIndex((x) => x.sujet === a.sujet);
+  const precedente = rang > 0 ? ordre[rang - 1] : null;
+  const suivante = rang >= 0 && rang < ordre.length - 1 ? ordre[rang + 1] : null;
   const voirActivite = () => document.getElementById("sujets-activite")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  const fermer = () => aller(lienSujet(null));
+  const genre = genreDe(a) === "message" ? "Message type" : "Sujet de demande";
 
-  /* une phrase : ce que l'accord fait aujourd'hui (le bandeau et les lignes de l'ancien écran) */
-  const description =
-    sujet?.description ||
-    (c === "principe"
-      ? "Réclamations, urgences, demandes de parler à quelqu'un et hors sujet ne s'autorisent jamais : chaque réponse est relue par une personne."
-      : a.statut === "active"
-        ? "Une réponse entièrement tirée de votre base part seule, dans la minute ; une réponse hors base, urgente ou corrigée est toujours relue."
-        : a.statut === "a_valider"
-          ? m.accords.seul_decideur
-            ? "L'accord est proposé. Vous êtes le seul décideur de l'organisation : vous pouvez l'activer vous-même."
-            : "L'accord est proposé : un autre décideur l'active dans « À valider ». D'ici là, chaque réponse est relue."
-          : "Par défaut, rien ne part sans votre validation. Autorisé, l'accord dure un an et se révoque à tout moment.");
+  /* la feuille : les règles de l'accord, seulement ce que la base connaît */
+  const lignes: [string, string][] = [
+    ["Accord", c === "principe" ? "Jamais : toujours relu" : ETATS[a.statut]],
+    ["Envoi seul", a.statut === "active" ? "Oui, si la réponse est tirée de la base" : "Non : chaque réponse est relue"],
+    ...(a.active_le ? ([["Donné le", dateLongue(a.active_le)]] as [string, string][]) : []),
+    ...(a.donne_par_libelle ? ([["Donné par", a.donne_par_libelle]] as [string, string][]) : []),
+    ...(a.fin && (a.statut === "active" || a.statut === "expire") ? ([[a.statut === "expire" ? "Expiré le" : "Valable jusqu'au", dateLongue(a.fin)]] as [string, string][]) : []),
+    ...(sujet && equipes.length ? ([["Service qui décide", service?.nom ?? "Tous les décideurs"]] as [string, string][]) : []),
+    ...(sujet?.delai_heures ? ([["Délai de traitement", `${sujet.delai_heures} h`]] as [string, string][]) : []),
+  ];
 
-  const optionsService: Option[] = [
+  /* l'activité : l'accord donné, sa fin, ce qui est parti seul */
+  const ic = { width: 14, height: 14, "aria-hidden": true as const };
+  const fil: { cle: string; icone: React.ReactNode; fort: string; texte: string }[] = [];
+  if (a.active_le) fil.push({ cle: "donne", icone: <ShieldCheck {...ic} />, fort: a.donne_par_libelle ?? "Accord donné", texte: `${a.donne_par_libelle ? "a donné l'accord" : ""} · ${dateLongue(a.active_le)}` });
+  if (a.statut === "active" && a.fin) fil.push({ cle: "fin", icone: <Clock {...ic} />, fort: "Jusqu'au", texte: `${dateLongue(a.fin)}, révocable à tout moment` });
+  if (a.statut === "active")
+    fil.push({
+      cle: "parties",
+      icone: <Send {...ic} />,
+      fort: pluriel(a.envoyees_seules_mois, "réponse"),
+      texte: `partie${a.envoyees_seules_mois > 1 ? "s" : ""} seule${a.envoyees_seules_mois > 1 ? "s" : ""} ce mois-ci`,
+    });
+  if (a.statut === "a_valider")
+    fil.push({ cle: "propose", icone: <ShieldCheck {...ic} />, fort: "Accord proposé", texte: m.accords.seul_decideur ? "à activer vous-même" : "un autre décideur l'active dans « À valider »" });
+  if (a.statut === "revoquee" || a.statut === "refusee") fil.push({ cle: "fini", icone: <ShieldOff {...ic} />, fort: ETATS[a.statut], texte: "les réponses sont de nouveau relues" });
+  if (a.statut === "expire") fil.push({ cle: "expire", icone: <Clock {...ic} />, fort: "Accord expiré", texte: `${a.fin ? `le ${dateLongue(a.fin)} : ` : ""}les réponses sont de nouveau relues` });
+
+  /* les boutons : le geste principal en bleu, la révocation en rouge, le délai à côté ; le reste dans « Plus d'actions » */
+  const principal = gestes.find((g) => g.cle === "donner" || g.cle === "activer");
+  const revoquer = gestes.find((g) => g.cle === "revoquer");
+  const plus: Option[] = [
+    ...gestes.filter((g) => g !== principal && g !== revoquer),
+    { cle: "epingle", libelle: epinglee ? "Désépingler" : "Épingler en haut de sa colonne", icone: <Star width={16} height={16} fill={epinglee ? "currentColor" : "none"} />, action: basculerEpingle },
     ...(dirige && sujet && equipes.length
       ? [
-          { cle: "tous", libelle: "Tous les décideurs", icone: <IconeGroupe />, coche: !sujet.equipe_id, action: () => envoi === null && sujet.equipe_id && router(null) },
-          ...equipes.map((e) => ({ cle: e.id, libelle: e.nom, icone: <IconeGroupe />, coche: sujet.equipe_id === e.id, action: () => envoi === null && sujet.equipe_id !== e.id && router(e.id) })),
+          { cle: "tous", libelle: "Service : tous les décideurs", icone: <IconeGroupe />, coche: !sujet.equipe_id, action: () => envoi === null && sujet.equipe_id && router(null) },
+          ...equipes.map((e) => ({ cle: e.id, libelle: `Service : ${e.nom}`, icone: <IconeGroupe />, coche: sujet.equipe_id === e.id, action: () => envoi === null && sujet.equipe_id !== e.id && router(e.id) })),
         ]
       : []),
     ...(sujet && equipes.length
       ? [
           {
-            cle: "filtre",
+            cle: "filtre-service",
             libelle: "Filtrer le tableau sur ce service",
             icone: <ListFilter width={16} height={16} />,
             coche: filtres.service === (sujet.equipe_id ?? "tous"),
@@ -896,281 +930,176 @@ function Fiche({
           },
         ]
       : []),
+    { cle: "filtre-genre", libelle: `Filtrer : ${GENRES[genreDe(a)].toLowerCase()}`, icone: <ListFilter width={16} height={16} />, coche: filtres.genre === genreDe(a), href: basculeFiltre("genre", genreDe(a)) },
+    { cle: "activite", libelle: "Voir l'activité", icone: <Bell width={16} height={16} />, action: voirActivite },
   ];
-  const optionsDelai: Option[] = [
-    ...(dirige && sujet?.delai_heures ? [{ cle: "changer", libelle: "Changer le délai de traitement…", meta: `${sujet.delai_heures} h`, icone: <Clock width={16} height={16} />, action: ouvrirDelai }] : []),
-    { cle: "activite", libelle: "Voir l'activité", icone: <MessageSquare width={16} height={16} />, action: voirActivite },
-  ];
-  const optionsDates: Option[] = [
-    ...(dirige && sujet?.delai_heures ? [{ cle: "changer", libelle: "Changer le délai de traitement…", meta: `${sujet.delai_heures} h`, icone: <Clock width={16} height={16} />, action: ouvrirDelai }] : []),
-    ...(a.statut === "active" && a.fin ? [{ cle: "fin", libelle: `Accord jusqu'au ${dateLongue(a.fin)}`, icone: <IconeCalendrier />, action: voirActivite }] : []),
-    ...(a.statut === "expire" && a.fin ? [{ cle: "fin", libelle: `Accord expiré le ${dateLongue(a.fin)}`, icone: <IconeCalendrier passe />, action: voirActivite }] : []),
-    ...(a.active_le ? [{ cle: "debut", libelle: `Accord donné le ${dateLongue(a.active_le)}`, icone: <IconeCalendrier />, action: voirActivite }] : []),
-    { cle: "activite", libelle: "Voir l'activité", icone: <MessageSquare width={16} height={16} />, action: voirActivite },
-  ];
-  const optionsGenre: Option[] = [
-    { cle: "filtre", libelle: `Filtrer : ${GENRES[genreDe(a)].toLowerCase()}`, icone: <ListFilter width={16} height={16} />, coche: filtres.genre === genreDe(a), href: basculeFiltre("genre", genreDe(a)) },
-  ];
-  const actionsTete: Option[] = [
-    ...(precedente ? [{ cle: "precedente", libelle: "Carte précédente", meta: "↑", icone: <ChevronUp width={16} height={16} />, action: () => aller(lienSujet(precedente.sujet)) }] : []),
-    ...(suivante ? [{ cle: "suivante", libelle: "Carte suivante", meta: "↓", icone: <ChevronDown width={16} height={16} />, action: () => aller(lienSujet(suivante.sujet)) }] : []),
-    ...gestes,
-    ...(dirige && sujet?.delai_heures ? [{ cle: "delai", libelle: "Changer le délai de traitement…", meta: `${sujet.delai_heures} h`, icone: <Clock width={16} height={16} />, action: ouvrirDelai }] : []),
-    { cle: "activite", libelle: "Voir l'activité", icone: <MessageSquare width={16} height={16} />, action: voirActivite },
-  ];
-
-  /* l'activité : l'accord donné, sa fin, ce qui est parti seul ; puis la décision qui attend */
-  const ic = { width: 14, height: 14, "aria-hidden": true as const };
-  const fil: { cle: string; icone: React.ReactNode; texte: React.ReactNode }[] = [];
-  if (a.active_le)
-    fil.push({
-      cle: "donne",
-      icone: <ShieldCheck {...ic} />,
-      texte: (
-        <>
-          <b>Accord donné</b>
-          {a.donne_par_libelle ? ` par ${a.donne_par_libelle}` : ""} · {dateCourte(a.active_le)}
-        </>
-      ),
-    });
-  if (a.statut === "active" && a.fin)
-    fil.push({
-      cle: "fin",
-      icone: <IconeCalendrier />,
-      texte: (
-        <>
-          <b>Jusqu&apos;au</b> {dateLongue(a.fin)}, révocable à tout moment
-        </>
-      ),
-    });
-  if (a.statut === "active")
-    fil.push({
-      cle: "parties",
-      icone: <Send {...ic} />,
-      texte: (
-        <>
-          <b>{pluriel(a.envoyees_seules_mois, "réponse")}</b> partie{a.envoyees_seules_mois > 1 ? "s" : ""} seule{a.envoyees_seules_mois > 1 ? "s" : ""} ce mois-ci
-        </>
-      ),
-    });
-  if (a.statut === "revoquee" || a.statut === "refusee")
-    fil.push({
-      cle: "fini",
-      icone: <ShieldOff {...ic} />,
-      texte: (
-        <>
-          <b>{ETATS[a.statut]}</b> : les réponses sont de nouveau relues
-        </>
-      ),
-    });
-  if (a.statut === "expire")
-    fil.push({
-      cle: "expire",
-      icone: <IconeCalendrier passe />,
-      texte: (
-        <>
-          <b>Accord expiré</b>
-          {a.fin ? ` le ${dateLongue(a.fin)}` : ""} : les réponses sont de nouveau relues
-        </>
-      ),
-    });
-  if (sujet?.delai_heures)
-    fil.push({
-      cle: "delai",
-      icone: <Clock {...ic} />,
-      texte: (
-        <>
-          <b>Délai de traitement</b> {sujet.delai_heures} h : passé ce délai, la demande remonte au responsable
-        </>
-      ),
-    });
-  const attente = gestes.length
-    ? a.statut === "a_valider"
-      ? m.accords.seul_decideur
-        ? "Accord proposé : vous pouvez l'activer vous-même."
-        : "Accord proposé : un autre décideur l'active dans « À valider »."
-      : a.statut === "active"
-        ? null
-        : "Chaque réponse sur ce sujet attend votre validation."
-    : null;
 
   return (
-    <section className="lin-boite-detail" id="sujets-fiche" aria-label={`Le sujet ${a.libelle}`}>
-      <header className="lin-tete">
-        <span className="lin-tete-ref">{a.sujet}</span>
-        <span className="lin-tete-nom">{a.libelle}</span>
-        <button
-          type="button"
-          className="lin-rond"
-          aria-pressed={epinglee}
-          aria-label={epinglee ? "Désépingler" : "Épingler en haut de sa colonne"}
-          title={epinglee ? "Désépingler" : "Épingler en haut de sa colonne"}
-          onClick={basculerEpingle}
-        >
-          <Star fill={epinglee ? "currentColor" : "none"} aria-hidden="true" />
-        </button>
-        <MenuActions rond aGauche titre="Actions" options={actionsTete} />
-        <div className="lin-tete-ronds">
-          <button type="button" className="lin-rond" aria-label="Voir l'activité" title="Voir l'activité" onClick={voirActivite}>
-            <Bell aria-hidden="true" />
-          </button>
-          <MenuOptions rond aDroite libelle="Dates" titre="Période de l'accord…" declencheur={<Clock aria-hidden="true" />} options={optionsDates} largeur={300} />
-          <button type="button" className="lin-rond" aria-label="Fermer (Échap)" title="Fermer (Échap)" onClick={fermer}>
-            <IconeBoiteX />
-          </button>
-        </div>
-      </header>
-
-      <div className="lin-ticket">
-        <article className="lin-ticket-corps">
-          <h2 className="lin-ticket-titre">{a.libelle}</h2>
-          <p className="lin-ticket-desc">{description}</p>
-          {gestes.length || (dirige && sujet?.delai_heures) ? (
-            <div className="lin-ticket-icones">
-              {gestes.map((g) => (
-                <button key={g.cle} type="button" className="lin-ticket-icone" aria-label={g.libelle.replace("…", "")} title={g.libelle.replace("…", "")} disabled={envoi !== null} onClick={g.action}>
-                  {g.icone}
-                </button>
-              ))}
-              {dirige && sujet?.delai_heures ? (
-                <button type="button" className="lin-ticket-icone" aria-label="Changer le délai de traitement" title="Changer le délai de traitement" disabled={envoi !== null} onClick={ouvrirDelai}>
-                  <Clock aria-hidden="true" />
-                </button>
-              ) : null}
+    <CarteCentrale
+      ouverte
+      fermer={fermer}
+      libelle={`Le sujet ${a.libelle}`}
+      sur={`REPUT · ${genre}`}
+      statut={
+        <>
+          <IconeEtat a={a} />
+          {COLONNES.find((x) => x.cle === c)!.nom}
+        </>
+      }
+      nav={{
+        position: rang + 1,
+        total: ordre.length,
+        precedente: precedente ? () => aller(lienSujet(precedente.sujet)) : undefined,
+        suivante: suivante ? () => aller(lienSujet(suivante.sujet)) : undefined,
+      }}
+      gauche={<Feuille titre="ACCORD PERMANENT" sous={a.sujet} nom={a.libelle} sousNom={[genre]} lignes={lignes} total={a.statut === "active" ? ["Parties seules ce mois", String(a.envoyees_seules_mois)] : null} />}
+      piedGauche={
+        <>
+          <div className="v2-det-document-ligne">
+            <span className="v2-det-mono">{a.sujet}</span>
+            <span className="v2-det-sous">{ETATS[a.statut]}</span>
+          </div>
+          {fiches.length ? (
+            <div className="v2-det-document-ligne">
+              <span className="v2-det-sous">{pluriel(fiches.length, "fiche")} dans la base</span>
+              <Link href={`${RACINE}/reput/base?filtre=sujet:${encodeURIComponent(a.sujet)}`} className="v2-btn v2-btn--petit v2-btn--fantome v2-det-document-ouvrir">
+                Ouvrir ses fiches
+              </Link>
             </div>
           ) : null}
-
-          {demandes.length ? (
-            <ul className="lin-ticket-sous" aria-label={`Les demandes « ${a.libelle} »`}>
-              {demandes.slice(0, 5).map((d) => (
-                <li key={d.id}>
-                  <Link href={`${RACINE}/reput?demande=${encodeURIComponent(d.id)}`} className="lin-ticket-sous-ligne" title={`${nomDe(d)} · ${STATUTS_DEMANDE[d.statut]}`}>
-                    <MessageSquare width={14} height={14} aria-hidden="true" className="sujets-sous-icone" />
-                    <span className="lin-ticket-sous-ref">{nomDe(d)}</span>
-                    <span className="lin-ticket-sous-nom">{d.objet || STATUTS_DEMANDE[d.statut]}</span>
-                    <span className="lin-ticket-sous-meta">{dateCourte(d.recu_le)}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+        </>
+      }
+      titre={a.libelle}
+      echeance={
+        a.statut === "active" && a.fin
+          ? { texte: `Accord jusqu'au ${dateLongue(a.fin)}` }
+          : a.statut === "expire"
+            ? { texte: a.fin ? `Accord expiré le ${dateLongue(a.fin)}` : "Accord expiré", urgence: "retard" }
+            : sujet?.delai_heures
+              ? { texte: `Traité sous ${sujet.delai_heures} h` }
+              : null
+      }
+      notes={
+        c === "principe" ? (
+          <Note>Ce sujet ne s&apos;autorise jamais : réclamations, urgences, demandes de parler à quelqu&apos;un et hors sujet sont toujours relus.</Note>
+        ) : !dirige ? (
+          <Note>Seuls le gérant ou l&apos;administrateur donnent ou révoquent un accord.</Note>
+        ) : a.statut === "a_valider" && !m.accords.seul_decideur ? (
+          <Note teinte="bleu">Un autre décideur active cet accord dans « À valider » : vous ne pouvez pas l&apos;activer vous-même.</Note>
+        ) : revoquer ? (
+          <Note teinte="bleu">La révocation demande un motif ; les réponses suivantes attendront votre validation.</Note>
+        ) : null
+      }
+      actions={
+        <>
+          {principal ? (
+            <button type="button" className="v2-btn v2-btn--primaire" disabled={envoi !== null} onClick={principal.action}>
+              {principal.icone} {principal.libelle}
+            </button>
           ) : null}
-
-          <hr className="lin-ticket-trait" />
-          <div className="lin-ticket-activite-tete" id="sujets-activite">
-            <h3>Activité</h3>
+          {revoquer ? (
+            <button type="button" className="v2-btn v2-det-btn-danger" disabled={envoi !== null} onClick={revoquer.action}>
+              {revoquer.icone} {revoquer.libelle}
+            </button>
+          ) : null}
+          {dirige && sujet?.delai_heures ? (
+            <button type="button" className="v2-btn v2-btn--fantome" disabled={envoi !== null} onClick={ouvrirDelai}>
+              <Clock width={16} height={16} aria-hidden="true" /> Changer le délai…
+            </button>
+          ) : null}
+          {/* Échap dans le menu ouvert ne referme que le menu, pas la carte */}
+          <div
+            className="v2 sujets-plus"
+            onKeyDown={(e) => {
+              if (e.key === "Escape" && e.currentTarget.querySelector(".lin-menu")) e.stopPropagation();
+            }}
+          >
+            <div className="lin">
+              <MenuActions rond titre="Plus d'actions" options={plus} />
+            </div>
           </div>
-          <ul className="lin-ticket-fil">
-            {fil.map((l) => (
-              <li key={l.cle}>
-                {l.icone}
-                <span>{l.texte}</span>
-              </li>
-            ))}
-            {c === "principe" ? (
-              <li>
-                <Lock {...ic} />
-                <span className="lin-ticket-fil-texte">Toujours relu, par principe.</span>
-              </li>
-            ) : attente ? (
-              <li>
-                <IconeEtat a={a} />
-                <div>
-                  <span className="lin-ticket-fil-texte">{attente}</span>
-                  <div className="lin-ticket-fil-actions">
-                    {gestes.map((g, i) => (
-                      <button key={g.cle} type="button" className="v2-btn v2-btn--petit" data-actif={i === gestes.length - 1 && g.cle !== "revoquer" ? "" : undefined} disabled={envoi !== null} onClick={g.action}>
-                        {g.libelle}
-                      </button>
-                    ))}
-                  </div>
+        </>
+      }
+    >
+      <dl className="v2-det-fiche">
+        <dt>État</dt>
+        <dd>
+          {c === "principe" ? "Relu par principe" : ETATS[a.statut]}
+          {a.statut === "active" ? <span className="v2-det-sous"> · part seul si la réponse est tirée de la base</span> : null}
+        </dd>
+        <dt>Genre</dt>
+        <dd>{genre}</dd>
+        {sujet && equipes.length ? (
+          <>
+            <dt>Service</dt>
+            <dd>{service?.nom ?? "Tous les décideurs"}</dd>
+          </>
+        ) : null}
+        {sujet?.delai_heures ? (
+          <>
+            <dt>Délai</dt>
+            <dd>
+              {sujet.delai_heures} h <span className="v2-det-sous">· passé ce délai, la demande remonte au responsable</span>
+            </dd>
+          </>
+        ) : null}
+        {a.statut === "active" ? (
+          <>
+            <dt>Ce mois-ci</dt>
+            <dd>
+              {pluriel(a.envoyees_seules_mois, "réponse")} partie{a.envoyees_seules_mois > 1 ? "s" : ""} seule{a.envoyees_seules_mois > 1 ? "s" : ""}
+            </dd>
+          </>
+        ) : null}
+      </dl>
+
+      {demandes.length ? (
+        <div className="v2-det-bloc">
+          <h3 className="v2-det-section-titre">
+            Demandes
+            <small>{demandes.length > 5 ? `5 sur ${demandes.length}` : pluriel(demandes.length, "demande")}</small>
+          </h3>
+          <ol className="v2-det-fil">
+            {demandes.slice(0, 5).map((d) => (
+              <li key={d.id}>
+                <span className="v2-det-fil-avatar" aria-hidden="true">
+                  <MessageSquare width={14} height={14} />
+                </span>
+                <div className="v2-det-fil-texte">
+                  <strong>
+                    <Link href={`${RACINE}/reput?demande=${encodeURIComponent(d.id)}`}>{nomDe(d)}</Link>
+                  </strong>
+                  <span>
+                    {d.objet || STATUTS_DEMANDE[d.statut]} · {dateCourte(d.recu_le)}
+                  </span>
                 </div>
               </li>
-            ) : !fil.length ? (
-              <li>
-                <IconeEtat a={a} />
-                <span className="lin-ticket-fil-texte">{ETATS[a.statut]}.</span>
-              </li>
-            ) : null}
-          </ul>
-        </article>
+            ))}
+          </ol>
+        </div>
+      ) : null}
 
-        <aside className="lin-ticket-cote" aria-label="Propriétés du sujet">
-          <section className="lin-ticket-section">
-            <h3>Propriétés</h3>
-            <div className="lin-ticket-pilules">
-              {gestes.length ? (
-                <MenuOptions
-                  raccourci="s"
-                  titre="Changer l'accord…"
-                  declencheur={
-                    <>
-                      <IconeEtat a={a} />
-                      {ETATS[a.statut]}
-                    </>
-                  }
-                  options={gestes}
-                  largeur={320}
-                />
-              ) : (
-                <span className="lin-ticket-pilule">
-                  <IconeEtat a={a} />
-                  {c === "principe" ? "Relu par principe" : ETATS[a.statut]}
+      <div className="v2-det-bloc" id="sujets-activite">
+        <h3 className="v2-det-section-titre">Activité</h3>
+        {fil.length ? (
+          <ol className="v2-det-fil">
+            {fil.map((l) => (
+              <li key={l.cle}>
+                <span className="v2-det-fil-avatar" aria-hidden="true">
+                  {l.icone}
                 </span>
-              )}
-              {sujet && equipes.length ? (
-                <MenuOptions
-                  raccourci="v"
-                  titre="Service qui décide…"
-                  declencheur={
-                    <>
-                      <IconeGroupe />
-                      {service?.nom ?? "Tous les décideurs"}
-                    </>
-                  }
-                  options={optionsService}
-                  largeur={300}
-                />
-              ) : null}
-              {sujet?.delai_heures ? (
-                <MenuOptions
-                  raccourci="d"
-                  titre="Délai de traitement…"
-                  declencheur={
-                    <>
-                      <Clock aria-hidden="true" />
-                      Traité sous {sujet.delai_heures} h
-                    </>
-                  }
-                  options={optionsDelai}
-                  largeur={300}
-                />
-              ) : null}
-            </div>
-          </section>
-          <section className="lin-ticket-section">
-            <h3>Étiquettes</h3>
-            <div className="lin-ticket-pilules">
-              <MenuOptions
-                titre="Genre…"
-                declencheur={
-                  <>
-                    {genreDe(a) === "message" ? <Mail aria-hidden="true" /> : <IconeDiese />}
-                    {genreDe(a) === "message" ? "Message type" : "Sujet de demande"}
-                  </>
-                }
-                options={optionsGenre}
-              />
-              {a.statut === "active" && a.fin ? (
-                <span className="lin-ticket-pilule lin-ticket-sous-pilule">
-                  <IconeCalendrier />
-                  Jusqu&apos;au {dateLongue(a.fin)}
-                </span>
-              ) : null}
-            </div>
-          </section>
-        </aside>
+                <div className="v2-det-fil-texte">
+                  <strong>{l.fort}</strong>
+                  <span>{l.texte}</span>
+                </div>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p className="v2-det-vide">{c === "principe" ? "Toujours relu, par principe." : "Aucun accord donné : chaque réponse sur ce sujet attend votre validation."}</p>
+        )}
       </div>
-    </section>
+    </CarteCentrale>
   );
 }
 

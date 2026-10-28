@@ -35,7 +35,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { BadgeCheck, Ban, Bell, Check, ChevronDown, ChevronUp, Clock, Copy, ExternalLink, FileText, Landmark, ListFilter, RefreshCw, SlidersHorizontal, Star, Unlock, UserCheck, Wallet } from "lucide-react";
+import { BadgeCheck, Ban, Check, Copy, ExternalLink, FileText, Landmark, ListFilter, RefreshCw, SlidersHorizontal, Star, Unlock, UserCheck, Wallet } from "lucide-react";
 import { Button, Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
 import { useSource } from "@/components/espace/source";
 import { useTempsReel } from "@/components/espace/tempsReel";
@@ -57,8 +57,9 @@ import {
 } from "@/components/espace/filed/portes";
 import type { Fournisseur, IbanFournisseur } from "@/components/espace/types";
 import { A_PAYER } from "./calculs";
-import { Choix, Menu, MenuActions, MenuOptions, useEpingles, type Option } from "../lin/Lin";
-import { IconeBoiteX, IconeDiese, IconeDocument, IconeGroupe, IconeNonLus, IconeStatutProjet, type EtatProjet } from "../lin/icones";
+import { Choix, Menu, MenuActions, useEpingles, type Option } from "../lin/Lin";
+import { CarteCentrale, Feuille } from "../lin/CarteCentrale";
+import { IconeDiese, IconeNonLus, IconeStatutProjet, type EtatProjet } from "../lin/icones";
 import { Note } from "../ui";
 import { useToast } from "../Toasts";
 import { useMonte } from "../horloge";
@@ -68,8 +69,6 @@ import "./tableau-fournisseurs.css";
 const CHEMIN = `${RACINE}/filed/fournisseurs`;
 const maintenant = () => new Date().toISOString();
 const sansAccents = (s: string) => s.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
-/* « IBAN validé » garde son sigle, « Identité vérifiée » passe en minuscule */
-const minuscule = (s: string) => (/^[A-Z]{2}/.test(s) ? s : s.charAt(0).toLowerCase() + s.slice(1));
 const pluriel = (n: number, mot: string) => `${n} ${mot}${n > 1 ? "s" : ""}`;
 
 /* ——— les colonnes : les états réels d'un fournisseur (filed_fournisseurs.statut), « IBAN à valider » mis à part ——— */
@@ -191,8 +190,6 @@ export default function TableauFournisseurs() {
   const [fait, setFait] = useState<{ id: string; texte: string } | null>(null);
   const [glisse, setGlisse] = useState<string | null>(null);
   const [depot, setDepot] = useState<Colonne | null>(null);
-  const activiteRef = useRef<HTMLDivElement>(null);
-  const detailRef = useRef<HTMLElement>(null);
   const [epingles, basculerEpingle] = useEpingles("filed-fournisseurs");
 
   /* ——— la base réelle : les mêmes portes que l'écran d'avant ——— */
@@ -346,11 +343,16 @@ export default function TableauFournisseurs() {
     return () => window.removeEventListener("keydown", touche);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form, id, colonnes, visibles.length, lienId]);
-  /* étroit : la fiche passe sous le tableau ; on la montre quand on ouvre une carte */
+  /* à la fermeture de la carte du milieu, le focus revient sur la carte du tableau */
+  const derniere = useRef<string | null>(null);
   useEffect(() => {
-    if (!id) return;
-    const el = detailRef.current;
-    if (el && el.getBoundingClientRect().top > window.innerHeight - 80) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (id) {
+      derniere.current = id;
+      return;
+    }
+    const avant = derniere.current;
+    derniere.current = null;
+    if (avant) window.setTimeout(() => document.querySelector<HTMLElement>(`[data-carte="${CSS.escape(avant)}"]`)?.focus(), 0);
   }, [id]);
 
   /* ——— les gestes : les portes de l'écran d'avant, ou la même chose en mémoire sur l'exemple ——— */
@@ -777,405 +779,298 @@ export default function TableauFournisseurs() {
       ) : !base.length ? (
         <p className="lin-vide">{erreur ? "Aucun fournisseur lu." : "Aucun fournisseur. Les fournisseurs naissent de la première facture lue."}</p>
       ) : (
-        <div className="lin-tableau-page">
-          {tableau}
-          {id ? (choisie ? detail(choisie) : introuvable()) : null}
-        </div>
+        <div className="lin-tableau-page">{tableau}</div>
       )}
+      {carteOuverte()}
       {fenetre()}
     </div>
   );
 
-  function introuvable() {
-    return (
-      <section className="lin-boite-detail" aria-label="Fournisseur introuvable" ref={detailRef}>
-        <header className="lin-tete">
-          <div className="lin-tete-ronds">
-            <button type="button" className="lin-rond" aria-label="Fermer (Échap)" title="Fermer (Échap)" onClick={() => aller(lienId(null))}>
-              <IconeBoiteX />
-            </button>
-          </div>
-        </header>
-        <p className="lin-vide">
-          Le fournisseur que désigne ce lien n&apos;est pas connu{source === "exemple" ? " (vous regardez les données d'exemple)" : ""}.{" "}
-          <Link href={lienId(null)} scroll={false} replace>
-            Revenir au tableau
-          </Link>
-        </p>
-      </section>
-    );
-  }
-
-  /* ——— le fournisseur ouvert : la page d'un ticket de Linear (comme ./BoiteAPayer.tsx) ———
-     le nom, une phrase, les gestes en icônes, ses IBAN et ses factures, le fil d'activité ;
-     à droite, sans cadre : statut, identité, IBAN, identifiants, factures. */
-  function detail(l: Ligne) {
+  /* ——— le fournisseur ouvert : la carte au milieu de l'écran, comme la carte de décision d'« À valider »
+     (Teo, 28/10 : « plutôt que d'ouvrir un truc sur la droite, ça ouvre une card au milieu ») ———
+     à gauche la fiche d'identité (feuille blanche, vraies valeurs) ; à droite le nom, la prochaine échéance,
+     la fiche des propriétés, les factures et l'activité ; en pied les gestes de l'écran d'avant. */
+  function carteOuverte() {
+    const ouverte = !!id && !chargement;
+    const fermer = () => aller(lienId(null));
+    if (!choisie) {
+      return (
+        <CarteCentrale
+          ouverte={ouverte}
+          fermer={fermer}
+          libelle="Fournisseur introuvable"
+          sur="FILED · Fournisseur"
+          gauche={<Feuille titre="FICHE FOURNISSEUR" sous={null} texte="Aucune fiche." />}
+          titre="Fournisseur introuvable"
+        >
+          <p className="v2-det-vide">Le fournisseur que désigne ce lien n&apos;est pas connu{source === "exemple" ? " (vous regardez les données d'exemple)" : ""}.</p>
+        </CarteCentrale>
+      );
+    }
+    const l = choisie;
     const f = l.f;
     const gestes = gestesDe(l);
     const geste = (cle: string) => gestes.find((g) => g.cle === cle);
     const lienFacture = (x: FactureDuFournisseur) => (A_PAYER.has(x.statut) ? `${RACINE}/filed/a-payer?id=${encodeURIComponent(x.id)}` : `${RACINE}/filed?objet=facture:${encodeURIComponent(x.id)}`);
     const lienDocuments = `${RACINE}/filed?objet=fournisseur:${encodeURIComponent(f.id)}`;
     const lienValidations = `${RACINE}/validations`;
-    const description =
-      f.statut === "a_confirmer"
-        ? `Fournisseur nouveau : ses factures restent bloquées tant qu'une personne n'a pas confirmé qu'il s'agit bien d'un fournisseur de l'entreprise.${l.deposant ? " Vous avez déposé sa première pièce : une autre personne confirme." : ""}`
-        : f.statut === "bloque"
-          ? "Bloqué : plus aucune facture n'est payée tant que le blocage tient."
-          : f.statut === "refuse"
-            ? "Écarté par une décision."
-            : l.proposes
-              ? `Confirmé, payable. ${l.proposes > 1 ? `${l.proposes} IBAN proposés attendent leur` : "Un IBAN proposé attend sa"} validation dans « À valider ».`
-              : "Confirmé, payable.";
+    const adresse = (f as Fournisseur & { adresse?: string | null }).adresse ?? null;
+    const proposes = l.ibans.filter((i) => i.statut === "propose");
 
-    /* le fil d'activité : ce que l'on sait, daté, dans l'ordre du temps */
-    type Entree = { cle: string; quand: string; icone: React.ReactNode; texte: React.ReactNode };
+    /* la position dans l'ordre du tableau : colonne par colonne, de haut en bas */
+    const rang = visibles.findIndex((x) => x.id === l.id);
+    const precedent = rang > 0 ? visibles[rang - 1] : null;
+    const suivant = rang >= 0 && rang < visibles.length - 1 ? visibles[rang + 1] : null;
+
+    /* la date qui compte : la prochaine échéance d'une facture encore à régler ou à traiter */
+    const prochaine = l.factures.filter((x) => x.echeance_lue && x.statut !== "ecartee").sort((a, b) => (a.echeance_lue ?? "").localeCompare(b.echeance_lue ?? ""))[0];
+    const echeance = prochaine?.echeance_lue
+      ? {
+          texte: `Échéance ${prochaine.reference ?? prochaine.numero ?? "facture"} · ${dateCourte(prochaine.echeance_lue)}`,
+          /* pas de rouge : l'état de paiement n'est pas chargé ici, une facture échue peut être payée */
+          urgence: undefined,
+        }
+      : null;
+
+    /* la feuille de gauche : la fiche d'identité, seulement ce que la base connaît */
+    const lignes: [string, string][] = [
+      ...(f.siren ? [["SIREN", f.siren] as [string, string]] : []),
+      ...(f.siret ? [["SIRET", f.siret] as [string, string]] : []),
+      ...(f.tva ? [["TVA intracommunautaire", f.tva] as [string, string]] : []),
+      ...(f.pays ? [["Pays", f.pays] as [string, string]] : []),
+      ...(f.regime_tva ? [["Régime de TVA", f.regime_tva] as [string, string]] : []),
+      ...(l.ibanValide ? [["IBAN validé", l.ibanValide.iban_masque] as [string, string]] : []),
+      ...proposes.map((i) => [`IBAN proposé le ${dateCourte(i.propose_le)}`, i.iban_masque] as [string, string]),
+      ["Identité", IDENTITES.find((x) => x.cle === l.identite)!.court],
+      ...(f.confirme_le ? [["Confirmé le", dateCourte(f.confirme_le)] as [string, string]] : []),
+    ];
+
+    /* l'activité : ce que l'on sait, daté, dans l'ordre du temps */
+    type Entree = { cle: string; quand: string; icone: React.ReactNode; qui: string; quoi: React.ReactNode };
     const fil: Entree[] = [
       ...l.ibans.map((i) => ({
         cle: `iban-${i.id}`,
         quand: i.propose_le,
-        icone: <Landmark aria-hidden="true" />,
-        texte: (
+        icone: <Landmark width={14} height={14} />,
+        qui: "IBAN proposé",
+        quoi: (
           <>
-            <b>IBAN proposé</b> · <span className="fou-mono">{i.iban_masque}</span> · {i.statut === "valide" ? "validé" : i.statut === "propose" ? "à valider" : i.statut === "refuse" ? "refusé" : "révoqué"} ·{" "}
-            {dateCourte(i.propose_le)}
+            <span className="v2-det-mono">{i.iban_masque}</span> · {i.statut === "valide" ? "validé" : i.statut === "propose" ? "à valider" : i.statut === "refuse" ? "refusé" : "révoqué"} · {dateCourte(i.propose_le)}
           </>
         ),
       })),
-      ...(f.identite_verifiee_le || l.identite !== "non"
-        ? [
-            {
-              cle: "identite",
-              quand: f.identite_verifiee_le ?? "",
-              icone: <BadgeCheck className={l.identite === "invalide" ? "fou-alerte" : undefined} aria-hidden="true" />,
-              texte: (
-                <>
-                  <b>Identité</b> · {l.identiteTexte}
-                </>
-              ),
-            },
-          ]
-        : []),
-      ...(f.confirme_le
-        ? [
-            {
-              cle: "confirme",
-              quand: f.confirme_le,
-              icone: <IconeStatutProjet etat="fait" />,
-              texte: (
-                <>
-                  <b>Confirmé</b> · {dateCourte(f.confirme_le)}
-                </>
-              ),
-            },
-          ]
-        : []),
+      ...(f.identite_verifiee_le || l.identite !== "non" ? [{ cle: "identite", quand: f.identite_verifiee_le ?? "", icone: <BadgeCheck width={14} height={14} />, qui: "Identité", quoi: <>{l.identiteTexte}</> }] : []),
+      ...(f.confirme_le ? [{ cle: "confirme", quand: f.confirme_le, icone: <UserCheck width={14} height={14} />, qui: "Confirmé", quoi: <>{dateCourte(f.confirme_le)}</> }] : []),
     ].sort((a, b) => a.quand.localeCompare(b.quand));
 
-    const rangCol = colonnes.find((c) => c.cle === l.col)?.cartes ?? [];
-    const rang = rangCol.findIndex((x) => x.id === l.id);
-    const precedent = rang > 0 ? rangCol[rang - 1] : null;
-    const suivant = rang >= 0 && rang < rangCol.length - 1 ? rangCol[rang + 1] : null;
+    /* les boutons : le geste qui fait avancer ce fournisseur en bleu, le blocage en rouge, trois boutons en tout,
+       le reste dans « Plus d'actions » — aucun geste de l'écran d'avant ne disparaît */
+    const principal = geste("confirmer") ?? (f.statut === "bloque" ? geste("bloquer") : null) ?? (l.identite !== "verifiee" ? (geste("reverifier") ?? geste("attester")) : null) ?? geste("iban") ?? null;
+    const danger = f.statut === "actif" ? geste("bloquer") : undefined;
+    const autres = gestes.filter((g) => g !== principal && g !== danger);
+    const visiblesBoutons = autres.slice(0, danger ? 1 : 2);
     const epingle = epingles.has(l.id);
-    const refermer = () => aller(lienId(null));
-    const optionsTete: Option[] = [
-      ...(precedent ? [{ cle: "precedent", libelle: "Fournisseur précédent", meta: `↑ · ${rang} / ${rangCol.length}`, icone: <ChevronUp width={16} height={16} />, action: () => aller(lienId(precedent.id)) }] : []),
-      ...(suivant ? [{ cle: "suivant", libelle: "Fournisseur suivant", meta: `↓ · ${rang + 2} / ${rangCol.length}`, icone: <ChevronDown width={16} height={16} />, action: () => aller(lienId(suivant.id)) }] : []),
-      ...gestes,
+    const plus: Option[] = [
+      ...autres.slice(visiblesBoutons.length),
+      { cle: "epingle", libelle: epingle ? "Désépingler" : "Épingler en haut de sa colonne", icone: <Star width={16} height={16} />, action: () => basculerEpingle(l.id) },
       { cle: "nom", libelle: "Copier le nom", icone: <Copy width={16} height={16} />, action: () => void copier(f.nom, "Nom copié") },
       ...(f.siren ? [{ cle: "siren", libelle: "Copier le SIREN", meta: f.siren, icone: <IconeDiese />, action: () => void copier(f.siren ?? "", "SIREN copié") }] : []),
       ...(f.tva ? [{ cle: "tva", libelle: "Copier la TVA", meta: f.tva, icone: <IconeDiese />, action: () => void copier(f.tva ?? "", "TVA copiée") }] : []),
+      ...(l.ibanValide
+        ? [{ cle: "copier-iban", libelle: "Copier l'IBAN (masqué)", meta: l.ibanValide.iban_masque, icone: <Copy width={16} height={16} />, action: () => void copier(l.ibanValide?.iban_masque ?? "", "IBAN copié") }]
+        : []),
+      ...(proposes.length && f.statut === "actif" ? [{ cle: "valider", libelle: "Valider l'IBAN dans « À valider »", icone: <ExternalLink width={16} height={16} />, href: lienValidations }] : []),
+      { cle: "seule", libelle: `Seulement « ${colonneDe(l.col).libelle} »`, icone: <ListFilter width={16} height={16} />, coche: estActif("colonne", l.col), href: basculer("colonne", l.col) },
       { cle: "documents", libelle: "Ouvrir dans Documents reçus", icone: <ExternalLink width={16} height={16} />, href: lienDocuments },
     ];
-    /* l'horloge : les dates du fournisseur — les échéances de ses factures (vers la facture), puis les faits datés (vers l'activité) */
-    const versActivite = () => activiteRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    const optionsDates: Option[] = [
-      ...l.factures
-        .filter((x) => x.echeance_lue)
-        .sort((a, b) => (a.echeance_lue ?? "").localeCompare(b.echeance_lue ?? ""))
-        .map((x) => ({ cle: `ech-${x.id}`, libelle: `Échéance ${x.reference ?? x.numero ?? "facture"}`, meta: dateCourte(x.echeance_lue), icone: <IconeDocument />, href: lienFacture(x) })),
-      ...fil
-        .filter((a) => a.quand)
-        .map((a) => ({
-          cle: a.cle,
-          libelle: a.cle === "confirme" ? "Confirmé" : a.cle === "identite" ? "Identité vérifiée" : "IBAN proposé",
-          meta: dateCourte(a.quand),
-          icone: <Clock width={16} height={16} />,
-          action: versActivite,
-        })),
-    ];
-    const optionsStatut: Option[] = [
-      ...gestes.filter((g) => g.cle === "confirmer" || g.cle === "bloquer"),
-      { cle: "filtre", libelle: `Seulement « ${colonneDe(l.col).libelle} »`, icone: <IconeColonne col={l.col} />, coche: estActif("colonne", l.col), href: basculer("colonne", l.col) },
-    ];
-    const optionsIdentite: Option[] = [
-      ...gestes.filter((g) => g.cle === "reverifier" || g.cle === "attester"),
-      {
-        cle: "filtre",
-        libelle: `Fournisseurs : ${minuscule(identiteLibelle(l.identite))}`,
-        icone: <BadgeCheck width={16} height={16} />,
-        coche: estActif("identite", l.identite),
-        href: basculer("identite", l.identite),
-      },
-    ];
-    const optionsIban: Option[] = [
-      ...gestes.filter((g) => g.cle === "iban"),
-      ...(l.proposes && f.statut === "actif" ? [{ cle: "valider", libelle: "Valider dans « À valider »", icone: <ExternalLink width={16} height={16} />, href: lienValidations }] : []),
-      ...(l.ibanValide
-        ? [{ cle: "copier", libelle: "Copier l'IBAN (masqué)", meta: l.ibanValide.iban_masque, icone: <Copy width={16} height={16} />, action: () => void copier(l.ibanValide?.iban_masque ?? "", "IBAN copié") }]
-        : []),
-      { cle: "filtre", libelle: `Fournisseurs : ${minuscule(ibanLibelle(l.iban))}`, icone: <Landmark width={16} height={16} />, coche: estActif("iban", l.iban), href: basculer("iban", l.iban) },
-    ];
-    const optionsFactures: Option[] = l.factures.map((x) => ({ cle: x.id, libelle: x.reference ?? x.numero ?? "Facture", meta: statutFacture(x.statut).libelle, icone: <IconeDocument />, href: lienFacture(x) }));
     const iconeGeste: Record<string, React.ReactNode> = {
-      confirmer: <UserCheck aria-hidden="true" />,
-      reverifier: <RefreshCw aria-hidden="true" />,
-      attester: <BadgeCheck aria-hidden="true" />,
-      iban: <Landmark aria-hidden="true" />,
-      bloquer: f.statut === "bloque" ? <Unlock aria-hidden="true" /> : <Ban aria-hidden="true" />,
+      confirmer: <UserCheck width={16} height={16} aria-hidden="true" />,
+      reverifier: <RefreshCw width={15} height={15} aria-hidden="true" />,
+      attester: <BadgeCheck width={16} height={16} aria-hidden="true" />,
+      iban: <Landmark width={16} height={16} aria-hidden="true" />,
+      bloquer: f.statut === "bloque" ? <Unlock width={15} height={15} aria-hidden="true" /> : <Ban width={15} height={15} aria-hidden="true" />,
+    };
+    /* les libellés courts des boutons du pied (le libellé entier reste en infobulle et dans « Plus d'actions ») */
+    const COURTS: Record<string, string> = { confirmer: "Confirmer", reverifier: "Revérifier", attester: "Attester", iban: "Proposer un IBAN", bloquer: f.statut === "bloque" ? "Débloquer" : "Bloquer" };
+    const bouton = (g: Option, classe: string) => {
+      const refuse = g.cle === "confirmer" && l.deposant;
+      return (
+        <button
+          key={g.cle}
+          type="button"
+          className={classe}
+          disabled={refuse || (g.cle === "reverifier" && envoi && !form)}
+          title={refuse ? "Vous avez déposé la pièce d'origine : une autre personne confirme." : g.libelle.replace("…", "")}
+          onClick={g.action}
+        >
+          {iconeGeste[g.cle]} {COURTS[g.cle] ?? g.libelle.replace("…", "")}
+        </button>
+      );
     };
 
     return (
-      <section className="lin-boite-detail" aria-label={`Fournisseur ${f.nom}`} ref={detailRef}>
-        <header className="lin-tete">
-          <span className="lin-tete-ref">{l.ref}</span>
-          <span className="lin-tete-nom">{f.nom}</span>
-          <button
-            type="button"
-            className="lin-rond"
-            aria-pressed={epingle}
-            aria-label={epingle ? "Désépingler" : "Épingler en haut de sa colonne"}
-            title={epingle ? "Désépingler" : "Épingler en haut de sa colonne"}
-            onClick={() => basculerEpingle(l.id)}
-          >
-            <Star fill={epingle ? "currentColor" : "none"} aria-hidden="true" />
-          </button>
-          <MenuActions rond aGauche titre="Actions" options={optionsTete} />
-          <div className="lin-tete-ronds">
-            <button type="button" className="lin-rond" aria-label="Voir l'activité" title="Voir l'activité" onClick={versActivite}>
-              <Bell aria-hidden="true" />
-            </button>
-            <MenuOptions rond aDroite libelle="Dates" titre="Dates…" declencheur={<Clock aria-hidden="true" />} options={optionsDates} largeur={300} />
-            <button type="button" className="lin-rond" aria-label="Fermer (Échap)" title="Fermer (Échap)" onClick={refermer}>
-              <IconeBoiteX />
-            </button>
-          </div>
-        </header>
-
-        <div className="lin-ticket">
-          <article className="lin-ticket-corps">
-            <h2 className="lin-ticket-titre">{f.nom}</h2>
-            <p className="lin-ticket-desc">{description}</p>
-            {gestes.length ? (
-              <div className="lin-ticket-icones">
-                {gestes.map((g) => {
-                  const refuse = g.cle === "confirmer" && l.deposant;
-                  const titre = refuse ? "Vous avez déposé la pièce d'origine : une autre personne confirme." : g.libelle.replace("…", "");
-                  return (
-                    <button key={g.cle} type="button" className="lin-ticket-icone" aria-label={titre} title={titre} disabled={refuse || (g.cle === "reverifier" && envoi && !form)} onClick={g.action}>
-                      {iconeGeste[g.cle]}
-                    </button>
-                  );
-                })}
-              </div>
-            ) : null}
-
-            {l.ibans.length ? (
-              <>
-                <p className="fou-sous-titre">IBAN</p>
-                <ul className="lin-ticket-sous" aria-label={`IBAN de ${f.nom}`}>
-                  {l.ibans.map((i) => (
-                    <li key={i.id}>
-                      <span className="lin-ticket-sous-ligne">
-                        <Landmark className="fou-ic" aria-hidden="true" />
-                        <span className="lin-ticket-sous-ref fou-mono">{i.iban_masque}</span>
-                        <span className="lin-ticket-sous-nom">
-                          {i.statut === "propose" ? (
-                            f.statut === "a_confirmer" ? (
-                              "validé avec le fournisseur à sa confirmation"
-                            ) : (
-                              <>
-                                à valider dans <Link href={lienValidations}>« À valider »</Link>
-                              </>
-                            )
-                          ) : (
-                            `proposé le ${dateCourte(i.propose_le)}`
-                          )}
-                        </span>
-                        <span className="lin-ticket-sous-meta">{i.statut === "valide" ? "Validé" : i.statut === "propose" ? "Proposé" : i.statut === "refuse" ? "Refusé" : "Révoqué"}</span>
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            ) : (
-              <p className="fou-sous-titre fou-sous-vide">Aucun IBAN connu : le paiement passera par un autre moyen, ou proposez-en un.</p>
-            )}
-
-            {l.factures.length ? (
-              <>
-                <p className="fou-sous-titre">Factures</p>
-                <ul className="lin-ticket-sous" aria-label={`Factures de ${f.nom}`}>
-                  {l.factures.map((x) => (
-                    <li key={x.id}>
-                      <Link href={lienFacture(x)} className="lin-ticket-sous-ligne">
-                        <IconeDocument />
-                        <span className="lin-ticket-sous-ref">{x.reference ?? x.numero ?? "Facture"}</span>
-                        <span className="lin-ticket-sous-nom">
-                          {statutFacture(x.statut).libelle.toLowerCase()}
-                          {x.date_emission ? `, du ${dateCourte(x.date_emission)}` : ""}
-                        </span>
-                        <span className="lin-ticket-sous-meta">{x.montant_ttc !== null ? `${montant(x.montant_ttc, x.devise)} TTC` : ""}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            ) : (
-              <p className="fou-sous-titre fou-sous-vide">Aucune facture rattachée.</p>
-            )}
-
-            <hr className="lin-ticket-trait" />
-            <div className="lin-ticket-activite-tete" ref={activiteRef}>
-              <h3>Activité</h3>
+      <CarteCentrale
+        ouverte={ouverte}
+        fermer={fermer}
+        libelle={`Fournisseur ${f.nom}`}
+        sur="FILED · Fournisseur"
+        statut={
+          <>
+            <IconeColonne col={l.col} />
+            {colonneDe(l.col).un}
+          </>
+        }
+        nav={{ position: rang + 1, total: visibles.length, precedente: precedent ? () => aller(lienId(precedent.id)) : undefined, suivante: suivant ? () => aller(lienId(suivant.id)) : undefined }}
+        gauche={
+          <Feuille
+            titre="FICHE FOURNISSEUR"
+            sous={l.ref}
+            nom={f.nom}
+            sousNom={adresse ? [adresse] : undefined}
+            lignes={lignes}
+            total={["Factures", l.enCours ? `${l.factures.length}, dont ${l.enCours} en cours` : String(l.factures.length)]}
+          />
+        }
+        piedGauche={
+          <>
+            <div className="v2-det-document-ligne">
+              <span className="v2-det-mono">{l.ref}</span>
+              <span className="v2-det-sous">{l.identiteTexte}</span>
             </div>
-            <ul className="lin-ticket-fil">
-              {fil.map((a) => (
-                <li key={a.cle}>
-                  {a.icone}
-                  <span>{a.texte}</span>
+            <div className="v2-det-document-ligne">
+              <span className="v2-det-sous">{l.enCours ? `${pluriel(l.factures.length, "facture")}, ${l.enCours} en cours` : pluriel(l.factures.length, "facture")}</span>
+              <Link href={lienDocuments} className="v2-btn v2-btn--petit v2-btn--fantome v2-det-document-ouvrir">
+                <ExternalLink width={14} height={14} aria-hidden="true" /> Ouvrir dans Documents reçus
+              </Link>
+            </div>
+          </>
+        }
+        titre={f.nom}
+        echeance={echeance}
+        notes={
+          <>
+            {f.statut === "a_confirmer" ? (
+              <Note teinte="ambre">
+                <strong>Fournisseur nouveau.</strong> Ses factures restent bloquées tant qu&apos;une personne n&apos;a pas confirmé qu&apos;il s&apos;agit bien d&apos;un fournisseur de l&apos;entreprise.
+                {l.deposant ? " Vous avez déposé sa première pièce : une autre personne confirme." : ""}
+              </Note>
+            ) : null}
+            {f.statut === "bloque" ? (
+              <Note teinte="rouge">
+                <strong>Bloqué.</strong> Plus aucune facture n&apos;est payée tant que le blocage tient ; le débloquer demande un motif.
+              </Note>
+            ) : null}
+            {f.statut === "actif" && proposes.length ? (
+              <Note teinte="bleu">
+                {proposes.length > 1 ? `${proposes.length} IBAN proposés attendent leur` : "Un IBAN proposé attend sa"} validation dans <Link href={lienValidations}>« À valider »</Link> avant tout paiement.
+              </Note>
+            ) : null}
+            {fait && fait.id === l.id ? (
+              <Note teinte="vert" role="status">
+                <strong>C&apos;est fait.</strong> {fait.texte}
+              </Note>
+            ) : null}
+            {erreurAction && !form ? (
+              <Note teinte="rouge" role="alert">
+                <strong>Refusé par la base.</strong> {erreurAction}
+              </Note>
+            ) : null}
+          </>
+        }
+        actions={
+          <>
+            {principal ? bouton(principal, "v2-btn v2-btn--primaire") : null}
+            {danger ? bouton(danger, "v2-btn v2-det-btn-danger") : null}
+            {visiblesBoutons.map((g) => bouton(g, "v2-btn v2-btn--fantome"))}
+            {/* la carte est rendue hors de la page (portail de react-aria) : le menu retrouve ses jetons dans ce petit « .v2 .lin » */}
+            <span className="v2 fou-plus">
+              <span className="lin">
+                <MenuActions rond titre="Plus d'actions" options={plus} />
+              </span>
+            </span>
+          </>
+        }
+      >
+        <dl className="v2-det-fiche">
+          <dt>Statut</dt>
+          <dd>
+            {colonneDe(l.col).un} <span className="v2-det-sous">· {colonneDe(l.col).sous}</span>
+          </dd>
+          <dt>Identité</dt>
+          <dd>{l.identiteTexte}</dd>
+          {f.siren || f.tva ? (
+            <>
+              <dt>Identifiants</dt>
+              <dd>
+                {f.siren ? <span className="v2-det-mono">SIREN {f.siren}</span> : null}
+                {f.siren && f.tva ? " · " : null}
+                {f.tva ? <span className="v2-det-mono">TVA {f.tva}</span> : null}
+              </dd>
+            </>
+          ) : null}
+          <dt>IBAN</dt>
+          <dd>
+            {l.ibanValide ? <span className="v2-det-mono">{l.ibanValide.iban_masque}</span> : "Aucun IBAN validé"}
+            {proposes.length ? (
+              <span className="v2-det-sous">
+                {" "}
+                · {f.statut === "a_confirmer" ? `${pluriel(proposes.length, "proposé")}, validé avec le fournisseur à sa confirmation` : `${pluriel(proposes.length, "proposé")} à valider`}
+              </span>
+            ) : null}
+          </dd>
+        </dl>
+
+        <div className="v2-det-bloc">
+          <h3 className="v2-det-section-titre">
+            Factures
+            <small>{l.enCours ? `${l.factures.length} · ${l.enCours} en cours` : l.factures.length}</small>
+          </h3>
+          {l.factures.length ? (
+            <ol className="v2-det-fil">
+              {l.factures.map((x) => (
+                <li key={x.id}>
+                  <span className="v2-det-fil-avatar" aria-hidden="true">
+                    <FileText width={14} height={14} />
+                  </span>
+                  <div className="v2-det-fil-texte">
+                    <strong>
+                      <Link href={lienFacture(x)}>{x.reference ?? x.numero ?? "Facture"}</Link>
+                    </strong>
+                    <span>
+                      {statutFacture(x.statut).libelle}
+                      {x.montant_ttc !== null ? ` · ${montant(x.montant_ttc, x.devise)} TTC` : ""}
+                      {x.echeance_lue ? ` · échéance ${dateCourte(x.echeance_lue)}` : x.date_emission ? ` · du ${dateCourte(x.date_emission)}` : ""}
+                    </span>
+                  </div>
                 </li>
               ))}
-              {!fil.length ? (
-                <li>
-                  <IconeStatutProjet etat="planifie" />
-                  <span>Rien d&apos;enregistré pour l&apos;instant.</span>
-                </li>
-              ) : null}
-              {fait && fait.id === l.id ? (
-                <li role="status">
-                  <IconeStatutProjet etat="fait" />
-                  <span className="lin-ticket-fil-texte fou-fait">
-                    <strong>C&apos;est fait.</strong> {fait.texte}
-                  </span>
-                </li>
-              ) : null}
-              {erreurAction && !form ? (
-                <li role="alert">
-                  <IconeStatutProjet etat="annule" />
-                  <span className="lin-ticket-fil-texte fou-rouge">
-                    <strong>Refusé par la base.</strong> {erreurAction}
-                  </span>
-                </li>
-              ) : null}
-            </ul>
-          </article>
-
-          <aside className="lin-ticket-cote" aria-label="Propriétés du fournisseur">
-            <section className="lin-ticket-section">
-              <h3>Propriétés</h3>
-              <div className="lin-ticket-pilules">
-                <MenuOptions
-                  raccourci="s"
-                  titre="Statut…"
-                  declencheur={
-                    <>
-                      <IconeColonne col={l.col} />
-                      {colonneDe(l.col).un}
-                    </>
-                  }
-                  options={optionsStatut}
-                  largeur={300}
-                />
-                <MenuOptions
-                  raccourci="i"
-                  titre="Identité…"
-                  declencheur={
-                    <>
-                      <IconeIdentite l={l} />
-                      {identiteLibelle(l.identite)}
-                    </>
-                  }
-                  options={optionsIdentite}
-                  largeur={300}
-                />
-                <MenuOptions
-                  raccourci="b"
-                  titre="IBAN…"
-                  declencheur={
-                    <>
-                      <Landmark aria-hidden="true" />
-                      {l.ibanValide ? l.ibanValide.iban_masque : l.proposes ? `${pluriel(l.proposes, "IBAN")} à valider` : "Sans IBAN"}
-                    </>
-                  }
-                  options={optionsIban}
-                  largeur={320}
-                />
-              </div>
-            </section>
-            {f.siren || f.tva || f.code ? (
-              <section className="lin-ticket-section">
-                <h3>Identifiants</h3>
-                <div className="lin-ticket-pilules">
-                  {f.siren ? (
-                    <button type="button" className="lin-ticket-pilule" title="Copier le SIREN" onClick={() => void copier(f.siren ?? "", "SIREN copié")}>
-                      <IconeDiese />
-                      SIREN {f.siren}
-                    </button>
-                  ) : null}
-                  {f.tva ? (
-                    <button type="button" className="lin-ticket-pilule" title="Copier la TVA" onClick={() => void copier(f.tva ?? "", "TVA copiée")}>
-                      <IconeDiese />
-                      TVA {f.tva}
-                    </button>
-                  ) : null}
-                  {f.code ? (
-                    <span className="lin-ticket-pilule" title="Code fournisseur">
-                      <IconeDiese />
-                      {f.code}
-                    </span>
-                  ) : null}
-                </div>
-              </section>
-            ) : null}
-            <section className="lin-ticket-section">
-              <h3>Factures</h3>
-              <div className="lin-ticket-pilules">
-                {l.factures.length ? (
-                  <MenuOptions
-                    raccourci="f"
-                    titre="Factures du fournisseur…"
-                    declencheur={
-                      <>
-                        <IconeDocument />
-                        {pluriel(l.factures.length, "facture")}
-                        {l.enCours ? `, ${l.enCours} en cours` : ""}
-                      </>
-                    }
-                    options={optionsFactures}
-                    largeur={320}
-                  />
-                ) : (
-                  <span className="lin-ticket-pilule" data-vide="">
-                    <IconeDocument />
-                    Aucune facture
-                  </span>
-                )}
-                {geste("confirmer") ? (
-                  <span className="lin-ticket-pilule lin-ticket-sous-pilule" data-alerte="">
-                    <IconeGroupe />
-                    {l.bloquees ? `${pluriel(l.bloquees, "facture")} bloquée${l.bloquees > 1 ? "s" : ""} jusqu'à confirmation` : "Bloquées jusqu'à confirmation"}
-                  </span>
-                ) : f.statut === "bloque" ? (
-                  <span className="lin-ticket-pilule lin-ticket-sous-pilule" data-alerte="">
-                    <Ban aria-hidden="true" />
-                    Ne pas payer : fournisseur bloqué
-                  </span>
-                ) : null}
-              </div>
-            </section>
-          </aside>
+            </ol>
+          ) : (
+            <p className="v2-det-vide">Aucune facture rattachée.</p>
+          )}
         </div>
-      </section>
+
+        <div className="v2-det-bloc">
+          <h3 className="v2-det-section-titre">Activité</h3>
+          {fil.length ? (
+            <ol className="v2-det-fil">
+              {fil.map((a) => (
+                <li key={a.cle}>
+                  <span className="v2-det-fil-avatar" aria-hidden="true">
+                    {a.icone}
+                  </span>
+                  <div className="v2-det-fil-texte">
+                    <strong>{a.qui}</strong>
+                    <span>{a.quoi}</span>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="v2-det-vide">Rien d&apos;enregistré pour l&apos;instant.</p>
+          )}
+        </div>
+      </CarteCentrale>
     );
   }
 

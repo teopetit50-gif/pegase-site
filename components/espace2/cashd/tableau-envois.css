@@ -42,73 +42,6 @@
   cursor: grabbing;
 }
 
-/* la fiche ouverte à droite du tableau : elle reste en vue (collée sous la tête de la page) et défile seule ;
-   dans ses 560 px, la page du ticket passe sur une colonne (les propriétés sous le texte) */
-.v2 .lin .c2e-page {
-  align-items: flex-start;
-}
-.v2 .lin .c2e-page > .lin-tableau {
-  align-self: stretch;
-  min-width: 0;
-}
-.v2 .lin .c2e-page > .c2e-detail {
-  position: sticky;
-  top: 44px;
-  align-self: flex-start;
-  max-height: calc(100dvh - 92px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-.v2 .lin .c2e-detail > .lin-tete {
-  top: 0;
-}
-.v2 .lin .c2e-detail .lin-ticket {
-  flex-direction: column;
-  gap: 24px;
-  padding: 0 24px 48px;
-}
-.v2 .lin .c2e-detail .lin-ticket-corps {
-  width: 100%;
-  max-width: none;
-  padding-top: 32px;
-}
-.v2 .lin .c2e-detail .lin-ticket-cote {
-  width: auto;
-  padding-top: 0;
-}
-@container principale (max-width: 900px) {
-  .v2 .lin .c2e-page {
-    align-items: stretch;
-  }
-  .v2 .lin .c2e-page > .c2e-detail {
-    position: static;
-    max-height: none;
-    overflow: visible;
-  }
-}
-
-/* le texte d'une relance, tel qu'il partira : ses retours à la ligne gardés */
-.v2 .lin .lin-ticket-desc.c2e-corps {
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-/* la « référence » de la tête est le nom du débiteur, parfois long : elle se coupe au lieu d'écraser le titre */
-.v2 .lin .c2e-detail .lin-tete-ref {
-  min-width: 48px;
-  flex-shrink: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-/* l'enveloppe qui donne sa bulle à l'horloge, sans compter dans la rangée */
-.v2 .lin .c2e-bulle {
-  display: contents;
-}
-/* la cloche s'arrête sous la tête collante de la fiche */
-.v2 .lin #c2e-activite {
-  scroll-margin-top: 56px;
-}
-
 /* les sections du menu de filtre */
 .v2 .lin .c2e-menu-titre {
   padding: 8px 16px 4px;
@@ -130,24 +63,58 @@
   color: var(--lin-second);
 }
 
-/* une entrée du fil : la phrase, puis le texte et les boutons d'une décision en attente */
-.v2 .lin .c2e-fil-corps {
-  flex: 1;
-  min-width: 0;
+/* ——— la carte ouverte au milieu (../lin/CarteCentrale, classes de la carte d'« À valider ») ——— */
+
+/* « Plus d'actions » : le menu « ··· » du gabarit Linear, posé dans le pied de la carte. Ses enveloppes
+   .v2 .lin ne lui donnent que ses jetons et ses styles (aucune boîte) ; il s'ouvre vers le haut, calé à droite. */
+.v2-val-carte .v2.c2e-plus,
+.v2-val-carte .c2e-plus.lin {
+  display: contents;
 }
-.v2 .lin .c2e-detail .lin-ticket-fil .lin-ticket-fil-texte {
-  display: block;
-  margin-top: 4px;
+.v2-val-carte .c2e-plus .lin-menu--options {
+  top: auto;
+  bottom: calc(100% + 5px);
+}
+.v2-val-carte .c2e-plus .lin-rond {
+  width: 32px;
+  height: 32px;
+  color: var(--v2-gray-900);
+}
+
+/* « Noter l'envoi à la main » réglé dans la carte : le canal, dans la note contre les boutons */
+.v2-val-carte .c2e-canal {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+/* la prochaine étape, une fois sa date passée */
+.v2-val-carte .c2e-passe {
+  color: var(--v2-red-900, var(--lin-orange));
+}
+
+/* « Ses autres relances » : chacune s'ouvre dans la carte */
+.v2-val-carte .c2e-autres {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+.v2-val-carte .c2e-autre {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 6px 8px;
+  margin: 0 -8px;
+  border-radius: 6px;
+  font: inherit;
   font-size: 13px;
-  line-height: 19px;
+  color: var(--v2-gray-1000);
+  text-align: left;
 }
-.v2 .lin .c2e-detail .lin-ticket-fil > li[data-attente] b {
-  color: var(--lin-texte);
-}
-.v2 .lin .c2e-detail a.lin-ticket-icone {
-  color: var(--lin-second);
-}
-.v2 .lin .c2e-gris {
-  color: var(--lin-second);
-  font-weight: 450;
+.v2-val-carte .c2e-autre:hover {
+  background: var(--v2-gray-100);
 }
