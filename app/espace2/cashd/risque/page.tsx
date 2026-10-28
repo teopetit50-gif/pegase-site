@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
-import { Risque } from "@/components/espace2/cashd/Fonctions";
+import { Suspense } from "react";
+import { Risque } from "@/components/espace2/cashd/Clients";
 
-/* /espace2/cashd/risque — CASHD, les plafonds d'encours (page de fonction, 21/10/2026). */
+/* /espace2/cashd/risque — CASHD, le risque client sur les pages « Tenants » de
+   Plain (28/10/2026) : la liste des comptes (plafond, encours, utilisation,
+   état), et la fiche d'un débiteur en pleine page (?id=). */
 
 export const metadata: Metadata = {
   title: "Risque client",
@@ -9,5 +12,9 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <Risque />;
+  return (
+    <Suspense>
+      <Risque />
+    </Suspense>
+  );
 }

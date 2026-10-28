@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
-import EcranBoite from "@/components/espace/filed/EcranBoite";
-import { HabilleSb } from "@/components/espace2/Habille";
+import { Suspense } from "react";
+import FilsBoite from "@/components/espace2/filed/FilsBoite";
 
-/* /espace2/filed/boite — l'écran de /espace/filed/boite, au dessin de la page Logs de Supabase (22/10). */
+/* /espace2/filed/boite — la boîte de réception de FILED sur la liste des fils
+   de Plain (28/10/2026) : onglets Nouveaux · Lus · Tous, filtres et tri dans
+   l'adresse, le courriel ouvert dans la carte au milieu. Mêmes données et
+   mêmes gestes que l'écran d'avant (components/espace/filed/EcranBoite.tsx). */
 
 export const metadata: Metadata = {
   title: "Boîte de réception",
@@ -11,8 +14,8 @@ export const metadata: Metadata = {
 
 export default function PageFiledBoite() {
   return (
-    <HabilleSb>
-      <EcranBoite gabarit="sb" />
-    </HabilleSb>
+    <Suspense>
+      <FilsBoite />
+    </Suspense>
   );
 }

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Refusees } from "@/components/espace2/filed/Refusees";
 
-/* /espace2/filed/refusees — FILED, les factures refusées : à reprendre ou à classer sans suite (26/10/2026). */
+/* /espace2/filed/refusees — FILED, les factures refusées : à reprendre ou à
+   classer sans suite (26/10/2026), sur la liste des fils de Plain (28/10/2026). */
 
 export const metadata: Metadata = {
   title: "Refusées, à reprendre ou à classer",
@@ -9,5 +11,9 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <Refusees />;
+  return (
+    <Suspense>
+      <Refusees />
+    </Suspense>
+  );
 }

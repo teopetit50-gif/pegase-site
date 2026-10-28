@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
-import { Litiges } from "@/components/espace2/cashd/Fonctions";
+import { Suspense } from "react";
+import { FilsLitiges } from "@/components/espace2/cashd/FilsCashd";
 
-/* /espace2/cashd/litiges — CASHD, les comptes sortis du cycle de relance (page de fonction, 21/10/2026). */
+/* /espace2/cashd/litiges — CASHD, les comptes sortis du cycle de relance, sur la
+   liste des fils de Plain (28/10/2026) : onglets En litige · En pause · Toutes
+   les situations, filtres et tri dans l'adresse, la carte du compte au milieu. */
 
 export const metadata: Metadata = {
   title: "Litiges et pauses",
@@ -9,5 +12,9 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <Litiges />;
+  return (
+    <Suspense>
+      <FilsLitiges />
+    </Suspense>
+  );
 }

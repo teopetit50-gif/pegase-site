@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
-import { Devis } from "@/components/espace2/cashd/Fonctions";
+import { Suspense } from "react";
+import { FilsDevis } from "@/components/espace2/cashd/FilsCashd";
 
-/* /espace2/cashd/devis — CASHD, les devis sans réponse (page de fonction, 21/10/2026). */
+/* /espace2/cashd/devis — CASHD, les devis sans réponse, sur la liste des fils
+   de Plain (28/10/2026) : onglets À rappeler · Avant le premier rappel · Tous,
+   filtres et tri dans l'adresse, la carte du devis au milieu. */
 
 export const metadata: Metadata = {
   title: "Devis sans réponse",
@@ -9,5 +12,9 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <Devis />;
+  return (
+    <Suspense>
+      <FilsDevis />
+    </Suspense>
+  );
 }

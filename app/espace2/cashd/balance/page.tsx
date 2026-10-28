@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
-import { BalanceAgee } from "@/components/espace2/cashd/Fonctions";
+import { Suspense } from "react";
+import { BalanceAgee } from "@/components/espace2/cashd/Clients";
 
-/* /espace2/cashd/balance — CASHD, la balance âgée (page de fonction, 21/10/2026). */
+/* /espace2/cashd/balance — CASHD, la balance âgée sur les pages « Tenants » de
+   Plain (28/10/2026) : la liste des comptes, et la fiche d'un débiteur en
+   pleine page (?id=). Mêmes données et mêmes portes que la page d'avant. */
 
 export const metadata: Metadata = {
   title: "Balance âgée",
@@ -9,5 +12,9 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <BalanceAgee />;
+  return (
+    <Suspense>
+      <BalanceAgee />
+    </Suspense>
+  );
 }

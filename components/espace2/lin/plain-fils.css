@@ -1,0 +1,974 @@
+/* ══════════════════════════════════════════════════════════════════════
+   La liste des fils de Plain (« All threads »), au 1:1 — 28/10/2026
+
+   Relevée au getComputedStyle dans l'espace Plain de Teo (app.plain.com,
+   fenêtre de 1600 px, thème sombre), panneau de 1239 de large. Les couleurs
+   sont celles du gabarit (--lin-*, lin.css : clair et sombre) ; tout le
+   reste (hauteurs, écarts, polices, graisses, rayons, colonnes) est celui
+   de Plain, au pixel. Relevé : scratchpad/releve-plain-fils.md.
+
+   Repères, en px depuis le bord gauche du panneau :
+     tête        padding 24, 58 de haut (boutons de 34 + 24 dessous) ; icône 24 à x 24, titre 20/400 à x 56 ;
+                 boutons à droite, 12 d'écart, finissant à 24 du bord : 34 de haut, padding 8 12 8 8, rayon 6,
+                 icône 18 + 4, libellé 12/600, raccourci <kbd> 18 × 18 à 6
+     onglets     rangée de 48 (padding 0 24), pilules de 28 (padding 0 6, rayon 6, 12/600 actif ; 12/400 à 80 %
+                 inactif), 2 d'écart, icône 18 + 4, compteur à 4
+     section     padding 24 32 12 ; icône 18, titre 14/600 à 8, compteur 14/400 gris à 8 ; description 12/400 à 26
+     ligne       67 de haut (8 + 50.5 + 8 + 0.5 de trait) ; colonnes 32 · 18 · 300 · 1fr · 76 · 84 · 113.5 · 94 ;
+                 poignée 24 (visible au survol), icône d'état 18, avatar 24 rayon 6 à x 62, nom 14/600 à x 92,
+                 titre à x 362 (référence 14/600 grise, titre 14/600, aperçu 14/400 gris, 4 d'écart),
+                 priorité (icône 18 + libellé 14/400), heure (icône 18 + 14/400 gris) calée à 12 du bord de
+                 colonne, assigné (bouton 32, avatar 18 rayon 4) à 16 du bord droit
+     état vide   carte 450 × 114 centrée, 56 sous les onglets, padding 32, rayon 10, trait 1
+     menus       panneau 237 (Filtres) / 282 (Affichage), fond relevé, trait 1, rayon 10 ; options de 36
+                 (padding 8, rayon 4, marge 0 4), icône 18 + 8, 14/400 ; survol fond relevé
+
+   Jetons pris au plus proche (pas d'équivalent exact chez --lin-*) :
+     fond du panneau 26,25,27 → --lin-fond ; texte 238,238,240 → --lin-titre ; gris 181,178,188 et
+     152,151,159 → --lin-second ; survol de bouton 35,34,37 → --lin-survol ; onglet actif et fond de
+     <kbd> 43,41,45 → --lin-pastille-active ; trait de <kbd> 73,71,78 → --lin-menu-bord ; trait de ligne
+     50,48,53 → --lin-trait ; bleu « Todo » 86,150,255 → --lin-graph-bleu ; barres de priorité éteintes
+     73,71,78 → --lin-maj-trait ; menus 18,17,19 / 50,48,53 / 35,34,37 → --lin-menu-fond / --lin-menu-bord /
+     --lin-menu-survol ; carte vide (trait 43,41,45) → --lin-detail-trait.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lin.pf {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lin-titre);
+}
+
+/* ——— tête de page ——— */
+.v2 .lin .pf-tete {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px 24px 24px;
+}
+.v2 .lin .pf-titre {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  height: 28px;
+}
+.v2 .lin .pf-titre-icone {
+  display: flex;
+  align-items: center;
+  width: 24px;
+  height: 24px;
+  color: var(--lin-second);
+}
+.v2 .lin .pf-titre-icone svg {
+  width: 24px;
+  height: 24px;
+}
+.v2 .lin .pf-h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 28px;
+  color: var(--lin-titre);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lin .pf-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* le bouton de la tête : 34 de haut, padding 8 12 8 8, rayon 6, sans bord ; survol fond relevé */
+.v2 .lin .pf-btn {
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 8px 12px 8px 8px;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--lin-titre);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s ease-in-out;
+}
+.v2 .lin .pf-btn:hover,
+.v2 .lin .pf-btn[aria-expanded="true"] {
+  background: var(--lin-survol);
+}
+.v2 .lin .pf-btn:hover svg,
+.v2 .lin .pf-btn[aria-expanded="true"] svg {
+  color: var(--lin-titre);
+}
+.v2 .lin .pf-btn > svg {
+  width: 18px;
+  height: 18px;
+  margin: 0 4px 0 -2px;
+  color: var(--lin-second);
+  transition: color 0.15s ease-in-out;
+}
+.v2 .lin .pf-btn[data-actif] > svg {
+  color: var(--lin-graph-bleu);
+}
+.v2 .lin .pf-btn:focus-visible,
+.v2 .lin .pf-onglet:focus-visible,
+.v2 .lin .pf-ligne:focus-visible,
+.v2 .lin .pf-option:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: -2px;
+}
+.v2 .lin .pf-kbd {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-left: 6px;
+  padding: 0 2px;
+  border: 1px solid var(--lin-menu-bord);
+  border-radius: 4px;
+  background: var(--lin-pastille-active);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+  color: var(--lin-second);
+}
+.v2 .lin .pf-btn-n {
+  margin-left: 4px;
+  font-weight: 400;
+  color: var(--lin-second);
+}
+
+/* ——— onglets d'état ——— */
+.v2 .lin .pf-onglets-rangee {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  height: 48px;
+  padding: 0 24px;
+}
+.v2 .lin .pf-onglets {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.v2 .lin .pf-onglet {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--lin-titre);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.v2 .lin .pf-onglet-contenu {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.v2 .lin .pf-onglet-icone {
+  display: flex;
+  align-items: center;
+  width: 18px;
+  height: 18px;
+  color: var(--lin-second);
+}
+.v2 .lin .pf-onglet-icone svg {
+  width: 18px;
+  height: 18px;
+}
+.v2 .lin .pf-onglet-icone[data-teinte="bleu"] {
+  color: var(--lin-graph-bleu);
+}
+.v2 .lin .pf-onglet-icone[data-teinte="orange"] {
+  color: var(--lin-orange);
+}
+.v2 .lin .pf-onglet-libelle {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  opacity: 0.8;
+}
+.v2 .lin .pf-onglet:hover .pf-onglet-libelle {
+  opacity: 1;
+}
+.v2 .lin .pf-onglet[data-actif] {
+  background: var(--lin-pastille-active);
+}
+.v2 .lin .pf-onglet[data-actif] .pf-onglet-libelle {
+  font-weight: 600;
+  opacity: 1;
+}
+.v2 .lin .pf-onglet-n {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--lin-second);
+}
+/* les filtres posés : des pilules de la même rangée, ✕ pour les retirer */
+.v2 .lin .pf-filtres-poses {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  flex-wrap: wrap;
+}
+.v2 .lin .pf-onglet--filtre {
+  background: var(--lin-pastille-active);
+}
+.v2 .lin .pf-onglet--filtre .pf-onglet-libelle {
+  opacity: 1;
+}
+.v2 .lin .pf-onglet--filtre .pf-onglet-x {
+  display: flex;
+  width: 14px;
+  height: 14px;
+  color: var(--lin-second);
+}
+.v2 .lin .pf-onglet--filtre .pf-onglet-x svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .lin .pf-onglet--filtre:hover .pf-onglet-x {
+  color: var(--lin-titre);
+}
+
+/* ——— la note sous les onglets (base réelle qui ne répond pas) ——— */
+.v2 .lin .pf-note {
+  padding: 0 24px 12px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--lin-orange);
+}
+
+/* ——— une section : titre, compteur, description, un geste à droite ——— */
+.v2 .lin .pf-section-tete {
+  padding: 24px 32px 12px;
+}
+.v2 .lin .pf-section-ligne {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 40px;
+}
+.v2 .lin .pf-section-titre {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 20px;
+}
+.v2 .lin .pf-section-titre svg {
+  width: 18px;
+  height: 18px;
+  color: var(--lin-second);
+}
+.v2 .lin .pf-section-titre h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--lin-titre);
+}
+.v2 .lin .pf-section-n {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--lin-second);
+}
+.v2 .lin .pf-section-desc {
+  margin: 4px 0 0;
+  padding-left: 26px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--lin-second);
+}
+.v2 .lin .pf-section-droite {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.v2 .lin .pf-lien {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  color: var(--lin-second);
+  cursor: pointer;
+}
+.v2 .lin .pf-lien:hover {
+  color: var(--lin-titre);
+}
+.v2 .lin .pf-lien svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ——— les lignes ——— */
+.v2 .lin .pf-lignes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2 .lin .pf-ligne {
+  display: grid;
+  grid-template-columns: 32px 18px 300px minmax(0, 1fr) 76px 100px 113.5px 94px;
+  grid-template-rows: 50.5px;
+  align-items: start;
+  padding: 8px 0;
+  border-bottom: 0.5px solid var(--lin-trait);
+  color: var(--lin-titre);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.v2 .lin .pf-ligne:hover,
+.v2 .lin .pf-ligne[data-actif] {
+  background: var(--lin-survol);
+}
+.v2 .lin .pf-ligne > * {
+  min-width: 0;
+}
+.v2 .lin .pf-c-poignee {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  opacity: 0;
+}
+.v2 .lin .pf-ligne:hover .pf-c-poignee,
+.v2 .lin .pf-ligne:focus-visible .pf-c-poignee {
+  opacity: 1;
+}
+.v2 .lin .pf-poignee {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-left: 4px;
+  padding: 5px;
+  border-radius: 6px;
+  color: var(--lin-second);
+}
+.v2 .lin .pf-poignee svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .lin .pf-c-etat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  color: var(--lin-second);
+}
+.v2 .lin .pf-c-etat svg {
+  width: 18px;
+  height: 18px;
+}
+.v2 .lin .pf-c-etat[data-teinte="bleu"] {
+  color: var(--lin-graph-bleu);
+}
+.v2 .lin .pf-c-etat[data-teinte="orange"] {
+  color: var(--lin-orange);
+}
+.v2 .lin .pf-c-client {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding-left: 12px;
+}
+.v2 .lin .pf-avatar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  background: var(--pf-avatar, var(--lin-avatar));
+  color: #fff;
+  font-size: 9.6px;
+  font-weight: 600;
+  line-height: 9.6px;
+  text-transform: uppercase;
+}
+.v2 .lin .pf-avatar[data-icone] {
+  background: transparent;
+  color: var(--lin-second);
+}
+.v2 .lin .pf-avatar svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .lin .pf-client {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--lin-titre);
+}
+.v2 .lin .pf-client b {
+  font-weight: 600;
+}
+.v2 .lin .pf-client b + span {
+  margin-left: 4px;
+}
+.v2 .lin .pf-badge {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 16px;
+  padding: 3px 6px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  background: var(--lin-pastille-active);
+  font-size: 10px;
+  font-weight: 475;
+  line-height: 10px;
+  color: var(--lin-texte-groupe);
+  white-space: nowrap;
+}
+.v2 .lin .pf-badge[data-teinte="orange"] {
+  color: var(--lin-orange);
+}
+.v2 .lin .pf-c-titre {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 12px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.v2 .lin .pf-ref {
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--lin-second);
+}
+.v2 .lin .pf-titre-fil {
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--lin-titre);
+}
+.v2 .lin .pf-apercu {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--lin-second);
+}
+.v2 .lin .pf-c-prio {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  white-space: nowrap;
+}
+.v2 .lin .pf-c-prio span {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--lin-titre);
+}
+.v2 .lin .pf-prio {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.v2 .lin .pf-prio rect {
+  fill: var(--lin-second);
+}
+.v2 .lin .pf-prio rect[data-eteinte] {
+  fill: var(--lin-maj-trait);
+}
+.v2 .lin .pf-prio[data-niveau="4"] {
+  color: var(--lin-orange);
+}
+.v2 .lin .pf-c-etiquettes {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 12px 0 8px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--lin-second);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.v2 .lin .pf-c-heure {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  height: 24px;
+  padding-right: 12px;
+  white-space: nowrap;
+}
+.v2 .lin .pf-c-heure svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--lin-second);
+}
+.v2 .lin .pf-c-heure time,
+.v2 .lin .pf-c-heure > span {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--lin-second);
+  font-variant-numeric: tabular-nums;
+}
+.v2 .lin .pf-c-heure[data-urgence] time,
+.v2 .lin .pf-c-heure[data-urgence] svg {
+  color: var(--lin-orange);
+}
+.v2 .lin .pf-c-qui {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: 24px;
+  padding-right: 16px;
+}
+.v2 .lin .pf-qui {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin: -4px 0;
+  padding: 7px;
+  border-radius: 6px;
+  color: var(--lin-second);
+}
+.v2 .lin .pf-qui-avatar {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: var(--pf-avatar, var(--lin-avatar));
+  color: #fff;
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 9px;
+}
+.v2 .lin .pf-qui svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ——— état vide ——— */
+.v2 .lin .pf-vide {
+  display: flex;
+  justify-content: center;
+  padding: 56px 24px 66px;
+}
+.v2 .lin .pf-vide-carte {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 450px;
+  max-width: 100%;
+  padding: 32px;
+  border: 1px solid var(--lin-detail-trait);
+  border-radius: 10px;
+  background: var(--lin-fond);
+  text-align: center;
+}
+.v2 .lin .pf-vide-carte strong {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--lin-titre);
+}
+.v2 .lin .pf-vide-carte p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--lin-second);
+}
+.v2 .lin .pf-vide-carte .pf-lien {
+  margin-top: 8px;
+}
+html[data-v2-theme="light"] .v2 .lin .pf-vide-carte {
+  background: var(--v2-bg-100);
+  border-color: var(--v2-a-400);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lin .pf-vide-carte {
+    background: var(--v2-bg-100);
+    border-color: var(--v2-a-400);
+  }
+}
+
+/* ——— les menus de la tête (Filtres, Affichage) ——— */
+.v2 .lin .pf-ancre {
+  position: relative;
+}
+.v2 .lin .pf-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 20;
+  width: 237px;
+  padding: 4px 0;
+  border: 1px solid var(--lin-menu-bord);
+  border-radius: 10px;
+  background: var(--lin-menu-fond);
+  color: var(--lin-menu-texte);
+  box-shadow: var(--lin-ombre-menu);
+  max-height: min(560px, calc(100dvh - 120px));
+  overflow-y: auto;
+}
+.v2 .lin .pf-menu--large {
+  width: 282px;
+  border-radius: 6px;
+}
+.v2 .lin .pf-menu-groupe {
+  padding: 0 4px;
+}
+.v2 .lin .pf-menu-groupe + .pf-menu-groupe {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--lin-menu-sep);
+}
+.v2 .lin .pf-menu-titre {
+  margin: 0;
+  padding: 8px 12px 4px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--lin-menu-gris);
+}
+.v2 .lin .pf-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 36px;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--lin-menu-texte);
+  text-align: left;
+  cursor: pointer;
+}
+.v2 .lin .pf-option:hover,
+.v2 .lin .pf-option[data-actif] {
+  background: var(--lin-menu-survol);
+}
+.v2 .lin .pf-option > svg:first-child,
+.v2 .lin .pf-option-icone {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--lin-menu-gris);
+}
+.v2 .lin .pf-option-icone svg {
+  width: 18px;
+  height: 18px;
+}
+.v2 .lin .pf-option-libelle {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lin .pf-option-n {
+  font-size: 12px;
+  color: var(--lin-menu-gris);
+  font-variant-numeric: tabular-nums;
+}
+.v2 .lin .pf-option-coche {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--lin-menu-texte);
+}
+.v2 .lin .pf-option-chevron {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--lin-menu-gris);
+}
+/* le champ de recherche du menu Filtres (le geste de recherche des écrans d'avant) */
+.v2 .lin .pf-menu-champ {
+  display: block;
+  width: calc(100% - 8px);
+  height: 36px;
+  margin: 0 4px;
+  padding: 8px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lin-menu-texte);
+  outline: none;
+}
+.v2 .lin .pf-menu-champ::placeholder {
+  color: var(--lin-menu-gris);
+}
+.v2 .lin .pf-menu-champ:focus,
+.v2 .lin .pf-menu-champ:focus-visible {
+  outline: none;
+  box-shadow: none;
+  background: var(--lin-menu-survol);
+}
+/* le menu Affichage : segment, étiquettes, champs — les mesures du menu « Display » de Plain */
+.v2 .lin .pf-menu-corps {
+  padding: 8px;
+}
+.v2 .lin .pf-segment {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--lin-menu-survol);
+}
+.v2 .lin .pf-segment button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 28px;
+  padding: 0 6px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--lin-menu-texte);
+  opacity: 0.8;
+  cursor: pointer;
+}
+.v2 .lin .pf-segment button[aria-pressed="true"] {
+  background: var(--lin-menu-fond);
+  font-weight: 600;
+  opacity: 1;
+}
+.v2 .lin .pf-etiquette {
+  margin: 16px 0 8px;
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--lin-menu-gris);
+}
+.v2 .lin .pf-champ {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 30px;
+  padding: 6px 12px;
+  border: 1px solid var(--lin-detail-trait);
+  border-radius: 6px;
+  background: var(--lin-fond);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--lin-menu-texte);
+  cursor: pointer;
+}
+.v2 .lin .pf-champ > svg {
+  position: absolute;
+  right: 10px;
+  width: 14px;
+  height: 14px;
+  color: var(--lin-menu-gris);
+}
+.v2 .lin .pf-champ select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+  font-size: 16px;
+}
+.v2 .lin .pf-bascule {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 36px;
+  margin-top: 8px;
+  padding: 0 8px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--lin-menu-texte);
+}
+.v2 .lin .pf-bascule input {
+  accent-color: var(--lin-graph-bleu);
+}
+
+/* ——— la carte au milieu (../lin/CarteCentrale) est rendue hors de la page : le « ··· » de « Plus d'actions »
+   est posé dans un petit « .v2 .lin » pour retrouver les jetons du gabarit (comme FILED « Fournisseurs ») ;
+   on lui retire la hauteur et le fond de page, et son menu s'ouvre vers le haut, au-dessus des boutons ——— */
+.v2.pf-plus {
+  display: inline-flex;
+  align-items: center;
+  min-height: 0;
+  margin-left: auto;
+  background: transparent;
+}
+.v2.pf-plus > .lin {
+  display: inline-flex;
+  min-height: 0;
+  background: transparent;
+}
+.v2.pf-plus .lin-menu {
+  top: auto;
+  bottom: calc(100% + 6px);
+}
+/* un bouton écrit comme un lien, dans la carte (ouvrir une pièce jointe) */
+.v2-det .pf-lien-bouton {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+/* ——— étroit : les colonnes secondaires s'effacent, le client et le titre se superposent ——— */
+@container principale (max-width: 1100px) {
+  .v2 .lin .pf-ligne {
+    grid-template-columns: 32px 18px 220px minmax(0, 1fr) 76px 113.5px 48px;
+  }
+  .v2 .lin .pf-c-etiquettes {
+    display: none;
+  }
+}
+@container principale (max-width: 760px) {
+  .v2 .lin .pf-tete {
+    padding: 16px 16px 16px;
+    gap: 12px;
+  }
+  .v2 .lin .pf-actions {
+    gap: 4px;
+  }
+  .v2 .lin .pf-btn {
+    padding: 8px 8px;
+  }
+  .v2 .lin .pf-btn .pf-btn-libelle,
+  .v2 .lin .pf-kbd {
+    display: none;
+  }
+  .v2 .lin .pf-btn > svg {
+    margin-right: 0;
+  }
+  .v2 .lin .pf-onglets-rangee {
+    padding: 0 16px;
+    height: auto;
+    min-height: 48px;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .v2 .lin .pf-section-tete {
+    padding: 16px 16px 8px;
+  }
+  .v2 .lin .pf-ligne {
+    grid-template-columns: 18px minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    row-gap: 2px;
+    padding: 10px 16px;
+  }
+  .v2 .lin .pf-c-poignee,
+  .v2 .lin .pf-c-etiquettes,
+  .v2 .lin .pf-c-qui {
+    display: none;
+  }
+  .v2 .lin .pf-c-etat {
+    grid-row: 1 / 3;
+    align-self: start;
+    margin-top: 2px;
+  }
+  .v2 .lin .pf-c-client {
+    grid-column: 2;
+    grid-row: 1;
+    padding-left: 8px;
+  }
+  .v2 .lin .pf-c-titre {
+    grid-column: 2;
+    grid-row: 2;
+    padding: 0 0 0 8px;
+  }
+  .v2 .lin .pf-c-prio {
+    grid-column: 3;
+    grid-row: 1;
+    justify-content: flex-end;
+    padding-left: 8px;
+  }
+  .v2 .lin .pf-c-prio span {
+    display: none;
+  }
+  .v2 .lin .pf-c-heure {
+    grid-column: 3;
+    grid-row: 2;
+    padding: 0 0 0 8px;
+  }
+  .v2 .lin .pf-c-heure svg {
+    display: none;
+  }
+  .v2 .lin .pf-c-heure time,
+  .v2 .lin .pf-c-heure > span {
+    font-size: 12px;
+  }
+  .v2 .lin .pf-menu {
+    width: min(237px, calc(100vw - 32px));
+  }
+  .v2 .lin .pf-vide {
+    padding: 32px 16px 48px;
+  }
+}
+
+/* étroit : le titre d'un fil se coupe par une ellipse plutôt que de déborder */
+@container principale (max-width: 760px) {
+  .v2 .lin .pf-titre-fil {
+    flex-shrink: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .v2 .lin .pf-apercu {
+    display: none;
+  }
+}
