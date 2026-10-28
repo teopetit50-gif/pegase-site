@@ -19,6 +19,11 @@
        corriger ou refuser (portes reput_decider et reput_corriger, comme
        l'ancien écran), son parcours en jalons.
 
+   Les menus ne mènent plus à d'autres sous-pages (règle du 28/10) : un choix
+   pose un filtre sur la page (?filtre=statut, étape, urgence, canal, sujet,
+   base), retiré par sa pastille ou en le choisissant de nouveau ; ou il agit
+   pour de vrai (valider, corriger, refuser, copier, écrire).
+
    Les chiffres passent par les mêmes portes que l'ancien écran
    (components/espace/reput/EcranReput) : l'exemple (mondeExemple, modifié
    en mémoire), ou la base réelle (chargerMonde, sous RLS, en temps réel).
@@ -148,12 +153,96 @@ const minuit = (t: number) => {
 const couleurDe = (id: string) => COULEURS[[...id].reduce((t, c) => t + c.charCodeAt(0), 0) % COULEURS.length];
 const somme = (v: number[]) => v.reduce((a, b) => a + b, 0);
 const cumul = (v: number[]) => v.map((_, i) => somme(v.slice(0, i + 1)));
-const lien = (p: Record<string, string | null | undefined>) => {
-  const q = new URLSearchParams();
-  for (const [k, v] of Object.entries(p)) if (v) q.set(k, v);
-  return `${RACINE}/reput?${q.toString()}`;
-};
 const ficheDe = (id: string) => `${RACINE}/reput?demande=${encodeURIComponent(id)}`;
+
+/* ——— les filtres de la page (règle des menus, 28/10) ———
+   Un choix de menu ne renvoie plus vers une autre sous-page : il change ce que
+   la page affiche. Les filtres vivent dans l'adresse (?filtre=sante:a_valider,
+   un « filtre » par dimension, cumulables) pour survivre au rechargement et se
+   partager ; le tableau de bord en tire sa « portée » et tous ses chiffres. */
+type Dimension = "sante" | "etape" | "urgence" | "canal" | "sujet" | "base";
+type Filtres = Partial<Record<Dimension, string>>;
+const DIMENSIONS: Dimension[] = ["sante", "etape", "urgence", "canal", "sujet", "base"];
+/* « escalade » : ce que liste la page Urgences ; « retard » : le délai du sujet est dépassé */
+const URGENCES: Record<string, string> = { escalade: "Urgences et escalade", retard: "Délai du sujet dépassé" };
+const BASES: Record<string, string> = { tiree: "Tirée de votre base", hors: "Hors de votre base" };
+const SANS_SUJET = "-";
+const valeurValide = (dim: Dimension, v: string) =>
+  dim === "sante" ? v in SANTES : dim === "etape" ? ETAPES.some((e) => e.cle === v) : dim === "canal" ? v in CANAUX : dim === "urgence" ? v in URGENCES : dim === "base" ? v in BASES : v.length > 0;
+function lireFiltres(params: { get: (k: string) => string | null; getAll: (k: string) => string[] }): Filtres {
+  const f: Filtres = {};
+  for (const brut of params.getAll("filtre")) {
+    const i = brut.indexOf(":");
+    const dim = brut.slice(0, i) as Dimension;
+    const v = brut.slice(i + 1);
+    if (i > 0 && DIMENSIONS.includes(dim) && valeurValide(dim, v)) f[dim] = v;
+  }
+  /* les anciens liens de la liste (?sante=, ?etape=, ?canal=, ?sujet=) restent lus */
+  for (const dim of ["sante", "etape", "canal", "sujet"] as const) {
+    const v = params.get(dim);
+    if (v && !f[dim] && valeurValide(dim, v)) f[dim] = v;
+  }
+  return f;
+}
+const sans = (f: Filtres, dim: Dimension): Filtres => {
+  const x = { ...f };
+  delete x[dim];
+  return x;
+};
+/* choisir de nouveau la valeur active retire le filtre */
+const bascule = (f: Filtres, dim: Dimension, v: string): Filtres => (f[dim] === v ? sans(f, dim) : { ...f, [dim]: v });
+/* l'adresse lisible : /espace2/reput?vue=demandes&filtre=sante:a_valider&filtre=canal:email */
+const lienFiltres = (f: Filtres, vue?: "demandes") => {
+  const q = [vue ? `vue=${vue}` : null, ...DIMENSIONS.filter((dim) => f[dim]).map((dim) => `filtre=${dim}:${encodeURIComponent(f[dim] ?? "")}`)].filter(Boolean);
+  return q.length ? `${RACINE}/reput?${q.join("&")}` : `${RACINE}/reput`;
+};
+const delaiDepasse = (m: Monde, d: Demande, maintenant: number) => {
+  const delai = m.sujets.find((s) => s.code === d.sujet)?.delai_heures ?? null;
+  return ouverte(d) && delai !== null && delai !== undefined && maintenant - Date.parse(d.recu_le) > delai * HEURE;
+};
+function correspond(m: Monde, d: Demande, f: Filtres, maintenant: number): boolean {
+  if (f.sante && santeDe(d) !== f.sante) return false;
+  if (f.canal && d.canal !== f.canal) return false;
+  if (f.sujet && (d.sujet || SANS_SUJET) !== f.sujet) return false;
+  if (f.urgence === "escalade" && !aEscalader(d)) return false;
+  if (f.urgence === "retard" && !delaiDepasse(m, d, maintenant)) return false;
+  if (f.etape || f.base) {
+    const rep = reponseDe(m, d);
+    if (f.etape && !parcours(d, rep)[f.etape as Etape]?.atteinte) return false;
+    if (f.base === "hors" && !(rep && !rep.couverte)) return false;
+    if (f.base === "tiree" && !rep?.couverte) return false;
+  }
+  return true;
+}
+function libelleFiltre(m: Monde, dim: Dimension, v: string): { libelle: string; icone: React.ReactNode } {
+  if (dim === "sante") return { libelle: SANTES[v as Sante].libelle, icone: <IconeStatut sante={v as Sante} /> };
+  if (dim === "etape") return { libelle: `Étape « ${ETAPES.find((e) => e.cle === v)?.libelle ?? v} »`, icone: <Losange atteint /> };
+  if (dim === "canal") return { libelle: CANAUX[v as Canal], icone: <IconeCanal canal={v as Canal} /> };
+  if (dim === "urgence") return { libelle: URGENCES[v], icone: <IconePriorite niveau={v === "escalade" ? 4 : 3} titre={URGENCES[v]} /> };
+  if (dim === "base") return { libelle: BASES[v], icone: <IconeDocument /> };
+  return { libelle: v === SANS_SUJET ? "Non classé" : (m.sujets.find((s) => s.code === v)?.libelle ?? v), icone: <IconeDiese /> };
+}
+/* les chiffres des sept derniers jours, recalculés sur la portée quand un filtre est posé
+   (sans filtre, ceux de la base : reput_indicateurs). Une réponse « partie seule » est une
+   réponse envoyée, non corrigée, sur un sujet autorisé d'avance. */
+function indicateursDe(m: Monde, liste: Demande[], maintenant: number): Monde["indicateurs"] {
+  const depuis = minuit(maintenant) - (JOURS - 1) * JOUR;
+  const recentes = liste.filter((d) => Date.parse(d.recu_le) >= depuis);
+  const delais = recentes
+    .filter((d) => d.envoyee_le)
+    .map((d) => (Date.parse(d.envoyee_le ?? d.recu_le) - Date.parse(d.recu_le)) / 60_000)
+    .sort((a, b) => a - b);
+  return {
+    recues: recentes.length,
+    repondues: recentes.filter((d) => santeDe(d) === "repondue").length,
+    parties_seules: recentes.filter((d) => d.statut === "envoyee" && !reponseDe(m, d)?.redigee_par && m.accords.sujets.some((a) => a.sujet === d.sujet && a.statut === "active")).length,
+    hors_base: recentes.filter((d) => {
+      const rep = reponseDe(m, d);
+      return !!rep && !rep.couverte;
+    }).length,
+    delai_median_minutes: delais.length ? delais[Math.floor(delais.length / 2)] : null,
+  };
+}
 
 /* la priorité d'une demande, en barres de Linear : urgente, délai du sujet dépassé (ou litige,
    ou remontée au responsable), à traiter par une personne, dans les délais ; aucune une fois traitée */
@@ -493,10 +582,8 @@ export default function TableauReput() {
 
   const demandeOuverte = params.get("demande");
   const vue = params.get("vue");
-  const onglet = (params.get("sante") as Sante | null) ?? "tous";
-  const etapeFiltre = params.get("etape") as Etape | null;
-  const canalFiltre = params.get("canal") as Canal | null;
-  const sujetFiltre = params.get("sujet");
+  const filtres = lireFiltres(params);
+  const actifs = DIMENSIONS.filter((dim) => filtres[dim]);
 
   /* Échap referme une demande ouverte */
   useEffect(() => {
@@ -584,7 +671,19 @@ export default function TableauReput() {
   });
   const sujetsPresents = [...new Set(demandes.map((d) => d.sujet ?? ""))];
   const canauxPresents = [...new Set(demandes.map((d) => d.canal))];
-  const ouvertes = demandes.filter(ouverte).sort(parUrgence);
+  /* les filtres actifs, en pastilles qui se retirent (la ligne des onglets, après les onglets) */
+  const pastillesFiltres = (vue?: "demandes", ignorer?: Dimension) =>
+    actifs
+      .filter((dim) => dim !== ignorer)
+      .map((dim) => {
+        const { libelle, icone } = libelleFiltre(m, dim, filtres[dim] ?? "");
+        return (
+          <Link key={dim} href={lienFiltres(sans(filtres, dim), vue)} className="v2-btn v2-btn--petit lin-filtre-actif" data-actif="" title="Retirer ce filtre" scroll={false}>
+            {icone}
+            {libelle} ✕
+          </Link>
+        );
+      });
 
   /* ——— une demande ouverte : la page d'un projet ——— */
   if (demandeOuverte) {
@@ -610,8 +709,10 @@ export default function TableauReput() {
     const courriel = adresse && /@/.test(adresse) ? adresse : null;
     const pieces = Array.isArray(rec?.pieces) ? rec.pieces.length : 0;
     const libStatut = libelleStatut(d, m);
-    const listeStatut = lien({ vue: "demandes", sante: s });
+    const listeStatut = lienFiltres({ sante: s }, "demandes");
 
+    /* les menus de la demande : les vraies décisions (valider, corriger, refuser), le courriel,
+       la copie, et l'ouverture de la liste filtrée sur la même valeur — plus aucune sous-page */
     const actionsStatut: Option[] = [
       ...(aValider && rep ? [{ cle: "valider", libelle: "Valider et envoyer", icone: <CheckCheck width={16} height={16} />, action: () => void agir(d, rep, "valider") }] : []),
       ...(corrigeable && rep
@@ -621,14 +722,31 @@ export default function TableauReput() {
       { cle: "liste", libelle: `Demandes « ${SANTES[s].libelle} »`, icone: <IconeStatut sante={s} />, href: listeStatut },
     ];
     const optionsPriorite: Option[] = [
-      { cle: "urgences", libelle: "Urgences et escalade", icone: <IconePriorite niveau={4} titre="Urgente" />, href: `${RACINE}/reput/urgences` },
-      { cle: "delais", libelle: "Délais par sujet", meta: delai !== null && delai !== undefined ? `${delai} h pour ce sujet` : undefined, icone: <IconeCalendrier />, href: `${RACINE}/reput/sujets` },
+      {
+        cle: "urgences",
+        libelle: "Demandes urgentes ou à escalader",
+        meta: String(demandes.filter(aEscalader).length),
+        icone: <IconePriorite niveau={4} titre="Urgente" />,
+        coche: aEscalader(d),
+        href: lienFiltres({ urgence: "escalade" }, "demandes"),
+      },
+      {
+        cle: "delais",
+        libelle: "Délai du sujet dépassé",
+        meta: delai !== null && delai !== undefined ? `${delai} h pour ce sujet` : undefined,
+        icone: <IconeCalendrier passe />,
+        coche: delaiDepasse(m, d, maint),
+        href: lienFiltres({ urgence: "retard" }, "demandes"),
+      },
     ];
     const optionsSujet: Option[] = [
-      ...(d.sujet
-        ? [{ cle: "meme", libelle: `Demandes « ${sujet ?? d.sujet} »`, meta: String(demandes.filter((x) => x.sujet === d.sujet).length), icone: <IconeDiese />, href: lien({ vue: "demandes", sujet: d.sujet }) }]
-        : []),
-      { cle: "sujets", libelle: "Sujets autorisés", icone: <ExternalLink width={16} height={16} />, href: `${RACINE}/reput/sujets` },
+      {
+        cle: "meme",
+        libelle: d.sujet ? `Demandes « ${sujet ?? d.sujet} »` : "Demandes non classées",
+        meta: String(demandes.filter((x) => (x.sujet || SANS_SUJET) === (d.sujet || SANS_SUJET)).length),
+        icone: <IconeDiese />,
+        href: lienFiltres({ sujet: d.sujet || SANS_SUJET }, "demandes"),
+      },
     ];
     const optionsCanal: Option[] = [
       {
@@ -636,19 +754,30 @@ export default function TableauReput() {
         libelle: `Demandes par ${CANAUX[d.canal].toLowerCase()}`,
         meta: String(demandes.filter((x) => x.canal === d.canal).length),
         icone: <IconeCanal canal={d.canal} />,
-        href: lien({ vue: "demandes", canal: d.canal }),
+        href: lienFiltres({ canal: d.canal }, "demandes"),
       },
       ...(courriel ? [{ cle: "ecrire", libelle: "Écrire un e-mail", icone: <IconeEnveloppe />, action: () => void window.open(`mailto:${courriel}`) }] : []),
       ...(adresse ? [{ cle: "copier", libelle: "Copier l'adresse", icone: <Copy width={16} height={16} />, action: () => void navigator.clipboard?.writeText(adresse) }] : []),
     ];
     const optionsClient: Option[] = memeClient.map((x) => ({ cle: x.id, libelle: titreDe(m, x), meta: dateCourte(x.recu_le), icone: <IconeStatut sante={santeDe(x)} />, coche: x.id === d.id, href: ficheDe(x.id) }));
     const optionsBase: Option[] = [
-      ...sources.map((f) => ({ cle: f.id, libelle: f.titre, meta: f.source, icone: <IconeDocument />, href: `${RACINE}/reput/base` })),
-      { cle: "base", libelle: "Base de connaissances", icone: <ExternalLink width={16} height={16} />, href: `${RACINE}/reput/base` },
+      ...(rep ? [{ cle: "copier", libelle: "Copier la réponse", icone: <Copy width={16} height={16} />, action: () => void navigator.clipboard?.writeText(rep.corps) }] : []),
+      ...(rep
+        ? [
+            {
+              cle: "base",
+              libelle: rep.couverte ? "Réponses tirées de votre base" : "Réponses hors de votre base",
+              icone: <IconeDocument />,
+              coche: true,
+              href: lienFiltres({ base: rep.couverte ? "tiree" : "hors" }, "demandes"),
+            },
+          ]
+        : []),
+      { cle: "historique", libelle: "Voir les versions de la réponse", icone: <MessageSquare width={16} height={16} />, action: () => setOngletFiche("historique") },
     ];
     const optionsEtape = (e: Etape): Option[] => [
       { cle: "historique", libelle: "Voir l'historique", icone: <MessageSquare width={16} height={16} />, action: () => setOngletFiche("historique") },
-      { cle: "liste", libelle: "Demandes à cette étape", icone: <Losange atteint />, href: lien({ vue: "demandes", etape: e }) },
+      { cle: "liste", libelle: "Demandes à cette étape", icone: <Losange atteint />, href: lienFiltres({ etape: e }, "demandes") },
     ];
     const libBase = !rep ? "Aucune réponse" : rep.couverte ? "Tirée de votre base" : "Hors de votre base";
     const evenements = evenementsDe(m, [d]);
@@ -1075,7 +1204,7 @@ export default function TableauReput() {
                   <dd className={rep ? undefined : "lin-props-vide"}>
                     <MenuOptions
                       plat
-                      titre="Base de connaissances…"
+                      titre="La réponse…"
                       declencheur={
                         <>
                           <IconeDocument />
@@ -1134,41 +1263,84 @@ export default function TableauReput() {
      Les mêmes briques que le tableau de bord de CASHD (titre, propriétés,
      « Latest update », sections, cartes de droite, carte Progress). */
   if (vue !== "demandes") {
-    const aValider = demandes.filter((d) => d.statut === "a_valider").sort(parUrgence);
-    const aTraiter = demandes.filter((d) => santeDe(d) === "a_traiter").sort(parUrgence);
-    const repondues = demandes.filter((d) => santeDe(d) === "repondue");
-    const sante: Sante = aTraiter.length ? "a_traiter" : aValider.length ? "a_valider" : ouvertes.length ? "preparation" : "repondue";
+    /* la portée : les demandes que les filtres gardent ; tout le tableau de bord en est tiré */
+    const portee = demandes.filter((d) => correspond(m, d, filtres, maint));
+    /* les chiffres d'un menu comptent sans le filtre de sa propre dimension, comme les facettes de Linear */
+    const horsDe = (dim: Dimension) => demandes.filter((d) => correspond(m, d, sans(filtres, dim), maint));
+    const ouvertes = portee.filter(ouverte).sort(parUrgence);
+    const aValider = portee.filter((d) => d.statut === "a_valider").sort(parUrgence);
+    const aTraiter = portee.filter((d) => santeDe(d) === "a_traiter").sort(parUrgence);
+    const repondues = portee.filter((d) => santeDe(d) === "repondue");
+    const sante: Sante = (filtres.sante as Sante | undefined) ?? (aTraiter.length ? "a_traiter" : aValider.length ? "a_valider" : ouvertes.length ? "preparation" : "repondue");
     const plusAncienne = ouvertes.slice().sort((a, b) => a.recu_le.localeCompare(b.recu_le));
     const enRetard = ouvertes.some((d) => prioriteDe(m, d, maint).niveau >= 3);
-    const escalade = demandes.filter(aEscalader).sort(parUrgence);
-    const ind = m.indicateurs;
+    const escalade = portee.filter(aEscalader).sort(parUrgence);
+    const retards = portee.filter((d) => delaiDepasse(m, d, maint));
+    const ind = actifs.length ? indicateursDe(m, portee, maint) : m.indicateurs;
     const fichesValidees = m.fiches.filter((f) => f.statut === "validee").length;
-    const brouillons = m.fiches.filter((f) => f.statut === "brouillon").length;
     const accordsActifs = m.accords.sujets.filter((a) => a.statut === "active");
-    const accordsAValider = m.accords.sujets.filter((a) => a.statut === "a_valider");
     const autorisables = m.accords.sujets.filter((a) => a.autorisable && a.actif).length;
-    const parCanal = canauxPresents.map((c) => ({ c, n: demandes.filter((d) => d.canal === c).length })).sort((a, b) => b.n - a.n);
-    const parSujet = sujetsPresents.map((x) => ({ x, n: demandes.filter((d) => (d.sujet ?? "") === x).length })).sort((a, b) => b.n - a.n);
+    const canauxPortee = [...new Set(portee.map((d) => d.canal))];
+    const sujetsPortee = [...new Set(portee.map((d) => d.sujet ?? ""))];
+    const parCanal = canauxPortee.map((c) => ({ c, n: portee.filter((d) => d.canal === c).length })).sort((a, b) => b.n - a.n);
+    const parSujet = sujetsPortee.map((x) => ({ x, n: portee.filter((d) => (d.sujet ?? "") === x).length })).sort((a, b) => b.n - a.n);
     const maxCanal = Math.max(1, ...parCanal.map((x) => x.n));
     const maxSujet = Math.max(1, ...parSujet.map((x) => x.n));
-    const reponsesDe = new Map(demandes.map((d) => [d.id, reponseDe(m, d)]));
-    const parEtape = ETAPES.map((e) => ({ e, n: demandes.filter((d) => parcours(d, reponsesDe.get(d.id))[e.cle].atteinte).length }));
+    const reponsesDe = new Map(portee.map((d) => [d.id, reponseDe(m, d)]));
+    const parEtape = ETAPES.map((e) => ({ e, n: portee.filter((d) => parcours(d, reponsesDe.get(d.id))[e.cle].atteinte).length }));
     const aFaire = [...aTraiter, ...aValider].sort(parUrgence);
+    const horsBase = portee.filter((d) => {
+      const rep = reponsesDe.get(d.id);
+      return !!rep && !rep.couverte;
+    }).length;
+    const tireesBase = portee.filter((d) => !!reponsesDe.get(d.id)?.couverte).length;
     const dernierePreparee = aValider
       .map((d) => reponsesDe.get(d.id)?.cree_le ?? d.preparee_le)
       .filter((x): x is string => !!x)
       .sort()
       .reverse()[0];
+    /* une option qui pose (ou retire, si elle est déjà posée) un filtre sur cette page */
+    const filtrer = (dim: Dimension, v: string, o: Omit<Option, "coche" | "href" | "action">): Option => ({ ...o, coche: filtres[dim] === v, href: lienFiltres(bascule(filtres, dim, v)) });
+    const horsSante = horsDe("sante");
     const optionsSante = (meta: (n: number) => string): Option[] =>
-      (Object.keys(SANTES) as Sante[]).map((x) => {
-        const n = demandes.filter((d) => santeDe(d) === x).length;
-        return { cle: x, libelle: SANTES[x].libelle, meta: meta(n), icone: <IconeStatut sante={x} />, coche: x === sante, href: lien({ vue: "demandes", sante: x }) };
-      });
+      (Object.keys(SANTES) as Sante[]).map((x) => filtrer("sante", x, { cle: x, libelle: SANTES[x].libelle, meta: meta(horsSante.filter((d) => santeDe(d) === x).length), icone: <IconeStatut sante={x} /> }));
     const optionsAValider: Option[] = [
+      filtrer("sante", "a_valider", { cle: "tout", libelle: "Filtrer sur les réponses à valider", meta: String(horsSante.filter((d) => d.statut === "a_valider").length), icone: <IconeStatut sante="a_valider" /> }),
       ...aValider.map((d): Option => ({ cle: d.id, libelle: nomDe(d), meta: sujetDe(m, d) ?? CANAUX[d.canal], icone: <Losange atteint />, href: ficheDe(d.id) })),
-      { cle: "tout", libelle: "Toutes les réponses à valider", icone: <ExternalLink width={16} height={16} />, href: lien({ vue: "demandes", sante: "a_valider" }) },
     ];
     const optionsAttente: Option[] = plusAncienne.map((d) => ({ cle: d.id, libelle: nomDe(d), meta: `attend depuis ${duree(maint - Date.parse(d.recu_le))}`, icone: <IconeDemande d={d} />, href: ficheDe(d.id) }));
+    const horsUrgence = horsDe("urgence");
+    const optionsUrgence: Option[] = [
+      filtrer("urgence", "escalade", {
+        cle: "escalade",
+        libelle: URGENCES.escalade,
+        meta: String(horsUrgence.filter(aEscalader).length),
+        icone: <IconePriorite niveau={4} titre={URGENCES.escalade} />,
+      }),
+      filtrer("urgence", "retard", { cle: "retard", libelle: URGENCES.retard, meta: String(horsUrgence.filter((d) => delaiDepasse(m, d, maint)).length), icone: <IconeCalendrier passe /> }),
+    ];
+    const horsBaseFiltre = horsDe("base");
+    const optionsBase: Option[] = [
+      filtrer("base", "hors", {
+        cle: "hors",
+        libelle: "Réponses hors de votre base",
+        meta: String(horsBaseFiltre.filter((d) => reponseDe(m, d)?.couverte === false).length),
+        icone: <IconeDocument />,
+      }),
+      filtrer("base", "tiree", { cle: "tiree", libelle: "Réponses tirées de votre base", meta: String(horsBaseFiltre.filter((d) => !!reponseDe(m, d)?.couverte).length), icone: <IconeDocument /> }),
+    ];
+    const horsSujet = horsDe("sujet");
+    const optionsSujets: Option[] = accordsActifs.map((a) =>
+      filtrer("sujet", a.sujet, {
+        cle: a.sujet,
+        libelle: a.libelle,
+        meta: `${pluriel(horsSujet.filter((d) => d.sujet === a.sujet).length, "demande")} · ${a.envoyees_seules_mois} seules ce mois`,
+        icone: <IconeStatutProjet etat="fait" />,
+      }),
+    );
+    const horsCanal = horsDe("canal");
+    const listeFiltree = lienFiltres(filtres, "demandes");
+    const etatReglages = !m.reglages ? "Non réglé" : m.reglages.actif ? (m.reglages.envoi_auto === false ? "Actif, sans envoi automatique" : "Actif") : "En pause";
 
     return (
       <div className="lin">
@@ -1182,407 +1354,401 @@ export default function TableauReput() {
             <span className="v2-btn v2-btn--petit" data-actif="" aria-current="page">
               Aperçu
             </span>
-            <Link href={LISTE} className="v2-btn v2-btn--petit">
+            <Link href={listeFiltree} className="v2-btn v2-btn--petit">
               Demandes
             </Link>
-            <Link href={lien({ vue: "demandes", sante: "a_valider" })} className="v2-btn v2-btn--petit">
+            <Link href={lienFiltres({ ...filtres, sante: "a_valider" }, "demandes")} className="v2-btn v2-btn--petit">
               À valider
             </Link>
+            {pastillesFiltres()}
           </nav>
         </div>
 
-        <div className="lin-projet">
-          <article className="lin-projet-texte">
-            <span className="lin-tuile" style={{ background: "color-mix(in srgb, #26b5ce 18%, transparent)", color: "#26b5ce" }}>
-              <MessageSquareText width={24} height={24} strokeWidth={1.6} aria-hidden="true" />
-            </span>
-            <h2 className="lin-projet-h1">Demandes clients</h2>
-            <p className="lin-projet-resume">
-              {demandes.length
-                ? `${pluriel(demandes.length, "demande reçue", "demandes reçues")} : ${ouvertes.length} en attente, ${pluriel(repondues.length, "répondue")}${aValider.length ? `, dont ${pluriel(aValider.length, "réponse prête", "réponses prêtes")} à valider` : ""}.`
-                : "Aucune demande reçue pour l'instant."}
-            </p>
-            <div className="lin-projet-ligne">
-              <span className="lin-projet-etiquette">Propriétés</span>
-              <MenuOptions
-                raccourci="s"
-                titre="Voir les demandes…"
-                teinte={SANTES[sante].teinte}
-                declencheur={
-                  <>
-                    <IconeStatut sante={sante} />
-                    {SANTES[sante].libelle}
-                  </>
-                }
-                options={optionsSante((n) => pluriel(n, "demande"))}
-                largeur={280}
-              />
-              <MenuOptions
-                raccourci="v"
-                titre="Réponses à valider…"
-                declencheur={
-                  <>
-                    <Losange atteint={aValider.length > 0} />
-                    {aValider.length} à valider
-                  </>
-                }
-                options={optionsAValider}
-                largeur={360}
-              />
-              <MenuOptions
-                raccourci="e"
-                titre="Demandes en attente…"
-                declencheur={
-                  <>
-                    <IconeCalendrier passe={enRetard} />
-                    {plusAncienne[0] ? `En attente depuis le ${dateCourte(plusAncienne[0].recu_le)}` : "Rien en attente"}
-                  </>
-                }
-                options={optionsAttente}
-                largeur={340}
-              />
-            </div>
-            <div className="lin-projet-ligne">
-              <span className="lin-projet-etiquette">Canaux</span>
-              {parCanal.map(({ c, n }) => (
+        {actifs.length && !portee.length ? (
+          <p className="lin-vide">Aucune demande ne correspond à ces filtres.</p>
+        ) : (
+          <div className="lin-projet">
+            <article className="lin-projet-texte">
+              <span className="lin-tuile" style={{ background: "color-mix(in srgb, #26b5ce 18%, transparent)", color: "#26b5ce" }}>
+                <MessageSquareText width={24} height={24} strokeWidth={1.6} aria-hidden="true" />
+              </span>
+              <h2 className="lin-projet-h1">Demandes clients</h2>
+              <p className="lin-projet-resume">
+                {portee.length
+                  ? `${pluriel(portee.length, "demande reçue", "demandes reçues")}${actifs.length ? ` (${actifs.map((dim) => libelleFiltre(m, dim, filtres[dim] ?? "").libelle.toLowerCase()).join(", ")})` : ""} : ${ouvertes.length} en attente, ${pluriel(repondues.length, "répondue")}${aValider.length ? `, dont ${pluriel(aValider.length, "réponse prête", "réponses prêtes")} à valider` : ""}.`
+                  : "Aucune demande reçue pour l'instant."}
+              </p>
+              <div className="lin-projet-ligne">
+                <span className="lin-projet-etiquette">Propriétés</span>
                 <MenuOptions
-                  key={c}
-                  titre={`${CANAUX[c]}…`}
+                  raccourci="s"
+                  titre="Filtrer par statut…"
+                  teinte={SANTES[sante].teinte}
                   declencheur={
                     <>
-                      <IconeCanal canal={c} />
-                      {CANAUX[c]} · {n}
+                      <IconeStatut sante={sante} />
+                      {SANTES[sante].libelle}
+                    </>
+                  }
+                  options={optionsSante((n) => pluriel(n, "demande"))}
+                  largeur={280}
+                />
+                <MenuOptions
+                  raccourci="v"
+                  titre="Réponses à valider…"
+                  declencheur={
+                    <>
+                      <Losange atteint={aValider.length > 0} />
+                      {aValider.length} à valider
+                    </>
+                  }
+                  options={optionsAValider}
+                  largeur={360}
+                />
+                <MenuOptions
+                  raccourci="e"
+                  titre="Demandes en attente…"
+                  declencheur={
+                    <>
+                      <IconeCalendrier passe={enRetard} />
+                      {plusAncienne[0] ? `En attente depuis le ${dateCourte(plusAncienne[0].recu_le)}` : "Rien en attente"}
+                    </>
+                  }
+                  options={optionsAttente}
+                  largeur={340}
+                />
+              </div>
+              <div className="lin-projet-ligne">
+                <span className="lin-projet-etiquette">Canaux</span>
+                {parCanal.map(({ c, n }) => (
+                  <MenuOptions
+                    key={c}
+                    titre={`Filtrer par canal : ${CANAUX[c].toLowerCase()}…`}
+                    declencheur={
+                      <>
+                        <IconeCanal canal={c} />
+                        {CANAUX[c]} · {n}
+                      </>
+                    }
+                    options={[
+                      filtrer("canal", c, {
+                        cle: "filtre",
+                        libelle: filtres.canal === c ? "Retirer ce filtre" : `Seulement ${CANAUX[c].toLowerCase()}`,
+                        meta: String(horsCanal.filter((d) => d.canal === c).length),
+                        icone: <IconeCanal canal={c} />,
+                      }),
+                      ...portee
+                        .filter((d) => d.canal === c)
+                        .sort((a, b) => b.recu_le.localeCompare(a.recu_le))
+                        .slice(0, 5)
+                        .map((d): Option => ({ cle: d.id, libelle: nomDe(d), meta: dateCourte(d.recu_le), icone: <IconeStatut sante={santeDe(d)} />, href: ficheDe(d.id) })),
+                    ]}
+                    largeur={300}
+                  />
+                ))}
+                {parCanal.length ? null : <span className="lin-puce lin-puce--vide">Aucun message reçu</span>}
+              </div>
+              <div className="lin-projet-ligne">
+                <span className="lin-projet-etiquette">7 jours</span>
+                <MenuOptions
+                  titre="Filtrer les sept derniers jours…"
+                  declencheur={
+                    <>
+                      <IconeJauge />
+                      {pluriel(ind.recues, "reçue")} · {pluriel(ind.repondues, "répondue")}
                     </>
                   }
                   options={[
-                    { cle: "liste", libelle: `Voir les ${pluriel(n, "demande")}`, icone: <IconeCanal canal={c} />, href: lien({ vue: "demandes", canal: c }) },
-                    ...demandes
-                      .filter((d) => d.canal === c)
-                      .sort((a, b) => b.recu_le.localeCompare(a.recu_le))
-                      .slice(0, 5)
-                      .map((d): Option => ({ cle: d.id, libelle: nomDe(d), meta: dateCourte(d.recu_le), icone: <IconeStatut sante={santeDe(d)} />, href: ficheDe(d.id) })),
+                    filtrer("sante", "repondue", {
+                      cle: "repondues",
+                      libelle: "Répondues",
+                      meta: `${ind.repondues} · ${ind.parties_seules} sans intervention · médiane ${ind.delai_median_minutes !== null ? `${Math.round(ind.delai_median_minutes)} min` : "—"}`,
+                      icone: <IconeStatut sante="repondue" />,
+                    }),
+                    filtrer("base", "hors", { cle: "hors", libelle: "Hors de votre base", meta: String(ind.hors_base), icone: <IconeDocument /> }),
+                    filtrer("urgence", "retard", { cle: "retard", libelle: URGENCES.retard, meta: String(retards.length), icone: <IconeCalendrier passe /> }),
                   ]}
-                  largeur={300}
+                  largeur={360}
                 />
-              ))}
-              {parCanal.length ? null : <span className="lin-puce lin-puce--vide">Aucun message reçu</span>}
-            </div>
-            <div className="lin-projet-ligne">
-              <span className="lin-projet-etiquette">7 jours</span>
-              <MenuOptions
-                titre="Les sept derniers jours…"
-                declencheur={
-                  <>
-                    <IconeJauge />
-                    {pluriel(ind.recues, "reçue")} · {pluriel(ind.repondues, "répondue")}
-                  </>
-                }
-                options={[
-                  { cle: "seules", libelle: "Parties sans intervention", meta: String(ind.parties_seules), icone: <IconeStatutProjet etat="fait" />, href: `${RACINE}/reput/sujets` },
-                  { cle: "hors", libelle: "Hors de votre base", meta: String(ind.hors_base), icone: <IconeDocument />, href: `${RACINE}/reput/base` },
-                  {
-                    cle: "delai",
-                    libelle: "Première réponse (médiane)",
-                    meta: ind.delai_median_minutes !== null ? `${Math.round(ind.delai_median_minutes)} min` : "—",
-                    icone: <IconeCalendrier />,
-                    href: lien({ vue: "demandes", sante: "repondue" }),
-                  },
-                ]}
-                largeur={320}
-              />
-            </div>
+              </div>
 
-            <details className="lin-maj" open aria-label="À traiter aujourd'hui">
-              <summary className="lin-maj-tete">
-                <span className="lin-maj-titre">
-                  À traiter aujourd&apos;hui
-                  <svg className="lin-maj-fleche" viewBox="0 0 16 16" aria-hidden="true">
-                    <path d="M5.2 6.4h5.6L8 9.6z" fill="currentColor" />
-                  </svg>
-                </span>
-                <Link href={lien({ vue: "demandes", sante: "a_valider" })} className="lin-maj-lien">
-                  <ExternalLink width={14} height={14} aria-hidden="true" /> Valider
-                </Link>
-              </summary>
-              <p className="lin-maj-auteur">
-                <IconeSante sante={aTraiter.length ? "a_traiter" : aValider.length ? "a_valider" : "repondue"} />
-                <span data-teinte={aTraiter.length ? "rouge" : aValider.length ? "jaune" : "vert"}>
-                  {aValider.length ? `${pluriel(aValider.length, "réponse prête", "réponses prêtes")}` : "Rien à valider"}
-                  {aTraiter.length ? ` · ${aTraiter.length} à traiter vous-même` : ""}
-                </span>
-                <span className="lin-avatar-auteur" aria-hidden="true">
-                  <MessageSquareText width={11} height={11} />
-                </span>
-                <span className="lin-maj-gris">REPUT</span>
-                {dernierePreparee ? <span className="lin-maj-gris">{dateCourte(dernierePreparee)}</span> : null}
-              </p>
-              <p className="lin-maj-texte">
-                Chaque message reçoit dans la minute une réponse préparée à partir de votre base de connaissances. Rien ne part sans votre accord, sauf sur les sujets autorisés d&apos;avance.
-              </p>
-              {aFaire.length ? (
-                <dl className="lin-maj-citation">
-                  {aFaire.slice(0, 5).map((d) => (
-                    <div key={d.id}>
-                      <dt>{nomDe(d)}</dt>
-                      <dd>
-                        <Link href={ficheDe(d.id)}>
-                          {SANTES[santeDe(d)].libelle} · {sujetDe(m, d) ?? CANAUX[d.canal]} · {titreDe(m, d)}
-                        </Link>
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
-              ) : null}
-              <footer className="lin-maj-pied">
-                <Link href={LISTE} className="lin-maj-pied-btn" aria-label="Voir les demandes" title="Voir les demandes">
-                  <MessageSquare width={16} height={16} aria-hidden="true" />
-                </Link>
-                <Link href={aValider[0] ? ficheDe(aValider[0].id) : lien({ vue: "demandes", sante: "a_valider" })} className="lin-maj-pied-rond" aria-label="Valider" title="Valider">
-                  <CheckCheck width={16} height={16} aria-hidden="true" />
-                </Link>
-              </footer>
-            </details>
-
-            <h3 className="lin-projet-h2">Demandes par canal</h3>
-            <ul className="lin-projet-liste">
-              {parCanal.map(({ c, n }) => (
-                <li key={c}>
-                  <span className="lin-tranche-nom">{CANAUX[c]}</span>
-                  <span className="lin-tranche-barre" aria-hidden="true">
-                    <span style={{ width: `${(n / maxCanal) * 100}%` }} />
+              <details className="lin-maj" open aria-label="À traiter aujourd'hui">
+                <summary className="lin-maj-tete">
+                  <span className="lin-maj-titre">
+                    À traiter aujourd&apos;hui
+                    <svg className="lin-maj-fleche" viewBox="0 0 16 16" aria-hidden="true">
+                      <path d="M5.2 6.4h5.6L8 9.6z" fill="currentColor" />
+                    </svg>
                   </span>
-                  <span className="lin-meta">{n}</span>
-                </li>
-              ))}
-            </ul>
-
-            <h3 className="lin-projet-h2">Demandes par sujet</h3>
-            <ul className="lin-projet-liste">
-              {parSujet.map(({ x, n }) => (
-                <li key={x || "-"}>
-                  <span className="lin-tranche-nom">{m.sujets.find((y) => y.code === x)?.libelle ?? "Non classé"}</span>
-                  <span className="lin-tranche-barre" aria-hidden="true">
-                    <span style={{ width: `${(n / maxSujet) * 100}%` }} />
+                  <Link href={lienFiltres({ ...filtres, sante: "a_valider" }, "demandes")} className="lin-maj-lien">
+                    <ExternalLink width={14} height={14} aria-hidden="true" /> Valider
+                  </Link>
+                </summary>
+                <p className="lin-maj-auteur">
+                  <IconeSante sante={aTraiter.length ? "a_traiter" : aValider.length ? "a_valider" : "repondue"} />
+                  <span data-teinte={aTraiter.length ? "rouge" : aValider.length ? "jaune" : "vert"}>
+                    {aValider.length ? `${pluriel(aValider.length, "réponse prête", "réponses prêtes")}` : "Rien à valider"}
+                    {aTraiter.length ? ` · ${aTraiter.length} à traiter vous-même` : ""}
                   </span>
-                  <span className="lin-meta">{n}</span>
-                </li>
-              ))}
-            </ul>
+                  <span className="lin-avatar-auteur" aria-hidden="true">
+                    <MessageSquareText width={11} height={11} />
+                  </span>
+                  <span className="lin-maj-gris">REPUT</span>
+                  {dernierePreparee ? <span className="lin-maj-gris">{dateCourte(dernierePreparee)}</span> : null}
+                </p>
+                <p className="lin-maj-texte">
+                  Chaque message reçoit dans la minute une réponse préparée à partir de votre base de connaissances. Rien ne part sans votre accord, sauf sur les sujets autorisés d&apos;avance.
+                </p>
+                {aFaire.length ? (
+                  <dl className="lin-maj-citation">
+                    {aFaire.slice(0, 5).map((d) => (
+                      <div key={d.id}>
+                        <dt>{nomDe(d)}</dt>
+                        <dd>
+                          <Link href={ficheDe(d.id)}>
+                            {SANTES[santeDe(d)].libelle} · {sujetDe(m, d) ?? CANAUX[d.canal]} · {titreDe(m, d)}
+                          </Link>
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                ) : null}
+                <footer className="lin-maj-pied">
+                  <Link href={listeFiltree} className="lin-maj-pied-btn" aria-label="Voir les demandes" title="Voir les demandes">
+                    <MessageSquare width={16} height={16} aria-hidden="true" />
+                  </Link>
+                  <Link href={aValider[0] ? ficheDe(aValider[0].id) : lienFiltres({ ...filtres, sante: "a_valider" }, "demandes")} className="lin-maj-pied-rond" aria-label="Valider" title="Valider">
+                    <CheckCheck width={16} height={16} aria-hidden="true" />
+                  </Link>
+                </footer>
+              </details>
 
-            <h3 className="lin-projet-h2">Les plus urgentes</h3>
-            {ouvertes.length ? (
+              <h3 className="lin-projet-h2">Demandes par canal</h3>
               <ul className="lin-projet-liste">
-                {ouvertes.slice(0, 5).map((d) => {
-                  const p = prioriteDe(m, d, maint);
-                  return (
-                    <li key={d.id}>
-                      <Link href={ficheDe(d.id)} className="lin-projet-lien">
-                        <IconeDemande d={d} />
-                        <span>
-                          {nomDe(d)} · {titreDe(m, d)}
-                        </span>
-                        <IconePriorite niveau={p.niveau} titre={p.libelle} />
-                        <span className="lin-meta">{duree(maint - Date.parse(d.recu_le))}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              <p className="lin-maj-texte lin-maj-gris">Rien en attente.</p>
-            )}
-            <Link href={LISTE} className="lin-voir-tout">
-              Voir toutes les demandes <ArrowRight width={14} height={14} aria-hidden="true" />
-            </Link>
-          </article>
-
-          <aside className="lin-cartes-droite" aria-label="Les chiffres">
-            {/* l'ordre des cartes de Linear : Properties, Milestones, Progress, Activity */}
-            <CarteDroite titre="Propriétés">
-              <dl className="lin-props">
-                <div>
-                  <dt>Demandes</dt>
-                  <dd>
-                    <MenuOptions
-                      plat
-                      titre="Voir les demandes…"
-                      declencheur={
-                        <>
-                          <IconeGroupe />
-                          {demandes.length}
-                        </>
-                      }
-                      options={optionsSante((n) => String(n))}
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt>À valider</dt>
-                  <dd>
-                    <MenuOptions
-                      plat
-                      titre="Réponses à valider…"
-                      declencheur={
-                        <>
-                          <Losange atteint={aValider.length > 0} />
-                          {aValider.length}
-                        </>
-                      }
-                      options={optionsAValider}
-                      largeur={320}
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt>Urgences</dt>
-                  <dd className={escalade.length ? undefined : "lin-props-vide"}>
-                    <MenuOptions
-                      plat
-                      titre="Urgences et escalade…"
-                      declencheur={
-                        <>
-                          <IconePriorite niveau={escalade.length ? 4 : 0} titre={escalade.length ? "Urgences" : "Aucune urgence"} />
-                          {escalade.length}
-                        </>
-                      }
-                      options={[
-                        ...escalade.map((d): Option => {
-                          const p = prioriteDe(m, d, maint);
-                          return { cle: d.id, libelle: nomDe(d), meta: p.libelle, icone: <IconePriorite niveau={p.niveau} titre={p.libelle} />, href: ficheDe(d.id) };
-                        }),
-                        { cle: "urgences", libelle: "Urgences et escalade", icone: <ExternalLink width={16} height={16} />, href: `${RACINE}/reput/urgences` },
-                      ]}
-                      largeur={320}
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt>Base</dt>
-                  <dd>
-                    <MenuOptions
-                      plat
-                      titre="Base de connaissances…"
-                      declencheur={
-                        <>
-                          <IconeDocument />
-                          {pluriel(fichesValidees, "fiche validée", "fiches validées")}
-                        </>
-                      }
-                      options={[
-                        { cle: "base", libelle: "Base de connaissances", meta: brouillons ? pluriel(brouillons, "brouillon") : undefined, icone: <ExternalLink width={16} height={16} />, href: `${RACINE}/reput/base` },
-                        { cle: "hors", libelle: "Réponses hors de votre base", meta: `${ind.hors_base} sur 7 jours`, icone: <IconeDocument />, href: `${RACINE}/reput/base` },
-                      ]}
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt>Sujets autorisés</dt>
-                  <dd className={accordsActifs.length ? undefined : "lin-props-vide"}>
-                    <MenuOptions
-                      plat
-                      titre="Sujets autorisés…"
-                      declencheur={
-                        <>
-                          <IconeDiese />
-                          {accordsActifs.length} sur {autorisables}
-                        </>
-                      }
-                      options={[
-                        ...accordsActifs.map((a): Option => ({ cle: a.sujet, libelle: a.libelle, meta: `${a.envoyees_seules_mois} ce mois`, icone: <IconeStatutProjet etat="fait" />, href: `${RACINE}/reput/sujets` })),
-                        ...(accordsAValider.length ? [{ cle: "valider", libelle: "Accords à valider", meta: String(accordsAValider.length), icone: <Losange atteint />, href: `${RACINE}/validations` }] : []),
-                        { cle: "sujets", libelle: "Sujets autorisés", icone: <ExternalLink width={16} height={16} />, href: `${RACINE}/reput/sujets` },
-                      ]}
-                      largeur={320}
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt>Délai médian</dt>
-                  <dd className={ind.delai_median_minutes !== null ? undefined : "lin-props-vide"}>
-                    <MenuOptions
-                      plat
-                      titre="Première réponse…"
-                      declencheur={
-                        <>
-                          <IconeJauge />
-                          {ind.delai_median_minutes !== null ? `${Math.round(ind.delai_median_minutes)} min sur 7 jours` : "Aucune réponse sur 7 jours"}
-                        </>
-                      }
-                      options={[
-                        { cle: "repondues", libelle: "Demandes répondues", meta: String(repondues.length), icone: <IconeStatut sante="repondue" />, href: lien({ vue: "demandes", sante: "repondue" }) },
-                        { cle: "delais", libelle: "Délais par sujet", icone: <ExternalLink width={16} height={16} />, href: `${RACINE}/reput/sujets` },
-                      ]}
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt>Réglages</dt>
-                  <dd className={m.reglages?.actif ? undefined : "lin-props-vide"}>
-                    <MenuOptions
-                      plat
-                      titre="Réglages et avis…"
-                      declencheur={
-                        <>
-                          <IconeStatutProjet etat={m.reglages?.actif ? "fait" : "planifie"} />
-                          {!m.reglages ? "Non réglé" : m.reglages.actif ? (m.reglages.envoi_auto === false ? "Actif, sans envoi automatique" : "Actif") : "En pause"}
-                        </>
-                      }
-                      options={[
-                        { cle: "reglages", libelle: "Réglages et avis", icone: <ExternalLink width={16} height={16} />, href: `${RACINE}/reput/reglages` },
-                        ...(m.reglages ? [{ cle: "accuse", libelle: "Accusé de réception", meta: m.reglages.accuse ? "activé" : "coupé", icone: <IconeEnveloppe />, href: `${RACINE}/reput/reglages` }] : []),
-                      ]}
-                    />
-                  </dd>
-                </div>
-              </dl>
-            </CarteDroite>
-
-            <CarteDroite titre="Parcours">
-              <ul className="lin-jalons">
-                {parEtape.map(({ e, n }) => (
-                  <li key={e.cle}>
-                    <Losange atteint={n > 0} />
-                    <span className="lin-jalon-nom">{e.libelle}</span>
-                    <span className="lin-meta">{pluriel(n, "demande")}</span>
-                    <MenuActions
-                      titre={`${e.libelle}…`}
-                      options={[
-                        { cle: "liste", libelle: "Demandes à cette étape", icone: <Losange atteint />, href: lien({ vue: "demandes", etape: e.cle }) },
-                        { cle: "valider", libelle: "Réponses à valider", icone: <IconeStatut sante="a_valider" />, href: lien({ vue: "demandes", sante: "a_valider" }) },
-                      ]}
-                    />
+                {parCanal.map(({ c, n }) => (
+                  <li key={c}>
+                    <span className="lin-tranche-nom">{CANAUX[c]}</span>
+                    <span className="lin-tranche-barre" aria-hidden="true">
+                      <span style={{ width: `${(n / maxCanal) * 100}%` }} />
+                    </span>
+                    <span className="lin-meta">{n}</span>
                   </li>
                 ))}
               </ul>
-            </CarteDroite>
 
-            <CarteAvancement monde={m} liste={demandes} maintenant={maint} onglets />
+              <h3 className="lin-projet-h2">Demandes par sujet</h3>
+              <ul className="lin-projet-liste">
+                {parSujet.map(({ x, n }) => (
+                  <li key={x || "-"}>
+                    <span className="lin-tranche-nom">{m.sujets.find((y) => y.code === x)?.libelle ?? "Non classé"}</span>
+                    <span className="lin-tranche-barre" aria-hidden="true">
+                      <span style={{ width: `${(n / maxSujet) * 100}%` }} />
+                    </span>
+                    <span className="lin-meta">{n}</span>
+                  </li>
+                ))}
+              </ul>
 
-            <CarteActivite evenements={evenementsDe(m, demandes)} tout={LISTE} noms />
-          </aside>
-        </div>
+              <h3 className="lin-projet-h2">Les plus urgentes</h3>
+              {ouvertes.length ? (
+                <ul className="lin-projet-liste">
+                  {ouvertes.slice(0, 5).map((d) => {
+                    const p = prioriteDe(m, d, maint);
+                    return (
+                      <li key={d.id}>
+                        <Link href={ficheDe(d.id)} className="lin-projet-lien">
+                          <IconeDemande d={d} />
+                          <span>
+                            {nomDe(d)} · {titreDe(m, d)}
+                          </span>
+                          <IconePriorite niveau={p.niveau} titre={p.libelle} />
+                          <span className="lin-meta">{duree(maint - Date.parse(d.recu_le))}</span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <p className="lin-maj-texte lin-maj-gris">Rien en attente.</p>
+              )}
+              <Link href={listeFiltree} className="lin-voir-tout">
+                Voir toutes les demandes <ArrowRight width={14} height={14} aria-hidden="true" />
+              </Link>
+            </article>
+
+            <aside className="lin-cartes-droite" aria-label="Les chiffres">
+              {/* l'ordre des cartes de Linear : Properties, Milestones, Progress, Activity */}
+              <CarteDroite titre="Propriétés">
+                <dl className="lin-props">
+                  <div>
+                    <dt>Demandes</dt>
+                    <dd>
+                      <MenuOptions
+                        plat
+                        titre="Filtrer par statut…"
+                        declencheur={
+                          <>
+                            <IconeGroupe />
+                            {portee.length}
+                          </>
+                        }
+                        options={optionsSante((n) => String(n))}
+                      />
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>À valider</dt>
+                    <dd>
+                      <MenuOptions
+                        plat
+                        titre="Réponses à valider…"
+                        declencheur={
+                          <>
+                            <Losange atteint={aValider.length > 0} />
+                            {aValider.length}
+                          </>
+                        }
+                        options={optionsAValider}
+                        largeur={320}
+                      />
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Urgences</dt>
+                    <dd className={escalade.length ? undefined : "lin-props-vide"}>
+                      <MenuOptions
+                        plat
+                        titre="Filtrer par urgence…"
+                        declencheur={
+                          <>
+                            <IconePriorite niveau={escalade.length ? 4 : 0} titre={escalade.length ? "Urgences" : "Aucune urgence"} />
+                            {escalade.length}
+                          </>
+                        }
+                        options={[
+                          ...optionsUrgence,
+                          ...escalade.map((d): Option => {
+                            const p = prioriteDe(m, d, maint);
+                            return { cle: d.id, libelle: nomDe(d), meta: p.libelle, icone: <IconePriorite niveau={p.niveau} titre={p.libelle} />, href: ficheDe(d.id) };
+                          }),
+                        ]}
+                        largeur={320}
+                      />
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Base</dt>
+                    <dd>
+                      <MenuOptions
+                        plat
+                        titre="Filtrer par base…"
+                        declencheur={
+                          <>
+                            <IconeDocument />
+                            {filtres.base ? `${tireesBase} tirées · ${horsBase} hors base` : pluriel(fichesValidees, "fiche validée", "fiches validées")}
+                          </>
+                        }
+                        options={optionsBase}
+                        largeur={300}
+                      />
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Sujets autorisés</dt>
+                    <dd className={accordsActifs.length ? undefined : "lin-props-vide"}>
+                      {optionsSujets.length ? (
+                        <MenuOptions
+                          plat
+                          titre="Filtrer par sujet autorisé…"
+                          declencheur={
+                            <>
+                              <IconeDiese />
+                              {accordsActifs.length} sur {autorisables}
+                            </>
+                          }
+                          options={optionsSujets}
+                          largeur={340}
+                        />
+                      ) : (
+                        <span className="lin-valeur lin-valeur--fixe">
+                          <IconeDiese />
+                          {accordsActifs.length} sur {autorisables}
+                        </span>
+                      )}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Délai médian</dt>
+                    <dd className={ind.delai_median_minutes !== null ? undefined : "lin-props-vide"}>
+                      <MenuOptions
+                        plat
+                        titre="Première réponse…"
+                        declencheur={
+                          <>
+                            <IconeJauge />
+                            {ind.delai_median_minutes !== null ? `${Math.round(ind.delai_median_minutes)} min sur 7 jours` : "Aucune réponse sur 7 jours"}
+                          </>
+                        }
+                        options={[
+                          filtrer("sante", "repondue", {
+                            cle: "repondues",
+                            libelle: "Demandes répondues",
+                            meta: String(horsSante.filter((d) => santeDe(d) === "repondue").length),
+                            icone: <IconeStatut sante="repondue" />,
+                          }),
+                          optionsUrgence[1],
+                        ]}
+                      />
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Réglages</dt>
+                    {/* l'état seul : les réglages se changent sur leur propre page, pas depuis un menu d'ici */}
+                    <dd className={m.reglages?.actif ? undefined : "lin-props-vide"}>
+                      <span className="lin-valeur lin-valeur--fixe" title={m.reglages ? `Accusé de réception ${m.reglages.accuse ? "activé" : "coupé"}` : undefined}>
+                        <IconeStatutProjet etat={m.reglages?.actif ? "fait" : "planifie"} />
+                        {etatReglages}
+                      </span>
+                    </dd>
+                  </div>
+                </dl>
+              </CarteDroite>
+
+              <CarteDroite titre="Parcours">
+                <ul className="lin-jalons">
+                  {parEtape.map(({ e, n }) => (
+                    <li key={e.cle}>
+                      <Losange atteint={n > 0} />
+                      <span className="lin-jalon-nom">{e.libelle}</span>
+                      <span className="lin-meta">{pluriel(n, "demande")}</span>
+                      <MenuActions
+                        titre={`Filtrer : ${e.libelle.toLowerCase()}…`}
+                        options={[
+                          filtrer("etape", e.cle, { cle: "etape", libelle: filtres.etape === e.cle ? "Retirer ce filtre" : "Demandes à cette étape", icone: <Losange atteint /> }),
+                          filtrer("sante", "a_valider", { cle: "valider", libelle: "Réponses à valider", icone: <IconeStatut sante="a_valider" /> }),
+                        ]}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </CarteDroite>
+
+              <CarteAvancement monde={m} liste={portee} maintenant={maint} onglets />
+
+              <CarteActivite evenements={evenementsDe(m, portee)} tout={listeFiltree} noms />
+            </aside>
+          </div>
+        )}
       </div>
     );
   }
 
   /* ——— la liste : le tableau des projets (« Voir toutes les demandes ») ——— */
   const q = filtre.trim().toLowerCase();
-  const filtres = ordonnes.filter(
-    (d) =>
-      (onglet === "tous" || santeDe(d) === onglet) &&
-      (!etapeFiltre || parcours(d, reponseDe(m, d))[etapeFiltre]?.atteinte) &&
-      (!canalFiltre || d.canal === canalFiltre) &&
-      (!sujetFiltre || d.sujet === sujetFiltre) &&
-      (!q || `${nomDe(d)} ${titreDe(m, d)} ${sujetDe(m, d) ?? ""} ${d.adresse_reponse ?? ""}`.toLowerCase().includes(q)),
-  );
-  const presentes = (Object.keys(SANTES) as Sante[]).filter((s) => demandes.some((d) => santeDe(d) === s));
-  const filtreActif = etapeFiltre
-    ? { libelle: ETAPES.find((e) => e.cle === etapeFiltre)?.libelle ?? etapeFiltre, icone: <Losange atteint /> }
-    : canalFiltre
-      ? { libelle: CANAUX[canalFiltre] ?? canalFiltre, icone: <IconeCanal canal={canalFiltre} /> }
-      : sujetFiltre
-        ? { libelle: m.sujets.find((x) => x.code === sujetFiltre)?.libelle ?? sujetFiltre, icone: <IconeDiese /> }
-        : null;
+  /* les onglets de la liste sont le filtre « statut » ; les autres filtres (venus du tableau de bord ou d'une demande) en pastilles */
+  const onglet: Sante | "tous" = (filtres.sante as Sante | undefined) ?? "tous";
+  const lignes = ordonnes.filter((d) => correspond(m, d, filtres, maint) && (!q || `${nomDe(d)} ${titreDe(m, d)} ${sujetDe(m, d) ?? ""} ${d.adresse_reponse ?? ""}`.toLowerCase().includes(q)));
+  const presentes = (Object.keys(SANTES) as Sante[]).filter((s) => s === onglet || demandes.some((d) => santeDe(d) === s));
   const ind = m.indicateurs;
   const lignesDetails =
     ongletDetails === "canaux"
@@ -1602,7 +1768,7 @@ export default function TableauReput() {
       <h1 className="v2-sr">Demandes clients</h1>
       <header className="lin-tete">
         <nav className="lin-fil" aria-label="Fil d'Ariane">
-          <Link href={`${RACINE}/reput`} className="lin-fil-equipe">
+          <Link href={lienFiltres(sans(filtres, "sante"))} className="lin-fil-equipe">
             Tableau de bord
           </Link>
           <span className="lin-fil-sep" aria-hidden="true">
@@ -1617,20 +1783,28 @@ export default function TableauReput() {
 
       <div className="lin-outils">
         <nav className="lin-onglets" aria-label="Statut">
-          <Link href={LISTE} className="v2-btn v2-btn--petit" data-actif={onglet === "tous" ? "" : undefined} aria-current={onglet === "tous" ? "page" : undefined} scroll={false}>
+          <Link
+            href={lienFiltres(sans(filtres, "sante"), "demandes")}
+            className="v2-btn v2-btn--petit"
+            data-actif={onglet === "tous" ? "" : undefined}
+            aria-current={onglet === "tous" ? "page" : undefined}
+            scroll={false}
+          >
             Toutes les demandes
           </Link>
           {presentes.map((s) => (
-            <Link key={s} href={lien({ vue: "demandes", sante: s })} className="v2-btn v2-btn--petit" data-actif={onglet === s ? "" : undefined} aria-current={onglet === s ? "page" : undefined} scroll={false}>
+            <Link
+              key={s}
+              href={lienFiltres({ ...filtres, sante: s }, "demandes")}
+              className="v2-btn v2-btn--petit"
+              data-actif={onglet === s ? "" : undefined}
+              aria-current={onglet === s ? "page" : undefined}
+              scroll={false}
+            >
               {SANTES[s].libelle}
             </Link>
           ))}
-          {filtreActif ? (
-            <Link href={lien({ vue: "demandes", sante: onglet === "tous" ? null : onglet })} className="v2-btn v2-btn--petit lin-filtre-actif" data-actif="" title="Retirer ce filtre" scroll={false}>
-              {filtreActif.icone}
-              {filtreActif.libelle} ✕
-            </Link>
-          ) : null}
+          {pastillesFiltres("demandes", "sante")}
         </nav>
         <div className="lin-outils-droite">
           <Menu
@@ -1702,10 +1876,10 @@ export default function TableauReput() {
               </span>
               <span role="columnheader">Canal</span>
             </div>
-            {filtres.length === 0 ? (
+            {lignes.length === 0 ? (
               <p className="lin-vide">{demandes.length ? "Aucune demande ne correspond." : "Les messages reçus s'afficheront ici, avec leur réponse préparée."}</p>
             ) : (
-              filtres.map((d) => {
+              lignes.map((d) => {
                 const s = santeDe(d);
                 const p = prioriteDe(m, d, maint);
                 const rep = reponseDe(m, d);

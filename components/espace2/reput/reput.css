@@ -3,8 +3,8 @@
    ../lin/lin.css n'a pas, parce que CASHD n'en a pas besoin — le texte
    d'un message ou d'une réponse (retours à la ligne gardés), le champ
    pour corriger ou refuser une réponse, la ligne de ses boutons, le mot
-   qui confirme une décision, la colonne Canal du tableau. Uniquement des
-   variables --lin-*, pour les deux thèmes. Supprimer ce fichier ne casse
+   qui confirme une décision, la colonne Canal du tableau, une valeur sans
+   menu. Uniquement des variables --lin-*, pour les deux thèmes. Supprimer ce fichier ne casse
    que ces détails.
    ══════════════════════════════════════════════════════════════════════ */
 
@@ -58,6 +58,10 @@
 }
 .v2 .lin .lin-reput-canal svg {
   color: var(--lin-second);
+}
+/* une valeur de la carte Propriétés sans menu (l'état des réglages) : pas de fond au survol */
+.v2 .lin .lin-valeur--fixe:hover {
+  background: none;
 }
 .v2 .lin button.lin-maj-pied-btn:disabled,
 .v2 .lin button.lin-maj-pied-rond:disabled {

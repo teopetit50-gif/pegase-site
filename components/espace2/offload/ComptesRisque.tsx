@@ -26,8 +26,12 @@
    modifié en mémoire par les gestes), ou la base réelle (offload_tableau,
    puis offload_fiche à l'ouverture d'un compte). Deux gestes seulement
    écrivent : préparer une reprise (offload_ouvrir_reprise) et reprendre la
-   main ou remettre dans le cycle (offload_changer_statut) ; le reste
-   navigue ou copie. Gabarit : ../lin/lin.css, retouches : ./offload.css.
+   main ou remettre dans le cycle (offload_changer_statut) ; recalculer
+   relance la détection (offload_recalculer). Le reste filtre la page sans
+   la quitter (?filtre=niveau|etape|silence|commercial|cloture|mode:valeur,
+   une pastille « ✕ » par filtre après les onglets), ouvre un compte ou un
+   onglet de sa fiche, ou copie. Gabarit : ../lin/lin.css, retouches :
+   ./offload.css.
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
@@ -105,6 +109,57 @@ const teinteReprise = (s: StatutReprise): Teinte => {
 const trancheDe = (j: number) => SILENCES.findIndex((t) => j <= t.max);
 /* la première raison qui dit pourquoi : celle de la clôture n'explique rien du silence */
 const raisonDe = (c: Compte) => c.signal?.raisons.find((x) => x.code !== "avant_cloture") ?? c.signal?.raisons[0] ?? null;
+const trancheCle = (c: Compte) => {
+  const j = c.signal?.jours_silence;
+  return j === null || j === undefined ? null : SILENCES[trancheDe(j)].cle;
+};
+
+/* les filtres du tableau de bord et de la liste (demande de Teo, 28/10 : « c'est juste censé
+   modifier ce que le dashboard affiche ») : une pastille ou une valeur de carte ne mène plus
+   vers une autre page, elle restreint les comptes dont tous les chiffres sont recalculés.
+   Ils sont lus dans l'adresse, un par dimension : ?filtre=niveau:eteint&filtre=silence:90 */
+type Dimension = "niveau" | "etape" | "silence" | "commercial" | "cloture" | "mode";
+type Filtres = Partial<Record<Dimension, string>>;
+const DIMENSIONS: Dimension[] = ["niveau", "etape", "silence", "commercial", "cloture", "mode"];
+const MODES: Record<string, string> = { essai: "Mode essai", reel: "Mode réel" };
+const SANS_COMMERCIAL = "-";
+const lireFiltres = (valeurs: string[]): Filtres => {
+  const f: Filtres = {};
+  for (const v of valeurs) {
+    const i = v.indexOf(":");
+    const dim = v.slice(0, i) as Dimension;
+    const val = v.slice(i + 1);
+    if (i < 1 || !val || !DIMENSIONS.includes(dim)) continue;
+    const valide =
+      dim === "niveau"
+        ? Object.hasOwn(SANTES, val)
+        : dim === "etape"
+          ? Object.hasOwn(STATUTS_REPRISE, val)
+          : dim === "silence"
+            ? SILENCES.some((t) => t.cle === val)
+            : dim === "cloture"
+              ? val === "oui"
+              : dim === "mode"
+                ? Object.hasOwn(MODES, val)
+                : true;
+    if (valide) f[dim] = val;
+  }
+  return f;
+};
+const libelleFiltre = (d: Dimension, v: string) =>
+  d === "niveau"
+    ? SANTES[v as Sante].libelle
+    : d === "etape"
+      ? STATUTS_REPRISE[v as StatutReprise].libelle
+      : d === "silence"
+        ? `Silence : ${(SILENCES.find((t) => t.cle === v)?.libelle ?? v).toLowerCase()}`
+        : d === "commercial"
+          ? v === SANS_COMMERCIAL
+            ? "Sans commercial"
+            : v
+          : d === "cloture"
+            ? "Avant la clôture"
+            : `Reprises en ${v === "essai" ? "essai" : "réel"}`;
 
 /* la santé d'un projet : un disque à 25 % et son signe, 16 px */
 function IconeSante({ sante }: { sante: Sante }) {
@@ -160,6 +215,15 @@ function Losange({ atteint }: { atteint: boolean }) {
       <path d="M8 1.8 12.9 8 8 14.2 3.1 8z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeOpacity={atteint ? 0.4 : 1} />
     </svg>
   );
+}
+
+/* l'icône d'un filtre, dans son option comme dans sa pastille « ✕ » */
+function IconeFiltre({ d, v }: { d: Dimension; v: string }) {
+  if (d === "niveau") return <IconeStatut sante={v as Sante} />;
+  if (d === "etape") return <Losange atteint />;
+  if (d === "silence" || d === "cloture") return <IconeCalendrier passe />;
+  if (d === "commercial") return <UserRound width={14} height={14} aria-hidden="true" />;
+  return <ShieldCheck width={14} height={14} aria-hidden="true" />;
 }
 
 function IconeCompte({ c, grand }: { c: Compte; grand?: boolean }) {
@@ -391,7 +455,8 @@ export default function ComptesRisque() {
   const compteOuvert = params.get("compte");
   const vue = params.get("vue");
   const onglet = (params.get("sante") as Sante | null) ?? "tous";
-  const etapeFiltre = params.get("etape") as StatutReprise | null;
+  const actifs = lireFiltres(params.getAll("filtre"));
+  const nbActifs = Object.keys(actifs).length;
   const fiche: Fiche | null = compteOuvert ? (source === "exemple" ? (exemple.fiches[compteOuvert] ?? null) : (fichesReelles[compteOuvert] ?? null)) : null;
 
   /* la fiche d'un compte ouvert, lue en base à l'ouverture (offload_fiche) */
@@ -547,10 +612,62 @@ export default function ComptesRisque() {
 
   const aValider = tableau.a_valider;
   const reglages = tableau.reglages;
-  const enJeu = comptes.filter(aRisque).sort((a, b) => valeurDe(b) - valeurDe(a));
-  const valeurEnJeu = somme(enJeu.map(valeurDe));
   const listeComptes = `${RACINE}/offload?vue=comptes`;
   const lienCompte = (id: string) => `${RACINE}/offload?compte=${encodeURIComponent(id)}`;
+
+  /* ——— les filtres : la portée de la page ———
+     Le mode d'un compte est celui de sa reprise : le message qui attend, sinon le premier envoi. */
+  const modeDe = (c: Compte) => aValider.find((v) => v.compte_id === c.id)?.mode ?? c.reprise?.envoi1?.mode ?? null;
+  const correspond = (c: Compte, f: Filtres) =>
+    (!f.niveau || santeDe(c) === f.niveau) &&
+    (!f.etape || c.reprise?.statut === f.etape) &&
+    (!f.silence || trancheCle(c) === f.silence) &&
+    (!f.commercial || (c.commercial ?? SANS_COMMERCIAL) === f.commercial) &&
+    (!f.cloture || !!c.signal?.avant_cloture) &&
+    (!f.mode || modeDe(c) === f.mode);
+  const sans = (d: Dimension): Filtres => {
+    const n = { ...actifs };
+    delete n[d];
+    return n;
+  };
+  const avec = (d: Dimension, v: string): Filtres => (actifs[d] === v ? sans(d) : { ...actifs, [d]: v });
+  /* l'adresse de la page avec ces filtres : le tableau de bord, ou la liste (son onglet de niveau gardé) */
+  const adresse = (f: Filtres, liste = vue === "comptes", sante: Sante | "tous" = onglet) => {
+    const p = [...(liste ? ["vue=comptes", ...(sante === "tous" ? [] : [`sante=${sante}`])] : []), ...DIMENSIONS.filter((d) => f[d]).map((d) => `filtre=${d}:${encodeURIComponent(f[d] ?? "")}`)];
+    return `${RACINE}/offload${p.length ? `?${p.join("&")}` : ""}`;
+  };
+  /* combien de comptes ce choix laisserait, les autres filtres gardés */
+  const nbAvec = (d: Dimension, v: string) => comptes.filter((c) => correspond(c, { ...sans(d), [d]: v })).length;
+  const optionFiltre = (d: Dimension, v: string, plus: Partial<Option> = {}): Option => ({
+    cle: `${d}-${v}`,
+    libelle: libelleFiltre(d, v),
+    meta: pluriel(nbAvec(d, v), "compte"),
+    icone: <IconeFiltre d={d} v={v} />,
+    coche: actifs[d] === v,
+    href: adresse(avec(d, v)),
+    ...plus,
+  });
+  const filtresNiveau = (): Option[] => (Object.keys(SANTES) as Sante[]).filter((s) => nbAvec("niveau", s) > 0 || actifs.niveau === s).map((s) => optionFiltre("niveau", s));
+  const filtresEtape = (etapes: StatutReprise[] = ETAPES): Option[] => etapes.map((e) => optionFiltre("etape", e));
+  const filtresSilence = (): Option[] => SILENCES.map((t) => optionFiltre("silence", t.cle, { libelle: t.libelle }));
+  const filtresCommercial = (): Option[] =>
+    [...new Set(comptes.map((c) => c.commercial ?? SANS_COMMERCIAL))].sort((a, b) => (a === SANS_COMMERCIAL ? 1 : b === SANS_COMMERCIAL ? -1 : a.localeCompare(b, "fr"))).map((m) => optionFiltre("commercial", m));
+  const filtresMode = (): Option[] =>
+    Object.keys(MODES)
+      .filter((m) => nbAvec("mode", m) > 0 || actifs.mode === m || reglages.mode === m)
+      .map((m) => optionFiltre("mode", m));
+  /* chaque filtre actif, en pastille « ✕ » après les onglets : la cliquer le retire */
+  const pastillesFiltres = DIMENSIONS.filter((d) => actifs[d]).map((d) => (
+    <Link key={d} href={adresse(sans(d))} className="v2-btn v2-btn--petit lin-filtre-actif" data-actif="" title="Retirer ce filtre" scroll={false}>
+      <IconeFiltre d={d} v={actifs[d] ?? ""} />
+      {libelleFiltre(d, actifs[d] ?? "")} ✕
+    </Link>
+  ));
+  const portee = nbActifs ? comptes.filter((c) => correspond(c, actifs)) : comptes;
+  const dansPortee = new Set(portee.map((c) => c.id));
+
+  const enJeu = portee.filter(aRisque).sort((a, b) => valeurDe(b) - valeurDe(a));
+  const valeurEnJeu = somme(enJeu.map(valeurDe));
   const parSante = (s: Sante) => comptes.filter((c) => santeDe(c) === s).length;
   const optionsNiveaux = (coche?: Sante): Option[] =>
     (Object.keys(SANTES) as Sante[])
@@ -563,18 +680,11 @@ export default function ComptesRisque() {
         coche: s === coche,
         href: `${RACINE}/offload?vue=comptes&sante=${s}`,
       }));
-  const lienPage = (cle: string, libelle: string, href: string, icone: React.ReactNode = <ExternalLink width={16} height={16} />): Option => ({ cle, libelle, icone, href });
-  const PAGES = {
-    echeances: lienPage("echeances", "Échéances et renouvellements", `${RACINE}/offload/echeances`, <IconeCalendrier />),
-    affaires: lienPage("affaires", "Affaires restées en plan", `${RACINE}/offload/affaires`, <IconeDocument />),
-    groupes: lienPage("groupes", "Groupes clients", `${RACINE}/offload/groupes`, <IconeGroupe />),
-    gardeFous: lienPage("garde-fous", "Garde-fous", `${RACINE}/offload/garde-fous`, <ShieldCheck width={16} height={16} />),
-    pilotage: lienPage("pilotage", "Pilotage", `${RACINE}/offload/pilotage`, <IconeJauge />),
-    validations: lienPage("validations", "Tout voir dans Décisions", `${RACINE}/validations`),
-  };
+  /* le suivi d'un compte : le seul choix qui écrit (offload_changer_statut, motif obligatoire) ;
+     un compte retiré à sa demande ne se remet pas dans le cycle d'ici */
   const optionsSuivi = (c: Compte): Option[] =>
     c.statut === "arrete"
-      ? [{ ...PAGES.gardeFous, libelle: "Retiré à sa demande : voir les garde-fous" }]
+      ? [{ cle: "arrete", libelle: STATUTS_COMPTE.arrete, meta: "ne reçoit plus rien", icone: <UserMinus width={16} height={16} />, coche: true }]
       : (["suivi", "exclu"] as const).map((x) => ({
           cle: x,
           libelle: STATUTS_COMPTE[x],
@@ -583,7 +693,7 @@ export default function ComptesRisque() {
           coche: c.statut === x,
           action: () => void changerSuivi(c, x),
         }));
-  const etapesDe = (s: StatutReprise) => comptes.filter((c) => c.reprise?.statut === s);
+  const etapesDe = (s: StatutReprise) => portee.filter((c) => c.reprise?.statut === s);
 
   /* ——— un compte ouvert : la page d'un projet ——— */
   if (compteOuvert) {
@@ -597,7 +707,12 @@ export default function ComptesRisque() {
     const message: AValider | null = aValider.find((v) => v.compte_id === c.id) ?? null;
     const peutPreparer = !enCours && c.statut === "suivi";
     const raisons = sig?.raisons ?? [];
-    const allerRaisons = () => document.getElementById("offload-raisons")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    /* une section de l'aperçu : on y revient d'abord si un autre onglet est ouvert */
+    const allerA = (id: string) => () => {
+      setOngletFiche("apercu");
+      window.setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
+    };
+    const allerRaisons = allerA("offload-raisons");
     const dateReprise = (r: Reprise) => r.close_le ?? r.repondu_le ?? r.envoye2_le ?? r.envoye1_le ?? r.cree_le;
     const reprises = fiche.reprises.slice().sort((x, y) => dateReprise(y).localeCompare(dateReprise(x)));
     const activite = [
@@ -632,11 +747,16 @@ export default function ComptesRisque() {
           { cle: "close", libelle: "Reprise close", le: derniere.close_le },
         ]
       : [];
-    const optionsDernierAchat: Option[] = [
-      { cle: "pieces", libelle: "Pièces du compte", meta: pluriel(fiche.nb_achats, "pièce"), icone: <IconeDocument />, action: () => setOngletFiche("pieces") },
-      PAGES.echeances,
-      PAGES.affaires,
-    ];
+    /* le dernier achat et la valeur annuelle ouvrent ce qui les explique sur cette page : ses pièces, son rythme */
+    const optionPieces: Option = { cle: "pieces", libelle: "Pièces du compte", meta: pluriel(fiche.nb_achats, "pièce"), icone: <IconeDocument />, action: () => setOngletFiche("pieces") };
+    const optionRythme: Option = {
+      cle: "rythme",
+      libelle: "Son rythme",
+      meta: sig?.rythme_jours ? `tous les ${Math.round(sig.rythme_jours)} j` : undefined,
+      icone: <IconeCalendrier />,
+      action: allerA("offload-rythme"),
+    };
+    const optionsDernierAchat: Option[] = [optionPieces, optionRythme];
     const optionsScore: Option[] = raisons.length
       ? raisons.map((r) => ({ cle: r.code, libelle: r.phrase, meta: r.points ? `+${r.points}` : "—", icone: <IconePriorite niveau={prioDe(r.points)} titre={`${r.points} points`} />, action: allerRaisons }))
       : [{ cle: "aucune", libelle: "Aucune raison relevée", icone: <IconePriorite niveau={0} titre="Aucune raison" />, action: allerRaisons }];
@@ -717,7 +837,7 @@ export default function ComptesRisque() {
                   />
                   <MenuOptions
                     raccourci="e"
-                    titre="Aller à…"
+                    titre="Dernier achat…"
                     declencheur={
                       <>
                         <IconeCalendrier passe={aRisque(c)} />
@@ -873,7 +993,9 @@ export default function ComptesRisque() {
                   <p className="lin-maj-texte lin-maj-gris">Rien à signaler : il achète à son rythme.</p>
                 )}
 
-                <h2 className="lin-projet-h2">Son rythme</h2>
+                <h2 className="lin-projet-h2" id="offload-rythme">
+                  Son rythme
+                </h2>
                 <ul className="lin-projet-liste">
                   <li>
                     <span>Rythme habituel</span>
@@ -1029,7 +1151,7 @@ export default function ComptesRisque() {
                   <dd className={sig?.dernier_achat ? undefined : "lin-props-vide"}>
                     <MenuOptions
                       plat
-                      titre="Aller à…"
+                      titre="Dernier achat…"
                       declencheur={
                         <>
                           <IconeCalendrier passe={aRisque(c)} />
@@ -1045,14 +1167,14 @@ export default function ComptesRisque() {
                   <dd className={sig?.valeur_annuelle ? undefined : "lin-props-vide"}>
                     <MenuOptions
                       plat
-                      titre="Valeur en jeu…"
+                      titre="Valeur annuelle…"
                       declencheur={
                         <>
                           <IconeJauge />
                           {sig?.valeur_annuelle ? montant(sig.valeur_annuelle) : "Inconnue"}
                         </>
                       }
-                      options={[PAGES.pilotage, PAGES.affaires]}
+                      options={[optionRythme, optionPieces]}
                     />
                   </dd>
                 </div>
@@ -1075,45 +1197,50 @@ export default function ComptesRisque() {
                 <div>
                   <dt>Commercial</dt>
                   <dd className={commercial ? undefined : "lin-props-vide"}>
-                    <MenuOptions
-                      plat
-                      titre={commercial ? `Comptes de ${commercial}…` : "Commercial…"}
-                      declencheur={
-                        <>
-                          <UserRound width={16} height={16} aria-hidden="true" />
-                          {commercial ?? "Sans commercial"}
-                        </>
-                      }
-                      options={
-                        commercial
-                          ? duCommercial.map((x) => ({ cle: x.id, libelle: x.nom, meta: SANTES[santeDe(x)].libelle, icone: <IconeCompte c={x} />, coche: x.id === c.id, href: lienCompte(x.id) }))
-                          : [PAGES.groupes]
-                      }
-                      largeur={300}
-                    />
+                    {commercial ? (
+                      <MenuOptions
+                        plat
+                        titre={`Comptes de ${commercial}…`}
+                        declencheur={
+                          <>
+                            <UserRound width={16} height={16} aria-hidden="true" />
+                            {commercial}
+                          </>
+                        }
+                        options={duCommercial.map((x) => ({ cle: x.id, libelle: x.nom, meta: SANTES[santeDe(x)].libelle, icone: <IconeCompte c={x} />, coche: x.id === c.id, href: lienCompte(x.id) }))}
+                        largeur={300}
+                      />
+                    ) : (
+                      <span className="lin-valeur">
+                        <UserRound width={16} height={16} aria-hidden="true" />
+                        Sans commercial
+                      </span>
+                    )}
                   </dd>
                 </div>
                 <div>
                   <dt>Groupe</dt>
                   <dd className={c.groupe ? undefined : "lin-props-vide"}>
-                    <MenuOptions
-                      plat
-                      titre="Groupe…"
-                      declencheur={
-                        <>
-                          <IconeGroupe />
-                          {c.groupe ?? "Aucun groupe"}
-                        </>
-                      }
-                      options={[
-                        ...(c.groupe
-                          ? comptes
-                              .filter((x) => x.groupe === c.groupe)
-                              .map((x): Option => ({ cle: x.id, libelle: x.nom, meta: SANTES[santeDe(x)].libelle, icone: <IconeCompte c={x} />, coche: x.id === c.id, href: lienCompte(x.id) }))
-                          : []),
-                        PAGES.groupes,
-                      ]}
-                    />
+                    {c.groupe ? (
+                      <MenuOptions
+                        plat
+                        titre="Comptes du groupe…"
+                        declencheur={
+                          <>
+                            <IconeGroupe />
+                            {c.groupe}
+                          </>
+                        }
+                        options={comptes
+                          .filter((x) => x.groupe === c.groupe)
+                          .map((x): Option => ({ cle: x.id, libelle: x.nom, meta: SANTES[santeDe(x)].libelle, icone: <IconeCompte c={x} />, coche: x.id === c.id, href: lienCompte(x.id) }))}
+                      />
+                    ) : (
+                      <span className="lin-valeur">
+                        <IconeGroupe />
+                        Aucun groupe
+                      </span>
+                    )}
                   </dd>
                 </div>
                 <div>
@@ -1172,8 +1299,7 @@ export default function ComptesRisque() {
                         titre={`${e.libelle}…`}
                         options={[
                           { cle: "reprises", libelle: "Voir les reprises", icone: <MessageSquare width={16} height={16} />, action: () => setOngletFiche("reprises") },
-                          { ...PAGES.validations, libelle: "Décisions" },
-                          PAGES.pilotage,
+                          ...(peutPreparer ? [{ cle: "preparer", libelle: "Préparer une nouvelle reprise", icone: <Send width={16} height={16} />, action: () => void preparerReprise(c) }] : []),
                         ]}
                       />
                     </li>
@@ -1219,33 +1345,39 @@ export default function ComptesRisque() {
      Les mêmes briques que le tableau de bord de CASHD (titre, propriétés,
      « Latest update », sections, cartes de droite). */
   if (vue !== "comptes") {
-    const k = tableau.compteurs;
+    /* tout se lit dans la portée (les comptes que laissent les filtres) : la phrase, les pastilles,
+       « À valider aujourd'hui », les barres, la liste, et chaque carte de droite */
+    const aValiderP = nbActifs ? aValider.filter((v) => dansPortee.has(v.compte_id)) : aValider;
     const pire = (["eteint", "decroche", "saison", "ralentit"] as const).find((n) => enJeu.some((c) => c.signal?.niveau === n)) ?? "ok";
     const plusAncien = enJeu
       .filter((c) => c.signal?.dernier_achat)
       .slice()
       .sort((a, b) => (a.signal?.dernier_achat ?? "").localeCompare(b.signal?.dernier_achat ?? ""));
     const derniereAnalyse =
-      comptes
+      portee
         .map((c) => c.signal?.jour)
         .filter((x): x is string => !!x)
         .sort()
         .reverse()[0] ?? null;
-    const avantCloture = comptes.filter((c) => c.signal?.avant_cloture);
-    const parNiveau = A_RISQUE.map((n) => {
-      const l = enJeu.filter((c) => c.signal?.niveau === n);
+    const avantCloture = portee.filter((c) => c.signal?.avant_cloture);
+    const niveauFiltre = actifs.niveau as Sante | undefined;
+    const parNiveau = (niveauFiltre ? [niveauFiltre] : (A_RISQUE as Sante[])).map((n) => {
+      const l = (A_RISQUE.includes(n as Niveau) ? enJeu : portee).filter((c) => santeDe(c) === n);
       return { n, nb: l.length, valeur: somme(l.map(valeurDe)) };
     });
     const maxNiveau = Math.max(1, ...parNiveau.map((x) => x.valeur));
-    const citation = aValider.length
-      ? aValider.slice(0, 5).map((v) => {
+    const citation = aValiderP.length
+      ? aValiderP.slice(0, 5).map((v) => {
           const c = comptes.find((x) => x.id === v.compte_id);
           return { cle: v.reprise, nom: v.compte_nom, texte: (c && raisonDe(c)?.phrase) ?? v.sujet ?? (v.rang === 2 ? "relance" : "premier message") };
         })
       : enJeu.slice(0, 3).map((c) => ({ cle: c.id, nom: c.nom, texte: raisonDe(c)?.phrase ?? SANTES[santeDe(c)].libelle }));
-    const appels = tableau.taches.filter((t) => t.type === "appel" && t.statut === "a_faire");
-    const reponses = tableau.taches.filter((t) => t.type === "repondre" && t.statut === "a_faire");
-    const recentes = comptes
+    const appels = tableau.taches.filter((t) => t.type === "appel" && t.statut === "a_faire" && dansPortee.has(t.compte_id));
+    const reponses = tableau.taches.filter((t) => t.type === "repondre" && t.statut === "a_faire" && dansPortee.has(t.compte_id));
+    /* sans filtre, les compteurs de la base ; avec, ceux de la portée */
+    const k = nbActifs ? { comptes: portee.length, avant_cloture: avantCloture.length, a_valider: aValiderP.length, appels: appels.length, reponses: reponses.length } : tableau.compteurs;
+    const commerciaux = new Set(portee.map((c) => c.commercial).filter((m): m is string => !!m));
+    const recentes = portee
       .filter((c) => c.reprise)
       .map((c) => {
         const r = c.reprise as Reprise;
@@ -1262,11 +1394,8 @@ export default function ComptesRisque() {
       })
       .sort((x, y) => y.le.localeCompare(x.le))
       .slice(0, 3);
-    const optionsAnalyse: Option[] = [
-      ...(source === "reelle" && tableau.client ? [{ cle: "recalculer", libelle: "Recalculer maintenant", icone: <RefreshCw width={16} height={16} />, action: () => void lancerRecalcul() }] : []),
-      PAGES.pilotage,
-      PAGES.gardeFous,
-    ];
+    const peutRecalculer = source === "reelle" && !!tableau.client;
+    const rien = nbActifs > 0 && portee.length === 0;
     return (
       <div className="lin">
         <h1 className="v2-sr">Comptes à risque</h1>
@@ -1289,9 +1418,10 @@ export default function ComptesRisque() {
             <Link href={listeComptes} className="v2-btn v2-btn--petit">
               Comptes
             </Link>
-            <Link href={`${RACINE}/validations`} className="v2-btn v2-btn--petit">
+            <Link href={`${RACINE}/offload?filtre=etape:a_valider`} className="v2-btn v2-btn--petit" scroll={false}>
               À valider
             </Link>
+            {pastillesFiltres}
           </nav>
         </div>
 
@@ -1308,358 +1438,387 @@ export default function ComptesRisque() {
             </span>
             <h2 className="lin-projet-h1">Comptes à risque</h2>
             <p className="lin-projet-resume">
-              {enJeu.length
-                ? `${pluriel(enJeu.length, "client")} ${enJeu.length > 1 ? "décrochent" : "décroche"} : ${montant(valeurEnJeu)} de chiffre annuel en jeu.${avantCloture.length ? ` ${avantCloture.length} à joindre avant la clôture.` : ""}`
-                : comptes.length
-                  ? "Vos clients suivis achètent à leur rythme : aucun ne décroche."
-                  : "L'historique est vide : importez l'export de votre logiciel de ventes (code client, date, montant HT)."}
+              {rien
+                ? "Aucun compte ne correspond à ces filtres."
+                : enJeu.length
+                  ? `${pluriel(enJeu.length, "client")} ${enJeu.length > 1 ? "décrochent" : "décroche"} : ${montant(valeurEnJeu)} de chiffre annuel en jeu.${avantCloture.length ? ` ${avantCloture.length} à joindre avant la clôture.` : ""}`
+                  : nbActifs
+                    ? `${pluriel(portee.length, "compte")} dans ce filtre : aucun ne décroche.`
+                    : comptes.length
+                      ? "Vos clients suivis achètent à leur rythme : aucun ne décroche."
+                      : "L'historique est vide : importez l'export de votre logiciel de ventes (code client, date, montant HT)."}
             </p>
             <div className="lin-projet-ligne">
               <span className="lin-projet-etiquette">Propriétés</span>
               <MenuOptions
                 raccourci="s"
-                titre="Voir les comptes…"
-                teinte={SANTES[pire].teinte}
+                titre="Filtrer par niveau…"
+                teinte={SANTES[niveauFiltre ?? pire].teinte}
                 declencheur={
                   <>
-                    <IconeStatut sante={pire} />
-                    {enJeu.length ? `${enJeu.length} à risque` : SANTES.ok.libelle}
+                    <IconeStatut sante={niveauFiltre ?? pire} />
+                    {niveauFiltre ? SANTES[niveauFiltre].libelle : enJeu.length ? `${enJeu.length} à risque` : SANTES.ok.libelle}
                   </>
                 }
-                options={optionsNiveaux(pire)}
+                options={filtresNiveau()}
                 largeur={280}
               />
               <MenuOptions
                 raccourci="v"
-                titre="Reprises à valider…"
+                titre="Filtrer par étape de la reprise…"
                 declencheur={
                   <>
-                    <Losange atteint={aValider.length > 0} />
-                    {aValider.length} à valider
+                    <Losange atteint={aValiderP.length > 0} />
+                    {actifs.etape ? libelleFiltre("etape", actifs.etape) : `${aValiderP.length} à valider`}
                   </>
                 }
-                options={[
-                  ...aValider.map((v): Option => ({
-                    cle: v.reprise,
-                    libelle: v.compte_nom,
-                    meta: v.rang === 2 ? "relance" : "premier message",
-                    icone: <Losange atteint />,
-                    href: `${RACINE}/validations`,
-                  })),
-                  PAGES.validations,
-                ]}
+                options={filtresEtape()}
                 largeur={340}
               />
               <MenuOptions
                 raccourci="e"
-                titre="Silences les plus longs…"
+                titre="Filtrer par silence…"
                 declencheur={
                   <>
                     <IconeCalendrier passe={plusAncien.length > 0} />
                     {plusAncien.length ? `Silence depuis le ${dateCourte(plusAncien[0].signal?.dernier_achat)}` : "Aucun silence"}
                   </>
                 }
-                options={plusAncien.map((c) => ({
-                  cle: c.id,
-                  libelle: c.nom,
-                  meta: dateCourte(c.signal?.dernier_achat),
-                  icone: <IconeCompte c={c} />,
-                  href: lienCompte(c.id),
-                }))}
+                options={filtresSilence()}
                 largeur={320}
               />
             </div>
             <div className="lin-projet-ligne">
               <span className="lin-projet-etiquette">Analyse</span>
+              {peutRecalculer ? (
+                <MenuOptions
+                  raccourci="d"
+                  titre="Détection…"
+                  declencheur={
+                    <>
+                      <RefreshCw width={16} height={16} aria-hidden="true" />
+                      {derniereAnalyse ? `Analysé le ${dateCourte(derniereAnalyse)}` : "Pas encore analysé"}
+                    </>
+                  }
+                  options={[{ cle: "recalculer", libelle: "Recalculer maintenant", icone: <RefreshCw width={16} height={16} />, action: () => void lancerRecalcul() }]}
+                />
+              ) : (
+                <span className="lin-puce">
+                  <RefreshCw width={16} height={16} aria-hidden="true" />
+                  {derniereAnalyse ? `Analysé le ${dateCourte(derniereAnalyse)}` : "Pas encore analysé"}
+                </span>
+              )}
               <MenuOptions
-                raccourci="d"
-                titre="Détection…"
-                declencheur={
-                  <>
-                    <RefreshCw width={16} height={16} aria-hidden="true" />
-                    {derniereAnalyse ? `Analysé le ${dateCourte(derniereAnalyse)}` : "Pas encore analysé"}
-                  </>
-                }
-                options={optionsAnalyse}
-              />
-              <MenuOptions
-                titre="Garde-fous…"
-                teinte={reglages.mode === "essai" ? "jaune" : undefined}
+                titre="Filtrer par mode…"
+                teinte={(actifs.mode ?? reglages.mode) === "essai" ? "jaune" : undefined}
                 declencheur={
                   <>
                     <ShieldCheck width={16} height={16} aria-hidden="true" />
-                    {reglages.mode === "essai" ? "Mode essai" : "Mode réel"}
+                    {actifs.mode ? libelleFiltre("mode", actifs.mode) : MODES[reglages.mode]}
                   </>
                 }
-                options={[PAGES.gardeFous, PAGES.pilotage]}
+                options={filtresMode()}
               />
             </div>
 
-            <details className="lin-maj" open aria-label="À valider aujourd'hui">
-              <summary className="lin-maj-tete">
-                <span className="lin-maj-titre">
-                  À valider aujourd&apos;hui
-                  <ChevronMaj />
-                </span>
-                <Link href={`${RACINE}/validations`} className="lin-maj-lien">
-                  <ExternalLink width={14} height={14} aria-hidden="true" /> Valider
-                </Link>
-              </summary>
-              <p className="lin-maj-auteur">
-                <IconeSante sante={aValider.length ? "decroche" : "ok"} />
-                <span data-teinte={aValider.length ? "jaune" : "vert"}>{aValider.length ? `${pluriel(aValider.length, "reprise")} ${aValider.length > 1 ? "prêtes" : "prête"}` : "Rien à valider"}</span>
-                <Avatar />
-                <span className="lin-maj-gris">OFFLOAD</span>
-                <span className="lin-maj-gris">{derniereAnalyse ? dateCourte(derniereAnalyse) : "cette nuit"}</span>
-              </p>
-              <p className="lin-maj-texte">
-                {aValider.length
-                  ? "Les reprises de contact sont préparées chaque nuit à partir de l'historique de vos ventes ; aucune ne part sans votre accord."
-                  : enJeu.length
-                    ? "Aucune reprise n'attend : les clients qui décrochent sont ci-dessous, avec leur raison."
-                    : "Aucune reprise n'attend votre accord."}
-              </p>
-              {citation.length ? (
-                <dl className="lin-maj-citation">
-                  {citation.map((x) => (
-                    <div key={x.cle}>
-                      <dt>{x.nom}</dt>
-                      <dd>{x.texte}</dd>
-                    </div>
-                  ))}
-                </dl>
-              ) : null}
-              <footer className="lin-maj-pied">
-                <Link href={listeComptes} className="lin-maj-pied-btn" aria-label="Voir les comptes" title="Voir les comptes">
-                  <MessageSquare width={16} height={16} aria-hidden="true" />
-                </Link>
-                <Link href={`${RACINE}/validations`} className="lin-maj-pied-rond" aria-label="Valider" title="Valider">
-                  <CheckCheck width={16} height={16} aria-hidden="true" />
-                </Link>
-              </footer>
-            </details>
-
-            <h3 className="lin-projet-h2">Valeur en jeu par niveau</h3>
-            <ul className="lin-projet-liste">
-              {parNiveau.map((x) => (
-                <li key={x.n}>
-                  <span className="lin-tranche-nom">{SANTES[x.n].libelle}</span>
-                  <span className="lin-tranche-barre" aria-hidden="true">
-                    <span style={{ width: `${(x.valeur / maxNiveau) * 100}%` }} />
-                  </span>
-                  <span className="lin-meta">
-                    {pluriel(x.nb, "compte")} · {montant(x.valeur)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-
-            <h3 className="lin-projet-h2">Plus grosses valeurs en jeu</h3>
-            {enJeu.length ? (
-              <ul className="lin-projet-liste">
-                {enJeu.slice(0, 5).map((c) => (
-                  <li key={c.id}>
-                    <Link href={lienCompte(c.id)} className="lin-projet-lien">
-                      <IconeCompte c={c} />
-                      <span>{c.nom}</span>
-                      <IconePriorite niveau={prioDe(c.signal?.score ?? 0)} titre={scoreDe(c)} />
-                      <span className="lin-meta">{montant(valeurDe(c))}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+            {rien ? (
+              <p className="lin-vide">Aucun compte ne correspond à ces filtres : retirez-en un pour revoir les chiffres.</p>
             ) : (
-              <p className="lin-maj-texte lin-maj-gris">Aucun client ne décroche.</p>
-            )}
-            <Link href={listeComptes} className="lin-voir-tout">
-              Voir tous les comptes <ArrowRight width={14} height={14} aria-hidden="true" />
-            </Link>
-          </article>
+              <>
+                <details className="lin-maj" open aria-label="À valider aujourd'hui">
+                  <summary className="lin-maj-tete">
+                    <span className="lin-maj-titre">
+                      À valider aujourd&apos;hui
+                      <ChevronMaj />
+                    </span>
+                    <Link href={`${RACINE}/validations`} className="lin-maj-lien">
+                      <ExternalLink width={14} height={14} aria-hidden="true" /> Valider
+                    </Link>
+                  </summary>
+                  <p className="lin-maj-auteur">
+                    <IconeSante sante={aValiderP.length ? "decroche" : "ok"} />
+                    <span data-teinte={aValiderP.length ? "jaune" : "vert"}>{aValiderP.length ? `${pluriel(aValiderP.length, "reprise")} ${aValiderP.length > 1 ? "prêtes" : "prête"}` : "Rien à valider"}</span>
+                    <Avatar />
+                    <span className="lin-maj-gris">OFFLOAD</span>
+                    <span className="lin-maj-gris">{derniereAnalyse ? dateCourte(derniereAnalyse) : "cette nuit"}</span>
+                  </p>
+                  <p className="lin-maj-texte">
+                    {aValiderP.length
+                      ? "Les reprises de contact sont préparées chaque nuit à partir de l'historique de vos ventes ; aucune ne part sans votre accord."
+                      : enJeu.length
+                        ? "Aucune reprise n'attend : les clients qui décrochent sont ci-dessous, avec leur raison."
+                        : "Aucune reprise n'attend votre accord."}
+                  </p>
+                  {citation.length ? (
+                    <dl className="lin-maj-citation">
+                      {citation.map((x) => (
+                        <div key={x.cle}>
+                          <dt>{x.nom}</dt>
+                          <dd>{x.texte}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  ) : null}
+                  <footer className="lin-maj-pied">
+                    <Link href={adresse(actifs, true, "tous")} className="lin-maj-pied-btn" aria-label="Voir les comptes" title="Voir les comptes">
+                      <MessageSquare width={16} height={16} aria-hidden="true" />
+                    </Link>
+                    <Link href={`${RACINE}/validations`} className="lin-maj-pied-rond" aria-label="Valider" title="Valider">
+                      <CheckCheck width={16} height={16} aria-hidden="true" />
+                    </Link>
+                  </footer>
+                </details>
 
-          <aside className="lin-cartes-droite" aria-label="Les chiffres">
-            {/* l'ordre des cartes de Linear : Properties, Milestones, Progress, Activity */}
-            <CarteDroite titre="Propriétés">
-              <dl className="lin-props">
-                <div>
-                  <dt>Comptes suivis</dt>
-                  <dd>
-                    <MenuOptions
-                      plat
-                      titre="Voir les comptes…"
-                      declencheur={
-                        <>
-                          <IconeGroupe />
-                          {k.comptes}
-                        </>
-                      }
-                      options={[...optionsNiveaux(), PAGES.groupes]}
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt>Valeur en jeu</dt>
-                  <dd>
-                    <MenuOptions
-                      plat
-                      titre="Valeur en jeu…"
-                      declencheur={
-                        <>
-                          <IconeJauge />
-                          {montant(valeurEnJeu)}
-                        </>
-                      }
-                      options={[...enJeu.slice(0, 5).map((c): Option => ({ cle: c.id, libelle: c.nom, meta: montant(valeurDe(c)), icone: <IconeCompte c={c} />, href: lienCompte(c.id) })), PAGES.pilotage, PAGES.affaires]}
-                      largeur={320}
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt>Avant la clôture</dt>
-                  <dd>
-                    <MenuOptions
-                      plat
-                      titre="À joindre avant la clôture…"
-                      declencheur={
-                        <>
-                          <IconeCalendrier passe={k.avant_cloture > 0} />
-                          {k.avant_cloture}
-                        </>
-                      }
-                      options={[...avantCloture.map((c): Option => ({ cle: c.id, libelle: c.nom, meta: dateCourte(c.signal?.cloture_le), icone: <IconeCompte c={c} />, href: lienCompte(c.id) })), PAGES.echeances]}
-                      largeur={320}
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt>Messages à valider</dt>
-                  <dd>
-                    <MenuOptions
-                      plat
-                      titre="Reprises à valider…"
-                      declencheur={
-                        <>
-                          <IconeEnveloppe />
-                          {k.a_valider}
-                        </>
-                      }
-                      options={[
-                        ...aValider.map((v): Option => ({ cle: v.reprise, libelle: v.compte_nom, meta: v.rang === 2 ? "relance" : "premier message", icone: <Losange atteint />, href: `${RACINE}/validations` })),
-                        PAGES.validations,
-                      ]}
-                      largeur={320}
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt>Appels à passer</dt>
-                  <dd>
-                    <MenuOptions
-                      plat
-                      titre="Appels à passer…"
-                      declencheur={
-                        <>
-                          <PhoneCall width={16} height={16} aria-hidden="true" />
-                          {k.appels}
-                        </>
-                      }
-                      options={
-                        appels.length
-                          ? appels.map((t) => ({ cle: t.id, libelle: t.compte_nom ?? t.titre, meta: `avant le ${dateCourte(t.echeance)}`, icone: <PhoneCall width={16} height={16} />, href: lienCompte(t.compte_id) }))
-                          : [{ ...PAGES.pilotage, libelle: "Aucun appel : voir le pilotage" }]
-                      }
-                      largeur={320}
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt>Réponses</dt>
-                  <dd>
-                    <MenuOptions
-                      plat
-                      titre="Réponses à traiter…"
-                      declencheur={
-                        <>
-                          <MessageSquare width={16} height={16} aria-hidden="true" />
-                          {k.reponses}
-                        </>
-                      }
-                      options={
-                        reponses.length
-                          ? reponses.map((t) => ({ cle: t.id, libelle: t.compte_nom ?? t.titre, meta: `avant le ${dateCourte(t.echeance)}`, icone: <IconeEnveloppe />, href: lienCompte(t.compte_id) }))
-                          : [{ ...PAGES.pilotage, libelle: "Aucune réponse : voir le pilotage" }]
-                      }
-                      largeur={320}
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt>Délai de silence</dt>
-                  <dd>
-                    <MenuOptions
-                      plat
-                      titre="Réglages de la détection…"
-                      declencheur={
-                        <>
-                          <IconeDiese />
-                          {reglages.delai_silence_jours} jours
-                        </>
-                      }
-                      options={[PAGES.gardeFous, PAGES.echeances]}
-                    />
-                  </dd>
-                </div>
-              </dl>
-            </CarteDroite>
-
-            <CarteDroite titre="Étapes de la reprise">
-              <ul className="lin-jalons">
-                {ETAPES.map((e) => {
-                  const n = etapesDe(e).length;
-                  return (
-                    <li key={e}>
-                      <Losange atteint={n > 0} />
-                      <span className="lin-jalon-nom">{STATUTS_REPRISE[e].libelle}</span>
-                      <span className="lin-meta">{pluriel(n, "compte")}</span>
-                      <MenuActions
-                        titre={`${STATUTS_REPRISE[e].libelle}…`}
-                        options={[
-                          { cle: "comptes", libelle: "Comptes à cette étape", icone: <Losange atteint />, href: `${RACINE}/offload?vue=comptes&etape=${e}` },
-                          { ...PAGES.validations, libelle: "Décisions" },
-                          PAGES.pilotage,
-                        ]}
-                      />
-                    </li>
-                  );
-                })}
-              </ul>
-            </CarteDroite>
-
-            <CarteEnJeu liste={comptes} />
-
-            <CarteDroite
-              titre="Activité"
-              action={
-                <Link href={`${RACINE}/offload/pilotage`} className="lin-carte-lien">
-                  Tout voir
-                </Link>
-              }
-            >
-              {recentes.length ? (
-                <ul className="lin-activite">
-                  {recentes.map((x) => (
-                    <li key={x.cle}>
-                      <Losange atteint={x.fait} />
-                      <span>
-                        <b>{x.nom}</b> · {x.quoi} · {dateCourte(x.le)}
+                <h3 className="lin-projet-h2">Valeur en jeu par niveau</h3>
+                <ul className="lin-projet-liste">
+                  {parNiveau.map((x) => (
+                    <li key={x.n}>
+                      <span className="lin-tranche-nom">{SANTES[x.n].libelle}</span>
+                      <span className="lin-tranche-barre" aria-hidden="true">
+                        <span style={{ width: `${(x.valeur / maxNiveau) * 100}%` }} />
+                      </span>
+                      <span className="lin-meta">
+                        {pluriel(x.nb, "compte")} · {montant(x.valeur)}
                       </span>
                     </li>
                   ))}
                 </ul>
-              ) : (
-                <p className="lin-activite-vide">Aucune reprise pour l&apos;instant.</p>
-              )}
-            </CarteDroite>
-          </aside>
+
+                <h3 className="lin-projet-h2">Plus grosses valeurs en jeu</h3>
+                {enJeu.length ? (
+                  <ul className="lin-projet-liste">
+                    {enJeu.slice(0, 5).map((c) => (
+                      <li key={c.id}>
+                        <Link href={lienCompte(c.id)} className="lin-projet-lien">
+                          <IconeCompte c={c} />
+                          <span>{c.nom}</span>
+                          <IconePriorite niveau={prioDe(c.signal?.score ?? 0)} titre={scoreDe(c)} />
+                          <span className="lin-meta">{montant(valeurDe(c))}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="lin-maj-texte lin-maj-gris">Aucun client ne décroche.</p>
+                )}
+                <Link href={adresse(actifs, true, "tous")} className="lin-voir-tout">
+                  Voir tous les comptes <ArrowRight width={14} height={14} aria-hidden="true" />
+                </Link>
+              </>
+            )}
+          </article>
+
+          {rien ? null : (
+            <aside className="lin-cartes-droite" aria-label="Les chiffres">
+              {/* l'ordre des cartes de Linear : Properties, Milestones, Progress, Activity ; chaque valeur filtre la page */}
+              <CarteDroite titre="Propriétés">
+                <dl className="lin-props">
+                  <div>
+                    <dt>Comptes suivis</dt>
+                    <dd>
+                      <MenuOptions
+                        plat
+                        titre="Filtrer par niveau…"
+                        declencheur={
+                          <>
+                            <IconeGroupe />
+                            {k.comptes}
+                          </>
+                        }
+                        options={filtresNiveau()}
+                        largeur={280}
+                      />
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Valeur en jeu</dt>
+                    <dd>
+                      <MenuOptions
+                        plat
+                        titre="Plus grosses valeurs en jeu…"
+                        declencheur={
+                          <>
+                            <IconeJauge />
+                            {montant(valeurEnJeu)}
+                          </>
+                        }
+                        options={enJeu.slice(0, 5).map((c): Option => ({ cle: c.id, libelle: c.nom, meta: montant(valeurDe(c)), icone: <IconeCompte c={c} />, href: lienCompte(c.id) }))}
+                        largeur={320}
+                      />
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Avant la clôture</dt>
+                    <dd>
+                      <MenuOptions
+                        plat
+                        titre="À joindre avant la clôture…"
+                        declencheur={
+                          <>
+                            <IconeCalendrier passe={k.avant_cloture > 0} />
+                            {k.avant_cloture}
+                          </>
+                        }
+                        options={[
+                          optionFiltre("cloture", "oui", { libelle: "Seulement ceux à joindre avant la clôture" }),
+                          ...avantCloture.map((c): Option => ({ cle: c.id, libelle: c.nom, meta: dateCourte(c.signal?.cloture_le), icone: <IconeCompte c={c} />, href: lienCompte(c.id) })),
+                        ]}
+                        largeur={320}
+                      />
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Messages à valider</dt>
+                    <dd>
+                      <MenuOptions
+                        plat
+                        titre="Reprises à valider…"
+                        declencheur={
+                          <>
+                            <IconeEnveloppe />
+                            {k.a_valider}
+                          </>
+                        }
+                        options={[
+                          ...filtresEtape(["a_valider", "relance_a_valider"]),
+                          ...aValiderP.map((v): Option => ({ cle: v.reprise, libelle: v.compte_nom, meta: v.rang === 2 ? "relance" : "premier message", icone: <Losange atteint />, href: lienCompte(v.compte_id) })),
+                        ]}
+                        largeur={320}
+                      />
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Appels à passer</dt>
+                    <dd>
+                      <MenuOptions
+                        plat
+                        titre="Appels à passer…"
+                        declencheur={
+                          <>
+                            <PhoneCall width={16} height={16} aria-hidden="true" />
+                            {k.appels}
+                          </>
+                        }
+                        options={[
+                          ...filtresEtape(["appel"]),
+                          ...appels.map((t): Option => ({
+                            cle: t.id,
+                            libelle: t.compte_nom ?? t.titre,
+                            meta: `avant le ${dateCourte(t.echeance)}`,
+                            icone: <PhoneCall width={16} height={16} />,
+                            href: lienCompte(t.compte_id),
+                          })),
+                        ]}
+                        largeur={320}
+                      />
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Réponses</dt>
+                    <dd>
+                      <MenuOptions
+                        plat
+                        titre="Réponses à traiter…"
+                        declencheur={
+                          <>
+                            <MessageSquare width={16} height={16} aria-hidden="true" />
+                            {k.reponses}
+                          </>
+                        }
+                        options={[
+                          ...filtresEtape(["repondue"]),
+                          ...reponses.map((t): Option => ({ cle: t.id, libelle: t.compte_nom ?? t.titre, meta: `avant le ${dateCourte(t.echeance)}`, icone: <IconeEnveloppe />, href: lienCompte(t.compte_id) })),
+                        ]}
+                        largeur={320}
+                      />
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Commercial</dt>
+                    <dd>
+                      <MenuOptions
+                        plat
+                        titre="Filtrer par commercial…"
+                        declencheur={
+                          <>
+                            <UserRound width={16} height={16} aria-hidden="true" />
+                            {actifs.commercial ? libelleFiltre("commercial", actifs.commercial) : `${commerciaux.size} commercia${commerciaux.size > 1 ? "ux" : "l"}`}
+                          </>
+                        }
+                        options={filtresCommercial()}
+                        largeur={300}
+                      />
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Délai de silence</dt>
+                    <dd>
+                      <MenuOptions
+                        plat
+                        titre="Filtrer par silence…"
+                        declencheur={
+                          <>
+                            <IconeDiese />
+                            {reglages.delai_silence_jours} jours
+                          </>
+                        }
+                        options={filtresSilence()}
+                        largeur={300}
+                      />
+                    </dd>
+                  </div>
+                </dl>
+              </CarteDroite>
+
+              <CarteDroite titre="Étapes de la reprise">
+                <ul className="lin-jalons">
+                  {ETAPES.map((e) => {
+                    const n = etapesDe(e).length;
+                    return (
+                      <li key={e}>
+                        <Losange atteint={n > 0} />
+                        <span className="lin-jalon-nom">{STATUTS_REPRISE[e].libelle}</span>
+                        <span className="lin-meta">{pluriel(n, "compte")}</span>
+                        <MenuActions
+                          titre={`${STATUTS_REPRISE[e].libelle}…`}
+                          options={[
+                            optionFiltre("etape", e, { libelle: actifs.etape === e ? "Retirer ce filtre" : "Filtrer sur cette étape", icone: <ListFilter width={16} height={16} /> }),
+                            { cle: "comptes", libelle: "Comptes à cette étape", icone: <Losange atteint />, href: adresse({ ...actifs, etape: e }, true, "tous") },
+                          ]}
+                        />
+                      </li>
+                    );
+                  })}
+                </ul>
+              </CarteDroite>
+
+              <CarteEnJeu liste={portee} />
+
+              <CarteDroite
+                titre="Activité"
+                action={
+                  <Link href={`${RACINE}/offload/pilotage`} className="lin-carte-lien">
+                    Tout voir
+                  </Link>
+                }
+              >
+                {recentes.length ? (
+                  <ul className="lin-activite">
+                    {recentes.map((x) => (
+                      <li key={x.cle}>
+                        <Losange atteint={x.fait} />
+                        <span>
+                          <b>{x.nom}</b> · {x.quoi} · {dateCourte(x.le)}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="lin-activite-vide">Aucune reprise pour l&apos;instant.</p>
+                )}
+              </CarteDroite>
+            </aside>
+          )}
         </div>
       </div>
     );
@@ -1668,28 +1827,32 @@ export default function ComptesRisque() {
   /* ——— la liste : le tableau des projets (« Voir tous les comptes ») ——— */
   const valeurTri = (c: Compte) => (tri === "priorite" ? -(c.signal?.priorite ?? 0) : tri === "valeur" ? -valeurDe(c) : tri === "silence" ? -(c.signal?.jours_silence ?? -1) : 0);
   /* à valeur égale, ceux qui décrochent d'abord (l'ordre de l'ancien écran) */
-  const ordonnes = comptes.slice().sort((a, b) => valeurTri(a) - valeurTri(b) || Number(aRisque(b)) - Number(aRisque(a)) || a.nom.localeCompare(b.nom, "fr"));
+  const ordonnes = portee.slice().sort((a, b) => valeurTri(a) - valeurTri(b) || Number(aRisque(b)) - Number(aRisque(a)) || a.nom.localeCompare(b.nom, "fr"));
   const q = filtre.trim().toLowerCase();
-  const filtres = ordonnes.filter(
-    (c) =>
-      (onglet === "tous" || santeDe(c) === onglet) && (!etapeFiltre || c.reprise?.statut === etapeFiltre) && (!q || `${c.nom} ${c.ref} ${c.commercial ?? ""} ${c.ville ?? ""} ${c.groupe ?? ""}`.toLowerCase().includes(q)),
-  );
+  const filtres = ordonnes.filter((c) => (onglet === "tous" || santeDe(c) === onglet) && (!q || `${c.nom} ${c.ref} ${c.commercial ?? ""} ${c.ville ?? ""} ${c.groupe ?? ""}`.toLowerCase().includes(q)));
   const presentes = (Object.keys(SANTES) as Sante[]).filter((s) => comptes.some((c) => santeDe(c) === s));
-  const commerciaux = [...new Set(comptes.map((c) => c.commercial ?? ""))];
+  const commerciaux = [...new Set(portee.map((c) => c.commercial ?? ""))];
+  /* le panneau de détails compte la portée des filtres, comme le tableau de bord */
+  const taches = (type: "appel" | "repondre") => tableau.taches.filter((t) => t.type === type && t.statut === "a_faire" && dansPortee.has(t.compte_id)).length;
   const lignesDetails =
     ongletDetails === "niveaux"
-      ? presentes.map((s) => ({ cle: s, libelle: SANTES[s].libelle, valeur: `${parSante(s)} · ${montant(somme(comptes.filter((c) => santeDe(c) === s).map(valeurDe)))}` }))
+      ? presentes
+          .filter((s) => portee.some((c) => santeDe(c) === s))
+          .map((s) => {
+            const l = portee.filter((c) => santeDe(c) === s);
+            return { cle: s, libelle: SANTES[s].libelle, valeur: `${l.length} · ${montant(somme(l.map(valeurDe)))}` };
+          })
       : ongletDetails === "reprises"
         ? [
             ...ETAPES.map((e) => ({ cle: e, libelle: STATUTS_REPRISE[e].libelle, valeur: String(etapesDe(e).length) })),
-            { cle: "appels", libelle: "Appels à passer", valeur: String(tableau.compteurs.appels) },
-            { cle: "reponses", libelle: "Réponses à traiter", valeur: String(tableau.compteurs.reponses) },
+            { cle: "appels", libelle: "Appels à passer", valeur: String(nbActifs ? taches("appel") : tableau.compteurs.appels) },
+            { cle: "reponses", libelle: "Réponses à traiter", valeur: String(nbActifs ? taches("repondre") : tableau.compteurs.reponses) },
           ]
         : commerciaux.map((m) => {
-            const l = comptes.filter((c) => (c.commercial ?? "") === m);
+            const l = portee.filter((c) => (c.commercial ?? "") === m);
             return { cle: m || "-", libelle: m || "Sans commercial", valeur: `${l.filter(aRisque).length} à risque sur ${l.length}` };
           });
-  const lienListe = (s: Sante | "tous") => `${listeComptes}${s === "tous" ? "" : `&sante=${s}`}`;
+  const lienListe = (s: Sante | "tous") => adresse(actifs, true, s);
 
   return (
     <div className="lin">
@@ -1726,12 +1889,7 @@ export default function ComptesRisque() {
               {SANTES[s].libelle}
             </Link>
           ))}
-          {etapeFiltre && STATUTS_REPRISE[etapeFiltre] ? (
-            <Link href={lienListe(onglet)} className="v2-btn v2-btn--petit lin-filtre-actif" data-actif="" title="Retirer ce filtre" scroll={false}>
-              <Losange atteint />
-              {STATUTS_REPRISE[etapeFiltre].libelle} ✕
-            </Link>
-          ) : null}
+          {pastillesFiltres}
         </nav>
         <div className="lin-outils-droite">
           <Menu

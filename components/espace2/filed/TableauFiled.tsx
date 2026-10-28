@@ -33,7 +33,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowRight, CheckCheck, Copy, ExternalLink, FileText, Inbox, ListFilter, MessageSquare, PanelRight, SlidersHorizontal, Upload } from "lucide-react";
+import { ArrowRight, CheckCheck, Copy, ExternalLink, FileText, ListFilter, MessageSquare, PanelRight, SlidersHorizontal, Upload } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { useSource } from "@/components/espace/source";
@@ -101,20 +101,16 @@ const familleDe = (f: Famille) => FAMILLES.find((x) => x.cle === f)!;
 const ORDRE_GROUPES: Groupe[] = ["retard", "semaine", "mois", "plus_tard", "sans"];
 const groupeLibelle = (g: Groupe) => GROUPES.find((x) => x.cle === g)!.libelle;
 const NIVEAUX: Record<Groupe, 0 | 1 | 2 | 3 | 4> = { retard: 4, semaine: 3, mois: 2, plus_tard: 1, sans: 0 };
-/* les étapes d'une facture, de la lecture à la comptabilité : les jalons du tableau de bord */
-const ETAPES: { cle: string; libelle: string; test: (l: Ligne) => boolean; page: { libelle: string; href: string } }[] = [
-  {
-    cle: "lecture",
-    libelle: "En lecture ou à classer",
-    test: (l) => l.a.document.etat === "en_lecture" || l.a.document.etat === "a_classer",
-    page: { libelle: "Boîte de réception", href: `${RACINE}/filed/boite` },
-  },
-  { cle: "a_completer", libelle: "À compléter", test: (l) => l.f?.statut === "a_completer", page: { libelle: "Contrôles et fraude", href: `${RACINE}/filed/controles` } },
-  { cle: "bloquee", libelle: "Bloquées", test: (l) => l.f?.statut === "bloquee", page: { libelle: "Contrôles et fraude", href: `${RACINE}/filed/controles` } },
-  { cle: "a_valider", libelle: "À valider", test: (l) => l.f?.statut === "a_valider", page: { libelle: "Circuit de validation", href: `${RACINE}/filed/circuit` } },
-  { cle: "validee", libelle: "Validées", test: (l) => l.f?.statut === "validee", page: { libelle: "À payer", href: `${RACINE}/filed/a-payer` } },
-  { cle: "comptabilisee", libelle: "Comptabilisées", test: (l) => l.f?.statut === "comptabilisee", page: { libelle: "Comptabilité", href: `${RACINE}/filed/comptabilite` } },
-  { cle: "refusee", libelle: "Refusées", test: (l) => l.f?.statut === "refusee", page: { libelle: "Refusées", href: `${RACINE}/filed/refusees` } },
+/* les étapes d'une facture, de la lecture à la comptabilité : les jalons du tableau de bord,
+   et les valeurs du filtre « etape » (le statut de la facture) */
+const ETAPES: { cle: string; libelle: string; test: (l: Ligne) => boolean }[] = [
+  { cle: "lecture", libelle: "En lecture ou à classer", test: (l) => l.a.document.etat === "en_lecture" || l.a.document.etat === "a_classer" },
+  { cle: "a_completer", libelle: "À compléter", test: (l) => l.f?.statut === "a_completer" },
+  { cle: "bloquee", libelle: "Bloquées", test: (l) => l.f?.statut === "bloquee" },
+  { cle: "a_valider", libelle: "À valider", test: (l) => l.f?.statut === "a_valider" },
+  { cle: "validee", libelle: "Validées", test: (l) => l.f?.statut === "validee" },
+  { cle: "comptabilisee", libelle: "Comptabilisées", test: (l) => l.f?.statut === "comptabilisee" },
+  { cle: "refusee", libelle: "Refusées", test: (l) => l.f?.statut === "refusee" },
 ];
 /* les couleurs d'icône de projet de Linear, une par fournisseur */
 const COULEURS = ["#26b5ce", "#5e6ad2", "#4cb782", "#f2994a", "#eb5757", "#bb87fc", "#f2c94c", "#95a2b3"];
@@ -139,6 +135,56 @@ const arrondi = (v: number) => Math.round(v * 100) / 100;
 const phrase = (t: string) => (t.endsWith(".") ? t : `${t}.`);
 const nomDe = (a: Apercu) => a.fournisseur?.nom ?? a.document.expediteur ?? a.document.nom_fichier;
 const copier = (texte: string) => navigator.clipboard?.writeText(texte);
+
+/* ——— les filtres du tableau de bord (règle de Teo, 28/10 : « quand on clique sur
+   Comptabilité ça renvoie vers une autre sous-page alors que c'est juste censé
+   modifier ce que le dashboard affiche ») ———
+   Une option de menu du tableau de bord ne quitte plus la page : elle pose un
+   filtre, gardé dans l'adresse (?filtre=etape:comptabilisee&filtre=fournisseur:<id>),
+   une valeur par dimension, et tout le tableau de bord se recalcule sur les
+   documents retenus (la « portée »). Choisir de nouveau l'option cochée retire
+   le filtre ; chaque filtre posé est une pastille ✕ après les onglets. */
+type Dimension = "sante" | "etape" | "echeance" | "fournisseur" | "paiement" | "controle";
+type Filtre = { dim: Dimension; val: string };
+const DIMENSIONS: Dimension[] = ["sante", "etape", "echeance", "fournisseur", "paiement", "controle"];
+/* « À payer » : validée ou comptabilisée, pas encore payée ; « points » : un point de contrôle encore ouvert */
+const PAIEMENTS = [{ cle: "a_payer", libelle: "À payer" }];
+const CONTROLES = [{ cle: "points", libelle: "Avec points de contrôle" }];
+const cleFournisseur = (l: Ligne) => l.a.fournisseur?.id ?? l.f?.fournisseur_id ?? null;
+const VALABLES: Record<Dimension, (val: string) => boolean> = {
+  sante: (v) => ORDRE_SANTES.includes(v as Famille),
+  etape: (v) => ETAPES.some((x) => x.cle === v),
+  echeance: (v) => ORDRE_GROUPES.includes(v as Groupe),
+  fournisseur: (v) => !!v,
+  paiement: (v) => PAIEMENTS.some((x) => x.cle === v),
+  controle: (v) => CONTROLES.some((x) => x.cle === v),
+};
+const GARDES: Record<Dimension, (l: Ligne, val: string) => boolean> = {
+  sante: (l, v) => l.sante === v,
+  etape: (l, v) => !!ETAPES.find((x) => x.cle === v)?.test(l),
+  /* un dû encore à tenir dans ce groupe d'échéance (calculs.ts) */
+  echeance: (l, v) => l.enJeu && l.groupe === v,
+  fournisseur: (l, v) => cleFournisseur(l) === v,
+  paiement: (l) => l.payable,
+  controle: (l) => l.points > 0 && l.sante !== "reste",
+};
+function lireFiltres(params: { getAll: (cle: string) => string[] }): Filtre[] {
+  const vus = new Map<Dimension, string>();
+  for (const brut of params.getAll("filtre")) {
+    const i = brut.indexOf(":");
+    const dim = brut.slice(0, i) as Dimension;
+    const val = brut.slice(i + 1);
+    if (i > 0 && DIMENSIONS.includes(dim) && !vus.has(dim) && VALABLES[dim](val)) vus.set(dim, val);
+  }
+  return DIMENSIONS.filter((d) => vus.has(d)).map((d) => ({ dim: d, val: vus.get(d)! }));
+}
+/* l'adresse du tableau de bord sous ces filtres, dans l'ordre des dimensions */
+const lienFiltres = (fs: Filtre[]) =>
+  fs.length
+    ? `${RACINE}/filed?${DIMENSIONS.flatMap((d) => fs.filter((f) => f.dim === d))
+        .map((f) => `filtre=${f.dim}:${encodeURIComponent(f.val)}`)
+        .join("&")}`
+    : `${RACINE}/filed`;
 
 /* la facture d'un aperçu, sous la forme de « À payer » (comme vueExemple, EcranFournisseurs) */
 const versFacture = (a: Apercu): FactureDuFournisseur | null =>
@@ -441,6 +487,8 @@ export default function TableauFiled() {
   const onglet = (params.get("sante") as Famille | null) ?? "tous";
   const echeanceFiltre = params.get("echeance") as Groupe | null;
   const etapeFiltre = params.get("etape");
+  /* les filtres du tableau de bord (?filtre=dimension:valeur) */
+  const filtresActifs = lireFiltres(params);
 
   /* le dossier complet du document ouvert : en mémoire sur l'exemple, lu à l'ouverture sur la base réelle */
   const dossier: DossierFiled | null = !apercuOuvert ? null : source === "exemple" ? (local.find((x) => x.document.id === apercuOuvert.document.id) ?? null) : (reel?.dossiers[apercuOuvert.document.id] ?? null);
@@ -685,18 +733,6 @@ export default function TableauFiled() {
       coche: coche === g.cle,
       href: `${LISTE}&echeance=${g.cle}`,
     }));
-  const optionsFamilles = (coche?: Famille): Option[] =>
-    ORDRE_SANTES.map((x) => {
-      const n = lignes.filter((l) => l.sante === x).length;
-      return {
-        cle: x,
-        libelle: familleDe(x).libelle,
-        meta: pluriel(n, "document"),
-        icone: <IconeStatut sante={x} />,
-        coche: coche === x,
-        href: `${LISTE}&sante=${x}`,
-      };
-    });
 
   /* ——— un document ouvert : la page d'un projet ——— */
   if (cible) {
@@ -724,22 +760,21 @@ export default function TableauFiled() {
         : "aucun point"
       : "—";
     const versDossier = () => setOngletFiche("dossier");
+    /* les menus d'un document ne quittent plus FILED (règle du 28/10) : une correction passe
+       par l'onglet « Dossier », le reste ouvre la liste ou le tableau de bord filtrés */
+    const etapeDuDocument = ETAPES.find((x) => x.test(l)) ?? null;
+    const cleF = cleFournisseur(l);
     const optionsSante: Option[] = [
       { cle: "dossier", libelle: "Corriger dans le dossier", icone: <IconeDocument />, action: versDossier },
-      ...(fac?.statut === "a_valider" ? [{ cle: "valider", libelle: "Décider dans À valider", icone: <CheckCheck width={16} height={16} />, href: `${RACINE}/validations` }] : []),
-      { cle: "controles", libelle: "Contrôles et fraude", icone: <ExternalLink width={16} height={16} />, href: `${RACINE}/filed/controles` },
       { cle: "famille", libelle: `Documents : ${familleDe(s).libelle.toLowerCase()}`, icone: <IconeStatut sante={s} />, href: `${LISTE}&sante=${s}` },
     ];
     const optionsStatut: Option[] = [
-      ...(fac?.statut === "a_valider" ? [{ cle: "valider", libelle: "Décider dans À valider", icone: <CheckCheck width={16} height={16} />, href: `${RACINE}/validations` }] : []),
-      { cle: "circuit", libelle: "Circuit de validation", icone: <ExternalLink width={16} height={16} />, href: `${RACINE}/filed/circuit` },
-      ...(l.payable || l.payee ? [{ cle: "payer", libelle: "À payer", icone: <IconeJauge />, href: `${RACINE}/filed/a-payer` }] : []),
-      ...(fac?.statut === "refusee" ? [{ cle: "refusees", libelle: "Refusées", icone: <IconeStatut sante="bloquee" />, href: `${RACINE}/filed/refusees` }] : []),
-      { cle: "compta", libelle: "Comptabilité", icone: <ExternalLink width={16} height={16} />, href: `${RACINE}/filed/comptabilite` },
+      { cle: "dossier", libelle: "Voir le parcours dans le dossier", icone: <IconeDocument />, action: versDossier },
+      ...(etapeDuDocument ? [{ cle: "etape", libelle: `Documents : ${etapeDuDocument.libelle.toLowerCase()}`, icone: <Losange atteint />, href: `${LISTE}&etape=${etapeDuDocument.cle}` }] : []),
     ];
     const optionsEcheance: Option[] = [
-      { cle: "payer", libelle: "À payer", icone: <IconeJauge />, href: `${RACINE}/filed/a-payer` },
       ...(l.groupe ? [{ cle: "groupe", libelle: `Factures : ${groupeLibelle(l.groupe).toLowerCase()}`, icone: <IconeCalendrier />, href: `${LISTE}&echeance=${l.groupe}` }] : []),
+      { cle: "dossier", libelle: "Corriger l'échéance dans le dossier", icone: <IconeDocument />, action: versDossier },
     ];
     const optionsFournisseur: Option[] = [
       ...memeFournisseur.map((x): Option => ({
@@ -750,7 +785,7 @@ export default function TableauFiled() {
         coche: x.id === l.id,
         href: ficheDe(x.id),
       })),
-      { cle: "fournisseurs", libelle: "Fournisseurs", icone: <ExternalLink width={16} height={16} />, href: `${RACINE}/filed/fournisseurs` },
+      ...(cleF ? [{ cle: "tableau", libelle: "Tableau de bord de ce fournisseur", icone: <IconeGroupe />, href: lienFiltres([{ dim: "fournisseur", val: cleF }]) }] : []),
     ];
     const jalons: { cle: string; libelle: string; atteint: boolean; meta: string }[] = [
       { cle: "recu", libelle: "Reçu", atteint: true, meta: dateCourte(doc.recu_le) },
@@ -765,14 +800,6 @@ export default function TableauFiled() {
       { cle: "comptabilise", libelle: "Comptabilisé", atteint: fac?.statut === "comptabilisee", meta: fac?.statut === "comptabilisee" ? "fait" : "pas encore" },
       { cle: "paye", libelle: "Payé", atteint: l.payee, meta: e?.etat === "payee" ? dateCourte(e.dernier_le) : e?.etat === "partielle" ? `en partie · ${montant(e.regle, fac?.devise)}` : "pas encore" },
     ];
-    const pageDuJalon: Record<string, { libelle: string; href: string }> = {
-      recu: { libelle: "Boîte de réception", href: `${RACINE}/filed/boite` },
-      lu: { libelle: "Boîte de réception", href: `${RACINE}/filed/boite` },
-      controle: { libelle: "Contrôles et fraude", href: `${RACINE}/filed/controles` },
-      valide: { libelle: "Circuit de validation", href: `${RACINE}/filed/circuit` },
-      comptabilise: { libelle: "Comptabilité", href: `${RACINE}/filed/comptabilite` },
-      paye: { libelle: "À payer", href: `${RACINE}/filed/a-payer` },
-    };
     const acteur = (h: DossierFiled["historique"][number]) => h.acteur_libelle ?? (h.acteur_type === "systeme" ? "FILED" : "Une personne");
     return (
       <div className="lin">
@@ -867,7 +894,7 @@ export default function TableauFiled() {
                 {fac ? (
                   <MenuOptions
                     raccourci="e"
-                    titre="Aller à…"
+                    titre="Échéance…"
                     declencheur={
                       <>
                         <IconeCalendrier passe={l.enJeu && l.groupe === "retard"} />
@@ -1056,7 +1083,7 @@ export default function TableauFiled() {
                     <dd>
                       <MenuOptions
                         plat
-                        titre="Aller à…"
+                        titre="Statut…"
                         declencheur={
                           <>
                             <IconeDocument />
@@ -1072,7 +1099,7 @@ export default function TableauFiled() {
                     <dd className={fac?.echeance_lue ? undefined : "lin-props-vide"}>
                       <MenuOptions
                         plat
-                        titre="Aller à…"
+                        titre="Échéance…"
                         declencheur={
                           <>
                             <IconeCalendrier passe={l.enJeu && l.groupe === "retard"} />
@@ -1157,17 +1184,14 @@ export default function TableauFiled() {
                     <dd className={fac ? undefined : "lin-props-vide"}>
                       <MenuOptions
                         plat
-                        titre="Aller à…"
+                        titre="Montant…"
                         declencheur={
                           <>
                             <IconeJauge />
                             {fac ? montant(fac.montant_ttc, fac.devise) : "Non lu"}
                           </>
                         }
-                        options={[
-                          { cle: "payer", libelle: "À payer", icone: <IconeJauge />, href: `${RACINE}/filed/a-payer` },
-                          { cle: "dossier", libelle: "Corriger dans le dossier", icone: <IconeDocument />, action: versDossier },
-                        ]}
+                        options={[{ cle: "dossier", libelle: "Corriger dans le dossier", icone: <IconeDocument />, action: versDossier }]}
                       />
                     </dd>
                   </div>
@@ -1176,14 +1200,14 @@ export default function TableauFiled() {
                     <dd>
                       <MenuOptions
                         plat
-                        titre="Aller à…"
+                        titre="Réception…"
                         declencheur={
                           <>
                             <IconeImport />
                             {dateCourte(doc.recu_le)} · {SOURCES[doc.source] ?? doc.source}
                           </>
                         }
-                        options={[{ cle: "boite", libelle: "Boîte de réception", icone: <Inbox width={16} height={16} />, href: `${RACINE}/filed/boite` }]}
+                        options={[{ cle: "historique", libelle: "Voir l'historique dans le dossier", icone: <IconeDocument />, action: versDossier }]}
                       />
                     </dd>
                   </div>
@@ -1197,13 +1221,7 @@ export default function TableauFiled() {
                       <Losange atteint={j.atteint} />
                       <span className="lin-jalon-nom">{j.libelle}</span>
                       <span className="lin-meta">{j.meta}</span>
-                      <MenuActions
-                        titre={`${j.libelle}…`}
-                        options={[
-                          { cle: "dossier", libelle: "Voir dans le dossier", icone: <IconeDocument />, action: versDossier },
-                          { cle: "page", libelle: pageDuJalon[j.cle].libelle, icone: <ExternalLink width={16} height={16} />, href: pageDuJalon[j.cle].href },
-                        ]}
-                      />
+                      <MenuActions titre={`${j.libelle}…`} options={[{ cle: "dossier", libelle: "Voir dans le dossier", icone: <IconeDocument />, action: versDossier }]} />
                     </li>
                   ))}
                 </ul>
@@ -1247,38 +1265,139 @@ export default function TableauFiled() {
      propriétés, « Latest update », jalons, cartes de droite, carte Progress
      avec ses chiffres et ses répartitions), comme CASHD. */
   if (vue !== "documents") {
-    const parSante = (x: Famille) => lignes.filter((l) => l.sante === x);
-    const sante: Famille = ORDRE_SANTES.find((x) => x !== "reste" && parSante(x).length) ?? "reste";
-    const aValider = lignes.filter((l) => l.f?.statut === "a_valider");
-    const enRetard = aPayerL.filter((l) => l.groupe === "retard");
+    /* la portée : les documents que retiennent les filtres posés (?filtre=) ; tout ce qui suit en est tiré */
+    const portee = lignes.filter((l) => filtresActifs.every((f) => GARDES[f.dim](l, f.val)));
+    /* la même sans le filtre d'une dimension : les chiffres des options de son menu */
+    const porteeSauf = (dim: Dimension) => lignes.filter((l) => filtresActifs.every((f) => f.dim === dim || GARDES[f.dim](l, f.val)));
+    const nombre = (dim: Dimension, test: (l: Ligne) => boolean) => porteeSauf(dim).filter(test).length;
+    const filtreDe = (dim: Dimension) => filtresActifs.find((f) => f.dim === dim)?.val ?? null;
+    const estActif = (dim: Dimension, val: string) => filtreDe(dim) === val;
+    /* choisir une valeur pose le filtre (et remplace celui de la même dimension) ; rechoisir l'option cochée le retire */
+    const basculer = (dim: Dimension, val: string) => lienFiltres([...filtresActifs.filter((f) => f.dim !== dim), ...(estActif(dim, val) ? [] : [{ dim, val }])]);
+    const optionFiltre = (dim: Dimension, val: string, libelle: string, icone: React.ReactNode, meta?: string): Option => ({
+      cle: `${dim}:${val}`,
+      libelle,
+      icone,
+      meta,
+      coche: estActif(dim, val),
+      href: basculer(dim, val),
+    });
+    const nomFournisseur = (id: string) => lignes.find((l) => cleFournisseur(l) === id && l.a.fournisseur)?.a.fournisseur?.nom ?? fournisseursListe.find((f) => f.id === id)?.nom ?? "Fournisseur";
+    /* la pastille d'un filtre posé, après les onglets */
+    const puce = (f: Filtre): { icone: React.ReactNode; libelle: string } => {
+      if (f.dim === "sante") return { icone: <IconeStatut sante={f.val as Famille} />, libelle: familleDe(f.val as Famille).libelle };
+      if (f.dim === "etape") return { icone: <Losange atteint />, libelle: ETAPES.find((x) => x.cle === f.val)!.libelle };
+      if (f.dim === "echeance") return { icone: <IconePriorite niveau={NIVEAUX[f.val as Groupe]} titre={groupeLibelle(f.val as Groupe)} />, libelle: `Échéance : ${groupeLibelle(f.val as Groupe).toLowerCase()}` };
+      if (f.dim === "fournisseur") return { icone: <IconeGroupe />, libelle: nomFournisseur(f.val) };
+      if (f.dim === "paiement") return { icone: <IconeJauge />, libelle: PAIEMENTS.find((x) => x.cle === f.val)!.libelle };
+      return { icone: <IconeStatut sante="bloquee" />, libelle: CONTROLES.find((x) => x.cle === f.val)!.libelle };
+    };
+
+    /* les options qui filtrent, par dimension */
+    const optionsFamillesBord = ORDRE_SANTES.map((x) =>
+      optionFiltre(
+        "sante",
+        x,
+        familleDe(x).libelle,
+        <IconeStatut sante={x} />,
+        pluriel(
+          nombre("sante", (l) => l.sante === x),
+          "document",
+        ),
+      ),
+    );
+    const optionEtape = (cle: string) => {
+      const x = ETAPES.find((e) => e.cle === cle)!;
+      return optionFiltre("etape", cle, x.libelle, <Losange atteint />, pluriel(nombre("etape", x.test), "document"));
+    };
+    const payablesSauf = porteeSauf("paiement").filter((l) => l.payable);
+    const optionAPayer = optionFiltre(
+      "paiement",
+      "a_payer",
+      "À payer",
+      <IconeJauge />,
+      payablesSauf.length
+        ? totaux(
+            payablesSauf.map((l) => l.f!),
+            etats,
+          )
+        : undefined,
+    );
+    const optionsEcheancesBord = GROUPES.map((g) =>
+      optionFiltre(
+        "echeance",
+        g.cle,
+        g.libelle,
+        <IconePriorite niveau={NIVEAUX[g.cle]} titre={g.libelle} />,
+        montant(
+          arrondi(
+            somme(
+              porteeSauf("echeance")
+                .filter((l) => GARDES.echeance(l, g.cle))
+                .map((l) => l.reste),
+            ),
+          ),
+        ),
+      ),
+    );
+    const optionControles = optionFiltre(
+      "controle",
+      "points",
+      CONTROLES[0].libelle,
+      <IconeStatut sante="bloquee" />,
+      pluriel(
+        nombre("controle", (l) => GARDES.controle(l, "points")),
+        "document",
+      ),
+    );
+    const fournisseurF = filtreDe("fournisseur");
+    const optionsFournisseursBord = [
+      ...new Set([
+        ...(fournisseurF ? [fournisseurF] : []),
+        ...porteeSauf("fournisseur")
+          .map(cleFournisseur)
+          .filter((x): x is string => !!x),
+      ]),
+    ]
+      .map((id) => ({ id, nom: nomFournisseur(id), n: nombre("fournisseur", (l) => cleFournisseur(l) === id) }))
+      .sort((x, y) => y.n - x.n || x.nom.localeCompare(y.nom, "fr"))
+      .map((x) => optionFiltre("fournisseur", x.id, x.nom, <IconeGroupe />, pluriel(x.n, "document")));
+
+    const aPayerP = portee.filter((l) => l.payable).sort((x, y) => (x.f?.echeance_lue ?? "9999").localeCompare(y.f?.echeance_lue ?? "9999"));
+    const totalP = (g: Groupe) => arrondi(somme(aPayerP.filter((l) => l.groupe === g).map((l) => l.reste)));
+    const parSante = (x: Famille) => portee.filter((l) => l.sante === x);
+    const filtreSante = filtreDe("sante") as Famille | null;
+    const sante: Famille = filtreSante ?? ORDRE_SANTES.find((x) => x !== "reste" && parSante(x).length) ?? "reste";
+    const aValider = portee.filter((l) => l.f?.statut === "a_valider");
+    const enRetard = aPayerP.filter((l) => l.groupe === "retard");
     const plusAncienne =
       enRetard
         .map((l) => l.f?.echeance_lue)
         .filter((x): x is string => !!x)
         .sort()[0] ?? null;
     const dernierRecu =
-      apercus
-        .map((a) => a.document.recu_le)
+      portee
+        .map((l) => l.a.document.recu_le)
         .sort()
         .reverse()[0] ?? null;
-    const aAgir = lignes.filter((l) => l.sante !== "reste").length;
+    const aAgir = portee.filter((l) => l.sante !== "reste").length;
     const aFaire = [...parSante("bloquee").map((l) => ({ l, quoi: "Bloquée" })), ...aValider.map((l) => ({ l, quoi: "À valider" })), ...enRetard.map((l) => ({ l, quoi: "À payer, en retard" }))];
-    const maxGroupe = Math.max(1, ...ORDRE_GROUPES.map(totalGroupe));
-    const plusGrosses = aPayerL.slice().sort((x, y) => y.reste - x.reste);
+    const maxGroupe = Math.max(1, ...ORDRE_GROUPES.map(totalP));
+    const plusGrosses = aPayerP.slice().sort((x, y) => y.reste - x.reste);
     const fournisseursVus = new Map<string, Fournisseur>();
-    for (const a of apercus) if (a.fournisseur) fournisseursVus.set(a.fournisseur.id, a.fournisseur);
+    for (const l of portee) if (l.a.fournisseur) fournisseursVus.set(l.a.fournisseur.id, l.a.fournisseur);
     const aConfirmer = [...fournisseursVus.values()].filter((f) => f.statut === "a_confirmer").length;
-    const avecPoints = lignes.filter((l) => l.points > 0 && l.sante !== "reste");
-    const refusees = lignes.filter((l) => l.f?.statut === "refusee");
-    const recents = lignes
+    const avecPoints = portee.filter((l) => GARDES.controle(l, "points"));
+    const refusees = portee.filter((l) => l.f?.statut === "refusee");
+    const recents = portee
       .slice()
       .sort((x, y) => y.a.document.recu_le.localeCompare(x.a.document.recu_le))
       .slice(0, 3);
-    const resume = aPayerL.length
+    const resume = aPayerP.length
       ? `${totaux(
-          aPayerL.map((l) => l.f!),
+          aPayerP.map((l) => l.f!),
           etats,
-        )} à payer sur ${pluriel(aPayerL.length, "facture")}${enRetard.length ? `, dont ${montant(totalGroupe("retard"))} en retard` : ""}.`
+        )} à payer sur ${pluriel(aPayerP.length, "facture")}${enRetard.length ? `, dont ${montant(totalP("retard"))} en retard` : ""}.`
       : "Aucune facture validée n'attend de paiement.";
     return (
       <div className="lin">
@@ -1295,385 +1414,375 @@ export default function TableauFiled() {
             <Link href={LISTE} className="v2-btn v2-btn--petit">
               Documents
             </Link>
-            <Link href={`${RACINE}/filed/a-payer`} className="v2-btn v2-btn--petit">
+            <Link href={`${RACINE}/filed?filtre=paiement:a_payer`} className="v2-btn v2-btn--petit" scroll={false}>
               À payer
             </Link>
-            <Link href={`${RACINE}/validations`} className="v2-btn v2-btn--petit">
+            <Link href={`${RACINE}/filed?filtre=etape:a_valider`} className="v2-btn v2-btn--petit" scroll={false}>
               À valider
             </Link>
+            {filtresActifs.map((f) => {
+              const p = puce(f);
+              return (
+                <Link key={f.dim} href={lienFiltres(filtresActifs.filter((x) => x !== f))} className="v2-btn v2-btn--petit lin-filtre-actif" data-actif="" title="Retirer ce filtre" scroll={false}>
+                  {p.icone}
+                  {p.libelle} ✕
+                </Link>
+              );
+            })}
           </nav>
         </div>
 
-        <div className="lin-projet">
-          <article className="lin-projet-texte">
-            <span
-              className="lin-tuile"
-              style={{
-                background: "color-mix(in srgb, #26b5ce 18%, transparent)",
-                color: "#26b5ce",
-              }}
-            >
-              <FileText width={24} height={24} strokeWidth={1.6} aria-hidden="true" />
-            </span>
-            <h2 className="lin-projet-h1">Documents reçus</h2>
-            <p className="lin-projet-resume">
-              {resume} {aAgir ? `${pluriel(aAgir, "document")} ${aAgir > 1 ? "demandent" : "demande"} une action.` : "Aucun document n'attend d'action."}
-            </p>
-            <div className="lin-projet-ligne">
-              <span className="lin-projet-etiquette">Propriétés</span>
-              <MenuOptions
-                raccourci="s"
-                titre="Voir les documents…"
-                teinte={SANTES[sante].teinte}
-                declencheur={
-                  <>
-                    <IconeStatut sante={sante} />
-                    {sante === "reste" ? "Tout est traité" : `${pluriel(parSante(sante).length, "document")} : ${familleDe(sante).libelle.toLowerCase()}`}
-                  </>
-                }
-                options={optionsFamilles(sante)}
-                largeur={280}
-              />
-              <MenuOptions
-                raccourci="v"
-                titre="Factures à valider…"
-                declencheur={
-                  <>
-                    <Losange atteint={aValider.length > 0} />
-                    {aValider.length} à valider
-                  </>
-                }
-                options={[
-                  ...aValider.map((l): Option => ({
-                    cle: l.id,
-                    libelle: l.nom,
-                    meta: `${l.a.document.reference} · ${montant(l.f?.montant_ttc, l.f?.devise)}`,
-                    icone: <IconeDocumentRecu l={l} />,
-                    href: ficheDe(l.id),
-                  })),
-                  { cle: "tout", libelle: "Tout voir dans Décisions", icone: <ExternalLink width={16} height={16} />, href: `${RACINE}/validations` },
-                ]}
-                largeur={360}
-              />
-              <MenuOptions
-                raccourci="e"
-                titre="Échéances passées…"
-                declencheur={
-                  <>
-                    <IconeCalendrier passe={!!plusAncienne} />
-                    {plusAncienne ? `En retard depuis le ${dateCourte(plusAncienne)}` : "Aucune échéance passée"}
-                  </>
-                }
-                options={[
-                  ...enRetard.map((l): Option => ({
-                    cle: l.id,
-                    libelle: l.nom,
-                    meta: `${dateCourte(l.f?.echeance_lue)} · ${montant(arrondi(l.reste), l.f?.devise)}`,
-                    icone: <IconeDocumentRecu l={l} />,
-                    href: ficheDe(l.id),
-                  })),
-                  { cle: "payer", libelle: "À payer", icone: <ExternalLink width={16} height={16} />, href: `${RACINE}/filed/a-payer` },
-                ]}
-                largeur={340}
-              />
-            </div>
-            <div className="lin-projet-ligne">
-              <span className="lin-projet-etiquette">Réception</span>
-              <MenuOptions
-                raccourci="d"
-                titre="Documents reçus…"
-                declencheur={
-                  <>
-                    <IconeImport />
-                    {dernierRecu ? `Dernier reçu le ${dateCourte(dernierRecu)}` : "Aucun document reçu"}
-                  </>
-                }
-                options={[
-                  { cle: "deposer", libelle: "Déposer un document", icone: <Upload width={16} height={16} />, action: () => void ouvrirDepot() },
-                  { cle: "boite", libelle: "Boîte de réception", icone: <Inbox width={16} height={16} />, href: `${RACINE}/filed/boite` },
-                  { cle: "compta", libelle: "Comptabilité", icone: <ExternalLink width={16} height={16} />, href: `${RACINE}/filed/comptabilite` },
-                ]}
-              />
-            </div>
-
-            <details className="lin-maj" open aria-label="À faire aujourd'hui">
-              <summary className="lin-maj-tete">
-                <span className="lin-maj-titre">
-                  À faire aujourd&apos;hui
-                  <svg className="lin-maj-fleche" viewBox="0 0 16 16" aria-hidden="true">
-                    <path d="M5.2 6.4h5.6L8 9.6z" fill="currentColor" />
-                  </svg>
-                </span>
-                <Link href={`${RACINE}/validations`} className="lin-maj-lien">
-                  <ExternalLink width={14} height={14} aria-hidden="true" /> Valider
-                </Link>
-              </summary>
-              <p className="lin-maj-auteur">
-                <IconeSante sante={aFaire.length ? (parSante("bloquee").length ? "bloquee" : "litige") : "reste"} />
-                <span data-teinte={aFaire.length ? (parSante("bloquee").length ? "rouge" : "jaune") : "vert"}>{aFaire.length ? `${pluriel(aFaire.length, "facture")} à reprendre` : "Rien à reprendre"}</span>
-                <span className="lin-avatar-auteur" aria-hidden="true">
-                  <FileText width={11} height={11} />
-                </span>
-                <span className="lin-maj-gris">FILED</span>
-                <span className="lin-maj-gris">aujourd&apos;hui</span>
+        {filtresActifs.length && !portee.length ? (
+          <p className="lin-vide">Aucun document ne correspond {filtresActifs.length > 1 ? "à ces filtres" : "à ce filtre"}.</p>
+        ) : (
+          <div className="lin-projet">
+            <article className="lin-projet-texte">
+              <span
+                className="lin-tuile"
+                style={{
+                  background: "color-mix(in srgb, #26b5ce 18%, transparent)",
+                  color: "#26b5ce",
+                }}
+              >
+                <FileText width={24} height={24} strokeWidth={1.6} aria-hidden="true" />
+              </span>
+              <h2 className="lin-projet-h1">Documents reçus</h2>
+              <p className="lin-projet-resume">
+                {resume} {aAgir ? `${pluriel(aAgir, "document")} ${aAgir > 1 ? "demandent" : "demande"} une action.` : "Aucun document n'attend d'action."}
               </p>
-              <p className="lin-maj-texte">Chaque document reçu est lu puis contrôlé : ce qui bloque, ce qui attend votre validation et ce qui est payable en retard est ici.</p>
-              {aFaire.length ? (
-                <dl className="lin-maj-citation">
-                  {aFaire.slice(0, 5).map(({ l, quoi }) => (
-                    <div key={`${quoi}-${l.id}`}>
-                      <dt>{l.nom}</dt>
-                      <dd>
-                        {quoi} · {l.f ? montant(quoi === "À payer, en retard" ? arrondi(l.reste) : l.f.montant_ttc, l.f.devise) : l.a.document.reference}
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
-              ) : null}
-              <footer className="lin-maj-pied">
-                <Link href={`${LISTE}&sante=bloquee`} className="lin-maj-pied-btn" aria-label="Voir les documents bloqués" title="Voir les documents bloqués">
-                  <MessageSquare width={16} height={16} aria-hidden="true" />
-                </Link>
-                <Link href={`${RACINE}/validations`} className="lin-maj-pied-rond" aria-label="Valider" title="Valider">
-                  <CheckCheck width={16} height={16} aria-hidden="true" />
-                </Link>
-              </footer>
-            </details>
+              <div className="lin-projet-ligne">
+                <span className="lin-projet-etiquette">Propriétés</span>
+                <MenuOptions
+                  raccourci="s"
+                  titre="Filtrer par famille…"
+                  teinte={SANTES[sante].teinte}
+                  declencheur={
+                    <>
+                      <IconeStatut sante={sante} />
+                      {sante === "reste" && !filtreSante ? "Tout est traité" : `${pluriel(parSante(sante).length, "document")} : ${familleDe(sante).libelle.toLowerCase()}`}
+                    </>
+                  }
+                  options={optionsFamillesBord}
+                  largeur={280}
+                />
+                <MenuOptions
+                  raccourci="v"
+                  titre="Factures à valider…"
+                  declencheur={
+                    <>
+                      <Losange atteint={aValider.length > 0} />
+                      {aValider.length} à valider
+                    </>
+                  }
+                  options={[
+                    ...aValider.map((l): Option => ({
+                      cle: l.id,
+                      libelle: l.nom,
+                      meta: `${l.a.document.reference} · ${montant(l.f?.montant_ttc, l.f?.devise)}`,
+                      icone: <IconeDocumentRecu l={l} />,
+                      href: ficheDe(l.id),
+                    })),
+                    { ...optionEtape("a_valider"), libelle: "Seulement les factures à valider" },
+                  ]}
+                  largeur={360}
+                />
+                <MenuOptions
+                  raccourci="e"
+                  titre="Échéances, ou filtrer par échéance…"
+                  declencheur={
+                    <>
+                      <IconeCalendrier passe={!!plusAncienne} />
+                      {plusAncienne ? `En retard depuis le ${dateCourte(plusAncienne)}` : "Aucune échéance passée"}
+                    </>
+                  }
+                  options={[
+                    ...enRetard.map((l): Option => ({
+                      cle: l.id,
+                      libelle: l.nom,
+                      meta: `${dateCourte(l.f?.echeance_lue)} · ${montant(arrondi(l.reste), l.f?.devise)}`,
+                      icone: <IconeDocumentRecu l={l} />,
+                      href: ficheDe(l.id),
+                    })),
+                    ...optionsEcheancesBord,
+                  ]}
+                  largeur={340}
+                />
+              </div>
+              <div className="lin-projet-ligne">
+                <span className="lin-projet-etiquette">Réception</span>
+                <MenuOptions
+                  raccourci="d"
+                  titre="Déposer, ou filtrer…"
+                  declencheur={
+                    <>
+                      <IconeImport />
+                      {dernierRecu ? `Dernier reçu le ${dateCourte(dernierRecu)}` : "Aucun document reçu"}
+                    </>
+                  }
+                  options={[{ cle: "deposer", libelle: "Déposer un document", icone: <Upload width={16} height={16} />, action: () => void ouvrirDepot() }, optionEtape("lecture"), optionEtape("comptabilisee")]}
+                />
+              </div>
 
-            <h3 className="lin-projet-h2">À payer par échéance</h3>
-            <ul className="lin-projet-liste">
-              {GROUPES.filter((g) => g.cle !== "sans" || totalGroupe("sans")).map((g) => (
-                <li key={g.cle}>
-                  <span className="lin-tranche-nom">{g.libelle}</span>
-                  <span className="lin-tranche-barre" aria-hidden="true">
-                    <span style={{ width: `${(Math.max(0, totalGroupe(g.cle)) / maxGroupe) * 100}%` }} />
+              <details className="lin-maj" open aria-label="À faire aujourd'hui">
+                <summary className="lin-maj-tete">
+                  <span className="lin-maj-titre">
+                    À faire aujourd&apos;hui
+                    <svg className="lin-maj-fleche" viewBox="0 0 16 16" aria-hidden="true">
+                      <path d="M5.2 6.4h5.6L8 9.6z" fill="currentColor" />
+                    </svg>
                   </span>
-                  <span className="lin-meta">{montant(totalGroupe(g.cle))}</span>
-                </li>
-              ))}
-            </ul>
+                  <Link href={`${RACINE}/validations`} className="lin-maj-lien">
+                    <ExternalLink width={14} height={14} aria-hidden="true" /> Valider
+                  </Link>
+                </summary>
+                <p className="lin-maj-auteur">
+                  <IconeSante sante={aFaire.length ? (parSante("bloquee").length ? "bloquee" : "litige") : "reste"} />
+                  <span data-teinte={aFaire.length ? (parSante("bloquee").length ? "rouge" : "jaune") : "vert"}>{aFaire.length ? `${pluriel(aFaire.length, "facture")} à reprendre` : "Rien à reprendre"}</span>
+                  <span className="lin-avatar-auteur" aria-hidden="true">
+                    <FileText width={11} height={11} />
+                  </span>
+                  <span className="lin-maj-gris">FILED</span>
+                  <span className="lin-maj-gris">aujourd&apos;hui</span>
+                </p>
+                <p className="lin-maj-texte">Chaque document reçu est lu puis contrôlé : ce qui bloque, ce qui attend votre validation et ce qui est payable en retard est ici.</p>
+                {aFaire.length ? (
+                  <dl className="lin-maj-citation">
+                    {aFaire.slice(0, 5).map(({ l, quoi }) => (
+                      <div key={`${quoi}-${l.id}`}>
+                        <dt>{l.nom}</dt>
+                        <dd>
+                          {quoi} · {l.f ? montant(quoi === "À payer, en retard" ? arrondi(l.reste) : l.f.montant_ttc, l.f.devise) : l.a.document.reference}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                ) : null}
+                <footer className="lin-maj-pied">
+                  <Link href={`${LISTE}&sante=bloquee`} className="lin-maj-pied-btn" aria-label="Voir les documents bloqués" title="Voir les documents bloqués">
+                    <MessageSquare width={16} height={16} aria-hidden="true" />
+                  </Link>
+                  <Link href={`${RACINE}/validations`} className="lin-maj-pied-rond" aria-label="Valider" title="Valider">
+                    <CheckCheck width={16} height={16} aria-hidden="true" />
+                  </Link>
+                </footer>
+              </details>
 
-            <h3 className="lin-projet-h2">Plus grosses factures à payer</h3>
-            {plusGrosses.length ? (
+              <h3 className="lin-projet-h2">À payer par échéance</h3>
               <ul className="lin-projet-liste">
-                {plusGrosses.slice(0, 5).map((l) => (
-                  <li key={l.id}>
-                    <Link href={ficheDe(l.id)} className="lin-projet-lien">
-                      <IconeDocumentRecu l={l} />
-                      <span>{l.nom}</span>
-                      <IconePriorite niveau={urgenceDe(l)} titre={urgenceTitre(l)} />
-                      <span className="lin-meta">{montant(arrondi(l.reste), l.f?.devise)}</span>
-                    </Link>
+                {GROUPES.filter((g) => g.cle !== "sans" || totalP("sans")).map((g) => (
+                  <li key={g.cle}>
+                    <span className="lin-tranche-nom">{g.libelle}</span>
+                    <span className="lin-tranche-barre" aria-hidden="true">
+                      <span style={{ width: `${(Math.max(0, totalP(g.cle)) / maxGroupe) * 100}%` }} />
+                    </span>
+                    <span className="lin-meta">{montant(totalP(g.cle))}</span>
                   </li>
                 ))}
               </ul>
-            ) : (
-              <p className="lin-maj-texte lin-maj-gris">Aucune facture à payer.</p>
-            )}
-            <Link href={LISTE} className="lin-voir-tout">
-              Voir tous les documents <ArrowRight width={14} height={14} aria-hidden="true" />
-            </Link>
-          </article>
 
-          <aside className="lin-cartes-droite" aria-label="Les chiffres">
-            {/* l'ordre des cartes de Linear : Properties, Milestones, Progress, Activity */}
-            <CarteDroite titre="Propriétés">
-              <dl className="lin-props">
-                <div>
-                  <dt>Documents</dt>
-                  <dd>
-                    <MenuOptions
-                      plat
-                      titre="Voir les documents…"
-                      declencheur={
-                        <>
-                          <IconeDocument />
-                          {lignes.length}
-                        </>
-                      }
-                      options={optionsFamilles()}
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt>À payer</dt>
-                  <dd>
-                    <MenuOptions
-                      plat
-                      titre="À payer…"
-                      declencheur={
-                        <>
-                          <IconeJauge />
-                          {aPayerL.length}
-                        </>
-                      }
-                      options={[
-                        {
-                          cle: "payer",
-                          libelle: "À payer",
-                          meta: aPayerL.length
-                            ? totaux(
-                                aPayerL.map((l) => l.f!),
-                                etats,
-                              )
-                            : undefined,
-                          icone: <IconeJauge />,
-                          href: `${RACINE}/filed/a-payer`,
-                        },
-                        { cle: "compta", libelle: "Comptabilité", icone: <ExternalLink width={16} height={16} />, href: `${RACINE}/filed/comptabilite` },
-                      ]}
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt>À valider</dt>
-                  <dd>
-                    <MenuOptions
-                      plat
-                      titre="À valider…"
-                      declencheur={
-                        <>
-                          <CheckCheck width={16} height={16} aria-hidden="true" className="lin-ic" />
-                          {aValider.length}
-                        </>
-                      }
-                      options={[
-                        { cle: "decisions", libelle: "Décisions", icone: <CheckCheck width={16} height={16} />, href: `${RACINE}/validations` },
-                        { cle: "circuit", libelle: "Circuit de validation", icone: <ExternalLink width={16} height={16} />, href: `${RACINE}/filed/circuit` },
-                      ]}
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt>Points de contrôle</dt>
-                  <dd>
-                    <MenuOptions
-                      plat
-                      titre="Points de contrôle…"
-                      declencheur={
-                        <>
-                          <IconeStatut sante={avecPoints.length ? "bloquee" : "reste"} />
-                          {avecPoints.length}
-                        </>
-                      }
-                      options={[
-                        ...avecPoints.map((l): Option => ({
-                          cle: l.id,
-                          libelle: l.nom,
-                          meta: `${l.a.document.reference} · ${pluriel(l.points, "point")}`,
-                          icone: <IconeDocumentRecu l={l} />,
-                          href: ficheDe(l.id),
-                        })),
-                        { cle: "controles", libelle: "Contrôles et fraude", icone: <ExternalLink width={16} height={16} />, href: `${RACINE}/filed/controles` },
-                      ]}
-                      largeur={320}
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt>Refusées</dt>
-                  <dd>
-                    <MenuOptions
-                      plat
-                      titre="Refusées…"
-                      declencheur={
-                        <>
-                          <IconeStatut sante="bloquee" />
-                          {refusees.length}
-                        </>
-                      }
-                      options={[{ cle: "refusees", libelle: "Refusées", icone: <ExternalLink width={16} height={16} />, href: `${RACINE}/filed/refusees` }]}
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt>Fournisseurs</dt>
-                  <dd>
-                    <MenuOptions
-                      plat
-                      titre="Fournisseurs…"
-                      declencheur={
-                        <>
-                          <IconeGroupe />
-                          {fournisseursVus.size}
-                          {aConfirmer ? ` · ${aConfirmer} à confirmer` : ""}
-                        </>
-                      }
-                      options={[{ cle: "fournisseurs", libelle: "Fournisseurs", meta: aConfirmer ? `${aConfirmer} à confirmer` : undefined, icone: <IconeGroupe />, href: `${RACINE}/filed/fournisseurs` }]}
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt>Dernier reçu</dt>
-                  <dd className={dernierRecu ? undefined : "lin-props-vide"}>
-                    <MenuOptions
-                      plat
-                      titre="Documents reçus…"
-                      declencheur={
-                        <>
-                          <IconeImport />
-                          {dernierRecu ? dateCourte(dernierRecu) : "Aucun"}
-                        </>
-                      }
-                      options={[
-                        { cle: "deposer", libelle: "Déposer un document", icone: <Upload width={16} height={16} />, action: () => void ouvrirDepot() },
-                        { cle: "boite", libelle: "Boîte de réception", icone: <Inbox width={16} height={16} />, href: `${RACINE}/filed/boite` },
-                      ]}
-                    />
-                  </dd>
-                </div>
-              </dl>
-            </CarteDroite>
-
-            <CarteDroite titre="Parcours des factures">
-              <ul className="lin-jalons">
-                {ETAPES.map((x) => {
-                  const n = lignes.filter(x.test).length;
-                  return (
-                    <li key={x.cle}>
-                      <Losange atteint={n > 0} />
-                      <span className="lin-jalon-nom">{x.libelle}</span>
-                      <span className="lin-meta">{pluriel(n, "document")}</span>
-                      <MenuActions
-                        titre={`${x.libelle}…`}
-                        options={[
-                          { cle: "documents", libelle: "Documents à cette étape", icone: <Losange atteint />, href: `${LISTE}&etape=${x.cle}` },
-                          { cle: "page", libelle: x.page.libelle, icone: <ExternalLink width={16} height={16} />, href: x.page.href },
-                        ]}
-                      />
-                    </li>
-                  );
-                })}
-              </ul>
-            </CarteDroite>
-
-            <CarteAPayer lignes={lignes} titre="Échéances" fournisseurs />
-
-            <CarteDroite
-              titre="Activité"
-              action={
-                <Link href={`${RACINE}/filed/boite`} className="lin-carte-lien">
-                  Tout voir
-                </Link>
-              }
-            >
-              {recents.length ? (
-                <ul className="lin-activite">
-                  {recents.map((l) => (
+              <h3 className="lin-projet-h2">Plus grosses factures à payer</h3>
+              {plusGrosses.length ? (
+                <ul className="lin-projet-liste">
+                  {plusGrosses.slice(0, 5).map((l) => (
                     <li key={l.id}>
-                      <Losange atteint={l.sante === "reste"} />
-                      <span>
-                        <b>{l.nom}</b> · {l.a.document.reference} · {dateCourte(l.a.document.recu_le)}
-                      </span>
+                      <Link href={ficheDe(l.id)} className="lin-projet-lien">
+                        <IconeDocumentRecu l={l} />
+                        <span>{l.nom}</span>
+                        <IconePriorite niveau={urgenceDe(l)} titre={urgenceTitre(l)} />
+                        <span className="lin-meta">{montant(arrondi(l.reste), l.f?.devise)}</span>
+                      </Link>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="lin-activite-vide">Aucun document reçu pour l&apos;instant.</p>
+                <p className="lin-maj-texte lin-maj-gris">Aucune facture à payer.</p>
               )}
-            </CarteDroite>
-          </aside>
-        </div>
+              <Link href={LISTE} className="lin-voir-tout">
+                Voir tous les documents <ArrowRight width={14} height={14} aria-hidden="true" />
+              </Link>
+            </article>
+
+            <aside className="lin-cartes-droite" aria-label="Les chiffres">
+              {/* l'ordre des cartes de Linear : Properties, Milestones, Progress, Activity */}
+              <CarteDroite titre="Propriétés">
+                <dl className="lin-props">
+                  <div>
+                    <dt>Documents</dt>
+                    <dd>
+                      <MenuOptions
+                        plat
+                        titre="Filtrer par famille…"
+                        declencheur={
+                          <>
+                            <IconeDocument />
+                            {portee.length}
+                          </>
+                        }
+                        options={optionsFamillesBord}
+                      />
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>À payer</dt>
+                    <dd>
+                      <MenuOptions
+                        plat
+                        titre="Filtrer : à payer ou comptabilisées…"
+                        declencheur={
+                          <>
+                            <IconeJauge />
+                            {aPayerP.length}
+                          </>
+                        }
+                        options={[optionAPayer, { ...optionEtape("comptabilisee"), libelle: "Comptabilité" }]}
+                      />
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>À valider</dt>
+                    <dd>
+                      <MenuOptions
+                        plat
+                        titre="Filtrer par décision…"
+                        declencheur={
+                          <>
+                            <CheckCheck width={16} height={16} aria-hidden="true" className="lin-ic" />
+                            {aValider.length}
+                          </>
+                        }
+                        options={[{ ...optionEtape("a_valider"), icone: <CheckCheck width={16} height={16} /> }, optionEtape("validee"), optionEtape("refusee")]}
+                      />
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Points de contrôle</dt>
+                    <dd>
+                      <MenuOptions
+                        plat
+                        titre="Points de contrôle…"
+                        declencheur={
+                          <>
+                            <IconeStatut sante={avecPoints.length ? "bloquee" : "reste"} />
+                            {avecPoints.length}
+                          </>
+                        }
+                        options={[
+                          ...avecPoints.map((l): Option => ({
+                            cle: l.id,
+                            libelle: l.nom,
+                            meta: `${l.a.document.reference} · ${pluriel(l.points, "point")}`,
+                            icone: <IconeDocumentRecu l={l} />,
+                            href: ficheDe(l.id),
+                          })),
+                          { ...optionControles, libelle: "Seulement les documents avec points" },
+                        ]}
+                        largeur={320}
+                      />
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Refusées</dt>
+                    <dd>
+                      <MenuOptions
+                        plat
+                        titre="Filtrer…"
+                        declencheur={
+                          <>
+                            <IconeStatut sante="bloquee" />
+                            {refusees.length}
+                          </>
+                        }
+                        options={[optionEtape("refusee")]}
+                      />
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Fournisseurs</dt>
+                    <dd>
+                      <MenuOptions
+                        plat
+                        titre="Filtrer par fournisseur…"
+                        declencheur={
+                          <>
+                            <IconeGroupe />
+                            {fournisseursVus.size}
+                            {aConfirmer ? ` · ${aConfirmer} à confirmer` : ""}
+                          </>
+                        }
+                        options={optionsFournisseursBord}
+                        largeur={300}
+                      />
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Dernier reçu</dt>
+                    <dd className={dernierRecu ? undefined : "lin-props-vide"}>
+                      <MenuOptions
+                        plat
+                        titre="Déposer, ou filtrer…"
+                        declencheur={
+                          <>
+                            <IconeImport />
+                            {dernierRecu ? dateCourte(dernierRecu) : "Aucun"}
+                          </>
+                        }
+                        options={[{ cle: "deposer", libelle: "Déposer un document", icone: <Upload width={16} height={16} />, action: () => void ouvrirDepot() }, optionEtape("lecture")]}
+                      />
+                    </dd>
+                  </div>
+                </dl>
+              </CarteDroite>
+
+              <CarteDroite titre="Parcours des factures">
+                <ul className="lin-jalons">
+                  {ETAPES.map((x) => {
+                    const n = portee.filter(x.test).length;
+                    return (
+                      <li key={x.cle}>
+                        <Losange atteint={n > 0} />
+                        <span className="lin-jalon-nom">{x.libelle}</span>
+                        <span className="lin-meta">{pluriel(n, "document")}</span>
+                        <MenuActions
+                          titre={`${x.libelle}…`}
+                          options={[
+                            { ...optionEtape(x.cle), libelle: "Filtrer sur cette étape" },
+                            { cle: "documents", libelle: "Voir ces documents dans la liste", icone: <ListFilter width={16} height={16} />, href: `${LISTE}&etape=${x.cle}` },
+                          ]}
+                        />
+                      </li>
+                    );
+                  })}
+                </ul>
+              </CarteDroite>
+
+              <CarteAPayer lignes={portee} titre="Échéances" fournisseurs />
+
+              <CarteDroite
+                titre="Activité"
+                action={
+                  <Link href={`${RACINE}/filed/boite`} className="lin-carte-lien">
+                    Tout voir
+                  </Link>
+                }
+              >
+                {recents.length ? (
+                  <ul className="lin-activite">
+                    {recents.map((l) => (
+                      <li key={l.id}>
+                        <Losange atteint={l.sante === "reste"} />
+                        <span>
+                          <b>{l.nom}</b> · {l.a.document.reference} · {dateCourte(l.a.document.recu_le)}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="lin-activite-vide">Aucun document reçu pour l&apos;instant.</p>
+                )}
+              </CarteDroite>
+            </aside>
+          </div>
+        )}
         {fenetreDepot}
       </div>
     );

@@ -32,7 +32,7 @@ import { tableauDe, jourParis } from "@/components/espace/cashd/calcul";
 import { exporterBalance } from "@/components/espace/cashd/tableur";
 import { DERNIER_IMPORT_EXEMPLE, FICHES_EXEMPLE, REGLAGES_EXEMPLE, RELANCES_EXEMPLE, SANS_COMPTE_EXEMPLE } from "@/components/espace/cashd/exemples";
 import * as portes from "@/components/espace/cashd/portes";
-import type { Balance, Relance, StatutCompte, Tableau } from "@/components/espace/cashd/types";
+import type { Balance, Relance, StatutCompte, Tableau, Totaux } from "@/components/espace/cashd/types";
 import { libellePalier } from "@/components/espace/cashd/etats";
 import { CarteDroite, Choix, GraphiqueProgres, IconePriorite, Menu, MenuActions, MenuOptions, type Option } from "../lin/Lin";
 import { IconeCalendrier, IconeDiese, IconeDocument, IconeEnveloppe, IconeGroupe, IconeImport, IconeJauge, IconeStatutProjet, type EtatProjet } from "../lin/icones";
@@ -124,6 +124,23 @@ const dateCourte = (iso: string | null) =>
 const couleurDe = (id: string) => COULEURS[[...id].reduce((t, c) => t + c.charCodeAt(0), 0) % COULEURS.length];
 const partEchue = (b: Balance) => (b.encours > 0 ? Math.round((b.echu / b.encours) * 100) : 0);
 
+/* ——— les filtres (demande de Teo, 28/10 : « quand on clique sur … ça renvoie vers une autre
+   sous-page alors que c'est juste censé modifier ce que le dashboard affiche ») ———
+   Un menu du tableau de bord ne quitte plus la page : il filtre ce qu'elle montre, comme sur
+   Linear. Un paramètre par dimension, le même pour le tableau de bord et la liste, pour que
+   « Voir tous les débiteurs » garde le filtre : ?sante=retard&palier=rappel&tranche=echu_31_60&groupe=… */
+type Dimension = "sante" | "palier" | "tranche" | "groupe";
+type CleTranche = (typeof TRANCHES)[number]["cle"];
+type Portee = Partial<Record<Dimension, string>>;
+const DIMENSIONS: Dimension[] = ["sante", "palier", "tranche", "groupe"];
+/* une valeur inconnue dans l'adresse est ignorée plutôt que de casser la page */
+const valeurAdmise = (k: Dimension, v: string) => (k === "sante" ? v in SANTES : k === "palier" ? (ORDRE_PALIERS as readonly string[]).includes(v) : k === "tranche" ? TRANCHES.some((x) => x.cle === v) : v !== "");
+const libelleTranche = (cle: string) => {
+  const x = TRANCHES.find((y) => y.cle === cle);
+  return !x ? cle : x.cle === "non_echu" ? x.libelle : `Échu ${x.libelle.toLowerCase()}`;
+};
+const libelleFiltre = (k: Dimension, v: string) => (k === "sante" ? SANTES[v as Sante].libelle : k === "palier" ? libellePalier(v) : k === "tranche" ? libelleTranche(v) : v);
+
 /* la santé d'un projet : un disque à 25 % et son signe, 16 px */
 function IconeSante({ sante }: { sante: Sante }) {
   const t = SANTES[sante].teinte;
@@ -174,6 +191,37 @@ function Losange({ atteint }: { atteint: boolean }) {
 const arrete = (b: Balance) => b.statut !== "actif" || b.en_litige > 0;
 const somme = (v: number[]) => v.reduce((a, b) => a + b, 0);
 const cumul = (v: number[]) => v.map((_, i) => somme(v.slice(0, i + 1)));
+
+/* les totaux d'un tableau filtré, faits comme ceux de tableauDe (calcul.ts) */
+const totauxDe = (liste: Balance[]): Totaux => {
+  const s = (k: keyof Totaux & keyof Balance) => Math.round(somme(liste.map((b) => Number(b[k]) || 0)) * 100) / 100;
+  return {
+    encours: s("encours"),
+    echu: s("echu"),
+    non_echu: s("non_echu"),
+    echu_1_30: s("echu_1_30"),
+    echu_31_60: s("echu_31_60"),
+    echu_61_90: s("echu_61_90"),
+    echu_plus_90: s("echu_plus_90"),
+    en_litige: s("en_litige"),
+    credits: s("credits"),
+    comptes_en_retard: liste.filter((b) => b.echu > 0).length,
+    factures_echues: s("factures_echues"),
+    au_dessus_du_plafond: liste.filter((b) => b.depasse_plafond).length,
+  };
+};
+
+/* l'icône d'un filtre actif, la même que dans le menu qui l'a posé */
+function IconeFiltre({ k, v }: { k: Dimension; v: string }) {
+  if (k === "sante") return <IconeStatut sante={v as Sante} />;
+  if (k === "palier") return <Losange atteint />;
+  const niveau = Math.max(
+    0,
+    TRANCHES.findIndex((x) => x.cle === v),
+  ) as 0 | 1 | 2 | 3 | 4;
+  if (k === "tranche") return <IconePriorite niveau={niveau} titre={libelleTranche(v)} />;
+  return <IconeGroupe />;
+}
 
 /* la carte « Encours » : la carte « Progress » de Linear. Trois chiffres, le graphique
    par ancienneté (cumulé de « à venir » à « plus de 90 jours », repère rouge à 90 jours),
@@ -351,8 +399,35 @@ export default function Debiteurs() {
   const comptes = useMemo(() => (d ? d.tableau.comptes.filter((b) => b.encours > 0 || b.en_litige > 0).map((b) => (statuts[b.compte_id] ? { ...b, statut: statuts[b.compte_id] } : b)) : []), [d, statuts]);
   const compteOuvert = params.get("compte");
   const vue = params.get("vue");
-  const onglet = (params.get("sante") as Sante | null) ?? "tous";
-  const palierFiltre = params.get("palier");
+  const portee: Portee = {};
+  for (const k of DIMENSIONS) {
+    const v = params.get(k);
+    if (v && valeurAdmise(k, v)) portee[k] = v;
+  }
+  const actifs = DIMENSIONS.filter((k) => portee[k]);
+  const onglet = (portee.sante as Sante | undefined) ?? "tous";
+  /* l'adresse de la page avec un filtre changé (null le retire) : le tableau de bord, ou la liste */
+  const lien = (liste: boolean, changes: Partial<Record<Dimension, string | null>> = {}) => {
+    const q = new URLSearchParams();
+    if (liste) q.set("vue", "debiteurs");
+    for (const k of DIMENSIONS) {
+      const v = k in changes ? changes[k] : portee[k];
+      if (v) q.set(k, v);
+    }
+    const s = q.toString();
+    return `${RACINE}/cashd${s ? `?${s}` : ""}`;
+  };
+  /* choisir le filtre déjà posé le retire */
+  const basculer = (liste: boolean, k: Dimension, v: string) => lien(liste, { [k]: portee[k] === v ? null : v });
+  const pucesFiltres = (liste: boolean) =>
+    actifs
+      .filter((k) => !liste || k !== "sante")
+      .map((k) => (
+        <Link key={k} href={lien(liste, { [k]: null })} className="v2-btn v2-btn--petit lin-filtre-actif" data-actif="" title="Retirer ce filtre" scroll={false}>
+          <IconeFiltre k={k} v={portee[k] as string} />
+          {libelleFiltre(k, portee[k] as string)} ✕
+        </Link>
+      ));
   const changerStatutCompte = async (b: Balance, statut: StatutCompte) => {
     if (source === "reelle") {
       try {
@@ -398,6 +473,10 @@ export default function Debiteurs() {
     const vus = paliersDe(id);
     return [...ORDRE_PALIERS].reverse().find((p) => vus.has(p)) ?? null;
   };
+  /* un débiteur est dans la portée quand il passe tous les filtres posés ; « sauf » laisse une
+     dimension de côté, pour compter les choix d'un menu sans le filtre qu'il pose lui-même */
+  const correspond = (b: Balance, k: Dimension, v: string) => (k === "sante" ? santeDe(b) === v : k === "palier" ? dernierPalier(b.compte_id) === v : k === "tranche" ? b[v as CleTranche] > 0 : (b.groupe ?? "") === v);
+  const dansPortee = (b: Balance, sauf?: Dimension) => DIMENSIONS.every((k) => k === sauf || !portee[k] || correspond(b, k, portee[k] as string));
   const valeurTri = (b: Balance) => (tri === "echu" ? -b.echu : tri === "encours" ? -b.encours : tri === "retard" ? -b.retard_max_jours : 0);
   const ordonnes = comptes.slice().sort((a, b) => valeurTri(a) - valeurTri(b) || a.nom.localeCompare(b.nom, "fr"));
 
@@ -412,6 +491,52 @@ export default function Debiteurs() {
     const contact = d.contacts[b.compte_id] ?? null;
     const suivi = `${RACINE}/cashd/suivi?vue=debiteurs&compte=${encodeURIComponent(b.compte_id)}`;
     const etatRelance = (r: Relance) => (r.etat === "a_valider" ? "à valider" : r.etat.replace(/_/g, " "));
+    /* les menus de la fiche ne mènent plus aux autres pages de CASHD : ils ouvrent l'onglet
+       Relances de la fiche, ou la liste des débiteurs filtrée (même page) */
+    const listeFiltree = (k: Dimension, v: string) => `${RACINE}/cashd?vue=debiteurs&${k}=${encodeURIComponent(v)}`;
+    const optionsTranches: Option[] = TRANCHES.map((x, i) => ({
+      cle: x.cle,
+      libelle: x.libelle,
+      meta: montant(b[x.cle], b.devise),
+      icone: <IconePriorite niveau={i as 0 | 1 | 2 | 3 | 4} titre={x.libelle} />,
+      href: listeFiltree("tranche", x.cle),
+    }));
+    const trancheRetard = TRANCHES[niveauDe(b.retard_max_jours)];
+    const optionsEcheance: Option[] = [
+      {
+        cle: "relances",
+        libelle: "Voir les relances",
+        icone: <MessageSquare width={16} height={16} />,
+        action: () => setOngletFiche("relances"),
+      },
+      {
+        cle: "tranche",
+        libelle: "Débiteurs de la même tranche",
+        meta: trancheRetard.libelle,
+        icone: <IconePriorite niveau={niveauDe(b.retard_max_jours)} titre={trancheRetard.libelle} />,
+        href: listeFiltree("tranche", trancheRetard.cle),
+      },
+    ];
+    const optionsGroupe: Option[] = b.groupe
+      ? [
+          ...comptes
+            .filter((x) => x.groupe === b.groupe)
+            .map((x) => ({
+              cle: x.compte_id,
+              libelle: x.nom,
+              meta: montant(x.encours, x.devise),
+              icone: <IconeDebiteur b={x} />,
+              coche: x.compte_id === b.compte_id,
+              href: `${RACINE}/cashd?compte=${encodeURIComponent(x.compte_id)}`,
+            })),
+          {
+            cle: "-groupe",
+            libelle: "Tous les débiteurs du groupe",
+            icone: <IconeGroupe />,
+            href: listeFiltree("groupe", b.groupe),
+          },
+        ]
+      : [];
     return (
       <div className="lin">
         <header className="lin-tete">
@@ -481,50 +606,25 @@ export default function Debiteurs() {
                   />
                   <MenuOptions
                     raccourci="r"
-                    titre="Échu par ancienneté…"
+                    titre="Débiteurs par ancienneté…"
                     declencheur={
                       <>
                         <IconePriorite niveau={niveauDe(b.retard_max_jours)} titre={retardDe(b.retard_max_jours)} />
                         {retardDe(b.retard_max_jours)}
                       </>
                     }
-                    options={TRANCHES.map((x, i) => ({
-                      cle: x.cle,
-                      libelle: x.libelle,
-                      meta: montant(b[x.cle], b.devise),
-                      icone: <IconePriorite niveau={i as 0 | 1 | 2 | 3 | 4} titre={x.libelle} />,
-                      href: `${RACINE}/cashd/balance`,
-                    }))}
+                    options={optionsTranches}
                   />
                   <MenuOptions
                     raccourci="e"
-                    titre="Aller à…"
+                    titre="Échéance…"
                     declencheur={
                       <>
                         <IconeCalendrier passe={!!(b.echu > 0)} />
                         {dateCourte(b.plus_ancienne_echeance)}
                       </>
                     }
-                    options={[
-                      {
-                        cle: "suivi",
-                        libelle: "Débiteurs et relances",
-                        icone: <ExternalLink width={16} height={16} />,
-                        href: suivi,
-                      },
-                      {
-                        cle: "balance",
-                        libelle: "Balance âgée",
-                        icone: <IconeCalendrier />,
-                        href: `${RACINE}/cashd/balance`,
-                      },
-                      {
-                        cle: "litiges",
-                        libelle: "Litiges et pauses",
-                        icone: <IconeStatut sante="litige" />,
-                        href: `${RACINE}/cashd/litiges`,
-                      },
-                    ]}
+                    options={optionsEcheance}
                   />
                   {b.groupe ? (
                     <MenuOptions
@@ -535,16 +635,7 @@ export default function Debiteurs() {
                           {b.groupe}
                         </>
                       }
-                      options={comptes
-                        .filter((x) => x.groupe === b.groupe)
-                        .map((x) => ({
-                          cle: x.compte_id,
-                          libelle: x.nom,
-                          meta: montant(x.encours, x.devise),
-                          icone: <IconeDebiteur b={x} />,
-                          coche: x.compte_id === b.compte_id,
-                          href: `${RACINE}/cashd?compte=${encodeURIComponent(x.compte_id)}`,
-                        }))}
+                      options={optionsGroupe}
                     />
                   ) : null}
                 </div>
@@ -713,20 +804,14 @@ export default function Debiteurs() {
                   <dd>
                     <MenuOptions
                       plat
-                      titre="Échu par ancienneté…"
+                      titre="Débiteurs par ancienneté…"
                       declencheur={
                         <>
                           <IconePriorite niveau={niveauDe(b.retard_max_jours)} titre={retardDe(b.retard_max_jours)} />
                           {retardDe(b.retard_max_jours)}
                         </>
                       }
-                      options={TRANCHES.map((x, i) => ({
-                        cle: x.cle,
-                        libelle: x.libelle,
-                        meta: montant(b[x.cle], b.devise),
-                        icone: <IconePriorite niveau={i as 0 | 1 | 2 | 3 | 4} titre={x.libelle} />,
-                        href: `${RACINE}/cashd/balance`,
-                      }))}
+                      options={optionsTranches}
                     />
                   </dd>
                 </div>
@@ -735,33 +820,14 @@ export default function Debiteurs() {
                   <dd>
                     <MenuOptions
                       plat
-                      titre="Aller à…"
+                      titre="Échéance…"
                       declencheur={
                         <>
                           <IconeCalendrier passe={!!(b.echu > 0)} />
                           {dateCourte(b.plus_ancienne_echeance)}
                         </>
                       }
-                      options={[
-                        {
-                          cle: "suivi",
-                          libelle: "Débiteurs et relances",
-                          icone: <ExternalLink width={16} height={16} />,
-                          href: suivi,
-                        },
-                        {
-                          cle: "envois",
-                          libelle: "Envois",
-                          icone: <IconeEnveloppe />,
-                          href: `${RACINE}/cashd/suivi?vue=envois`,
-                        },
-                        {
-                          cle: "balance",
-                          libelle: "Balance âgée",
-                          icone: <IconeCalendrier />,
-                          href: `${RACINE}/cashd/balance`,
-                        },
-                      ]}
+                      options={optionsEcheance}
                     />
                   </dd>
                 </div>
@@ -791,60 +857,35 @@ export default function Debiteurs() {
                 <div>
                   <dt>Groupe</dt>
                   <dd className={b.groupe ? undefined : "lin-props-vide"}>
-                    <MenuOptions
-                      plat
-                      titre={b.groupe ? "Débiteurs du groupe…" : "Groupe…"}
-                      declencheur={
-                        <>
-                          <IconeGroupe />
-                          {b.groupe ?? "Aucun groupe"}
-                        </>
-                      }
-                      options={
-                        b.groupe
-                          ? comptes
-                              .filter((x) => x.groupe === b.groupe)
-                              .map((x) => ({
-                                cle: x.compte_id,
-                                libelle: x.nom,
-                                meta: montant(x.encours, x.devise),
-                                icone: <IconeDebiteur b={x} />,
-                                coche: x.compte_id === b.compte_id,
-                                href: `${RACINE}/cashd?compte=${encodeURIComponent(x.compte_id)}`,
-                              }))
-                          : [
-                              {
-                                cle: "suivi",
-                                libelle: "Rattacher dans Débiteurs et relances",
-                                icone: <ExternalLink width={16} height={16} />,
-                                href: suivi,
-                              },
-                            ]
-                      }
-                    />
+                    {/* sans groupe, plus rien à proposer ici (le rattachement se fait dans Débiteurs et relances) : la valeur seule */}
+                    {b.groupe ? (
+                      <MenuOptions
+                        plat
+                        titre="Débiteurs du groupe…"
+                        declencheur={
+                          <>
+                            <IconeGroupe />
+                            {b.groupe}
+                          </>
+                        }
+                        options={optionsGroupe}
+                      />
+                    ) : (
+                      <span className="lin-valeur">
+                        <IconeGroupe />
+                        Aucun groupe
+                      </span>
+                    )}
                   </dd>
                 </div>
                 <div>
                   <dt>Plafond</dt>
                   <dd className={b.plafond_encours ? undefined : "lin-props-vide"}>
-                    <MenuOptions
-                      plat
-                      titre="Plafond d'encours…"
-                      declencheur={
-                        <>
-                          <IconeJauge />
-                          {b.plafond_encours ? montant(b.plafond_encours, b.devise) : "Aucun plafond"}
-                        </>
-                      }
-                      options={[
-                        {
-                          cle: "risque",
-                          libelle: "Régler dans Risque client",
-                          icone: <ExternalLink width={16} height={16} />,
-                          href: `${RACINE}/cashd/risque`,
-                        },
-                      ]}
-                    />
+                    {/* le plafond se règle dans Risque client : ici, la valeur seule */}
+                    <span className="lin-valeur">
+                      <IconeJauge />
+                      {b.plafond_encours ? montant(b.plafond_encours, b.devise) : "Aucun plafond"}
+                    </span>
                   </dd>
                 </div>
                 <div>
@@ -852,7 +893,7 @@ export default function Debiteurs() {
                   <dd>
                     <MenuOptions
                       plat
-                      titre="Factures…"
+                      titre="Débiteurs…"
                       declencheur={
                         <>
                           <IconeDocument />
@@ -860,20 +901,12 @@ export default function Debiteurs() {
                           {b.factures_echues > 1 ? "s" : ""} sur {b.factures_ouvertes}
                         </>
                       }
-                      options={[
-                        {
-                          cle: "suivi",
-                          libelle: "Voir les factures",
-                          icone: <ExternalLink width={16} height={16} />,
-                          href: suivi,
-                        },
-                        {
-                          cle: "litiges",
-                          libelle: "Litiges et pauses",
-                          icone: <IconeStatut sante="litige" />,
-                          href: `${RACINE}/cashd/litiges`,
-                        },
-                      ]}
+                      options={(["retard", "litige"] as const).map((x) => ({
+                        cle: x,
+                        libelle: `Débiteurs ${SANTES[x].libelle.toLowerCase()}`,
+                        icone: <IconeStatut sante={x} />,
+                        href: listeFiltree("sante", x),
+                      }))}
                     />
                   </dd>
                 </div>
@@ -900,13 +933,7 @@ export default function Debiteurs() {
                           cle: "debiteurs",
                           libelle: "Débiteurs à ce palier",
                           icone: <Losange atteint />,
-                          href: `${RACINE}/cashd?vue=debiteurs&palier=${p}`,
-                        },
-                        {
-                          cle: "envois",
-                          libelle: "Envois",
-                          icone: <IconeEnveloppe />,
-                          href: `${RACINE}/cashd/suivi?vue=envois`,
+                          href: listeFiltree("palier", p),
                         },
                       ]}
                     />
@@ -952,10 +979,29 @@ export default function Debiteurs() {
      (titre, propriétés, « Latest update », jalons, cartes de droite, carte
      Progress avec ses chiffres et ses répartitions). */
   if (vue !== "debiteurs") {
-    const t = d.tableau.totaux;
-    const aValider = d.relances.filter((r) => r.etat === "a_valider");
-    const enRetard = comptes.filter((b) => b.echu > 0).sort((a, b) => b.echu - a.echu);
-    const sante: Sante = comptes.some((b) => santeDe(b) === "litige") && !t.comptes_en_retard ? "litige" : t.comptes_en_retard ? "retard" : "a_jour";
+    /* la portée : les débiteurs qui passent les filtres posés. Tout ce qui suit en part
+       (phrase, pastilles, bloc « À valider », barres, retards, cartes de droite) */
+    const liste = comptes.filter((b) => dansPortee(b));
+    const ids = new Set(liste.map((b) => b.compte_id));
+    const t = actifs.length ? totauxDe(liste) : d.tableau.totaux;
+    const relancesPortee = actifs.length ? d.relances.filter((r) => ids.has(r.compte_id)) : d.relances;
+    const aValider = relancesPortee.filter((r) => r.etat === "a_valider");
+    const enRetard = liste.filter((b) => b.echu > 0).sort((a, b) => b.echu - a.echu);
+    const sante: Sante = (portee.sante as Sante | undefined) ?? (liste.some((b) => santeDe(b) === "litige") && !t.comptes_en_retard ? "litige" : t.comptes_en_retard ? "retard" : "a_jour");
+    /* les choix d'un menu se comptent sans le filtre qu'il pose (une santé choisie n'efface pas les autres) */
+    const optionsSante = (meta: (n: number) => string): Option[] =>
+      (Object.keys(SANTES) as Sante[]).map((x) => {
+        const n = comptes.filter((b) => santeDe(b) === x && dansPortee(b, "sante")).length;
+        return {
+          cle: x,
+          libelle: SANTES[x].libelle,
+          meta: meta(n),
+          icone: <IconeStatut sante={x} />,
+          coche: portee.sante === x,
+          href: basculer(false, "sante", x),
+        };
+      });
+    const groupes = [...new Set(comptes.map((b) => b.groupe).filter((g): g is string => !!g))].sort((a, b) => a.localeCompare(b, "fr"));
     const plusAncienne =
       enRetard
         .map((b) => b.plus_ancienne_echeance)
@@ -964,20 +1010,21 @@ export default function Debiteurs() {
     const maxTranche = Math.max(1, ...TRANCHES.slice(1).map((x) => t[x.cle] ?? 0));
     const parPalier = ORDRE_PALIERS.map((p) => ({
       p,
-      n: comptes.filter((b) => dernierPalier(b.compte_id) === p).length,
+      n: liste.filter((b) => dernierPalier(b.compte_id) === p).length,
     }));
-    const recentes = d.relances
+    const recentes = relancesPortee
       .slice()
       .sort((x, y) => y.jour.localeCompare(x.jour))
       .slice(0, 3);
-    const listeDebiteurs = `${RACINE}/cashd?vue=debiteurs`;
+    /* la liste reprend les filtres du tableau de bord */
+    const listeDebiteurs = lien(true);
     return (
       <div className="lin">
         <h1 className="v2-sr">Relances</h1>
         <header className="lin-tete">
           <span className="lin-tete-titre">Tableau de bord</span>
           <div className="lin-tete-droite">
-            <button type="button" className="v2-btn v2-btn--petit" onClick={() => exporterBalance(comptes, jourParis())}>
+            <button type="button" className="v2-btn v2-btn--petit" onClick={() => exporterBalance(liste, jourParis())}>
               <Download width={14} height={14} aria-hidden="true" />
               <span>Exporter</span>
             </button>
@@ -991,412 +1038,377 @@ export default function Debiteurs() {
             <Link href={listeDebiteurs} className="v2-btn v2-btn--petit">
               Débiteurs
             </Link>
-            <Link href={`${RACINE}/validations`} className="v2-btn v2-btn--petit">
-              À valider
-            </Link>
+            {pucesFiltres(false)}
           </nav>
         </div>
 
-        <div className="lin-projet">
-          <article className="lin-projet-texte">
-            <span
-              className="lin-tuile"
-              style={{
-                background: "color-mix(in srgb, #f2c94c 18%, transparent)",
-                color: "#f2c94c",
-              }}
-            >
-              <HandCoins width={24} height={24} strokeWidth={1.6} aria-hidden="true" />
-            </span>
-            <h2 className="lin-projet-h1">Relances</h2>
-            <p className="lin-projet-resume">
-              {t.encours > 0 ? `On vous doit ${montant(t.encours)}, dont ${montant(t.echu)} échus chez ${t.comptes_en_retard} débiteur${t.comptes_en_retard > 1 ? "s" : ""}.` : "Personne ne vous doit d'argent."}
-            </p>
-            <div className="lin-projet-ligne">
-              <span className="lin-projet-etiquette">Propriétés</span>
-              <MenuOptions
-                raccourci="s"
-                titre="Voir les débiteurs…"
-                teinte={SANTES[sante].teinte}
-                declencheur={
-                  <>
-                    <IconeStatut sante={sante} />
-                    {SANTES[sante].libelle}
-                  </>
-                }
-                options={(Object.keys(SANTES) as Sante[]).map((x) => {
-                  const n = comptes.filter((b) => santeDe(b) === x).length;
-                  return {
-                    cle: x,
-                    libelle: SANTES[x].libelle,
-                    meta: `${n} débiteur${n > 1 ? "s" : ""}`,
-                    icone: <IconeStatut sante={x} />,
-                    coche: x === sante,
-                    href: `${RACINE}/cashd?vue=debiteurs&sante=${x}`,
-                  };
-                })}
-                largeur={280}
-              />
-              <MenuOptions
-                raccourci="v"
-                titre="Relances à valider…"
-                declencheur={
-                  <>
-                    <Losange atteint={aValider.length > 0} />
-                    {aValider.length} à valider
-                  </>
-                }
-                options={[
-                  ...aValider.map((r): Option => ({
+        {actifs.length && !liste.length ? (
+          <p className="lin-vide">Aucun débiteur ne correspond à ce filtre.</p>
+        ) : (
+          <div className="lin-projet">
+            <article className="lin-projet-texte">
+              <span
+                className="lin-tuile"
+                style={{
+                  background: "color-mix(in srgb, #f2c94c 18%, transparent)",
+                  color: "#f2c94c",
+                }}
+              >
+                <HandCoins width={24} height={24} strokeWidth={1.6} aria-hidden="true" />
+              </span>
+              <h2 className="lin-projet-h1">Relances</h2>
+              <p className="lin-projet-resume">
+                {t.encours > 0 ? `On vous doit ${montant(t.encours)}, dont ${montant(t.echu)} échus chez ${t.comptes_en_retard} débiteur${t.comptes_en_retard > 1 ? "s" : ""}.` : "Personne ne vous doit d'argent."}
+              </p>
+              <div className="lin-projet-ligne">
+                <span className="lin-projet-etiquette">Propriétés</span>
+                <MenuOptions
+                  raccourci="s"
+                  titre="Filtrer par santé…"
+                  teinte={SANTES[sante].teinte}
+                  declencheur={
+                    <>
+                      <IconeStatut sante={sante} />
+                      {SANTES[sante].libelle}
+                    </>
+                  }
+                  options={optionsSante((n) => `${n} débiteur${n > 1 ? "s" : ""}`)}
+                  largeur={280}
+                />
+                {/* chaque relance à valider ouvre son débiteur (sa dernière relance y est en tête) */}
+                <MenuOptions
+                  raccourci="v"
+                  titre="Relances à valider…"
+                  declencheur={
+                    <>
+                      <Losange atteint={aValider.length > 0} />
+                      {aValider.length} à valider
+                    </>
+                  }
+                  options={aValider.map((r): Option => ({
                     cle: r.id,
                     libelle: r.compte,
                     meta: `${libellePalier(r.palier)} · ${montant(r.montant)}`,
                     icone: <Losange atteint />,
-                    href: `${RACINE}/validations`,
-                  })),
-                  {
-                    cle: "tout",
-                    libelle: "Tout voir dans Décisions",
-                    icone: <ExternalLink width={16} height={16} />,
-                    href: `${RACINE}/validations`,
-                  },
-                ]}
-                largeur={360}
-              />
-              <MenuOptions
-                raccourci="e"
-                titre="Échéances passées…"
-                declencheur={
-                  <>
-                    <IconeCalendrier passe={!!plusAncienne} />
-                    {plusAncienne ? `Depuis le ${dateCourte(plusAncienne)}` : "Aucune échéance passée"}
-                  </>
-                }
-                options={enRetard
-                  .slice()
-                  .sort((a, b) => (a.plus_ancienne_echeance ?? "").localeCompare(b.plus_ancienne_echeance ?? ""))
-                  .map((b) => ({
-                    cle: b.compte_id,
-                    libelle: b.nom,
-                    meta: dateCourte(b.plus_ancienne_echeance),
-                    icone: <IconeDebiteur b={b} />,
-                    href: `${RACINE}/cashd?compte=${encodeURIComponent(b.compte_id)}`,
+                    href: `${RACINE}/cashd?compte=${encodeURIComponent(r.compte_id)}`,
                   }))}
-                largeur={320}
-              />
-            </div>
-            <div className="lin-projet-ligne">
-              <span className="lin-projet-etiquette">Import</span>
-              <MenuOptions
-                raccourci="d"
-                titre="Données…"
-                declencheur={
-                  <>
-                    <IconeImport />
-                    {d.tableau.dernier_import ? `Dernier import le ${dateCourte(d.tableau.dernier_import)}` : "Aucun import"}
-                  </>
-                }
-                options={[
-                  {
-                    cle: "exporter",
-                    libelle: "Exporter la balance",
-                    icone: <IconeImport />,
-                    action: () => exporterBalance(comptes, jourParis()),
-                  },
-                  {
-                    cle: "balance",
-                    libelle: "Balance âgée",
-                    icone: <IconeCalendrier />,
-                    href: `${RACINE}/cashd/balance`,
-                  },
-                  {
-                    cle: "suivi",
-                    libelle: "Débiteurs et relances",
-                    icone: <ExternalLink width={16} height={16} />,
-                    href: `${RACINE}/cashd/suivi?vue=debiteurs`,
-                  },
-                ]}
-              />
-            </div>
+                  largeur={360}
+                />
+                <MenuOptions
+                  raccourci="e"
+                  titre="Échéances passées…"
+                  declencheur={
+                    <>
+                      <IconeCalendrier passe={!!plusAncienne} />
+                      {plusAncienne ? `Depuis le ${dateCourte(plusAncienne)}` : "Aucune échéance passée"}
+                    </>
+                  }
+                  options={enRetard
+                    .slice()
+                    .sort((a, b) => (a.plus_ancienne_echeance ?? "").localeCompare(b.plus_ancienne_echeance ?? ""))
+                    .map((b) => ({
+                      cle: b.compte_id,
+                      libelle: b.nom,
+                      meta: dateCourte(b.plus_ancienne_echeance),
+                      icone: <IconeDebiteur b={b} />,
+                      href: `${RACINE}/cashd?compte=${encodeURIComponent(b.compte_id)}`,
+                    }))}
+                  largeur={320}
+                />
+                {groupes.length ? (
+                  <MenuOptions
+                    titre="Filtrer par groupe…"
+                    declencheur={
+                      <>
+                        <IconeGroupe />
+                        {portee.groupe ?? `${groupes.length} groupe${groupes.length > 1 ? "s" : ""}`}
+                      </>
+                    }
+                    options={groupes.map((g) => ({
+                      cle: g,
+                      libelle: g,
+                      meta: montant(somme(comptes.filter((b) => b.groupe === g && dansPortee(b, "groupe")).map((b) => b.encours))),
+                      icone: <IconeGroupe />,
+                      coche: portee.groupe === g,
+                      href: basculer(false, "groupe", g),
+                    }))}
+                    largeur={300}
+                  />
+                ) : null}
+              </div>
+              <div className="lin-projet-ligne">
+                <span className="lin-projet-etiquette">Import</span>
+                <MenuOptions
+                  raccourci="d"
+                  titre="Données…"
+                  declencheur={
+                    <>
+                      <IconeImport />
+                      {d.tableau.dernier_import ? `Dernier import le ${dateCourte(d.tableau.dernier_import)}` : "Aucun import"}
+                    </>
+                  }
+                  options={[
+                    {
+                      cle: "exporter",
+                      libelle: "Exporter la balance",
+                      icone: <IconeImport />,
+                      action: () => exporterBalance(liste, jourParis()),
+                    },
+                  ]}
+                />
+              </div>
 
-            <details className="lin-maj" open aria-label="À valider aujourd'hui">
-              <summary className="lin-maj-tete">
-                <span className="lin-maj-titre">
-                  À valider aujourd&apos;hui
-                  <svg className="lin-maj-fleche" viewBox="0 0 16 16" aria-hidden="true">
-                    <path d="M5.2 6.4h5.6L8 9.6z" fill="currentColor" />
-                  </svg>
-                </span>
-                <Link href={`${RACINE}/validations`} className="lin-maj-lien">
-                  <ExternalLink width={14} height={14} aria-hidden="true" /> Valider
-                </Link>
-              </summary>
-              <p className="lin-maj-auteur">
-                <IconeSante sante={aValider.length ? "retard" : "a_jour"} />
-                <span data-teinte={aValider.length ? "jaune" : "vert"}>{aValider.length ? `${aValider.length} relance${aValider.length > 1 ? "s" : ""} prête${aValider.length > 1 ? "s" : ""}` : "Rien à valider"}</span>
-                <span className="lin-avatar-auteur" aria-hidden="true">
-                  <HandCoins width={11} height={11} />
-                </span>
-                <span className="lin-maj-gris">CASHD</span>
-                <span className="lin-maj-gris">ce matin</span>
-              </p>
-              <p className="lin-maj-texte">Les relances sont écrites chaque matin ; aucune ne part sans votre accord.</p>
-              {aValider.length ? (
-                <dl className="lin-maj-citation">
-                  {aValider.slice(0, 5).map((r) => (
-                    <div key={r.id}>
-                      <dt>{r.compte}</dt>
-                      <dd>
-                        {libellePalier(r.palier)} · {montant(r.montant)}
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
-              ) : null}
-              <footer className="lin-maj-pied">
-                <Link href={`${RACINE}/cashd/suivi?vue=relances`} className="lin-maj-pied-btn" aria-label="Voir les relances" title="Voir les relances">
-                  <MessageSquare width={16} height={16} aria-hidden="true" />
-                </Link>
-                <Link href={`${RACINE}/validations`} className="lin-maj-pied-rond" aria-label="Valider" title="Valider">
-                  <CheckCheck width={16} height={16} aria-hidden="true" />
-                </Link>
-              </footer>
-            </details>
-
-            <h3 className="lin-projet-h2">Échu par ancienneté</h3>
-            <ul className="lin-projet-liste">
-              {TRANCHES.slice(1).map((x) => (
-                <li key={x.cle}>
-                  <span className="lin-tranche-nom">{x.libelle}</span>
-                  <span className="lin-tranche-barre" aria-hidden="true">
-                    <span
-                      style={{
-                        width: `${((t[x.cle] ?? 0) / maxTranche) * 100}%`,
-                      }}
-                    />
+              <details className="lin-maj" open aria-label="À valider aujourd'hui">
+                <summary className="lin-maj-tete">
+                  <span className="lin-maj-titre">
+                    À valider aujourd&apos;hui
+                    <svg className="lin-maj-fleche" viewBox="0 0 16 16" aria-hidden="true">
+                      <path d="M5.2 6.4h5.6L8 9.6z" fill="currentColor" />
+                    </svg>
                   </span>
-                  <span className="lin-meta">{montant(t[x.cle] ?? 0)}</span>
-                </li>
-              ))}
-            </ul>
+                  <Link href={`${RACINE}/validations`} className="lin-maj-lien">
+                    <ExternalLink width={14} height={14} aria-hidden="true" /> Valider
+                  </Link>
+                </summary>
+                <p className="lin-maj-auteur">
+                  <IconeSante sante={aValider.length ? "retard" : "a_jour"} />
+                  <span data-teinte={aValider.length ? "jaune" : "vert"}>{aValider.length ? `${aValider.length} relance${aValider.length > 1 ? "s" : ""} prête${aValider.length > 1 ? "s" : ""}` : "Rien à valider"}</span>
+                  <span className="lin-avatar-auteur" aria-hidden="true">
+                    <HandCoins width={11} height={11} />
+                  </span>
+                  <span className="lin-maj-gris">CASHD</span>
+                  <span className="lin-maj-gris">ce matin</span>
+                </p>
+                <p className="lin-maj-texte">Les relances sont écrites chaque matin ; aucune ne part sans votre accord.</p>
+                {aValider.length ? (
+                  <dl className="lin-maj-citation">
+                    {aValider.slice(0, 5).map((r) => (
+                      <div key={r.id}>
+                        <dt>{r.compte}</dt>
+                        <dd>
+                          {libellePalier(r.palier)} · {montant(r.montant)}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                ) : null}
+                <footer className="lin-maj-pied">
+                  <Link href={`${RACINE}/cashd/suivi?vue=relances`} className="lin-maj-pied-btn" aria-label="Voir les relances" title="Voir les relances">
+                    <MessageSquare width={16} height={16} aria-hidden="true" />
+                  </Link>
+                  <Link href={`${RACINE}/validations`} className="lin-maj-pied-rond" aria-label="Valider" title="Valider">
+                    <CheckCheck width={16} height={16} aria-hidden="true" />
+                  </Link>
+                </footer>
+              </details>
 
-            <h3 className="lin-projet-h2">Plus gros retards</h3>
-            {enRetard.length ? (
+              <h3 className="lin-projet-h2">Échu par ancienneté</h3>
               <ul className="lin-projet-liste">
-                {enRetard.slice(0, 5).map((b) => (
-                  <li key={b.compte_id}>
-                    <Link href={`${RACINE}/cashd?compte=${encodeURIComponent(b.compte_id)}`} className="lin-projet-lien">
-                      <IconeDebiteur b={b} />
-                      <span>{b.nom}</span>
-                      <IconePriorite niveau={niveauDe(b.retard_max_jours)} titre={retardDe(b.retard_max_jours)} />
-                      <span className="lin-meta">{montant(b.echu, b.devise)}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="lin-maj-texte lin-maj-gris">Aucun retard.</p>
-            )}
-            <Link href={listeDebiteurs} className="lin-voir-tout">
-              Voir tous les débiteurs <ArrowRight width={14} height={14} aria-hidden="true" />
-            </Link>
-          </article>
-
-          <aside className="lin-cartes-droite" aria-label="Les chiffres">
-            {/* l'ordre des cartes de Linear : Properties, Milestones, Progress, Activity */}
-            <CarteDroite titre="Propriétés">
-              <dl className="lin-props">
-                <div>
-                  <dt>Débiteurs</dt>
-                  <dd>
-                    <MenuOptions
-                      plat
-                      titre="Voir les débiteurs…"
-                      declencheur={
-                        <>
-                          <IconeGroupe />
-                          {comptes.length}
-                        </>
-                      }
-                      options={(Object.keys(SANTES) as Sante[]).map((x) => {
-                        const n = comptes.filter((b) => santeDe(b) === x).length;
-                        return {
-                          cle: x,
-                          libelle: SANTES[x].libelle,
-                          meta: `${n}`,
-                          icone: <IconeStatut sante={x} />,
-                          href: `${RACINE}/cashd?vue=debiteurs&sante=${x}`,
-                        };
-                      })}
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt>Factures échues</dt>
-                  <dd>
-                    <MenuOptions
-                      plat
-                      titre="Factures échues…"
-                      declencheur={
-                        <>
-                          <IconeDocument />
-                          {t.factures_echues}
-                        </>
-                      }
-                      options={[
-                        {
-                          cle: "balance",
-                          libelle: "Balance âgée",
-                          icone: <IconeCalendrier />,
-                          href: `${RACINE}/cashd/balance`,
-                        },
-                        {
-                          cle: "suivi",
-                          libelle: "Débiteurs et relances",
-                          icone: <ExternalLink width={16} height={16} />,
-                          href: `${RACINE}/cashd/suivi?vue=debiteurs`,
-                        },
-                      ]}
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt>Plafonds dépassés</dt>
-                  <dd>
-                    <MenuOptions
-                      plat
-                      titre="Plafonds dépassés…"
-                      declencheur={
-                        <>
-                          <IconeJauge />
-                          {comptes.filter((b) => b.depasse_plafond).length}
-                        </>
-                      }
-                      options={[
-                        ...comptes
-                          .filter((b) => b.depasse_plafond)
-                          .map((b): Option => ({
-                            cle: b.compte_id,
-                            libelle: b.nom,
-                            meta: montant(b.encours, b.devise),
-                            icone: <IconeDebiteur b={b} />,
-                            href: `${RACINE}/cashd?compte=${encodeURIComponent(b.compte_id)}`,
-                          })),
-                        {
-                          cle: "risque",
-                          libelle: "Risque client",
-                          icone: <ExternalLink width={16} height={16} />,
-                          href: `${RACINE}/cashd/risque`,
-                        },
-                      ]}
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt>Dernier import</dt>
-                  <dd className={d.tableau.dernier_import ? undefined : "lin-props-vide"}>
-                    <MenuOptions
-                      plat
-                      titre="Données…"
-                      declencheur={
-                        <>
-                          <IconeImport />
-                          {d.tableau.dernier_import ? dateCourte(d.tableau.dernier_import) : "Aucun"}
-                        </>
-                      }
-                      options={[
-                        {
-                          cle: "exporter",
-                          libelle: "Exporter la balance",
-                          icone: <IconeImport />,
-                          action: () => exporterBalance(comptes, jourParis()),
-                        },
-                        {
-                          cle: "tresorerie",
-                          libelle: "Trésorerie",
-                          icone: <ExternalLink width={16} height={16} />,
-                          href: `${RACINE}/cashd/suivi?vue=tresorerie`,
-                        },
-                      ]}
-                    />
-                  </dd>
-                </div>
-              </dl>
-            </CarteDroite>
-
-            <CarteDroite titre="Paliers atteints">
-              <ul className="lin-jalons">
-                {parPalier.map(({ p, n }) => (
-                  <li key={p}>
-                    <Losange atteint={n > 0} />
-                    <span className="lin-jalon-nom">{libellePalier(p)}</span>
-                    <span className="lin-meta">
-                      {n} débiteur{n > 1 ? "s" : ""}
+                {TRANCHES.slice(1).map((x) => (
+                  <li key={x.cle}>
+                    <span className="lin-tranche-nom">{x.libelle}</span>
+                    <span className="lin-tranche-barre" aria-hidden="true">
+                      <span
+                        style={{
+                          width: `${((t[x.cle] ?? 0) / maxTranche) * 100}%`,
+                        }}
+                      />
                     </span>
-                    <MenuActions
-                      titre={`${libellePalier(p)}…`}
-                      options={[
-                        {
-                          cle: "debiteurs",
-                          libelle: "Débiteurs à ce palier",
-                          icone: <Losange atteint />,
-                          href: `${RACINE}/cashd?vue=debiteurs&palier=${p}`,
-                        },
-                        {
-                          cle: "relances",
-                          libelle: "Relances",
-                          icone: <ExternalLink width={16} height={16} />,
-                          href: `${RACINE}/cashd/suivi?vue=relances`,
-                        },
-                        {
-                          cle: "envois",
-                          libelle: "Envois",
-                          icone: <IconeEnveloppe />,
-                          href: `${RACINE}/cashd/suivi?vue=envois`,
-                        },
-                      ]}
-                    />
+                    <span className="lin-meta">{montant(t[x.cle] ?? 0)}</span>
                   </li>
                 ))}
               </ul>
-            </CarteDroite>
 
-            <CarteEncours liste={comptes} groupes />
-
-            <CarteDroite
-              titre="Activité"
-              action={
-                <Link href={`${RACINE}/cashd/suivi?vue=relances`} className="lin-carte-lien">
-                  Tout voir
-                </Link>
-              }
-            >
-              {recentes.length ? (
-                <ul className="lin-activite">
-                  {recentes.map((r) => (
-                    <li key={r.id}>
-                      <Losange atteint={r.etat !== "a_valider"} />
-                      <span>
-                        <b>{r.compte}</b> · {libellePalier(r.palier)} · {dateCourte(r.jour)}
-                      </span>
+              <h3 className="lin-projet-h2">Plus gros retards</h3>
+              {enRetard.length ? (
+                <ul className="lin-projet-liste">
+                  {enRetard.slice(0, 5).map((b) => (
+                    <li key={b.compte_id}>
+                      <Link href={`${RACINE}/cashd?compte=${encodeURIComponent(b.compte_id)}`} className="lin-projet-lien">
+                        <IconeDebiteur b={b} />
+                        <span>{b.nom}</span>
+                        <IconePriorite niveau={niveauDe(b.retard_max_jours)} titre={retardDe(b.retard_max_jours)} />
+                        <span className="lin-meta">{montant(b.echu, b.devise)}</span>
+                      </Link>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="lin-activite-vide">Aucune relance pour l&apos;instant.</p>
+                <p className="lin-maj-texte lin-maj-gris">Aucun retard.</p>
               )}
-            </CarteDroite>
-          </aside>
-        </div>
+              <Link href={listeDebiteurs} className="lin-voir-tout">
+                Voir tous les débiteurs <ArrowRight width={14} height={14} aria-hidden="true" />
+              </Link>
+            </article>
+
+            <aside className="lin-cartes-droite" aria-label="Les chiffres">
+              {/* l'ordre des cartes de Linear : Properties, Milestones, Progress, Activity */}
+              <CarteDroite titre="Propriétés">
+                <dl className="lin-props">
+                  <div>
+                    <dt>Débiteurs</dt>
+                    <dd>
+                      <MenuOptions
+                        plat
+                        titre="Filtrer par santé…"
+                        declencheur={
+                          <>
+                            <IconeGroupe />
+                            {liste.length}
+                          </>
+                        }
+                        options={optionsSante((n) => `${n}`)}
+                      />
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Factures échues</dt>
+                    <dd>
+                      <MenuOptions
+                        plat
+                        titre="Filtrer par ancienneté…"
+                        declencheur={
+                          <>
+                            <IconeDocument />
+                            {t.factures_echues}
+                          </>
+                        }
+                        options={TRANCHES.map((x, i) => ({
+                          cle: x.cle,
+                          libelle: x.libelle,
+                          meta: montant(somme(comptes.filter((b) => dansPortee(b, "tranche")).map((b) => b[x.cle]))),
+                          icone: <IconePriorite niveau={i as 0 | 1 | 2 | 3 | 4} titre={x.libelle} />,
+                          coche: portee.tranche === x.cle,
+                          href: basculer(false, "tranche", x.cle),
+                        }))}
+                      />
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Plafonds dépassés</dt>
+                    <dd>
+                      {/* les débiteurs au-dessus de leur plafond ouvrent leur fiche ; s'il n'y en a pas, la valeur seule */}
+                      {liste.some((b) => b.depasse_plafond) ? (
+                        <MenuOptions
+                          plat
+                          titre="Plafonds dépassés…"
+                          declencheur={
+                            <>
+                              <IconeJauge />
+                              {liste.filter((b) => b.depasse_plafond).length}
+                            </>
+                          }
+                          options={liste
+                            .filter((b) => b.depasse_plafond)
+                            .map((b): Option => ({
+                              cle: b.compte_id,
+                              libelle: b.nom,
+                              meta: montant(b.encours, b.devise),
+                              icone: <IconeDebiteur b={b} />,
+                              href: `${RACINE}/cashd?compte=${encodeURIComponent(b.compte_id)}`,
+                            }))}
+                        />
+                      ) : (
+                        <span className="lin-valeur">
+                          <IconeJauge />0
+                        </span>
+                      )}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Dernier import</dt>
+                    <dd className={d.tableau.dernier_import ? undefined : "lin-props-vide"}>
+                      <MenuOptions
+                        plat
+                        titre="Données…"
+                        declencheur={
+                          <>
+                            <IconeImport />
+                            {d.tableau.dernier_import ? dateCourte(d.tableau.dernier_import) : "Aucun"}
+                          </>
+                        }
+                        options={[
+                          {
+                            cle: "exporter",
+                            libelle: "Exporter la balance",
+                            icone: <IconeImport />,
+                            action: () => exporterBalance(liste, jourParis()),
+                          },
+                        ]}
+                      />
+                    </dd>
+                  </div>
+                </dl>
+              </CarteDroite>
+
+              <CarteDroite titre="Paliers atteints">
+                <ul className="lin-jalons">
+                  {parPalier.map(({ p, n }) => (
+                    <li key={p}>
+                      <Losange atteint={n > 0} />
+                      <span className="lin-jalon-nom">{libellePalier(p)}</span>
+                      <span className="lin-meta">
+                        {n} débiteur{n > 1 ? "s" : ""}
+                      </span>
+                      <MenuActions
+                        titre={`${libellePalier(p)}…`}
+                        options={[
+                          {
+                            cle: "filtrer",
+                            libelle: portee.palier === p ? "Retirer le filtre" : "Filtrer sur ce palier",
+                            icone: <Losange atteint />,
+                            coche: portee.palier === p,
+                            href: basculer(false, "palier", p),
+                          },
+                          {
+                            cle: "debiteurs",
+                            libelle: "Débiteurs à ce palier",
+                            icone: <IconeGroupe />,
+                            href: lien(true, { palier: p }),
+                          },
+                        ]}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </CarteDroite>
+
+              <CarteEncours liste={liste} groupes />
+
+              <CarteDroite
+                titre="Activité"
+                action={
+                  <Link href={`${RACINE}/cashd/suivi?vue=relances`} className="lin-carte-lien">
+                    Tout voir
+                  </Link>
+                }
+              >
+                {recentes.length ? (
+                  <ul className="lin-activite">
+                    {recentes.map((r) => (
+                      <li key={r.id}>
+                        <Losange atteint={r.etat !== "a_valider"} />
+                        <span>
+                          <b>{r.compte}</b> · {libellePalier(r.palier)} · {dateCourte(r.jour)}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="lin-activite-vide">Aucune relance pour l&apos;instant.</p>
+                )}
+              </CarteDroite>
+            </aside>
+          </div>
+        )}
       </div>
     );
   }
 
   /* ——— la liste : le tableau des projets (« Voir tous les débiteurs ») ——— */
   const q = filtre.trim().toLowerCase();
-  const filtres = ordonnes.filter(
-    (b) => (onglet === "tous" || santeDe(b) === onglet) && (!palierFiltre || dernierPalier(b.compte_id) === palierFiltre) && (!q || `${b.nom} ${b.reference} ${b.groupe ?? ""}`.toLowerCase().includes(q)),
-  );
+  /* la santé (onglets), le palier, la tranche et le groupe : les mêmes filtres que le tableau de bord */
+  const filtres = ordonnes.filter((b) => dansPortee(b) && (!q || `${b.nom} ${b.reference} ${b.groupe ?? ""}`.toLowerCase().includes(q)));
   const presentes = (Object.keys(SANTES) as Sante[]).filter((s) => comptes.some((b) => santeDe(b) === s));
   const { totaux } = d.tableau;
   const envois = (p: string) => d.reponses.find((r) => r.palier === p)?.envoyees ?? 0;
@@ -1436,7 +1448,7 @@ export default function Debiteurs() {
       <h1 className="v2-sr">Relances</h1>
       <header className="lin-tete">
         <nav className="lin-fil" aria-label="Fil d'Ariane">
-          <Link href={`${RACINE}/cashd`} className="lin-fil-equipe">
+          <Link href={lien(false)} className="lin-fil-equipe">
             Tableau de bord
           </Link>
           <span className="lin-fil-sep" aria-hidden="true">
@@ -1456,20 +1468,15 @@ export default function Debiteurs() {
 
       <div className="lin-outils">
         <nav className="lin-onglets" aria-label="Santé">
-          <Link href={`${RACINE}/cashd?vue=debiteurs`} className="v2-btn v2-btn--petit" data-actif={onglet === "tous" ? "" : undefined} aria-current={onglet === "tous" ? "page" : undefined} scroll={false}>
+          <Link href={lien(true, { sante: null })} className="v2-btn v2-btn--petit" data-actif={onglet === "tous" ? "" : undefined} aria-current={onglet === "tous" ? "page" : undefined} scroll={false}>
             Tous les débiteurs
           </Link>
           {presentes.map((s) => (
-            <Link key={s} href={`${RACINE}/cashd?vue=debiteurs&sante=${s}`} className="v2-btn v2-btn--petit" data-actif={onglet === s ? "" : undefined} aria-current={onglet === s ? "page" : undefined} scroll={false}>
+            <Link key={s} href={lien(true, { sante: s })} className="v2-btn v2-btn--petit" data-actif={onglet === s ? "" : undefined} aria-current={onglet === s ? "page" : undefined} scroll={false}>
               {SANTES[s].libelle}
             </Link>
           ))}
-          {palierFiltre ? (
-            <Link href={`${RACINE}/cashd?vue=debiteurs${onglet === "tous" ? "" : `&sante=${onglet}`}`} className="v2-btn v2-btn--petit lin-filtre-actif" data-actif="" title="Retirer ce filtre" scroll={false}>
-              <Losange atteint />
-              {libellePalier(palierFiltre)} ✕
-            </Link>
-          ) : null}
+          {pucesFiltres(true)}
         </nav>
         <div className="lin-outils-droite">
           <Menu
