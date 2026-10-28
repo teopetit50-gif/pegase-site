@@ -1411,20 +1411,30 @@ export default function BoiteDebiteurs({ vue }: { vue: VueBoite }) {
               {menuAffichage}
             </div>
           </header>
-          {puces.length || essai ? (
-            <div className="lin-outils">
-              <nav className="lin-onglets" aria-label="Filtres posés">
-                {puces}
-              </nav>
-              {essai ? (
-                <div className="lin-outils-droite">
-                  <span className="lin-meta" title="Les relances validées partent vers l'adresse d'essai d'Omega, jamais chez vos clients, tant que le gérant n'a pas basculé en réel.">
-                    Mode essai
-                  </span>
-                </div>
-              ) : null}
-            </div>
-          ) : null}
+          {/* les deux vues de la page, en onglets : le menu de gauche n'a plus qu'une entrée « Débiteurs et
+              relances », pour que la troisième entrée de CASHD soit le tableau des envois comme ailleurs (28/10) */}
+          <div className="lin-outils">
+            <nav className="lin-onglets" aria-label="Vues et filtres">
+              {(
+                [
+                  ["debiteurs", "Débiteurs"],
+                  ["relances", "Relances"],
+                ] as const
+              ).map(([cle, lib]) => (
+                <button key={cle} type="button" className="v2-btn v2-btn--petit" data-actif={vue === cle ? "" : undefined} aria-pressed={vue === cle} onClick={() => vue !== cle && changerVue(cle)}>
+                  {lib}
+                </button>
+              ))}
+              {puces}
+            </nav>
+            {essai ? (
+              <div className="lin-outils-droite">
+                <span className="lin-meta" title="Les relances validées partent vers l'adresse d'essai d'Omega, jamais chez vos clients, tant que le gérant n'a pas basculé en réel.">
+                  Mode essai
+                </span>
+              </div>
+            ) : null}
+          </div>
           {messageListe ? <p className="c2b-message">{messageListe}</p> : null}
           {liste}
         </section>

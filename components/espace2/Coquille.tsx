@@ -758,8 +758,8 @@ function LogoClient({ chemin, nom, demo }: { chemin: string | null; nom: string;
    EcranCashd (C2) ouvre la vue que porte ?vue= */
 const SOUS_CASHD = [
   { libelle: "Tableau de bord", href: `${RACINE}/cashd` },
-  { libelle: "Débiteurs", href: `${RACINE}/cashd/suivi?vue=debiteurs` },
-  { libelle: "Relances", href: `${RACINE}/cashd/suivi?vue=relances` },
+  /* une seule entrée pour la boîte (débiteurs et relances en onglets) : la troisième est le tableau des envois, comme ailleurs */
+  { libelle: "Débiteurs et relances", href: `${RACINE}/cashd/suivi?vue=debiteurs` },
   { libelle: "Envois", href: `${RACINE}/cashd/suivi?vue=envois` },
   { libelle: "Trésorerie", href: `${RACINE}/cashd/suivi?vue=tresorerie` },
 ];
