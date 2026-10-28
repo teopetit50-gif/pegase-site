@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
-import EcranOffload from "@/components/espace/offload/EcranOffload";
-import { HabilleSb } from "@/components/espace2/Habille";
+import { Suspense } from "react";
+import ComptesRisque from "@/components/espace2/offload/ComptesRisque";
 
-/* /espace2/offload — l'écran de /espace/offload, repris dans le nouvel espace.
-   21/10/2026 : les cinq cartes empilées sous la liste (garde-fous,
-   échéances, affaires, groupes, pilotage) ont chacune leur page. */
+/* /espace2/offload — la première page d'OFFLOAD, sur le gabarit Linear comme
+   CASHD (28/10/2026, demande de Teo : la page « Projects » de Linear au 1:1).
+   Elle remplace l'écran repris de /espace/offload (EcranOffload, gabarit
+   « Users » de Supabase du 22/10) : le tableau de bord des comptes à risque,
+   la liste des comptes en ?vue=comptes, un compte en ?compte=. Les pages de
+   fonction (échéances, affaires, groupes, garde-fous, pilotage) restent
+   celles du 21/10 et ouvrent un compte ici. */
 
 export const metadata: Metadata = {
   title: "Comptes à risque",
@@ -13,8 +17,8 @@ export const metadata: Metadata = {
 
 export default function PageOffload() {
   return (
-    <HabilleSb>
-      <EcranOffload sections={false} gabarit="sb" />
-    </HabilleSb>
+    <Suspense>
+      <ComptesRisque />
+    </Suspense>
   );
 }

@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
-import EcranReput from "@/components/espace/reput/EcranReput";
-import Habille from "@/components/espace2/Habille";
+import { Suspense } from "react";
+import TableauReput from "@/components/espace2/reput/TableauReput";
 
-/* /espace2/reput — l'écran de /espace/reput, repris dans le nouvel espace.
-   21/10/2026 : ses onglets sont devenus des pages du volet (base, sujets,
-   réglages) ; celle-ci garde les demandes. */
+/* /espace2/reput — la première page de REPUT, sur le gabarit Linear comme
+   CASHD (28/10/2026, demande de Teo : la page « Projects » de Linear au 1:1).
+   Elle remplace l'écran repris de /espace (EcranReput, vue « demandes ») :
+   le tableau de bord sans paramètre, la liste des demandes en ?vue=demandes,
+   une demande et sa réponse préparée en ?demande=. Mêmes données, mêmes
+   portes ; la base, les sujets, les réglages et les urgences restent leurs
+   propres pages du volet. */
 
 export const metadata: Metadata = {
   title: "Demandes clients",
@@ -13,8 +17,8 @@ export const metadata: Metadata = {
 
 export default function PageReput() {
   return (
-    <Habille>
-      <EcranReput vue="demandes" />
-    </Habille>
+    <Suspense>
+      <TableauReput />
+    </Suspense>
   );
 }

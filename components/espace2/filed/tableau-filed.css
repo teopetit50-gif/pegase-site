@@ -1,0 +1,35 @@
+/* ══════════════════════════════════════════════════════════════════════
+   FILED sur le gabarit Linear (28/10/2026) : les quelques réglages propres
+   à la première page de FILED (./TableauFiled.tsx), sous .v2 .lin comme
+   le gabarit (../lin/lin.css), qui reste intact.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* le pied de la carte « À faire » : un bouton peut y remplacer un lien */
+.v2 .lin button.lin-maj-pied-btn {
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* l'onglet « Dossier » d'un document : l'écran du dossier (DossierVue), pleine largeur sous les onglets */
+.v2 .lin .filed-dossier {
+  flex: 1;
+  min-width: 0;
+  padding: 16px 24px 32px;
+}
+
+/* un document introuvable : le message, puis le lien vers la liste */
+.v2 .lin .filed-vide {
+  display: grid;
+  justify-items: center;
+}
+.v2 .lin .filed-lien-retour {
+  display: inline-flex;
+  margin-top: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-second);
+}
+.v2 .lin .filed-lien-retour:hover {
+  color: var(--lin-texte);
+}

@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
-import TableauCashd from "@/components/espace2/TableauCashd";
+import { Suspense } from "react";
+import Debiteurs from "@/components/espace2/cashd/Debiteurs";
 
-/* /espace2/cashd — le tableau de bord CASHD (maquette de Teo, 07/10/2026).
-   Décision de Teo le même jour : il REMPLACE l'écran de travail repris de
-   /espace/cashd (débiteurs, fiche, relances écrites) ; les relances se
-   valident dans « À valider ». */
+/* /espace2/cashd — la première page de CASHD, sur le gabarit Linear
+   (28/10/2026, demande de Teo : la page « Issues » de Linear au 1:1, modèle
+   des premières pages de FILED, REPUT et OFFLOAD). Elle remplace le tableau
+   de bord du 22/10 (TableauCashd) : les débiteurs groupés par situation,
+   le détail d'un débiteur en ?compte=, les chiffres dans le panneau Détails. */
 
 export const metadata: Metadata = {
   title: "Relances",
@@ -12,6 +14,9 @@ export const metadata: Metadata = {
 };
 
 export default function PageCashd() {
-  /* 22/10 — le tableau de bord porte lui-même son titre et sa marge (gabarit Observability de Supabase) */
-  return <TableauCashd />;
+  return (
+    <Suspense>
+      <Debiteurs />
+    </Suspense>
+  );
 }

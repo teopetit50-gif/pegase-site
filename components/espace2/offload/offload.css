@@ -1,0 +1,43 @@
+/* ══════════════════════════════════════════════════════════════════════
+   OFFLOAD sur le gabarit Linear (28/10/2026) : les retouches propres au
+   module, posées sur ../lin/lin.css sans le modifier.
+     · la petite tuile d'auteur de « Latest update » prend la couleur
+       d'OFFLOAD (celle de CASHD est jaune) ;
+     · le message de reprise préparé se lit tel qu'il partira, retours à
+       la ligne compris ;
+     · une raison du signal tient sur plusieurs lignes, ses points à droite.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lin .lin-avatar-auteur.lin-avatar-offload {
+  background: color-mix(in srgb, #26b5ce 22%, transparent);
+  color: #26b5ce;
+}
+.v2 .lin .lin-offload-message {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: var(--lin-survol);
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 20px;
+  color: var(--lin-texte);
+  white-space: pre-line;
+}
+.v2 .lin .lin-offload-message-tete {
+  margin: 16px 0 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-second);
+}
+.v2 .lin .lin-offload-raison {
+  align-items: flex-start !important;
+  height: auto !important;
+  min-height: 36px;
+  padding: 8px 0;
+  line-height: 20px;
+}
+.v2 .lin .lin-offload-raison .lin-meta {
+  min-width: 36px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}

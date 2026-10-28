@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
-import EcranFiled from "@/components/espace/filed/EcranFiled";
-import { HabilleSb } from "@/components/espace2/Habille";
+import { Suspense } from "react";
+import TableauFiled from "@/components/espace2/filed/TableauFiled";
 
-/* /espace2/filed — l'écran de /espace/filed, repris tel quel dans le nouvel espace. */
+/* /espace2/filed — la première page de FILED, sur le gabarit Linear comme
+   CASHD (28/10/2026, demande de Teo : la page « Projects » de Linear au
+   1:1). Elle remplace l'écran repris de /espace/filed (EcranFiled, page
+   Storage de Supabase) : le tableau de bord, la liste des documents en
+   ?vue=documents, un document en ?objet= (les liens des autres écrans y
+   mènent toujours), son dossier et ses corrections dans l'onglet Dossier. */
 
 export const metadata: Metadata = {
   title: "Documents reçus",
@@ -11,8 +16,8 @@ export const metadata: Metadata = {
 
 export default function PageFiled() {
   return (
-    <HabilleSb>
-      <EcranFiled gabarit="sb" />
-    </HabilleSb>
+    <Suspense>
+      <TableauFiled />
+    </Suspense>
   );
 }
