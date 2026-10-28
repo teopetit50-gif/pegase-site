@@ -748,3 +748,58 @@ html.v2-calme .v2 .lin-boite-surlignage { transition: none; }
    seule autre couleur. Le détail ouvert garde ses couleurs. */
 .v2 .lin-boite-ligne .lin-ic-sante, .v2 .lin-boite-ligne .lin-ic-statut { color: var(--lin-second); }
 .v2 .lin-boite-ligne .lin-ic-sante--hors, .v2 .lin-boite-ligne .lin-ic-statut--annule { color: var(--lin-orange); }
+
+/* ——— le tableau en colonnes (vue « Board » de Linear) : les troisièmes pages de chaque SaaS ———
+   Relevé du 28/10/2026 sur linear.app/omegaaii/team/OME/all en Board, fenêtre de 1710 px :
+     colonnes        pas de 348 (tête et corps : padding 0 12, la tête 2 12 0 18), sans fond ; défilement horizontal
+     tête de colonne 50 de haut ; icône d'état 14, nom 13/500 L 90, nombre 13 gris, écart 8 ; à droite « ··· » et « + »
+     carte           324 de large, padding 8, rayon 8, fond L 9.2, ombre 0 0 0 .5px blanc 8 % + 0 .5px 1px noir 30 % ;
+                     8 entre deux cartes ; 117 de haut pour quatre rangs :
+                     référence 12/450 grise (y 8, x 12), avatar 16 en haut à droite ;
+                     titre 13/500 blanc précédé de l'icône d'état 14 (rang de 37, padding 0 34 0 4, écart 6) ;
+                     pastilles 24 de haut, padding 0 8, rayon plein, trait .5 L 20, texte 12/450 gris, écart 4 ;
+                     pied 12/450 gris (« Created Oct 28 »), x 10 */
+.v2 .lin-tableau { flex: 1; display: flex; align-items: stretch; min-height: 0; overflow-x: auto; padding-left: 4px; scrollbar-width: thin; }
+.v2 .lin-colonne { display: flex; flex-direction: column; flex: 0 0 348px; min-width: 0; }
+.v2 .lin-colonne-tete { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: 12px; height: 50px; padding: 2px 12px 0 18px; background: var(--lin-fond); }
+.v2 .lin-colonne-nom { display: flex; align-items: center; gap: 8px; min-width: 0; height: 24px; font-size: 13px; font-weight: 500; color: var(--lin-texte); }
+.v2 .lin-colonne-nom h3 { margin: 0; font: inherit; color: inherit; white-space: nowrap; }
+.v2 .lin-colonne-nom .lin-ic { width: 14px; height: 14px; }
+.v2 .lin-colonne-compte { font-size: 13px; font-weight: 500; color: var(--lin-second); }
+.v2 .lin-colonne-tete .lin-tete-ronds { gap: 2px; }
+.v2 .lin-colonne-corps { display: flex; flex-direction: column; gap: 8px; padding: 5px 12px 24px; min-height: 120px; border-radius: 10px; transition: background 0.15s; }
+.v2 .lin-colonne-corps[data-depot] { background: var(--lin-survol); }
+.v2 .lin-colonne-vide { display: grid; place-items: center; height: 64px; border: 0.5px dashed var(--lin-trait); border-radius: 8px; font-size: 12px; color: var(--lin-second); }
+.v2 .lin-carte-tableau { position: relative; display: grid; row-gap: 0; padding: 8px; border-radius: 8px; background: var(--lin-composeur); box-shadow: 0 0 0 0.5px lch(100 0 0 / 0.083), 0 0.5px 1px lch(0 0 0 / 0.3); color: var(--lin-texte); cursor: pointer; transition: background 0.12s, box-shadow 0.12s; }
+html[data-v2-theme="light"] .v2 .lin-carte-tableau { box-shadow: 0 0 0 1px var(--v2-a-400), var(--v2-ombre-petite); }
+@media (prefers-color-scheme: light) { html:not([data-v2-theme="dark"]) .v2 .lin-carte-tableau { box-shadow: 0 0 0 1px var(--v2-a-400), var(--v2-ombre-petite); } }
+.v2 .lin-carte-tableau:hover { background: color-mix(in srgb, var(--lin-composeur) 82%, var(--lin-texte) 4%); }
+.v2 .lin-carte-tableau[data-actif] { box-shadow: 0 0 0 1px var(--lin-graph-bleu), 0 0.5px 1px lch(0 0 0 / 0.3); }
+.v2 .lin-carte-tableau[data-glisse] { opacity: 0.4; }
+.v2 .lin-carte-tableau:focus-visible { outline: 2px solid var(--lin-fait); outline-offset: 1px; }
+.v2 .lin-carte-ref { display: flex; align-items: center; justify-content: space-between; min-height: 15px; padding: 0 4px; font-size: 12px; font-weight: 450; color: var(--lin-second); }
+.v2 .lin-carte-ref .lin-ic, .v2 .lin-carte-ref svg { width: 16px; height: 16px; }
+/* scopé à la carte du tableau : .lin-carte-titre sert aussi au titre des cartes de droite (CarteDroite) */
+.v2 .lin-carte-tableau .lin-carte-titre, .v2 .lin-carte-tableau .lin-carte-titre:hover { display: flex; align-items: flex-start; gap: 6px; margin: 0; padding: 6px 34px 6px 4px; border-radius: 0; font-size: 13px; font-weight: 500; line-height: 18px; color: var(--lin-titre); }
+.v2 .lin-carte-tableau .lin-carte-titre .lin-ic, .v2 .lin-carte-tableau .lin-carte-titre > svg { flex-shrink: 0; width: 14px; height: 14px; margin-top: 2px; }
+.v2 .lin-carte-tableau .lin-carte-titre span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.v2 .lin-carte-pastilles { display: flex; flex-wrap: wrap; gap: 4px; padding: 2px 4px; }
+.v2 .lin-carte-pastille { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 8px; border-radius: 9999px; border: 0.5px solid lch(20.032 1.93 272); background: var(--lin-composeur); font-size: 12px; font-weight: 450; color: var(--lin-second); white-space: nowrap; }
+html[data-v2-theme="light"] .v2 .lin-carte-pastille { border-color: var(--v2-a-400); }
+@media (prefers-color-scheme: light) { html:not([data-v2-theme="dark"]) .v2 .lin-carte-pastille { border-color: var(--v2-a-400); } }
+.v2 .lin-carte-pastille .lin-ic, .v2 .lin-carte-pastille svg { width: 14px; height: 14px; }
+.v2 .lin-carte-pied { padding: 8px 2px 0; font-size: 12px; font-weight: 450; color: var(--lin-second); }
+/* dans les cartes aussi, la palette sobre : gris, l'orange pour le hors délai */
+.v2 .lin-carte-tableau .lin-ic-sante, .v2 .lin-carte-tableau .lin-ic-statut { color: var(--lin-second); }
+.v2 .lin-carte-tableau .lin-ic-sante--hors, .v2 .lin-carte-tableau .lin-ic-statut--annule { color: var(--lin-orange); }
+/* la page : le tableau à gauche, la fiche de la carte ouverte à droite (la même que dans la boîte) */
+.v2 .lin-tableau-page { flex: 1; display: flex; min-height: 0; }
+.v2 .lin-tableau-page > .lin-tableau { flex: 1; }
+.v2 .lin-tableau-page > .lin-boite-detail { flex: 0 0 min(560px, 45%); border-left: 0.5px solid var(--lin-trait); }
+@container principale (max-width: 900px) {
+  .v2 .lin-tableau-page { flex-direction: column; }
+  .v2 .lin-tableau-page > .lin-boite-detail { flex-basis: auto; border-left: 0; border-top: 0.5px solid var(--lin-trait); }
+  .v2 .lin-colonne { flex-basis: 300px; }
+}
+/* l'icône du coin d'une carte reste grise (palette sobre) */
+.v2 .lin-carte-tableau .lin-carte-ref > svg { color: var(--lin-second); }

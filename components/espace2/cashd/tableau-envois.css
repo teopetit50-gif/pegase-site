@@ -1,0 +1,153 @@
+/* ══════════════════════════════════════════════════════════════════════
+   CASHD — « Envois » en tableau (28/10/2026) : les quelques réglages propres
+   à ./TableauEnvois.tsx, sous .v2 .lin comme le gabarit (../lin/lin.css,
+   bloc « le tableau en colonnes »), qui reste intact.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* palette sobre : les icônes d'état des têtes de colonne en gris, comme dans les cartes */
+.v2 .lin .lin-colonne-nom .lin-ic-statut {
+  color: var(--lin-second);
+}
+/* une relance arrêtée n'est orange que si elle bloque (échec, bloquée, sans adresse) ; coupée ou refusée reste grise */
+.v2 .lin .lin-carte-tableau:not([data-bloquant]) .lin-ic-statut--annule {
+  color: var(--lin-second);
+}
+.v2 .lin .lin-carte-tableau[data-bloquant] .c2e-pastille-etat svg,
+.v2 .lin .lin-ticket-pilule[data-bloquant] svg {
+  color: var(--lin-orange);
+}
+
+/* la référence d'une carte : le point bleu (à traiter), le débiteur, l'étoile d'une carte épinglée */
+.v2 .lin .c2e-ref {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.v2 .lin .c2e-ref-nom {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lin .lin-carte-ref .c2e-epingle {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+.v2 .lin .lin-carte-tableau[draggable="true"] {
+  cursor: grab;
+}
+.v2 .lin .lin-carte-tableau[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+/* la fiche ouverte à droite du tableau : elle reste en vue (collée sous la tête de la page) et défile seule ;
+   dans ses 560 px, la page du ticket passe sur une colonne (les propriétés sous le texte) */
+.v2 .lin .c2e-page {
+  align-items: flex-start;
+}
+.v2 .lin .c2e-page > .lin-tableau {
+  align-self: stretch;
+  min-width: 0;
+}
+.v2 .lin .c2e-page > .c2e-detail {
+  position: sticky;
+  top: 44px;
+  align-self: flex-start;
+  max-height: calc(100dvh - 92px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.v2 .lin .c2e-detail > .lin-tete {
+  top: 0;
+}
+.v2 .lin .c2e-detail .lin-ticket {
+  flex-direction: column;
+  gap: 24px;
+  padding: 0 24px 48px;
+}
+.v2 .lin .c2e-detail .lin-ticket-corps {
+  width: 100%;
+  max-width: none;
+  padding-top: 32px;
+}
+.v2 .lin .c2e-detail .lin-ticket-cote {
+  width: auto;
+  padding-top: 0;
+}
+@container principale (max-width: 900px) {
+  .v2 .lin .c2e-page {
+    align-items: stretch;
+  }
+  .v2 .lin .c2e-page > .c2e-detail {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+/* le texte d'une relance, tel qu'il partira : ses retours à la ligne gardés */
+.v2 .lin .lin-ticket-desc.c2e-corps {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+/* la « référence » de la tête est le nom du débiteur, parfois long : elle se coupe au lieu d'écraser le titre */
+.v2 .lin .c2e-detail .lin-tete-ref {
+  min-width: 48px;
+  flex-shrink: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* l'enveloppe qui donne sa bulle à l'horloge, sans compter dans la rangée */
+.v2 .lin .c2e-bulle {
+  display: contents;
+}
+/* la cloche s'arrête sous la tête collante de la fiche */
+.v2 .lin #c2e-activite {
+  scroll-margin-top: 56px;
+}
+
+/* les sections du menu de filtre */
+.v2 .lin .c2e-menu-titre {
+  padding: 8px 16px 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-second);
+}
+.v2 .lin .c2e-menu-titre:not(:first-child) {
+  margin-top: 4px;
+  border-top: 0.5px solid var(--lin-menu-trait);
+}
+
+/* un message sous la tête (chargement, base non installée, erreur, filtre vide) */
+.v2 .lin .c2e-message {
+  margin: 0;
+  padding: 12px 24px 4px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--lin-second);
+}
+
+/* une entrée du fil : la phrase, puis le texte et les boutons d'une décision en attente */
+.v2 .lin .c2e-fil-corps {
+  flex: 1;
+  min-width: 0;
+}
+.v2 .lin .c2e-detail .lin-ticket-fil .lin-ticket-fil-texte {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 19px;
+}
+.v2 .lin .c2e-detail .lin-ticket-fil > li[data-attente] b {
+  color: var(--lin-texte);
+}
+.v2 .lin .c2e-detail a.lin-ticket-icone {
+  color: var(--lin-second);
+}
+.v2 .lin .c2e-gris {
+  color: var(--lin-second);
+  font-weight: 450;
+}

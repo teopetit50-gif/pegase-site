@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
-import { PageAffaires } from "@/components/espace2/offload/Sections";
+import { Suspense } from "react";
+import TableauAffaires from "@/components/espace2/offload/TableauAffaires";
 
-/* /espace2/offload/affaires — OFFLOAD, les affaires restées en plan (page de fonction, 21/10/2026). */
+/* /espace2/offload/affaires — OFFLOAD, les affaires restées en plan, sur la
+   vue « Board » de Linear (28/10/2026, la troisième page de chaque SaaS).
+   Elle remplace la page de fonction du 21/10 (Sections.tsx, PageAffaires) :
+   une colonne par statut d'une affaire, la carte ouverte en ?id= à droite,
+   les filtres en ?filtre=. Mêmes portes : offload_affaires_liste, et les
+   gestes offload_decider_affaire et offload_retirer_affaire. */
 
 export const metadata: Metadata = {
   title: "Affaires restées en plan",
@@ -9,5 +15,9 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <PageAffaires />;
+  return (
+    <Suspense>
+      <TableauAffaires />
+    </Suspense>
+  );
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import EcranCashd from "@/components/espace/cashd/EcranCashd";
 import BoiteDebiteurs from "@/components/espace2/cashd/BoiteDebiteurs";
+import TableauEnvois from "@/components/espace2/cashd/TableauEnvois";
 import { HabilleSb } from "@/components/espace2/Habille";
 
 /* /espace2/cashd/suivi — « Débiteurs et relances », la seconde page de
@@ -12,8 +13,11 @@ import { HabilleSb } from "@/components/espace2/Habille";
        (?compte=<id>, le lien des autres écrans) ;
      · ?vue=relances : une relance par ligne, son texte et ses gestes à
        droite (?relance=<id>), « Vos textes » en ?textes=1.
-   Envois et Trésorerie, qui ne sont pas des boîtes, restent l'écran de
-   travail d'avant (EcranCashd, C2, au gabarit Supabase du 22/10). */
+     · ?vue=envois : les relances en tableau, une colonne par état d'envoi
+       (à valider, à envoyer, parties, réponse reçue, arrêtées), sur la vue
+       « Board » de Linear (TableauEnvois, ?id=<relance> ouvre sa fiche).
+   Trésorerie reste l'écran de travail d'avant (EcranCashd, C2, au gabarit
+   Supabase du 22/10). */
 
 export const metadata: Metadata = {
   title: "Débiteurs et relances",
@@ -26,7 +30,13 @@ const VUES = ["debiteurs", "relances", "envois", "tresorerie"] as const;
 export default async function PageCashdSuivi({ searchParams }: { searchParams: Promise<{ vue?: string }> }) {
   const { vue } = await searchParams;
   const v = VUES.find((x) => x === vue) ?? "debiteurs";
-  if (v === "envois" || v === "tresorerie")
+  if (v === "envois")
+    return (
+      <Suspense>
+        <TableauEnvois />
+      </Suspense>
+    );
+  if (v === "tresorerie")
     return (
       <HabilleSb>
         <EcranCashd vue={v} gabarit="sb" />

@@ -1,0 +1,105 @@
+/* ══════════════════════════════════════════════════════════════════════
+   REPUT, les sujets autorisés en tableau (vue « Board » de Linear,
+   28/10/2026) : les réglages propres à ./TableauSujets.tsx, sous
+   .v2 .lin.sujets ; le gabarit (../lin/lin.css) reste intact.
+   Uniquement des variables --lin-*, pour les deux thèmes.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* la page tient dans la hauteur : le tableau défile en largeur, chaque colonne et la fiche en hauteur */
+.v2 .lin.sujets {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.v2 .lin.sujets .lin-tableau-page {
+  min-width: 0;
+  min-height: calc(100dvh - 48px - 44px);
+}
+.v2 .lin.sujets .lin-tableau {
+  min-width: 0;
+  padding-top: 0;
+}
+
+/* les filtres posés, sous la tête */
+.v2 .lin.sujets .sujets-filtres {
+  gap: 6px;
+  padding-left: 16px;
+}
+.v2 .lin.sujets .sujets-filtres .lin-filtre-actif svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* palette sobre : les icônes d'état grises, en tête de colonne comme sur la carte ; seul l'expiré en orange */
+.v2 .lin.sujets .lin-colonne-nom .lin-ic,
+.v2 .lin.sujets .lin-colonne-nom svg,
+.v2 .lin.sujets .lin-carte-tableau .lin-ic,
+.v2 .lin.sujets .lin-carte-tableau svg,
+.v2 .lin.sujets .sujets-cadenas,
+.v2 .lin.sujets .sujets-sous-icone {
+  color: var(--lin-second);
+}
+.v2 .lin.sujets .lin-carte-tableau .lin-ic-calendrier--passe,
+.v2 .lin.sujets .lin-carte-pastille[data-teinte="orange"] {
+  color: var(--lin-orange);
+}
+
+/* la référence de la carte : le point bleu « à traiter » devant le code du sujet */
+.v2 .lin.sujets .sujets-ref {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lin.sujets .lin-carte-ref > span:last-child:not(.sujets-ref) {
+  display: inline-flex;
+}
+.v2 .lin.sujets .lin-carte-tableau {
+  cursor: default;
+}
+.v2 .lin.sujets .lin-carte-tableau[draggable="true"] {
+  cursor: grab;
+}
+.v2 .lin.sujets .lin-carte-tableau[draggable="true"]:active {
+  cursor: grabbing;
+}
+/* pendant un glisser : la colonne qui accepte la carte le dit doucement, les autres non */
+.v2 .lin.sujets .lin-colonne-corps[data-cible] {
+  box-shadow: inset 0 0 0 0.5px var(--lin-trait);
+}
+
+/* la fiche à droite : 560 de large au plus, le ticket en une colonne (le corps, puis les propriétés) */
+.v2 .lin.sujets .lin-tableau-page > .lin-boite-detail {
+  min-width: 0;
+}
+.v2 .lin.sujets .lin-boite-detail .lin-ticket {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 24px;
+  padding: 0 32px 48px;
+}
+.v2 .lin.sujets .lin-boite-detail .lin-ticket-corps {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding-top: 32px;
+}
+.v2 .lin.sujets .lin-boite-detail .lin-ticket-cote {
+  width: auto;
+  padding-top: 0;
+}
+.v2 .lin.sujets .lin-ticket-icone:disabled {
+  opacity: 0.5;
+}
+
+@container principale (max-width: 900px) {
+  .v2 .lin.sujets .lin-tableau-page {
+    min-height: 0;
+  }
+  .v2 .lin.sujets .lin-boite-detail .lin-ticket {
+    padding: 0 16px 48px;
+  }
+}
