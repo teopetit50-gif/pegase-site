@@ -106,3 +106,9 @@
   font-weight: 500;
   cursor: pointer;
 }
+
+/* la cloche de la tête fait défiler jusqu'à « Activité » : le titre s'arrête sous la barre du haut (48)
+   et la tête collante de la facture (44), au lieu de passer dessous */
+.v2 .lin .lin-boite-detail .lin-ticket-activite-tete {
+  scroll-margin-top: 100px;
+}

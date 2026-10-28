@@ -33,20 +33,46 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowRight, CheckCheck, Copy, ExternalLink, FileText, ListFilter, MessageSquare, PanelRight, SlidersHorizontal, Upload } from "lucide-react";
+import {
+  ArrowRight,
+  Ban,
+  Check,
+  CheckCheck,
+  ClipboardList,
+  Copy,
+  ExternalLink,
+  FileText,
+  FolderInput,
+  Landmark,
+  Link2,
+  ListFilter,
+  MessageSquare,
+  PanelRight,
+  Pencil,
+  RefreshCw,
+  Scale,
+  ShieldCheck,
+  SlidersHorizontal,
+  Unlock,
+  Upload,
+  UserCheck,
+} from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { useSource } from "@/components/espace/source";
 import { useTempsReel } from "@/components/espace/tempsReel";
 import { Avis } from "@/components/espace/ui";
-import { montant } from "@/components/espace/format";
+import { masquerIban, montant } from "@/components/espace/format";
 import { COMMANDES_EXEMPLE, DOSSIERS_EXEMPLE, FOURNISSEURS_EXEMPLE, LIGNES_COMMANDE_EXEMPLE, MOTIFS_EXEMPLE } from "@/components/espace/exemples/filed";
 import { ENTITES, EXEMPLE_CLIENT_ID, EXEMPLE_MOI, SIEGE } from "@/components/espace/exemples/socle";
 import type { Commande, DossierFiled, Fournisseur, LigneCommande, MotifRefus } from "@/components/espace/types";
-import { FAMILLES, FAMILLES_CONTROLE, NATURES, SOURCES, etatDocument, famille, grouperControles, statutFacture, type Famille } from "@/components/espace/filed/etats";
+import { CHAMPS_PAR_NOTION, FAMILLES, FAMILLES_CONTROLE, NATURES, SOURCES, etatDocument, famille, grouperControles, statutFacture, type Famille } from "@/components/espace/filed/etats";
+import type { DemandeDossier, EtatDossier } from "@/components/espace/filed/DossierVue";
 import { chargerCommandes, chargerDossier, chargerFournisseurs, chargerListe, deposerDocument, etatPaiement, monClient, type Apercu, type EtatPaiement, type FactureDuFournisseur } from "@/components/espace/filed/portes";
 import { lireCible, trouverCible } from "@/components/espace/filed/lien";
-import { HabilleSb } from "../Habille";
+/* les habits de l'ancien espace, que portent encore les fenêtres du dossier et la pièce (chargés avant par HabilleSb) */
+import "@/components/espace/espace.css";
+import "../habillage.css";
 import { useToast } from "../Toasts";
 import { useAujourdhui, useMonte } from "../horloge";
 import { A_PAYER, GROUPES, aPayer, du, etatsExemple, groupeDe, minuit, totaux, type Etats, type Groupe } from "./calculs";
@@ -56,7 +82,9 @@ import { RACINE } from "../modules";
 import "./tableau-filed.css";
 
 /* l'écran du dossier (pièce en regard, lecteur PDF) ne se charge qu'à l'ouverture de l'onglet « Dossier » */
-const DossierVue = dynamic(() => import("@/components/espace/filed/DossierVue"), { ssr: false, loading: () => <p className="lin-vide">Ouverture du dossier…</p> });
+/* le dossier de toujours ne rend plus son écran ici : l'Aperçu lui emprunte ses fenêtres de correction (28/10/2026) */
+const DossierVue = dynamic(() => import("@/components/espace/filed/DossierVue"), { ssr: false });
+const VisionneusePiece = dynamic(() => import("@/components/espace/filed/VisionneusePiece"), { ssr: false, loading: () => <p className="lin-vide">Ouverture de la pièce…</p> });
 
 type Reel = {
   apercus: Apercu[];
@@ -397,7 +425,12 @@ export default function TableauFiled() {
   const [details, setDetails] = useState(false);
   const [ongletDetails, setOngletDetails] = useState<"familles" | "echeances" | "fournisseurs">("familles");
   const [filtre, setFiltre] = useState("");
-  const [ongletFiche, setOngletFiche] = useState<"apercu" | "dossier">("apercu");
+  /* les gestes du dossier, ouverts depuis l'Aperçu : une demande par clic (n), l'état que le dossier renvoie, la pièce en grand */
+  const [demande, setDemande] = useState<{ quoi: DemandeDossier; n: number } | null>(null);
+  const [etatDossier, setEtatDossier] = useState<EtatDossier | null>(null);
+  const [pieceOuverte, setPieceOuverte] = useState<string | null>(null);
+  const [toutLeFil, setToutLeFil] = useState(false);
+  const agir = (quoi: DemandeDossier) => setDemande((d) => ({ quoi, n: (d?.n ?? 0) + 1 }));
 
   /* ——— la base réelle : les mêmes portes que l'ancien écran ——— */
   const lire = useCallback(async (): Promise<Reel> => {
@@ -759,22 +792,107 @@ export default function TableauFiled() {
         ? [fac.nb_bloquants ? pluriel(fac.nb_bloquants, "bloquant") : null, fac.nb_attention ? `${fac.nb_attention} à vérifier` : null].filter(Boolean).join(" · ")
         : "aucun point"
       : "—";
-    const versDossier = () => setOngletFiche("dossier");
-    /* les menus d'un document ne quittent plus FILED (règle du 28/10) : une correction passe
-       par l'onglet « Dossier », le reste ouvre la liste ou le tableau de bord filtrés */
+    /* l'onglet « Dossier » n'existe plus (Teo, 28/10) : la pièce s'ouvre en grand, chaque correction
+       ouvre la fenêtre du dossier de toujours, et rien ne quitte FILED */
+    const voirPiece = (valeurId?: string) => setPieceOuverte(valeurId ?? "");
+    const fou = dossier?.fournisseur ?? null;
+    const valeurDe = (notion: string) => {
+      for (const nom of CHAMPS_PAR_NOTION[notion] ?? [notion]) {
+        const v = dossier?.valeurs.find((x) => x.champ === nom);
+        if (v) return v;
+      }
+      return null;
+    };
+    const lues: { notion: string; libelle: string; valeur: string | null; champ?: string }[] = [
+      { notion: "fournisseur", libelle: "Fournisseur", valeur: l.a.fournisseur?.nom ?? null },
+      { notion: "numero", libelle: "N° de facture", valeur: fac?.numero ?? null, champ: "numero" },
+      { notion: "date_emission", libelle: "Date d'émission", valeur: fac?.date_emission ? dateCourte(fac.date_emission) : null, champ: "date_emission" },
+      { notion: "echeance_lue", libelle: "Échéance", valeur: fac?.echeance_lue ? dateCourte(fac.echeance_lue) : null, champ: "echeance_lue" },
+      { notion: "montant_ht", libelle: "Total HT", valeur: fac ? montant(fac.montant_ht, fac.devise) : null, champ: "montant_ht" },
+      { notion: "montant_tva", libelle: "TVA", valeur: fac ? montant(fac.montant_tva, fac.devise) : null, champ: "montant_tva" },
+      { notion: "montant_ttc", libelle: "Total TTC", valeur: fac ? montant(fac.montant_ttc, fac.devise) : null, champ: "montant_ttc" },
+      { notion: "iban", libelle: "IBAN", valeur: null, champ: "iban" },
+      { notion: "siren", libelle: "SIREN", valeur: null },
+    ];
+    const optionsFournisseurGestes: Option[] = [
+      ...(fou?.statut === "a_confirmer"
+        ? [
+            {
+              cle: "confirmer-fournisseur",
+              libelle: etatDossier?.deposantOrigine ? "Confirmer ce fournisseur (une autre personne)" : "Confirmer ce fournisseur…",
+              icone: <UserCheck width={16} height={16} />,
+              action: () => agir({ type: "confirmer_fournisseur" }),
+            },
+          ]
+        : []),
+      ...(etatDossier?.peutReverifier ? [{ cle: "reverifier", libelle: "Revérifier l'identité au registre", icone: <RefreshCw width={16} height={16} />, action: () => agir({ type: "reverifier" }) }] : []),
+      ...(fou ? [{ cle: "attester", libelle: "Attester l'identité…", icone: <ShieldCheck width={16} height={16} />, action: () => agir({ type: "attester" }) }] : []),
+      { cle: "identifiants", libelle: "Saisir les vrais identifiants…", icone: <Pencil width={16} height={16} />, action: () => agir({ type: "identifiants" }) },
+      { cle: "rattacher", libelle: "Rattacher à un fournisseur…", icone: <Link2 width={16} height={16} />, action: () => agir({ type: "rattacher" }) },
+      ...(fou ? [{ cle: "iban", libelle: "Proposer un IBAN…", icone: <Landmark width={16} height={16} />, action: () => agir({ type: "iban" }) }] : []),
+      ...(fou
+        ? [
+            {
+              cle: "bloquer",
+              libelle: fou.statut === "bloque" ? "Débloquer le fournisseur…" : "Bloquer le fournisseur…",
+              icone: <Ban width={16} height={16} />,
+              action: () => agir({ type: "bloquer", bloquer: fou.statut !== "bloque" }),
+            },
+          ]
+        : []),
+    ];
+    const optionsGestes: Option[] = dossier
+      ? [
+          ...(fac
+            ? [
+                { cle: "corriger", libelle: "Corriger une valeur…", icone: <Pencil width={16} height={16} />, action: () => agir({ type: "corriger" }) },
+                ...(etatDossier?.nonVerifiees
+                  ? [
+                      {
+                        cle: "confirmer",
+                        libelle: `Confirmer ${etatDossier.nonVerifiees > 1 ? `les ${etatDossier.nonVerifiees} valeurs non vérifiées` : "la valeur non vérifiée"}…`,
+                        icone: <ShieldCheck width={16} height={16} />,
+                        action: () => agir({ type: "confirmer" }),
+                      },
+                    ]
+                  : []),
+                etatDossier?.litigeOuvert
+                  ? { cle: "clore", libelle: "Clore le litige…", icone: <Scale width={16} height={16} />, action: () => agir({ type: "clore_litige", litige: etatDossier.litigeOuvert ?? "" }) }
+                  : { cle: "litige", libelle: "Ouvrir un litige…", icone: <Scale width={16} height={16} />, action: () => agir({ type: "litige" }) },
+                ...(commandes.length
+                  ? [{ cle: "commande", libelle: fac.commande_id ? "Changer la commande…" : "Désigner une commande…", icone: <ClipboardList width={16} height={16} />, action: () => agir({ type: "commande" }) }]
+                  : []),
+                ...(fac.commande_id
+                  ? dossier.lignes.map((x): Option => ({
+                      cle: `apparier-${x.id}`,
+                      libelle: `Apparier la ligne ${x.rang}…`,
+                      meta: x.designation ?? undefined,
+                      icone: <Link2 width={16} height={16} />,
+                      action: () => agir({ type: "apparier", ligne: x }),
+                    }))
+                  : []),
+                ...(fac.statut === "validee" ? [{ cle: "compta", libelle: "Transmettre à la comptabilité…", icone: <CheckCheck width={16} height={16} />, action: () => agir({ type: "comptabiliser" }) }] : []),
+              ]
+            : []),
+          ...(doc.etat === "a_classer" || doc.etat === "illisible" ? [{ cle: "classer", libelle: "Classer ce document…", icone: <FolderInput width={16} height={16} />, action: () => agir({ type: "classer" }) }] : []),
+          ...optionsFournisseurGestes,
+          { cle: "piece", libelle: "Voir la pièce", icone: <IconeDocument />, action: () => voirPiece() },
+        ]
+      : [{ cle: "piece", libelle: "Voir la pièce", icone: <IconeDocument />, action: () => voirPiece() }];
+    /* les menus d'un document ne quittent pas FILED (règle du 28/10) */
     const etapeDuDocument = ETAPES.find((x) => x.test(l)) ?? null;
     const cleF = cleFournisseur(l);
     const optionsSante: Option[] = [
-      { cle: "dossier", libelle: "Corriger dans le dossier", icone: <IconeDocument />, action: versDossier },
+      { cle: "corriger", libelle: "Corriger une valeur…", icone: <Pencil width={16} height={16} />, action: () => agir({ type: "corriger" }) },
       { cle: "famille", libelle: `Documents : ${familleDe(s).libelle.toLowerCase()}`, icone: <IconeStatut sante={s} />, href: `${LISTE}&sante=${s}` },
     ];
     const optionsStatut: Option[] = [
-      { cle: "dossier", libelle: "Voir le parcours dans le dossier", icone: <IconeDocument />, action: versDossier },
+      { cle: "piece", libelle: "Voir la pièce", icone: <IconeDocument />, action: () => voirPiece() },
       ...(etapeDuDocument ? [{ cle: "etape", libelle: `Documents : ${etapeDuDocument.libelle.toLowerCase()}`, icone: <Losange atteint />, href: `${LISTE}&etape=${etapeDuDocument.cle}` }] : []),
     ];
     const optionsEcheance: Option[] = [
       ...(l.groupe ? [{ cle: "groupe", libelle: `Factures : ${groupeLibelle(l.groupe).toLowerCase()}`, icone: <IconeCalendrier />, href: `${LISTE}&echeance=${l.groupe}` }] : []),
-      { cle: "dossier", libelle: "Corriger l'échéance dans le dossier", icone: <IconeDocument />, action: versDossier },
+      { cle: "corriger", libelle: "Corriger l'échéance…", icone: <Pencil width={16} height={16} />, action: () => agir({ type: "corriger", champ: "echeance_lue" }) },
     ];
     const optionsFournisseur: Option[] = [
       ...memeFournisseur.map((x): Option => ({
@@ -786,6 +904,7 @@ export default function TableauFiled() {
         href: ficheDe(x.id),
       })),
       ...(cleF ? [{ cle: "tableau", libelle: "Tableau de bord de ce fournisseur", icone: <IconeGroupe />, href: lienFiltres([{ dim: "fournisseur", val: cleF }]) }] : []),
+      ...optionsFournisseurGestes,
     ];
     const jalons: { cle: string; libelle: string; atteint: boolean; meta: string }[] = [
       { cle: "recu", libelle: "Reçu", atteint: true, meta: dateCourte(doc.recu_le) },
@@ -818,443 +937,475 @@ export default function TableauFiled() {
             </span>
           </nav>
           <div className="lin-tete-droite">
+            <MenuActions titre="Agir sur ce document" options={optionsGestes} />
             <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Copier la référence" title="Copier la référence" onClick={() => copier(doc.reference)}>
               <Copy width={14} height={14} aria-hidden="true" />
             </button>
             {boutonDepot}
           </div>
         </header>
-        <div className="lin-outils">
-          <nav className="lin-onglets" aria-label="Vues du document">
-            <button type="button" className="v2-btn v2-btn--petit" data-actif={ongletFiche === "apercu" ? "" : undefined} aria-pressed={ongletFiche === "apercu"} onClick={() => setOngletFiche("apercu")}>
-              Aperçu
-            </button>
-            <button type="button" className="v2-btn v2-btn--petit" data-actif={ongletFiche === "dossier" ? "" : undefined} aria-pressed={ongletFiche === "dossier"} onClick={() => setOngletFiche("dossier")}>
-              Dossier
-            </button>
-          </nav>
-        </div>
-
-        {ongletFiche === "dossier" ? (
-          <div className="filed-dossier">
-            {/* l'écran du dossier de toujours, dans le monde .resa .esp qu'il attend : contrôles, pièce, corrections par les portes FILED */}
-            <HabilleSb>
-              {dossier ? (
-                <DossierVue
-                  key={dossier.document.id}
-                  dossier={dossier}
-                  source={source}
-                  motifs={motifs}
-                  fournisseurs={fournisseursListe}
-                  commandes={commandes}
-                  lignesCommande={lignesCommande}
-                  onLocal={remplacerLocal}
-                  relire={() => relireReel(l.a)}
-                  moi={source === "exemple" ? EXEMPLE_MOI : (reel?.moi ?? null)}
-                />
-              ) : (
-                <p className="lin-vide">{erreurDossier ? `Le dossier n'a pas pu être lu : ${erreurDossier}` : "Lecture du dossier…"}</p>
-              )}
-            </HabilleSb>
-          </div>
-        ) : (
-          <div className="lin-projet">
-            <article className="lin-projet-texte">
-              <IconeDocumentRecu l={l} grand />
-              <h2 className="lin-projet-h1">{l.nom}</h2>
-              <p className="lin-projet-resume">{resume}</p>
-              <div className="lin-projet-ligne">
-                <span className="lin-projet-etiquette">Propriétés</span>
+        <div className="lin-projet">
+          <article className="lin-projet-texte">
+            <IconeDocumentRecu l={l} grand />
+            <h2 className="lin-projet-h1">{l.nom}</h2>
+            <p className="lin-projet-resume">{resume}</p>
+            <div className="lin-projet-ligne">
+              <span className="lin-projet-etiquette">Propriétés</span>
+              <MenuOptions
+                raccourci="s"
+                titre="Agir sur ce document…"
+                teinte={SANTES[s].teinte}
+                declencheur={
+                  <>
+                    <IconeStatut sante={s} />
+                    {SANTES[s].libelle}
+                  </>
+                }
+                options={optionsSante}
+                largeur={300}
+              />
+              {fac ? (
                 <MenuOptions
-                  raccourci="s"
-                  titre="Agir sur ce document…"
-                  teinte={SANTES[s].teinte}
+                  raccourci="r"
+                  titre="À payer par échéance…"
                   declencheur={
                     <>
-                      <IconeStatut sante={s} />
-                      {SANTES[s].libelle}
+                      <IconePriorite niveau={urgenceDe(l)} titre={urgenceTitre(l)} />
+                      {urgenceTitre(l)}
                     </>
                   }
-                  options={optionsSante}
-                  largeur={300}
+                  options={optionsGroupes(l.groupe)}
                 />
-                {fac ? (
-                  <MenuOptions
-                    raccourci="r"
-                    titre="À payer par échéance…"
-                    declencheur={
-                      <>
-                        <IconePriorite niveau={urgenceDe(l)} titre={urgenceTitre(l)} />
-                        {urgenceTitre(l)}
-                      </>
-                    }
-                    options={optionsGroupes(l.groupe)}
-                  />
-                ) : null}
-                {fac ? (
-                  <MenuOptions
-                    raccourci="e"
-                    titre="Échéance…"
-                    declencheur={
-                      <>
-                        <IconeCalendrier passe={l.enJeu && l.groupe === "retard"} />
-                        {fac.echeance_lue ? dateCourte(fac.echeance_lue) : "Sans échéance"}
-                      </>
-                    }
-                    options={optionsEcheance}
-                  />
-                ) : null}
+              ) : null}
+              {fac ? (
                 <MenuOptions
-                  titre="Documents du fournisseur…"
+                  raccourci="e"
+                  titre="Échéance…"
                   declencheur={
                     <>
-                      <IconeGroupe />
-                      {l.a.fournisseur?.nom ?? "Fournisseur inconnu"}
+                      <IconeCalendrier passe={l.enJeu && l.groupe === "retard"} />
+                      {fac.echeance_lue ? dateCourte(fac.echeance_lue) : "Sans échéance"}
                     </>
                   }
-                  options={optionsFournisseur}
-                  largeur={320}
+                  options={optionsEcheance}
                 />
-              </div>
-              <div className="lin-projet-ligne">
-                <span className="lin-projet-etiquette">Pièce</span>
+              ) : null}
+              <MenuOptions
+                titre="Documents du fournisseur…"
+                declencheur={
+                  <>
+                    <IconeGroupe />
+                    {l.a.fournisseur?.nom ?? "Fournisseur inconnu"}
+                    {fou?.statut === "a_confirmer" ? <span className="lin-maj-gris">à confirmer</span> : null}
+                  </>
+                }
+                options={optionsFournisseur}
+                largeur={320}
+              />
+            </div>
+            <div className="lin-projet-ligne">
+              <span className="lin-projet-etiquette">Pièce</span>
+              <MenuOptions
+                raccourci="d"
+                titre="Pièce…"
+                declencheur={
+                  <>
+                    <IconeDocument />
+                    {doc.nom_fichier}
+                  </>
+                }
+                options={[
+                  { cle: "voir", libelle: "Voir la pièce", icone: <IconeDocument />, action: () => voirPiece() },
+                  { cle: "copier", libelle: "Copier le nom du fichier", icone: <Copy width={16} height={16} />, action: () => copier(doc.nom_fichier) },
+                ]}
+              />
+              {doc.expediteur ? (
                 <MenuOptions
-                  raccourci="d"
-                  titre="Pièce…"
+                  titre="Expéditeur…"
                   declencheur={
                     <>
-                      <IconeDocument />
-                      {doc.nom_fichier}
+                      <IconeEnveloppe />
+                      {doc.expediteur}
                     </>
                   }
                   options={[
-                    { cle: "voir", libelle: "Voir la pièce et le dossier", icone: <IconeDocument />, action: versDossier },
-                    { cle: "copier", libelle: "Copier le nom du fichier", icone: <Copy width={16} height={16} />, action: () => copier(doc.nom_fichier) },
+                    { cle: "ecrire", libelle: "Écrire un e-mail", icone: <IconeEnveloppe />, action: () => window.open(`mailto:${doc.expediteur}`) },
+                    { cle: "copier", libelle: "Copier l'adresse", icone: <Copy width={16} height={16} />, action: () => copier(doc.expediteur ?? "") },
                   ]}
                 />
-                {doc.expediteur ? (
-                  <MenuOptions
-                    titre="Expéditeur…"
-                    declencheur={
-                      <>
-                        <IconeEnveloppe />
-                        {doc.expediteur}
-                      </>
-                    }
-                    options={[
-                      { cle: "ecrire", libelle: "Écrire un e-mail", icone: <IconeEnveloppe />, action: () => window.open(`mailto:${doc.expediteur}`) },
-                      { cle: "copier", libelle: "Copier l'adresse", icone: <Copy width={16} height={16} />, action: () => copier(doc.expediteur ?? "") },
-                    ]}
-                  />
-                ) : null}
-              </div>
-
-              <details className="lin-maj" open aria-label="Dernier événement">
-                <summary className="lin-maj-tete">
-                  <span className="lin-maj-titre">
-                    Dernier événement
-                    <svg className="lin-maj-fleche" viewBox="0 0 16 16" aria-hidden="true">
-                      <path d="M5.2 6.4h5.6L8 9.6z" fill="currentColor" />
-                    </svg>
-                  </span>
-                  <button type="button" className="lin-maj-lien" onClick={versDossier}>
-                    <ExternalLink width={14} height={14} aria-hidden="true" /> Dossier
-                  </button>
-                </summary>
-                {dernier ? (
-                  <>
-                    <p className="lin-maj-auteur">
-                      <IconeSante sante={s} />
-                      <span data-teinte={SANTES[s].teinte}>{SANTES[s].libelle}</span>
-                      <span className="lin-avatar-auteur" aria-hidden="true">
-                        <FileText width={11} height={11} />
-                      </span>
-                      <span className="lin-maj-gris">{acteur(dernier)}</span>
-                      <span className="lin-maj-gris">{dateCourte(dernier.survenu_le)}</span>
-                    </p>
-                    <p className="lin-maj-texte">{dernier.message}</p>
-                  </>
-                ) : (
-                  <p className="lin-maj-texte lin-maj-gris">{dossier ? "Aucun événement noté pour ce document." : erreurDossier ? `Le dossier n'a pas pu être lu : ${erreurDossier}` : "Lecture du dossier…"}</p>
-                )}
-                <dl className="lin-maj-citation">
-                  <div>
-                    <dt>Statut</dt>
-                    <dd>{statut.libelle}</dd>
-                  </div>
-                  <div>
-                    <dt>Montant</dt>
-                    <dd>{fac ? montant(fac.montant_ttc, fac.devise) : "—"}</dd>
-                  </div>
-                  <div>
-                    <dt>Contrôles</dt>
-                    <dd>{pointsTexte}</dd>
-                  </div>
-                </dl>
-                <footer className="lin-maj-pied">
-                  <button type="button" className="lin-maj-pied-btn" aria-label="Ouvrir le dossier" title="Ouvrir le dossier" onClick={versDossier}>
-                    <MessageSquare width={16} height={16} aria-hidden="true" />
-                  </button>
-                  <Link href={`${RACINE}/validations`} className="lin-maj-pied-rond" aria-label="Décider" title="Décider">
-                    <CheckCheck width={16} height={16} aria-hidden="true" />
-                  </Link>
-                </footer>
-              </details>
-
-              {fac ? (
-                <>
-                  <h3 className="lin-projet-h2">Montants</h3>
-                  <ul className="lin-projet-liste">
-                    {(
-                      [
-                        ["Total HT", fac.montant_ht],
-                        ["TVA", fac.montant_tva],
-                        ["Total TTC", fac.montant_ttc],
-                        ["Net à payer", fac.net_a_payer],
-                        ...(e
-                          ? [
-                              ["Réglé", e.regle],
-                              ["Reste à payer", e.reste],
-                            ]
-                          : []),
-                      ] as [string, number | null][]
-                    ).map(([lib, v]) => (
-                      <li key={lib}>
-                        <span>{lib}</span>
-                        <span className="lin-meta">{montant(v, fac.devise)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </>
               ) : null}
+            </div>
 
-              <h3 className="lin-projet-h2">Contrôles</h3>
-              {!fac ? (
-                <p className="lin-maj-texte lin-maj-gris">Pas encore de facture lue sur ce document : les contrôles passent après la lecture.</p>
-              ) : !controles ? (
-                <p className="lin-maj-texte lin-maj-gris">{erreurDossier ? `Le dossier n'a pas pu être lu : ${erreurDossier}` : "Lecture du dossier…"}</p>
+            <details className="lin-maj" open aria-label="Dernier événement">
+              <summary className="lin-maj-tete">
+                <span className="lin-maj-titre">
+                  Dernier événement
+                  <svg className="lin-maj-fleche" viewBox="0 0 16 16" aria-hidden="true">
+                    <path d="M5.2 6.4h5.6L8 9.6z" fill="currentColor" />
+                  </svg>
+                </span>
+                <button type="button" className="lin-maj-lien" onClick={() => voirPiece()}>
+                  <ExternalLink width={14} height={14} aria-hidden="true" /> Pièce
+                </button>
+              </summary>
+              {dernier ? (
+                <>
+                  <p className="lin-maj-auteur">
+                    <IconeSante sante={s} />
+                    <span data-teinte={SANTES[s].teinte}>{SANTES[s].libelle}</span>
+                    <span className="lin-avatar-auteur" aria-hidden="true">
+                      <FileText width={11} height={11} />
+                    </span>
+                    <span className="lin-maj-gris">{acteur(dernier)}</span>
+                    <span className="lin-maj-gris">{dateCourte(dernier.survenu_le)}</span>
+                  </p>
+                  <p className="lin-maj-texte">{dernier.message}</p>
+                </>
               ) : (
-                <ul className="lin-projet-liste">
-                  {controles.echoues.map((c) => (
-                    <li key={c.id}>
-                      <Losange atteint={false} />
-                      <span>{c.message}</span>
-                      <span className="lin-meta">{c.gravite === "bloquant" ? "bloquant" : c.gravite === "attention" ? "à vérifier" : "information"}</span>
-                    </li>
-                  ))}
-                  {controles.leves.map((c) => (
-                    <li key={c.id}>
-                      <Losange atteint />
-                      <span>{c.message}</span>
-                      <span className="lin-meta">levé</span>
-                    </li>
-                  ))}
-                  <li>
-                    <Losange atteint />
-                    <span>{controles.passes.length ? `${pluriel(controles.passes.length, "contrôle")} sans anomalie` : "Aucun contrôle passé sans anomalie"}</span>
-                    <span className="lin-meta">{[...new Set(controles.passes.map((c) => FAMILLES_CONTROLE[c.famille] ?? c.famille))].slice(0, 3).join(", ")}</span>
-                  </li>
-                </ul>
+                <p className="lin-maj-texte lin-maj-gris">{dossier ? "Aucun événement noté pour ce document." : erreurDossier ? `Le dossier n'a pas pu être lu : ${erreurDossier}` : "Lecture du dossier…"}</p>
               )}
-            </article>
+              <dl className="lin-maj-citation">
+                <div>
+                  <dt>Statut</dt>
+                  <dd>{statut.libelle}</dd>
+                </div>
+                <div>
+                  <dt>Montant</dt>
+                  <dd>{fac ? montant(fac.montant_ttc, fac.devise) : "—"}</dd>
+                </div>
+                <div>
+                  <dt>Contrôles</dt>
+                  <dd>{pointsTexte}</dd>
+                </div>
+              </dl>
+              <footer className="lin-maj-pied">
+                <button type="button" className="lin-maj-pied-btn" aria-label="Voir la pièce" title="Voir la pièce" onClick={() => voirPiece()}>
+                  <MessageSquare width={16} height={16} aria-hidden="true" />
+                </button>
+                <Link href={`${RACINE}/validations`} className="lin-maj-pied-rond" aria-label="Décider" title="Décider">
+                  <CheckCheck width={16} height={16} aria-hidden="true" />
+                </Link>
+              </footer>
+            </details>
 
-            <aside className="lin-cartes-droite" aria-label="Propriétés du document">
-              <CarteDroite titre="Propriétés">
-                <dl className="lin-props">
-                  <div>
-                    <dt>Santé</dt>
-                    <dd data-teinte={SANTES[s].teinte}>
-                      <MenuOptions
-                        plat
-                        titre="Agir sur ce document…"
-                        declencheur={
-                          <>
-                            <IconeStatut sante={s} />
-                            {SANTES[s].libelle}
-                          </>
-                        }
-                        options={optionsSante}
-                        largeur={300}
-                      />
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Statut</dt>
-                    <dd>
-                      <MenuOptions
-                        plat
-                        titre="Statut…"
-                        declencheur={
-                          <>
-                            <IconeDocument />
-                            {statut.libelle}
-                          </>
-                        }
-                        options={optionsStatut}
-                      />
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Échéance</dt>
-                    <dd className={fac?.echeance_lue ? undefined : "lin-props-vide"}>
-                      <MenuOptions
-                        plat
-                        titre="Échéance…"
-                        declencheur={
-                          <>
-                            <IconeCalendrier passe={l.enJeu && l.groupe === "retard"} />
-                            {fac?.echeance_lue ? dateCourte(fac.echeance_lue) : "Sans échéance"}
-                          </>
-                        }
-                        options={optionsEcheance}
-                      />
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Urgence</dt>
-                    <dd>
-                      <MenuOptions
-                        plat
-                        titre="À payer par échéance…"
-                        declencheur={
-                          <>
-                            <IconePriorite niveau={urgenceDe(l)} titre={urgenceTitre(l)} />
-                            {urgenceTitre(l)}
-                          </>
-                        }
-                        options={optionsGroupes(l.groupe)}
-                      />
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Référence</dt>
-                    <dd>
-                      <MenuOptions
-                        plat
-                        titre="Référence…"
-                        declencheur={
-                          <>
-                            <IconeDiese />
-                            {doc.reference}
-                          </>
-                        }
-                        options={[{ cle: "copier", libelle: "Copier la référence", icone: <Copy width={16} height={16} />, action: () => copier(doc.reference) }]}
-                      />
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>N° de facture</dt>
-                    <dd className={fac?.numero ? undefined : "lin-props-vide"}>
-                      <MenuOptions
-                        plat
-                        titre="Numéro…"
-                        declencheur={
-                          <>
-                            <IconeDiese />
-                            {fac?.numero ?? "Non lu"}
-                          </>
-                        }
-                        options={
-                          fac?.numero
-                            ? [{ cle: "copier", libelle: "Copier le numéro", icone: <Copy width={16} height={16} />, action: () => copier(fac.numero ?? "") }]
-                            : [{ cle: "dossier", libelle: "Corriger dans le dossier", icone: <IconeDocument />, action: versDossier }]
-                        }
-                      />
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Fournisseur</dt>
-                    <dd className={l.a.fournisseur ? undefined : "lin-props-vide"}>
-                      <MenuOptions
-                        plat
-                        titre="Documents du fournisseur…"
-                        declencheur={
-                          <>
-                            <IconeGroupe />
-                            {l.a.fournisseur?.nom ?? "Inconnu"}
-                          </>
-                        }
-                        options={optionsFournisseur}
-                        largeur={320}
-                      />
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Montant</dt>
-                    <dd className={fac ? undefined : "lin-props-vide"}>
-                      <MenuOptions
-                        plat
-                        titre="Montant…"
-                        declencheur={
-                          <>
-                            <IconeJauge />
-                            {fac ? montant(fac.montant_ttc, fac.devise) : "Non lu"}
-                          </>
-                        }
-                        options={[{ cle: "dossier", libelle: "Corriger dans le dossier", icone: <IconeDocument />, action: versDossier }]}
-                      />
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Reçu</dt>
-                    <dd>
-                      <MenuOptions
-                        plat
-                        titre="Réception…"
-                        declencheur={
-                          <>
-                            <IconeImport />
-                            {dateCourte(doc.recu_le)} · {SOURCES[doc.source] ?? doc.source}
-                          </>
-                        }
-                        options={[{ cle: "historique", libelle: "Voir l'historique dans le dossier", icone: <IconeDocument />, action: versDossier }]}
-                      />
-                    </dd>
-                  </div>
-                </dl>
-              </CarteDroite>
+            {fac ? (
+              <>
+                <h3 className="lin-projet-h2">Valeurs lues</h3>
+                <ul className="lin-projet-liste filed-lignes-actions">
+                  {lues.map((x) => {
+                    const v = valeurDe(x.notion);
+                    const brut = x.valeur ?? v?.texte ?? null;
+                    /* l'IBAN masqué comme partout ; le SIREN sans son étiquette, que la pièce répète parfois */
+                    const texte = brut && x.notion === "iban" ? masquerIban(brut) : brut && x.notion === "siren" ? brut.replace(/^siren\s*:?\s*/i, "") : brut;
+                    return (
+                      <li key={x.notion}>
+                        <span>{x.libelle}</span>
+                        <span className={texte ? "lin-meta" : "lin-meta lin-props-vide"}>
+                          {v?.verifiee ? <Check className="filed-lue-ok" width={12} height={12} aria-label="vérifiée" /> : null}
+                          {texte ?? "non lu"}
+                        </span>
+                        <MenuActions
+                          titre={`${x.libelle}…`}
+                          options={[
+                            ...(v ? [{ cle: "citer", libelle: "Voir sur la pièce", meta: `p. ${v.page ?? 1}`, icone: <IconeDocument />, action: () => voirPiece(v.id) }] : []),
+                            ...(x.champ ? [{ cle: "corriger", libelle: "Corriger cette valeur…", icone: <Pencil width={16} height={16} />, action: () => agir({ type: "corriger", champ: x.champ }) }] : []),
+                            ...(x.valeur || v?.texte
+                              ? [{ cle: "copier", libelle: "Copier", icone: <Copy width={16} height={16} />, action: () => copier((x.valeur ?? v?.texte ?? "").replace(/^siren\s*:?\s*/i, "")) }]
+                              : []),
+                          ]}
+                        />
+                      </li>
+                    );
+                  })}
+                  {e
+                    ? (
+                        [
+                          ["Réglé", e.regle],
+                          ["Reste à payer", e.reste],
+                        ] as [string, number][]
+                      ).map(([lib, m]) => (
+                        <li key={lib}>
+                          <span>{lib}</span>
+                          <span className="lin-meta">{montant(m, fac.devise)}</span>
+                        </li>
+                      ))
+                    : null}
+                </ul>
+              </>
+            ) : null}
 
-              <CarteDroite titre="Parcours">
-                <ul className="lin-jalons">
-                  {jalons.map((j) => (
-                    <li key={j.cle}>
-                      <Losange atteint={j.atteint} />
-                      <span className="lin-jalon-nom">{j.libelle}</span>
-                      <span className="lin-meta">{j.meta}</span>
-                      <MenuActions titre={`${j.libelle}…`} options={[{ cle: "dossier", libelle: "Voir dans le dossier", icone: <IconeDocument />, action: versDossier }]} />
+            <h3 className="lin-projet-h2">Contrôles</h3>
+            {!fac ? (
+              <p className="lin-maj-texte lin-maj-gris">Pas encore de facture lue sur ce document : les contrôles passent après la lecture.</p>
+            ) : !controles ? (
+              <p className="lin-maj-texte lin-maj-gris">{erreurDossier ? `Le dossier n'a pas pu être lu : ${erreurDossier}` : "Lecture du dossier…"}</p>
+            ) : (
+              <ul className="lin-projet-liste filed-lignes-actions">
+                {controles.echoues.map((c) => (
+                  <li key={c.id}>
+                    <Losange atteint={false} />
+                    <span>{c.message}</span>
+                    <span className="lin-meta">{c.gravite === "bloquant" ? "bloquant" : c.gravite === "attention" ? "à vérifier" : "information"}</span>
+                    <MenuActions
+                      titre="Ce contrôle…"
+                      options={
+                        c.code === "fournisseur.a_confirmer"
+                          ? optionsFournisseurGestes
+                          : [
+                              { cle: "lever", libelle: "Lever avec un motif…", icone: <Unlock width={16} height={16} />, action: () => agir({ type: "lever", controle: c }) },
+                              ...(c.code === "fournisseur.iban_connu" && fou ? [{ cle: "iban", libelle: "Proposer cet IBAN…", icone: <Landmark width={16} height={16} />, action: () => agir({ type: "iban" }) }] : []),
+                            ]
+                      }
+                    />
+                  </li>
+                ))}
+                {controles.leves.map((c) => (
+                  <li key={c.id}>
+                    <Losange atteint />
+                    <span>{c.message}</span>
+                    <span className="lin-meta">levé</span>
+                  </li>
+                ))}
+                <li>
+                  <Losange atteint />
+                  <span>{controles.passes.length ? `${pluriel(controles.passes.length, "contrôle")} sans anomalie` : "Aucun contrôle passé sans anomalie"}</span>
+                  <span className="lin-meta">{[...new Set(controles.passes.map((c) => FAMILLES_CONTROLE[c.famille] ?? c.famille))].slice(0, 3).join(", ")}</span>
+                </li>
+              </ul>
+            )}
+          </article>
+
+          <aside className="lin-cartes-droite" aria-label="Propriétés du document">
+            <CarteDroite titre="Propriétés">
+              <dl className="lin-props">
+                <div>
+                  <dt>Santé</dt>
+                  <dd data-teinte={SANTES[s].teinte}>
+                    <MenuOptions
+                      plat
+                      titre="Agir sur ce document…"
+                      declencheur={
+                        <>
+                          <IconeStatut sante={s} />
+                          {SANTES[s].libelle}
+                        </>
+                      }
+                      options={optionsSante}
+                      largeur={300}
+                    />
+                  </dd>
+                </div>
+                <div>
+                  <dt>Statut</dt>
+                  <dd>
+                    <MenuOptions
+                      plat
+                      titre="Statut…"
+                      declencheur={
+                        <>
+                          <IconeDocument />
+                          {statut.libelle}
+                        </>
+                      }
+                      options={optionsStatut}
+                    />
+                  </dd>
+                </div>
+                <div>
+                  <dt>Échéance</dt>
+                  <dd className={fac?.echeance_lue ? undefined : "lin-props-vide"}>
+                    <MenuOptions
+                      plat
+                      titre="Échéance…"
+                      declencheur={
+                        <>
+                          <IconeCalendrier passe={l.enJeu && l.groupe === "retard"} />
+                          {fac?.echeance_lue ? dateCourte(fac.echeance_lue) : "Sans échéance"}
+                        </>
+                      }
+                      options={optionsEcheance}
+                    />
+                  </dd>
+                </div>
+                <div>
+                  <dt>Urgence</dt>
+                  <dd>
+                    <MenuOptions
+                      plat
+                      titre="À payer par échéance…"
+                      declencheur={
+                        <>
+                          <IconePriorite niveau={urgenceDe(l)} titre={urgenceTitre(l)} />
+                          {urgenceTitre(l)}
+                        </>
+                      }
+                      options={optionsGroupes(l.groupe)}
+                    />
+                  </dd>
+                </div>
+                <div>
+                  <dt>Référence</dt>
+                  <dd>
+                    <MenuOptions
+                      plat
+                      titre="Référence…"
+                      declencheur={
+                        <>
+                          <IconeDiese />
+                          {doc.reference}
+                        </>
+                      }
+                      options={[{ cle: "copier", libelle: "Copier la référence", icone: <Copy width={16} height={16} />, action: () => copier(doc.reference) }]}
+                    />
+                  </dd>
+                </div>
+                <div>
+                  <dt>N° de facture</dt>
+                  <dd className={fac?.numero ? undefined : "lin-props-vide"}>
+                    <MenuOptions
+                      plat
+                      titre="Numéro…"
+                      declencheur={
+                        <>
+                          <IconeDiese />
+                          {fac?.numero ?? "Non lu"}
+                        </>
+                      }
+                      options={
+                        fac?.numero
+                          ? [{ cle: "copier", libelle: "Copier le numéro", icone: <Copy width={16} height={16} />, action: () => copier(fac.numero ?? "") }]
+                          : [{ cle: "corriger", libelle: "Corriger le numéro…", icone: <Pencil width={16} height={16} />, action: () => agir({ type: "corriger", champ: "numero" }) }]
+                      }
+                    />
+                  </dd>
+                </div>
+                <div>
+                  <dt>Fournisseur</dt>
+                  <dd className={l.a.fournisseur ? undefined : "lin-props-vide"}>
+                    <MenuOptions
+                      plat
+                      titre="Documents du fournisseur…"
+                      declencheur={
+                        <>
+                          <IconeGroupe />
+                          {l.a.fournisseur?.nom ?? "Inconnu"}
+                          {fou?.statut === "a_confirmer" ? <span className="lin-maj-gris">à confirmer</span> : null}
+                        </>
+                      }
+                      options={optionsFournisseur}
+                      largeur={320}
+                    />
+                  </dd>
+                </div>
+                <div>
+                  <dt>Montant</dt>
+                  <dd className={fac ? undefined : "lin-props-vide"}>
+                    <MenuOptions
+                      plat
+                      titre="Montant…"
+                      declencheur={
+                        <>
+                          <IconeJauge />
+                          {fac ? montant(fac.montant_ttc, fac.devise) : "Non lu"}
+                        </>
+                      }
+                      options={[{ cle: "corriger", libelle: "Corriger le montant…", icone: <Pencil width={16} height={16} />, action: () => agir({ type: "corriger", champ: "montant_ttc" }) }]}
+                    />
+                  </dd>
+                </div>
+                <div>
+                  <dt>Reçu</dt>
+                  <dd>
+                    <MenuOptions
+                      plat
+                      titre="Réception…"
+                      declencheur={
+                        <>
+                          <IconeImport />
+                          {dateCourte(doc.recu_le)} · {SOURCES[doc.source] ?? doc.source}
+                        </>
+                      }
+                      options={[
+                        { cle: "piece", libelle: "Voir la pièce", icone: <IconeDocument />, action: () => voirPiece() },
+                        { cle: "fil", libelle: "Voir toute l'activité", icone: <FileText width={16} height={16} />, action: () => setToutLeFil(true) },
+                      ]}
+                    />
+                  </dd>
+                </div>
+              </dl>
+            </CarteDroite>
+
+            <CarteDroite titre="Parcours">
+              <ul className="lin-jalons">
+                {jalons.map((j) => (
+                  <li key={j.cle}>
+                    <Losange atteint={j.atteint} />
+                    <span className="lin-jalon-nom">{j.libelle}</span>
+                    <span className="lin-meta">{j.meta}</span>
+                    <MenuActions titre={`${j.libelle}…`} options={[{ cle: "piece", libelle: "Voir la pièce", icone: <IconeDocument />, action: () => voirPiece() }]} />
+                  </li>
+                ))}
+              </ul>
+            </CarteDroite>
+
+            <CarteAPayer lignes={memeFournisseur} titre={l.a.fournisseur ? "Dû à ce fournisseur" : "Dû"} />
+
+            <CarteDroite
+              titre="Activité"
+              action={
+                <button type="button" className="lin-carte-lien" onClick={() => setToutLeFil((x) => !x)}>
+                  {toutLeFil ? "Réduire" : "Tout voir"}
+                </button>
+              }
+            >
+              {historique.length ? (
+                <ul className="lin-activite">
+                  {historique.slice(0, toutLeFil ? undefined : 3).map((h) => (
+                    <li key={h.id}>
+                      <Losange atteint={h.acteur_type !== "systeme"} />
+                      <span>
+                        <b>{acteur(h)}</b> · {h.message} · {dateCourte(h.survenu_le)}
+                      </span>
                     </li>
                   ))}
                 </ul>
-              </CarteDroite>
-
-              <CarteAPayer lignes={memeFournisseur} titre={l.a.fournisseur ? "Dû à ce fournisseur" : "Dû"} />
-
-              <CarteDroite
-                titre="Activité"
-                action={
-                  <button type="button" className="lin-carte-lien" onClick={versDossier}>
-                    Tout voir
-                  </button>
-                }
-              >
-                {historique.length ? (
-                  <ul className="lin-activite">
-                    {historique.slice(0, 3).map((h) => (
-                      <li key={h.id}>
-                        <Losange atteint={h.acteur_type !== "systeme"} />
-                        <span>
-                          <b>{acteur(h)}</b> · {h.message} · {dateCourte(h.survenu_le)}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="lin-activite-vide">{dossier ? "Aucun événement pour l'instant." : "Lecture du dossier…"}</p>
-                )}
-              </CarteDroite>
-            </aside>
-          </div>
-        )}
+              ) : (
+                <p className="lin-activite-vide">{dossier ? "Aucun événement pour l'instant." : "Lecture du dossier…"}</p>
+              )}
+            </CarteDroite>
+          </aside>
+        </div>
+        {dossier ? (
+          <DossierVue
+            key={dossier.document.id}
+            dialoguesSeuls
+            demande={demande}
+            onFait={(m) => toast(`C'est fait. ${m}`, "vert")}
+            onEtat={setEtatDossier}
+            dossier={dossier}
+            source={source}
+            motifs={motifs}
+            fournisseurs={fournisseursListe}
+            commandes={commandes}
+            lignesCommande={lignesCommande}
+            onLocal={remplacerLocal}
+            relire={() => relireReel(l.a)}
+            moi={source === "exemple" ? EXEMPLE_MOI : (reel?.moi ?? null)}
+          />
+        ) : null}
+        <Dialog open={pieceOuverte !== null} onOpenChange={(o) => !o && setPieceOuverte(null)}>
+          <DialogContent className="filed-piece-fenetre">
+            <DialogHeader>
+              <DialogTitle>{doc.nom_fichier}</DialogTitle>
+              <DialogDescription>Cliquez une valeur lue pour la voir surlignée dans la pièce.</DialogDescription>
+            </DialogHeader>
+            <DialogBody>
+              <div id="ecran" className="resa esp sb-ecran filed-piece-cadre">
+                {dossier ? <VisionneusePiece dossier={dossier} source={source} actif={pieceOuverte || null} onChoisir={(id) => setPieceOuverte(id ?? "")} /> : <p className="lin-vide">Lecture du dossier…</p>}
+              </div>
+            </DialogBody>
+          </DialogContent>
+        </Dialog>
         {fenetreDepot}
       </div>
     );

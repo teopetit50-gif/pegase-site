@@ -118,3 +118,9 @@
 .v2 .lin .lin-ticket-corps {
   width: 100%;
 }
+
+/* la cloche de la tête du détail fait défiler jusqu'à « Activité » : le titre s'arrête sous la barre
+   du site (48) et la tête collante du détail (44), au lieu de passer dessous */
+.v2 .lin #ech-activite {
+  scroll-margin-top: 104px;
+}

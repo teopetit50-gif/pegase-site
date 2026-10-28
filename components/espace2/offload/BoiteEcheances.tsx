@@ -29,6 +29,14 @@
    de Linear (rien n'est choisi d'office).
    ↑ et ↓ passent d'une échéance à l'autre, Échap referme.
 
+   Les deux têtes (Teo, 28/10 : « les mêmes logos que Linear, qui montrent
+   d'autres choses ») : la liste a son titre, un « ··· » (les gestes sur la
+   liste) et trois ronds : « à traiter seulement » (?traiter=1, le même
+   réglage que « Afficher »), Filtrer, Options d'affichage. Le détail a la
+   référence et le titre, l'étoile (épingler en tête de liste, propre au
+   navigateur), un « ··· » (précédente, suivante et les gestes de
+   l'échéance) et trois ronds : l'activité, les dates, fermer.
+
    Mêmes portes que l'écran du 21/10 (../../espace/offload/Echeances) :
    l'exemple (echeancesExemple, modifié en mémoire par les gestes), ou la
    base réelle (offload_echeances_tableau). Le commercial et le contact du
@@ -36,7 +44,7 @@
    d'offload_parc_compte. Un seul geste écrit : noter une intervention, y
    compris « faite ailleurs » (offload_noter_intervention, le geste du
    parc de la fiche) ; le geste de l'ancien écran, ouvrir la fiche du
-   compte, est le bouton de la tête du détail. Le reste filtre la page sans
+   compte, est dans le « ··· » de la tête du détail. Le reste filtre la page sans
    la quitter (?filtre=horizon|etat|commercial|nature|type|compte:valeur,
    une pastille « ✕ » par filtre sous la tête de la liste), écrit ou
    appelle le client, ou copie. Gabarit : ../lin/lin.css, retouches :
@@ -46,14 +54,14 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowUp, Building2, Check, CheckCheck, Copy, ExternalLink, FileText, Inbox, ListFilter, MoreHorizontal, PhoneCall, ShieldCheck, SlidersHorizontal, UserRound, Wrench, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Bell, Building2, Check, CheckCheck, Clock, Copy, ExternalLink, FileText, Inbox, ListFilter, PhoneCall, ShieldCheck, SlidersHorizontal, Star, UserRound, Wrench, X } from "lucide-react";
 import { useSource } from "@/components/espace/source";
 import { STATUTS_ECHEANCE, echeancesExemple } from "@/components/espace/offload/Echeances";
 import { exempleOffload } from "@/components/espace/offload/exemples";
 import * as portes from "@/components/espace/offload/portes";
 import type { Compte, EcheanceLigne, ParcCompte } from "@/components/espace/offload/types";
-import { Choix, Menu, MenuOptions, Surlignage, type Option } from "../lin/Lin";
-import { IconeCalendrier, IconeEnveloppe, IconeSante, IconeStatutProjet, type EtatProjet, type Sante } from "../lin/icones";
+import { Choix, Menu, MenuActions, MenuOptions, Surlignage, useEpingles, type Option } from "../lin/Lin";
+import { IconeBoiteX, IconeCalendrier, IconeEnveloppe, IconeNonLus, IconeSante, IconeStatutProjet, type EtatProjet, type Sante } from "../lin/icones";
 import { RACINE } from "../modules";
 import "./offload.css";
 import "./BoiteEcheances.css";
@@ -66,6 +74,7 @@ type Montrer = "toutes" | "a_traiter";
 type Intervention = { le: string; nature: string; ailleurs: boolean; reference: string | null };
 
 const ICI = `${RACINE}/offload/echeances`;
+const LIEN_DECISIONS = `${RACINE}/validations`;
 /* ce qui demande un geste d'abord, puis ce qui suit son cours, puis ce qui est fini */
 const ORDRE: Statut[] = ["depassee", "appel", "a_valider", "a_venir", "prevenue", "honoree", "honoree_ailleurs", "close"];
 const A_GESTE: Statut[] = ["depassee", "appel", "a_valider"];
@@ -169,7 +178,8 @@ export default function BoiteEcheances() {
   const [parcs, setParcs] = useState<Record<string, ParcCompte>>({});
   const [notees, setNotees] = useState<Record<string, Intervention[]>>({});
   const [tri, setTri] = useState<Tri>("echeance");
-  const [montrer, setMontrer] = useState<Montrer>("toutes");
+  /* les échéances épinglées (l'étoile de la tête du détail) : propres à ce navigateur, en tête de liste */
+  const [epingles, basculerEpingle] = useEpingles("offload-echeances");
   const [recherche, setRecherche] = useState("");
   /* l'échéance dont la référence vient d'être copiée (l'icône passe à la coche un instant) */
   const [copie, setCopie] = useState<string | null>(null);
@@ -210,6 +220,9 @@ export default function BoiteEcheances() {
   const parCompte = useMemo(() => new Map(comptes.map((c) => [c.id, c])), [comptes]);
   const id = params.get("id");
   const actifs = lireFiltres(params.getAll("filtre"));
+  /* « à traiter seulement » (le rond « non lus » de la tête et le réglage « Afficher ») : ?traiter=1 */
+  const traiter = params.get("traiter") === "1";
+  const montrer: Montrer = traiter ? "a_traiter" : "toutes";
   const choisie = id ? (lignes.find((x) => x.id === id) ?? null) : null;
   const compteChoisi = choisie?.compte_id ?? null;
 
@@ -245,9 +258,9 @@ export default function BoiteEcheances() {
     return n;
   };
   const avec = (d: Dimension, v: string): Filtres => (actifs[d] === v ? sans(d) : { ...actifs, [d]: v });
-  /* l'adresse de la page : l'échéance ouverte et les filtres */
-  const adresse = (f: Filtres, sel: string | null = id) => {
-    const p = [...(sel ? [`id=${encodeURIComponent(sel)}`] : []), ...DIMENSIONS.filter((d) => f[d]).map((d) => `filtre=${d}:${encodeURIComponent(f[d] ?? "")}`)];
+  /* l'adresse de la page : l'échéance ouverte, les filtres et « à traiter seulement » */
+  const adresse = (f: Filtres, sel: string | null = id, t: boolean = traiter) => {
+    const p = [...(sel ? [`id=${encodeURIComponent(sel)}`] : []), ...DIMENSIONS.filter((d) => f[d]).map((d) => `filtre=${d}:${encodeURIComponent(f[d] ?? "")}`), ...(t ? ["traiter=1"] : [])];
     return `${ICI}${p.length ? `?${p.join("&")}` : ""}`;
   };
   const nbAvec = (d: Dimension, v: string) => lignes.filter((e) => correspond(e, { ...sans(d), [d]: v })).length;
@@ -310,7 +323,7 @@ export default function BoiteEcheances() {
   };
   const optionsDe = (d: Dimension) => valeursDe(d).map((v) => optionFiltre(d, v));
 
-  /* la liste : les filtres, la recherche, « à traiter seulement », puis le tri */
+  /* la liste : les filtres, la recherche, « à traiter seulement », puis le tri ; les épinglées passent en tête, dans l'ordre du tri */
   const q = recherche.trim().toLowerCase();
   const visibles = lignes
     .filter((e) => correspond(e, actifs))
@@ -323,7 +336,9 @@ export default function BoiteEcheances() {
         : tri === "etat"
           ? Number(aTraiter(b)) - Number(aTraiter(a)) || ORDRE.indexOf(a.statut) - ORDRE.indexOf(b.statut) || a.due_le.localeCompare(b.due_le)
           : a.due_le.localeCompare(b.due_le) || a.compte_nom.localeCompare(b.compte_nom, "fr"),
-    );
+    )
+    .sort((a, b) => Number(epingles.has(b.id)) - Number(epingles.has(a.id)));
+  const montrerTraiter = (t: boolean) => routeur.replace(adresse(actifs, id, t), { scroll: false });
   const nbATraiter = visibles.filter(aTraiter).length;
 
   /* ↑ / ↓ passent d'une échéance à l'autre, Échap referme : les touches lisent la dernière liste */
@@ -409,24 +424,42 @@ export default function BoiteEcheances() {
     </Link>
   ));
   const chargement = source === "reelle" && reel === null && !erreur;
+  /* le « ··· » de la tête de la liste (« Notification actions » de Linear) : les gestes sur la liste entière */
+  const premiere = visibles.find(aTraiter) ?? null;
+  const nbAValider = lignes.filter((e) => e.statut === "a_valider").length;
+  const optionsListe: Option[] = [
+    ...(premiere
+      ? [{ cle: "premiere", libelle: "Ouvrir la première à traiter", meta: premiere.compte_nom, icone: <Inbox width={16} height={16} aria-hidden="true" />, action: () => clavier.current.aller(premiere.id) }]
+      : []),
+    { cle: "decisions", libelle: "Valider les messages", meta: nbAValider ? pluriel(nbAValider, "message") : "aucun", icone: <CheckCheck width={16} height={16} aria-hidden="true" />, href: LIEN_DECISIONS },
+    ...(pastillesFiltres.length || recherche
+      ? [
+          {
+            cle: "retirer",
+            libelle: "Retirer les filtres",
+            icone: <X width={16} height={16} aria-hidden="true" />,
+            action: () => {
+              setRecherche("");
+              routeur.replace(adresse({}), { scroll: false });
+            },
+          },
+        ]
+      : []),
+  ];
   const liste = (
     <section className="lin-boite-liste" aria-label="Échéances">
       <header className="lin-tete">
-        <span className="lin-boite-titre">Échéances</span>
-        <div className="lin-tete-droite">
+        <span className="lin-tete-titre">Échéances</span>
+        <MenuActions rond aGauche titre="Actions de la liste" options={optionsListe} />
+        <div className="lin-tete-ronds">
+          <button type="button" className="lin-rond" aria-pressed={traiter} aria-label="Seulement ce qui est à traiter" title="Seulement ce qui est à traiter" onClick={() => montrerTraiter(!traiter)}>
+            <IconeNonLus />
+          </button>
           <Menu
             largeur={300}
             bouton={(ouvert, basculer) => (
-              <button
-                type="button"
-                className="v2-btn v2-btn--petit v2-btn--icone"
-                aria-label="Filtrer"
-                title="Filtrer"
-                aria-expanded={ouvert}
-                aria-pressed={!!recherche || Object.keys(actifs).length > 0}
-                onClick={basculer}
-              >
-                <ListFilter width={14} height={14} aria-hidden="true" />
+              <button type="button" className="lin-rond" aria-label="Filtrer" title="Filtrer" aria-expanded={ouvert} data-actif={recherche || Object.keys(actifs).length > 0 ? "" : undefined} onClick={basculer}>
+                <ListFilter aria-hidden="true" />
               </button>
             )}
           >
@@ -473,8 +506,8 @@ export default function BoiteEcheances() {
           </Menu>
           <Menu
             bouton={(ouvert, basculer) => (
-              <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Options d'affichage" title="Options d'affichage" aria-expanded={ouvert} onClick={basculer}>
-                <SlidersHorizontal width={14} height={14} aria-hidden="true" />
+              <button type="button" className="lin-rond" aria-label="Options d'affichage" title="Options d'affichage" aria-expanded={ouvert} onClick={basculer}>
+                <SlidersHorizontal aria-hidden="true" />
               </button>
             )}
           >
@@ -498,7 +531,7 @@ export default function BoiteEcheances() {
                   <Choix<Montrer>
                     libelle="Afficher"
                     valeur={montrer}
-                    onChange={setMontrer}
+                    onChange={(v) => montrerTraiter(v === "a_traiter")}
                     options={[
                       { cle: "toutes", libelle: "Toutes les échéances" },
                       { cle: "a_traiter", libelle: "À traiter seulement" },
@@ -576,27 +609,30 @@ export default function BoiteEcheances() {
         <h1 className="v2-sr">Échéances et renouvellements</h1>
         <div className="lin-boite">
           {liste}
-          <div className="lin-boite-vide">
-            <Inbox aria-hidden="true" strokeWidth={1.2} />
-            {id && !chargement ? (
-              <>
-                {avisPerdu ? (
-                  <p className="lin-ech-avis" data-teinte={avisPerdu.teinte} role="status">
-                    {avisPerdu.texte}
+          <section className="lin-boite-detail" aria-label="Aucune échéance ouverte">
+            <header className="lin-tete" />
+            <div className="lin-boite-vide">
+              <Inbox aria-hidden="true" strokeWidth={1.2} />
+              {id && !chargement ? (
+                <>
+                  {avisPerdu ? (
+                    <p className="lin-ech-avis" data-teinte={avisPerdu.teinte} role="status">
+                      {avisPerdu.texte}
+                    </p>
+                  ) : null}
+                  <span>Cette échéance n&apos;est plus dans la liste.</span>
+                </>
+              ) : (
+                <>
+                  <span>{nbATraiter ? `${pluriel(nbATraiter, "échéance")} à traiter` : "Rien à traiter"}</span>
+                  <p className="lin-ech-vide-sous">
+                    Les entretiens, révisions, contrôles et contrats qui arrivent à échéance dans les soixante jours. Le client est prévenu la semaine qui précède, après votre validation ; une échéance réglementaire est
+                    marquée comme telle.
                   </p>
-                ) : null}
-                <span>Cette échéance n&apos;est plus dans la liste.</span>
-              </>
-            ) : (
-              <>
-                <span>{nbATraiter ? `${pluriel(nbATraiter, "échéance")} à traiter` : "Rien à traiter"}</span>
-                <p className="lin-ech-vide-sous">
-                  Les entretiens, révisions, contrôles et contrats qui arrivent à échéance dans les soixante jours. Le client est prévenu la semaine qui précède, après votre validation ; une échéance réglementaire est
-                  marquée comme telle.
-                </p>
-              </>
-            )}
-          </div>
+                </>
+              )}
+            </div>
+          </section>
         </div>
       </div>
     );
@@ -660,7 +696,21 @@ export default function BoiteEcheances() {
     );
   };
   const lienFiche = `${RACINE}/offload?compte=${encodeURIComponent(e.compte_id)}`;
-  const lienDecisions = `${RACINE}/validations`;
+  /* le « ··· » de la tête du détail : passer d'une échéance à l'autre (↑ ↓), les gestes de l'ancienne tête et de son « ··· » */
+  const epinglee = epingles.has(e.id);
+  const ordre = visibles.map((x) => x.id);
+  const rang = ordre.indexOf(e.id);
+  const precedente = rang > 0 ? ordre[rang - 1] : rang < 0 && ordre.length ? ordre[ordre.length - 1] : null;
+  const suivante = rang >= 0 ? (ordre[rang + 1] ?? null) : (ordre[0] ?? null);
+  const optionsDetail: Option[] = [
+    ...(precedente ? [{ cle: "precedente", libelle: "Échéance précédente", meta: "↑", icone: <ArrowUp width={16} height={16} aria-hidden="true" />, action: () => clavier.current.aller(precedente) }] : []),
+    ...(suivante ? [{ cle: "suivante", libelle: "Échéance suivante", meta: "↓", icone: <ArrowDown width={16} height={16} aria-hidden="true" />, action: () => clavier.current.aller(suivante) }] : []),
+    ...optionNoter,
+    ...optionsContact,
+    ...optionsRef,
+    optionFiltre("compte", e.compte_id, { libelle: actifs.compte === e.compte_id ? "Toutes les échéances" : "Les échéances de ce compte", meta: undefined }),
+    { cle: "fiche", libelle: "Ouvrir la fiche du compte", icone: <ExternalLink width={16} height={16} aria-hidden="true" />, href: lienFiche },
+  ];
   const desc = `${e.compte_nom}${e.equipement?.site ? `, site ${e.equipement.site}` : ""} : ${e.type === "contrat" ? "le contrat prend fin" : `échéance${e.nature === "reglementaire" ? " réglementaire" : ""}`} le ${dateMoyenne(e.due_le)}, ${relatif(n)}.`;
 
   /* le fil d'activité : les interventions, le client prévenu (ou la décision qui l'attend), l'échéance — dans l'ordre du temps */
@@ -710,7 +760,7 @@ export default function BoiteEcheances() {
     etat.actions =
       e.statut === "a_valider" ? (
         <>
-          <Link href={lienDecisions} className="v2-btn v2-btn--petit" data-actif="">
+          <Link href={LIEN_DECISIONS} className="v2-btn v2-btn--petit" data-actif="">
             <CheckCheck width={14} height={14} aria-hidden="true" />
             <span>Valider le message</span>
           </Link>
@@ -797,60 +847,33 @@ export default function BoiteEcheances() {
         {liste}
         <section className="lin-boite-detail" aria-label={`Échéance : ${e.compte_nom}`}>
           <header className="lin-tete">
-            <nav className="lin-fil" aria-label="Fil d'Ariane">
-              <Link href={adresse(actifs, null)} className="lin-fil-equipe" scroll={false}>
-                Échéances
-              </Link>
-              <span className="lin-fil-sep" aria-hidden="true">
-                ›
-              </span>
-              <span className="lin-fil-ici lin-fil-projet" aria-current="page">
-                <Building2 width={16} height={16} strokeWidth={1.8} style={{ color: couleurDe(e.compte_id) }} aria-hidden="true" />
-                <b>{refDe(e)}</b>
-                {e.compte_nom}
-              </span>
-            </nav>
-            <div className="lin-tete-droite">
-              <Link href={lienFiche} className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Ouvrir la fiche du compte" title="Ouvrir la fiche du compte">
-                <ExternalLink width={14} height={14} aria-hidden="true" />
-              </Link>
-              <Menu
-                largeur={260}
-                bouton={(ouvert, basculer) => (
-                  <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Actions" title="Actions" aria-expanded={ouvert} onClick={basculer}>
-                    <MoreHorizontal width={14} height={14} aria-hidden="true" />
-                  </button>
-                )}
+            <span className="lin-tete-ref">{refDe(e)}</span>
+            <span className="lin-tete-nom">{titreDe(e)}</span>
+            <button
+              type="button"
+              className="lin-rond"
+              aria-pressed={epinglee}
+              aria-label={epinglee ? "Désépingler" : "Épingler en haut de la liste"}
+              title={epinglee ? "Désépingler" : "Épingler en haut de la liste"}
+              onClick={() => basculerEpingle(e.id)}
+            >
+              <Star fill={epinglee ? "currentColor" : "none"} aria-hidden="true" />
+            </button>
+            <MenuActions rond aGauche titre="Actions" options={optionsDetail} />
+            <div className="lin-tete-ronds">
+              <button
+                type="button"
+                className="lin-rond"
+                aria-label="Voir l'activité"
+                title="Voir l'activité"
+                onClick={() => document.getElementById("ech-activite")?.scrollIntoView({ behavior: "smooth", block: "start" })}
               >
-                {(fermer) => (
-                  <div className="lin-ech-menu">
-                    {[
-                      ...optionNoter,
-                      ...optionsContact,
-                      ...optionsRef,
-                      optionFiltre("compte", e.compte_id, { libelle: actifs.compte === e.compte_id ? "Toutes les échéances" : "Les échéances de ce compte", meta: undefined }),
-                    ].map((o) => (
-                      <button
-                        key={o.cle}
-                        type="button"
-                        className="lin-menu-option"
-                        onClick={() => {
-                          fermer();
-                          if (o.action) o.action();
-                          else if (o.href) routeur.push(o.href, { scroll: false });
-                        }}
-                      >
-                        {o.icone}
-                        <span>{o.libelle}</span>
-                        {o.meta ? <span className="lin-meta">{o.meta}</span> : null}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </Menu>
-              <Link href={adresse(actifs, null)} className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Fermer (Échap)" title="Fermer (Échap)" scroll={false}>
-                <X width={14} height={14} aria-hidden="true" />
-              </Link>
+                <Bell aria-hidden="true" />
+              </button>
+              <MenuOptions rond aDroite libelle="Dates" titre="Horizon…" declencheur={<Clock aria-hidden="true" />} options={optionsDate} largeur={280} />
+              <button type="button" className="lin-rond" aria-label="Fermer (Échap)" title="Fermer (Échap)" onClick={() => clavier.current.aller(null)}>
+                <IconeBoiteX />
+              </button>
             </div>
           </header>
 
@@ -911,7 +934,7 @@ export default function BoiteEcheances() {
               ) : null}
 
               <hr className="lin-ticket-trait" />
-              <div className="lin-ticket-activite-tete">
+              <div className="lin-ticket-activite-tete" id="ech-activite">
                 <h3>Activité</h3>
               </div>
               <ul className="lin-ticket-fil">

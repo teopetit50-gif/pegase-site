@@ -34,6 +34,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Archive,
   ArrowUp,
+  Bell,
   BookOpen,
   Check,
   CheckCheck,
@@ -48,10 +49,10 @@ import {
   ListFilter,
   MessageCircleQuestion,
   MessageSquare,
-  MoreHorizontal,
   PenLine,
   Plus,
   SlidersHorizontal,
+  Star,
 } from "lucide-react";
 import { useSource } from "@/components/espace/source";
 import { useTempsReel } from "@/components/espace/tempsReel";
@@ -59,8 +60,8 @@ import { mondeExemple } from "@/components/espace/reput/exemples";
 import { csvDemandes, telecharger } from "@/components/espace/reput/export";
 import { chargerMonde, ecrireFiche, monClient, retirerFiche, validerFiche } from "@/components/espace/reput/portes";
 import type { Client, Demande, Fiche, GenreFiche, Monde, Reponse, StatutDemande, StatutReponse } from "@/components/espace/reput/types";
-import { Choix, Menu, MenuOptions, Surlignage, type Option } from "../lin/Lin";
-import { IconeCalendrier, IconeDiese, IconeDocument, IconeSante, IconeStatutProjet, type EtatProjet, type Sante } from "../lin/icones";
+import { Choix, Menu, MenuActions, MenuOptions, Surlignage, useEpingles, type Option } from "../lin/Lin";
+import { IconeBoiteX, IconeCalendrier, IconeDiese, IconeDocument, IconeNonLus, IconeSante, IconeStatutProjet, type EtatProjet, type Sante } from "../lin/icones";
 import { useMaintenant } from "../horloge";
 import { RACINE } from "../modules";
 import "./reput.css";
@@ -69,7 +70,8 @@ import "./boite-base.css";
 type Teinte = "vert" | "jaune" | "rouge" | "gris" | "bleu";
 type Etat = "brouillon" | "a_revoir" | "a_venir" | "en_vigueur";
 type Dimension = "etat" | "sujet" | "genre" | "usage";
-type Filtres = Partial<Record<Dimension, string>>;
+/* traiter : « Seulement ce qui est à traiter » (le rond de la tête), les fiches au point bleu */
+type Filtres = Partial<Record<Dimension, string>> & { traiter?: boolean };
 type Tri = "recente" | "etat" | "sujet" | "usage" | "titre";
 type Usage = "citee" | "jamais";
 
@@ -162,7 +164,7 @@ const citationsDe = (m: Monde, f: Fiche): Reponse[] => m.reponses.filter((r) => 
 const nomDe = (d: Demande) => d.de_nom || d.adresse_reponse || "Client";
 const usageDe = (m: Monde, f: Fiche): Usage => (citationsDe(m, f).length ? "citee" : "jamais");
 
-/* ——— les filtres, dans l'adresse : ?filtre=etat:brouillon&filtre=sujet:horaires&fiche=<id> ——— */
+/* ——— les filtres, dans l'adresse : ?filtre=etat:brouillon&filtre=sujet:horaires&traiter=1&fiche=<id> ——— */
 const valeurValide = (dim: Dimension, v: string) => (dim === "etat" ? v in ETATS : dim === "genre" ? v in GENRES : dim === "usage" ? v in USAGES : v.length > 0);
 function lireFiltres(params: { getAll: (k: string) => string[] }): Filtres {
   const f: Filtres = {};
@@ -172,6 +174,7 @@ function lireFiltres(params: { getAll: (k: string) => string[] }): Filtres {
     const v = brut.slice(i + 1);
     if (i > 0 && DIMENSIONS.includes(dim) && valeurValide(dim, v)) f[dim] = v;
   }
+  if (params.getAll("traiter").includes("1")) f.traiter = true;
   return f;
 }
 const sans = (f: Filtres, dim: Dimension): Filtres => {
@@ -182,10 +185,11 @@ const sans = (f: Filtres, dim: Dimension): Filtres => {
 /* choisir de nouveau la valeur active retire le filtre */
 const bascule = (f: Filtres, dim: Dimension, v: string): Filtres => (f[dim] === v ? sans(f, dim) : { ...f, [dim]: v });
 const lien = (f: Filtres, fiche: string | null) => {
-  const q = [...DIMENSIONS.filter((dim) => f[dim]).map((dim) => `filtre=${dim}:${encodeURIComponent(f[dim] ?? "")}`), fiche ? `fiche=${encodeURIComponent(fiche)}` : null].filter(Boolean);
+  const q = [...DIMENSIONS.filter((dim) => f[dim]).map((dim) => `filtre=${dim}:${encodeURIComponent(f[dim] ?? "")}`), f.traiter ? "traiter=1" : null, fiche ? `fiche=${encodeURIComponent(fiche)}` : null].filter(Boolean);
   return q.length ? `${BASE}?${q.join("&")}` : BASE;
 };
 function correspond(m: Monde, f: Fiche, filtres: Filtres, jour: string, q: string): boolean {
+  if (filtres.traiter && !nonLue(etatDe(f, jour))) return false;
   if (filtres.etat && etatDe(f, jour) !== filtres.etat) return false;
   if (filtres.sujet && f.sujet !== filtres.sujet) return false;
   if (filtres.genre && f.genre !== filtres.genre) return false;
@@ -288,6 +292,8 @@ function Boite({
   const [retrait, setRetrait] = useState<{ id: string; motif: string } | null>(null);
   const [envoi, setEnvoi] = useState(false);
   const [retour, setRetour] = useState<Retour | null>(null);
+  /* l'étoile de la tête du détail : épinglées par fiche d'origine (l'épingle survit à une correction), propres à ce navigateur */
+  const [epingles, basculerEpingle] = useEpingles("reput-base");
 
   /* les droits de l'ancien écran : un lecteur lit ; un collaborateur écrit un brouillon ; un gérant, un administrateur ou un valideur décide */
   const ecrit = role !== "lecteur";
@@ -301,7 +307,7 @@ function Boite({
 
   const visibles = useMemo(() => {
     const ordreSujet = (code: string) => m.sujets.find((s) => s.code === code)?.ordre ?? 9999;
-    return m.fiches
+    const triees = m.fiches
       .filter((f) => correspond(m, f, filtres, jour, q))
       .sort((a, b) => {
         if (tri === "etat") return ORDRE_ETATS.indexOf(etatDe(a, jour)) - ORDRE_ETATS.indexOf(etatDe(b, jour)) || derniereDe(b).localeCompare(derniereDe(a));
@@ -310,7 +316,9 @@ function Boite({
         if (tri === "titre") return a.titre.localeCompare(b.titre, "fr");
         return derniereDe(b).localeCompare(derniereDe(a));
       });
-  }, [m, filtres, jour, q, tri]);
+    /* les épinglées en tête, chacune des deux parts dans l'ordre courant */
+    return [...triees.filter((f) => epingles.has(f.origine_id)), ...triees.filter((f) => !epingles.has(f.origine_id))];
+  }, [m, filtres, jour, q, tri, epingles]);
   const ids = visibles.map((f) => f.id);
   const cleIds = ids.join(",");
 
@@ -326,6 +334,13 @@ function Boite({
     },
     [filtres, routeur],
   );
+  /* Échap et le bac à croix de la tête : l'édition ou le retrait d'abord, puis la fiche */
+  const fermer = useCallback(() => {
+    if (edition || retrait) {
+      setEdition(null);
+      setRetrait(null);
+    } else if (idChoisi) choisir(null);
+  }, [edition, retrait, idChoisi, choisir]);
 
   /* ↑/↓ changent de fiche, Échap referme l'édition puis la fiche — hors d'un champ et d'un menu ouvert */
   useEffect(() => {
@@ -341,16 +356,11 @@ function Boite({
         const pas = e.key === "ArrowDown" ? 1 : -1;
         const j = i < 0 ? (pas > 0 ? 0 : liste.length - 1) : Math.min(liste.length - 1, Math.max(0, i + pas));
         if (liste[j] !== idChoisi) choisir(liste[j]);
-      } else if (e.key === "Escape") {
-        if (edition || retrait) {
-          setEdition(null);
-          setRetrait(null);
-        } else if (idChoisi) choisir(null);
-      }
+      } else if (e.key === "Escape") fermer();
     };
     window.addEventListener("keydown", touche);
     return () => window.removeEventListener("keydown", touche);
-  }, [cleIds, idChoisi, edition, retrait, choisir]);
+  }, [cleIds, idChoisi, choisir, fermer]);
 
   /* la ligne choisie reste visible quand les flèches la déplacent */
   useEffect(() => {
@@ -487,29 +497,37 @@ function Boite({
   ];
   const libelleFiltre = (dim: Dimension, v: string) => groupesFiltre.find((g) => g.dim === dim)?.valeurs.find((x) => x.v === v) ?? { libelle: v, icone: <IconeDiese /> };
   const exporter = () => telecharger(`demandes-clients-${new Date(maint).toISOString().slice(0, 10)}.csv`, csvDemandes(m));
+  /* le « ··· » à côté du titre : les anciens boutons cerclés de la tête de la liste */
+  const actionsListe: Option[] = [
+    { cle: "exporter", libelle: "Exporter les demandes vers un tableur", icone: <Download width={16} height={16} />, action: exporter },
+    ...(ecrit ? [{ cle: "nouvelle", libelle: "Nouvelle fiche", icone: <Plus width={16} height={16} />, coche: !!edition && edition.id === null, action: nouvelle }] : []),
+  ];
 
   const liste = (
     <section className="lin-boite-liste" aria-label="Fiches de la base">
       <header className="lin-tete">
-        <span className="lin-boite-titre">Base de connaissances</span>
-        <div className="lin-tete-droite">
-          <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Exporter les demandes vers un tableur" title="Exporter les demandes vers un tableur" onClick={exporter}>
-            <Download width={14} height={14} aria-hidden="true" />
+        <span className="lin-tete-titre">Base de connaissances</span>
+        <MenuActions rond aGauche titre="Actions de la liste" options={actionsListe} />
+        <div className="lin-tete-ronds">
+          <button
+            type="button"
+            className="lin-rond"
+            aria-pressed={!!filtres.traiter}
+            aria-label="Seulement ce qui est à traiter"
+            title="Seulement ce qui est à traiter"
+            onClick={() => routeur.replace(lien({ ...filtres, traiter: !filtres.traiter }, idChoisi), { scroll: false })}
+          >
+            <IconeNonLus />
           </button>
-          {ecrit ? (
-            <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Nouvelle fiche" title="Nouvelle fiche" aria-pressed={!!edition && edition.id === null} onClick={nouvelle}>
-              <Plus width={14} height={14} aria-hidden="true" />
-            </button>
-          ) : null}
           <Menu
             largeur={300}
             bouton={(ouvert, basculer) => (
-              <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Filtrer" title="Filtrer" aria-expanded={ouvert} aria-pressed={actifs.length > 0 || !!q} onClick={basculer}>
-                <ListFilter width={14} height={14} aria-hidden="true" />
+              <button type="button" className="lin-rond" aria-label="Filtrer" title="Filtrer" aria-expanded={ouvert} aria-pressed={actifs.length > 0 || !!q} onClick={basculer}>
+                <ListFilter aria-hidden="true" />
               </button>
             )}
           >
-            {(fermer) => (
+            {(fermerMenu) => (
               <>
                 <input
                   className="lin-menu-champ"
@@ -518,7 +536,7 @@ function Boite({
                   aria-label="Chercher dans les fiches"
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && fermer()}
+                  onKeyDown={(e) => e.key === "Enter" && fermerMenu()}
                 />
                 {groupesFiltre.map((g) =>
                   g.valeurs.length ? (
@@ -527,7 +545,7 @@ function Boite({
                         <span className="lin-reglage">{g.titre}</span>
                       </div>
                       {g.valeurs.map((x) => (
-                        <Link key={x.v} href={lien(bascule(filtres, g.dim, x.v), idChoisi)} className="lin-menu-option" scroll={false} replace onClick={fermer}>
+                        <Link key={x.v} href={lien(bascule(filtres, g.dim, x.v), idChoisi)} className="lin-menu-option" scroll={false} replace onClick={fermerMenu}>
                           {x.icone}
                           <span>{x.libelle}</span>
                           <span className="lin-meta">{compte(g.dim, x.v)}</span>
@@ -542,8 +560,8 @@ function Boite({
           </Menu>
           <Menu
             bouton={(ouvert, basculer) => (
-              <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Options d'affichage" title="Options d'affichage" aria-expanded={ouvert} onClick={basculer}>
-                <SlidersHorizontal width={14} height={14} aria-hidden="true" />
+              <button type="button" className="lin-rond" aria-label="Options d'affichage" title="Options d'affichage" aria-expanded={ouvert} onClick={basculer}>
+                <SlidersHorizontal aria-hidden="true" />
               </button>
             )}
           >
@@ -643,15 +661,12 @@ function Boite({
     detail = (
       <section className="lin-boite-detail" id="lin-base-fiche" aria-label="Nouvelle fiche">
         <header className="lin-tete">
-          <nav className="lin-fil" aria-label="Fil d'Ariane">
-            <span className="lin-fil-equipe">Base de connaissances</span>
-            <span className="lin-fil-sep" aria-hidden="true">
-              ›
-            </span>
-            <span className="lin-fil-ici" aria-current="page">
-              Nouvelle fiche
-            </span>
-          </nav>
+          <span className="lin-tete-nom">Nouvelle fiche</span>
+          <div className="lin-tete-ronds">
+            <button type="button" className="lin-rond" aria-label="Fermer (Échap)" title="Fermer (Échap)" onClick={fermer}>
+              <IconeBoiteX />
+            </button>
+          </div>
         </header>
         <div className="lin-projet">
           <article className="lin-projet-texte">
@@ -668,11 +683,12 @@ function Boite({
         f={choisie}
         jour={jour}
         filtres={filtres}
-        position={ids.indexOf(choisie.id)}
-        total={ids.length}
         precedente={ids[ids.indexOf(choisie.id) - 1] ?? null}
         suivante={ids[ids.indexOf(choisie.id) + 1] ?? null}
         choisir={choisir}
+        fermer={fermer}
+        epinglee={epingles.has(choisie.origine_id)}
+        basculerEpingle={() => basculerEpingle(choisie.origine_id)}
         ecrit={ecrit}
         decide={decide}
         envoi={envoi}
@@ -690,14 +706,18 @@ function Boite({
     );
   } else {
     detail = (
-      <section className="lin-boite-vide" aria-label="Aucune fiche choisie">
-        <BookOpen aria-hidden="true" strokeWidth={1.2} />
-        <span>{aTraiter ? `${pluriel(aTraiter, "fiche")} à traiter` : "Aucune fiche à traiter"}</span>
-        {retour ? (
-          <p className="lin-reput-retour lin-base-vide-retour" data-teinte={retour.teinte} role={retour.teinte === "rouge" ? "alert" : "status"}>
-            {retour.texte}
-          </p>
-        ) : null}
+      <section className="lin-boite-detail" aria-label="Aucune fiche choisie">
+        {/* la tête vide : la ligne des têtes traverse toute la largeur, comme sur Linear */}
+        <header className="lin-tete" />
+        <div className="lin-boite-vide">
+          <BookOpen aria-hidden="true" strokeWidth={1.2} />
+          <span>{aTraiter ? `${pluriel(aTraiter, "fiche")} à traiter` : "Aucune fiche à traiter"}</span>
+          {retour ? (
+            <p className="lin-reput-retour lin-base-vide-retour" data-teinte={retour.teinte} role={retour.teinte === "rouge" ? "alert" : "status"}>
+              {retour.texte}
+            </p>
+          ) : null}
+        </div>
       </section>
     );
   }
@@ -804,11 +824,12 @@ function PageFiche({
   f,
   jour,
   filtres,
-  position,
-  total,
   precedente,
   suivante,
   choisir,
+  fermer,
+  epinglee,
+  basculerEpingle,
   ecrit,
   decide,
   envoi,
@@ -827,11 +848,12 @@ function PageFiche({
   f: Fiche;
   jour: string;
   filtres: Filtres;
-  position: number;
-  total: number;
   precedente: string | null;
   suivante: string | null;
   choisir: (id: string | null, remplacer?: boolean) => void;
+  fermer: () => void;
+  epinglee: boolean;
+  basculerEpingle: () => void;
   ecrit: boolean;
   decide: boolean;
   envoi: boolean;
@@ -849,7 +871,6 @@ function PageFiche({
   const [toutes, setToutes] = useState(false);
   const [correction, setCorrection] = useState("");
   const e = etatDe(f, jour);
-  const couleur = couleurDe(f.sujet);
   const sujet = sujetDe(m, f.sujet);
   const citations = citationsDe(m, f).sort((a, b) => b.cree_le.localeCompare(a.cree_le));
   const versions = m.fiches.filter((x) => x.origine_id === f.origine_id).sort((a, b) => b.version - a.version);
@@ -857,7 +878,12 @@ function PageFiche({
   const lienFiltre = (dim: Dimension, v: string) => lien(bascule(filtres, dim, v), f.id);
   const copier = (t: string) => void navigator.clipboard?.writeText(t);
   const voir = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-  const voirActivite = () => voir("lin-base-activite");
+  /* l'activité n'est pas rendue pendant l'édition : la refermer d'abord */
+  const voirActivite = () => {
+    if (!edition) return voir("lin-base-activite");
+    setEdition(null);
+    window.setTimeout(() => voir("lin-base-activite"), 50);
+  };
   const ouvrirRetrait = () => setRetrait({ id: f.id, motif: "" });
 
   /* le composeur : la réponse corrigée devient une nouvelle version, les autres champs de la fiche ne bougent pas */
@@ -942,6 +968,19 @@ function PageFiche({
       coche: x.id === f.id,
       href: lien(filtres, x.id),
     })),
+    { cle: "activite", libelle: "Voir l'activité", icone: <MessageSquare width={16} height={16} />, action: voirActivite },
+  ];
+
+  /* le « ··· » de la tête : les anciens boutons (précédente, suivante, copier) et l'ancien menu d'actions */
+  const garde = (action: () => void) => () => {
+    if (!envoi) action();
+  };
+  const actionsTete: Option[] = [
+    ...(precedente ? [{ cle: "precedente", libelle: "Fiche précédente", meta: "↑", icone: <ChevronUp width={16} height={16} />, action: () => choisir(precedente) }] : []),
+    ...(suivante ? [{ cle: "suivante", libelle: "Fiche suivante", meta: "↓", icone: <ChevronDown width={16} height={16} />, action: () => choisir(suivante) }] : []),
+    ...gestes.map((o) => ({ ...o, action: o.action && garde(o.action) })),
+    { cle: "copier", libelle: "Copier la réponse", icone: <Copy width={16} height={16} />, action: () => copier(f.contenu) },
+    { cle: "copier-source", libelle: "Copier la source", icone: <Copy width={16} height={16} />, action: () => copier(f.source) },
     { cle: "activite", libelle: "Voir l'activité", icone: <MessageSquare width={16} height={16} />, action: voirActivite },
   ];
 
@@ -1046,67 +1085,27 @@ function PageFiche({
   return (
     <section className="lin-boite-detail" id="lin-base-fiche" aria-label={`La fiche ${refDe(f)}`}>
       <header className="lin-tete">
-        <nav className="lin-fil" aria-label="Fil d'Ariane">
-          <Link href={lien(filtres, null)} className="lin-fil-equipe" scroll={false} replace onClick={() => setEdition(null)}>
-            Base de connaissances
-          </Link>
-          <span className="lin-fil-sep" aria-hidden="true">
-            ›
-          </span>
-          <span className="lin-fil-ici lin-fil-projet" aria-current="page">
-            <IconeGenre genre={f.genre} couleur={couleur} />
-            <b>{refDe(f)}</b>
-            {f.titre}
-          </span>
-        </nav>
-        <div className="lin-tete-droite">
-          {position >= 0 ? (
-            <span className="lin-position">
-              {position + 1} / {total}
-            </span>
-          ) : null}
-          <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Fiche précédente (↑)" title="Fiche précédente (↑)" disabled={!precedente} onClick={() => precedente && choisir(precedente)}>
-            <ChevronUp width={14} height={14} aria-hidden="true" />
+        <span className="lin-tete-ref">{refDe(f)}</span>
+        <span className="lin-tete-nom">{f.titre}</span>
+        <button
+          type="button"
+          className="lin-rond"
+          aria-pressed={epinglee}
+          aria-label={epinglee ? "Désépingler" : "Épingler en haut de la liste"}
+          title={epinglee ? "Désépingler" : "Épingler en haut de la liste"}
+          onClick={basculerEpingle}
+        >
+          <Star fill={epinglee ? "currentColor" : "none"} aria-hidden="true" />
+        </button>
+        <MenuActions rond aGauche titre="Actions" options={actionsTete} />
+        <div className="lin-tete-ronds">
+          <button type="button" className="lin-rond" aria-label="Voir l'activité" title="Voir l'activité" onClick={voirActivite}>
+            <Bell aria-hidden="true" />
           </button>
-          <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Fiche suivante (↓)" title="Fiche suivante (↓)" disabled={!suivante} onClick={() => suivante && choisir(suivante)}>
-            <ChevronDown width={14} height={14} aria-hidden="true" />
+          <MenuOptions rond aDroite libelle="Dates" titre="Période…" declencheur={<Clock aria-hidden="true" />} options={optionsPeriode} largeur={300} />
+          <button type="button" className="lin-rond" aria-label="Fermer (Échap)" title="Fermer (Échap)" onClick={fermer}>
+            <IconeBoiteX />
           </button>
-          <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Copier la réponse" title="Copier la réponse" onClick={() => copier(f.contenu)}>
-            <Copy width={14} height={14} aria-hidden="true" />
-          </button>
-          <Menu
-            largeur={260}
-            bouton={(ouvert, basculer) => (
-              <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Actions sur la fiche" title="Actions sur la fiche" aria-expanded={ouvert} onClick={basculer}>
-                <MoreHorizontal width={14} height={14} aria-hidden="true" />
-              </button>
-            )}
-          >
-            {(fermer) => (
-              <>
-                {[
-                  ...gestes,
-                  { cle: "copier", libelle: "Copier la réponse", icone: <Copy width={16} height={16} />, action: () => copier(f.contenu) },
-                  { cle: "copier-source", libelle: "Copier la source", icone: <Copy width={16} height={16} />, action: () => copier(f.source) },
-                  { cle: "activite", libelle: "Voir l'activité", icone: <MessageSquare width={16} height={16} />, action: voirActivite },
-                ].map((o) => (
-                  <button
-                    key={o.cle}
-                    type="button"
-                    className="lin-menu-option"
-                    disabled={envoi}
-                    onClick={() => {
-                      fermer();
-                      o.action?.();
-                    }}
-                  >
-                    {o.icone}
-                    <span>{o.libelle}</span>
-                  </button>
-                ))}
-              </>
-            )}
-          </Menu>
         </div>
       </header>
 

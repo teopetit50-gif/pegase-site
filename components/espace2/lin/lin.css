@@ -700,3 +700,45 @@ html[data-v2-theme="light"] .v2 .lin-ticket-composeur { box-shadow: var(--v2-omb
 }
 html.v2-calme .v2 .lin-boite-lignes > li, html.v2-calme .v2 .lin-boite-point::after { animation: none; }
 html.v2-calme .v2 .lin-boite-surlignage { transition: none; }
+
+/* ——— les têtes de la boîte (relevé du 28/10/2026 sur l'Inbox, fenêtre de 1710 px) ———
+   liste : titre, « ··· » à côté (Notification actions), puis à droite trois ronds (Show unreads
+   only, Add filter, Display options) ; élément ouvert : référence 13/500 grise, titre 13/500, étoile
+   et « ··· », puis à droite trois ronds (Unsubscribe, Snooze, Delete notification).
+   Les ronds : 28 × 28, rayon plein, sans bord ni fond, icône de 14 en L 90, écart de 6. */
+.v2 .lin-rond { display: inline-grid; place-items: center; width: 28px; height: 28px; flex-shrink: 0; border-radius: 9999px; color: var(--lin-texte); background: transparent; }
+.v2 .lin-rond:hover, .v2 .lin-rond[aria-expanded="true"], .v2 .lin-rond[aria-pressed="true"] { background: var(--lin-survol); }
+.v2 .lin-rond[aria-pressed="true"] { color: var(--lin-titre); }
+.v2 .lin-rond svg { width: 14px; height: 14px; }
+.v2 .lin-rond[data-actif] svg { color: var(--lin-en-cours); }
+.v2 .lin-tete-ronds { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.v2 .lin-tete .lin-tete-titre + .lin-rond, .v2 .lin-tete .lin-tete-titre + * > .lin-rond { margin-left: 4px; }
+.v2 .lin-tete-ref { flex-shrink: 0; margin-left: 4px; font-size: 13px; font-weight: 500; color: var(--lin-second); }
+.v2 .lin-tete-nom { min-width: 0; margin: 0 6px 0 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 500; color: var(--lin-texte); }
+.v2 .lin-tete-compte { margin-left: 6px; font-size: 13px; font-weight: 450; color: var(--lin-second); }
+
+/* les onglets de vue (Aperçu, Documents, À payer…) : le contour seul, l'intérieur vide — Teo le
+   28/10/2026 : « juste les contours autour et l'intérieur vide, pas gris ». L'onglet courant garde
+   le même fond vide, son contour et son texte passent au plus clair. */
+.v2 .lin .lin-onglets .v2-btn, .v2 .lin .lin-onglets .v2-btn:hover { background: transparent; box-shadow: 0 0 0 1px var(--v2-a-500); }
+.v2 .lin .lin-onglets .v2-btn:hover { box-shadow: 0 0 0 1px var(--v2-a-600); color: var(--v2-gray-1000); }
+.v2 .lin .lin-onglets .v2-btn[data-actif], .v2 .lin .lin-onglets .v2-btn[aria-current="page"], .v2 .lin .lin-onglets .v2-btn[aria-pressed="true"] { background: transparent; box-shadow: 0 0 0 1px var(--v2-gray-700); color: var(--v2-gray-1000); }
+/* le contour est une ombre de 1 px : la rangée défilante la rognait à gauche */
+.v2 .lin .lin-onglets { padding: 1px; margin: -1px; }
+/* l'étoile et le « ··· » de la tête du détail : 6 d'écart comme chez Linear (la tête en met 4) */
+.v2 .lin-tete-nom + .lin-rond + * { margin-left: 2px; }
+
+/* étroit, sur les quatre pages : le « ··· » de la tête du détail est à droite du titre, son menu (300 de large) ouvert depuis
+   le bouton sortirait de l'écran ; il se cale alors sur le bord droit de la tête (collante, donc son repère) */
+@container principale (max-width: 640px) {
+  .v2 .lin .lin-boite-detail > .lin-tete > .lin-ancre {
+    position: static;
+  }
+  .v2 .lin .lin-boite-detail > .lin-tete > .lin-ancre > .lin-menu--options {
+    left: auto;
+    right: 8px;
+  }
+}
+
+/* la cloche des têtes fait défiler jusqu'à « Activité » : le titre s'arrête sous la barre du site (48) et la tête collante (44) */
+.v2 .lin .lin-ticket-activite-tete { scroll-margin-top: 100px; }

@@ -44,7 +44,17 @@ type Props = {
   /* la personne connectée (exemple : « vous ») — celle qui a déposé la pièce
      d'origine d'un fournisseur ne le confirme pas */
   moi: string | null;
+  /* l'Aperçu de FILED (espace 2, 28/10/2026) garde sa page et ne prend d'ici que les fenêtres :
+     il les ouvre par « demande » (le n change à chaque clic), reçoit le message de réussite et
+     ce qu'il faut savoir pour proposer les bons gestes */
+  dialoguesSeuls?: boolean;
+  demande?: { quoi: DemandeDossier; n: number } | null;
+  onFait?: (message: string) => void;
+  onEtat?: (etat: EtatDossier) => void;
 };
+
+export type DemandeDossier = NonNullable<Form> | { type: "reverifier" };
+export type EtatDossier = { nonVerifiees: number; litigeOuvert: string | null; toutFaitFoi: boolean; deposantOrigine: boolean; peutReverifier: boolean; envoi: boolean; erreur: string | null };
 
 type Form =
   | { type: "corriger"; champ?: string }
@@ -66,7 +76,7 @@ type Form =
 
 const maintenant = () => new Date().toISOString();
 
-export default function DossierVue({ dossier, source, motifs, fournisseurs, commandes, lignesCommande, onLocal, relire, moi }: Props) {
+export default function DossierVue({ dossier, source, motifs, fournisseurs, commandes, lignesCommande, onLocal, relire, moi, dialoguesSeuls, demande, onFait, onEtat }: Props) {
   const { document: doc, facture, fournisseur } = dossier;
   const [actif, setActif] = useState<string | null>(null);
   const [form, setForm] = useState<Form>(null);
@@ -462,317 +472,8 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
     );
   };
 
-  const e = etatDocument(doc.etat);
-
-  return (
-    <div className="esp-dossier" style={{ display: "grid", gap: 14 }}>
-      <div className="esp-carte">
-        <div className="esp-carte-tete">
-          <div className="esp-item-haut">
-            <span className="esp-mono" style={{ fontWeight: 700, fontSize: 15 }}>{doc.reference}</span>
-            <Pastille teinte={e.teinte}>{e.libelle}</Pastille>
-            {facture ? <Pastille teinte={statutFacture(facture.statut).teinte}>{statutFacture(facture.statut).libelle}</Pastille> : null}
-            {facture ? <Pastille teinte={provenance.cle === "electronique" ? "noir" : provenance.cle === "structure" ? "bleu" : undefined} contour={provenance.cle === "lue" || provenance.cle === "saisie"} title={provenance.aide}>{provenance.libelle}</Pastille> : null}
-            {litigeOuvert ? <Pastille teinte="ambre">En litige</Pastille> : null}
-            {doc.nature ? <Pastille contour>{NATURES[doc.nature]}{doc.nature_source === "humain" ? " · classé à la main" : ""}</Pastille> : <Pastille teinte="ambre">Nature à classer</Pastille>}
-            {facture ? <Pastille contour>version {facture.version}</Pastille> : null}
-          </div>
-          <span className="esp-kpi-sous">Reçu le {dateHeure(doc.recu_le)}{doc.expediteur ? ` · ${doc.expediteur}` : ""}</span>
-        </div>
-
-        <div className="esp-dossier-grille">
-          {/* ——— colonne dossier ——— */}
-          <div className="esp-carte-corps" style={{ display: "grid", gap: 16 }}>
-            {facture ? (
-              <div className="esp-onglets" role="tablist" aria-label="Le dossier de la facture">
-                {([["dossier", "Dossier"], ["cycle", `Cycle de vie${dossier.cycle?.length ? ` (${dossier.cycle.length})` : ""}`], ["ecritures", `Écritures${dossier.ecritures?.length ? ` (${dossier.ecritures.length})` : ""}`]] as const).map(([cle, libelle]) => (
-                  <button key={cle} type="button" role="tab" aria-selected={onglet === cle} className="esp-onglet" onClick={() => { setOnglet(cle); setFait(null); }}>{libelle}</button>
-                ))}
-              </div>
-            ) : null}
-            {onglet !== "dossier" && facture ? (
-              <>
-                {fait ? <Avis teinte="vert" role="status"><strong>C&apos;est fait.</strong> {fait}</Avis> : null}
-                {erreur && !form ? <Avis teinte="rouge" role="alert"><strong>Refusé par la base.</strong> {erreur}</Avis> : null}
-                {onglet === "cycle" ? (
-                  <CycleDeVie lignes={dossier.cycle ?? []} />
-                ) : (
-                  <EcrituresFacture
-                    ecritures={dossier.ecritures ?? []}
-                    peutTransmettre={facture.statut === "validee"}
-                    envoi={envoi}
-                    onTransmettre={() => ouvrir({ type: "comptabiliser" })}
-                  />
-                )}
-              </>
-            ) : (
-            <>
-            {litigeOuvert ? (
-              <Avis teinte="ambre">
-                <strong>En litige depuis le {quand(litigeOuvert.ouvert_le)}.</strong> {litigeOuvert.motif}{" "}
-                <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "clore_litige", litige: litigeOuvert.id })}>Clore le litige</button>
-              </Avis>
-            ) : null}
-            {doc.etat === "doublon" ? (
-              <Avis teinte="gris"><strong>Doublon.</strong> {doc.motif ?? "Ce document a déjà été reçu."}</Avis>
-            ) : null}
-            {doc.etat === "a_classer" ? (
-              <Avis teinte="ambre"><strong>À classer.</strong> {doc.motif ?? "Le lecteur n'a pas reconnu la nature du document."}</Avis>
-            ) : null}
-            {doc.etat === "en_lecture" ? (
-              <Avis teinte="bleu"><strong>En lecture.</strong> Le document est en cours de lecture ; ses valeurs et ses contrôles arrivent dans quelques secondes.</Avis>
-            ) : null}
-            {fournisseur?.statut === "bloque" ? (
-              <Avis teinte="rouge"><strong>Fournisseur bloqué.</strong> Aucune facture de {fournisseur.nom} ne sera payée tant qu&apos;il n&apos;est pas débloqué.</Avis>
-            ) : null}
-
-            {facture ? (
-              <>
-                <div>
-                  <div className="esp-section-titre">Valeurs lues — cliquer pour voir la citation dans la pièce</div>
-                  <div className="esp-valeurs">
-                    {(
-                      [
-                        ["fournisseur", fournisseur?.nom ?? String(facture.fournisseur_lu?.nom ?? ""), facture.champs_douteux.some((c) => /fournisseur\.nom|^fournisseur$/.test(c))],
-                        ["numero", facture.numero ?? "", facture.champs_douteux.some((c) => /numero/.test(c))],
-                        ["date_emission", facture.date_emission ? dateCourte(facture.date_emission) : "", false],
-                        ["echeance_lue", facture.echeance_lue ? dateCourte(facture.echeance_lue) : "", false],
-                        ["montant_ht", facture.montant_ht !== null ? montant(facture.montant_ht, facture.devise) : "", false],
-                        ["montant_tva", facture.montant_tva !== null ? montant(facture.montant_tva, facture.devise) : "", false],
-                        ["montant_ttc", facture.montant_ttc !== null ? montant(facture.montant_ttc, facture.devise) : "", false],
-                        ["iban", facture.iban ? masquerIban(facture.iban) : "", facture.champs_douteux.some((c) => /iban/.test(c))],
-                        ["siren", fournisseur?.siren ?? String(facture.fournisseur_lu?.siren ?? ""), false],
-                      ] as [string, string, boolean][]
-                    ).map(([notion, texte, douteux]) => {
-                      const v = valeurDe(notion);
-                      return <Valeur key={notion} champ={v?.champ ?? CHAMPS_PAR_NOTION[notion][0]} texte={ou(texte, v)} v={v} actif={actif} onClick={() => citer(notion)} douteux={douteux} />;
-                    })}
-                  </div>
-                  <div className="esp-actions" style={{ marginTop: 10 }}>
-                    <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={toutFaitFoi} title={toutFaitFoi ? AIDE_FAIT_FOI : undefined} onClick={() => { ouvrir({ type: "corriger" }); const libre = CHAMPS_CORRIGEABLES.find((c) => !faitFoi(c.cle)); if (libre) setChamp(libre.cle); }}><Pencil width={13} height={13} aria-hidden="true" /> Corriger une valeur</button>
-                    {!litigeOuvert ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={ouvrirFormLitige}><Scale width={13} height={13} aria-hidden="true" /> Ouvrir un litige</button> : null}
-                    {structuree && (facture.statut === "a_valider" || facture.statut === "bloquee") ? <Link href="/espace/validations" className="r-btn r-btn--fil r-btn--petit" title="La facture se refuse dans la file de validation, avec son motif."><X width={13} height={13} aria-hidden="true" /> Refuser</Link> : null}
-                    <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!nonVerifiees.length} onClick={() => ouvrir({ type: "confirmer" })}><ShieldCheck width={13} height={13} aria-hidden="true" /> {nonVerifiees.length ? `Confirmer ${nonVerifiees.length > 1 ? `les ${nonVerifiees.length} valeurs non vérifiées` : "la valeur non vérifiée"}` : "Valeurs lues vérifiées"}</button>
-                    <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "rattacher" })}><Link2 width={13} height={13} aria-hidden="true" /> Rattacher à un fournisseur</button>
-                    <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!commandes.length} onClick={() => ouvrir({ type: "commande" })}><ClipboardList width={13} height={13} aria-hidden="true" /> {commandeRetenue ? `Commande ${commandeRetenue.numero} · changer` : "Désigner une commande"}</button>
-                    {fournisseur ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "iban" })}><Landmark width={13} height={13} aria-hidden="true" /> Proposer un IBAN</button> : null}
-                    {fournisseur ? (
-                      <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "bloquer", bloquer: fournisseur.statut !== "bloque" })}>
-                        {fournisseur.statut === "bloque" ? <Unlock width={13} height={13} aria-hidden="true" /> : <Ban width={13} height={13} aria-hidden="true" />} {fournisseur.statut === "bloque" ? "Débloquer le fournisseur" : "Bloquer le fournisseur"}
-                      </button>
-                    ) : null}
-                  </div>
-                </div>
-
-                {fournisseur ? (
-                  <FicheFournisseur
-                    fournisseur={fournisseur}
-                    deposantOrigine={deposantOrigine}
-                    registre={registre?.nom ?? null}
-                    envoi={envoi && !form}
-                    onConfirmer={() => ouvrir({ type: "confirmer_fournisseur" })}
-                    onAttester={() => ouvrir({ type: "attester" })}
-                    onReverifier={() => { setFait(null); void reverifier(); }}
-                  />
-                ) : null}
-
-                {lus.length ? (
-                  <div className="esp-identifiants-lus">
-                    <Avis teinte="ambre">
-                      <strong>Identifiants lus sur la pièce, non retenus.</strong> Le lecteur les a trouvés sans pouvoir les vérifier : ils ne montent pas sur la fiche du fournisseur tant qu&apos;une personne ne les a pas confirmés ou corrigés.
-                    </Avis>
-                    <ul className="esp-fil" style={{ marginTop: 10 }}>
-                      {lus.map((l) => (
-                        <li key={l.notion}>
-                          <span className="esp-fil-point" data-teinte={l.juste ? "bleu" : "rouge"} />
-                          <div>
-                            <div className="esp-fil-texte esp-item-haut">
-                              <span>{l.libelle} lu</span>
-                              <span className="esp-mono">{l.valeur}</span>
-                              <Pastille teinte={l.juste ? "bleu" : "rouge"}>{l.raison}</Pastille>
-                            </div>
-                            <div className="esp-actions" style={{ marginTop: 6 }}>
-                              {valeurDe(l.notion) ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => citer(l.notion)}>Voir sur la pièce</button> : null}
-                              {l.juste && valeurDe(l.notion) ? <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={envoi} onClick={() => { setFait(null); void confirmerLu(l.notion); }}><ShieldCheck width={12} height={12} aria-hidden="true" /> Confirmer la valeur lue</button> : null}
-                            </div>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                    <div className="esp-actions">
-                      <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={() => { ouvrir({ type: "identifiants" }); setSirenSaisi(""); setTvaSaisie(""); }}><Pencil width={13} height={13} aria-hidden="true" /> Saisir les vrais identifiants</button>
-                    </div>
-                  </div>
-                ) : null}
-
-                <div>
-                  <div className="esp-section-titre">
-                    Contrôles — {groupes.passes.length} passé{groupes.passes.length > 1 ? "s" : ""}, {groupes.echoues.length} échoué{groupes.echoues.length > 1 ? "s" : ""}, {groupes.leves.length} levé{groupes.leves.length > 1 ? "s" : ""}
-                  </div>
-                  {[...groupes.echoues, ...groupes.leves, ...groupes.passes].map((c) => {
-                    /* le motif officiel est celui qui VAUDRAIT si le contrôle échouait : on ne le dit que sur une anomalie ou une levée */
-                    const m = c.resultat === "ok" ? null : motifOfficiel(c.motif_officiel);
-                    const levee = c.levee_id ? dossier.levees.find((l) => l.id === c.levee_id) : null;
-                    const preuve = Object.entries(c.preuve ?? {});
-                    return (
-                      <div key={c.id} className="esp-controle">
-                        <span className="esp-controle-icone" data-resultat={c.resultat} data-gravite={c.gravite} aria-hidden="true">
-                          {c.resultat === "ok" ? <Check width={13} height={13} /> : c.resultat === "levee" ? <Unlock width={12} height={12} /> : <AlertTriangle width={12} height={12} />}
-                        </span>
-                        <div>
-                          <div className="esp-controle-haut">
-                            <span className="esp-mono">{c.code}</span>
-                            <Pastille contour>{FAMILLES_CONTROLE[c.famille] ?? c.famille}</Pastille>
-                            <Pastille teinte={c.gravite === "bloquant" ? "rouge" : c.gravite === "attention" ? "ambre" : "gris"}>{c.gravite === "bloquant" ? "Bloquant" : c.gravite === "attention" ? "À vérifier" : "Information"}</Pastille>
-                            {c.resultat === "levee" ? <Pastille teinte="bleu">Levé</Pastille> : null}
-                          </div>
-                          <div className="esp-controle-message">{c.message}</div>
-                          {m ? (
-                            <div className="esp-controle-motif">
-                              Motif officiel : <b>{m.libelle}</b> <span className="esp-mono">({m.code})</span>
-                              {m.description ? ` — ${m.description}` : ""}
-                            </div>
-                          ) : null}
-                          {preuve.length ? (
-                            <div className="esp-preuve">
-                              {preuve.map(([k, val]) => (
-                                <span key={k}><b>{k.replace(/_/g, " ")}</b> : {typeof val === "object" ? JSON.stringify(val) : String(val)}</span>
-                              ))}
-                            </div>
-                          ) : null}
-                          {levee ? <div className="esp-controle-motif">Levé par <b>{levee.leve_par_nom ?? "une personne habilitée"}</b> le {dateHeure(levee.leve_le)} : {levee.motif}</div> : null}
-                          {c.resultat === "anomalie" ? (
-                            <div className="esp-controle-actions">
-                              {/* a4_12 : « fournisseur à confirmer » ne se lève pas (42501 pour tous) — on confirme le fournisseur */}
-                              {c.code !== "fournisseur.a_confirmer" ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "lever", controle: c })}><Unlock width={12} height={12} aria-hidden="true" /> Lever avec un motif</button> : null}
-                              {c.preuve?.champ ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => citer(String(c.preuve.champ))}>Voir dans la pièce</button> : null}
-                              {c.code === "fournisseur.a_confirmer" && fournisseur?.statut === "a_confirmer" ? <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={deposantOrigine} title={deposantOrigine ? "Vous avez déposé la pièce d'origine : une autre personne confirme." : undefined} onClick={() => ouvrir({ type: "confirmer_fournisseur" })}><UserCheck width={12} height={12} aria-hidden="true" /> Confirmer ce fournisseur</button> : null}
-                              {c.code === "fournisseur.a_confirmer" && deposantOrigine ? <span className="esp-kpi-sous">Vous avez déposé la pièce d&apos;origine : une autre personne confirme ce fournisseur.</span> : null}
-                              {c.code === "identite.registre" && fournisseur && registre ? <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={envoi} onClick={() => { setFait(null); void reverifier(); }}><RefreshCw width={12} height={12} aria-hidden="true" /> Revérifier</button> : null}
-                              {c.code === "fournisseur.iban_connu" && fournisseur ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "iban" })}><Landmark width={12} height={12} aria-hidden="true" /> Proposer cet IBAN</button> : null}
-                            </div>
-                          ) : null}
-                        </div>
-                      </div>
-                    );
-                  })}
-                  {!dossier.controles.length ? <p className="esp-kpi-sous">Aucun contrôle pour cette version.</p> : null}
-                </div>
-
-                {dossier.lignes.length ? (
-                  <div>
-                    <div className="esp-section-titre">Lignes</div>
-                    {/* un cadre qui défile se rejoint au clavier (axe : scrollable-region-focusable) */}
-                    <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Lignes de la facture">
-                      <table className="esp-tableau">
-                        <thead>
-                          <tr><th>#</th><th>Désignation</th><th className="esp-num">Qté</th><th className="esp-num">P.U. HT</th><th className="esp-num">Montant HT</th><th className="esp-num">TVA</th><th>Commande</th><th aria-label="Apparier" /></tr>
-                        </thead>
-                        <tbody>
-                          {dossier.lignes.map((l) => (
-                            <tr key={l.id}>
-                              <td>{l.rang}</td>
-                              <td>{l.designation}</td>
-                              <td className="esp-num">{nombreFr(l.quantite)}{l.unite ? ` ${l.unite}` : ""}</td>
-                              <td className="esp-num">{montant(l.prix_unitaire, facture.devise)}</td>
-                              <td className="esp-num">{montant(l.montant_ht, facture.devise)}</td>
-                              <td className="esp-num">{pourcent(l.taux_tva)}</td>
-                              <td>
-                                {(() => {
-                                  const lc = ligneCommandeDe(l);
-                                  if (lc) {
-                                    const ecart = l.prix_unitaire !== null && lc.prix_unitaire !== null ? l.prix_unitaire - lc.prix_unitaire : 0;
-                                    return (
-                                      <span className="esp-item-haut">
-                                        <span className="esp-mono">{commandeDe(lc.commande_id)?.numero ?? ""}/{lc.rang}</span>
-                                        {ecart ? <Pastille teinte="ambre">{ecart > 0 ? "+" : ""}{montant(ecart, facture.devise)} / u.</Pastille> : <Pastille teinte="vert">conforme</Pastille>}
-                                      </span>
-                                    );
-                                  }
-                                  return <span className="esp-mono">{l.commande_ligne ?? "—"}</span>;
-                                })()}
-                              </td>
-                              <td>
-                                {commandeRetenue || commandes.length ? (
-                                  <button type="button" className="esp-lien-bouton" onClick={() => { ouvrir({ type: "apparier", ligne: l }); if (commandeRetenue) setCommandeChoisie(commandeRetenue.id); }}>
-                                    {ligneCommandeDe(l) ? "Changer" : "Apparier"}
-                                  </button>
-                                ) : null}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                ) : null}
-
-                {dossier.tva.length || dossier.rapprochement ? (
-                  <dl className="esp-def">
-                    {dossier.tva.length ? (
-                      <Def etiquette="TVA par taux">
-                        {dossier.tva.map((t) => (
-                          <div key={t.id}>{pourcent(t.taux)} sur {montant(t.base, facture.devise)} → {montant(t.montant, facture.devise)}</div>
-                        ))}
-                      </Def>
-                    ) : null}
-                    {dossier.rapprochement ? (
-                      <Def etiquette="Rapprochement commande">
-                        {dossier.rapprochement.mode === "aucun"
-                          ? "Aucune commande citée ni désignée."
-                          : `${dossier.rapprochement.nb_appariees}/${dossier.rapprochement.nb_lignes} lignes appariées (mode ${dossier.rapprochement.mode})${dossier.rapprochement.ecart_prix ? ` · écart de prix ${montant(dossier.rapprochement.ecart_prix, facture.devise)}` : ""}${dossier.rapprochement.ecart_quantite ? ` · écart de quantité ${nombreFr(dossier.rapprochement.ecart_quantite)}` : ""}`}
-                      </Def>
-                    ) : null}
-                    {dossier.ibans.length ? (
-                      <Def etiquette="IBAN connus du fournisseur">
-                        {dossier.ibans.map((i) => (
-                          <div key={i.id} className="esp-item-haut">
-                            <span className="esp-mono">{i.iban_masque}</span>
-                            <Pastille teinte={i.statut === "valide" ? "vert" : i.statut === "propose" ? "ambre" : "gris"}>{i.statut === "valide" ? "Validé" : i.statut === "propose" ? "Proposé" : i.statut === "refuse" ? "Refusé" : "Révoqué"}</Pastille>
-                          </div>
-                        ))}
-                      </Def>
-                    ) : null}
-                  </dl>
-                ) : null}
-              </>
-            ) : (
-              <div className="esp-actions">
-                {doc.etat === "a_classer" || doc.etat === "illisible" ? (
-                  <button type="button" className="r-btn r-btn--noir" onClick={() => ouvrir({ type: "classer" })}><FolderInput width={15} height={15} aria-hidden="true" /> Classer ce document</button>
-                ) : null}
-              </div>
-            )}
-
-            {fait ? <Avis teinte="vert" role="status"><strong>C&apos;est fait.</strong> {fait}</Avis> : null}
-            {erreur && !form ? <Avis teinte="rouge" role="alert"><strong>Refusé par la base.</strong> {erreur}</Avis> : null}
-
-            <div>
-              <div className="esp-section-titre">Fil du document</div>
-              <ul className="esp-fil">
-                {dossier.historique.map((h) => (
-                  <li key={String(h.id)}>
-                    <span className="esp-fil-point" data-teinte={/levee|integration|classement|paiement|confirmation/.test(h.etape) ? "vert" : /blocage|doublon|litige/.test(h.etape) ? "rouge" : /demande|correction|iban|rattachement/.test(h.etape) ? "bleu" : undefined} />
-                    <div>
-                      <div className="esp-fil-texte">{h.message}</div>
-                      <div className="esp-fil-meta">{dateHeure(h.survenu_le)}{h.acteur_libelle ? ` · ${h.acteur_libelle}` : h.acteur_type === "systeme" ? " · système" : ""}</div>
-                    </div>
-                  </li>
-                ))}
-                {!dossier.historique.length ? <li><span className="esp-fil-point" /><div className="esp-fil-meta">Aucun évènement.</div></li> : null}
-              </ul>
-            </div>
-            </>
-            )}
-          </div>
-
-          {/* ——— colonne pièce ——— */}
-          <div className="esp-carte-corps">
-            <VisionneusePiece dossier={dossier} source={source} actif={actif} onChoisir={setActif} />
-          </div>
-        </div>
-      </div>
-
+  const dialogues = (
+    <>
       {/* ——— dialogues ——— */}
       <Dialog open={form?.type === "corriger"} onOpenChange={(o) => !o && setForm(null)}>
         <DialogContent>
@@ -1135,6 +836,355 @@ export default function DossierVue({ dossier, source, motifs, fournisseurs, comm
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </>
+  );
+
+  /* les demandes de l'Aperçu : chaque clic (n) ouvre sa fenêtre, comme le bouton du même nom ici */
+  const derniere = useRef(0);
+  useEffect(() => {
+    if (!demande || demande.n === derniere.current) return;
+    derniere.current = demande.n;
+    const q = demande.quoi;
+    if (q.type === "reverifier") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- une demande venue de l'Aperçu, pas un état dérivé
+      setFait(null);
+      void reverifier();
+    } else if (q.type === "litige") ouvrirFormLitige();
+    else if (q.type === "corriger" && !q.champ) {
+      ouvrir(q);
+      const libre = CHAMPS_CORRIGEABLES.find((c) => !faitFoi(c.cle));
+      if (libre) setChamp(libre.cle);
+    } else {
+      ouvrir(q);
+      if (q.type === "identifiants") {
+        setSirenSaisi("");
+        setTvaSaisie("");
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [demande?.n]);
+  useEffect(() => {
+    if (fait) onFait?.(fait);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fait]);
+  useEffect(() => {
+    onEtat?.({ nonVerifiees: nonVerifiees.length, litigeOuvert: litigeOuvert?.id ?? null, toutFaitFoi, deposantOrigine, peutReverifier: !!fournisseur && !!registre, envoi, erreur: form ? null : erreur });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nonVerifiees.length, litigeOuvert?.id, toutFaitFoi, deposantOrigine, fournisseur, registre?.nom, envoi, erreur, form]);
+  if (dialoguesSeuls) return dialogues;
+
+  const e = etatDocument(doc.etat);
+
+  return (
+    <div className="esp-dossier" style={{ display: "grid", gap: 14 }}>
+      <div className="esp-carte">
+        <div className="esp-carte-tete">
+          <div className="esp-item-haut">
+            <span className="esp-mono" style={{ fontWeight: 700, fontSize: 15 }}>{doc.reference}</span>
+            <Pastille teinte={e.teinte}>{e.libelle}</Pastille>
+            {facture ? <Pastille teinte={statutFacture(facture.statut).teinte}>{statutFacture(facture.statut).libelle}</Pastille> : null}
+            {facture ? <Pastille teinte={provenance.cle === "electronique" ? "noir" : provenance.cle === "structure" ? "bleu" : undefined} contour={provenance.cle === "lue" || provenance.cle === "saisie"} title={provenance.aide}>{provenance.libelle}</Pastille> : null}
+            {litigeOuvert ? <Pastille teinte="ambre">En litige</Pastille> : null}
+            {doc.nature ? <Pastille contour>{NATURES[doc.nature]}{doc.nature_source === "humain" ? " · classé à la main" : ""}</Pastille> : <Pastille teinte="ambre">Nature à classer</Pastille>}
+            {facture ? <Pastille contour>version {facture.version}</Pastille> : null}
+          </div>
+          <span className="esp-kpi-sous">Reçu le {dateHeure(doc.recu_le)}{doc.expediteur ? ` · ${doc.expediteur}` : ""}</span>
+        </div>
+
+        <div className="esp-dossier-grille">
+          {/* ——— colonne dossier ——— */}
+          <div className="esp-carte-corps" style={{ display: "grid", gap: 16 }}>
+            {facture ? (
+              <div className="esp-onglets" role="tablist" aria-label="Le dossier de la facture">
+                {([["dossier", "Dossier"], ["cycle", `Cycle de vie${dossier.cycle?.length ? ` (${dossier.cycle.length})` : ""}`], ["ecritures", `Écritures${dossier.ecritures?.length ? ` (${dossier.ecritures.length})` : ""}`]] as const).map(([cle, libelle]) => (
+                  <button key={cle} type="button" role="tab" aria-selected={onglet === cle} className="esp-onglet" onClick={() => { setOnglet(cle); setFait(null); }}>{libelle}</button>
+                ))}
+              </div>
+            ) : null}
+            {onglet !== "dossier" && facture ? (
+              <>
+                {fait ? <Avis teinte="vert" role="status"><strong>C&apos;est fait.</strong> {fait}</Avis> : null}
+                {erreur && !form ? <Avis teinte="rouge" role="alert"><strong>Refusé par la base.</strong> {erreur}</Avis> : null}
+                {onglet === "cycle" ? (
+                  <CycleDeVie lignes={dossier.cycle ?? []} />
+                ) : (
+                  <EcrituresFacture
+                    ecritures={dossier.ecritures ?? []}
+                    peutTransmettre={facture.statut === "validee"}
+                    envoi={envoi}
+                    onTransmettre={() => ouvrir({ type: "comptabiliser" })}
+                  />
+                )}
+              </>
+            ) : (
+            <>
+            {litigeOuvert ? (
+              <Avis teinte="ambre">
+                <strong>En litige depuis le {quand(litigeOuvert.ouvert_le)}.</strong> {litigeOuvert.motif}{" "}
+                <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "clore_litige", litige: litigeOuvert.id })}>Clore le litige</button>
+              </Avis>
+            ) : null}
+            {doc.etat === "doublon" ? (
+              <Avis teinte="gris"><strong>Doublon.</strong> {doc.motif ?? "Ce document a déjà été reçu."}</Avis>
+            ) : null}
+            {doc.etat === "a_classer" ? (
+              <Avis teinte="ambre"><strong>À classer.</strong> {doc.motif ?? "Le lecteur n'a pas reconnu la nature du document."}</Avis>
+            ) : null}
+            {doc.etat === "en_lecture" ? (
+              <Avis teinte="bleu"><strong>En lecture.</strong> Le document est en cours de lecture ; ses valeurs et ses contrôles arrivent dans quelques secondes.</Avis>
+            ) : null}
+            {fournisseur?.statut === "bloque" ? (
+              <Avis teinte="rouge"><strong>Fournisseur bloqué.</strong> Aucune facture de {fournisseur.nom} ne sera payée tant qu&apos;il n&apos;est pas débloqué.</Avis>
+            ) : null}
+
+            {facture ? (
+              <>
+                <div>
+                  <div className="esp-section-titre">Valeurs lues — cliquer pour voir la citation dans la pièce</div>
+                  <div className="esp-valeurs">
+                    {(
+                      [
+                        ["fournisseur", fournisseur?.nom ?? String(facture.fournisseur_lu?.nom ?? ""), facture.champs_douteux.some((c) => /fournisseur\.nom|^fournisseur$/.test(c))],
+                        ["numero", facture.numero ?? "", facture.champs_douteux.some((c) => /numero/.test(c))],
+                        ["date_emission", facture.date_emission ? dateCourte(facture.date_emission) : "", false],
+                        ["echeance_lue", facture.echeance_lue ? dateCourte(facture.echeance_lue) : "", false],
+                        ["montant_ht", facture.montant_ht !== null ? montant(facture.montant_ht, facture.devise) : "", false],
+                        ["montant_tva", facture.montant_tva !== null ? montant(facture.montant_tva, facture.devise) : "", false],
+                        ["montant_ttc", facture.montant_ttc !== null ? montant(facture.montant_ttc, facture.devise) : "", false],
+                        ["iban", facture.iban ? masquerIban(facture.iban) : "", facture.champs_douteux.some((c) => /iban/.test(c))],
+                        ["siren", fournisseur?.siren ?? String(facture.fournisseur_lu?.siren ?? ""), false],
+                      ] as [string, string, boolean][]
+                    ).map(([notion, texte, douteux]) => {
+                      const v = valeurDe(notion);
+                      return <Valeur key={notion} champ={v?.champ ?? CHAMPS_PAR_NOTION[notion][0]} texte={ou(texte, v)} v={v} actif={actif} onClick={() => citer(notion)} douteux={douteux} />;
+                    })}
+                  </div>
+                  <div className="esp-actions" style={{ marginTop: 10 }}>
+                    <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={toutFaitFoi} title={toutFaitFoi ? AIDE_FAIT_FOI : undefined} onClick={() => { ouvrir({ type: "corriger" }); const libre = CHAMPS_CORRIGEABLES.find((c) => !faitFoi(c.cle)); if (libre) setChamp(libre.cle); }}><Pencil width={13} height={13} aria-hidden="true" /> Corriger une valeur</button>
+                    {!litigeOuvert ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={ouvrirFormLitige}><Scale width={13} height={13} aria-hidden="true" /> Ouvrir un litige</button> : null}
+                    {structuree && (facture.statut === "a_valider" || facture.statut === "bloquee") ? <Link href="/espace/validations" className="r-btn r-btn--fil r-btn--petit" title="La facture se refuse dans la file de validation, avec son motif."><X width={13} height={13} aria-hidden="true" /> Refuser</Link> : null}
+                    <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!nonVerifiees.length} onClick={() => ouvrir({ type: "confirmer" })}><ShieldCheck width={13} height={13} aria-hidden="true" /> {nonVerifiees.length ? `Confirmer ${nonVerifiees.length > 1 ? `les ${nonVerifiees.length} valeurs non vérifiées` : "la valeur non vérifiée"}` : "Valeurs lues vérifiées"}</button>
+                    <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "rattacher" })}><Link2 width={13} height={13} aria-hidden="true" /> Rattacher à un fournisseur</button>
+                    <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!commandes.length} onClick={() => ouvrir({ type: "commande" })}><ClipboardList width={13} height={13} aria-hidden="true" /> {commandeRetenue ? `Commande ${commandeRetenue.numero} · changer` : "Désigner une commande"}</button>
+                    {fournisseur ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "iban" })}><Landmark width={13} height={13} aria-hidden="true" /> Proposer un IBAN</button> : null}
+                    {fournisseur ? (
+                      <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "bloquer", bloquer: fournisseur.statut !== "bloque" })}>
+                        {fournisseur.statut === "bloque" ? <Unlock width={13} height={13} aria-hidden="true" /> : <Ban width={13} height={13} aria-hidden="true" />} {fournisseur.statut === "bloque" ? "Débloquer le fournisseur" : "Bloquer le fournisseur"}
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+
+                {fournisseur ? (
+                  <FicheFournisseur
+                    fournisseur={fournisseur}
+                    deposantOrigine={deposantOrigine}
+                    registre={registre?.nom ?? null}
+                    envoi={envoi && !form}
+                    onConfirmer={() => ouvrir({ type: "confirmer_fournisseur" })}
+                    onAttester={() => ouvrir({ type: "attester" })}
+                    onReverifier={() => { setFait(null); void reverifier(); }}
+                  />
+                ) : null}
+
+                {lus.length ? (
+                  <div className="esp-identifiants-lus">
+                    <Avis teinte="ambre">
+                      <strong>Identifiants lus sur la pièce, non retenus.</strong> Le lecteur les a trouvés sans pouvoir les vérifier : ils ne montent pas sur la fiche du fournisseur tant qu&apos;une personne ne les a pas confirmés ou corrigés.
+                    </Avis>
+                    <ul className="esp-fil" style={{ marginTop: 10 }}>
+                      {lus.map((l) => (
+                        <li key={l.notion}>
+                          <span className="esp-fil-point" data-teinte={l.juste ? "bleu" : "rouge"} />
+                          <div>
+                            <div className="esp-fil-texte esp-item-haut">
+                              <span>{l.libelle} lu</span>
+                              <span className="esp-mono">{l.valeur}</span>
+                              <Pastille teinte={l.juste ? "bleu" : "rouge"}>{l.raison}</Pastille>
+                            </div>
+                            <div className="esp-actions" style={{ marginTop: 6 }}>
+                              {valeurDe(l.notion) ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => citer(l.notion)}>Voir sur la pièce</button> : null}
+                              {l.juste && valeurDe(l.notion) ? <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={envoi} onClick={() => { setFait(null); void confirmerLu(l.notion); }}><ShieldCheck width={12} height={12} aria-hidden="true" /> Confirmer la valeur lue</button> : null}
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="esp-actions">
+                      <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={() => { ouvrir({ type: "identifiants" }); setSirenSaisi(""); setTvaSaisie(""); }}><Pencil width={13} height={13} aria-hidden="true" /> Saisir les vrais identifiants</button>
+                    </div>
+                  </div>
+                ) : null}
+
+                <div>
+                  <div className="esp-section-titre">
+                    Contrôles — {groupes.passes.length} passé{groupes.passes.length > 1 ? "s" : ""}, {groupes.echoues.length} échoué{groupes.echoues.length > 1 ? "s" : ""}, {groupes.leves.length} levé{groupes.leves.length > 1 ? "s" : ""}
+                  </div>
+                  {[...groupes.echoues, ...groupes.leves, ...groupes.passes].map((c) => {
+                    /* le motif officiel est celui qui VAUDRAIT si le contrôle échouait : on ne le dit que sur une anomalie ou une levée */
+                    const m = c.resultat === "ok" ? null : motifOfficiel(c.motif_officiel);
+                    const levee = c.levee_id ? dossier.levees.find((l) => l.id === c.levee_id) : null;
+                    const preuve = Object.entries(c.preuve ?? {});
+                    return (
+                      <div key={c.id} className="esp-controle">
+                        <span className="esp-controle-icone" data-resultat={c.resultat} data-gravite={c.gravite} aria-hidden="true">
+                          {c.resultat === "ok" ? <Check width={13} height={13} /> : c.resultat === "levee" ? <Unlock width={12} height={12} /> : <AlertTriangle width={12} height={12} />}
+                        </span>
+                        <div>
+                          <div className="esp-controle-haut">
+                            <span className="esp-mono">{c.code}</span>
+                            <Pastille contour>{FAMILLES_CONTROLE[c.famille] ?? c.famille}</Pastille>
+                            <Pastille teinte={c.gravite === "bloquant" ? "rouge" : c.gravite === "attention" ? "ambre" : "gris"}>{c.gravite === "bloquant" ? "Bloquant" : c.gravite === "attention" ? "À vérifier" : "Information"}</Pastille>
+                            {c.resultat === "levee" ? <Pastille teinte="bleu">Levé</Pastille> : null}
+                          </div>
+                          <div className="esp-controle-message">{c.message}</div>
+                          {m ? (
+                            <div className="esp-controle-motif">
+                              Motif officiel : <b>{m.libelle}</b> <span className="esp-mono">({m.code})</span>
+                              {m.description ? ` — ${m.description}` : ""}
+                            </div>
+                          ) : null}
+                          {preuve.length ? (
+                            <div className="esp-preuve">
+                              {preuve.map(([k, val]) => (
+                                <span key={k}><b>{k.replace(/_/g, " ")}</b> : {typeof val === "object" ? JSON.stringify(val) : String(val)}</span>
+                              ))}
+                            </div>
+                          ) : null}
+                          {levee ? <div className="esp-controle-motif">Levé par <b>{levee.leve_par_nom ?? "une personne habilitée"}</b> le {dateHeure(levee.leve_le)} : {levee.motif}</div> : null}
+                          {c.resultat === "anomalie" ? (
+                            <div className="esp-controle-actions">
+                              {/* a4_12 : « fournisseur à confirmer » ne se lève pas (42501 pour tous) — on confirme le fournisseur */}
+                              {c.code !== "fournisseur.a_confirmer" ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "lever", controle: c })}><Unlock width={12} height={12} aria-hidden="true" /> Lever avec un motif</button> : null}
+                              {c.preuve?.champ ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => citer(String(c.preuve.champ))}>Voir dans la pièce</button> : null}
+                              {c.code === "fournisseur.a_confirmer" && fournisseur?.statut === "a_confirmer" ? <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={deposantOrigine} title={deposantOrigine ? "Vous avez déposé la pièce d'origine : une autre personne confirme." : undefined} onClick={() => ouvrir({ type: "confirmer_fournisseur" })}><UserCheck width={12} height={12} aria-hidden="true" /> Confirmer ce fournisseur</button> : null}
+                              {c.code === "fournisseur.a_confirmer" && deposantOrigine ? <span className="esp-kpi-sous">Vous avez déposé la pièce d&apos;origine : une autre personne confirme ce fournisseur.</span> : null}
+                              {c.code === "identite.registre" && fournisseur && registre ? <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={envoi} onClick={() => { setFait(null); void reverifier(); }}><RefreshCw width={12} height={12} aria-hidden="true" /> Revérifier</button> : null}
+                              {c.code === "fournisseur.iban_connu" && fournisseur ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "iban" })}><Landmark width={12} height={12} aria-hidden="true" /> Proposer cet IBAN</button> : null}
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {!dossier.controles.length ? <p className="esp-kpi-sous">Aucun contrôle pour cette version.</p> : null}
+                </div>
+
+                {dossier.lignes.length ? (
+                  <div>
+                    <div className="esp-section-titre">Lignes</div>
+                    {/* un cadre qui défile se rejoint au clavier (axe : scrollable-region-focusable) */}
+                    <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Lignes de la facture">
+                      <table className="esp-tableau">
+                        <thead>
+                          <tr><th>#</th><th>Désignation</th><th className="esp-num">Qté</th><th className="esp-num">P.U. HT</th><th className="esp-num">Montant HT</th><th className="esp-num">TVA</th><th>Commande</th><th aria-label="Apparier" /></tr>
+                        </thead>
+                        <tbody>
+                          {dossier.lignes.map((l) => (
+                            <tr key={l.id}>
+                              <td>{l.rang}</td>
+                              <td>{l.designation}</td>
+                              <td className="esp-num">{nombreFr(l.quantite)}{l.unite ? ` ${l.unite}` : ""}</td>
+                              <td className="esp-num">{montant(l.prix_unitaire, facture.devise)}</td>
+                              <td className="esp-num">{montant(l.montant_ht, facture.devise)}</td>
+                              <td className="esp-num">{pourcent(l.taux_tva)}</td>
+                              <td>
+                                {(() => {
+                                  const lc = ligneCommandeDe(l);
+                                  if (lc) {
+                                    const ecart = l.prix_unitaire !== null && lc.prix_unitaire !== null ? l.prix_unitaire - lc.prix_unitaire : 0;
+                                    return (
+                                      <span className="esp-item-haut">
+                                        <span className="esp-mono">{commandeDe(lc.commande_id)?.numero ?? ""}/{lc.rang}</span>
+                                        {ecart ? <Pastille teinte="ambre">{ecart > 0 ? "+" : ""}{montant(ecart, facture.devise)} / u.</Pastille> : <Pastille teinte="vert">conforme</Pastille>}
+                                      </span>
+                                    );
+                                  }
+                                  return <span className="esp-mono">{l.commande_ligne ?? "—"}</span>;
+                                })()}
+                              </td>
+                              <td>
+                                {commandeRetenue || commandes.length ? (
+                                  <button type="button" className="esp-lien-bouton" onClick={() => { ouvrir({ type: "apparier", ligne: l }); if (commandeRetenue) setCommandeChoisie(commandeRetenue.id); }}>
+                                    {ligneCommandeDe(l) ? "Changer" : "Apparier"}
+                                  </button>
+                                ) : null}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ) : null}
+
+                {dossier.tva.length || dossier.rapprochement ? (
+                  <dl className="esp-def">
+                    {dossier.tva.length ? (
+                      <Def etiquette="TVA par taux">
+                        {dossier.tva.map((t) => (
+                          <div key={t.id}>{pourcent(t.taux)} sur {montant(t.base, facture.devise)} → {montant(t.montant, facture.devise)}</div>
+                        ))}
+                      </Def>
+                    ) : null}
+                    {dossier.rapprochement ? (
+                      <Def etiquette="Rapprochement commande">
+                        {dossier.rapprochement.mode === "aucun"
+                          ? "Aucune commande citée ni désignée."
+                          : `${dossier.rapprochement.nb_appariees}/${dossier.rapprochement.nb_lignes} lignes appariées (mode ${dossier.rapprochement.mode})${dossier.rapprochement.ecart_prix ? ` · écart de prix ${montant(dossier.rapprochement.ecart_prix, facture.devise)}` : ""}${dossier.rapprochement.ecart_quantite ? ` · écart de quantité ${nombreFr(dossier.rapprochement.ecart_quantite)}` : ""}`}
+                      </Def>
+                    ) : null}
+                    {dossier.ibans.length ? (
+                      <Def etiquette="IBAN connus du fournisseur">
+                        {dossier.ibans.map((i) => (
+                          <div key={i.id} className="esp-item-haut">
+                            <span className="esp-mono">{i.iban_masque}</span>
+                            <Pastille teinte={i.statut === "valide" ? "vert" : i.statut === "propose" ? "ambre" : "gris"}>{i.statut === "valide" ? "Validé" : i.statut === "propose" ? "Proposé" : i.statut === "refuse" ? "Refusé" : "Révoqué"}</Pastille>
+                          </div>
+                        ))}
+                      </Def>
+                    ) : null}
+                  </dl>
+                ) : null}
+              </>
+            ) : (
+              <div className="esp-actions">
+                {doc.etat === "a_classer" || doc.etat === "illisible" ? (
+                  <button type="button" className="r-btn r-btn--noir" onClick={() => ouvrir({ type: "classer" })}><FolderInput width={15} height={15} aria-hidden="true" /> Classer ce document</button>
+                ) : null}
+              </div>
+            )}
+
+            {fait ? <Avis teinte="vert" role="status"><strong>C&apos;est fait.</strong> {fait}</Avis> : null}
+            {erreur && !form ? <Avis teinte="rouge" role="alert"><strong>Refusé par la base.</strong> {erreur}</Avis> : null}
+
+            <div>
+              <div className="esp-section-titre">Fil du document</div>
+              <ul className="esp-fil">
+                {dossier.historique.map((h) => (
+                  <li key={String(h.id)}>
+                    <span className="esp-fil-point" data-teinte={/levee|integration|classement|paiement|confirmation/.test(h.etape) ? "vert" : /blocage|doublon|litige/.test(h.etape) ? "rouge" : /demande|correction|iban|rattachement/.test(h.etape) ? "bleu" : undefined} />
+                    <div>
+                      <div className="esp-fil-texte">{h.message}</div>
+                      <div className="esp-fil-meta">{dateHeure(h.survenu_le)}{h.acteur_libelle ? ` · ${h.acteur_libelle}` : h.acteur_type === "systeme" ? " · système" : ""}</div>
+                    </div>
+                  </li>
+                ))}
+                {!dossier.historique.length ? <li><span className="esp-fil-point" /><div className="esp-fil-meta">Aucun évènement.</div></li> : null}
+              </ul>
+            </div>
+            </>
+            )}
+          </div>
+
+          {/* ——— colonne pièce ——— */}
+          <div className="esp-carte-corps">
+            <VisionneusePiece dossier={dossier} source={source} actif={actif} onChoisir={setActif} />
+          </div>
+        </div>
+      </div>
+
+      {dialogues}
     </div>
   );
 }

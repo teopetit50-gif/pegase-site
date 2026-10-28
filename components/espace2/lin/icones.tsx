@@ -130,3 +130,27 @@ export function IconeSante({ etat, titre }: { etat: Sante; titre?: string }) {
     ),
   );
 }
+
+/* les icônes des têtes de la boîte, au trait comme celles de Linear (14 px) : « non lus seulement »
+   (un bac avec un point) et « retirer de la boîte » (un bac avec une croix) */
+const BAC = "M2.2 8.8 3.6 3.9A1.4 1.4 0 0 1 4.9 2.9h3.3M2.2 8.8v3.2a1.6 1.6 0 0 0 1.6 1.6h8.4a1.6 1.6 0 0 0 1.6-1.6V8.8M2.2 8.8h3.1l1 1.6h3.4l1-1.6h3.1";
+export function IconeNonLus({ titre, className }: P) {
+  return svg(
+    titre,
+    className,
+    <>
+      <path d={BAC} fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="12" cy="4.4" r="2" fill="currentColor" />
+    </>,
+  );
+}
+export function IconeBoiteX({ titre, className }: P) {
+  return svg(
+    titre,
+    className,
+    <>
+      <path d={BAC} fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M10.6 2.6 13.6 5.6M13.6 2.6 10.6 5.6" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+    </>,
+  );
+}

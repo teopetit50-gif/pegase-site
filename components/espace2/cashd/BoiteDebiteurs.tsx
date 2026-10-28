@@ -34,11 +34,15 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  ArrowDown,
+  ArrowUp,
   Banknote,
+  Bell,
   Building2,
   CalendarRange,
   CheckCheck,
   ClipboardList,
+  Clock,
   Copy,
   Download,
   FileDown,
@@ -60,6 +64,7 @@ import {
   Scissors,
   Send,
   SlidersHorizontal,
+  Star,
   X,
 } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
@@ -79,8 +84,8 @@ import Textes from "@/components/espace/cashd/Textes";
 import type { Balance, Fiche, NaturePiece, Piece, ReglementEtat, Relance, RelanceCommande, ReponseLue, StatutCompte, Suivi, Tableau } from "@/components/espace/cashd/types";
 import { HabilleSb } from "../Habille";
 import { useToast } from "../Toasts";
-import { Choix, IconePriorite, Menu, MenuActions, MenuOptions, Surlignage, type Option } from "../lin/Lin";
-import { IconeCalendrier, IconeDocument, IconeEnveloppe, IconeGroupe, IconeSante as IconeSanteLin, IconeStatutProjet, type EtatProjet, type Sante as SanteLin } from "../lin/icones";
+import { Choix, IconePriorite, Menu, MenuActions, MenuOptions, Surlignage, useEpingles, type Option } from "../lin/Lin";
+import { IconeBoiteX, IconeCalendrier, IconeDocument, IconeEnveloppe, IconeGroupe, IconeNonLus, IconeSante as IconeSanteLin, IconeStatutProjet, type EtatProjet, type Sante as SanteLin } from "../lin/icones";
 import { RACINE } from "../modules";
 /* les fenêtres de geste et « Vos textes » portent les classes de l'écran d'avant (c2-sous, c2-coche…) */
 import "@/components/espace/cashd/cashd.css";
@@ -243,6 +248,69 @@ function EnvoiMain({ relance, noter }: { relance: Relance; noter: (r: Relance, c
 
 const copier = (texte: string) => void navigator.clipboard?.writeText(texte);
 
+/* ——— la tête d'un élément ouvert : celle de l'Inbox de Linear (28/10/2026) ———
+   la référence en gris, le titre, l'étoile (épingler en tête de liste), le « ··· » de tous les gestes ;
+   à droite les trois ronds de Linear avec notre sens : la cloche mène à l'activité, l'horloge aux dates,
+   le bac à croix referme (comme Échap). Plus de fil d'Ariane, de « i / n », de flèches ni de bouton cerclé. */
+type Tete = { epingle: boolean; epingler: () => void; voisins: Option[] };
+function TeteDetail({
+  reference,
+  nom,
+  tete,
+  actions = [],
+  dates,
+  activite,
+  fermer,
+}: {
+  reference: string;
+  nom: string;
+  tete?: Tete;
+  actions?: Option[];
+  dates?: { titre: string; options: Option[] };
+  activite?: boolean;
+  fermer: () => void;
+}) {
+  const options = [...(tete?.voisins ?? []), ...actions];
+  return (
+    <header className="lin-tete">
+      <span className="lin-tete-ref">{reference}</span>
+      <span className="lin-tete-nom" title={nom}>
+        {nom}
+      </span>
+      {tete ? (
+        <button
+          type="button"
+          className="lin-rond"
+          aria-pressed={tete.epingle}
+          data-actif={tete.epingle ? "" : undefined}
+          aria-label={tete.epingle ? "Désépingler" : "Épingler en haut de la liste"}
+          title={tete.epingle ? "Désépingler" : "Épingler en haut de la liste"}
+          onClick={tete.epingler}
+        >
+          <Star aria-hidden="true" fill={tete.epingle ? "currentColor" : "none"} />
+        </button>
+      ) : null}
+      {options.length ? <MenuActions rond aGauche titre="Actions" options={options} /> : null}
+      <div className="lin-tete-ronds">
+        {activite ? (
+          <button type="button" className="lin-rond" aria-label="Voir l'activité" title="Voir l'activité" onClick={() => document.getElementById("c2b-activite")?.scrollIntoView({ behavior: "smooth", block: "start" })}>
+            <Bell aria-hidden="true" />
+          </button>
+        ) : null}
+        {/* MenuOptions ne pose pas de bulle sur son bouton : l'enveloppe la donne (display: contents) */}
+        {dates?.options.length ? (
+          <span className="c2b-bulle" title="Dates">
+            <MenuOptions rond aDroite libelle="Dates" titre={dates.titre} declencheur={<Clock aria-hidden="true" />} options={dates.options} largeur={280} />
+          </span>
+        ) : null}
+        <button type="button" className="lin-rond" aria-label="Fermer" title="Fermer (Échap)" onClick={fermer}>
+          <IconeBoiteX />
+        </button>
+      </div>
+    </header>
+  );
+}
+
 export default function BoiteDebiteurs({ vue }: { vue: VueBoite }) {
   const { source } = useSource();
   const routeur = useRouter();
@@ -347,6 +415,19 @@ export default function BoiteDebiteurs({ vue }: { vue: VueBoite }) {
     else f[k] = v;
     aller({ filtre: ecrireFiltres(f) });
   };
+  /* « Seulement ce qui est à traiter » (le bac à point de la tête) : chez les débiteurs, c'est le filtre
+     « À traiter » qui existait déjà ; chez les relances, traiter=1. Posé en remplacement, sur la même route. */
+  const traiterSeul = vue === "debiteurs" ? filtres.situation === "a_traiter" : params.get("traiter") === "1";
+  const basculerTraiter = () => {
+    if (vue === "relances") return aller({ traiter: traiterSeul ? null : "1" }, true);
+    const f = { ...filtres };
+    if (traiterSeul) delete f.situation;
+    else f.situation = "a_traiter";
+    aller({ filtre: ecrireFiltres(f) }, true);
+  };
+  /* les épingles (l'étoile de la tête du détail) : propres à ce navigateur, une liste par vue */
+  const [epinglesDebiteurs, epinglerDebiteur] = useEpingles("cashd-debiteurs");
+  const [epinglesRelances, epinglerRelance] = useEpingles("cashd-relances");
   const suivreLien = (e: React.MouseEvent, changes: Record<string, string | null>) => {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
     e.preventDefault();
@@ -778,7 +859,10 @@ export default function BoiteDebiteurs({ vue }: { vue: VueBoite }) {
     k === "situation" ? (v === "a_traiter" ? x.i.nonLu : v === "echu" ? x.b.echu > 0 : v === "plus_90" ? x.b.echu_plus_90 > 0 : x.b.statut !== "actif") : k === "palier" ? x.i.palier === v : (x.b.groupe ?? "") === v;
   const dansDebiteurs = (x: LigneDebiteur, sauf?: string) => Object.entries(filtres).every(([k, v]) => k === sauf || correspondDebiteur(x, k, v));
   const valeurTri = (x: LigneDebiteur) => (tri === "retard" ? -x.b.retard_max_jours : tri === "encours" ? -x.b.encours : tri === "recent" ? -Date.parse(x.i.date ?? "1970-01-01") : tri === "nom" ? 0 : -x.b.echu);
-  const debiteursVus = debiteurs.filter((x) => dansDebiteurs(x)).sort((a, b) => valeurTri(a) - valeurTri(b) || a.b.nom.localeCompare(b.b.nom, "fr"));
+  /* les épinglés passent en tête, chacun gardant l'ordre courant */
+  const debiteursVus = debiteurs
+    .filter((x) => dansDebiteurs(x))
+    .sort((a, b) => Number(epinglesDebiteurs.has(b.b.compte_id)) - Number(epinglesDebiteurs.has(a.b.compte_id)) || valeurTri(a) - valeurTri(b) || a.b.nom.localeCompare(b.b.nom, "fr"));
 
   /* une relance par ligne, et les relances de bon de commande */
   const nomCompte = (id: string) => tous.find((b) => b.compte_id === id)?.nom ?? ficheDe(id)?.compte.nom ?? "Débiteur";
@@ -798,10 +882,15 @@ export default function BoiteDebiteurs({ vue }: { vue: VueBoite }) {
   const palierLigne = (l: Ligne) => l.r?.palier ?? "";
   const correspondLigne = (l: Ligne, k: string, v: string) => (k === "etat" ? l.groupe === v : k === "palier" ? palierLigne(l) === v : k === "nature" ? l.nature === v : l.compte_id === v);
   const dansLignes = (l: Ligne, sauf?: string) => Object.entries(filtres).every(([k, v]) => k === sauf || correspondLigne(l, k, v));
-  const lignesVues = lignes
-    .filter((l) => dansLignes(l))
-    .sort((a, b) => (tri === "montant" ? (b.montant ?? 0) - (a.montant ?? 0) : tri === "debiteur" ? a.compte.localeCompare(b.compte, "fr") : 0) || b.jour.localeCompare(a.jour));
   const nonLue = (l: Ligne) => l.groupe === "repondue" || l.groupe === "a_valider" || l.groupe === "a_envoyer";
+  const lignesVues = lignes
+    .filter((l) => dansLignes(l) && (!traiterSeul || nonLue(l)))
+    .sort(
+      (a, b) =>
+        Number(epinglesRelances.has(b.cle)) - Number(epinglesRelances.has(a.cle)) ||
+        (tri === "montant" ? (b.montant ?? 0) - (a.montant ?? 0) : tri === "debiteur" ? a.compte.localeCompare(b.compte, "fr") : 0) ||
+        b.jour.localeCompare(a.jour),
+    );
 
   const ids = vue === "debiteurs" ? debiteursVus.map((x) => x.b.compte_id) : lignesVues.map((l) => l.cle);
   const aTraiter = vue === "debiteurs" ? debiteursVus.filter((x) => x.i.nonLu).length : lignesVues.filter(nonLue).length;
@@ -865,8 +954,8 @@ export default function BoiteDebiteurs({ vue }: { vue: VueBoite }) {
     <Menu
       largeur={300}
       bouton={(ouvert, basculer) => (
-        <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Filtrer" title="Filtrer" aria-expanded={ouvert} aria-pressed={Object.keys(filtres).length > 0} onClick={basculer}>
-          <ListFilter width={14} height={14} aria-hidden="true" />
+        <button type="button" className="lin-rond" aria-label="Filtrer" title="Filtrer" aria-expanded={ouvert} data-actif={Object.keys(filtres).length ? "" : undefined} onClick={basculer}>
+          <ListFilter aria-hidden="true" />
         </button>
       )}
     >
@@ -925,8 +1014,8 @@ export default function BoiteDebiteurs({ vue }: { vue: VueBoite }) {
   const menuAffichage = (
     <Menu
       bouton={(ouvert, basculer) => (
-        <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Options d'affichage" title="Options d'affichage" aria-expanded={ouvert} onClick={basculer}>
-          <SlidersHorizontal width={14} height={14} aria-hidden="true" />
+        <button type="button" className="lin-rond" aria-label="Options d'affichage" title="Options d'affichage" aria-expanded={ouvert} onClick={basculer}>
+          <SlidersHorizontal aria-hidden="true" />
         </button>
       )}
     >
@@ -940,108 +1029,56 @@ export default function BoiteDebiteurs({ vue }: { vue: VueBoite }) {
       )}
     </Menu>
   );
-  const boutonPreparer =
-    source === "reelle" && reel?.client ? (
-      <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Écrire les relances du jour" title="Écrire les relances du jour" disabled={prepare} onClick={() => void preparer()}>
-        {prepare ? <Loader variant="spin" /> : <PenLine width={14} height={14} aria-hidden="true" />}
-      </button>
-    ) : null;
-  const boutonDepot = (
-    <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Déposer un export du facturier" title="Déposer un export du facturier" onClick={ouvrirDepot}>
-      <FileUp width={14} height={14} aria-hidden="true" />
-    </button>
-  );
-  const boutonsListe =
-    vue === "debiteurs" ? (
-      <>
-        {menuFiltre}
-        {menuAffichage}
-        <button
-          type="button"
-          className="v2-btn v2-btn--petit v2-btn--icone"
-          aria-label="Exporter la balance âgée (tableur)"
-          title="Exporter la balance âgée (tableur)"
-          onClick={() =>
-            exporterBalance(
-              debiteursVus.map((x) => x.b),
-              jourParis(),
-            )
-          }
-        >
-          <Download width={14} height={14} aria-hidden="true" />
-        </button>
-        {boutonPreparer}
-        {boutonDepot}
-      </>
-    ) : (
-      <>
-        {menuFiltre}
-        {menuAffichage}
-        <button
-          type="button"
-          className="v2-btn v2-btn--petit v2-btn--icone"
-          aria-label="Exporter les relances (tableur)"
-          title="Exporter les relances (tableur)"
-          onClick={() =>
-            exporterRelances(
-              lignesVues.map((l) => l.r).filter((r): r is Relance => !!r),
-              jourParis(),
-            )
-          }
-        >
-          <Download width={14} height={14} aria-hidden="true" />
-        </button>
-        <Link href={`${RACINE}/validations`} className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Ouvrir la file de validation" title="Ouvrir la file de validation">
-          <CheckCheck width={14} height={14} aria-hidden="true" />
-        </Link>
-        <button
-          type="button"
-          className="v2-btn v2-btn--petit v2-btn--icone"
-          aria-label="Vos textes de relance"
-          title="Vos textes de relance"
-          aria-pressed={textes}
-          onClick={() => aller({ textes: textes ? null : "1", relance: null })}
-        >
-          <FileText width={14} height={14} aria-hidden="true" />
-        </button>
-        {boutonPreparer}
-        <Menu
-          largeur={260}
-          bouton={(ouvert, basculer) => (
-            <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Plus d'actions" title="Plus d'actions" aria-expanded={ouvert} onClick={basculer}>
-              <MoreHorizontal width={14} height={14} aria-hidden="true" />
-            </button>
-          )}
-        >
-          {(fermer) => (
-            <>
-              <button
-                type="button"
-                className="lin-menu-option"
-                onClick={() => {
-                  fermer();
-                  ouvrirDepot();
-                }}
-              >
-                <FileUp width={16} height={16} aria-hidden="true" />
-                <span>Déposer un export du facturier</span>
-              </button>
-              <button
-                type="button"
-                className="lin-menu-option"
-                onClick={() => {
-                  fermer();
-                  exporterBalance(tous, jourParis());
-                }}
-              >
-                <Download width={16} height={16} aria-hidden="true" />
-                <span>Exporter la balance âgée</span>
-              </button>
-            </>
-          )}
-        </Menu>
-      </>
-    );
+  /* le « ··· » à côté du titre : tous les gestes qui étaient en boutons cerclés dans cette tête */
+  const optionPreparer: Option[] =
+    source === "reelle" && reel?.client
+      ? [
+          {
+            cle: "preparer",
+            libelle: "Écrire les relances du jour",
+            meta: prepare ? "en cours…" : undefined,
+            icone: prepare ? <Loader variant="spin" /> : <PenLine width={16} height={16} aria-hidden="true" />,
+            action: () => {
+              if (!prepare) void preparer();
+            },
+          },
+        ]
+      : [];
+  const optionDepot: Option = { cle: "depot", libelle: "Déposer un export du facturier", icone: <FileUp width={16} height={16} aria-hidden="true" />, action: ouvrirDepot };
+  const optionsListe: Option[] =
+    vue === "debiteurs"
+      ? [
+          {
+            cle: "export",
+            libelle: "Exporter la balance âgée (tableur)",
+            meta: pluriel(debiteursVus.length, "ligne"),
+            icone: <Download width={16} height={16} aria-hidden="true" />,
+            action: () =>
+              exporterBalance(
+                debiteursVus.map((x) => x.b),
+                jourParis(),
+              ),
+          },
+          ...optionPreparer,
+          optionDepot,
+        ]
+      : [
+          {
+            cle: "export",
+            libelle: "Exporter les relances (tableur)",
+            icone: <Download width={16} height={16} aria-hidden="true" />,
+            action: () =>
+              exporterRelances(
+                lignesVues.map((l) => l.r).filter((r): r is Relance => !!r),
+                jourParis(),
+              ),
+          },
+          { cle: "validations", libelle: "Ouvrir la file de validation", icone: <CheckCheck width={16} height={16} aria-hidden="true" />, href: `${RACINE}/validations` },
+          { cle: "textes", libelle: "Vos textes de relance", icone: <FileText width={16} height={16} aria-hidden="true" />, coche: textes, action: () => aller({ textes: textes ? null : "1", relance: null }) },
+          ...optionPreparer,
+          optionDepot,
+          { cle: "balance", libelle: "Exporter la balance âgée", icone: <Download width={16} height={16} aria-hidden="true" />, action: () => exporterBalance(tous, jourParis()) },
+        ];
 
   const libelleFiltre = (k: string, v: string) =>
     k === "situation"
@@ -1168,7 +1205,7 @@ export default function BoiteDebiteurs({ vue }: { vue: VueBoite }) {
       : source === "reelle" && reel && !reel.tableau?.reglages
         ? "CASHD n'est pas encore installé pour votre organisation : Omega l'installe en mode essai, puis vous déposez le premier export de votre facturier."
         : !nVus
-          ? Object.keys(filtres).length
+          ? Object.keys(filtres).length || traiterSeul
             ? "Rien dans ce filtre."
             : vue === "debiteurs"
               ? "Personne ne vous doit rien ici. Déposez l'export des factures non soldées de votre facturier pour commencer."
@@ -1178,39 +1215,34 @@ export default function BoiteDebiteurs({ vue }: { vue: VueBoite }) {
 
   /* ——— le détail ——— */
   const fermer = () => aller({ [cleChoix]: null, textes: null });
-  const position = choix && ids.includes(choix) ? `${ids.indexOf(choix) + 1} / ${ids.length}` : null;
+  /* l'étoile et « Précédent / Suivant » (les flèches ↑ ↓ du clavier, rangées dans le « ··· ») de l'élément ouvert */
+  const rang = choix ? ids.indexOf(choix) : -1;
+  const allerA = (id: string) => aller({ [cleChoix]: id, textes: null }, true);
+  const voisins: Option[] =
+    rang < 0
+      ? []
+      : [
+          ...(rang > 0 ? [{ cle: "precedent", libelle: "Précédent", meta: "↑", icone: <ArrowUp width={16} height={16} aria-hidden="true" />, action: () => allerA(ids[rang - 1]) }] : []),
+          ...(rang < ids.length - 1 ? [{ cle: "suivant", libelle: "Suivant", meta: "↓", icone: <ArrowDown width={16} height={16} aria-hidden="true" />, action: () => allerA(ids[rang + 1]) }] : []),
+        ];
+  const teteDe = (id: string): Tete =>
+    vue === "debiteurs" ? { epingle: epinglesDebiteurs.has(id), epingler: () => epinglerDebiteur(id), voisins } : { epingle: epinglesRelances.has(id), epingler: () => epinglerRelance(id), voisins };
+  /* rien d'ouvert : la tête reste, vide, pour que sa ligne traverse toute la largeur comme chez Linear */
   const detailVide = (
-    <div className="lin-boite-vide">
-      <Inbox aria-hidden="true" />
-      <span>{chargement ? "Lecture de l'encours…" : aTraiter ? `${pluriel(aTraiter, "élément")} à traiter` : "Rien à traiter"}</span>
-      {vue === "debiteurs" && total ? (
-        <span className="c2b-vide-sous">
-          {pluriel(nVus, "débiteur")} · {montant(total.echu)} échus sur {montant(total.encours)}
-        </span>
-      ) : vue === "relances" ? (
-        <span className="c2b-vide-sous">{pluriel(nVus, "relance")} dans la liste</span>
-      ) : null}
-    </div>
-  );
-  const teteSimple = (racine: string, ici: React.ReactNode) => (
-    <header className="lin-tete">
-      <nav className="lin-fil" aria-label="Fil d'Ariane">
-        <button type="button" className="lin-fil-equipe" onClick={fermer}>
-          {racine}
-        </button>
-        <span className="lin-fil-sep" aria-hidden="true">
-          ›
-        </span>
-        <span className="lin-fil-ici lin-fil-projet" aria-current="page">
-          {ici}
-        </span>
-      </nav>
-      <div className="lin-tete-droite">
-        <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Fermer" title="Fermer (Échap)" onClick={fermer}>
-          <X width={14} height={14} aria-hidden="true" />
-        </button>
+    <section className="lin-boite-detail" aria-label="Aucun élément ouvert">
+      <header className="lin-tete" />
+      <div className="lin-boite-vide">
+        <Inbox aria-hidden="true" />
+        <span>{chargement ? "Lecture de l'encours…" : aTraiter ? `${pluriel(aTraiter, "élément")} à traiter` : "Rien à traiter"}</span>
+        {vue === "debiteurs" && total ? (
+          <span className="c2b-vide-sous">
+            {pluriel(nVus, "débiteur")} · {montant(total.echu)} échus sur {montant(total.encours)}
+          </span>
+        ) : vue === "relances" ? (
+          <span className="c2b-vide-sous">{pluriel(nVus, "relance")} dans la liste</span>
+        ) : null}
       </div>
-    </header>
+    </section>
   );
 
   let detail: React.ReactNode = detailVide;
@@ -1229,7 +1261,7 @@ export default function BoiteDebiteurs({ vue }: { vue: VueBoite }) {
           vus={paliersDe(fiche, rs)}
           freres={b.groupe ? debiteurs.filter((x) => x.b.groupe === b.groupe).map((x) => x.b) : []}
           actions={actionsPour(fiche)}
-          position={position}
+          tete={teteDe(choix)}
           noter={noterEnvoi}
           aller={aller}
           fermer={fermer}
@@ -1241,13 +1273,7 @@ export default function BoiteDebiteurs({ vue }: { vue: VueBoite }) {
       const nom = b?.nom ?? fiche?.compte.nom ?? "Débiteur";
       detail = (
         <section className="lin-boite-detail" aria-label="Débiteur">
-          {teteSimple(
-            "Débiteurs",
-            <>
-              <IconeDebiteur id={choix} />
-              {nom}
-            </>,
-          )}
+          <TeteDetail reference={b?.reference ?? "Débiteur"} nom={nom} tete={teteDe(choix)} fermer={fermer} />
           <p className="lin-vide">{echecsFiche[choix] ? `La fiche n'a pas pu être lue : ${echecsFiche[choix]}` : chargement || source === "reelle" ? "Lecture du compte…" : "Ce débiteur n'est plus dans l'encours."}</p>
         </section>
       );
@@ -1255,13 +1281,7 @@ export default function BoiteDebiteurs({ vue }: { vue: VueBoite }) {
   } else if (vue === "relances" && textes) {
     detail = (
       <section className="lin-boite-detail" aria-label="Vos textes">
-        {teteSimple(
-          "Relances",
-          <>
-            <FileText width={16} height={16} aria-hidden="true" />
-            Vos textes
-          </>,
-        )}
+        <TeteDetail reference="Relances" nom="Vos textes" fermer={fermer} />
         <div className="c2b-textes">
           <HabilleSb>
             <Textes key={`${source}:${reel?.client?.client_id ?? ""}`} source={source} client={reel?.client?.client_id ?? null} reglages={tableau?.reglages ?? null} apresReglage={relire} gabarit="sb" />
@@ -1274,7 +1294,7 @@ export default function BoiteDebiteurs({ vue }: { vue: VueBoite }) {
     if (!l) {
       detail = (
         <section className="lin-boite-detail" aria-label="Relance">
-          {teteSimple("Relances", "Relance")}
+          <TeteDetail reference="Relances" nom="Relance" fermer={fermer} />
           <p className="lin-vide">{chargement ? "Lecture des relances…" : "Cette relance n'est plus dans la liste."}</p>
         </section>
       );
@@ -1290,7 +1310,7 @@ export default function BoiteDebiteurs({ vue }: { vue: VueBoite }) {
           actions={fiche ? actionsPour(fiche) : null}
           autres={relancesDe(l.compte_id).filter((r) => r.id !== l.cle)}
           suivant={prochainPalier(fiche?.suivi ?? [])}
-          position={position}
+          tete={teteDe(l.cle)}
           noter={noterEnvoi}
           aller={aller}
           fermer={fermer}
@@ -1381,8 +1401,15 @@ export default function BoiteDebiteurs({ vue }: { vue: VueBoite }) {
       <div className="lin-boite">
         <section className="lin-boite-liste" aria-label={vue === "debiteurs" ? "Débiteurs" : "Relances"}>
           <header className="lin-tete">
-            <span className="lin-boite-titre">{vue === "debiteurs" ? "Débiteurs" : "Relances"}</span>
-            <div className="lin-tete-droite">{boutonsListe}</div>
+            <span className="lin-tete-titre">{vue === "debiteurs" ? "Débiteurs" : "Relances"}</span>
+            <MenuActions rond aGauche titre="Actions de la liste" options={optionsListe} />
+            <div className="lin-tete-ronds">
+              <button type="button" className="lin-rond" aria-pressed={traiterSeul} aria-label="Seulement ce qui est à traiter" title="Seulement ce qui est à traiter" onClick={basculerTraiter}>
+                <IconeNonLus />
+              </button>
+              {menuFiltre}
+              {menuAffichage}
+            </div>
           </header>
           {puces.length || essai ? (
             <div className="lin-outils">
@@ -1540,7 +1567,7 @@ function FicheDebiteur({
   vus,
   freres,
   actions,
-  position,
+  tete,
   noter,
   aller,
   fermer,
@@ -1554,7 +1581,7 @@ function FicheDebiteur({
   vus: Map<string, string | null>;
   freres: Balance[];
   actions: Actions;
-  position: string | null;
+  tete: Tete;
   noter: (r: Relance, canal: string) => Promise<void>;
   aller: Aller;
   fermer: () => void;
@@ -1921,79 +1948,56 @@ function FicheDebiteur({
       : []),
   ].sort((x, y) => (x.le ?? "").localeCompare(y.le ?? ""));
 
+  /* le « ··· » de la tête : les boutons cerclés d'avant (règlement, copier la référence) et les gestes du compte */
+  const optionsTete: Option[] = [
+    { cle: "reglement", libelle: "Noter un règlement", icone: <Banknote width={16} height={16} aria-hidden="true" />, action: () => ouvrir({ type: "reglement", facture: null }) },
+    {
+      cle: "copier",
+      libelle: "Copier la référence",
+      meta: c.reference,
+      icone: <Copy width={16} height={16} aria-hidden="true" />,
+      action: () => {
+        copier(c.reference);
+        toast(`Référence copiée : ${c.reference}.`, "vert");
+      },
+    },
+    {
+      cle: "plafond",
+      libelle: c.plafond_encours !== null ? `Plafond d'encours : ${montant(c.plafond_encours, b.devise)}…` : "Fixer un plafond d'encours…",
+      icone: <Gauge width={16} height={16} aria-hidden="true" />,
+      action: () => void ouvrirPlafond(),
+    },
+    c.statut === "actif"
+      ? { cle: "pause", libelle: "Mettre en pause", icone: <PauseCircle width={16} height={16} aria-hidden="true" />, action: () => ouvrir({ type: "statut", vers: "pause" }) }
+      : { cle: "reprendre", libelle: "Reprendre les relances", icone: <PlayCircle width={16} height={16} aria-hidden="true" />, action: () => ouvrir({ type: "statut", vers: "actif" }) },
+    ...(facturesJoignables.length ? [{ cle: "piece", libelle: "Joindre une pièce", icone: <Paperclip width={16} height={16} aria-hidden="true" />, action: () => ouvrir({ type: "piece" }) }] : []),
+    {
+      cle: "dossier",
+      libelle: "Télécharger le dossier",
+      meta: telecharge ? "en cours…" : undefined,
+      icone: <FileDown width={16} height={16} aria-hidden="true" />,
+      action: () => {
+        if (!telecharge) void telecharger();
+      },
+    },
+    {
+      cle: "assurance",
+      libelle: "Dossier d'assurance-crédit",
+      meta: telecharge ? "en cours…" : undefined,
+      icone: <FileDown width={16} height={16} aria-hidden="true" />,
+      action: () => {
+        if (!telecharge) void telecharger("assurance_credit");
+      },
+    },
+    { cle: "relances", libelle: "Voir ses relances", icone: <MessageSquare width={16} height={16} aria-hidden="true" />, action: () => voirRelances({ filtre: `debiteur:${encodeURIComponent(c.id)}` }) },
+    ...(derniere?.corps
+      ? [{ cle: "copier-relance", libelle: "Copier la dernière relance", icone: <Copy width={16} height={16} aria-hidden="true" />, action: () => copier(`${derniere.sujet ?? ""}\n\n${derniere.corps ?? ""}`) }]
+      : []),
+  ];
+
   return (
     <section className="lin-boite-detail" aria-label={`Débiteur ${c.nom}`}>
-      <header className="lin-tete">
-        <nav className="lin-fil" aria-label="Fil d'Ariane">
-          <button type="button" className="lin-fil-equipe" onClick={fermer}>
-            Débiteurs
-          </button>
-          <span className="lin-fil-sep" aria-hidden="true">
-            ›
-          </span>
-          <span className="lin-fil-ici lin-fil-projet" aria-current="page">
-            <IconeDebiteur id={c.id} />
-            {c.nom}
-          </span>
-        </nav>
-        <div className="lin-tete-droite">
-          {position ? <span className="lin-position">{position}</span> : null}
-          <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Noter un règlement" title="Noter un règlement" onClick={() => ouvrir({ type: "reglement", facture: null })}>
-            <Banknote width={14} height={14} aria-hidden="true" />
-          </button>
-          <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Copier la référence" title="Copier la référence" onClick={() => copier(c.reference)}>
-            <Copy width={14} height={14} aria-hidden="true" />
-          </button>
-          <Menu
-            largeur={280}
-            bouton={(ouvert, basculer) => (
-              <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Gestes du compte" title="Gestes du compte" aria-expanded={ouvert} onClick={basculer}>
-                <MoreHorizontal width={14} height={14} aria-hidden="true" />
-              </button>
-            )}
-          >
-            {(fermerMenu) => {
-              const item = (cle: string, icone: React.ReactNode, libelle: string, faire: () => void, desactive?: boolean) => (
-                <button
-                  key={cle}
-                  type="button"
-                  className="lin-menu-option"
-                  disabled={desactive}
-                  onClick={() => {
-                    fermerMenu();
-                    faire();
-                  }}
-                >
-                  {icone}
-                  <span>{libelle}</span>
-                </button>
-              );
-              return (
-                <>
-                  {item("reglement", <Banknote width={16} height={16} aria-hidden="true" />, "Noter un règlement", () => ouvrir({ type: "reglement", facture: null }))}
-                  {item(
-                    "plafond",
-                    <Gauge width={16} height={16} aria-hidden="true" />,
-                    c.plafond_encours !== null ? `Plafond d'encours : ${montant(c.plafond_encours, b.devise)}…` : "Fixer un plafond d'encours…",
-                    () => void ouvrirPlafond(),
-                  )}
-                  {c.statut === "actif"
-                    ? item("pause", <PauseCircle width={16} height={16} aria-hidden="true" />, "Mettre en pause", () => ouvrir({ type: "statut", vers: "pause" }))
-                    : item("reprendre", <PlayCircle width={16} height={16} aria-hidden="true" />, "Reprendre les relances", () => ouvrir({ type: "statut", vers: "actif" }))}
-                  {facturesJoignables.length ? item("piece", <Paperclip width={16} height={16} aria-hidden="true" />, "Joindre une pièce", () => ouvrir({ type: "piece" })) : null}
-                  {item("dossier", <FileDown width={16} height={16} aria-hidden="true" />, "Télécharger le dossier", () => void telecharger(), telecharge)}
-                  {item("assurance", <FileDown width={16} height={16} aria-hidden="true" />, "Dossier d'assurance-crédit", () => void telecharger("assurance_credit"), telecharge)}
-                  {item("relances", <MessageSquare width={16} height={16} aria-hidden="true" />, "Voir ses relances", () => voirRelances({ filtre: `debiteur:${encodeURIComponent(c.id)}` }))}
-                  {derniere?.corps ? item("copier-relance", <Copy width={16} height={16} aria-hidden="true" />, "Copier la dernière relance", () => copier(`${derniere.sujet ?? ""}\n\n${derniere.corps ?? ""}`)) : null}
-                </>
-              );
-            }}
-          </Menu>
-          <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Fermer" title="Fermer (Échap)" onClick={fermer}>
-            <X width={14} height={14} aria-hidden="true" />
-          </button>
-        </div>
-      </header>
+      <TeteDetail reference={c.reference} nom={c.nom} tete={tete} actions={optionsTete} dates={{ titre: "Échéance…", options: optionsEcheance }} activite fermer={fermer} />
 
       <div className="lin-ticket">
         <article className="lin-ticket-corps">
@@ -2061,7 +2065,7 @@ function FicheDebiteur({
           )}
 
           <hr className="lin-ticket-trait" />
-          <div className="lin-ticket-activite-tete">
+          <div className="lin-ticket-activite-tete" id="c2b-activite">
             <h3>Activité</h3>
             <button type="button" className="lin-ticket-lien" onClick={() => voirRelances({ filtre: `debiteur:${encodeURIComponent(c.id)}` })}>
               Ses relances
@@ -2459,7 +2463,7 @@ function FicheRelance({
   actions,
   autres,
   suivant,
-  position,
+  tete,
   noter,
   aller,
   fermer,
@@ -2472,7 +2476,7 @@ function FicheRelance({
   actions: Actions | null;
   autres: Relance[];
   suivant: Suivi | null;
-  position: string | null;
+  tete: Tete;
   noter: (r: Relance, canal: string) => Promise<void>;
   aller: Aller;
   fermer: () => void;
@@ -2528,6 +2532,34 @@ function FicheRelance({
         { cle: "copier", libelle: "Copier l'adresse", meta: nomDest ? adresseDest : undefined, icone: <Copy width={16} height={16} />, action: () => copier(adresseDest) },
       ]
     : [];
+  /* le « ··· » de la tête : les boutons cerclés d'avant */
+  const optionsTete: Option[] = [
+    ...(corps
+      ? [
+          {
+            cle: "copier",
+            libelle: "Copier le texte",
+            icone: <Copy width={16} height={16} aria-hidden="true" />,
+            action: () => {
+              copier(texteComplet);
+              toast("Texte copié : sujet et corps de la relance.", "vert");
+            },
+          },
+        ]
+      : []),
+    { cle: "debiteur", libelle: "Ouvrir le débiteur", meta: b ? STATUTS_COMPTE[b.statut].libelle : undefined, icone: <Building2 width={16} height={16} aria-hidden="true" />, action: voirDebiteur },
+  ];
+  /* l'horloge : aucune pilule de la relance ne porte de date, donc « Ses autres relances », chacune à sa date */
+  const optionsDates: Option[] = [
+    ...autres.map((x) => ({
+      cle: x.id,
+      libelle: libellePalier(x.palier),
+      meta: `${(ETATS_RELANCE[x.etat] ?? ETATS_RELANCE.preparee).libelle.toLowerCase()} · ${jour(x.envoye_le ?? x.jour)}`,
+      icone: <Losange atteint={x.etat !== "a_valider"} />,
+      action: () => aller({ relance: x.id }),
+    })),
+    { cle: "toutes", libelle: "Toutes ses relances", icone: <MessageSquare width={16} height={16} aria-hidden="true" />, action: () => filtrer("debiteur", l.compte_id) },
+  ];
   /* la prochaine étape du débiteur : la sous-pilule du parent */
   const etape: { libelle: string; vide?: boolean } = suivant
     ? { libelle: `${libellePalier(suivant.palier_suivant)} le ${jour(suivant.palier_suivant_le)}` }
@@ -2656,35 +2688,15 @@ function FicheRelance({
 
   return (
     <section className="lin-boite-detail" aria-label={`Relance : ${sujet}`}>
-      <header className="lin-tete">
-        <nav className="lin-fil" aria-label="Fil d'Ariane">
-          <button type="button" className="lin-fil-equipe" onClick={fermer}>
-            Relances
-          </button>
-          <span className="lin-fil-sep" aria-hidden="true">
-            ›
-          </span>
-          <span className="lin-fil-ici lin-fil-projet" aria-current="page">
-            <IconeDebiteur id={l.compte_id} />
-            <b>{l.compte}</b>
-            {r ? libellePalier(r.palier) : NATURES_LIGNE.commande}
-          </span>
-        </nav>
-        <div className="lin-tete-droite">
-          {position ? <span className="lin-position">{position}</span> : null}
-          {corps ? (
-            <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Copier le texte" title="Copier le texte" onClick={() => copier(texteComplet)}>
-              <Copy width={14} height={14} aria-hidden="true" />
-            </button>
-          ) : null}
-          <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Ouvrir le débiteur" title="Ouvrir le débiteur" onClick={voirDebiteur}>
-            <Building2 width={14} height={14} aria-hidden="true" />
-          </button>
-          <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Fermer" title="Fermer (Échap)" onClick={fermer}>
-            <X width={14} height={14} aria-hidden="true" />
-          </button>
-        </div>
-      </header>
+      <TeteDetail
+        reference={l.compte}
+        nom={r ? libellePalier(r.palier) : NATURES_LIGNE.commande}
+        tete={tete}
+        actions={optionsTete}
+        dates={{ titre: "Ses autres relances…", options: optionsDates }}
+        activite
+        fermer={fermer}
+      />
 
       <div className="lin-ticket">
         <article className="lin-ticket-corps">
@@ -2778,7 +2790,7 @@ function FicheRelance({
           ) : null}
 
           <hr className="lin-ticket-trait" />
-          <div className="lin-ticket-activite-tete">
+          <div className="lin-ticket-activite-tete" id="c2b-activite">
             <h3>Activité</h3>
             <button type="button" className="lin-ticket-lien" onClick={() => filtrer("debiteur", l.compte_id)}>
               Ses autres relances

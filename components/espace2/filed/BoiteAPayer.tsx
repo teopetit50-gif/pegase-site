@@ -36,7 +36,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Banknote, Check, ChevronDown, ChevronUp, Copy, ExternalLink, FileText, ListFilter, SlidersHorizontal, X } from "lucide-react";
+import { Banknote, Bell, Check, ChevronDown, ChevronUp, Clock, Copy, ExternalLink, FileText, ListFilter, SlidersHorizontal, Star } from "lucide-react";
 import { Button, Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
 import { useSource } from "@/components/espace/source";
 import { useTempsReel } from "@/components/espace/tempsReel";
@@ -46,8 +46,8 @@ import { vueExemple } from "@/components/espace/filed/EcranFournisseurs";
 import { MOYENS_PAIEMENT, chargerVueFournisseurs, etatPaiement, noterPaiement, type EtatPaiement, type FactureDuFournisseur, type MoyenPaiement, type VueFournisseurs } from "@/components/espace/filed/portes";
 import type { Fournisseur } from "@/components/espace/types";
 import { A_PAYER, GROUPES, JOUR, aPayer, du, etatsExemple, groupeDe, jourDe, minuit, totaux, type Etats, type Groupe } from "./calculs";
-import { Choix, IconePriorite, Menu, MenuActions, MenuOptions, Surlignage, type Option } from "../lin/Lin";
-import { IconeCalendrier, IconeDiese, IconeDocument, IconeGroupe, IconeJauge, IconeSante, IconeStatutProjet, type EtatProjet } from "../lin/icones";
+import { Choix, IconePriorite, Menu, MenuActions, MenuOptions, Surlignage, useEpingles, type Option } from "../lin/Lin";
+import { IconeBoiteX, IconeCalendrier, IconeDiese, IconeDocument, IconeGroupe, IconeJauge, IconeNonLus, IconeSante, IconeStatutProjet, type EtatProjet } from "../lin/icones";
 import { Note } from "../ui";
 import { useToast } from "../Toasts";
 import { useAujourdhui } from "../horloge";
@@ -198,6 +198,10 @@ export default function BoiteAPayer() {
   /* le message de l'écran d'avant, gardé à l'identique : « C'est fait. … », sur la facture notée */
   const [fait, setFait] = useState<{ id: string; texte: string } | null>(null);
   const listeRef = useRef<HTMLUListElement>(null);
+  /* la section Activité de la facture ouverte : la cloche de la tête y fait défiler */
+  const activiteRef = useRef<HTMLDivElement>(null);
+  /* l'étoile de la tête du détail : les factures épinglées passent en tête de la liste (propre à ce navigateur) */
+  const [epingles, basculerEpingle] = useEpingles("filed-a-payer");
 
   /* ——— la base réelle : les mêmes portes que l'écran d'avant ——— */
   const charger = useCallback(async () => {
@@ -265,6 +269,8 @@ export default function BoiteAPayer() {
 
   /* ——— l'adresse : la facture choisie (?id=) et les filtres (?filtre=) ——— */
   const id = params.get("id");
+  /* « Seulement ce qui est à traiter » (le « Show unreads only » de Linear) : ?traiter=1 */
+  const traiter = params.get("traiter") === "1";
   const filtresActifs = lireFiltres(params);
   const adresse = useCallback(
     (modif: (p: URLSearchParams) => void) => {
@@ -281,6 +287,15 @@ export default function BoiteAPayer() {
       p.delete("filtre");
       for (const d of DIMENSIONS) for (const f of fs.filter((x) => x.dim === d)) p.append("filtre", `${f.dim}:${f.val}`);
     });
+  const lienSansFiltres = adresse((p) => {
+    p.delete("filtre");
+    p.delete("traiter");
+  });
+  const basculerTraiter = () =>
+    routeur.replace(
+      adresse((p) => (traiter ? p.delete("traiter") : p.set("traiter", "1"))),
+      { scroll: false },
+    );
   const filtreDe = (dim: Dimension) => filtresActifs.find((f) => f.dim === dim)?.val ?? null;
   const estActif = (dim: Dimension, val: string) => filtreDe(dim) === val;
   const basculer = (dim: Dimension, val: string) => lienFiltres([...filtresActifs.filter((f) => f.dim !== dim), ...(estActif(dim, val) ? [] : [{ dim, val }])]);
@@ -289,7 +304,7 @@ export default function BoiteAPayer() {
   const voirPayees = montrerPayees || filtreDe("paiement") === "payee";
   const q = sansAccents(recherche.trim());
   const correspond = (l: Ligne) => !q || [l.four?.nom, l.f.reference, l.f.numero].some((x) => x && sansAccents(x).includes(q));
-  const dansLaPortee = (l: Ligne, sauf?: Dimension) => (voirPayees || l.paiement !== "payee") && correspond(l) && filtresActifs.every((f) => f.dim === sauf || GARDES[f.dim](l, f.val));
+  const dansLaPortee = (l: Ligne, sauf?: Dimension) => (voirPayees || l.paiement !== "payee") && (!traiter || l.aTraiter) && correspond(l) && filtresActifs.every((f) => f.dim === sauf || GARDES[f.dim](l, f.val));
   const cleFiltres = filtresActifs.map((f) => `${f.dim}:${f.val}`).join("|");
   const visibles = useMemo(() => {
     const ordre = (a: Ligne, b: Ligne) =>
@@ -298,9 +313,11 @@ export default function BoiteAPayer() {
         : tri === "fournisseur"
           ? a.nom.localeCompare(b.nom, "fr") || (a.f.echeance_lue ?? "9999").localeCompare(b.f.echeance_lue ?? "9999")
           : (a.f.echeance_lue ?? "9999").localeCompare(b.f.echeance_lue ?? "9999") || aPayer(b.f, etats) - aPayer(a.f, etats);
-    return base.filter((l) => dansLaPortee(l)).sort(ordre);
+    const tries = base.filter((l) => dansLaPortee(l)).sort(ordre);
+    /* les épinglées d'abord, chacune des deux parts dans l'ordre courant */
+    return [...tries.filter((l) => epingles.has(l.id)), ...tries.filter((l) => !epingles.has(l.id))];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [base, tri, voirPayees, q, cleFiltres, etats]);
+  }, [base, tri, voirPayees, traiter, q, cleFiltres, etats, epingles]);
   const choisie = id ? (base.find((l) => l.id === id) ?? null) : null;
   const rang = choisie ? visibles.findIndex((l) => l.id === choisie.id) : -1;
 
@@ -439,25 +456,74 @@ export default function BoiteAPayer() {
     },
   ];
 
+  /* le « ··· » de la tête de liste (« Notification actions » de Linear) : les gestes sur toute la liste */
+  const premiereATraiter = visibles.find((l) => l.aTraiter) ?? null;
+  const optionsListe: Option[] = [
+    ...(premiereATraiter
+      ? [
+          {
+            cle: "premiere",
+            libelle: "Ouvrir la première à traiter",
+            meta: premiereATraiter.f.reference ?? undefined,
+            icone: <IconeNonLus />,
+            action: () => routeur.replace(lienId(premiereATraiter.id), { scroll: false }),
+          },
+        ]
+      : []),
+    ...(nbPayees
+      ? [{ cle: "payees", libelle: montrerPayees ? "Masquer les payées" : "Afficher les payées", meta: String(nbPayees), icone: <IconeStatutProjet etat="fait" />, action: () => setMontrerPayees((v) => !v) }]
+      : []),
+    ...(filtresActifs.length || recherche || traiter
+      ? [
+          {
+            cle: "effacer",
+            libelle: "Effacer les filtres",
+            icone: <ListFilter width={16} height={16} />,
+            action: () => {
+              setRecherche("");
+              routeur.replace(lienSansFiltres, { scroll: false });
+            },
+          },
+        ]
+      : []),
+    ...(aPayerVisibles.length
+      ? [
+          {
+            cle: "total",
+            libelle: "Copier le reste à payer",
+            meta: totaux(
+              aPayerVisibles.map((l) => l.f),
+              etats,
+            ),
+            icone: <Copy width={16} height={16} />,
+            action: () =>
+              void copier(
+                totaux(
+                  aPayerVisibles.map((l) => l.f),
+                  etats,
+                ),
+                "Reste à payer copié",
+              ),
+          },
+        ]
+      : []),
+    { cle: "fournisseurs", libelle: "Voir les fournisseurs", icone: <IconeGroupe />, href: `${RACINE}/filed/fournisseurs` },
+  ];
+
   /* ——— la colonne de liste ——— */
   const liste = (
     <section className="lin-boite-liste" aria-label="Factures à payer">
       <header className="lin-tete">
-        <span className="lin-boite-titre">À payer</span>
-        {!chargement ? <span className="lin-meta">{nbATraiter ? `${nbATraiter} à traiter` : pluriel(aPayerVisibles.length, "facture")}</span> : null}
-        <div className="lin-tete-droite">
+        <span className="lin-tete-titre">À payer</span>
+        <MenuActions rond aGauche titre="Actions de la liste" options={optionsListe} />
+        <div className="lin-tete-ronds">
+          <button type="button" className="lin-rond" aria-pressed={traiter} aria-label="Seulement ce qui est à traiter" title="Seulement ce qui est à traiter" onClick={basculerTraiter}>
+            <IconeNonLus />
+          </button>
           <Menu
             largeur={300}
             bouton={(ouvert, basculerMenu) => (
-              <button
-                type="button"
-                className="v2-btn v2-btn--petit v2-btn--icone"
-                aria-label="Filtrer"
-                title="Filtrer"
-                aria-expanded={ouvert}
-                aria-pressed={!!recherche || filtresActifs.length > 0}
-                onClick={basculerMenu}
-              >
+              <button type="button" className="lin-rond" aria-label="Filtrer" title="Filtrer" aria-expanded={ouvert} data-actif={recherche || filtresActifs.length ? "" : undefined} onClick={basculerMenu}>
                 <ListFilter width={14} height={14} aria-hidden="true" />
               </button>
             )}
@@ -503,7 +569,7 @@ export default function BoiteAPayer() {
           <Menu
             largeur={280}
             bouton={(ouvert, basculerMenu) => (
-              <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Options d'affichage" title="Options d'affichage" aria-expanded={ouvert} onClick={basculerMenu}>
+              <button type="button" className="lin-rond" aria-label="Options d'affichage" title="Options d'affichage" aria-expanded={ouvert} onClick={basculerMenu}>
                 <SlidersHorizontal width={14} height={14} aria-hidden="true" />
               </button>
             )}
@@ -562,10 +628,10 @@ export default function BoiteAPayer() {
         <p className="lin-vide">{erreur ? `La base réelle n'a pas répondu : ${erreur}` : "Rien à payer. Aucune facture validée pour l'instant : elles arrivent ici après leur validation dans « À valider »."}</p>
       ) : !visibles.length ? (
         <div className="lin-vide">
-          <p style={{ margin: "0 0 12px" }}>{filtresActifs.length || q ? "Aucune facture ne correspond." : "Toutes les factures sont payées."}</p>
-          {filtresActifs.length || q ? (
+          <p style={{ margin: "0 0 12px" }}>{filtresActifs.length || q ? "Aucune facture ne correspond." : traiter ? "Rien à traiter : ni retard, ni échéance cette semaine." : "Toutes les factures sont payées."}</p>
+          {filtresActifs.length || q || traiter ? (
             <Link
-              href={lienFiltres([])}
+              href={lienSansFiltres}
               className="v2-btn v2-btn--petit"
               scroll={false}
               replace
@@ -618,78 +684,82 @@ export default function BoiteAPayer() {
 
   /* ——— rien de choisi : l'Inbox vide de Linear, avec les compteurs de l'écran d'avant ——— */
   const vide = (
-    <section className="lin-boite-vide apayer-vide" aria-label="Aucune facture choisie">
-      <Banknote strokeWidth={1.2} aria-hidden="true" />
-      {chargement ? (
-        <p className="apayer-vide-sous">Lecture des factures…</p>
-      ) : id && !choisie ? (
-        <>
-          <p className="apayer-vide-titre">Facture introuvable</p>
-          <p className="apayer-vide-sous">
-            La facture que désigne ce lien n&apos;est pas dans « À payer »{source === "exemple" ? " (vous regardez les données d'exemple)" : ""}.{" "}
-            <Link href={lienId(null)} scroll={false} replace>
-              Revenir à la liste
-            </Link>
-          </p>
-        </>
-      ) : (
-        <>
-          <p className="apayer-vide-titre">{nbATraiter ? `${pluriel(nbATraiter, "facture")} à traiter` : aPayerVisibles.length ? `${pluriel(aPayerVisibles.length, "facture")} à payer` : "Rien à payer"}</p>
-          <p className="apayer-vide-sous">
-            Les factures validées, par échéance : le retard d&apos;abord, le reste à payer, et ce qui empêcherait de payer. Reste à payer :{" "}
-            <strong>
-              {totaux(
-                base.filter((l) => l.paiement !== "payee").map((l) => l.f),
-                etats,
-              )}
-            </strong>
-            .
-          </p>
-          <ul className="apayer-compteurs" aria-label="Filtrer par échéance">
-            {GROUPES.filter((g) => g.cle !== "sans" || parGroupe("sans").length).map((g) => {
-              const lignes = parGroupe(g.cle);
-              return (
-                <li key={g.cle}>
-                  <Link
-                    href={basculer("echeance", g.cle)}
-                    className="v2-btn v2-btn--petit"
-                    data-actif={estActif("echeance", g.cle) ? "" : undefined}
-                    aria-pressed={estActif("echeance", g.cle)}
-                    scroll={false}
-                    replace
-                    title={g.sous}
-                  >
-                    <IconePriorite niveau={NIVEAUX[g.cle]} titre={g.libelle} />
-                    {g.libelle}
-                    <span className="lin-meta">
-                      {lignes.length
-                        ? `${lignes.length} · ${totaux(
-                            lignes.map((l) => l.f),
-                            etats,
-                          )}`
-                        : "0"}
-                    </span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-          {sansIban ? (
+    <section className="lin-boite-detail" aria-label="Aucune facture choisie">
+      {/* la tête reste là, vide, pour que sa ligne traverse toute la largeur (comme l'Inbox de Linear) */}
+      <header className="lin-tete" />
+      <div className="lin-boite-vide apayer-vide">
+        <Banknote strokeWidth={1.2} aria-hidden="true" />
+        {chargement ? (
+          <p className="apayer-vide-sous">Lecture des factures…</p>
+        ) : id && !choisie ? (
+          <>
+            <p className="apayer-vide-titre">Facture introuvable</p>
             <p className="apayer-vide-sous">
-              <strong className="apayer-alerte">
-                {sansIban} facture{sansIban > 1 ? "s" : ""} sans IBAN validé.
-              </strong>{" "}
-              Le virement attend qu&apos;un IBAN du fournisseur soit validé dans « À valider », ou passera par un autre moyen.
+              La facture que désigne ce lien n&apos;est pas dans « À payer »{source === "exemple" ? " (vous regardez les données d'exemple)" : ""}.{" "}
+              <Link href={lienId(null)} scroll={false} replace>
+                Revenir à la liste
+              </Link>
             </p>
-          ) : null}
-          {erreur ? (
-            <p className="apayer-vide-sous apayer-rouge" role="alert">
-              La base réelle n&apos;a pas répondu. {erreur}
+          </>
+        ) : (
+          <>
+            <p className="apayer-vide-titre">{nbATraiter ? `${pluriel(nbATraiter, "facture")} à traiter` : aPayerVisibles.length ? `${pluriel(aPayerVisibles.length, "facture")} à payer` : "Rien à payer"}</p>
+            <p className="apayer-vide-sous">
+              Les factures validées, par échéance : le retard d&apos;abord, le reste à payer, et ce qui empêcherait de payer. Reste à payer :{" "}
+              <strong>
+                {totaux(
+                  base.filter((l) => l.paiement !== "payee").map((l) => l.f),
+                  etats,
+                )}
+              </strong>
+              .
             </p>
-          ) : null}
-          {visibles.length ? <p className="apayer-vide-sous">↑ ↓ pour parcourir les factures, Échap pour refermer.</p> : null}
-        </>
-      )}
+            <ul className="apayer-compteurs" aria-label="Filtrer par échéance">
+              {GROUPES.filter((g) => g.cle !== "sans" || parGroupe("sans").length).map((g) => {
+                const lignes = parGroupe(g.cle);
+                return (
+                  <li key={g.cle}>
+                    <Link
+                      href={basculer("echeance", g.cle)}
+                      className="v2-btn v2-btn--petit"
+                      data-actif={estActif("echeance", g.cle) ? "" : undefined}
+                      aria-pressed={estActif("echeance", g.cle)}
+                      scroll={false}
+                      replace
+                      title={g.sous}
+                    >
+                      <IconePriorite niveau={NIVEAUX[g.cle]} titre={g.libelle} />
+                      {g.libelle}
+                      <span className="lin-meta">
+                        {lignes.length
+                          ? `${lignes.length} · ${totaux(
+                              lignes.map((l) => l.f),
+                              etats,
+                            )}`
+                          : "0"}
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+            {sansIban ? (
+              <p className="apayer-vide-sous">
+                <strong className="apayer-alerte">
+                  {sansIban} facture{sansIban > 1 ? "s" : ""} sans IBAN validé.
+                </strong>{" "}
+                Le virement attend qu&apos;un IBAN du fournisseur soit validé dans « À valider », ou passera par un autre moyen.
+              </p>
+            ) : null}
+            {erreur ? (
+              <p className="apayer-vide-sous apayer-rouge" role="alert">
+                La base réelle n&apos;a pas répondu. {erreur}
+              </p>
+            ) : null}
+            {visibles.length ? <p className="apayer-vide-sous">↑ ↓ pour parcourir les factures, Échap pour refermer.</p> : null}
+          </>
+        )}
+      </div>
     </section>
   );
 
@@ -872,66 +942,62 @@ export default function BoiteAPayer() {
     const ibanTexte = l.iban === "valide" ? (l.ibanMasque ?? "IBAN validé") : ibanLibelle(l.iban);
     const precedente = rang > 0 ? visibles[rang - 1] : null;
     const suivante = rang >= 0 && rang < visibles.length - 1 ? visibles[rang + 1] : null;
+    const epinglee = epingles.has(l.id);
+    const refermer = () => routeur.replace(lienId(null), { scroll: false });
+    /* le « ··· » de la tête : les gestes de l'ancienne tête (précédente, suivante, payer, copier, ouvrir) puis l'ancien ··· */
+    const optionsTete: Option[] = [
+      ...(precedente
+        ? [
+            {
+              cle: "precedente",
+              libelle: "Facture précédente",
+              meta: `↑ · ${rang} / ${visibles.length}`,
+              icone: <ChevronUp width={16} height={16} />,
+              action: () => routeur.replace(lienId(precedente.id), { scroll: false }),
+            },
+          ]
+        : []),
+      ...(suivante
+        ? [
+            {
+              cle: "suivante",
+              libelle: "Facture suivante",
+              meta: `↓ · ${rang + 2} / ${visibles.length}`,
+              icone: <ChevronDown width={16} height={16} />,
+              action: () => routeur.replace(lienId(suivante.id), { scroll: false }),
+            },
+          ]
+        : []),
+      ...optionsActions.filter((o) => o.cle !== "fournisseur"),
+      { cle: "dossier", libelle: "Ouvrir le dossier", icone: <ExternalLink width={16} height={16} />, href: lienDossier },
+      ...optionsActions.filter((o) => o.cle === "fournisseur"),
+    ];
 
     return (
       <section className="lin-boite-detail" aria-label={`Facture ${f.reference ?? ""}`}>
+        {/* la tête de l'élément ouvert de l'Inbox de Linear : référence, titre, étoile, ···, puis cloche, horloge, bac-croix */}
         <header className="lin-tete">
-          <nav className="lin-fil" aria-label="Fil d'Ariane">
-            <Link href={lienId(null)} className="lin-fil-equipe" scroll={false}>
-              À payer
-            </Link>
-            <span className="lin-fil-sep" aria-hidden="true">
-              ›
-            </span>
-            <span className="lin-fil-ici lin-fil-projet" aria-current="page">
-              <IconeDocument />
-              <b>{f.reference ?? "dossier"}</b>
-              {l.nom}
-            </span>
-          </nav>
-          <div className="lin-tete-droite">
-            {rang >= 0 ? (
-              <span className="lin-position">
-                {rang + 1} / {visibles.length}
-              </span>
-            ) : null}
-            <button
-              type="button"
-              className="v2-btn v2-btn--petit v2-btn--icone"
-              aria-label="Facture précédente"
-              title="Facture précédente (↑)"
-              disabled={!precedente}
-              onClick={() => precedente && routeur.replace(lienId(precedente.id), { scroll: false })}
-            >
-              <ChevronUp width={14} height={14} aria-hidden="true" />
+          <span className="lin-tete-ref">{f.reference ?? "dossier"}</span>
+          <span className="lin-tete-nom">{l.nom}</span>
+          <button
+            type="button"
+            className="lin-rond"
+            aria-pressed={epinglee}
+            aria-label={epinglee ? "Désépingler" : "Épingler en haut de la liste"}
+            title={epinglee ? "Désépingler" : "Épingler en haut de la liste"}
+            onClick={() => basculerEpingle(l.id)}
+          >
+            <Star fill={epinglee ? "currentColor" : "none"} aria-hidden="true" />
+          </button>
+          <MenuActions rond aGauche titre="Actions" options={optionsTete} />
+          <div className="lin-tete-ronds">
+            <button type="button" className="lin-rond" aria-label="Voir l'activité" title="Voir l'activité" onClick={() => activiteRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>
+              <Bell aria-hidden="true" />
             </button>
-            <button
-              type="button"
-              className="v2-btn v2-btn--petit v2-btn--icone"
-              aria-label="Facture suivante"
-              title="Facture suivante (↓)"
-              disabled={!suivante}
-              onClick={() => suivante && routeur.replace(lienId(suivante.id), { scroll: false })}
-            >
-              <ChevronDown width={14} height={14} aria-hidden="true" />
+            <MenuOptions rond aDroite libelle="Dates" titre="Échéance…" declencheur={<Clock aria-hidden="true" />} options={optionsEcheance} />
+            <button type="button" className="lin-rond" aria-label="Fermer (Échap)" title="Fermer (Échap)" onClick={refermer}>
+              <IconeBoiteX />
             </button>
-            {peutPayer ? (
-              <button type="button" className="v2-btn v2-btn--petit" onClick={() => ouvrirPaiement(l)}>
-                {/* le nom accessible commence par le texte visible (axe : label-content-name-mismatch) */}
-                <Banknote width={14} height={14} aria-hidden="true" /> Payer
-                <span className="v2-sr"> : noter un paiement sur {f.reference ?? "la facture"}</span>
-              </button>
-            ) : null}
-            <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Copier la référence" title="Copier la référence" onClick={() => void copier(f.reference ?? f.id)}>
-              <Copy width={14} height={14} aria-hidden="true" />
-            </button>
-            <Link href={lienDossier} className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Ouvrir le dossier" title="Ouvrir le dossier">
-              <ExternalLink width={14} height={14} aria-hidden="true" />
-            </Link>
-            <MenuActions titre={`Actions sur ${f.reference ?? "la facture"}…`} options={optionsActions} />
-            <Link href={lienId(null)} className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Refermer (Échap)" title="Refermer (Échap)" scroll={false}>
-              <X width={14} height={14} aria-hidden="true" />
-            </Link>
           </div>
         </header>
 
@@ -972,7 +1038,7 @@ export default function BoiteAPayer() {
               </Link>
             ) : null}
             <hr className="lin-ticket-trait" />
-            <div className="lin-ticket-activite-tete">
+            <div className="lin-ticket-activite-tete" ref={activiteRef}>
               <h3>Activité</h3>
             </div>
             <ul className="lin-ticket-fil">

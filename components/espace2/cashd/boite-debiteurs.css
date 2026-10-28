@@ -10,9 +10,21 @@
   overflow-wrap: anywhere;
 }
 
-/* le fil d'Ariane du détail : « Débiteurs » referme l'élément ouvert */
-.v2 .lin button.lin-fil-equipe {
-  cursor: pointer;
+/* les têtes de la boîte (28/10) : l'enveloppe qui donne sa bulle à l'horloge, sans compter dans la rangée */
+.v2 .lin .c2b-bulle {
+  display: contents;
+}
+/* la « référence » d'une relance est le nom du débiteur, parfois long : sur un écran étroit elle se coupe aussi, au lieu d'écraser le titre */
+.v2 .lin .lin-tete-ref {
+  min-width: 48px;
+  flex-shrink: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* la cloche fait défiler jusqu'à l'activité : elle s'arrête sous la tête collante (44) */
+.v2 .lin #c2b-activite {
+  scroll-margin-top: 56px;
 }
 
 /* « Noter l'envoi à la main » : le canal puis le bouton, dans les boutons d'une entrée du fil */

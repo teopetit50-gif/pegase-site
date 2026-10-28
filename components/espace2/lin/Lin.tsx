@@ -114,6 +114,7 @@ export function MenuOptions({
   plat,
   libelle,
   raccourci,
+  rond,
 }: {
   declencheur: React.ReactNode;
   titre: string;
@@ -124,6 +125,8 @@ export function MenuOptions({
   plat?: boolean;
   libelle?: string;
   raccourci?: string;
+  /* le bouton rond de 28 des têtes de la boîte (« Display options » de Linear) */
+  rond?: boolean;
 }) {
   const routeur = useRouter();
   const [ouvert, setOuvert] = useState(false);
@@ -185,7 +188,7 @@ export function MenuOptions({
     <div className="lin-ancre" ref={ref}>
       <button
         type="button"
-        className={plat ? "lin-valeur" : "lin-puce lin-declencheur"}
+        className={rond ? "lin-rond" : plat ? "lin-valeur" : "lin-puce lin-declencheur"}
         data-teinte={teinte}
         aria-label={libelle}
         aria-haspopup="listbox"
@@ -234,8 +237,35 @@ export function MenuOptions({
 }
 
 /* le « ··· » d'une ligne de carte : un menu d'actions, ouvert vers la gauche */
-export function MenuActions({ titre, options }: { titre: string; options: Option[] }) {
-  return <MenuOptions plat aDroite libelle={titre} titre={titre} declencheur={<MoreHorizontal width={14} height={14} aria-hidden="true" />} options={options} largeur={240} />;
+export function MenuActions({ titre, options, rond, aGauche }: { titre: string; options: Option[]; rond?: boolean; aGauche?: boolean }) {
+  return <MenuOptions plat={!rond} rond={rond} aDroite={!aGauche} libelle={titre} titre={titre} declencheur={<MoreHorizontal width={14} height={14} aria-hidden="true" />} options={options} largeur={240} />;
+}
+
+/* les éléments épinglés d'une boîte (l'étoile « Add to favorites » de Linear) : propres à ce
+   navigateur, rangés en tête de liste. Rien n'est envoyé au serveur. */
+export function useEpingles(cle: string): [Set<string>, (id: string) => void] {
+  const [ids, setIds] = useState<Set<string>>(() => new Set());
+  useEffect(() => {
+    try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- lu après le montage : le rendu du serveur ne connaît pas ce navigateur
+      setIds(new Set(JSON.parse(localStorage.getItem(`lin-epingles:${cle}`) ?? "[]") as string[]));
+    } catch {
+      /* stockage indisponible : rien d'épinglé */
+    }
+  }, [cle]);
+  const basculer = (id: string) =>
+    setIds((avant) => {
+      const apres = new Set(avant);
+      if (apres.has(id)) apres.delete(id);
+      else apres.add(id);
+      try {
+        localStorage.setItem(`lin-epingles:${cle}`, JSON.stringify([...apres]));
+      } catch {
+        /* stockage indisponible : l'épingle vaut pour cette visite */
+      }
+      return apres;
+    });
+  return [ids, basculer];
 }
 
 /* une carte de la colonne de droite : son titre et sa flèche « ▾ » la replient, comme sur Linear */
