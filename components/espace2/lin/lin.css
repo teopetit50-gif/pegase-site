@@ -742,3 +742,9 @@ html.v2-calme .v2 .lin-boite-surlignage { transition: none; }
 
 /* la cloche des têtes fait défiler jusqu'à « Activité » : le titre s'arrête sous la barre du site (48) et la tête collante (44) */
 .v2 .lin .lin-ticket-activite-tete { scroll-margin-top: 100px; }
+
+/* la palette sobre des listes (choix de Teo du 28/10/2026, « palette 1 ») : dans les lignes d'une boîte,
+   tout est gris ; seul ce qui est hors délai ressort, en orange. Le point bleu des non-lus reste la
+   seule autre couleur. Le détail ouvert garde ses couleurs. */
+.v2 .lin-boite-ligne .lin-ic-sante, .v2 .lin-boite-ligne .lin-ic-statut { color: var(--lin-second); }
+.v2 .lin-boite-ligne .lin-ic-sante--hors, .v2 .lin-boite-ligne .lin-ic-statut--annule { color: var(--lin-orange); }
