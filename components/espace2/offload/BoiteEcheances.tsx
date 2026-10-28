@@ -17,12 +17,16 @@
    pas encore prévenue. Les données n'ont pas de geste « lu » : rien n'est
    marqué en ouvrant une ligne.
 
-   À droite, la page de l'échéance ouverte (?id=) : son titre, ses
-   propriétés (statut, date, nature, commercial, compte, contact), la carte
-   « Prévenir le client » (le message de la semaine qui précède), son
-   équipement ou son contrat, ses interventions, les autres échéances du
-   compte ; et les cartes Propriétés, Étapes, Calendrier et Activité. Sans
-   échéance ouverte, l'état vide de Linear (rien n'est choisi d'office).
+   À droite, l'échéance ouverte (?id=) sur la page d'un ticket de Linear
+   (Teo, 28/10 : « pas de sections grises, trop d'informations ») : ce qui
+   tombe en titre, une phrase (compte, site, date, nature), quatre icônes
+   (noter une intervention, appeler ou écrire, copier la référence, ouvrir
+   la fiche), les autres échéances du compte, puis « Activité » : les
+   interventions, le client prévenu (ou la décision qui l'attend) et
+   l'échéance, et le composeur « Noter une intervention… ». À droite, sans
+   cadre : Propriétés (état, échéance, nature), Étiquettes (type,
+   commercial), Compte (et son contact). Sans échéance ouverte, l'état vide
+   de Linear (rien n'est choisi d'office).
    ↑ et ↓ passent d'une échéance à l'autre, Échap referme.
 
    Mêmes portes que l'écran du 21/10 (../../espace/offload/Echeances) :
@@ -42,15 +46,14 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Building2, CheckCheck, Copy, ExternalLink, FileText, Inbox, ListFilter, MoreHorizontal, PhoneCall, ShieldCheck, SlidersHorizontal, UserRound, Wrench, X } from "lucide-react";
+import { ArrowUp, Building2, Check, CheckCheck, Copy, ExternalLink, FileText, Inbox, ListFilter, MoreHorizontal, PhoneCall, ShieldCheck, SlidersHorizontal, UserRound, Wrench, X } from "lucide-react";
 import { useSource } from "@/components/espace/source";
-import { dateLongue, montant } from "@/components/espace/format";
 import { STATUTS_ECHEANCE, echeancesExemple } from "@/components/espace/offload/Echeances";
 import { exempleOffload } from "@/components/espace/offload/exemples";
 import * as portes from "@/components/espace/offload/portes";
 import type { Compte, EcheanceLigne, ParcCompte } from "@/components/espace/offload/types";
-import { CarteDroite, Choix, Menu, MenuActions, MenuOptions, type Option } from "../lin/Lin";
-import { IconeCalendrier, IconeDiese, IconeEnveloppe, IconeJauge, IconeStatutProjet, type EtatProjet } from "../lin/icones";
+import { Choix, Menu, MenuOptions, type Option } from "../lin/Lin";
+import { IconeCalendrier, IconeEnveloppe, IconeStatutProjet, type EtatProjet } from "../lin/icones";
 import { RACINE } from "../modules";
 import "./offload.css";
 import "./BoiteEcheances.css";
@@ -101,6 +104,11 @@ const relatif = (n: number) => (n === 0 ? "aujourd'hui" : n === 1 ? "demain" : n
 /* « 22 oct. », l'année en plus quand ce n'est pas celle-ci */
 const dateCourte = (iso: string | null | undefined) =>
   iso ? new Date(`${iso.slice(0, 10)}T12:00:00Z`).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: iso.slice(0, 4) === aujourdhui().slice(0, 4) ? undefined : "numeric", timeZone: "UTC" }) : "—";
+/* « 12 novembre », l'année en plus quand ce n'est pas celle-ci : la date de la description */
+const dateMoyenne = (iso: string) =>
+  new Date(`${iso.slice(0, 10)}T12:00:00Z`)
+    .toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: iso.slice(0, 4) === aujourdhui().slice(0, 4) ? undefined : "numeric", timeZone: "UTC" })
+    .replace(/^1 /, "1er ");
 const horizonDe = (e: EcheanceLigne): Horizon => (ecart(e.due_le) < 0 ? "passee" : e.due_le.slice(0, 7) === aujourdhui().slice(0, 7) ? "mois" : "suivants");
 /* à traiter : un geste attendu, un contrat qui s'éteint, ou une échéance dans la semaine pas encore prévenue */
 const aTraiter = (e: EcheanceLigne) => A_GESTE.includes(e.statut) || (e.s_eteint && !FINIES.includes(e.statut)) || (e.statut === "a_venir" && ecart(e.due_le) <= 7);
@@ -132,23 +140,6 @@ const lireFiltres = (valeurs: string[]): Filtres => {
   return f;
 };
 
-/* le losange d'un jalon : contour seul, jaune à 40 % une fois l'étape atteinte (celui de la première page) */
-function Losange({ atteint }: { atteint: boolean }) {
-  return (
-    <svg className="lin-losange" data-atteint={atteint ? "" : undefined} viewBox="0 0 16 16" aria-hidden="true">
-      <path d="M8 1.8 12.9 8 8 14.2 3.1 8z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeOpacity={atteint ? 0.4 : 1} />
-    </svg>
-  );
-}
-
-function ChevronMaj() {
-  return (
-    <svg className="lin-maj-fleche" viewBox="0 0 16 16" aria-hidden="true">
-      <path d="M5.2 6.4h5.6L8 9.6z" fill="currentColor" />
-    </svg>
-  );
-}
-
 function IconeType({ e, taille = 16 }: { e: EcheanceLigne; taille?: number }) {
   return e.type === "contrat" ? <FileText width={taille} height={taille} strokeWidth={1.8} aria-hidden="true" /> : <Wrench width={taille} height={taille} strokeWidth={1.8} aria-hidden="true" />;
 }
@@ -171,7 +162,8 @@ export default function BoiteEcheances() {
   const [tri, setTri] = useState<Tri>("echeance");
   const [montrer, setMontrer] = useState<Montrer>("toutes");
   const [recherche, setRecherche] = useState("");
-  const [ongletCalendrier, setOngletCalendrier] = useState<"horizon" | "etat">("horizon");
+  /* l'échéance dont la référence vient d'être copiée (l'icône passe à la coche un instant) */
+  const [copie, setCopie] = useState<string | null>(null);
   /* le formulaire « Noter une intervention » est ouvert pour une échéance (son id), et l'avis qui suit le geste */
   const [formPour, setFormPour] = useState<string | null>(null);
   const [form, setForm] = useState(FORM_VIDE);
@@ -600,7 +592,7 @@ export default function BoiteEcheances() {
     );
   }
 
-  /* ——— l'échéance ouverte : la page d'un projet ——— */
+  /* ——— l'échéance ouverte : la page d'un ticket de Linear ——— */
   const e = choisie;
   const c = parCompte.get(e.compte_id) ?? null;
   const commercial = c?.commercial ?? null;
@@ -612,13 +604,13 @@ export default function BoiteEcheances() {
   const peutNoter = !!e.equipement && !FINIES.includes(e.statut);
   const formOuvert = formPour === e.id && peutNoter;
   const avisIci = avis?.id === e.id ? avis : null;
-  const valeur = c?.signal?.valeur_annuelle ?? null;
   const memeCompte = lignes.filter((x) => x.compte_id === e.compte_id && x.id !== e.id).sort((a, b) => a.due_le.localeCompare(b.due_le));
   const interventions: (Intervention & { cle: string })[] = [
     ...(notees[e.id] ?? []).map((iv, i) => ({ ...iv, cle: `note-${i}` })),
     ...(equipementParc?.interventions ?? []).map((iv, i) => ({ ...iv, cle: `parc-${i}` })),
   ].sort((a, b) => b.le.localeCompare(a.le));
-  const derniere = interventions[0]?.le ?? equipementParc?.derniere_intervention ?? e.base_le;
+  const tel = c?.telephone ? `tel:${c.telephone.replace(/\s/g, "")}` : null;
+  const mail = c?.email ? `mailto:${c.email}` : null;
   const optionNoter: Option[] = peutNoter ? [{ cle: "noter", libelle: "Noter une intervention…", icone: <Wrench width={16} height={16} />, action: () => ouvrirForm(e) }] : [];
   const optionsContact: Option[] = [
     ...(c?.email
@@ -637,6 +629,7 @@ export default function BoiteEcheances() {
   const optionsStatut: Option[] = [...optionNoter, ...optionsDe("etat").map((o) => ({ ...o, coche: o.cle === `etat-${e.statut}` }))];
   const optionsDate: Option[] = optionsDe("horizon").map((o) => ({ ...o, coche: o.cle === `horizon-${horizonDe(e)}` }));
   const optionsNature: Option[] = optionsDe("nature").map((o) => ({ ...o, coche: o.cle === `nature-${e.nature}` }));
+  const optionsType: Option[] = optionsDe("type").map((o) => ({ ...o, coche: o.cle === `type-${e.type}` }));
   const optionsCommercial: Option[] = optionsDe("commercial").map((o) => ({ ...o, coche: o.cle === `commercial-${commercial ?? SANS_COMMERCIAL}` }));
   const optionsCompte: Option[] = [
     optionFiltre("compte", e.compte_id, { libelle: actifs.compte === e.compte_id ? "Toutes les échéances" : "Les échéances de ce compte" }),
@@ -646,61 +639,146 @@ export default function BoiteEcheances() {
   const optionsRef: Option[] = [
     { cle: "copier", libelle: e.contrat ? "Copier le numéro du contrat" : "Copier la référence de l'équipement", icone: <Copy width={16} height={16} />, action: () => navigator.clipboard?.writeText(refDe(e)) },
   ];
+  const copierRef = () => {
+    /* la coche ne vient que si le presse-papiers a accepté (il refuse une page sans le focus) */
+    navigator.clipboard?.writeText(refDe(e)).then(
+      () => {
+        setCopie(e.id);
+        window.setTimeout(() => setCopie((x) => (x === e.id ? null : x)), 1500);
+      },
+      () => {},
+    );
+  };
   const lienFiche = `${RACINE}/offload?compte=${encodeURIComponent(e.compte_id)}`;
-  /* « Prévenir le client » : ce que dit l'état de l'échéance, mot pour mot celui de l'ancien écran */
-  const texteMaj =
-    e.motif ??
-    (e.statut === "a_venir"
-      ? `Le client est prévenu la semaine qui précède le ${dateCourte(e.due_le)}, après votre validation.`
-      : e.statut === "a_valider"
-        ? "Le message de la semaine qui précède attend votre validation dans Décisions."
-        : e.statut === "prevenue"
-          ? "Le client est prévenu : l'échéance attend son intervention."
-          : e.statut === "appel"
-            ? "Le client est à prévenir par appel."
-            : e.statut === "depassee"
-              ? "Échéance tombée sans intervention connue : en attente, sans seconde relance."
-              : e.statut === "honoree"
-                ? "Échéance honorée."
-                : e.statut === "honoree_ailleurs"
-                  ? "Faite ailleurs : l'échéance sort du cycle."
-                  : "Échéance close.");
-  const etapes =
-    e.type === "contrat"
-      ? [
-          { cle: "debut", libelle: "Début du contrat", meta: contratParc?.debut ? dateCourte(contratParc.debut) : "—", atteint: !!contratParc?.debut },
-          { cle: "reconduction", libelle: "Reconduction", meta: e.contrat?.reconduction ?? "—", atteint: !e.s_eteint },
-          { cle: "fin", libelle: "Fin du contrat", meta: dateCourte(e.due_le), atteint: n <= 0 },
-        ]
-      : [
-          { cle: "base", libelle: "Dernière intervention", meta: derniere ? dateCourte(derniere) : "—", atteint: !!derniere },
-          {
-            cle: "message",
-            libelle: "Client prévenu",
-            meta: e.statut === "prevenue" ? "prévenu" : e.statut === "a_valider" ? "message à valider" : e.statut === "appel" ? "par appel" : e.statut === "a_venir" ? "la semaine qui précède" : "—",
-            atteint: e.statut === "prevenue",
-          },
-          { cle: "echeance", libelle: "Échéance", meta: dateCourte(e.due_le), atteint: n <= 0 },
-          {
-            cle: "intervention",
-            libelle: "Intervention",
-            meta: e.statut === "honoree" ? "faite" : e.statut === "honoree_ailleurs" ? "faite ailleurs" : "—",
-            atteint: e.statut === "honoree" || e.statut === "honoree_ailleurs",
-          },
-        ];
-  const activite = [
-    ...interventions.map((iv) => ({ cle: iv.cle, le: iv.le, quoi: `${NATURES_INTERVENTION[iv.nature] ?? iv.nature}${iv.ailleurs ? ", faite ailleurs" : ""}${iv.reference ? ` · bon ${iv.reference}` : ""}`, fait: true })),
-    ...(e.base_le && !interventions.some((iv) => iv.le === e.base_le) ? [{ cle: "base", le: e.base_le, quoi: "Dernière intervention connue", fait: true }] : []),
-    { cle: "due", le: e.due_le, quoi: e.type === "contrat" ? "Fin du contrat" : "Échéance", fait: n <= 0 },
-  ].sort((a, b) => b.le.localeCompare(a.le));
-  /* la carte « Calendrier » : la liste (filtres gardés) par horizon ou par état ; une ligne filtre */
-  const portee = lignes.filter((x) => correspond(x, actifs));
-  const repartition =
-    ongletCalendrier === "horizon"
-      ? (Object.keys(HORIZONS) as Horizon[]).map((h) => ({ cle: h, d: "horizon" as Dimension, libelle: HORIZONS[h], nb: portee.filter((x) => horizonDe(x) === h).length }))
-      : ORDRE.filter((s) => portee.some((x) => x.statut === s)).map((s) => ({ cle: s, d: "etat" as Dimension, libelle: STATUTS_ECHEANCE[s].libelle, nb: portee.filter((x) => x.statut === s).length }));
-  const maxRepartition = Math.max(1, ...repartition.map((x) => x.nb));
-  const resume = `${e.compte_nom} : ${e.type === "contrat" ? "le contrat prend fin" : "échéance"} le ${dateLongue(e.due_le)}, ${relatif(n)}.${e.nature === "reglementaire" ? " Échéance réglementaire." : ""}${e.equipement?.site ? ` Site : ${e.equipement.site}.` : ""}`;
+  const lienDecisions = `${RACINE}/validations`;
+  const desc = `${e.compte_nom}${e.equipement?.site ? `, site ${e.equipement.site}` : ""} : ${e.type === "contrat" ? "le contrat prend fin" : `échéance${e.nature === "reglementaire" ? " réglementaire" : ""}`} le ${dateMoyenne(e.due_le)}, ${relatif(n)}.`;
+
+  /* le fil d'activité : les interventions, le client prévenu (ou la décision qui l'attend), l'échéance — dans l'ordre du temps */
+  type Entree = { cle: string; le: string; icone: React.ReactNode; texte: React.ReactNode; actions?: React.ReactNode };
+  const ic14 = { width: 14, height: 14, "aria-hidden": true } as const;
+  const fil: Entree[] = [];
+  for (const iv of interventions.slice(0, 3))
+    fil.push({
+      cle: iv.cle,
+      le: iv.le,
+      icone: <Wrench {...ic14} />,
+      texte: (
+        <>
+          <b>{NATURES_INTERVENTION[iv.nature] ?? iv.nature}</b> {iv.ailleurs ? "faite ailleurs" : "faite"}
+          {iv.reference ? ` · bon ${iv.reference}` : ""} · {dateCourte(iv.le)}
+        </>
+      ),
+    });
+  if (e.type === "entretien" && e.base_le && !interventions.some((iv) => iv.le === e.base_le))
+    fil.push({
+      cle: "base",
+      le: e.base_le,
+      icone: <Wrench {...ic14} />,
+      texte: (
+        <>
+          <b>Dernière intervention</b> connue · {dateCourte(e.base_le)}
+        </>
+      ),
+    });
+  if (contratParc?.debut)
+    fil.push({
+      cle: "debut",
+      le: contratParc.debut,
+      icone: <FileText {...ic14} />,
+      texte: (
+        <>
+          <b>Début</b> du contrat · {dateCourte(contratParc.debut)}
+        </>
+      ),
+    });
+  /* l'état de l'échéance : une phrase d'OFFLOAD, ou une décision à prendre (message à valider, client à appeler) */
+  const etat: Entree = { cle: "etat", le: aujourdhui(), icone: <IconeStatut s={e.statut} />, texte: null };
+  if (e.statut === "a_valider" || e.statut === "appel") {
+    etat.texte = (
+      <span className="lin-ticket-fil-texte">{e.motif ?? (e.statut === "a_valider" ? "Le message de la semaine qui précède attend votre validation dans Décisions." : "Le client est à prévenir par appel.")}</span>
+    );
+    etat.actions =
+      e.statut === "a_valider" ? (
+        <>
+          <Link href={lienDecisions} className="v2-btn v2-btn--petit" data-actif="">
+            <CheckCheck width={14} height={14} aria-hidden="true" />
+            <span>Valider le message</span>
+          </Link>
+          {peutNoter ? (
+            <button type="button" className="v2-btn v2-btn--petit" onClick={() => ouvrirForm(e)}>
+              <Wrench width={14} height={14} aria-hidden="true" />
+              <span>Noter une intervention</span>
+            </button>
+          ) : null}
+        </>
+      ) : (
+        <>
+          {tel ? (
+            <a href={tel} className="v2-btn v2-btn--petit" data-actif="">
+              <PhoneCall width={14} height={14} aria-hidden="true" />
+              <span>Appeler {c?.telephone}</span>
+            </a>
+          ) : null}
+          {mail ? (
+            <a href={mail} className="v2-btn v2-btn--petit">
+              <IconeEnveloppe />
+              <span>Écrire</span>
+            </a>
+          ) : null}
+          {!tel && !mail && peutNoter ? (
+            <button type="button" className="v2-btn v2-btn--petit" onClick={() => ouvrirForm(e)}>
+              <Wrench width={14} height={14} aria-hidden="true" />
+              <span>Noter une intervention</span>
+            </button>
+          ) : null}
+        </>
+      );
+  } else {
+    const phrase: Record<Exclude<Statut, "a_valider" | "appel">, React.ReactNode> = {
+      a_venir: (
+        <>
+          <b>OFFLOAD</b> préviendra le client la semaine qui précède, après votre validation
+        </>
+      ),
+      prevenue: (
+        <>
+          <b>OFFLOAD</b> a prévenu le client · l&apos;échéance attend son intervention
+        </>
+      ),
+      depassee: (
+        <>
+          <b>Échéance tombée</b> sans intervention connue · en attente, sans seconde relance
+        </>
+      ),
+      honoree: <b>Échéance honorée</b>,
+      honoree_ailleurs: (
+        <>
+          <b>Faite ailleurs</b> · l&apos;échéance sort du cycle
+        </>
+      ),
+      close: <b>Échéance close</b>,
+    };
+    etat.texte = e.motif ? (
+      <>
+        <b>OFFLOAD</b> · {e.motif}
+      </>
+    ) : (
+      phrase[e.statut]
+    );
+  }
+  fil.push(etat);
+  fil.push({
+    cle: "due",
+    le: e.due_le,
+    icone: <IconeCalendrier passe={n < 0} />,
+    texte: (
+      <>
+        <b>{e.type === "contrat" ? (e.s_eteint ? "Fin du contrat" : "Échéance du contrat") : "Échéance"}</b>
+        {e.contrat?.reconduction ? ` · reconduction ${e.contrat.reconduction}` : ""} · {dateCourte(e.due_le)} · {relatif(n)}
+      </>
+    ),
+  });
+  fil.sort((a, b) => a.le.localeCompare(b.le) || (a.cle === "etat" ? 1 : b.cle === "etat" ? -1 : 0));
 
   return (
     <div className="lin">
@@ -766,103 +844,77 @@ export default function BoiteEcheances() {
             </div>
           </header>
 
-          <div className="lin-projet">
-            <article className="lin-projet-texte">
-              <span className="lin-tuile" style={{ background: `color-mix(in srgb, ${couleurDe(e.compte_id)} 18%, transparent)`, color: couleurDe(e.compte_id) }}>
-                <IconeType e={e} taille={24} />
-              </span>
-              <h1 className="lin-projet-h1">{titreDe(e)}</h1>
-              <p className="lin-projet-resume">{resume}</p>
-              <div className="lin-projet-ligne">
-                <span className="lin-projet-etiquette">Propriétés</span>
-                <MenuOptions
-                  raccourci="s"
-                  titre="État de l'échéance…"
-                  teinte={teinte}
-                  declencheur={
-                    <>
-                      <IconeStatut s={e.statut} />
-                      {libelleStatut(e)}
-                    </>
-                  }
-                  options={optionsStatut}
-                  largeur={300}
-                />
-                <MenuOptions
-                  raccourci="d"
-                  titre="Horizon…"
-                  declencheur={
-                    <>
-                      <IconeCalendrier passe={n < 0} />
-                      {`${e.type === "contrat" ? "Fin le" : "Échéance le"} ${dateCourte(e.due_le)}`}
-                    </>
-                  }
-                  options={optionsDate}
-                  largeur={280}
-                />
-                <MenuOptions
-                  titre="Nature…"
-                  declencheur={
-                    <>
-                      <ShieldCheck width={16} height={16} aria-hidden="true" />
-                      {NATURES[e.nature]}
-                    </>
-                  }
-                  options={optionsNature}
-                  largeur={280}
-                />
-                <MenuOptions
-                  titre="Commercial…"
-                  declencheur={
-                    <>
-                      <UserRound width={16} height={16} aria-hidden="true" />
-                      {commercial ?? "Sans commercial"}
-                    </>
-                  }
-                  options={optionsCommercial}
-                  largeur={280}
-                />
-              </div>
-              <div className="lin-projet-ligne">
-                <span className="lin-projet-etiquette">Compte</span>
-                <MenuOptions
-                  raccourci="c"
-                  titre="Compte…"
-                  declencheur={
-                    <>
-                      <Building2 width={16} height={16} strokeWidth={1.8} style={{ color: couleurDe(e.compte_id) }} aria-hidden="true" />
-                      {e.compte_nom}
-                    </>
-                  }
-                  options={optionsCompte}
-                  largeur={320}
-                />
-                {c?.email ? (
-                  <MenuOptions
-                    titre="Contact…"
-                    declencheur={
-                      <>
-                        <IconeEnveloppe />
-                        {c.email}
-                      </>
-                    }
-                    options={optionsContact.filter((o) => o.cle === "ecrire" || o.cle === "copier-mail")}
-                  />
+          <div className="lin-ticket">
+            <article className="lin-ticket-corps">
+              <h2 className="lin-ticket-titre">{titreDe(e)}</h2>
+              <p className="lin-ticket-desc">{desc}</p>
+              <div className="lin-ticket-icones">
+                {peutNoter ? (
+                  <button
+                    type="button"
+                    className="lin-ticket-icone"
+                    aria-label="Noter une intervention"
+                    title="Noter une intervention"
+                    aria-expanded={formOuvert}
+                    onClick={() => (formOuvert ? setFormPour(null) : ouvrirForm(e))}
+                  >
+                    <Wrench aria-hidden="true" />
+                  </button>
                 ) : null}
-                {c?.telephone ? (
-                  <MenuOptions
-                    titre="Téléphone…"
-                    declencheur={
-                      <>
-                        <PhoneCall width={16} height={16} aria-hidden="true" />
-                        {c.telephone}
-                      </>
-                    }
-                    options={optionsContact.filter((o) => o.cle === "appeler" || o.cle === "copier-tel")}
-                  />
+                {tel ? (
+                  <a href={tel} className="lin-ticket-icone" aria-label="Appeler le client" title={`Appeler le client · ${c?.telephone}`}>
+                    <PhoneCall aria-hidden="true" />
+                  </a>
+                ) : mail ? (
+                  <a href={mail} className="lin-ticket-icone" aria-label="Écrire au client" title={`Écrire au client · ${c?.email}`}>
+                    <IconeEnveloppe />
+                  </a>
                 ) : null}
-                {!c?.email && !c?.telephone ? <span className="lin-puce lin-puce--vide">{c ? "Aucun moyen de le joindre" : "Contact inconnu"}</span> : null}
+                <button type="button" className="lin-ticket-icone" aria-label={optionsRef[0].libelle} title={copie === e.id ? "Copié" : `${optionsRef[0].libelle} · ${refDe(e)}`} onClick={copierRef}>
+                  {copie === e.id ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
+                </button>
+                <Link href={lienFiche} className="lin-ticket-icone" aria-label="Ouvrir la fiche du compte" title="Ouvrir la fiche du compte">
+                  <Building2 aria-hidden="true" />
+                </Link>
               </div>
+
+              {memeCompte.length ? (
+                <>
+                  <ul className="lin-ticket-sous" aria-label="Les autres échéances du compte">
+                    {memeCompte.slice(0, 5).map((x) => (
+                      <li key={x.id}>
+                        <Link href={adresse(actifs, x.id)} className="lin-ticket-sous-ligne" scroll={false}>
+                          <IconeStatut s={x.statut} />
+                          <span className="lin-ticket-sous-ref">{refDe(x)}</span>
+                          <span className="lin-ticket-sous-nom">{titreDe(x)}</span>
+                          <span className="lin-ticket-sous-meta">{dateCourte(x.due_le)}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                  {memeCompte.length > 5 ? (
+                    <Link href={adresse(avec("compte", e.compte_id))} className="lin-ticket-sous-appel" scroll={false}>
+                      Voir les {memeCompte.length + 1} échéances du compte
+                    </Link>
+                  ) : null}
+                </>
+              ) : null}
+
+              <hr className="lin-ticket-trait" />
+              <div className="lin-ticket-activite-tete">
+                <h3>Activité</h3>
+              </div>
+              <ul className="lin-ticket-fil">
+                {fil.map((x) => (
+                  <li key={x.cle}>
+                    {x.icone}
+                    <span>
+                      {x.texte}
+                      {x.actions ? <span className="lin-ticket-fil-actions">{x.actions}</span> : null}
+                    </span>
+                  </li>
+                ))}
+              </ul>
 
               {avisIci ? (
                 <p className="lin-ech-avis" data-teinte={avisIci.teinte} role={avisIci.teinte === "rouge" ? "alert" : "status"}>
@@ -870,68 +922,21 @@ export default function BoiteEcheances() {
                 </p>
               ) : null}
 
-              <details className="lin-maj" open aria-label="Prévenir le client">
-                <summary className="lin-maj-tete">
-                  <span className="lin-maj-titre">
-                    Prévenir le client
-                    <ChevronMaj />
-                  </span>
-                  {e.statut === "a_valider" ? (
-                    <Link href={`${RACINE}/validations`} className="lin-maj-lien">
-                      <ExternalLink width={14} height={14} aria-hidden="true" /> Décisions
-                    </Link>
-                  ) : null}
-                </summary>
-                <p className="lin-maj-auteur">
-                  <IconeStatut s={e.statut} />
-                  <span data-teinte={teinte}>{libelleStatut(e)}</span>
-                  <span className="lin-avatar-auteur lin-avatar-offload" aria-hidden="true">
-                    <IconeType e={e} taille={11} />
-                  </span>
-                  <span className="lin-maj-gris">OFFLOAD</span>
-                  <span className="lin-maj-gris">{relatif(n)}</span>
-                </p>
-                <p className="lin-maj-texte">{texteMaj}</p>
-                <dl className="lin-maj-citation">
-                  <div>
-                    <dt>{e.type === "contrat" ? "Fin du contrat" : "Échéance"}</dt>
-                    <dd>{dateLongue(e.due_le)}</dd>
-                  </div>
-                  {e.type === "entretien" ? (
-                    <div>
-                      <dt>Dernière intervention</dt>
-                      <dd>{derniere ? dateLongue(derniere) : "—"}</dd>
-                    </div>
-                  ) : (
-                    <div>
-                      <dt>Reconduction</dt>
-                      <dd>{e.contrat?.reconduction ?? "—"}</dd>
-                    </div>
-                  )}
-                  <div>
-                    <dt>Nature</dt>
-                    <dd>{e.nature === "reglementaire" ? "réglementaire" : "commerciale"}</dd>
-                  </div>
-                  <div>
-                    <dt>Le message</dt>
-                    <dd>la semaine qui précède, après votre validation</dd>
-                  </div>
-                </dl>
-
-                {formOuvert ? (
-                  <form
-                    id="ech-intervention"
-                    className="lin-ech-form"
-                    aria-label="Noter une intervention"
-                    onSubmit={(ev) => {
-                      ev.preventDefault();
-                      void noter(e);
-                    }}
-                  >
+              {peutNoter ? (
+                <form
+                  id="ech-intervention"
+                  className="lin-ticket-composeur lin-ech-composeur"
+                  aria-label="Noter une intervention"
+                  onSubmit={(ev) => {
+                    ev.preventDefault();
+                    void noter(e);
+                  }}
+                >
+                  {formOuvert ? (
                     <div className="lin-ech-form-ligne">
                       <label className="lin-ech-champ">
                         Le (obligatoire)
-                        <input type="date" value={form.le} onChange={(ev) => setForm({ ...form, le: ev.target.value })} required />
+                        <input type="date" autoFocus value={form.le} onChange={(ev) => setForm({ ...form, le: ev.target.value })} required />
                       </label>
                       <label className="lin-ech-champ">
                         Nature
@@ -948,369 +953,135 @@ export default function BoiteEcheances() {
                         <input value={form.reference} onChange={(ev) => setForm({ ...form, reference: ev.target.value })} />
                       </label>
                     </div>
-                    <label className="lin-ech-case">
-                      <input type="checkbox" checked={form.ailleurs} onChange={(ev) => setForm({ ...form, ailleurs: ev.target.checked })} /> Faite ailleurs (par un autre prestataire)
-                    </label>
-                    <div className="lin-ech-form-pied">
-                      <button type="submit" className="v2-btn v2-btn--petit" data-actif="" disabled={occupe || !/^\d{4}-\d{2}-\d{2}$/.test(form.le)}>
-                        <CheckCheck width={14} height={14} aria-hidden="true" />
-                        <span>Noter l&apos;intervention</span>
-                      </button>
-                      <button type="button" className="v2-btn v2-btn--petit" onClick={() => setFormPour(null)}>
-                        Annuler
-                      </button>
-                    </div>
-                  </form>
-                ) : null}
-
-                <footer className="lin-maj-pied">
-                  {peutNoter ? (
-                    <button
-                      type="button"
-                      className="lin-maj-pied-btn"
-                      aria-label="Noter une intervention"
-                      title="Noter une intervention"
-                      aria-expanded={formOuvert}
-                      onClick={() => (formOuvert ? setFormPour(null) : ouvrirForm(e))}
-                    >
-                      <Wrench width={16} height={16} aria-hidden="true" />
-                    </button>
-                  ) : null}
-                  {e.statut === "a_valider" ? (
-                    <Link href={`${RACINE}/validations`} className="lin-maj-pied-rond" aria-label="Valider le message" title="Valider le message">
-                      <CheckCheck width={16} height={16} aria-hidden="true" />
-                    </Link>
-                  ) : c?.telephone ? (
-                    <a href={`tel:${c.telephone.replace(/\s/g, "")}`} className="lin-maj-pied-rond" aria-label="Appeler le client" title="Appeler le client">
-                      <PhoneCall width={16} height={16} aria-hidden="true" />
-                    </a>
-                  ) : c?.email ? (
-                    <a href={`mailto:${c.email}`} className="lin-maj-pied-rond" aria-label="Écrire au client" title="Écrire au client">
-                      <IconeEnveloppe />
-                    </a>
-                  ) : null}
-                </footer>
-              </details>
-
-              <h2 className="lin-projet-h2">{e.contrat ? "Le contrat" : "L'équipement"}</h2>
-              {e.equipement ? (
-                <ul className="lin-projet-liste">
-                  <li>
-                    <Wrench width={16} height={16} aria-hidden="true" />
-                    <span>{e.equipement.designation}</span>
-                    <span className="lin-meta">n° {e.equipement.ref}</span>
-                  </li>
-                  <li>
-                    <IconeDiese />
-                    <span>Type d&apos;entretien</span>
-                    <span className="lin-meta">{e.equipement.type_entretien ?? "—"}</span>
-                  </li>
-                  <li>
-                    <Building2 width={16} height={16} aria-hidden="true" />
-                    <span>Site</span>
-                    <span className="lin-meta">{e.equipement.site ?? "—"}</span>
-                  </li>
-                  {equipementParc ? (
-                    <li>
-                      <IconeCalendrier />
-                      <span>Périodicité</span>
-                      <span className="lin-meta">tous les {equipementParc.periodicite_mois} mois</span>
-                    </li>
-                  ) : null}
-                  <li>
-                    <IconeCalendrier passe={n < 0} />
-                    <span>Prochaine échéance</span>
-                    <span className="lin-meta">
-                      {dateCourte(e.due_le)}
-                      {e.base_le ? ` · datée depuis le ${dateCourte(e.base_le)}` : ""}
-                    </span>
-                  </li>
-                </ul>
-              ) : e.contrat ? (
-                <ul className="lin-projet-liste">
-                  <li>
-                    <FileText width={16} height={16} aria-hidden="true" />
-                    <span>
-                      Contrat {e.contrat.numero}
-                      {e.contrat.libelle ? ` — ${e.contrat.libelle}` : ""}
-                    </span>
-                    <span className="lin-meta">{e.s_eteint ? "s'éteint" : (contratParc?.statut ?? "")}</span>
-                  </li>
-                  {contratParc?.debut ? (
-                    <li>
-                      <IconeCalendrier />
-                      <span>Début</span>
-                      <span className="lin-meta">{dateCourte(contratParc.debut)}</span>
-                    </li>
-                  ) : null}
-                  <li>
-                    <IconeCalendrier passe={n < 0} />
-                    <span>Fin</span>
-                    <span className="lin-meta">{dateCourte(e.due_le)}</span>
-                  </li>
-                  <li>
-                    <IconeDiese />
-                    <span>Reconduction</span>
-                    <span className="lin-meta">{e.contrat.reconduction}</span>
-                  </li>
-                </ul>
-              ) : (
-                <p className="lin-maj-texte lin-maj-gris">Ni équipement ni contrat rattaché.</p>
-              )}
-
-              {e.equipement ? (
-                <>
-                  <h2 className="lin-projet-h2">Interventions</h2>
-                  {interventions.length ? (
-                    <ul className="lin-projet-liste">
-                      {interventions.map((iv) => (
-                        <li key={iv.cle}>
-                          <Losange atteint />
-                          <span>
-                            {NATURES_INTERVENTION[iv.nature] ?? iv.nature}
-                            {iv.ailleurs ? ", faite ailleurs" : ""}
-                          </span>
-                          <span className="lin-meta">
-                            {dateCourte(iv.le)}
-                            {iv.reference ? ` · bon ${iv.reference}` : ""}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
                   ) : (
-                    <p className="lin-maj-texte lin-maj-gris">{e.base_le ? `Dernière intervention connue le ${dateCourte(e.base_le)}.` : "Aucune intervention connue."}</p>
+                    <button type="button" className="lin-ech-composeur-appel" onClick={() => ouvrirForm(e)}>
+                      Noter une intervention…
+                    </button>
                   )}
-                </>
+                  <div className="lin-ticket-composeur-pied">
+                    {formOuvert ? (
+                      <>
+                        <label className="lin-ech-case">
+                          <input type="checkbox" checked={form.ailleurs} onChange={(ev) => setForm({ ...form, ailleurs: ev.target.checked })} /> Faite ailleurs (par un autre prestataire)
+                        </label>
+                        <button type="button" className="v2-btn v2-btn--petit" onClick={() => setFormPour(null)}>
+                          Annuler
+                        </button>
+                      </>
+                    ) : null}
+                    <button type="submit" className="lin-ticket-envoyer" aria-label="Noter l'intervention" title="Noter l'intervention" disabled={!formOuvert || occupe || !/^\d{4}-\d{2}-\d{2}$/.test(form.le)}>
+                      <ArrowUp width={16} height={16} aria-hidden="true" />
+                    </button>
+                  </div>
+                </form>
               ) : null}
-
-              <h2 className="lin-projet-h2">Les autres échéances du compte</h2>
-              {memeCompte.length ? (
-                <ul className="lin-projet-liste">
-                  {memeCompte.map((x) => (
-                    <li key={x.id}>
-                      <Link href={adresse(actifs, x.id)} className="lin-projet-lien" scroll={false}>
-                        <IconeStatut s={x.statut} />
-                        <span>{titreDe(x)}</span>
-                        <span className="lin-meta">
-                          {libelleStatut(x)} · {dateCourte(x.due_le)}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="lin-maj-texte lin-maj-gris">Aucune autre échéance dans les soixante jours pour ce compte.</p>
-              )}
             </article>
 
-            <aside className="lin-cartes-droite" aria-label="Propriétés de l'échéance">
-              <CarteDroite titre="Propriétés">
-                <dl className="lin-props">
-                  <div>
-                    <dt>État</dt>
-                    <dd data-teinte={teinte}>
+            <aside className="lin-ticket-cote" aria-label="Propriétés de l'échéance">
+              <section className="lin-ticket-section">
+                <h3>Propriétés</h3>
+                <div className="lin-ticket-pilules">
+                  <MenuOptions
+                    raccourci="s"
+                    titre="État de l'échéance…"
+                    teinte={teinte}
+                    declencheur={
+                      <>
+                        <IconeStatut s={e.statut} />
+                        {libelleStatut(e)}
+                      </>
+                    }
+                    options={optionsStatut}
+                    largeur={300}
+                  />
+                  <MenuOptions
+                    raccourci="d"
+                    titre="Horizon…"
+                    declencheur={
+                      <>
+                        <IconeCalendrier passe={n < 0} />
+                        {`${e.type === "contrat" ? "Fin le" : "Échéance le"} ${dateCourte(e.due_le)}`}
+                      </>
+                    }
+                    options={optionsDate}
+                    largeur={280}
+                  />
+                  <MenuOptions
+                    titre="Nature…"
+                    declencheur={
+                      <>
+                        <ShieldCheck width={16} height={16} aria-hidden="true" />
+                        {NATURES[e.nature]}
+                      </>
+                    }
+                    options={optionsNature}
+                    largeur={280}
+                  />
+                </div>
+              </section>
+              <section className="lin-ticket-section">
+                <h3>Étiquettes</h3>
+                <div className="lin-ticket-pilules">
+                  <MenuOptions
+                    titre="Type…"
+                    declencheur={
+                      <>
+                        <IconeType e={e} />
+                        {e.equipement?.type_entretien ?? TYPES[e.type]}
+                      </>
+                    }
+                    options={optionsType}
+                    largeur={280}
+                  />
+                  <MenuOptions
+                    titre="Commercial…"
+                    declencheur={
+                      <>
+                        <UserRound width={16} height={16} aria-hidden="true" />
+                        {commercial ?? <span className="lin-ech-gris">Sans commercial</span>}
+                      </>
+                    }
+                    options={optionsCommercial}
+                    largeur={280}
+                  />
+                </div>
+              </section>
+              <section className="lin-ticket-section">
+                <h3>Compte</h3>
+                <div className="lin-ticket-pilules">
+                  <MenuOptions
+                    raccourci="c"
+                    titre="Compte…"
+                    declencheur={
+                      <>
+                        <Building2 width={16} height={16} strokeWidth={1.8} style={{ color: couleurDe(e.compte_id) }} aria-hidden="true" />
+                        {e.compte_nom}
+                      </>
+                    }
+                    options={optionsCompte}
+                    largeur={320}
+                  />
+                  {optionsContact.length ? (
+                    <div className="lin-ticket-sous-pilule">
                       <MenuOptions
-                        plat
-                        titre="État de l'échéance…"
+                        titre="Contact…"
                         declencheur={
                           <>
-                            <IconeStatut s={e.statut} />
-                            {libelleStatut(e)}
+                            {c?.email ? <IconeEnveloppe /> : <PhoneCall width={16} height={16} aria-hidden="true" />}
+                            {c?.email ?? c?.telephone}
                           </>
                         }
-                        options={optionsStatut}
+                        options={optionsContact}
                         largeur={300}
                       />
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>{e.type === "contrat" ? "Fin" : "Échéance"}</dt>
-                    <dd>
-                      <MenuOptions
-                        plat
-                        titre="Horizon…"
-                        declencheur={
-                          <>
-                            <IconeCalendrier passe={n < 0} />
-                            {dateCourte(e.due_le)}
-                          </>
-                        }
-                        options={optionsDate}
-                        largeur={280}
-                      />
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Nature</dt>
-                    <dd>
-                      <MenuOptions
-                        plat
-                        titre="Nature…"
-                        declencheur={
-                          <>
-                            <ShieldCheck width={16} height={16} aria-hidden="true" />
-                            {NATURES[e.nature]}
-                          </>
-                        }
-                        options={optionsNature}
-                        largeur={280}
-                      />
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Type</dt>
-                    <dd>
-                      <MenuOptions
-                        plat
-                        titre="Type…"
-                        declencheur={
-                          <>
-                            <IconeType e={e} />
-                            {TYPES[e.type]}
-                          </>
-                        }
-                        options={optionsDe("type").map((o) => ({ ...o, coche: o.cle === `type-${e.type}` }))}
-                        largeur={280}
-                      />
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Compte</dt>
-                    <dd>
-                      <MenuOptions
-                        plat
-                        titre="Compte…"
-                        declencheur={
-                          <>
-                            <Building2 width={16} height={16} strokeWidth={1.8} style={{ color: couleurDe(e.compte_id) }} aria-hidden="true" />
-                            {e.compte_nom}
-                          </>
-                        }
-                        options={optionsCompte}
-                        largeur={320}
-                      />
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Commercial</dt>
-                    <dd className={commercial ? undefined : "lin-props-vide"}>
-                      <MenuOptions
-                        plat
-                        titre="Commercial…"
-                        declencheur={
-                          <>
-                            <UserRound width={16} height={16} aria-hidden="true" />
-                            {commercial ?? "Sans commercial"}
-                          </>
-                        }
-                        options={optionsCommercial}
-                        largeur={280}
-                      />
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Référence</dt>
-                    <dd>
-                      <MenuOptions
-                        plat
-                        titre="Référence…"
-                        declencheur={
-                          <>
-                            <IconeDiese />
-                            {refDe(e)}
-                          </>
-                        }
-                        options={optionsRef}
-                      />
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Valeur du compte</dt>
-                    <dd className={valeur ? undefined : "lin-props-vide"}>
-                      <span className="lin-valeur" title="La valeur annuelle du compte à son rythme d'achat habituel">
-                        <IconeJauge />
-                        {valeur ? `${montant(valeur)} par an` : "Inconnue"}
-                      </span>
-                    </dd>
-                  </div>
-                </dl>
-              </CarteDroite>
-
-              <CarteDroite titre="Étapes">
-                <ul className="lin-jalons">
-                  {etapes.map((x) => (
-                    <li key={x.cle}>
-                      <Losange atteint={x.atteint} />
-                      <span className="lin-jalon-nom">{x.libelle}</span>
-                      <span className="lin-meta">{x.meta}</span>
-                      {x.cle === "intervention" && peutNoter ? <MenuActions titre="Intervention…" options={optionNoter} /> : null}
-                    </li>
-                  ))}
-                </ul>
-              </CarteDroite>
-
-              <CarteDroite titre="Calendrier">
-                <dl className="lin-kpis lin-kpis--trois">
-                  <div>
-                    <dt>
-                      <span className="lin-carre" style={{ background: "var(--lin-graph-bleu)" }} />À traiter
-                    </dt>
-                    <dd>{portee.filter(aTraiter).length}</dd>
-                  </div>
-                  <div>
-                    <dt>
-                      <span className="lin-carre" style={{ background: "var(--lin-graph-jaune)" }} />
-                      Ce mois-ci
-                    </dt>
-                    <dd>{portee.filter((x) => horizonDe(x) === "mois").length}</dd>
-                  </div>
-                  <div>
-                    <dt>
-                      <span className="lin-carre" style={{ background: "var(--lin-rouge)" }} />
-                      Date passée
-                    </dt>
-                    <dd>{portee.filter((x) => horizonDe(x) === "passee").length}</dd>
-                  </div>
-                </dl>
-                <div className="lin-segment-carte" role="tablist">
-                  {(
-                    [
-                      ["horizon", "Horizon"],
-                      ["etat", "État"],
-                    ] as const
-                  ).map(([cle, lib]) => (
-                    <button key={cle} type="button" role="tab" className="lin-details-onglet" aria-selected={ongletCalendrier === cle} onClick={() => setOngletCalendrier(cle)}>
-                      {lib}
-                    </button>
-                  ))}
+                    </div>
+                  ) : (
+                    <span className="lin-ticket-pilule lin-ticket-sous-pilule" data-vide="">
+                      {c ? "Aucun moyen de le joindre" : "Contact inconnu"}
+                    </span>
+                  )}
                 </div>
-                <ul className="lin-repartition lin-ech-repartition">
-                  {repartition.map((x) => (
-                    <li key={x.cle}>
-                      <Link href={adresse(avec(x.d, x.cle))} scroll={false} data-actif={actifs[x.d] === x.cle ? "" : undefined} title={actifs[x.d] === x.cle ? "Retirer ce filtre" : "Filtrer la liste"}>
-                        <span className="lin-tranche-nom">{x.libelle}</span>
-                        <span className="lin-tranche-barre" aria-hidden="true">
-                          <span style={{ width: `${(x.nb / maxRepartition) * 100}%` }} />
-                        </span>
-                        <span className="lin-meta">{x.nb}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </CarteDroite>
-
-              <CarteDroite titre="Activité">
-                <ul className="lin-activite">
-                  {activite.slice(0, 5).map((x) => (
-                    <li key={x.cle}>
-                      <Losange atteint={x.fait} />
-                      <span>
-                        {x.quoi} · {dateCourte(x.le)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </CarteDroite>
+              </section>
             </aside>
           </div>
         </section>

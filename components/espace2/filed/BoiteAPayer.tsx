@@ -15,9 +15,10 @@
        d'échéance, l'hexagone de l'état de paiement et la date d'échéance.
        « Non lu » = à traiter : en retard ou due cette semaine, pas payée.
        Les payées restent masquées, comme avant, sauf à les afficher.
-     · la facture choisie (?id=<facture>) : la page d'un projet — montants,
-       échéance, fournisseur, IBAN, état de paiement, et « Noter un
-       paiement » (la même fenêtre, la même porte noterPaiement).
+     · la facture choisie (?id=<facture>) : la page d'un ticket — le
+       fournisseur, une phrase, les autres factures dues, le parcours en
+       fil d'activité ; à droite paiement, urgence, échéance, IBAN, statut,
+       et « Noter un paiement » (la même fenêtre, la même porte noterPaiement).
      · rien de choisi : le chiffre à traiter et les groupes d'échéance (les
        compteurs de l'écran d'avant), comme l'Inbox vide de Linear.
 
@@ -45,7 +46,7 @@ import { vueExemple } from "@/components/espace/filed/EcranFournisseurs";
 import { MOYENS_PAIEMENT, chargerVueFournisseurs, etatPaiement, noterPaiement, type EtatPaiement, type FactureDuFournisseur, type MoyenPaiement, type VueFournisseurs } from "@/components/espace/filed/portes";
 import type { Fournisseur } from "@/components/espace/types";
 import { A_PAYER, GROUPES, JOUR, aPayer, du, etatsExemple, groupeDe, jourDe, minuit, totaux, type Etats, type Groupe } from "./calculs";
-import { CarteDroite, Choix, GraphiqueProgres, IconePriorite, Menu, MenuActions, MenuOptions, type Option } from "../lin/Lin";
+import { Choix, IconePriorite, Menu, MenuActions, MenuOptions, type Option } from "../lin/Lin";
 import { IconeCalendrier, IconeDiese, IconeDocument, IconeGroupe, IconeJauge, IconeStatutProjet, type EtatProjet } from "../lin/icones";
 import { Note } from "../ui";
 import { useToast } from "../Toasts";
@@ -70,9 +71,6 @@ const dateCourte = (iso: string | null | undefined) =>
       })
     : "—";
 const pluriel = (n: number, mot: string) => `${n} ${mot}${n > 1 ? "s" : ""}`;
-const arrondi = (v: number) => Math.round(v * 100) / 100;
-const somme = (v: number[]) => v.reduce((a, b) => a + b, 0);
-const cumul = (v: number[]) => v.map((_, i) => Math.max(0, somme(v.slice(0, i + 1))));
 /* les couleurs d'icône de projet de Linear, une par fournisseur (les mêmes que la première page) */
 const COULEURS = ["#26b5ce", "#5e6ad2", "#4cb782", "#f2994a", "#eb5757", "#bb87fc", "#f2c94c", "#95a2b3"];
 const couleurDe = (id: string) => COULEURS[[...id].reduce((t, c) => t + c.charCodeAt(0), 0) % COULEURS.length];
@@ -705,7 +703,10 @@ export default function BoiteAPayer() {
     </div>
   );
 
-  /* ——— la facture choisie : la page d'un projet ——— */
+  /* ——— la facture choisie : la page d'un ticket de Linear (Teo, 28/10 : « trop d'informations », pas de sections grises) ———
+     le fournisseur en titre, une phrase (numéro, ce qui reste à payer, l'échéance), trois gestes en icônes,
+     les autres factures dues au même fournisseur, puis le parcours en fil d'activité ; à droite, sans cadre,
+     Propriétés (paiement, urgence, échéance), Étiquettes (IBAN, statut) et le fournisseur avec la prochaine étape. */
   function detail(l: Ligne) {
     const f = l.f;
     const ep = l.ep;
@@ -713,18 +714,16 @@ export default function BoiteAPayer() {
     const peutPayer = l.paiement !== "avoir" && l.paiement !== "payee";
     const lienDossier = `${RACINE}/filed?objet=facture:${encodeURIComponent(f.id)}`;
     const memeFournisseur = base.filter((x) => (f.fournisseur_id ? x.f.fournisseur_id === f.fournisseur_id : x.id === l.id));
-    const aPayerFournisseur = memeFournisseur.filter((x) => x.paiement !== "payee");
-    const part = ep && ep.du > 0 ? Math.min(100, Math.round((ep.regle / ep.du) * 100)) : l.paiement === "payee" ? 100 : 0;
-    const echeanceTexte = f.echeance_lue ? `${dateCourte(f.echeance_lue)}, ${delai(l)}` : "sans échéance lue";
-    const resume = `${f.nature === "avoir" ? "Avoir" : "Facture"}${f.numero ? ` n° ${f.numero}` : ""}${f.date_emission ? ` du ${dateCourte(f.date_emission)}` : ""} : ${montant(f.montant_ttc, f.devise)} TTC, échéance ${f.echeance_lue ? `le ${echeanceTexte}` : "non lue"}. ${
+    /* les éléments liés : les autres factures encore dues à ce fournisseur, l'échéance la plus proche d'abord */
+    const autres = memeFournisseur.filter((x) => x.id !== l.id && x.paiement !== "payee").sort((a, b) => (a.f.echeance_lue ?? "9999").localeCompare(b.f.echeance_lue ?? "9999"));
+    const numero = f.numero ? ` n° ${f.numero}` : "";
+    /* la description : une phrase, et le seul endroit de la page où paraît le montant de cette facture */
+    const description =
       l.paiement === "avoir"
-        ? "Un avoir ne se paie pas : il vient en déduction."
+        ? `Avoir${numero} : ${montant(Math.abs(l.reste), f.devise)} en déduction de ce que vous devez à ${l.nom}.`
         : l.paiement === "payee"
-          ? "Elle est payée."
-          : l.paiement === "partielle"
-            ? `Payée en partie : il reste ${montant(l.reste, f.devise)} à payer.`
-            : `${montant(l.reste, f.devise)} à payer.`
-    }${l.bloque && l.paiement !== "payee" ? " Fournisseur bloqué : ne pas payer." : ""}`;
+          ? `Facture${numero} de ${montant(ep?.du ?? du(f), f.devise)}, payée.`
+          : `Facture${numero} : ${l.paiement === "partielle" ? "reste " : ""}${montant(l.reste, f.devise)} à payer, ${f.echeance_lue ? `échéance le ${dateCourte(f.echeance_lue)} (${delai(l)})` : "sans échéance lue"}.`;
 
     /* les options des pastilles : une action réelle (noter un paiement, copier), ou un filtre de la liste */
     const optionsEtat: Option[] = [
@@ -766,90 +765,109 @@ export default function BoiteAPayer() {
         : []),
     ];
     const optionsIban: Option[] = [
-      { cle: "filtre", libelle: `Factures : ${ibanLibelle(l.iban).toLowerCase()}`, icone: <IconeJauge />, coche: estActif("iban", l.iban), href: basculer("iban", l.iban) },
+      { cle: "filtre", libelle: `Factures : ${ibanLibelle(l.iban)}`, icone: <IconeJauge />, coche: estActif("iban", l.iban), href: basculer("iban", l.iban) },
       ...(f.iban && l.iban !== "valide" && l.paiement !== "avoir"
         ? [{ cle: "lu", libelle: "Copier l'IBAN lu (masqué)", meta: masquerIban(f.iban), icone: <Copy width={16} height={16} />, action: () => void copier(masquerIban(f.iban), "IBAN copié") }]
         : []),
     ];
+    /* le menu ··· de la tête : ce qui n'a plus de place dans la page (copier le montant, ex-pastille « Montant ») */
     const optionsActions: Option[] = [
       ...(peutPayer ? [{ cle: "payer", libelle: "Noter un paiement…", icone: <Banknote width={16} height={16} />, action: () => ouvrirPaiement(l) }] : []),
       { cle: "ref", libelle: "Copier la référence", icone: <Copy width={16} height={16} />, action: () => void copier(f.reference ?? f.id) },
       ...(f.numero ? [{ cle: "numero", libelle: "Copier le numéro de facture", icone: <IconeDiese />, action: () => void copier(f.numero ?? "", "Numéro copié") }] : []),
+      { cle: "montant", libelle: "Copier le montant", icone: <Banknote width={16} height={16} />, action: () => void copier(String(Math.abs(l.reste)).replace(".", ","), "Montant copié") },
       ...(f.fournisseur_id
         ? [{ cle: "fournisseur", libelle: "Filtrer la liste sur ce fournisseur", icone: <IconeGroupe />, coche: estActif("fournisseur", f.fournisseur_id), href: basculer("fournisseur", f.fournisseur_id) }]
         : []),
     ];
 
-    const jalons: { cle: string; libelle: string; atteint: boolean; meta: string; options?: Option[] }[] = [
-      { cle: "validee", libelle: "Validée", atteint: true, meta: "fait" },
-      { cle: "comptabilisee", libelle: "Comptabilisée", atteint: f.statut === "comptabilisee", meta: f.statut === "comptabilisee" ? "fait" : "pas encore" },
-      { cle: "echeance", libelle: "Échéance", atteint: l.jours !== null && l.jours < 0, meta: f.echeance_lue ? dateCourte(f.echeance_lue) : "non lue", options: optionsEcheance },
-      {
+    /* le fil d'activité : le parcours de l'écran d'avant (validée, comptabilisée, échéance, règlements, payée), dans l'ordre du temps */
+    type Entree = { cle: string; quand: string; icone: React.ReactNode; texte: React.ReactNode };
+    const datees: Entree[] = [];
+    if (f.echeance_lue) {
+      const passee = l.jours !== null && l.jours < 0;
+      datees.push({
+        cle: "echeance",
+        quand: f.echeance_lue,
+        icone: <IconeCalendrier passe={passee && peutPayer} />,
+        texte: (
+          <>
+            <b>Échéance</b> · {l.paiement === "payee" || l.paiement === "avoir" ? (passee ? "passée" : "à venir") : delai(l)} · {dateCourte(f.echeance_lue)}
+          </>
+        ),
+      });
+    }
+    if (ep && ep.regle > 0) {
+      const fois = ep.nb_reglements > 1 ? ` en ${ep.nb_reglements} règlements` : "";
+      datees.push({
         cle: "reglement",
-        libelle: "Premier règlement",
-        atteint: !!ep && ep.regle > 0,
-        meta: ep && ep.regle > 0 ? (ep.nb_reglements > 1 ? `${ep.nb_reglements} règlements` : dateCourte(ep.dernier_le)) : l.paiement === "avoir" ? "en déduction" : "pas encore",
-        options: peutPayer ? [{ cle: "payer", libelle: "Noter un paiement…", icone: <Banknote width={16} height={16} />, action: () => ouvrirPaiement(l) }] : undefined,
-      },
-      {
-        cle: "payee",
-        libelle: "Payée",
-        atteint: l.paiement === "payee",
-        meta: l.paiement === "payee" ? dateCourte(ep?.dernier_le) : l.paiement === "partielle" && ep ? `${part} %` : "pas encore",
-        options: peutPayer ? [{ cle: "payer", libelle: "Noter le paiement du reste…", meta: montant(l.reste, f.devise), icone: <Banknote width={16} height={16} />, action: () => ouvrirPaiement(l) }] : undefined,
-      },
-    ];
-    /* le dû à ce fournisseur, cumulé par échéance (la courbe de la première page, sur ses seules factures) */
-    const valeursGroupes = ORDRE_GROUPES.map((g) => arrondi(somme(aPayerFournisseur.filter((x) => x.groupe === g).map((x) => x.reste))));
-    const activite = [
-      ...(ep?.dernier_le
-        ? [
-            {
-              cle: "reglement",
-              quand: ep.dernier_le,
-              texte: (
-                <>
-                  <b>Règlement</b> · {montant(ep.regle, f.devise)} réglés{ep.nb_reglements > 1 ? ` en ${ep.nb_reglements} fois` : ""} · {dateCourte(ep.dernier_le)}
-                </>
-              ),
-              atteint: true,
-            },
-          ]
-        : []),
-      ...(f.echeance_lue
-        ? [
-            {
-              cle: "echeance",
-              quand: f.echeance_lue,
-              texte: (
-                <>
-                  <b>Échéance</b> · {delai(l)} · {dateCourte(f.echeance_lue)}
-                </>
-              ),
-              atteint: l.jours !== null && l.jours < 0,
-            },
-          ]
-        : []),
+        quand: ep.dernier_le ?? "9999",
+        icone: <IconeStatutProjet etat={l.paiement === "payee" ? "fait" : "en-cours"} />,
+        texte: (
+          <>
+            <b>Paiement noté</b>
+            {l.paiement === "payee" ? `${fois} : la facture est payée` : ` : ${montant(ep.regle, f.devise)} réglés${fois}`}
+            {ep.dernier_le ? ` · ${dateCourte(ep.dernier_le)}` : ""}
+          </>
+        ),
+      });
+    }
+    datees.sort((a, b) => a.quand.localeCompare(b.quand));
+    const fil: Entree[] = [
       ...(f.date_emission
         ? [
             {
               cle: "emise",
               quand: f.date_emission,
+              icone: <IconeDocument />,
               texte: (
                 <>
                   <b>{l.nom}</b> · {f.nature === "avoir" ? "avoir émis" : "facture émise"} · {dateCourte(f.date_emission)}
                 </>
               ),
-              atteint: true,
             },
           ]
         : []),
-    ].sort((a, b) => b.quand.localeCompare(a.quand));
-    const avatar = (
-      <span className="lin-tuile" style={{ background: `color-mix(in srgb, ${l.couleur} 18%, transparent)`, color: l.couleur }}>
-        {l.paiement === "avoir" ? <FileMinus width={24} height={24} strokeWidth={1.6} aria-hidden="true" /> : <FileText width={24} height={24} strokeWidth={1.6} aria-hidden="true" />}
-      </span>
-    );
+      {
+        cle: "validee",
+        quand: "",
+        icone: <Losange atteint />,
+        texte: (
+          <>
+            <b>Validée</b> dans « À valider »
+          </>
+        ),
+      },
+      ...(f.statut === "comptabilisee"
+        ? [
+            {
+              cle: "comptabilisee",
+              quand: "",
+              icone: <Losange atteint />,
+              texte: (
+                <>
+                  <b>Comptabilisée</b>
+                </>
+              ),
+            },
+          ]
+        : []),
+      ...datees,
+    ];
+
+    /* la prochaine étape, sous le fournisseur : ce qui empêche de payer d'abord, puis le geste */
+    const etape: { texte: string; teinte?: string; payer?: boolean } =
+      l.bloque && l.paiement !== "payee"
+        ? { texte: "Ne pas payer : fournisseur bloqué", teinte: "rouge" }
+        : l.paiement === "avoir"
+          ? { texte: "Rien à payer : vient en déduction" }
+          : l.paiement === "payee"
+            ? { texte: "Rien à faire : facture payée" }
+            : l.iban === "manquant"
+              ? { texte: "Obtenir un IBAN, ou payer autrement", teinte: "rouge" }
+              : l.iban === "a_valider"
+                ? { texte: "Valider l'IBAN dans « À valider »", teinte: "jaune" }
+                : { texte: "Faire le virement, puis le noter", payer: true };
     const ibanTexte = l.iban === "valide" ? (l.ibanMasque ?? "IBAN validé") : ibanLibelle(l.iban);
     const precedente = rang > 0 ? visibles[rang - 1] : null;
     const suivante = rang >= 0 && rang < visibles.length - 1 ? visibles[rang + 1] : null;
@@ -916,466 +934,158 @@ export default function BoiteAPayer() {
           </div>
         </header>
 
-        <div className="lin-projet">
-          <article className="lin-projet-texte">
-            {avatar}
-            <h2 className="lin-projet-h1">{l.nom}</h2>
-            <p className="lin-projet-resume">{resume}</p>
-            <div className="lin-projet-ligne">
-              <span className="lin-projet-etiquette">Propriétés</span>
-              <MenuOptions
-                raccourci="s"
-                titre="État de paiement…"
-                teinte={l.bloque && l.paiement !== "payee" ? "rouge" : undefined}
-                declencheur={
-                  <>
-                    <IconeEtat l={l} />
-                    {etatTitre(l)}
-                  </>
-                }
-                options={optionsEtat}
-                largeur={300}
-              />
-              <MenuOptions
-                raccourci="r"
-                titre="À payer par échéance…"
-                declencheur={
-                  <>
-                    <IconePriorite niveau={l.paiement === "payee" ? 0 : NIVEAUX[l.groupe]} titre={groupeLibelle(l.groupe)} />
-                    {l.paiement === "payee" ? "Payée" : groupeLibelle(l.groupe)}
-                  </>
-                }
-                options={optionsGroupes}
-                largeur={320}
-              />
-              <MenuOptions
-                raccourci="e"
-                titre="Échéance…"
-                declencheur={
-                  <>
-                    <IconeCalendrier passe={l.paiement !== "payee" && l.groupe === "retard"} />
-                    {f.echeance_lue ? dateCourte(f.echeance_lue) : "Sans échéance"}
-                  </>
-                }
-                options={optionsEcheance}
-              />
-              <MenuOptions
-                raccourci="f"
-                titre="Factures du fournisseur…"
-                declencheur={
-                  <>
-                    <IconeGroupe />
-                    {l.nom}
-                  </>
-                }
-                options={optionsFournisseur}
-                largeur={320}
-              />
-            </div>
-            <div className="lin-projet-ligne">
-              <span className="lin-projet-etiquette">Paiement</span>
-              <MenuOptions
-                raccourci="i"
-                titre="IBAN…"
-                teinte={l.iban === "manquant" ? "rouge" : l.iban === "a_valider" ? "jaune" : undefined}
-                declencheur={
-                  <>
-                    <IconeJauge />
-                    {ibanTexte}
-                  </>
-                }
-                options={optionsIban}
-                largeur={300}
-              />
-              <MenuOptions
-                titre="Montant…"
-                declencheur={
-                  <>
-                    <Banknote width={16} height={16} aria-hidden="true" />
-                    {l.paiement === "payee" ? `${montant(ep?.du ?? du(f), f.devise)} payés` : `${montant(l.reste, f.devise)}${l.paiement === "avoir" ? " en déduction" : " à payer"}`}
-                  </>
-                }
-                options={[
-                  ...(peutPayer ? [{ cle: "payer", libelle: "Noter un paiement…", icone: <Banknote width={16} height={16} />, action: () => ouvrirPaiement(l) }] : []),
-                  { cle: "copier", libelle: "Copier le montant", icone: <Copy width={16} height={16} />, action: () => void copier(String(l.reste).replace(".", ","), "Montant copié") },
-                ]}
-              />
-            </div>
-
-            <details className="lin-maj" open aria-label="Règlements">
-              <summary className="lin-maj-tete">
-                <span className="lin-maj-titre">
-                  Règlements
-                  <svg className="lin-maj-fleche" viewBox="0 0 16 16" aria-hidden="true">
-                    <path d="M5.2 6.4h5.6L8 9.6z" fill="currentColor" />
-                  </svg>
-                </span>
-                <Link href={lienDossier} className="lin-maj-lien">
-                  <ExternalLink width={14} height={14} aria-hidden="true" /> Dossier
-                </Link>
-              </summary>
-              <p className="lin-maj-auteur">
-                <IconeEtat l={l} />
-                <span>{etatTitre(l)}</span>
-                {ep?.dernier_le ? (
-                  <span className="lin-maj-gris">
-                    dernier règlement le {dateCourte(ep.dernier_le)}
-                    {ep.nb_reglements > 1 ? ` (${ep.nb_reglements})` : ""}
-                  </span>
-                ) : null}
-              </p>
-              {fait && fait.id === f.id ? (
-                <p className="lin-maj-texte apayer-fait" role="status">
-                  <strong>C&apos;est fait.</strong> {fait.texte}
-                </p>
-              ) : (
-                <p className="lin-maj-texte">
-                  {l.paiement === "avoir"
-                    ? `Un avoir ne se paie pas : ${montant(Math.abs(l.reste), f.devise)} viennent en déduction de ce que vous devez à ${l.nom}.`
-                    : ep && ep.regle > 0
-                      ? `${montant(ep.regle, f.devise)} réglés sur ${montant(ep.du, f.devise)}${l.paiement === "payee" ? " : la facture est payée." : `, reste ${montant(ep.reste, f.devise)}.`}`
-                      : "Aucun règlement noté pour l'instant. Le paiement est noté, pas exécuté : faites le virement dans votre banque."}
-                </p>
-              )}
-              <dl className="lin-maj-citation">
-                <div>
-                  <dt>Dû</dt>
-                  <dd>{montant(ep?.du ?? du(f), f.devise)}</dd>
-                </div>
-                <div>
-                  <dt>Réglé</dt>
-                  <dd>{ep ? montant(ep.regle, f.devise) : "—"}</dd>
-                </div>
-                <div>
-                  <dt>Reste à payer</dt>
-                  <dd>{l.paiement === "avoir" ? "en déduction" : montant(l.reste, f.devise)}</dd>
-                </div>
-              </dl>
-              <footer className="lin-maj-pied">
-                {peutPayer ? (
-                  <button type="button" className="lin-maj-pied-btn lin-maj-pied-btn--texte" onClick={() => ouvrirPaiement(l)}>
-                    <Banknote width={16} height={16} aria-hidden="true" /> Noter un paiement
-                  </button>
-                ) : null}
-                <button type="button" className="lin-maj-pied-rond" aria-label="Copier la référence" title="Copier la référence" onClick={() => void copier(f.reference ?? f.id)}>
-                  <Copy width={16} height={16} aria-hidden="true" />
+        <div className="lin-ticket">
+          <article className="lin-ticket-corps">
+            <h2 className="lin-ticket-titre">{l.nom}</h2>
+            <p className="lin-ticket-desc">{description}</p>
+            <div className="lin-ticket-icones">
+              {peutPayer ? (
+                <button type="button" className="lin-ticket-icone" aria-label="Noter un paiement" title="Noter un paiement" onClick={() => ouvrirPaiement(l)}>
+                  <Banknote aria-hidden="true" />
                 </button>
-              </footer>
-            </details>
-
-            <h3 className="lin-projet-h2">Montants</h3>
-            <ul className="lin-projet-liste">
-              {(
-                [["Total TTC", f.montant_ttc], ...(f.net_a_payer !== null ? [["Net à payer", f.net_a_payer]] : []), ["Dû", ep?.du ?? du(f)], ...(ep ? [["Réglé", ep.regle]] : []), ["Reste à payer", l.reste]] as [
-                  string,
-                  number | null,
-                ][]
-              ).map(([lib, v]) => (
-                <li key={lib}>
-                  <span>{lib}</span>
-                  <span className="lin-meta">{montant(v, f.devise)}</span>
-                </li>
-              ))}
-            </ul>
-
-            <h3 className="lin-projet-h2">Pour payer</h3>
-            <ul className="lin-projet-liste">
-              <li>
-                <Losange atteint={l.iban === "valide" || l.iban === "deduction"} />
-                <span className={l.iban === "manquant" ? "apayer-rouge" : l.iban === "a_valider" ? "apayer-alerte" : undefined}>
-                  {l.iban === "valide" ? "IBAN validé" : l.iban === "deduction" ? "Avoir : en déduction, pas de virement" : l.iban === "a_valider" ? "IBAN à valider dans « À valider »" : "IBAN manquant"}
-                </span>
-                <span className="lin-meta">{l.iban === "valide" ? l.ibanMasque : f.iban && l.iban !== "deduction" ? `lu : ${masquerIban(f.iban)}` : ""}</span>
-              </li>
-              <li>
-                <Losange atteint={!l.bloque} />
-                <span className={l.bloque ? "apayer-rouge" : undefined}>{l.bloque ? "Fournisseur bloqué : ne pas payer" : `Fournisseur ${l.four ? "connu" : "inconnu"}`}</span>
-                <span className="lin-meta">{l.four?.statut === "a_confirmer" ? "à confirmer" : l.four?.statut === "actif" ? "actif" : ""}</span>
-              </li>
-              <li>
-                <Losange atteint={l.paiement === "payee"} />
-                <span>{l.paiement === "payee" ? "Payée" : "Le paiement est noté, pas exécuté : faites le virement dans votre banque"}</span>
-              </li>
-            </ul>
-            {l.iban !== "valide" && peutPayer ? (
-              <div style={{ marginTop: 16 }}>
-                <Note teinte="ambre">Le virement attend qu&apos;un IBAN du fournisseur soit validé dans « À valider », ou passera par un autre moyen.</Note>
-              </div>
-            ) : null}
-          </article>
-
-          <aside className="lin-cartes-droite" aria-label="Propriétés de la facture">
-            <CarteDroite titre="Propriétés">
-              <dl className="lin-props">
-                <div>
-                  <dt>Paiement</dt>
-                  <dd data-teinte={l.bloque && l.paiement !== "payee" ? "rouge" : undefined}>
-                    <MenuOptions
-                      plat
-                      titre="État de paiement…"
-                      declencheur={
-                        <>
-                          <IconeEtat l={l} />
-                          {etatTitre(l)}
-                        </>
-                      }
-                      options={optionsEtat}
-                      largeur={300}
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt>Urgence</dt>
-                  <dd>
-                    <MenuOptions
-                      plat
-                      titre="À payer par échéance…"
-                      declencheur={
-                        <>
-                          <IconePriorite niveau={l.paiement === "payee" ? 0 : NIVEAUX[l.groupe]} titre={groupeLibelle(l.groupe)} />
-                          {l.paiement === "payee" ? "Payée" : groupeLibelle(l.groupe)}
-                        </>
-                      }
-                      options={optionsGroupes}
-                      largeur={320}
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt>Échéance</dt>
-                  <dd className={f.echeance_lue ? undefined : "lin-props-vide"}>
-                    <MenuOptions
-                      plat
-                      titre="Échéance…"
-                      declencheur={
-                        <>
-                          <IconeCalendrier passe={l.paiement !== "payee" && l.groupe === "retard"} />
-                          {f.echeance_lue ? `${dateCourte(f.echeance_lue)} · ${delai(l)}` : "Sans échéance"}
-                        </>
-                      }
-                      options={optionsEcheance}
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt>Statut</dt>
-                  <dd>
-                    <IconeDocument />
-                    {st.libelle}
-                  </dd>
-                </div>
-                <div>
-                  <dt>Référence</dt>
-                  <dd>
-                    <MenuOptions
-                      plat
-                      titre="Référence…"
-                      declencheur={
-                        <>
-                          <IconeDiese />
-                          {f.reference ?? "—"}
-                        </>
-                      }
-                      options={[{ cle: "copier", libelle: "Copier la référence", icone: <Copy width={16} height={16} />, action: () => void copier(f.reference ?? f.id) }]}
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt>N° de facture</dt>
-                  <dd className={f.numero ? undefined : "lin-props-vide"}>
-                    {f.numero ? (
-                      <MenuOptions
-                        plat
-                        titre="Numéro…"
-                        declencheur={
-                          <>
-                            <IconeDiese />
-                            {f.numero}
-                          </>
-                        }
-                        options={[{ cle: "copier", libelle: "Copier le numéro", icone: <Copy width={16} height={16} />, action: () => void copier(f.numero ?? "", "Numéro copié") }]}
-                      />
-                    ) : (
-                      <>
-                        <IconeDiese />
-                        Non lu
-                      </>
-                    )}
-                  </dd>
-                </div>
-                <div>
-                  <dt>Fournisseur</dt>
-                  <dd className={l.four ? undefined : "lin-props-vide"}>
-                    <MenuOptions
-                      plat
-                      titre="Factures du fournisseur…"
-                      declencheur={
-                        <>
-                          <IconeGroupe />
-                          {l.nom}
-                        </>
-                      }
-                      options={optionsFournisseur}
-                      largeur={320}
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt>À payer</dt>
-                  <dd>
-                    <Banknote width={16} height={16} aria-hidden="true" />
-                    {l.paiement === "avoir" ? `${montant(l.reste, f.devise)} (déduction)` : montant(l.reste, f.devise)}
-                  </dd>
-                </div>
-                <div>
-                  <dt>IBAN</dt>
-                  <dd data-teinte={l.iban === "manquant" ? "rouge" : l.iban === "a_valider" ? "jaune" : undefined}>
-                    <MenuOptions
-                      plat
-                      titre="IBAN…"
-                      declencheur={
-                        <>
-                          <IconeJauge />
-                          {ibanTexte}
-                        </>
-                      }
-                      options={optionsIban}
-                      largeur={300}
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt>Émise le</dt>
-                  <dd className={f.date_emission ? undefined : "lin-props-vide"}>
-                    <IconeCalendrier />
-                    {f.date_emission ? dateCourte(f.date_emission) : "Non lue"}
-                  </dd>
-                </div>
-              </dl>
-            </CarteDroite>
-
-            <CarteDroite titre="Parcours">
-              <ul className="lin-jalons">
-                {jalons.map((j) => (
-                  <li key={j.cle}>
-                    <Losange atteint={j.atteint} />
-                    <span className="lin-jalon-nom">{j.libelle}</span>
-                    <span className="lin-meta">{j.meta}</span>
-                    {j.options?.length ? <MenuActions titre={`${j.libelle}…`} options={j.options} /> : null}
+              ) : null}
+              <Link href={lienDossier} className="lin-ticket-icone" aria-label="Ouvrir le document" title="Ouvrir le document">
+                <FileText aria-hidden="true" />
+              </Link>
+              <button type="button" className="lin-ticket-icone" aria-label="Copier la référence" title="Copier la référence" onClick={() => void copier(f.reference ?? f.id)}>
+                <Copy aria-hidden="true" />
+              </button>
+            </div>
+            {autres.length ? (
+              <ul className="lin-ticket-sous" aria-label={`Autres factures dues à ${l.nom}`}>
+                {autres.slice(0, 5).map((x) => (
+                  <li key={x.id}>
+                    <Link href={lienId(x.id)} className="lin-ticket-sous-ligne" scroll={false}>
+                      <IconeEtat l={x} />
+                      <span className="lin-ticket-sous-ref">{x.f.reference ?? "dossier"}</span>
+                      <span className="lin-ticket-sous-nom">{x.paiement === "avoir" ? "avoir, en déduction" : x.f.echeance_lue ? `échéance ${dateCourte(x.f.echeance_lue)}, ${delai(x)}` : "sans échéance"}</span>
+                      <span className="lin-ticket-sous-meta">{montant(Math.abs(x.reste), x.f.devise)}</span>
+                    </Link>
                   </li>
                 ))}
               </ul>
-            </CarteDroite>
-
-            <CarteDroite titre="Règlement">
-              <dl className="lin-kpis lin-kpis--trois">
-                <div>
-                  <dt>
-                    <span className="lin-carre" style={{ background: "var(--lin-graph-gris)" }} />
-                    Dû
-                  </dt>
-                  <dd>{montant(ep?.du ?? du(f), f.devise)}</dd>
-                </div>
-                <div>
-                  <dt>
-                    <span className="lin-carre" style={{ background: "var(--lin-graph-bleu)" }} />
-                    Réglé
-                  </dt>
-                  <dd>{ep ? montant(ep.regle, f.devise) : "—"}</dd>
-                </div>
-                <div>
-                  <dt>
-                    <span className="lin-carre" style={{ background: "var(--lin-graph-jaune)" }} />
-                    Reste
-                  </dt>
-                  <dd>{l.paiement === "avoir" ? "—" : montant(l.reste, f.devise)}</dd>
-                </div>
-              </dl>
-              {l.paiement !== "avoir" ? (
-                <div className="lin-barre-avancement" role="img" aria-label={`${part} % réglés`}>
-                  <span style={{ width: `${part}%` }} />
-                </div>
+            ) : null}
+            {autres.length > 5 && f.fournisseur_id ? (
+              <Link href={basculer("fournisseur", f.fournisseur_id)} className="lin-ticket-sous-appel" scroll={false} replace>
+                <IconeGroupe /> Voir les {autres.length + 1} factures de {l.nom}
+              </Link>
+            ) : null}
+            <hr className="lin-ticket-trait" />
+            <div className="lin-ticket-activite-tete">
+              <h3>Activité</h3>
+            </div>
+            <ul className="lin-ticket-fil">
+              {fil.map((a) => (
+                <li key={a.cle}>
+                  {a.icone}
+                  <span>{a.texte}</span>
+                </li>
+              ))}
+              {fait && fait.id === f.id ? (
+                <li role="status">
+                  <IconeStatutProjet etat="fait" />
+                  <span className="lin-ticket-fil-texte apayer-fait">
+                    <strong>C&apos;est fait.</strong> {fait.texte}
+                  </span>
+                </li>
               ) : null}
-            </CarteDroite>
+            </ul>
+          </article>
 
-            <CarteDroite titre={l.four ? "Dû à ce fournisseur" : "Dû"}>
-              <dl className="lin-kpis lin-kpis--trois">
-                <div>
-                  <dt>
-                    <span className="lin-carre" style={{ background: "var(--lin-graph-bleu)" }} />À payer
-                  </dt>
-                  <dd>
-                    {totaux(
-                      aPayerFournisseur.map((x) => x.f),
-                      etats,
-                    )}
-                  </dd>
-                </div>
-                <div>
-                  <dt>
-                    <span className="lin-carre" style={{ background: "var(--lin-rouge)" }} />
-                    En retard
-                  </dt>
-                  <dd>
-                    {totaux(
-                      aPayerFournisseur.filter((x) => x.groupe === "retard").map((x) => x.f),
-                      etats,
-                    )}
-                  </dd>
-                </div>
-                <div>
-                  <dt>
-                    <span className="lin-carre" style={{ background: "var(--lin-graph-gris)" }} />
-                    Factures
-                  </dt>
-                  <dd>{aPayerFournisseur.length}</dd>
-                </div>
-              </dl>
-              {aPayerFournisseur.length && valeursGroupes.some((v) => v > 0) ? (
-                <GraphiqueProgres
-                  libelle={`Reste à payer à ${l.nom}, cumulé par échéance : ${totaux(
-                    aPayerFournisseur.map((x) => x.f),
-                    etats,
-                  )}`}
-                  etiquettes={["Échu", "7 j", "30 j", "+30 j", "Sans date"]}
-                  series={[{ cle: "reste", teinte: "bleu", valeurs: cumul(valeursGroupes), aire: true }]}
+          <aside className="lin-ticket-cote" aria-label="Propriétés de la facture">
+            <section className="lin-ticket-section">
+              <h3>Propriétés</h3>
+              <div className="lin-ticket-pilules">
+                <MenuOptions
+                  raccourci="s"
+                  titre="État de paiement…"
+                  teinte={l.bloque && l.paiement !== "payee" ? "rouge" : undefined}
+                  declencheur={
+                    <>
+                      <IconeEtat l={l} />
+                      {etatTitre(l)}
+                    </>
+                  }
+                  options={optionsEtat}
+                  largeur={300}
                 />
-              ) : (
-                <p className="lin-activite-vide" style={{ marginTop: 12 }}>
-                  Plus rien à payer à ce fournisseur.
-                </p>
-              )}
-              {aPayerFournisseur.length ? (
-                <ul className="lin-repartition">
-                  {GROUPES.filter((g, i) => valeursGroupes[i] || aPayerFournisseur.some((x) => x.groupe === g.cle)).map((g) => (
-                    <li key={g.cle}>
-                      <span>{g.libelle}</span>
-                      <span>
-                        {totaux(
-                          aPayerFournisseur.filter((x) => x.groupe === g.cle).map((x) => x.f),
-                          etats,
-                        )}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-            </CarteDroite>
-
-            <CarteDroite titre="Activité">
-              {activite.length ? (
-                <ul className="lin-activite">
-                  {activite.map((a) => (
-                    <li key={a.cle}>
-                      <Losange atteint={a.atteint} />
-                      <span>{a.texte}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="lin-activite-vide">Aucune date lue sur cette facture.</p>
-              )}
-            </CarteDroite>
+                <MenuOptions
+                  raccourci="r"
+                  titre="À payer par échéance…"
+                  declencheur={
+                    <>
+                      <IconePriorite niveau={l.paiement === "payee" ? 0 : NIVEAUX[l.groupe]} titre={groupeLibelle(l.groupe)} />
+                      {l.paiement === "payee" ? "Payée" : groupeLibelle(l.groupe)}
+                    </>
+                  }
+                  options={optionsGroupes}
+                  largeur={320}
+                />
+                <MenuOptions
+                  raccourci="e"
+                  titre="Échéance…"
+                  teinte={f.echeance_lue ? undefined : "gris"}
+                  declencheur={
+                    <>
+                      <IconeCalendrier passe={l.paiement !== "payee" && l.groupe === "retard"} />
+                      {f.echeance_lue ? dateCourte(f.echeance_lue) : "Sans échéance"}
+                    </>
+                  }
+                  options={optionsEcheance}
+                />
+              </div>
+            </section>
+            <section className="lin-ticket-section">
+              <h3>Étiquettes</h3>
+              <div className="lin-ticket-pilules">
+                <MenuOptions
+                  raccourci="i"
+                  titre="IBAN…"
+                  teinte={l.iban === "manquant" ? "rouge" : l.iban === "a_valider" ? "jaune" : undefined}
+                  declencheur={
+                    <>
+                      <IconeJauge />
+                      {ibanTexte}
+                    </>
+                  }
+                  options={optionsIban}
+                  largeur={300}
+                />
+                <span className="lin-ticket-pilule" title="Statut de la facture">
+                  <IconeDocument />
+                  {st.libelle}
+                </span>
+              </div>
+            </section>
+            <section className="lin-ticket-section">
+              <h3>Fournisseur</h3>
+              <div className="lin-ticket-pilules">
+                <MenuOptions
+                  raccourci="f"
+                  titre="Factures du fournisseur…"
+                  teinte={l.four ? undefined : "gris"}
+                  declencheur={
+                    <>
+                      <IconeGroupe />
+                      {l.nom}
+                    </>
+                  }
+                  options={optionsFournisseur}
+                  largeur={320}
+                />
+                {etape.payer ? (
+                  <button type="button" className="lin-ticket-pilule lin-ticket-sous-pilule" title="Noter un paiement" onClick={() => ouvrirPaiement(l)}>
+                    <Banknote aria-hidden="true" />
+                    {etape.texte}
+                  </button>
+                ) : (
+                  <span className="lin-ticket-pilule lin-ticket-sous-pilule" data-teinte={etape.teinte}>
+                    <IconeStatutProjet etat={etatProjetDe(l)} />
+                    {etape.texte}
+                  </span>
+                )}
+              </div>
+            </section>
           </aside>
         </div>
       </section>

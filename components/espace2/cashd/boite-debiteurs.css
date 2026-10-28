@@ -4,35 +4,19 @@
    (../lin/lin.css), qui reste intact.
    ══════════════════════════════════════════════════════════════════════ */
 
-/* le texte d'une relance, tel qu'il partira : ses retours à la ligne gardés */
-.v2 .lin .c2b-corps {
-  margin: 20px 0 0;
-  font: inherit;
-  font-size: 14px;
-  font-weight: 450;
-  line-height: 22px;
-  color: var(--lin-texte);
+/* le texte d'une relance, tel qu'il partira : il tient la place de la description, ses retours à la ligne gardés */
+.v2 .lin .lin-ticket-desc.c2b-corps {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 
-/* une ligne de liste trop longue (une facture et son état) : coupée, lisible au survol */
-.v2 .lin .c2b-ligne-texte {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 /* le fil d'Ariane du détail : « Débiteurs » referme l'élément ouvert */
-.v2 .lin button.lin-fil-equipe,
-.v2 .lin button.lin-maj-pied-btn,
-.v2 .lin button.lin-maj-pied-rond {
+.v2 .lin button.lin-fil-equipe {
   cursor: pointer;
 }
 
-/* le pied d'une carte : des boutons à texte à droite des boutons ronds */
+/* « Noter l'envoi à la main » : le canal puis le bouton, dans les boutons d'une entrée du fil */
 .v2 .lin .c2b-pied-droite {
-  margin-left: auto;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -74,4 +58,70 @@
   flex: 1;
   min-width: 0;
   padding: 16px 24px 32px;
+}
+
+/* ——— la page d'un élément ouvert (modèle « page d'un ticket », ../lin/lin.css) ——— */
+
+/* une entrée du fil : la phrase, puis le texte et les boutons d'une décision en attente */
+.v2 .lin .c2b-fil-corps {
+  flex: 1;
+  min-width: 0;
+}
+.v2 .lin .lin-ticket-fil .lin-ticket-fil-texte {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 19px;
+}
+.v2 .lin .lin-ticket-fil > li[data-attente] b {
+  color: var(--lin-texte);
+}
+/* un nom dans une phrase du fil (une relance) : il l'ouvre */
+.v2 .lin .c2b-fil-lien {
+  font: inherit;
+  font-weight: 500;
+  color: var(--lin-texte);
+  cursor: pointer;
+}
+.v2 .lin .c2b-fil-lien:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* une facture soldée : grise ; son « ··· » ne paraît qu'au survol (sur un écran qui survole) */
+.v2 .lin .lin-ticket-sous-ligne[data-solde] {
+  color: var(--lin-second);
+}
+.v2 .lin .lin-ticket-sous-ligne .lin-ancre {
+  flex-shrink: 0;
+}
+@media (hover: hover) {
+  .v2 .lin .lin-ticket-sous-ligne .lin-ancre {
+    opacity: 0;
+    transition: opacity 0.1s;
+  }
+  .v2 .lin .lin-ticket-sous-ligne:hover .lin-ancre,
+  .v2 .lin .lin-ticket-sous-ligne .lin-ancre:focus-within {
+    opacity: 1;
+  }
+}
+.v2 .lin .c2b-sous-vide {
+  margin: 20px 0 0;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+}
+
+/* le menu d'un bouton-icône (le canal d'un envoi à la main) s'ouvre vers la droite */
+.v2 .lin .c2b-icone-menu .lin-menu {
+  left: -6px;
+  right: auto;
+}
+.v2 .lin a.lin-ticket-icone {
+  color: var(--lin-second);
+}
+
+/* une valeur absente dans une pilule-menu (« Pas encore relancé ») */
+.v2 .lin .c2b-gris {
+  color: var(--lin-second);
 }

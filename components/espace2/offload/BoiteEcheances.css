@@ -2,10 +2,10 @@
    OFFLOAD — la boîte des échéances (28/10/2026) : les retouches propres à
    ./BoiteEcheances.tsx, posées sur ../lin/lin.css sans le modifier.
      · le menu « Filtrer » de la liste : des sections titrées, qui défilent ;
-     · le formulaire « Noter une intervention » dans la carte « Prévenir le
-       client » ;
+     · le composeur « Noter une intervention… » de la page d'un ticket, et
+       ses champs ;
      · l'avis qui suit un geste (vert : fait ; rouge : refusé) ;
-     · les lignes de la carte « Calendrier », qui filtrent la liste.
+     · la largeur du corps de la page d'un ticket quand elle passe en colonne.
    ══════════════════════════════════════════════════════════════════════ */
 
 .v2 .lin .lin-ech-menu {
@@ -33,14 +33,18 @@
   white-space: nowrap;
 }
 
-/* « Noter une intervention » : les champs de l'ancienne fiche (ParcCompte), au gabarit */
-.v2 .lin .lin-ech-form {
-  display: grid;
-  gap: 12px;
-  margin: 20px 0 0;
-  padding: 12px;
-  border-radius: 8px;
-  background: var(--lin-survol);
+/* « Noter une intervention… » : le composeur de la page d'un ticket (lin-ticket-composeur),
+   qui s'ouvre sur les champs de l'ancienne fiche (ParcCompte) : date, nature, n° de bon */
+.v2 .lin .lin-ech-composeur-appel {
+  display: block;
+  width: 100%;
+  min-height: 24px;
+  padding: 0;
+  text-align: left;
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--lin-second);
+  cursor: text;
 }
 .v2 .lin .lin-ech-form-ligne {
   display: flex;
@@ -49,6 +53,8 @@
 }
 .v2 .lin .lin-ech-champ {
   display: grid;
+  flex: 1 1 120px;
+  min-width: 0;
   gap: 6px;
   font-size: 12px;
   font-weight: 500;
@@ -56,7 +62,7 @@
 }
 .v2 .lin .lin-ech-champ :is(input, select) {
   height: 28px;
-  min-width: 160px;
+  width: 100%;
   padding: 0 8px;
   border-radius: 6px;
   border: 0.5px solid var(--lin-trait);
@@ -65,18 +71,23 @@
   font-size: 13px;
   font-weight: 450;
   color: var(--lin-texte);
+  color-scheme: inherit;
 }
 .v2 .lin .lin-ech-case {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
+  margin-right: auto;
+  font-size: 12px;
   font-weight: 450;
-  color: var(--lin-texte);
+  color: var(--lin-second);
 }
-.v2 .lin .lin-ech-form-pied {
-  display: flex;
-  gap: 8px;
+.v2 .lin .lin-ech-gris {
+  color: var(--lin-second);
+}
+.v2 .lin .lin-ticket-fil .lin-ticket-fil-actions .lin-ic {
+  width: 14px;
+  height: 14px;
 }
 
 .v2 .lin .lin-ech-avis {
@@ -102,30 +113,8 @@
   color: var(--lin-second);
 }
 
-/* la carte « Calendrier » : chaque ligne de répartition filtre la liste */
-.v2 .lin .lin-ech-repartition li {
-  gap: 10px;
-}
-.v2 .lin .lin-ech-repartition a {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+/* en colonne (détail étroit), .lin-ticket aligne au début : sans largeur, le corps prendrait la
+   largeur « min-content » d'une ligne liée (son nom ne se coupe pas) et déborderait à 390 px */
+.v2 .lin .lin-ticket-corps {
   width: 100%;
-  height: 24px;
-  margin: 0 -6px;
-  padding: 0 6px;
-  border-radius: 6px;
-  color: inherit;
-}
-.v2 .lin .lin-ech-repartition a:hover,
-.v2 .lin .lin-ech-repartition a[data-actif] {
-  background: var(--lin-onglet-detail);
-  color: var(--lin-texte);
-}
-.v2 .lin .lin-ech-repartition .lin-tranche-nom {
-  flex: 0 0 120px !important;
-}
-.v2 .lin .lin-ech-repartition .lin-meta {
-  min-width: 24px;
-  text-align: right;
 }

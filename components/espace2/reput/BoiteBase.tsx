@@ -30,9 +30,10 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useId, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Archive,
+  ArrowUp,
   BookOpen,
   Check,
   CheckCheck,
@@ -54,13 +55,12 @@ import {
 } from "lucide-react";
 import { useSource } from "@/components/espace/source";
 import { useTempsReel } from "@/components/espace/tempsReel";
-import { dateHeure } from "@/components/espace/format";
 import { mondeExemple } from "@/components/espace/reput/exemples";
 import { csvDemandes, telecharger } from "@/components/espace/reput/export";
 import { chargerMonde, ecrireFiche, monClient, retirerFiche, validerFiche } from "@/components/espace/reput/portes";
 import type { Client, Demande, Fiche, GenreFiche, Monde, Reponse, StatutDemande, StatutReponse } from "@/components/espace/reput/types";
-import { CarteDroite, Choix, Menu, MenuActions, MenuOptions, type Option, type Serie } from "../lin/Lin";
-import { IconeCalendrier, IconeDiese, IconeDocument, IconeJauge, IconeStatutProjet, type EtatProjet } from "../lin/icones";
+import { Choix, Menu, MenuOptions, type Option } from "../lin/Lin";
+import { IconeCalendrier, IconeDiese, IconeDocument, IconeStatutProjet, type EtatProjet } from "../lin/icones";
 import { useMaintenant } from "../horloge";
 import { RACINE } from "../modules";
 import "./reput.css";
@@ -74,8 +74,6 @@ type Tri = "recente" | "etat" | "sujet" | "usage" | "titre";
 type Usage = "citee" | "jamais";
 
 const BASE = `${RACINE}/reput/base`;
-const JOUR = 86_400_000;
-const JOURS = 7;
 
 /* l'état d'une fiche : ce qui attend une personne d'abord (brouillon, période échue) */
 const ETATS: Record<Etat, { libelle: string; court: string; teinte: Teinte; hexa: EtatProjet }> = {
@@ -144,8 +142,6 @@ const extrait = (t: string | null | undefined, n = 90) => {
   const x = (t ?? "").replace(/\s+/g, " ").trim();
   return x.length > n ? `${x.slice(0, n - 1)}…` : x;
 };
-const somme = (v: number[]) => v.reduce((a, b) => a + b, 0);
-const cumul = (v: number[]) => v.map((_, i) => somme(v.slice(0, i + 1)));
 const couleurDe = (cle: string) => COULEURS[[...cle].reduce((t, c) => t + c.charCodeAt(0), 0) % COULEURS.length];
 
 const etatDe = (f: Fiche, jour: string): Etat => {
@@ -158,11 +154,9 @@ const nonLue = (e: Etat) => e === "brouillon" || e === "a_revoir";
 /* la référence courte d'une fiche : son genre et la fin de son identifiant d'origine (stable d'une version à l'autre) */
 const refDe = (f: Fiche) => `${GENRES_COURTS[f.genre] ?? "FI"}-${f.origine_id.replace(/-/g, "").slice(-4).toUpperCase()}`;
 const derniereDe = (f: Fiche) => [f.cree_le, f.valide_le].filter((x): x is string => !!x).sort((a, b) => b.localeCompare(a))[0] ?? f.cree_le;
-const periodeDe = (f: { valide_du: string; valide_au: string | null }) => `du ${dateCal(f.valide_du)}${f.valide_au ? ` au ${dateCal(f.valide_au)}` : ", sans fin"}`;
 const sujetDe = (m: Monde, code: string) => m.sujets.find((s) => s.code === code)?.libelle ?? code;
 /* les réponses qui citent cette version de la fiche (reput_reponses.sources), et leurs demandes */
 const citationsDe = (m: Monde, f: Fiche): Reponse[] => m.reponses.filter((r) => r.sources.includes(f.id));
-const demandesDe = (m: Monde, reps: Reponse[]): Demande[] => [...new Set(reps.map((r) => r.demande_id))].map((id) => m.demandes.find((d) => d.id === id)).filter((d): d is Demande => !!d);
 const nomDe = (d: Demande) => d.de_nom || d.adresse_reponse || "Client";
 const usageDe = (m: Monde, f: Fiche): Usage => (citationsDe(m, f).length ? "citee" : "jamais");
 
@@ -220,79 +214,6 @@ function Losange({ atteint }: { atteint: boolean }) {
       <path d="M8 1.8 12.9 8 8 14.2 3.1 8z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeOpacity={atteint ? 0.4 : 1} />
     </svg>
   );
-}
-
-/* la courbe de la carte « Usage » : celle de la première page (GraphiqueDemandes), l'axe en nombres entiers */
-function GraphiqueCitations({ etiquettes, series, libelle, hauteur = 140 }: { etiquettes: string[]; series: Serie[]; libelle: string; hauteur?: number }) {
-  const degrade = `lin-base-degrade-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
-  const L = 600;
-  const H = hauteur;
-  const n = etiquettes.length;
-  const max = Math.ceil(Math.max(1, ...series.flatMap((s) => s.valeurs)) / 4) * 4;
-  const lisse = (valeurs: number[]) => {
-    const pts = valeurs.map((v, i) => [(i / Math.max(1, n - 1)) * L, H - (v / max) * H] as const);
-    let ligne = `M${pts[0][0]},${pts[0][1]}`;
-    for (let i = 0; i < pts.length - 1; i++) {
-      const p0 = pts[i - 1] ?? pts[i],
-        p1 = pts[i],
-        p2 = pts[i + 1],
-        p3 = pts[i + 2] ?? p2;
-      const c1y = Math.min(H, p1[1] + (p2[1] - p0[1]) / 6),
-        c2y = Math.min(H, p2[1] - (p3[1] - p1[1]) / 6);
-      ligne += ` C${p1[0] + (p2[0] - p0[0]) / 6},${c1y} ${p2[0] - (p3[0] - p1[0]) / 6},${c2y} ${p2[0]},${p2[1]}`;
-    }
-    return ligne;
-  };
-  const couleur = { gris: "var(--lin-graph-gris)", jaune: "var(--lin-graph-jaune)", bleu: "var(--lin-graph-bleu)" };
-  return (
-    <figure className="v2-va-courbe lin-courbe">
-      <div className="v2-va-axe-y" aria-hidden="true" style={{ height: H }}>
-        {[1, 0.75, 0.5, 0.25, 0].map((p) => (
-          <span key={p}>{max * p}</span>
-        ))}
-      </div>
-      <div style={{ minWidth: 0 }}>
-        <svg viewBox={`0 0 ${L} ${H}`} preserveAspectRatio="none" style={{ width: "100%", height: H, display: "block", overflow: "visible" }} role="img" aria-label={libelle}>
-          <defs>
-            <linearGradient id={degrade} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="var(--lin-graph-bleu)" stopOpacity="0.4" />
-              <stop offset="1" stopColor="var(--lin-graph-bleu)" stopOpacity="0.02" />
-            </linearGradient>
-          </defs>
-          {[0, 0.25, 0.5, 0.75, 1].map((p) => (
-            <line key={p} x1="0" x2={L} y1={H * p} y2={H * p} stroke="var(--v2-a-300, var(--v2-a-400))" strokeWidth="1" vectorEffect="non-scaling-stroke" />
-          ))}
-          {series
-            .filter((s) => s.aire)
-            .map((s) => (
-              <path key={`${s.cle}-aire`} d={`${lisse(s.valeurs)} L${L},${H} L0,${H} Z`} fill={`url(#${degrade})`} />
-            ))}
-          {series.map((s) => (
-            <path key={s.cle} d={lisse(s.valeurs)} pathLength={1} className="v2-trace" fill="none" stroke={couleur[s.teinte]} strokeWidth={s.aire ? 2 : 1.5} strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
-          ))}
-        </svg>
-        <div className="v2-va-axe">
-          {etiquettes.map((e, i) => (
-            <span key={i} style={{ left: `${(i / Math.max(1, n - 1)) * 100}%` }}>
-              {e}
-            </span>
-          ))}
-        </div>
-      </div>
-    </figure>
-  );
-}
-
-/* ce qui s'est passé pour une fiche, du plus récent au plus ancien : écrite, validée, citée */
-type Evenement = { cle: string; le: string; quoi: string; fait: boolean };
-function evenementsDe(m: Monde, f: Fiche): Evenement[] {
-  const e: Evenement[] = [{ cle: "ecrite", le: f.cree_le, quoi: f.version > 1 ? `version ${f.version} écrite` : "fiche écrite", fait: false }];
-  if (f.valide_le) e.push({ cle: "validee", le: f.valide_le, quoi: "validée et mise en vigueur", fait: true });
-  for (const r of citationsDe(m, f)) {
-    const d = m.demandes.find((x) => x.id === r.demande_id);
-    e.push({ cle: r.id, le: r.cree_le, quoi: `citée dans la réponse à ${d ? nomDe(d) : "une demande"} (${ETATS_REPONSE[r.statut]})`, fait: r.statut === "envoyee" });
-  }
-  return e.sort((a, b) => b.le.localeCompare(a.le));
 }
 
 /* ══════════════════════════════════════════════════════════════════════ */
@@ -361,7 +282,6 @@ function Boite({
   const params = useSearchParams();
   const [tri, setTri] = useState<Tri>("recente");
   const [q, setQ] = useState("");
-  const [onglet, setOnglet] = useState<"apercu" | "historique">("apercu");
   const [edition, setEdition] = useState<Brouillon | null>(null);
   const [retrait, setRetrait] = useState<{ id: string; motif: string } | null>(null);
   const [envoi, setEnvoi] = useState(false);
@@ -396,7 +316,6 @@ function Boite({
     (id: string | null, remplacer = true) => {
       setEdition(null);
       setRetrait(null);
-      setOnglet("apercu");
       /* le mot d'un geste reste sur la page vide (une fiche retirée), pas sur la fiche suivante */
       if (id) setRetour(null);
       const href = lien(filtres, id);
@@ -474,7 +393,6 @@ function Boite({
   const ouvrirEdition = (f: Fiche) => {
     setRetour(null);
     setRetrait(null);
-    setOnglet("apercu");
     setEdition({ id: f.id, sujet: f.sujet, genre: f.genre, titre: f.titre, contenu: f.contenu, source: f.source, valide_du: f.valide_du, valide_au: f.valide_au ?? "" });
   };
   const nouvelle = () => {
@@ -541,7 +459,6 @@ function Boite({
       }
       setRetour({ texte: decide ? "La fiche est en vigueur : la prochaine réponse la cite." : "Brouillon enregistré : un valideur le met en vigueur.", teinte: "vert" });
       setEdition(null);
-      setOnglet("apercu");
       routeur.replace(lien(filtres, nouvelId), { scroll: false });
     } catch (e) {
       setRetour({ texte: e instanceof Error ? e.message : "La base n'a pas répondu.", teinte: "rouge" });
@@ -687,7 +604,6 @@ function Boite({
                     setEdition(null);
                     setRetrait(null);
                     setRetour(null);
-                    setOnglet("apercu");
                     if (window.innerWidth < 1024) window.setTimeout(() => document.getElementById("lin-base-fiche")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
                   }}
                 >
@@ -748,7 +664,6 @@ function Boite({
         m={m}
         f={choisie}
         jour={jour}
-        maint={maint}
         filtres={filtres}
         position={ids.indexOf(choisie.id)}
         total={ids.length}
@@ -759,8 +674,6 @@ function Boite({
         decide={decide}
         envoi={envoi}
         retour={retour}
-        onglet={onglet}
-        setOnglet={setOnglet}
         edition={edition && edition.id === choisie.id ? edition : null}
         setEdition={setEdition}
         ouvrirEdition={() => ouvrirEdition(choisie)}
@@ -875,12 +788,18 @@ function Editeur({
   );
 }
 
-/* ——— la page d'une fiche : la page d'un projet de Linear ——— */
+/* ——— la page d'une fiche : la page d'un ticket de Linear (28/10, « trop d'informations ») ———
+   à gauche la question, la réponse entière, trois gestes, les demandes qui l'ont citée,
+   puis l'activité (son cycle de vie et ses autres versions) et le composeur, qui corrige
+   la réponse (reput_ecrire_connaissance : une nouvelle version) ; à droite, sans fond,
+   Propriétés (état, sujet, version), Étiquettes (genre, usage), Source (sa période en retrait). */
+const CITATIONS_VISIBLES = 5;
+type Ligne = { cle: string; le: string; rang: number; icone: React.ReactNode; texte: React.ReactNode };
+
 function PageFiche({
   m,
   f,
   jour,
-  maint,
   filtres,
   position,
   total,
@@ -891,8 +810,6 @@ function PageFiche({
   decide,
   envoi,
   retour,
-  onglet,
-  setOnglet,
   edition,
   setEdition,
   ouvrirEdition,
@@ -906,7 +823,6 @@ function PageFiche({
   m: Monde;
   f: Fiche;
   jour: string;
-  maint: number;
   filtres: Filtres;
   position: number;
   total: number;
@@ -917,8 +833,6 @@ function PageFiche({
   decide: boolean;
   envoi: boolean;
   retour: Retour | null;
-  onglet: "apercu" | "historique";
-  setOnglet: (o: "apercu" | "historique") => void;
   edition: Brouillon | null;
   setEdition: (b: Brouillon | null) => void;
   ouvrirEdition: () => void;
@@ -929,26 +843,32 @@ function PageFiche({
   valider: () => void;
   retirer: (motif: string) => void;
 }) {
+  const [toutes, setToutes] = useState(false);
+  const [correction, setCorrection] = useState("");
   const e = etatDe(f, jour);
   const couleur = couleurDe(f.sujet);
   const sujet = sujetDe(m, f.sujet);
   const citations = citationsDe(m, f).sort((a, b) => b.cree_le.localeCompare(a.cree_le));
-  const demandes = demandesDe(m, citations);
-  const envoyees = citations.filter((r) => r.statut === "envoyee").length;
   const versions = m.fiches.filter((x) => x.origine_id === f.origine_id).sort((a, b) => b.version - a.version);
   const autres = versions.filter((x) => x.id !== f.id);
-  const evenements = evenementsDe(m, f);
-  const horsBaseSujet = m.reponses.filter((r) => r.sujet === f.sujet && !r.couverte).length;
-  const enVigueurAtteinte = f.statut === "validee" && f.valide_du.slice(0, 10) <= jour;
-  const finAtteinte = !!f.valide_au && f.valide_au.slice(0, 10) < jour;
   const lienFiltre = (dim: Dimension, v: string) => lien(bascule(filtres, dim, v), f.id);
   const copier = (t: string) => void navigator.clipboard?.writeText(t);
+  const voir = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const voirActivite = () => voir("lin-base-activite");
+  const ouvrirRetrait = () => setRetrait({ id: f.id, motif: "" });
 
-  /* les gestes de l'ancien écran (Corriger, Valider, Retirer), puis la copie et l'historique */
+  /* le composeur : la réponse corrigée devient une nouvelle version, les autres champs de la fiche ne bougent pas */
+  const corrigee: Brouillon = { id: f.id, sujet: f.sujet, genre: f.genre, titre: f.titre, contenu: correction.trim(), source: f.source, valide_du: f.valide_du, valide_au: f.valide_au ?? "" };
+  const peutCorriger = !envoi && !!correction.trim() && correction.trim() !== f.contenu.trim() && pret(corrigee);
+  const envoyerCorrection = () => {
+    if (peutCorriger) enregistrer(corrigee);
+  };
+
+  /* les gestes de l'ancien écran (Corriger, Valider, Retirer), puis la copie et l'activité */
   const gestes: Option[] = [
     ...(decide && f.statut === "brouillon" ? [{ cle: "valider", libelle: "Valider et mettre en vigueur", icone: <CheckCheck width={16} height={16} />, action: valider }] : []),
     ...(ecrit ? [{ cle: "corriger", libelle: "Corriger la fiche…", icone: <PenLine width={16} height={16} />, action: ouvrirEdition }] : []),
-    ...(decide ? [{ cle: "retirer", libelle: "Retirer la fiche…", icone: <Archive width={16} height={16} />, action: () => setRetrait({ id: f.id, motif: "" }) }] : []),
+    ...(decide ? [{ cle: "retirer", libelle: "Retirer la fiche…", icone: <Archive width={16} height={16} />, action: ouvrirRetrait }] : []),
   ];
   const optionsEtat: Option[] = [
     ...gestes,
@@ -1004,7 +924,7 @@ function PageFiche({
       coche: filtres.usage === u,
       href: lienFiltre("usage", u),
     })),
-    { cle: "historique", libelle: "Voir les réponses qui la citent", icone: <MessageSquare width={16} height={16} />, action: () => setOnglet("historique") },
+    ...(citations.length ? [{ cle: "citations", libelle: "Voir les réponses qui la citent", icone: <MessageSquare width={16} height={16} />, action: () => voir("lin-base-citations") }] : []),
   ];
   const optionsSource: Option[] = [
     { cle: "copier", libelle: "Copier la source", icone: <Copy width={16} height={16} />, action: () => copier(f.source) },
@@ -1019,38 +939,106 @@ function PageFiche({
       coche: x.id === f.id,
       href: lien(filtres, x.id),
     })),
-    { cle: "historique", libelle: "Voir l'historique", icone: <MessageSquare width={16} height={16} />, action: () => setOnglet("historique") },
-  ];
-  const optionsJalon: Option[] = [
-    { cle: "historique", libelle: "Voir l'historique", icone: <MessageSquare width={16} height={16} />, action: () => setOnglet("historique") },
-    ...(ecrit ? [{ cle: "corriger", libelle: "Corriger la période…", icone: <PenLine width={16} height={16} />, action: ouvrirEdition }] : []),
-  ];
-  const jalons: { cle: string; libelle: string; atteint: boolean; le: string }[] = [
-    { cle: "ecrite", libelle: f.version > 1 ? `Version ${f.version} écrite` : "Écrite", atteint: true, le: dateCourte(f.cree_le) },
-    { cle: "validee", libelle: "Validée", atteint: !!f.valide_le, le: f.valide_le ? dateCourte(f.valide_le) : "—" },
-    { cle: "vigueur", libelle: "En vigueur", atteint: enVigueurAtteinte, le: dateCal(f.valide_du) },
-    { cle: "fin", libelle: "Fin de validité", atteint: finAtteinte, le: f.valide_au ? dateCal(f.valide_au) : "sans fin" },
+    { cle: "activite", libelle: "Voir l'activité", icone: <MessageSquare width={16} height={16} />, action: voirActivite },
   ];
 
-  /* la carte « Usage » : les réponses qui citent la fiche sur les sept derniers jours (tout ce qui est plus ancien compte dans le premier point) */
-  const aujourdhui = minuit(maint);
-  const indexDe = (iso: string) => Math.min(JOURS - 1, Math.max(0, JOURS - 1 - Math.round((aujourdhui - minuit(Date.parse(iso))) / JOUR)));
-  const parJour = (filtre: (r: Reponse) => boolean) => {
-    const v = Array<number>(JOURS).fill(0);
-    for (const r of citations.filter(filtre)) v[indexDe(r.cree_le)]++;
-    return v;
-  };
-  const preparees = parJour(() => true);
-  const parties = parJour((r) => r.statut === "envoyee");
-  const etiquettes = Array.from({ length: JOURS }, (_, i) => (i === JOURS - 1 ? "Auj." : i === 0 ? dateCourte(aujourdhui - (JOURS - 1) * JOUR) : String(new Date(aujourdhui - (JOURS - 1 - i) * JOUR).getDate())));
-  const parStatut = [...new Set(demandes.map((d) => d.statut))].map((s) => ({ s, n: demandes.filter((d) => d.statut === s).length }));
+  /* une fiche validée après le début de sa période entre en vigueur le jour de sa validation */
+  const vigueurALaValidation = !!f.valide_le && f.valide_le.slice(0, 10) >= f.valide_du.slice(0, 10);
+  const debut = vigueurALaValidation && f.valide_le ? f.valide_le : f.valide_du;
+  /* la période, en sous-pilule de la source : ce qui compte aujourd'hui */
+  const periode =
+    e === "a_revoir"
+      ? `Échue le ${dateJour(f.valide_au)}`
+      : e === "a_venir"
+        ? `En vigueur le ${dateJour(f.valide_du)}`
+        : e === "brouillon"
+          ? f.valide_du.slice(0, 10) > jour
+            ? `En vigueur le ${dateJour(f.valide_du)}, une fois validée`
+            : "En vigueur dès sa validation"
+          : `En vigueur depuis le ${dateJour(debut)}${f.valide_au ? ` → ${dateJour(f.valide_au)}` : ""}`;
 
-  const chipEtat = (
-    <>
-      <IconeEtat etat={e} />
-      {ETATS[e].libelle}
-    </>
-  );
+  /* l'activité : l'ancien onglet Historique et la carte « Cycle de vie », du plus ancien au plus récent (le même jour : écrite, validée, puis en vigueur) */
+  const ic = { width: 14, height: 14, "aria-hidden": true as const };
+  const fil: Ligne[] = [
+    {
+      cle: "ecrite",
+      rang: 0,
+      le: f.cree_le,
+      icone: <PenLine {...ic} />,
+      texte: (
+        <>
+          <b>{f.version > 1 ? `Version ${f.version}` : "Fiche"}</b> écrite{f.version > 1 ? ", les précédentes restent au journal" : ""} · {dateCourte(f.cree_le)}
+        </>
+      ),
+    },
+    ...(f.valide_le
+      ? [
+          {
+            cle: "validee",
+            rang: 1,
+            le: f.valide_le,
+            icone: <CheckCheck {...ic} />,
+            texte: (
+              <>
+                <b>Validée</b>
+                {vigueurALaValidation ? ", en vigueur" : ""} · {dateCourte(f.valide_le)}
+              </>
+            ),
+          },
+        ]
+      : []),
+    ...(f.statut === "validee" && !vigueurALaValidation
+      ? [
+          {
+            cle: "vigueur",
+            rang: 2,
+            le: f.valide_du,
+            icone: <IconeCalendrier />,
+            texte: (
+              <>
+                <b>En vigueur</b> {f.valide_du.slice(0, 10) <= jour ? "depuis le" : "à partir du"} {dateCal(f.valide_du)}
+              </>
+            ),
+          },
+        ]
+      : []),
+    ...(f.valide_au
+      ? [
+          {
+            cle: "fin",
+            rang: 3,
+            le: f.valide_au,
+            icone: <IconeCalendrier passe={e === "a_revoir"} />,
+            texte: (
+              <>
+                <b>Fin de validité</b> {e === "a_revoir" ? "atteinte le" : "le"} {dateCal(f.valide_au)}
+              </>
+            ),
+          },
+        ]
+      : []),
+    ...autres.map((x) => ({
+      cle: x.id,
+      rang: 0,
+      le: x.cree_le,
+      icone: <IconeEtat etat={etatDe(x, jour)} />,
+      texte: (
+        <>
+          <Link href={lien(filtres, x.id)} scroll={false} replace>
+            <b>Version {x.version}</b>
+          </Link>{" "}
+          · {ETATS[etatDe(x, jour)].court.toLowerCase()} · {dateCourte(derniereDe(x))}
+        </>
+      ),
+    })),
+  ].sort((a, b) => a.le.slice(0, 10).localeCompare(b.le.slice(0, 10)) || a.rang - b.rang || a.le.localeCompare(b.le));
+  /* la décision en attente, en dernière ligne : un brouillon à valider, une période échue à reprendre */
+  const attente =
+    e === "brouillon"
+      ? { texte: decide ? "Brouillon : les réponses ne la citent qu'une fois validée." : "Brouillon : un valideur la met en vigueur.", oui: decide ? { libelle: "Valider et mettre en vigueur", action: valider } : null }
+      : e === "a_revoir"
+        ? { texte: "Période échue : la fiche est à corriger ou à retirer.", oui: decide ? { libelle: "Retirer la fiche…", action: ouvrirRetrait } : null }
+        : null;
 
   return (
     <section className="lin-boite-detail" id="lin-base-fiche" aria-label={`La fiche ${refDe(f)}`}>
@@ -1097,7 +1085,7 @@ function PageFiche({
                   ...gestes,
                   { cle: "copier", libelle: "Copier la réponse", icone: <Copy width={16} height={16} />, action: () => copier(f.contenu) },
                   { cle: "copier-source", libelle: "Copier la source", icone: <Copy width={16} height={16} />, action: () => copier(f.source) },
-                  { cle: "historique", libelle: "Voir l'historique", icone: <MessageSquare width={16} height={16} />, action: () => setOnglet("historique") },
+                  { cle: "activite", libelle: "Voir l'activité", icone: <MessageSquare width={16} height={16} />, action: voirActivite },
                 ].map((o) => (
                   <button
                     key={o.cle}
@@ -1118,33 +1106,180 @@ function PageFiche({
           </Menu>
         </div>
       </header>
-      <div className="lin-outils">
-        <nav className="lin-onglets" aria-label="Vues de la fiche">
-          <button type="button" className="v2-btn v2-btn--petit" data-actif={onglet === "apercu" ? "" : undefined} aria-pressed={onglet === "apercu"} onClick={() => setOnglet("apercu")}>
-            Aperçu
-          </button>
-          <button type="button" className="v2-btn v2-btn--petit" data-actif={onglet === "historique" ? "" : undefined} aria-pressed={onglet === "historique"} onClick={() => setOnglet("historique")}>
-            Historique
-          </button>
-        </nav>
-      </div>
 
-      <div className="lin-projet">
-        <article className="lin-projet-texte">
-          {edition ? (
+      {edition ? (
+        <div className="lin-projet">
+          <article className="lin-projet-texte">
             <Editeur m={m} b={edition} setB={setEdition} decide={decide} envoi={envoi} pret={pret(edition)} enregistrer={() => enregistrer(edition)} annuler={() => setEdition(null)} retour={retour} />
-          ) : onglet === "apercu" ? (
-            <>
-              <span className="lin-tuile" style={{ background: `color-mix(in srgb, ${couleur} 18%, transparent)`, color: couleur }}>
-                <IconeGenre genre={f.genre} taille={24} />
-              </span>
-              <h1 className="lin-projet-h1">{f.titre}</h1>
-              <p className="lin-projet-resume">
-                {GENRES[f.genre]} · {sujet} · en vigueur {periodeDe(f)}
+          </article>
+        </div>
+      ) : (
+        <div className="lin-ticket">
+          <article className="lin-ticket-corps">
+            <h2 className="lin-ticket-titre">{f.titre}</h2>
+            {/* le corps de la fiche EST un texte : la réponse prend la place de la description, en entier */}
+            <p className="lin-ticket-desc lin-reput-corps" data-vide={f.contenu.trim() ? undefined : ""}>
+              {f.contenu.trim() || "Aucune réponse écrite."}
+            </p>
+            <div className="lin-ticket-icones">
+              {ecrit ? (
+                <button type="button" className="lin-ticket-icone" aria-label="Corriger la fiche" title="Corriger la fiche" disabled={envoi} onClick={ouvrirEdition}>
+                  <PenLine aria-hidden="true" />
+                </button>
+              ) : null}
+              <button type="button" className="lin-ticket-icone" aria-label="Copier la réponse" title="Copier la réponse" onClick={() => copier(f.contenu)}>
+                <Copy aria-hidden="true" />
+              </button>
+              {decide ? (
+                <button type="button" className="lin-ticket-icone" aria-label="Retirer la fiche" title="Retirer la fiche" aria-pressed={!!retrait} disabled={envoi} onClick={ouvrirRetrait}>
+                  <Archive aria-hidden="true" />
+                </button>
+              ) : null}
+            </div>
+            {retrait ? (
+              <>
+                <input
+                  className="lin-reput-champ lin-base-motif"
+                  autoFocus
+                  aria-label="Pourquoi retirer cette fiche ? (obligatoire)"
+                  placeholder="Pourquoi retirer cette fiche ? Par exemple : tarif remplacé par la grille 2027"
+                  value={retrait.motif}
+                  onChange={(ev) => setRetrait({ id: f.id, motif: ev.target.value })}
+                />
+                <div className="lin-reput-actions">
+                  <button type="button" className="v2-btn v2-btn--petit" data-actif="" disabled={envoi || !retrait.motif.trim()} onClick={() => retirer(retrait.motif.trim())}>
+                    Retirer la fiche
+                  </button>
+                  <button type="button" className="v2-btn v2-btn--petit" onClick={() => setRetrait(null)}>
+                    Annuler
+                  </button>
+                </div>
+              </>
+            ) : null}
+            {retour ? (
+              <p className="lin-reput-retour" data-teinte={retour.teinte} role={retour.teinte === "rouge" ? "alert" : "status"}>
+                {retour.texte}
               </p>
-              <div className="lin-projet-ligne">
-                <span className="lin-projet-etiquette">Propriétés</span>
-                <MenuOptions raccourci="s" titre="État…" teinte={ETATS[e].teinte} declencheur={chipEtat} options={optionsEtat} largeur={300} />
+            ) : null}
+
+            {citations.length ? (
+              <ul className="lin-ticket-sous" id="lin-base-citations" aria-label="Les demandes qui l'ont citée">
+                {(toutes ? citations : citations.slice(0, CITATIONS_VISIBLES)).map((r) => {
+                  const d = m.demandes.find((x) => x.id === r.demande_id);
+                  const contenu = (
+                    <>
+                      <Losange atteint={r.statut === "envoyee"} />
+                      <span className="lin-ticket-sous-ref">{d ? nomDe(d) : "Demande"}</span>
+                      <span className="lin-ticket-sous-nom">{d ? d.objet || STATUTS_DEMANDE[d.statut] : "hors de la liste chargée"}</span>
+                      <span className="lin-ticket-sous-meta">
+                        réponse {ETATS_REPONSE[r.statut]} · {dateCourte(r.cree_le)}
+                      </span>
+                    </>
+                  );
+                  return (
+                    <li key={r.id}>
+                      {d ? (
+                        <Link href={`${RACINE}/reput?demande=${encodeURIComponent(d.id)}`} className="lin-ticket-sous-ligne" title={`${nomDe(d)} · ${STATUTS_DEMANDE[d.statut]}`}>
+                          {contenu}
+                        </Link>
+                      ) : (
+                        <span className="lin-ticket-sous-ligne">{contenu}</span>
+                      )}
+                    </li>
+                  );
+                })}
+                {citations.length > CITATIONS_VISIBLES ? (
+                  <li>
+                    <button type="button" className="lin-ticket-sous-appel" aria-expanded={toutes} onClick={() => setToutes((v) => !v)}>
+                      {toutes ? "Voir moins" : `Voir les ${citations.length}`}
+                    </button>
+                  </li>
+                ) : null}
+              </ul>
+            ) : null}
+
+            <hr className="lin-ticket-trait" />
+            <div className="lin-ticket-activite-tete" id="lin-base-activite">
+              <h3>Activité</h3>
+            </div>
+            <ul className="lin-ticket-fil">
+              {fil.map((l) => (
+                <li key={l.cle}>
+                  {l.icone}
+                  <span>{l.texte}</span>
+                </li>
+              ))}
+              {attente ? (
+                <li>
+                  <IconeEtat etat={e} />
+                  <div>
+                    <span className="lin-ticket-fil-texte">{attente.texte}</span>
+                    {attente.oui || ecrit ? (
+                      <div className="lin-ticket-fil-actions">
+                        {attente.oui ? (
+                          <button type="button" className="v2-btn v2-btn--petit" data-actif="" disabled={envoi} onClick={attente.oui.action}>
+                            {attente.oui.libelle}
+                          </button>
+                        ) : null}
+                        {ecrit ? (
+                          <button type="button" className="v2-btn v2-btn--petit" disabled={envoi} onClick={ouvrirEdition}>
+                            Corriger…
+                          </button>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </div>
+                </li>
+              ) : null}
+            </ul>
+            {ecrit ? (
+              <div className="lin-ticket-composeur">
+                <textarea
+                  aria-label="Corriger la réponse : la correction crée une nouvelle version"
+                  placeholder="Corriger la réponse…"
+                  rows={Math.max(1, correction.split("\n").length)}
+                  value={correction}
+                  onChange={(ev) => setCorrection(ev.target.value)}
+                  onKeyDown={(ev) => {
+                    if (ev.key === "Enter" && (ev.metaKey || ev.ctrlKey)) {
+                      ev.preventDefault();
+                      envoyerCorrection();
+                    }
+                  }}
+                />
+                <div className="lin-ticket-composeur-pied">
+                  <button
+                    type="button"
+                    className="lin-ticket-envoyer"
+                    aria-label={decide ? "Mettre en vigueur la réponse corrigée" : "Enregistrer la correction en brouillon"}
+                    title={decide ? "Mettre en vigueur la réponse corrigée (⌘↵)" : "Enregistrer la correction en brouillon (⌘↵)"}
+                    disabled={!peutCorriger}
+                    onClick={envoyerCorrection}
+                  >
+                    <ArrowUp width={16} height={16} aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
+            ) : null}
+          </article>
+
+          <aside className="lin-ticket-cote" aria-label="Propriétés de la fiche">
+            <section className="lin-ticket-section">
+              <h3>Propriétés</h3>
+              <div className="lin-ticket-pilules">
+                <MenuOptions
+                  raccourci="s"
+                  titre="État…"
+                  teinte={ETATS[e].teinte}
+                  declencheur={
+                    <>
+                      <IconeEtat etat={e} />
+                      {ETATS[e].libelle}
+                    </>
+                  }
+                  options={optionsEtat}
+                  largeur={300}
+                />
                 <MenuOptions
                   raccourci="t"
                   titre="Sujet…"
@@ -1157,6 +1292,23 @@ function PageFiche({
                   options={optionsSujet}
                 />
                 <MenuOptions
+                  titre="Versions…"
+                  declencheur={
+                    <>
+                      <IconeDocument />
+                      Version {f.version}
+                      {autres.length ? ` · ${pluriel(autres.length, "autre")}` : ""}
+                    </>
+                  }
+                  options={optionsVersion}
+                  largeur={300}
+                />
+              </div>
+            </section>
+            <section className="lin-ticket-section">
+              <h3>Étiquettes</h3>
+              <div className="lin-ticket-pilules">
+                <MenuOptions
                   raccourci="g"
                   titre="Genre…"
                   declencheur={
@@ -1168,424 +1320,51 @@ function PageFiche({
                   options={optionsGenre}
                 />
                 <MenuOptions
-                  titre="Période…"
-                  declencheur={
-                    <>
-                      <IconeCalendrier passe={e === "a_revoir"} />
-                      {f.valide_au ? `${dateJour(f.valide_du)} → ${dateJour(f.valide_au)}` : `Depuis le ${dateJour(f.valide_du)}`}
-                    </>
-                  }
-                  options={optionsPeriode}
-                  largeur={300}
-                />
-                <MenuOptions
                   raccourci="u"
                   titre="Usage…"
                   declencheur={
                     <>
-                      <IconeJauge />
-                      {citations.length ? `Citée ${pluriel(citations.length, "fois", "fois")}` : "Jamais citée"}
+                      {citations.length ? <MessageSquare width={16} height={16} aria-hidden="true" /> : <IconeDocument />}
+                      {USAGES[citations.length ? "citee" : "jamais"]}
                     </>
                   }
                   options={optionsUsage}
                   largeur={300}
                 />
+                {f.langue && f.langue !== "fr" ? <span className="lin-ticket-pilule">Langue : {f.langue}</span> : null}
               </div>
-              <div className="lin-projet-ligne">
-                <span className="lin-projet-etiquette">Source</span>
+            </section>
+            <section className="lin-ticket-section">
+              <h3>Source</h3>
+              <div className="lin-ticket-pilules">
                 <MenuOptions
                   titre="Source…"
                   declencheur={
                     <>
                       <IconeDocument />
-                      {extrait(f.source, 60)}
+                      {extrait(f.source, 38)}
                     </>
                   }
                   options={optionsSource}
                 />
-              </div>
-
-              <details className="lin-maj" open aria-label="La réponse de la fiche">
-                <summary className="lin-maj-tete">
-                  <span className="lin-maj-titre">
-                    {`La réponse${f.version > 1 ? ` · version ${f.version}` : ""}`}
-                    <svg className="lin-maj-fleche" viewBox="0 0 16 16" aria-hidden="true">
-                      <path d="M5.2 6.4h5.6L8 9.6z" fill="currentColor" />
-                    </svg>
-                  </span>
-                  <button
-                    type="button"
-                    className="lin-maj-lien"
-                    onClick={(ev) => {
-                      ev.preventDefault();
-                      copier(f.contenu);
-                    }}
-                  >
-                    <Copy width={14} height={14} aria-hidden="true" /> Copier
-                  </button>
-                </summary>
-                <p className="lin-maj-auteur">
-                  <IconeEtat etat={e} />
-                  <span data-teinte={ETATS[e].teinte}>{ETATS[e].libelle}</span>
-                  <span className="lin-avatar-auteur" aria-hidden="true">
-                    <BookOpen width={11} height={11} />
-                  </span>
-                  <span className="lin-maj-gris">{f.statut === "brouillon" ? "En attente d'un valideur" : "Base de connaissances"}</span>
-                  <span className="lin-maj-gris">{dateCourte(derniereDe(f))}</span>
-                </p>
-                <p className="lin-maj-texte lin-reput-corps">{f.contenu}</p>
-                <dl className="lin-maj-citation">
-                  <div>
-                    <dt>Source</dt>
-                    <dd>{f.source}</dd>
-                  </div>
-                  <div>
-                    <dt>En vigueur</dt>
-                    <dd>{periodeDe(f)}</dd>
-                  </div>
-                  <div>
-                    <dt>Sujet</dt>
-                    <dd>{sujet}</dd>
-                  </div>
-                  <div>
-                    <dt>Citée</dt>
-                    <dd>{citations.length ? `${pluriel(citations.length, "réponse")}, ${pluriel(demandes.length, "demande")}` : "Dans aucune réponse pour l'instant"}</dd>
-                  </div>
-                  {f.langue && f.langue !== "fr" ? (
-                    <div>
-                      <dt>Langue</dt>
-                      <dd>{f.langue}</dd>
-                    </div>
-                  ) : null}
-                </dl>
-                {retrait ? (
-                  <input
-                    className="lin-reput-champ lin-base-motif"
-                    autoFocus
-                    aria-label="Pourquoi retirer cette fiche ? (obligatoire)"
-                    placeholder="Pourquoi retirer cette fiche ? Par exemple : tarif remplacé par la grille 2027"
-                    value={retrait.motif}
-                    onChange={(ev) => setRetrait({ id: f.id, motif: ev.target.value })}
-                  />
-                ) : null}
-                {retrait ? (
-                  <div className="lin-reput-actions">
-                    <button type="button" className="v2-btn v2-btn--petit" data-actif="" disabled={envoi || !retrait.motif.trim()} onClick={() => retirer(retrait.motif.trim())}>
-                      Retirer la fiche
-                    </button>
-                    <button type="button" className="v2-btn v2-btn--petit" onClick={() => setRetrait(null)}>
-                      Annuler
-                    </button>
-                  </div>
-                ) : null}
-                {retour ? (
-                  <p className="lin-reput-retour" data-teinte={retour.teinte} role={retour.teinte === "rouge" ? "alert" : "status"}>
-                    {retour.texte}
-                  </p>
-                ) : null}
-                <footer className="lin-maj-pied">
-                  {ecrit ? (
-                    <button type="button" className="lin-maj-pied-btn" aria-label="Corriger la fiche" title="Corriger la fiche" disabled={envoi} onClick={ouvrirEdition}>
-                      <PenLine width={16} height={16} aria-hidden="true" />
-                    </button>
-                  ) : (
-                    <button type="button" className="lin-maj-pied-btn" aria-label="Voir l'historique" title="Voir l'historique" onClick={() => setOnglet("historique")}>
-                      <MessageSquare width={16} height={16} aria-hidden="true" />
-                    </button>
-                  )}
-                  {decide && f.statut === "brouillon" ? (
-                    <button type="button" className="lin-maj-pied-rond" aria-label="Valider et mettre en vigueur" title="Valider et mettre en vigueur" disabled={envoi} onClick={valider}>
-                      <CheckCheck width={16} height={16} aria-hidden="true" />
-                    </button>
-                  ) : null}
-                  {decide ? (
-                    <button type="button" className="lin-maj-pied-rond" aria-label="Retirer la fiche" title="Retirer la fiche" disabled={envoi} onClick={() => setRetrait({ id: f.id, motif: "" })}>
-                      <Archive width={16} height={16} aria-hidden="true" />
-                    </button>
-                  ) : null}
-                </footer>
-              </details>
-
-              <h2 className="lin-projet-h2">Les demandes qui l&apos;ont citée</h2>
-              {citations.length ? (
-                <ul className="lin-projet-liste">
-                  {citations.map((r) => {
-                    const d = m.demandes.find((x) => x.id === r.demande_id);
-                    return (
-                      <li key={r.id}>
-                        {d ? (
-                          <Link href={`${RACINE}/reput?demande=${encodeURIComponent(d.id)}`} className="lin-projet-lien">
-                            <Losange atteint={r.statut === "envoyee"} />
-                            <span>
-                              {nomDe(d)} · {STATUTS_DEMANDE[d.statut]}
-                            </span>
-                            <span className="lin-meta">
-                              réponse {ETATS_REPONSE[r.statut]} · {dateCourte(r.cree_le)}
-                            </span>
-                          </Link>
-                        ) : (
-                          <>
-                            <Losange atteint={r.statut === "envoyee"} />
-                            <span>Une demande hors de la liste chargée</span>
-                            <span className="lin-meta">
-                              réponse {ETATS_REPONSE[r.statut]} · {dateCourte(r.cree_le)}
-                            </span>
-                          </>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              ) : (
-                <p className="lin-meta">Aucune réponse ne l&apos;a encore citée.</p>
-              )}
-
-              {autres.length ? (
-                <>
-                  <h2 className="lin-projet-h2">Autres versions en cours</h2>
-                  <ul className="lin-projet-liste">
-                    {autres.map((x) => (
-                      <li key={x.id}>
-                        <Link href={lien(filtres, x.id)} className="lin-projet-lien" scroll={false} replace>
-                          <IconeEtat etat={etatDe(x, jour)} />
-                          <span>
-                            Version {x.version} · {ETATS[etatDe(x, jour)].court}
-                          </span>
-                          <span className="lin-meta">{dateCourte(derniereDe(x))}</span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              ) : null}
-            </>
-          ) : (
-            <>
-              <h1 className="lin-projet-h1" style={{ marginTop: 0 }}>
-                Historique
-              </h1>
-              <h2 className="lin-projet-h2">Versions</h2>
-              <ul className="lin-projet-liste">
-                {versions.map((x) => (
-                  <li key={x.id}>
-                    <IconeEtat etat={etatDe(x, jour)} />
-                    <span>
-                      Version {x.version}
-                      {x.id === f.id ? " · celle-ci" : ""}
-                    </span>
-                    <span className="lin-meta">
-                      {ETATS[etatDe(x, jour)].court} · {dateCourte(derniereDe(x))}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-              {f.version > 1 ? <p className="lin-meta">Les versions précédentes, remplacées, restent au journal de la base.</p> : null}
-              <h2 className="lin-projet-h2">Événements</h2>
-              <ul className="lin-projet-liste">
-                {evenements.map((x) => (
-                  <li key={x.cle}>
-                    <Losange atteint={x.fait} />
-                    <span>{x.quoi.charAt(0).toUpperCase() + x.quoi.slice(1)}</span>
-                    <span className="lin-meta">{dateHeure(x.le)}</span>
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-        </article>
-
-        <aside className="lin-cartes-droite" aria-label="Propriétés de la fiche">
-          <CarteDroite titre="Propriétés">
-            <dl className="lin-props">
-              <div>
-                <dt>État</dt>
-                <dd data-teinte={ETATS[e].teinte}>
-                  <MenuOptions plat titre="État…" declencheur={chipEtat} options={optionsEtat} largeur={300} />
-                </dd>
-              </div>
-              <div>
-                <dt>Sujet</dt>
-                <dd>
+                <div className="lin-ticket-sous-pilule">
                   <MenuOptions
-                    plat
-                    titre="Sujet…"
-                    declencheur={
-                      <>
-                        <IconeDiese />
-                        {sujet}
-                      </>
-                    }
-                    options={optionsSujet}
-                  />
-                </dd>
-              </div>
-              <div>
-                <dt>Genre</dt>
-                <dd>
-                  <MenuOptions
-                    plat
-                    titre="Genre…"
-                    declencheur={
-                      <>
-                        <IconeGenre genre={f.genre} />
-                        {GENRES[f.genre]}
-                      </>
-                    }
-                    options={optionsGenre}
-                  />
-                </dd>
-              </div>
-              <div>
-                <dt>Version</dt>
-                <dd>
-                  <MenuOptions
-                    plat
-                    titre="Versions…"
-                    declencheur={
-                      <>
-                        <MessageSquare width={16} height={16} aria-hidden="true" />
-                        Version {f.version}
-                        {autres.length ? ` · ${pluriel(autres.length, "autre")}` : ""}
-                      </>
-                    }
-                    options={optionsVersion}
-                    largeur={300}
-                  />
-                </dd>
-              </div>
-              <div>
-                <dt>Source</dt>
-                <dd>
-                  <MenuOptions
-                    plat
-                    titre="Source…"
-                    declencheur={
-                      <>
-                        <IconeDocument />
-                        {extrait(f.source, 34)}
-                      </>
-                    }
-                    options={optionsSource}
-                  />
-                </dd>
-              </div>
-              <div>
-                <dt>En vigueur</dt>
-                <dd>
-                  <MenuOptions
-                    plat
                     titre="Période…"
                     declencheur={
                       <>
                         <IconeCalendrier passe={e === "a_revoir"} />
-                        {f.valide_au ? `${dateCal(f.valide_du)} → ${dateCal(f.valide_au)}` : `Depuis le ${dateCal(f.valide_du)}`}
+                        {periode}
                       </>
                     }
                     options={optionsPeriode}
                     largeur={300}
                   />
-                </dd>
+                </div>
               </div>
-              <div>
-                <dt>Usage</dt>
-                <dd className={citations.length ? undefined : "lin-props-vide"}>
-                  <MenuOptions
-                    plat
-                    titre="Usage…"
-                    declencheur={
-                      <>
-                        <IconeJauge />
-                        {citations.length ? `${pluriel(citations.length, "réponse")} · ${pluriel(demandes.length, "demande")}` : "Jamais citée"}
-                      </>
-                    }
-                    options={optionsUsage}
-                    largeur={300}
-                  />
-                </dd>
-              </div>
-            </dl>
-          </CarteDroite>
-
-          <CarteDroite titre="Cycle de vie">
-            <ul className="lin-jalons">
-              {jalons.map((j) => (
-                <li key={j.cle}>
-                  <Losange atteint={j.atteint} />
-                  <span className="lin-jalon-nom">{j.libelle}</span>
-                  <span className="lin-meta">{j.le}</span>
-                  <MenuActions titre={`${j.libelle}…`} options={optionsJalon} />
-                </li>
-              ))}
-            </ul>
-          </CarteDroite>
-
-          <CarteDroite titre="Usage">
-            <dl className="lin-kpis lin-kpis--trois">
-              <div data-teinte="gris">
-                <dt>
-                  <span className="lin-carre" style={{ background: "var(--lin-graph-gris)" }} />
-                  Réponses
-                </dt>
-                <dd>{citations.length}</dd>
-              </div>
-              <div data-teinte="jaune">
-                <dt>
-                  <span className="lin-carre" style={{ background: "var(--lin-graph-jaune)" }} />
-                  Demandes
-                </dt>
-                <dd>{demandes.length}</dd>
-              </div>
-              <div data-teinte="bleu">
-                <dt>
-                  <span className="lin-carre" style={{ background: "var(--lin-graph-bleu)" }} />
-                  Envoyées
-                </dt>
-                <dd>{envoyees}</dd>
-              </div>
-            </dl>
-            <GraphiqueCitations
-              libelle={`Réponses citant la fiche, cumulées sur sept jours : ${pluriel(somme(preparees), "réponse")}, dont ${somme(parties)} envoyée${somme(parties) > 1 ? "s" : ""}`}
-              etiquettes={etiquettes}
-              series={[
-                { cle: "preparees", teinte: "gris", valeurs: cumul(preparees) },
-                { cle: "envoyees", teinte: "bleu", valeurs: cumul(parties), aire: true },
-              ]}
-            />
-            <ul className="lin-repartition">
-              {parStatut.map((l) => (
-                <li key={l.s}>
-                  <span>{STATUTS_DEMANDE[l.s]}</span>
-                  <span>{l.n}</span>
-                </li>
-              ))}
-              <li>
-                <span>Réponses hors base sur ce sujet</span>
-                <span>{horsBaseSujet}</span>
-              </li>
-            </ul>
-          </CarteDroite>
-
-          <CarteDroite
-            titre="Activité"
-            action={
-              <button type="button" className="lin-carte-lien" onClick={() => setOnglet("historique")}>
-                Tout voir
-              </button>
-            }
-          >
-            <ul className="lin-activite">
-              {evenements.slice(0, 3).map((x) => (
-                <li key={x.cle}>
-                  <Losange atteint={x.fait} />
-                  <span>
-                    {x.quoi} · {dateCourte(x.le)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </CarteDroite>
-        </aside>
-      </div>
+            </section>
+          </aside>
+        </div>
+      )}
     </section>
   );
 }

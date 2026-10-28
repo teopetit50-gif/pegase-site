@@ -88,24 +88,21 @@
   color: var(--lin-rouge);
 }
 
-/* le pied de « Règlements » : un bouton peut y remplacer un lien */
-.v2 .lin button.lin-maj-pied-btn,
-.v2 .lin button.lin-maj-pied-rond {
-  border: 0;
-  font: inherit;
-  cursor: pointer;
-}
-.v2 .lin .lin-maj-pied-btn--texte {
-  display: inline-flex;
-  align-items: center;
-  width: auto;
-  gap: 6px;
-  padding: 0 12px;
-  font-size: 13px;
-  font-weight: 500;
-}
-
 /* la phrase « C'est fait » après un paiement noté */
 .v2 .lin .apayer-fait strong {
   font-weight: 600;
+}
+
+/* la page de la facture (modèle « page d'un ticket ») : une pilule en lecture seule prend sa teinte
+   (la prochaine étape en rouge quand le fournisseur est bloqué ou l'IBAN manquant), et le bouton
+   de la prochaine étape s'habille comme une pilule */
+.v2 .lin .lin-ticket-pilule[data-teinte] {
+  color: var(--lin-teinte);
+}
+.v2 .lin button.lin-ticket-pilule {
+  border: 0;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
 }

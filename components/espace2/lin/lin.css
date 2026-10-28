@@ -594,3 +594,76 @@ html[data-v2-theme="light"] .v2 .lin { --lin-maj-pied: var(--v2-a-200); }
   .v2 .lin-boite { flex-direction: column; }
   .v2 .lin-boite-liste { width: auto; min-height: 0; border-right: 0; border-bottom: 0.5px solid var(--lin-trait); }
 }
+
+/* ——— la page d'un élément ouvert dans la boîte (page d'un ticket de Linear) ———
+   Relevé du 28/10/2026 sur OME-5 ouvert depuis l'Inbox, fenêtre de 1710 px. Teo : « dans la
+   référence il n'y a pas les sections grises, et trop d'informations chez nous ». Donc : pas de
+   cartes, pas de courbe ; un titre, deux lignes, une liste d'éléments liés, un fil d'activité.
+     colonne principale  591 de large (x 695 pour un détail qui part de x 645) ; titre 24/600 lh 32 à 59 sous la tête
+     description         15/400 lh 24, padding 10 14 16 décalé de −14 ; placeholder gris
+     sous-éléments       ligne d'appel 24 de haut, 12/500 grise, « + » ; trait 0.5 px 50 plus bas
+     Activité            h3 15/600 lh 23, ligne de 32 avec « Unsubscribe » 12/500 à droite ;
+                         entrées 12 : auteur 12/500 gris, « · », heure 12/450, icône 14 sur un fil vertical, pas de 25
+     composeur           607 de large (débord de 8), padding 12 16, rayon 8, fond L 9.2, trait 0.5 L 16.8, ombre 0 .5 1 1 /.3
+     colonne de droite   342 de large, sans fond ni trait ; titre de section 13/500 gris, padding 0 8 ;
+                         propriétés en pilules de 28 (rayon plein, padding 0 10 0 6, écart 6, 13/500) au pas de 32 ;
+                         sections espacées de 23 (padding bas 10) */
+.v2 .lin { --lin-composeur: lch(9.232 0.85 272); --lin-composeur-trait: lch(16.793 1.93 272); --lin-separateur: lch(18.48 1.48 272); }
+html[data-v2-theme="light"] .v2 .lin { --lin-composeur: var(--v2-bg-100); --lin-composeur-trait: var(--v2-a-400); --lin-separateur: var(--v2-a-400); }
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lin { --lin-composeur: var(--v2-bg-100); --lin-composeur-trait: var(--v2-a-400); --lin-separateur: var(--v2-a-400); }
+}
+.v2 .lin-ticket { flex: 1; display: flex; align-items: flex-start; gap: 37px; padding: 0 37px 64px 50px; }
+.v2 .lin-ticket-corps { flex: 1; min-width: 0; max-width: 591px; margin: 0 auto; padding-top: 59px; }
+.v2 .lin-ticket-titre { margin: 0; font-size: 24px; font-weight: 600; line-height: 32px; color: var(--lin-titre); letter-spacing: -0.01em; }
+.v2 .lin-ticket-desc { margin: 14px 0 0; font-size: 15px; font-weight: 400; line-height: 24px; color: var(--lin-texte); }
+.v2 .lin-ticket-desc[data-vide] { color: var(--lin-second); }
+.v2 .lin-ticket-icones { display: flex; align-items: center; gap: 4px; margin: 18px 0 0 -6px; }
+.v2 .lin-ticket-icone { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 6px; color: var(--lin-second); }
+.v2 .lin-ticket-icone:hover { background: var(--lin-survol); color: var(--lin-texte); }
+.v2 .lin-ticket-icone svg { width: 16px; height: 16px; }
+.v2 .lin-ticket-sous { margin: 20px 0 0; padding: 0; list-style: none; }
+.v2 .lin-ticket-sous-appel { display: inline-flex; align-items: center; gap: 6px; height: 24px; margin-left: -6px; padding: 0 6px; border-radius: 6px; font-size: 12px; font-weight: 500; color: var(--lin-second); }
+.v2 .lin-ticket-sous-appel:hover { background: var(--lin-survol); color: var(--lin-texte); }
+.v2 .lin-ticket-sous-ligne { position: relative; display: flex; align-items: center; gap: 8px; height: 32px; margin: 0 -8px; padding: 0 8px; border-radius: 6px; font-size: 13px; font-weight: 500; color: var(--lin-texte); }
+.v2 .lin-ticket-sous-ligne:hover { background: var(--lin-survol); }
+.v2 .lin-ticket-sous-ligne .lin-ticket-sous-ref { color: var(--lin-second); font-weight: 450; }
+.v2 .lin-ticket-sous-ligne .lin-ticket-sous-nom { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2 .lin-ticket-sous-ligne .lin-ticket-sous-meta { font-size: 12px; font-weight: 450; color: var(--lin-second); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.v2 .lin-ticket-trait { height: 0; margin: 26px 0 19px; border: 0; border-top: 0.5px solid var(--lin-separateur); }
+.v2 .lin-ticket-activite-tete { display: flex; align-items: center; justify-content: space-between; height: 32px; padding-right: 8px; }
+.v2 .lin-ticket-activite-tete h3 { margin: 0; font-size: 15px; font-weight: 600; line-height: 23px; color: var(--lin-titre); }
+.v2 .lin-ticket-activite-tete .lin-ticket-lien { height: 32px; padding: 0 10px; border-radius: 6px; font-size: 12px; font-weight: 500; color: var(--lin-second); display: inline-flex; align-items: center; gap: 6px; }
+.v2 .lin-ticket-activite-tete .lin-ticket-lien:hover { background: var(--lin-survol); color: var(--lin-texte); }
+.v2 .lin-ticket-fil { position: relative; margin: 14px 0 0; padding: 0; list-style: none; }
+.v2 .lin-ticket-fil::before { content: ""; position: absolute; left: 18px; top: 12px; bottom: 12px; width: 1px; background: var(--lin-separateur); }
+.v2 .lin-ticket-fil > li { position: relative; display: flex; align-items: flex-start; gap: 10px; min-height: 25px; padding: 4px 0 4px 11px; font-size: 12px; font-weight: 450; line-height: 16.8px; color: var(--lin-second); }
+.v2 .lin-ticket-fil > li > .lin-ic, .v2 .lin-ticket-fil > li > svg:first-child { flex-shrink: 0; width: 14px; height: 14px; margin-top: 1px; background: var(--lin-fond); box-shadow: 0 0 0 3px var(--lin-fond); border-radius: 50%; }
+.v2 .lin-ticket-fil b { font-weight: 500; color: var(--lin-second); }
+.v2 .lin-ticket-fil .lin-ticket-fil-texte { color: var(--lin-texte); }
+.v2 .lin-ticket-fil .lin-ticket-fil-actions { display: flex; gap: 6px; margin-top: 6px; }
+.v2 .lin-ticket-composeur { margin: 18px -8px 0; padding: 12px 16px; border-radius: 8px; background: var(--lin-composeur); border: 0.5px solid var(--lin-composeur-trait); box-shadow: 0 0.5px 1px 1px lch(0 0 0 / 0.3); }
+html[data-v2-theme="light"] .v2 .lin-ticket-composeur { box-shadow: var(--v2-ombre-petite); }
+.v2 .lin-ticket-composeur textarea { display: block; width: 100%; min-height: 24px; resize: none; border: 0; outline: 0; background: transparent; padding: 0; font: inherit; font-size: 15px; line-height: 24px; color: var(--lin-texte); }
+.v2 .lin-ticket-composeur textarea::placeholder { color: var(--lin-second); }
+.v2 .lin-ticket-composeur textarea:focus-visible { box-shadow: none; }
+.v2 .lin-ticket-composeur-pied { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 10px; }
+.v2 .lin-ticket-envoyer { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--lin-pastille-active); color: var(--lin-texte); }
+.v2 .lin-ticket-envoyer:disabled { opacity: 0.5; }
+.v2 .lin-ticket-cote { width: 342px; flex-shrink: 0; padding-top: 72px; }
+.v2 .lin-ticket-section { padding: 0 0 10px 4px; }
+.v2 .lin-ticket-section + .lin-ticket-section { margin-top: 23px; }
+.v2 .lin-ticket-section > h3 { display: flex; align-items: center; height: 20px; margin: 0 0 8px; padding: 0 8px; font-size: 13px; font-weight: 500; color: var(--lin-second); }
+.v2 .lin-ticket-pilules { display: grid; justify-items: start; row-gap: 4px; }
+.v2 .lin-ticket-pilule, .v2 .lin-ticket-pilules .lin-puce { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 6px; border-radius: 9999px; font-size: 13px; font-weight: 500; color: var(--lin-texte); background: transparent; white-space: nowrap; }
+.v2 .lin-ticket-pilule:hover, .v2 .lin-ticket-pilules .lin-puce:hover { background: var(--lin-survol); }
+.v2 .lin-ticket-pilule[data-vide] { color: var(--lin-second); }
+.v2 .lin-ticket-pilule svg, .v2 .lin-ticket-pilules .lin-puce svg { width: 16px; height: 16px; flex-shrink: 0; }
+.v2 .lin-ticket-sous-pilule { position: relative; margin-left: 22px; }
+.v2 .lin-ticket-sous-pilule::before { content: ""; position: absolute; left: -10px; top: -6px; width: 9px; height: 18px; border-left: 1px solid var(--lin-separateur); border-bottom: 1px solid var(--lin-separateur); border-bottom-left-radius: 6px; }
+
+@container principale (max-width: 1100px) {
+  .v2 .lin-ticket { flex-direction: column; gap: 24px; padding: 0 16px 48px; }
+  .v2 .lin-ticket-corps { width: 100%; padding-top: 32px; max-width: none; }
+  .v2 .lin-ticket-cote { width: auto; padding-top: 0; }
+}

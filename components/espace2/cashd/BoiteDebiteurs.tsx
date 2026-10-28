@@ -56,7 +56,6 @@ import {
   PauseCircle,
   PenLine,
   PlayCircle,
-  Plus,
   Scale,
   Scissors,
   Send,
@@ -80,8 +79,8 @@ import Textes from "@/components/espace/cashd/Textes";
 import type { Balance, Fiche, NaturePiece, Piece, ReglementEtat, Relance, RelanceCommande, ReponseLue, StatutCompte, Suivi, Tableau } from "@/components/espace/cashd/types";
 import { HabilleSb } from "../Habille";
 import { useToast } from "../Toasts";
-import { CarteDroite, Choix, GraphiqueProgres, IconePriorite, Menu, MenuActions, MenuOptions, type Option } from "../lin/Lin";
-import { IconeCalendrier, IconeDiese, IconeDocument, IconeEnveloppe, IconeGroupe, IconeJauge, IconeStatutProjet, type EtatProjet } from "../lin/icones";
+import { Choix, IconePriorite, Menu, MenuActions, MenuOptions, type Option } from "../lin/Lin";
+import { IconeCalendrier, IconeDocument, IconeEnveloppe, IconeGroupe, IconeStatutProjet, type EtatProjet } from "../lin/icones";
 import { RACINE } from "../modules";
 /* les fenêtres de geste et « Vos textes » portent les classes de l'écran d'avant (c2-sous, c2-coche…) */
 import "@/components/espace/cashd/cashd.css";
@@ -116,20 +115,11 @@ const STATUTS: { cle: StatutCompte; aide: string }[] = [
 ];
 const santeStatut = (statut: StatutCompte, b: Balance): Sante => (statut === "actif" ? (b.echu > 0 ? "retard" : "a_jour") : statut === "litige" || statut === "recouvrement" ? "litige" : "pause");
 const ORDRE_PALIERS = ["echeance", "rappel", "relance", "mise_en_demeure"] as const;
-const TRANCHES = [
-  { cle: "non_echu", libelle: "Non échu" },
-  { cle: "echu_1_30", libelle: "1 à 30 jours" },
-  { cle: "echu_31_60", libelle: "31 à 60 jours" },
-  { cle: "echu_61_90", libelle: "61 à 90 jours" },
-  { cle: "echu_plus_90", libelle: "Plus de 90 jours" },
-] as const;
 const COULEURS = ["#26b5ce", "#5e6ad2", "#4cb782", "#f2994a", "#eb5757", "#bb87fc", "#f2c94c", "#95a2b3"];
 const couleurDe = (id: string) => COULEURS[[...id].reduce((t, c) => t + c.charCodeAt(0), 0) % COULEURS.length];
 const niveauDe = (j: number): 0 | 1 | 2 | 3 | 4 => (j > 90 ? 4 : j > 60 ? 3 : j > 30 ? 2 : j > 0 ? 1 : 0);
 const retardDe = (j: number) => (j > 0 ? `${j} jour${j > 1 ? "s" : ""} de retard` : "Aucun retard");
 const jour = (iso: string | null | undefined) => (iso ? new Date(iso.length === 10 ? `${iso}T12:00:00Z` : iso).toLocaleDateString("fr-FR", { day: "numeric", month: "short", timeZone: "Europe/Paris" }) : "—");
-const somme = (v: number[]) => v.reduce((a, b) => a + b, 0);
-const cumul = (v: number[]) => v.map((_, i) => somme(v.slice(0, i + 1)));
 const pluriel = (n: number, mot: string) => `${n} ${mot}${n > 1 ? "s" : ""}`;
 
 /* ——— les filtres de la liste : une valeur par dimension, dans ?filtre= ——— */
@@ -202,15 +192,8 @@ function Losange({ atteint }: { atteint: boolean }) {
     </svg>
   );
 }
-function IconeDebiteur({ id, grand }: { id: string; grand?: boolean }) {
-  const couleur = couleurDe(id);
-  if (grand)
-    return (
-      <span className="lin-tuile" style={{ background: `color-mix(in srgb, ${couleur} 18%, transparent)`, color: couleur }}>
-        <Building2 width={24} height={24} strokeWidth={1.6} aria-hidden="true" />
-      </span>
-    );
-  return <Building2 className="lin-icone-projet" width={16} height={16} strokeWidth={1.8} style={{ color: couleur }} aria-hidden="true" />;
+function IconeDebiteur({ id }: { id: string }) {
+  return <Building2 className="lin-icone-projet" width={16} height={16} strokeWidth={1.8} style={{ color: couleurDe(id) }} aria-hidden="true" />;
 }
 function IconeLigne({ nature, taille = 20 }: { nature: NatureLigne; taille?: number }) {
   const Icone = nature === "commande" ? ClipboardList : nature === "devis" ? FileText : Mail;
@@ -231,64 +214,6 @@ function paliersDe(fiche: Fiche | null, relances: Relance[]) {
 const dernierPalier = (vus: Map<string, string | null>) => [...ORDRE_PALIERS].reverse().find((p) => vus.has(p)) ?? null;
 /* le prochain palier prévu par le suivi des factures */
 const prochainPalier = (suivi: Suivi[]) => suivi.filter((s) => s.palier_suivant && s.palier_suivant_le).sort((a, b) => (a.palier_suivant_le ?? "").localeCompare(b.palier_suivant_le ?? ""))[0] ?? null;
-
-/* la carte « Encours » : la carte « Progress » de Linear, pour un débiteur */
-function CarteEncours({ b }: { b: Balance }) {
-  const total = TRANCHES.map((x) => b[x.cle]);
-  const arrete = b.statut !== "actif" || b.en_litige > 0;
-  const arretes = total.map((v) => (arrete ? v : 0));
-  const relances = total.map((v) => (arrete ? 0 : v));
-  return (
-    <CarteDroite titre="Encours">
-      <dl className="lin-kpis lin-kpis--trois">
-        <div data-teinte="gris">
-          <dt>
-            <span className="lin-carre" style={{ background: "var(--lin-graph-gris)" }} />
-            Encours
-          </dt>
-          <dd>{montant(somme(total), b.devise)}</dd>
-        </div>
-        <div data-teinte="jaune">
-          <dt>
-            <span className="lin-carre" style={{ background: "var(--lin-graph-jaune)" }} />
-            Arrêté
-          </dt>
-          <dd>{montant(somme(arretes), b.devise)}</dd>
-        </div>
-        <div data-teinte="bleu">
-          <dt>
-            <span className="lin-carre" style={{ background: "var(--lin-graph-bleu)" }} />
-            Relancé
-          </dt>
-          <dd>{montant(somme(relances), b.devise)}</dd>
-        </div>
-      </dl>
-      <GraphiqueProgres
-        libelle={`Encours cumulé par ancienneté : ${montant(somme(total), b.devise)}`}
-        etiquettes={["À venir", "30 j", "60 j", "90 j", "+90 j"]}
-        series={[
-          { cle: "encours", teinte: "gris", valeurs: cumul(total) },
-          { cle: "arrete", teinte: "jaune", valeurs: cumul(arretes) },
-          { cle: "relance", teinte: "bleu", valeurs: cumul(relances), aire: true },
-        ]}
-      />
-      <ul className="lin-repartition">
-        {TRANCHES.map((x) => (
-          <li key={x.cle}>
-            <span>{x.libelle}</span>
-            <span>{montant(b[x.cle], b.devise)}</span>
-          </li>
-        ))}
-        {b.credits > 0 ? (
-          <li>
-            <span>Crédits à déduire</span>
-            <span>{montant(b.credits, b.devise)}</span>
-          </li>
-        ) : null}
-      </ul>
-    </CarteDroite>
-  );
-}
 
 /* le pied « Noter l'envoi à la main » d'une relance validée (c2_11) : copier le texte, choisir le canal, noter */
 function EnvoiMain({ relance, noter }: { relance: Relance; noter: (r: Relance, canal: string) => Promise<void> }) {
@@ -1359,7 +1284,7 @@ export default function BoiteDebiteurs({ vue }: { vue: VueBoite }) {
           reponse={l.r ? (reponseDeRelance.get(l.r.id) ?? null) : null}
           actions={fiche ? actionsPour(fiche) : null}
           autres={relancesDe(l.compte_id).filter((r) => r.id !== l.cle)}
-          vus={paliersDe(fiche, relancesDe(l.compte_id))}
+          suivant={prochainPalier(fiche?.suivi ?? [])}
           position={position}
           noter={noterEnvoi}
           aller={aller}
@@ -1547,6 +1472,60 @@ function etatPieceTexte(p: Piece, s: Suivi | undefined) {
   else if (s) morceaux.push(`${libelleSequence(s)}${s.palier_suivant ? ` ; suivant : ${libellePalier(s.palier_suivant).toLowerCase()} le ${jour(s.palier_suivant_le)}` : ""}`);
   return morceaux.join(" · ");
 }
+
+/* ——— la page d'un élément, sur la page d'un ticket de Linear : le fil d'activité ———
+   Une entrée : son icône (14), une phrase en 12 gris, sa date ; une décision en attente
+   (réponse à trancher, relance à valider ou à envoyer) porte son texte et ses boutons. */
+type Entree = { cle: string; le: string | null; icone: React.ReactNode; contenu: React.ReactNode; texte?: React.ReactNode; actions?: React.ReactNode; attente?: boolean };
+const LIMITE_FIL = 8;
+function Fil({ entrees, vide }: { entrees: Entree[]; vide: string }) {
+  const [tout, setTout] = useState(false);
+  const debut = tout ? 0 : Math.max(0, entrees.length - LIMITE_FIL);
+  const vues = entrees.filter((e, i) => i >= debut || e.attente);
+  const cachees = entrees.length - vues.length;
+  return (
+    <ul className="lin-ticket-fil">
+      {cachees > 0 ? (
+        <li>
+          <MoreHorizontal width={14} height={14} aria-hidden="true" />
+          <span>
+            <FilLien onClick={() => setTout(true)}>
+              Voir {pluriel(cachees, "entrée")} plus ancienne{cachees > 1 ? "s" : ""}
+            </FilLien>
+          </span>
+        </li>
+      ) : null}
+      {vues.length ? (
+        vues.map((e) => (
+          <li key={e.cle} data-attente={e.attente ? "" : undefined}>
+            {e.icone}
+            <div className="c2b-fil-corps">
+              <span>
+                {e.contenu}
+                {e.le ? ` · ${jour(e.le)}` : ""}
+              </span>
+              {e.texte ? <span className="lin-ticket-fil-texte">{e.texte}</span> : null}
+              {e.actions ? <div className="lin-ticket-fil-actions">{e.actions}</div> : null}
+            </div>
+          </li>
+        ))
+      ) : (
+        <li>
+          <Inbox width={14} height={14} aria-hidden="true" />
+          <span>{vide}</span>
+        </li>
+      )}
+    </ul>
+  );
+}
+function FilLien({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button type="button" className="c2b-fil-lien" onClick={onClick}>
+      {children}
+    </button>
+  );
+}
+const court = (t: string, n: number) => (t.length > n ? `${t.slice(0, n - 1).trimEnd()}…` : t);
 
 function FicheDebiteur({
   b,
@@ -1736,7 +1715,6 @@ function FicheDebiteur({
         { cle: "copier", libelle: "Copier l'adresse", icone: <Copy width={16} height={16} />, action: () => copier(contact) },
       ]
     : [];
-  const optionsPlafond: Option[] = [{ cle: "plafond", libelle: c.plafond_encours !== null ? "Changer le plafond…" : "Fixer un plafond…", icone: <Gauge width={16} height={16} />, action: () => void ouvrirPlafond() }];
   const gestesPiece = (p: Piece): Option[] => {
     const facture = p.nature === "facture" || p.nature === "acompte";
     if (facture && p.statut === "ouverte" && p.reste_du > 0)
@@ -1755,12 +1733,188 @@ function FicheDebiteur({
     if (facture && p.statut === "litige") return [{ cle: "clore", libelle: "Clore le litige", icone: <Scale width={16} height={16} />, action: () => ouvrir({ type: "litige", facture: p, ouvrir: false }) }];
     return [];
   };
-  const etatRelance = (r: Relance) => (ETATS_RELANCE[r.etat] ?? ETATS_RELANCE.preparee).libelle.toLowerCase();
-  const activite = [
-    ...relances.map((r) => ({ cle: r.id, le: r.envoye_le ?? r.jour, texte: `${libellePalier(r.palier)} ${etatRelance(r)}`, icone: <Losange atteint={r.etat !== "a_valider"} /> })),
-    ...fiche.reglements.map((r) => ({ cle: r.id, le: r.recu_le, texte: `Règlement de ${montant(r.montant)}${r.a_imputer > 0 ? ", à rapprocher" : ""}`, icone: <Banknote width={14} height={14} aria-hidden="true" /> })),
-    ...(c.statut_le ? [{ cle: "statut", le: c.statut_le, texte: `${STATUTS_COMPTE[c.statut].libelle}${c.statut_motif ? ` : ${c.statut_motif}` : ""}`, icone: <IconeStatut sante={s} /> }] : []),
-  ].sort((x, y) => y.le.localeCompare(x.le));
+  const relanceDe = (id: string) => relances.find((r) => r.id === id) ?? relances.find((r) => r.demande_id === id) ?? null;
+  const palier = dernierPalier(vus);
+  /* la pilule du palier : les gestes de l'ancienne carte « Paliers », pour chacun des quatre */
+  const optionsPaliers: Option[] = [
+    ...ORDRE_PALIERS.map((p) => ({
+      cle: `r-${p}`,
+      libelle: `Ses relances : ${libellePalier(p).toLowerCase()}`,
+      meta: vus.has(p) ? jour(vus.get(p) ?? null) : "pas atteint",
+      icone: <Losange atteint={vus.has(p)} />,
+      coche: p === palier,
+      action: () => voirRelances({ filtre: `debiteur:${encodeURIComponent(c.id)},palier:${p}` }),
+    })),
+    ...ORDRE_PALIERS.map((p) => ({ cle: `d-${p}`, libelle: `Débiteurs au palier ${libellePalier(p).toLowerCase()}`, icone: <Losange atteint />, action: () => filtrer("palier", p) })),
+  ];
+  /* la prochaine chose à faire pour ce débiteur : la sous-pilule de « Relances » */
+  const aValider = relances.find((r) => groupeDe(r, false) === "a_valider") ?? null;
+  const aPartir = relances.find(aEnvoyer) ?? null;
+  const suivant = prochainPalier(fiche.suivi);
+  const etape: { libelle: string; relance?: string; vide?: boolean } = reponses.length
+    ? { libelle: `${pluriel(reponses.length, "réponse")} à trancher`, relance: relanceDe(reponses[0].relance_id)?.id ?? reponses[0].relance_id }
+    : aValider
+      ? { libelle: `${libellePalier(aValider.palier)} à valider`, relance: aValider.id }
+      : aPartir
+        ? { libelle: `${libellePalier(aPartir.palier)} à envoyer`, relance: aPartir.id }
+        : c.statut !== "actif"
+          ? { libelle: `Aucune relance : ${STATUTS_COMPTE[c.statut].libelle.toLowerCase()}`, vide: true }
+          : suivant
+            ? { libelle: `${libellePalier(suivant.palier_suivant)} le ${jour(suivant.palier_suivant_le)}` }
+            : { libelle: "Aucune étape prévue", vide: true };
+  /* deux phrases au plus : ce qu'il doit, et pourquoi il est hors cycle s'il l'est */
+  const depasse = b.depasse_plafond || (c.plafond_encours !== null && b.encours > c.plafond_encours);
+  const description = [
+    b.echu <= 0
+      ? `Doit ${montant(b.encours, b.devise)}, rien n'est encore échu.`
+      : b.echu >= b.encours - 0.005
+        ? `Doit ${montant(b.encours, b.devise)}, tout est échu.`
+        : `Doit ${montant(b.encours, b.devise)}, dont ${montant(b.echu, b.devise)} échus.`,
+    c.statut !== "actif"
+      ? `${STATUTS_COMPTE[c.statut].libelle}${c.statut_motif ? ` : ${court(c.statut_motif, 70)}` : ""}.`
+      : b.en_litige > 0
+        ? `${montant(b.en_litige, b.devise)} en litige.`
+        : depasse
+          ? "L'encours dépasse le plafond accordé."
+          : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+  /* les factures : cinq, puis « Voir les N » ; un reste dû égal à l'encours ou à l'échu est déjà dans la description */
+  const [toutesFactures, setToutesFactures] = useState(false);
+  const dejaDit = (v: number) => Math.abs(v - b.encours) < 0.005 || (b.echu > 0 && Math.abs(v - b.echu) < 0.005);
+  const facturesVues = toutesFactures ? pieces : pieces.slice(0, 5);
+  /* le fil : les relances, les réponses à trancher, les règlements, les pièces jointes, le statut */
+  const lienRelance = (r: Relance) => <FilLien onClick={() => voirRelances({ relance: r.id })}>{libellePalier(r.palier)}</FilLien>;
+  const entrees: Entree[] = [
+    ...relances.map((r): Entree => {
+      if (r.envoye_le)
+        return {
+          cle: r.id,
+          le: r.envoye_le,
+          icone: <Send width={14} height={14} aria-hidden="true" />,
+          contenu: r.envoi_main ? (
+            <>
+              <b>Envoyée à la main</b> : {lienRelance(r)} ({CANAUX_MAIN[r.envoi_main.canal] ?? r.envoi_main.canal})
+            </>
+          ) : (
+            <>
+              <b>CASHD</b> a envoyé {lienRelance(r)} ({canalDe(r)})
+            </>
+          ),
+        };
+      if (groupeDe(r, false) === "a_valider")
+        return {
+          cle: r.id,
+          le: r.jour,
+          attente: true,
+          icone: <PenLine width={14} height={14} aria-hidden="true" />,
+          contenu: (
+            <>
+              <b>CASHD</b> a écrit {lienRelance(r)}, à valider
+            </>
+          ),
+          actions: (
+            <Link href={`${RACINE}/validations`} className="v2-btn v2-btn--petit">
+              <CheckCheck width={14} height={14} aria-hidden="true" />
+              <span>Ouvrir la file de validation</span>
+            </Link>
+          ),
+        };
+      if (aEnvoyer(r))
+        return {
+          cle: r.id,
+          le: r.jour,
+          attente: true,
+          icone: <CheckCheck width={14} height={14} aria-hidden="true" />,
+          contenu: (
+            <>
+              <b>Validée</b> : {lienRelance(r)}, à envoyer
+            </>
+          ),
+          actions: <EnvoiMain relance={r} noter={noter} />,
+        };
+      return {
+        cle: r.id,
+        le: r.jour,
+        icone: <X width={14} height={14} aria-hidden="true" />,
+        contenu: (
+          <>
+            <b>{(ETATS_RELANCE[r.etat] ?? ETATS_RELANCE.preparee).libelle}</b> : {lienRelance(r)}
+            {r.motif ? `, ${r.motif}` : ""}
+          </>
+        ),
+      };
+    }),
+    ...reponses.map((x): Entree => {
+      const r = relanceDe(x.relance_id);
+      return {
+        cle: x.id,
+        le: x.cree_le,
+        attente: true,
+        icone: <IconeSante sante={x.lecture === "contestation" ? "litige" : x.lecture === "promesse" ? "a_jour" : "retard"} />,
+        contenu: (
+          <>
+            <b>Réponse reçue</b> à <FilLien onClick={() => voirRelances({ relance: r?.id ?? x.relance_id })}>{r ? libellePalier(r.palier) : "la relance"}</FilLien>
+            {x.lecture !== "autre" ? ` : ${LECTURES[x.lecture].toLowerCase()}` : ""}
+          </>
+        ),
+        texte: (
+          <>
+            {x.indice ? `« ${x.indice} » — ` : ""}Proposé : {PROPOSITIONS[x.proposition]}.
+          </>
+        ),
+        actions: (
+          <>
+            {x.proposition !== "aucune" ? (
+              <button type="button" className="v2-btn v2-btn--petit" disabled={tranche === x.id} onClick={() => void trancher(x, true)}>
+                {tranche === x.id ? <Loader variant="spin" /> : <CheckCheck width={14} height={14} aria-hidden="true" />}
+                <span>Accepter</span>
+              </button>
+            ) : null}
+            <button type="button" className="v2-btn v2-btn--petit" disabled={tranche === x.id} onClick={() => void trancher(x, false)}>
+              <span>{x.proposition === "aucune" ? "Lue" : "Écarter"}</span>
+            </button>
+          </>
+        ),
+      };
+    }),
+    ...fiche.reglements.map((r): Entree => ({
+      cle: r.id,
+      le: r.recu_le,
+      icone: <Banknote width={14} height={14} aria-hidden="true" />,
+      contenu: (
+        <>
+          <b>Règlement</b> de {montant(r.montant)} ({r.reference ?? r.libelle ?? MODES.find((m) => m.cle === r.mode)?.libelle ?? "sans référence"}),{" "}
+          {r.statut === "annule" ? "annulé" : r.a_imputer > 0 ? `${montant(r.a_imputer)} à rapprocher` : "lettré"}
+        </>
+      ),
+    })),
+    ...(fiche.pieces_jointes ?? []).map((x): Entree => ({
+      cle: x.id,
+      le: x.cree_le,
+      icone: <Paperclip width={14} height={14} aria-hidden="true" />,
+      contenu: (
+        <>
+          <b>Pièce jointe</b> à {numero(x.facture_id)} : {NATURES.find((n) => n.cle === x.nature)?.libelle} ({x.nom})
+        </>
+      ),
+    })),
+    ...(c.statut_le
+      ? [
+          {
+            cle: "statut",
+            le: c.statut_le,
+            icone: <IconeStatut sante={s} />,
+            contenu: (
+              <>
+                Compte passé à <b>« {STATUTS_COMPTE[c.statut].libelle} »</b>
+              </>
+            ),
+          },
+        ]
+      : []),
+  ].sort((x, y) => (x.le ?? "").localeCompare(y.le ?? ""));
 
   return (
     <section className="lin-boite-detail" aria-label={`Débiteur ${c.nom}`}>
@@ -1812,7 +1966,12 @@ function FicheDebiteur({
               return (
                 <>
                   {item("reglement", <Banknote width={16} height={16} aria-hidden="true" />, "Noter un règlement", () => ouvrir({ type: "reglement", facture: null }))}
-                  {item("plafond", <Gauge width={16} height={16} aria-hidden="true" />, "Plafond d'encours…", () => void ouvrirPlafond())}
+                  {item(
+                    "plafond",
+                    <Gauge width={16} height={16} aria-hidden="true" />,
+                    c.plafond_encours !== null ? `Plafond d'encours : ${montant(c.plafond_encours, b.devise)}…` : "Fixer un plafond d'encours…",
+                    () => void ouvrirPlafond(),
+                  )}
                   {c.statut === "actif"
                     ? item("pause", <PauseCircle width={16} height={16} aria-hidden="true" />, "Mettre en pause", () => ouvrir({ type: "statut", vers: "pause" }))
                     : item("reprendre", <PlayCircle width={16} height={16} aria-hidden="true" />, "Reprendre les relances", () => ouvrir({ type: "statut", vers: "actif" }))}
@@ -1820,6 +1979,7 @@ function FicheDebiteur({
                   {item("dossier", <FileDown width={16} height={16} aria-hidden="true" />, "Télécharger le dossier", () => void telecharger(), telecharge)}
                   {item("assurance", <FileDown width={16} height={16} aria-hidden="true" />, "Dossier d'assurance-crédit", () => void telecharger("assurance_credit"), telecharge)}
                   {item("relances", <MessageSquare width={16} height={16} aria-hidden="true" />, "Voir ses relances", () => voirRelances({ filtre: `debiteur:${encodeURIComponent(c.id)}` }))}
+                  {derniere?.corps ? item("copier-relance", <Copy width={16} height={16} aria-hidden="true" />, "Copier la dernière relance", () => copier(`${derniere.sujet ?? ""}\n\n${derniere.corps ?? ""}`)) : null}
                 </>
               );
             }}
@@ -1830,469 +1990,188 @@ function FicheDebiteur({
         </div>
       </header>
 
-      <div className="lin-projet">
-        <article className="lin-projet-texte">
-          <IconeDebiteur id={c.id} grand />
-          <h2 className="lin-projet-h1">{c.nom}</h2>
-          <p className="lin-projet-resume">
-            {b.echu > 0 ? `Doit ${montant(b.encours, b.devise)}, dont ${montant(b.echu, b.devise)} échus.` : `Doit ${montant(b.encours, b.devise)}, rien n'est encore échu.`}
-            {b.depasse_plafond || (c.plafond_encours !== null && b.encours > c.plafond_encours) ? " L'encours dépasse le plafond accordé." : ""}
-            {c.statut !== "actif"
-              ? ` ${STATUTS_COMPTE[c.statut].libelle}${c.statut_le ? ` depuis le ${jour(c.statut_le)}` : ""}${c.statut_motif ? ` : ${c.statut_motif}` : ""}. Aucune relance ne part tant que vous ne le reprenez pas.`
-              : ""}
-          </p>
-          <div className="lin-projet-ligne">
-            <span className="lin-projet-etiquette">Propriétés</span>
-            <MenuOptions
-              raccourci="s"
-              titre="Changer le statut…"
-              teinte={SANTES[s].teinte}
-              declencheur={
-                <>
-                  <IconeStatut sante={s} />
-                  {STATUTS_COMPTE[c.statut].libelle}
-                </>
-              }
-              options={optionsStatut}
-              largeur={300}
-            />
-            <MenuOptions
-              raccourci="r"
-              titre="Débiteurs en retard…"
-              declencheur={
-                <>
-                  <IconePriorite niveau={niveauDe(b.retard_max_jours)} titre={retardDe(b.retard_max_jours)} />
-                  {retardDe(b.retard_max_jours)}
-                </>
-              }
-              options={optionsRetard}
-              largeur={280}
-            />
-            <MenuOptions
-              raccourci="e"
-              titre="Échéance…"
-              declencheur={
-                <>
-                  <IconeCalendrier passe={b.echu > 0} />
-                  {jour(b.plus_ancienne_echeance)}
-                </>
-              }
-              options={optionsEcheance}
-              largeur={280}
-            />
-            {b.groupe ? (
-              <MenuOptions
-                titre="Débiteurs du groupe…"
-                declencheur={
-                  <>
-                    <IconeGroupe />
-                    {b.groupe}
-                  </>
-                }
-                options={optionsGroupe}
-              />
-            ) : null}
-          </div>
-          <div className="lin-projet-ligne">
-            <span className="lin-projet-etiquette">Contact</span>
-            {contact ? (
-              <MenuOptions
-                titre="Contact…"
-                declencheur={
-                  <>
-                    <IconeEnveloppe />
-                    {c.contact_facturation_nom ? `${c.contact_facturation_nom} — ${contact}` : contact}
-                  </>
-                }
-                options={optionsContact}
-              />
-            ) : (
-              <span className="lin-puce lin-puce--vide">Aucune adresse : la relance ne peut pas partir</span>
-            )}
-          </div>
-
-          {reponses.map((x) => (
-            <details key={x.id} className="lin-maj" open aria-label="Réponse à trancher">
-              <summary className="lin-maj-tete">
-                <span className="lin-maj-titre">
-                  Réponse à trancher
-                  <svg className="lin-maj-fleche" viewBox="0 0 16 16" aria-hidden="true">
-                    <path d="M5.2 6.4h5.6L8 9.6z" fill="currentColor" />
-                  </svg>
-                </span>
-                <button
-                  type="button"
-                  className="lin-maj-lien"
-                  onClick={() => voirRelances({ relance: (relances.find((r) => r.id === x.relance_id) ?? relances.find((r) => r.demande_id === x.relance_id))?.id ?? x.relance_id })}
-                >
-                  <MessageSquare width={14} height={14} aria-hidden="true" /> Relance
-                </button>
-              </summary>
-              <p className="lin-maj-auteur">
-                <IconeSante sante={x.lecture === "contestation" ? "litige" : x.lecture === "promesse" ? "a_jour" : "retard"} />
-                <span data-teinte={x.lecture === "contestation" ? "rouge" : x.lecture === "promesse" ? "vert" : "jaune"}>{LECTURES[x.lecture]}</span>
-                <span className="lin-maj-gris">reçue le {jour(x.cree_le)}</span>
-              </p>
-              <p className="lin-maj-texte">
-                {x.indice ? `« ${x.indice} » — ` : ""}Proposé : {PROPOSITIONS[x.proposition]}.
-              </p>
-              <footer className="lin-maj-pied">
-                <span className="c2b-pied-droite">
-                  {x.proposition !== "aucune" ? (
-                    <button type="button" className="v2-btn v2-btn--petit" disabled={tranche === x.id} onClick={() => void trancher(x, true)}>
-                      {tranche === x.id ? <Loader variant="spin" /> : <CheckCheck width={14} height={14} aria-hidden="true" />}
-                      <span>Accepter</span>
-                    </button>
-                  ) : null}
-                  <button type="button" className="v2-btn v2-btn--petit" disabled={tranche === x.id} onClick={() => void trancher(x, false)}>
-                    <span>{x.proposition === "aucune" ? "Lue" : "Écarter"}</span>
-                  </button>
-                </span>
-              </footer>
-            </details>
-          ))}
-
-          <details className="lin-maj" open aria-label="Dernière relance">
-            <summary className="lin-maj-tete">
-              <span className="lin-maj-titre">
-                Dernière relance
-                <svg className="lin-maj-fleche" viewBox="0 0 16 16" aria-hidden="true">
-                  <path d="M5.2 6.4h5.6L8 9.6z" fill="currentColor" />
-                </svg>
-              </span>
-              <button type="button" className="lin-maj-lien" onClick={() => voirRelances({ filtre: `debiteur:${encodeURIComponent(c.id)}` })}>
-                <MessageSquare width={14} height={14} aria-hidden="true" /> Relances
+      <div className="lin-ticket">
+        <article className="lin-ticket-corps">
+          <h2 className="lin-ticket-titre">{c.nom}</h2>
+          <p className="lin-ticket-desc">{description}</p>
+          <div className="lin-ticket-icones">
+            <button type="button" className="lin-ticket-icone" aria-label="Noter un règlement" title="Noter un règlement" onClick={() => ouvrir({ type: "reglement", facture: null })}>
+              <Banknote aria-hidden="true" />
+            </button>
+            {facturesJoignables.length ? (
+              <button type="button" className="lin-ticket-icone" aria-label="Joindre une pièce" title="Joindre une pièce" onClick={() => ouvrir({ type: "piece" })}>
+                <Paperclip aria-hidden="true" />
               </button>
-            </summary>
-            {derniere ? (
-              <>
-                <p className="lin-maj-auteur">
-                  <IconeSante sante={s} />
-                  <span data-teinte={SANTES[s].teinte}>{SANTES[s].libelle}</span>
-                  <span className="lin-avatar-auteur" aria-hidden="true">
-                    <HandCoins width={11} height={11} />
-                  </span>
-                  <span className="lin-maj-gris">CASHD</span>
-                  <span className="lin-maj-gris">{jour(derniere.jour)}</span>
-                </p>
-                <p className="lin-maj-texte">{derniere.sujet ?? libellePalier(derniere.palier)}</p>
-                <dl className="lin-maj-citation">
-                  <div>
-                    <dt>Palier</dt>
-                    <dd>{libellePalier(derniere.palier)}</dd>
-                  </div>
-                  <div>
-                    <dt>Montant</dt>
-                    <dd>{montant(derniere.montant, b.devise)}</dd>
-                  </div>
-                  <div>
-                    <dt>État</dt>
-                    <dd>{(ETATS_RELANCE[derniere.etat] ?? ETATS_RELANCE.preparee).libelle}</dd>
-                  </div>
-                  {derniere.destinataire_adresse ? (
-                    <div>
-                      <dt>Pour</dt>
-                      <dd>{derniere.destinataire_adresse}</dd>
-                    </div>
-                  ) : null}
-                  {derniere.motif ? (
-                    <div>
-                      <dt>Motif</dt>
-                      <dd>{derniere.motif}</dd>
-                    </div>
-                  ) : null}
-                </dl>
-                <footer className="lin-maj-pied">
-                  <button type="button" className="lin-maj-pied-btn" aria-label="Voir la relance" title="Voir la relance" onClick={() => voirRelances({ relance: derniere.id })}>
-                    <MessageSquare width={16} height={16} aria-hidden="true" />
-                  </button>
-                  {derniere.corps ? (
-                    <button type="button" className="lin-maj-pied-rond" aria-label="Copier le texte" title="Copier le texte" onClick={() => copier(`${derniere.sujet ?? ""}\n\n${derniere.corps ?? ""}`)}>
-                      <Copy width={16} height={16} aria-hidden="true" />
-                    </button>
-                  ) : null}
-                  {groupeDe(derniere, false) === "a_valider" ? (
-                    <Link href={`${RACINE}/validations`} className="lin-maj-pied-rond" aria-label="Ouvrir la file de validation" title="Ouvrir la file de validation">
-                      <CheckCheck width={16} height={16} aria-hidden="true" />
-                    </Link>
-                  ) : null}
-                  {aEnvoyer(derniere) ? <EnvoiMain relance={derniere} noter={noter} /> : null}
-                </footer>
-              </>
-            ) : (
-              <p className="lin-maj-texte lin-maj-gris">Aucune relance écrite pour ce débiteur. Elles sont préparées chaque matin et ne partent qu&apos;avec votre accord.</p>
-            )}
-          </details>
+            ) : null}
+            <button
+              type="button"
+              className="lin-ticket-icone"
+              aria-label="Copier la référence"
+              title={`Copier la référence (${c.reference})`}
+              onClick={() => {
+                copier(c.reference);
+                toast(`Référence copiée : ${c.reference}.`, "vert");
+              }}
+            >
+              <Copy aria-hidden="true" />
+            </button>
+          </div>
 
-          <h3 className="lin-projet-h2" id="c2b-factures">
-            Factures
-          </h3>
           {pieces.length ? (
-            <ul className="lin-projet-liste">
-              {pieces.map((p) => {
+            <ul className="lin-ticket-sous" id="c2b-factures" aria-label="Factures">
+              {facturesVues.map((p) => {
                 const texte = etatPieceTexte(p, suiviDe(p.id));
                 const gestes = gestesPiece(p);
+                const soldee = p.reste_du <= 0 && p.nature !== "devis";
+                const du =
+                  p.nature === "devis"
+                    ? montant(p.montant_ttc)
+                    : soldee
+                      ? "Soldée"
+                      : !dejaDit(p.reste_du)
+                        ? `${montant(p.reste_du, p.devise ?? "EUR")}${p.devise && p.devise !== "EUR" && p.reste_du_eur !== null && p.reste_du_eur !== undefined ? ` (${montant(p.reste_du_eur)})` : ""}`
+                        : null;
                 return (
-                  <li key={p.id} data-solde={p.reste_du <= 0 && p.nature !== "devis" ? "" : undefined}>
-                    <IconeDocument />
-                    <span className="c2b-ligne-texte" title={`${p.numero}${texte ? ` · ${texte}` : ""}`}>
-                      {p.numero}
-                      {texte ? <span className="lin-maj-gris"> · {texte}</span> : null}
-                    </span>
-                    <span className="lin-meta">
-                      {p.nature === "devis" ? montant(p.montant_ttc) : p.statut === "soldee" ? "Soldée" : montant(p.reste_du, p.devise ?? "EUR")}
-                      {p.devise && p.devise !== "EUR" && p.reste_du_eur !== null && p.reste_du_eur !== undefined ? ` (${montant(p.reste_du_eur)})` : ""} · {p.echeance ? jour(p.echeance) : jour(p.date_emission)}
-                    </span>
-                    {gestes.length ? <MenuActions titre={`${p.numero}…`} options={gestes} /> : null}
+                  <li key={p.id}>
+                    <div className="lin-ticket-sous-ligne" data-solde={soldee ? "" : undefined} title={`${p.numero}${texte ? ` · ${texte}` : ""}`}>
+                      <IconeDocument />
+                      <span className="lin-ticket-sous-ref">{p.numero}</span>
+                      <span className="lin-ticket-sous-nom">{texte}</span>
+                      <span className="lin-ticket-sous-meta">{[du, jour(p.echeance ?? p.date_emission)].filter(Boolean).join(" · ")}</span>
+                      {gestes.length ? <MenuActions titre={`${p.numero}…`} options={gestes} /> : null}
+                    </div>
                   </li>
                 );
               })}
+              {pieces.length > 5 ? (
+                <li>
+                  <button type="button" className="lin-ticket-sous-appel" aria-expanded={toutesFactures} onClick={() => setToutesFactures((v) => !v)}>
+                    {toutesFactures ? "Voir moins" : `Voir les ${pieces.length} pièces`}
+                  </button>
+                </li>
+              ) : null}
             </ul>
           ) : (
-            <p className="lin-maj-texte lin-maj-gris">Aucune pièce : les factures du compte arrivent avec l&apos;export du facturier.</p>
+            <p className="c2b-sous-vide">Aucune pièce : les factures du compte arrivent avec l&apos;export du facturier.</p>
           )}
 
-          <h3 className="lin-projet-h2">Ancienneté de l&apos;encours</h3>
-          <ul className="lin-projet-liste">
-            {TRANCHES.map((t, i) => (
-              <li key={t.cle}>
-                <IconePriorite niveau={i as 0 | 1 | 2 | 3 | 4} titre={t.libelle} />
-                <span>{t.libelle}</span>
-                <span className="lin-meta">{montant(b[t.cle], b.devise)}</span>
-              </li>
-            ))}
-          </ul>
-
-          {fiche.reglements.length ? (
-            <>
-              <h3 className="lin-projet-h2">Règlements</h3>
-              <ul className="lin-projet-liste">
-                {fiche.reglements.map((r) => (
-                  <li key={r.id}>
-                    <Banknote width={16} height={16} aria-hidden="true" />
-                    <span className="c2b-ligne-texte">
-                      {jour(r.recu_le)} · {r.reference ?? r.libelle ?? r.mode ?? "sans référence"}
-                      <span className="lin-maj-gris"> · {r.statut === "annule" ? "annulé" : r.a_imputer > 0 ? `${montant(r.a_imputer)} à rapprocher` : "lettré"}</span>
-                    </span>
-                    <span className="lin-meta">{montant(r.montant)}</span>
-                  </li>
-                ))}
-              </ul>
-            </>
-          ) : null}
-
-          <h3 className="lin-projet-h2">Pièces du dossier</h3>
-          <ul className="lin-projet-liste">
-            {(fiche.pieces_jointes ?? []).map((x) => (
-              <li key={x.id}>
-                <Paperclip width={16} height={16} aria-hidden="true" />
-                <span className="c2b-ligne-texte">
-                  {numero(x.facture_id)} · {NATURES.find((n) => n.cle === x.nature)?.libelle}
-                </span>
-                <span className="lin-meta">{x.nom}</span>
-              </li>
-            ))}
-            {facturesJoignables.length ? (
-              <li>
-                <button type="button" className="lin-puce lin-puce--vide" onClick={() => ouvrir({ type: "piece" })}>
-                  <Plus width={14} height={14} aria-hidden="true" />
-                  Joindre une pièce
-                </button>
-              </li>
-            ) : null}
-          </ul>
-          {!(fiche.pieces_jointes ?? []).length ? <p className="lin-maj-texte lin-maj-gris">Aucune pièce jointe : le dossier d&apos;assurance-crédit nommera les factures à qui manque leur PDF.</p> : null}
+          <hr className="lin-ticket-trait" />
+          <div className="lin-ticket-activite-tete">
+            <h3>Activité</h3>
+            <button type="button" className="lin-ticket-lien" onClick={() => voirRelances({ filtre: `debiteur:${encodeURIComponent(c.id)}` })}>
+              Ses relances
+            </button>
+          </div>
+          <Fil entrees={entrees} vide="Aucune relance ni aucun règlement pour l'instant. Les relances s'écrivent chaque matin et ne partent qu'avec votre accord." />
         </article>
 
-        <aside className="lin-cartes-droite" aria-label="Propriétés du débiteur">
-          <CarteDroite titre="Propriétés">
-            <dl className="lin-props">
-              <div>
-                <dt>Statut</dt>
-                <dd data-teinte={SANTES[s].teinte}>
-                  <MenuOptions
-                    plat
-                    titre="Changer le statut…"
-                    declencheur={
-                      <>
-                        <IconeStatut sante={s} />
-                        {STATUTS_COMPTE[c.statut].libelle}
-                      </>
-                    }
-                    options={optionsStatut}
-                    largeur={300}
-                  />
-                </dd>
-              </div>
-              <div>
-                <dt>Retard</dt>
-                <dd>
-                  <MenuOptions
-                    plat
-                    titre="Débiteurs en retard…"
-                    declencheur={
-                      <>
-                        <IconePriorite niveau={niveauDe(b.retard_max_jours)} titre={retardDe(b.retard_max_jours)} />
-                        {retardDe(b.retard_max_jours)}
-                      </>
-                    }
-                    options={optionsRetard}
-                    largeur={280}
-                  />
-                </dd>
-              </div>
-              <div>
-                <dt>Échéance</dt>
-                <dd>
-                  <MenuOptions
-                    plat
-                    titre="Échéance…"
-                    declencheur={
-                      <>
-                        <IconeCalendrier passe={b.echu > 0} />
-                        {jour(b.plus_ancienne_echeance)}
-                      </>
-                    }
-                    options={optionsEcheance}
-                    largeur={280}
-                  />
-                </dd>
-              </div>
-              <div>
-                <dt>Référence</dt>
-                <dd>
-                  <MenuOptions
-                    plat
-                    titre="Référence…"
-                    declencheur={
-                      <>
-                        <IconeDiese />
-                        {c.reference}
-                        {c.secteur ? ` · ${c.secteur}` : ""}
-                      </>
-                    }
-                    options={[{ cle: "copier", libelle: "Copier la référence", icone: <Copy width={16} height={16} />, action: () => copier(c.reference) }]}
-                  />
-                </dd>
-              </div>
-              <div>
-                <dt>Groupe</dt>
-                <dd className={b.groupe ? undefined : "lin-props-vide"}>
-                  {b.groupe ? (
-                    <MenuOptions
-                      plat
-                      titre="Débiteurs du groupe…"
-                      declencheur={
-                        <>
-                          <IconeGroupe />
-                          {b.groupe}
-                        </>
-                      }
-                      options={optionsGroupe}
-                    />
-                  ) : (
-                    <span className="lin-valeur">
+        <aside className="lin-ticket-cote" aria-label="Propriétés du débiteur">
+          <section className="lin-ticket-section">
+            <h3>Propriétés</h3>
+            <div className="lin-ticket-pilules">
+              <MenuOptions
+                raccourci="s"
+                titre="Changer le statut…"
+                teinte={SANTES[s].teinte}
+                declencheur={
+                  <>
+                    <IconeStatut sante={s} />
+                    {STATUTS_COMPTE[c.statut].libelle}
+                  </>
+                }
+                options={optionsStatut}
+                largeur={300}
+              />
+              <MenuOptions
+                raccourci="r"
+                titre="Débiteurs en retard…"
+                declencheur={
+                  <>
+                    <IconePriorite niveau={niveauDe(b.retard_max_jours)} titre={retardDe(b.retard_max_jours)} />
+                    {retardDe(b.retard_max_jours)}
+                  </>
+                }
+                options={optionsRetard}
+                largeur={280}
+              />
+              <MenuOptions
+                raccourci="e"
+                titre="Échéance…"
+                declencheur={
+                  <>
+                    <IconeCalendrier passe={b.echu > 0} />
+                    {b.plus_ancienne_echeance ? `Échéance du ${jour(b.plus_ancienne_echeance)}` : "Rien d'échu"}
+                  </>
+                }
+                options={optionsEcheance}
+                largeur={280}
+              />
+            </div>
+          </section>
+          <section className="lin-ticket-section">
+            <h3>Étiquettes</h3>
+            <div className="lin-ticket-pilules">
+              {b.groupe ? (
+                <MenuOptions
+                  titre="Débiteurs du groupe…"
+                  declencheur={
+                    <>
                       <IconeGroupe />
-                      Aucun groupe
-                    </span>
-                  )}
-                </dd>
-              </div>
-              <div>
-                <dt>Plafond</dt>
-                <dd className={c.plafond_encours !== null ? undefined : "lin-props-vide"}>
-                  <MenuOptions
-                    plat
-                    titre="Plafond d'encours…"
-                    declencheur={
-                      <>
-                        <IconeJauge />
-                        {c.plafond_encours !== null ? montant(c.plafond_encours, b.devise) : "Aucun plafond"}
-                      </>
-                    }
-                    options={optionsPlafond}
-                  />
-                </dd>
-              </div>
-              <div>
-                <dt>Contact</dt>
-                <dd className={contact ? undefined : "lin-props-vide"}>
-                  {contact ? (
-                    <MenuOptions
-                      plat
-                      titre="Contact…"
-                      declencheur={
-                        <>
-                          <IconeEnveloppe />
-                          {contact}
-                        </>
-                      }
-                      options={optionsContact}
-                    />
-                  ) : (
-                    <span className="lin-valeur">
+                      {b.groupe}
+                    </>
+                  }
+                  options={optionsGroupe}
+                />
+              ) : (
+                <span className="lin-ticket-pilule" data-vide="">
+                  <IconeGroupe />
+                  Aucun groupe
+                </span>
+              )}
+              {contact ? (
+                <MenuOptions
+                  titre="Contact…"
+                  declencheur={
+                    <>
                       <IconeEnveloppe />
-                      Aucune adresse
-                    </span>
-                  )}
-                </dd>
-              </div>
-              <div>
-                <dt>Factures</dt>
-                <dd>
-                  <span className="lin-valeur">
-                    <IconeDocument />
-                    {b.factures_echues} échue{b.factures_echues > 1 ? "s" : ""} sur {b.factures_ouvertes}
-                  </span>
-                </dd>
-              </div>
-            </dl>
-          </CarteDroite>
-
-          <CarteDroite titre="Paliers">
-            <ul className="lin-jalons">
-              {ORDRE_PALIERS.map((p) => (
-                <li key={p}>
-                  <Losange atteint={vus.has(p)} />
-                  <span className="lin-jalon-nom">{libellePalier(p)}</span>
-                  <span className="lin-meta">{vus.has(p) ? jour(vus.get(p) ?? null) : "—"}</span>
-                  <MenuActions
-                    titre={`${libellePalier(p)}…`}
-                    options={[
-                      { cle: "relances", libelle: "Ses relances à ce palier", icone: <MessageSquare width={16} height={16} />, action: () => voirRelances({ filtre: `debiteur:${encodeURIComponent(c.id)},palier:${p}` }) },
-                      { cle: "debiteurs", libelle: "Débiteurs à ce palier", icone: <Losange atteint />, action: () => filtrer("palier", p) },
-                    ]}
-                  />
-                </li>
-              ))}
-            </ul>
-          </CarteDroite>
-
-          <CarteEncours b={{ ...b, statut: c.statut }} />
-
-          <CarteDroite
-            titre="Activité"
-            action={
-              <button type="button" className="lin-carte-lien" onClick={() => voirRelances({ filtre: `debiteur:${encodeURIComponent(c.id)}` })}>
-                Tout voir
-              </button>
-            }
-          >
-            {activite.length ? (
-              <ul className="lin-activite">
-                {activite.slice(0, 5).map((a) => (
-                  <li key={a.cle}>
-                    {a.icone}
-                    <span>
-                      {a.texte} · {jour(a.le)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="lin-activite-vide">Aucune relance ni aucun règlement pour l&apos;instant.</p>
-            )}
-          </CarteDroite>
+                      {c.contact_facturation_nom ?? contact}
+                    </>
+                  }
+                  options={optionsContact}
+                />
+              ) : (
+                <span className="lin-ticket-pilule" data-vide="" title="La relance ne peut pas partir sans adresse">
+                  <IconeEnveloppe />
+                  Aucune adresse
+                </span>
+              )}
+            </div>
+          </section>
+          <section className="lin-ticket-section">
+            <h3>Relances</h3>
+            <div className="lin-ticket-pilules">
+              <MenuOptions
+                titre="Paliers…"
+                declencheur={
+                  <>
+                    <Losange atteint={!!palier} />
+                    {palier ? libellePalier(palier) : <span className="c2b-gris">Pas encore relancé</span>}
+                  </>
+                }
+                options={optionsPaliers}
+                largeur={320}
+              />
+              {etape.relance ? (
+                <button type="button" className="lin-ticket-pilule lin-ticket-sous-pilule" title="Ouvrir la relance" onClick={() => voirRelances({ relance: etape.relance ?? null })}>
+                  {etape.libelle}
+                </button>
+              ) : (
+                <span className="lin-ticket-pilule lin-ticket-sous-pilule" data-vide={etape.vide ? "" : undefined}>
+                  {etape.libelle}
+                </span>
+              )}
+            </div>
+          </section>
         </aside>
       </div>
 
@@ -2574,7 +2453,7 @@ function FicheRelance({
   reponse,
   actions,
   autres,
-  vus,
+  suivant,
   position,
   noter,
   aller,
@@ -2587,7 +2466,7 @@ function FicheRelance({
   reponse: ReponseLue | null;
   actions: Actions | null;
   autres: Relance[];
-  vus: Map<string, string | null>;
+  suivant: Suivi | null;
   position: string | null;
   noter: (r: Relance, canal: string) => Promise<void>;
   aller: Aller;
@@ -2597,6 +2476,8 @@ function FicheRelance({
 }) {
   const toast = useToast();
   const [tranche, setTranche] = useState(false);
+  const [envoi, setEnvoi] = useState(false);
+  const [toutesFactures, setToutesFactures] = useState(false);
   const r = l.r;
   const cmd = l.c;
   const sujet = r?.sujet ?? cmd?.sujet ?? (r ? libellePalier(r.palier) : NATURES_LIGNE.commande);
@@ -2624,17 +2505,149 @@ function FicheRelance({
     coche: l.groupe === g,
     action: () => filtrer("etat", g),
   }));
+  /* le parent : le débiteur, ses relances et chacune des autres (l'ancienne carte « Activité ») */
   const optionsDebiteur: Option[] = [
-    { cle: "ouvrir", libelle: "Ouvrir le débiteur", icone: <Building2 width={16} height={16} />, action: voirDebiteur },
+    { cle: "ouvrir", libelle: "Ouvrir le débiteur", meta: b ? STATUTS_COMPTE[b.statut].libelle : undefined, icone: <Building2 width={16} height={16} />, action: voirDebiteur },
     { cle: "filtrer", libelle: "Toutes ses relances", icone: <MessageSquare width={16} height={16} />, action: () => filtrer("debiteur", l.compte_id) },
+    ...autres.map((x) => ({
+      cle: x.id,
+      libelle: libellePalier(x.palier),
+      meta: `${(ETATS_RELANCE[x.etat] ?? ETATS_RELANCE.preparee).libelle.toLowerCase()} · ${jour(x.envoye_le ?? x.jour)}`,
+      icone: <Losange atteint={x.etat !== "a_valider"} />,
+      action: () => aller({ relance: x.id }),
+    })),
   ];
   const optionsDest: Option[] = adresseDest
     ? [
         { cle: "ecrire", libelle: "Écrire un e-mail", icone: <IconeEnveloppe />, action: () => window.open(`mailto:${adresseDest}`) },
-        { cle: "copier", libelle: "Copier l'adresse", icone: <Copy width={16} height={16} />, action: () => copier(adresseDest) },
+        { cle: "copier", libelle: "Copier l'adresse", meta: nomDest ? adresseDest : undefined, icone: <Copy width={16} height={16} />, action: () => copier(adresseDest) },
       ]
     : [];
-  const s = b ? santeDe(b) : null;
+  /* la prochaine étape du débiteur : la sous-pilule du parent */
+  const etape: { libelle: string; vide?: boolean } = suivant
+    ? { libelle: `${libellePalier(suivant.palier_suivant)} le ${jour(suivant.palier_suivant_le)}` }
+    : b && b.statut !== "actif"
+      ? { libelle: `Aucune relance : ${STATUTS_COMPTE[b.statut].libelle.toLowerCase()}`, vide: true }
+      : { libelle: "Aucune étape prévue", vide: true };
+  /* les factures relancées : leur montant seulement quand il y en a plusieurs (sinon c'est celui de la relance) */
+  const factures = r?.pieces ?? [];
+  const facturesVues = toutesFactures ? factures : factures.slice(0, 5);
+  /* le fil de la relance : écrite, validée, partie ou arrêtée, et la réponse reçue */
+  const entrees: Entree[] = [];
+  if (r) {
+    entrees.push({
+      cle: "ecrite",
+      le: r.jour,
+      icone: <PenLine width={14} height={14} aria-hidden="true" />,
+      contenu: (
+        <>
+          <b>CASHD</b> a écrit la relance
+        </>
+      ),
+    });
+    if (groupeDe(r, false) === "a_valider")
+      entrees.push({
+        cle: "valider",
+        le: null,
+        icone: <CheckCheck width={14} height={14} aria-hidden="true" />,
+        contenu: (
+          <>
+            <b>À valider</b> dans la file de validation
+          </>
+        ),
+      });
+    else if (aEnvoyer(r) || r.etat === "envoyee")
+      entrees.push({
+        cle: "validee",
+        le: null,
+        icone: <CheckCheck width={14} height={14} aria-hidden="true" />,
+        contenu: (
+          <>
+            <b>Validée</b> dans la file{aEnvoyer(r) ? " : à envoyer, puis noter l'envoi" : ""}
+          </>
+        ),
+      });
+    if (r.envoye_le)
+      entrees.push({
+        cle: "partie",
+        le: r.envoye_le,
+        icone: <Send width={14} height={14} aria-hidden="true" />,
+        contenu: r.envoi_main ? (
+          <>
+            <b>Envoyée à la main</b> ({CANAUX_MAIN[r.envoi_main.canal] ?? r.envoi_main.canal})
+          </>
+        ) : (
+          <>
+            <b>CASHD</b> l&apos;a envoyée ({canalDe(r)})
+          </>
+        ),
+      });
+    else if (groupeDe(r, false) === "arretee")
+      entrees.push({
+        cle: "arret",
+        le: null,
+        icone: <X width={14} height={14} aria-hidden="true" />,
+        contenu: (
+          <>
+            <b>{libelleEtat}</b>
+            {motif ? ` : ${motif}` : ""}
+          </>
+        ),
+      });
+  } else if (cmd) {
+    entrees.push({
+      cle: "ecrite",
+      le: cmd.jour,
+      icone: <PenLine width={14} height={14} aria-hidden="true" />,
+      contenu: (
+        <>
+          <b>CASHD</b> a écrit la relance du bon de commande, pour le service qui l&apos;émet (pas la comptabilité)
+        </>
+      ),
+    });
+    entrees.push({
+      cle: "etat",
+      le: null,
+      icone: <ClipboardList width={14} height={14} aria-hidden="true" />,
+      contenu: (
+        <>
+          <b>{libelleEtat}</b>
+          {motif ? ` : ${motif}` : ""}
+        </>
+      ),
+    });
+  }
+  if (reponse)
+    entrees.push({
+      cle: reponse.id,
+      le: reponse.cree_le,
+      attente: true,
+      icone: <IconeSante sante={reponse.lecture === "contestation" ? "litige" : reponse.lecture === "promesse" ? "a_jour" : "retard"} />,
+      contenu: (
+        <>
+          <b>Réponse reçue</b>
+          {reponse.lecture !== "autre" ? ` : ${LECTURES[reponse.lecture].toLowerCase()}` : ""}
+        </>
+      ),
+      texte: (
+        <>
+          {reponse.indice ? `« ${reponse.indice} » — ` : ""}Proposé : {PROPOSITIONS[reponse.proposition]}.
+        </>
+      ),
+      actions: (
+        <>
+          {reponse.proposition !== "aucune" ? (
+            <button type="button" className="v2-btn v2-btn--petit" disabled={tranche || !actions} onClick={() => void trancher(true)}>
+              {tranche ? <Loader variant="spin" /> : <CheckCheck width={14} height={14} aria-hidden="true" />}
+              <span>Accepter</span>
+            </button>
+          ) : null}
+          <button type="button" className="v2-btn v2-btn--petit" disabled={tranche || !actions} onClick={() => void trancher(false)}>
+            <span>{reponse.proposition === "aucune" ? "Lue" : "Écarter"}</span>
+          </button>
+        </>
+      ),
+    });
 
   return (
     <section className="lin-boite-detail" aria-label={`Relance : ${sujet}`}>
@@ -2668,351 +2681,198 @@ function FicheRelance({
         </div>
       </header>
 
-      <div className="lin-projet">
-        <article className="lin-projet-texte">
-          <span className="lin-tuile" style={{ background: `color-mix(in srgb, ${couleurDe(l.compte_id)} 18%, transparent)`, color: couleurDe(l.compte_id) }}>
-            <IconeLigne nature={l.nature} taille={24} />
-          </span>
-          <h2 className="lin-projet-h1">{sujet}</h2>
-          <p className="lin-projet-resume">
-            Écrite le {jour(r?.jour ?? cmd?.jour)}
-            {adresseDest ? ` pour ${adresseDest}` : ""}
-            {r?.envoye_le ? ` · partie le ${dateHeure(r.envoye_le)}` : ""}
-            {r && r.indemnites > 0 ? ` · indemnité ${montant(r.indemnites)}` : ""}
-            {r && r.penalites > 0 ? ` · pénalités ${montant(r.penalites)}` : ""}
-            {motif ? `. ${motif}` : ""}
-            {cmd ? " La relance va au service qui émet le bon, pas à la comptabilité." : ""}
-          </p>
-          <div className="lin-projet-ligne">
-            <span className="lin-projet-etiquette">Propriétés</span>
-            <MenuOptions
-              raccourci="s"
-              titre="Relances dans cet état…"
-              declencheur={
-                <>
-                  <IconeGroupeRelance g={l.groupe} />
-                  {libelleEtat}
-                </>
-              }
-              options={optionsEtat}
-              largeur={280}
-            />
-            {r ? (
-              <MenuOptions
-                raccourci="p"
-                titre="Relances à ce palier…"
-                declencheur={
-                  <>
-                    <Losange atteint={r.etat !== "a_valider"} />
-                    {libellePalier(r.palier)}
-                  </>
-                }
-                options={[{ cle: "palier", libelle: `Relances au palier « ${libellePalier(r.palier)} »`, icone: <Losange atteint />, action: () => filtrer("palier", r.palier) }]}
-                largeur={300}
-              />
-            ) : null}
-            {r ? (
-              <span className="lin-puce">
-                <HandCoins width={16} height={16} aria-hidden="true" />
-                {montant(r.montant)}
-              </span>
-            ) : null}
-            <MenuOptions
-              titre="Débiteur…"
-              declencheur={
-                <>
-                  <IconeDebiteur id={l.compte_id} />
-                  {l.compte}
-                </>
-              }
-              options={optionsDebiteur}
-            />
-          </div>
-          <div className="lin-projet-ligne">
-            <span className="lin-projet-etiquette">Pour</span>
-            {adresseDest ? (
-              <MenuOptions
-                titre="Destinataire…"
-                declencheur={
-                  <>
-                    <IconeEnveloppe />
-                    {nomDest ? `${nomDest} — ${adresseDest}` : adresseDest}
-                  </>
-                }
-                options={optionsDest}
-              />
-            ) : (
-              <span className="lin-puce lin-puce--vide">Aucune adresse : la relance ne peut pas partir</span>
-            )}
-          </div>
-
-          {reponse ? (
-            <details className="lin-maj" open aria-label="Réponse à trancher">
-              <summary className="lin-maj-tete">
-                <span className="lin-maj-titre">
-                  Réponse à trancher
-                  <svg className="lin-maj-fleche" viewBox="0 0 16 16" aria-hidden="true">
-                    <path d="M5.2 6.4h5.6L8 9.6z" fill="currentColor" />
-                  </svg>
-                </span>
-              </summary>
-              <p className="lin-maj-auteur">
-                <IconeSante sante={reponse.lecture === "contestation" ? "litige" : reponse.lecture === "promesse" ? "a_jour" : "retard"} />
-                <span data-teinte={reponse.lecture === "contestation" ? "rouge" : reponse.lecture === "promesse" ? "vert" : "jaune"}>{LECTURES[reponse.lecture]}</span>
-                <span className="lin-maj-gris">reçue le {jour(reponse.cree_le)}</span>
-              </p>
-              <p className="lin-maj-texte">
-                {reponse.indice ? `« ${reponse.indice} » — ` : ""}Proposé : {PROPOSITIONS[reponse.proposition]}.
-              </p>
-              <footer className="lin-maj-pied">
-                <span className="c2b-pied-droite">
-                  {reponse.proposition !== "aucune" ? (
-                    <button type="button" className="v2-btn v2-btn--petit" disabled={tranche || !actions} onClick={() => void trancher(true)}>
-                      {tranche ? <Loader variant="spin" /> : <CheckCheck width={14} height={14} aria-hidden="true" />}
-                      <span>Accepter</span>
-                    </button>
-                  ) : null}
-                  <button type="button" className="v2-btn v2-btn--petit" disabled={tranche || !actions} onClick={() => void trancher(false)}>
-                    <span>{reponse.proposition === "aucune" ? "Lue" : "Écarter"}</span>
-                  </button>
-                </span>
-              </footer>
-            </details>
-          ) : null}
-
-          <details className="lin-maj" open aria-label="Texte de la relance">
-            <summary className="lin-maj-tete">
-              <span className="lin-maj-titre">
-                Texte de la relance
-                <svg className="lin-maj-fleche" viewBox="0 0 16 16" aria-hidden="true">
-                  <path d="M5.2 6.4h5.6L8 9.6z" fill="currentColor" />
-                </svg>
-              </span>
-              <button type="button" className="lin-maj-lien" onClick={voirDebiteur}>
-                <Building2 width={14} height={14} aria-hidden="true" /> Débiteur
-              </button>
-            </summary>
-            <p className="lin-maj-auteur">
-              {s ? <IconeSante sante={s} /> : null}
-              <span className="lin-avatar-auteur" aria-hidden="true">
-                <HandCoins width={11} height={11} />
-              </span>
-              <span className="lin-maj-gris">CASHD</span>
-              <span className="lin-maj-gris">{jour(r?.jour ?? cmd?.jour)}</span>
+      <div className="lin-ticket">
+        <article className="lin-ticket-corps">
+          <h2 className="lin-ticket-titre">{sujet}</h2>
+          {/* le corps de la relance est un texte : il prend la place de la description, en entier */}
+          {corps ? (
+            <p className="lin-ticket-desc c2b-corps">{corps}</p>
+          ) : (
+            <p className="lin-ticket-desc" data-vide="">
+              Le texte est dans la file de validation.
             </p>
-            {corps ? <pre className="c2b-corps">{corps}</pre> : <p className="lin-maj-texte lin-maj-gris">Le texte est dans la file de validation.</p>}
-            <footer className="lin-maj-pied">
-              {corps ? (
-                <button type="button" className="lin-maj-pied-btn" aria-label="Copier le texte" title="Copier le texte" onClick={() => copier(texteComplet)}>
-                  <Copy width={16} height={16} aria-hidden="true" />
-                </button>
-              ) : null}
-              {l.groupe === "a_valider" ? (
-                <Link href={`${RACINE}/validations`} className="lin-maj-pied-rond" aria-label="Ouvrir la file de validation" title="Ouvrir la file de validation">
-                  <CheckCheck width={16} height={16} aria-hidden="true" />
-                </Link>
-              ) : null}
-              {r && aEnvoyer(r) ? <EnvoiMain relance={r} noter={noter} /> : null}
-            </footer>
-          </details>
+          )}
+          <div className="lin-ticket-icones">
+            {corps ? (
+              <button
+                type="button"
+                className="lin-ticket-icone"
+                aria-label="Copier le texte"
+                title="Copier le texte"
+                onClick={() => {
+                  copier(texteComplet);
+                  toast("Texte copié : sujet et corps de la relance.", "vert");
+                }}
+              >
+                <Copy aria-hidden="true" />
+              </button>
+            ) : null}
+            {r && aEnvoyer(r) ? (
+              <span className="c2b-icone-menu">
+                <Menu
+                  largeur={220}
+                  bouton={(ouvert, basculer) => (
+                    <button type="button" className="lin-ticket-icone" aria-label="Noter l'envoi à la main" title="Noter l'envoi à la main" aria-expanded={ouvert} disabled={envoi} onClick={basculer}>
+                      {envoi ? <Loader variant="spin" /> : <Send aria-hidden="true" />}
+                    </button>
+                  )}
+                >
+                  {(fermerMenu) => (
+                    <>
+                      <p className="c2b-menu-titre">Envoyée par</p>
+                      {Object.entries(CANAUX_MAIN).map(([cle, libelle]) => (
+                        <button
+                          key={cle}
+                          type="button"
+                          className="lin-menu-option"
+                          onClick={() => {
+                            fermerMenu();
+                            setEnvoi(true);
+                            void noter(r, cle).finally(() => setEnvoi(false));
+                          }}
+                        >
+                          <Send width={16} height={16} aria-hidden="true" />
+                          <span>{libelle}</span>
+                        </button>
+                      ))}
+                    </>
+                  )}
+                </Menu>
+              </span>
+            ) : null}
+            {r && groupeDe(r, false) === "a_valider" ? (
+              <Link href={`${RACINE}/validations`} className="lin-ticket-icone" aria-label="Ouvrir la file de validation" title="Ouvrir la file de validation">
+                <CheckCheck aria-hidden="true" />
+              </Link>
+            ) : null}
+            <button type="button" className="lin-ticket-icone" aria-label="Ouvrir le débiteur" title="Ouvrir le débiteur" onClick={voirDebiteur}>
+              <Building2 aria-hidden="true" />
+            </button>
+          </div>
 
-          {r?.pieces.length ? (
-            <>
-              <h3 className="lin-projet-h2">{r.nature === "devis" ? "Devis relancé" : "Factures relancées"}</h3>
-              <ul className="lin-projet-liste">
-                {r.pieces.map((p) => {
-                  const texte = [p.retard_jours > 0 ? `${p.retard_jours} j de retard` : null, p.penalites > 0 ? `pénalités ${montant(p.penalites)}` : null, p.indemnite > 0 ? `indemnité ${montant(p.indemnite)}` : null]
-                    .filter(Boolean)
-                    .join(" · ");
-                  return (
-                    <li key={p.facture_id}>
-                      <IconeDocument />
-                      <span className="c2b-ligne-texte" title={`${p.numero}${texte ? ` · ${texte}` : ""}`}>
-                        {p.numero}
-                        {texte ? <span className="lin-maj-gris"> · {texte}</span> : null}
-                      </span>
-                      <span className="lin-meta">{montant(p.reste_du)}</span>
-                    </li>
-                  );
-                })}
-              </ul>
-            </>
-          ) : null}
-        </article>
-
-        <aside className="lin-cartes-droite" aria-label="Propriétés de la relance">
-          <CarteDroite titre="Propriétés">
-            <dl className="lin-props">
-              <div>
-                <dt>État</dt>
-                <dd>
-                  <MenuOptions
-                    plat
-                    titre="Relances dans cet état…"
-                    declencheur={
-                      <>
-                        <IconeGroupeRelance g={l.groupe} />
-                        {libelleEtat}
-                      </>
-                    }
-                    options={optionsEtat}
-                    largeur={280}
-                  />
-                </dd>
-              </div>
-              <div>
-                <dt>Nature</dt>
-                <dd>
-                  <span className="lin-valeur">
-                    <IconeLigne nature={l.nature} taille={16} />
-                    {NATURES_LIGNE[l.nature]}
-                  </span>
-                </dd>
-              </div>
-              {r ? (
-                <>
-                  <div>
-                    <dt>Palier</dt>
-                    <dd>
-                      <span className="lin-valeur">
-                        <Losange atteint={r.etat !== "a_valider"} />
-                        {libellePalier(r.palier)}
-                      </span>
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Montant</dt>
-                    <dd>{montant(r.montant)}</dd>
-                  </div>
-                  {r.indemnites > 0 ? (
-                    <div>
-                      <dt>Indemnité</dt>
-                      <dd>{montant(r.indemnites)}</dd>
-                    </div>
-                  ) : null}
-                  {r.penalites > 0 ? (
-                    <div>
-                      <dt>Pénalités</dt>
-                      <dd>{montant(r.penalites)}</dd>
-                    </div>
-                  ) : null}
-                  <div>
-                    <dt>Canal</dt>
-                    <dd>{canalDe(r)}</dd>
-                  </div>
-                </>
-              ) : null}
-              <div>
-                <dt>Écrite le</dt>
-                <dd>
-                  <span className="lin-valeur">
-                    <IconeCalendrier />
-                    {jour(r?.jour ?? cmd?.jour)}
-                  </span>
-                </dd>
-              </div>
-              {r?.envoye_le ? (
-                <div>
-                  <dt>Partie le</dt>
-                  <dd>{dateHeure(r.envoye_le)}</dd>
-                </div>
-              ) : null}
-              <div>
-                <dt>Destinataire</dt>
-                <dd className={adresseDest ? undefined : "lin-props-vide"}>
-                  <span className="lin-valeur">
-                    <IconeEnveloppe />
-                    {adresseDest ?? "Aucune adresse"}
-                  </span>
-                </dd>
-              </div>
-            </dl>
-          </CarteDroite>
-
-          {b ? (
-            <CarteDroite
-              titre="Débiteur"
-              action={
-                <button type="button" className="lin-carte-lien" onClick={voirDebiteur}>
-                  Ouvrir
-                </button>
-              }
-            >
-              <dl className="lin-props">
-                <div>
-                  <dt>Nom</dt>
-                  <dd>
-                    <span className="lin-valeur">
-                      <IconeDebiteur id={b.compte_id} />
-                      {b.nom}
-                    </span>
-                  </dd>
-                </div>
-                <div>
-                  <dt>Statut</dt>
-                  <dd data-teinte={s ? SANTES[s].teinte : undefined}>
-                    <span className="lin-valeur">
-                      {s ? <IconeStatut sante={s} /> : null}
-                      {STATUTS_COMPTE[b.statut].libelle}
-                    </span>
-                  </dd>
-                </div>
-                <div>
-                  <dt>Échu</dt>
-                  <dd>{montant(b.echu, b.devise)}</dd>
-                </div>
-                <div>
-                  <dt>Encours</dt>
-                  <dd>{montant(b.encours, b.devise)}</dd>
-                </div>
-                <div>
-                  <dt>Retard</dt>
-                  <dd>
-                    <span className="lin-valeur">
-                      <IconePriorite niveau={niveauDe(b.retard_max_jours)} titre={retardDe(b.retard_max_jours)} />
-                      {retardDe(b.retard_max_jours)}
-                    </span>
-                  </dd>
-                </div>
-              </dl>
-            </CarteDroite>
-          ) : null}
-
-          <CarteDroite titre="Paliers">
-            <ul className="lin-jalons">
-              {ORDRE_PALIERS.map((p) => (
-                <li key={p}>
-                  <Losange atteint={vus.has(p)} />
-                  <span className="lin-jalon-nom">{libellePalier(p)}</span>
-                  <span className="lin-meta">{vus.has(p) ? jour(vus.get(p) ?? null) : "—"}</span>
+          {factures.length ? (
+            <ul className="lin-ticket-sous" aria-label={r?.nature === "devis" ? "Devis relancé" : "Factures relancées"}>
+              {facturesVues.map((p) => (
+                <li key={p.facture_id}>
+                  <button type="button" className="lin-ticket-sous-ligne" title={`${p.numero} : ouvrir le débiteur`} onClick={voirDebiteur}>
+                    <IconeDocument />
+                    <span className="lin-ticket-sous-ref">{p.numero}</span>
+                    <span className="lin-ticket-sous-nom">{p.retard_jours > 0 ? `${p.retard_jours} j de retard` : "à échoir"}</span>
+                    {factures.length > 1 ? <span className="lin-ticket-sous-meta">{montant(p.reste_du)}</span> : null}
+                  </button>
                 </li>
               ))}
+              {factures.length > 5 ? (
+                <li>
+                  <button type="button" className="lin-ticket-sous-appel" aria-expanded={toutesFactures} onClick={() => setToutesFactures((v) => !v)}>
+                    {toutesFactures ? "Voir moins" : `Voir les ${factures.length} factures`}
+                  </button>
+                </li>
+              ) : null}
             </ul>
-          </CarteDroite>
+          ) : null}
 
-          <CarteDroite
-            titre="Activité"
-            action={
-              <button type="button" className="lin-carte-lien" onClick={() => filtrer("debiteur", l.compte_id)}>
-                Tout voir
-              </button>
-            }
-          >
-            {autres.length ? (
-              <ul className="lin-activite">
-                {autres.slice(0, 5).map((x) => (
-                  <li key={x.id}>
-                    <Losange atteint={x.etat !== "a_valider"} />
-                    <button type="button" className="c2b-ligne-texte" onClick={() => aller({ relance: x.id })}>
-                      {libellePalier(x.palier)} {(ETATS_RELANCE[x.etat] ?? ETATS_RELANCE.preparee).libelle.toLowerCase()} · {jour(x.envoye_le ?? x.jour)}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="lin-activite-vide">Aucune autre relance pour ce débiteur.</p>
-            )}
-          </CarteDroite>
+          <hr className="lin-ticket-trait" />
+          <div className="lin-ticket-activite-tete">
+            <h3>Activité</h3>
+            <button type="button" className="lin-ticket-lien" onClick={() => filtrer("debiteur", l.compte_id)}>
+              Ses autres relances
+            </button>
+          </div>
+          <Fil entrees={entrees} vide="Rien n'est encore arrivé à cette relance." />
+        </article>
+
+        <aside className="lin-ticket-cote" aria-label="Propriétés de la relance">
+          <section className="lin-ticket-section">
+            <h3>Propriétés</h3>
+            <div className="lin-ticket-pilules">
+              <MenuOptions
+                raccourci="s"
+                titre="Relances dans cet état…"
+                declencheur={
+                  <>
+                    <IconeGroupeRelance g={l.groupe} />
+                    {libelleEtat}
+                  </>
+                }
+                options={optionsEtat}
+                largeur={280}
+              />
+              {r ? (
+                <MenuOptions
+                  raccourci="p"
+                  titre="Relances à ce palier…"
+                  declencheur={
+                    <>
+                      <Losange atteint={r.etat !== "a_valider"} />
+                      {libellePalier(r.palier)}
+                    </>
+                  }
+                  options={[{ cle: "palier", libelle: `Relances au palier « ${libellePalier(r.palier)} »`, icone: <Losange atteint />, action: () => filtrer("palier", r.palier) }]}
+                  largeur={300}
+                />
+              ) : (
+                <span className="lin-ticket-pilule">
+                  <IconeLigne nature={l.nature} taille={16} />
+                  {NATURES_LIGNE[l.nature]}
+                </span>
+              )}
+              {r && !sujet.replace(/\s/g, "").includes(montant(r.montant).replace(/\s/g, "")) ? (
+                <span className="lin-ticket-pilule" title="Montant relancé">
+                  <HandCoins aria-hidden="true" />
+                  {montant(r.montant)}
+                </span>
+              ) : null}
+            </div>
+          </section>
+          <section className="lin-ticket-section">
+            <h3>Étiquettes</h3>
+            <div className="lin-ticket-pilules">
+              {adresseDest ? (
+                <MenuOptions
+                  titre="Destinataire…"
+                  declencheur={
+                    <>
+                      <IconeEnveloppe />
+                      {nomDest ?? adresseDest}
+                    </>
+                  }
+                  options={optionsDest}
+                />
+              ) : (
+                <span className="lin-ticket-pilule" data-vide="" title="La relance ne peut pas partir sans adresse">
+                  <IconeEnveloppe />
+                  Aucune adresse
+                </span>
+              )}
+              {r ? (
+                <span className="lin-ticket-pilule" title="Canal d'envoi">
+                  <Mail aria-hidden="true" />
+                  {canalDe(r)}
+                </span>
+              ) : null}
+            </div>
+          </section>
+          <section className="lin-ticket-section">
+            <h3>Débiteur</h3>
+            <div className="lin-ticket-pilules">
+              <MenuOptions
+                titre="Débiteur…"
+                declencheur={
+                  <>
+                    <IconeDebiteur id={l.compte_id} />
+                    {l.compte}
+                  </>
+                }
+                options={optionsDebiteur}
+                largeur={320}
+              />
+              <span className="lin-ticket-pilule lin-ticket-sous-pilule" data-vide={etape.vide ? "" : undefined}>
+                {etape.vide ? null : <Losange atteint={false} />}
+                {etape.libelle}
+              </span>
+            </div>
+          </section>
         </aside>
       </div>
     </section>
