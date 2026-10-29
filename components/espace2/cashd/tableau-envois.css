@@ -118,3 +118,73 @@
 .v2-val-carte .c2e-autre:hover {
   background: var(--v2-gray-100);
 }
+
+/* la fiche courte : l'adresse passe sous le nom plutôt qu'à la suite */
+.v2-val-carte .c2e-fiche {
+  grid-template-columns: 72px minmax(0, 1fr);
+  row-gap: 10px;
+}
+.v2-val-carte .c2e-adresse {
+  display: block;
+  font-size: 12.5px;
+}
+
+/* les sections repliées (factures, historique, autres relances) : un clic les déplie */
+.v2-val-carte .c2e-replis {
+  border-bottom: 1px solid var(--v2-a-400);
+}
+.v2-val-carte .c2e-repli {
+  border-top: 1px solid var(--v2-a-400);
+}
+.v2-val-carte .c2e-repli > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 8px;
+  margin: 0 -8px;
+  border-radius: 6px;
+  list-style: none;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--v2-gray-1000);
+  cursor: pointer;
+  user-select: none;
+}
+.v2-val-carte .c2e-repli > summary::-webkit-details-marker {
+  display: none;
+}
+.v2-val-carte .c2e-repli > summary:hover {
+  background: var(--v2-gray-100);
+}
+.v2-val-carte .c2e-repli > summary:focus-visible {
+  outline: 2px solid var(--v2-blue-700, currentColor);
+  outline-offset: -2px;
+}
+.v2-val-carte .c2e-repli > summary small {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--v2-gray-900);
+  font-variant-numeric: tabular-nums;
+}
+.v2-val-carte .c2e-repli-fleche {
+  flex-shrink: 0;
+  color: var(--v2-gray-900);
+  transition: transform 150ms ease;
+}
+.v2-val-carte .c2e-repli[open] > .c2e-repli-fleche,
+.v2-val-carte .c2e-repli[open] > summary .c2e-repli-fleche {
+  transform: rotate(90deg);
+}
+.v2-val-carte .c2e-repli[open] > summary {
+  margin-bottom: 4px;
+}
+.v2-val-carte .c2e-repli > :not(summary) {
+  margin-bottom: 14px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .v2-val-carte .c2e-repli-fleche {
+    transition: none;
+  }
+}
