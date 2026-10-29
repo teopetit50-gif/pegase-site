@@ -403,39 +403,16 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
     width: 208px;
   }
 }
-/* 29/10/2026 — capture de Teo sur « Entreprises » : sur ordinateur, le rail
-   ouvert au survol recouvrait les deux tiers du volet, sans ombre ; il ne
-   restait qu'un bout de surbrillance vide, lu comme un bug d'affichage. Le
-   rail ne s'ouvre donc plus à côté d'un volet : le libellé de l'entrée
-   survolée sort en étiquette à droite de l'icône, par-dessus le volet. Fixe
-   pour échapper aux overflow du rail ; top auto le laisse centré sur l'entrée.
-   Le tiroir du mobile garde son rail qui s'ouvre. */
-@media (hover: hover) and (min-width: 768px) {
+/* 29/10/2026 — capture de Teo sur « Entreprises » : le rail ouvert au
+   survol recouvrait le volet sans ombre, et se lisait comme un bug ; une
+   étiquette à droite de l'icône l'avait remplacé le matin même. Le soir,
+   Teo : « il ne déroule plus sur la droite, il est bloqué ». Le rail
+   s'ouvre de nouveau, mais posé PAR-DESSUS le volet, comme chez Supabase :
+   l'ombre des menus le détache du volet qu'il recouvre. */
+@media (hover: hover) {
   .v2-laterale--fixe .v2-rail:hover,
   .v2-laterale--fixe .v2-rail:has(:focus-visible) {
-    width: 48px;
-  }
-  .v2-laterale--fixe .v2-rail-item > .v2-rail-libelle {
-    position: fixed;
-    left: 54px;
-    z-index: 60;
-    max-width: 240px;
-    padding: 4px 8px;
-    border: 1px solid var(--v2-a-400);
-    border-radius: 6px;
-    background: var(--v2-bg-100);
-    box-shadow: var(--v2-ombre-petite, 0 4px 12px rgb(0 0 0 / 0.12));
-    color: var(--v2-gray-1000);
-    font-size: 13px;
-    font-weight: 500;
-    line-height: 18px;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.1s linear;
-  }
-  .v2-laterale--fixe .v2-rail-item:hover > .v2-rail-libelle,
-  .v2-laterale--fixe .v2-rail-item:focus-visible > .v2-rail-libelle {
-    opacity: 1;
+    box-shadow: var(--v2-ombre-menu);
   }
 }
 .v2-rail-int {
