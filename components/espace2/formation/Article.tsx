@@ -63,6 +63,7 @@ export default function Article({ page }: { page: PageFormation }) {
           return (
             <section key={s.id} className="fm-section">
               <Titre id={s.id}>{s.titre}</Titre>
+              {s.video && <Lecteur src={s.video.src} affiche={s.video.affiche} titre={s.video.titre} duree={s.video.duree} />}
               {blocs(s.blocs)}
             </section>
           );

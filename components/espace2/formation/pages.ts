@@ -21,17 +21,29 @@ import { MODULES, MODULES_PRINCIPAUX } from "../modules";
 
 export type Riche = string;
 export type Bloc = { p: Riche } | { sous: string } | { liste: Riche[] };
-export type SectionFormation = { id: string; titre: string; niveau: 2 | 3; blocs: Bloc[] };
+export type VideoFormation = { src: string; affiche: string; titre: string; duree: number };
+export type SectionFormation = { id: string; titre: string; niveau: 2 | 3; video?: VideoFormation; blocs: Bloc[] };
 export type PageFormation = {
   titre: string;
   intro: Riche;
-  video?: { src: string; affiche: string; titre: string; duree: number };
+  video?: VideoFormation;
   sections: SectionFormation[];
   suivant?: { titre: string; href: string };
 };
 
 const F = "/espace2/formation";
 const E = "/espace2";
+
+/* 29/10/2026 — Teo : « chaque page doit avoir sa ou ses vidéos de formation »,
+   une par geste, qu'il tournera plus tard. En attendant, chaque emplacement
+   montre la vidéo du guide sous son propre titre. Pour en remplacer une :
+   déposer le fichier dans public/formation/ et passer son nom à v(). */
+const v = (titre: string, fichier = "decouvrir-omega"): VideoFormation => ({
+  src: `/formation/${fichier}.mp4`,
+  affiche: `/formation/${fichier}.jpg`,
+  titre,
+  duree: fichier === "decouvrir-omega" ? 38 : 0,
+});
 
 const minuscule = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 const PRINCIPAUX = MODULES_PRINCIPAUX.map((cle) => MODULES.find((m) => m.cle === cle)!);
@@ -48,7 +60,7 @@ export const PAGES: Record<string, PageFormation> = {
     titre: "Guide de démarrage",
     intro:
       "Omega relance vos impayés, répond à vos demandes et classe vos factures, et c'est toujours vous qui validez. Ce guide vous mène de votre premier accès à votre première validation.",
-    video: { src: "/formation/decouvrir-omega.mp4", affiche: "/formation/decouvrir-omega.jpg", titre: "Découvrir Omega", duree: 38 },
+    video: v("Découvrir Omega"),
     sections: [
       {
         id: "vue-ensemble",
@@ -120,6 +132,7 @@ export const PAGES: Record<string, PageFormation> = {
         id: "a-valider",
         titre: "Tout passe par « À valider »",
         niveau: 2,
+        video: v("Valider une demande"),
         blocs: [
           {
             p: `Les virements, les factures, les IBAN et les accords qui attendent une décision arrivent dans [À valider](${E}/validations), classés par échéance : en retard, aujourd'hui, cette semaine, plus tard.`,
@@ -145,6 +158,7 @@ export const PAGES: Record<string, PageFormation> = {
         id: "essai",
         titre: "Le mode essai",
         niveau: 2,
+        video: v("Le mode essai"),
         blocs: [
           {
             p: "Chaque module est installé en mode essai. Tant que le gérant n'a pas basculé en réel, les messages validés partent vers une adresse d'essai d'Omega, jamais chez vos clients.",
@@ -171,6 +185,7 @@ export const PAGES: Record<string, PageFormation> = {
         id: "equipe",
         titre: "Qui fait quoi",
         niveau: 2,
+        video: v("Les rôles de l'équipe"),
         blocs: [
           {
             p: `Chaque personne a un rôle : Gérant, Administrateur, Valideur, Collaborateur ou Lecteur. Le rôle fixe ce qu'elle voit et ce qu'elle peut décider ; la liste est dans [Équipe](${E}/equipe).`,
@@ -200,6 +215,7 @@ export const PAGES: Record<string, PageFormation> = {
         id: "premier-acces",
         titre: "Le premier accès",
         niveau: 2,
+        video: v("Le premier accès"),
         blocs: [
           { p: "Le lien reçu par e-mail ouvre quatre écrans :" },
           {
@@ -222,6 +238,7 @@ export const PAGES: Record<string, PageFormation> = {
         id: "point",
         titre: "Lire le point du matin",
         niveau: 3,
+        video: v("Le point du matin"),
         blocs: [
           {
             p: `Le [point du matin](${E}/point) arrive à 7 h par défaut, par e-mail ou WhatsApp. Il commence par ce qu'il faut regarder en premier, puis ce qui a bougé depuis la dernière édition. Les sept dernières éditions restent consultables.`,
@@ -232,6 +249,7 @@ export const PAGES: Record<string, PageFormation> = {
         id: "decider",
         titre: "Décider ce qui attend",
         niveau: 3,
+        video: v("Votre routine dans « À valider »"),
         blocs: [{ p: `Ouvrez [À valider](${E}/validations) sur l'onglet « À décider par moi ». Ce qui est en retard est en haut.` }],
       },
       {
@@ -268,6 +286,7 @@ export const PAGES: Record<string, PageFormation> = {
         id: "ecrans",
         titre: "Les écrans",
         niveau: 2,
+        video: v("Une facture qui arrive"),
         blocs: [
           {
             liste: [
@@ -293,6 +312,7 @@ export const PAGES: Record<string, PageFormation> = {
         id: "dossier",
         titre: "Dans le dossier d'une facture",
         niveau: 3,
+        video: v("Le dossier d'une facture"),
         blocs: [
           {
             liste: [
@@ -308,12 +328,14 @@ export const PAGES: Record<string, PageFormation> = {
         id: "payer",
         titre: "Payer",
         niveau: 3,
+        video: v("Payer une facture"),
         blocs: [{ p: `Dans [À payer](${E}/filed/a-payer), « Noter un paiement » enregistre le règlement d'une facture.` }],
       },
       {
         id: "garde-fous",
         titre: "Les garde-fous",
         niveau: 2,
+        video: v("Contrôles et fraude"),
         blocs: [
           {
             liste: [
@@ -337,6 +359,7 @@ export const PAGES: Record<string, PageFormation> = {
         id: "ecrans",
         titre: "Les écrans",
         niveau: 2,
+        video: v("Le tableau de bord"),
         blocs: [
           {
             liste: [
@@ -352,6 +375,7 @@ export const PAGES: Record<string, PageFormation> = {
         id: "calendrier",
         titre: "Le calendrier des relances",
         niveau: 2,
+        video: v("Valider une relance"),
         blocs: [
           {
             liste: [
@@ -368,6 +392,7 @@ export const PAGES: Record<string, PageFormation> = {
         id: "gestes",
         titre: "Ce que vous faites",
         niveau: 2,
+        video: v("Noter un règlement, un litige, une pause"),
         blocs: [
           {
             liste: [
@@ -384,6 +409,7 @@ export const PAGES: Record<string, PageFormation> = {
         id: "garde-fous",
         titre: "Les garde-fous",
         niveau: 2,
+        video: v("Qui valide quoi"),
         blocs: [
           {
             liste: [
@@ -429,18 +455,21 @@ export const PAGES: Record<string, PageFormation> = {
         id: "repondre",
         titre: "Répondre",
         niveau: 3,
+        video: v("Répondre à une demande"),
         blocs: [{ p: "Sur une demande : « Valider et envoyer », « Corriger la réponse » ou « Refuser la réponse »." }],
       },
       {
         id: "base",
         titre: "Tenir la base à jour",
         niveau: 3,
+        video: v("La base de connaissances"),
         blocs: [{ p: "Une fiche se crée, se corrige, puis se met en vigueur ; une fiche retirée ne sert plus. Une question hors de la base vous est transférée." }],
       },
       {
         id: "sujets",
         titre: "Laisser partir seul",
         niveau: 3,
+        video: v("Laisser partir seul"),
         blocs: [
           {
             p: "Sujet par sujet, vous pouvez autoriser l'envoi sans relecture. « Couper l'envoi automatique » remet toutes les réponses en validation ; il faut en donner le motif.",
@@ -451,6 +480,7 @@ export const PAGES: Record<string, PageFormation> = {
         id: "garde-fous",
         titre: "Les garde-fous",
         niveau: 2,
+        video: v("Avis et urgences"),
         blocs: [
           {
             liste: [
@@ -474,6 +504,7 @@ export const PAGES: Record<string, PageFormation> = {
         id: "ecrans",
         titre: "Les écrans",
         niveau: 2,
+        video: v("Les comptes à risque"),
         blocs: [
           {
             liste: [
@@ -489,6 +520,7 @@ export const PAGES: Record<string, PageFormation> = {
         id: "gestes",
         titre: "Ce que vous faites",
         niveau: 2,
+        video: v("Préparer une reprise"),
         blocs: [
           {
             liste: [
@@ -504,6 +536,7 @@ export const PAGES: Record<string, PageFormation> = {
         id: "garde-fous",
         titre: "Les garde-fous",
         niveau: 2,
+        video: v("Les garde-fous"),
         blocs: [
           {
             liste: [
@@ -529,6 +562,7 @@ export const PAGES: Record<string, PageFormation> = {
         id: "ecrans",
         titre: "Les écrans",
         niveau: 2,
+        video: v("Vos chantiers"),
         blocs: [
           {
             liste: [
@@ -545,6 +579,7 @@ export const PAGES: Record<string, PageFormation> = {
         id: "gestes",
         titre: "Ce que vous faites",
         niveau: 2,
+        video: v("Avenants et prix"),
         blocs: [
           {
             liste: [
@@ -580,12 +615,14 @@ export const PAGES: Record<string, PageFormation> = {
         id: "ecrans",
         titre: "L'écran",
         niveau: 2,
+        video: v("Le calendrier des permis"),
         blocs: [{ liste: [`[Calendrier des permis](${E}/lorani) : à confirmer, pièces à fournir, en instruction, accordés, clos.`] }],
       },
       {
         id: "gestes",
         titre: "Ce que vous faites",
         niveau: 2,
+        video: v("Suivre un permis"),
         blocs: [
           {
             liste: [
@@ -615,6 +652,7 @@ export const PAGES: Record<string, PageFormation> = {
         id: "ecrans",
         titre: "L'écran",
         niveau: 2,
+        video: v("Le tableau de bord"),
         blocs: [
           {
             liste: [
@@ -627,6 +665,7 @@ export const PAGES: Record<string, PageFormation> = {
         id: "gestes",
         titre: "Ce que vous faites",
         niveau: 2,
+        video: v("Chiffrer un retour"),
         blocs: [
           {
             liste: ["Chiffrer un retour.", "Signer l'état des lieux.", "Demander un avoir.", "Publier un barème.", "Envoyer le dossier à la banque."],
@@ -650,6 +689,7 @@ export const PAGES: Record<string, PageFormation> = {
         id: "ecrans",
         titre: "L'écran",
         niveau: 2,
+        video: v("Le tableau de bord"),
         blocs: [
           {
             liste: [
@@ -662,6 +702,7 @@ export const PAGES: Record<string, PageFormation> = {
         id: "gestes",
         titre: "Ce que vous faites",
         niveau: 2,
+        video: v("La liste d'attente"),
         blocs: [
           {
             liste: [
@@ -698,6 +739,7 @@ export const PAGES: Record<string, PageFormation> = {
         id: "ecrans",
         titre: "L'écran",
         niveau: 2,
+        video: v("Les dossiers du cabinet"),
         blocs: [
           {
             liste: [`[Dossiers du cabinet](${E}/tamila) : délais à confirmer, échéances sous quinze jours, audiences, dossiers ouverts et clos.`],
@@ -708,6 +750,7 @@ export const PAGES: Record<string, PageFormation> = {
         id: "gestes",
         titre: "Ce que vous faites",
         niveau: 2,
+        video: v("Ouvrir un dossier"),
         blocs: [
           {
             liste: ["Ouvrir un nouveau dossier.", "Calculer une date.", "Contrôler les conflits.", "Saisir un avis.", "Clôturer un dossier."],
@@ -738,6 +781,7 @@ export const PAGES: Record<string, PageFormation> = {
         id: "ecrans",
         titre: "L'écran",
         niveau: 2,
+        video: v("Le groupe sur une page"),
         blocs: [
           {
             liste: [
@@ -750,6 +794,7 @@ export const PAGES: Record<string, PageFormation> = {
         id: "gestes",
         titre: "Ce que vous faites",
         niveau: 2,
+        video: v("Rapprocher les fiches"),
         blocs: [
           {
             liste: [

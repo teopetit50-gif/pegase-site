@@ -94,6 +94,14 @@
 .fm-article :is(h2, h3) + .fm-sous {
   margin-top: 6px;
 }
+/* la vidéo d'un geste, sous le titre de sa section ; le texte suit à 16 px */
+.fm-article :is(h2, h3) + .fm-video {
+  margin-top: 12px;
+}
+.fm-article .fm-video + p,
+.fm-article .fm-video + ul {
+  margin-top: 16px;
+}
 .fm-article ul {
   margin: 12px 0 0;
   padding: 0 0 0 24px;
