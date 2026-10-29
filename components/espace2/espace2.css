@@ -400,9 +400,7 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
 @media (hover: hover) {
   .v2-rail:hover,
   .v2-rail:has(:focus-visible) {
-    /* 29/10/2026 — « la barre est trop large » : 184 px, le plus long
-       libellé (« Autres modules » et son chevron) tient en 166 */
-    width: 184px;
+    width: 208px;
   }
 }
 /* 29/10/2026 — capture de Teo sur « Entreprises » : le rail ouvert au
@@ -510,43 +508,6 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
 .v2-rail-libelle {
   overflow: hidden;
   text-overflow: ellipsis;
-}
-/* 29/10/2026 — les titres des groupes du rail : un filet quand le rail est
-   replié, l'intitulé (capitales, chasse fixe, comme le volet) quand il
-   s'ouvre ; la hauteur ne change pas, les icônes ne bougent pas */
-.v2-rail-titre {
-  position: relative;
-  height: 16px;
-  margin-bottom: 4px;
-}
-.v2-rail-titre::before {
-  content: "";
-  position: absolute;
-  inset: 50% 0 auto;
-  border-top: 1px solid var(--v2-a-400);
-  transition: opacity 0.1s linear;
-}
-.v2-rail-titre > span {
-  position: absolute;
-  inset: 0 0 auto 6px;
-  overflow: hidden;
-  color: var(--v2-gray-700);
-  font-family: var(--v2-mono);
-  font-size: 11px;
-  line-height: 16px;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  opacity: 0;
-  transition: opacity 0.1s linear;
-}
-@media (hover: hover) {
-  .v2-rail:is(:hover, :has(:focus-visible)) .v2-rail-titre:has(> span)::before {
-    opacity: 0;
-  }
-  .v2-rail:is(:hover, :has(:focus-visible)) .v2-rail-titre > span {
-    opacity: 1;
-  }
 }
 /* 29/10/2026 — « Autres modules » : un déroulant sous les modules du rail.
    Le chevron n'apparaît qu'une fois le rail ouvert (il est hors des 48 px) ;
