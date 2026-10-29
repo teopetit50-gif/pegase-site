@@ -8,6 +8,9 @@
    - chaque « /espace/<x> » écrit par un moteur a sa page app/espace2/<x>.
 
    node outils/verifier-aiguillage.mjs          → la liste, code 1 s'il manque une règle
+   node outils/verifier-aiguillage.mjs <dossier>… → lit aussi ces dossiers de .sql
+     (les migrations de production assemblées hors de main, ex.
+     ~/Desktop/PEGASE/releve-prod/omega/prod/migrations)
    À relancer après chaque nouvelle migration qui écrit un lien, et après
    chaque refonte d'une page métier.
    ══════════════════════════════════════════════════════════════════════ */
@@ -40,7 +43,8 @@ const pages = new Map(); // /espace/<x> → premier endroit
 const autres = new Map(); // objet_type nommé ailleurs (demandes à valider…) → premier endroit
 const PREFIXES = /^(filed|cashd|offload|reput|btp|loc|lorani|tamila|tiroma|grp)_/;
 
-for (const f of fichiers(join(racine, "omega/modules"))) {
+const dossiers = [join(racine, "omega/modules"), ...process.argv.slice(2)];
+for (const f of dossiers.flatMap(fichiers)) {
   const t = readFileSync(f, "utf8");
   const ou = (i) => `${relative(racine, f)}:${ligneDe(t, i)}`;
   for (const m of t.matchAll(/'lien'\s*,/g)) {

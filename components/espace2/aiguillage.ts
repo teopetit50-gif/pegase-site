@@ -81,12 +81,25 @@ export const REGLES: Record<string, Regle> = {
   lorani_projets: (id) => `${RACINE}/lorani?projet=${q(id)}`,
   /* le même projet, au singulier, dans les demandes de Lorani */
   lorani_projet: (id) => `${RACINE}/lorani?projet=${q(id)}`,
+  /* une question restée sans réponse (b5_25) : son lien porte déjà « ?projet= », il l'emporte */
+  lorani_point: () => null,
+
+  /* une décision de Varelo à valider (b1_15) : la page À valider ne sait pas encore ouvrir une demande donnée */
+  demandes_validation: () => `${RACINE}/validations`,
 
   /* DALIRO, TAVARO, TAMILA, TIROMA, VARELO — « ?objet= », lu par les pages refaites */
   btp_chantiers: daliro("btp_chantiers"),
   loc_contrats: tavaro("loc_contrats"),
   loc_reservations: tavaro("loc_reservations"),
   loc_vehicules: tavaro("loc_vehicules"),
+  /* le point du matin de production (b2_18) */
+  loc_avis_contravention: tavaro("loc_avis_contravention"),
+  loc_contestations: tavaro("loc_contestations"),
+  loc_entretiens: tavaro("loc_entretiens"),
+  loc_immobilisations: tavaro("loc_immobilisations"),
+  loc_passages_peage: tavaro("loc_passages_peage"),
+  loc_rappels_vehicules: tavaro("loc_rappels_vehicules"),
+  loc_remises: tavaro("loc_remises"),
   tamila_dossier: tamila("tamila_dossier"),
   tiroma_evenements_agenda: tiroma("tiroma_evenements_agenda"),
   tiroma_fauteuils: tiroma("tiroma_fauteuils"),
