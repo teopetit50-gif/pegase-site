@@ -1,6 +1,6 @@
 "use client";
 
-/* Le lecteur vidéo de /formation, sur celui de la documentation Linear :
+/* Le lecteur vidéo de /espace2/formation, sur celui de la documentation Linear :
    cadre 16:9 à filet de 5 % et rayon 8, barre de commandes posée à 17 px
    du bas avec 50 px de marge latérale, boutons ronds de 32 px « verre »,
    piste de 4 px à 16 % de blanc. Écart assumé : la piste est un vrai
@@ -18,14 +18,16 @@ const horloge = (s: number) => {
   return `${String(m).padStart(2, "0")}:${String(r).padStart(2, "0")}`;
 };
 
-export default function Lecteur({ src, affiche, titre }: { src: string; affiche: string; titre: string }) {
+/* `duree` : la durée affichée avant que la vidéo ait chargé ses métadonnées
+   (sur téléphone, elle ne les charge souvent qu'au premier appui) */
+export default function Lecteur({ src, affiche, titre, duree: dureeConnue = 0 }: { src: string; affiche: string; titre: string; duree?: number }) {
   const cadre = useRef<HTMLDivElement | null>(null);
   const video = useRef<HTMLVideoElement | null>(null);
   const repos = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [lecture, setLecture] = useState(false);
   const [muet, setMuet] = useState(false);
   const [temps, setTemps] = useState(0);
-  const [duree, setDuree] = useState(0);
+  const [duree, setDuree] = useState(dureeConnue);
   const [vitesse, setVitesse] = useState(1);
   const [plein, setPlein] = useState(false);
   const [commandes, setCommandes] = useState(true);

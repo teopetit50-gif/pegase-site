@@ -23,7 +23,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, Banknote, Building2, CheckSquare, CircleHelp, Home, Bell, Check, CheckCheck, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, LayoutGrid, LifeBuoy, LogOut, Menu as IconeMenu, Moon, Plus, Search, Settings, Sun, Terminal, User, X } from "lucide-react";
+import { Activity, Banknote, Building2, CheckSquare, CircleHelp, Home, Bell, Check, CheckCheck, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, GraduationCap, LayoutGrid, LifeBuoy, LogOut, Menu as IconeMenu, Moon, Plus, Search, Settings, Sun, Terminal, User, X } from "lucide-react";
 import { Button, Dialog, DialogTrigger, Modal, ModalOverlay, Popover, RouterProvider } from "react-aria-components";
 import type { Utilisateur } from "@/lib/compte";
 import { createClient } from "@/lib/supabase/client";
@@ -543,7 +543,17 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
       },
     ],
   };
-  const toutes = [...sections, reglages];
+  /* 29/10/2026 — demande de Teo : la formation (le guide de démarrage, texte
+     et vidéo) dans l'espace, avec sa place dans le rail, au-dessus de l'aide */
+  const formation: Section = {
+    cle: "formation",
+    titre: "Formation",
+    icone: <GraduationCap {...R} />,
+    href: `${RACINE}/formation`,
+    racines: [`${RACINE}/formation`],
+    groupes: [{ titre: "Formation", liens: [{ libelle: "Guide de démarrage", href: `${RACINE}/formation`, exact: true }] }],
+  };
+  const toutes = [...sections, formation, reglages];
   const ouvre = (l: Lien) => (l.exact ? chemin === l.href : chemin === (l.racine ?? l.href) || chemin.startsWith(`${l.racine ?? l.href}/`));
   const courante =
     toutes.find((s) => s.racines.some((r) => chemin === r || chemin.startsWith(`${r}/`))) ??
@@ -583,6 +593,7 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
 
           <div className="v2-rail-bas">
             <ul className="v2-rail-groupe">
+              <li>{iconeRail(formation)}</li>
               <li>
                 <button
                   type="button"
