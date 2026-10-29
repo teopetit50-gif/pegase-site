@@ -43,8 +43,10 @@ const pages = new Map(); // /espace/<x> → premier endroit
 const autres = new Map(); // objet_type nommé ailleurs (demandes à valider…) → premier endroit
 const PREFIXES = /^(filed|cashd|offload|reput|btp|loc|lorani|tamila|tiroma|grp)_/;
 
+/* omega/modules, plus les extraits du socle photographiés à la racine de omega/ (le point du matin de Lorani y vit) */
+const extraits = readdirSync(join(racine, "omega")).filter((n) => n.endsWith(".sql")).map((n) => join(racine, "omega", n));
 const dossiers = [join(racine, "omega/modules"), ...process.argv.slice(2)];
-for (const f of dossiers.flatMap(fichiers)) {
+for (const f of [...extraits, ...dossiers.flatMap(fichiers)]) {
   const t = readFileSync(f, "utf8");
   const ou = (i) => `${relative(racine, f)}:${ligneDe(t, i)}`;
   for (const m of t.matchAll(/'lien'\s*,/g)) {
