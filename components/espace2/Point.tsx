@@ -40,12 +40,14 @@ import { Note } from "./ui";
 import { useMonte } from "./horloge";
 import { Chiffre, EnDirect, Initiales } from "./vivant";
 import { RACINE } from "./modules";
+import { aiguiller } from "./aiguillage";
 
 type Contenu = { point: PointDuJour | null; lignes: LignePoint[]; apercu?: boolean; motifs?: unknown[] };
 type Motif = { module?: string; motif?: string };
 
-/* « /espace/filed » → « /espace2/filed » : les liens du point visent l'ancien espace */
-const lienV2 = (l: string | null) => (l ? l.replace(/^\/espace(?=\/|$)/, RACINE) : null);
+/* le lien d'une ligne : son objet trouve sa page (aiguillage.ts), sinon le
+   lien du moteur, porté de /espace vers /espace2 ; sans lien ni objet, rien */
+const lienV2 = (l: LignePoint) => (l.lien || (l.objet_type && l.objet_id) ? aiguiller(l) : null);
 
 /* la première phrase fait le titre, le reste le détail */
 function couper(texte: string | null): { titre: string; detail: string | null } {
@@ -245,7 +247,7 @@ export default function Point() {
               <ul className="v2-pm-liste">
                 {cartes.premier.map((l) => {
                   const { titre, detail } = couper(l.texte);
-                  const lien = lienV2(l.lien);
+                  const lien = lienV2(l);
                   const action = l.module === "socle" ? { libelle: "À valider", icone: ArrowRight } : l.gravite === "critique" ? { libelle: "Ouvrir", icone: ArrowUpRight } : { libelle: "Examiner", icone: ArrowUpRight };
                   return (
                     <li key={l.id}>
@@ -330,7 +332,7 @@ export default function Point() {
                     .split(/,\s(?![^()]*\))/)
                     .map((x) => x.trim())
                     .filter(Boolean);
-                  const lien = lienV2(l.lien);
+                  const lien = lienV2(l);
                   const lignes = morceaux.length > 1 ? morceaux : [t.replace(/\.$/, "")];
                   return lignes.map((m, i) => {
                     const note = m.match(/\(([^)]*)\)/)?.[1];

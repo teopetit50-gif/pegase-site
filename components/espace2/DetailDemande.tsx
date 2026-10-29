@@ -32,6 +32,7 @@ import { statutFacture } from "@/components/espace/filed/etats";
 import { lienDossierFiled } from "@/components/espace/filed/lien";
 import { lienPiece } from "@/components/espace/filed/receptions";
 import PagePdf, { nombreDePages } from "@/components/espace/filed/PagePdf";
+import { aiguiller, moduleDeObjet } from "./aiguillage";
 import { Note } from "./ui";
 import { Initiales } from "./vivant";
 import "./detail-demande.css";
@@ -370,6 +371,8 @@ export default function DetailDemande(p: Props) {
   const restantes = d.statut === "en_attente" ? Math.max(0, compte.requises - compte.faites) : 0;
   const delegs = useMemo(() => delegationsUtilisables(d, moi, delegations), [d, moi, delegations]);
   const grp = groupeDe(d);
+  /* l'objet d'une demande hors FILED (qui a son « Ouvrir le dossier ») mène à sa page (aiguillage.ts) */
+  const pageObjet = d.objet_type && d.objet_id && !d.objet_type.startsWith("filed_") ? aiguiller({ module: d.module, objet_type: d.objet_type, objet_id: d.objet_id, payload: d.payload }) : null;
 
   /* ——— champs des formulaires ——— */
   const [commentaire, setCommentaire] = useState("");
@@ -606,6 +609,14 @@ export default function DetailDemande(p: Props) {
                       <dt>Objet</dt>
                       <dd>
                         {NATURE_OBJET[d.objet_type] ?? phrase(d.objet_type)} {d.objet_id ? <span className="v2-det-mono">{d.objet_id}</span> : null}
+                        {pageObjet ? (
+                          <>
+                            {" "}
+                            <Link href={pageObjet} className="v2-det-objet-lien">
+                              Ouvrir dans {libelleModule(moduleDeObjet(d.objet_type) ?? d.module)}
+                            </Link>
+                          </>
+                        ) : null}
                       </dd>
                     </>
                   ) : null}
