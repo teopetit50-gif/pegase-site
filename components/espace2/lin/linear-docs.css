@@ -1,0 +1,879 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Notes sur le document de projet de Linear (28/10/2026, nuit) — préfixe ld-.
+   Relevé au getComputedStyle dans l'espace Linear de Teo, document
+   « Réunion d'équipe du lundi » du projet « exemple » :
+   scratchpad/releve-linear-docs.md. Le cadre (barre du titre 44, onglets
+   pastilles, colonne de 805, menus) vient de ./lin.css ; ici : la liste des
+   documents (pastilles « Resources » et lignes de 36), le document lui-même
+   (icône, titre 24/600, texte 15/450/24, H2 19, H3 17, liste, citation),
+   le menu « ··· », le bouton « Modifié le … » et son volet, le plan à gauche.
+   Couleurs : jetons --lin-* (clair et sombre). Tout le reste : la référence.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .ld {
+  position: relative;
+}
+.v2 .ld .lin-fil-ici {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.v2 .ld .lin-fil-ici svg,
+.v2 .ld .lin-fil-equipe svg {
+  width: 16px;
+  height: 16px;
+}
+.v2 .ld .lin-fil + .lin-rond {
+  margin-left: 6px;
+}
+.v2 .ld .lin-rond + .lin-rond {
+  margin-left: 6px;
+}
+.v2 .ld .lin-tete-ronds {
+  gap: 4px;
+}
+.v2 .ld .lin-tete-ronds .lin-rond + .lin-rond {
+  margin-left: 0;
+}
+.v2 .ld-compte {
+  margin-left: 6px;
+  font-weight: 450;
+  color: var(--lin-second);
+  font-variant-numeric: tabular-nums;
+}
+.v2 .ld-vide {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  margin: 1px 0;
+  padding: 3px 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-second);
+}
+.v2 .ld-rien {
+  margin: 24px 0 0;
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--lin-second);
+}
+
+/* ——— la recherche dans la barre d'outils : une pastille de 28, comme les onglets ——— */
+.v2 .ld-recherche {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  width: 220px;
+  max-width: 100%;
+  border-radius: 9999px;
+  border: 0.5px solid transparent;
+  background: var(--lin-pastille);
+}
+.v2 .ld-recherche::after {
+  content: "";
+  position: absolute;
+  inset: -0.5px;
+  border-radius: inherit;
+  box-shadow: var(--lin-anneau), var(--lin-ombre-pastille);
+  pointer-events: none;
+}
+.v2 .ld-recherche svg {
+  position: absolute;
+  left: 9px;
+  width: 14px;
+  height: 14px;
+  color: var(--lin-second);
+  pointer-events: none;
+}
+.v2 .ld-recherche input {
+  width: 100%;
+  height: 100%;
+  padding: 0 28px 0 29px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-titre);
+  outline: none;
+}
+.v2 .ld-recherche input::placeholder {
+  color: var(--lin-second);
+}
+.v2 .ld-recherche input:focus,
+.v2 .ld-recherche input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.v2 .ld-recherche-effacer {
+  position: absolute;
+  right: 2px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  color: var(--lin-second);
+}
+.v2 .ld-recherche-effacer:hover {
+  background: var(--lin-pastille-active);
+  color: var(--lin-texte);
+}
+.v2 .ld-recherche-effacer svg {
+  position: static;
+  width: 12px;
+  height: 12px;
+}
+
+/* ——— les pastilles de documents (« Resources » de Linear) : 24 de haut, 3 6, rayon 9999 ——— */
+.v2 .ld-pastilles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  min-width: 0;
+}
+.v2 .ld-pastille {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  max-width: 100%;
+  margin: 1px;
+  padding: 3px 6px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-texte);
+}
+.v2 .ld-pastille:hover,
+.v2 .ld-pastille:focus-within,
+.v2 .ld-pastille[data-ouvert] {
+  background: var(--lin-survol);
+}
+.v2 .ld-pastille > svg {
+  width: 16px;
+  height: 16px;
+}
+.v2 .ld-pastille-ouvrir {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+.v2 .ld-pastille-titre {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .ld-pastille-etoile {
+  width: 14px;
+  height: 14px;
+  color: var(--lin-en-cours);
+  fill: currentColor;
+}
+.v2 .ld-pastille-plus {
+  position: relative;
+  z-index: 1;
+  display: none;
+  align-items: center;
+  gap: 2px;
+  margin: -3px -6px -3px 0;
+  padding-left: 10px;
+}
+.v2 .ld-pastille:hover .ld-pastille-plus,
+.v2 .ld-pastille:focus-within .ld-pastille-plus,
+.v2 .ld-pastille[data-ouvert] .ld-pastille-plus {
+  display: flex;
+}
+.v2 .ld-pastille-plus .lin-rond {
+  width: 24px;
+  height: 24px;
+}
+.v2 .ld-pastille-plus .lin-rond svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .ld .lin-projet-ligne > .ld-pastilles {
+  flex: 1;
+  min-width: 0;
+  margin-left: -6px;
+}
+
+/* ——— les lignes de documents : 36 de haut, survol en retrait de 8, rayon 8 ——— */
+.v2 .ld-lignes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2 .ld-ligne {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  margin: 0 -8px;
+  padding: 0 8px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-texte);
+}
+.v2 .ld-ligne:hover,
+.v2 .ld-ligne:focus-within,
+.v2 .ld-ligne[data-ouvert] {
+  background: var(--lin-survol);
+}
+.v2 .ld-ligne > svg {
+  width: 16px;
+  height: 16px;
+}
+.v2 .ld-ligne-ouvrir {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+.v2 .ld-ligne-ouvrir:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: -2px;
+}
+.v2 .ld-ligne-titre {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .ld-ligne-apercu {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 450;
+  color: var(--lin-second);
+}
+.v2 .ld-ligne-meta {
+  position: relative;
+  z-index: 1;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+.v2 .ld-ligne-meta > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.v2 .ld-ligne-meta svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .ld-avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--lin-avatar);
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--lin-titre);
+  text-transform: uppercase;
+}
+.v2 .ld-avatar--grand {
+  width: 20px;
+  height: 20px;
+  font-size: 10px;
+}
+.v2 .ld-ligne-outils {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  opacity: 0;
+}
+.v2 .ld-ligne:hover .ld-ligne-outils,
+.v2 .ld-ligne:focus-within .ld-ligne-outils,
+.v2 .ld-ligne[data-ouvert] .ld-ligne-outils,
+.v2 .ld-ligne-outils:has([aria-pressed="true"]) {
+  opacity: 1;
+}
+.v2 .ld-ligne-outils .lin-rond {
+  width: 24px;
+  height: 24px;
+}
+.v2 .ld-ligne-outils .lin-rond[aria-pressed="true"] {
+  background: transparent;
+  color: var(--lin-en-cours);
+}
+.v2 .ld-ligne-outils .lin-rond[aria-pressed="true"] svg {
+  fill: currentColor;
+}
+.v2 .ld-utiliser {
+  position: relative;
+  z-index: 1;
+  margin-right: 2px;
+}
+.v2 .ld .lin-projet-h2 {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.v2 .ld .lin-projet-h2:first-of-type {
+  margin-top: 24px;
+}
+.v2 .ld .lin-tuile {
+  color: var(--lin-titre);
+}
+.v2 .ld .lin-tuile svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ——— le document : colonne de 805 centrée, 64 sous la barre ——— */
+.v2 .ld-doc {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 64px 24px 0;
+}
+.v2 .ld-doc-colonne {
+  position: relative;
+  width: 805px;
+  max-width: 100%;
+  min-width: 0;
+}
+.v2 .ld-doc-haut {
+  display: flex;
+  align-items: center;
+  width: 32px;
+  height: 36px;
+}
+.v2 .ld-doc-icone {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin: 6px 4px;
+  border-radius: 6px;
+  color: var(--lin-titre);
+}
+.v2 .ld-doc-icone svg {
+  width: 18px;
+  height: 18px;
+}
+.v2 .ld-doc-icone[data-favori] {
+  color: var(--lin-en-cours);
+}
+.v2 .ld-titre {
+  display: block;
+  width: 100%;
+  margin: 6px 0 16px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+  letter-spacing: -0.16px;
+  color: var(--lin-titre);
+  outline: none;
+}
+.v2 .ld-titre::placeholder {
+  color: var(--lin-second);
+}
+.v2 .ld-titre:focus,
+.v2 .ld-titre:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* les liens de la note (entreprise, rendez-vous) : des pastilles, comme les ressources d'un projet */
+.v2 .ld-props {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  margin: -8px 0 8px -6px;
+}
+.v2 .ld-props .ld-pastille[data-vide] {
+  color: var(--lin-second);
+}
+.v2 .ld-props .ld-pastille[data-vide] > svg {
+  color: var(--lin-second);
+}
+.v2 .ld-props .ld-pastille > svg {
+  color: var(--lin-second);
+}
+.v2 .ld-props .ld-pastille:not([data-vide]) > svg {
+  color: var(--lin-texte);
+}
+.v2 .ld-date-cachee {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: default;
+}
+
+/* le texte : 15/450/24, éditeur à 14 du bord de la colonne, 384 sous le texte */
+.v2 .ld-corps {
+  position: relative;
+  margin: 0 -14px;
+  padding: 10px 14px 384px;
+}
+.v2 .ld-texte,
+.v2 .ld-rendu {
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 24px;
+  letter-spacing: -0.1px;
+  color: var(--lin-texte);
+}
+.v2 .ld-texte {
+  display: block;
+  width: 100%;
+  min-height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  resize: none;
+  overflow: hidden;
+  font-family: inherit;
+  outline: none;
+}
+.v2 .ld-texte::placeholder {
+  color: var(--lin-second);
+}
+.v2 .ld-texte:focus,
+.v2 .ld-texte:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.v2 .ld-rendu {
+  min-height: 24px;
+  cursor: text;
+}
+.v2 .ld-rendu > * {
+  margin: 0;
+}
+.v2 .ld-rendu > * + * {
+  margin-top: 16px;
+}
+.v2 .ld-rendu p {
+  overflow-wrap: anywhere;
+}
+.v2 .ld-rendu h2 {
+  margin: 32px 0 16px;
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 28px;
+  letter-spacing: 0.05px;
+  color: var(--lin-titre);
+}
+.v2 .ld-rendu h3 {
+  margin: 24px 0 6px;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 24px;
+  letter-spacing: 0.1px;
+  color: var(--lin-titre);
+}
+.v2 .ld-rendu > h2:first-child,
+.v2 .ld-rendu > h3:first-child {
+  margin-top: 0;
+}
+.v2 .ld-rendu ul {
+  padding: 0 0 0 24px;
+  list-style: disc;
+}
+.v2 .ld-rendu li {
+  line-height: 24px;
+}
+.v2 .ld-rendu li + li {
+  margin-top: 4px;
+}
+.v2 .ld-rendu li::marker {
+  color: var(--lin-texte);
+}
+.v2 .ld-rendu blockquote {
+  position: relative;
+  margin-top: 16px;
+  padding: 0 0 0 16px;
+}
+.v2 .ld-rendu blockquote::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 2px;
+  background: var(--lin-citation);
+}
+.v2 .ld-rendu blockquote + p {
+  margin-top: 22px;
+}
+.v2 .ld-placeholder {
+  color: var(--lin-second);
+}
+
+/* une note vide : les modèles favoris et les actions, dans le style des options d'un menu */
+.v2 .ld-suggestions {
+  margin-top: 24px;
+}
+.v2 .ld-suggestions-etiquette {
+  margin: 16px 0 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-second);
+}
+.v2 .ld-suggestions-etiquette:first-child {
+  margin-top: 0;
+}
+.v2 .ld-suggestions ul {
+  margin: 0 0 0 -8px;
+  padding: 0;
+  list-style: none;
+}
+.v2 .ld-suggestions li button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 32px;
+  padding: 0 12px 0 8px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--lin-texte);
+  text-align: left;
+}
+.v2 .ld-suggestions li button:hover {
+  background: var(--lin-survol);
+  color: var(--lin-titre);
+}
+.v2 .ld-suggestions li button svg {
+  width: 16px;
+  height: 16px;
+  color: var(--lin-second);
+}
+.v2 .ld-suggestions p {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--lin-second);
+}
+
+/* ——— le plan, au bord gauche : un tiret par titre, le volet au survol ——— */
+.v2 .ld-plan {
+  position: absolute;
+  left: 0;
+  top: 44px;
+  bottom: 0;
+  width: 24px;
+  z-index: 4;
+}
+.v2 .ld-plan-tirets {
+  position: absolute;
+  left: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 4px;
+}
+.v2 .ld-plan-tiret {
+  display: block;
+  width: 8px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--lin-texte);
+}
+.v2 .ld-plan-tiret[data-niveau="3"] {
+  width: 4px;
+  margin-left: 4px;
+  background: var(--lin-second);
+}
+.v2 .ld-plan-volet {
+  display: none;
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  min-width: 117px;
+  padding: 10px 0;
+  border-radius: 8px;
+  border: 0.5px solid var(--lin-menu-bord);
+  background: var(--lin-menu-fond);
+  box-shadow:
+    0 3px 8px lch(0 0 0 / 0.125),
+    0 2px 5px lch(0 0 0 / 0.125),
+    0 1px 1px lch(0 0 0 / 0.125);
+}
+.v2 .ld-plan:hover .ld-plan-volet,
+.v2 .ld-plan:focus-within .ld-plan-volet {
+  display: block;
+}
+.v2 .ld-plan:hover .ld-plan-tirets,
+.v2 .ld-plan:focus-within .ld-plan-tirets {
+  visibility: hidden;
+}
+.v2 .ld-plan-volet button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  height: 24px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--lin-menu-texte);
+  white-space: nowrap;
+  text-align: left;
+}
+.v2 .ld-plan-volet button:hover {
+  color: var(--lin-titre);
+}
+.v2 .ld-plan-volet button[data-niveau="3"] {
+  padding-left: 24px;
+  color: var(--lin-menu-gris);
+}
+
+/* ——— « Modifié le … » : pastille 28 à texte gris 12/500, icône 14 ——— */
+.v2 .ld-edite {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px 0 8px;
+  border-radius: 9999px;
+  border: 0.5px solid transparent;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+.v2 .ld-edite svg {
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+}
+.v2 .ld-edite:hover,
+.v2 .ld-edite[aria-expanded="true"] {
+  background: var(--lin-survol);
+  color: var(--lin-texte);
+}
+.v2 .ld-infos {
+  position: absolute;
+  top: calc(100% + 5px);
+  right: 0;
+  z-index: 20;
+  width: 301px;
+  border-radius: 12px;
+  border: 0.5px solid var(--lin-menu-bord);
+  background: var(--lin-menu-fond);
+  box-shadow:
+    0 3px 8px lch(0 0 0 / 0.125),
+    0 2px 5px lch(0 0 0 / 0.125),
+    0 1px 1px lch(0 0 0 / 0.125);
+  color: var(--lin-menu-texte);
+}
+.v2 .ld-infos-ligne {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 43px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.v2 .ld-infos-ligne + .ld-infos-ligne {
+  border-top: 0.5px solid var(--lin-menu-sep);
+}
+.v2 .ld-infos-etiquette {
+  width: 92px;
+  flex-shrink: 0;
+  font-weight: 450;
+  color: var(--lin-menu-gris);
+}
+.v2 .ld-infos-qui {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .ld-infos-date {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-weight: 450;
+  color: var(--lin-menu-gris);
+  font-variant-numeric: tabular-nums;
+}
+.v2 .ld-infos-pied {
+  padding: 8px;
+  border-top: 0.5px solid var(--lin-menu-sep);
+}
+.v2 .ld-infos-pied button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  height: 28px;
+  border-radius: 9999px;
+  background: var(--lin-pastille-active);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-menu-texte);
+}
+.v2 .ld-infos-pied button svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ——— le menu « ··· » : 264 de large, rayon 12, lignes de 32 (0 18 0 14), icône 16, raccourci à droite ——— */
+.v2 .ld-menu {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  z-index: 20;
+  min-width: 264px;
+  padding: 2px 0;
+  border-radius: 12px;
+  border: 0.5px solid var(--lin-menu-bord);
+  background: var(--lin-menu-fond);
+  box-shadow:
+    0 3px 8px lch(0 0 0 / 0.125),
+    0 2px 5px lch(0 0 0 / 0.125),
+    0 1px 1px lch(0 0 0 / 0.125);
+  color: var(--lin-menu-texte);
+}
+.v2 .ld-menu[data-cote="droite"] {
+  left: auto;
+  right: 0;
+}
+.v2 .ld-menu ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2 .ld-menu-titre {
+  display: flex;
+  align-items: center;
+  height: 28px;
+  padding: 4px 14px 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-menu-gris);
+}
+.v2 .ld-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 32px;
+  padding: 0 18px 0 14px;
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--lin-menu-texte);
+  text-align: left;
+  white-space: nowrap;
+  cursor: default;
+}
+.v2 .ld-menu-item:hover,
+.v2 .ld-menu-item[data-actif] {
+  background: var(--lin-menu-survol);
+}
+.v2 .ld-menu-item:focus-visible {
+  outline: none;
+  background: var(--lin-menu-survol);
+}
+.v2 .ld-menu-item > svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.v2 .ld-menu-item[data-coche] > svg:first-child {
+  color: var(--lin-menu-gris);
+}
+.v2 .ld-menu-item > span:not(.ld-menu-kbd) {
+  flex: 1;
+  min-width: 0;
+}
+.v2 .ld-menu-kbd {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-menu-gris);
+}
+.v2 .ld-menu-coche {
+  margin-left: auto;
+  width: 14px;
+  height: 14px;
+  color: var(--lin-menu-texte);
+}
+.v2 .ld-menu-coche[data-vide] {
+  visibility: hidden;
+}
+.v2 .ld-menu-sep {
+  height: 0;
+  margin: 0;
+  border: 0;
+  border-top: 0.5px solid var(--lin-menu-sep);
+}
+
+/* ——— étroit ——— */
+@container principale (max-width: 640px) {
+  .v2 .ld-doc {
+    padding: 32px 16px 0;
+  }
+  .v2 .ld-corps {
+    margin: 0;
+    padding: 10px 0 160px;
+  }
+  .v2 .ld-ligne-apercu,
+  .v2 .ld-ligne-meta > .ld-ligne-auteur,
+  .v2 .ld-ligne-meta > .ld-ligne-entreprise {
+    display: none;
+  }
+  .v2 .ld-recherche {
+    width: 140px;
+  }
+  .v2 .ld-menu {
+    min-width: 240px;
+  }
+  .v2 .ld-infos {
+    width: min(301px, calc(100vw - 32px));
+  }
+  .v2 .ld .lin-btn--plein span {
+    display: none;
+  }
+  .v2 .ld .lin-btn--plein {
+    padding: 0 2px;
+  }
+  .v2 .ld-plan {
+    display: none;
+  }
+}

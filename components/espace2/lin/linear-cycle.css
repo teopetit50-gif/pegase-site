@@ -1,0 +1,830 @@
+/* ══════════════════════════════════════════════════════════════════════
+   La page d'un cycle de Linear (28/10/2026) : relevée au getComputedStyle
+   dans l'espace Linear de Teo (équipe Omega › Cycles › Cycle 1, fenêtre
+   à 1600, thème sombre ; relevé : scratchpad/releve-linear-cycle.md).
+   Sert à « Utilisation » (components/espace2/Utilisation.tsx). Préfixe
+   des classes : lcy-. Couleurs : les jetons --lin-* de ./lin.css (clair
+   et sombre) ; tout le reste au pixel de Linear.
+
+   Repères, en px depuis le bord gauche du panneau de Linear (1347 de large) :
+     barre du titre     44 de haut ; fil « Omega › Cycles › Cycle 1 ▾ », ronds de 28 à 4 d'écart
+     barre d'outils     y 44, 43.5 de haut ; « 14 issues » à x 18 ; 3 ronds de 28 à droite, 6 d'écart, 8 du bord
+     liste              907 de large ; en-tête de groupe 36 (fond en retrait de 8, rayon 8), lignes de 44 ;
+                        priorité x 42, identifiant x 66, statut x 130, titre x 153, date à 26 du bord droit
+     panneau            440 (4 de marge à gauche) ; carte de 428, rayon 10, bord 0.5, 8 du bord droit et du bas ;
+                        bloc du haut padding 16, section « Progress » padding 12 ; graphique 403 × 200
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ——— le corps : la liste à gauche, le panneau à droite ——— */
+.v2 .lcy-corps {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  min-height: 0;
+}
+.v2 .lcy-liste {
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 24px;
+}
+.v2 .lcy-outils-compte {
+  padding-left: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+.v2 .lcy-outils-droite {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.v2 .lcy-rond {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  border: 0.5px solid transparent;
+  background: var(--lin-pastille);
+  color: var(--lin-texte);
+}
+.v2 .lcy-rond:hover {
+  background: var(--lin-pastille-active);
+}
+.v2 .lcy-rond[aria-pressed="true"] {
+  background: var(--lin-pastille-active);
+  color: var(--lin-titre);
+}
+.v2 .lcy-rond svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .lcy-rond--nu {
+  background: transparent;
+}
+.v2 .lcy-note {
+  padding: 8px 8px 0;
+}
+
+/* les menus qui s'ouvrent vers la droite (sous le bouton du fil, sous « Progress ») */
+.v2 .lcy-menu-gauche {
+  display: inline-flex;
+}
+.v2 .lcy-menu-gauche .lin-menu {
+  left: 0;
+  right: auto;
+}
+
+/* ——— la barre du titre : le fil « Omega › Cycles › Cycle 1 ▾ » ——— */
+.v2 .lcy-fil-lien {
+  padding: 0 6px 0 0;
+}
+.v2 .lcy-fil-periode {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 4px;
+  margin: 0 -4px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-texte);
+  white-space: nowrap;
+}
+.v2 .lcy-fil-periode:hover,
+.v2 .lcy-fil-periode[aria-expanded="true"] {
+  background: var(--lin-survol);
+}
+.v2 .lcy-fil-periode svg {
+  width: 16px;
+  height: 16px;
+}
+.v2 .lcy-fil-periode .lcy-chevron {
+  width: 12px;
+  height: 12px;
+  color: var(--lin-second);
+}
+.v2 .lcy-tete-ronds {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 4px;
+}
+.v2 .lcy-tete-ronds .lcy-rond {
+  background: transparent;
+}
+.v2 .lcy-tete-ronds .lcy-rond:hover,
+.v2 .lcy-tete-ronds .lcy-rond[aria-expanded="true"] {
+  background: var(--lin-survol);
+}
+
+/* ——— la liste : groupes de 36, lignes de 44 ——— */
+.v2 .lcy-groupe {
+  margin: 0 0 2px;
+}
+.v2 .lcy-groupe-tete {
+  position: sticky;
+  top: 44px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  margin: 0 8px 2px;
+  padding: 0 8px 0 0;
+  border-radius: 8px;
+  background: var(--lin-groupe);
+}
+.v2 .lcy-groupe-chevron {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin: 4px 0 4px 8px;
+  border-radius: 9999px;
+  color: var(--lin-second);
+}
+.v2 .lcy-groupe-chevron:hover {
+  background: var(--lin-pastille-active);
+  color: var(--lin-texte);
+}
+.v2 .lcy-groupe-chevron svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.12s;
+}
+.v2 .lcy-groupe[data-replie] .lcy-groupe-chevron svg {
+  transform: rotate(-90deg);
+}
+.v2 .lcy-groupe-icone {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-left: -2px;
+}
+.v2 .lcy-groupe-titre {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.v2 .lcy-groupe-titre h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: normal;
+  color: var(--lin-titre);
+  white-space: nowrap;
+}
+.v2 .lcy-groupe-compte {
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--lin-second);
+  font-variant-numeric: tabular-nums;
+}
+.v2 .lcy-groupe[data-teinte="jaune"] .lcy-groupe-compte {
+  color: var(--lin-en-cours);
+}
+.v2 .lcy-groupe-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--lin-orange) 16%, transparent);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--lin-orange);
+  white-space: nowrap;
+}
+.v2 .lcy-groupe-ouvrir {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin-left: auto;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  color: var(--lin-second);
+}
+.v2 .lcy-groupe-ouvrir:hover {
+  background: var(--lin-pastille-active);
+  color: var(--lin-titre);
+}
+.v2 .lcy-groupe-ouvrir svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .lcy-groupe-vide {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 0 0 66px;
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--lin-second);
+}
+.v2 .lcy-lignes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2 .lcy-ligne {
+  position: relative;
+  display: grid;
+  grid-template-columns: 34px 16px minmax(55px, max-content) 16px minmax(0, 1fr) auto 60px;
+  column-gap: 8px;
+  align-items: center;
+  height: 44px;
+  padding: 0 26px 0 0;
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--lin-texte);
+}
+.v2 .lcy-ligne:hover,
+.v2 .lcy-ligne:focus-visible {
+  background: var(--lin-survol);
+}
+.v2 .lcy-ligne:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: -2px;
+}
+.v2 .lcy-ligne-point {
+  position: relative;
+  justify-self: end;
+  margin-right: 1px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--lin-graph-bleu);
+}
+.v2 .lcy-ligne-point::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: inherit;
+  animation: lcy-pouls 2.4s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+@keyframes lcy-pouls {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  70%,
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v2 .lcy-ligne-point::after {
+    animation: none;
+  }
+}
+html.v2-calme .v2 .lcy-ligne-point::after {
+  animation: none;
+}
+.v2 .lcy-ligne-type {
+  width: 16px;
+  height: 16px;
+  color: var(--lin-second);
+}
+.v2 .lcy-ligne-type svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+.v2 .lcy-ligne-ref {
+  font-size: 13px;
+  font-weight: 450;
+  letter-spacing: -0.26px;
+  color: var(--lin-second);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
+}
+.v2 .lcy-ligne-etat {
+  width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+}
+.v2 .lcy-ligne-etat svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .lcy-ligne-titre {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin-right: -5px;
+}
+.v2 .lcy-ligne-titre > span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-titre);
+}
+.v2 .lcy-pilule {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 48px;
+  border: 0.5px solid var(--lin-trait);
+  background: var(--lin-fond);
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.v2 .lcy-pilule svg {
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+}
+.v2 .lcy-ligne-montant {
+  justify-self: end;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.v2 .lcy-ligne-date {
+  justify-self: end;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.v2 .lcy-ligne-date[data-passe] {
+  color: var(--lin-orange);
+}
+
+/* ——— le panneau de droite : 440 (4 de marge), carte de 428 ——— */
+.v2 .lcy-panneau {
+  position: sticky;
+  top: 44px;
+  width: 440px;
+  flex-shrink: 0;
+  padding-left: 4px;
+  max-height: calc(100dvh - 48px - 88px);
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.v2 .lcy-carte {
+  margin: 0 8px 8px 0;
+  border-radius: 10px;
+  border: 0.5px solid var(--lin-detail-trait);
+  background: var(--lin-detail);
+}
+.v2 .lcy-carte-haut {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+.v2 .lcy-pastilles {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  margin: -6px 0 4px -6px;
+}
+.v2 .lcy-pastille {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--lin-pastille);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 19.5px;
+  color: var(--lin-titre);
+  white-space: nowrap;
+}
+.v2 .lcy-pastille--dates {
+  height: 28px;
+}
+.v2 .lcy-pastille--dates > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 9.5px;
+  padding: 0 4px;
+  font-variant-numeric: tabular-nums;
+}
+.v2 .lcy-pastille--dates svg {
+  width: 14px;
+  height: 14px;
+  color: var(--lin-second);
+}
+.v2 .lcy-carte-titre {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  height: 28px;
+}
+.v2 .lcy-carte-titre > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.v2 .lcy-carte-titre svg.lcy-ic-cycle {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--lin-second);
+}
+.v2 .lcy-carte-titre h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 23px;
+  color: var(--lin-titre);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lcy-carte-ronds {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.v2 .lcy-carte-ronds .lcy-rond {
+  background: transparent;
+}
+.v2 .lcy-carte-ronds .lcy-rond:hover,
+.v2 .lcy-carte-ronds .lcy-rond[aria-expanded="true"] {
+  background: var(--lin-pastille-active);
+}
+.v2 .lcy-carte-ronds .lin-rond {
+  width: 24px;
+  height: 24px;
+}
+.v2 .lcy-resume {
+  display: flex;
+  align-items: center;
+  min-height: 28px;
+  margin: 0 0 0 -6px;
+  padding: 3px 6px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--lin-second);
+}
+.v2 .lcy-resume[data-vide] {
+  color: var(--lin-avatar);
+}
+
+/* la section « Progress » : padding 12 */
+.v2 .lcy-progres {
+  padding: 12px;
+  border-radius: 10px;
+}
+.v2 .lcy-progres-tete {
+  display: flex;
+  align-items: center;
+  height: 16px;
+}
+.v2 .lcy-progres-choix {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 28px;
+  padding: 0 8px;
+  margin: -6px 0 -6px -8px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-second);
+}
+.v2 .lcy-progres-choix:hover,
+.v2 .lcy-progres-choix[aria-expanded="true"] {
+  background: var(--lin-pastille-active);
+  color: var(--lin-texte);
+}
+.v2 .lcy-progres-choix svg {
+  width: 16px;
+  height: 16px;
+}
+.v2 .lcy-progres-corps {
+  display: flex;
+  flex-direction: column;
+  padding-top: 12px;
+}
+.v2 .lcy-chiffres {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 4px;
+  margin: 0;
+}
+.v2 .lcy-chiffres > div {
+  position: relative;
+  min-width: 0;
+  padding: 0 0 0 20px;
+}
+.v2 .lcy-chiffres .lcy-carre {
+  position: absolute;
+  left: 5px;
+  top: 10px;
+  width: 6px;
+  height: 6px;
+  border-radius: 1px;
+  background: var(--lcy-teinte);
+}
+.v2 .lcy-chiffres dt {
+  display: block;
+  padding: 6px 0 5.5px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 14.5px;
+  color: var(--lin-second);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lcy-chiffres dd {
+  display: flex;
+  align-items: center;
+  margin: 0 0 0 4px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 14.5px;
+  color: var(--lin-titre);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.v2 .lcy-chiffres dd .lcy-point {
+  margin: 0 3px;
+  font-weight: 450;
+  color: var(--lin-second);
+}
+.v2 .lcy-chiffres dd .lcy-pct {
+  font-weight: 450;
+  color: var(--lin-second);
+}
+.v2 .lcy-chiffres [data-teinte="gris"] {
+  --lcy-teinte: var(--lin-graph-gris);
+}
+.v2 .lcy-chiffres [data-teinte="jaune"] {
+  --lcy-teinte: var(--lin-graph-jaune);
+}
+.v2 .lcy-chiffres [data-teinte="bleu"] {
+  --lcy-teinte: var(--lin-graph-bleu);
+}
+
+/* le graphique : 403 × 200, puis l'axe de 24 */
+.v2 .lcy-graphique {
+  height: 169px;
+  margin: 2px 0 0;
+}
+.v2 .lcy-graphique svg {
+  display: block;
+  width: 100%;
+  height: 169px;
+  overflow: visible;
+}
+.v2 .lcy-axe {
+  position: relative;
+  height: 24px;
+  margin-top: 3px;
+}
+.v2 .lcy-axe > span {
+  position: absolute;
+  top: 0;
+  display: flex;
+  align-items: center;
+  height: 24px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.v2 .lcy-axe > span::before {
+  content: "";
+  position: absolute;
+  top: -3px;
+  width: 1px;
+  height: 5px;
+  background: var(--lin-trait);
+}
+.v2 .lcy-axe > span[data-pos="debut"] {
+  left: 0;
+}
+.v2 .lcy-axe > span[data-pos="debut"]::before {
+  left: 0;
+}
+.v2 .lcy-axe > span[data-pos="fin"] {
+  right: 0;
+}
+.v2 .lcy-axe > span[data-pos="fin"]::before {
+  right: 0;
+}
+.v2 .lcy-axe > span[data-pos="milieu"] {
+  transform: translateX(-50%);
+}
+.v2 .lcy-axe > span[data-pos="milieu"]::before {
+  left: 50%;
+}
+
+/* les onglets : h32, puis la répartition, lignes de 42 */
+.v2 .lcy-onglets {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 32px;
+  margin: 18px 0 0;
+  border-radius: 5px;
+  background: var(--lin-detail);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.v2 .lcy-onglet {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 28px;
+  margin: 2px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  border: 0.5px solid transparent;
+  background: var(--lin-onglet-detail);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-onglet-detail-texte);
+  white-space: nowrap;
+}
+.v2 .lcy-onglet[aria-selected="true"] {
+  background: var(--lin-onglet-detail-actif);
+  color: var(--lin-titre);
+}
+.v2 .lcy-repartition {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.v2 .lcy-repartition li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 42px;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: var(--lin-detail);
+}
+.v2 .lcy-repartition-nom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--lin-titre);
+}
+.v2 .lcy-repartition-nom[data-second] {
+  color: var(--lin-second);
+}
+.v2 .lcy-repartition-nom > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lcy-repartition-icone {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin: 0 -1px;
+  flex-shrink: 0;
+  color: var(--lin-second);
+}
+.v2 .lcy-repartition-icone svg {
+  width: 16px;
+  height: 16px;
+}
+.v2 .lcy-repartition-icone .lcy-initiale {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--lin-avatar);
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--lin-titre);
+}
+.v2 .lcy-repartition-part {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.v2 .lcy-repartition-part svg {
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+}
+.v2 .lcy-repartition-vide {
+  padding: 12px 10px;
+  font-size: 12px;
+  color: var(--lin-second);
+}
+
+/* ——— sans panneau (bouton de la barre d'outils) ——— */
+.v2 .lcy-corps[data-sans-panneau] .lcy-panneau {
+  display: none;
+}
+
+/* ——— étroit : le panneau passe sous la liste, les colonnes se serrent ——— */
+@media (max-width: 1100px) {
+  .v2 .lcy-corps {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .v2 .lcy-panneau {
+    position: static;
+    width: auto;
+    max-height: none;
+    padding: 0 8px;
+    overflow: visible;
+  }
+  .v2 .lcy-carte {
+    margin: 0 0 8px;
+  }
+  .v2 .lcy-panneau {
+    order: -1;
+  }
+}
+@media (max-width: 640px) {
+  .v2 .lcy-ligne {
+    grid-template-columns: 16px 16px minmax(0, 1fr) 60px;
+    padding: 0 14px 0 14px;
+    column-gap: 8px;
+  }
+  .v2 .lcy-ligne-ref,
+  .v2 .lcy-ligne-montant {
+    display: none;
+  }
+  .v2 .lcy-ligne-point {
+    grid-column: 1;
+  }
+  .v2 .lcy-ligne-type {
+    grid-column: 1;
+  }
+  .v2 .lcy-ligne-etat {
+    grid-column: 2;
+  }
+  .v2 .lcy-ligne-titre {
+    grid-column: 3;
+  }
+  .v2 .lcy-ligne-date {
+    grid-column: 4;
+  }
+  .v2 .lcy-ligne-titre .lcy-pilule {
+    display: none;
+  }
+  .v2 .lcy-groupe-vide {
+    padding-left: 38px;
+  }
+  .v2 .lcy-chiffres {
+    column-gap: 8px;
+  }
+  .v2 .lcy-carte-haut {
+    padding: 12px;
+  }
+  .v2 .lcy-progres {
+    padding: 8px;
+  }
+  .v2 .lcy-fil-periode span.lcy-fil-texte {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

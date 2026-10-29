@@ -1,0 +1,909 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Entreprises et Contacts (28/10/2026, nuit) : la liste « Projects » de Linear
+   et la page d'un projet, relevées au getComputedStyle dans l'espace de Teo
+   (scratchpad/releve-linear-clients.md). Le modèle demandé, « Customers », est
+   désactivé sur son espace (réglage « Customer requests » à off) : c'est le
+   repli prévu par le brief. Couleurs : les jetons --lin-* de ./lin.css ; les
+   briques communes (tête, barre d'outils, ronds, puces, page d'un projet,
+   cartes de droite, menus) viennent de lin.css ; ici, ce qui leur est propre,
+   préfixe `lcl-`.
+
+   Repères (px depuis le bord du panneau, 1347 de large) :
+     tableau   en-tête y 88, 32 de haut ; lignes de 48, rayon 8 ;
+               colonnes [retrait 8] [case 18] [nom 1fr] [type 130] [commune 120]
+               [téléphone 120] [contacts 49] [créée 91] [retrait 8], 6 d'écart
+     nom       bouton-icône 28 (padding 6, rayon 8, marge droite 6), titre 13/500
+     type      bouton 24, padding 0 8, icône 16, texte 12/500 gris à 8
+     valeurs   bouton 28, padding 3 6, icône 16, texte 12/400 lh 18
+     fenêtre   879 de large, voile en retrait de 52 12 ; nom 24/600, puces de 24
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ——— barre d'outils : les trois ronds de droite ont le fond d'une pastille ——— */
+.v2 .lcl .lin-outils-droite > .lin-rond,
+.v2 .lcl .lin-outils-droite > .lin-ancre > .lin-rond {
+  background: var(--lin-pastille);
+}
+.v2 .lcl .lin-outils-droite > .lin-rond:hover,
+.v2 .lcl .lin-outils-droite > .lin-rond[aria-pressed="true"],
+.v2 .lcl .lin-outils-droite > .lin-ancre > .lin-rond:hover,
+.v2 .lcl .lin-outils-droite > .lin-ancre > .lin-rond[aria-expanded="true"] {
+  background: var(--lin-pastille-active);
+}
+/* le champ de recherche, ouvert par la loupe : la saisie d'un menu de Linear, posée dans la barre */
+.v2 .lcl-recherche {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 9999px;
+  background: var(--lin-pastille);
+  color: var(--lin-second);
+}
+.v2 .lcl-recherche svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+.v2 .lcl-recherche input {
+  width: 200px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-titre);
+  outline: none;
+}
+.v2 .lcl-recherche input::placeholder {
+  color: var(--lin-second);
+}
+
+/* ——— le tableau ——— */
+.v2 .lcl-table {
+  padding-bottom: 24px;
+}
+.v2 .lcl-tete,
+.v2 .lcl-ligne {
+  cursor: default;
+  display: grid;
+  grid-template-columns: var(--lcl-colonnes);
+  column-gap: 6px;
+  align-items: center;
+}
+.v2 .lcl--entreprises {
+  --lcl-colonnes: 8px 18px minmax(0, 1fr) 130px 120px 120px 49px 91px 8px;
+}
+.v2 .lcl--contacts {
+  --lcl-colonnes: 8px 18px minmax(0, 1fr) 150px 190px 120px 91px 8px;
+}
+.v2 .lcl-tete {
+  height: 32px;
+}
+.v2 .lcl-tete > span {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+.v2 .lcl-tete > .lcl-num {
+  justify-self: end;
+}
+.v2 .lcl-ligne {
+  cursor: default;
+  position: relative;
+  height: 48px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-texte);
+  text-decoration: none;
+  transition: background 0.1s;
+}
+.v2 .lcl-ligne:hover {
+  background: var(--lin-survol);
+}
+.v2 .lcl-ligne:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: -2px;
+}
+.v2 .lcl-ligne > * {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+/* la case : 14, à 5 du bord de sa colonne, visible au survol seulement */
+.v2 .lcl-case {
+  width: 14px;
+  height: 14px;
+  margin-left: 5px;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px var(--lin-avatar);
+  opacity: 0;
+}
+.v2 .lcl-ligne:hover .lcl-case {
+  opacity: 1;
+}
+/* le nom : bouton-icône 28 puis le titre */
+.v2 .lcl-nom {
+  gap: 0;
+  height: 28px;
+}
+.v2 .lcl-icone {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 6px;
+  margin-right: 6px;
+  border-radius: 8px;
+  color: var(--lin-icone);
+}
+.v2 .lcl-icone svg {
+  width: 16px;
+  height: 16px;
+}
+.v2 .lcl-titre {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-titre);
+}
+/* l'avatar d'un contact : 16, rond, initiales */
+.v2 .lcl-avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--lin-avatar);
+  color: var(--lin-fond);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.v2 .lcl-avatar--grand {
+  width: 24px;
+  height: 24px;
+  font-size: 11px;
+}
+/* le type : la pastille de santé (24) ; dans une ligne, elle ouvre son menu */
+.v2 .lcl-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 9999px;
+  border: 0.5px solid transparent;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+.v2 .lcl-type svg,
+.v2 .lcl-type .lin-ic {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.v2 .lcl-ligne .lin-ancre > .lin-valeur {
+  height: 24px;
+  padding: 0 8px;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-second);
+}
+.v2 .lcl-ligne .lin-ancre > .lin-valeur svg {
+  width: 16px;
+  height: 16px;
+}
+.v2 .lcl-ligne .lin-ancre > .lin-valeur:hover,
+.v2 .lcl-ligne .lin-ancre > .lin-valeur[aria-expanded="true"] {
+  background: var(--lin-pastille-active);
+}
+/* une valeur (commune, téléphone, entreprise, date) : bouton de 28, icône 16, texte 12/400 */
+.v2 .lcl-valeur {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  padding: 3px 6px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+  color: var(--lin-texte);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lcl-valeur > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lcl-valeur svg,
+.v2 .lcl-valeur .lin-ic {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--lin-second);
+}
+.v2 .lcl-valeur--vide {
+  color: var(--lin-avatar);
+}
+.v2 a.lcl-valeur:hover {
+  background: var(--lin-pastille-active);
+}
+.v2 .lcl-valeur--lien:hover {
+  background: var(--lin-pastille-active);
+}
+/* le compte (contacts) : à droite de sa colonne, 12/450 */
+.v2 .lcl-num {
+  justify-content: flex-end;
+}
+.v2 .lcl-compte {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 3px 6px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-titre);
+  font-variant-numeric: tabular-nums;
+}
+.v2 .lcl-vide {
+  padding: 48px 24px;
+  font-size: 13px;
+  color: var(--lin-second);
+  text-align: center;
+}
+.v2 .lcl-vide b {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: var(--lin-texte);
+}
+
+/* le panneau Détails (bouton « Ouvrir le volet ») : les totaux de la liste */
+.v2 .lcl-details-note {
+  margin: 16px 10px 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--lin-onglet-detail-texte);
+}
+
+/* ——— la page d'une fiche ——— */
+.v2 .lcl-fil-nom {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 2px 4px;
+  margin: -2px -4px;
+  border-radius: 6px;
+}
+.v2 .lcl-fil-nom svg {
+  width: 16px;
+  height: 16px;
+  color: var(--lin-fait);
+}
+.v2 .lcl-tuile {
+  background: color-mix(in srgb, var(--lin-fait) 18%, transparent);
+  color: var(--lin-fait);
+}
+.v2 .lcl-tuile svg {
+  width: 24px;
+  height: 24px;
+}
+.v2 .lcl-tuile .lcl-avatar--grand {
+  width: 24px;
+  height: 24px;
+}
+/* le titre et le résumé se modifient en place : un clic, puis Entrée ou un clic ailleurs */
+.v2 .lcl-h1 {
+  display: block;
+  width: 100%;
+  margin: 12px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+  color: var(--lin-titre);
+  outline: none;
+  border-radius: 6px;
+}
+.v2 .lcl-h1:hover,
+.v2 .lcl-h1:focus {
+  box-shadow: 0 0 0 4px var(--lin-survol);
+  background: var(--lin-survol);
+}
+.v2 .lcl-h1::placeholder {
+  color: var(--lin-avatar);
+}
+/* une puce de propriété qui se modifie : le champ remplace la puce, mêmes mesures */
+.v2 .lcl-saisie {
+  height: 28px;
+  min-width: 120px;
+  padding: 3px 8px;
+  border: 0;
+  border-radius: 9999px;
+  background: var(--lin-champ);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-titre);
+  outline: none;
+  box-shadow: 0 0 0 1px var(--lin-fait);
+}
+.v2 .lcl-saisie::placeholder {
+  color: var(--lin-second);
+  font-weight: 450;
+}
+/* la carte « update » : le bouton d'une note au centre */
+.v2 .lcl-maj {
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+  margin: 16px 0 24px -16px;
+}
+.v2 .lcl-maj-btn {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 12px 0 10px;
+  border-radius: 9999px;
+  border: 0.5px solid transparent;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-second);
+}
+.v2 .lcl-maj-btn svg {
+  width: 16px;
+  height: 16px;
+  margin-right: 6px;
+}
+.v2 .lcl-maj-btn:hover {
+  background: var(--lin-survol);
+  color: var(--lin-texte);
+}
+/* la description : un texte libre, enregistré en quittant le champ */
+.v2 .lcl-desc {
+  display: block;
+  width: 100%;
+  min-height: 72px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 24px;
+  color: var(--lin-texte);
+  resize: vertical;
+  outline: none;
+}
+.v2 .lcl-desc::placeholder {
+  color: var(--lin-avatar);
+}
+/* « + Contact » sous le texte, comme « + Milestone » */
+.v2 .lcl-plus {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 8px;
+  margin: 8px 0 0 -8px;
+  border-radius: 9999px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 23px;
+  color: var(--lin-avatar);
+}
+.v2 .lcl-plus svg {
+  width: 16px;
+  height: 16px;
+}
+.v2 .lcl-plus:hover {
+  color: var(--lin-second);
+  background: var(--lin-survol);
+}
+/* les lignes de contacts dans le texte : 36 de haut, comme la liste des jalons */
+.v2 .lcl-liens {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2 .lcl-liens li {
+  display: flex;
+  align-items: center;
+}
+.v2 .lcl-lien {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  height: 36px;
+  margin: 0 -8px;
+  padding: 0 8px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-texte);
+}
+.v2 .lcl-lien:hover {
+  background: var(--lin-survol);
+}
+.v2 .lcl-lien > span:not(.lcl-avatar):not(.lin-meta) {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lcl-lien .lin-meta {
+  margin-left: auto;
+}
+/* la carte « Contacts » de droite : 24 par ligne */
+.v2 .lcl-carte-liste {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2 .lcl-carte-liste li a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 24px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-texte-groupe);
+}
+.v2 .lcl-carte-liste li a:hover {
+  color: var(--lin-titre);
+}
+.v2 .lcl-carte-liste li a > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lcl-carte-vide {
+  margin: 0;
+  font-size: 12px;
+  line-height: 15px;
+  color: var(--lin-onglet-detail-texte);
+}
+.v2 .lcl-carte-vide a {
+  color: var(--lin-texte);
+}
+.v2 .lcl-carte-droite-action {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin: -6px -8px -6px 0;
+  border-radius: 9999px;
+  color: var(--lin-icone);
+}
+.v2 .lcl-carte-droite-action:hover {
+  background: var(--lin-survol);
+}
+.v2 .lcl-carte-droite-action svg {
+  width: 14px;
+  height: 14px;
+}
+/* dans les propriétés de la carte, la valeur se modifie aussi (même puce, 28, 12/450) */
+.v2 .lin-props dd .lin-valeur,
+.v2 .lin-props dd .lcl-valeur {
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-titre);
+  padding: 3px 6px;
+}
+.v2 .lin-props dd .lcl-valeur svg {
+  color: var(--lin-texte);
+}
+.v2 .lin-props dd .lcl-valeur--vide,
+.v2 .lin-props dd .lcl-valeur--vide svg {
+  color: var(--lin-onglet-detail-texte);
+}
+.v2 .lin-props dd .lcl-saisie {
+  height: 28px;
+  font-size: 12px;
+  font-weight: 450;
+}
+
+/* ——— la fenêtre « Nouvelle entreprise » / « Nouveau contact » ——— */
+.v2 .lcl-voile {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 52px 12px;
+  background: lch(0 0 0 / 0.45);
+}
+.v2 .lcl-modale {
+  display: flex;
+  flex-direction: column;
+  width: 879px;
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 12px;
+  border: 0.5px solid var(--lin-menu-bord);
+  background: var(--lin-menu-fond);
+  box-shadow:
+    var(--lin-ombre-menu),
+    0 16px 48px lch(0 0 0 / 0.35);
+  color: var(--lin-texte);
+}
+.v2 .lcl-modale-tete {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  margin: 12px 12px 0 18px;
+}
+.v2 .lcl-modale-equipe {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 24px;
+  padding: 0 8px 0 4px;
+  border-radius: 9999px;
+  border: 0.5px solid transparent;
+  background: var(--lin-pastille);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-second);
+  opacity: 0.6;
+  white-space: nowrap;
+}
+.v2 .lcl-modale-equipe svg {
+  width: 14px;
+  height: 14px;
+  margin-right: 4px;
+}
+.v2 .lcl-modale-ici {
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--lin-titre);
+}
+.v2 .lcl-modale-tete .lin-rond {
+  margin-left: auto;
+}
+.v2 .lcl-modale-corps {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px 18px 0;
+}
+.v2 .lcl-modale-tuile {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--lin-fait) 18%, transparent);
+  color: var(--lin-fait);
+}
+.v2 .lcl-modale-tuile svg {
+  width: 18px;
+  height: 18px;
+}
+.v2 .lcl-modale-nom {
+  display: block;
+  width: 100%;
+  margin: 12px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 38px;
+  color: var(--lin-titre);
+  outline: none;
+}
+.v2 .lcl-modale-nom::placeholder {
+  color: var(--lin-avatar);
+}
+.v2 .lcl-modale-resume {
+  display: block;
+  width: 100%;
+  margin: 2px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 23px;
+  color: var(--lin-texte);
+  outline: none;
+}
+.v2 .lcl-modale-resume::placeholder {
+  color: var(--lin-second);
+}
+.v2 .lcl-modale-puces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+.v2 .lcl-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 8px 0 6px;
+  border-radius: 9999px;
+  border: 0.5px solid transparent;
+  background: var(--lin-pastille);
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-titre);
+  white-space: nowrap;
+}
+.v2 .lcl-chip svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--lin-second);
+}
+.v2 .lcl-chip input {
+  width: 13ch;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-titre);
+  outline: none;
+}
+.v2 .lcl-chip input::placeholder {
+  color: var(--lin-second);
+}
+.v2 .lcl-chip:focus-within {
+  background: var(--lin-pastille-active);
+}
+.v2 .lcl-modale-desc {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 0.5px solid var(--lin-menu-sep);
+}
+.v2 .lcl-modale-desc .lcl-desc {
+  min-height: 140px;
+}
+.v2 .lcl-modale-pied {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 16px 16px;
+  border-top: 0.5px solid var(--lin-menu-sep);
+}
+.v2 .lcl-modale-note {
+  margin: 0 auto 0 0;
+  font-size: 12px;
+  color: var(--lin-second);
+}
+.v2 .lcl-btn-plein {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 9999px;
+  border: 0.5px solid transparent;
+  background: var(--lin-fait);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: 0 0.5px 1px 1px lch(0 0 0 / 0.3);
+  white-space: nowrap;
+}
+.v2 .lcl-btn-plein:hover {
+  filter: brightness(1.08);
+}
+.v2 .lcl-btn-plein:disabled {
+  opacity: 0.5;
+}
+.v2 .lcl-btn-fantome {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-second);
+}
+.v2 .lcl-btn-fantome:hover {
+  background: var(--lin-survol);
+  color: var(--lin-texte);
+}
+.v2 .lcl-modale-texte {
+  margin: 0;
+  padding: 0 18px;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--lin-texte);
+}
+.v2 .lcl-modale--petite {
+  width: 440px;
+}
+.v2 .lcl-modale--petite .lcl-modale-corps {
+  padding-bottom: 16px;
+}
+.v2 .lcl-modale--petite .lcl-modale-corps h2 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 23px;
+  color: var(--lin-titre);
+}
+.v2 .lcl-modale--petite .lcl-modale-corps p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--lin-second);
+}
+.v2 .lcl-btn-danger {
+  background: var(--lin-rouge);
+}
+
+/* ——— étroit ——— */
+@container principale (max-width: 1100px) {
+  .v2 .lcl--entreprises {
+    --lcl-colonnes: 8px 18px minmax(0, 1fr) 130px 120px 91px 8px;
+  }
+  .v2 .lcl--entreprises .lcl-tete > :nth-child(6),
+  .v2 .lcl--entreprises .lcl-ligne > :nth-child(6),
+  .v2 .lcl--entreprises .lcl-tete > :nth-child(7),
+  .v2 .lcl--entreprises .lcl-ligne > :nth-child(7) {
+    display: none;
+  }
+  .v2 .lcl--contacts {
+    --lcl-colonnes: 8px 18px minmax(0, 1fr) 150px 120px 91px 8px;
+  }
+  .v2 .lcl--contacts .lcl-tete > :nth-child(5),
+  .v2 .lcl--contacts .lcl-ligne > :nth-child(5) {
+    display: none;
+  }
+}
+@container principale (max-width: 640px) {
+  .v2 .lcl--entreprises,
+  .v2 .lcl--contacts {
+    --lcl-colonnes: minmax(0, 1fr) 91px;
+  }
+  .v2 .lcl-tete,
+  .v2 .lcl-ligne {
+    padding: 0 8px;
+  }
+  .v2 .lcl-tete > :not(.lcl-col-nom):not(.lcl-col-date),
+  .v2 .lcl-ligne > :not(.lcl-col-nom):not(.lcl-col-date) {
+    display: none;
+  }
+  .v2 .lcl-recherche input {
+    width: 120px;
+  }
+  .v2 .lcl-voile {
+    padding: 12px 8px;
+  }
+  .v2 .lcl-modale-corps {
+    padding: 12px 12px 0;
+  }
+  .v2 .lcl-modale-tete {
+    margin-left: 12px;
+  }
+  .v2 .lcl-modale-nom {
+    font-size: 20px;
+    line-height: 30px;
+  }
+  .v2 .lcl-maj {
+    margin-left: 0;
+  }
+}
+
+/* ——— reprises après le contrôle côte à côte (28/10, nuit) ——— */
+.v2 .lcl-case {
+  flex-shrink: 0;
+}
+/* dans une ligne, le menu du type est la pastille de santé : collée au bord de sa colonne, rayon plein */
+.v2 .lcl-ligne .lin-ancre > .lin-valeur {
+  margin: 0;
+  border-radius: 9999px;
+}
+/* la carte Propriétés : étiquette de 90, valeur en bouton de 28 (padding 3 6, icône 16, 12/450) */
+.v2 .lcl .lin-props dt {
+  min-width: 90px;
+  margin-right: 0;
+}
+.v2 .lin-props dd .lin-puce {
+  height: 28px;
+  margin: 0;
+  padding: 3px 6px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-titre);
+}
+.v2 .lin-props dd .lin-puce svg {
+  width: 16px;
+  height: 16px;
+}
+/* les puces de la fenêtre de création : 24 de haut, fond de pastille, icône 14, texte 12/450 */
+.v2 .lcl-modale-puces .lin-ancre > .lin-puce {
+  height: 24px;
+  padding: 0 8px 0 6px;
+  gap: 4px;
+  border-radius: 9999px;
+  background: var(--lin-pastille);
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-titre);
+}
+.v2 .lcl-modale-puces .lin-ancre > .lin-puce svg {
+  width: 14px;
+  height: 14px;
+  color: var(--lin-second);
+}
+.v2 .lcl-modale-puces .lin-ancre > .lin-puce:hover,
+.v2 .lcl-modale-puces .lin-ancre > .lin-puce[aria-expanded="true"] {
+  background: var(--lin-pastille-active);
+}
+/* la carte « update » fait 65 de haut (padding 16 autour du bouton de 32) ; « Description » 38 plus bas, en 500 */
+.v2 .lin-maj.lcl-maj {
+  padding: 16px;
+}
+.v2 .lcl .lin-projet-h2 {
+  margin-top: 38px;
+  font-weight: 500;
+}
+/* les champs : aucun cadre ni anneau venus des règles génériques du dashboard */
+.v2 .lcl-modale input,
+.v2 .lcl-modale textarea,
+.v2 .lcl-h1,
+.v2 .lcl-desc {
+  box-shadow: none;
+}
+.v2 .lcl-modale input:focus,
+.v2 .lcl-modale textarea:focus,
+.v2 .lcl-modale input:focus-visible,
+.v2 .lcl-modale textarea:focus-visible,
+.v2 .lcl-desc:focus,
+.v2 .lcl-desc:focus-visible,
+.v2 .lcl-h1:focus-visible {
+  outline: none;
+  box-shadow: none;
+  border: 0;
+}
+.v2 .lcl-saisie:focus,
+.v2 .lcl-saisie:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 1px var(--lin-fait);
+}
+@container principale (max-width: 640px) {
+  /* étroit : dans les lignes de contacts du texte, seuls l'avatar et le nom restent */
+  .v2 .lcl-lien .lin-meta {
+    display: none;
+  }
+}

@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Utilisation from "@/components/espace2/Utilisation";
 
-/* /espace2/utilisation — la première page de suivi, sur le modèle « Usage » (06/10/2026). */
+/* /espace2/utilisation — la page de suivi, sur la page d'un cycle de Linear
+   (28/10/2026 ; 06/10 : modèle « Usage »). Les menus lisent l'adresse
+   (?periode=, ?mesure=, ?repartition=, ?groupe=), d'où le Suspense. */
 
 export const metadata: Metadata = {
   title: "Utilisation",
@@ -9,5 +12,9 @@ export const metadata: Metadata = {
 };
 
 export default function PageUtilisation() {
-  return <Utilisation />;
+  return (
+    <Suspense>
+      <Utilisation />
+    </Suspense>
+  );
 }

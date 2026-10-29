@@ -330,7 +330,7 @@ export function Rapport({
   const periodeLibelle = PERIODES.find((p) => p.cle === periode)?.libelle ?? "";
   const pasLibelle = PAS.find((p) => p.cle === pas)?.libelle ?? "";
   return (
-    <div className="lin pr">
+    <div className="lin rap">
       <div className="rap-page">
         <header className="rap-tete">
           <div className="rap-titre">
@@ -527,14 +527,14 @@ export function CourbeRapport({ serie, libelle, format = kEuros, vide = "Aucune 
         <title>{libelle}</title>
         <defs>
           <linearGradient id={`${id}-bande`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="var(--pr-bande-haut)" />
-            <stop offset="0.1" stopColor="var(--pr-bande-haut)" />
-            <stop offset="1" stopColor="var(--pr-bande-bas)" />
+            <stop offset="0" stopColor="var(--rap-bande-haut)" />
+            <stop offset="0.1" stopColor="var(--rap-bande-haut)" />
+            <stop offset="1" stopColor="var(--rap-bande-bas)" />
           </linearGradient>
           <linearGradient id={`${id}-aire`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="var(--pr-courbe)" stopOpacity="0.3" />
-            <stop offset="0.53" stopColor="var(--pr-courbe)" stopOpacity="0.05" />
-            <stop offset="1" stopColor="var(--pr-courbe)" stopOpacity="0" />
+            <stop offset="0" stopColor="var(--rap-courbe)" stopOpacity="0.3" />
+            <stop offset="0.53" stopColor="var(--rap-courbe)" stopOpacity="0.05" />
+            <stop offset="1" stopColor="var(--rap-courbe)" stopOpacity="0" />
           </linearGradient>
           <clipPath id={`${id}-clip`}>
             <rect x="0" y="0" width={Lt} height={Ht} />
@@ -556,9 +556,9 @@ export function CourbeRapport({ serie, libelle, format = kEuros, vide = "Aucune 
           </g>
         ) : null}
         <g clipPath={`url(#${id}-clip)`}>
-          <path d={dessin} pathLength={1} className="v2-trace" fill="none" stroke="var(--pr-courbe)" strokeWidth="2" strokeLinejoin="round" />
+          <path d={dessin} pathLength={1} className="v2-trace" fill="none" stroke="var(--rap-courbe)" strokeWidth="2" strokeLinejoin="round" />
         </g>
-        {survol !== null && !vide_ ? <circle cx={x(survol)} cy={y(serie.valeurs[survol])} r="3.5" fill="var(--pr-courbe)" stroke="var(--lin-fond)" strokeWidth="1.5" /> : null}
+        {survol !== null && !vide_ ? <circle cx={x(survol)} cy={y(serie.valeurs[survol])} r="3.5" fill="var(--rap-courbe)" stroke="var(--lin-fond)" strokeWidth="1.5" /> : null}
         {indices.map((i) => {
           const px = Math.max(0, Math.min(Lt, x(i)));
           const anchor = i === 0 ? "start" : i === n - 1 ? "end" : "middle";

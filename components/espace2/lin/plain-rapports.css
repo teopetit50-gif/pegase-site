@@ -23,25 +23,25 @@
    Scopé .v2 .lin ; supprimer ce fichier supprime le modèle, sans effet ailleurs.
    ══════════════════════════════════════════════════════════════════════ */
 
-.v2 .lin.pr {
+.v2 .lin.rap {
   /* les bandes verticales du graphique : du fond du panneau (haut) au plus sombre (bas) */
-  --pr-bande-haut: var(--lin-fond);
-  --pr-bande-bas: #0e0e0f;
-  --pr-courbe: var(--lin-graph-bleu);
-  --pr-menu-fond: var(--lin-menu-fond);
+  --rap-bande-haut: var(--lin-fond);
+  --rap-bande-bas: #0e0e0f;
+  --rap-courbe: var(--lin-graph-bleu);
+  --rap-menu-fond: var(--lin-menu-fond);
   flex-direction: column;
   font-size: 14px;
   line-height: 20px;
   color: var(--lin-titre);
 }
-html[data-v2-theme="light"] .v2 .lin.pr {
-  --pr-bande-haut: var(--lin-fond);
-  --pr-bande-bas: var(--v2-a-100, var(--lin-survol));
+html[data-v2-theme="light"] .v2 .lin.rap {
+  --rap-bande-haut: var(--lin-fond);
+  --rap-bande-bas: var(--v2-a-100, var(--lin-survol));
 }
 @media (prefers-color-scheme: light) {
-  html:not([data-v2-theme="dark"]) .v2 .lin.pr {
-    --pr-bande-haut: var(--lin-fond);
-    --pr-bande-bas: var(--v2-a-100, var(--lin-survol));
+  html:not([data-v2-theme="dark"]) .v2 .lin.rap {
+    --rap-bande-haut: var(--lin-fond);
+    --rap-bande-bas: var(--v2-a-100, var(--lin-survol));
   }
 }
 
@@ -175,7 +175,7 @@ html[data-v2-theme="light"] .v2 .lin.pr {
   padding: 4px 0;
   border-radius: 10px;
   border: 1px solid var(--lin-trait);
-  background: var(--pr-menu-fond);
+  background: var(--rap-menu-fond);
   color: var(--lin-menu-texte);
   box-shadow: var(--lin-ombre-menu);
 }
@@ -520,7 +520,7 @@ html[data-v2-theme="light"] .v2 .lin.pr {
   padding: 6px 8px;
   border-radius: 6px;
   border: 1px solid var(--lin-trait);
-  background: var(--pr-menu-fond);
+  background: var(--rap-menu-fond);
   color: var(--lin-menu-texte);
   font-size: 12px;
   line-height: 16px;
@@ -666,7 +666,7 @@ html[data-v2-theme="light"] .v2 .lin.pr {
 .v2 .lin .rap-part > i > b {
   display: block;
   height: 100%;
-  background: var(--pr-courbe);
+  background: var(--rap-courbe);
 }
 
 /* ——— un formulaire dans une carte : champs de 30, 12 px ——— */

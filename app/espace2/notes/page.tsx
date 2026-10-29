@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Notes",
 };
 
-/* la page Notes, à la manière d'Attio (10/10/2026) — components/espace2/Notes */
+/* la page Notes, sur le document de projet de Linear (28/10/2026) — components/espace2/Notes */
 export default function Page() {
   return (
     <Suspense>
