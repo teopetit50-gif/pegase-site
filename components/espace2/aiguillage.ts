@@ -120,11 +120,15 @@ export function moduleDeObjet(objet_type: string | null | undefined): string | n
   return PREFIXES.find(([p]) => objet_type.startsWith(p))?.[1] ?? null;
 }
 
-/* « /espace/x?… » → « /espace2/x?… » ; « ?ancien=1 » garde l'écran actuel */
+/* « /espace/x?… » → « /espace2/x?… » ; « ?ancien=1 » garde l'écran actuel.
+   Le point du matin de Tavaro (lot 2a, omega/SOCLE-EXTRAITS-TAVARO.sql)
+   écrit « /tavaro/factures », sans /espace : une route qui n'a jamais
+   existé. Un lien qui commence par le nom d'un module mène à sa page. */
 function versEspace2(lien: string): string | null {
   if (lien.startsWith(RACINE)) return lien;
-  if (!/^\/espace(\/|\?|$)/.test(lien)) return null;
-  return lien.includes("ancien=1") ? lien : lien.replace(/^\/espace/, RACINE);
+  if (/^\/espace(\/|\?|$)/.test(lien)) return lien.includes("ancien=1") ? lien : lien.replace(/^\/espace/, RACINE);
+  const nu = lien.match(/^\/([a-z0-9]+)[^?]*(\?.*)?$/);
+  return nu && moduleDe(nu[1]) ? `${RACINE}/${nu[1]}${nu[2] ?? ""}` : null;
 }
 
 /* La page d'un repère : la règle de son objet, sinon le lien du moteur

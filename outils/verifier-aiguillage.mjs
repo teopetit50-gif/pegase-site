@@ -42,6 +42,8 @@ const dynamiques = []; // objet_type calculé : à relire à la main
 const pages = new Map(); // /espace/<x> → premier endroit
 const autres = new Map(); // objet_type nommé ailleurs (demandes à valider…) → premier endroit
 const PREFIXES = /^(filed|cashd|offload|reput|btp|loc|lorani|tamila|tiroma|grp)_/;
+const MODULES = ["filed", "cashd", "offload", "reput", "daliro", "tavaro", "lorani", "tamila", "tiroma", "varelo"];
+const hors = new Map(); // lien hors du dashboard (« /signer », page publique) → premier endroit
 
 /* omega/modules, plus les extraits du socle photographiés à la racine de omega/ (le point du matin de Lorani y vit) */
 const extraits = readdirSync(join(racine, "omega")).filter((n) => n.endsWith(".sql")).map((n) => join(racine, "omega", n));
@@ -60,6 +62,11 @@ for (const f of [...extraits, ...dossiers.flatMap(fichiers)]) {
   for (const m of t.matchAll(/objet_type[^,;']{0,8}(?:,|=|:=)\s*'([a-z]+_[a-z_]+)'/g))
     if (PREFIXES.test(m[1]) && !autres.has(m[1])) autres.set(m[1], ou(m.index));
   for (const m of t.matchAll(/'\/espace\/([a-z0-9-]+)/g)) if (!pages.has(m[1])) pages.set(m[1], ou(m.index));
+  /* un lien sans /espace (« /tavaro/factures ») : l'aiguillage le ramène à la page du module */
+  for (const m of t.matchAll(/'lien'\s*,\s*'\/(?!espace)([a-z0-9]+)/g)) {
+    if (!MODULES.includes(m[1])) hors.set(m[1], hors.get(m[1]) ?? ou(m.index));
+    else if (!pages.has(m[1])) pages.set(m[1], `${ou(m.index)} (sans /espace)`);
+  }
   /* les fonctions de lien de Lorani portent leur objet dans le nom */
   if (/lorani_lien_permis\(/.test(t) && !objets.has("lorani_permis")) objets.set("lorani_permis", relative(racine, f));
   if (/lorani_lien_projet\(/.test(t) && !objets.has("lorani_projets")) objets.set("lorani_projets", relative(racine, f));
@@ -84,6 +91,10 @@ const sansRegle = [...autres].filter(([type]) => !regles.has(type) && !objets.ha
 if (sansRegle.length) {
   console.log(`\nAutres objet_type sans règle (demandes à valider…) : ils mènent à la page du module, à préciser à la refonte :`);
   for (const [type, ou] of sansRegle) console.log(`  ${type.padEnd(28)} ${ou}`);
+}
+if (hors.size) {
+  console.log(`\nLiens hors du dashboard (laissés tels quels) :`);
+  for (const [page, ou] of [...hors].sort()) console.log(`  /${page.padEnd(27)} ${ou}`);
 }
 if (dynamiques.length) {
   console.log(`\nobjet_type calculé (à relire à la main) :`);
