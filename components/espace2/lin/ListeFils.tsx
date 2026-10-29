@@ -294,7 +294,7 @@ export type Fil = {
   priorite: Priorite;
   etiquettes?: React.ReactNode;
   heure: { texte: string; iso?: string; icone?: "bulle" | "calendrier" | "horloge"; urgence?: boolean };
-  qui?: { lettre: string; couleur?: string; titre: string } | null;
+  qui?: { lettre: string; icone?: React.ReactNode; couleur?: string; titre: string } | null;
 };
 
 const COULEURS = ["#26b5ce", "#5e6ad2", "#4cb782", "#f2994a", "#d96466", "#bb87fc", "#c9a227", "#95a2b3"];
@@ -361,8 +361,8 @@ export function LigneFil({ fil, actif }: { fil: Fil; actif: boolean }) {
         <span className="pf-c-qui">
           <span className="pf-qui" title={fil.qui ? fil.qui.titre : "Non assigné"} aria-hidden="true">
             {fil.qui ? (
-              <span className="pf-qui-avatar" style={fil.qui.couleur ? ({ "--pf-avatar": fil.qui.couleur } as React.CSSProperties) : undefined}>
-                {fil.qui.lettre}
+              <span className="pf-qui-avatar" data-icone={fil.qui.icone ? "" : undefined} style={fil.qui.couleur ? ({ "--pf-avatar": fil.qui.couleur } as React.CSSProperties) : undefined}>
+                {fil.qui.icone ?? fil.qui.lettre}
               </span>
             ) : (
               <IconePersonne />

@@ -803,3 +803,16 @@ html[data-v2-theme="light"] .v2 .lin-carte-pastille { border-color: var(--v2-a-4
 }
 /* l'icône du coin d'une carte reste grise (palette sobre) */
 .v2 .lin-carte-tableau .lin-carte-ref > svg { color: var(--lin-second); }
+
+/* la marque d'un module, en masque sur la couleur du texte (MarqueModule, icones.tsx) */
+.v2 .lin-marque {
+  display: inline-block;
+  flex: none;
+  background-color: currentColor;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+}

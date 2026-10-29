@@ -23,6 +23,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Check, Copy, ExternalLink, FileText, ListFilter, Paperclip, RotateCcw, X } from "lucide-react";
+import { MarqueModule } from "../lin/icones";
 import { useMaintenant } from "../horloge";
 import { useSource } from "@/components/espace/source";
 import { useTempsReel } from "@/components/espace/tempsReel";
@@ -221,7 +222,7 @@ export default function FilsBoite() {
         </>
       ) : null,
       heure: { texte: relatif(r.recu_le, dateMaintenant), iso: r.recu_le, icone: "bulle" },
-      qui: st.libelle === "Traité" ? { lettre: "F", titre: "Traité par FILED" } : null,
+      qui: st.libelle === "Traité" ? { lettre: "F", icone: <MarqueModule cle="filed" />, titre: "Traité par FILED" } : null,
     };
   };
   const description = [

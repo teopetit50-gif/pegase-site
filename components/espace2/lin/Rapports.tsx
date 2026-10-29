@@ -526,9 +526,11 @@ export function CourbeRapport({ serie, libelle, format = kEuros, vide = "Aucune 
       <svg viewBox={`0 0 ${L} ${H}`} width={L} height={H} role="img" aria-label={libelle}>
         <title>{libelle}</title>
         <defs>
+          {/* 29/10 — une seule couleur, de transparent à la teinte du bas : du blanc opaque vers un noir
+              à 3 %, le SVG interpole couleur et opacité à part et le milieu passait par un gris à 50 % */}
           <linearGradient id={`${id}-bande`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="var(--rap-bande-haut)" />
-            <stop offset="0.1" stopColor="var(--rap-bande-haut)" />
+            <stop offset="0" stopColor="var(--rap-bande-bas)" stopOpacity="0" />
+            <stop offset="0.1" stopColor="var(--rap-bande-bas)" stopOpacity="0" />
             <stop offset="1" stopColor="var(--rap-bande-bas)" />
           </linearGradient>
           <linearGradient id={`${id}-aire`} x1="0" y1="0" x2="0" y2="1">

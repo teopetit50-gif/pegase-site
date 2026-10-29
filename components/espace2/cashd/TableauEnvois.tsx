@@ -36,7 +36,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Building2, CheckCheck, ClipboardList, Copy, Download, FileText, HandCoins, ListFilter, Mail, MessageSquare, PenLine, Plus, Send, SlidersHorizontal, Star, X } from "lucide-react";
+import { Building2, CheckCheck, ChevronRight, ClipboardList, Copy, Download, FileText, HandCoins, ListFilter, Mail, MessageSquare, PenLine, Plus, Send, SlidersHorizontal, Star, X } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { useSource } from "@/components/espace/source";
@@ -105,6 +105,11 @@ const etatTexte = (k: Carte) => (k.r ? (ETATS_RELANCE[k.r.etat] ?? ETATS_RELANCE
 const jour = (iso: string | null | undefined) => (iso ? new Date(iso.length === 10 ? `${iso}T12:00:00Z` : iso).toLocaleDateString("fr-FR", { day: "numeric", month: "short", timeZone: "Europe/Paris" }) : "—");
 const pluriel = (n: number, mot: string) => `${n} ${mot}${n > 1 ? "s" : ""}`;
 const copier = (texte: string) => void navigator.clipboard?.writeText(texte);
+/* le plus gros retard des pièces relancées, pour le titre replié */
+const retardMax = (pieces: { retard_jours: number }[]) => {
+  const j = Math.max(0, ...pieces.map((p) => p.retard_jours));
+  return j > 0 ? `${j} j de retard` : "à échoir";
+};
 
 function lireFiltres(s: string | null): Filtres {
   const f: Filtres = {};
@@ -1028,11 +1033,11 @@ function CarteEnvoi({
     actions = (
       <>
         <Link href={`${RACINE}/validations`} className="v2-btn v2-btn--primaire">
-          <CheckCheck width={16} height={16} aria-hidden="true" /> Ouvrir la file de validation
+          <CheckCheck width={16} height={16} aria-hidden="true" /> Valider
         </Link>
         {corps ? (
           <button type="button" className="v2-btn v2-btn--fantome" onClick={copierTexte}>
-            <Copy width={15} height={15} aria-hidden="true" /> Copier le texte
+            <Copy width={15} height={15} aria-hidden="true" /> Copier
           </button>
         ) : null}
         {menuPlus}
@@ -1070,7 +1075,7 @@ function CarteEnvoi({
       La relance comptera comme partie, à cette date.
     </Note>
   ) : k.groupe === "a_valider" ? (
-    <Note teinte="bleu">Une relance ne part qu&apos;une fois validée dans la file de validation : rien n&apos;est parti.</Note>
+    <Note teinte="bleu">Rien n&apos;est parti : elle attend votre validation.</Note>
   ) : k.groupe === "a_envoyer" ? (
     <Note teinte="bleu">Validée, mais l&apos;envoi du module est coupé : envoyez-la vous-même, puis notez l&apos;envoi. Elle comptera comme partie, à cette date.</Note>
   ) : k.groupe === "repondue" && reponse ? (
@@ -1107,125 +1112,121 @@ function CarteEnvoi({
         />
       }
       piedGauche={
-        <>
-          <div className="v2-det-document-ligne">
-            {factures.length ? <span className="v2-det-mono">{factures.map((p) => p.numero).join(", ")}</span> : null}
-            <span className="v2-det-sous">{[libelleEtat, k.canal].filter(Boolean).join(" · ")}</span>
-          </div>
-          <div className="v2-det-document-ligne">
-            <span className="v2-det-sous">
-              {k.compte}
-              {b ? ` · ${STATUTS_COMPTE[b.statut].libelle.toLowerCase()}` : ""}
-            </span>
-            <Link href={lienCompte(k.compte_id)} className="v2-btn v2-btn--petit v2-btn--fantome v2-det-document-ouvrir">
-              <Building2 width={14} height={14} aria-hidden="true" /> Ouvrir le débiteur
-            </Link>
-          </div>
-        </>
+        <div className="v2-det-document-ligne">
+          <span className="v2-det-sous">
+            {factures.length ? <span className="v2-det-mono">{factures.map((p) => p.numero).join(", ")}</span> : k.compte}
+            {b && b.statut !== "actif" ? ` · ${STATUTS_COMPTE[b.statut].libelle.toLowerCase()}` : ""}
+          </span>
+          <Link href={lienCompte(k.compte_id)} className="v2-btn v2-btn--petit v2-btn--fantome v2-det-document-ouvrir">
+            <Building2 width={14} height={14} aria-hidden="true" /> Ouvrir le débiteur
+          </Link>
+        </div>
       }
-      titre={sujet}
+      titre={k.compte}
       chiffre={r ? montant(r.montant) : null}
       echeance={echeance}
       notes={notes}
       actions={actions}
     >
-      <dl className="v2-det-fiche">
-        <dt>Débiteur</dt>
-        <dd>
-          {k.compte}
-          {b ? <span className="v2-det-sous"> · {STATUTS_COMPTE[b.statut].libelle}</span> : null}
-        </dd>
-        <dt>{r ? "Palier" : "Nature"}</dt>
-        <dd>{r ? libellePalier(r.palier) : NATURES[k.nature]}</dd>
-        <dt>Destinataire</dt>
+      {/* l'essentiel en trois lignes : l'état est dans l'en-tête, le reste se déplie (28/10/2026, Teo : « trop d'info ») */}
+      <dl className="v2-det-fiche c2e-fiche">
+        <dt>À</dt>
         <dd>
           {adresseDest ? (
             <>
               {nomDest ?? adresseDest}
-              {nomDest ? <span className="v2-det-sous"> · {adresseDest}</span> : null}
+              {nomDest ? <span className="v2-det-sous c2e-adresse">{adresseDest}</span> : null}
             </>
           ) : (
-            <span className="v2-det-sous">Aucune adresse</span>
+            <span className="c2e-passe">Aucune adresse</span>
           )}
         </dd>
-        {k.canal ? (
+        <dt>{r ? "Palier" : "Nature"}</dt>
+        <dd>
+          {r ? libellePalier(r.palier) : NATURES[k.nature]}
+          {k.canal ? <span className="v2-det-sous"> · {k.canal.toLowerCase()}</span> : null}
+        </dd>
+        {motif ? (
           <>
-            <dt>Canal</dt>
-            <dd>{k.canal}</dd>
+            <dt>Motif</dt>
+            <dd>{motif}</dd>
           </>
         ) : null}
-        <dt>État</dt>
-        <dd>
-          {libelleEtat}
-          {motif ? <span className="v2-det-sous"> · {motif}</span> : null}
-        </dd>
-        <dt>Prochaine étape</dt>
+        <dt>Ensuite</dt>
         <dd className={etape.passe ? "c2e-passe" : etape.vide ? "v2-det-sous" : undefined}>{etape.libelle}</dd>
       </dl>
 
-      {factures.length && corps ? (
-        <div className="v2-det-bloc">
-          <h3 className="v2-det-section-titre">
-            {r?.nature === "devis" ? "Devis relancé" : "Factures relancées"}
-            <small>{factures.length}</small>
-          </h3>
-          <dl className="v2-det-fiche">
-            {factures.map((p) => (
-              <div key={p.facture_id} style={{ display: "contents" }}>
-                <dt className="v2-det-mono">{p.numero}</dt>
-                <dd>
-                  {montant(p.reste_du)}
-                  <span className="v2-det-sous"> · {p.retard_jours > 0 ? `${p.retard_jours} j de retard` : "à échoir"}</span>
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-      ) : null}
-
-      <div className="v2-det-bloc">
-        <h3 className="v2-det-section-titre">Activité</h3>
-        <ol className="v2-det-fil">
-          {fil.map((x) => (
-            <li key={x.cle} data-attente={x.attente ? "" : undefined}>
-              <span className="v2-det-fil-avatar" aria-hidden="true">
-                {x.icone}
-              </span>
-              <div>
-                <div className="v2-det-fil-texte">
-                  <strong>{x.qui}</strong>
-                  <span>
-                    {x.quoi}
-                    {x.le ? ` · ${jour(x.le)}` : ""}
-                  </span>
+      <div className="c2e-replis">
+        {factures.length && corps ? (
+          <details className="c2e-repli">
+            <summary>
+              <ChevronRight className="c2e-repli-fleche" width={14} height={14} aria-hidden="true" />
+              {r?.nature === "devis" ? "Devis relancé" : factures.length > 1 ? "Factures relancées" : "Facture relancée"}
+              <small>{factures.length > 1 ? `${factures.length} · ` : ""}{retardMax(factures)}</small>
+            </summary>
+            <dl className="v2-det-fiche">
+              {factures.map((p) => (
+                <div key={p.facture_id} style={{ display: "contents" }}>
+                  <dt className="v2-det-mono">{p.numero}</dt>
+                  <dd>
+                    {montant(p.reste_du)}
+                    <span className="v2-det-sous"> · {p.retard_jours > 0 ? `${p.retard_jours} j de retard` : "à échoir"}</span>
+                  </dd>
                 </div>
-                {x.commentaire ? <p className="v2-det-fil-commentaire">{x.commentaire}</p> : null}
-              </div>
-            </li>
-          ))}
-        </ol>
-      </div>
+              ))}
+            </dl>
+          </details>
+        ) : null}
 
-      {autres.length ? (
-        <div className="v2-det-bloc">
-          <h3 className="v2-det-section-titre">
-            Ses autres relances
-            <small>{autres.length}</small>
-          </h3>
-          <ul className="c2e-autres">
-            {autres.map((x) => (
-              <li key={x.id}>
-                <button type="button" className="c2e-autre" onClick={() => aller({ id: x.id }, true)}>
-                  <span>{libellePalier(x.palier)}</span>
-                  <span className="v2-det-sous">
-                    {(ETATS_RELANCE[x.etat] ?? ETATS_RELANCE.preparee).libelle.toLowerCase()} · {jour(x.envoye_le ?? x.jour)}
-                  </span>
-                </button>
+        <details className="c2e-repli">
+          <summary>
+            <ChevronRight className="c2e-repli-fleche" width={14} height={14} aria-hidden="true" />
+            Historique
+            <small>{fil.length}</small>
+          </summary>
+          <ol className="v2-det-fil">
+            {fil.map((x) => (
+              <li key={x.cle} data-attente={x.attente ? "" : undefined}>
+                <span className="v2-det-fil-avatar" aria-hidden="true">
+                  {x.icone}
+                </span>
+                <div>
+                  <div className="v2-det-fil-texte">
+                    <strong>{x.qui}</strong>
+                    <span>
+                      {x.quoi}
+                      {x.le ? ` · ${jour(x.le)}` : ""}
+                    </span>
+                  </div>
+                  {x.commentaire ? <p className="v2-det-fil-commentaire">{x.commentaire}</p> : null}
+                </div>
               </li>
             ))}
-          </ul>
-        </div>
-      ) : null}
+          </ol>
+        </details>
+
+        {autres.length ? (
+          <details className="c2e-repli">
+            <summary>
+              <ChevronRight className="c2e-repli-fleche" width={14} height={14} aria-hidden="true" />
+              Ses autres relances
+              <small>{autres.length}</small>
+            </summary>
+            <ul className="c2e-autres">
+              {autres.map((x) => (
+                <li key={x.id}>
+                  <button type="button" className="c2e-autre" onClick={() => aller({ id: x.id }, true)}>
+                    <span>{libellePalier(x.palier)}</span>
+                    <span className="v2-det-sous">
+                      {(ETATS_RELANCE[x.etat] ?? ETATS_RELANCE.preparee).libelle.toLowerCase()} · {jour(x.envoye_le ?? x.jour)}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </details>
+        ) : null}
+      </div>
     </CarteCentrale>
   );
 }

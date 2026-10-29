@@ -72,10 +72,10 @@
   align-items: center;
 }
 .v2 .lcl--entreprises {
-  --lcl-colonnes: 8px 18px minmax(0, 1fr) 130px 120px 120px 49px 91px 8px;
+  --lcl-colonnes: 8px 18px minmax(0, 1fr) 130px 150px 136px 72px 91px 8px;
 }
 .v2 .lcl--contacts {
-  --lcl-colonnes: 8px 18px minmax(0, 1fr) 150px 190px 120px 91px 8px;
+  --lcl-colonnes: 8px 18px minmax(0, 1fr) 180px 220px 136px 91px 8px;
 }
 .v2 .lcl-tete {
   height: 32px;
@@ -773,7 +773,7 @@
 /* ——— étroit ——— */
 @container principale (max-width: 1100px) {
   .v2 .lcl--entreprises {
-    --lcl-colonnes: 8px 18px minmax(0, 1fr) 130px 120px 91px 8px;
+    --lcl-colonnes: 8px 18px minmax(0, 1fr) 130px 150px 91px 8px;
   }
   .v2 .lcl--entreprises .lcl-tete > :nth-child(6),
   .v2 .lcl--entreprises .lcl-ligne > :nth-child(6),
@@ -782,7 +782,7 @@
     display: none;
   }
   .v2 .lcl--contacts {
-    --lcl-colonnes: 8px 18px minmax(0, 1fr) 150px 120px 91px 8px;
+    --lcl-colonnes: 8px 18px minmax(0, 1fr) 180px 136px 91px 8px;
   }
   .v2 .lcl--contacts .lcl-tete > :nth-child(5),
   .v2 .lcl--contacts .lcl-ligne > :nth-child(5) {

@@ -403,6 +403,41 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
     width: 208px;
   }
 }
+/* 29/10/2026 — capture de Teo sur « Entreprises » : sur ordinateur, le rail
+   ouvert au survol recouvrait les deux tiers du volet, sans ombre ; il ne
+   restait qu'un bout de surbrillance vide, lu comme un bug d'affichage. Le
+   rail ne s'ouvre donc plus à côté d'un volet : le libellé de l'entrée
+   survolée sort en étiquette à droite de l'icône, par-dessus le volet. Fixe
+   pour échapper aux overflow du rail ; top auto le laisse centré sur l'entrée.
+   Le tiroir du mobile garde son rail qui s'ouvre. */
+@media (hover: hover) and (min-width: 768px) {
+  .v2-laterale--fixe .v2-rail:hover,
+  .v2-laterale--fixe .v2-rail:has(:focus-visible) {
+    width: 48px;
+  }
+  .v2-laterale--fixe .v2-rail-item > .v2-rail-libelle {
+    position: fixed;
+    left: 54px;
+    z-index: 60;
+    max-width: 240px;
+    padding: 4px 8px;
+    border: 1px solid var(--v2-a-400);
+    border-radius: 6px;
+    background: var(--v2-bg-100);
+    box-shadow: var(--v2-ombre-petite, 0 4px 12px rgb(0 0 0 / 0.12));
+    color: var(--v2-gray-1000);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 18px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.1s linear;
+  }
+  .v2-laterale--fixe .v2-rail-item:hover > .v2-rail-libelle,
+  .v2-laterale--fixe .v2-rail-item:focus-visible > .v2-rail-libelle {
+    opacity: 1;
+  }
+}
 .v2-rail-int {
   display: flex;
   flex-direction: column;
@@ -1610,42 +1645,32 @@ a.v2-jauge:hover {
   }
 }
 
-/* ══ Notes (les avis) ══════════════════════════════════════════════════ */
+/* ══ Notes (les avis) ══════════════════════════════════════════════════
+   29/10/2026 — Teo : « toutes les bandes en jaune et en d'autres couleurs,
+   trouve une autre manière de les afficher, et ne mets plus les couleurs ».
+   Plus de fond ni de bord teinté : une ligne de texte gris, son icône
+   devant (coche, triangle, croix, « i ») qui garde seule le sens, et le
+   début en gras dans la couleur du texte. Toutes les teintes se valent. */
 .v2-note {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: flex-start;
-  padding: 10px 12px;
-  border-radius: 6px;
-  font-size: 14px;
-  line-height: 20px;
-  background: var(--v2-gray-100);
-  color: var(--v2-gray-1000);
-  box-shadow: inset 0 0 0 1px var(--v2-a-400);
+  padding: 0;
+  font-size: 13px;
+  line-height: 19px;
+  background: none;
+  color: var(--v2-gray-900);
 }
 .v2-note svg {
   flex: none;
-  margin-top: 2px;
+  width: 14px;
+  height: 14px;
+  margin-top: 2.5px;
+  color: var(--v2-gray-900);
 }
-.v2-note[data-teinte="ambre"] {
-  background: var(--v2-amber-100);
-  color: var(--v2-amber-900);
-  box-shadow: inset 0 0 0 1px var(--v2-amber-400);
-}
-.v2-note[data-teinte="rouge"] {
-  background: var(--v2-red-100);
-  color: var(--v2-red-900);
-  box-shadow: inset 0 0 0 1px var(--v2-red-400);
-}
-.v2-note[data-teinte="vert"] {
-  background: var(--v2-green-100);
-  color: var(--v2-green-900);
-  box-shadow: inset 0 0 0 1px var(--v2-green-400);
-}
-.v2-note[data-teinte="bleu"] {
-  background: var(--v2-blue-100);
-  color: var(--v2-blue-900);
-  box-shadow: inset 0 0 0 1px var(--v2-blue-400);
+.v2-note strong {
+  font-weight: 500;
+  color: var(--v2-gray-1000);
 }
 
 /* ══ États vides et squelettes ═════════════════════════════════════════ */

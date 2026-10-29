@@ -581,6 +581,10 @@
   font-weight: 600;
   line-height: 9px;
 }
+.v2 .lin .pf-qui-avatar[data-icone] {
+  background: transparent;
+  color: var(--lin-second);
+}
 .v2 .lin .pf-qui svg {
   width: 18px;
   height: 18px;
