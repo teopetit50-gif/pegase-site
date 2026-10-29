@@ -1,0 +1,421 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Le modèle « Get started » de Plain, au 1:1 — 29/10/2026 : un titre, le
+   compte « N sur M terminées », puis les étapes en accordéon (case, titre,
+   chevron qui pivote) ; l'étape ouverte prend un fond teinté et montre son
+   contenu en grille de deux colonnes (texte à gauche, carte à droite).
+   Sert à la page d'un permis de LORANI (components/espace2/lorani/PagePermis.tsx).
+
+   Relevé au getComputedStyle sur app.plain.com (onboarding), fenêtre
+   1440×900 puis 390×844, thème clair : docs/refonte-metiers/releves/
+   plain-get-started.md. Les couleurs sont celles du gabarit (--lin-*,
+   lin.css : clair et sombre) ; tout le reste (hauteurs, écarts, polices,
+   graisses, rayons, colonnes) est celui de Plain. La police Whyte de
+   Plain → var(--v2-titre). Préfixe : pgs-.
+
+   Repères, en px depuis le bord de la colonne :
+     colonne     920 au plus, centrée, padding 32 32 98 (24 à 390)
+     tête        flex, bas aligné : titre Whyte 24/400 lh 32 ; sous-titre 14/400 lh 20 gris, 4 sous le titre ;
+                 « N sur M terminées » 12/400 lh 16 gris à droite, sur la ligne du sous-titre ; 32 avant la liste
+     liste       trait 1, rayon 10, sans débord ; un trait 1 entre les étapes
+     étape       en-tête 72 (padding 24, gap 16) : case 18 (rayon 4, trait 1.5 accent ; faite : pleine grise,
+                 coche blanche), titre 16/550 lh 24 (fait : gris), chevron 18 gris à droite, 180° ouvert en
+                 .15s ease-in-out ; survol : fond relevé sur toute la largeur
+     ouverte     fond teinté vert ; contenu padding 0 24 24 ; grille 388/388, gap 32, centrée verticalement ;
+                 texte padding 0 34, gap 12 : h3 Whyte 32/400 lh 40 vert, p 14/400 lh 20 vert sombre ;
+                 boutons 28 sous le texte ; carte : fond carte, trait 1, rayon 10, ombre 0 1 1
+     390         tête en colonne (le compte passe dessous) ; liste sans bords latéraux ni rayon ;
+                 grille sur une colonne
+
+   Écarts assumés : Plain dessine une carte blanche (rayon 12) dans sa page ; ici le panneau du dashboard
+   EST la carte (comme plain-broadcasts.css). L'illustration de fond de l'étape ouverte (logos et motifs de
+   Plain) n'est pas reprise : le fond teinté seul. La hauteur ne s'anime pas à l'ouverture (seul le chevron
+   pivote). Le lien de retour au-dessus du titre et la pastille d'état n'existent pas chez Plain : lien en
+   12/550 gris, pastille aux mesures de « Recommended » (10/475, padding 3 6, rayon 4). Une étape dont la
+   carte est vide passe sur une colonne, comme « Invite your team ».
+
+   Jetons pris au plus proche (Plain clair → --lin-*) : texte #1f1f28 → --lin-titre ; gris #636370 →
+   --lin-second ; chevron #adadb7 → --lin-compte ; survol #f0f0f5 → --lin-survol ; traits #e7e7ef →
+   --lin-detail-trait (clair : --v2-a-400) ; case #4a52d1 → --lin-fait ; case faite #d8d8e3 → --lin-avatar ;
+   vert #008046 → --lin-vert ; vert sombre #074022 → --lin-vert mêlé au texte ; fond #f3fbe9 → --lin-vert
+   à 7 % sur le fond ; carte #fff → --lin-carte.
+   Scopé .v2 .lin ; supprimer ce fichier supprime le modèle, sans effet ailleurs.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lin.pgs {
+  --pgs-trait: var(--lin-detail-trait);
+  --pgs-teinte: color-mix(in srgb, var(--lin-vert) 7%, var(--lin-fond));
+  --pgs-vert: var(--lin-vert);
+  --pgs-vert-texte: color-mix(in srgb, var(--lin-vert) 55%, var(--lin-titre));
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--lin-titre);
+}
+html[data-v2-theme="light"] .v2 .lin.pgs {
+  --pgs-trait: var(--v2-a-400);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lin.pgs {
+    --pgs-trait: var(--v2-a-400);
+  }
+}
+
+.v2 .lin .pgs-retour:focus-visible,
+.v2 .lin .pgs-lien:focus-visible,
+.v2 .lin .pgs-entete:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: -2px;
+}
+
+/* ——— la colonne : 920 au plus, centrée ——— */
+.v2 .lin .pgs-colonne {
+  width: 100%;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 32px 32px 98px;
+}
+
+/* ——— retour vers la vue d'ensemble (hors Plain) ——— */
+.v2 .lin .pgs-retour {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin: 0 0 12px -4px;
+  padding: 2px 4px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--lin-second);
+  text-decoration: none;
+}
+.v2 .lin .pgs-retour:hover {
+  color: var(--lin-titre);
+  background: var(--lin-survol);
+}
+.v2 .lin .pgs-retour svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ——— la tête : titre et sous-titre à gauche, le compte à droite ——— */
+.v2 .lin .pgs-tete {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+.v2 .lin .pgs-tete-gauche {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.v2 .lin .pgs-titre-ligne {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  min-width: 0;
+}
+.v2 .lin .pgs-titre {
+  margin: 0;
+  font-family: var(--v2-titre);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 32px;
+  letter-spacing: normal;
+  color: var(--lin-titre);
+  overflow-wrap: anywhere;
+}
+.v2 .lin .pgs-sous {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--lin-second);
+  overflow-wrap: anywhere;
+}
+.v2 .lin .pgs-lien {
+  color: var(--lin-titre);
+  text-decoration: underline;
+  text-decoration-color: var(--pgs-trait);
+  text-underline-offset: 3px;
+  border-radius: 4px;
+}
+.v2 .lin .pgs-lien:hover {
+  text-decoration-color: currentColor;
+}
+.v2 .lin .pgs-compte {
+  flex-shrink: 0;
+  margin: 0;
+  padding-bottom: 2px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+
+/* la pastille d'état : les mesures de « Recommended » (10/475, padding 3 6, rayon 4) */
+.v2 .lin .pgs-pastille {
+  --pgs-p: var(--lin-second);
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 475;
+  line-height: 10px;
+  color: var(--pgs-p);
+  background: color-mix(in srgb, var(--pgs-p) 14%, transparent);
+  white-space: nowrap;
+}
+.v2 .lin .pgs-pastille[data-teinte="vert"] {
+  --pgs-p: var(--lin-vert);
+}
+.v2 .lin .pgs-pastille[data-teinte="ambre"] {
+  --pgs-p: var(--lin-jaune);
+}
+.v2 .lin .pgs-pastille[data-teinte="rouge"] {
+  --pgs-p: var(--lin-rouge);
+}
+.v2 .lin .pgs-pastille[data-teinte="bleu"] {
+  --pgs-p: var(--lin-graph-bleu);
+}
+
+/* ——— ce qui attend un membre, au-dessus de la liste (hors Plain) ——— */
+.v2 .lin .pgs-attente {
+  margin-bottom: 24px;
+}
+.v2 .lin .pgs-attente:not(:has(.esp-carte, .esp-avis)) {
+  display: none;
+}
+
+/* ——— la liste en accordéon ——— */
+.v2 .lin .pgs-liste {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--pgs-trait);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.v2 .lin .pgs-etape {
+  border-bottom: 1px solid var(--pgs-trait);
+}
+.v2 .lin .pgs-etape:last-child {
+  border-bottom: 0;
+}
+.v2 .lin .pgs-etape[data-ouverte] {
+  background: var(--pgs-teinte);
+}
+
+/* l'en-tête d'une étape : 72 de haut, identique ouverte ou fermée */
+.v2 .lin .pgs-entete {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  min-height: 72px;
+  margin: 0;
+  padding: 24px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.v2 .lin .pgs-entete:hover {
+  background: var(--lin-survol);
+}
+.v2 .lin .pgs-case {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--lin-fait);
+  border-radius: 4px;
+  background: var(--lin-fond);
+}
+.v2 .lin .pgs-case[data-faite] {
+  border-color: transparent;
+  background: var(--lin-avatar);
+  color: #ffffff;
+}
+.v2 .lin .pgs-case svg {
+  width: 13px;
+  height: 14px;
+  stroke-width: 3;
+}
+.v2 .lin .pgs-etape-titre {
+  flex: 1;
+  min-width: 0;
+  font-size: 16px;
+  font-weight: 550;
+  line-height: 24px;
+  color: var(--lin-titre);
+}
+.v2 .lin .pgs-etape[data-faite] .pgs-etape-titre {
+  color: var(--lin-second);
+}
+.v2 .lin .pgs-chevron {
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: var(--lin-compte);
+  transition: transform 0.15s ease-in-out;
+}
+.v2 .lin .pgs-etape[data-ouverte] .pgs-chevron {
+  transform: rotate(180deg);
+}
+.v2 .lin .pgs-chevron svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ——— l'étape ouverte : grille 388/388, gap 32 ——— */
+.v2 .lin .pgs-contenu {
+  padding: 0 24px 24px;
+}
+.v2 .lin .pgs-grille {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 32px;
+  align-items: center;
+}
+/* une carte vide : une seule colonne, comme « Invite your team » */
+.v2 .lin .pgs-grille:not(:has(.pgs-carte :is(.esp-carte, .esp-avis))) {
+  grid-template-columns: minmax(0, 1fr);
+}
+.v2 .lin .pgs-carte:not(:has(.esp-carte, .esp-avis)) {
+  display: none;
+}
+.v2 .lin .pgs-texte {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 0 34px;
+}
+.v2 .lin .pgs-h3 {
+  margin: 0;
+  font-family: var(--v2-titre);
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 40px;
+  letter-spacing: normal;
+  color: var(--pgs-vert);
+  overflow-wrap: anywhere;
+}
+.v2 .lin .pgs-p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--pgs-vert-texte);
+}
+
+/* les boutons de l'étape, 28 sous le texte : la carte « Saisir ce qui est arrivé » réduite à ses boutons */
+.v2 .lin .pgs-gestes {
+  margin-top: 16px;
+}
+.v2 .lin .pgs-gestes:not(:has(.esp-carte, .esp-avis)) {
+  display: none;
+}
+.v2 .lin .pgs-gestes .resa.esp .esp-carte {
+  overflow: visible;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.v2 .lin .pgs-gestes .resa.esp .esp-carte-tete {
+  display: none;
+}
+.v2 .lin .pgs-gestes .resa.esp .esp-carte-corps {
+  padding: 0;
+}
+
+/* ——— les blocs habillés : la colonne de l'écran repris, sans ses marges ——— */
+.v2 .lin.pgs .v2-page:has(> #ecran) {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+/* la carte liste de Plain : fond carte, trait 1, rayon 10, ombre 0 1 1 */
+.v2 .lin .pgs-carte,
+.v2 .lin .pgs-attente,
+.v2 .lin .pgs-courriers {
+  min-width: 0;
+  container: pgs-carte / inline-size;
+}
+.v2 .lin :is(.pgs-carte, .pgs-attente, .pgs-courriers) .resa.esp .esp-carte {
+  border-radius: 10px;
+  background: var(--lin-carte);
+  box-shadow:
+    0 0 0 1px var(--pgs-trait),
+    0 1px 1px #1a33330a;
+}
+.v2 .lin :is(.pgs-carte, .pgs-attente, .pgs-courriers) .resa.esp .esp-carte-tete {
+  background: transparent;
+  border-bottom-color: var(--pgs-trait);
+}
+/* le bandeau des quatre chiffres : deux par ligne dans la carte, un seul quand elle est étroite */
+.v2 .lin .pgs-carte .resa.esp .lor-bandeau {
+  grid-template-columns: minmax(0, 1fr);
+}
+@container pgs-carte (min-width: 360px) {
+  .v2 .lin .pgs-carte .resa.esp .lor-bandeau {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ——— les courriers du dossier, sous la liste (hors Plain) ——— */
+.v2 .lin .pgs-courriers {
+  margin-top: 24px;
+}
+
+/* ——— l'attente, la page absente ——— */
+.v2 .lin .pgs-vide {
+  margin: 0;
+  padding: 24px 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lin-second);
+}
+
+/* ——— tablette : la grille passe sur une colonne ——— */
+@container principale (max-width: 900px) {
+  .v2 .lin .pgs-grille {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ——— téléphone (relevé à 390) ——— */
+@container principale (max-width: 640px) {
+  .v2 .lin .pgs-colonne {
+    padding: 24px 24px 98px;
+  }
+  .v2 .lin .pgs-tete {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .v2 .lin .pgs-liste {
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+  }
+  .v2 .lin .pgs-h3 {
+    overflow-wrap: break-word;
+  }
+}

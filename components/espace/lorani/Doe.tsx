@@ -32,11 +32,14 @@ const plus = (d: string, n: number) => {
 
 type Form = { type: "recu"; item: PieceDoe } | { type: "sans_objet"; item: PieceDoe } | null;
 
-export default function Doe({ projet, dossier, peutEcrire, agir }: {
+export default function Doe({ projet, dossier, peutEcrire, agir, confirmer }: {
   projet: Projet;
   dossier: Dossier;
   peutEcrire: boolean;
   agir: (reel: () => Promise<void>, local: () => Dossier) => Promise<void>;
+  /* espace 2 : « Demander les pièces manquantes » demande confirmation (les questions partent aux entreprises) ;
+     sans, la demande part au clic, comme avant */
+  confirmer?: boolean;
 }) {
   const lots = useMemo(() => dossier.lots.filter((l) => l.projet_id === projet.id).sort((a, b) => a.numero.localeCompare(b.numero)), [dossier.lots, projet.id]);
   const items = useMemo(() => dossier.doe.filter((d) => d.projet_id === projet.id), [dossier.doe, projet.id]);
@@ -46,6 +49,7 @@ export default function Doe({ projet, dossier, peutEcrire, agir }: {
   const [erreur, setErreur] = useState<string | null>(null);
   const [nr, setNr] = useState({ piece_id: "", motif: "" });
   const [demande, setDemande] = useState<string | null>(null);
+  const [aDemander, setADemander] = useState(false);
   const clientId = dossier.moi?.client_id ?? "";
   const auj = aujourdhui();
   const attendus = items.filter((d) => d.statut === "attendu");
@@ -107,7 +111,7 @@ export default function Doe({ projet, dossier, peutEcrire, agir }: {
         <span>DOE : dossier des ouvrages exécutés</span>
         <span className="esp-item-haut">
           <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi || !lots.length} onClick={() => void preparer()}>{items.length ? "Compléter la liste" : "Préparer la liste"}</button>
-          {attendus.length ? <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => void demander()}>Demander les pièces manquantes</button> : null}
+          {attendus.length ? <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => (confirmer ? setADemander(true) : void demander())}>Demander les pièces manquantes</button> : null}
         </span>
       </div>
       {!items.length ? (
@@ -151,6 +155,26 @@ export default function Doe({ projet, dossier, peutEcrire, agir }: {
         </>
       )}
       {erreur && !form ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+
+      {confirmer ? (
+        <Dialog open={aDemander} onOpenChange={(o) => !o && setADemander(false)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogIcone><FolderCheck width={18} height={18} aria-hidden="true" /></DialogIcone>
+              <DialogTitle>Demander les pièces manquantes</DialogTitle>
+              <DialogDescription>
+                {(() => {
+                  const n = new Set(attendus.map((d) => d.lot_id)).size;
+                  return `${n} question${n > 1 ? "s" : ""} aux entreprises, une par lot, avec la liste de ce qui manque au DOE, à remettre sous quinze jours. Chacune est suivie et relancée jusqu’à la réponse.`;
+                })()}
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <button type="button" className="r-btn r-btn--noir" disabled={!peutEcrire || envoi || !attendus.length} onClick={() => { setADemander(false); void demander(); }}>{envoi ? <Loader variant="spin" /> : null} Demander</button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      ) : null}
 
       <Dialog open={!!form} onOpenChange={(o) => !o && setForm(null)}>
         <DialogContent>

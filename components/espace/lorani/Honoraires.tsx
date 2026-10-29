@@ -13,7 +13,7 @@ import { Loader } from "@/components/ui/loader";
 import { Avis, Pastille } from "../ui";
 import { dateCourte } from "../format";
 import { changerHonoraire, poserHonoraire, saisirTemps } from "./portes";
-import type { Dossier, ElementMission, Honoraire, Projet } from "./types";
+import type { Dossier, ElementMission, Honoraire, Projet, Temps } from "./types";
 
 export const ELEMENTS: { cle: ElementMission; libelle: string; court: string }[] = [
   { cle: "diag", libelle: "Diagnostic", court: "DIAG" },
@@ -39,14 +39,38 @@ const aujourdhui = () => new Date().toISOString().slice(0, 10);
 const nombre = (s: string) => Number(s.replace(/\s/g, "").replace(",", "."));
 
 type Ligne = Honoraire & { passees: number; conso: number | null; etat: "ok" | "a_surveiller" | "depasse"; taux: number | null };
+export type LigneHonoraire = Ligne;
 
-export default function Honoraires({ projet, dossier, nommer, peutEcrire, agir }: {
+/* 29/10/2026 — la page « Honoraires et temps » de l'espace 2 dessine ses propres cartes (habit) avec les mêmes
+   calculs et les mêmes fenêtres ; sans `habit`, la carte s'affiche comme sur l'écran de /espace */
+export type VueHonoraires = {
+  lignes: Ligne[];
+  temps: Temps[];
+  total: number;
+  prevues: number;
+  passees: number;
+  facture: number;
+  aAppeler: Ligne[];
+  alerte: Ligne[];
+  libelle: (h: Honoraire) => string;
+  envoi: boolean;
+  erreur: string | null;
+  /* Saisir du temps (G42) : comme le bouton de la carte, exige une personne connectée et au moins un élément */
+  peutSaisirTemps: boolean;
+  ouvrirTemps: () => void;
+  ouvrirElement: () => void;
+  /* Achevé / Facturé (G44, G45) : vrai quand la base a accepté */
+  changerStatut: (l: Ligne, statut: Honoraire["statut"]) => Promise<boolean>;
+};
+
+export default function Honoraires({ projet, dossier, nommer, peutEcrire, agir, habit }: {
   projet: Projet;
   dossier: Dossier;
   nommer: (id: string | null | undefined) => string;
   peutEcrire: boolean;
   /* la saisie : en base réelle la porte puis la relecture, en exemple la mise à jour en mémoire ; lève l'erreur de la base */
   agir: (reel: () => Promise<void>, local: () => Dossier) => Promise<void>;
+  habit?: (v: VueHonoraires) => React.ReactNode;
 }) {
   const lignes = useMemo<Ligne[]>(() => dossier.honoraires
     .filter((h) => h.projet_id === projet.id)
@@ -79,8 +103,10 @@ export default function Honoraires({ projet, dossier, nommer, peutEcrire, agir }
     try {
       await agir(reel, local);
       setForm(null);
+      return true;
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
+      return false;
     } finally {
       setEnvoi(false);
     }
@@ -91,6 +117,11 @@ export default function Honoraires({ projet, dossier, nommer, peutEcrire, agir }
     setNt({ honoraire_id: enCours?.id ?? "", jour: aujourdhui(), heures: "", note: "" });
     setErreur(null);
     setForm("temps");
+  };
+  const ouvrirElement = () => {
+    setNe({ element: ELEMENTS.find((e) => !lignes.some((l) => l.element === e.cle))?.cle ?? "autre", intitule: "", montant: "", heures: "" });
+    setErreur(null);
+    setForm("element");
   };
   const elementOk = (ne.element !== "autre" || ne.intitule.trim().length > 0) && nombre(ne.montant || "0") >= 0 && !Number.isNaN(nombre(ne.montant || "0")) && !Number.isNaN(nombre(ne.heures || "0")) && nombre(ne.heures || "0") >= 0
     && !lignes.some((l) => l.element === ne.element && (ne.element !== "autre" || (l.intitule ?? "") === ne.intitule.trim()));
@@ -120,13 +151,99 @@ export default function Honoraires({ projet, dossier, nommer, peutEcrire, agir }
     () => ({ ...dossier, honoraires: dossier.honoraires.map((x) => (x.id === l.id ? { ...x, statut, achevee_le: x.achevee_le ?? aujourdhui(), facturee_le: statut === "facturee" ? aujourdhui() : x.facturee_le } : x)) }),
   );
 
+  /* les deux fenêtres (F22, F23), communes à la carte et à son habit */
+  const fenetres = (
+    <>
+      <Dialog open={form === "element"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><Plus width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Ajouter un élément de mission</DialogTitle>
+            <DialogDescription>Les honoraires HT de la phase et le temps que vous comptez y passer. Lorani prévient le chef de projet à 80 % et à 100 % des heures prévues.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <div className="esp-form-ligne">
+                <label className="rv-libelle">Élément
+                  <select className="rv-champ" value={ne.element} onChange={(e) => setNe((s) => ({ ...s, element: e.target.value as ElementMission }))}>
+                    {ELEMENTS.map((e) => <option key={e.cle} value={e.cle}>{e.court} · {e.libelle}</option>)}
+                  </select>
+                </label>
+                {ne.element === "autre" ? (
+                  <label className="rv-libelle">Intitulé <span className="esp-obligatoire">(obligatoire)</span>
+                    <input className="rv-champ" value={ne.intitule} maxLength={120} onChange={(e) => setNe((s) => ({ ...s, intitule: e.target.value }))} placeholder="Mission complémentaire" />
+                  </label>
+                ) : null}
+              </div>
+              <div className="esp-form-ligne">
+                <label className="rv-libelle">Honoraires HT (€)
+                  <input className="rv-champ" inputMode="decimal" value={ne.montant} onChange={(e) => setNe((s) => ({ ...s, montant: e.target.value }))} placeholder="4 200" />
+                </label>
+                <label className="rv-libelle">Heures prévues
+                  <input className="rv-champ" inputMode="decimal" value={ne.heures} onChange={(e) => setNe((s) => ({ ...s, heures: e.target.value }))} placeholder="52" />
+                </label>
+              </div>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!elementOk || envoi} onClick={soumettreElement}>{envoi ? <Loader variant="spin" /> : null} Ajouter</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={form === "temps"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><Clock width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Saisir du temps</DialogTitle>
+            <DialogDescription>Le temps passé sur un élément de mission de « {projet.nom} », à votre nom. Une saisie se corrige, elle ne s&apos;efface pas.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Élément
+                <select className="rv-champ" value={nt.honoraire_id} onChange={(e) => setNt((s) => ({ ...s, honoraire_id: e.target.value }))}>
+                  {lignes.filter((l) => l.statut !== "facturee").map((l) => <option key={l.id} value={l.id}>{ELEMENTS[RANG[l.element]]?.court} · {libelle(l)}</option>)}
+                </select>
+              </label>
+              <div className="esp-form-ligne">
+                <label className="rv-libelle">Jour
+                  <input className="rv-champ" type="date" max={aujourdhui()} value={nt.jour} onChange={(e) => setNt((s) => ({ ...s, jour: e.target.value }))} />
+                </label>
+                <label className="rv-libelle">Heures
+                  <input className="rv-champ" inputMode="decimal" value={nt.heures} onChange={(e) => setNt((s) => ({ ...s, heures: e.target.value }))} placeholder="3,5" />
+                </label>
+              </div>
+              <label className="rv-libelle">Note
+                <input className="rv-champ" value={nt.note} maxLength={300} onChange={(e) => setNt((s) => ({ ...s, note: e.target.value }))} placeholder="Plans au 1/50" />
+              </label>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!tempsOk || envoi} onClick={soumettreTemps}>{envoi ? <Loader variant="spin" /> : null} Enregistrer</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+
+  if (habit) {
+    return (
+      <>
+        {habit({ lignes, temps, total, prevues, passees, facture, aAppeler, alerte, libelle, envoi, erreur: form ? null : erreur, peutSaisirTemps: !!lignes.length && !!moi, ouvrirTemps, ouvrirElement, changerStatut })}
+        {fenetres}
+      </>
+    );
+  }
+
   return (
     <div className="esp-carte-corps">
       <div className="esp-section-titre">
         <span>Honoraires et temps passés</span>
         <span className="esp-item-haut">
           <button type="button" className="esp-lien-bouton" disabled={!lignes.length || !moi || envoi} onClick={ouvrirTemps}>Saisir du temps</button>
-          <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => { setNe({ element: ELEMENTS.find((e) => !lignes.some((l) => l.element === e.cle))?.cle ?? "autre", intitule: "", montant: "", heures: "" }); setErreur(null); setForm("element"); }}>Ajouter un élément</button>
+          <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={ouvrirElement}>Ajouter un élément</button>
         </span>
       </div>
       {lignes.length ? (
@@ -202,77 +319,7 @@ export default function Honoraires({ projet, dossier, nommer, peutEcrire, agir }
         <div className="lor-tableau-vide">Aucun élément de mission : posez les honoraires de chaque phase (esquisse, APS, APD…) pour suivre le temps passé.</div>
       )}
 
-      <Dialog open={form === "element"} onOpenChange={(o) => !o && setForm(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogIcone><Plus width={18} height={18} aria-hidden="true" /></DialogIcone>
-            <DialogTitle>Ajouter un élément de mission</DialogTitle>
-            <DialogDescription>Les honoraires HT de la phase et le temps que vous comptez y passer. Lorani prévient le chef de projet à 80 % et à 100 % des heures prévues.</DialogDescription>
-          </DialogHeader>
-          <DialogBody>
-            <div className="esp-form">
-              <div className="esp-form-ligne">
-                <label className="rv-libelle">Élément
-                  <select className="rv-champ" value={ne.element} onChange={(e) => setNe((s) => ({ ...s, element: e.target.value as ElementMission }))}>
-                    {ELEMENTS.map((e) => <option key={e.cle} value={e.cle}>{e.court} · {e.libelle}</option>)}
-                  </select>
-                </label>
-                {ne.element === "autre" ? (
-                  <label className="rv-libelle">Intitulé <span className="esp-obligatoire">(obligatoire)</span>
-                    <input className="rv-champ" value={ne.intitule} maxLength={120} onChange={(e) => setNe((s) => ({ ...s, intitule: e.target.value }))} placeholder="Mission complémentaire" />
-                  </label>
-                ) : null}
-              </div>
-              <div className="esp-form-ligne">
-                <label className="rv-libelle">Honoraires HT (€)
-                  <input className="rv-champ" inputMode="decimal" value={ne.montant} onChange={(e) => setNe((s) => ({ ...s, montant: e.target.value }))} placeholder="4 200" />
-                </label>
-                <label className="rv-libelle">Heures prévues
-                  <input className="rv-champ" inputMode="decimal" value={ne.heures} onChange={(e) => setNe((s) => ({ ...s, heures: e.target.value }))} placeholder="52" />
-                </label>
-              </div>
-              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
-            </div>
-          </DialogBody>
-          <DialogFooter>
-            <button type="button" className="r-btn r-btn--noir" disabled={!elementOk || envoi} onClick={soumettreElement}>{envoi ? <Loader variant="spin" /> : null} Ajouter</button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={form === "temps"} onOpenChange={(o) => !o && setForm(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogIcone><Clock width={18} height={18} aria-hidden="true" /></DialogIcone>
-            <DialogTitle>Saisir du temps</DialogTitle>
-            <DialogDescription>Le temps passé sur un élément de mission de « {projet.nom} », à votre nom. Une saisie se corrige, elle ne s&apos;efface pas.</DialogDescription>
-          </DialogHeader>
-          <DialogBody>
-            <div className="esp-form">
-              <label className="rv-libelle">Élément
-                <select className="rv-champ" value={nt.honoraire_id} onChange={(e) => setNt((s) => ({ ...s, honoraire_id: e.target.value }))}>
-                  {lignes.filter((l) => l.statut !== "facturee").map((l) => <option key={l.id} value={l.id}>{ELEMENTS[RANG[l.element]]?.court} · {libelle(l)}</option>)}
-                </select>
-              </label>
-              <div className="esp-form-ligne">
-                <label className="rv-libelle">Jour
-                  <input className="rv-champ" type="date" max={aujourdhui()} value={nt.jour} onChange={(e) => setNt((s) => ({ ...s, jour: e.target.value }))} />
-                </label>
-                <label className="rv-libelle">Heures
-                  <input className="rv-champ" inputMode="decimal" value={nt.heures} onChange={(e) => setNt((s) => ({ ...s, heures: e.target.value }))} placeholder="3,5" />
-                </label>
-              </div>
-              <label className="rv-libelle">Note
-                <input className="rv-champ" value={nt.note} maxLength={300} onChange={(e) => setNt((s) => ({ ...s, note: e.target.value }))} placeholder="Plans au 1/50" />
-              </label>
-              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
-            </div>
-          </DialogBody>
-          <DialogFooter>
-            <button type="button" className="r-btn r-btn--noir" disabled={!tempsOk || envoi} onClick={soumettreTemps}>{envoi ? <Loader variant="spin" /> : null} Enregistrer</button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {fenetres}
     </div>
   );
 }

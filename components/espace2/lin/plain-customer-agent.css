@@ -1,0 +1,738 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Le modèle « Customer Agent » (29/10/2026) : la page Customer Agent de
+   Plain, au 1:1 — le sous-menu de gauche (titre, groupes titrés, entrée
+   active), la page dans une carte blanche, une colonne de cartes titrées
+   (en-tête à filet, rangées à chevron, état vide). Relevé au
+   getComputedStyle sur app.plain.com (ai/knowledge-sources/, ai/),
+   fenêtre 1440, thème clair : docs/refonte-metiers/releves/plain-customer-agent.md.
+   Sert la page d'un projet LORANI (components/espace2/lorani/PageProjet).
+   Couleurs : les jetons --lin-* de lin.css (clair et sombre) ; tout le
+   reste (dimensions, polices, graisses, rayons, écarts) = Plain, au pixel.
+
+   Repères (px) :
+     sous-menu   289 de large, padding 0 4 ; titre 14/20 en 550 sur une ligne de 32 (padding 0 8) ;
+                 8 sous le titre, 24 entre groupes ; intitulé de groupe 12/16 gris (padding 0 8), 4 dessous ;
+                 entrée 32 (pas de 33), padding 4 8, rayon 8, déborde de 1 de chaque côté ; icône 18 dans
+                 une case de 24, libellé 14/20 à 8 ; survol fond gris, actif fond plus soutenu et 550
+     carte page  à 8 du sous-menu et des bords, rayon 12, anneau 1 + ombre 0 1 1
+     colonne     856 (920 avec le padding 32 32 98), centrée ; tête : titre 24/32 en 400 (Whyte →
+                 --v2-titre), sous-titre 14/20 gris à 4, 32 dessous ; cartes à 24 d'écart
+     carte       trait 1, rayon 8, padding haut 16 ; en-tête padding 0 16 16, trait bas 1 ; h3 16/24 en 550,
+                 texte 14/20 gris à 4 ; rangée 52 (padding 16), icône 18 + libellé 14/20 en 550 à 12,
+                 chevron 18 à droite ; survol fond gris en 75 ms
+     pastille    26, padding 6 8, rayon 4, 12/12 en 475
+     état vide   carte 450 au plus, trait 1, rayon 10, padding 32, 16 d'écart ; icône 48 dans une case
+                 de 64 (rayon 6, gris à 12 %) ; titre 14/20 en 550, texte 14/20 gris à 8, 384 au plus
+     bouton      40, padding 10 16 10 12, rayon 6, icône 18 à 8, 14/20 en 550, ombre intérieure
+   À moins de 900 de large (conteneur principale) : le sous-menu devient une rangée d'onglets qui
+   défile au-dessus de la page (Plain le sort de l'écran à 390), la carte page perd rayon et ombre,
+   la colonne prend un padding de 24 ; sous 640, rangées 44 (padding 12 24).
+
+   Les cartes de l'écran d'avant (ProjetCarte habillé, .pca-habille) prennent l'habit des cartes
+   titrées : chaque bloc (.esp-carte-corps) devient une carte, son titre de section (.esp-section-titre)
+   l'en-tête à filet, ses boutons « Ajouter », « Nouveau… » des pastilles à droite.
+
+   Jetons pris au plus proche (pas d'équivalent exact chez --lin-*) :
+     page #f9f9fc → --lin-fond ; carte #fff → --lin-carte ; traits #e7e7ef et #e0e0e9 → --lin-trait
+     (sombre : --lin-detail-trait) ; texte #1f1f28 → --lin-titre ; gris #636370 → --lin-second ;
+     icônes #8e8e9c → --lin-compte ; survol #f0f0f5 → --lin-survol ; actif #e7e7ef →
+     --lin-pastille-active ; dans une carte sombre, survol et pastille = --lin-titre à 5 et 8 % ;
+     bouton plein #1f1f28 → --lin-titre sur --lin-carte. Titres (Whyte chez Plain) → --v2-titre.
+   Scopé .v2 .lin.pca ; supprimer ce fichier supprime le modèle, sans effet ailleurs.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lin.pca {
+  --pca-page: var(--lin-fond);
+  --pca-carte: var(--lin-carte);
+  --pca-trait: var(--lin-detail-trait);
+  --pca-survol-carte: color-mix(in srgb, var(--lin-titre) 5%, transparent);
+  --pca-pastille: color-mix(in srgb, var(--lin-titre) 8%, transparent);
+  --pca-ombre-cadre: 0 0 0 1px var(--lin-detail-trait), 0 1px 1px lch(0 0 0 / 0.3);
+  --pca-ombre-carte: 0 1px 1px lch(0 0 0 / 0.2);
+  --pca-ombre-bouton: inset 0 0 0 1px lch(100 0 0 / 0.1), inset 0 -1px 2px lch(0 0 0 / 0.12);
+  --pca-ombre-plein: 0 1px 2px lch(0 0 0 / 0.24), inset 0 -1px 1px 1px lch(0 0 0 / 0.12), inset 0 1px 2px lch(100 0 0 / 0.12);
+  background: var(--pca-page);
+  color: var(--lin-titre);
+  font-size: 14px;
+  line-height: 20px;
+}
+html[data-v2-theme="light"] .v2 .lin.pca {
+  --pca-trait: var(--lin-trait);
+  --pca-survol-carte: var(--lin-survol);
+  --pca-pastille: var(--lin-survol);
+  --pca-ombre-cadre: 0 0 0 1px rgb(38 38 38 / 0.08), 0 1px 1px rgb(38 38 38 / 0.08);
+  --pca-ombre-carte: 0 1px 1px rgb(26 51 51 / 0.04);
+  --pca-ombre-bouton: inset 0 0 0 1px rgb(26 26 38 / 0.08), inset 0 0 3px 1px rgb(255 255 255 / 0.2), inset 0 -1px 2px rgb(0 0 0 / 0.12);
+  --pca-ombre-plein: 0 1px 2px rgb(33 38 46 / 0.24), 0 2px 6px 2px rgb(38 38 38 / 0.08), 0 2px 8px rgb(38 38 38 / 0.08), 0 1px 1px rgb(26 51 51 / 0.04), inset 0 -1px 1px 1px rgb(0 0 0 / 0.12), inset 0 1px 2px rgb(255 255 255 / 0.12);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lin.pca {
+    --pca-trait: var(--lin-trait);
+    --pca-survol-carte: var(--lin-survol);
+    --pca-pastille: var(--lin-survol);
+    --pca-ombre-cadre: 0 0 0 1px rgb(38 38 38 / 0.08), 0 1px 1px rgb(38 38 38 / 0.08);
+    --pca-ombre-carte: 0 1px 1px rgb(26 51 51 / 0.04);
+    --pca-ombre-bouton: inset 0 0 0 1px rgb(26 26 38 / 0.08), inset 0 0 3px 1px rgb(255 255 255 / 0.2), inset 0 -1px 2px rgb(0 0 0 / 0.12);
+    --pca-ombre-plein: 0 1px 2px rgb(33 38 46 / 0.24), 0 2px 6px 2px rgb(38 38 38 / 0.08), 0 2px 8px rgb(38 38 38 / 0.08), 0 1px 1px rgb(26 51 51 / 0.04), inset 0 -1px 1px 1px rgb(0 0 0 / 0.12), inset 0 1px 2px rgb(255 255 255 / 0.12);
+  }
+}
+
+/* ——— le cadre : sous-menu 289 | carte page ——— */
+.v2 .lin .pca-cadre {
+  display: flex;
+  align-items: flex-start;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ——— le sous-menu ——— */
+.v2 .lin .pca-menu {
+  position: sticky;
+  top: 48px;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 289px;
+  width: 289px;
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+  padding: 8px 4px 12px;
+  scrollbar-width: thin;
+}
+.v2 .lin .pca-menu-titre {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 8px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 550;
+  color: var(--lin-titre);
+}
+.v2 .lin .pca-groupe {
+  margin-top: 24px;
+}
+.v2 .lin .pca-menu-titre + .pca-groupe {
+  margin-top: 8px;
+}
+.v2 .lin .pca-groupe-titre {
+  height: 16px;
+  margin: 0 0 4px;
+  padding: 0 8px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  color: var(--lin-second);
+}
+.v2 .lin .pca-entrees {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.v2 .lin .pca-entrees > li {
+  padding-bottom: 1px;
+}
+.v2 .lin .pca-entree {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  margin: 0 -1px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  color: var(--lin-second);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lin .pca-entree-icone {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  color: var(--lin-compte);
+}
+.v2 .lin .pca-entree-icone svg {
+  width: 18px;
+  height: 18px;
+}
+.v2 .lin .pca-entree:hover {
+  background: var(--lin-survol);
+  color: var(--lin-titre);
+}
+.v2 .lin .pca-entree:hover .pca-entree-icone,
+.v2 .lin .pca-entree[aria-current="page"] .pca-entree-icone {
+  color: var(--lin-titre);
+}
+.v2 .lin .pca-entree[aria-current="page"] {
+  background: var(--lin-pastille-active);
+  color: var(--lin-titre);
+  font-weight: 550;
+}
+.v2 .lin .pca-entree:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--lin-graph-bleu);
+}
+
+/* ——— la carte page et sa colonne de 856 ——— */
+.v2 .lin .pca-carte-page {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: calc(100dvh - 48px - 16px);
+  margin: 8px 8px 8px 8px;
+  border-radius: 12px;
+  background: var(--pca-carte);
+  box-shadow: var(--pca-ombre-cadre);
+}
+.v2 .lin .pca-colonne {
+  width: 100%;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 32px 32px 98px;
+}
+
+/* ——— la tête : retour, titre 24/32, sous-titre à 4, 32 dessous ——— */
+.v2 .lin .pca-tete {
+  margin: 0 0 32px;
+}
+.v2 .lin .pca-retour {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  margin: -8px 0 8px -8px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 550;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+.v2 .lin .pca-retour svg {
+  width: 18px;
+  height: 18px;
+}
+.v2 .lin .pca-retour:hover {
+  background: var(--pca-survol-carte);
+  color: var(--lin-titre);
+}
+.v2 .lin .pca-tete-ligne {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+.v2 .lin .pca-tete-texte {
+  min-width: 0;
+}
+.v2 .lin .pca-h1 {
+  margin: 0;
+  font-family: var(--v2-titre);
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 400;
+  color: var(--lin-titre);
+  overflow-wrap: anywhere;
+}
+.v2 .lin .pca-sous {
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  color: var(--lin-second);
+}
+
+/* ——— le bouton secondaire (« Add sitemap ») : 40, icône 18 à 8 ——— */
+.v2 .lin .pca-bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-shrink: 0;
+  height: 40px;
+  padding: 10px 16px 10px 12px;
+  border-radius: 6px;
+  background: var(--pca-carte);
+  box-shadow: var(--pca-ombre-bouton);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 550;
+  color: var(--lin-titre);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.v2 .lin .pca-bouton svg {
+  width: 18px;
+  height: 18px;
+  color: var(--lin-compte);
+}
+.v2 .lin .pca-bouton:hover:not(:disabled) {
+  background: var(--pca-page);
+}
+.v2 .lin .pca-bouton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.v2 .lin .pca-bouton:focus-visible {
+  outline: none;
+  box-shadow: var(--pca-ombre-bouton), 0 0 0 2px var(--lin-graph-bleu);
+}
+
+/* l'erreur de lecture de la base */
+.v2 .lin .pca-alerte {
+  margin: 0 0 24px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--lin-rouge) 40%, transparent);
+  background: color-mix(in srgb, var(--lin-rouge) 8%, transparent);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lin-titre);
+}
+
+/* ——— la carte titrée : en-tête à filet, puis des rangées ——— */
+.v2 .lin .pca-carte {
+  overflow: hidden;
+  padding: 16px 0 0;
+  border-radius: 8px;
+  border: 1px solid var(--pca-trait);
+  background: var(--pca-carte);
+}
+.v2 .lin .pca-carte-tete {
+  padding: 0 16px 16px;
+  border-bottom: 1px solid var(--pca-trait);
+}
+.v2 .lin .pca-carte-tete h3 {
+  margin: 0;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 550;
+  color: var(--lin-titre);
+}
+.v2 .lin .pca-carte-tete p {
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lin-second);
+}
+.v2 .lin .pca-rangees {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.v2 .lin .pca-rangees > li + li {
+  border-top: 1px solid var(--pca-trait);
+}
+.v2 .lin .pca-rangee {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 16px;
+  border-radius: 0;
+  text-align: left;
+  color: var(--lin-titre);
+  cursor: pointer;
+  transition: background-color 75ms ease-in-out;
+}
+.v2 .lin .pca-rangee:hover:not(:disabled) {
+  background: var(--pca-survol-carte);
+}
+.v2 .lin .pca-rangee:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--lin-graph-bleu);
+}
+.v2 .lin .pca-rangee--action {
+  border-top: 1px solid var(--pca-trait);
+}
+.v2 .lin .pca-rangee:disabled {
+  color: var(--lin-second);
+  cursor: not-allowed;
+}
+.v2 .lin .pca-rangee-icone,
+.v2 .lin .pca-chevron {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--lin-compte);
+}
+.v2 .lin .pca-chevron {
+  margin-left: auto;
+}
+.v2 .lin .pca-rangee-texte {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.v2 .lin .pca-rangee-titre,
+.v2 .lin .pca-rangee-sous {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.v2 .lin .pca-rangee-titre {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 550;
+}
+.v2 .lin .pca-rangee-sous {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  color: var(--lin-second);
+}
+.v2 .lin .pca-pastilles {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* la pastille (« Docs », « Not set up ») ; la teinte de l'état en point de 6 */
+.v2 .lin .pca-pastille {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  background: var(--pca-pastille);
+  font-size: 12px;
+  line-height: 12px;
+  font-weight: 475;
+  color: var(--lin-titre);
+  white-space: nowrap;
+}
+.v2 .lin .pca-pastille[data-teinte]::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--lin-second);
+}
+.v2 .lin .pca-pastille[data-teinte="vert"]::before { background: var(--lin-vert); }
+.v2 .lin .pca-pastille[data-teinte="jaune"]::before { background: var(--lin-jaune); }
+.v2 .lin .pca-pastille[data-teinte="rouge"]::before { background: var(--lin-rouge); }
+.v2 .lin .pca-pastille[data-teinte="bleu"]::before { background: var(--lin-graph-bleu); }
+
+/* ——— l'état vide : case 64, titre, texte ——— */
+.v2 .lin .pca-vide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 450px;
+  margin: 0 auto;
+  padding: 32px;
+  border-radius: 10px;
+  border: 1px solid var(--pca-trait);
+  background: var(--pca-carte);
+  box-shadow: var(--pca-ombre-carte);
+  text-align: center;
+}
+.v2 .lin .pca-vide--carte {
+  width: calc(100% - 48px);
+  margin: 24px auto;
+}
+.v2 .lin .pca-vide-icone {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--lin-second) 12%, transparent);
+  color: var(--lin-second);
+}
+.v2 .lin .pca-vide-icone svg {
+  width: 48px;
+  height: 48px;
+  stroke-width: 1;
+}
+.v2 .lin .pca-vide-texte {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 384px;
+}
+.v2 .lin .pca-vide-texte p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lin-second);
+}
+.v2 .lin .pca-vide-texte .pca-vide-titre {
+  font-weight: 550;
+  color: var(--lin-titre);
+}
+
+/* ══════ les cartes de l'écran d'avant, à l'habit des cartes titrées ══════ */
+.v2 .lin.pca .pca-habille .v2-page:has(> #ecran) {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+.v2 .lin.pca .pca-habille .resa.esp {
+  font-family: var(--font-v2-inter), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lin-titre);
+}
+/* la section du dossier : plus de cadre, ses blocs empilés à 24 */
+.v2 .lin.pca .pca-habille .esp-carte {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+/* chaque bloc : une carte titrée */
+.v2 .lin.pca .pca-habille .esp-carte-corps,
+.v2 .lin.pca .pca-habille .lor-grille-dossier > div {
+  min-width: 0;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--pca-trait);
+  background: var(--pca-carte);
+}
+/* l'équipe et les lots : deux cartes côte à côte, à 24 */
+.v2 .lin.pca .pca-habille .esp-carte-corps:has(> .lor-grille-dossier) {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.v2 .lin.pca .pca-habille .lor-grille-dossier {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+}
+/* le titre de section : l'en-tête à filet, ses boutons en pastilles à droite */
+.v2 .lin.pca .pca-habille .esp-section-titre {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin: 0 -16px 16px;
+  padding: 0 16px 16px;
+  border-bottom: 1px solid var(--pca-trait);
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 550;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--lin-titre);
+}
+.v2 .lin.pca .pca-habille .esp-section-titre > .esp-kpi-sous {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  color: var(--lin-second);
+}
+.v2 .lin.pca .pca-habille .esp-section-titre > .esp-item-haut {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.v2 .lin.pca .pca-habille .esp-section-titre .esp-lien-bouton {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  background: var(--pca-pastille);
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 12px;
+  font-weight: 475;
+  color: var(--lin-titre);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 75ms ease-in-out;
+}
+.v2 .lin.pca .pca-habille .esp-section-titre .esp-lien-bouton:hover:not(:disabled) {
+  background: var(--lin-pastille-active);
+}
+.v2 .lin.pca .pca-habille .esp-section-titre .esp-lien-bouton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+/* l'identité du projet : l'en-tête et ses actions forment une seule carte */
+.v2 .lin.pca .pca-habille .esp-carte-tete {
+  min-height: 0;
+  padding: 16px;
+  border-radius: 8px 8px 0 0;
+  border: 1px solid var(--pca-trait);
+  background: var(--pca-carte);
+}
+.v2 .lin.pca .pca-habille .esp-carte-tete + .esp-carte-corps {
+  margin-top: -24px;
+  border-top: 0;
+  border-radius: 0 0 8px 8px;
+}
+.v2 .lin.pca .pca-habille .esp-carte-titre {
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 550;
+  color: var(--lin-titre);
+}
+.v2 .lin.pca .pca-habille .esp-carte-tete .lor-sous {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lin-second);
+}
+.v2 .lin.pca .pca-habille .esp-carte-tete .esp-pastille {
+  height: 26px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--pca-pastille);
+  font-size: 12px;
+  line-height: 12px;
+  font-weight: 475;
+  color: var(--lin-titre);
+  box-shadow: none;
+}
+/* les actions du projet : boutons de 40, plein puis secondaires */
+.v2 .lin.pca .pca-habille .esp-actions {
+  gap: 8px;
+}
+.v2 .lin.pca .pca-habille .esp-actions .r-btn {
+  height: 40px;
+  gap: 8px;
+  padding: 10px 16px 10px 12px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--pca-carte);
+  box-shadow: var(--pca-ombre-bouton);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 550;
+  color: var(--lin-titre);
+}
+.v2 .lin.pca .pca-habille .esp-actions .r-btn svg {
+  width: 18px;
+  height: 18px;
+  color: var(--lin-compte);
+}
+.v2 .lin.pca .pca-habille .esp-actions .r-btn:hover:not(:disabled) {
+  background: var(--pca-page);
+}
+.v2 .lin.pca .pca-habille .esp-actions .r-btn--noir,
+.v2 .lin.pca .pca-habille .esp-actions .r-btn--noir:hover:not(:disabled) {
+  padding: 10px 16px;
+  background: var(--lin-titre);
+  box-shadow: var(--pca-ombre-plein);
+  color: var(--pca-carte);
+}
+.v2 .lin.pca .pca-habille .esp-actions .r-btn--noir svg {
+  color: currentColor;
+}
+/* la rangée vide (« No URLs have failed to index. ») */
+.v2 .lin.pca .pca-habille .lor-tableau-vide {
+  padding: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lin-second);
+}
+
+/* ——— points de rupture ——— */
+@container principale (min-width: 640px) {
+  .v2 .lin.pca .pca-habille .lor-grille-dossier {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* le sous-menu devient une rangée d'onglets qui défile, au-dessus de la page */
+@container principale (max-width: 900px) {
+  .v2 .lin .pca-cadre {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .v2 .lin .pca-menu {
+    position: static;
+    flex: none;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    width: auto;
+    max-width: 100%;
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--pca-trait);
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .v2 .lin .pca-menu::-webkit-scrollbar {
+    display: none;
+  }
+  .v2 .lin .pca-menu-titre,
+  .v2 .lin .pca-groupe-titre {
+    display: none;
+  }
+  .v2 .lin .pca-groupe,
+  .v2 .lin .pca-entrees {
+    display: contents;
+  }
+  .v2 .lin .pca-entrees > li {
+    flex-shrink: 0;
+    padding: 0;
+  }
+  .v2 .lin .pca-entree {
+    margin: 0;
+    overflow: visible;
+  }
+  .v2 .lin .pca-carte-page {
+    min-height: 0;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .v2 .lin .pca-colonne {
+    padding: 24px 24px 98px;
+  }
+  .v2 .lin .pca-tete-ligne {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+}
+
+@container principale (max-width: 640px) {
+  .v2 .lin .pca-rangee {
+    flex-wrap: wrap;
+    min-height: 44px;
+    padding: 12px 24px;
+  }
+  .v2 .lin .pca-rangee-texte {
+    flex-basis: calc(100% - 60px);
+  }
+  .v2 .lin .pca-rangee .pca-pastilles {
+    order: 3;
+    flex-wrap: wrap;
+    width: 100%;
+    padding-left: 30px;
+  }
+  .v2 .lin .pca-vide {
+    padding: 32px 16px;
+  }
+  .v2 .lin .pca-vide--carte {
+    width: calc(100% - 32px);
+    margin: 16px auto;
+  }
+}

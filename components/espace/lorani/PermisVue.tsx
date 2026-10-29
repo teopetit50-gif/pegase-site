@@ -43,7 +43,19 @@ type Props = {
   onLocal: (d: Dossier) => void;
   /* en base réelle : relire */
   relire: () => Promise<void>;
+  /* 29/10/2026 — la page d'un permis de l'espace 2 (components/espace2/lorani/PagePermis.tsx) range ces blocs dans
+     les étapes de son accordéon ; sans `parties`, tout s'affiche (l'écran de /espace) */
+  parties?: PartiePermis[];
 };
+
+/* Les blocs de la vue : « entete » est la carte du titre entière, « regime » la même sans le titre (pastilles, bouton
+   Régime, bandeau des quatre chiffres, règle d'instruction) ; « retour » dit « C'est fait » ou le refus de la base,
+   « lecture » l'accès en lecture seule. « saisir:<quoi> » ne garde qu'un bouton de « Saisir ce qui est arrivé »,
+   « etape:<nature> » qu'une nature d'étape du calendrier, « echeance:<nature> » qu'une nature d'échéance ; un
+   calendrier ou des échéances filtrés et vides ne s'affichent pas. */
+export type BlocPermis = "entete" | "regime" | "retour" | "lecture" | "implicite" | "lues" | "saisir" | "calendrier" | "demandes" | "avertissements" | "echeances" | "recours" | "courriers";
+export type SaisieVisible = Quoi | "recours";
+export type PartiePermis = BlocPermis | `saisir:${SaisieVisible}` | `etape:${string}` | `echeance:${Echeance["nature"]}`;
 
 /* « PCMI 3, PC8 » ou « PCMI 3 PC 8 » → [PCMI3, PC8] : un espace suivi d'un chiffre reste dans le code */
 const decouperCodes = (brut: string) => brut.split(/[,;]+|\s+(?=[A-Za-z])/).map((c) => c.replace(/\s/g, "").toUpperCase()).filter(Boolean);
@@ -112,7 +124,12 @@ function valeursEnClair(nature: DateLue["nature"], v: Record<string, unknown>): 
     });
 }
 
-export default function PermisVue({ permis: p, projet, dossier, source, peutEcrire, nommer, onLocal, relire }: Props) {
+export default function PermisVue({ permis: p, projet, dossier, source, peutEcrire, nommer, onLocal, relire, parties }: Props) {
+  const voir = (b: BlocPermis) => !parties || parties.includes(b);
+  const voirSaisie = (q: SaisieVisible) => !parties || parties.includes("saisir") || parties.includes(`saisir:${q}`);
+  const filtre = (prefixe: string) => (parties ?? []).filter((x) => x.startsWith(prefixe)).map((x) => x.slice(prefixe.length));
+  const naturesEtapes = filtre("etape:");
+  const naturesEcheances = filtre("echeance:");
   const [form, setForm] = useState<Form>(null);
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -124,6 +141,8 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
   const proposees = datesLues.filter((d) => d.statut === "proposee");
   const decidees = datesLues.filter((d) => d.statut !== "proposee").sort((a, b) => (b.decide_le ?? "").localeCompare(a.decide_le ?? ""));
   const echeances = useMemo(() => dossier.echeances.filter((e) => e.permis_id === p.id).sort((a, b) => a.echeance.localeCompare(b.echeance)), [dossier.echeances, p.id]);
+  /* les échéances montrées : toutes, ou les natures demandées par `parties` */
+  const echeancesVues = naturesEcheances.length ? echeances.filter((e) => naturesEcheances.includes(e.nature)) : echeances;
   const recours = useMemo(() => dossier.recours.filter((r) => r.permis_id === p.id), [dossier.recours, p.id]);
   const pieces = useMemo(() => dossier.pieces.filter((x) => x.objet_id === p.projet_id && !TYPES_CONTROLE.includes(x.type_piece ?? "")), [dossier.pieces, p.projet_id]);
   const etat = ETATS[p.etat] ?? ETATS.a_deposer;
@@ -133,9 +152,11 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
   /* ——— la ligne « aujourd'hui » dans le calendrier ——— */
   const etapes = c.etapes ?? [];
   const auj = aujourdHuiIso();
+  /* les étapes montrées : toutes, ou les natures demandées par `parties` */
+  const etapesVues = naturesEtapes.length ? etapes.filter((e) => naturesEtapes.includes(e.nature)) : etapes;
   const rangAujourdhui = (() => {
     let i = 0;
-    while (i < etapes.length && etapes[i].date && etapes[i].date! < auj) i++;
+    while (i < etapesVues.length && etapesVues[i].date && etapesVues[i].date! < auj) i++;
     return i;
   })();
 
@@ -336,11 +357,25 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
 
   const gris = !peutEcrire || envoi;
 
+  /* les boutons de « Saisir ce qui est arrivé », selon l'état du permis et `parties` */
+  const boutons = {
+    depot: !p.date_depot && voirSaisie("depot"),
+    demande_pieces: !!p.date_depot && !p.decision && !p.date_demande_pieces && voirSaisie("demande_pieces"),
+    pieces_fournies: !!p.date_demande_pieces && !p.date_pieces_fournies && voirSaisie("pieces_fournies"),
+    delai: !!p.date_depot && !p.decision && !p.delai_notifie_mois && voirSaisie("delai"),
+    decision: !!p.date_depot && !p.decision && voirSaisie("decision"),
+    affichage: accorde && !p.date_affichage && voirSaisie("affichage"),
+    recours: accorde && voirSaisie("recours"),
+  };
+  const voirSaisir = parties ? Object.values(boutons).some(Boolean) : true;
+
   return (
     <div style={{ display: "grid", gap: 14, gridTemplateColumns: "minmax(0, 1fr)" }}>
       {/* ——— en-tête ——— */}
+      {voir("entete") || voir("regime") ? (
       <section className="esp-carte" aria-label="Le permis">
         <div className="esp-carte-tete">
+          {voir("entete") ? (
           <div>
             <h2 className="esp-carte-titre">{titre}</h2>
             <div className="lor-sous">
@@ -351,6 +386,7 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
               {projet.parcelles.length ? ` · ${projet.parcelles.join(", ")}` : ""}
             </div>
           </div>
+          ) : null}
           <span className="esp-item-haut">
             <Pastille teinte={etat.teinte}>{etat.libelle}</Pastille>
             {p.secteur_protege ? <Pastille contour>Secteur protégé</Pastille> : null}
@@ -404,13 +440,14 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
           ) : null}
         </div>
       </section>
+      ) : null}
 
-      {fait ? <Avis teinte="vert" role="status"><strong>C&apos;est fait.</strong> {fait}</Avis> : null}
-      {erreur && !form ? <Avis teinte="rouge" role="alert"><strong>La base a refusé.</strong> {erreur}</Avis> : null}
-      {!peutEcrire ? <Avis teinte="gris">Vous voyez ce dossier sans pouvoir y écrire : demandez l&apos;accès en écriture à un gérant ou au chef de projet.</Avis> : null}
+      {fait && voir("retour") ? <Avis teinte="vert" role="status"><strong>C&apos;est fait.</strong> {fait}</Avis> : null}
+      {erreur && !form && voir("retour") ? <Avis teinte="rouge" role="alert"><strong>La base a refusé.</strong> {erreur}</Avis> : null}
+      {!peutEcrire && voir("lecture") ? <Avis teinte="gris">Vous voyez ce dossier sans pouvoir y écrire : demandez l&apos;accès en écriture à un gérant ou au chef de projet.</Avis> : null}
 
       {/* ——— 1. ce qui attend un membre ——— */}
-      {p.etat === "decision_a_confirmer" && c.decision_implicite ? (
+      {voir("implicite") && p.etat === "decision_a_confirmer" && c.decision_implicite ? (
         <section className="esp-carte" aria-label="Décision implicite à confirmer">
           <div className="esp-carte-tete">
             <h2 className="esp-carte-titre">{c.decision_implicite.nature === "tacite" ? (dp ? "Non-opposition tacite née" : "Permis tacite né") : dp ? "Opposition tacite" : "Rejet implicite"} le {dateCourte(`${c.decision_implicite.date}T12:00:00`)}</h2>
@@ -430,7 +467,7 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
         </section>
       ) : null}
 
-      {proposees.length ? (
+      {voir("lues") && proposees.length ? (
         <section className="esp-carte" aria-label="Dates lues sur les courriers">
           <div className="esp-carte-tete">
             <h2 className="esp-carte-titre">Lu sur les courriers de la mairie</h2>
@@ -472,7 +509,7 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
       ) : null}
 
       {/* ——— ce qu'on peut saisir maintenant ——— */}
-      {peutEcrire && p.actif && !["purge", "refuse", "rejete", "annule", "classe", "hors_catalogue"].includes(p.etat) ? (
+      {(voir("saisir") || filtre("saisir:").length > 0) && voirSaisir && peutEcrire && p.actif && !["purge", "refuse", "rejete", "annule", "classe", "hors_catalogue"].includes(p.etat) ? (
         <section className="esp-carte" aria-label="Saisir une étape">
           <div className="esp-carte-tete">
             <h2 className="esp-carte-titre">Saisir ce qui est arrivé</h2>
@@ -480,42 +517,44 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
           </div>
           <div className="esp-carte-corps">
             <div className="esp-actions">
-              {!p.date_depot ? <button type="button" className="r-btn r-btn--noir" disabled={gris} onClick={() => ouvrirSaisie("depot")}><CalendarPlus width={16} height={16} aria-hidden="true" /> Dossier déposé</button> : null}
-              {p.date_depot && !p.decision && !p.date_demande_pieces ? <button type="button" className="r-btn r-btn--fil" disabled={gris} onClick={() => ouvrirSaisie("demande_pieces")}>Demande de pièces reçue</button> : null}
-              {p.date_demande_pieces && !p.date_pieces_fournies ? <button type="button" className="r-btn r-btn--noir" disabled={gris} onClick={() => ouvrirSaisie("pieces_fournies")}><ListChecks width={16} height={16} aria-hidden="true" /> Pièces reçues par la mairie</button> : null}
-              {p.date_depot && !p.decision && !p.delai_notifie_mois ? <button type="button" className="r-btn r-btn--fil" disabled={gris} onClick={() => ouvrirSaisie("delai")}>Délai notifié par la mairie</button> : null}
-              {p.date_depot && !p.decision ? <button type="button" className="r-btn r-btn--fil" disabled={gris} onClick={() => ouvrirSaisie("decision")}><FileSignature width={16} height={16} aria-hidden="true" /> Arrêté reçu</button> : null}
-              {accorde && !p.date_affichage ? <button type="button" className="r-btn r-btn--noir" disabled={gris} onClick={() => ouvrirSaisie("affichage")}><CalendarCheck width={16} height={16} aria-hidden="true" /> Permis affiché sur le terrain</button> : null}
-              {accorde ? <button type="button" className="r-btn r-btn--fil" disabled={gris} onClick={() => { setRec((r) => ({ ...r, nature: "gracieux", date: aujourdHuiIso(), auteur: "" })); setErreur(null); setForm({ type: "recours" }); }}><Scale width={16} height={16} aria-hidden="true" /> Recours reçu</button> : null}
+              {boutons.depot ? <button type="button" className="r-btn r-btn--noir" disabled={gris} onClick={() => ouvrirSaisie("depot")}><CalendarPlus width={16} height={16} aria-hidden="true" /> Dossier déposé</button> : null}
+              {boutons.demande_pieces ? <button type="button" className="r-btn r-btn--fil" disabled={gris} onClick={() => ouvrirSaisie("demande_pieces")}>Demande de pièces reçue</button> : null}
+              {boutons.pieces_fournies ? <button type="button" className="r-btn r-btn--noir" disabled={gris} onClick={() => ouvrirSaisie("pieces_fournies")}><ListChecks width={16} height={16} aria-hidden="true" /> Pièces reçues par la mairie</button> : null}
+              {boutons.delai ? <button type="button" className="r-btn r-btn--fil" disabled={gris} onClick={() => ouvrirSaisie("delai")}>Délai notifié par la mairie</button> : null}
+              {boutons.decision ? <button type="button" className="r-btn r-btn--fil" disabled={gris} onClick={() => ouvrirSaisie("decision")}><FileSignature width={16} height={16} aria-hidden="true" /> Arrêté reçu</button> : null}
+              {boutons.affichage ? <button type="button" className="r-btn r-btn--noir" disabled={gris} onClick={() => ouvrirSaisie("affichage")}><CalendarCheck width={16} height={16} aria-hidden="true" /> Permis affiché sur le terrain</button> : null}
+              {boutons.recours ? <button type="button" className="r-btn r-btn--fil" disabled={gris} onClick={() => { setRec((r) => ({ ...r, nature: "gracieux", date: aujourdHuiIso(), auteur: "" })); setErreur(null); setForm({ type: "recours" }); }}><Scale width={16} height={16} aria-hidden="true" /> Recours reçu</button> : null}
             </div>
           </div>
         </section>
       ) : null}
 
       {/* ——— 2. le calendrier ——— */}
+      {(voir("calendrier") || naturesEtapes.length > 0) && !(naturesEtapes.length > 0 && !etapesVues.length) ? (
       <section className="esp-carte" aria-label="Calendrier du permis">
         <div className="esp-carte-tete">
           <h2 className="esp-carte-titre">Calendrier</h2>
           <span className="esp-kpi-sous">{c.version ? `moteur ${c.version}` : ""}{p.calcule_le ? ` · calculé le ${dateHeure(p.calcule_le)}` : ""}</span>
         </div>
         <div className="esp-carte-corps">
-          {!etapes.length ? (
+          {!etapesVues.length ? (
             <div className="lor-tableau-vide">
               {p.etat === "hors_catalogue" ? "Lorani ne calcule pas les délais de ce territoire." : "Le calendrier commence au dépôt du dossier : saisissez la date de dépôt, ou déposez le récépissé pour qu'il soit lu."}
             </div>
           ) : (
             <ol className="lor-calendrier">
-              {etapes.map((e, i) => (
+              {etapesVues.map((e, i) => (
                 <EtapeLigne key={`${e.nature}-${i}`} e={e} avant={i === rangAujourdhui ? <li className="lor-aujourdhui" aria-label="Aujourd'hui">Aujourd&apos;hui</li> : null} />
               ))}
-              {rangAujourdhui >= etapes.length ? <li className="lor-aujourdhui" aria-label="Aujourd'hui">Aujourd&apos;hui</li> : null}
+              {rangAujourdhui >= etapesVues.length ? <li className="lor-aujourdhui" aria-label="Aujourd'hui">Aujourd&apos;hui</li> : null}
             </ol>
           )}
         </div>
       </section>
+      ) : null}
 
       {/* ——— 4 bis. les lettres de demande de pièces (b5_07) ——— */}
-      {(p.demandes_pieces?.length ?? 0) > 1 ? (
+      {voir("demandes") && (p.demandes_pieces?.length ?? 0) > 1 ? (
         <Avis teinte="ambre">
           <strong>Plusieurs demandes de pièces.</strong> À fournir : {p.pieces_demandees.map((x) => x.code).join(", ") || "—"}.{" "}
           Lettres : {p.demandes_pieces!.map((h) => `du ${dateCourte(`${h.date}T12:00:00`)} (${h.pieces.map((x) => x.code).join(", ") || "aucune pièce"})`).join(" ; ")}.{" "}
@@ -525,7 +564,7 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
       ) : null}
 
       {/* ——— 5. les avertissements ——— */}
-      {c.avertissements?.length ? (
+      {voir("avertissements") && c.avertissements?.length ? (
         <div style={{ display: "grid", gap: 8 }}>
           {c.avertissements.map((a, i) => (
             <Avis key={i} teinte="ambre"><strong>À savoir.</strong> {a}</Avis>
@@ -534,26 +573,28 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
       ) : null}
 
       {/* ——— 3. les échéances et les rappels ——— */}
+      {(voir("echeances") || naturesEcheances.length > 0) && !(naturesEcheances.length > 0 && !echeancesVues.length) ? (
       <section className="esp-carte" aria-label="Échéances et rappels">
         <div className="esp-carte-tete">
           <h2 className="esp-carte-titre">Échéances et rappels</h2>
-          <span className="esp-kpi-sous">{echeances.filter((e) => e.statut === "ouvert" || e.statut === "depasse").length} en cours</span>
+          <span className="esp-kpi-sous">{echeancesVues.filter((e) => e.statut === "ouvert" || e.statut === "depasse").length} en cours</span>
         </div>
         <div className="esp-carte-corps">
-          {!echeances.length ? (
+          {!echeancesVues.length ? (
             <div className="lor-tableau-vide">Aucune échéance posée : elles naissent au dépôt du dossier.</div>
           ) : (
             <ul className="esp-fil">
-              {echeances.map((e) => (
+              {echeancesVues.map((e) => (
                 <EcheanceLigne key={e.delai_id} e={e} nommer={nommer} />
               ))}
             </ul>
           )}
         </div>
       </section>
+      ) : null}
 
       {/* ——— 4. les recours ——— */}
-      {recours.length || accorde ? (
+      {voir("recours") && (recours.length || accorde) ? (
         <section className="esp-carte" aria-label="Recours">
           <div className="esp-carte-tete">
             <h2 className="esp-carte-titre">Recours</h2>
@@ -587,6 +628,7 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
       ) : null}
 
       {/* ——— 6. les courriers et les dates déjà décidées ——— */}
+      {voir("courriers") ? (
       <section className="esp-carte" aria-label="Courriers du dossier">
         <div className="esp-carte-tete">
           <h2 className="esp-carte-titre">Courriers du dossier</h2>
@@ -604,6 +646,7 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
           )}
         </div>
       </section>
+      ) : null}
 
       {/* ——— les dialogues ——— */}
       <Dialog open={form?.type === "confirmer"} onOpenChange={(o) => !o && setForm(null)}>

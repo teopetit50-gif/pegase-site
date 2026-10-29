@@ -28,11 +28,13 @@ type Form =
   | { type: "reponse"; ligne: LigneCr }
   | null;
 
-export default function ComptesRendus({ projet, dossier, peutEcrire, agir }: {
+export default function ComptesRendus({ projet, dossier, peutEcrire, agir, confirmer }: {
   projet: Projet;
   dossier: Dossier;
   peutEcrire: boolean;
   agir: (reel: () => Promise<void>, local: () => Dossier) => Promise<void>;
+  /* espace 2 : « Diffuser » demande confirmation (le CR diffusé est figé) ; sans, il part au clic, comme avant */
+  confirmer?: boolean;
 }) {
   const crs = useMemo(() => dossier.comptesRendus.filter((c) => c.projet_id === projet.id).sort((a, b) => b.numero - a.numero), [dossier.comptesRendus, projet.id]);
   const intervenants = useMemo(() => dossier.intervenants.filter((i) => i.projet_id === projet.id && i.actif), [dossier.intervenants, projet.id]);
@@ -47,6 +49,7 @@ export default function ComptesRendus({ projet, dossier, peutEcrire, agir }: {
   const [nc, setNc] = useState({ visite_le: auj, presents: [] as Present[], notes: "", avancement: "", prochaine_visite: "", lots: {} as Record<string, string> });
   const [np, setNp] = useState({ nature: "question" as Point["nature"], texte: "", intervenant_id: "", lot_id: "", echeance: "" });
   const [nr, setNr] = useState("");
+  const [aDiffuser, setADiffuser] = useState<CompteRendu | null>(null);
   const clientId = dossier.moi?.client_id ?? "";
 
   const lancer = async (reel: () => Promise<void>, local: () => Dossier) => {
@@ -179,7 +182,7 @@ export default function ComptesRendus({ projet, dossier, peutEcrire, agir }: {
                 <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutEcrire || envoi || !cr.notes} onClick={() => ouvrir({ type: "notes", cr, lus: lireNotes(cr.notes ?? "", intervenants, lots, Number(cr.visite_le.slice(0, 4))) })}>Rédiger depuis les notes</button>
                 <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => { setNp({ nature: "question", texte: "", intervenant_id: "", lot_id: "", echeance: "" }); ouvrir({ type: "point", cr }); }}>Ajouter un point</button>
                 <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => ouvrirCr(cr)}>Modifier</button>
-                <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => void diffuser(cr)}>Diffuser</button>
+                <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => (confirmer ? setADiffuser(cr) : void diffuser(cr))}>Diffuser</button>
               </>
             ) : null}
             <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={telechargerPdf}><FileDown width={15} height={15} aria-hidden="true" /> PDF</button>
@@ -341,6 +344,22 @@ export default function ComptesRendus({ projet, dossier, peutEcrire, agir }: {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* ——— diffuser : le CR est figé, sans retour possible ——— */}
+      {confirmer ? (
+        <Dialog open={!!aDiffuser} onOpenChange={(o) => !o && setADiffuser(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogIcone><NotebookPen width={18} height={18} aria-hidden="true" /></DialogIcone>
+              <DialogTitle>Diffuser le compte rendu n° {aDiffuser?.numero}</DialogTitle>
+              <DialogDescription>Une fois diffusé, le compte rendu est figé : il ne se modifie plus et fait foi. Les points soldés depuis la visite précédente sont clos.</DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <button type="button" className="r-btn r-btn--noir" disabled={!peutEcrire || envoi || !aDiffuser} onClick={() => { const c = aDiffuser; setADiffuser(null); if (c) void diffuser(c); }}>{envoi ? <Loader variant="spin" /> : null} Diffuser</button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      ) : null}
 
       {/* ——— la réponse ——— */}
       <Dialog open={form?.type === "reponse"} onOpenChange={(o) => !o && setForm(null)}>
