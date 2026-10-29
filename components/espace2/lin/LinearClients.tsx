@@ -1228,25 +1228,44 @@ function PuceEntreprise({ fiche, entreprise, entreprises, poser }: { fiche: Fich
   );
 }
 
-/* la description : « Description » puis le texte, enregistré en quittant le champ */
+/* la description : « Description » puis le texte, enregistré en quittant le champ.
+   29/10 — Teo : toute la bande se clique, pas seulement le libellé, et le champ
+   est grand ; il suit la longueur du texte et se voit encadré pendant la saisie */
 function Description({ valeur, poser }: { valeur: string; poser: (v: string) => void }) {
   const [v, setV] = useState(valeur);
   const [edite, setEdite] = useState(false);
+  const champ = useRef<HTMLTextAreaElement>(null);
+  const affiche = edite ? v : valeur;
+  /* le champ grandit avec le texte (field-sizing n'existe pas partout) */
+  useEffect(() => {
+    const t = champ.current;
+    if (!t) return;
+    t.style.height = "auto";
+    t.style.height = `${t.scrollHeight + 2}px`;
+  }, [affiche]);
+  const ouvrir = () => {
+    const t = champ.current;
+    if (!t) return;
+    t.focus({ preventScroll: true });
+    t.setSelectionRange(t.value.length, t.value.length);
+    t.scrollIntoView({ block: "center", behavior: "smooth" });
+  };
   return (
     <>
-      <div className="lin-maj lcl-maj">
-        <button type="button" className="lcl-maj-btn" onClick={() => document.getElementById("lcl-description")?.focus()}>
+      <button type="button" className="lin-maj lcl-maj" onClick={ouvrir}>
+        <span className="lcl-maj-btn">
           <Pencil aria-hidden="true" />
           {valeur ? "Modifier la description" : "Écrire une première note"}
-        </button>
-      </div>
+        </span>
+      </button>
       <h2 className="lin-projet-h2">Description</h2>
       <textarea
+        ref={champ}
         id="lcl-description"
-        className="lcl-desc"
+        className="lcl-desc lcl-desc--fiche"
         aria-label="Description"
         placeholder="Ajouter une description…"
-        value={edite ? v : valeur}
+        value={affiche}
         onFocus={() => {
           setV(valeur);
           setEdite(true);

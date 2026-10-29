@@ -399,12 +399,28 @@
   color: var(--lin-second);
   font-weight: 450;
 }
-/* la carte « update » : le bouton d'une note au centre */
+/* la carte « update » : le bouton d'une note au centre.
+   29/10 — la bande entière est le bouton (Teo : « cliquer sur la bande blanche, pas que l'écriture ») */
 .v2 .lcl-maj {
   display: flex;
   justify-content: center;
   padding: 16px;
   margin: 16px 0 24px -16px;
+  font: inherit;
+  color: inherit;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+.v2 .lcl-maj:hover {
+  background: var(--lin-survol);
+}
+.v2 .lcl-maj:focus-visible {
+  outline: 2px solid var(--lin-en-cours);
+  outline-offset: 2px;
+}
+.v2 .lcl-maj:hover .lcl-maj-btn {
+  color: var(--lin-texte);
 }
 .v2 .lcl-maj-btn {
   display: inline-flex;
@@ -421,10 +437,6 @@
   width: 16px;
   height: 16px;
   margin-right: 6px;
-}
-.v2 .lcl-maj-btn:hover {
-  background: var(--lin-survol);
-  color: var(--lin-texte);
 }
 /* la description : un texte libre, enregistré en quittant le champ */
 .v2 .lcl-desc {
@@ -445,6 +457,29 @@
 }
 .v2 .lcl-desc::placeholder {
   color: var(--lin-avatar);
+}
+/* sur la fiche : un grand champ encadré comme la bande au-dessus (Teo : « qu'il y ait des contours »),
+   dont le contour s'affirme pendant la saisie */
+.v2 .lcl-desc--fiche {
+  width: calc(100% + 32px);
+  max-width: 837px;
+  min-height: 200px;
+  margin-left: -16px;
+  padding: 14px 16px;
+  border: 0.5px solid var(--lin-maj-trait);
+  border-radius: 10px;
+  background: var(--lin-fond);
+  resize: none;
+  overflow: hidden;
+  cursor: text;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+.v2 .lcl-desc--fiche:hover {
+  border-color: var(--lin-second);
+}
+.v2 .lcl-desc--fiche:focus {
+  border-color: var(--lin-second);
+  box-shadow: 0 0 0 1px var(--lin-second);
 }
 /* « + Contact » sous le texte, comme « + Milestone » */
 .v2 .lcl-plus {
@@ -864,6 +899,11 @@
     line-height: 30px;
   }
   .v2 .lcl-maj {
+    width: 100%;
+    margin-left: 0;
+  }
+  .v2 .lcl-desc--fiche {
+    width: 100%;
     margin-left: 0;
   }
 }
