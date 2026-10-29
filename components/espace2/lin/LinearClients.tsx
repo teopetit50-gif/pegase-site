@@ -32,7 +32,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { Bell, Briefcase, Building2, Copy, Handshake, ListFilter, Mail, MapPin, PanelRight, Pencil, Phone, Plus, Search, SlidersHorizontal, Star, Tag, Trash2, Truck, UserRound, X } from "lucide-react";
+import { Bell, Briefcase, Building2, ChevronDown, Copy, Handshake, ListFilter, Mail, MapPin, PanelRight, Pencil, Phone, Plus, Search, SlidersHorizontal, Star, Tag, Trash2, Truck, UserRound, X } from "lucide-react";
 import { useSource } from "@/components/espace/source";
 import { useToast } from "../Toasts";
 import { ecrireStockage, useStockage } from "../Collection";
@@ -185,6 +185,7 @@ function PageCollection({ collection }: { collection: Collection }) {
 type Donnees = { entreprises: Fiche[] | null; contacts: Fiche[] | null; majEntreprises: (f: Fiche[]) => void; majContacts: (f: Fiche[]) => void };
 
 /* ═══════════════════════ la liste ═══════════════════════ */
+const SEUIL = 10;
 function Liste({
   collection,
   filtre,
@@ -208,6 +209,7 @@ function Liste({
   const champ = useRef<HTMLInputElement>(null);
   const tris = TRIS[collection];
   const triActif = tris.find((t) => t.cle === tri) ?? tris[0];
+  const [tout, setTout] = useState(false);
 
   /* l'adresse porte le filtre et le tri : un menu change la page en place */
   const aller = (f: string | null, t: string | null) => {
@@ -231,6 +233,10 @@ function Liste({
       })
       .sort(triActif.ordre);
   }, [fiches, q, filtre, collection, entrepriseFiltre, entreprises, triActif]);
+  /* 29/10 — au-delà de SEUIL fiches, la liste s'arrête sous un fondu et un
+     « Voir plus » : quarante lignes alignées, on n'en lit aucune */
+  const caches = visibles.length - SEUIL;
+  const affichees = tout || caches <= 0 ? visibles : visibles.slice(0, SEUIL);
 
   const titre = collection === "entreprises" ? "Entreprises" : "Contacts";
   const une = collection === "entreprises" ? "Nouvelle entreprise" : "Nouveau contact";
@@ -388,7 +394,7 @@ function Liste({
                 )}
               </p>
             ) : collection === "entreprises" ? (
-              visibles.map((f) => {
+              affichees.map((f) => {
                 const t = typeDe(f);
                 const n = contactsDe(f, contacts ?? []).length;
                 return (
@@ -454,7 +460,7 @@ function Liste({
                 );
               })
             ) : (
-              visibles.map((f) => {
+              affichees.map((f) => {
                 const e = entrepriseDe(f, entreprises ?? []);
                 return (
                   <div
@@ -515,6 +521,14 @@ function Liste({
               })
             )}
           </div>
+          {caches > 0 ? (
+            <div className="lcl-suite" data-ouvert={tout ? "" : undefined}>
+              <button type="button" className="lcl-suite-btn" aria-expanded={tout} onClick={() => setTout((v) => !v)}>
+                {tout ? "Voir moins" : `Voir plus · ${caches}`}
+                <ChevronDown aria-hidden="true" />
+              </button>
+            </div>
+          ) : null}
         </div>
 
         {details ? (
