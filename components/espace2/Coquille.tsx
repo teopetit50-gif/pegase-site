@@ -36,7 +36,7 @@ import Palette from "./Palette";
 import Assistant from "./Assistant";
 import { PanneauAide, PanneauRetour, type TypeRetour } from "./Retours";
 import { useOuvertes } from "./Collection";
-import { MODULES, MODULES_PRINCIPAUX, RACINE, moduleMetier, porteeDe, titreDe } from "./modules";
+import { MODULES, MODULES_PRINCIPAUX, RACINE, moduleDe, moduleMetier, porteeDe, titreDe } from "./modules";
 import { useCompteurs } from "./compteurs";
 import { OrganisationContexte } from "./organisation";
 import { useTheme } from "./theme";
@@ -434,6 +434,8 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
         { libelle: "Réglages et avis", href: `${RACINE}/reput/reglages` },
       ];
     if (cle === "offload") return [{ libelle: "Comptes à risque", href: `${RACINE}/offload`, exact: true }];
+    /* 29/10/2026 — DALIRO redécoupé : ses sous-pages viennent de modules.ts */
+    if (cle === "daliro") return (moduleDe("daliro")?.onglets ?? []).map((o) => ({ libelle: o.libelle, href: o.href, exact: o.exact }));
     return [{ libelle: "Tableau de bord", href: `${RACINE}/${cle}`, exact: true }];
   };
   /* 21/10/2026 — demande de Teo : sous les écrans de travail, une page par

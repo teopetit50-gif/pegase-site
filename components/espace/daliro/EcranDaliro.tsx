@@ -28,37 +28,12 @@ import { TABLEAUX_EXEMPLE } from "./exemples";
 import { chargerListe, chargerTableau, monClient } from "./portes";
 import type { Chantier, Tableau } from "./types";
 import ChantierVue from "./ChantierVue";
+import { famille, listeDepuis } from "./liste";
 import AccordJ2 from "./AccordJ2";
 import ARangerCarte from "./ARangerCarte";
 import PointMensuelCarte from "./PointMensuelCarte";
 
 type Reel = { liste: Chantier[]; tableaux: Record<string, Tableau>; client: { client_id: string; user_id: string; role: string } | null };
-
-export function famille(c: Chantier): Famille | null {
-  if ((c.nb_bloquants ?? 0) > 0) return "bloque";
-  if ((c.nb_avenants_en_cours ?? 0) > 0) return "a_signer";
-  const conf = c.prochain_passage?.confirmation;
-  if (conf === "demandee" || conf === "sans_reponse" || conf === "declinee") return "a_confirmer";
-  if (c.statut === "ouvert" || c.statut === "suspendu") return "ouvert";
-  return null;
-}
-
-/* la liste d'exemple se recalcule depuis les tableaux (en mémoire) */
-function listeDepuis(tableaux: Record<string, Tableau>): Chantier[] {
-  return Object.values(tableaux).map((t) => ({
-    ...t.chantier,
-    nb_lots: t.lots.length,
-    nb_bloquants: t.controles.filter((k) => k.gravite === "bloquant").length,
-    nb_attention: t.controles.filter((k) => k.gravite === "attention").length,
-    marche_verifie: t.marches.some((m) => m.statut === "verifie"),
-    nb_avenants_en_cours: t.avenants.filter((a) => a.statut === "brouillon" || a.statut === "soumis").length,
-    nb_avenants_signes: t.avenants.filter((a) => a.statut === "signe").length,
-    prochain_passage: (() => {
-      const p = [...t.passages].filter((x) => x.statut === "prevu").sort((a, b) => a.debut.localeCompare(b.debut))[0];
-      return p ? { id: p.id, debut: p.debut, fin: p.fin, tache: p.tache, confirmation: p.confirmation, intervenant_type: p.intervenant_type, intervenant_nom: p.intervenant_nom ?? null } : null;
-    })(),
-  }));
-}
 
 const MO_TYPES = [
   { cle: "professionnel", libelle: "Professionnel (promoteur, SCI, entreprise)" },
@@ -70,6 +45,8 @@ const PLACES = [
   { cle: "cotraitant", libelle: "Cotraitant (groupement)" },
   { cle: "sous_traitant", libelle: "Sous-traitant d'une entreprise principale" },
 ];
+
+export { famille } from "./liste";
 
 export default function EcranDaliro() {
   const { source } = useSource();

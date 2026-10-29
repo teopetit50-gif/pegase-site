@@ -55,7 +55,6 @@ const PREFIXES: [string, string][] = [
   ["grp_", "varelo"],
 ];
 
-const daliro = objet("daliro");
 const tavaro = objet("tavaro");
 const tamila = objet("tamila");
 const tiroma = objet("tiroma");
@@ -87,8 +86,14 @@ export const REGLES: Record<string, Regle> = {
   /* une décision de Varelo à valider (b1_15) : la page À valider ne sait pas encore ouvrir une demande donnée */
   demandes_validation: () => `${RACINE}/validations`,
 
-  /* DALIRO, TAVARO, TAMILA, TIROMA, VARELO — « ?objet= », lu par les pages refaites */
-  btp_chantiers: daliro("btp_chantiers"),
+  /* TAVARO, TAMILA, TIROMA, VARELO — « ?objet= », lu par les pages refaites */
+  /* DALIRO, refait le 29/10/2026 : la fiche du chantier, la page des avenants et situations, la page À faire */
+  btp_chantiers: (id) => `${RACINE}/daliro/chantiers/${q(id)}`,
+  btp_avenants: (id) => `${RACINE}/daliro/avenants?avenant=${q(id)}`,
+  btp_avenant: (id) => `${RACINE}/daliro/avenants?avenant=${q(id)}`,
+  btp_situations: (id) => `${RACINE}/daliro/avenants?situation=${q(id)}`,
+  btp_situation: (id) => `${RACINE}/daliro/avenants?situation=${q(id)}`,
+  btp_passages: (id) => `${RACINE}/daliro/a-faire?passage=${q(id)}`,
   loc_contrats: tavaro("loc_contrats"),
   loc_reservations: tavaro("loc_reservations"),
   loc_vehicules: tavaro("loc_vehicules"),

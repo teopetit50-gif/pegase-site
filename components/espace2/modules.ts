@@ -100,7 +100,17 @@ export const MODULES: ModuleV2[] = [
   m("lorani", "LORANI", "Permis", "Demandes de permis et délais d'instruction", Stamp),
   m("tiroma", "TIROMA", "Cabinet dentaire", "Créneaux, fauteuils et liste d'attente", Smile),
   m("tamila", "TAMILA", "Dossiers du cabinet", "Dossiers chiffrés et pièces", FolderLock),
-  m("daliro", "DALIRO", "Chantiers", "Chantiers, envois et accords", HardHat),
+  /* 29/10/2026 — refonte : une page par usage (docs/refonte-metiers/DECOUPAGES.md) */
+  m("daliro", "DALIRO", "Chantiers", "Chantiers, envois et accords", HardHat, [
+    { libelle: "Vue d'ensemble", href: `${RACINE}/daliro`, exact: true },
+    { libelle: "Chantiers", href: `${RACINE}/daliro/chantiers` },
+    { libelle: "À ranger", href: `${RACINE}/daliro/a-ranger` },
+    { libelle: "À faire", href: `${RACINE}/daliro/a-faire` },
+    { libelle: "Avenants et situations", href: `${RACINE}/daliro/avenants` },
+    { libelle: "Annuaire", href: `${RACINE}/daliro/annuaire` },
+    { libelle: "Équipes", href: `${RACINE}/daliro/equipes` },
+    { libelle: "Réglages", href: `${RACINE}/daliro/reglages` },
+  ]),
   m("offload", "OFFLOAD", "Clients qui décrochent", "Rythme d'achat, décrochages et reprises de contact", UserMinus, [
     { libelle: "Comptes à risque", href: `${RACINE}/offload`, exact: true },
     { libelle: "Échéances et renouvellements", href: `${RACINE}/offload/echeances` },

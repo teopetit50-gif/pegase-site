@@ -44,7 +44,13 @@ import ReleveDialog from "./ReleveDialog";
 import { abandonnerAvenant, accepterEcart, changerStatutChantier, chargerFacturesCandidates, chiffrerLigneAvenant, confirmerDependance, detacherFacture, ecrireLigne, ecrireMarche, ouvrirAvenant, poserPrix, proposerDependances, proposerRemplacants, rattacherFacture, repondreConfirmation, retirerLigneAvenant, rouvrirMarche, signerAvenant, soumettreAvenant, validerPrix, verifierMarche } from "./portes";
 import type { Avenant, FactureCandidate, LigneAvenant, LigneMarche, Marche, Passage, Prix, Remplacant, Tableau } from "./types";
 
-type Props = { tableau: Tableau; source: Source; onLocal: (t: Tableau) => void; relire: () => Promise<void> };
+/* 29/10/2026 — la fiche d'un chantier de l'espace 2 répartit ces sections
+   entre ses onglets ; sans `sections`, tout s'affiche (l'écran de /espace) */
+export type SectionChantier =
+  | "entete" | "controles" | "lots" | "marche" | "questions" | "meteo" | "planning" | "appro"
+  | "avenants" | "fil" | "situations" | "heures" | "reception" | "factures" | "annuaire" | "disponibilites";
+
+type Props = { tableau: Tableau; source: Source; onLocal: (t: Tableau) => void; relire: () => Promise<void>; sections?: SectionChantier[] };
 
 type Form =
   | { type: "ecart"; ligne: LigneMarche }
@@ -76,7 +82,8 @@ const maintenant = () => new Date().toISOString();
 const aujourdhui = () => new Date().toISOString().slice(0, 10);
 const nid = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
 
-export default function ChantierVue({ tableau, source, onLocal, relire }: Props) {
+export default function ChantierVue({ tableau, source, onLocal, relire, sections }: Props) {
+  const voir = (x: SectionChantier) => !sections || sections.includes(x);
   const { chantier: c, lots, marches, passages, avenants, factures, debourse, tiers, bibliotheque, voit_prix } = tableau;
   const [form, setForm] = useState<Form>(null);
   const planningVivant = c.statut === "ouvert" || c.statut === "suspendu";
@@ -327,6 +334,8 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
       {erreur && !form ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
 
       {/* ——— en-tête ——— */}
+      {voir("entete") ? (
+        <>
       <section className="esp-carte" aria-label="Le chantier">
         <div className="esp-carte-tete">
           <div>
@@ -351,8 +360,12 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
           <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "facture" })}><Link2 width={14} height={14} aria-hidden="true" /> Rattacher une facture</button>
         </div>
       </section>
+        </>
+      ) : null}
 
       {/* ——— contrôles ——— */}
+      {voir("controles") ? (
+        <>
       <section className="esp-carte" aria-label="Contrôles">
         <div className="esp-section-titre">Contrôles — {controles.length ? `${controles.filter((k) => k.gravite === "bloquant").length} bloquant(s), ${controles.filter((k) => k.gravite === "attention").length} à voir` : "rien à signaler sur ce chantier"}</div>
         {controles.map((k) => (
@@ -376,8 +389,12 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
           </div>
         ) : null}
       </section>
+        </>
+      ) : null}
 
       {/* ——— lots et déboursé ——— */}
+      {voir("lots") ? (
+        <>
       <section className="esp-carte" aria-label="Lots">
         <div className="esp-section-titre">Lots et déboursé — engagé au marché et par avenants signés, facturé, reste</div>
         {lots.length ? (
@@ -402,8 +419,12 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
         ) : <Avis teinte="ambre">Aucun lot : le planning et les lignes du marché ne peuvent pas s&apos;y rattacher.</Avis>}
         {!voit_prix ? <div className="esp-kpi-sous" style={{ marginTop: 8 }}>Les montants sont réservés aux personnes qui ont le droit de voir les prix.</div> : null}
       </section>
+        </>
+      ) : null}
 
       {/* ——— marché ——— */}
+      {voir("marche") ? (
+        <>
       <section className="esp-carte" aria-label="Marché">
         <div className="esp-carte-tete">
           <div className="esp-section-titre" style={{ margin: 0 }}>Marché{marche?.reference ? ` ${marche.reference}` : ""} {marche ? <Pastille teinte={marche.statut === "verifie" ? "vert" : "ambre"}>{marche.statut === "verifie" ? "Vérifié, figé" : "À vérifier ligne à ligne"}</Pastille> : null}</div>
@@ -460,14 +481,26 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
           </>
         ) : <Avis teinte="ambre">Aucun marché : les avenants et les situations ne peuvent pas être chiffrés tant que le marché signé n&apos;est pas saisi puis vérifié ligne à ligne.</Avis>}
       </section>
+        </>
+      ) : null}
 
       {/* ——— questions sur le chantier (b6_36) ——— */}
+      {voir("questions") ? (
+        <>
       <QuestionsCarte key={`questions-${source}-${c.id}`} tableau={tableau} source={source} aujourdhui={aujourdHui()} />
+        </>
+      ) : null}
 
       {/* ——— météo des passages extérieurs (b6_21) ——— */}
+      {voir("meteo") ? (
+        <>
       <MeteoCarte key={`meteo-${c.id}`} tableau={tableau} source={source} onLocal={onLocal} relire={relire} />
+        </>
+      ) : null}
 
       {/* ——— planning ——— */}
+      {voir("planning") ? (
+        <>
       <section className="esp-carte" aria-label="Planning">
         <div className="esp-carte-tete">
           <div className="esp-section-titre" style={{ margin: 0 }}>Planning — passages à venir et confirmation à J-2</div>
@@ -514,11 +547,19 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
           </div>
         ) : null}
       </section>
+        </>
+      ) : null}
 
       {/* ——— approvisionnement (b6_22) ——— */}
+      {voir("appro") ? (
+        <>
       <ApproCarte key={`appro-${c.id}`} tableau={tableau} source={source} />
+        </>
+      ) : null}
 
       {/* ——— avenants ——— */}
+      {voir("avenants") ? (
+        <>
       <section className="esp-carte" aria-label="Avenants">
         <div className="esp-section-titre">Travaux supplémentaires — {avenants.length ? `${avenants.length} avenant(s), ${avenants.filter((a) => a.statut === "signe").length} signé(s)` : "aucun avenant"}</div>
         {avenants.map((a) => {
@@ -574,20 +615,40 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
         })}
         {!avenants.length ? <div className="esp-kpi-sous">Un travail supplémentaire repéré (vocal, photo, visite) devient un avenant chiffré sur vos prix, signé avant exécution.</div> : null}
       </section>
+        </>
+      ) : null}
 
       {/* ——— fil du chantier : photos, vocaux, messages (b6_24) ——— */}
+      {voir("fil") ? (
+        <>
       <FilCarte key={`fil-${c.id}`} tableau={tableau} source={source} relire={relire} />
+        </>
+      ) : null}
 
       {/* ——— situations de travaux (b6_12) ——— */}
+      {voir("situations") ? (
+        <>
       <SituationsCarte tableau={tableau} source={source} onLocal={onLocal} relire={relire} />
+        </>
+      ) : null}
 
       {/* ——— heures pointées et rentabilité (b6_17) ——— */}
+      {voir("heures") ? (
+        <>
       <HeuresCarte key={tableau.chantier.id} tableau={tableau} source={source} />
+        </>
+      ) : null}
 
       {/* ——— réception, réserves, retenue, décompte (b6_13) ——— */}
+      {voir("reception") ? (
+        <>
       <ReceptionCarte tableau={tableau} source={source} onLocal={onLocal} relire={relire} />
+        </>
+      ) : null}
 
       {/* ——— factures ——— */}
+      {voir("factures") ? (
+        <>
       <section className="esp-carte" aria-label="Factures">
         <div className="esp-section-titre">Factures fournisseurs rattachées — {factures.length ? `${factures.length}` : "aucune"}</div>
         {factures.length ? (
@@ -611,8 +672,12 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
           </div>
         ) : <div className="esp-kpi-sous">Une facture reçue par FILED se rattache ici au chantier et à son lot : le fournisseur doit être l&apos;entreprise du lot.</div>}
       </section>
+        </>
+      ) : null}
 
       {/* ——— annuaire et bibliothèque ——— */}
+      {voir("annuaire") ? (
+        <>
       <section className="esp-carte" aria-label="Annuaire et bibliothèque">
         <div className="esp-carte-tete">
           <div className="esp-section-titre" style={{ margin: 0 }}>Annuaire — {tiers.length} tiers · Bibliothèque — {prixValides.length} prix validé(s)</div>
@@ -623,7 +688,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
             <li key={t.id}><span className="esp-fil-point" data-teinte={t.vigilance === "a_jour" ? "vert" : t.vigilance === "absente" || t.vigilance === "echue" ? "rouge" : undefined} /><div><div className="esp-fil-texte"><strong>{t.nom}</strong> — {t.roles.map((r) => ROLES_TIERS[r] ?? r).join(", ")}</div><div className="esp-fil-meta">{t.commune ?? ""}{t.telephone ? ` · ${t.telephone}` : ""}{t.email ? ` · ${t.email}` : ""}{t.roles.includes("sous_traitant") && t.vigilance ? <> · <Pastille teinte={VIGILANCES[t.vigilance].teinte} contour>{VIGILANCES[t.vigilance].libelle}</Pastille></> : null}</div></div></li>
           ))}
         </ul>
-        <DisponibilitesBloc tableau={tableau} source={source} />
+        {voir("disponibilites") ? <DisponibilitesBloc tableau={tableau} source={source} /> : null}
         <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Bibliothèque de prix (tableau qui défile)" style={{ marginTop: 10 }}>
           <table className="esp-tableau">
             <thead><tr><th>Désignation</th><th>Unité</th>{voit_prix ? <th className="esp-num">PU HT</th> : null}<th>Origine</th><th>Statut</th><th></th></tr></thead>
@@ -643,6 +708,8 @@ export default function ChantierVue({ tableau, source, onLocal, relire }: Props)
           </table>
         </div>
       </section>
+        </>
+      ) : null}
 
       {/* ——— les dialogues ——— */}
       <Dialog open={form !== null} onOpenChange={(o) => !o && fermer()}>
