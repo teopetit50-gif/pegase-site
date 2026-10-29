@@ -1,0 +1,378 @@
+/* ══════════════════════════════════════════════════════════════════════
+   La frise (29/10/2026) : la page Projects de Linear en affichage
+   « Timeline », zoom « Year », relevée au getComputedStyle / getBounding-
+   ClientRect dans l'espace de Teo (fenêtre 1440 × 900, thème clair) — le
+   relevé : docs/refonte-metiers/releves/linear-timeline.md. Préfixe : ltl-.
+   Servie par components/espace2/daliro/Frise.tsx (Chantiers, Équipes).
+
+   Couleurs : les jetons --lin-* de lin.css (clair et sombre). Les teintes
+   que lin.css n'a pas (fond et filet d'une barre, trait des mois, violet
+   d'aujourd'hui, hachure d'une absence) sont posées ici, sous les mêmes
+   sélecteurs de thème ; le relevé ne couvre que le clair, le sombre suit
+   les gris de lin.css.
+
+   Repères, en px depuis le bord gauche de la zone de la frise :
+     en-tête          32 de haut, deux rangées de 16 : mois 11/500 en
+                      capitales (mois et année, écart 2), jours 11/500 ;
+                      pastille d'aujourd'hui 15 de haut, rayon 8, 1 × 4,
+                      à 1 sous le haut de la rangée des jours, centrée
+     commandes        flottantes en haut à droite : 34 de haut, 5 10 5 36,
+                      écart 4, fond en dégradé vers la gauche ; boutons de
+                      24, padding 0 8, 12/500, rayon plein
+     colonne gauche   320, collée à gauche ; padding gauche 8, droit 10 ;
+                      icône 28 (rayon 8, padding 6), nom 13/500 sur 166 ;
+                      quatre ronds de 28, écart 6
+     ligne            72, sans trait ; libellé de barre 13/500 à 5 du haut,
+                      barre de 24 à 24 du haut, rayon 6, filet 0.5
+     échelle          Année 2,5 px par jour (un mois ≈ 77,5), un repère de
+                      jour tous les 14 jours ; Trimestre 7,5 et 7 jours ;
+                      Mois 24 et chaque jour
+     traits           un trait de mois en tirets de 1 ; « aujourd'hui » 1 de
+                      large, dégradé violet → pâle vers le bas, opacité .6
+   À 640 px de colonne et moins, Linear passe en liste : lignes de 48,
+   icône 28 à 14 du bord, nom, pilule, ronds de 28 (sans ceux marqués data-liste="non").
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lin {
+  --ltl-barre: #1c1d1f;
+  --ltl-barre-bord: #303236;
+  --ltl-barre-survol: #232427;
+  --ltl-barre-bord-survol: lch(100 0 0 / 0.18);
+  --ltl-ombre: 0 3px 6px -2px lch(0 0 0 / 0.2), 0 1px 1px 0 lch(0 0 0 / 0.25);
+  --ltl-mois-trait: #222325;
+  --ltl-aujourdhui: #6d78d5;
+  --ltl-aujourdhui-bas: #23253a;
+  --ltl-aujourdhui-texte: #fffeff;
+  --ltl-hachure: lch(100 0 0 / 0.07);
+}
+html[data-v2-theme="light"] .v2 .lin {
+  --ltl-barre: var(--v2-bg-100);
+  --ltl-barre-bord: #d3d3d3;
+  --ltl-barre-survol: #f0f0f1;
+  --ltl-barre-bord-survol: lch(0 0 0 / 0.15);
+  --ltl-ombre: 0 3px 6px -2px lch(0 0 0 / 0.02), 0 1px 1px 0 lch(0 0 0 / 0.04);
+  --ltl-mois-trait: #ececec;
+  --ltl-aujourdhui-bas: #e0e2f2;
+  --ltl-hachure: lch(0 0 0 / 0.06);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lin {
+    --ltl-barre: var(--v2-bg-100);
+    --ltl-barre-bord: #d3d3d3;
+    --ltl-barre-survol: #f0f0f1;
+    --ltl-barre-bord-survol: lch(0 0 0 / 0.15);
+    --ltl-ombre: 0 3px 6px -2px lch(0 0 0 / 0.02), 0 1px 1px 0 lch(0 0 0 / 0.04);
+    --ltl-mois-trait: #ececec;
+    --ltl-aujourdhui-bas: #e0e2f2;
+    --ltl-hachure: lch(0 0 0 / 0.06);
+  }
+}
+
+/* les teintes d'une icône, d'un rond, d'une barre */
+.v2 .lin [data-teinte="rouge"] { --ltl-t: var(--lin-rouge); }
+.v2 .lin [data-teinte="ambre"] { --ltl-t: var(--lin-jaune); }
+.v2 .lin [data-teinte="bleu"] { --ltl-t: var(--lin-fait); }
+.v2 .lin [data-teinte="vert"] { --ltl-t: var(--lin-vert); }
+.v2 .lin [data-teinte="gris"] { --ltl-t: var(--lin-second); }
+
+/* ——— le cadre : la zone défile dans les deux sens, l'en-tête et la colonne restent ——— */
+.v2 .ltl { position: relative; flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
+.v2 .ltl-frise {
+  position: relative;
+  height: calc(100dvh - 48px - 88px);
+  min-height: 300px;
+  overflow: auto;
+  overscroll-behavior-x: contain;
+  background: var(--lin-fond);
+}
+.v2 .ltl-toile { position: relative; min-height: 100%; }
+
+/* ——— l'en-tête : mois, jours, pastille d'aujourd'hui ——— */
+.v2 .ltl-entete { position: sticky; top: 0; z-index: 3; display: flex; height: 32px; background: var(--lin-fond); }
+.v2 .ltl-coin { position: sticky; left: 0; z-index: 4; flex: 0 0 320px; background: var(--lin-fond); }
+.v2 .ltl-reperes { position: relative; flex: 1 0 auto; height: 32px; overflow: hidden; }
+.v2 .ltl-mois {
+  position: absolute;
+  top: 0;
+  display: flex;
+  gap: 2px;
+  height: 16px;
+  padding-left: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  text-transform: uppercase;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+.v2 .ltl-jour {
+  position: absolute;
+  top: 16px;
+  height: 16px;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--lin-compte);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.v2 .ltl-pastille-jour {
+  position: absolute;
+  top: 17px;
+  z-index: 1;
+  height: 15px;
+  padding: 1px 4px;
+  border-radius: 8px;
+  transform: translateX(-50%);
+  background: var(--ltl-aujourdhui);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 13px;
+  text-transform: uppercase;
+  color: var(--ltl-aujourdhui-texte);
+  white-space: nowrap;
+}
+
+/* ——— les traits : un par début de mois, et aujourd'hui ——— */
+.v2 .ltl-traits { position: absolute; top: 0; bottom: 0; left: 320px; z-index: 0; pointer-events: none; }
+.v2 .ltl-trait-mois { position: absolute; top: 0; bottom: 0; width: 0; border-right: 1px dashed var(--ltl-mois-trait); }
+.v2 .ltl-reperes .ltl-trait-mois { height: 32px; }
+.v2 .ltl-trait-jour {
+  position: absolute;
+  top: 32px;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(0deg, var(--ltl-aujourdhui-bas) 0%, var(--ltl-aujourdhui) 100%);
+  opacity: 0.6;
+}
+
+/* ——— les commandes flottantes : Aujourd'hui, zoom ——— */
+.v2 .ltl-commandes {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 34px;
+  padding: 5px 10px 5px 36px;
+  background: linear-gradient(to left, var(--lin-fond) 70%, transparent);
+}
+.v2 .ltl-commande {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 9999px;
+  border: 0.5px solid transparent;
+  background: var(--lin-bouton);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-texte);
+  white-space: nowrap;
+}
+.v2 .ltl-commande::after { content: ""; position: absolute; inset: -0.5px; border-radius: inherit; box-shadow: var(--lin-anneau); pointer-events: none; }
+.v2 .ltl-commande:hover, .v2 .ltl-commande[aria-expanded="true"] { background: var(--lin-pastille-active); }
+.v2 .ltl-commande svg { width: 12px; height: 12px; color: var(--lin-second); }
+.v2 .ltl-commandes .lin-menu { min-width: 0; width: 180px; padding: 6px 0; }
+.v2 .ltl-commandes .lin-menu-option[aria-checked="true"] { color: var(--lin-titre); }
+.v2 .ltl-commandes .lin-menu-option svg { width: 14px; height: 14px; margin-left: auto; }
+
+/* ——— les lignes : la cellule de gauche, collée, et la piste ——— */
+.v2 .ltl-lignes { position: relative; z-index: 1; margin: 0; padding: 0 0 24px; list-style: none; }
+.v2 .ltl-ligne { display: flex; height: 72px; }
+.v2 .ltl-gauche {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  flex: 0 0 320px;
+  padding-left: 8px;
+  background: var(--lin-fond);
+}
+/* un menu ouvert dans la cellule passe au-dessus des lignes suivantes */
+.v2 .ltl-gauche:focus-within { z-index: 5; }
+.v2 .ltl-gauche-bloc { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; padding-right: 10px; }
+.v2 .ltl-nom { display: flex; align-items: center; gap: 4px; flex: 1 1 auto; min-width: 0; height: 32px; padding: 2px 0; border-radius: 8px; }
+.v2 .ltl-icone {
+  display: grid;
+  place-items: center;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  padding: 6px;
+  border-radius: 8px;
+  color: var(--ltl-t, var(--lin-second));
+}
+.v2 .ltl-icone svg { width: 16px; height: 16px; }
+.v2 .ltl-icone .lin-ic { color: inherit; }
+.v2 .ltl-nom-texte { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 500; color: var(--lin-texte); }
+.v2 .ltl-ouvrir { display: none; place-items: center; flex: 0 0 24px; width: 24px; height: 24px; margin-left: auto; border-radius: 9999px; color: var(--lin-texte); }
+.v2 .ltl-ouvrir svg { width: 16px; height: 16px; }
+.v2 a.ltl-nom:hover .ltl-nom-texte, .v2 a.ltl-nom:focus-visible .ltl-nom-texte { color: var(--lin-titre); }
+.v2 a.ltl-nom:hover .ltl-ouvrir, .v2 a.ltl-nom:focus-visible .ltl-ouvrir { display: grid; }
+.v2 a.ltl-nom:hover .ltl-ouvrir { background: var(--lin-pastille-active); }
+.v2 .ltl-nom:focus-visible { outline: 2px solid var(--lin-fait); outline-offset: -2px; }
+
+/* les ronds de 28 : santé, avancement, maître d'ouvrage… */
+.v2 .ltl-ronds { display: flex; align-items: center; gap: 6px; flex: none; }
+.v2 .ltl-rond {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9999px;
+  border: 0.5px solid transparent;
+  color: var(--ltl-t, var(--lin-second));
+  font-size: 11px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.v2 .ltl-rond svg { width: 16px; height: 16px; }
+.v2 .ltl-rond .lin-ic-sante { width: 14px; height: 14px; }
+.v2 .ltl-rond .lin-ic { color: inherit; }
+.v2 .ltl-rond:hover { background: var(--lin-pastille-active); }
+.v2 .ltl-rond--chiffre { color: var(--lin-second); }
+.v2 .ltl-rond .lin-rond { width: 28px; height: 28px; }
+.v2 .ltl-avatar {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--lin-avatar);
+  font-size: 8px;
+  font-weight: 600;
+  line-height: 1;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+/* la piste d'une ligne et ses barres */
+.v2 .ltl-piste { position: relative; flex: 1 0 auto; }
+.v2 .ltl-libelle {
+  position: absolute;
+  top: 5px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  height: 16px;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--lin-texte);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.v2 .ltl-libelle[data-dessous] { top: 52px; }
+.v2 .ltl-libelle > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; }
+.v2 .ltl-libelle-meta { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; font-size: 12px; font-weight: 450; color: var(--lin-compte); }
+.v2 .ltl-barre {
+  position: absolute;
+  top: 24px;
+  display: block;
+  height: 24px;
+  border-radius: 6px;
+  border: 0.5px solid var(--ltl-barre-bord);
+  background: var(--ltl-barre);
+  box-shadow: var(--ltl-ombre);
+  transition: background 0.1s, border-color 0.1s;
+}
+.v2 .ltl-barre[data-ouvert="gauche"] { border-radius: 0 6px 6px 0; border-left-color: transparent; }
+.v2 .ltl-barre[data-ouvert="droite"] { border-radius: 6px 0 0 6px; border-right-color: transparent; }
+.v2 :is(a, button).ltl-barre:hover { background: var(--ltl-barre-survol); border-color: var(--ltl-barre-bord-survol); }
+.v2 .ltl-barre:focus-visible { outline: 2px solid var(--lin-fait); outline-offset: 1px; }
+.v2 .ltl-barre[data-teinte] { background: color-mix(in srgb, var(--ltl-t) 14%, var(--ltl-barre)); border-color: color-mix(in srgb, var(--ltl-t) 45%, transparent); }
+.v2 :is(a, button).ltl-barre[data-teinte]:hover { background: color-mix(in srgb, var(--ltl-t) 24%, var(--ltl-barre)); border-color: color-mix(in srgb, var(--ltl-t) 70%, transparent); }
+.v2 .ltl-barre[data-hachure] {
+  background: repeating-linear-gradient(-45deg, var(--ltl-hachure) 0 4px, transparent 4px 8px), var(--ltl-barre);
+  border-style: dashed;
+  border-color: var(--ltl-barre-bord-survol);
+  box-shadow: none;
+}
+.v2 button.ltl-barre[data-hachure]:hover { background: repeating-linear-gradient(-45deg, var(--ltl-hachure) 0 4px, transparent 4px 8px), var(--ltl-barre-survol); }
+/* le jalon posé sur une barre : un losange de 8 (le prochain passage) */
+.v2 .ltl-jalon {
+  position: absolute;
+  top: 8px;
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  border-radius: 1.5px;
+  transform: rotate(45deg);
+  background: var(--ltl-t, var(--lin-second));
+  box-shadow: 0 0 0 1.5px var(--ltl-barre);
+}
+
+/* ——— la liste (colonne étroite) : Linear n'y montre pas la frise ——— */
+.v2 .ltl-liste { display: none; margin: 0; padding: 4px 0 24px; list-style: none; }
+.v2 .ltl-liste-ligne {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto auto;
+  align-items: center;
+  column-gap: 6px;
+  min-height: 48px;
+  padding: 0 8px 0 14px;
+  border-radius: 8px;
+}
+.v2 a.ltl-liste-ligne:hover { background: var(--lin-survol); }
+.v2 .ltl-liste-ligne:focus-visible { outline: 2px solid var(--lin-fait); outline-offset: -2px; }
+.v2 .ltl-liste-ligne .ltl-icone { padding: 6px; }
+.v2 .ltl-liste-ligne .ltl-nom-texte { color: var(--lin-titre); }
+/* Linear y garde la santé et le statut, pas la priorité ni le responsable */
+.v2 .ltl-liste-ligne .ltl-ronds > [data-liste="non"] { display: none; }
+.v2 .ltl-pilule {
+  display: inline-flex;
+  align-items: center;
+  max-width: 132px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 48px;
+  border: 0.5px solid var(--lin-trait);
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .ltl-puces { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0 14px 10px 48px; list-style: none; }
+.v2 .ltl-puce {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 0.5px solid var(--ltl-barre-bord);
+  background: var(--ltl-barre);
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-texte);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .ltl-puce[data-teinte] { background: color-mix(in srgb, var(--ltl-t) 14%, var(--ltl-barre)); border-color: color-mix(in srgb, var(--ltl-t) 45%, transparent); }
+.v2 .ltl-puce[data-hachure] { background: repeating-linear-gradient(-45deg, var(--ltl-hachure) 0 4px, transparent 4px 8px), var(--ltl-barre); border-style: dashed; border-color: var(--ltl-barre-bord-survol); }
+.v2 :is(a, button).ltl-puce:hover { border-color: var(--ltl-barre-bord-survol); }
+
+/* ——— les messages de la page ——— */
+.v2 .ltl-note { margin: 0 8px 8px; padding: 8px 12px; border-radius: 8px; background: var(--lin-survol); font-size: 12px; font-weight: 450; color: var(--lin-second); }
+.v2 .ltl-note[data-teinte="rouge"] { color: var(--lin-rouge); }
+.v2 .ltl-compte { margin-left: 2px; color: var(--lin-compte); font-variant-numeric: tabular-nums; }
+.v2 .lin .v2-btn[data-actif] .ltl-compte { color: var(--lin-second); }
+
+@container principale (max-width: 640px) {
+  .v2 .ltl-frise, .v2 .ltl-commandes { display: none; }
+  .v2 .ltl-liste { display: block; }
+  .v2 .lin-tete-droite .lin-position { display: none; }
+}
