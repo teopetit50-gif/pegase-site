@@ -156,6 +156,8 @@ export function porteeDe(chemin: string): ModuleV2 | null {
 
 /* le titre de la page, au centre de la barre du haut */
 export function titreDe(chemin: string): string {
+  /* les pages de la formation portent toutes « Formation » */
+  if (chemin.startsWith(`${RACINE}/formation/`)) return "Formation";
   const portee = porteeDe(chemin);
   /* un module sans sous-pages porte son nom ; avec, le nom de la sous-page */
   const onglets = portee ? (portee.onglets.length > 1 ? portee.onglets : []) : ONGLETS_ORGANISATION;

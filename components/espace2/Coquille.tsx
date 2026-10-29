@@ -552,14 +552,26 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
     ],
   };
   /* 29/10/2026 — demande de Teo : la formation (le guide de démarrage, texte
-     et vidéo) dans l'espace, avec sa place dans le rail, au-dessus de l'aide */
+     et vidéo) dans l'espace, avec sa place dans le rail, au-dessus de l'aide.
+     Puis ses pages : « Bien démarrer », et une page par module du rail —
+     les quatre communs et celui du métier (components/espace2/formation/pages.ts) */
   const formation: Section = {
     cle: "formation",
     titre: "Formation",
     icone: <GraduationCap {...R} />,
     href: `${RACINE}/formation`,
     racines: [`${RACINE}/formation`],
-    groupes: [{ titre: "Formation", liens: [{ libelle: "Guide de démarrage", href: `${RACINE}/formation`, exact: true }] }],
+    groupes: [
+      {
+        titre: "Bien démarrer",
+        liens: [
+          { libelle: "Guide de démarrage", href: `${RACINE}/formation`, exact: true },
+          { libelle: "Comment marche Omega", href: `${RACINE}/formation/principes` },
+          { libelle: "Votre première semaine", href: `${RACINE}/formation/premiere-semaine` },
+        ],
+      },
+      { titre: "Les modules", liens: modules.map((m) => ({ libelle: m.nom, href: `${RACINE}/formation/${m.cle}` })) },
+    ],
   };
   const toutes = [...sections, ...autres, formation, reglages];
   const ouvre = (l: Lien) => (l.exact ? chemin === l.href : chemin === (l.racine ?? l.href) || chemin.startsWith(`${l.racine ?? l.href}/`));
