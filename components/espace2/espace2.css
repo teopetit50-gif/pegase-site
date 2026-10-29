@@ -532,6 +532,40 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* 29/10/2026 — « Autres modules » : un déroulant sous les modules du rail.
+   Le chevron n'apparaît qu'une fois le rail ouvert (il est hors des 48 px) ;
+   les modules dépliés gardent la taille des autres entrées, sur un fond
+   teinté d'un seul tenant qui les rattache au bouton. */
+.v2-rail-chevron {
+  flex: none;
+  margin-left: auto;
+  color: var(--v2-gray-700);
+  transition: transform 0.2s var(--v2-doux);
+}
+.v2-rail-item[aria-expanded="true"] .v2-rail-chevron {
+  transform: rotate(180deg);
+}
+.v2-rail-tiroir {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.2s var(--v2-doux);
+}
+.v2-rail-tiroir[data-ouvert] {
+  grid-template-rows: 1fr;
+}
+.v2-rail-tiroir > .v2-rail-groupe {
+  min-height: 0;
+  overflow: hidden;
+  margin-top: 2px;
+  border-radius: 6px;
+  background: var(--v2-a-100);
+}
+@media (prefers-reduced-motion: reduce) {
+  .v2-rail-tiroir,
+  .v2-rail-chevron {
+    transition: none;
+  }
+}
 .v2-volet {
   flex: 1;
   min-width: 0;

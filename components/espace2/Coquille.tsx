@@ -20,10 +20,10 @@
    contexte que l'ancien espace (components/espace/source.tsx).
    ══════════════════════════════════════════════════════════════════════ */
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, Banknote, Building2, CheckSquare, CircleHelp, Home, Bell, Check, CheckCheck, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, GraduationCap, LayoutGrid, LifeBuoy, LogOut, Menu as IconeMenu, Moon, Plus, Search, Settings, Sun, Terminal, User, X } from "lucide-react";
+import { Activity, Banknote, Building2, CheckSquare, CircleHelp, Home, Bell, Check, CheckCheck, ChevronDown, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, GraduationCap, LayoutGrid, LifeBuoy, LogOut, Menu as IconeMenu, Moon, Plus, Search, Settings, Sun, Terminal, User, X } from "lucide-react";
 import { Button, Dialog, DialogTrigger, Modal, ModalOverlay, Popover, RouterProvider } from "react-aria-components";
 import type { Utilisateur } from "@/lib/compte";
 import { createClient } from "@/lib/supabase/client";
@@ -444,6 +444,24 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
   const modules = MODULES.filter((m) => MODULES_PRINCIPAUX.includes(m.cle) || m.cle === metier)
     /* les quatre communs dans leur ordre, puis le module du métier */
     .sort((a, b) => Number(a.cle === metier) - Number(b.cle === metier));
+  const sectionModule = (m: (typeof MODULES)[number]): Section => ({
+    cle: m.cle,
+    titre: m.nom,
+    sousTitre: m.libelle,
+    icone: <m.icone {...R} />,
+    /* FILED ouvre sur « À payer », son écran de travail */
+    href: `${RACINE}/${m.cle}${m.cle === "filed" ? "/a-payer" : ""}`,
+    racines: [`${RACINE}/${m.cle}`],
+    groupes: [
+      { titre: "Pages", liens: pagesDe(m.cle).map((l, i) => (i === 0 ? { ...l, compteur: compteurs[m.cle] } : l)) },
+      ...(fonctionsDe(m.cle).length ? [{ titre: "Fonctions", liens: fonctionsDe(m.cle) }] : []),
+    ],
+  });
+  /* 29/10/2026 — demande de Teo : les autres modules métier (LORANI,
+     VARELO, TAVARO…) n'étaient atteignables que par « Tous les modules », en
+     haut, et leur page ouvrait le volet de l'accueil. Ils sont rangés sous
+     les modules du rail, dans un déroulant « Autres modules ». */
+  const autres = MODULES.filter((m) => !modules.includes(m)).map(sectionModule);
   const sections: Section[] = [
     {
       cle: "accueil",
@@ -496,19 +514,7 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
         },
       ],
     },
-    ...modules.map<Section>((m) => ({
-      cle: m.cle,
-      titre: m.nom,
-      sousTitre: m.libelle,
-      icone: <m.icone {...R} />,
-      /* FILED ouvre sur « À payer », son écran de travail */
-      href: `${RACINE}/${m.cle}${m.cle === "filed" ? "/a-payer" : ""}`,
-      racines: [`${RACINE}/${m.cle}`],
-      groupes: [
-        { titre: "Pages", liens: pagesDe(m.cle).map((l, i) => (i === 0 ? { ...l, compteur: compteurs[m.cle] } : l)) },
-        ...(fonctionsDe(m.cle).length ? [{ titre: "Fonctions", liens: fonctionsDe(m.cle) }] : []),
-      ],
-    })),
+    ...modules.map(sectionModule),
     {
       cle: "suivi",
       titre: "Suivi",
@@ -555,14 +561,24 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
     racines: [`${RACINE}/formation`],
     groupes: [{ titre: "Formation", liens: [{ libelle: "Guide de démarrage", href: `${RACINE}/formation`, exact: true }] }],
   };
-  const toutes = [...sections, formation, reglages];
+  const toutes = [...sections, ...autres, formation, reglages];
   const ouvre = (l: Lien) => (l.exact ? chemin === l.href : chemin === (l.racine ?? l.href) || chemin.startsWith(`${l.racine ?? l.href}/`));
   const courante =
     toutes.find((s) => s.racines.some((r) => chemin === r || chemin.startsWith(`${r}/`))) ??
     toutes.find((s) => s.groupes.some((g) => g.liens.some(ouvre))) ??
     sections[0];
+  /* le déroulant s'ouvre de lui-même quand on arrive sur l'un de ses modules */
+  const dansAutres = autres.some((s) => s.cle === courante.cle);
+  const idAutres = useId();
+  const [autresOuverts, setAutresOuverts] = useState(dansAutres);
+  const [dansAutresVu, setDansAutresVu] = useState(dansAutres);
+  if (dansAutresVu !== dansAutres) {
+    setDansAutresVu(dansAutres);
+    if (dansAutres) setAutresOuverts(true);
+  }
   /* les groupes du rail, séparés par un filet : l'accueil ; travail et fiches ; les modules ; le suivi */
-  const rail: Section[][] = [[sections[0]], sections.slice(1, 3), sections.slice(3, 3 + modules.length), sections.slice(3 + modules.length)].filter((g) => g.length);
+  const railModules = sections.slice(3, 3 + modules.length);
+  const rail: Section[][] = [[sections[0]], sections.slice(1, 3), railModules, sections.slice(3 + modules.length)].filter((g) => g.length);
   /* 21/10 (soir), capture de Teo : la bulle « title » du navigateur restait
      dessinée par-dessus le rail ouvert (« Travail » collée sur « Accueil »),
      et parfois après le survol — le navigateur la pose et l'enlève à sa
@@ -589,6 +605,22 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
                 {g.map((s) => (
                   <li key={s.cle}>{iconeRail(s)}</li>
                 ))}
+                {g === railModules && autres.length ? (
+                  <li>
+                    <button type="button" className="v2-rail-item" aria-expanded={autresOuverts} aria-controls={idAutres} onClick={() => setAutresOuverts((v) => !v)}>
+                      <LayoutGrid {...R} />
+                      <span className="v2-rail-libelle">Autres modules</span>
+                      <ChevronDown width={14} height={14} aria-hidden="true" className="v2-rail-chevron" />
+                    </button>
+                    <div className="v2-rail-tiroir" id={idAutres} data-ouvert={autresOuverts ? "" : undefined}>
+                      <ul className="v2-rail-groupe" inert={!autresOuverts}>
+                        {autres.map((s) => (
+                          <li key={s.cle}>{iconeRail(s)}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </li>
+                ) : null}
               </ul>
             ))}
           </nav>
