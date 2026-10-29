@@ -22,6 +22,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { ExternalLink, FileText, ListFilter, Users } from "lucide-react";
+import { MarqueModule } from "../lin/icones";
 import { useSource } from "@/components/espace/source";
 import { dateCourte, dateHeure, montant, relatif } from "@/components/espace/format";
 import { DOSSIERS_EXEMPLE } from "@/components/espace/exemples/filed";
@@ -259,8 +260,8 @@ export default function ReglesControles() {
       nom: c.nom,
       etat: c.points.length ? { libelle: pluriel(c.points.length, "point"), teinte: c.gravite === "bloquant" ? "orange" : undefined } : null,
       declencheur: DECLENCHEURS[c.declencheur],
-      creee: { nom: "FILED", lettre: "F", couleur: "#5e6ad2" },
-      modifiee: { nom: "FILED", lettre: "F", couleur: "#5e6ad2" },
+      creee: { nom: "FILED", icone: <MarqueModule cle="filed" /> },
+      modifiee: { nom: "FILED", icone: <MarqueModule cle="filed" /> },
       dernier: dernier ? { texte: quand(dernier) ?? dateCourte(dernier), iso: dernier, urgence: c.gravite === "bloquant" } : null,
       options: [
         { cle: "ouvrir", libelle: "Ouvrir le contrôle", icone: <ListFilter width={18} height={18} />, href: lienId(c.id) },

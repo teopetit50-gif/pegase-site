@@ -72,7 +72,7 @@
   align-items: center;
 }
 .v2 .lcl--entreprises {
-  --lcl-colonnes: 8px 18px minmax(0, 1fr) 130px 120px 120px 49px 91px 8px;
+  --lcl-colonnes: 8px 18px minmax(0, 1fr) 130px 120px 120px 72px 91px 8px;
 }
 .v2 .lcl--contacts {
   --lcl-colonnes: 8px 18px minmax(0, 1fr) 150px 190px 120px 91px 8px;

@@ -276,21 +276,13 @@ html[data-v2-theme="light"] .v2 .lin.rap {
 }
 .v2 .lin .rap-avis {
   margin: 16px 0 0;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--lin-trait);
   font-size: 13px;
   line-height: 18px;
-  color: var(--lin-texte);
-}
-.v2 .lin .rap-avis[data-teinte="rouge"] {
-  border-color: var(--lin-orange);
-}
-.v2 .lin .rap-avis[data-teinte="vert"] {
-  border-color: var(--lin-vert);
+  color: var(--lin-second);
 }
 .v2 .lin .rap-avis strong {
-  font-weight: 600;
+  font-weight: 500;
+  color: var(--lin-titre);
 }
 
 /* ——— une section : tête de 60 (titre + chevron), grille de cartes ——— */

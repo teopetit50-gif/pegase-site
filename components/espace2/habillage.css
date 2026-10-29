@@ -452,41 +452,37 @@ html.v2-actif .dlg-panneau .esp-pastille--contour {
 }
 .v2 .esp .esp-ruban[data-source="exemple"] { display: none; }
 
-/* ——— avis (la « note ») ——— */
-.v2 .esp .esp-avis,
-html.v2-actif .dlg-panneau .esp-avis {
-  padding: 10px 12px;
+/* ——— avis (la « note ») : 29/10, comme .v2-note — ni fond ni bord teinté,
+   une ligne grise et son icône, quelle que soit la teinte ——— */
+.v2 .esp-avis,
+.v2 .esp .esp-avis[data-teinte],
+html.v2-actif .dlg-panneau .esp-avis,
+html.v2-actif .dlg-panneau .esp-avis[data-teinte] {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 0;
   border: 0;
-  border-radius: 6px;
-  background: var(--v2-gray-100);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--v2-gray-900);
+  font-size: 13px;
+  line-height: 19px;
+}
+.v2 .esp-avis .esp-avis-icone,
+.v2 .esp .esp-avis[data-teinte] .esp-avis-icone,
+html.v2-actif .dlg-panneau .esp-avis .esp-avis-icone {
+  width: 14px;
+  height: 14px;
+  margin-top: 2.5px;
+  color: var(--v2-gray-900);
+}
+.v2 .esp-avis strong,
+.v2 .esp .esp-avis[data-teinte] strong,
+html.v2-actif .dlg-panneau .esp-avis[data-teinte] strong {
+  font-weight: 500;
   color: var(--v2-gray-1000);
-  box-shadow: inset 0 0 0 1px var(--v2-a-400);
-  font-size: 14px;
-  line-height: 20px;
-}
-.v2 .esp .esp-avis[data-teinte="ambre"],
-html.v2-actif .dlg-panneau .esp-avis[data-teinte="ambre"] {
-  background: var(--v2-amber-100);
-  color: var(--v2-amber-900);
-  box-shadow: inset 0 0 0 1px var(--v2-amber-400);
-}
-.v2 .esp .esp-avis[data-teinte="rouge"],
-html.v2-actif .dlg-panneau .esp-avis[data-teinte="rouge"] {
-  background: var(--v2-red-100);
-  color: var(--v2-red-900);
-  box-shadow: inset 0 0 0 1px var(--v2-red-400);
-}
-.v2 .esp .esp-avis[data-teinte="vert"],
-html.v2-actif .dlg-panneau .esp-avis[data-teinte="vert"] {
-  background: var(--v2-green-100);
-  color: var(--v2-green-900);
-  box-shadow: inset 0 0 0 1px var(--v2-green-400);
-}
-.v2 .esp .esp-avis[data-teinte="bleu"],
-html.v2-actif .dlg-panneau .esp-avis[data-teinte="bleu"] {
-  background: var(--v2-blue-100);
-  color: var(--v2-blue-900);
-  box-shadow: inset 0 0 0 1px var(--v2-blue-400);
 }
 
 /* ——— le fil (historique) ——— */

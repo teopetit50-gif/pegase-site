@@ -154,3 +154,19 @@ export function IconeBoiteX({ titre, className }: P) {
     </>,
   );
 }
+
+/* 29/10 — la marque d'un module (public/logos/<cle>-mark.png, blanche sur fond transparent), à
+   la place du carré de couleur avec l'initiale (Teo : « change ce logo avec celui de FILED »).
+   Peinte en masque : elle prend la couleur du texte, en clair comme en sombre. */
+export function MarqueModule({ cle, taille = 16, titre }: { cle: string; taille?: number; titre?: string }) {
+  const image = `url(/logos/${cle}-mark.png)`;
+  return (
+    <span
+      className="lin-marque"
+      role={titre ? "img" : undefined}
+      aria-label={titre}
+      aria-hidden={titre ? undefined : true}
+      style={{ width: taille, height: taille, maskImage: image, WebkitMaskImage: image }}
+    />
+  );
+}
