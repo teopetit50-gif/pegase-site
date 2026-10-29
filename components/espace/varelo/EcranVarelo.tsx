@@ -60,13 +60,15 @@ import ObjetDetail from "./ObjetDetail";
 import Lots from "./Lots";
 import Societes from "./Societes";
 import Depot from "./Depot";
-import Encours from "./Encours";
-import Contrats from "./Contrats";
-import Reciproques from "./Reciproques";
+/* 29/10/2026 — les cartes portent le préfixe « Carte » : sur un disque insensible à la casse (macOS),
+   « ./Reserves » trouvait reserves.ts (le calcul) au lieu de Reserves.tsx, et le build échouait */
+import Encours from "./CarteEncours";
+import Contrats from "./CarteContrats";
+import Reciproques from "./CarteReciproques";
 import CeMatin from "./CeMatin";
 import GroupePage from "./GroupePage";
-import Reportings from "./Reportings";
-import Reserves from "./Reserves";
+import Reportings from "./CarteReportings";
+import Reserves from "./CarteReserves";
 import Branchements from "./Branchements";
 import ReglesGroupe from "./ReglesGroupe";
 import Caisses from "./Caisses";
