@@ -2950,8 +2950,12 @@ html.v2-calme *::after {
 
 /* la barre de saisie */
 .v2-ia-saisie { display: grid; gap: 6px; padding: 10px 10px 8px 12px; border-radius: 6px; background: var(--v2-bg-100); box-shadow: 0 0 0 1px var(--v2-a-400); transition: box-shadow 0.15s; }
-.v2-ia-saisie:focus-within { box-shadow: var(--v2-anneau); }
+/* 29/10/2026 — retour de Teo : pas de halo autour de la barre au focus, le trait s'assombrit seulement. */
+.v2-ia-saisie:focus-within { box-shadow: 0 0 0 1px var(--v2-a-600); }
 .v2-ia-saisie textarea { width: 100%; border: 0; outline: 0; resize: none; background: transparent; color: var(--v2-gray-1000); font: inherit; font-size: 14px; line-height: 20px; max-height: 200px; }
+/* 26/10/2026 — retour de Teo : l'anneau global (.v2-jetons :focus-visible) encadrait aussi
+   la zone de texte, d'où un second cadre gris dans la barre. Seule la barre porte l'anneau. */
+.v2-ia-saisie textarea:focus-visible { box-shadow: none; }
 .v2-ia-saisie textarea::placeholder { color: var(--v2-gray-900); }
 .v2-ia-saisie-pied { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .v2-ia-saisie-pied > span { font-size: 11px; color: var(--v2-gray-900); }
