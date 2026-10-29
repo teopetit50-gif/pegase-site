@@ -483,7 +483,7 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
     },
     {
       cle: "travail",
-      titre: "Travail",
+      titre: "Tâches et notes",
       icone: <CheckSquare {...R} />,
       href: `${RACINE}/taches`,
       racines: [],
@@ -500,7 +500,7 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
     },
     {
       cle: "fiches",
-      titre: "Fiches",
+      titre: "Annuaire",
       icone: <Building2 {...R} />,
       href: `${RACINE}/entreprises`,
       racines: [],
@@ -576,9 +576,18 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
     setDansAutresVu(dansAutres);
     if (dansAutres) setAutresOuverts(true);
   }
-  /* les groupes du rail, séparés par un filet : l'accueil ; travail et fiches ; les modules ; le suivi */
+  /* les groupes du rail : l'accueil ; le quotidien (tâches, annuaire) ; les
+     modules ; le suivi. 29/10/2026 — retour de Teo : « rendre la barre plus
+     facile à comprendre ». Le filet entre deux groupes devient leur titre
+     quand le rail s'ouvre (« AU QUOTIDIEN », « MODULES »), comme les
+     intitulés du volet. */
   const railModules = sections.slice(3, 3 + modules.length);
-  const rail: Section[][] = [[sections[0]], sections.slice(1, 3), railModules, sections.slice(3 + modules.length)].filter((g) => g.length);
+  const rail: { titre?: string; sections: Section[] }[] = [
+    { sections: [sections[0]] },
+    { titre: "Au quotidien", sections: sections.slice(1, 3) },
+    { titre: "Modules", sections: railModules },
+    { sections: sections.slice(3 + modules.length) },
+  ].filter((g) => g.sections.length);
   /* 21/10 (soir), capture de Teo : la bulle « title » du navigateur restait
      dessinée par-dessus le rail ouvert (« Travail » collée sur « Accueil »),
      et parfois après le survol — le navigateur la pose et l'enlève à sa
@@ -601,27 +610,34 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
 
           <nav className="v2-rail-nav" aria-label="Sections">
             {rail.map((g, i) => (
-              <ul key={i} className="v2-rail-groupe">
-                {g.map((s) => (
-                  <li key={s.cle}>{iconeRail(s)}</li>
-                ))}
-                {g === railModules && autres.length ? (
-                  <li>
-                    <button type="button" className="v2-rail-item" aria-expanded={autresOuverts} aria-controls={idAutres} onClick={() => setAutresOuverts((v) => !v)}>
-                      <LayoutGrid {...R} />
-                      <span className="v2-rail-libelle">Autres modules</span>
-                      <ChevronDown width={14} height={14} aria-hidden="true" className="v2-rail-chevron" />
-                    </button>
-                    <div className="v2-rail-tiroir" id={idAutres} data-ouvert={autresOuverts ? "" : undefined}>
-                      <ul className="v2-rail-groupe" inert={!autresOuverts}>
-                        {autres.map((s) => (
-                          <li key={s.cle}>{iconeRail(s)}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </li>
+              <div key={i} className="v2-rail-bloc">
+                {i > 0 ? (
+                  <div className="v2-rail-titre" aria-hidden="true">
+                    {g.titre ? <span>{g.titre}</span> : null}
+                  </div>
                 ) : null}
-              </ul>
+                <ul className="v2-rail-groupe" aria-label={g.titre}>
+                  {g.sections.map((s) => (
+                    <li key={s.cle}>{iconeRail(s)}</li>
+                  ))}
+                  {g.sections === railModules && autres.length ? (
+                    <li>
+                      <button type="button" className="v2-rail-item" aria-expanded={autresOuverts} aria-controls={idAutres} onClick={() => setAutresOuverts((v) => !v)}>
+                        <LayoutGrid {...R} />
+                        <span className="v2-rail-libelle">Autres modules</span>
+                        <ChevronDown width={14} height={14} aria-hidden="true" className="v2-rail-chevron" />
+                      </button>
+                      <div className="v2-rail-tiroir" id={idAutres} data-ouvert={autresOuverts ? "" : undefined}>
+                        <ul className="v2-rail-groupe" inert={!autresOuverts}>
+                          {autres.map((s) => (
+                            <li key={s.cle}>{iconeRail(s)}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </li>
+                  ) : null}
+                </ul>
+              </div>
             ))}
           </nav>
 
