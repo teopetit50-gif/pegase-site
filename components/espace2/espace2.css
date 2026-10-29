@@ -403,16 +403,16 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
     width: 208px;
   }
 }
-/* 29/10/2026 — capture de Teo sur « Entreprises » : le rail ouvert au
-   survol recouvrait le volet sans ombre, et se lisait comme un bug ; une
-   étiquette à droite de l'icône l'avait remplacé le matin même. Le soir,
-   Teo : « il ne déroule plus sur la droite, il est bloqué ». Le rail
-   s'ouvre de nouveau, mais posé PAR-DESSUS le volet, comme chez Supabase :
-   l'ombre des menus le détache du volet qu'il recouvre. */
+/* 29/10/2026 — capture de Teo sur « Entreprises » : le rail ouvert
+   recouvrait le volet ; une étiquette l'avait remplacé le matin, puis Teo :
+   « il ne déroule plus sur la droite, il est bloqué ». Le rail s'ouvre de
+   nouveau par-dessus le volet. L'ombre des menus essayée ensuite faisait un
+   bord droit épais et flou (« le bout était trop large et pas assez fin ») :
+   le rail ouvert ne garde que son filet d'un pixel, un peu plus marqué. */
 @media (hover: hover) {
   .v2-laterale--fixe .v2-rail:hover,
   .v2-laterale--fixe .v2-rail:has(:focus-visible) {
-    box-shadow: var(--v2-ombre-menu);
+    border-right-color: var(--v2-a-500);
   }
 }
 .v2-rail-int {
