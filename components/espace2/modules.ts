@@ -97,7 +97,13 @@ export const MODULES: ModuleV2[] = [
   ]),
   m("varelo", "VARELO", "Référentiel du groupe", "Sociétés, lots et objets du groupe", Building),
   m("tavaro", "TAVARO", "Location", "Contrats, retours et barèmes", CarFront),
-  m("lorani", "LORANI", "Permis", "Demandes de permis et délais d'instruction", Stamp),
+  /* 29/10/2026 — refonte : une page par usage (docs/refonte-metiers/DECOUPAGES.md) */
+  m("lorani", "LORANI", "Permis", "Demandes de permis et délais d'instruction", Stamp, [
+    { libelle: "Vue d'ensemble", href: `${RACINE}/lorani`, exact: true },
+    { libelle: "Courrier à ranger", href: `${RACINE}/lorani/courrier` },
+    { libelle: "Honoraires et temps", href: `${RACINE}/lorani/honoraires` },
+    { libelle: "Réglages", href: `${RACINE}/lorani/reglages` },
+  ]),
   m("tiroma", "TIROMA", "Cabinet dentaire", "Créneaux, fauteuils et liste d'attente", Smile),
   m("tamila", "TAMILA", "Dossiers du cabinet", "Dossiers chiffrés et pièces", FolderLock),
   /* 29/10/2026 — refonte : une page par usage (docs/refonte-metiers/DECOUPAGES.md) */
