@@ -1,0 +1,836 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Le catalogue et la page d'une intégration de Linear (Settings ›
+   Integrations), au 1:1 (29/10/2026). Relevé au getComputedStyle, fenêtre
+   1440 × 900 puis 390 × 844 : docs/refonte-metiers/releves/linear-integrations.md.
+   Préfixe de classes : lig-. Première page : DALIRO, /espace2/daliro/annuaire
+   (components/espace2/daliro/Annuaire.tsx).
+
+   Couleurs : les jetons --lin-* de ./lin.css (clair et sombre). Tout le
+   reste — hauteurs, marges, rayons, polices, graisses — est la mesure de
+   Linear, recopiée.
+
+   Repères (px, depuis le bord du panneau) :
+     colonne           640 centrée ; en-tête padding 0 16, écart 4, 32 dessous ;
+                       titre 24/500/32 −0.16 ; sous-titre 13/450/22
+     recherche         640 × 44, trait 1, rayon 8, padding 12 12 12 40,
+                       15/400 ; loupe 16 à 17 du bord ; 48 dessous
+     carrousel         panneau 640, trait 0.5, rayon 6 ; pastille 11/500
+                       capitales à 16 du coin (padding 2.5 5 2, rayon 8) ;
+                       pied padding 16, écart 12 : logo 56 rayon 6, nom
+                       15/600/23, phrase 15/450/23, flèche 16 ; onglets 16
+                       dessous : 27 de haut, rayon 6, padding 2 16, écart 8,
+                       15/600/23, inactifs à 0.6 ; 48 dessous
+     sections          sur-titre 11/500 capitales, retrait 16 ; grille 16
+                       dessous, 3 colonnes (202.7), écart 16 ; 48 entre sections
+     carte             202.7 × 156, rayon 8, padding 16, anneau 0.5 + ombre ;
+                       colonne écart 12 : ligne 36 (logo 36 rayon 6, écart 8,
+                       nom 13/500), description 12/450 sur 4 lignes ;
+                       survol : fond un cran plus clair, rien d'autre
+     page d'une        retour 28 rayon plein (padding 0 8, 13/500, chevron 14) ;
+     intégration       logo 48 rayon 8 trait 1, à 16 du titre 18/500 et de la
+                       phrase 15/450/23 ; carte d'info rayon 10 trait 0.5
+                       padding 16 : méta 11/500 capitales / valeur 13/500 ;
+                       titre 15/500, texte 15/400/25.5 ; sections : titre
+                       15/500/23 (+ sous-titre 13/450/22), carte liste 16
+                       dessous, rayon 10, lignes padding 16 écart 12,
+                       séparateur 0.5 en retrait de 16 ; bouton 24 rayon plein
+     390               colonne à 22 du bord ; sous-titre 13/450/18 ; le
+                       carrousel devient une liste ; les cartes deviennent
+                       des lignes de 68 (padding 16 10.67, logo 36, nom
+                       13/500, description masquée, chevron 16)
+
+   Écart assumé : le panneau « À surveiller » n'a pas d'image ; sa hauteur
+   suit son texte (≈ 200) au lieu des 384 du visuel de Linear.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lin.lig {
+  display: block;
+  padding-bottom: 64px;
+  --lig-blanc: lch(100 5 286.91);
+  --lig-ombre: 0 3px 6px -2px lch(0 0 0 / 0.02), 0 1px 1px 0 lch(0 0 0 / 0.04);
+  --lig-ombre-carte: var(--lin-anneau), 0 0.5px 1px 1px lch(0 0 0 / 0.3);
+  --lig-carte-survol: color-mix(in srgb, var(--lin-detail), var(--lin-texte) 4%);
+  --lig-trait-champ: var(--lin-menu-bord);
+}
+html[data-v2-theme="light"] .v2 .lin.lig {
+  --lig-ombre-carte: 0 0 0 0.5px lch(0 0 0 / 0.088), 0 3px 6px -2px lch(0 0 0 / 0.02), 0 1px 1px 0 lch(0 0 0 / 0.04);
+  --lig-carte-survol: lch(96.5 0 282);
+  --lig-trait-champ: lch(84.44 0 282);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lin.lig {
+    --lig-ombre-carte: 0 0 0 0.5px lch(0 0 0 / 0.088), 0 3px 6px -2px lch(0 0 0 / 0.02), 0 1px 1px 0 lch(0 0 0 / 0.04);
+    --lig-carte-survol: lch(96.5 0 282);
+    --lig-trait-champ: lch(84.44 0 282);
+  }
+}
+
+/* ——— les teintes : pastilles d'initiales (à la place du logo) et états ——— */
+.v2 .lig [data-ton="0"] { --lig-ton: lch(52 46 290); }
+.v2 .lig [data-ton="1"] { --lig-ton: lch(54 44 250); }
+.v2 .lig [data-ton="2"] { --lig-ton: lch(56 42 200); }
+.v2 .lig [data-ton="3"] { --lig-ton: lch(56 46 150); }
+.v2 .lig [data-ton="4"] { --lig-ton: lch(60 52 75); }
+.v2 .lig [data-ton="5"] { --lig-ton: lch(56 54 45); }
+.v2 .lig [data-ton="6"] { --lig-ton: lch(52 54 20); }
+.v2 .lig [data-ton="7"] { --lig-ton: lch(50 44 330); }
+.v2 .lig [data-teinte="vert"] { --lig-teinte: var(--lin-vert); }
+.v2 .lig [data-teinte="ambre"] { --lig-teinte: var(--lin-jaune); }
+.v2 .lig [data-teinte="rouge"] { --lig-teinte: var(--lin-rouge); }
+.v2 .lig [data-teinte="bleu"] { --lig-teinte: var(--lin-fait); }
+.v2 .lig [data-teinte="gris"] { --lig-teinte: var(--lin-second); }
+
+.v2 .lig-pastille {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  background: var(--lig-ton, var(--lin-avatar));
+  color: var(--lig-blanc);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+.v2 .lig-pastille--16 {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  font-size: 8px;
+  letter-spacing: 0;
+}
+.v2 .lig-pastille--48 {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  font-size: 17px;
+  box-shadow: 0 0 0 1px var(--lin-trait);
+}
+.v2 .lig-pastille--56 {
+  width: 56px;
+  height: 56px;
+  font-size: 19px;
+  box-shadow: 0 6px 18px lch(0 0 0 / 0.02), 0 3px 9px lch(0 0 0 / 0.04), 0 1px 1px lch(0 0 0 / 0.04);
+}
+
+/* ——— la colonne de 640 et son en-tête ——— */
+.v2 .lig-colonne {
+  max-width: 640px;
+  margin: 0 auto;
+  padding-top: 64px;
+  display: flex;
+  flex-direction: column;
+}
+.v2 .lig-tete {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 16px;
+  margin-bottom: 32px;
+}
+.v2 .lin .lig-titre {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 32px;
+  letter-spacing: -0.16px;
+  color: var(--lin-titre);
+}
+.v2 .lig-sous {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 22px;
+  color: var(--lin-second);
+}
+
+/* ——— la recherche : 640 × 44 ——— */
+.v2 .lig-recherche {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 48px;
+}
+.v2 .lig-recherche > svg {
+  position: absolute;
+  left: 17px;
+  width: 16px;
+  height: 16px;
+  color: var(--lin-second);
+  pointer-events: none;
+}
+.v2 .lig-champ {
+  width: 100%;
+  height: 44px;
+  padding: 12px 12px 12px 40px;
+  border: 1px solid var(--lig-trait-champ);
+  border-radius: 8px;
+  background: transparent;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--lin-titre);
+  outline: none;
+}
+.v2 .lig-champ::placeholder {
+  color: var(--lin-second);
+}
+.v2 .lig-champ:focus-visible {
+  border-color: var(--lin-fait);
+}
+.v2 .lig-champ::-webkit-search-cancel-button {
+  display: none;
+}
+
+/* ——— « À surveiller » : le carrousel de Linear, sans image ——— */
+.v2 .lig-surveiller {
+  margin-bottom: 48px;
+}
+.v2 .lig-panneau {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 0.5px solid var(--lin-trait);
+  border-radius: 6px;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--lig-teinte, var(--lin-second)) 9%, transparent), transparent 70%),
+    var(--lin-detail);
+  color: var(--lin-titre);
+  transition: background-color 0.1s;
+}
+.v2 .lig-panneau:hover {
+  background-color: var(--lig-carte-survol);
+}
+.v2 .lig-panneau:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: 2px;
+}
+.v2 .lig-etiquette {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  padding: 2.5px 5px 2px;
+  border-radius: 8px;
+  background: var(--lin-detail);
+  box-shadow: var(--lin-anneau), var(--lig-ombre);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16.5px;
+  text-transform: uppercase;
+  color: var(--lin-titre);
+}
+.v2 .lig-panneau-corps {
+  margin: 0;
+  padding: 53px 16px 0;
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 23px;
+  color: var(--lin-second);
+}
+.v2 .lig-panneau-pied {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 16px;
+}
+.v2 .lig-panneau-texte {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.v2 .lig-panneau-nom {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 23px;
+  color: var(--lin-titre);
+}
+.v2 .lig-panneau-phrase {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 23px;
+  color: var(--lin-titre);
+}
+.v2 .lig-panneau-pied > svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--lin-second);
+}
+
+/* les onglets sous le panneau, puis ceux des rôles : 27, inactifs à 0.6 */
+.v2 .lig-onglets {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.v2 .lig-onglets::-webkit-scrollbar {
+  display: none;
+}
+.v2 .lig-onglets--roles {
+  margin: 0 0 32px;
+}
+.v2 .lig-onglet {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  height: 27px;
+  padding: 2px 16px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 23px;
+  color: var(--lin-titre);
+  white-space: nowrap;
+  opacity: 0.6;
+  transition: opacity 0.1s;
+}
+.v2 .lig-onglet:hover {
+  opacity: 0.8;
+}
+.v2 .lig-onglet[aria-selected="true"],
+.v2 .lig-onglet[aria-current="page"] {
+  opacity: 1;
+}
+.v2 .lig-onglet:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: -2px;
+}
+.v2 .lig-onglet-compte {
+  font-weight: 450;
+  color: var(--lin-second);
+}
+
+/* ——— les sections et la grille de cartes ——— */
+.v2 .lig-section {
+  margin-bottom: 48px;
+}
+.v2 .lin .lig-sur {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: normal;
+  text-transform: uppercase;
+  color: var(--lin-second);
+}
+.v2 .lig-grille {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.v2 .lig-carte {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 156px;
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--lin-detail);
+  box-shadow: var(--lig-ombre-carte);
+  overflow: hidden;
+  transition: all 0.1s;
+}
+.v2 .lig-carte:hover,
+.v2 .lig-carte:focus-within {
+  background: var(--lig-carte-survol);
+}
+.v2 .lig-lien {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: 8px;
+}
+.v2 .lig-lien:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: -2px;
+}
+.v2 .lig-carte-ligne {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  height: 36px;
+}
+.v2 .lig-carte-noms {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.v2 .lig-nom {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: normal;
+  color: var(--lin-titre);
+}
+.v2 .lig-roles {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: normal;
+  color: var(--lin-second);
+}
+.v2 .lig-desc {
+  margin: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: normal;
+  color: var(--lin-second);
+}
+.v2 .lig-carte[data-badge] .lig-desc {
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+.v2 .lig-chevron {
+  display: none;
+}
+
+/* le badge d'état (vigilance, chantier, confirmation) : point + texte */
+.v2 .lig-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 6px;
+  max-width: 100%;
+  height: 20px;
+  padding: 0 8px 0 6px;
+  border-radius: 9999px;
+  box-shadow: var(--lin-anneau);
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 20px;
+  color: var(--lin-texte);
+  white-space: nowrap;
+}
+.v2 .lig-carte .lig-badge {
+  margin-top: auto;
+}
+.v2 .lig-badge-texte {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lig-point {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--lig-teinte, var(--lin-second));
+}
+.v2 .lig-vide {
+  margin: 16px 0 0;
+  padding: 0 16px;
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 22px;
+  color: var(--lin-second);
+}
+.v2 .lig-vide[data-erreur] {
+  color: var(--lin-rouge);
+}
+
+/* la version liste (« Essentials » à 390) : masquée au large */
+.v2 .lig-surveiller-liste {
+  display: none;
+}
+
+/* ——— la page d'une entreprise : la page d'une intégration ——— */
+.v2 .lig-barre {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  height: 80px;
+  margin-bottom: -80px;
+  padding: 11px 9px 0;
+  background: linear-gradient(var(--lin-fond) 40px, transparent 80px);
+  pointer-events: none;
+}
+.v2 .lig-retour {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 9999px;
+  border: 0.5px solid transparent;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-second);
+  pointer-events: auto;
+  transition:
+    background 0.1s,
+    color 0.1s;
+}
+.v2 .lig-retour:hover {
+  background: var(--lin-survol);
+  color: var(--lin-texte);
+}
+.v2 .lig-retour:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: 1px;
+}
+.v2 .lig-retour svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .lig-fiche {
+  padding-top: 77px;
+}
+.v2 .lig-fiche-tete {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.v2 .lig-fiche-noms {
+  flex: 1;
+  min-width: 0;
+}
+.v2 .lin .lig-fiche-titre {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: normal;
+  color: var(--lin-titre);
+  overflow-wrap: anywhere;
+}
+.v2 .lig-fiche-phrase {
+  margin: 2px 0 0;
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 23px;
+  color: var(--lin-second);
+}
+
+.v2 .lig-info {
+  padding: 16px;
+  border: 0.5px solid var(--lin-trait);
+  border-radius: 10px;
+  background: var(--lin-detail);
+}
+.v2 .lig-metas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 32px;
+  margin: 0;
+}
+.v2 .lig-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.v2 .lig-meta dt {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16.5px;
+  text-transform: uppercase;
+  color: var(--lin-second);
+}
+.v2 .lig-meta dd {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 19.5px;
+  color: var(--lin-texte);
+}
+.v2 .lin .lig-info-titre {
+  margin: 24px 0 8px;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 18.75px;
+  color: var(--lin-titre);
+}
+.v2 .lig-coord {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 25.5px;
+  color: var(--lin-second);
+  overflow-wrap: anywhere;
+}
+.v2 .lig-coord a {
+  color: var(--lin-fait);
+}
+.v2 .lig-coord a:hover {
+  text-decoration: underline;
+}
+.v2 .lig-coord-libelle {
+  color: var(--lin-texte);
+}
+
+.v2 .lig-bloc {
+  margin-top: 48px;
+}
+.v2 .lig-bloc-tete {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding-left: 16px;
+}
+.v2 .lig-bloc-noms {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.v2 .lin .lig-bloc-titre {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 23px;
+  color: var(--lin-titre);
+}
+.v2 .lig-bloc-sous {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 22px;
+  color: var(--lin-second);
+}
+.v2 .lig-petit {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 9999px;
+  background: var(--lin-pastille);
+  box-shadow: var(--lin-anneau), var(--lig-ombre);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-texte);
+  white-space: nowrap;
+  transition: background 0.1s;
+}
+.v2 .lig-petit:hover {
+  background: var(--lin-pastille-active);
+  color: var(--lin-titre);
+}
+.v2 .lig-petit:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: 1px;
+}
+.v2 .lig-petit svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .lig-liste {
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+  border-radius: 10px;
+  background: var(--lin-detail);
+  box-shadow: var(--lig-ombre-carte);
+}
+.v2 .lig-rang {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 16px;
+  transition: background 0.1s;
+}
+.v2 .lig-rang:first-child {
+  border-radius: 10px 10px 0 0;
+}
+.v2 .lig-rang:last-child {
+  border-radius: 0 0 10px 10px;
+}
+.v2 .lig-rang:only-child {
+  border-radius: 10px;
+}
+.v2 .lig-rang:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 0;
+  border-bottom: 0.5px solid var(--lin-trait);
+  pointer-events: none;
+}
+.v2 .lig-rang:has(.lig-lien):hover,
+.v2 .lig-rang:has(.lig-lien):focus-within {
+  background: var(--lig-carte-survol);
+}
+.v2 .lig-rang .lig-lien {
+  border-radius: inherit;
+}
+.v2 .lig-rang-texte {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.v2 .lig-rang-titre {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: normal;
+  color: var(--lin-titre);
+  overflow-wrap: anywhere;
+}
+.v2 .lig-rang-aide {
+  font-size: 12px;
+  font-weight: 450;
+  line-height: normal;
+  color: var(--lin-second);
+  overflow-wrap: anywhere;
+}
+.v2 .lig-rang-aide--seule {
+  font-size: 13px;
+}
+.v2 .lig-rang .lig-badge {
+  align-self: center;
+  flex-shrink: 0;
+}
+.v2 .lig-rang > svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--lin-second);
+}
+
+/* ——— étroit : 390 ——— */
+@container principale (max-width: 640px) {
+  .v2 .lig-colonne {
+    padding: 16px 22px 0;
+  }
+  .v2 .lig-sous {
+    line-height: 18px;
+  }
+  /* le carrousel disparaît, remplacé par une section en liste */
+  .v2 .lig-surveiller {
+    display: none;
+  }
+  .v2 .lig-surveiller-liste {
+    display: block;
+  }
+  /* la grille devient une liste : lignes de 68, description masquée, chevron */
+  .v2 .lig-grille {
+    display: block;
+    border-radius: 10px;
+    background: var(--lin-detail);
+    box-shadow: var(--lig-ombre-carte);
+  }
+  .v2 .lig-carte {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    height: 68px;
+    padding: 16px 10.67px;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    overflow: visible;
+  }
+  .v2 .lig-carte:first-child {
+    border-radius: 10px 10px 0 0;
+  }
+  .v2 .lig-carte:last-child {
+    border-radius: 0 0 10px 10px;
+  }
+  .v2 .lig-carte:only-child {
+    border-radius: 10px;
+  }
+  .v2 .lig-carte:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 0;
+    border-bottom: 0.5px solid var(--lin-trait);
+    pointer-events: none;
+  }
+  .v2 .lig-carte .lig-lien {
+    border-radius: inherit;
+  }
+  .v2 .lig-carte-ligne {
+    flex: 1;
+  }
+  .v2 .lig-desc {
+    display: none;
+  }
+  /* le badge garde son point ; son texte reste lu par les lecteurs d'écran */
+  .v2 .lig-carte .lig-badge {
+    margin-top: 0;
+    align-self: center;
+    flex-shrink: 0;
+    width: 20px;
+    padding: 0;
+    justify-content: center;
+    box-shadow: none;
+  }
+  .v2 .lig-carte .lig-badge-texte {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .v2 .lig-point {
+    width: 8px;
+    height: 8px;
+  }
+  .v2 .lig-chevron {
+    display: block;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    color: var(--lin-compte);
+  }
+  .v2 .lig-onglet {
+    padding: 2px 10px;
+  }
+
+  .v2 .lig-barre {
+    padding: 11px 13px 0;
+  }
+  .v2 .lig-fiche {
+    padding-top: 56px;
+  }
+  .v2 .lig-info {
+    padding: 16px 10.67px;
+  }
+  .v2 .lig-rang {
+    padding: 16px 10.67px;
+    gap: 8px;
+  }
+  .v2 .lig-rang .lig-badge-texte {
+    max-width: 110px;
+  }
+}

@@ -501,7 +501,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire, sections
       {/* ——— planning ——— */}
       {voir("planning") ? (
         <>
-      <section className="esp-carte" aria-label="Planning">
+      <section id="planning" className="esp-carte" aria-label="Planning">
         <div className="esp-carte-tete">
           <div className="esp-section-titre" style={{ margin: 0 }}>Planning — passages à venir et confirmation à J-2</div>
           <div className="esp-actions" style={{ marginTop: 0 }}>
@@ -560,7 +560,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire, sections
       {/* ——— avenants ——— */}
       {voir("avenants") ? (
         <>
-      <section className="esp-carte" aria-label="Avenants">
+      <section id="avenants" className="esp-carte" aria-label="Avenants">
         <div className="esp-section-titre">Travaux supplémentaires — {avenants.length ? `${avenants.length} avenant(s), ${avenants.filter((a) => a.statut === "signe").length} signé(s)` : "aucun avenant"}</div>
         {avenants.map((a) => {
           const st = STATUTS_AVENANT[a.statut];
@@ -620,16 +620,16 @@ export default function ChantierVue({ tableau, source, onLocal, relire, sections
 
       {/* ——— fil du chantier : photos, vocaux, messages (b6_24) ——— */}
       {voir("fil") ? (
-        <>
+        <div id="fil">
       <FilCarte key={`fil-${c.id}`} tableau={tableau} source={source} relire={relire} />
-        </>
+        </div>
       ) : null}
 
       {/* ——— situations de travaux (b6_12) ——— */}
       {voir("situations") ? (
-        <>
+        <div id="situations">
       <SituationsCarte tableau={tableau} source={source} onLocal={onLocal} relire={relire} />
-        </>
+        </div>
       ) : null}
 
       {/* ——— heures pointées et rentabilité (b6_17) ——— */}

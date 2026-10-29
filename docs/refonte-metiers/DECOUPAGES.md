@@ -25,7 +25,29 @@ sont le contrat : chaque bloc et chaque geste qu'ils listent garde une place ci-
 6. **Exemple et réel** : chaque sous-page garde la bascule de l'écran actuel.
 7. **L'ancien écran reste** sous `?ancien=1` tant que Teo n'a pas validé le nouveau.
 
-## DALIRO — Chantiers (pilote)
+## DALIRO — Chantiers (pilote) — FAIT le 29/10/2026
+
+Références retenues avec Teo (uniquement des pages jamais reprises, remplies de contenu de test avant le relevé ;
+relevés dans `releves/`) :
+
+| Page | Route | Référence |
+|---|---|---|
+| Vue d'ensemble | `/espace2/daliro` | Linear, Home d'une équipe |
+| Chantiers | `/espace2/daliro/chantiers` | Linear, Projects en Timeline |
+| Fiche d'un chantier | `/espace2/daliro/chantiers/[id]` | Linear, page d'une Initiative (Initiatives activées le 29/10 avec l'accord de Teo) |
+| À ranger | `/espace2/daliro/a-ranger` | Linear, Triage (activé le 29/10 avec l'accord de Teo) |
+| À faire | `/espace2/daliro/a-faire` | Plain, Tasks |
+| Avenants et situations | `/espace2/daliro/avenants` | Plain, Broadcasts |
+| Annuaire | `/espace2/daliro/annuaire` | Linear, Settings › Integrations |
+| Équipes | `/espace2/daliro/equipes` | Linear, Timeline (même frise) |
+| Réglages | `/espace2/daliro/reglages` | Linear, Settings › Labels et Templates |
+
+Déjà repris avant le 29/10, donc exclus pour les métiers suivants : Linear Projects (liste et page projet), Inbox, Board,
+liste et page d'un ticket, Cycles, Docs, Pulse, Customers, Settings › Preferences et Members, Agent ; Plain All threads,
+un fil, Tenants (liste et fiche), Insights/rapports, Settings, Workflows, éditeur, Runs.
+
+Le découpage ci-dessous est la proposition d'avant les références ; la table ci-dessus fait foi.
+
 
 Le dossier d'un chantier empile 17 cartes, dont 5 valent pour toute l'entreprise (§ 8.2, 8.4-9).
 
