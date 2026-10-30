@@ -1083,3 +1083,76 @@ html[data-v2-theme="light"] .v2 .lin :is(.lit-carte, .lit-maj) {
     padding-left: 84px;
   }
 }
+
+/* ——— 30/10/2026 : Terrain et Argent, plus courts ———
+   « l'essentiel » en tête (chiffres en cartes de la grille du volet, 0.5 de filet,
+   rayon 12 ; phrases à pastille), puis les parties en pilules de 28 (comme les onglets) :
+   une carte de l'écran d'avant à la fois */
+.v2 .lit-essentiel { display: flex; flex-direction: column; gap: 12px; margin: 0 0 20px; }
+.v2 .lit-essentiel-chiffres { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+.v2 .lit-essentiel-chiffre {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 0.5px solid var(--lin-trait);
+  background: var(--lin-detail);
+}
+.v2 .lit-essentiel-chiffre > span { font-size: 12px; font-weight: 450; color: var(--lin-second); }
+.v2 .lit-essentiel-chiffre > strong { font-size: 18px; font-weight: 600; line-height: 24px; color: var(--lin-titre); font-variant-numeric: tabular-nums; }
+.v2 .lit-essentiel-chiffre[data-fort] { border-color: color-mix(in srgb, var(--lin-fait) 55%, transparent); }
+.v2 .lit-essentiel-note { margin: 0; font-size: 13px; color: var(--lin-second); }
+.v2 .lit-essentiel-phrases { display: flex; flex-direction: column; gap: 2px; margin: 0 -8px; padding: 0; list-style: none; }
+.v2 .lit-essentiel-phrase {
+  display: grid;
+  grid-template-columns: 6px minmax(0, 1fr) 14px;
+  align-items: start;
+  column-gap: 10px;
+  padding: 7px 8px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 18px;
+  color: var(--lin-texte);
+}
+.v2 .lit-essentiel-phrase[data-teinte="rouge"] { --lit-t: var(--lin-rouge); }
+.v2 .lit-essentiel-phrase[data-teinte="ambre"] { --lit-t: var(--lin-jaune); }
+.v2 .lit-essentiel-phrase[data-teinte="bleu"] { --lit-t: var(--lin-fait); }
+.v2 .lit-essentiel-phrase[data-teinte="vert"] { --lit-t: var(--lin-vert); }
+.v2 .lit-essentiel-phrase::before { content: ""; width: 6px; height: 6px; margin-top: 6px; border-radius: 50%; background: var(--lit-t, var(--lin-second)); }
+.v2 .lit-essentiel-phrase svg { width: 14px; height: 14px; margin-top: 2px; color: var(--lin-second); opacity: 0; }
+.v2 a.lit-essentiel-phrase:hover { background: var(--lin-survol); }
+.v2 a.lit-essentiel-phrase:hover svg { opacity: 1; }
+.v2 .lit-parties { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; padding-bottom: 12px; border-bottom: 0.5px solid var(--lin-trait); }
+.v2 .lit-partie {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 9999px;
+  background: var(--lin-bouton);
+  box-shadow: var(--lin-anneau);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+.v2 .lit-partie:hover { color: var(--lin-texte); }
+.v2 .lit-partie[aria-current="page"] { background: var(--lin-pastille-active); color: var(--lin-titre); }
+.v2 .lit-partie--tout { margin-left: auto; background: none; box-shadow: none; }
+/* une seule écriture dans la fiche : les cartes de l'écran d'avant (Geist Mono, Source Code Pro,
+   Manrope, en-têtes en capitales) prennent l'Inter de la page ; les nombres gardent des chiffres
+   de même largeur. Limité à la fiche refaite : /espace ne change pas. */
+.v2 .lit :is(.lit-gestes, .lit-volet) :is(.esp-mono, .esp-item-montant, .esp-num, th, .esp-section-titre, .esp-kpi-valeur) {
+  font-family: inherit;
+  letter-spacing: normal;
+}
+.v2 .lit :is(.lit-gestes, .lit-volet) th {
+  text-transform: none;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-second);
+}
+.v2 .lit :is(.lit-gestes, .lit-volet) :is(.esp-mono, .esp-item-montant, .esp-num) { font-variant-numeric: tabular-nums; }
+.v2 .lit .lit-gestes .esp-section-titre { font-size: 15px; font-weight: 600; color: var(--lin-titre); }

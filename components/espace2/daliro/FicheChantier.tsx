@@ -47,20 +47,37 @@ import { RACINE } from "@/components/espace2/modules";
 import { IconeCalendrier, IconeDocument, IconeGroupe, IconeJauge, IconeSante, IconeStatutProjet, type EtatProjet, type Sante } from "../lin/icones";
 import { useToast } from "../Toasts";
 import { useDaliro } from "./donnees";
+import Essentiel from "./Essentiel";
 import "../lin/lin.css";
 import "../lin/linear-initiative.css";
 
 const BASE = `${RACINE}/daliro`;
 
 type CleOnglet = "apercu" | "terrain" | "argent" | "fil" | "reception";
+/* 30/10/2026 : Terrain et Argent montrent une partie à la fois (?partie=, pastilles sous les onglets),
+   la plus utile d'abord ; « Tout » rend l'ancienne pile. Les ancres des repères (#planning, #avenants,
+   #situations) choisissent leur partie. */
 const ONGLETS: { cle: CleOnglet; libelle: string; sections?: SectionChantier[] }[] = [
   { cle: "apercu", libelle: "Aperçu" },
-  { cle: "terrain", libelle: "Terrain", sections: ["controles", "questions", "meteo", "planning", "appro"] },
-  { cle: "argent", libelle: "Argent", sections: ["marche", "lots", "avenants", "situations", "heures", "factures"] },
+  { cle: "terrain", libelle: "Terrain", sections: ["planning", "controles", "questions", "appro", "meteo"] },
+  { cle: "argent", libelle: "Argent", sections: ["avenants", "situations", "marche", "lots", "factures", "heures"] },
   { cle: "fil", libelle: "Fil", sections: ["fil"] },
   { cle: "reception", libelle: "Réception", sections: ["reception"] },
 ];
 const estOnglet = (v: string | null): v is CleOnglet => ONGLETS.some((o) => o.cle === v);
+const PARTIES: Partial<Record<SectionChantier, string>> = {
+  planning: "Planning",
+  controles: "Points à régler",
+  questions: "Questions",
+  appro: "Approvisionnement",
+  meteo: "Météo",
+  avenants: "Avenants",
+  situations: "Situations",
+  marche: "Marché",
+  lots: "Lots et déboursé",
+  factures: "Factures",
+  heures: "Heures",
+};
 
 /* les teintes des états (etats.ts) dans celles du gabarit */
 type TeinteLin = "vert" | "jaune" | "rouge" | "bleu" | "gris";
@@ -218,6 +235,24 @@ export default function FicheChantier({ id }: { id: string }) {
 
   const statut = t ? STATUTS_CHANTIER[t.chantier.statut] : null;
   const courant = ONGLETS.find((x) => x.cle === onglet);
+  const auj = useMemo(() => jourLocal(), []);
+  /* la partie montrée : ?partie=, sinon l'ancre d'un repère, sinon la première ; « tout » rend la pile */
+  const [ancre, setAncre] = useState("");
+  useEffect(() => {
+    const lire = () => setAncre(decodeURIComponent(window.location.hash.slice(1)));
+    lire();
+    window.addEventListener("hashchange", lire);
+    return () => window.removeEventListener("hashchange", lire);
+  }, []);
+  const pParam = params.get("partie");
+  const parties = courant?.sections && courant.sections.length > 1 ? courant.sections : null;
+  const partie: SectionChantier | "tout" | null = !parties
+    ? null
+    : pParam === "tout"
+      ? "tout"
+      : parties.find((x) => x === pParam) ?? parties.find((x) => x === ancre) ?? parties[0];
+  const lienPartie = (x: SectionChantier | "tout") => `${chemin}?onglet=${onglet}&partie=${x}`;
+  const sectionsMontrees = partie === null || partie === "tout" ? courant?.sections : [partie];
 
   return (
     <div className="lin lit">
@@ -291,8 +326,21 @@ export default function FicheChantier({ id }: { id: string }) {
                 {onglet === "reception" && !t.reception && !["ouvert", "suspendu", "receptionne", "clos"].includes(t.chantier.statut) ? (
                   <p className="lit-vide">La réception se prononce sur un chantier ouvert ou suspendu. Ouvrez d&apos;abord le chantier, depuis les détails.</p>
                 ) : null}
+                {onglet === "terrain" || onglet === "argent" ? <Essentiel t={t} onglet={onglet} auj={auj} /> : null}
+                {parties ? (
+                  <nav className="lit-parties" aria-label={`Parties de l'onglet ${courant?.libelle ?? ""}`}>
+                    {parties.map((x) => (
+                      <Link key={x} href={lienPartie(x)} scroll={false} className="lit-partie" aria-current={partie === x ? "page" : undefined}>
+                        {PARTIES[x] ?? x}
+                      </Link>
+                    ))}
+                    <Link href={lienPartie("tout")} scroll={false} className="lit-partie lit-partie--tout" aria-current={partie === "tout" ? "page" : undefined}>
+                      Tout voir
+                    </Link>
+                  </nav>
+                ) : null}
                 <Habille>
-                  <ChantierVue key={`${onglet}-${source}-${id}`} tableau={t} source={source} onLocal={onLocal} relire={relire} sections={courant?.sections} />
+                  <ChantierVue key={`${onglet}-${source}-${id}`} tableau={t} source={source} onLocal={onLocal} relire={relire} sections={sectionsMontrees} />
                 </Habille>
               </div>
             )}

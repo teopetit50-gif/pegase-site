@@ -81,7 +81,7 @@ export function phrasesChantier(c: Chantier, t: Tableau | null, auj: string): Ph
   const r: Phrase[] = [];
   const voitPrix = t ? t.voit_prix : false;
   if (t) {
-    for (const k of t.controles.filter((x) => x.gravite === "bloquant")) r.push({ cle: `k-${k.code}-${k.objet_id}`, teinte: "rouge", texte: sansNomDeChantier(k.message, c.nom), href: lienFiche(c.id, "terrain") });
+    for (const k of t.controles.filter((x) => x.gravite === "bloquant")) r.push({ cle: `k-${k.code}-${k.objet_id}`, teinte: "rouge", texte: sansNomDeChantier(k.message, c.nom), href: `${lienFiche(c.id, "terrain")}&partie=controles` });
     const mo = c.maitre_ouvrage_nom ?? "le maître d'ouvrage";
     for (const a of t.avenants.filter((x) => x.statut === "soumis"))
       r.push({ cle: `a-${a.id}`, teinte: "ambre", texte: `Avenant n° ${a.numero}${voitPrix && a.montant_ht !== null ? ` de ${montant(a.montant_ht)} HT` : ""} : ${mo} doit le signer avant que les travaux commencent.`, href: `${BASE}/avenants?avenant=${encodeURIComponent(a.id)}` });
