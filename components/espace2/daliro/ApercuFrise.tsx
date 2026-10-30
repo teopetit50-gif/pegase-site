@@ -12,10 +12,13 @@
      · un passage : qui, quoi, quand, sur quel lot, ce que l'intervenant a
        répondu, et où agir (« À faire » pour noter la réponse, le planning
        du chantier pour le décaler).
-   Lecture seule : les gestes restent dans leurs pages, rien n'est réécrit.
+   Lecture seule : les gestes restent dans leurs pages, rien n'est réécrit —
+   sauf les heures d'un passage (30/10/2026, b6_82) : arrivée et départ se
+   posent ici, la page les écrit (onHeures).
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
+import { useState } from "react";
 import { ArrowLeft, ArrowRight, X } from "lucide-react";
 import { dateCourte } from "@/components/espace/format";
 import { STATUTS_CHANTIER } from "@/components/espace/daliro/etats";
@@ -41,6 +44,7 @@ export default function ApercuFrise({
   onPassage,
   onChantier,
   onFermer,
+  onHeures,
 }: {
   chantier: Chantier;
   tableau: Tableau | null;
@@ -50,6 +54,8 @@ export default function ApercuFrise({
   onPassage: (id: string) => void;
   onChantier: () => void;
   onFermer: () => void;
+  /* poser ou retirer les heures d'un passage prévu (« 07:30 », « 12:00 », ou null et null) */
+  onHeures?: (p: Passage, debut: string | null, fin: string | null) => void;
 }) {
   return (
     <aside className="ltl-apercu" aria-label={passage ? `Passage : ${passage.tache ?? "sans tâche"}` : `Aperçu : ${chantier.nom}`}>
@@ -68,7 +74,7 @@ export default function ApercuFrise({
           <X aria-hidden="true" />
         </button>
       </div>
-      {passage ? <VuePassage chantier={chantier} p={passage} auj={auj} /> : <VueChantier c={chantier} t={tableau} auj={auj} lecture={lecture} onPassage={onPassage} />}
+      {passage ? <VuePassage chantier={chantier} p={passage} auj={auj} onHeures={onHeures} /> : <VueChantier c={chantier} t={tableau} auj={auj} lecture={lecture} onPassage={onPassage} />}
     </aside>
   );
 }
@@ -190,8 +196,14 @@ function VueChantier({ c, t, auj, lecture, onPassage }: { c: Chantier; t: Tablea
   );
 }
 
-function VuePassage({ chantier, p, auj }: { chantier: Chantier; p: Passage; auj: string }) {
+const hhmm = (t: string | null | undefined) => (t ? t.slice(0, 5) : "");
+
+function VuePassage({ chantier, p, auj, onHeures }: { chantier: Chantier; p: Passage; auj: string; onHeures?: (p: Passage, debut: string | null, fin: string | null) => void }) {
   const conf = CONFIRMATION_CLAIRE[p.confirmation];
+  const [hd, setHd] = useState(hhmm(p.heure_debut));
+  const [hf, setHf] = useState(hhmm(p.heure_fin));
+  const change = hd !== hhmm(p.heure_debut) || hf !== hhmm(p.heure_fin);
+  const incomplet = !!hd !== !!hf;
   const ph = phrasePassage(p, auj);
   const dans = ecartJours(p.debut, auj);
   return (
@@ -215,6 +227,25 @@ function VuePassage({ chantier, p, auj }: { chantier: Chantier; p: Passage; auj:
         <dl className="ltl-apercu-props">
           <dt>Quand</dt>
           <dd>{p.debut.slice(0, 10) === p.fin.slice(0, 10) ? `${quand(p.debut, auj)} (${dateCourte(p.debut)})` : `${dateCourte(p.debut)} → ${dateCourte(p.fin)}`}</dd>
+          <dt>Heures</dt>
+          <dd>
+            {p.statut === "prevu" && onHeures ? (
+              <span className="ltl-apercu-heures">
+                <input type="time" step={900} value={hd} onChange={(e) => setHd(e.target.value)} aria-label="Heure d'arrivée" />
+                <span aria-hidden="true">→</span>
+                <input type="time" step={900} value={hf} onChange={(e) => setHf(e.target.value)} aria-label="Heure de départ" />
+                {change ? (
+                  <button type="button" className="v2-btn v2-btn--petit" disabled={incomplet} title={incomplet ? "L'arrivée et le départ, ou aucun des deux" : undefined} onClick={() => onHeures(p, hd || null, hf || null)}>
+                    Enregistrer
+                  </button>
+                ) : null}
+              </span>
+            ) : p.heure_debut ? (
+              `${hhmm(p.heure_debut)} → ${hhmm(p.heure_fin)}`
+            ) : (
+              "Toute la journée"
+            )}
+          </dd>
           <dt>Qui</dt>
           <dd>
             {qui(p)}

@@ -35,7 +35,8 @@
    (onChanger) : en exemple, tout s'applique en mémoire ; en base réelle,
    seul le bord droit a une porte (btp_recaler, avec sa fenêtre de
    confirmation) — la base ne sait pas encore déplacer le début d'un passage.
-   Les passages ne portent pas d'heures en base : le planning est au jour.
+   Les heures (b6_82, facultatives) s'affichent en tête du bloc ; elles se
+   posent dans l'aperçu du passage.
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
@@ -404,7 +405,10 @@ export default function Planning({
                         onPassage(p.id);
                       }}
                     >
-                      <span className="fpl-bloc-ligne fpl-bloc-ligne--1">{p.tache ?? lot ?? "Passage"}</span>
+                      <span className="fpl-bloc-ligne fpl-bloc-ligne--1">
+                        {p.heure_debut ? <span className="fpl-heures">{`${p.heure_debut.slice(0, 5).replace(":", "h")}–${(p.heure_fin ?? "").slice(0, 5).replace(":", "h")}`}</span> : null}
+                        {p.tache ?? lot ?? "Passage"}
+                      </span>
                       <span className="fpl-bloc-ligne">{bl.chantier.nom}</span>
                       {lot && p.tache ? <span className="fpl-bloc-ligne">{lot}</span> : null}
                       <span className="fpl-pastille">{fait ? "fait" : REPONSE[p.confirmation]}</span>

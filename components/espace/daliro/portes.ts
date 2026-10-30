@@ -235,6 +235,10 @@ export async function proposerRecalage(passage: string, nouvelleFin: string): Pr
 export async function recaler(passage: string, nouvelleFin: string, motif: string | null): Promise<Recalage> {
   return rpc<Recalage>("btp_recaler", { p_passage: passage, p_nouvelle_fin: nouvelleFin, p_motif: motif });
 }
+/* b6_82 : poser les jours (début compris) et les heures d'un passage prévu ; la suite qui en dépend est recalée */
+export async function deplacerPassage(passage: string, debut: string, fin: string, heureDebut: string | null, heureFin: string | null, motif: string | null): Promise<{ passage_id: string; confirmation: string; reconfirmer: boolean; recalage: Recalage | null }> {
+  return rpc("btp_deplacer_passage", { p_passage: passage, p_debut: debut, p_fin: fin, p_heure_debut: heureDebut, p_heure_fin: heureFin, p_motif: motif });
+}
 
 export async function terminerPassage(passage: string, finReelle: string): Promise<unknown> {
   return rpc("btp_terminer_passage", { p_passage: passage, p_fin_reelle: finReelle });

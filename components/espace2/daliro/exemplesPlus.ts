@@ -61,7 +61,7 @@ const EQUIPES = [
 const NOMS: Record<string, string> = Object.fromEntries([...TIERS.map((t) => [t.id, t.nom]), ...EQUIPES.map((e) => [e.id, e.nom])]);
 
 type LotDef = { n: number; code: string; libelle: string; corps: string; par: string; equipe?: boolean; statut?: Lot["statut"] };
-type PassDef = { n: number; lot: number; tache: string; du: number; au: number; conf: Confirmation; fait?: boolean };
+type PassDef = { n: number; lot: number; tache: string; du: number; au: number; conf: Confirmation; fait?: boolean; h?: [string, string] };
 
 function chantier(o: {
   n: number; nom: string; ref: string; adresse: string; cp: string; commune: string; mo: string; moType: Chantier["maitre_ouvrage_type"];
@@ -80,7 +80,7 @@ function chantier(o: {
       id: id(p.n), chantier_id: cid, lot_id: id(lot.n), lot_code: lot.code, lot_libelle: lot.libelle,
       equipe_id: lot.equipe ? lot.par : null, tiers_id: lot.equipe ? null : lot.par, intervenant_type: lot.equipe ? "equipe" : "tiers",
       intervenant_lu: NOMS[lot.par], intervenant_nom: NOMS[lot.par], rapprochement: "identique", tache: p.tache,
-      debut: aujourdHui(p.du), fin: aujourdHui(p.au), exterieur: !lot.equipe, statut: p.fait ? "fait" : "prevu",
+      debut: aujourdHui(p.du), fin: aujourdHui(p.au), heure_debut: p.h ? `${p.h[0]}:00` : null, heure_fin: p.h ? `${p.h[1]}:00` : null, exterieur: !lot.equipe, statut: p.fait ? "fait" : "prevu",
       confirmation: p.conf, confirmation_le: p.conf === "non_demandee" ? null : quand, source: "saisie", source_ref: null, version: 1, confirmations: [],
     };
   });
@@ -127,7 +127,7 @@ const LISTE: Tableau[] = [
     passages: [
       { n: 24, lot: 21, tache: "Ossatures et premières plaques", du: -6, au: -2, conf: "confirmee", fait: true },
       { n: 25, lot: 21, tache: "Bandes et enduits", du: 0, au: 3, conf: "confirmee" },
-      { n: 26, lot: 22, tache: "Passage des gaines", du: 4, au: 5, conf: "demandee" },
+      { n: 26, lot: 22, tache: "Passage des gaines", du: 4, au: 5, conf: "demandee", h: ["08:00", "16:00"] },
       { n: 27, lot: 23, tache: "Pose des blocs-portes", du: 7, au: 10, conf: "non_demandee" },
       { n: 28, lot: 22, tache: "Appareillage et tableau", du: 14, au: 15, conf: "non_demandee" },
     ],
@@ -142,9 +142,9 @@ const LISTE: Tableau[] = [
     ],
     passages: [
       { n: 34, lot: 31, tache: "Fabrication des comptoirs", du: -4, au: 1, conf: "confirmee" },
-      { n: 35, lot: 32, tache: "Arrivées d'eau du labo", du: 1, au: 2, conf: "sans_reponse" },
+      { n: 35, lot: 32, tache: "Arrivées d'eau du labo", du: 1, au: 2, conf: "sans_reponse", h: ["07:30", "12:00"] },
       { n: 36, lot: 31, tache: "Pose des comptoirs", du: 4, au: 6, conf: "non_demandee" },
-      { n: 37, lot: 33, tache: "Rubans LED des vitrines", du: 5, au: 5, conf: "confirmee" },
+      { n: 37, lot: 33, tache: "Rubans LED des vitrines", du: 5, au: 5, conf: "confirmee", h: ["14:00", "17:30"] },
       { n: 38, lot: 32, tache: "Raccordement du four", du: 11, au: 11, conf: "non_demandee" },
     ],
   }),
