@@ -1,0 +1,126 @@
+/* ══════════════════════════════════════════════════════════════════════
+   OFFLOAD — la boîte des échéances (28/10/2026) : les retouches propres à
+   ./BoiteEcheances.tsx, posées sur ../lin/lin.css sans le modifier.
+     · le menu « Filtrer » de la liste : des sections titrées, qui défilent ;
+     · le composeur « Noter une intervention… » de la page d'un ticket, et
+       ses champs ;
+     · l'avis qui suit un geste (vert : fait ; rouge : refusé) ;
+     · la largeur du corps de la page d'un ticket quand elle passe en colonne.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lin .lin-ech-menu {
+  max-height: min(70vh, 560px);
+  overflow-y: auto;
+  padding-bottom: 4px;
+}
+.v2 .lin .lin-ech-menu-titre {
+  margin: 0;
+  padding: 10px 16px 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--lin-second);
+}
+.v2 .lin .lin-ech-menu .lin-menu-option svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.v2 .lin .lin-ech-menu .lin-menu-option > span:not(.lin-meta) {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* « Noter une intervention… » : le composeur de la page d'un ticket (lin-ticket-composeur),
+   qui s'ouvre sur les champs de l'ancienne fiche (ParcCompte) : date, nature, n° de bon */
+.v2 .lin .lin-ech-composeur-appel {
+  display: block;
+  width: 100%;
+  min-height: 24px;
+  padding: 0;
+  text-align: left;
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--lin-second);
+  cursor: text;
+}
+.v2 .lin .lin-ech-form-ligne {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.v2 .lin .lin-ech-champ {
+  display: grid;
+  flex: 1 1 120px;
+  min-width: 0;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-second);
+}
+.v2 .lin .lin-ech-champ :is(input, select) {
+  height: 28px;
+  width: 100%;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 0.5px solid var(--lin-trait);
+  background: var(--lin-fond);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--lin-texte);
+  color-scheme: inherit;
+}
+.v2 .lin .lin-ech-case {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: auto;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+}
+.v2 .lin .lin-ech-gris {
+  color: var(--lin-second);
+}
+.v2 .lin .lin-ticket-fil .lin-ticket-fil-actions .lin-ic {
+  width: 14px;
+  height: 14px;
+}
+
+.v2 .lin .lin-ech-avis {
+  margin: 16px 0 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 20px;
+  color: var(--lin-teinte, var(--lin-texte));
+  background: color-mix(in srgb, var(--lin-teinte, var(--lin-second)) 12%, transparent);
+}
+.v2 .lin .lin-boite-vide .lin-ech-avis {
+  max-width: 360px;
+  text-align: center;
+}
+.v2 .lin .lin-ech-vide-sous {
+  max-width: 360px;
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+  text-align: center;
+  color: var(--lin-second);
+}
+
+/* en colonne (détail étroit), .lin-ticket aligne au début : sans largeur, le corps prendrait la
+   largeur « min-content » d'une ligne liée (son nom ne se coupe pas) et déborderait à 390 px */
+.v2 .lin .lin-ticket-corps {
+  width: 100%;
+}
+
+/* la cloche de la tête du détail fait défiler jusqu'à « Activité » : le titre s'arrête sous la barre
+   du site (48) et la tête collante du détail (44), au lieu de passer dessous */
+.v2 .lin #ech-activite {
+  scroll-margin-top: 104px;
+}

@@ -1,0 +1,830 @@
+/* ══════════════════════════════════════════════════════════════════════
+   La liste des workflows de Plain, au 1:1 — 28/10/2026 (2e vague)
+
+   Relevée au getComputedStyle dans l'espace Plain de Teo (app.plain.com,
+   fenêtre de 1600 px, thème sombre), panneau de 1239 de large. Les couleurs
+   sont celles du gabarit (--lin-*, lin.css : clair et sombre) ; tout le
+   reste (hauteurs, écarts, polices, graisses, rayons, colonnes) est celui
+   de Plain, au pixel. Relevé : scratchpad/releve-plain-workflows.md.
+
+   Repères, en px depuis le bord gauche du panneau :
+     tête        padding 24 24 24 (58 de haut : bouton 34 + 24 dessous), calée en bas ; icône 24 à x 24,
+                 titre 24/400 lh 32 à x 60 ; à droite le bouton primaire (34, padding 8 12 8 8, rayon 6,
+                 fond clair sur texte sombre, icône 18, libellé 12/600) et, avant lui, les boutons de la
+                 tête des fils (pf-btn), 12 d'écart, finissant à 24 du bord
+     onglets     rangée de 36 (padding 0 24) : groupe padding 2, rayon 8, gap 8 ; pilules de 32 (padding 0 8,
+                 rayon 6, 14/600 ; actif fond relevé, inactif gris) ; à droite le bouton Filtres (34) et son <kbd>
+     recherche   12 sous la rangée : champ de 32, padding 5 8 5 38, rayon 6, bord 1, 14/400 ; loupe 18 à 12 / 7
+     tableau     16 sous la recherche, pleine largeur ; en-tête 32 (padding 8 16, 12/600 gris, trait inset 1) ;
+                 colonnes 120 · 1fr · 200 · 170 · 170 · 168 · 64 ; lignes de 56 + trait 1 (padding 16) ;
+                 poignée 18 + numéro 12/400 ; nom 14/600 ; badge 24 (12/400, padding 0 8, rayon 6, fond inset 1) ;
+                 avatar 18 rayon 4 + « qui · quand » 12/400 ; « ··· » 24 (padding 5, icône 14) ; survol fond relevé
+     état vide   carte à 24 des bords, rayon 10, trait 1, padding 32 ; boîte d'icône 64 (icône 48), titre 14/600,
+                 texte 14/400 gris, bouton de 40 (padding 10 16 10 12, 14/600)
+     menu ···    185 de large, padding 4 0, rayon 10 ; options de 36 (padding 8, rayon 6), icône 18, 14/400
+
+   Jetons pris au plus proche (pas d'équivalent exact chez --lin-*) :
+     fond 26,25,27 → --lin-fond ; texte 238,238,240 → --lin-titre ; gris 181,178,188 / 152,151,159 → --lin-second ;
+     survol et fond de badge 35,34,37 → --lin-survol ; onglet actif et fond de <kbd> 43,41,45 → --lin-pastille-active ;
+     trait des lignes et de l'en-tête 43,41,45 → --lin-detail-trait ; bord du champ 50,48,53 → --lin-trait ;
+     menus 18,17,19 / 50,48,53 → --lin-menu-fond / --lin-menu-bord ; bouton primaire 238,238,240 sur 18,17,19 →
+     --lin-titre sur --lin-fond.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lin.pw {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--lin-titre);
+}
+
+/* ——— tête de page : 58 de haut, calée en bas ——— */
+.v2 .lin .pw-tete {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px 24px 24px;
+}
+.v2 .lin .pw-titre {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+  height: 32px;
+}
+.v2 .lin .pw-titre-icone {
+  display: flex;
+  align-items: center;
+  width: 24px;
+  height: 24px;
+  margin-top: 4px;
+  color: var(--lin-second);
+}
+.v2 .lin .pw-titre-icone svg {
+  width: 24px;
+  height: 24px;
+}
+.v2 .lin .pw-h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 32px;
+  color: var(--lin-titre);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lin .pw-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* le bouton primaire de la tête (« Add workflow ») : les mesures de pf-btn, les couleurs inversées */
+.v2 .lin .pw-primaire {
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 8px 12px 8px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--lin-titre);
+  color: var(--lin-fond);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow:
+    rgba(32, 39, 44, 0.08) 0 1px 0 0,
+    rgba(32, 39, 44, 0.08) 0 2px 5px 0;
+  transition: opacity 0.15s ease-in-out;
+}
+.v2 .lin .pw-primaire:hover {
+  opacity: 0.9;
+}
+.v2 .lin .pw-primaire:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.v2 .lin .pw-primaire > svg {
+  width: 18px;
+  height: 18px;
+  margin: 0 4px 0 -2px;
+  color: inherit;
+}
+.v2 .lin .pw-primaire:focus-visible,
+.v2 .lin .pw-onglet:focus-visible,
+.v2 .lin .pw-ligne:focus-visible,
+.v2 .lin .pw-plus:focus-visible,
+.v2 .lin .pw-th-bouton:focus-visible,
+.v2 .lin .pw-vide-bouton:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: -2px;
+}
+
+/* ——— la rangée des onglets et du bouton Filtres ——— */
+.v2 .lin .pw-rangee {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 36px;
+  padding: 0 24px;
+}
+.v2 .lin .pw-onglets {
+  display: flex;
+  gap: 8px;
+  padding: 2px;
+  border-radius: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.v2 .lin .pw-onglet {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--lin-second);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.15s ease-in-out,
+    color 0.15s ease-in-out;
+}
+.v2 .lin .pw-onglet:hover {
+  color: var(--lin-titre);
+}
+.v2 .lin .pw-onglet[data-actif] {
+  background: var(--lin-pastille-active);
+  color: var(--lin-titre);
+}
+.v2 .lin .pw-onglet-n {
+  margin-left: 6px;
+  font-weight: 400;
+  color: var(--lin-second);
+}
+.v2 .lin .pw-rangee-droite {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* ——— la recherche : 12 sous la rangée ——— */
+.v2 .lin .pw-recherche {
+  position: relative;
+  margin: 12px 24px 0;
+}
+.v2 .lin .pw-recherche > svg {
+  position: absolute;
+  left: 12px;
+  top: 7px;
+  width: 18px;
+  height: 18px;
+  color: var(--lin-second);
+  pointer-events: none;
+}
+.v2 .lin .pw-champ {
+  display: block;
+  width: 100%;
+  height: 32px;
+  padding: 5px 8px 5px 38px;
+  border: 1px solid var(--lin-trait);
+  border-radius: 6px;
+  background: var(--lin-fond);
+  font: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lin-titre);
+  outline: none;
+  transition: border-color 0.15s ease-in-out;
+}
+.v2 .lin .pw-champ::placeholder {
+  color: var(--lin-second);
+}
+.v2 .lin .pw-champ:focus,
+.v2 .lin .pw-champ:focus-visible {
+  outline: none;
+  border-color: var(--lin-menu-bord);
+  box-shadow: none;
+}
+
+/* ——— la note sous la recherche (base réelle qui ne répond pas) ——— */
+.v2 .lin .pw-note {
+  margin: 0;
+  padding: 12px 24px 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--lin-orange);
+}
+
+/* ——— le tableau : 16 sous la recherche, pleine largeur ——— */
+.v2 .lin .pw-tableau {
+  margin-top: 16px;
+  padding-bottom: 66px;
+}
+.v2 .lin .pw-grille {
+  --pw-colonnes: 120px minmax(0, 1fr) 200px 170px 170px 168px 64px;
+}
+.v2 .lin .pw-en-tete {
+  display: grid;
+  grid-template-columns: var(--pw-colonnes);
+  height: 32px;
+  background: var(--lin-fond);
+  box-shadow: inset 0 -1px 0 var(--lin-detail-trait);
+}
+.v2 .lin .pw-th {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-width: 0;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  color: var(--lin-second);
+  text-align: left;
+  white-space: nowrap;
+}
+.v2 .lin .pw-th:first-child {
+  padding-left: 24px;
+}
+.v2 .lin .pw-th:last-child {
+  padding-right: 24px;
+}
+.v2 .lin .pw-th-contenu {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lin .pw-th-contenu > svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--lin-second);
+}
+.v2 .lin .pw-th-contenu > svg[data-sens="desc"] {
+  transform: rotate(180deg);
+}
+.v2 .lin .pw-th-bouton {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.v2 .lin .pw-th-bouton:hover ~ .pw-th-contenu {
+  color: var(--lin-titre);
+}
+.v2 .lin .pw-lignes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2 .lin .pw-ligne {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--pw-colonnes);
+  align-items: center;
+  height: 57px;
+  border-bottom: 1px solid var(--lin-detail-trait);
+  color: var(--lin-titre);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.v2 .lin .pw-ligne:hover,
+.v2 .lin .pw-ligne[data-actif] {
+  background: var(--lin-survol);
+}
+/* le lien absolu qui couvre la ligne (chaque cellule de Plain en porte un) */
+.v2 .lin .pw-ligne-lien {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  padding: 0;
+  border-radius: 0;
+}
+.v2 .lin .pw-ligne:has(.pw-ligne-lien:focus-visible) {
+  background: var(--lin-survol);
+  box-shadow: inset 0 0 0 2px var(--lin-fait);
+}
+.v2 .lin .pw-ligne-lien:focus-visible {
+  outline: none;
+}
+.v2 .lin .pw-ligne > * {
+  min-width: 0;
+  padding: 0 16px;
+}
+.v2 .lin .pw-c-plus {
+  position: relative;
+  z-index: 2;
+}
+.v2 .lin .pw-ligne > .pw-c-ordre {
+  padding-left: 24px;
+}
+.v2 .lin .pw-ligne > .pw-c-plus {
+  padding-right: 24px;
+}
+.v2 .lin .pw-c-ordre {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 18px;
+}
+.v2 .lin .pw-poignee {
+  display: flex;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--lin-second);
+}
+.v2 .lin .pw-poignee svg {
+  width: 18px;
+  height: 18px;
+}
+.v2 .lin .pw-ordre {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--lin-titre);
+  font-variant-numeric: tabular-nums;
+}
+.v2 .lin .pw-c-nom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.v2 .lin .pw-nom {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--lin-titre);
+}
+.v2 .lin .pw-ligne[data-etat="desactivee"] .pw-nom {
+  color: var(--lin-second);
+}
+/* l'état, à côté du nom : une pastille de 16 (désactivée en gris, en attente en orange) */
+.v2 .lin .pw-etat {
+  display: inline-flex;
+  align-items: center;
+  height: 16px;
+  padding: 0 6px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  background: var(--lin-pastille-active);
+  font-size: 10px;
+  font-weight: 475;
+  line-height: 10px;
+  color: var(--lin-texte-groupe);
+  white-space: nowrap;
+}
+.v2 .lin .pw-etat[data-teinte="orange"] {
+  color: var(--lin-orange);
+}
+/* le badge du déclencheur : 24 de haut, rayon 6, fond en retrait de 1 */
+.v2 .lin .pw-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--lin-titre);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lin .pw-badge::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  border-radius: 5px;
+  background: var(--lin-survol);
+}
+.v2 .lin .pw-ligne:hover .pw-badge::before,
+.v2 .lin .pw-ligne[data-actif] .pw-badge::before {
+  background: var(--lin-pastille-active);
+}
+.v2 .lin .pw-c-badge {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  isolation: isolate;
+}
+/* « qui · quand » : avatar 18 rayon 4, puis 12/400 */
+.v2 .lin .pw-c-qui {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 16px;
+  white-space: nowrap;
+}
+.v2 .lin .pw-avatar {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  background: var(--pw-avatar, var(--lin-avatar));
+  color: #fff;
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 9px;
+  text-transform: uppercase;
+}
+.v2 .lin .pw-avatar[data-icone] {
+  background: transparent;
+  color: var(--lin-second);
+}
+.v2 .lin .pw-avatar svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .lin .pw-qui {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--lin-titre);
+}
+.v2 .lin .pw-qui span,
+.v2 .lin .pw-quand {
+  color: var(--lin-second);
+}
+.v2 .lin .pw-c-quand {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 16px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--lin-second);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.v2 .lin .pw-c-quand[data-urgence] {
+  color: var(--lin-orange);
+}
+.v2 .lin .pw-c-plus {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.v2 .lin .pw-plus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 5px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--lin-second);
+  cursor: pointer;
+  transition: background 0.15s ease-in-out;
+}
+.v2 .lin .pw-plus:hover,
+.v2 .lin .pw-plus[aria-expanded="true"] {
+  background: var(--lin-pastille-active);
+  color: var(--lin-titre);
+}
+.v2 .lin .pw-plus svg {
+  width: 14px;
+  height: 14px;
+}
+/* le menu « ··· » d'une ligne : 185 de large, options de 36 */
+.v2 .lin .pw-ancre {
+  position: relative;
+}
+.v2 .lin .pw-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 20;
+  width: 185px;
+  padding: 4px 0;
+  border: 1px solid var(--lin-menu-bord);
+  border-radius: 10px;
+  background: var(--lin-menu-fond);
+  color: var(--lin-menu-texte);
+  box-shadow: var(--lin-ombre-menu);
+}
+.v2 .lin .pw-menu[data-haut] {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
+.v2 .lin .pw-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: calc(100% - 8px);
+  height: 36px;
+  margin: 0 4px;
+  padding: 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--lin-menu-texte);
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.v2 .lin .pw-option:hover,
+.v2 .lin .pw-option:focus-visible {
+  background: var(--lin-menu-survol);
+  outline: none;
+}
+.v2 .lin .pw-option[data-danger] {
+  color: var(--lin-orange);
+}
+.v2 .lin .pw-option > svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--lin-menu-gris);
+}
+.v2 .lin .pw-option > span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ——— l'état vide : la carte de Plain, à 24 des bords ——— */
+.v2 .lin .pw-vide {
+  margin: 0 24px;
+  border: 1px solid var(--lin-detail-trait);
+  border-radius: 10px;
+  background: var(--lin-fond);
+}
+.v2 .lin .pw-vide-corps {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 32px;
+  text-align: center;
+}
+.v2 .lin .pw-vide-icone {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--lin-second) 12%, transparent);
+  color: var(--lin-second);
+}
+.v2 .lin .pw-vide-icone svg {
+  width: 48px;
+  height: 48px;
+}
+.v2 .lin .pw-vide-texte {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.v2 .lin .pw-vide-texte strong {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--lin-titre);
+}
+.v2 .lin .pw-vide-texte p {
+  margin: 0;
+  max-width: 560px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--lin-second);
+}
+.v2 .lin .pw-vide-bouton {
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 10px 16px 10px 12px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--lin-fond);
+  color: var(--lin-titre);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow:
+    rgba(32, 39, 44, 0.08) 0 1px 0 0,
+    rgba(32, 39, 44, 0.08) 0 2px 5px 0,
+    0 0 0 1px var(--lin-menu-bord) inset;
+}
+.v2 .lin .pw-vide-bouton:hover {
+  background: var(--lin-survol);
+}
+.v2 .lin .pw-vide-bouton > svg {
+  width: 18px;
+  height: 18px;
+  margin-right: 6px;
+  color: var(--lin-second);
+}
+
+/* clair : --lin-detail-trait y est transparent (lin.css) ; les traits prennent ceux du dashboard, comme la liste des fils */
+html[data-v2-theme="light"] .v2 .lin .pw-vide,
+html[data-v2-theme="light"] .v2 .lin .pw-ligne {
+  border-color: var(--v2-a-400);
+}
+html[data-v2-theme="light"] .v2 .lin .pw-en-tete {
+  box-shadow: inset 0 -1px 0 var(--v2-a-400);
+}
+html[data-v2-theme="light"] .v2 .lin .pw-vide {
+  background: var(--v2-bg-100);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lin .pw-vide,
+  html:not([data-v2-theme="dark"]) .v2 .lin .pw-ligne {
+    border-color: var(--v2-a-400);
+  }
+  html:not([data-v2-theme="dark"]) .v2 .lin .pw-en-tete {
+    box-shadow: inset 0 -1px 0 var(--v2-a-400);
+  }
+  html:not([data-v2-theme="dark"]) .v2 .lin .pw-vide {
+    background: var(--v2-bg-100);
+  }
+}
+
+/* ——— dans la carte au milieu : la liste des éléments qu'une règle tient en ce moment ——— */
+.v2-det .pw-det-liste {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+.v2-det .pw-det-liste li {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.v2-det .pw-det-liste li > span:first-child {
+  min-width: 0;
+}
+.v2-det .pw-det-liste li strong {
+  display: block;
+  font-weight: 600;
+}
+.v2-det .pw-det-liste li small {
+  display: block;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--v2-gray-700, inherit);
+}
+.v2-det .pw-det-liste li a {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.v2-det .pw-det-champ {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+}
+.v2-det .pw-det-champ input {
+  width: 100%;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--v2-a-400, #3d3d41);
+  border-radius: 6px;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  color: inherit;
+}
+
+/* ——— étroit : les colonnes secondaires s'effacent, rien ne déborde ——— */
+@container principale (max-width: 1100px) {
+  .v2 .lin .pw-grille {
+    --pw-colonnes: 72px minmax(0, 1fr) 170px 150px 64px;
+  }
+  .v2 .lin .pw-c-creee,
+  .v2 .lin .pw-c-modifiee,
+  .v2 .lin .pw-th-creee,
+  .v2 .lin .pw-th-modifiee {
+    display: none;
+  }
+}
+@container principale (max-width: 760px) {
+  .v2 .lin .pw-tete {
+    padding: 16px 16px 16px;
+    gap: 12px;
+  }
+  .v2 .lin .pw-h1 {
+    font-size: 20px;
+    line-height: 28px;
+  }
+  .v2 .lin .pw-titre {
+    height: 28px;
+  }
+  .v2 .lin .pw-titre-icone {
+    margin-top: 2px;
+  }
+  .v2 .lin .pw-actions {
+    gap: 4px;
+  }
+  .v2 .lin .pw-actions .pf-btn {
+    padding: 8px 8px;
+  }
+  .v2 .lin .pw-actions .pf-btn .pf-btn-libelle,
+  .v2 .lin .pw-actions .pf-btn .pf-kbd,
+  .v2 .lin .pw-rangee-droite .pf-kbd {
+    display: none;
+  }
+  .v2 .lin .pw-actions .pf-btn > svg {
+    margin-right: 0;
+  }
+  .v2 .lin .pw-rangee {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 36px;
+    padding: 0 16px;
+    row-gap: 4px;
+  }
+  .v2 .lin .pw-onglets {
+    gap: 2px;
+  }
+  .v2 .lin .pw-onglet {
+    padding: 0 6px;
+    font-size: 12px;
+  }
+  .v2 .lin .pw-recherche {
+    margin: 12px 16px 0;
+  }
+  .v2 .lin .pw-note {
+    padding: 12px 16px 0;
+  }
+  .v2 .lin .pw-grille {
+    --pw-colonnes: minmax(0, 1fr) 96px 40px;
+  }
+  .v2 .lin .pw-th-ordre,
+  .v2 .lin .pw-c-ordre,
+  .v2 .lin .pw-th-dernier,
+  .v2 .lin .pw-c-dernier {
+    display: none;
+  }
+  .v2 .lin .pw-ligne > * {
+    padding: 0 8px;
+  }
+  .v2 .lin .pw-ligne > .pw-c-nom,
+  .v2 .lin .pw-th-nom {
+    padding-left: 16px;
+  }
+  .v2 .lin .pw-ligne > .pw-c-plus,
+  .v2 .lin .pw-th:last-child {
+    padding-right: 16px;
+  }
+  .v2 .lin .pw-th {
+    padding: 8px;
+  }
+  .v2 .lin .pw-c-nom {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .v2 .lin .pw-c-badge {
+    padding-right: 0;
+  }
+  .v2 .lin .pw-vide {
+    margin: 0 16px;
+  }
+  .v2 .lin .pw-vide-corps {
+    padding: 24px 16px;
+  }
+  .v2 .lin .pw-menu {
+    width: min(185px, calc(100vw - 32px));
+  }
+}

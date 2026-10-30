@@ -1,0 +1,818 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Le gabarit des pages SaaS (28/10/2026) : les pages « Projects » et « page
+   d'un projet » de Linear au 1:1, relevées au getComputedStyle dans l'espace
+   Linear de Teo (linear.app/omegaaii), fenêtre à 1600 px, thèmes sombre et
+   clair. Demande de Teo : « du 1.1, exactement la même chose ». Le cadre du
+   dashboard (barre du haut, rail) ne change pas : ce bloc dessine
+   l'intérieur du panneau de Linear, posé dans <main>.
+
+   Repères, en px depuis le bord du panneau de Linear (1347 de large) :
+     barre du titre     44 de haut, trait bas 0.5 ; titre à x 18 ; bouton à 8 du bord droit
+     barre d'outils     y 52, 28 de haut ; pastilles à x 9, 4 d'écart ; boutons ronds de 28, 6 d'écart
+     tableau            en-tête y 88, 32 de haut ; lignes de 48 ; case à x 22, nom à x 38,
+                        6 entre les colonnes, 14 au bord droit ; textes à 6 du bord de colonne
+     survol             fond en retrait de 8 de chaque côté, rayon 8
+     panneau Détails    428 de large, 12 après la liste, rayon 10, padding 12
+     page d'un projet   texte x 71, 805 de large ; tuile 36 à y 152, titre 24/600 à y 200 ;
+                        cartes de 388 à droite, à 8 du bord, 8 entre elles, padding 12, rayon 10
+   Supprimer ce fichier supprime le gabarit, sans effet ailleurs.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lin {
+  /* sombre (relevé 28/10, thème « System preference » sur un Mac sombre) */
+  --lin-fond: #131313;
+  --lin-trait: #212224;
+  --lin-survol: #1b1a1a;
+  --lin-groupe: #1b1a1a;
+  --lin-pastille: #1c1c1d;
+  --lin-pastille-active: #28282b;
+  --lin-anneau: 0 0 0 0.5px lch(100 0 0 / 0.137);
+  --lin-ombre-pastille: none;
+  --lin-bouton: #1a1c1c;
+  --lin-icone: #e3e5e7;
+  --lin-titre: #fffefe;
+  --lin-texte: #e3e5e7;
+  --lin-texte-groupe: #e4e4e6;
+  --lin-second: #949497;
+  --lin-compte: #9599a6;
+  --lin-cercle: #e3e3e2;
+  --lin-en-cours: #f0bf00;
+  --lin-fait: lch(48 59.31 288.43);
+  --lin-annule: rgb(149 162 179);
+  --lin-avatar: #565759;
+  --lin-carte: lch(13% 0.8 272);
+  --lin-detail: #1b1a1a;
+  --lin-detail-trait: #28282c;
+  --lin-onglet-detail: #232325;
+  --lin-onglet-detail-actif: #303132;
+  --lin-onglet-detail-texte: #98999c;
+  --lin-menu: lch(13% 1 272);
+  --lin-menu-trait: lch(26% 1 272);
+  --lin-ombre-menu: 0 3px 8px lch(0 0 0 / 0.13), 0 2px 5px lch(0 0 0 / 0.13), 0 1px 1px lch(0 0 0 / 0.13);
+  --lin-champ: lch(17% 1 272);
+
+  /* santé d'un projet, date passée, carte « Latest update » (relevé du 28/10) */
+  --lin-vert: lch(67.2 64.37 141.95);
+  --lin-jaune: lch(87.2 90 85);
+  --lin-rouge: lch(65.2 73 29);
+  --lin-orange: #ff7237;
+  --lin-maj-trait: #3f4143;
+  --lin-citation: #28292a;
+  --lin-graph-gris: var(--v2-gray-700);
+  --lin-graph-jaune: #f2c94c;
+  --lin-graph-bleu: var(--v2-blue-700);
+  --lin-menu-fond: #202022;
+  --lin-menu-bord: #3d3d41;
+  --lin-menu-sep: #313135;
+  --lin-menu-survol: #313234;
+  --lin-menu-texte: #e5e7e9;
+  --lin-menu-gris: #9d9c9f;
+
+  /* tout le panneau sous la barre du haut du dashboard (48 px) */
+  min-height: calc(100dvh - 48px);
+  background: var(--lin-fond);
+  color: var(--lin-texte);
+  font-family: var(--font-v2-inter), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13px;
+  line-height: normal;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  display: flex;
+  flex-direction: column;
+}
+
+html[data-v2-theme="light"] .v2 .lin {
+  /* clair : les couleurs du dashboard lui-même (vue d'ensemble), pas celles de Linear —
+     demande de Teo du 28/10 : « les couleurs ne sont pas les mêmes que la vue d'ensemble ».
+     Fond de page gris doux, cartes blanches cerclées, texte presque noir, bleu du dashboard. */
+  --lin-fond: var(--v2-bg-200);
+  --lin-trait: var(--v2-a-400);
+  --lin-survol: var(--v2-a-200);
+  --lin-groupe: var(--v2-a-200);
+  --lin-pastille: var(--v2-bouton);
+  --lin-pastille-active: var(--v2-bouton-survol);
+  --lin-anneau: 0 0 0 1px var(--v2-a-400);
+  --lin-ombre-pastille: none;
+  --lin-bouton: var(--v2-bouton);
+  --lin-icone: var(--v2-gray-1000);
+  --lin-titre: var(--v2-gray-1000);
+  --lin-texte: var(--v2-gray-1000);
+  --lin-texte-groupe: var(--v2-gray-1000);
+  --lin-second: var(--v2-gray-900);
+  --lin-compte: var(--v2-gray-700);
+  --lin-cercle: var(--v2-gray-700);
+  --lin-en-cours: var(--v2-amber-700);
+  --lin-fait: var(--v2-blue-700);
+  --lin-avatar: var(--v2-gray-700);
+  --lin-carte: var(--v2-bg-100);
+  --lin-detail: var(--v2-bg-100);
+  --lin-detail-trait: transparent;
+  --lin-onglet-detail: var(--v2-a-200);
+  --lin-onglet-detail-actif: var(--v2-bg-100);
+  --lin-onglet-detail-texte: var(--v2-gray-900);
+  --lin-menu: var(--v2-bg-eleve);
+  --lin-menu-trait: var(--v2-a-400);
+  --lin-ombre-menu: 0 0 0 1px var(--v2-a-400), 0 8px 24px #0000001a;
+  --lin-champ: var(--v2-a-200);
+  --lin-vert: var(--v2-green-900);
+  --lin-jaune: var(--v2-amber-700);
+  --lin-rouge: var(--v2-red-900);
+  --lin-orange: var(--v2-amber-700);
+  --lin-maj-trait: transparent;
+  --lin-citation: var(--v2-a-500);
+  --lin-graph-gris: var(--v2-gray-700);
+  --lin-graph-jaune: var(--v2-amber-700);
+  --lin-graph-bleu: var(--v2-blue-700);
+  --lin-menu-fond: var(--v2-bg-eleve);
+  --lin-menu-bord: var(--v2-a-400);
+  --lin-menu-sep: var(--v2-a-400);
+  --lin-menu-survol: var(--v2-a-200);
+  --lin-menu-texte: var(--v2-gray-1000);
+  --lin-menu-gris: var(--v2-gray-700);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lin {
+    /* clair : les couleurs du dashboard lui-même (vue d'ensemble), pas celles de Linear —
+       demande de Teo du 28/10 : « les couleurs ne sont pas les mêmes que la vue d'ensemble ».
+       Fond de page gris doux, cartes blanches cerclées, texte presque noir, bleu du dashboard. */
+    --lin-fond: var(--v2-bg-200);
+    --lin-trait: var(--v2-a-400);
+    --lin-survol: var(--v2-a-200);
+    --lin-groupe: var(--v2-a-200);
+    --lin-pastille: var(--v2-bouton);
+    --lin-pastille-active: var(--v2-bouton-survol);
+    --lin-anneau: 0 0 0 1px var(--v2-a-400);
+    --lin-ombre-pastille: none;
+    --lin-bouton: var(--v2-bouton);
+    --lin-icone: var(--v2-gray-1000);
+    --lin-titre: var(--v2-gray-1000);
+    --lin-texte: var(--v2-gray-1000);
+    --lin-texte-groupe: var(--v2-gray-1000);
+    --lin-second: var(--v2-gray-900);
+    --lin-compte: var(--v2-gray-700);
+    --lin-cercle: var(--v2-gray-700);
+    --lin-en-cours: var(--v2-amber-700);
+    --lin-fait: var(--v2-blue-700);
+    --lin-avatar: var(--v2-gray-700);
+    --lin-carte: var(--v2-bg-100);
+    --lin-detail: var(--v2-bg-100);
+    --lin-detail-trait: transparent;
+    --lin-onglet-detail: var(--v2-a-200);
+    --lin-onglet-detail-actif: var(--v2-bg-100);
+    --lin-onglet-detail-texte: var(--v2-gray-900);
+    --lin-menu: var(--v2-bg-eleve);
+    --lin-menu-trait: var(--v2-a-400);
+    --lin-ombre-menu: 0 0 0 1px var(--v2-a-400), 0 8px 24px #0000001a;
+    --lin-champ: var(--v2-a-200);
+    --lin-vert: var(--v2-green-900);
+    --lin-jaune: var(--v2-amber-700);
+    --lin-rouge: var(--v2-red-900);
+    --lin-orange: var(--v2-amber-700);
+    --lin-maj-trait: transparent;
+    --lin-citation: var(--v2-a-500);
+    --lin-graph-gris: var(--v2-gray-700);
+    --lin-graph-jaune: var(--v2-amber-700);
+    --lin-graph-bleu: var(--v2-blue-700);
+    --lin-menu-fond: var(--v2-bg-eleve);
+    --lin-menu-bord: var(--v2-a-400);
+    --lin-menu-sep: var(--v2-a-400);
+    --lin-menu-survol: var(--v2-a-200);
+    --lin-menu-texte: var(--v2-gray-1000);
+    --lin-menu-gris: var(--v2-gray-700);
+  }
+}
+
+/* remise à zéro sans poids : chaque brique ci-dessous la remplace */
+.v2 .lin :where(a) { color: inherit; text-decoration: none; }
+.v2 .lin :where(button) { font: inherit; color: inherit; background: none; border: 0; margin: 0; padding: 0; cursor: default; }
+.v2 .lin :where(svg) { flex-shrink: 0; }
+
+/* ——— boutons ronds de 28 et boutons à texte ——— */
+.v2 .lin-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 28px;
+  min-width: 28px;
+  padding: 0 2px;
+  border-radius: 9999px;
+  border: 0.5px solid transparent;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-icone);
+  white-space: nowrap;
+  transition: background 0.1s;
+}
+.v2 .lin-btn:hover { background: var(--lin-pastille-active); }
+.v2 .lin-btn--plein { background: var(--lin-bouton); }
+.v2 .lin-btn--plein::after { content: ""; position: absolute; inset: -0.5px; border-radius: inherit; box-shadow: var(--lin-anneau), var(--lin-ombre-pastille); pointer-events: none; }
+.v2 .lin-btn--texte { padding: 0 10px 0 8px; color: var(--lin-second); }
+.v2 .lin-btn--texte:hover { color: var(--lin-texte); }
+.v2 .lin-btn[aria-pressed="true"] { background: var(--lin-pastille-active); }
+.v2 .lin-btn:focus-visible, .v2 .lin-onglet:focus-visible, .v2 .lin-ligne:focus-visible, .v2 .lin-carte:focus-visible { outline: 2px solid var(--lin-fait); outline-offset: -2px; }
+
+/* ——— barre du titre : 44 px, trait bas 0.5 ——— */
+.v2 .lin-tete {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 44px;
+  flex-shrink: 0;
+  padding: 0 8px 0 14px;
+  border-bottom: 0.5px solid var(--lin-trait);
+  background: var(--lin-fond);
+}
+.v2 .lin-fil { display: flex; align-items: center; gap: 0; min-width: 0; font-size: 13px; font-weight: 500; color: var(--lin-texte); }
+.v2 .lin-fil-equipe { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 5px 0 4px; border-radius: 8px; }
+.v2 .lin-fil-equipe:hover { background: var(--lin-survol); }
+.v2 .lin-fil-equipe svg { width: 16px; height: 16px; }
+.v2 .lin-fil-sep { width: 5px; margin: 0 8px 0 2px; color: var(--lin-second); text-align: center; }
+.v2 .lin-fil-lien { white-space: nowrap; }
+.v2 .lin-fil-lien:hover { color: var(--lin-titre); }
+.v2 .lin-fil-ici { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2 .lin-fil-ici b { font-weight: 500; color: var(--lin-texte); margin-right: 6px; }
+.v2 .lin-fil + .lin-btn { margin-left: 4px; }
+.v2 .lin-tete-droite { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+.v2 .lin-position { margin-right: 8px; font-size: 13px; font-weight: 450; color: var(--lin-second); font-variant-numeric: tabular-nums; }
+
+/* ——— barre d'outils : y 52, 28 px ——— */
+.v2 .lin-outils { display: flex; align-items: center; height: 28px; margin: 8px 0; padding: 0 7px 0 8px; flex-shrink: 0; }
+.v2 .lin-onglets { display: flex; align-items: center; gap: 4px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.v2 .lin-onglet {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 9999px;
+  border: 0.5px solid transparent;
+  background: var(--lin-pastille);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+.v2 .lin-onglet::after { content: ""; position: absolute; inset: -0.5px; border-radius: inherit; box-shadow: var(--lin-anneau), var(--lin-ombre-pastille); pointer-events: none; }
+.v2 .lin-onglet:hover { color: var(--lin-texte); }
+.v2 .lin-onglet[data-actif] { background: var(--lin-pastille-active); color: var(--lin-titre); }
+.v2 .lin-onglet[data-actif]::after { box-shadow: var(--lin-anneau); }
+.v2 .lin-outils-droite { margin-left: auto; display: flex; align-items: center; gap: 6px; padding-left: 12px; }
+
+/* ——— le corps : le tableau, et le panneau Détails à droite ——— */
+.v2 .lin-corps { flex: 1; display: flex; align-items: flex-start; min-height: 0; }
+.v2 .lin-liste { flex: 1; min-width: 0; padding-bottom: 24px; }
+.v2 .lin-corps[data-details] .lin-liste { margin-right: 12px; }
+
+/* le tableau des projets : en-tête 32, lignes 48 */
+.v2 .lin-table-tete, .v2 .lin-table-ligne {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) 130px 68px 91px 91px 49px 120px;
+  column-gap: 6px;
+  align-items: center;
+  padding: 0 14px 0 22px;
+}
+.v2 .lin-table-tete { height: 32px; font-size: 12px; font-weight: 450; color: var(--lin-second); }
+.v2 .lin-table-tete > span { padding-left: 6px; white-space: nowrap; }
+.v2 .lin-table-ligne { position: relative; height: 48px; font-size: 12px; font-weight: 450; color: var(--lin-texte); }
+.v2 .lin-table-ligne::before { content: ""; position: absolute; inset: 0 8px; border-radius: 8px; background: transparent; }
+.v2 .lin-table-ligne:hover::before { background: var(--lin-survol); }
+.v2 .lin-table-ligne > * { position: relative; display: flex; align-items: center; min-width: 0; padding-left: 6px; }
+.v2 .lin-table-ligne:focus-visible { outline: 2px solid var(--lin-fait); outline-offset: -2px; border-radius: 8px; }
+.v2 .lin-table-tete .lin-num, .v2 .lin-table-ligne .lin-num { justify-content: flex-end; text-align: right; padding-left: 0; padding-right: 6px; }
+.v2 .lin-case { width: 10px; height: 10px; padding: 0 !important; border-radius: 3px; box-shadow: inset 0 0 0 1px var(--lin-second); opacity: 0; }
+.v2 .lin-table-ligne:hover .lin-case { opacity: 1; }
+.v2 .lin-table-nom { gap: 12px; }
+.v2 .lin-icone-projet { flex-shrink: 0; }
+.v2 .lin-table-titre { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 500; color: var(--lin-titre); }
+.v2 .lin-jalon-puce { display: inline-flex; align-items: center; gap: 4px; margin-left: 4px; color: var(--lin-second); font-size: 12px; font-weight: 450; white-space: nowrap; }
+.v2 .lin-jalon-puce .lin-losange { color: var(--lin-en-cours); }
+.v2 .lin-table-sante { gap: 8px; padding-left: 9px !important; font-weight: 500; white-space: nowrap; }
+.v2 .lin-table-valeur { color: var(--lin-texte); font-variant-numeric: tabular-nums; }
+.v2 .lin-table-date { gap: 8px; white-space: nowrap; }
+.v2 .lin-table-chiffre { color: var(--lin-titre); font-variant-numeric: tabular-nums; }
+.v2 .lin-table-statut { gap: 8px; font-variant-numeric: tabular-nums; }
+.v2 .lin-meta { font-size: 12px; font-weight: 450; color: var(--lin-second); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* icônes : santé, anneau, losange, calendrier, priorité, tous à 16 */
+.v2 .lin-prio, .v2 .lin-sante, .v2 .lin-anneau, .v2 .lin-losange { width: 16px; height: 16px; flex-shrink: 0; }
+.v2 .lin-prio { color: var(--lin-second); }
+.v2 .lin [data-teinte="vert"] { --lin-teinte: var(--lin-vert); }
+.v2 .lin [data-teinte="jaune"] { --lin-teinte: var(--lin-jaune); }
+.v2 .lin [data-teinte="rouge"] { --lin-teinte: var(--lin-rouge); }
+.v2 .lin [data-teinte="gris"] { --lin-teinte: var(--lin-second); }
+.v2 .lin [data-teinte="bleu"] { --lin-teinte: var(--lin-fait); }
+.v2 .lin-sante, .v2 .lin-anneau { color: var(--lin-teinte); }
+.v2 .lin-table-sante, .v2 .lin-puce[data-teinte], .v2 .lin-props dd[data-teinte], .v2 .lin-maj-auteur [data-teinte] { color: var(--lin-teinte); }
+.v2 .lin-losange { color: var(--lin-second); }
+.v2 .lin-losange[data-atteint] { color: var(--lin-en-cours); }
+.v2 .lin-calendrier { flex-shrink: 0; color: var(--lin-texte); }
+.v2 .lin-calendrier[data-passe] { color: var(--lin-orange); }
+
+/* ——— panneau Détails : 428 de large, rayon 10 ——— */
+.v2 .lin-details {
+  position: sticky;
+  top: 52px;
+  width: 428px;
+  flex-shrink: 0;
+  margin-right: 7px;
+  margin-bottom: 8px;
+  padding: 12px;
+  min-height: calc(100vh - 160px);
+  border-radius: 10px;
+  border: 0.5px solid var(--lin-detail-trait);
+  background: var(--lin-detail);
+}
+.v2 .lin-details-onglets { display: flex; gap: 6px; padding: 2px 2px 0; margin-bottom: 21px; overflow-x: auto; scrollbar-width: none; }
+.v2 .lin-details-onglet { height: 28px; padding: 4px 12px; border-radius: 9999px; border: 0.5px solid transparent; background: var(--lin-onglet-detail); font-size: 12px; font-weight: 500; color: var(--lin-onglet-detail-texte); white-space: nowrap; }
+.v2 .lin-details-onglet[aria-selected="true"] { background: var(--lin-onglet-detail-actif); color: var(--lin-titre); }
+.v2 .lin-details-lignes { display: grid; gap: 12px; margin: 0; padding: 0 10px; list-style: none; }
+.v2 .lin-details-lignes li { display: flex; align-items: center; gap: 10px; height: 20px; font-size: 13px; font-weight: 450; color: var(--lin-onglet-detail-texte); }
+.v2 .lin-details-lignes li > span:first-of-type { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2 .lin-details-lignes .lin-details-valeur { font-variant-numeric: tabular-nums; }
+
+/* ——— menus (Affichage, Filtre) : fond relevé sur le menu Priorité ——— */
+.v2 .lin-ancre { position: relative; }
+.v2 .lin-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 10;
+  min-width: 300px;
+  padding: 8px 0;
+  border-radius: 12px;
+  border: 0.5px solid var(--lin-menu-trait);
+  background: var(--lin-menu);
+  box-shadow: var(--lin-ombre-menu);
+  font-size: 13px;
+  color: var(--lin-texte);
+}
+.v2 .lin-menu-section { padding: 6px 16px; }
+.v2 .lin-menu-section + .lin-menu-section { border-top: 0.5px solid var(--lin-menu-trait); }
+.v2 .lin-segment { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.v2 .lin-segment button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 28px; padding: 6px 8px; border-radius: 9999px; border: 0.5px solid transparent; background: var(--lin-pastille); font-size: 12px; font-weight: 500; color: var(--lin-second); }
+.v2 .lin-segment button[aria-pressed="true"] { background: var(--lin-pastille-active); color: var(--lin-titre); }
+.v2 .lin-reglage { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 32px; font-size: 12px; font-weight: 500; color: var(--lin-second); }
+.v2 .lin-select { position: relative; display: inline-flex; align-items: center; height: 24px; min-width: 116px; padding: 1px 18px 1px 8px; border-radius: 8px; border: 0.5px solid transparent; background: var(--lin-champ); font-size: 12px; font-weight: 400; color: var(--lin-texte); }
+.v2 .lin-select select { position: absolute; inset: 0; opacity: 0; cursor: default; font-size: 16px; }
+.v2 .lin-select svg { position: absolute; right: 5px; width: 12px; height: 12px; color: var(--lin-second); }
+.v2 .lin-menu-option { display: flex; align-items: center; gap: 10px; width: 100%; height: 32px; padding: 0 12px; margin: 0 4px; width: calc(100% - 8px); border-radius: 8px; font-size: 13px; font-weight: 450; color: var(--lin-texte); text-align: left; }
+.v2 .lin-menu-option:hover { background: var(--lin-pastille-active); color: var(--lin-titre); }
+.v2 .lin-menu-option .lin-meta { margin-left: auto; }
+.v2 .lin-menu-champ { width: 100%; height: 32px; padding: 0 16px 8px; border: 0; border-bottom: 0.5px solid var(--lin-menu-trait); margin-bottom: 4px; background: transparent; font: inherit; font-size: 13px; color: var(--lin-titre); outline: none; }
+.v2 .lin-menu-champ::placeholder { color: var(--lin-second); }
+
+/* ——— la page d'un projet ——— */
+.v2 .lin-tete-titre { margin-left: 4px; font-size: 13px; font-weight: 500; color: var(--lin-texte); }
+.v2 .lin-fil-projet { display: inline-flex; align-items: center; gap: 6px; }
+.v2 .lin-projet { flex: 1; display: flex; align-items: flex-start; }
+.v2 .lin-projet-texte { flex: 1; min-width: 0; padding: 64px 24px 64px 71px; }
+.v2 .lin-projet-texte > * { max-width: 805px; }
+.v2 .lin-tuile { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 6px; }
+.v2 .lin-projet-h1 { margin: 12px 0 0; font-size: 24px; font-weight: 600; line-height: 32px; color: var(--lin-titre); }
+.v2 .lin-projet-resume { margin: 4px 0 0; font-size: 15px; font-weight: 450; line-height: 23px; color: var(--lin-texte); }
+.v2 .lin-projet-ligne { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; min-height: 28px; margin-top: 12px; }
+.v2 .lin-projet-ligne:first-of-type { margin-top: 20px; }
+.v2 .lin-projet-etiquette { width: 77px; flex-shrink: 0; padding: 6px 0; font-size: 13px; font-weight: 500; color: var(--lin-second); }
+.v2 .lin-puce { display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 3px 6px; border-radius: 9999px; font-size: 13px; font-weight: 500; color: var(--lin-texte); white-space: nowrap; }
+.v2 a.lin-puce:hover, .v2 .lin-puce:hover, .v2 .lin-puce[aria-expanded="true"] { background: var(--lin-survol); }
+.v2 .lin-puce--vide { color: var(--lin-avatar); gap: 6px; }
+
+/* « Latest update » : la dernière relance */
+.v2 .lin-maj { margin: 16px 0 0 -16px; width: calc(100% + 32px); max-width: 837px !important; padding: 8px 16px 16px; border-radius: 10px; border: 0.5px solid var(--lin-maj-trait); background: var(--lin-fond); }
+.v2 .lin-maj-tete { display: flex; align-items: center; justify-content: space-between; height: 28px; font-size: 13px; font-weight: 500; color: var(--lin-second); }
+.v2 .lin-maj-lien { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 9px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--lin-second); }
+.v2 .lin-maj-lien:hover { background: var(--lin-survol); color: var(--lin-texte); }
+.v2 .lin-maj-auteur { display: flex; align-items: center; gap: 8px; margin: 13px 0 0; font-size: 13px; font-weight: 450; }
+.v2 .lin-maj-gris { color: var(--lin-second); }
+.v2 .lin-maj-texte { margin: 20px 0 0; font-size: 15px; font-weight: 450; line-height: 24px; color: var(--lin-texte); }
+.v2 .lin-maj-citation { position: relative; margin: 29px 0 0 3px; padding-left: 0; }
+.v2 .lin-maj-citation::before { content: ""; position: absolute; left: -2px; top: 0; bottom: 0; width: 2px; border-radius: 1px; background: var(--lin-citation); }
+.v2 .lin-maj-citation > div { display: flex; align-items: center; min-height: 27px; padding-left: 0; }
+.v2 .lin-maj-citation dt { width: 151px; padding-left: 12px; font-size: 12px; font-weight: 500; color: var(--lin-second); }
+.v2 .lin-maj-citation dd { margin: 0 0 0 2px; font-size: 12px; font-weight: 500; color: var(--lin-texte); }
+
+/* sections du texte : titre gris en 13/500, comme « Description » */
+.v2 .lin-projet-h2 { margin: 32px 0 8px; font-size: 13px; font-weight: 500; line-height: 28px; color: var(--lin-second); }
+.v2 .lin-projet-liste { margin: 0; padding: 0; list-style: none; }
+.v2 .lin-projet-liste li { display: flex; align-items: center; gap: 8px; height: 36px; font-size: 13px; font-weight: 500; color: var(--lin-texte); }
+.v2 .lin-projet-liste li > span:not(.lin-meta) { flex: 1; min-width: 0; }
+
+/* les cartes de droite : 388 de large, 8 entre elles */
+.v2 .lin-cartes-droite { display: grid; gap: 8px; width: 388px; flex-shrink: 0; margin-right: 8px; align-content: start; }
+.v2 .lin-carte-droite { padding: 12px; border-radius: 10px; border: 0.5px solid var(--lin-detail-trait); background: var(--lin-detail); box-shadow: 0 0.5px 1px 1px lch(0 0 0 / 0.3); }
+.v2 .lin-carte-droite h3 { display: flex; align-items: center; justify-content: space-between; height: 16px; margin: 0 0 12px; line-height: 16px; font-size: 13px; font-weight: 500; color: var(--lin-onglet-detail-texte); }
+.v2 .lin-carte-lien { font-size: 12px; font-weight: 500; color: var(--lin-texte); }
+.v2 .lin-props { margin: 0; display: grid; }
+.v2 .lin-props > div { display: flex; align-items: center; height: 28px; }
+.v2 .lin-props > div + div { margin-top: 8px; }
+.v2 .lin-props dt { min-width: 96px; margin-right: 12px; flex-shrink: 0; white-space: nowrap; padding-left: 1px; font-size: 12px; font-weight: 450; color: var(--lin-onglet-detail-texte); }
+.v2 .lin-props dd { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 12px; font-weight: 450; color: var(--lin-titre); }
+.v2 .lin-props .lin-props-vide { color: var(--lin-onglet-detail-texte); }
+.v2 .lin-jalons, .v2 .lin-activite { display: grid; gap: 12px; margin: 0; padding: 6px 0 0; list-style: none; }
+.v2 .lin-jalons li { display: flex; align-items: center; gap: 8px; height: 24px; font-size: 12px; font-weight: 450; color: var(--lin-texte-groupe); }
+.v2 .lin-jalon-nom { flex: 1; min-width: 0; }
+.v2 .lin-activite li { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 450; color: var(--lin-onglet-detail-texte); }
+.v2 .lin-activite-vide { margin: 0; font-size: 12px; color: var(--lin-onglet-detail-texte); }
+.v2 .lin-avancement { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.v2 .lin-avancement > div { display: grid; grid-template-columns: 14px auto; align-items: center; row-gap: 4px; font-size: 12px; font-weight: 500; color: var(--lin-onglet-detail-texte); }
+.v2 .lin-avancement strong { grid-column: 2; font-weight: 500; color: var(--lin-titre); font-variant-numeric: tabular-nums; }
+.v2 .lin-carre { width: 6px; height: 6px; border-radius: 1.5px; background: var(--lin-teinte); }
+.v2 .lin-barre-avancement { height: 6px; margin-top: 14px; border-radius: 3px; background: var(--lin-onglet-detail); overflow: hidden; }
+.v2 .lin-barre-avancement span { display: block; height: 100%; border-radius: inherit; background: var(--lin-jaune); }
+.v2 .lin-vide { padding: 48px 24px; font-size: 13px; color: var(--lin-second); text-align: center; }
+
+/* ——— étroit : le panneau Détails et les cartes passent dessous ——— */
+@container principale (max-width: 1100px) {
+  .v2 .lin-corps, .v2 .lin-projet { flex-direction: column; align-items: stretch; }
+  .v2 .lin-corps[data-details] .lin-liste { margin-right: 0; }
+  .v2 .lin-details { position: static; width: auto; min-height: 0; margin: 8px; }
+  .v2 .lin-projet-texte { padding: 32px 24px 24px; }
+  .v2 .lin-maj { margin-left: 0; width: auto; }
+  .v2 .lin-maj-citation > div { display: grid; padding: 4px 0; }
+  .v2 .lin-maj-citation dd { margin: 2px 0 0 12px; }
+  .v2 .lin-tranche-nom { flex-basis: 96px !important; }
+  .v2 .lin-cartes-droite { width: auto; margin: 0 8px 32px; }
+  .v2 .lin-table-tete, .v2 .lin-table-ligne { grid-template-columns: 10px minmax(0, 1fr) 130px 68px 91px 120px; }
+  .v2 .lin-table-tete > :nth-child(6), .v2 .lin-table-ligne > :nth-child(6), .v2 .lin-table-tete > :nth-child(7), .v2 .lin-table-ligne > :nth-child(7) { display: none; }
+}
+@container principale (max-width: 640px) {
+  .v2 .lin-tete { padding-left: 12px; }
+  .v2 .lin-table-tete, .v2 .lin-table-ligne { grid-template-columns: minmax(0, 1fr) auto; padding: 0 16px; }
+  .v2 .lin-table-tete > :not(:nth-child(2)):not(:nth-child(5)), .v2 .lin-table-ligne > :not(:nth-child(2)):not(:nth-child(5)) { display: none; }
+  .v2 .lin-jalon-puce { display: none; }
+  .v2 .lin-btn--texte span { display: none; }
+}
+
+/* ——— le tableau de bord : la carte « Progress » de Linear et ses chiffres ———
+   carré de 6 à x 5, libellé 12/500 à x 20, valeur dessous à x 24 (20 plus bas) ;
+   onglets de 28, 16 sous les chiffres ; lignes de répartition 24, icône à x 9 */
+.v2 .lin-kpis { display: grid; grid-template-columns: 1fr 1fr; row-gap: 14px; column-gap: 8px; margin: 18px 0 0; }
+.v2 .lin-kpis > div { min-width: 0; }
+.v2 .lin-kpis dt { display: flex; align-items: center; gap: 9px; padding-left: 5px; font-size: 12px; font-weight: 500; color: var(--lin-onglet-detail-texte); white-space: nowrap; }
+.v2 .lin-kpis dd { margin: 5px 0 0 24px; font-size: 12px; font-weight: 500; color: var(--lin-titre); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.v2 .lin-segment-carte { display: flex; gap: 6px; margin: 16px 2px 0; }
+.v2 .lin-segment-carte .lin-details-onglet { flex: 1 1 auto; }
+.v2 .lin-repartition { display: grid; gap: 8px; margin: 19px 0 0; padding: 0 10px 0 9px; list-style: none; }
+.v2 .lin-repartition li { display: flex; align-items: center; justify-content: space-between; height: 24px; font-size: 13px; font-weight: 450; color: var(--lin-onglet-detail-texte); font-variant-numeric: tabular-nums; }
+.v2 .lin-tranche-nom { flex: 0 0 140px !important; }
+.v2 .lin-tranche-barre { flex: 1; height: 6px; border-radius: 3px; background: var(--lin-onglet-detail); overflow: hidden; }
+.v2 .lin-tranche-barre span { display: block; height: 100%; border-radius: inherit; background: var(--lin-jaune); }
+.v2 .lin-projet-lien { display: flex; align-items: center; gap: 12px; width: 100%; height: 36px; margin: 0 -8px; padding: 0 8px; border-radius: 8px; }
+.v2 .lin-projet-lien:hover { background: var(--lin-survol); }
+.v2 .lin-projet-lien > span:not(.lin-meta) { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2 .lin-voir-tout { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 13px; font-weight: 500; color: var(--lin-second); }
+.v2 .lin-voir-tout:hover { color: var(--lin-texte); }
+.v2 .lin-activite b { font-weight: 500; color: var(--lin-texte-groupe); }
+
+/* ——— boutons : ceux du dashboard (« Nouveau… », v2-btn v2-btn--petit), demande de Teo du 28/10 ———
+   Les onglets, les pastilles de propriétés et les boutons d'outils prennent le bouton
+   du cadre ; seul l'onglet courant est en blanc, les autres en gris. */
+.v2 .lin .v2-btn { color: var(--v2-gray-900); }
+.v2 .lin .v2-btn[data-actif], .v2 .lin .v2-btn[aria-current="page"], .v2 .lin .v2-btn[aria-expanded="true"], .v2 .lin .v2-btn[aria-pressed="true"] { color: var(--v2-gray-1000); background: var(--v2-bouton-survol); }
+.v2 .lin .lin-onglets { gap: 6px; }
+.v2 .lin .lin-outils-droite { gap: 6px; }
+.v2 .lin .lin-declencheur[data-teinte] { color: var(--lin-teinte); }
+.v2 .lin .lin-declencheur svg { width: 16px; height: 16px; }
+.v2 .lin .lin-projet-ligne { gap: 4px; }
+
+/* le menu d'options : « Change status… » de Linear, relevé au pixel le 28/10
+   252 de large, fond #202022, trait 0.5 #3d3d41, rayon 12 ; en-tête de 37 (champ 13/400,
+   raccourci en touches de 18 × 17), trait 0.5 #313135 ; options de 32 à 7 des bords,
+   icône 16 à 8, texte 8 plus loin, chiffre 11/500 à 12 du bord ; survol #313234.
+   Ouvert depuis une pastille : dessous, calé à gauche (5 plus bas) ; depuis une valeur
+   de carte : à gauche de la valeur, haut calé (8 plus haut, 9 d'écart). */
+.v2 .lin-menu--options { top: calc(100% + 5px); left: 0; right: auto; padding: 0; z-index: 20; border-radius: 12px; border: 0.5px solid var(--lin-menu-bord); background: var(--lin-menu-fond); color: var(--lin-menu-texte); box-shadow: 0 3px 8px lch(0 0 0 / 0.125), 0 2px 5px lch(0 0 0 / 0.125), 0 1px 1px lch(0 0 0 / 0.125); }
+.v2 .lin-menu--options[data-cote="droite"] { left: auto; right: 0; }
+.v2 .lin-menu--options[data-cote="gauche"] { top: -8px; left: auto; right: calc(100% + 10px); }
+.v2 .lin-menu-tete { display: flex; align-items: center; gap: 4px; height: 37px; padding: 0 12px 0 14px; border-bottom: 0.5px solid var(--lin-menu-sep); }
+.v2 .lin-menu-saisie { flex: 1; min-width: 0; height: 36px; padding: 10px 0 9px; border: 0; background: transparent; font: inherit; font-size: 13px; font-weight: 400; color: var(--lin-menu-texte); outline: none; }
+.v2 .lin-menu-saisie::placeholder { color: var(--lin-menu-gris); }
+/* l'anneau de focus du dashboard (.v2 :focus-visible) dessinait un cadre autour du champ : Linear n'a que le curseur */
+.v2 .lin-menu-saisie:focus, .v2 .lin-menu-saisie:focus-visible, .v2 .lin-menu-champ:focus, .v2 .lin-menu-champ:focus-visible { outline: none; box-shadow: none; }
+.v2 .lin-kbd { display: inline-grid; place-items: center; min-width: 18px; height: 17px; padding: 2px; border-radius: 4px; border: 0.5px solid var(--lin-menu-sep); font-family: inherit; font-size: 11px; font-weight: 400; color: var(--lin-menu-gris); }
+.v2 .lin-options { margin: 0; padding: 6px 6px 7px 7px; list-style: none; max-height: 320px; overflow-y: auto; }
+.v2 .lin-option { display: flex; align-items: center; gap: 8px; width: 100%; height: 32px; padding: 0 12px 0 8px; border-radius: 8px; font-size: 13px; font-weight: 450; color: var(--lin-menu-texte); text-align: left; cursor: default; }
+.v2 .lin-option[data-actif] { background: var(--lin-menu-survol); color: var(--lin-titre); }
+.v2 .lin-option-icone { display: inline-flex; width: 16px; justify-content: center; flex-shrink: 0; }
+.v2 .lin-option-icone svg { width: 16px; height: 16px; }
+.v2 .lin-option-libelle { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2 .lin-option-meta { font-size: 12px; color: var(--lin-menu-gris); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.v2 .lin-option-coche { flex-shrink: 0; margin-left: 4px; color: var(--lin-titre); }
+.v2 .lin-option-chiffre { min-width: 7px; margin-left: 4px; text-align: right; font-size: 11px; font-weight: 500; color: var(--lin-menu-gris); font-variant-numeric: tabular-nums; }
+.v2 .lin-options-vide { padding: 8px 10px 6px; font-size: 13px; color: var(--lin-menu-gris); }
+
+/* ——— colonne de droite modifiable (demande de Teo du 28/10) : valeurs à menu, cartes repliables, « ··· » ——— */
+.v2 .lin-valeur { display: inline-flex; align-items: center; gap: 8px; height: 28px; margin-left: -6px; padding: 0 6px; border-radius: 6px; font-size: 12px; font-weight: 450; color: inherit; white-space: nowrap; }
+.v2 .lin-valeur:hover, .v2 .lin-valeur[aria-expanded="true"] { background: var(--lin-onglet-detail); }
+.v2 .lin-valeur svg { width: 16px; height: 16px; }
+.v2 .lin-carte-titre { display: inline-flex; align-items: center; gap: 6px; margin: -2px -4px; padding: 2px 4px; border-radius: 6px; font-size: 13px; font-weight: 500; color: var(--lin-onglet-detail-texte); }
+.v2 .lin-carte-titre:hover { color: var(--lin-texte); }
+.v2 .lin-carte-fleche { width: 16px; height: 16px; transition: transform 0.12s; }
+.v2 .lin-carte-droite[data-fermee] .lin-carte-fleche { transform: rotate(-90deg); }
+.v2 .lin-carte-droite[data-fermee] h3 { margin-bottom: 0; }
+.v2 .lin-jalons li .lin-ancre { opacity: 0; transition: opacity 0.1s; }
+.v2 .lin-jalons li:hover .lin-ancre, .v2 .lin-jalons li .lin-ancre:focus-within { opacity: 1; }
+.v2 .lin-jalons .lin-valeur { margin: 0; padding: 0 5px; height: 22px; }
+.v2 .lin-kpis--trois { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+/* la courbe : celle de la Vue d'ensemble (v2-va-courbe), posée dans la carte */
+.v2 .lin-courbe { margin-top: 20px; }
+.v2 .lin-filtre-actif { display: inline-flex; align-items: center; gap: 6px; }
+
+/* clair : les cartes (colonne de droite, « Dernière relance ») sont celles de la vue d'ensemble — blanches, cerclées, petite ombre */
+html[data-v2-theme="light"] .v2 .lin :is(.lin-carte-droite, .lin-maj, .lin-details) { background: var(--v2-bg-100); border-color: transparent; box-shadow: var(--v2-ombre-petite); }
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lin :is(.lin-carte-droite, .lin-maj, .lin-details) { background: var(--v2-bg-100); border-color: transparent; box-shadow: var(--v2-ombre-petite); }
+}
+
+/* « Latest update » de Linear : la flèche replie la carte ; l'auteur a sa petite tuile (relevé du 28/10) */
+.v2 .lin-maj-tete { list-style: none; cursor: default; }
+.v2 .lin-maj-tete::-webkit-details-marker { display: none; }
+.v2 .lin-maj-titre { display: inline-flex; align-items: center; gap: 3px; }
+.v2 .lin-maj-fleche { width: 16px; height: 16px; transition: transform 0.12s; }
+.v2 .lin-maj:not([open]) .lin-maj-fleche { transform: rotate(-90deg); }
+.v2 .lin-maj:not([open]) { padding-bottom: 8px; }
+.v2 .lin-avatar-auteur { display: inline-grid; place-items: center; width: 16px; height: 16px; margin-left: 6px; border-radius: 4px; background: color-mix(in srgb, #f2c94c 22%, transparent); color: #f2c94c; }
+
+/* les icônes pleines du gabarit (./icones.tsx), 16 px : grises, en couleur pour le statut et la date passée */
+.v2 .lin-ic { flex-shrink: 0; color: var(--lin-second); }
+.v2 .lin-ic-statut--planifie { color: var(--lin-second); }
+.v2 .lin-ic-statut--en-cours { color: var(--lin-en-cours); }
+.v2 .lin-ic-statut--fait { color: var(--lin-fait); }
+.v2 .lin-ic-statut--annule { color: var(--lin-rouge); }
+.v2 .lin-ic-calendrier--passe { color: var(--lin-orange); }
+
+/* le pied de « Latest update » : une pastille de 37 × 28 (#1d1c1c) et un bouton rond de 28, 29 sous la citation */
+.v2 .lin-maj-pied { display: flex; align-items: center; gap: 8px; margin-top: 29px; }
+.v2 .lin-maj-pied-btn { display: inline-grid; place-items: center; width: 37px; height: 28px; border-radius: 30px; background: var(--lin-maj-pied); color: var(--lin-second); }
+.v2 .lin-maj-pied-rond { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 9999px; color: var(--lin-second); }
+.v2 .lin-maj-pied-btn:hover, .v2 .lin-maj-pied-rond:hover { background: var(--lin-survol); color: var(--lin-texte); }
+.v2 .lin { --lin-maj-pied: #1d1c1c; }
+html[data-v2-theme="light"] .v2 .lin { --lin-maj-pied: var(--v2-a-200); }
+
+
+/* ——— la boîte de réception (Inbox de Linear) : les secondes pages de chaque SaaS ———
+   Relevé du 28/10/2026 sur linear.app/omegaaii/inbox, fenêtre de 1710 px :
+     colonne de liste   400 de large, trait à droite ; tête de 44 (titre 13/500, boutons ronds de 28 à droite)
+     ligne              55 de haut ; avatar rond de 32 (fond de sa couleur à 13 %, icône 20) à x 17 ;
+                        texte à x 61 : ligne 1 en 13 (point bleu de 8 si non lu, référence 450, titre 500),
+                        ligne 2 en 12/450 grise ; à droite l'icône de statut (14) et l'heure (12/450) calées à 16 du bord ;
+                        lu : tout en gris ; survol et sélection : fond en retrait de 8, rayon 8
+     détail             le reste de la largeur : tête de 44, puis la page de l'élément (titre 24/600, propriétés à droite) */
+.v2 .lin-boite { display: flex; align-items: stretch; flex: 1; min-height: 0; }
+.v2 .lin-boite-liste { display: flex; flex-direction: column; width: 400px; flex-shrink: 0; border-right: 0.5px solid var(--lin-trait); min-height: calc(100dvh - 48px); }
+.v2 .lin-boite-liste > .lin-tete { position: sticky; top: 0; }
+.v2 .lin-boite-titre { margin-left: 4px; font-size: 13px; font-weight: 500; color: var(--lin-texte); }
+.v2 .lin-boite-lignes { margin: 0; padding: 8px 0; list-style: none; }
+.v2 .lin-boite-ligne { position: relative; display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; column-gap: 12px; align-items: center; height: 55px; padding: 0 16px 0 17px; color: var(--lin-second); }
+.v2 .lin-boite-ligne::before { content: ""; position: absolute; inset: 0 8px; border-radius: 8px; background: transparent; }
+.v2 .lin-boite-ligne:hover::before, .v2 .lin-boite-ligne[data-actif]::before { background: var(--lin-survol); }
+.v2 .lin-boite-ligne > * { position: relative; min-width: 0; }
+.v2 .lin-boite-ligne:focus-visible { outline: 2px solid var(--lin-fait); outline-offset: -2px; border-radius: 8px; }
+.v2 .lin-boite-avatar { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: color-mix(in srgb, currentColor 13%, transparent); color: var(--lin-avatar-teinte, #6879e1); }
+.v2 .lin-boite-avatar svg { width: 20px; height: 20px; }
+.v2 .lin-boite-texte { display: grid; row-gap: 4px; }
+.v2 .lin-boite-l1 { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 13px; font-weight: 500; color: var(--lin-second); white-space: nowrap; }
+.v2 .lin-boite-l1 b { font-weight: 450; }
+.v2 .lin-boite-l1 span:last-child { overflow: hidden; text-overflow: ellipsis; }
+.v2 .lin-boite-ligne[data-non-lu] .lin-boite-l1 { color: var(--lin-texte); }
+.v2 .lin-boite-ligne[data-non-lu] .lin-boite-l1 b { font-weight: 500; }
+.v2 .lin-boite-point { width: 8px; height: 8px; border-radius: 50%; background: var(--lin-graph-bleu); flex-shrink: 0; }
+.v2 .lin-boite-l2 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 450; color: var(--lin-second); }
+.v2 .lin-boite-droite { display: grid; justify-items: end; row-gap: 4px; }
+.v2 .lin-boite-droite .lin-ic, .v2 .lin-boite-droite svg { width: 14px; height: 14px; }
+.v2 .lin-boite-heure { font-size: 12px; font-weight: 450; color: var(--lin-second); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.v2 .lin-boite-detail { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.v2 .lin-boite-vide { flex: 1; display: grid; place-content: center; justify-items: center; gap: 14px; color: var(--lin-second); font-size: 13px; }
+.v2 .lin-boite-vide svg { width: 64px; height: 64px; color: var(--lin-second); opacity: 0.8; }
+
+@container principale (max-width: 1100px) {
+  .v2 .lin-boite { flex-direction: column; }
+  .v2 .lin-boite-liste { width: auto; min-height: 0; border-right: 0; border-bottom: 0.5px solid var(--lin-trait); }
+}
+
+/* ——— la page d'un élément ouvert dans la boîte (page d'un ticket de Linear) ———
+   Relevé du 28/10/2026 sur OME-5 ouvert depuis l'Inbox, fenêtre de 1710 px. Teo : « dans la
+   référence il n'y a pas les sections grises, et trop d'informations chez nous ». Donc : pas de
+   cartes, pas de courbe ; un titre, deux lignes, une liste d'éléments liés, un fil d'activité.
+     colonne principale  591 de large (x 695 pour un détail qui part de x 645) ; titre 24/600 lh 32 à 59 sous la tête
+     description         15/400 lh 24, padding 10 14 16 décalé de −14 ; placeholder gris
+     sous-éléments       ligne d'appel 24 de haut, 12/500 grise, « + » ; trait 0.5 px 50 plus bas
+     Activité            h3 15/600 lh 23, ligne de 32 avec « Unsubscribe » 12/500 à droite ;
+                         entrées 12 : auteur 12/500 gris, « · », heure 12/450, icône 14 sur un fil vertical, pas de 25
+     composeur           607 de large (débord de 8), padding 12 16, rayon 8, fond L 9.2, trait 0.5 L 16.8, ombre 0 .5 1 1 /.3
+     colonne de droite   342 de large, sans fond ni trait ; titre de section 13/500 gris, padding 0 8 ;
+                         propriétés en pilules de 28 (rayon plein, padding 0 10 0 6, écart 6, 13/500) au pas de 32 ;
+                         sections espacées de 23 (padding bas 10) */
+.v2 .lin { --lin-composeur: lch(9.232 0.85 272); --lin-composeur-trait: lch(16.793 1.93 272); --lin-separateur: lch(18.48 1.48 272); }
+html[data-v2-theme="light"] .v2 .lin { --lin-composeur: var(--v2-bg-100); --lin-composeur-trait: var(--v2-a-400); --lin-separateur: var(--v2-a-400); }
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lin { --lin-composeur: var(--v2-bg-100); --lin-composeur-trait: var(--v2-a-400); --lin-separateur: var(--v2-a-400); }
+}
+.v2 .lin-ticket { flex: 1; display: flex; align-items: flex-start; gap: 37px; padding: 0 37px 64px 50px; }
+.v2 .lin-ticket-corps { flex: 1; min-width: 0; max-width: 591px; margin: 0 auto; padding-top: 59px; }
+.v2 .lin-ticket-titre { margin: 0; font-size: 24px; font-weight: 600; line-height: 32px; color: var(--lin-titre); letter-spacing: -0.01em; }
+.v2 .lin-ticket-desc { margin: 14px 0 0; font-size: 15px; font-weight: 400; line-height: 24px; color: var(--lin-texte); }
+.v2 .lin-ticket-desc[data-vide] { color: var(--lin-second); }
+.v2 .lin-ticket-icones { display: flex; align-items: center; gap: 4px; margin: 18px 0 0 -6px; }
+.v2 .lin-ticket-icone { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 6px; color: var(--lin-second); }
+.v2 .lin-ticket-icone:hover { background: var(--lin-survol); color: var(--lin-texte); }
+.v2 .lin-ticket-icone svg { width: 16px; height: 16px; }
+.v2 .lin-ticket-sous { margin: 20px 0 0; padding: 0; list-style: none; }
+.v2 .lin-ticket-sous-appel { display: inline-flex; align-items: center; gap: 6px; height: 24px; margin-left: -6px; padding: 0 6px; border-radius: 6px; font-size: 12px; font-weight: 500; color: var(--lin-second); }
+.v2 .lin-ticket-sous-appel:hover { background: var(--lin-survol); color: var(--lin-texte); }
+.v2 .lin-ticket-sous-ligne { position: relative; display: flex; align-items: center; gap: 8px; height: 32px; margin: 0 -8px; padding: 0 8px; border-radius: 6px; font-size: 13px; font-weight: 500; color: var(--lin-texte); }
+.v2 .lin-ticket-sous-ligne:hover { background: var(--lin-survol); }
+.v2 .lin-ticket-sous-ligne .lin-ticket-sous-ref { color: var(--lin-second); font-weight: 450; }
+.v2 .lin-ticket-sous-ligne .lin-ticket-sous-nom { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2 .lin-ticket-sous-ligne .lin-ticket-sous-meta { font-size: 12px; font-weight: 450; color: var(--lin-second); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.v2 .lin-ticket-trait { height: 0; margin: 26px 0 19px; border: 0; border-top: 0.5px solid var(--lin-separateur); }
+.v2 .lin-ticket-activite-tete { display: flex; align-items: center; justify-content: space-between; height: 32px; padding-right: 8px; }
+.v2 .lin-ticket-activite-tete h3 { margin: 0; font-size: 15px; font-weight: 600; line-height: 23px; color: var(--lin-titre); }
+.v2 .lin-ticket-activite-tete .lin-ticket-lien { height: 32px; padding: 0 10px; border-radius: 6px; font-size: 12px; font-weight: 500; color: var(--lin-second); display: inline-flex; align-items: center; gap: 6px; }
+.v2 .lin-ticket-activite-tete .lin-ticket-lien:hover { background: var(--lin-survol); color: var(--lin-texte); }
+.v2 .lin-ticket-fil { position: relative; margin: 14px 0 0; padding: 0; list-style: none; }
+.v2 .lin-ticket-fil::before { content: ""; position: absolute; left: 18px; top: 12px; bottom: 12px; width: 1px; background: var(--lin-separateur); }
+.v2 .lin-ticket-fil > li { position: relative; display: flex; align-items: flex-start; gap: 10px; min-height: 25px; padding: 4px 0 4px 11px; font-size: 12px; font-weight: 450; line-height: 16.8px; color: var(--lin-second); }
+.v2 .lin-ticket-fil > li > .lin-ic, .v2 .lin-ticket-fil > li > svg:first-child { flex-shrink: 0; width: 14px; height: 14px; margin-top: 1px; background: var(--lin-fond); box-shadow: 0 0 0 3px var(--lin-fond); border-radius: 50%; }
+.v2 .lin-ticket-fil b { font-weight: 500; color: var(--lin-second); }
+.v2 .lin-ticket-fil .lin-ticket-fil-texte { color: var(--lin-texte); }
+.v2 .lin-ticket-fil .lin-ticket-fil-actions { display: flex; gap: 6px; margin-top: 6px; }
+.v2 .lin-ticket-composeur { margin: 18px -8px 0; padding: 12px 16px; border-radius: 8px; background: var(--lin-composeur); border: 0.5px solid var(--lin-composeur-trait); box-shadow: 0 0.5px 1px 1px lch(0 0 0 / 0.3); }
+html[data-v2-theme="light"] .v2 .lin-ticket-composeur { box-shadow: var(--v2-ombre-petite); }
+.v2 .lin-ticket-composeur textarea { display: block; width: 100%; min-height: 24px; resize: none; border: 0; outline: 0; background: transparent; padding: 0; font: inherit; font-size: 15px; line-height: 24px; color: var(--lin-texte); }
+.v2 .lin-ticket-composeur textarea::placeholder { color: var(--lin-second); }
+.v2 .lin-ticket-composeur textarea:focus-visible { box-shadow: none; }
+.v2 .lin-ticket-composeur-pied { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 10px; }
+.v2 .lin-ticket-envoyer { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--lin-pastille-active); color: var(--lin-texte); }
+.v2 .lin-ticket-envoyer:disabled { opacity: 0.5; }
+.v2 .lin-ticket-cote { width: 342px; flex-shrink: 0; padding-top: 72px; }
+.v2 .lin-ticket-section { padding: 0 0 10px 4px; }
+.v2 .lin-ticket-section + .lin-ticket-section { margin-top: 23px; }
+.v2 .lin-ticket-section > h3 { display: flex; align-items: center; height: 20px; margin: 0 0 8px; padding: 0 8px; font-size: 13px; font-weight: 500; color: var(--lin-second); }
+.v2 .lin-ticket-pilules { display: grid; justify-items: start; row-gap: 4px; }
+.v2 .lin-ticket-pilule, .v2 .lin-ticket-pilules .lin-puce { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 6px; border-radius: 9999px; font-size: 13px; font-weight: 500; color: var(--lin-texte); background: transparent; white-space: nowrap; }
+.v2 .lin-ticket-pilule:hover, .v2 .lin-ticket-pilules .lin-puce:hover { background: var(--lin-survol); }
+.v2 .lin-ticket-pilule[data-vide] { color: var(--lin-second); }
+.v2 .lin-ticket-pilule svg, .v2 .lin-ticket-pilules .lin-puce svg { width: 16px; height: 16px; flex-shrink: 0; }
+.v2 .lin-ticket-sous-pilule { position: relative; margin-left: 22px; }
+.v2 .lin-ticket-sous-pilule::before { content: ""; position: absolute; left: -10px; top: -6px; width: 9px; height: 18px; border-left: 1px solid var(--lin-separateur); border-bottom: 1px solid var(--lin-separateur); border-bottom-left-radius: 6px; }
+
+@container principale (max-width: 1100px) {
+  .v2 .lin-ticket { flex-direction: column; gap: 24px; padding: 0 16px 48px; }
+  .v2 .lin-ticket-corps { width: 100%; padding-top: 32px; max-width: none; }
+  .v2 .lin-ticket-cote { width: auto; padding-top: 0; }
+}
+
+/* ——— la liste « vivante » (style A choisi par Teo le 28/10/2026) ———
+   un surlignage qui glisse d'une ligne à l'autre, le point des non-lus qui bat doucement, les
+   lignes qui arrivent en cascade ; l'icône de gauche devient la santé de Linear (16 px), sans rond
+   coloré autour. Tout s'arrête si l'appareil ou l'espace demande moins de mouvement. */
+.v2 .lin-boite-lignes { position: relative; isolation: isolate; }
+.v2 .lin-boite-surlignage { position: absolute; z-index: -1; top: 0; left: 8px; right: 8px; height: 55px; border-radius: 8px; background: var(--lin-survol); opacity: 0; pointer-events: none; transition: transform 0.24s cubic-bezier(0.2, 0.8, 0.2, 1), height 0.24s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.16s ease; }
+.v2 .lin-boite-lignes[data-glisse] .lin-boite-ligne:hover::before, .v2 .lin-boite-lignes[data-glisse] .lin-boite-ligne[data-actif]::before { background: transparent; }
+.v2 .lin-boite-lignes > li:not(.lin-boite-surlignage) { animation: lin-entree 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.v2 .lin-boite-lignes > li:nth-child(2) { animation-delay: 30ms; }
+.v2 .lin-boite-lignes > li:nth-child(3) { animation-delay: 60ms; }
+.v2 .lin-boite-lignes > li:nth-child(4) { animation-delay: 90ms; }
+.v2 .lin-boite-lignes > li:nth-child(5) { animation-delay: 120ms; }
+.v2 .lin-boite-lignes > li:nth-child(6) { animation-delay: 150ms; }
+.v2 .lin-boite-lignes > li:nth-child(7) { animation-delay: 180ms; }
+.v2 .lin-boite-lignes > li:nth-child(8) { animation-delay: 210ms; }
+.v2 .lin-boite-lignes > li:nth-child(n + 9) { animation-delay: 240ms; }
+@keyframes lin-entree { from { opacity: 0; transform: translateY(6px); } }
+.v2 .lin-boite-point { position: relative; }
+.v2 .lin-boite-point::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: inherit; animation: lin-pouls 2.4s cubic-bezier(0.2, 0.8, 0.2, 1) infinite; }
+@keyframes lin-pouls { 0% { transform: scale(1); opacity: 0.55; } 70%, 100% { transform: scale(2.6); opacity: 0; } }
+.v2 .lin-boite-sante { display: grid; place-items: center; width: 32px; height: 32px; }
+.v2 .lin-boite-sante .lin-ic { width: 16px; height: 16px; }
+.v2 .lin-ic-sante--risque { color: var(--lin-jaune); }
+.v2 .lin-ic-sante--hors { color: var(--lin-rouge); }
+.v2 .lin-ic-sante--bien { color: var(--lin-vert); }
+.v2 .lin-ic-sante--neutre { color: var(--lin-second); }
+@media (prefers-reduced-motion: reduce) {
+  .v2 .lin-boite-lignes > li, .v2 .lin-boite-point::after { animation: none; }
+  .v2 .lin-boite-surlignage { transition: none; }
+}
+html.v2-calme .v2 .lin-boite-lignes > li, html.v2-calme .v2 .lin-boite-point::after { animation: none; }
+html.v2-calme .v2 .lin-boite-surlignage { transition: none; }
+
+/* ——— les têtes de la boîte (relevé du 28/10/2026 sur l'Inbox, fenêtre de 1710 px) ———
+   liste : titre, « ··· » à côté (Notification actions), puis à droite trois ronds (Show unreads
+   only, Add filter, Display options) ; élément ouvert : référence 13/500 grise, titre 13/500, étoile
+   et « ··· », puis à droite trois ronds (Unsubscribe, Snooze, Delete notification).
+   Les ronds : 28 × 28, rayon plein, sans bord ni fond, icône de 14 en L 90, écart de 6. */
+.v2 .lin-rond { display: inline-grid; place-items: center; width: 28px; height: 28px; flex-shrink: 0; border-radius: 9999px; color: var(--lin-texte); background: transparent; }
+.v2 .lin-rond:hover, .v2 .lin-rond[aria-expanded="true"], .v2 .lin-rond[aria-pressed="true"] { background: var(--lin-survol); }
+.v2 .lin-rond[aria-pressed="true"] { color: var(--lin-titre); }
+.v2 .lin-rond svg { width: 14px; height: 14px; }
+.v2 .lin-rond[data-actif] svg { color: var(--lin-en-cours); }
+.v2 .lin-tete-ronds { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.v2 .lin-tete .lin-tete-titre + .lin-rond, .v2 .lin-tete .lin-tete-titre + * > .lin-rond { margin-left: 4px; }
+.v2 .lin-tete-ref { flex-shrink: 0; margin-left: 4px; font-size: 13px; font-weight: 500; color: var(--lin-second); }
+.v2 .lin-tete-nom { min-width: 0; margin: 0 6px 0 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 500; color: var(--lin-texte); }
+.v2 .lin-tete-compte { margin-left: 6px; font-size: 13px; font-weight: 450; color: var(--lin-second); }
+
+/* les onglets de vue (Aperçu, Documents, À payer…) : le contour seul, l'intérieur vide — Teo le
+   28/10/2026 : « juste les contours autour et l'intérieur vide, pas gris ». L'onglet courant garde
+   le même fond vide, son contour et son texte passent au plus clair. */
+.v2 .lin .lin-onglets .v2-btn, .v2 .lin .lin-onglets .v2-btn:hover { background: transparent; box-shadow: 0 0 0 1px var(--v2-a-500); }
+.v2 .lin .lin-onglets .v2-btn:hover { box-shadow: 0 0 0 1px var(--v2-a-600); color: var(--v2-gray-1000); }
+.v2 .lin .lin-onglets .v2-btn[data-actif], .v2 .lin .lin-onglets .v2-btn[aria-current="page"], .v2 .lin .lin-onglets .v2-btn[aria-pressed="true"] { background: transparent; box-shadow: 0 0 0 1px var(--v2-gray-700); color: var(--v2-gray-1000); }
+/* le contour est une ombre de 1 px : la rangée défilante la rognait à gauche */
+.v2 .lin .lin-onglets { padding: 1px; margin: -1px; }
+/* l'étoile et le « ··· » de la tête du détail : 6 d'écart comme chez Linear (la tête en met 4) */
+.v2 .lin-tete-nom + .lin-rond + * { margin-left: 2px; }
+
+/* étroit, sur les quatre pages : le « ··· » de la tête du détail est à droite du titre, son menu (300 de large) ouvert depuis
+   le bouton sortirait de l'écran ; il se cale alors sur le bord droit de la tête (collante, donc son repère) */
+@container principale (max-width: 640px) {
+  .v2 .lin .lin-boite-detail > .lin-tete > .lin-ancre {
+    position: static;
+  }
+  .v2 .lin .lin-boite-detail > .lin-tete > .lin-ancre > .lin-menu--options {
+    left: auto;
+    right: 8px;
+  }
+}
+
+/* la cloche des têtes fait défiler jusqu'à « Activité » : le titre s'arrête sous la barre du site (48) et la tête collante (44) */
+.v2 .lin .lin-ticket-activite-tete { scroll-margin-top: 100px; }
+
+/* la palette sobre des listes (choix de Teo du 28/10/2026, « palette 1 ») : dans les lignes d'une boîte,
+   tout est gris ; seul ce qui est hors délai ressort, en orange. Le point bleu des non-lus reste la
+   seule autre couleur. Le détail ouvert garde ses couleurs. */
+.v2 .lin-boite-ligne .lin-ic-sante, .v2 .lin-boite-ligne .lin-ic-statut { color: var(--lin-second); }
+.v2 .lin-boite-ligne .lin-ic-sante--hors, .v2 .lin-boite-ligne .lin-ic-statut--annule { color: var(--lin-orange); }
+
+/* ——— le tableau en colonnes (vue « Board » de Linear) : les troisièmes pages de chaque SaaS ———
+   Relevé du 28/10/2026 sur linear.app/omegaaii/team/OME/all en Board, fenêtre de 1710 px :
+     colonnes        pas de 348 (tête et corps : padding 0 12, la tête 2 12 0 18), sans fond ; défilement horizontal
+     tête de colonne 50 de haut ; icône d'état 14, nom 13/500 L 90, nombre 13 gris, écart 8 ; à droite « ··· » et « + »
+     carte           324 de large, padding 8, rayon 8, fond L 9.2, ombre 0 0 0 .5px blanc 8 % + 0 .5px 1px noir 30 % ;
+                     8 entre deux cartes ; 117 de haut pour quatre rangs :
+                     référence 12/450 grise (y 8, x 12), avatar 16 en haut à droite ;
+                     titre 13/500 blanc précédé de l'icône d'état 14 (rang de 37, padding 0 34 0 4, écart 6) ;
+                     pastilles 24 de haut, padding 0 8, rayon plein, trait .5 L 20, texte 12/450 gris, écart 4 ;
+                     pied 12/450 gris (« Created Oct 28 »), x 10 */
+.v2 .lin-tableau { flex: 1; display: flex; align-items: stretch; min-height: 0; overflow-x: auto; padding-left: 4px; scrollbar-width: thin; }
+.v2 .lin-colonne { display: flex; flex-direction: column; flex: 0 0 348px; min-width: 0; }
+.v2 .lin-colonne-tete { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: 12px; height: 50px; padding: 2px 12px 0 18px; background: var(--lin-fond); }
+.v2 .lin-colonne-nom { display: flex; align-items: center; gap: 8px; min-width: 0; height: 24px; font-size: 13px; font-weight: 500; color: var(--lin-texte); }
+.v2 .lin-colonne-nom h3 { margin: 0; font: inherit; color: inherit; white-space: nowrap; }
+.v2 .lin-colonne-nom .lin-ic { width: 14px; height: 14px; }
+.v2 .lin-colonne-compte { font-size: 13px; font-weight: 500; color: var(--lin-second); }
+.v2 .lin-colonne-tete .lin-tete-ronds { gap: 2px; }
+.v2 .lin-colonne-corps { display: flex; flex-direction: column; gap: 8px; padding: 5px 12px 24px; min-height: 120px; border-radius: 10px; transition: background 0.15s; }
+.v2 .lin-colonne-corps[data-depot] { background: var(--lin-survol); }
+.v2 .lin-colonne-vide { display: grid; place-items: center; height: 64px; border: 0.5px dashed var(--lin-trait); border-radius: 8px; font-size: 12px; color: var(--lin-second); }
+.v2 .lin-carte-tableau { position: relative; display: grid; row-gap: 0; padding: 8px; border-radius: 8px; background: var(--lin-composeur); box-shadow: 0 0 0 0.5px lch(100 0 0 / 0.083), 0 0.5px 1px lch(0 0 0 / 0.3); color: var(--lin-texte); cursor: pointer; transition: background 0.12s, box-shadow 0.12s; }
+html[data-v2-theme="light"] .v2 .lin-carte-tableau { box-shadow: 0 0 0 1px var(--v2-a-400), var(--v2-ombre-petite); }
+@media (prefers-color-scheme: light) { html:not([data-v2-theme="dark"]) .v2 .lin-carte-tableau { box-shadow: 0 0 0 1px var(--v2-a-400), var(--v2-ombre-petite); } }
+.v2 .lin-carte-tableau:hover { background: color-mix(in srgb, var(--lin-composeur) 82%, var(--lin-texte) 4%); }
+.v2 .lin-carte-tableau[data-actif] { box-shadow: 0 0 0 1px var(--lin-graph-bleu), 0 0.5px 1px lch(0 0 0 / 0.3); }
+.v2 .lin-carte-tableau[data-glisse] { opacity: 0.4; }
+.v2 .lin-carte-tableau:focus-visible { outline: 2px solid var(--lin-fait); outline-offset: 1px; }
+.v2 .lin-carte-ref { display: flex; align-items: center; justify-content: space-between; min-height: 15px; padding: 0 4px; font-size: 12px; font-weight: 450; color: var(--lin-second); }
+.v2 .lin-carte-ref .lin-ic, .v2 .lin-carte-ref svg { width: 16px; height: 16px; }
+/* scopé à la carte du tableau : .lin-carte-titre sert aussi au titre des cartes de droite (CarteDroite) */
+.v2 .lin-carte-tableau .lin-carte-titre, .v2 .lin-carte-tableau .lin-carte-titre:hover { display: flex; align-items: flex-start; gap: 6px; margin: 0; padding: 6px 34px 6px 4px; border-radius: 0; font-size: 13px; font-weight: 500; line-height: 18px; color: var(--lin-titre); }
+.v2 .lin-carte-tableau .lin-carte-titre .lin-ic, .v2 .lin-carte-tableau .lin-carte-titre > svg { flex-shrink: 0; width: 14px; height: 14px; margin-top: 2px; }
+.v2 .lin-carte-tableau .lin-carte-titre span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.v2 .lin-carte-pastilles { display: flex; flex-wrap: wrap; gap: 4px; padding: 2px 4px; }
+.v2 .lin-carte-pastille { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 8px; border-radius: 9999px; border: 0.5px solid lch(20.032 1.93 272); background: var(--lin-composeur); font-size: 12px; font-weight: 450; color: var(--lin-second); white-space: nowrap; }
+html[data-v2-theme="light"] .v2 .lin-carte-pastille { border-color: var(--v2-a-400); }
+@media (prefers-color-scheme: light) { html:not([data-v2-theme="dark"]) .v2 .lin-carte-pastille { border-color: var(--v2-a-400); } }
+.v2 .lin-carte-pastille .lin-ic, .v2 .lin-carte-pastille svg { width: 14px; height: 14px; }
+.v2 .lin-carte-pied { padding: 8px 2px 0; font-size: 12px; font-weight: 450; color: var(--lin-second); }
+/* dans les cartes aussi, la palette sobre : gris, l'orange pour le hors délai */
+.v2 .lin-carte-tableau .lin-ic-sante, .v2 .lin-carte-tableau .lin-ic-statut { color: var(--lin-second); }
+.v2 .lin-carte-tableau .lin-ic-sante--hors, .v2 .lin-carte-tableau .lin-ic-statut--annule { color: var(--lin-orange); }
+/* la page : le tableau à gauche, la fiche de la carte ouverte à droite (la même que dans la boîte) */
+.v2 .lin-tableau-page { flex: 1; display: flex; min-height: 0; }
+.v2 .lin-tableau-page > .lin-tableau { flex: 1; }
+.v2 .lin-tableau-page > .lin-boite-detail { flex: 0 0 min(560px, 45%); border-left: 0.5px solid var(--lin-trait); }
+@container principale (max-width: 900px) {
+  .v2 .lin-tableau-page { flex-direction: column; }
+  .v2 .lin-tableau-page > .lin-boite-detail { flex-basis: auto; border-left: 0; border-top: 0.5px solid var(--lin-trait); }
+  .v2 .lin-colonne { flex-basis: 300px; }
+}
+/* l'icône du coin d'une carte reste grise (palette sobre) */
+.v2 .lin-carte-tableau .lin-carte-ref > svg { color: var(--lin-second); }
+
+/* la marque d'un module, en masque sur la couleur du texte (MarqueModule, icones.tsx) */
+.v2 .lin-marque {
+  display: inline-block;
+  flex: none;
+  background-color: currentColor;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+}

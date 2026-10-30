@@ -1,0 +1,140 @@
+/* ══════════════════════════════════════════════════════════════════════
+   FILED « Fournisseurs » sur la vue Board de Linear (28/10/2026) : les
+   quelques réglages propres à ./TableauFournisseurs.tsx, sous .v2 .lin
+   comme le gabarit (../lin/lin.css, bloc « le tableau en colonnes »),
+   qui reste intact.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* large : la page tient dans la fenêtre comme chez Linear — les colonnes défilent chacune */
+@container principale (min-width: 901px) {
+  .v2 .lin.fou {
+    height: calc(100dvh - 48px);
+    overflow: hidden;
+  }
+  .v2 .lin.fou .lin-tableau-page {
+    min-height: 0;
+  }
+  .v2 .lin.fou .lin-colonne {
+    min-height: 0;
+  }
+  .v2 .lin.fou .lin-colonne-corps {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+}
+
+/* la carte : « .lin-carte-titre » sert aussi au titre des cartes de droite de la page d'un projet ;
+   son retrait (−2 −4) et sa couleur au survol ne valent pas pour le titre d'une carte du tableau */
+.v2 .lin.fou .lin-carte-tableau .lin-carte-titre {
+  margin: 0;
+  border-radius: 0;
+}
+.v2 .lin.fou .lin-carte-tableau .lin-carte-titre:hover {
+  color: var(--lin-titre);
+}
+.v2 .lin.fou .lin-carte-tableau {
+  text-decoration: none;
+}
+.v2 .lin.fou .lin-carte-tableau[draggable="true"] {
+  cursor: grab;
+}
+.v2 .lin.fou .fou-ref {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lin.fou .lin-carte-ref > svg {
+  width: 12px;
+  height: 12px;
+  color: var(--lin-second);
+}
+
+/* la palette sobre (Teo, 28/10) : les icônes d'état des têtes de colonne en gris, le bloquant en orange ;
+   un refus n'est pas un blocage, il reste gris */
+.v2 .lin.fou .lin-colonne-nom .lin-ic-statut {
+  color: var(--lin-second);
+}
+.v2 .lin.fou .lin-colonne[data-colonne="bloque"] .lin-colonne-nom .lin-ic-statut {
+  color: var(--lin-orange);
+}
+.v2 .lin.fou .lin-carte-tableau[data-colonne="refuse"] .lin-ic-statut--annule,
+.v2 .lin.fou .lin-colonne[data-colonne="refuse"] .lin-colonne-nom .lin-ic-statut {
+  color: var(--lin-second);
+}
+.v2 .lin.fou .lin-carte-pastille[data-alerte],
+.v2 .lin.fou .fou-alerte {
+  color: var(--lin-orange);
+}
+
+/* les filtres posés et l'erreur de la base, sous la tête : une rangée qui passe à la ligne */
+.v2 .lin.fou .fou-outils {
+  flex-wrap: wrap;
+  height: auto;
+  min-height: 28px;
+  gap: 6px;
+}
+.v2 .lin.fou .fou-erreur {
+  font-size: 12px;
+  color: var(--lin-orange);
+}
+
+/* le menu « Filtrer » : la recherche, puis une section par dimension (comme « À payer ») */
+.v2 .lin.fou .fou-menu {
+  max-height: min(520px, calc(100dvh - 140px));
+  overflow-y: auto;
+}
+.v2 .lin.fou .fou-menu-titre {
+  margin: 0;
+  padding: 8px 16px 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--lin-second);
+}
+.v2 .lin.fou .fou-menu .lin-menu-option svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.v2 .lin.fou .fou-menu .lin-option-coche {
+  width: 14px;
+  height: 14px;
+}
+.v2 .lin.fou .fou-bascule {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* les fenêtres des gestes : l'icône du geste devant le titre, comme l'écran d'avant */
+.v2-modale .fou-modale-titre {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.v2-modale .fou-mono {
+  font-family: var(--font-geist-mono, ui-monospace), ui-monospace, monospace;
+}
+
+/* la carte du milieu (../lin/CarteCentrale) est rendue hors de la page : le « ··· » de « Plus d'actions »
+   est posé dans un petit « .v2 .lin » pour retrouver les jetons du gabarit ; on lui retire la hauteur
+   et le fond de page, et son menu s'ouvre vers le haut, au-dessus des boutons */
+.v2.fou-plus {
+  display: inline-flex;
+  align-items: center;
+  min-height: 0;
+  margin-left: auto;
+  background: transparent;
+}
+.v2.fou-plus > .lin {
+  display: inline-flex;
+  min-height: 0;
+  background: transparent;
+}
+.v2.fou-plus .lin-menu {
+  top: auto;
+  bottom: calc(100% + 6px);
+}

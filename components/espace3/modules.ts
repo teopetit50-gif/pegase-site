@@ -1,0 +1,170 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Les « portées » du nouvel espace (06/10/2026, session C1)
+
+   Comme le tableau de bord de référence : une portée ORGANISATION (ses
+   onglets : vue d'ensemble, validations, point du matin, activité,
+   réglages) et, en dessous, une portée par MODULE (la carte « projet »,
+   avec ses propres onglets). Les écrans pas encore redessinés renvoient
+   vers leur écran actuel, sous /espace.
+   ══════════════════════════════════════════════════════════════════════ */
+
+import type { LucideIcon } from "lucide-react";
+import { Building, CarFront, FileText, FolderLock, HandCoins, HardHat, MessageSquareText, Smile, Stamp, UserMinus } from "lucide-react";
+
+export const RACINE = "/espace3";
+
+export type Onglet = { libelle: string; href: string; exact?: boolean };
+
+export const ONGLETS_ORGANISATION: Onglet[] = [
+  { libelle: "Vue d'ensemble", href: RACINE, exact: true },
+  { libelle: "À valider", href: `${RACINE}/validations` },
+  { libelle: "Point du matin", href: `${RACINE}/point` },
+  { libelle: "Demandes reçues", href: `${RACINE}/demandes` },
+  { libelle: "Activité", href: `${RACINE}/activite` },
+  { libelle: "Tâches", href: `${RACINE}/taches` },
+  { libelle: "Notes", href: `${RACINE}/notes` },
+  { libelle: "Appels", href: `${RACINE}/appels` },
+  { libelle: "Entreprises", href: `${RACINE}/entreprises` },
+  { libelle: "Contacts", href: `${RACINE}/contacts` },
+  { libelle: "Automatisations", href: `${RACINE}/automatisations` },
+  { libelle: "Utilisation de l'IA", href: `${RACINE}/utilisation` },
+  { libelle: "Réglages", href: `${RACINE}/reglages` },
+  { libelle: "Équipe", href: `${RACINE}/equipe` },
+  { libelle: "Formation", href: `${RACINE}/formation` },
+];
+
+export type ModuleV2 = {
+  cle: string;
+  nom: string;
+  libelle: string;
+  description: string;
+  icone: LucideIcon;
+  /* l'écran actuel, sous /espace */
+  ancien: string;
+  /* redessiné dans ce palier */
+  pret: boolean;
+  onglets: Onglet[];
+};
+
+const m = (cle: string, nom: string, libelle: string, description: string, icone: LucideIcon, onglets?: Onglet[], pret = false): ModuleV2 => ({
+  cle,
+  nom,
+  libelle,
+  description,
+  icone,
+  ancien: `/espace/${cle}?ancien=1`,
+  pret,
+  onglets: onglets ?? [{ libelle: "Vue d'ensemble", href: `${RACINE}/${cle}`, exact: true }],
+});
+
+const TOUS_MODULES: ModuleV2[] = [
+  m(
+    "filed",
+    "FILED",
+    "Documents reçus",
+    "Factures lues, contrôlées et mises à payer",
+    FileText,
+    [
+      { libelle: "Documents reçus", href: `${RACINE}/filed`, exact: true },
+      { libelle: "Boîte de réception", href: `${RACINE}/filed/boite` },
+      { libelle: "À payer", href: `${RACINE}/filed/a-payer` },
+      { libelle: "Fournisseurs", href: `${RACINE}/filed/fournisseurs` },
+      { libelle: "Comptabilité", href: `${RACINE}/filed/comptabilite` },
+      /* 21/10/2026 — les pages de fonction */
+      { libelle: "Contrôles et fraude", href: `${RACINE}/filed/controles` },
+      { libelle: "Circuit de validation", href: `${RACINE}/filed/circuit` },
+      /* 26/10/2026 — les factures refusées, à reprendre ou à classer */
+      { libelle: "Refusées", href: `${RACINE}/filed/refusees` },
+    ],
+    true,
+  ),
+  m("cashd", "CASHD", "Relances", "Qui vous doit, depuis quand, où en est chaque relance", HandCoins, [
+    { libelle: "Tableau de bord", href: `${RACINE}/cashd`, exact: true },
+    { libelle: "Débiteurs et relances", href: `${RACINE}/cashd/suivi` },
+    /* 21/10/2026 — les pages de fonction (le titre de la barre du haut) */
+    { libelle: "Balance âgée", href: `${RACINE}/cashd/balance` },
+    { libelle: "Litiges et pauses", href: `${RACINE}/cashd/litiges` },
+    { libelle: "Risque client", href: `${RACINE}/cashd/risque` },
+    { libelle: "Devis sans réponse", href: `${RACINE}/cashd/devis` },
+    { libelle: "Encaissements", href: `${RACINE}/cashd/encaissements` },
+  ]),
+  m("reput", "REPUT", "Demandes clients", "Demandes reçues et réponses préparées", MessageSquareText, [
+    { libelle: "Demandes", href: `${RACINE}/reput`, exact: true },
+    { libelle: "Base de connaissances", href: `${RACINE}/reput/base` },
+    { libelle: "Sujets autorisés", href: `${RACINE}/reput/sujets` },
+    { libelle: "Réglages et avis", href: `${RACINE}/reput/reglages` },
+    { libelle: "Urgences et escalade", href: `${RACINE}/reput/urgences` },
+  ]),
+  m("varelo", "VARELO", "Le groupe sur une page", "Sociétés, ventes, trésorerie, contrats et reportings du groupe", Building),
+  m("tavaro", "TAVARO", "Location", "Contrats, retours et barèmes", CarFront),
+  m("lorani", "LORANI", "Permis", "Demandes de permis et délais d'instruction", Stamp),
+  m("tiroma", "TIROMA", "Cabinet dentaire", "Créneaux, fauteuils et liste d'attente", Smile),
+  m("tamila", "TAMILA", "Dossiers du cabinet", "Dossiers chiffrés et pièces", FolderLock),
+  /* 29/10/2026 — refonte : une page par usage (docs/refonte-metiers/DECOUPAGES.md) */
+  m("daliro", "DALIRO", "Chantiers", "Chantiers, envois et accords", HardHat, [
+    { libelle: "Vue d'ensemble", href: `${RACINE}/daliro`, exact: true },
+    { libelle: "Chantiers", href: `${RACINE}/daliro/chantiers` },
+    { libelle: "À ranger", href: `${RACINE}/daliro/a-ranger` },
+    { libelle: "À faire", href: `${RACINE}/daliro/a-faire` },
+    { libelle: "Avenants et situations", href: `${RACINE}/daliro/avenants` },
+    { libelle: "Annuaire", href: `${RACINE}/daliro/annuaire` },
+    { libelle: "Équipes", href: `${RACINE}/daliro/equipes` },
+    { libelle: "Réglages", href: `${RACINE}/daliro/reglages` },
+  ]),
+  m("offload", "OFFLOAD", "Clients qui décrochent", "Rythme d'achat, décrochages et reprises de contact", UserMinus, [
+    { libelle: "Comptes à risque", href: `${RACINE}/offload`, exact: true },
+    { libelle: "Échéances et renouvellements", href: `${RACINE}/offload/echeances` },
+    { libelle: "Affaires restées en plan", href: `${RACINE}/offload/affaires` },
+    { libelle: "Groupes clients", href: `${RACINE}/offload/groupes` },
+    { libelle: "Garde-fous", href: `${RACINE}/offload/garde-fous` },
+    { libelle: "Pilotage", href: `${RACINE}/offload/pilotage` },
+  ]),
+];
+
+/* 30/10/2026 — /espace3 : les modules d'un groupe seulement (les modules métier
+   d'une PME — chantiers, permis, dentaire, avocats, location — n'y ont pas de sens) */
+const DU_GROUPE = ["varelo", "filed", "cashd", "offload", "reput"];
+export const MODULES: ModuleV2[] = TOUS_MODULES.filter((x) => DU_GROUPE.includes(x.cle)).sort((a, b) => DU_GROUPE.indexOf(a.cle) - DU_GROUPE.indexOf(b.cle));
+
+/* 07/10/2026 — demande de Teo : la barre ne montre que les quatre
+   modules communs, puis LE module du métier de l'entreprise (un seul).
+   Les autres restent atteignables par « Tous les modules », en haut. */
+export const MODULES_PRINCIPAUX = ["filed", "cashd", "reput", "offload"];
+
+/** Le module métier d'un secteur (valeurs de SECTEURS, lib/creneaux) ;
+    sans compte (démo), celui du BTP. */
+export function moduleMetier(secteur: string | undefined, connecte: boolean): string | null {
+  if (!connecte) return "daliro";
+  const table: Record<string, string> = {
+    btp: "daliro",
+    archi: "lorani",
+    location: "tavaro",
+    dentaire: "tiroma",
+    avocats: "tamila",
+    groupe: "varelo",
+    immo: "varelo",
+  };
+  return (secteur && table[secteur]) || null;
+}
+
+/* les modules annoncés, sans écran encore : une place dans la navigation, sans lien */
+export const MODULES_A_VENIR: { cle: string; nom: string; libelle: string; icone: LucideIcon }[] = [
+];
+
+export const moduleDe = (cle: string | undefined) => MODULES.find((x) => x.cle === cle);
+
+/* la portée de la route : l'organisation, ou un module */
+export function porteeDe(chemin: string): ModuleV2 | null {
+  const seg = chemin.slice(RACINE.length).split("/").filter(Boolean)[0];
+  return moduleDe(seg) ?? null;
+}
+
+/* le titre de la page, au centre de la barre du haut */
+export function titreDe(chemin: string): string {
+  /* les pages de la formation portent toutes « Formation » */
+  if (chemin.startsWith(`${RACINE}/formation/`)) return "Formation";
+  const portee = porteeDe(chemin);
+  /* un module sans sous-pages porte son nom ; avec, le nom de la sous-page */
+  const onglets = portee ? (portee.onglets.length > 1 ? portee.onglets : []) : ONGLETS_ORGANISATION;
+  return onglets.find((o) => o.href === chemin)?.libelle ?? portee?.libelle ?? "Espace client";
+}

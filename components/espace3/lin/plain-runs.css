@@ -1,0 +1,980 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Le journal des exécutions de Plain (Workflows › Runs), au 1:1 — 28/10/2026 (nuit)
+
+   Relevé au getComputedStyle dans l'espace Plain de Teo (app.plain.com,
+   fenêtre de 1600 px, thème sombre), panneau de 1239 de large :
+   scratchpad/releve-plain-runs.md. Les couleurs sont celles du gabarit
+   (--lin-*, lin.css : clair et sombre) ; tout le reste (hauteurs, écarts,
+   polices, graisses, rayons, colonnes) est celui de Plain, au pixel.
+   Préfixe de classes : pru-. Les boutons de tête (pf-btn) et le bouton
+   Filtres viennent de plain-fils.css (importé, pas modifié).
+
+   Repères, en px depuis le bord gauche du panneau :
+     tête        padding 24 24 24 (52 de haut : titre 28 + 24 dessous) ; icône 24 à x 24, titre 20/400 lh 28 à x 60
+     onglets     rangée de 36 (padding 0 24) : groupe padding 2, rayon 8, gap 8 ; pilules de 32 (padding 0 8, rayon 6, 14/600) ;
+                 à droite le bouton Filtres (34) et son <kbd> ; menu 237 (options 36), sous-menu 282 (recherche 45, options 32)
+     tableau     16 sous la rangée, pleine largeur ; en-tête 32 (padding 8 16, 12/600 gris, trait inset 1) ; lignes de 56 + trait 1 (padding 16) ;
+                 nom 14/600 ; déclencheur, moment, durée 12/400 gris ; badge d'état 24 (padding 6 8, rayon 4, 12/475 lh 12) ;
+                 puce de l'objet 24 (rayon 6, fond inset 1, padding 0 8 0 4, icône 14) ; montant à droite ; survol fond relevé
+     panneau     360 de large à droite, padding 16, gap 16 : titre 16/400 lh 24 et × de 32 ; fiche dt 12/600 lh 24 gris + dd 12/400 (grille 72 + 1fr, gap 8 16) ;
+                 « Étapes » 12/600 avec un bouton de 26 ; une étape : tuile 24 (rayon 6, teinte à 12 %, icône 18) + nom 14/400 + petit badge 10/475 (padding 3 6) ; 24 entre les étapes
+     état vide   carte de 450 centrée, rayon 10, trait 1, padding 32, gap 16 ; boîte d'icône 64 (icône 48), titre 14/600, texte 14/400 gris
+
+   Jetons pris au plus proche (pas d'équivalent exact chez --lin-*) :
+     fond 26,25,27 → --lin-fond ; texte 238,238,240 → --lin-titre ; gris 181,178,188 / 152,151,159 → --lin-second ; gris faible 98,95,105 → --lin-second à 60 % ;
+     survol, fond de badge et de puce 35,34,37 → --lin-survol ; onglet actif, fond de <kbd> 43,41,45 → --lin-pastille-active ;
+     traits 43,41,45 → --lin-detail-trait ; menus 18,17,19 / 50,48,53 → --lin-menu-fond / --lin-menu-bord ;
+     vert 178,242,192 sur 21,45,28 → --lin-vert sur --lin-vert à 15 % ; orange (échec) → --lin-orange ; bleu (en cours) → --lin-fait.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lin.pru {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--lin-titre);
+}
+
+/* ——— la grille : la liste, et le panneau de 360 quand une exécution est ouverte ——— */
+.v2 .lin .pru-grille {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  flex: 1;
+  min-height: 0;
+}
+.v2 .lin .pru[data-panneau] .pru-grille,
+.v2 .lin.pru[data-panneau] .pru-grille {
+  grid-template-columns: minmax(0, 1fr) 360px;
+}
+.v2 .lin .pru-gauche {
+  min-width: 0;
+}
+
+/* ——— tête de page : 52 de haut (titre 28 + 24 dessous) ——— */
+.v2 .lin .pru-tete {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px 24px 24px;
+}
+.v2 .lin .pru-titre {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  height: 28px;
+}
+.v2 .lin .pru-titre-icone {
+  display: flex;
+  align-items: center;
+  width: 24px;
+  height: 24px;
+  color: var(--lin-second);
+}
+.v2 .lin .pru-titre-icone svg {
+  width: 24px;
+  height: 24px;
+}
+.v2 .lin .pru-h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 28px;
+  color: var(--lin-titre);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lin .pru-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* le bouton primaire de la tête (les mesures de pf-btn, les couleurs inversées — comme « Add workflow ») */
+.v2 .lin .pru-primaire {
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 8px 12px 8px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--lin-titre);
+  color: var(--lin-fond);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow:
+    rgba(32, 39, 44, 0.08) 0 1px 0 0,
+    rgba(32, 39, 44, 0.08) 0 2px 5px 0;
+  transition: opacity 0.15s ease-in-out;
+}
+.v2 .lin .pru-primaire:hover {
+  opacity: 0.9;
+}
+.v2 .lin .pru-primaire > svg {
+  width: 18px;
+  height: 18px;
+  margin: 0 4px 0 -2px;
+  color: inherit;
+}
+.v2 .lin .pru-primaire:focus-visible,
+.v2 .lin .pru-onglet:focus-visible,
+.v2 .lin .pru-ligne-lien:focus-visible,
+.v2 .lin .pru-puce:focus-visible,
+.v2 .lin .pru-fermer:focus-visible,
+.v2 .lin .pru-petit:focus-visible,
+.v2 .lin .pru-option:focus-visible,
+.v2 .lin .pru-sous-option:focus-visible,
+.v2 .lin .pru-vide-bouton:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: -2px;
+}
+
+/* ——— la rangée des onglets et du bouton Filtres ——— */
+.v2 .lin .pru-rangee {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 36px;
+  padding: 0 24px;
+}
+.v2 .lin .pru-onglets {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 2px;
+  border-radius: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.v2 .lin .pru-onglets::-webkit-scrollbar {
+  display: none;
+}
+.v2 .lin .pru-onglet {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--lin-second);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.15s ease-in-out,
+    color 0.15s ease-in-out;
+}
+.v2 .lin .pru-onglet:hover {
+  color: var(--lin-titre);
+}
+.v2 .lin .pru-onglet[data-actif] {
+  background: var(--lin-pastille-active);
+  color: var(--lin-titre);
+}
+/* un filtre posé : une pilule de la même rangée, ✕ pour le retirer */
+.v2 .lin .pru-onglet--filtre {
+  gap: 6px;
+  background: var(--lin-pastille-active);
+  color: var(--lin-titre);
+  font-weight: 400;
+}
+.v2 .lin .pru-onglet--filtre svg {
+  width: 14px;
+  height: 14px;
+  color: var(--lin-second);
+}
+.v2 .lin .pru-onglet--filtre:hover svg {
+  color: var(--lin-titre);
+}
+.v2 .lin .pru-rangee-droite {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* ——— le menu Filtres : 237 de large, 4 sous le bouton ; un sous-menu de 282 à sa gauche ——— */
+.v2 .lin .pru-ancre {
+  position: relative;
+}
+.v2 .lin .pru-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 20;
+  width: 237px;
+  padding: 4px 0;
+  border: 1px solid var(--lin-menu-bord);
+  border-radius: 10px;
+  background: var(--lin-menu-fond);
+  color: var(--lin-menu-texte);
+  box-shadow: var(--lin-ombre-menu);
+}
+.v2 .lin .pru-option-cadre {
+  padding: 0 4px;
+}
+.v2 .lin .pru-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  height: 36px;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--lin-menu-texte);
+  text-align: left;
+  cursor: pointer;
+}
+.v2 .lin .pru-option:hover,
+.v2 .lin .pru-option[aria-expanded="true"] {
+  background: var(--lin-menu-survol);
+}
+.v2 .lin .pru-option-gauche {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.v2 .lin .pru-option-gauche > svg {
+  width: 18px;
+  height: 18px;
+  color: var(--lin-menu-gris);
+}
+.v2 .lin .pru-option > svg:last-child {
+  width: 14px;
+  height: 14px;
+  color: var(--lin-menu-gris);
+}
+.v2 .lin .pru-sous-menu {
+  position: absolute;
+  top: -1px;
+  right: calc(100% + 4px);
+  z-index: 21;
+  width: 282px;
+  padding: 0;
+  border: 1px solid var(--lin-menu-bord);
+  border-radius: 10px;
+  background: var(--lin-menu-fond);
+  color: var(--lin-menu-texte);
+  box-shadow: var(--lin-ombre-menu);
+}
+.v2 .lin .pru-sous-recherche {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 45px;
+  padding: 12px;
+  border-bottom: 1px solid var(--lin-menu-sep);
+}
+.v2 .lin .pru-sous-recherche > svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--lin-menu-gris);
+}
+.v2 .lin .pru-sous-champ {
+  display: block;
+  width: 100%;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lin-menu-texte);
+  outline: none;
+}
+.v2 .lin .pru-sous-champ::placeholder {
+  color: var(--lin-menu-gris);
+}
+.v2 .lin .pru-sous-champ:focus,
+.v2 .lin .pru-sous-champ:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.v2 .lin .pru-sous-liste {
+  padding: 4px 8px;
+  max-height: min(400px, calc(100dvh - 200px));
+  overflow-y: auto;
+}
+.v2 .lin .pru-sous-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  width: 100%;
+  height: 32px;
+  margin: 0 0 1px;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--lin-menu-texte);
+  text-align: left;
+  cursor: pointer;
+}
+.v2 .lin .pru-sous-option:hover,
+.v2 .lin .pru-sous-option[data-actif] {
+  background: var(--lin-menu-survol);
+}
+.v2 .lin .pru-sous-option > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lin .pru-sous-option > svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--lin-menu-gris);
+}
+.v2 .lin .pru-sous-rien {
+  padding: 8px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lin-menu-gris);
+}
+
+/* ——— la note sous la rangée (base réelle qui ne répond pas) ——— */
+.v2 .lin .pru-note {
+  margin: 12px 24px 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--lin-orange);
+}
+
+/* ——— le tableau : 16 sous la rangée, pleine largeur ——— */
+.v2 .lin .pru-tableau {
+  margin-top: 16px;
+  overflow-x: auto;
+}
+.v2 .lin .pru-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  table-layout: auto;
+}
+.v2 .lin .pru-th {
+  height: 32px;
+  padding: 8px 16px;
+  background: var(--lin-fond);
+  box-shadow: inset 0 -1px 0 var(--lin-detail-trait);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  color: var(--lin-second);
+  text-align: left;
+  vertical-align: bottom;
+  white-space: nowrap;
+}
+.v2 .lin .pru-th:first-child {
+  padding-left: 24px;
+}
+.v2 .lin .pru-th:last-child {
+  padding-right: 24px;
+}
+.v2 .lin .pru-th--droite {
+  text-align: right;
+}
+/* les largeurs de Plain : la première colonne est la souple, les autres prennent la largeur de leur contenu
+   (chez Plain : 119 · 97 · 75 · 80 · 74, au moins), la dernière fait 260 */
+.v2 .lin .pru-th-declencheur,
+.v2 .lin .pru-th-etat,
+.v2 .lin .pru-th-demarre,
+.v2 .lin .pru-th-duree,
+.v2 .lin .pru-th-montant {
+  width: 1px;
+}
+.v2 .lin .pru-th-declencheur {
+  min-width: 119px;
+}
+.v2 .lin .pru-th-etat {
+  min-width: 97px;
+}
+.v2 .lin .pru-th-demarre {
+  min-width: 75px;
+}
+.v2 .lin .pru-th-duree {
+  min-width: 80px;
+}
+.v2 .lin .pru-th-montant {
+  min-width: 74px;
+}
+.v2 .lin .pru-th-objet {
+  width: 260px;
+  min-width: 260px;
+}
+.v2 .lin .pru-ligne {
+  position: relative;
+  border-bottom: 1px solid var(--lin-detail-trait);
+}
+.v2 .lin .pru-td {
+  position: relative;
+  height: 56px;
+  padding: 16px;
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 0.1s ease-in-out;
+}
+.v2 .lin .pru-td:first-child {
+  padding-left: 24px;
+}
+.v2 .lin .pru-td:last-child {
+  padding-right: 24px;
+}
+.v2 .lin .pru-td--droite {
+  text-align: right;
+}
+.v2 .lin .pru-ligne:hover .pru-td,
+.v2 .lin .pru-ligne[data-actif] .pru-td {
+  background: var(--lin-survol);
+}
+/* comme chez Plain, un lien couvre chaque cellule ; la puce de l'objet reste au-dessus */
+.v2 .lin .pru-ligne-lien {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  border-radius: 0;
+}
+.v2 .lin .pru-nom {
+  position: relative;
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--lin-titre);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lin .pru-gris {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--lin-second);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lin .pru-gris--faible {
+  color: color-mix(in srgb, var(--lin-second) 60%, transparent);
+}
+.v2 .lin .pru-td time {
+  font-variant-numeric: tabular-nums;
+}
+
+/* le badge d'état : 24 de haut, padding 6 8, rayon 4, 12/475 lh 12, teinte sur sa teinte à 15 % */
+.v2 .lin .pru-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  padding: 6px 8px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--pru-teinte) 15%, transparent);
+  color: var(--pru-teinte);
+  font-size: 12px;
+  font-weight: 475;
+  line-height: 12px;
+  white-space: nowrap;
+  --pru-teinte: var(--lin-second);
+}
+.v2 .lin .pru-badge > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lin [data-teinte="vert"] {
+  --pru-teinte: var(--lin-vert);
+}
+.v2 .lin [data-teinte="ambre"] {
+  --pru-teinte: var(--lin-en-cours);
+}
+.v2 .lin [data-teinte="rouge"] {
+  --pru-teinte: var(--lin-orange);
+}
+.v2 .lin [data-teinte="bleu"] {
+  --pru-teinte: var(--lin-fait);
+}
+.v2 .lin [data-teinte="gris"] {
+  --pru-teinte: var(--lin-second);
+}
+
+/* la puce de l'objet : 24 de haut, rayon 6, fond en retrait de 1 ; icône 14, référence grise, titre blanc */
+.v2 .lin .pru-puce-cadre {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  max-width: 220px;
+}
+.v2 .lin .pru-puce {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 220px;
+  height: 24px;
+  border-radius: 6px;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--lin-titre);
+  isolation: isolate;
+}
+.v2 .lin .pru-puce::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  border-radius: 5px;
+  background: var(--lin-survol);
+}
+.v2 .lin .pru-ligne:hover .pru-puce::before,
+.v2 .lin .pru-ligne[data-actif] .pru-puce::before {
+  background: var(--lin-pastille-active);
+}
+.v2 .lin .pru-puce:hover::before {
+  background: var(--lin-pastille-active);
+}
+.v2 .lin .pru-puce-corps {
+  display: flex;
+  align-items: baseline;
+  min-width: 0;
+  height: 20px;
+  padding: 0 8px 0 4px;
+}
+.v2 .lin .pru-puce-icone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  width: 14px;
+  height: 14px;
+  margin-right: 4px;
+  flex-shrink: 0;
+  color: var(--lin-fait);
+}
+.v2 .lin .pru-puce-icone svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .lin .pru-puce-ref {
+  flex-shrink: 0;
+  margin-right: 4px;
+  color: var(--lin-second);
+}
+.v2 .lin .pru-puce-titre {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ——— l'état vide : carte de 450 centrée, 16 sous la rangée ——— */
+.v2 .lin .pru-vide-cadre {
+  display: flex;
+  justify-content: center;
+  padding: 0 24px;
+}
+.v2 .lin .pru-vide {
+  width: 100%;
+  max-width: 450px;
+  border: 1px solid var(--lin-detail-trait);
+  border-radius: 10px;
+  background: var(--lin-fond);
+}
+.v2 .lin .pru-vide-corps {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 32px;
+  text-align: center;
+}
+.v2 .lin .pru-vide-icone {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--lin-second) 12%, transparent);
+  color: var(--lin-second);
+}
+.v2 .lin .pru-vide-icone svg {
+  width: 48px;
+  height: 48px;
+}
+.v2 .lin .pru-vide-texte {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.v2 .lin .pru-vide-texte strong {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--lin-titre);
+}
+.v2 .lin .pru-vide-texte p {
+  margin: 0;
+  max-width: 384px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--lin-second);
+}
+.v2 .lin .pru-vide-bouton {
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 10px 16px 10px 12px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--lin-fond);
+  color: var(--lin-titre);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow:
+    0 0 0 1px var(--lin-trait),
+    rgba(32, 39, 44, 0.08) 0 1px 0 0,
+    rgba(32, 39, 44, 0.08) 0 2px 5px 0;
+}
+.v2 .lin .pru-vide-bouton:hover {
+  background: var(--lin-survol);
+}
+.v2 .lin .pru-vide-bouton > svg {
+  width: 18px;
+  height: 18px;
+  margin-right: 6px;
+  color: var(--lin-second);
+}
+
+/* ——— le panneau de droite : 360, padding 16, colonne gap 16, toute la hauteur ——— */
+.v2 .lin .pru-panneau {
+  position: sticky;
+  top: 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: calc(100dvh - 48px);
+  padding: 16px;
+  border-left: 1px solid var(--lin-detail-trait);
+  background: var(--lin-fond);
+  overflow-y: auto;
+}
+.v2 .lin .pru-panneau-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 32px;
+}
+.v2 .lin .pru-panneau-titre {
+  margin: 0;
+  min-width: 0;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  color: var(--lin-titre);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lin .pru-fermer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  padding: 7px;
+  border-radius: 6px;
+  color: var(--lin-second);
+  cursor: pointer;
+}
+.v2 .lin .pru-fermer:hover {
+  background: var(--lin-survol);
+  color: var(--lin-titre);
+}
+.v2 .lin .pru-fermer svg {
+  width: 18px;
+  height: 18px;
+}
+.v2 .lin .pru-fiche {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 8px 16px;
+  margin: 0;
+}
+.v2 .lin .pru-fiche dt {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 24px;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+.v2 .lin .pru-fiche dd {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: 20px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--lin-titre);
+}
+.v2 .lin .pru-fiche dd > span:not(.pru-badge):not(.pru-puce-cadre) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lin .pru-fiche dd .pru-puce {
+  max-width: 100%;
+}
+.v2 .lin .pru-fiche dd .pru-puce-cadre {
+  max-width: 100%;
+}
+/* « Étapes » : 12 au-dessus, puis 12 ; la rangée de 26 avec son bouton */
+.v2 .lin .pru-etapes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 12px;
+}
+.v2 .lin .pru-etapes-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 26px;
+}
+.v2 .lin .pru-etapes-tete h2 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  color: var(--lin-titre);
+}
+.v2 .lin .pru-petit {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  padding: 5px 8px 5px 6px;
+  border-radius: 6px;
+  color: var(--lin-titre);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.v2 .lin .pru-petit:hover {
+  background: var(--lin-survol);
+}
+.v2 .lin .pru-petit > svg {
+  width: 14px;
+  height: 14px;
+  color: var(--lin-second);
+}
+.v2 .lin .pru-etapes-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2 .lin .pru-etape {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+.v2 .lin .pru-etape-tuile {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--pru-teinte) 12%, transparent);
+  color: var(--pru-teinte);
+  --pru-teinte: var(--lin-second);
+}
+.v2 .lin .pru-etape-tuile svg {
+  width: 18px;
+  height: 18px;
+}
+.v2 .lin .pru-etape-corps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+.v2 .lin .pru-etape-nom {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--lin-titre);
+}
+.v2 .lin .pru-etape-nom > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lin .pru-etape-nom > svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--lin-second);
+}
+.v2 .lin .pru-etape-sous {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 16px;
+}
+.v2 .lin .pru-etape-gauche {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.v2 .lin .pru-mini {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  background: var(--lin-survol);
+  color: var(--lin-titre);
+  font-size: 10px;
+  font-weight: 475;
+  line-height: 10px;
+  white-space: nowrap;
+  --pru-teinte: transparent;
+}
+.v2 .lin .pru-mini[data-teinte] {
+  background: color-mix(in srgb, var(--pru-teinte) 15%, transparent);
+  color: var(--pru-teinte);
+}
+.v2 .lin .pru-etape-gris {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+
+/* clair : --lin-detail-trait y est transparent (lin.css) ; les traits prennent ceux du dashboard, comme la liste des fils */
+html[data-v2-theme="light"] .v2 .lin .pru-vide,
+html[data-v2-theme="light"] .v2 .lin .pru-ligne,
+html[data-v2-theme="light"] .v2 .lin .pru-panneau {
+  border-color: var(--v2-a-400);
+}
+html[data-v2-theme="light"] .v2 .lin .pru-th {
+  box-shadow: inset 0 -1px 0 var(--v2-a-400);
+}
+html[data-v2-theme="light"] .v2 .lin .pru-vide {
+  background: var(--v2-bg-100);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lin .pru-vide,
+  html:not([data-v2-theme="dark"]) .v2 .lin .pru-ligne,
+  html:not([data-v2-theme="dark"]) .v2 .lin .pru-panneau {
+    border-color: var(--v2-a-400);
+  }
+  html:not([data-v2-theme="dark"]) .v2 .lin .pru-th {
+    box-shadow: inset 0 -1px 0 var(--v2-a-400);
+  }
+  html:not([data-v2-theme="dark"]) .v2 .lin .pru-vide {
+    background: var(--v2-bg-100);
+  }
+}
+
+/* ——— étroit : le panneau prend toute la largeur, les colonnes se serrent, rien ne déborde de la page ——— */
+@media (max-width: 1023px) {
+  .v2 .lin.pru[data-panneau] .pru-grille {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .v2 .lin .pru-panneau {
+    position: fixed;
+    inset: 48px 0 0 0;
+    z-index: 30;
+    height: auto;
+    border-left: 0;
+  }
+}
+@media (max-width: 767px) {
+  .v2 .lin .pru-tete {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 16px 16px;
+  }
+  .v2 .lin .pru-rangee {
+    padding: 0 16px;
+  }
+  .v2 .lin .pru-menu {
+    width: min(237px, calc(100vw - 32px));
+  }
+  .v2 .lin .pru-sous-menu {
+    top: calc(100% + 4px);
+    right: 0;
+    width: min(282px, calc(100vw - 32px));
+  }
+  .v2 .lin .pru-th:first-child,
+  .v2 .lin .pru-td:first-child {
+    padding-left: 16px;
+  }
+  .v2 .lin .pru-th:last-child,
+  .v2 .lin .pru-td:last-child {
+    padding-right: 16px;
+  }
+  .v2 .lin .pru-th,
+  .v2 .lin .pru-td {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .v2 .lin .pru-th-objet {
+    width: auto;
+    min-width: 160px;
+  }
+  .v2 .lin .pru-vide-cadre {
+    padding: 0 16px;
+  }
+  .v2 .lin .pru-vide-corps {
+    padding: 24px 16px;
+  }
+}

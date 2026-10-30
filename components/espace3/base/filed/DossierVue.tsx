@@ -1,0 +1,1212 @@
+"use client";
+
+/* ══════════════════════════════════════════════════════════════════════
+   Le dossier d'un document FILED (05/10/2026)
+
+   À gauche : l'en-tête (numéro, état, fournisseur, dates, montants — chaque
+   valeur cliquable surligne sa citation dans la pièce), les contrôles
+   (échoués d'abord, puis levés, puis passés ; chaque contrôle avec sa
+   preuve et le motif officiel DGFiP), les lignes et la TVA, le
+   rapprochement, le fil. À droite : la pièce en regard.
+
+   Les corrections passent par les portes (portes.ts) ; en exemple elles
+   sont appliquées en mémoire pour que l'écran réagisse. Les formulaires
+   sont des Dialog ; chaque porte demande un motif (≥ 3 caractères, comme
+   la contrainte de filed_levees).
+   ══════════════════════════════════════════════════════════════════════ */
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { AlertTriangle, Ban, BadgeCheck, BookOpen, Check, CheckCircle2, ClipboardList, FolderInput, Landmark, Link2, Pencil, RefreshCw, Scale, ShieldCheck, Unlock, UserCheck, X } from "lucide-react";
+import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
+import { Loader } from "@/components/ui/loader";
+import type { Source } from "../source";
+import { Avis, Def, Pastille } from "../ui";
+import { dateCourte, dateHeure, masquerIban, montant, nombreFr, pourcent } from "../format";
+import type { Commande, Controle, DossierFiled, Fournisseur, LigneCommande, LigneFacture, MotifRefus, NatureDocument } from "../types";
+import { CHAMPS_CORRIGEABLES, CHAMPS_PAR_NOTION, FAMILLES_CONTROLE, NATURES, NOTION_PAR_COLONNE, etatDocument, grouperControles, libelleChamp, statutFacture } from "./etats";
+import { apparierLigne, attesterIdentite, bloquerFournisseur, classerDocument, confirmerFournisseur, confirmerValeurs, corrigerFacture, demanderVerification, leverAnomalie, proposerIban, rattacherCommande, rattacherFournisseur } from "./portes";
+import VisionneusePiece from "./VisionneusePiece";
+import FicheFournisseur, { registreDe } from "./FicheFournisseur";
+import { analyserTva, chiffres, sirenValide, tvaPropre } from "./identifiants";
+import { AIDE_FAIT_FOI, MOTIFS_207, chargerMotifsLitige, cloreLitige, comptabiliserFacture, ouvrirLitige, pastilleProvenance, provenanceDe, quand, type MotifLitige } from "./factureElectronique";
+import { CycleDeVie, EcrituresFacture } from "./CycleEcritures";
+
+type Props = {
+  dossier: DossierFiled;
+  source: Source;
+  motifs: MotifRefus[];
+  fournisseurs: Fournisseur[];
+  commandes: Commande[];
+  lignesCommande: LigneCommande[];
+  onLocal: (d: DossierFiled) => void;
+  relire: () => Promise<void>;
+  /* la personne connectée (exemple : « vous ») — celle qui a déposé la pièce
+     d'origine d'un fournisseur ne le confirme pas */
+  moi: string | null;
+  /* l'Aperçu de FILED (espace 2, 28/10/2026) garde sa page et ne prend d'ici que les fenêtres :
+     il les ouvre par « demande » (le n change à chaque clic), reçoit le message de réussite et
+     ce qu'il faut savoir pour proposer les bons gestes */
+  dialoguesSeuls?: boolean;
+  demande?: { quoi: DemandeDossier; n: number } | null;
+  onFait?: (message: string) => void;
+  onEtat?: (etat: EtatDossier) => void;
+};
+
+export type DemandeDossier = NonNullable<Form> | { type: "reverifier" };
+export type EtatDossier = { nonVerifiees: number; litigeOuvert: string | null; toutFaitFoi: boolean; deposantOrigine: boolean; peutReverifier: boolean; envoi: boolean; erreur: string | null };
+
+type Form =
+  | { type: "corriger"; champ?: string }
+  | { type: "confirmer" }
+  | { type: "lever"; controle: Controle }
+  | { type: "classer" }
+  | { type: "rattacher" }
+  | { type: "iban" }
+  | { type: "bloquer"; bloquer: boolean }
+  | { type: "commande" }
+  | { type: "apparier"; ligne: LigneFacture }
+  | { type: "confirmer_fournisseur" }
+  | { type: "attester" }
+  | { type: "identifiants" }
+  | { type: "litige" }
+  | { type: "clore_litige"; litige: string }
+  | { type: "comptabiliser" }
+  | null;
+
+const maintenant = () => new Date().toISOString();
+
+export default function DossierVue({ dossier, source, motifs, fournisseurs, commandes, lignesCommande, onLocal, relire, moi, dialoguesSeuls, demande, onFait, onEtat }: Props) {
+  const { document: doc, facture, fournisseur } = dossier;
+  const [actif, setActif] = useState<string | null>(null);
+  const [form, setForm] = useState<Form>(null);
+  const [envoi, setEnvoi] = useState(false);
+  const [erreur, setErreur] = useState<string | null>(null);
+  const [fait, setFait] = useState<string | null>(null);
+  const [motif, setMotif] = useState("");
+  const [champ, setChamp] = useState(CHAMPS_CORRIGEABLES[0].cle);
+  const [valeur, setValeur] = useState("");
+  const [nature, setNature] = useState<NatureDocument>("facture");
+  const [fournisseurChoisi, setFournisseurChoisi] = useState("");
+  const [iban, setIban] = useState("");
+  const [commandeChoisie, setCommandeChoisie] = useState("");
+  const [ligneCommandeChoisie, setLigneCommandeChoisie] = useState("");
+  const [onglet, setOnglet] = useState<"dossier" | "cycle" | "ecritures">("dossier");
+  const [motifsLitige, setMotifsLitige] = useState<MotifLitige[]>(MOTIFS_207);
+  const [codeLitige, setCodeLitige] = useState("");
+  const [sirenSaisi, setSirenSaisi] = useState("");
+  const [tvaSaisie, setTvaSaisie] = useState("");
+
+  const groupes = useMemo(() => grouperControles(dossier.controles), [dossier.controles]);
+  const motifOfficiel = (code: string | null) => (code ? motifs.find((m) => m.code === code) ?? { code, libelle: code.replace(/_/g, " ").toLowerCase(), description: null } : null);
+
+  /* une notion de l'en-tête → la valeur citée dans la pièce, sous l'un de
+     ses noms possibles (lecteur réel ou gabarit) ; un nom de champ exact
+     passe aussi (preuve d'un contrôle) */
+  const valeurDe = (notion: string) => {
+    const noms = CHAMPS_PAR_NOTION[notion] ?? [notion];
+    for (const nom of noms) {
+      const v = dossier.valeurs.find((x) => x.champ === nom);
+      if (v) return v;
+    }
+    return null;
+  };
+  const citer = (notion: string) => {
+    const v = valeurDe(notion);
+    setActif((a) => (v && a !== v.id ? v.id : null));
+  };
+  /* la valeur de la facture, sinon le texte cité dans la pièce */
+  const ou = (valeur: string | null | undefined, v: DossierFiled["valeurs"][number] | null) => (valeur && valeur !== "—" ? valeur : (v?.texte ?? "—"));
+  /* un SIREN ou une TVA lus dont la clé est fausse ne se confirment pas en bloc : ils se corrigent */
+  const cleFausse = (v: DossierFiled["valeurs"][number]) => {
+    const brut = String(v.valeur ?? v.texte ?? "");
+    if (CHAMPS_PAR_NOTION.siren.includes(v.champ)) return !sirenValide(brut);
+    if (CHAMPS_PAR_NOTION.tva_intracom.includes(v.champ)) return analyserTva(brut).valide === false;
+    return false;
+  };
+  const nonVerifiees = dossier.valeurs.filter((v) => !v.verifiee && !cleFausse(v));
+
+  const ouvrir = (f: Form) => {
+    setErreur(null);
+    setFait(null);
+    setMotif("");
+    setValeur("");
+    setIban("");
+    setFournisseurChoisi("");
+    setCommandeChoisie(facture?.commande_id ?? "");
+    setLigneCommandeChoisie("");
+    if (f?.type === "corriger" && f.champ) setChamp(f.champ);
+    if (f?.type === "classer") setNature(doc.nature ?? "facture");
+    setForm(f);
+  };
+
+  const motifOk = motif.trim().length >= 3;
+
+  async function envoyer(action: () => Promise<void>, local: () => DossierFiled, message: string) {
+    setEnvoi(true);
+    setErreur(null);
+    try {
+      if (source === "reelle") {
+        await action();
+        await relire();
+      } else {
+        await new Promise((r) => setTimeout(r, 350));
+        onLocal(local());
+      }
+      setFait(message);
+      setForm(null);
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : "La base a refusé l'opération.");
+    } finally {
+      setEnvoi(false);
+    }
+  }
+
+  const ajouterFil = (d: DossierFiled, etape: string, message: string): DossierFiled => {
+    const quand = maintenant();
+    return {
+      ...d,
+      historique: [...d.historique, { id: `${etape}-${quand}`, etape, message, detail: {}, acteur_type: "utilisateur", acteur_libelle: "Vous", survenu_le: quand }],
+    };
+  };
+
+  /* ——— les sept portes ——— */
+  const soumettreCorrection = () => {
+    if (!facture) return;
+    const def = CHAMPS_CORRIGEABLES.find((c) => c.cle === champ)!;
+    const brut = valeur.trim();
+    const val: unknown = def.type === "montant" ? Number(brut.replace(/\s/g, "").replace(",", ".")) : def.porte === "fournisseur.iban" ? brut.replace(/\s+/g, "").toUpperCase() : brut;
+    return envoyer(
+      () => corrigerFacture(facture.id, { [def.porte]: val }, motif.trim()).then(() => undefined),
+      () => {
+        const cite = valeurDe(NOTION_PAR_COLONNE[champ] ?? champ);
+        const f = { ...facture, [champ]: val, version: facture.version + 1, champs_douteux: facture.champs_douteux.filter((c) => c !== cite?.champ) };
+        const valeurs = dossier.valeurs.map((v) => (cite && v.id === cite.id ? { ...v, texte: def.type === "montant" ? montant(val as number) : brut, valeur: val, source: "humain" as const, verifiee: true, confiance: 1 } : v));
+        return ajouterFil({ ...dossier, facture: f, valeurs }, "correction", `${def.libelle} corrigé(e) : ${brut} — ${motif.trim()}`);
+      },
+      "La valeur est corrigée ; les contrôles vont être rejoués sur la nouvelle version.",
+    );
+  };
+
+  const soumettreConfirmation = () => {
+    if (!facture) return;
+    const champs = nonVerifiees.map((v) => v.champ);
+    return envoyer(
+      () => confirmerValeurs(facture.id, champs).then(() => undefined),
+      () => ajouterFil({ ...dossier, valeurs: dossier.valeurs.map((v) => ({ ...v, verifiee: true })) }, "confirmation", `${champs.length} valeurs lues confirmées.`),
+      `${champs.length} valeur${champs.length > 1 ? "s" : ""} confirmée${champs.length > 1 ? "s" : ""}.`,
+    );
+  };
+
+  const soumettreLevee = (c: Controle) => {
+    if (!facture) return;
+    return envoyer(
+      () => leverAnomalie(facture.id, c.code, motif.trim()).then(() => undefined),
+      () => {
+        const leveeId = `levee-${Date.now()}`;
+        const controles = dossier.controles.map((x) => (x.id === c.id ? { ...x, resultat: "levee" as const, levee_id: leveeId } : x));
+        const restants = controles.filter((x) => x.resultat === "anomalie");
+        const nb_bloquants = restants.filter((x) => x.gravite === "bloquant").length;
+        const nb_attention = restants.filter((x) => x.gravite === "attention").length;
+        const f = { ...facture, nb_bloquants, nb_attention, anomalies: restants.map((x) => x.code), statut: nb_bloquants ? ("bloquee" as const) : ("a_valider" as const) };
+        return ajouterFil(
+          { ...dossier, facture: f, controles, levees: [...dossier.levees, { id: leveeId, code: c.code, cle: c.cle, motif: motif.trim(), leve_par: null, leve_le: maintenant(), leve_par_nom: "Vous" }] },
+          "levee",
+          `Anomalie « ${c.code} » levée : ${motif.trim()}`,
+        );
+      },
+      "L'anomalie est levée, avec son motif ; la facture avance.",
+    );
+  };
+
+  const soumettreClassement = () =>
+    envoyer(
+      () => classerDocument(doc.id, nature, motif.trim()).then(() => undefined),
+      () => ajouterFil({ ...dossier, document: { ...doc, nature, nature_source: "humain", etat: "classe", traite_le: maintenant(), motif: motif.trim() } }, "classement", `Classé « ${NATURES[nature]} » : ${motif.trim()}`),
+      `Le document est classé comme ${NATURES[nature].toLowerCase()}.`,
+    );
+
+  const soumettreRattachement = () => {
+    if (!facture) return;
+    const f = fournisseurs.find((x) => x.id === fournisseurChoisi);
+    return envoyer(
+      () => rattacherFournisseur(facture.id, fournisseurChoisi, motif.trim()).then(() => undefined),
+      () => ajouterFil({ ...dossier, fournisseur: f ?? dossier.fournisseur, facture: { ...facture, fournisseur_id: fournisseurChoisi, fournisseur_identification: "humain" } }, "rattachement", `Fournisseur rattaché : ${f?.nom ?? fournisseurChoisi} — ${motif.trim()}`),
+      "Le fournisseur est rattaché à la facture.",
+    );
+  };
+
+  const ibanPropre = iban.replace(/\s+/g, "").toUpperCase();
+  const ibanOk = /^[A-Z]{2}[0-9]{2}[A-Z0-9]{10,30}$/.test(ibanPropre);
+  const soumettreIban = () => {
+    if (!fournisseur) return;
+    return envoyer(
+      () => proposerIban(fournisseur.id, ibanPropre, motif.trim()).then(() => undefined),
+      () => ajouterFil({ ...dossier, ibans: [...dossier.ibans, { id: `iban-${Date.now()}`, fournisseur_id: fournisseur.id, iban_masque: masquerIban(ibanPropre), statut: "propose", propose_le: maintenant() }] }, "iban", `IBAN proposé pour ${fournisseur.nom} : ${masquerIban(ibanPropre)} — ${motif.trim()}`),
+      "L'IBAN est proposé ; il sera validé par une personne habilitée.",
+    );
+  };
+
+  /* la commande retenue et ses lignes — pour « rattacher » et « apparier » */
+  const commandeDe = (id: string | null) => commandes.find((c) => c.id === id) ?? null;
+  const commandeRetenue = commandeDe(facture?.commande_id ?? null);
+  const lignesDeLaCommande = (id: string) => lignesCommande.filter((l) => l.commande_id === id);
+  const ligneCommandeDe = (ligne: LigneFacture) => {
+    const a = dossier.appariements.find((x) => x.facture_ligne_id === ligne.id);
+    return a ? lignesCommande.find((l) => l.id === a.commande_ligne_id) ?? null : null;
+  };
+
+  const soumettreCommande = () => {
+    if (!facture) return;
+    const c = commandeDe(commandeChoisie);
+    return envoyer(
+      () => rattacherCommande(facture.id, commandeChoisie, motif.trim()).then(() => undefined),
+      () => ajouterFil({ ...dossier, facture: { ...facture, commande_id: commandeChoisie }, rapprochement: dossier.rapprochement ? { ...dossier.rapprochement, commande_id: commandeChoisie } : { id: `rp-${Date.now()}`, commande_id: commandeChoisie, mode: "lignes", nb_lignes: dossier.lignes.length, nb_appariees: 0, nb_sans_commande: dossier.lignes.length, ecart_prix: 0, ecart_quantite: 0, deja_facture: 0, non_recu: 0, ecart_montant: null } }, "rattachement_commande", `Commande ${c?.numero ?? commandeChoisie} désignée — ${motif.trim()}`),
+      "La commande est rattachée ; le rapprochement est rejoué sur ses lignes.",
+    );
+  };
+
+  const soumettreAppariement = (ligne: LigneFacture) => {
+    if (!facture) return;
+    const lc = lignesCommande.find((l) => l.id === ligneCommandeChoisie);
+    return envoyer(
+      () => apparierLigne(facture.id, ligne.id, ligneCommandeChoisie, motif.trim()).then(() => undefined),
+      () => {
+        const appariements = [...dossier.appariements.filter((x) => x.facture_ligne_id !== ligne.id), { facture_ligne_id: ligne.id, commande_ligne_id: ligneCommandeChoisie }];
+        const rapprochement = dossier.rapprochement ? { ...dossier.rapprochement, nb_appariees: appariements.length, nb_sans_commande: Math.max(0, dossier.lignes.length - appariements.length) } : dossier.rapprochement;
+        return ajouterFil({ ...dossier, appariements, rapprochement }, "appariement", `Ligne ${ligne.rang} appariée à la ligne ${lc?.rang ?? "?"} de la commande — ${motif.trim()}`);
+      },
+      "La ligne est appariée à la commande.",
+    );
+  };
+
+  const soumettreBlocage = (bloquer: boolean) => {
+    if (!fournisseur) return;
+    return envoyer(
+      () => bloquerFournisseur(fournisseur.id, bloquer, motif.trim()).then(() => undefined),
+      () => ajouterFil({ ...dossier, fournisseur: { ...fournisseur, statut: bloquer ? "bloque" : "actif" } }, bloquer ? "blocage_fournisseur" : "deblocage_fournisseur", `${fournisseur.nom} ${bloquer ? "bloqué" : "débloqué"} : ${motif.trim()}`),
+      bloquer ? "Le fournisseur est bloqué : plus aucune facture ne sera payée sans déblocage." : "Le fournisseur est débloqué.",
+    );
+  };
+
+  /* ——— le fournisseur : confirmer (a4_10), attester, revérifier (b7_02) ——— */
+  const deposantOrigine = !!fournisseur && fournisseur.statut === "a_confirmer" && !!moi && dossier.origine_deposee_par === moi;
+  /* le registre qu'on interroge : VIES si le fournisseur a une TVA, sinon Sirene (comme le balayage de B7) */
+  const registre = fournisseur ? registreDe(fournisseur) : null;
+
+  /* le contrôle « fournisseur à confirmer » tombe, la facture avance (en exemple seulement : la base recontrôle) */
+  const sansControle = (d: DossierFiled, code: string, message: string): DossierFiled => {
+    if (!d.facture) return d;
+    const controles = d.controles.map((x) => (x.code === code && x.resultat === "anomalie" ? { ...x, resultat: "ok" as const, message } : x));
+    const restants = controles.filter((x) => x.resultat === "anomalie");
+    const nb_bloquants = restants.filter((x) => x.gravite === "bloquant").length;
+    const nb_attention = restants.filter((x) => x.gravite === "attention").length;
+    return { ...d, controles, facture: { ...d.facture, nb_bloquants, nb_attention, anomalies: restants.map((x) => x.code), statut: nb_bloquants ? "bloquee" : "a_valider" } };
+  };
+
+  const soumettreConfirmationFournisseur = () => {
+    if (!fournisseur) return;
+    return envoyer(
+      () => confirmerFournisseur(fournisseur.id, motif.trim()).then(() => undefined),
+      () => {
+        const quand = maintenant();
+        const d = sansControle(dossier, "fournisseur.a_confirmer", "Fournisseur confirmé par une personne.");
+        const ibans = d.ibans.map((i) => (i.statut === "propose" ? { ...i, statut: "valide" as const } : i));
+        return ajouterFil({ ...d, ibans, fournisseur: { ...fournisseur, statut: "actif", confirme_le: quand, confirme_par: moi } }, "confirmation", `Fournisseur confirmé par une personne${motif.trim() ? ` : ${motif.trim()}` : "."}`);
+      },
+      `${fournisseur.nom} est confirmé ; ses factures bloquées sont recontrôlées.`,
+    );
+  };
+
+  const soumettreAttestation = () => {
+    if (!fournisseur) return;
+    return envoyer(
+      () => attesterIdentite(fournisseur.id, motif.trim()).then(() => undefined),
+      () => {
+        const quand = maintenant();
+        const d = sansControle(dossier, "identite.registre", "Identité attestée par une personne.");
+        return ajouterFil(
+          { ...d, fournisseur: { ...fournisseur, identite_verifiee_le: quand, identite_source: "humain", identite_verdict: { resultat: "valide", registre: "humain", preuve: { par: moi, motif: motif.trim() } } } },
+          "identite_attestee",
+          `Identité attestée par une personne : ${motif.trim()}`,
+        );
+      },
+      "L'identité est attestée, avec votre motif ; les factures du fournisseur sont recontrôlées.",
+    );
+  };
+
+  /* la réponse du registre arrive en une à deux minutes (cron de l'ouvrier
+     identite) : sans attendre l'événement Realtime (filed_fournisseurs n'est
+     pas encore publiée), le dossier se relit à 1, 2 et 4 minutes */
+  const relectures = useRef<number[]>([]);
+  useEffect(() => () => relectures.current.forEach((t) => window.clearTimeout(t)), []);
+  const relireApres = () => {
+    relectures.current.forEach((t) => window.clearTimeout(t));
+    relectures.current = [60, 120, 240].map((sec) => window.setTimeout(() => void relire().catch(() => undefined), sec * 1000));
+  };
+
+  const reverifier = () => {
+    if (!fournisseur || !registre) return;
+    const nom = registre.nom === "vies" ? "VIES" : "Sirene";
+    return envoyer(
+      () => demanderVerification(doc.client_id, registre.nom, registre.identifiant, fournisseur.id).then(() => relireApres()),
+      () => {
+        const quand = maintenant();
+        return ajouterFil(
+          { ...dossier, fournisseur: { ...fournisseur, identite_verifiee_le: quand, identite_source: registre.nom, identite_verdict: { resultat: "valide", registre: registre.nom, identifiant: registre.identifiant.replace(/\s+/g, "") } } },
+          "identite",
+          `Identité revérifiée : confirmée par ${nom}.`,
+        );
+      },
+      source === "reelle"
+        ? `La vérification est demandée à ${nom} ; la réponse arrive en une à deux minutes et l'écran se relit seul.`
+        : `Identité confirmée par ${nom} (en exemple, la réponse est immédiate ; en base réelle elle arrive en une à deux minutes).`,
+    );
+  };
+
+  /* ——— les identifiants lus sur la pièce mais non retenus (a4_10 :
+     fournisseur_lu.non_verifie) : une personne confirme la valeur lue si
+     sa clé est juste, ou saisit les vrais identifiants ——— */
+  const nonVerifie = (facture?.fournisseur_lu?.non_verifie ?? null) as { siren?: string; tva?: string } | null;
+  const lus = [
+    nonVerifie?.siren && !fournisseur?.siren ? { notion: "siren", libelle: "SIREN", valeur: nonVerifie.siren, juste: sirenValide(nonVerifie.siren), raison: sirenValide(nonVerifie.siren) ? "clé juste" : "clé de Luhn invalide" } : null,
+    nonVerifie?.tva && !fournisseur?.tva ? (() => { const a = analyserTva(nonVerifie.tva!); return { notion: "tva_intracom", libelle: "TVA", valeur: nonVerifie.tva!, juste: a.valide === true, raison: a.raison }; })() : null,
+  ].filter(Boolean) as { notion: string; libelle: string; valeur: string; juste: boolean; raison: string }[];
+
+  const confirmerLu = (notion: string) => {
+    if (!facture) return;
+    const v = valeurDe(notion);
+    if (!v) return;
+    return envoyer(
+      () => confirmerValeurs(facture.id, [v.champ]).then(() => undefined),
+      () => ajouterFil({ ...dossier, valeurs: dossier.valeurs.map((x) => (x.id === v.id ? { ...x, verifiee: true } : x)) }, "confirmation", `${libelleChamp(v.champ)} lu confirmé sur la pièce : ${v.texte}`),
+      "La valeur lue est confirmée ; les contrôles vont la reprendre.",
+    );
+  };
+
+  const sirenNet = chiffres(sirenSaisi);
+  const tvaNette = tvaPropre(tvaSaisie);
+  const avisTva = tvaNette ? analyserTva(tvaNette) : null;
+  const identifiantsOk =
+    (!!sirenNet || !!tvaNette) &&
+    (!sirenNet || sirenValide(sirenNet)) &&
+    (!avisTva || avisTva.valide !== false) &&
+    (!sirenNet || !avisTva?.siren || avisTva.siren === sirenNet);
+  const soumettreIdentifiants = () => {
+    if (!facture) return;
+    const valeurs: Record<string, string> = {};
+    if (sirenNet) valeurs["fournisseur.siren"] = sirenNet;
+    if (tvaNette) valeurs["fournisseur.tva"] = tvaNette;
+    return envoyer(
+      () => corrigerFacture(facture.id, valeurs, motif.trim()).then(() => undefined),
+      () => {
+        const siren = sirenNet || avisTva?.siren || null;
+        const lu = { ...facture.fournisseur_lu, siren: siren ?? facture.fournisseur_lu?.siren, tva: tvaNette || facture.fournisseur_lu?.tva };
+        delete (lu as Record<string, unknown>).non_verifie;
+        return ajouterFil(
+          { ...dossier, facture: { ...facture, version: facture.version + 1, fournisseur_lu: lu }, fournisseur: fournisseur ? { ...fournisseur, siren: fournisseur.siren ?? siren, tva: fournisseur.tva ?? (tvaNette || null) } : fournisseur },
+          "correction",
+          `Identifiants du fournisseur saisis : ${[sirenNet ? `SIREN ${sirenNet}` : null, tvaNette ? `TVA ${tvaNette}` : null].filter(Boolean).join(", ")} — ${motif.trim()}`,
+        );
+      },
+      "Les identifiants sont saisis ; les contrôles et la vérification au registre vont être rejoués.",
+    );
+  };
+
+  /* ——— la facture électronique (fiche d'A4, a4_16 à a4_18) ——— */
+  const provenance = pastilleProvenance(dossier);
+  const structuree = provenanceDe(dossier) === "structuree";
+  /* une valeur du fichier structuré fait foi : elle ne se corrige pas (la base refuse, 22023) */
+  const faitFoi = (cle: string) => {
+    const notion = NOTION_PAR_COLONNE[cle] ?? cle;
+    const v = valeurDe(notion);
+    return v?.source === "xml";
+  };
+  const toutFaitFoi = CHAMPS_CORRIGEABLES.every((c) => faitFoi(c.cle));
+  const litigeOuvert = (dossier.litiges ?? []).find((l) => !l.clos_le) ?? null;
+
+  const ouvrirFormLitige = () => {
+    ouvrir({ type: "litige" });
+    setCodeLitige("");
+    if (source === "reelle") void chargerMotifsLitige().then(setMotifsLitige);
+  };
+  const soumettreLitige = () => {
+    if (!facture) return;
+    const libelle = motifsLitige.find((m) => m.code === codeLitige)?.libelle;
+    return envoyer(
+      () => ouvrirLitige(facture.id, codeLitige || null, motif).then(() => undefined),
+      () => {
+        const quandIso = maintenant();
+        const texte = codeLitige ? `${codeLitige} : ${motif.trim()}` : motif.trim();
+        const cycle = [...(dossier.cycle ?? []), { code: 207, libelle: "En litige", survenu_le: quandIso, motif_code: codeLitige || "AUTRE", motif_libelle: libelle ?? "Autre", motif: motif.trim(), montant: null, etat: structuree ? "a_emettre" : "sans_objet", emis_le: null, sens: "emis" as const, erreur: null, obligatoire: false }];
+        return ajouterFil({ ...dossier, cycle, litiges: [{ id: `litige-${Date.now()}`, ouvert_le: quandIso, motif: texte, clos_le: null, issue: null }, ...(dossier.litiges ?? [])] }, "litige", `Litige ouvert${libelle ? ` (${libelle})` : ""} : ${motif.trim()}`);
+      },
+      "Le litige est ouvert ; le statut « En litige » part au fournisseur.",
+    );
+  };
+  const soumettreClotureLitige = (id: string) =>
+    envoyer(
+      () => cloreLitige(id, motif.trim()),
+      () => ajouterFil({ ...dossier, litiges: (dossier.litiges ?? []).map((l) => (l.id === id ? { ...l, clos_le: maintenant(), issue: motif.trim() } : l)) }, "litige", `Litige clos : ${motif.trim()}`),
+      "Le litige est clos, avec son issue.",
+    );
+  const soumettreComptabilisation = () => {
+    if (!facture) return;
+    return envoyer(
+      () => comptabiliserFacture(facture.id, motif.trim() || null).then(() => undefined),
+      () => {
+        const ht = facture.montant_ht ?? 0;
+        const tva = facture.montant_tva ?? 0;
+        const ttc = facture.montant_ttc ?? ht + tva;
+        const num = 1 + Math.max(0, ...(dossier.ecritures ?? []).map((x) => x.ecriture_num));
+        const base = { journal_code: "HA", journal_lib: "Achats", ecriture_num: num, ecriture_date: maintenant().slice(0, 10), comp_aux_num: null, ecriture_let: null, date_let: null };
+        const ecritures = [
+          ...(dossier.ecritures ?? []),
+          { ...base, compte_num: "606", compte_lib: "Achats non stockés", debit: ht, credit: 0 },
+          { ...base, compte_num: "44566", compte_lib: "TVA déductible sur autres biens et services", debit: tva, credit: 0 },
+          { ...base, compte_num: "401", compte_lib: "Fournisseurs", comp_aux_num: fournisseur?.code ?? null, debit: 0, credit: ttc },
+        ];
+        return ajouterFil({ ...dossier, ecritures, facture: { ...facture, statut: "comptabilisee" } }, "comptabilisation", "Transmise à la comptabilité : écriture d'achat passée.");
+      },
+      "La facture est transmise à la comptabilité ; ses écritures sont passées.",
+    );
+  };
+
+  const dialogues = (
+    <>
+      {/* ——— dialogues ——— */}
+      <Dialog open={form?.type === "corriger"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><Pencil width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Corriger une valeur</DialogTitle>
+            <DialogDescription>La correction crée une nouvelle version de la facture ; les contrôles sont rejoués. La valeur lue reste dans le fil.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Champ
+                <select className="rv-champ" value={champ} onChange={(e2) => setChamp(e2.target.value)}>
+                  {CHAMPS_CORRIGEABLES.map((c) => <option key={c.cle} value={c.cle} disabled={faitFoi(c.cle)}>{c.libelle}{faitFoi(c.cle) ? " — du fichier, fait foi" : ""}</option>)}
+                </select>
+              </label>
+              {structuree ? <Avis teinte="bleu">{AIDE_FAIT_FOI} Un champ absent du fichier se complète normalement.</Avis> : null}
+              <label className="rv-libelle">Nouvelle valeur <span className="esp-obligatoire">(obligatoire)</span>
+                <input className="rv-champ" type={CHAMPS_CORRIGEABLES.find((c) => c.cle === champ)?.type === "date" ? "date" : "text"} inputMode={CHAMPS_CORRIGEABLES.find((c) => c.cle === champ)?.type === "montant" ? "decimal" : undefined} value={valeur} onChange={(e2) => setValeur(e2.target.value)} />
+              </label>
+              <ChampMotif motif={motif} onChange={setMotif} />
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!motifOk || !valeur.trim() || envoi} onClick={soumettreCorrection}>{envoi ? <Loader variant="spin" /> : null} Corriger</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={form?.type === "confirmer"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><ShieldCheck width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Confirmer les valeurs lues</DialogTitle>
+            <DialogDescription>Vous attestez que ces {nonVerifiees.length} valeurs sont celles de la pièce. Elles passent « vérifiées » et ne seront plus signalées.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <ul className="esp-fil">
+              {nonVerifiees.map((v) => (
+                <li key={v.id}><span className="esp-fil-point" /><div><div className="esp-fil-texte"><strong>{libelleChamp(v.champ)}</strong> — {v.texte}</div><div className="esp-fil-meta">page {v.page ?? 1} · confiance {v.confiance !== null ? Math.round(v.confiance * 100) : "—"} %</div></div></li>
+              ))}
+            </ul>
+            {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={envoi} onClick={soumettreConfirmation}>{envoi ? <Loader variant="spin" /> : null} Confirmer</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={form?.type === "lever"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><Unlock width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Lever l&apos;anomalie</DialogTitle>
+            <DialogDescription>{form?.type === "lever" ? form.controle.message : ""}</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              {form?.type === "lever" && form.controle.gravite === "bloquant" ? <Avis teinte="rouge"><strong>Contrôle bloquant.</strong> Lever une anomalie bloquante engage votre responsabilité : le motif est conservé avec votre nom et l&apos;heure.</Avis> : null}
+              <ChampMotif motif={motif} onChange={setMotif} aide="Ce que vous avez vérifié, et par quel canal (téléphone au numéro connu, courriel, bon de commande…)." />
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!motifOk || envoi} onClick={() => form?.type === "lever" && soumettreLevee(form.controle)}>{envoi ? <Loader variant="spin" /> : null} Lever l&apos;anomalie</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={form?.type === "classer"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><FolderInput width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Classer le document</DialogTitle>
+            <DialogDescription>Vous donnez la nature que le lecteur n&apos;a pas su reconnaître.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Nature
+                <select className="rv-champ" value={nature} onChange={(e2) => setNature(e2.target.value as NatureDocument)}>
+                  {(Object.keys(NATURES) as NatureDocument[]).map((n) => <option key={n} value={n}>{NATURES[n]}</option>)}
+                </select>
+              </label>
+              <ChampMotif motif={motif} onChange={setMotif} />
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!motifOk || envoi} onClick={soumettreClassement}>{envoi ? <Loader variant="spin" /> : null} Classer</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={form?.type === "rattacher"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><Link2 width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Rattacher à un fournisseur</DialogTitle>
+            <DialogDescription>Le fournisseur désigné l&apos;emporte sur celui que le lecteur a identifié.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Fournisseur
+                <select className="rv-champ" value={fournisseurChoisi} onChange={(e2) => setFournisseurChoisi(e2.target.value)}>
+                  <option value="">Choisir…</option>
+                  {fournisseurs.map((f) => <option key={f.id} value={f.id}>{f.nom}{f.siren ? ` — SIREN ${f.siren}` : ""}</option>)}
+                </select>
+              </label>
+              <ChampMotif motif={motif} onChange={setMotif} />
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!motifOk || !fournisseurChoisi || envoi} onClick={soumettreRattachement}>{envoi ? <Loader variant="spin" /> : null} Rattacher</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={form?.type === "iban"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><Landmark width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Proposer un IBAN</DialogTitle>
+            <DialogDescription>Pour {fournisseur?.nom}. L&apos;IBAN proposé devra être validé par une personne habilitée avant tout paiement.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">IBAN <span className="esp-obligatoire">(obligatoire)</span>
+                <input className="rv-champ esp-mono" value={iban} onChange={(e2) => setIban(e2.target.value)} placeholder="FR76 …" autoComplete="off" />
+              </label>
+              {iban && !ibanOk ? <Avis teinte="ambre">Format attendu : deux lettres, deux chiffres, puis 10 à 30 caractères.</Avis> : null}
+              <ChampMotif motif={motif} onChange={setMotif} aide="D'où vient cet IBAN et comment il a été vérifié (appel au numéro connu, courrier signé…)." />
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!motifOk || !ibanOk || envoi} onClick={soumettreIban}>{envoi ? <Loader variant="spin" /> : null} Proposer</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={form?.type === "commande"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><ClipboardList width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Désigner la commande</DialogTitle>
+            <DialogDescription>La commande que vous désignez l&apos;emporte sur celle que la facture cite ; le rapprochement est rejoué ligne à ligne.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Commande
+                <select className="rv-champ" value={commandeChoisie} onChange={(e2) => setCommandeChoisie(e2.target.value)}>
+                  <option value="">Choisir…</option>
+                  {commandes.filter((c) => !fournisseur || !c.fournisseur_id || c.fournisseur_id === fournisseur.id).map((c) => <option key={c.id} value={c.id}>{c.numero}{c.date_commande ? ` — ${dateCourte(c.date_commande)}` : ""}{c.montant_ht !== null ? ` — ${montant(c.montant_ht, c.devise ?? "EUR")} HT` : ""}{c.reference_externe ? ` (${c.reference_externe})` : ""}</option>)}
+                </select>
+              </label>
+              {commandeChoisie ? (
+                <ul className="esp-fil">
+                  {lignesDeLaCommande(commandeChoisie).map((l) => (
+                    <li key={l.id}><span className="esp-fil-point" /><div><div className="esp-fil-texte">{l.rang}. {l.designation}</div><div className="esp-fil-meta">{nombreFr(l.quantite)}{l.unite ? ` ${l.unite}` : ""} × {montant(l.prix_unitaire)} = {montant(l.montant_ht)}</div></div></li>
+                  ))}
+                </ul>
+              ) : null}
+              <ChampMotif motif={motif} onChange={setMotif} />
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!motifOk || !commandeChoisie || commandeChoisie === facture?.commande_id || envoi} onClick={soumettreCommande}>{envoi ? <Loader variant="spin" /> : null} Rattacher la commande</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={form?.type === "apparier"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><ClipboardList width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Apparier la ligne</DialogTitle>
+            <DialogDescription>{form?.type === "apparier" ? `Ligne ${form.ligne.rang} — ${form.ligne.designation ?? ""} : ${montant(form.ligne.montant_ht, facture?.devise)}` : ""}</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Commande
+                <select className="rv-champ" value={commandeChoisie} onChange={(e2) => { setCommandeChoisie(e2.target.value); setLigneCommandeChoisie(""); }}>
+                  <option value="">Choisir…</option>
+                  {commandes.map((c) => <option key={c.id} value={c.id}>{c.numero}</option>)}
+                </select>
+              </label>
+              <label className="rv-libelle">Ligne de commande
+                <select className="rv-champ" value={ligneCommandeChoisie} disabled={!commandeChoisie} onChange={(e2) => setLigneCommandeChoisie(e2.target.value)}>
+                  <option value="">Choisir…</option>
+                  {lignesDeLaCommande(commandeChoisie).map((l) => <option key={l.id} value={l.id}>{l.rang}. {l.designation} — {nombreFr(l.quantite)}{l.unite ? ` ${l.unite}` : ""} × {montant(l.prix_unitaire)}</option>)}
+                </select>
+              </label>
+              <ChampMotif motif={motif} onChange={setMotif} />
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!motifOk || !ligneCommandeChoisie || envoi} onClick={() => form?.type === "apparier" && soumettreAppariement(form.ligne)}>{envoi ? <Loader variant="spin" /> : null} Apparier</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={form?.type === "confirmer_fournisseur"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><UserCheck width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Confirmer le fournisseur</DialogTitle>
+            <DialogDescription>Vous confirmez que {fournisseur?.nom} est bien un fournisseur de l&apos;entreprise. Il devient actif, l&apos;IBAN proposé avec sa première facture est validé, et ses factures bloquées sont recontrôlées.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <Avis teinte="ambre">La personne qui a déposé la pièce d&apos;origine ne confirme pas ce fournisseur : une autre personne décide. La confirmation est réservée au gérant, à l&apos;administrateur et au valideur ; elle est conservée avec votre nom et l&apos;heure.</Avis>
+              <label className="rv-libelle">
+                Motif <span className="esp-kpi-sous">(facultatif)</span>
+                <textarea className="rv-champ" value={motif} onChange={(e2) => setMotif(e2.target.value)} maxLength={500} placeholder="Ce que vous avez vérifié : bon de commande, appel au numéro connu, contrat…" />
+              </label>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={envoi || deposantOrigine} onClick={soumettreConfirmationFournisseur}>{envoi ? <Loader variant="spin" /> : null} Confirmer le fournisseur</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={form?.type === "identifiants"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><Pencil width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Saisir les identifiants du fournisseur</DialogTitle>
+            <DialogDescription>Les valeurs saisies remplacent celles lues sur la pièce : une nouvelle version de la facture est créée, ses contrôles sont rejoués et l&apos;identité est demandée au registre public.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">SIREN
+                <input className="rv-champ esp-mono" inputMode="numeric" value={sirenSaisi} onChange={(e2) => setSirenSaisi(e2.target.value)} placeholder="9 chiffres" autoComplete="off" />
+              </label>
+              {sirenNet && !sirenValide(sirenNet) ? <Avis teinte="ambre">Ce SIREN n&apos;a pas une clé juste (neuf chiffres, clé de Luhn) : vérifiez-le sur un document officiel du fournisseur.</Avis> : null}
+              <label className="rv-libelle">TVA intracommunautaire
+                <input className="rv-champ esp-mono" value={tvaSaisie} onChange={(e2) => setTvaSaisie(e2.target.value)} placeholder="FR + 2 + SIREN" autoComplete="off" />
+              </label>
+              {avisTva && avisTva.valide === false ? <Avis teinte="ambre">TVA : {avisTva.raison}.</Avis> : null}
+              {sirenNet && avisTva?.siren && avisTva.siren !== sirenNet ? <Avis teinte="ambre">La TVA porte le SIREN {avisTva.siren}, pas {sirenNet}.</Avis> : null}
+              <ChampMotif motif={motif} onChange={setMotif} aide="Où vous avez lu ces identifiants : Kbis, papier à en-tête, annuaire des entreprises…" />
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!identifiantsOk || !motifOk || envoi} onClick={soumettreIdentifiants}>{envoi ? <Loader variant="spin" /> : null} Enregistrer</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={form?.type === "litige"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><Scale width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Ouvrir un litige</DialogTitle>
+            <DialogDescription>Le litige suspend la facture : elle n&apos;entre plus dans l&apos;échéancier tant qu&apos;il est ouvert{structuree ? ", et le statut « En litige » part au fournisseur avec son motif" : ""}.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Motif du litige
+                <select className="rv-champ" value={codeLitige} onChange={(e2) => setCodeLitige(e2.target.value)}>
+                  <option value="">Autre motif</option>
+                  {motifsLitige.filter((m) => m.code !== "AUTRE").map((m) => <option key={m.code} value={m.code}>{m.libelle}</option>)}
+                </select>
+              </label>
+              <label className="rv-libelle">Précisez pour le fournisseur <span className="esp-obligatoire">(obligatoire, 3 caractères au moins)</span>
+                <textarea className="rv-champ" value={motif} onChange={(e2) => setMotif(e2.target.value)} maxLength={480} placeholder="Ce qui ne va pas, et ce que vous attendez (avoir, facture rectificative…)." />
+              </label>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!motifOk || envoi} onClick={soumettreLitige}>{envoi ? <Loader variant="spin" /> : null} Ouvrir le litige</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={form?.type === "clore_litige"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><Scale width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Clore le litige</DialogTitle>
+            <DialogDescription>La facture revient dans l&apos;échéancier. L&apos;issue est conservée avec votre nom et l&apos;heure.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Issue du litige <span className="esp-obligatoire">(obligatoire, 3 caractères au moins)</span>
+                <textarea className="rv-champ" value={motif} onChange={(e2) => setMotif(e2.target.value)} maxLength={480} placeholder="Avoir reçu, facture rectifiée, accord trouvé…" />
+              </label>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!motifOk || envoi} onClick={() => form?.type === "clore_litige" && soumettreClotureLitige(form.litige)}>{envoi ? <Loader variant="spin" /> : null} Clore le litige</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={form?.type === "comptabiliser"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><BookOpen width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Transmettre à la comptabilité</DialogTitle>
+            <DialogDescription>FILED passe l&apos;écriture d&apos;achat de la facture (journal Achats) d&apos;après ses imputations validées. Une écriture ne se modifie plus : une erreur se corrige par une écriture de correction.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Motif <span className="esp-kpi-sous">(facultatif)</span>
+                <textarea className="rv-champ" value={motif} onChange={(e2) => setMotif(e2.target.value)} maxLength={480} />
+              </label>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}{/imputation/i.test(erreur) ? " Complétez l'imputation de la facture, puis recommencez." : ""}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={envoi} onClick={soumettreComptabilisation}>{envoi ? <Loader variant="spin" /> : null} Transmettre</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={form?.type === "attester"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><BadgeCheck width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Attester l&apos;identité</DialogTitle>
+            <DialogDescription>Quand le registre ne répond pas, ou pour un fournisseur étranger hors registre, vous attestez que {fournisseur?.nom} est bien l&apos;entreprise qu&apos;il dit être.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <ChampMotif motif={motif} onChange={setMotif} aide="Sur quoi l'attestation se fonde : extrait Kbis reçu, registre étranger consulté, contrat signé…" />
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!motifOk || envoi} onClick={soumettreAttestation}>{envoi ? <Loader variant="spin" /> : null} Attester</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={form?.type === "bloquer"} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone>{form?.type === "bloquer" && !form.bloquer ? <Unlock width={18} height={18} aria-hidden="true" /> : <Ban width={18} height={18} aria-hidden="true" />}</DialogIcone>
+            <DialogTitle>{form?.type === "bloquer" && !form.bloquer ? "Débloquer le fournisseur" : "Bloquer le fournisseur"}</DialogTitle>
+            <DialogDescription>{form?.type === "bloquer" && !form.bloquer ? `${fournisseur?.nom} pourra de nouveau être payé.` : `Plus aucune facture de ${fournisseur?.nom} ne sera payée tant que le blocage tient.`}</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <ChampMotif motif={motif} onChange={setMotif} />
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className={`r-btn ${form?.type === "bloquer" && !form.bloquer ? "r-btn--noir" : "r-btn--rouge"}`} disabled={!motifOk || envoi} onClick={() => form?.type === "bloquer" && soumettreBlocage(form.bloquer)}>{envoi ? <Loader variant="spin" /> : null} {form?.type === "bloquer" && !form.bloquer ? "Débloquer" : "Bloquer"}</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+
+  /* les demandes de l'Aperçu : chaque clic (n) ouvre sa fenêtre, comme le bouton du même nom ici */
+  const derniere = useRef(0);
+  useEffect(() => {
+    if (!demande || demande.n === derniere.current) return;
+    derniere.current = demande.n;
+    const q = demande.quoi;
+    if (q.type === "reverifier") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- une demande venue de l'Aperçu, pas un état dérivé
+      setFait(null);
+      void reverifier();
+    } else if (q.type === "litige") ouvrirFormLitige();
+    else if (q.type === "corriger" && !q.champ) {
+      ouvrir(q);
+      const libre = CHAMPS_CORRIGEABLES.find((c) => !faitFoi(c.cle));
+      if (libre) setChamp(libre.cle);
+    } else {
+      ouvrir(q);
+      if (q.type === "identifiants") {
+        setSirenSaisi("");
+        setTvaSaisie("");
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [demande?.n]);
+  useEffect(() => {
+    if (fait) onFait?.(fait);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fait]);
+  useEffect(() => {
+    onEtat?.({ nonVerifiees: nonVerifiees.length, litigeOuvert: litigeOuvert?.id ?? null, toutFaitFoi, deposantOrigine, peutReverifier: !!fournisseur && !!registre, envoi, erreur: form ? null : erreur });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nonVerifiees.length, litigeOuvert?.id, toutFaitFoi, deposantOrigine, fournisseur, registre?.nom, envoi, erreur, form]);
+  if (dialoguesSeuls) return dialogues;
+
+  const e = etatDocument(doc.etat);
+
+  return (
+    <div className="esp-dossier" style={{ display: "grid", gap: 14 }}>
+      <div className="esp-carte">
+        <div className="esp-carte-tete">
+          <div className="esp-item-haut">
+            <span className="esp-mono" style={{ fontWeight: 700, fontSize: 15 }}>{doc.reference}</span>
+            <Pastille teinte={e.teinte}>{e.libelle}</Pastille>
+            {facture ? <Pastille teinte={statutFacture(facture.statut).teinte}>{statutFacture(facture.statut).libelle}</Pastille> : null}
+            {facture ? <Pastille teinte={provenance.cle === "electronique" ? "noir" : provenance.cle === "structure" ? "bleu" : undefined} contour={provenance.cle === "lue" || provenance.cle === "saisie"} title={provenance.aide}>{provenance.libelle}</Pastille> : null}
+            {litigeOuvert ? <Pastille teinte="ambre">En litige</Pastille> : null}
+            {doc.nature ? <Pastille contour>{NATURES[doc.nature]}{doc.nature_source === "humain" ? " · classé à la main" : ""}</Pastille> : <Pastille teinte="ambre">Nature à classer</Pastille>}
+            {facture ? <Pastille contour>version {facture.version}</Pastille> : null}
+          </div>
+          <span className="esp-kpi-sous">Reçu le {dateHeure(doc.recu_le)}{doc.expediteur ? ` · ${doc.expediteur}` : ""}</span>
+        </div>
+
+        <div className="esp-dossier-grille">
+          {/* ——— colonne dossier ——— */}
+          <div className="esp-carte-corps" style={{ display: "grid", gap: 16 }}>
+            {facture ? (
+              <div className="esp-onglets" role="tablist" aria-label="Le dossier de la facture">
+                {([["dossier", "Dossier"], ["cycle", `Cycle de vie${dossier.cycle?.length ? ` (${dossier.cycle.length})` : ""}`], ["ecritures", `Écritures${dossier.ecritures?.length ? ` (${dossier.ecritures.length})` : ""}`]] as const).map(([cle, libelle]) => (
+                  <button key={cle} type="button" role="tab" aria-selected={onglet === cle} className="esp-onglet" onClick={() => { setOnglet(cle); setFait(null); }}>{libelle}</button>
+                ))}
+              </div>
+            ) : null}
+            {onglet !== "dossier" && facture ? (
+              <>
+                {fait ? <Avis teinte="vert" role="status"><strong>C&apos;est fait.</strong> {fait}</Avis> : null}
+                {erreur && !form ? <Avis teinte="rouge" role="alert"><strong>Refusé par la base.</strong> {erreur}</Avis> : null}
+                {onglet === "cycle" ? (
+                  <CycleDeVie lignes={dossier.cycle ?? []} />
+                ) : (
+                  <EcrituresFacture
+                    ecritures={dossier.ecritures ?? []}
+                    peutTransmettre={facture.statut === "validee"}
+                    envoi={envoi}
+                    onTransmettre={() => ouvrir({ type: "comptabiliser" })}
+                  />
+                )}
+              </>
+            ) : (
+            <>
+            {litigeOuvert ? (
+              <Avis teinte="ambre">
+                <strong>En litige depuis le {quand(litigeOuvert.ouvert_le)}.</strong> {litigeOuvert.motif}{" "}
+                <button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "clore_litige", litige: litigeOuvert.id })}>Clore le litige</button>
+              </Avis>
+            ) : null}
+            {doc.etat === "doublon" ? (
+              <Avis teinte="gris"><strong>Doublon.</strong> {doc.motif ?? "Ce document a déjà été reçu."}</Avis>
+            ) : null}
+            {doc.etat === "a_classer" ? (
+              <Avis teinte="ambre"><strong>À classer.</strong> {doc.motif ?? "Le lecteur n'a pas reconnu la nature du document."}</Avis>
+            ) : null}
+            {doc.etat === "en_lecture" ? (
+              <Avis teinte="bleu"><strong>En lecture.</strong> Le document est en cours de lecture ; ses valeurs et ses contrôles arrivent dans quelques secondes.</Avis>
+            ) : null}
+            {fournisseur?.statut === "bloque" ? (
+              <Avis teinte="rouge"><strong>Fournisseur bloqué.</strong> Aucune facture de {fournisseur.nom} ne sera payée tant qu&apos;il n&apos;est pas débloqué.</Avis>
+            ) : null}
+
+            {facture ? (
+              <>
+                <div>
+                  <div className="esp-section-titre">Valeurs lues — cliquer pour voir la citation dans la pièce</div>
+                  <div className="esp-valeurs">
+                    {(
+                      [
+                        ["fournisseur", fournisseur?.nom ?? String(facture.fournisseur_lu?.nom ?? ""), facture.champs_douteux.some((c) => /fournisseur\.nom|^fournisseur$/.test(c))],
+                        ["numero", facture.numero ?? "", facture.champs_douteux.some((c) => /numero/.test(c))],
+                        ["date_emission", facture.date_emission ? dateCourte(facture.date_emission) : "", false],
+                        ["echeance_lue", facture.echeance_lue ? dateCourte(facture.echeance_lue) : "", false],
+                        ["montant_ht", facture.montant_ht !== null ? montant(facture.montant_ht, facture.devise) : "", false],
+                        ["montant_tva", facture.montant_tva !== null ? montant(facture.montant_tva, facture.devise) : "", false],
+                        ["montant_ttc", facture.montant_ttc !== null ? montant(facture.montant_ttc, facture.devise) : "", false],
+                        ["iban", facture.iban ? masquerIban(facture.iban) : "", facture.champs_douteux.some((c) => /iban/.test(c))],
+                        ["siren", fournisseur?.siren ?? String(facture.fournisseur_lu?.siren ?? ""), false],
+                      ] as [string, string, boolean][]
+                    ).map(([notion, texte, douteux]) => {
+                      const v = valeurDe(notion);
+                      return <Valeur key={notion} champ={v?.champ ?? CHAMPS_PAR_NOTION[notion][0]} texte={ou(texte, v)} v={v} actif={actif} onClick={() => citer(notion)} douteux={douteux} />;
+                    })}
+                  </div>
+                  <div className="esp-actions" style={{ marginTop: 10 }}>
+                    <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={toutFaitFoi} title={toutFaitFoi ? AIDE_FAIT_FOI : undefined} onClick={() => { ouvrir({ type: "corriger" }); const libre = CHAMPS_CORRIGEABLES.find((c) => !faitFoi(c.cle)); if (libre) setChamp(libre.cle); }}><Pencil width={13} height={13} aria-hidden="true" /> Corriger une valeur</button>
+                    {!litigeOuvert ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={ouvrirFormLitige}><Scale width={13} height={13} aria-hidden="true" /> Ouvrir un litige</button> : null}
+                    {structuree && (facture.statut === "a_valider" || facture.statut === "bloquee") ? <Link href="/espace/validations" className="r-btn r-btn--fil r-btn--petit" title="La facture se refuse dans la file de validation, avec son motif."><X width={13} height={13} aria-hidden="true" /> Refuser</Link> : null}
+                    <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!nonVerifiees.length} onClick={() => ouvrir({ type: "confirmer" })}><ShieldCheck width={13} height={13} aria-hidden="true" /> {nonVerifiees.length ? `Confirmer ${nonVerifiees.length > 1 ? `les ${nonVerifiees.length} valeurs non vérifiées` : "la valeur non vérifiée"}` : "Valeurs lues vérifiées"}</button>
+                    <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "rattacher" })}><Link2 width={13} height={13} aria-hidden="true" /> Rattacher à un fournisseur</button>
+                    <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!commandes.length} onClick={() => ouvrir({ type: "commande" })}><ClipboardList width={13} height={13} aria-hidden="true" /> {commandeRetenue ? `Commande ${commandeRetenue.numero} · changer` : "Désigner une commande"}</button>
+                    {fournisseur ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "iban" })}><Landmark width={13} height={13} aria-hidden="true" /> Proposer un IBAN</button> : null}
+                    {fournisseur ? (
+                      <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "bloquer", bloquer: fournisseur.statut !== "bloque" })}>
+                        {fournisseur.statut === "bloque" ? <Unlock width={13} height={13} aria-hidden="true" /> : <Ban width={13} height={13} aria-hidden="true" />} {fournisseur.statut === "bloque" ? "Débloquer le fournisseur" : "Bloquer le fournisseur"}
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+
+                {fournisseur ? (
+                  <FicheFournisseur
+                    fournisseur={fournisseur}
+                    deposantOrigine={deposantOrigine}
+                    registre={registre?.nom ?? null}
+                    envoi={envoi && !form}
+                    onConfirmer={() => ouvrir({ type: "confirmer_fournisseur" })}
+                    onAttester={() => ouvrir({ type: "attester" })}
+                    onReverifier={() => { setFait(null); void reverifier(); }}
+                  />
+                ) : null}
+
+                {lus.length ? (
+                  <div className="esp-identifiants-lus">
+                    <Avis teinte="ambre">
+                      <strong>Identifiants lus sur la pièce, non retenus.</strong> Le lecteur les a trouvés sans pouvoir les vérifier : ils ne montent pas sur la fiche du fournisseur tant qu&apos;une personne ne les a pas confirmés ou corrigés.
+                    </Avis>
+                    <ul className="esp-fil" style={{ marginTop: 10 }}>
+                      {lus.map((l) => (
+                        <li key={l.notion}>
+                          <span className="esp-fil-point" data-teinte={l.juste ? "bleu" : "rouge"} />
+                          <div>
+                            <div className="esp-fil-texte esp-item-haut">
+                              <span>{l.libelle} lu</span>
+                              <span className="esp-mono">{l.valeur}</span>
+                              <Pastille teinte={l.juste ? "bleu" : "rouge"}>{l.raison}</Pastille>
+                            </div>
+                            <div className="esp-actions" style={{ marginTop: 6 }}>
+                              {valeurDe(l.notion) ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => citer(l.notion)}>Voir sur la pièce</button> : null}
+                              {l.juste && valeurDe(l.notion) ? <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={envoi} onClick={() => { setFait(null); void confirmerLu(l.notion); }}><ShieldCheck width={12} height={12} aria-hidden="true" /> Confirmer la valeur lue</button> : null}
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="esp-actions">
+                      <button type="button" className="r-btn r-btn--noir r-btn--petit" onClick={() => { ouvrir({ type: "identifiants" }); setSirenSaisi(""); setTvaSaisie(""); }}><Pencil width={13} height={13} aria-hidden="true" /> Saisir les vrais identifiants</button>
+                    </div>
+                  </div>
+                ) : null}
+
+                <div>
+                  <div className="esp-section-titre">
+                    Contrôles — {groupes.passes.length} passé{groupes.passes.length > 1 ? "s" : ""}, {groupes.echoues.length} échoué{groupes.echoues.length > 1 ? "s" : ""}, {groupes.leves.length} levé{groupes.leves.length > 1 ? "s" : ""}
+                  </div>
+                  {[...groupes.echoues, ...groupes.leves, ...groupes.passes].map((c) => {
+                    /* le motif officiel est celui qui VAUDRAIT si le contrôle échouait : on ne le dit que sur une anomalie ou une levée */
+                    const m = c.resultat === "ok" ? null : motifOfficiel(c.motif_officiel);
+                    const levee = c.levee_id ? dossier.levees.find((l) => l.id === c.levee_id) : null;
+                    const preuve = Object.entries(c.preuve ?? {});
+                    return (
+                      <div key={c.id} className="esp-controle">
+                        <span className="esp-controle-icone" data-resultat={c.resultat} data-gravite={c.gravite} aria-hidden="true">
+                          {c.resultat === "ok" ? <Check width={13} height={13} /> : c.resultat === "levee" ? <Unlock width={12} height={12} /> : <AlertTriangle width={12} height={12} />}
+                        </span>
+                        <div>
+                          <div className="esp-controle-haut">
+                            <span className="esp-mono">{c.code}</span>
+                            <Pastille contour>{FAMILLES_CONTROLE[c.famille] ?? c.famille}</Pastille>
+                            <Pastille teinte={c.gravite === "bloquant" ? "rouge" : c.gravite === "attention" ? "ambre" : "gris"}>{c.gravite === "bloquant" ? "Bloquant" : c.gravite === "attention" ? "À vérifier" : "Information"}</Pastille>
+                            {c.resultat === "levee" ? <Pastille teinte="bleu">Levé</Pastille> : null}
+                          </div>
+                          <div className="esp-controle-message">{c.message}</div>
+                          {m ? (
+                            <div className="esp-controle-motif">
+                              Motif officiel : <b>{m.libelle}</b> <span className="esp-mono">({m.code})</span>
+                              {m.description ? ` — ${m.description}` : ""}
+                            </div>
+                          ) : null}
+                          {preuve.length ? (
+                            <div className="esp-preuve">
+                              {preuve.map(([k, val]) => (
+                                <span key={k}><b>{k.replace(/_/g, " ")}</b> : {typeof val === "object" ? JSON.stringify(val) : String(val)}</span>
+                              ))}
+                            </div>
+                          ) : null}
+                          {levee ? <div className="esp-controle-motif">Levé par <b>{levee.leve_par_nom ?? "une personne habilitée"}</b> le {dateHeure(levee.leve_le)} : {levee.motif}</div> : null}
+                          {c.resultat === "anomalie" ? (
+                            <div className="esp-controle-actions">
+                              {/* a4_12 : « fournisseur à confirmer » ne se lève pas (42501 pour tous) — on confirme le fournisseur */}
+                              {c.code !== "fournisseur.a_confirmer" ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "lever", controle: c })}><Unlock width={12} height={12} aria-hidden="true" /> Lever avec un motif</button> : null}
+                              {c.preuve?.champ ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => citer(String(c.preuve.champ))}>Voir dans la pièce</button> : null}
+                              {c.code === "fournisseur.a_confirmer" && fournisseur?.statut === "a_confirmer" ? <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={deposantOrigine} title={deposantOrigine ? "Vous avez déposé la pièce d'origine : une autre personne confirme." : undefined} onClick={() => ouvrir({ type: "confirmer_fournisseur" })}><UserCheck width={12} height={12} aria-hidden="true" /> Confirmer ce fournisseur</button> : null}
+                              {c.code === "fournisseur.a_confirmer" && deposantOrigine ? <span className="esp-kpi-sous">Vous avez déposé la pièce d&apos;origine : une autre personne confirme ce fournisseur.</span> : null}
+                              {c.code === "identite.registre" && fournisseur && registre ? <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={envoi} onClick={() => { setFait(null); void reverifier(); }}><RefreshCw width={12} height={12} aria-hidden="true" /> Revérifier</button> : null}
+                              {c.code === "fournisseur.iban_connu" && fournisseur ? <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={() => ouvrir({ type: "iban" })}><Landmark width={12} height={12} aria-hidden="true" /> Proposer cet IBAN</button> : null}
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {!dossier.controles.length ? <p className="esp-kpi-sous">Aucun contrôle pour cette version.</p> : null}
+                </div>
+
+                {dossier.lignes.length ? (
+                  <div>
+                    <div className="esp-section-titre">Lignes</div>
+                    {/* un cadre qui défile se rejoint au clavier (axe : scrollable-region-focusable) */}
+                    <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Lignes de la facture">
+                      <table className="esp-tableau">
+                        <thead>
+                          <tr><th>#</th><th>Désignation</th><th className="esp-num">Qté</th><th className="esp-num">P.U. HT</th><th className="esp-num">Montant HT</th><th className="esp-num">TVA</th><th>Commande</th><th aria-label="Apparier" /></tr>
+                        </thead>
+                        <tbody>
+                          {dossier.lignes.map((l) => (
+                            <tr key={l.id}>
+                              <td>{l.rang}</td>
+                              <td>{l.designation}</td>
+                              <td className="esp-num">{nombreFr(l.quantite)}{l.unite ? ` ${l.unite}` : ""}</td>
+                              <td className="esp-num">{montant(l.prix_unitaire, facture.devise)}</td>
+                              <td className="esp-num">{montant(l.montant_ht, facture.devise)}</td>
+                              <td className="esp-num">{pourcent(l.taux_tva)}</td>
+                              <td>
+                                {(() => {
+                                  const lc = ligneCommandeDe(l);
+                                  if (lc) {
+                                    const ecart = l.prix_unitaire !== null && lc.prix_unitaire !== null ? l.prix_unitaire - lc.prix_unitaire : 0;
+                                    return (
+                                      <span className="esp-item-haut">
+                                        <span className="esp-mono">{commandeDe(lc.commande_id)?.numero ?? ""}/{lc.rang}</span>
+                                        {ecart ? <Pastille teinte="ambre">{ecart > 0 ? "+" : ""}{montant(ecart, facture.devise)} / u.</Pastille> : <Pastille teinte="vert">conforme</Pastille>}
+                                      </span>
+                                    );
+                                  }
+                                  return <span className="esp-mono">{l.commande_ligne ?? "—"}</span>;
+                                })()}
+                              </td>
+                              <td>
+                                {commandeRetenue || commandes.length ? (
+                                  <button type="button" className="esp-lien-bouton" onClick={() => { ouvrir({ type: "apparier", ligne: l }); if (commandeRetenue) setCommandeChoisie(commandeRetenue.id); }}>
+                                    {ligneCommandeDe(l) ? "Changer" : "Apparier"}
+                                  </button>
+                                ) : null}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ) : null}
+
+                {dossier.tva.length || dossier.rapprochement ? (
+                  <dl className="esp-def">
+                    {dossier.tva.length ? (
+                      <Def etiquette="TVA par taux">
+                        {dossier.tva.map((t) => (
+                          <div key={t.id}>{pourcent(t.taux)} sur {montant(t.base, facture.devise)} → {montant(t.montant, facture.devise)}</div>
+                        ))}
+                      </Def>
+                    ) : null}
+                    {dossier.rapprochement ? (
+                      <Def etiquette="Rapprochement commande">
+                        {dossier.rapprochement.mode === "aucun"
+                          ? "Aucune commande citée ni désignée."
+                          : `${dossier.rapprochement.nb_appariees}/${dossier.rapprochement.nb_lignes} lignes appariées (mode ${dossier.rapprochement.mode})${dossier.rapprochement.ecart_prix ? ` · écart de prix ${montant(dossier.rapprochement.ecart_prix, facture.devise)}` : ""}${dossier.rapprochement.ecart_quantite ? ` · écart de quantité ${nombreFr(dossier.rapprochement.ecart_quantite)}` : ""}`}
+                      </Def>
+                    ) : null}
+                    {dossier.ibans.length ? (
+                      <Def etiquette="IBAN connus du fournisseur">
+                        {dossier.ibans.map((i) => (
+                          <div key={i.id} className="esp-item-haut">
+                            <span className="esp-mono">{i.iban_masque}</span>
+                            <Pastille teinte={i.statut === "valide" ? "vert" : i.statut === "propose" ? "ambre" : "gris"}>{i.statut === "valide" ? "Validé" : i.statut === "propose" ? "Proposé" : i.statut === "refuse" ? "Refusé" : "Révoqué"}</Pastille>
+                          </div>
+                        ))}
+                      </Def>
+                    ) : null}
+                  </dl>
+                ) : null}
+              </>
+            ) : (
+              <div className="esp-actions">
+                {doc.etat === "a_classer" || doc.etat === "illisible" ? (
+                  <button type="button" className="r-btn r-btn--noir" onClick={() => ouvrir({ type: "classer" })}><FolderInput width={15} height={15} aria-hidden="true" /> Classer ce document</button>
+                ) : null}
+              </div>
+            )}
+
+            {fait ? <Avis teinte="vert" role="status"><strong>C&apos;est fait.</strong> {fait}</Avis> : null}
+            {erreur && !form ? <Avis teinte="rouge" role="alert"><strong>Refusé par la base.</strong> {erreur}</Avis> : null}
+
+            <div>
+              <div className="esp-section-titre">Fil du document</div>
+              <ul className="esp-fil">
+                {dossier.historique.map((h) => (
+                  <li key={String(h.id)}>
+                    <span className="esp-fil-point" data-teinte={/levee|integration|classement|paiement|confirmation/.test(h.etape) ? "vert" : /blocage|doublon|litige/.test(h.etape) ? "rouge" : /demande|correction|iban|rattachement/.test(h.etape) ? "bleu" : undefined} />
+                    <div>
+                      <div className="esp-fil-texte">{h.message}</div>
+                      <div className="esp-fil-meta">{dateHeure(h.survenu_le)}{h.acteur_libelle ? ` · ${h.acteur_libelle}` : h.acteur_type === "systeme" ? " · système" : ""}</div>
+                    </div>
+                  </li>
+                ))}
+                {!dossier.historique.length ? <li><span className="esp-fil-point" /><div className="esp-fil-meta">Aucun évènement.</div></li> : null}
+              </ul>
+            </div>
+            </>
+            )}
+          </div>
+
+          {/* ——— colonne pièce ——— */}
+          <div className="esp-carte-corps">
+            <VisionneusePiece dossier={dossier} source={source} actif={actif} onChoisir={setActif} />
+          </div>
+        </div>
+      </div>
+
+      {dialogues}
+    </div>
+  );
+}
+
+function Valeur({ champ, texte, v, actif, onClick, douteux }: { champ: string; texte: string; v: DossierFiled["valeurs"][number] | null; actif: string | null; onClick: () => void; douteux: boolean }) {
+  return (
+    <button type="button" className="esp-valeur" aria-pressed={!!v && actif === v.id} data-douteux={douteux} onClick={onClick} disabled={!v} title={v ? `Voir la citation, page ${v.page ?? 1}` : "Pas de citation dans la pièce"}>
+      <span className="esp-valeur-champ">
+        {libelleChamp(champ)}
+        {v?.verifiee ? <span className="esp-coche" title="Vérifiée"><CheckCircle2 width={14} height={14} aria-label="vérifiée" /></span> : null}
+      </span>
+      <span className="esp-valeur-texte">{texte}</span>
+      <span className="esp-valeur-cite">{v?.source === "xml" ? "du fichier" : v ? `p. ${v.page ?? 1} · ${v.source === "humain" ? "saisie" : v.source === "regle" ? "règle" : v.source.toUpperCase()}${v.confiance !== null && v.source !== "humain" ? ` · ${Math.round(v.confiance * 100)} %` : ""}` : douteux ? "douteux" : "non cité"}</span>
+    </button>
+  );
+}
+
+function ChampMotif({ motif, onChange, aide }: { motif: string; onChange: (s: string) => void; aide?: string }) {
+  return (
+    <label className="rv-libelle">
+      Motif <span className="esp-obligatoire">(obligatoire, 3 caractères au moins)</span>
+      <textarea className="rv-champ" value={motif} onChange={(e) => onChange(e.target.value)} maxLength={500} placeholder={aide ?? "Pourquoi, en une phrase."} />
+    </label>
+  );
+}

@@ -1,0 +1,190 @@
+/* ══════════════════════════════════════════════════════════════════════
+   CASHD — « Envois » en tableau (28/10/2026) : les quelques réglages propres
+   à ./TableauEnvois.tsx, sous .v2 .lin comme le gabarit (../lin/lin.css,
+   bloc « le tableau en colonnes »), qui reste intact.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* palette sobre : les icônes d'état des têtes de colonne en gris, comme dans les cartes */
+.v2 .lin .lin-colonne-nom .lin-ic-statut {
+  color: var(--lin-second);
+}
+/* une relance arrêtée n'est orange que si elle bloque (échec, bloquée, sans adresse) ; coupée ou refusée reste grise */
+.v2 .lin .lin-carte-tableau:not([data-bloquant]) .lin-ic-statut--annule {
+  color: var(--lin-second);
+}
+.v2 .lin .lin-carte-tableau[data-bloquant] .c2e-pastille-etat svg,
+.v2 .lin .lin-ticket-pilule[data-bloquant] svg {
+  color: var(--lin-orange);
+}
+
+/* la référence d'une carte : le point bleu (à traiter), le débiteur, l'étoile d'une carte épinglée */
+.v2 .lin .c2e-ref {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.v2 .lin .c2e-ref-nom {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lin .lin-carte-ref .c2e-epingle {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+.v2 .lin .lin-carte-tableau[draggable="true"] {
+  cursor: grab;
+}
+.v2 .lin .lin-carte-tableau[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+/* les sections du menu de filtre */
+.v2 .lin .c2e-menu-titre {
+  padding: 8px 16px 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-second);
+}
+.v2 .lin .c2e-menu-titre:not(:first-child) {
+  margin-top: 4px;
+  border-top: 0.5px solid var(--lin-menu-trait);
+}
+
+/* un message sous la tête (chargement, base non installée, erreur, filtre vide) */
+.v2 .lin .c2e-message {
+  margin: 0;
+  padding: 12px 24px 4px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--lin-second);
+}
+
+/* ——— la carte ouverte au milieu (../lin/CarteCentrale, classes de la carte d'« À valider ») ——— */
+
+/* « Plus d'actions » : le menu « ··· » du gabarit Linear, posé dans le pied de la carte. Ses enveloppes
+   .v2 .lin ne lui donnent que ses jetons et ses styles (aucune boîte) ; il s'ouvre vers le haut, calé à droite. */
+.v2-val-carte .v2.c2e-plus,
+.v2-val-carte .c2e-plus.lin {
+  display: contents;
+}
+.v2-val-carte .c2e-plus .lin-menu--options {
+  top: auto;
+  bottom: calc(100% + 5px);
+}
+.v2-val-carte .c2e-plus .lin-rond {
+  width: 32px;
+  height: 32px;
+  color: var(--v2-gray-900);
+}
+
+/* « Noter l'envoi à la main » réglé dans la carte : le canal, dans la note contre les boutons */
+.v2-val-carte .c2e-canal {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+/* la prochaine étape, une fois sa date passée */
+.v2-val-carte .c2e-passe {
+  color: var(--v2-red-900, var(--lin-orange));
+}
+
+/* « Ses autres relances » : chacune s'ouvre dans la carte */
+.v2-val-carte .c2e-autres {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+.v2-val-carte .c2e-autre {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 6px 8px;
+  margin: 0 -8px;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--v2-gray-1000);
+  text-align: left;
+}
+.v2-val-carte .c2e-autre:hover {
+  background: var(--v2-gray-100);
+}
+
+/* la fiche courte : l'adresse passe sous le nom plutôt qu'à la suite */
+.v2-val-carte .c2e-fiche {
+  grid-template-columns: 72px minmax(0, 1fr);
+  row-gap: 10px;
+}
+.v2-val-carte .c2e-adresse {
+  display: block;
+  font-size: 12.5px;
+}
+
+/* les sections repliées (factures, historique, autres relances) : un clic les déplie */
+.v2-val-carte .c2e-replis {
+  border-bottom: 1px solid var(--v2-a-400);
+}
+.v2-val-carte .c2e-repli {
+  border-top: 1px solid var(--v2-a-400);
+}
+.v2-val-carte .c2e-repli > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 8px;
+  margin: 0 -8px;
+  border-radius: 6px;
+  list-style: none;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--v2-gray-1000);
+  cursor: pointer;
+  user-select: none;
+}
+.v2-val-carte .c2e-repli > summary::-webkit-details-marker {
+  display: none;
+}
+.v2-val-carte .c2e-repli > summary:hover {
+  background: var(--v2-gray-100);
+}
+.v2-val-carte .c2e-repli > summary:focus-visible {
+  outline: 2px solid var(--v2-blue-700, currentColor);
+  outline-offset: -2px;
+}
+.v2-val-carte .c2e-repli > summary small {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--v2-gray-900);
+  font-variant-numeric: tabular-nums;
+}
+.v2-val-carte .c2e-repli-fleche {
+  flex-shrink: 0;
+  color: var(--v2-gray-900);
+  transition: transform 150ms ease;
+}
+.v2-val-carte .c2e-repli[open] > .c2e-repli-fleche,
+.v2-val-carte .c2e-repli[open] > summary .c2e-repli-fleche {
+  transform: rotate(90deg);
+}
+.v2-val-carte .c2e-repli[open] > summary {
+  margin-bottom: 4px;
+}
+.v2-val-carte .c2e-repli > :not(summary) {
+  margin-bottom: 14px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .v2-val-carte .c2e-repli-fleche {
+    transition: none;
+  }
+}

@@ -1,0 +1,1265 @@
+/* ══════════════════════════════════════════════════════════════════════
+   L'éditeur de workflow de Plain, au 1:1 — 28/10/2026 (2e vague)
+
+   Relevé au getComputedStyle dans l'espace Plain de Teo (app.plain.com,
+   fenêtre de 1600 × 919, thème sombre) sur l'éditeur d'un workflow :
+   scratchpad/releve-plain-editeur.md. Les couleurs sont celles du gabarit
+   (--lin-*, lin.css : clair et sombre) ; tout le reste (hauteurs, écarts,
+   polices, graisses, rayons, positions) est celui de Plain, au pixel.
+
+   Repères :
+     barre du haut   53 de haut, padding 10 12 ; ← 32 (padding 7, icône 18) ; nom 14/475 (padding 5 8, rayon 6) ;
+                     badge 24 (12/475, padding 6 8, rayon 4) ; à droite ⋯ 32, boutons 32 (padding 8 12, 12/600, rayon 6),
+                     bascule 32 ; 12 d'écart
+     canevas         fond relevé, points de 1 px tous les 20 ; bloc 308 de large, padding 12, rayon 16, trait 1 ;
+                     titre 24 (pastille 24 rayon 6 + 8 + 14/600) ; corps à 8 ; rangées à trait 1 rayon 6 padding 8 ;
+                     puces 22 (12/400, padding 2 4, rayon 4) ; opérateurs 20 ; poignées 8 ; liens bézier trait 1 ;
+                     blocs à 408 de pas (308 + 100) ; sélection : trait indigo
+     commandes       32 × 160 en bas à gauche (15 du bord), 5 boutons de 32, icône 12 ; mini-carte 202 × 152 en bas à droite
+     panneau         401 (trait gauche 1) ; en-tête 53 (padding 12, trait bas) ; onglets 28 (padding 0 6, rayon 6, 12/600) ;
+                     corps padding 16 ; recherche 30 (padding 4 6 4 38, 12/400) ; groupes à 16, titre 12/600 gris, éléments
+                     44 à 8 (padding 10 38 10 12, rayon 6, ombre de bouton) ; lignes d'exécution 57 (padding 16, trait bas) ;
+                     fiche dl (12/600 gris · 12/400, rangées de 24, colonne à 88) ; étapes à 24 (pastille 24 + 16)
+
+   Jetons pris au plus proche (pas d'équivalent exact chez --lin-*) :
+     fond 26,25,27 → --lin-fond ; fond du canevas 20,20,20 → --lin-carte ; points 85,85,85 → --lin-second à 55 % ;
+     texte 238,238,240 → --lin-titre ; gris 181,178,188 / 152,151,159 → --lin-second ; icône 114,112,123 → --lin-compte ;
+     trait de bloc 50,48,53 → --lin-trait ; trait de puce 43,41,45 → --lin-detail-trait ; fond d'opérateur 18,17,19 →
+     --lin-menu-fond ; survol 35,34,37 → --lin-survol ; onglet actif et commandes 43,41,45 → --lin-pastille-active ;
+     lien 62,62,62 → --lin-maj-trait ; poignée 190,190,190 → --lin-cercle ; vert 0,199,112 → --lin-vert ; jaune
+     244,194,36 → --lin-graph-jaune ; indigo 92,103,244 → --lin-graph-bleu ; badge bleu → --lin-graph-bleu à 20 % ;
+     badge vert 21,45,28 / 178,242,192 → --lin-vert à 18 % / --lin-vert ; ambre → --lin-jaune ; rouge → --lin-rouge.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lin.pe {
+  --pe-points: color-mix(in srgb, var(--lin-second) 55%, transparent);
+  --pe-trait: var(--lin-trait);
+  --pe-trait-fin: var(--lin-detail-trait, var(--lin-trait));
+  --pe-lien: var(--lin-maj-trait, var(--lin-trait));
+  --pe-vert: var(--lin-vert);
+  --pe-jaune: var(--lin-graph-jaune);
+  --pe-indigo: var(--lin-graph-bleu);
+  --pe-ombre:
+    rgba(32, 39, 44, 0.08) 0 1px 0 0, rgba(32, 39, 44, 0.08) 0 2px 5px 0, rgba(255, 255, 255, 0.02) 1px 1px 2px 0 inset, rgba(255, 255, 255, 0.1) 0 0 1px 0 inset, rgba(22, 26, 38, 0.08) 0 0 0 1px inset,
+    rgba(255, 255, 255, 0.12) 0 0 1px 1px inset, rgba(0, 0, 0, 0.12) 0 -1px 1px 0 inset;
+  --pe-ombre-survol:
+    rgba(32, 39, 44, 0.16) 0 1px 4px 0, rgba(32, 39, 44, 0.08) 0 2px 16px 0, rgba(255, 255, 255, 0.02) 1px 1px 2px 0 inset, rgba(255, 255, 255, 0.1) 0 0 1px 0 inset, rgba(22, 26, 38, 0.08) 0 0 0 1px inset,
+    rgba(255, 255, 255, 0.12) 0 0 1px 1px inset, rgba(0, 0, 0, 0.12) 0 -1px 1px 0 inset;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 401px;
+  grid-template-rows: 53px minmax(0, 1fr);
+  height: calc(100dvh - 48px);
+  min-height: 480px;
+  overflow: hidden;
+  background: var(--lin-fond);
+  color: var(--lin-titre);
+  font-size: 14px;
+  line-height: 20px;
+}
+html[data-v2-theme="light"] .v2 .lin.pe {
+  --pe-points: color-mix(in srgb, var(--lin-second) 35%, transparent);
+  --pe-trait-fin: var(--v2-a-400);
+  --pe-lien: var(--v2-a-500);
+  --pe-ombre: 0 0 0 1px var(--v2-a-400), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --pe-ombre-survol: 0 0 0 1px var(--v2-a-500), 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lin.pe {
+    --pe-points: color-mix(in srgb, var(--lin-second) 35%, transparent);
+    --pe-trait-fin: var(--v2-a-400);
+    --pe-lien: var(--v2-a-500);
+    --pe-ombre: 0 0 0 1px var(--v2-a-400), 0 1px 2px rgba(0, 0, 0, 0.04);
+    --pe-ombre-survol: 0 0 0 1px var(--v2-a-500), 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+}
+.v2 .lin.pe[data-panneau="ferme"] {
+  grid-template-columns: minmax(0, 1fr) 0;
+}
+.v2 .lin.pe button {
+  cursor: pointer;
+}
+.v2 .lin.pe :is(button, a, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--lin-graph-bleu);
+  outline-offset: 1px;
+}
+
+/* ——— barre du haut : 53, padding 10 12, trait bas ——— */
+.v2 .lin .pe-barre {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 53px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--pe-trait-fin);
+  background: var(--lin-fond);
+}
+.v2 .lin .pe-barre-gauche,
+.v2 .lin .pe-barre-droite {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 32px;
+  min-width: 0;
+}
+.v2 .lin .pe-barre-gauche {
+  flex: 1 1 auto;
+}
+.v2 .lin .pe-barre-droite {
+  flex-shrink: 0;
+}
+/* le bouton-icône : 32, padding 7, rayon 6, icône 18 grise ; survol fond relevé ; actif (panneau ouvert) fond relevé */
+.v2 .lin .pe-icone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 7px;
+  border-radius: 6px;
+  color: var(--lin-second);
+  background: transparent;
+  transition: background 0.15s ease-in-out;
+}
+.v2 .lin .pe-icone > svg {
+  width: 18px;
+  height: 18px;
+}
+.v2 .lin .pe-icone:hover,
+.v2 .lin .pe-icone[aria-pressed="true"],
+.v2 .lin .pe-icone[aria-expanded="true"] {
+  background: var(--lin-survol);
+  color: var(--lin-titre);
+}
+.v2 .lin .pe-nom-groupe {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+/* le nom du workflow : la boîte du champ de Plain (14/475, padding 5 8, rayon 6, trait transparent) */
+.v2 .lin .pe-nom {
+  display: block;
+  height: 32px;
+  padding: 5px 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 475;
+  line-height: 20px;
+  color: var(--lin-titre);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* le badge d'état : 24, 12/475/12, padding 6 8, rayon 4 */
+.v2 .lin .pe-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 475;
+  line-height: 12px;
+  white-space: nowrap;
+  background: color-mix(in srgb, var(--lin-graph-bleu) 20%, transparent);
+  color: var(--lin-graph-bleu);
+}
+.v2 .lin .pe-badge[data-teinte="vert"] {
+  background: color-mix(in srgb, var(--lin-vert) 18%, transparent);
+  color: var(--lin-vert);
+}
+.v2 .lin .pe-badge[data-teinte="ambre"] {
+  background: color-mix(in srgb, var(--lin-jaune) 18%, transparent);
+  color: var(--lin-jaune);
+}
+.v2 .lin .pe-badge[data-teinte="rouge"] {
+  background: color-mix(in srgb, var(--lin-rouge) 18%, transparent);
+  color: var(--lin-rouge);
+}
+.v2 .lin .pe-badge[data-teinte="gris"] {
+  background: var(--lin-pastille-active);
+  color: var(--lin-second);
+}
+.v2 .lin .pe-badge--petit {
+  height: 16px;
+  padding: 3px 6px;
+  gap: 2px;
+  font-size: 10px;
+  line-height: 10px;
+}
+/* les boutons de la barre : 32, padding 8 12, rayon 6, 12/600/16 ; secondaire fond du panneau + ombre ; primaire plein */
+.v2 .lin .pe-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 32px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  white-space: nowrap;
+  color: var(--lin-titre);
+  background: var(--lin-fond);
+  box-shadow: var(--pe-ombre);
+  transition:
+    background 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out;
+}
+.v2 .lin .pe-btn:hover {
+  background: var(--lin-survol);
+  box-shadow: var(--pe-ombre-survol);
+}
+.v2 .lin .pe-btn > svg {
+  width: 18px;
+  height: 18px;
+  margin-left: -4px;
+  color: var(--lin-compte);
+}
+.v2 .lin .pe-btn-n {
+  margin-left: 2px;
+  color: var(--lin-second);
+  font-weight: 500;
+}
+.v2 .lin .pe-btn--primaire {
+  background: var(--lin-titre);
+  color: var(--lin-fond);
+  box-shadow: none;
+}
+.v2 .lin .pe-btn--primaire:hover {
+  background: var(--lin-texte);
+  box-shadow: none;
+}
+.v2 .lin .pe-btn--primaire > svg {
+  color: inherit;
+}
+/* le ⋯ de la barre : un MenuActions du dashboard dans une enveloppe v2 › lin (comme pf-plus) */
+.v2.pe-plus {
+  display: inline-flex;
+  align-items: center;
+  min-height: 0;
+  background: transparent;
+}
+.v2.pe-plus > .lin {
+  display: inline-flex;
+  min-height: 0;
+  background: transparent;
+}
+.v2.pe-plus .lin-valeur {
+  width: 32px;
+  height: 32px;
+  padding: 7px;
+  border-radius: 6px;
+  color: var(--lin-second);
+}
+.v2.pe-plus .lin-valeur > svg {
+  width: 18px;
+  height: 18px;
+}
+.v2.pe-plus .lin-valeur:hover,
+.v2.pe-plus .lin-valeur[aria-expanded="true"] {
+  background: var(--lin-survol);
+  color: var(--lin-titre);
+}
+
+/* ——— le canevas ——— */
+.v2 .lin .pe-canevas {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--lin-carte);
+  background-image: radial-gradient(circle, var(--pe-points) 0.5px, transparent 0.6px);
+  background-size: 20px 20px;
+  background-position: var(--pe-bg-x, 0) var(--pe-bg-y, 0);
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  outline: none;
+}
+.v2 .lin .pe-canevas[data-glisse] {
+  cursor: grabbing;
+}
+.v2 .lin .pe-canevas:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--lin-graph-bleu);
+}
+.v2 .lin .pe-vue {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+.v2 .lin .pe-liens {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  overflow: visible;
+  pointer-events: none;
+}
+.v2 .lin .pe-lien {
+  fill: none;
+  stroke: var(--pe-lien);
+  stroke-width: 1px;
+}
+.v2 .lin .pe-lien[data-actif] {
+  stroke: var(--lin-graph-bleu);
+}
+
+/* le bloc : 308, padding 12, rayon 16, trait 1 ; sélectionné : trait indigo */
+.v2 .lin .pe-bloc {
+  position: absolute;
+  width: 308px;
+  padding: 12px;
+  border: 1px solid var(--pe-trait);
+  border-radius: 16px;
+  background: var(--lin-fond);
+  color: var(--lin-titre);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s ease-in-out;
+}
+.v2 .lin .pe-bloc[aria-pressed="true"] {
+  border-color: var(--pe-indigo);
+}
+.v2 .lin .pe-bloc[data-eteint] {
+  opacity: 0.35;
+}
+.v2 .lin .pe-bloc-titre {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 24px;
+  min-width: 0;
+}
+/* la pastille d'icône : 24, rayon 6, fond = la couleur à 12 %, icône 18 */
+.v2 .lin .pe-pastille {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  color: var(--pe-indigo);
+  background: color-mix(in srgb, var(--pe-indigo) 12%, transparent);
+}
+.v2 .lin .pe-pastille > svg {
+  width: 18px;
+  height: 18px;
+}
+.v2 .lin .pe-pastille[data-teinte="vert"] {
+  color: var(--pe-vert);
+  background: color-mix(in srgb, var(--pe-vert) 12%, transparent);
+}
+.v2 .lin .pe-pastille[data-teinte="jaune"] {
+  color: var(--pe-jaune);
+  background: color-mix(in srgb, var(--pe-jaune) 12%, transparent);
+}
+.v2 .lin .pe-pastille[data-teinte="gris"] {
+  color: var(--lin-second);
+  background: color-mix(in srgb, var(--lin-second) 12%, transparent);
+}
+.v2 .lin .pe-bloc-nom {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lin .pe-bloc-corps {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+.v2 .lin .pe-bloc-corps > * + * {
+  margin-top: 0;
+}
+/* la rangée simple (« Thread created ») : trait 1, rayon 6, padding 8, texte 12/400 dans une ligne de 20 → 38 */
+.v2 .lin .pe-rangee {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 8px;
+  border: 1px solid var(--pe-trait);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+}
+/* la rangée d'action (« Labels picked by AI ») : icône 14 + 8 + 12/400/16 → 34 */
+.v2 .lin .pe-rangee--action {
+  min-height: 34px;
+  line-height: 16px;
+}
+.v2 .lin .pe-rangee--action > svg {
+  width: 14px;
+  height: 14px;
+  color: var(--lin-second);
+}
+/* la rangée « Else » : 12/600 gris → 34 */
+.v2 .lin .pe-rangee--sinon {
+  min-height: 34px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--lin-second);
+}
+/* la rangée de condition : libellé 12/600 puis lignes de puces à gap 4 */
+.v2 .lin .pe-condition {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid var(--pe-trait);
+  border-radius: 6px;
+}
+.v2 .lin .pe-condition-libelle {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+}
+.v2 .lin .pe-condition-lignes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.v2 .lin .pe-condition-ligne {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+}
+/* la puce : 22, trait 1 fin, rayon 4, padding 2 4, 12/400/16 */
+.v2 .lin .pe-puce {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 22px;
+  padding: 2px 4px;
+  border: 1px solid var(--pe-trait-fin);
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--lin-titre);
+  white-space: nowrap;
+}
+.v2 .lin .pe-puce > svg {
+  width: 14px;
+  height: 14px;
+  color: var(--lin-compte);
+}
+/* l'opérateur (« IS NOT », « OR ») : 20, fond relevé, padding 1 4, gris */
+.v2 .lin .pe-op {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 1px 4px;
+  border: 1px solid var(--pe-trait-fin);
+  border-radius: 4px;
+  background: var(--lin-menu-fond);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+/* la poignée : 8, ronde, à cheval sur le bord du bloc (12 de padding + 1 de trait = 13 ; centre sur le bord → -17) */
+.v2 .lin .pe-poignee {
+  position: absolute;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  border: 1px solid var(--lin-fond);
+  border-radius: 100%;
+  background: var(--lin-cercle);
+  pointer-events: none;
+}
+.v2 .lin .pe-poignee[data-cote="sortie"] {
+  right: -17px;
+}
+.v2 .lin .pe-poignee[data-cote="entree"] {
+  left: -17px;
+}
+.v2 .lin .pe-bloc > .pe-poignee {
+  margin-top: -4px;
+}
+.v2 .lin .pe-bloc > .pe-poignee[data-cote="sortie"] {
+  right: -4px;
+}
+.v2 .lin .pe-bloc > .pe-poignee[data-cote="entree"] {
+  left: -4px;
+}
+
+/* les commandes de zoom : 32 × 160 en bas à gauche, 5 boutons de 32, icône 12 */
+.v2 .lin .pe-commandes {
+  position: absolute;
+  left: 15px;
+  bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  width: 32px;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: rgba(0, 0, 0, 0.08) 0 0 2px 1px;
+  z-index: 2;
+}
+.v2 .lin .pe-commande {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 4px;
+  background: var(--lin-pastille-active);
+  color: var(--lin-titre);
+  border-bottom: 1px solid var(--lin-fond);
+}
+.v2 .lin .pe-commande:last-child {
+  border-bottom: 0;
+}
+.v2 .lin .pe-commande:hover {
+  background: var(--lin-survol);
+}
+.v2 .lin .pe-commande > svg {
+  width: 12px;
+  height: 12px;
+}
+.v2 .lin .pe-raccourcis {
+  position: absolute;
+  left: 15px;
+  bottom: 183px;
+  width: 220px;
+  padding: 8px 0;
+  border: 1px solid var(--lin-menu-bord, var(--pe-trait));
+  border-radius: 10px;
+  background: var(--lin-menu-fond);
+  box-shadow: var(--lin-ombre-menu);
+  z-index: 3;
+}
+.v2 .lin .pe-raccourcis dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  margin: 0;
+  padding: 0 12px;
+  font-size: 12px;
+  line-height: 20px;
+  color: var(--lin-menu-texte, var(--lin-titre));
+}
+.v2 .lin .pe-raccourcis dt {
+  color: var(--lin-menu-gris, var(--lin-second));
+}
+.v2 .lin .pe-raccourcis dd {
+  margin: 0;
+}
+.v2 .lin .pe-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border: 1px solid var(--lin-menu-bord, var(--pe-trait));
+  border-radius: 4px;
+  background: var(--lin-pastille-active);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+}
+/* la mini-carte : 202 × 152 en bas à droite, fond du canevas, trait 1, rayon 8 */
+.v2 .lin .pe-minicarte {
+  position: absolute;
+  right: 15px;
+  bottom: 15px;
+  width: 202px;
+  height: 152px;
+  border: 1px solid var(--pe-trait-fin);
+  border-radius: 8px;
+  background: var(--lin-carte);
+  box-shadow: var(--pe-ombre);
+  overflow: hidden;
+  cursor: pointer;
+  z-index: 2;
+}
+.v2 .lin .pe-minicarte svg {
+  display: block;
+  width: 200px;
+  height: 150px;
+}
+.v2 .lin .pe-minicarte-bloc {
+  fill: var(--lin-pastille-active);
+}
+.v2 .lin .pe-minicarte-masque {
+  fill: var(--lin-fond);
+  fill-opacity: 0.6;
+  stroke: var(--pe-trait);
+  stroke-width: 1px;
+}
+/* l'état vide du canevas */
+.v2 .lin .pe-vide {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 450px;
+  max-width: calc(100% - 32px);
+  padding: 32px;
+  border: 1px solid var(--pe-trait-fin);
+  border-radius: 10px;
+  background: var(--lin-fond);
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+.v2 .lin .pe-vide strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+.v2 .lin .pe-vide p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--lin-second);
+}
+
+/* ——— le panneau de droite ——— */
+.v2 .lin .pe-panneau {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  border-left: 1px solid var(--pe-trait);
+  background: var(--lin-fond);
+  overflow: hidden;
+}
+.v2 .lin.pe[data-panneau="ferme"] .pe-panneau {
+  display: none;
+}
+.v2 .lin .pe-panneau-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+  height: 53px;
+  padding: 12px;
+  border-bottom: 1px solid var(--pe-trait-fin);
+}
+.v2 .lin .pe-panneau-tete-gauche {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.v2 .lin .pe-panneau-titre {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lin .pe-panneau-titre--leger {
+  font-weight: 400;
+}
+/* les onglets : groupe 32 (padding 2, gap 2, rayon 8) ; onglet 28, padding 0 6, rayon 6 ; actif fond relevé 12/600 ; inactif 12/400 à 80 % */
+.v2 .lin .pe-onglets {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 32px;
+  padding: 2px;
+  border-radius: 8px;
+}
+.v2 .lin .pe-onglet {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 28px;
+  padding: 0 6px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--lin-titre);
+  opacity: 0.8;
+  white-space: nowrap;
+}
+.v2 .lin .pe-onglet:hover {
+  opacity: 1;
+}
+.v2 .lin .pe-onglet[aria-selected="true"] {
+  background: var(--lin-pastille-active);
+  font-weight: 600;
+  opacity: 1;
+}
+/* le libellé en double (600, invisible) fixe la largeur : l'onglet ne bouge pas quand il s'active */
+.v2 .lin .pe-onglet-libelle {
+  display: inline-grid;
+}
+.v2 .lin .pe-onglet-libelle > span {
+  grid-area: 1 / 1;
+}
+.v2 .lin .pe-onglet-libelle > span:last-child {
+  font-weight: 600;
+  visibility: hidden;
+}
+.v2 .lin .pe-onglet-n {
+  color: var(--lin-second);
+}
+.v2 .lin .pe-panneau-corps {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.v2 .lin .pe-panneau-corps--pad {
+  padding: 16px;
+}
+/* la recherche : 30, padding 4 6 4 38, loupe 18 à 12 */
+.v2 .lin .pe-recherche {
+  position: relative;
+  margin-bottom: 16px;
+}
+.v2 .lin .pe-recherche > svg {
+  position: absolute;
+  left: 12px;
+  top: 6px;
+  width: 18px;
+  height: 18px;
+  color: var(--lin-second);
+  pointer-events: none;
+}
+.v2 .lin .pe-recherche input {
+  width: 100%;
+  height: 30px;
+  padding: 4px 6px 4px 38px;
+  border: 1px solid var(--pe-trait);
+  border-radius: 6px;
+  background: var(--lin-fond);
+  color: var(--lin-titre);
+  font: inherit;
+  font-size: 12px;
+  line-height: 20px;
+}
+.v2 .lin .pe-recherche input::placeholder {
+  color: var(--lin-second);
+}
+.v2 .lin .pe-recherche input:focus {
+  outline: none;
+  border-color: var(--lin-graph-bleu);
+}
+/* les groupes : gap 16 ; titre 12/600 gris ; éléments à 8 */
+.v2 .lin .pe-groupes {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.v2 .lin .pe-groupe {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.v2 .lin .pe-groupe-titre {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  color: var(--lin-second);
+}
+/* l'élément : 44, padding 10 38 10 12, rayon 6, ombre de bouton ; ⓘ 14 à 12 du bord droit */
+.v2 .lin .pe-element {
+  position: relative;
+  width: 100%;
+}
+.v2 .lin .pe-element-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 38px 10px 12px;
+  border-radius: 6px;
+  background: var(--lin-fond);
+  box-shadow: var(--pe-ombre);
+  color: var(--lin-titre);
+  text-align: left;
+  transition:
+    background 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out;
+}
+.v2 .lin .pe-element-btn:hover,
+.v2 .lin .pe-element-btn[aria-pressed="true"] {
+  background: var(--lin-menu-fond);
+  box-shadow: var(--pe-ombre-survol);
+}
+.v2 .lin .pe-element-nom {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lin .pe-element-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  height: 22px;
+  padding: 0 8px 0 4px;
+  border: 1px solid var(--pe-trait-fin);
+  border-radius: 6px;
+  background: var(--lin-menu-fond);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--lin-second);
+}
+.v2 .lin .pe-element-chip > svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .lin .pe-element-info {
+  position: absolute;
+  right: 12px;
+  top: 15px;
+  display: flex;
+  width: 14px;
+  height: 14px;
+  color: var(--lin-second);
+  pointer-events: none;
+}
+.v2 .lin .pe-element-info > svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .lin .pe-panneau-vide {
+  padding: 24px 0;
+  text-align: center;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--lin-second);
+}
+
+/* les lignes d'exécution : 57, padding 16, trait bas ; date 14/400 ; badge + chevron 18 à 4 */
+.v2 .lin .pe-execution {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  height: 57px;
+  padding: 16px;
+  border-bottom: 1px solid var(--pe-trait);
+  color: var(--lin-titre);
+  text-align: left;
+  transition: background 0.15s ease-in-out;
+}
+.v2 .lin .pe-execution:hover {
+  background: var(--lin-survol);
+}
+.v2 .lin .pe-execution-date {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lin .pe-execution-sous {
+  display: block;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--lin-second);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lin .pe-execution-droite {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.v2 .lin .pe-execution-droite > svg {
+  width: 18px;
+  height: 18px;
+  color: var(--lin-second);
+}
+.v2 .lin .pe-execution-resume {
+  padding: 16px 16px 0;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  color: var(--lin-second);
+}
+
+/* la fiche d'une exécution : dl en deux colonnes (88 + 1fr), gap 8 16, rangées de 24 */
+.v2 .lin .pe-fiche {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 8px 16px;
+  margin: 0;
+}
+.v2 .lin .pe-fiche dt {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 24px;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+.v2 .lin .pe-fiche dd {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-height: 24px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+}
+.v2 .lin .pe-fiche-lien {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  padding: 0 8px 0 4px;
+  border-radius: 6px;
+  background: var(--lin-pastille-active);
+  color: var(--lin-titre);
+}
+.v2 .lin .pe-fiche-lien > svg {
+  width: 14px;
+  height: 14px;
+  color: var(--lin-compte);
+}
+.v2 .lin .pe-fiche-lien:hover {
+  background: var(--lin-survol);
+}
+.v2 .lin .pe-hr {
+  height: 1px;
+  margin: 12px -16px 0;
+  border: 0;
+  background: var(--pe-trait-fin);
+}
+/* les étapes : titre 12/600 + bouton 26 ; liste à 24 ; étape = pastille 24 + 16 + colonne à gap 8 */
+.v2 .lin .pe-etapes-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 26px;
+  margin-top: 12px;
+}
+.v2 .lin .pe-etapes-tete h2 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  color: var(--lin-titre);
+}
+.v2 .lin .pe-btn--petit {
+  height: 26px;
+  padding: 5px 8px 5px 6px;
+  background: transparent;
+  box-shadow: none;
+}
+.v2 .lin .pe-btn--petit > svg {
+  width: 14px;
+  height: 14px;
+  margin-left: 0;
+}
+.v2 .lin .pe-etapes {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 12px;
+}
+.v2 .lin .pe-etape {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+.v2 .lin .pe-etape-colonne {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.v2 .lin .pe-etape-titre {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+}
+.v2 .lin .pe-etape-badges {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 16px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--lin-second);
+}
+.v2 .lin .pe-etape-badges-gauche {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.v2 .lin .pe-etape-texte {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 16px;
+}
+.v2 .lin .pe-etape-texte > svg {
+  width: 14px;
+  height: 14px;
+  color: var(--lin-second);
+}
+.v2 .lin .pe-etape-gris {
+  color: var(--lin-second);
+}
+
+/* ——— le panneau « Configurer » ——— */
+.v2 .lin .pe-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border-bottom: 1px solid var(--pe-trait-fin);
+}
+.v2 .lin .pe-section:last-child {
+  border-bottom: 0;
+}
+.v2 .lin .pe-section--espace {
+  gap: 16px;
+}
+.v2 .lin .pe-section-titre {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+.v2 .lin .pe-section-titre--gris {
+  color: var(--lin-second);
+}
+.v2 .lin .pe-section-texte {
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--lin-second);
+}
+.v2 .lin .pe-section-tete {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.v2 .lin .pe-section-tete .pe-section-texte {
+  margin-top: 0;
+}
+/* le champ-sélecteur : 30, trait 1 fin, rayon 6, padding 6 12, 12/400 ; icône 18 + 8 ; chevron 18 à droite */
+.v2 .lin .pe-champ {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 30px;
+  padding: 6px 12px;
+  border: 1px solid var(--pe-trait-fin);
+  border-radius: 6px;
+  background: var(--lin-fond);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--lin-titre);
+  text-align: left;
+}
+.v2 .lin .pe-champ[data-gris] {
+  background: var(--lin-menu-fond);
+  color: var(--lin-second);
+}
+.v2 .lin .pe-champ--32 {
+  min-height: 32px;
+  border-radius: 4px;
+}
+.v2 .lin .pe-champ-icone {
+  display: flex;
+  align-items: center;
+  width: 18px;
+  height: 16px;
+  color: var(--lin-compte);
+}
+.v2 .lin .pe-champ-icone > svg {
+  width: 18px;
+  height: 18px;
+}
+.v2 .lin .pe-champ-valeur {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lin .pe-champ-chevron {
+  display: flex;
+  align-items: center;
+  width: 18px;
+  height: 16px;
+  color: var(--lin-second);
+}
+.v2 .lin .pe-champ-chevron > svg {
+  width: 18px;
+  height: 18px;
+}
+/* la carte de condition : fond relevé, rayon 12, padding 8, gap 6 ; en-tête 24 (« Condition » 12/600 gris + ⓘ 14) */
+.v2 .lin .pe-carte {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 12px;
+  background: var(--lin-menu-fond);
+}
+.v2 .lin .pe-carte-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 24px;
+  padding-left: 4px;
+}
+.v2 .lin .pe-carte-libelle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  color: var(--lin-second);
+}
+.v2 .lin .pe-carte-libelle > svg {
+  width: 14px;
+  height: 14px;
+  color: var(--lin-compte);
+}
+.v2 .lin .pe-cartes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.v2 .lin .pe-ou {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 34px;
+  padding: 8px 8px 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  color: var(--lin-titre);
+}
+.v2 .lin .pe-ou > svg {
+  width: 18px;
+  height: 18px;
+  color: var(--lin-second);
+}
+/* le bouton bordé du panneau (« Add condition ») : 34, padding 8 12 8 8, icône 18 + 4, 12/600 */
+.v2 .lin .pe-btn--panneau {
+  height: 34px;
+  padding: 8px 12px 8px 8px;
+  width: fit-content;
+}
+.v2 .lin .pe-btn--panneau > svg {
+  margin-left: 0;
+}
+/* l'encart bleu (« Automatic ») : rayon 10, padding 12, icône 18 + 12 ; titre 14/400 ; texte 12/14 */
+.v2 .lin .pe-encart {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--lin-graph-bleu) 45%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--lin-graph-bleu) 10%, var(--lin-fond));
+}
+.v2 .lin .pe-encart > svg {
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  color: var(--lin-graph-bleu);
+}
+.v2 .lin .pe-encart-titre {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--lin-graph-bleu);
+}
+.v2 .lin .pe-encart p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--lin-second);
+}
+.v2 .lin .pe-puces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+}
+
+/* ——— sur un téléphone : barre sur deux lignes, canevas puis panneau dessous, aucun défilement horizontal ——— */
+@media (max-width: 899px) {
+  .v2 .lin.pe {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(360px, 56dvh) minmax(0, 1fr);
+    height: auto;
+    min-height: calc(100dvh - 48px);
+  }
+  .v2 .lin.pe[data-panneau="ferme"] {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .v2 .lin .pe-barre {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 53px;
+  }
+  .v2 .lin .pe-barre-droite {
+    flex-wrap: wrap;
+    height: auto;
+    gap: 8px;
+  }
+  .v2 .lin .pe-panneau {
+    border-left: 0;
+    border-top: 1px solid var(--pe-trait);
+    min-height: 360px;
+  }
+  .v2 .lin.pe[data-panneau="ferme"] .pe-panneau {
+    display: none;
+  }
+  .v2 .lin .pe-minicarte {
+    display: none;
+  }
+  .v2 .lin .pe-vide {
+    padding: 20px;
+  }
+}

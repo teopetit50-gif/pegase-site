@@ -1,0 +1,1085 @@
+/* ══════════════════════════════════════════════════════════════════════
+   La fiche d'un objet sur la page d'une Initiative de Linear (onglet
+   Overview, volet « Initiative details »), au 1:1 (29/10/2026). Relevé au
+   getComputedStyle / getBoundingClientRect, fenêtre 1440 × 900 puis
+   390 × 844 : docs/refonte-metiers/releves/linear-initiative.md.
+   Préfixe de classes : lit-. Première page : la fiche d'un chantier
+   DALIRO, /espace3/daliro/chantiers/<id>
+   (components/espace3/daliro/FicheChantier.tsx).
+
+   Couleurs : les jetons --lin-* de ./lin.css (clair et sombre). Tout le
+   reste — hauteurs, marges, rayons, polices, graisses — est la mesure de
+   Linear, recopiée.
+
+   Repères (px ; la carte principale de Linear fait 1188 de large) :
+     tête              barre du fil 44, padding 0 8, trait bas 0.5 ; fil
+                       13/500, « › » gris, nom à icône 16 ; boutons ronds
+                       28 (copier : 24)
+     onglets           12 sous la barre ; pilules de 28, écart 4, padding
+                       0 10, 12/500, rayon plein ; bouton du volet à droite
+     zone              padding 0 48 ; colonne de texte 805, centrée ;
+                       tuile 36 rayon 6 (icône 24) à 64 du haut ; titre
+                       24/600/32 −0.16 à 12 dessous ; résumé 15/450/23,
+                       padding 4 0
+     propriétés        16 sous le résumé, puis 12 ; libellé 13/500 gris sur
+                       77, pastilles de 28 (padding 3 6, écart 8, 13/500),
+                       4 entre elles
+     dernière nouvelle déborde de 16 de chaque côté (837) ; trait 0.5,
+                       rayon 10, padding 8 16 16 ; méta 13/450 ; texte
+                       15/450/24 à 20 ; pastille de pied 28, rayon 30
+     description       12 dessous, déborde de 16, rayon 12, padding 10 16 0
+     tableau des lots  section de 963 centrée, titre 18/500 ; tableau en
+                       sous-grille, débord −28 à gauche (1001) ; colonnes
+                       18 · nom · 50 · 122 · 100 · 68 · 12, écart 6 ;
+                       en-tête 32 (12/450) ; groupe 32 (flèche 20, nom
+                       11/450, filet 0.5) ; ligne 36, rayon 8, survol plein
+     volet             400 (padding gauche 4) ; cartes de 388, écart 8,
+                       padding 12, rayon 10, trait 0.5, ombre standard ;
+                       titre 13/500 sur 28 (padding 0 8) ; rangées 36,
+                       libellé 12/450 sur 90, valeur 12/450 en pastille
+     390               boutons et onglets à 32 ; zone padding 0 40 ;
+                       carte « dernière nouvelle » débord 12, padding
+                       8 12 12, bouton du fil réduit à l'icône ; tableau
+                       2 · nom · 50 · 28 · 12 (exécutant, reste masqués ;
+                       statut = l'icône seule)
+   Les onglets Terrain, Argent, Fil et Réception et le volet portent les
+   cartes de l'écran d'avant (ChantierVue, habillée) : le volet les
+   redessine en rangées « libellé / valeur » comme celui de Linear.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lin.lit {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ——— la tête : la barre du fil (44, trait bas) ——— */
+.v2 .lit-tete {
+  position: sticky;
+  top: 48px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 44px;
+  flex-shrink: 0;
+  padding: 0 8px;
+  border-bottom: 0.5px solid var(--lin-trait);
+  background: var(--lin-fond);
+}
+.v2 .lit-fil {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  margin-left: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-texte);
+}
+.v2 .lit-fil-lien {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 5px 0 4px;
+  border-radius: 8px;
+  white-space: nowrap;
+  transition: background 0.1s;
+}
+.v2 .lit-fil-lien:hover {
+  background: var(--lin-survol);
+}
+.v2 .lit-fil-sep {
+  margin: 0 6px 0 2px;
+  color: var(--lin-second);
+}
+.v2 .lit-fil-ici {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  height: 28px;
+  padding: 2px 4px;
+  border-radius: 6px;
+}
+.v2 .lit-fil-ici svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--lin-teinte, var(--lin-second));
+}
+.v2 .lit-fil-ici > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lit-tete-droite {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* les boutons ronds : 28, trait 0.5 transparent, icône 14 grise */
+.v2 .lit-rond {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  padding: 0 2px;
+  border-radius: 9999px;
+  border: 0.5px solid transparent;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-texte);
+  transition: background 0.1s;
+}
+.v2 .lit-rond svg {
+  width: 14px;
+  height: 14px;
+  color: var(--lin-second);
+}
+.v2 .lit-rond:hover {
+  background: var(--lin-survol);
+}
+.v2 .lit-rond--24 {
+  width: 24px;
+  height: 24px;
+}
+.v2 .lit-rond--plein {
+  background: var(--lin-pastille);
+}
+.v2 .lit-rond--plein::after {
+  content: "";
+  position: absolute;
+  inset: -0.5px;
+  border-radius: inherit;
+  box-shadow: var(--lin-anneau);
+  pointer-events: none;
+}
+.v2 .lit-rond--plein:hover,
+.v2 .lit-rond[aria-expanded="true"] {
+  background: var(--lin-pastille-active);
+}
+.v2 .lit-rond:focus-visible,
+.v2 .lit-onglet:focus-visible,
+.v2 .lit-puce:focus-visible,
+.v2 .lit-ligne-lien:focus-visible,
+.v2 .lit-maj-bouton:focus-visible,
+.v2 .lit-maj-pilule:focus-visible,
+.v2 .lit-groupe-fleche:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: -2px;
+}
+
+/* ——— les onglets : 12 sous la barre, pilules de 28, écart 4 ——— */
+.v2 .lit-barre {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  flex-shrink: 0;
+  margin: 12px 0 4px;
+  padding: 0 8px;
+}
+.v2 .lit-barre > .lit-rond {
+  margin-left: auto;
+}
+.v2 .lit-onglets {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.v2 .lit-onglet {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 9999px;
+  border: 0.5px solid transparent;
+  background: var(--lin-pastille);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-second);
+  white-space: nowrap;
+  transition:
+    background 0.1s,
+    color 0.1s;
+}
+.v2 .lit-onglet:hover {
+  background: color-mix(in srgb, var(--lin-pastille) 50%, var(--lin-pastille-active));
+  color: var(--lin-texte);
+}
+.v2 .lit-onglet[aria-current="page"] {
+  background: var(--lin-pastille-active);
+  color: var(--lin-titre);
+}
+
+/* ——— le corps : la zone défilante et, à droite, le volet de 400 ——— */
+.v2 .lit-corps {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  min-height: 0;
+}
+.v2 .lit-zone {
+  flex: 1;
+  min-width: 0;
+  padding: 0 48px 64px;
+}
+.v2 .lit-vide {
+  margin: 0;
+  padding: 48px 0;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--lin-second);
+  text-align: center;
+}
+.v2 .lit-lien {
+  color: var(--lin-texte);
+  text-decoration: underline;
+  text-decoration-color: var(--lin-trait);
+  text-underline-offset: 3px;
+}
+.v2 .lit-lien:hover {
+  color: var(--lin-titre);
+  text-decoration-color: currentColor;
+}
+
+/* icônes à trait (lucide) mises au gabarit des icônes pleines : 16, grises */
+.v2 .lin .lit-ic {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--lin-second);
+}
+.v2 .lit-avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--lin-avatar);
+  font-size: 8px;
+  font-weight: 600;
+  line-height: 1;
+  color: #fff;
+}
+.v2 .lit-avatar--18 {
+  width: 18px;
+  height: 18px;
+  font-size: 9px;
+}
+
+/* ——— Aperçu : la page (963, pour le tableau) et la colonne de texte (805) ——— */
+.v2 .lit-page {
+  max-width: 963px;
+  margin: 0 auto;
+  padding-top: 64px;
+}
+.v2 .lit-texte {
+  max-width: 805px;
+  margin: 0 auto;
+}
+.v2 .lit-tuile {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--lin-teinte, var(--lin-second)) 12.5%, transparent);
+  color: var(--lin-teinte, var(--lin-second));
+}
+.v2 .lit-tuile svg {
+  width: 24px;
+  height: 24px;
+}
+.v2 .lin .lit-titre {
+  margin: 12px 0 0;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+  letter-spacing: -0.16px;
+  color: var(--lin-titre);
+  overflow-wrap: anywhere;
+}
+.v2 .lit-resume {
+  margin: 0;
+  padding: 4px 0;
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 23px;
+  letter-spacing: -0.1px;
+  color: var(--lin-texte);
+}
+
+/* les rangées « Properties » / « Resources » : libellé de 77, pastilles à 4 d'écart */
+.v2 .lit-rangee {
+  display: grid;
+  grid-template-columns: 77px minmax(0, 1fr);
+  column-gap: 4px;
+  align-items: start;
+  margin-top: 12px;
+}
+.v2 .lit-resume + .lit-rangee {
+  margin-top: 16px;
+}
+.v2 .lin .lit-etiquette {
+  margin: 0;
+  padding: 6px 0;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+.v2 .lit-puces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2 .lit-puces > li {
+  display: flex;
+  min-width: 0;
+}
+.v2 .lit-puce {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 28px;
+  padding: 3px 6px;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--lin-texte);
+  transition:
+    background 0.1s,
+    color 0.1s;
+}
+.v2 a.lit-puce:hover {
+  background: var(--lin-survol);
+  color: var(--lin-titre);
+}
+.v2 .lit-puce .lin-ic,
+.v2 .lit-puce .lit-ic,
+.v2 .lit-puce .lit-avatar {
+  flex-shrink: 0;
+}
+.v2 .lit-puce--vide {
+  color: var(--lin-compte);
+}
+.v2 .lin .lit-puce--vide .lin-ic,
+.v2 .lin .lit-puce--vide .lit-ic {
+  color: var(--lin-compte);
+}
+.v2 .lin .lit-puce[data-teinte] .lit-ic-teinte {
+  color: var(--lin-teinte);
+}
+
+/* ——— « Latest update » : la dernière nouvelle du chantier ——— */
+.v2 .lit-maj {
+  margin: 16px -16px 0;
+  padding: 8px 16px 16px;
+  border-radius: 10px;
+  border: 0.5px solid var(--lin-maj-trait);
+  background: var(--lin-fond);
+}
+.v2 .lit-maj-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 28px;
+}
+.v2 .lit-maj-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 8px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-second);
+  white-space: nowrap;
+  transition:
+    background 0.1s,
+    color 0.1s;
+}
+.v2 .lit-maj-bouton svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .lit-maj-bouton:hover {
+  background: var(--lin-survol);
+  color: var(--lin-texte);
+}
+.v2 .lit-maj-corps {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0 0;
+}
+.v2 .lit-maj-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin-top: 9px;
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 16px;
+}
+.v2 .lit-maj-etat {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--lin-teinte, var(--lin-second));
+}
+.v2 .lit-maj-etat svg {
+  width: 16px;
+  height: 16px;
+  color: var(--lin-teinte, var(--lin-second));
+}
+.v2 .lit-maj-gris {
+  color: var(--lin-second);
+}
+.v2 .lit-maj-texte {
+  margin: 20px 0 0;
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 24px;
+  letter-spacing: -0.1px;
+  color: var(--lin-texte);
+  overflow-wrap: anywhere;
+}
+.v2 .lit-maj-texte--vide {
+  margin-top: 12px;
+  color: var(--lin-second);
+}
+.v2 .lit-maj-pied {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+.v2 .lit-maj-pilule {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 5px 10px;
+  border-radius: 30px;
+  background: var(--lin-maj-pied);
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+  white-space: nowrap;
+  transition:
+    background 0.1s,
+    color 0.1s;
+}
+.v2 .lit-maj-pilule svg {
+  width: 16px;
+  height: 16px;
+}
+.v2 .lit-maj-pilule:hover {
+  background: var(--lin-survol);
+  color: var(--lin-texte);
+}
+
+/* ——— « Description » : les contrôles en phrases ——— */
+.v2 .lit-description {
+  margin: 12px -16px 0;
+  padding: 10px 16px 0;
+  border-radius: 12px;
+}
+.v2 .lit-description-texte {
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 24px;
+  letter-spacing: -0.1px;
+  color: var(--lin-texte);
+}
+.v2 .lit-description-texte p {
+  margin: 10px 0 0;
+}
+.v2 .lit-description-texte ul {
+  margin: 8px 0 0;
+  padding: 0 0 0 22px;
+}
+.v2 .lit-description-texte li + li {
+  margin-top: 4px;
+}
+.v2 .lit-description-texte strong {
+  font-weight: 500;
+  color: var(--lin-teinte, var(--lin-titre));
+}
+
+/* ——— le tableau des lots (le tableau « Projects » de l'initiative), en sous-grille ——— */
+.v2 .lit-lots {
+  margin-top: 48px;
+  padding-bottom: 40px;
+}
+.v2 .lit-lots-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 3px 0;
+}
+.v2 .lin .lit-lots-titre {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 28px;
+  color: var(--lin-texte);
+}
+.v2 .lit-aide {
+  margin: 8px 0 0;
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 20px;
+  color: var(--lin-second);
+}
+.v2 .lit-table {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) 50px 122px 100px 68px 12px;
+  column-gap: 6px;
+  width: calc(100% + 38px);
+  margin: 4px -10px 0 -28px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.v2 .lit-table:not([data-prix]) {
+  grid-template-columns: 18px minmax(0, 1fr) 50px 122px 68px 12px;
+}
+.v2 .lit-table :is(thead, tbody, tr) {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+}
+.v2 .lit-table :is(th, td) {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 0;
+  font-weight: 450;
+  text-align: left;
+}
+.v2 .lit-table-tete {
+  height: 32px;
+}
+.v2 .lit-table-tete th {
+  padding: 0 6px;
+  font-size: 12px;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+.v2 .lit-table-tete .lit-col-reste {
+  justify-content: flex-end;
+}
+
+/* une ligne de groupe : flèche 20, nom 11/450, filet 0.5 jusqu'au bord */
+.v2 .lit-groupe {
+  height: 32px;
+}
+.v2 .lit-groupe th {
+  grid-column: 1 / -1;
+  gap: 8px;
+  padding-right: 12px;
+  border-radius: 8px;
+}
+.v2 .lit-groupe-fleche {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  color: var(--lin-compte);
+  transition: background 0.1s;
+}
+.v2 .lit-groupe-fleche svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.12s;
+}
+.v2 .lit-groupe-fleche:hover {
+  background: var(--lin-survol);
+}
+.v2 .lit-groupe-fleche[aria-expanded="false"] svg {
+  transform: rotate(-90deg);
+}
+.v2 .lit-groupe-nom {
+  font-size: 11px;
+  font-weight: 450;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+.v2 .lit-groupe-filet {
+  flex: 1;
+  height: 0.5px;
+  background: var(--lin-trait);
+}
+
+/* une ligne de lot : 36, rayon 8, fond de survol en retrait (::before) */
+.v2 .lit-ligne {
+  position: relative;
+  height: 36px;
+  font-size: 12px;
+  color: var(--lin-texte);
+}
+.v2 .lit-ligne::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  background: transparent;
+  transition: background 0.1s;
+}
+@media (any-hover: hover) and (any-pointer: fine) {
+  .v2 .lit-ligne:hover::before {
+    background: var(--lin-survol);
+  }
+}
+.v2 .lit-ligne > * {
+  position: relative;
+  z-index: 2;
+}
+.v2 .lit-ligne > .lit-ligne-nom {
+  position: static;
+  gap: 6px;
+  padding-left: 3px;
+}
+.v2 .lit-ligne-nom > .lit-ic {
+  position: relative;
+  z-index: 2;
+}
+.v2 .lit-ligne-lien {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-titre);
+  border-radius: 4px;
+}
+/* toute la ligne mène à l'onglet Argent, comme une ligne de projet mène au projet */
+.v2 .lit-ligne-lien::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: 8px;
+}
+.v2 .lit-ligne-code {
+  color: var(--lin-second);
+  font-variant-numeric: tabular-nums;
+}
+.v2 .lit-rond--cellule {
+  pointer-events: auto;
+}
+.v2 .lit-rond--cellule:hover {
+  background: transparent;
+}
+.v2 .lin .lit-rond--cellule .lin-ic {
+  width: 16px;
+  height: 16px;
+}
+.v2 .lit-col-executant {
+  gap: 6px;
+  padding: 0 6px !important;
+}
+.v2 .lit-executant {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--lin-texte);
+}
+.v2 .lit-executant--vide {
+  color: var(--lin-compte);
+}
+.v2 .lit-col-reste {
+  justify-content: flex-end;
+  padding: 0 6px !important;
+}
+.v2 .lit-reste {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--lin-texte);
+}
+.v2 .lit-reste[data-teinte] {
+  color: var(--lin-teinte);
+}
+.v2 .lit-statut {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 3px 6px;
+  border-radius: 9999px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--lin-texte);
+}
+
+/* ——— les autres onglets : les cartes de l'écran d'avant, sans leur cadre de page ——— */
+.v2 .lit-gestes {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-top: 24px;
+}
+.v2 .lit-gestes > .lit-vide {
+  padding: 0 0 16px;
+  text-align: left;
+}
+.v2 .lin .lit-gestes .v2-page:has(> #ecran),
+.v2 .lin .lit-carte-gestes .v2-page:has(> #ecran) {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+.v2 .lin .lit-gestes .resa.esp .esp-dossier {
+  display: grid;
+  gap: 16px;
+}
+/* les ancres des autres pages (?onglet=…#planning) : sous la barre du site (48) et la tête (44) */
+.v2 .lin.lit :is(#planning, #avenants, #situations, #fil) {
+  scroll-margin-top: 108px;
+}
+
+/* ——— le volet de détails : 400, cartes de 388 ——— */
+.v2 .lit-volet {
+  position: sticky;
+  top: 92px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 400px;
+  flex-shrink: 0;
+  max-height: calc(100dvh - 92px);
+  overflow-y: auto;
+  padding: 0 8px 8px 4px;
+  scrollbar-width: thin;
+}
+.v2 .lit-carte {
+  padding: 12px;
+  border-radius: 10px;
+  border: 0.5px solid var(--lin-detail-trait);
+  background: var(--lin-detail);
+  box-shadow: 0 0.5px 1px 1px lch(0 0 0 / 0.3);
+}
+.v2 .lin .lit-carte-titre {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3px;
+  height: 28px;
+  margin: 0;
+  padding: 0 8px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--lin-onglet-detail-texte);
+}
+.v2 .lit-carte-lien {
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-onglet-detail-texte);
+}
+.v2 .lit-carte-lien:hover {
+  color: var(--lin-texte);
+}
+
+/* la carte « Activity » : un point de 16, le texte 12/450/16.8 */
+.v2 .lit-activite {
+  display: grid;
+  gap: 12px;
+  margin: 6px 0 0;
+  padding: 0 8px 4px;
+  list-style: none;
+}
+.v2 .lit-activite li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 16.8px;
+  color: var(--lin-onglet-detail-texte);
+}
+.v2 .lit-activite-point {
+  position: relative;
+  width: 16px;
+  height: 16.8px;
+  flex-shrink: 0;
+}
+.v2 .lit-activite-point::before {
+  content: "";
+  position: absolute;
+  top: 5.4px;
+  left: 5px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--lin-teinte, var(--lin-second));
+}
+.v2 .lit-activite-texte {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.v2 .lit-activite-quand {
+  white-space: nowrap;
+}
+
+/* l'en-tête de ChantierVue (B11), redessiné en rangées « libellé / valeur » */
+.v2 .lin .lit-carte-gestes .resa.esp {
+  font-size: 12px;
+  line-height: 16px;
+}
+.v2 .lin .lit-carte-gestes .resa.esp .esp-dossier {
+  display: grid;
+  gap: 8px;
+}
+.v2 .lin .lit-carte-gestes .resa.esp .esp-avis {
+  font-size: 12px;
+  line-height: 16px;
+}
+.v2 .lin .lit-carte-gestes .resa.esp .esp-carte {
+  overflow: visible;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.v2 .lin .lit-carte-gestes .resa.esp .esp-carte-tete {
+  display: block;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+/* le nom et l'adresse sont déjà le titre et le résumé de la page */
+.v2 .lin .lit-carte-gestes .resa.esp .esp-carte-tete > div:first-child {
+  display: none;
+}
+/* statut, marché et relevé : la première rangée */
+.v2 .lin .lit-carte-gestes .resa.esp .esp-item-haut {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  padding: 4px 0 4px 90px;
+}
+.v2 .lin .lit-carte-gestes .resa.esp .esp-item-haut::before {
+  content: "État";
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 36px;
+  color: var(--lin-onglet-detail-texte);
+}
+.v2 .lin .lit-carte-gestes .resa.esp .esp-pastille {
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 450;
+}
+.v2 .lin .lit-carte-gestes .resa.esp .esp-def,
+.v2 .lin .lit-carte-gestes .resa.esp .esp-def--trois {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  margin: 0;
+}
+.v2 .lin .lit-carte-gestes .resa.esp .esp-def > div {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  align-items: center;
+  min-height: 36px;
+}
+.v2 .lin .lit-carte-gestes .resa.esp .esp-def dt {
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 16px;
+  color: var(--lin-onglet-detail-texte);
+}
+.v2 .lin .lit-carte-gestes .resa.esp .esp-def dd,
+.v2 .lin .lit-carte-gestes .resa.esp .esp-def dd.esp-def-fort {
+  justify-self: start;
+  max-width: 100%;
+  margin: 0;
+  padding: 6px;
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 16px;
+  letter-spacing: normal;
+  color: var(--lin-titre);
+}
+.v2 .lin .lit-carte-gestes .resa.esp .esp-def .esp-obligatoire {
+  color: var(--lin-onglet-detail-texte);
+}
+/* les gestes de l'en-tête : des pastilles de 28, rayon plein, comme les boutons de Linear */
+.v2 .lin .lit-carte-gestes .resa.esp .esp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 12px 0 0;
+  border-top: 0.5px solid var(--lin-trait);
+}
+.v2 .lin .lit-carte-gestes .resa.esp .r-btn {
+  height: 28px;
+  padding: 0 10px 0 8px;
+  border: 0;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+}
+.v2 .lin .lit-carte-gestes .resa.esp .r-btn:not(.r-btn--noir) {
+  background: var(--lin-pastille);
+  color: var(--lin-texte);
+  box-shadow: var(--lin-anneau);
+}
+.v2 .lin .lit-carte-gestes .resa.esp .r-btn:not(.r-btn--noir):hover {
+  background: var(--lin-pastille-active);
+  box-shadow: var(--lin-anneau);
+}
+.v2 .lin .lit-carte-gestes .resa.esp .r-btn[disabled] {
+  opacity: 0.5;
+}
+.v2 .lin .lit-carte-gestes .resa.esp .esp-item-haut .r-btn {
+  height: 24px;
+}
+
+/* clair : les cartes sont celles de la vue d'ensemble — blanches, cerclées, petite ombre (comme ./lin.css) */
+html[data-v2-theme="light"] .v2 .lin :is(.lit-carte, .lit-maj) {
+  background: var(--v2-bg-100);
+  border-color: transparent;
+  box-shadow: var(--v2-ombre-petite);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lin :is(.lit-carte, .lit-maj) {
+    background: var(--v2-bg-100);
+    border-color: transparent;
+    box-shadow: var(--v2-ombre-petite);
+  }
+}
+
+/* ——— moins large : le volet passe au-dessus du contenu ——— */
+@container principale (max-width: 960px) {
+  .v2 .lit-corps[data-volet] {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .v2 .lit-volet {
+    order: -1;
+    position: static;
+    width: auto;
+    max-height: none;
+    overflow: visible;
+    padding: 8px 16px 0;
+  }
+}
+
+/* ——— 390 (et jusqu'à 640) : relevé à 390 × 844 ——— */
+@container principale (max-width: 640px) {
+  .v2 .lit-rond {
+    width: 32px;
+    height: 32px;
+  }
+  .v2 .lit-rond--24 {
+    width: 28px;
+    height: 28px;
+  }
+  .v2 .lit-rond--cellule {
+    width: 28px;
+    height: 28px;
+  }
+  .v2 .lit-barre {
+    height: 32px;
+  }
+  .v2 .lit-onglet {
+    height: 32px;
+  }
+  .v2 .lit-zone {
+    padding: 0 40px 48px;
+  }
+  .v2 .lit-page {
+    padding-top: 40px;
+  }
+  .v2 .lit-maj {
+    margin: 16px -12px 0;
+    padding: 8px 12px 12px;
+  }
+  .v2 .lit-maj-corps {
+    padding: 12px 8px;
+  }
+  .v2 .lit-maj-meta {
+    margin-top: 0;
+  }
+  .v2 .lit-maj-bouton {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    justify-content: center;
+  }
+  .v2 .lit-maj-bouton span {
+    display: none;
+  }
+  .v2 .lit-description {
+    margin: 12px -12px 0;
+    padding: 10px 12px 0;
+  }
+  .v2 .lit-table,
+  .v2 .lit-table:not([data-prix]) {
+    grid-template-columns: 2px minmax(0, 1fr) 50px 28px 12px;
+    width: calc(100% + 6px);
+    margin: 4px 0 0 -6px;
+  }
+  .v2 .lit-table .lit-col-executant,
+  .v2 .lit-table .lit-col-reste {
+    display: none;
+  }
+  .v2 .lit-statut {
+    width: 28px;
+    padding: 6px;
+  }
+  .v2 .lit-statut-pct {
+    display: none;
+  }
+  .v2 .lit-gestes {
+    margin: 0 -24px;
+  }
+  .v2 .lit-volet {
+    padding: 8px 16px 0;
+  }
+  .v2 .lin .lit-carte-gestes .resa.esp .esp-def > div {
+    grid-template-columns: 84px minmax(0, 1fr);
+  }
+  .v2 .lin .lit-carte-gestes .resa.esp .esp-item-haut {
+    padding-left: 84px;
+  }
+}

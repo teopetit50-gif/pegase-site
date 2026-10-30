@@ -1,0 +1,1056 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Les réglages et l'équipe, sur Settings › Preferences et Settings › Members
+   de Linear, au 1:1 (28/10/2026, nuit). Relevé au getComputedStyle dans
+   l'espace Linear de Teo, fenêtre 1600 × 863 :
+   scratchpad/releve-linear-reglages.md. Préfixe de classes : lrg-.
+
+   Couleurs : les jetons --lin-* de ./lin.css (clair et sombre). Tout le
+   reste — hauteurs, marges, rayons, polices — est la mesure de Linear.
+
+   Repères (px, depuis le bord du panneau) :
+     Preferences  colonne de 640 centrée, 64 sous le haut ; titre 24/500 à
+                  16 du bord de la colonne, 32 au-dessus de la première
+                  section ; sections à 48 d'écart ; titre de section 15/500,
+                  carte 16 dessous, rayon 10 ; lignes de 65 (padding 16),
+                  séparateur 0.5 à 16 des bords ; liste déroulante de 30,
+                  interrupteur 30 × 20, bouton texte de 32
+     Members      tête à 56 des bords, 20 au-dessus du tableau ; champ de
+                  300 × 32 ; boutons de 32 ; en-tête 32 ; groupe 32 à 8 des
+                  bords ; lignes de 50, survol en retrait de 8, rayon 8 ;
+                  colonnes 60 · 1fr · 25 % · 140 · 82 · 28 · 32
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ——— le panneau : un seul conteneur qui défile avec la page ——— */
+.v2 .lin.lrg {
+  display: block;
+}
+.v2 .lrg-page {
+  margin: 0 40px 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.v2 .lrg-col {
+  width: 100%;
+  max-width: 640px;
+  padding-top: 64px;
+  display: flex;
+  flex-direction: column;
+}
+.v2 .lrg-tete {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 0 16px;
+  margin: 0 0 32px;
+}
+.v2 .lin .lrg-h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 32px;
+  color: var(--lin-titre);
+}
+.v2 .lrg-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+/* une section : le titre, puis la carte 16 plus bas ; l'ancre arrive 12 au-dessus du titre
+   (padding/margin de Linear) et sous la barre du haut du dashboard (48) */
+.v2 .lrg-section {
+  margin: -12px 0 0;
+  padding: 12px 0 0;
+  border: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  scroll-margin-top: 56px;
+}
+.v2 .lrg-section-tete {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 16px;
+}
+.v2 .lin .lrg-h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 23px;
+  color: var(--lin-titre);
+}
+.v2 .lrg-section-desc {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+}
+
+/* la carte : rayon 10, anneau 0.5 et ombre 0.5/1 */
+.v2 .lrg-carte {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-radius: 10px;
+  background: var(--lin-groupe);
+  box-shadow:
+    var(--lin-anneau),
+    0 0.5px 1px 1px lch(0 0 0 / 0.3);
+}
+html[data-v2-theme="light"] .v2 .lrg-carte {
+  box-shadow:
+    var(--lin-anneau),
+    0 0.5px 1px 1px lch(0 0 0 / 0.06);
+}
+.v2 .lrg-ligne {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 65px;
+  padding: 16px;
+}
+.v2 .lrg-ligne:first-child {
+  border-radius: 10px 10px 0 0;
+}
+.v2 .lrg-ligne:last-child {
+  border-radius: 0 0 10px 10px;
+}
+.v2 .lrg-ligne:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 0;
+  height: 0.5px;
+  border-bottom: 0.5px solid var(--lin-trait);
+  pointer-events: none;
+}
+.v2 .lrg-ligne-texte {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.v2 .lrg-libelle {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--lin-titre);
+}
+.v2 .lrg-aide {
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 15px;
+  color: var(--lin-second);
+}
+.v2 .lrg-aide a {
+  color: var(--lin-texte);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.v2 .lrg-ligne-droite {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+/* une ligne sans commande, qui porte un texte en pleine largeur (la note « non connecté ») */
+.v2 .lrg-ligne--texte {
+  min-height: 0;
+  padding: 12px 16px;
+}
+.v2 .lrg-ligne--texte .lrg-aide {
+  color: var(--lin-second);
+}
+/* la section « Export et effacement » : l'écran de /espace, repris tel quel */
+.v2 .lrg-ancien .esp-tete {
+  display: none;
+}
+.v2 .lrg-ancien {
+  min-width: 0;
+}
+
+/* ——— la liste déroulante : 30 de haut, chevron de 9 × 5 à 10 du bord ——— */
+.v2 .lrg-select {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  margin: 1px 0;
+  padding: 1px 28px 1px 10px;
+  border-radius: 8px;
+  border: 0.5px solid transparent;
+  background: var(--lin-menu-fond);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--lin-texte);
+  white-space: nowrap;
+  transition: background 0.1s;
+}
+.v2 .lrg-select:hover {
+  background: var(--lin-menu-survol);
+}
+.v2 .lrg-select:focus-within {
+  box-shadow: 0 0 0 2px var(--lin-fait);
+}
+.v2 .lrg-select select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: default;
+  font-size: 16px;
+}
+.v2 .lrg-select select:disabled {
+  cursor: not-allowed;
+}
+.v2 .lrg-select[data-desactive] {
+  opacity: 0.5;
+}
+.v2 .lrg-select .lrg-chevron {
+  position: absolute;
+  right: 10px;
+  top: 0;
+  height: 100%;
+  width: 9px;
+  color: var(--lin-second);
+}
+.v2 .lrg-select .lrg-faible {
+  margin-left: 4px;
+  color: var(--lin-second);
+}
+
+/* ——— l'interrupteur : 30 × 20, bouton de 14 à 3 du bord ——— */
+.v2 .lrg-interrupteur {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 6px 0 0;
+}
+.v2 .lrg-interrupteur-rail {
+  position: relative;
+  display: block;
+  width: 30px;
+  height: 20px;
+  border-radius: 72px;
+  background: var(--lin-avatar);
+  transition: background 0.15s;
+}
+.v2 .lrg-interrupteur-rail::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+}
+.v2 .lrg-interrupteur-rail::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: lch(100 5 288.421);
+  transition: transform 0.15s;
+}
+.v2 .lrg-interrupteur[aria-checked="true"] .lrg-interrupteur-rail {
+  background: var(--lin-fait);
+}
+.v2 .lrg-interrupteur[aria-checked="true"] .lrg-interrupteur-rail::after {
+  transform: translateX(10px);
+}
+.v2 .lrg-interrupteur:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.v2 .lrg-interrupteur:focus-visible {
+  outline: none;
+}
+.v2 .lrg-interrupteur:focus-visible .lrg-interrupteur-rail {
+  box-shadow:
+    0 0 0 2px var(--lin-fond),
+    0 0 0 4px var(--lin-fait);
+}
+
+/* ——— les boutons ———
+   texte (« Customize ») : 32 de haut, padding 0 12, rayon plein, 13/500, à −6 du bord droit ;
+   cerclé (« Export CSV ») : le même, fond pastille et anneau 0.5 ;
+   plein (« Invite ») : le même, fond bleu, texte blanc, ombre 0.5/1. */
+.v2 .lrg-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  min-width: 32px;
+  padding: 0 12px;
+  border-radius: 9999px;
+  border: 0.5px solid transparent;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--lin-texte);
+  white-space: nowrap;
+  transition:
+    background 0.1s,
+    color 0.1s;
+}
+.v2 .lrg-btn:hover {
+  background: var(--lin-menu-survol);
+  color: var(--lin-titre);
+}
+.v2 .lrg-btn--texte {
+  margin-right: -6px;
+}
+.v2 .lrg-btn--cercle {
+  background: var(--lin-pastille);
+}
+.v2 .lrg-btn--cercle::after {
+  content: "";
+  position: absolute;
+  inset: -0.5px;
+  border-radius: inherit;
+  box-shadow:
+    var(--lin-anneau),
+    0 0.5px 1px 1px lch(0 0 0 / 0.3);
+  pointer-events: none;
+}
+html[data-v2-theme="light"] .v2 .lrg-btn--cercle::after {
+  box-shadow:
+    var(--lin-anneau),
+    0 0.5px 1px 1px lch(0 0 0 / 0.06);
+}
+.v2 .lrg-btn--plein {
+  background: var(--lin-fait);
+  color: lch(100 5 288.421);
+  box-shadow: 0 0.5px 1px 1px lch(0 0 0 / 0.3);
+}
+.v2 .lrg-btn--plein:hover {
+  background: color-mix(in lch, var(--lin-fait), white 8%);
+  color: lch(100 5 288.421);
+}
+.v2 .lrg-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.v2 .lrg-btn:disabled:hover {
+  background: inherit;
+}
+.v2 .lrg-btn--plein:disabled:hover {
+  background: var(--lin-fait);
+}
+.v2 .lrg-btn svg {
+  width: 16px;
+  height: 16px;
+}
+.v2 .lrg-btn:focus-visible,
+.v2 .lrg-select:focus-visible,
+.v2 .lrg-champ:focus-visible,
+.v2 .lrg-mligne:focus-visible,
+.v2 .lrg-menu-item:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: -2px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Équipe — Settings › Members
+   ══════════════════════════════════════════════════════════════════════ */
+.v2 .lrg-mtete {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0 56px 20px;
+  padding-top: 64px;
+}
+.v2 .lrg-mtete .lrg-h1 {
+  height: 32px;
+}
+.v2 .lrg-outils {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 34px;
+}
+.v2 .lrg-outils-gauche {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+.v2 .lrg-outils-droite {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.v2 .lrg-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* le champ de recherche : 300 × 32, loupe à 10 du bord */
+.v2 .lrg-recherche {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 300px;
+  margin: 1px 0;
+}
+.v2 .lrg-recherche svg {
+  position: absolute;
+  left: 10px;
+  width: 16px;
+  height: 16px;
+  color: var(--lin-second);
+  pointer-events: none;
+}
+.v2 .lrg-champ {
+  width: 100%;
+  height: 32px;
+  padding: 6px 25px 6px 32px;
+  border-radius: 8px;
+  border: 0.5px solid var(--lin-menu-bord);
+  background: var(--lin-pastille);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-titre);
+  outline: none;
+}
+.v2 .lrg-champ::placeholder {
+  color: var(--lin-second);
+  font-weight: 500;
+}
+.v2 .lrg-champ:focus,
+.v2 .lrg-champ:focus-visible {
+  outline: none;
+  border-color: var(--lin-fait);
+  box-shadow: 0 0 0 1px var(--lin-fait);
+}
+.v2 .lrg-recherche .lrg-effacer {
+  position: absolute;
+  right: 6px;
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  color: var(--lin-second);
+}
+.v2 .lrg-recherche .lrg-effacer:hover {
+  background: var(--lin-menu-survol);
+  color: var(--lin-texte);
+}
+.v2 .lrg-recherche .lrg-effacer svg {
+  position: static;
+  width: 12px;
+  height: 12px;
+  color: inherit;
+}
+
+/* le bouton filtre « All » : la liste déroulante de 32, fond pastille */
+.v2 .lrg-filtre {
+  height: 32px;
+  background: var(--lin-pastille);
+}
+.v2 .lrg-filtre[aria-expanded="true"],
+.v2 .lrg-filtre:hover {
+  background: var(--lin-menu-survol);
+}
+/* son menu : 142 de large, options de 32, coche à droite */
+.v2 .lrg .lin-menu:has(> .lrg-menu-corps) {
+  top: calc(100% + 5px);
+  left: 0;
+  right: auto;
+  min-width: 142px;
+  padding: 4px 0;
+  border-radius: 8px;
+  border: 0.5px solid var(--lin-menu-bord);
+  background: var(--lin-menu-fond);
+  color: var(--lin-menu-texte);
+  box-shadow:
+    0 3px 8px lch(0 0 0 / 0.125),
+    0 2px 5px lch(0 0 0 / 0.125),
+    0 1px 1px lch(0 0 0 / 0.125);
+}
+.v2 .lrg .lin-menu:has(> .lrg-menu--droite) {
+  left: auto;
+  right: 0;
+}
+.v2 .lrg-menu-corps ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2 .lrg-menu-titre {
+  display: flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 12px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--lin-menu-gris);
+}
+.v2 .lrg-menu-sep {
+  height: 0.5px;
+  margin: 4px 0;
+  background: var(--lin-menu-sep);
+}
+.v2 .lrg-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 32px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--lin-menu-texte);
+  text-align: left;
+  white-space: nowrap;
+}
+.v2 .lrg-menu-item:hover,
+.v2 .lrg-menu-item:focus-visible {
+  background: var(--lin-menu-survol);
+  color: var(--lin-titre);
+  outline: none;
+}
+.v2 .lrg-menu-item .lrg-coche {
+  margin-left: auto;
+  width: 14px;
+  height: 14px;
+  color: var(--lin-menu-texte);
+  padding-left: 15px;
+  box-sizing: content-box;
+}
+.v2 .lrg-menu-item[data-danger] {
+  color: var(--lin-rouge);
+}
+.v2 .lrg-menu-item:disabled {
+  opacity: 0.5;
+}
+.v2 .lrg-menu-item svg:first-child {
+  width: 16px;
+  height: 16px;
+  color: var(--lin-menu-gris);
+  flex-shrink: 0;
+}
+
+/* ——— le tableau : grille partagée par l'en-tête, les groupes et les lignes ——— */
+.v2 .lrg-tableau {
+  --lrg-colonnes: 60px minmax(0, 1fr) 25% 140px 150px 28px 32px;
+  padding-bottom: 24px;
+}
+.v2 .lrg-entete,
+.v2 .lrg-mligne,
+.v2 .lrg-groupe {
+  display: grid;
+  grid-template-columns: var(--lrg-colonnes);
+  align-items: center;
+}
+.v2 .lrg-entete {
+  height: 32px;
+  background: var(--lin-fond);
+}
+.v2 .lrg-entete > * {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  height: 32px;
+}
+.v2 .lrg-entete-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  height: 24px;
+  min-width: 24px;
+  margin-left: -6.5px;
+  padding: 0 6px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+.v2 .lrg-entete-btn[data-tri] {
+  font-weight: 500;
+  color: var(--lin-texte);
+}
+.v2 .lrg-entete-btn svg {
+  width: 12px;
+  height: 12px;
+}
+button.lrg-entete-btn:hover {
+  background: var(--lin-survol);
+  color: var(--lin-texte);
+}
+.v2 .lrg-entete-btn[data-tri="desc"] svg {
+  transform: rotate(180deg);
+}
+
+/* la ligne de groupe : 32, à 8 des bords, rayon 8 */
+.v2 .lrg-groupe {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  margin: 0 8px 2px;
+  padding: 0 44px 0 52px;
+  border-radius: 8px;
+  background: var(--lin-pastille);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-second);
+}
+.v2 .lrg-groupe-nom {
+  margin-left: 2px;
+}
+.v2 .lrg-groupe-n {
+  color: var(--lin-avatar);
+  font-variant-numeric: tabular-nums;
+}
+
+/* une ligne : 50, survol en retrait de 8 */
+.v2 .lrg-mligne {
+  position: relative;
+  min-height: 50px;
+  border-radius: 8px;
+}
+.v2 .lrg-mligne::before {
+  content: "";
+  position: absolute;
+  inset: 0 8px;
+  border-radius: 8px;
+  background: transparent;
+  pointer-events: none;
+}
+.v2 .lrg-mligne:hover::before,
+.v2 .lrg-mligne:focus-within::before {
+  background: var(--lin-survol);
+}
+.v2 .lrg-mligne > * {
+  position: relative;
+  min-width: 0;
+}
+.v2 .lrg-cel-nom {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-right: 16px;
+}
+.v2 .lrg-avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--lin-avatar);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  color: lch(100 0 272);
+  text-transform: uppercase;
+}
+.v2 .lrg-nom {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.v2 .lrg-nom-titre {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--lin-texte);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lrg-nom-sous {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 15px;
+  color: var(--lin-second);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lrg-cel-email {
+  grid-column: 3;
+  padding: 8px 16px 8px 0;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 15px;
+  color: var(--lin-second);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lrg-cel-role {
+  grid-column: 4;
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+}
+.v2 .lrg-cel-soc {
+  grid-column: 5;
+  display: block;
+  line-height: 15px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lrg-cel-soc[data-vide] {
+  color: var(--lin-orange);
+}
+.v2 .lrg-cel-menu {
+  grid-column: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.v2 .lrg-cel-menu .lin-ancre {
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+.v2 .lrg-mligne:hover .lrg-cel-menu .lin-ancre,
+.v2 .lrg-cel-menu .lin-ancre:focus-within,
+.v2 .lrg-cel-menu .lin-ancre:has([aria-expanded="true"]) {
+  opacity: 1;
+}
+/* le badge de rôle (« Admin » de Linear) : rayon 3, fond bleu à 20 % */
+.v2 .lrg-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--lin-fait) 20%, transparent);
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 15px;
+  color: color-mix(in lch, var(--lin-fait), white 45%);
+  white-space: nowrap;
+}
+html[data-v2-theme="light"] .v2 .lrg-badge {
+  color: var(--lin-fait);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lrg-badge {
+    color: var(--lin-fait);
+  }
+  html:not([data-v2-theme="dark"]) .v2 .lrg-carte,
+  html:not([data-v2-theme="dark"]) .v2 .lrg-btn--cercle::after {
+    box-shadow:
+      var(--lin-anneau),
+      0 0.5px 1px 1px lch(0 0 0 / 0.06);
+  }
+}
+/* le point « en ligne » de Linear, repris pour « vous » */
+.v2 .lrg-point {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--lin-vert);
+  border: 1px solid var(--lin-fond);
+  flex-shrink: 0;
+}
+
+/* état vide / chargement, dans la colonne du nom */
+.v2 .lrg-vide {
+  grid-column: 2 / 6;
+  padding: 16px 0;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+}
+.v2 .lrg-vide strong {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-texte);
+}
+.v2 .lrg-squelette {
+  grid-column: 2 / 6;
+  padding: 12px 16px 12px 0;
+}
+.v2 .lrg-mnote {
+  margin: 0 56px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+}
+
+/* ——— le dialogue : « Invite to your workspace », 562 de large ——— */
+.lrg-voile {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: lch(0 0 0 / 0.5);
+}
+html[data-v2-theme="light"] .lrg-voile {
+  background: lch(0 0 0 / 0.3);
+}
+.v2.lrg-dlg-portail {
+  position: fixed;
+  inset: 0;
+  z-index: 61;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  min-height: 0;
+  background: transparent;
+  pointer-events: none;
+}
+.v2.lrg-dlg-portail > * {
+  pointer-events: auto;
+}
+.v2 .lin.lrg-dlg {
+  position: relative;
+  width: 562px;
+  max-width: 100%;
+  max-height: calc(100dvh - 32px);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  border: 0.5px solid var(--lin-menu-bord);
+  background: var(--lin-groupe);
+  box-shadow:
+    0 4px 40px lch(0 0 0 / 0.1),
+    0 3px 20px lch(0 0 0 / 0.125),
+    0 3px 12px lch(0 0 0 / 0.125),
+    0 2px 8px lch(0 0 0 / 0.125),
+    0 1px 1px lch(0 0 0 / 0.125);
+  animation: lrg-dlg-entree 0.15s var(--v2-doux, ease-out);
+  outline: none;
+}
+@keyframes lrg-dlg-entree {
+  from {
+    transform: translateY(6px) scale(0.98);
+  }
+}
+.v2 .lrg-dlg-tete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 48px 16px 16px;
+}
+.v2 .lrg-dlg-icone {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: var(--lin-fait);
+  color: lch(100 5 288.421);
+}
+.v2 .lrg-dlg-icone svg {
+  width: 12px;
+  height: 12px;
+}
+.v2 .lrg-dlg-titre {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 23px;
+  color: var(--lin-titre);
+}
+.v2 .lrg-dlg-titre b {
+  font-weight: 600;
+}
+.v2 .lrg-dlg-fermer {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+}
+.v2 .lrg-dlg-fermer svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .lrg-dlg-corps {
+  padding: 12px 16px 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.v2 .lrg-dlg-desc {
+  margin: -4px 0 12px;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 19.5px;
+  color: var(--lin-second);
+}
+.v2 .lrg-dlg-bloc {
+  margin: 0 0 12px;
+  display: flex;
+  flex-direction: column;
+}
+.v2 .lrg-dlg-libelle {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 24px;
+  color: var(--lin-texte);
+}
+.v2 .lrg-dlg-champ {
+  width: 100%;
+  height: 32px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 0.5px solid var(--lin-menu-bord);
+  background: var(--lin-groupe);
+  font: inherit;
+  font-size: 13px;
+  color: var(--lin-titre);
+  outline: none;
+}
+.v2 .lrg-dlg-champ::placeholder {
+  color: var(--lin-second);
+}
+.v2 .lrg-dlg-champ:focus,
+.v2 .lrg-dlg-champ:focus-visible {
+  outline: none;
+  border-color: var(--lin-fait);
+  box-shadow: 0 0 0 1px var(--lin-fait);
+}
+.v2 .lrg-dlg .lrg-select {
+  align-self: flex-start;
+  min-width: 160px;
+}
+.v2 .lrg-dlg-aide {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 15px;
+  color: var(--lin-second);
+}
+.v2 .lrg-dlg-pied {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+.v2 .lrg-dlg-note {
+  margin: 0 0 12px;
+}
+/* la liste des sociétés à cocher : cases de 14, rayon 3 (Linear) */
+.v2 .lrg-choix {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.v2 .lrg-choix label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--lin-texte);
+  cursor: default;
+}
+.v2 .lrg-choix input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: var(--lin-fait);
+}
+.v2 .lrg-choix-sous {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 22px;
+}
+
+/* ——— petits écrans ——— */
+@media (max-width: 767px) {
+  .v2 .lrg-page {
+    margin: 0 8px 48px;
+  }
+  .v2 .lrg-col {
+    padding-top: 24px;
+  }
+  .v2 .lrg-ligne {
+    flex-wrap: wrap;
+  }
+  .v2 .lrg-mtete {
+    margin: 0 16px 16px;
+    padding-top: 24px;
+  }
+  .v2 .lrg-outils {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .v2 .lrg-outils-gauche {
+    flex-basis: 100%;
+  }
+  .v2 .lrg-recherche {
+    max-width: none;
+  }
+  .v2 .lrg-tableau {
+    --lrg-colonnes: 16px minmax(0, 1fr) 28px 16px;
+  }
+  .v2 .lrg-entete > :not(.lrg-entete-nom) {
+    display: none;
+  }
+  .v2 .lrg-groupe {
+    padding: 0 16px 0 16px;
+  }
+  .v2 .lrg-mligne {
+    padding: 8px 0;
+  }
+  .v2 .lrg-cel-nom {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .v2 .lrg-cel-email,
+  .v2 .lrg-cel-role,
+  .v2 .lrg-cel-soc {
+    grid-column: 2;
+    padding: 2px 0 0;
+  }
+  .v2 .lrg-cel-menu {
+    grid-column: 3;
+    grid-row: 1;
+  }
+  .v2 .lrg-cel-menu .lin-ancre {
+    opacity: 1;
+  }
+  .v2 .lrg-vide,
+  .v2 .lrg-squelette {
+    grid-column: 2 / 4;
+  }
+  .v2 .lrg-mnote {
+    margin: 0 16px;
+  }
+  .v2 .lrg .lin-menu:has(> .lrg-menu-corps) {
+    min-width: 142px;
+    max-width: calc(100vw - 32px);
+  }
+}

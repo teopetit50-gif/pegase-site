@@ -1,0 +1,1263 @@
+/* ══════════════════════════════════════════════════════════════════════
+   « Tâches » sur la liste des tickets de Linear (28/10/2026, nuit) :
+   la vue Omega › Issues, affichage « List », relevée au getComputedStyle
+   dans l'espace de Teo (fenêtre 1600, panneau 1347 de large) — le relevé :
+   scratchpad/releve-linear-issues-list.md. Préfixe de classes : lt-.
+   Les couleurs sont les jetons --lin-* de lin.css (clair et sombre) ; les
+   deux teintes qui n'y sont pas (fond d'une pilule, coche d'un disque)
+   sont posées ici, sous les mêmes sélecteurs de thème.
+
+   Repères, en px depuis le bord gauche du panneau :
+     barre du titre   44 (lin-tete) ; « Nouvelle tâche » finit à 8 du bord
+     barre d'outils   44 (28 + 8 + 8) : onglets 28, pilule, écart 4 ;
+                      ronds de 28 à droite, écart 6, le dernier à 8 du bord
+     en-tête de groupe en retrait de 8, 36 de haut, rayon 8 ; chevron 20
+                      dans une boîte 26 à x 12, icône 16 à x 42, nom à x 66,
+                      compte à 8 ; « + » 24 à 8 du bord droit ; 2 sous l'en-tête
+     ligne            44 ; grille 8·18·16·55·16·1fr·60·18, écart 8 : case à
+                      x 16, priorité 42, ID 66, état 129, titre 153 ; date
+                      alignée à droite à 26 du bord ; pilules à droite du titre,
+                      24 avant la fin de la colonne, avatar 18 à 8 après
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lin.lt {
+  --lt-pilule: #0e0e0f;
+  --lt-pilule-bord: #2a2b2d;
+  --lt-coche: #0e0e0f;
+  --lt-backlog: #bec2c8;
+  --lt-segment: #1a1a1b;
+  --lt-propriete: #2a2a2d;
+  --lt-propriete-active: #3b3b3f;
+  --lt-fenetre: #1b1a1a;
+  --lt-ombre-fenetre: 0 4px 40px lch(0 0 0 / 0.1), 0 3px 20px lch(0 0 0 / 0.125), 0 3px 12px lch(0 0 0 / 0.125), 0 2px 8px lch(0 0 0 / 0.125), 0 1px 1px lch(0 0 0 / 0.125);
+}
+html[data-v2-theme="light"] .v2 .lin.lt {
+  --lt-pilule: var(--v2-bg-100);
+  --lt-pilule-bord: var(--v2-a-400);
+  --lt-coche: #fff;
+  --lt-backlog: var(--v2-gray-700);
+  --lt-segment: var(--v2-a-200);
+  --lt-propriete: var(--v2-a-200);
+  --lt-propriete-active: var(--v2-a-400);
+  --lt-fenetre: var(--v2-bg-100);
+  --lt-ombre-fenetre: 0 0 0 1px var(--v2-a-400), 0 24px 60px #0000002e;
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lin.lt {
+    --lt-pilule: var(--v2-bg-100);
+    --lt-pilule-bord: var(--v2-a-400);
+    --lt-coche: #fff;
+    --lt-backlog: var(--v2-gray-700);
+    --lt-segment: var(--v2-a-200);
+    --lt-propriete: var(--v2-a-200);
+    --lt-propriete-active: var(--v2-a-400);
+    --lt-fenetre: var(--v2-bg-100);
+    --lt-ombre-fenetre: 0 0 0 1px var(--v2-a-400), 0 24px 60px #0000002e;
+  }
+}
+
+/* ——— barre d'outils : 28 dans 44, padding 8 des deux côtés ——— */
+:is(.v2, .v2-jetons) .lt-outils {
+  display: flex;
+  align-items: center;
+  height: 28px;
+  margin: 8px 0;
+  padding: 0 8px;
+  flex-shrink: 0;
+}
+:is(.v2, .v2-jetons) .lt-outils-droite {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 12px;
+}
+:is(.v2, .v2-jetons) .lt-rond--plein {
+  background: var(--lin-pastille);
+}
+:is(.v2, .v2-jetons) .lt-rond--plein:hover,
+:is(.v2, .v2-jetons) .lt-rond--plein[aria-expanded="true"] {
+  background: var(--lin-pastille-active);
+}
+/* le point bleu du bouton « Affichage » quand l'affichage n'est plus celui par défaut (Linear) */
+:is(.v2, .v2-jetons) .lt-rond--point {
+  position: relative;
+}
+:is(.v2, .v2-jetons) .lt-rond--point::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--lin-fait);
+  box-shadow: 0 0 0 2px var(--lin-fond);
+}
+
+/* ——— filtres posés : une rangée de pilules sous la barre d'outils ——— */
+:is(.v2, .v2-jetons) .lt-filtres {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px 8px;
+}
+:is(.v2, .v2-jetons) .lt-filtre {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  border-radius: 6px;
+  border: 0.5px solid var(--lt-pilule-bord);
+  background: var(--lt-pilule);
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+  overflow: hidden;
+}
+:is(.v2, .v2-jetons) .lt-filtre > span {
+  padding: 0 8px;
+  border-right: 0.5px solid var(--lt-pilule-bord);
+  white-space: nowrap;
+}
+:is(.v2, .v2-jetons) .lt-filtre > span b {
+  font-weight: 500;
+  color: var(--lin-texte);
+}
+:is(.v2, .v2-jetons) .lt-filtre > button {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 100%;
+  color: var(--lin-second);
+}
+:is(.v2, .v2-jetons) .lt-filtre > button:hover {
+  background: var(--lin-pastille-active);
+  color: var(--lin-titre);
+}
+:is(.v2, .v2-jetons) .lt-filtres-vider {
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-second);
+}
+:is(.v2, .v2-jetons) .lt-filtres-vider:hover {
+  background: var(--lin-survol);
+  color: var(--lin-texte);
+}
+
+/* ——— la liste ——— */
+:is(.v2, .v2-jetons) .lt-liste {
+  flex: 1;
+  padding-bottom: 24px;
+}
+:is(.v2, .v2-jetons) .lt-groupe {
+  padding-bottom: 2px;
+}
+:is(.v2, .v2-jetons) .lt-groupe-tete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  margin: 0 8px;
+  padding: 0 8px 0 0;
+  border-radius: 8px;
+  background: var(--lin-groupe);
+}
+:is(.v2, .v2-jetons) .lt-groupe-chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 28px;
+  margin: 0 -4px 0 4px;
+  flex-shrink: 0;
+}
+:is(.v2, .v2-jetons) .lt-chevron {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  color: var(--lin-second);
+}
+:is(.v2, .v2-jetons) .lt-chevron:hover {
+  background: var(--lin-pastille-active);
+  color: var(--lin-titre);
+}
+:is(.v2, .v2-jetons) .lt-chevron svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.12s;
+}
+:is(.v2, .v2-jetons) .lt-chevron[aria-expanded="false"] svg {
+  transform: rotate(-90deg);
+}
+:is(.v2, .v2-jetons) .lt-groupe-icone {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+:is(.v2, .v2-jetons) .lt-groupe-nom {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-texte-groupe);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+:is(.v2, .v2-jetons) .lt-groupe-compte {
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--lin-compte);
+  font-variant-numeric: tabular-nums;
+}
+:is(.v2, .v2-jetons) .lt-groupe-plus {
+  margin-left: auto;
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  color: var(--lin-texte-groupe);
+}
+:is(.v2, .v2-jetons) .lt-groupe-plus:hover {
+  background: var(--lin-pastille-active);
+  color: var(--lin-titre);
+}
+:is(.v2, .v2-jetons) .lt-groupe-plus svg {
+  width: 14px;
+  height: 14px;
+}
+:is(.v2, .v2-jetons) .lt-lignes {
+  margin: 0;
+  padding: 2px 0 0;
+  list-style: none;
+}
+
+:is(.v2, .v2-jetons) .lt-ligne {
+  position: relative;
+  display: grid;
+  grid-template-columns: 18px 16px 55px 16px minmax(0, 1fr) 60px;
+  column-gap: 8px;
+  align-items: center;
+  height: 44px;
+  padding: 0 26px 0 16px;
+  border-radius: 8px;
+  cursor: default;
+}
+:is(.v2, .v2-jetons) .lt-ligne:hover,
+:is(.v2, .v2-jetons) .lt-ligne[data-actif] {
+  background: var(--lin-survol);
+}
+:is(.v2, .v2-jetons) .lt-ligne:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: -2px;
+}
+
+/* la case (Linear : apparaît au survol) — ici, elle marque la tâche faite, le geste de l'ancienne page */
+:is(.v2, .v2-jetons) .lt-case {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  margin: 0 0 0 0;
+  border-radius: 3px;
+  border: 1px solid var(--lin-avatar);
+  background: transparent;
+  opacity: 0;
+  cursor: default;
+  display: grid;
+  place-items: center;
+  transition: opacity 0.1s;
+}
+:is(.v2, .v2-jetons) .lt-case::after {
+  content: "";
+  width: 8px;
+  height: 5px;
+  margin-top: -1px;
+  border: 2px solid var(--lt-coche);
+  border-top: 0;
+  border-right: 0;
+  transform: rotate(-45deg) scale(0);
+  transition: transform 0.1s;
+}
+:is(.v2, .v2-jetons) .lt-case:checked {
+  border-color: var(--lin-fait);
+  background: var(--lin-fait);
+  opacity: 1;
+}
+:is(.v2, .v2-jetons) .lt-case:checked::after {
+  transform: rotate(-45deg) scale(1);
+}
+:is(.v2, .v2-jetons) .lt-ligne:hover .lt-case,
+:is(.v2, .v2-jetons) .lt-ligne[data-actif] .lt-case,
+:is(.v2, .v2-jetons) .lt-case:focus-visible {
+  opacity: 1;
+}
+:is(.v2, .v2-jetons) .lt-case:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: 1px;
+}
+
+:is(.v2, .v2-jetons) .lt-icone-btn {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 36px;
+  border-radius: 4px;
+  color: var(--lin-texte);
+}
+:is(.v2, .v2-jetons) .lt-icone-btn svg {
+  width: 16px;
+  height: 16px;
+}
+:is(.v2, .v2-jetons) .lt-icone-btn--etat {
+  padding: 0 1px;
+}
+:is(.v2, .v2-jetons) .lt-icone-btn--etat svg {
+  width: 14px;
+  height: 14px;
+}
+:is(.v2, .v2-jetons) .lt-icone-btn:hover,
+:is(.v2, .v2-jetons) .lt-icone-btn[aria-expanded="true"] {
+  color: var(--lin-titre);
+}
+:is(.v2, .v2-jetons) .lt-id {
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--lin-second);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
+}
+:is(.v2, .v2-jetons) .lt-cellule-titre {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  height: 36px;
+}
+:is(.v2, .v2-jetons) .lt-titre {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-titre);
+  text-align: left;
+}
+:is(.v2, .v2-jetons) .lt-pilules {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 3px;
+  min-width: 0;
+  height: 24px;
+  margin-right: 16px;
+}
+:is(.v2, .v2-jetons) .lt-pilule {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 48px;
+  border: 0.5px solid var(--lt-pilule-bord);
+  background: var(--lt-pilule);
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+:is(.v2, .v2-jetons) .lt-pilule svg {
+  width: 14px;
+  height: 14px;
+}
+:is(.v2, .v2-jetons) .lt-pilule[data-passe] {
+  color: var(--lin-orange);
+}
+:is(.v2, .v2-jetons) .lt-pilule-point {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--lin-avatar);
+  flex-shrink: 0;
+}
+:is(.v2, .v2-jetons) .lt-avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  margin-right: -2px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: #fff;
+  background: var(--lin-avatar);
+  text-transform: uppercase;
+}
+:is(.v2, .v2-jetons) .lt-avatar--vide {
+  background: transparent;
+  color: var(--lin-second);
+}
+:is(.v2, .v2-jetons) .lt-avatar--vide svg {
+  width: 18px;
+  height: 18px;
+}
+:is(.v2, .v2-jetons) .lt-avatar-btn {
+  display: grid;
+  place-items: center;
+  height: 36px;
+  border-radius: 4px;
+}
+:is(.v2, .v2-jetons) .lt-avatar-btn:hover .lt-avatar--vide,
+:is(.v2, .v2-jetons) .lt-avatar-btn[aria-expanded="true"] .lt-avatar--vide {
+  color: var(--lin-titre);
+}
+:is(.v2, .v2-jetons) .lt-date {
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ——— les icônes d'état (14) et de priorité (16), aux tracés de Linear ——— */
+:is(.v2, .v2-jetons) .lt-etat {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+:is(.v2, .v2-jetons) .lt-etat--backlog {
+  color: var(--lt-backlog);
+}
+:is(.v2, .v2-jetons) .lt-etat--todo {
+  color: var(--lin-cercle);
+}
+:is(.v2, .v2-jetons) .lt-etat--en_cours {
+  color: var(--lin-en-cours);
+}
+:is(.v2, .v2-jetons) .lt-etat--fait {
+  color: var(--lin-fait);
+}
+:is(.v2, .v2-jetons) .lt-etat--annule {
+  color: var(--lin-annule);
+}
+:is(.v2, .v2-jetons) .lt-prio {
+  width: 16px;
+  height: 16px;
+  display: block;
+  color: var(--lin-texte);
+}
+:is(.v2, .v2-jetons) .lt-prio--4 {
+  color: var(--lin-orange);
+}
+:is(.v2, .v2-jetons) .lt-prio--4 path {
+  fill: var(--lin-orange);
+}
+
+/* ——— vide, et le mot sur l'appareil ——— */
+:is(.v2, .v2-jetons) .lt-vide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 320px;
+  padding: 24px;
+  text-align: center;
+}
+:is(.v2, .v2-jetons) .lt-vide h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--lin-titre);
+}
+:is(.v2, .v2-jetons) .lt-vide p {
+  margin: 0;
+  max-width: 420px;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--lin-second);
+}
+:is(.v2, .v2-jetons) .lt-vide .lin-btn {
+  margin-top: 8px;
+}
+:is(.v2, .v2-jetons) .lt-pied {
+  padding: 8px 16px;
+  font-size: 12px;
+  color: var(--lin-second);
+}
+
+/* ——— menus : un panneau de 252, une recherche en tête, des options de 32 (classes lin-options…) ——— */
+:is(.v2, .v2-jetons) .lt-menu {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  z-index: 20;
+  width: 252px;
+  border-radius: 12px;
+  border: 0.5px solid var(--lin-menu-bord);
+  background: var(--lin-menu-fond);
+  color: var(--lin-menu-texte);
+  box-shadow:
+    0 3px 8px lch(0 0 0 / 0.125),
+    0 2px 5px lch(0 0 0 / 0.125),
+    0 1px 1px lch(0 0 0 / 0.125);
+  font-size: 13px;
+  text-align: left;
+}
+:is(.v2, .v2-jetons) .lt-menu[data-cote="droite"] {
+  left: auto;
+  right: 0;
+}
+:is(.v2, .v2-jetons) .lt-menu[data-haut] {
+  top: auto;
+  bottom: calc(100% + 5px);
+}
+:is(.v2, .v2-jetons) .lt-menu-sep {
+  height: 0.5px;
+  margin: 6px 0;
+  background: var(--lin-menu-sep);
+}
+:is(.v2, .v2-jetons) .lt-menu-retour {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  height: 32px;
+  padding: 0 12px 0 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-menu-gris);
+  text-align: left;
+}
+:is(.v2, .v2-jetons) .lt-menu-retour:hover {
+  color: var(--lin-menu-texte);
+}
+:is(.v2, .v2-jetons) .lt-option-point {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--lin-avatar);
+}
+:is(.v2, .v2-jetons) .lt-option-fleche {
+  margin-left: auto;
+  color: var(--lin-menu-gris);
+}
+
+/* ——— le menu « Affichage » (300 de large, sections de 8 16, rangées de 32) ——— */
+:is(.v2, .v2-jetons) .lt-affichage {
+  width: 300px;
+  padding: 8px 0;
+}
+:is(.v2, .v2-jetons) .lt-affichage-section {
+  padding: 8px 16px;
+}
+:is(.v2, .v2-jetons) .lt-affichage-section + .lt-affichage-section {
+  border-top: 0.5px solid var(--lin-menu-sep);
+}
+:is(.v2, .v2-jetons) .lt-affichage-titre {
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-menu-gris);
+  line-height: 24px;
+}
+:is(.v2, .v2-jetons) .lt-segment {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 2px;
+  border-radius: 5px;
+  background: var(--lt-segment);
+  margin-bottom: 6px;
+}
+:is(.v2, .v2-jetons) .lt-segment button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 28px;
+  padding: 6px 8px;
+  border-radius: 9999px;
+  border: 0.5px solid transparent;
+  background: var(--lt-propriete);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-menu-gris);
+}
+:is(.v2, .v2-jetons) .lt-segment button svg {
+  width: 14px;
+  height: 14px;
+}
+:is(.v2, .v2-jetons) .lt-segment button[aria-pressed="true"] {
+  background: var(--lt-propriete-active);
+  color: var(--lin-titre);
+}
+:is(.v2, .v2-jetons) .lt-segment button[disabled] {
+  opacity: 0.5;
+}
+:is(.v2, .v2-jetons) .lt-rangee {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 32px;
+}
+:is(.v2, .v2-jetons) .lt-rangee > label,
+:is(.v2, .v2-jetons) .lt-rangee > span:first-child {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-menu-gris);
+  white-space: nowrap;
+}
+:is(.v2, .v2-jetons) .lt-rangee-droite {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+:is(.v2, .v2-jetons) .lt-select {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 116px;
+  height: 24px;
+  padding: 1px 18px 1px 8px;
+  border-radius: 8px;
+  border: 0.5px solid transparent;
+  background: var(--lt-propriete);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--lin-menu-texte);
+  white-space: nowrap;
+  overflow: hidden;
+}
+:is(.v2, .v2-jetons) .lt-select > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+:is(.v2, .v2-jetons) .lt-select select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: default;
+  font-size: 16px;
+}
+:is(.v2, .v2-jetons) .lt-select > svg {
+  position: absolute;
+  right: 5px;
+  width: 10px;
+  height: 10px;
+  color: var(--lin-menu-gris);
+}
+:is(.v2, .v2-jetons) .lt-ordre {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  color: var(--lin-menu-texte);
+}
+:is(.v2, .v2-jetons) .lt-ordre:hover {
+  background: var(--lt-propriete);
+}
+:is(.v2, .v2-jetons) .lt-ordre svg {
+  width: 14px;
+  height: 14px;
+}
+:is(.v2, .v2-jetons) .lt-interrupteur {
+  position: relative;
+  width: 22px;
+  height: 14px;
+  flex-shrink: 0;
+  border-radius: 72px;
+  background: var(--lt-propriete-active);
+  transition: background 0.15s;
+}
+:is(.v2, .v2-jetons) .lt-interrupteur::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.15s;
+}
+:is(.v2, .v2-jetons) .lt-interrupteur[aria-checked="true"] {
+  background: var(--lin-fait);
+}
+:is(.v2, .v2-jetons) .lt-interrupteur[aria-checked="true"]::after {
+  transform: translateX(8px);
+}
+:is(.v2, .v2-jetons) .lt-proprietes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding-top: 2px;
+}
+:is(.v2, .v2-jetons) .lt-propriete {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 9999px;
+  border: 0.5px solid transparent;
+  background: var(--lt-propriete);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-menu-gris);
+  white-space: nowrap;
+}
+:is(.v2, .v2-jetons) .lt-propriete[aria-pressed="true"] {
+  background: var(--lt-propriete-active);
+  color: var(--lin-titre);
+}
+:is(.v2, .v2-jetons) .lt-affichage-pied {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 16px 0;
+}
+:is(.v2, .v2-jetons) .lt-affichage-pied button {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-menu-gris);
+}
+:is(.v2, .v2-jetons) .lt-affichage-pied button:hover {
+  color: var(--lin-menu-texte);
+}
+
+/* ——— la fenêtre « Nouvelle tâche » : 750 de large, rayon 21, posée à 119 du haut ——— */
+.lt-voile {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 119px 12px 24px;
+  background: #0000008a;
+}
+:is(.v2, .v2-jetons) .lt-fenetre {
+  width: 750px;
+  max-width: 100%;
+  border-radius: 21px;
+  border: 0.5px solid var(--lin-menu-bord);
+  background: var(--lt-fenetre);
+  color: var(--lin-texte);
+  box-shadow: var(--lt-ombre-fenetre);
+  outline: none;
+  font-family:
+    var(--font-v2-inter),
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+}
+:is(.v2, .v2-jetons) .lt-fenetre form {
+  display: flex;
+  flex-direction: column;
+}
+:is(.v2, .v2-jetons) .lt-fenetre-tete {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 56px;
+  padding: 12px;
+}
+:is(.v2, .v2-jetons) .lt-fenetre-equipe {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 8px 0 4px;
+  border-radius: 8px;
+  background: var(--lt-propriete);
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-titre);
+}
+:is(.v2, .v2-jetons) .lt-fenetre-equipe svg {
+  width: 14px;
+  height: 14px;
+  opacity: 0.9;
+}
+:is(.v2, .v2-jetons) .lt-fenetre-sep {
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--lin-second);
+  margin: 0 4px;
+}
+:is(.v2, .v2-jetons) .lt-fenetre-nom {
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--lin-texte);
+}
+:is(.v2, .v2-jetons) .lt-fenetre-outils {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+:is(.v2, .v2-jetons) .lt-fenetre-rond {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9999px;
+  color: var(--lin-texte);
+}
+:is(.v2, .v2-jetons) .lt-fenetre-rond:hover {
+  background: var(--lin-pastille-active);
+  color: var(--lin-titre);
+}
+:is(.v2, .v2-jetons) .lt-fenetre-rond svg {
+  width: 16px;
+  height: 16px;
+}
+:is(.v2, .v2-jetons) .lt-fenetre-corps {
+  padding: 0 18px 6px;
+}
+:is(.v2, .v2-jetons) .lt-fenetre-titre {
+  width: 100%;
+  height: 29px;
+  padding: 2px 0 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 24px;
+  color: var(--lin-titre);
+  outline: none;
+}
+:is(.v2, .v2-jetons) .lt-fenetre-titre::placeholder {
+  color: var(--lin-second);
+  opacity: 0.8;
+}
+:is(.v2, .v2-jetons) .lt-fenetre-description {
+  width: 100%;
+  min-height: 76px;
+  padding: 6px 0 12px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 22.5px;
+  color: var(--lin-texte);
+  outline: none;
+  resize: vertical;
+}
+:is(.v2, .v2-jetons) .lt-fenetre-description::placeholder {
+  color: var(--lin-second);
+}
+:is(.v2, .v2-jetons) .lt-fenetre-proprietes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px 12px;
+}
+:is(.v2, .v2-jetons) .lt-propriete-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 8px 0 6px;
+  border-radius: 9999px;
+  border: 0.5px solid transparent;
+  background: var(--lt-propriete);
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+:is(.v2, .v2-jetons) .lt-propriete-btn:hover,
+:is(.v2, .v2-jetons) .lt-propriete-btn[aria-expanded="true"] {
+  background: var(--lt-propriete-active);
+}
+:is(.v2, .v2-jetons) .lt-propriete-btn[data-posee] {
+  color: var(--lin-titre);
+}
+:is(.v2, .v2-jetons) .lt-propriete-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+:is(.v2, .v2-jetons) .lt-propriete-btn .lt-etat {
+  width: 14px;
+  height: 14px;
+}
+:is(.v2, .v2-jetons) .lt-propriete-btn .lt-prio {
+  width: 14px;
+  height: 14px;
+}
+:is(.v2, .v2-jetons) .lt-propriete-date {
+  position: relative;
+}
+:is(.v2, .v2-jetons) .lt-propriete-date input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: default;
+}
+:is(.v2, .v2-jetons) .lt-propriete-date input::-webkit-calendar-picker-indicator {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: default;
+}
+:is(.v2, .v2-jetons) .lt-fenetre-pied {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 12px 12px;
+  border-top: 0.5px solid var(--lin-menu-sep);
+}
+:is(.v2, .v2-jetons) .lt-fenetre-pied-droite {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+:is(.v2, .v2-jetons) .lt-fenetre-encore {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+}
+:is(.v2, .v2-jetons) .lt-fenetre-creer {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: var(--lin-fait);
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  transition: filter 0.1s;
+}
+:is(.v2, .v2-jetons) .lt-fenetre-creer:hover {
+  filter: brightness(1.1);
+}
+:is(.v2, .v2-jetons) .lt-fenetre-creer:focus-visible,
+:is(.v2, .v2-jetons) .lt-fenetre-titre:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: 2px;
+}
+:is(.v2, .v2-jetons) .lt-fenetre-titre:focus-visible {
+  outline: none;
+}
+
+/* ——— dans la carte au milieu : les valeurs comme des pastilles, un champ pour la date ——— */
+:is(.v2, .v2-jetons) .lt-carte-valeur {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  margin: -4px 0 -4px -6px;
+  padding: 0 8px 0 6px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: inherit;
+}
+:is(.v2, .v2-jetons) .lt-carte-valeur:hover,
+:is(.v2, .v2-jetons) .lt-carte-valeur[aria-expanded="true"] {
+  background: var(--v2-a-200);
+}
+:is(.v2, .v2-jetons) .lt-carte-valeur .lt-etat,
+:is(.v2, .v2-jetons) .lt-carte-valeur .lt-prio {
+  width: 16px;
+  height: 16px;
+}
+:is(.v2, .v2-jetons) .lt-carte-valeur--vide {
+  color: var(--v2-gray-900);
+}
+:is(.v2, .v2-jetons) .lt-carte-champ {
+  max-width: 220px;
+}
+:is(.v2, .v2-jetons) .lt-carte-etiquettes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+:is(.v2, .v2-jetons) .lt-carte-etiquettes .lt-pilule {
+  color: var(--v2-gray-1000);
+  background: var(--v2-bg-100);
+  border-color: var(--v2-a-400);
+}
+:is(.v2, .v2-jetons) .lt-carte-etiquettes .lt-pilule button {
+  display: inline-grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  margin: 0 -4px 0 -2px;
+  border-radius: 50%;
+  color: var(--v2-gray-900);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: default;
+}
+:is(.v2, .v2-jetons) .lt-carte-etiquettes .lt-pilule button:hover {
+  color: var(--v2-gray-1000);
+  background: var(--v2-a-300);
+}
+:is(.v2, .v2-jetons) .lt-carte-etiquettes input {
+  width: 140px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 12px;
+  border: 0;
+  background: var(--v2-a-200);
+  color: var(--v2-gray-1000);
+  font: inherit;
+  font-size: 12px;
+  outline: none;
+}
+:is(.v2, .v2-jetons) .lt-carte-etiquettes input:focus-visible {
+  box-shadow: var(--v2-anneau);
+}
+
+/* ——— 390 de large : la grille se resserre, ID et date s'effacent, rien ne déborde ——— */
+@media (max-width: 720px) {
+  :is(.v2, .v2-jetons) .lt-pilules {
+    display: none;
+  }
+}
+@media (max-width: 560px) {
+  :is(.v2, .v2-jetons) .lt-ligne {
+    grid-template-columns: 18px 16px 16px minmax(0, 1fr);
+    padding: 0 12px 0 12px;
+  }
+  :is(.v2, .v2-jetons) .lt-id,
+  :is(.v2, .v2-jetons) .lt-date {
+    display: none;
+  }
+  :is(.v2, .v2-jetons) .lt-outils-droite {
+    padding-left: 8px;
+  }
+  :is(.v2, .v2-jetons) .lt-fenetre-corps {
+    padding: 0 12px 6px;
+  }
+  :is(.v2, .v2-jetons) .lt-voile {
+    padding-top: 48px;
+  }
+  :is(.v2, .v2-jetons) .lt-affichage {
+    width: min(300px, calc(100vw - 32px));
+  }
+}
+
+/* ——— hors du panneau : la carte au milieu et la fenêtre « Nouvelle tâche » sont portées
+   sur <body> (react-aria), sous .v2-jetons et non sous .v2 .lin — les jetons --lin-* n'y
+   existent pas. Les quelques-uns que ces deux-là utilisent sont posés ici sur les
+   jetons --v2-* (clair et sombre suivent le thème du dashboard), avec les briques des
+   menus de lin.css qu'un menu ouvert dans la carte emploie (lin-options, lin-option…). ——— */
+.v2-jetons:is(.lt-voile, .v2-voile--carte) {
+  --lin-fond: var(--v2-bg-100);
+  --lin-titre: var(--v2-gray-1000);
+  --lin-texte: var(--v2-gray-1000);
+  --lin-second: var(--v2-gray-900);
+  --lin-avatar: var(--v2-gray-700);
+  --lin-cercle: var(--v2-gray-700);
+  --lin-en-cours: var(--v2-amber-700);
+  --lin-fait: var(--v2-blue-700);
+  --lin-annule: var(--v2-gray-700);
+  --lin-orange: var(--v2-amber-700);
+  --lin-survol: var(--v2-a-200);
+  --lin-pastille: var(--v2-a-200);
+  --lin-pastille-active: var(--v2-a-400);
+  --lin-menu-fond: var(--v2-bg-eleve);
+  --lin-menu-bord: var(--v2-a-400);
+  --lin-menu-sep: var(--v2-a-400);
+  --lin-menu-survol: var(--v2-a-200);
+  --lin-menu-texte: var(--v2-gray-1000);
+  --lin-menu-gris: var(--v2-gray-700);
+  --lin-ombre-menu: 0 0 0 1px var(--v2-a-400), 0 8px 24px #0000001a;
+  --lt-pilule: var(--v2-bg-100);
+  --lt-pilule-bord: var(--v2-a-400);
+  --lt-coche: #fff;
+  --lt-backlog: var(--v2-gray-700);
+  --lt-segment: var(--v2-a-200);
+  --lt-propriete: var(--v2-a-200);
+  --lt-propriete-active: var(--v2-a-400);
+  --lt-fenetre: var(--v2-bg-eleve);
+  --lt-ombre-fenetre: 0 0 0 1px var(--v2-a-400), 0 24px 60px #0000002e;
+}
+.v2-jetons :where(.lt-fenetre, .lt-menu, .lt-carte-etiquettes) :where(button),
+.v2-jetons .lt-carte-valeur,
+.v2-jetons .lt-fenetre-rond,
+.v2-jetons .lt-fenetre-creer,
+.v2-jetons .lt-interrupteur {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  cursor: default;
+}
+.v2-jetons .lin-ancre {
+  position: relative;
+}
+.v2-jetons .lin-menu-tete {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 37px;
+  padding: 0 12px 0 14px;
+  border-bottom: 0.5px solid var(--lin-menu-sep);
+}
+.v2-jetons .lin-menu-saisie {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  padding: 10px 0 9px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--lin-menu-texte);
+  outline: none;
+}
+.v2-jetons .lin-menu-saisie::placeholder {
+  color: var(--lin-menu-gris);
+}
+.v2-jetons .lin-menu-saisie:focus,
+.v2-jetons .lin-menu-saisie:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.v2-jetons .lin-kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 17px;
+  padding: 2px;
+  border-radius: 4px;
+  border: 0.5px solid var(--lin-menu-sep);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--lin-menu-gris);
+}
+.v2-jetons .lin-options {
+  margin: 0;
+  padding: 6px 6px 7px 7px;
+  list-style: none;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.v2-jetons .lin-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 32px;
+  padding: 0 12px 0 8px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--lin-menu-texte);
+  text-align: left;
+  cursor: default;
+}
+.v2-jetons .lin-option[data-actif] {
+  background: var(--lin-menu-survol);
+  color: var(--lin-titre);
+}
+.v2-jetons .lin-option-icone {
+  display: inline-flex;
+  width: 16px;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.v2-jetons .lin-option-icone svg {
+  width: 16px;
+  height: 16px;
+}
+.v2-jetons .lin-option-libelle {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2-jetons .lin-option-meta {
+  font-size: 12px;
+  color: var(--lin-menu-gris);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.v2-jetons .lin-option-coche {
+  flex-shrink: 0;
+  margin-left: 4px;
+  color: var(--lin-titre);
+}
+.v2-jetons .lin-option-chiffre {
+  min-width: 7px;
+  margin-left: 4px;
+  text-align: right;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--lin-menu-gris);
+  font-variant-numeric: tabular-nums;
+}
+.v2-jetons .lin-options-vide {
+  padding: 8px 10px 6px;
+  font-size: 13px;
+  color: var(--lin-menu-gris);
+}
+.v2-jetons .lt-menu svg {
+  flex-shrink: 0;
+}
+
+/* ——— réglages après contrôle (écarts relevés sur la page) ——— */
+:is(.v2, .v2-jetons) .lt-outils .lin-onglets {
+  gap: 4px;
+}
+:is(.v2, .v2-jetons) .lt-groupe-tete .lt-groupe-nom {
+  font-weight: 500;
+}
+:is(.v2, .v2-jetons) .lt-groupe-chevron {
+  justify-content: flex-start;
+  padding-left: 4px;
+}
+:is(.v2, .v2-jetons) .lt-cellule-titre .lt-pilules {
+  margin-right: 0;
+}
+.v2-jetons .lt-fenetre-titre:focus-visible,
+.v2-jetons .lt-fenetre-description:focus-visible,
+.v2-jetons .lt-fenetre [role="dialog"]:focus-visible {
+  outline: none;
+  box-shadow: none;
+}

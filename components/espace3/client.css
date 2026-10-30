@@ -1,0 +1,211 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Le dessin du pilotage /omega, cloné pour l'espace client (11/10/2026)
+
+   Demande de Teo : le tableau de bord client prend le dessin de
+   omegaai.fr/omega. Le pilotage est lui-même une copie de /espace3 (mêmes
+   classes v2-) ; ce qui l'en distingue est recopié ici depuis
+   components/omega/omega.css, sous la portée .v2.oc et html.oc-actif. Le
+   pilotage n'est pas importé : une autre session de Teo y travaille, et
+   ses retouches ne doivent pas changer l'espace client sans recette.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2.oc { --oc-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace; --v2-mono: var(--oc-mono); }
+
+/* — le rendu du texte, relevé sur vercel.com : jeux OpenType, lissage.
+   Les menus flottants (rendus hors de .oc) suivent par html.oc-actif. — */
+.v2.oc, html.oc-actif .v2-jetons {
+  font-feature-settings: "calt" 0, "rlig", "ss11";
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* — le logo suit le thème : blanc en sombre, noir en clair — */
+.oc-logo-clair { display: none; }
+html[data-v2-theme="light"] .oc-logo-clair { display: block; }
+html[data-v2-theme="light"] .oc-logo-sombre { display: none; }
+
+/* — la navigation latérale : le volet Supabase (21/10) — entrées de 26 px,
+   6 px de rayon, grises au repos, blanches au survol, blanches et en 600
+   sur la page ouverte (graisses dans espace2.css) ; l'anneau de focus ne
+   reste pas après un clic (il reste au clavier) — */
+.v2.oc .v2-lien { height: 26px; border-radius: 6px; letter-spacing: -0.02em; color: var(--v2-gray-900); }
+.v2.oc .v2-lien:hover { color: var(--v2-gray-1000); }
+.v2.oc .v2-lien[aria-current="page"], .v2.oc .v2-lien[data-dedans] { color: var(--v2-gray-1000); }
+.v2.oc .v2-lien svg { color: currentColor; opacity: 0.85; }
+.v2.oc .v2-lien:focus:not(:focus-visible) { box-shadow: none; }
+.v2.oc .v2-laterale .v2-section-titre { font-size: 13px; font-weight: 400; letter-spacing: 0; color: var(--v2-gray-700); }
+
+
+/* — la barre du haut et les boutons — */
+.v2.oc .v2-haut-titre { font-weight: 500; letter-spacing: -0.02em; }
+.v2.oc .v2-portee, .v2.oc .v2-btn, .v2.oc .v2-val-bouton { font-weight: 500; letter-spacing: -0.01em; }
+
+/* — la typographie Geist : titres 600 resserrés, libellés 13 px gris,
+   titres de ligne et de carte en 500 — */
+.v2.oc h1, .v2.oc h2, .v2.oc h3, .v2.oc .v2-h2 { font-weight: 600; letter-spacing: -0.02em; }
+.v2.oc .v2-tete h1 { letter-spacing: -0.03em; }
+.v2.oc .v2-va-sous { font-size: 13px; line-height: 18px; }
+.v2.oc :is(.v2-val-titre, .v2-dr-titre-ligne, .v2-va-tache-titre, .v2-pm-titre) { font-weight: 500; letter-spacing: -0.01em; }
+.v2.oc :is(.v2-gris, .v2-va-sous) { color: var(--v2-gray-900); }
+
+/* — les chiffres clés : libellé 13 px gris, chiffre 600 à chasse fixe ;
+   au survol, le libellé s'éclaire et le chiffre passe au bleu — */
+.v2.oc .v2-va-kpi-libelle { font-size: 13px; color: var(--v2-gray-900); }
+.v2.oc .v2-va-kpi-valeur, .v2.oc .v2-va-kpi strong { font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.v2.oc .v2-va-kpi:hover { background: none; }
+.v2.oc .v2-va-kpi .v2-va-kpi-libelle, .v2.oc .v2-va-kpi strong { transition: color 0.15s; }
+.v2.oc .v2-va-kpi:hover .v2-va-kpi-libelle { color: var(--v2-gray-1000); }
+.v2.oc .v2-va-kpi:hover strong { color: var(--v2-blue-900); }
+
+/* — les cartes : 6 px de rayon et le filet seul, sans ombre portée, comme
+   les cadres du tableau de bord Supabase (relevé du 21/10) ; sans le liseré
+   lumineux qui tourne ni le fond animé de la vue d'ensemble — */
+.v2.oc .v2-carte, .v2.oc .v2-dr-carte, .v2.oc .v2-va-kpis { border-radius: 6px; box-shadow: 0 0 0 1px var(--v2-a-400); }
+.v2.oc .v2-carte > .v2-tableau-cadre { border-radius: 6px; }
+.v2.oc .v2-carte::before,
+.v2.oc .v2-dr-carte::before,
+.v2.oc .v2-va-kpis::before { content: none; animation: none; }
+.v2.oc .v2-va.v2-vivant { background-image: none; }
+
+/* — les tableaux : en-têtes de 36 px sans fond, 13 px gris ; un filet très
+   léger entre les lignes — */
+.v2.oc .v2-tableau th { height: 36px; font-size: 13px; background: none; }
+.v2.oc .v2-tableau td { border-bottom-color: var(--v2-a-200, var(--v2-a-300)); }
+
+/* — les menus flottants : 6 px de rayon comme chez Supabase, lignes de 6 px — */
+html.oc-actif .v2-popover { border-radius: 6px; }
+html.oc-actif .v2-menu-item { border-radius: 6px; font-weight: 400; }
+
+/* — contrastes (WCAG AA, 4,5:1), relevés par axe au clonage ; écarts au
+   pilotage assumés :
+   · en sombre, le bleu 700 des liens « Voir tout » et de la marque de
+     l'assistant donne 4,2:1 sur le fond — le bleu 900, plus clair, au repos ;
+   · en clair, le gris 700 des titres de section et des groupes de réglages
+     donne 3,1:1 — le gris 900, comme les autres libellés — */
+html[data-v2-theme="dark"] .v2.oc :is(.v2-va-lien, .v2-va-ia-marque) { color: var(--v2-blue-900); }
+html[data-v2-theme="dark"] .v2.oc .v2-va-lien:hover { color: var(--v2-gray-1000); }
+html[data-v2-theme="light"] .v2.oc :is(.v2-section-titre, .v2-cote-groupe) { color: var(--v2-gray-900); }
+
+/* — la vue d'ensemble allégée (15/10), comme celle du pilotage : une ligne
+   par élément, la date à droite (rouge si dépassée), la flèche au survol — */
+.v2.oc .oc-meta { flex: none; font-size: 12px; color: var(--v2-gray-900); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.v2.oc .oc-meta[data-retard], .v2.oc .oc-va-simple .v2-va-table td[data-retard] { color: var(--v2-red-900, var(--v2-red-700)); }
+.v2.oc .oc-va-simple .v2-va-liste li { align-items: center; }
+.v2.oc .oc-va-simple .v2-va-texte { min-width: 0; }
+.v2.oc .oc-va-simple .v2-va-texte > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2.oc .oc-va-simple .v2-va-liste li > a { opacity: 0; transition: opacity 0.15s; }
+.v2.oc .oc-va-simple .v2-va-liste li:hover > a, .v2.oc .oc-va-simple .v2-va-liste li > a:focus-visible { opacity: 1; }
+@media (hover: none) { .v2.oc .oc-va-simple .v2-va-liste li > a { opacity: 1; } }
+/* le nom du fournisseur mène à « À payer » : du texte, souligné au survol */
+.v2.oc .oc-va-simple .v2-va-table td:first-child a { display: inline; color: var(--v2-gray-1000); }
+.v2.oc .oc-va-simple .v2-va-table td:first-child a:hover { text-decoration: underline; text-underline-offset: 2px; }
+
+/* — À valider allégé (15/10), comme celui du pilotage : une ligne par
+   demande, le montant et le délai à droite, la flèche au survol — */
+.v2.oc .oc-val-simple .v2-val-corps { grid-template-columns: minmax(0, 1fr) auto 16px; min-height: 44px; }
+.v2.oc .oc-val-simple .v2-val-chevron { opacity: 0; transition: opacity 0.15s; }
+.v2.oc .oc-val-simple .v2-val-ligne:hover .v2-val-chevron, .v2.oc .oc-val-simple .v2-val-corps:focus-visible .v2-val-chevron { opacity: 1; }
+@media (hover: none) { .v2.oc .oc-val-simple .v2-val-chevron { opacity: 1; } }
+
+/* — le Point du matin allégé (15/10), comme celui du pilotage : une ligne par
+   élément, le détail à droite, l'action au survol ; le titre de la carte
+   mène à la page — */
+.v2.oc .oc-pm-simple .v2-pm-liste li { align-items: center; gap: 12px; }
+.v2.oc .oc-pm-simple .v2-pm-texte { min-width: 0; }
+.v2.oc .oc-pm-simple .v2-pm-texte > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2.oc .oc-pm-simple .v2-pm-action { opacity: 0; transition: opacity 0.15s, color 0.15s; }
+.v2.oc .oc-pm-simple .v2-pm-liste li:hover .v2-pm-action, .v2.oc .oc-pm-simple .v2-pm-action:focus-visible { opacity: 1; }
+@media (hover: none) { .v2.oc .oc-pm-simple .v2-pm-action { opacity: 1; } }
+.v2.oc .oc-pm-simple .v2-pm-corps { padding-bottom: 6px; }
+.v2.oc .oc-meta--fort { font-size: 13px; font-weight: 600; color: var(--v2-gray-1000); }
+.v2.oc .oc-pm-titre { display: inline-flex; align-items: center; gap: 4px; color: inherit; text-decoration: none; }
+.v2.oc .oc-pm-titre svg { color: var(--v2-gray-900); transition: color 0.15s, transform 0.15s; }
+.v2.oc .oc-pm-titre:hover svg { color: var(--v2-gray-1000); transform: translateX(2px); }
+.v2.oc .oc-pm-titre:focus-visible { outline: 0; border-radius: 4px; box-shadow: var(--v2-anneau); }
+/* le détail cède la place avant le titre (points de suspension) quand la carte est étroite */
+.v2.oc .oc-pm-simple .v2-pm-texte { flex: 1 1 auto; }
+.v2.oc .oc-pm-simple .oc-meta { flex: 0 100 auto; min-width: 3.5em; overflow: hidden; text-overflow: ellipsis; }
+.v2.oc .oc-pm-simple .v2-pm-action { flex: none; }
+
+/* — les collections (Tâches, Notes, Appels, Entreprises, Contacts), 15/10,
+   comme Tâches et Appels du pilotage : une barre fine, puis une ligne par
+   fiche (titre, détail gris, date à droite), la corbeille au survol — */
+.v2.oc .oc-barre { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.v2.oc .oc-barre-recherche { flex: 1; min-width: 0; height: 30px; }
+.v2.oc .oc-barre-recherche svg { flex: none; color: var(--v2-gray-900); }
+.v2.oc .oc-barre-recherche input { min-width: 0; }
+.v2.oc .oc-barre > .v2-btn { flex: none; }
+.v2.oc .oc-collection .v2-liste-item { min-height: 44px; padding-top: 8px; padding-bottom: 8px; }
+.v2.oc .oc-collection .v2-liste-texte { flex: 1; min-width: 0; }
+.v2.oc .oc-collection .v2-liste-texte > span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2.oc .oc-collection-detail { color: var(--v2-gray-900); font-weight: 400; }
+.v2.oc .oc-collection .v2-liste-item > button { opacity: 0; transition: opacity 0.15s; }
+.v2.oc .oc-collection .v2-liste-item:hover > button, .v2.oc .oc-collection .v2-liste-item > button:focus-visible { opacity: 1; }
+@media (hover: none) { .v2.oc .oc-collection .v2-liste-item > button { opacity: 1; } }
+
+/* ══════════════════════════════════════════════════════════════════════
+   Base commune au 1:1 de Supabase (22/10/2026)
+
+   Demande de Teo : reprendre exactement le tableau de bord Supabase, pas
+   à 80 %. Valeurs lues au style calculé sur supabase.com/dashboard
+   (Settings › General, Database › Tables, Org › Usage, Observability),
+   en clair et en sombre :
+     · texte    Inter 13 px, graisse 450, interligne 19,5 px
+     · titres   Manrope 600 — section 18/25,2 px, sous-titre 14 px
+     · bouton   26 px, rayon 8 px, 12 px graisse 500, marge 10 px,
+                quatre filets intérieurs + ombre portée ; petit : 24 px, marge 8 px
+     · champ    34 px, rayon 8 px, 13 px, marge 12 px, filet 1 px
+     · carte    rayon 10,667 px, filet 1 px + ombre 0 1px 2px à 5 %
+     · tableau  en-tête Source Code Pro 12 px graisse 500, capitales,
+                interlettrage 0,6 px, gris 600, 40 px ; cellule 13 px,
+                graisse 450, marge 16 px de chaque côté
+   Posé ici, à la fin de client.css, sous la portée .v2.oc : sinon le
+   dessin cloné de /omega (11/10) l'emporte. Les couleurs restent les
+   nôtres (gris neutres du 21/10, principal bleu) : Supabase sombre a une
+   pointe de vert que Teo a fait retirer.
+   ══════════════════════════════════════════════════════════════════════ */
+.v2.oc { font-size: 13px; line-height: 19.5px; font-weight: 450; }
+.v2.oc .v2-h2 { font-family: var(--v2-titre); font-size: 18px; line-height: 25.2px; letter-spacing: normal; font-weight: 600; }
+.v2.oc .v2-h3 { font-family: var(--v2-titre); font-size: 14px; line-height: 20px; letter-spacing: normal; font-weight: 600; }
+.v2.oc .v2-tete p { font-size: 13px; line-height: 19.5px; }
+
+/* — boutons — */
+.v2.oc .v2-btn, .v2.oc .v2-val-bouton, .v2.oc .v2-portee { height: 26px; padding: 0 10px; gap: 6px; border-radius: 8px; font-family: var(--v2-sans); font-size: 12px; font-weight: 500; line-height: 16px; box-shadow: var(--v2-ombre-bouton); }
+.v2.oc .v2-btn:hover, .v2.oc .v2-val-bouton:hover { box-shadow: var(--v2-ombre-bouton); }
+.v2.oc .v2-btn--petit { height: 24px; padding: 0 8px; }
+.v2.oc .v2-btn--icone { width: 26px; padding: 0; }
+.v2.oc .v2-btn--petit.v2-btn--icone { width: 24px; }
+.v2.oc .v2-btn svg, .v2.oc .v2-val-bouton svg { width: 14px; height: 14px; }
+.v2.oc .v2-btn--primaire, .v2.oc a.v2-btn--primaire, .v2.oc .v2-btn--primaire:hover, .v2.oc .v2-dr-principal, .v2.oc .v2-ia-envoyer { box-shadow: var(--v2-ombre-primaire); border-radius: 8px; }
+.v2.oc .v2-btn--fantome, .v2.oc .v2-btn--fantome:hover { box-shadow: none; }
+/* désactivé : le bouton garde sa couleur à demi-opacité, comme « Save changes » */
+.v2.oc .v2-btn[disabled], .v2.oc .v2-btn[data-disabled] { opacity: 0.5; background: var(--v2-bouton); color: var(--v2-gray-1000); box-shadow: var(--v2-ombre-bouton); }
+.v2.oc .v2-btn--primaire[disabled], .v2.oc .v2-btn--primaire[data-disabled] { background: var(--v2-blue-700); color: #fff; box-shadow: var(--v2-ombre-primaire); }
+
+/* — champs — */
+.v2.oc .v2-champ, .v2.oc .v2-val-recherche { height: 34px; padding: 0 12px; border-radius: 8px; box-shadow: 0 0 0 1px var(--v2-a-500); font-size: 13px; }
+.v2.oc .v2-champ:hover { box-shadow: 0 0 0 1px var(--v2-a-600); }
+.v2.oc .v2-champ:focus-within, .v2.oc .v2-val-recherche:focus-within { box-shadow: var(--v2-anneau); }
+.v2.oc .v2-champ input, .v2.oc .v2-champ select, .v2.oc .v2-champ textarea { font-size: 13px; }
+.v2.oc .v2-champ--erreur { box-shadow: 0 0 0 1px var(--v2-red-700); }
+
+/* — cartes — */
+.v2.oc .v2-carte, .v2.oc .v2-va .v2-carte, .v2.oc .v2-val .v2-carte, .v2.oc .v2-pm .v2-carte, .v2.oc .v2-dr-carte, .v2.oc .v2-va-kpis, .v2.oc .v2-stat, .v2.oc .v2-bascule { border-radius: 8px; box-shadow: var(--v2-ombre-petite); }
+.v2.oc .v2-carte-pied { border-radius: 0 0 8px 8px; }
+.v2.oc .v2-vivant .v2-carte, .v2.oc .v2-vivant .v2-dr-carte, .v2.oc .v2-vivant .v2-va-kpis { box-shadow: var(--v2-ombre-petite); }
+
+/* — tableaux — */
+.v2.oc .v2-tableau-cadre, .v2.oc .v2-carte > .v2-tableau-cadre { border-radius: 8px; }
+.v2.oc .v2-tableau { font-size: 13px; line-height: 19.5px; }
+.v2.oc .v2-tableau th { height: 40px; padding: 0 16px; font-family: var(--v2-code); font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: 0.6px; text-transform: uppercase; color: var(--v2-gray-600); }
+.v2.oc .v2-tableau th:first-child { border-top-left-radius: 8px; }
+.v2.oc .v2-tableau th:last-child { border-top-right-radius: 8px; }
+.v2.oc .v2-tableau td { padding: 16px; font-weight: 450; border-bottom-color: var(--v2-a-400); }
+.v2.oc .v2-tableau td small, .v2.oc .v2-sous { font-size: 12px; line-height: 16px; }
+/* les étiquettes des tuiles de chiffres : Source Code Pro en capitales, comme « SLOW QUERIES » */
+.v2.oc .v2-stat-etiquette { font-family: var(--v2-code); font-size: 12px; line-height: 16px; font-weight: 600; text-transform: uppercase; }
+@container principale (max-width: 767px) {
+  .v2.oc .v2-tableau--empile td { padding: 0; }
+  .v2.oc .v2-tableau--empile td::before { font-family: var(--v2-code); font-size: 12px; letter-spacing: 0.6px; text-transform: uppercase; }
+}

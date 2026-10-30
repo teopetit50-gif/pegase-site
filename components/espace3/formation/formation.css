@@ -1,0 +1,373 @@
+/* ══════════════════════════════════════════════════════════════════════
+   /espace3/formation — le Start Guide de la documentation Linear
+   (linear.app/docs/start-guide), posé dans l'espace client (29/10/2026).
+
+   La géométrie est celle relevée au getComputedStyle sur la référence ;
+   les couleurs sont les jetons de /espace3 (espace2.css), pour que la page
+   suive le thème clair ou sombre choisi par le client. La barre latérale
+   et la barre du haut de Linear sont remplacées par celles de l'espace.
+
+   Relevé (1440 × 900) :
+   · colonne 650 px + 76 px + sommaire 250 px, centrés ; titre à 48 px du
+     haut de la colonne. h1 32/36, 590, −0,704 px. Corps 15/24, −0,165 px.
+     Intro → vidéo 20 px. h2 24/31,92, 590, −0,288 px, 56 px au-dessus ;
+     h3 20/32, 590, 56 px. Paragraphe après titre 12 px, puis 16 px.
+     Liste : retrait 24, puces 8 px d'écart. Liens soulignés, décalés de
+     0,175em, soulignement en gris.
+   · sommaire collant, filet gauche de 2 px, liens 13 / 19,5, 4 px haut et
+     bas ; h3 en retrait de 12 px ; trait plein sur la section courante.
+   · vidéo : cadre 16:9, filet de 5 %, rayon 8 ; commandes à 17 px du bas,
+     50 px de marge latérale, boutons ronds de 32 px, piste de 4 px à 16 %.
+   · « Next » : carte à filet, rayon 8, 16 px de marge, débordant de 17 px
+     de chaque côté de la colonne.
+   · le sommaire disparaît sous 1281 px de fenêtre ; sous 769 px, la
+     colonne passe à 24 px des bords.
+
+   Écarts assumés :
+   · la police n'est pas chargée ici : c'est celle de l'espace (Inter, la
+     même que Linear, posée par app/espace3/layout.tsx).
+   · l'affiche de la vidéo reprend la composition de « Intro to Linear »
+     (marque en haut à gauche, grand titre en bas) avec le dessin d'Omega,
+     deux anneaux, à la place des barres obliques de Linear.
+   · la piste de lecture est un vrai <input type="range">, réglable au
+     clavier.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.fm {
+  --fm-titre: var(--v2-gray-1000);
+  --fm-corps: var(--v2-gray-900);
+  --fm-terne: var(--v2-gray-700);
+  --fm-filet: var(--v2-a-400);
+  --fm-souligne: var(--v2-a-600);
+  --fm-survol: var(--v2-a-100);
+
+  display: grid;
+  grid-template-columns: minmax(0, 650px) 250px;
+  justify-content: center;
+  column-gap: 76px;
+  padding: 48px 24px 96px;
+}
+
+/* ——— l'article ——— */
+.fm-article {
+  min-width: 0;
+  font-size: 15px;
+  line-height: 24px;
+  letter-spacing: -0.165px;
+  color: var(--fm-corps);
+}
+.fm-article .fm-h1 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 590;
+  line-height: 36px;
+  letter-spacing: -0.704px;
+  color: var(--fm-titre);
+}
+.fm-article p {
+  margin: 16px 0 0;
+}
+.fm-article .fm-intro {
+  margin-top: 24px;
+}
+.fm-article h2,
+.fm-article h3 {
+  margin: 56px 0 0;
+  font-weight: 590;
+  color: var(--fm-titre);
+  scroll-margin-top: 88px;
+}
+.fm-article h2 {
+  font-size: 24px;
+  line-height: 31.92px;
+  letter-spacing: -0.288px;
+}
+.fm-article h3 {
+  font-size: 20px;
+  line-height: 32px;
+  letter-spacing: normal;
+}
+.fm-article :is(h2, h3) + p,
+.fm-article :is(h2, h3) + ul {
+  margin-top: 12px;
+}
+.fm-article :is(h2, h3) + .fm-sous {
+  margin-top: 6px;
+}
+/* la vidéo d'un geste, sous le titre de sa section ; le texte suit à 16 px */
+.fm-article :is(h2, h3) + .fm-video {
+  margin-top: 12px;
+}
+.fm-article .fm-video + p,
+.fm-article .fm-video + ul {
+  margin-top: 16px;
+}
+.fm-article ul {
+  margin: 12px 0 0;
+  padding: 0 0 0 24px;
+  list-style: disc; /* le reset du site les retire */
+}
+.fm-article .fm-liste-large {
+  margin-top: 16px;
+}
+.fm-article li + li {
+  margin-top: 8px;
+}
+.fm-article p a,
+.fm-article li a {
+  color: var(--fm-titre);
+  text-decoration: underline;
+  text-decoration-color: var(--fm-souligne);
+  text-decoration-thickness: from-font;
+  text-underline-offset: 0.175em;
+  transition: text-decoration-color 0.15s;
+}
+.fm-article p a:hover,
+.fm-article li a:hover {
+  text-decoration-color: var(--fm-titre);
+}
+
+.fm-suivant {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin: 64px -17px 0;
+  padding: 16px;
+  border: 1px solid var(--fm-filet);
+  border-radius: 8px;
+  color: var(--fm-titre);
+  text-decoration: none;
+  transition: background-color 0.15s;
+}
+@media (hover: hover) {
+  .fm-suivant:hover {
+    background: var(--fm-survol);
+  }
+}
+.fm-suivant-sur {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--fm-terne);
+}
+.fm-suivant-titre {
+  margin-top: 2px;
+  font-size: 15px;
+  font-weight: 510;
+}
+
+/* ——— le sommaire ——— */
+.fm-sommaire {
+  position: sticky;
+  top: 80px;
+  align-self: start;
+}
+.fm-sommaire ul {
+  margin: 0;
+  padding: 0 0 0 12px;
+  list-style: none;
+  border-left: 2px solid transparent;
+}
+.fm-sommaire li[data-niveau="3"] {
+  padding-left: 12px;
+}
+.fm-sommaire a {
+  position: relative;
+  display: block;
+  padding: 4px 0;
+  font-size: 13px;
+  line-height: 19.5px;
+  color: var(--fm-terne);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.fm-sommaire a:hover,
+.fm-sommaire a[aria-current] {
+  color: var(--fm-titre);
+}
+/* le trait de la section courante, sur le filet de gauche */
+.fm-sommaire a[aria-current]::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: -14px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--fm-titre);
+}
+.fm-sommaire li[data-niveau="3"] a[aria-current]::before {
+  left: -26px;
+}
+
+/* ——— la vidéo ——— */
+.fm-video {
+  position: relative;
+  margin-top: 20px;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--v2-a-300);
+  border-radius: 8px;
+  background: #e9e9ea;
+  color: #f7f8f8;
+}
+.fm-video:fullscreen {
+  border: 0;
+  border-radius: 0;
+  background: #000;
+}
+.fm-video-media {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+}
+.fm-video:fullscreen .fm-video-media {
+  object-fit: contain;
+}
+/* l'affiche est claire : un voile en bas garde les commandes lisibles */
+.fm-video-voile {
+  position: absolute;
+  inset: auto 0 0;
+  height: 96px;
+  background: linear-gradient(to top, rgba(8, 9, 10, 0.42), rgba(8, 9, 10, 0));
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.fm-video-commandes {
+  position: absolute;
+  right: 0;
+  bottom: 17px;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 32px;
+  padding: 0 50px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  transition: opacity 0.3s;
+}
+.fm-video[data-commandes="false"] :is(.fm-video-commandes, .fm-video-voile) {
+  opacity: 0;
+}
+.fm-video[data-commandes="false"] {
+  cursor: none;
+}
+.fm-verre {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 9999px;
+  background: transparent;
+  color: #f7f8f8;
+  font: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+.fm-verre:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+.fm-verre:focus-visible {
+  outline: 2px solid #f7f8f8;
+  outline-offset: -2px;
+}
+.fm-verre-texte {
+  font-size: 13px;
+  font-weight: 510;
+}
+.fm-video-temps {
+  flex: none;
+  min-width: 40px;
+  font-weight: 510;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+.fm-video-piste {
+  flex: 1;
+  min-width: 0;
+  height: 16px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.fm-video-piste::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 9999px;
+  background: linear-gradient(to right, #f7f8f8 var(--fm-avance, 0%), rgba(255, 255, 255, 0.16) var(--fm-avance, 0%));
+}
+.fm-video-piste::-moz-range-track {
+  height: 4px;
+  border-radius: 9999px;
+  background: linear-gradient(to right, #f7f8f8 var(--fm-avance, 0%), rgba(255, 255, 255, 0.16) var(--fm-avance, 0%));
+}
+.fm-video-piste::-webkit-slider-thumb {
+  width: 10px;
+  height: 10px;
+  margin-top: -3px;
+  border-radius: 9999px;
+  background: #f7f8f8;
+  opacity: 0;
+  transition: opacity 0.15s;
+  -webkit-appearance: none;
+}
+.fm-video-piste::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border: 0;
+  border-radius: 9999px;
+  background: #f7f8f8;
+  opacity: 0;
+}
+.fm-video-piste:is(:hover, :focus-visible)::-webkit-slider-thumb {
+  opacity: 1;
+}
+.fm-video-piste:is(:hover, :focus-visible)::-moz-range-thumb {
+  opacity: 1;
+}
+
+/* le sommaire disparaît sous 1281 px ; la colonne prend la place */
+@media (max-width: 1280px) {
+  .fm {
+    grid-template-columns: minmax(0, 720px);
+  }
+  .fm-sommaire {
+    display: none;
+  }
+}
+@media (max-width: 768px) {
+  .fm {
+    padding: 32px 24px 64px;
+  }
+  .fm-suivant {
+    margin-right: 0;
+    margin-left: 0;
+  }
+}
+@media (max-width: 640px) {
+  .fm-video-commandes {
+    bottom: 8px;
+    gap: 6px;
+    padding: 0 12px;
+  }
+  .fm-video-option {
+    display: none;
+  }
+  .fm-video-temps {
+    min-width: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fm *,
+  .fm *::before {
+    transition: none !important;
+  }
+}

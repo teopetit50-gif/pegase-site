@@ -1,0 +1,139 @@
+/* ══════════════════════════════════════════════════════════════════════
+   CASHD — la boîte « Débiteurs et relances » (28/10/2026) : les quelques
+   réglages propres à ./BoiteDebiteurs.tsx, sous .v2 .lin comme le gabarit
+   (../lin/lin.css), qui reste intact.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* le texte d'une relance, tel qu'il partira : il tient la place de la description, ses retours à la ligne gardés */
+.v2 .lin .lin-ticket-desc.c2b-corps {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* les têtes de la boîte (28/10) : l'enveloppe qui donne sa bulle à l'horloge, sans compter dans la rangée */
+.v2 .lin .c2b-bulle {
+  display: contents;
+}
+/* la « référence » d'une relance est le nom du débiteur, parfois long : sur un écran étroit elle se coupe aussi, au lieu d'écraser le titre */
+.v2 .lin .lin-tete-ref {
+  min-width: 48px;
+  flex-shrink: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* la cloche fait défiler jusqu'à l'activité : elle s'arrête sous la tête collante (44) */
+.v2 .lin #c2b-activite {
+  scroll-margin-top: 56px;
+}
+
+/* « Noter l'envoi à la main » : le canal puis le bouton, dans les boutons d'une entrée du fil */
+.v2 .lin .c2b-pied-droite {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* les sections d'un menu de filtre */
+.v2 .lin .c2b-menu-titre {
+  padding: 8px 16px 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-second);
+}
+.v2 .lin .c2b-menu-titre:not(:first-child) {
+  margin-top: 4px;
+  border-top: 0.5px solid var(--lin-menu-trait);
+}
+.v2 .lin .lin-menu-option[aria-checked="true"] {
+  color: var(--lin-titre);
+}
+
+/* un message sous la tête de la liste (chargement, base non installée, erreur) */
+.v2 .lin .c2b-message {
+  margin: 0;
+  padding: 12px 24px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--lin-second);
+}
+
+/* l'état vide du détail : le total sous le compte des éléments à traiter */
+.v2 .lin .c2b-vide-sous {
+  font-size: 12px;
+  color: var(--lin-second);
+}
+
+/* « Vos textes » : l'écran des gabarits de toujours, dans le monde .resa .esp qu'il attend */
+.v2 .lin .c2b-textes {
+  flex: 1;
+  min-width: 0;
+  padding: 16px 24px 32px;
+}
+
+/* ——— la page d'un élément ouvert (modèle « page d'un ticket », ../lin/lin.css) ——— */
+
+/* une entrée du fil : la phrase, puis le texte et les boutons d'une décision en attente */
+.v2 .lin .c2b-fil-corps {
+  flex: 1;
+  min-width: 0;
+}
+.v2 .lin .lin-ticket-fil .lin-ticket-fil-texte {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 19px;
+}
+.v2 .lin .lin-ticket-fil > li[data-attente] b {
+  color: var(--lin-texte);
+}
+/* un nom dans une phrase du fil (une relance) : il l'ouvre */
+.v2 .lin .c2b-fil-lien {
+  font: inherit;
+  font-weight: 500;
+  color: var(--lin-texte);
+  cursor: pointer;
+}
+.v2 .lin .c2b-fil-lien:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* une facture soldée : grise ; son « ··· » ne paraît qu'au survol (sur un écran qui survole) */
+.v2 .lin .lin-ticket-sous-ligne[data-solde] {
+  color: var(--lin-second);
+}
+.v2 .lin .lin-ticket-sous-ligne .lin-ancre {
+  flex-shrink: 0;
+}
+@media (hover: hover) {
+  .v2 .lin .lin-ticket-sous-ligne .lin-ancre {
+    opacity: 0;
+    transition: opacity 0.1s;
+  }
+  .v2 .lin .lin-ticket-sous-ligne:hover .lin-ancre,
+  .v2 .lin .lin-ticket-sous-ligne .lin-ancre:focus-within {
+    opacity: 1;
+  }
+}
+.v2 .lin .c2b-sous-vide {
+  margin: 20px 0 0;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+}
+
+/* le menu d'un bouton-icône (le canal d'un envoi à la main) s'ouvre vers la droite */
+.v2 .lin .c2b-icone-menu .lin-menu {
+  left: -6px;
+  right: auto;
+}
+.v2 .lin a.lin-ticket-icone {
+  color: var(--lin-second);
+}
+
+/* une valeur absente dans une pilule-menu (« Pas encore relancé ») */
+.v2 .lin .c2b-gris {
+  color: var(--lin-second);
+}

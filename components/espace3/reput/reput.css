@@ -1,0 +1,69 @@
+/* ══════════════════════════════════════════════════════════════════════
+   REPUT sur le gabarit Linear (28/10/2026) : les quelques briques que
+   ../lin/lin.css n'a pas, parce que CASHD n'en a pas besoin — le texte
+   d'un message ou d'une réponse (retours à la ligne gardés), le champ
+   pour corriger ou refuser une réponse, la ligne de ses boutons, le mot
+   qui confirme une décision, la colonne Canal du tableau, une valeur sans
+   menu. Uniquement des variables --lin-*, pour les deux thèmes. Supprimer ce fichier ne casse
+   que ces détails.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lin .lin-reput-corps {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.v2 .lin .lin-reput-message {
+  margin-top: 8px;
+}
+.v2 .lin .lin-reput-champ {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 0.5px solid var(--lin-trait);
+  background: var(--lin-champ);
+  font: inherit;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--lin-texte);
+  resize: vertical;
+}
+.v2 .lin .lin-reput-champ::placeholder {
+  color: var(--lin-second);
+}
+.v2 .lin .lin-reput-champ:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: -1px;
+}
+.v2 .lin .lin-reput-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+.v2 .lin .lin-reput-retour {
+  margin: 16px 0 0;
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--lin-second);
+}
+.v2 .lin .lin-reput-retour[data-teinte] {
+  color: var(--lin-teinte);
+}
+.v2 .lin .lin-reput-canal {
+  gap: 8px;
+  white-space: nowrap;
+  color: var(--lin-texte);
+}
+.v2 .lin .lin-reput-canal svg {
+  color: var(--lin-second);
+}
+/* une valeur de la carte Propriétés sans menu (l'état des réglages) : pas de fond au survol */
+.v2 .lin .lin-valeur--fixe:hover {
+  background: none;
+}
+.v2 .lin button.lin-maj-pied-btn:disabled,
+.v2 .lin button.lin-maj-pied-rond:disabled {
+  opacity: 0.5;
+}

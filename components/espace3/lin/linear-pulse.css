@@ -1,0 +1,937 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Activité — le fil d'activité d'un projet Linear, au 1:1 (28/10/2026, nuit)
+   components/espace3/Activite.tsx. Relevé au getComputedStyle sur
+   linear.app/omegaaii/project/exemple-…/activity (Pulse n'est pas dans
+   l'offre de Teo : /pulse renvoie sur /agent) — fenêtre 1600, thème sombre :
+   scratchpad/releve-linear-pulse.md.
+
+   Sous .v2 .lin (../lin/lin.css, intact) : la tête de 44, les pastilles de
+   28 (.lin-onglet), les ronds de 28 (.lin-rond), les cartes de droite
+   (.lin-carte-droite, .lin-props) et les menus viennent du gabarit. Ici,
+   préfixe lpu- : la colonne de 805 à 71 du bord, le composeur, les cartes
+   de mise à jour et de commentaire, les lignes d'événement, le panneau de
+   droite de 400, l'histogramme. Couleurs : jetons --lin-* (clair et sombre).
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ——— la rangée des pastilles : 43.5 de haut, pastilles à 8 du haut ——— */
+.v2 .lin .lpu-rangee {
+  height: 44px;
+  margin: 0;
+  padding: 8px 8px 7.5px;
+  align-items: flex-start;
+}
+
+/* ——— le corps : la colonne de gauche (le reste) et le panneau de droite (400) ——— */
+.v2 .lin .lpu-corps {
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  min-height: 0;
+}
+.v2 .lin .lpu-fil {
+  flex: 1;
+  min-width: 0;
+  padding: 32px 0 48px;
+}
+.v2 .lin .lpu-colonne {
+  max-width: 805px;
+  margin: 0 71px;
+}
+.v2 .lin .lpu-bloc {
+  position: relative;
+  padding: 36px 12px 0;
+}
+.v2 .lin .lpu-bloc--premier {
+  padding-top: 12px;
+}
+.v2 .lin .lpu-bloc--composeur {
+  padding: 12px;
+}
+/* la carte déborde de 16 de chaque côté de la colonne : 813 de large, à 67 du bord */
+.v2 .lin .lpu-carte,
+.v2 .lin .lpu-composeur {
+  margin: 0 -16px;
+}
+
+/* ——— le composeur (813 × 172) : ici, les types et la recherche ——— */
+.v2 .lin .lpu-composeur {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 172px;
+  border-radius: 10px;
+  border: 0.5px solid var(--lin-detail-trait);
+  background: var(--lin-detail);
+}
+.v2 .lin .lpu-composeur-haut {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 37px;
+  padding: 12px 12px 0;
+}
+.v2 .lin .lpu-segment {
+  display: inline-flex;
+  align-items: center;
+  height: 25px;
+  border-radius: 9999px;
+  border: 0.5px solid var(--lin-menu-trait);
+  background: var(--lin-pastille);
+}
+.v2 .lin .lpu-segment button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+.v2 .lin .lpu-segment button[aria-pressed="true"] {
+  background: var(--lin-onglet-detail-actif);
+  color: var(--lin-texte);
+  box-shadow:
+    0 0 0 0.5px var(--lin-menu-trait),
+    0 0.5px 1px 1px lch(0 0 0 / 0.3);
+}
+.v2 .lin .lpu-segment button:hover {
+  color: var(--lin-texte);
+}
+.v2 .lin .lpu-segment button:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: -2px;
+}
+.v2 .lin .lpu-segment-compte {
+  font-weight: 450;
+  color: var(--lin-second);
+  font-variant-numeric: tabular-nums;
+}
+.v2 .lin .lpu-segment button[aria-pressed="true"] .lpu-segment-compte {
+  color: var(--lin-compte);
+}
+.v2 .lin .lpu-composeur-champ {
+  width: 100%;
+  min-height: 32px;
+  margin: 12px 0 0;
+  padding: 4px 16px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 24px;
+  letter-spacing: -0.1px;
+  color: var(--lin-texte);
+  outline: none;
+}
+.v2 .lin .lpu-composeur-champ::placeholder {
+  color: var(--lin-second);
+}
+.v2 .lin .lpu-composeur-pied {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 52px;
+  margin-top: auto;
+  padding: 12px 14px 12px 12px;
+  border-radius: 0 0 10px 10px;
+}
+.v2 .lin .lpu-composeur-source {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+.v2 .lin .lpu-composeur-droite {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.v2 .lin .lpu-bouton-pilule {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  min-width: 24px;
+  padding: 0 8px;
+  border-radius: 9999px;
+  border: 0.5px solid transparent;
+  background: var(--lin-pastille);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-texte);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.v2 .lin button.lpu-bouton-pilule:hover {
+  background: var(--lin-pastille-active);
+}
+
+/* ——— une carte de mise à jour (813, rayon 10, bord 0.5, padding 12 16 16) ——— */
+.v2 .lin .lpu-carte {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  border: 0.5px solid var(--lin-maj-trait);
+  background: var(--lin-fond);
+  color: var(--lin-texte);
+}
+.v2 .lin .lpu-carte--maj {
+  padding: 12px 16px 16px;
+}
+.v2 .lin .lpu-carte[tabindex]:hover {
+  border-color: var(--lin-menu-bord);
+}
+.v2 .lin .lpu-carte[data-actif] {
+  border-color: var(--lin-fait);
+}
+.v2 .lin .lpu-carte:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: -2px;
+}
+.v2 .lin .lpu-carte-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  height: 32px;
+  margin-bottom: 12px;
+}
+.v2 .lin .lpu-carte-gauche {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  height: 24px;
+}
+.v2 .lin .lpu-sante {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 16px;
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--lin-teinte, var(--lin-second));
+  white-space: nowrap;
+}
+.v2 .lin .lpu-sante .lin-ic {
+  color: inherit;
+}
+.v2 .lin .lpu-auteur {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  height: 18px;
+}
+.v2 .lin .lpu-auteur-nom {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--lin-second);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lin .lpu-date {
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+.v2 .lin .lpu-avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--lin-avatar);
+  color: var(--lin-fond);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.v2 .lin .lpu-avatar--module {
+  border-radius: 4px;
+  background: color-mix(in srgb, #f2c94c 22%, transparent);
+  color: #f2c94c;
+  font-size: 10px;
+}
+/* le « ··· » de la carte : 32 × 32, icône 16, invisible hors survol (comme « Open menu » de Linear) */
+.v2 .lin .lpu-carte-menu {
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+.v2 .lin .lpu-carte:hover .lpu-carte-menu,
+.v2 .lin .lpu-carte:focus-within .lpu-carte-menu,
+.v2 .lin .lpu-carte-menu:has([aria-expanded="true"]) {
+  opacity: 1;
+}
+.v2 .lin .lpu-carte-menu .lin-rond {
+  width: 32px;
+  height: 32px;
+}
+.v2 .lin .lpu-carte-menu .lin-rond svg {
+  width: 16px;
+  height: 16px;
+}
+.v2 .lin .lpu-carte-texte {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 24px;
+  color: var(--lin-texte);
+  overflow-wrap: anywhere;
+}
+.v2 .lin .lpu-carte-texte + .lpu-carte-texte {
+  margin-top: 16px;
+}
+
+/* le bloc des propriétés : padding 12 0, barre de 2 à gauche, grille 80 + reste, rangées 28 */
+.v2 .lin .lpu-citation {
+  margin-top: 16px;
+  padding: 12px 0;
+}
+.v2 .lin .lpu-citation-cadre {
+  display: flex;
+  border-radius: 8px 0 8px 8px;
+}
+.v2 .lin .lpu-citation-barre {
+  width: 2px;
+  flex-shrink: 0;
+  border-radius: 2px;
+  background: var(--lin-citation);
+}
+.v2 .lin .lpu-props {
+  display: grid;
+  grid-template-columns: 80px minmax(0, 1fr);
+  align-items: start;
+  margin: 0;
+}
+.v2 .lin .lpu-props dt {
+  display: flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+.v2 .lin .lpu-props dd {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  margin: 0;
+  padding: 6px 12px 6px 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-texte);
+  overflow: hidden;
+}
+.v2 .lin .lpu-props dd > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lin .lpu-props dd svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--lin-second);
+}
+.v2 .lin .lpu-props dd [data-teinte] {
+  color: var(--lin-teinte);
+}
+.v2 .lin .lpu-fleche {
+  color: var(--lin-second);
+}
+
+/* le pied : « 0 comments » (37 × 28, rayon 30) puis le rond de 28 */
+.v2 .lin .lpu-carte-pied {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+.v2 .lin .lpu-bouton-bulle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 28px;
+  min-width: 32px;
+  padding: 5px 10px;
+  border-radius: 30px;
+  border: 0.5px solid transparent;
+  background: var(--lin-pastille);
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+.v2 .lin .lpu-bouton-bulle svg {
+  width: 16px;
+  height: 16px;
+  color: var(--lin-second);
+}
+.v2 .lin .lpu-bouton-bulle:hover {
+  background: var(--lin-pastille-active);
+  color: var(--lin-texte);
+}
+.v2 .lin .lpu-bouton-bulle:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: -2px;
+}
+.v2 .lin .lpu-bouton-bulle [data-teinte] {
+  color: var(--lin-teinte);
+}
+
+/* ——— une carte de commentaire : corps padding 16, gap 6, pied 0 16 16 ——— */
+.v2 .lin .lpu-commentaire-corps {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+}
+.v2 .lin .lpu-commentaire-tete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 18px;
+}
+.v2 .lin .lpu-commentaire-nom {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-titre);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lin .lpu-commentaire-actions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  padding: 1px;
+  background: var(--lin-fond);
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+.v2 .lin .lpu-carte:hover .lpu-commentaire-actions,
+.v2 .lin .lpu-carte:focus-within .lpu-commentaire-actions,
+.v2 .lin .lpu-commentaire-actions:has([aria-expanded="true"]) {
+  opacity: 1;
+}
+.v2 .lin .lpu-commentaire-pied {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px 16px;
+}
+
+/* ——— les lignes d'événement, hors carte : icône 16, texte 12/450 ——— */
+.v2 .lin .lpu-evenements {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.v2 .lin .lpu-evenement {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-height: 17px;
+  cursor: default;
+}
+.v2 .lin .lpu-evenement-icone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 17px;
+  padding-top: 1px;
+  flex-shrink: 0;
+}
+.v2 .lin .lpu-evenement-icone .lin-ic {
+  color: var(--lin-teinte, var(--lin-second));
+}
+.v2 .lin .lpu-evenement-texte {
+  margin: -4px;
+  padding: 4px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 16.8px;
+  color: var(--lin-second);
+  overflow-wrap: anywhere;
+}
+.v2 .lin .lpu-evenement-texte b {
+  font-weight: 500;
+  color: var(--lin-second);
+}
+.v2 .lin .lpu-evenement:hover .lpu-evenement-texte,
+.v2 .lin .lpu-evenement[data-actif] .lpu-evenement-texte {
+  color: var(--lin-texte);
+}
+.v2 .lin .lpu-evenement:hover .lpu-evenement-texte b,
+.v2 .lin .lpu-evenement[data-actif] .lpu-evenement-texte b {
+  color: var(--lin-titre);
+}
+.v2 .lin .lpu-evenement:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ——— vide, erreur, chargement : dans la colonne, comme un bloc du fil ——— */
+.v2 .lin .lpu-vide {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 48px 24px;
+  font-size: 13px;
+  color: var(--lin-second);
+  text-align: center;
+}
+.v2 .lin .lpu-vide svg {
+  color: var(--lin-second);
+}
+.v2 .lin .lpu-vide p {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--lin-texte);
+}
+.v2 .lin .lpu-squelettes {
+  display: grid;
+  gap: 12px;
+}
+
+/* ——— le panneau de droite : 400, trait de 0.5 à gauche, cartes de 388 à 8 du bord ——— */
+.v2 .lin .lpu-aside {
+  width: 400px;
+  flex-shrink: 0;
+  padding: 0 0 0 4px;
+  border-left: 0.5px solid var(--lin-maj-trait);
+}
+.v2 .lin .lpu-aside-interieur {
+  position: sticky;
+  top: 44px;
+  display: grid;
+  gap: 8px;
+  width: 388px;
+  margin: 0 8px 8px 0;
+  padding-top: 0;
+  align-content: start;
+}
+.v2 .lin .lpu-aside .lin-carte-droite h3 {
+  margin-bottom: 0;
+}
+.v2 .lin .lpu-aside .lin-carte-droite[data-fermee] h3 {
+  margin-bottom: 0;
+}
+.v2 .lin .lpu-aside .lin-carte-corps {
+  padding-top: 12px;
+}
+/* le titre d'une carte : « Properties ▾ » et son rond « + » de 28 */
+.v2 .lin .lpu-carte-rond {
+  margin: -6px -6px -6px 0;
+}
+/* Propriétés : rangées 28, libellé 90, valeur en pastille (padding 3 6) */
+.v2 .lin .lpu-proprietes {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+.v2 .lin .lpu-proprietes > div {
+  display: flex;
+  align-items: center;
+  height: 28px;
+}
+.v2 .lin .lpu-proprietes dt {
+  width: 90px;
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-onglet-detail-texte);
+  white-space: nowrap;
+}
+.v2 .lin .lpu-proprietes dd {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  margin: 0;
+}
+.v2 .lin .lpu-valeur {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  max-width: 100%;
+  padding: 3px 6px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-titre);
+  white-space: nowrap;
+}
+.v2 .lin .lpu-valeur > span {
+  margin-left: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lin .lpu-valeur svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--lin-icone);
+}
+.v2 .lin .lpu-valeur--vide {
+  color: var(--lin-onglet-detail-texte);
+}
+.v2 .lin .lpu-valeur [data-teinte],
+.v2 .lin .lpu-valeur[data-teinte] {
+  color: var(--lin-teinte);
+}
+.v2 .lin button.lpu-valeur:hover,
+.v2 .lin a.lpu-valeur:hover,
+.v2 .lin .lpu-valeur[aria-expanded="true"] {
+  background: var(--lin-onglet-detail);
+}
+.v2 .lin .lpu-valeur:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: -2px;
+}
+.v2 .lin .lpu-proprietes .lin-ancre .lin-puce.lin-declencheur {
+  height: 28px;
+  padding: 3px 6px;
+  font-size: 12px;
+  font-weight: 450;
+}
+/* Modules (les jalons de Linear) : rangées 36, padding 0 10, débord de 10 de chaque côté */
+.v2 .lin .lpu-jalons {
+  display: flex;
+  flex-direction: column;
+  margin: 0 -10px -10px;
+  padding: 0;
+  list-style: none;
+}
+.v2 .lin .lpu-jalon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-texte);
+  text-align: left;
+}
+.v2 .lin .lpu-jalon:hover {
+  background: var(--lin-onglet-detail);
+}
+.v2 .lin .lpu-jalon:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: -2px;
+}
+.v2 .lin .lpu-jalon svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--lin-en-cours);
+}
+.v2 .lin .lpu-jalon[aria-pressed="false"] {
+  color: var(--lin-onglet-detail-texte);
+}
+.v2 .lin .lpu-jalon[aria-pressed="false"] svg {
+  color: var(--lin-second);
+}
+.v2 .lin .lpu-jalon-nom {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lin .lpu-jalon-compte {
+  margin-left: 4px;
+  color: var(--lin-onglet-detail-texte);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.v2 .lin .lpu-jalon-coche {
+  margin-left: auto;
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+}
+.v2 .lin .lpu-jalon-coche svg {
+  width: 14px;
+  height: 14px;
+  color: var(--lin-icone);
+}
+.v2 .lin .lpu-jalon[aria-pressed="false"] .lpu-jalon-coche svg {
+  opacity: 0;
+}
+/* Activité : la légende (carré 6, libellé 12/500, chiffre), l'histogramme de 200, l'axe du bas */
+.v2 .lin .lpu-legende {
+  display: grid;
+  grid-template-columns: repeat(3, 6px minmax(0, 1fr));
+  column-gap: 4px;
+  align-items: center;
+  margin: 0;
+  white-space: nowrap;
+}
+.v2 .lin .lpu-legende-carre {
+  width: 6px;
+  height: 6px;
+  border-radius: 1px;
+  background: var(--lin-teinte);
+  align-self: start;
+  margin-top: 10px;
+}
+.v2 .lin .lpu-legende dt {
+  height: 26px;
+  padding: 0 0 2px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 24px;
+  color: var(--lin-onglet-detail-texte);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lin .lpu-legende dd {
+  margin: 0 0 0 2px;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 14.5px;
+  color: var(--lin-titre);
+  font-variant-numeric: tabular-nums;
+}
+.v2 .lin .lpu-histo {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 200px;
+  margin-top: 2px;
+  border-bottom: 0.5px solid var(--lin-maj-trait);
+}
+.v2 .lin .lpu-histo > span {
+  flex: 1;
+  display: flex;
+  flex-direction: column-reverse;
+  min-width: 0;
+}
+.v2 .lin .lpu-histo i {
+  display: block;
+  min-height: 0;
+  border-radius: 1px 1px 0 0;
+  background: var(--lin-teinte);
+}
+.v2 .lin .lpu-histo > span[data-vide] {
+  height: 1px;
+  background: var(--lin-maj-trait);
+}
+.v2 .lin .lpu-axe {
+  display: flex;
+  justify-content: space-between;
+  height: 24px;
+  margin-top: 3px;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 24px;
+  color: var(--lin-onglet-detail-texte);
+  white-space: nowrap;
+}
+.v2 .lin .lpu-axe span {
+  position: relative;
+}
+.v2 .lin .lpu-axe span::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 0;
+  width: 1px;
+  height: 5px;
+  background: var(--lin-maj-trait);
+}
+.v2 .lin .lpu-axe span:last-child::before {
+  left: auto;
+  right: 0;
+}
+/* Détail : la fiche de l'événement choisi, et « Ouvrir » */
+.v2 .lin .lpu-detail-texte {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 20px;
+  color: var(--lin-texte);
+  overflow-wrap: anywhere;
+}
+.v2 .lin .lpu-detail-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* clair : les cartes du fil et le composeur comme les cartes de la vue d'ensemble (blanches, cerclées) */
+html[data-v2-theme="light"] .v2 .lin :is(.lpu-carte, .lpu-composeur) {
+  background: var(--v2-bg-100);
+  border-color: var(--v2-a-400);
+}
+html[data-v2-theme="light"] .v2 .lin .lpu-carte[data-actif] {
+  border-color: var(--lin-fait);
+}
+html[data-v2-theme="light"] .v2 .lin .lpu-commentaire-actions {
+  background: var(--v2-bg-100);
+}
+html[data-v2-theme="light"] .v2 .lin .lpu-aside {
+  border-left-color: var(--v2-a-400);
+}
+html[data-v2-theme="light"] .v2 .lin :is(.lpu-histo, .lpu-histo > span[data-vide], .lpu-axe span::before) {
+  border-color: var(--v2-a-500);
+  background-color: transparent;
+}
+html[data-v2-theme="light"] .v2 .lin :is(.lpu-histo > span[data-vide], .lpu-axe span::before) {
+  background-color: var(--v2-a-500);
+}
+html[data-v2-theme="light"] .v2 .lin .lpu-segment button[aria-pressed="true"] {
+  box-shadow: 0 0 0 1px var(--v2-a-400);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lin :is(.lpu-carte, .lpu-composeur) {
+    background: var(--v2-bg-100);
+    border-color: var(--v2-a-400);
+  }
+  html:not([data-v2-theme="dark"]) .v2 .lin .lpu-carte[data-actif] {
+    border-color: var(--lin-fait);
+  }
+  html:not([data-v2-theme="dark"]) .v2 .lin .lpu-commentaire-actions {
+    background: var(--v2-bg-100);
+  }
+  html:not([data-v2-theme="dark"]) .v2 .lin .lpu-aside {
+    border-left-color: var(--v2-a-400);
+  }
+  html:not([data-v2-theme="dark"]) .v2 .lin :is(.lpu-histo, .lpu-histo > span[data-vide], .lpu-axe span::before) {
+    border-color: var(--v2-a-500);
+    background-color: transparent;
+  }
+  html:not([data-v2-theme="dark"]) .v2 .lin :is(.lpu-histo > span[data-vide], .lpu-axe span::before) {
+    background-color: var(--v2-a-500);
+  }
+  html:not([data-v2-theme="dark"]) .v2 .lin .lpu-segment button[aria-pressed="true"] {
+    box-shadow: 0 0 0 1px var(--v2-a-400);
+  }
+}
+
+/* ——— écrans étroits : le panneau passe sous le fil, la colonne prend la largeur ——— */
+@media (max-width: 1180px) {
+  .v2 .lin .lpu-corps {
+    flex-direction: column;
+  }
+  .v2 .lin .lpu-aside {
+    width: auto;
+    padding: 0 8px 8px;
+    border-left: 0;
+    border-top: 0.5px solid var(--lin-maj-trait);
+  }
+  .v2 .lin .lpu-aside-interieur {
+    position: static;
+    width: auto;
+    margin: 8px 0 0;
+  }
+  .v2 .lin .lpu-colonne {
+    margin: 0 32px;
+  }
+}
+@media (max-width: 720px) {
+  .v2 .lin .lpu-fil {
+    padding-top: 16px;
+  }
+  .v2 .lin .lpu-colonne {
+    margin: 0 16px;
+  }
+  .v2 .lin .lpu-bloc {
+    padding: 24px 0 0;
+  }
+  .v2 .lin .lpu-bloc--premier {
+    padding-top: 8px;
+  }
+  .v2 .lin .lpu-carte,
+  .v2 .lin .lpu-composeur {
+    margin: 0;
+  }
+  .v2 .lin .lpu-carte-gauche {
+    flex-wrap: wrap;
+    height: auto;
+    row-gap: 4px;
+  }
+  .v2 .lin .lpu-carte-tete {
+    height: auto;
+    min-height: 32px;
+  }
+  .v2 .lin .lpu-composeur-haut {
+    height: auto;
+  }
+  .v2 .lin .lpu-segment {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 25px;
+  }
+  .v2 .lin .lpu-composeur-source {
+    display: none;
+  }
+  .v2 .lin .lpu-props {
+    grid-template-columns: 72px minmax(0, 1fr);
+  }
+  .v2 .lin .lpu-carte-menu {
+    opacity: 1;
+  }
+  .v2 .lin .lpu-commentaire-actions {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v2 .lin .lpu-carte-menu,
+  .v2 .lin .lpu-commentaire-actions {
+    transition: none;
+  }
+}
+
+/* le titre d'un groupe du menu Filtrer, et le montant du Détail (pas d'icône devant) */
+.v2 .lin .lpu-menu-titre {
+  margin: 4px 0 0;
+  padding: 6px 16px 2px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-menu-gris);
+}
+.v2 .lin .lpu-valeur--chiffre {
+  font-variant-numeric: tabular-nums;
+}

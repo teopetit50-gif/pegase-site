@@ -1,0 +1,592 @@
+/* ══════════════════════════════════════════════════════════════════════
+   « À faire » de DALIRO sur les Tasks de Plain (29/10/2026)
+
+   Relevé au getComputedStyle sur app.plain.com (…/tasks/ puis TASK-1 ouvert
+   à droite), fenêtre 1440 × 900 : docs/refonte-metiers/releves/plain-tasks.md.
+   Préfixe de classes : pta-. Les couleurs sont les jetons --lin-* de lin.css
+   (clair et sombre), pris au plus proche :
+     texte #1f1f28 → --lin-titre ; gris #636370 → --lin-second ; icônes #8e8e9c → --lin-second ;
+     piste du segment et survol #f0f0f5 → --lin-survol ; onglet actif #e7e7ef → --lin-pastille-active ;
+     filets #e7e7ef / #e0e0e9 → --lin-trait ; fond de carte #fff → --lin-fond ;
+     ligne ouverte #f7f9ff → le bleu du gabarit à 7 % ; accent #525cdb, case #4a52d1 → --lin-graph-bleu ;
+     vert de « Handle with Agent » #00ab5f → --lin-vert.
+   La police « Whyte » (commerciale) du titre → var(--v2-titre). Inter « medium » = 550.
+
+   Repères, en px depuis le bord gauche de la carte de Plain (1079 de large) :
+     colonne     padding 24 en haut, 120 en bas ; tête padding 0 24 24, titre Whyte 24/400 lh 32
+     onglets     barre collante padding 0 24 12, filet bas 1, écart 16 ;
+                 segment 36 (padding 2, rayon 8, écart 8, piste) ; onglet 32 (padding 0 8, rayon 6) :
+                 icône 18 + libellé 14/550 lh 20 + compteur 12/400 lh 16, écart 4 ;
+                 à droite le tri 34 (rayon 6, padding 8, icône 18, 12/550 lh 16)
+     ligne       49 (filet haut 1) ; grille 18 / 1fr / 40, écart 8 12, padding 0 24, 48 de haut ;
+                 case 18 ; identifiant 12/475 lh 16 gris puis titre 14/550 lh 20 (≈ 6 d'écart) ;
+                 avatar 18 rayon 4 dans un bouton de 32 (rayon 6, padding 7)
+     panneau     360 de large, collant, padding 16, écart 16 :
+                 tête 32 (identifiant 12/550 lh 16 ; ronds de 32, rayon 6, icône 18) ;
+                 actions : case 18 (trait 1.5, rayon 4) + 12/400 ; boutons 34 (padding 8 12 8 8, rayon 6, 12/400) ;
+                 titre Whyte 24/400 lh 32 ; date 14/400 lh 20 grise, 4 sous le titre ;
+                 description 14/400 lh 20, padding 4 0 24 ;
+                 propriétés : grille ≈ 90 + 1fr, écart 4 16 ; dt 12/550 lh 32 ; dd en boutons de 34
+     à 390       segment remplacé par un bouton menu de 34 ; colonne padding 16 ;
+                 le panneau devient une feuille plein écran (padding 16) — ici dès 700 de colonne,
+                 à la place de la liste dans le flux : la colonne principale (container-type)
+                 serait le repère d'un position: fixed, pas l'écran
+
+   Écarts assumés : pas de ligne « Add new task » (les tâches se calculent sur
+   les chantiers, rien ne se crée ici) ; pas de bouton « Handle with Agent » —
+   sa place porte le geste de la tâche, un lien vers la fiche du chantier.
+   Supprimer ce fichier supprime le modèle, sans effet ailleurs.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lin.pta {
+  --pta-choisie: color-mix(in srgb, var(--lin-graph-bleu) 7%, transparent);
+  --pta-accent: var(--lin-graph-bleu);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--lin-titre);
+}
+
+/* ——— la grille : la liste, et le panneau de 360 quand une tâche est ouverte ——— */
+.v2 .lin .pta-grille {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  flex: 1;
+  align-items: start;
+}
+.v2 .lin.pta[data-panneau] .pta-grille {
+  grid-template-columns: minmax(0, 1fr) 360px;
+}
+.v2 .lin .pta-gauche {
+  min-width: 0;
+  padding: 24px 0 120px;
+}
+
+/* ——— la tête : titre Whyte 24/400 lh 32, 24 dessous ——— */
+.v2 .lin .pta-entete {
+  padding: 0 24px 24px;
+}
+.v2 .lin .pta-h1 {
+  margin: 0;
+  font-family: var(--v2-titre);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 32px;
+  color: var(--lin-titre);
+}
+
+/* ——— la barre d'onglets : collante, padding 0 24 12, filet bas 1 ——— */
+.v2 .lin .pta-barre {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 24px 12px;
+  border-bottom: 1px solid var(--lin-trait);
+  background: var(--lin-fond);
+}
+.v2 .lin .pta-segment {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  height: 36px;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--lin-survol);
+}
+.v2 .lin .pta-onglet {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 550;
+  line-height: 20px;
+  color: var(--lin-second);
+  white-space: nowrap;
+  transition:
+    background 0.15s ease-in-out,
+    color 0.15s ease-in-out;
+}
+.v2 .lin .pta-onglet:hover {
+  color: var(--lin-titre);
+}
+.v2 .lin .pta-onglet[aria-current="page"] {
+  background: var(--lin-pastille-active);
+  color: var(--lin-titre);
+}
+.v2 .lin .pta-onglet svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.v2 .lin .pta-onglet--a-faire svg {
+  color: var(--pta-accent);
+}
+.v2 .lin .pta-onglet--attente svg {
+  color: var(--lin-en-cours);
+}
+.v2 .lin .pta-onglet--tous svg {
+  color: var(--lin-second);
+}
+.v2 .lin .pta-compte {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--lin-second);
+  font-variant-numeric: tabular-nums;
+}
+.v2 .lin .pta-onglet:focus-visible,
+.v2 .lin .pta-lien:focus-visible,
+.v2 .lin .pta-rond:focus-visible,
+.v2 .lin .pta-bouton:focus-visible,
+.v2 .lin .pta-valeur:focus-visible {
+  outline: 2px solid var(--pta-accent);
+  outline-offset: -2px;
+}
+
+/* le tri et le menu des vues : boutons de 34 (rayon 6, padding 8, icône 18, 12/550) */
+.v2 .lin .pta-tri {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.v2 .lin .pta-vues-menu {
+  display: none;
+}
+.v2 .lin .pta-tri .lin-puce,
+.v2 .lin .pta-vues-menu .lin-puce {
+  gap: 4px;
+  height: 34px;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--lin-titre);
+}
+.v2 .lin .pta-tri .lin-puce:hover,
+.v2 .lin .pta-vues-menu .lin-puce:hover,
+.v2 .lin .pta-tri .lin-puce[aria-expanded="true"],
+.v2 .lin .pta-vues-menu .lin-puce[aria-expanded="true"] {
+  background: var(--lin-survol);
+}
+.v2 .lin .pta-tri .lin-puce svg,
+.v2 .lin .pta-vues-menu .lin-puce svg {
+  width: 18px;
+  height: 18px;
+  color: var(--lin-second);
+}
+.v2 .lin .pta-vues-menu .lin-puce .pta-compte {
+  margin-left: 2px;
+}
+
+/* ——— les lignes : 49 (filet haut 1), grille 18 / 1fr / 40 ——— */
+.v2 .lin .pta-lignes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2 .lin .pta-li {
+  position: relative;
+  background: var(--lin-fond);
+}
+.v2 .lin .pta-li + .pta-li {
+  border-top: 1px solid var(--lin-trait);
+}
+.v2 .lin .pta-li[data-actif] + .pta-li,
+.v2 .lin .pta-li + .pta-li[data-actif] {
+  border-top-color: var(--pta-choisie);
+}
+.v2 .lin .pta-li:has(:focus-visible) {
+  z-index: 1;
+  box-shadow: 0 0 0 2px var(--pta-accent);
+}
+.v2 .lin .pta-ligne {
+  position: relative;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) 40px;
+  align-items: center;
+  gap: 8px 12px;
+  height: 48px;
+  padding: 0 24px;
+}
+.v2 .lin .pta-ligne:hover {
+  background: var(--lin-survol);
+}
+.v2 .lin .pta-li[data-actif] .pta-ligne {
+  background: var(--pta-choisie);
+}
+
+/* la case : 18, un carré arrondi bordé (bleu à faire, gris en pointillé en attente) */
+.v2 .lin .pta-case {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+}
+.v2 .lin .pta-case::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  border: 1.5px solid var(--pta-accent);
+}
+.v2 .lin .pta-case[data-attente]::before {
+  border-color: var(--lin-second);
+  border-style: dashed;
+}
+
+/* l'identifiant 12/475 puis le titre 14/550 ; le lien couvre toute la ligne */
+.v2 .lin .pta-lien {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  color: inherit;
+}
+.v2 .lin .pta-lien::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.v2 .lin .pta-id {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 475;
+  line-height: 16px;
+  color: var(--lin-second);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.v2 .lin .pta-nom {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 550;
+  line-height: 20px;
+  color: var(--lin-titre);
+}
+/* l'avatar : 18, rayon 4, dans une case de 32 (rayon 6, padding 7) */
+.v2 .lin .pta-qui {
+  display: grid;
+  place-items: center;
+  justify-self: end;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+}
+.v2 .lin .pta-avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--pta-teinte, var(--lin-avatar)) 24%, transparent);
+  color: var(--pta-teinte, var(--lin-second));
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.v2 .lin .pta-vide {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+  padding: 24px;
+}
+.v2 .lin .pta-vide strong {
+  font-size: 14px;
+  font-weight: 550;
+  color: var(--lin-titre);
+}
+.v2 .lin .pta-vide span {
+  max-width: 520px;
+  font-size: 14px;
+  color: var(--lin-second);
+}
+.v2 .lin .pta-squelette {
+  display: block;
+  height: 12px;
+  border-radius: 4px;
+  background: var(--lin-survol);
+}
+.v2 .lin .pta-avis {
+  margin: 12px 24px 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--lin-second);
+}
+
+/* ——— le panneau : 360, collant, padding 16, écart 16 ——— */
+.v2 .lin .pta-panneau {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+  padding: 16px;
+  background: var(--lin-fond);
+}
+.v2 .lin .pta-p-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 32px;
+}
+.v2 .lin .pta-p-id {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--lin-second);
+}
+.v2 .lin .pta-p-feuille {
+  display: none;
+  margin: 0;
+  font-family: var(--v2-titre);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  color: var(--lin-titre);
+}
+.v2 .lin .pta-p-ronds {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.v2 .lin .pta-rond {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 7px;
+  border-radius: 6px;
+  color: var(--lin-second);
+}
+.v2 .lin .pta-rond:hover {
+  background: var(--lin-survol);
+  color: var(--lin-titre);
+}
+.v2 .lin .pta-rond svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* les actions : la case et son état, puis les boutons de 34 */
+.v2 .lin .pta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.v2 .lin .pta-etat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 18px;
+  margin-right: 4px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--lin-titre);
+  white-space: nowrap;
+}
+.v2 .lin .pta-etat::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  border-radius: 4px;
+  border: 1.5px solid var(--pta-accent);
+  background: var(--lin-bouton);
+}
+.v2 .lin .pta-etat[data-attente]::before {
+  border-color: var(--lin-second);
+  border-style: dashed;
+}
+.v2 .lin .pta-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  max-width: 100%;
+  padding: 8px 12px 8px 8px;
+  border-radius: 6px;
+  background: var(--lin-bouton);
+  box-shadow: var(--lin-anneau);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--lin-titre);
+  white-space: nowrap;
+}
+.v2 .lin a.pta-bouton:hover {
+  background: var(--lin-pastille-active);
+}
+.v2 .lin .pta-bouton > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lin .pta-bouton svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--lin-second);
+}
+.v2 .lin .pta-bouton--geste {
+  font-weight: 550;
+}
+.v2 .lin .pta-bouton--geste svg {
+  color: var(--lin-vert);
+}
+
+/* le titre Whyte 24/400 lh 32, la date 4 dessous, la description 14/400 */
+.v2 .lin .pta-p-titre {
+  margin: 0;
+  font-family: var(--v2-titre);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 32px;
+  color: var(--lin-titre);
+  overflow-wrap: anywhere;
+}
+.v2 .lin .pta-p-date {
+  margin: -12px 0 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--lin-second);
+}
+.v2 .lin .pta-p-date[data-retard] {
+  color: var(--lin-orange);
+}
+.v2 .lin .pta-p-desc {
+  margin: 0;
+  padding: 4px 0 24px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--lin-titre);
+}
+
+/* les propriétés : dt 12/550 lh 32, dd en boutons de 34 */
+.v2 .lin .pta-props {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  gap: 4px 16px;
+  margin: 0;
+}
+.v2 .lin .pta-props dt {
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 32px;
+  color: var(--lin-second);
+}
+.v2 .lin .pta-props dd {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  margin: 0;
+}
+.v2 .lin .pta-valeur {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  max-width: 100%;
+  padding: 8px 12px 8px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--lin-second);
+}
+.v2 .lin a.pta-valeur {
+  color: var(--lin-titre);
+}
+.v2 .lin a.pta-valeur:hover {
+  background: var(--lin-survol);
+}
+.v2 .lin .pta-valeur svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--lin-second);
+}
+.v2 .lin .pta-valeur > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.v2 .lin .pta-p-aide {
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--lin-second);
+}
+
+/* ——— étroit : la feuille plein écran, puis le menu à la place du segment ——— */
+@container principale (max-width: 700px) {
+  /* la colonne principale contient les éléments fixes (container-type) : la « feuille » prend
+     la place de la liste dans le flux, sous la barre du haut, au lieu d'un position: fixed */
+  .v2 .lin.pta[data-panneau] .pta-grille {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .v2 .lin.pta[data-panneau] .pta-gauche {
+    display: none;
+  }
+  .v2 .lin .pta-panneau {
+    position: static;
+    max-height: none;
+    min-height: calc(100dvh - 48px);
+    padding: 16px;
+  }
+  .v2 .lin .pta-p-feuille {
+    display: block;
+  }
+  .v2 .lin .pta-p-id {
+    display: none;
+  }
+}
+@container principale (max-width: 640px) {
+  .v2 .lin .pta-gauche {
+    padding: 16px 0 120px;
+  }
+  .v2 .lin .pta-entete {
+    padding: 0 16px 16px;
+  }
+  .v2 .lin .pta-barre {
+    padding: 0 16px 12px;
+  }
+  .v2 .lin .pta-segment {
+    display: none;
+  }
+  .v2 .lin .pta-vues-menu {
+    display: block;
+  }
+  .v2 .lin .pta-ligne {
+    height: auto;
+    min-height: 48px;
+    padding: 8px 24px;
+  }
+  .v2 .lin .pta-props {
+    grid-template-columns: 90px minmax(0, 1fr);
+  }
+}

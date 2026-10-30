@@ -1,0 +1,759 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Le modèle « rapports » (28/10/2026) : la page « Insights › Reporting » de
+   Plain, au 1:1 — la tête (titre ; Filtres · Grouper par · Période ·
+   Granularité), des sections repliables (« Overview », « Support volume »…)
+   et leur grille de cartes-graphiques (titre + « i », grand chiffre + légende,
+   graphique à bandes, point d'état en haut à droite). Relevé au
+   getComputedStyle sur app.plain.com, fenêtre 1600 px, thème sombre :
+   scratchpad/plain-rapports/releve-plain.md. Couleurs : les jetons --lin-* de
+   lin.css (clair et sombre) ; tout le reste (dimensions, polices, rayons,
+   positions) = Plain, au pixel.
+
+   Repères, en px depuis le bord du panneau (Plain : 1239 de large) :
+     tête      padding 24 24 24 ; titre 24/32 (400) à x 24 ; boutons de 30 (padding 6 12,
+               rayon 6, bord 1, texte 12/600 + valeur 12/400, chevron 18) à 8 d'écart,
+               le dernier à 24 du bord ; trait 1 sous la tête
+     section   titre 14/20 (600) + bouton-chevron 24 ; tête de section 60 (padding 24 0 12) ;
+               grille gap 42, 3 colonnes de 369 ; carte large = 2 par rangée (574.5)
+     carte     padding 12 (margin −12), rayon 8 ; en-tête 66 (titre 12/16 600 gris +
+               « i » 14 ; chiffre 24/36 + légende 14/20 gris) ; 24 dessous ; graphique
+               369 × 155 (tracé 368 × 125, axe 30) ou 575 × 200 (tracé 574 × 170)
+     menus     à 4 sous le bouton, 237 de large (214.5 pour la période), padding 4 0,
+               rayon 10, bord 1 ; rangée 36 (14/20) ou 54 (titre 14/20 + sous-titre 12/16)
+   Scopé .v2 .lin ; supprimer ce fichier supprime le modèle, sans effet ailleurs.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lin.rap {
+  /* les bandes verticales du graphique : du fond du panneau (haut) au plus sombre (bas) */
+  --rap-bande-haut: var(--lin-fond);
+  --rap-bande-bas: #0e0e0f;
+  --rap-courbe: var(--lin-graph-bleu);
+  --rap-menu-fond: var(--lin-menu-fond);
+  flex-direction: column;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lin-titre);
+}
+html[data-v2-theme="light"] .v2 .lin.rap {
+  --rap-bande-haut: var(--lin-fond);
+  --rap-bande-bas: var(--v2-a-100, var(--lin-survol));
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lin.rap {
+    --rap-bande-haut: var(--lin-fond);
+    --rap-bande-bas: var(--v2-a-100, var(--lin-survol));
+  }
+}
+
+/* ——— la page : padding 24, sans bas ——— */
+.v2 .lin .rap-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  padding: 24px 24px 0;
+}
+
+/* ——— la tête : titre à gauche (24/32), boutons à droite (30), 24 dessous ——— */
+.v2 .lin .rap-tete {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin: 0 -24px;
+  padding: 0 24px 24px;
+}
+.v2 .lin .rap-titre {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  min-height: 32px;
+  min-width: 0;
+}
+.v2 .lin .rap-titre h1 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 400;
+  color: var(--lin-titre);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lin .rap-tete-droite {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 38px;
+  flex-shrink: 0;
+}
+
+/* le bouton de 30 (« Filter », « Group by », « Timeframe  Past month ⌄ », « Granularity  Daily ⌄ ») */
+.v2 .lin .rap-btn {
+  display: flex;
+  align-items: center;
+  height: 30px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--lin-menu-bord);
+  background: var(--lin-fond);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--lin-texte);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.v2 .lin .rap-btn:hover,
+.v2 .lin .rap-btn[aria-expanded="true"] {
+  background: var(--lin-survol);
+}
+.v2 .lin .rap-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.v2 .lin .rap-btn > .rap-btn-icone {
+  display: flex;
+  width: 18px;
+  height: 18px;
+  margin: -1px 8px -1px 0;
+  color: var(--lin-compte);
+}
+.v2 .lin .rap-btn > .rap-btn-icone > svg {
+  width: 18px;
+  height: 18px;
+}
+.v2 .lin .rap-btn > .rap-btn-valeur {
+  margin-left: 8px;
+  font-weight: 400;
+  color: var(--lin-second);
+}
+.v2 .lin .rap-btn > .rap-btn-chevron {
+  display: flex;
+  width: 18px;
+  height: 18px;
+  margin: -1px 0 -1px 2px;
+  color: var(--lin-second);
+}
+.v2 .lin .rap-btn > .rap-btn-chevron > svg {
+  width: 18px;
+  height: 18px;
+}
+.v2 .lin .rap-btn--petit {
+  height: 24px;
+  padding: 3px 8px;
+}
+.v2 .lin .rap-btn--plein {
+  background: var(--lin-fait);
+  border-color: var(--lin-fait);
+  color: #fff;
+}
+.v2 .lin .rap-btn--plein:hover {
+  background: var(--lin-fait);
+  opacity: 0.9;
+}
+.v2 .lin .rap-btn:focus-visible,
+.v2 .lin .rap-section-bouton:focus-visible,
+.v2 .lin .rap-menu-option:focus-visible,
+.v2 .lin .rap-champ:focus-visible,
+.v2 .lin .rap-lien:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: -2px;
+}
+
+/* ——— le menu d'un bouton : à 4 sous lui, aligné à droite ——— */
+.v2 .lin .rap-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 20;
+  width: 237px;
+  max-height: 450px;
+  overflow: auto;
+  padding: 4px 0;
+  border-radius: 10px;
+  border: 1px solid var(--lin-trait);
+  background: var(--rap-menu-fond);
+  color: var(--lin-menu-texte);
+  box-shadow: var(--lin-ombre-menu);
+}
+.v2 .lin .rap-menu[data-cote="gauche"] {
+  left: 0;
+  right: auto;
+}
+.v2 .lin .rap-menu ul {
+  margin: 0;
+  padding: 0 4px;
+  list-style: none;
+}
+.v2 .lin .rap-menu li + li[data-section] {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--lin-menu-sep);
+}
+.v2 .lin .rap-menu-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 36px;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  color: var(--lin-menu-texte);
+  text-align: left;
+  cursor: pointer;
+}
+.v2 .lin .rap-menu-option:hover {
+  background: var(--lin-menu-survol);
+}
+.v2 .lin .rap-menu-option[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: default;
+}
+.v2 .lin .rap-menu-option > .rap-option-icone {
+  display: flex;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--lin-menu-gris);
+}
+.v2 .lin .rap-menu-option > .rap-option-icone > svg {
+  width: 16px;
+  height: 16px;
+}
+.v2 .lin .rap-menu-option > .rap-option-texte {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  gap: 2px;
+}
+.v2 .lin .rap-menu-option > .rap-option-texte > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lin .rap-menu-option > .rap-option-texte > small {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--lin-second);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lin .rap-menu-option > .rap-option-coche {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--lin-menu-texte);
+}
+.v2 .lin .rap-menu-option > .rap-option-suite {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--lin-menu-gris);
+}
+.v2 .lin .rap-menu-vide {
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--lin-menu-gris);
+}
+
+/* ——— le corps : trait sous la tête, 120 de bas ——— */
+.v2 .lin .rap-corps {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  margin: 0 -24px;
+  padding: 0 24px 120px;
+  border-top: 1px solid var(--lin-trait);
+}
+.v2 .lin .rap-avis {
+  margin: 16px 0 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--lin-second);
+}
+.v2 .lin .rap-avis strong {
+  font-weight: 500;
+  color: var(--lin-titre);
+}
+
+/* ——— une section : tête de 60 (titre + chevron), grille de cartes ——— */
+.v2 .lin .rap-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.v2 .lin .rap-section-tete {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 60px;
+  padding: 24px 0 12px;
+}
+.v2 .lin .rap-section-bouton {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 16px;
+  margin: -12px -16px;
+  border-radius: 8px;
+  color: var(--lin-titre);
+  cursor: pointer;
+}
+.v2 .lin .rap-section-bouton h2 {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--lin-titre);
+  white-space: nowrap;
+}
+.v2 .lin .rap-section-chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 5px;
+  border-radius: 6px;
+  color: var(--lin-second);
+}
+.v2 .lin .rap-section-bouton:hover .rap-section-chevron {
+  background: var(--lin-survol);
+}
+.v2 .lin .rap-section-chevron > svg {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.15s ease-in-out;
+}
+.v2 .lin .rap-section-bouton[aria-expanded="true"] .rap-section-chevron > svg {
+  transform: rotate(90deg);
+}
+.v2 .lin .rap-section-meta {
+  margin-left: auto;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--lin-second);
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lin .rap-grille {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 42px;
+}
+.v2 .lin .rap-grille > * {
+  grid-column: span 2;
+}
+.v2 .lin .rap-grille > .rap-carte--large {
+  grid-column: span 3;
+}
+.v2 .lin .rap-grille > .rap-carte--pleine {
+  grid-column: span 6;
+}
+
+/* ——— une carte-graphique : padding 12 en débord, rayon 8, 24 entre l'en-tête et le graphique ——— */
+.v2 .lin .rap-carte {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+  padding: 12px;
+  margin: -12px;
+  border-radius: 8px;
+}
+.v2 .lin .rap-carte-tete {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.v2 .lin .rap-carte-ligne {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  height: 26px;
+}
+.v2 .lin .rap-carte-titre {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--lin-second);
+}
+.v2 .lin .rap-carte-titre > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lin .rap-carte-titre > svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--lin-compte);
+}
+.v2 .lin .rap-carte-droite {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+/* le point d'état : 26 × 26, icône 18 ; vert = en ordre, orange = bloquant / hors délai, gris = rien à dire */
+.v2 .lin .rap-etat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  color: var(--lin-vert);
+}
+.v2 .lin .rap-etat[data-teinte="orange"] {
+  color: var(--lin-orange);
+}
+.v2 .lin .rap-etat[data-teinte="gris"] {
+  color: var(--lin-compte);
+}
+.v2 .lin .rap-etat > svg {
+  width: 18px;
+  height: 18px;
+}
+.v2 .lin .rap-carte-chiffre {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  height: 36px;
+  min-width: 0;
+}
+.v2 .lin .rap-carte-chiffre > strong {
+  font-size: 24px;
+  line-height: 36px;
+  font-weight: 400;
+  color: var(--lin-titre);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.v2 .lin .rap-carte-chiffre > span {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lin-second);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lin .rap-carte-corps {
+  min-width: 0;
+}
+
+/* ——— le graphique : svg à la largeur de la carte, 155 (ou 200) de haut ——— */
+.v2 .lin .rap-courbe {
+  position: relative;
+  width: 100%;
+  height: 155px;
+}
+.v2 .lin .rap-carte--large .rap-courbe,
+.v2 .lin .rap-carte--pleine .rap-courbe {
+  height: 200px;
+}
+.v2 .lin .rap-courbe > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.v2 .lin .rap-courbe text {
+  font-family: inherit;
+  font-size: 12px;
+  fill: var(--lin-second);
+}
+/* « No data » : au centre du tracé, fantôme 18 + 12/400 */
+.v2 .lin .rap-sans {
+  position: absolute;
+  left: 50%;
+  top: 62px;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+.v2 .lin .rap-carte--large .rap-sans,
+.v2 .lin .rap-carte--pleine .rap-sans {
+  top: 85px;
+}
+.v2 .lin .rap-sans > svg {
+  width: 18px;
+  height: 18px;
+  color: var(--lin-compte);
+}
+/* la bulle au survol d'un point */
+.v2 .lin .rap-bulle {
+  position: absolute;
+  z-index: 5;
+  transform: translate(-50%, calc(-100% - 8px));
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--lin-trait);
+  background: var(--rap-menu-fond);
+  color: var(--lin-menu-texte);
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: var(--lin-ombre-menu);
+}
+.v2 .lin .rap-bulle > small {
+  display: block;
+  color: var(--lin-second);
+}
+
+/* ——— dans une carte : un tableau sobre (en-tête 12/600 gris de 32, lignes de 36) ——— */
+.v2 .lin .rap-table-cadre {
+  min-width: 0;
+  overflow-x: auto;
+}
+.v2 .lin .rap-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--lin-texte);
+}
+.v2 .lin .rap-table th {
+  height: 32px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--lin-trait);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--lin-second);
+  text-align: left;
+  white-space: nowrap;
+}
+.v2 .lin .rap-table td {
+  height: 36px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--lin-trait);
+  vertical-align: middle;
+}
+.v2 .lin .rap-table th:first-child,
+.v2 .lin .rap-table td:first-child {
+  padding-left: 0;
+}
+.v2 .lin .rap-table th:last-child,
+.v2 .lin .rap-table td:last-child {
+  padding-right: 0;
+}
+.v2 .lin .rap-table tr:last-child td {
+  border-bottom: 0;
+}
+.v2 .lin .rap-table .rap-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.v2 .lin .rap-table td > small,
+.v2 .lin .rap-sous {
+  display: block;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--lin-second);
+}
+.v2 .lin .rap-table tr[data-total] td {
+  font-weight: 600;
+}
+.v2 .lin .rap-table tr[data-retrait] td:first-child {
+  padding-left: 20px;
+}
+.v2 .lin .rap-table a {
+  color: inherit;
+  font-weight: 500;
+  text-decoration: none;
+}
+.v2 .lin .rap-table a:hover {
+  text-decoration: underline;
+}
+.v2 .lin .rap-lien {
+  padding: 0;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--lin-texte);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.v2 .lin .rap-lien:hover {
+  text-decoration: underline;
+}
+.v2 .lin .rap-lien:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.v2 .lin .rap-gestes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+/* la petite pastille d'état d'une ligne */
+.v2 .lin .rap-pastille {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 4px;
+  border: 1px solid var(--lin-trait);
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+.v2 .lin .rap-pastille[data-teinte="orange"] {
+  color: var(--lin-orange);
+  border-color: var(--lin-orange);
+}
+.v2 .lin .rap-pastille[data-teinte="bleu"] {
+  color: var(--lin-fait);
+  border-color: var(--lin-fait);
+}
+.v2 .lin .rap-pastille[data-teinte="vert"] {
+  color: var(--lin-vert);
+  border-color: var(--lin-vert);
+}
+/* la barre d'une part (taux, part d'un segment) */
+.v2 .lin .rap-part {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  width: 100%;
+}
+.v2 .lin .rap-part > i {
+  width: 64px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--lin-trait);
+  overflow: hidden;
+  flex: none;
+}
+.v2 .lin .rap-part > i > b {
+  display: block;
+  height: 100%;
+  background: var(--rap-courbe);
+}
+
+/* ——— un formulaire dans une carte : champs de 30, 12 px ——— */
+.v2 .lin .rap-form {
+  display: grid;
+  gap: 12px;
+}
+.v2 .lin .rap-form-ligne {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+.v2 .lin .rap-libelle {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--lin-second);
+}
+.v2 .lin .rap-champ {
+  width: 100%;
+  height: 30px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--lin-menu-bord);
+  background: var(--lin-fond);
+  font: inherit;
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 400;
+  color: var(--lin-texte);
+  outline: none;
+}
+.v2 .lin .rap-champ:focus {
+  border-color: var(--lin-fait);
+}
+.v2 .lin textarea.rap-champ {
+  height: auto;
+  min-height: 72px;
+  resize: vertical;
+}
+.v2 .lin .rap-coche {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--lin-texte);
+}
+.v2 .lin .rap-coche input {
+  margin-top: 2px;
+}
+.v2 .lin .rap-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ——— étroit : 2 cartes par rangée sous 1100, 1 sous 720 ; la tête s'empile ——— */
+@container principale (max-width: 1100px) {
+  .v2 .lin .rap-grille > *,
+  .v2 .lin .rap-grille > .rap-carte--large {
+    grid-column: span 3;
+  }
+  .v2 .lin .rap-grille {
+    gap: 32px;
+  }
+}
+@container principale (max-width: 720px) {
+  .v2 .lin .rap-page {
+    padding: 16px 16px 0;
+  }
+  .v2 .lin .rap-tete {
+    margin: 0 -16px;
+    padding: 0 16px 16px;
+  }
+  .v2 .lin .rap-corps {
+    margin: 0 -16px;
+    padding: 0 16px 48px;
+  }
+  .v2 .lin .rap-tete-droite {
+    width: 100%;
+  }
+  .v2 .lin .rap-grille > *,
+  .v2 .lin .rap-grille > .rap-carte--large {
+    grid-column: span 6;
+  }
+  .v2 .lin .rap-grille {
+    gap: 28px;
+  }
+  .v2 .lin .rap-menu {
+    width: min(237px, calc(100vw - 32px));
+  }
+}

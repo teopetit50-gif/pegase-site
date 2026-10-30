@@ -1,0 +1,1165 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Le modèle « clients » (28/10/2026) : les pages « Tenants » de Plain, au 1:1
+   — la liste (tête, recherche, tableau) et la fiche d'un client (lien retour,
+   titre, onglets, corps, volet « Details » à droite). Relevé au
+   getComputedStyle sur app.plain.com, fenêtre 1600 px, thème sombre :
+   scratchpad/plain-clients/releve-plain.md. Couleurs : les jetons --lin-* de
+   lin.css (clair et sombre) ; tout le reste (dimensions, polices, rayons,
+   positions) = Plain, au pixel.
+
+   Repères, en px depuis le bord du panneau (Plain : 1239 de large) :
+     liste     padding 24 ; tête 58 (boutons 34 + 24 dessous), titre 20/28 à x 50 après
+               l'icône 18 ; boutons de 34 (padding 8 12 8 8, rayon 6) à 8 d'écart, le
+               dernier collé au bord ; recherche 320 × 40 à x 20 ; en-tête 32 ; lignes 56 + 1
+     fiche     colonne gauche padding 24, tête 109 ; lien retour 32 ; tuile 24 + nom 16/24 ;
+               onglets 32 (padding 0 8, rayon 6, actif = pastille) à 8 d'écart ; corps
+               pleine largeur ; volet Details 360, padding 16, rangées de 28
+   Scopé .v2 .lin ; supprimer ce fichier supprime le modèle, sans effet ailleurs.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lin.pc {
+  --pc-sep: var(--lin-detail-trait);
+  --pc-anneau: var(--lin-anneau), inset 0 0 1px 1px lch(100 0 0 / 0.12), inset 0 -1px 1px lch(0 0 0 / 0.12);
+  flex-direction: column;
+  font-size: 14px;
+  line-height: 20px;
+}
+html[data-v2-theme="light"] .v2 .lin.pc {
+  --pc-sep: var(--lin-trait);
+  --pc-anneau: var(--lin-anneau), var(--v2-ombre-petite, 0 1px 2px lch(0 0 0 / 0.06));
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lin.pc {
+    --pc-sep: var(--lin-trait);
+    --pc-anneau: var(--lin-anneau), var(--v2-ombre-petite, 0 1px 2px lch(0 0 0 / 0.06));
+  }
+}
+
+/* ——— la page : padding 24, sans bas ——— */
+.v2 .lin .pc-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  padding: 24px 24px 0;
+}
+
+/* ——— la tête de la liste : titre à gauche, boutons à droite, 24 dessous ——— */
+.v2 .lin .pc-tete {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 0 -24px;
+  padding: 0 24px 24px;
+}
+.v2 .lin .pc-titre {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  min-width: 0;
+}
+.v2 .lin .pc-titre > svg {
+  width: 18px;
+  height: 18px;
+  color: var(--lin-second);
+}
+.v2 .lin .pc-titre h1 {
+  margin: 0;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 500;
+  color: var(--lin-titre);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lin .pc-tete-droite {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* le bouton rond de 32 (étoile, « ··· », volet) : icône 18 */
+.v2 .lin .pc-rond {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 7px;
+  border-radius: 6px;
+  color: var(--lin-second);
+  cursor: pointer;
+}
+.v2 .lin .pc-rond--sombre {
+  color: var(--lin-compte);
+}
+.v2 .lin .pc-rond svg {
+  width: 18px;
+  height: 18px;
+}
+.v2 .lin .pc-rond:hover,
+.v2 .lin .pc-rond[aria-expanded="true"] {
+  background: var(--lin-survol);
+  color: var(--lin-texte);
+}
+.v2 .lin .pc-rond[aria-pressed="true"] {
+  color: var(--lin-en-cours);
+}
+.v2 .lin .pc-rond--petit {
+  width: 24px;
+  height: 24px;
+  padding: 5px;
+}
+.v2 .lin .pc-rond--petit svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* le bouton à texte de 34 (« Filters », « Display V », « + Create tenant ») */
+.v2 .lin .pc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  padding: 8px 12px 8px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--lin-texte);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.v2 .lin .pc-btn > svg {
+  width: 18px;
+  height: 18px;
+  margin: 0 4px 0 -2px;
+  color: var(--lin-second);
+}
+.v2 .lin .pc-btn:hover,
+.v2 .lin .pc-btn[aria-expanded="true"] {
+  background: var(--lin-survol);
+}
+.v2 .lin .pc-btn--plein {
+  position: relative;
+  background: var(--lin-fond);
+}
+.v2 .lin .pc-btn--plein::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: var(--pc-anneau);
+  pointer-events: none;
+}
+.v2 .lin .pc-btn--plein > svg {
+  color: var(--lin-compte);
+}
+.v2 .lin .pc-btn--plein:hover {
+  background: var(--lin-survol);
+}
+.v2 .lin .pc-btn--apres {
+  padding: 8px 8px 8px 12px;
+}
+.v2 .lin .pc-btn--apres > svg {
+  margin: 0 -2px 0 4px;
+}
+.v2 .lin .pc-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-left: 6px;
+  padding: 0 2px;
+  border-radius: 4px;
+  border: 1px solid var(--lin-menu-bord);
+  background: var(--lin-pastille-active);
+  font-family: inherit;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--lin-second);
+}
+.v2 .lin .pc-btn:focus-visible,
+.v2 .lin .pc-rond:focus-visible,
+.v2 .lin .pc-onglet:focus-visible,
+.v2 .lin .pc-retour:focus-visible,
+.v2 .lin .pc-item:focus-visible,
+.v2 .lin .pc-ligne-lien:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: -2px;
+}
+
+/* ——— sous la tête : pleine largeur ——— */
+.v2 .lin .pc-section {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  margin: 0 -24px;
+}
+
+/* la barre : recherche à gauche (320 × 40), « Sorted by » à droite */
+.v2 .lin .pc-outils {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 40px;
+  margin: 12px 20px;
+}
+.v2 .lin .pc-recherche {
+  position: relative;
+  width: 320px;
+  max-width: 100%;
+  flex-shrink: 1;
+}
+.v2 .lin .pc-recherche > svg {
+  position: absolute;
+  left: 12px;
+  top: 11px;
+  width: 18px;
+  height: 18px;
+  color: var(--lin-second);
+  pointer-events: none;
+}
+.v2 .lin .pc-recherche input {
+  width: 100%;
+  height: 40px;
+  padding: 9px 12px 9px 38px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: var(--lin-fond);
+  font: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lin-texte);
+  outline: none;
+}
+.v2 .lin .pc-recherche input::placeholder {
+  color: var(--lin-second);
+}
+.v2 .lin .pc-recherche input:hover {
+  background: var(--lin-survol);
+}
+.v2 .lin .pc-recherche input:focus {
+  border-color: var(--lin-menu-bord);
+  background: var(--lin-survol);
+}
+.v2 .lin .pc-tri {
+  display: grid;
+  grid-auto-flow: column;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+.v2 .lin .pc-tri > svg {
+  width: 18px;
+  height: 18px;
+}
+.v2 .lin .pc-tri b {
+  font-weight: 600;
+  color: var(--lin-texte);
+}
+.v2 .lin .pc-tri .pc-rond--petit {
+  color: var(--lin-compte);
+}
+.v2 .lin .pc-filtres-actifs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: -4px 20px 8px;
+}
+.v2 .lin .pc-filtre {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 4px 0 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--lin-texte);
+  background: var(--lin-pastille-active);
+}
+.v2 .lin .pc-filtre svg {
+  width: 14px;
+  height: 14px;
+  color: var(--lin-second);
+}
+.v2 .lin .pc-filtre:hover {
+  background: var(--lin-menu-bord);
+}
+.v2 .lin .pc-erreur {
+  margin: 0 24px 8px;
+  font-size: 12px;
+  color: var(--lin-rouge);
+}
+
+/* ——— le tableau : en-tête 32, lignes 56 + trait, cellules padding 16 (32 aux bords) ——— */
+.v2 .lin .pc-table-cadre {
+  flex: 1;
+  min-width: 0;
+}
+.v2 .lin .pc-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  white-space: nowrap;
+}
+.v2 .lin .pc-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  height: 32px;
+  padding: 8px 16px;
+  background: var(--lin-fond);
+  box-shadow: inset 0 -1px 0 var(--lin-trait);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--lin-second);
+  text-align: left;
+}
+.v2 .lin .pc-table th:first-child,
+.v2 .lin .pc-table td:first-child {
+  padding-left: 32px;
+}
+.v2 .lin .pc-table th:last-child,
+.v2 .lin .pc-table td:last-child {
+  padding-right: 32px;
+}
+.v2 .lin .pc-table th > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 16px;
+  max-width: 100%;
+}
+.v2 .lin .pc-table th > span > svg {
+  width: 14px;
+  height: 14px;
+  color: var(--lin-second);
+  flex-shrink: 0;
+}
+.v2 .lin .pc-table th > span > b {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lin .pc-table th.pc-num,
+.v2 .lin .pc-table td.pc-num {
+  text-align: right;
+}
+.v2 .lin .pc-table th.pc-fin > span {
+  display: flex;
+  justify-content: flex-end;
+}
+.v2 .lin .pc-table tr {
+  position: relative;
+}
+.v2 .lin .pc-table td {
+  height: 57px;
+  padding: 16px;
+  border-bottom: 1px solid var(--lin-trait);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lin-texte);
+  vertical-align: top;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lin .pc-table tbody tr:last-child td {
+  border-bottom-color: transparent;
+}
+.v2 .lin .pc-table tbody tr:hover td {
+  background: var(--lin-survol);
+}
+.v2 .lin .pc-table tbody tr:has(.pc-ligne-lien:focus-visible) td {
+  background: var(--lin-survol);
+}
+/* la ligne entière ouvre la fiche : le lien du nom s'étend sur toute la ligne */
+.v2 .lin .pc-ligne-lien::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.v2 .lin .pc-ligne-lien:focus-visible {
+  outline: none;
+}
+.v2 .lin .pc-table .pc-nom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--lin-titre);
+}
+.v2 .lin .pc-table .pc-nom > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lin .pc-tuile {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: var(--lin-survol);
+  color: var(--lin-second);
+}
+.v2 .lin .pc-tuile svg {
+  width: 12px;
+  height: 12px;
+}
+.v2 .lin .pc-val {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--lin-texte);
+}
+.v2 .lin .pc-val > svg {
+  width: 14px;
+  height: 14px;
+  color: var(--lin-compte);
+  flex-shrink: 0;
+}
+.v2 .lin .pc-val--compte {
+  font-weight: 600;
+  color: var(--lin-second);
+}
+.v2 .lin .pc-val--num {
+  font-variant-numeric: tabular-nums;
+}
+.v2 .lin .pc-gris {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--lin-compte);
+}
+.v2 .lin .pc-fort {
+  font-weight: 600;
+  color: var(--lin-titre);
+}
+.v2 .lin .pc-val[data-teinte="rouge"],
+.v2 .lin .pc-val[data-teinte="rouge"] > svg {
+  color: var(--lin-orange);
+}
+.v2 .lin .pc-val[data-teinte="jaune"] > svg {
+  color: var(--lin-en-cours);
+}
+.v2 .lin .pc-val[data-teinte="vert"] > svg {
+  color: var(--lin-vert);
+}
+.v2 .lin .pc-val[data-teinte="bleu"] > svg {
+  color: var(--lin-fait);
+}
+/* table-layout fixed : la largeur de chaque colonne est posée sur son <col> */
+.v2 .lin .pc-table .pc-col--secondaire {
+}
+
+/* ——— l'état vide : une boîte cerclée de 450, centrée ——— */
+.v2 .lin .pc-vide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 450px;
+  max-width: calc(100% - 48px);
+  margin: 57px auto 24px;
+  padding: 32px;
+  border-radius: 10px;
+  border: 1px solid var(--lin-trait);
+  background: var(--lin-fond);
+  text-align: center;
+}
+.v2 .lin .pc-vide strong {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--lin-titre);
+}
+.v2 .lin .pc-vide p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lin-second);
+}
+.v2 .lin .pc-chargement {
+  padding: 57px 24px;
+  font-size: 14px;
+  color: var(--lin-second);
+  text-align: center;
+}
+
+/* ——— la fiche : colonne gauche + volet Details (360) ——— */
+.v2 .lin .pc-fiche {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  flex: 1;
+  min-width: 0;
+}
+.v2 .lin .pc-fiche[data-volet="ferme"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+.v2 .lin .pc-fiche[data-volet="ferme"] .pc-details {
+  display: none;
+}
+.v2 .lin .pc-fiche-gauche {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 24px 24px 0;
+}
+.v2 .lin .pc-fiche-tete {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 0 -24px;
+  padding: 0 24px 24px;
+}
+.v2 .lin .pc-fiche-identite {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+.v2 .lin .pc-retour {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  margin-left: -8px;
+  padding: 0 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 32px;
+  font-weight: 600;
+  color: var(--lin-texte);
+  white-space: nowrap;
+}
+.v2 .lin .pc-retour > svg {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+}
+.v2 .lin .pc-retour:hover {
+  background: var(--lin-survol);
+}
+.v2 .lin .pc-fiche-titre {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  min-width: 0;
+  max-width: 100%;
+}
+.v2 .lin .pc-fiche-tuile {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: var(--lin-survol);
+  color: var(--lin-second);
+}
+.v2 .lin .pc-fiche-tuile svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .lin .pc-fiche-nom {
+  margin: 0;
+  padding: 4px 0;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--lin-titre);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lin .pc-fiche-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: -2px;
+  min-height: 19px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--lin-second);
+}
+.v2 .lin .pc-fiche-meta strong {
+  font-weight: 600;
+}
+.v2 .lin .pc-fiche-meta .pc-avatar {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  font-size: 9px;
+}
+.v2 .lin .pc-fiche-droite {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+/* la rangée des onglets : collante, 24 au-dessus, 12 dessous */
+.v2 .lin .pc-onglets-rangee {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0;
+  padding: 24px 24px 12px;
+  background: var(--lin-fond);
+}
+.v2 .lin .pc-onglets {
+  display: flex;
+  gap: 8px;
+  padding: 2px;
+  border-radius: 8px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.v2 .lin .pc-onglets::-webkit-scrollbar {
+  display: none;
+}
+.v2 .lin .pc-onglet {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  color: var(--lin-texte);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.v2 .lin .pc-onglet:hover {
+  background: var(--lin-survol);
+}
+.v2 .lin .pc-onglet[aria-selected="true"] {
+  background: var(--lin-pastille-active);
+}
+.v2 .lin .pc-onglet small {
+  font-size: 12px;
+  color: var(--lin-second);
+}
+.v2 .lin .pc-onglets-droite {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.v2 .lin .pc-fiche-corps {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  margin: 0 -24px;
+}
+
+/* la liste d'un onglet (comme « Customers ») : recherche en tête, puis des lignes de 64 */
+.v2 .lin .pc-liste-tete {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--pc-sep);
+}
+.v2 .lin .pc-liste-tete .pc-recherche {
+  width: 100%;
+}
+.v2 .lin .pc-liste {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2 .lin .pc-item {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 10px;
+  height: 64px;
+  margin-bottom: 1px;
+  padding: 16px 32px;
+  color: var(--lin-texte);
+}
+.v2 .lin .pc-item:hover,
+.v2 .lin a.pc-item:focus-visible {
+  background: var(--lin-survol);
+}
+.v2 .lin .pc-item-texte {
+  min-width: 0;
+  margin-top: 1px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--lin-titre);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lin .pc-item-texte small {
+  margin-left: 8px;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--lin-second);
+}
+.v2 .lin .pc-item-sous {
+  display: block;
+  margin-top: -1px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  color: var(--lin-second);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .lin .pc-item-droite {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+.v2 .lin .pc-avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: var(--lin-pastille-active);
+  color: var(--lin-texte);
+  font-size: 14px;
+  line-height: 14px;
+  font-weight: 400;
+}
+.v2 .lin .pc-avatar svg {
+  width: 14px;
+  height: 14px;
+  color: var(--lin-second);
+}
+.v2 .lin .pc-avatar[data-teinte="rouge"] {
+  background: color-mix(in srgb, var(--lin-orange) 22%, transparent);
+  color: var(--lin-orange);
+}
+.v2 .lin .pc-avatar[data-teinte="jaune"] {
+  background: color-mix(in srgb, var(--lin-en-cours) 22%, transparent);
+  color: var(--lin-en-cours);
+}
+.v2 .lin .pc-avatar[data-teinte="vert"] {
+  background: color-mix(in srgb, var(--lin-vert) 22%, transparent);
+  color: var(--lin-vert);
+}
+.v2 .lin .pc-avatar[data-teinte="bleu"] {
+  background: color-mix(in srgb, var(--lin-fait) 22%, transparent);
+  color: var(--lin-fait);
+}
+
+/* ——— le volet Details ——— */
+.v2 .lin .pc-details {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  box-shadow: inset 1px 0 0 var(--pc-sep);
+  background: var(--lin-fond);
+}
+.v2 .lin .pc-details-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 20px;
+}
+.v2 .lin .pc-details-tete h2 {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--lin-titre);
+}
+.v2 .lin .pc-details-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 0 -16px;
+  background: var(--pc-sep);
+}
+.v2 .lin .pc-details-section {
+  padding: 16px;
+  background: var(--lin-fond);
+}
+.v2 .lin .pc-details-section:first-child {
+  padding-top: 0;
+}
+.v2 .lin .pc-details-section h3 {
+  margin: 0 0 12px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  color: var(--lin-second);
+}
+.v2 .lin .pc-details-lignes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.v2 .lin .pc-details-ligne {
+  display: flex;
+  align-items: center;
+  height: 28px;
+}
+.v2 .lin .pc-details-etiquette {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 40%;
+  min-width: 0;
+  padding: 6px 16px 6px 0;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--lin-texte);
+}
+.v2 .lin .pc-details-etiquette > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lin .pc-details-etiquette > svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--lin-second);
+}
+.v2 .lin .pc-details-valeur {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  margin: -4px 0 -4px -6px;
+  padding: 4px 6px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 20px;
+  font-weight: 400;
+  color: var(--lin-texte);
+  text-align: left;
+}
+.v2 .lin .pc-details-valeur > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lin .pc-details-valeur[data-vide] {
+  color: var(--lin-second);
+}
+.v2 .lin .pc-details-valeur[data-teinte="rouge"] {
+  color: var(--lin-orange);
+}
+.v2 .lin .pc-details-valeur[data-teinte="jaune"] {
+  color: var(--lin-en-cours);
+}
+.v2 .lin .pc-details-valeur[data-teinte="vert"] {
+  color: var(--lin-vert);
+}
+.v2 .lin a.pc-details-valeur:hover,
+.v2 .lin button.pc-details-valeur:hover {
+  background: var(--lin-survol);
+  cursor: pointer;
+}
+.v2 .lin .pc-details-valeur > svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--lin-second);
+  opacity: 0;
+}
+.v2 .lin .pc-details-valeur:hover > svg {
+  opacity: 1;
+}
+.v2 .lin .pc-mono {
+  font-family: var(--v2-mono, ui-monospace, monospace);
+  font-size: 12px;
+}
+.v2 .lin .pc-point {
+  display: inline-grid;
+  place-items: center;
+  width: 9px;
+  height: 16px;
+  margin-right: 4px;
+  vertical-align: top;
+}
+.v2 .lin .pc-point::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--lin-second);
+}
+.v2 .lin .pc-point[data-teinte="vert"]::before {
+  background: var(--lin-vert);
+}
+.v2 .lin .pc-point[data-teinte="rouge"]::before {
+  background: var(--lin-orange);
+}
+.v2 .lin .pc-point[data-teinte="jaune"]::before {
+  background: var(--lin-en-cours);
+}
+.v2 .lin .pc-point[data-teinte="bleu"]::before {
+  background: var(--lin-fait);
+}
+.v2 .lin .pc-details-pied {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2px;
+  height: 24px;
+}
+.v2 .lin .pc-details-pied > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 10px;
+  line-height: 12px;
+  color: var(--lin-second);
+}
+.v2 .lin .pc-details-pied > span > svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+.v2 .lin .pc-details-pied > span > b {
+  font-weight: 400;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lin .pc-details-pied .pc-rond--petit {
+  color: var(--lin-second);
+}
+.v2 .lin .pc-details .pc-champ {
+  width: 100%;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid var(--lin-menu-bord);
+  background: var(--lin-champ);
+  font: inherit;
+  font-size: 12px;
+  color: var(--lin-texte);
+  outline: none;
+}
+.v2 .lin .pc-details .pc-champ:focus {
+  border-color: var(--lin-fait);
+}
+.v2 .lin .pc-details-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* ——— les menus (Filters, Display, « ··· ») : le menu d'options de Linear, ouvert sous le bouton ——— */
+.v2 .lin .pc-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 20;
+  min-width: 240px;
+  padding: 6px;
+  border-radius: 12px;
+  border: 0.5px solid var(--lin-menu-bord);
+  background: var(--lin-menu-fond);
+  color: var(--lin-menu-texte);
+  box-shadow: var(--lin-ombre-menu);
+}
+.v2 .lin .pc-menu[data-cote="gauche"] {
+  left: 0;
+  right: auto;
+}
+.v2 .lin .pc-menu-titre {
+  padding: 6px 8px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--lin-menu-gris);
+}
+.v2 .lin .pc-menu ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2 .lin .pc-menu li + li[data-section] {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 0.5px solid var(--lin-menu-sep);
+}
+.v2 .lin .pc-menu-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--lin-menu-texte);
+  text-align: left;
+  cursor: pointer;
+}
+.v2 .lin .pc-menu-option:hover,
+.v2 .lin .pc-menu-option:focus-visible {
+  background: var(--lin-menu-survol);
+  outline: none;
+}
+.v2 .lin .pc-menu-option[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: default;
+}
+.v2 .lin .pc-menu-option > svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--lin-menu-gris);
+}
+.v2 .lin .pc-menu-option > span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lin .pc-menu-option > small {
+  font-size: 12px;
+  color: var(--lin-menu-gris);
+  font-variant-numeric: tabular-nums;
+}
+.v2 .lin .pc-menu-option > .pc-coche {
+  width: 14px;
+  height: 14px;
+  color: var(--lin-menu-texte);
+}
+.v2 .lin .pc-menu-vide {
+  padding: 8px;
+  font-size: 12px;
+  color: var(--lin-menu-gris);
+}
+
+/* ——— étroit : le volet Details passe sous la colonne ; les colonnes secondaires se replient ——— */
+@container principale (max-width: 1100px) {
+  .v2 .lin .pc-fiche {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .v2 .lin .pc-details {
+    box-shadow: inset 0 1px 0 var(--pc-sep);
+  }
+}
+@container principale (max-width: 900px) {
+  .v2 .lin .pc-table .pc-col--secondaire,
+  .v2 .lin .pc-table [data-secondaire] {
+    display: none;
+  }
+}
+@container principale (max-width: 640px) {
+  .v2 .lin .pc-page,
+  .v2 .lin .pc-fiche-gauche {
+    padding: 16px 16px 0;
+  }
+  .v2 .lin .pc-tete,
+  .v2 .lin .pc-fiche-tete {
+    margin: 0 -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .v2 .lin .pc-onglets-rangee {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .v2 .lin .pc-section,
+  .v2 .lin .pc-fiche-corps {
+    margin: 0 -16px;
+  }
+  .v2 .lin .pc-tete {
+    flex-wrap: wrap;
+    align-items: center;
+    padding-bottom: 16px;
+  }
+  .v2 .lin .pc-tete-droite,
+  .v2 .lin .pc-onglets-droite {
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+  .v2 .lin .pc-tete-droite > .pc-btn--plein {
+    margin-left: auto;
+  }
+  .v2 .lin .pc-outils {
+    flex-wrap: wrap;
+    height: auto;
+    margin: 8px 16px;
+  }
+  .v2 .lin .pc-recherche {
+    width: 100%;
+  }
+  .v2 .lin .pc-tri {
+    margin-left: 0;
+  }
+  .v2 .lin .pc-table .pc-col--tertiaire,
+  .v2 .lin .pc-table [data-tertiaire] {
+    display: none;
+  }
+  .v2 .lin .pc-table th:first-child,
+  .v2 .lin .pc-table td:first-child {
+    padding-left: 16px;
+  }
+  .v2 .lin .pc-table th:last-child,
+  .v2 .lin .pc-table td:last-child {
+    padding-right: 16px;
+  }
+  .v2 .lin .pc-item {
+    padding: 16px;
+  }
+  .v2 .lin .pc-onglets-rangee {
+    flex-wrap: wrap;
+    padding-top: 16px;
+  }
+  .v2 .lin .pc-vide {
+    margin-top: 24px;
+  }
+  .v2 .lin .pc-details-etiquette {
+    flex-basis: 44%;
+  }
+}

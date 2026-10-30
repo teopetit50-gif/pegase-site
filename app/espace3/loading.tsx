@@ -1,4 +1,4 @@
-import { Squelette } from "@/components/espace2/ui";
+import { Squelette } from "@/components/espace3/ui";
 
 /* Le squelette affiché pendant qu'une page de /espace3 se prépare. */
 

@@ -1,0 +1,59 @@
+/* ══════════════════════════════════════════════════════════════════════
+   FILED sur le gabarit Linear (28/10/2026) : les quelques réglages propres
+   à la première page de FILED (./TableauFiled.tsx), sous .v2 .lin comme
+   le gabarit (../lin/lin.css), qui reste intact.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* le pied de la carte « À faire » : un bouton peut y remplacer un lien */
+.v2 .lin button.lin-maj-pied-btn {
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* l'onglet « Dossier » d'un document : l'écran du dossier (DossierVue), pleine largeur sous les onglets */
+.v2 .lin .filed-dossier {
+  flex: 1;
+  min-width: 0;
+  padding: 16px 24px 32px;
+}
+
+/* un document introuvable : le message, puis le lien vers la liste */
+.v2 .lin .filed-vide {
+  display: grid;
+  justify-items: center;
+}
+.v2 .lin .filed-lien-retour {
+  display: inline-flex;
+  margin-top: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-second);
+}
+.v2 .lin .filed-lien-retour:hover {
+  color: var(--lin-texte);
+}
+
+/* l'Aperçu d'un document reprend ce que montrait l'onglet « Dossier » (28/10/2026) : la coche d'une
+   valeur lue vérifiée, et la pièce en grand dans sa fenêtre */
+.v2 .lin .filed-lue-ok {
+  margin-right: 6px;
+  vertical-align: -1px;
+  color: var(--lin-vert);
+}
+.dlg-panneau.resa.filed-piece-fenetre {
+  width: min(920px, calc(100vw - 32px));
+  max-width: none;
+}
+.v2 .lin .filed-lignes-actions .lin-meta {
+  display: inline-flex;
+  align-items: center;
+}
+.v2 .lin .filed-lignes-actions li .lin-ancre {
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+.v2 .lin .filed-lignes-actions li:hover .lin-ancre,
+.v2 .lin .filed-lignes-actions li .lin-ancre:focus-within {
+  opacity: 1;
+}

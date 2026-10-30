@@ -1,0 +1,208 @@
+/* ══════════════════════════════════════════════════════════════════════
+   OFFLOAD — le tableau des affaires restées en plan (28/10/2026) : les
+   retouches propres à ./TableauAffaires.tsx, posées sur ../lin/lin.css
+   (bloc « le tableau en colonnes ») sans le modifier.
+     · la palette sobre dans les têtes de colonne : icônes grises, « à
+       décider » (le seul état bloquant) en orange ;
+     · la valeur immobilisée de la colonne, à côté de son nombre (comme la
+       somme des estimations d'une colonne de Linear) ;
+     · le point « à traiter » et l'étoile dans la ligne de référence ;
+     · « Colonnes masquées » (« Hidden columns » de Linear) : les colonnes
+       qu'on a masquées et les deux issues hors liste, cibles du glisser ;
+     · le menu « Filtrer » en sections ;
+     · la carte ouverte au milieu (CarteCentrale) : ses icônes d'état grises
+       (orange pour « à décider »), le fil, les autres affaires du compte.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lin .lin-colonne-nom .lin-ic-statut,
+.v2 .lin .lin-aff-masquee .lin-ic-statut,
+.v2 .lin .lin-ticket-sous-ligne .lin-ic-statut,
+.v2 .lin .lin-ticket-fil .lin-ic-statut,
+.v2 .lin .lin-ticket-pilules .lin-ic-statut {
+  color: var(--lin-second);
+}
+.v2 .lin .lin-colonne-nom .lin-ic-statut--annule,
+.v2 .lin .lin-ticket-sous-ligne .lin-ic-statut--annule,
+.v2 .lin .lin-ticket-fil .lin-ic-statut--annule,
+.v2 .lin .lin-ticket-pilules .lin-ic-statut--annule {
+  color: var(--lin-orange);
+}
+.v2 .lin .lin-aff-valeur {
+  font-weight: 450;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* la ligne de référence d'une carte : le point bleu, la référence, l'étoile d'une carte épinglée */
+.v2 .lin .lin-aff-ref {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.v2 .lin .lin-carte-ref .lin-aff-ref .lin-boite-point {
+  width: 7px;
+  height: 7px;
+}
+.v2 .lin .lin-carte-ref svg.lin-aff-etoile {
+  width: 12px;
+  height: 12px;
+  color: var(--lin-second);
+}
+.v2 .lin .lin-carte-tableau[draggable="true"] {
+  cursor: grab;
+}
+.v2 .lin .lin-carte-tableau[draggable="true"]:active {
+  cursor: grabbing;
+}
+.v2 .lin .lin-carte-pastille {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* « Colonnes masquées » : une colonne plus étroite, des rangées de 36 */
+.v2 .lin .lin-aff-masquees {
+  flex-basis: 260px;
+}
+.v2 .lin .lin-aff-masquees .lin-colonne-nom {
+  color: var(--lin-second);
+}
+.v2 .lin .lin-aff-masquees-corps {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 5px 12px 24px;
+}
+.v2 .lin .lin-aff-masquee {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-texte);
+  text-align: left;
+  transition:
+    background 0.15s,
+    box-shadow 0.15s;
+}
+.v2 .lin .lin-aff-masquee .lin-ic {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+.v2 .lin .lin-aff-masquee > span:not(.lin-colonne-compte) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lin button.lin-aff-masquee:hover {
+  background: var(--lin-survol);
+}
+.v2 .lin .lin-aff-masquee[data-issue] {
+  color: var(--lin-second);
+}
+.v2 .lin .lin-aff-masquee[data-cible] {
+  outline: 0.5px dashed var(--lin-trait);
+  outline-offset: -1px;
+}
+.v2 .lin .lin-aff-masquee[data-depot] {
+  background: var(--lin-survol);
+  color: var(--lin-texte);
+}
+.v2 .lin .lin-aff-masquees-aide {
+  margin: 8px 10px 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--lin-second);
+}
+
+/* le menu « Filtrer » : des sections titrées, qui défilent */
+.v2 .lin .lin-aff-menu {
+  max-height: min(70vh, 560px);
+  overflow-y: auto;
+  padding-bottom: 4px;
+}
+.v2 .lin .lin-aff-menu-titre {
+  margin: 0;
+  padding: 10px 16px 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--lin-second);
+}
+.v2 .lin .lin-aff-menu .lin-menu-option svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.v2 .lin .lin-aff-menu .lin-menu-option > span:not(.lin-meta) {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* le tableau défile seul en largeur : la page, jamais */
+.v2 .lin .lin-tableau-page {
+  min-width: 0;
+}
+.v2 .lin .lin-tableau-page > .lin-tableau {
+  min-width: 0;
+}
+
+/* ——— la carte ouverte au milieu (../lin/CarteCentrale, hors de .v2 : elle vit dans le voile) ———
+   repérée par la fiche de cette page (.lin-aff-carte), pour ne pas toucher aux cartes des autres SaaS */
+.v2-val-carte:has(.lin-aff-carte) .lin-ic {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+.v2-val-carte:has(.lin-aff-carte) .lin-ic-statut {
+  color: var(--v2-gray-900);
+}
+.v2-val-carte:has(.lin-aff-carte) .lin-ic-statut--annule {
+  color: #ff7237;
+}
+.v2-val-carte:has(.lin-aff-carte) .v2-det-statut {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.v2-val-carte .lin-aff-fil-icone {
+  color: var(--v2-gray-900);
+}
+.v2-val-carte .lin-aff-autres {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2-val-carte .lin-aff-autre {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 32px;
+  margin: 0 -8px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--v2-gray-1000);
+  text-align: left;
+}
+.v2-val-carte .lin-aff-autre:hover {
+  background: var(--v2-a-200);
+}
+.v2-val-carte .lin-aff-autre-nom {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

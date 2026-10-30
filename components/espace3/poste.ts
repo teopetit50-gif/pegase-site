@@ -3,34 +3,39 @@
 /* ══════════════════════════════════════════════════════════════════════
    Le poste affiché dans /espace3 (30/10/2026)
 
-   Deux postes, choisis dans la barre du haut à la place du module : le CEO
-   du groupe et la direction marketing. Le choix est gardé dans ce
-   navigateur. Une page propre à un poste (les campagnes, la trésorerie…)
-   impose son poste : on y arrive toujours avec la bonne navigation.
+   /espace3 est la copie de /espace2 pour les groupes. Dans la barre du
+   haut, à la place du module, le POSTE : le CEO du groupe ou la direction
+   marketing. Le poste choisit les modules du rail, la vue d'ensemble, le
+   point du matin, la file des validations et la consommation de l'IA.
+   Le choix est gardé dans ce navigateur.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useSyncExternalStore } from "react";
-import { Building2, Coins, Crown, Database, FileWarning, Home, Megaphone, PenLine, Shield, Sparkles, Star, Target, Users, Waypoints } from "lucide-react";
-
-export const RACINE = "/espace3";
+import { Crown, Megaphone, type LucideIcon } from "lucide-react";
 
 export type Poste = "ceo" | "marketing";
 
-export const POSTES: Record<Poste, { nom: string; libelle: string; personne: string; icone: typeof Crown }> = {
-  ceo: { nom: "CEO", libelle: "Président du groupe", personne: "Le Président", icone: Crown },
-  marketing: { nom: "MARKETING", libelle: "Direction marketing du groupe", personne: "Mme Rosan", icone: Megaphone },
+export const POSTES: Record<Poste, { nom: string; libelle: string; personne: string; icone: LucideIcon; modules: string[] }> = {
+  ceo: { nom: "CEO", libelle: "Président du groupe", personne: "Le Président", icone: Crown, modules: ["varelo", "filed", "cashd", "offload", "reput"] },
+  marketing: { nom: "MARKETING", libelle: "Direction marketing du groupe", personne: "Maëva Rosan", icone: Megaphone, modules: ["reput", "offload"] },
 };
+
+export const GROUPE = "Groupe Soléa";
 
 const CLE = "espace3.poste";
 const abonnes = new Set<() => void>();
+let memoire: Poste | null = null;
 
-const lire = (): Poste => {
+/** Le poste choisi, lu hors React (les jeux d'exemple) ; « ceo » côté serveur. */
+export function posteCourant(): Poste {
+  if (memoire) return memoire;
   try {
-    return localStorage.getItem(CLE) === "marketing" ? "marketing" : "ceo";
+    memoire = typeof window !== "undefined" && localStorage.getItem(CLE) === "marketing" ? "marketing" : "ceo";
   } catch {
-    return "ceo";
+    memoire = "ceo";
   }
-};
+  return memoire;
+}
 
 export function ecrirePoste(p: Poste) {
   try {
@@ -42,185 +47,11 @@ export function ecrirePoste(p: Poste) {
   abonnes.forEach((f) => f());
 }
 
-let memoire: Poste | null = null;
-
 const abonner = (f: () => void) => {
   abonnes.add(f);
   return () => abonnes.delete(f);
 };
 
-export function usePosteChoisi(): Poste {
-  return useSyncExternalStore(abonner, () => memoire ?? (memoire = lire()), () => "ceo");
+export function usePoste(): Poste {
+  return useSyncExternalStore(abonner, posteCourant, () => "ceo");
 }
-
-/* la navigation de chaque poste : des sections (une icône dans le rail), chacune ses pages */
-export type Page = { libelle: string; href: string; exact?: boolean; compteur?: number };
-export type Section = { cle: string; titre: string; icone: typeof Crown; groupes: { titre: string; pages: Page[] }[] };
-
-export const NAVIGATION: Record<Poste, Section[]> = {
-  ceo: [
-    {
-      cle: "accueil",
-      titre: "Accueil",
-      icone: Home,
-      groupes: [
-        {
-          titre: "Le groupe",
-          pages: [
-            { libelle: "Le groupe ce matin", href: RACINE, exact: true },
-            { libelle: "Le groupe sur une page", href: `${RACINE}/groupe` },
-            { libelle: "Décisions à prendre", href: `${RACINE}/decisions`, compteur: 3 },
-          ],
-        },
-      ],
-    },
-    {
-      cle: "argent",
-      titre: "Argent",
-      icone: Coins,
-      groupes: [{ titre: "Argent du groupe", pages: [{ libelle: "Trésorerie et encours", href: `${RACINE}/argent` }] }],
-    },
-    {
-      cle: "echeances",
-      titre: "Échéances",
-      icone: FileWarning,
-      groupes: [{ titre: "Échéances et risques", pages: [{ libelle: "Contrats, baux, reportings", href: `${RACINE}/echeances` }] }],
-    },
-    {
-      cle: "directions",
-      titre: "Directions",
-      icone: Building2,
-      groupes: [{ titre: "Les directions", pages: [{ libelle: "Qui suit quoi", href: `${RACINE}/directions` }] }],
-    },
-    {
-      cle: "ia",
-      titre: "Données et IA",
-      icone: Database,
-      groupes: [
-        {
-          titre: "Le coffre du groupe",
-          pages: [
-            { libelle: "Demander au groupe", href: `${RACINE}/demander` },
-            { libelle: "Sources et référentiel", href: `${RACINE}/coffre` },
-          ],
-        },
-        {
-          titre: "Pilotage de l'IA",
-          pages: [
-            { libelle: "Consommation et coûts", href: `${RACINE}/consommation` },
-            { libelle: "Gouvernance et journal", href: `${RACINE}/gouvernance` },
-          ],
-        },
-      ],
-    },
-    {
-      cle: "systemes",
-      titre: "Omega dans le groupe",
-      icone: Waypoints,
-      groupes: [{ titre: "Omega dans le groupe", pages: [{ libelle: "Systèmes par société", href: `${RACINE}/systemes` }] }],
-    },
-  ],
-  marketing: [
-    {
-      cle: "accueil",
-      titre: "Accueil",
-      icone: Home,
-      groupes: [
-        {
-          titre: "Le marketing",
-          pages: [
-            { libelle: "Le marketing ce matin", href: RACINE, exact: true },
-            { libelle: "Décisions à prendre", href: `${RACINE}/decisions`, compteur: 3 },
-          ],
-        },
-      ],
-    },
-    {
-      cle: "campagnes",
-      titre: "Campagnes",
-      icone: Target,
-      groupes: [{ titre: "Campagnes", pages: [{ libelle: "Toutes les campagnes", href: `${RACINE}/campagnes` }] }],
-    },
-    {
-      cle: "clients",
-      titre: "Clients",
-      icone: Users,
-      groupes: [{ titre: "Clients du groupe", pages: [{ libelle: "Base unifiée et segments", href: `${RACINE}/clients` }] }],
-    },
-    {
-      cle: "reputation",
-      titre: "Avis et demandes",
-      icone: Star,
-      groupes: [{ titre: "Avis et demandes", pages: [{ libelle: "Par enseigne", href: `${RACINE}/avis` }] }],
-    },
-    {
-      cle: "contenus",
-      titre: "Contenus",
-      icone: PenLine,
-      groupes: [{ titre: "Contenus", pages: [{ libelle: "À valider et programmés", href: `${RACINE}/contenus`, compteur: 4 }] }],
-    },
-    {
-      cle: "ia",
-      titre: "IA du marketing",
-      icone: Sparkles,
-      groupes: [
-        {
-          titre: "IA du marketing",
-          pages: [
-            { libelle: "Demander au groupe", href: `${RACINE}/demander` },
-            { libelle: "Consommation et coûts", href: `${RACINE}/consommation` },
-          ],
-        },
-      ],
-    },
-  ],
-};
-
-export const REGLAGES: Section = {
-  cle: "reglages",
-  titre: "Accès",
-  icone: Shield,
-  groupes: [{ titre: "Accès", pages: [{ libelle: "Équipe et périmètres", href: `${RACINE}/equipe` }] }],
-};
-
-/* les pages qui n'existent que pour un poste */
-const PROPRES: Record<string, Poste> = {
-  groupe: "ceo",
-  argent: "ceo",
-  echeances: "ceo",
-  directions: "ceo",
-  coffre: "ceo",
-  gouvernance: "ceo",
-  systemes: "ceo",
-  societe: "ceo",
-  campagnes: "marketing",
-  clients: "marketing",
-  avis: "marketing",
-  contenus: "marketing",
-};
-
-export function posteImpose(chemin: string): Poste | null {
-  const seg = chemin.replace(RACINE, "").split("/")[1] ?? "";
-  return PROPRES[seg] ?? null;
-}
-
-export const TITRES: Record<string, string> = {
-  "": "Accueil",
-  groupe: "Le groupe sur une page",
-  decisions: "Décisions à prendre",
-  argent: "Trésorerie et encours",
-  echeances: "Échéances et risques",
-  directions: "Les directions",
-  demander: "Demander au groupe",
-  coffre: "Le coffre du groupe",
-  consommation: "Consommation et coûts de l'IA",
-  gouvernance: "Gouvernance et journal",
-  systemes: "Omega dans le groupe",
-  equipe: "Équipe et périmètres",
-  campagnes: "Campagnes",
-  clients: "Clients du groupe",
-  avis: "Avis et demandes",
-  contenus: "Contenus",
-  societe: "Fiche société",
-};
-
