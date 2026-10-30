@@ -865,7 +865,7 @@ function FichePage({ collection, id, onglet, entreprises, contacts, majEntrepris
 
       <div className="lin-projet">
         <div className="lin-projet-texte">
-          <span className="lin-tuile lcl-tuile" aria-hidden="true">
+          <span className={estEntreprise ? "lin-tuile lcl-tuile" : "lin-tuile lcl-tuile lcl-tuile--contact"} aria-hidden="true">
             {estEntreprise ? <Building2 /> : <span className="lcl-avatar lcl-avatar--grand">{initiales(nom)}</span>}
           </span>
           <TitreModifiable valeur={texte(fiche.nom)} poser={(v) => poser({ nom: v })} />

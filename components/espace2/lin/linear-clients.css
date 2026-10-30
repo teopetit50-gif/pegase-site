@@ -356,6 +356,16 @@
   width: 24px;
   height: 24px;
 }
+/* 29/10 — Teo n'aime pas le carré bleu autour des initiales : sur la fiche d'un contact,
+   l'avatar rond seul, à la taille de la tuile */
+.v2 .lcl-tuile--contact {
+  background: none;
+}
+.v2 .lcl-tuile--contact .lcl-avatar--grand {
+  width: 36px;
+  height: 36px;
+  font-size: 14px;
+}
 /* le titre et le résumé se modifient en place : un clic, puis Entrée ou un clic ailleurs */
 .v2 .lcl-h1 {
   display: block;
