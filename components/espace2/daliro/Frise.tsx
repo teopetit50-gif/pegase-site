@@ -27,6 +27,14 @@
    laisse une pastille au bord (« Début 19 Nov → ») qui y mène ; les
    commandes Aujourd'hui / zoom passent dans le coin vide au-dessus des noms,
    au lieu de couvrir les jours ; les traits ne passent plus sous les noms.
+
+   Puis (« c'est pas clair ») : des pavés de couleur sans un mot ne disent
+   rien. Une ligne peut porter des étiquettes (`pastilles`) : une boîte de
+   la durée, teintée, avec son icône, et son texte dedans s'il tient, sinon
+   juste après ; les étiquettes qui se gêneraient passent sur une voie de
+   plus et la ligne grandit. Une ligne de niveau 2 (un lot sous son
+   chantier) est plus basse et décalée ; une barre `fine` (la durée d'un
+   chantier) n'est plus qu'un trait sous son libellé.
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
@@ -64,6 +72,8 @@ export type BarreFrise = {
   href?: string;
   onClick?: () => void;
   choisie?: boolean;
+  /* la durée d'un chantier : un trait de 6 sous le libellé, pas une barre pleine */
+  fine?: boolean;
   /* les pavés posés sur la barre : un par événement (un passage), cliquables un par un */
   evenements?: EvenementFrise[];
 };
@@ -78,6 +88,19 @@ export type EvenementFrise = {
   choisi?: boolean;
 };
 
+export type PastilleFrise = {
+  cle: string;
+  debut: string;
+  fin: string;
+  texte: string;
+  sous?: string;
+  teinte?: TeinteFrise;
+  icone?: React.ReactNode;
+  titre: string;
+  onClick?: () => void;
+  choisi?: boolean;
+};
+
 export type LigneFrise = {
   cle: string;
   icone: React.ReactNode;
@@ -86,6 +109,9 @@ export type LigneFrise = {
   /* la phrase sous le nom : ce que la ligne demande, en clair */
   sous?: { texte: string; teinte?: TeinteFrise };
   choisie?: boolean;
+  /* 1 : une tête de groupe (un chantier) ; 2 : une ligne rattachée à la précédente (un lot sous son chantier) */
+  niveau?: 1 | 2;
+  pastilles?: PastilleFrise[];
   href?: string;
   /* les ronds de 28 à droite du nom (santé, statut, priorité, responsable chez Linear) */
   ronds: React.ReactNode;
@@ -145,6 +171,14 @@ export default function Frise({
     for (const l of lignes)
       for (const b of l.barres)
         for (const d of [b.debut, b.fin, b.jalon?.jour, ...(b.evenements ?? []).flatMap((e) => [e.debut, e.fin])])
+          if (d) {
+            const n = jourNum(d);
+            if (n < min) min = n;
+            if (n > max) max = n;
+          }
+    for (const l of lignes)
+      for (const p of l.pastilles ?? [])
+        for (const d of [p.debut, p.fin])
           if (d) {
             const n = jourNum(d);
             if (n < min) min = n;
@@ -224,7 +258,7 @@ export default function Frise({
   };
 
   /* ce que la page a ouvert à côté reste en vue : s'il sort de la zone visible, la frise le ramène au tiers */
-  const choix = lignes.flatMap((l) => l.barres.flatMap((b) => [b.choisie ? b.cle : "", ...(b.evenements ?? []).map((e) => (e.choisi ? e.cle : ""))])).find(Boolean) ?? "";
+  const choix = lignes.flatMap((l) => [...l.barres.flatMap((b) => [b.choisie ? b.cle : "", ...(b.evenements ?? []).map((e) => (e.choisi ? e.cle : ""))]), ...(l.pastilles ?? []).map((p) => (p.choisi ? p.cle : ""))]).find(Boolean) ?? "";
   useEffect(() => {
     const el = zone.current;
     const cible = el?.querySelector<HTMLElement>("[data-choisi]");
@@ -267,6 +301,34 @@ export default function Frise({
     }
     return barres.map((p, i) => ({ ...p, ...libelles[i] }));
   };
+
+  /* les étiquettes d'une ligne : boîte de la durée, texte dedans s'il tient, voies pour qu'aucune n'en cache une autre */
+  const rangerPastilles = (l: LigneFrise) => {
+    const items = (l.pastilles ?? [])
+      .map((p) => {
+        const x0 = x(jourNum(p.debut));
+        const w = Math.max(px, x(jourNum(p.fin) + 1) - x0);
+        /* le texte dans la boîte s'il tient (icône comprise), la réponse toujours juste après */
+        const texte = Math.round(p.texte.length * 6.2);
+        const sous = p.sous ? Math.round(p.sous.length * 5.9 + 6) : 0;
+        /* à partir de 72 px, le texte reste dedans (34 : icône et marges), coupé au besoin ; le titre le donne en entier */
+        const dedans = texte + 34 <= w || w >= 72;
+        return { p, x0, w, dedans, bout: x0 + (dedans ? w : w + 6 + texte) + sous };
+      })
+      .sort((a, z) => a.x0 - z.x0);
+    const voies: number[] = [];
+    const places = items.map((q) => {
+      let v = voies.findIndex((f) => q.x0 >= f + 6);
+      if (v < 0) {
+        v = voies.length;
+        voies.push(0);
+      }
+      voies[v] = q.bout;
+      return { ...q, voie: v };
+    });
+    return { places, voies: voies.length };
+  };
+  const PAS_VOIE = 34;
 
   const commandes = (
     <div className="ltl-commandes">
@@ -338,6 +400,7 @@ export default function Frise({
       "data-hachure": b.hachure ? "" : undefined,
       "data-ouvert": puce ? undefined : !b.debut ? "gauche" : !b.fin ? "droite" : undefined,
       "data-choisi": b.choisie ? "" : undefined,
+      "data-fine": b.fine ? "" : undefined,
       title: b.titre,
       "aria-label": b.titre,
     };
@@ -403,8 +466,11 @@ export default function Frise({
           </div>
 
           <ul className="ltl-lignes">
-            {lignes.map((l) => (
-              <li key={l.cle} className="ltl-ligne" data-choisie={l.choisie ? "" : undefined}>
+            {lignes.map((l) => {
+              const ranges = l.pastilles ? rangerPastilles(l) : null;
+              const hauteur = ranges ? Math.max(44, 10 + Math.max(1, ranges.voies) * PAS_VOIE) : undefined;
+              return (
+              <li key={l.cle} className="ltl-ligne" data-choisie={l.choisie ? "" : undefined} data-niveau={l.niveau} style={hauteur ? { height: hauteur } : undefined}>
                 <div className="ltl-gauche">
                   <div className="ltl-gauche-bloc">
                     {l.href ? (
@@ -458,9 +524,34 @@ export default function Frise({
                     </span>
                     );
                   })}
+                  {ranges?.places.map((q) => {
+                    const { p } = q;
+                    const etiquette = <span className="ltl-pas-texte">{p.texte}</span>;
+                    const corps = (
+                      <>
+                        <span className="ltl-pas-boite" style={{ width: Math.max(px - 2, q.w - 2) }}>
+                          {p.icone ? <span className="ltl-pas-icone">{p.icone}</span> : null}
+                          {q.dedans ? etiquette : null}
+                        </span>
+                        {q.dedans ? null : etiquette}
+                        {p.sous ? <span className="ltl-pas-sous">{p.sous}</span> : null}
+                      </>
+                    );
+                    const style = { left: q.x0 + 1, top: 5 + q.voie * PAS_VOIE };
+                    return p.onClick ? (
+                      <button key={p.cle} type="button" className="ltl-pas" style={style} data-teinte={p.teinte} data-choisi={p.choisi ? "" : undefined} title={p.titre} aria-pressed={!!p.choisi} onClick={p.onClick}>
+                        {corps}
+                      </button>
+                    ) : (
+                      <span key={p.cle} className="ltl-pas" style={style} data-teinte={p.teinte} title={p.titre}>
+                        {corps}
+                      </span>
+                    );
+                  })}
                 </div>
               </li>
-            ))}
+              );
+            })}
           </ul>
         </div>
       </div>
