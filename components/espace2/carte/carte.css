@@ -1,0 +1,104 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Suivi › Carte (29/10/2026) — ce que la Carte ajoute à l'éditeur
+   (../lin/plain-editeur.css) : la rangée « libellé … valeur », la carte
+   des chiffres, le résumé et les portes du panneau.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* la rangée « libellé ……… valeur » */
+.v2 .lin .crt-mesure {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+}
+.v2 .lin .crt-mesure > span:first-child {
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+.v2 .lin .crt-valeur {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lin .crt-valeur[data-teinte="ambre"] {
+  color: color-mix(in srgb, var(--lin-graph-jaune) 85%, var(--lin-titre));
+}
+.v2 .lin .crt-valeur[data-teinte="rouge"] {
+  color: var(--lin-rouge, #d93d3d);
+}
+
+/* la carte des chiffres, en haut à gauche du canevas */
+.v2 .lin .crt-entete-titre {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  color: var(--lin-second);
+}
+.v2 .lin .crt-chiffres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin: 8px 0 0;
+}
+.v2 .lin .crt-chiffres > div {
+  display: flex;
+  flex-direction: column-reverse;
+}
+.v2 .lin .crt-chiffres dt {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--lin-second);
+}
+.v2 .lin .crt-chiffres dd {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 28px;
+  font-variant-numeric: tabular-nums;
+  color: var(--lin-titre);
+}
+.v2 .lin .crt-chiffres dd[data-teinte="ambre"] {
+  color: color-mix(in srgb, var(--lin-graph-jaune) 85%, var(--lin-titre));
+}
+
+/* le panneau */
+.v2 .lin .crt-resume {
+  margin: 0 0 12px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--lin-second);
+}
+.v2 .lin .crt-chip-ambre {
+  color: color-mix(in srgb, var(--lin-graph-jaune) 85%, var(--lin-titre));
+  background: color-mix(in srgb, var(--lin-graph-jaune) 14%, transparent);
+}
+.v2 .lin .crt-portes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.v2 .lin .crt-liste {
+  margin: 0 -16px;
+}
+.v2 .lin .crt-pied {
+  padding: 12px 16px 16px;
+}
+
+/* les rangées de mesure, plus serrées que les rangées d'action de Plain : la carte tient à une échelle lisible */
+.v2 .lin .pe-rangee:has(> .crt-mesure) {
+  min-height: 30px;
+  padding: 4px 8px;
+}
+
+/* le compte dans le bouton noir « À valider » */
+.v2 .lin .pe-btn--primaire .pe-btn-n {
+  color: inherit;
+  opacity: 0.7;
+}

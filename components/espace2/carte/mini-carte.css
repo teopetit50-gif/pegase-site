@@ -1,0 +1,138 @@
+/* La Carte en miniature, sur la vue d'ensemble (29/10/2026) — ./MiniCarte.tsx */
+
+.v2 .mc {
+  margin-bottom: 12px;
+}
+.v2 .mc-lignes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.v2 .mc-lignes li + li {
+  border-top: 1px solid var(--v2-a-400);
+}
+/* source — fil — agent — fil — vous — fil — résultat */
+.v2 .mc-ligne {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 40px minmax(0, 1.2fr) 40px minmax(0, 0.9fr) 40px minmax(0, 1.1fr);
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  color: var(--v2-gray-1000);
+  font-size: 13px;
+  line-height: 18px;
+}
+.v2 .mc-ligne:hover .mc-agent strong {
+  color: var(--v2-blue-700);
+}
+.v2 .mc-ligne[data-erreur] {
+  opacity: 0.5;
+}
+.v2 .mc-source,
+.v2 .mc-resultat {
+  color: var(--v2-gray-900);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.v2 .mc-agent {
+  display: grid;
+  min-width: 0;
+}
+.v2 .mc-agent strong {
+  font-weight: 600;
+  transition: color 0.15s;
+}
+.v2 .mc-agent span {
+  color: var(--v2-gray-900);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .mc-vous {
+  justify-self: start;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--v2-a-200);
+  color: var(--v2-gray-900);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.v2 .mc-vous[data-attente] {
+  background: var(--v2-amber-200);
+  color: var(--v2-amber-900);
+  font-weight: 500;
+}
+/* le fil et le point qui court */
+.v2 .mc-fil {
+  position: relative;
+  height: 1px;
+  background: var(--v2-a-500);
+}
+.v2 .mc-point {
+  position: absolute;
+  top: -3px;
+  left: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--v2-blue-700);
+  animation: mc-court 2.2s linear infinite;
+}
+@keyframes mc-court {
+  0% {
+    left: 0;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    left: calc(100% - 7px);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v2 .mc-point {
+    display: none;
+  }
+}
+.v2 .mc-pied {
+  margin: 8px 0 0;
+}
+
+/* tablette : la source tombe */
+@media (max-width: 1100px) {
+  .v2 .mc-ligne {
+    grid-template-columns: minmax(0, 1.2fr) 32px minmax(0, 0.9fr) 32px minmax(0, 1.1fr);
+  }
+  .v2 .mc-source,
+  .v2 .mc-source + .mc-fil {
+    display: none;
+  }
+}
+/* téléphone : l'agent sur toute la ligne, puis l'attente et le résultat */
+@media (max-width: 640px) {
+  .v2 .mc-ligne {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: "agent agent" "vous resultat";
+    row-gap: 6px;
+  }
+  .v2 .mc-fil {
+    display: none;
+  }
+  .v2 .mc-agent {
+    grid-area: agent;
+  }
+  .v2 .mc-vous {
+    grid-area: vous;
+  }
+  .v2 .mc-resultat {
+    grid-area: resultat;
+  }
+}

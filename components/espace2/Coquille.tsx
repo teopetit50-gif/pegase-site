@@ -519,12 +519,14 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
       cle: "suivi",
       titre: "Suivi",
       icone: <Activity {...R} />,
-      href: `${RACINE}/activite`,
+      /* 29/10/2026 — le Suivi ouvre sur la Carte ; Activité reste le journal détaillé */
+      href: `${RACINE}/carte`,
       racines: [],
       groupes: [
         {
           titre: "Suivi",
           liens: [
+            { libelle: "Carte", href: `${RACINE}/carte` },
             { libelle: "Activité", href: `${RACINE}/activite` },
             { libelle: "Automatisations", href: `${RACINE}/automatisations` },
             { libelle: "Utilisation", href: `${RACINE}/utilisation` },

@@ -72,7 +72,8 @@ html[data-v2-theme="light"] .v2 .lin.pe {
     --pe-ombre-survol: 0 0 0 1px var(--v2-a-500), 0 2px 8px rgba(0, 0, 0, 0.06);
   }
 }
-.v2 .lin.pe[data-panneau="ferme"] {
+.v2 .lin.pe[data-panneau="ferme"],
+.v2 .lin.pe[data-panneau="auto"] {
   grid-template-columns: minmax(0, 1fr) 0;
 }
 .v2 .lin.pe button {
@@ -606,6 +607,54 @@ html[data-v2-theme="light"] .v2 .lin.pe {
   stroke: var(--pe-trait);
   stroke-width: 1px;
 }
+/* ——— la Carte (29/10/2026) : ce qui passe, qui attend, les chiffres ——— */
+/* les points qui courent sur un lien */
+.v2 .lin .pe-flux {
+  fill: var(--pe-indigo);
+  stroke: var(--lin-fond);
+  stroke-width: 1.5px;
+}
+/* le bloc qui attend quelqu'un : trait ambre et halo qui respire */
+.v2 .lin .pe-bloc[data-alerte] {
+  border-color: color-mix(in srgb, var(--lin-graph-jaune) 70%, var(--pe-trait));
+  animation: pe-respire 2.4s ease-in-out infinite;
+}
+.v2 .lin .pe-bloc[data-alerte][aria-pressed="true"] {
+  border-color: var(--pe-indigo);
+}
+@keyframes pe-respire {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--lin-graph-jaune) 0%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--lin-graph-jaune) 22%, transparent);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v2 .lin .pe-flux {
+    display: none;
+  }
+  .v2 .lin .pe-bloc[data-alerte] {
+    animation: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--lin-graph-jaune) 22%, transparent);
+  }
+}
+/* la carte des chiffres, en haut à gauche, hors zoom */
+.v2 .lin .pe-entete {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  z-index: 2;
+  max-width: calc(100% - 30px);
+  padding: 12px 14px;
+  border: 1px solid var(--pe-trait-fin);
+  border-radius: 12px;
+  background: var(--lin-fond);
+  box-shadow: var(--pe-ombre);
+  cursor: default;
+}
+
 /* l'état vide du canevas */
 .v2 .lin .pe-vide {
   position: absolute;
@@ -643,7 +692,8 @@ html[data-v2-theme="light"] .v2 .lin.pe {
   background: var(--lin-fond);
   overflow: hidden;
 }
-.v2 .lin.pe[data-panneau="ferme"] .pe-panneau {
+.v2 .lin.pe[data-panneau="ferme"] .pe-panneau,
+.v2 .lin.pe[data-panneau="auto"] .pe-panneau {
   display: none;
 }
 .v2 .lin .pe-panneau-tete {
@@ -1256,10 +1306,22 @@ html[data-v2-theme="light"] .v2 .lin.pe {
   .v2 .lin.pe[data-panneau="ferme"] .pe-panneau {
     display: none;
   }
+  /* « auto » (la Carte) : sur un téléphone, le panneau reste sous le canevas */
+  .v2 .lin.pe[data-panneau="auto"] {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(360px, 56dvh) minmax(0, 1fr);
+  }
+  .v2 .lin.pe[data-panneau="auto"] .pe-panneau {
+    display: flex;
+  }
   .v2 .lin .pe-minicarte {
     display: none;
   }
   .v2 .lin .pe-vide {
     padding: 20px;
+  }
+  /* sur un téléphone, les chiffres sont en tête du panneau : la carte laisse le canevas libre */
+  .v2 .lin .pe-entete {
+    display: none;
   }
 }

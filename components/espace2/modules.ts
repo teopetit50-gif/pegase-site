@@ -20,6 +20,7 @@ export const ONGLETS_ORGANISATION: Onglet[] = [
   { libelle: "À valider", href: `${RACINE}/validations` },
   { libelle: "Point du matin", href: `${RACINE}/point` },
   { libelle: "Demandes reçues", href: `${RACINE}/demandes` },
+  { libelle: "Carte", href: `${RACINE}/carte` },
   { libelle: "Activité", href: `${RACINE}/activite` },
   { libelle: "Tâches", href: `${RACINE}/taches` },
   { libelle: "Notes", href: `${RACINE}/notes` },

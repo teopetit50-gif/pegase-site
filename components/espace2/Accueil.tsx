@@ -30,6 +30,7 @@ import { RACINE } from "./modules";
 import { useDonnees } from "./donnees";
 import { evenements } from "./evenements";
 import { ecrireStockage, useStockage } from "./Collection";
+import MiniCarte from "./carte/MiniCarte";
 import "./habillage.css";
 
 const CLE_TACHES = "espace2-collection-taches";
@@ -101,6 +102,9 @@ export default function Accueil() {
     <div className="v2-page v2-arrivee v2-va v2-vivant oc-va-simple">
       <h1 className="v2-sr">Vue d&apos;ensemble</h1>
       {erreur ? <p className="v2-gris">La base n&apos;a pas répondu : {erreur}</p> : null}
+
+      {/* 29/10/2026 — la Carte en miniature : les agents au travail, un clic l'ouvre */}
+      <MiniCarte />
 
       <div className="v2-va-grille">
         <div className="v2-va-col">

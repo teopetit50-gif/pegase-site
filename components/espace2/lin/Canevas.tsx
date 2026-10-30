@@ -39,8 +39,13 @@ export type NoeudPE = {
   sortie?: string;
   /* le libellé lu par un lecteur d'écran */
   libelle?: string;
+  /* le bloc attend quelqu'un : un halo ambre qui respire (la Carte, « Vous ») */
+  alerte?: boolean;
+  /* posé au milieu de la hauteur du dessin, hors rangées (la Carte : « Vous », où tous les agents convergent) */
+  centre?: boolean;
 };
-export type LienPE = { de: string; sortie: string; vers: string };
+/* flux : le nombre de points qui courent sur le lien (0 à 3) — la Carte montre ce qui passe */
+export type LienPE = { de: string; sortie: string; vers: string; flux?: number };
 export type Vue = { x: number; y: number; k: number };
 
 const LARGEUR_BLOC = 308;
@@ -334,13 +339,32 @@ type Props = {
   eteints?: ReadonlySet<string>;
   panneau: React.ReactNode;
   vide?: { titre: string; texte: string };
+  /* une carte posée en haut à gauche du canevas, hors zoom (la Carte : les chiffres de la période) */
+  entete?: React.ReactNode;
+  /* ajuster le dessin à la fenêtre au premier rendu, sur toutes les largeurs */
+  ajusterAuDepart?: boolean;
+  /* l'écart entre deux colonnes (408 chez Plain) ; la Carte, à quatre colonnes, les resserre */
+  pasColonne?: number;
+  /* le panneau fermé à l'ouverture : il s'ouvre au premier bloc choisi (la Carte laisse toute la place au dessin) */
+  panneauFerme?: boolean;
+  /* la mini-carte en bas à droite (par défaut) ; la Carte, ajustée à la fenêtre, s'en passe */
+  miniCarte?: boolean;
 };
 
-export const EditeurPlain = forwardRef<PoigneeEditeur, Props>(function EditeurPlain({ titre, retour, badge, actions, noeuds, liens, selection, choisir, eteints, panneau, vide }, ref) {
-  const [panneauOuvert, setPanneauOuvert] = useState(true);
+export const EditeurPlain = forwardRef<PoigneeEditeur, Props>(function EditeurPlain({ titre, retour, badge, actions, noeuds, liens, selection, choisir, eteints, panneau, vide, entete, ajusterAuDepart, pasColonne = PAS_COLONNE, panneauFerme, miniCarte = true }, ref) {
+  /* null : « auto » — fermé sur un écran large, ouvert sur un téléphone (où il est, sous le canevas, la version qui se lit) ; le CSS tranche, le serveur et le navigateur rendent la même chose */
+  const [choixPanneau, setChoixPanneau] = useState<boolean | null>(panneauFerme ? null : true);
+  const panneauOuvert = choixPanneau ?? false;
+  /* un bloc choisi ouvre le panneau, qui le détaille */
+  const [selectionVue, setSelectionVue] = useState(selection);
+  if (selection !== selectionVue) {
+    setSelectionVue(selection);
+    if (selection) setChoixPanneau(true);
+  }
+  const enteteRef = useRef<HTMLDivElement>(null);
   const [vue, setVue] = useState<Vue>({ x: 0, y: 0, k: 1 });
   const [hauteurs, setHauteurs] = useState<Record<string, number>>({});
-  const [chemins, setChemins] = useState<{ cle: string; d: string; actif: boolean }[]>([]);
+  const [chemins, setChemins] = useState<{ cle: string; d: string; actif: boolean; flux: number }[]>([]);
   const [raccourcis, setRaccourcis] = useState(false);
   const canevas = useRef<HTMLDivElement>(null);
   const vueRef = useRef<HTMLDivElement>(null);
@@ -350,7 +374,7 @@ export const EditeurPlain = forwardRef<PoigneeEditeur, Props>(function EditeurPl
   /* positions : colonnes à 408, rangées empilées sur la plus haute de chaque rangée + 60 */
   const positions = useMemo(() => {
     const parRangee = new Map<number, number>();
-    for (const n of noeuds) parRangee.set(n.rangee, Math.max(parRangee.get(n.rangee) ?? 0, hauteurs[n.id] ?? 96));
+    for (const n of noeuds) if (!n.centre) parRangee.set(n.rangee, Math.max(parRangee.get(n.rangee) ?? 0, hauteurs[n.id] ?? 96));
     const rangees = Array.from(parRangee.keys()).sort((a, b) => a - b);
     const y = new Map<number, number>();
     let cumul = MARGE;
@@ -359,9 +383,13 @@ export const EditeurPlain = forwardRef<PoigneeEditeur, Props>(function EditeurPl
       cumul += (parRangee.get(r) ?? 96) + ECART_RANGEE;
     }
     const p = new Map<string, { x: number; y: number; h: number }>();
-    for (const n of noeuds) p.set(n.id, { x: MARGE + n.colonne * PAS_COLONNE, y: y.get(n.rangee) ?? MARGE, h: hauteurs[n.id] ?? 96 });
+    const hauteurTotale = Math.max(0, cumul - ECART_RANGEE - MARGE);
+    for (const n of noeuds) {
+      const h = hauteurs[n.id] ?? 96;
+      p.set(n.id, { x: MARGE + n.colonne * pasColonne, y: n.centre ? MARGE + Math.max(0, (hauteurTotale - h) / 2) : (y.get(n.rangee) ?? MARGE), h });
+    }
     return p;
-  }, [noeuds, hauteurs]);
+  }, [noeuds, hauteurs, pasColonne]);
 
   const bornes = useMemo(() => {
     if (!noeuds.length) return { x: 0, y: 0, w: 0, h: 0 };
@@ -401,7 +429,7 @@ export const EditeurPlain = forwardRef<PoigneeEditeur, Props>(function EditeurPl
         const r = el.getBoundingClientRect();
         return { x: (r.left + r.width / 2 - base.left) / vue.k, y: (r.top + r.height / 2 - base.top) / vue.k };
       };
-      const suivant: { cle: string; d: string; actif: boolean }[] = [];
+      const suivant: { cle: string; d: string; actif: boolean; flux: number }[] = [];
       for (const l of liens) {
         const de = blocs.current.get(l.de);
         const vers = blocs.current.get(l.vers);
@@ -410,9 +438,9 @@ export const EditeurPlain = forwardRef<PoigneeEditeur, Props>(function EditeurPl
         const b = centre(vers.querySelector('[data-poignee="entree"]'));
         if (!a || !b) continue;
         const dx = Math.max(24, Math.abs(b.x - a.x) / 2);
-        suivant.push({ cle: `${l.de}:${l.sortie}>${l.vers}`, d: `M${a.x},${a.y} C${a.x + dx},${a.y} ${b.x - dx},${b.y} ${b.x},${b.y}`, actif: selection === l.de || selection === l.vers });
+        suivant.push({ cle: `${l.de}:${l.sortie}>${l.vers}`, d: `M${a.x},${a.y} C${a.x + dx},${a.y} ${b.x - dx},${b.y} ${b.x},${b.y}`, actif: selection === l.de || selection === l.vers, flux: Math.max(0, Math.min(3, l.flux ?? 0)) });
       }
-      setChemins((avant) => (avant.length === suivant.length && avant.every((c, i) => c.d === suivant[i].d && c.actif === suivant[i].actif && c.cle === suivant[i].cle) ? avant : suivant));
+      setChemins((avant) => (avant.length === suivant.length && avant.every((c, i) => c.d === suivant[i].d && c.actif === suivant[i].actif && c.cle === suivant[i].cle && c.flux === suivant[i].flux) ? avant : suivant));
     });
     return () => cancelAnimationFrame(id);
   }, [liens, positions, vue.k, selection, noeuds]);
@@ -431,10 +459,12 @@ export const EditeurPlain = forwardRef<PoigneeEditeur, Props>(function EditeurPl
   const ajuster = useCallback(() => {
     const el = canevas.current;
     if (!el || !bornes.w) return;
+    /* la carte d'en-tête (s'il y en a une, et qu'elle se voit) garde sa place au-dessus du dessin */
+    const haut = enteteRef.current?.offsetHeight ? enteteRef.current.offsetHeight + 15 : 0;
     const W = el.clientWidth;
-    const H = el.clientHeight;
+    const H = el.clientHeight - haut;
     const k = Math.min(1, (W - 2 * MARGE) / bornes.w, (H - 2 * MARGE) / bornes.h, ZOOM_MAX);
-    setVue({ k, x: (W - bornes.w * k) / 2 - bornes.x * k, y: (H - bornes.h * k) / 2 - bornes.y * k });
+    setVue({ k, x: (W - bornes.w * k) / 2 - bornes.x * k, y: haut + (H - bornes.h * k) / 2 - bornes.y * k });
   }, [bornes]);
 
   const centrer = useCallback(
@@ -454,8 +484,8 @@ export const EditeurPlain = forwardRef<PoigneeEditeur, Props>(function EditeurPl
   useEffect(() => {
     if (ajusteUneFois.current || !bornes.w || !Object.keys(hauteurs).length) return;
     ajusteUneFois.current = true;
-    if (window.matchMedia("(max-width: 899px)").matches) ajuster();
-  }, [bornes, hauteurs, ajuster]);
+    if (ajusterAuDepart || window.matchMedia("(max-width: 899px)").matches) ajuster();
+  }, [bornes, hauteurs, ajuster, ajusterAuDepart]);
 
   /* molette : déplacement ; avec ⌘ / Ctrl (ou pincement) : zoom autour du curseur */
   useEffect(() => {
@@ -475,7 +505,7 @@ export const EditeurPlain = forwardRef<PoigneeEditeur, Props>(function EditeurPl
   const glisse = useRef<{ x: number; y: number; vx: number; vy: number; bouge: boolean } | null>(null);
   const [enGlisse, setEnGlisse] = useState(false);
   const pointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if ((e.target as HTMLElement).closest(".pe-bloc, .pe-commandes, .pe-minicarte, .pe-raccourcis, .pe-vide")) return;
+    if ((e.target as HTMLElement).closest(".pe-bloc, .pe-commandes, .pe-minicarte, .pe-raccourcis, .pe-vide, .pe-entete")) return;
     if (e.button !== 0) return;
     glisse.current = { x: e.clientX, y: e.clientY, vx: vue.x, vy: vue.y, bouge: false };
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -547,7 +577,7 @@ export const EditeurPlain = forwardRef<PoigneeEditeur, Props>(function EditeurPl
   };
 
   return (
-    <div className="lin pe" data-panneau={panneauOuvert ? "ouvert" : "ferme"}>
+    <div className="lin pe" data-panneau={choixPanneau === null ? "auto" : choixPanneau ? "ouvert" : "ferme"}>
       <h1 className="v2-sr">{titre}</h1>
       <header className="pe-barre">
         <div className="pe-barre-gauche">
@@ -563,7 +593,7 @@ export const EditeurPlain = forwardRef<PoigneeEditeur, Props>(function EditeurPl
         </div>
         <div className="pe-barre-droite">
           {actions}
-          <button type="button" className="pe-icone" aria-label={panneauOuvert ? "Masquer le panneau" : "Afficher le panneau"} aria-pressed={panneauOuvert} onClick={() => setPanneauOuvert((v) => !v)}>
+          <button type="button" className="pe-icone" aria-label={panneauOuvert ? "Masquer le panneau" : "Afficher le panneau"} aria-pressed={panneauOuvert} onClick={() => setChoixPanneau(!(choixPanneau ?? window.matchMedia("(max-width: 899px)").matches))}>
             <PanelRight aria-hidden="true" />
           </button>
         </div>
@@ -588,6 +618,14 @@ export const EditeurPlain = forwardRef<PoigneeEditeur, Props>(function EditeurPl
             {chemins.map((c) => (
               <path key={c.cle} className="pe-lien" d={c.d} data-actif={c.actif ? "" : undefined} />
             ))}
+            {/* les points qui courent : décalés sur la durée du trajet, cachés si l'on a demandé moins d'animation */}
+            {chemins.flatMap((c) =>
+              Array.from({ length: c.flux }, (_, i) => (
+                <circle key={`${c.cle}#${i}:${c.d}`} className="pe-flux" r={3.5}>
+                  <animateMotion dur="2.8s" begin={`${(i * 2.8) / c.flux}s`} repeatCount="indefinite" path={c.d} />
+                </circle>
+              )),
+            )}
           </svg>
           {noeuds.map((n) => {
             const p = positions.get(n.id)!;
@@ -604,6 +642,7 @@ export const EditeurPlain = forwardRef<PoigneeEditeur, Props>(function EditeurPl
                 aria-pressed={selection === n.id}
                 aria-label={n.libelle ?? n.titre}
                 data-eteint={eteints?.has(n.id) ? "" : undefined}
+                data-alerte={n.alerte ? "" : undefined}
                 onClick={() => choisir(selection === n.id ? null : n.id)}
               >
                 <span className="pe-bloc-titre">
@@ -617,6 +656,12 @@ export const EditeurPlain = forwardRef<PoigneeEditeur, Props>(function EditeurPl
             );
           })}
         </div>
+
+        {entete ? (
+          <div className="pe-entete" ref={enteteRef}>
+            {entete}
+          </div>
+        ) : null}
 
         {!noeuds.length && vide ? (
           <div className="pe-vide" role="status">
@@ -665,19 +710,21 @@ export const EditeurPlain = forwardRef<PoigneeEditeur, Props>(function EditeurPl
           </div>
         ) : null}
 
-        <div className="pe-minicarte" role="img" aria-label="Mini-carte du circuit" onClick={clicMini}>
-          <svg viewBox="0 0 200 150">
-            {noeuds.map((n) => {
-              const p = positions.get(n.id)!;
-              return <rect key={n.id} className="pe-minicarte-bloc" x={mini.ox + p.x * mini.s} y={mini.oy + p.y * mini.s} width={LARGEUR_BLOC * mini.s} height={p.h * mini.s} rx={2} />;
-            })}
-            <path
-              className="pe-minicarte-masque"
-              fillRule="evenodd"
-              d={`M-2,-2 h204 v154 h-204 z M${mini.ox + mini.fen.x * mini.s},${mini.oy + mini.fen.y * mini.s} h${mini.fen.w * mini.s} v${mini.fen.h * mini.s} h${-mini.fen.w * mini.s} z`}
-            />
-          </svg>
-        </div>
+        {miniCarte ? (
+          <div className="pe-minicarte" role="img" aria-label="Mini-carte du circuit" onClick={clicMini}>
+            <svg viewBox="0 0 200 150">
+              {noeuds.map((n) => {
+                const p = positions.get(n.id)!;
+                return <rect key={n.id} className="pe-minicarte-bloc" x={mini.ox + p.x * mini.s} y={mini.oy + p.y * mini.s} width={LARGEUR_BLOC * mini.s} height={p.h * mini.s} rx={2} />;
+              })}
+              <path
+                className="pe-minicarte-masque"
+                fillRule="evenodd"
+                d={`M-2,-2 h204 v154 h-204 z M${mini.ox + mini.fen.x * mini.s},${mini.oy + mini.fen.y * mini.s} h${mini.fen.w * mini.s} v${mini.fen.h * mini.s} h${-mini.fen.w * mini.s} z`}
+              />
+            </svg>
+          </div>
+        ) : null}
       </div>
 
       <aside className="pe-panneau" aria-label="Panneau">
