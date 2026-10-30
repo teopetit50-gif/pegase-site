@@ -482,3 +482,6 @@ html[data-v2-theme="light"] .v2 .lin {
 }
 /* la légende des passages prend une rangée : la frise et l'aperçu la rendent */
 .v2 .ltl-cadre .ltl-frise, .v2 .ltl-cadre .ltl-apercu { height: calc(100dvh - 48px - 88px - 28px); }
+@container principale (max-width: 1000px) {
+  .v2 .ltl-cadre .ltl-apercu { height: auto; }
+}
