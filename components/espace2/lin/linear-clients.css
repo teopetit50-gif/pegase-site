@@ -382,10 +382,9 @@
   outline: none;
   border-radius: 6px;
 }
-.v2 .lcl-h1:hover,
-.v2 .lcl-h1:focus {
-  box-shadow: 0 0 0 4px var(--lin-survol);
-  background: var(--lin-survol);
+/* 29/10 — Teo : pas de longue barre grise au survol ni à la saisie ; seul le curseur dit qu'on écrit */
+.v2 .lcl-h1 {
+  cursor: text;
 }
 .v2 .lcl-h1::placeholder {
   color: var(--lin-avatar);
