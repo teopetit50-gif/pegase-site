@@ -17,9 +17,10 @@
    de /espace), les composants qui s'en servent gardent leur dessin d'avant.
    ══════════════════════════════════════════════════════════════════════ */
 
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { ChevronDown, X } from "lucide-react";
+import "./linear-initiative.css";
 import "./linear-my-issues.css";
 import "./volet-parties.css";
 
@@ -33,6 +34,29 @@ export type Volet = {
 
 export const VoletContexte = createContext<Volet | null>(null);
 export const useVolet = () => useContext(VoletContexte);
+
+/* Le volet d'une page qui n'en avait pas (la page d'un projet LORANI…) : l'élément choisi, l'endroit
+   où son détail se pose, Échap qui le referme, et `vue` (la partie montrée) qui le referme en changeant. */
+export function useVoletPage(vue: string) {
+  const [choisie, setChoisie] = useState<string | null>(null);
+  const [cible, setCible] = useState<HTMLElement | null>(null);
+  const [vueVue, setVueVue] = useState(vue);
+  if (vueVue !== vue) {
+    setVueVue(vue);
+    setChoisie(null);
+  }
+  useEffect(() => {
+    if (choisie === null) return;
+    const touche = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || document.querySelector("[role='dialog']")) return;
+      setChoisie(null);
+    };
+    window.addEventListener("keydown", touche);
+    return () => window.removeEventListener("keydown", touche);
+  }, [choisie]);
+  const contexte = useMemo<Volet>(() => ({ cible, choisie, choisir: setChoisie }), [cible, choisie]);
+  return { contexte, ouvert: choisie !== null, setCible };
+}
 
 /* les teintes de l'écran d'avant (ui.tsx) dans celles du gabarit */
 export type TeinteLin = "vert" | "jaune" | "rouge" | "bleu" | "gris";

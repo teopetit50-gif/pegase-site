@@ -548,3 +548,45 @@
 .v2 .lvp-ligne .lmi-titre-second {
   flex: 1 1 0;
 }
+
+/* ——— le volet d'une page qui n'en avait pas (la page d'un projet LORANI, carte de Plain) :
+   à droite de la colonne, le temps qu'un élément est choisi ——— */
+.v2 .lin .pca-carte-page[data-volet] {
+  display: flex;
+  align-items: flex-start;
+}
+.v2 .lin .pca-carte-page[data-volet] > .pca-colonne {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.v2 .lvp-volet-page {
+  top: 56px;
+  padding-top: 32px;
+}
+@container principale (max-width: 1100px) {
+  .v2 .lin .pca-carte-page[data-volet] {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .v2 .lin .pca-carte-page[data-volet] > .lvp-volet-page {
+    order: -1;
+    position: static;
+    width: auto;
+    max-height: none;
+    overflow: visible;
+    padding: 16px 16px 0;
+  }
+}
+
+/* étroit : « My issues » masque à 390 pastilles et date ; ici la première pastille (l'état) et la
+   date restent, ce sont elles qu'on vient lire (colonnes : icône · titre · état · date) */
+@container principale (max-width: 640px) {
+  .v2 .lmi-ligne.lvp-ligne {
+    grid-template-columns: 8px 16px minmax(0, 1fr) auto auto 8px;
+  }
+  .v2 .lmi-ligne.lvp-ligne > .lmi-icone { grid-column: 2; }
+  .v2 .lmi-ligne.lvp-ligne > .lmi-titre { grid-column: 3; }
+  .v2 .lmi-ligne.lvp-ligne > .lmi-droite { grid-column: 4; }
+  .v2 .lmi-ligne.lvp-ligne > .lmi-date { grid-column: 5; display: block; }
+  .v2 .lmi-ligne.lvp-ligne > .lmi-droite > .lmi-pilule:first-child { display: inline-flex; }
+}

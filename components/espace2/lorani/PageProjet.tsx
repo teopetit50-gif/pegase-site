@@ -42,6 +42,7 @@ import type { Permis } from "@/components/espace/lorani/types";
 import { dateCourte } from "@/components/espace/format";
 import Habille from "@/components/espace2/Habille";
 import { RACINE } from "@/components/espace2/modules";
+import { VoletContexte, useVoletPage } from "../lin/Volet";
 import { useLorani } from "./donnees";
 import "../lin/lin.css";
 import "../lin/plain-customer-agent.css";
@@ -97,6 +98,8 @@ export default function PageProjet({ id }: { id: string }) {
   const entree = ENTREES.find((e) => e.cle === partie) ?? ENTREES[0];
   const projet = dossier.projets.find((x) => x.id === id) ?? null;
   const lien = (cle: ClePartie) => (cle === "projet" ? chemin : `${chemin}?partie=${cle}`);
+  /* 30/10/2026 : l'élément choisi dans une partie (un constat, un compte rendu…) s'ouvre dans un volet à droite */
+  const { contexte, ouvert, setCible } = useVoletPage(`${id}/${partie}`);
 
   /* après une création : la page du projet ou du permis créé, dès que le dossier relu le contient */
   const aOuvrir = useRef<{ id: string; type: "projet" | "permis" } | null>(null);
@@ -122,6 +125,7 @@ export default function PageProjet({ id }: { id: string }) {
   const resume = projet ? [projet.reference, projet.commune, NATURES_PROJET[projet.nature], PHASES[projet.phase]].filter(Boolean).join(" · ") : null;
 
   return (
+    <VoletContexte.Provider value={contexte}>
     <div className="lin pca">
       <h1 className="v2-sr">{nom}</h1>
 
@@ -160,7 +164,7 @@ export default function PageProjet({ id }: { id: string }) {
           </div>
         </nav>
 
-        <div className="pca-carte-page">
+        <div className="pca-carte-page" data-volet={ouvert ? "" : undefined}>
           <div className="pca-colonne">
             <header className="pca-tete">
               <Link href={BASE} className="pca-retour">
@@ -227,6 +231,11 @@ export default function PageProjet({ id }: { id: string }) {
               </div>
             )}
           </div>
+          {ouvert ? (
+            <aside className="lit-volet lvp-volet-page" aria-label="Détail">
+              <div ref={setCible} className="lvp-cible" />
+            </aside>
+          ) : null}
         </div>
       </div>
 
@@ -242,6 +251,7 @@ export default function PageProjet({ id }: { id: string }) {
         onEnvoi={setEnvoi}
       />
     </div>
+    </VoletContexte.Provider>
   );
 }
 
