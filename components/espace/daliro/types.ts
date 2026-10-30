@@ -164,6 +164,9 @@ export type Passage = {
   version: number;
   confirmations?: EvenementConfirmation[];
   envoi?: EnvoiPassage | null;
+  /* b6_82 : la plage horaire prévue, la même chaque jour du passage (« 07:30:00 »), ou rien */
+  heure_debut?: string | null;
+  heure_fin?: string | null;
 };
 
 /* La dernière demande J-2 partie pour un passage (public.envois, b6_07). */

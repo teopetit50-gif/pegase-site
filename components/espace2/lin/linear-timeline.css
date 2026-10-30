@@ -595,3 +595,8 @@ html[data-v2-theme="light"] .v2 .lin { --ltl-barre: #ffffff; --ltl-barre-bord: #
 .v2 .ltl-barre[data-fine] { top: 30px; height: 8px; border-radius: 4px; box-shadow: none; }
 .v2 .ltl-pas-boite .ltl-pas-texte { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .v2 .ltl-ligne[data-niveau="2"] .ltl-gauche { align-items: flex-start; padding-top: 3px; }
+/* les heures d'un passage dans l'aperçu : deux champs d'heure de 104 (sans icône d'horloge), un bouton */
+.v2 .ltl-apercu-heures { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.v2 .ltl-apercu-heures input { width: 104px; height: 26px; padding: 0 4px; border: 0.5px solid var(--lin-trait); border-radius: 6px; background: var(--lin-fond); font: inherit; font-size: 12.5px; color: var(--lin-texte); }
+.v2 .ltl-apercu-heures > span { color: var(--lin-second); }
+.v2 .ltl-apercu-heures input::-webkit-calendar-picker-indicator { display: none; }

@@ -277,3 +277,5 @@ html[data-v2-theme="light"] .v2 .lin .fpl .fpl-bloc[data-clair][data-provisoire]
 @media (prefers-color-scheme: light) {
   html:not([data-v2-theme="dark"]) .v2 .lin .fpl .fpl-bloc[data-clair][data-provisoire] { color: #0a6f93; }
 }
+/* les heures d'un passage (b6_82), en tête du bloc */
+.v2 .fpl-heures { margin-right: 5px; font-weight: 600; font-variant-numeric: tabular-nums; opacity: 0.85; }
