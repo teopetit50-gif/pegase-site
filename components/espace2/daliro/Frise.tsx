@@ -14,6 +14,12 @@
    Zoom Mois / Trimestre / Année (le bouton « Year ▾ » de Linear), choisi
    par la page (gardé dans l'adresse). À 640 px de colonne et moins, la
    frise laisse la place à une liste, comme Linear sur un téléphone.
+
+   30/10/2026 : la frise devient un calendrier qu'on touche. Une barre peut
+   porter des événements (les passages d'un chantier, un pavé par passage,
+   de la couleur de sa réponse), chacun cliquable ; une ligne peut porter
+   une phrase sous son nom ; ce que la page a ouvert à côté (l'aperçu) est
+   marqué « choisi » sur la frise.
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
@@ -50,6 +56,19 @@ export type BarreFrise = {
   titre: string;
   href?: string;
   onClick?: () => void;
+  choisie?: boolean;
+  /* les pavés posés sur la barre : un par événement (un passage), cliquables un par un */
+  evenements?: EvenementFrise[];
+};
+
+export type EvenementFrise = {
+  cle: string;
+  debut: string;
+  fin: string;
+  teinte?: TeinteFrise;
+  titre: string;
+  onClick?: () => void;
+  choisi?: boolean;
 };
 
 export type LigneFrise = {
@@ -57,6 +76,9 @@ export type LigneFrise = {
   icone: React.ReactNode;
   teinteIcone?: TeinteFrise;
   nom: string;
+  /* la phrase sous le nom : ce que la ligne demande, en clair */
+  sous?: { texte: string; teinte?: TeinteFrise };
+  choisie?: boolean;
   href?: string;
   /* les ronds de 28 à droite du nom (santé, statut, priorité, responsable chez Linear) */
   ronds: React.ReactNode;
@@ -67,7 +89,8 @@ export type LigneFrise = {
 };
 
 const JOUR = 86_400_000;
-const GAUCHE = 320;
+/* 400 et non 320 (relevé) : la phrase en clair sous le nom tient sur deux lignes (30/10) */
+const GAUCHE = 400;
 const MOIS = ["Jan", "Fév", "Mars", "Avr", "Mai", "Juin", "Juil", "Août", "Sept", "Oct", "Nov", "Déc"];
 
 /* les jours comptés en jours UTC : pas d'heure d'été qui décale une barre */
@@ -114,7 +137,7 @@ export default function Frise({
     let max = auj;
     for (const l of lignes)
       for (const b of l.barres)
-        for (const d of [b.debut, b.fin, b.jalon?.jour])
+        for (const d of [b.debut, b.fin, b.jalon?.jour, ...(b.evenements ?? []).flatMap((e) => [e.debut, e.fin])])
           if (d) {
             const n = jourNum(d);
             if (n < min) min = n;
@@ -163,6 +186,20 @@ export default function Frise({
     const visible = Math.max(0, el.clientWidth - GAUCHE);
     el.scrollLeft = Math.max(0, xAuj - visible * 0.35);
   }, [xAuj, pleine]);
+
+  /* ce que la page a ouvert à côté reste en vue : s'il sort de la zone visible, la frise le ramène au tiers */
+  const choix = lignes.flatMap((l) => l.barres.flatMap((b) => [b.choisie ? b.cle : "", ...(b.evenements ?? []).map((e) => (e.choisi ? e.cle : ""))])).find(Boolean) ?? "";
+  useEffect(() => {
+    const el = zone.current;
+    const cible = el?.querySelector<HTMLElement>("[data-choisi]");
+    if (!el || !cible || !choix) return;
+    const zoneG = el.getBoundingClientRect().left + GAUCHE;
+    const r = cible.getBoundingClientRect();
+    const visible = el.clientWidth - GAUCHE;
+    /* déjà en vue, même en partie (une barre de chantier déborde souvent) : on ne bouge pas */
+    if (r.right > zoneG + 8 && r.left < zoneG + visible - 8) return;
+    el.scrollTo({ left: el.scrollLeft + (r.left - zoneG) - visible * 0.3, behavior: "smooth" });
+  }, [choix]);
 
   /* les barres d'une ligne : position, et libellés rangés sur deux voies (dessus, dessous) */
   const place = (l: LigneFrise) => {
@@ -238,7 +275,14 @@ export default function Frise({
       <span className="ltl-icone" data-teinte={l.teinteIcone} aria-hidden="true">
         {l.icone}
       </span>
-      <span className="ltl-nom-texte">{l.nom}</span>
+      <span className="ltl-nom-bloc">
+        <span className="ltl-nom-texte">{l.nom}</span>
+        {l.sous ? (
+          <span className="ltl-sous" data-teinte={l.sous.teinte}>
+            {l.sous.texte}
+          </span>
+        ) : null}
+      </span>
       {ouvrir && l.href ? (
         <span className="ltl-ouvrir" aria-hidden="true">
           <ArrowRight />
@@ -257,6 +301,7 @@ export default function Frise({
       "data-teinte": b.teinte,
       "data-hachure": b.hachure ? "" : undefined,
       "data-ouvert": puce ? undefined : !b.debut ? "gauche" : !b.fin ? "droite" : undefined,
+      "data-choisi": b.choisie ? "" : undefined,
       title: b.titre,
       "aria-label": b.titre,
     };
@@ -323,7 +368,7 @@ export default function Frise({
 
           <ul className="ltl-lignes">
             {lignes.map((l) => (
-              <li key={l.cle} className="ltl-ligne">
+              <li key={l.cle} className="ltl-ligne" data-choisie={l.choisie ? "" : undefined}>
                 <div className="ltl-gauche">
                   <div className="ltl-gauche-bloc">
                     {l.href ? (
@@ -346,6 +391,17 @@ export default function Frise({
                         {p.b.meta ? <span className="ltl-libelle-meta">{p.b.meta}</span> : null}
                       </span>
                       {barre(p, false)}
+                      {(p.b.evenements ?? []).map((e) => {
+                        const e0 = Math.max(p.x0, x(jourNum(e.debut)));
+                        const e1 = Math.min(p.x0 + p.l, x(jourNum(e.fin) + 1));
+                        if (e1 <= p.x0 || e0 >= p.x0 + p.l) return null;
+                        const style = { left: e0 + 1, width: Math.max(8, e1 - e0 - 2) };
+                        return e.onClick ? (
+                          <button key={e.cle} type="button" className="ltl-evt" style={style} data-teinte={e.teinte} data-choisi={e.choisi ? "" : undefined} title={e.titre} aria-label={e.titre} aria-pressed={!!e.choisi} onClick={e.onClick} />
+                        ) : (
+                          <span key={e.cle} className="ltl-evt" style={style} data-teinte={e.teinte} title={e.titre} role="img" aria-label={e.titre} />
+                        );
+                      })}
                     </span>
                   ))}
                 </div>

@@ -24,13 +24,27 @@
      B07  l'erreur de la base réelle, sous la barre d'outils
      B08  la liste : triée par famille puis par nom ; la recherche par nom
           ou commune (le bouton Filtre) ; un clic ouvre la fiche
-   Zoom de la frise : ?zoom=mois|trimestre|annee (Année par défaut, comme
-   le relevé).
+   Zoom de la frise : ?zoom=mois|trimestre|annee.
+
+   30/10/2026 — la frise qu'on touche (Teo : « le mec peut cliquer et
+   accéder aux fiches ») :
+     · Mois par défaut : on voit les semaines qui viennent, pas une année
+       presque vide ;
+     · sous chaque nom, la phrase la plus pressée du chantier (./enClair)
+       à la place des trois ronds sans texte (santé, avancement, maître
+       d'ouvrage) : il reste l'avancement et le maître d'ouvrage ;
+     · sur chaque barre, un pavé par passage prévu, de la couleur de la
+       réponse de l'intervenant (confirmé, sans réponse, refusé…) ;
+     · un clic sur la barre ou sur un pavé ouvre l'aperçu à droite
+       (./ApercuFrise : ce qu'il faut faire, les trois semaines à venir,
+       les portes de la fiche), sans quitter la frise. ?apercu=<chantier>,
+       ?passage=<passage> ; Échap referme. Le nom, à gauche, mène toujours
+       droit à la fiche.
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { HardHat, ListFilter, Plus, UserRound } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
@@ -41,10 +55,12 @@ import { CONFIRMATIONS, FAMILLES, STATUTS_CHANTIER, type Famille } from "@/compo
 import { famille } from "@/components/espace/daliro/liste";
 import type { Chantier, StatutChantier } from "@/components/espace/daliro/types";
 import { Menu } from "../lin/Lin";
-import { IconeSante, IconeStatutProjet, type EtatProjet, type Sante } from "../lin/icones";
+import { IconeStatutProjet, type EtatProjet } from "../lin/icones";
 import { useToast } from "../Toasts";
 import { useDaliro, type NouveauChantier } from "./donnees";
 import Frise, { estZoom, type LigneFrise, type TeinteFrise, type Zoom } from "./Frise";
+import ApercuFrise from "./ApercuFrise";
+import { CONFIRMATION_CLAIRE, jourLocal, qui, quand, resume } from "./enClair";
 import "@/components/espace/espace.css";
 
 const MO_TYPES = [
@@ -60,12 +76,11 @@ const PLACES = [
 const VIDE: NouveauChantier = { nom: "", reference: "", adresse: "", code_postal: "", commune: "", maitre_ouvrage_type: "professionnel", place_client: "titulaire", maitre_ouvrage_id: "" };
 
 const ORDRE: Record<Famille, number> = { bloque: 0, a_signer: 1, a_confirmer: 2, ouvert: 3 };
-const UNE: Record<Famille, string> = { bloque: "Bloqué", a_signer: "Avenant à signer", a_confirmer: "Passage à confirmer", ouvert: "En cours" };
-const SANTE: Record<Famille, Sante> = { bloque: "hors", a_signer: "risque", a_confirmer: "risque", ouvert: "bien" };
+/* les familles dites comme sur un chantier (les compteurs de la barre d'outils) */
+const FAMILLE_CLAIRE: Record<Famille, string> = { bloque: "Bloqués", a_signer: "Avenant à faire signer", a_confirmer: "Intervenant à relancer", ouvert: "En cours" };
 const ETAT: Record<StatutChantier, EtatProjet> = { preparation: "planifie", ouvert: "en-cours", suspendu: "en-cours", receptionne: "fait", clos: "fait", annule: "annule" };
 const teinteDe = (t: string): TeinteFrise => (t === "rouge" || t === "ambre" || t === "bleu" || t === "vert" ? t : "gris");
 const estFamille = (v: string | null): v is Famille => v === "bloque" || v === "a_signer" || v === "a_confirmer" || v === "ouvert";
-const jjmm = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
 const initiales = (nom: string) =>
   nom
     .replace(/[^\p{L}\s-]/gu, " ")
@@ -75,10 +90,6 @@ const initiales = (nom: string) =>
     .slice(0, 2)
     .map((m) => m[0]?.toUpperCase() ?? "")
     .join("");
-const jourLocal = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${`${d.getMonth() + 1}`.padStart(2, "0")}-${`${d.getDate()}`.padStart(2, "0")}`;
-};
 
 /* l'avancement de l'étape : un anneau de 16, rempli à proportion */
 function Avancement({ pct }: { pct: number | null }) {
@@ -93,7 +104,7 @@ function Avancement({ pct }: { pct: number | null }) {
 }
 
 export default function Chantiers() {
-  const { source, pret, erreur, liste, quota, maitresOuvrage, creer } = useDaliro();
+  const { source, pret, erreur, liste, quota, maitresOuvrage, creer, tableau, demanderTous, enLecture } = useDaliro();
   const toast = useToast();
   const params = useSearchParams();
   const routeur = useRouter();
@@ -103,7 +114,9 @@ export default function Chantiers() {
 
   const filtre = estFamille(params.get("famille")) ? (params.get("famille") as Famille) : null;
   const zParam = params.get("zoom");
-  const zoom: Zoom = estZoom(zParam) ? zParam : "annee";
+  const zoom: Zoom = estZoom(zParam) ? zParam : "mois";
+  const apercuId = params.get("apercu");
+  const passageId = params.get("passage");
   const lien = (modif: Record<string, string | null>) => {
     const p = new URLSearchParams(params.toString());
     for (const [k, v] of Object.entries(modif)) {
@@ -113,6 +126,34 @@ export default function Chantiers() {
     const s = p.toString();
     return `${chemin}${s ? `?${s}` : ""}`;
   };
+
+  /* les passages de la frise sont dans les tableaux : en base réelle, on les lit tous, une fois */
+  useEffect(() => {
+    if (source === "reelle" && pret) demanderTous();
+  }, [source, pret, demanderTous]);
+
+  const ouvrir = (modif: Record<string, string | null>) => routeur.replace(lien(modif), { scroll: false });
+  const fermer = () => ouvrir({ apercu: null, passage: null });
+  useEffect(() => {
+    if (!apercuId && !passageId) return;
+    const touche = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || document.querySelector("[role=dialog]")) return;
+      routeur.replace(lien({ apercu: null, passage: null }), { scroll: false });
+    };
+    window.addEventListener("keydown", touche);
+    return () => window.removeEventListener("keydown", touche);
+  });
+
+  /* l'élément ouvert : le passage dit son chantier */
+  const passageOuvert = useMemo(() => {
+    if (!passageId) return null;
+    for (const c of liste) {
+      const p = tableau(c.id)?.passages.find((x) => x.id === passageId);
+      if (p) return p;
+    }
+    return null;
+  }, [passageId, liste, tableau]);
+  const chantierOuvert = liste.find((c) => c.id === (passageOuvert?.chantier_id ?? apercuId)) ?? null;
 
   const tries = useMemo(
     () =>
@@ -163,27 +204,27 @@ export default function Chantiers() {
   const visibles = tries.filter((c) => (!filtre || famille(c) === filtre) && (!recherche || `${c.nom} ${c.commune} ${c.code_postal} ${c.reference ?? ""}`.toLocaleLowerCase("fr").includes(recherche)));
 
   const ligne = (c: Chantier): LigneFrise => {
-    const f = famille(c);
     const statut = STATUTS_CHANTIER[c.statut];
-    const sante = f ? UNE[f] : statut.libelle;
+    const t = tableau(c.id);
     const pct = c.etape && c.etape.etapes ? c.etape.avancement_pct : null;
     const p = c.prochain_passage;
     const conf = p ? CONFIRMATIONS[p.confirmation] : null;
     const lot = c.etape?.lot_libelle ?? null;
-    const passage = p ? `Prochain passage le ${dateCourte(p.debut)}${p.intervenant_nom ? `, ${p.intervenant_nom}` : ""}${p.tache ? ` (${p.tache})` : ""} · ${conf?.libelle.toLowerCase()}` : "Aucun passage prévu";
-    const meta = [lot, p ? `passage le ${jjmm(p.debut)}` : null].filter(Boolean).join(" · ");
+    const enClair = resume(c, t, aujourdhui);
+    const passages = (t?.passages ?? []).filter((x) => x.statut !== "annule");
+    const aVenir = passages.filter((x) => x.statut === "prevu" && x.fin.slice(0, 10) >= aujourdhui).length;
+    const choisi = c.id === chantierOuvert?.id;
     return {
       cle: c.id,
       icone: <IconeStatutProjet etat={ETAT[c.statut]} />,
       teinteIcone: teinteDe(statut.teinte),
       nom: c.nom,
+      sous: { texte: enClair.texte, teinte: enClair.teinte },
+      choisie: choisi,
       href: `${RACINE}/daliro/chantiers/${encodeURIComponent(c.id)}`,
-      pilule: lot ?? (p ? `Passage le ${jjmm(p.debut)}` : undefined),
+      pilule: lot ?? (p ? `Passage ${quand(p.debut, aujourdhui)}` : undefined),
       ronds: (
         <>
-          <span className="ltl-rond" data-teinte={f ? FAMILLES.find((x) => x.cle === f)?.teinte : "gris"} title={`Santé : ${sante}`} aria-label={`Santé : ${sante}`} role="img">
-            <IconeSante etat={f ? SANTE[f] : "neutre"} />
-          </span>
           <span className="ltl-rond" data-teinte={pct === null ? "gris" : pct === 100 ? "vert" : "ambre"} title={pct === null ? "Avancement : aucun lot posé" : `Avancement : ${pct} %${lot ? `, ${lot}` : ""}`} aria-label={pct === null ? "Avancement : aucun lot posé" : `Avancement : ${pct} %`} role="img">
             <Avancement pct={pct} />
           </span>
@@ -199,11 +240,22 @@ export default function Chantiers() {
                 cle: c.id,
                 debut: c.date_debut,
                 fin: c.date_fin_prevue,
-                libelle: c.nom,
-                meta: meta || undefined,
-                titre: `${c.nom}, ${c.date_debut ? `du ${dateCourte(c.date_debut)}` : "sans date de début"} ${c.date_fin_prevue ? `au ${dateCourte(c.date_fin_prevue)}` : "sans fin prévue"}${lot ? ` · lot en cours : ${lot}` : ""} · ${passage}`,
-                href: `${RACINE}/daliro/chantiers/${encodeURIComponent(c.id)}`,
-                jalon: p && conf ? { jour: p.debut, teinte: teinteDe(conf.teinte), titre: passage } : null,
+                libelle: lot ? `En cours : ${lot}` : statut.libelle,
+                meta: aVenir ? `${aVenir} passage${aVenir > 1 ? "s" : ""} à venir` : undefined,
+                titre: `${c.nom}, ${c.date_debut ? `du ${dateCourte(c.date_debut)}` : "sans date de début"} ${c.date_fin_prevue ? `au ${dateCourte(c.date_fin_prevue)}` : "sans fin prévue"} · cliquez pour l'aperçu`,
+                onClick: () => ouvrir({ apercu: c.id, passage: null }),
+                choisie: choisi && !passageOuvert,
+                /* sans tableau (base réelle pas encore lue), le losange du prochain passage, comme avant */
+                jalon: !t && p && conf ? { jour: p.debut, teinte: teinteDe(conf.teinte), titre: `Prochain passage ${quand(p.debut, aujourdhui)}` } : null,
+                evenements: passages.map((x) => ({
+                  cle: x.id,
+                  debut: x.debut,
+                  fin: x.fin,
+                  teinte: x.statut === "fait" ? "gris" : CONFIRMATION_CLAIRE[x.confirmation].teinte,
+                  titre: `${quand(x.debut, aujourdhui)} · ${qui(x)}${x.tache ? ` · ${x.tache}` : ""} · ${x.statut === "fait" ? "fait" : CONFIRMATION_CLAIRE[x.confirmation].court}`,
+                  onClick: () => ouvrir({ passage: x.id, apercu: null }),
+                  choisi: x.id === passageOuvert?.id,
+                })),
               },
             ]
           : [],
@@ -257,7 +309,7 @@ export default function Chantiers() {
               title={fa.sous}
               scroll={false}
             >
-              {fa.libelle} <span className="ltl-compte">{comptes[fa.cle]}</span>
+              {FAMILLE_CLAIRE[fa.cle]} <span className="ltl-compte">{comptes[fa.cle]}</span>
             </Link>
           ))}
         </nav>
@@ -299,7 +351,33 @@ export default function Chantiers() {
         </p>
       ) : null}
 
-      <Frise libelle="Frise des chantiers" lignes={pret ? visibles.map(ligne) : []} zoom={zoom} onZoom={(z) => routeur.replace(lien({ zoom: z === "annee" ? null : z }), { scroll: false })} aujourdhui={aujourdhui} vide={vide} />
+      {pret && visibles.length ? (
+        <p className="ltl-legende" aria-label="Couleur des passages">
+          <span>Cliquez un chantier ou un passage pour l&apos;ouvrir à droite.</span>
+          <span data-teinte="vert"><i />confirmé</span>
+          <span data-teinte="bleu"><i />réponse attendue</span>
+          <span data-teinte="ambre"><i />sans réponse</span>
+          <span data-teinte="rouge"><i />a dit non</span>
+          <span data-teinte="gris"><i />pas encore prévenu</span>
+        </p>
+      ) : null}
+
+      <div className="ltl-cadre">
+        <Frise libelle="Frise des chantiers" lignes={pret ? visibles.map(ligne) : []} zoom={zoom} onZoom={(z) => ouvrir({ zoom: z === "mois" ? null : z })} aujourdhui={aujourdhui} vide={vide} />
+        {chantierOuvert ? (
+          <ApercuFrise
+            key={passageOuvert?.id ?? chantierOuvert.id}
+            chantier={chantierOuvert}
+            tableau={tableau(chantierOuvert.id)}
+            passage={passageOuvert}
+            auj={aujourdhui}
+            lecture={enLecture(chantierOuvert.id)}
+            onPassage={(id) => ouvrir({ passage: id, apercu: null })}
+            onChantier={() => ouvrir({ apercu: chantierOuvert.id, passage: null })}
+            onFermer={fermer}
+          />
+        ) : null}
+      </div>
 
       <Dialog open={nouveau} onOpenChange={(o) => !o && setNouveau(false)}>
         <DialogContent>
