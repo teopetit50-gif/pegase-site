@@ -20,10 +20,17 @@
    de la couleur de sa réponse), chacun cliquable ; une ligne peut porter
    une phrase sous son nom ; ce que la page a ouvert à côté (l'aperçu) est
    marqué « choisi » sur la frise.
+
+   30/10/2026, après la capture de Teo (« la frise est mal faite ») : les
+   libellés restent lisibles quand la barre part à gauche de la zone (ils
+   glissent avec le défilement, comme chez Linear) ; une barre hors de vue
+   laisse une pastille au bord (« Début 19 Nov → ») qui y mène ; les
+   commandes Aujourd'hui / zoom passent dans le coin vide au-dessus des noms,
+   au lieu de couvrir les jours ; les traits ne passent plus sous les noms.
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, Check, ChevronDown } from "lucide-react";
 import { Menu } from "../lin/Lin";
 import "../lin/lin.css";
@@ -187,6 +194,35 @@ export default function Frise({
     el.scrollLeft = Math.max(0, xAuj - visible * 0.35);
   }, [xAuj, pleine]);
 
+  /* ce qui est en vue : le défilement (en px de piste) et la largeur visible de la piste */
+  const [vue, setVue] = useState({ g: 0, l: 0 });
+  useEffect(() => {
+    const el = zone.current;
+    if (!el) return;
+    let image = 0;
+    const lire = () => {
+      cancelAnimationFrame(image);
+      image = requestAnimationFrame(() => setVue({ g: el.scrollLeft, l: Math.max(0, el.clientWidth - GAUCHE) }));
+    };
+    lire();
+    el.addEventListener("scroll", lire, { passive: true });
+    const taille = new ResizeObserver(lire);
+    taille.observe(el);
+    return () => {
+      cancelAnimationFrame(image);
+      el.removeEventListener("scroll", lire);
+      taille.disconnect();
+    };
+  }, [pleine]);
+  const aller = (xPiste: number) => {
+    const el = zone.current;
+    if (el) el.scrollTo({ left: Math.max(0, xPiste - (el.clientWidth - GAUCHE) * 0.3), behavior: "smooth" });
+  };
+  const jourCourt = (iso: string) => {
+    const d = dateDe(jourNum(iso));
+    return `${d.getUTCDate()} ${MOIS[d.getUTCMonth()]}`;
+  };
+
   /* ce que la page a ouvert à côté reste en vue : s'il sort de la zone visible, la frise le ramène au tiers */
   const choix = lignes.flatMap((l) => l.barres.flatMap((b) => [b.choisie ? b.cle : "", ...(b.evenements ?? []).map((e) => (e.choisi ? e.cle : ""))])).find(Boolean) ?? "";
   useEffect(() => {
@@ -336,16 +372,16 @@ export default function Frise({
       {commandes}
       <div className="ltl-frise" ref={zone} role="region" aria-label={libelle} tabIndex={0}>
         <div className="ltl-toile" style={{ width: GAUCHE + largeur }}>
-          <div className="ltl-traits" style={{ width: largeur }} aria-hidden="true">
+          <div className="ltl-traits" style={{ width: largeur, clipPath: `inset(0 0 0 ${vue.g}px)` }} aria-hidden="true">
             {mois.map((m) => (
               <span key={m.cle} className="ltl-trait-mois" style={{ left: m.x - 1 }} />
             ))}
             <span className="ltl-trait-jour" style={{ left: xAuj }} />
           </div>
 
-          <div className="ltl-entete" aria-hidden="true">
+          <div className="ltl-entete">
             <div className="ltl-coin" />
-            <div className="ltl-reperes" style={{ width: largeur }}>
+            <div className="ltl-reperes" style={{ width: largeur }} aria-hidden="true">
               {mois.map((m) => (
                 <span key={m.cle}>
                   <span className="ltl-trait-mois" style={{ left: m.x - 1 }} />
@@ -384,9 +420,26 @@ export default function Frise({
                   </div>
                 </div>
                 <div className="ltl-piste" style={{ width: largeur }}>
-                  {place(l).map((p) => (
+                  {place(l).map((p) => {
+                    /* le libellé glisse avec le défilement tant que sa barre est en vue */
+                    const lg = vue.l ? Math.max(p.x0, Math.min(vue.g + 8, p.x0 + p.l - 80)) : p.x0;
+                    const apres = vue.l > 0 && p.x0 > vue.g + vue.l - 4;
+                    const avant = vue.l > 0 && p.x0 + p.l < vue.g + 4;
+                    return (
                     <span key={p.b.cle}>
-                      <span className="ltl-libelle" data-dessous={p.dessous ? "" : undefined} style={{ left: p.x0, maxWidth: p.max !== undefined ? Math.max(0, p.max) : undefined }} aria-hidden="true">
+                      {apres || avant ? (
+                        <button
+                          type="button"
+                          className="ltl-horschamp"
+                          data-cote={apres ? "droite" : "gauche"}
+                          style={apres ? { left: vue.g + vue.l - 8 } : { left: vue.g + 8 }}
+                          onClick={() => aller(apres ? p.x0 : p.x0 + p.l - 40)}
+                          title={p.b.titre}
+                        >
+                          {apres ? `${p.b.libelle} · dès le ${p.b.debut ? jourCourt(p.b.debut) : "?"} →` : `← ${p.b.libelle} · fini le ${p.b.fin ? jourCourt(p.b.fin) : "?"}`}
+                        </button>
+                      ) : null}
+                      <span className="ltl-libelle" data-dessous={p.dessous ? "" : undefined} style={{ left: lg, maxWidth: p.max !== undefined ? Math.max(0, p.max - (lg - p.x0)) : undefined }} aria-hidden="true">
                         <span>{p.b.libelle}</span>
                         {p.b.meta ? <span className="ltl-libelle-meta">{p.b.meta}</span> : null}
                       </span>
@@ -403,7 +456,8 @@ export default function Frise({
                         );
                       })}
                     </span>
-                  ))}
+                    );
+                  })}
                 </div>
               </li>
             ))}
