@@ -26,12 +26,20 @@
            un refus garde le contour, en rouge
      jour en surcharge (fond rose pâle)
          → deux passages le même jour pour le même intervenant
-   Un clic sur un bloc ouvre l'aperçu de Chantiers (?passage=). Lecture
-   seule : les gestes restent dans « À faire » et le planning du chantier.
+   Un clic sur un bloc ouvre l'aperçu de Chantiers (?passage=).
+
+   30/10/2026 (« je veux pouvoir le déplacer ») : comme dans Float, un bloc
+   prévu se fait glisser (il change de jours) et se tire par son bord droit
+   (il s'allonge ou se raccourcit), au jour près ; pendant le geste, le bloc
+   suit la souris et dit ses nouvelles dates. Au lâcher, la page décide
+   (onChanger) : en exemple, tout s'applique en mémoire ; en base réelle,
+   seul le bord droit a une porte (btp_recaler, avec sa fenêtre de
+   confirmation) — la base ne sait pas encore déplacer le début d'un passage.
+   Les passages ne portent pas d'heures en base : le planning est au jour.
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 import { ChevronDown, ChevronLeft, ChevronRight, Diamond, UserPlus } from "lucide-react";
 import type { Chantier, Confirmation, Passage, Tableau } from "@/components/espace/daliro/types";
 import { RACINE } from "../modules";
@@ -105,6 +113,7 @@ export default function Planning({
   onDensite,
   onType,
   onPassage,
+  onChanger,
 }: {
   lundi: string;
   aujourdhui: string;
@@ -120,6 +129,8 @@ export default function Planning({
   onDensite: (d: Densite) => void;
   onType: (t: "equipes" | "sous-traitants" | null) => void;
   onPassage: (id: string) => void;
+  /* un bloc glissé (« deplacer », de `jours`) ou tiré par son bord droit (« etirer », fin + `jours`) */
+  onChanger: (c: { passage: Passage; chantierId: string; mode: "deplacer" | "etirer"; jours: number }) => void;
 }) {
   const l0 = num(lundi);
   const n = NB_JOURS[densite];
@@ -181,6 +192,15 @@ export default function Planning({
   const fin = new Date((l0 + n - 1) * JOUR);
   const debut = new Date(l0 * JOUR);
   const titre = `${debut.getUTCDate()} ${MOIS[debut.getUTCMonth()].toLowerCase()} – ${fin.getUTCDate()} ${MOIS[fin.getUTCMonth()].toLowerCase()} ${fin.getUTCFullYear()}`;
+  /* le geste en cours : quel bloc, quel mode, combien de jours ; `bouge` dès 4 px, pour distinguer d'un clic */
+  const [geste, setGeste] = useState<{ id: string; mode: "deplacer" | "etirer"; jours: number } | null>(null);
+  /* le geste vit aussi dans une référence : au lâcher, l'état n'est pas forcément déjà rendu */
+  const depart = useRef<{ x: number; id: string; mode: "deplacer" | "etirer"; bouge: boolean; jours: number } | null>(null);
+  const apresGeste = useRef(false);
+  const dateCourte = (d: number) => {
+    const x = new Date(d * JOUR);
+    return `${JOURS[(d + 3) % 7].toLowerCase()} ${x.getUTCDate()} ${MOIS[x.getUTCMonth()].toLowerCase()}`;
+  };
   const HAUT = 80;
   const PAS = 86;
   const TYPES = [
@@ -318,32 +338,82 @@ export default function Planning({
                 ))}
                 {auj >= l0 && auj < l0 + n ? <span className="fpl-aujourdhui" style={{ left: (auj - l0) * W }} aria-hidden="true" /> : null}
                 {pers.blocs.map((bl) => {
-                  const a = Math.max(bl.a, l0) - l0;
-                  const b = Math.min(bl.b, l0 + n - 1) - l0;
                   const { p } = bl;
+                  const g = geste?.id === p.id ? geste : null;
+                  const da = g?.mode === "deplacer" ? g.jours : 0;
+                  const db = g ? (g.mode === "deplacer" ? g.jours : Math.max(bl.a - bl.b, g.jours)) : 0;
+                  const a = Math.max(bl.a + da, l0) - l0;
+                  const b = Math.min(bl.b + db, l0 + n - 1) - l0;
                   const fait = p.statut === "fait";
+                  const mobile = p.statut === "prevu";
                   const provisoire = !fait && p.confirmation !== "confirmee";
                   const lot = p.lot_libelle ? `${p.lot_code ? `${p.lot_code} · ` : ""}${p.lot_libelle}` : null;
+                  const commencer = (e: React.PointerEvent, mode: "deplacer" | "etirer") => {
+                    if (!mobile || e.button !== 0) return;
+                    e.stopPropagation();
+                    depart.current = { x: e.clientX, id: p.id, mode, bouge: false, jours: 0 };
+                    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+                  };
+                  const bouger = (e: React.PointerEvent) => {
+                    const d = depart.current;
+                    if (!d || d.id !== p.id) return;
+                    const dx = e.clientX - d.x;
+                    if (!d.bouge && Math.abs(dx) < 4) return;
+                    d.bouge = true;
+                    const jours = Math.round(dx / W);
+                    d.jours = jours;
+                    if (!geste || geste.jours !== jours || geste.id !== p.id || geste.mode !== d.mode) setGeste({ id: p.id, mode: d.mode, jours });
+                  };
+                  const lacher = () => {
+                    const d = depart.current;
+                    depart.current = null;
+                    if (!d || d.id !== p.id || !d.bouge) return;
+                    apresGeste.current = true;
+                    const jours = d.jours;
+                    setGeste(null);
+                    if (jours !== 0) onChanger({ passage: p, chantierId: bl.chantier.id, mode: d.mode, jours: d.mode === "etirer" ? Math.max(bl.a - bl.b, jours) : jours });
+                  };
                   return (
                     <button
                       key={p.id}
                       type="button"
                       className="fpl-bloc"
-                      style={{ left: a * W + 3, width: (b - a + 1) * W - 6, top: 6 + bl.voie * PAS, height: HAUT, "--fpl-c": bl.couleur } as React.CSSProperties}
+                      style={{ left: a * W + 3, width: Math.max(1, b - a + 1) * W - 6, top: 6 + bl.voie * PAS, height: HAUT, "--fpl-c": bl.couleur } as React.CSSProperties}
                       data-provisoire={provisoire ? "" : undefined}
                       data-refus={p.confirmation === "declinee" && !fait ? "" : undefined}
                       data-fait={fait ? "" : undefined}
                       data-clair={CLAIRES.has(bl.couleur) ? "" : undefined}
                       data-choisi={passageChoisi === p.id ? "" : undefined}
-                      data-coupe={bl.a < l0 ? "avant" : bl.b > l0 + n - 1 ? "apres" : undefined}
+                      data-coupe={bl.a + da < l0 ? "avant" : bl.b + db > l0 + n - 1 ? "apres" : undefined}
+                      data-mobile={mobile ? "" : undefined}
+                      data-geste={g ? g.mode : undefined}
                       aria-pressed={passageChoisi === p.id}
-                      title={`${p.tache ?? "Passage"} · ${bl.chantier.nom}${lot ? ` · ${lot}` : ""} · ${pers.nom} · ${fait ? "fait" : REPONSE[p.confirmation]}`}
-                      onClick={() => onPassage(p.id)}
+                      title={`${p.tache ?? "Passage"} · ${bl.chantier.nom}${lot ? ` · ${lot}` : ""} · ${pers.nom} · ${fait ? "fait" : REPONSE[p.confirmation]}${mobile ? " — glissez pour changer les jours, tirez le bord droit pour la durée" : ""}`}
+                      onPointerDown={(e) => commencer(e, "deplacer")}
+                      onPointerMove={bouger}
+                      onPointerUp={lacher}
+                      onPointerCancel={() => {
+                        depart.current = null;
+                        setGeste(null);
+                      }}
+                      onClick={() => {
+                        if (apresGeste.current) {
+                          apresGeste.current = false;
+                          return;
+                        }
+                        onPassage(p.id);
+                      }}
                     >
                       <span className="fpl-bloc-ligne fpl-bloc-ligne--1">{p.tache ?? lot ?? "Passage"}</span>
                       <span className="fpl-bloc-ligne">{bl.chantier.nom}</span>
                       {lot && p.tache ? <span className="fpl-bloc-ligne">{lot}</span> : null}
                       <span className="fpl-pastille">{fait ? "fait" : REPONSE[p.confirmation]}</span>
+                      {g && g.jours !== 0 ? (
+                        <span className="fpl-bloc-dates" aria-live="polite">
+                          {bl.a + da === bl.b + db ? dateCourte(bl.a + da) : `${dateCourte(bl.a + da)} → ${dateCourte(bl.b + db)}`}
+                        </span>
+                      ) : null}
+                      {mobile ? <span className="fpl-poignee" aria-hidden="true" onPointerDown={(e) => commencer(e, "etirer")} onPointerMove={bouger} onPointerUp={lacher} /> : null}
                     </button>
                   );
                 })}

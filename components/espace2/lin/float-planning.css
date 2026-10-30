@@ -247,3 +247,33 @@ html[data-v2-theme="light"] .v2 .lin .fpl .fpl-bloc[data-provisoire] { box-shado
   .v2 .fpl-avatar { width: 26px; height: 26px; font-size: 11px; }
   .v2 .fpl-nom { font-size: 14px; }
 }
+
+/* ——— 30/10/2026 : glisser et tirer, comme dans Float ———
+   un bloc prévu prend la main ; pendant le geste il passe au-dessus des autres,
+   légèrement soulevé, et dit ses nouvelles dates ; le bord droit (8 px) étire */
+.v2 .fpl-bloc[data-mobile] { cursor: grab; touch-action: none; user-select: none; }
+.v2 .fpl-bloc[data-geste] { z-index: 6; cursor: grabbing; box-shadow: 0 6px 18px lch(0 0 0 / 0.28); transition: none; }
+.v2 .fpl-bloc[data-geste="etirer"] { cursor: ew-resize; }
+.v2 .fpl-poignee { position: absolute; top: 0; right: 0; bottom: 0; width: 8px; cursor: ew-resize; }
+.v2 .fpl-poignee::after { content: ""; position: absolute; top: 50%; right: 3px; width: 2px; height: 18px; margin-top: -9px; border-radius: 1px; background: currentColor; opacity: 0; transition: opacity 0.1s; }
+.v2 .fpl-bloc:hover .fpl-poignee::after, .v2 .fpl-bloc[data-geste="etirer"] .fpl-poignee::after { opacity: 0.6; }
+.v2 .fpl-bloc-dates {
+  position: absolute;
+  left: 5px;
+  bottom: 5px;
+  height: 16px;
+  padding: 0 6px;
+  border-radius: 9999px;
+  background: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+  color: #1e242b;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px lch(0 0 0 / 0.25);
+}
+/* un contour cyan sur fond blanc se lit mal : le texte d'un bloc clair non confirmé fonce */
+html[data-v2-theme="light"] .v2 .lin .fpl .fpl-bloc[data-clair][data-provisoire] { color: #0a6f93; }
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lin .fpl .fpl-bloc[data-clair][data-provisoire] { color: #0a6f93; }
+}
