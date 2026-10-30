@@ -208,6 +208,20 @@
 .v2 .lcl-ligne .lin-ancre > .lin-valeur svg {
   width: 16px;
   height: 16px;
+  flex-shrink: 0;
+}
+/* un type long (« Prospect location auto ») se coupe dans sa colonne au lieu de passer sur la commune */
+.v2 .lcl-ligne .lin-ancre {
+  min-width: 0;
+  max-width: 100%;
+}
+.v2 .lcl-ligne .lin-ancre > .lin-valeur {
+  max-width: 100%;
+}
+.v2 .lcl-type-texte {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .v2 .lcl-ligne .lin-ancre > .lin-valeur:hover,
 .v2 .lcl-ligne .lin-ancre > .lin-valeur[aria-expanded="true"] {

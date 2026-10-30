@@ -426,7 +426,7 @@ function Liste({
                         declencheur={
                           <>
                             {t.icone}
-                            {t.libelle}
+                            <span className="lcl-type-texte" title={t.libelle}>{t.libelle}</span>
                           </>
                         }
                         options={TYPES.map((x) => ({ cle: x.cle, libelle: x.libelle, icone: x.icone, coche: t.cle === x.cle, action: () => changerType(f, x.cle) }))}
