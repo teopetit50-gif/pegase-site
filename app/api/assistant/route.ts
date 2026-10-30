@@ -12,15 +12,24 @@ import { reponseVarelo } from "@/lib/varelo/assistant";
    Garde-fous : réservé aux comptes connectés (un visiteur ne dépense pas
    le crédit d'Omega), 20 messages d'historique au plus, 4 000 caractères
    par message, réponse plafonnée. La clé vit dans ANTHROPIC_API_KEY
-   (Vercel → pegase-site2 → Environment Variables), jamais dans le code. */
+   (Vercel → pegase-site2 → Environment Variables), jamais dans le code.
+
+   30/10/2026 (demande de Teo : « qu'il puisse répondre à toutes les
+   questions ») : le panneau joint le résumé des données que la personne
+   voit dans son espace (components/espace2/assistant-contexte.tsx), lues
+   sous sa session ; il entre dans le prompt système, après les consignes,
+   plafonné à 80 000 caractères. Le cache garde ce bloc d'une question à
+   l'autre de la même conversation. */
 
 const MODELE = "claude-opus-5-5";
 /* tarif Anthropic de Claude Opus 5.5, en dollars par million de jetons */
 const PRIX = { entree: 4, sortie: 20, lectureCache: 0.2, ecritureCache: 5 };
 
-const SYSTEME = `Tu es l'assistant de l'espace client Omega, un tableau de bord où une entreprise suit ses modules d'automatisation (FILED : factures reçues et à payer ; CASHD : relances de paiement ; REPUT : demandes clients ; OFFLOAD : clients qui décrochent ; et un module propre à son métier).
-Tu réponds en français, clairement et brièvement, à un employé de l'entreprise : comment utiliser l'espace, rédiger un message, résumer un texte qu'il colle, organiser son travail.
-Tu n'as PAS accès aux données de l'entreprise (factures, clients, chiffres) : si on te demande un chiffre ou un dossier précis, dis-le simplement et indique la page de l'espace où le trouver. N'invente jamais de donnée.
+const SYSTEME = `Tu es l'assistant de l'espace client Omega, un tableau de bord où une entreprise suit ses modules d'automatisation (FILED : factures fournisseurs reçues et à payer ; CASHD : créances clients et relances de paiement ; REPUT : demandes clients ; OFFLOAD : clients qui décrochent ; et un module propre à son métier).
+Tu réponds en français, clairement et brièvement, à un employé de l'entreprise. Tu réponds à toutes ses questions : sur ses chiffres, sur l'utilisation de l'espace, et aussi les questions générales (rédiger un message, résumer un texte, expliquer une notion de gestion, organiser son travail).
+Les données de l'espace que la personne voit sont jointes ci-dessous. Pour une question sur ses factures, ses clients, ses montants ou ses validations, réponds à partir de ces données : compte, additionne, trie, cite les noms et les montants. Donne le chiffre d'abord, puis le détail utile.
+N'invente jamais de donnée : si l'information n'est pas dans les données jointes (module non chargé, REPUT, OFFLOAD, pièce précise), dis-le simplement et indique la page de l'espace où la trouver. Tu lis seulement : tu ne peux rien modifier, valider ni envoyer.
+Écris en texte simple, sans Markdown : pas d'astérisques ni de dièses ; des tirets pour les listes.
 Pour une question commerciale, de contrat ou un problème technique, renvoie vers Omega : page Aide, ou contact@omegaai.fr.`;
 
 const client = new Anthropic();
@@ -32,8 +41,10 @@ export async function POST(req: Request) {
   if (!utilisateur) return Response.json({ erreur: "Connectez-vous pour utiliser l'assistant." }, { status: 401 });
 
   let messages: Entree[];
+  let contexte = "";
   try {
-    const corps = (await req.json()) as { messages?: unknown };
+    const corps = (await req.json()) as { messages?: unknown; contexte?: unknown };
+    if (typeof corps.contexte === "string") contexte = corps.contexte.slice(0, 80_000);
     messages = (Array.isArray(corps.messages) ? corps.messages : [])
       .filter((m): m is Entree => !!m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string" && m.content.trim() !== "")
       .slice(-20)
@@ -59,7 +70,7 @@ export async function POST(req: Request) {
     betas: ["server-side-fallback-2026-07-01"],
     fallbacks: "default",
     cache_control: { type: "ephemeral" },
-    system: SYSTEME,
+    system: contexte ? [{ type: "text", text: SYSTEME }, { type: "text", text: `Données de l'espace :\n\n${contexte}` }] : SYSTEME,
     messages,
   });
 

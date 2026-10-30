@@ -7,18 +7,21 @@
    la conversation se déroule et la barre descend en bas. Les anciennes
    conversations se retrouvent dans l'historique : elles sont gardées sur
    cet appareil (localStorage), jamais envoyées ailleurs qu'à l'API.
-   Il parle à /api/assistant, qui appelle l'API Claude en flux. */
+   Il parle à /api/assistant, qui appelle l'API Claude en flux.
+   30/10 : chaque question part avec le résumé des données affichées
+   (LecteurContexte), pour que l'assistant réponde sur les chiffres. */
 
 import { useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { ArrowUp, History, MessageSquare, Plus, Sparkles, Trash2, X } from "lucide-react";
 import { Dialog, Modal, ModalOverlay } from "react-aria-components";
 import { ecrireStockage, useStockage } from "./Collection";
+import LecteurContexte from "./assistant-contexte";
 
 type Message = { role: "user" | "assistant"; content: string };
 type Conversation = { id: string; titre: string; maj: string; messages: Message[] };
 
 const CLE = "espace2-assistant-conversations";
-const IDEES = ["Rédiger une relance polie pour une facture impayée", "Résumer un texte que je vais coller", "Comment valider une facture dans l'espace ?"];
+const IDEES = ["Combien de factures me reste-t-il à payer ?", "Quels clients sont le plus en retard ?", "Rédiger une relance polie pour une facture impayée"];
 
 function lire(brut: string | null): Conversation[] {
   try {
@@ -45,6 +48,7 @@ export default function Assistant({ ouvert, changer, connecte, prenom }: { ouver
   const [envoi, setEnvoi] = useState(false);
   const [texte, setTexte] = useState("");
   const fil = useRef<HTMLDivElement>(null);
+  const contexte = useRef("");
 
   const conv = conversations.find((c) => c.id === courante) ?? null;
   const messages = enCours ?? conv?.messages ?? [];
@@ -69,7 +73,7 @@ export default function Assistant({ ouvert, changer, connecte, prenom }: { ouver
     defiler();
     let reponse = "";
     try {
-      const rep = await fetch("/api/assistant", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: historique }) });
+      const rep = await fetch("/api/assistant", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: historique, contexte: contexte.current }) });
       if (!rep.ok || !rep.body) {
         reponse = ((await rep.json().catch(() => null)) as { erreur?: string } | null)?.erreur ?? "L'assistant n'a pas pu répondre.";
       } else {
@@ -140,6 +144,7 @@ export default function Assistant({ ouvert, changer, connecte, prenom }: { ouver
 
   return (
     <ModalOverlay isOpen={ouvert} onOpenChange={changer} isDismissable className="v2-jetons v2-voile v2-voile--assistant">
+      {ouvert && connecte && <LecteurContexte cibleRef={contexte} />}
       <Modal className="v2-assistant v2-ia">
         <Dialog className="v2-modale-dialogue v2-assistant-corps" aria-label="Assistant">
           <div className="v2-ia-tete">
@@ -200,7 +205,7 @@ export default function Assistant({ ouvert, changer, connecte, prenom }: { ouver
                   </button>
                 ))}
               </div>
-              <p className="v2-ia-gris v2-ia-note">L&apos;assistant ne voit pas vos factures ni vos clients.</p>
+              <p className="v2-ia-gris v2-ia-note">L&apos;assistant lit les données affichées dans votre espace, sans rien modifier.</p>
             </div>
           ) : (
             <>
