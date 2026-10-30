@@ -11,6 +11,8 @@
    et un tableau lu en base n'est pas relu à chaque changement de page.
 
    Mêmes portes que EcranDaliro (components/espace/daliro/portes.ts).
+   L'exemple compte quatre chantiers de plus que celui de l'écran d'avant
+   (./exemplesPlus, 30/10/2026) : de quoi remplir le planning.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
@@ -19,6 +21,7 @@ import { EXEMPLE_CLIENT_ID } from "@/components/espace/exemples/socle";
 import { useSource, type Source } from "@/components/espace/source";
 import { useTempsReel } from "@/components/espace/tempsReel";
 import { TABLEAUX_EXEMPLE } from "@/components/espace/daliro/exemples";
+import { TABLEAUX_PLUS } from "./exemplesPlus";
 import { listeDepuis } from "@/components/espace/daliro/liste";
 import { chargerListe, chargerTableau, monClient } from "@/components/espace/daliro/portes";
 import type { Chantier, Tableau, Tiers } from "@/components/espace/daliro/types";
@@ -71,7 +74,7 @@ export function useDaliro(): Contexte {
 
 export default function DonneesDaliro({ children }: { children: React.ReactNode }) {
   const { source } = useSource();
-  const [local, setLocal] = useState<Record<string, Tableau>>(TABLEAUX_EXEMPLE);
+  const [local, setLocal] = useState<Record<string, Tableau>>(() => ({ ...TABLEAUX_EXEMPLE, ...TABLEAUX_PLUS }));
   const [reel, setReel] = useState<Reel | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
   const [enCours, setEnCours] = useState<Set<string>>(new Set());

@@ -30,15 +30,17 @@ type Props = {
   onLocal: (t: Tableau) => void;
   relire: () => Promise<void>;
   fermer: (message: string | null) => void;
+  /* la nouvelle fin déjà choisie ailleurs (le planning de l'espace 2, bord droit tiré) */
+  finInitiale?: string;
 };
 
 const dates = (debut: string, fin: string) => (debut === fin ? dateCourte(debut) : `${dateCourte(debut)} → ${dateCourte(fin)}`);
 const jm = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
 const datesCourtes = (debut: string, fin: string) => (debut === fin ? jm(debut) : `${jm(debut)} → ${jm(fin)}`);
 
-export default function RecalageDialog({ mode, passage: p, tableau, source, onLocal, relire, fermer }: Props) {
+export default function RecalageDialog({ mode, passage: p, tableau, source, onLocal, relire, fermer, finInitiale }: Props) {
   const auj = aujourdHui();
-  const [fin, setFin] = useState(() => (mode === "terminer" ? (p.fin < auj ? auj : p.fin) : ajouterOuvres(p.fin, 1)));
+  const [fin, setFin] = useState(() => (mode === "terminer" ? (p.fin < auj ? auj : p.fin) : (finInitiale ?? ajouterOuvres(p.fin, 1))));
   const [motif, setMotif] = useState("");
   const [apercu, setApercu] = useState<Recalage | null>(null);
   const [envoi, setEnvoi] = useState(false);

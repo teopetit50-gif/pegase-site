@@ -33,6 +33,12 @@
    ?semaine=<lundi> choisit la première semaine (un passage ouvert depuis
    ailleurs, ?passage=, montre la sienne), ?echelle=mois resserre,
    ?qui=equipes|sous-traitants filtre les lignes.
+   Un bloc glissé ou tiré dans le planning (changer, plus bas) : en exemple,
+   la même règle que le recalage de la base (la suite qui en dépend part
+   après, un passage déplacé repart en confirmation J-2) ; en base réelle,
+   le bord droit ouvre la fenêtre « Recaler » de l'écran d'avant, sur la
+   date choisie (btp_proposer_recalage puis btp_recaler) ; déplacer le début
+   n'a pas de porte, la page le dit.
 
    30/10/2026 — la frise qu'on touche (Teo : « le mec peut cliquer et
    accéder aux fiches ») :
@@ -64,6 +70,8 @@ import { famille } from "@/components/espace/daliro/liste";
 import type { Chantier, Confirmation, Passage, StatutChantier, Tableau } from "@/components/espace/daliro/types";
 import { Menu } from "../lin/Lin";
 import { IconeStatutProjet, type EtatProjet } from "../lin/icones";
+import RecalageDialog from "@/components/espace/daliro/RecalageDialog";
+import { appliquerLocal, recalageLocal } from "@/components/espace/daliro/recalage";
 import { useToast } from "../Toasts";
 import { useDaliro, type NouveauChantier } from "./donnees";
 import Frise, { estZoom, type LigneFrise, type PastilleFrise, type TeinteFrise, type Zoom } from "./Frise";
@@ -113,7 +121,7 @@ function Avancement({ pct }: { pct: number | null }) {
 }
 
 export default function Chantiers() {
-  const { source, pret, erreur, liste, quota, maitresOuvrage, creer, tableau, demanderTous, enLecture } = useDaliro();
+  const { source, pret, erreur, liste, quota, maitresOuvrage, creer, tableau, demanderTous, enLecture, onLocal, relireChantier } = useDaliro();
   const toast = useToast();
   const params = useSearchParams();
   const routeur = useRouter();
@@ -166,6 +174,53 @@ export default function Chantiers() {
   const chantierOuvert = liste.find((c) => c.id === (passageOuvert?.chantier_id ?? apercuId)) ?? null;
   const sParam = params.get("semaine");
   const lundi = sParam && /^\d{4}-\d{2}-\d{2}$/.test(sParam) ? lundiDe(sParam) : lundiDe(passageOuvert?.debut ?? aujourdhui);
+
+  /* ——— un bloc du planning glissé ou tiré ——— */
+  const [recalage, setRecalage] = useState<{ passage: Passage; tableau: Tableau; fin: string } | null>(null);
+  const plusJours = (iso: string, n: number) => {
+    const [a, m, j] = iso.slice(0, 10).split("-").map(Number);
+    return new Date(Date.UTC(a, m - 1, j + n)).toISOString().slice(0, 10);
+  };
+  const changer = ({ passage: p, chantierId, mode, jours }: { passage: Passage; chantierId: string; mode: "deplacer" | "etirer"; jours: number }) => {
+    const t = tableau(chantierId);
+    if (!t) return;
+    const nom = `« ${p.tache ?? "Passage"} »`;
+    if (mode === "etirer") {
+      const fin = plusJours(p.fin, jours);
+      if (source === "reelle") {
+        setRecalage({ passage: p, tableau: t, fin });
+        return;
+      }
+      try {
+        const r = recalageLocal(t, p.id, fin);
+        onLocal(appliquerLocal(t, r));
+        toast(r.nombre > 1 ? `${nom} finit ${quand(fin, aujourdhui)} : ${r.nombre - 1} passage${r.nombre > 2 ? "s" : ""} qui en dépendent suivent.` : `${nom} finit maintenant ${quand(fin, aujourdhui)}.`, "vert");
+      } catch (e) {
+        toast(e instanceof Error ? e.message : "Ce passage ne se recale pas.", "rouge");
+      }
+      return;
+    }
+    if (source === "reelle") {
+      toast("Déplacer le début d'un passage n'existe pas encore dans la base. Tirez son bord droit pour changer sa fin, ou recalez-le depuis le planning du chantier.", "rouge");
+      return;
+    }
+    const debut = plusJours(p.debut, jours);
+    const fin = plusJours(p.fin, jours);
+    const reconfirmer = p.confirmation !== "non_demandee";
+    let t2: Tableau = { ...t, passages: t.passages.map((q) => (q.id === p.id ? { ...q, debut, fin, version: q.version + 1, confirmation: reconfirmer ? "non_demandee" : q.confirmation, confirmation_le: reconfirmer ? null : q.confirmation_le } : q)) };
+    let suite = 0;
+    if (jours > 0) {
+      try {
+        const r = recalageLocal(t2, p.id, fin);
+        suite = r.deplaces.filter((d) => d.passage_id !== p.id).length;
+        t2 = appliquerLocal(t2, r);
+      } catch {
+        /* rien en aval */
+      }
+    }
+    onLocal(t2);
+    toast(`${nom} déplacé ${debut === fin ? quand(debut, aujourdhui) : `du ${dateCourte(debut)} au ${dateCourte(fin)}`}${reconfirmer ? ", à reconfirmer à J-2" : ""}${suite ? ` ; ${suite} passage${suite > 1 ? "s" : ""} qui en dépendent suivent` : ""}.`, "vert");
+  };
 
   const tries = useMemo(
     () =>
@@ -428,6 +483,7 @@ export default function Chantiers() {
             onDensite={(d) => ouvrir({ echelle: d === "semaines" ? null : d })}
             onType={(t) => ouvrir({ qui: t })}
             onPassage={(id) => ouvrir({ passage: id, apercu: null })}
+            onChanger={changer}
           />
         ) : (
           <div className="ltl">{vide}</div>
@@ -525,6 +581,26 @@ export default function Chantiers() {
               {envoi ? <Loader variant="spin" /> : null} Créer le chantier
             </button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!recalage} onOpenChange={(o) => !o && setRecalage(null)}>
+        <DialogContent>
+          {recalage ? (
+            <RecalageDialog
+              mode="recaler"
+              passage={recalage.passage}
+              tableau={recalage.tableau}
+              source={source}
+              onLocal={onLocal}
+              relire={() => relireChantier(recalage.tableau.chantier.id)}
+              finInitiale={recalage.fin}
+              fermer={(message) => {
+                setRecalage(null);
+                if (message) toast(message, "vert");
+              }}
+            />
+          ) : null}
         </DialogContent>
       </Dialog>
     </div>
