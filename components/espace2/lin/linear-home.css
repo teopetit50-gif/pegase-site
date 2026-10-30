@@ -464,3 +464,56 @@
     align-items: flex-start;
   }
 }
+
+/* ——— DALIRO, 30/10/2026 : la vue d'ensemble qui montre les chantiers ———
+   les familles en pastilles (rayon plein, 28, 12/500, comme les onglets),
+   une rangée par chantier sur deux lignes (nom et lieu, puis la phrase la
+   plus pressée, de sa teinte), et à droite « Cette semaine » jour par jour */
+.v2 .lh-familles { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 0 -2px; }
+.v2 .lh-famille {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 8px;
+  border-radius: 9999px;
+  border: 0.5px solid var(--lin-trait);
+  background: var(--lin-bouton);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-texte);
+  white-space: nowrap;
+}
+.v2 .lh-famille svg { width: 14px; height: 14px; color: var(--lin-teinte); }
+.v2 .lh-famille span { color: var(--lin-second); font-variant-numeric: tabular-nums; }
+.v2 .lh-famille:hover { background: var(--lin-pastille-active); }
+.v2 .lh-rangee--chantier { align-items: flex-start; padding-top: 10px; padding-bottom: 10px; }
+.v2 .lh-rangee--chantier .lh-rangee-icone { margin-top: 4px; }
+.v2 .lh-rangee--chantier .lh-rangee-fleche { margin-top: 5px; }
+.v2 .lh-rangee-phrase {
+  flex-basis: 100%;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 19px;
+  color: var(--lin-texte);
+}
+.v2 .lh-rangee-phrase::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--lin-teinte, var(--lin-second)); transform: translateY(-1px); }
+
+.v2 .lh-semaine { display: flex; flex-direction: column; gap: 14px; margin: 0; padding: 0; list-style: none; }
+.v2 .lh-semaine ul { display: flex; flex-direction: column; gap: 2px; margin: 4px 0 0 -8px; padding: 0; list-style: none; }
+.v2 .lh-semaine-jour { display: block; font-size: 12px; font-weight: 500; color: var(--lin-titre); }
+.v2 .lh-semaine-jour::first-letter { text-transform: uppercase; }
+.v2 .lh-semaine-passage { display: flex; flex-direction: column; gap: 1px; padding: 5px 8px 5px 18px; border-radius: 8px; position: relative; }
+.v2 .lh-semaine-passage::before { content: ""; position: absolute; left: 8px; top: 11px; width: 5px; height: 5px; border-radius: 50%; background: var(--lin-teinte, var(--lin-second)); }
+.v2 .lh-semaine-passage:hover { background: var(--lin-survol); }
+.v2 .lh-semaine-qui { font-size: 13px; font-weight: 500; color: var(--lin-texte); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2 .lh-semaine-meta { font-size: 12px; font-weight: 450; line-height: 16px; color: var(--lin-second); }
+.v2 .lh-semaine-vide { margin: 0; font-size: 13px; color: var(--lin-second); }
+/* étroit : « Cette semaine » passe sous la liste au lieu de disparaître */
+@container principale (max-width: 1100px) {
+  .v2 .lh-droite--semaine { display: block; position: static; max-width: 700px; margin: 32px auto 0; padding: 0; }
+}
+.v2 .lh-rangee-autres { flex-basis: 100%; padding-left: 14px; font-size: 12px; font-weight: 450; color: var(--lin-second); }

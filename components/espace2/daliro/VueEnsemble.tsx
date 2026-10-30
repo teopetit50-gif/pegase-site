@@ -19,14 +19,23 @@
        d'avant reprise habillée ;
      · F01 / G01 : la fenêtre « Nouveau chantier », mêmes champs et même
        validation, puis useDaliro().creer et la fiche du chantier.
-   Les liens « Aller à » mènent aux sous-pages (modules.ts, onglets de daliro).
    Les données : components/espace2/daliro/donnees (exemple ou base réelle).
+
+   30/10/2026 — plus simple à lire (Teo : « on a du mal à comprendre ») :
+     · la page montre les chantiers eux-mêmes, chacun avec sa phrase la plus
+       pressée (./enClair), les plus urgents d'abord ; les quatre familles
+       restent en pastilles au-dessus (B03, même filtre de la liste) ;
+     · les sept liens « Aller à », en double avec le menu de gauche, laissent
+       la colonne droite à « Cette semaine » : qui passe sur quel chantier,
+       jour par jour ; un clic ouvre le passage dans la frise (Chantiers) ;
+     · « Nouveau chantier » n'a plus sa section : le + de la barre et une
+       rangée en bas de la liste.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowUpRight, BookUser, CalendarClock, Copy, FileSignature, HardHat, Inbox, ListTodo, OctagonAlert, Plus, Settings, Users } from "lucide-react";
+import { ArrowUpRight, CalendarClock, Copy, FileSignature, HardHat, OctagonAlert, Plus } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { Avis } from "@/components/espace/ui";
@@ -38,6 +47,8 @@ import { HabilleSb } from "../Habille";
 import { RACINE } from "../modules";
 import { useToast } from "../Toasts";
 import { useDaliro, type NouveauChantier } from "./donnees";
+import { CONFIRMATION_CLAIRE, ecartJours, jourLocal, phrasesChantier, qui, quand, resume, type TeinteClair } from "./enClair";
+import { STATUTS_CHANTIER } from "@/components/espace/daliro/etats";
 import "../lin/lin.css";
 import "../lin/linear-home.css";
 
@@ -57,6 +68,9 @@ const VIDE: NouveauChantier = { nom: "", reference: "", adresse: "", code_postal
 
 /* la teinte d'une famille (etats.ts) dans les jetons du gabarit */
 const TEINTES: Record<Famille, string> = { bloque: "var(--lin-rouge)", a_signer: "var(--lin-jaune)", a_confirmer: "var(--lin-fait)", ouvert: "var(--lin-vert)" };
+const TEINTE_CLAIRE: Record<TeinteClair, string> = { rouge: "var(--lin-rouge)", ambre: "var(--lin-jaune)", bleu: "var(--lin-fait)", vert: "var(--lin-vert)", gris: "var(--lin-second)" };
+const FAMILLE_CLAIRE: Record<Famille, string> = { bloque: "Bloqués", a_signer: "Avenant à faire signer", a_confirmer: "Intervenant à relancer", ouvert: "En cours" };
+const URGENCE: Record<TeinteClair, number> = { rouge: 0, ambre: 1, bleu: 2, gris: 3, vert: 4 };
 const ICONES: Record<Famille, React.ReactNode> = {
   bloque: <OctagonAlert aria-hidden="true" />,
   a_signer: <FileSignature aria-hidden="true" />,
@@ -65,7 +79,8 @@ const ICONES: Record<Famille, React.ReactNode> = {
 };
 
 export default function VueEnsemble() {
-  const { source, pret, erreur, client, liste, tableau, premier, demander, demanderTous, quota, maitresOuvrage, creer } = useDaliro();
+  const { source, pret, erreur, client, liste, tableau, premier, demander, demanderTous, maitresOuvrage, creer } = useDaliro();
+  const auj = useMemo(() => jourLocal(), []);
   const params = useSearchParams();
   const routeur = useRouter();
   const toast = useToast();
@@ -80,12 +95,12 @@ export default function VueEnsemble() {
   /* le point du mois lit tous les tableaux (formule, droits) : une fois par liste */
   const demandes = useRef("");
   useEffect(() => {
-    if (vue !== "point" || source !== "reelle" || !pret) return;
+    if (source !== "reelle" || !pret) return;
     const cle = liste.map((c) => c.id).join(",");
     if (demandes.current === cle) return;
     demandes.current = cle;
     demanderTous();
-  }, [vue, source, pret, liste, demanderTous]);
+  }, [source, pret, liste, demanderTous]);
 
   /* B03 : les familles, exclusives (un chantier compte dans la première qui le concerne) */
   const comptes = useMemo(() => {
@@ -96,32 +111,28 @@ export default function VueEnsemble() {
     }
     return c;
   }, [liste]);
-  const ouverts = liste.filter((c) => c.statut === "ouvert" || c.statut === "suspendu").length;
-  const avenantsEnCours = liste.reduce((s, c) => s + (c.nb_avenants_en_cours ?? 0), 0);
-  const prixProposes = (premier?.bibliotheque ?? []).filter((p) => p.statut === "propose").length;
-
-  const liens: { libelle: string; href: string; icone: React.ReactNode; compte?: number }[] = [
-    { libelle: "Chantiers", href: `${BASE}/chantiers`, icone: <HardHat aria-hidden="true" />, compte: liste.length },
-    { libelle: "À ranger", href: `${BASE}/a-ranger`, icone: <Inbox aria-hidden="true" /> },
-    { libelle: "À faire", href: `${BASE}/a-faire`, icone: <ListTodo aria-hidden="true" /> },
-    { libelle: "Avenants et situations", href: `${BASE}/avenants`, icone: <FileSignature aria-hidden="true" />, compte: avenantsEnCours || undefined },
-    { libelle: "Annuaire", href: `${BASE}/annuaire`, icone: <BookUser aria-hidden="true" />, compte: premier?.tiers.length },
-    { libelle: "Équipes", href: `${BASE}/equipes`, icone: <Users aria-hidden="true" /> },
-    { libelle: "Réglages", href: `${BASE}/reglages`, icone: <Settings aria-hidden="true" />, compte: prixProposes || undefined },
-  ];
-  const listeLiens = (replies?: boolean) => (
-    <ul className={replies ? "lh-liens lh-liens--replies" : "lh-liens"} aria-label={replies ? "Aller à" : undefined}>
-      {liens.map((l) => (
-        <li key={l.href}>
-          <Link href={l.href} className="lh-lien">
-            {l.icone}
-            {l.libelle}
-            {l.compte !== undefined ? <span className="lh-lien-compte">{l.compte}</span> : null}
-          </Link>
-        </li>
-      ))}
-    </ul>
+  /* les chantiers, les plus pressés d'abord, chacun avec sa phrase */
+  const chantiers = useMemo(
+    () =>
+      liste
+        .filter((c) => c.statut !== "clos" && c.statut !== "annule")
+        .map((c) => ({ c, r: resume(c, tableau(c.id), auj), n: phrasesChantier(c, tableau(c.id), auj).length }))
+        .sort((a, b) => URGENCE[a.r.teinte] - URGENCE[b.r.teinte] || a.c.nom.localeCompare(b.c.nom, "fr")),
+    [liste, tableau, auj],
   );
+  /* cette semaine : les passages prévus des sept jours qui viennent, tous chantiers, jour par jour */
+  const semaine = useMemo(() => {
+    const jours = new Map<string, { id: string; chantier: string; qui: string; tache: string | null; teinte: TeinteClair; court: string }[]>();
+    for (const c of liste)
+      for (const p of tableau(c.id)?.passages ?? []) {
+        const n = ecartJours(p.debut, auj);
+        if (p.statut !== "prevu" || n < 0 || n > 6) continue;
+        const j = p.debut.slice(0, 10);
+        const conf = CONFIRMATION_CLAIRE[p.confirmation];
+        jours.set(j, [...(jours.get(j) ?? []), { id: p.id, chantier: c.nom, qui: qui(p), tache: p.tache, teinte: conf.teinte, court: conf.court }]);
+      }
+    return [...jours.entries()].sort(([a], [b]) => a.localeCompare(b));
+  }, [liste, tableau, auj]);
 
   /* ——— F01 : nouveau chantier ——— */
   const [nouveau, setNouveau] = useState(false);
@@ -228,21 +239,31 @@ export default function VueEnsemble() {
                 <p className="lh-nom">Chantiers</p>
               </div>
               <div className="lh-description">
-                <p>Le marché vérifié ligne à ligne, les travaux supplémentaires chiffrés sur vos prix et signés avant exécution, les passages confirmés à J-2, les factures rattachées à leurs lots.</p>
+                <p>Ce qui coince sur vos chantiers, et qui passe cette semaine.</p>
               </div>
-              {listeLiens(true)}
 
               <section className="lh-section" aria-labelledby="lh-regarder">
                 <div className="lh-section-tete">
                   <h2 id="lh-regarder" className="lh-section-titre">
-                    À regarder
+                    Vos chantiers
                   </h2>
                   <div className="lh-section-boutons">
-                    <Link href={`${BASE}/chantiers`} className="lh-rond lh-rond--plein" aria-label="Tous les chantiers" title="Tous les chantiers">
+                    <Link href={`${BASE}/chantiers`} className="lh-rond lh-rond--plein" aria-label="Voir la frise des chantiers" title="Voir la frise des chantiers">
                       <ArrowUpRight aria-hidden="true" />
                     </Link>
                   </div>
                 </div>
+                {pret && !erreur ? (
+                  <nav className="lh-familles" aria-label="Familles de chantiers">
+                    {FAMILLES.filter((fa) => comptes[fa.cle] > 0).map((fa) => (
+                      <Link key={fa.cle} href={`${BASE}/chantiers?famille=${fa.cle}`} className="lh-famille" style={{ "--lin-teinte": TEINTES[fa.cle] } as React.CSSProperties}>
+                        {ICONES[fa.cle]}
+                        {FAMILLE_CLAIRE[fa.cle]}
+                        <span>{comptes[fa.cle]}</span>
+                      </Link>
+                    ))}
+                  </nav>
+                ) : null}
                 {erreur ? (
                   <p className="lh-aide" data-erreur="" role="alert">
                     La base réelle n&apos;a pas répondu. {erreur}
@@ -251,60 +272,75 @@ export default function VueEnsemble() {
                   <p className="lh-aide">Lecture des chantiers…</p>
                 ) : (
                   <ul className="lh-rangees">
-                    {FAMILLES.map((fa) => {
-                      const n = comptes[fa.cle];
-                      const meta = fa.cle === "ouvert" && quota ? `${ouverts} ouvert${ouverts > 1 ? "s" : ""} sur un quota de ${quota}` : fa.sous;
-                      return (
-                        <li key={fa.cle}>
-                          <Link href={`${BASE}/chantiers?famille=${fa.cle}`} className="lh-rangee" data-vide={n ? undefined : ""} style={{ "--lin-teinte": TEINTES[fa.cle] } as React.CSSProperties}>
-                            <span className="lh-rangee-icone">{ICONES[fa.cle]}</span>
-                            <span className="lh-rangee-texte">
-                              <span className="lh-rangee-nom">{fa.libelle}</span>
-                              <span className="lh-rangee-meta">{meta}</span>
+                    {chantiers.map(({ c, r, n }) => (
+                      <li key={c.id}>
+                        <Link href={`${BASE}/chantiers/${encodeURIComponent(c.id)}`} className="lh-rangee lh-rangee--chantier" style={{ "--lin-teinte": TEINTE_CLAIRE[r.teinte] } as React.CSSProperties}>
+                          <span className="lh-rangee-icone">
+                            <HardHat aria-hidden="true" />
+                          </span>
+                          <span className="lh-rangee-texte">
+                            <span className="lh-rangee-nom">{c.nom}</span>
+                            <span className="lh-rangee-meta">
+                              {STATUTS_CHANTIER[c.statut].libelle} · {c.commune}
                             </span>
-                            <span className="lh-rangee-compte">{n}</span>
-                            <ArrowUpRight className="lh-rangee-fleche" aria-hidden="true" />
-                          </Link>
-                        </li>
-                      );
-                    })}
+                            <span className="lh-rangee-phrase">{r.texte}</span>
+                            {n > 1 ? (
+                              <span className="lh-rangee-autres">
+                                et {n - 1} autre{n > 2 ? "s" : ""} chose{n > 2 ? "s" : ""} à faire
+                              </span>
+                            ) : null}
+                          </span>
+                          <ArrowUpRight className="lh-rangee-fleche" aria-hidden="true" />
+                        </Link>
+                      </li>
+                    ))}
+                    <li>
+                      <button type="button" className="lh-rangee" onClick={ouvrirNouveau}>
+                        <span className="lh-rangee-icone">
+                          <Plus aria-hidden="true" />
+                        </span>
+                        <span className="lh-rangee-texte">
+                          <span className="lh-rangee-nom">Nouveau chantier</span>
+                          <span className="lh-rangee-meta">nom, code postal et commune suffisent</span>
+                        </span>
+                      </button>
+                    </li>
                   </ul>
                 )}
               </section>
-
-              <section className="lh-section" aria-labelledby="lh-nouveau">
-                <div className="lh-section-tete">
-                  <h2 id="lh-nouveau" className="lh-section-titre">
-                    Nouveau chantier
-                  </h2>
-                  <div className="lh-section-boutons">
-                    <button type="button" className="lh-rond lh-rond--plein" aria-label="Nouveau chantier" title="Nouveau chantier" onClick={ouvrirNouveau}>
-                      <Plus aria-hidden="true" />
-                    </button>
-                  </div>
-                </div>
-                <p className="lh-aide">Le chantier naît en préparation : son nom, son adresse, son maître d&apos;ouvrage. Vous posez ensuite ses lots et son marché, puis vous l&apos;ouvrez.</p>
-                <ul className="lh-rangees">
-                  <li>
-                    <button type="button" className="lh-rangee" onClick={ouvrirNouveau}>
-                      <span className="lh-rangee-icone">
-                        <Plus aria-hidden="true" />
-                      </span>
-                      <span className="lh-rangee-texte">
-                        <span className="lh-rangee-nom">Créer un chantier</span>
-                        <span className="lh-rangee-meta">nom, code postal et commune suffisent</span>
-                      </span>
-                    </button>
-                  </li>
-                </ul>
-              </section>
             </div>
 
-            <aside className="lh-droite" aria-label="Aller à">
+            <aside className="lh-droite lh-droite--semaine" aria-label="Cette semaine">
               <div className="lh-droite-bloc">
                 <section className="lh-droite-section">
-                  <h2 className="lh-droite-titre">Aller à</h2>
-                  {listeLiens()}
+                  <h2 className="lh-droite-titre">Cette semaine</h2>
+                  {!pret ? null : semaine.length ? (
+                    <ol className="lh-semaine">
+                      {semaine.map(([jour, passages]) => (
+                        <li key={jour}>
+                          <span className="lh-semaine-jour">{quand(jour, auj)}</span>
+                          <ul>
+                            {passages.map((p) => (
+                              <li key={p.id}>
+                                <Link href={`${BASE}/chantiers?passage=${encodeURIComponent(p.id)}`} className="lh-semaine-passage" style={{ "--lin-teinte": TEINTE_CLAIRE[p.teinte] } as React.CSSProperties} title={`${p.qui} · ${p.tache ?? ""} · ${p.court}`}>
+                                  <span className="lh-semaine-qui">{p.qui}</span>
+                                  <span className="lh-semaine-meta">
+                                    {p.chantier} · {p.court}
+                                  </span>
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </li>
+                      ))}
+                    </ol>
+                  ) : (
+                    <p className="lh-semaine-vide">Personne n&apos;est prévu sur vos chantiers ces sept jours.</p>
+                  )}
+                  <Link href={`${BASE}/chantiers`} className="lh-lien" style={{ marginLeft: -7 }}>
+                    <CalendarClock aria-hidden="true" />
+                    Ouvrir la frise
+                  </Link>
                 </section>
               </div>
             </aside>
