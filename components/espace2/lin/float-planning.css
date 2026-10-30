@@ -279,3 +279,24 @@ html[data-v2-theme="light"] .v2 .lin .fpl .fpl-bloc[data-clair][data-provisoire]
 }
 /* les heures d'un passage (b6_82), en tête du bloc */
 .v2 .fpl-heures { margin-right: 5px; font-weight: 600; font-variant-numeric: tabular-nums; opacity: 0.85; }
+
+/* une absence (le « Time off » de Float) : hachures rouge pâle sur toute la ligne, sous les blocs */
+.v2 .fpl-absence {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 6px 6px;
+  border: 0;
+  border-left: 1px solid color-mix(in srgb, #e5484d 45%, transparent);
+  border-right: 1px solid color-mix(in srgb, #e5484d 45%, transparent);
+  background: repeating-linear-gradient(-45deg, color-mix(in srgb, #e5484d 16%, transparent) 0 2px, transparent 2px 7px);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.v2 .fpl-absence:disabled { cursor: default; }
+.v2 .fpl-absence > span { padding: 1px 6px; border-radius: 9999px; background: var(--fpl-fond); font-size: 11px; font-weight: 500; color: #c2363b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2 .fpl-absence:hover > span { text-decoration: underline; }

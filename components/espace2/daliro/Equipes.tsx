@@ -24,26 +24,29 @@
      G62      « Annuler l'absence » (clic sur une absence, ou le « ··· ») :
               annulerIndisponibilite, après une fenêtre de confirmation
    Le coût horaire (G48) reste dans la fiche du chantier.
-   Filtre ?type=sous-traitants|equipes, zoom ?zoom= (Mois par défaut).
+   Filtre ?type=sous-traitants|equipes.
+
+   30/10/2026 : la frise laisse la place au planning façon Float (./Planning,
+   le même que Chantiers) : une ligne par intervenant, ses passages en blocs
+   qu'on glisse ou qu'on étire (./deplacer), ses absences en hachures (un
+   clic : l'annuler, G62). ?semaine=, ?echelle=mois.
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Building2, CalendarOff, CircleHelp, Plus } from "lucide-react";
+import { CalendarOff, Plus } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { RACINE } from "@/components/espace2/modules";
 import { dateCourte } from "@/components/espace/format";
 import { Avis } from "@/components/espace/ui";
-import { CONFIRMATIONS } from "@/components/espace/daliro/etats";
 import { annulerIndisponibilite, chargerDisponibilites, noterIndisponibilite } from "@/components/espace/daliro/portes";
 import type { Confirmation, Disponibilite, Tableau } from "@/components/espace/daliro/types";
-import { MenuActions, type Option } from "../lin/Lin";
-import { IconeGroupe, IconeSante, type Sante } from "../lin/icones";
 import { useToast } from "../Toasts";
 import { useDaliro } from "./donnees";
-import Frise, { estZoom, type BarreFrise, type LigneFrise, type TeinteFrise, type Zoom } from "./Frise";
+import Planning, { estDensite, lundiDe } from "./Planning";
+import { useDeplacer } from "./deplacer";
 import "@/components/espace/espace.css";
 
 type Absence = Disponibilite["absences"][number];
@@ -52,12 +55,6 @@ type Genre = "equipe" | "tiers" | "inconnu";
 type Intervenant = { cle: string; nom: string; genre: Genre; tiers: string | null; passages: PassageVu[]; absences: Absence[] };
 
 const RANG: Record<Genre, number> = { equipe: 0, tiers: 1, inconnu: 2 };
-const GENRE: Record<Genre, string> = { equipe: "Nos équipes", tiers: "Sous-traitant", inconnu: "Intervenant non rapproché de l'annuaire" };
-const TYPES = [
-  { cle: null, libelle: "Tous les intervenants" },
-  { cle: "equipes", libelle: "Nos équipes" },
-  { cle: "sous-traitants", libelle: "Sous-traitants" },
-] as const;
 
 const iso = (d: Date) => `${d.getFullYear()}-${`${d.getMonth() + 1}`.padStart(2, "0")}-${`${d.getDate()}`.padStart(2, "0")}`;
 const plus = (n: number) => {
@@ -68,7 +65,6 @@ const plus = (n: number) => {
 const jj = (s: string) => s.slice(0, 10);
 const nid = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
 const pluriel = (n: number, mot: string) => `${n} ${mot}${n > 1 ? "s" : ""}`;
-const teinteDe = (t: string): TeinteFrise => (t === "rouge" || t === "ambre" || t === "bleu" || t === "vert" ? t : "gris");
 const chevauche = (a: { debut: string; fin: string }, b: { du: string; au: string }) => jj(a.debut) <= b.au && jj(a.fin) >= b.du;
 const periode = (du: string, au: string) => (du === au ? `le ${dateCourte(du)}` : `du ${dateCourte(du)} au ${dateCourte(au)}`);
 
@@ -79,7 +75,8 @@ export default function Equipes() {
   const chemin = usePathname();
   const toast = useToast();
   const du = useMemo(() => plus(0), []);
-  const au = useMemo(() => plus(30), []);
+  /* les absences se lisent sur la fenêtre la plus large du planning (neuf semaines) */
+  const au = useMemo(() => plus(70), []);
 
   /* base réelle : tous les tableaux (les passages de chaque chantier) */
   useEffect(() => {
@@ -142,8 +139,6 @@ export default function Equipes() {
 
   const typeParam = params.get("type");
   const type = typeParam === "equipes" || typeParam === "sous-traitants" ? typeParam : null;
-  const zParam = params.get("zoom");
-  const zoom: Zoom = estZoom(zParam) ? zParam : "mois";
   const lien = (modif: Record<string, string | null>) => {
     const p = new URLSearchParams(params.toString());
     for (const [k, v] of Object.entries(modif)) {
@@ -153,8 +148,6 @@ export default function Equipes() {
     const s = p.toString();
     return `${chemin}${s ? `?${s}` : ""}`;
   };
-  const compte = (t: (typeof TYPES)[number]["cle"]) => intervenants.filter((i) => !t || (t === "equipes" ? i.genre === "equipe" : i.genre === "tiers")).length;
-  const visibles = intervenants.filter((i) => !type || (type === "equipes" ? i.genre === "equipe" : i.genre === "tiers"));
   const sousTraitants = intervenants.filter((i) => i.tiers);
 
   /* ——— G61 : noter une absence ——— */
@@ -212,77 +205,12 @@ export default function Equipes() {
     }
   };
 
-  const ligne = (iv: Intervenant): LigneFrise => {
-    const conflits = iv.passages.filter((p) => iv.absences.some((a) => chevauche(p, a)));
-    const confs = new Set(iv.passages.map((p) => p.confirmation));
-    const etat: { sante: Sante; teinte: TeinteFrise; texte: string } = conflits.length
-      ? { sante: "hors", teinte: "rouge", texte: `Absent pendant ${pluriel(conflits.length, "passage")} prévu${conflits.length > 1 ? "s" : ""}` }
-      : confs.has("declinee")
-        ? { sante: "hors", teinte: "rouge", texte: "Un passage décliné" }
-        : confs.has("sans_reponse")
-          ? { sante: "risque", teinte: "ambre", texte: "Un passage sans réponse" }
-          : confs.has("demandee")
-            ? { sante: "risque", teinte: "bleu", texte: "Demande envoyée, réponse attendue" }
-            : iv.passages.length
-              ? { sante: "bien", teinte: "vert", texte: iv.absences.length ? `Occupé, ${pluriel(iv.absences.length, "absence")} notée${iv.absences.length > 1 ? "s" : ""}` : "Occupé, rien à confirmer" }
-              : iv.absences.length
-                ? { sante: "risque", teinte: "ambre", texte: `${pluriel(iv.absences.length, "absence")} notée${iv.absences.length > 1 ? "s" : ""}, aucun passage` }
-                : { sante: "neutre", teinte: "gris", texte: "Libre sur la période" };
-    const actions: Option[] = iv.tiers
-      ? [
-          { cle: "noter", libelle: "Noter une absence", icone: <CalendarOff aria-hidden="true" />, action: () => ouvrirNoter(iv.tiers ?? undefined) },
-          ...iv.absences.map((a) => ({ cle: `annuler-${a.id}`, libelle: `Annuler l'absence ${periode(a.du, a.au)}`, action: () => ouvrirAnnuler(iv, a) })),
-        ]
-      : [];
-    const barres: BarreFrise[] = [
-      ...iv.absences.map((a) => ({
-        cle: `a:${a.id}`,
-        debut: a.du,
-        fin: a.au,
-        libelle: "Absent",
-        meta: a.motif ?? undefined,
-        hachure: true,
-        titre: `${iv.nom} absent ${periode(a.du, a.au)}${a.motif ? ` (${a.motif})` : ""}${iv.tiers ? " : cliquez pour annuler l'absence" : ""}`,
-        onClick: iv.tiers ? () => ouvrirAnnuler(iv, a) : undefined,
-      })),
-      ...iv.passages.map((p) => {
-        const conf = p.confirmation ? CONFIRMATIONS[p.confirmation] : null;
-        return {
-          cle: `p:${p.id}`,
-          debut: p.debut,
-          fin: p.fin,
-          libelle: `${p.chantier}${p.tache ? ` · ${p.tache}` : ""}`,
-          teinte: conf ? teinteDe(conf.teinte) : undefined,
-          titre: `${p.chantier}${p.tache ? ` · ${p.tache}` : ""}, ${periode(p.debut, p.fin)}${conf ? ` · ${conf.libelle.toLowerCase()}` : ""}`,
-          href: p.chantierId ? `${RACINE}/daliro/chantiers/${encodeURIComponent(p.chantierId)}` : undefined,
-        };
-      }),
-    ];
-    return {
-      cle: iv.cle,
-      icone: iv.genre === "equipe" ? <IconeGroupe /> : iv.genre === "tiers" ? <Building2 aria-hidden="true" /> : <CircleHelp aria-hidden="true" />,
-      teinteIcone: iv.genre === "equipe" ? "bleu" : iv.genre === "tiers" ? "ambre" : "gris",
-      nom: iv.nom,
-      pilule: iv.passages.length ? pluriel(iv.passages.length, "passage") : iv.absences.length ? "Absent" : "Libre",
-      puces: true,
-      ronds: (
-        <>
-          <span className="ltl-rond" data-teinte={etat.teinte} title={etat.texte} aria-label={etat.texte} role="img">
-            <IconeSante etat={etat.sante} />
-          </span>
-          <span className="ltl-rond ltl-rond--chiffre" data-liste="non" title={`${GENRE[iv.genre]} · ${pluriel(iv.passages.length, "passage")} prévu${iv.passages.length > 1 ? "s" : ""} sur 30 jours`} aria-label={`${pluriel(iv.passages.length, "passage")} prévu${iv.passages.length > 1 ? "s" : ""}`} role="img">
-            {iv.passages.length}
-          </span>
-          {actions.length ? (
-            <span className="ltl-rond">
-              <MenuActions titre={`Actions pour ${iv.nom}`} options={actions} rond />
-            </span>
-          ) : null}
-        </>
-      ),
-      barres,
-    };
-  };
+  /* le planning façon Float (./Planning, comme Chantiers) : ses absences par sous-traitant, ses gestes partagés */
+  const { changer } = useDeplacer(du);
+  const absences: Record<string, Absence[]> = Object.fromEntries(intervenants.filter((iv) => iv.tiers).map((iv) => [iv.tiers as string, iv.absences]));
+  const sParam = params.get("semaine");
+  const lundi = sParam && /^\d{4}-\d{2}-\d{2}$/.test(sParam) ? lundiDe(sParam) : lundiDe(du);
+  const eParam = params.get("echelle");
 
   const vide = !pret || (enLecture && !intervenants.length) ? (
     <p className="lin-vide">Lecture du planning…</p>
@@ -303,9 +231,6 @@ export default function Equipes() {
       <header className="lin-tete">
         <span className="lin-tete-titre">Équipes</span>
         <div className="lin-tete-droite">
-          <span className="lin-position">
-            {dateCourte(du)} → {dateCourte(au)}
-          </span>
           <button type="button" className="v2-btn v2-btn--petit" onClick={() => ouvrirNoter()} disabled={!sousTraitants.length}>
             <Plus width={14} height={14} aria-hidden="true" />
             <span>Noter une absence</span>
@@ -313,15 +238,6 @@ export default function Equipes() {
         </div>
       </header>
 
-      <div className="lin-outils">
-        <nav className="lin-onglets" aria-label="Intervenants">
-          {TYPES.map((t) => (
-            <Link key={t.libelle} href={lien({ type: t.cle })} className="v2-btn v2-btn--petit" data-actif={type === t.cle ? "" : undefined} aria-current={type === t.cle ? "page" : undefined} scroll={false}>
-              {t.libelle} <span className="ltl-compte">{compte(t.cle)}</span>
-            </Link>
-          ))}
-        </nav>
-      </div>
 
       {erreur && source === "reelle" ? (
         <p className="ltl-note" data-teinte="rouge" role="alert">
@@ -339,7 +255,31 @@ export default function Equipes() {
         </p>
       ) : null}
 
-      <Frise libelle="Frise des équipes et sous-traitants" lignes={pret ? visibles.map(ligne) : []} zoom={zoom} onZoom={(z) => routeur.replace(lien({ zoom: z === "mois" ? null : z }), { scroll: false })} aujourdhui={du} vide={vide} />
+      {pret && (tableaux.length || !enLecture) && intervenants.length ? (
+        <Planning
+          lundi={lundi}
+          aujourdhui={du}
+          densite={estDensite(eParam) ? eParam : "semaines"}
+          type={type}
+          chantiers={liste}
+          tous={liste}
+          tableau={tableau}
+          passageChoisi={null}
+          onSemaine={(l) => routeur.replace(lien({ semaine: l ?? lundiDe(du) }), { scroll: false })}
+          onDensite={(d) => routeur.replace(lien({ echelle: d === "semaines" ? null : d }), { scroll: false })}
+          onType={(t) => routeur.replace(lien({ type: t }), { scroll: false })}
+          onPassage={(id) => routeur.push(`${RACINE}/daliro/chantiers?passage=${encodeURIComponent(id)}`)}
+          onChanger={changer}
+          absences={absences}
+          onAbsence={(tiers, id) => {
+            const iv = intervenants.find((x) => x.tiers === tiers);
+            const a = iv?.absences.find((x) => x.id === id);
+            if (iv && a) ouvrirAnnuler(iv, a);
+          }}
+        />
+      ) : (
+        <div className="ltl">{vide}</div>
+      )}
 
       <Dialog open={!!form} onOpenChange={(o) => !o && setForm(null)}>
         <DialogContent>

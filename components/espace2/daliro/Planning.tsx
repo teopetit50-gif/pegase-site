@@ -37,6 +37,11 @@
    confirmation) — la base ne sait pas encore déplacer le début d'un passage.
    Les heures (b6_82, facultatives) s'affichent en tête du bloc ; elles se
    posent dans l'aperçu du passage.
+
+   Les absences d'un sous-traitant (page Équipes, btp_disponibilites) : une
+   bande hachurée sur toute la hauteur de sa ligne, comme le « Time off » de
+   Float ; un jour où un passage tombe pendant une absence passe en
+   surcharge (fond rose). Un clic sur la bande : onAbsence.
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
@@ -115,6 +120,8 @@ export default function Planning({
   onType,
   onPassage,
   onChanger,
+  absences,
+  onAbsence,
 }: {
   lundi: string;
   aujourdhui: string;
@@ -132,6 +139,9 @@ export default function Planning({
   onPassage: (id: string) => void;
   /* un bloc glissé (« deplacer », de `jours`) ou tiré par son bord droit (« etirer », fin + `jours`) */
   onChanger: (c: { passage: Passage; chantierId: string; mode: "deplacer" | "etirer"; jours: number }) => void;
+  /* les absences notées, par sous-traitant (identifiant de l'annuaire) */
+  absences?: Record<string, { id: string; du: string; au: string; motif: string | null }[]>;
+  onAbsence?: (tiersId: string, absenceId: string) => void;
 }) {
   const l0 = num(lundi);
   const n = NB_JOURS[densite];
@@ -186,9 +196,12 @@ export default function Planning({
       const compte = new Map<number, number>();
       for (const bl of pers.blocs) for (let d = Math.max(bl.a, l0); d <= Math.min(bl.b, l0 + n - 1); d++) compte.set(d, (compte.get(d) ?? 0) + 1);
       for (const [d, k] of compte) if (k > 1) pers.surcharge.add(d);
+      /* un passage pendant une absence : le jour est en surcharge */
+      for (const ab of pers.tiersId ? (absences?.[pers.tiersId] ?? []) : [])
+        for (let d = Math.max(num(ab.du), l0); d <= Math.min(num(ab.au), l0 + n - 1); d++) if (compte.has(d)) pers.surcharge.add(d);
     }
     return [...m.values()].filter((x) => !type || (type === "equipes" ? x.genre === "equipe" : x.genre !== "equipe")).sort((x, y) => RANG[x.genre] - RANG[y.genre] || x.nom.localeCompare(y.nom, "fr"));
-  }, [tous, chantiers, tableau, couleurDe, l0, n, type]);
+  }, [tous, chantiers, tableau, couleurDe, l0, n, type, absences]);
 
   const fin = new Date((l0 + n - 1) * JOUR);
   const debut = new Date(l0 * JOUR);
@@ -338,6 +351,17 @@ export default function Planning({
                   <span key={d} className="fpl-case" style={{ left: i * W, width: W }} data-we={i % 7 >= 5 ? "" : undefined} data-surcharge={pers.surcharge.has(d) ? "" : undefined} aria-hidden="true" />
                 ))}
                 {auj >= l0 && auj < l0 + n ? <span className="fpl-aujourdhui" style={{ left: (auj - l0) * W }} aria-hidden="true" /> : null}
+                {(pers.tiersId ? (absences?.[pers.tiersId] ?? []) : []).map((ab) => {
+                  const a = Math.max(num(ab.du), l0) - l0;
+                  const b = Math.min(num(ab.au), l0 + n - 1) - l0;
+                  if (b < 0 || a > n - 1) return null;
+                  const titre = `${pers.nom} absent du ${dateCourte(num(ab.du))} au ${dateCourte(num(ab.au))}${ab.motif ? ` (${ab.motif})` : ""}${onAbsence ? " — cliquez pour l'annuler" : ""}`;
+                  return (
+                    <button key={ab.id} type="button" className="fpl-absence" style={{ left: a * W, width: (b - a + 1) * W }} title={titre} aria-label={titre} disabled={!onAbsence} onClick={() => pers.tiersId && onAbsence?.(pers.tiersId, ab.id)}>
+                      <span>Absent{ab.motif ? ` · ${ab.motif}` : ""}</span>
+                    </button>
+                  );
+                })}
                 {pers.blocs.map((bl) => {
                   const { p } = bl;
                   const g = geste?.id === p.id ? geste : null;
