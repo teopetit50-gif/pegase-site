@@ -477,9 +477,12 @@
 .v2 .lcl-desc--fiche:hover {
   border-color: var(--lin-second);
 }
-.v2 .lcl-desc--fiche:focus {
-  border-color: var(--lin-second);
+/* le double sélecteur passe devant « .lcl-desc:focus { border: 0 } » plus bas, qui effaçait le contour à la saisie */
+.v2 .lcl-desc.lcl-desc--fiche:focus,
+.v2 .lcl-desc.lcl-desc--fiche:focus-visible {
+  border: 0.5px solid var(--lin-second);
   box-shadow: 0 0 0 1px var(--lin-second);
+  outline: none;
 }
 /* « + Contact » sous le texte, comme « + Milestone » */
 .v2 .lcl-plus {
