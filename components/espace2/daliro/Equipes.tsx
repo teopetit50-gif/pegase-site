@@ -222,7 +222,7 @@ export default function Equipes() {
         : confs.has("sans_reponse")
           ? { sante: "risque", teinte: "ambre", texte: "Un passage sans réponse" }
           : confs.has("demandee")
-            ? { sante: "risque", teinte: "bleu", texte: "Une confirmation J-2 en attente" }
+            ? { sante: "risque", teinte: "bleu", texte: "Demande envoyée, réponse attendue" }
             : iv.passages.length
               ? { sante: "bien", teinte: "vert", texte: iv.absences.length ? `Occupé, ${pluriel(iv.absences.length, "absence")} notée${iv.absences.length > 1 ? "s" : ""}` : "Occupé, rien à confirmer" }
               : iv.absences.length

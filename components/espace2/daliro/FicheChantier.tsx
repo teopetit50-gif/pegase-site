@@ -529,7 +529,7 @@ function Apercu({ t, ici }: { t: Tableau; ici: string }) {
         {/* « Description » : les contrôles bloquants et à voir (B12), en phrases */}
         <section className="lit-description" aria-labelledby="lit-description-titre">
           <h3 id="lit-description-titre" className="lit-etiquette">
-            Contrôles
+            Ce qui coince
           </h3>
           <div className="lit-description-texte">
             {controles.length ? (
@@ -547,11 +547,11 @@ function Apercu({ t, ici }: { t: Tableau; ici: string }) {
                 </ul>
               </>
             ) : (
-              <p>Rien à signaler : aucun contrôle bloquant ni à voir sur ce chantier.</p>
+              <p>Rien ne coince sur ce chantier.</p>
             )}
             <p>
-              <Link href={`${ici}?onglet=terrain`} className="lit-lien">
-                Tous les contrôles, dans Terrain
+              <Link href={`${ici}?onglet=terrain&partie=controles`} className="lit-lien">
+                Le détail, dans Terrain › Points à régler
               </Link>
             </p>
           </div>

@@ -46,6 +46,28 @@ Déjà repris avant le 29/10, donc exclus pour les métiers suivants : Linear Pr
 liste et page d'un ticket, Cycles, Docs, Pulse, Customers, Settings › Preferences et Members, Agent ; Plain All threads,
 un fil, Tenants (liste et fiche), Insights/rapports, Settings, Workflows, éditeur, Runs.
 
+### Daliro, deuxième passage (30/10/2026) : plus simple à lire, même dessin
+
+Teo trouvait les pages « ultra complexes ». Diagnostic : l'habillage Linear était copié, mais le contenu restait
+celui de l'ancien écran (onglets Terrain et Argent = l'ancienne pile de cartes, Argent à 3 700 px, quatre polices),
+des modèles choisis parce que libres plutôt que parce qu'ils allaient au besoin, le vocabulaire de la base, des doublons.
+Ce qui a changé, sans toucher aux portes ni aux gestes :
+
+- `enClair.ts` : ce qu'un chantier demande, en phrases de chantier (« Serrurerie Dumont n'a pas répondu pour demain »),
+  avec le lien où agir ; montants seulement pour qui voit les prix.
+- **Chantiers** : la frise s'ouvre au mois ; sous chaque nom, la phrase la plus pressée ; sur chaque barre, un pavé par
+  passage, de la couleur de la réponse ; un clic sur la barre ou un pavé ouvre l'aperçu à droite (`ApercuFrise.tsx`,
+  `?apercu=`, `?passage=`, Échap) ; la frise ramène l'élément choisi en vue. Colonne de gauche à 400 (deux lignes).
+- **Vue d'ensemble** : les chantiers eux-mêmes, les plus pressés d'abord, avec leur phrase ; les familles en pastilles ;
+  à droite « Cette semaine » (qui passe, jour par jour, un clic ouvre le passage dans la frise) à la place des liens
+  « Aller à » en double avec le menu.
+- **Fiche** : « l'essentiel » en tête de Terrain et Argent (`Essentiel.tsx` : chiffres et phrases), puis une partie à la
+  fois (`?partie=`, « Tout voir » rend la pile ; les ancres #planning, #avenants, #situations choisissent leur partie) ;
+  Argent passe de 3 700 à 1 350 px ; une seule écriture (Inter) dans les cartes de l'écran d'avant, limitée à la fiche.
+
+Reste à faire : redessiner pour de bon les cartes de l'écran d'avant (tableaux du planning, des avenants) au lieu de les
+habiller ; même passage sur À ranger, À faire, Avenants, Annuaire, Réglages ; puis Lorani.
+
 Le découpage ci-dessous est la proposition d'avant les références ; la table ci-dessus fait foi.
 
 
