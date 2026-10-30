@@ -265,15 +265,15 @@
 }
 /* « Voir plus » (29/10) : un fondu vers le fond de la page recouvre les
    dernières lignes ; le bouton reste cliquable, les lignes dessous non.
-   -120 = le padding-bottom de 24 du tableau + 96 de fondu. */
+   -192 = le padding-bottom de 24 du tableau + 168 de fondu (trois lignes et demie). */
 .v2 .lcl-suite {
   position: relative;
   z-index: 1;
   display: flex;
   justify-content: center;
-  margin-top: -120px;
-  padding-top: 88px;
-  background: linear-gradient(to bottom, transparent, var(--lin-fond) 70%);
+  margin-top: -192px;
+  padding-top: 160px;
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--lin-fond) 55%, transparent) 40%, var(--lin-fond) 80%);
 }
 .v2 .lcl-suite[data-ouvert] {
   margin-top: -12px;
