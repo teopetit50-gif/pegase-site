@@ -26,6 +26,14 @@
           ou commune (le bouton Filtre) ; un clic ouvre la fiche
    Zoom de la frise : ?zoom=mois|trimestre|annee.
 
+   30/10/2026, choix de Teo (« celui de Float, exactement le même ») : la
+   page s'ouvre sur le planning (./Planning, le Schedule de Float : une
+   ligne par intervenant, les jours en colonnes, un bloc par passage à la
+   couleur de son chantier) ; la frise reste à un clic (?vue=frise).
+   ?semaine=<lundi> choisit la première semaine (un passage ouvert depuis
+   ailleurs, ?passage=, montre la sienne), ?echelle=mois resserre,
+   ?qui=equipes|sous-traitants filtre les lignes.
+
    30/10/2026 — la frise qu'on touche (Teo : « le mec peut cliquer et
    accéder aux fiches ») :
      · Mois par défaut : on voit les semaines qui viennent, pas une année
@@ -60,6 +68,7 @@ import { useToast } from "../Toasts";
 import { useDaliro, type NouveauChantier } from "./donnees";
 import Frise, { estZoom, type LigneFrise, type PastilleFrise, type TeinteFrise, type Zoom } from "./Frise";
 import ApercuFrise from "./ApercuFrise";
+import Planning, { estDensite, lundiDe } from "./Planning";
 import { CONFIRMATION_CLAIRE, jourLocal, qui, quand, resume } from "./enClair";
 import "@/components/espace/espace.css";
 
@@ -115,6 +124,7 @@ export default function Chantiers() {
   const filtre = estFamille(params.get("famille")) ? (params.get("famille") as Famille) : null;
   const zParam = params.get("zoom");
   const zoom: Zoom = estZoom(zParam) ? zParam : "mois";
+  const vueFrise = params.get("vue") === "frise";
   const apercuId = params.get("apercu");
   const passageId = params.get("passage");
   const lien = (modif: Record<string, string | null>) => {
@@ -154,6 +164,8 @@ export default function Chantiers() {
     return null;
   }, [passageId, liste, tableau]);
   const chantierOuvert = liste.find((c) => c.id === (passageOuvert?.chantier_id ?? apercuId)) ?? null;
+  const sParam = params.get("semaine");
+  const lundi = sParam && /^\d{4}-\d{2}-\d{2}$/.test(sParam) ? lundiDe(sParam) : lundiDe(passageOuvert?.debut ?? aujourdhui);
 
   const tries = useMemo(
     () =>
@@ -350,6 +362,14 @@ export default function Chantiers() {
           ))}
         </nav>
         <div className="lin-outils-droite">
+          <nav className="lin-onglets" aria-label="Affichage" style={{ marginRight: 6 }}>
+            <Link href={lien({ vue: null, zoom: null })} className="v2-btn v2-btn--petit" data-actif={!vueFrise ? "" : undefined} aria-current={!vueFrise ? "page" : undefined} scroll={false}>
+              Planning
+            </Link>
+            <Link href={lien({ vue: "frise", semaine: null, echelle: null, qui: null })} className="v2-btn v2-btn--petit" data-actif={vueFrise ? "" : undefined} aria-current={vueFrise ? "page" : undefined} scroll={false}>
+              Frise
+            </Link>
+          </nav>
           <Menu
             largeur={280}
             bouton={(ouvert, basculer) => (
@@ -387,12 +407,31 @@ export default function Chantiers() {
         </p>
       ) : null}
 
-      {pret && visibles.length ? (
+      {vueFrise && pret && visibles.length ? (
         <p className="ltl-legende">Une ligne par lot, un rectangle par passage : qui vient, pour quoi, et ce qu&apos;il a répondu. Cliquez pour le détail à droite.</p>
       ) : null}
 
       <div className="ltl-cadre">
-        <Frise libelle="Frise des chantiers" lignes={pret ? visibles.flatMap((c) => [ligne(c), ...lignesLots(c, tableau(c.id))]) : []} zoom={zoom} onZoom={(z) => ouvrir({ zoom: z === "mois" ? null : z })} aujourdhui={aujourdhui} vide={vide} />
+        {vueFrise ? (
+          <Frise libelle="Frise des chantiers" lignes={pret ? visibles.flatMap((c) => [ligne(c), ...lignesLots(c, tableau(c.id))]) : []} zoom={zoom} onZoom={(z) => ouvrir({ zoom: z === "mois" ? null : z })} aujourdhui={aujourdhui} vide={vide} />
+        ) : pret && liste.length ? (
+          <Planning
+            lundi={lundi}
+            aujourdhui={aujourdhui}
+            densite={estDensite(params.get("echelle")) ? (params.get("echelle") as "semaines" | "mois") : "semaines"}
+            type={params.get("qui") === "equipes" ? "equipes" : params.get("qui") === "sous-traitants" ? "sous-traitants" : null}
+            chantiers={visibles}
+            tous={liste}
+            tableau={tableau}
+            passageChoisi={passageOuvert?.id ?? null}
+            onSemaine={(l) => ouvrir({ semaine: l ?? lundiDe(aujourdhui) })}
+            onDensite={(d) => ouvrir({ echelle: d === "semaines" ? null : d })}
+            onType={(t) => ouvrir({ qui: t })}
+            onPassage={(id) => ouvrir({ passage: id, apercu: null })}
+          />
+        ) : (
+          <div className="ltl">{vide}</div>
+        )}
         {chantierOuvert ? (
           <ApercuFrise
             key={passageOuvert?.id ?? chantierOuvert.id}
