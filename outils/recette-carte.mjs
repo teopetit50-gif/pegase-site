@@ -20,6 +20,14 @@ const LARGEURS = process.argv[3] ? [Number(process.argv[3])] : [390, 768, 1024, 
 mkdirSync('captures', { recursive: true });
 
 let defauts = 0;
+/* attendre qu'une condition soit vraie dans la page (la machine peut être lente) : 15 s au plus */
+const attendre = async (s, expression, plafond = 15000) => {
+  for (let t = 0; t < plafond; t += 250) {
+    if (await s.evaluer(expression)) return true;
+    await s.dormir(250);
+  }
+  return false;
+};
 const dire = (ok, texte) => { console.log(`  ${ok ? '✓' : '✗'}   ${texte}`); if (!ok) defauts++; };
 
 const SONDE_CARTE = `(() => {
@@ -44,7 +52,8 @@ for (const largeur of LARGEURS) {
   const s = await ouvrirSession({ largeur, hauteur: 900, marque: 'carte', densite: 1, flags: ['--disable-webgl'] });
   try {
     if (!await s.aller(`${origine}/espace2/carte`)) { dire(false, 'la carte ne s\'ouvre pas'); continue; }
-    await s.dormir(2500);
+    await attendre(s, `document.querySelectorAll('.pe-lien').length === 12`);
+    await s.dormir(500);
     const d = await s.evaluer(SONDE_CARTE);
     dire(d.blocs === 13 && d.liens === 12, `${d.blocs} blocs, ${d.liens} liens`);
     dire(d.points > 0, `${d.points} points courent sur les liens`);
@@ -54,14 +63,15 @@ for (const largeur of LARGEURS) {
     await s.capturer(`captures/carte-${largeur}.jpg`);
 
     await s.evaluer(`[...document.querySelectorAll('.pe-bloc')].find((b) => b.getAttribute('aria-label')?.startsWith('FILED'))?.click()`);
-    await s.dormir(600);
+    await attendre(s, `location.search.includes('bloc=') && !!document.querySelector('.pe-panneau .pe-panneau-titre')`);
     const p = await s.evaluer(`({ adresse: location.search, titre: document.querySelector('.pe-panneau .pe-panneau-titre')?.textContent, ouvert: document.querySelector('.lin.pe')?.dataset.panneau, portes: [...document.querySelectorAll('.pe-panneau a')].map((a) => a.getAttribute('href')) })`);
     dire(p.adresse.includes('bloc=agent%3Afiled') && p.ouvert === 'ouvert', `clic sur FILED : ${p.adresse}, panneau ${p.ouvert}`);
     dire(p.titre?.startsWith('FILED') && p.portes.includes('/espace2/activite?modules=filed'), `détail « ${p.titre} », lien vers le journal filtré`);
     await s.capturer(`captures/carte-${largeur}-filed.jpg`);
 
     if (!await s.aller(`${origine}/espace2`)) { dire(false, 'la vue d\'ensemble ne s\'ouvre pas'); continue; }
-    await s.dormir(2500);
+    await attendre(s, `document.querySelectorAll('.mc-ligne').length === 4`);
+    await s.dormir(500);
     const m = await s.evaluer(`({ lignes: document.querySelectorAll('.mc-ligne').length, lien: !!document.querySelector('.mc a[href="/espace2/carte"]'), debord: document.documentElement.scrollWidth - document.documentElement.clientWidth })`);
     dire(m.lignes === 4 && m.lien, `miniature : ${m.lignes} agents et le lien « Ouvrir la carte »`);
     dire(m.debord <= 0, `vue d'ensemble sans débordement (${m.debord})`);

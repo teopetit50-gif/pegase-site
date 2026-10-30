@@ -445,8 +445,12 @@ export const EditeurPlain = forwardRef<PoigneeEditeur, Props>(function EditeurPl
     return () => cancelAnimationFrame(id);
   }, [liens, positions, vue.k, selection, noeuds]);
 
+  /* la vue a été bougée à la main (molette, glisser, zoom, mini-carte, centrage) : on ne la réajuste plus d'office */
+  const touchee = useRef(false);
+
   /* zoom autour d'un point du canevas (coordonnées écran relatives au canevas) */
   const zoomer = useCallback((facteur: number, px?: number, py?: number) => {
+    touchee.current = true;
     setVue((v) => {
       const k = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, v.k * facteur));
       const el = canevas.current;
@@ -456,15 +460,18 @@ export const EditeurPlain = forwardRef<PoigneeEditeur, Props>(function EditeurPl
     });
   }, []);
 
-  const ajuster = useCallback(() => {
+  /* vrai si l'ajustement a eu lieu : un canevas encore sans taille (feuille de style pas encore là) est laissé tel quel */
+  const ajuster = useCallback((): boolean => {
     const el = canevas.current;
-    if (!el || !bornes.w) return;
+    if (!el || !bornes.w) return false;
     /* la carte d'en-tête (s'il y en a une, et qu'elle se voit) garde sa place au-dessus du dessin */
     const haut = enteteRef.current?.offsetHeight ? enteteRef.current.offsetHeight + 15 : 0;
     const W = el.clientWidth;
     const H = el.clientHeight - haut;
+    if (W <= 2 * MARGE || H <= 2 * MARGE) return false;
     const k = Math.min(1, (W - 2 * MARGE) / bornes.w, (H - 2 * MARGE) / bornes.h, ZOOM_MAX);
     setVue({ k, x: (W - bornes.w * k) / 2 - bornes.x * k, y: haut + (H - bornes.h * k) / 2 - bornes.y * k });
+    return true;
   }, [bornes]);
 
   const centrer = useCallback(
@@ -472,6 +479,7 @@ export const EditeurPlain = forwardRef<PoigneeEditeur, Props>(function EditeurPl
       const el = canevas.current;
       const p = positions.get(id);
       if (!el || !p) return;
+      touchee.current = true;
       setVue((v) => ({ k: v.k, x: el.clientWidth / 2 - (p.x + LARGEUR_BLOC / 2) * v.k, y: el.clientHeight / 2 - (p.y + p.h / 2) * v.k }));
     },
     [positions],
@@ -483,8 +491,12 @@ export const EditeurPlain = forwardRef<PoigneeEditeur, Props>(function EditeurPl
   const ajusteUneFois = useRef(false);
   useEffect(() => {
     if (ajusteUneFois.current || !bornes.w || !Object.keys(hauteurs).length) return;
-    ajusteUneFois.current = true;
-    if (ajusterAuDepart || window.matchMedia("(max-width: 899px)").matches) ajuster();
+    if (!ajusterAuDepart && !window.matchMedia("(max-width: 899px)").matches) {
+      ajusteUneFois.current = true;
+      return;
+    }
+    /* tant que le canevas n'a pas sa taille, on réessaie au rendu suivant */
+    if (ajuster()) ajusteUneFois.current = true;
   }, [bornes, hauteurs, ajuster, ajusterAuDepart]);
 
   /* molette : déplacement ; avec ⌘ / Ctrl (ou pincement) : zoom autour du curseur */
@@ -494,6 +506,7 @@ export const EditeurPlain = forwardRef<PoigneeEditeur, Props>(function EditeurPl
     const molette = (e: WheelEvent) => {
       e.preventDefault();
       const r = el.getBoundingClientRect();
+      touchee.current = true;
       if (e.ctrlKey || e.metaKey) zoomer(Math.exp(-e.deltaY * 0.01), e.clientX - r.left, e.clientY - r.top);
       else setVue((v) => ({ ...v, x: v.x - e.deltaX, y: v.y - e.deltaY }));
     };
@@ -518,6 +531,7 @@ export const EditeurPlain = forwardRef<PoigneeEditeur, Props>(function EditeurPl
     if (!g.bouge && Math.hypot(dx, dy) < 3) return;
     if (!g.bouge) {
       g.bouge = true;
+      touchee.current = true;
       setEnGlisse(true);
     }
     setVue((v) => ({ ...v, x: g.vx + dx, y: g.vy + dy }));
@@ -556,6 +570,10 @@ export const EditeurPlain = forwardRef<PoigneeEditeur, Props>(function EditeurPl
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
+  /* « ajuster au départ » : tant que personne n'a bougé la vue, le dessin suit la taille du canevas (fenêtre, panneau, feuille de style arrivée après) */
+  useEffect(() => {
+    if (ajusterAuDepart && !touchee.current) ajuster();
+  }, [taille, ajusterAuDepart, ajuster]);
   const mini = useMemo(() => {
     const fen = { x: -vue.x / vue.k, y: -vue.y / vue.k, w: taille.w / vue.k, h: taille.h / vue.k };
     const x1 = Math.min(bornes.x, fen.x);
@@ -570,6 +588,7 @@ export const EditeurPlain = forwardRef<PoigneeEditeur, Props>(function EditeurPl
     return { s, ox, oy, fen };
   }, [vue, taille, bornes]);
   const clicMini = (e: React.MouseEvent<HTMLDivElement>) => {
+    touchee.current = true;
     const r = e.currentTarget.getBoundingClientRect();
     const fx = (e.clientX - r.left - 1 - mini.ox) / mini.s;
     const fy = (e.clientY - r.top - 1 - mini.oy) / mini.s;
@@ -680,7 +699,15 @@ export const EditeurPlain = forwardRef<PoigneeEditeur, Props>(function EditeurPl
           <button type="button" className="pe-commande" aria-label="Ajuster à la fenêtre" onClick={ajuster}>
             <Maximize aria-hidden="true" />
           </button>
-          <button type="button" className="pe-commande" aria-label="Remettre en place" onClick={() => setVue({ x: 0, y: 0, k: 1 })}>
+          <button
+            type="button"
+            className="pe-commande"
+            aria-label="Remettre en place"
+            onClick={() => {
+              touchee.current = true;
+              setVue({ x: 0, y: 0, k: 1 });
+            }}
+          >
             <Shuffle aria-hidden="true" />
           </button>
           <button type="button" className="pe-commande" aria-label="Raccourcis clavier" aria-expanded={raccourcis} aria-controls={idRaccourcis} onClick={() => setRaccourcis((v) => !v)}>
