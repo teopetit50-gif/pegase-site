@@ -484,6 +484,21 @@
   box-shadow: 0 0 0 1px var(--lin-second);
   outline: none;
 }
+/* en clair, --lin-maj-trait est transparent : le champ prend le cadre de la bande en clair
+   (carte blanche et petite ombre, lin.css), cerclé de gris pendant la saisie */
+html[data-v2-theme="light"] .v2 .lin .lcl-desc.lcl-desc--fiche {
+  border-color: var(--v2-a-400);
+  background: var(--v2-bg-100);
+  box-shadow: var(--v2-ombre-petite);
+}
+html[data-v2-theme="light"] .v2 .lin .lcl-desc.lcl-desc--fiche:hover {
+  border-color: var(--v2-gray-700);
+}
+html[data-v2-theme="light"] .v2 .lin .lcl-desc.lcl-desc--fiche:focus,
+html[data-v2-theme="light"] .v2 .lin .lcl-desc.lcl-desc--fiche:focus-visible {
+  border-color: var(--v2-gray-900);
+  box-shadow: 0 0 0 1px var(--v2-gray-900);
+}
 /* « + Contact » sous le texte, comme « + Milestone » */
 .v2 .lcl-plus {
   display: inline-flex;
