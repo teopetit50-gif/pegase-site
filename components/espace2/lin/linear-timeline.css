@@ -485,3 +485,49 @@ html[data-v2-theme="light"] .v2 .lin {
 @container principale (max-width: 1000px) {
   .v2 .ltl-cadre .ltl-apercu { height: auto; }
 }
+
+/* ——— 30/10/2026, la frise reprise (capture de Teo) ———
+   barres : nettement visibles (fond plus clair, filet plus franc) ; pavés : couleur pleine
+   en repli si color-mix manque ; commandes dans le coin vide au-dessus des noms ;
+   pastille au bord pour une barre hors de vue */
+.v2 .lin { --ltl-barre: #26282c; --ltl-barre-bord: #45474d; }
+html[data-v2-theme="light"] .v2 .lin { --ltl-barre: #ffffff; --ltl-barre-bord: #cfd0d3; }
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lin { --ltl-barre: #ffffff; --ltl-barre-bord: #cfd0d3; }
+}
+.v2 .ltl-evt { background: var(--ltl-t, var(--lin-second)); }
+@supports (background: color-mix(in srgb, red 50%, blue)) {
+  .v2 .ltl-evt { background: color-mix(in srgb, var(--ltl-t, var(--lin-second)) 80%, var(--ltl-barre)); }
+}
+.v2 .ltl-commandes {
+  left: 0;
+  right: auto;
+  width: 400px;
+  height: 32px;
+  padding: 4px 10px 4px 12px;
+  background: var(--lin-fond);
+}
+.v2 .ltl-libelle { transition: none; }
+.v2 .ltl-horschamp {
+  position: absolute;
+  top: 24px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  max-width: 240px;
+  padding: 0 10px;
+  border-radius: 9999px;
+  border: 0.5px solid var(--ltl-barre-bord);
+  background: var(--lin-bouton);
+  box-shadow: var(--ltl-ombre);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-texte);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.v2 .ltl-horschamp[data-cote="droite"] { transform: translateX(-100%); }
+.v2 .ltl-horschamp:hover { background: var(--lin-pastille-active); color: var(--lin-titre); }
