@@ -7,13 +7,20 @@
    les écrans — l'exemple ou la base réelle selon l'interrupteur, sous la
    session de la personne (RLS) — et en tire un résumé texte : factures FILED
    et leur reste à payer, file des validations, balance âgée CASHD. Le
-   résumé part avec chaque question ; la route le plafonne. */
+   résumé part avec chaque question ; la route le plafonne.
 
-import { useEffect, type RefObject } from "react";
+   30/10/2026 (Teo : « qui sont les contacts que j'ai à appeler ajd »,
+   l'assistant répondait sur CASHD) : il lit aussi l'annuaire (Entreprises,
+   Contacts), les Tâches et les Appels, gardés dans ce navigateur. Ces blocs
+   passent avant FILED, plus long, pour ne pas tomber sous le plafond. */
+
+import { useEffect, useMemo, type RefObject } from "react";
 import { useSource } from "@/components/espace/source";
 import { useDonnees, type Donnees } from "./donnees";
 import { useTableauCashd } from "./cashd/donnees";
 import type { Tableau } from "@/components/espace/cashd/types";
+import { useStockage } from "./Collection";
+import { analyser, useFiches, type Fiche } from "./lin/annuaire";
 
 const eur = (n: number | null | undefined, devise = "EUR") =>
   n == null ? "?" : `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${devise === "EUR" ? "€" : devise}`;
@@ -55,6 +62,41 @@ function cashd(t: Tableau): string {
   ].join("\n");
 }
 
+/* un champ libre sur une ligne : les retours à la ligne des notes deviennent des « / » */
+const champ = (v: unknown, max = 300) => (typeof v === "string" ? v.trim().replace(/\s*\n+\s*/g, " / ").slice(0, max) : "");
+const ligne = (morceaux: [string, unknown][]) =>
+  "- " +
+  morceaux
+    .map(([nom, v]) => [nom, champ(v)] as const)
+    .filter(([, v]) => v)
+    .map(([nom, v]) => (nom ? `${nom} ${v}` : v))
+    .join(" | ");
+
+function annuaire(entreprises: Fiche[], contacts: Fiche[]): string {
+  return [
+    `## Entreprises — annuaire de la page Entreprises (${entreprises.length})`,
+    ...entreprises.slice(0, 300).map((e) => ligne([["", e.nom], ["type", e.type], ["commune", e.ville], ["tél.", e.telephone], ["e-mail", e.email], ["notes", e.notes]])),
+    `## Contacts — page Contacts (${contacts.length})`,
+    ...contacts.slice(0, 400).map((c) => ligne([["", c.nom], ["entreprise", c.entreprise], ["tél.", c.telephone], ["e-mail", c.email], ["notes", c.notes]])),
+  ].join("\n");
+}
+
+const PRIORITE = ["aucune", "urgente", "haute", "moyenne", "basse"];
+function taches(liste: Fiche[]): string {
+  const ouvertes = liste.filter((t) => !t.fait && t.statut !== "fait" && t.statut !== "annule");
+  return [
+    `## Tâches — page Tâches (${ouvertes.length} à faire, ${liste.length - ouvertes.length} faites ou annulées)`,
+    ...ouvertes.slice(0, 200).map((t) => ligne([["", t.titre], ["échéance", t.echeance], ["statut", t.statut], ["priorité", PRIORITE[Number(t.priorite) || 0]], ["pour", t.qui], ["étiquettes", t.etiquettes], ["détail", t.description]])),
+  ].join("\n");
+}
+
+function appels(liste: Fiche[]): string {
+  return [
+    `## Appels — page Appels (${liste.length})`,
+    ...liste.slice(0, 150).map((a) => ligne([["avec", a.avec], ["le", a.date], ["dit", a.resume], ["rappel prévu", a.suivi], ["", a.clos ? "clos" : "ouvert"]])),
+  ].join("\n");
+}
+
 /* une donnée mal formée ne doit jamais faire tomber l'assistant : le bloc dit seulement qu'il manque */
 function sur(resumer: () => string, module: string): string {
   try {
@@ -68,20 +110,30 @@ export default function LecteurContexte({ cibleRef }: { cibleRef: RefObject<stri
   const { source } = useSource();
   const { donnees } = useDonnees();
   const { tableau } = useTableauCashd();
+  const [entreprises] = useFiches("entreprises");
+  const [contacts] = useFiches("contacts");
+  const brutTaches = useStockage("espace2-collection-taches");
+  const brutAppels = useStockage("espace2-collection-appels");
+  const listeTaches = useMemo(() => analyser(brutTaches), [brutTaches]);
+  const listeAppels = useMemo(() => analyser(brutAppels), [brutAppels]);
 
   useEffect(() => {
+    const maintenant = new Date();
     cibleRef.current = [
-      `Date du jour : ${new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}.`,
+      `Date du jour : ${maintenant.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}, ${maintenant.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })} (heure de l'appareil).`,
       source === "exemple"
         ? "L'espace affiche les DONNÉES D'EXEMPLE (démonstration, interrupteur en haut de l'écran) : réponds sur ces données et précise une fois que ce sont des données d'exemple."
         : "L'espace affiche la BASE RÉELLE de l'entreprise.",
+      entreprises && contacts ? sur(() => annuaire(entreprises, contacts), "Entreprises et Contacts") : "",
+      listeTaches ? sur(() => taches(listeTaches), "Tâches") : "",
+      listeAppels?.length ? sur(() => appels(listeAppels), "Appels") : "",
       donnees ? sur(() => filed(donnees), "FILED") : "## FILED — en cours de lecture ou indisponible",
       donnees ? sur(() => validations(donnees), "Validations") : "",
       tableau ? sur(() => cashd(tableau), "CASHD") : "## CASHD — en cours de lecture ou indisponible",
     ]
       .filter(Boolean)
       .join("\n\n");
-  }, [cibleRef, source, donnees, tableau]);
+  }, [cibleRef, source, donnees, tableau, entreprises, contacts, listeTaches, listeAppels]);
 
   return null;
 }
