@@ -531,3 +531,67 @@ html[data-v2-theme="light"] .v2 .lin { --ltl-barre: #ffffff; --ltl-barre-bord: #
 }
 .v2 .ltl-horschamp[data-cote="droite"] { transform: translateX(-100%); }
 .v2 .ltl-horschamp:hover { background: var(--lin-pastille-active); color: var(--lin-titre); }
+
+/* ——— 30/10/2026 : les étiquettes de passage et les lignes de lot ———
+   étiquette : boîte de 26 de haut, rayon 6, fond teinté à 18 %, filet 1 à 55 %, icône 12
+   de sa teinte, texte 12/500 (la réponse en 450 grise) ; dedans si la durée le permet,
+   sinon juste après la boîte. Ligne de lot : 44 au moins, décalée de 36, nom 12.5/500. */
+.v2 .ltl-pas {
+  position: absolute;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.v2 span.ltl-pas { cursor: default; }
+.v2 .ltl-pas-boite {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  height: 26px;
+  min-width: 0;
+  padding: 0 7px;
+  overflow: hidden;
+  border-radius: 6px;
+  border: 1px solid var(--ltl-t, var(--lin-second));
+  background: var(--ltl-barre);
+  transition: background 0.1s, border-color 0.1s;
+}
+@supports (background: color-mix(in srgb, red 50%, blue)) {
+  .v2 .ltl-pas-boite {
+    border-color: color-mix(in srgb, var(--ltl-t, var(--lin-second)) 55%, transparent);
+    background: color-mix(in srgb, var(--ltl-t, var(--lin-second)) 18%, var(--ltl-barre));
+  }
+  .v2 button.ltl-pas:hover .ltl-pas-boite { background: color-mix(in srgb, var(--ltl-t, var(--lin-second)) 30%, var(--ltl-barre)); }
+}
+.v2 .ltl-pas-icone { display: grid; place-items: center; flex: none; color: var(--ltl-t, var(--lin-second)); }
+.v2 .ltl-pas-icone svg { width: 12px; height: 12px; }
+.v2 .ltl-pas-texte { font-size: 12px; font-weight: 500; line-height: 16px; color: var(--lin-texte); }
+.v2 .ltl-pas-sous { font-size: 12px; font-weight: 450; line-height: 16px; color: var(--lin-second); }
+.v2 .ltl-pas[data-teinte="rouge"] .ltl-pas-sous, .v2 .ltl-pas[data-teinte="ambre"] .ltl-pas-sous { color: var(--ltl-t); }
+.v2 button.ltl-pas:hover .ltl-pas-texte { color: var(--lin-titre); }
+.v2 .ltl-pas:focus-visible { outline: 2px solid var(--lin-fait); outline-offset: 2px; border-radius: 6px; }
+.v2 .ltl-pas[data-choisi] .ltl-pas-boite { box-shadow: 0 0 0 2px var(--lin-titre); }
+
+.v2 .ltl-ligne[data-niveau="2"] .ltl-gauche { padding-left: 44px; }
+.v2 .ltl-ligne[data-niveau="2"] .ltl-icone { display: none; }
+.v2 .ltl-ligne[data-niveau="2"] .ltl-nom-texte { font-size: 12.5px; color: var(--lin-texte); }
+.v2 .ltl-ligne[data-niveau="2"] .ltl-sous { font-size: 11.5px; }
+.v2 .ltl-ligne[data-niveau="2"] .ltl-gauche::before { content: ""; position: absolute; left: 22px; top: 0; bottom: 0; border-left: 1px solid var(--lin-trait); }
+.v2 .ltl-ligne[data-niveau="1"] + .ltl-ligne[data-niveau="2"] .ltl-gauche::before { top: -10px; }
+.v2 .ltl-ligne[data-niveau="1"]:not(:first-child) { border-top: 0.5px solid var(--lin-trait); }
+.v2 .ltl-ligne[data-niveau="1"] { height: 64px; }
+
+/* la durée d'un chantier : un trait sous son libellé */
+.v2 .ltl-barre[data-fine] { top: 30px; height: 8px; border-radius: 4px; box-shadow: none; }
+.v2 .ltl-pas-boite .ltl-pas-texte { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.v2 .ltl-ligne[data-niveau="2"] .ltl-gauche { align-items: flex-start; padding-top: 3px; }

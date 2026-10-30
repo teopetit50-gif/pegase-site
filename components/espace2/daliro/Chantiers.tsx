@@ -45,20 +45,20 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { HardHat, ListFilter, Plus, UserRound } from "lucide-react";
+import { Check, CheckCheck, CircleDashed, Clock, HardHat, ListFilter, Plus, Send, UserRound, X } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { RACINE } from "@/components/espace2/modules";
 import { dateCourte } from "@/components/espace/format";
 import { Avis } from "@/components/espace/ui";
-import { CONFIRMATIONS, FAMILLES, STATUTS_CHANTIER, type Famille } from "@/components/espace/daliro/etats";
+import { CONFIRMATIONS, EXECUTIONS, FAMILLES, STATUTS_CHANTIER, type Famille } from "@/components/espace/daliro/etats";
 import { famille } from "@/components/espace/daliro/liste";
-import type { Chantier, StatutChantier } from "@/components/espace/daliro/types";
+import type { Chantier, Confirmation, Passage, StatutChantier, Tableau } from "@/components/espace/daliro/types";
 import { Menu } from "../lin/Lin";
 import { IconeStatutProjet, type EtatProjet } from "../lin/icones";
 import { useToast } from "../Toasts";
 import { useDaliro, type NouveauChantier } from "./donnees";
-import Frise, { estZoom, type LigneFrise, type TeinteFrise, type Zoom } from "./Frise";
+import Frise, { estZoom, type LigneFrise, type PastilleFrise, type TeinteFrise, type Zoom } from "./Frise";
 import ApercuFrise from "./ApercuFrise";
 import { CONFIRMATION_CLAIRE, jourLocal, qui, quand, resume } from "./enClair";
 import "@/components/espace/espace.css";
@@ -216,6 +216,7 @@ export default function Chantiers() {
     const choisi = c.id === chantierOuvert?.id;
     return {
       cle: c.id,
+      niveau: 1,
       icone: <IconeStatutProjet etat={ETAT[c.statut]} />,
       teinteIcone: teinteDe(statut.teinte),
       nom: c.nom,
@@ -247,19 +248,54 @@ export default function Chantiers() {
                 choisie: choisi && !passageOuvert,
                 /* sans tableau (base réelle pas encore lue), le losange du prochain passage, comme avant */
                 jalon: !t && p && conf ? { jour: p.debut, teinte: teinteDe(conf.teinte), titre: `Prochain passage ${quand(p.debut, aujourdhui)}` } : null,
-                evenements: passages.map((x) => ({
-                  cle: x.id,
-                  debut: x.debut,
-                  fin: x.fin,
-                  teinte: x.statut === "fait" ? "gris" : CONFIRMATION_CLAIRE[x.confirmation].teinte,
-                  titre: `${quand(x.debut, aujourdhui)} · ${qui(x)}${x.tache ? ` · ${x.tache}` : ""} · ${x.statut === "fait" ? "fait" : CONFIRMATION_CLAIRE[x.confirmation].court}`,
-                  onClick: () => ouvrir({ passage: x.id, apercu: null }),
-                  choisi: x.id === passageOuvert?.id,
-                })),
+                /* sous les lots, la durée du chantier n'est plus qu'un trait */
+                fine: !!t,
               },
             ]
           : [],
     };
+  };
+
+  /* sous chaque chantier, une ligne par lot qui a des passages : qui fait le lot, et ses passages en étiquettes */
+  const ICONE_REPONSE: Record<Confirmation, React.ReactNode> = {
+    confirmee: <Check aria-hidden="true" />,
+    demandee: <Send aria-hidden="true" />,
+    sans_reponse: <Clock aria-hidden="true" />,
+    declinee: <X aria-hidden="true" />,
+    non_demandee: <CircleDashed aria-hidden="true" />,
+  };
+  const pastille = (x: Passage): PastilleFrise => {
+    const fait = x.statut === "fait";
+    const conf = CONFIRMATION_CLAIRE[x.confirmation];
+    return {
+      cle: x.id,
+      debut: x.debut,
+      fin: x.fin,
+      texte: x.tache ?? qui(x),
+      sous: fait ? "fait" : conf.court,
+      teinte: fait ? "gris" : conf.teinte,
+      icone: fait ? <CheckCheck aria-hidden="true" /> : ICONE_REPONSE[x.confirmation],
+      titre: `${quand(x.debut, aujourdhui)} · ${qui(x)}${x.tache ? ` · ${x.tache}` : ""} · ${fait ? "fait" : conf.court} — cliquez pour le détail`,
+      onClick: () => ouvrir({ passage: x.id, apercu: null }),
+      choisi: x.id === passageOuvert?.id,
+    };
+  };
+  const lignesLots = (c: Chantier, t: Tableau | null): LigneFrise[] => {
+    if (!t) return [];
+    const passages = t.passages.filter((x) => x.statut !== "annule");
+    const parLot = new Map<string, Passage[]>();
+    for (const x of passages) parLot.set(x.lot_id ?? "", [...(parLot.get(x.lot_id ?? "") ?? []), x]);
+    const lots = [...t.lots].sort((a, b) => a.rang - b.rang || a.code.localeCompare(b.code));
+    const r: LigneFrise[] = [];
+    for (const lot of lots) {
+      const ps = parLot.get(lot.id);
+      if (!ps?.length) continue;
+      const qui = lot.tiers_nom ?? lot.equipe_nom ?? (lot.execution === "client" ? "Nos équipes" : EXECUTIONS[lot.execution]);
+      r.push({ cle: `${c.id}:${lot.id}`, niveau: 2, icone: null, nom: `${lot.code} · ${lot.libelle}`, sous: { texte: qui }, ronds: null, barres: [], pastilles: ps.map(pastille) });
+    }
+    const sans = parLot.get("");
+    if (sans?.length) r.push({ cle: `${c.id}:sans-lot`, niveau: 2, icone: null, nom: "Sans lot", sous: { texte: "passages à rattacher à un lot" }, ronds: null, barres: [], pastilles: sans.map(pastille) });
+    return r;
   };
 
   const vide = !pret ? (
@@ -352,18 +388,11 @@ export default function Chantiers() {
       ) : null}
 
       {pret && visibles.length ? (
-        <p className="ltl-legende" aria-label="Couleur des passages">
-          <span>Cliquez un chantier ou un passage pour l&apos;ouvrir à droite.</span>
-          <span data-teinte="vert"><i />confirmé</span>
-          <span data-teinte="bleu"><i />réponse attendue</span>
-          <span data-teinte="ambre"><i />sans réponse</span>
-          <span data-teinte="rouge"><i />a dit non</span>
-          <span data-teinte="gris"><i />pas encore prévenu</span>
-        </p>
+        <p className="ltl-legende">Une ligne par lot, un rectangle par passage : qui vient, pour quoi, et ce qu&apos;il a répondu. Cliquez pour le détail à droite.</p>
       ) : null}
 
       <div className="ltl-cadre">
-        <Frise libelle="Frise des chantiers" lignes={pret ? visibles.map(ligne) : []} zoom={zoom} onZoom={(z) => ouvrir({ zoom: z === "mois" ? null : z })} aujourdhui={aujourdhui} vide={vide} />
+        <Frise libelle="Frise des chantiers" lignes={pret ? visibles.flatMap((c) => [ligne(c), ...lignesLots(c, tableau(c.id))]) : []} zoom={zoom} onZoom={(z) => ouvrir({ zoom: z === "mois" ? null : z })} aujourdhui={aujourdhui} vide={vide} />
         {chantierOuvert ? (
           <ApercuFrise
             key={passageOuvert?.id ?? chantierOuvert.id}
