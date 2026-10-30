@@ -16,6 +16,7 @@
 
 import { useEffect, useState } from "react";
 import { Camera, FileSpreadsheet, Plus } from "lucide-react";
+import { Bouton, Detail, Gestes, Groupe, Ligne, Liste, Partie, Pilule, Point, Rangee, Rangees, SousLigne, SousListe, Texte, Vide, jourCourt, teinte, useVolet } from "@/components/espace2/lin/Volet";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
@@ -47,6 +48,7 @@ type Props = { tableau: Tableau; source: Source; onLocal: (t: Tableau) => void; 
 
 export default function SituationsCarte({ tableau, source, onLocal, relire }: Props) {
   const { chantier: c, voit_prix, lots } = tableau;
+  const volet = useVolet();
   const situations = tableau.situations ?? [];
   const [ouvrirForm, setOuvrirForm] = useState(false);
   const [annuler, setAnnuler] = useState<Situation | null>(null);
@@ -75,6 +77,12 @@ export default function SituationsCarte({ tableau, source, onLocal, relire }: Pr
   }, [source, clePhotos]); // eslint-disable-line react-hooks/exhaustive-deps -- clePhotos porte la situation et ses avancements
 
   if (!voit_prix) {
+    if (volet)
+      return (
+        <Partie id="situations" titre="Situations de travaux">
+          <Vide>Les situations sont réservées à qui a le droit de voir les prix.</Vide>
+        </Partie>
+      );
     return (
       <section className="esp-carte" aria-label="Situations de travaux">
         <div className="esp-section-titre">Situations de travaux</div>
@@ -215,6 +223,298 @@ export default function SituationsCarte({ tableau, source, onLocal, relire }: Pr
     : avancementPhotosExemple(enCours, lotCode);
   const approuvee = enCours?.demande_statut === "approuvee" || enCours?.demande_statut === "executee";
 
+  const fenetres = (
+    <>
+      <Dialog open={ouvrirForm} onOpenChange={(o) => !o && setOuvrirForm(false)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><FileSpreadsheet width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Nouvelle situation de travaux</DialogTitle>
+            <DialogDescription>
+              Les lignes du marché vérifié et des avenants signés, l&apos;avancement repris de la situation précédente. {regime === "autoliquidation" ? "Vous êtes sous-traitant sur ce chantier : la TVA est autoliquidée par l'entreprise principale (CGI art. 283-2 nonies)." : regime === "non_applicable" || regime === "hors_champ" ? "Pas de TVA sur ce chantier." : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Fin de la période <span className="esp-obligatoire">(obligatoire)</span>
+                <input className="rv-champ" type="date" value={fin} onChange={(e) => setFin(e.target.value)} />
+              </label>
+              {regime === "normal" ? (
+                <label className="rv-libelle">Taux de TVA
+                  <select className="rv-champ" value={taux} onChange={(e) => setTaux(e.target.value)}>
+                    <option value="">Taux de la zone ({pourcent(Math.round(tauxDefaut * 1000) / 10)})</option>
+                    {TAUX.map((t) => <option key={t.v} value={String(t.v)}>{t.libelle}</option>)}
+                  </select>
+                </label>
+              ) : null}
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" onClick={() => void ouvrir()} disabled={envoi || !fin}>{envoi ? <Loader variant="spin" /> : null} Ouvrir la situation</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!payer} onOpenChange={(o) => !o && setPayer(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><FileSpreadsheet width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Paiement reçu — situation n° {payer?.numero}</DialogTitle>
+            <DialogDescription>Net à payer {montant(payer?.net_a_payer)} ; déjà encaissé {montant(payer ? encaissement(payer, aujourdhui()).encaisse : 0)}. Un paiement partiel est admis.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <div className="esp-form-ligne">
+                <label className="rv-libelle">Montant reçu (€) <span className="esp-obligatoire">(obligatoire)</span>
+                  <input className="rv-champ" inputMode="decimal" value={montantPaye} onChange={(e) => setMontantPaye(e.target.value)} />
+                </label>
+                <label className="rv-libelle">Reçu le
+                  <input className="rv-champ" type="date" max={aujourdhui()} value={datePaiement} onChange={(e) => setDatePaiement(e.target.value)} />
+                </label>
+              </div>
+              <label className="rv-libelle">Référence (virement, chèque)
+                <input className="rv-champ" maxLength={120} value={reference} onChange={(e) => setReference(e.target.value)} placeholder="VIR SCI LEFEVRE 0123" />
+              </label>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" onClick={() => void confirmerPaiement()} disabled={envoi || !montantPaye.trim()}>{envoi ? <Loader variant="spin" /> : null} Noter le paiement</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!annuler} onOpenChange={(o) => !o && setAnnuler(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><FileSpreadsheet width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Annuler la situation n° {annuler?.numero}</DialogTitle>
+            <DialogDescription>Elle n&apos;est pas encore validée : elle disparaît, la suivante repartira de la dernière situation validée.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Motif (gardé au journal)
+                <input className="rv-champ" value={motif} maxLength={500} onChange={(e) => setMotif(e.target.value)} placeholder="Erreur d'avancement sur le lot 02" />
+              </label>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" onClick={() => void confirmerAnnulation()} disabled={envoi}>{envoi ? <Loader variant="spin" /> : null} Annuler la situation</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+
+
+  /* 30/10/2026 — dans la fiche de l'espace 2 : la situation en cours puis les validées, une par ligne ;
+     lignes, totaux, paiements et gestes dans le volet (../../espace2/lin/Volet.tsx) */
+  if (volet) {
+    const paiement = (x: Situation) => {
+      const e = encaissement(x, aujourdhui());
+      const t = e.etat === "payee" ? "vert" : e.etat === "en_retard" ? "rouge" : e.etat === "partielle" ? "jaune" : "gris";
+      const l = e.etat === "payee" ? `Payée${e.retard ? ` (${e.retard} j de retard)` : ""}` : e.etat === "en_retard" ? `En retard de ${e.retard} j` : e.etat === "partielle" ? `Reste ${montant(e.reste)}` : "À échoir";
+      return { e, t: t as "vert" | "rouge" | "jaune" | "gris", l };
+    };
+    const validation = (x: Situation) => {
+      const ok = x.demande_statut === "approuvee" || x.demande_statut === "executee";
+      return ok ? { t: "vert" as const, l: "Approuvée : à valider" } : x.demande_statut === "rejetee" ? { t: "rouge" as const, l: "Rejetée à la validation" } : { t: "bleu" as const, l: "Dans « À valider »" };
+    };
+    const tvaLibelle = (x: Situation) => (x.autoliquidation ? "Autoliquidée" : x.taux_tva ? `TVA ${pourcent(Math.round(x.taux_tva * 1000) / 10)}` : "TVA");
+    const retenueLibelle = (x: Situation) => (x.retenue_caution ? "Retenue (caution)" : `Retenue ${pourcent(Math.round(x.retenue_taux * 1000) / 10)}`);
+    return (
+      <Partie
+        id="situations"
+        titre="Situations de travaux"
+        compte={validees.length ? `${validees.length} validée${validees.length > 1 ? "s" : ""} · ${montant(netCumule)} nets` : "aucune validée"}
+        gestes={
+          <Bouton
+            icone={<Plus aria-hidden="true" />}
+            onClick={() => { setFin(aujourdhui()); setTaux(""); setErreur(null); setOuvrirForm(true); }}
+            disabled={envoi || !!enCours || !marcheVerifie || (c.statut !== "ouvert" && c.statut !== "suspendu" && c.statut !== "receptionne")}
+            title={!marcheVerifie ? "Une situation se calcule sur un marché vérifié" : enCours ? `La situation n° ${enCours.numero} est en cours` : undefined}
+          >
+            Nouvelle situation
+          </Bouton>
+        }
+        avis={fait || (erreur && !ouvrirForm && !annuler && !payer) ? <>{fait ? <Avis teinte="vert" role="status">{fait}</Avis> : null}{erreur && !ouvrirForm && !annuler && !payer ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}</> : null}
+      >
+        {enCours || validees.length ? (
+          <Liste>
+            {enCours ? (
+              <Groupe nom="En cours" compte={1}>
+                <Ligne
+                  cle={`situation:${enCours.id}`}
+                  libelle={`Situation n° ${enCours.numero} au ${dateCourte(enCours.periode_fin)}, ${STATUTS[enCours.statut].libelle}`}
+                  icone={<FileSpreadsheet />}
+                  id={`n° ${enCours.numero}`}
+                  titre={`Situation au ${dateCourte(enCours.periode_fin)}`}
+                  second={`${enCours.lignes.length} ligne${enCours.lignes.length > 1 ? "s" : ""} · période ${montant(enCours.periode_ht)} HT`}
+                  droite={
+                    enCours.statut === "soumise" ? (
+                      <Pilule teinte={validation(enCours).t} icone={<Point teinte={validation(enCours).t} />}>{validation(enCours).l}</Pilule>
+                    ) : (
+                      <Pilule teinte={teinte(STATUTS[enCours.statut].teinte)} icone={<Point teinte={teinte(STATUTS[enCours.statut].teinte)} />}>{STATUTS[enCours.statut].libelle}</Pilule>
+                    )
+                  }
+                  date={montant(enCours.net_a_payer)}
+                  dateTitre="Net à payer"
+                />
+              </Groupe>
+            ) : null}
+            {validees.length ? (
+              <Groupe nom="Validées" compte={validees.length}>
+                {validees.map((x) => {
+                  const pm = paiement(x);
+                  return (
+                    <Ligne
+                      key={x.id}
+                      cle={`situation:${x.id}`}
+                      libelle={`Situation n° ${x.numero} au ${dateCourte(x.periode_fin)}, ${pm.l}`}
+                      icone={<FileSpreadsheet />}
+                      id={`n° ${x.numero}`}
+                      titre={`Situation au ${dateCourte(x.periode_fin)}`}
+                      second={x.echeance ? `échéance ${jourCourt(x.echeance)}` : null}
+                      droite={<Pilule teinte={pm.t} icone={<Point teinte={pm.t} />}>{pm.l}</Pilule>}
+                      date={montant(x.net_a_payer)}
+                      dateTitre="Net à payer"
+                    />
+                  );
+                })}
+              </Groupe>
+            ) : null}
+          </Liste>
+        ) : (
+          <Vide>{!marcheVerifie ? "Une situation se calcule sur le marché vérifié ligne à ligne : vérifiez d'abord le marché." : "Aucune situation : ouvrez la première à la fin du mois, sur l'avancement de chaque ligne."}</Vide>
+        )}
+        {enCours ? (
+          <Detail cle={`situation:${enCours.id}`} titre={`Situation n° ${enCours.numero}`} sous={`Au ${dateCourte(enCours.periode_fin)}`}>
+            <Rangees>
+              <Rangee libelle="Statut" teinte={teinte(STATUTS[enCours.statut].teinte)}>
+                {STATUTS[enCours.statut].libelle}
+              </Rangee>
+              {enCours.statut === "soumise" ? (
+                <Rangee libelle="Validation" teinte={validation(enCours).t}>
+                  {validation(enCours).l}
+                </Rangee>
+              ) : null}
+              <Rangee libelle="Cumul HT">{montant(enCours.cumul_ht)}</Rangee>
+              <Rangee libelle="Précédentes">− {montant(enCours.precedent_ht)}</Rangee>
+              <Rangee libelle="Période HT">{montant(enCours.periode_ht)}</Rangee>
+              <Rangee libelle={tvaLibelle(enCours)}>{montant(enCours.tva)}</Rangee>
+              <Rangee libelle={retenueLibelle(enCours)}>− {montant(enCours.retenue)}</Rangee>
+              <Rangee libelle="Net à payer">{montant(enCours.net_a_payer)}</Rangee>
+            </Rangees>
+            {enCours.motif ? <Texte citation>Motif du refus : « {enCours.motif} »</Texte> : null}
+            <SousListe titre={modifiable ? "Avancement cumulé, ligne à ligne" : "Lignes"}>
+              {enCours.lignes.map((l) => (
+                <SousLigne
+                  key={l.id}
+                  titre={`${l.designation}${l.origine === "avenant" ? ` (avenant n° ${l.avenant_numero})` : ""}`}
+                  second={`Lot ${lotCode(l.lot_id)} · ${montant(l.base_ht)} · avant ${pourcent(l.precedent_avancement)} · période ${montant(l.cumule_ht - l.precedent_ht)}`}
+                  valeur={
+                    modifiable ? (
+                      <input
+                        className="lvp-champ"
+                        inputMode="decimal"
+                        aria-label={`Avancement cumulé de « ${l.designation} » (en %)`}
+                        value={saisies[l.id] ?? String(l.avancement).replace(".", ",")}
+                        onChange={(e) => setSaisies((p) => ({ ...p, [l.id]: e.target.value }))}
+                        onBlur={() => void avancer(enCours, l.id)}
+                        onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+                        disabled={envoi}
+                      />
+                    ) : (
+                      pourcent(l.avancement)
+                    )
+                  }
+                />
+              ))}
+            </SousListe>
+            {photos && (photos.propositions.length || photos.non_rattaches.length) ? (
+              <SousListe titre={`Lu dans les photos${photos.depuis ? ` depuis le ${dateCourte(photos.depuis)}` : ""}${source !== "reelle" ? " (exemple fictif)" : ""}`}>
+                {photos.propositions.map((p) => (
+                  <SousLigne
+                    key={`${p.message}-${p.ligne}`}
+                    titre={`« ${p.designation} » : ${pourcent(p.propose ?? p.pourcentage)} lu (aujourd'hui ${pourcent(p.actuel ?? 0)})`}
+                    second={<>{p.de_nom ? `Photo de ${p.de_nom}, ` : ""}{dateHeure(p.le)}{p.extrait ? ` · « ${p.extrait} »` : ""}{p.photo ? <> · <PhotoLien chemin={p.photo} /></> : null}</>}
+                    valeur={<button type="button" className="lvp-lien" disabled={envoi || !p.ligne} onClick={() => p.ligne && reprendre(enCours, p.ligne, p.propose ?? p.pourcentage, p.de_nom)}>Reprendre</button>}
+                  />
+                ))}
+                {photos.non_rattaches.map((p, k) => (
+                  <SousLigne
+                    key={`n-${p.message}-${k}`}
+                    teinte="jaune"
+                    titre={`« ${p.ouvrage ?? "ouvrage non nommé"} »${p.lot_code ? ` (lot ${p.lot_code})` : ""} : ${pourcent(p.pourcentage)} lu`}
+                    second={<>{dateHeure(p.le)}, sans ligne de la situation qui lui corresponde : à reporter à la main.{p.photo ? <> <PhotoLien chemin={p.photo} /></> : null}</>}
+                  />
+                ))}
+              </SousListe>
+            ) : null}
+            {enCours.mentions.length ? (
+              <div className="lvp-note">
+                {enCours.mentions.map((m) => <div key={m}>{m}</div>)}
+              </div>
+            ) : null}
+            <Gestes>
+              {modifiable ? (
+                <Bouton fort onClick={() => void soumettre(enCours)} disabled={envoi || Object.keys(saisies).length > 0}>
+                  Soumettre à la validation
+                </Bouton>
+              ) : null}
+              {enCours.statut === "soumise" ? (
+                <Bouton fort onClick={() => void valider(enCours)} disabled={envoi || !approuvee} title={!approuvee ? "Elle attend sa validation dans « À valider »" : undefined}>
+                  Valider la situation
+                </Bouton>
+              ) : null}
+              <Bouton onClick={() => { setMotif(""); setErreur(null); setAnnuler(enCours); }} disabled={envoi}>Annuler</Bouton>
+            </Gestes>
+          </Detail>
+        ) : null}
+        {validees.map((x) => {
+          const pm = paiement(x);
+          return (
+            <Detail key={x.id} cle={`situation:${x.id}`} titre={`Situation n° ${x.numero}`} sous={`Au ${dateCourte(x.periode_fin)}`}>
+              <Rangees>
+                <Rangee libelle="Période HT">{montant(x.periode_ht)}</Rangee>
+                <Rangee libelle={tvaLibelle(x)}>{x.autoliquidation ? "autoliquidée" : montant(x.tva)}</Rangee>
+                <Rangee libelle="Retenue">{montant(x.retenue)}</Rangee>
+                <Rangee libelle="Net">{montant(x.net_a_payer)}</Rangee>
+                <Rangee libelle="Validée">
+                  {dateCourte(x.validee_le)}
+                  {x.validee_libelle ? ` · ${x.validee_libelle}` : ""}
+                </Rangee>
+                <Rangee libelle="Échéance">{dateCourte(x.echeance)}</Rangee>
+                <Rangee libelle="Encaissé">{montant(pm.e.encaisse)}</Rangee>
+                <Rangee libelle="Paiement" teinte={pm.t}>
+                  {pm.l}
+                </Rangee>
+              </Rangees>
+              {pm.e.etat === "en_retard" ? <Texte>Indemnité de 40 € due{pm.e.penalites ? `, pénalités ${montant(pm.e.penalites)}` : ""}.</Texte> : null}
+              {(x.paiements ?? []).length ? (
+                <SousListe titre="Paiements reçus">
+                  {(x.paiements ?? []).map((y) => (
+                    <SousLigne key={y.id} titre={dateCourte(y.recu_le)} second={y.reference ?? undefined} valeur={montant(y.montant)} />
+                  ))}
+                </SousListe>
+              ) : null}
+              {pm.e.etat !== "payee" ? (
+                <Gestes>
+                  <Bouton fort onClick={() => ouvrirPaiement(x)} disabled={envoi}>
+                    Noter un paiement
+                  </Bouton>
+                </Gestes>
+              ) : null}
+            </Detail>
+          );
+        })}
+        {fenetres}
+      </Partie>
+    );
+  }
+
   return (
     <section className="esp-carte" aria-label="Situations de travaux">
       <div className="esp-carte-tete">
@@ -344,86 +644,7 @@ export default function SituationsCarte({ tableau, source, onLocal, relire }: Pr
         </div>
       ) : null}
 
-      <Dialog open={ouvrirForm} onOpenChange={(o) => !o && setOuvrirForm(false)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogIcone><FileSpreadsheet width={18} height={18} aria-hidden="true" /></DialogIcone>
-            <DialogTitle>Nouvelle situation de travaux</DialogTitle>
-            <DialogDescription>
-              Les lignes du marché vérifié et des avenants signés, l&apos;avancement repris de la situation précédente. {regime === "autoliquidation" ? "Vous êtes sous-traitant sur ce chantier : la TVA est autoliquidée par l'entreprise principale (CGI art. 283-2 nonies)." : regime === "non_applicable" || regime === "hors_champ" ? "Pas de TVA sur ce chantier." : ""}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogBody>
-            <div className="esp-form">
-              <label className="rv-libelle">Fin de la période <span className="esp-obligatoire">(obligatoire)</span>
-                <input className="rv-champ" type="date" value={fin} onChange={(e) => setFin(e.target.value)} />
-              </label>
-              {regime === "normal" ? (
-                <label className="rv-libelle">Taux de TVA
-                  <select className="rv-champ" value={taux} onChange={(e) => setTaux(e.target.value)}>
-                    <option value="">Taux de la zone ({pourcent(Math.round(tauxDefaut * 1000) / 10)})</option>
-                    {TAUX.map((t) => <option key={t.v} value={String(t.v)}>{t.libelle}</option>)}
-                  </select>
-                </label>
-              ) : null}
-              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
-            </div>
-          </DialogBody>
-          <DialogFooter>
-            <button type="button" className="r-btn r-btn--noir" onClick={() => void ouvrir()} disabled={envoi || !fin}>{envoi ? <Loader variant="spin" /> : null} Ouvrir la situation</button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={!!payer} onOpenChange={(o) => !o && setPayer(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogIcone><FileSpreadsheet width={18} height={18} aria-hidden="true" /></DialogIcone>
-            <DialogTitle>Paiement reçu — situation n° {payer?.numero}</DialogTitle>
-            <DialogDescription>Net à payer {montant(payer?.net_a_payer)} ; déjà encaissé {montant(payer ? encaissement(payer, aujourdhui()).encaisse : 0)}. Un paiement partiel est admis.</DialogDescription>
-          </DialogHeader>
-          <DialogBody>
-            <div className="esp-form">
-              <div className="esp-form-ligne">
-                <label className="rv-libelle">Montant reçu (€) <span className="esp-obligatoire">(obligatoire)</span>
-                  <input className="rv-champ" inputMode="decimal" value={montantPaye} onChange={(e) => setMontantPaye(e.target.value)} />
-                </label>
-                <label className="rv-libelle">Reçu le
-                  <input className="rv-champ" type="date" max={aujourdhui()} value={datePaiement} onChange={(e) => setDatePaiement(e.target.value)} />
-                </label>
-              </div>
-              <label className="rv-libelle">Référence (virement, chèque)
-                <input className="rv-champ" maxLength={120} value={reference} onChange={(e) => setReference(e.target.value)} placeholder="VIR SCI LEFEVRE 0123" />
-              </label>
-              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
-            </div>
-          </DialogBody>
-          <DialogFooter>
-            <button type="button" className="r-btn r-btn--noir" onClick={() => void confirmerPaiement()} disabled={envoi || !montantPaye.trim()}>{envoi ? <Loader variant="spin" /> : null} Noter le paiement</button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={!!annuler} onOpenChange={(o) => !o && setAnnuler(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogIcone><FileSpreadsheet width={18} height={18} aria-hidden="true" /></DialogIcone>
-            <DialogTitle>Annuler la situation n° {annuler?.numero}</DialogTitle>
-            <DialogDescription>Elle n&apos;est pas encore validée : elle disparaît, la suivante repartira de la dernière situation validée.</DialogDescription>
-          </DialogHeader>
-          <DialogBody>
-            <div className="esp-form">
-              <label className="rv-libelle">Motif (gardé au journal)
-                <input className="rv-champ" value={motif} maxLength={500} onChange={(e) => setMotif(e.target.value)} placeholder="Erreur d'avancement sur le lot 02" />
-              </label>
-              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
-            </div>
-          </DialogBody>
-          <DialogFooter>
-            <button type="button" className="r-btn r-btn--noir" onClick={() => void confirmerAnnulation()} disabled={envoi}>{envoi ? <Loader variant="spin" /> : null} Annuler la situation</button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {fenetres}
     </section>
   );
 }

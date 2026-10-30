@@ -34,6 +34,8 @@ import SignatureLienDialog from "./SignatureLienDialog";
 import MeteoCarte from "./MeteoCarte";
 import ApproCarte from "./ApproCarte";
 import FilCarte from "./FilCarte";
+import PartiesChantier from "@/components/espace2/daliro/PartiesChantier";
+import { useVolet } from "@/components/espace2/lin/Volet";
 import { Avis, Def, Pastille } from "../ui";
 import { dateCourte, dateHeure, montant, nombreFr, pourcent } from "../format";
 import { ACCEPTATIONS, CONFIRMATIONS, CONTROLES_LIGNE, EXECUTIONS, GRAVITES, ROLES_TIERS, STATUTS_AVENANT, STATUTS_CHANTIER, UNITES, VIGILANCES, familleControle, libelleEnvoi, libelleStatutFacture, libelleUnite } from "./etats";
@@ -52,6 +54,7 @@ export type SectionChantier =
 
 type Props = { tableau: Tableau; source: Source; onLocal: (t: Tableau) => void; relire: () => Promise<void>; sections?: SectionChantier[] };
 
+export type FormChantier = Form;
 type Form =
   | { type: "ecart"; ligne: LigneMarche }
   | { type: "lot_ligne"; ligne: LigneMarche }
@@ -84,6 +87,9 @@ const nid = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? cry
 
 export default function ChantierVue({ tableau, source, onLocal, relire, sections }: Props) {
   const voir = (x: SectionChantier) => !sections || sections.includes(x);
+  /* 30/10/2026 — dans une page qui fournit un volet (la fiche de l'espace 2), les parties
+     sont des listes dont le détail s'ouvre dans le volet (PartiesChantier, et chaque carte chez elle) */
+  const volet = useVolet();
   const { chantier: c, lots, marches, passages, avenants, factures, debourse, tiers, bibliotheque, voit_prix } = tableau;
   const [form, setForm] = useState<Form>(null);
   const planningVivant = c.statut === "ouvert" || c.statut === "suspendu";
@@ -363,6 +369,19 @@ export default function ChantierVue({ tableau, source, onLocal, relire, sections
         </>
       ) : null}
 
+      {volet ? (
+        <>
+          <PartiesChantier tableau={tableau} voir={voir} ouvrir={(f) => void ouvrir(f)} envoi={envoi} aujourdhui={aujourdhui()} faireProposerDependances={() => void faireProposerDependances()} faireDependance={(id, oui) => void faireDependance(id, oui)} faireRetirerLigne={(a, l) => void faireRetirerLigne(a, l)} />
+          {voir("questions") ? <QuestionsCarte key={`questions-${source}-${c.id}`} tableau={tableau} source={source} aujourdhui={aujourdHui()} /> : null}
+          {voir("meteo") ? <MeteoCarte key={`meteo-${c.id}`} tableau={tableau} source={source} onLocal={onLocal} relire={relire} /> : null}
+          {voir("appro") ? <ApproCarte key={`appro-${c.id}`} tableau={tableau} source={source} /> : null}
+          {voir("fil") ? <FilCarte key={`fil-${c.id}`} tableau={tableau} source={source} relire={relire} /> : null}
+          {voir("situations") ? <SituationsCarte tableau={tableau} source={source} onLocal={onLocal} relire={relire} /> : null}
+          {voir("heures") ? <HeuresCarte key={tableau.chantier.id} tableau={tableau} source={source} /> : null}
+          {voir("reception") ? <ReceptionCarte tableau={tableau} source={source} onLocal={onLocal} relire={relire} /> : null}
+        </>
+      ) : (
+        <>
       {/* ——— contrôles ——— */}
       {voir("controles") ? (
         <>
@@ -710,6 +729,9 @@ export default function ChantierVue({ tableau, source, onLocal, relire, sections
       </section>
         </>
       ) : null}
+
+        </>
+      )}
 
       {/* ——— les dialogues ——— */}
       <Dialog open={form !== null} onOpenChange={(o) => !o && fermer()}>

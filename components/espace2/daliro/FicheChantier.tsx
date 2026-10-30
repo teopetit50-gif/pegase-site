@@ -28,6 +28,9 @@
      Volet      B11 (l'en-tête et ses gestes : ouvrir, suspendre, reprendre,
                 ouvrir un avenant, rattacher une facture, relevé du
                 chantier) — ChantierVue habillé, restylé en rangées
+   30/10/2026 : dans ces onglets, chaque partie est une liste groupée (« My
+   issues » de Linear) et l'élément choisi s'ouvre dans le volet, à la place
+   des propriétés (../lin/Volet.tsx, PartiesChantier.tsx et chaque carte).
    Aucun geste n'est réécrit : chaque onglet monte sa propre ChantierVue
    (mêmes portes, mêmes fenêtres). Les ancres #planning, #avenants,
    #situations et #fil (posées dans ChantierVue) sont rejointes à
@@ -45,6 +48,7 @@ import { dateCourte, dateHeure, montant, relatif } from "@/components/espace/for
 import Habille from "@/components/espace2/Habille";
 import { RACINE } from "@/components/espace2/modules";
 import { IconeCalendrier, IconeDocument, IconeGroupe, IconeJauge, IconeSante, IconeStatutProjet, type EtatProjet, type Sante } from "../lin/icones";
+import { VoletContexte } from "../lin/Volet";
 import { useToast } from "../Toasts";
 import { useDaliro } from "./donnees";
 import Essentiel from "./Essentiel";
@@ -200,7 +204,10 @@ export default function FicheChantier({ id }: { id: string }) {
   const toast = useToast();
   const large = useLarge();
   const [voletChoisi, setVoletChoisi] = useState<boolean | null>(null);
-  const volet = voletChoisi ?? large;
+  /* 30/10/2026 : l'élément choisi dans une partie (passage, avenant, commande…) s'ouvre dans le volet */
+  const [choisie, setChoisie] = useState<string | null>(null);
+  const [cible, setCible] = useState<HTMLElement | null>(null);
+  const volet = choisie !== null || (voletChoisi ?? large);
 
   const o = params.get("onglet");
   const onglet: CleOnglet = estOnglet(o) ? o : "apercu";
@@ -254,7 +261,30 @@ export default function FicheChantier({ id }: { id: string }) {
   const lienPartie = (x: SectionChantier | "tout") => `${chemin}?onglet=${onglet}&partie=${x}`;
   const sectionsMontrees = partie === null || partie === "tout" ? courant?.sections : [partie];
 
+  /* changer d'onglet ou de partie referme l'élément choisi ; Échap aussi */
+  const [vue, setVue] = useState(`${onglet}/${partie}`);
+  if (vue !== `${onglet}/${partie}`) {
+    setVue(`${onglet}/${partie}`);
+    setChoisie(null);
+  }
+  useEffect(() => {
+    if (choisie === null) return;
+    const touche = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || document.querySelector("[role='dialog']")) return;
+      setChoisie(null);
+    };
+    window.addEventListener("keydown", touche);
+    return () => window.removeEventListener("keydown", touche);
+  }, [choisie]);
+  /* moins large, le volet passe au-dessus du contenu : on l'amène à l'écran */
+  useEffect(() => {
+    if (choisie === null || large || !cible) return;
+    cible.parentElement?.scrollIntoView({ block: "start", behavior: "smooth" });
+  }, [choisie, large, cible]);
+  const contexte = useMemo(() => ({ cible, choisie, choisir: setChoisie }), [cible, choisie]);
+
   return (
+    <VoletContexte.Provider value={contexte}>
     <div className="lin lit">
       <h1 className="v2-sr">{nom}</h1>
 
@@ -293,7 +323,10 @@ export default function FicheChantier({ id }: { id: string }) {
           title={volet ? "Fermer les détails du chantier" : "Ouvrir les détails du chantier"}
           aria-expanded={volet}
           aria-controls={volet ? "lit-volet" : undefined}
-          onClick={() => setVoletChoisi(!volet)}
+          onClick={() => {
+            setChoisie(null);
+            setVoletChoisi(!volet);
+          }}
         >
           <PanelRight aria-hidden="true" />
         </button>
@@ -326,7 +359,7 @@ export default function FicheChantier({ id }: { id: string }) {
                 {onglet === "reception" && !t.reception && !["ouvert", "suspendu", "receptionne", "clos"].includes(t.chantier.statut) ? (
                   <p className="lit-vide">La réception se prononce sur un chantier ouvert ou suspendu. Ouvrez d&apos;abord le chantier, depuis les détails.</p>
                 ) : null}
-                {onglet === "terrain" || onglet === "argent" ? <Essentiel t={t} onglet={onglet} auj={auj} /> : null}
+                {onglet === "argent" ? <Essentiel t={t} onglet={onglet} auj={auj} phrases={false} /> : null}
                 {parties ? (
                   <nav className="lit-parties" aria-label={`Parties de l'onglet ${courant?.libelle ?? ""}`}>
                     {parties.map((x) => (
@@ -348,6 +381,7 @@ export default function FicheChantier({ id }: { id: string }) {
 
           {volet ? (
             <aside id="lit-volet" className="lit-volet" aria-label="Détails du chantier">
+              <div ref={setCible} className="lvp-cible" />
               <section className="lit-carte" aria-labelledby="lit-proprietes">
                 <h2 id="lit-proprietes" className="lit-carte-titre">
                   Propriétés
@@ -364,6 +398,7 @@ export default function FicheChantier({ id }: { id: string }) {
         </div>
       )}
     </div>
+    </VoletContexte.Provider>
   );
 }
 

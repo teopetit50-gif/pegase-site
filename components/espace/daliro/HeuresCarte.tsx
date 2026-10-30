@@ -15,7 +15,8 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Euro, Users } from "lucide-react";
+import { ChevronLeft, ChevronRight, Euro, Layers, Users } from "lucide-react";
+import { Bouton, Detail, Groupe, Ligne, Liste, Partie, Rangee, Rangees, Vide, useVolet } from "@/components/espace2/lin/Volet";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { aujourdHui } from "../exemples/socle";
@@ -31,6 +32,7 @@ const HORS_LOT = "hors";
 type Props = { tableau: Tableau; source: Source };
 
 export default function HeuresCarte({ tableau, source }: Props) {
+  const volet = useVolet();
   const c = tableau.chantier;
   const lotsClient = tableau.lots.filter((l) => l.execution === "client");
   const [lundi, setLundi] = useState(() => lundiDe(aujourdHui()));
@@ -160,6 +162,12 @@ export default function HeuresCarte({ tableau, source }: Props) {
   };
 
   if (chargement && !h) {
+    if (volet)
+      return (
+        <Partie titre="Heures">
+          <Loader variant="spin" />
+        </Partie>
+      );
     return (
       <section className="esp-carte" aria-label="Heures et rentabilité">
         <div className="esp-section-titre">Heures et rentabilité</div>
@@ -168,6 +176,12 @@ export default function HeuresCarte({ tableau, source }: Props) {
     );
   }
   if (!h) {
+    if (volet)
+      return (
+        <Partie titre="Heures">
+          {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : <Vide>Les heures de ce chantier ne vous sont pas ouvertes.</Vide>}
+        </Partie>
+      );
     return (
       <section className="esp-carte" aria-label="Heures et rentabilité">
         <div className="esp-section-titre">Heures et rentabilité</div>
@@ -179,6 +193,229 @@ export default function HeuresCarte({ tableau, source }: Props) {
   const r = h.rentabilite;
   const totalJour = (j: string) => (h.pointages ?? []).filter((p) => p.jour === j).reduce((t, p) => t + p.heures, 0);
   const semaineCourante = lundi >= lundiDe(auj);
+
+  const fenetres = (
+    <>
+      <Dialog open={equipeForm} onOpenChange={(o) => !o && setEquipeForm(false)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><Users width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Pointer une équipe</DialogTitle>
+            <DialogDescription>Les mêmes heures pour chaque intervenant actif de l&apos;équipe (chef compris), sur le {lotLibelle}.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Équipe
+                <select className="rv-champ" value={equipe} onChange={(e) => setEquipe(e.target.value)}>
+                  {h.equipes.map((e) => <option key={e.id} value={e.id}>{e.nom}</option>)}
+                </select>
+              </label>
+              <div className="esp-form-ligne">
+                <label className="rv-libelle">Jour
+                  <input className="rv-champ" type="date" max={auj} value={jourEquipe} onChange={(e) => setJourEquipe(e.target.value)} />
+                </label>
+                <label className="rv-libelle">Heures chacun
+                  <input className="rv-champ" inputMode="decimal" value={heuresEquipe} onChange={(e) => setHeuresEquipe(e.target.value)} />
+                </label>
+              </div>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" onClick={() => void pointerLEquipe()} disabled={envoi || !equipe || !jourEquipe || !heuresEquipe.trim()}>{envoi ? <Loader variant="spin" /> : null} Pointer l&apos;équipe</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={coutForm} onOpenChange={(o) => !o && setCoutForm(false)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><Euro width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Coût horaire chargé</DialogTitle>
+            <DialogDescription>Salaire brut, charges patronales, congés payés et intempéries (caisse CIBTP) ramenés à l&apos;heure travaillée. Daté : les heures déjà pointées gardent le coût de leur jour.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Pour
+                <select className="rv-champ" value={coutQui} onChange={(e) => setCoutQui(e.target.value)}>
+                  <option value="">Toute l&apos;entreprise (par défaut)</option>
+                  {h.intervenants.map((i) => <option key={i.id} value={i.id}>{i.nom}</option>)}
+                </select>
+              </label>
+              <div className="esp-form-ligne">
+                <label className="rv-libelle">€ de l&apos;heure <span className="esp-obligatoire">(obligatoire)</span>
+                  <input className="rv-champ" inputMode="decimal" value={coutValeur} onChange={(e) => setCoutValeur(e.target.value)} placeholder="38" />
+                </label>
+                <label className="rv-libelle">Depuis le
+                  <input className="rv-champ" type="date" value={coutDepuis} onChange={(e) => setCoutDepuis(e.target.value)} />
+                </label>
+              </div>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" onClick={() => void poserCout()} disabled={envoi || !coutValeur.trim()}>{envoi ? <Loader variant="spin" /> : null} Poser le coût</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+
+
+  /* 30/10/2026 — dans la fiche de l'espace 2 : la grille de la semaine seule, à la mesure des listes
+     (en-tête 32, lignes 36, cases de 48) ; la rentabilité en quatre chiffres puis un lot par ligne,
+     son détail dans le volet (../../espace2/lin/Volet.tsx) */
+  if (volet) {
+    return (
+      <>
+        <Partie
+          titre="Heures"
+          compte={`${heuresFr(h.total_heures)} pointées`}
+          gestes={
+            <>
+              <Bouton icone={<Users aria-hidden="true" />} disabled={envoi || !ouvert || !h.equipes.length} onClick={() => { setEquipe(h.equipes[0]?.id ?? ""); setJourEquipe(auj); setHeuresEquipe("8"); setErreur(null); setEquipeForm(true); }}>
+                Pointer une équipe
+              </Bouton>
+              {h.voit_prix ? (
+                <Bouton icone={<Euro aria-hidden="true" />} disabled={envoi} onClick={() => { setCoutQui(""); setCoutValeur(h.cout_defaut !== null ? String(h.cout_defaut).replace(".", ",") : ""); setCoutDepuis(auj); setErreur(null); setCoutForm(true); }}>
+                  Coût horaire
+                </Bouton>
+              ) : null}
+            </>
+          }
+          avis={
+            fait || alertes.length || (erreur && !equipeForm && !coutForm) || !ouvert ? (
+              <>
+                {fait ? <Avis teinte="vert" role="status">{fait}</Avis> : null}
+                {alertes.map((a) => <Avis key={a} teinte="ambre" role="alert">{a}</Avis>)}
+                {erreur && !equipeForm && !coutForm ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+                {!ouvert ? <p className="lvp-vide">Le chantier n&apos;est pas ouvert : on n&apos;y pointe pas encore d&apos;heures.</p> : null}
+              </>
+            ) : null
+          }
+        >
+          <div className="lvp-barre">
+            <button type="button" className="lit-rond lit-rond--plein" onClick={() => setLundi(ajouterJours(lundi, -7))} disabled={envoi} aria-label="Semaine précédente">
+              <ChevronLeft aria-hidden="true" />
+            </button>
+            <span className="lvp-barre-titre">Semaine du {dateCourte(lundi)}</span>
+            <button type="button" className="lit-rond lit-rond--plein" onClick={() => setLundi(ajouterJours(lundi, 7))} disabled={envoi || semaineCourante} aria-label="Semaine suivante">
+              <ChevronRight aria-hidden="true" />
+            </button>
+            <label className="lvp-barre-choix">
+              <span>Lot pointé</span>
+              <select className="lvp-select" value={lot} onChange={(e) => { setLot(e.target.value); setSaisies({}); }}>
+                {tableau.lots.map((l) => <option key={l.id} value={l.id}>{l.code} · {l.libelle}</option>)}
+                <option value={HORS_LOT}>Hors lot</option>
+              </select>
+            </label>
+            <span className="lvp-barre-note">{heuresFr(h.semaine_heures)} cette semaine, tous lots</span>
+          </div>
+          {h.intervenants.length ? (
+            <div className="lvp-grille-cadre" tabIndex={0} role="region" aria-label={`Heures de la semaine du ${dateCourte(lundi)} (tableau qui défile)`}>
+              <table className="lvp-grille">
+                <thead>
+                  <tr>
+                    <th scope="col">Intervenant</th>
+                    {h.jours.map((j, k) => <th key={j} scope="col" className="lvp-num">{JOURS_COURTS[k]} {j.slice(8, 10)}</th>)}
+                    <th scope="col" className="lvp-num">Semaine</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {h.intervenants.map((i) => (
+                    <tr key={i.id}>
+                      <th scope="row">
+                        <span className="lvp-grille-nom">{i.nom}</span>
+                        {i.equipe_nom || !i.actif ? <span className="lvp-grille-second">{[i.equipe_nom, !i.actif ? "inactif" : null].filter(Boolean).join(" · ")}</span> : null}
+                      </th>
+                      {h.jours.map((j) => {
+                        const k = cle(i.id, j);
+                        const v = heuresDe(i.id, j);
+                        const autres = heuresDe(i.id, j, true) - v;
+                        const ferme = !ouvert || j > auj || envoi || (!i.actif && v === 0);
+                        return (
+                          <td key={j} className="lvp-num" title={autres > 0 ? `+${heuresFr(autres)} sur d'autres lots ce jour` : undefined}>
+                            <input
+                              className="lvp-champ lvp-champ--case"
+                              inputMode="decimal"
+                              aria-label={`Heures de ${i.nom} le ${dateCourte(j)} (${lotLibelle})`}
+                              value={saisies[k] ?? (v ? String(v).replace(".", ",") : "")}
+                              placeholder={j > auj ? "" : "–"}
+                              onChange={(e) => setSaisies((p) => ({ ...p, [k]: e.target.value }))}
+                              onBlur={() => void enregistrer(i.id, i.nom, j)}
+                              onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+                              disabled={ferme}
+                            />
+                            {autres > 0 ? <span className="lvp-grille-autres">+{heuresFr(autres)}</span> : null}
+                          </td>
+                        );
+                      })}
+                      <td className="lvp-num lvp-fort">{heuresFr(h.jours.reduce((t, j) => t + heuresDe(i.id, j, true), 0))}</td>
+                    </tr>
+                  ))}
+                  <tr className="lvp-grille-total">
+                    <th scope="row">Total du jour</th>
+                    {h.jours.map((j) => <td key={j} className="lvp-num">{totalJour(j) ? heuresFr(totalJour(j)) : "–"}</td>)}
+                    <td className="lvp-num lvp-fort">{heuresFr(h.semaine_heures)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <Vide>Aucun intervenant : ajoutez vos compagnons et leurs équipes pour pointer leurs heures.</Vide>
+          )}
+          <p className="lvp-vide">Au quart d&apos;heure (7,5 = 7 h 30) ; 0 retire la journée. 12 h au plus par jour, tous chantiers confondus (Code du travail, L3121-18 et L3121-19).</p>
+        </Partie>
+
+        <Partie titre="Rentabilité à date">
+          {r ? (
+            <>
+              <div className="lit-essentiel-chiffres lvp-chiffres">
+                <div className="lit-essentiel-chiffre"><span>Vendu HT</span><strong>{montant(r.vendu_ht)}</strong><span>marché vérifié et avenants signés</span></div>
+                <div className="lit-essentiel-chiffre"><span>Facturé HT</span><strong>{montant(r.facture_ht)}</strong><span>dernière situation validée</span></div>
+                <div className="lit-essentiel-chiffre"><span>Déboursé</span><strong>− {montant(r.main_oeuvre_ht + r.achats_ht)}</strong><span>{heuresFr(r.heures)} de main-d&apos;œuvre et achats</span></div>
+                <div className="lit-essentiel-chiffre" data-fort=""><span>Marge à date</span><strong>{montant(r.marge_ht)}</strong><span>{r.marge_taux !== null ? `${pourcent(Math.round(r.marge_taux * 1000) / 10)} du facturé` : "rien de facturé encore"}</span></div>
+              </div>
+              {r.heures_sans_cout > 0 ? <div className="lvp-avis"><Avis teinte="ambre">{heuresFr(r.heures_sans_cout)} sans coût horaire : posez le coût chargé de l&apos;entreprise (« Coût horaire ») pour qu&apos;elles comptent dans la marge.</Avis></div> : null}
+              {r.facture_ht === 0 && r.debourse_ht > 0 ? <p className="lvp-vide">Rien de facturé encore : la marge à date ne deviendra parlante qu&apos;avec la première situation validée.</p> : null}
+              <Liste>
+                <Groupe nom="Par lot" compte={r.lots.length}>
+                  {r.lots.map((l) => (
+                    <Ligne
+                      key={l.lot_id ?? HORS_LOT}
+                      cle={`rentabilite:${l.lot_id ?? HORS_LOT}`}
+                      libelle={`${l.code ?? ""} ${l.libelle} : marge ${montant(l.marge_ht)}`}
+                      icone={<Layers />}
+                      id={l.code ?? undefined}
+                      titre={l.libelle}
+                      second={`${l.heures ? heuresFr(l.heures) : "aucune heure"} · vendu ${montant(l.vendu_ht)}`}
+                      date={<span className="lvp-montant" data-teinte={l.marge_ht < 0 ? "rouge" : undefined}>{montant(l.marge_ht)}</span>}
+                      dateTitre="Marge"
+                    />
+                  ))}
+                </Groupe>
+              </Liste>
+              {r.lots.map((l) => (
+                <Detail key={l.lot_id ?? HORS_LOT} cle={`rentabilite:${l.lot_id ?? HORS_LOT}`} titre={`${l.code ? `${l.code} · ` : ""}${l.libelle}`} sous="Rentabilité à date">
+                  <Rangees>
+                    <Rangee libelle="Vendu HT">{montant(l.vendu_ht)}</Rangee>
+                    <Rangee libelle="Facturé HT">{montant(l.facture_ht)}</Rangee>
+                    <Rangee libelle="Heures">{l.heures ? heuresFr(l.heures) : "–"}</Rangee>
+                    <Rangee libelle="Main-d'œuvre">− {montant(l.main_oeuvre_ht)}</Rangee>
+                    <Rangee libelle="Achats HT">− {montant(l.achats_ht)}</Rangee>
+                    <Rangee libelle="Marge" teinte={l.marge_ht < 0 ? "rouge" : undefined}>{montant(l.marge_ht)}</Rangee>
+                  </Rangees>
+                </Detail>
+              ))}
+            </>
+          ) : (
+            <Vide>La rentabilité (coûts et marge) est réservée à qui a le droit de voir les prix.</Vide>
+          )}
+        </Partie>
+        {fenetres}
+      </>
+    );
+  }
 
   return (
     <section className="esp-carte" aria-label="Heures et rentabilité">
@@ -306,68 +543,7 @@ export default function HeuresCarte({ tableau, source }: Props) {
         </div>
       ) : <p className="esp-kpi-sous" style={{ marginTop: 10 }}>La rentabilité (coûts et marge) est réservée à qui a le droit de voir les prix.</p>}
 
-      <Dialog open={equipeForm} onOpenChange={(o) => !o && setEquipeForm(false)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogIcone><Users width={18} height={18} aria-hidden="true" /></DialogIcone>
-            <DialogTitle>Pointer une équipe</DialogTitle>
-            <DialogDescription>Les mêmes heures pour chaque intervenant actif de l&apos;équipe (chef compris), sur le {lotLibelle}.</DialogDescription>
-          </DialogHeader>
-          <DialogBody>
-            <div className="esp-form">
-              <label className="rv-libelle">Équipe
-                <select className="rv-champ" value={equipe} onChange={(e) => setEquipe(e.target.value)}>
-                  {h.equipes.map((e) => <option key={e.id} value={e.id}>{e.nom}</option>)}
-                </select>
-              </label>
-              <div className="esp-form-ligne">
-                <label className="rv-libelle">Jour
-                  <input className="rv-champ" type="date" max={auj} value={jourEquipe} onChange={(e) => setJourEquipe(e.target.value)} />
-                </label>
-                <label className="rv-libelle">Heures chacun
-                  <input className="rv-champ" inputMode="decimal" value={heuresEquipe} onChange={(e) => setHeuresEquipe(e.target.value)} />
-                </label>
-              </div>
-              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
-            </div>
-          </DialogBody>
-          <DialogFooter>
-            <button type="button" className="r-btn r-btn--noir" onClick={() => void pointerLEquipe()} disabled={envoi || !equipe || !jourEquipe || !heuresEquipe.trim()}>{envoi ? <Loader variant="spin" /> : null} Pointer l&apos;équipe</button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={coutForm} onOpenChange={(o) => !o && setCoutForm(false)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogIcone><Euro width={18} height={18} aria-hidden="true" /></DialogIcone>
-            <DialogTitle>Coût horaire chargé</DialogTitle>
-            <DialogDescription>Salaire brut, charges patronales, congés payés et intempéries (caisse CIBTP) ramenés à l&apos;heure travaillée. Daté : les heures déjà pointées gardent le coût de leur jour.</DialogDescription>
-          </DialogHeader>
-          <DialogBody>
-            <div className="esp-form">
-              <label className="rv-libelle">Pour
-                <select className="rv-champ" value={coutQui} onChange={(e) => setCoutQui(e.target.value)}>
-                  <option value="">Toute l&apos;entreprise (par défaut)</option>
-                  {h.intervenants.map((i) => <option key={i.id} value={i.id}>{i.nom}</option>)}
-                </select>
-              </label>
-              <div className="esp-form-ligne">
-                <label className="rv-libelle">€ de l&apos;heure <span className="esp-obligatoire">(obligatoire)</span>
-                  <input className="rv-champ" inputMode="decimal" value={coutValeur} onChange={(e) => setCoutValeur(e.target.value)} placeholder="38" />
-                </label>
-                <label className="rv-libelle">Depuis le
-                  <input className="rv-champ" type="date" value={coutDepuis} onChange={(e) => setCoutDepuis(e.target.value)} />
-                </label>
-              </div>
-              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
-            </div>
-          </DialogBody>
-          <DialogFooter>
-            <button type="button" className="r-btn r-btn--noir" onClick={() => void poserCout()} disabled={envoi || !coutValeur.trim()}>{envoi ? <Loader variant="spin" /> : null} Poser le coût</button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {fenetres}
     </section>
   );
 }

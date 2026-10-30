@@ -10,7 +10,8 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useState } from "react";
-import { ClipboardCheck } from "lucide-react";
+import { ClipboardCheck, ClipboardList, Landmark, Scale } from "lucide-react";
+import { Bouton, Detail, Gestes, Groupe, Ligne, Liste, Partie, Pilule, Point, Rangee, Rangees, Texte, Vide, jourCourt, useVolet } from "@/components/espace2/lin/Volet";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
@@ -30,6 +31,7 @@ const plusJours = (d: string, n: number) => { const x = new Date(`${d}T12:00:00`
 export default function ReceptionCarte({ tableau, source, onLocal, relire }: Props) {
   const { chantier: c, voit_prix } = tableau;
   const r = tableau.reception ?? null;
+  const volet = useVolet();
   const [fenetre, setFenetre] = useState<Fenetre>(null);
   const [date, setDate] = useState(aujourdhui());
   const [texte, setTexte] = useState("");
@@ -81,7 +83,51 @@ export default function ReceptionCarte({ tableau, source, onLocal, relire }: Pro
     );
   };
 
+  const fenetrePrononcer = (
+    <Dialog open={fenetre === "prononcer"} onOpenChange={(o) => !o && setFenetre(null)}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogIcone><ClipboardCheck width={18} height={18} aria-hidden="true" /></DialogIcone>
+          <DialogTitle>Prononcer la réception</DialogTitle>
+          <DialogDescription>La date du procès-verbal signé avec le maître d&apos;ouvrage, et ses réserves. Le chantier passe « réceptionné ».</DialogDescription>
+        </DialogHeader>
+        <DialogBody>
+          <div className="esp-form">
+            <label className="rv-libelle">Date du procès-verbal <span className="esp-obligatoire">(obligatoire)</span>
+              <input className="rv-champ" type="date" max={jour} value={date} onChange={(e) => setDate(e.target.value)} />
+            </label>
+            <label className="rv-libelle">Réserves (une par ligne ; vide = sans réserve)
+              <textarea className="rv-champ" rows={4} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder={"Joint de la fenêtre du séjour à reprendre\nRayure sur la porte palière"} />
+            </label>
+            {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+          </div>
+        </DialogBody>
+        <DialogFooter>
+          <button type="button" className="r-btn r-btn--noir" onClick={() => void prononcer()} disabled={envoi || !date}>{envoi ? <Loader variant="spin" /> : null} Prononcer la réception</button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+
   if (!r) {
+    if (volet) {
+      const close = c.statut !== "ouvert" && c.statut !== "suspendu";
+      return (
+        <Partie
+          titre="Réception des travaux"
+          compte={close ? "prononcée" : "pas encore prononcée"}
+          gestes={!close && voit_prix ? <Bouton fort icone={<ClipboardCheck aria-hidden="true" />} onClick={() => ouvrir("prononcer")} disabled={envoi}>Prononcer la réception</Bouton> : null}
+          avis={fait ? <Avis teinte="vert" role="status">{fait}</Avis> : null}
+        >
+          <Vide>
+            {close
+              ? voit_prix ? "Réception prononcée." : "Réception prononcée : la retenue et le décompte sont réservés à qui voit les prix."
+              : "À la réception, la retenue de garantie commence à courir : elle sera due un an plus tard, sauf opposition motivée. Le décompte final part dans les 45 jours."}
+          </Vide>
+          {fenetrePrononcer}
+        </Partie>
+      );
+    }
     if (c.statut !== "ouvert" && c.statut !== "suspendu") {
       return (
         <section className="esp-carte" aria-label="Réception des travaux">
@@ -98,29 +144,7 @@ export default function ReceptionCarte({ tableau, source, onLocal, relire }: Pro
         </div>
         <p className="esp-kpi-sous">À la réception, la retenue de garantie commence à courir : elle sera due un an plus tard, sauf opposition motivée. Le décompte final part dans les 45 jours.</p>
         {fait ? <div style={{ marginTop: 8 }}><Avis teinte="vert" role="status">{fait}</Avis></div> : null}
-        <Dialog open={fenetre === "prononcer"} onOpenChange={(o) => !o && setFenetre(null)}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogIcone><ClipboardCheck width={18} height={18} aria-hidden="true" /></DialogIcone>
-              <DialogTitle>Prononcer la réception</DialogTitle>
-              <DialogDescription>La date du procès-verbal signé avec le maître d&apos;ouvrage, et ses réserves. Le chantier passe « réceptionné ».</DialogDescription>
-            </DialogHeader>
-            <DialogBody>
-              <div className="esp-form">
-                <label className="rv-libelle">Date du procès-verbal <span className="esp-obligatoire">(obligatoire)</span>
-                  <input className="rv-champ" type="date" max={jour} value={date} onChange={(e) => setDate(e.target.value)} />
-                </label>
-                <label className="rv-libelle">Réserves (une par ligne ; vide = sans réserve)
-                  <textarea className="rv-champ" rows={4} value={texte} onChange={(e) => setTexte(e.target.value)} placeholder={"Joint de la fenêtre du séjour à reprendre\nRayure sur la porte palière"} />
-                </label>
-                {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
-              </div>
-            </DialogBody>
-            <DialogFooter>
-              <button type="button" className="r-btn r-btn--noir" onClick={() => void prononcer()} disabled={envoi || !date}>{envoi ? <Loader variant="spin" /> : null} Prononcer la réception</button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        {fenetrePrononcer}
       </section>
     );
   }
@@ -194,6 +218,171 @@ export default function ReceptionCarte({ tableau, source, onLocal, relire }: Pro
     accepte ? "Décompte accepté par le maître d'ouvrage." : "Contestation du décompte notée.",
   );
 
+  const fenetres = (
+    <>
+      <Dialog open={fenetre === "opposer" || fenetre === "liberer" || fenetre === "contester"} onOpenChange={(o) => !o && setFenetre(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><ClipboardCheck width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>{fenetre === "opposer" ? "Opposition du maître d'ouvrage" : fenetre === "liberer" ? (r.retenue_caution ? "Caution levée" : "Retenue libérée") : "Décompte contesté"}</DialogTitle>
+            <DialogDescription>
+              {fenetre === "opposer" ? `Notifiée par lettre recommandée avant le ${dateCourte(r.retenue_due_le)}, motivée par l'inexécution des obligations de l'entreprise (loi n° 71-584, art. 2).`
+                : fenetre === "liberer" ? (avantTerme && r.retenue_statut !== "opposee" ? `Avant le ${dateCourte(r.retenue_due_le)}, une libération demande l'accord du maître d'ouvrage et toutes les réserves levées.` : "La retenue a été remboursée, ou la caution levée.")
+                : "La réponse du maître d'ouvrage, avec son motif."}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              {fenetre === "opposer" ? <label className="rv-libelle">Date de l&apos;opposition <input className="rv-champ" type="date" max={jour} value={date} onChange={(e) => setDate(e.target.value)} /></label> : null}
+              {fenetre === "opposer" || fenetre === "contester" ? <label className="rv-libelle">Motif <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" maxLength={500} value={texte} onChange={(e) => setTexte(e.target.value)} /></label> : null}
+              {fenetre === "liberer" && avantTerme && r.retenue_statut !== "opposee" ? (
+                <label className="rv-libelle" style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  <input type="checkbox" checked={accord} onChange={(e) => setAccord(e.target.checked)} /> Le maître d&apos;ouvrage accepte une libération anticipée
+                </label>
+              ) : null}
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={envoi || ((fenetre === "opposer" || fenetre === "contester") && !texte.trim())}
+                    onClick={() => void (fenetre === "opposer" ? opposer() : fenetre === "liberer" ? liberer() : repondre(false))}>
+              {envoi ? <Loader variant="spin" /> : null} {fenetre === "opposer" ? "Noter l'opposition" : fenetre === "liberer" ? "Confirmer" : "Noter la contestation"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+
+
+  /* 30/10/2026 — dans la fiche de l'espace 2 : les réserves une par ligne, puis la retenue et le
+     décompte ; chacun s'ouvre dans le volet avec ses gestes (../../espace2/lin/Volet.tsx) */
+  if (volet) {
+    const retenue =
+      etat === "bloquee" ? { t: "gris" as const, l: `Due le ${dateCourte(r.retenue_due_le)}` }
+      : etat === "liberable" ? { t: "jaune" as const, l: "À réclamer" }
+      : etat === "opposee" ? { t: "rouge" as const, l: "Opposée" }
+      : { t: "vert" as const, l: `Libérée${r.liberee_avant_terme ? " avant terme" : ""}` };
+    const decompte =
+      r.decompte_statut === "a_preparer" ? { t: "jaune" as const, l: "À préparer", d: echeance, dt: "À envoyer avant le" }
+      : r.decompte_statut === "projet" ? { t: "jaune" as const, l: "Projet prêt", d: echeance, dt: "À envoyer avant le" }
+      : r.decompte_statut === "envoye" ? { t: "bleu" as const, l: "Envoyé, en attente", d: r.decompte_envoye_le, dt: "Envoyé le" }
+      : r.decompte_statut === "accepte" ? { t: "vert" as const, l: "Accepté", d: r.decompte_repondu_le, dt: "Accepté le" }
+      : { t: "rouge" as const, l: "Contesté", d: r.decompte_repondu_le, dt: "Contesté le" };
+    const avenantDe = (id: string | null | undefined) => (id ? tableau.avenants.find((a) => a.id === id)?.numero ?? "?" : null);
+    return (
+      <Partie
+        titre="Réception des travaux"
+        compte={`prononcée le ${dateCourte(r.date_reception)}`}
+        avis={fait || (erreur && !fenetre) ? <>{fait ? <Avis teinte="vert" role="status">{fait}</Avis> : null}{erreur && !fenetre ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}</> : null}
+      >
+        <Liste>
+          <Groupe nom="Réserves" compte={r.reserves.length} precision={r.reserves.length ? (ouvertes.length ? `${ouvertes.length} ouverte${ouvertes.length > 1 ? "s" : ""}` : "toutes levées") : "sans réserve"}>
+            {r.reserves.map((v) => (
+              <Ligne
+                key={v.id}
+                cle={`reserve:${v.id}`}
+                libelle={`Réserve : ${v.description}`}
+                icone={<ClipboardList />}
+                titre={v.description}
+                second={v.avenant_id ? `avenant n° ${avenantDe(v.avenant_id)} (hors devis)` : null}
+                droite={v.statut === "levee" ? <Pilule teinte="vert" icone={<Point teinte="vert" />}>Levée</Pilule> : <Pilule teinte="jaune" icone={<Point teinte="jaune" />}>Ouverte</Pilule>}
+                date={v.levee_le ? jourCourt(v.levee_le) : null}
+                dateTitre={v.levee_le ? `Levée le ${dateCourte(v.levee_le)}` : undefined}
+              />
+            ))}
+          </Groupe>
+          <Groupe nom="Après la réception" compte={2}>
+            <Ligne
+              cle="reception:retenue"
+              libelle={`${libellRetenue}, ${retenue.l}`}
+              icone={<Landmark />}
+              titre={r.retenue_caution ? "Caution de retenue de garantie" : "Retenue de garantie"}
+              second={r.retenue_caution ? null : montant(r.retenue_montant)}
+              droite={<Pilule teinte={retenue.t} icone={<Point teinte={retenue.t} />}>{retenue.l}</Pilule>}
+              date={jourCourt(r.retenue_due_le)}
+              dateTitre={`Due le ${dateCourte(r.retenue_due_le)}`}
+            />
+            <Ligne
+              cle="reception:decompte"
+              libelle={`Décompte final, ${decompte.l}`}
+              icone={<Scale />}
+              titre="Décompte final"
+              second={r.decompte_reste_ht !== null ? `reste ${montant(r.decompte_reste_ht)} HT` : null}
+              droite={<Pilule teinte={decompte.t} icone={<Point teinte={decompte.t} />}>{decompte.l}</Pilule>}
+              date={decompte.d ? jourCourt(decompte.d) : null}
+              dateTitre={decompte.d ? `${decompte.dt} ${dateCourte(decompte.d)}` : undefined}
+            />
+          </Groupe>
+        </Liste>
+        {!r.reserves.length ? <Vide>Réception prononcée sans réserve.</Vide> : null}
+        {r.reserves.map((v) => (
+          <Detail key={v.id} cle={`reserve:${v.id}`} titre="Réserve" sous={`Réception du ${dateCourte(r.date_reception)}`}>
+            <Texte>{v.description}</Texte>
+            <Rangees>
+              <Rangee libelle="État" teinte={v.statut === "levee" ? "vert" : "jaune"}>
+                {v.statut === "levee" ? `Levée le ${dateCourte(v.levee_le)}` : "Ouverte"}
+              </Rangee>
+              {v.avenant_id ? <Rangee libelle="Avenant">n° {avenantDe(v.avenant_id)}, ouvert hors devis</Rangee> : null}
+            </Rangees>
+            {v.statut === "ouverte" ? (
+              <Gestes>
+                <Bouton fort onClick={() => void lever(v.id)} disabled={envoi}>Lever la réserve</Bouton>
+                {!v.avenant_id ? <Bouton onClick={() => void horsDevis(v.id)} disabled={envoi}>Hors devis : ouvrir un avenant</Bouton> : null}
+              </Gestes>
+            ) : null}
+          </Detail>
+        ))}
+        <Detail cle="reception:retenue" titre={r.retenue_caution ? "Caution de retenue de garantie" : "Retenue de garantie"} sous="Due un an après la réception, sauf opposition motivée (loi n° 71-584, art. 2)">
+          <Rangees>
+            {!r.retenue_caution ? <Rangee libelle="Montant">{montant(r.retenue_montant)}</Rangee> : null}
+            <Rangee libelle="Due le">{dateCourte(r.retenue_due_le)}</Rangee>
+            <Rangee libelle="État" teinte={retenue.t}>
+              {etat === "liberable" ? `Due depuis le ${dateCourte(r.retenue_due_le)} : réclamez-la` : etat === "opposee" ? `Opposée le ${dateCourte(r.opposition_le)}` : etat === "liberee" ? `Libérée le ${dateCourte(r.liberee_le)}${r.liberee_avant_terme ? " (avant terme)" : ""}` : "Bloquée jusqu'à l'échéance"}
+            </Rangee>
+          </Rangees>
+          {etat === "opposee" && r.opposition_motif ? <Texte citation>« {r.opposition_motif} »</Texte> : null}
+          {etat !== "liberee" ? (
+            <Gestes>
+              <Bouton fort={etat === "liberable"} onClick={() => ouvrir("liberer")} disabled={envoi}>{r.retenue_caution ? "Noter la caution levée" : "Noter la retenue libérée"}</Bouton>
+              {etat === "bloquee" && avantTerme ? <Bouton onClick={() => ouvrir("opposer")} disabled={envoi}>Noter une opposition</Bouton> : null}
+            </Gestes>
+          ) : null}
+        </Detail>
+        <Detail cle="reception:decompte" titre="Décompte final" sous={`À envoyer dans les 45 jours, avant le ${dateCourte(echeance)}`}>
+          <Rangees>
+            <Rangee libelle="État" teinte={decompte.t}>
+              {decompte.l}
+              {decompte.d && r.decompte_statut !== "a_preparer" && r.decompte_statut !== "projet" ? ` le ${dateCourte(decompte.d)}` : ""}
+            </Rangee>
+            {r.decompte_marche_ht !== null ? (
+              <>
+                <Rangee libelle="Marché HT">{montant(r.decompte_marche_ht)}</Rangee>
+                <Rangee libelle="Facturé HT">{montant(r.decompte_facture_ht)}</Rangee>
+                <Rangee libelle="Reste HT">{montant(r.decompte_reste_ht)}</Rangee>
+                <Rangee libelle="Retenues">{montant(r.decompte_retenue)}</Rangee>
+              </>
+            ) : null}
+          </Rangees>
+          {r.decompte_statut === "conteste" && r.decompte_motif ? <Texte citation>« {r.decompte_motif} »</Texte> : null}
+          {r.decompte_statut === "a_preparer" || r.decompte_statut === "projet" || r.decompte_statut === "envoye" ? (
+            <Gestes>
+              {r.decompte_statut === "projet" ? <Bouton fort onClick={() => void envoyer()} disabled={envoi}>Noter le décompte envoyé</Bouton> : null}
+              {r.decompte_statut === "a_preparer" || r.decompte_statut === "projet" ? <Bouton fort={r.decompte_statut === "a_preparer"} onClick={() => void preparer()} disabled={envoi}>{r.decompte_statut === "projet" ? "Recalculer le décompte" : "Préparer le décompte"}</Bouton> : null}
+              {r.decompte_statut === "envoye" ? (
+                <>
+                  <Bouton fort onClick={() => void repondre(true)} disabled={envoi}>Accepté par le maître d&apos;ouvrage</Bouton>
+                  <Bouton onClick={() => ouvrir("contester")} disabled={envoi}>Contesté</Bouton>
+                </>
+              ) : null}
+            </Gestes>
+          ) : null}
+        </Detail>
+        {fenetres}
+      </Partie>
+    );
+  }
+
   return (
     <section className="esp-carte" aria-label="Réception des travaux">
       <div className="esp-carte-tete">
@@ -251,37 +440,7 @@ export default function ReceptionCarte({ tableau, source, onLocal, relire }: Pro
         </> : null}
       </div>
 
-      <Dialog open={fenetre === "opposer" || fenetre === "liberer" || fenetre === "contester"} onOpenChange={(o) => !o && setFenetre(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogIcone><ClipboardCheck width={18} height={18} aria-hidden="true" /></DialogIcone>
-            <DialogTitle>{fenetre === "opposer" ? "Opposition du maître d'ouvrage" : fenetre === "liberer" ? (r.retenue_caution ? "Caution levée" : "Retenue libérée") : "Décompte contesté"}</DialogTitle>
-            <DialogDescription>
-              {fenetre === "opposer" ? `Notifiée par lettre recommandée avant le ${dateCourte(r.retenue_due_le)}, motivée par l'inexécution des obligations de l'entreprise (loi n° 71-584, art. 2).`
-                : fenetre === "liberer" ? (avantTerme && r.retenue_statut !== "opposee" ? `Avant le ${dateCourte(r.retenue_due_le)}, une libération demande l'accord du maître d'ouvrage et toutes les réserves levées.` : "La retenue a été remboursée, ou la caution levée.")
-                : "La réponse du maître d'ouvrage, avec son motif."}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogBody>
-            <div className="esp-form">
-              {fenetre === "opposer" ? <label className="rv-libelle">Date de l&apos;opposition <input className="rv-champ" type="date" max={jour} value={date} onChange={(e) => setDate(e.target.value)} /></label> : null}
-              {fenetre === "opposer" || fenetre === "contester" ? <label className="rv-libelle">Motif <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" maxLength={500} value={texte} onChange={(e) => setTexte(e.target.value)} /></label> : null}
-              {fenetre === "liberer" && avantTerme && r.retenue_statut !== "opposee" ? (
-                <label className="rv-libelle" style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                  <input type="checkbox" checked={accord} onChange={(e) => setAccord(e.target.checked)} /> Le maître d&apos;ouvrage accepte une libération anticipée
-                </label>
-              ) : null}
-              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
-            </div>
-          </DialogBody>
-          <DialogFooter>
-            <button type="button" className="r-btn r-btn--noir" disabled={envoi || ((fenetre === "opposer" || fenetre === "contester") && !texte.trim())}
-                    onClick={() => void (fenetre === "opposer" ? opposer() : fenetre === "liberer" ? liberer() : repondre(false))}>
-              {envoi ? <Loader variant="spin" /> : null} {fenetre === "opposer" ? "Noter l'opposition" : fenetre === "liberer" ? "Confirmer" : "Noter la contestation"}
-            </button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {fenetres}
     </section>
   );
 }

@@ -1,0 +1,550 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Les parties d'une fiche en liste et volet (30/10/2026) — ./Volet.tsx
+
+   Rien de mesuré à neuf : la liste et ses lignes sont celles de « My
+   issues » (./linear-my-issues.css, lmi-), le titre de partie celui de la
+   section « Projects » d'une Initiative (lit-lots-titre, 18/500), le détail
+   une carte du volet (lit-carte, 388) avec ses rangées de 36 (libellé
+   12/450 sur 90) et ses gestes en pastilles de 28. Préfixe : lvp-.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lvp-partie + .lvp-partie {
+  margin-top: 32px;
+}
+.v2 .lvp-compte {
+  margin-left: 8px;
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--lin-second);
+  font-variant-numeric: tabular-nums;
+}
+.v2 .lvp-gestes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.v2 .lvp-avis {
+  margin: 8px 0 4px;
+}
+.v2 .lvp-vide {
+  margin: 8px 0 0;
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 20px;
+  color: var(--lin-second);
+}
+
+/* ——— la liste : les lignes de « My issues », débordant de 8 pour que le texte s'aligne ——— */
+.v2 .lvp-liste {
+  margin: 8px -8px 0;
+  padding-bottom: 8px;
+}
+.v2 .lmi-ligne.lvp-ligne {
+  grid-template-columns: 8px 16px auto minmax(0, 1fr) auto auto 8px;
+}
+.v2 .lvp-ligne > .lmi-icone { grid-column: 2; }
+.v2 .lvp-ligne > .lmi-id { grid-column: 3; max-width: 96px; }
+.v2 .lvp-ligne > .lmi-titre { grid-column: 4; }
+.v2 .lvp-ligne > .lmi-droite { grid-column: 5; }
+.v2 .lvp-ligne > .lmi-date { grid-column: 6; }
+.v2 .lvp-ligne > .lmi-id:empty { display: none; }
+.v2 .lvp-ligne[data-choisie]::before {
+  background: var(--lin-pastille-active);
+}
+.v2 .lvp-ligne .lmi-ligne-lien:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: -2px;
+}
+.v2 .lvp-ligne .lmi-icone[data-teinte] {
+  color: var(--lin-teinte);
+}
+.v2 .lvp-point {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--lin-teinte, var(--lin-second));
+}
+.v2 .lmi-pilule .lvp-point {
+  width: 6px;
+  height: 6px;
+  margin-right: 2px;
+}
+
+/* ——— le volet : un élément choisi prend la place des cartes du chantier ——— */
+.v2 .lvp-cible {
+  display: contents;
+}
+.v2 .lit-volet:has(> .lvp-cible:not(:empty)) > :not(.lvp-cible) {
+  display: none;
+}
+
+/* ——— le détail ——— */
+.v2 .lvp-detail {
+  display: flex;
+  flex-direction: column;
+}
+.v2 .lvp-detail-tete {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 0 0 8px;
+}
+.v2 .lin .lvp-detail-titre {
+  margin: 0;
+  padding-top: 1px;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 22px;
+  color: var(--lin-titre);
+  overflow-wrap: anywhere;
+}
+.v2 .lvp-detail-sous {
+  margin: 2px 0 0;
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 16.8px;
+  color: var(--lin-onglet-detail-texte);
+}
+.v2 .lvp-rangees {
+  display: grid;
+  margin: 6px 0 0;
+}
+.v2 .lvp-rangees > div {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  align-items: center;
+  min-height: 36px;
+  padding: 0 8px;
+}
+.v2 .lvp-rangees dt {
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 16px;
+  color: var(--lin-onglet-detail-texte);
+}
+.v2 .lvp-rangees dd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  min-width: 0;
+  margin: 0;
+  padding: 6px 0;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 16px;
+  color: var(--lin-titre);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.v2 .lvp-rangees dd[data-teinte] {
+  color: var(--lin-teinte);
+}
+.v2 .lvp-texte {
+  margin: 6px 0 0;
+  padding: 0 8px;
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 20px;
+  color: var(--lin-texte);
+  overflow-wrap: anywhere;
+}
+.v2 .lvp-texte--citation {
+  margin-left: 8px;
+  padding: 0 0 0 10px;
+  border-left: 2px solid var(--lin-maj-trait);
+}
+
+/* une sous-liste : filet 0.5 au-dessus, lignes de 12/450 */
+.v2 .lvp-sous {
+  margin: 10px 0 0;
+  padding: 8px 0 0;
+  border-top: 0.5px solid var(--lin-trait);
+}
+.v2 .lin .lvp-sous-titre {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  margin: 0;
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-onglet-detail-texte);
+}
+.v2 .lvp-sous-liste {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2 .lvp-sous-liste > li {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 16px;
+  color: var(--lin-texte);
+}
+.v2 .lvp-sous-gauche {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.v2 .lvp-sous-texte {
+  overflow-wrap: anywhere;
+}
+.v2 .lvp-sous-second {
+  color: var(--lin-onglet-detail-texte);
+  overflow-wrap: anywhere;
+}
+.v2 .lvp-sous-valeur {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  color: var(--lin-titre);
+}
+.v2 .lvp-sous-liste > li[data-teinte] .lvp-sous-valeur {
+  color: var(--lin-teinte);
+}
+
+/* un geste dans une sous-ligne (« Retirer ») : un lien de 12/500 */
+.v2 .lin .lvp-lien {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-second);
+  cursor: pointer;
+}
+.v2 .lin .lvp-lien:hover {
+  color: var(--lin-texte);
+  text-decoration: underline;
+}
+.v2 .lin .lvp-lien:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+/* ce que Daliro a lu (chiffrage d'un avenant…) : des phrases de 12/450 grises */
+.v2 .lvp-note {
+  display: grid;
+  gap: 4px;
+  margin: 6px 0 0;
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 16.8px;
+  color: var(--lin-onglet-detail-texte);
+}
+/* le résumé d'une partie (l'objet du marché, ses dates…) : 13/450 gris sous le titre */
+.v2 .lvp-resume {
+  margin: 2px 0 0;
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 20px;
+  color: var(--lin-second);
+}
+
+/* les gestes : pastilles de 28, rayon plein, sous un filet 0.5 */
+.v2 .lvp-gestes-detail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0 0;
+  padding: 12px 8px 2px;
+  border-top: 0.5px solid var(--lin-trait);
+}
+.v2 .lin .lvp-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 8px;
+  border: 0;
+  border-radius: 9999px;
+  background: var(--lin-pastille);
+  box-shadow: var(--lin-anneau);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--lin-texte);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.v2 .lin .lvp-bouton:hover {
+  background: var(--lin-pastille-active);
+}
+.v2 .lin .lvp-bouton[data-fort] {
+  background: var(--lin-fait);
+  box-shadow: none;
+  color: #fff;
+}
+.v2 .lin .lvp-bouton[data-fort]:hover {
+  background: color-mix(in srgb, var(--lin-fait) 88%, #fff);
+}
+.v2 .lin .lvp-bouton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.v2 .lin .lvp-bouton svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+.v2 .lin .lvp-bouton:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: 2px;
+}
+
+/* ——— étroit : l'identifiant et les pastilles après la première tombent (comme « My issues » à 390) ——— */
+@container principale (max-width: 640px) {
+  .v2 .lvp-ligne > .lmi-id,
+  .v2 .lvp-ligne > .lmi-droite > :not(:first-child) {
+    display: none;
+  }
+  .v2 .lit-lots-tete:has(> .lvp-gestes) {
+    flex-wrap: wrap;
+  }
+}
+
+/* une icône de ligne à la teinte de son état (contrôles), un montant négatif en rouge */
+.v2 .lvp-icone-teinte {
+  display: inline-flex;
+  color: var(--lin-teinte, var(--lin-second));
+}
+.v2 .lvp-icone-teinte svg {
+  width: 16px;
+  height: 16px;
+}
+.v2 .lvp-montant[data-teinte] {
+  color: var(--lin-teinte);
+}
+
+/* les photos et vocaux d'un message : vignettes de 160 × 100 à 8 d'écart */
+.v2 .lvp-medias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 0;
+  padding: 0 8px;
+  font-size: 12px;
+  color: var(--lin-onglet-detail-texte);
+}
+.v2 .lvp-medias img {
+  border-color: var(--lin-trait) !important;
+}
+
+/* un champ dans une sous-ligne (l'avancement cumulé d'une ligne de situation) : 64 × 24, chiffres à droite */
+.v2 .lin .lvp-champ {
+  width: 64px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 6px;
+  border: 0.5px solid var(--lin-trait);
+  background: var(--lin-champ, var(--lin-fond));
+  font: inherit;
+  font-size: 12px;
+  text-align: right;
+  color: var(--lin-titre);
+  font-variant-numeric: tabular-nums;
+}
+.v2 .lin .lvp-champ:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: 0;
+}
+
+/* ——— une barre d'outils sous le titre (semaine, lot pointé) : boutons ronds de 28, choix en pastille ——— */
+.v2 .lvp-barre {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin: 10px 0 4px;
+}
+.v2 .lvp-barre-titre {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-titre);
+}
+.v2 .lvp-barre-choix {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 8px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+}
+.v2 .lin .lvp-select {
+  height: 28px;
+  max-width: 220px;
+  padding: 0 8px;
+  border-radius: 9999px;
+  border: 0;
+  background: var(--lin-pastille);
+  box-shadow: var(--lin-anneau);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-texte);
+}
+.v2 .lvp-barre-note {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ——— une grille de saisie (heures de la semaine) : en-tête 32 en 12/450, lignes 36, filets 0.5 ——— */
+.v2 .lvp-grille-cadre {
+  margin: 8px 0 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.v2 .lvp-grille {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-texte);
+}
+.v2 .lvp-grille thead th {
+  height: 32px;
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 450;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--lin-second);
+  white-space: nowrap;
+  border-bottom: 0.5px solid var(--lin-trait);
+}
+.v2 .lvp-grille tbody :is(th, td) {
+  height: 36px;
+  padding: 2px 6px;
+  border-bottom: 0.5px solid var(--lin-trait);
+  font-weight: 450;
+  text-align: left;
+  vertical-align: middle;
+}
+.v2 .lvp-grille tbody th {
+  min-width: 140px;
+}
+.v2 .lvp-grille .lvp-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.v2 .lvp-grille-nom {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-titre);
+}
+.v2 .lvp-grille-second {
+  display: block;
+  color: var(--lin-second);
+}
+.v2 .lvp-grille-autres {
+  display: block;
+  font-size: 11px;
+  color: var(--lin-second);
+}
+.v2 .lvp-grille-total :is(th, td) {
+  color: var(--lin-second);
+  border-bottom: 0 !important;
+}
+.v2 .lvp-fort {
+  font-weight: 500 !important;
+  color: var(--lin-titre);
+}
+.v2 .lin .lvp-champ--case {
+  width: 48px;
+  height: 28px;
+}
+.v2 .lin .lvp-champ:disabled {
+  opacity: 0.5;
+}
+.v2 .lvp-chiffres {
+  margin: 10px 0 4px;
+}
+
+/* les sept jours de la météo : cartes de la grille, plus étroites */
+.v2 .lvp-chiffres--jours {
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+}
+.v2 .lvp-chiffres--jours .lit-essentiel-chiffre {
+  padding: 10px 12px;
+}
+.v2 .lvp-chiffres--jours .lit-essentiel-chiffre > strong {
+  font-size: 15px;
+  line-height: 20px;
+}
+.v2 .lvp-chiffres--jours .lit-essentiel-chiffre[data-fort] {
+  border-color: color-mix(in srgb, var(--lin-jaune) 60%, transparent);
+}
+
+/* une question posée à Daliro : le champ de la « dernière nouvelle » (trait 0.5, rayon 10), pastilles dessous */
+.v2 .lvp-question {
+  margin: 12px 0 4px;
+  padding: 8px 8px 8px 12px;
+  border-radius: 10px;
+  border: 0.5px solid var(--lin-trait);
+  background: var(--lin-detail);
+}
+.v2 .lin .lvp-question-champ {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  resize: vertical;
+  font: inherit;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--lin-titre);
+}
+.v2 .lin .lvp-question-champ:focus {
+  outline: none;
+}
+.v2 .lvp-question-pied {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+}
+.v2 .lvp-gestes--gauche {
+  justify-content: flex-start;
+}
+.v2 .lvp-texte--long {
+  white-space: pre-line;
+}
+
+/* la pile de ChantierVue est une grille : sa colonne ne s'élargit pas au contenu (grille des heures) */
+.v2 .lin.lit .lit-gestes .resa.esp .esp-dossier {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* le titre d'une ligne passe avant sa précision : c'est elle qui se coupe */
+.v2 .lvp-ligne .lmi-titre-texte {
+  flex-shrink: 0;
+  max-width: 72%;
+}
+.v2 .lvp-ligne .lmi-titre-second {
+  flex: 1 1 0;
+}

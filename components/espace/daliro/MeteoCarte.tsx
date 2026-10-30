@@ -13,7 +13,8 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CloudRain } from "lucide-react";
+import { ArrowLeftRight, CloudRain } from "lucide-react";
+import { Bouton, Detail, Gestes, Groupe, Ligne, Liste, Partie, Pilule, Point, Texte, Vide, jourCourt, useVolet } from "@/components/espace2/lin/Volet";
 import { Loader } from "@/components/ui/loader";
 import { aujourdHui } from "../exemples/socle";
 import type { Source } from "../source";
@@ -81,6 +82,7 @@ function meteoExemple(tableau: Tableau): MeteoChantier {
 
 export default function MeteoCarte({ tableau, source, onLocal, relire }: { tableau: Tableau; source: Source; onLocal?: (t: Tableau) => void; relire?: () => Promise<void> }) {
   const c = tableau.chantier;
+  const volet = useVolet();
   const [reel, setReel] = useState<MeteoChantier | null>(null);
   const [chargement, setChargement] = useState(source === "reelle");
   const [erreur, setErreur] = useState<string | null>(null);
@@ -125,7 +127,83 @@ export default function MeteoCarte({ tableau, source, onLocal, relire }: { table
     } catch (x) { setErreur(x instanceof Error ? x.message : "La base a refusé l'échange."); }
     finally { setEnvoi(false); }
   };
-  if (c.statut !== "ouvert" && c.statut !== "suspendu") return null;
+  if (c.statut !== "ouvert" && c.statut !== "suspendu")
+    return volet ? (
+      <Partie titre="Météo des 7 jours">
+        <Vide>La météo surveille les passages extérieurs d&apos;un chantier ouvert ou suspendu.</Vide>
+      </Partie>
+    ) : null;
+
+  /* 30/10/2026 — dans la fiche de l'espace 2 : les sept jours en cartes de la grille du volet, puis
+     les passages menacés et les échanges proposés, une ligne chacun ; le détail dans le volet */
+  if (volet) {
+    const fort = (d: JourMeteo) => (d.pluie_mm !== null && d.pluie_mm >= 5) || (d.rafales_kmh != null && d.rafales_kmh >= 60) || (d.vent_kmh != null && d.vent_kmh >= 40);
+    const vent = (d: JourMeteo) => (d.rafales_kmh != null ? `rafales ${Math.round(d.rafales_kmh)} km/h` : d.vent_kmh != null ? `vent ${Math.round(d.vent_kmh)} km/h` : null);
+    return (
+      <Partie titre="Météo des 7 jours" compte="passages extérieurs" avis={fait || erreur ? <>{fait ? <Avis teinte="vert" role="status">{fait}</Avis> : null}{erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}</> : null}>
+        {chargement ? (
+          <Loader variant="spin" />
+        ) : !m ? null : !m.localise ? (
+          <Vide>Adresse du chantier non localisée : pas de prévision. Posez ses coordonnées pour que les passages extérieurs soient surveillés.</Vide>
+        ) : !m.ouverte ? (
+          <Vide>La surveillance météo est comprise dans les formules Chantiers et Entreprise.</Vide>
+        ) : !m.prevision.length ? (
+          <Vide>{m.erreur ? `Pas de prévision : ${m.erreur}.` : "La prévision arrive avec le prochain passage du serveur (deux fois par jour), s'il y a un passage extérieur dans les 7 jours."}</Vide>
+        ) : (
+          <>
+            <div className="lit-essentiel-chiffres lvp-chiffres lvp-chiffres--jours">
+              {m.prevision.map((d) => (
+                <div key={d.jour} className="lit-essentiel-chiffre" data-fort={fort(d) ? "" : undefined} title={JOURS_LONGS[jourDe(d.jour).getDay()]}>
+                  <span>{JOURS[jourDe(d.jour).getDay()]} {Number(d.jour.slice(8, 10))}</span>
+                  <strong>{d.pluie_mm === null ? "—" : `${nf(d.pluie_mm)} mm`}</strong>
+                  <span>{d.tmin === null || d.tmax === null ? "—" : `${nf(d.tmin)} / ${nf(d.tmax)} °C`}</span>
+                  {vent(d) ? <span>{vent(d)}</span> : null}
+                </div>
+              ))}
+            </div>
+            <Liste>
+              <Groupe nom="Passages menacés" compte={m.risques.length} precision={m.risques.length ? null : "aucun dans les 7 jours"}>
+                {m.risques.map((r) => (
+                  <Ligne key={r.passage_id} cle={`risque:${r.passage_id}`} libelle={r.texte} icone={<CloudRain />} titre={r.tache ?? "Passage extérieur"} second={r.motifs.join(", ")} droite={<Pilule teinte="jaune" icone={<Point teinte="jaune" />}>À décaler ou protéger</Pilule>} date={jourCourt(r.jour)} />
+                ))}
+              </Groupe>
+              {echanges.length ? (
+                <Groupe nom="Nouvel ordre proposé" compte={echanges.length} precision="rien ne bouge sans vous">
+                  {echanges.map((e) => (
+                    <Ligne key={`${e.exterieur}-${e.interieur}`} cle={`echange:${e.exterieur}-${e.interieur}`} libelle={e.texte} icone={<ArrowLeftRight />} titre={`${e.exterieur_tache ?? "Passage extérieur"} ⇄ ${e.interieur_tache ?? "passage intérieur"}`} second={e.texte} />
+                  ))}
+                </Groupe>
+              ) : null}
+            </Liste>
+            {m.risques.map((r) => (
+              <Detail key={r.passage_id} cle={`risque:${r.passage_id}`} titre={r.tache ?? "Passage extérieur"} sous={`${JOURS_LONGS[jourDe(r.jour).getDay()]} ${jourCourt(r.jour)}`}>
+                <Texte>{r.texte}</Texte>
+              </Detail>
+            ))}
+            {echanges.map((e) => (
+              <Detail key={`${e.exterieur}-${e.interieur}`} cle={`echange:${e.exterieur}-${e.interieur}`} titre="Échanger deux passages" sous="Proposé à cause de la pluie annoncée">
+                <Texte>{e.texte}</Texte>
+                <Gestes>
+                  <Bouton fort icone={<ArrowLeftRight aria-hidden="true" />} disabled={envoi} onClick={() => void echanger(e)}>Échanger</Bouton>
+                </Gestes>
+              </Detail>
+            ))}
+            <p className="lvp-vide">
+              {m.fournisseur === "met_norway" ? (
+                <>
+                  Données météo : <a href="https://api.met.no/" target="_blank" rel="noreferrer">MET Norway</a>, licence <a href="https://creativecommons.org/licenses/by/4.0/deed.fr" target="_blank" rel="noreferrer">CC BY 4.0</a>
+                </>
+              ) : (
+                "Prévision Météo-France"
+              )}
+              {m.recue_le ? `, reçue le ${dateHeure(m.recue_le)}` : ""}
+              {source !== "reelle" ? " (exemple fictif)" : ""}. Seuils du passage, sinon pluie 5 mm, rafales 60 km/h (vent moyen 40 km/h quand les rafales ne sont pas données), gel.
+            </p>
+          </>
+        )}
+      </Partie>
+    );
+  }
 
   return (
     <section className="esp-carte" aria-label="Météo du chantier">
