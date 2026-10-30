@@ -1,0 +1,249 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Le planning de DALIRO sur le « Schedule » de Float (30/10/2026).
+   Préfixe fpl-. Servi par components/espace2/daliro/Planning.tsx.
+
+   Relevé : captures produit de float.com/product/scheduling (« Schedule
+   hero », 2 400 × 1 452 ; « Accordion image 1 et 3 », 1 708 × 1 342),
+   densité 2 : les tailles ci-dessous sont les mesures des captures ÷ 2.
+   Couleurs lues au pixel (BMP décodé). L'application de Float demande un
+   compte : pas de getComputedStyle possible, d'où des tailles à ±1 px.
+
+     colonne des personnes   258 ; avatar 32 rond, écart 12 ; nom 16/500
+                             #1e242b ; rôle 13/400 #2d3d5a ; étiquette 12
+                             fond #eeedf0, texte #303f53, rayon 6, 20 de haut
+     têtes                   deux rangées de 24 : n° de semaine 12 #394452 et
+                             mois 13 ; puis « Lun 26 » 13 #24282e
+     colonnes                jour de 96 (« Weeks ») ; filets 1 px #e1e0e3 ;
+                             samedi et dimanche hachurés à 45°, traits #ececec
+     lignes                  112 au moins, filet bas 1 px #e1e0e3 ; elles
+                             grandissent avec leurs blocs (voies de 86)
+     bloc                    rayon 4, padding 5 7, 13/400 interligne 17,
+                             blanc sur la couleur du projet : #2a0362,
+                             #f9448f, #304869, #4dd3fe (texte foncé), #155ff1 ;
+                             pastille 11/500 en bas à droite, fond noir à 25 %
+     bloc provisoire         fond blanc, contour 1.5 px de la couleur du projet,
+                             texte de la même couleur (« Tentative »)
+     surcharge               case rose pâle #fecece
+     aujourd'hui             filet 1 px #bac7d5 ; jour en bleu #155ff1
+     boutons de la barre     28 de haut, rayon 8, filet 1 px #d5d8de, 13/500
+
+   Thème sombre (Float en a un, non relevé) : les surfaces et filets
+   prennent les jetons de lin.css ; les blocs gardent leurs couleurs.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lin .fpl {
+  --fpl-gauche: 258px;
+  --fpl-fond: var(--lin-fond);
+  --fpl-trait: var(--lin-trait);
+  --fpl-hachure: lch(100 0 0 / 0.06);
+  --fpl-nom: var(--lin-titre);
+  --fpl-role: var(--lin-second);
+  --fpl-jour-texte: var(--lin-texte);
+  --fpl-semaine: var(--lin-compte);
+  --fpl-etiquette-fond: var(--lin-pastille-active);
+  --fpl-etiquette-texte: var(--lin-texte);
+  --fpl-surcharge: lch(60 60 25 / 0.18);
+  --fpl-auj: #6d78d5;
+  --fpl-auj-trait: lch(60 30 270 / 0.55);
+  --fpl-bouton-trait: var(--lin-trait);
+  --fpl-provisoire-fond: var(--lin-fond);
+  --fpl-avatar: var(--lin-avatar);
+}
+html[data-v2-theme="light"] .v2 .lin .fpl {
+  --fpl-fond: #ffffff;
+  --fpl-trait: #e1e0e3;
+  --fpl-hachure: #ececec;
+  --fpl-nom: #1e242b;
+  --fpl-role: #2d3d5a;
+  --fpl-jour-texte: #24282e;
+  --fpl-semaine: #394452;
+  --fpl-etiquette-fond: #eeedf0;
+  --fpl-etiquette-texte: #303f53;
+  --fpl-surcharge: #fecece;
+  --fpl-auj: #155ff1;
+  --fpl-auj-trait: #bac7d5;
+  --fpl-bouton-trait: #d5d8de;
+  --fpl-provisoire-fond: #ffffff;
+  --fpl-avatar: #8a94a6;
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lin .fpl {
+    --fpl-fond: #ffffff;
+    --fpl-trait: #e1e0e3;
+    --fpl-hachure: #ececec;
+    --fpl-nom: #1e242b;
+    --fpl-role: #2d3d5a;
+    --fpl-jour-texte: #24282e;
+    --fpl-semaine: #394452;
+    --fpl-etiquette-fond: #eeedf0;
+    --fpl-etiquette-texte: #303f53;
+    --fpl-surcharge: #fecece;
+    --fpl-auj: #155ff1;
+    --fpl-auj-trait: #bac7d5;
+    --fpl-bouton-trait: #d5d8de;
+    --fpl-provisoire-fond: #ffffff;
+    --fpl-avatar: #8a94a6;
+  }
+}
+
+.v2 .fpl { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; min-height: 0; background: var(--fpl-fond); }
+
+/* ——— la barre : période à gauche ; ‹ › Aujourd'hui Semaines ▾ à droite ——— */
+.v2 .fpl-barre { display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 12px 0 16px; border-bottom: 1px solid var(--fpl-trait); }
+.v2 .fpl-titre { font-size: 15px; font-weight: 600; color: var(--fpl-nom); white-space: nowrap; }
+.v2 .fpl-barre-droite { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+.v2 .fpl-icone { display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 8px; background: none; color: var(--fpl-jour-texte); cursor: pointer; }
+.v2 .fpl-icone:hover { background: var(--lin-survol); }
+.v2 .fpl-icone svg { width: 18px; height: 18px; }
+.v2 .fpl-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--fpl-bouton-trait);
+  border-radius: 8px;
+  background: var(--fpl-fond);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fpl-nom);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.v2 .fpl-bouton:hover { background: var(--lin-survol); }
+.v2 .fpl-bouton svg { width: 14px; height: 14px; color: var(--fpl-role); }
+.v2 .fpl .lin-menu-option[aria-checked="true"] { color: var(--lin-titre); font-weight: 500; }
+
+/* ——— la zone : défile dans les deux sens ; têtes et colonne des personnes restent ——— */
+.v2 .fpl-zone { position: relative; flex: 1 1 auto; height: calc(100dvh - 48px - 88px - 48px); min-height: 320px; overflow: auto; overscroll-behavior-x: contain; }
+.v2 .fpl-toile { position: relative; min-height: 100%; }
+
+.v2 .fpl-tetes { position: sticky; top: 0; z-index: 4; display: flex; height: 48px; background: var(--fpl-fond); border-bottom: 1px solid var(--fpl-trait); }
+.v2 .fpl-coin {
+  position: sticky;
+  left: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 var(--fpl-gauche);
+  padding: 0 12px;
+  background: var(--fpl-fond);
+  border-right: 1px solid var(--fpl-trait);
+}
+.v2 .fpl-bouton--coin { margin-left: auto; }
+.v2 .fpl-jours { display: flex; }
+.v2 .fpl-jour { display: flex; flex-direction: column; justify-content: center; flex: 0 0 var(--fpl-jour); width: var(--fpl-jour); padding: 0 6px; overflow: hidden; }
+.v2 .fpl-jour-haut { display: flex; align-items: baseline; gap: 10px; height: 18px; white-space: nowrap; }
+.v2 .fpl-semaine { font-size: 12px; color: var(--fpl-semaine); font-variant-numeric: tabular-nums; }
+.v2 .fpl-mois { font-size: 13px; font-weight: 500; color: var(--fpl-nom); }
+.v2 .fpl-jour-nom { font-size: 13px; color: var(--fpl-jour-texte); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.v2 .fpl-jour[data-we] .fpl-jour-nom { color: var(--fpl-role); }
+.v2 .fpl-jour[data-auj] .fpl-jour-nom { color: var(--fpl-auj); font-weight: 600; }
+
+/* ——— une ligne : la personne, collée à gauche, et sa piste ——— */
+.v2 .fpl-ligne { position: relative; display: flex; border-bottom: 1px solid var(--fpl-trait); }
+.v2 .fpl-personne {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 0 0 var(--fpl-gauche);
+  padding: 14px 12px;
+  background: var(--fpl-fond);
+  border-right: 1px solid var(--fpl-trait);
+}
+.v2 .fpl-avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--fpl-avatar);
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+}
+.v2 .fpl-avatar[data-genre="inconnu"] { background: var(--fpl-etiquette-fond); color: var(--fpl-role); }
+.v2 .fpl-avatar svg { width: 16px; height: 16px; }
+.v2 .fpl-personne-texte { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+.v2 .fpl-nom { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 16px; font-weight: 500; line-height: 20px; color: var(--fpl-nom); }
+.v2 a.fpl-nom:hover { text-decoration: underline; text-underline-offset: 2px; }
+.v2 .fpl-role { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; line-height: 18px; color: var(--fpl-role); }
+.v2 .fpl-etiquette { display: inline-flex; align-items: center; height: 20px; margin-top: 4px; padding: 0 6px; border-radius: 6px; background: var(--fpl-etiquette-fond); font-size: 12px; color: var(--fpl-etiquette-texte); white-space: nowrap; }
+
+.v2 .fpl-piste { position: relative; flex: none; }
+.v2 .fpl-case { position: absolute; top: 0; bottom: 0; border-right: 1px solid var(--fpl-trait); }
+.v2 .fpl-case[data-we] { background: repeating-linear-gradient(-45deg, var(--fpl-hachure) 0 1px, transparent 1px 6px); }
+.v2 .fpl-case[data-surcharge] { background: var(--fpl-surcharge); }
+.v2 .fpl-aujourdhui { position: absolute; top: 0; bottom: 0; z-index: 1; width: 1px; background: var(--fpl-auj-trait); }
+
+/* ——— un bloc ——— */
+.v2 .fpl-bloc {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 5px 7px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 4px;
+  background: var(--fpl-c);
+  font: inherit;
+  text-align: left;
+  color: #fff;
+  cursor: pointer;
+  transition: filter 0.1s, box-shadow 0.1s;
+}
+.v2 .fpl-bloc:hover { filter: brightness(1.08); box-shadow: 0 2px 8px lch(0 0 0 / 0.18); }
+.v2 .fpl-bloc:focus-visible { outline: 2px solid var(--fpl-auj); outline-offset: 2px; }
+.v2 .fpl-bloc[data-clair] { color: #0b2540; }
+.v2 .fpl-bloc-ligne { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; line-height: 17px; }
+.v2 .fpl-bloc-ligne--1 { font-weight: 500; }
+.v2 .fpl-pastille {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  height: 16px;
+  padding: 0 5px;
+  border-radius: 9999px;
+  background: lch(0 0 0 / 0.25);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
+}
+.v2 .fpl-bloc[data-clair] .fpl-pastille { background: lch(0 0 0 / 0.12); }
+/* « Tentative » : le contour seul */
+.v2 .fpl-bloc[data-provisoire] {
+  background: var(--fpl-provisoire-fond);
+  box-shadow: inset 0 0 0 1.5px var(--fpl-c);
+  color: var(--fpl-c);
+}
+.v2 .fpl-bloc[data-provisoire] .fpl-pastille { background: color-mix(in srgb, var(--fpl-c) 14%, transparent); }
+.v2 .fpl-bloc[data-refus] { --fpl-c: #e5484d; }
+.v2 .fpl-bloc[data-refus] .fpl-bloc-ligne--1 { text-decoration: line-through; }
+.v2 .fpl-bloc[data-fait] { opacity: 0.55; }
+.v2 .fpl-bloc[data-coupe="avant"] { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.v2 .fpl-bloc[data-coupe="apres"] { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.v2 .fpl-bloc[data-choisi] { outline: 2px solid var(--fpl-auj); outline-offset: 2px; }
+/* en sombre, un contour violet foncé ne se voit pas : il s'éclaircit */
+.v2 .lin .fpl .fpl-bloc[data-provisoire] { --fpl-c-vu: color-mix(in srgb, var(--fpl-c) 55%, #fff); box-shadow: inset 0 0 0 1.5px var(--fpl-c-vu); color: var(--fpl-c-vu); }
+html[data-v2-theme="light"] .v2 .lin .fpl .fpl-bloc[data-provisoire] { box-shadow: inset 0 0 0 1.5px var(--fpl-c); color: var(--fpl-c); }
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lin .fpl .fpl-bloc[data-provisoire] { box-shadow: inset 0 0 0 1.5px var(--fpl-c); color: var(--fpl-c); }
+}
+
+.v2 .fpl[data-densite="mois"] .fpl-pastille { display: none; }
+.v2 .fpl-vide { position: sticky; left: 0; margin: 0; padding: 48px 16px; font-size: 13px; color: var(--fpl-role); }
+
+@container principale (max-width: 760px) {
+  .v2 .lin .fpl { --fpl-gauche: 176px; }
+  .v2 .fpl-etiquette, .v2 .fpl-role { display: none; }
+  .v2 .fpl-avatar { width: 26px; height: 26px; font-size: 11px; }
+  .v2 .fpl-nom { font-size: 14px; }
+}
