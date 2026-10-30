@@ -67,13 +67,12 @@ import { famille } from "@/components/espace/daliro/liste";
 import type { Chantier, Confirmation, Passage, StatutChantier, Tableau } from "@/components/espace/daliro/types";
 import { Menu } from "../lin/Lin";
 import { IconeStatutProjet, type EtatProjet } from "../lin/icones";
-import { deplacerPassage } from "@/components/espace/daliro/portes";
-import { appliquerLocal, recalageLocal } from "@/components/espace/daliro/recalage";
 import { useToast } from "../Toasts";
 import { useDaliro, type NouveauChantier } from "./donnees";
 import Frise, { estZoom, type LigneFrise, type PastilleFrise, type TeinteFrise, type Zoom } from "./Frise";
 import ApercuFrise from "./ApercuFrise";
 import Planning, { estDensite, lundiDe } from "./Planning";
+import { useDeplacer } from "./deplacer";
 import { CONFIRMATION_CLAIRE, jourLocal, qui, quand, resume } from "./enClair";
 import "@/components/espace/espace.css";
 
@@ -118,7 +117,7 @@ function Avancement({ pct }: { pct: number | null }) {
 }
 
 export default function Chantiers() {
-  const { source, pret, erreur, liste, quota, maitresOuvrage, creer, tableau, demanderTous, enLecture, onLocal, relireChantier } = useDaliro();
+  const { source, pret, erreur, liste, quota, maitresOuvrage, creer, tableau, demanderTous, enLecture } = useDaliro();
   const toast = useToast();
   const params = useSearchParams();
   const routeur = useRouter();
@@ -172,55 +171,8 @@ export default function Chantiers() {
   const sParam = params.get("semaine");
   const lundi = sParam && /^\d{4}-\d{2}-\d{2}$/.test(sParam) ? lundiDe(sParam) : lundiDe(passageOuvert?.debut ?? aujourdhui);
 
-  /* ——— un bloc du planning glissé ou tiré, ou ses heures posées dans l'aperçu ———
-     En exemple : la règle de la base rejouée en mémoire (la suite qui en dépend part après, un passage déplacé ou
-     ré-horé repart en confirmation J-2). En base réelle : btp_deplacer_passage (b6_82), qui fait de même et journalise. */
-  const plusJours = (iso: string, n: number) => {
-    const [a, m, j] = iso.slice(0, 10).split("-").map(Number);
-    return new Date(Date.UTC(a, m - 1, j + n)).toISOString().slice(0, 10);
-  };
-  const poser = async (p: Passage, chantierId: string, debut: string, fin: string, hd: string | null, hf: string | null, quoi: string) => {
-    const t = tableau(chantierId);
-    if (!t) return;
-    const nom = `« ${p.tache ?? "Passage"} »`;
-    if (source === "reelle") {
-      try {
-        const r = await deplacerPassage(p.id, debut, fin, hd, hf, null);
-        await relireChantier(chantierId);
-        const suite = (r.recalage?.deplaces ?? []).filter((d) => d.passage_id !== p.id).length;
-        toast(`${nom} ${quoi}${r.reconfirmer ? ", à reconfirmer à J-2" : ""}${suite ? ` ; ${suite} passage${suite > 1 ? "s" : ""} qui en dépendent suivent` : ""}.`, "vert");
-      } catch (e) {
-        toast(e instanceof Error ? e.message : "La base a refusé le déplacement.", "rouge");
-      }
-      return;
-    }
-    const sec = (h: string | null) => (h ? (h.length === 5 ? `${h}:00` : h) : null);
-    const avant = { debut: p.debut, fin: p.fin, hd: p.heure_debut ?? null, hf: p.heure_fin ?? null };
-    const bouge = debut !== avant.debut || fin !== avant.fin || sec(hd) !== avant.hd || sec(hf) !== avant.hf;
-    const reconfirmer = bouge && p.confirmation !== "non_demandee";
-    let t2: Tableau = { ...t, passages: t.passages.map((q) => (q.id === p.id ? { ...q, debut, fin, heure_debut: sec(hd), heure_fin: sec(hf), version: q.version + (bouge ? 1 : 0), confirmation: reconfirmer ? "non_demandee" : q.confirmation, confirmation_le: reconfirmer ? null : q.confirmation_le } : q)) };
-    let suite = 0;
-    if (fin > avant.fin) {
-      try {
-        const r = recalageLocal(t2, p.id, fin);
-        suite = r.deplaces.filter((d) => d.passage_id !== p.id).length;
-        t2 = appliquerLocal(t2, r);
-      } catch {
-        /* rien en aval */
-      }
-    }
-    onLocal(t2);
-    toast(`${nom} ${quoi}${reconfirmer ? ", à reconfirmer à J-2" : ""}${suite ? ` ; ${suite} passage${suite > 1 ? "s" : ""} qui en dépendent suivent` : ""}.`, "vert");
-  };
-  const changer = ({ passage: p, chantierId, mode, jours }: { passage: Passage; chantierId: string; mode: "deplacer" | "etirer"; jours: number }) => {
-    const debut = mode === "deplacer" ? plusJours(p.debut, jours) : p.debut.slice(0, 10);
-    const fin = plusJours(p.fin, jours);
-    const quoi = mode === "etirer" ? `finit ${quand(fin, aujourdhui)}` : `déplacé ${debut === fin ? quand(debut, aujourdhui) : `du ${dateCourte(debut)} au ${dateCourte(fin)}`}`;
-    void poser(p, chantierId, debut, fin, p.heure_debut?.slice(0, 5) ?? null, p.heure_fin?.slice(0, 5) ?? null, quoi);
-  };
-  const heures = (p: Passage, hd: string | null, hf: string | null) => {
-    void poser(p, p.chantier_id, p.debut.slice(0, 10), p.fin.slice(0, 10), hd, hf, hd ? `de ${hd.replace(":", " h ")} à ${(hf ?? "").replace(":", " h ")}` : "sans heures");
-  };
+  /* un bloc du planning glissé ou tiré, ou ses heures posées dans l'aperçu : ./deplacer (partagé avec Équipes) */
+  const { changer, heures } = useDeplacer(aujourdhui);
 
   const tries = useMemo(
     () =>
