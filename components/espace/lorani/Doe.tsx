@@ -7,7 +7,8 @@
    jusqu'à la réponse comme les points des comptes rendus. Base réelle : lorani_doe sous la RLS. */
 
 import { useMemo, useState } from "react";
-import { FolderCheck } from "lucide-react";
+import { FolderCheck, ListChecks, Send } from "lucide-react";
+import { Bouton, Detail, Gestes, Groupe, Ligne, Liste, Partie, Pilule, Point, Rangee, Rangees, Texte, Vide, jourCourt, useVolet } from "@/components/espace2/lin/Volet";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { Avis, Pastille } from "../ui";
@@ -41,6 +42,7 @@ export default function Doe({ projet, dossier, peutEcrire, agir, confirmer }: {
      sans, la demande part au clic, comme avant */
   confirmer?: boolean;
 }) {
+  const volet = useVolet();
   const lots = useMemo(() => dossier.lots.filter((l) => l.projet_id === projet.id).sort((a, b) => a.numero.localeCompare(b.numero)), [dossier.lots, projet.id]);
   const items = useMemo(() => dossier.doe.filter((d) => d.projet_id === projet.id), [dossier.doe, projet.id]);
   const pieces = useMemo(() => dossier.pieces.filter((p) => p.objet_id === projet.id), [dossier.pieces, projet.id]);
@@ -105,6 +107,169 @@ export default function Doe({ projet, dossier, peutEcrire, agir, confirmer }: {
   const pct = comptes.length ? Math.round((100 * recus.length) / comptes.length) : 0;
   const okForm = form?.type === "recu" || nr.motif.trim().length >= 3;
 
+  const fenetres = (
+    <>
+      {confirmer ? (
+        <Dialog open={aDemander} onOpenChange={(o) => !o && setADemander(false)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogIcone><FolderCheck width={18} height={18} aria-hidden="true" /></DialogIcone>
+              <DialogTitle>Demander les pièces manquantes</DialogTitle>
+              <DialogDescription>
+                {(() => {
+                  const n = new Set(attendus.map((d) => d.lot_id)).size;
+                  return `${n} question${n > 1 ? "s" : ""} aux entreprises, une par lot, avec la liste de ce qui manque au DOE, à remettre sous quinze jours. Chacune est suivie et relancée jusqu’à la réponse.`;
+                })()}
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <button type="button" className="r-btn r-btn--noir" disabled={!peutEcrire || envoi || !attendus.length} onClick={() => { setADemander(false); void demander(); }}>{envoi ? <Loader variant="spin" /> : null} Demander</button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      ) : null}
+
+      <Dialog open={!!form} onOpenChange={(o) => !o && setForm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><FolderCheck width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>{form?.type === "recu" ? "Pièce reçue" : "Sans objet"}</DialogTitle>
+            <DialogDescription>{form?.item.intitule}</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              {form?.type === "recu" ? (
+                <label className="rv-libelle">Pièce déposée
+                  <select className="rv-champ" value={nr.piece_id} onChange={(e) => setNr((s) => ({ ...s, piece_id: e.target.value }))}>
+                    <option value="">Reçue hors Lorani (papier, plateforme)</option>
+                    {pieces.map((p) => <option key={p.id} value={p.id}>{p.nom_fichier}</option>)}
+                  </select>
+                </label>
+              ) : (
+                <label className="rv-libelle">Motif <span className="esp-obligatoire">(obligatoire)</span>
+                  <input className="rv-champ" value={nr.motif} maxLength={300} onChange={(e) => setNr((s) => ({ ...s, motif: e.target.value }))} placeholder="Aucun équipement sous garantie dans ce lot" />
+                </label>
+              )}
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!okForm || envoi} onClick={soumettre}>{envoi ? <Loader variant="spin" /> : null} Enregistrer</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+
+  /* 30/10/2026 — dans la fiche de l'espace 2 : une pièce par ligne, groupées par où elles en sont (attendues,
+     reçues, sans objet), le lot en identifiant ; entreprise, pièce rattachée, motif et gestes dans le volet
+     (../../espace2/lin/Volet.tsx) */
+  if (volet) {
+    const rang = (d: PieceDoe) => (d.lot_id === null ? lots.length : lots.findIndex((l) => l.id === d.lot_id));
+    const tries = [...items].sort((a, b) => rang(a) - rang(b));
+    const etat = (d: PieceDoe) =>
+      d.statut === "recu" ? { t: "vert" as const, l: "Reçue" } : d.statut === "sans_objet" ? { t: "gris" as const, l: "Sans objet" } : { t: "jaune" as const, l: "Attendue" };
+    const groupesEtat = [
+      { cle: "attendu", nom: "Attendues" },
+      { cle: "recu", nom: "Reçues" },
+      { cle: "sans_objet", nom: "Sans objet" },
+    ] as const;
+    const recuAvant = projet.reception_le && attendus.length;
+    return (
+      <Partie
+        titre="DOE : dossier des ouvrages exécutés"
+        compte={items.length ? `${recus.length} reçue${recus.length > 1 ? "s" : ""} sur ${comptes.length} · ${pct} %` : null}
+        gestes={
+          <>
+            <Bouton icone={<ListChecks aria-hidden="true" />} disabled={!peutEcrire || envoi || !lots.length} onClick={() => void preparer()}>
+              {items.length ? "Compléter la liste" : "Préparer la liste"}
+            </Bouton>
+            {attendus.length ? (
+              <Bouton icone={<Send aria-hidden="true" />} disabled={!peutEcrire || envoi} onClick={() => (confirmer ? setADemander(true) : void demander())}>
+                Demander les pièces manquantes
+              </Bouton>
+            ) : null}
+          </>
+        }
+        avis={(items.length && recuAvant) || (erreur && !form) ? (
+          <>
+            {items.length && recuAvant ? <Avis teinte="ambre">Réception prononcée le {jour(projet.reception_le)} : le DOE est incomplet ({attendus.length} pièce{attendus.length > 1 ? "s" : ""} attendue{attendus.length > 1 ? "s" : ""}).</Avis> : null}
+            {erreur && !form ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+          </>
+        ) : null}
+      >
+        {!items.length ? (
+          <Vide>{lots.length ? "Lorani prépare la liste type : plans conformes, notices, fiches techniques, procès-verbaux d’essais et garanties pour chaque lot, et le DIUO du projet." : "Ajoutez d’abord les lots du projet."}</Vide>
+        ) : (
+          <>
+            <p className="lvp-resume" role="status">
+              {recus.length} pièce{recus.length > 1 ? "s" : ""} reçue{recus.length > 1 ? "s" : ""} sur {comptes.length} ({pct} %) · {attendus.length} attendue{attendus.length > 1 ? "s" : ""}{items.length - comptes.length ? ` · ${items.length - comptes.length} sans objet` : ""}.
+              {demande ? ` ${demande}` : ""}
+            </p>
+            <Liste>
+              {groupesEtat.map((g) => {
+                const ds = tries.filter((d) => d.statut === g.cle);
+                return ds.length ? (
+                  <Groupe key={g.cle} nom={g.nom} compte={ds.length}>
+                    {ds.map((d) => {
+                      const lot = lots.find((l) => l.id === d.lot_id);
+                      const ent = lot ? entrepriseDu(lot.id) : undefined;
+                      const e = etat(d);
+                      return (
+                        <Ligne
+                          key={d.id}
+                          cle={`doe:${d.id}`}
+                          libelle={`${d.intitule}, ${lot ? `lot ${lot.numero}` : "projet"}, ${e.l}`}
+                          icone={<span data-teinte={e.t} className="lvp-icone-teinte"><FolderCheck /></span>}
+                          id={lot ? `Lot ${lot.numero}` : "Projet"}
+                          titre={d.intitule}
+                          second={ent?.organisme ?? null}
+                          droite={<Pilule teinte={e.t} icone={<Point teinte={e.t} />}>{e.l}</Pilule>}
+                          date={d.statut === "recu" && d.recu_le ? jourCourt(d.recu_le) : null}
+                          dateTitre={d.statut === "recu" && d.recu_le ? `Reçue le ${jour(d.recu_le)}` : undefined}
+                        />
+                      );
+                    })}
+                  </Groupe>
+                ) : null;
+              })}
+            </Liste>
+          </>
+        )}
+        {items.map((d) => {
+          const lot = lots.find((l) => l.id === d.lot_id);
+          const ent = lot ? entrepriseDu(lot.id) : undefined;
+          const p = pieces.find((x) => x.id === d.piece_id);
+          const e = etat(d);
+          return (
+            <Detail key={d.id} cle={`doe:${d.id}`} titre={d.intitule} sous={lot ? `Lot ${lot.numero} · ${lot.intitule}` : "Projet"}>
+              <Rangees>
+                <Rangee libelle="État" teinte={e.t}>
+                  <Point teinte={e.t} />
+                  {d.statut === "recu" ? `Reçue le ${jour(d.recu_le)}` : e.l}
+                </Rangee>
+                {lot ? <Rangee libelle="Entreprise">{ent?.organisme ?? "—"}</Rangee> : null}
+                {d.statut === "recu" ? <Rangee libelle="Pièce">{p ? p.nom_fichier : "Reçue hors Lorani"}</Rangee> : null}
+              </Rangees>
+              {d.motif ? <Texte citation>{d.motif}</Texte> : null}
+              <Gestes>
+                {d.statut === "attendu" ? (
+                  <>
+                    <Bouton fort disabled={!peutEcrire || envoi} onClick={() => { setNr({ piece_id: "", motif: "" }); setErreur(null); setForm({ type: "recu", item: d }); }}>Reçu</Bouton>
+                    <Bouton disabled={!peutEcrire || envoi} onClick={() => { setNr({ piece_id: "", motif: "" }); setErreur(null); setForm({ type: "sans_objet", item: d }); }}>Sans objet</Bouton>
+                  </>
+                ) : (
+                  <Bouton disabled={!peutEcrire || envoi} onClick={() => void remettre(d)}>Remettre en attente</Bouton>
+                )}
+              </Gestes>
+            </Detail>
+          );
+        })}
+        {fenetres}
+      </Partie>
+    );
+  }
+
   return (
     <div className="esp-carte-corps">
       <div className="esp-section-titre">
@@ -156,55 +321,7 @@ export default function Doe({ projet, dossier, peutEcrire, agir, confirmer }: {
       )}
       {erreur && !form ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
 
-      {confirmer ? (
-        <Dialog open={aDemander} onOpenChange={(o) => !o && setADemander(false)}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogIcone><FolderCheck width={18} height={18} aria-hidden="true" /></DialogIcone>
-              <DialogTitle>Demander les pièces manquantes</DialogTitle>
-              <DialogDescription>
-                {(() => {
-                  const n = new Set(attendus.map((d) => d.lot_id)).size;
-                  return `${n} question${n > 1 ? "s" : ""} aux entreprises, une par lot, avec la liste de ce qui manque au DOE, à remettre sous quinze jours. Chacune est suivie et relancée jusqu’à la réponse.`;
-                })()}
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <button type="button" className="r-btn r-btn--noir" disabled={!peutEcrire || envoi || !attendus.length} onClick={() => { setADemander(false); void demander(); }}>{envoi ? <Loader variant="spin" /> : null} Demander</button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      ) : null}
-
-      <Dialog open={!!form} onOpenChange={(o) => !o && setForm(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogIcone><FolderCheck width={18} height={18} aria-hidden="true" /></DialogIcone>
-            <DialogTitle>{form?.type === "recu" ? "Pièce reçue" : "Sans objet"}</DialogTitle>
-            <DialogDescription>{form?.item.intitule}</DialogDescription>
-          </DialogHeader>
-          <DialogBody>
-            <div className="esp-form">
-              {form?.type === "recu" ? (
-                <label className="rv-libelle">Pièce déposée
-                  <select className="rv-champ" value={nr.piece_id} onChange={(e) => setNr((s) => ({ ...s, piece_id: e.target.value }))}>
-                    <option value="">Reçue hors Lorani (papier, plateforme)</option>
-                    {pieces.map((p) => <option key={p.id} value={p.id}>{p.nom_fichier}</option>)}
-                  </select>
-                </label>
-              ) : (
-                <label className="rv-libelle">Motif <span className="esp-obligatoire">(obligatoire)</span>
-                  <input className="rv-champ" value={nr.motif} maxLength={300} onChange={(e) => setNr((s) => ({ ...s, motif: e.target.value }))} placeholder="Aucun équipement sous garantie dans ce lot" />
-                </label>
-              )}
-              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
-            </div>
-          </DialogBody>
-          <DialogFooter>
-            <button type="button" className="r-btn r-btn--noir" disabled={!okForm || envoi} onClick={soumettre}>{envoi ? <Loader variant="spin" /> : null} Enregistrer</button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {fenetres}
     </div>
   );
 }

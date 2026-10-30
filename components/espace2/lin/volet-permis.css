@@ -1,0 +1,98 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Le volet de la page d'un permis LORANI — 30/10/2026
+   (components/espace2/lorani/PagePermis.tsx, gabarit pgs- de
+   ./plain-get-started.css ; le kit : ./Volet.tsx, ./volet-parties.css)
+
+   Rien de mesuré à neuf. Le calendrier, les échéances, les dates lues,
+   les recours et les courriers sont des listes de « My issues » (lvp-) ;
+   chacune prend l'habit de la carte de Plain (fond carte, trait 1, rayon
+   10, ombre 0 1 1) que portaient les cartes d'avant. L'élément choisi
+   s'ouvre dans le volet de 400 d'une Initiative, à droite de la colonne
+   de 920 ; en dessous de 1100 px de large, au-dessus de la colonne.
+   Scopé .v2 .lin.pgs ; supprimer ce fichier rend la page d'avant.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ——— la page et son volet ——— */
+.v2 .lin.pgs[data-volet] {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+.v2 .lin.pgs[data-volet] > .pgs-colonne {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+}
+/* un détail dont l'élément a disparu (une date confirmée quitte la liste) : pas de volet vide */
+.v2 .lin.pgs > .lvp-volet-page:has(> .lvp-cible:empty) {
+  display: none;
+}
+
+/* ——— une liste dans la page : la carte de Plain ——— */
+.v2 .lin.pgs :is(.pgs-carte, .pgs-attente, .pgs-courriers) .lvp-partie {
+  min-width: 0;
+  padding: 12px 16px 4px;
+  border-radius: 10px;
+  background: var(--lin-carte);
+  box-shadow:
+    0 0 0 1px var(--pgs-trait),
+    0 1px 1px #1a33330a;
+}
+.v2 .lin.pgs .lvp-partie + .lvp-partie {
+  margin-top: 0;
+}
+
+/* une étape dont la carte n'a que des listes garde sa colonne de droite (le gabarit ne compte que les cartes d'avant) */
+.v2 .lin.pgs .pgs-carte:has(.lvp-partie) {
+  display: block;
+}
+.v2 .lin.pgs .pgs-grille:has(.pgs-carte .lvp-partie) {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+@container principale (max-width: 900px) {
+  .v2 .lin.pgs .pgs-grille:has(.pgs-carte .lvp-partie) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ——— au-dessous de 1100 : le volet passe au-dessus de la colonne ——— */
+@container principale (max-width: 1100px) {
+  .v2 .lin.pgs[data-volet] {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .v2 .lin.pgs[data-volet] > .pgs-colonne {
+    margin: 0 auto;
+  }
+  .v2 .lin.pgs[data-volet] > .lvp-volet-page {
+    order: -1;
+    position: static;
+    width: 100%;
+    max-width: 920px;
+    max-height: none;
+    margin: 0 auto;
+    overflow: visible;
+    padding: 16px 32px 0;
+  }
+}
+@container principale (max-width: 640px) {
+  .v2 .lin.pgs[data-volet] > .lvp-volet-page {
+    padding: 16px 24px 0;
+  }
+}
+
+/* ce qui attend un membre (dates lues à confirmer…) et les courriers : le gabarit ne montre ces
+   blocs que s'ils portent une carte d'avant ; une liste suffit aussi */
+.v2 .lin.pgs :is(.pgs-attente, .pgs-courriers, .pgs-gestes):has(.lvp-partie) {
+  display: block;
+}
+
+/* la page du gabarit est une colonne (flex-direction: column) : avec le volet, une rangée */
+.v2 .lin.pgs[data-volet] {
+  flex-direction: row;
+}
+@container principale (max-width: 1100px) {
+  .v2 .lin.pgs[data-volet] {
+    flex-direction: column;
+  }
+}

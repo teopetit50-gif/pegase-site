@@ -7,7 +7,8 @@
    art. 12.2.2), 15 jours en marché privé par défaut ; 15 jours pour un visa (art. 29) ; retenue de garantie ≤ 5 %. */
 
 import { useMemo, useState } from "react";
-import { FileCheck2, HardHat, Plus } from "lucide-react";
+import { FileCheck2, HardHat, Plus, Receipt } from "lucide-react";
+import { Bouton, Detail, Gestes, Groupe, Ligne, Liste, Partie, Pilule, Point, Rangee, Rangees, Texte, Vide, jourCourt, teinte, useVolet } from "@/components/espace2/lin/Volet";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { Avis, Pastille } from "../ui";
@@ -53,6 +54,7 @@ export default function Chantier({ projet, dossier, peutEcrire, agir }: {
   peutEcrire: boolean;
   agir: (reel: () => Promise<void>, local: () => Dossier) => Promise<void>;
 }) {
+  const volet = useVolet();
   const lots = useMemo(() => dossier.lots.filter((l) => l.projet_id === projet.id).sort((a, b) => a.numero.localeCompare(b.numero)), [dossier.lots, projet.id]);
   const marches = useMemo(() => dossier.marches.filter((m) => m.projet_id === projet.id && m.actif)
     .sort((a, b) => (lots.find((l) => l.id === a.lot_id)?.numero ?? "").localeCompare(lots.find((l) => l.id === b.lot_id)?.numero ?? "")), [dossier.marches, projet.id, lots]);
@@ -129,133 +131,8 @@ export default function Chantier({ projet, dossier, peutEcrire, agir }: {
   const documentOk = nd.document.trim().length > 0 && /^[0-9A-Za-z.-]{1,6}$/.test(nd.indice.trim()) && /^\d{4}-\d{2}-\d{2}$/.test(nd.recu_le) && (!nd.commande_le || nd.commande_le >= nd.recu_le);
   const avisOk = na.avis === "vso" || na.observation.trim().length >= 3;
 
-  return (
-    <div className="esp-carte-corps">
-      <div className="esp-section-titre">
-        <span>Chantier : situations et visas</span>
-        <span className="esp-item-haut">
-          <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi || !marches.length} onClick={() => {
-            const m = marches[0];
-            const n = m ? Math.max(0, ...situations.filter((x) => x.marche_id === m.id).map((x) => x.numero)) + 1 : 1;
-            setNs({ marche_id: m?.id ?? "", numero: String(n), mois: auj.slice(0, 7), cumul: "", recue_le: auj, retenue: "", avance: "", penalites: "" });
-            ouvrir({ type: "situation" });
-          }}>Situation reçue</button>
-          <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => { setNd({ lot_id: lots[0]?.id ?? "", document: "", indice: "A", recu_le: auj, commande_le: "" }); ouvrir({ type: "document" }); }}>Document à viser</button>
-          <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi || !lots.length} onClick={() => { setNm({ lot_id: lots[0]?.id ?? "", titulaire: "", montant: "", avenants: "", retenue: "5", avance: "0", penalite: "" }); ouvrir({ type: "marche" }); }}>Nouveau marché</button>
-        </span>
-      </div>
-
-      {!marches.length && !visas.length ? (
-        <div className="lor-tableau-vide">{lots.length ? "Aucun marché de travaux : posez le marché de chaque lot pour contrôler les situations des entreprises." : "Ajoutez d’abord les lots du projet, puis le marché de chaque lot."}</div>
-      ) : null}
-
-      {aViser.map((s) => {
-        const m = marcheDe(s.marche_id);
-        if (!m) return null;
-        const p = precedente(s);
-        const total = m.montant_ht + m.avenants_ht;
-        const mois = s.cumul_ht - (p ? retenu(p) : 0);
-        const retard = !!s.a_viser_avant && s.a_viser_avant < auj;
-        return (
-          <div key={s.id} className="lor-situation" data-retard={retard || undefined}>
-            <div className="lor-situation-tete">
-              <strong>Situation n° {s.numero} · {m.titulaire}</strong> <span className="esp-kpi-sous">lot {lotDe(m.lot_id)?.numero ?? "—"} · reçue le {jour(s.recue_le)}</span>
-              <Pastille teinte={retard ? "rouge" : "ambre"}>{retard ? `À viser depuis le ${jour(s.a_viser_avant)}` : `À viser avant le ${jour(s.a_viser_avant)}`}</Pastille>
-            </div>
-            <div className="lor-sous">{euros(s.cumul_ht)} HT cumulés sur {euros(total)} ({Math.round((100 * s.cumul_ht) / total)} %) · {euros(mois)} ce mois · retenue de garantie {euros(Math.round(mois * m.retenue_pct) / 100)}</div>
-            {s.cumul_ht > total ? <Avis teinte="rouge">Le cumul dépasse le marché et ses avenants de <strong>{euros(s.cumul_ht - total)}</strong> : un avenant manque, ou la situation est à rectifier.</Avis> : null}
-            {(() => {
-              /* b5_32 : l'avancement facturé contre le dernier constaté au compte rendu */
-              const a = avancementSituation(s, m, dossier);
-              if (a.constate === null || !a.cr) return <div className="lor-sous lor-avancement">Avancement constaté : aucun compte rendu diffusé ne le donne pour ce lot avant la réception.</div>;
-              return a.declare - a.constate > ECART_AVANCEMENT
-                ? <Avis teinte="ambre">La situation facture <strong>{pct(a.declare)}</strong> d’avancement, le chantier en est à <strong>{pct(a.constate)}</strong> au compte rendu n° {a.cr.numero} du {jour(a.cr.visite_le)} : à rectifier, ou à justifier par l’entreprise.</Avis>
-                : <div className="lor-sous lor-avancement">Avancement constaté : {pct(a.constate)} au compte rendu n° {a.cr.numero} du {jour(a.cr.visite_le)} (facturé {pct(a.declare)}).</div>;
-            })()}
-            {(() => {
-              /* b5_33 : retenue, avance et pénalités recalculées */
-              const mt = montantsSituation(s, m, projet);
-              return (
-                <>
-                  {mt.ecarts.map((e) => <Avis key={e.nature} teinte="ambre">{e.texte.charAt(0).toUpperCase() + e.texte.slice(1)}.</Avis>)}
-                  <div className="lor-sous lor-montants">Recalcul : retenue {eurosMt(mt.retenue_attendue)}{mt.avance ? ` · avance à rembourser ${eurosMt(mt.avance_a_rembourser)} sur ${eurosMt(mt.avance)}` : ""}{mt.penalites_applicables ? ` · pénalités ${eurosMt(mt.penalites_applicables)} (${mt.jours_retard} j)` : ""} · net attendu {eurosMt(mt.net_attendu)} HT</div>
-                </>
-              );
-            })()}
-            {p && s.cumul_ht < retenu(p) ? <Avis teinte="ambre">Le cumul recule par rapport à la situation n° {p.numero} ({euros(retenu(p))}) : à vérifier avec l’entreprise.</Avis> : null}
-            <div className="esp-actions">
-              <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => { setNv({ cumul: "", observation: "" }); ouvrir({ type: "viser", situation: s, rectifier: false }); }}>Viser</button>
-              <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => { setNv({ cumul: String(Math.min(s.cumul_ht, total)), observation: "" }); ouvrir({ type: "viser", situation: s, rectifier: true }); }}>Rectifier</button>
-            </div>
-          </div>
-        );
-      })}
-
-      {marches.length ? (
-        <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Marchés de travaux du projet">
-          <table className="esp-tableau lor-chantier">
-            <thead>
-              <tr><th scope="col">Lot</th><th scope="col">Titulaire</th><th scope="col">Marché + avenants HT</th><th scope="col">Avancement</th><th scope="col">Dernière situation</th></tr>
-            </thead>
-            <tbody>
-              {marches.map((m) => {
-                const d = derniere(m);
-                const total = m.montant_ht + m.avenants_ht;
-                const cumul = d ? retenu(d) : 0;
-                const pct = Math.round((100 * cumul) / total);
-                return (
-                  <tr key={m.id}>
-                    <td><strong>{lotDe(m.lot_id)?.numero}</strong> {lotDe(m.lot_id)?.intitule}</td>
-                    <td>{m.titulaire}<span className="esp-kpi-sous"> · retenue {m.retenue_pct.toLocaleString("fr-FR")} % · {m.delai_verification_jours ?? 15} j pour viser</span></td>
-                    <td>{euros(total)}{m.avenants_ht ? <span className="esp-kpi-sous"> dont {euros(m.avenants_ht)} d’avenants</span> : null}</td>
-                    <td>
-                      <span className="lor-jauge" data-etat={cumul > total ? "depasse" : "ok"} role="img" aria-label={`${pct} % du marché`}><span style={{ width: `${Math.min(100, pct)}%` }} /></span>
-                      <span className="esp-kpi-sous">{euros(cumul)} · {pct} %</span>
-                    </td>
-                    <td>{d ? <>n° {d.numero} · {d.statut === "a_viser" ? "à viser" : d.statut === "visee" ? `visée le ${jour(d.visee_le)}` : `rectifiée (${euros(d.cumul_admis_ht ?? 0)} admis)`}</> : "Aucune"}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      ) : null}
-
-      {visas.length ? (
-        <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Documents d’exécution à viser">
-          <table className="esp-tableau lor-chantier">
-            <thead>
-              <tr><th scope="col">Document</th><th scope="col">Lot</th><th scope="col">Reçu le</th><th scope="col">À viser avant</th><th scope="col">Avis</th></tr>
-            </thead>
-            <tbody>
-              {visas.map((v) => {
-                const retard = v.avis === "a_viser" && !!v.a_viser_avant && v.a_viser_avant < auj;
-                return (
-                  <tr key={v.id}>
-                    <td>{v.document} <span className="esp-kpi-sous">indice {v.indice}</span></td>
-                    <td>{lotDe(v.lot_id)?.numero ?? "—"}</td>
-                    <td>{jour(v.recu_le)}</td>
-                    <td>
-                      {jour(v.a_viser_avant)}{v.commande_le ? <span className="esp-kpi-sous"> · commande le {jour(v.commande_le)}</span> : null}
-                      {v.avis === "a_viser" && !retard && !!v.a_viser_avant && v.a_viser_avant < plus(auj, 5) ? <> <Pastille teinte="ambre">Urgent</Pastille></> : null}
-                    </td>
-                    <td>
-                      {v.avis === "a_viser" ? (
-                        <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => { setNa({ avis: "vso", observation: "" }); ouvrir({ type: "avis", visa: v }); }}>
-                          {retard ? "En retard : rendre l’avis" : "Rendre l’avis"}
-                        </button>
-                      ) : (
-                        <Pastille teinte={AVIS[v.avis].teinte}>{AVIS[v.avis].libelle}{v.vise_le ? ` le ${jour(v.vise_le)}` : ""}</Pastille>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      ) : null}
-
+  const fenetres = (
+    <>
       {/* ——— nouveau marché ——— */}
       <Dialog open={form?.type === "marche"} onOpenChange={(o) => !o && setForm(null)}>
         <DialogContent>
@@ -458,6 +335,348 @@ export default function Chantier({ projet, dossier, peutEcrire, agir }: {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </>
+  );
+
+  /* 30/10/2026 — dans la fiche de l'espace 2 : les situations à viser, les documents à viser, les marchés puis les
+     documents visés, un par ligne ; écarts, recalcul, avancement et gestes (viser, rectifier, rendre l'avis) dans le
+     volet (../../espace2/lin/Volet.tsx) */
+  if (volet) {
+    const visasAViser = visas.filter((v) => v.avis === "a_viser");
+    const visasRendus = visas.filter((v) => v.avis !== "a_viser");
+    const situationsVues = aViser.filter((s) => !!marcheDe(s.marche_id));
+    const enRetardVisa = (v: Visa) => v.avis === "a_viser" && !!v.a_viser_avant && v.a_viser_avant < auj;
+    const urgentVisa = (v: Visa) => v.avis === "a_viser" && !enRetardVisa(v) && !!v.a_viser_avant && v.a_viser_avant < plus(auj, 5);
+    const pluriel = (n: number, mot: string) => `${n} ${mot}${n > 1 ? "s" : ""}`;
+    const compte = [situationsVues.length ? `${pluriel(situationsVues.length, "situation")} à viser` : null, visasAViser.length ? `${pluriel(visasAViser.length, "document")} à viser` : null, marches.length ? pluriel(marches.length, "marché") : null].filter(Boolean).join(" · ");
+    const derniereLibelle = (d: Situation | undefined) => (d ? `n° ${d.numero} · ${d.statut === "a_viser" ? "à viser" : d.statut === "visee" ? `visée le ${jour(d.visee_le)}` : `rectifiée (${euros(d.cumul_admis_ht ?? 0)} admis)`}` : "Aucune");
+    const ligneVisa = (v: Visa) => {
+      const retard = enRetardVisa(v);
+      const urgent = urgentVisa(v);
+      const lot = lotDe(v.lot_id);
+      return (
+        <Ligne
+          key={v.id}
+          cle={`chantier-visa:${v.id}`}
+          libelle={`${v.document}, indice ${v.indice}, ${v.avis === "a_viser" ? `à viser avant le ${jour(v.a_viser_avant)}` : AVIS[v.avis].libelle}`}
+          icone={<FileCheck2 />}
+          id={`ind. ${v.indice}`}
+          titre={v.document}
+          second={lot ? `lot ${lot.numero}` : null}
+          droite={
+            v.avis === "a_viser" ? (
+              retard ? <Pilule teinte="rouge" icone={<Point teinte="rouge" />}>En retard</Pilule> : urgent ? <Pilule teinte="jaune" icone={<Point teinte="jaune" />}>Urgent</Pilule> : <Pilule teinte="gris" icone={<Point teinte="gris" />}>À viser</Pilule>
+            ) : (
+              <Pilule teinte={teinte(AVIS[v.avis].teinte)} icone={<Point teinte={teinte(AVIS[v.avis].teinte)} />}>{AVIS[v.avis].libelle}</Pilule>
+            )
+          }
+          date={v.avis === "a_viser" ? jourCourt(v.a_viser_avant) : jourCourt(v.vise_le)}
+          dateTitre={v.avis === "a_viser" ? "À viser avant" : "Visé le"}
+        />
+      );
+    };
+    return (
+      <Partie
+        titre="Chantier : situations et visas"
+        compte={compte || null}
+        gestes={
+          <>
+            <Bouton icone={<Plus aria-hidden="true" />} disabled={!peutEcrire || envoi || !marches.length} onClick={() => {
+              const m = marches[0];
+              const n = m ? Math.max(0, ...situations.filter((x) => x.marche_id === m.id).map((x) => x.numero)) + 1 : 1;
+              setNs({ marche_id: m?.id ?? "", numero: String(n), mois: auj.slice(0, 7), cumul: "", recue_le: auj, retenue: "", avance: "", penalites: "" });
+              ouvrir({ type: "situation" });
+            }}>Situation reçue</Bouton>
+            <Bouton icone={<Plus aria-hidden="true" />} disabled={!peutEcrire || envoi} onClick={() => { setNd({ lot_id: lots[0]?.id ?? "", document: "", indice: "A", recu_le: auj, commande_le: "" }); ouvrir({ type: "document" }); }}>Document à viser</Bouton>
+            <Bouton icone={<Plus aria-hidden="true" />} disabled={!peutEcrire || envoi || !lots.length} onClick={() => { setNm({ lot_id: lots[0]?.id ?? "", titulaire: "", montant: "", avenants: "", retenue: "5", avance: "0", penalite: "" }); ouvrir({ type: "marche" }); }}>Nouveau marché</Bouton>
+          </>
+        }
+      >
+        {!marches.length && !visas.length ? (
+          <Vide>{lots.length ? "Aucun marché de travaux : posez le marché de chaque lot pour contrôler les situations des entreprises." : "Ajoutez d’abord les lots du projet, puis le marché de chaque lot."}</Vide>
+        ) : null}
+        {situationsVues.length || marches.length || visas.length ? (
+          <Liste>
+            {situationsVues.length ? (
+              <Groupe nom="Situations à viser" compte={situationsVues.length}>
+                {situationsVues.map((s) => {
+                  const m = marcheDe(s.marche_id) as Marche;
+                  const p = precedente(s);
+                  const total = m.montant_ht + m.avenants_ht;
+                  const mois = s.cumul_ht - (p ? retenu(p) : 0);
+                  const retard = !!s.a_viser_avant && s.a_viser_avant < auj;
+                  return (
+                    <Ligne
+                      key={s.id}
+                      cle={`chantier-situation:${s.id}`}
+                      libelle={`Situation n° ${s.numero} de ${m.titulaire}, ${retard ? `à viser depuis le ${jour(s.a_viser_avant)}` : `à viser avant le ${jour(s.a_viser_avant)}`}`}
+                      icone={<Receipt />}
+                      id={`n° ${s.numero}`}
+                      titre={m.titulaire}
+                      second={`lot ${lotDe(m.lot_id)?.numero ?? "—"} · ${euros(mois)} ce mois`}
+                      droite={
+                        <>
+                          {s.cumul_ht > total ? <Pilule teinte="rouge" icone={<Point teinte="rouge" />}>Dépasse le marché</Pilule> : null}
+                          <Pilule teinte={retard ? "rouge" : "jaune"} icone={<Point teinte={retard ? "rouge" : "jaune"} />}>{retard ? "En retard" : "À viser"}</Pilule>
+                        </>
+                      }
+                      date={jourCourt(s.a_viser_avant)}
+                      dateTitre={retard ? "À viser depuis le" : "À viser avant le"}
+                    />
+                  );
+                })}
+              </Groupe>
+            ) : null}
+            {visasAViser.length ? (
+              <Groupe nom="Documents à viser" compte={visasAViser.length}>
+                {visasAViser.map(ligneVisa)}
+              </Groupe>
+            ) : null}
+            {marches.length ? (
+              <Groupe nom="Marchés de travaux" compte={marches.length}>
+                {marches.map((m) => {
+                  const d = derniere(m);
+                  const total = m.montant_ht + m.avenants_ht;
+                  const cumul = d ? retenu(d) : 0;
+                  const avance = Math.round((100 * cumul) / total);
+                  const lot = lotDe(m.lot_id);
+                  return (
+                    <Ligne
+                      key={m.id}
+                      cle={`chantier-marche:${m.id}`}
+                      libelle={`Lot ${lot?.numero ?? "—"}, ${m.titulaire}, ${avance} % du marché`}
+                      icone={<HardHat />}
+                      id={`lot ${lot?.numero ?? "—"}`}
+                      titre={m.titulaire}
+                      second={lot ? `${lot.intitule} · ${avance} %` : `${avance} %`}
+                      droite={d ? <Pilule teinte={d.statut === "a_viser" ? "jaune" : d.statut === "visee" ? "vert" : "gris"} icone={<Point teinte={d.statut === "a_viser" ? "jaune" : d.statut === "visee" ? "vert" : "gris"} />}>{`n° ${d.numero} ${d.statut === "a_viser" ? "à viser" : d.statut === "visee" ? "visée" : "rectifiée"}`}</Pilule> : null}
+                      date={euros(total)}
+                      dateTitre="Marché + avenants HT"
+                    />
+                  );
+                })}
+              </Groupe>
+            ) : null}
+            {visasRendus.length ? (
+              <Groupe nom="Documents visés" compte={visasRendus.length}>
+                {visasRendus.map(ligneVisa)}
+              </Groupe>
+            ) : null}
+          </Liste>
+        ) : null}
+
+        {situationsVues.map((s) => {
+          const m = marcheDe(s.marche_id) as Marche;
+          const p = precedente(s);
+          const total = m.montant_ht + m.avenants_ht;
+          const mois = s.cumul_ht - (p ? retenu(p) : 0);
+          const retard = !!s.a_viser_avant && s.a_viser_avant < auj;
+          /* b5_32 : l'avancement facturé contre le dernier constaté au compte rendu */
+          const a = avancementSituation(s, m, dossier);
+          /* b5_33 : retenue, avance et pénalités recalculées */
+          const mt = montantsSituation(s, m, projet);
+          const ecartAvancement = a.constate !== null && !!a.cr && a.declare - a.constate > ECART_AVANCEMENT;
+          return (
+            <Detail key={s.id} cle={`chantier-situation:${s.id}`} titre={`Situation n° ${s.numero} · ${m.titulaire}`} sous={`Lot ${lotDe(m.lot_id)?.numero ?? "—"} · reçue le ${jour(s.recue_le)}`}>
+              <Rangees>
+                <Rangee libelle="Visa" teinte={retard ? "rouge" : "jaune"}>{retard ? `À viser depuis le ${jour(s.a_viser_avant)}` : `À viser avant le ${jour(s.a_viser_avant)}`}</Rangee>
+                <Rangee libelle="Cumul HT" teinte={s.cumul_ht > total ? "rouge" : undefined}>{euros(s.cumul_ht)} sur {euros(total)} ({Math.round((100 * s.cumul_ht) / total)} %)</Rangee>
+                <Rangee libelle="Ce mois">{euros(mois)}</Rangee>
+                <Rangee libelle="Retenue">{euros(Math.round(mois * m.retenue_pct) / 100)}</Rangee>
+                <Rangee libelle="Avancement" teinte={ecartAvancement ? "jaune" : undefined}>
+                  {a.constate === null || !a.cr
+                    ? "Aucun compte rendu diffusé ne le donne pour ce lot avant la réception."
+                    : ecartAvancement
+                      ? `La situation facture ${pct(a.declare)} d’avancement, le chantier en est à ${pct(a.constate)} au compte rendu n° ${a.cr.numero} du ${jour(a.cr.visite_le)} : à rectifier, ou à justifier par l’entreprise.`
+                      : `${pct(a.constate)} au compte rendu n° ${a.cr.numero} du ${jour(a.cr.visite_le)} (facturé ${pct(a.declare)}).`}
+                </Rangee>
+                <Rangee libelle="Recalcul">
+                  Retenue {eurosMt(mt.retenue_attendue)}{mt.avance ? ` · avance à rembourser ${eurosMt(mt.avance_a_rembourser)} sur ${eurosMt(mt.avance)}` : ""}{mt.penalites_applicables ? ` · pénalités ${eurosMt(mt.penalites_applicables)} (${mt.jours_retard} j)` : ""} · net attendu {eurosMt(mt.net_attendu)} HT
+                </Rangee>
+              </Rangees>
+              {s.cumul_ht > total ? <Texte>Le cumul dépasse le marché et ses avenants de {euros(s.cumul_ht - total)} : un avenant manque, ou la situation est à rectifier.</Texte> : null}
+              {mt.ecarts.map((e) => <Texte key={e.nature}>{e.texte.charAt(0).toUpperCase() + e.texte.slice(1)}.</Texte>)}
+              {p && s.cumul_ht < retenu(p) ? <Texte>Le cumul recule par rapport à la situation n° {p.numero} ({euros(retenu(p))}) : à vérifier avec l’entreprise.</Texte> : null}
+              <Gestes>
+                <Bouton fort disabled={!peutEcrire || envoi} onClick={() => { setNv({ cumul: "", observation: "" }); ouvrir({ type: "viser", situation: s, rectifier: false }); }}>Viser</Bouton>
+                <Bouton disabled={!peutEcrire || envoi} onClick={() => { setNv({ cumul: String(Math.min(s.cumul_ht, total)), observation: "" }); ouvrir({ type: "viser", situation: s, rectifier: true }); }}>Rectifier</Bouton>
+              </Gestes>
+            </Detail>
+          );
+        })}
+        {marches.map((m) => {
+          const d = derniere(m);
+          const total = m.montant_ht + m.avenants_ht;
+          const cumul = d ? retenu(d) : 0;
+          const avance = Math.round((100 * cumul) / total);
+          const lot = lotDe(m.lot_id);
+          return (
+            <Detail key={m.id} cle={`chantier-marche:${m.id}`} titre={`Lot ${lot?.numero ?? "—"} · ${m.titulaire}`} sous={lot?.intitule}>
+              <Rangees>
+                <Rangee libelle="Marché HT">{euros(total)}{m.avenants_ht ? ` dont ${euros(m.avenants_ht)} d’avenants` : ""}</Rangee>
+                <Rangee libelle="Avancement" teinte={cumul > total ? "rouge" : undefined}>{euros(cumul)} · {avance} %</Rangee>
+                <Rangee libelle="Retenue">{m.retenue_pct.toLocaleString("fr-FR")} %</Rangee>
+                <Rangee libelle="Pour viser">{m.delai_verification_jours ?? 15} j</Rangee>
+                <Rangee libelle="Dernière">{derniereLibelle(d)}</Rangee>
+              </Rangees>
+            </Detail>
+          );
+        })}
+        {visas.map((v) => {
+          const retard = enRetardVisa(v);
+          const lot = lotDe(v.lot_id);
+          return (
+            <Detail key={v.id} cle={`chantier-visa:${v.id}`} titre={v.document} sous={`Indice ${v.indice}${lot ? ` · lot ${lot.numero} ${lot.intitule}` : ""}`}>
+              <Rangees>
+                <Rangee libelle="Reçu le">{jour(v.recu_le)}</Rangee>
+                <Rangee libelle="À viser avant" teinte={retard ? "rouge" : urgentVisa(v) ? "jaune" : undefined}>{jour(v.a_viser_avant)}{retard ? " · en retard" : urgentVisa(v) ? " · urgent" : ""}</Rangee>
+                {v.commande_le ? <Rangee libelle="Commande">{jour(v.commande_le)}</Rangee> : null}
+                <Rangee libelle="Avis" teinte={v.avis === "a_viser" ? undefined : teinte(AVIS[v.avis].teinte)}>{AVIS[v.avis].libelle}{v.vise_le ? ` le ${jour(v.vise_le)}` : ""}</Rangee>
+              </Rangees>
+              {v.observation ? <Texte citation>« {v.observation} »</Texte> : null}
+              {v.avis === "a_viser" ? (
+                <Gestes>
+                  <Bouton fort disabled={!peutEcrire || envoi} onClick={() => { setNa({ avis: "vso", observation: "" }); ouvrir({ type: "avis", visa: v }); }}>
+                    {retard ? "En retard : rendre l’avis" : "Rendre l’avis"}
+                  </Bouton>
+                </Gestes>
+              ) : null}
+            </Detail>
+          );
+        })}
+        {fenetres}
+      </Partie>
+    );
+  }
+
+  return (
+    <div className="esp-carte-corps">
+      <div className="esp-section-titre">
+        <span>Chantier : situations et visas</span>
+        <span className="esp-item-haut">
+          <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi || !marches.length} onClick={() => {
+            const m = marches[0];
+            const n = m ? Math.max(0, ...situations.filter((x) => x.marche_id === m.id).map((x) => x.numero)) + 1 : 1;
+            setNs({ marche_id: m?.id ?? "", numero: String(n), mois: auj.slice(0, 7), cumul: "", recue_le: auj, retenue: "", avance: "", penalites: "" });
+            ouvrir({ type: "situation" });
+          }}>Situation reçue</button>
+          <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => { setNd({ lot_id: lots[0]?.id ?? "", document: "", indice: "A", recu_le: auj, commande_le: "" }); ouvrir({ type: "document" }); }}>Document à viser</button>
+          <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi || !lots.length} onClick={() => { setNm({ lot_id: lots[0]?.id ?? "", titulaire: "", montant: "", avenants: "", retenue: "5", avance: "0", penalite: "" }); ouvrir({ type: "marche" }); }}>Nouveau marché</button>
+        </span>
+      </div>
+
+      {!marches.length && !visas.length ? (
+        <div className="lor-tableau-vide">{lots.length ? "Aucun marché de travaux : posez le marché de chaque lot pour contrôler les situations des entreprises." : "Ajoutez d’abord les lots du projet, puis le marché de chaque lot."}</div>
+      ) : null}
+
+      {aViser.map((s) => {
+        const m = marcheDe(s.marche_id);
+        if (!m) return null;
+        const p = precedente(s);
+        const total = m.montant_ht + m.avenants_ht;
+        const mois = s.cumul_ht - (p ? retenu(p) : 0);
+        const retard = !!s.a_viser_avant && s.a_viser_avant < auj;
+        return (
+          <div key={s.id} className="lor-situation" data-retard={retard || undefined}>
+            <div className="lor-situation-tete">
+              <strong>Situation n° {s.numero} · {m.titulaire}</strong> <span className="esp-kpi-sous">lot {lotDe(m.lot_id)?.numero ?? "—"} · reçue le {jour(s.recue_le)}</span>
+              <Pastille teinte={retard ? "rouge" : "ambre"}>{retard ? `À viser depuis le ${jour(s.a_viser_avant)}` : `À viser avant le ${jour(s.a_viser_avant)}`}</Pastille>
+            </div>
+            <div className="lor-sous">{euros(s.cumul_ht)} HT cumulés sur {euros(total)} ({Math.round((100 * s.cumul_ht) / total)} %) · {euros(mois)} ce mois · retenue de garantie {euros(Math.round(mois * m.retenue_pct) / 100)}</div>
+            {s.cumul_ht > total ? <Avis teinte="rouge">Le cumul dépasse le marché et ses avenants de <strong>{euros(s.cumul_ht - total)}</strong> : un avenant manque, ou la situation est à rectifier.</Avis> : null}
+            {(() => {
+              /* b5_32 : l'avancement facturé contre le dernier constaté au compte rendu */
+              const a = avancementSituation(s, m, dossier);
+              if (a.constate === null || !a.cr) return <div className="lor-sous lor-avancement">Avancement constaté : aucun compte rendu diffusé ne le donne pour ce lot avant la réception.</div>;
+              return a.declare - a.constate > ECART_AVANCEMENT
+                ? <Avis teinte="ambre">La situation facture <strong>{pct(a.declare)}</strong> d’avancement, le chantier en est à <strong>{pct(a.constate)}</strong> au compte rendu n° {a.cr.numero} du {jour(a.cr.visite_le)} : à rectifier, ou à justifier par l’entreprise.</Avis>
+                : <div className="lor-sous lor-avancement">Avancement constaté : {pct(a.constate)} au compte rendu n° {a.cr.numero} du {jour(a.cr.visite_le)} (facturé {pct(a.declare)}).</div>;
+            })()}
+            {(() => {
+              /* b5_33 : retenue, avance et pénalités recalculées */
+              const mt = montantsSituation(s, m, projet);
+              return (
+                <>
+                  {mt.ecarts.map((e) => <Avis key={e.nature} teinte="ambre">{e.texte.charAt(0).toUpperCase() + e.texte.slice(1)}.</Avis>)}
+                  <div className="lor-sous lor-montants">Recalcul : retenue {eurosMt(mt.retenue_attendue)}{mt.avance ? ` · avance à rembourser ${eurosMt(mt.avance_a_rembourser)} sur ${eurosMt(mt.avance)}` : ""}{mt.penalites_applicables ? ` · pénalités ${eurosMt(mt.penalites_applicables)} (${mt.jours_retard} j)` : ""} · net attendu {eurosMt(mt.net_attendu)} HT</div>
+                </>
+              );
+            })()}
+            {p && s.cumul_ht < retenu(p) ? <Avis teinte="ambre">Le cumul recule par rapport à la situation n° {p.numero} ({euros(retenu(p))}) : à vérifier avec l’entreprise.</Avis> : null}
+            <div className="esp-actions">
+              <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => { setNv({ cumul: "", observation: "" }); ouvrir({ type: "viser", situation: s, rectifier: false }); }}>Viser</button>
+              <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => { setNv({ cumul: String(Math.min(s.cumul_ht, total)), observation: "" }); ouvrir({ type: "viser", situation: s, rectifier: true }); }}>Rectifier</button>
+            </div>
+          </div>
+        );
+      })}
+
+      {marches.length ? (
+        <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Marchés de travaux du projet">
+          <table className="esp-tableau lor-chantier">
+            <thead>
+              <tr><th scope="col">Lot</th><th scope="col">Titulaire</th><th scope="col">Marché + avenants HT</th><th scope="col">Avancement</th><th scope="col">Dernière situation</th></tr>
+            </thead>
+            <tbody>
+              {marches.map((m) => {
+                const d = derniere(m);
+                const total = m.montant_ht + m.avenants_ht;
+                const cumul = d ? retenu(d) : 0;
+                const pct = Math.round((100 * cumul) / total);
+                return (
+                  <tr key={m.id}>
+                    <td><strong>{lotDe(m.lot_id)?.numero}</strong> {lotDe(m.lot_id)?.intitule}</td>
+                    <td>{m.titulaire}<span className="esp-kpi-sous"> · retenue {m.retenue_pct.toLocaleString("fr-FR")} % · {m.delai_verification_jours ?? 15} j pour viser</span></td>
+                    <td>{euros(total)}{m.avenants_ht ? <span className="esp-kpi-sous"> dont {euros(m.avenants_ht)} d’avenants</span> : null}</td>
+                    <td>
+                      <span className="lor-jauge" data-etat={cumul > total ? "depasse" : "ok"} role="img" aria-label={`${pct} % du marché`}><span style={{ width: `${Math.min(100, pct)}%` }} /></span>
+                      <span className="esp-kpi-sous">{euros(cumul)} · {pct} %</span>
+                    </td>
+                    <td>{d ? <>n° {d.numero} · {d.statut === "a_viser" ? "à viser" : d.statut === "visee" ? `visée le ${jour(d.visee_le)}` : `rectifiée (${euros(d.cumul_admis_ht ?? 0)} admis)`}</> : "Aucune"}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : null}
+
+      {visas.length ? (
+        <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Documents d’exécution à viser">
+          <table className="esp-tableau lor-chantier">
+            <thead>
+              <tr><th scope="col">Document</th><th scope="col">Lot</th><th scope="col">Reçu le</th><th scope="col">À viser avant</th><th scope="col">Avis</th></tr>
+            </thead>
+            <tbody>
+              {visas.map((v) => {
+                const retard = v.avis === "a_viser" && !!v.a_viser_avant && v.a_viser_avant < auj;
+                return (
+                  <tr key={v.id}>
+                    <td>{v.document} <span className="esp-kpi-sous">indice {v.indice}</span></td>
+                    <td>{lotDe(v.lot_id)?.numero ?? "—"}</td>
+                    <td>{jour(v.recu_le)}</td>
+                    <td>
+                      {jour(v.a_viser_avant)}{v.commande_le ? <span className="esp-kpi-sous"> · commande le {jour(v.commande_le)}</span> : null}
+                      {v.avis === "a_viser" && !retard && !!v.a_viser_avant && v.a_viser_avant < plus(auj, 5) ? <> <Pastille teinte="ambre">Urgent</Pastille></> : null}
+                    </td>
+                    <td>
+                      {v.avis === "a_viser" ? (
+                        <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => { setNa({ avis: "vso", observation: "" }); ouvrir({ type: "avis", visa: v }); }}>
+                          {retard ? "En retard : rendre l’avis" : "Rendre l’avis"}
+                        </button>
+                      ) : (
+                        <Pastille teinte={AVIS[v.avis].teinte}>{AVIS[v.avis].libelle}{v.vise_le ? ` le ${jour(v.vise_le)}` : ""}</Pastille>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : null}
+
+      {fenetres}
     </div>
   );
 }

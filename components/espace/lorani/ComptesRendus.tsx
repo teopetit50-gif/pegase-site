@@ -8,6 +8,7 @@
 
 import { useMemo, useState } from "react";
 import { FileDown, NotebookPen } from "lucide-react";
+import { Bouton, Detail, Gestes, Groupe, Ligne, Liste, Partie, Pilule, Point as PointTeinte, Rangee, Rangees, SousLigne, SousListe, Vide, jourCourt, useVolet } from "@/components/espace2/lin/Volet";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { Avis, Pastille } from "../ui";
@@ -36,11 +37,14 @@ export default function ComptesRendus({ projet, dossier, peutEcrire, agir, confi
   /* espace 2 : « Diffuser » demande confirmation (le CR diffusé est figé) ; sans, il part au clic, comme avant */
   confirmer?: boolean;
 }) {
+  const volet = useVolet();
   const crs = useMemo(() => dossier.comptesRendus.filter((c) => c.projet_id === projet.id).sort((a, b) => b.numero - a.numero), [dossier.comptesRendus, projet.id]);
   const intervenants = useMemo(() => dossier.intervenants.filter((i) => i.projet_id === projet.id && i.actif), [dossier.intervenants, projet.id]);
   const lots = useMemo(() => dossier.lots.filter((l) => l.projet_id === projet.id).sort((a, b) => a.numero.localeCompare(b.numero)), [dossier.lots, projet.id]);
   const [choisi, setChoisi] = useState<string | null>(null);
-  const cr = crs.find((c) => c.id === choisi) ?? crs[0] ?? null;
+  /* espace 2 : le compte rendu choisi dans la liste est celui du volet */
+  const choisiVolet = volet?.choisie?.startsWith("cr:") ? volet.choisie.slice(3) : null;
+  const cr = crs.find((c) => c.id === (choisiVolet ?? choisi)) ?? crs[0] ?? null;
   const contenu = cr ? contenuCr(cr, projet, dossier) : null;
   const auj = aujourdhui();
   const [form, setForm] = useState<Form>(null);
@@ -154,66 +158,8 @@ export default function ComptesRendus({ projet, dossier, peutEcrire, agir, confi
     </li>
   );
 
-  return (
-    <div className="esp-carte-corps">
-      <div className="esp-section-titre">
-        <span>Comptes rendus de chantier</span>
-        <span className="esp-item-haut">
-          <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => ouvrirCr(null)}>Nouveau compte rendu</button>
-        </span>
-      </div>
-      {!cr || !contenu ? (
-        <div className="lor-tableau-vide">Aucun compte rendu. Après la visite, notez ce que vous avez vu et demandé : chaque ligne devient un point, suivi de compte rendu en compte rendu jusqu’à sa réponse.</div>
-      ) : (
-        <>
-          {crs.length > 1 ? (
-            <div className="esp-filtres lor-controles" role="group" aria-label="Comptes rendus du projet">
-              {crs.map((c) => <button key={c.id} type="button" className="esp-filtre" aria-pressed={c.id === cr.id} onClick={() => setChoisi(c.id)}>n° {c.numero} · {jour(c.visite_le)}</button>)}
-            </div>
-          ) : null}
-          <div className="lor-controle-tete">
-            <strong>Compte rendu n° {cr.numero} · visite du {jour(cr.visite_le)}</strong>
-            <Pastille teinte={brouillon ? "gris" : "vert"}>{brouillon ? "Brouillon" : `Diffusé le ${jour(cr.diffuse_le)}`}</Pastille>
-            {cr.prochaine_visite ? <span className="esp-kpi-sous">prochaine visite le {jour(cr.prochaine_visite)}</span> : null}
-          </div>
-          <div className="esp-actions lor-rapport">
-            {brouillon ? (
-              <>
-                <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutEcrire || envoi || !cr.notes} onClick={() => ouvrir({ type: "notes", cr, lus: lireNotes(cr.notes ?? "", intervenants, lots, Number(cr.visite_le.slice(0, 4))) })}>Rédiger depuis les notes</button>
-                <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => { setNp({ nature: "question", texte: "", intervenant_id: "", lot_id: "", echeance: "" }); ouvrir({ type: "point", cr }); }}>Ajouter un point</button>
-                <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => ouvrirCr(cr)}>Modifier</button>
-                <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => (confirmer ? setADiffuser(cr) : void diffuser(cr))}>Diffuser</button>
-              </>
-            ) : null}
-            <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={telechargerPdf}><FileDown width={15} height={15} aria-hidden="true" /> PDF</button>
-          </div>
-          {contenu.cr.presents.length ? (
-            <p className="lor-sous">Présents : {contenu.cr.presents.filter((p) => p.present).map((p) => `${p.nom}${p.organisme ? ` (${p.organisme})` : ""}`).join(", ") || "—"}{contenu.cr.presents.some((p) => !p.present) ? ` · excusés : ${contenu.cr.presents.filter((p) => !p.present).map((p) => p.nom).join(", ")}` : ""}</p>
-          ) : null}
-          {contenu.cr.avancement ? <p className="lor-sous">Avancement : {contenu.cr.avancement}</p> : null}
-          {Object.keys(cr.avancement_lots ?? {}).length ? (
-            <p className="lor-sous lor-avancement-lots">Avancement constaté : {lots.filter((l) => typeof cr.avancement_lots?.[l.id] === "number").map((l) => `lot ${l.numero} ${l.intitule} ${String(cr.avancement_lots?.[l.id]).replace(".", ",")} %`).join(" · ")}</p>
-          ) : null}
-          {brouillon && cr.notes ? <p className="lor-sous">Notes de visite : {cr.notes.split("\n").filter(Boolean).length} ligne{cr.notes.split("\n").filter(Boolean).length > 1 ? "s" : ""}, à rédiger en points.</p> : null}
-          {erreur && !form ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
-
-          <div className="lor-cr-bloc">
-            <div className="lor-cr-titre">Points de cette visite ({contenu.nouveaux.length})</div>
-            {contenu.nouveaux.length ? <ul className="lor-liste">{contenu.nouveaux.map((l) => ligne(l, false))}</ul> : <div className="lor-tableau-vide">Aucun point nouveau.</div>}
-          </div>
-          <div className="lor-cr-bloc">
-            <div className="lor-cr-titre">En suspens ({contenu.en_suspens.length})</div>
-            {contenu.en_suspens.length ? <ul className="lor-liste">{contenu.en_suspens.map((l) => ligne(l, true))}</ul> : <div className="lor-tableau-vide">Rien en suspens.</div>}
-          </div>
-          {contenu.soldes.length ? (
-            <details className="lor-temps-recents">
-              <summary>Soldés depuis {contenu.precedent ? `le CR n° ${contenu.precedent.numero}` : "le début"} ({contenu.soldes.length})</summary>
-              <ul className="lor-liste">{contenu.soldes.map((l) => ligne(l, false))}</ul>
-            </details>
-          ) : null}
-        </>
-      )}
-
+  const fenetres = (
+    <>
       {/* ——— nouveau CR, ou le modifier ——— */}
       <Dialog open={form?.type === "cr"} onOpenChange={(o) => !o && setForm(null)}>
         <DialogContent>
@@ -382,6 +328,171 @@ export default function ComptesRendus({ projet, dossier, peutEcrire, agir, confi
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </>
+  );
+
+  /* 30/10/2026 — dans la fiche de l'espace 2 : les brouillons puis les comptes rendus diffusés, un par ligne ; la
+     visite, ses points (de la visite, en suspens, soldés) et les gestes dans le volet (../../espace2/lin/Volet.tsx) */
+  if (volet) {
+    const brouillons = crs.filter((c) => c.statut === "brouillon");
+    const diffuses = crs.filter((c) => c.statut !== "brouillon");
+    const ligneCr = (c: CompteRendu) => (
+      <Ligne
+        key={c.id}
+        cle={`cr:${c.id}`}
+        libelle={`Compte rendu n° ${c.numero}, visite du ${jour(c.visite_le)}, ${c.statut === "brouillon" ? "brouillon" : `diffusé le ${jour(c.diffuse_le)}`}`}
+        icone={<NotebookPen />}
+        id={`n° ${c.numero}`}
+        titre={`Visite du ${jour(c.visite_le)}`}
+        second={c.prochaine_visite ? `prochaine visite le ${jour(c.prochaine_visite)}` : null}
+        droite={c.statut === "brouillon" ? <Pilule teinte="gris" icone={<PointTeinte teinte="gris" />}>Brouillon</Pilule> : <Pilule teinte="vert" icone={<PointTeinte teinte="vert" />}>Diffusé</Pilule>}
+        date={c.statut === "brouillon" ? null : jourCourt(c.diffuse_le)}
+        dateTitre={c.statut === "brouillon" ? undefined : "Diffusé le"}
+      />
+    );
+    /* un point du compte rendu : mêmes faits et mêmes gestes que la ligne d'avant */
+    const pointVolet = (l: LigneCr, suspens: boolean) => (
+      <SousLigne
+        key={l.id}
+        teinte={enRetard(l) ? "rouge" : undefined}
+        titre={l.texte}
+        second={
+          <>
+            {NATURES[l.nature]}{l.lot ? ` · lot ${l.lot}` : ""}{l.entreprise ? ` · ${l.entreprise}` : ""}{l.echeance && l.statut === "ouvert" ? ` · pour le ${jour(l.echeance)}` : ""}{suspens && l.age_jours ? ` · en suspens depuis ${l.age_jours} j (CR n° ${l.ne_au_cr})` : ""}{enRetard(l) ? " · en retard" : ""}
+            {l.reponse ? <><br />Réponse{l.repondu_le ? ` du ${jour(l.repondu_le)}` : ""} : {l.reponse}</> : null}
+          </>
+        }
+        valeur={
+          l.statut === "ouvert" && (l.nature === "question" || l.nature === "action") && !(cr?.statut === "diffuse" && cr.contenu) ? (
+            <>
+              <button type="button" className="lvp-lien" disabled={!peutEcrire || envoi} onClick={() => { setNr(""); ouvrir({ type: "reponse", ligne: l }); }}>{l.nature === "question" ? "Réponse reçue" : "Faite"}</button>
+              {" · "}
+              <button type="button" className="lvp-lien" disabled={!peutEcrire || envoi} onClick={() => void solder(l)}>Solder</button>
+            </>
+          ) : undefined
+        }
+      />
+    );
+    const presents = contenu ? contenu.cr.presents.filter((p) => p.present).map((p) => `${p.nom}${p.organisme ? ` (${p.organisme})` : ""}`).join(", ") : "";
+    const excuses = contenu ? contenu.cr.presents.filter((p) => !p.present).map((p) => p.nom).join(", ") : "";
+    const lignesNotes = cr?.notes ? cr.notes.split("\n").filter(Boolean).length : 0;
+    return (
+      <Partie
+        titre="Comptes rendus de chantier"
+        compte={crs.length ? `${crs.length} compte${crs.length > 1 ? "s" : ""} rendu${crs.length > 1 ? "s" : ""}${brouillons.length ? ` · ${brouillons.length} brouillon${brouillons.length > 1 ? "s" : ""}` : ""}` : null}
+        gestes={<Bouton icone={<NotebookPen aria-hidden="true" />} disabled={!peutEcrire || envoi} onClick={() => ouvrirCr(null)}>Nouveau compte rendu</Bouton>}
+        avis={erreur && !form ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+      >
+        {crs.length ? (
+          <Liste>
+            {brouillons.length ? <Groupe nom="Brouillons" compte={brouillons.length}>{brouillons.map(ligneCr)}</Groupe> : null}
+            {diffuses.length ? <Groupe nom="Diffusés" compte={diffuses.length}>{diffuses.map(ligneCr)}</Groupe> : null}
+          </Liste>
+        ) : (
+          <Vide>Aucun compte rendu. Après la visite, notez ce que vous avez vu et demandé : chaque ligne devient un point, suivi de compte rendu en compte rendu jusqu’à sa réponse.</Vide>
+        )}
+        {cr && contenu && choisiVolet === cr.id ? (
+          <Detail cle={`cr:${cr.id}`} titre={`Compte rendu n° ${cr.numero}`} sous={`Visite du ${jour(cr.visite_le)}${cr.prochaine_visite ? ` · prochaine visite le ${jour(cr.prochaine_visite)}` : ""}`}>
+            <Rangees>
+              <Rangee libelle="Statut" teinte={brouillon ? "gris" : "vert"}>{brouillon ? "Brouillon" : `Diffusé le ${jour(cr.diffuse_le)}`}</Rangee>
+              {contenu.cr.presents.length ? <Rangee libelle="Présents">{presents || "—"}</Rangee> : null}
+              {excuses ? <Rangee libelle="Excusés">{excuses}</Rangee> : null}
+              {contenu.cr.avancement ? <Rangee libelle="Avancement">{contenu.cr.avancement}</Rangee> : null}
+              {Object.keys(cr.avancement_lots ?? {}).length ? (
+                <Rangee libelle="Constaté">{lots.filter((l) => typeof cr.avancement_lots?.[l.id] === "number").map((l) => `lot ${l.numero} ${l.intitule} ${String(cr.avancement_lots?.[l.id]).replace(".", ",")} %`).join(" · ")}</Rangee>
+              ) : null}
+              {brouillon && cr.notes ? <Rangee libelle="Notes">{lignesNotes} ligne{lignesNotes > 1 ? "s" : ""}, à rédiger en points</Rangee> : null}
+            </Rangees>
+            <SousListe titre={`Points de cette visite (${contenu.nouveaux.length})`}>
+              {contenu.nouveaux.length ? contenu.nouveaux.map((l) => pointVolet(l, false)) : <SousLigne titre="Aucun point nouveau." />}
+            </SousListe>
+            <SousListe titre={`En suspens (${contenu.en_suspens.length})`}>
+              {contenu.en_suspens.length ? contenu.en_suspens.map((l) => pointVolet(l, true)) : <SousLigne titre="Rien en suspens." />}
+            </SousListe>
+            {contenu.soldes.length ? (
+              <SousListe titre={`Soldés depuis ${contenu.precedent ? `le CR n° ${contenu.precedent.numero}` : "le début"} (${contenu.soldes.length})`}>
+                {contenu.soldes.map((l) => pointVolet(l, false))}
+              </SousListe>
+            ) : null}
+            <Gestes>
+              {brouillon ? (
+                <>
+                  <Bouton fort disabled={!peutEcrire || envoi} onClick={() => (confirmer ? setADiffuser(cr) : void diffuser(cr))}>Diffuser</Bouton>
+                  <Bouton disabled={!peutEcrire || envoi || !cr.notes} onClick={() => ouvrir({ type: "notes", cr, lus: lireNotes(cr.notes ?? "", intervenants, lots, Number(cr.visite_le.slice(0, 4))) })}>Rédiger depuis les notes</Bouton>
+                  <Bouton disabled={!peutEcrire || envoi} onClick={() => { setNp({ nature: "question", texte: "", intervenant_id: "", lot_id: "", echeance: "" }); ouvrir({ type: "point", cr }); }}>Ajouter un point</Bouton>
+                  <Bouton disabled={!peutEcrire || envoi} onClick={() => ouvrirCr(cr)}>Modifier</Bouton>
+                </>
+              ) : null}
+              <Bouton icone={<FileDown aria-hidden="true" />} onClick={telechargerPdf}>PDF</Bouton>
+            </Gestes>
+          </Detail>
+        ) : null}
+        {fenetres}
+      </Partie>
+    );
+  }
+
+  return (
+    <div className="esp-carte-corps">
+      <div className="esp-section-titre">
+        <span>Comptes rendus de chantier</span>
+        <span className="esp-item-haut">
+          <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => ouvrirCr(null)}>Nouveau compte rendu</button>
+        </span>
+      </div>
+      {!cr || !contenu ? (
+        <div className="lor-tableau-vide">Aucun compte rendu. Après la visite, notez ce que vous avez vu et demandé : chaque ligne devient un point, suivi de compte rendu en compte rendu jusqu’à sa réponse.</div>
+      ) : (
+        <>
+          {crs.length > 1 ? (
+            <div className="esp-filtres lor-controles" role="group" aria-label="Comptes rendus du projet">
+              {crs.map((c) => <button key={c.id} type="button" className="esp-filtre" aria-pressed={c.id === cr.id} onClick={() => setChoisi(c.id)}>n° {c.numero} · {jour(c.visite_le)}</button>)}
+            </div>
+          ) : null}
+          <div className="lor-controle-tete">
+            <strong>Compte rendu n° {cr.numero} · visite du {jour(cr.visite_le)}</strong>
+            <Pastille teinte={brouillon ? "gris" : "vert"}>{brouillon ? "Brouillon" : `Diffusé le ${jour(cr.diffuse_le)}`}</Pastille>
+            {cr.prochaine_visite ? <span className="esp-kpi-sous">prochaine visite le {jour(cr.prochaine_visite)}</span> : null}
+          </div>
+          <div className="esp-actions lor-rapport">
+            {brouillon ? (
+              <>
+                <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutEcrire || envoi || !cr.notes} onClick={() => ouvrir({ type: "notes", cr, lus: lireNotes(cr.notes ?? "", intervenants, lots, Number(cr.visite_le.slice(0, 4))) })}>Rédiger depuis les notes</button>
+                <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => { setNp({ nature: "question", texte: "", intervenant_id: "", lot_id: "", echeance: "" }); ouvrir({ type: "point", cr }); }}>Ajouter un point</button>
+                <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => ouvrirCr(cr)}>Modifier</button>
+                <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => (confirmer ? setADiffuser(cr) : void diffuser(cr))}>Diffuser</button>
+              </>
+            ) : null}
+            <button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={telechargerPdf}><FileDown width={15} height={15} aria-hidden="true" /> PDF</button>
+          </div>
+          {contenu.cr.presents.length ? (
+            <p className="lor-sous">Présents : {contenu.cr.presents.filter((p) => p.present).map((p) => `${p.nom}${p.organisme ? ` (${p.organisme})` : ""}`).join(", ") || "—"}{contenu.cr.presents.some((p) => !p.present) ? ` · excusés : ${contenu.cr.presents.filter((p) => !p.present).map((p) => p.nom).join(", ")}` : ""}</p>
+          ) : null}
+          {contenu.cr.avancement ? <p className="lor-sous">Avancement : {contenu.cr.avancement}</p> : null}
+          {Object.keys(cr.avancement_lots ?? {}).length ? (
+            <p className="lor-sous lor-avancement-lots">Avancement constaté : {lots.filter((l) => typeof cr.avancement_lots?.[l.id] === "number").map((l) => `lot ${l.numero} ${l.intitule} ${String(cr.avancement_lots?.[l.id]).replace(".", ",")} %`).join(" · ")}</p>
+          ) : null}
+          {brouillon && cr.notes ? <p className="lor-sous">Notes de visite : {cr.notes.split("\n").filter(Boolean).length} ligne{cr.notes.split("\n").filter(Boolean).length > 1 ? "s" : ""}, à rédiger en points.</p> : null}
+          {erreur && !form ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+
+          <div className="lor-cr-bloc">
+            <div className="lor-cr-titre">Points de cette visite ({contenu.nouveaux.length})</div>
+            {contenu.nouveaux.length ? <ul className="lor-liste">{contenu.nouveaux.map((l) => ligne(l, false))}</ul> : <div className="lor-tableau-vide">Aucun point nouveau.</div>}
+          </div>
+          <div className="lor-cr-bloc">
+            <div className="lor-cr-titre">En suspens ({contenu.en_suspens.length})</div>
+            {contenu.en_suspens.length ? <ul className="lor-liste">{contenu.en_suspens.map((l) => ligne(l, true))}</ul> : <div className="lor-tableau-vide">Rien en suspens.</div>}
+          </div>
+          {contenu.soldes.length ? (
+            <details className="lor-temps-recents">
+              <summary>Soldés depuis {contenu.precedent ? `le CR n° ${contenu.precedent.numero}` : "le début"} ({contenu.soldes.length})</summary>
+              <ul className="lor-liste">{contenu.soldes.map((l) => ligne(l, false))}</ul>
+            </details>
+          ) : null}
+        </>
+      )}
+
+      {fenetres}
     </div>
   );
 }

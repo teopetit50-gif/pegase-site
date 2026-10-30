@@ -31,6 +31,11 @@
    chaque bloc est PermisVue habillée, filtrée par `parties` (mêmes
    portes, mêmes fenêtres). Les liens des alertes (E1-E3, E5-E9) arrivent
    ici : ce qui attend un membre est en tête, l'étape en cours ouverte.
+
+   30/10/2026 : le calendrier, les échéances et rappels, les dates lues,
+   les recours et les courriers sont des listes ; l'élément choisi s'ouvre
+   dans un volet à droite de la colonne (au-dessus, en dessous de 1100 px
+   de large), refermé quand une autre étape s'ouvre.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useMemo, useState } from "react";
@@ -41,10 +46,12 @@ import { DECISIONS, ETATS, TYPES, titrePermis } from "@/components/espace/lorani
 import type { Calcul, Etape, Permis, Recours } from "@/components/espace/lorani/types";
 import Habille from "@/components/espace2/Habille";
 import { RACINE } from "@/components/espace2/modules";
+import { VoletContexte, useVoletPage } from "../lin/Volet";
 import { useLorani } from "./donnees";
 import "@/components/espace/lorani/lorani.css";
 import "../lin/lin.css";
 import "../lin/plain-get-started.css";
+import "../lin/volet-permis.css";
 
 const BASE = `${RACINE}/lorani`;
 
@@ -196,10 +203,17 @@ export default function PagePermis({ id }: { id: string }) {
     return { p, c, etapes: c.etapes ?? [], recours: dossier.recours.filter((r) => r.permis_id === p.id), auj: aujourdHui() };
   }, [p, dossier.recours]);
 
+  const faites = ctx ? franchies(ctx) : null;
+  const courante = faites ? (ETAPES.find((e) => !faites[e.cle])?.cle ?? null) : null;
+  const ouverte = choisie === undefined ? courante : choisie;
+  /* 30/10/2026 : l'élément choisi dans une liste (une étape du calendrier, une échéance, un courrier…) s'ouvre dans
+     un volet ; il se referme quand une autre étape s'ouvre (le détail vit dans la carte de l'étape) */
+  const { contexte, ouvert, setCible } = useVoletPage(`${id}/${ouverte ?? "aucune"}`);
+
   const absent = pret && (!p || !projet);
   const titre = p ? titrePermis(p, projet?.nom ?? "") : "Permis";
 
-  if (!p || !projet || !ctx) {
+  if (!p || !projet || !ctx || !faites) {
     return (
       <div className="lin pgs">
         <h1 className="v2-sr">{titre}</h1>
@@ -225,10 +239,7 @@ export default function PagePermis({ id }: { id: string }) {
     );
   }
 
-  const faites = franchies(ctx);
   const nbFaites = ETAPES.filter((e) => faites[e.cle]).length;
-  const courante = ETAPES.find((e) => !faites[e.cle])?.cle ?? null;
-  const ouverte = choisie === undefined ? courante : choisie;
   const etat = ETATS[p.etat] ?? ETATS.a_deposer;
   /* les natures d'étape que le calcul pose sans qu'une étape les range */
   const autres = [...new Set(ctx.etapes.map((e) => e.nature).filter((n) => !NATURES_RANGEES.has(n)))].map((n) => `etape:${n}` as PartiePermis);
@@ -241,7 +252,8 @@ export default function PagePermis({ id }: { id: string }) {
   );
 
   return (
-    <div className="lin pgs">
+    <VoletContexte.Provider value={contexte}>
+    <div className="lin pgs" data-volet={ouvert ? "" : undefined}>
       <h1 className="v2-sr">{titre}</h1>
       <div className="pgs-colonne">
         <Link href={BASE} className="pgs-retour">
@@ -311,6 +323,12 @@ export default function PagePermis({ id }: { id: string }) {
         {/* les courriers du dossier et les dates déjà décidées */}
         <div className="pgs-courriers">{vue(["courriers"], "courriers")}</div>
       </div>
+      {ouvert ? (
+        <aside className="lit-volet lvp-volet-page" aria-label="Détail">
+          <div ref={setCible} className="lvp-cible" />
+        </aside>
+      ) : null}
     </div>
+    </VoletContexte.Provider>
   );
 }

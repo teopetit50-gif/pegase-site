@@ -15,7 +15,8 @@
    de constats coupées ; les réglages valent au prochain passage. */
 
 import { useMemo, useState } from "react";
-import { FileDown, MessageSquareText, PauseCircle, ScanSearch, ShieldCheck, SlidersHorizontal, UserCheck } from "lucide-react";
+import { AlertTriangle, ArrowRightLeft, CheckCircle2, FileDown, MessageSquareText, PauseCircle, ScanSearch, ShieldCheck, SlidersHorizontal, UserCheck } from "lucide-react";
+import { Bouton, Detail, Gestes, Groupe, Ligne, Liste, Partie, Pilule, Point as PointLin, Rangee, Rangees, SousLigne, SousListe, Texte, Vide, jourCourt, teinte, useVolet, type TeinteLin } from "@/components/espace2/lin/Volet";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { Avis, Pastille } from "../ui";
@@ -88,6 +89,7 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
   peutEcrire: boolean;
   agir: (reel: () => Promise<void>, local: () => Dossier) => Promise<void>;
 }) {
+  const volet = useVolet();
   const controles = useMemo(() => dossier.controles.filter((c) => c.projet_id === projet.id).sort((a, b) => b.cree_le.localeCompare(a.cree_le)), [dossier.controles, projet.id]);
   const piecesProjet = useMemo(() => dossier.pieces.filter((p) => p.objet_id === projet.id), [dossier.pieces, projet.id]);
   const [choisi, setChoisi] = useState<string | null>(null);
@@ -311,151 +313,8 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
     return `${ref}${v.page ? `, p. ${v.page}` : ""}${v.texte ? ` : « ${v.texte} »` : ""}`;
   };
 
-  return (
-    <div className="esp-carte-corps">
-      <div className="esp-section-titre">
-        <span>Contrôle du dossier</span>
-        <span className="esp-item-haut">
-          {c ? <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => ouvrirNouveau(c)}>Revérifier à l’indice suivant</button> : null}
-          <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi || piecesProjet.length < 2} onClick={() => ouvrirNouveau(null)}>Nouveau contrôle</button>
-          <button type="button" className="esp-lien-bouton" disabled={!peutChoisir || envoi} onClick={ouvrirReglages}>Régler les contrôles</button>
-        </span>
-      </div>
-      {reglesPropres || famillesCoupees.length ? (
-        <p className="lor-sous lor-reglages">
-          Réglages du projet : {reglesPropres ? `${pluriel(reglesPropres, "tolérance")} propre${reglesPropres > 1 ? "s" : ""}` : "tolérances du code"}
-          {famillesCoupees.length ? ` · ne tourne${famillesCoupees.length > 1 ? "nt" : ""} pas : ${famillesCoupees.map((f) => NATURES[f]).join(", ")}` : ""}.
-        </p>
-      ) : null}
-
-      {!c ? (
-        <div className="lor-tableau-vide">
-          {piecesProjet.length < 2
-            ? "Déposez les planches, le CCTP, la DPGF ou le règlement du PLU : Lorani les lit, puis croise cotes, surfaces, reculs et postes d’une pièce à l’autre."
-            : "Aucun contrôle : choisissez les pièces à croiser (planches entre elles, contre le règlement du PLU, CCTP contre DPGF)."}
-        </div>
-      ) : (
-        <>
-          {controles.length > 1 ? (
-            <div className="esp-filtres lor-controles" role="group" aria-label="Contrôles du projet">
-              {controles.map((x) => (
-                <button key={x.id} type="button" className="esp-filtre" aria-pressed={x.id === c.id} onClick={() => setChoisi(x.id)}>
-                  {x.intitule} · indice {x.indice}
-                </button>
-              ))}
-            </div>
-          ) : null}
-
-          <div className="lor-controle-tete">
-            <strong>{c.intitule} · indice {c.indice}</strong>
-            <Pastille teinte={STATUTS[c.statut].teinte}>{STATUTS[c.statut].libelle}</Pastille>
-            <span className="esp-kpi-sous">
-              {c.lance_le ? `passé le ${jour(c.lance_le)}` : "en attente de la lecture des pièces"}
-              {precedent ? ` · revérifie l’indice ${precedent.indice}` : ""}
-            </span>
-            {c.suspendu_le ? <Pastille teinte="ambre">Suspendu</Pastille> : null}
-            <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi || c.statut === "clos" || !!c.suspendu_le} onClick={relancer}>{envoi ? <Loader variant="spin" /> : null} {c.lance_le ? "Relancer" : "Lancer"}</button>
-            {c.suspendu_le
-              ? <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={reprendre}>Reprendre</button>
-              : <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi || c.statut === "clos"} onClick={ouvrirSuspension}>Suspendre</button>}
-          </div>
-          <p className="lor-sous">
-            Décide des constats : <strong>{c.decideur ? nommer(c.decideur) : "toute l’équipe du projet"}</strong>{" "}
-            <button type="button" className="esp-lien-bouton" disabled={!peutChoisir || envoi || c.statut === "clos"} onClick={ouvrirDecideur}>Choisir qui décide</button>
-            {c.decideur && !peutDecider ? <span> · vous pouvez préparer une question, la décision lui revient.</span> : null}
-          </p>
-          {c.suspendu_le ? (
-            <p className="lor-sous" role="status">Suspendu le {jour(c.suspendu_le)} : {c.suspendu_motif}. Il ne se lancera pas, même quand ses pièces seront lues, tant qu’il n’est pas repris.</p>
-          ) : null}
-          {c.lance_le ? (
-            <p className="lor-sous" role="status">
-              {ouverts.length ? `${pluriel(ouverts.length, "constat")} ouvert${ouverts.length > 1 ? "s" : ""}, dont ${pluriel(bloquants, "bloquant")}.` : "Aucun constat ouvert."}
-              {precedent ? ` ${pluriel(corrigesIci.length, "constat")} de l’indice ${precedent.indice} corrigé${corrigesIci.length > 1 ? "s" : ""}.` : ""}
-            </p>
-          ) : null}
-          {c.lance_le ? (
-            <div className="esp-actions lor-rapport">
-              <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!!rapport} onClick={() => void exporter("pdf")}>{rapport === "pdf" ? <Loader variant="spin" /> : <FileDown width={15} height={15} aria-hidden="true" />} Rapport PDF annoté</button>
-              <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!!rapport} onClick={() => void exporter("xlsx")}>{rapport === "xlsx" ? <Loader variant="spin" /> : <FileDown width={15} height={15} aria-hidden="true" />} Tableau Excel</button>
-            </div>
-          ) : null}
-          {erreur && !form ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
-
-          <ul className="lor-controle-pieces" aria-label="Pièces croisées">
-            {pieces.map((x) => {
-              const p = pieceDe(x.piece_id);
-              return (
-                <li key={x.id}>
-                  <strong>{x.reference ?? ROLES[x.role]}</strong> <span className="esp-kpi-sous">{ROLES[x.role]} · {p?.nom_fichier ?? "pièce"}{p && !lue(p) ? " · en lecture" : ""}</span>
-                </li>
-              );
-            })}
-          </ul>
-
-          {ouverts.map((k) => (
-            <div key={k.id} className="lor-constat" data-gravite={k.gravite}>
-              <div className="lor-situation-tete">
-                <Pastille teinte={GRAVITES[k.gravite].teinte}>{GRAVITES[k.gravite].libelle}</Pastille>
-                <span className="esp-kpi-sous">{NATURES[k.nature]}{k.precedent_id ? ` · relevé depuis l’indice ${precedent?.indice ?? "précédent"}` : ""}</span>
-              </div>
-              <div>{k.titre}</div>
-              {k.correction ? <div className="lor-sous"><strong>Correction proposée :</strong> {k.correction}</div> : null}
-              {k.valeurs.length ? (
-                <ul className="lor-citations" aria-label="Valeurs lues">
-                  {k.valeurs.map((v, i) => <li key={i}>{citation(v, k.grandeur)}</li>)}
-                </ul>
-              ) : null}
-              <div className="esp-actions">
-                <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={!peutDecider || envoi} onClick={() => ouvrirDecision(k, "corrige")}>Corrigé</button>
-                <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutDecider || envoi} onClick={() => ouvrirDecision(k, "accepte")}>Accepter</button>
-                <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutDecider || envoi} onClick={() => ouvrirDecision(k, "ecarte")}>Écarter</button>
-                <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => ouvrirQuestion(k)}>En faire une question</button>
-              </div>
-            </div>
-          ))}
-
-          {c.changements?.length ? (
-            <details className="lor-temps-recents" open={c.changements.some((x) => !x.releve)}>
-              <summary>Changements depuis l’indice {precedent?.indice ?? "précédent"} ({c.changements.length}{c.changements.some((x) => !x.releve) ? `, dont ${c.changements.filter((x) => !x.releve).length} non relevé${c.changements.filter((x) => !x.releve).length > 1 ? "s" : ""}` : ""})</summary>
-              <ul className="lor-liste">
-                {c.changements.map((x, i) => (
-                  <li key={i}>
-                    <Pastille teinte={x.releve ? "gris" : "ambre"}>{x.releve ? "Relevé" : "Non relevé"}</Pastille>{" "}
-                    <strong>{x.reference}</strong> · {x.libelle.charAt(0).toUpperCase() + x.libelle.slice(1)} : {valeurIndice(x.avant, x.unite)} → {valeurIndice(x.apres, x.unite)}
-                    <span className="lor-sous"> {x.page_apres ? `p. ${x.page_apres}` : ""}{x.texte_apres ? ` · « ${x.texte_apres} »` : ""}</span>
-                  </li>
-                ))}
-              </ul>
-            </details>
-          ) : null}
-          {corrigesIci.length ? (
-            <details className="lor-temps-recents">
-              <summary>Corrigés depuis l’indice {precedent?.indice ?? "précédent"} ({corrigesIci.length})</summary>
-              <ul className="lor-liste">
-                {corrigesIci.map((k) => <li key={k.id}><Pastille teinte="vert">Corrigé à l’indice {c.indice}</Pastille> {k.titre}</li>)}
-              </ul>
-            </details>
-          ) : null}
-          {decides.length ? (
-            <details className="lor-temps-recents">
-              <summary>Décidés ({decides.length})</summary>
-              <ul className="lor-liste">
-                {decides.map((k) => {
-                  const d = DECISIONS[k.statut as Exclude<Constat["statut"], "ouvert">];
-                  return (
-                    <li key={k.id}>
-                      <Pastille teinte={d.teinte}>{d.libelle}</Pastille> {k.titre}
-                      <span className="lor-sous"> {k.motif ? `Motif : ${k.motif}` : ""}{k.decide_par ? ` · ${nommer(k.decide_par)}, le ${jour(k.decide_le)}` : ""}</span>{" "}
-                      <button type="button" className="esp-lien-bouton" disabled={!peutDecider || envoi} onClick={() => void rouvrir(k)}>Rouvrir</button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </details>
-          ) : null}
-        </>
-      )}
-
+  const fenetres = (
+    <>
       {/* ——— nouveau contrôle, ou revérification à l'indice suivant ——— */}
       <Dialog open={form?.type === "nouveau"} onOpenChange={(o) => !o && setForm(null)}>
         <DialogContent>
@@ -656,6 +515,422 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </>
+  );
+
+  /* 30/10/2026 — dans la fiche de l'espace 2 : un constat par ligne, ouverts par gravité puis décidés, corrigés
+     à l'indice et changements ; le contrôle lui-même en tête (pièces croisées, qui décide, lancer, rapport), et
+     pour chaque constat les valeurs citées et les gestes dans le volet (../../espace2/lin/Volet.tsx) */
+  if (volet) {
+    /* l'identifiant court d'un constat : les pièces qu'il cite (« PC5 · PC2 »), sinon l'article du règlement */
+    const refsDe = (k: Constat) => [...new Set(k.valeurs.filter((v) => !v.regle).map((v) => v.reference ?? pieceDe(v.piece)?.nom_fichier).filter(Boolean))].join(" · ") || (k.article ? `art. ${k.article}` : undefined);
+    const nonReleves = c?.changements?.filter((x) => !x.releve).length ?? 0;
+    const groupesOuverts: { cle: Constat["gravite"]; nom: string }[] = [
+      { cle: "bloquant", nom: "Bloquants" },
+      { cle: "majeur", nom: "Majeurs" },
+      { cle: "mineur", nom: "Mineurs" },
+    ];
+    const ligneConstat = (k: Constat, droite: React.ReactNode, t: TeinteLin, icone: React.ReactNode, date?: string | null, dateTitre?: string) => (
+      <Ligne
+        key={k.id}
+        cle={`constat:${k.id}`}
+        libelle={`${k.titre}, ${NATURES[k.nature]}`}
+        icone={<span data-teinte={t} className="lvp-icone-teinte">{icone}</span>}
+        id={refsDe(k)}
+        titre={k.titre}
+        second={NATURES[k.nature]}
+        droite={droite}
+        date={date ?? null}
+        dateTitre={dateTitre}
+      />
+    );
+    /* ce qu'un constat porte, ouvert ou décidé : la correction proposée et les valeurs lues */
+    const corpsConstat = (k: Constat) => (
+      <>
+        {k.correction ? <Texte><strong>Correction proposée :</strong> {k.correction}</Texte> : null}
+        {k.valeurs.length ? (
+          <SousListe titre="Valeurs lues">
+            {k.valeurs.map((v, i) => <SousLigne key={i} titre={citation(v, k.grandeur)} />)}
+          </SousListe>
+        ) : null}
+      </>
+    );
+    const rangeesConstat = (k: Constat) => (
+      <>
+        <Rangee libelle="Gravité" teinte={teinte(GRAVITES[k.gravite].teinte)}>
+          <PointLin teinte={teinte(GRAVITES[k.gravite].teinte)} />
+          {GRAVITES[k.gravite].libelle}
+        </Rangee>
+        <Rangee libelle="Famille">{NATURES[k.nature]}</Rangee>
+        {k.precedent_id ? <Rangee libelle="Depuis">relevé depuis l’indice {precedent?.indice ?? "précédent"}</Rangee> : null}
+      </>
+    );
+    return (
+      <Partie
+        titre="Contrôle du dossier"
+        compte={c?.lance_le ? `${pluriel(ouverts.length, "constat")} ouvert${ouverts.length > 1 ? "s" : ""}${bloquants ? ` · ${pluriel(bloquants, "bloquant")}` : ""}` : null}
+        gestes={
+          <>
+            {c ? <Bouton disabled={!peutEcrire || envoi} onClick={() => ouvrirNouveau(c)}>Revérifier à l’indice suivant</Bouton> : null}
+            <Bouton icone={<ScanSearch aria-hidden="true" />} disabled={!peutEcrire || envoi || piecesProjet.length < 2} onClick={() => ouvrirNouveau(null)}>Nouveau contrôle</Bouton>
+            <Bouton icone={<SlidersHorizontal aria-hidden="true" />} disabled={!peutChoisir || envoi} onClick={ouvrirReglages}>Régler les contrôles</Bouton>
+          </>
+        }
+        avis={erreur && !form ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+      >
+        {reglesPropres || famillesCoupees.length ? (
+          <p className="lvp-resume">
+            Réglages du projet : {reglesPropres ? `${pluriel(reglesPropres, "tolérance")} propre${reglesPropres > 1 ? "s" : ""}` : "tolérances du code"}
+            {famillesCoupees.length ? ` · ne tourne${famillesCoupees.length > 1 ? "nt" : ""} pas : ${famillesCoupees.map((f) => NATURES[f]).join(", ")}` : ""}.
+          </p>
+        ) : null}
+        {!c ? (
+          <Vide>
+            {piecesProjet.length < 2
+              ? "Déposez les planches, le CCTP, la DPGF ou le règlement du PLU : Lorani les lit, puis croise cotes, surfaces, reculs et postes d’une pièce à l’autre."
+              : "Aucun contrôle : choisissez les pièces à croiser (planches entre elles, contre le règlement du PLU, CCTP contre DPGF)."}
+          </Vide>
+        ) : (
+          <>
+            {controles.length > 1 ? (
+              <div className="lvp-barre">
+                <label className="lvp-barre-choix">
+                  <span>Contrôle</span>
+                  <select className="lvp-select" value={c.id} onChange={(e) => { setChoisi(e.target.value); volet.choisir(null); }}>
+                    {controles.map((x) => <option key={x.id} value={x.id}>{x.intitule} · indice {x.indice}</option>)}
+                  </select>
+                </label>
+              </div>
+            ) : null}
+            <p className="lvp-resume" role="status">
+              {c.lance_le
+                ? `${ouverts.length ? `${pluriel(ouverts.length, "constat")} ouvert${ouverts.length > 1 ? "s" : ""}, dont ${pluriel(bloquants, "bloquant")}.` : "Aucun constat ouvert."}${precedent ? ` ${pluriel(corrigesIci.length, "constat")} de l’indice ${precedent.indice} corrigé${corrigesIci.length > 1 ? "s" : ""}.` : ""}`
+                : "En attente de la lecture des pièces."}
+              {" "}Décide des constats : {c.decideur ? nommer(c.decideur) : "toute l’équipe du projet"}.
+              {c.suspendu_le ? ` Suspendu le ${jour(c.suspendu_le)} : ${c.suspendu_motif}.` : ""}
+            </p>
+            <Liste>
+              <Groupe nom="Le contrôle" compte={1}>
+                <Ligne
+                  cle={`controle:${c.id}`}
+                  libelle={`${c.intitule}, indice ${c.indice}, ${STATUTS[c.statut].libelle}`}
+                  icone={<ScanSearch />}
+                  id={`indice ${c.indice}`}
+                  titre={c.intitule}
+                  second={`${pluriel(pieces.length, "pièce")} croisée${pieces.length > 1 ? "s" : ""}${precedent ? ` · revérifie l’indice ${precedent.indice}` : ""}`}
+                  droite={
+                    <>
+                      <Pilule teinte={teinte(STATUTS[c.statut].teinte)} icone={<PointLin teinte={teinte(STATUTS[c.statut].teinte)} />}>{STATUTS[c.statut].libelle}</Pilule>
+                      {c.suspendu_le ? <Pilule teinte="jaune">Suspendu</Pilule> : null}
+                    </>
+                  }
+                  date={c.lance_le ? jourCourt(c.lance_le) : null}
+                  dateTitre={c.lance_le ? `Passé le ${jour(c.lance_le)}` : undefined}
+                />
+              </Groupe>
+              {groupesOuverts.map((g) => {
+                const ks = ouverts.filter((k) => k.gravite === g.cle);
+                const t = teinte(GRAVITES[g.cle].teinte);
+                return ks.length ? (
+                  <Groupe key={g.cle} nom={g.nom} compte={ks.length}>
+                    {ks.map((k) => ligneConstat(k, <Pilule teinte={t} icone={<PointLin teinte={t} />}>{GRAVITES[k.gravite].libelle}</Pilule>, t, <AlertTriangle />))}
+                  </Groupe>
+                ) : null;
+              })}
+              {decides.length ? (
+                <Groupe nom="Décidés" compte={decides.length}>
+                  {decides.map((k) => {
+                    const d = DECISIONS[k.statut as Exclude<Constat["statut"], "ouvert">];
+                    return ligneConstat(k, <Pilule teinte={teinte(d.teinte)} icone={<PointLin teinte={teinte(d.teinte)} />}>{d.libelle}</Pilule>, teinte(d.teinte), <ShieldCheck />, k.decide_le ? jourCourt(k.decide_le) : null, k.decide_le ? `Décidé le ${jour(k.decide_le)}` : undefined);
+                  })}
+                </Groupe>
+              ) : null}
+              {corrigesIci.length ? (
+                <Groupe nom={`Corrigés depuis l’indice ${precedent?.indice ?? "précédent"}`} compte={corrigesIci.length}>
+                  {corrigesIci.map((k) => ligneConstat(k, <Pilule teinte="vert" icone={<PointLin teinte="vert" />}>Corrigé à l’indice {c.indice}</Pilule>, "vert", <CheckCircle2 />))}
+                </Groupe>
+              ) : null}
+              {c.changements?.length ? (
+                <Groupe nom={`Changements depuis l’indice ${precedent?.indice ?? "précédent"}`} compte={c.changements.length} precision={nonReleves ? `dont ${nonReleves} non relevé${nonReleves > 1 ? "s" : ""}` : null}>
+                  {c.changements.map((x, i) => (
+                    <Ligne
+                      key={i}
+                      cle={`changement:${c.id}:${i}`}
+                      libelle={`${x.reference}, ${x.libelle} : ${valeurIndice(x.avant, x.unite)} puis ${valeurIndice(x.apres, x.unite)}`}
+                      icone={<span data-teinte={x.releve ? "gris" : "jaune"} className="lvp-icone-teinte"><ArrowRightLeft /></span>}
+                      id={x.reference}
+                      titre={x.libelle.charAt(0).toUpperCase() + x.libelle.slice(1)}
+                      second={`${valeurIndice(x.avant, x.unite)} → ${valeurIndice(x.apres, x.unite)}`}
+                      droite={<Pilule teinte={x.releve ? "gris" : "jaune"} icone={<PointLin teinte={x.releve ? "gris" : "jaune"} />}>{x.releve ? "Relevé" : "Non relevé"}</Pilule>}
+                      date={x.page_apres ? `p. ${x.page_apres}` : null}
+                    />
+                  ))}
+                </Groupe>
+              ) : null}
+            </Liste>
+
+            {/* ——— le détail du contrôle ——— */}
+            <Detail
+              cle={`controle:${c.id}`}
+              titre={`${c.intitule} · indice ${c.indice}`}
+              sous={`${c.lance_le ? `passé le ${jour(c.lance_le)}` : "en attente de la lecture des pièces"}${precedent ? ` · revérifie l’indice ${precedent.indice}` : ""}`}
+            >
+              <Rangees>
+                <Rangee libelle="État" teinte={teinte(STATUTS[c.statut].teinte)}>
+                  <PointLin teinte={teinte(STATUTS[c.statut].teinte)} />
+                  {STATUTS[c.statut].libelle}
+                </Rangee>
+                {c.suspendu_le ? <Rangee libelle="Suspendu" teinte="jaune">le {jour(c.suspendu_le)} : {c.suspendu_motif}</Rangee> : null}
+                <Rangee libelle="Constats">
+                  {c.lance_le ? (ouverts.length ? `${pluriel(ouverts.length, "ouvert")}, dont ${pluriel(bloquants, "bloquant")}` : "aucun ouvert") : "pas encore croisés"}
+                  {decides.length ? ` · ${pluriel(decides.length, "décidé")}` : ""}
+                </Rangee>
+                <Rangee libelle="Décide">{c.decideur ? nommer(c.decideur) : "Toute l’équipe du projet"}</Rangee>
+              </Rangees>
+              {c.decideur && !peutDecider ? <div className="lvp-note"><div>Vous pouvez préparer une question, la décision lui revient.</div></div> : null}
+              {c.suspendu_le ? <div className="lvp-note"><div>Il ne se lancera pas, même quand ses pièces seront lues, tant qu’il n’est pas repris.</div></div> : null}
+              {pieces.length ? (
+                <SousListe titre="Pièces croisées">
+                  {pieces.map((x) => {
+                    const p = pieceDe(x.piece_id);
+                    return <SousLigne key={x.id} titre={x.reference ?? ROLES[x.role]} second={`${ROLES[x.role]} · ${p?.nom_fichier ?? "pièce"}`} valeur={p && !lue(p) ? "en lecture" : undefined} teinte={p && !lue(p) ? "jaune" : undefined} />;
+                  })}
+                </SousListe>
+              ) : null}
+              <Gestes>
+                <Bouton fort icone={envoi ? <Loader variant="spin" /> : undefined} disabled={!peutEcrire || envoi || c.statut === "clos" || !!c.suspendu_le} onClick={relancer}>{c.lance_le ? "Relancer" : "Lancer"}</Bouton>
+                {c.suspendu_le
+                  ? <Bouton disabled={!peutEcrire || envoi} onClick={reprendre}>Reprendre</Bouton>
+                  : <Bouton icone={<PauseCircle aria-hidden="true" />} disabled={!peutEcrire || envoi || c.statut === "clos"} onClick={ouvrirSuspension}>Suspendre</Bouton>}
+                <Bouton icone={<UserCheck aria-hidden="true" />} disabled={!peutChoisir || envoi || c.statut === "clos"} onClick={ouvrirDecideur}>Choisir qui décide</Bouton>
+                {c.lance_le ? (
+                  <>
+                    <Bouton icone={rapport === "pdf" ? <Loader variant="spin" /> : <FileDown aria-hidden="true" />} disabled={!!rapport} onClick={() => void exporter("pdf")}>Rapport PDF annoté</Bouton>
+                    <Bouton icone={rapport === "xlsx" ? <Loader variant="spin" /> : <FileDown aria-hidden="true" />} disabled={!!rapport} onClick={() => void exporter("xlsx")}>Tableau Excel</Bouton>
+                  </>
+                ) : null}
+              </Gestes>
+            </Detail>
+
+            {/* ——— un constat ouvert : décider, ou en faire une question ——— */}
+            {ouverts.map((k) => (
+              <Detail key={k.id} cle={`constat:${k.id}`} titre={k.titre} sous={refsDe(k)}>
+                <Rangees>{rangeesConstat(k)}</Rangees>
+                {corpsConstat(k)}
+                {c.decideur && !peutDecider ? <div className="lvp-note"><div>Vous pouvez préparer une question, la décision revient à {nommer(c.decideur)}.</div></div> : null}
+                <Gestes>
+                  <Bouton fort disabled={!peutDecider || envoi} onClick={() => ouvrirDecision(k, "corrige")}>Corrigé</Bouton>
+                  <Bouton disabled={!peutDecider || envoi} onClick={() => ouvrirDecision(k, "accepte")}>Accepter</Bouton>
+                  <Bouton disabled={!peutDecider || envoi} onClick={() => ouvrirDecision(k, "ecarte")}>Écarter</Bouton>
+                  <Bouton icone={<MessageSquareText aria-hidden="true" />} disabled={!peutEcrire || envoi} onClick={() => ouvrirQuestion(k)}>En faire une question</Bouton>
+                </Gestes>
+              </Detail>
+            ))}
+
+            {/* ——— un constat décidé : la décision, son motif, et le rouvrir ——— */}
+            {decides.map((k) => {
+              const d = DECISIONS[k.statut as Exclude<Constat["statut"], "ouvert">];
+              return (
+                <Detail key={k.id} cle={`constat:${k.id}`} titre={k.titre} sous={refsDe(k)}>
+                  <Rangees>
+                    <Rangee libelle="Décision" teinte={teinte(d.teinte)}>
+                      <PointLin teinte={teinte(d.teinte)} />
+                      {d.libelle}
+                    </Rangee>
+                    {k.decide_par ? <Rangee libelle="Par">{nommer(k.decide_par)}, le {jour(k.decide_le)}</Rangee> : null}
+                    {rangeesConstat(k)}
+                  </Rangees>
+                  {k.motif ? <Texte citation>Motif : {k.motif}</Texte> : null}
+                  {corpsConstat(k)}
+                  <Gestes>
+                    <Bouton disabled={!peutDecider || envoi} onClick={() => void rouvrir(k)}>Rouvrir</Bouton>
+                  </Gestes>
+                </Detail>
+              );
+            })}
+
+            {/* ——— un constat de l'indice précédent, qui ne se retrouve plus ——— */}
+            {corrigesIci.map((k) => (
+              <Detail key={k.id} cle={`constat:${k.id}`} titre={k.titre} sous={refsDe(k)}>
+                <Rangees>
+                  <Rangee libelle="État" teinte="vert">
+                    <PointLin teinte="vert" />
+                    Corrigé à l’indice {c.indice}
+                  </Rangee>
+                  {rangeesConstat(k)}
+                </Rangees>
+                {corpsConstat(k)}
+              </Detail>
+            ))}
+
+            {/* ——— une valeur lue qui a changé depuis l'indice précédent ——— */}
+            {(c.changements ?? []).map((x, i) => (
+              <Detail key={i} cle={`changement:${c.id}:${i}`} titre={x.libelle.charAt(0).toUpperCase() + x.libelle.slice(1)} sous={x.reference}>
+                <Rangees>
+                  <Rangee libelle="État" teinte={x.releve ? undefined : "jaune"}>
+                    <PointLin teinte={x.releve ? "gris" : "jaune"} />
+                    {x.releve ? "Relevé par un constat" : "Non relevé"}
+                  </Rangee>
+                  <Rangee libelle={`Indice ${precedent?.indice ?? "précédent"}`}>{valeurIndice(x.avant, x.unite)}{x.page_avant ? ` · p. ${x.page_avant}` : ""}</Rangee>
+                  <Rangee libelle={`Indice ${c.indice}`}>{valeurIndice(x.apres, x.unite)}{x.page_apres ? ` · p. ${x.page_apres}` : ""}</Rangee>
+                </Rangees>
+                {x.texte_avant ? <Texte citation>Avant : « {x.texte_avant} »</Texte> : null}
+                {x.texte_apres ? <Texte citation>Après : « {x.texte_apres} »</Texte> : null}
+              </Detail>
+            ))}
+          </>
+        )}
+        {fenetres}
+      </Partie>
+    );
+  }
+
+  return (
+    <div className="esp-carte-corps">
+      <div className="esp-section-titre">
+        <span>Contrôle du dossier</span>
+        <span className="esp-item-haut">
+          {c ? <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => ouvrirNouveau(c)}>Revérifier à l’indice suivant</button> : null}
+          <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi || piecesProjet.length < 2} onClick={() => ouvrirNouveau(null)}>Nouveau contrôle</button>
+          <button type="button" className="esp-lien-bouton" disabled={!peutChoisir || envoi} onClick={ouvrirReglages}>Régler les contrôles</button>
+        </span>
+      </div>
+      {reglesPropres || famillesCoupees.length ? (
+        <p className="lor-sous lor-reglages">
+          Réglages du projet : {reglesPropres ? `${pluriel(reglesPropres, "tolérance")} propre${reglesPropres > 1 ? "s" : ""}` : "tolérances du code"}
+          {famillesCoupees.length ? ` · ne tourne${famillesCoupees.length > 1 ? "nt" : ""} pas : ${famillesCoupees.map((f) => NATURES[f]).join(", ")}` : ""}.
+        </p>
+      ) : null}
+
+      {!c ? (
+        <div className="lor-tableau-vide">
+          {piecesProjet.length < 2
+            ? "Déposez les planches, le CCTP, la DPGF ou le règlement du PLU : Lorani les lit, puis croise cotes, surfaces, reculs et postes d’une pièce à l’autre."
+            : "Aucun contrôle : choisissez les pièces à croiser (planches entre elles, contre le règlement du PLU, CCTP contre DPGF)."}
+        </div>
+      ) : (
+        <>
+          {controles.length > 1 ? (
+            <div className="esp-filtres lor-controles" role="group" aria-label="Contrôles du projet">
+              {controles.map((x) => (
+                <button key={x.id} type="button" className="esp-filtre" aria-pressed={x.id === c.id} onClick={() => setChoisi(x.id)}>
+                  {x.intitule} · indice {x.indice}
+                </button>
+              ))}
+            </div>
+          ) : null}
+
+          <div className="lor-controle-tete">
+            <strong>{c.intitule} · indice {c.indice}</strong>
+            <Pastille teinte={STATUTS[c.statut].teinte}>{STATUTS[c.statut].libelle}</Pastille>
+            <span className="esp-kpi-sous">
+              {c.lance_le ? `passé le ${jour(c.lance_le)}` : "en attente de la lecture des pièces"}
+              {precedent ? ` · revérifie l’indice ${precedent.indice}` : ""}
+            </span>
+            {c.suspendu_le ? <Pastille teinte="ambre">Suspendu</Pastille> : null}
+            <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi || c.statut === "clos" || !!c.suspendu_le} onClick={relancer}>{envoi ? <Loader variant="spin" /> : null} {c.lance_le ? "Relancer" : "Lancer"}</button>
+            {c.suspendu_le
+              ? <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={reprendre}>Reprendre</button>
+              : <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi || c.statut === "clos"} onClick={ouvrirSuspension}>Suspendre</button>}
+          </div>
+          <p className="lor-sous">
+            Décide des constats : <strong>{c.decideur ? nommer(c.decideur) : "toute l’équipe du projet"}</strong>{" "}
+            <button type="button" className="esp-lien-bouton" disabled={!peutChoisir || envoi || c.statut === "clos"} onClick={ouvrirDecideur}>Choisir qui décide</button>
+            {c.decideur && !peutDecider ? <span> · vous pouvez préparer une question, la décision lui revient.</span> : null}
+          </p>
+          {c.suspendu_le ? (
+            <p className="lor-sous" role="status">Suspendu le {jour(c.suspendu_le)} : {c.suspendu_motif}. Il ne se lancera pas, même quand ses pièces seront lues, tant qu’il n’est pas repris.</p>
+          ) : null}
+          {c.lance_le ? (
+            <p className="lor-sous" role="status">
+              {ouverts.length ? `${pluriel(ouverts.length, "constat")} ouvert${ouverts.length > 1 ? "s" : ""}, dont ${pluriel(bloquants, "bloquant")}.` : "Aucun constat ouvert."}
+              {precedent ? ` ${pluriel(corrigesIci.length, "constat")} de l’indice ${precedent.indice} corrigé${corrigesIci.length > 1 ? "s" : ""}.` : ""}
+            </p>
+          ) : null}
+          {c.lance_le ? (
+            <div className="esp-actions lor-rapport">
+              <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!!rapport} onClick={() => void exporter("pdf")}>{rapport === "pdf" ? <Loader variant="spin" /> : <FileDown width={15} height={15} aria-hidden="true" />} Rapport PDF annoté</button>
+              <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!!rapport} onClick={() => void exporter("xlsx")}>{rapport === "xlsx" ? <Loader variant="spin" /> : <FileDown width={15} height={15} aria-hidden="true" />} Tableau Excel</button>
+            </div>
+          ) : null}
+          {erreur && !form ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+
+          <ul className="lor-controle-pieces" aria-label="Pièces croisées">
+            {pieces.map((x) => {
+              const p = pieceDe(x.piece_id);
+              return (
+                <li key={x.id}>
+                  <strong>{x.reference ?? ROLES[x.role]}</strong> <span className="esp-kpi-sous">{ROLES[x.role]} · {p?.nom_fichier ?? "pièce"}{p && !lue(p) ? " · en lecture" : ""}</span>
+                </li>
+              );
+            })}
+          </ul>
+
+          {ouverts.map((k) => (
+            <div key={k.id} className="lor-constat" data-gravite={k.gravite}>
+              <div className="lor-situation-tete">
+                <Pastille teinte={GRAVITES[k.gravite].teinte}>{GRAVITES[k.gravite].libelle}</Pastille>
+                <span className="esp-kpi-sous">{NATURES[k.nature]}{k.precedent_id ? ` · relevé depuis l’indice ${precedent?.indice ?? "précédent"}` : ""}</span>
+              </div>
+              <div>{k.titre}</div>
+              {k.correction ? <div className="lor-sous"><strong>Correction proposée :</strong> {k.correction}</div> : null}
+              {k.valeurs.length ? (
+                <ul className="lor-citations" aria-label="Valeurs lues">
+                  {k.valeurs.map((v, i) => <li key={i}>{citation(v, k.grandeur)}</li>)}
+                </ul>
+              ) : null}
+              <div className="esp-actions">
+                <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={!peutDecider || envoi} onClick={() => ouvrirDecision(k, "corrige")}>Corrigé</button>
+                <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutDecider || envoi} onClick={() => ouvrirDecision(k, "accepte")}>Accepter</button>
+                <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutDecider || envoi} onClick={() => ouvrirDecision(k, "ecarte")}>Écarter</button>
+                <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => ouvrirQuestion(k)}>En faire une question</button>
+              </div>
+            </div>
+          ))}
+
+          {c.changements?.length ? (
+            <details className="lor-temps-recents" open={c.changements.some((x) => !x.releve)}>
+              <summary>Changements depuis l’indice {precedent?.indice ?? "précédent"} ({c.changements.length}{c.changements.some((x) => !x.releve) ? `, dont ${c.changements.filter((x) => !x.releve).length} non relevé${c.changements.filter((x) => !x.releve).length > 1 ? "s" : ""}` : ""})</summary>
+              <ul className="lor-liste">
+                {c.changements.map((x, i) => (
+                  <li key={i}>
+                    <Pastille teinte={x.releve ? "gris" : "ambre"}>{x.releve ? "Relevé" : "Non relevé"}</Pastille>{" "}
+                    <strong>{x.reference}</strong> · {x.libelle.charAt(0).toUpperCase() + x.libelle.slice(1)} : {valeurIndice(x.avant, x.unite)} → {valeurIndice(x.apres, x.unite)}
+                    <span className="lor-sous"> {x.page_apres ? `p. ${x.page_apres}` : ""}{x.texte_apres ? ` · « ${x.texte_apres} »` : ""}</span>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          ) : null}
+          {corrigesIci.length ? (
+            <details className="lor-temps-recents">
+              <summary>Corrigés depuis l’indice {precedent?.indice ?? "précédent"} ({corrigesIci.length})</summary>
+              <ul className="lor-liste">
+                {corrigesIci.map((k) => <li key={k.id}><Pastille teinte="vert">Corrigé à l’indice {c.indice}</Pastille> {k.titre}</li>)}
+              </ul>
+            </details>
+          ) : null}
+          {decides.length ? (
+            <details className="lor-temps-recents">
+              <summary>Décidés ({decides.length})</summary>
+              <ul className="lor-liste">
+                {decides.map((k) => {
+                  const d = DECISIONS[k.statut as Exclude<Constat["statut"], "ouvert">];
+                  return (
+                    <li key={k.id}>
+                      <Pastille teinte={d.teinte}>{d.libelle}</Pastille> {k.titre}
+                      <span className="lor-sous"> {k.motif ? `Motif : ${k.motif}` : ""}{k.decide_par ? ` · ${nommer(k.decide_par)}, le ${jour(k.decide_le)}` : ""}</span>{" "}
+                      <button type="button" className="esp-lien-bouton" disabled={!peutDecider || envoi} onClick={() => void rouvrir(k)}>Rouvrir</button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </details>
+          ) : null}
+        </>
+      )}
+
+      {fenetres}
     </div>
   );
 }

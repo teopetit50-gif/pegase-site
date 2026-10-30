@@ -17,7 +17,7 @@
    de /espace), les composants qui s'en servent gardent leur dessin d'avant.
    ══════════════════════════════════════════════════════════════════════ */
 
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { ChevronDown, X } from "lucide-react";
 import "./linear-initiative.css";
@@ -149,9 +149,17 @@ export function Point({ teinte: t }: { teinte: TeinteLin }) {
 /* ——— le détail de l'élément choisi, posé dans le volet ——— */
 export function Detail({ cle, titre, sous, children }: { cle: string; titre: string; sous?: ReactNode; children: ReactNode }) {
   const v = useVolet();
+  /* moins large, le volet passe au-dessus de la page : le détail qui s'ouvre hors de l'écran y est amené */
+  const amener = useCallback((el: HTMLElement | null) => {
+    if (!el) return;
+    requestAnimationFrame(() => {
+      const r = el.getBoundingClientRect();
+      if (r.top < 0 || r.top > window.innerHeight - 120) el.scrollIntoView({ block: "start", behavior: "smooth" });
+    });
+  }, []);
   if (!v || v.choisie !== cle || !v.cible) return null;
   return createPortal(
-    <section className="lit-carte lvp-detail" aria-label={titre}>
+    <section ref={amener} className="lit-carte lvp-detail" aria-label={titre}>
       <div className="lvp-detail-tete">
         <h2 className="lvp-detail-titre">{titre}</h2>
         <button type="button" className="lit-rond lit-rond--24" aria-label="Fermer le détail" title="Fermer (Échap)" onClick={() => v.choisir(null)}>

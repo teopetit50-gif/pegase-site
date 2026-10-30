@@ -22,15 +22,16 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useMemo, useState } from "react";
-import { CalendarCheck, CalendarPlus, Check, FileSignature, Gavel, ListChecks, Scale, SlidersHorizontal, XCircle } from "lucide-react";
+import { Bell, CalendarCheck, CalendarDays, CalendarPlus, Check, FileSignature, FileText, Gavel, ListChecks, Scale, ScanText, SlidersHorizontal, XCircle } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
-import { Avis, Pastille } from "../ui";
+import { Avis, Pastille, type Teinte } from "../ui";
 import { dateCourte, dateHeure } from "../format";
 import { DECISIONS, ETATS, ISSUES_RECOURS, NATURES_DATE_LUE, NATURES_RECOURS, STATUTS_ETAPE, TYPES, TYPES_CONTROLE, libelleRappel, libelleTypePiece, titrePermis } from "./etats";
 import { clore_recours, confirmerDateLue, confirmerDecisionImplicite, ecarterDateLue, saisirPermis, saisirRecours, type SaisiePermis } from "./portes";
 import type { Calcul, DateLue, Dossier, Echeance, Etape, Permis, PieceProjet, Projet, Recours } from "./types";
+import { Bouton, Detail, Gestes, Groupe, Ligne, Liste, Partie, Pilule, Point, Rangee, Rangees, SousLigne, SousListe, Texte, Vide, jourCourt, teinte as teinteLin, useVolet } from "@/components/espace2/lin/Volet";
 
 type Props = {
   permis: Permis;
@@ -125,6 +126,10 @@ function valeursEnClair(nature: DateLue["nature"], v: Record<string, unknown>): 
 }
 
 export default function PermisVue({ permis: p, projet, dossier, source, peutEcrire, nommer, onLocal, relire, parties }: Props) {
+  /* 30/10/2026 — sur la page d'un permis de l'espace 2 (qui fournit un volet), le calendrier, les échéances, les
+     dates lues, les recours et les courriers passent en liste, le détail de l'élément choisi dans le volet ;
+     sans volet (l'écran de /espace), le dessin d'avant */
+  const volet = useVolet();
   const voir = (b: BlocPermis) => !parties || parties.includes(b);
   const voirSaisie = (q: SaisieVisible) => !parties || parties.includes("saisir") || parties.includes(`saisir:${q}`);
   const filtre = (prefixe: string) => (parties ?? []).filter((x) => x.startsWith(prefixe)).map((x) => x.slice(prefixe.length));
@@ -369,286 +374,9 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
   };
   const voirSaisir = parties ? Object.values(boutons).some(Boolean) : true;
 
-  return (
-    <div style={{ display: "grid", gap: 14, gridTemplateColumns: "minmax(0, 1fr)" }}>
-      {/* ——— en-tête ——— */}
-      {voir("entete") || voir("regime") ? (
-      <section className="esp-carte" aria-label="Le permis">
-        <div className="esp-carte-tete">
-          {voir("entete") ? (
-          <div>
-            <h2 className="esp-carte-titre">{titre}</h2>
-            <div className="lor-sous">
-              {TYPES[p.type_autorisation].libelle}
-              {p.numero ? <> · <span className="esp-mono">{p.numero}</span></> : " · sans numéro"}
-              {" · "}
-              {projet.commune ?? "commune inconnue"}
-              {projet.parcelles.length ? ` · ${projet.parcelles.join(", ")}` : ""}
-            </div>
-          </div>
-          ) : null}
-          <span className="esp-item-haut">
-            <Pastille teinte={etat.teinte}>{etat.libelle}</Pastille>
-            {p.secteur_protege ? <Pastille contour>Secteur protégé</Pastille> : null}
-            {p.immeuble_inscrit_mh ? <Pastille contour>Monument historique</Pastille> : null}
-            {p.erp_autorisation ? <Pastille contour>ERP</Pastille> : null}
-            {p.igh ? <Pastille contour>IGH</Pastille> : null}
-            {p.evaluation_environnementale ? <Pastille contour>Évaluation environnementale</Pastille> : null}
-            {!p.actif ? <Pastille teinte="gris">Inactif</Pastille> : null}
-            {peutEcrire && p.actif ? <button type="button" className="esp-lien-bouton" disabled={gris} onClick={ouvrirRegime}><SlidersHorizontal width={14} height={14} aria-hidden="true" style={{ verticalAlign: "-2px", marginRight: 4 }} />Régime</button> : null}
-          </span>
-        </div>
-        <div className="esp-carte-corps">
-          <dl className="lor-bandeau">
-            <div className="lor-chiffre">
-              <dt>Déposé le</dt>
-              <dd>{p.date_depot ? dateCourte(`${p.date_depot}T12:00:00`) : "—"}{p.date_depot ? <small>{quand(p.date_depot)}</small> : <small>à déposer</small>}</dd>
-            </div>
-            <div className="lor-chiffre" data-teinte={p.etat === "pieces_demandees" ? "rouge" : undefined}>
-              <dt>{p.etat === "pieces_demandees" ? "Pièces à fournir avant le" : "Décision attendue le"}</dt>
-              <dd>
-                {p.etat === "pieces_demandees"
-                  ? (() => {
-                      const e = etapes.find((x) => x.nature === "pieces");
-                      return e?.date ? <>{dateCourte(`${e.date}T12:00:00`)}<small>{quand(e.date)} · sinon {dp ? "opposition" : "rejet"} tacite</small></> : "—";
-                    })()
-                  : p.decision
-                    ? <>{DECISIONS[p.decision]}<small>le {dateCourte(`${p.date_decision}T12:00:00`)}</small></>
-                    : c.date_decision_attendue
-                      ? <>{dateCourte(`${c.date_decision_attendue}T12:00:00`)}<small>{quand(c.date_decision_attendue)} · sinon {c.regime?.effet_silence ?? "permis tacite"}</small></>
-                      : "—"}
-              </dd>
-            </div>
-            <div className="lor-chiffre" data-teinte={accorde && p.date_affichage ? "vert" : accorde ? "ambre" : undefined}>
-              <dt>Purgé de tout recours le</dt>
-              <dd>
-                {c.date_purge ? <>{dateCourte(`${c.date_purge}T12:00:00`)}<small>{quand(c.date_purge)}</small></> : accorde && !p.date_affichage ? <>Affichage à saisir<small>le recours des tiers ne court pas</small></> : p.etat === "recours_en_cours" ? <>Suspendu<small>recours en cours</small></> : "—"}
-              </dd>
-            </div>
-            <div className="lor-chiffre" data-teinte={c.chantier_sans_risque_le && c.chantier_sans_risque_le <= auj ? "vert" : undefined}>
-              <dt>Chantier sans risque dès le</dt>
-              <dd>{c.chantier_sans_risque_le ? <>{dateCourte(`${c.chantier_sans_risque_le}T12:00:00`)}<small>{c.chantier_sans_risque_le <= auj ? "vous pouvez démarrer" : quand(c.chantier_sans_risque_le)}</small></> : "—"}</dd>
-            </div>
-          </dl>
-          {c.regime ? (
-            <p className="esp-kpi-sous" style={{ marginTop: 10 }}>
-              Règle d&apos;instruction : <span className="esp-mono">{c.regime.regle_instruction}</span>
-              {c.regime.delai_notifie_mois ? ` · délai de ${c.regime.delai_notifie_mois} mois notifié par la mairie` : ""}
-              {" · "}sans réponse de la mairie : <strong>{c.regime.effet_silence}</strong>
-              {c.regime.motifs_silence?.length ? ` (${c.regime.motifs_silence.map((m) => `art. ${m.article}`).join(", ")})` : ""}
-            </p>
-          ) : null}
-        </div>
-      </section>
-      ) : null}
-
-      {fait && voir("retour") ? <Avis teinte="vert" role="status"><strong>C&apos;est fait.</strong> {fait}</Avis> : null}
-      {erreur && !form && voir("retour") ? <Avis teinte="rouge" role="alert"><strong>La base a refusé.</strong> {erreur}</Avis> : null}
-      {!peutEcrire && voir("lecture") ? <Avis teinte="gris">Vous voyez ce dossier sans pouvoir y écrire : demandez l&apos;accès en écriture à un gérant ou au chef de projet.</Avis> : null}
-
-      {/* ——— 1. ce qui attend un membre ——— */}
-      {voir("implicite") && p.etat === "decision_a_confirmer" && c.decision_implicite ? (
-        <section className="esp-carte" aria-label="Décision implicite à confirmer">
-          <div className="esp-carte-tete">
-            <h2 className="esp-carte-titre">{c.decision_implicite.nature === "tacite" ? (dp ? "Non-opposition tacite née" : "Permis tacite né") : dp ? "Opposition tacite" : "Rejet implicite"} le {dateCourte(`${c.decision_implicite.date}T12:00:00`)}</h2>
-            <Pastille teinte={c.decision_implicite.nature === "tacite" ? "ambre" : "rouge"}>À confirmer</Pastille>
-          </div>
-          <div className="esp-carte-corps">
-            <Avis teinte={c.decision_implicite.nature === "tacite" ? "ambre" : "rouge"}>
-              <strong>Si aucune décision ne vous a été notifiée</strong>, {c.decision_implicite.motif} Confirmez-le ici : le moteur date la décision. Si un arrêté est arrivé, saisissez-le plutôt.
-            </Avis>
-            <div className="esp-actions" style={{ marginTop: 12 }}>
-              <button type="button" className="r-btn r-btn--noir" disabled={gris} onClick={() => { setErreur(null); setForm({ type: "implicite" }); }}>
-                <Gavel width={16} height={16} aria-hidden="true" /> Confirmer la décision implicite
-              </button>
-              <button type="button" className="r-btn r-btn--fil" disabled={gris} onClick={() => ouvrirSaisie("decision")}>Saisir la décision reçue</button>
-            </div>
-          </div>
-        </section>
-      ) : null}
-
-      {voir("lues") && proposees.length ? (
-        <section className="esp-carte" aria-label="Dates lues sur les courriers">
-          <div className="esp-carte-tete">
-            <h2 className="esp-carte-titre">Lu sur les courriers de la mairie</h2>
-            <Pastille teinte="ambre">{proposees.length} à confirmer</Pastille>
-          </div>
-          <div className="esp-carte-corps" style={{ display: "grid", gap: 10 }}>
-            {proposees.map((d) => {
-              const piece = dossier.pieces.find((x) => x.id === d.piece_id);
-              return (
-                <div key={d.id} className="lor-lecture" data-statut={d.statut}>
-                  <div className="esp-item-haut">
-                    <strong>{NATURES_DATE_LUE[d.nature].libelle}</strong>
-                    <Pastille contour>{libelleTypePiece(d.type_piece)}</Pastille>
-                    {d.verifiee ? <Pastille teinte="vert">Citation retrouvée</Pastille> : <Pastille teinte="ambre">Citation non retrouvée</Pastille>}
-                    {!d.permis_id ? <Pastille teinte="ambre">Permis à choisir</Pastille> : null}
-                  </div>
-                  <div className="lor-lecture-valeurs">
-                    {valeursEnClair(d.nature, d.proposition).map((v) => (
-                      <span key={v.libelle}>{v.libelle} : <b>{v.valeur}</b></span>
-                    ))}
-                  </div>
-                  {d.citations?.length ? (
-                    <div style={{ display: "grid", gap: 2 }}>
-                      {d.citations.slice(0, 3).map((ci, i) => (
-                        <span key={i} className="lor-citation">{ci.texte}{ci.page ? ` (page ${ci.page})` : ""}</span>
-                      ))}
-                    </div>
-                  ) : null}
-                  <div className="esp-kpi-sous">{piece?.nom_fichier ?? "courrier"} · lu {d.cree_le ? dateHeure(d.cree_le) : ""}</div>
-                  <div className="esp-actions">
-                    <button type="button" className="r-btn r-btn--noir" disabled={gris} onClick={() => ouvrirConfirmation(d)}><Check width={16} height={16} aria-hidden="true" /> Confirmer</button>
-                    <button type="button" className="r-btn r-btn--fil" disabled={gris} onClick={() => { setMotif(""); setErreur(null); setForm({ type: "ecarter", date: d }); }}><XCircle width={16} height={16} aria-hidden="true" /> Écarter</button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      ) : null}
-
-      {/* ——— ce qu'on peut saisir maintenant ——— */}
-      {(voir("saisir") || filtre("saisir:").length > 0) && voirSaisir && peutEcrire && p.actif && !["purge", "refuse", "rejete", "annule", "classe", "hors_catalogue"].includes(p.etat) ? (
-        <section className="esp-carte" aria-label="Saisir une étape">
-          <div className="esp-carte-tete">
-            <h2 className="esp-carte-titre">Saisir ce qui est arrivé</h2>
-            <span className="esp-kpi-sous">Chaque saisie recalcule le calendrier et ses rappels.</span>
-          </div>
-          <div className="esp-carte-corps">
-            <div className="esp-actions">
-              {boutons.depot ? <button type="button" className="r-btn r-btn--noir" disabled={gris} onClick={() => ouvrirSaisie("depot")}><CalendarPlus width={16} height={16} aria-hidden="true" /> Dossier déposé</button> : null}
-              {boutons.demande_pieces ? <button type="button" className="r-btn r-btn--fil" disabled={gris} onClick={() => ouvrirSaisie("demande_pieces")}>Demande de pièces reçue</button> : null}
-              {boutons.pieces_fournies ? <button type="button" className="r-btn r-btn--noir" disabled={gris} onClick={() => ouvrirSaisie("pieces_fournies")}><ListChecks width={16} height={16} aria-hidden="true" /> Pièces reçues par la mairie</button> : null}
-              {boutons.delai ? <button type="button" className="r-btn r-btn--fil" disabled={gris} onClick={() => ouvrirSaisie("delai")}>Délai notifié par la mairie</button> : null}
-              {boutons.decision ? <button type="button" className="r-btn r-btn--fil" disabled={gris} onClick={() => ouvrirSaisie("decision")}><FileSignature width={16} height={16} aria-hidden="true" /> Arrêté reçu</button> : null}
-              {boutons.affichage ? <button type="button" className="r-btn r-btn--noir" disabled={gris} onClick={() => ouvrirSaisie("affichage")}><CalendarCheck width={16} height={16} aria-hidden="true" /> Permis affiché sur le terrain</button> : null}
-              {boutons.recours ? <button type="button" className="r-btn r-btn--fil" disabled={gris} onClick={() => { setRec((r) => ({ ...r, nature: "gracieux", date: aujourdHuiIso(), auteur: "" })); setErreur(null); setForm({ type: "recours" }); }}><Scale width={16} height={16} aria-hidden="true" /> Recours reçu</button> : null}
-            </div>
-          </div>
-        </section>
-      ) : null}
-
-      {/* ——— 2. le calendrier ——— */}
-      {(voir("calendrier") || naturesEtapes.length > 0) && !(naturesEtapes.length > 0 && !etapesVues.length) ? (
-      <section className="esp-carte" aria-label="Calendrier du permis">
-        <div className="esp-carte-tete">
-          <h2 className="esp-carte-titre">Calendrier</h2>
-          <span className="esp-kpi-sous">{c.version ? `moteur ${c.version}` : ""}{p.calcule_le ? ` · calculé le ${dateHeure(p.calcule_le)}` : ""}</span>
-        </div>
-        <div className="esp-carte-corps">
-          {!etapesVues.length ? (
-            <div className="lor-tableau-vide">
-              {p.etat === "hors_catalogue" ? "Lorani ne calcule pas les délais de ce territoire." : "Le calendrier commence au dépôt du dossier : saisissez la date de dépôt, ou déposez le récépissé pour qu'il soit lu."}
-            </div>
-          ) : (
-            <ol className="lor-calendrier">
-              {etapesVues.map((e, i) => (
-                <EtapeLigne key={`${e.nature}-${i}`} e={e} avant={i === rangAujourdhui ? <li className="lor-aujourdhui" aria-label="Aujourd'hui">Aujourd&apos;hui</li> : null} />
-              ))}
-              {rangAujourdhui >= etapesVues.length ? <li className="lor-aujourdhui" aria-label="Aujourd'hui">Aujourd&apos;hui</li> : null}
-            </ol>
-          )}
-        </div>
-      </section>
-      ) : null}
-
-      {/* ——— 4 bis. les lettres de demande de pièces (b5_07) ——— */}
-      {voir("demandes") && (p.demandes_pieces?.length ?? 0) > 1 ? (
-        <Avis teinte="ambre">
-          <strong>Plusieurs demandes de pièces.</strong> À fournir : {p.pieces_demandees.map((x) => x.code).join(", ") || "—"}.{" "}
-          Lettres : {p.demandes_pieces!.map((h) => `du ${dateCourte(`${h.date}T12:00:00`)} (${h.pieces.map((x) => x.code).join(", ") || "aucune pièce"})`).join(" ; ")}.{" "}
-          Une nouvelle invitation à compléter le dossier est sans incidence sur le cours du délai et sur la naissance d’une décision tacite (CE, 30 avril 2024, n° 461958 ; art. R*423-38) : le délai de trois mois court depuis la première lettre
-          {p.date_pieces_fournies ? " ; une lettre reçue après la remise des pièces ne modifie pas les délais (art. R*423-41)" : ""}.
-        </Avis>
-      ) : null}
-
-      {/* ——— 5. les avertissements ——— */}
-      {voir("avertissements") && c.avertissements?.length ? (
-        <div style={{ display: "grid", gap: 8 }}>
-          {c.avertissements.map((a, i) => (
-            <Avis key={i} teinte="ambre"><strong>À savoir.</strong> {a}</Avis>
-          ))}
-        </div>
-      ) : null}
-
-      {/* ——— 3. les échéances et les rappels ——— */}
-      {(voir("echeances") || naturesEcheances.length > 0) && !(naturesEcheances.length > 0 && !echeancesVues.length) ? (
-      <section className="esp-carte" aria-label="Échéances et rappels">
-        <div className="esp-carte-tete">
-          <h2 className="esp-carte-titre">Échéances et rappels</h2>
-          <span className="esp-kpi-sous">{echeancesVues.filter((e) => e.statut === "ouvert" || e.statut === "depasse").length} en cours</span>
-        </div>
-        <div className="esp-carte-corps">
-          {!echeancesVues.length ? (
-            <div className="lor-tableau-vide">Aucune échéance posée : elles naissent au dépôt du dossier.</div>
-          ) : (
-            <ul className="esp-fil">
-              {echeancesVues.map((e) => (
-                <EcheanceLigne key={e.delai_id} e={e} nommer={nommer} />
-              ))}
-            </ul>
-          )}
-        </div>
-      </section>
-      ) : null}
-
-      {/* ——— 4. les recours ——— */}
-      {voir("recours") && (recours.length || accorde) ? (
-        <section className="esp-carte" aria-label="Recours">
-          <div className="esp-carte-tete">
-            <h2 className="esp-carte-titre">Recours</h2>
-            <span className="esp-kpi-sous">{recours.length ? `${recours.length} saisi${recours.length > 1 ? "s" : ""}` : "aucun"}</span>
-          </div>
-          <div className="esp-carte-corps">
-            {!recours.length ? (
-              <div className="lor-tableau-vide">Aucun recours saisi. {p.date_affichage ? "Le délai des tiers court depuis l'affichage." : "Tant que le permis n'est pas affiché, un recours reste possible."}</div>
-            ) : (
-              <ul className="esp-fil">
-                {recours.map((r) => (
-                  <li key={r.id}>
-                    <span className="esp-fil-point" data-teinte={ISSUES_RECOURS[r.issue].teinte} />
-                    <div>
-                      <div className="esp-fil-texte">
-                        <strong>{NATURES_RECOURS[r.nature]}</strong> du {dateCourte(`${r.date_recours}T12:00:00`)}{r.auteur ? ` — ${r.auteur}` : ""}
-                        {" "}<Pastille teinte={ISSUES_RECOURS[r.issue].teinte}>{ISSUES_RECOURS[r.issue].libelle}{r.date_issue ? ` le ${dateCourte(`${r.date_issue}T12:00:00`)}` : ""}</Pastille>
-                      </div>
-                      {r.issue === "en_cours" && peutEcrire ? (
-                        <div className="esp-actions" style={{ marginTop: 6 }}>
-                          <button type="button" className="r-btn r-btn--fil" disabled={gris} onClick={() => { setRec((x) => ({ ...x, issue: "rejete", date_issue: aujourdHuiIso() })); setErreur(null); setForm({ type: "issue", recours: r }); }}>Saisir l&apos;issue</button>
-                        </div>
-                      ) : null}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </section>
-      ) : null}
-
-      {/* ——— 6. les courriers et les dates déjà décidées ——— */}
-      {voir("courriers") ? (
-      <section className="esp-carte" aria-label="Courriers du dossier">
-        <div className="esp-carte-tete">
-          <h2 className="esp-carte-titre">Courriers du dossier</h2>
-          <span className="esp-kpi-sous">{pieces.length} pièce{pieces.length > 1 ? "s" : ""}</span>
-        </div>
-        <div className="esp-carte-corps">
-          {!pieces.length ? (
-            <div className="lor-tableau-vide">Aucun courrier déposé. Déposez le récépissé, les lettres de la mairie, l&apos;arrêté et le constat d&apos;affichage : Lorani les lit et propose les dates.</div>
-          ) : (
-            <ul className="esp-fil">
-              {pieces.map((x) => (
-                <PieceLigne key={x.id} piece={x} decisions={decidees.filter((d) => d.piece_id === x.id)} nommer={nommer} />
-              ))}
-            </ul>
-          )}
-        </div>
-      </section>
-      ) : null}
-
-      {/* ——— les dialogues ——— */}
+  /* 30/10/2026 — les fenêtres, les mêmes pour la liste et pour le dessin d'avant */
+  const fenetres = (
+    <>
       <Dialog open={form?.type === "confirmer"} onOpenChange={(o) => !o && setForm(null)}>
         <DialogContent>
           <DialogHeader>
@@ -879,6 +607,669 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </>
+  );
+
+  /* ══ 30/10/2026 — les blocs denses en liste (une ligne de 44 par élément), le détail dans le volet de la page ══
+     Les clés (« lue: », « etape: », « echeance: », « recours: », « courrier: ») sont uniques dans la page : une
+     étape du calendrier est repérée par son rang dans le calcul, les autres par leur identifiant. */
+  const jourLong = (iso: string) => dateCourte(`${iso}T12:00:00`);
+  const pastille = (t: Teinte, libelle: string) => (
+    <Pilule teinte={teinteLin(t)} icone={<Point teinte={teinteLin(t)} />}>
+      {libelle}
+    </Pilule>
+  );
+  const iconeTeinte = (t: Teinte, icone: React.ReactNode) => (
+    <span className="lvp-icone-teinte" data-teinte={teinteLin(t)}>
+      {icone}
+    </span>
+  );
+  const fondement = (texte: string, url: string | null | undefined) =>
+    url ? (
+      <a className="lvp-lien" href={url} target="_blank" rel="noopener noreferrer">
+        {texte}
+      </a>
+    ) : (
+      texte
+    );
+
+  /* ——— les dates lues sur les courriers, à confirmer ——— */
+  const listeLues = volet ? (
+    <Partie titre="Lu sur les courriers de la mairie" compte={`${proposees.length} à confirmer`}>
+      <Liste>
+        <Groupe nom="À confirmer" compte={proposees.length}>
+          {proposees.map((d) => {
+            const lu = NATURES_DATE_LUE[d.nature];
+            return (
+              <Ligne
+                key={d.id}
+                cle={`lue:${d.id}`}
+                libelle={`${lu.libelle} lue sur ${libelleTypePiece(d.type_piece).toLowerCase()}, à confirmer`}
+                icone={iconeTeinte("ambre", <ScanText />)}
+                titre={lu.libelle}
+                second={valeursEnClair(d.nature, d.proposition).map((v) => v.valeur).join(" · ")}
+                droite={
+                  <>
+                    {!d.permis_id ? pastille("ambre", "Permis à choisir") : null}
+                    {d.verifiee ? pastille("vert", "Citation retrouvée") : pastille("ambre", "Citation non retrouvée")}
+                  </>
+                }
+                date={jourCourt(d.cree_le)}
+                dateTitre={d.cree_le ? `Lu le ${dateHeure(d.cree_le)}` : undefined}
+              />
+            );
+          })}
+        </Groupe>
+      </Liste>
+      {proposees.map((d) => {
+        const piece = dossier.pieces.find((x) => x.id === d.piece_id);
+        return (
+          <Detail key={d.id} cle={`lue:${d.id}`} titre={NATURES_DATE_LUE[d.nature].libelle} sous={`${libelleTypePiece(d.type_piece)} · ${piece?.nom_fichier ?? "courrier"}`}>
+            <Rangees>
+              {valeursEnClair(d.nature, d.proposition).map((v) => (
+                <Rangee key={v.libelle} libelle={v.libelle}>
+                  {v.valeur}
+                </Rangee>
+              ))}
+              <Rangee libelle="Citation" teinte={d.verifiee ? "vert" : "jaune"}>
+                {d.verifiee ? "Retrouvée dans le courrier" : "Non retrouvée"}
+              </Rangee>
+              {!d.permis_id ? (
+                <Rangee libelle="Permis" teinte="jaune">
+                  À choisir en confirmant
+                </Rangee>
+              ) : null}
+              <Rangee libelle="Courrier">{piece?.nom_fichier ?? "courrier"}</Rangee>
+              {d.cree_le ? <Rangee libelle="Lu le">{dateHeure(d.cree_le)}</Rangee> : null}
+            </Rangees>
+            {(d.citations ?? []).slice(0, 3).map((ci, i) => (
+              <Texte key={i} citation>
+                {ci.texte}
+                {ci.page ? ` (page ${ci.page})` : ""}
+              </Texte>
+            ))}
+            <Gestes>
+              <Bouton fort icone={<Check aria-hidden="true" />} disabled={gris} onClick={() => ouvrirConfirmation(d)}>
+                Confirmer
+              </Bouton>
+              <Bouton icone={<XCircle aria-hidden="true" />} disabled={gris} onClick={() => { setMotif(""); setErreur(null); setForm({ type: "ecarter", date: d }); }}>
+                Écarter
+              </Bouton>
+            </Gestes>
+          </Detail>
+        );
+      })}
+    </Partie>
+  ) : null;
+
+  /* ——— le calendrier : avant aujourd'hui, puis aujourd'hui et après (la ligne « aujourd'hui » d'avant) ——— */
+  const cleEtape = (e: Etape) => `etape:${e.nature}:${etapes.indexOf(e)}`;
+  const calculLe = [c.version ? `moteur ${c.version}` : null, p.calcule_le ? `le ${dateHeure(p.calcule_le)}` : null].filter(Boolean).join(" · ");
+  const ligneEtape = (e: Etape) => {
+    const s = STATUTS_ETAPE[e.statut] ?? STATUTS_ETAPE.a_venir;
+    const prevision = e.certitude === "prevision" || e.certitude === "a_confirmer";
+    return (
+      <Ligne
+        key={cleEtape(e)}
+        cle={cleEtape(e)}
+        libelle={`${e.libelle}, ${s.libelle.toLowerCase()}${e.date ? `, le ${jourLong(e.date)}` : ", sans date"}`}
+        icone={iconeTeinte(s.teinte, <CalendarDays />)}
+        titre={e.libelle}
+        second={e.date ? `${e.statut === "fait" ? "fait" : quand(e.date)}${prevision ? " · prévision" : ""}` : "sans date"}
+        droite={pastille(s.teinte, s.libelle)}
+        date={jourCourt(e.date)}
+        dateTitre={e.date ? jourLong(e.date) : undefined}
+      />
+    );
+  };
+  const listeCalendrier = volet ? (
+    <Partie titre="Calendrier" compte={etapesVues.length ? `${etapesVues.length} étape${etapesVues.length > 1 ? "s" : ""}` : null}>
+      {!etapesVues.length ? (
+        <Vide>{p.etat === "hors_catalogue" ? "Lorani ne calcule pas les délais de ce territoire." : "Le calendrier commence au dépôt du dossier : saisissez la date de dépôt, ou déposez le récépissé pour qu'il soit lu."}</Vide>
+      ) : (
+        <Liste>
+          {rangAujourdhui > 0 ? (
+            <Groupe nom="Avant aujourd'hui" compte={rangAujourdhui}>
+              {etapesVues.slice(0, rangAujourdhui).map(ligneEtape)}
+            </Groupe>
+          ) : null}
+          {rangAujourdhui < etapesVues.length ? (
+            <Groupe nom="Aujourd'hui et après" compte={etapesVues.length - rangAujourdhui}>
+              {etapesVues.slice(rangAujourdhui).map(ligneEtape)}
+            </Groupe>
+          ) : null}
+        </Liste>
+      )}
+      {etapesVues.map((e) => {
+        const s = STATUTS_ETAPE[e.statut] ?? STATUTS_ETAPE.a_venir;
+        const prevision = e.certitude === "prevision" || e.certitude === "a_confirmer";
+        const note = e.issue ?? e.motif ?? e.detail;
+        return (
+          <Detail key={cleEtape(e)} cle={cleEtape(e)} titre={e.libelle} sous={e.date ? `${jourLong(e.date)} · ${e.statut === "fait" ? "fait" : quand(e.date)}` : "Sans date"}>
+            <Rangees>
+              <Rangee libelle="Date">{e.date ? jourLong(e.date) : "—"}</Rangee>
+              <Rangee libelle="Statut" teinte={teinteLin(s.teinte)}>
+                {s.libelle}
+              </Rangee>
+              {prevision && e.date ? <Rangee libelle="Certitude">Prévision</Rangee> : null}
+              {e.source ? <Rangee libelle="Fondement">{fondement(e.source, e.source_url)}</Rangee> : null}
+              {e.regle ? (
+                <Rangee libelle="Règle">
+                  {e.regle}
+                  {e.version ? ` v${e.version}` : ""}
+                </Rangee>
+              ) : null}
+              {calculLe ? <Rangee libelle="Calcul">{calculLe}</Rangee> : null}
+            </Rangees>
+            {note ? <Texte>{note}</Texte> : null}
+          </Detail>
+        );
+      })}
+    </Partie>
+  ) : null;
+
+  /* ——— les échéances et les rappels : en cours, puis tenues ou annulées ——— */
+  const ligneEcheance = (e: Echeance) => {
+    const et = etatEcheance(e);
+    const prevus = e.rappels ?? [];
+    const partis = prevus.filter((j) => (e.rappels_faits ?? []).includes(j)).length;
+    const rappels = prevus.length ? `${prevus.length} rappel${prevus.length > 1 ? "s" : ""}${partis ? `, ${partis} parti${partis > 1 ? "s" : ""}` : ""}` : "sans rappel";
+    return (
+      <Ligne
+        key={e.delai_id}
+        cle={`echeance:${e.delai_id}`}
+        libelle={`${libelleEcheance(e)}, ${et.libelle.toLowerCase()}, le ${jourLong(e.echeance)}`}
+        icone={iconeTeinte(et.teinte, <Bell />)}
+        titre={libelleEcheance(e)}
+        second={[rappels, e.responsable ? nommer(e.responsable) : null].filter(Boolean).join(" · ")}
+        droite={pastille(et.teinte, et.libelle)}
+        date={jourCourt(e.echeance)}
+        dateTitre={jourLong(e.echeance)}
+      />
+    );
+  };
+  const echeancesEnCours = echeancesVues.filter((e) => e.statut !== "tenu" && e.statut !== "annule");
+  const echeancesCloses = echeancesVues.filter((e) => e.statut === "tenu" || e.statut === "annule");
+  const listeEcheances = volet ? (
+    <Partie titre="Échéances et rappels" compte={`${echeancesVues.filter((e) => e.statut === "ouvert" || e.statut === "depasse").length} en cours`}>
+      {!echeancesVues.length ? (
+        <Vide>Aucune échéance posée : elles naissent au dépôt du dossier.</Vide>
+      ) : (
+        <Liste>
+          {echeancesEnCours.length ? (
+            <Groupe nom="En cours" compte={echeancesEnCours.length}>
+              {echeancesEnCours.map(ligneEcheance)}
+            </Groupe>
+          ) : null}
+          {echeancesCloses.length ? (
+            <Groupe nom="Tenues ou annulées" compte={echeancesCloses.length}>
+              {echeancesCloses.map(ligneEcheance)}
+            </Groupe>
+          ) : null}
+        </Liste>
+      )}
+      {echeancesVues.map((e) => {
+        const et = etatEcheance(e);
+        const partis = e.rappels_faits ?? [];
+        const prevus = (e.rappels ?? []).slice().sort((a, b) => b - a);
+        return (
+          <Detail key={e.delai_id} cle={`echeance:${e.delai_id}`} titre={libelleEcheance(e)} sous={`Échéance du ${jourLong(e.echeance)} · ${quand(e.echeance)}`}>
+            <Rangees>
+              <Rangee libelle="Échéance">{jourLong(e.echeance)}</Rangee>
+              <Rangee libelle="État" teinte={teinteLin(et.teinte)}>
+                {et.libelle}
+              </Rangee>
+              {e.echeance_notifiee && e.echeance_calculee && e.echeance_notifiee !== e.echeance_calculee ? (
+                <>
+                  <Rangee libelle="Calculée">{jourLong(e.echeance_calculee)}</Rangee>
+                  <Rangee libelle="Notifiée">{jourLong(e.echeance_notifiee)}</Rangee>
+                </>
+              ) : null}
+              {e.responsable ? <Rangee libelle="Responsable">{nommer(e.responsable)}</Rangee> : null}
+              {e.regle_code ? (
+                <Rangee libelle="Règle">
+                  {e.regle_code}
+                  {e.regle_version ? ` v${e.regle_version}` : ""}
+                </Rangee>
+              ) : null}
+              {e.source_url && e.source ? <Rangee libelle="Fondement">{fondement(e.source, e.source_url)}</Rangee> : null}
+            </Rangees>
+            {e.action_attendue ? <Texte>{e.action_attendue}</Texte> : null}
+            {e.source_notification ? <Texte>{e.source_notification}</Texte> : null}
+            {prevus.length ? (
+              <SousListe titre="Rappels">
+                {prevus.map((j) => (
+                  <SousLigne key={j} titre={libelleRappel(j)} valeur={partis.includes(j) ? "parti" : "prévu"} teinte={partis.includes(j) ? "vert" : undefined} />
+                ))}
+              </SousListe>
+            ) : (
+              <Texte>Échéance d&apos;information, sans rappel.</Texte>
+            )}
+          </Detail>
+        );
+      })}
+    </Partie>
+  ) : null;
+
+  /* ——— les recours : en cours, puis clos ——— */
+  const ligneRecours = (r: Recours) => {
+    const issue = ISSUES_RECOURS[r.issue];
+    return (
+      <Ligne
+        key={r.id}
+        cle={`recours:${r.id}`}
+        libelle={`${NATURES_RECOURS[r.nature]} du ${jourLong(r.date_recours)}, ${issue.libelle.toLowerCase()}`}
+        icone={iconeTeinte(issue.teinte, <Scale />)}
+        titre={NATURES_RECOURS[r.nature]}
+        second={r.auteur}
+        droite={pastille(issue.teinte, issue.libelle)}
+        date={jourCourt(r.date_recours)}
+        dateTitre={`Formé le ${jourLong(r.date_recours)}`}
+      />
+    );
+  };
+  const recoursEnCours = recours.filter((r) => r.issue === "en_cours");
+  const recoursClos = recours.filter((r) => r.issue !== "en_cours");
+  const listeRecours = volet ? (
+    <Partie titre="Recours" compte={recours.length ? `${recours.length} saisi${recours.length > 1 ? "s" : ""}` : "aucun"}>
+      {!recours.length ? (
+        <Vide>Aucun recours saisi. {p.date_affichage ? "Le délai des tiers court depuis l'affichage." : "Tant que le permis n'est pas affiché, un recours reste possible."}</Vide>
+      ) : (
+        <Liste>
+          {recoursEnCours.length ? (
+            <Groupe nom="En cours" compte={recoursEnCours.length}>
+              {recoursEnCours.map(ligneRecours)}
+            </Groupe>
+          ) : null}
+          {recoursClos.length ? (
+            <Groupe nom="Clos" compte={recoursClos.length}>
+              {recoursClos.map(ligneRecours)}
+            </Groupe>
+          ) : null}
+        </Liste>
+      )}
+      {recours.map((r) => {
+        const issue = ISSUES_RECOURS[r.issue];
+        return (
+          <Detail key={r.id} cle={`recours:${r.id}`} titre={NATURES_RECOURS[r.nature]} sous={`Du ${jourLong(r.date_recours)}${r.auteur ? ` · ${r.auteur}` : ""}`}>
+            <Rangees>
+              <Rangee libelle="Formé le">{jourLong(r.date_recours)}</Rangee>
+              {r.auteur ? <Rangee libelle="Auteur">{r.auteur}</Rangee> : null}
+              <Rangee libelle="Issue" teinte={teinteLin(issue.teinte)}>
+                {issue.libelle}
+                {r.date_issue ? ` le ${jourLong(r.date_issue)}` : ""}
+              </Rangee>
+            </Rangees>
+            {r.issue === "en_cours" && peutEcrire ? (
+              <Gestes>
+                <Bouton fort icone={<Gavel aria-hidden="true" />} disabled={gris} onClick={() => { setRec((x) => ({ ...x, issue: "rejete", date_issue: aujourdHuiIso() })); setErreur(null); setForm({ type: "issue", recours: r }); }}>
+                  Saisir l&apos;issue
+                </Bouton>
+              </Gestes>
+            ) : null}
+          </Detail>
+        );
+      })}
+    </Partie>
+  ) : null;
+
+  /* ——— les courriers du dossier : ceux à regarder, puis les autres ; les dates décidées dans le détail ——— */
+  const ligneCourrier = (x: PieceProjet) => {
+    const et = etatPiece(x);
+    const n = decidees.filter((d) => d.piece_id === x.id).length;
+    return (
+      <Ligne
+        key={x.id}
+        cle={`courrier:${x.id}`}
+        libelle={`${libelleTypePiece(x.type_piece)}, ${x.nom_fichier}, ${et.libelle.toLowerCase()}`}
+        icone={iconeTeinte(et.teinte, <FileText />)}
+        titre={libelleTypePiece(x.type_piece)}
+        second={`${x.nom_fichier}${n ? ` · ${n} date${n > 1 ? "s" : ""} décidée${n > 1 ? "s" : ""}` : ""}`}
+        droite={pastille(et.teinte, et.libelle)}
+        date={jourCourt(x.cree_le)}
+        dateTitre={x.cree_le ? `${x.source === "courriel" ? "Reçu" : "Déposé"} le ${dateHeure(x.cree_le)}` : undefined}
+      />
+    );
+  };
+  const aRegarder = (x: PieceProjet) => ["ambre", "rouge"].includes(etatPiece(x).teinte);
+  const courriersARegarder = pieces.filter(aRegarder);
+  const courriersRanges = pieces.filter((x) => !aRegarder(x));
+  const listeCourriers = volet ? (
+    <Partie titre="Courriers du dossier" compte={`${pieces.length} pièce${pieces.length > 1 ? "s" : ""}`}>
+      {!pieces.length ? (
+        <Vide>Aucun courrier déposé. Déposez le récépissé, les lettres de la mairie, l&apos;arrêté et le constat d&apos;affichage : Lorani les lit et propose les dates.</Vide>
+      ) : (
+        <Liste>
+          {courriersARegarder.length ? (
+            <Groupe nom="À regarder" compte={courriersARegarder.length}>
+              {courriersARegarder.map(ligneCourrier)}
+            </Groupe>
+          ) : null}
+          {courriersRanges.length ? (
+            <Groupe nom="Lus ou reçus" compte={courriersRanges.length}>
+              {courriersRanges.map(ligneCourrier)}
+            </Groupe>
+          ) : null}
+        </Liste>
+      )}
+      {pieces.map((x) => {
+        const et = etatPiece(x);
+        const decisions = decidees.filter((d) => d.piece_id === x.id);
+        return (
+          <Detail key={x.id} cle={`courrier:${x.id}`} titre={libelleTypePiece(x.type_piece)} sous={x.nom_fichier}>
+            <Rangees>
+              <Rangee libelle="Statut" teinte={teinteLin(et.teinte)}>
+                {et.libelle}
+              </Rangee>
+              {x.cree_le ? <Rangee libelle={x.source === "courriel" ? "Reçu le" : "Déposé le"}>{dateHeure(x.cree_le)}</Rangee> : null}
+            </Rangees>
+            {x.cree_le && x.source === "courriel" ? <Texte>Reçu par courriel du guichet et rangé ici par son numéro de dossier.</Texte> : null}
+            {x.statut === "a_classer" ? (
+              <Texte>
+                Le lecteur n&apos;a pas reconnu un courrier de la mairie{x.motif ? ` : « ${x.motif} »` : ""}. Aucune date n&apos;en est proposée ; saisissez-la à la main.
+              </Texte>
+            ) : null}
+            {x.statut === "echec" && x.motif ? <Texte citation>Motif : « {x.motif} »</Texte> : null}
+            {decisions.length ? (
+              <SousListe titre="Dates lues">
+                {decisions.map((d) => (
+                  <SousLigne
+                    key={d.id}
+                    titre={NATURES_DATE_LUE[d.nature].libelle}
+                    second={`par ${nommer(d.decide_par)}${d.decide_le ? ` le ${dateHeure(d.decide_le)}` : ""}${d.motif ? ` (« ${d.motif} »)` : ""}`}
+                    valeur={d.statut === "confirmee" ? "confirmée" : "écartée"}
+                    teinte={d.statut === "confirmee" ? "vert" : "gris"}
+                  />
+                ))}
+              </SousListe>
+            ) : null}
+          </Detail>
+        );
+      })}
+    </Partie>
+  ) : null;
+
+  return (
+    <div style={{ display: "grid", gap: 14, gridTemplateColumns: "minmax(0, 1fr)" }}>
+      {/* ——— en-tête ——— */}
+      {voir("entete") || voir("regime") ? (
+      <section className="esp-carte" aria-label="Le permis">
+        <div className="esp-carte-tete">
+          {voir("entete") ? (
+          <div>
+            <h2 className="esp-carte-titre">{titre}</h2>
+            <div className="lor-sous">
+              {TYPES[p.type_autorisation].libelle}
+              {p.numero ? <> · <span className="esp-mono">{p.numero}</span></> : " · sans numéro"}
+              {" · "}
+              {projet.commune ?? "commune inconnue"}
+              {projet.parcelles.length ? ` · ${projet.parcelles.join(", ")}` : ""}
+            </div>
+          </div>
+          ) : null}
+          <span className="esp-item-haut">
+            <Pastille teinte={etat.teinte}>{etat.libelle}</Pastille>
+            {p.secteur_protege ? <Pastille contour>Secteur protégé</Pastille> : null}
+            {p.immeuble_inscrit_mh ? <Pastille contour>Monument historique</Pastille> : null}
+            {p.erp_autorisation ? <Pastille contour>ERP</Pastille> : null}
+            {p.igh ? <Pastille contour>IGH</Pastille> : null}
+            {p.evaluation_environnementale ? <Pastille contour>Évaluation environnementale</Pastille> : null}
+            {!p.actif ? <Pastille teinte="gris">Inactif</Pastille> : null}
+            {peutEcrire && p.actif ? <button type="button" className="esp-lien-bouton" disabled={gris} onClick={ouvrirRegime}><SlidersHorizontal width={14} height={14} aria-hidden="true" style={{ verticalAlign: "-2px", marginRight: 4 }} />Régime</button> : null}
+          </span>
+        </div>
+        <div className="esp-carte-corps">
+          <dl className="lor-bandeau">
+            <div className="lor-chiffre">
+              <dt>Déposé le</dt>
+              <dd>{p.date_depot ? dateCourte(`${p.date_depot}T12:00:00`) : "—"}{p.date_depot ? <small>{quand(p.date_depot)}</small> : <small>à déposer</small>}</dd>
+            </div>
+            <div className="lor-chiffre" data-teinte={p.etat === "pieces_demandees" ? "rouge" : undefined}>
+              <dt>{p.etat === "pieces_demandees" ? "Pièces à fournir avant le" : "Décision attendue le"}</dt>
+              <dd>
+                {p.etat === "pieces_demandees"
+                  ? (() => {
+                      const e = etapes.find((x) => x.nature === "pieces");
+                      return e?.date ? <>{dateCourte(`${e.date}T12:00:00`)}<small>{quand(e.date)} · sinon {dp ? "opposition" : "rejet"} tacite</small></> : "—";
+                    })()
+                  : p.decision
+                    ? <>{DECISIONS[p.decision]}<small>le {dateCourte(`${p.date_decision}T12:00:00`)}</small></>
+                    : c.date_decision_attendue
+                      ? <>{dateCourte(`${c.date_decision_attendue}T12:00:00`)}<small>{quand(c.date_decision_attendue)} · sinon {c.regime?.effet_silence ?? "permis tacite"}</small></>
+                      : "—"}
+              </dd>
+            </div>
+            <div className="lor-chiffre" data-teinte={accorde && p.date_affichage ? "vert" : accorde ? "ambre" : undefined}>
+              <dt>Purgé de tout recours le</dt>
+              <dd>
+                {c.date_purge ? <>{dateCourte(`${c.date_purge}T12:00:00`)}<small>{quand(c.date_purge)}</small></> : accorde && !p.date_affichage ? <>Affichage à saisir<small>le recours des tiers ne court pas</small></> : p.etat === "recours_en_cours" ? <>Suspendu<small>recours en cours</small></> : "—"}
+              </dd>
+            </div>
+            <div className="lor-chiffre" data-teinte={c.chantier_sans_risque_le && c.chantier_sans_risque_le <= auj ? "vert" : undefined}>
+              <dt>Chantier sans risque dès le</dt>
+              <dd>{c.chantier_sans_risque_le ? <>{dateCourte(`${c.chantier_sans_risque_le}T12:00:00`)}<small>{c.chantier_sans_risque_le <= auj ? "vous pouvez démarrer" : quand(c.chantier_sans_risque_le)}</small></> : "—"}</dd>
+            </div>
+          </dl>
+          {c.regime ? (
+            <p className="esp-kpi-sous" style={{ marginTop: 10 }}>
+              Règle d&apos;instruction : <span className="esp-mono">{c.regime.regle_instruction}</span>
+              {c.regime.delai_notifie_mois ? ` · délai de ${c.regime.delai_notifie_mois} mois notifié par la mairie` : ""}
+              {" · "}sans réponse de la mairie : <strong>{c.regime.effet_silence}</strong>
+              {c.regime.motifs_silence?.length ? ` (${c.regime.motifs_silence.map((m) => `art. ${m.article}`).join(", ")})` : ""}
+            </p>
+          ) : null}
+        </div>
+      </section>
+      ) : null}
+
+      {fait && voir("retour") ? <Avis teinte="vert" role="status"><strong>C&apos;est fait.</strong> {fait}</Avis> : null}
+      {erreur && !form && voir("retour") ? <Avis teinte="rouge" role="alert"><strong>La base a refusé.</strong> {erreur}</Avis> : null}
+      {!peutEcrire && voir("lecture") ? <Avis teinte="gris">Vous voyez ce dossier sans pouvoir y écrire : demandez l&apos;accès en écriture à un gérant ou au chef de projet.</Avis> : null}
+
+      {/* ——— 1. ce qui attend un membre ——— */}
+      {voir("implicite") && p.etat === "decision_a_confirmer" && c.decision_implicite ? (
+        <section className="esp-carte" aria-label="Décision implicite à confirmer">
+          <div className="esp-carte-tete">
+            <h2 className="esp-carte-titre">{c.decision_implicite.nature === "tacite" ? (dp ? "Non-opposition tacite née" : "Permis tacite né") : dp ? "Opposition tacite" : "Rejet implicite"} le {dateCourte(`${c.decision_implicite.date}T12:00:00`)}</h2>
+            <Pastille teinte={c.decision_implicite.nature === "tacite" ? "ambre" : "rouge"}>À confirmer</Pastille>
+          </div>
+          <div className="esp-carte-corps">
+            <Avis teinte={c.decision_implicite.nature === "tacite" ? "ambre" : "rouge"}>
+              <strong>Si aucune décision ne vous a été notifiée</strong>, {c.decision_implicite.motif} Confirmez-le ici : le moteur date la décision. Si un arrêté est arrivé, saisissez-le plutôt.
+            </Avis>
+            <div className="esp-actions" style={{ marginTop: 12 }}>
+              <button type="button" className="r-btn r-btn--noir" disabled={gris} onClick={() => { setErreur(null); setForm({ type: "implicite" }); }}>
+                <Gavel width={16} height={16} aria-hidden="true" /> Confirmer la décision implicite
+              </button>
+              <button type="button" className="r-btn r-btn--fil" disabled={gris} onClick={() => ouvrirSaisie("decision")}>Saisir la décision reçue</button>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {voir("lues") && proposees.length ? (volet ? listeLues : (
+        <section className="esp-carte" aria-label="Dates lues sur les courriers">
+          <div className="esp-carte-tete">
+            <h2 className="esp-carte-titre">Lu sur les courriers de la mairie</h2>
+            <Pastille teinte="ambre">{proposees.length} à confirmer</Pastille>
+          </div>
+          <div className="esp-carte-corps" style={{ display: "grid", gap: 10 }}>
+            {proposees.map((d) => {
+              const piece = dossier.pieces.find((x) => x.id === d.piece_id);
+              return (
+                <div key={d.id} className="lor-lecture" data-statut={d.statut}>
+                  <div className="esp-item-haut">
+                    <strong>{NATURES_DATE_LUE[d.nature].libelle}</strong>
+                    <Pastille contour>{libelleTypePiece(d.type_piece)}</Pastille>
+                    {d.verifiee ? <Pastille teinte="vert">Citation retrouvée</Pastille> : <Pastille teinte="ambre">Citation non retrouvée</Pastille>}
+                    {!d.permis_id ? <Pastille teinte="ambre">Permis à choisir</Pastille> : null}
+                  </div>
+                  <div className="lor-lecture-valeurs">
+                    {valeursEnClair(d.nature, d.proposition).map((v) => (
+                      <span key={v.libelle}>{v.libelle} : <b>{v.valeur}</b></span>
+                    ))}
+                  </div>
+                  {d.citations?.length ? (
+                    <div style={{ display: "grid", gap: 2 }}>
+                      {d.citations.slice(0, 3).map((ci, i) => (
+                        <span key={i} className="lor-citation">{ci.texte}{ci.page ? ` (page ${ci.page})` : ""}</span>
+                      ))}
+                    </div>
+                  ) : null}
+                  <div className="esp-kpi-sous">{piece?.nom_fichier ?? "courrier"} · lu {d.cree_le ? dateHeure(d.cree_le) : ""}</div>
+                  <div className="esp-actions">
+                    <button type="button" className="r-btn r-btn--noir" disabled={gris} onClick={() => ouvrirConfirmation(d)}><Check width={16} height={16} aria-hidden="true" /> Confirmer</button>
+                    <button type="button" className="r-btn r-btn--fil" disabled={gris} onClick={() => { setMotif(""); setErreur(null); setForm({ type: "ecarter", date: d }); }}><XCircle width={16} height={16} aria-hidden="true" /> Écarter</button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )) : null}
+
+      {/* ——— ce qu'on peut saisir maintenant ——— */}
+      {(voir("saisir") || filtre("saisir:").length > 0) && voirSaisir && peutEcrire && p.actif && !["purge", "refuse", "rejete", "annule", "classe", "hors_catalogue"].includes(p.etat) ? (
+        <section className="esp-carte" aria-label="Saisir une étape">
+          <div className="esp-carte-tete">
+            <h2 className="esp-carte-titre">Saisir ce qui est arrivé</h2>
+            <span className="esp-kpi-sous">Chaque saisie recalcule le calendrier et ses rappels.</span>
+          </div>
+          <div className="esp-carte-corps">
+            <div className="esp-actions">
+              {boutons.depot ? <button type="button" className="r-btn r-btn--noir" disabled={gris} onClick={() => ouvrirSaisie("depot")}><CalendarPlus width={16} height={16} aria-hidden="true" /> Dossier déposé</button> : null}
+              {boutons.demande_pieces ? <button type="button" className="r-btn r-btn--fil" disabled={gris} onClick={() => ouvrirSaisie("demande_pieces")}>Demande de pièces reçue</button> : null}
+              {boutons.pieces_fournies ? <button type="button" className="r-btn r-btn--noir" disabled={gris} onClick={() => ouvrirSaisie("pieces_fournies")}><ListChecks width={16} height={16} aria-hidden="true" /> Pièces reçues par la mairie</button> : null}
+              {boutons.delai ? <button type="button" className="r-btn r-btn--fil" disabled={gris} onClick={() => ouvrirSaisie("delai")}>Délai notifié par la mairie</button> : null}
+              {boutons.decision ? <button type="button" className="r-btn r-btn--fil" disabled={gris} onClick={() => ouvrirSaisie("decision")}><FileSignature width={16} height={16} aria-hidden="true" /> Arrêté reçu</button> : null}
+              {boutons.affichage ? <button type="button" className="r-btn r-btn--noir" disabled={gris} onClick={() => ouvrirSaisie("affichage")}><CalendarCheck width={16} height={16} aria-hidden="true" /> Permis affiché sur le terrain</button> : null}
+              {boutons.recours ? <button type="button" className="r-btn r-btn--fil" disabled={gris} onClick={() => { setRec((r) => ({ ...r, nature: "gracieux", date: aujourdHuiIso(), auteur: "" })); setErreur(null); setForm({ type: "recours" }); }}><Scale width={16} height={16} aria-hidden="true" /> Recours reçu</button> : null}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {/* ——— 2. le calendrier ——— */}
+      {(voir("calendrier") || naturesEtapes.length > 0) && !(naturesEtapes.length > 0 && !etapesVues.length) ? (volet ? listeCalendrier : (
+      <section className="esp-carte" aria-label="Calendrier du permis">
+        <div className="esp-carte-tete">
+          <h2 className="esp-carte-titre">Calendrier</h2>
+          <span className="esp-kpi-sous">{c.version ? `moteur ${c.version}` : ""}{p.calcule_le ? ` · calculé le ${dateHeure(p.calcule_le)}` : ""}</span>
+        </div>
+        <div className="esp-carte-corps">
+          {!etapesVues.length ? (
+            <div className="lor-tableau-vide">
+              {p.etat === "hors_catalogue" ? "Lorani ne calcule pas les délais de ce territoire." : "Le calendrier commence au dépôt du dossier : saisissez la date de dépôt, ou déposez le récépissé pour qu'il soit lu."}
+            </div>
+          ) : (
+            <ol className="lor-calendrier">
+              {etapesVues.map((e, i) => (
+                <EtapeLigne key={`${e.nature}-${i}`} e={e} avant={i === rangAujourdhui ? <li className="lor-aujourdhui" aria-label="Aujourd'hui">Aujourd&apos;hui</li> : null} />
+              ))}
+              {rangAujourdhui >= etapesVues.length ? <li className="lor-aujourdhui" aria-label="Aujourd'hui">Aujourd&apos;hui</li> : null}
+            </ol>
+          )}
+        </div>
+      </section>
+      )) : null}
+
+      {/* ——— 4 bis. les lettres de demande de pièces (b5_07) ——— */}
+      {voir("demandes") && (p.demandes_pieces?.length ?? 0) > 1 ? (
+        <Avis teinte="ambre">
+          <strong>Plusieurs demandes de pièces.</strong> À fournir : {p.pieces_demandees.map((x) => x.code).join(", ") || "—"}.{" "}
+          Lettres : {p.demandes_pieces!.map((h) => `du ${dateCourte(`${h.date}T12:00:00`)} (${h.pieces.map((x) => x.code).join(", ") || "aucune pièce"})`).join(" ; ")}.{" "}
+          Une nouvelle invitation à compléter le dossier est sans incidence sur le cours du délai et sur la naissance d’une décision tacite (CE, 30 avril 2024, n° 461958 ; art. R*423-38) : le délai de trois mois court depuis la première lettre
+          {p.date_pieces_fournies ? " ; une lettre reçue après la remise des pièces ne modifie pas les délais (art. R*423-41)" : ""}.
+        </Avis>
+      ) : null}
+
+      {/* ——— 5. les avertissements ——— */}
+      {voir("avertissements") && c.avertissements?.length ? (
+        <div style={{ display: "grid", gap: 8 }}>
+          {c.avertissements.map((a, i) => (
+            <Avis key={i} teinte="ambre"><strong>À savoir.</strong> {a}</Avis>
+          ))}
+        </div>
+      ) : null}
+
+      {/* ——— 3. les échéances et les rappels ——— */}
+      {(voir("echeances") || naturesEcheances.length > 0) && !(naturesEcheances.length > 0 && !echeancesVues.length) ? (volet ? listeEcheances : (
+      <section className="esp-carte" aria-label="Échéances et rappels">
+        <div className="esp-carte-tete">
+          <h2 className="esp-carte-titre">Échéances et rappels</h2>
+          <span className="esp-kpi-sous">{echeancesVues.filter((e) => e.statut === "ouvert" || e.statut === "depasse").length} en cours</span>
+        </div>
+        <div className="esp-carte-corps">
+          {!echeancesVues.length ? (
+            <div className="lor-tableau-vide">Aucune échéance posée : elles naissent au dépôt du dossier.</div>
+          ) : (
+            <ul className="esp-fil">
+              {echeancesVues.map((e) => (
+                <EcheanceLigne key={e.delai_id} e={e} nommer={nommer} />
+              ))}
+            </ul>
+          )}
+        </div>
+      </section>
+      )) : null}
+
+      {/* ——— 4. les recours ——— */}
+      {voir("recours") && (recours.length || accorde) ? (volet ? listeRecours : (
+        <section className="esp-carte" aria-label="Recours">
+          <div className="esp-carte-tete">
+            <h2 className="esp-carte-titre">Recours</h2>
+            <span className="esp-kpi-sous">{recours.length ? `${recours.length} saisi${recours.length > 1 ? "s" : ""}` : "aucun"}</span>
+          </div>
+          <div className="esp-carte-corps">
+            {!recours.length ? (
+              <div className="lor-tableau-vide">Aucun recours saisi. {p.date_affichage ? "Le délai des tiers court depuis l'affichage." : "Tant que le permis n'est pas affiché, un recours reste possible."}</div>
+            ) : (
+              <ul className="esp-fil">
+                {recours.map((r) => (
+                  <li key={r.id}>
+                    <span className="esp-fil-point" data-teinte={ISSUES_RECOURS[r.issue].teinte} />
+                    <div>
+                      <div className="esp-fil-texte">
+                        <strong>{NATURES_RECOURS[r.nature]}</strong> du {dateCourte(`${r.date_recours}T12:00:00`)}{r.auteur ? ` — ${r.auteur}` : ""}
+                        {" "}<Pastille teinte={ISSUES_RECOURS[r.issue].teinte}>{ISSUES_RECOURS[r.issue].libelle}{r.date_issue ? ` le ${dateCourte(`${r.date_issue}T12:00:00`)}` : ""}</Pastille>
+                      </div>
+                      {r.issue === "en_cours" && peutEcrire ? (
+                        <div className="esp-actions" style={{ marginTop: 6 }}>
+                          <button type="button" className="r-btn r-btn--fil" disabled={gris} onClick={() => { setRec((x) => ({ ...x, issue: "rejete", date_issue: aujourdHuiIso() })); setErreur(null); setForm({ type: "issue", recours: r }); }}>Saisir l&apos;issue</button>
+                        </div>
+                      ) : null}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </section>
+      )) : null}
+
+      {/* ——— 6. les courriers et les dates déjà décidées ——— */}
+      {voir("courriers") ? (volet ? listeCourriers : (
+      <section className="esp-carte" aria-label="Courriers du dossier">
+        <div className="esp-carte-tete">
+          <h2 className="esp-carte-titre">Courriers du dossier</h2>
+          <span className="esp-kpi-sous">{pieces.length} pièce{pieces.length > 1 ? "s" : ""}</span>
+        </div>
+        <div className="esp-carte-corps">
+          {!pieces.length ? (
+            <div className="lor-tableau-vide">Aucun courrier déposé. Déposez le récépissé, les lettres de la mairie, l&apos;arrêté et le constat d&apos;affichage : Lorani les lit et propose les dates.</div>
+          ) : (
+            <ul className="esp-fil">
+              {pieces.map((x) => (
+                <PieceLigne key={x.id} piece={x} decisions={decidees.filter((d) => d.piece_id === x.id)} nommer={nommer} />
+              ))}
+            </ul>
+          )}
+        </div>
+      </section>
+      )) : null}
+
+      {/* ——— les dialogues ——— */}
+      {fenetres}
     </div>
   );
 }
@@ -919,9 +1310,26 @@ function EtapeLigne({ e, avant }: { e: Etape; avant: React.ReactNode }) {
 }
 
 /* ——— une échéance du socle ——— */
+/* 30/10/2026 — l'état d'une échéance et celui d'un courrier, les mêmes dans la liste d'avant et dans celle du volet */
+function etatEcheance(e: Echeance): { teinte: Teinte; libelle: string } {
+  return {
+    teinte: e.statut === "tenu" ? "vert" : e.statut === "annule" ? "gris" : e.statut === "depasse" ? "rouge" : "bleu",
+    libelle: e.statut === "tenu" ? "Tenue" : e.statut === "annule" ? "Annulée" : e.statut === "depasse" ? "Dépassée" : "Ouverte",
+  };
+}
+/* le libellé d'une échéance sans son préfixe technique (« PC « … » : ») */
+const libelleEcheance = (e: Echeance) => e.libelle.replace(/^[A-Z]+ « [^»]* » : /, "");
+
+function etatPiece(piece: PieceProjet): { teinte: Teinte; libelle: string } {
+  const s = piece.statut;
+  return {
+    teinte: s === "lue" ? "vert" : s === "echec" || s === "rejetee" ? "rouge" : s === "a_verifier" || s === "a_classer" ? "ambre" : "gris",
+    libelle: s === "lue" ? "Lue" : s === "en_lecture" ? "En lecture" : s === "a_verifier" ? "À vérifier" : s === "a_classer" ? "Courrier non reconnu" : s === "echec" ? "Illisible" : s === "rejetee" ? "Rejetée" : "Reçue",
+  };
+}
+
 function EcheanceLigne({ e, nommer }: { e: Echeance; nommer: (id: string | null | undefined) => string }) {
-  const teinte = e.statut === "tenu" ? "vert" : e.statut === "annule" ? "gris" : e.statut === "depasse" ? "rouge" : "bleu";
-  const libelle = e.statut === "tenu" ? "Tenue" : e.statut === "annule" ? "Annulée" : e.statut === "depasse" ? "Dépassée" : "Ouverte";
+  const { teinte, libelle } = etatEcheance(e);
   const partis = (e.rappels_faits ?? []).slice().sort((a, b) => b - a);
   const prevus = (e.rappels ?? []).slice().sort((a, b) => b - a);
   return (
@@ -929,7 +1337,7 @@ function EcheanceLigne({ e, nommer }: { e: Echeance; nommer: (id: string | null 
       <span className="esp-fil-point" data-teinte={teinte} />
       <div>
         <div className="esp-fil-texte">
-          <strong>{dateCourte(`${e.echeance}T12:00:00`)}</strong> · {e.libelle.replace(/^[A-Z]+ « [^»]* » : /, "")} <Pastille teinte={teinte}>{libelle}</Pastille>
+          <strong>{dateCourte(`${e.echeance}T12:00:00`)}</strong> · {libelleEcheance(e)} <Pastille teinte={teinte}>{libelle}</Pastille>
         </div>
         <div className="esp-fil-meta">
           {e.echeance_notifiee && e.echeance_calculee && e.echeance_notifiee !== e.echeance_calculee ? `Calculée au ${dateCourte(`${e.echeance_calculee}T12:00:00`)}, notifiée au ${dateCourte(`${e.echeance_notifiee}T12:00:00`)}. ` : ""}
@@ -949,14 +1357,14 @@ function EcheanceLigne({ e, nommer }: { e: Echeance; nommer: (id: string | null 
 
 /* ——— un courrier du dossier et ce qu'on en a décidé ——— */
 function PieceLigne({ piece, decisions, nommer }: { piece: PieceProjet; decisions: DateLue[]; nommer: (id: string | null | undefined) => string }) {
-  const teinte = piece.statut === "lue" ? "vert" : piece.statut === "echec" || piece.statut === "rejetee" ? "rouge" : piece.statut === "a_verifier" || piece.statut === "a_classer" ? "ambre" : "gris";
+  const { teinte, libelle } = etatPiece(piece);
   return (
     <li>
       <span className="esp-fil-point" data-teinte={teinte} />
       <div>
         <div className="esp-fil-texte">
           <strong>{libelleTypePiece(piece.type_piece)}</strong> · {piece.nom_fichier}{" "}
-          <Pastille teinte={teinte}>{piece.statut === "lue" ? "Lue" : piece.statut === "en_lecture" ? "En lecture" : piece.statut === "a_verifier" ? "À vérifier" : piece.statut === "a_classer" ? "Courrier non reconnu" : piece.statut === "echec" ? "Illisible" : piece.statut === "rejetee" ? "Rejetée" : "Reçue"}</Pastille>
+          <Pastille teinte={teinte}>{libelle}</Pastille>
         </div>
         <div className="esp-fil-meta">
           {piece.cree_le ? `${piece.source === "courriel" ? "Reçu par courriel du guichet et rangé ici par son numéro de dossier, le" : "Déposé le"} ${dateHeure(piece.cree_le)}. ` : ""}
