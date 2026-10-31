@@ -40,3 +40,12 @@
     padding-right: 14px;
   }
 }
+
+/* L'identifiant de My issues fait 55 (« OME-19 ») ; une référence du cabinet
+   (« 2026-0412 », « AUDIT-2026-03 ») en demande 90 à 13/450 −0.26. Seul écart
+   à la grille de la ligne, pour ne pas tronquer la référence. */
+@container principale (min-width: 641px) {
+  .v2 .tme-dossiers .lmi-ligne {
+    grid-template-columns: 8px 18px 16px 90px 16px minmax(0, 1fr) auto 60px 18px;
+  }
+}

@@ -287,7 +287,7 @@ export default function VueEnsemble() {
   const groupesMontres = vue === "echeances" ? periodes.map((p) => ({ rang: p.rang, nom: p.nom, precision: p.precision, icone: CalendarClock, n: p.lignes.length, rendu: p.lignes.map(ligneEcheance) })) : groupes.map((g) => ({ rang: g.rang, nom: g.nom, precision: g.precision, icone: g.icone, n: g.lignes.length, rendu: g.lignes.map(ligneDossier) }));
 
   return (
-    <div className="lin lmi">
+    <div className="lin lmi tme-dossiers">
       <h1 className="v2-sr">Dossiers du cabinet</h1>
 
       <header className="lmi-tete">

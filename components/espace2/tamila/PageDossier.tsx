@@ -28,7 +28,7 @@
    layout tant que l'onglet du navigateur vit.
    ══════════════════════════════════════════════════════════════════════ */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { CalendarClock, Copy, FolderLock, PanelRight, Scale, UserRound } from "lucide-react";
@@ -77,6 +77,12 @@ const ONGLETS: { cle: OngletDossier; libelle: string; parties: Partie[] }[] = [
 ];
 const estOnglet = (x: string | null): x is OngletDossier => ONGLETS.some((o) => o.cle === x);
 
+const abonnerLarge = (rappel: () => void) => {
+  const m = window.matchMedia("(min-width: 1024px)");
+  m.addEventListener("change", rappel);
+  return () => m.removeEventListener("change", rappel);
+};
+
 const TEINTE: Record<string, string> = { vert: "vert", ambre: "jaune", rouge: "rouge", bleu: "bleu", gris: "gris", noir: "gris" };
 
 export default function PageDossier({ id }: { id: string }) {
@@ -84,7 +90,10 @@ export default function PageDossier({ id }: { id: string }) {
   const params = useSearchParams();
   const chemin = usePathname();
   const toast = useToast();
-  const [volet, setVolet] = useState(true);
+  /* le volet s'ouvre de lui-même sur grand écran ; en dessous de 1024, il attend qu'on le demande */
+  const large = useSyncExternalStore(abonnerLarge, () => window.matchMedia("(min-width: 1024px)").matches, () => true);
+  const [voletChoisi, setVolet] = useState<boolean | null>(null);
+  const volet = voletChoisi ?? large;
 
   useEffect(() => {
     ouvrir(id);

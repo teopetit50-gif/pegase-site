@@ -32,6 +32,7 @@ import { conformiteExemple, honorairesExemple, MOI } from "@/components/espace/t
 import * as portes from "@/components/espace/tamila/portes";
 import { proposerTemps } from "@/components/espace/tamila/temps";
 import type { Conformite as Conf, Temps } from "@/components/espace/tamila/types";
+import { MenuOptions } from "../lin/Lin";
 import { couleurDe, initiales, lienDossier } from "./commun";
 import { useTamila } from "./donnees";
 import "../lin/lin.css";
@@ -178,6 +179,22 @@ export default function ConformiteCabinet() {
                   </Link>
                 ))}
               </nav>
+              {/* en étroit, le segment se replie dans ce menu (plain-tasks.css) */}
+              <div className="pta-vues-menu">
+                <MenuOptions
+                  libelle="Changer de vue"
+                  titre="Vue…"
+                  declencheur={
+                    <>
+                      {VUES.find((x) => x.cle === vue)!.icone}
+                      {VUES.find((x) => x.cle === vue)!.libelle}
+                      <span className="pta-compte">{chargement ? "·" : comptes[vue]}</span>
+                    </>
+                  }
+                  options={VUES.map((x) => ({ cle: x.cle, libelle: x.libelle, meta: String(comptes[x.cle]), coche: x.cle === vue, href: lienVue(x.cle) }))}
+                  largeur={220}
+                />
+              </div>
             </div>
 
             {chargement ? (

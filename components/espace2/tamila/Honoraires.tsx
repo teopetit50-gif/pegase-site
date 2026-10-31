@@ -144,13 +144,13 @@ export default function HonorairesCabinet() {
 
   const colonnes: ColonnePc[] = [
     { cle: "dossier", libelle: "Dossier" },
-    { cle: "responsable", libelle: "Responsable", largeur: 150, repli: "secondaire" },
-    { cle: "convention", libelle: "Convention", largeur: 170, repli: "tertiaire" },
-    { cle: "minutes", libelle: "Non facturé", num: true, largeur: 110, repli: "tertiaire" },
-    { cle: "a_facturer", libelle: "À facturer HT", num: true, largeur: 130, triee: true },
-    { cle: "provisions", libelle: "Provisions", num: true, largeur: 120, repli: "secondaire" },
-    { cle: "reste", libelle: "Reste dû", num: true, largeur: 120, repli: "tertiaire" },
-    { cle: "signaux", libelle: "À faire", largeur: 220, repli: "secondaire" },
+    { cle: "responsable", libelle: "Responsable", largeur: 130, repli: "secondaire" },
+    { cle: "convention", libelle: "Convention", largeur: 140, repli: "tertiaire" },
+    { cle: "minutes", libelle: "Non facturé", num: true, largeur: 90, repli: "tertiaire" },
+    { cle: "a_facturer", libelle: "À facturer HT", num: true, largeur: 120, triee: true },
+    { cle: "provisions", libelle: "Provisions", num: true, largeur: 100, repli: "secondaire" },
+    { cle: "reste", libelle: "Reste dû", num: true, largeur: 100, repli: "tertiaire" },
+    { cle: "signaux", libelle: "À faire", largeur: 190, repli: "secondaire" },
   ];
   const tirets = (v: number, rendu: (v: number) => string) => (v ? <span className="pc-val pc-val--num">{rendu(v)}</span> : <span className="pc-gris">—</span>);
   const lignesPc: LignePc[] = visibles.map((l) => ({
