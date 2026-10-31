@@ -54,7 +54,11 @@ type Props = {
   relire: () => Promise<void>;
   /* la référence en clair d'un autre dossier du cabinet, si on la connaît (contrôle des conflits) */
   referenceDe?: (dossier: string) => string | null;
+  /* les cartes à montrer (l'espace 2 range le dossier en onglets) ; sans, toutes, comme l'écran d'avant */
+  cartes?: CarteDossier[];
 };
+
+export type CarteDossier = "entete" | "parties" | "delais" | "audiences" | "attentes" | "expertise" | "lectures" | "pieces" | "honoraires" | "conformite" | "avis" | "membres" | "exports" | "journal";
 
 type Form =
   | { type: "partie" }
@@ -82,7 +86,8 @@ const maintenant = () => new Date().toISOString();
 const aujourdhui = () => new Date().toISOString().slice(0, 10);
 const CHIFFRE = "\\x01" + "00".repeat(28);
 
-export default function DossierTamila({ complet, source, moi, personnes, regles, reglages, cle, clientId, onLocal, relire, referenceDe = () => null }: Props) {
+export default function DossierTamila({ complet, source, moi, personnes, regles, reglages, cle, clientId, onLocal, relire, referenceDe = () => null, cartes }: Props) {
+  const voir = (c: CarteDossier) => !cartes || cartes.includes(c);
   const { dossier: d, clair, parties, appel, delais, audiences, avis, membres, murailles, exports, pieces, lectures, demandes } = complet;
   /* les événements dont le temps se propose à la saisie (b4_12) */
   const evenementsTemps = useMemo(() => ({ audiences, delais, avis }), [audiences, delais, avis]);
@@ -514,6 +519,7 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
       {erreur && !form ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
 
       {/* ——— l'en-tête ——— */}
+      {voir("entete") ? (
       <section className="esp-carte" aria-label="Identité du dossier">
         <div className="esp-carte-tete">
           <div>
@@ -565,8 +571,15 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
           </div>
         </div>
       </section>
+      ) : null}
+
+      {/* ——— dans l'espace 2, les conflits passent avant les parties (RIN art. 4 : contrôle à l'entrée) ——— */}
+      {voir("conformite") && cartes ? (
+      <ConformiteTamila dossier={d} source={source} clientId={clientId} parties={parties} partiesClair={complet.partiesClair} pieces={pieces} peutEcrire={peutEcrire} peutGerer={peutGerer && avocat} gerant={gerant} referenceDe={referenceDe} />
+      ) : null}
 
       {/* ——— les parties ——— */}
+      {voir("parties") ? (
       <section className="esp-carte" aria-label="Parties">
         <div className="esp-carte-tete">
           <h2 className="esp-carte-titre">Parties</h2>
@@ -605,8 +618,10 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
           )}
         </div>
       </section>
+      ) : null}
 
       {/* ——— l'appel et les délais ——— */}
+      {voir("delais") ? (
       <section className="esp-carte" aria-label="Appel et délais de procédure">
         <div className="esp-carte-tete">
           <h2 className="esp-carte-titre">Appel et délais de procédure</h2>
@@ -688,8 +703,10 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
           )}
         </div>
       </section>
+      ) : null}
 
       {/* ——— les audiences ——— */}
+      {voir("audiences") ? (
       <section className="esp-carte" aria-label="Audiences">
         <div className="esp-carte-tete">
           <h2 className="esp-carte-titre">Audiences</h2>
@@ -724,17 +741,25 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
           })}
         </div>
       </section>
+      ) : null}
 
       {/* ——— les pièces attendues (b4_18) ——— */}
+      {voir("attentes") ? (
       <AttentesTamila dossier={d} source={source} cle={cle} peutEcrire={peutEcrire} />
+      ) : null}
 
       {/* ——— l'expertise (b4_16) ——— */}
+      {voir("expertise") ? (
       <ExpertiseTamila dossier={d} source={source} peutEcrire={peutEcrire} />
+      ) : null}
 
       {/* ——— les lectures longues (carnet n° 4, b4_15, lecteur d'A1) ——— */}
+      {voir("lectures") && !cartes ? (
       <AnalysesTamila dossier={d} source={source} cle={cle} pieces={pieces} clair={clair} peutDemander={peutEcrire && avocat} auCoffre={complet.cle?.fournisseur === "scaleway"} />
+      ) : null}
 
       {/* ——— les pièces ——— */}
+      {voir("pieces") ? (
       <section className="esp-carte" aria-label="Pièces">
         <div className="esp-carte-tete">
           <h2 className="esp-carte-titre">Pièces</h2>
@@ -769,14 +794,26 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
           ))}
         </div>
       </section>
+      ) : null}
+
+      {/* ——— dans l'espace 2, les lectures après les pièces dont elles dépendent ——— */}
+      {/* ——— les lectures longues (carnet n° 4, b4_15, lecteur d'A1) ——— */}
+      {voir("lectures") && cartes ? (
+      <AnalysesTamila dossier={d} source={source} cle={cle} pieces={pieces} clair={clair} peutDemander={peutEcrire && avocat} auCoffre={complet.cle?.fournisseur === "scaleway"} />
+      ) : null}
 
       {/* ——— les honoraires (b4_06) ——— */}
+      {voir("honoraires") ? (
       <HonorairesTamila dossier={d} source={source} moi={moi} personnes={personnes} pieces={pieces} cle={cle} peutEcrire={peutEcrire} peutGerer={peutGerer && avocat} peutEncaisser={(peutGerer && avocat) || (associe && !murailles.some((m) => m.user_id === moi?.user_id && !m.leve_le))} clientId={clientId} gerant={gerant} entete={reglages?.facture_entete ?? {}} clair={clair} clientNom={(() => { const p = parties.find((x) => x.qualite === "client"); return p ? (complet.partiesClair[p.id]?.nom ?? null) : null; })()} evenements={evenementsTemps} />
+      ) : null}
 
       {/* ——— conflits d'intérêts et vigilance LCB-FT (b4_07) ——— */}
+      {voir("conformite") && !cartes ? (
       <ConformiteTamila dossier={d} source={source} clientId={clientId} parties={parties} partiesClair={complet.partiesClair} pieces={pieces} peutEcrire={peutEcrire} peutGerer={peutGerer && avocat} gerant={gerant} referenceDe={referenceDe} />
+      ) : null}
 
       {/* ——— les avis RPVA ——— */}
+      {voir("avis") ? (
       <section className="esp-carte" aria-label="Avis RPVA">
         <div className="esp-carte-tete">
           <h2 className="esp-carte-titre">Avis RPVA</h2>
@@ -807,8 +844,10 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
           })}
         </div>
       </section>
+      ) : null}
 
       {/* ——— membres et murailles ——— */}
+      {voir("membres") ? (
       <section className="esp-carte" aria-label="Membres et murailles">
         <div className="esp-carte-tete">
           <h2 className="esp-carte-titre">Qui voit le dossier</h2>
@@ -856,8 +895,10 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
           </div>
         ) : null}
       </section>
+      ) : null}
 
       {/* ——— exports ——— */}
+      {voir("exports") ? (
       <section className="esp-carte" aria-label="Exports">
         <div className="esp-carte-tete">
           <h2 className="esp-carte-titre">Exports</h2>
@@ -882,8 +923,10 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
           ))}
         </div>
       </section>
+      ) : null}
 
       {/* ——— journal des accès ——— */}
+      {voir("journal") ? (
       <section className="esp-carte" aria-label="Journal des accès">
         <div className="esp-carte-tete">
           <h2 className="esp-carte-titre">Journal des accès</h2>
@@ -904,6 +947,7 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
           )}
         </div>
       </section>
+      ) : null}
 
       {/* ——— le dialogue du geste en cours ——— */}
       <Dialog open={!!form} onOpenChange={(o) => !o && setForm(null)}>

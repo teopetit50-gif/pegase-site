@@ -1,0 +1,42 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TAMILA, espace 2 — les seuls ajouts aux gabarits décalqués (30/10/2026)
+
+   Les pages de /espace2/tamila prennent leurs mesures dans
+   components/espace2/lin/ (linear-my-issues, linear-triage,
+   linear-initiative, plain-clients, plain-rapports, plain-tasks,
+   linear-team-settings). Ici, rien qu'une chose que ces pages n'ont pas :
+   la ligne d'avis sous la barre (phrase du cabinet, coffre, installation,
+   dossiers hors de vue), au gabarit de la ligne « lecture seule » de My
+   issues : 13/450, gris secondaire, filet bas 0.5, padding 0 18, 36 de haut.
+   Préfixe tme-. Scopé .v2 ; supprimer ce fichier ne casse rien d'autre.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .tme-avis {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  min-height: 36px;
+  padding: 6px 18px;
+  border-bottom: 0.5px solid var(--lin-trait);
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 20px;
+  color: var(--lin-second);
+}
+.v2 .tme-avis strong {
+  font-weight: 500;
+  color: var(--lin-titre);
+}
+.v2 .tme-avis[data-teinte="rouge"] strong {
+  color: var(--lin-rouge);
+}
+.v2 .tme-avis .lmi-onglet {
+  height: 24px;
+}
+@container principale (max-width: 640px) {
+  .v2 .tme-avis {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+}
